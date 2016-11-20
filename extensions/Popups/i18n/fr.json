@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko",
+			"Ltrlg",
+			"VIGNERON",
+			"Benjozork",
+			"Orikrin1998",
+			"Djiboun",
+			"Cl3m3n7",
+			"Wladek92",
+			"C13m3n7"
+		]
+	},
+	"popups-message": "Hovercards",
+	"popups-desc": "Afficher des fenêtres au survol avec les résumés des contenus des pages quand l’utilisateur survole un lien de page.",
+	"popups-last-edited": "Dernière modification $1",
+	"popups-redirects": "redirigé vers <h3>$1</h3>",
+	"popups-settings-title": "Aperçu de la page",
+	"popups-settings-description": "Cet outil vous donne un aperçu des liens vers les pages wiki et les références.",
+	"popups-settings-option-simple": "Simple",
+	"popups-settings-option-simple-description": "Voir la phrase clé d’une page et une image de l’aperçu. C’est ce qui est recommandé pour les lecteurs.",
+	"popups-settings-option-advanced": "Avancé",
+	"popups-settings-option-advanced-description": "Voir les aperçus de lien et accéder aux menus des fonctions d’édition. C’est ce qui est utilisé par beaucoup d’éditeurs.",
+	"popups-settings-option-off": "Désactiver les aperçus",
+	"popups-settings-option-off-description": "Vous pouvez modifier ce paramètre en utilisant le lien en bas de page",
+	"popups-settings-save": "Enregistrer",
+	"popups-settings-help-ok": "OK",
+	"popups-settings-cancel": "Annuler",
+	"popups-settings-help": "Vous pouvez activer des aperçus sur l'utilisation d'un lien dans le pied de page.",
+	"popups-settings-enable": "Activer les aperçus",
+	"popups-send-feedback": "Envoyer des Commentaires (lien externe)",
+	"popups-mobile-continue-to-page": "Continuer à la page",
+	"popups-mobile-dismiss": "Rejeter",
+	"popups-mobile-message": "Aperçu"
+}

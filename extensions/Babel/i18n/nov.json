@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Malafaya"
+		]
+	},
+	"babel-0": "Dis usere [[$1|non komprenda]] [[$2|$3]] (o komprenda nur tre pokim).",
+	"babel-1": "Dis usere pove komunika per [[$1|basal]] nivele de [[$2|$3]].",
+	"babel-2": "Dis usere pove komunika per [[$1|medi]] nivele de [[$2|$3]].",
+	"babel-3": "Dis usere pove komunika per [[$1|alti]] nivele de [[$2|$3]].",
+	"babel-4": "Dis usere skripte [[$2|$3]] [[$1|preske kom sen patrial lingue]]."
+}

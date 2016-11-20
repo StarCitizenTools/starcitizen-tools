@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Võrok"
+		]
+	},
+	"babel": "Pruukja keelemõistminõ (Paabõli perrä)",
+	"babel-desc": "Tege <code>#babel</code>-abinõvvo, miä luu esiq pruukja keelemõistmisõ tabõli, kohe saa pandaq näüdüssit.",
+	"babel-url": "Project:Paabõl",
+	"babel-0": "Taa pruukja mõist [[$1|väega veidüq vai ei sukugi]] [[$2|$3]] kiilt.",
+	"babel-1": "Taa pruukja mõist [[$1|veidükese]] [[$2|$3]] kiilt.",
+	"babel-2": "Taa pruukja mõist [[$1|küländ häste]] [[$2|$3]] kiilt.",
+	"babel-3": "Taa pruukja mõist [[$1|väega häste]] [[$2|$3]] kiilt.",
+	"babel-4": "Taa pruukja mõist [[$2|$3]] kiilt [[$1|pia nigu imäkiilt]].",
+	"babel-5": "Taa pruukja om [[$2|$3]] keele pääle [[$1|vällä opnuq]].",
+	"babel-N": "Taa pruukja [[$1|imäkiil]] om [[$2|$3]] kiil.",
+	"babel-0-n": "Taa pruukja mõist [[$1|väega veidüq vai ei sukugi]] [[$2|võro]] kiilt.",
+	"babel-1-n": "Taa pruukja mõist [[$1|veidükese]] [[$2|võro]] kiilt.",
+	"babel-2-n": "Taa pruukja mõist [[$1|küländ häste]] [[$2|võro]] kiilt.",
+	"babel-3-n": "Taa pruukja mõist [[$1|väega häste]] [[$2|võro]] kiilt.",
+	"babel-4-n": "Taa pruukja mõist [[$2|võro]] kiilt [[$1|pia nigu imäkiilt]].",
+	"babel-5-n": "Taa pruukja om [[$2|võro]] keele pääle [[$1|vällä opnuq]].",
+	"babel-N-n": "Taa pruukja [[$1|imäkiil]] om [[$2|võro]] kiil."
+}

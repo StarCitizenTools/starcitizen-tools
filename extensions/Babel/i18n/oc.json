@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Boulaur",
+			"Cedric31"
+		]
+	},
+	"babel": "Entresenhas sus l’utilizaire de Babel",
+	"babel-desc": "Apond una foncion parser <code>#babel</code> que permet la creacion automatica d'una bóstia d’utilizaire Babèl amb la possibilitat d’i enclure de modèls locals.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Utilizaires per lenga",
+	"babel-autocreate-reason": "Creacion automatica de la categoria [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Los utilizaires dins aquesta categoria an indicat qu'an lo nivèl $1 per la lenga $2.",
+	"babel-autocreate-text-main": "Los utilizaires dins aquesta categoria an indicat qu'an una coneissença en $1.",
+	"babel-0": "Aqueste utilizaire a [[$1|pas cap]] de coneissença en [[$2|$3]] (o comprend amb de dificultats grandas).",
+	"babel-1": "Aqueste utilizaire pòt contribuir amb un nivèl [[$1|elementari]] en [[$2|$3]].",
+	"babel-2": "Aqueste utilizaire a una coneissença [[$1|mejana]] en [[$2|$3]].",
+	"babel-3": "Aqueste utilizaire dispausa d’una coneissença [[$1|avançada]] en [[$2|$3]].",
+	"babel-4": "Aqueste utilizaire a una coneissença pròcha de la de [[$1|lenga mairala]] en [[$2|$3]].",
+	"babel-5": "Aqueste utilizaire a una coneissença [[$1|professionala]] en [[$2|$3]].",
+	"babel-N": "Aqueste utilizaire dispausa d’una compreneson coma [[$1|lenga mairala]] en [[$2|$3]].",
+	"babel-0-n": "Aqueste utilizaire a [[$1|pas cap]] de coneissença en [[$2|occitan]] (o lo compren amb de dificultats grandas).",
+	"babel-1-n": "Aqueste utilizaire dispausa de coneissenças [[$1|de basa]] en [[$2|occitan]].",
+	"babel-2-n": "Aqueste utilizaire dispausa d'un [[$1|nivèl intermediari]] de coneissença en [[$2|occitan]].",
+	"babel-3-n": "Aqueste utilizaire dispausa de coneissenças [[$1|avançadas]] en [[$2|occitan]].",
+	"babel-4-n": "Aqueste utilizaire dispausa de coneissenças pròchas de la [[$1|lenga mairala]] en [[$2|occitan]].",
+	"babel-5-n": "Aqueste utilizaire dispausa d'un nivèl de coneissenças [[$1|professional]] en [[$2|occitan]].",
+	"babel-N-n": "Aqueste utilizaire a per [[$1|lenga mairala]] l'[[$2|occitan]].",
+	"babel-footer": "Utilizaires per lengas"
+}

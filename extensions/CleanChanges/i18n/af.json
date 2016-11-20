@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Naudefj"
+		]
+	},
+	"cleanchanges-changerightslink": "verander groepe",
+	"cleanchanges-desc": "Meer kompakte weergawe van die [[Special:RecentChanges|lys van onlangse wysigings]]",
+	"cleanchanges-language": "Taal:",
+	"cleanchanges-language-na": "Alle tale",
+	"cleanchanges-users": "Gebruikers (geskei deur \"|\"):",
+	"cleanchanges-showuserlinks": "Wys gebruiker se skakels"
+}

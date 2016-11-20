@@ -1,0 +1,40 @@
+{
+	"@metadata": {
+		"authors": [
+			"Okras",
+			"Kaganer",
+			"Дмитрий"
+		]
+	},
+	"apihelp-aggregategroups-param-aggregategroup": "ID агрегированной группы сообщений",
+	"apihelp-aggregategroups-param-group": "ID группы сообщений",
+	"apihelp-groupreview-param-group": "Группа сообщений.",
+	"apihelp-groupreview-param-language": "Код языка.",
+	"apihelp-groupreview-param-state": "Новое состояние группы.",
+	"apihelp-query+languagestats-param-language": "Код языка.",
+	"apihelp-query+messagecollection-param-group": "Группа сообщений.",
+	"apihelp-query+messagecollection-param-language": "Код языка.",
+	"apihelp-query+messagecollection-param-limit": "Сколько сообщений показывать (после фильтрации).",
+	"apihelp-query+messagecollection-example-1": "Список поддерживаемых языков",
+	"apihelp-query+messagecollection-example-2": "Список обязательных определений сообщений для группы «page-Example»",
+	"apihelp-query+messagecollection-example-3": "Список необязательных сообщений на финском языке с метками для группы «page-Example»",
+	"apihelp-query+messagegroups-example-1": "Показать группы сообщений",
+	"apihelp-query+messagegroupstats-description": "Запросить статистику группы сообщений",
+	"apihelp-query+messagegroupstats-param-group": "ID группы сообщений.",
+	"apihelp-query+messagetranslations-param-title": "Полный заголовок известного сообщения.",
+	"apihelp-query+messagetranslations-example-1": "Список переводов в вики для «MediaWiki:January»",
+	"apihelp-translatesandbox-param-do": "Что делать.",
+	"apihelp-translateuser-example-1": "Показать информацию об участнике",
+	"apihelp-translationaids-param-title": "Полный заголовок известного сообщения.",
+	"apihelp-translationreview-description": "Пометить переводы как проверенные.",
+	"apihelp-translationstash-param-subaction": "Действие.",
+	"apihelp-translationstash-param-translation": "Перевод, сделанный участником.",
+	"apihelp-translationstash-param-metadata": "Объект JSON.",
+	"apihelp-ttmserver-param-sourcelanguage": "Код языка исходного текста.",
+	"apihelp-searchtranslations-description": "Поиск переводов.",
+	"apihelp-searchtranslations-param-query": "Строка для поиска.",
+	"apihelp-searchtranslations-param-sourcelanguage": "Код языка исходного текста.",
+	"apihelp-searchtranslations-param-limit": "Размер результата.",
+	"apihelp-searchtranslations-example-1": "Показать переводы на язык.",
+	"apihelp-searchtranslations-example-2": "Показать непереведённые сообщения, соответствующие запросу на исходном языке."
+}

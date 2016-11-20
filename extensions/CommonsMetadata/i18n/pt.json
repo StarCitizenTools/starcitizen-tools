@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hamilton Abreu",
+			"Vitorvicentevalente"
+		]
+	},
+	"commonsmetadata-desc": "Expande a propriedade \"extmetadata\" do módulo da API de informação sobre imagens, de forma a incluir informação armazenada nas páginas de descrição das imagens que usem as predefinições mais comuns da Wikimedia Commons.",
+	"commonsmetadata-trackingcategory-no-license": "Ficheiros sem licença legível por máquina",
+	"commonsmetadata-trackingcategory-no-license-desc": "O ficheiro não possui nenhuma predefinição de licença [{{MediaWiki:Commonsmetadata-doc-url}} legível por máquina].",
+	"commonsmetadata-trackingcategory-no-description": "Ficheiros sem descrição legível por máquina",
+	"commonsmetadata-trackingcategory-no-description-desc": "O ficheiro não possui nenhuma predefinição de informação [{{MediaWiki:Commonsmetadata-doc-url}} legível por máquina] ou o campo de descrição não está preenchido.",
+	"commonsmetadata-trackingcategory-no-author": "Ficheiros sem autor legível por máquina",
+	"commonsmetadata-trackingcategory-no-author-desc": "O ficheiro não possui nenhuma predefinição de informação [{{MediaWiki:Commonsmetadata-doc-url}} legível por máquina] ou o campo de autor não está preenchido.",
+	"commonsmetadata-trackingcategory-no-source": "Ficheiros sem fonte legível por máquina",
+	"commonsmetadata-trackingcategory-no-source-desc": "O ficheiro não possui nenhuma predefinição de informação [{{MediaWiki:Commonsmetadata-doc-url}} legível por máquina] ou o campo de fonte não está preenchido."
+}

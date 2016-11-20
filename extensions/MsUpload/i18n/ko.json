@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hwangjy9",
+			"Revi"
+		]
+	},
+	"msu-desc": "동시에 하나 또는 여러 개의 파일을 쉽게 올릴 수 있습니다",
+	"msu-button-title": "파일 선택",
+	"msu-insert-link": "링크 넣기",
+	"msu-insert-gallery": "모두 갤러리로 넣기",
+	"msu-insert-files": "모두 파일로 넣기",
+	"msu-insert-links": "모두 링크로 넣기",
+	"msu-cancel-upload": "올리기 취소",
+	"msu-replace-file": "파일을 대체할까요?",
+	"msu-clean-all": "목록 비우기",
+	"msu-upload-possible": "선택된 파일을 올릴 수 있습니다",
+	"msu-ext-not-allowed": "다음 {{PLURAL:$1|형식의|형식의}} 파일만 허용됩니다:",
+	"msu-upload-this": "이 파일 올리기",
+	"msu-upload-all": "모든 파일 올리기",
+	"msu-dropzone": "여기에 파일을 놓으세요",
+	"msu-comment": "MsUpload로 파일을 올림"
+}

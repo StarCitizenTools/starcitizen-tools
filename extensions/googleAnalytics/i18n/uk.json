@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andriykopanytsia",
+			"Prima klasy4na",
+			"Ата"
+		]
+	},
+	"googleanalytics-desc": "Додає скрипти Google Universal Analytics (та/або іншу веб-аналітику) на сторінки MediaWiki для відстеження",
+	"right-noanalytics": "Звільнені від відстеження веб-аналітикою"
+}

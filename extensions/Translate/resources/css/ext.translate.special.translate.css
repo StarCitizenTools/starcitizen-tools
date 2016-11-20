@@ -1,0 +1,220 @@
+/*
+ * Breadcrumb for message group selector
+ */
+.tux-breadcrumb {
+	margin-bottom: 10px;
+	color: #555555;
+	font-size: 14pt;
+	line-height: 1.25em;
+}
+
+/* Arrow between breadcrumb items */
+.tux-breadcrumb .grouplink + .grouplink:before {
+	border-left: 4px solid #777;
+	border-top: 4px solid transparent;
+	border-bottom: 4px solid transparent;
+	content: "";
+	display: inline-block;
+	vertical-align: middle;
+	position: relative;
+	left: -5px;
+}
+
+/* This applies to all items in the breadcrumb */
+.tux-breadcrumb .grouptitle {
+	float: left;
+	padding: 0 6px 0 0;
+}
+
+/* Not all of these are links, so name is wrong besides being too generic.
+ * This excludes the first item which says "message group". */
+.tux-breadcrumb .grouplink {
+	padding: 0 6px;
+}
+
+/* Color clickable groups to look as links */
+.tux-breadcrumb__item--aggregate {
+	cursor: pointer;
+	color: #0645AD;
+}
+
+/* Language selector */
+.ext-translate-language-selector-label {
+	color: #555555;
+}
+
+.ext-translate-language-selector {
+	float: right;
+	text-align: right;
+	border: medium none;
+	font-size: 14pt;
+	font-weight: normal;
+	line-height: 1.25em;
+	padding-bottom: 3px;
+	padding-left: 15px;
+	padding-top: 1.25em;
+}
+
+/* The triangle shaped down-pointing callout after the language name
+ * in the target language selector
+ */
+.ext-translate-language-selector:after {
+	margin-left: 4px;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	border-top: 4px solid #0645AD;
+	content: "";
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.ext-translate-language-selector .uls {
+	color: #0645AD;
+	cursor: pointer;
+	min-height: 1px;
+	position: relative;
+}
+
+
+/* */
+.tux-message-selector {
+	font-size: 14px;
+	margin: 0;
+	padding: 6px 0 0 0;
+	list-style: none;
+}
+
+.tux-message-selector li {
+	border: medium none;
+	font-size: 14pt;
+	cursor: pointer;
+	font-weight: normal;
+	line-height: 1.25em;
+	padding-bottom: 3px;
+	padding-left: 15px;
+	padding-top: 1.25em;
+	top: 1px;
+	display: block;
+	position: relative;
+	float: left;
+	margin-bottom: 0;
+}
+
+.tux-message-selector .more {
+	padding: 0 40px 0 5px;
+}
+
+.tux-message-selector .more ul {
+	display: none;
+	cursor: default;
+	border: 1px solid #777;
+	border-top: 2px solid transparent;
+	padding: 3px 5px 10px 5px;
+	width: 300px;
+	z-index: 10;
+	background: #fff;
+	top: 100%;
+	left: -5px;
+}
+
+.tux-message-selector .more ul a {
+	display: block;
+	white-space: nowrap;
+	margin-left: 1px;
+}
+
+.tux-message-selector .more:hover ul {
+	display: block;
+	position: absolute;
+}
+
+.tux-message-selector .more:hover li {
+	float: none;
+}
+
+.tux-message-selector li.selected {
+	border-bottom: 2px solid #3366BB;
+}
+
+.tux-message-selector li.selected a {
+	color: #3366BB;
+}
+
+.tux-message-selector li a {
+	color: #555555;
+	text-decoration: none;
+	white-space: nowrap;
+	margin-left: 1px;
+}
+
+.tux-message-selector label {
+	font-size: 12pt;
+	color: #555555;
+	top: 1px;
+}
+
+.tux-editor-header {
+	color: #252525;
+	font-size: 14px;
+	padding-bottom: 20px;
+}
+
+.tux-editor-header .description {
+	margin: 5px 0;
+}
+
+.group-warning {
+	background: #FFF5AA;
+	padding: 5px;
+	margin: 5px 0;
+}
+
+.group-warning:empty {
+	display: none;
+}
+
+.tux-messagetable-header {
+	padding-top: 5px;
+	border-bottom: 1px solid #777;
+	/* @noflip */
+	box-shadow: 0 3px 3px -3px rgba(0, 0, 0, 0.5);
+	font-size: 14px;
+	margin: 0;
+	list-style: none;
+	transition: width 250ms;
+}
+
+@media screen and ( min-height: 600px ) {
+	.tux-messagetable-header.floating {
+		background: white;
+		position: fixed;
+		padding-top: 5px;
+		top: 0;
+		z-index: 200;
+	}
+
+	.tux-messagetable-header.floating+.tux-messagelist {
+		margin-top: 50px;
+	}
+}
+
+.tux-message-filter-box {
+	font-size: 14px;
+	height: 28px;
+	border: 1px solid #C9C9C9;
+	width: 100%;
+	padding: 0 5px;
+}
+
+.tux-message-filter-wrapper {
+	background: url('../images/search.png') no-repeat scroll left center transparent;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/search.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/search.svg);
+	background-size: 25px;
+	padding-left: 30px;
+}
+
+.client-nojs .tux-messagetable-header {
+	display: none;
+}

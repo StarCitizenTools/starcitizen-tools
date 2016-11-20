@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"CERminator"
+		]
+	},
+	"cleanchanges-changerightslink": "promijeni grupe",
+	"cleanchanges-desc": "Kompaktniji prikaz [[Special:RecentChanges|spiska nedavnih promjena]]",
+	"cleanchanges-language": "Jezik:",
+	"cleanchanges-language-na": "Sve",
+	"cleanchanges-users": "Korisnici: (Razdv: |):",
+	"cleanchanges-showuserlinks": "Prikaži korisničke linkove"
+}

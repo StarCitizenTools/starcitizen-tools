@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dori",
+			"Ammartivari",
+			"Toplove12"
+		]
+	},
+	"checkuser": "Kontrollo përdoruesin",
+	"checkuser-reason": "Arsyeja:",
+	"checkuser-blocked": "Bllokuar",
+	"checkuser-wasblocked": "Bllokuar më parë",
+	"checkuser-log-search-type": "Kërko nga:"
+}

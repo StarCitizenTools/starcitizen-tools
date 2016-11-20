@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"SNN95",
+			"Anakmalaysia"
+		]
+	},
+	"commonsmetadata-desc": "Meluaskan ciri \"extmetadata\" modul maklumat imej API untuk memasukkan maklumat yang disimpan di dalam laman penerangan imej yang menggunakan templat biasa digunakan di Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Fail tanpa lesen boleh dibaca mesin",
+	"commonsmetadata-trackingcategory-no-license-desc": "Fail ini tiada lesen templat yang [{{MediaWiki:Commonsmetadata-doc-url}} boleh dibaca oleh mesin].",
+	"commonsmetadata-trackingcategory-no-description": "Fail tanpa keterangan boleh dibaca mesin",
+	"commonsmetadata-trackingcategory-no-description-desc": "Fail ini tiada templat keterangan yang [{{MediaWiki:Commonsmetadata-doc-url}} boleh dibaca oleh mesin], ataupun ruangan huraiannya tidak diisi.",
+	"commonsmetadata-trackingcategory-no-author": "Fail tanpa pengarang boleh dibaca mesin",
+	"commonsmetadata-trackingcategory-no-author-desc": "Fail ini tiada templat keterangan yang [{{MediaWiki:Commonsmetadata-doc-url}} boleh dibaca oleh mesin], ataupun ruangan pengarangnya tidak diisi.",
+	"commonsmetadata-trackingcategory-no-source": "Fail tanpa sumber boleh dibaca mesin",
+	"commonsmetadata-trackingcategory-no-source-desc": "Fail ini tiada templat keterangan yang [{{MediaWiki:Commonsmetadata-doc-url}} boleh dibaca oleh mesin], ataupun ruangan sumbernya tidak diisi."
+}

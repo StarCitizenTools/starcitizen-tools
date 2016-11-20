@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Consta",
+			"Crazymadlover",
+			"Omnipaedista",
+			"Protnet"
+		]
+	},
+	"cleanchanges-changerightslink": "αλλαγή ομάδων",
+	"cleanchanges-desc": "Πιο συμπαγής προβολή της [[Special:RecentChanges|λίστας προσφάτων αλλαγών]]",
+	"cleanchanges-language": "Γλώσσα:",
+	"cleanchanges-language-na": "Όλες",
+	"cleanchanges-users": "Χρήστες (διαχωρισμένοι με |):",
+	"cleanchanges-showuserlinks": "Προβολή συνδέσμων χρήστη"
+}

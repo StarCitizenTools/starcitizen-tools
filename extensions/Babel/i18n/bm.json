@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel-0": "Nin mɔgɔ'in tɛ se ka [[$1|foyi]] sɛbɛn [[$2|$3]] na.",
+	"babel-1": "Nin mɔgɔ'in bɛ se ka dɔw seben [[$2|$3]] na [[$1|dɔɔni-dɔɔni]].",
+	"babel-N": "[[$2|$3]] y'a [[$1|todukan]] ye ani a bɛ a sɛbɛn.",
+	"babel-0-n": "Nin mɔgɔ'in tɛ se ka [[$1|foyi]] sɛbɛn [[$2|bamanankan]] na.",
+	"babel-1-n": "Nin mɔgɔ'in bɛ se ka dɔw seben [[$2|bamanankan]] na [[$1|dɔɔni-dɔɔni]].",
+	"babel-N-n": "[[$2|Bamanankan]] y'a [[$1|todukan]] ye ani a bɛ a sɛbɛn."
+}

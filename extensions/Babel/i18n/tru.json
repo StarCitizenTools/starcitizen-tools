@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ariyo"
+		]
+	},
+	"babel-footer-url": ":Category:Babel - aHadome u aLeşonaṭe",
+	"babel-autocreate-text-main": "aHadome dkitne buSedrano koḍ³i $1.",
+	"babel-0": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|lo koḍa³|lo koḍ³o|lo koḍa³}} [[$2|$3]].",
+	"babel-1": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|koḍa³|koḍ³o|koḍa³}} işmo [[$2|$3]].",
+	"babel-2": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|koḍa³|koḍ³o|koḍa³}} [[$2|$3]] baş.",
+	"babel-3": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|koḍa³|koḍ³o|koḍa³}} [[$2|$3]] ṫawo.",
+	"babel-4": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|koḍa³|koḍ³o|koḍa³}} [[$2|$3]] gişt xed ḥa dyalıf [[$2|$3]] bNa³muṭe.",
+	"babel-5": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|koḍa³|koḍ³o|koḍa³}} [[$2|$3]] bDerğo ğalabe 3eloyo.",
+	"babel-N": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|yalıf|iyalıfo|yalıf}} [[$2|$3]] [[$1|{{GENDER:$6|bNa³muṭe|bNa3muṭa|bNa³muṭe}}]].",
+	"babel-0-n": "\t{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|lo koḍa³|lo koḍ³o|lo koḍa³}} [[$2|Ṫuroyo]].",
+	"babel-1-n": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|koḍa³|koḍ³o|koḍa³}} işmo [[$2|Ṫuroyo]].",
+	"babel-2-n": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|koḍa³|koḍ³o|koḍa³}} [[$2|Ṫuroyo]] baş.",
+	"babel-3-n": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|koḍa³|koḍ³o|koḍa³}} [[$2|Ṫuroyo]] ṫawo",
+	"babel-4-n": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|koḍa³|koḍ³o|koḍa³}} [[$2|Ṫuroyo]] gişt xed ḥa dyalıf [[$2|Ṫuroyo]] bNa³muṭe.",
+	"babel-5-n": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|koḍa³|koḍ³o|koḍa³}} [[$2|Ṫuroyo]] bDerğo ğalabe 3eloyo.",
+	"babel-N-n": "{{GENDER:$4|uHadomano|iHadomtaṭe|uHadomano}} {{GENDER:$5|yalıf|iyalıfo|yalıf}} [[$2|Ṫuroyo]] [[$1|{{GENDER:$6|bNa³muṭe|bNa3muṭa|bNa³muṭe}}]].",
+	"babel-footer": "aHadome u aLeşonaṭe"
+}

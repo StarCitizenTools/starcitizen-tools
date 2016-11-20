@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Antonytse",
+			"Yueman"
+		]
+	},
+	"scribunto-lua-error": "Lua出錯：$2。",
+	"scribunto-limitreport-profile-ms": "$1毫秒"
+}

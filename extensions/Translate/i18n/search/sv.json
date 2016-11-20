@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"WikiPhoenix",
+			"Jopparn"
+		]
+	},
+	"searchtranslations": "Sök översättningar",
+	"tux-sst-edit": "Redigera översättning",
+	"tux-sst-view-foreign": "Visa på $1",
+	"tux-sst-search": "Sök",
+	"tux-sst-search-ph": "Sök översättningar",
+	"tux-sst-count": "{{PLURAL:$1|Ett|$1}} resultat hittades",
+	"tux-sst-facet-language": "Språk",
+	"tux-sst-facet-group": "Meddelandegrupper",
+	"tux-sst-facet-orphan": "(föräldralös)",
+	"tux-sst-nosolr-title": "Sökning är inte tillgänglig",
+	"tux-sst-nosolr-body": "Denna wiki har inte en tjänst för att söka efter översättningar.",
+	"tux-sst-solr-offline-title": "Sökning är inte tillgänglig",
+	"tux-sst-solr-offline-body": "Söktjänsten är inte tillgänglig för tillfället.",
+	"tux-sst-next": "Nästa ›",
+	"tux-sst-prev": "‹ Föregående",
+	"tux-sst-default": "Översättningar",
+	"tux-sst-translated": "Översättningar från $1",
+	"tux-sst-untranslated": "Inga översättningar från $1",
+	"tux-sst-outdated": "Föråldrade översättningar från $1",
+	"tux-sst-ellipsis-untranslated": "Ingen översättning",
+	"tux-sst-ellipsis-outdated": "Föråldrade översättningar",
+	"tux-sst-match-message": "Visar översättningar som överensstämmer något sökord. $1",
+	"tux-sst-case-sensitive": "Skiftlägeskänsligt"
+}

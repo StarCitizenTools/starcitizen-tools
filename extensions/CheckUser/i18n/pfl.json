@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Manuae"
+		]
+	},
+	"checkuser-search": "Suche",
+	"checkuser-week-1": "ledschd Woch",
+	"checkuser-week-2": "ledschde zwee Woche",
+	"checkuser-month": "ledschde Monad",
+	"checkuser-locked": "gschberd",
+	"checkuser-wasblocked": "Frija gschberd",
+	"checkuser-block-failure": "'''S'isch kän Benudza gschberd worre.'''"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kghbln",
+			"Metalhead64",
+			"Debenben"
+		]
+	},
+	"pageimages-desc": "Sammelt Informationen zu Bildern auf der Seite",
+	"pageimages-info-label": "Seitenbild",
+	"apihelp-query+pageimages-example-1": "Gibt den Namen und ein <kbd>100</kbd>-Pixel-Vorschaubild einer Grafik von der Seite <kbd>Albert Einstein</kbd> zurück.",
+	"apihelp-query+pageimages-param-prop": "Welche Informationen zurückgegeben werden sollen:\n;thumbnail:URL und die Maße des mit der Seite verknüpften Bildes, falls vorhanden.\n;name:Bildtitel.",
+	"apihelp-query+pageimages-param-thumbsize": "Maximale Abmessungen des Vorschaubildes.",
+	"apihelp-query+pageimages-param-limit": "Gibt Eigenschaften von dieser Anzahl an Seiten zurück."
+}

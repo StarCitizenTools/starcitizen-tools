@@ -1,0 +1,165 @@
+/**
+ * @author Niklas Laxström
+ * @author Pau Giner
+ * @since 2013-01-10
+ */
+
+.tux-searchpage .tux-selectedbox .facet-item {
+	background-color: #EDEDED;
+	margin-right: 5px;
+}
+
+.tux-searchpage .tux-searchboxform .tux-selectedbox,
+.tux-searchpage .searchcontent .facets {
+	padding: 0 15px 0 5px;
+}
+
+/* Facets */
+.tux-searchpage .facet {
+	font-size: 24px;
+	color: #252525;
+	padding: 20px 0 10px 0;
+}
+
+.tux-searchpage .facet-item {
+	font-size: 16px;
+	padding: 4px 5px;
+}
+
+.tux-searchpage .facet-item:hover {
+	background: #f8f8f8;
+	cursor: pointer;
+}
+
+.grid.tux-searchpage .facet-item:first-child {
+	margin-top: 10px;
+}
+
+.tux-searchpage .facet-item .facet-count {
+	color: #AAA;
+	float: right;
+	margin-right: 5%;
+}
+
+.tux-searchpage .facet-level-0 {
+	font-size: 16px;
+}
+
+.tux-searchpage .facet-level-1 {
+	font-size: 14px;
+}
+
+.tux-searchpage .facet-level-2 {
+	font-size: 12px;
+}
+
+.tux-searchpage .facet-level-3 {
+	font-size: 10px;
+}
+
+.tux-searchpage .facet-item .facet-name.selected {
+	font-weight: bold;
+}
+
+.tux-searchpage .facet-item a:visited,
+.tux-searchpage .facet-item a:link {
+	color: #0645AD;
+}
+
+/* Results */
+.tux-searchpage .count {
+	color: #555;
+	font-size: 16px;
+	padding-bottom: 10px;
+}
+
+.tux-searchpage .searchcontent .results {
+	color: #252525;
+	padding-left: 10px;
+}
+
+.tux-searchpage .results .tux-text {
+	text-align: left;
+	font-size: 16px;
+	padding-top: 20px;
+}
+
+.tux-searchpage .results .tux-title {
+	text-align: left;
+	color: #555;
+}
+
+/* Pagination links */
+.tux-searchpage .results .tux-pagination-line {
+	color: #eee;
+	font-size: 1px;
+}
+
+.tux-searchpage .results .tux-pagination-links {
+	font-size: 20px;
+	padding-top: 20px;
+	text-align: center;
+}
+
+/* Search area */
+.tux-searchpage .searchinput {
+	padding: 10px 0;
+}
+
+.tux-searchpage .searchinput .searchinputbox {
+	width: 60%;
+	display: inline-block;
+	margin-right: 5px;
+}
+
+.tux-search-operators {
+	margin: 5px 0;
+}
+
+h1.firstHeading {
+	display: none;
+}
+
+.translate-search-more-groups,
+.translate-search-more-languages {
+	background-color: #F0F0F0;
+	font-size: 16px;
+	cursor: pointer;
+	padding: 0 6px;
+	border-radius: 2px;
+	border: 1px solid #EEE;
+}
+
+.translate-search-more-groups:hover,
+.translate-search-more-languages:hover {
+	border: 1px solid #CCC;
+	text-decoration: none;
+}
+
+.translate-search-more-groups-info,
+.translate-search-more-languages-info {
+	color: #888;
+	font-size: 14px;
+	padding: 0 8px;
+}
+
+/* Override tabs */
+.tux-searchpage .tux-messagetable-header .seven {
+	width: 100%;
+}
+
+.tux-searchpage .tux-message-selector .more ul {
+	width: auto;
+}
+
+.tux-searchpage .tux-message-selector .more ul a {
+	white-space: pre-wrap;
+}
+
+.tux-searchpage .successbox {
+	margin-left: 25%;
+}
+
+.tux-search-highlight {
+	background-color: #C9C9C9;
+}

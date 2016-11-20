@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Giromin Cangiaxo"
+		]
+	},
+	"babel-0": "St'utente o [[$1|no]] capisce ò [[$2|$3]] (o-o capisce con benben de difficurtæ).",
+	"babel-1": "St'utente ô l'è'n [[$1|prinçipiante]] de [[$2|$3]].",
+	"babel-2": "St'utente o conosce o [[$2|$3]] a un livello [[$1|medio]] .",
+	"babel-3": "St'utente ô sa asæ de [[$2|$3]], ô l'è [[$1|avançou]].",
+	"babel-4": "St'utente ô parla [[$2|$3]] quæxi [[$1|comme ûn d'o paize]].",
+	"babel-N": "St'utente o l'è [[$1|de lengoa moæ]] [[$2|$3]].",
+	"babel-0-n": "St'utente ô [[$1|no]] capisce o [[$2|lìggûre]] (o capisce con ben-ben de difficultæ).",
+	"babel-1-n": "St'utente ô l'è'n [[$1|prinçipiante]] de [[$2|lìggûre]].",
+	"babel-2-n": "St'utente o conosce o [[$2|ligure]] a un livello [[$1|medio]] .",
+	"babel-3-n": "St'utente ô sa asæ de [[$2|lìggûre]], ô l'è [[$1|avançou]].",
+	"babel-4-n": "St'utente ô parla [[$2|lìggûre]] quæxi [[$1|comme ûn d'o paize]].",
+	"babel-N-n": "St'utente o l'è [[$1|de lengoa moæ]] [[$2|liggure]]."
+}

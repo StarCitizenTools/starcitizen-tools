@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby"
+		]
+	},
+	"popups-message": "Hovercards",
+	"popups-last-edited": "Geännert $1",
+	"popups-redirects": "Viruleedung op <h3>$1</h3",
+	"popups-settings-title": "Säit kucken ouni ofzespäicheren",
+	"popups-settings-description": "Dësen Tool erlaabt et Linken op Wikisäiten an op Referenzen ze kucken ouni se ze späicheren.",
+	"popups-settings-option-simple": "Einfach",
+	"popups-settings-option-advanced": "Erweidert",
+	"popups-settings-option-off-description": "Dir kënnt dës Astellung änneren wann Dir de Link ënnen op der Säit benotzt",
+	"popups-settings-save": "Späicheren",
+	"popups-settings-help-ok": "OK",
+	"popups-settings-cancel": "Ofbriechen",
+	"popups-settings-enable": "Kucken ouni ze späicheren aktivéieren",
+	"popups-send-feedback": "Feedback schécken (externe Link)",
+	"popups-mobile-continue-to-page": "Virun op d'Säit",
+	"popups-mobile-dismiss": "Verwerfen",
+	"popups-mobile-message": "Hovercards (mobil)"
+}

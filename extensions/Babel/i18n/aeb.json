@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Csisc",
+			"GeekEmad"
+		]
+	},
+	"babel": "Linformasyon mtagħ Babel għallutilizateur",
+	"babel-desc": "يضيف دالة المحلل <code>#babel</code> للسماح بالتوليد التلقائي لعامود صندوق بابل مع إمكانية تضمين قوالب أخرى",
+	"babel-url": "Project:بابل",
+	"babel-footer-url": ":Category:بابل - المستخدمون حسب اللغة",
+	"babel-autocreate-abort": "اسم المستخدم الذي حددته مستخدم للإنشاء التلقائي لتصنيفات [[$1|بابل]] ولا يمكن تسجيله.",
+	"babel-autocreate-reason": "إنشاء صفحة تصنيف [[$1|بابل]] تلقائيا.",
+	"babel-autocreate-text-levels": "المستخدمون في هذا التصنيف مستوى مهارتهم $1 للغة $2.",
+	"babel-autocreate-text-main": "المستخدمون في هذا التصنيف لديهم معرفة باللغة $1.",
+	"babel-0": "Lutilizateur hadha [[$1|ma yefhemch]] [[$2|$3]] (wella yefhem àmma bessif)",
+	"babel-1": "Lutilizateur hadha yefhem [[$1|chway]] [[$2|$3]].",
+	"babel-2": "Lutilizateur hadha yefhem [[$1|metwasstʾ]] [[$2|$3]]",
+	"babel-3": "Lutilizateur hadha yefhem [[$1|belbàhi]] [[$2|$3]]",
+	"babel-4": "Lutilizateur hadha yefhem [[$1|barcha]] [[$2|$3]]",
+	"babel-5": "Lutilizateur hadha [[$1|mgħallem]] mtagħ [[$2|$3]]",
+	"babel-N": "Lutilizateur hadha [[$1|loughtou elmaternàl]] hiya [[$2|$3]]"
+}

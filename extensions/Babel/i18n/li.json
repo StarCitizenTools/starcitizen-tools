@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ooswesthoesbes",
+			"Pahles"
+		]
+	},
+	"babel": "Babel Gebroekersinfermasie",
+	"babel-desc": "Voog de <code>#babel</code>-parserfónksie toe óm automatische generatie van 'ne babelgebroekersbóks mäögelik te make mit de mäögelikheid óm aangepasde sjablone in te voge",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Gebroekers nao sjpraok",
+	"babel-autocreate-reason": "Automatisch aanmake [[$1|Babel]]-categoriepagina.",
+	"babel-autocreate-text-levels": "Gebroekers in dees categorie gaeve aan dat hun niveau veur de taal $2 $1 is.",
+	"babel-autocreate-text-main": "Gebroekers in dees categorie gaeve aan dat zie benöl höbbe vaan de taol $1.",
+	"babel-0": "Deze gebroeker haet [[$1|gein]] benöl van 't [[$2|$3]] (of haet groete meujte 't te begriepe)",
+	"babel-1": "Deze gebroeker haet op [[$1|basisniveau]] benöl van 't [[$2|$3]].",
+	"babel-2": "Deze gebroeker haet [[$1|gemiddeld]] benöl van 't [[$2|$3]].",
+	"babel-3": "Deze gebroeker haet [[$1|good]] benöl van 't [[$2|$3]].",
+	"babel-4": "Deze gebroeker haet benöl van 't [[$2|$3]] op [[$1|bekans-mojerspraokniveau]].",
+	"babel-5": "Deze gebroeker haet [[$1|perfesjeneel]] benöl van 't [[$2|$3]].",
+	"babel-N": "Deze gebroeker haet benöl van 't [[$2|$3]] op [[$1|mojerspraokniveau]].",
+	"babel-0-n": "Deze gebroeker haet [[$1|gein]] benöl van 't [[$2|Limburgs]] (of haet groete meujte 't te begriepe).",
+	"babel-1-n": "Deze gebroeker haet op [[$1|basisniveau]] benöl van 't [[$2|Limburgs]].",
+	"babel-2-n": "Deze gebroeker haet [[$1|gemiddeld]] benöl van 't [[$2|Limburgs]].",
+	"babel-3-n": "Deze gebroeker haet [[$1|good]] benöl van 't [[$2|Limburgs]].",
+	"babel-4-n": "Deze gebroeker haet benöl van 't [[$2|Limburgs]] op [[$1|bekans-mojerspraokniveau]].",
+	"babel-5-n": "Deze gebroeker haet [[$1|perfesjeneel]] benöl van 't [[$2|Limburgs]].",
+	"babel-N-n": "Deze gebroeker haet benöl van 't [[$2|Limburgs]] op [[$1|mojerspraokniveau]].",
+	"babel-footer": "Gebroekers per sjpraok"
+}

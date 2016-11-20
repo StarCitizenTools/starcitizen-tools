@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Melancholie",
+			"Yekrats"
+		]
+	},
+	"cleanchanges-changerightslink": "ŝanĝu grupojn",
+	"cleanchanges-desc": "Pli kompakta versio de la [[Special:RecentChanges|listo de lastaj ŝanĝoj]]",
+	"cleanchanges-language": "Lingvo:",
+	"cleanchanges-language-na": "Ĉiuj",
+	"cleanchanges-users": "Uzantoj (disigilo: |):",
+	"cleanchanges-showuserlinks": "Vidi uzantoj ligiloj"
+}

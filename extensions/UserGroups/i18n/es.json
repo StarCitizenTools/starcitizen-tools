@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fitoschido",
+			"Macofe"
+		]
+	},
+	"usergroups": "Gestión de grupos de usuarios",
+	"usergroups-desc": "Proporciona un control más preciso sobre qué permisos pueden registrarse con cuáles grupos de usuarios.",
+	"usergroupnameexists-error": "No se puede crear otro grupo de usuarios con este nombre porque ya existe.",
+	"usergroups-createnew": "(crear nuevo…)",
+	"usergroups-editgroup-delete": "Eliminar este grupo de usuarios <span class=\"important\" style=\"color:red\">(<strong>Advertencia</strong>: esto es irreversible. Para volver a crear esta clase, debes [[Special:UserGroups/new|crear una nueva]].)</span>",
+	"usergroups-editgroup-desc": "Selecciona un grupo de usuarios de la lista desplegable de abajo, o crea uno propio con la opción \"crear nuevo…\".",
+	"usergroups-editgroup-newgroup": "Escribe el nombre del grupo de usuarios nuevo:",
+	"usergroups-editgroup-reason": "Motivo:",
+	"usergroups-editgroup-save": "Guardar cambios",
+	"usergroups-editgroup-userrights": "Todos los permisos disponibles",
+	"usergroups-log-name": "Registro de grupos de usuarios",
+	"usergroups-log-header": "Este registro guarda los cambios de los permisos de usuario de cada grupo de usuarios.",
+	"usergroups-log-none": "(ninguno)",
+	"action-modifygroups": "modificar grupos de usuarios",
+	"invalidusergroupname-title": "Nombre de grupo de usuarios no válido",
+	"invalidusergroupname-error": "El nombre que has proporcionado para el grupo de usuarios nuevo no es válido.\n\n[[Special:UserGroups|Regresar]].",
+	"nosuchusergroup": "No se encontró ningún grupo de usuarios llamado «$1». ¿Quieres [[Special:UserGroups/new|crearlo]]?",
+	"right-modifygroups": "Crear, modificar y eliminar grupos de usuarios",
+	"logentry-usergroups-delete": "$1 {{GENDER:$2|eliminó}} el grupo de usuarios «$4».",
+	"logentry-usergroups-modify": "$1 {{GENDER:$2|modificó}} el grupo de usuarios «$4». $7Añadido $5; eliminado $6"
+}

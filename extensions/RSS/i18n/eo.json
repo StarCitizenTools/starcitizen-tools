@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Yekrats"
+		]
+	},
+	"rss-desc": "Montras RSS-fluon en vikia paĝo",
+	"rss-error": "Malsukcesis ŝarĝi RSS-fonton de $1: $2",
+	"rss-empty": "Malsukcesis ŝarĝi RSS-fonton de $1!",
+	"rss-fetch-nourl": "Akiro vokita sen URL-o!",
+	"rss-invalid-url": "Malvalida URL-o: $1",
+	"rss-parse-error": "Eraro interpretante XML-on de RSS-o",
+	"rss-ns-permission": "RSS-abonado ne estas permesita en ĉi tiu nomspaco",
+	"rss-feed": "<!-- Jen du alternativaj ŝablonoj. La unua estas la baza defaŭlta ŝablono por abonfontoj. -->; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''\n: {{{description}}}\n: {{{author}}} {{{date}}}<!-- ne uzu novlinio ĉi tie --><!-- La dua estas plibonigita versio kiu devigas ilon Extension:ParserFunctions --><!-- ; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''{{#if: {{{description|}}}|: {{{description}}}}}{{#if: {{{author|}}} | {{#if: {{{date|}}} |: &mdash; {{{author}}} {{{date}}}}} | {{#if: {{{author|}}}|: &mdash; {{{author}}}}} {{#if: {{{date|}}}|:{{{date}}}}}|}} -->"
+}

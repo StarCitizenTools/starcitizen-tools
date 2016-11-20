@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Akoopal",
+			"GerardM",
+			"Hamaryns",
+			"MarkAHershberger",
+			"McDutchie",
+			"SPQRobin",
+			"Siebrand"
+		]
+	},
+	"babel": "Taalvaardigheid",
+	"babel-desc": "Voegt de parserfunctie <code>#babel</code> toe om automatische generatie van een babelgebruikersbox mogelijk te maken met de mogelijkheid om aangepaste sjablonen in te voegen",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Gebruikers naar taal",
+	"babel-autocreate-reason": "Automatisch aangemaakte [[$1|Babel]]-categorie.",
+	"babel-autocreate-text-levels": "Gebruikers in deze categorie geven aan dat hun niveau voor de taal $2 $1 is.",
+	"babel-autocreate-text-main": "Gebruikers in deze categorie geven aan dat zij kennis van de taal $1 hebben.",
+	"babel-0": "Deze gebruiker heeft [[$1|geen]] kennis van het [[$2|$3]] (of heeft moeite om het te begrijpen).",
+	"babel-1": "Deze gebruiker bezit kennis van het [[$2|$3]] op [[$1|elementair niveau]].",
+	"babel-2": "Deze gebruiker beheerst het [[$2|$3]] op [[$1|basisniveau]].",
+	"babel-3": "Deze gebruiker beheerst het [[$2|$3]] [[$1|goed]].",
+	"babel-4": "Deze gebruiker beheerst het [[$2|$3]] op [[$1|bijna-moedertaalniveau]].",
+	"babel-5": "Deze gebruiker heeft een [[$1|professionele]] kennis van het [[$2|$3]].",
+	"babel-N": "Deze gebruiker beheerst het [[$2|$3]] op [[$1|moedertaalniveau]].",
+	"babel-0-n": "Deze gebruiker heeft [[$1|geen]] kennis van het [[$2|Nederlands]] (of begrijpt het met grote moeite).",
+	"babel-1-n": "Deze gebruiker heeft [[$1|elementaire]] kennis van het [[$2|Nederlands]].",
+	"babel-2-n": "Deze gebruiker heeft [[$1|basiskennis]] van het [[$2|Nederlands]].",
+	"babel-3-n": "Deze gebruiker heeft [[$1|gevorderde]] kennis van het [[$2|Nederlands]].",
+	"babel-4-n": "Deze gebruiker beheerst het [[$2|Nederlands]] als ware het zijn [[$1|moedertaal]].",
+	"babel-5-n": "Deze gebruiker heeft [[$1|professionele]] kennis van het [[$2|Nederlands]].",
+	"babel-N-n": "Deze gebruiker heeft het [[$2|Nederlands]] als [[$1|moedertaal]].",
+	"babel-footer": "Gebruikers per taal"
+}

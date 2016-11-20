@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pirehelokan"
+		]
+	},
+	"msu-button-title": "پەڕگەکان ھەڵبژێرە",
+	"msu-insert-link": "بەستەر زیاد بکە",
+	"msu-insert-gallery": "ھەموویان وەکوو گالەری زیاد بکە",
+	"msu-insert-files": "ھەموویان وەکوو فایل زیاد بکە",
+	"msu-insert-links": "ھەموویان وەکوو بەستەر زیاد بکە",
+	"msu-cancel-upload": "بارکردن پووچەڵ بکەرەوە",
+	"msu-clean-all": "لیستەکە پاک بکەرەوە",
+	"msu-upload-possible": "پەڕگە دەتوانێت بار بکرێت",
+	"msu-ext-not-allowed": "تەنیا ئەم جۆرە فایلانە ڕێگەیان پێ دراوە:",
+	"msu-upload-this": "ئەم پەڕگەیە بار بکە",
+	"msu-upload-all": "گشت پەڕگەکان بار بکە",
+	"msu-dropzone": "فایلەکان بخەرە ئێرە"
+}

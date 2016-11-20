@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hanberke"
+		]
+	},
+	"babel": "Babyl ulanyjy maglumaty",
+	"babel-desc": "Ýörite şablonlary öz içine almak häsiýeti bar bolan Babyl ulanyjy gutusy sütüniniň awtomatik usulda döredilmegi üçin <code>#babel</code> parser funksiýasyny goşýar",
+	"babel-url": "Project:Babyl",
+	"babel-autocreate-reason": "Awtomatik usulda [[$1|Babyl]] kategoriýa sahypasy döredilýär.",
+	"babel-autocreate-text-levels": "Bu kategoriýadaky ulanyjylar $1 derejede $2 dilini bilýändiklerini görkezýär.",
+	"babel-autocreate-text-main": "Bu kategoriýadaky ulanyjylar $1 dilini bilýändiklerini görkezýär.",
+	"babel-0": "Bu ulanyjy [[$1|hiç hili]] [[$2|$3]] bilmeýär (ýa-da örän kynlyk bilen düşünýär).",
+	"babel-1": "Bu ulanyjy [[$1|başlangyç derejede]] [[$2|$3]] bilýär.",
+	"babel-2": "Bu ulanyjy [[$1|orta derejede]] [[$2|$3]] bilýär.",
+	"babel-3": "Bu ulanyjy [[$1|ýokary derejede]] [[$2|$3]] bilýär.",
+	"babel-4": "Bu ulanyjy [[$1|öz ene dili ýaly]] [[$2|$3]] bilýär.",
+	"babel-5": "Bu ulanyjy [[$1|professional derejede]] [[$2|$3]] bilýär.",
+	"babel-N": "Bu ulanyjynyň [[$1|öz ene dili]] [[$2|$3]]dir.",
+	"babel-0-n": "Bu ulanyjy [[$1|hiç hili]] [[$2|Türkmençe]] bilmeýär (ýa-da örän kynlyk bilen düşünýär).",
+	"babel-1-n": "Bu ulanyjy [[$1|başlangyç derejede]] [[$2|Türkmençe]] bilýär.",
+	"babel-2-n": "Bu ulanyjy [[$1|orta derejede]] [[$2|Türkmençe]] bilýär.",
+	"babel-3-n": "Bu ulanyjy [[$1|ýokary derejede]] [[$2|Türkmençe]] bilýär.",
+	"babel-4-n": "Bu ulanyjy [[$1|öz ene dili ýaly]] [[$2|Türkmençe]] bilýär.",
+	"babel-5-n": "Bu ulanyjy [[$1|professional derejede]] [[$2|Türkmençe]] bilýär.",
+	"babel-N-n": "Bu ulanyjynyň [[$1|öz ene dili]] [[$2|Türkmençe]]dir."
+}

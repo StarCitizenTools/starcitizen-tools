@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andria",
+			"Gloria sah",
+			"Marzedu",
+			"Taxandru"
+		]
+	},
+	"babel": "Babel impitadore",
+	"babel-desc": "Aciungit sa funtzioni parser <code>#babel</code> pro permitiri sa generatzioni automatica de una colunna box impitadore babel cun sa possibilidade de insertai templates personalitzaus",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Impitadores pro limba",
+	"babel-autocreate-reason": "Crea automatigamente sa pàgina de sa categoria [[$1|Babel]]",
+	"babel-autocreate-text-levels": "Is impitadores in custa categoria indicant de arrenèschere a comunicare in $2  cun unu livellu de connoschèntzia $1.",
+	"babel-autocreate-text-main": "Is impitadores de custa categoria indicant de arrenèschere a comunicare in $1.",
+	"babel-0": "Custu impitadore [[$1|non]] connoschet su [[$2|$3]] (o ddu cumprendet cun aprentu mannu).",
+	"babel-1": "Custu impitadore tenet una connoscéntzia [[$1|bàsica]] de su [[$2|$3]].",
+	"babel-2": "Custu impitadore tenet una connoscéntzia [[$1|mèdia]] de su [[$2|$3]].",
+	"babel-3": "Custu impitadore tenet una connoscéntzia [[$1|avantzada]] de su [[$2|$3]].",
+	"babel-4": "Custu impitadore tenet una connoscéntzia [[$1|cante sa limba mama]] de su [[$2|$3]].",
+	"babel-5": "Custu impitadore tenet una connoscéntzia [[$1|professionale]] de su [[$2|$3]].",
+	"babel-N": "Custu impitadore faeddat su [[$2|$3]] comente [[$1|limba mama]].",
+	"babel-0-n": "Custu impitadore [[$1|non cumprendet]] su '''[[$2|Sardu]]''', o ddu cumprendet cun aprentu mannu.",
+	"babel-1-n": "Custu impitadore podet azudare, ca unu '''[[$1|azicu]]''' de '''[[$2|Sardu]]''' lu connoschet.",
+	"babel-2-n": "Custu impitadore podet azudare, ca connoschet su '''[[$2|Sardu]]''' e lu '''[[$1|cumprendet]]'''.",
+	"babel-3-n": "Custu impitadore potet azudare '''[[$1|meda]]''' pro ite ischit faeddare e iscrìere su '''[[$2|Sardu]]'''.",
+	"babel-4-n": "Custu impitadore faeddat su '''[[$2|Sardu]]''' in modu '''[[$1|perfetu]]'''.",
+	"babel-5-n": "Custu impitadore connoschet su [[$2|Sardu]] a livellu [[$1|profesionale]].",
+	"babel-N-n": "Custu impitadore faeddat su [[$2|Sardu]] comente [[$1|limba mama]].",
+	"babel-footer": "Impitadores pro limba"
+}

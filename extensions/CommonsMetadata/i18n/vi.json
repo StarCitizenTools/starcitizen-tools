@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minh Nguyen"
+		]
+	},
+	"commonsmetadata-desc": "Mở rộng thuộc tính “extmetadata” của mô đun API thông tin hình ảnh để cung cấp thông tin từ các trang miêu tả tập tin bằng cách rút thông tin từ các bản mẫu phổ biến tại Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Tập tin thiếu giấy phép đọc được bằng máy",
+	"commonsmetadata-trackingcategory-no-license-desc": "Tập tin này không có bản mẫu giấy phép nào [{{MediaWiki:Commonsmetadata-doc-url}} đọc được bằng máy].",
+	"commonsmetadata-trackingcategory-no-description": "Tập tin thiếu miêu tả đọc được bằng máy",
+	"commonsmetadata-trackingcategory-no-description-desc": "Tập tin không có bản mẫu thông tin [{{MediaWiki:Commonsmetadata-doc-url}} đọc được bằng máy], hoặc trường miêu tả của nó chưa được điền vào.",
+	"commonsmetadata-trackingcategory-no-author": "Tập tin thiếu tác giả đọc được bằng máy",
+	"commonsmetadata-trackingcategory-no-author-desc": "Tập tin này không có bản mẫu thông tin [{{MediaWiki:Commonsmetadata-doc-url}} đọc được bằng máy], hoặc trường tác giả của nó chưa được điền vào.",
+	"commonsmetadata-trackingcategory-no-source": "Tập tin thiếu nguồn gốc đọc được bằng máy",
+	"commonsmetadata-trackingcategory-no-source-desc": "Tập tin này không có bản mẫu thông tin [{{MediaWiki:Commonsmetadata-doc-url}} đọc được bằng máy], hoặc trường nguồn gốc của nó chưa được điền vào."
+}

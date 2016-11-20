@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80"
+		]
+	},
+	"pageimages-desc": "איסוף מידע על תמונות שמשמשות בדף",
+	"pageimages-info-label": "תמונת דף",
+	"apihelp-query+pageimages-description": "החזרת מידע על תמונות בדפים, כגון תמונות ממוזערות ונוכחות של תמונות.",
+	"apihelp-query+pageimages-example-1": "קבלת שם ותמונה ממוזערת בגודל <kbd>100</kbd> פיקסלים של התמונה בדף <kbd>Albert Einstein</kbd>.",
+	"apihelp-query+pageimages-param-prop": "איזה מידע להחזיר:\n;thumbnail:URL ומידות של תמונות שמשויכת לדף, אם יש כזאת.\n;name:שם התמונה.",
+	"apihelp-query+pageimages-param-thumbsize": "גודל מרבי לתמונה ממוזערת.",
+	"apihelp-query+pageimages-param-limit": "מאפיינים של כמה דפים להחזיר."
+}

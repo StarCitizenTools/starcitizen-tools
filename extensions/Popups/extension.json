@@ -1,0 +1,99 @@
+{
+	"name": "Popups",
+	"author": [
+		"Prateek Saxena",
+		"Yair Rand"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:Popups",
+	"descriptionmsg": "popups-desc",
+	"license-name": "GPL-2.0+",
+	"type": "betafeatures",
+	"AutoloadClasses": {
+		"PopupsHooks": "Popups.hooks.php"
+	},
+	"ConfigRegistry": {
+		"popups": "GlobalVarConfig::newInstance"
+	},
+	"Hooks": {
+		"GetBetaFeaturePreferences": [
+			"PopupsHooks::getPreferences"
+		],
+		"BeforePageDisplay": [
+			"PopupsHooks::onBeforePageDisplay"
+		],
+		"ResourceLoaderTestModules": [
+			"PopupsHooks::onResourceLoaderTestModules"
+		],
+		"ResourceLoaderRegisterModules": [
+			"PopupsHooks::onResourceLoaderRegisterModules"
+		],
+		"ResourceLoaderGetConfigVars": [
+			"PopupsHooks::onResourceLoaderGetConfigVars"
+		],
+		"BeforePageDisplayMobile": [
+			"PopupsHooks::onBeforePageDisplayMobile"
+		]
+	},
+	"MessagesDirs": {
+		"Popups": [
+			"i18n"
+		]
+	},
+	"EventLoggingSchemas": {
+		"Popups": 11625443
+	},
+	"config": {
+		"@PopupsBetaFeature": "@var bool: Whether the extension should be enabled as an opt-in beta feature. If true, the BetaFeatures extension must be installed. False by default.",
+		"PopupsBetaFeature": false,
+		"PopupsSurveyLink": false,
+		"EnablePopupsMobile": false
+	},
+	"DefaultUserOptions": {
+		"popupsmobile": "1"
+	},
+	"ResourceModules": {
+		"ext.popups.core": {
+			"scripts": [
+				"resources/ext.popups.core.js"
+			],
+			"dependencies": [
+				"mediawiki.api",
+				"mediawiki.Title",
+				"mediawiki.Uri",
+				"mediawiki.RegExp"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			],
+			"styles": [
+				"resources/ext.popups.core.less"
+			]
+		},
+		"ext.popups.targets.desktopTarget": {
+			"scripts": [
+				"resources/ext.popups.targets/desktopTarget.js"
+			],
+			"dependencies": [
+				"jquery.jStorage",
+				"jquery.client",
+				"ext.popups.core",
+				"ext.popups.renderer.desktopRenderer"
+			],
+			"targets": [ "desktop" ]
+		},
+		"ext.popups.renderer.desktopRenderer": {
+			"scripts": [
+				"resources/ext.popups.renderer/desktopRenderer.js"
+			],
+			"dependencies": [
+				"ext.popups.core"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "Popups"
+	},
+	"manifest_version": 1
+}

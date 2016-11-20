@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"googleanalytics-desc": "Вметнува скрипти од  Google Universal Analytics (и/или други семрежни аналитики) во страници за следење на МедијаВики",
+	"right-noanalytics": "Изземеност од следење со семрежна аналитика"
+}

@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Irwangatot",
+			"Kandar"
+		]
+	},
+	"babel": "Katerangan Babel Pamaké",
+	"babel-desc": "Nambahan fungsi parser <code>#babel</code> pikeun mintonkeun lajur babel kotak pamaké sacara otomatis jeung pangabisa ngagunakeun citakan dinamis",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Katégori:Babel - Kontributor dumadar basana",
+	"babel-autocreate-reason": "Otomatis nyieun kaca kategori [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Pamaké di kategori ieu nandakeun maranéhanana ngabogaan pangabisa $1 pikeun basa $2.",
+	"babel-autocreate-text-main": "Pamaké di kategori ieu nandakeun maranéhanana ngabogaan pangabisa basa $1.",
+	"babel-0": "Pamaké ieu [[$1|teu]] ngarti [[$2|$3]] (atawa saeutik-saeutik ngartina).",
+	"babel-1": "Pamaké ieu gaduh kamampuan [[$2|$3]] hambalan [[$1|dasar]].",
+	"babel-2": "Pamaké ieu gaduh kamampuan [[$2|$3]] hambalan [[$1|panengah]].",
+	"babel-3": "Pamaké ieu [[$1|mahér]] [[$2|$3]].",
+	"babel-4": "Pamaké ieu tiasa [[$2|$3]] anu [[$1|sampurna]].",
+	"babel-5": "Pamaké ieu tiasa [[$2|$3]] anu [[$1|mahér tur sampurna]].",
+	"babel-N": "Pamaké ieu [[$1|tulen]] bisa [[$2|$3]].",
+	"babel-0-n": "Pamaké ieu [[$1|teu]] ngarti [[$2|basa Sunda]] (atawa saeutik-saeutik ngartina).",
+	"babel-1-n": "Pamaké ieu gaduh kamampuan [[$2|basa Sunda]] hambalan [[$1|dasar]].",
+	"babel-2-n": "Pamaké ieu gaduh kamampuan [[$2|basa Sunda]] hambalan [[$1|panengah]].",
+	"babel-3-n": "Pamaké ieu [[$1|mahér]] [[$2|basa Sunda]].",
+	"babel-4-n": "Pamaké ieu tiasa [[$2|basa Sunda]] anu [[$1|sampurna]].",
+	"babel-5-n": "Pamaké ieu tiasa [[$2|basa Sunda]] anu [[$1|mahér tur sampurna]].",
+	"babel-N-n": "Pamaké ieu [[$1|tulen]] bisa [[$2|basa Sunda]] .",
+	"babel-footer": "Pamaké dumasar basana"
+}

@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Withoutaname",
+			"Robby",
+			"Shirayuki",
+			"Umherirrender"
+		]
+	},
+	"usergroups": "{{Doc-special|UserGroups}}",
+	"usergroups-desc": "{{desc|name=User Groups|url=https://www.mediawiki.org/wiki/Extension:UserGroups}}",
+	"usergroupnameexists-error": "Error message thrown when user inputs a name for a new user group when the name has already been taken.",
+	"usergroups-createnew": "Dropdown option in [[Special:UserGroups]] to create a new user group.\n\nSee also:\n* {{msg-mw|Usergroups-editgroup-desc}}",
+	"usergroups-editgroup-delete": "{{doc-important|Do not translate <code><nowiki><span class=\"important\" style=\"color:red\"></nowiki></code>, <code><nowiki>Special:UserGroups/new</nowiki></code>, and <code><nowiki></span></nowiki></code>.}}\nToggle to delete this usergroup using [[Special:UserGroups]].",
+	"usergroups-editgroup-desc": "Description header for the main form page of [[Special:UserGroups]].\n\n\"create new...\" should be consistent with {{msg-mw|Usergroups-createnew}}.",
+	"usergroups-editgroup-newgroup": "Input textfield for the new usergroup's name",
+	"usergroups-editgroup-reason": "{{Identical|Reason}}",
+	"usergroups-editgroup-revoke": "Toggle to determine if this usergroup should be part of $wgGroupPermissions or $wgRevokePermissions",
+	"usergroups-editgroup-save": "Used as label for the Submit button.\n{{Identical|Save changes}}",
+	"usergroups-editgroup-userrights": "The set of all available user rights.",
+	"usergroups-log-name": "{{Doc-logpage}}",
+	"usergroups-log-header": "Used as log header in [[Special:Log/usergroups]].",
+	"usergroups-log-none": "Used as <code>$4</code> or <code>$5</code> in {{msg-mw|Logentry-usergroups-modify}}.\n{{Identical|None}}",
+	"usergroups-log-revoke": "Used as <code>$7</code> in the following message to specify if the newly created user group is a revoke-type, as defined by $wgRevokePermissions.\n* {{msg-mw|Logentry-usergroups-create}}\n{{Related|Usergroups-log-revoke}}",
+	"usergroups-log-revoke-switchon": "Used as <code>$7</code> in the following message to specify if the modified user group was switched to revoke type, as defined by $wgRevokePermissions.\n* {{msg-mw|Logentry-usergroups-modify}}\n{{Related|Usergroups-log-revoke}}",
+	"usergroups-log-revoke-switchoff": "Used as <code>$7</code> in the following message to specify if the modified user group was switched to normal type.\n* {{msg-mw|Logentry-usergroups-modify}}\n{{Related|Usergroups-log-revoke}}",
+	"action-modifygroups": "{{Doc-action|modifygroups}}",
+	"invalidusergroupname-title": "Custom error title given when user enters invalid input into [[Special:UserGroups/new]].\n\nThe body for this title is:\n* {{msg-mw|Invalidusergroupname-error}}",
+	"invalidusergroupname-error": "Custom error message given when user enters invalid input into [[Special:UserGroups/new]].\n\nFollowed by \"{{int:returnto|{{int:mainpage}}}}\".\n\nThe title for this error is {{msg-mw|Invalidusergroupname-title}}.",
+	"nosuchusergroup": "Displays if the user enters an invalid user group name for [[Special:UserGroups]].\n\nParameters:\n* $1 - the specified user group name",
+	"right-modifygroups": "{{Doc-right|modifygroups}}",
+	"logentry-usergroups-create": "{{logentry}}\nAdditional parameters:\n* $4 - user group name\n* $5 - user rights\n* $6 - (Unused)\n* $7 - any one of the following:\n** ''empty string''\n** {{msg-mw|Usergroups-log-revoke}}\n{{Related|Logentry-usergroups}}",
+	"logentry-usergroups-delete": "{{logentry}}\nAdditional parameters:\n* $4 - user group name\n{{Related|Logentry-usergroups}}",
+	"logentry-usergroups-modify": "{{logentry}}\nAdditional parameters:\n* $4 - user group name\n* $5 - list of user rights added to the group, or {{msg-mw|Usergroups-log-none}}\n* $6 - list of user rights removed from the group, or {{msg-mw|Usergroups-log-none}}\n* $7 - any one of the following messages:\n** ''empty string''\n** {{msg-mw|Usergroups-log-revoke-switchon}}\n** {{msg-mw|Usergroups-log-revoke-switchoff}}\n{{Related|Logentry-usergroups}}"
+}

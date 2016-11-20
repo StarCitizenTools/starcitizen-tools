@@ -1,0 +1,41 @@
+.tux-statsbar {
+	max-width: 400px;
+	padding: 0;
+	height: 5px;
+	background-color: #BBB;
+}
+
+.tux-statsbar span {
+	height: 5px;
+	float: left;
+	padding: 0;
+	-webkit-transition: width 1s;
+	-moz-transition: width 1s;
+	-o-transition: width 1s;
+	transition: width 1s;
+}
+
+.tux-statsbar .tux-proofread {
+	background-color: #23567F;
+}
+
+.tux-statsbar .tux-translated {
+	background-color: #3A89C9;
+}
+
+.tux-statsbar .tux-fuzzy {
+	background-color: #EBCC6E;
+}
+
+.tux-statsbar .tux-untranslated {
+	display: none;
+}
+
+.tux-statsbar-info {
+	font-weight: normal;
+	line-height: 1.25em;
+	color: #777;
+	font-size: 10pt;
+	position: absolute;
+	padding-top: 5px;
+}

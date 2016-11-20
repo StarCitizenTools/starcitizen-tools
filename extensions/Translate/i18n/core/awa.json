@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"1AnuraagPandey"
+		]
+	},
+	"translate": "अनुवाद करा जाय",
+	"translate-desc": "[[Special:Translate| खाश पन्ना]] मीडीयाविकि कय अनुवादन खत्तिर",
+	"translate-taskui-view": "कुल सनेशा देखाव जाय",
+	"translate-taskui-untranslated": "अअनुवादित सन्देश देखावा जाय",
+	"translate-taskui-optional": "वैकल्पिक सन्देश देखावा जाय",
+	"translate-taskui-reviewall": "कुल अनुवाद कय समीक्षा करा जाय",
+	"translate-taskui-export-to-file": "मूल स्वरूप में निर्यात करा जाय",
+	"translate-taskui-export-as-po": "ऑफ़लाइन अनुवाद खत्तिर निर्यात करा जाय",
+	"translate-taction-translate": "अनुवाद करा जाय",
+	"translate-edit-in-other-languages": "सनेशा दुसर भाषा मा",
+	"translate-sidebar-alltrans": "दुसर भाषा में",
+	"languagestats": "भाषा कय आकलन",
+	"languagestats-summary": "इ पन्ना भाषा कय कुल सन्देश समुह कय अनुवाद आकलन देखावत है ।",
+	"languagestats-stats-for": "$1 ($2) कय खत्तीर अनुवाद आकँडा।",
+	"languagestats-recenttranslations": "नँवा अनुवाद",
+	"translate-language-code": "भाषा कय कोड",
+	"translate-language-code-field-name": "भाषा कय कोड:",
+	"supportedlanguages": "कुल समर्थित भाषा",
+	"supportedlanguages-recenttranslations": "नँवा अनुवाद",
+	"supportedlanguages-count": "कुल $1 {{PLURAL:$1|भाषा|भाषा}} ।",
+	"translate-documentation-language": "मैसेज डकुमेन्टेशन",
+	"tux-editor-in-other-languages": "दुसर भाषा में"
+}

@@ -1,0 +1,11 @@
+<div class="flow-board-header flow-load-interactive" data-flow-load-handler="loadSideRail">
+	{{> flow_header_title}}
+	{{> flow_errors}}
+	{{#if oldSystem}}
+		{{> flow_header_detail_oldsystem}}
+	{{else}}
+		{{> flow_header_detail}}
+	{{/if}}
+	{{> flow_header_categories}}
+	{{> flow_header_footer}}
+</div>

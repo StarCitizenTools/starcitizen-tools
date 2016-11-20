@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Candalua",
+			"Gloria sah"
+		]
+	},
+	"babel": "Babel utente",
+	"babel-desc": "Zonta la funsion parser <code>#babel</code> par permétar la generazion automatica de un riquadro \"utente Babel\" con la possibilità de inserir template personalizà",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Utenti par lengua",
+	"babel-autocreate-reason": "Creo automaticamente la pàxena de la categoria [[$1|Babel]].",
+	"babel-autocreate-text-levels": "I utenti in sta categoria i gà indicà de verghe un livèl de conossensa $1 de la lengua $2.",
+	"babel-autocreate-text-main": "I utenti in sta categoria i gà indicà che i conosse la lengua $1.",
+	"babel-0": "Sto utente qua [[$1|no'l parla]] par gnente el [[$2|$3]] (o el lo capisse con gran fadiga).",
+	"babel-1": "Sto utente qua el parla [[$1|na s-cianta]] el [[$2|$3]].",
+	"babel-2": "Sto utente qua el parla [[$1|'bastansa ben]] el [[$2|$3]].",
+	"babel-3": "Sto utente qua el parla el [[$2|$3]] [[$1|ben assè]].",
+	"babel-4": "Sto utente qua el parla el [[$2|$3]] squasi [[$1|come la so lengua mare]].",
+	"babel-5": "Sto utente qua el parla el [[$2|$3]] a [[$1|livèi da professionista]].",
+	"babel-N": "Sto utente qua el parla el [[$2|$3]] [[$1|da co che'l xe nato]].",
+	"babel-0-n": "Sto utente qua [[$1|no'l parla]] par gnente la [[$2|lengua veneta]] (o el la capisse con gran fadiga).",
+	"babel-1-n": "Sto utente qua el parla [[$1|na s-cianta]] la [[$2|lengua veneta]].",
+	"babel-2-n": "Sto utente qua el parla [[$1|'bastansa ben]] la [[$2|lengua veneta]].",
+	"babel-3-n": "Sto utente qua el parla la [[$2|lengua veneta]] [[$1|ben assè]].",
+	"babel-4-n": "Sto utente qua el parla la [[$2|lengua veneta]] squasi [[$1|come la so lengua mare]].",
+	"babel-5-n": "Sto utente qua el parla la [[$2|lengua veneta]] a [[$1|livèi da professionista]].",
+	"babel-N-n": "Sto utente qua el parla la [[$2|lengua veneta]] [[$1|da co che'l xe nato]].",
+	"babel-footer": "Utenti par lengua"
+}

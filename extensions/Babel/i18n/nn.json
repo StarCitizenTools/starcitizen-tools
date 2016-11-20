@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eirik",
+			"Finnrind",
+			"Gunnernett",
+			"Harald Khan",
+			"Njardarlogar",
+			"Ranveig",
+			"Jeblad"
+		]
+	},
+	"babel": "Babel-brukarinformasjon",
+	"babel-desc": "Legg til parserfunksjonen <code>#babel</code> for å automatisk lage ein babelboks der ein kan bruka sjølvlaga malar",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Kategori:Babel/Brukarar etter språk",
+	"babel-autocreate-reason": "Skapar automatisk ei [[$1|Babel]]-kategoriside.",
+	"babel-autocreate-text-levels": "Brukarar i denne kategorien har eit språkdugleiksnivå på $1 for $2.",
+	"babel-autocreate-text-main": "Brukarar i denne kategorien har dugleik i språket $1.",
+	"babel-0": "Denne brukaren meistrar [[$1|ikkje]] [[$2|$3]] (eller skjøner det med store vanskar)",
+	"babel-1": "Denne brukaren meistrar [[$2|$3]] på eit [[$1|grunnleggjande]] nivå.",
+	"babel-2": "Denne brukaren meistrar [[$2|$3]] på eit [[$1|middels]] nivå.",
+	"babel-3": "Denne brukaren meistrar [[$2|$3]] på eit [[$1|høgt]] nivå.",
+	"babel-4": "Denne brukaren meistrar [[$2|$3]] på eit [[$1|morsmålsnært]] nivå.",
+	"babel-5": "Denne brukaren meistrar [[$2|$3]] på eit [[$1|profesjonelt]] nivå.",
+	"babel-N": "Denne brukaren meistrar [[$2|$3]] på [[$1|morsmålsnivå]].",
+	"babel-0-n": "Denne brukaren meistrar [[$1|ikkje]] [[$2|nynorsk]] (eller skjøner det med store vanskar)",
+	"babel-1-n": "Denne brukaren meistrar [[$2|nynorsk]] på eit [[$1|grunnleggjande]] nivå.",
+	"babel-2-n": "Denne brukaren meistrar [[$2|nynorsk]] på eit [[$1|middels]] nivå.",
+	"babel-3-n": "Denne brukaren meistrar [[$2|nynorsk]] på eit [[$1|høgt]] nivå.",
+	"babel-4-n": "Denne brukaren meistrar [[$2|nynorsk]] på eit [[$1|morsmålsnært]] nivå.",
+	"babel-5-n": "Denne brukaren meistrar [[$2|nynorsk]] på eit [[$1|profesjonelt]] nivå.",
+	"babel-N-n": "Denne brukaren meistrar [[$2|nynorsk]] på [[$1|morsmålsnivå]].",
+	"babel-footer": "Brukarar etter språk"
+}

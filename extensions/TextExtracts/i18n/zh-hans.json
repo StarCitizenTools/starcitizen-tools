@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Yfdyh000",
+			"Liuxinyu970226"
+		]
+	},
+	"textextracts-desc": "提供纯文本或有限的HTML页面内容提取",
+	"apihelp-query+extracts-description": "返回指定页面的纯文本或有限的HTML页面内容提取物。",
+	"apihelp-query+extracts-param-chars": "返回多少个字符。实际返回的文本可能比这稍长。",
+	"apihelp-query+extracts-param-sentences": "返回的句子数量。",
+	"apihelp-query+extracts-param-limit": "要返回多少提取物。",
+	"apihelp-query+extracts-param-intro": "只返回在首个章节前的内容",
+	"apihelp-query+extracts-param-plaintext": "返回提取物为纯文本而非HTML。",
+	"apihelp-query+extracts-param-sectionformat": "纯文本模式下如何格式化章节：\n;plain:无格式。\n;wiki:Wiki文本样式的格式（== 像是这样 ==）。\n;raw:此模块的内部表示方法（章节标题前缀&lt;ASCII 1&gt;&lt;ASCII 2&gt;&lt;章节级别&gt;&lt;ASCII 2&gt;&lt;ASCII 1&gt;）",
+	"apihelp-query+extracts-param-variant": "转换内容至这种语言变体。",
+	"apihelp-query+extracts-example-1": "获得175个字符的内容"
+}

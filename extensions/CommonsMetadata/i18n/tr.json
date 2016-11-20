@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Violetanka"
+		]
+	},
+	"commonsmetadata-trackingcategory-no-license": "Makine sistemi tarafından okunabilir bir lisansa sahip olmayan dosyalar",
+	"commonsmetadata-trackingcategory-no-license-desc": "Dosya herhangi bir [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] lisans şablonuna sahip değil.",
+	"commonsmetadata-trackingcategory-no-description": "Makine sistemi tarafından okunabilir bir tanıma sahip olmayan dosyalar",
+	"commonsmetadata-trackingcategory-no-description-desc": "Dosya herhangi bir [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] bilgi şablonuna sahip değil ya da tanım alanı doldurulmamış.",
+	"commonsmetadata-trackingcategory-no-author": "Makine sistemi tarafından okunabilir bir yazara sahip olmayan dosyalar",
+	"commonsmetadata-trackingcategory-no-author-desc": "Dosya herhangi bir [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] bilgi şablonuna sahip değil ya da yazar alanı doldurulmamış.",
+	"commonsmetadata-trackingcategory-no-source": "Makine sistemi tarafından okunabilir kaynağa sahip olmayan dosyalar",
+	"commonsmetadata-trackingcategory-no-source-desc": "Dosya herhangi bir [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] bilgi şablonuna sahip değil ya da kaynak alanı doldurulmamış."
+}

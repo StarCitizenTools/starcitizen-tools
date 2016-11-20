@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"CERminator"
+		]
+	},
+	"cldr-desc": "Ekstenzija koja pruža lokalizirane nazive jezika zasnovane na [http://cldr.unicode.org/index/downloads podacima CLDR]"
+}

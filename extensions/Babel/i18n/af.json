@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Arnobarnard",
+			"Naudefj",
+			"SPQRobin",
+			"Winstonza"
+		]
+	},
+	"babel": "Babel-gebruikersinligting",
+	"babel-desc": "Voeg die <code>#babel</code>-ontlederfunksie by om outomatiese generasie van 'n babel-gebruikersboks moontlik te maak met die funksionaliteit om doelgemaakte sjablone in te plaas.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Gebruikers volgens taal",
+	"babel-autocreate-reason": "[[$1|Babel]]-kategorie word outomaties geskep.",
+	"babel-autocreate-text-levels": "Gebruikers in hierdie kategorie dui aan dat hul vaardigheidsvlak vir die taal $2 $1 is.",
+	"babel-autocreate-text-main": "Gebruikers in hierdie kategorie dui aan dat hulle kennis van die taal $1 het.",
+	"babel-0": "Hierdie gebruiker het [[$1|geen]] kennis van [[$2|$3]] nie (of verstaan dit met groot moeite).",
+	"babel-1": "Hierdie gebruiker het ’n [[$1|basiese]] kennis van [[$2|$3]].",
+	"babel-2": "Hierdie gebruiker het ’n [[$1|middelbare]] kennis van [[$2|$3]].",
+	"babel-3": "Hierdie gebruiker het ’n [[$1|gevorderde]] kennis van [[$2|$3]].",
+	"babel-4": "Hierdie gebruiker het kennis van [[$2|$3]] op [[$1|byna-moedertaalvlak]].",
+	"babel-5": "Hierdie gebruiker het ’n [[$1|professionele]] kennis van [[$2|$3]].",
+	"babel-N": "Hierdie gebruiker het kennis van [[$2|$3]] op [[$1|moedertaalvlak]].",
+	"babel-0-n": "Hierdie gebruiker het [[$1|geen]] kennis van [[$2|Afrikaans]] nie (of verstaan dit met groot moeite).",
+	"babel-1-n": "Hierdie gebruiker het [[$1|basiese]] kennis van [[$2|Afrikaans]].",
+	"babel-2-n": "Hierdie gebruiker het [[$1|middelbare]] kennis van [[$2|Afrikaans]].",
+	"babel-3-n": "Hierdie gebruiker het [[$1|gevorderde]] kennis van [[$2|Afrikaans]].",
+	"babel-4-n": "Hierdie gebruiker het kennis van [[$2|Afrikaans]] op [[$1|byna-moedertaalvlak]].",
+	"babel-5-n": "Hierdie gebruiker het [[$1|professionele]] kennis van [[$2|Afrikaans]].",
+	"babel-N-n": "Hierdie gebruiker het kennis van [[$2|Afrikaans]] op [[$1|moedertaalvlak]].",
+	"babel-footer": "Gebruikers per taal"
+}

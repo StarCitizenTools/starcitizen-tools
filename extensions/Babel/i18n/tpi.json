@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iceflow",
+			"Iketsi"
+		]
+	},
+	"babel": "Babel save bilong yusa",
+	"babel-url": "Project:Babel",
+	"babel-0": "Dispela yusa i [[$1|no]] save long [[$2|$3]].",
+	"babel-1": "Dispela yusa i save [[$1|liklik tasol]] long [[$2|$3]].",
+	"babel-2": "Dispela yusa i save [[$1|hap hap]] long [[$2|$3]].",
+	"babel-3": "Dispela yusa i save [[$1|gut tru]] long [[$2|$3]].",
+	"babel-4": "Dispela yusa i save long [[$2|$3]] kain olsem [[$1|wanpela lokol]].",
+	"babel-5": "Dispela yusa i save [[$1|nambawan]] long [[$2|$3]].",
+	"babel-N": "[[$2|$3]] i [[$1|as tok]] bilong dispela yusa.",
+	"babel-0-n": "Dispela yusa i [[$1|no save]] long [[$2|Tok Pisin]]",
+	"babel-1-n": "Dispela yusa i save [[$1|liklik tasol]] long [[$2|Tok Pisin]].",
+	"babel-2-n": "Dispela yusa i save [[$1|hap hap]] long [[$2|Tok Pisin]].",
+	"babel-3-n": "Dispela yusa i save [[$1|gut tru]] long [[$2|Tok Pisin]].",
+	"babel-4-n": "Dispela yusa i save long [[$2|Tok Pisin]] [[$1|kain klostu wanpela lokol]].",
+	"babel-5-n": "Dispela yusa i [[$1|man bilong]] save long [[$2|Tok Pisin]].",
+	"babel-N-n": "Dispela yusa i save long [[$2|Tok Pisin]] [[$1|kain olsem wanpela lokol]].",
+	"babel-footer": "Ol yusa long tokples"
+}

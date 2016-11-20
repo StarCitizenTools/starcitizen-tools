@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aotake",
+			"JtFuruhata",
+			"Shirayuki",
+			"青子守歌"
+		]
+	},
+	"cldr-desc": "[http://cldr.unicode.org/index/downloads CLDR データ]に基づいて地域化された言語名を提供する拡張機能"
+}

@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ainali",
+			"Lejonel",
+			"M.M.S.",
+			"Rotsee"
+		]
+	},
+	"cldr-desc": "Tillägg som ger översatta språknamn baserade på [http://cldr.unicode.org/index/downloads CLDR-data]"
+}

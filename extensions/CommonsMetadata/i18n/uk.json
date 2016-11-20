@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andriykopanytsia",
+			"Olvin",
+			"Ата"
+		]
+	},
+	"commonsmetadata-desc": "Розповсюджує властивості зображення \"extmetadata\" до API модуля, щоб включити інформацію, яка зберігається на сторінках опису зображення, в шаблони, що зазвичай застосовані на Вікісховищі",
+	"commonsmetadata-trackingcategory-no-license": "Файли без машиночитабельної ліцензії",
+	"commonsmetadata-trackingcategory-no-license-desc": "Файл не має [{{MediaWiki:Commonsmetadata-doc-url}} машиночитабельного] шаблона ліцензії.",
+	"commonsmetadata-trackingcategory-no-description": "Файли без машиночитабельного опису",
+	"commonsmetadata-trackingcategory-no-description-desc": "Файл не має [{{MediaWiki:Commonsmetadata-doc-url}} машиночитабельного] інформаційного шаблона або ж поле опису (description) у ньому не заповнено.",
+	"commonsmetadata-trackingcategory-no-author": "Файли без авторства в машиночитабельному вигляді",
+	"commonsmetadata-trackingcategory-no-author-desc": "Файл не має [{{MediaWiki:Commonsmetadata-doc-url}} машиночитабельного] інформаційного шаблона або ж поле автора (author) в ньому не заповнено.",
+	"commonsmetadata-trackingcategory-no-source": "Файли без машиночитабельного джерела",
+	"commonsmetadata-trackingcategory-no-source-desc": "Файл не має [{{MediaWiki:Commonsmetadata-doc-url}} машиночитабельного] інформаційного шаблона або ж поле «джерело» (source) у ньому не зазначено."
+}

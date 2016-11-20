@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"ChrisiPK",
+			"Forrester",
+			"Iwan Novirion",
+			"Kghbln",
+			"Metalhead64",
+			"Purodha",
+			"Raimond Spekking",
+			"Revolus",
+			"The Evil IP address",
+			"Umherirrender",
+			"J. 'mach' wust"
+		]
+	},
+	"babel": "Babel – Benutzerinformationen",
+	"babel-desc": "Eine zusätzliche Parserfunktion <code>#babel</code> erstellt „Babel“-Benutzerboxen automatisch und erlaubt, selbstdefinierte Vorlagen einzubinden",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Benutzer nach Sprache",
+	"babel-autocreate-reason": "Erstelle automatisch die [[$1|Babel]]-Kategorie.",
+	"babel-autocreate-text-levels": "Benutzer in dieser Kategorie haben Kenntnisse der Stufe $1 in der Sprache $2.",
+	"babel-autocreate-text-main": "Benutzer in dieser Kategorie haben Kenntnisse der Sprache $1.",
+	"babel-autocreate-user": "Babel AutoCreate",
+	"babel-0": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|$3]] [[$1|nicht]] (oder versteht es nur mit beträchtlichen Schwierigkeiten).",
+	"babel-1": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|$3]] auf [[$1|grundlegendem]] Niveau.",
+	"babel-2": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|$3]] auf [[$1|fortgeschrittenem]] Niveau.",
+	"babel-3": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|$3]] auf [[$1|hohem]] Niveau.",
+	"babel-4": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|$3]] auf [[$1|muttersprachlichem Niveau]].",
+	"babel-5": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|$3]] auf [[$1|professionellem]] Niveau.",
+	"babel-N": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} spricht [[$2|$3]] als [[$1|Muttersprache]].",
+	"babel-0-n": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|Deutsch]] [[$1|nicht]] (oder versteht es nur mit beträchtlichen Schwierigkeiten).",
+	"babel-1-n": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|Deutsch]] auf [[$1|grundlegendem]] Niveau.",
+	"babel-2-n": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|Deutsch]] auf [[$1|fortgeschrittenem]] Niveau.",
+	"babel-3-n": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|Deutsch]] auf [[$1|hohem]] Niveau.",
+	"babel-4-n": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|Deutsch]] auf [[$1|muttersprachlichem Niveau]].",
+	"babel-5-n": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} beherrscht [[$2|Deutsch]] auf [[$1|professionellem]] Niveau.",
+	"babel-N-n": "{{GENDER:$4|Dieser Benutzer|Diese Benutzerin}} spricht [[$2|Deutsch]] als [[$1|Muttersprache]].",
+	"babel-template": "Template:User $1",
+	"babel-footer": "Benutzer nach Sprache"
+}

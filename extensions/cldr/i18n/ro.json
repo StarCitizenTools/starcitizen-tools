@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"KlaudiuMihaila"
+		]
+	},
+	"cldr-desc": "Extensie care oferă nume de limbi localizate pe baza [http://cldr.unicode.org/index/downloads datelor CLDR]"
+}

@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kghbln",
+			"Metalhead64"
+		]
+	},
+	"commonsmetadata-desc": "Reichert das Attribut „extmetadata“ des API-Moduls zu Bildinformationen um Informationen aus den Bildbeschreibungsvorlagen auf „Wikimedia Commons“ an",
+	"commonsmetadata-trackingcategory-no-license": "Dateien mit keiner maschinenlesbaren Lizenz",
+	"commonsmetadata-trackingcategory-no-license-desc": "Die Datei hat keine [{{MediaWiki:Commonsmetadata-doc-url}} maschinenlesbare] Lizenzvorlage.",
+	"commonsmetadata-trackingcategory-no-description": "Dateien mit keiner maschinenlesbaren Beschreibung",
+	"commonsmetadata-trackingcategory-no-description-desc": "Die Datei hat keine [{{MediaWiki:Commonsmetadata-doc-url}} maschinenlesbare] Informationsvorlage oder das Beschreibungsfeld ist nicht ausgefüllt.",
+	"commonsmetadata-trackingcategory-no-author": "Dateien mit keinem maschinenlesbaren Urheber",
+	"commonsmetadata-trackingcategory-no-author-desc": "Die Datei hat keine [{{MediaWiki:Commonsmetadata-doc-url}} maschinenlesbare] Informationsvorlage oder das Urheberfeld ist nicht ausgefüllt.",
+	"commonsmetadata-trackingcategory-no-source": "Dateien mit keiner maschinenlesbaren Quelle",
+	"commonsmetadata-trackingcategory-no-source-desc": "Die Datei hat keine [{{MediaWiki:Commonsmetadata-doc-url}} maschinenlesbare] Informationsvorlage oder das Quellenfeld ist nicht ausgefüllt."
+}

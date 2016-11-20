@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Omnipaedista",
+			"ZaDiak"
+		]
+	},
+	"cldr-desc": "Επέκταση που παρέχει εντοπιωμένα ονόματα γλωσσών βασισμένα σε [http://cldr.unicode.org/index/downloads δεδομένα CLDR]"
+}

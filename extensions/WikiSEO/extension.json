@@ -1,0 +1,30 @@
+{
+	"name": "WikiSEO",
+	"version": "1.2.1",
+	"author": [
+		"Andru Vallance",
+		"..."
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:WikiSEO",
+	"descriptionmsg": "seo-desc",
+	"license-name": "GPL-2.0+",
+	"type": "parserhook",
+	"ExtensionMessagesFiles": {
+		"WikiSEOMagic": "WikiSEO.i18n.magic.php",
+		"WikiSEO": "WikiSEO.i18n.php"
+	},
+	"AutoloadClasses": {
+		"WikiSEO": "WikiSEO.body.php"
+	},
+	"Hooks": {
+		"ParserFirstCallInit": [
+			"WikiSEO::init"
+		],
+		"OutputPageBeforeHTML": [
+			"WikiSEO::loadParamsFromWikitext"
+		],
+		"BeforePageDisplay": [
+			"WikiSEO::modifyHTML"
+		]
+	}
+}

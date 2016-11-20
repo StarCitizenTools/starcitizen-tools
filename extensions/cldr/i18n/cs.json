@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Danny B.",
+			"Matěj Grabovský",
+			"Mormegil"
+		]
+	},
+	"cldr-desc": "Rozšíření poskytující lokalizované názvy jazyků s využitím [http://cldr.unicode.org/index/downloads dat CLDR]"
+}

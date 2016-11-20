@@ -1,0 +1,37 @@
+@import "../mmv.mixins";
+@import "../mmv.globals";
+
+.mw-mmv-download-dialog {
+	@divider-border-height: 1px;
+	@dialog-height: 230px;
+
+	height: @dialog-height;
+
+	// positioned relative to the download button
+	position: fixed;
+	bottom: @metadatabar-above-fold-height + @progress-bar-height + 35px;
+
+	.mw-mmv-download-size .oo-ui-optionWidget {
+		@tab-border-height: 3px;
+		@highlighted-tab-color: rgb(225, 243, 255);
+		@selected-tab-color: rgb(0, 113, 188);
+
+		display: inline-block;
+		padding: 10px 25px;
+
+		font-size: 16px;
+
+		&.oo-ui-optionWidget-selected {
+			border: none;
+		}
+
+		&:first-child {
+			.box-round(@border-radius 0 0 0);
+		}
+	}
+
+	.mw-mmv-dialog-down-arrow {
+		bottom: @metadatabar-above-fold-height + @progress-bar-height + 45px;
+		background-color: #F2F2F2;
+	}
+}

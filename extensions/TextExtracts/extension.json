@@ -1,0 +1,56 @@
+{
+	"name": "TextExtracts",
+	"author": [
+		"Max Semenik"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:TextExtracts",
+	"descriptionmsg": "textextracts-desc",
+	"license-name": "GPL-2.0+",
+	"type": "other",
+	"ConfigRegistry": {
+		"textextracts": "GlobalVarConfig::newInstance"
+	},
+	"APIPropModules": {
+		"extracts": {
+			"class": "TextExtracts\\ApiQueryExtracts",
+			"factory": "TextExtracts\\ApiQueryExtracts::factory"
+		}
+	},
+	"MessagesDirs": {
+		"TextExtracts": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"TextExtracts\\ApiQueryExtracts": "includes/ApiQueryExtracts.php",
+		"TextExtracts\\ExtractFormatter": "includes/ExtractFormatter.php",
+		"TextExtracts\\Hooks": "includes/Hooks.php"
+	},
+	"Hooks": {
+		"OpenSearchXml": [
+			"TextExtracts\\Hooks::onApiOpenSearchSuggest"
+		],
+		"ApiOpenSearchSuggest": [
+			"TextExtracts\\Hooks::onApiOpenSearchSuggest"
+		],
+		"UnitTestsList": [
+			"TextExtracts\\Hooks::onUnitTestsList"
+		]
+	},
+	"config": {
+		"ExtractsRemoveClasses": [
+			"table",
+			"div",
+			"ul.gallery",
+			".mw-editsection",
+			"sup.reference",
+			"ol.references",
+			".error",
+			".nomobile",
+			".noprint",
+			".noexcerpt"
+		],
+		"ExtractsExtendOpenSearchXml": false
+	},
+	"manifest_version": 1
+}

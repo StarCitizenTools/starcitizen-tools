@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Praveenp"
+		]
+	},
+	"commonsmetadata-desc": "വിക്കിമീഡിയ കോമൺസിലെ ചിത്രവിവരണ താളുകളിലെ ഫലകങ്ങളിൽ ഉപയോഗിച്ചിരിക്കുന്ന വിവരങ്ങൾ കൂടി ഉൾപ്പെടുത്തക്കവിധം ചിത്രവിവരണ എ.പി.ഐ. മോഡ്യൂളിലെ \"extmetadata\" സൗകര്യം വികസിപ്പിക്കുന്നു",
+	"commonsmetadata-trackingcategory-no-license": "യന്ത്രത്തിനു വായിക്കാനാവുന്ന അനുമതി ഇല്ലാത്ത പ്രമാണങ്ങൾ",
+	"commonsmetadata-trackingcategory-no-license-desc": "പ്രമാണത്തിൽ [{{MediaWiki:Commonsmetadata-doc-url}} യന്ത്രത്തിനു വായിക്കാനാവുന്ന] അനുമതി ഫലകം ഇല്ല.",
+	"commonsmetadata-trackingcategory-no-description": "യന്ത്രത്തിനു വായിക്കാനാവുന്ന വിവരണം ഇല്ലാത്ത പ്രമാണങ്ങൾ",
+	"commonsmetadata-trackingcategory-no-description-desc": "പ്രമാണത്തിൽ [{{MediaWiki:Commonsmetadata-doc-url}} യന്ത്രത്തിനു വായിക്കാനാവുന്ന] വിവരദായക ഫലകം അല്ലെങ്കിൽ വിവരണ മണ്ഡലം പൂരിപ്പിച്ച് നൽകിയിട്ടില്ല.",
+	"commonsmetadata-trackingcategory-no-author": "യന്ത്രത്തിനു വായിക്കാനാവുന്ന നിർമ്മിതി വിവരങ്ങൾ ഇല്ലാത്ത പ്രമാണങ്ങൾ",
+	"commonsmetadata-trackingcategory-no-author-desc": "പ്രമാണത്തിൽ [{{MediaWiki:Commonsmetadata-doc-url}} യന്ത്രത്തിനു വായിക്കാനാവുന്ന] വിവരദായക ഫലകം അല്ലെങ്കിൽ സ്രഷ്ടാവിന്റെ വിവരങ്ങളുടെ മണ്ഡലം പൂരിപ്പിച്ച് നൽകിയിട്ടില്ല.",
+	"commonsmetadata-trackingcategory-no-source": "യന്ത്രത്തിനു വായിക്കാനാവുന്ന സ്രോതസ്സ് വിവരങ്ങൾ ഇല്ലാത്ത പ്രമാണങ്ങൾ",
+	"commonsmetadata-trackingcategory-no-source-desc": "പ്രമാണത്തിൽ [{{MediaWiki:Commonsmetadata-doc-url}} യന്ത്രത്തിനു വായിക്കാനാവുന്ന] വിവരദായക ഫലകം അല്ലെങ്കിൽ സ്രോതസ്സ് വിവരമണ്ഡലം പൂരിപ്പിച്ച് നൽകിയിട്ടില്ല."
+}

@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chaojoker",
+			"Vadgt",
+			"Դավիթ Սարոյան",
+			"Beko"
+		]
+	},
+	"translate": "Թարգմանություն",
+	"translate-taction-translate": "Թարգմանություն",
+	"translate-taction-proofread": "Սրբագրել",
+	"translate-edit-translation": "Թարգմանություն",
+	"translate-magic-module": "Մոդուլ:",
+	"translate-sidebar-alltrans": "Այլ լեզուներով",
+	"translate-manage-import-new": "Նոր Հաղորդագրություն $1",
+	"translate-documentation-language": "Հաղորդագրության փաստաթղթեր"
+}

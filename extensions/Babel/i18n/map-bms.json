@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"StefanusRA"
+		]
+	},
+	"babel": "Informasi Babel Panganggo",
+	"babel-desc": "Nambahna fungsi parser <code>#babel</code> sing marengaké générasi otomatis kolom kothak panganggo babel mawa kamungkinan nglebokna cithakan kustomisasi",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Kategori:Panganggo miturut basa",
+	"babel-autocreate-reason": "Otomatis nggawe kaca kategori [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Panganggo nang kategori kiye nandakna nek dheweke nduwe kemampuan $1 nggo basa $2.",
+	"babel-autocreate-text-main": "Panganggo nang kategori kiye nandakna nek dheweke nduwe kemampuan basa $1.",
+	"babel-0": "Panganggo kiye [[$1|ora]] duwé kawruh [[$2|$3]] (utawa angèl banget mangertèni).",
+	"babel-1": "Panganggo kiye duwé kawruh [[$1|dhasar]] [[$2|$3]].",
+	"babel-2": "Panganggo kiye duwé kawruh [[$1|madya]] [[$2|$3]].",
+	"babel-3": "Panganggo kiye duwé kawruh [[$1|mahir]] [[$2|$3]].",
+	"babel-4": "Panganggo kiye duwé kawruh [[$1|sing meh padha karo panutur ibu]] sekang [[$2|$3]].",
+	"babel-5": "Panganggo kiye duwé kawruh [[$1|profésional]] [[$2|$3]].",
+	"babel-N": "Panganggo kiye [[$1|panutur ibu]] [[$2|$3]].",
+	"babel-0-n": "Panganggo kiye [[$1|ora]] bisa [[$2|basa Banyumasan]] (utawa angèl banget mangertèni).",
+	"babel-1-n": "Panganggo kiye duwé kawruh [[$1|dhasar]] [[$2|basa Banyumasan]].",
+	"babel-2-n": "Panganggo kiye duwé kawruh [[$1|madya]] [[$2|basa Banyumasan]].",
+	"babel-3-n": "Panganggo kiye duwé kawruh [[$1|mahir]] [[$2|basa Banyumasan]].",
+	"babel-4-n": "Panganggo kiye duwé kawruh [[$1|sing meh padha karo panutur ibu]] sekang [[$2|basa Banyumasan]].",
+	"babel-5-n": "Panganggo kiye duwé kawruh [[$1|profésional]] [[$2|basa Banyumasan]].",
+	"babel-N-n": "Panganggo kiye [[$1|panutur ibu]] [[$2|basa Banyumasan]].",
+	"babel-footer": "Panganggo miturut basa"
+}

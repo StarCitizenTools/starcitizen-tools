@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha",
+			"John Reid"
+		]
+	},
+	"babel": "Babel uiser information",
+	"babel-desc": "Eiks the <code>#babel</code> parser function tae allou autæmatit generation o ae babel uiserkist column wi the abeelitie tae incluid custom templates",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Categerie:Babel - Uisers bi leid",
+	"babel-autocreate-reason": "Autæmateeclie creautin ae [[$1|Babel]] categerie page.",
+	"babel-autocreate-text-levels": "Uisers in this categerie indicate that thay'v skill level $1 fer the leid $2.",
+	"babel-autocreate-text-main": "Uisers in this categerie indicate that thay'v knawledge o the leid $1.",
+	"babel-0": "This uiser haes [[$1|nae]] knawledge o [[$2|$3]] (or unnerstaunns it wi ae fair amoont o deefficultie).",
+	"babel-1": "This uiser can contreebute wi ae [[$1|laich]] level o [[$2|$3]].",
+	"babel-2": "This uiser can contreebute wi ae [[$1|middlin]] level o [[$2|$3]].",
+	"babel-3": "This uiser can contreebute wi ae [[$1|heich]] level o [[$2|$3]].",
+	"babel-4": "This uiser haes aen [[$1|awmaist mither tounge]] knawledge o [[$2|$3]].",
+	"babel-5": "$4 knaws enouch [[$2|$3]] tae [[$1|owerset]] fair weel.",
+	"babel-N": "This uiser haes [[$2|$3]] aes ae [[$1|mither tung]].",
+	"babel-0-n": "$4 haes [[$1|nae]] knawledge o [[$2|Scots]] (or unnerstaunds it wi ae fair amoont o diffeecultie).",
+	"babel-1-n": "This uiser can contreebute wi ae [[$1|laich]] level o [[$2|Scots]].",
+	"babel-2-n": "This uiser can contreebute wi ae [[$1|middlin]] level o [[$2|Scots]].",
+	"babel-3-n": "This uiser can contreebute wi ae [[$1|heich]] level o [[$2|Scots]].",
+	"babel-4-n": "$4 haes [[$1|awmaist mither tounge]] knawledge o [[$2|Scots]].",
+	"babel-5-n": "$4 knaws enouch [[$2|Scots]] tae [[$1|owerset]] fair weel.",
+	"babel-N-n": "This uiser haes [[$2|Scots]] aes ae [[$1|mither tung]].",
+	"babel-footer": "Uisers bi leid"
+}

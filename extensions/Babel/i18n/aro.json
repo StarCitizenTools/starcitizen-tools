@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ooswesthoesbes"
+		]
+	},
+	"babel-0": "Ma-e [[$1|tsa-aita mahue eje]] jejeme [[$2|$3]] poi (o pitsatuda taisi mahue).",
+	"babel-1": "Ma-e [[$1|cuatsa-isi]] jejeme [[$2|$3]] poi.",
+	"babel-2": "Ma-e [[$1|tsata pezohue eje]] jejeme [[$2|$3]] poi.",
+	"babel-0-n": "Ma-e [[$1|tsa-aita mahue eje]] jejeme [[$2|araona]] poi (o pitsatuda taisi mahue).",
+	"babel-1-n": "Ma-e [[$1|cuatsa-isi]] jejeme [[$2|araona]] poi.",
+	"babel-2-n": "Ma-e [[$1|tsata pezohue eje]] jejeme [[$2|araona]] poi."
+}

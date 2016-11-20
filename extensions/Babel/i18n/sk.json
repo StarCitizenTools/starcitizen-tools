@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Helix84",
+			"Meno25",
+			"Rudko",
+			"Sudo77(new)",
+			"Danny B."
+		]
+	},
+	"babel": "Babylon - informácie o používateľovi",
+	"babel-desc": "Pridáva funkciu syntaktického analyzátora <code>#babel</code>, ktorá umožňuje automatickú tvorbu babylonských šablón používateľov s možnosťou používať prispôsobené šablóny.",
+	"babel-url": "Project:Babylon",
+	"babel-footer-url": ":Kategória:Babylon - Redaktori podľa jazyka",
+	"babel-autocreate-reason": "Automaticky sa vytvára stránka kategórie [[$1|Babylon]].",
+	"babel-autocreate-text-levels": "Používatelia v tejto kategórii označili svoju úroveň v jazyku $2 ako $1.",
+	"babel-autocreate-text-main": "Používatelia v tejto kategórii označili, že poznajú jazyk $1.",
+	"babel-0": "Tento používateľ [[$1|nemá]] znalosti [[$2|{{GRAMMAR:genitív|$3}}]] (alebo jej rozumie so značnými problémami).",
+	"babel-1": "Tento používateľ má [[$1|základné]] znalosti [[$2|{{GRAMMAR:genitív|$3}}]].",
+	"babel-2": "Tento používateľ má [[$1|stredné]] znalosti [[$2|{{GRAMMAR:genitív|$3}}]].",
+	"babel-3": "Tento používateľ má [[$1|pokročilé]] znalosti [[$2|{{GRAMMAR:genitív|$3}}]].",
+	"babel-4": "Tento používateľ má znalosti [[$2|{{GRAMMAR:genitív|$3}}]] takmer na úrovni [[$1|rodného jazyka]].",
+	"babel-5": "Tento používateľ má [[$1|profesionálne]] znalosti [[$2|{{GRAMMAR:genitív|$3}}]].",
+	"babel-N": "Tento používateľ má [[$2|{{GRAMMAR:akuzatív|$3}}]] ako [[$1|rodný jazyk]].",
+	"babel-0-n": "Tento redaktor [[$1|nerozumie]] po [[$2|slovensky]] (alebo rozumie so značnými problémami).",
+	"babel-1-n": "Tento redaktor má [[$1|základné]] znalosti [[$2|slovenčiny]].",
+	"babel-2-n": "Tento redaktor má [[$1|stredné]] znalosti [[$2|slovenčiny]].",
+	"babel-3-n": "Tento redaktor má [[$1|pokročilé]] znalosti [[$2|slovenčiny]].",
+	"babel-4-n": "Tento redaktor má znalosti [[$2|slovenčiny]] [[$1|takmer na úrovni materinského jazyka]].",
+	"babel-5-n": "Tento redaktor má [[$1|profesionálne]] znalosti [[$2|slovenčiny]].",
+	"babel-N-n": "Tento redaktor má [[$2|slovenčinu]] ako [[$1|materinský jazyk]].",
+	"babel-footer": "Redaktori podľa jazyka"
+}

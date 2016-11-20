@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226",
+			"Xiaomingyan",
+			"Yfdyh000"
+		]
+	},
+	"popups-message": "悬停卡片",
+	"popups-desc": "当用户在页面链接上悬停鼠标指针时，显示带有页面内容摘要的悬停卡片",
+	"popups-last-edited": "编辑于$1",
+	"popups-redirects": "重定向至<h3>$1</h3>",
+	"popups-settings-title": "页面预览",
+	"popups-settings-description": "此工具允许您预览至wiki页面及参考资料的链接。",
+	"popups-settings-option-simple": "简单",
+	"popups-settings-option-simple-description": "参见页面和预览图片的开头内容。这被推荐给读者",
+	"popups-settings-option-advanced": "高级",
+	"popups-settings-option-advanced-description": "参见连接预览并访问编辑功能菜单。这被很多编辑者使用。",
+	"popups-settings-option-off": "禁用预览",
+	"popups-settings-option-off-description": "您可通过页面页脚的连接更改此设置",
+	"popups-settings-save": "保存",
+	"popups-settings-help-ok": "确定",
+	"popups-settings-cancel": "取消",
+	"popups-settings-help": "您可以使用页面页脚中的链接让预览回来。",
+	"popups-settings-enable": "启用预览",
+	"popups-send-feedback": "发送反馈",
+	"popups-mobile-continue-to-page": "继续前往页面",
+	"popups-mobile-dismiss": "关闭",
+	"popups-mobile-message": "悬停卡片（移动）"
+}

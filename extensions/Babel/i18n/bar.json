@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Man77",
+			"Mucalexx"
+		]
+	},
+	"babel": "Babel – Benutzerinformaziónen",
+	"babel-desc": "Ergänzd dé <code>#babel</code>-Parserfunkzión fyr d' automaatische Erstöung voh Babel-Benutzerboxen-Zeun mid da Méglichkeid, daas ma eigerne Vurlong eihbindt",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Benutzer noch Sprooch",
+	"babel-autocreate-reason": "Autómaatisch erstöde [[$1|Babel]]-Kategorie.",
+	"babel-autocreate-text-levels": "Benutzer in derer Kategorie håm Kenntniss in da Stufm $1 in da Sprooch $2.",
+	"babel-autocreate-text-main": "Benutzer in derer Kategorie håm Kenntniss voh da Sprooch $1.",
+	"babel-0": "Der Benutzer do kå koah [[$2|$3]] [[$1|néd]] (óder er vasteed d' Sprooch netter mid gscheide Schwiarigkeiden).",
+	"babel-1": "Der Benutzer kå [[$1|a bisserl]] [[$2|$3]].",
+	"babel-2": "Der Benutzer kå [[$2|$3]] schoh [[$1|relatiav guad]].",
+	"babel-3": "Der Benutzer kå [[$1|wirklé guad]] [[$2|$3]].",
+	"babel-4": "Der Benutzer kå [[$2|$3]] [[$1|fost asó guad, wia wånns seih Muadersprooch waarad]].",
+	"babel-5": "Der Benutzer kå [[$2|$3]] [[$1|wiara Muadersproochler]].",
+	"babel-N": "Dém Benutzer seih [[$1|Muadersprooch]] is [[$2|$3]].",
+	"babel-0-n": "Der Benutzer kå koah [[$2|Boarisch]] [[$1|néd]] (óder er vasteets netter mid gscheide Schwiarigkeiten).",
+	"babel-1-n": "Der Benutzer kå [[$1|a bisserl]] [[$2|Boarisch]].",
+	"babel-2-n": "Der Benutzer kå schoh [[$1|relativ guad]] [[$2|Boarisch]].",
+	"babel-3-n": "Der Benutzer kå schoh [[$1|wirklé guad]] [[$2|Boarisch]].",
+	"babel-4-n": "Der Benutzer kå [[$2|Boarisch]] [[$1|schoh fost asó guad, wia wånns seih Muadersprooch waarad]].",
+	"babel-5-n": "Der Benutzer kå [[$2|Boarisch]] asó guad wiara [[$1|Muadersproochler]].",
+	"babel-N-n": "Dém Benutzer seih [[$1|Muadersprooch]] is [[$2|Boarisch]].",
+	"babel-footer": "Benutzer noch Sprooch"
+}

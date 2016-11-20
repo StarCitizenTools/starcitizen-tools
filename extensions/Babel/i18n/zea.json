@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ooswesthoesbes"
+		]
+	},
+	"babel-1": "Deêze gebruker praot en verstaet [[$1|'n bitje]] [[$2|$3]].",
+	"babel-2": "Deêze gebruker praot en verstaet [[$1|aoreg]] [[$2|$3]].",
+	"babel-3": "Deêze gebruker praot [[$1|vloeiend]] [[$2|$3]].",
+	"babel-4": "Deêze gebruker praot [[$2|$3]] [[$1|asof't z'n moerstaele is]].",
+	"babel-N": "Deêze gebruker eit [[$2|$3]] as [[$1|moerstaele]].",
+	"babel-1-n": "Deêze gebruker praot en verstaet [[$1|'n bitje]] [[$2|Zeêuws]].",
+	"babel-2-n": "Deêze gebruker praot en verstaet [[$1|aoreg]] [[$2|Zeêuws]].",
+	"babel-3-n": "Deêze gebruker praot [[$1|vloeiend]] [[$2|Zeêuws]].",
+	"babel-4-n": "Deêze gebruker praot [[$2|Zeêuws]] [[$1|asof't z'n moerstaele is]].",
+	"babel-N-n": "Deêze gebruker eit [[$2|Zeêuws]] as [[$1|moerstaele]].",
+	"babel-footer": "Hebrukers per taele"
+}

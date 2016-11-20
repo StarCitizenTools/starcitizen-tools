@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"زكريا",
+			"Yahya Sakhnini"
+		]
+	},
+	"scribunto-lua-error": "خطأ أخذ:$2",
+	"scribunto-limitreport-timeusage": "زمن لوا المستغرق",
+	"scribunto-limitreport-memusage": "ذاكرة لوا المستخدمة"
+}

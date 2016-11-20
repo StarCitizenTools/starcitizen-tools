@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Masti",
+			"Sp5uhe"
+		]
+	},
+	"cldr-desc": "Rozszerzenie dodające zlokalizowane nazwy języków w oparciu o [http://cldr.unicode.org/index/downloads dane CLDR]"
+}

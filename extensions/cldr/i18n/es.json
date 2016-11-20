@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Locos epraix",
+			"Sanbec"
+		]
+	},
+	"cldr-desc": "Extensión que provee nombres de idioma traducidos basados en [http://cldr.unicode.org/index/downloads datos CLDR]"
+}

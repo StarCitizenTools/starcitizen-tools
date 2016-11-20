@@ -1,0 +1,13 @@
+{
+	"@metadata": [],
+	"textextracts-desc": "{{desc}}",
+	"apihelp-query+extracts-description": "{{doc-apihelp-description|query+extracts}}",
+	"apihelp-query+extracts-param-chars": "{{doc-apihelp-param|query+extracts|chars}}",
+	"apihelp-query+extracts-param-sentences": "{{doc-apihelp-param|query+extracts|sentences}}",
+	"apihelp-query+extracts-param-limit": "{{doc-apihelp-param|query+extracts|limit}}",
+	"apihelp-query+extracts-param-intro": "{{doc-apihelp-param|query+extracts|intro}}",
+	"apihelp-query+extracts-param-plaintext": "{{doc-apihelp-param|query+extracts|plaintext}}",
+	"apihelp-query+extracts-param-sectionformat": "{{doc-apihelp-param|query+extracts|sectionformat}}",
+	"apihelp-query+extracts-param-variant": "{{doc-apihelp-param|query+extracts|variant}}",
+	"apihelp-query+extracts-example-1": "{{doc-apihelp-example|query+extracts}}"
+}

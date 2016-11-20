@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"msu-desc": "Määd et einfach, Datteije huhzelahde, för ein Dattei udder en Aanzahl Dateije ob eijmohl.",
+	"msu-button-title": "Söhk Datteije uß",
+	"msu-insert-link": "Donn ene Lengk ennföhje",
+	"msu-insert-gallery": "Alle als en Jallerih ennföhje",
+	"msu-insert-files": "Alle als Datteije ennföhje",
+	"msu-insert-links": "Alle als Lengks ennföhje",
+	"msu-cancel-upload": "Ophühre!",
+	"msu-clean-all": "maach di leß läddesch",
+	"msu-upload-possible": "Di ußjesöhk Dattei(je) kam_mer huh lahde",
+	"msu-ext-not-allowed": "Bloß heh di {{PLURAL:$1|Zoot Dattei|Zoote Datteije|kein Datteije}} sin zohjelohße:",
+	"msu-upload-this": "Lohß Jonn!",
+	"msu-upload-all": "Lohß Jonn!",
+	"msu-dropzone": "Lähsch de Datteije heh hen",
+	"msu-comment": "Met <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\">MsUpload</i>\nhuhjelahde Dattei"
+}

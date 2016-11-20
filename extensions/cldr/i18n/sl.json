@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dbc334"
+		]
+	},
+	"cldr-desc": "Razširitev, ki nudi domača imena jezikov, temelječa na [http://cldr.unicode.org/index/downloads podatkih CLDR]"
+}

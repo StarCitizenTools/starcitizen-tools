@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"SPQRobin",
+			"Robin0van0der0vliet",
+			"Siebrand"
+		]
+	},
+	"usergroups-createnew": "(nieuwe maken...)",
+	"usergroups-editgroup-reason": "Reden:",
+	"usergroups-editgroup-save": "Wijzigingen opslaan",
+	"usergroups-log-name": "Logboek gebruikersgroepen",
+	"usergroups-log-none": "(geen)"
+}

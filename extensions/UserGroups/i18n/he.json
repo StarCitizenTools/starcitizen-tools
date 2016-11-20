@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"SGTTechnologicBunny"
+		]
+	},
+	"usergroups-desc": "מאפשר בקרה על הרשאות למשתמשים שנמצאים בקבוצות משתמשים מסוימות.",
+	"invalidusergroupname-error": "השם שהזנת עבור קבוצת משתמשים חדשה אינו חוקי.\n\nחזור אל [[{{#special:UserGroups}}]].",
+	"nosuchusergroup": "אין קבוצת משתמשים שנקראת \"$1\". אולי תרצה  [[Special:UserGroups/new|ליצור]] קבוצת משתמשים חדשה כזו?"
+}

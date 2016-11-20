@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Malafaya",
+			"McDutchie"
+		]
+	},
+	"babel": "Informationes Babel del usator",
+	"babel-desc": "Adde le function <code>#babel</code> al analysator syntactic, pro permitter le generation automatic de un columna con un quadro de usator 'Babel' con le capacitate de includer patronos personalisate.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Usatores per lingua",
+	"babel-autocreate-reason": "Le pagina del categoria [[$1|Babel]] ha essite create automaticamente.",
+	"babel-autocreate-text-levels": "Le usatores in iste categoria declara haber un nivello de cognoscentia $1 del lingua $2.",
+	"babel-autocreate-text-main": "Le usatores in iste categoria declara haber cognoscentia del lingua $1.",
+	"babel-0": "Iste usator ha [[$1|nulle]] cognoscentia de [[$2|$3]] (o lo comprende con difficultates considerabile).",
+	"babel-1": "Iste usator ha cognoscentias [[$1|de base]] de [[$2|$3]].",
+	"babel-2": "Iste usator ha cognoscentias [[$1|medie]] de [[$2|$3]].",
+	"babel-3": "Iste usator ha cognoscentias [[$1|avantiate]] de [[$2|$3]].",
+	"babel-4": "Iste usator ha cognoscentias a nivello [[$1|quasi native]] de [[$2|$3]].",
+	"babel-5": "Iste usator ha cognoscentias [[$1|professional]] de [[$2|$3]].",
+	"babel-N": "Iste usator ha cognoscentias a nivello [[$1|native]] de [[$2|$3]].",
+	"babel-0-n": "Iste usator ha [[$1|nulle]] cognoscentia de [[$2|interlingua]] (o lo comprende con difficultate considerabile).",
+	"babel-1-n": "Iste usator ha cognoscentias [[$1|de base]] de [[$2|interlingua]].",
+	"babel-2-n": "Iste usator ha cognoscentias [[$1|medie]] de [[$2|interlingua]].",
+	"babel-3-n": "Iste usator ha cognoscentias [[$1|avantiate]] de [[$2|interlingua]].",
+	"babel-4-n": "Iste usator ha cognoscentias a nivello [[$1|quasi native]] de [[$2|interlingua]].",
+	"babel-5-n": "Iste usator ha cognoscentias [[$1|professional]] de [[$2|interlingua]].",
+	"babel-N-n": "Iste usator ha cognoscentias a nivello [[$1|native]] de [[$2|interlingua]].",
+	"babel-template": "Template:$1",
+	"babel-footer": "Usatores per lingua"
+}

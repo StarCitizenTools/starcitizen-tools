@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ker",
+			"Pikne"
+		]
+	},
+	"babel": "Kasutaja keelteoskus",
+	"babel-desc": "Lisab parsimisfunktsiooni <code>#babel</code>, mis võimaldab kasutaja keelteoskuse infokasti lisamist.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel – Kasutajad keelteoskuse järgi",
+	"babel-autocreate-reason": "[[$1|Babeli]] kategoorialehe automaatne genereerimine.",
+	"babel-autocreate-text-levels": "Kasutajad selles kategoorias on märkinud, et valdavad $2 keelt tasemel $1.",
+	"babel-autocreate-text-main": "Kasutajad selles kategoorias on märkinud, et valdavad $1 keelt.",
+	"babel-0": "[[$2|$3]] — [[$1|oskus väga nõrk või puudub]]",
+	"babel-1": "[[$2|$3]] — [[$1|algtase]]",
+	"babel-2": "[[$2|$3]] — [[$1|keskmine tase]]",
+	"babel-3": "[[$2|$3]] — [[$1|hea tase]]",
+	"babel-4": "[[$2|$3]] — [[$1|emakeele lähedane tase]]",
+	"babel-5": "[[$2|$3]] — [[$1|professionaalne tase]]",
+	"babel-N": "[[$2|$3]] — [[$1|emakeel]]",
+	"babel-0-n": "See kasutaja [[$1|ei valda]] [[$2|eesti keelt]].",
+	"babel-1-n": "See kasutaja valdab [[$2|eesti keelt]] [[$1|algtasemel]].",
+	"babel-2-n": "See kasutaja valdab [[$2|eesti keelt]] [[$1|keskmisel tasemel]].",
+	"babel-3-n": "See kasutaja valdab [[$2|eesti keelt]] [[$1|heal tasemel]].",
+	"babel-4-n": "See kasutaja valdab [[$2|eesti keelt]] [[$1|peaaegu nagu emakeelt]].",
+	"babel-5-n": "See kasutaja valdab [[$2|eesti keelt]] [[$1|professionaalsel tasemel]].",
+	"babel-N-n": "See kasutaja valdab [[$2|eesti keelt]] [[$1|emakeelena]].",
+	"babel-footer": "Kasutajad keelteoskuse järgi"
+}

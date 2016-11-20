@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Akerbeltz",
+			"Caoimhin",
+			"Sionnach",
+			"Steafan31",
+			"GunChleoc"
+		]
+	},
+	"babel": "Fiosrachadh Babel mun chleachdaiche",
+	"babel-desc": "Cuiridh seo am parser function <code>#babel</code> ris an duilleag gus an dèid colbh babel a chruthachadh mun chleachdaiche seo, le comas gus teamplaidean sònraichte a ghabhail a-steach.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Cleachdaichean a-rèir cànain",
+	"babel-autocreate-reason": "A' cruthachadh duilleag roinne [[$1|Babel]] leis fhèin.",
+	"babel-autocreate-text-levels": "Tha na cleachdaichean san roinn seo ag innse gu bheil comas ìre $1 aca ann an $2.",
+	"babel-autocreate-text-main": "Tha na cleachdaichean san roinn seo ag innse gu bheil iad eòlach air a' chànan a leanas: $1.",
+	"babel-autocreate-user": "Cruthachadh fèin-obrachail Babel",
+	"babel-0": "[[$1|Cha tuig]] an cleachdaiche seo [[$2|$3]] idir (no chan eil {{GENDER:$4|e|i}} 'ga tuigsinn ach air èiginn).",
+	"babel-1": "Tha comas labhairt [[$1|bunaiteach]] sa [[$2|$3|Ghàidhlig]] aig a' chleachdaiche seo.",
+	"babel-2": "Tha comas labhairt [[$1|meadhanach]] aig a' chleachdaiche seo sa [[$2|$3|Ghàidhlig]].",
+	"babel-3": "Tha comas labhairt [[$1|adhartach]] aig a' chleachdaiche seo sa [[$2|$3|Ghàidhlig]].",
+	"babel-4": "Tha comas labhairt [[$1|cha mhòr mar cuideigin air ag bheil i on ghlùn]] aig a' chleachdaiche seo sa [[$2|$3|Ghàidhlig]].",
+	"babel-5": "Tha comas labhairt [[$1|proifeiseanta]] aig a' chleachdaiche seo sa [[$2|$3|Ghàidhlig]].",
+	"babel-N": "Tha [[$2|$3]] [[$1|on ghlùn]] aig a' chleachdaiche seo.",
+	"babel-0-n": "[[$1|Cha tuig]] an cleachdaiche seo [[$2|Gàidhlig]] idir (no chan eil {{GENDER:$4|e|i}} 'ga tuigsinn ach air èiginn).",
+	"babel-1-n": "Tha comas labhairt [[$1|bunaiteach]] sa [[$2|Ghàidhlig]] aig a' chleachdaiche seo.",
+	"babel-2-n": "Tha comas labhairt [[$1|meadhanach]] aig a' chleachdaiche seo sa [[$2|Ghàidhlig]].",
+	"babel-3-n": "Tha comas labhairt [[$1|adhartach]] aig a' chleachdaiche seo sa [[$2|Ghàidhlig]].",
+	"babel-4-n": "Tha comas labhairt [[$1|cha mhòr mar cuideigin air ag bheil i on ghlùn]] aig a' chleachdaiche seo sa [[$2|Ghàidhlig]].",
+	"babel-5-n": "Tha comas labhairt [[$1|proifeiseanta]] aig a' chleachdaiche seo sa [[$2|Ghàidhlig]].",
+	"babel-N-n": "Tha [[$2|Gàidhlig]] [[$1|on ghlùn]] aig a' chleachdaiche seo.",
+	"babel-template": "Template:User $1",
+	"babel-footer": "Cleachdaichean a-rèir cànain"
+}

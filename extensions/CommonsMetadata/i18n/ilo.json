@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lam-ang"
+		]
+	},
+	"commonsmetadata-desc": "Mangipaatiddog ti \"extmetadata\" a tagikua ti pakaammo ti ladawan ti modulo ti API tapno mangiraman iti naipenpen a pakaammo kadagiti deskripsion ti panid ti ladawan a mangus-usar kadagiti plantilia a kadawyan nga inus-usar idiay Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Dagiti papeles nga awan iti lisensia a mabasa iti makina",
+	"commonsmetadata-trackingcategory-no-license-desc": "Ti papeles ket awan iti ania man a plantilia ti lisensia a [{{MediaWiki:Commonsmetadata-doc-url}} mabasa iti makina].",
+	"commonsmetadata-trackingcategory-no-description": "Dagiti papeles nga awan iti deskripsion a mabasa iti makina",
+	"commonsmetadata-trackingcategory-no-description-desc": "Ti papeles ket awan iti ania man a plantilia ti pakaammo a  [{{MediaWiki:Commonsmetadata-doc-url}} mabasa iti makina], wenno ti pagikabilan ti deskripsionna ket saan a napunno.",
+	"commonsmetadata-trackingcategory-no-author": "Dagiti papeles nga awan iti mannurat a mabasa iti makina",
+	"commonsmetadata-trackingcategory-no-author-desc": "Ti papeles ket awan iti ania man a plantilia ti pakaammo a  [{{MediaWiki:Commonsmetadata-doc-url}} mabasa iti makina], wenno ti pagikanilan iti mannuratna ket saan a napunno.",
+	"commonsmetadata-trackingcategory-no-source": "Dagiti papeles nga awan iti taudan a mabasa iti makina",
+	"commonsmetadata-trackingcategory-no-source-desc": "Ti papeles ket awan iti ania man a plantilia ti pakaammo a   [{{MediaWiki:Commonsmetadata-doc-url}} mabasa iti makina], wenno ti pagikabilan iti taudanna ket saan a napunno."
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sanbec"
+		]
+	},
+	"cleanchanges-changerightslink": "cambiar grupos",
+	"cleanchanges-desc": "Visualización más compacta de la [[Special:RecentChanges|lista de cambios recientes]]",
+	"cleanchanges-language": "Idioma:",
+	"cleanchanges-language-na": "Todos",
+	"cleanchanges-users": "Usuarios (Sep: |):",
+	"cleanchanges-showuserlinks": "Mostrar enlaces de usuario"
+}

@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joemaza",
+			"Lam-ang"
+		]
+	},
+	"babel": "Pakaammo dagiti agar-aramat ti Babel",
+	"babel-desc": "Aginayon ti <code>#babel</code>  a \"parser\" a pamay-an tapno agpalubos ti atomatiko a panagpartuat ti babel a kahon ti agar-aramat nga adda ti abilidad nga agiraman kadagiti naiduma a plantilia.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Dagiti agar-aramat babaen ti pagsasao",
+	"babel-autocreate-reason": "Atomatiko nga agar-aramid iti panid ti [[$1|Babel]] a kategoria.",
+	"babel-autocreate-text-levels": "Dagiti agar-aramat iti daytoy a kategoria ket maipatudo nga adda ti kalaingda ti agpang a $1 para iti $2 a pagsasao.",
+	"babel-autocreate-text-main": "Dagiti agararamat iti daytoy a kategoria ket maipatudo nga adda pannnakaammoda ti $1 a pagsasao.",
+	"babel-0": "Daytoy nga agar-aramat ket [[$1|awan]] ti pannakaammona iti [[$2|$3]] (wenno marigatan unay a makaawat) .",
+	"babel-1": "Daytoy nga agar-aramat ket [[$1|nababa]] ti pannakaammona iti [[$2|$3]].",
+	"babel-2": "Daytoy nga agar-aramat ket [[$1|agpakatengnga]] ti pannakaammona iti [[$2|$3]].",
+	"babel-3": "Daytoy nga agar-aramat ket [[$1|nangato]] ti pannakaammona iti [[$2|$3]].",
+	"babel-4": "Daytoy nga agar-aramat ket [[$1|kasla patneng nga agsasao]]  ti pannakaammona iti [[$2|$3]].",
+	"babel-5": "Daytoy nga agar-aramat ket [[$1|propesional]] ti pannakaammona iti [[$2|$3]].",
+	"babel-N": "Daytoy nga agar-aramat ket [[$1|patneng]] ti pannakaawatna iti [[$2|$3]].",
+	"babel-0-n": "Daytoy nga agar-aramat ket [[$1|awan]] ti pannakaammona iti [[$2|Ilokano]] (wenno marigatan unay a makaawat) .",
+	"babel-1-n": "Daytoy nga agar-aramat ket [[$1|nababa]] ti pannakaammona iti [[$2|Ilokano]].",
+	"babel-2-n": "Daytoy nga agar-aramat ket [[$1|agpakatengnga]] ti pannakaammona iti [[$2|Ilokano]].",
+	"babel-3-n": "Daytoy nga agar-aramat ket [[$1|nangato]] ti pannakaammona iti [[$2|Ilokano]].",
+	"babel-4-n": "Daytoy nga agar-aramat ket [[$1|kasla patneng nga agsasao]]  ti pannakaammona iti [[$2|Ilokano]].",
+	"babel-5-n": "Daytoy nga agar-aramat ket [[$1|propesional]] ti pannakaammona iti [[$2|Ilokano]].",
+	"babel-N-n": "Daytoy nga agar-aramat ket [[$1|patneng]] ti pannakaawatna iti [[$2|Ilokano]].",
+	"babel-footer": "Dagiti agar-aramat babaen ti pagsasao"
+}

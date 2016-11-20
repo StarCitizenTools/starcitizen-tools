@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Toliño"
+		]
+	},
+	"cldr-desc": "Extensión que proporciona os nomes localizados das linguas, mediante os [http://cldr.unicode.org/index/downloads datos CLDR]"
+}

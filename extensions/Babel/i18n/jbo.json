@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Malafaya",
+			"Xbony2"
+		]
+	},
+	"babel-1": "ti poi prenu cu ka'e cusku je jimpe [[$1|lo sampu]] bau [[$2|la $3]]",
+	"babel-1-n": "ti poi prenu cu ka'e cusku je jimpe [[$1|lo sampu]] bau [[$2|la .lojban.]]"
+}

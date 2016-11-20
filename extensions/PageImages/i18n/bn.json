@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aftabuzzaman"
+		]
+	},
+	"pageimages-desc": "পাতায় ব্যবহৃত চিত্র সম্পর্কে তথ্য সংগ্রহ করে",
+	"pageimages-info-label": "পাতার চিত্র",
+	"apihelp-query+pageimages-description": "পাতায় থাকা চিত্র সম্পর্কে তথ্য প্রদান করে, যেমন থাম্বনেল এবং চিত্রের উপস্থিতি।",
+	"apihelp-query+pageimages-param-thumbsize": "সর্বোচ্চ থাম্বনেইলের মাত্রা।"
+}

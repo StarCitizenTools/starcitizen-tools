@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cedric31"
+		]
+	},
+	"commonsmetadata-desc": "Espandís la proprietat « extmetadata » del modul d’API info d’imatge per inclure d'informacions emmagazinadas dins las paginas de descripcion de l’imatge qu'utilizan los modèls corrents de Wikimèdia Commons.",
+	"commonsmetadata-trackingcategory-no-license": "Fichièrs sens licéncia legibla per una maquina",
+	"commonsmetadata-trackingcategory-no-description": "Fichièrs sens descripcion legibla per una maquina",
+	"commonsmetadata-trackingcategory-no-source": "Fichièrs sens font legibla per una maquina"
+}

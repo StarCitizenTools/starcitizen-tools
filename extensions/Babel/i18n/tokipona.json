@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel-0": "jan ni li [[$1|toki ala]] e [[$2|$3]].",
+	"babel-1": "jan ni li [[$1|toki lili]] e [[$2|$3]].",
+	"babel-2": "jan ni li [[$1|toki]] e [[$2|$3]].",
+	"babel-3": "jan ni li [[$1|toki pona]] e [[$2|$3]].",
+	"babel-4": "jan ni li [[$1|toki pona mute]] e [[$2|$3]].",
+	"babel-N": "[[$1|tenpo ona ali]] la jan ni li toki e [[$2|$3]].",
+	"babel-0-n": "jan ni li [[$1|toki ala]] e [[$2|toki pona]].",
+	"babel-1-n": "jan ni li [[$1|toki lili]] e [[$2|toki pona]].",
+	"babel-2-n": "jan ni li [[$1|toki]] e [[$2|toki pona]].",
+	"babel-3-n": "jan ni li [[$1|toki pona]] e [[$2|toki pona]].",
+	"babel-4-n": "jan ni li [[$1|toki pona mute]] e [[$2|toki pona]].",
+	"babel-N-n": "[[$1|tenpo ona ali]] la jan ni li toki e [[$2|toki pona]]."
+}

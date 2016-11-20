@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel-footer-url": ":Category:Mga_pinulongan_sa_mga_gumagamit",
+	"babel-0": "Kining maong gumagamit [[$1|dili makasabot]] og [[$2|$3]].",
+	"babel-1": "Kining maong gumagamit makatampo og [[$1|taphaw]] nga matang sa [[$2|$3]].",
+	"babel-2": "Kining maong gumagamit makatampo og [[$1|tunga-tunga]] nga matang sa [[$2|$3]].",
+	"babel-3": "Kining maong gumagamit makatampo og [[$1|hataas]] nga matang sa [[$2|$3]].",
+	"babel-4": "Kining maong gumagamit makatampo og [[$1|daw-lumad]] nga matang sa [[$2|$3]].",
+	"babel-N": "Ang [[$2|$3]] nianing tawhana susama sa usa ka [[$1|lumad]].",
+	"babel-0-n": "Kining maong gumagamit [[$1|dili makasabot]] og [[$2|Binisayang Sinugboanon]].",
+	"babel-1-n": "Kining maong gumagamit makatampo og [[$1|taphaw]] nga matang sa [[$2|Sinugboanong Binisaya]].",
+	"babel-2-n": "Kining maong gumagamit makatampo og [[$1|tunga-tunga]] nga matang sa [[$2|Sinugboanong Binisaya]].",
+	"babel-3-n": "Kining maong gumagamit makatampo og [[$1|hataas]] nga matang sa [[$2|Sinugboanong Binisaya]].",
+	"babel-4-n": "Kining maong gumagamit makatampo og [[$1|daw-lumad]] nga matang sa [[$2|Sinugboanon]].",
+	"babel-footer": "Pangita og mga gumagamit sa usa ka pinulongan"
+}

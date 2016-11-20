@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko",
+			"Wladek92"
+		]
+	},
+	"textextracts-desc": "Fournit des extraits en texte brut ou en HTML limité du contenu de la page",
+	"apihelp-query+extracts-description": "Renvoie du texte brut ou des extraits limités de HTML des pages fournies.",
+	"apihelp-query+extracts-param-chars": "Nombre de caractères à retourner. Le texte courant retourné peut être légèrement plus long.",
+	"apihelp-query+extracts-param-sentences": "Combien de phrases renvoyer.",
+	"apihelp-query+extracts-param-limit": "Combien d'extraits retourner.",
+	"apihelp-query+extracts-param-intro": "Retourner uniquement le contenu précédant la première section.",
+	"apihelp-query+extracts-param-plaintext": "Retourner les extraits au format texte brut au lieu de HTML limité.",
+	"apihelp-query+extracts-param-sectionformat": "Comment mettre en forme les sections en mode texte brut: ;plain:Pas de mise en forme.\n;wiki:mise en forme dans le style Wiki (== comme ceci ==).\n;raw:en format de représentation interne de ce module  (les titres de section préfixés avec &lt;ASCII 1&gt;&lt;ASCII 2&gt;&lt;section level&gt;&lt;ASCII 2&gt;&lt;ASCII 1&gt;).",
+	"apihelp-query+extracts-param-variant": "Convertir le contenu dans cette variante de la langue.",
+	"apihelp-query+extracts-example-1": "Obtenir un extrait de 175 caractères"
+}

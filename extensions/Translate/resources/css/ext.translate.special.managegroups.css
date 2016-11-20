@@ -1,0 +1,20 @@
+.mw-translate-smg-change {
+	padding-bottom: 1em;
+	margin-bottom: 2em;
+}
+
+.mw-translate-smg-submit {
+	font-size: 5em;
+	margin: auto;
+	width: 80%;
+	display: block;
+}
+
+.diff-lineno {
+	display: none;
+}
+
+.mw-translate-smg-header td {
+	font-size: 200%;
+	font-weight: bold;
+}

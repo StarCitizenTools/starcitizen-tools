@@ -1,0 +1,42 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sasan700",
+			"Умар"
+		]
+	},
+	"checkuser-desc": "Йиш хуьлуьйту IP-адресаш хьажа а, декъашхойн кхин тӀе хаам а хьажа а",
+	"checkuser": "Декъашхочунга хьажа",
+	"checkuser-contribs": "хьажа декъашхочун IP-адресе",
+	"group-checkuser": "Декъашхошка хьовсурш",
+	"group-checkuser-member": "{{GENDER:$1|декъашхойн тӀе хьожург}}",
+	"right-checkuser": "декъашхойн IP-адресашка а, кхин хаамашка а хьажар",
+	"right-checkuser-log": "декъашхойн зеран тептаре хьажар",
+	"action-checkuser": "декъашхойн IP-адресашка а, кхин хаамашка а хьажар",
+	"action-checkuser-log": "декъашхойн зеран тептаре хьажар",
+	"checkuser-reason": "Бахьана:",
+	"checkuser-reason-api": "API: $1",
+	"checkuser-showlog": "Гайта тептар",
+	"checkuser-query": "Деха керла нисдарш",
+	"checkuser-target": "IP-адрес я декъашхочун цӀе:",
+	"checkuser-users": "Керла декъашхой",
+	"checkuser-edits": "Нисдарш хьажа",
+	"checkuser-ips": "Деха IP-адрес",
+	"checkuser-period": "Йохалла:",
+	"checkuser-week-1": "тӀаьххьара кӀира",
+	"checkuser-week-2": "тӀаьххьара ши кӀира",
+	"checkuser-month": "тӀаьххьара 30 де",
+	"checkuser-all": "массо",
+	"checkuser-check": "Хьажа",
+	"checkuser-log-fail": "Цатарло тептар тӀе дӀаяздар тӀоха",
+	"checkuser-blocked": "Блоктоьхна",
+	"checkuser-gblocked": "Глобальни блоктоьхна",
+	"checkuser-locked": "Блоктоьхна",
+	"checkuser-block-success": "'''ХӀинца  {{PLURAL:$2|1=блоктоьхна $1 декъашхочун|блоктоьхна $1 декъашхойн}}.'''",
+	"checkuser-search": "Лахар",
+	"checkuser-search-submit": "Лахар",
+	"checkuser-search-target": "Ӏалашо",
+	"checkuser-log-search-target": "Ӏалашо:",
+	"checkuser-log-search-type": "Лахар:",
+	"checkuser-create-action": "кхолийна"
+}

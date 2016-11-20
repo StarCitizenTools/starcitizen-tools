@@ -1,0 +1,97 @@
+@import "minerva.variables";
+@import "minerva.mixins";
+
+@borderBottomColor: #CACACA;
+
+// hide menu items when not possible to use
+.client-nojs #ca-watch,
+.client-nojs #ca-edit,
+#ca-talk.selected {
+	display: none;
+}
+
+#page-actions .nojs-edit {
+	display: inline-block;
+}
+
+.heading-holder {
+	padding: @titleSectionSpacingTop 0 @titleSectionSpacingBottom;
+
+	h1 {
+		padding-right: @contentMargin;
+	}
+
+	.tagline {
+		color: @colorGray5;
+		font-size: .85em;
+		margin: 7px 0 10px 0;
+
+		&:first-letter {
+			text-transform: capitalize;
+		}
+	}
+}
+
+#section_0 {
+	padding-top: 0;
+	padding-bottom: 0;
+	border-bottom: none;
+}
+
+#page-actions {
+	font-size: 1.1em; // Icons are 24px square.
+	float: right;
+	border: none;
+	overflow: hidden;
+
+	li {
+		display: block;
+		// Needed for non-JavaScript users
+		position: relative;
+		cursor: pointer;
+		// Override .hlist rule.
+		margin-right: 0;
+		margin-bottom: 20px;
+
+		// FIXME: use .cloaked class
+		// file inputs are notoriously difficult to style
+		input {
+			opacity: 0;
+		}
+
+		input,
+		a,
+		span,
+		button {
+			// Needed for non-JavaScript users
+			position: absolute;
+			display: block;
+			width: 100%;
+			height: 100%;
+			// needed for ContentOverlay pointer arrow
+			margin: 0 0 8px;
+		}
+
+		button {
+			text-indent: inherit;
+			outline: none;
+		}
+
+		&:first-child {
+			margin-top: 3px;
+		}
+	}
+}
+
+// On small devices that don't support Javascript, hide the page actions bar
+@media all and (max-width: @wgMFDeviceWidthMobileSmall) {
+	.client-nojs {
+		#page-actions {
+			display: none;
+		}
+
+		#section_0 {
+			border: none;
+		}
+	}
+}

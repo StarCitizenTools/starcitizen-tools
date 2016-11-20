@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kc kennylau"
+		]
+	},
+	"usergroups-createnew": "（建立新嘅……）",
+	"usergroups-editgroup-newgroup": "唔該輸入你嘅新用戶姐嘅名：",
+	"usergroups-editgroup-reason": "原因:",
+	"usergroups-log-none": "(冇)",
+	"logentry-usergroups-create": "$1整咗一個新嘅包含$5嘅$7用戶組「$4」",
+	"logentry-usergroups-delete": "$1剷咗用戶姐「$4」。",
+	"logentry-usergroups-modify": "$1修改咗用戶組「$4」。$7加咗$5；剷咗$6"
+}

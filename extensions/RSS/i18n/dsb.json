@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"rss-desc": "Zwobraznjujo RSS-kanal na wikiboku",
+	"rss-tracking-category": "Boki z RSS-kanalami",
+	"rss-error": "RSS-kanal njejo dał se z $1 zacytaś: $2",
+	"rss-empty": "RSS-kanal njejo dał se z $1 zacytaś!",
+	"rss-fetch-nourl": "Wótwołanje bźez URL!",
+	"rss-invalid-url": "Njepłaśiwy URL: $1",
+	"rss-parse-error": "Zmólka pśi parsowanju XML za RSS",
+	"rss-ns-permission": "RSS njejo w toś tom mjenjowem rumje dowólony.",
+	"rss-feed": "<!--  the following are two alternative templates. The first is the basic default template for feeds -->; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''\n: {{{description}}}\n: {{{author}}} {{{date}}}<!-- don't use newline here --><!-- The second is an improved version which requires Extension:ParserFunctions --><!-- ; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''{{#if: {{{description|}}}|: {{{description}}}}}{{#if: {{{author|}}} | {{#if: {{{date|}}} |: &mdash; {{{author}}} {{{date}}}}} | {{#if: {{{author|}}}|: &mdash; {{{author}}}}} {{#if: {{{date|}}}|:{{{date}}}}}|}} -->"
+}

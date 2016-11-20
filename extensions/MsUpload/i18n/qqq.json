@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Luis Felipe Schenone",
+			"Robby",
+			"Purodha",
+			"Umherirrender"
+		]
+	},
+	"msu-desc": "{{desc|name=MsUpload|url=https://www.mediawiki.org/wiki/Extension:MsUpload}}",
+	"msu-button-title": "Button for selecting files from the users computer.\n{{Identical|Select file}}",
+	"msu-insert-link": "Button for inserting a file link into the wikitext.\n{{Identical|Insert link}}",
+	"msu-insert-gallery": "Button for inserting a gallery with all the uploaded files into the wikitext.",
+	"msu-insert-files": "Button for inserting calls to all the uploaded files into the wikitext.",
+	"msu-insert-links": "Button for inserting links to all the uploaded files into the wikitext.",
+	"msu-insert-image": "Button for inserting an image into the wikitext",
+	"msu-insert-video": "Button for inserting a video",
+	"msu-cancel-upload": "Button for canceling an upload",
+	"msu-replace-file": "Button for replacing a file",
+	"msu-clean-all": "Button for clearing the list of uploaded files",
+	"msu-ext-not-allowed": "Message that alerts the user that one or more of the selected files are of a forbidden type.\n$1 is the number of file types listed after this message. It is to used for PLURAL.",
+	"msu-upload-this": "Button for uploading the selected file.",
+	"msu-upload-all": "Button for uploading all the selected files.",
+	"msu-dropzone": "Message in the area where files can be dropped.",
+	"msu-comment": "Comment left as an edit summary when uploading a file, and in the page of the uploaded file."
+}

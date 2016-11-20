@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Girmitya"
+		]
+	},
+	"babel": "Babel sadasya ke jaankari",
+	"babel-desc": "Ii <code>#babel</code> parser function ke jorre hae jisse babel ke sadasya box ke column apne se ban jaawe hae, aue isse custom template banawa jaae sake hae",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Bhasa ke aadhar pe sadasya",
+	"babel-autocreate-reason": "Apne se [[$1|Babel]] vibhag ke banawa jaae hae",
+	"babel-autocreate-text-levels": "Ii vibhag ke sadasya ke lage $2 bhasa ke khaatir $1 ke baraabar ke jaankari hae.",
+	"babel-autocreate-text-main": "Ii vibhag ke sadasya ii batae hae ki uske lage bhasa $1 ke jaankari hae.",
+	"babel-0": "Ii sadasya ke lage [[$2|$3]] ke [[$1|kuchh nai]] jaankari nai hae (nai to ii bhasa ke bahut muskil se samjhe hae).",
+	"babel-1": "Ii sadasya ke lage [[$2|$3]] ke [[$1|khaali thorraa]] jaankari hae.",
+	"babel-2": "Ii sadasya ke lage [[$2|$3]] ke [[$1|samjhe bhar ke]] jaankari hae.",
+	"babel-3": "Ii sadasya ke lage [[$2|$3]] ke [[$1|achchhaa]] jaankari hae.",
+	"babel-4": "Ii sadasya ke lage [[$2|$3]] ke [[$1|lagbhag bachpan ke bhasa ke rakam ke]] jaankari hae.",
+	"babel-5": "Ii sadasya ke lage [[$2|$3]] ke [[$1|khaas]] jaankari hae.",
+	"babel-N": "Ii sadasya ke lage [[$2|$3]] ke [[$1|bachpan ke  bhasa ke rakam ke]] jaankari hae.",
+	"babel-0-n": "Ii sadasya ke lage [[$2|English]] ke [[$1|kuchh nai]] jaankari nai hae (nai to ii bhasa ke bahut muskil se samjhe hae).",
+	"babel-1-n": "Ii sadasya ke lage [[$2|English]] ke [[$1|khaali thorraa]] jaankari hae.",
+	"babel-2-n": "Ii sadasya ke lage [[$2|English]] ke [[$1|samjhe bhar ke]] jaankari hae.",
+	"babel-3-n": "Ii sadasya ke lage [[$2|English]] ke [[$1|achchhaa]] jaankari hae.",
+	"babel-4-n": "Ii sadasya ke lage [[$2|English]] ke [[$1|lagbhag bachpan ke bhasa ke rakam ke]] jaankari hae.",
+	"babel-5-n": "Ii sadasya ke lage [[$2|English]] ke [[$1|khaas]] jaankari hae.",
+	"babel-N-n": "Ii sadasya ke lage [[$2|English]] ke [[$1|bachpan ke  bhasa ke rakam ke]] jaankari hae.",
+	"babel-footer": "Bhasa ke aadhaar pe sadasya"
+}

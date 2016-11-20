@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"JHeydar",
+			"Vugar 1981",
+			"Гусейн"
+		]
+	},
+	"babel": "Babil iştirokəkə məlumot",
+	"babel-desc": "Ziyod kardeydə analiz kardey funksiyə <code>#babel</code>, haşteydə avtomatik ofəye sun de zıvonon barədə məlumoti iyən de mımkunoti co ğəlibon daxıl karde",
+	"babel-url": "Project:Babil",
+	"babel-footer-url": ":Category:Babil- iştirokəkon zıvononədə",
+	"babel-autocreate-reason": "Səhifə avtomatik ofəye [[$1|Babil]] tispirədə.",
+	"babel-autocreate-text-levels": "İştirokəkon çe ın tispiriku işorә kardəşone zınəyon səviyyə $1 bo zıvoni $2.",
+	"babel-autocreate-text-main": "İştirokəkon bı tispirədə zıvoni zınəy işorə kardəşone $1.",
+	"babel-0": "In iştirokəkə [[$1|zıneydəni]] [[$2|$3]] (yaanki çətin dərəseydə).",
+	"babel-1": "In iştirokəkə [[$1|zəif]] zıneydә [[$2|$3]].",
+	"babel-2": "In iştirokəkə [[$1|miyonə səviyyədə]] zıneydə [[$2|$3]].",
+	"babel-3": "In iştirokəkə [[$1|çok]] zıneydə [[$2|$3]].",
+	"babel-4": "In iştirokəkə bənə [[$1|moə zıvoni]] zıneydə [[$2|$3]].",
+	"babel-5": "In iştirokəkə [[$1|peşəkorə səviyyədə]] zıneydə [[$2|$3]].",
+	"babel-N": "Bo ın iştirokəkə [[$2|Tolışi]] [[$1|moə zıvone]].",
+	"babel-0-n": "In iştirokəkə [[$1|zıneydəni]] [[$2|Tolışi]] (yaanki çətin dərəseydə).",
+	"babel-1-n": "In iştirokəkə [[$1|zəif]] zıneydə [[$2|Tolışi]].",
+	"babel-2-n": "In iştirokəkə [[$1|miyonə səviyyədə]] zıneydə [[$2|Tolışə zıvoni]].",
+	"babel-3-n": "In iştirokəkə [[$1|çok]] zıneydə [[$2|Tolışə zıvoni]].",
+	"babel-4-n": "In iştirokəkə bənə [[$1|moə zıvoni]] зынејдә [[$2|Tolışə zıvoni]].",
+	"babel-5-n": "In iştirokəkə [[$1|peşəkor səviyyədə]] zıneydə [[$2|Tolışə zıvoni]].",
+	"babel-N-n": "Bo ın iştirokəkə [[$2|Tolışə zıvon]] [[$1|moə zıvone]].",
+	"babel-footer": "İştirokəkon zıvononədə"
+}

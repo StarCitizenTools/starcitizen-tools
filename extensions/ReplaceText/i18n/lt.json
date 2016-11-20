@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Homo"
+		]
+	},
+	"replacetext": "Keisti tekstą",
+	"replacetext_continue": "Tęsti",
+	"replacetext_editsummary": "Teksto pakeitimas - \"$1\" į \"$2\""
+}

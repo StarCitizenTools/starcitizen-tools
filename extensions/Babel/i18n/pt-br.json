@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Brunoy Anastasiya Seryozhenko",
+			"Eduardo.mps",
+			"Giro720",
+			"555",
+			"Opraco"
+		]
+	},
+	"babel": "Informação Babel {{GENDER:$1|do usuário|da usuária|do(a) usuário(a)}}",
+	"babel-desc": "Adiciona a função do analisador parser <code>#babel</code> para permitir a geração automática de um coluna de caixas de babel de um usuário coma possibilidade de incluir predefinições personalizadas",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Categoria:Babel - Usuários por língua",
+	"babel-autocreate-reason": "Criando automaticamente a página da categoria [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Os usuários nesta categoria indicam que possuem um nível de conhecimento $1 na língua $2.",
+	"babel-autocreate-text-main": "Os usuários nesta categoria indicam que possuem conhecimentos da língua $1.",
+	"babel-0": "Este usuário [[$1|não]] têm conhecimento de [[$2|$3]] (ou compreende com dificuldades consideráveis).",
+	"babel-1": "Este usuário têm um [[$1|básico]] conhecimento de [[$2|$3]].",
+	"babel-2": "Este usuário têm um conhecimento [[$1|intermediário]] de [[$2|$3]].",
+	"babel-3": "Este usuário têm um [[$1|avançado]] conhecimento de [[$2|$3]].",
+	"babel-4": "Este usuário possui um conhecimento [[$1|próximo ao nativo]] de [[$2|$3]].",
+	"babel-5": "Este usuário têm um conhecimento [[$1|profissional]] de [[$2|$3]].",
+	"babel-N": "Este usuário é um [[$1|falante nativo]] de [[$2|$3]].",
+	"babel-0-n": "Este usuário [[$1|não compreende]] [[$2|português]] (ou compreende com dificuldades consideráveis).",
+	"babel-1-n": "{{GENDER:$4|Este usuário|Esta usuária}} pode contribuir com um nível [[$1|básico]] de [[$2|português no dialeto brasileiro]].",
+	"babel-2-n": "{{GENDER:$4|Este usuário|Esta usuária}} pode contribuir com um nível [[$1|médio]] de [[$2|português no dialeto brasileiro]].",
+	"babel-3-n": "{{GENDER:$4|Este usuário|Esta usuária}} pode contribuir com um nível [[$1|avançado]] de [[$2|português no dialeto brasileiro]].",
+	"babel-4-n": "{{GENDER:$4|Este usuário|Esta usuária}} pode contribuir com um nível [[$1|quase nativo]] de [[$2|português no dialeto brasileiro]].",
+	"babel-5-n": "{{GENDER:$4|Este usuário|Esta usuária}} pode contribuir com um nível [[$1|profissional]] de [[$2|português no dialeto brasileiro]].",
+	"babel-N-n": "{{GENDER:$4|Este usuário|Esta usuária}} tem como língua [[$1|materna]] o [[$2|dialeto brasileiro da língua portuguesa]].",
+	"babel-footer": "Usuários por língua"
+}

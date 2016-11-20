@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Geopoet"
+		]
+	},
+	"babel": "Babel na impormasyon nin paragamit",
+	"babel-desc": "Nagdudugang nin <code>#babel</code> sa punksyon nin parabangay tanganing itugot an automatikadong henerasyon kan sarong babel na kahon nin paragamit na kolum na magkaigwa nin abilidad sa pagbali kan mga templatong kustombre",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Kategorya:Babel-Mga paragamit uyon sa lengguwahe",
+	"babel-autocreate-reason": "Automatikong maimumukna an [[$1|Babel]] na kategoryang pahina.",
+	"babel-autocreate-text-levels": "An mga paragamit sa kategoryang ini minapasabot na sinda igwal nin kakayanan na yaon sa grado $1 para sa lengguwaheng $2.",
+	"babel-autocreate-text-main": "Mga paragamit sa kategoryang ini minapasabot na sinda igwa nin kaaraman sa lengguwaheng $1.",
+	"babel-0": "Ining paragamit [[$1|mayo]]ng kaaraman sa [[$2|$3]](o nakakasabot kaini na igwang konsiderableng kadepesilan).",
+	"babel-1": "Ining paragamit igwa nin [[$1|pananday]] na kaaraman sa [[$2|$3]].",
+	"babel-2": "Ining paragamit igwa nin [[$1|panundag]] na kaaraman sa [[$2|$3]].",
+	"babel-3": "Ining paragamit igwa nin [[$1|mauswag]] kaaraman sa [[$2|$3]].",
+	"babel-4": "Ining paragamit igwa nin [[$1|pahapyaw na parataram]] nin kaaraman sa [[$2|$3]].",
+	"babel-5": "Ining paragamit igwa nin [[$1|prospeyunal]] na kaaraman sa [[$2|$3]].",
+	"babel-N": "Ining paragamit igwa nin [[$1|banyas]] na pagkakasabot sa [[$2|$3]].",
+	"babel-0-n": "Ining paragamit [[$1|mayo]]ng kaaraman sa [[$2|Ingles]] (o nakakasabot kaini na igwang konsiderableng kadepesilan).",
+	"babel-1-n": "Ining paragamit igwa nin [[$1|pananday]] na kaaraman sa [[$2|Ingles]].",
+	"babel-2-n": "Ining paragamit igwa nin [[$1|panundag]] na kaaraman sa [[$2|Ingles]].",
+	"babel-3-n": "Ining paragamit igwa nin [[$1|mauswag]] na kaaraman sa [[$2|Ingles]].",
+	"babel-4-n": "Ining paragamit igwa nin [[$1|pahapyaw na parataram]] sa kaaraman nin [[$2|Ingles]].",
+	"babel-5-n": "Ining paragamit igwa nin [[$1|propesyunal]] na kaaraman sa [[$2|Ingles]].",
+	"babel-N-n": "Ining paragamit igwa nin [[$1|banyas]] na pagkasabot sa [[$2|Ingles]].",
+	"babel-footer": "Mga paragamit uyon sa lengguwahe"
+}

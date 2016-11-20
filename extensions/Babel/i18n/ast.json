@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Esbardu",
+			"Xuacu"
+		]
+	},
+	"babel": "Información babel d'usuariu",
+	"babel-desc": "Añade la función d'análisis sintáuticu <code>#babel</code> pa permitir la xeneración automática d'una columna userbox babel cola capacidá d'incluyir plantíes al gustu d'ún",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Usuarios por llingua",
+	"babel-autocreate-reason": "Creando automáticamente la páxina de la categoría [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Los usuarios d'esta categoría indiquen que tienen un nivel de conocimientu $1 de la llingua $2.",
+	"babel-autocreate-text-main": "Los usuarios d'esta categoría indiquen la so conocencia de la llingua $1.",
+	"babel-0": "{{GENDER:$4|Esti usuariu|Esta usuaria}} [[$1|nun]] tien conocimientos de [[$2|$3]] (o entiendelo con gran dificultá).",
+	"babel-1": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|básicu]] de [[$2|$3]].",
+	"babel-2": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|intermediu]] de [[$2|$3]].",
+	"babel-3": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|avanzáu]] de [[$2|$3]].",
+	"babel-4": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|cuasi nativu]] de [[$2|$3]].",
+	"babel-5": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|profesional]] de [[$2|$3]].",
+	"babel-N": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|nativu]] de [[$2|$3]].",
+	"babel-0-n": "{{GENDER:$4|Esti usuariu|Esta usuaria}} [[$1|nun]] tien conocimientos d'[[$2|asturianu]] (o entiendelo con gran dificultá).",
+	"babel-1-n": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|básicu]] d'[[$2|asturianu]].",
+	"babel-2-n": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|intermediu]] d'[[$2|asturianu]].",
+	"babel-3-n": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|avanzáu]] d'[[$2|asturianu]].",
+	"babel-4-n": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|cuasi nativu]] d'[[$2|asturianu]].",
+	"babel-5-n": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|profesional]] d'[[$2|asturianu]].",
+	"babel-N-n": "{{GENDER:$4|Esti usuariu|Esta usuaria}} ye {{GENDER:$4|un|una}} falante [[$1|{{GENDER:$4|nativu|nativa}}]] d'[[$2|asturianu]].",
+	"babel-footer": "Usuarios por llingua"
+}

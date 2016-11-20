@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fitoschido",
+			"Macofe"
+		]
+	},
+	"commonsmetadata-desc": "Extiende la propiedad «extmetadata» del módulo de API de información de imagen para incluir datos guardados en las páginas de descripción de las imágenes que usan las plantillas más comunes de Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Archivos sin licencia de lectura mecánica",
+	"commonsmetadata-trackingcategory-no-license-desc": "El archivo no tiene ninguna plantilla de licencia de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecánica].",
+	"commonsmetadata-trackingcategory-no-description": "Archivos sin descripción de lectura mecánica",
+	"commonsmetadata-trackingcategory-no-description-desc": "El archivo no tiene ninguna plantilla de información de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecánica], o el campo de descripción está vacío.",
+	"commonsmetadata-trackingcategory-no-author": "Archivos sin autor de lectura mecánica",
+	"commonsmetadata-trackingcategory-no-author-desc": "El archivo no tiene ninguna plantilla de información de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecánica], o el campo de autor está vacío.",
+	"commonsmetadata-trackingcategory-no-source": "Archivos sin fuente de lectura mecánica",
+	"commonsmetadata-trackingcategory-no-source-desc": "El archivo no tiene ninguna plantilla de información de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecánica], o el campo de origen está vacío."
+}

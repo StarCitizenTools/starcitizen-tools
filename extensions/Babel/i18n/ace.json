@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iwan Novirion",
+			"Si Gam Acèh"
+		]
+	},
+	"babel": "Keutrangan ureuëng ngui Babel",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Ureuëng ngui meunurôt bahsa",
+	"babel-autocreate-user": "Babel AutoCreate",
+	"babel-0": "Ureuëng nyoë [[$1|hana]] muphôm [[$2|$3]] (atawa payah that muphôm).",
+	"babel-1": "Ureuëng nyoë jeuët [[$1|bacut]] [[$2|$3]].",
+	"babel-2": "Ureuëng nyoë muphôm [[$1|le bacut]] [[$2|$3]].",
+	"babel-3": "Ureuëng nyoë [[$1|le muphôm]] [[$2|$3]].",
+	"babel-4": "Ureuëng nyoë [[$1|muphôm]] [[$2|$3]] lagèë ureuëng Acèh aseuli",
+	"babel-5": "Ureuëng nyoë [[$1|utôih]] lam [[$2|$3]].",
+	"babel-N": "Ureuëng nyoë [[$1|geumarit]] lam [[$2|$3]].",
+	"babel-0-n": "Ureuëng nyoë [[$1|hana muphôm]] [[$2|bahsa Acèh]] (atawa muphôm bacut that).",
+	"babel-1-n": "Ureuëng ngui nyoë muphôm [[$1|bacut]] [[$2|bahsa Acèh]].",
+	"babel-2-n": "Ureuëng nyoë muphôm [[$1|le bacut]] [[$2|bahsa Acèh]].",
+	"babel-3-n": "Ureuëng nyoë [[$1|le muphôm]] [[$2|bahsa Acèh]].",
+	"babel-4-n": "Ureuëng nyoë jeuët [[$2|bahsa Acèh]] karap lagèë [[$1|ureuëng Acèh aseuli]]",
+	"babel-5-n": "Ureuëng nyoë [[$1|utôih]] lam [[$2|bahsa Acèh]].",
+	"babel-N-n": "Ureuëng nyoë [[$1|geumarit]] lam [[$2|bahsa Aceh]].",
+	"babel-template": "Template:User $1",
+	"babel-footer": "Ureuëng meunurôt bahsa"
+}

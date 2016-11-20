@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"commonsmetadata-desc": "Extends the \"extmetadata\" property of the image information API module to include information stored in image description pages that use the templates commonly used on Wikimedia Commons",
+	"commonsmetadata-doc-url": "https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Machine-readable_data",
+	"commonsmetadata-trackingcategory-no-license": "Files with no machine-readable license",
+	"commonsmetadata-trackingcategory-no-license-desc": "The file does not have any [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] license template.",
+	"commonsmetadata-trackingcategory-no-description": "Files with no machine-readable description",
+	"commonsmetadata-trackingcategory-no-description-desc": "The file does not have a [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] information template, or its description field is not filled out.",
+	"commonsmetadata-trackingcategory-no-author": "Files with no machine-readable author",
+	"commonsmetadata-trackingcategory-no-author-desc": "The file does not have a [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] information template, or its author field is not filled out.",
+	"commonsmetadata-trackingcategory-no-source": "Files with no machine-readable source",
+	"commonsmetadata-trackingcategory-no-source-desc": "The file does not have a [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] information template, or its source field is not filled out."
+}

@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"晒太阳的冰 (zoglun@gmail.com)",
+			"Liuxinyu970226"
+		]
+	},
+	"msu-desc": "为一个或多个文件同时开启轻松上传",
+	"msu-button-title": "选择文件",
+	"msu-insert-link": "插入链接",
+	"msu-insert-gallery": "将所有插入为图库",
+	"msu-insert-files": "将所有插入为文件",
+	"msu-insert-links": "将所有插入为链接",
+	"msu-insert-image": "插入为图片",
+	"msu-insert-video": "插入视频",
+	"msu-cancel-upload": "取消上传",
+	"msu-replace-file": "替代文件？",
+	"msu-clean-all": "清空列表",
+	"msu-ext-not-allowed": "只允许以下文件{{PLURAL:$1|类型}}：",
+	"msu-upload-this": "上传此文件",
+	"msu-upload-all": "上传所有文件",
+	"msu-dropzone": "拖动文件至此",
+	"msu-comment": "基于MsUpload的文件上传"
+}

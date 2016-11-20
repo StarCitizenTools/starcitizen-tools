@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"محمد أحمد عبد الفتاح"
+		]
+	},
+	"searchtranslations": "ابحث في الترجمات",
+	"tux-sst-edit": "عدل الترجمة",
+	"tux-sst-view-foreign": "اعرض في $1",
+	"tux-sst-search": "ابحث",
+	"tux-sst-search-ph": "ابحث في الترجمات",
+	"tux-sst-facet-language": "اللغات",
+	"tux-sst-facet-group": "مجموعات الرسائل",
+	"tux-sst-nosolr-title": "البحث غير متوفر",
+	"tux-sst-nosolr-body": "هذا الويكي لا يوفر خدمة البحث في الترجمات.",
+	"tux-sst-solr-offline-title": "البحث غير متوفر",
+	"tux-sst-next": "التالي »",
+	"tux-sst-prev": "« السابق",
+	"tux-sst-default": "الترجمات",
+	"tux-sst-translated": "الترجمات من $1",
+	"tux-sst-untranslated": "لا ترجمات من $1",
+	"tux-sst-outdated": "الترجمات غير المحدثة من $1",
+	"tux-sst-ellipsis-untranslated": "لا ترجمات",
+	"tux-sst-ellipsis-outdated": "ترجمات غير محدثة",
+	"tux-sst-match-message": "إظهار الترجمات التي تطابق أي من كلمات البحث. $1",
+	"tux-sst-case-sensitive": "مراعاة حالة الأحرف"
+}

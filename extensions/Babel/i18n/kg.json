@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rkupsala"
+		]
+	},
+	"babel": "Babilone: luzâbu ya bandînga",
+	"babel-url": "Project:Babilone",
+	"babel-footer-url": ":Category:Babilone - Basadi na bandînga",
+	"babel-autocreate-text-levels": "Bântu ya kimvuka yayi bâwu zâbisaka ti bâwu zâba tuba ndînga $2 na nivô ya $1",
+	"babel-autocreate-text-main": "Bântu ya kimvuka yayi bâwu zâbisaka ti bâwu ke zâbaka ndînga $1.",
+	"babel-0": "Mûntu yayi zâba tuba [[$2|$3]] [[$1|ve]] (to yandi ke kuwaka yawu na mpasi)",
+	"babel-1": "Mûntu yayi zaba tuba [[$1|fyoti]] [[$2|$3]].",
+	"babel-2": "Mûntu yayi zâba tuba [[$2|$3]] [[$1|mbote]].",
+	"babel-3": "Mûntu yayi zâba tuba [[$2|$3]] [[$1|mbote mîngi]].",
+	"babel-4": "Mûntu yayi zâba tuba [[$2|$3]] na mutîndu mosi ya mûntu tubaka yawu [[$1|katuka lubutuku]].",
+	"babel-5": "Mûntu yayi zâba tuba [[$2|$3]] na mutîndu ya [[$1|nsêkudi]].",
+	"babel-N": "Mûntu yayi zaba tuba [[$2|$3]] [[$1|katuka lubutuku]].",
+	"babel-0-n": "Mûntu yayi zâba tuba [[$2|kituba Kôngo]] [[$1|ve]] (to yandi ke kuwaka yawu na mpasi)",
+	"babel-1-n": "Mûntu yayi zaba tuba [[$1|fyoti]] [[$2|kituba Kôngo]].",
+	"babel-2-n": "Mûntu yayi zâba tuba [[$2|kituba Kôngo]] [[$1|mbote]].",
+	"babel-3-n": "Mûntu yayi zâba tuba [[$2|kituba Kôngo]] [[$1|mbote mîngi]].",
+	"babel-4-n": "Mûntu yayi zâba tuba [[$2|kituba Kôngo]] na mutîndu ya [[$1|mwana Kôngo]].",
+	"babel-5-n": "Mûntu yayi zâba tuba [[$2|kituba Kôngo]] na mutîndu ya [[$1|nsêkudi]].",
+	"babel-N-n": "Mûntu yayi zaba tuba [[$2|kituba Kôngo]] [[$1|katuka lubutuku]].",
+	"babel-footer": "Basadi na bandînga"
+}

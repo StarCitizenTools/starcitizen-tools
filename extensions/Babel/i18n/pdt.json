@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel-1": "Dis Benutza redt [[$1|en bet]] [[$2|$3]].",
+	"babel-2": "Dis Benutza redt [[$1|nich schlachjt]] [[$2|$3]].",
+	"babel-3": "Dis Benutza redt [[$1|goot]] [[$2|$3]].",
+	"babel-4": "Dis Benutza redt [[$2|$3]] [[$1|meist soo goot aus ne Muttasproak]].",
+	"babel-N": "[[$2|$3]] es fe disem Benutza [[$1|Muttasproak]].",
+	"babel-1-n": "Dis Benutza redt [[$1|en bet]] [[$2|Plautdietsch]].",
+	"babel-2-n": "Dis Benutza redt [[$1|nich schlachjt]] [[$2|Plautdietsch]].",
+	"babel-3-n": "Dis Benutza redt [[$1|goot]] [[$2|Plautdietsch]].",
+	"babel-4-n": "Dis Benutza redt [[$2|Plautdietsch]] [[$1|meist soo goot aus ne Muttasproak]].",
+	"babel-N-n": "[[$2|Plautdietsch]] es fe disem Benutza [[$1|Muttasproak]]."
+}

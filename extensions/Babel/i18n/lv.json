@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dark Eagle",
+			"Gleb Borisov",
+			"Papuass",
+			"Yyy"
+		]
+	},
+	"babel": "Lietotāja informācija (Bābeles tornis)",
+	"babel-desc": "Pievieno parsera funkciju <code>#babel</code>, automātiskai kolonnu ar valodu informāciju veidošanai, ka arī ar citu veidņu ievietošanas iespēju",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Lietotāju valodas",
+	"babel-autocreate-reason": "Automātiski izveido [[$1|Babel]] kategorijas lapu.",
+	"babel-autocreate-text-levels": "Lietotāji šajā kategorijā ir norādījuši, ka tie pārzina $2 valodu $1 līmenī.",
+	"babel-autocreate-text-main": "Lietotāji šajā kategorijā ir norādījuši ka tiem ir $1 valodas zināšanas.",
+	"babel-0": "Šis lietotājs [[$2|$3]] valodu [[$1|neprot]]. (vai saprot ar ievērojamām grūtībām).",
+	"babel-1": "Šis lietotājs [[$2|$3]] valodu prot [[$1|pamatlīmenī]].",
+	"babel-2": "Šis lietotājs [[$2|$3]] valodu prot [[$1|vidējā]] līmenī.",
+	"babel-3": "Šis lietotājs [[$2|$3]] valodu prot [[$1|padziļinātā]] līmenī.",
+	"babel-4": "Šis lietotājs [[$2|$3]] valodu pārzina [[$1|gandrīz kā dzimto valodu]].",
+	"babel-5": "Šis lietotājs [[$2|$3]] valodu pārzina [[$1|profesionālā]] līmenī.",
+	"babel-N": "Šim lietotājam [[$2|$3]] valoda ir [[$1|dzimtā valoda]].",
+	"babel-0-n": "Šis lietotājs [[$2|latviešu valodu]] [[$1|neprot]] (vai saprot ar ievērojamām grūtībām).",
+	"babel-1-n": "Šis lietotājs [[$2|latviešu valodu]] prot [[$1|pamatlīmenī]].",
+	"babel-2-n": "Šis lietotājs [[$2|latviešu valodu]] prot [[$1|vidējā]] līmenī.",
+	"babel-3-n": "Šis lietotājs [[$2|latviešu valodu]] prot [[$1|padziļinātā]] līmenī.",
+	"babel-4-n": "Šis lietotājs [[$2|latviešu valodu]] pārzina [[$1|gandrīz kā dzimto valodu]].",
+	"babel-5-n": "Šis lietotājs [[$2|latviešu valodu]] pārzina [[$1|profesionālā]] līmenī.",
+	"babel-N-n": "Šim lietotājam [[$2|latviešu valoda]] ir [[$1|dzimtā valoda]].",
+	"babel-footer": "Lietotāji pēc valodas"
+}

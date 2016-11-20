@@ -1,0 +1,23 @@
+{
+	"private": true,
+	"scripts": {
+		"test": "grunt test && npm run doc",
+		"predoc": "bundle install --path vendor/bundle",
+		"doc": "bundle exec jsduck"
+	},
+	"dependencies": {
+		"jsdoc": "<=3.3.0",
+		"svgo": ">=0.4.4"
+	},
+	"devDependencies": {
+		"grunt-cli": "0.1.13",
+		"grunt-contrib-jshint": "1.0.0",
+		"grunt-banana-checker": "0.5.0",
+		"grunt-jscs": "2.8.0",
+		"jscs-preset-wikimedia": "1.0.0",
+		"js-beautify": "1.5.10",
+		"grunt-notify": "0.4.5",
+		"grunt-contrib-watch": "1.0.0",
+		"grunt-jsonlint": "1.0.7"
+	}
+}

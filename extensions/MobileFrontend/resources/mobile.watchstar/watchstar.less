@@ -1,0 +1,11 @@
+@import "minerva.variables";
+@import "minerva.mixins";
+
+.animations {
+	.watch-this-article {
+		.transition-transform( .5s );
+		&.watched {
+			.transform( rotate(72deg) );
+		}
+	}
+}

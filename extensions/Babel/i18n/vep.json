@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Игорь Бродский"
+		]
+	},
+	"babel": "Andmused ühtnijan keliš",
+	"babel-desc": "Ližadab <code>#babel</code>-parseran funkcii, kudamb laskeb säta avtomatižešti pacaz informacijanke keliš, kudambha sab ližata toižid-ki šablonoid",
+	"babel-url": "Project:Vavilon",
+	"babel-footer-url": ":Category:Babel - Kävutajad keliden mödhe",
+	"babel-autocreate-reason": "[[$1|Babel]]-projektan avtomatine lehtpolen sädand.",
+	"babel-autocreate-text-levels": "Necen kategorijan kävutajad oma ozutadud tedonmär $1 $2-kelen täht.",
+	"babel-autocreate-text-main": "Necen kategorijan kävutajad ozutiba $1-kelen tedmine.",
+	"babel-0": "Nece kävutai [[$1|ei el'genda]] kel't [[$2|$3]] (vai el'gendab lujiden jügedusidenke)",
+	"babel-1": "Nece kävutai tedab kel't [[$2|$3]] [[$1|augotižmäras]]",
+	"babel-2": "Nece kävutai tedab kel't [[$2|$3]] [[$1|keskmäras]].",
+	"babel-3": "Nece kävutai tedab kel't [[$2|$3]] [[$1|hüväs märas]].",
+	"babel-4": "Nece kävutai tedab kel't [[$2|$3]] [[$1|läz mamankelen kävutamišt]].",
+	"babel-5": "Nece kävutai tedab kel't [[$2|$3]] [[$1|professionaližes märas]].",
+	"babel-N": "[[$2|$3]] kel' om kävutajan [[$1|mamankel']]",
+	"babel-0-n": "Nece kävutai [[$1|ei el'genda]] [[$2|vepsän kel't]] (vai el'gendab lujiden jügedusidenke).",
+	"babel-1-n": "Nece kävutai tedab [[$2|vepsän kel't]] [[$1|augotižmäras]].",
+	"babel-2-n": "Nece kävutai tedab [[$2|vepsän kel't]] [[$1|keskmäras]].",
+	"babel-3-n": "Nece kävutai tedab [[$2|vepsän kel't]] [[$1|hüväs märas]].",
+	"babel-4-n": "Nece kävutai tedab [[$2|vepsän kel't]] [[$1|läz mamankelen kävutamišt]].",
+	"babel-5-n": "Nece kävutai tedab [[$2|vepsän kel't]] [[$1|professionaližes märas]].",
+	"babel-N-n": "[[$2|Vepsän kel']] om necen kävutajan [[$1|mamankel']].",
+	"babel-footer": "Kävutajad keliden mödhe"
+}

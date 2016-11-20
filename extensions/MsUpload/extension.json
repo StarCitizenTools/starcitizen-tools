@@ -1,0 +1,69 @@
+{
+	"name": "MsUpload",
+	"version": "12.0",
+	"author": [
+		"[mailto:wiki@ratin.de Martin Schwindl]",
+		"[mailto:wiki@keyler-consult.de Martin Keyler]",
+		"[https://www.mediawiki.org/wiki/User:Luis_Felipe_Schenone Luis Felipe Schenone]"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:MsUpload",
+	"descriptionmsg": "msu-desc",
+	"license-name": "GPL-2.0+",
+	"type": "parserhook",
+	"MessagesDirs": {
+		"MsUpload": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"MsUpload": "MsUpload.body.php"
+	},
+	"ResourceModules": {
+		"ext.MsUpload": {
+			"scripts": [
+				"plupload/plupload.full.min.js",
+				"MsUpload.js"
+			],
+			"dependencies": "jquery.ui.progressbar",
+			"styles": "MsUpload.css",
+			"messages": [
+				"msu-button-title",
+				"msu-insert-link",
+				"msu-insert-gallery",
+				"msu-insert-files",
+				"msu-insert-links",
+				"msu-insert-image",
+				"msu-insert-video",
+				"msu-cancel-upload",
+				"msu-replace-file",
+				"msu-clean-all",
+				"msu-ext-not-allowed",
+				"msu-upload-this",
+				"msu-upload-all",
+				"msu-dropzone",
+				"msu-comment"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "MsUpload"
+	},
+	"Hooks": {
+		"EditPage::showEditForm:initial": [
+			"MsUpload::start"
+		]
+	},
+	"AjaxExportList": [
+		"MsUpload::saveCat"
+	],
+	"config": {
+		"MSU_useDragDrop": true,
+		"MSU_showAutoCat": true,
+		"MSU_checkAutoCat": true,
+		"MSU_useMsLinks": false,
+		"MSU_confirmReplace": true,
+		"MSU_imgParams": "400px"
+	},
+	"manifest_version": 1
+}

@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"MacTire02",
+			"Shimmin Beg"
+		]
+	},
+	"babel": "Fys ymmydeyr Babel",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "Croo duillag ronney [[$1|Babel]] dy seyr-obbragh.",
+	"babel-autocreate-text-levels": "Ymmydeyryn ayns y ronneys shoh, t'ad cowraghey dy vel schlei $1 oc er $2.",
+	"babel-autocreate-text-main": "Ymmydeyryn ayns y ronney shoh, t'ad cowraghey dy vel $1 ennagh oc.",
+	"babel-0": "Cha nel [[$2|$3]] [[$1|erbee]] ec yn ymmydeyr shoh (ny s'feer doillee da toiggal ee).",
+	"babel-1": "Ta [[$2|$3]] [[$1|veg]] ec yn ymmydeyr shoh.",
+	"babel-2": "Ta [[$2|$3]] [[$1|veanagh]] ec yn ymmydeyr shoh.",
+	"babel-3": "Ta [[$2|$3]] [[$1|vie]] ec yn ymmydeyr shoh.",
+	"babel-4": "Ta [[$2|$3]] [[$1|feer vie]] ec yn ymmydeyr shoh.",
+	"babel-5": "Ta [[$2|$3]] [[$1|cheirdey]] ec yn ymmydeyr shoh.",
+	"babel-N": "Ta [[$2|$3]] [[$1|ghlen]] ec yn ymmydeyr shoh.",
+	"babel-0-n": "Cha nel [[$2|Gaelg]] [[$1|erbee]] ec yn ymmydeyr shoh (ny s'feer doillee da toiggal ee).",
+	"babel-1-n": "Ta [[$2|Gaelg]] [[$1|veg]] ec yn ymmydeyr shoh.",
+	"babel-2-n": "Ta [[$2|Gaelg]] [[$1|veanagh]] ec yn ymmydeyr shoh.",
+	"babel-3-n": "Ta [[$2|Gaelg]] [[$1|vie]] ec yn ymmydeyr shoh.",
+	"babel-4-n": "Ta [[$2|Gaelg]] [[$1|feer vie]] ec yn ymmydeyr shoh.",
+	"babel-5-n": "Ta [[$2|Gaelg]] [[$1|cheirdey]] ec yn ymmydeyr shoh.",
+	"babel-N-n": "Ta [[$2|Gaelg]] [[$1|ghlen]] ec yn ymmydeyr shoh."
+}

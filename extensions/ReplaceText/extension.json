@@ -1,0 +1,47 @@
+{
+	"name": "Replace Text",
+	"version": "1.1.1",
+	"author": [
+		"Yaron Koren",
+		"Niklas Laxström",
+		"..."
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:Replace_Text",
+	"descriptionmsg": "replacetext-desc",
+	"license-name": "GPL-2.0+",
+	"type": "specialpage",
+	"GroupPermissions": {
+		"sysop": {
+			"replacetext": true
+		}
+	},
+	"AvailableRights": [
+		"replacetext"
+	],
+	"SpecialPages": {
+		"ReplaceText": "SpecialReplaceText"
+	},
+	"JobClasses": {
+		"replaceText": "ReplaceTextJob"
+	},
+	"MessagesDirs": {
+		"ReplaceText": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"ReplaceTextAlias": "ReplaceText.alias.php"
+	},
+	"AutoloadClasses": {
+		"ReplaceTextHooks": "ReplaceText.hooks.php",
+		"SpecialReplaceText": "SpecialReplaceText.php",
+		"ReplaceTextJob": "ReplaceTextJob.php",
+		"ReplaceTextSearch": "ReplaceTextSearch.php"
+	},
+	"Hooks": {
+		"AdminLinks": [
+			"ReplaceTextHooks::addToAdminLinks"
+		]
+	},
+	"manifest_version": 1
+}

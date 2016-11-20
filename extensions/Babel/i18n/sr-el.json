@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michaello",
+			"Rancher"
+		]
+	},
+	"babel": "Jezičke kutijice",
+	"babel-desc": "Dodaje funkciju raščlanjivača <code>#babel</code> koja omogućava samostalno stvaranje kolone s jezičkom kutijicom uz mogućnost dodavanja prilagođenih šablona",
+	"babel-url": "Project:Vavilon",
+	"babel-footer-url": ":Category:Vavilon – Korisnici po jeziku",
+	"babel-autocreate-reason": "Samostalno stvaranje kategorije [[$1|Vavilon]].",
+	"babel-autocreate-text-levels": "Korisnici u ovoj kategoriji imaju znanje $1 $2 jezika.",
+	"babel-autocreate-text-main": "Korisnici u ovoj kategoriji imaju znanje $1 jezika.",
+	"babel-autocreate-user": "Vavilon – samostvaranje",
+	"babel-0": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} [[$1|ne]] zna [[$2|$3]] jezik (ili ga razume sa znatnim poteškoćama).",
+	"babel-1": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} razume [[$2|$3]] jezik na [[$1|osnovnom]] nivou.",
+	"babel-2": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} razume [[$2|$3]] jezik na [[$1|srednjem]] nivou.",
+	"babel-3": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} razume [[$2|$3]] jezik na [[$1|naprednom]] nivou.",
+	"babel-4": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} [[$1|tečno]] govori [[$2|$3]] jezik.",
+	"babel-5": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} zna [[$2|$3]] jezik na [[$1|profesionalnom]] nivou.",
+	"babel-N": "[[$1|Maternji jezik]] {{GENDER:$4|ovog korisnika|ove korisnice|ovog korisnika}} je [[$2|$3]].",
+	"babel-0-n": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} [[$1|ne]] zna [[$2|srpski jezik]] (ili ga razume sa znatnim poteškoćama).",
+	"babel-1-n": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} ima [[$1|osnovno]] poznavanje [[$2|srpskog jezika]].",
+	"babel-2-n": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} razume [[$2|srpski jezik]] na [[$1|srednjem]] nivou.",
+	"babel-3-n": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} [[$1|dosta dobro]] poznaje [[$2|srpski jezik]].",
+	"babel-4-n": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} [[$1|tečno]] govori [[$2|srpski jezik]].",
+	"babel-5-n": "{{GENDER:$4|Ovaj korisnik|Ova korisnica|Ovaj korisnik}} zna [[$2|srpski jezik]] na [[$1|profesionalnom]] nivou.",
+	"babel-N-n": "[[$1|Maternji jezik]] {{GENDER:$4|ovog korisnika|ove korisnice|ovog korisnika}} je [[$2|srpski]].",
+	"babel-template": "Template:Korisnik $1",
+	"babel-footer": "Korisnici po jeziku"
+}

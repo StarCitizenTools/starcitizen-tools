@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ebraminio",
+			"Huji",
+			"Mjbmr"
+		]
+	},
+	"cleanchanges-changerightslink": "گروه‌های تغییر",
+	"cleanchanges-desc": "نمایش فشرده‌تری از [[Special:RecentChanges|فهرست تغییرات اخیر]]",
+	"cleanchanges-language": "زبان:",
+	"cleanchanges-language-na": "همه",
+	"cleanchanges-users": "کاربران (جدا کردن با: |):",
+	"cleanchanges-showuserlinks": "نمایش پیوندهای کاربر",
+	"cleanchanges-rcinfo-2": "($1؛ $2)",
+	"cleanchanges-rcinfo-3": "($1؛ $2؛ $3)"
+}

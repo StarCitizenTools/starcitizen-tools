@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"DavidL",
+			"Gomoko",
+			"Wladek92"
+		]
+	},
+	"pageimages-desc": "Recueille des informations sur les images utilisées sur les pages",
+	"pageimages-info-label": "Image de la page",
+	"apihelp-query+pageimages-description": "Retourne des informations sur les images de la page, comme par exemple les vignettes et la présence de photos.",
+	"apihelp-query+pageimages-example-1": "Obtenir le nom et la vignette de <kbd>100</kbd> pixels d’une image sur la page <kbd>Albert Einstein</kbd>.",
+	"apihelp-query+pageimages-param-prop": "Quelles informations renvoyer :\n;thumbnail:URL et dimensions de l’image associée à la page, s’il y en a une.\n;name:Titre de l’image.",
+	"apihelp-query+pageimages-param-thumbsize": "Dimension maximale de la vignette.",
+	"apihelp-query+pageimages-param-limit": "Propriétés concernant le nombre de pages à retourner."
+}

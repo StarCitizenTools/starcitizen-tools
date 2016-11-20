@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Milicevic01"
+		]
+	},
+	"commonsmetadata-trackingcategory-no-license": "Датотеке без машински читљиве лиценце",
+	"commonsmetadata-trackingcategory-no-license-desc": "Датотеке које немају [{{MediaWiki:Commonsmetadata-doc-url}} машински читљиву] лиценцу.",
+	"commonsmetadata-trackingcategory-no-description": "Датотеке без машински читљивог описа",
+	"commonsmetadata-trackingcategory-no-description-desc": "Датотеке које немају [{{MediaWiki:Commonsmetadata-doc-url}} машински читљив] информативни шаблон или поље опис није попуњено.",
+	"commonsmetadata-trackingcategory-no-author": "Датотеке без машински читљивог аутора",
+	"commonsmetadata-trackingcategory-no-author-desc": "Датотеке које немају [{{MediaWiki:Commonsmetadata-doc-url}} машински читљив] информативни шаблон или поље аутор није попуњено.",
+	"commonsmetadata-trackingcategory-no-source": "Датотеке без машински читљивог извора",
+	"commonsmetadata-trackingcategory-no-source-desc": "Датотеке које немају [{{MediaWiki:Commonsmetadata-doc-url}} машински читљив] информативни шаблон или поље извор није попуњено."
+}

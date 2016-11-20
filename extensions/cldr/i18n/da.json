@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Peter Alberti"
+		]
+	},
+	"cldr-desc": "Udvidelse, som giver lokaliserede sprognavne baseret på [http://cldr.unicode.org/index/downloads CLDR-data]"
+}

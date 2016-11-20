@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"JeanVoisin"
+		]
+	},
+	"checkuser-summary": "Cet outil observe les derniers changements pour récupérer l’adresse IP de l’useur ou pour montrer les données de modification et de l’useur de cette adresse IP.\nLes useurs et les modifications par l’adresse IP d’un client peuvent être récupérés par les en-têtes XFF en ajoutant « /xff » à l’adresse IP. Les adresses IPv4 (CIDR $1–32) et IPv6 (CIDR $2-128) sont supportées.\nPour des raisons de performance, cet outil ne retourne pas plus de 5&nbsp;000 modifications.\nUsez ça ici en accord avec les régulations.",
+	"checkuser-logcase": "La charche des notes est sensible aux lettres basses ou hautes.",
+	"checkuser": "'Gardez-voir à l'useur encore",
+	"checkuserlog": "Notes de la Garde d'useur",
+	"group-checkuser": "'Gardez-voir aux useurs encore",
+	"group-checkuser-member": "'Gardez-voir à l'useur encore",
+	"grouppage-checkuser": "{{ns:project}}:'Gardez-voir à l'useur encore",
+	"checkuser-reason": "Raison:",
+	"checkuser-showlog": "Montrer les notes",
+	"checkuser-query": "Charchez les nouveaux changements",
+	"checkuser-target": "Nom de l'useur ou IP",
+	"checkuser-users": "Obtenir les useurs",
+	"checkuser-edits": "Obtenir les modifications du IP",
+	"checkuser-ips": "Obtenir les adresses IP",
+	"checkuser-search": "Charche",
+	"checkuser-empty": "Les notes sont vides.",
+	"checkuser-nomatch": "Rien pareil trouvé.",
+	"checkuser-check": "Charche",
+	"checkuser-log-fail": "Pas capable d'additionner la note",
+	"checkuser-nolog": "Rien trouvé dans les notes."
+}

@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"F3RaN",
+			"Vriullop",
+			"Jaumeortola"
+		]
+	},
+	"msu-desc": "Permet càrregues simples per un o múltiples fitxers simultàniament",
+	"msu-button-title": "Seleccioneu els fitxers",
+	"msu-insert-link": "Inserir un enllaç",
+	"msu-insert-gallery": "Insereix-los tots com a galeria",
+	"msu-insert-links": "Insereix-los tots com a enllaços",
+	"msu-insert-image": "Inserir imatge",
+	"msu-insert-video": "Inserir pel·lícula",
+	"msu-cancel-upload": "Cancel·lar la càrrega",
+	"msu-clean-all": "Esborrar la llista",
+	"msu-ext-not-allowed": "Només {{PLURAL:$1|el següent tipus de fitxer és permès| els següents tipus de fitxer són permesos}}:",
+	"msu-upload-this": "Carrega aquest fitxer",
+	"msu-upload-all": "Carrega tots els fitxers",
+	"msu-dropzone": "Deseu els arxius aquí",
+	"msu-comment": "Fitxer carregat amb MsUpload"
+}

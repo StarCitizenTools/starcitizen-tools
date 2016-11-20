@@ -1,0 +1,16 @@
+<div class="overlay-header-container position-fixed">
+	{{>contentHeader}}
+	{{>saveHeader}}
+</div>
+
+<div class="overlay-content talk-overlay">
+	<div class="save-panel panel">
+		<p class="license">{{{licenseMsg}}}</p>
+	</div>
+	<div class="panel">
+		<input type="text" class="summary mw-ui-input" placeholder="{{topicTitlePlaceHolder}}">
+	</div>
+	<div class="panel">
+		<textarea class="wikitext-editor mw-ui-input" cols="40" rows="10" placeholder="{{topicContentPlaceHolder}}"></textarea>
+	</div>
+</div>

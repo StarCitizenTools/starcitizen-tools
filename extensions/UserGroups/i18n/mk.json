@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"usergroups": "Раководење со кориснички групи",
+	"usergroups-desc": "Овозможува поточно определување на корисничките права кои можат да се зададат на кои кориснички групи.",
+	"usergroupnameexists-error": "Не можете да создадете нова корисничка група со ова име бидејќи е зафатено.",
+	"usergroups-createnew": "(создај нова...)",
+	"usergroups-editgroup-delete": "Избришете ја оваа корисничка група <span class=\"important\" style=\"color:red\">(ПРЕДУПРЕДУВАЊЕ: Ова е неповратно. За да ја пресоздадете класава, ќе мора да се послужите со [[Special:UserGroups/new|овој образец]].)</span>",
+	"usergroups-editgroup-desc": "Изберете корисничка група од паѓачкиот изборник подолу, или пак да создадете ваша со можноста „создај нова...“.",
+	"usergroups-editgroup-newgroup": "Внесете го името на новата корисничка група:",
+	"usergroups-editgroup-reason": "Причина:",
+	"usergroups-editgroup-revoke": "Задај ѝ на групава одземање наместо доделување на права",
+	"usergroups-editgroup-save": "Зачувај промени",
+	"usergroups-editgroup-userrights": "Сите расположиви дозволи",
+	"usergroups-log-name": "Дневник на кориснички групи",
+	"usergroups-log-header": "Дневников ги заведува измените во корисничките права на секоја група.",
+	"usergroups-log-none": "(нема)",
+	"usergroups-log-revoke": "одземање",
+	"usergroups-log-revoke-switchon": "Сменето на одземање:",
+	"usergroups-log-revoke-switchoff": "Сменето на неодземање:",
+	"action-modifygroups": "менување на кориснички групи",
+	"invalidusergroupname-title": "Неважечко име на корисничка група",
+	"invalidusergroupname-error": "Внесеното име на новата корисничка група е неважечко.\n\nНазад на [[{{#special:UserGroups}}]].",
+	"nosuchusergroup": "Не пронајдов корисничка група наречена „$1“. Дали можеби сакавте да ја [[Special:UserGroups/new|создадете]] оваа корисничка група?",
+	"right-modifygroups": "Создавање, менување и бришење на кориснички групи",
+	"logentry-usergroups-create": "$1 {{GENDER:$2|создаде}} нова $7корисничка група „$4“ што содржи: $5",
+	"logentry-usergroups-delete": "$1 ја {{GENDER:$2|избриша}} корисничката група „$4“.",
+	"logentry-usergroups-modify": "$1 ја {{GENDER:$2|измени}} корисничката група „$4“. $7Додадено $5; Отстрането $6"
+}

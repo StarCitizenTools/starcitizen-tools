@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"John Reid",
+			"AmaryllisGardener"
+		]
+	},
+	"commonsmetadata-desc": "Extends the \"extmetadata\" propertie o the eemage information API module tae incluid information stored in the eemage descreeption pages that uise the templates commynlie uised oan Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-description": "Files wi no machine-readable description",
+	"commonsmetadata-trackingcategory-no-author": "Files wi no machine-readable author",
+	"commonsmetadata-trackingcategory-no-source": "Files wi no machine-readable soorce"
+}

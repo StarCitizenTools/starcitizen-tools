@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Crt",
+			"Ilaiho",
+			"Jaakonam",
+			"Linnea",
+			"Nedergard",
+			"Nike",
+			"Pxos"
+		]
+	},
+	"babel": "Käyttäjän kielitaito",
+	"babel-desc": "Lisää <code>#babel</code>-funktion, jotta käyttäjän kielitaidosta kertova babel-käyttäjälaatikkosarake voidaan luoda automaattisesti ja sisällyttää räätälöityihin mallineisiin.",
+	"babel-url": "Project:Kielitaito",
+	"babel-footer-url": ":Category:Babel - Käyttäjät kielittäin",
+	"babel-autocreate-reason": "[[$1|Kielitaidon]] luokkasivun automaattinen luonti.",
+	"babel-autocreate-text-levels": "Käyttäjät tässä luokassa ovat ilmoittaneet osaavansa kieltä $2 tasolla $1.",
+	"babel-autocreate-text-main": "Käyttäjät tässä luokassa ovat ilmoittaneet ymmärtävänsä kieltä $1.",
+	"babel-0": "Tämä käyttäjä osaa [[$1|hyvin vähän tai ei lainkaan]] kieltä [[$2|$3]].",
+	"babel-1": "Tällä käyttäjällä on kielen [[$2|$3]] [[$1|perustaidot]]",
+	"babel-2": "Tämä käyttäjä osaa kieltä [[$2|$3]] [[$1|kohtalaisesti]].",
+	"babel-3": "Tämä käyttäjä osaa kieltä [[$2|$3]] [[$1|erinomaisesti]].",
+	"babel-4": "Tämä käyttäjä osaa kieltä [[$2|$3]] [[$1|lähes äidinkielen tavoin]].",
+	"babel-5": "Tämä käyttäjä osaa käyttää kieltä [[$2|$3]] [[$1|ammattimaisesti]].",
+	"babel-N": "Tämä käyttäjä puhuu kieltä [[$2|$3]] [[$1|äidinkielenään]].",
+	"babel-0-n": "Tämä käyttäjä osaa [[$1|hyvin vähän tai ei lainkaan]] [[$2|suomea]].",
+	"babel-1-n": "Tämä käyttäjä puhuu [[$2|suomea]] [[$1|vähän]].",
+	"babel-2-n": "Tämä käyttäjä osaa [[$2|suomea]] [[$1|kohtalaisesti]].",
+	"babel-3-n": "Tämä käyttäjä osaa [[$2|suomea]] [[$1|erinomaisesti]].",
+	"babel-4-n": "Tämä käyttäjä osaa [[$2|suomea]] [[$1|melkein äidinkielen tavoin]].",
+	"babel-5-n": "Tämä käyttäjä käyttää [[$2|suomea]] [[$1|ammattimaisesti]].",
+	"babel-N-n": "Tämä käyttäjä puhuu [[$2|suomea]] [[$1|äidinkielenään]].",
+	"babel-footer": "Käyttäjät kielittäin"
+}

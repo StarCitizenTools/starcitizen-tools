@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bennylin",
+			"Rex"
+		]
+	},
+	"cleanchanges-changerightslink": "ubah kelompok",
+	"cleanchanges-desc": "Tampilan lebih padat dari [[Special:RecentChanges|daftar perubahan terbaru]]",
+	"cleanchanges-language": "Bahasa:",
+	"cleanchanges-language-na": "Semua",
+	"cleanchanges-users": "Pengguna (Pemisah: |):",
+	"cleanchanges-showuserlinks": "Tunjukkan pranala pengguna"
+}

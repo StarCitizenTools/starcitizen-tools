@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Irwangatot",
+			"Kandar"
+		]
+	},
+	"checkuser-desc": "Leler kawenangan pikeun mariksa alamat IP jeung émbaran lianna ti hiji pamaké",
+	"checkuser-logcase": "Panyungsi log ngabédakeun kapitalisasi.",
+	"checkuser": "Pamaké pamariksa",
+	"checkuserlog": "Log PamakéPamariksa",
+	"group-checkuser": "Pamaké pamariksa",
+	"group-checkuser-member": "{{GENDER:$1|pamariksa}}",
+	"grouppage-checkuser": "{{ns:project}}:Pamaké pamariksa",
+	"checkuser-reason": "Alesan:",
+	"checkuser-showlog": "Témbongkeun log",
+	"checkuser-target": "Sandiasma atawa alamat IP:",
+	"checkuser-users": "Sungsi pamaké",
+	"checkuser-edits": "Sungsi éditan",
+	"checkuser-ips": "Sungsi IP",
+	"checkuser-search": "Sungsi",
+	"checkuser-empty": "Logna kosong.",
+	"checkuser-nomatch": "Euweuh nu cocog.",
+	"checkuser-check": "Pariksa",
+	"checkuser-log-fail": "Teu bisa nambahkeun kana log",
+	"checkuser-nolog": "Koropak log teu kapanggih.",
+	"checkuser-blocked": "Dipeungpeuk",
+	"checkuser-too-many": "Hasilna loba teuing, heureutan CIDR-na.\nDi handap ieu béréndélan IP nu dipaké (paling loba 5000, disusun dumasar alamat):",
+	"checkuser-user-nonexistent": "Euweuh pamaké nu cocog jeung pamundut.",
+	"checkuser-search-form": "Téang éntri log nu $1-na sarua jeung $2",
+	"checkuser-search-submit": "Sungsi",
+	"checkuser-search-initiator": "inisiator",
+	"checkuser-search-target": "tujul",
+	"checkuser-ipeditcount": "~$1 ti sakumna pamaké",
+	"checkuser-log-return": "Balik ka formulir utama PamakéPamariksa"
+}

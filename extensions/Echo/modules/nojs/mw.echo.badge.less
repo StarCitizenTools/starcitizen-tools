@@ -1,0 +1,58 @@
+@import '../echo.variables';
+
+/* We have to include the #pt-notifications selector due to monobook */
+.mw-echo-notifications-badge {
+	#pt-notifications-alert &,
+	#pt-notifications-message & {
+		font-weight: bold;
+		cursor: pointer;
+		text-decoration: none;
+		margin-top: -0.2em;
+		display: inline-block;
+
+		padding: @badge-padding (@badge-padding + 0.25em) @badge-padding (@badge-padding + 0.25em + 1.1em);
+		// Override height, width, min-height and min-width from OOUI IconElement
+		height: 1.05em;
+		min-height: 1.05em;
+		width: auto;
+		min-width: 0;
+
+		body.ltr & {
+			background-position: @badge-padding 0.1em;
+		}
+		body.rtl & {
+			// CSS sucks, we can't specify background-position-x from the right
+			// You can in Firefox with background-position-x: right 0.12em;
+			// but that's not supported in any other browsers
+			background-position: ~"calc(100% - @{badge-padding}) 0.1em";
+		}
+		background-size: @badge-icon-size;
+		background-repeat: no-repeat;
+
+		&:hover,
+		&:active,
+		&:focus {
+			outline: none;
+			-moz-outline-style: none;
+		}
+
+		&-dimmed {
+			opacity: 0.4;
+		}
+	}
+
+	#pt-notifications-message & {
+		margin-left: @badge-distance-adjustment;
+
+		body.ltr & + .oo-ui-popupWidget {
+			// Only add a left adjustment for LTR pages.
+			// In LTR, the correction above moves the badge from the left
+			// which means we have to adjust the positioning of the anchor
+			// to be in the middle of the badge.
+			// In RTL, however, the above will be flipped to margin-right
+			// which doesn't affect the positioning of the anchor and hence
+			// doesn't require a correction.
+			left: (1em + @badge-distance-adjustment);
+		}
+	}
+}

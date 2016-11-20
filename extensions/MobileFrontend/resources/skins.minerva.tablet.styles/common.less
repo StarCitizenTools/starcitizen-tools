@@ -1,0 +1,188 @@
+/*
+A file for css that optimises the Minerva skin on larger devices.
+*/
+
+@import "minerva.variables";
+@import "minerva.mixins";
+@paddingVertical: 1.4em;
+
+@media all and (min-width: @deviceWidthTablet) {
+	.toc-mobile {
+		// Reset the rule for mobile mode (but not for .client-nojs)
+		display: block;
+		visibility: visible;
+		position: relative;
+		font-size: 1.3em;
+		float: left;
+		clear: left;
+		margin: 1em 0;
+		border: solid 1px transparent;
+
+		> h2 {
+			visibility: hidden;
+			font-family: @fontFamily;
+			font-size: @tocFontSize;
+			font-weight: bold;
+			border-bottom: none;
+			padding: @paddingVertical / 2 0;
+		}
+	}
+
+	.content_block {
+		width: auto;
+		clear: none;
+	}
+
+	.heading-holder {
+		padding: 20px 0;
+	}
+
+	.heading-holder {
+		position: relative;
+
+		#section_0 {
+			border-bottom: none;
+			padding: 0 0 7px 0;
+			font-size: 2.6525em; // 42px
+		}
+	}
+
+	#page-actions {
+		padding: 18px 0 0 0;
+
+		li {
+			display: inline-block;
+		}
+
+		li:first-child {
+			margin-top: 0;
+		}
+	}
+
+	// FIXME: Have a class that identifies all of these selectors
+	.pre-content,
+	.content,
+	.content-overlay,
+	.post-content {
+		max-width: @contentMaxWidthTablet;
+		margin: 0 @contentPaddingTablet;
+	}
+
+	.content {
+		// Classes added by thumbnails
+		// e.g. [[File:Scholars mate animation.gif|frame|left|"[[Scholar's mate]]"]]
+		// We use @noflip because we still want .tleft to be on the left and
+		// .tright to be on the right in RTL languages.
+		.thumb {
+			&.tleft {
+				/* @noflip */
+				float: left;
+				/* @noflip */
+				clear: left;
+				/* @noflip */
+				margin-right: 1.4em;
+			}
+
+			&.tright {
+				/* @noflip */
+				float: right;
+				/* @noflip */
+				clear: right;
+				/* @noflip */
+				margin-left: 1.4em;
+			}
+		}
+
+		// Blockquotes
+		blockquote {
+			// Increase horizontal padding
+			padding-right: @blockquotePaddingRight + 10px;
+			padding-left: @blockquotePaddingLeft + 10px;
+		}
+
+		// Override rules in common.less
+		table {
+			display: table;
+			width: auto !important;
+			caption {
+				display: table-caption;
+			}
+			tbody {
+				display: table-row-group;
+			}
+		}
+	}
+
+	#footer {
+		padding: 2em @contentPaddingTablet 1.5em @contentPaddingTablet;
+	}
+
+	#mw-mf-last-modified {
+		padding: 5px 0;
+	}
+
+	.last-modified-bar {
+		background-color: transparent;
+		padding-left: 0;
+		padding-right: 0;
+		font-size: 1em;
+		&.active {
+			background-color: transparent;
+			#mw-mf-last-modified {
+				background-color: @lastModifiedBarActiveBackgroundColor;
+			}
+		}
+
+		// This rule must be scoped to .last-modified-bar to prevent side effects on the MainPage bar
+		#mw-mf-last-modified {
+			background-color: @colorGray14;
+			font-size: 0.9em;
+			padding-left: 16px;
+			padding-right: 16px;
+		}
+	}
+}
+
+@media all and (min-width: @wgMFDeviceWidthDesktop) {
+	// FIXME: Zero should use banner-container class or better - append to banner-container
+	#mw-mf-page-center .mw-mf-banner,
+	.banner-container,
+	// FIXME: Generic header class needed me-thinks!
+	.header,
+	.page-header-bar,
+	.content-header,
+	.overlay-header,
+	// FIXME: Generic content class needed?
+	.content,
+	.overlay-content,
+	.content-unstyled,
+	.pre-content,
+	.post-content,
+	.content-overlay,
+	// FIXME: remove need for id selector
+	#mw-mf-page-center .pointer-overlay {
+		margin-left: auto;
+		margin-right: auto;
+		max-width: @contentMaxWidthTablet;
+	}
+
+	.header {
+		margin-top: -1px;
+	}
+
+	.main-menu-button, {
+		// so that the icon image is aligned with the content
+		left: -@iconGutterWidth;
+	}
+
+	#secondary-button {
+		// so that the icon image is aligned with the content
+		right: -@iconGutterWidth;
+	}
+
+	// Search input in the header
+	#searchInput {
+		// because we're pulling .main-menu-button to the left too (see above)
+		margin-left: -@iconGutterWidth;
+	}
+}

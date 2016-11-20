@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eduardo.mps",
+			"Waldir"
+		]
+	},
+	"cldr-desc": "Extensão que provê nomes de línguas localizados, com base em [http://cldr.unicode.org/index/downloads dados do CLDR]"
+}

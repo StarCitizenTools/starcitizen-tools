@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rbix"
+		]
+	},
+	"msu-desc": "Enables easy uploads for one file or multiple files simultaneously",
+	"msu-ext-not-allowed": "Only the following file {{PLURAL:$1|type is|types are}} allowed:"
+}

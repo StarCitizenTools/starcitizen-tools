@@ -1,0 +1,74 @@
+@import 'mediawiki.mixins';
+@import 'mediawiki.ui/variables';
+@import 'flow.colors';
+
+.flow-editor {
+	background-color: white;
+
+	// because we're attaching switcher controls below the textarea & we
+	// want them to look unified with the textarea, we'll have to take away
+	// it's border and re-apply on the parent node that contains both
+	&.flow-editor-none {
+		border: 1px solid @colorFieldBorder;
+		padding: 2px;
+
+		// Undo border & box-shadow on textarea and re-apply it on the
+		// div that contains textarea + legal text + switch button
+		&.flow-ui-focused {
+			border-color: @colorProgressive;
+			box-shadow: inset 0 0 0 2px @colorProgressive;
+		}
+		.oo-ui-textInputWidget textarea {
+			border: 0;
+			background: transparent;
+			min-height: 8em;
+
+			&:focus {
+				box-shadow: none;
+			}
+
+			// Comma-separating this rule doesn't work :(
+			// Placeholder text styling must be set individually for each browser @winter
+			&::-webkit-input-placeholder { // webkit
+				font-style: italic;
+			}
+			&::-moz-placeholder { // FF 4-18
+				font-style: italic;
+			}
+			&:-moz-placeholder { // FF >= 19
+				font-style: italic;
+			}
+			&:-ms-input-placeholder { // IE >= 10
+				font-style: italic;
+			}
+		}
+		.flow-switcher-controls {
+			padding: 4px 6px 6px 6px;
+			position: relative;
+		}
+
+		// TextInputWidget is limited to a 50em max-width - don't want that!
+		.oo-ui-textInputWidget {
+			max-width: none;
+		}
+	}
+
+	// would prefer textarea:not(.flow-input-compressed) above, but ie8 wont do it
+	// so here we re-apply the border from .mw-ui-input that was removed above.
+	textarea.flow-input-compressed {
+		border-bottom: 1px solid @colorFieldBorder;
+	}
+
+	// @todo this is basically the terms of use, come up with a shared
+	// name for all but the float
+	.flow-wikitext-editor-help {
+		color: @colorTextLight;
+		font-size: .75em;
+		position: absolute;
+		bottom: 0;
+	}
+
+	a.flow-editor-switcher {
+		float: right;
+	}
+}

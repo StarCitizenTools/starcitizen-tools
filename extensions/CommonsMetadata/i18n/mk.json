@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06",
+			"Shirayuki"
+		]
+	},
+	"commonsmetadata-desc": "Го проширува својството за информирање „extmetadata“ во API-модул со информации што стојат на описните страници на сликите кои користат шаблони застапени на Ризницата",
+	"commonsmetadata-trackingcategory-no-license": "Податотеки без машински читлива лиценца",
+	"commonsmetadata-trackingcategory-no-license-desc": "Податотекава нема [{{MediaWiki:Commonsmetadata-doc-url}} машински читлив] лиценцен шаблон.",
+	"commonsmetadata-trackingcategory-no-description": "Податотеки без машински читлив опис",
+	"commonsmetadata-trackingcategory-no-description-desc": "Податотекава нема [{{MediaWiki:Commonsmetadata-doc-url}} машински читлив] информативен шаблон, или пак не му е пополнето полето за опис.",
+	"commonsmetadata-trackingcategory-no-author": "Податотеки без машински читлив автор",
+	"commonsmetadata-trackingcategory-no-author-desc": "Податотекава нема [{{MediaWiki:Commonsmetadata-doc-url}} машински читлив] информативен шаблон, или пак не му е пополнето полето за автор.",
+	"commonsmetadata-trackingcategory-no-source": "Податотеки без машински читлив извор",
+	"commonsmetadata-trackingcategory-no-source-desc": "Податотекава нема [{{MediaWiki:Commonsmetadata-doc-url}} машински читлив] информативен шаблон, или пак не му е пополнето полето за извор."
+}

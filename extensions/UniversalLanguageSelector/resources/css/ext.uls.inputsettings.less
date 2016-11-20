@@ -1,0 +1,137 @@
+@import 'mediawiki.mixins';
+
+.input-settings-block {
+	background: transparent no-repeat left top;
+	.background-image-svg( '../images/input.svg', '../images/input.png' );
+	background-size: 20px auto;
+	color: #252525;
+	padding-left: 26px;
+	cursor: pointer;
+}
+
+.imelabel {
+	display: block;
+	padding-bottom: 10px;
+	font-size: 10pt;
+	line-height: 16pt;
+}
+
+.imelabel span {
+	padding-left: 5px;
+}
+
+.imelabel input {
+	float: left;
+}
+
+.uls-ime-menu-settings-item {
+	background-color: #f0f0f0;
+	border-radius: 0 0 5px 5px;
+	border-top: 1px solid #ddd;
+	margin-top: 6px;
+	padding: 4px 2px;
+	color: #444;
+	position: relative;
+}
+
+.uls-ime-disable-link {
+	background: transparent no-repeat left top;
+	.background-image-svg( '../images/remove-input.svg', '../images/remove-input.png' );
+	background-size: auto 16px;
+	padding-left: 22px;
+	padding-right: 26px;
+	padding-bottom: 10px;
+	cursor: pointer;
+}
+
+.uls-ime-more-settings-link {
+	background: transparent no-repeat center top;
+	.background-image-svg( '../images/cog.svg', '../images/cog.png' );
+	background-size: auto 14px;
+	border-left: 1px solid #ccc;
+	width: 22px;
+	height: 14px;
+	position: absolute;
+	right: 0;
+	cursor: pointer;
+}
+
+.uls-ime-menu-settings-item > a:hover {
+	background-color: #f0f0f0;
+	color: #000;
+}
+
+.ext-uls-input-settings-imes-title:empty {
+	display: none;
+}
+
+.uls-input-settings-disable-info,
+.uls-input-settings-no-inputmethods {
+	color: #565656;
+	padding-top: 10px;
+	padding-bottom: 15px;
+	font-size: 11pt;
+}
+
+.down + .uls-input-settings-caret {
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-top: 0;
+	border-right: 8px solid transparent;
+	border-left: 8px solid transparent;
+	border-bottom: 8px solid #f0f0f0;
+	content: '';
+	position: relative;
+	vertical-align: bottom;
+	top: 12px;
+	left: -16%;
+	margin: 0 -8px;
+}
+
+.uls-input-settings-toggle {
+	padding-top: 10px;
+	margin-bottom: 10px;
+}
+
+.uls-input-settings .uls-input-settings-inputmethods-list {
+	margin: 12px 0;
+	padding: 6px 10px;
+	background: #f0f0f0;
+}
+
+.uls-input-settings-inputmethods-list .mw-ui-radio {
+	display: block;
+}
+
+.uls-ime-notification-bubble .link {
+	color: #0645ad;
+	cursor: pointer;
+}
+
+.uls-input-settings .uls-ime-help {
+	margin-left: 10px;
+}
+
+/* Ime menu customizations */
+.ime-perime-help {
+	display: none;
+}
+
+.ime-checked .ime-perime-help {
+	display: inline-block;
+	width: 20px;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	opacity: 0.75;
+	padding: 0;
+	background: transparent no-repeat left center;
+	.background-image-svg( '../images/help.svg', '../images/help.png' );
+}
+
+.ime-checked .ime-perime-help:hover {
+	opacity: 1;
+}

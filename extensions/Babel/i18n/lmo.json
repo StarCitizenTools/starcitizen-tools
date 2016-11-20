@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dakrismeno",
+			"Gloria sah",
+			"Sprüngli"
+		]
+	},
+	"babel": "Infurmazion Babel del druvat",
+	"babel-desc": "Gionta la 'parser function' <code>#babel</code> per permet la generazion utumatega d'un quader \"druvat Babel\" cun la pussibilità da metegh denter 'l templat persunalizaa",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Catégorja:Babel - Druvat per lingua",
+	"babel-autocreate-reason": "Creazion utumatega de la pagina de la categurìa [[$1|Babel]].",
+	"babel-autocreate-text-levels": "I druvat in quela categuria chì i mustren d'avegh un nivel de cunuscenza $1 de la lengua $2.",
+	"babel-autocreate-text-main": "I druvat in quela categuria chì i mustren ch'i cugnussen la lengua $1.",
+	"babel-0": "Quel dupradur chì 'l gh'ha [[$1|mía]] de cunuscenza de [[$2|$3]] (o 'l le cumprend cun di gran dificultaa)",
+	"babel-1": "Quel druvat chì 'l gh'ha una cunuscenza [[$1|basilara]] de [[$2|$3]].",
+	"babel-2": "Quel druvat chì 'l gh'ha una cunuscenza [[$1|intermedia]] de [[$2|$3]].",
+	"babel-3": "Quel druvat chì 'l gh'ha una cunuscenza [[$1|avanzada]] de [[$2|$3]].",
+	"babel-4": "Quel druvat chì 'l gh'ha una cunuscenza [[$1|asquas madrelengua]] de [[$2|$3]].",
+	"babel-5": "Chestu dovratt al gh'a una cognossenza [[$1|professionala]] de [[$2|$3]].",
+	"babel-N": "Quel druvat chì l'è un parlant [[$1|madrelengua]] de [[$2|$3]].",
+	"babel-0-n": "Quel dupradur chì 'l cugnuss [[$1|mía]] 'l [[$2|Lumbard]] (o 'l le cumprend cun di gran dificultaa).",
+	"babel-1-n": "Quel druvat chì 'l gh'ha una cunuscenza [[$1|basilar]] del [[$2|Lumbard]].",
+	"babel-2-n": "Quel druvat chì 'l gh'ha una cunuscenza [[$1|intermedia]] del [[$2|Lumbard]].",
+	"babel-3-n": "Quel druvat chì 'l gh'ha una cunuscenza [[$1|avanzada]] del [[$2|Lumbard]].",
+	"babel-4-n": "Quel druvat chì 'l gh'ha una cunuscenza [[$1|asquas maderlengua]] del [[$2|Lumbard]]",
+	"babel-5-n": "Quel druvat chì 'l gh'ha una cunuscenza [[$1|prufessiunal]] del [[$2|Lumbard]].",
+	"babel-N-n": "Quel druvat chì l'è de [[$1|maderlengua]] [[$2|Lumbarda]].",
+	"babel-footer": "Druvat per lingua"
+}

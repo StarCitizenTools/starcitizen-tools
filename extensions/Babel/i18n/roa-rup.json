@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel-0": "Ufilizitorlu aestu nu zburashce [[$2|$3]].",
+	"babel-1": "Aistu ufilizator poate s-da contributsie cu un nivel [[$1|di baza]] di [[$2|$3]].",
+	"babel-N": "Utilizatorlu-aistu u-zburashce [[$2|$3]] ca  [[$1|limba di dadã]].",
+	"babel-0-n": "Ufilizitorlu aestu nu zburashce [[$2|armãneashce]].",
+	"babel-1-n": "Aistu ufilizator poate s-da contributsie cu un nivel [[$1|di baza]] di [[$2|armãneashce]].",
+	"babel-N-n": "Utilizatorlu-aistu u-zburashce [[$2|limba armãneascã]] ca  [[$1|limba di dadã]]."
+}

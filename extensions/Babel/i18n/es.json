@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bengoa",
+			"Crazymadlover",
+			"Fitoschido",
+			"Fluence",
+			"GerardM",
+			"Sanbec",
+			"Vivaelcelta",
+			"Macofe"
+		]
+	},
+	"babel": "Información de idiomas {{GENDER:$1|del usuario|de la usuaria}}",
+	"babel-desc": "Añade la función del analizador <code>#babel</code> para permitir la generación automática de una caja de usuario (userbox) «babel» con la posibilidad de incluir plantillas personalizadas",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Usuarios por idioma",
+	"babel-autocreate-reason": "Creando automáticamente la página de categoría [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Los usuarios de esta categoría indican que tienen un nivel de dominio $1 del idioma $2.",
+	"babel-autocreate-text-main": "Los usuarios en esta categoría indican su conocimiento del idioma $1.",
+	"babel-0": "{{GENDER:$4|Este usuario|Esta usuaria}} [[$1|no]] tiene ningún conocimiento del [[$2|$3]] (o lo entiende con mucha dificultad).",
+	"babel-1": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene un conocimiento [[$1|básico]] del [[$2|$3]].",
+	"babel-2": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene un conocimiento [[$1|intermedio]] del [[$2|$3]].",
+	"babel-3": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene un conocimiento [[$1|avanzado]] del [[$2|$3]].",
+	"babel-4": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene un conocimiento [[$1|casi nativo]] del [[$2|$3]].",
+	"babel-5": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene un conocimiento [[$1|profesional]] del [[$2|$3]]",
+	"babel-N": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene una comprensión [[$1|nativa]] del [[$2|$3]].",
+	"babel-0-n": "{{GENDER:$4|Este usuario|Esta usuaria}} [[$1|no]] tiene ningún conocimiento del [[$2|español]] (o lo entiende con mucha dificultad).",
+	"babel-1-n": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene un conocimiento [[$1|básico]] del [[$2|español]].",
+	"babel-2-n": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene un conocimiento [[$1|intermedio]] del [[$2|español]].",
+	"babel-3-n": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene un conocimiento [[$1|avanzado]] del [[$2|español]].",
+	"babel-4-n": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene un conocimiento [[$1|casi nativo]] del [[$2|español]].",
+	"babel-5-n": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene un conocimiento [[$1|profesional]] del [[$2|español]].",
+	"babel-N-n": "{{GENDER:$4|Este usuario|Esta usuaria}} tiene una comprensión [[$1|nativa]] del [[$2|español]].",
+	"babel-footer": "Usuarios por idioma"
+}

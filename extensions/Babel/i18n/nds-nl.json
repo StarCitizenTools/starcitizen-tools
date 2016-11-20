@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Servien"
+		]
+	},
+	"babel": "Babel-gebrukersinformasie",
+	"babel-desc": "Voegt de <code>#babel</code>-ontlejerfunksie toe um de automatiese anmaak van de babelgebrukerskolom meugelik te maken mit de meugelikheid um spesiale mallen in te voegen.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Gebrukers naor taal",
+	"babel-autocreate-reason": "Automaties an-emaakten [[$1|Babel]]-kategorie.",
+	"babel-autocreate-text-levels": "De gebrukers in disse kategorie geven an dat hulen nivo van t $2 $1 is.",
+	"babel-autocreate-text-main": "De gebrukers in disse kategorie geven an dat ze kennis hebben van t $1.",
+	"babel-0": "Disse gebruker hef [[$1|gien]] kennis van t [[$2|$3]] (of berip t mit grote meuite).",
+	"babel-1": "Disse gebruker hef op [[$1|baosisnivo]] kennis van t [[$2|$3]].",
+	"babel-2": "Disse gebruker hef n [[$1|gemiddelde]] kennis van t [[$2|$3]].",
+	"babel-3": "Disse gebruker hef n [[$1|goeie kennis]] van t [[$2|$3]].",
+	"babel-4": "Disse gebruker praot [[$2|$3]] [[$1|as of t zien moerstaal is]].",
+	"babel-5": "Disse gebruker hef n [[$1|professionele]] kennis van t [[$2|$3]].",
+	"babel-N": "Disse gebruker hef t [[$2|$3]] as zien [[$1|moerstaal]].",
+	"babel-0-n": "Disse gebruker hef [[$1|gien]] kennis van t [[$2|Nedersaksies]] (of begrip t mit grote meuite).",
+	"babel-1-n": "Disse gebruker hef op [[$1|baosisnivo]] kennis van t [[$2|Nedersaksies]].",
+	"babel-2-n": "Disse gebruker hef n [[$1|gemiddelde]] kennis van t [[$2|Nedersaksies]].",
+	"babel-3-n": "Disse gebruker hef n [[$1|goeie kennis]] van t [[$2|Nedersaksies]].",
+	"babel-4-n": "Disse gebruker praot [[$2|Nedersaksies]] [[$1|as of t zien moerstaal is]].",
+	"babel-5-n": "Disse gebruker hef n [[$1|professionele]] kennis van t [[$2|Nedersaksies]].",
+	"babel-N-n": "Disse gebruker hef t [[$2|Nedersaksies]] as zien [[$1|moerstaal]].",
+	"babel-template": "Template:Gebruker $1",
+	"babel-footer": "Gebrukers per taal"
+}

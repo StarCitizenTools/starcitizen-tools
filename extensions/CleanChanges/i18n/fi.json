@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nike",
+			"Vililikku"
+		]
+	},
+	"cleanchanges-changerightslink": "muokkaa ryhmiä",
+	"cleanchanges-desc": "Tiivistetymmät [[Special:RecentChanges|muutoslistaukset]].",
+	"cleanchanges-language": "Kieli:",
+	"cleanchanges-language-na": "Kaikki",
+	"cleanchanges-users": "Käyttäjät (erotin: |)",
+	"cleanchanges-showuserlinks": "Näytä käyttäjälinkit"
+}

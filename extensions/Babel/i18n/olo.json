@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mashoi7",
+			"Denö"
+		]
+	},
+	"babel": "Käyttäjän kielinero",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Käyttäjät kielilöin mugah",
+	"babel-autocreate-reason": "[[$1|Kielineron]] kategouriisivun automuattine luajindu.",
+	"babel-autocreate-text-levels": "Käyttäjät täs kategouries ollah jiävitty, ku maltetah kieldy $2 tazol $1.",
+	"babel-autocreate-text-main": "Käyttäjät täs kategouries ollah jiävitty, ku ellendetäh kieldy $1.",
+	"babel-0": "Tämä käyttäi maltau [[$1|ylen vähä libo nivouze]] kieldy [[$2|$3]].",
+	"babel-1": "Täl käyttäjäl on kielen [[$2|$3]] [[$1|perustiijot]]",
+	"babel-2": "Tämä käyttäi maltau kieldy [[$2|$3]] [[$1|keskimiäräzesti]].",
+	"babel-3": "Tämä käyttäi maltau kieldy [[$2|$3]] [[$1|ylen hyvin]].",
+	"babel-4": "Tämä käyttäi maltau kieldy [[$2|$3]] [[$1|läs muamankielen jytyi]].",
+	"babel-5": "Tämä käyttäi maltau kieldy [[$2|$3]] [[$1|ammattimaizesti]].",
+	"babel-N": "Tämä käyttäi pagizou kieldy [[$2|$3]] [[$1|muamankielenny]].",
+	"babel-0-n": "Tämä käyttäi maltau [[$1|ylen vähä libo nivouze]] [[$2|karjalakse]].",
+	"babel-1-n": "Tämä käyttäi pagizou [[$2|karjalakse]] [[$1|vähä]].",
+	"babel-2-n": "Tämä käyttäi maltau [[$2|karjalua]] [[$1|keskimiäräzesti]].",
+	"babel-3-n": "Tämä käyttäi maltau [[$2|karjalakse]] [[$1|ylen hyvin]].",
+	"babel-4-n": "Tämä käyttäi maltau [[$2|karjalakse]] [[$1|läs muamankielen jytyi]].",
+	"babel-5-n": "Tämä käyttäi käyttäy [[$2|karjalua]] [[$1|ammattimaizesti]].",
+	"babel-N-n": "Tämä käyttäi pagizou [[$2|karjalakse]] [[$1|muamankielenny]].",
+	"babel-footer": "Käyttäjät kielen mugah"
+}

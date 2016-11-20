@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Emperyan"
+		]
+	},
+	"babel-1": "Bu kullanıcı var nicä [[$1|saadä düzeydä]] lafetsin [[$2|$3]].",
+	"babel-2": "Bu kullanıcı var nicä [[$1|orta düzeydä]] lafetsin [[$2|$3]].",
+	"babel-3": "Bu kullanıcı var nicä [[$1|islää düzeydä]] lafetsin [[$2|$3]].",
+	"babel-4": "Bu kullanıcı var nicä [[$1|sansın ana dili]] lafetsin [[$2|$3]].",
+	"babel-N": "Bu kullanıcının [[$1|ana dili]] [[$2|$3]]."
+}

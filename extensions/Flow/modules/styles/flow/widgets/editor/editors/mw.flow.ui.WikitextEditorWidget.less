@@ -1,0 +1,52 @@
+@import 'flow.colors';
+@import 'flow.variables';
+
+.flow-ui-wikitextEditorWidget {
+	position: relative;
+
+	.oo-ui-textInputWidget {
+		max-width: none;
+		padding-bottom: @editorToolbarHeight;
+
+		// Work around Chrome bug adding 5px below the textarea
+		line-height: 0;
+
+		textarea {
+			min-height: @editorMinHeight;
+			-webkit-appearance: none;
+			background: transparent;
+
+			&, &:focus {
+				border: none;
+				box-shadow: none;
+			}
+
+			// Comma-separating this rule doesn't work :(
+			// Placeholder text styling must be set individually for each browser
+			&::-webkit-input-placeholder { // webkit
+				font-style: italic;
+			}
+			&::-moz-placeholder { // FF 4-18
+				font-style: italic;
+			}
+			&:-moz-placeholder { // FF >= 19
+				font-style: italic;
+			}
+			&:-ms-input-placeholder { // IE >= 10
+				font-style: italic;
+			}
+		}
+	}
+
+	&-label {
+		color: @colorTextLight;
+		font-size: 0.75em;
+		padding: 4px 6px 6px 6px;
+		position: absolute;
+		bottom: 0;
+	}
+
+	> .oo-ui-toolbar {
+		float: right;
+	}
+}

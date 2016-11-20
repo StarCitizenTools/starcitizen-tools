@@ -1,0 +1,110 @@
+{
+	"name": "CheckUser",
+	"version": "2.4",
+	"author": [
+		"Tim Starling",
+		"Aaron Schulz"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:CheckUser",
+	"descriptionmsg": "checkuser-desc",
+	"license-name": "GPL-2.0+",
+	"type": "specialpage",
+	"requires": {
+		"MediaWiki": ">= 1.27.0"
+	},
+	"ExtensionMessagesFiles": {
+		"CheckUserAliases": "CheckUser.alias.php"
+	},
+	"config": {
+		"@doc": "see CheckUser.php",
+		"CheckUserCIDRLimit": {
+			"IPv4": 16,
+			"IPv6": 32
+		},
+		"CheckUserMaxBlocks": 200,
+		"CheckUserLog": "/home/wikipedia/logs/checkuser.log",
+		"CUPublicKey": "",
+		"CUDMaxAge": 7776000,
+		"CheckUserForceSummary": false
+	},
+	"APIListModules": {
+		"checkuser": "ApiQueryCheckUser",
+		"checkuserlog": "ApiQueryCheckUserLog"
+	},
+	"Hooks": {
+		"RecentChange_save": [
+			"CheckUserHooks::updateCheckUserData"
+		],
+		"EmailUser": [
+			"CheckUserHooks::updateCUEmailData"
+		],
+		"User::mailPasswordInternal": [
+			"CheckUserHooks::updateCUPasswordResetData"
+		],
+		"LocalUserCreated": [
+			"CheckUserHooks::onLocalUserCreated"
+		],
+		"UserMergeAccountFields": [
+			"CheckUserHooks::onUserMergeAccountFields"
+		],
+		"RenameUserSQL": [
+			"CheckUserHooks::onRenameUserSQL"
+		],
+		"ArticleEditUpdatesDeleteFromRecentchanges": [
+			"CheckUserHooks::maybePruneIPData"
+		],
+		"ParserTestTables": [
+			"CheckUserHooks::checkUserParserTestTables"
+		],
+		"LoadExtensionSchemaUpdates": [
+			"CheckUserHooks::checkUserSchemaUpdates"
+		],
+		"ContributionsToolLinks": [
+			"CheckUserHooks::checkUserContributionsLinks"
+		],
+		"PerformRetroactiveAutoblock": [
+			"CheckUserHooks::doRetroactiveAutoblock"
+		]
+	},
+	"MessagesDirs": {
+		"CheckUser": [
+			"i18n"
+		]
+	},
+	"ResourceModules": {
+		"ext.checkUser": {
+			"scripts": "modules/ext.checkuser.cidr.js",
+			"dependencies": [
+				"mediawiki.util"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "CheckUser"
+	},
+	"GroupPermissions": {
+		"checkuser": {
+			"checkuser": true,
+			"checkuser-log": true
+		}
+	},
+	"AvailableRights": [
+		"checkuser",
+		"checkuser-log"
+	],
+	"SpecialPages": {
+		"CheckUser": "CheckUser",
+		"CheckUserLog": "SpecialCheckUserLog"
+	},
+	"AutoloadClasses": {
+		"CheckUser": "specials/SpecialCheckUser.php",
+		"CheckUserHooks": "CheckUser.hooks.php",
+		"CheckUserLogPager": "CheckUserLogPager.php",
+		"SpecialCheckUserLog": "specials/SpecialCheckUserLog.php",
+		"CheckUserEncryptedData": "CheckUserEncryptedData.php",
+		"ApiQueryCheckUser": "api/ApiQueryCheckUser.php",
+		"ApiQueryCheckUserLog": "api/ApiQueryCheckUserLog.php"
+	},
+	"manifest_version": 1
+}

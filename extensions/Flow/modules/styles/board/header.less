@@ -1,0 +1,79 @@
+@import 'mediawiki.mixins';
+@import 'flow.colors';
+@import 'flow.helpers';
+@import 'flow.variables';
+
+.flow-board-header {
+	word-break: break-word;
+	width: 100%;
+	max-width: 700px;
+	padding-top: 10px;
+	padding-right: 15px;
+	padding-left: 5px;
+	position: relative;
+	z-index: 3;
+}
+
+// Top board header
+.flow-board-header-nav {
+	margin-bottom: 10px;
+	.mw-ui-button {
+		padding: 0;
+	}
+}
+
+// Top board header edit icon
+.flow-board-header-icon {
+	opacity: .33;
+
+	&:hover,
+	&:focus {
+		opacity: 1;
+	}
+}
+
+// need to be specific to override this h2
+div#content h2.flow-board-header-title {
+	margin-right: 10px;
+
+	margin-top: 0;
+	margin-bottom: 10px;
+	border-bottom: none;
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: 1.15em;
+}
+
+.flow-board-header-title {
+	display: none;
+}
+
+// We must include a more specific rule for margin and padding
+// on the catlinks ul item, because there is a mw rule to 'correct'
+// ul that live inside .mw-content-ltr/rtl and defines a specific
+// margin value. We have to make this rule more specific so to
+// override that fix in this case.
+.mw-normal-catlinks ul.flow-board-header-category-list {
+	margin: 0;
+	padding: 0;
+}
+
+.side-rail-toggle-button {
+	visibility: hidden;
+	position: absolute;
+	top: 9px;
+	right: 5px;
+	font-size: 1.3em;
+
+	&.mw-ui-button {
+		padding: 0;
+	}
+
+	.collapse-button {
+		display: none;
+	}
+
+	.expand-button {
+		display: none;
+	}
+}

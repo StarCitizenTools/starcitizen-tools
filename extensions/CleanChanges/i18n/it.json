@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"BrokenArrow",
+			"Darth Kule",
+			"Nemo bis"
+		]
+	},
+	"cleanchanges-changerightslink": "modifica gruppi",
+	"cleanchanges-desc": "Presentazione più compatta della [[Special:RecentChanges|lista delle ultime modifiche]]",
+	"cleanchanges-language": "Lingua:",
+	"cleanchanges-language-na": "Tutte",
+	"cleanchanges-users": "Utenti (Sep: |):",
+	"cleanchanges-showuserlinks": "Mostra collegamenti utente"
+}

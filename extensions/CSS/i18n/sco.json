@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"John Reid"
+		]
+	},
+	"css-desc": "A parser function that permits CSS stylesheets tae be incluided in speceefic pages"
+}

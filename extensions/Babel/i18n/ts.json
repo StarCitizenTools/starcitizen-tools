@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Thuvack"
+		]
+	},
+	"babel": "Vuxokoxoko bya mutirhisi eka Babele",
+	"babel-desc": "Yi engetela <code>#babel</code> xiangarhi lexi pfumelelaka xipfuneti kutumbuluxa xirhapa eka bokisa ramutirhisi ra Babele lexi kotaka ku nghenisa swivumbiwa-ntirho leswi tolovelekeke",
+	"babel-url": "Project:Babele",
+	"babel-footer-url": ":Category:Babele - Vatirhisi kuya hiririmi",
+	"babel-autocreate-reason": "Tluka ra ntlawa [[$1|wa Babel]] ratitumbuluxa.",
+	"babel-autocreate-text-levels": "Vatirhisi eka ntlawa lowu vana vuthsila bya $1 eka ririmi ra xi $2.",
+	"babel-autocreate-text-main": "Vatirhisi eka ntlawa lowu vana vutivi bya ririmi ra xi $1.",
+	"babel-0": "Mutirhisi loyi u [[$1|hava]] vutivi bya ririmi ra xi[[$2|$3]] (Kumbe uritwisisa sitsanana).",
+	"babel-1": "Mutirhisi loyi una vutivi [[$1|byale hansi]]  hi ririmi ra xi [[$2|$3]].",
+	"babel-2": "Mutirhisi loyi una vutivi [[$1|byale xikarhi]]  hi ririmi ra xi [[$2|$3]].",
+	"babel-3": "Mutirhisi loyi una vutivi [[$1|byale henhla]]  hi ririmi ra xi [[$2|$3]].",
+	"babel-4": "Mutirhisi loyi una vutivi [[$1|byo enta]]  hi ririmi ra xi [[$2|$3]].",
+	"babel-5": "Mutirhisi loyi una vutivi [[$1|dyondzeriwa]]  hi ririmi ra xi [[$2|$3]].",
+	"babel-N": "Mutirhisi loyi una vutivi [[$1|byo mama]]  hi ririmi ra xi [[$2|$3]].",
+	"babel-0-n": "Mutirhisi loyi anga [[$1|ri twisisi]] ririmi ra [[$2|Xitsonga]] (kumbe utwisisa switsanana).",
+	"babel-1-n": "Mutirhisi loyi wa [[$1|ri twisisanyana]] ririmi ra [[$2|Xitsonga]].",
+	"babel-2-n": "Mutirhisi loyi wa [[$1|ri twisisa]] ririmi ra [[$2|Xitsonga]].",
+	"babel-3-n": "Mutirhisi loyi wa [[$1|ri twisisa kahle]] ririmi ra [[$2|Xitsonga]].",
+	"babel-4-n": "Mutirhisi loyi wa [[$1|ri twisisa hiku enta]] ririmi ra [[$2|Xitsonga]].",
+	"babel-5-n": "Mutirhisi loyi u lo [[$1|ri dyondzela]] ririmi ra [[$2|Xitsonga]].",
+	"babel-N-n": "Mutirhisi loyi ulo [[$1|ri mama]] ririmi ra [[$2|Xitsonga]].",
+	"babel-footer": "Vatirhisi hikuya hi ririmi"
+}

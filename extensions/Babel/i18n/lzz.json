@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bombola"
+		]
+	},
+	"babel": "Babel Maxmareş çkinape",
+	"babel-desc": "Doxmeli şablonepe na uğun Babel maxmareş kut'işi sut'uni otomatikurot ok'idu şeni <code>#babel</code> derleyici fonk'sioni uk'ataps",
+	"babel-url": "Project:Babeli",
+	"babel-autocreate-reason": "Otomatikurot [[$1|Babil]] k'at'egoriş but'k'a ik'iden.",
+	"babel-autocreate-text-levels": "Am k'at'egoris na renan maxmarepe, $1 seviyes, $2 nena miçkinan yado t'ani mo3'irapan.",
+	"babel-autocreate-text-main": "Am k'at'egoris na renan maxmarepe, $1 nena miçkinan yado t'ani mo3'irapan.",
+	"babel-0": "Am maxmares [[$1|çkar]] [[$2|$3]] va uçkin (varna dido zorite oxo3'onaps).",
+	"babel-1": "Am maxmares [[$1|am3ika]] uçkin [[$2|$3]].",
+	"babel-2": "Am maxmares [[$1|normalurot]] uçkin [[$2|$3]].",
+	"babel-3": "Am maxmares [[$1|k'ai]] uçkin [[$2|$3]].",
+	"babel-4": "Am maxmarek [[$1|nananena-muşi steri]] [[$2|$3]] ğarğalaps.",
+	"babel-5": "Am maxmares [[$1|p'rofesyonelurot]] uçkin [[$2|$3]].",
+	"babel-N": "Am maxmareşi [[$1|nananena]]-muşi [[$2|$3]] ren.",
+	"babel-0-n": "Am maxmares [[$1|çkar]] [[$2|Lazuri]] va uçkin (varna dido zorite oxo3'onaps).",
+	"babel-1-n": "Am maxmares [[$1|am3ika]] [[$2|Lazuri]] uçkin.",
+	"babel-2-n": "Am maxmares [[$1|normalurot]] [[$2|Lazuri]] uçkin.",
+	"babel-3-n": "Am maxmares [[$1|k'ai]] [[$2|Lazuri]] uçkin.",
+	"babel-4-n": "Am maxmarek [[$1|nananena-muşi steri]] [[$2|Lazuri]] ğarğalaps.",
+	"babel-5-n": "Am maxmares [[$1|p'rofesyonelurot]] [[$2|Lazuri]] uçkin.",
+	"babel-N-n": "Am maxmareşi [[$1|nananena]]-muşi [[$2|Lazuri]] ren."
+}

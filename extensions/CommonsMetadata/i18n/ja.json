@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Shirayuki",
+			"Fryed-peach"
+		]
+	},
+	"commonsmetadata-desc": "ウィキメディア・コモンズでよく使用されるテンプレートを使用している画像説明ページ内に格納されている情報を含められるように、画像情報 API モジュールののプロパティ「extmetadata」を拡張する",
+	"commonsmetadata-trackingcategory-no-license": "機械的に読み取れるライセンスがないファイル",
+	"commonsmetadata-trackingcategory-no-license-desc": "このファイルには [{{MediaWiki:Commonsmetadata-doc-url}} 機械可読]なライセンステンプレートがありません。",
+	"commonsmetadata-trackingcategory-no-description": "機械的に読み取れる解説がないファイル",
+	"commonsmetadata-trackingcategory-no-description-desc": "このファイルには[{{MediaWiki:Commonsmetadata-doc-url}} 機械可読]な情報テンプレートがないか、その解説欄が記入されていません。",
+	"commonsmetadata-trackingcategory-no-author": "機械的に読み取れる作者がないファイル",
+	"commonsmetadata-trackingcategory-no-author-desc": "このファイルには[{{MediaWiki:Commonsmetadata-doc-url}} 機械可読]な情報テンプレートがないか、その著者欄が記入されていません。",
+	"commonsmetadata-trackingcategory-no-source": "機械的に読み取れる出典がないファイル",
+	"commonsmetadata-trackingcategory-no-source-desc": "このファイルには[{{MediaWiki:Commonsmetadata-doc-url}} 機械可読]な情報テンプレートがないか、その出典欄が記入されていません。"
+}

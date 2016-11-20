@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"MF-Warburg"
+		]
+	},
+	"babel-0": "Uza-na'in ne'e [[$1|la]] ko'alia [[$2|$3]] nein musan ida la hatene lian [[$2|$3]] (ka komprende uitoan de'it).",
+	"babel-1": "Uza-na'in ne'e bele kontribui ho nivel [[$1|báziku]] iha lian [[$2|$3]].",
+	"babel-2": "Uza-na'in ne'e bele kontribui ho nivel [[$1|maizumenus]] iha lian [[$2|$3]].",
+	"babel-3": "Uza-na'in ne'e bele kontribui ho nivel [[$1|aas]] iha lian [[$2|$3]].",
+	"babel-4": "Uza-na'in ne'e nia nivel [[$1|atu hanesan makdalen nativu]] iha lian [[$2|$3]].",
+	"babel-N": "Uza-na'in ne'e iha [[$2|$3]] nu'udar [[$1|lian inan]].",
+	"babel-0-n": "Uza-na'in ne'e [[$1|la]] ko'alia [[$2|tetun]] nein musan ida la hatene lian [[$2|tetun]] (ka komprende uitoan de'it).",
+	"babel-1-n": "Uza-na'in ne'e bele kontribui ho nivel [[$1|báziku]] iha lian [[$2|tetun]].",
+	"babel-2-n": "Uza-na'in ne'e bele kontribui ho nivel [[$1|maizumenus]] iha lian [[$2|tetun]].",
+	"babel-3-n": "Uza-na'in ne'e bele kontribui ho nivel [[$1|aas]] iha lian [[$2|tetun]].",
+	"babel-4-n": "Uza-na'in ne'e nia nivel [[$1|atu hanesan makdalen nativu]] iha lian [[$2|tetun]].",
+	"babel-N-n": "Uza-na'in ne'e iha [[$2|tetun]] nu'udar [[$1|lian inan]]."
+}

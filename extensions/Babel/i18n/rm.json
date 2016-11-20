@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gion",
+			"Gion-andri"
+		]
+	},
+	"babel": "infurmaziuns d'utilisader da Babel",
+	"babel-desc": "Agiunta la funcziun da generar automaticamain ina chascha cun las indicaziuns da babel davart l'utilisader e che pussibilitescha d'includer agens templates.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Utilisaders tenor lingua",
+	"babel-autocreate-reason": "Categoria da [[$1|Babel]] creada automaticamain.",
+	"babel-autocreate-text-levels": "Ils utilisaders en questa categoria han inditgà il nivel $1 per la lingua $2.",
+	"babel-autocreate-text-main": "Utilisaders en questa categoria han conuschientscha da la lingua $1.",
+	"babel-0": "Quest utilisader ha [[$1|naginas]] conuschientschas da [[$2|$3]] (u chapescha mo cun considerablas difficultads).",
+	"babel-1": "Quest utilisader ha conuschientschas [[$1|fundamentalas]] da [[$2|$3]].",
+	"babel-2": "Quest utilisader ha conuschientschas [[$1|d’in principiant avanzà]] da [[$2|$3]].",
+	"babel-3": "Quest utilisader ha conuschientschas [[$1|avanzadas]] da [[$2|$3]].",
+	"babel-4": "Quest utilisader sa [[$2|$3]] prest sco ina [[$1|persuna da lingua materna]].",
+	"babel-5": "Quest utilisader ha conuschientschas [[$1|professiunalas]] da [[$2|$3]].",
+	"babel-N": "Per quest utilisader è [[$2|$3]] la [[$1|lingua materna]].",
+	"babel-0-n": "Quest utilisader ha [[$1|naginas]] conuschientschas dal [[$2|rumantsch]] (u chapescha mo cun considerablas difficultads).",
+	"babel-1-n": "Quest utilisader ha conuschientschas [[$1|fundamentalas]] dal [[$2|rumantsch]].",
+	"babel-2-n": "Quest utilisader ha conuschientschas dal [[$2|rumantsch]] [[$1|d'in principiant avanzà]].",
+	"babel-3-n": "Quest utilisader ha conuschientschas [[$1|avanzads]] dal [[$2|rumantsch]].",
+	"babel-4-n": "Quest utilisader sa [[$2|rumantsch]] prest sco ina [[$1|persuna da lingua materna]].",
+	"babel-5-n": "Quest utilisader ha conuschientschas [[$1|professiunalas]] dal [[$2|rumantsch]].",
+	"babel-N-n": "Per quest utilisader è [[$2|rumantsch]] la [[$1|lingua materna]].",
+	"babel-footer": "Utilisaders tenor lingua"
+}

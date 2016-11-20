@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elisardojm"
+		]
+	},
+	"msu-desc": "Permite a transferencia sinxela para un ou varios ficheiros ó mesmo tempo",
+	"msu-button-title": "Seleccionar ficheiros",
+	"msu-insert-link": "Inserir ligazón",
+	"msu-insert-gallery": "Inserir todos como unha galería",
+	"msu-insert-files": "Inserir todos como ficheiros",
+	"msu-insert-links": "Inserir todos como ligazóns",
+	"msu-insert-image": "Inserir como imaxe",
+	"msu-insert-video": "Inserir vídeo",
+	"msu-cancel-upload": "Cancelar a carga",
+	"msu-replace-file": "Reemprazar ficheiro?",
+	"msu-clean-all": "Baleirar a lista",
+	"msu-ext-not-allowed": "Só se {{PLURAL:$1|permite o seguinte tipo|permiten os seguintes tipos}} de ficheiros:",
+	"msu-upload-this": "Subir este ficheiro",
+	"msu-upload-all": "Subir todos os ficheiros",
+	"msu-dropzone": "Soltar os ficheiros aquí",
+	"msu-comment": "Ficheiro cargado con MsUpload"
+}

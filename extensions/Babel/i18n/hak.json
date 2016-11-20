@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"唐吉訶德的侍從"
+		]
+	},
+	"babel-0": "Liá chak yung-fu [[$1|vàn-chhiòn m̀ hiáu]] [[$2|$3]].<br />邇隻用戶[[$1|完全毋曉]][[$2|$3]]。",
+	"babel-1": "Liá chak yung-fu thu̍k-siá [[$2|$3]] ke nèn-li̍t he [[$1|chhû-khip]].<br />邇隻用戶讀寫[[$2|$3]]嘅能力是[[$1|初級]]。",
+	"babel-2": "Liá chak yung-fu thu̍k-siá [[$2|$3]] ke nèn-li̍t he [[$1|chûng-tén]].<br />邇隻用戶讀寫[[$2|$3]]嘅能力是[[$1|中等]]。",
+	"babel-3": "Liá chak yung-fu thu̍k-siá [[$2|$3]] ke nèn-li̍t he [[$1|kô-khip]].<br />邇隻用戶讀寫[[$2|$3]]嘅能力是[[$1|高級]]。",
+	"babel-4": "Liá chak yung-fu thu̍k-siá [[$2|$3]] ke nèn-li̍t [[$1|chiap-khiun mû-ngî]].<br />邇隻用戶讀寫[[$2|$3]]嘅能力[[$1|接近母語]]。",
+	"babel-5": "Liá chak yung-fu thu̍k-siá [[$2|$3]] ke nèn-li̍t [[$1|tông chôn-ngia̍p]].<br />邇隻用戶讀寫[[$2|$3]]嘅能力[[$1|當專業]]。",
+	"babel-N": "Liá chak yung-fu ke [[$1|mû-ngî]] he [[$2|$3]].<br />邇隻用戶嘅[[$1|母語]]是[[$2|$3]]。",
+	"babel-0-n": "Liá chak yung-fu [[$1|vàn-chhiòn m̀ hiáu]] [[$2|Hak-kâ-ngî]].<br />邇隻用戶[[$1|完全毋曉]][[$2|客家語]]。",
+	"babel-1-n": "Liá chak yung-fu thu̍k-siá [[$2|Hak-kâ-ngî]] ke nèn-li̍t he [[$1|chhû-khip]].<br />邇隻用戶讀寫[[$2|客家語]]嘅能力是[[$1|初級]]。",
+	"babel-2-n": "Liá chak yung-fu thu̍k-siá [[$2|Hak-kâ-ngî]] ke nèn-li̍t he [[$1|chûng-tén]].<br />邇隻用戶讀寫[[$2|客家語]]嘅能力是[[$1|中等]]。",
+	"babel-3-n": "Liá chak yung-fu thu̍k-siá [[$2|Hak-kâ-ngî]] ke nèn-li̍t he [[$1|kô-khip]].<br />邇隻用戶讀寫[[$2|客家語]]嘅能力是[[$1|高級]]。",
+	"babel-4-n": "Liá chak yung-fu thu̍k-siá [[$2|Hak-kâ-ngî]] ke nèn-li̍t he [[$1|chiap-khiun mû-ngî]].<br />邇隻用戶讀寫[[$2|客家語]]嘅能力是[[$1|接近母語]]。",
+	"babel-5-n": "Liá chak yung-fu thu̍k-siá [[$2|Hak-kâ-ngî]] ke nèn-li̍t [[$1|tông chôn-ngia̍p]].<br />邇隻用戶讀寫[[$2|客家語]]嘅能力[[$1|當專業]]。",
+	"babel-N-n": "Liá chak yung-fu ke [[$1|mû-ngî]] he [[$2|Hak-kâ-ngî]].<br />邇隻用戶嘅[[$1|母語]]是[[$2|客家語]]。"
+}

@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kguirnela",
+			"Tagimata"
+		]
+	},
+	"babel": "Inpormasyon sang Babel naga-usar",
+	"babel-desc": "Gadugang sang <code>#babel</code> parser nga gagana para magamit nga henerasyon automatiko sang babel userbox kolum upod sang abilidad para maintra sa kustom templeyts",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "Automatiko nga ginahimo [[$1|Babel]] pahina kategorya.",
+	"babel-autocreate-text-levels": "Mga naga-usar sa sini nga kategorya nagapakita nga may-ara sila kasarang lebel $1 para sa lengwahe $2.",
+	"babel-autocreate-text-main": "Mga user sa sini nga kategorya nagapakita nga may-ara sila ka-alam lebel $1.",
+	"babel-0": "Ini nga naga-usar ay may-ara [[$1|wala]] ka-alam sang [[$2|$3]] (o maka-intindi sini nga may daku nga pagkabudlayan).",
+	"babel-1": "Ini nga naga-usar ay may-ara [[$1|simpli]] ka-alam sang [[$2|$3]].",
+	"babel-2": "Ini nga naga-usar ay may-ara [[$1|ensaktohanon]] ka-alam sang [[$2|$3]].",
+	"babel-3": "Ini nga naga-usar ay may-ara [[$1|madalum]] ka-alam sang [[$2|$3]].",
+	"babel-4": "Ini nga naga-usar ay may-ara [[$1|lapit sa gahambal nga nitibo]] ka-alam sang [[$2|$3]].",
+	"babel-5": "Ini nga naga-usar ay may-ara [[$1|propesyonal]] ka-alam sang [[$2|$3]].",
+	"babel-N": "Ini nga naga-usar ay may-ara [[$1|nitibo]] ka-alam sang [[$2|$3]].",
+	"babel-0-n": "Ini nga naga-usar ay may-ara [[$1|wala]] ka-alam sang [[$2|Hiligaynon]] (o maka-intindi sini nga may daku nga pagkabudlayan).",
+	"babel-1-n": "Ini nga naga-usar ay may-ara [[$1|simpli]] ka-alam sang [[$2|Hiligaynon]].",
+	"babel-2-n": "Ini nga naga-usar ay may-ara [[$1|ensaktohanon]] ka-alam sang [[$2|Hiligaynon]].",
+	"babel-3-n": "Ini nga naga-usar ay may-ara [[$1|madalum]] ka-alam sang [[$2|Hiligaynon]].",
+	"babel-4-n": "Ini nga naga-usar ay may-ara [[$1|lapit sa gahambal nga nitibo]] ka-alam sang [[$2|Hiligaynon]].",
+	"babel-5-n": "Ini nga naga-usar ay may-ara [[$1|propesyonal]] ka-alam sang [[$2|Hiligaynon]].",
+	"babel-N-n": "Ini nga naga-usar ay may-ara [[$1|nitibo]] ka-alam sang [[$2|Hiligaynon]]."
+}

@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko",
+			"JackPotte"
+		]
+	},
+	"commonsmetadata-desc": "Étend la propriété « extmetadata » du module d’API info d’image pour inclure des informations stockées dans les pages de description de l’image qui utilisent les modèles courants de Wikimédia Communs.",
+	"commonsmetadata-trackingcategory-no-license": "Fichiers sans licence lisible par une machine",
+	"commonsmetadata-trackingcategory-no-license-desc": "Le fichier n’a aucun modèle de licence [{{MediaWiki:Commonsmetadata-doc-url}} lisible par une machine].",
+	"commonsmetadata-trackingcategory-no-description": "Fichiers sans description lisible par une machine",
+	"commonsmetadata-trackingcategory-no-description-desc": "Le fichier n’a pas de modèle d’information [{{MediaWiki:Commonsmetadata-doc-url}} lisible par une machine], ou bien son champ description n’est pas rempli.",
+	"commonsmetadata-trackingcategory-no-author": "Fichiers sans auteur lisible par une machine",
+	"commonsmetadata-trackingcategory-no-author-desc": "Le fichier n’a pas de modèle d’information [{{MediaWiki:Commonsmetadata-doc-url}} lisible par une machine], ou bien son champ auteur n’est pas rempli.",
+	"commonsmetadata-trackingcategory-no-source": "Fichiers sans source lisible par une machine",
+	"commonsmetadata-trackingcategory-no-source-desc": "Le fichier n’a pas de modèle d’information [{{MediaWiki:Commonsmetadata-doc-url}} lisible par une machine], ou bien son champ source n’est pas rempli."
+}

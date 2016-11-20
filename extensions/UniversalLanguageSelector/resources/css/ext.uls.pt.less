@@ -1,0 +1,58 @@
+@import 'mediawiki.mixins';
+
+/* stylelint-disable selector-no-id */
+
+/*
+ * The trigger can be placed in the personal toolbar near the username
+ * or near the interlanguage links.
+ */
+
+/*
+ * A hack to load the icon before the rest of the module is lazy-loaded.
+ * Copied from jquery.uls.css with the path changed.
+ */
+.uls-trigger {
+	background: transparent no-repeat scroll left center;
+	.background-image-svg( '../../lib/jquery.uls/images/icon-language.svg', '../../lib/jquery.uls/images/icon-language.png' );
+	padding-left: 30px;
+}
+
+#pt-uls a.uls-trigger {
+	padding-left: 30px;
+	/* Fix alignment in vector: https://phabricator.wikimedia.org/T61239 */
+	line-height: 1;
+}
+
+/* Opera for some inexplicable reason confuses right and left padding with */
+/* RTL text direction here (bug T47142). x:-o-prefocus won't match anything, */
+/* but will make other browsers ignore this rule. */
+x:-o-prefocus,
+body.rtl li#pt-uls {
+	/* @noflip */
+	direction: ltr;
+}
+
+#uls-settings-block {
+	border-top: 1px solid #c9c9c9;
+	background: #f8f8f8;
+	background: -webkit-gradient( linear, left top, left bottom, from( #fbfbfb ), to( #f0f0f0 ) );
+	background: -webkit-linear-gradient( top, #fbfbfb, #f0f0f0 );
+	background: -moz-linear-gradient( top, #fbfbfb, #f0f0f0 );
+	background: -o-linear-gradient( top, #fbfbfb, #f0f0f0 );
+	background: linear-gradient( #fbfbfb, #f0f0f0 );
+	padding-left: 10px;
+	line-height: 1.2em;
+	border-radius: 0 0 5px 5px;
+}
+
+#uls-settings-block div.display-settings-block,
+#uls-settings-block div.input-settings-block {
+	display: inline-block;
+	margin: 8px 15px;
+	color: #565656;
+}
+
+#uls-settings-block div.display-settings-block:hover,
+#uls-settings-block div.input-settings-block:hover {
+	color: #252525;
+}

@@ -1,0 +1,61 @@
+{
+	"name": "EmbedVideo",
+	"version": "2.4.0",
+	"author": [
+		"Jim R. Wilson",
+		"Andrew Whitworth",
+		"Alexia E. Smith",
+		"Cameron M. Chunn"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:EmbedVideo",
+	"descriptionmsg": "embedvideo_description",
+	"license-name": "MIT",
+	"type": "parserhook",
+	"callback": "EmbedVideoHooks::onExtension",
+	"MessagesDirs": {
+		"EmbedVideo": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"EmbedVideoMagic": "EmbedVideo.i18n.magic.php"
+	},
+	"AutoloadClasses": {
+		"EmbedVideoHooks": "EmbedVideo.hooks.php",
+		"EmbedVideo\\OEmbed": "classes/OEmbed.php",
+		"EmbedVideo\\VideoService": "classes/VideoService.php",
+		"EmbedVideo\\FFProbe": "classes/media/FFProbe.php",
+		"EmbedVideo\\AudioHandler": "classes/media/AudioHandler.php",
+		"EmbedVideo\\AudioTransformOutput": "classes/media/AudioTransformOutput.php",
+		"EmbedVideo\\VideoHandler": "classes/media/VideoHandler.php",
+		"EmbedVideo\\VideoTransformOutput": "classes/media/VideoTransformOutput.php"
+	},
+	"ResourceModules": {
+		"ext.embedVideo": {
+			"styles": [
+				"css/embedvideo.css"
+			],
+			"scripts": [
+				"js/autoResize.js"
+			],
+			"position": "top",
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "EmbedVideo"
+	},
+	"config": {
+		"FFmpegLocation": "/usr/bin/ffmpeg",
+		"FFprobeLocation": "/usr/bin/ffprobe"
+	},
+	"Hooks": {
+		"ParserFirstCallInit": [
+			"EmbedVideoHooks::onParserFirstCallInit"
+		]
+	}
+}

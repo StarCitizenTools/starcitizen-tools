@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"textextracts-desc": "Provides plain-text or limited HTML extracts of page content",
+	"apihelp-query+extracts-description": "Returns plain-text or limited HTML extracts of the given pages.",
+	"apihelp-query+extracts-param-chars": "How many characters to return. Actual text returned might be slightly longer.",
+	"apihelp-query+extracts-param-sentences": "How many sentences to return.",
+	"apihelp-query+extracts-param-limit": "How many extracts to return.",
+	"apihelp-query+extracts-param-intro": "Return only content before the first section.",
+	"apihelp-query+extracts-param-plaintext": "Return extracts as plain text instead of limited HTML.",
+	"apihelp-query+extracts-param-sectionformat": "How to format sections in plaintext mode:\n;plain:No formatting.\n;wiki:Wikitext-style formatting (== like this ==).\n;raw:This module's internal representation (section titles prefixed with &lt;ASCII 1&gt;&lt;ASCII 2&gt;&lt;section level&gt;&lt;ASCII 2&gt;&lt;ASCII 1&gt;).",
+	"apihelp-query+extracts-param-variant": "Convert content into this language variant.",
+	"apihelp-query+extracts-example-1": "Get a 175-character extract"
+}

@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Peteris"
+		]
+	},
+	"babel": "Babel turmus terpautajas",
+	"babel-url": "Project: Babel",
+	"babel-0": "Šis terpautajs [[$1|ni izpresta]] [[$2|$3]] (anga turri sen stan debīkans prōblamans).",
+	"babel-1": "Šis terpautajs zinna [[$2|$3]] na gruntiskan līgmenin",
+	"babel-2": "Šis terpautajs zinna [[$2|$3]] na [[$1|sirdan]] līgmenin.",
+	"babel-3": "Šis terpautajs zinna [[$2|$3]] na [[$1|ēmpirsin treppusin]] līgmenin.",
+	"babel-4": "Šis terpautajs zinna [[$2|$3]] ēst stawīdiskai, kāigi [[$1|gīmtan]].",
+	"babel-5": "Šis terpautajs zinna [[$2|$3]] stawīdiskai, kāigi [[$1|gimtan]].",
+	"babel-N": "[[$2|$3]] ast [[$1|gimta]] bilā šisse terpautajas.",
+	"babel-0-n": "Šis terpautajs [[$1|ni izpresta]] [[$2|prūsiskan]] (anga turri sen stan debīkans prōblamans).",
+	"babel-1-n": "Šis terpautajs zinna [[$2|prūsiskan]] na gruntiskan līgmenin",
+	"babel-2-n": "Šis terpautajs zinna [[$2|prūsiskan]] na [[$1|sirdan]] līgmenin.",
+	"babel-3-n": "Šis terpautajs zinna [[$2|prūsiskan]] na [[$1|ēmpirsin treppusin]] līgmenin.",
+	"babel-4-n": "Šis terpautajs zinna [[$2|prūsiskan]] ēst stawīdiskai, kāigi [[$1|gīmtan]].",
+	"babel-5-n": "Šis terpautajs zinna [[$2|prūsiskan]] stawīdiskai, kāigi [[$1|gimtan]].",
+	"babel-N-n": "[[$2|Prūsiskan]] ast [[$1|gimta]] bilā šisse terpautajas."
+}

@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Meno25"
+		]
+	},
+	"cldr-desc": "امتداد يوفر أسماء لغات مترجمة بالاعتماد على [http://cldr.unicode.org/index/downloads بيانات CLDR]"
+}

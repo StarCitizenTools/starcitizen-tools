@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ömer Berkay",
+			"Kincki",
+			"KorkmazO"
+		]
+	},
+	"msu-desc": "Aynı anda tek bir dosya veya birden fazla dosya için kolay yükleme sağlar",
+	"msu-ext-not-allowed": "Sadece aşağıdaki dosya {{ÇOĞUL:$1|tipi|tipleri}} kullanılabilir:",
+	"msu-upload-this": "Dosyayı yükle",
+	"msu-upload-all": "Tüm dosyaları yükle"
+}

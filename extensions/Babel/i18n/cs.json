@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Danny B.",
+			"Kuvaly",
+			"Li-sung",
+			"Littledogboy",
+			"Matěj Grabovský",
+			"Mormegil",
+			"Mr. Richard Bolla",
+			"Matěj Suchánek"
+		]
+	},
+	"babel": "Babylon – informace o&nbsp;{{GENDER:$1|uživateli|uživatelce|uživateli}}",
+	"babel-desc": "Přidává funkci <code><nowiki>{{#babel:}}</nowiki></code>, umožňující automatickou tvorbu rámečku s informacemi o jazykových schopnostech uživatele s možností používat vlastní šablony.",
+	"babel-url": "Project:Babylon",
+	"babel-footer-url": ":Kategorie:Babylon – Uživatelé podle jazyka",
+	"babel-autocreate-reason": "Automatické založení stránky kategorie pro [[$1|Babylon]]",
+	"babel-autocreate-text-levels": "Uživatelé v této kategorii označili svou úroveň znalostí jazyka $2 jako $1.",
+	"babel-autocreate-text-main": "Uživatelé v této kategorii se přihlásili ke znalosti jazyka $1.",
+	"babel-0": "{{GENDER:$4|Tento uživatel|Tato uživatelka|Tento uživatel}} [[$1|nerozumí]] [[$2|$3]] (nebo rozumí se značnými problémy).",
+	"babel-1": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má [[$1|základní]] znalosti [[$2|{{GRAMMAR:2sg|$3}}]].",
+	"babel-2": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má znalosti [[$2|{{GRAMMAR:2sg|$3}}]] na [[$1|středně pokročilé]] úrovni.",
+	"babel-3": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má znalosti [[$2|{{GRAMMAR:2sg|$3}}]] na [[$1|pokročilé]] úrovni.",
+	"babel-4": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má znalosti [[$2|{{GRAMMAR:2sg|$3}}]] srovnatelné s [[$1|rodilým mluvčím]].",
+	"babel-5": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má znalosti [[$2|{{GRAMMAR:2sg|$3}}]] na [[$1|profesionální]] úrovni.",
+	"babel-N": "{{GENDER:$4|Tento uživatel je [[$1|rodilý]]|Tato uživatelka je [[$1|rodilá]]}} mluvčí [[$2|$3]].",
+	"babel-0-n": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} [[$1|nerozumí]] [[$2|česky]] (nebo rozumí se značnými problémy).",
+	"babel-1-n": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má [[$1|základní]] znalosti [[$2|češtiny]].",
+	"babel-2-n": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má [[$1|střední]] znalosti [[$2|češtiny]].",
+	"babel-3-n": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má [[$1|pokročilé]] znalosti [[$2|češtiny]].",
+	"babel-4-n": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má znalosti [[$2|češtiny]] [[$1|téměř na úrovni rodilého mluvčího]].",
+	"babel-5-n": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má [[$1|profesionální]] znalosti [[$2|češtiny]].",
+	"babel-N-n": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} je [[$1|{{GENDER:$4|rodilý|rodilá}} mluvčí]] [[$2|češtiny]].",
+	"babel-footer": "Uživatelé podle jazyka"
+}

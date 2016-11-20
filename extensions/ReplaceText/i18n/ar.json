@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Alnokta",
+			"Meno25",
+			"OsamaK",
+			"Ouda"
+		]
+	},
+	"replacetext": "استبدل النص",
+	"replacetext-desc": "يوفر [[Special:ReplaceText|صفحة خاصة]] للسماح للإداريين للقيام بعملية أوجد واستبدل على نص في كل صفحات المحتوى لويكي",
+	"replacetext_docu": "لاستبدال سلسلة نص بأخرى عبر كل الصفحات العادية في هذا الويكي، أدخل قطعتي النص هنا ثم اضغط 'استمرار'. سيعرض عليك بعد ذلك قائمة بالصفحات التي تحتوي على نص البحث، ويمكنك اختيار اللواتي تريد الاستبدال فيها. اسمك سيظهر في تواريخ الصفحات كالمستخدم المسؤول عن أية تغييرات.",
+	"replacetext_originaltext": "النص الأصلي:",
+	"replacetext_replacementtext": "نص الاستبدال:",
+	"replacetext_optionalfilters": "مرشحات اختيارية:",
+	"replacetext_categorysearch": "استبدل فقط في التصنيف:",
+	"replacetext_prefixsearch": "استبدل فقط في الصفحات ذات البادئة:",
+	"replacetext_editpages": "استبدل النص في محتويات الصفحة",
+	"replacetext_movepages": "استبدل النص في عناوين الصفحات، عندما يكون ممكنا",
+	"replacetext_givetarget": "لابد أن تحدد السلسلة التي تريد استبدالها",
+	"replacetext_nonamespace": "يجب أن تختار على الأقل نطاقا واحدا.",
+	"replacetext_editormove": "لابد أن تختار خيار واحد على الأقل من خيارات الاستبدال.",
+	"replacetext_choosepagesforedit": "استبدال ب'$1' '$2' في نص {{PLURAL:$3||الصفحة التالية|الصفحتين التاليتين|الصفحات التالية}}:",
+	"replacetext_choosepagesformove": "استبدل \"$1\" ب\"$2\" في {{PLURAL:$3||اسم الصفحة التالية|اسمي الصفحتين التاليتين|أسماء الصفحات التالية}}:",
+	"replacetext_cannotmove": "لا يمكن نقل {{PLURAL:$1||الصفحة التالية|الصفحتين التاليتين|الصفحات التالية}}:",
+	"replacetext_formovedpages": "للصفحات المنقولة:",
+	"replacetext_savemovedpages": "احفظ العناوين القديمة كتحويلات للعناوين الجديدة",
+	"replacetext_watchmovedpages": "راقب هذه الصفحات",
+	"replacetext_invertselections": "عكس الاختيارات",
+	"replacetext_replace": "استبدل",
+	"replacetext_success": "سوف تستبدل '$2' ب'$1' في {{PLURAL:$3||صفحة واحدة|صفحتين|$3 صفحات|$3 صفحة}}.",
+	"replacetext_noreplacement": "لا صفحات تم العثور عليها تحتوي على السلسلة '$1'.",
+	"replacetext_nomove": "لم توجد صفحات تحتوي عناوينها '$1'.",
+	"replacetext_nosuchcategory": "لا يوجد تصنيف بالاسم \"$1\".",
+	"replacetext_return": "رجوع إلى الاستمارة",
+	"replacetext_warning": "'''تحذير''': توجد {{PLURAL:$1||صفحة واحدة تحتوي|صفحتان تحتويان|$1 صفحات تحتوي|$1 صفحة تحتوي}} بالفعل على سلسلة الاستبدال '$2'. إذا قمت بهذا الاستبدال فلن تصبح قادرًا على فصل استبدالاتك عن هذه السلاسل.",
+	"replacetext_blankwarning": "لأن سلسلة الاستبدال فارغة، هذه العملية لن تكون عكسية؛ استمر؟",
+	"replacetext_continue": "استمرار",
+	"replacetext_editsummary": "استبدال النص - '$1' ب'$2'",
+	"right-replacetext": "القيام باستبدال للسلاسل في الويكي بأكمله"
+}

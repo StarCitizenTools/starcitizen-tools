@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16"
+		]
+	},
+	"commonsmetadata-desc": "Estende le proprietà \"extmetadata\" del modulo API per le informazioni sulle immagini, per includere informazioni memorizzate nelle pagine di descrizione dell'immagine che usano i template comunemente utilizzati su Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "File senza licenza leggibile da una macchina",
+	"commonsmetadata-trackingcategory-no-license-desc": "Il file non ha alcun template di licenza  [{{MediaWiki:Commonsmetadata-doc-url}} leggibile da una macchina].",
+	"commonsmetadata-trackingcategory-no-description": "File senza descrizione leggibile da una macchina",
+	"commonsmetadata-trackingcategory-no-description-desc": "Il file non ha alcun template di informazioni [{{MediaWiki:Commonsmetadata-doc-url}} leggibile da una macchina], o non è compilato il campo descrizione.",
+	"commonsmetadata-trackingcategory-no-author": "File senza autore leggibile da una macchina",
+	"commonsmetadata-trackingcategory-no-author-desc": "Il file non ha alcun template di informazioni [{{MediaWiki:Commonsmetadata-doc-url}} leggibile da una macchina], o non è compilato il campo autore.",
+	"commonsmetadata-trackingcategory-no-source": "File senza fonte leggibile da una macchina",
+	"commonsmetadata-trackingcategory-no-source-desc": "Il file non ha alcun template di informazioni [{{MediaWiki:Commonsmetadata-doc-url}} leggibile da una macchina], o non è compilato il campo fonte."
+}

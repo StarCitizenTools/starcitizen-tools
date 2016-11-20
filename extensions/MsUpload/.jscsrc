@@ -1,0 +1,7 @@
+{
+	"preset": "wikimedia",
+	"requireVarDeclFirst": null,
+	"requireMultipleVarDecl": null,
+	"requireCamelCaseOrUpperCaseIdentifiers": null,
+	"disallowEmptyBlocks": null
+}

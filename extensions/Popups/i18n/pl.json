@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps",
+			"Peter Bowman",
+			"Rezonansowy",
+			"WTM",
+			"Ty221"
+		]
+	},
+	"popups-message": "Wyskakujące okienka",
+	"popups-desc": "Wyświetla wyskakujące okienka z podsumowaniem treści strony docelowej po umieszczeniu wskaźnika myszy na odnośniku.",
+	"popups-last-edited": "Edytowano $1",
+	"popups-redirects": "przekierowuje do<h3>$1</h3>",
+	"popups-settings-title": "Podgląd strony",
+	"popups-settings-description": "To narzędzie umożliwia szybki podgląd linków do stron wiki i przypisów.",
+	"popups-settings-option-simple": "Prosty",
+	"popups-settings-option-simple-description": "Zobacz zdanie wprowadzające oraz podgląd obrazka na stronie. Zalecane dla czytelników.",
+	"popups-settings-option-advanced": "Zaawansowany",
+	"popups-settings-option-off": "Dezaktywuj podgląd",
+	"popups-settings-option-off-description": "Można zmienić to ustawienie za pomocą linku w stopce strony",
+	"popups-settings-save": "Zapisz",
+	"popups-settings-help-ok": "OK",
+	"popups-settings-cancel": "Anuluj",
+	"popups-settings-help": "Możesz ponownie włączyć podgląd za pomocą linku znajdującego się w stopce strony.",
+	"popups-settings-enable": "Aktywuj podgląd",
+	"popups-send-feedback": "Wyślij opinię (link zewnętrzny)",
+	"popups-mobile-continue-to-page": "Przejdź do strony",
+	"popups-mobile-dismiss": "Odrzuć"
+}

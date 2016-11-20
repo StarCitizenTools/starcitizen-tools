@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cedric31"
+		]
+	},
+	"cleanchanges-changerightslink": "càmbia los gropes",
+	"cleanchanges-desc": "Afichatge mai compacte de la [[Special:RecentChanges|lista dels darrièrs cambiaments]]",
+	"cleanchanges-language": "Lenga :",
+	"cleanchanges-language-na": "Totes",
+	"cleanchanges-users": "Utilizaires (sep. per |) :",
+	"cleanchanges-showuserlinks": "Afichar los ligams d'aqueste utilizaire"
+}

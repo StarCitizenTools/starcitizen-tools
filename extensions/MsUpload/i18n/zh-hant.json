@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"晒太阳的冰 (zoglun@gmail.com)",
+			"LNDDYL",
+			"Cwlin0416"
+		]
+	},
+	"msu-desc": "開啟單檔或多檔的簡易上傳",
+	"msu-button-title": "選擇檔案",
+	"msu-insert-link": "插入連結",
+	"msu-insert-gallery": "插入全部作為圖庫",
+	"msu-insert-files": "插入全部作為檔案",
+	"msu-insert-links": "插入全部作為連結",
+	"msu-insert-image": "插入圖片",
+	"msu-insert-video": "插入影片",
+	"msu-cancel-upload": "取消上傳",
+	"msu-clean-all": "清空清單",
+	"msu-ext-not-allowed": "只允許上傳下列{{PLURAL:$1|類型|類型}}檔案：",
+	"msu-upload-this": "上傳此檔案",
+	"msu-upload-all": "上傳所有檔案",
+	"msu-dropzone": "拖曳檔案到此處",
+	"msu-comment": "使用 MsUpload 上傳檔案"
+}

@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Diupwijk",
+			"EileenSanda",
+			"Quackor"
+		]
+	},
+	"babel": "Babel brúkara upplýsing",
+	"babel-desc": "Leggur afturat <code>#babel</code> parsarafunksjón fyri at loyva sjálvvirkandi upprættan av babel brúkarakassa við møguleika fyri at taka við tilevnaðar fyrimyndir (skapilónir)",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Brúkari eftir máli",
+	"babel-autocreate-reason": "Sjálvvirkandi skapan av [[$1|Babel]] bólka síða.",
+	"babel-autocreate-text-levels": "Brúkarir í hesum bólki vísa at tey hava vitan á stigi $1 fyri máli $2.",
+	"babel-autocreate-text-main": "Brúkarir í hesum bólki vísa at teir hava vitan um mál $1.",
+	"babel-0": "Hesin brúkarin skilur [[$1|ikki]] [[$2|$3]] (ella skilir tað ikki gott).",
+	"babel-1": "Hesin brúkarin hevur [[$1|grundleggjandi]] kunnleika til [[$2|$3]].",
+	"babel-2": "Hesin brúkarin hevur [[$1|miðal]] kunnleika til [[$2|$3]].",
+	"babel-3": "Hesin brúkarin hevur kunnleika á [[$1|hástigi]] um [[$2|$3]].",
+	"babel-4": "Hesin brúkari hevur [[$1|nærum móðurmáls]] kunnleika til [[$2|$3]].",
+	"babel-5": "Hesin brúkari hevur [[$1|professionellan]] kunnleika til [[$2|$3]].",
+	"babel-N": "Hesin brúkarin hevur [[$2|$3]] sum [[$1|móðurmál]].",
+	"babel-0-n": "Hesin brúkarin hevur [[$1|onga]] vitan um [[$2|føroyskt]] (ella skilur tað eitt sindur við stórum trupulleikum).",
+	"babel-1-n": "Hesin brúkarin hevur [[$1|grundleggjandi]] vitan um [[$2|føroyskt]].",
+	"babel-2-n": "Hesin brúkari hevur [[$1|miðal góðan]] kunnleika til [[$2|føroyskt]].",
+	"babel-3-n": "\nHesin brúkarin hevur kunnleika á [[$1|hástigi]] til [[$2|føroyskt]].",
+	"babel-4-n": "Hesin brúkari hevur [[$1|nærum móðurmáls]] kunnleika til [[$2|føroyskt]].",
+	"babel-5-n": "Hesin brúkari hevur [[$1|professionellan]] kunnleika til [[$2|føroyskt]].",
+	"babel-N-n": "Hesin brúkarin hevur [[$2|føroyskt]] sum [[$1|móðurmál]].",
+	"babel-footer": "Brúkari eftir máli"
+}

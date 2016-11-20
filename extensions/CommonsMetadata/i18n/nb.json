@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jeblad"
+		]
+	},
+	"commonsmetadata-desc": "Utvider API-modulens \"extmetadata\" egenskaper for billedinformasjon til å inkludere informasjon fra filsider for de mest brukte malene på Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Filer uten maskinlesbar lisens",
+	"commonsmetadata-trackingcategory-no-license-desc": "Denne filen har ingen [{{MediaWiki:Commonsmetadata-doc-url}} maskinlesbar] lisensmal.",
+	"commonsmetadata-trackingcategory-no-description": "Filer uten maskinlesbar beskrivelse",
+	"commonsmetadata-trackingcategory-no-description-desc": "Denne filen har ingen [{{MediaWiki:Commonsmetadata-doc-url}} maskinlesbar] infomal, eller så er ikke feltet for beskrivelse fyllt ut.",
+	"commonsmetadata-trackingcategory-no-author": "Filer uten maskinlesbar opphavsmann",
+	"commonsmetadata-trackingcategory-no-author-desc": "Denne filen har ingen [{{MediaWiki:Commonsmetadata-doc-url}} maskinlesbar] infomal, eller så er ikke feltet for opphavsmann fyllt ut.",
+	"commonsmetadata-trackingcategory-no-source": "Filer uten maskinlesbar kilde",
+	"commonsmetadata-trackingcategory-no-source-desc": "Denne filen har ingen [{{MediaWiki:Commonsmetadata-doc-url}} maskinlesbar] infomal, eller så er ikke feltet for kilde fyllt ut."
+}

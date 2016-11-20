@@ -1,0 +1,63 @@
+@import "minerva.variables.less";
+@import "minerva.mixins.less";
+
+@animationDuration: 0.3s;
+
+.lazy-image-placeholder {
+	display: inline-block;
+	// The image placeholder for shouldn't show for no-js devices
+	.client-nojs & {
+		display: none;
+	}
+
+	background-color: @colorGray14;
+	border: 1px solid @colorGray11;
+	// offset the borders to avoid pushing down content by 2px border on load
+	box-sizing: border-box;
+	border-radius: 2px;
+
+	// Hide anything around the dimensions of the placeholder (avoids spinner
+	// overflowing on smaller images
+	overflow: hidden;
+
+	// Center spinner vertically and horizontally
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	// When inserted, don't show the image because we want to animate it
+	img {
+		opacity: 0;
+	}
+
+	// When the image has loaded transition background color and image opacity
+	// for a fade-in effect
+	&.loaded {
+		.animation(fadeOutContainer @animationDuration ease-in);
+		background-color: transparent;
+		border: none;
+
+		img {
+			.animation(fadeInImage @animationDuration ease-in);
+			opacity: 1;
+		}
+	}
+}
+
+@-webkit-keyframes fadeInImage {
+	from { opacity: 0 }
+	to { opacity: 1 }
+}
+@keyframes fadeInImage {
+	from { opacity: 0 }
+	to { opacity: 1 }
+}
+
+@-webkit-keyframes fadeOutContainer {
+	from { background-color: @colorGray14 }
+	to { background-color: transparent }
+}
+@keyframes fadeOutContainer {
+	from { background-color: @colorGray14 }
+	to { background-color: transparent }
+}

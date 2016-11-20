@@ -1,0 +1,307 @@
+// Component of ui.less
+// FIXME: Move to components/
+@import "minerva.variables";
+@import "minerva.mixins";
+
+/* Left menu */
+@menuBorder: 12px;
+@menuBorderColor: #252525;
+@menuLinkLineHeight: 22px;
+@menuItemFontSize: 1.2em;
+
+@pageLeftListDarkBorderColor: #3e3e3e;
+@pageLeftListMediumBorderColor: #5C5C5C;
+@pageLeftListLightBorderColor: #717171;
+
+#mw-mf-viewport {
+	position: relative;
+	height: 100%;
+}
+
+#mw-mf-page-center {
+	width: 100%;
+	position: relative;
+}
+
+.main-menu-button {
+	&.indicator-circle {
+		overflow: initial;
+		&::after {
+			content: '';
+			background-color: @colorProgressive;
+		  width: .65em;
+		  height: .65em;
+		  position: absolute;
+		  top: -0.4em;
+		  right: .6em;
+		  border-radius: .5em;
+		  border: solid .2em white;
+		}
+	}
+}
+
+nav {
+	float: left;
+}
+
+// needs to be more specific than .overlay rules
+.notifications-overlay.navigation-drawer {
+	right: 0;
+
+	height: 100%;
+	width: auto;
+	box-shadow: -5px 0 0 0 rgba(0, 0, 0, 0.3);
+}
+
+nav {
+	font-size: 90%;
+	min-height: 100%;
+	background: @mainMenuBackgroundColor;
+	border-left: solid @menuBorder @menuBorderColor;
+
+
+	.client-js & {
+		.secondary-action {
+			border: none;
+			position: absolute;
+			right: 0;
+			top: 0;
+			bottom: 0;
+			padding-right: 0;
+			border-left: 1px solid @colorGray7;
+		}
+
+		.primary-action {
+			// 1px for the logout icon border-left
+			margin-right: @menuLinkLineHeight * 2 + 1;
+		}
+	}
+
+	ul {
+		&:first-child {
+			border-bottom: @menuBorder solid @menuBorderColor;
+
+			li:first-child {
+				border-top: none;
+			}
+		}
+
+		li {
+			position: relative; // ensure the logout link in beta can be position absolute
+			font-size: @menuItemFontSize;
+			border-top: 1px solid @colorGray7;
+
+			&:hover {
+				background-color: @colorGray5;
+				margin-left: -@menuBorder;
+				a {
+					border-left: solid @menuBorder #3366BB;
+				}
+			}
+			&:last-child {
+				border-bottom: 1px solid @colorGray7;
+			}
+
+			a {
+				color: white;
+				display: block;
+				padding: @menuLinkLineHeight / 2 10px @menuLinkLineHeight / 2 9px;
+
+				&:hover {
+					text-decoration: none;
+				}
+
+				&:visited,
+				&:active {
+					color: white;
+				}
+			}
+		}
+
+		&.hlist {
+			li {
+				font-size: 0.8em;
+				margin: 0;
+				border: none;
+
+				a {
+					color: @colorGray12;
+					border: none;
+					padding: .7em 12px;
+					margin-left: 0;
+				}
+			}
+		}
+	}
+}
+
+body.navigation-enabled {
+
+	#mw-mf-viewport {
+		// disable horizontal scrolling
+		overflow: hidden;
+		// the two following properties are needed to override the height set
+		// by position: fixed fallback on scroll event
+		min-height: 100%;
+		height: auto !important;
+	}
+
+	#mw-mf-page-center {
+		// Since we change the color of the body tag above we need to ensure the content has a white background
+		background: #fff;
+		position: absolute;
+		height: 100%;
+		// Overriden in mainmenuAnimation
+		left: @menuWidth;
+		// set border here (nav doesn't expand height)
+		border-left: solid 1px #000;
+		box-shadow: -5px 0 0 0 rgba(0, 0, 0, 0.1);
+	}
+
+	.navigation-drawer,
+	.transparent-shield {
+		visibility: visible;
+	}
+
+	.transparent-shield {
+		background: @semiTransparent;
+		opacity: 1;
+	}
+}
+
+.primary-navigation-enabled {
+	// set background and border here (nav doesn't expand height
+	// and #mw-mf-viewport has overflow: hidden and clips blue hover borders)
+	border-left: solid @menuBorder @menuBorderColor;
+	background: @mainMenuBackgroundColor;
+
+	#mw-mf-viewport {
+		margin-left: -@menuBorder;
+	}
+
+	nav {
+		width: @menuWidth;
+	}
+
+	// FIXME: Menu shouldn't need to know about drawers but a cta drawer might be open
+	.drawer .position-fixed {
+		left: @menuWidth !important;
+	}
+}
+
+@media all and (min-width: @deviceWidthTablet) {
+	@rightDrawerLeftOffset: 100% - @rightDrawerWidth;
+	.secondary-navigation-enabled {
+		#mw-mf-page-center {
+			left: -@rightDrawerWidth !important;
+			right: @rightDrawerWidth !important;
+			width: auto;
+			.main-header-button {
+				visibility: hidden;
+			}
+		}
+	}
+
+	.notifications-overlay.navigation-drawer {
+		left: @rightDrawerLeftOffset;
+	}
+}
+
+// animated version
+@duration: .25s;
+@easing: ease-in-out;
+
+// FIXME: Cleanup animation css
+.animations {
+
+	#mw-mf-page-center {
+		min-height: 100%;
+		// We need to ensure the content has a white background - otherwise it will
+		// overlap the menu during the main menu reveal/hide animation
+		background-color: #fff;
+
+		// *2 to avoid weird glitch of left nav flickering after closing
+		@transition: @duration @easing, height 0s (@duration*2);
+		.transition-transform(@transition);
+	}
+
+	nav {
+		width: @menuWidth;
+
+		.transition(visibility 0s @duration);
+	}
+
+	// FIXME: Make animations a conditional class on the drawer itself
+	.notifications-overlay.navigation-drawer {
+		display: block;
+
+		// +2% to accommodate for the border/box-shadow
+		.transform(translate(102%, 0));
+		.transition-transform(@duration @easing, visibility 0s @duration;);
+
+		&.visible {
+			.transform(translate(0, 0));
+		}
+	}
+}
+
+
+.navigation-enabled.animations {
+	// FIXME: Menu shouldn't need to know about drawers but a cta drawer might be open
+	.drawer .position-fixed,
+	#mw-mf-page-center {
+		.transition-transform(@duration @easing);
+	}
+}
+
+.primary-navigation-enabled.animations {
+	// FIXME: Menu shouldn't need to know about drawers
+	.drawer .position-fixed,
+	#mw-mf-page-center {
+		// override non-animated version
+		left: 0 !important;
+		.transform(translate(@menuWidth, 0));
+	}
+
+	nav {
+		// make menu scrollable when open (on small screens)
+		position: static;
+
+		.transition(none);
+	}
+}
+
+.secondary-navigation-enabled.animations {
+	#mw-mf-page-center {
+		// override non-animated version
+		left: 0 !important;
+		.transform(translate(-@rightDrawerWidth, 0));
+		width: 100%;
+	}
+}
+
+.rtl {
+	// FIXME: Make animations a conditional class on the drawer itself
+	.animations .notifications-overlay.navigation-drawer {
+		// +2% to accommodate for the border/box-shadow
+		.transform(translate(-102%, 0));
+
+		&.visible {
+			.transform(translate(0, 0));
+		}
+	}
+
+	&.primary-navigation-enabled.animations {
+		// FIXME: Menu shouldn't need to know about drawers
+		.drawer .position-fixed,
+		#mw-mf-page-center {
+			.transform(translate(-@menuWidth, 0));
+		}
+	}
+
+	&.secondary-navigation-enabled.animations {
+		#mw-mf-page-center {
+			.transform(translate(@rightDrawerWidth, 0));
+		}
+	}
+}

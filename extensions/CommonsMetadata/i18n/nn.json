@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jeblad",
+			"Njardarlogar"
+		]
+	},
+	"commonsmetadata-desc": "Utvidar «extmetadata»-eigenskapen til API-modulen for biletinformasjon slik at han inkluderer informasjon frå filsider som brukar dei mest brukte malane på Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Filer utan maskinlesbar lisens",
+	"commonsmetadata-trackingcategory-no-license-desc": "Fila har ikkje [{{MediaWiki:Commonsmetadata-doc-url}} maskinlesbar] lisensmal.",
+	"commonsmetadata-trackingcategory-no-description": "Filer utan maskinlesbar skildring",
+	"commonsmetadata-trackingcategory-no-description-desc": "Fila har ikkje [{{MediaWiki:Commonsmetadata-doc-url}} maskinlesbar] infomal, eller så er ikkje skildringsfeltet hennar fylt ut.",
+	"commonsmetadata-trackingcategory-no-author": "Filer utan maskinlesbar opphavsperson",
+	"commonsmetadata-trackingcategory-no-author-desc": "Fila har ikkje [{{MediaWiki:Commonsmetadata-doc-url}} maskinlesbar] infomal, eller så er ikkje feltet for opphavsperson fylt ut.",
+	"commonsmetadata-trackingcategory-no-source": "Filer utan maskinlesbar kjelde",
+	"commonsmetadata-trackingcategory-no-source-desc": "Fila har ikkje [{{MediaWiki:Commonsmetadata-doc-url}} maskinlesbar] infomal, eller så er ikkje feltet for kjelde fylt ut."
+}

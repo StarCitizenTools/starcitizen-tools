@@ -1,0 +1,6 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"cldr-desc": "Extension which provides localised language names based on [http://cldr.unicode.org/index/downloads CLDR data]"
+}

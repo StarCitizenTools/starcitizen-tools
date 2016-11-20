@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Oesjaar"
+		]
+	},
+	"msu-insert-link": "Voeg skakel by",
+	"msu-insert-links": "Voeg alles as skakels in",
+	"msu-cancel-upload": "Kanselleer oplaai.",
+	"msu-clean-all": "Maak lys skoon",
+	"msu-upload-possible": "Lêer kan nou opgelaai word.",
+	"msu-ext-not-allowed": "Slegs die volgende lêer tipes word toegelaat:",
+	"msu-upload-this": "Kliek hier om hierdie lêer op te laai.",
+	"msu-dropzone": "Laai lêers hier af."
+}

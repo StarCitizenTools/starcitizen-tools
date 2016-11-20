@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kghbln",
+			"Raimond Spekking"
+		]
+	},
+	"cleanchanges-changerightslink": "Gruppen ändern",
+	"cleanchanges-desc": "Ermöglicht eine kompaktere Anzeige der [[Special:RecentChanges|letzten Änderungen]]",
+	"cleanchanges-language": "Sprache:",
+	"cleanchanges-language-na": "Alle",
+	"cleanchanges-users": "Benutzer (Trennzeichen:&nbsp;„|“):",
+	"cleanchanges-showuserlinks": "Zeige Benutzerlinks"
+}

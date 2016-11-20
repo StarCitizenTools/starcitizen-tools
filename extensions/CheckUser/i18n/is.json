@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"S.Örvarr.S",
+			"Snævar",
+			"Spacebirdy",
+			"පසිඳු කාවින්ද"
+		]
+	},
+	"checkuser-desc": "Veitir notendum réttindi til að athuga vistföng notenda og aðrar notendaupplýsingar.",
+	"checkuser": "Notenda athugandi",
+	"group-checkuser": "Notenda athugandi",
+	"group-checkuser-member": "{{GENDER:$1|notenda athugandi}}",
+	"grouppage-checkuser": "{{ns:project}}:Notenda athugandi",
+	"checkuser-reason": "Ástæða:",
+	"checkuser-showlog": "Sýna skrá",
+	"checkuser-query": "Sækja nýlegar breytingar",
+	"checkuser-target": "Notandi eða vistfang:",
+	"checkuser-users": "Sækja notendur",
+	"checkuser-edits": "Sækja breytingar",
+	"checkuser-ips": "Sækja vistföng",
+	"checkuser-search": "Leita",
+	"checkuser-all": "allt",
+	"checkuser-nomatch": "Engin samsvörun fannst.",
+	"checkuser-check": "Athuga",
+	"checkuser-nolog": "Engin skrá fundin.",
+	"checkuser-blocked": "Bannaður",
+	"checkuser-locked": "Læstur",
+	"checkuser-accounts": "$1 {{PLURAL:$1|nýr aðgangur|nýir aðgangar}}",
+	"checkuser-search-submit": "Leita"
+}

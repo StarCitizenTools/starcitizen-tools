@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nghtwlkr"
+		]
+	},
+	"cldr-desc": "Utvidelse som gir lokaliserte språknavn basert på [http://cldr.unicode.org/index/downloads CLDR-data]"
+}

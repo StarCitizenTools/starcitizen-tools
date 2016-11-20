@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"El libre",
+			"SMP",
+			"Solde"
+		]
+	},
+	"cleanchanges-changerightslink": "canvia els grups",
+	"cleanchanges-desc": "Versió més compacta de la [[Special:RecentChanges|llista de canvis recents]]",
+	"cleanchanges-language": "Idioma:",
+	"cleanchanges-language-na": "Tot",
+	"cleanchanges-users": "Usuaris (Separador: |):",
+	"cleanchanges-showuserlinks": "Mostra els enllaços de l'usuari/a"
+}

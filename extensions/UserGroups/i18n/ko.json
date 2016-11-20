@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kwj2772"
+		]
+	},
+	"usergroups": "사용자 그룹 관리",
+	"usergroupnameexists-error": "이 이름을 가진 그룹이 이미 존재하기 때문에 새로운 사용자 그룹을 생성할 수 없습니다.",
+	"usergroups-createnew": "(새로 추가...)",
+	"usergroups-editgroup-newgroup": "새 사용자 그룹 이름 입력:",
+	"usergroups-editgroup-reason": "이유:",
+	"usergroups-editgroup-revoke": "이 그룹에 권한을 부여하는 대신 제거하도록 설정",
+	"usergroups-editgroup-save": "변경 사항 저장",
+	"usergroups-editgroup-userrights": "사용 가능한 모든 권한",
+	"usergroups-log-name": "사용자 그룹 기록",
+	"usergroups-log-header": "이 기록은 사용자 그룹의 권한의 변동 사항입니다.",
+	"usergroups-log-none": "(없음)",
+	"usergroups-log-revoke": "권한 제거형",
+	"usergroups-log-revoke-switchon": "권한 제거형으로 변경했습니다;",
+	"usergroups-log-revoke-switchoff": "권한 부여형으로 변경했습니다;",
+	"action-modifygroups": "사용자 그룹을 수정할",
+	"invalidusergroupname-title": "잘못된 사용자 그룹 이름",
+	"invalidusergroupname-error": "새 사용자 그룹으로 입력한 이름이 잘못되었습니다.\n\n[[{{#special:UserGroups}}]]으로 돌아갑니다.",
+	"nosuchusergroup": "\"$1\"이라는 사용자 그룹이 존재하지 않습니다. 새 사용자 그룹을[[Special:UserGroups/new|생성]]하시겠습니까?",
+	"right-modifygroups": "사용자 그룹을 생성, 수정, 삭제함",
+	"logentry-usergroups-create": "$1 사용자가 다음 권한을 포함한 $7사용자 그룹 \"$4\"을 {{GENDER:$2|생성했습니다}}: $5",
+	"logentry-usergroups-delete": "$1 사용자가 사용자 그룹 \"$4\"를 {{GENDER:$2|삭제했습니다}}.",
+	"logentry-usergroups-modify": "$1 사용자가 사용자 그룹 \"$4\"를 {{GENDER:$2|수정}}하였습니다. $7추가: $5; 제거: $6"
+}

@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chuvash2014"
+		]
+	},
+	"translate": "Куçарни",
+	"translate-taction-translate": "Куçарни",
+	"translate-next": "Урăх страницă",
+	"translate-prev": "Унчченхи страницă",
+	"translate-langstats-expand": "сар",
+	"translate-language-code": "Чĕлхен кодчĕ",
+	"translate-language-code-field-name": "Чĕлхен кодчĕ:",
+	"translate-untranslated": "Куçарманнисем",
+	"translate-percentage-fuzzy": "Кивелнĕ",
+	"translate-gethelp": "Ыйтмалли",
+	"tux-languageselector": "Куçармалла",
+	"tux-tab-all": "Пурте",
+	"tux-tab-untranslated": "Куçарманнисем",
+	"tux-tab-outdated": "Кивелнисем",
+	"tux-tab-translated": "Куçарнисем",
+	"tux-tab-unproofread": "Тĕрĕслеменисем",
+	"tux-empty-list-other": "Куçармалли çук.",
+	"tux-empty-list-other-action": "Куçарнисене тĕрĕслемелли"
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Armando-Martin",
+			"Ryo567",
+			"Macofe"
+		]
+	},
+	"pageimages-desc": "Recopila información sobre las imágenes utilizadas en la página",
+	"pageimages-info-label": "Imagen de la página",
+	"apihelp-query+pageimages-example-1": "Obtener el nombre y una miniatura de <kbd>100</kbd> píxeles de una imagen en la página de <kbd>Albert Einstein</kbd>.",
+	"apihelp-query+pageimages-param-thumbsize": "Tamaño máximo de la miniatura."
+}

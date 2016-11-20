@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06",
+			"Brest"
+		]
+	},
+	"cldr-desc": "Додаток кој дава преведени имиња на јазиците, врз онснова на [http://cldr.unicode.org/index/downloads податоците од CLDR]"
+}

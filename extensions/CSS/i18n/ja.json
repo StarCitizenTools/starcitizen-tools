@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fryed-peach",
+			"Shirayuki",
+			"Whym"
+		]
+	},
+	"css-desc": "指定したページにCSSスタイルシートを埋め込めるようにするパーサー関数"
+}

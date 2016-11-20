@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elisardojm"
+		]
+	},
+	"usergroups": "Xestión de grupos de usuarios",
+	"usergroups-desc": "Proporciona un mellor control de que privilexios poden rexistrarse con cada grupo de usuarios.",
+	"usergroupnameexists-error": "Non se pode crear outro grupo de usuarios con este nome porque xa existe.",
+	"usergroups-createnew": "(crear novo…)",
+	"usergroups-editgroup-delete": "Eliminar este grupo de usuarios <span class=\"important\" style=\"color:red\">(<strong>AVISO</strong>: Isto é irreversible. Para recrear esta clase terá que [[Special:UserGroups/new|facer un novo]].)</span>",
+	"usergroups-editgroup-desc": "Seleccione un grupo de usuarios da lista de abaixo, ou cree o seu coa opción \"crear novo...\".",
+	"usergroups-editgroup-newgroup": "Introduza o nome do novo grupo de usuarios:",
+	"usergroups-editgroup-reason": "Motivo:",
+	"usergroups-editgroup-revoke": "Definir este grupo de usuarios para revogar en vez de conceder permisos",
+	"usergroups-editgroup-save": "Gardar cambios",
+	"usergroups-editgroup-userrights": "Todos os permisos dispoñibles",
+	"usergroups-log-name": "Rexistro de grupos de usuarios",
+	"usergroups-log-header": "Este registo amosa as modificacións dos dereitos de usuario de cada grupo de usuarios.",
+	"usergroups-log-none": "(ningún)",
+	"usergroups-log-revoke": "tipo para revogación",
+	"usergroups-log-revoke-switchon": "Intercambiado a tipo revocado;",
+	"usergroups-log-revoke-switchoff": "Intercambiado a tipo sen revocación;",
+	"action-modifygroups": "modificar grupos de usuarios",
+	"invalidusergroupname-title": "Nome de grupo de usuarios non válido",
+	"invalidusergroupname-error": "O nome que indicou para o novo grupo de usuarios non é válido.\n\n[[Special:UserGroups|Volver]].",
+	"nosuchusergroup": "Non se atopou ningún grupo de usuarios chamado «$1». Quere [[Special:UserGroups/new|crealo]]?",
+	"right-modifygroups": "Crear, modificar e borrar grupos de usuarios",
+	"logentry-usergroups-create": "$1 {{GENDER:$2|creou}} un novo grupo de usuarios $7 \"$4\" que contén: $5",
+	"logentry-usergroups-delete": "$1 {{GENDER:$2|eliminou}} o grupo de usuarios \"$4\".",
+	"logentry-usergroups-modify": "$1 {{GENDER:$2|modificou}} o grupo de usuarios \"$4\". $7 Engadido $5; eliminado $6"
+}

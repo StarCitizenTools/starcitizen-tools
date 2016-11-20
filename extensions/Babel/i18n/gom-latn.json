@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"The Discoverer"
+		]
+	},
+	"babel": "Babel vapurpi mahiti",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Bhase pormonnem vapurpi",
+	"babel-autocreate-text-levels": "Hea vorgacheo vapurpeanim khunnaila ki $2 bhasen kushaltaiche $1 pavlar asat",
+	"babel-autocreate-text-main": "Hea vorgacheo vapurpeanim tenka $1 bhas kitli kollta ti khunnaila.",
+	"babel-0": "Hea vangddiak [[$2|$3]] [[$1|kollna]]",
+	"babel-1": "Hea vangddiak [[$1|thodi]] [[$2|$3]] kollta",
+	"babel-2": "Hea vangddeak [[$2|$3]] [[$1|sadhi]] sthorar kollta",
+	"babel-3": "Hea vangddiak [[$2|$3]] [[$1|borem]] bhaxen kollta",
+	"babel-4": "Hea vangddiak [[$2|$3]] [[$1|khup borem]] bhaxen kollta",
+	"babel-5": "Hea vangddeak [[$2|$3]] [[$1|vyavasaik]] sthorar kollta",
+	"babel-N": "[[$2|$3]] hea vangddiachi [[$1|mai-bhas]] zaun asa",
+	"babel-0-n": "Hea vangddiak [[$2|Konknni]] [[$1|kollna]]",
+	"babel-1-n": "Hea vangddiak [[$1|thodi]] [[$2|Konknni]] kollta",
+	"babel-2-n": "Hea vangddeak [[$2|Konknni]] [[$1|sadhi]] sthorar kollta",
+	"babel-3-n": "Hea vangddiak [[$2|Konknni]] [[$1|borem]] bhaxen kollta",
+	"babel-4-n": "Hea vangddiak [[$2|Konknni]] [[$1|khup borem]] bhaxen kollta",
+	"babel-5-n": "Hea vangddeak [[$2|Konknni]] [[$1|vyavasaik]] sthorar kollta",
+	"babel-N-n": "[[$2|Konknni]] hea vangddiachi [[$1|mai-bhas]] zaun asa",
+	"babel-footer": "Bhasepormonem vapurpeanchim nanvam"
+}

@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lejonel",
+			"M.M.S.",
+			"WikiPhoenix"
+		]
+	},
+	"googleanalytics-desc": "Lägger in ett skript från Google Analytics (ga.js) på MediaWiki-sidor för att spåra användare",
+	"right-noanalytics": "Undantagen från Google Analytics-spårning"
+}

@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Murma174",
+			"Purodha",
+			"Pyt"
+		]
+	},
+	"babel": "Babel brüker-informatjuun",
+	"babel-desc": "Saat det <code>#babel</code>-funktjuun diartu. Diarmä kön \"Babel\"-brükerfialen maaget, an uk aanj föörlaagen iinbünjen wurd.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Brükern efter spriak",
+	"babel-autocreate-reason": "Automaatisch mååged [[$1|Babel]]-kategorii.",
+	"babel-autocreate-text-levels": "Brükern uun detdiar kategorii haa weden üüb di peegel $1 faan det spriak $2.",
+	"babel-autocreate-text-main": "Brükern uun detdiar kategorii haa weden faan det spriak $1.",
+	"babel-0": "{{GENDER:$4|Didiar brüker}} hää [[$1|nian]] weden faan [[$2|$3]] (of ferstäänt det man jüst so).",
+	"babel-1": "{{GENDER:$4|Didiar brüker}} hää [[$1|en betj]] weden faan [[$2|$3]].",
+	"babel-2": "{{GENDER:$4|Didiar brüker}} koon [[$1|en betj]] lees an skriiw üüb [[$2|$3]].",
+	"babel-3": "{{GENDER:$4|Didiar brüker}} koon [[$1|gud]] lees an skriiw üüb [[$2|$3]].",
+	"babel-4": "{{GENDER:$4|Didiar brüker}} snaaket [[$2|$3]], bal üs wan't sin [[$1|mamenspriak]] wiar.",
+	"babel-5": "{{GENDER:$4|Didiar brüker}} hää en [[$1|auer a miaten]] gud weden faan [[$2|$3]].",
+	"babel-N": "{{GENDER:$4|Didiar brüker}} snaaket [[$2|$3]] üs [[$1|mamenspriak]].",
+	"babel-0-n": "{{GENDER:$4|Didiar brüker}} hää [[$1|nian]] weden faan [[$2|Nordfriisk]] (of ferstäänt det man jüst so).",
+	"babel-1-n": "{{GENDER:$4|Didiar brüker}} hää [[$1|en betj]] weden faan [[$2|Nordfriisk]].",
+	"babel-2-n": "{{GENDER:$4|Didiar brüker}} koon [[$1|en betj]] lees an skriiw üüb [[$2|Nordfriisk]].",
+	"babel-3-n": "{{GENDER:$4|Didiar brüker}} koon [[$1|gud]] lees an skriiw üüb [[$2|Nordfriisk]].",
+	"babel-4-n": "{{GENDER:$4|Didiar brüker}} snaaket [[$2|Nordfriisk]], bal üs wan't sin [[$1|mamenspriak]] wiar.",
+	"babel-5-n": "{{GENDER:$4|Didiar brüker}} hää en [[$1|auer a miaten]] gud weden faan [[$2|Nordfriisk]].",
+	"babel-N-n": "{{GENDER:$4|Didiar brüker}} snaaket [[$2|Nordfriisk]] üs [[$1|mamenspriak]].",
+	"babel-footer": "Brükern efter spriak"
+}

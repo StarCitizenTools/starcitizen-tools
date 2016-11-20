@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Martin Schwindl",
+			"Taylor Braun-Jones",
+			"kotra"
+		]
+	},
+	"msu-desc": "Enables easy uploads for one file or multiple files simultaneously",
+	"msu-button-title": "Select files",
+	"msu-insert-link": "Insert link",
+	"msu-insert-gallery": "Insert all as gallery",
+	"msu-insert-files": "Insert all as files",
+	"msu-insert-links": "Insert all as links",
+	"msu-insert-image": "Insert as image",
+	"msu-insert-video": "Insert video",
+	"msu-cancel-upload": "Cancel upload",
+	"msu-replace-file": "Replace file?",
+	"msu-clean-all": "Clear list",
+	"msu-ext-not-allowed": "Only the following file {{PLURAL:$1|type is|types are}} allowed:",
+	"msu-upload-this": "Upload this file",
+	"msu-upload-all": "Upload all files",
+	"msu-dropzone": "Drop files here",
+	"msu-comment": "File uploaded with MsUpload"
+}

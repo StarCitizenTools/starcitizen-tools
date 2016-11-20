@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ukabia"
+		]
+	},
+	"checkuser": "Lé ọ'bànifé anya",
+	"group-checkuser": "Lé ọ'bànifé anya",
+	"group-checkuser-member": "Lé ọ'bànifé anya",
+	"checkuser-reason": "Mgbághapụtà:",
+	"checkuser-showlog": "Zí ndétu nchétá",
+	"checkuser-users": "Wèté ọ'bànifé",
+	"checkuser-edits": "Gá nwèté orü shí IP",
+	"checkuser-ips": "Gá nwèté ónúọgụgụ IP",
+	"checkuser-search": "Chọwa",
+	"checkuser-period": "Ógè ȯ wèrè:",
+	"checkuser-week-1": "izù nke gáráni",
+	"checkuser-month": "úbochi 30 gárání",
+	"checkuser-all": "nke nílé",
+	"checkuser-check": "Lechányá",
+	"checkuser-blocked": "Kwàchịrị",
+	"checkuser-locked": "Gbàchịrị",
+	"checkuser-search-submit": "Chọwa",
+	"checkuser-search-initiator": "onyé bịdòrò",
+	"checkuser-search-target": "ẹ́té"
+}

@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cin",
+			"Firilacroco",
+			"KlaudiuMihaila",
+			"Minisarm"
+		]
+	},
+	"babel": "Informații Babel despre utilizator",
+	"babel-desc": "Adaugă funcția de parsare <code>#babel</code> pentru generarea automată a coloanei de cutii de utilizator babel, cu posibilitatea de a include formate personalizate",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Categorie:Babel - Utilizatori după limbă",
+	"babel-autocreate-reason": "Crearea automată a categoriei [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Utilizatorii din această categorie cunosc limba  $2 la nivelul  $1.",
+	"babel-autocreate-text-main": "Utilizatorii din această categorie cunosc limba  $1.",
+	"babel-0": "Acest utilizator [[$1|nu]] are cunoștințe de [[$2|$3]] (sau înțelege cu mare dificultate).",
+	"babel-1": "Acest utilizator poate contribui cu un nivel [[$1|de bază]] de [[$2|$3]].",
+	"babel-2": "Acest utilizator poate contribui cu un nivel [[$1|intermediar]] de [[$2|$3]].",
+	"babel-3": "Acest utilizator poate contribui cu un nivel [[$1|avansat]] de [[$2|$3]].",
+	"babel-4": "Acest utilizator poate contribui cu un nivel [[$1|aproape nativ]] de [[$2|$3]].",
+	"babel-5": "Acest utilizator contribuie folosind un nivel [[$1|profesional]] de [[$2|$3]].",
+	"babel-N": "Acest utilizator este un vorbitor [[$1|nativ]] al [[$2|$3]].",
+	"babel-0-n": "Acest utilizator [[$1|nu]] are cunoștințe de [[$2|română]] (sau înțelege cu mare dificultate).",
+	"babel-1-n": "Acest utilizator poate contribui cu un nivel [[$1|de bază]] de [[$2|română]].",
+	"babel-2-n": "Acest utilizator poate contribui cu un nivel [[$1|intermediar]] de [[$2|română]].",
+	"babel-3-n": "Acest utilizator poate contribui cu un nivel [[$1|avansat]] de [[$2|română]].",
+	"babel-4-n": "Acest utilizator poate contribui cu un nivel [[$1|aproape nativ]] de [[$2|română]].",
+	"babel-5-n": "Acest utilizator contribuie folosind un nivel [[$1|profesional]] de [[$2|română]].",
+	"babel-N-n": "Acest utilizator este un vorbitor [[$1|nativ]] al [[$2|limbii române]].",
+	"babel-footer": "Utilizatori după limbă"
+}

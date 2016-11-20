@@ -1,0 +1,245 @@
+@import '../../echo.variables';
+@import '../../echo.mixins';
+
+.mw-echo-ui-notificationItemWidget {
+	padding: 0.8em 1em 0.5em 1em;
+	background-color: #F1F1F1;
+	border-bottom: 1px solid #DDDDDD;
+	white-space: normal;
+
+	> a,
+	&:hover > a {
+		text-decoration: none;
+	}
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&-icon {
+		img {
+			height: 30px;
+			width: 30px;
+		}
+
+		position: absolute;
+	}
+
+	&-content {
+		display: inline-block;
+		// The icon is 30px and has a 0.8em right margin
+		padding-left: ~"calc(30px + 0.8em)";
+		box-sizing: border-box;
+		width: 100%;
+
+		&-message {
+			line-height: 16px;
+			&-header {
+				color: @notification-text-color;
+			}
+			&-body {
+				.mw-echo-ui-mixin-one-line-truncated;
+				color: @notification-body-color;
+				margin-top: 4px;
+			}
+		}
+
+		&-table {
+			display: table;
+			width: 100%;
+			margin-top: 0.8em;
+		}
+
+		&-actions {
+			display: table-row;
+			font-size: 0.9em;
+
+			& > &-buttons.oo-ui-buttonSelectWidget {
+				display: table-cell;
+				vertical-align: bottom;
+			}
+
+			&-button,
+			.mw-echo-ui-menuItemWidget {
+				margin-right: 1.2em;
+			}
+
+			&-menu {
+				.mw-echo-ui-mixin-hover-opacity();
+				display: table-cell;
+				vertical-align: bottom;
+				padding: 0;
+
+				.oo-ui-popupWidget-popup {
+					font-size: 1 / 0.8em;
+					padding: 0.5em;
+				}
+			}
+
+			&-timestamp {
+				display: table-cell;
+				vertical-align: bottom;
+				text-align: right;
+				color: black;
+				opacity: @opacity-low;
+				white-space: nowrap;
+				width: 100%;
+			}
+
+		}
+	}
+
+	// Table layout only for the content inside bundles
+	&-bundle {
+		display: table;
+		width: 100%;
+
+		.mw-echo-ui-notificationItemWidget-content {
+			display: table-row;
+
+			.mw-echo-ui-notificationItemWidget {
+				// CSS table layout
+				&-icon,
+				&-content-message,
+				&-content-actions,
+				&-markAsReadButton {
+					display: table-cell;
+					vertical-align: top;
+				}
+
+				// Positioning fixes for bundled items
+				&-icon {
+					position: relative;
+					padding-right: 0.5em;
+				}
+
+				&-content-message {
+					display: table-cell;
+					padding-right: 0.5em;
+					width: 100%;
+				}
+
+				&-content-actions {
+					&-row {
+						display: table-row;
+					}
+
+					&-buttons {
+						display: table-cell;
+						vertical-align: middle;
+					}
+
+					&-menu {
+						display: table-cell;
+						vertical-align: middle;
+					}
+
+					&-timestamp {
+						float: none;
+						display: table-cell;
+						vertical-align: middle;
+						padding-right: 0.5em;
+						white-space: nowrap;
+					}
+				}
+
+				&-markAsReadButton {
+					width: 1em;
+					float: none;
+				}
+
+			}
+		}
+	}
+
+	&-markAsReadButton {
+		.mw-echo-ui-mixin-hover-opacity;
+		float: right;
+		font-size: 1em;
+		margin-top: -0.5em;
+		margin-right: -0.4em;
+		padding: 0;
+
+		.mw-echo-ui-notificationItemWidget-bundle & {
+			font-size: 0.8em;
+			margin-top: 0;
+		}
+
+		.oo-ui-iconElement-icon {
+			// We have to override oojs-i's width/height,
+			// which uses a very specific selector
+			width: 1.7em !important;
+			height: 1.7em !important;
+		}
+	}
+
+	&-initiallyUnseen {
+		-webkit-animation-name: unseen-fadeout-to-read;
+		animation-name: unseen-fadeout-to-read;
+		-webkit-animation-duration: .5s;
+		animation-duration: .5s;
+		-webkit-animation-delay: 2s;
+		animation-delay: 2s;
+		-webkit-animation-timing-function: ease-out;
+		animation-timing-function: ease-out;
+		-webkit-animation-fill-mode: both;
+		animation-fill-mode: both;
+
+		&.mw-echo-ui-notificationItemWidget-unread {
+			-webkit-animation-name: unseen-fadeout-to-unread;
+			animation-name: unseen-fadeout-to-unread;
+		}
+	}
+	&-unread {
+		background-color: white;
+	}
+
+	&.oo-ui-optionWidget-selected,
+	&.oo-ui-optionWidget-highlighted {
+		background-color: #F9F9F9;
+	}
+
+	&-unread.oo-ui-optionWidget-highlighted {
+		background-color: white;
+	}
+
+	// NOTE: The internal styling of the notifications is outside this file, because
+	// it also affects the notifications in Special:Notifications
+	// These styles are in modules/nojs/ext.echo.notifications.less
+}
+
+@-webkit-keyframes unseen-fadeout-to-unread {
+	from {
+		background-color: @notification-background-unseen;
+	}
+	to {
+		background-color: @notification-background-unread;
+	}
+}
+
+@keyframes unseen-fadeout-to-unread {
+	from {
+		background-color: @notification-background-unseen;
+	}
+	to {
+		background-color: @notification-background-unread;
+	}
+}
+
+@-webkit-keyframes unseen-fadeout-to-read {
+	from {
+		background-color: @notification-background-unseen;
+	}
+	to {
+		background-color: @notification-background-read;
+	}
+}
+
+@keyframes unseen-fadeout-to-read {
+	from {
+		background-color: @notification-background-unseen;
+	}
+	to {
+		background-color: @notification-background-read;
+	}
+}

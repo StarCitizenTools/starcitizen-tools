@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jopparn",
+			"Lokal Profil",
+			"WikiPhoenix"
+		]
+	},
+	"usergroups": "Hantering av användargrupper",
+	"usergroups-desc": "Ger noggrannare kontroll över vilka användarrättigheter som kan registreras med vilka användargrupper.",
+	"usergroupnameexists-error": "Du kan inte skapa en ny användargrupp med detta namn då det redan finns en.",
+	"usergroups-createnew": "(skapa ny...)",
+	"usergroups-editgroup-delete": "Radera denna användargrupp <span class=\"important\" style=\"color:red\">(<strong>Varning</strong>: Detta är oåterkalleligt. För att återskapa denna klass måste du [[Special:UserGroups/new|skapa en ny]].)</span>",
+	"usergroups-editgroup-desc": "Välj en användargrupp från rullmenyn nedan, eller skapa din egen med \"skapa ny...\"-alternativet.",
+	"usergroups-editgroup-newgroup": "Ange namnet för din nya användargrupp:",
+	"usergroups-editgroup-reason": "Orsak:",
+	"usergroups-editgroup-revoke": "Ange denna användargruppen som återkalla i stället för bevilja behörighet.",
+	"usergroups-editgroup-save": "Spara ändringar",
+	"usergroups-editgroup-userrights": "Alla tillgängliga behörigheter",
+	"usergroups-log-name": "Användargruppslogg",
+	"usergroups-log-header": "Denna logg registrerar ändringar till användarrättigheterna för var användargrupp.",
+	"usergroups-log-none": "(ingen)",
+	"usergroups-log-revoke": "återkalla-typ-",
+	"usergroups-log-revoke-switchon": "Bytte till återkalla-typ;",
+	"usergroups-log-revoke-switchoff": "Bytte till icke-återkalla-typ;",
+	"action-modifygroups": "ändra användargrupper",
+	"invalidusergroupname-title": "Ogiltigt namn för användargrupp",
+	"invalidusergroupname-error": "Namnet som du angav för din nya användargrupp är ogiltigt.\n\n[[Special:UserGroups|Tillbaka]]",
+	"nosuchusergroup": "Kunde inte hitta någon användargrupp med namnet \"$1\". Ville du kanske [[Special:UserGroups/new|skapa]] denna nya användargrupp?",
+	"right-modifygroups": "Skapa, ändra eller radera användargrupper",
+	"logentry-usergroups-create": "$1 {{GENDER:$2|skapade}} ny $7användargrupp \"$4\" innehållande: $5",
+	"logentry-usergroups-delete": "$1 {{GENDER:$2|raderade}} användargrupp \"$4\".",
+	"logentry-usergroups-modify": "$1 {{GENDER:$2|ändrade}} användargrupp \"$4\". $7La till $5; Tog bort $6"
+}

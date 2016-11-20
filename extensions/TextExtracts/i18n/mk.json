@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"textextracts-desc": "Дава извадоци од содржината на страницата во прост текст или ограничен HTML",
+	"apihelp-query+extracts-description": "Дава извадоци од дадените страници во прост текст или ограничен HTML.",
+	"apihelp-query+extracts-param-chars": "Колку знаци да има извадокот. Самиот текст што ќе се даде може да биде малку подолг.",
+	"apihelp-query+extracts-param-sentences": "Колку реченици да има извадокот.",
+	"apihelp-query+extracts-param-limit": "Колку извадоци да се дадат.",
+	"apihelp-query+extracts-param-intro": "Дај го само воведниот дел пред првиот поднаслов.",
+	"apihelp-query+extracts-param-plaintext": "Давај ги извадоците како прост текс или ограничен HTML.",
+	"apihelp-query+extracts-param-sectionformat": "Како да се форматираат поднасловите во прост текст:\n;plain: Без форматирање.\n;wiki: во викитекстуален стил (== Вака ==).\n;raw: Внатрешното претставување на модулов (називите на поднасловите добиваат претставки &lt;ASCII 1&gt;&lt;ASCII 2&gt;&lt;ниво на поднасловот&gt;&lt;ASCII 2&gt;&lt;ASCII 1&gt;).",
+	"apihelp-query+extracts-param-variant": "Претвори ја содржината во оваа јазична варијанта.",
+	"apihelp-query+extracts-example-1": "Дај извадок во 175 знаци"
+}

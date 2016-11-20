@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Base",
+			"Ата",
+			"Piramidion"
+		]
+	},
+	"pageimages-desc": "Збирає сторінку про зображення, що використовуються на сторінці",
+	"pageimages-info-label": "Зображення сторінки",
+	"apihelp-query+pageimages-description": "Видає інформацію про зображення на сторінці, таку як мініатюри і наявність фото.",
+	"apihelp-query+pageimages-example-1": "Отримати назву та <kbd>100</kbd>-піксельну мініатюру зображення на сторінці <kbd>Albert Einstein</kbd>.",
+	"apihelp-query+pageimages-param-prop": "Яку інформацію видавати:\n;thumbnail:URL та розміри зображення, асоційованого зі сторінкою, за наявності.\n;name:Назва зображення.",
+	"apihelp-query+pageimages-param-thumbsize": "Максимальний розмір мініатюр.",
+	"apihelp-query+pageimages-param-limit": "Властивості скількох сторінок видавати."
+}

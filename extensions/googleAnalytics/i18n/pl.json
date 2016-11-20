@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Leinad",
+			"Woytecr"
+		]
+	},
+	"googleanalytics-desc": "Wstawia skrypt Google Analytics (ga.js) do stron MediaWiki w celu śledzenia",
+	"right-noanalytics": "Wyłączone ze śledzenia Google Analytics"
+}

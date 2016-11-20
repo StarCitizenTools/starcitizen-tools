@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Byrial",
+			"Christian List"
+		]
+	},
+	"cleanchanges-changerightslink": "ændr grupper",
+	"cleanchanges-desc": "Mere kompakt visning af [[Special:RecentChanges|seneste ændringer]]",
+	"cleanchanges-language": "Sprog:",
+	"cleanchanges-language-na": "Alle",
+	"cleanchanges-users": "Brugere (adskil med |):",
+	"cleanchanges-showuserlinks": "Vis brugerhenvisninger"
+}

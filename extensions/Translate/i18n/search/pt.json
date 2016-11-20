@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Luckas",
+			"Hamilton Abreu",
+			"Vitorvicentevalente",
+			"Macofe",
+			"Fúlvio"
+		]
+	},
+	"searchtranslations": "Pesquisar nas traduções",
+	"tux-sst-edit": "Editar a tradução",
+	"tux-sst-view-foreign": "Ver em $1",
+	"tux-sst-search": "Pesquisar",
+	"tux-sst-search-ph": "Pesquisar nas traduções",
+	"tux-sst-count": "{{PLURAL:$1|Foi encontrado um resultado|Foram encontrados $1 resultados}}",
+	"tux-sst-facet-language": "Idiomas",
+	"tux-sst-facet-group": "Grupos de mensagens",
+	"tux-sst-facet-orphan": "(orfãs)",
+	"tux-sst-nosolr-title": "Pesquisa indisponível",
+	"tux-sst-nosolr-body": "Esta wiki não tem um serviço de pesquisa de traduções.",
+	"tux-sst-solr-offline-title": "Pesquisa indisponível",
+	"tux-sst-solr-offline-body": "O serviço de pesquisa está temporariamente indisponível.",
+	"tux-sst-next": "Seguintes ›",
+	"tux-sst-prev": "‹ Anteriores",
+	"tux-sst-default": "Traduções",
+	"tux-sst-translated": "Traduções para $1",
+	"tux-sst-untranslated": "Nenhuma tradução de $1",
+	"tux-sst-outdated": "Traduções desatualizadas de $1",
+	"tux-sst-ellipsis-untranslated": "Nenhuma tradução",
+	"tux-sst-ellipsis-outdated": "Traduções desatualizadas",
+	"tux-sst-link-all-match": "Solicitar todas as palavras.",
+	"tux-sst-match-message": "Mostrar as traduções que correspondam a nenhuma das palavras pesquisadas. $1",
+	"tux-sst-case-sensitive": "Maiúsculas e minúsculas"
+}

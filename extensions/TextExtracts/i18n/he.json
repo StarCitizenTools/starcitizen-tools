@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80"
+		]
+	},
+	"textextracts-desc": "אספקת מובאות של תוכן הדפים טקסט בפשוט או ב־HTML מוגבל",
+	"apihelp-query+extracts-description": "מחזיר מובאות בטקסט רגיל או ב־HMTL מוגבל של דפים נתונים.",
+	"apihelp-query+extracts-param-chars": "כמה תווים להחזיר. הטקסט האמתי עשוי להיות ארוך קצת יותר.",
+	"apihelp-query+extracts-param-sentences": "כמה משפטים להחזיר.",
+	"apihelp-query+extracts-param-limit": "כמה מובאות להחזיר.",
+	"apihelp-query+extracts-param-intro": "להחזיר רק תוכן לפני הפסקה הראשונה.",
+	"apihelp-query+extracts-param-plaintext": "להחזיר מובאות בתור טקסט רגיל במקום HTML מוגבל.",
+	"apihelp-query+extracts-param-sectionformat": "איך לעצב פסקאות במצב טקסט רגיל:\n;plain:ללא עיצוב.\n;wiki:עיצוב בסגונון קוד ויקי (== ככה ==).\n;raw:הייצוג הפנימי של המודול הזה (לכותרות פסקאות תהיה תחילית &lt;ASCII 1&gt;&lt;ASCII 2&gt;&lt;section level&gt;&lt;ASCII 2&gt;&lt;ASCII 1&gt;).",
+	"apihelp-query+extracts-param-variant": "המרת תוכן להגוון השפה הזה.",
+	"apihelp-query+extracts-example-1": "קבלת מובאה של 175 תווים"
+}

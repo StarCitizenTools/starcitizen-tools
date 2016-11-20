@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lokal Profil",
+			"Hangsna"
+		]
+	},
+	"commonsmetadata-desc": "Utökar \"extmetadata\" egenskapen i API-modulen för bildinformation med information som lagras på bildbeskrivningssidor som använder de mallar som ofta används på Wikimedia Commons.",
+	"commonsmetadata-trackingcategory-no-license": "Filer utan maskinläsbar licens",
+	"commonsmetadata-trackingcategory-no-license-desc": "Filen har inte någon [{{MediaWiki:Commonsmetadata-doc-url}} maskinläsbar] licensmall.",
+	"commonsmetadata-trackingcategory-no-description": "Filer utan maskinläsbar beskrivning",
+	"commonsmetadata-trackingcategory-no-description-desc": "Filen har inte någon [{{MediaWiki:Commonsmetadata-doc-url}} maskinläsbar] informationsmall, eller så har dess beskrivningsfält inte fyllts i.",
+	"commonsmetadata-trackingcategory-no-author": "Filer utan maskinläsbar upphovsman",
+	"commonsmetadata-trackingcategory-no-author-desc": "Filen har inte någon [{{MediaWiki:Commonsmetadata-doc-url}} maskinläsbar] informationsmall, eller så har dess skaparfält inte fyllts i.",
+	"commonsmetadata-trackingcategory-no-source": "Filer utan maskinläsbar källa",
+	"commonsmetadata-trackingcategory-no-source-desc": "Filen har inte någon [{{MediaWiki:Commonsmetadata-doc-url}} maskinläsbar] informationsmall, eller så har dess källfält inte fyllts i."
+}

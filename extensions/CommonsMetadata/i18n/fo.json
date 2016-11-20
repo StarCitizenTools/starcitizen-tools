@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"EileenSanda"
+		]
+	},
+	"commonsmetadata-desc": "Víðkar \"extmetadata\" eginleikan fyri API-modulið fyri kunning um myndina ið er goymd í frágreiðingarsíðuni fyri myndina, ið nýtir fyrimyndir, ið vanliga verða nýttar á Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Fílur ið ikki hava lisens, ið tól kunnu lesa",
+	"commonsmetadata-trackingcategory-no-license-desc": "Fílan hevur ikki nakra [{{MediaWiki:Commonsmetadata-doc-url}} tól-lesiliga] lisensfyrimynd.",
+	"commonsmetadata-trackingcategory-no-description": "Fílur ið ikki hava nakra frágreiðing, ið tól kunnu lesa",
+	"commonsmetadata-trackingcategory-no-description-desc": "Fílan hevur ikki nakra [{{MediaWiki:Commonsmetadata-doc-url}} tól-lesiliga] kunningar-fyrimynd, ella er frágreiðingarteigurin ikki útfyltur.",
+	"commonsmetadata-trackingcategory-no-author": "Fílur ið ikki hava upplýsing um høvund, ið tól kunnu lesa",
+	"commonsmetadata-trackingcategory-no-author-desc": "Fílan hevur ikki nakra [{{MediaWiki:Commonsmetadata-doc-url}} tól-lesiliga] kunningar-fyrimynd, ella er teigurin um høvund ikki útfyltur.",
+	"commonsmetadata-trackingcategory-no-source": "Fílur ið ikki hava nakra tól-lesiliga keldu",
+	"commonsmetadata-trackingcategory-no-source-desc": "Fílan hevur ikki nakra [{{MediaWiki:Commonsmetadata-doc-url}} tól-lesiliga] kunningar-fyrimynd, ella er teigurin um keldu ikki útfyltur."
+}

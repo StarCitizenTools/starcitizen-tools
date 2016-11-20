@@ -1,0 +1,5 @@
+<?php
+
+$languageNames = [
+	've' => 'Tshivenḓa',
+];

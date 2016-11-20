@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tacsipacsi"
+		]
+	},
+	"commonsmetadata-trackingcategory-no-license": "Géppel nem olvasható licencű fájlok",
+	"commonsmetadata-trackingcategory-no-license-desc": "A fájl nem tartalmaz [{{MediaWiki:Commonsmetadata-doc-url}} géppel olvasható] licencsablont.",
+	"commonsmetadata-trackingcategory-no-description": "Géppel nem olvasható leírású fájlok",
+	"commonsmetadata-trackingcategory-no-description-desc": "A fájl nem tartalmaz [{{MediaWiki:Commonsmetadata-doc-url}} géppel olvasható] információs sablont, vagy a leírás mező nincs kitöltve.",
+	"commonsmetadata-trackingcategory-no-author": "Géppel nem olvasható szerzőjű fájlok",
+	"commonsmetadata-trackingcategory-no-author-desc": "A fájl nem tartalmaz [{{MediaWiki:Commonsmetadata-doc-url}} géppel olvasható] információs sablont, vagy a szerző mező nincs kitöltve.",
+	"commonsmetadata-trackingcategory-no-source": "Géppel nem olvasható forrású fájlok",
+	"commonsmetadata-trackingcategory-no-source-desc": "A fájl nem tartalmaz [{{MediaWiki:Commonsmetadata-doc-url}} géppel olvasható] információs sablont, vagy a forrás mező nincs kitöltve."
+}

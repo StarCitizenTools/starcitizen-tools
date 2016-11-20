@@ -1,0 +1,63 @@
+{
+	"name": "RevisionSlider",
+	"version": "0.0.0",
+	"author": [
+		"WMDE"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:RevisionSlider",
+	"namemsg": "revisionslider",
+	"descriptionmsg": "revisionslider-desc",
+	"license-name": "GPL-2.0+",
+	"type": "other",
+	"manifest_version": 1,
+	"MessagesDirs": {
+		"RevisionSlider": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"RevisionSliderHooks": "RevisionSlider.hooks.php"
+	},
+	"ResourceModules": {
+		"ext.RevisionSlider.init": {
+			"scripts": [
+				"modules/ext.RevisionSlider.init.js"
+			],
+			"styles": [
+				"modules/ext.RevisionSlider.css"
+			],
+			"dependencies": [
+				"ext.RevisionSlider.Revision",
+				"ext.RevisionSlider.rainbow",
+				"ext.RevisionSlider.fetchRevisions"
+			],
+			"position": "top"
+		},
+		"ext.RevisionSlider.rainbow": {
+			"scripts": [
+				"modules/ext.RevisionSlider.rainbow.js"
+			]
+		},
+		"ext.RevisionSlider.fetchRevisions": {
+			"scripts": [
+				"modules/ext.RevisionSlider.fetchRevisions.js"
+			]
+		},
+		"ext.RevisionSlider.Revision": {
+			"scripts": [
+				"modules/ext.RevisionSlider.Revision.js"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": ""
+	},
+	"Hooks": {
+		"DiffViewHeader": [
+			"RevisionSliderHooks::onDiffViewHeader"
+		],
+		"ResourceLoaderTestModules": [
+			"RevisionSliderHooks::onResourceLoaderTestModules"
+		]
+	}
+}

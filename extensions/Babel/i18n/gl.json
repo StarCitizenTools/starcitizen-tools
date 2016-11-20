@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Toliño",
+			"Elisardojm"
+		]
+	},
+	"babel": "Información Babel {{GENDER:$1|do usuario|da usuaria}}",
+	"babel-desc": "Engade a función analítica <code>#babel</code> para permitir a xeración automática dunha caixa de usuario Babel coa posibilidade de incluír modelos personalizados",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Categoría:Babel - Usuarios por lingua",
+	"babel-autocreate-reason": "Creación automática da categoría [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Os usuarios que están nesta categoría teñen un nivel $1 de destreza en lingua $2.",
+	"babel-autocreate-text-main": "Os usuarios desta categoría indican o seu coñecemento da lingua $1.",
+	"babel-0": "{{GENDER:$4|Este usuario|Esta usuaria}} [[$1|non]] ten ningún coñecemento de [[$2|$3]] (ou ten dificultades para entendelo).",
+	"babel-1": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|básico]] de [[$2|$3]].",
+	"babel-2": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|intermedio]] de [[$2|$3]].",
+	"babel-3": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|avanzado]] de [[$2|$3]].",
+	"babel-4": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|similar ao dun nativo]] de [[$2|$3]].",
+	"babel-5": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|profesional]] de [[$2|$3]].",
+	"babel-N": "{{GENDER:$4|Este usuario|Esta usuaria}} é {{GENDER:$4|un|unha}} falante [[$1|{{GENDER:$4|nativo|nativa}}]] de [[$2|$3]].",
+	"babel-0-n": "{{GENDER:$4|Este usuario|Esta usuaria}} [[$1|non]] ten ningún coñecemento de [[$2|galego]] (ou ten dificultades para entendelo).",
+	"babel-1-n": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|básico]] de [[$2|galego]].",
+	"babel-2-n": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|intermedio]] de [[$2|galego]].",
+	"babel-3-n": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|avanzado]] de [[$2|galego]].",
+	"babel-4-n": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|similar ao dun nativo]] de [[$2|galego]].",
+	"babel-5-n": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|profesional]] de [[$2|galego]].",
+	"babel-N-n": "{{GENDER:$4|Este usuario|Esta usuaria}} é {{GENDER:$4|un|unha}} falante [[$1|{{GENDER:$4|nativo|nativa}}]] de [[$2|galego]].",
+	"babel-footer": "Usuarios por lingua"
+}

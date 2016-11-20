@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Shirayuki",
+			"Sujiniku"
+		]
+	},
+	"usergroups": "利用者グループの管理",
+	"usergroups-desc": "利用者グループにどの利用者権限を登録するかについて、より洗練された制御手段を提供する",
+	"usergroupnameexists-error": "指定した名前の利用者グループが既に存在するため、新規作成できません。",
+	"usergroups-createnew": "(新規作成...)",
+	"usergroups-editgroup-delete": "この利用者グループを削除 <span class=\"important\" style=\"color:red\">(<strong>Warning</strong>: この操作は取り消せません。このクラスを再作成するには、[[Special:UserGroups/new|新しく作ってください。]])</span>",
+	"usergroups-editgroup-desc": "下のドロップダウンから利用者グループを選択するか、または「新規作成...」でグループを作成してください。",
+	"usergroups-editgroup-newgroup": "新しい利用者グループの名前を入力:",
+	"usergroups-editgroup-reason": "理由:",
+	"usergroups-editgroup-revoke": "この利用者グループを、権限を取り消すグループにする",
+	"usergroups-editgroup-save": "変更を保存",
+	"usergroups-editgroup-userrights": "利用できるすべての権限",
+	"usergroups-log-name": "利用者グループ記録",
+	"usergroups-log-header": "以下は各利用者グループの利用者権限の変更記録です。",
+	"usergroups-log-none": "(なし)",
+	"usergroups-log-revoke": "権限を取り消す",
+	"usergroups-log-revoke-switchon": "権限を取り消すグループに切り替えました。",
+	"usergroups-log-revoke-switchoff": "権限を与えるグループに切り替えました。",
+	"action-modifygroups": "利用者グループの変更",
+	"invalidusergroupname-title": "利用者グループ名が無効",
+	"invalidusergroupname-error": "新しい利用者グループの名前として入力したものは無効です。\n\n[[Special:UserGroups|戻ってください。]]",
+	"nosuchusergroup": "「$1」という名前の利用者グループが見つかりませんでした。この名前の利用者グループを[[Special:UserGroups/new|新規作成]]することもできます。",
+	"right-modifygroups": "利用者グループを作成、変更、削除",
+	"logentry-usergroups-create": "$1 が$7利用者グループ「$4」を新規{{GENDER:$2|作成しました}}。権限: $5",
+	"logentry-usergroups-delete": "$1 が利用者グループ「$4」を{{GENDER:$2|削除しました}}。",
+	"logentry-usergroups-modify": "$1 が利用者グループ「$4」を{{GENDER:$2|変更しました}}。$7追加: $5、除去: $6"
+}

@@ -1,0 +1,62 @@
+@import 'mediawiki.mixins';
+@import 'flow.colors';
+@import 'flow.helpers';
+
+.flow-timestamp {
+	.box-sizing( border-box );
+	padding-right: 0.5em;
+
+	span {
+		unicode-bidi: embed;
+	}
+
+	.flow-timestamp-user-formatted {
+		display: none;
+	}
+	.flow-timestamp-ago {
+		display: inline;
+		// This should flip with interface language
+		direction: ltr;
+	}
+
+	&:hover {
+		.flow-timestamp-user-formatted {
+			display: inline;
+		}
+		.flow-timestamp-ago {
+			display: none;
+		}
+	}
+}
+
+.flow-timestamp-ago,
+.flow-timestamp-user-formatted {
+	display: block;
+	position: relative;
+}
+
+.flow-timestamp-ago {
+	margin-top: -1em;
+}
+
+a.flow-timestamp-anchor {
+	&, &:visited {
+		color: inherit;
+	}
+}
+
+// Colors are from mediawiki.skinning/elements.css
+// Could use a.flow-timestamp-anchor:not(:hover) to set color to gray
+// only when *not* hovering (and avoid the copied colors), but we can't
+// use :not for now due to old IE.
+a.flow-timestamp-anchor:hover {
+	color: #0645ad;
+
+	&:visited {
+		color: #0b0080;
+	}
+
+	&:active {
+		color: #faa700;
+	}
+}

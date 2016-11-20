@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16"
+		]
+	},
+	"textextracts-desc": "Fornisce estratti in testo semplice o HTML dal contenuto della pagina",
+	"apihelp-query+extracts-param-chars": "Quanti caratteri restituire. Il testo effettivo restituito potrebbe essere leggermente più lungo.",
+	"apihelp-query+extracts-param-sentences": "Quante frasi restituire.",
+	"apihelp-query+extracts-param-limit": "Quanti estratti restituire.",
+	"apihelp-query+extracts-param-intro": "Restituisci solo il contenuto prima della prima sezione.",
+	"apihelp-query+extracts-example-1": "Ottieni un estratto di 175 caratteri"
+}

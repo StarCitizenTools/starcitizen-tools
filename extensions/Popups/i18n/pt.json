@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Imperadeiro98",
+			"SandroHc",
+			"Vitorvicentevalente",
+			"Dianakc",
+			"Diniscoelho"
+		]
+	},
+	"popups-message": "Cartões flutuantes",
+	"popups-desc": "Exibe um painel com o resumo do conteúdo de páginas quando o utilizador passa o rato por cima da ligação de uma página.",
+	"popups-last-edited": "Editado $1",
+	"popups-redirects": "redirecciona para <h3>$1</h3>",
+	"popups-settings-title": "Antevisão de página",
+	"popups-settings-description": "Esta ferramenta permite-lhe pré-visualizar ligações para páginas wiki e referências.",
+	"popups-settings-option-simple": "Simples",
+	"popups-settings-option-simple-description": "Veja a introdução da página com uma imagem de antevisão. Esta opção é recomendada para leitores.",
+	"popups-settings-option-advanced": "Avançado",
+	"popups-settings-option-advanced-description": "Veja a antevisão da ligação e aceda a menus com funções de edição. Isto é usado por muitos editores.",
+	"popups-settings-option-off": "Desativar antevisão",
+	"popups-settings-option-off-description": "Pode alterar esta configuração através da ligação no rodapé da página.",
+	"popups-settings-save": "Gravar",
+	"popups-settings-help-ok": "OK",
+	"popups-settings-cancel": "Cancelar",
+	"popups-settings-help": "Pode reativar as antevisões ao utilizar a ligação existente no rodapé da página.",
+	"popups-settings-enable": "Ativar antevisão",
+	"popups-send-feedback": "Enviar comentário (ligação externa)",
+	"popups-mobile-continue-to-page": "Continuar para a página",
+	"popups-mobile-dismiss": "Ignorar",
+	"popups-mobile-message": "Cartões flutuantes (dispositivos móveis)"
+}

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"WikiEoFrEn",
+			"JackPotte"
+		]
+	},
+	"babel": "Retrache des laungages des féchouneus",
+	"babel-url": "Project:Babel",
+	"babel-0": "Ch't'î-chîn ne pâle [[$1|paé]] en [[$2|$3]].",
+	"babel-1": "Chu faichonneu prêche [[$1|eun miot]] en [[$2|$3]].",
+	"babel-N": "La laungue [[$1|native]] du faichonneu est l'[[$2|nourmand]] (ou eun de ses loceis/dgialectes).",
+	"babel-0-n": "Ch't'î-chîn ne pâle [[$1|paé]] en [[$2|loceis normaund]].",
+	"babel-N-n": "La laungue [[$1|native]] du faichonneu est l'[[$2|nourmand]] (ou eun de ses loceis/dgialectes).",
+	"babel-footer": "Féchouneux par laungue"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"زكريا"
+		]
+	},
+	"rss-desc": "اترك تعليقات RSS في صفحة الميدياويكي بصيغة عادية أو محددة الاستخدام باستعمال صفحات القوالب",
+	"rss-error": "فشل في تحميل تغذية RSS من $1: $2",
+	"rss-empty": "فشل في تحميل تغذية RSS من $1!",
+	"rss-fetch-nourl": "طلب تفحص بدون URL!",
+	"rss-invalid-url": "عنوان URL غير صالح: $1",
+	"rss-parse-error": "خطأ في تحليل XML من أجل RSS",
+	"rss-ns-permission": "RSS غير مسموح به في هذا النطاق",
+	"rss-feed": "<!--  the following are two alternative templates. The first is the basic default template for feeds -->; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''\n: {{{description}}}\n: {{{author}}} {{{date}}}<!-- don't use newline here --><!-- The second is an improved version which requires Extension:ParserFunctions --><!-- ; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''{{#if: {{{description|}}}|: {{{description}}}}}{{#if: {{{author|}}} | {{#if: {{{date|}}} |: &mdash; {{{author}}} {{{date}}}}} | {{#if: {{{author|}}}|: &mdash; {{{author}}}}} {{#if: {{{date|}}}|:{{{date}}}}}|}} -->"
+}

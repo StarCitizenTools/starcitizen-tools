@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dori",
+			"Eagleal",
+			"Olsi",
+			"Vinie007"
+		]
+	},
+	"babel": "Informacioni Babel i Përdoruesit",
+	"babel-desc": "Shton mundësinë <code>#babel</code> për të lejuar krijimin automatik të kutive babel me mundësinë për të shtuar stampa vetjake.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ": Category: Babel - Përdorues sipas gjuhës",
+	"babel-autocreate-reason": "automatikisht per krijimin e [[$1|Babel]] faqe kategori.",
+	"babel-autocreate-text-levels": "Përdoruesit në këtë kategori tregojnë se ata kanë aftësi të nivelit $1 për gjuhën e $2 .",
+	"babel-autocreate-text-main": "Përdoruesit në këtë kategori tregojnë se ata kanë njohuri të gjuhës $1 .",
+	"babel-0": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} [[$1|nuk ka]] njohuri të [[$2|$3]] (ose e kupton me shumë vështirësi).",
+	"babel-1": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|të kufizuar]] të [[$2|$3]].",
+	"babel-2": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|thelbësore]] të [[$2|$3]].",
+	"babel-3": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|të thellë]] të [[$2|$3]].",
+	"babel-4": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|afërsisht amtare]] të [[$2|$3]].",
+	"babel-5": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|profesionale]] të [[$2|$3]].",
+	"babel-N": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|amtare]] të [[$2|$3]].",
+	"babel-0-n": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} [[$1|nuk ka]] njohuri të [[$2|gjuhës shqipe]] (ose e kupton me vështirësi të madhe).",
+	"babel-1-n": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|të kufizuar]] të [[$2|gjuhës shqipe]].",
+	"babel-2-n": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|thelbësore]] të [[$2|gjuhës shqipe]].",
+	"babel-3-n": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|të thellë]] të [[$2|gjuhës shqipe]].",
+	"babel-4-n": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|afërsisht amtare]] të [[$2|gjuhës shqipe]].",
+	"babel-5-n": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|profesionale]] të [[$2|gjuhës shqipe]].",
+	"babel-N-n": "{{GENDER:$4|Ky përdorues|Kjo përdoruese}} ka njohuri [[$1|amtare]] të [[$2|gjuhës shqipe]].",
+	"babel-footer": "Përdorues sipas gjuhës"
+}

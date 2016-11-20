@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel": "Babel",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Chiba jangle le jenendar kathar",
+	"babel-autocreate-text-main": "Kadala jene vakyaren e $1.<!--\nO vastno lekh la kadale shopnyorako si $1.\n-->",
+	"babel-0": "Me vakyarau e [[$2|$3]] [[$1|but tsira vay ci janau khanc]].",
+	"babel-1": "Kadala jene vakyaren e [[$2|$3]] [[$1|tsira]].",
+	"babel-2": "Kadala jene vakyaren e [[$2|$3]] [[$1|opretele]].",
+	"babel-3": "Kadala jene vakyaren e [[$2|$3]] [[$1|mishto]].",
+	"babel-5": "Kadala jene vakyaren e [[$2|$3]] [[$1|but mishto]].",
+	"babel-N": "Kadala jene vakyaren e [[$2|$3]] sar e [[$1|lengi daki chib]].",
+	"babel-0-n": "Me vakyarau e [[$2|Romani chib]] [[$1|but tsira vay ci janau khanc]].",
+	"babel-1-n": "Kadala jene vakyaren e [[$2|Romani chib]] [[$1|tsira]].",
+	"babel-2-n": "Kadala jene vakyaren e [[$2|Romani chib]] [[$1|opretele]].",
+	"babel-3-n": "Kadala jene vakyaren e [[$2|Romani chib]] [[$1|mishto]].",
+	"babel-4-n": "Kadala jene vakyaren e [[$2|Romani chib]] [[$1|but mishto]].",
+	"babel-N-n": "Kadala jene vakyaren e [[$2|Romani chib]] sar e [[$1|lengi daki chib]].",
+	"babel-footer": "Rod"
+}

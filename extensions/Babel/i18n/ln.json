@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Moyogo"
+		]
+	},
+	"babel": "Liyébisi Babel ya moto",
+	"babel-0": "Moto óyo ayébí koloba [[$2|$3]] [[$1|tɛ̂]] (tǒ akokí koyóka na mpási).",
+	"babel-1": "Moto óyo ayébí koloba [[$2|$3]] [[$1|mwâ mokɛ́]].",
+	"babel-2": "Moto óyo ayébí koloba [[$2|$3]] [[$1|mokɛ́]].",
+	"babel-3": "Moto óyo ayébí koloba [[$2|$3]] [[$1|malámu]].",
+	"babel-4": "Moto óyo ayébí koloba [[$2|$3]] [[$1|malámu mpenza]].",
+	"babel-N": "Moto óyo ayébí koloba [[$2|$3]] [[$1|bandá mbótama]].",
+	"babel-0-n": "Moto óyo ayébí koloba [[$2|lingála]] [[$1|tɛ̂]] (tǒ akokí koyóka na mpási).",
+	"babel-1-n": "Moto óyo ayébí koloba [[$2|lingála]] [[$1|mwâ mokɛ́]].",
+	"babel-2-n": "Moto óyo ayébí koloba [[$2|lingála]] [[$1|mokɛ́]].",
+	"babel-3-n": "Moto óyo ayébí koloba [[$2|lingála]] [[$1|malámu]].",
+	"babel-4-n": "Moto óyo ayébí koloba [[$2|lingála]] [[$1|malámu mpenza]].",
+	"babel-N-n": "Moto óyo ayébí koloba [[$2|lingála]] [[$1|bandá mbótama]]."
+}

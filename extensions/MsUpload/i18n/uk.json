@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ата",
+			"Piramidion"
+		]
+	},
+	"msu-desc": "Дозволяє легко вивантажувати один файл або декілька файлів одночасно",
+	"msu-button-title": "Вибрати файли",
+	"msu-insert-link": "Вставити посилання",
+	"msu-insert-gallery": "Вставити все як галерею",
+	"msu-insert-files": "Вставити все як файли",
+	"msu-insert-links": "Вставити все як посилання",
+	"msu-insert-image": "Вставити як зображення",
+	"msu-insert-video": "Вставити відео",
+	"msu-cancel-upload": "Скасування завантаження",
+	"msu-replace-file": "Замінити файл?",
+	"msu-clean-all": "Очистити список",
+	"msu-ext-not-allowed": "Дозволено лише {{PLURAL:$1|такий тип|такі типи}} файлів:",
+	"msu-upload-this": "Завантажити цей файл",
+	"msu-upload-all": "Завантажити усі файли",
+	"msu-dropzone": "Перемістіть файли сюди",
+	"msu-comment": "Файл завантажений з MsUpload"
+}

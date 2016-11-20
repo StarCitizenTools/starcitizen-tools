@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Saosukham"
+		]
+	},
+	"msu-desc": "ဢမ်ႇၸၢင်ႈလူတ်ႇၶိုၼ်ႈငၢႆႈငၢႆႈ (when available also via drag&drop) တႃႇၼိုင်ႈၾၢႆႇ ဢမ်ႇၼၼ် ၾၢႆႇသွၼ်ႉၵပ်းၵၼ်",
+	"msu-button-title": "လိူၵ်ႈၾၢႆႇ",
+	"msu-insert-link": "သႂ်ႇလိင်ႉၵွင်ႉ",
+	"msu-insert-gallery": "ဢဝ် gallery သႂ်ႇသဵင်ႈ",
+	"msu-insert-files": "သႂ်ႇၾၢႆႇ ၼင်ႇတင်းသဵင်ႈ",
+	"msu-insert-links": "သႂ်ႇလိင်ႉၵွင်ႉတင်းသဵင်ႈ",
+	"msu-cancel-upload": "ယႃႉပႅတ်ႈ လူတ်ႇၶိုၼ်ႈ",
+	"msu-clean-all": "ၽဵဝ်ႈပႅတ်ႈသဵၼ်ႈ",
+	"msu-upload-possible": "ၾၢႆႇၸၢင်ႈလူတ်ႇၶိုၼ်ႈ",
+	"msu-ext-not-allowed": "filetypes ၾၢႆႇလိၵ်ႈတီႈတႂ်းၼႆႉၵူၺ်း ပၼ်ပေႃႉ",
+	"msu-upload-this": "ၼဵၵ်းတီႈၼႆႈ တႃႇလူတ်ႇၾၢႆႇၶိုၼ်ႈ",
+	"msu-upload-all": "ၼဵၵ်းတီႈၼႆႈ တႃႇလူတ်ႇၾၢႆႇၶိုၼ်ႈ",
+	"msu-dropzone": "ဢဝ်ၾၢႆႇ သႂ်ႇတီႈၼႆႉ",
+	"msu-comment": "လူတ်ႇၶိုၼ်ႈၾၢႆႇၵိုၵ်း MsUpload"
+}

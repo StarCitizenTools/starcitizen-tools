@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pikne"
+		]
+	},
+	"popups-message": "Hõljukkaardid",
+	"popups-desc": "Kuvab lehekülje kokkuvõtte hõljukkaardil, kui liigutada kursor üle leheküljelingi.",
+	"popups-last-edited": "Muudetud $1",
+	"popups-redirects": "suunab ümber leheküljele <h3>$1</h3>",
+	"popups-settings-title": "Lehekülje eelvaatlus",
+	"popups-settings-description": "See tööriist võimaldab eelvaadelda linke, mis viitavad viki lehekülgedele ja viidetele.",
+	"popups-settings-option-simple": "Lihtne",
+	"popups-settings-option-simple-description": "Kuvatakse pilt ja lehekülje esimene lause. Soovitatav lugejatele.",
+	"popups-settings-option-advanced": "Laiendatud",
+	"popups-settings-option-advanced-description": "Kuvatakse lingi eelvaatlus ja võimaldatakse juurdepääs redigeerimismenüüdele. Seda kasutab osa toimetajaid.",
+	"popups-settings-option-off": "Keela eelvaatlus",
+	"popups-settings-option-off-description": "Saad seda sätet muuta, kasutades linki lehekülje jaluses.",
+	"popups-settings-save": "Salvesta",
+	"popups-settings-help-ok": "Sobib",
+	"popups-settings-cancel": "Loobu",
+	"popups-settings-help": "Saad eelvaatluse tagasi sisse lülitada, kasutades linki lehekülje jaluses.",
+	"popups-settings-enable": "Luba eelvaatlus",
+	"popups-send-feedback": "Saada tagasisidet (välislink)"
+}

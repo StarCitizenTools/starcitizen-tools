@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tim Laqua",
+			"Davis Mosenkovs"
+		]
+	},
+	"googleanalytics-desc": "Inserts Google Universal Analytics (and/or other web analytics) scripts into MediaWiki pages for tracking",
+	"right-noanalytics": "Exempted from web analytics tracking"
+}

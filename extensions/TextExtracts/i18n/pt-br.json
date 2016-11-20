@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Araceletorres"
+		]
+	},
+	"textextracts-desc": "Fornece texto simples ou extratos de HTML limitados de conteúdo da página",
+	"apihelp-query+extracts-description": "Retorna texto simples ou extratos de HTML limitados das páginas dadas.",
+	"apihelp-query+extracts-param-chars": "Quantos caracteres retornar. O texto real retornado pode ser um pouco mais longo.",
+	"apihelp-query+extracts-param-sentences": "Quantas sentenças retornar.",
+	"apihelp-query+extracts-param-limit": "Quantos extratos retornar.",
+	"apihelp-query+extracts-param-intro": "Retornar apenas o conteúdo antes da primeira seção.",
+	"apihelp-query+extracts-param-plaintext": "Retornar extratos como texto simples em vez de HTML limitado.",
+	"apihelp-query+extracts-param-variant": "Converter conteúdo para esta variante do idioma.",
+	"apihelp-query+extracts-example-1": "Obter um extrato de 175 caracteres"
+}

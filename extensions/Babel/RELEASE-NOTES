@@ -1,0 +1,5 @@
+== Babel 2016.08 ==
+Released at 2016-08-25.
+
+=== Noteworthy changes ===
+* Ricordisamoa changed language categories to be formatted consistently following the BCP47 standard.

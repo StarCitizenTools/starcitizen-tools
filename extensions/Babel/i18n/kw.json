@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kernoweger",
+			"Kw-Moon",
+			"Nicky.ker",
+			"Nrowe"
+		]
+	},
+	"babel": "Derivadow Babel an devnydhyer",
+	"babel-desc": "Keworra an gwythres styryer <code>#babel</code> rag alowa denethyans awtomategys a goloven gist-devnydhyer babel gans an gallos a ynkludya skantlyns personelhes",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Devnydhyoryon herwydh yeth",
+	"babel-autocreate-reason": "Ow kwruthyl yn awtomatek folen an klass [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Devnydhyoryon y'n klass-ma a dheklar y's teves niver $1 rag $2.",
+	"babel-autocreate-text-main": "Devnydhyoryon y'n klass-ma a dheklar y's teves godhvos a $1.",
+	"babel-0": "[[$1|Ny wor]] an devnydhyer-ma konvedhes [[$2|$3]] (po a'n gor gans kaletter dres ehen).",
+	"babel-1": "An devnydhyer-ma a wor skrifa [[$2|$3]] orth nivel [[$1|sempel]].",
+	"babel-2": "An devnydhyer-ma a wor skrifa [[$2|$3]] orth nivel [[$1|kres]].",
+	"babel-3": "An devnydhyer-ma a wor skrifa [[$2|$3]] orth nivel [[$1|avonsys]].",
+	"babel-4": "An devnydhyer-ma a wor skrifa [[$2|$3]] [[$1|kepar ha mammyeth]].",
+	"babel-5": "An devnydhyer-ma a wor scrifa [[$2|$3]] orth nivel [[$1|galwansek]].",
+	"babel-N": "[[$2|$3]] yw [[$1|mammyeth]] an devnydhyer-ma.",
+	"babel-0-n": "[[$1|Ny wor]] an devnydhyer-ma konvedhes [[$2|Kernewek]].",
+	"babel-1-n": "An devnydhyer-ma a wor skrifa [[$2|Kernewek]] orth nivel [[$1|sempel]].",
+	"babel-2-n": "An devnydhyer-ma a wor skrifa [[$2|Kernewek]] orth nivel [[$1|kres]].",
+	"babel-3-n": "An devnydhyer-ma a wor skrifa [[$2|Kernewek]] orth nivel [[$1|avonsys]].",
+	"babel-4-n": "An devnydhyer-ma a wor skrifa [[$2|Kernewek]] [[$1|kepar ha mammyeth]].",
+	"babel-5-n": "An devnydhyer-ma a wor skrifa [[$2|Kernewek]] orth nivel [[$1|galwansek]].",
+	"babel-N-n": "[[$2|Kernewek]] yw [[$1|mammyeth]] an devnydhyer-ma.",
+	"babel-footer": "Devnydhyoryon herwydh yeth"
+}

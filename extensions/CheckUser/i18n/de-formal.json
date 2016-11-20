@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Imre",
+			"Kghbln",
+			"Umherirrender"
+		]
+	},
+	"checkuser-summary": "Dieses Werkzeug durchsucht die letzten Änderungen, um die IP-Adressen eines Benutzers bzw. die Bearbeitungen/Benutzernamen für eine IP-Adresse zu ermitteln. Benutzer und Bearbeitungen einer IP-Adresse können auch nach Informationen aus den XFF-Headern abgefragt werden, indem der IP-Adresse ein „/xff“ angehängt wird. IPv4 (CIDR $1-32) und IPv6 (CIDR $2-128) werden unterstützt.\nZur Aufrechterhaltung der Leistungsfähigkeit werden maximal 5000 Bearbeitungen ausgegeben. Benutzen Sie CheckUser ausschließlich in Übereinstimmung mit den Datenschutzrichtlinien.",
+	"checkuser-block-noreason": "Sie müssen einen Grund für die Sperre angeben.",
+	"checkuser-too-many": "Die Ergebnisliste ist zu lang (nach Schätzung der Abfrage). Bitte grenzen Sie den IP-Adressbereich weiter ein.\nEs folgen die benutzten IP-Adressen (maximal 5000, sortiert nach Adresse):"
+}

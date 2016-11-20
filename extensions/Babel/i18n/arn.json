@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kaniw",
+			"Lin linao"
+		]
+	},
+	"babel": "Babel kvzawfe ñi kimam",
+	"babel-desc": "Yomvmpe ti <code>#babel</code> gvnezuamvn kamañ ñi kisu pepi zewmawam kiñe Babel kvzawfe ñi columna de cuadro pepi nvrvftvkukelu kisu ñi plantilla",
+	"babel-url": "Project: Babel",
+	"babel-footer-url": ":Xokiñ:Babel - Kvzawfe zugun mew",
+	"babel-autocreate-reason": "Kisu zewmaley [[$1|Babel]] xokiñ ñi aztapvl.",
+	"babel-autocreate-text-levels": "Kvzawkvlelu faci xokiñ mu feypi ñi kimniefiñ $1 pvrawe mew ti $2 cezugun mew",
+	"babel-autocreate-text-main": "Kvzawfe faci xokiñ mu feypi ñi kimniefi tici $1 cezugun",
+	"babel-0": "Tüfachi che [[$1|chemnorume]] [[$2|kim$3lay]].",
+	"babel-1": "Tüfachi che [[$1|püchintu]] [[$2|kim$3y]].",
+	"babel-2": "Tüfachi che [[$1|küme]] [[$2|kim$3y]].",
+	"babel-3": "Tüfachi che [[$1|rume]] [[$2|kim$3y]].",
+	"babel-4": "Faci kvzawfe [[$1|epe azvmniefi]] ti [[$2|$3]] mew.",
+	"babel-5": "Faci kvzawfe ta [[$1|gvnezuamniefegey]] ti [[$2|$3]] mew.",
+	"babel-N": "Tüfachi che ñi [[$1|wünen dungun]] ta [[$2|$3]].",
+	"babel-0-n": "Tüfachi che [[$1|chemnorume]] [[$2|kimmapudungulay]].",
+	"babel-1-n": "Tüfachi che [[$1|püchintu]] [[$2|kimmapudunguy]].",
+	"babel-2-n": "Tüfachi che [[$1|küme]] [[$2|kimmapudunguy]].",
+	"babel-3-n": "Tüfachi che [[$1|rume]] [[$2|kimmapudunguy]].",
+	"babel-4-n": "Faci kvzawfe [[$1|epe azvmniefi]] ti [[$2|mapuzugun]].",
+	"babel-5-n": "Faci kvzawfe ta [[$1|gvnezuamniefegey]] [[$2|Mapuzugun]] mew.",
+	"babel-N-n": "Tvfaci ce ñi [[$1|wvnen zugun]] ta [[$2|mapuzugun]].",
+	"babel-footer": "Kvzawfe ñi zugun mew"
+}

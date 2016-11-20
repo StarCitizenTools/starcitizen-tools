@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tlustulimu"
+		]
+	},
+	"usergroups": "Prizorgado de uzanto-rajtoj",
+	"usergroups-desc": "Ebligas pli detalan kontrolon pri tio, kiuj uzanto-rajtoj povas esti registritaj por kiuj uzanto-grupoj.",
+	"usergroups-editgroup-desc": "Elektu uzanto-grupon el la malsupra falmenuo, aŭ kreu vian propran grupon per la opcio \"kreu novan...\".",
+	"usergroups-editgroup-reason": "Kialo:",
+	"usergroups-editgroup-revoke": "Difinu ĉi tiun uzanto-grupon por forpreni rajtojn anstataŭ doni ilin.",
+	"usergroups-editgroup-save": "Konservi ŝanĝojn",
+	"usergroups-editgroup-userrights": "Ĉiuj disponeblaj rajtoj",
+	"usergroups-log-name": "Protokolo pri uzanto-grupoj",
+	"usergroups-log-revoke": "Forprena tipo",
+	"usergroups-log-revoke-switchoff": "Ŝanĝi al neforprena tipo.",
+	"action-modifygroups": "Redakti grupojn de uzantoj",
+	"invalidusergroupname-error": "La nomo, kiun vi enigis, por via nova uzanto-grupo estas malvalida. Reiru al [[{{#special:UserGroups}}]].",
+	"nosuchusergroup": "Ne estis trovita uzanto-grupo kun la nomo \"$1\". Ĉu vi eble volis  [[Special:UserGroups/new|krei]] ĉi tiun novan uzanto-grupon?",
+	"right-modifygroups": "Krei, ŝanĝi kaj forigi uzanto-grupojn",
+	"logentry-usergroups-modify": "$1 {{GENDER:$2|ŝanĝis}} uzanto-grupon \"$4\". $7 Aldonita $5; Forprenita $6"
+}

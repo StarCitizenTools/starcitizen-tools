@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andriykopanytsia",
+			"Ата",
+			"Olion",
+			"Максим Підліснюк",
+			"Piramidion"
+		]
+	},
+	"popups-message": "Спливні вікна",
+	"popups-desc": "Відображає спливні вікна з описом змісту сторінок при наведенні вказівника миші на посилання сторінки.",
+	"popups-last-edited": "Редаговано $1",
+	"popups-redirects": "перенаправляє на <h3>$1</h3>",
+	"popups-settings-title": "Попередній перегляд сторінки",
+	"popups-settings-description": "Цей інструмент дає Вам змогу попередньо переглядати посилання на вікісторінки і примітки.",
+	"popups-settings-option-simple": "Простий",
+	"popups-settings-option-simple-description": "Показувати першу фразу та ескіз малюнку зі сторінки. Рекомендовано для читачів",
+	"popups-settings-option-advanced": "Розширений",
+	"popups-settings-option-advanced-description": "Показувати активні посилання та доступ до функцій редагування. Використовується багатьма редакторами.",
+	"popups-settings-option-off": "Вимкнути Спливні вікна",
+	"popups-settings-option-off-description": "Ви можете змінити це налаштування, скориставшись посиланням унизу сторінки",
+	"popups-settings-save": "Зберегти",
+	"popups-settings-help-ok": "Гаразд",
+	"popups-settings-cancel": "Скасувати",
+	"popups-settings-help": "Ви можете повернути назад передперегляди з допомогою посилання унизу сторінки.",
+	"popups-settings-enable": "Увімкнути Спливні вікна",
+	"popups-send-feedback": "Надіслати відгук (зовнішнє посилання)",
+	"popups-mobile-continue-to-page": "Перейти до сторінки",
+	"popups-mobile-dismiss": "Відхилити",
+	"popups-mobile-message": "Спливні вікна (мобільна версія)"
+}

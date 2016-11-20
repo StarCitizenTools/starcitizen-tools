@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lloffiwr",
+			"Malangali"
+		]
+	},
+	"babel": "Maelezo ya Babeli ya mtumiaji",
+	"babel-url": "Project:Babeli",
+	"babel-footer-url": ":Jamii:Wanawikipedia lugha kwa lugha",
+	"babel-autocreate-reason": "Ukurasa wa jamii ya [[$1|Babeli]] unaanzishwa moja kwa moja.",
+	"babel-autocreate-text-levels": "Watumiaji katika jamii hii wanaonyesha kwamba wanaongea lugha ya $2 kwa kiwango cha $1.",
+	"babel-autocreate-text-main": "Watumiaji katika jamii hii wanadai kwamba wana ujuzi wa lugha ya $1.",
+	"babel-0": "Mtumiaji huyu [[$1|hajui]] [[$2|$3]] (au anaelewa kidogo sana).",
+	"babel-1": "Mtumiaji huyu ni mwongeaji wa [[$2|$3]] cha kiwango cha [[$1|Msingi]].",
+	"babel-2": "Mtumiaji huyu ni mwongeaji wa [[$2|$3]] cha kiwango cha [[$1|Wastani]].",
+	"babel-3": "Mtumiaji huyu ni mwongeaji wa [[$2|$3]] kiwango [[$1|cha Juu]].",
+	"babel-4": "Mtumiaji huyu ni mwongeaji wa [[$2|$3]] cha kiwango cha [[$1|Juu Kabisa]].",
+	"babel-5": "Mtumiaji huyu ni mwongeaji wa [[$2|$3]] cha kiwango cha [[$1|Utaalamu]].",
+	"babel-N": "Mtumiaji huyu ni mwongeaji wa [[$2|$3]] [[$1|Fasaha]].",
+	"babel-0-n": "Mtumiaji huyu [[$1|hajui]] [[$2|Kiswahili]] (au anaelewa kidogo sana).",
+	"babel-1-n": "Mtumiaji huyu ni mwongeaji wa [[$2|Kiswahili]] cha kiwango cha [[$1|Msingi]].",
+	"babel-2-n": "Mtumiaji huyu ni mwongeaji wa [[$2|Kiswahili]] cha kiwango cha [[$1|Wastani]].",
+	"babel-3-n": "Mtumiaji huyu ni mwongeaji wa [[$2|Kiswahili]] kiwango [[$1|cha Juu]].",
+	"babel-4-n": "Mtumiaji huyu ni mwongeaji wa [[$2|Kiswahili]] cha kiwango cha [[$1|Juu Kabisa]].",
+	"babel-5-n": "Mtumiaji huyu ni mwongeaji wa [[$2|Kiswahili]] cha kiwango cha [[$1|Utaalamu]].",
+	"babel-N-n": "Mtumiaji huyu ni mwongeaji wa [[$2|Kiswahili]] [[$1|Fasaha]].",
+	"babel-footer": "Watumiaji lugha kwa lugha"
+}

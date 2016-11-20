@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Grondin",
+			"IAlex",
+			"Verdy p"
+		]
+	},
+	"cleanchanges-changerightslink": "changer les groupes",
+	"cleanchanges-desc": "Affichage plus compact de la [[Special:RecentChanges|liste des modifications récentes]]",
+	"cleanchanges-language": "Langue :",
+	"cleanchanges-language-na": "Tous",
+	"cleanchanges-users": "Utilisateurs (sép. par |) :",
+	"cleanchanges-showuserlinks": "Afficher les liens de cet utilisateur",
+	"cleanchanges-rcinfo-2": "($1 ; $2)",
+	"cleanchanges-rcinfo-3": "($1 ; $2 ; $3)"
+}

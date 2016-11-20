@@ -1,0 +1,24 @@
+@import "minerva.variables";
+@import "minerva.mixins";
+
+body.navigation-full-screen {
+	nav {
+		// !important needed to override media query rules set in mainmenu.less
+		width: 100% !important;
+		right: 0 !important;
+		display: block !important;
+		visibility: visible !important;
+	}
+
+	#mw-mf-page-center {
+		display: none;
+	}
+}
+
+.client-nojs {
+	nav {
+		.secondary-action {
+			display: none;
+		}
+	}
+}

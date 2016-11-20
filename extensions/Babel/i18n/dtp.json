@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"FRANCIS5091",
+			"FRANELYA"
+		]
+	},
+	"babel": "Kointalangan momoguna Babaol",
+	"babel-desc": "Poruhango <code>#babel</code> parsaor gugunoon popomilo tutumanud mimpopori bogian kutak momomoguno babaol miampai komilaan poposuang kouroson pongitanan.",
+	"babel-url": "Project:Babaol",
+	"babel-footer-url": ":Katogori:Babil - Momomoguno maya woyoboros",
+	"babel-autocreate-reason": "Mimpopori momonsoi katogori bolikon [[$1|Babil]].",
+	"babel-autocreate-text-levels": "Momomoguno id katogori tinandaan do kitingkat toilaan $1 montok woyoboros $2.",
+	"babel-autocreate-text-main": "Momomoguno id katogori tinandaan do kitingkat toilaan do woyoboros $1.",
+	"babel-0": "Momomoguno diti [[$1|ingaa]] toilaan kokomoi [[$2|$3]] (toi karati dilo do tokuti no toomod).",
+	"babel-1": "Momomoguno diti [[$1|karati do tokuri]] diti woyoboros [[$2|$3]].",
+	"babel-2": "Momomoguno diti [[$1|karati tomod]] diti woyoboros [[$2|$3]].",
+	"babel-3": "Momomoguno diti [[$1|ogumu toilaan]] diti woyoboros [[$2|$3]].",
+	"babel-4": "Momomoguno diti [[$1|osomok kaagal di monunutur mamasok]] diti woyoboros [[$2|$3]].",
+	"babel-5": "Momomoguno diti [[$1|akawas toilaan]] diti woyoboros [[$2|$3]].",
+	"babel-N": "Momomoguno diti [[$1|mamasok]] om monunutur [[$2|$3]].",
+	"babel-0-n": "Momomoguno diti [[$1|ingaa]] toila-ilaan kokomoi [[$2|Dusun]] (toi osusa do mangarati dilo).",
+	"babel-1-n": "Momomoguno diti [[$1|karati do tokuri]] diti woyoboros [[$2|Dusun]].",
+	"babel-2-n": "Momomoguno diti [[$1|karati tomod]] diti woyoboros [[$2|Dusun]].",
+	"babel-3-n": "Momomoguno diti [[$1|ogumu toilaan]] diti woyoboros [[$2|Dusun]].",
+	"babel-4-n": "Momomoguno diti [[$1|osomok kaagal di monunutur mamasok]] diti woyoboros [[$2|Dusun]].",
+	"babel-5-n": "Momomoguno diti [[$1|akawas toilaan]] diti woyoboros [[$2|Dusun]].",
+	"babel-N-n": "Momomoguno diti [[$1|mamasok]] om monunutur [[$2|Dusun]]."
+}

@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu"
+		]
+	},
+	"textextracts-desc": "Ufre estractos del conteníu de la páxina en testu simple o HTML llimitáu",
+	"apihelp-query+extracts-description": "Devuelve testu planu o estractos en HTML parciales de les páxines indicaes.",
+	"apihelp-query+extracts-param-chars": "Cuántos caráuteres hai que devolver. El testu real devueltu pué ser un poco más llargu.",
+	"apihelp-query+extracts-param-sentences": "Cuántes frases hai que devolver.",
+	"apihelp-query+extracts-param-limit": "Cuántos estractos hai que devolver.",
+	"apihelp-query+extracts-param-intro": "Devolver sólo el conteníu anterior a la primera seición.",
+	"apihelp-query+extracts-param-plaintext": "Devolver estractos como testu planu en llugar de HTML parcial.",
+	"apihelp-query+extracts-param-sectionformat": "Como dar formatu a les seiciones en mou testu planu:\n;plain:Sin formatu.\n;wiki:Formatu d'estilu testu wiki (== como esto ==).\n;raw:Representación interna d'esti módulu (títulos de sección prefixaos con &lt;ASCII 1&gt;&lt;ASCII 2&gt;&lt;nivel de seición&gt;&lt;ASCII 2&gt;&lt;ASCII 1&gt;).",
+	"apihelp-query+extracts-param-variant": "Convertir el conteníu a esta variante de la llingua.",
+	"apihelp-query+extracts-example-1": "Recibir un estractu de 175 caráuteres"
+}

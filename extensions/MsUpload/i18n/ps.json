@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ahmed-Najib-Biabani-Ibrahimkhel"
+		]
+	},
+	"msu-desc": "آسانه پورته کېدنه (که دا چاره موجوده وي نو د راکاږل او خوشې کولو له لارې) هممهاله د يوې او يا څو دوتنو لپاره چارنوي",
+	"msu-button-title": "دوتنې ټاکل",
+	"msu-insert-link": "تړنه ورټومبل",
+	"msu-insert-gallery": "ټول د انځورتون په توگه ورټومبل",
+	"msu-insert-files": "ټول د دوتنو په توگه ورټومبل",
+	"msu-insert-links": "ټول د تړنو په توگه ورټومبل",
+	"msu-insert-image": "انځور ورټومبل",
+	"msu-insert-video": "ويډيو ورټومبل",
+	"msu-cancel-upload": "پورته کېدنه ناگارل",
+	"msu-clean-all": "لړليک سپينول",
+	"msu-ext-not-allowed": "يوازې د دوتنو لانديني ډولونه پرېښل شوي:",
+	"msu-upload-this": "د دې دوتنې پورته کولو لپاه دلته کېښکاږئ",
+	"msu-upload-all": "د ټولو دوتنو د پورته کولو لپاره دلته کېښکاږئ",
+	"msu-dropzone": "دوتنې مو دلته خوشې کړئ",
+	"msu-comment": "دوتنه د MsUpload له لارې پورته شوې"
+}

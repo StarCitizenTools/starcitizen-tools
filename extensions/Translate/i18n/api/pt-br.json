@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mordecool",
+			"Dianakc"
+		]
+	},
+	"apihelp-groupreview-param-language": "Código do idioma.",
+	"apihelp-query+languagestats-param-language": "Código da linguagem",
+	"apihelp-translatesandbox-param-do": "O que fazer.",
+	"apihelp-translationstash-param-subaction": "Ação."
+}

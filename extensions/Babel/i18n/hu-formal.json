@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tacsipacsi"
+		]
+	},
+	"babel-0": "Ez a szerkesztő [[$1|nem]] beszéli a(z) [[$2|$3]] nyelvet (vagy csak nagy nagyon nehezen érti meg).",
+	"babel-1": "Ez a szerkesztő [[$1|alapszinten]] beszéli a(z) [[$2|$3]] nyelvet.",
+	"babel-2": "Ez a szerkesztő [[$1|középszinten]] beszéli a(z) [[$2|$3]] nyelvet.",
+	"babel-3": "Ez a szerkesztő [[$1|haladó]] szinten beszéli a(z) [[$2|$3]] nyelvet.",
+	"babel-4": "Ez a szerkesztő [[$1|közel anyanyelvi]] szinten beszéli a(z) [[$2|$3]] nyelvet.",
+	"babel-5": "Ez a szerkesztő [[$1|professzionális]] szinten beszéli a(z) [[$2|$3]] nyelvet.",
+	"babel-N": "Ennek a szerkesztőnek [[$2|$3]] az [[$1|anyanyelve]].",
+	"babel-0-n": "Ez a szerkesztő [[$1|nem]] beszéli a [[$2|magyar (magázó)]] nyelvet (vagy csak nagyon nehezen érti meg).",
+	"babel-1-n": "Ez a szerkesztő [[$1|alapszinten]] beszéli a [[$2|magyar (magázó)]] nyelvet.",
+	"babel-2-n": "Ez a szerkesztő [[$1|középszinten]] beszéli a [[$2|magyar (magázó)]] nyelvet.",
+	"babel-3-n": "Ez a szerkesztő [[$1|haladó]] szinten beszéli a [[$2|magyar (magázó)]] nyelvet.",
+	"babel-4-n": "Ez a szerkesztő [[$1|közel anyanyelvi]] szinten beszéli a [[$2|magyar (magázó)]] nyelvet.",
+	"babel-5-n": "Ez a szerkesztő [[$1|professzionális]] szinten beszéli a [[$2|magyar (magázó)]] nyelvet.",
+	"babel-N-n": "Ennek a szerkesztőnek [[$2|magyar (magázó)]] az [[$1|anyanyelve]]."
+}

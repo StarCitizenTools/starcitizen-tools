@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel-0": "Amseqdac-agi [[$1|ur yessin ara]] akk [[$2|taqbaylit]].",
+	"babel-1": "Zemreɣ ad ɛiweneɣ s uswir [[$1|aferdas]] n [[$2|$3]].",
+	"babel-2": "Zemreɣ ad ɛiweneɣ s uswir [[$1|alemmas]] n [[$2|$3]].",
+	"babel-3": "Zemreɣ ad ɛiweneɣ s uswir [[$1|anaẓi]] n [[$2|$3]].",
+	"babel-4": "Ssawaleɣ [[$2|$3]] [[$1|qrib am akken d tutlayt iw n tlalit]].",
+	"babel-5": "{{ucfirst:[[$2|$3]]}} iw tesɛa aswir [[$1|asadar]].",
+	"babel-N": "Tutlayt iw n tlalit d [[$2|$3]].",
+	"babel-0-n": "Amseqdac-agi [[$1|ur yessin ara]] akk [[$2|taqbaylit]].",
+	"babel-1-n": "Zemreɣ ad ɛiweneɣ s uswir [[$1|aferdas]] n [[$2|taqbaylit]].",
+	"babel-2-n": "Zemreɣ ad ɛiweneɣ s uswir [[$1|alemmas]] n [[$2|taqbaylit]].",
+	"babel-3-n": "Zemreɣ ad ɛiweneɣ s uswir [[$1|anaẓi]] n [[$2|taqbaylit]].",
+	"babel-4-n": "Ssawaleɣ [[$2|taqbaylit]] [[$1|qrib am akken d tutlayt iw n tlalit]].",
+	"babel-5-n": "[[$2|Taqbaylit]] iw tesɛa aswir [[$1|asadar]].",
+	"babel-N-n": "Tutlayt iw n tlalit d [[$2|taqbaylit]]."
+}

@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kouichi Nishizawa",
+			"Sujiniku",
+			"Otokoume"
+		]
+	},
+	"msu-desc": "ひとつまたは複数のファイルを同時にアップロードすることができます",
+	"msu-button-title": "ファイル選択",
+	"msu-insert-link": "リンクを挿入",
+	"msu-insert-gallery": "ギャラリーとして画像を挿入",
+	"msu-insert-files": "ファイルとしてすべて挿入",
+	"msu-insert-links": "リンクとしてすべて挿入",
+	"msu-insert-image": "画像として挿入",
+	"msu-insert-video": "動画を挿入",
+	"msu-cancel-upload": "アップロードをキャンセル",
+	"msu-replace-file": "ファイルを置き換えますか?",
+	"msu-clean-all": "クリア",
+	"msu-ext-not-allowed": "次の{{PLURAL:$1|形式|形式}}のファイルのみアップロードできます:",
+	"msu-upload-this": "このファイルをアップロード",
+	"msu-upload-all": "すべてのファイルをアップロード",
+	"msu-dropzone": "ファイルをここにドロップしてください",
+	"msu-comment": "MsUpload によるアップロード"
+}

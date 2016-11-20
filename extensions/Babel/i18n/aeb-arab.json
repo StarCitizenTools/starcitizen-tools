@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Csisc"
+		]
+	},
+	"babel-desc": "يضيف دالة المحلل <code>#babel</code> للسماح بالتوليد التلقائي لعامود صندوق بابل مع إمكانية تضمين قوالب أخرى",
+	"babel-url": "Project:بابل",
+	"babel-footer-url": ":Category:بابل - المستخدمون حسب اللغة",
+	"babel-autocreate-reason": "إنشاء صفحة تصنيف [[$1|بابل]] تلقائيا.",
+	"babel-autocreate-text-levels": "المستخدمون في هذا التصنيف مستوى مهارتهم $1 للغة $2.",
+	"babel-autocreate-text-main": "المستخدمون في هذا التصنيف لديهم معرفة باللغة $1."
+}

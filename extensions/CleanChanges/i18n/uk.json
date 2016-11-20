@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ahonc",
+			"Prima klasy4na",
+			"Piramidion"
+		]
+	},
+	"cleanchanges-changerightslink": "змінити групи",
+	"cleanchanges-desc": "Більш стисле відображення [[Special:RecentChanges|списку останніх змін]]",
+	"cleanchanges-language": "Мова:",
+	"cleanchanges-language-na": "Усі",
+	"cleanchanges-users": "Користувачі (через: |):",
+	"cleanchanges-showuserlinks": "Показувати посилання користувачів"
+}

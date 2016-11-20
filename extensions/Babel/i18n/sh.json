@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"OC Ripper",
+			"Kolega2357",
+			"Conquistador"
+		]
+	},
+	"babel": "Babilonske korisničke informacije",
+	"babel-desc": "Dodaje parsersku funkciju <code>#babel</code> da omogući automatsko generiranje stupca s babilonskim korisničkim okvirima s mogućnošću uključenja predložaka po želji",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Kategorija:Babel - Korisnici po jeziku",
+	"babel-autocreate-reason": "Automatsko stvaranje stranice kategorije [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Korisnici u ovoj kategoriji ukazuju da su vješti na razini $1 za jezik $2.",
+	"babel-autocreate-text-main": "Korisnici u ovoj kategoriji su označeni da imaju znanje $1 jezika.",
+	"babel-0": "Ovaj korisnik [[$1|ne]] zna [[$2|$3]] (ili razumije sa znatnim poteškoćama).",
+	"babel-1": "Ovaj korisnik zna [[$2|$3]] na [[$1|osnovnoj]] razini.",
+	"babel-2": "Ovaj korisnik zna [[$2|$3]] na [[$1|srednjoj]] razini.",
+	"babel-3": "Ovaj korisnik zna [[$2|$3]] na [[$1|naprednoj]] razini.",
+	"babel-4": "Ovaj korisnik zna [[$2|$3]] na razini [[$1|skoro izvornoga govornika]].",
+	"babel-5": "Ovaj korisnik zna [[$2|$3]] na [[$1|profesionalnoj]] razini.",
+	"babel-N": "Ovaj korisnik govori [[$2|$3]] kao [[$1|materinski jezik]].",
+	"babel-0-n": "Ovaj korisnik [[$1|ne]] zna [[$2|srpskohrvatski]] (ili razumije sa znatnim poteškoćama).",
+	"babel-1-n": "Ovaj korisnik zna [[$2|srpskohrvatski]] na [[$1|osnovnoj]] razini.",
+	"babel-2-n": "Ovaj korisnik zna [[$2|srpskohrvatski]] na [[$1|srednjoj]] razini.",
+	"babel-3-n": "Ovaj korisnik zna [[$2|srpskohrvatski]] na [[$1|naprednoj]] razini.",
+	"babel-4-n": "Ovaj korisnik zna [[$2|srpskohrvatski]] na razini [[$1|skoro izvornoga govornika]].",
+	"babel-5-n": "Ovaj korisnik zna [[$2|srpskohrvatski]] na [[$1|profesionalnoj]] razini.",
+	"babel-N-n": "Ovaj korisnik govori [[$2|srpskohrvatski]] kao [[$1|materinski jezik]].",
+	"babel-footer": "Korisnici po jeziku"
+}

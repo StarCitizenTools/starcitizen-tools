@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mervat Salman",
+			"محمد أحمد عبد الفتاح"
+		]
+	},
+	"msu-desc": "يتيح تحميل ملف واحد أو عدة ملفات معاً بسهولة",
+	"msu-insert-image": "أضف صورة",
+	"msu-insert-video": "أضف فيديو",
+	"msu-ext-not-allowed": "الملف {{PLURAL:$1|type is|types are}} متاح فقط:"
+}

@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80"
+		]
+	},
+	"searchtranslations": "חיפוש בתרגומים",
+	"tux-sst-edit": "עריכת התרגום",
+	"tux-sst-view-foreign": "להציג באתר $1",
+	"tux-sst-search": "חיפוש",
+	"tux-sst-search-ph": "חיפוש בתרגומים",
+	"tux-sst-count": "{{PLURAL:$1|נמצאה תוצאה אחת|נמצאו $1 תוצאות}}",
+	"tux-sst-facet-language": "שפות",
+	"tux-sst-facet-group": "קבוצות הודעות",
+	"tux-sst-facet-orphan": "(יתומים)",
+	"tux-sst-nosolr-title": "החיפוש אינו זמין",
+	"tux-sst-nosolr-body": "בוויקי הזה אין שירות חיפוש בתרגומים.",
+	"tux-sst-solr-offline-title": "החיפוש אינו זמין",
+	"tux-sst-solr-offline-body": "זמנית שירות החיפוש אינו זמין.",
+	"tux-sst-next": "הבאות ›",
+	"tux-sst-prev": "‹ הקודמות",
+	"tux-sst-default": "תרגומים",
+	"tux-sst-translated": "תרגומים מ־$1",
+	"tux-sst-untranslated": "אין תרגומים מ־$1",
+	"tux-sst-outdated": "תרגומים מיושנים מ־$1",
+	"tux-sst-ellipsis-untranslated": "אין תרגום",
+	"tux-sst-ellipsis-outdated": "תרגומים מיושנים",
+	"tux-sst-link-all-match": "לדרוש את כל מילות החיפוש.",
+	"tux-sst-match-message": "הצגת תרגומים שמתאימים למילה כלשהי ממילות החיפוש. $1",
+	"tux-sst-case-sensitive": "תלוי רישיות"
+}

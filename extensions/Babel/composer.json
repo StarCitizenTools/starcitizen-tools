@@ -1,0 +1,36 @@
+{
+	"name": "mediawiki/babel",
+	"type": "mediawiki-extension",
+	"description": "Users can easily indicate their language proficiency on their user page",
+	"keywords": [
+		"MediaWiki",
+		"Language"
+	],
+	"homepage": "https://www.mediawiki.org/wiki/Extension:Babel",
+	"license": "GPL-2.0+",
+	"authors": [
+		{
+			"name": "Robert Leverington",
+			"role": "Original developer"
+		}
+	],
+	"support": {
+		"issues": "https://phabricator.wikimedia.org/tag/mediawiki-extensions-babel/",
+		"irc": "irc://irc.freenode.net/mediawiki-i18n"
+	},
+	"require": {
+		"php": ">=5.5.9",
+		"composer/installers": ">=1.0.1"
+	},
+	"require-dev": {
+		"jakub-onderka/php-parallel-lint": "0.9.2",
+		"mediawiki/mediawiki-codesniffer": "0.7.2"
+	},
+	"scripts": {
+		"fix": "phpcbf --ignore=vendor --ignore=extensions",
+		"test": [
+			"parallel-lint . --exclude vendor --exclude extensions",
+			"phpcs -p -s"
+		]
+	}
+}

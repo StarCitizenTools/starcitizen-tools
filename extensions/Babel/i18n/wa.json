@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lucyin",
+			"Srtxg"
+		]
+	},
+	"babel": "Racsegnes Babel so l' uzeu",
+	"babel-desc": "Radjoute ene fonccion d' analijhe sintacsike <code>#babel</code> ki permete li fjhaedje otomatike di boesses ''Babel'' po-z indiker les lingaedjes k' èn uzeu cnoxhe; avou l' possibilité di radjouter locålmint des modeles",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Uzeus pa lingaedje",
+	"babel-autocreate-reason": "Askepiaedje otomatike del categoreye [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Les uzeus d' cisse categoreye ci ont-st ene kinoxhance di livea $1 do lingaedje $2.",
+	"babel-autocreate-text-main": "Les uzeus d' cisse categoreye ci ont-st ene kinoxhance do lingaedje $1.",
+	"babel-0": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci n' a [[$1|nole]] kinoxhance do [[$2|$3]] (oudon-bén, nel comprinde k' a schipe)",
+	"babel-1": "{{GENDER:$4|Cist uzeu ci ni sait l' [[$2|$3]] ki come [[$1|onk ki cmince]]|Ciste uzeuse ci ni sait l' [[$2|$3]] ki come [[$1|ene ki cmince]]}}.",
+	"babel-2": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci kinoxhe [[$1|ene miete]] li [[$2|$3]].",
+	"babel-3": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci sait [[$1|bén]] l' [[$2|$3]].",
+	"babel-4": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci sait [[$1|foirt bén]] l' [[$2|$3]].",
+	"babel-5": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci kinoxhe li [[$2|$3]] [[$1|come ene djin d' mestî]]",
+	"babel-N": "{{GENDER:$4|Cist uzeu est [[$2|$3]]-cåzant [[$1|natif]]|Ciste uzeuse est [[$2|$3]]-cåzante [[$1|native]]}}.",
+	"babel-0-n": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} cial ni sait [[$1|nén]] l'&nbsp;[[$2|walon]] (oudon-bén nel comprinde k' a poenne).",
+	"babel-1-n": "{{GENDER:$4|Cist uzeu ci ni sait l' [[$2|walon]] ki come [[$1|onk ki cmince]]|Ciste uzeuse ci ni sait l' [[$2|walon]] ki come [[$1|ene ki cmince]]}}.",
+	"babel-2-n": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci kinoxhe [[$1|ene miete]] li [[$2|walon]].",
+	"babel-3-n": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci sait [[$1|bén]] l' [[$2|walon]].",
+	"babel-4-n": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci kinoxhe [[$1|foirt bén]] li [[$2|walon]].",
+	"babel-5-n": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci kinoxhe li [[$2|walon]] [[$1|come ene djin d' mestî]]",
+	"babel-N-n": "{{GENDER:$4|Cist uzeu est on [[$1|cåzant natif]]|Ciste uzeuse est ene [[$1|cåzante native]]}} do [[$2|walon]].",
+	"babel-footer": "Uzeus pa lingaedje"
+}

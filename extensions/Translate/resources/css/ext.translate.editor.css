@@ -1,0 +1,442 @@
+.tux-message-editor {
+	position: relative;
+	border: 1px solid #777;
+	background-color: #FFFFFF;
+	cursor: default;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Temporary fix for T111685 */
+.grid .tux-message-editor .close {
+	background: url('../images/close.png') no-repeat scroll center center transparent;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/close.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/close.svg);
+	padding: 15px;
+	cursor: pointer;
+	float: right;
+}
+
+/* Temporary fix for T111685 */
+.grid .tux-message-editor .editor-info-toggle {
+	padding: 15px;
+	cursor: pointer;
+	float: right;
+}
+
+.tux-message-editor .editor-contract {
+	background: url('../images/contract-ltr.png') no-repeat scroll center center transparent;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/contract-ltr.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/contract-ltr.svg);
+}
+
+.tux-message-editor .editor-expand {
+	background: url('../images/expand-ltr.png') no-repeat scroll center center transparent;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/expand-ltr.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/expand-ltr.svg);
+}
+
+.tux-message-editor .editcolumn {
+	border-right: 1px solid #AAA;
+	-webkit-transition: width 0.5s;
+	transition: width 0.5s;
+}
+
+.tux-message-editor textarea {
+	border: 1px solid #555;
+	font-size: 16px;
+	/* The (30px + 5px paddings) 40px for bottom is for the insertables */
+	padding: 5px 5px 40px 5px;
+	height: 100px;
+	min-height: 150px;
+	overflow-y: auto;
+	position: relative;
+	z-index: 100;
+	/* We have automatic resizing for height, and horizontal makes no sense */
+	resize: none;
+}
+
+.tux-editor-editsummary-block input {
+	border: 1px solid #C0C0C0;
+	font-size: 14px;
+	width: 100%;
+	height: 30px;
+	margin: 5px 0 0;
+	padding: 1px 4px;
+}
+
+.tux-editor-editsummary-block input:disabled {
+	background-color: #F8F8F8;
+}
+
+.tux-message-editor .editarea {
+	position: relative;
+}
+
+/* Temporary fix for T111685 */
+.grid .tux-message-editor .messagekey {
+	color: #252525;
+	font-size: 13px;
+	font-weight: bold;
+	padding: 5px 0 5px 10px;
+	cursor: pointer;
+}
+
+.tux-message-editor .messagekey .caret {
+	border-top: 4px solid #252525;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	display: inline-block;
+	vertical-align: middle;
+	margin: 0 4px;
+}
+
+/* Temporary fix for T111685 */
+.grid .tux-message-editor .sourcemessage {
+	font-size: 18px;
+	line-height: 1.6em;
+	padding: 5px 0 10px 10px;
+	word-wrap: break-word;
+}
+
+.tux-message-editor .sourcemessage.long {
+	font-size: 16px;
+}
+
+.tux-message-editor .sourcemessage.longer {
+	font-size: 14px;
+}
+
+.tux-message-editor .shortcutinfo {
+	font-size: 13px;
+	color: #555;
+	padding: 0 5px 5px 10px;
+}
+
+.tux-message-editor .infocolumn-block .infocolumn {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 10px;
+	padding: 0 5px;
+	overflow: auto;
+}
+
+/* Temporary fix for T111685 */
+.grid .tux-message-editor .infocolumn-block {
+	font-size: 12pt;
+	background: #FCFCFC;
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	padding: 0;
+	-webkit-transition: width 0.5s;
+	transition: width 0.5s;
+}
+
+.tux-message-editor .infocolumn-block .caret:before {
+	border-top: 20px solid transparent;
+	border-right: 20px solid #AAA;
+	border-bottom: 20px solid transparent;
+	content: "";
+	display: inline-block;
+	left: -21px;
+	position: absolute;
+	bottom: 50%;
+}
+
+.tux-message-editor .infocolumn-block .caret:after {
+	border-top: 20px solid transparent;
+	border-right: 20px solid #FCFCFC;
+	border-bottom: 20px solid transparent;
+	content: "";
+	display: inline-block;
+	left: -20px;
+	position: absolute;
+	bottom: 50%;
+}
+
+.infocolumn-block .infocolumn .message-desc-editor {
+	padding: 5px 0;
+	margin-right: 5px;
+}
+
+.tux-textarea-documentation {
+	height: 100px;
+	overflow: auto;
+}
+
+.infocolumn-block .infocolumn .message-desc {
+	font-size: 16px;
+	padding: 5px 0;
+	margin-right: 5px;
+}
+
+.infocolumn-block .infocolumn .message-desc.long {
+	font-size: 14px;
+	border-bottom: 1px solid #DDD;
+}
+
+.infocolumn-block .infocolumn .message-desc.compact {
+	max-height: 100px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.message-desc-control {
+	font-size: 14px;
+	padding: 3px 0 5px 0;
+}
+
+.message-desc-control .read-more {
+	font-size: 14px;
+	color: #3366BB;
+	cursor: pointer;
+	margin-right: 5px;
+}
+
+.message-desc-edit {
+	background: transparent url(../images/action-edit.png) left center no-repeat;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/action-edit.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/action-edit.svg);
+	background-size: 18px 18px;
+	padding-left: 19px;
+}
+
+.tm-suggestions-title,
+.in-other-languages-title {
+	font-size: 16px;
+	font-weight: bold;
+	padding: 10px 0;
+}
+
+.tm-suggestion,
+.in-other-language {
+	font-size: 14px;
+	border: 1px solid #ddd;
+	border-left: 2px solid #3366BB;
+	padding: 5px 5px 5px 10px;
+	background-color: #f5f5f5;
+}
+
+.grid .row .tm-suggestion,
+.grid .row .in-other-language {
+	margin: 0 5px 3px -5px;
+}
+
+.tm-suggestion:hover,
+.in-other-language:hover {
+	cursor: pointer;
+	box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+}
+
+.in-other-language .language {
+	color: #565656;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.tux-message-editor .help {
+	font-size: 16px;
+	padding: 10px 5px;
+}
+
+.tux-message-editor .help a {
+	font-size: 14px;
+	padding: 0 0 0 5px;
+}
+
+.editarea .tux-warnings-block {
+	position: relative;
+}
+
+.tux-warning {
+	background-color: #FFFFCC;
+}
+
+.tux-highlight {
+	background-color: #C9C9C9;
+}
+
+.tux-warning-message {
+	font-size: 14px;
+	padding: 2px 15% 2px 5px;
+	/* 15px space for icon */
+	padding-left: 20px;
+	background-position: left;
+	background-repeat: no-repeat;
+}
+
+.tux-warning .diff {
+	font-size: 12px;
+	padding: 0 0 0 20px;
+	/* 15px space for icon */
+}
+
+.editarea .tux-more-warnings {
+	background-color: #FBF6AD;
+	position: absolute;
+	right: 0;
+	padding: 2px 5px;
+	text-align: right;
+	cursor: pointer;
+	bottom: 0;
+}
+
+.tux-warning-message.validation {
+	background-image: url(../images/label-flag.png);
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/label-flag.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/label-flag.svg);
+}
+
+.tux-warning-message.diff {
+	background-image: url(../images/label-clock.png);
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/label-clock.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/label-clock.svg);
+}
+
+.tux-warning-message .show-diff-link {
+	color: #3366BB;
+	cursor: pointer;
+	padding-left: 5px;
+}
+
+.editarea .tux-more-warnings:before {
+	content: "";
+	border-bottom: 1em solid #FBF6AD;
+	border-top: 1em solid transparent;
+	border-left: 1em solid transparent;
+	border-right: 1em solid #FBF6AD;
+	display: inline-block;
+	position: absolute;
+	right: 100%;
+	top: 0;
+}
+
+.tux-editor-request-right {
+	font-size: 13px;
+	padding: 0 5px;
+	color: #555;
+}
+
+.tux-editor-ask-permission {
+	padding: 0 5px;
+}
+
+.tux-editor-editarea-block {
+	padding: 0 5px;
+}
+
+.tux-editor-editsummary-block {
+	padding: 0 5px;
+}
+
+.tux-editor-actions-block {
+	position: relative;
+}
+
+/* Temporary fix for T111685 */
+.grid .tux-editor-actions-block .tux-editor-insert-buttons {
+	position: absolute;
+	/* 30px + 5px padding on bottom */
+	top: -35px;
+	margin: 0 10px;
+	z-index: 110;
+}
+
+.tux-editor-insert-buttons button {
+	padding: 4px;
+	border: 1px solid #DDD;
+	background: #FBFBFB;
+	color: #252525;
+	font-size: 13px;
+	height: 30px;
+}
+
+.tux-editor-insert-buttons .tux-editor-paste-original-button {
+	background: #FBFBFB url(../images/paste.png) left center no-repeat;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/paste.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/paste.svg);
+	background-size: 16px 16px;
+	padding-left: 18px;
+}
+
+.message-desc-editor .mw-ui-button,
+.tux-editor-control-buttons .mw-ui-button {
+	margin: 10px 5px;
+}
+
+.sourcemessage,
+.suggestiontext {
+	white-space: pre-wrap;
+}
+
+.infocolumn .loading {
+	padding: 10px;
+	font-size: 14px;
+	color: #565656;
+}
+
+.tux-message-tools-menu li a {
+	color: #555555;
+	display: block;
+	font-size: 14px;
+	padding: 0 2px;
+	text-decoration: none;
+}
+
+.tux-message-tools-menu li a:hover {
+	cursor: pointer;
+	background-color: #f0f0f0;
+	color: #252525;
+}
+
+.tux-message-tools-menu li.selected {
+	background: url(../images/label-tick.png) right no-repeat;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/label-tick.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/label-tick.svg);
+	color: #252525;
+}
+
+/*
+ * Hide the cancel button by default, but show it in the last message.
+ * !important is used to override the button styling in ULS.
+*/
+.tux-editor-cancel-button {
+	display: none !important;
+}
+
+.last-message .tux-editor-cancel-button {
+	display: inline-block !important;
+}
+
+.last-message .tux-editor-skip-button {
+	display: none;
+}
+
+.shortcut-popup {
+	/* Firefox likes to add "relative" inline for elements with offset */
+	position: absolute !important;
+	width: 17px;
+	height: 17px;
+	line-height: 17px;
+	overflow: hidden;
+	font-size: 13px;
+	text-align: center;
+	border: 1px dashed gray;
+	border-radius: 100%;
+	z-index: 110;
+	background-color: white;
+	margin-top: -10px;
+	/* @noflip */
+	margin-left: -10px;
+}

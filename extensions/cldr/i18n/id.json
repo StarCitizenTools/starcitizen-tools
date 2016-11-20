@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"IvanLanin",
+			"Rex"
+		]
+	},
+	"cldr-desc": "Ekstensi yang menyediakan nama bahasa dalam bahasa lokal berdasarkan [http://cldr.unicode.org/index/downloads data CLDR]"
+}

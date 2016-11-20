@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Siebrand"
+		]
+	},
+	"css-desc": "Een parserfunctie die het mogelijk maakt om CSS-stylesheets op te nemen in opgegeven pagina's"
+}

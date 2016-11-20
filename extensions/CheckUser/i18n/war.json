@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"JinJian"
+		]
+	},
+	"group-checkuser": "Mga manginginsayod hin gumaramit",
+	"group-checkuser-member": "{{HENERO:$1|manginginsayod hin gumaramit}}",
+	"checkuser-all": "ngatanan",
+	"checkuser-check": "Panginsayori",
+	"checkuser-massblock": "Pugngi an mga ginpili nga gumaramit",
+	"checkuser-blocktag": "Igliwan an mga pakli-han-gumaramit hin:",
+	"checkuser-blocktag-talk": "Igliwan an mga hiruhimanraw-nga-pakli hin:",
+	"checkuser-search-submit": "Bilnga",
+	"checkuser-search-initiator": "nagpatikang",
+	"checkuser-autocreate-action": "in naglugaring kahimo",
+	"checkuser-create-action": "in nahimo"
+}

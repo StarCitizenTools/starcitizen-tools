@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"NoiX180"
+		]
+	},
+	"rss-desc": "Tampilaké lebon saran RSS standar nèng kaca MediaWiki utawa format kekarepané panganggo mawa kaca templat",
+	"rss-error": "Gagal ngemot lebon saran RSS saka $1: $2",
+	"rss-empty": "Gagal ngemot lebon saran RSS saka $1!",
+	"rss-fetch-nourl": "Panjupukan dilakokaké tanpa URL!",
+	"rss-invalid-url": "Dudu URL sing sah: $1",
+	"rss-parse-error": "Kasalahan nguraèkaké XML kanggo RSS",
+	"rss-ns-permission": "RSS ora dililakaké nèng bilik panganggo iki"
+}

@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ahmed-Najib-Biabani-Ibrahimkhel"
+		]
+	},
+	"managetranslatorsandbox": "ژباړن شگبکس مهارول",
+	"tsb-reminder-sent-new": "يوه يادگيرنه ولېږله",
+	"tsb-reminder-failed": "د يادگيرنې لېږنه نابرياله شوه",
+	"tsb-email-promoted-subject": "اوس تاسې په {{SITENAME}} کې يو ژباړن ياست",
+	"tsb-request-count": "$1 {{PLURAL:$1|غوښتنه|غوښتنې}}",
+	"tsb-all-languages-button-label": "ټولې ژبې",
+	"tsb-search-requests": "د پلټنې غوښتنې",
+	"tsb-accept-button-label": "منل",
+	"tsb-reject-button-label": "ردول",
+	"tsb-selected-count": "{{PLURAL:$1|$1 کارن ټاکل شوی|$1 کارنان ټاکل شوي}}",
+	"tsb-older-requests": "$1 {{PLURAL:$1|زړه غوښتنه|زړې غوښتنې}}",
+	"tsb-accept-all-button-label": "ټول منل",
+	"tsb-reject-all-button-label": "ټول ردول",
+	"tsb-user-posted-a-comment": "يو ژباړن نه دی",
+	"tsb-reminder-link-text": "د يادولو برېښليک ورلېږل",
+	"tsb-didnt-make-any-translations": "دغه کارن کومې ژباړې نه دي ترسره کړي.",
+	"tsb-translations-source": "سرچينه",
+	"tsb-translations-user": "{{GENDER:$1|کارن}} ژباړې",
+	"tsb-translations-current": "شته ژباړې",
+	"translationstash": "ښه راغلئ",
+	"translate-translationstash-welcome": "ښه راغلئ {{GENDER:$1|$1}}، تاسې يو نوی ژباړن ياست",
+	"translate-translationstash-initialtranslation": "ستاسې لومړنۍ ژباړه",
+	"translate-translationstash-translations": "$1 {{PLURAL:$1|ژباړه بشپړه شوې|ژباړې بشپړې شوي}}",
+	"translate-translationstash-skip-button-label": "بل آزمويل",
+	"tsb-limit-reached-title": "له ژباړو څخه مو مننه",
+	"tsb-create-user-page": "يو بنسټيز کارن مخ جوړول",
+	"log-name-translatorsandbox": "د ژباړې شگبکس"
+}

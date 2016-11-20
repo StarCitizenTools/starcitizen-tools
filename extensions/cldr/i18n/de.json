@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kghbln",
+			"Raimond Spekking"
+		]
+	},
+	"cldr-desc": "Ermöglicht die Unterstützung für internationalisierte Sprachennamen aus dem [http://cldr.unicode.org/index „Common Locale Data Repository“ (CLDR)]"
+}

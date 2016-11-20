@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ahonc",
+			"Тест"
+		]
+	},
+	"cldr-desc": "Розширення, яке забезпечує локалізовані назви мов на основі [http://cldr.unicode.org/index/downloads даних CLDR]"
+}

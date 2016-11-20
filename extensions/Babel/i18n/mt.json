@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrisportelli"
+		]
+	},
+	"babel": "Informazzjoni tal-utent Babel",
+	"babel-desc": "Iżżid il-funzjoni parser <code>#babel</code> sabiex tippermetti l-ġenerazzjoni awtomatika ta' kolonna ta' kaxxa tal-utent babel bil-possibilità li tinkludi mudelli personalizzati",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Utenti skont il-lingwa",
+	"babel-autocreate-reason": "Ħolqien awtomatiku tal-paġna tal-kategorija [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Utenti f'din il-kategorija jindikaw li għandhom livell ta' għarfien $1 għal-lingwa $2.",
+	"babel-autocreate-text-main": "Utenti f'din il-kategorija jindikaw li għandhom għarfien tal-lingwa $1.",
+	"babel-0": "Dan l-utent [[$1|m'huwiex kapaċi jikkomunika]] bil-[[$2|$3]] (jew jifhmu b'diffikultà konsiderevoli).",
+	"babel-1": "Dan l-utent jista' jikkontribwixxi b'livell [[$1|bażiku]] tal-[[$2|$3]].",
+	"babel-2": "Dan l-utent jista' jikkontribwixxi b'livell [[$1|intermedju]] tal-[[$2|$3]].",
+	"babel-3": "Dan l-utent jista' jikkontribwixxi b'livell [[$1|avvanzat]] tal-[[$2|$3]].",
+	"babel-4": "Dan l-utent jista' jikkontribwixxi b'livell ta' [[$1|kważi nattiv]] tal-[[$2|$3]].",
+	"babel-5": "Dan l-utent jista' jikkontribwixxi b'livell [[$1|professjonali]] tal-[[$2|$3]].",
+	"babel-N": "Dan l-utent jista' jikkontribwixxi b'livell [[$1|nattiv]] tal-[[$2|$3]].",
+	"babel-0-n": "Dan l-utent [[$1|m'huwiex kapaċi jikkomunika]] bil-[[$2|Malti]] (jew jifhmu b'diffikultà konsiderevoli).",
+	"babel-1-n": "Dan l-utent jista' jikkontribwixxi b'livell [[$1|bażiku]] tal-[[$2|Malti]].",
+	"babel-2-n": "Dan l-utent jista' jikkontribwixxi b'livell [[$1|intermedju]] tal-[[$2|Malti]].",
+	"babel-3-n": "Dan l-utent jista' jikkontribwixxi b'livell [[$1|avvanzat]] tal-[[$2|Malti]].",
+	"babel-4-n": "Dan l-utent jista' jikkontribwixxi b'livell ta' [[$1|kważi nattiv]] tal-[[$2|Malti]].",
+	"babel-5-n": "Dan l-utent jista' jikkontribwixxi b'livell [[$1|professjonali]] tal-[[$2|Malti]].",
+	"babel-N-n": "Dan l-utent jista' jikkontribwixxi b'livell [[$1|nattiv]] tal-[[$2|Malti]].",
+	"babel-footer": "Utenti skont il-lingwa"
+}

@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ezagren",
+			"J Subhi",
+			"Riemogerz"
+		]
+	},
+	"babel": "Panjalasan Babel pamakai",
+	"babel-desc": "Manambahi pungsi parser <code>#babel</code> gasan mambulihakan paulahan sabuah kutak pamakai utumatis lawan kamampuan gasan mamakai citakan nang dikustomisasiakan",
+	"babel-url": "Pruyik:Babel",
+	"babel-footer-url": "Tumbung:Babel - Pamakai bapadal bahasa",
+	"babel-autocreate-reason": "Utumatis maulah tumbung tungkaran [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Pamakai dalam tumbung naya artinya sidin baisi kamampuan $1 gasan bahasa $2.",
+	"babel-autocreate-text-main": "Pamakai dalam tumbung naya artinya sidin baisi ilmu gasan bahasa $1.",
+	"babel-0": "Pamakai ngini [[$1|kada]] baisi ilmu gasan [[$2|$3]] (atawa paham haja tagal pina ngalih banar).",
+	"babel-1": "Pamakai ngini baisi ilmu [[$1|pandal]] gasan [[$2|$3]].",
+	"babel-2": "Pamakai ngini baisi ilmu [[$1|manangah]] gasan [[$2|$3]].",
+	"babel-3": "Pamakai ngini baisi ilmu [[$1|mahir]] gasan [[$2|$3]].",
+	"babel-4": "Pamakai ngini baisi ilmu [[$1|parak nangkaya pamandir asli]] gasan [[$2|$3]].",
+	"babel-5": "  Pamakai ngini baisi ilmu [[$1|harat]] gasan [[$2|$3]].",
+	"babel-N": "Pamakai ngini [[$1|pamandir asli]] nang paham banar [[$2|$3]].",
+	"babel-0-n": "Pamakai ngini [[$1|kada]] baisi ilmu gasan [[$2|Bahasa Banjar]] (atawa paham haja tagal pina ngalih banar).",
+	"babel-1-n": "Pamakai ngini baisi ilmu [[$1|pandal]] gasan  [[$2|Bahasa Banjar]].",
+	"babel-2-n": "Pamakai ngini baisi ilmu [[$1|manangah]] gasan [[$2|Bahasa Banjar]].",
+	"babel-3-n": "Pamakai ngini baisi ilmu [[$1|mahir]] gasan  [[$2|Bahasa Banjar]].",
+	"babel-4-n": "Pamakai ngini baisi ilmu [[$1|parak nangkaya pamandir asli]] gasan [[$2|Bahasa Banjar]].",
+	"babel-5-n": "Pamakai ngini baisi ilmu [[$1|harat]] gasan [[$2|Bahasa Banjar]].",
+	"babel-N-n": "Pamakai ngini [[$1|pamandir asli]] nang paham banar [[$2|Bahasa Banjar]].",
+	"babel-footer": "Papamakai bapadal bahasa"
+}

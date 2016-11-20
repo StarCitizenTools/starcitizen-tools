@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16",
+			"Pippinu",
+			"F. Cosoleto",
+			"Statix64",
+			"Macofe",
+			"Sarvaturi"
+		]
+	},
+	"searchtranslations": "Ricerca traduzioni",
+	"tux-sst-edit": "Modifica traduzione",
+	"tux-sst-view-foreign": "Visualizza su $1",
+	"tux-sst-search": "Cerca",
+	"tux-sst-search-ph": "Cerca traduzioni",
+	"tux-sst-count": "{{PLURAL:$1|Un risultato trovato|$1 risultati trovati}}",
+	"tux-sst-facet-language": "Lingue",
+	"tux-sst-facet-group": "Gruppi di messaggi",
+	"tux-sst-facet-orphan": "(orfano)",
+	"tux-sst-nosolr-title": "Ricerca non disponibile",
+	"tux-sst-nosolr-body": "Questo wiki non ha un servizio di ricerca delle traduzioni.",
+	"tux-sst-solr-offline-title": "Ricerca non disponibile",
+	"tux-sst-solr-offline-body": "Il servizio di ricerca è temporaneamente non disponibile.",
+	"tux-sst-next": "Risultati successivi ›",
+	"tux-sst-prev": "‹ Risultati precedenti",
+	"tux-sst-default": "Traduzioni",
+	"tux-sst-translated": "Traduzioni da $1",
+	"tux-sst-untranslated": "Nessuna traduzione da $1",
+	"tux-sst-outdated": "Traduzioni non aggiornate da $1",
+	"tux-sst-ellipsis-untranslated": "Nessuna traduzione",
+	"tux-sst-ellipsis-outdated": "Traduzioni non aggiornate",
+	"tux-sst-case-sensitive": "Distingui maiuscole e minuscole"
+}

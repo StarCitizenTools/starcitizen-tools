@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"googleanalytics-desc": "Zasuwa skript Google Analytics (ga.js) do bokow MediaWiki za slědowanje",
+	"right-noanalytics": "Ze slědowanja pśez Google Analytics wuwzety"
+}

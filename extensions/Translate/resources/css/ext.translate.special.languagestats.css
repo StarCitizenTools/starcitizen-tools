@@ -1,0 +1,21 @@
+.mw-sp-translate-table.wikitable tr:hover td {
+	background: white;
+}
+
+.groupexpander-all {
+	text-align: right;
+}
+
+.groupexpander {
+	float: right;
+}
+
+.statstable .expanded,
+.statstable .expanded a {
+	cursor: n-resize;
+}
+
+.statstable .collapsed,
+.statstable .collapsed a {
+	cursor: s-resize;
+}

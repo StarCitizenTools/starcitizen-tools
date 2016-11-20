@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"唐吉訶德的侍從",
+			"Yejianfei"
+		]
+	},
+	"babel": "用戶信息",
+	"babel-desc": "添加<code>#babel</code>解析器功能，來支持自動形成蜀萆用戶框，固加會使包括自定義模板。",
+	"babel-url": "Project:用戶信息",
+	"babel-footer-url": ":類別:用戶信息——用戶使語言分類",
+	"babel-autocreate-reason": "自動創建[[$1|用戶信息]]類別頁面。",
+	"babel-autocreate-text-levels": "敆茲蜀萆分類下底其用戶表示伊各儂對$2語言都有$1其水平。",
+	"babel-autocreate-text-main": "敆茲蜀萆分類下底其用戶表示伊各儂對$1語言都會會意仂囝。",
+	"babel-0": "Cī ciáh ê̤ṳng-hô [[$1|uòng-ciòng mâ̤ huôi-é]] [[$2|$3]].<br />茲隻用戶[[$1|完全𣍐會意]][[$2|$3]]。",
+	"babel-1": "Cī ciáh ê̤ṳng-hô tĕ̤k-siā [[$2|$3]] gì nèng-lĭk sê [[$1|chĕ̤-gék]].<br />茲隻用戶讀寫[[$2|$3]]其能力是[[$1|初級]]。",
+	"babel-2": "Cī ciáh ê̤ṳng-hô tĕ̤k-siā [[$2|$3]] gì nèng-lĭk [[$1|dṳ̆ng-dēng]].<br />茲隻用戶讀寫[[$2|$3]]其能力[[$1|中等]]。",
+	"babel-3": "Cī ciáh ê̤ṳng-hô tĕ̤k-siā [[$2|$3]] gì nèng-lĭk [[$1|gŏ̤-gék]].<br />茲隻用戶讀寫[[$2|$3]]其能力[[$1|高級]]。",
+	"babel-4": "Cī ciáh ê̤ṳng-hô tĕ̤k-siā [[$2|$3]] gì nèng-lĭk [[$1|ciék-gê̤ṳng mū-ngṳ̄]].<br />茲隻用戶讀寫[[$2|$3]]其能力[[$1|接近母語]]。",
+	"babel-5": "Cī ciáh ê̤ṳng-hô tĕ̤k-siā [[$2|$3]] gì nèng-lĭk [[$1|iā ciŏng-ngiĕk]].<br />茲隻用戶讀寫[[$2|$3]]其能力[[$1|嘢專業]]。",
+	"babel-N": "Cī ciáh ê̤ṳng-hô gì [[$1|mū-ngṳ̄]] sê [[$2|$3]].<br />茲隻用戶其[[$1|母語]]是[[$2|$3]]。",
+	"babel-0-n": "Cī ciáh ê̤ṳng-hô uòng-ciòng [[$1|mâ̤ huôi-é]] [[$2|Mìng-dĕ̤ng-ngṳ̄]].<br />茲隻用戶完全[[$1|𣍐會意]][[$2|閩東語]]。",
+	"babel-1-n": "Cī ciáh ê̤ṳng-hô tĕ̤k-siā [[$2|Mìng-dĕ̤ng-ngṳ̄]] gì nèng-lĭk sê [[$1|chĕ̤-gék]].<br />茲隻用戶讀寫[[$2|閩東語]]其能力是[[$1|初級]]。",
+	"babel-2-n": "Cī ciáh ê̤ṳng-hô tĕ̤k-siā [[$2|Mìng-dĕ̤ng-ngṳ̄]] gì nèng-lĭk [[$1|dṳ̆ng-dēng]].<br />茲隻用戶讀寫[[$2|閩東語]]其能力[[$1|中等]]。",
+	"babel-3-n": "Cī ciáh ê̤ṳng-hô tĕ̤k-siā [[$2|Mìng-dĕ̤ng-ngṳ̄]] gì nèng-lĭk [[$1|gŏ̤-gék]].<br />茲隻用戶讀寫[[$2|閩東語]]其能力[[$1|高級]]。",
+	"babel-4-n": "Cī ciáh ê̤ṳng-hô tĕ̤k-siā [[$2|Mìng-dĕ̤ng-ngṳ̄]] gì nèng-lĭk [[$1|ciék-gê̤ṳng mū-ngṳ̄]].<br />茲隻用戶讀寫[[$2|閩東語]]其能力[[$1|接近母語]]。",
+	"babel-5-n": "Cī ciáh ê̤ṳng-hô tĕ̤k-siā [[$2|Mìng-dĕ̤ng-ngṳ̄]] gì nèng-lĭk [[$1|iā ciŏng-ngiĕk]].<br />茲隻用戶讀寫[[$2|閩東語]]其能力[[$1|野專業]]。",
+	"babel-N-n": "Cī ciáh ê̤ṳng-hô gì [[$1|mū-ngṳ̄]] sê [[$2|Mìng-dĕ̤ng-ngṳ̄]].<br />茲隻用戶其[[$1|母語]]是[[$2|閩東語]]。",
+	"babel-footer": "用戶，使語言分類"
+}

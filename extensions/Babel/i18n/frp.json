@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"ChrisPtDe"
+		]
+	},
+	"babel": "Enformacions Babél sur l’usanciér",
+	"babel-desc": "Apond la fonccion du parsor <code>#babel</code> que pèrmèt la crèacion ôtomatica d’una bouèta usanciér Babél avouéc la possibilitât d’y encllure des modèlos locals.",
+	"babel-url": "Project:Babél",
+	"babel-footer-url": ":Category:Babél - Usanciérs per lengoua",
+	"babel-autocreate-reason": "Crèacion ôtomatica de la catègorie [[$1|Babél]].",
+	"babel-autocreate-text-levels": "Los usanciérs dens ceta catègorie ont endicâ qu’ont lo nivél $1 por la lengoua $2.",
+	"babel-autocreate-text-main": "Los usanciérs dens ceta catègorie ont endicâ qu’ont des cognessences en $1.",
+	"babel-0": "Cet’utilisat{{GENDER:$4|or|rice|or}} at [[$1|gins]] de cognessence en [[$2|$3]] (ou ben lo comprend avouéc de grôsses dificultâts).",
+	"babel-1": "Cet’utilisat{{GENDER:$4|or|rice|or}} at des cognessences [[$1|totes simples]] en [[$2|$3]].",
+	"babel-2": "Cet’utilisat{{GENDER:$4|or|rice|or}} at des cognessences [[$1|moyenes]] en [[$2|$3]].",
+	"babel-3": "Cet’utilisat{{GENDER:$4|or|rice|or}} at des cognessences [[$1|avanciêes]] en [[$2|$3]].",
+	"babel-4": "Cet’utilisat{{GENDER:$4|or|rice|or}} at des cognessences prôches de la [[$1|lengoua matèrnâla]] en [[$2|$3]].",
+	"babel-5": "Cet’utilisat{{GENDER:$4|or|rice|or}} at des cognessences [[$1|profèssionèles]] en [[$2|$3]].",
+	"babel-N": "Cet’utilisat{{GENDER:$4|or|rice|or}} at por [[$1|lengoua matèrnâla]] lo [[$2|$3]].",
+	"babel-0-n": "Cet’utilisat{{GENDER:$4|or|rice|or}} at [[$1|gins]] de cognessence en [[$2|arpetan]] (ou ben lo comprend avouéc de grôsses dificultâts).",
+	"babel-1-n": "Cet’utilisat{{GENDER:$4|or|rice|or}} at des cognessences [[$1|totes simples]] en [[$2|arpetan]].",
+	"babel-2-n": "Cet’utilisat{{GENDER:$4|or|rice|or}} at des cognessences [[$1|moyenes]] en [[$2|arpetan]].",
+	"babel-3-n": "Cet’utilisat{{GENDER:$4|or|rice|or}} at des cognessences [[$1|avanciêes]] en [[$2|arpetan]].",
+	"babel-4-n": "Cet’utilisat{{GENDER:$4|or|rice|or}} at des cognessences prôches de la [[$1|lengoua matèrnâla]] en [[$2|arpetan]].",
+	"babel-5-n": "Cet’utilisat{{GENDER:$4|or|rice|or}} at des cognessences [[$1|profèssionèles]] en [[$2|arpetan]].",
+	"babel-N-n": "Cet’utilisat{{GENDER:$4|or|rice|or}} at por [[$1|lengoua matèrnâla]] l’[[$2|arpetan]].",
+	"babel-footer": "Usanciérs per lengoua"
+}

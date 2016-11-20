@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aftabuzzaman"
+		]
+	},
+	"msu-desc": "একযোগে সহজে একটি ফাইল বা একাধিক ফাইল আপলোড করা সক্ষম করে",
+	"msu-button-title": "ফাইলসমূহ নির্বাচন করুন",
+	"msu-insert-link": "লিংক যোগ করো",
+	"msu-insert-gallery": "গ্যালারি হিসাবে সব সন্নিবেশ করুন",
+	"msu-insert-files": "ফাইলসমূহ হিসাবে সব সন্নিবেশ করুন",
+	"msu-insert-links": "লিঙ্ক হিসাবে সব সন্নিবেশ করুন",
+	"msu-insert-image": "চিত্র হিসেবে সন্নিবেশ করুন",
+	"msu-insert-video": "ভিডিও সন্নিবেশ করুন",
+	"msu-cancel-upload": "আপলোড বাতিল করুন",
+	"msu-clean-all": "তালিকা পরিষ্কার করুন",
+	"msu-ext-not-allowed": "কেবলমাত্র নিচের ফাইলের {{PLURAL:$1|ধরন|ধরনসমূহ}} অনুমোদিত:",
+	"msu-upload-this": "এই ফাইল ডাউনলোড করুন",
+	"msu-upload-all": "সব ফাইল আপলোড করুন",
+	"msu-dropzone": "এখানে ফাইল ছাড়ুন",
+	"msu-comment": "এমএসআপলোড দিয়ে ফাইল আপলোডকৃত"
+}

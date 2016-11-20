@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"DCLXVI"
+		]
+	},
+	"cldr-desc": "Разширение, което предоставя локализирани имена на езиците от [http://cldr.unicode.org/index/downloads CLDR данните]"
+}

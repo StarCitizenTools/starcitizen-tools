@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cecílio"
+		]
+	},
+	"babel": "Anformaçon Babel de Outelizador",
+	"babel-desc": "Ajunta la funçon de l analisador parser <code>#babel</code> pa premitir la criaçon outomatica dua coluna de caixas de outelizador babel cula possiblidade de ancluir modelos pessonalizadas",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "A criar outomaticamiente la páigina de la catadorie [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Ls outelizadores nesta catadorie dízen que ténen un nible de coincimiento $1 na lhéngua $2.",
+	"babel-autocreate-text-main": "Ls outelizadores nesta catadorie dízen que ténen coincimientos de la lhéngua $1.",
+	"babel-0": "{{GENDER:$4|Este outelizador|Esta outelizadora}} [[$1|nun antende]] [[$2|$3]] (ó antende cun muitas deficuldades).",
+	"babel-1": "{{GENDER:$4|Este outelizador|Esta outelizadora}} puode ajudar cun un nible [[$1|básico]] de [[$2|$3]].",
+	"babel-2": "{{GENDER:$4|Este outelizador|Esta outelizadora}} puode ajudar cun un nible [[$1|médio]] de [[$2|$3]].",
+	"babel-3": "{{GENDER:$4|Este outelizador|Esta outelizadora}} puode ajudar cun un nible [[$1|abançado]] de [[$2|$3]].",
+	"babel-4": "{{GENDER:$4|Este outelizador|Esta outelizadora}} puode ajudar cun un nible [[$1|quaijeque cumo de quien l mamou a la nacença]] de [[$2|$3]].",
+	"babel-5": "{{GENDER:$4|Este outelizador|Esta outelizadora}} puode ajudar cun un nible [[$1|porfissional]] de [[$2|$3]].",
+	"babel-N": "{{GENDER:$4|Este outelizador|Esta outelizadora}} ten cumo lhéngua [[$1|de nacença]] l [[$2|$3]].",
+	"babel-0-n": "{{GENDER:$4|Este outelizador|Esta outelizadora}} [[$1|nun antende]] [[$2|Mirandés]] (ó antende cun algun custo).",
+	"babel-1-n": "{{GENDER:$4|Este outelizador|Esta outelizadora}} puode ajudar cun un nible [[$1|básico]] de [[$2|mirandés]].",
+	"babel-2-n": "{{GENDER:$4|Este outelizador|Esta outelizadora}} puode ajudar cun un nible [[$1|médio]] de [[$2|mirandés]].",
+	"babel-3-n": "{{GENDER:$4|Este outelizador|Esta outelizadora}} puode ajudar cun un nible [[$1|abançado]] de [[$2|mirandés]].",
+	"babel-4-n": "{{GENDER:$4|Este outelizador|Esta outelizadora}} puode ajudar cun un nible [[$1|quaijeque cumo de quien l mamou a la nacença]] de [[$2|mirandés]].",
+	"babel-5-n": "{{GENDER:$4|Este outelizador|Esta outelizadora}} puode ajudar cun un nible [[$1|porfissional]] de [[$2|mirandés]].",
+	"babel-N-n": "{{GENDER:$4|Este outelizador|Esta outelizadora}} ten cumo lhéngua [[$1|de nacença]] l [[$2|mirandés]]."
+}

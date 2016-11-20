@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lloffiwr",
+			"Robin Owain"
+		]
+	},
+	"babel": "Gwybodaeth am ieithoedd y defnyddiwr",
+	"babel-desc": "Yn ychwanegu'r ffwythiant dosrannu <code>#babel</code> er mwyn gosod blwch ieithoedd y defnyddiwr yn awtomatig, a chyda'r modd i gynnwys nodiadau pwrpasol",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Categori:Ieithoedd defnyddwyr",
+	"babel-autocreate-reason": "Yn creu tudalen gategoreiddio [[$1|Babel]] yn awtomatig.",
+	"babel-autocreate-text-levels": "Mae defnyddwyr yn y categori hwn yn crybwyll bod ganddynt gallu ieithyddol ar lefel $1 mewn $2.",
+	"babel-autocreate-text-main": "Mae defnyddwyr yn y categori hwn yn crybwyll bod rhywfaint o allu $1 ganddynt.",
+	"babel-0": "[[$1|Nid]] yw{{GENDER:$4| hwn| hon|'r defnyddiwr yma}} yn deall [[$2|$3]].",
+	"babel-1": "Mae {{GENDER:$4|hwn|hon|'r defnyddiwr yma}} yn medru [[$2|$3]] ar lefel [[$1|syml]].",
+	"babel-2": "Mae{{GENDER:$4| hwn| hon|'r defnyddiwr yma}} yn medru [[$2|$3]] ar lefel [[$1|ganolradd]].",
+	"babel-3": "Mae{{GENDER:$4| hwn| hon|'r defnyddiwr yma}} yn medru [[$2|$3]] ar lefel [[$1|uwchradd]].",
+	"babel-4": "Mae [[$2|$3]] [[$1|rhugl]] gan {{GENDER:$4|hwn|hon|y defnyddiwr yma}}.",
+	"babel-5": "Mae{{GENDER:$4| hwn| hon|'r defnyddiwr yma}} yn medru [[$2|$3]] ar lefel [[$1|broffesiynol]].",
+	"babel-N": "[[$2|$3]] yw [[$1|mamiaith]] {{GENDER:$4|hwn|hon|y defnyddiwr yma}}.",
+	"babel-0-n": "[[$1|Nid]] yw{{GENDER:$4| hwn| hon|'r defnyddiwr 'ma}} yn medru'r [[$2|Gymraeg]] (neu mae'n cael hi'n anodd iawn ei deall).",
+	"babel-1-n": "Mae{{GENDER:$4| hwn| hon|'r defnyddiwr 'ma}} yn medru'r [[$2|Gymraeg]] ar lefel [[$1|syml]].",
+	"babel-2-n": "Mae{{GENDER:$4| hwn| hon|'r defnyddiwr 'ma}} yn medru'r [[$2|Gymraeg]] ar lefel [[$1|ganolradd]].",
+	"babel-3-n": "Mae{{GENDER:$4| hwn| hon|'r defnyddiwr 'ma}} yn medru'r [[$2|Gymraeg]] ar lefel [[$1|uwchradd]].",
+	"babel-4-n": "Mae [[$2|Cymraeg]] [[$1|rhugl]] gan {{GENDER:$4|hwn|hon|y defnyddiwr yma}}.",
+	"babel-5-n": "Mae{{GENDER:$4| hwn| hon|'r defnyddiwr 'ma}} yn medru'r [[$2|Gymraeg]] ar lefel [[$1|broffesiynol]].",
+	"babel-N-n": "[[$2|Cymraeg]] yw [[$1|mamiaith]] {{GENDER:$4|hwn|hon|y defnyddiwr yma}}.",
+	"babel-footer": "Ieithoedd defnyddwyr"
+}

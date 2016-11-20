@@ -1,0 +1,43 @@
+@import '../../echo.variables';
+
+.mw-echo-ui-bundledNotificationGroupWidget {
+
+	&:not(:first-child) {
+		padding-top: @bundle-group-padding;
+	}
+
+	&-title {
+		// Override OOUI's line height for labels
+		line-height: 1em !important;
+		font-weight: bold;
+		color: #666666;
+		margin-bottom: @bundle-group-padding;
+	}
+
+	.mw-echo-ui-notificationsWidget {
+		margin-bottom: @bundle-group-padding / 2;
+	}
+
+	.mw-echo-ui-notificationItemWidget {
+		padding: 0.5em;
+		border: 1px solid #DDDDDD;
+		box-sizing: border-box;
+
+		&:not(:last-child) {
+			border-bottom: 0;
+		}
+
+		&-icon img {
+			height: 1.5em;
+			width: 1.5em;
+		}
+
+		&-content {
+			padding-left: 0.5em + 1.5em;
+		}
+
+		&-markAsReadButton {
+			padding-top: 0;
+		}
+	}
+}

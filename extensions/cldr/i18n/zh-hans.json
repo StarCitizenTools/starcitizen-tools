@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Alex S.H. Lin",
+			"PhiLiP"
+		]
+	},
+	"cldr-desc": "基于[http://cldr.unicode.org/index/downloads CLDR数据]提供本地化语言名称的扩展。"
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"cleanchanges-changerightslink": "change groups",
+	"cleanchanges-desc": "More compact display of the [[Special:RecentChanges|recent changes list]]",
+	"cleanchanges-language": "Language:",
+	"cleanchanges-language-na": "All",
+	"cleanchanges-users": "Users (Sep: |):",
+	"cleanchanges-showuserlinks": "Show user links",
+	"cleanchanges-rcinfo-2": "($1; $2)",
+	"cleanchanges-rcinfo-3": "($1; $2; $3)"
+}

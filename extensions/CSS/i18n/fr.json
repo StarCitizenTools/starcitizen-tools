@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"IAlex",
+			"Urhixidur",
+			"Verdy p"
+		]
+	},
+	"css-desc": "Une fonction de l’analyseur syntaxique qui permet d’inclure des feuilles de style dans des pages spécifiques"
+}

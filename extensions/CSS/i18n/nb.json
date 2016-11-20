@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Laaknor"
+		]
+	},
+	"css-desc": "En parserfunksjon som gjør det mulig å inkludere CSS-stilark på spesifikke sider"
+}

@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Helix84"
+		]
+	},
+	"cldr-desc": "Rozšírenie, ktoré poskytuje lokalizované názvy jazykov na základe [http://cldr.unicode.org/index/downloads údajov CLDR]"
+}

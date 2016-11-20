@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jack Phoenix <jack@countervandalism.net>",
+			"Nike",
+			"Olli"
+		]
+	},
+	"rss-desc": "Näyttää RSS-syötteitä MediaWiki-sivuilla yleisessä tai käyttäjän määrittämässä muodossa mallinesivuja käyttäen",
+	"rss-error": "RSS-syötteen lataaminen osoitteesta $1 epäonnistui: $2",
+	"rss-empty": "RSS-syötteen lataaminen osoitteesta $1 epäonnistui!",
+	"rss-fetch-nourl": "Syötettä kutsuttiin ilman osoitetta!",
+	"rss-invalid-url": "Ei kelpaava osoite: $1",
+	"rss-parse-error": "Virhe jäsennettäessä XML:ää RSS:ää varten",
+	"rss-ns-permission": "RSS ei ole sallittu tässä nimiavaruudessa",
+	"rss-feed": "<!--  seuraavat ovat kaksi vaihtoehtoista mallinetta. Ensimmäinen on perusmalline syötteille -->; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''\n: {{{description}}}\n: {{{author}}} {{{date}}}<!-- älä käytä rivinvaihtoa tässä --><!-- Toinen on kehittyneempi versio, joka tarvitsee ParserFunctions-laajennoksen --><!-- ; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''{{#if: {{{description|}}}|: {{{description}}}}}{{#if: {{{author|}}} | {{#if: {{{date|}}} |: &mdash; {{{author}}} {{{date}}}}} | {{#if: {{{author|}}}|: &mdash; {{{author}}}}} {{#if: {{{date|}}}|:{{{date}}}}}|}} -->"
+}

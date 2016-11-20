@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Red Winged Duck",
+			"Renessaince"
+		]
+	},
+	"notification-bundle-header-flow-post-reply": "$1 новых адказаў у «$2».",
+	"echo-pref-tooltip-flow-discussion": "Паведамляць мне, калі зьвязаныя са мной дзеяньні адбываюцца ў Flow.",
+	"right-flow-hide": "хаваць тэмы і паведамленьні Flow",
+	"right-flow-lock": "пазначэньне тэмаў Flow як вырашаных",
+	"right-flow-delete": "выдаленьне тэмаў і запісаў Flow",
+	"right-flow-edit-post": "рэдагаваньне запісаў іншых удзельнікаў у Flow",
+	"right-flow-suppress": "падаўленьне вэрсіяў Flow",
+	"flow-special-type": "Тып"
+}

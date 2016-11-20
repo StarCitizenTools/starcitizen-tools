@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby",
+			"Les Meloures"
+		]
+	},
+	"commonsmetadata-desc": "Erweidert d''extmetadata'-Eegeschaft vum API-Modul vun de Bildinformatioune fir Informatiounen aus de Bildbeschreiwungssäiten anzebannen, déi d'Schablounen benotzen déi op Wikimedia Commons benotzt ginn",
+	"commonsmetadata-trackingcategory-no-license": "Fichieren ouni maschinneliesbar Lizenz",
+	"commonsmetadata-trackingcategory-no-license-desc": "De Fichier huet keng [{{MediaWiki:Commonsmetadata-doc-url}} maschinneliesbar] Lizenzschabloun.",
+	"commonsmetadata-trackingcategory-no-description": "Fichieren ouni maschinneliesbar Beschreiwung",
+	"commonsmetadata-trackingcategory-no-author": "Fichieren ouni maschinneliesbaren Auteur",
+	"commonsmetadata-trackingcategory-no-source": "Fichieren ouni maschinneliesbar Quell"
+}

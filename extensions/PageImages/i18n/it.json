@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16",
+			"Gianfranco"
+		]
+	},
+	"pageimages-desc": "Raccoglie informazioni sulle immagini utilizzate nella pagina",
+	"pageimages-info-label": "Immagine della pagina",
+	"apihelp-query+pageimages-description": "Fornisce informazioni sulle immagini nella pagina, ad esempio le anteprime e la presenza di foto.",
+	"apihelp-query+pageimages-param-thumbsize": "Dimensione massima miniatura.",
+	"apihelp-query+pageimages-param-limit": "Proprietà di quante pagine da mostrare."
+}

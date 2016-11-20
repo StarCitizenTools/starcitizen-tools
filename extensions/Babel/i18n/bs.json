@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"CERminator",
+			"Palapa"
+		]
+	},
+	"babel": "Babel korisničke informacije",
+	"babel-desc": "Dodaje <code>#babel</code> parsersku funkciju koja omogućava automatsko pravljenje babel korisničke kutije u stupcu sa mogućnostima uključivanja prilagođenih šablona",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Korisnici po jeziku",
+	"babel-autocreate-reason": "Automatski napravljena stranica [[$1|Babel]] kategorije.",
+	"babel-autocreate-text-levels": "Korisnici u ovoj kategoriji su naveli da imaju nivo $1 znanja $2 jezika.",
+	"babel-autocreate-text-main": "Korisnici u ovoj kategoriji su označeni da imaju znanje $1 jezika.",
+	"babel-0": "Ovaj korisnik [[$1|ne]] govori [[$2|$3]] (ili ga razumije sa velikim poteškoćama).",
+	"babel-1": "Ovaj korisnik ima [[$1|osnovno]] poznavanje [[$2|$3]] jezika.",
+	"babel-2": "Ovaj korisnik [[$1|dobro]] poznaje [[$2|$3]].",
+	"babel-3": "Ovaj korisnik [[$1|napredno]] poznaje [[$2|$3]].",
+	"babel-4": "Ovaj korisnik poznaje [[$2|$3]] gotovo na nivou [[$1|maternjeg jezika]]",
+	"babel-5": "Ovaj korisnik ima znanje [[$2|$3]] na [[$1|profesionalnom nivou]].",
+	"babel-N": "Ovaj korisnik govori [[$2|$3]] kao [[$1|maternji jezik]].",
+	"babel-0-n": "Ovaj korisnik [[$1|ne]] govori [[$2|bosanski]] (ili ga razumije sa velikim poteškoćama).",
+	"babel-1-n": "Ovaj korisnik ima [[$1|osnovno]] znanje [[$2|bosanskog jezika]].",
+	"babel-2-n": "Ovaj korisnik ima [[$1|osrednje]] znanje [[$2|bosanskog jezika]].",
+	"babel-3-n": "Ovaj korisnik ima [[$1|napredno]] znanje [[$2|bosanskog jezika]].",
+	"babel-4-n": "Ovaj korisnik ima [[$1|odlično]] znanje [[$2|bosanskog jezika]].",
+	"babel-5-n": "Ovaj korisnik ima [[$1|profesionalno]] znanje [[$2|bosanskog jezika]].",
+	"babel-N-n": "Ovaj korisnik ima znanje [[$2|bosanskog]] na nivou [[$1|maternjeg jezika]].",
+	"babel-footer": "Korisnici po jezicima"
+}

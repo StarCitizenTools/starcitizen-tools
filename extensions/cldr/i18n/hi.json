@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kaustubh",
+			"Siddhartha Ghai"
+		]
+	},
+	"cldr-desc": "एक्सटेंशन जो [http://cldr.unicode.org/index/downloads CLDR डाटा] के अनुसार भाषाओं के स्थानीय नाम प्रदान करता है"
+}

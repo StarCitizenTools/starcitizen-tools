@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jonny84",
+			"Piotron"
+		]
+	},
+	"babel": "Babel-Benutzer-Information",
+	"babel-desc": "Ergänzt de <code>#babel</code>-Parserfunktion zur automatischen Erstellung vo Babel-Benutzerboxen-Zeilen mit der Möglichkeit, eigene Vorlagen einzubinden",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "Automatisch arstellte [[$1|Babel]]-Kategorie.",
+	"babel-autocreate-text-levels": "Benutzer ei dieser Kategorie haben den Kenntnis-Level $1 für die Sproache $2.",
+	"babel-autocreate-text-main": "Benutzer ei dieser Kategorie haben Kenntnisse der Sproache $1.",
+	"babel-0": "Dieser Benutzer beherrscht [[$2|$3]] [[$1|nicht]] (oder versteht es nur mit beträchtlichen Schwierigkeiten).",
+	"babel-1": "Dieser Benutzer beherrscht [[$2|$3]] auf [[$1|grundlegendem]] Niveau.",
+	"babel-2": "Dieser Benutzer beherrscht [[$2|$3]] uff [[$1|fortgeschrittenem]] Niveau.",
+	"babel-3": "Dieser Benutzer beherrscht [[$2|$3]] uff [[$1|hohem]] Niveau.",
+	"babel-4": "Dieser Benutzer beherrscht [[$2|$3]] uff [[$1|muttersprachlichem Niveau]].",
+	"babel-5": "Dieser Benutzer beherrscht [[$2|$3]] uff [[$1|professionellem]] Niveau.",
+	"babel-N": "Dieser Benutzer spricht [[$2|$3]] als [[$1|Muttersproache]].",
+	"babel-0-n": "Dieser Benutzer beherrscht [[$2|Schläsch]] [[$1|nä]] (oder versteht es nur mit beträchtlicha Schwierigkeita).",
+	"babel-1-n": "Dieser Benutzer koann a wing [[$2|Schläsch]].",
+	"babel-2-n": "Dieser Benutzer beherrscht [[$2|Schläsch]] uff [[$1|fortgeschrittenem]] Niveau.",
+	"babel-3-n": "Dieser Benutzer beherrscht [[$2|Schläsch]] uff [[$1|hohem]] Niveau.",
+	"babel-4-n": "Dieser Benutzer beherrscht [[$2|Schläsch]] uff [[$1|muttersproachlichem Niveau]].",
+	"babel-5-n": "Dieser Benutzer beherrscht [[$2|Schläsch]] uff [[$1|professionellem]] Niveau.",
+	"babel-N-n": "Dieser Benutzer ies a echte schläsche Lerge un spricht [[$2|Schläsch]] als [[$1|Muttersproache]]."
+}

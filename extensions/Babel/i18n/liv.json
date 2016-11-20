@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Warbola"
+		]
+	},
+	"babel": "Kȭlbatijizt kīeld mõistimi",
+	"babel-desc": "Panāb jūrõ <code>#babel</code> funktsij, laz  lūodõg automātlistiz Bābõl kȭlbatijiz kast ummist mallõdõks",
+	"babel-url": "Project:Bābõl",
+	"babel-footer-url": ":Category:Bābõl - Kȭlbatijizt kīeld mõistimi",
+	"babel-autocreate-reason": "[[$1|Babel]] kategōrij līed automātli lūomi.",
+	"babel-autocreate-text-levels": "Kȭlbatijizt sīesõ kategōrijs ātõ kītõnd, ku mūoštabõd kīeldõ \"$2\" astāmõks $1.",
+	"babel-autocreate-text-main": "Kȭlbatijizt sīesõ kategōrijs ātõ kītõnd, ku ne mūoštabõd kīeldõ \"$1\".",
+	"babel-0": "Se kȭlbatiji [[$1|äb mūošta]]  [[$2|$3]] kīeldõ (agā mūoštab sūŗ vōjaks).",
+	"babel-1": "Se kȭlbatiji mūoštab  [[$2|$3]] kīeldõ [[$1|īrgandõks astāmõs]] .",
+	"babel-2": "Se kȭlbatiji mūoštab [[$1|sidāmist astāmõs]]  [[$2|$3]].",
+	"babel-3": "Se kȭlbatiji mūoštab  [[$2|$3]] kīeldõ [[$1|kuordist astāmõs]].",
+	"babel-4": "Se kȭlbatiji mūoštab  [[$2|$3]] kīeldõ [[$1|pigātagā nei ku sindikīeldõ]].",
+	"babel-5": "Se kȭlbatiji mūoštab  [[$2|$3]] kīeldõ [[$1|amāt pūolstõ (profesionālist astāmõs)]].",
+	"babel-N": "Sīen kȭlbatijizõn um [[$2|$3]] kēļ [[$1|sindikēļ]].",
+	"babel-0-n": "Se kȭlbatiji [[$1|äb mūošta]] [[$2|līvõ kīeldõ]] (agā mūoštab sūŗ vōjaks).",
+	"babel-1-n": "Se kȭlbatiji mūoštab [[$2|līvõ]] kīeldõ [[$1|īrgandõks]] astāmõs.",
+	"babel-2-n": "Se kȭlbatiji mūoštab [[$2|līvõ]] kīeldõ [[$1|sidāmist]] astāmõs.",
+	"babel-3-n": "Se kȭlbatiji mūoštab [[$2|līvõ kīeldõ]] [[$1|kuordist]] astāmõs.",
+	"babel-4-n": "Se kȭlbatiji mūoštab [[$2|līvõ kīeldõ]] pigātagā  [[$1| nei ku sindikīeldõ]].",
+	"babel-5-n": "Se kȭlbatiji mūoštab [[$2|līvõ]] kīeldõ [[$1|profesionālist]] astāmõs.",
+	"babel-N-n": "Sīen kȭlbatijizõn um [[$2|līvõ]] kēļ [[$1|sindikēļ]]."
+}

@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Als-Holder",
+			"Strommops"
+		]
+	},
+	"babel": "Babel-Benutzer-Information",
+	"babel-desc": "Ergänzt d <code>#babel</code>-Parserfunktion fir s automatisch Aalege vu Babel-Benutzerchäschtli-Zyyle mit dr Megligkeit, eigeni Vorlagen yyzbinde",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Benutzer no Sproch",
+	"babel-autocreate-reason": "Automatisch aagleiti [[$1|Babel]]-Kategorie.",
+	"babel-autocreate-text-levels": "Benutzer in däre Kategorii hän s Chänntnis-Level $1 fir d Sproch $2.",
+	"babel-autocreate-text-main": "Benutzer in däre Kategorii hän Chänntnis vu dr Sproch $1.",
+	"babel-0": "Dä Benutzer cha [[$1|kei]] [[$2|$3]] (oder verstoht's numme mit größere Schwyrigkeite).",
+	"babel-1": "Dä Benutzer cha [[$1|e bitz]] [[$2|$3]].",
+	"babel-2": "Dä Benutzer cha [[$2|$3]] uff [[$1|fortgschrittenem]] Niveau.",
+	"babel-3": "Dä Benutzer cha [[$1|sehr güet]] [[$2|$3]].",
+	"babel-4": "Dä Benutzer cha [[$2|$3]] uff em Niveau vo me [[$1|Müetersprochler]].",
+	"babel-5": "Dä Benutzer cha [[$2|$3]] uff [[$1|professionällem]] Niveau.",
+	"babel-N": "Dem Benutzer sini [[$1|Müetersproch]] isch [[$2|$3]].",
+	"babel-0-n": "Dää Benutzer cha [[$1|kei]] [[$2|Alemannisch]] (oder verstoht s nume mit greschte Schwirigkeite).",
+	"babel-1-n": "Dää Benutzer cha [[$1|e bitzeli]] [[$2|Alemannisch]].",
+	"babel-2-n": "Dää Benutzer cha [[$2|Alemannisch]] uf [[$1|fortgschrittenem]] Niveau.",
+	"babel-3-n": "Dää Benutzer cha [[$1|seli guet]] [[$2|Alemannisch]].",
+	"babel-4-n": "Dää Benutzer cha [[$2|Alemannisch]] [[$1|wie ne Muetterspröchler]].",
+	"babel-5-n": "Dää Benutzer cha [[$2|Alemannisch]] uf [[$1|professionällem]] Niveau.",
+	"babel-N-n": "Däm Benutzer syyni [[$1|Muettersproch]] isch [[$2|Alemannisch]].",
+	"babel-footer": "Benutzer no Sproch"
+}

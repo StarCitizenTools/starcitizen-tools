@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Danny B.",
+			"Matěj Grabovský",
+			"Mormegil"
+		]
+	},
+	"cleanchanges-changerightslink": "změnit skupiny",
+	"cleanchanges-desc": "Kompaktnější zobrazení [[Special:RecentChanges|seznamu posledních změn]]",
+	"cleanchanges-language": "Jazyk:",
+	"cleanchanges-language-na": "Všechny",
+	"cleanchanges-users": "Uživatelé (odd.&nbsp;|):",
+	"cleanchanges-showuserlinks": "Ukázat uživatelské odkazy"
+}

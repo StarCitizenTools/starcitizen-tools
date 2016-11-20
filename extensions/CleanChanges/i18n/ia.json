@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"cleanchanges-changerightslink": "cambiar gruppos",
+	"cleanchanges-desc": "Presentation plus compacte del [[Special:RecentChanges|lista de modificationes recente]]",
+	"cleanchanges-language": "Lingua:",
+	"cleanchanges-language-na": "Totes",
+	"cleanchanges-users": "Usatores (Sep: |):",
+	"cleanchanges-showuserlinks": "Monstrar ligamines de usator"
+}

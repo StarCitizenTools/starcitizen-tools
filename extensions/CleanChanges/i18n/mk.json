@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Brest"
+		]
+	},
+	"cleanchanges-changerightslink": "промена на групи",
+	"cleanchanges-desc": "Компактен приказ на [[Special:RecentChanges|скорешни промени]]",
+	"cleanchanges-language": "Јазик:",
+	"cleanchanges-language-na": "Сите",
+	"cleanchanges-users": "Корисници (разделник: |):",
+	"cleanchanges-showuserlinks": "Прикажи кориснички врски"
+}

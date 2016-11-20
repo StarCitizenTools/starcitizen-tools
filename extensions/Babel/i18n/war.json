@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Harvzsf",
+			"JinJian"
+		]
+	},
+	"babel": "Babel pangilal-an han gumaramit",
+	"babel-desc": "Nadugang hin <code>#babel</code> katungdangan sintaktiko nga natugot hinn lugaring nga paghatag hin uska rumbay hin babel nga kahon-han-gumaramit nga may-ada akos maglakip hin mga batakan hin tinuyoan nga paghimo",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Mga gumaramit ha pinulongan",
+	"babel-autocreate-reason": "Lugaring nga naghihimo hin [[$1|Babel]] kaarangay nga pakli.",
+	"babel-autocreate-text-levels": "An mga gumaramit hinin nga kaarangay in nagpapasabot hin ira katupngan $1 nga kabatiran para ha yinaknan nga $2.",
+	"babel-autocreate-text-main": "An mga gumaramit hinin nga kaarangay in nagpapasabot nga maaram han pinulongan nga $1.",
+	"babel-0": "Ini nga gumaramit in [[$1|waray]] sarabutan hin [[$2|$3]] (o nagkukuri pagsabot).",
+	"babel-1": "Ini nga gumaramit in may-ada [[$1|hamabaw]] nga pananabutan han [[$2|$3]].",
+	"babel-2": "Ini nga gumaramit in may-ada [[$1|tunga-tunga]] nga pananabutan han [[$2|$3]].",
+	"babel-3": "Ini nga gumaramit in may-ada [[$1|hilarom]] nga pananabutan han [[$2|$3]].",
+	"babel-4": "Ini nga gumaramit in may-ada [[$1|haros tuminongnong nga manyarakan]] nga pananabutan han [[$2|$3]].",
+	"babel-5": "Ini nga gumaramit in may-ada [[$1|propesyonal]] nga pananabutan han [[$2|$3]].",
+	"babel-N": "Ini nga gumaramit in may-ada [[$1|tuminongnong]] nga pananabutan han [[$2|$3]].",
+	"babel-0-n": "Ini nga gumaramit in [[$1|waray]] sarabutan hin [[$2|Winaray]] (o nagkukuri pagsabot).",
+	"babel-1-n": "Ini nga gumaramit in may-ada [[$1|hamabaw]] nga pananabutan han [[$2|Winaray]].",
+	"babel-2-n": "Ini nga gumaramit in may-ada [[$1|tunga-tunga]] nga pananabutan han [[$2|Winaray]].",
+	"babel-3-n": "Ini nga gumaramit in may-ada [[$1|hilarom]] nga pananabutan han [[$2|Winaray]].",
+	"babel-4-n": "Ini nga gumaramit in may-ada [[$1|haros tuminongnong nga manyarakan]] nga pananabutan han [[$2|Winaray]].",
+	"babel-5-n": "Ini nga gumaramit in may-ada [[$1|propesyonal]] nga pananabutan han [[$2|Winaray]].",
+	"babel-N-n": "Ini nga gumaramit in may-ada [[$1|tuminongnong]] nga pananabutan han [[$2|Winaray]].",
+	"babel-footer": "Mga gumaramit ha yinaknan"
+}

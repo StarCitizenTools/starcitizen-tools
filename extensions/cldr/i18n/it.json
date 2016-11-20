@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16",
+			"Pietrodn"
+		]
+	},
+	"cldr-desc": "Estensione che fornisce i nomi localizzati delle lingue sulla base dei [http://cldr.unicode.org/index/downloads dati CLDR]"
+}

@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps"
+		]
+	},
+	"apihelp-groupreview-param-group": "Grupa komunikatów.",
+	"apihelp-groupreview-param-language": "Kod języka.",
+	"apihelp-query+languagestats-param-language": "Kod języka.",
+	"apihelp-query+messagecollection-param-language": "Kod języka.",
+	"apihelp-query+messagecollection-example-1": "Lista obsługiwanych języków",
+	"apihelp-query+messagegroups-param-iconsize": "Preferowany rozmiar zrasteryzowanej grupy ikon.",
+	"apihelp-query+messagegroups-example-1": "Pokaż grupy komunikatów",
+	"apihelp-translateuser-example-1": "Pokaż informacje o użytkowniku",
+	"apihelp-translationstash-param-translation": "Tłumaczenia wykonane przez użytkownika.",
+	"apihelp-translationstash-param-metadata": "Obiekt JSON.",
+	"apihelp-ttmserver-param-sourcelanguage": "Kod języka tekstu źródłowego.",
+	"apihelp-searchtranslations-description": "Wyszukiwanie tłumaczeń.",
+	"apihelp-searchtranslations-param-query": "Łańcuch znaków do wyszukania.",
+	"apihelp-searchtranslations-param-sourcelanguage": "Kod języka tekstu źródłowego.",
+	"apihelp-searchtranslations-param-language": "Kod języka do wyszukiwania ciąg znaków.",
+	"apihelp-searchtranslations-param-limit": "Rozmiar wyniku.",
+	"apihelp-searchtranslations-example-1": "Pokaż tłumaczenia dla języka."
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dbc334"
+		]
+	},
+	"cleanchanges-changerightslink": "spremeni skupine",
+	"cleanchanges-desc": "Bolj strjen prikaz [[Special:RecentChanges|seznama zadnjih sprememb]]",
+	"cleanchanges-language": "Jezik:",
+	"cleanchanges-language-na": "Vse",
+	"cleanchanges-users": "Uporabniki (ločilo: |):",
+	"cleanchanges-showuserlinks": "Prikaži uporabniške povezave"
+}

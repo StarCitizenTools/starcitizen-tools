@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Metalhead64",
+			"CennoxX",
+			"Peter Bowman",
+			"Andreasburmeister",
+			"Kghbln"
+		]
+	},
+	"popups-message": "Hovercards",
+	"popups-desc": "Ermöglicht beim Führen des Mauszeigers über einen Seitenlink das Einblenden entsprechender Inhaltszusammenfassungen",
+	"popups-last-edited": "$1 bearbeitet",
+	"popups-redirects": "leitet weiter auf <h3>$1</h3>",
+	"popups-settings-title": "Seitenvorschau",
+	"popups-settings-description": "Dieses Werkzeug ermöglicht dir das Vorschauen von Links auf Wikiseiten und auf Einzelnachweise.",
+	"popups-settings-option-simple": "Aktivieren",
+	"popups-settings-option-simple-description": "Den Einleitungssatz und ein Vorschaubild einer Seite anzeigen. Für Leser empfohlen.",
+	"popups-settings-option-advanced": "Erweitert",
+	"popups-settings-option-advanced-description": "Link-Vorschau anzeigen und Zugriff auf Bearbeitungsfunktionen erhalten. Benutzt von vielen Bearbeitern.",
+	"popups-settings-option-off": "Vorschau deaktivieren",
+	"popups-settings-option-off-description": "Du kannst diese Einstellung ändern, indem du den Link am Seitenende benutzt",
+	"popups-settings-save": "Speichern",
+	"popups-settings-help-ok": "Okay",
+	"popups-settings-cancel": "Abbrechen",
+	"popups-settings-help": "Du kannst Vorschaubilder erneut aktivieren, indem du einen Link im Fußbereich der Seite verwendest.",
+	"popups-settings-enable": "Vorschau aktivieren",
+	"popups-send-feedback": "Rückmeldung senden (externer Link)",
+	"popups-mobile-continue-to-page": "Auf Seite fortfahren",
+	"popups-mobile-dismiss": "Ausblenden",
+	"popups-mobile-message": "Hovercards (mobil)"
+}

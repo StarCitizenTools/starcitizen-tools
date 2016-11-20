@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kaganer",
+			"Kusurija",
+			"Hugo.arg"
+		]
+	},
+	"babel-url": "Project:Babėliuons",
+	"babel-footer-url": "Kateguorėjė:Babėliuons - Nauduotuojē palē kalbas",
+	"babel-autocreate-text-levels": "Šiuo kateguorėjuo esontē nauduotojē muok $2 kalba, ėr anū žėnuojėms $1 īr.",
+	"babel-autocreate-text-main": "Šiuo kateguorėjuo esontē nauduotojē muok $1 kalba.",
+	"babel-0": "[[$2|$3]] — [[$1|nasopront]] (a sopronta nuognē mažā).",
+	"babel-1": "[[$2|$3]] — [[$1|pradėnė līgė]].",
+	"babel-2": "[[$2|$3]] — [[$1|vėdotėnė līgė]].",
+	"babel-3": "[[$2|$3]] — [[$1|aukšta līgė]].",
+	"babel-4": "Tas nauduotuos [[$2|$3]] rokoujės zars tāp, būktās ton ruoda būtom anuo [[$1|gėmtojė]].",
+	"babel-5": "Tas nauduotuos [[$2|$3]] kalba muok kāp čīstos [[$1|žėnuovs]].",
+	"babel-N": "[[$2|$3]] — [[$1|gimta kalba]].",
+	"babel-0-n": "Tas nauduotuos [[$1|nasopront]] [[$2|žemaitiu kalbuos]] (a sopronta nuognē mažā).",
+	"babel-1-n": "Tas nauduotuos gal prisėdietė pri pruojekta [[$1|pradėnė līgė]] [[$2|žemaitiu kalbuo]].",
+	"babel-2-n": "Tas nauduotuos gal prisėdietė pri pruojekta [[$1|vėdotėnė līgė]] [[$2|žemaitiu kalbuo]].",
+	"babel-3-n": "Tas nauduotuos gal prisėdietė pri pruojekta [[$1|aukšta līgė]] [[$2|žemaitiu kalbuo]].",
+	"babel-4-n": "Tas nauduotuos [[$2|žemaitėškā]] rokoujės zars tāp, būktās ton ruoda būtom anuo [[$1|gėmtojė]].",
+	"babel-N-n": "Tuo nauduotuojė [[$1|gimta kalba]] īr [[$2|žemaitiu]].",
+	"babel-footer": "Nauduotuojē vagol kalbas"
+}

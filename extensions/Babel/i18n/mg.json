@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jagwar"
+		]
+	},
+	"babel": "Torohaim-pikambana Babel",
+	"babel-desc": "Manampy ny Parser function <code>#babel</code> mampamela ny fanamboarana userbox hoazy. Afaka mampiditra endrika tsy natao tany amin'ny mediawiki ilay izy",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Sokajy:Babel - Mpikambana araka ny tenim-pirenena",
+	"babel-autocreate-reason": "Natao hoazy ilay sokajy [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Niteny ny mpikambana anatin'ity sokajy ity fa $1 hono ny lentany amin'ny fiteny $2.",
+	"babel-autocreate-text-main": "Ny mpikambana anatin'ity sokajy ity niteny fa $1 hono ny fahaizany.",
+	"babel-0": "[[$1|Tsy mahay]] miteny [[$2|$3]] ity mpikambana ity (na sarotra aminy no miteny azy).\n\n== Lohateny anankiray ==",
+	"babel-1": "Ity mpikambana ity dia miteny [[$2|$3]] [[$1|tsotsotra]].",
+	"babel-2": "[[$1|Antonontonony]] ny lenta n'ity mpikambana ity amin'ny teny [[$2|$3]].",
+	"babel-3": "Ity mpikambana ity dia [[$1|havanana]] amin'ny teny [[$2|$3]].",
+	"babel-4": "Ity mpikambana ity dia miteny [[$2|$3]] [[$1|mira-lenta amin'ny tenin-dreniny]].",
+	"babel-5": "Ity mpikambana ity dia manana fahaizana [[$1|matihanina]] amin'ny teny [[$2|$3]] .",
+	"babel-N": "Ny teny [[$2|$3]] no [[$1|teny nibeazan']]ity mpikambana ity.",
+	"babel-0-n": "Ity mpikambana ity dia [[$1|tsy mahay]] miteny [[$2|malagasy]] (na sarotra aminy no miteny azy).",
+	"babel-1-n": "Ity mpikambana ity dia miteny [[$2|malagasy]] [[$1|tsotsotra]].",
+	"babel-2-n": "Ity mpikambana ity dia miteny [[$2|Malagasy]] [[$1|antonontonony]].",
+	"babel-3-n": "Ity mpikambana ity dia [[$1|havanana]] amin'ny teny [[$2|frantsay]].",
+	"babel-4-n": "Ity mpikambana ity dia miteny [[$2|malagasy]] [[$1|mira-lenta amin'ny tenin-dreniny]].",
+	"babel-5-n": "Ity mpikambana ity dia manana fahaizana [[$1|matihanina]] amin'ny teny [[$2|malagasy]]",
+	"babel-N-n": "Ny teny [[$2|malagasy]] no [[$1|tenim-pirenena nahabe]] ity mpikambana ity.",
+	"babel-footer": "Mpikambana araka ny tenim-pirenena"
+}

@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dani",
+			"Dj",
+			"Glanthor Reviol",
+			"Xbspiro"
+		]
+	},
+	"babel": "Bábel szerkesztői információk",
+	"babel-desc": "<code>#babel</code> értelmes függvény bábel-információkat tartalmazó oszlop automatikus generálásához, saját sablononok beillesztésének lehetőségével",
+	"babel-url": "Project:Bábel",
+	"babel-footer-url": ":Category:Bábel – Felhasználók nyelvek szerint",
+	"babel-autocreate-reason": "[[$1|Bábel]]kategória-oldal automatikus létrehozása.",
+	"babel-autocreate-text-levels": "Az ebben a kategóriában szereplő szerkesztők $1 szinten beszélik a(z) $2 nyelvet.",
+	"babel-autocreate-text-main": "Az ebben a kategóriában szereplő szerkesztők valamilyen szinten beszélik a(z) $1 nyelvet.",
+	"babel-0": "Ez a szerkesztő [[$1|nem]] beszéli a(z) [[$2|$3]] nyelvet (vagy csak nagy nagyon nehezen érti meg).",
+	"babel-1": "Ez a szerkesztő [[$1|alapszinten]] beszéli a(z) [[$2|$3]] nyelvet.",
+	"babel-2": "Ez a szerkesztő [[$1|középszinten]] beszéli a(z) [[$2|$3]] nyelvet.",
+	"babel-3": "Ez a szerkesztő [[$1|haladó]] szinten beszéli a(z) [[$2|$3]] nyelvet.",
+	"babel-4": "Ez a szerkesztő [[$1|közel anyanyelvi]] szinten beszéli a(z) [[$2|$3]] nyelvet.",
+	"babel-5": "Ez a szerkesztő [[$1|professzionális]] szinten beszéli a(z) [[$2|$3]] nyelvet.",
+	"babel-N": "Ennek a szerkesztőnek [[$2|$3]] az [[$1|anyanyelve]].",
+	"babel-0-n": "Ez a szerkesztő [[$1|nem]] beszéli a [[$2|magyar]] nyelvet (vagy csak nagyon nehezen érti meg).",
+	"babel-1-n": "Ez a szerkesztő [[$1|alapszinten]] beszéli a [[$2|magyar]] nyelvet.",
+	"babel-2-n": "Ez a szerkesztő [[$1|középszinten]] beszéli a [[$2|magyar]] nyelvet.",
+	"babel-3-n": "Ez a szerkesztő [[$1|haladó]] szinten beszéli a [[$2|magyar]] nyelvet.",
+	"babel-4-n": "Ez a szerkesztő [[$1|közel anyanyelvi]] szinten beszéli a [[$2|magyar]] nyelvet.",
+	"babel-5-n": "Ez a szerkesztő [[$1|professzionális]] szinten beszéli a [[$2|magyar]] nyelvet.",
+	"babel-N-n": "Ennek a szerkesztőnek [[$2|magyar]] az [[$1|anyanyelve]].",
+	"babel-footer": "Szerkesztők nyelvek szerint"
+}

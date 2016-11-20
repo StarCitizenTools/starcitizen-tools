@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"AlimanRuna"
+		]
+	},
+	"babel": "Ruraqmanta willay Babel",
+	"babel-desc": "<code>#babel</code> k'uskina antachatam yapan ruraqpa babel t'asranpi wachu kikinmanta kamariyta saqillanapaq kikinchasqa plantillakunata ch'aqtana atichinapaqpas",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Ruraqkuna rimayninkama",
+	"babel-autocreate-reason": "Kikinmanta kamarispa [[$1|Babel]] katiguriya p'anqata.",
+	"babel-autocreate-text-levels": "Kay katiguriyapi ruraqkunaqa $2 nisqatam $1 yachaywan rimanku nisqankama.",
+	"babel-autocreate-text-main": "Kay katiguriyapi ruraqkunaqa $1 nisqatam rimanku nisqankama.",
+	"babel-0": "Kay ruraqqa [[$2|$3]]ta [[$1|manam]] rimanchu (icha ancha sasallata hap'iqan).",
+	"babel-1": "Kay ruraqqa [[$2|$3]]ta [[$1|aslla]] yachaywanmi riman.",
+	"babel-2": "Kay ruraqqa [[$2|$3]]ta [[$1|chawpi]] yachaywanmi riman.",
+	"babel-3": "Kay ruraqqa [[$2|$3]]ta [[$1|ñawparikusqa]] yachaywanmi riman.",
+	"babel-4": "Kay ruraqqa [[$2|$3]]ta [[$1|yaqa mama rimaynin hina]] yachaywanmi riman.",
+	"babel-5": "Kay ruraqqa [[$2|$3]]ta [[$1|amawtap]] yachayninwanmi riman.",
+	"babel-N": "Kay ruraqpa [[$1|mama siminqa]] [[$2|$3]]m.",
+	"babel-0-n": "Kay ruraqqa [[$2|Runa Simita]] [[$1|manam]] rimanchu (icha ancha sasallata hap'iqan).",
+	"babel-1-n": "Kay ruraqqa [[$2|Runa Simita]] [[$1|aslla]] yachaywanmi riman.",
+	"babel-2-n": "Kay ruraqqa [[$2|Runa Simita]] [[$1|chawpi]] yachaywanmi riman.",
+	"babel-3-n": "Kay ruraqqa [[$2|Runa Simita]] [[$1|ñawparikusqa]] yachaywanmi riman.",
+	"babel-4-n": "Kay ruraqqa [[$2|Runa Simita]] [[$1|yaqa mama rimaynin hina]] yachaywanmi riman.",
+	"babel-5-n": "Kay ruraqqa [[$2|Runa Simita]] [[$1|amawtap]] yachayninwanmi riman.",
+	"babel-N-n": "Kay ruraqpa [[$1|mama siminqa]] [[$2|Runa Simim]].",
+	"babel-footer": "Ruraqkuna rimayninkama"
+}

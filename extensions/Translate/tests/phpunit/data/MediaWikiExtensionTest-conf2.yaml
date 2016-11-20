@@ -1,0 +1,47 @@
+BASIC:
+  class: MediaWikiExtensionMessageGroup
+  id: ext-wikimediamessages
+  namespace: 8
+  label: Wikimedia Messages
+  description: Plop
+
+FILES:
+  class: MediaWikiExtensionFFS
+  sourcePattern: "%GROUPROOT%/mediawiki-extensions/extensions/WikimediaMessages/WikimediaMessages.i18n.php"
+  aliasFile: FooBar.alias.php
+  magicFile: FooBar.magic.php
+  aliasFileSource: "%GROUPROOT%/mediawiki-extensions/extensions/FooBar.alias.php"
+  magicFileSource: "%GROUPROOT%/mediawiki-extensions/extensions/FooBar.magic.php"
+
+CHECKER:
+  class: MediaWikiMessageChecker
+  checks:
+   - pluralCheck
+   - pluralFormsCheck
+   - wikiParameterCheck
+   - wikiLinksCheck
+   - XhtmlCheck
+   - braceBalanceCheck
+   - pagenameMessagesCheck
+   - miscMWChecks
+
+INSERTABLES:
+  class: MediaWikiInsertablesSuggester
+
+MANGLER:
+  class: StringMatcher
+  prefix: wmf-
+  patterns:
+    - sidebar
+    - grouppage-Staff
+    - group-Staff
+    - group-Staff-member
+
+TAGS:
+  optional:
+    - grouppage-recursive-export
+    - "*-extensionname"
+    - skinname-*
+  ignored:
+    - wmf-sidebar
+    - robots.txt

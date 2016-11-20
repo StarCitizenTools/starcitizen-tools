@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"John Reid"
+		]
+	},
+	"cldr-desc": "Extension that provides localised leid names based oan [http://cldr.unicode.org/index/downloads CLDR data]"
+}

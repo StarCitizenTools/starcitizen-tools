@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mashoi7"
+		]
+	},
+	"babel-1": "Tällä käyttäjällä on kielen [[$2|$3]] [[$1|perustiijot]]",
+	"babel-2": "Tämä käyttäjä mahtau kieltä [[$2|$3]] [[$1|keskimiäräsesti]].",
+	"babel-3": "Tämä käyttäjä mahtau kieltä [[$2|$3]] [[$1|ylen hyvin]].",
+	"babel-4": "Tämä käyttäjä mahtau kieltä [[$2|$3]] [[$1|läs muamankielen jyttyöh]].",
+	"babel-5": "Tämä käyttäjä mahtau kieltä [[$2|$3]] [[$1|ammattimaisesti]].",
+	"babel-N": "Tämä käyttäjä pakajau [[$2|$3]] [[$1|muamankielenä]]."
+}

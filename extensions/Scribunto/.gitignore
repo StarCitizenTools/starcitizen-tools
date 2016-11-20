@@ -1,0 +1,9 @@
+*~
+*.kate-swp
+.*.swp
+\#*#
+.#*
+
+NormalizationTest.txt
+node_modules/
+vendor/

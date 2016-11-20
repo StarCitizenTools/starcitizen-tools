@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nike"
+		]
+	},
+	"searchtranslations": "Search translations",
+	"tux-sst-edit": "Edit translation",
+	"tux-sst-view-foreign": "View at $1",
+	"tux-sst-search": "Search",
+	"tux-sst-search-ph": "Search translations",
+	"tux-sst-count": "{{PLURAL:$1|One result found|$1 results found}}",
+	"tux-sst-facet-language": "Languages",
+	"tux-sst-facet-group": "Message groups",
+	"tux-sst-nosolr-title": "Search unavailable",
+	"tux-sst-nosolr-body": "This wiki does not have a translation search service.",
+	"tux-sst-solr-offline-title": "Search unavailable",
+	"tux-sst-solr-offline-body": "The search service is temporarily unavailable.",
+	"tux-sst-next": "Next ›",
+	"tux-sst-prev": "‹ Previous",
+	"tux-sst-default": "Translations",
+	"tux-sst-translated": "Translations from $1",
+	"tux-sst-untranslated": "No translation from $1",
+	"tux-sst-outdated": "Outdated translations from $1",
+	"tux-sst-ellipsis-untranslated": "No translation",
+	"tux-sst-ellipsis-outdated": "Outdated translations",
+	"tux-sst-link-all-match": "Require all search words.",
+	"tux-sst-match-message": "Showing translations which match any of the search words. $1",
+	"tux-sst-case-sensitive": "Case sensitive"
+}

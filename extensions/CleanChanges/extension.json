@@ -1,0 +1,52 @@
+{
+	"name": "Clean Changes",
+	"version": "2016-03-05",
+	"author": "Niklas Laxström",
+	"url": "https://www.mediawiki.org/wiki/Extension:CleanChanges",
+	"descriptionmsg": "cleanchanges-desc",
+	"license-name": "GPL-2.0+",
+	"type": "other",
+	"AutoloadClasses": {
+		"NCL": "CleanChanges_body.php",
+		"CCFilters": "Filters.php"
+	},
+	"config": {
+		"CCTrailerFilter": false,
+		"CCUserFilter": true
+	},
+	"Hooks": {
+		"FetchChangesList": [
+			"NCL::hook"
+		],
+		"MakeGlobalVariablesScript": [
+			"NCL::addScriptVariables"
+		],
+		"ChangesListSpecialPageQuery": [
+			"CCFilters::user",
+			"CCFilters::trailer"
+		],
+		"SpecialRecentChangesPanel": [
+			"CCFilters::userForm",
+			"CCFilters::trailerForm"
+		]
+	},
+	"MessagesDirs": {
+		"CleanChanges": [
+			"i18n"
+		]
+	},
+	"ResourceModules": {
+		"ext.cleanchanges": {
+			"scripts": "resources/cleanchanges.js"
+		},
+		"ext.cleanchanges.uls": {
+			"scripts": "resources/cleanchanges.uls.js",
+			"styles": "resources/cleanchanges.uls.css"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "CleanChanges"
+	},
+	"manifest_version": 1
+}

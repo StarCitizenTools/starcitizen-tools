@@ -1,0 +1,71 @@
+@import 'mediawiki.mixins';
+
+div.display-settings-block {
+	background: transparent no-repeat left top;
+	.background-image-svg( '../images/display.svg', '../images/display.png' );
+	background-size: 20px auto;
+	color: #252525;
+	padding-left: 26px;
+	cursor: pointer;
+}
+
+.uls-display-settings-tab-switcher {
+	text-align: center;
+}
+
+.uls-button-group {
+	display: inline-block;
+	position: relative;
+	padding: 0 0 0 0;
+	left: -20px;
+	z-index: 1;
+}
+
+.ext-uls-sub-panel {
+	border-top: 1px solid #eee;
+	padding-top: 25px;
+	top: -20px;
+	position: relative;
+	min-height: 150px;
+}
+
+.uls-display-settings-font-selectors {
+	margin: 5px 0 15px 0;
+}
+
+.uls-font-item {
+	border-bottom: 1px solid #eee;
+	background: #fbfbfb;
+	padding: 10px 0;
+
+	&:first-child {
+		border-top: 1px solid #eee;
+	}
+}
+
+.uls-font-label,
+.uls-font-select {
+	font-size: 10pt;
+}
+
+.uls-content-fonts:hover,
+.uls-ui-fonts:hover {
+	background-color: #f6f6f6;
+}
+
+.uls-font-label strong {
+	color: #252525;
+}
+
+.uls-font-label {
+	color: #555;
+	font-size: 10pt;
+}
+
+.uls-display-settings-anon-label {
+	font-weight: bold;
+}
+
+#uls-display-settings-anon-log-in-cta { /* stylelint-disable-line selector-no-id */
+	font-size: 10pt;
+}

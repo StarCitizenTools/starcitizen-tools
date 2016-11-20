@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Woytecr",
+			"WTM",
+			"Saper"
+		]
+	},
+	"pageimages-desc": "Zbiera informacje o grafikach wykorzystywanych na stronie",
+	"pageimages-info-label": "Grafika dla strony",
+	"apihelp-query+pageimages-example-1": "Pobierz nazwę i stupikslową miniaturę portretu Alberta Einsteina."
+}

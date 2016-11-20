@@ -1,0 +1,275 @@
+@import "mediawiki.mixins";
+
+/* Default colors */
+.tux-messagelist {
+	color: #252525;
+	background-color: #F8F8F8;
+	max-width: 800px;
+}
+
+.tux-message {
+	height: auto;
+	cursor: pointer;
+}
+
+/* The "block" views of page mode and proofreading mode have 0 margin on
+ * .tux-message. To make the actual editor be of same width, set 0 margin on
+ * the open editor (overriding the -5px set by the grid) */
+.grid .tux-message.open {
+	margin: 0 auto;
+}
+
+.tux-message-item {
+	line-height: 50px;
+	height: 50px;
+	overflow: hidden;
+	margin-right: 5px !important;
+	margin-left: 5px !important;
+	vertical-align: middle;
+	border-bottom: 1px solid #C9C9C9;
+	background: #FFFFFF;
+}
+
+.tux-message-item.translated,
+.tux-message-item.translated:hover,
+.tux-message-item.proofread,
+.tux-message-item.proofread:hover {
+	background-color: #F0F0F0;
+}
+
+.tux-message-item:hover {
+	background-color: #F8F8F8;
+}
+
+.tux-list-status span,
+.tux-list-edit {
+	padding: 5px;
+	/* 15px space for icon */
+	padding-left: 20px;
+	/* Do not combine these two, unless you also fix the
+	 * tux-status-* styles below. That includes you, Siebrand ;)
+	 */
+	background-position: left;
+	background-repeat: no-repeat;
+}
+
+.tux-info {
+	background-color: #F0F0F0;
+}
+
+.tux-list-source {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	unicode-bidi: -webkit-isolate;
+	unicode-bidi: -moz-isolate;
+	unicode-bidi: isolate;
+}
+
+.tux-list-translation {
+	white-space: nowrap;
+	color: #565656;
+	padding-left: 5px;
+	text-overflow: ellipsis;
+	unicode-bidi: -webkit-isolate;
+	unicode-bidi: -moz-isolate;
+	unicode-bidi: isolate;
+}
+
+.tux-list-message {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.tux-status-unsaved {
+	.background-image-svg( '../images/label-pen.svg', '../images/label-pen.png' );
+}
+
+.tux-status-translated,
+.tux-status-proofread {
+	.background-image-svg( '../images/label-tick.svg', '../images/label-tick.png' );
+}
+
+.tux-status-fuzzy {
+	.background-image-svg( '../images/label-clock.svg', '../images/label-clock.png' );
+}
+
+.tux-list-edit a {
+	.background-image-svg( '../images/action-edit.svg', '../images/action-edit.png' );
+	background-position: left center;
+	background-repeat: no-repeat;
+	background-size: 18px 18px;
+	padding-left: 19px;
+}
+
+.tux-messagetable-loader {
+	color: #565656;
+	padding: 15px;
+	top: 0;
+	background: #F0F0F0 16px 50%;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;
+}
+
+.tux-messagetable-loader-info {
+	padding-left: 46px;
+	font-size: 25px;
+}
+
+
+.tux-action-bar {
+	background-color: #F0F0F0;
+	color: #252525;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+	transition: width 250ms;
+}
+
+.tux-action-bar.floating {
+	border-top: 1px solid #DDD;
+	position: fixed;
+	bottom: 0;
+	z-index: 200;
+}
+
+.tux-action-bar .tux-statsbar {
+	position: relative;
+	top: 30px;
+}
+
+.tux-action-bar .tux-view-switcher {
+	padding: 0 5px;
+}
+
+.tux-action-bar button {
+	min-height: 40px;
+	font-size: 14px;
+	margin: 5px 0;
+	cursor: pointer;
+	background-color: #e6e6e6;
+	font-weight: bold;
+	line-height: 1;
+	background-image: linear-gradient(#f0f0f0,#e6e6e6);
+	border: 1px #c9c9c9 solid;
+}
+
+.tux-action-bar button:hover {
+	background-color: #f0f0f0;
+	background-image: linear-gradient(#f8f8f8, #f0f0f0);
+}
+
+.tux-action-bar button:active,
+.tux-action-bar button.down {
+	color: #FFF;
+	background: #252525;
+}
+
+.tux-action-bar button.disabled,
+.tux-action-bar button.disabled:hover {
+	color: #c9c9c9;
+	cursor: default;
+	background-color: #f0f0f0;
+	border-color: #e3e3e3;
+}
+
+.tux-view-switcher button {
+	padding: 0 2px 0 0;
+}
+
+.tux-view-switcher button:first-child {
+	border-radius: 3px 0 0 3px;
+	border-right: none;
+}
+
+.tux-view-switcher button:last-child {
+	border-radius: 0 3px 3px 0;
+	border-left: none;
+}
+
+.tux-view-switcher button:before {
+	content: "";
+	height: 15px;
+	width: 25px;
+	display: inline-block;
+	vertical-align: bottom;
+}
+
+.tux-action-bar .translate-mode-button {
+	width: 30%;
+}
+
+.tux-action-bar .translate-mode-button:before {
+	.background-image-svg( '../images/view-list.svg', '../images/view-list.png' );
+}
+
+.tux-action-bar .translate-mode-button.down:before {
+	.background-image-svg( '../images/view-list-hi.svg', '../images/view-list-hi.png' );
+}
+
+.tux-action-bar .page-mode-button {
+	width: 30%;
+}
+
+.tux-action-bar .page-mode-button:before {
+	.background-image-svg( '../images/view-page.svg', '../images/view-page.png' );
+}
+
+.tux-action-bar .page-mode-button.down:before {
+	.background-image-svg( '../images/view-page-hi.svg', '../images/view-page-hi.png' );
+}
+
+.tux-action-bar .proofread-mode-button {
+	width: 36%;
+}
+
+.tux-action-bar .proofread-mode-button:before {
+	.background-image-svg( '../images/view-proofread.svg', '../images/view-proofread.png' );
+}
+
+.tux-action-bar .proofread-mode-button.down:before {
+	.background-image-svg( '../images/view-proofread-hi.svg', '../images/view-proofread-hi.png' );
+}
+
+.ext-translate-container .tux-messagelist .tux-message-filter-result {
+	color: #252525;
+	line-height: 35px;
+	font-size: 15px;
+	vertical-align: middle;
+	border-bottom: 1px solid #C9C9C9;
+	margin: 0;
+	padding: 0 5px;
+}
+
+.tux-message-filter-result.highlight {
+	background: #FFF5AA;
+}
+
+.tux-message-filter-result button {
+	float: right;
+	padding: 5px;
+	margin: 5px 0;
+	font-size: 15px;
+	vertical-align: middle;
+}
+
+.tux-empty-list {
+	padding: 20px;
+}
+
+.tux-empty-list-header {
+	font-size: 25px;
+	padding: 5px 0;
+}
+
+.tux-empty-list-guide {
+	font-size: 15px;
+	color: #565656;
+	padding: 5px 0;
+}
+
+.tux-empty-list-actions {
+	font-size: 15px;
+	padding: 8px 0;
+}
+
+.tux-empty-list-actions a {
+	cursor: pointer;
+	margin: 0 10px;
+}

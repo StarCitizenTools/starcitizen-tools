@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sab",
+			"Wikimistusik"
+		]
+	},
+	"babel": "Babel webesikgiva",
+	"babel-desc": "Batcoba va <code>#babel</code> exulerafli loplekur ta mivaskafa gononasbara va Babel webesikborbriz do rotira va doplekura va ilkateza",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": "Webesik kare ava",
+	"babel-autocreate-reason": "Mivaskafa redura va [[$1|Babel]] lomabu.",
+	"babel-autocreate-text-levels": "Webesik ke bata loma bazed da tid $1 ekastinaf icde $2 ava.",
+	"babel-autocreate-text-main": "Webesik ke bata loma bazed da kan $1 ava grugoled.",
+	"babel-0": "Bat webesik kan [[$2|$3]] [[$1|me]] grugoler (oke wavdapon gildar).",
+	"babel-1": "Bat webesik kan [[$2|$3]] [[$1|omekon]] grugoler.",
+	"babel-2": "Bat webesik kan [[$2|$3]] [[$1|mialukekon]] grugoler.",
+	"babel-3": "Bat webesik kan [[$2|$3]] [[$1|ontinekon]] grugoler.",
+	"babel-4": "Bat webesik kan [[$2|$3]] dum [[$1|nasbokavusik]] riwe grugoler.",
+	"babel-5": "Bat webesik kan [[$2|$3]] [[$1|ebekon]] grugoler.",
+	"babel-N": "Bat webesik kan [[$2|$3]] ton [[$1|nasbokavusik]] grugoler.",
+	"babel-0-n": "Bat webesik kan [[$2|Kotava]] [[$1|me]] grugoler (oke wavdapon gildar).",
+	"babel-1-n": "Bat webesik kan [[$2|Kotava]] [[$1|omekon]] grugoler.",
+	"babel-2-n": "Bat webesik kan [[$2|Kotava]] [[$1|mialukekon]] grugoler.",
+	"babel-3-n": "Bat webesik kan [[$2|Kotava]] [[$1|ontinekon]] grugoler.",
+	"babel-4-n": "Bat webesik kan [[$2|Kotava]] ton [[$1|nasbokavusik]] riwe grugoler.",
+	"babel-5-n": "Bat webesik kan [[$2|Kotava]] [[$1|ebekon]] grugoler.",
+	"babel-N-n": "Bat webesik kan [[$2|Kotava]] ton [[$1|nasbokavusik]] grugoler.",
+	"babel-footer": "Webesik kare ava"
+}

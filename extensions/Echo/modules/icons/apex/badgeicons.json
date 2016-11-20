@@ -1,0 +1,20 @@
+{
+	"prefix": "oo-ui-icon",
+	"images": {
+		"bell": {
+			"file": "../bell.svg"
+		},
+		"bellOn": {
+			"file": {
+				"ltr": "../bellOn-ltr.svg",
+				"rtl": "../bellOn-rtl.svg"
+			}
+		},
+		"speechBubbles": {
+			"file": {
+				"ltr": "../speechBubbles-ltr.svg",
+				"rtl": "../speechBubbles-rtl.svg"
+			}
+		}
+	}
+}

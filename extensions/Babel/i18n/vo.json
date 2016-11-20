@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Malafaya",
+			"Smeira"
+		]
+	},
+	"babel": "Gebananüns-Babel",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Gebans ma pük",
+	"babel-autocreate-reason": "[[$1|Babel]]-kladapad pajafon itjäfidiko",
+	"babel-autocreate-text-levels": "Gebans in klad at sagons, das labons nivoda: $1 tefü pük: $2.",
+	"babel-autocreate-text-main": "Gebans in klad at sagons, das sevons püki: $1.",
+	"babel-0": "Geban at [[$1|no suemon]] [[$2|$3]]i (u suemon oni mu fikuliko).",
+	"babel-1": "Geban at kanon kompenön pö spikots me [[$2|$3]] nivoda [[$1|balugik]].",
+	"babel-2": "Geban at kanon kompenön pö spikots me [[$2|$3]] nivoda [[$1|vüik]].",
+	"babel-3": "Geban at kanon kompenön pö spikots me [[$2|$3]] nivoda [[$1|löpik]].",
+	"babel-4": "Geban at kanon gebön [[$2|$3]]i [[$1|ti so gudiko, äsä lomapüki oka]].",
+	"babel-5": "Geban at kanon gebön [[$2|$3]]i [[$1|caliko]].",
+	"babel-N": "Geban at labon [[$2|$3]]i as [[$1|lomapük]] oka.",
+	"babel-0-n": "Geban a [[$1|no suemon]] [[$2|Volapük]]i (u suemon oni mu fikuliko).",
+	"babel-1-n": "Geban at labon sevi [[$1|stabik]] [[$2|Volapük]]a.",
+	"babel-2-n": "Geban at labon sevi [[$1|vüik]] [[$2|Volapük]]a.",
+	"babel-3-n": "Geban at labon sevi [[$1|löpik]] [[$2|Volapük]]a.",
+	"babel-4-n": "Geban at labon sevi [[$1|sümik ad ut lomapükana]] [[$2|Volapük]]a.",
+	"babel-5-n": "Geban at labon sevi [[$1|calik]] [[$2|Volapük]]a.",
+	"babel-N-n": "Geban at labon nivodi [[$1|lomapükik]] [[$2|Volapük]]a.",
+	"babel-template": "Template:Geban $1",
+	"babel-footer": "Gebans ma pük"
+}

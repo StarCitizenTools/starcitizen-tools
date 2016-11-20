@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel-1": "Man ia i save raetem [[$1|smol]] long toktok ia [[$2|$3]].",
+	"babel-2": "Man ia i save raetem [[$1|medel]] long [[$2|$3]].",
+	"babel-3": "Man ia i save raetem [[$1|gud]] long [[$2|$3]].",
+	"babel-4": "Man ia i luksave toktok ia [[$2|$3]] long fasin we i [[$1|kolosap olsem manples]].",
+	"babel-N": "Man ia i luksave toktok ia [[$2|$3]] long fasin blong [[$1|manples]].",
+	"babel-1-n": "Man ia i save raetem [[$1|smol]] long toktok ia [[$2|Bislama]].",
+	"babel-2-n": "Man ia i save raetem [[$1|medel]] long [[$2|Bislama]].",
+	"babel-3-n": "Man ia i save raetem [[$1|gud]] long [[$2|Bislama]].",
+	"babel-4-n": "Man ia i luksave toktok ia [[$2|Bislama]] long fasin we i [[$1|kolosap olsem manples]].",
+	"babel-N-n": "Man ia i luksave toktok ia [[$2|Bislama]] long fasin blong [[$1|manples]]."
+}

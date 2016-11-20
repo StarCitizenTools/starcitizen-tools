@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hydra",
+			"Li3939108",
+			"Xiaomingyan",
+			"Yfdyh000",
+			"Liuxinyu970226"
+		]
+	},
+	"searchtranslations": "搜索译文",
+	"tux-sst-edit": "编辑译文",
+	"tux-sst-view-foreign": "在$1查看",
+	"tux-sst-search": "搜索",
+	"tux-sst-search-ph": "搜索译文",
+	"tux-sst-count": "{{PLURAL:$1|找到$1个结果}}",
+	"tux-sst-facet-language": "语言",
+	"tux-sst-facet-group": "信息组",
+	"tux-sst-facet-orphan": "（孤立）",
+	"tux-sst-nosolr-title": "搜索不可用",
+	"tux-sst-nosolr-body": "本wiki没有译文搜索服务。",
+	"tux-sst-solr-offline-title": "搜索不可用",
+	"tux-sst-solr-offline-body": "搜索服务暂时不可用。",
+	"tux-sst-next": "下一页 ›",
+	"tux-sst-prev": "‹ 上一页",
+	"tux-sst-default": "翻译",
+	"tux-sst-translated": "来自$1的翻译",
+	"tux-sst-untranslated": "没有来自$1的翻译",
+	"tux-sst-outdated": "来自$1的已过时翻译",
+	"tux-sst-ellipsis-untranslated": "无翻译",
+	"tux-sst-ellipsis-outdated": "已过时翻译",
+	"tux-sst-link-all-match": "需要所有搜索单词。",
+	"tux-sst-match-message": "显示匹配任何搜索单词的翻译。$1",
+	"tux-sst-case-sensitive": "区分大小写"
+}

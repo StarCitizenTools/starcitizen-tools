@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Erdemaslancan"
+		]
+	},
+	"babel": "Zonoşe babila karwani",
+	"babel-url": "Project:Babil",
+	"babel-0": "Va karwan nê zoni ya [[$1|hêç]] nozone yonne [[$2|$3]] (fehem keron feqet vat nezonon).",
+	"babel-1": "Va karwan [[$2|$3]] [[$1|teynekon]] fehm kenon.",
+	"babel-2": "Va karwan [[$1|hol]] zonon [[$2|$3]].",
+	"babel-3": "Va karwan [[$1|Zehef]] zonon [[$2|$3]].",
+	"babel-4": "Va karwan [[$1|Zey zon]] dê co [[$2|$3]].",
+	"babel-5": "Va karwan [[$1|tor zehf]] sewiyon de [[$2|$3]] zonon.",
+	"babel-N": "[[$1|Zone mordon]] va karwani [[$2|$3]].",
+	"babel-0-n": "Va karwan nê zoni ya [[$1|hêç]] nozone yonne [[$2|$3]] (fehem keron feqet vat nezonon).",
+	"babel-1-n": "Va karwan [[$1|teynekon]] [[$2|Tatiki]] zonon.",
+	"babel-2-n": "[[$2|Tatikiya]] va karwani [[$1|holon]].",
+	"babel-3-n": "Va karwan [[$1|voş]] [[$2|tatiki]] zonon.",
+	"babel-4-n": "Va karwan [[$2|Tatiki]] zey [[$1|zoy zondo morda]] xo zonon.",
+	"babel-5-n": "Va karwan [[$1|tor zehf]] sewiyon de [[$2|Tatiki]] zonon.",
+	"babel-N-n": "[[$1|Zone mordon]] va karwani [[$2|Tatikiyon]].",
+	"babel-footer": "Zon dehon karwan"
+}

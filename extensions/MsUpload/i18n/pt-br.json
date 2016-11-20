@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michael Siegwarth (msiegwarth@gmail.com)"
+		]
+	},
+	"msu-desc": "Habilita uploads fáceis (quando disponível, também por drag&drop), para um ou vários arquivos, simultaneamente",
+	"msu-button-title": "Selecionar arquivos",
+	"msu-insert-link": "Inserir link",
+	"msu-insert-gallery": "Inserir imagem como galeria",
+	"msu-cancel-upload": "Cancelar upload",
+	"msu-clean-all": "Clear list",
+	"msu-upload-possible": "Upload habilitado",
+	"msu-ext-not-allowed": "Somente esses tipos de arquivo são permitidos:",
+	"msu-upload-this": "Clique aqui para fazer upload deste arquivo",
+	"msu-upload-all": "Clique aqui para fazer upload de todos os arquivos",
+	"msu-dropzone": "Arraste arquivos para cá",
+	"msu-comment": "MsUpload"
+}

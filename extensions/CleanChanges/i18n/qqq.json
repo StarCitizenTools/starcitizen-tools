@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Byrial",
+			"Jon Harald Søby",
+			"Meno25",
+			"Purodha",
+			"Shirayuki"
+		]
+	},
+	"cleanchanges-changerightslink": "Link text for a link in the recent changes page to manage user rights for a user.\nIt is shown after clicking on the \"Show user links\"-picture if you are allowed to manage user rights.",
+	"cleanchanges-desc": "Shown in [[Special:Version]]",
+	"cleanchanges-language": "{{Identical|Language}}",
+	"cleanchanges-language-na": "Used in the trailer selection of [[Special:RecentChanges]] to not filter on any trailer.\n\n{{Identical|All}}",
+	"cleanchanges-users": "Used as label for \"Users\" input box.\n\n\"Sep: |\" stands for \"Separate with |\" or \"|-separated\".",
+	"cleanchanges-showuserlinks": "Used as HTML <code>alt=</code> and <code>title=</code> attribute for HTML <code><nowiki><img></nowiki></code> tag for <code>magnify-clip.png</code>.\n\nThe image is used as link text.\nThe link is an action link to show/hide User Info.",
+	"cleanchanges-rcinfo-2": "{{Optional}}\nUse in enhanced recent changes when CleanChanges is enabled. Parameters:\n* $1 - the number of changes in the overview with {{msg-mw|Nchanges}} used as link text or a diff link with {{msg-mw|Diff}} as link text\n* $2 - a link to the page history. {{msg-mw|Hist}} is used as link text",
+	"cleanchanges-rcinfo-3": "{{Optional}}\nUse in enhanced recent changes when CleanChanges is enabled. Parameters:\n* $1 - the number of changes in the overview with {{msg-mw|Nchanges}} used as link text or a diff link with {{msg-mw|Diff}} as link text\n* $2 - a link to the page history. {{msg-mw|Hist}} is used as link text\n* $3 - the size change from the oldest revision to the latest revision in the overview"
+}

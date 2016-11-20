@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16",
+			"Cruccone",
+			"Darth Kule",
+			"FRacco",
+			"McDutchie",
+			"Melos",
+			"Morel",
+			"Nemo bis"
+		]
+	},
+	"babel": "Babel utente",
+	"babel-desc": "Aggiunge la parser function <code>#babel</code> per permettere la generazione automatica di una colonna box utente babel con la possibilità di includere template personalizzati",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Utenti per lingua",
+	"babel-autocreate-reason": "Creo automaticamente la pagina della categoria [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Gli utenti in questa categoria indicano che riescono a comunicare in $2 con un livello di conoscenza $1.",
+	"babel-autocreate-text-main": "Gli utenti in questa categoria indicano il loro livello di conoscenza in $1.",
+	"babel-0": "Questo utente [[$1|non è in grado di comunicare]] in [[$2|$3]] (o lo capisce solo con notevole difficoltà).",
+	"babel-1": "Questo utente può contribuire con un livello [[$1|elementare]] in [[$2|$3]].",
+	"babel-2": "Questo utente può contribuire con un livello [[$1|intermedio]] in [[$2|$3]].",
+	"babel-3": "Questo utente può contribuire con un livello [[$1|avanzato]] in [[$2|$3]].",
+	"babel-4": "Questo utente può contribuire con un livello [[$1|quasi madrelingua]] in [[$2|$3]].",
+	"babel-5": "Questo utente può contribuire con un livello [[$1|professionale]] in [[$2|$3]].",
+	"babel-N": "Questo utente può contribuire con un livello [[$1|madrelingua]] in [[$2|$3]].",
+	"babel-0-n": "Questo utente [[$1|non è in grado di comunicare]] in [[$2|italiano]] (o lo capisce solo con notevole difficoltà).",
+	"babel-1-n": "Questo utente può contribuire con un livello [[$1|elementare]] in [[$2|italiano]].",
+	"babel-2-n": "Questo utente può contribuire con un livello [[$1|intermedio]] in [[$2|italiano]].",
+	"babel-3-n": "Questo utente può contribuire con un livello [[$1|avanzato]] in [[$2|italiano]].",
+	"babel-4-n": "Questo utente può contribuire con un livello [[$1|quasi madrelingua]] in [[$2|italiano]].",
+	"babel-5-n": "Questo utente può contribuire con un livello [[$1|professionale]] in [[$2|italiano]].",
+	"babel-N-n": "Questo utente può contribuire con un livello [[$1|madrelingua]] in [[$2|italiano]].",
+	"babel-template": "Template:Utente $1",
+	"babel-footer": "Utenti per lingua"
+}

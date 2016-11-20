@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Davykamanzi"
+		]
+	},
+	"babel": "Informasiyo z'ukoresha za Babel",
+	"babel-footer-url": ":Icyiciro:Babel - Abakoresha hakurikijwe indimi",
+	"babel-autocreate-reason": "Guhanga ipaje y'icyiciro cya [[$1|Babel]] byikora.",
+	"babel-autocreate-text-levels": "Abakoresha muri iki cyiciro bagaragaza ko bagira urwego $1 rw'ubumenyi bw'ururimi $2.",
+	"babel-autocreate-text-main": "Abakoresha muri iki cyiciro bagaragaza ko bagira ubumenyi bw'ururimi $1.",
+	"babel-0": "Uyu ukoresha [[$1|ntabwo agira]] ubumenyi bw'[[$2|$3]] (cyangwa agira ibibazo byinshi kucyumva).",
+	"babel-1": "Uyu ukoresha agira ubumenyi [[$1|bucye]] bw'[[$2|$3]].",
+	"babel-2": "Uyu ukoresha agira ubumenyi [[$1|buringaniye]] bw'[[$2|$3]].",
+	"babel-3": "Uyu ukoresha agira ubumenyi [[$1|bwinshi]] bw'[[$2|$3]], ariko butari nk'ubw'umwenegihugu.",
+	"babel-4": "Uyu ukoresha agira ubumenyi bw'[[$2|$3]], [[$1|hafi nk'ubw'umwenegihugu]].",
+	"babel-5": "Uyu ukoresha agira ubumenyi bw'[[$1|inzobere]] bw'[[$2|$3]].",
+	"babel-N": "Uyu ukoresha yumva kandi akavuga [[$2|$3]] [[$1|nk'umwenegihugu]].",
+	"babel-0-n": "Uyu ukoresha [[$1|ntabwo agira]] ubumenyi bw'[[$2|icyongereza]] (cyangwa agira ibibazo byinshi kucyumva).",
+	"babel-1-n": "Uyu ukoresha agira ubumenyi [[$1|bucye]] bw'[[$2|icyongereza]].",
+	"babel-2-n": "Uyu ukoresha agira ubumenyi [[$1|buringaniye]] bw'[[$2|icyongereza]].",
+	"babel-3-n": "Uyu ukoresha agira ubumenyi [[$1|bwinshi]] bw'[[$2|icyongereza]], ariko butari nk'ubw'umuwenegihugu.",
+	"babel-4-n": "Uyu ukoresha agira ubumenyi bw'[[$2|icyongereza]], [[$1|hafi nk'ubw'umwenegihugu]].",
+	"babel-5-n": "Uyu ukoresha agira ubumenyi bw'[[$1|inzobere]] bw'[[$2|icyongereza]].",
+	"babel-N-n": "Uyu ukoresha agira ubumenyi bw'[[$2|icyongereza]] [[$1|nk'ubw'umwenegihugu]].",
+	"babel-footer": "Abakoresha hakurikijwe indimi"
+}

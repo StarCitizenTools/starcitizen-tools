@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"ОйЛ"
+		]
+	},
+	"tpt-languages-nonzero": "$1 ($2% {{PLURAL:$2|прѣложєнъ ѥстъ|прѣложєна ѥстє|прѣложєнꙑ сѫтъ}})",
+	"tpt-aggregategroup-new-name": "имѧ :"
+}

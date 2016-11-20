@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mdkidiri"
+		]
+	},
+	"babel": "Sango tî nyîmbâ sô Bäbêle awara",
+	"babel-desc": "Zîa mbênî likua tî kïröngö sêndïäyângâ <code>#babel</code> daä, tîtene aseka bîakü bîakü  mbênî kopu tî wasärängö-kua na Bäbêle, sï alîngbi ngâ tî zîa na yâ nî ângôbo tî sêndo.",
+	"babel-url": "Project:Bäbêle",
+	"babel-footer-url": ":Fündä:Bäbêle - Âwasärängö-kua tî ¨yângâködörö  ôko ôko",
+	"babel-autocreate-reason": "Sëkängö lêmbëtï tî fündä tî [[$1|Babel]] bîakü bîakü.",
+	"babel-autocreate-text-levels": "Ânyîmbâ tî yâ tî fündä sô afa atene ânï yângâ tî $2  $1.",
+	"babel-autocreate-text-main": "Ânyîmbâ tî yâ tî fündä sô afa atene ânï hînga yângâ tî $1",
+	"babel-0": "Nyîmbâ sô ahînga [[$2|$3]] [[$1|kêtê pëpe]] wala lo mä nî na kötä pâsi mîngi.",
+	"babel-1": "Nyîmbâ sô ahînga [[$2|$3]] [[$1|nzönî kêtê]]",
+	"babel-2": "Nyîmbâ sô ahînga [[$2|$3]]  [[$1|nzönî alîngbi na nî]] .",
+	"babel-3": "Nyîmbâ sô ahînga [[$2|$3]] [[$1|taâ nzönî]].",
+	"babel-4": "Nyîmbâ sô ahînga yângâ tî  [[$2|$3]] ndurü na [[$1|lkôzo yângâ]]",
+	"babel-5": "Nyîmbâ sô ahînga yângâ tî [[$2|$3]] töngana  [[$1|kpëngbä wakua]] nî.",
+	"babel-N": "Nyîmbâ sô ahînga [[$2|$3]] pendere mîngi, tënë tî sô ayeke  [[$1|kôzo yângâ]] tî lo.",
+	"babel-0-n": "Nyîmbâ sô ahînga [[$2|sängö]] [[$1|kêtê pëpe]] wala lo mä nî na kötä pâsi mîngi.",
+	"babel-1-n": "Nyîmbâ sô ahînga [[$2|sängö]] [[$1|nzönî kêtê]]",
+	"babel-2-n": "Nyîmbâ sô ahînga [[$2|sängö]] [[$1|nzönî alîngbi na nî]]",
+	"babel-3-n": "Nyîmbâ sô ahînga [[$2|sängö]]  [[$1|taâ nzönî]].",
+	"babel-4-n": "Nyîmbâ sô ahînga yângâ tî  [[$2|sängö]] ndurü na [[$1|lkôzo yângâ]]",
+	"babel-5-n": "Nyîmbâ sô ahînga yângâ tî [[$2|sängö]] töngana  [[$1|kpëngbä wakua]] nî.",
+	"babel-N-n": "Nyîmbâ sô ahînga [[$2|sängö]] pendere mîngi, tënë tî sô ayeke  [[$1|kôzo yângâ]] tî lo.",
+	"babel-footer": "Ânyîmbâ tî yângâ ôko ôko"
+}

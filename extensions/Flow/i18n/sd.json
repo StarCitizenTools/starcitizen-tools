@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sindhu",
+			"Mehtab ahmed",
+			"Aursani"
+		]
+	},
+	"flow-topic-action-watchlist-add": "هن موضوع کي سبسڪرائب ڪريو",
+	"flow-topic-action-watchlist-remove": "اڻ سبسڪرائب ڪريو",
+	"flow-notification-enabled-on-talkpage-email-subject-message": "$2 تي نئون مباحثي سرشتو"
+}

@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fitoschido",
+			"Macofe"
+		]
+	},
+	"textextracts-desc": "Proporciona extractos del contenido de una página en texto sencillo o HTML limitado",
+	"apihelp-query+extracts-description": "Devuelve extractos de la páginas dadas en texto sin formato o con HTML limitado.",
+	"apihelp-query+extracts-param-chars": "Cuántos caracteres devolver. El texto real devuelto puede ser un poco más largo.",
+	"apihelp-query+extracts-param-sentences": "Cuántas oraciones se devolverán.",
+	"apihelp-query+extracts-param-limit": "Cuántos extractos se devolverán.",
+	"apihelp-query+extracts-param-intro": "Devolver sólo el contenido antes de la primera sección.",
+	"apihelp-query+extracts-param-plaintext": "Devuelve extractos como texto sin formato en lugar de HTML limitado.",
+	"apihelp-query+extracts-param-variant": "Convertir el contenido a esta variante del idioma.",
+	"apihelp-query+extracts-example-1": "Obtener un extracto de 175 caracteres"
+}

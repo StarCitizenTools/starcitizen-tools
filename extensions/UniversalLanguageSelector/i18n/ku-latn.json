@@ -1,0 +1,42 @@
+{
+	"@metadata": {
+		"authors": [
+			"George Animal",
+			"Ghybu",
+			"Bikarhêner"
+		]
+	},
+	"uls-plang-title-languages": "Ziman",
+	"ext-uls-select-language-settings-icon-tooltip": "Eyarên ziman",
+	"ext-uls-undo-language-tooltip-text": "Ziman hate guherandin ji $1",
+	"ext-uls-display-settings-title": "Hevyazên ekranê",
+	"ext-uls-display-settings-language-tab": "Ziman",
+	"ext-uls-display-settings-fonts-tab": "Tîp",
+	"ext-uls-display-settings-title-short": "Ekran",
+	"ext-uls-display-settings-desc": "Zimanê ku bo menu û nivîsan tê bikaranîn",
+	"ext-uls-language-settings-title": "Eyarên ziman",
+	"ext-uls-language-settings-cancel": "Betal bike",
+	"ext-uls-display-settings-font-settings": "Eyarên nivîsê",
+	"ext-uls-display-settings-ui-language": "Zimanê ekranê",
+	"ext-uls-display-settings-anon-label": "Zimanê ekranê:",
+	"ext-uls-webfonts-settings-title": "Gava pêwist be tîpan daxe",
+	"ext-uls-webfonts-settings-info-link": "Zêdetir agahî",
+	"ext-uls-webfonts-select-for-content-info": "Tîpên ku bo naverokê tên bikaranîn",
+	"ext-uls-webfonts-system-font": "Tîpên pergalê",
+	"ext-uls-back-to-display-settings": "Vegere hevyazên ekranê",
+	"ext-uls-input-settings-title": "Hevyazên têxistinê",
+	"ext-uls-input-settings-title-short": "Têketin",
+	"ext-uls-input-settings-desc": "Tu bi zimanekî cuda dinivîsî?",
+	"ext-uls-input-settings-ime-settings": "Metodên têxistinê bo $1",
+	"ext-uls-input-settings-ui-language": "Zimanê ku bo nivîsînê tê bikaranîn",
+	"ext-uls-back-to-input-settings": "Vegere hevyazên têxistinê",
+	"ext-uls-ime-help": "Alîkariya bo bikaranînê",
+	"ext-uls-input-settings-more-languages-tooltip": "Zêdetir ziman",
+	"jquery-ime-other-languages": "Zimanên din",
+	"jquery-ime-help": "Alîkarî",
+	"ext-uls-input-disable-notification-undo": "Betal bike",
+	"apihelp-languagesearch-example-1": "Li \"Te\" bigere",
+	"apihelp-languagesearch-example-2": "Li \"ഫി\" bigere",
+	"apihelp-ulslocalization-param-language": "Koda ziman.",
+	"prefs-languages": "Ziman"
+}

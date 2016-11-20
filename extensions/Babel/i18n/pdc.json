@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xqt"
+		]
+	},
+	"babel": "Babel Yuuser Information",
+	"babel-desc": "Ennert die <code>#babel</code>-Parserfunktion fer zum automatische Aalege vun Babel-Yuuserbox-Columns damit eigene Vorlage dezu ze duh meeglich sinn",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Benutzer natt Schprooche",
+	"babel-autocreate-reason": "Automatisch aagelegte [[$1|Babel]]-Abdeeling.",
+	"babel-autocreate-text-levels": "Yuuser in derre Abdeeling henn Kenntnis-Level $1 fer die Sprooch $2.",
+	"babel-autocreate-text-main": "Yuuser in derre Abdeeling schwetze $1.",
+	"babel-0": "Daer Yuuser do schwetzt [[$1|ken]] [[$2|$3]].",
+	"babel-1": "Daer Yuuser do schwetzt [[$1|en wennich]] [[$2|$3]].",
+	"babel-2": "Daer Yuuser do schwetzt [[$1|gans guud]] [[$2|$3]].",
+	"babel-3": "Daer Yuuser do schwetzt [[$1|aartlich guud]] [[$2|$3]].",
+	"babel-4": "Daer Yuuser do schwetzt [[$2|$3]], ass en [[$1|Muddersproch]].",
+	"babel-5": "Daer Yuuser do schwetzt [[$2|$3]] uff [[$1|professionellem]] Level.",
+	"babel-N": "Dem Yuuser do sei [[$1|Mudderschprooch]] iss [[$2|$3]].",
+	"babel-0-n": "Daer Yuuser do schwetzt [[$1|ken]] [[$2|Pennsilfaanisch Deitsch]].",
+	"babel-1-n": "Daer Yuuser do schwetzt [[$1|en wennich]] [[$2|Pennsilfaanisch Deitsch]].",
+	"babel-2-n": "Daer Yuuser do schwetzt [[$1|gans guud]] [[$2|Pennsilfaanisch Deitsch]].",
+	"babel-3-n": "Daer Yuuser do schwetzt [[$1|aartlich guud]] [[$2|Pennsilfaanisch Deitsch]].",
+	"babel-4-n": "Daer Yuuser do schwetzt [[$2|Pennsilfaanisch Deitsch]], wie ass [[$1|Muddersproch]].",
+	"babel-5-n": "Daer Yuuser do schwetzt [[$2|Pennsilfaanisch Deitsch]] uff [[$1|professionellem]] Level.",
+	"babel-N-n": "Dem Yuuser do sei [[$1|Mudderschprooch]] iss [[$2|Pennsilfaanisch Deitsch]].",
+	"babel-footer": "Yuuser natt Schprooche"
+}

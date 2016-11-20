@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liangent"
+		]
+	},
+	"css-desc": "可讓CSS樣式表包含在特定頁面的語法解析功能"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"David1010",
+			"BRUTE"
+		]
+	},
+	"cleanchanges-changerightslink": "ჯგუფების ცვლილება",
+	"cleanchanges-desc": "[[Special:RecentChanges|ბოლო ცვლილებების სიის]] უფრო კომპაქტური ჩვენება",
+	"cleanchanges-language": "ენა:",
+	"cleanchanges-language-na": "ყველა",
+	"cleanchanges-users": "მომხმარებლები (გამყოფი: |):",
+	"cleanchanges-rcinfo-2": "($1; $2)",
+	"cleanchanges-rcinfo-3": "($1; $2; $3)"
+}

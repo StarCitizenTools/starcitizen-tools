@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"GerardM",
+			"RMizo"
+		]
+	},
+	"babel": "Babel hmangtu chanchin",
+	"babel-desc": "<code>#babel</code> chhuifiahtu hian hmangtubawm, siamsa thlansa telh thieh turin a belh",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Ţawng azira hmangtute thliarna tihlanna",
+	"babel-autocreate-reason": "[[$1|Babel]] pawl phek insiamtir.",
+	"babel-autocreate-text-levels": "He pawla hmangtute hian $2 ṭawng $1 an thiam tih an sawi.",
+	"babel-autocreate-text-main": "He pawla hmangtute hian $1 ṭawng an thiam tih an sawi.",
+	"babel-0": "He hmangtu hian [[$2|$3]] ṭawng hi  [[$1|pakhatmah]] a thiam lo tih a sawi (a nih loh pawhin harsa fein a hrethiam chauh)",
+	"babel-1": "He hmangtu hian [[$2|$3]] ṭawng hi [[$1|tlém]] a thiam.",
+	"babel-2": "He hmangtu hian [[$2|$3]] ṭawng hi a thiam ve [[$1|pangngai]].",
+	"babel-3": "He hmangtu hian [[$2|$3]] ṭawng hi a [[$1|thiam näl fe]].",
+	"babel-4": "He hmangtu hian [[$2|$3]] ṭawng hi [[$1|pianpui ṭawng ang deuh thawin]] a thiam.",
+	"babel-5": "He hmangtu hian [[$2|$3]] ţawng hi [[$1|eizawnna tlâk]] a thiam.",
+	"babel-N": "He hmangtu hian [[$2|$3]] ṭawng a  [[$1|pianpui]]  a ni.",
+	"babel-0-n": "He hmangtu hian [[$2|mizo ṭawng]] [[$1|pakhatmah]] a thiam lo (a ni ber e).",
+	"babel-1-n": "He hmangtu hian [[$2|mizo ṭawng]]  [[$1|tlém]] a thiam.",
+	"babel-2-n": "He hmangtu hian [[$2|mizo ṭawng]]  a thiam ve  [[$1|pangngai]].",
+	"babel-3-n": "He hmangtu hian [[$2|mizo ṭawng]]  a [[$1|thiam näl fe]].",
+	"babel-4-n": "He hmangtu hian [[$2|mizo ṭawng]] hi [[$1|pianpui ṭawng ang deuh thawin]] a thiam.",
+	"babel-5-n": "He hmangtu hian [[$2|mizo ṭawng]]  hi [[$1|eizawnna tlâk]] a thiam.",
+	"babel-N-n": "He hmangtu hian [[$2|mizo ṭawng]]  a [[$1|pianpui]] a ni.",
+	"babel-footer": "Ṭawng hman azirin hmangtute"
+}

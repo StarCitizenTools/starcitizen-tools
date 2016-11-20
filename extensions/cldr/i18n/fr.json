@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Peter17",
+			"Verdy p"
+		]
+	},
+	"cldr-desc": "Extension qui fournit les noms traduits des langues, sur la base des [http://cldr.unicode.org/index/downloads données CLDR]"
+}

@@ -1,0 +1,6 @@
+== CleanChanges 2016.08 ==
+Released at 2016-08-25.
+
+=== Noteworthy changes ===
+* Niklas Laxström fixed a JavaScript error in Special:WatchList. T138702
+* Brian Wolff improved the way we invoke JavaScript for click handlers.

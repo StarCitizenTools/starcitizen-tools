@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kolonahe",
+			"Singularity"
+		]
+	},
+	"babel": "ʻIke mea ho‘ohana Babel",
+	"babel-desc": "Ho‘ohui i ka <code>#babel</code> hana pāsā e ho‘oku‘u i ka hikahana o ke kolamu pahu mea ho‘ohana Babel, me ka hiki ʻana e hoʻohui i nā anakuhi pilikino",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Mahele:Babel - Mea hoʻohana e ka ʻōlelo",
+	"babel-autocreate-reason": "Ke hikahana nei i ka ʻaoʻao mahele [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Hōʻike i nā mea hoʻohana i loko o kēia māhele, loaʻa iā lākou i ke kalamania mākau  $1 no ka ʻōlelo $2.",
+	"babel-autocreate-text-main": "Hōʻike i nā mea hoʻohana i loko o kēia māhele, loaʻa iā lākou i ka ʻike o ka ʻōlelo $1.",
+	"babel-0": "[[$1|‘A‘ole hiki]] i kēia mea ho‘ohana ke hā‘awi ma ka [[$2|$3]].",
+	"babel-1": "Hiki i kēia mea ho‘ohana ke hā‘awi me [[$1|kahi kūlana ha‘aha‘a]] ma ka [[$2|$3]].",
+	"babel-2": "Hiki i kēia mea ho‘ohana ke hā‘awi me [[$1|kahi kūlana o waena]] ma ka [[$2|$3]].",
+	"babel-3": "Hiki i kēia mea ho‘ohana ke hā‘awi me [[$1|kahi kūlana ki‘eki‘e]] ma ka [[$2|$3]].",
+	"babel-4": "Hiki i kēia mea ho‘ohana ke hā‘awi me [[$1|kahi kūlana kokoke]] i kō ka mānaleo ma ka [[$2|$3]].",
+	"babel-5": "Hiki i kēia mea ho‘ohana ke hā‘awi me [[$1|kahi kūlana ‘oihana]] ma ka [[$2|$3]].",
+	"babel-N": "He [[$1|mānaleo]] kēia kanaka ma ka [[$2|$3]].",
+	"babel-0-n": "[[$1|‘A‘ole hiki]] i kēia mea ho‘ohana ke hā‘awi ma ka [[$2|‘ōlelo Hawai‘i]].",
+	"babel-1-n": "Hiki i kēia mea ho‘ohana ke hā‘awi me [[$1|kahi kūlana ha‘aha‘a]] ma ka [[$2|‘ōlelo Hawai‘i]].",
+	"babel-2-n": "Hiki i kēia mea ho‘ohana ke hā‘awi me [[$1|kahi kūlana o waena]] ma ka [[$2|‘ōlelo Hawai‘i]].",
+	"babel-3-n": "Hiki i kēia mea ho‘ohana ke hā‘awi me [[$1|kahi kūlana ki‘eki‘e]] ma ka [[$2|‘ōlelo Hawai‘i]].",
+	"babel-4-n": "Hiki i kēia mea ho‘ohana ke hā‘awi me [[$1|kahi kūlana kokoke]] i kō ka mānaleo ma ka [[$2|‘ōlelo Hawai‘i]].",
+	"babel-5-n": "Hiki i kēia mea ho‘ohana ke hā‘awi me [[$1|kahi kūlana ‘oihana]] ma ka [[$2|‘ōlelo Hawai‘i]].",
+	"babel-N-n": "He [[$1|mānaleo]] kēia kanaka ma ka [[$2|‘ōlelo Hawai‘i]].",
+	"babel-footer": "Nā mea hoʻohana e kā ʻōlelo"
+}

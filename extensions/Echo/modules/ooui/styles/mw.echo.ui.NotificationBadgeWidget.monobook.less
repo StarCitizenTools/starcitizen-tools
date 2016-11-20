@@ -1,0 +1,36 @@
+@import '../../echo.variables';
+@import '../../echo.variables.monobook';
+
+#p-personal li.mw-echo-ui-notificationBadgeButtonPopupWidget {
+	text-transform: none;
+	font-weight: normal;
+	&, a {
+		color: #333;
+	}
+	// Badge
+	> .oo-ui-buttonElement-button {
+		padding-right: (@badge-padding + 0.25em);
+		&:hover {
+			.oo-ui-labelElement-label {
+				color: black !important;
+			}
+		}
+	}
+
+	// Footer
+	.oo-ui-popupWidget-footer {
+		// Override text-align that monobook uses for #p-personal li
+		text-align: left;
+	}
+
+}
+
+// These rules are outside of the LESS nesting because they don't work inside
+// the nested rule. These should be very strong so as to override the base styles
+#pt-notifications-alert .mw-echo-notifications-badge.oo-ui-flaggedElement-unseen {
+	background-color: @badge-background-unseen-alert;
+}
+
+#pt-notifications-message .mw-echo-notifications-badge.oo-ui-flaggedElement-unseen {
+	background-color: @badge-background-unseen-message;
+}

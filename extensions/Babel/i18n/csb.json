@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iketsi",
+			"Kaszeba"
+		]
+	},
+	"babel": "Wieżô Babel brëkòwnika",
+	"babel-desc": "Dodôwô fùnkcëjã parsera <code>#babel</code> zezwalającą na aùtomatné ùsôdzanié kastczi brëkòwnika z mòżnotą wstôwianiô swòjich szblonów",
+	"babel-url": "Project:Wieżô Babel",
+	"babel-footer-url": ":Kategòrëjô:Jãzëczi brëkòwników",
+	"babel-autocreate-reason": "Starna aùtomatno ùsôdzony kategòrëji [[$1|wieżë Babel]].",
+	"babel-autocreate-text-levels": "Brëkòwnicë w ti kategòrëji zeswiôdczają znajemòtã jãzëka $2 jakno $1.",
+	"babel-autocreate-text-main": "Brëkòwnicë w ti kategòrëji zeswiôdczają znajemòtã jãzëka $1.",
+	"babel-0": "[[$2|$3 ]] jãzëk [[$1|nie je zrozmiałi]] dlô negò brëkòwnika (abò mô òn z nim stolemné problemë).",
+	"babel-1": "Nen brëkòwnik rozmieje [[$2|$3 jãzëk]] w [[$1|spòdlowim]] gradze.",
+	"babel-2": "Nen brëkòwnik rozmieje [[$2|$3 jãzëk]] w [[$1|strzédnoawansowónym]] gradze.",
+	"babel-3": "Nen brëkòwnik rozmieje [[$2|$3 jãzëk]] w [[$1|awansowónym]] gradze.",
+	"babel-4": "Nen brëkòwnik rozmieje [[$2|$3 jãzëk]] wnetka jakno [[$1|rodną mòwã]].",
+	"babel-5": "Nen brëkòwnik rozmieje [[$2|$3 jãzëk]] na równi z [[$1|rodną mòwą]].",
+	"babel-N": "[[$2|$3 jãzëk]] je [[$1|rodną mòwą]] negò brëkòwnika.",
+	"babel-0-n": "[[$2|Kaszëbsczi]] jãzëk [[$1|nie je zrozmiałi]] dlô negò brëkòwnika (abò mô òn z nim stolemné problemë).",
+	"babel-1-n": "Nen brëkòwnik rozmieje [[$2|kaszëbsczi jãzëk]] w [[$1|spòdlowim]] gradze.",
+	"babel-2-n": "Nen brëkòwnik rozmieje [[$2|kaszëbsczi jãzëk]] w [[$1|strzédnoawansowónym]] gradze.",
+	"babel-3-n": "Nen brëkòwnik rozmieje [[$2|kaszëbsczi jãzëk]] w [[$1|awansowónym]] gradze.",
+	"babel-4-n": "Nen brëkòwnik rozmieje [[$2|kaszëbsczi jãzëk]] wnetka jakno [[$1|rodną mòwã]].",
+	"babel-5-n": "Nen brëkòwnik rozmieje [[$2|kaszëbsczi jãzëk]] na równi z [[$1|rodną mòwą]].",
+	"babel-N-n": "[[$2|Kaszëbsczi jãzëk]] je [[$1|rodną mòwą]] negò brëkòwnika.",
+	"babel-footer": "Jãzëczi brëkòwników"
+}

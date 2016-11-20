@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Naval Scene"
+		]
+	},
+	"babel": "Informasi penggune Babel",
+	"babel-desc": "Nambahin fungsi parser <code>#babel</code> untuk nampilin kolom kotak penggune babel secare otomatis, dengan templat nyang bise diobah sesuei keinginan (custom)",
+	"babel-url": "Proyek:Babel",
+	"babel-footer-url": "Kategori:Babel - Penggune menurut bahase",
+	"babel-autocreate-reason": "Secare otomatis nyiptain halaman kategori [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Penggune di kategori eni nganggep die udah punye kemampuan tingkat $1 untuk bahase $2.",
+	"babel-autocreate-text-main": "Penggune di kategori eni nganggep die udah punye pengetahuan bahase $1",
+	"babel-0": "Penggune eni [[$1|kagak]] ngarti [[$2|$3]] (atawe ngarti dikit tapi sulit banget).",
+	"babel-1": "Penggune eni bise nyumbang make [[$2|$3]] tingkat [[$1|dasar]].",
+	"babel-2": "Penggune eni bise nyumbang make [[$2|$3]] tingkat [[$1|menengah]].",
+	"babel-3": "Penggune eni bise nyumbang make [[$2|$3]] tingkat [[$1|mahir]].",
+	"babel-4": "Penggune eni bise nyumbang make [[$2|$3]] [[$1|udah mirip kayak orang Betawi asli]].",
+	"babel-5": "Penggune eni bise nyumbang secare [[$1|profesional]] make [[$2|$3]].",
+	"babel-N": "Penggune eni emang bener-bener [[$1|asli ngomongnye]] [[$2|$3]].",
+	"babel-0-n": "Penggune eni [[$1|kagak]] ngarti [[$2|bahase Betawi]] (atawe ngarti dikit tapi sulit banget).",
+	"babel-1-n": "Penggune eni bise nyumbang make [[$2|bahase Betawi]] tingkat [[$1|dasar]].",
+	"babel-2-n": "Penggune eni bise nyumbang make [[$2|bahase Betawi]] tingkat [[$1|menengah]].",
+	"babel-3-n": "Penggune eni bise nyumbang make [[$2|bahase Betawi]] tingkat [[$1|mahir]].",
+	"babel-4-n": "Penggune eni bise nyumbang make [[$2|bahase Betawi]] [[$1|udah mirip kayak orang Betawi asli]].",
+	"babel-5-n": "Penggune eni bise nyumbang secare [[$1|profesional]] make [[$2|bahase Betawi]].",
+	"babel-N-n": "Penggune eni emang bener-bener [[$1|asli ngomongnye]] [[$2|bahase Betawi]].",
+	"babel-footer": "Penggune nurutin kebisaan bahasenye"
+}

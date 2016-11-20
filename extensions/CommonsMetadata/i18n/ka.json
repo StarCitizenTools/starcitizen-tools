@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"David1010"
+		]
+	},
+	"commonsmetadata-trackingcategory-no-license": "ფაილები მანქანისთვის კითხვადი ლიცენზიის გარეშე",
+	"commonsmetadata-trackingcategory-no-license-desc": "ფაილს არ აქვს [{{MediaWiki:Commonsmetadata-doc-url}} მანქანისთვის კითხვადი] ლიცენზიის თარგი.",
+	"commonsmetadata-trackingcategory-no-description": "ფაილები მანქანისთვის კითხვადი აღწერის გარეშე",
+	"commonsmetadata-trackingcategory-no-description-desc": "ფაილს არ აქვს [{{MediaWiki:Commonsmetadata-doc-url}} მანქანისთვის კითხვადი] ინფორმაციის თარგი, ან მისი აღწერის ველი არ არის შევსებული.",
+	"commonsmetadata-trackingcategory-no-author": "ფაილები მანქანისთვის კითხვადი ავტორის გარეშე",
+	"commonsmetadata-trackingcategory-no-author-desc": "ფაილს არ აქვს [{{MediaWiki:Commonsmetadata-doc-url}} მანქანისთვის კითხვადი] ინფორმაციის თარგი, ან მისი ავტორის ველი არ არის შევსებული.",
+	"commonsmetadata-trackingcategory-no-source": "ფაილები მანქანისთვის კითხვადი წყაროს გარეშე",
+	"commonsmetadata-trackingcategory-no-source-desc": "ფაილს არ აქვს [{{MediaWiki:Commonsmetadata-doc-url}} მანქანისთვის კითხვადი] ინფორმაციის თარგი, ან მისი წყაროს ველი არ არის შევსებული."
+}

@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hamilton Abreu",
+			"Malafaya",
+			"Waldir",
+			"555",
+			"Opraco",
+			"Vitorvicentevalente"
+		]
+	},
+	"babel": "Informação Babel {{GENDER:$1|do utilizador|da utilizadora|do(a) utilizador(a)}}",
+	"babel-desc": "Adiciona a função <code>#babel</code> ao analisador sintáctico, para permitir a geração automatizada de uma coluna de caixas babel com a possibilidade de incluir predefinições personalizadas",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Categoria:Babel - Utilizadores por língua",
+	"babel-autocreate-reason": "A criar automaticamente a página da categoria [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Os utilizadores nesta categoria indicam que têm um nível de conhecimento $1 na língua $2.",
+	"babel-autocreate-text-main": "Os utilizadores nesta categoria indicam o seu nível de conhecimentos do idioma $1.",
+	"babel-0": "{{GENDER:$4|Este utilizador|Esta utilizadora}} [[$1|não compreende]] [[$2|$3]] (ou compreende com dificuldades consideráveis).",
+	"babel-1": "{{GENDER:$4|Este utilizador|Esta utilizadora}} pode contribuir com um nível [[$1|básico]] de [[$2|$3]].",
+	"babel-2": "{{GENDER:$4|Este utilizador|Esta utilizadora}} pode contribuir com um nível [[$1|médio]] de [[$2|$3]].",
+	"babel-3": "{{GENDER:$4|Este utilizador|Esta utilizadora}} pode contribuir com um nível [[$1|avançado]] de [[$2|$3]].",
+	"babel-4": "{{GENDER:$4|Este utilizador|Esta utilizadora}} pode contribuir com um nível [[$1|quase nativo]] de [[$2|$3]].",
+	"babel-5": "{{GENDER:$4|Este utilizador|Esta utilizadora}} pode contribuir com um nível [[$1|profissional]] de [[$2|$3]].",
+	"babel-N": "{{GENDER:$4|Este utilizador|Esta utilizadora}} tem como língua [[$1|materna]] o [[$2|$3]].",
+	"babel-0-n": "{{GENDER:$4|Este utilizador|Esta utilizadora}} [[$1|não compreende]] [[$2|português]] (ou compreende com dificuldades consideráveis).",
+	"babel-1-n": "{{GENDER:$4|Este utilizador|Esta utilizadora}} pode contribuir com um nível [[$1|básico]] de [[$2|português]].",
+	"babel-2-n": "{{GENDER:$4|Este utilizador|Esta utilizadora}} pode contribuir com um nível [[$1|médio]] de [[$2|português]].",
+	"babel-3-n": "{{GENDER:$4|Este utilizador|Esta utilizadora}} pode contribuir com um nível [[$1|avançado]] de [[$2|português]].",
+	"babel-4-n": "{{GENDER:$4|Este utilizador|Esta utilizadora}} pode contribuir com um nível [[$1|quase nativo]] de [[$2|português]].",
+	"babel-5-n": "{{GENDER:$4|Este utilizador|Esta utilizadora}} pode contribuir com um nível [[$1|profissional]] de [[$2|português]].",
+	"babel-N-n": "{{GENDER:$4|Este utilizador|Esta utilizadora}} tem como língua [[$1|materna]] o [[$2|português]].",
+	"babel-footer": "Utilizadores por língua"
+}

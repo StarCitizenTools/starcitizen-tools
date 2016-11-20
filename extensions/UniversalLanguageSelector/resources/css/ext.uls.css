@@ -1,0 +1,73 @@
+/* Overrides to follow MediaWiki style */
+.uls-menu {
+	border-radius: 4px;
+	/* Ensure base font size is same in different skins */
+	font-size: medium;
+}
+
+.uls-search,
+.uls-language-settings-close-block {
+	border-top-right-radius: 4px;
+	border-top-left-radius: 4px;
+}
+
+.uls-language-list {
+	border-bottom-right-radius: 4px;
+	border-bottom-left-radius: 4px;
+}
+
+.uls-menu.callout .caret-before,
+.uls-menu.callout .caret-after {
+	border-top: 10px solid transparent;
+	border-right: 10px solid #c9c9c9;
+	border-bottom: 10px solid transparent;
+	display: inline-block;
+	left: -11px;
+	/* 17px aligns nicely with the size of the search row in language selection */
+	top: 17px;
+	position: absolute;
+}
+
+.uls-menu.callout .caret-after {
+	border-right: 10px solid #fcfcfc;
+	display: inline-block;
+	left: -10px;
+}
+
+.uls-menu.callout--languageselection .caret-after {
+	border-right: 10px solid #fff;
+}
+
+.uls-ui-languages button {
+	margin: 5px 15px 5px 0;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.uls-search-wrapper-wrapper {
+	position: relative;
+	padding-left: 40px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.uls-icon-back {
+	background: transparent url( ../images/back-grey-ltr.png ) no-repeat scroll center center;
+	background-image: -webkit-linear-gradient( transparent, transparent ), url( ../images/back-grey-ltr.svg );
+	/* @embed */
+	background-image: linear-gradient( transparent, transparent ), url( ../images/back-grey-ltr.svg );
+	background-size: 28px;
+	background-position: center center;
+	height: 32px;
+	width: 40px;
+	display: block;
+	position: absolute;
+	left: 0;
+	border-right: 1px solid #c9c9c9;
+	opacity: 0.8;
+}
+
+.uls-icon-back:hover {
+	opacity: 1;
+	cursor: pointer;
+}

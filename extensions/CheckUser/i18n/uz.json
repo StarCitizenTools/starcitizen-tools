@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"CoderSI",
+			"Sociologist"
+		]
+	},
+	"group-checkuser": "Foydalanuvchilarni tekshiruvchilar",
+	"checkuser-search-target": "chetlatiluvchi",
+	"checkuser-autocreate-action": "avtomatik ravishda yaratilgan"
+}

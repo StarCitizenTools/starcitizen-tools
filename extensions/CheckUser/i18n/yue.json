@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xiaomingyan"
+		]
+	},
+	"checkuser-summary": "呢個工具會響最近更改度掃瞄對一位用戶用過嘅IP地址，或者係睇一個IP嘅用戶資料同埋佢嘅編輯記錄。\n\t響用戶同埋用戶端IP嘅編輯係可幾經由XFF頭，加上 \"/xff\" 就可以拎到。呢個工具係支援 IPv4 (CIDR $1-32) 同埋 IPv6 (CIDR $2-128)。\n\t由於為咗效能方面嘅原因，將唔會顯示多過5000次嘅編輯。請跟源政策去用呢個工具。",
+	"checkuser-desc": "畀合適去查用戶IP或其它嘢嘅能力畀用戶",
+	"checkuser-logcase": "搵呢個日誌係有分大細楷嘅。",
+	"checkuser": "核對用戶",
+	"checkuserlog": "核對用戶日誌",
+	"group-checkuser": "稽查員",
+	"group-checkuser-member": "稽查員",
+	"right-checkuser": "核對用戶嘅IP地址同埋其它嘅資料",
+	"grouppage-checkuser": "{{ns:project}}:稽查員",
+	"checkuser-reason": "原因:",
+	"checkuser-showlog": "顯示日誌",
+	"checkuser-query": "查詢最近更改",
+	"checkuser-target": "用戶名或IP",
+	"checkuser-users": "拎用戶",
+	"checkuser-edits": "拎IP嘅編輯",
+	"checkuser-ips": "拎IP",
+	"checkuser-search": "搵",
+	"checkuser-empty": "呢個日誌無任何嘅項目。",
+	"checkuser-nomatch": "搵唔到符合嘅資訊。",
+	"checkuser-check": "检查",
+	"checkuser-log-fail": "唔能夠加入日誌項目",
+	"checkuser-nolog": "搵唔到日誌檔。",
+	"checkuser-blocked": "已經封鎖",
+	"checkuser-too-many": "太多結果，請收窄個CIDR。\n呢度係個用過嘅IP (最多5000個，按地址排):",
+	"checkuser-user-nonexistent": "指定嘅用戶唔存在。",
+	"checkuser-search-form": "搵當 $1 係 $2 嗰陣時嘅日誌",
+	"checkuser-search-submit": "搵",
+	"checkuser-search-initiator": "創始者",
+	"checkuser-search-target": "目標",
+	"checkuser-ipeditcount": "~響全部用戶度搵$1",
+	"checkuser-log-return": "返去核對用戶主要表格"
+}

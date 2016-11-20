@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Karol007",
+			"Sp5uhe",
+			"Ymar"
+		]
+	},
+	"babel": "Wieża Babel użytkownika",
+	"babel-desc": "Dodaje funkcję parsera <code>#babel</code> ułatwiającą tworzenie ramki informującej o językowych lub innych umiejętnościach użytkownika",
+	"babel-url": "Project:Wieża Babel",
+	"babel-footer-url": ":Category:Babel",
+	"babel-autocreate-reason": "Strona automatycznie utworzonej kategorii [[$1|wieży Babel]].",
+	"babel-autocreate-text-levels": "Użytkownicy znajdujący się w tej kategorii deklarują znajomość języka $2 na poziomie $1.",
+	"babel-autocreate-text-main": "Użytkownicy znajdujący się w tej kategorii deklarują znajomość języka $1.",
+	"babel-0": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} [[$1|nie rozumie]] języka [[$2|$3]] (albo ma z nim olbrzymie trudności).",
+	"babel-1": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem $3]] na poziomie [[$1|podstawowym]].",
+	"babel-2": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem $3]] na poziomie [[$1|średnio zaawansowanym]].",
+	"babel-3": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem $3]] na poziomie [[$1|zaawansowanym]].",
+	"babel-4": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem $3]] prawie tak samo biegle, jak [[$1|językiem ojczystym]].",
+	"babel-5": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem $3]] na równi z [[$1|językiem ojczystym]].",
+	"babel-N": "[[$2|$3]] jest [[$1|językiem ojczystym]] {{GENDER:$4|tego użytkownika|tej użytkowniczki}}.",
+	"babel-0-n": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} [[$1|nie rozumie]] języka [[$2|polskiego]] (albo ma z nim olbrzymie trudności).",
+	"babel-1-n": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem polskim]] na poziomie [[$1|podstawowym]].",
+	"babel-2-n": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem polskim]] na poziomie [[$1|średnio zaawansowanym]].",
+	"babel-3-n": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem polskim]] na poziomie [[$1|zaawansowanym]].",
+	"babel-4-n": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem polskim]] prawie tak samo biegle, jak [[$1|językiem ojczystym]].",
+	"babel-5-n": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem polskim]] na równi z [[$1|językiem ojczystym]].",
+	"babel-N-n": "[[$2|Polski]] jest [[$1|językiem ojczystym]] {{GENDER:$4|tego użytkownika|tej użytkowniczki}}.",
+	"babel-footer": "Użytkownicy według języka"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Metalhead64"
+		]
+	},
+	"textextracts-desc": "Stellt Auszüge aus Seiten in Klartext oder beschränktem HTML zur Verfügung",
+	"apihelp-query+extracts-param-chars": "Wie viele Zeichen zurückgegeben werden sollen. Der tatsächlich zurückgegebene Text kann etwas länger sein.",
+	"apihelp-query+extracts-param-sentences": "Wie viele Sätze zurückgegeben werden sollen.",
+	"apihelp-query+extracts-param-limit": "Wie viele Auszüge zurückgegeben werden sollen.",
+	"apihelp-query+extracts-param-intro": "Gibt nur den Inhalt vor dem ersten Abschnitt zurück.",
+	"apihelp-query+extracts-param-plaintext": "Gibt Auszüge als Klartext anstatt in beschränktem HTML zurück.",
+	"apihelp-query+extracts-param-variant": "Konvertiert Inhalt in seine Sprachvariante.",
+	"apihelp-query+extracts-example-1": "Ruft einen 175-Zeichen-Auszug ab"
+}

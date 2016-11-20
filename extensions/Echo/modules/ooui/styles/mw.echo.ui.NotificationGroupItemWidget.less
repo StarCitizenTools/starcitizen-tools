@@ -1,0 +1,40 @@
+@import '../../echo.variables';
+
+.mw-echo-ui-notificationGroupItemWidget {
+	// Remove the padding that ItemWidget puts in
+	padding-left: 0;
+	padding-right: 0;
+	padding-bottom: 0;
+
+	> .mw-echo-ui-notificationItemWidget {
+		// Compensate for the 0.8em of left/right padding and 0.5em of bottom padding that we removed
+		&-icon {
+			margin-left: 0.8em;
+		}
+
+		&-content {
+			margin-bottom: 1em;
+			padding-right: 0.8em;
+			padding-left: ~"calc(30px + 1.6em)"; // 30px+0.8em from ItemWidget, plus 0.8em
+		}
+	}
+
+	&-separator {
+		display: block;
+		position: absolute;
+		bottom: 0.4em;
+		width: 100%;
+		border-bottom: 1px #eeeeee solid;
+	}
+
+	&-group {
+		cursor: default;
+		padding: @bundle-group-padding;
+		background-color: #f8f8f8;
+		-webkit-box-shadow: inset 0px -2px 0px 0px rgba(0,0,0,0.05),  inset 0px 2px 0px 0px rgba(0,0,0,0.05);
+		-moz-box-shadow: inset 0px -2px 0px 0px rgba(0,0,0,0.05),  inset 0px 2px 0px 0px rgba(0,0,0,0.05);
+		box-shadow: inset 0px -2px 0px 0px rgba(0,0,0,0.05),  inset 0px 2px 0px 0px rgba(0,0,0,0.05);
+		border-bottom: 1px #dddddd solid;
+		margin-bottom: 0.4em;
+	}
+}

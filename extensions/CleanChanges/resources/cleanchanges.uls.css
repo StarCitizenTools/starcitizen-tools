@@ -1,0 +1,30 @@
+.ext-cc-language-selector__trigger {
+	cursor: pointer;
+
+	color: #0645ad;
+}
+
+.ext-cc-language-selector__trigger:after {
+	display: inline-block;
+
+	margin-left: 4px;
+
+	content: '';
+	vertical-align: middle;
+
+	border-top: 4px solid #0645ad;
+	border-right: 4px solid transparent;
+	border-left: 4px solid transparent;
+}
+
+.ext-cc-language-selector__clear {
+	font-weight: bold;
+
+	padding-left: 10px;
+
+	cursor: pointer;
+}
+
+.ext-cc-language-selector {
+	padding-right: 50px;
+}

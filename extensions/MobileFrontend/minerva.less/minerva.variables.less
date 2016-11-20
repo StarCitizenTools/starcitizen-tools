@@ -1,0 +1,115 @@
+@import "mediawiki.ui/variables";
+
+// Search bar
+@searchBarPaddingLeft: 40px;
+@searchBarPaddingRight: 40px;
+@searchResultPaddingVertical: 12px;
+@searchBoxColor: #fafafa;
+
+// Navigation Drawers
+@menuWidth: 240px;
+@rightDrawerWidth: 60%;
+
+// Headings
+@fontSizeH1: 1.7em;
+@fontSizeH2: 1.5em;
+@fontSizeH3: 1.2em;
+
+// Content
+@contentMargin: 16px;
+
+// old header
+// FIXME: Remove when mediawiki.ui buttons in stable
+@headerElementHeight: 30px;
+@headerBorderBottom: #e3e3e3;
+
+// new header
+@headerTitlePaddingH: .5em;
+@headerTitleFontSize: 1em;
+@headerHeight: 3.35em;
+
+@titleSectionSpacingTop: 20px;
+@titleSectionSpacingBottom: 25px;
+
+@grayDark: #252525;
+@grayMediumDark: @colorGray5;
+@grayMedium: @colorGray7;
+@grayMediumLight: @colorGray10;
+@grayLight: @colorGray12;
+@grayLightest: @colorGray14;
+
+// page actions
+@watchStarSize: 22px;
+
+// colors
+@semiTransparent: rgba(255, 255, 255, .8);
+// note this is also used for red links
+@redBase: @colorErrorText;
+@mainMenuBackgroundColor: @colorGray4;
+@colorTutorial: #2E76FF;
+@linkColor: #002bb8;
+@lastModifiedBarActiveBackgroundColor: #00AF8B;
+
+// Use when an element is selected. FIXME: This should be in mediawiki ui.
+@selectedBackgroundColor: #e6eeff;
+
+// messages
+@colorWarningBackground: #feb;
+@colorWarningBorder: #fde29b;
+@colorWarningText: #850;
+@colorSuccessBackground: #e1fddf;
+@colorSuccessBorder: #b7fdb5;
+@colorSuccessText: #009000;
+@colorErrorBackground: #fae3e3;
+@colorErrorBorder: #fac5c5;
+
+// typography
+@fontFamily: "Helvetica Neue", "Helvetica", "Nimbus Sans L", "Arial", "Liberation Sans", sans-serif;
+@fontFamilyHeading: "Linux Libertine", Georgia, Times, serif;
+@fontScalingFactor: 1.0;
+@contentLineHeight: 1.65;
+
+@headingMargin: .5em;
+// FIXME: Merge with @grayLightest (?)
+@sectionBorderColor: #E2E3E4;
+@sectionIconWidth: 30px;
+
+// information messages, e.g. empty watchlist message
+@infoColor: #707070;
+
+// blockquotes
+@blockquotePaddingRight: 25px;
+@blockquotePaddingLeft: 30px;
+
+// custom tablet styling
+@contentPaddingTablet: 3.35em;
+
+// FIXME: To be moved to includes/Config in a follow up patch.
+@wgMFDeviceWidthDesktop: 62.5em; // 1000px / 16 px;
+
+// note since content does not use view border box we have to include padding.
+@contentMaxWidthTablet: @wgMFDeviceWidthDesktop - ( 2 * @contentPaddingTablet );
+@contentTopPadding: 1.6em;
+
+// calculated values
+@secondaryNavWidth: @headerElementHeight;
+
+// calculated colors
+@searchBoxColorTo: darken( @searchBoxColor, 2.75% );
+
+// Wiki specific variables
+@infoboxWidth: 320px;
+
+// OOJs specific icon variables
+@baseIconSize: 24px;
+@targetIconSize: 32px;
+
+// z-index definitions (see bug 64707)
+@z-indexBase: 0;
+@z-indexOverlay: 1;
+@z-indexOverOverlay: 2;
+
+// table of contents
+@tocFontSize: .8em;
+// indicators
+@indicatorFontSize: .4em;

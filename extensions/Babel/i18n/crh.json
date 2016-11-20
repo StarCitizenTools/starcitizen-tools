@@ -1,0 +1,14 @@
+{
+    "@metadata": {
+        "authors": [
+            "Don Alessandro"
+        ]
+    },
+    "babel-0": "Bu qullanıcı [[$2|Qırımtatar tili]]ni [[$1|iç bilmey]].",
+    "babel-1": "Bu qullanıcı [[$2|Qırımtatar tili]]ni [[$1|başlanğıç seviyede]] bile.",
+    "babel-2": "Bu qullanıcı [[$2|Qırımtatar tili]]ni [[$1|orta seviyede]] bile.",
+    "babel-3": "Bu qullanıcı [[$2|Qırımtatar tili]]ni [[$1|yahşı]] bile.",
+    "babel-4": "Bu qullanıcı [[$2|Qırımtatar tili]]ni [[$1|ana tili kibi]] bile.",
+    "babel-5": "Bu qullanıcı [[$2|Qırımtatar tili]]ni [[$1|ihtisasiy seviyede]] bile.",
+    "babel-N": "Bu qullanıcınıñ [[$1|ana tili]] [[$2|Qırımtatar tili]]dir."
+}

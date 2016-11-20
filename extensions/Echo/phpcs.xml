@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ruleset name="MediaWiki">
+	<file>.</file>
+	<rule ref="vendor/mediawiki/mediawiki-codesniffer/MediaWiki">
+		<exclude name="Generic.Files.LineLength"/>
+	</rule>
+	<arg name="encoding" value="utf8"/>
+	<arg name="extensions" value="php,php5,inc"/>
+	<arg name="colors"/>
+	<exclude-pattern>vendor</exclude-pattern>
+</ruleset>

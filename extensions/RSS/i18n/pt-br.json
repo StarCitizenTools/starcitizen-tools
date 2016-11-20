@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Giro720",
+			"MetalBrasil",
+			"Araceletorres"
+		]
+	},
+	"rss-desc": "Mostra um feed RSS em uma página wiki",
+	"rss-tracking-category": "Páginas com feeds RSS",
+	"rss-tracking-category-desc": "A página tem um feed RSS.",
+	"rss-error": "Falha ao carregar feed RSS de $1: $2",
+	"rss-empty": "Falha ao carregar feed RSS de $1!",
+	"rss-fetch-nourl": "Chamada fetch sem uma URL!",
+	"rss-invalid-url": "Não é uma URL válida: $1",
+	"rss-parse-error": "Erro ao analisar XML para o RSS",
+	"rss-ns-permission": "O RSS não é permitido neste espaço nominal",
+	"rss-feed": "<!--  Os seguintes são dois modelos alternativos. O primeiro é o padrão básico para fontes novas -->; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''\n: {{{description}}}\n: {{{author}}} {{{date}}}<!-- Não adicionar uma linha nova aqui --><!-- O segundo é uma versão melhorada quer requer Extension:ParserFunctions --><!-- ; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''{{#if: {{{description|}}}|: {{{description}}}}}{{#if: {{{author|}}} | {{#if: {{{date|}}} |: &mdash; {{{author}}} {{{date}}}}} | {{#if: {{{author|}}}|: &mdash; {{{author}}}}} {{#if: {{{date|}}}|:{{{date}}}}}|}} -->"
+}

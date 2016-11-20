@@ -1,0 +1,185 @@
+.ext-translate-container .tux-messagelist .tux-message-proofread {
+	min-height: 50px;
+	margin: 0 auto;
+	vertical-align: middle;
+	background: #F8F8F8;
+}
+
+.ext-translate-container .tux-messagelist .tux-message-proofread .tux-message-item-compact {
+	padding: 30px 0;
+	overflow: hidden;
+	margin-right: auto;
+	margin-left: auto;
+	vertical-align: middle;
+	border-bottom: 1px solid #f0f0f0;
+	border-left: 1px solid #DDDDDD;
+	border-right: 1px solid #DDDDDD;
+	background: #FFFFFF;
+	max-width: 900px;
+}
+
+.ext-translate-container .tux-messagelist .tux-message-proofread .tux-message-item-compact:hover {
+	background: #FCFCFC;
+}
+
+.ext-translate-container .tux-messagelist .tux-message-proofread:first-child .tux-message-item-compact {
+	margin-top: 10px;
+	padding-top: 60px;
+	border-top: 1px solid #DDDDDD;
+}
+
+.ext-translate-container .tux-messagelist .tux-message-proofread:last-child .tux-message-item-compact {
+	margin-bottom: 10px;
+	padding-bottom: 60px;
+	border-bottom: 1px solid #DDDDDD;
+}
+
+.tux-proofread-source,
+.tux-proofread-translation {
+	word-wrap: break-word;
+	white-space: pre-wrap;
+}
+
+.tux-message-proofread.open .tux-proofread-status,
+.tux-message-proofread.open .tux-proofread-source,
+.tux-message-proofread.open .tux-proofread-translation,
+.tux-message-proofread.open .tux-proofread-action-block {
+	display: none;
+}
+
+.tux-messagelist .tux-message-proofread .tux-proofread-source {
+	color: #555;
+	font-size: 16px;
+	line-height: 1.5em;
+	padding-right: 25px;
+	padding-left: 25px;
+}
+
+.tux-messagelist .tux-message-proofread .tux-proofread-translation {
+	color: #252525;
+	font-size: 16px;
+	line-height: 1.5em;
+	padding-left: 20px;
+}
+
+.tux-proofread-action-block {
+	top: -5px;
+	right: -5px;
+}
+
+.ext-translate-container .tux-messagelist .tux-message-proofread.own-translation,
+.ext-translate-container .tux-messagelist .tux-message-proofread.own-translation:hover {
+	background: #FBFBFB;
+}
+
+.translated-by-self {
+	color: #777;
+	text-align: right;
+	font-size: 12px;
+	margin-right: 5px;
+	margin-left: auto;
+	width: 18px;
+	height: 18px; /* Icon height + 3px */
+	background: url(../images/user-small.png) top right no-repeat;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/user-small.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/user-small.svg);
+}
+
+.tux-proofread-status {
+	top: -10px;
+}
+
+.tux-proofread-status.fuzzy {
+	background: url(../images/outdated-ltr.png) left center no-repeat;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/outdated-ltr.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/outdated-ltr.svg);
+	height: 40px;
+}
+
+.tux-proofread-status.untranslated {
+	background: url(../images/translate-ltr.png) left center no-repeat;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/translate-ltr.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/translate-ltr.svg);
+	height: 40px;
+}
+
+.tux-proofread-action {
+	background-position: right top;
+	background-repeat: no-repeat;
+	background-image: url(../images/check-sprite-ltr.png);
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/check-sprite-ltr.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/check-sprite-ltr.svg);
+	/* There is 1px white row between each icon */
+	height: 30px;
+	cursor: pointer;
+}
+
+.tux-proofread-action:hover {
+	background-position: right -31px;
+}
+
+.tux-proofread-action.accepted {
+	cursor: default;
+	background-position: right -62px;
+}
+
+.proofread-by-others .tux-proofread-action {
+	background-position: right -124px;
+}
+
+.proofread-by-others .tux-proofread-action:hover {
+	background-position: right -155px;
+}
+
+.proofread-by-others .tux-proofread-action.accepted {
+	cursor: default;
+	background-position: right -186px;
+}
+
+.tux-proofread-edit {
+	background-image: url(../images/edit-mark.png);
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/edit-mark.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/edit-mark.svg);
+	background-repeat: no-repeat;
+	background-position: right center;
+	height: 50px;
+	cursor: pointer;
+	visibility: hidden;
+	text-align: right;
+}
+
+.tux-message-proofread:hover .tux-proofread-edit {
+	visibility: visible;
+}
+
+.tux-proofread-edit-label {
+	position: relative;
+	color: #777777;
+	display: inline-block;
+	font-size: 13px;
+	padding-top: 30px;
+	padding-right: 2px;
+}
+
+.tux-proofread-count {
+	color: #777;
+	font-size: 15px;
+	padding-right: 5px;
+	text-align: right;
+}
+
+.tux-proofread-count:before {
+	content: '';
+	display: inline-block;
+	background: url(../images/check-small.png) left bottom no-repeat;
+	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/check-small.svg);
+	/* @embed */
+	background-image: linear-gradient(transparent, transparent), url(../images/check-small.svg);
+	height: 12px;
+	width: 14px;
+}

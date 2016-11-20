@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Milicevic01"
+		]
+	},
+	"usergroups-editgroup-reason": "Разлог:",
+	"usergroups-editgroup-save": "Сачувај измене",
+	"usergroups-log-none": "(нема)",
+	"logentry-usergroups-delete": "$1 је {{GENDER:$2|обрисао|обрисала}} корисничку групу „$4“."
+}

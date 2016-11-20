@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iwan Novirion",
+			"Naval Scene"
+		]
+	},
+	"babel": "Informasi bahaso pangguno",
+	"babel-desc": "Menambah fungsi parser <code>#babel</code> untuak manampilan kotak pangguno babel sacaro otomatih jo kamampuan manggunoan templat surang",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Kategori:Pangguno manuruik bahaso",
+	"babel-autocreate-reason": "Otomatih mambuek laman kategori [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Pangguno di kategori ko manandoan punyo kamampuan $1 untuak bahaso $2.",
+	"babel-autocreate-text-main": "Pangguno di kategori ko punyo kamampuan babahaso $1.",
+	"babel-autocreate-user": "Babel AutoCreate",
+	"babel-0": "Pangguno ko [[$1|indak]] mangarati [[$2|$3]] (atau payah bana mangaratinyo).",
+	"babel-1": "Pangguno ko lai tau [[$1|sangenek]] jo [[$2|$3]].",
+	"babel-2": "Pangguno ko mangarati [[$2|$3]] [[$1|sadang elok]].",
+	"babel-3": "Pangguno ko lai mangarati [[$1|bana]] [[$2|$3]].",
+	"babel-4": "Pangguno ko mangarati [[$2|$3]] saroman [[$1|urang Minang]].",
+	"babel-5": "Pangguno ko [[$1|ahli]] [[$2|$3]].",
+	"babel-N": "Pangguno ko [[$1|mangecek]] jo [[$2|$3]].",
+	"babel-0-n": "Pangguno ko [[$1|indak]] mangarati bahaso [[$2|Minang]] (atau payah bana mangaratinyo).",
+	"babel-1-n": "Pangguno ko lai tau [[$1|sangenek]] jo bahaso [[$2|Minang]].",
+	"babel-2-n": "Pangguno ko mangarati bahaso [[$2|Minang]] [[$1|sadang elok]].",
+	"babel-3-n": "Pangguno ko mangarati [[$1|bana]] bahaso [[$2|Minang]].",
+	"babel-4-n": "Pangguno ko mangarati bahaso [[$2|Minang]] saroman [[$1|urang Minang]].",
+	"babel-5-n": "Pangguno ko [[$1|ahli]] bahaso [[$2|Minang]].",
+	"babel-N-n": "Pangguno ko [[$1|mangecek]] jo bahaso [[$2|Minang]].",
+	"babel-template": "Template:User $1",
+	"babel-footer": "Pangguno badasarkan bahaso"
+}

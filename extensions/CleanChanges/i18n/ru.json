@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ferrer",
+			"Innv",
+			"Александр Сигачёв"
+		]
+	},
+	"cleanchanges-changerightslink": "изменить группы",
+	"cleanchanges-desc": "Более сжатое представление [[Special:RecentChanges|списка свежих правок]]",
+	"cleanchanges-language": "Язык:",
+	"cleanchanges-language-na": "Все",
+	"cleanchanges-users": "Участники (разделитель: |):",
+	"cleanchanges-showuserlinks": "Показывать ссылки участников"
+}

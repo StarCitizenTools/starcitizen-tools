@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Toliño",
+			"Elisardojm"
+		]
+	},
+	"textextracts-desc": "Proporciona extractos de texto do contido da páxina sen formato ou con HTML limitado",
+	"apihelp-query+extracts-description": "Devolve texto plano ou extractos limitados en HTML das páxinas indicadas.",
+	"apihelp-query+extracts-param-chars": "Cantos caracteres devolver. O texto devolto actual pode ser un pouco máis longo.",
+	"apihelp-query+extracts-param-sentences": "Cantas frases devolver.",
+	"apihelp-query+extracts-param-limit": "Cantos extractos devolver.",
+	"apihelp-query+extracts-param-intro": "Só devolver contido antes da primeira sección.",
+	"apihelp-query+extracts-param-plaintext": "Devolver extractos como texto plano no canto de HTML limitado.",
+	"apihelp-query+extracts-param-sectionformat": "Como formatear seccións en modo texto plano:\n;plain:Sen formato.\n;wiki:Formateo en estilo wiki (== como isto ==).\n;raw:Representación interna deste módulo (títulos de sección prefixados con &lt;ASCII 1&gt;&lt;ASCII 2&gt;&lt;nivel de sección&gt;&lt;ASCII 2&gt;&lt;ASCII 1&gt;).",
+	"apihelp-query+extracts-param-variant": "Converter o contido nesta variante do idioma.",
+	"apihelp-query+extracts-example-1": "Devolver un extracto de 175 caracteres"
+}

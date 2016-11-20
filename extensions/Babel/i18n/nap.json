@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"C.R.",
+			"Sannita"
+		]
+	},
+	"babel": "Nfurmaziune babel utente",
+	"babel-desc": "Jògne 'a funzione d'analise <code>#babel</code> pe' ve permettere 'a generazione automatezzata 'e 'na culonna babel cu 'a possibbeletà 'e 'ncludere template personalizzate",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Utente pe' llengua",
+	"babel-autocreate-reason": "Stong' crianno automatecamente 'a categurìa [[$1|Babel]].",
+	"babel-autocreate-text-levels": "L'utente dint'a sta categurìa riceno ca tengono nu livello $1 p' 'a lengua $2.",
+	"babel-autocreate-text-main": "L'utente dint'a sta categurìa riceno 'e canoscere 'a lengua $1.",
+	"babel-0": "Chist'utente [[$1|nun]] sape parlà [[$2|$3]] (o capisce malamente 'a lengua).",
+	"babel-1": "St'utente tene nu livello [[$1|base]] 'e [[$2|$3]].",
+	"babel-2": "St'utente tene nu livello [[$1|mezo]] 'e [[$2|$3]].",
+	"babel-3": "St'utente tene nu livello [[$1|aveto]] 'e [[$2|$3]].",
+	"babel-4": "St'utente tene nu livello comme fosse quase [[$1|nativo]] 'e [[$2|$3]].",
+	"babel-5": "St'utente tene na canuscenza [[$1|professionale]] 'e [[$2|$3]].",
+	"babel-N": "St'utente è de [[$1|madrelengua]] [[$2|$3]].",
+	"babel-0-n": "St'utente [[$1|nun]] sape 'o [[$2|napulitano]] (o pure 'u capisce malamente).",
+	"babel-1-n": "St'utente tene nu livello [[$1|base]] 'e [[$2|napulitano]].",
+	"babel-2-n": "St'utente tene nu livello [[$1|mezo]] 'e [[$2|napulitano]].",
+	"babel-3-n": "St'utente tene nu livello [[$1|aveto]] 'e [[$2|napulitano]].",
+	"babel-4-n": "St'utente tene nu livello comme fosse quase [[$1|nativo]] 'e [[$2|napulitano]].",
+	"babel-5-n": "St'utente tene na canuscenza [[$1|professionale]] 'e [[$2|napulitano]].",
+	"babel-N-n": "St'utente è de [[$1|madrelèngua]] [[$2|napulitana]].",
+	"babel-footer": "Utente pe' lengua"
+}

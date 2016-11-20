@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"EugeneZelenko",
+			"Wizardist",
+			"Red Winged Duck"
+		]
+	},
+	"googleanalytics-desc": "Устаўляе скрыпты Google Universal Analytics (і/або іншай вэб-аналітыкі) у старонкі MediaWiki для сачэньня",
+	"right-noanalytics": "выключэньне з назіраньня ў вэб-аналітыцы"
+}

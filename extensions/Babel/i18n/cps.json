@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"GerardM",
+			"Oxyzen"
+		]
+	},
+	"babel": "Inpormasyon sa naga usar sang Babel",
+	"babel-desc": "Ginadugang ang <code>#babel</code> paggana parser para mapasugtan ang automated generation sang kahon sang manug-usar sang Babel sa kolum nga may abilidad sa pag-upod sang mga kostumbre nga templeyt",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "Automatiko nga ginahimo ang [[$1|Babel]] nga pahina kategorya.",
+	"babel-autocreate-text-levels": "Ang mga naga-usar sa mini nga kategorya nagapakita nga may ara sila kasarang lebel $1 para sa lenggwahe nga $2.",
+	"babel-autocreate-text-main": "Mga user sa mini nga kategorya nagapakita nga may-ara sila ka-alam lebel $1.",
+	"babel-0": "Ang mini nga manug-usar [[$1|wala]] sang ka-alam sang [[$2|$3]]  (ukon nabudlayan mini sa pag-intyende).",
+	"babel-1": "Ang mini nga manug-usar may [[$1|gamay]] nga ka-alam sang [[$2|$3]].",
+	"babel-2": "Ang mini nga manug-usar may [[$1|katamtaman]] nga ka-alam sang [[$2|$3]].",
+	"babel-3": "Ang mini nga manug-usar may [[$1|madalum]] nga ka-alam sang [[$2|$3]].",
+	"babel-4": "Ang mini nga manug-usar may [[$1|malapit sa tumandok]] nga ka-alam sang [[$2|$3]].",
+	"babel-5": "Ang mini nga manug-usar may [[$1|propesyunal]] nga ka-alam sang [[$2|$3]].",
+	"babel-N": "Ang mini nga manug-usar may [[$1|tumandok]] nga ka-alam sang [[$2|$3]].",
+	"babel-0-n": "Ang mini nga manug-usar [[$1|wala]] sang ka-alam sang [[$2|Capiceño]] (ukon nabudlayan mini mag-intyende).",
+	"babel-1-n": "Ang mini nga manug-usar may [[$1|gamay]] nga ka-alam sang [[$2|Capiceño]].",
+	"babel-2-n": "Ang mini nga manug-usar may [[$1|katamtaman]] nga ka-alam sang [[$2|Capiceño]].",
+	"babel-3-n": "Ang mini nga manug-usar may [[$1|abanse]] nga ka-alam sang [[$2|Capiceño]].",
+	"babel-4-n": "Ang mini nga manug-usar may [[$1|malapit sa tumandok]] nga ka-alam sang [[$2|Capiceño]].",
+	"babel-5-n": "Ang mini nga manug-usar may [[$1|propesyunal]] nga ka-alam sang [[$2|Capiceño]].",
+	"babel-N-n": "Ang mini nga manug-usar may [[$1|tumandok]] nga ka-alam sang [[$2|Capiceño]]."
+}

@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu"
+		]
+	},
+	"pageimages-desc": "Recueye información de les imaxes que s'usen nuna páxina",
+	"pageimages-info-label": "Imaxe de la páxina",
+	"apihelp-query+pageimages-description": "Devuelve información sobro les imaxes de la páxina, como miniatures y presencia de fotos.",
+	"apihelp-query+pageimages-example-1": "Llograr el nome y una miniatura de <kbd>100</kbd> píxeles d'una imaxe na páxina d'<kbd>Albert Einstein</kbd>.",
+	"apihelp-query+pageimages-param-prop": "Qué información devolver:\n;thumbnail:URL y dimensiones de la imaxe asociada cola páxina, si la hai.\n;name:Títulu de la imaxe.",
+	"apihelp-query+pageimages-param-thumbsize": "Dimensión máxima da miniatura.",
+	"apihelp-query+pageimages-param-limit": "Propiedaes de cuántes páxines devolver."
+}

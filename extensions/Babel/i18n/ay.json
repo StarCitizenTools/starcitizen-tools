@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Erebedhel"
+		]
+	},
+	"babel": "Wawil apnaqirxata uñt'ayawi",
+	"babel-desc": "<code>#babel</code> arthapi suk'atat uñakipawi lurt'awix yapxatiwa, mäwawil apnaqirina llatatax uñacht'arawi turkatax apantachi q'aphawimpiwa achurpayachayiti luräni.",
+	"babel-url": "Project:Wawil",
+	"babel-autocreate-reason": "[[$1|Wawil]]-na patawi uñstawi uñstayarachayaski.",
+	"babel-autocreate-text-levels": "Patawinax apnaqiripacha $1 q'aphawi $2 arutakiwa sistu.",
+	"babel-autocreate-text-main": "Patawinax apnaqiripacha $1 aru yatiniwa sistu.",
+	"babel-0": "Jupax apnaqiri [[$2|$3]]xa [[$1|jani]] yatiniwa (inasa ch'ama yattaniwa).",
+	"babel-1": "Jupax apnaqiri [[$2|$3]]xa [[$1|juk'a]] yatiniwa.",
+	"babel-2": "Jupax apnaqiri [[$2|$3]]xa [[$1|chika]] yatiniwa.",
+	"babel-3": "Jupax apnaqiri [[$2|$3]]xa [[$1|alluxa]] yatiniwa.",
+	"babel-4": "Jupax apnaqiri [[$2|$3]]xa [[$1|niyaki yurawita]] yatiniwa.",
+	"babel-5": "Jupax apnaqiri [[$2|$3]]xa [[$1|yatxatata]] yatiniwa.",
+	"babel-N": "Jupax apnaqiri [[$2|$3]]xa [[$1|yurawita]] yatiniwa.",
+	"babel-0-n": "Jupax apnaqiri [[$2|aymar aru]]xa [[$1|jani]] yatiniwa (inasa ch'ama yattaniwa).",
+	"babel-1-n": "Jupax apnaqiri [[$2|aymar aru]]xa [[$1|juk'a]] yatiniwa.",
+	"babel-2-n": "Jupax apnaqiri [[$2|aymar aru]]xa [[$1|chika]] yatiniwa.",
+	"babel-3-n": "Jupax apnaqiri [[$2|aymar aru]]xa [[$1|alluxa]] yatiniwa.",
+	"babel-4-n": "Jupax apnaqiri [[$2|aymar aru]]xa [[$1|niyaki yurawita]] yatiniwa.",
+	"babel-5-n": "Jupax apnaqiri [[$2|aymar aru]]xa [[$1|yatxatata]] yatiniwa.",
+	"babel-N-n": "Jupax apnaqiri [[$2|aymar aru]]xa [[$1|yurawita]] yatiniwa."
+}

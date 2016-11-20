@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mormegil",
+			"Littledogboy",
+			"Cvanca"
+		]
+	},
+	"popups-message": "Vyskakovací kartičky",
+	"popups-desc": "Zobrazuje vyskakovací kartičky se shrnutím obsahu cílové stránky, když uživatel umístí kurzor myši nad odkaz.",
+	"popups-last-edited": "Editováno $1",
+	"popups-redirects": "přesměrování na <h3>$1</h3>",
+	"popups-settings-title": "Náhled stránky",
+	"popups-settings-description": "Tento nástroj vám umožňuje zobrazovat náhledy odkazů na články a na reference.",
+	"popups-settings-option-simple": "Jednoduchý",
+	"popups-settings-option-simple-description": "Zobrazí úvodní větu stránky a náhledový obrázek. Doporučené nastavení pro čtenáře.",
+	"popups-settings-option-advanced": "Pokročilý",
+	"popups-settings-option-advanced-description": "Zobrazí náhledy odkazů a zpřístupní menu editačních funkcí. Nastavení užívané mnoha editory.",
+	"popups-settings-option-off": "Vypnout náhledy",
+	"popups-settings-option-off-description": "Toto nastavení můžete změnit pomocí odkazu v patičce stránky",
+	"popups-settings-save": "Uložit",
+	"popups-settings-help-ok": "OK",
+	"popups-settings-cancel": "Storno",
+	"popups-settings-help": "Náhledy můžete opět zapnout pomocí odkazu v patičce stránky.",
+	"popups-settings-enable": "Zapnout náhledy",
+	"popups-send-feedback": "Poslat názor (externí odkaz)",
+	"popups-mobile-continue-to-page": "Pokračovat na stránku",
+	"popups-mobile-dismiss": "Zavřít",
+	"popups-mobile-message": "Vyskakovací kartičky (mobilní)"
+}

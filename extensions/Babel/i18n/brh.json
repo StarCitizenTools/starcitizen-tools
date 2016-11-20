@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Imdadb"
+		]
+	},
+	"babel": "Babel kárband cáindárí",
+	"babel-0": "Dá kárband e [[$2|$3]] [[$1|asul bafak]] (yá kalaí seaŧ poh marek ta).",
+	"babel-1": "Dá kárband e [[$2|$3]] ná [[$1|bunyádí]] cáindárí are.",
+	"babel-N": "[[$2|$3]] dá kárband ná [[$1|lummaí bolí]] e.",
+	"babel-0-n": "Dá kárband e [[$2|Bráhuí]] [[$1|asul bafak]] (yá kalaí seaŧ poh marek ta).",
+	"babel-1-n": "Dá kárband e [[$2|Bráhuí]] ná [[$1|bunyádí]] cáindárí are.",
+	"babel-N-n": "[[$2|Bráhuí]] dá kárband ná [[$1|lummaí bolí]] e."
+}

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"commonsmetadata-desc": "Estende 'a probbieta \"extmetadata\" d'u module API pe 'a 'mbormazione de l'immaggine pe 'ngludere 'mbormaziune reggistrate jndr'à le pàggene de descrizione de l'immaggine ca ause le template normalmende ausate sus a Uicchimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "File senze 'na licenze leggibbile d'a maghene",
+	"commonsmetadata-trackingcategory-no-license-desc": "'U file non ge tène nisicune template de licenze [{{MediaWiki:Commonsmetadata-doc-url}} leggibbile d'a maghene].",
+	"commonsmetadata-trackingcategory-no-description": "File senze 'na descrizione leggibbile d'a maghene",
+	"commonsmetadata-trackingcategory-no-description-desc": "'U file non ge tène nisicune template de 'mbormazione [{{MediaWiki:Commonsmetadata-doc-url}} leggibbile d'a maghene], o 'a descriziona soje non g'ha state anghiute.",
+	"commonsmetadata-trackingcategory-no-author": "File senze 'n'autore leggibbile d'a maghene",
+	"commonsmetadata-trackingcategory-no-author-desc": "'U file non ge tène nisicune template de 'mbormazione [{{MediaWiki:Commonsmetadata-doc-url}} leggibbile d'a maghene], o 'l'autore sue non g'ha state anghiute.",
+	"commonsmetadata-trackingcategory-no-source": "File senze 'na sorgende leggibbile d'a maghene",
+	"commonsmetadata-trackingcategory-no-source-desc": "'U file non ge tène nisicune template de 'mbormazione [{{MediaWiki:Commonsmetadata-doc-url}} leggibbile d'a maghene], o 'a sorgende soje non g'ha state anghiute."
+}

@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Przemub",
+			"Purodha",
+			"Uostofchuodnego"
+		]
+	},
+	"babel": "Wieża Babel ôd używŏcza",
+	"babel-desc": "Przidŏwŏ fōnkcyjõ parsera <code>#babel</code>, coby przizwolić na autōmatycznõ gyneracyjõ rōmki z informacyjami ô gŏdkowych abo inkszych szprymach ôd używŏcza.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": "Kategoria:Wikipedysty podug godki",
+	"babel-autocreate-reason": "Zajta kategoryji [[$1|Wjeży Babel]]",
+	"babel-autocreate-text-levels": "Używŏcze we tyj kategoryji ôznŏczyli swoje szprymy we gŏdce $2 za $1.",
+	"babel-autocreate-text-main": "Używacze kerzi sům w tej kategoryji poradzům godać w godce $1.",
+	"babel-0": "Tyn użytkowńik [[$1|ńy godo]] w godce [[$2|$3]] (abo mo s ńům wjelge trudnośći).",
+	"babel-1": "Tyn użytkowńik wjy ino [[$1|źdźebko]] godke [[$2|$3]].",
+	"babel-2": "Tyn użytkowńik mo [[$1|strzedńe]] wjadůmośći godki [[$2|$3]].",
+	"babel-3": "Tyn użytkowńik mo [[$1|fest dobre]] wjadůmośći godki [[$2|$3]].",
+	"babel-4": "Tyn użytkowńik wjy godke [[$2|$3]] [[$1|bezmałaś jak uojczysto]].",
+	"babel-0-n": "Tyn użytkowńik [[$1|ńy godo]] we [[$2|ślůnskij godce]] (abo mo s ńům wjelge trudnośći).",
+	"babel-1-n": "Tyn użytkowńik wjy ino [[$1|źdźebko]] [[$2|ślůnsko godka]].",
+	"babel-2-n": "Tyn użytkowńik mo [[$1|strzedńe]] wjadůmośći [[$2|ślůnskij godki]].",
+	"babel-3-n": "Tyn użytkowńik mo [[$1|fest dobre]] wjadůmośći [[$2|ślůnskij godki]].",
+	"babel-4-n": "Tyn użytkowńik wjy [[$2|ślůnsko godka]] [[$1|bezmałaś jak uojczysto]].",
+	"babel-N-n": "[[$2|Ślůnski]] je [[$1|uojczystům godkům]] tygo użytkowńika."
+}

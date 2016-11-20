@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Okras"
+		]
+	},
+	"pageimages-desc": "Собирает информацию об изображениях, используемых на странице",
+	"pageimages-info-label": "Изображение страницы",
+	"apihelp-query+pageimages-description": "Возвращает информацию об изображениях на страницы, такие как эскиз и наличие фотографий.",
+	"apihelp-query+pageimages-example-1": "Получить название и <kbd>100</kbd>-пиксельный эскиз изображения страницы об <kbd>Альберте Эйнштейне</kbd>.",
+	"apihelp-query+pageimages-param-prop": "Какую информацию возвращать:\n;thumbnail:URL-адрес и размеры изображения, связанного со страницей, если таковое имеется.\n;name:заголовок изображения.",
+	"apihelp-query+pageimages-param-thumbsize": "Максимальный размер эскизов.",
+	"apihelp-query+pageimages-param-limit": "Свойства, указывающие на то, сколько страниц возвращать."
+}

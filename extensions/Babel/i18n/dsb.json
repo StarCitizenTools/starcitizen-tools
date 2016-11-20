@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"babel": "Babelowe wužywarske informacije",
+	"babel-desc": "Pśidawa parserowu funkciju <code>#babel</code> za awtomatiske twórjenje słupa babelowych wužywarskich kašćikow, z móžnosću, swójske pśedłogi zapśěgnuś",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Wužywarje pó rěcy",
+	"babel-autocreate-reason": "Awtomatiske wutwórjenje [[$1|Babeloweje]] kategorije.",
+	"babel-autocreate-text-levels": "Wužywarje w toś tej kategoriji pódawaju, až maju stopjeń znajobnosćow $1 za rěc $2.",
+	"babel-autocreate-text-main": "Wužywarje w toś tej kategoriji pódawaju, až maju znajobnosći rěcy $1.",
+	"babel-0": "Toś ten wužywaŕ [[$1|njama]] znajobnosći [[$2|$3]] (abo rozmějo ju jano z wjelikimi śěźami).",
+	"babel-1": "Toś ten wužywaŕ ma [[$1|zakładne]] znajobnosći [[$2|$3]].",
+	"babel-2": "Toś ten wužywaŕ ma [[$1|pśerězne]] znajobnosći [[$2|$3]].",
+	"babel-3": "Toś ten wužywaŕ ma [[$1|póstupjone]] znajobnosći [[$2|$3]].",
+	"babel-4": "Toś ten wužywaŕ ma znajobnosći [[$2|$3]] na [[$1|maminorěcnem]] niwowje.",
+	"babel-5": "Toś ten wužywaŕ ma [[$1|profesionelne]] znajobnosći [[$2|$3]].",
+	"babel-N": "Toś ten wužywaŕ powĕda [[$2|$3]] ako [[$1|maminu]] rĕc.",
+	"babel-0-n": "Toś ten wužywaŕ njama [[$1|žedne]] znajobnosći [[$2|dolnoserbšćiny]] (abo rozmějo ju jano z bejnymi śěžkosćami).",
+	"babel-1-n": "Toś ten wužywaŕ ma [[$1|zakładne]] znajobnosći [[$2|dolnoserbšćiny]].",
+	"babel-2-n": "Toś ten wužywaŕ ma [[$1|pśerězne]] znajobnosći [[$2|dolnoserbšćiny]].",
+	"babel-3-n": "Toś ten wužywaŕ ma [[$1|póstupjone]] znajobnosći [[$2|dolnoserbšćiny]].",
+	"babel-4-n": "Toś ten wužywaŕ powěda [[$2|dolnoserbšćinu]] kaž [[$1|maminorěcny]].",
+	"babel-5-n": "Toś ten wužywaŕ ma [[$1|profesionelne]] znajobnosći [[$2|dolnoserbšćiny]].",
+	"babel-N-n": "Toś ten wužywaŕ powěda [[$2|dolnoserbšćinu]] ako [[$1|maminu rěc]].",
+	"babel-footer": "Wužywarje pó rěcy"
+}

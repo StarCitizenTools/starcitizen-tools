@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu"
+		]
+	},
+	"commonsmetadata-desc": "Estiende la propiedá \"extmetadata\" del módulu de la API d'información de la imaxe pa incluir información guardada nes páxines de descripción de la imaxe qu'usen les plantíes usaes de vezu en Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Ficheros ensin llicencia de llectura automática",
+	"commonsmetadata-trackingcategory-no-license-desc": "El ficheru nun tien nenguna plantía de llicencia [{{MediaWiki:Commonsmetadata-doc-url}} lleíble automáticamente].",
+	"commonsmetadata-trackingcategory-no-description": "Ficheros ensin descripción de llectura automática",
+	"commonsmetadata-trackingcategory-no-description-desc": "El ficheru nun tien nenguna plantía d'informacion [{{MediaWiki:Commonsmetadata-doc-url}} lleíble automáticamente], o'l campu de descripción nun se rellenó.",
+	"commonsmetadata-trackingcategory-no-author": "Ficheros ensin autor de llectura automática",
+	"commonsmetadata-trackingcategory-no-author-desc": "El ficheru nun tien nenguna plantía d'informacion [{{MediaWiki:Commonsmetadata-doc-url}} lleíble automáticamente], o'l campu d'autor nun se rellenó.",
+	"commonsmetadata-trackingcategory-no-source": "Ficheros ensin orixe de llectura automática",
+	"commonsmetadata-trackingcategory-no-source-desc": "El ficheru nun tien nenguna plantía d'informacion [{{MediaWiki:Commonsmetadata-doc-url}} lleíble automáticamente], o'l campu d'orixe nun se rellenó."
+}

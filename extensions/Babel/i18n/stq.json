@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Crazymadlover",
+			"Pyt",
+			"SK-luuut"
+		]
+	},
+	"babel": "Babel-Benutser-Information",
+	"babel-desc": "Föiget an ju <code>#babel</code>-Parserfunktion foar automatisk Deerstaalen fon Babel-Benutserboxen-Riegen ju Muugelkhaid tou, oaine Foarloagen ientoubienden",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Benutsere ätter Sproake",
+	"babel-autocreate-reason": "Automatisk moakede [[$1|Babel]]-Kategorie.",
+	"babel-autocreate-text-levels": "Benutsere in disse Kategorie hääbe ju Kunde-Ieuwene $1 foar ju Sproake $2.",
+	"babel-autocreate-text-main": "Benutsere in disse Kategorie hääbe Kunde fon ju Sproake $1.",
+	"babel-0": "Dissen Benutser boalt un ferstoant [[$1|neen]] [[$2|$3]].",
+	"babel-1": "Dissen Benutser [[$1|boalt un ferstoant n Bitje]] [[$2|$3]].",
+	"babel-2": "Dissen Benutser kon [[$1|oarich]] [[$2|$3]] baale.",
+	"babel-3": "Dissen Benutser kon [[$1|goud]] [[$2|$3]] baale.",
+	"babel-4": "Dissen Benutser [[$1|boalt slonk]] [[$2|$3]].",
+	"babel-5": "Dissen Benutser behärsket [[$2|$3]] ap [[$1|professionelle]] Ieuwene.",
+	"babel-N": "Dissen Benutser häd [[$2|$3]] [[$1|as Määmesproake]].",
+	"babel-0-n": "Dissen Benutser behärsket [[$2|Seeltersk]] [[$1|nit]] (of ferstoant et man stuur).",
+	"babel-1-n": "Dissen Benutser behärsket [[$2|Seeltersk]] ap [[$1|gruundlääsende]] Ieuwene.",
+	"babel-2-n": "Dissen Benutser kon [[$1|oarich]] [[$2|Seelters]] baale.",
+	"babel-3-n": "Dissen Benutser kon [[$1|goud]] [[$2|Seeltersk]] baale.",
+	"babel-4-n": "Dissen Benutser boalt [[$1|slonk]] [[$2|Seeltersk]].",
+	"babel-5-n": "Dissen Benutser behärsket [[$2|Seeltersk]] ap [[$1|professionelle]] Ieuwene.",
+	"babel-N-n": "Dissen Benutser boalt [[$2|Seeltersk]] as [[$1|Määmesproake]]."
+}

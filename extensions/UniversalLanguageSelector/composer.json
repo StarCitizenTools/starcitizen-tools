@@ -1,0 +1,38 @@
+{
+	"name": "mediawiki/universal-language-selector",
+	"type": "mediawiki-extension",
+	"description": "The primary aim is to allow users to select a language and configure its support in an easy way. Main features are language selection, input methods and web fonts.",
+	"keywords": [
+		"MediaWiki",
+		"Language selection",
+		"Input methods",
+		"Web fonts"
+	],
+	"homepage": "https://www.mediawiki.org/wiki/Extension:UniversalLanguageSelector",
+	"license": [
+		"GPL-2.0+",
+		"MIT"
+	],
+	"support": {
+		"issues": "https://phabricator.wikimedia.org/tag/mediawiki-extensions-universallanguageselector/",
+		"irc": "irc://irc.freenode.net/mediawiki-i18n"
+	},
+	"require": {
+		"php": ">=5.5.9",
+		"composer/installers": ">=1.0.1"
+	},
+	"suggest": {
+		"mediawiki/cldr": "Language names in all languages"
+	},
+	"require-dev": {
+		"jakub-onderka/php-parallel-lint": "0.9.2",
+		"mediawiki/mediawiki-codesniffer": "0.7.2"
+	},
+	"scripts": {
+		"fix": "phpcbf",
+		"test": [
+			"parallel-lint . --exclude vendor",
+			"phpcs -p -s"
+		]
+	}
+}

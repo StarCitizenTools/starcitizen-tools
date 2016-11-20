@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Geraki"
+		]
+	},
+	"commonsmetadata-desc": "Επεκτείνει την ιδιότητα \"extmetadata\" της μονάδας API πληροφορών εικόνας ώστε να περιλαμβάνει πληροφορίες που είναι αποθηκευμένες σε σελίδες περιγραφής εικόνας που χρησιμοποιούν τα πρότυπα που χρησιμοποιούνται συνήθως στα Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Αρχεία χωρίς μηχανικά αναγνώσιμη άδεια",
+	"commonsmetadata-trackingcategory-no-license-desc": "Το αρχείο δεν έχει [{{MediaWiki:Commonsmetadata-doc-url}} μηχανικά αναγνώσιμο] πρότυπο άδειας.",
+	"commonsmetadata-trackingcategory-no-description": "Αρχεία χωρίς μηχανικά αναγνώσιμη περιγραφή",
+	"commonsmetadata-trackingcategory-no-description-desc": "Το αρχείο δεν έχει [{{MediaWiki:Commonsmetadata-doc-url}} μηχανικά αναγνώσιμο] πρότυπο πληροφοριών, ή το πεδίο περιγραφής δεν έχει συμπληρωθεί.",
+	"commonsmetadata-trackingcategory-no-author": "Αρχεία χωρίς μηχανικά αναγνώσιμο δημιουργό",
+	"commonsmetadata-trackingcategory-no-author-desc": "Το αρχείο δεν έχει [{{MediaWiki:Commonsmetadata-doc-url}} μηχανικά αναγνώσιμο] πρότυπο πληροφοριών, ή το πεδίο δημιουργού δεν έχει συμπληρωθεί.",
+	"commonsmetadata-trackingcategory-no-source": "Αρχεία χωρίς μηχανικά αναγνώσιμη πηγή",
+	"commonsmetadata-trackingcategory-no-source-desc": "Το αρχείο δεν έχει [{{MediaWiki:Commonsmetadata-doc-url}} μηχανικά αναγνώσιμο] πρότυπο πληροφοριών, ή το πεδίο πηγής δεν έχει συμπληρωθεί."
+}

@@ -1,0 +1,31 @@
+@import "minerva.variables";
+@import "minerva.mixins";
+@import "mediawiki.mixins.less";
+
+
+// FIXME: Standardise on a loading class (update ConfirmEdit extension)
+.fancycaptcha-reload-loading,
+.mw-ui-icon-spinner {
+	.m-background-image('ajax-loader.gif');
+}
+
+.mw-ui-icon-refresh {
+	.m-background-image('refresh.png');
+}
+
+// Asynchronous loading
+//
+// Use the loading class along with spinner or content class whilst asynchronously loading content.
+//
+// Markup:
+// <div class="fancycaptcha-reload-loading"></div>
+//
+// Styleguide 6.2.
+
+.loading {
+	&.spinner {
+		text-align: center;
+		background-position: 50%;
+		margin: 8px auto;
+	}
+}

@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Boukman",
+			"Masterches"
+		]
+	},
+	"babel": "Enfòmasyon sou itilizatè Babel",
+	"babel-desc": "Ap ajoute yon fonksyon pasè <code>#babel</code> ki ap pèmèt kreyasyon otomatik de yon bwat itilizatè Babel ak posibilite mete anndan l modèl definisyon lokal, tankou lang itilizatè a pale.",
+	"babel-url": "Project:Babèl",
+	"babel-0": "Itilizatè sa [[$1|pa genyen]] konesans nan [[$2|$3]] (oubyen li ap konprann ak anpil difikilte).",
+	"babel-1": "Itilizatè sa genyen [[$1|kèk baz]] nan [[$2|$3]].",
+	"babel-2": "Itilizatè sa genyen [[$1|yon nivo entèmedyè]] nan [[$2|$3]].",
+	"babel-3": "Itilizatè sa genyen [[$1|yon nivo avanse]] nan [[$2|$3]].",
+	"babel-4": "Itilizatè sa pale [[$2|$3]] près tankou l te [[$1|lang matènèl l]].",
+	"babel-5": "Itilizatè sa genyen [[$1|nivo pwofesyonèl]] nan [[$2|$3]].",
+	"babel-N": "Itilizatè sa konprann [[$2|$3]] tankou l te [[$1|lang matènèl l]].",
+	"babel-0-n": "Itilizatè sa [[$1|pa konnen anyen]] nan [[$2|Kreyòl ayisyen]] (oubyen li ap konprann li ak anpil anpil difikilte)",
+	"babel-1-n": "Itilizatè sa [[$1|konnen kèk baz]] nan [[$2|Kreyòl ayisyen]].",
+	"babel-2-n": "Itilizatè sa [[$1|genyen yon nivo entèmedyè]] nan [[$2|Kreyòl ayisyen]].",
+	"babel-3-n": "Itilizatè sa [[$1|genyen nivo avanse]] nan [[$2|Kreyòl ayisyen]].",
+	"babel-4-n": "Itilizatè sa pale [[$2|Kreyòl ayisyen]] près tankou li te [[$1|lang matènèl l]].",
+	"babel-5-n": "Itilizatè sa genyen [[$1|nivo pwofesyonèl]] nan [[$2|Kreyòl ayisyen]].",
+	"babel-N-n": "Itilizatè sa pale [[$2|Kreyòl ayisyen]] tankou li te [[$1|lang matènèl l]]."
+}

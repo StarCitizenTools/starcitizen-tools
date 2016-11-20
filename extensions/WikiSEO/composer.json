@@ -1,0 +1,11 @@
+{
+    "name": "tinymighty/wiki-seo",
+    "description": "A simple MediaWiki extension to give you control over the HTML title and meta tags via a tag or parser function.",
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "autoload": {
+        "files": ["WikiSEO.php"]
+    },
+    "type": "mediawiki-extension"
+}

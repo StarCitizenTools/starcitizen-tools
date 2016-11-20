@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"محک"
+		]
+	},
+	"tooltip-pt-notifications-alert": "{{GENDER:|شمه}} هشدارون",
+	"tooltip-pt-notifications-message": "{{GENDER:|شمه}} پیغوم‌ئون"
+}

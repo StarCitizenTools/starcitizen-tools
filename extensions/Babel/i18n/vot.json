@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"2Q"
+		]
+	},
+	"babel": "Tšäüttijää tšeelesnorofka",
+	"babel-desc": "Lissäb <code>#babel</code>-funkttsiaa, kumpa annab tšäüttijää luvaa tšeelisnorofka-škatulkaa lissämä.",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "[[$1|Babelii]] meelegruppatšüľľee avtomattskoi loomin.",
+	"babel-autocreate-text-levels": "Tšäüttijäd kassen gruppaza õmad kuulutõttu, jot nämä tunta $2 tšeelt $1 uroveńńalla.",
+	"babel-autocreate-text-main": "Tšäüttijäd kassen gruppaza õmad kuulutõttu, jot nämä saa arvoa $1 tšeelt.",
+	"babel-0": "Kase tšäüttijä tunnab [[$1|liika vähää vai eb eestiit]] [[$2|$3]] tšeelt.",
+	"babel-1": "Kase tšäüttijä on [[$2|$3]] tšeelee [[$1|õppialkõja]]",
+	"babel-2": "Kase tšäüttijä tunnab [[$2|$3]] tšeelt [[$1|tšehsimeisessi]].",
+	"babel-3": "Kase tšäüttijä tunnab [[$2|$3]] tšeelt [[$1|esimeissi]].",
+	"babel-4": "Kase tšäüttijä tunnab [[$2|$3]] tšeelt [[$1|bezmalo nii ku emätšeeli]].",
+	"babel-5": "Kase tšäüttijä tunnab tarvitta [[$2|$3]] tšeelt [[$1|ammõttimeissi]].",
+	"babel-N": "[[$2|$3]] tšeeli on sene tšäüttijää [[$1|emätšeeli]].",
+	"babel-0-n": "Kase tšäüttijä [[$1|eb tunna]] [[$2|vaďďakossi]].",
+	"babel-1-n": "Kase tšäüttijä pajatab [[$1|vähää]] [[$2|vaďďakossi]].",
+	"babel-2-n": "Kase tšäüttijä tunnab [[$1|tšehsimeisessi]] [[$2|vaďďakossi]].",
+	"babel-3-n": "Kase tšäüttijä tunnab [[$1|esimeissi]] [[$2|vaďďakossi]].",
+	"babel-4-n": "Kase tšäüttijä tunnab [[$2|vaďďakossi]] [[$1|bezmalo nii ku emätšeeli]].",
+	"babel-5-n": "Kase tšäüttijä tunnab tarvitta [[$2|vaďďakossi]] [[$1|ammõttimeissi]].",
+	"babel-N-n": "[[$2|Vaďďa tšeeli]] on sene tšäüttijää [[$1|emätšeeli]]."
+}

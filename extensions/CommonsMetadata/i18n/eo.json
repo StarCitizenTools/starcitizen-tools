@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"KuboF"
+		]
+	},
+	"commonsmetadata-trackingcategory-no-license": "Dosieroj sen maŝine legebla permesilo",
+	"commonsmetadata-trackingcategory-no-license-desc": "La dosiero havas neniun [{{MediaWiki:Commonsmetadata-doc-url}} maŝine legeblan] informo-ŝablonon pri permesilo.",
+	"commonsmetadata-trackingcategory-no-description": "Dosieroj sen maŝine legebla priskribo",
+	"commonsmetadata-trackingcategory-no-description-desc": "La dosiero havas neniun [{{MediaWiki:Commonsmetadata-doc-url}} maŝine legeblan] informo-ŝablonon aŭ ĝia kampo por priskribo ne estas plenigita.",
+	"commonsmetadata-trackingcategory-no-author": "Dosieroj sen maŝine legebla aŭtoro",
+	"commonsmetadata-trackingcategory-no-author-desc": "La dosiero havas neniun [{{MediaWiki:Commonsmetadata-doc-url}} maŝine legeblan] informo-ŝablonon aŭ ĝia kampo pri aŭtoro ne estas plenigita.",
+	"commonsmetadata-trackingcategory-no-source": "Dosieroj sen maŝine legebla fonto",
+	"commonsmetadata-trackingcategory-no-source-desc": "La dosiero havas neniun [{{MediaWiki:Commonsmetadata-doc-url}} maŝine legeblan] informo-ŝablonon aŭ ĝia kampo pri fonto ne estas plenigita."
+}

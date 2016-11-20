@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby"
+		]
+	},
+	"searchtranslations": "Iwwersetzunge sichen",
+	"tux-sst-edit": "Iwwersetzung änneren",
+	"tux-sst-view-foreign": "Op $1 kucken",
+	"tux-sst-search": "Sichen",
+	"tux-sst-search-ph": "Iwwersetzunge sichen",
+	"tux-sst-count": "{{PLURAL:$1|Ee Resultat|$1 Resultater}} fonnt",
+	"tux-sst-facet-language": "Sproochen",
+	"tux-sst-facet-group": "Gruppe vu Messagen",
+	"tux-sst-facet-orphan": "(verwaist)",
+	"tux-sst-nosolr-title": "Sichen ass net disponibel",
+	"tux-sst-nosolr-body": "Dës Wiki huet d'Sichfonctioun vun den Iwwersetzungen net.",
+	"tux-sst-solr-offline-title": "Sichen ass net disponibel",
+	"tux-sst-solr-offline-body": "D'Sichfonctioun ass temporär net disponibel.",
+	"tux-sst-next": "Nächst ›",
+	"tux-sst-prev": "‹ Vireg",
+	"tux-sst-default": "Iwwersetzungen",
+	"tux-sst-translated": "Iwwersetzunge vu(n) $1",
+	"tux-sst-untranslated": "Keng Iwwersetzung vu(n) $1",
+	"tux-sst-outdated": "Vereelst Iwwersetzung vu(n) $1",
+	"tux-sst-ellipsis-untranslated": "Keng Iwwersetzung",
+	"tux-sst-ellipsis-outdated": " Vereelst Iwwersetzungen",
+	"tux-sst-link-all-match": "All Sichwierder verlaangen.",
+	"tux-sst-match-message": "Iwwersetzunge weise mat engem vun de gesichte Wierder. $1",
+	"tux-sst-case-sensitive": "Ënnerscheed tëscht groussen a klenge Buschtawen"
+}

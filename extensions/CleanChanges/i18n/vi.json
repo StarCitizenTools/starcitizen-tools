@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minh Nguyen",
+			"Vinhtantran"
+		]
+	},
+	"cleanchanges-changerightslink": "thay đổi nhóm",
+	"cleanchanges-desc": "Hiển thị [[Special:RecentChanges|danh sách thay đổi gần đây]] ngắn gọn hơn",
+	"cleanchanges-language": "Ngôn ngữ:",
+	"cleanchanges-language-na": "Tất cả",
+	"cleanchanges-users": "Các thành viên (Phân cách: |):",
+	"cleanchanges-showuserlinks": "Hiện liên kết người dùng"
+}

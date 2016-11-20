@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby"
+		]
+	},
+	"msu-desc": "Erméiglecht et fir een oder méi Fichieren einfach zesummen eropzelueden",
+	"msu-button-title": "Fichieren eraussichen",
+	"msu-insert-link": "Link drasetzen",
+	"msu-insert-gallery": "All als Galerie drasetzen",
+	"msu-insert-files": "All als Fichieren drasetzen",
+	"msu-insert-links": "All als Link drasetzen",
+	"msu-insert-image": "Als Bild drasetzen",
+	"msu-insert-video": "Video drasetzen",
+	"msu-cancel-upload": "Eroplueden ofbriechen",
+	"msu-replace-file": "Fichier ersetzen!",
+	"msu-clean-all": "Lëscht eidelmaachen",
+	"msu-ext-not-allowed": "Nëmmen {{PLURAL:$1|dësen Typ vu Fichier ass|dës Type vu Fichiere sinn}} erlaabt:",
+	"msu-upload-this": "Dëse Fichier eroplueden",
+	"msu-upload-all": "all Fichieren eroplueden",
+	"msu-dropzone": "Fichieren hei ofleeën",
+	"msu-comment": "Fichier mat MsUpload eropgelueden"
+}

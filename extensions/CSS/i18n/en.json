@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aran Dunkley"
+		]
+	},
+	"css-desc": "A parser function that allows CSS stylesheets to be included in specific pages"
+}

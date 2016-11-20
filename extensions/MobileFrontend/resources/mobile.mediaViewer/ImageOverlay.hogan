@@ -1,0 +1,21 @@
+<div class="prev slider-button">
+	{{{slideLeftButton}}}
+</div>
+<div class="main">
+	<div class="image-wrapper">
+		<div class="image">
+			{{{spinner}}}
+		</div>
+	</div>
+	{{{cancelButton}}}
+	<div class="details">
+		{{#detailsButton}}
+			{{>button}}
+		{{/detailsButton}}
+		<p class="truncated-text">{{caption}}</p>
+		<p class="license"><a href="#">{{licenseLinkMsg}}</a></p>
+	</div>
+</div>
+<div class="next slider-button">
+	{{{slideRightButton}}}
+</div>

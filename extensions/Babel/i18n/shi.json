@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dalinanir"
+		]
+	},
+	"babel": "Inɣmas Babel f umsqdac",
+	"babel-desc": "Zayd awur <code>#babel</code> lli radd immurzm s utumatik yat tanaka (taznbilt) nu umsqdac Babil d mas rad yaf an ig timuḍimin n idɣarn.",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "Askr utumatik n [[$1|Babel]] talɣa .",
+	"babel-autocreate-text-levels": "Mdn v talɣa yad ar mmaln mas llan ɣ uswir n $1 i tutlayt n $2.",
+	"babel-autocreate-text-main": " Imqdacn ɣ talɣa yad ar mlan masd darsn tusna ɣ  tutlayt $1.",
+	"babel-0": "Amdan ad ur dar n tusna ɣ [[$1|walu]] (niɣd dars tamukrist iggutn ɣ tusna n tutlayt ad)[[$2|$3]].",
+	"babel-1": "Amdan ad ittaws s uswir [[$1|idrusn]] s  [[$2|$3]].",
+	"babel-2": "Amdan ad dars tusna s uswir  [[$2|$3]] ɣ [[$1|anamas]].",
+	"babel-3": "Amdan  dar tusna s uswir [[$1|n yittin]] ɣ [[$2|$3]].",
+	"babel-4": "Amdan ad dar tusna n yaẓn i [[$1|tutlayt  tamzwarut]] ɣ [[$2|$3]].",
+	"babel-5": "Amdan ad dars tusna [[$1|bahra yattuyn]] ɣ [[$2|$3]].",
+	"babel-N": "Amdan tga  [[$2|$3]]  [[$1|ils amzwarut]] ns",
+	"babel-0-n": "Amdan ad ur dars [[$1|ḥtta kra]] kra n tusna ɣ [[$2|tamaziɣ tasusit]]",
+	"babel-1-n": "Amsqdac ad dar tusna [[$1|tamzwarut]] ɣ [[$2|Tasussit]].",
+	"babel-2-n": "Amdan ad dars tusna s [[$1|uswir anamas]] ɣ [[$2|Tamaziɣt tasusit]].",
+	"babel-3-n": "Amdan ad dars tusna n [[$1|bahra yattuyn ]] ɣ [[$2|tamaziɣt tasusit]].",
+	"babel-4-n": "Amdan ad dars tusna nn yazn i [[$1|ils ns amzwaru ]]  [[$2|tamaziɣt tasusit]].",
+	"babel-5-n": "Amdan ad dars yan uswir iɣatrn n  [[$1|uslmad]] s [[$2|ils amaziɣ asusi]]",
+	"babel-N-n": "Amdan tga [[$2|tamaziɣt tasusit]] [[$1|ils amzwaru]]  ns"
+}

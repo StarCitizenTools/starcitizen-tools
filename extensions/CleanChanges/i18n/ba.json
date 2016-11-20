@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Assele"
+		]
+	},
+	"cleanchanges-changerightslink": "төркөмдәрҙе үҙгәртергә",
+	"cleanchanges-desc": "[[Special:RecentChanges|Һуңғы үҙгәртеүҙәр исемлегенең]] ҡыҫылған күренеше",
+	"cleanchanges-language": "Тел:",
+	"cleanchanges-language-na": "Барыһы ла",
+	"cleanchanges-users": "Ҡатнашыусылар (Бүлгес: |):",
+	"cleanchanges-showuserlinks": "Ҡатнашыусы һылтанмаларын күрһәтергә"
+}

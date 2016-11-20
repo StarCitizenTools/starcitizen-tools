@@ -1,0 +1,11 @@
+{
+    "@metadata": {
+        "authors": [
+            "WMDE"
+        ]
+    },
+    "revisionslider": "RevisionSlider",
+    "revisionslider-desc": "Shows a slider allowing selecting and comparing of revisions on a diff page",
+    "revisionslider-loading-placeholder": "The revision slider is loading.",
+    "revisionslider-loading-noscript": "As you have JavaScript disabled the revision slider will not be able to load."
+}

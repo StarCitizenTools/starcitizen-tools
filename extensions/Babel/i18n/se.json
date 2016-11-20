@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"GerardM"
+		]
+	},
+	"babel-1-n": "Dát geavaheaddji máhttá [[$1|veaháš]] [[$2|sámegiela]]",
+	"babel-2-n": "Dát geavaheaddji máhttá [[$2|sámegiela]] [[$1|viehka bures]]",
+	"babel-3-n": "Dát geavaheaddji máhttá [[$2|sámegiela]] [[$1|hui bures]]",
+	"babel-4-n": "Dát geavaheaddji máhttá [[$2|sámegiela]] [[$1|dego eatnigiela]]",
+	"babel-5-n": "Dát geavaheaddji máhttá [[$2|sámegiela]] [[$1|ámmátlaš dásis]]",
+	"babel-N-n": " Dát geavaheaddji máhttá [[$2|sámegiela]] [[$1|eatnigiellan]]"
+}

@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"KuboF",
+			"Malafaya",
+			"Michawiki",
+			"Yekrats",
+			"Robin van der Vliet"
+		]
+	},
+	"babel": "Babela informo pri uzanto",
+	"babel-desc": "Aldonas la <code>#babel</code> sintaksanalizilan funkcion por aŭtomate generi kolumnon de babel-uzantoskatolo kun la ebleco inkluzivi sxablonojn de uzanto.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babelo - Uzantoj laŭ lingvoj",
+	"babel-autocreate-reason": "Aŭtomate kreante kategorio-paĝo por [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Uzantoj en ĉi tiu kategorio indikas ke ili havas spertnivelo $1 por $2.",
+	"babel-autocreate-text-main": "Uzantoj en ĉi tiu kategorio indikas, ke ili havas lingvoscion de $1.",
+	"babel-0": "Ĉi tiu uzanto [[$1|ne komprenas]] la lingvon [[$2|$3]], aŭ tre malfacile komprenas.",
+	"babel-1": "Ĉi tiu uzanto povas komuniki per [[$1|baza]] nivelo de [[$2|$3]].",
+	"babel-2": "Ĉi tiu uzanto havas [[$1|meznivelan]] scion de [[$2|$3]].",
+	"babel-3": "Ĉi tiu uzanto povas komuniki per [[$1|alta aŭ flua]] nivelo de [[$2|$3]].",
+	"babel-4": "Ĉi tiu uzanto parolas kun [[$1|preskaŭ denaska]] scio de [[$2|$3]].",
+	"babel-5": "Ĉi tiu uzanto estas [[$1|profesia]] parolanto de [[$2|$3]].",
+	"babel-N": "Ĉi tiu uzanto estas [[$1|denaska parolanto]] de [[$2|$3]].",
+	"babel-0-n": "Ĉi tiu uzanto [[$1|ne komprenas]] [[$2|Esperanton]], aŭ tre malfacile komprenas.",
+	"babel-1-n": "Ĉi tiu uzanto povas komuniki per [[$1|baza]] nivelo de [[$2|Esperanto]].",
+	"babel-2-n": "Ĉi tiu uzanto havas [[$1|meznivelan]] scion de [[$2|Esperanto]].",
+	"babel-3-n": "Ĉi tiu uzanto povas komuniki per [[$1|alta aŭ flua]] nivelo de [[$2|Esperanto]].",
+	"babel-4-n": "Ĉi tiu uzanto parolas kun [[$1|preskaŭ denaska]] scio de [[$2|Esperanto]].",
+	"babel-5-n": "Ĉi tiu uzanto estas [[$1|profesia]] parolanto de [[$2|Esperanto]].",
+	"babel-N-n": "Ĉi tiu uzanto estas [[$1|denaska parolanto]] de [[$2|Esperanto]].",
+	"babel-footer": "Uzantoj laŭ lingvoj"
+}

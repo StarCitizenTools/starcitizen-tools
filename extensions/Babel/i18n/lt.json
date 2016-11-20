@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eitvys200",
+			"Garas",
+			"Homo",
+			"Hugo.arg",
+			"Matasg",
+			"Vpovilaitis",
+			"Albertas",
+			"Zygimantus"
+		]
+	},
+	"babel": "Naudotojo informacijos Babelio bokštas",
+	"babel-desc": "Prideda parserio funkciją <code>#babel</code>, leidžiančią automatiškai sudaryti stulpelį su informacija apie kalbas su gailmybe įtraukti kitus šablonus",
+	"babel-url": "Project:Babelis",
+	"babel-footer-url": ": Kategorija: Babelis - Vartotojai pagal kalbas",
+	"babel-autocreate-reason": "Automatiškas kategorijos „[[$1|Babel]]“ puslapio sukūrimas.",
+	"babel-autocreate-text-levels": "Naudotojai, esantys šioje kategorijoje, yra nurodę kad geba $1 lygiu naudoti $2 kalbą.",
+	"babel-autocreate-text-main": "Naudotojai šioje kategorijoje parodo savo $1 kalbos žinias.",
+	"babel-0": "Šis naudotojas [[$1|ne]]supranta [[$2|$3]] (arba supranta labai ribotai).",
+	"babel-1": "Šis naudotojas turi [[$2|lietuvių kalbos]] [[$1|pradinio lygio]] žinias.",
+	"babel-2": "Šis naudotojas turi [[$2|lietuvių kalbos]] [[$1|vidutinio lygio]] žinias.",
+	"babel-3": "Šis naudotojas turi [[$2|lietuvių kalbos]] [[$1|aukšto lygio]] žinias.",
+	"babel-4": "Šis vartotojas kalba [[$2|lietuviškai]] beveik taip, lyg ši kalba būtų jo [[$1|gimtoji kalba]]",
+	"babel-5": "Šis naudotojas kalba [[$2|lietuviškai]] [[$1|ypač gerai]].",
+	"babel-N": "Šio naudotojo [[$1|gimtoji kalba]] yra [[$2|lietuvių]].",
+	"babel-0-n": "Šis naudotojas [[$1|negali]] rašyti ir skaityti [[$2|lietuvių]] kalba (arba ją supranta labai sunkiai).",
+	"babel-1-n": "Šis naudotojas gali rašyti ir skaityti [[$1|pradinio]] lygio [[$2|lietuvių]] kalba",
+	"babel-2-n": "Šis naudotojas gali rašyti ir skaityti [[$1|vidutinio]] lygio [[$2|lietuvių]] kalba",
+	"babel-3-n": "Šis naudotojas gali rašyti ir skaityti [[$1|aukšto]] lygio [[$2|lietuvių]] kalba",
+	"babel-4-n": "Šis naudotojas gali rašyti ir skaityti [[$2|lietuvių]] kalba [[$1|beveik kaip gimtąja]]",
+	"babel-5-n": "Šis naudotojas gali rašyti ir skaityti [[$1|profesionalia]] [[$2|lietuvių]] kalba",
+	"babel-N-n": "Šis naudotojas gali rašyti ir skaityti [[$1|gimtąja]] [[$2|lietuvių]] kalba",
+	"babel-footer": "Naudotojai pagal kalbą"
+}

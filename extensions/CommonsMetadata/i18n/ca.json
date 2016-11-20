@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Vriullop"
+		]
+	},
+	"commonsmetadata-desc": "Estén la propietat «extmetadata» del mòdul API d'informació d'imatges per incloure informació emmagatzemada en les pàgines de descripció d'imatges que utilitzen les plantilles normalment usades a Wikimedia Commons.",
+	"commonsmetadata-trackingcategory-no-license": "Fitxers sense llicència de lectura mecànica",
+	"commonsmetadata-trackingcategory-no-license-desc": "El fitxer no té cap plantilla de llicència de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecànica].",
+	"commonsmetadata-trackingcategory-no-description": "Fitxers sense descripció de lectura mecànica",
+	"commonsmetadata-trackingcategory-no-description-desc": "El fitxer no té cap plantilla d'informació de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecànica], o el camp de descripció no està omplert.",
+	"commonsmetadata-trackingcategory-no-author": "Fitxers sense autor de lectura mecànica",
+	"commonsmetadata-trackingcategory-no-author-desc": "El fitxer no té cap plantilla d'informació de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecànica], o el camp d'autor no està omplert.",
+	"commonsmetadata-trackingcategory-no-source": "Fitxers sense origen de lectura mecànica",
+	"commonsmetadata-trackingcategory-no-source-desc": "El fitxer no té cap plantilla d'informació de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecànica], o el camp d'origen no està omplert."
+}

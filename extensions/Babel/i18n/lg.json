@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kizito"
+		]
+	},
+	"babel": "Ebya Babbeeri ebya memba ono",
+	"babel-url": "Project:Babbeeri",
+	"babel-autocreate-reason": "Sisitemu ekolawo olupapula olw'ettuluba ery'omu [[$1|Babbeeri]].",
+	"babel-autocreate-text-levels": "Bamemba abali mu ttuluba lino obusobozi bwabwe mu $2 buli ku ddaala erya $1.",
+	"babel-autocreate-text-main": "Bamemba abali mu ttuluba lino bategeezeza nti balina obusobozi mu $1.",
+	"babel-0": "Memba ono [[$1|tamanyi]] [[$2|$3]] (oba alutegeerako kitono nyo).",
+	"babel-1": "Memba ono o[[$2|$3]] alumanyimu [[$1|ebitandikirwako]].",
+	"babel-2": "Memba ono o[[$2|$3]] alumanyimu [[$1|olusaamusamu]].",
+	"babel-3": "Memba ono o[[$2|$3]] alumanyi ku [[$1|ddaala erya waggulu]].",
+	"babel-4": "Memba ono o[[$2|$3]] alumanyi [[$1|kumpi kwenkana ng'omuzaaliranwa]].",
+	"babel-5": "Memba ono o[[$2|$3]] alumanyi [[$1|ku ddaala ery'ekikugu]].",
+	"babel-N": "Memba ono o[[$2|$3]] [[$1|lwe luzaaliranwa]].",
+	"babel-0-n": "Memba ono [[$1|tamanyi]] [[$2|Luganda]] (oba alutegeerako kitono nyo).",
+	"babel-1-n": "Memba ono [[$2|Oluganda]] alumanyimu [[$1|ebitandikirwako]].",
+	"babel-2-n": "Memba ono [[$2|Oluganda]] alumanyimu [[$1|olusaamusamu]].",
+	"babel-3-n": "Memba ono [[$2|Oluganda]] alumanyi ku [[$1|ddaala erya waggulu]].",
+	"babel-4-n": "Memba ono [[$2|Oluganda]] alumanyi [[$1|kumpi kwenkana ng'omuzaaliranwa]].",
+	"babel-5-n": "Memba ono [[$2|Oluganda]] alumanyi [[$1|ku ddaala ery'ekikugu]].",
+	"babel-N-n": "Memba ono [[$2|Oluganda]] [[$1|lwe luzaaliranwa]]."
+}

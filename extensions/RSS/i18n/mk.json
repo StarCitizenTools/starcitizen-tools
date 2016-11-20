@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"rss-desc": "Прикажува RSS-канал на викистраница",
+	"rss-tracking-category": "Страници со RSS-канали",
+	"rss-tracking-category-desc": "Страницата има RSS-канал.",
+	"rss-error": "Не успеав да го вчитам RSS-каналот од $1: $2",
+	"rss-empty": "Не успеав да го вчитам RSS-каналот од $1!",
+	"rss-fetch-nourl": "Повикувањето за добивање нема URL!",
+	"rss-invalid-url": "Не претставува важечка URL: $1",
+	"rss-parse-error": "Грешка при расчленувањето на XML за RSS",
+	"rss-ns-permission": "RSS не е допуштен во овој именски простор",
+	"rss-url-is-not-whitelisted": "„$1“ не е на белиот список на дозволени канали. {{PLURAL:$3|Единствениот дозволен е $2|Дозволени се следниве: $2}}.",
+	"rss-empty-whitelist": "„$1“ не е на белиост список на дозволени канали. На списокот нема URL-адреси на допуштени канали.",
+	"rss-deprecated-wgrssallowedfeeds-found": "Утврдена е застарената променлива <var>$wgRSSAllowedFeeds</var>. Од верзијата RSS 2.0 натаму, оваа променлива мора да се замени со <var>$wgRSSUrlWhitelist</var> според опишаното во прирачникот, на страницата [https://www.mediawiki.org/wiki/Extension:RSS Додаток:RSS].",
+	"rss-feed": "<!--  Ова се два алтернативни шаблона. Првиот е основно зададениот шаблон за канали -->; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''\n: {{{description}}}\n: {{{author}}} {{{date}}}<!-- туак не вметнувајте нов ред --><!-- Вториот е подобрена верзија што бара Extension:ParserFunctions --><!-- ; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''{{#if: {{{description|}}}|: {{{description}}}}}{{#if: {{{author|}}} | {{#if: {{{date|}}} |: &mdash; {{{author}}} {{{date}}}}} | {{#if: {{{author|}}}|: &mdash; {{{author}}}}} {{#if: {{{date|}}}|:{{{date}}}}}|}} -->"
+}

@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"commonsmetadata-desc": "Extende le proprietate \"extmetadate\" del modulo de API \"info de imagine\" pro includer le information continite in paginas de description de imagine que usa le patronos commun de Wikimedia Commons."
+}

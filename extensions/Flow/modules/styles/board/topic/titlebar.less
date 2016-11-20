@@ -1,0 +1,125 @@
+@import 'mediawiki.mixins';
+@import 'flow.colors';
+@import 'flow.helpers';
+@import 'flow.variables';
+
+// Show that the topic titlebar is clickable
+.flow-topic-titlebar {
+	position: relative;
+	padding: .5em 0;
+	background: @colorGrayLightest;
+	border-radius: 3px;
+	outline: none;
+
+	// use child selector to block ie6
+	.flow-menu {
+		top: 1.5em;
+	}
+}
+
+// needs extra specificity to override `div#content h2` from vector
+div#content .flow-topic-title {
+	padding: 0;
+	border-bottom: none;
+	font-family: sans-serif;
+	font-weight: bold;
+	word-break: break-word;
+	word-wrap: break-word;
+	overflow: visible;
+}
+
+// Correct positioning for ltr/rtl content direction
+div#content .mw-content-ltr .flow-topic-title {
+	/* @noflip */
+	margin: 0 2.5em .15em 0;
+
+	.mw-ui-icon.mw-ui-icon-before:before {
+		/* @noflip */
+		float: left;
+
+		// HACK: move check icon a bit to the left so it appears to align better with the text below it
+		/* @noflip */
+		margin-left: -0.25em;
+	}
+}
+
+// Correct positioning for ltr/rtl content direction
+div#content .mw-content-rtl .flow-topic-title {
+	/* @noflip */
+	margin: 0 0 .15em 2.5em;
+
+	.mw-ui-icon.mw-ui-icon-before:before {
+		/* @noflip */
+		float: right;
+
+		// HACK: move check icon a bit to the right so it appears to align better with the text below it
+		/* @noflip */
+		margin-right: -0.25em;
+	}
+}
+
+.flow-moderated-topic-title {
+	margin-bottom: .33em;
+	color: @colorTextLight;
+	font-weight: bold;
+}
+
+// Override default Vector heading styles
+div#content h2.flow-topic-title {
+	font-size: 1.5em;
+}
+
+// Notification about subscribing to a topic
+.flow-notification-tooltip-topicsub {
+	width: 15em;
+}
+.flow-notification-tooltip-icon {
+	font-size: 2.5em;
+	text-align: center;
+
+	.mw-ui-icon {
+		display: inline-block;
+	}
+}
+.flow-notification-tooltip-title {
+	font-size: 1em;
+	font-weight: bold;
+}
+
+.flow-undo {
+	float: right;
+}
+
+.flow-topic-title-activate-edit {
+	.flow-topic-title {
+		display: none;
+	}
+}
+
+// MEDIA QUERIES
+@media all and (min-width: @small) {
+	.flow-topic-titlebar {
+		padding-top: 0.5em;
+		padding-bottom: 0.5em;
+
+		.flow-topic-titlebar-container,
+		.flow-edit-title-form,
+		.flow-topic-summary,
+		.flow-ui-editTopicSummaryWidget {
+
+			.mw-content-ltr & {
+				/* @noflip */
+				padding-right: @topicIndent + 1;
+				/* @noflip */
+				padding-left: @topicIndent;
+			}
+
+			.mw-content-rtl & {
+				/* @noflip */
+				padding-right: @topicIndent;
+				/* @noflip */
+				padding-left: @topicIndent + 1;
+			}
+		}
+	}
+}

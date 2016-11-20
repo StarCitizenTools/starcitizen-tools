@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+        <g>
+            <path fill="#676767" d="M23 21H1v-3h22v3z"/>
+        </g>
+        <g>
+            <path fill="#676767" d="M23 14H1v-3h22v3z"/>
+        </g>
+        <g>
+            <path fill="#676767" d="M23 7H1V4h22v3z"/>
+        </g>
+    </g>
+</svg>

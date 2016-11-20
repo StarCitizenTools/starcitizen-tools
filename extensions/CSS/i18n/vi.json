@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minh Nguyen"
+		]
+	},
+	"css-desc": "Hàm trong bộ phân tích để nhúng tập tin định kiểu CSS trong một trang nói riêng"
+}

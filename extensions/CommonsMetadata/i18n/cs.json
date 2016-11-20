@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mormegil"
+		]
+	},
+	"commonsmetadata-desc": "Rozšíří vlastnost „extmetadata“ v API modulu pro informace o obrázcích o informace uložené na popisných stránkách souborů, které používají šablony běžně užívané na Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Soubory bez strojově čitelné licence",
+	"commonsmetadata-trackingcategory-no-license-desc": "Soubor nemá žádnou [{{MediaWiki:Commonsmetadata-doc-url}} strojově čitelnou] licenční šablonu.",
+	"commonsmetadata-trackingcategory-no-description": "Soubory bez strojově čitelného popisu",
+	"commonsmetadata-trackingcategory-no-description-desc": "Soubor nemá žádnou [{{MediaWiki:Commonsmetadata-doc-url}} strojově čitelnou] šablonu s informacemi nebo je její pole s popisem nevyplněno.",
+	"commonsmetadata-trackingcategory-no-author": "Soubory bez strojově čitelného autora",
+	"commonsmetadata-trackingcategory-no-author-desc": "Soubor nemá žádnou [{{MediaWiki:Commonsmetadata-doc-url}} strojově čitelnou] šablonu s informacemi nebo je její pole s autorem nevyplněno.",
+	"commonsmetadata-trackingcategory-no-source": "Soubory bez strojově čitelného zdroje",
+	"commonsmetadata-trackingcategory-no-source-desc": "Soubor nemá žádnou [{{MediaWiki:Commonsmetadata-doc-url}} strojově čitelnou] šablonu s informacemi nebo je její pole se zdrojem nevyplněno."
+}

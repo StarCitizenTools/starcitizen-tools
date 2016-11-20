@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Умар"
+		]
+	},
+	"commonsmetadata-desc": "Суьртан «extmetadata» хьал API-модуле доккху суьртийн дийцаре агӀонашкахь болу хаам лато аьтту хуьлуьйту, кепаш лелош болу, Викигуламехь дукха лело",
+	"commonsmetadata-trackingcategory-no-license": "Машинан-еша ло лицензи йоцу файлаш",
+	"commonsmetadata-trackingcategory-no-license-desc": "Файлан яц [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] лицензин кеп.",
+	"commonsmetadata-trackingcategory-no-description": "Машинан-еша цало хаам болу файлаш",
+	"commonsmetadata-trackingcategory-no-description-desc": "Файлан яц [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] хааман кеп, я и язйо меттиг юьзна яц.",
+	"commonsmetadata-trackingcategory-no-author": "Машинан-еша ло автор язъянза йолу файлаш",
+	"commonsmetadata-trackingcategory-no-author-desc": "Файлан яц [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] хааман кеп, я цуна авторан меттиг юьзна яц.",
+	"commonsmetadata-trackingcategory-no-source": "Машинан-еша ло хьост йоцу файлаш",
+	"commonsmetadata-trackingcategory-no-source-desc": "Файлан яц [{{MediaWiki:Commonsmetadata-doc-url}} machine-readable] хааман кеп, я цуна хьост язйо меттиг юьзна яц."
+}

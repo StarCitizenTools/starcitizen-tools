@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby"
+		]
+	},
+	"apihelp-groupreview-param-language": "Sproochcode.",
+	"apihelp-query+languagestats-param-language": "Sproochcode.",
+	"apihelp-query+messagecollection-param-language": "Sproochcode.",
+	"apihelp-query+messagecollection-example-1": "Lëscht vun den ënnerstëtzte Sproochen",
+	"apihelp-query+messagecollection-example-4": "Méi Informatioun iwwer déi lescht Iwwersetzungsversioun fir de Grupp \"Beispill-Säit\"",
+	"apihelp-query+messagegroups-param-format": "Am Baamformat kënne Gruppe vu Messagen op verschiddene Plazen am Bam existéieren.",
+	"apihelp-query+messagetranslations-param-title": "Kompletten Titel vun engem bekannte Message.",
+	"apihelp-query+messagetranslations-example-1": "Lëscht vun Iwwersetzungen an der Wiki fir \"MediaWiki:January\"",
+	"apihelp-translatesandbox-param-do": "Wat maachen.",
+	"apihelp-translateuser-example-1": "Informatioun iwwer de Benotzer weisen",
+	"apihelp-translationaids-param-title": "Kompletten Titel vun engem bekannte Message.",
+	"apihelp-translationreview-param-revision": "D'Nummer vun der Versioun fir nozekucken.",
+	"apihelp-translationreview-example-1": "Versioun 1 nokucken",
+	"apihelp-translationstash-param-subaction": "Aktioun.",
+	"apihelp-translationstash-param-metadata": "JSON-Objet.",
+	"apihelp-searchtranslations-description": "Iwwersetzunge sichen.",
+	"apihelp-searchtranslations-param-service": "Wat fir ee vun den disponibelen Iwwersetzungsservicer benotzt gi soll.",
+	"apihelp-searchtranslations-param-query": "D'Zeechen no deene gesicht gi soll.",
+	"apihelp-searchtranslations-param-limit": "Gréisst vum Resultat",
+	"apihelp-searchtranslations-example-1": "Iwwersetzunge fir d'Sprooch weisen."
+}

@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel-url": "Project:Babel",
+	"babel-0": "Esta usor ave [[$1|no capas]] de [[$2|$3]].",
+	"babel-1": "Esta usor es [[$1|poca capas]] de [[$2|$3]].",
+	"babel-2": "Esta usor es [[$1|medial capas]] de [[$2|$3]].",
+	"babel-3": "Esta usor es [[$1|bon capas]] de [[$2|$3]].",
+	"babel-4": "Esta usor es [[$1|la plu perfeta capas]] de [[$2|$3]].",
+	"babel-N": "Esta usor ave [[$2|$3]] se [[$1|lingua propre]].",
+	"babel-1-n": "Esta usor es [[$1|poca capas]] de [[$2|Lingua Franca Nova]].",
+	"babel-2-n": "Esta usor es [[$1|medial capas]] de [[$2|Lingua Franca Nova]].",
+	"babel-3-n": "Esta usor es [[$1|bon capas]] de [[$2|Lingua Franca Nova]].",
+	"babel-4-n": "Esta usor es [[$1|la plu perfeta capas]] de [[$2|Lingua Franca Nova]].",
+	"babel-N-n": "Esta usor ave [[$2|Lingua Franca Nova]] se [[$1|lingua propre]]."
+}

@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel": "Informasi pengguna Babel",
+	"babel-footer-url": ":Category:Bahasa_pengguna",
+	"babel-0": "Édé papaké [[$1|dé na iseng]] [[$2|$3]]",
+	"babel-1": "Pappake yae wéddingngi mabbere iyarega massumbang [[$1|tingka' dasara']] ri lalénna [[$2|$3]].",
+	"babel-3": "Pappake yae wéddingngi mabbere iyarega massumbang [[$1|tingka' macca]] ri lalénna [[$2|$3]].",
+	"babel-4": "Pappake yae wéddingngi mabbere iyarega massumbang [[$1|tingka' elo' narapi basa indo]] [[$2|$3]].",
+	"babel-5": "Pappake yae wéddingngi mabbere iyarega massumbang [[$1|tingka' macca siséng]] ri lalénna [[$2|$3]].",
+	"babel-N": "[[$1|ᨅᨔ ᨕᨗᨉᨚ ]]ᨕᨗᨙᨐᨙᨕᨙᨉ ᨄᨄᨙᨀ ᨕᨗᨐᨊᨑᨗᨈᨘ [[$2|$3]]᨞",
+	"babel-0-n": "Édé papaké [[$1|dé na iseng]] [[$2|basa Ugi]]",
+	"babel-1-n": "Pappake yae wéddingngi mabbere iyarega massumbang [[$1|tingka' dasara']] ri lalénna [[$2|basa Ugi]].",
+	"babel-2-n": "ᨄᨄᨙᨀ ᨕᨗᨙᨐᨙᨉ ᨓᨛᨉᨘᨂᨗ ᨆᨄᨛᨙᨉᨙᨌ ᨒᨕᨚ ᨅᨔ ᨕᨘᨁᨗ ᨑᨗ intermediate level᨞",
+	"babel-3-n": "Pappake yae wéddingngi mabbere iyarega massumbang [[$1|tingka' macca]] ri lalénna [[$2|basa Ugi]].",
+	"babel-4-n": "Pappake yae wéddingngi mabbere iyarega massumbang [[$1|tingka' elo' narapi basa indo]] [[$2|basa Ugi]].",
+	"babel-5-n": "Pappake yae wéddingngi mabbere iyarega massumbang [[$1|tingka' macca siséng]] ri lalénna [[$2|basa Ugi]].",
+	"babel-N-n": "[[$1|ᨅᨔ ᨕᨗᨉᨚ ]]ᨕᨗᨙᨐᨙᨕᨙᨉ ᨄᨄᨙᨀ ᨕᨗᨐᨊᨑᨗᨈᨘ [[$2|ᨅᨔ ᨕᨘᨁᨗ]]᨞",
+	"babel-footer": "Lihat bahasa pengguna"
+}

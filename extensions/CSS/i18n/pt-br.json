@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eduardo.mps"
+		]
+	},
+	"css-desc": "Uma função de análise (parser) que permite que folhas de estilo CSS sejam incluídas em páginas específicas"
+}

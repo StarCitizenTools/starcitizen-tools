@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michaello"
+		]
+	},
+	"css-desc": "Funkcija parsera koja omogućuje da se CSS stilovi uključe u određene strane"
+}

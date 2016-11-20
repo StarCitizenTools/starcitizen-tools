@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Csisc",
+			"GeekEmad"
+		]
+	},
+	"babel": "Linformasyon mtagħ Babel għallutilizateur",
+	"babel-0": "Lutilizateur hadha [[$1|ma yefhemch]] [[$2|$3]] (wella yefhem àmma bessif)",
+	"babel-1": "Lutilizateur hadha yefhem [[$1|chway]] [[$2|$3]].",
+	"babel-2": "Lutilizateur hadha yefhem [[$1|metwasstʾ]] [[$2|$3]]",
+	"babel-3": "Lutilizateur hadha yefhem [[$1|belbàhi]] [[$2|$3]]",
+	"babel-4": "Lutilizateur hadha yefhem [[$1|barcha]] [[$2|$3]]",
+	"babel-5": "Lutilizateur hadha [[$1|mgħallem]] mtagħ [[$2|$3]]",
+	"babel-N": "Lutilizateur hadha [[$1|loughtou elmaternàl]] hiya [[$2|$3]]"
+}

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Toliño",
+			"Banjo",
+			"Elisardojm"
+		]
+	},
+	"pageimages-desc": "Recolle información sobre as imaxes usadas nunha páxina",
+	"pageimages-info-label": "Imaxe da páxina",
+	"apihelp-query+pageimages-description": "Devolve información sobre as imaxes na páxina, coma miniaturas e presencia de fotos.",
+	"apihelp-query+pageimages-example-1": "Obter o nome e unha miniatura de <kbd>100</kbd> píxeles dunha imaxe na páxina de <kbd>Albert Einstein</kbd>.",
+	"apihelp-query+pageimages-param-prop": "Que información devolver:\n;thumbnail:URL e dimensións da imaxe asociada coa páxina, se hai.\n;name:Título da imaxe.",
+	"apihelp-query+pageimages-param-thumbsize": "Dimensión máxima da miniatura.",
+	"apihelp-query+pageimages-param-limit": "Propiedades de cantas páxinas devolver."
+}

@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Waldir"
+		]
+	},
+	"babel": "Informason di línguas di utilizador",
+	"babel-desc": "Ta adisiona funsãu di analizador <code>#babel</code>, ki ta permiti kria automatikamenti un kuluna ku kaixas \"babel\", i tambe inklui predefinisons personalizadu",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Katiguria:Babel - Utilizadoris pur língua",
+	"babel-autocreate-reason": "Ta kria pájina di katiguria [[$1|Babel]] automatikamenti.",
+	"babel-autocreate-text-levels": "Utilizadoris nes katiguria li ta afirma ki es ten un nível di konhesimentu $1 na língua $2.",
+	"babel-autocreate-text-main": "Utilizadoris nes katiguria li ta afirma ki es ten konhesimentu di língua $1.",
+	"babel-0": "Kel utilizador li [[$1|ka ta entende]] [[$2|$3]] (o e' ta entendê-l ku txeu difikuldadi).",
+	"babel-1": "Kel utilizador li ta papia [[$2|$3]] ku un nível [[$1|báziku]].",
+	"babel-2": "Kel utilizador li ta papia [[$2|$3]] ku un nível [[$1|médiu]].",
+	"babel-3": "Kel utilizador li ta papia [[$2|$3]] ku un nível [[$1|avansadu]].",
+	"babel-4": "Kel utilizador li ta papia [[$2|$3]] [[$1|kuazi sima un falanti nativu]].",
+	"babel-5": "Kel utilizador li ta papia [[$2|$3]] ku un nível [[$1|prifisiunal]].",
+	"babel-N": "Kel utilizador li se língua [[$1|maternu]] e [[$2|$3]].",
+	"babel-0-n": "Kel utilizador li [[$1|ka ta entende]] [[$2|kriolu]] (o e' ta entendê-l ku txeu difikuldadi).",
+	"babel-1-n": "Kel utilizador li ta papia [[$2|kriolu]] ku un nível [[$1|báziku]].",
+	"babel-2-n": "Kel utilizador li ta papia [[$2|kriolu]] ku un nível [[$1|médiu]].",
+	"babel-3-n": "Kel utilizador li ta papia [[$2|kriolu]] ku un nível [[$1|avansadu]].",
+	"babel-4-n": "Kel utilizador li ta papia [[$2|kriolu]] [[$1|kuazi sima un falanti nativu]].",
+	"babel-5-n": "Kel utilizador li ta papia [[$2|kriolu]] ku un nível [[$1|prufisiunal]].",
+	"babel-N-n": "Kel utilizador li se língua [[$1|maternu]] e [[$2|kriolu]].",
+	"babel-footer": "Utilizadoris pur língua"
+}

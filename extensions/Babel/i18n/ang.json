@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Crazymadlover",
+			"Gott wisst"
+		]
+	},
+	"babel-0": "Þes brūcend [[$1|ne cann]] sprecan [[$2|$3]] (oððe cann undergietan hit efne swīðe earfoðe).",
+	"babel-1": "Þes brūcend cann forðian mid [[$1|grundlicgendre]] mǣðe [[$2|$3]].",
+	"babel-2": "Þes brūcend cann forðian mid [[$1|middelre]] mǣðe [[$2|$3]].",
+	"babel-3": "Þes brūcend cann forðian mid [[$1|forþweardre]] mǣðe [[$2|$3]].",
+	"babel-N": "Þes brūcend cann [[$2|$3]] [[$1|inlendisclīce]].",
+	"babel-0-n": "Þes brūcere [[$1|ne cann]] sprecan [[$2|Englisce]] (oððe cann undergietan hit efne swīðe earfoðe).",
+	"babel-1-n": "Þes brūcere cann forðian mid [[$1|grundlicgendre]] mǣðe [[$2|Englisces]].",
+	"babel-2-n": "Þes brūcere cann forðian mid [[$1|middelre]] mǣðe [[$2|Englisces]].",
+	"babel-3-n": "Þes brūcere cann forðian mid [[$1|forþweardre]] mǣðe [[$2|Englisces]]."
+}

@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Siebrand",
+			"Purodha"
+		]
+	},
+	"babel": "Babel user information",
+	"babel-desc": "Adds the <code>#babel</code> parser function to allow automated generation of a babel userbox column with the ability to include custom templates",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Users by language",
+	"babel-autocreate-reason": "Automatically creating [[$1|Babel]] category page.",
+	"babel-autocreate-text-levels": "Users in this category indicate they have skill level $1 for language $2.",
+	"babel-autocreate-text-main": "Users in this category indicate their knowledge of language $1.",
+	"babel-autocreate-user": "Babel AutoCreate",
+	"babel-0": "This user has [[$1|no]] knowledge of [[$2|$3]] (or understands it with considerable difficulty).",
+	"babel-1": "This user has [[$1|basic]] knowledge of [[$2|$3]].",
+	"babel-2": "This user has [[$1|intermediate]] knowledge of [[$2|$3]].",
+	"babel-3": "This user has [[$1|advanced]] knowledge of [[$2|$3]].",
+	"babel-4": "This user has [[$1|near native speaker]] knowledge of [[$2|$3]].",
+	"babel-5": "This user has [[$1|professional]] knowledge of [[$2|$3]].",
+	"babel-N": "This user has a [[$1|native]] understanding of [[$2|$3]].",
+	"babel-0-n": "This user has [[$1|no]] knowledge of [[$2|English]] (or understands it with considerable difficulty).",
+	"babel-1-n": "This user has [[$1|basic]] knowledge of [[$2|English]].",
+	"babel-2-n": "This user has [[$1|intermediate]] knowledge of [[$2|English]].",
+	"babel-3-n": "This user has [[$1|advanced]] knowledge of [[$2|English]].",
+	"babel-4-n": "This user has [[$1|near native speaker]] knowledge of [[$2|English]].",
+	"babel-5-n": "This user has [[$1|professional]] knowledge of [[$2|English]].",
+	"babel-N-n": "This user has a [[$1|native]] understanding of [[$2|English]].",
+	"babel-box-cellspacing": "0",
+	"babel-box-cellpadding": "0",
+	"babel-cellspacing": "0",
+	"babel-cellpadding": "0",
+	"babel-portal": "",
+	"babel-template": "Template:User $1",
+	"babel-footer": "Users by language"
+}

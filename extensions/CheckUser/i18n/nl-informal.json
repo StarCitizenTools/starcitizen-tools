@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Siebrand"
+		]
+	},
+	"checkuser-block-noreason": "Je moet een reden opgeven voor de blokkades.",
+	"checkuser-noreason": "Je moet een reden opgeven voor deze zoekopdracht."
+}

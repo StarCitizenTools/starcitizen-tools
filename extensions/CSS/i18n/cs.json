@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Matěj Grabovský"
+		]
+	},
+	"css-desc": "Funkce syntaktického analyzátoru, která umožňuje vkládání CSS do určitých stránek."
+}

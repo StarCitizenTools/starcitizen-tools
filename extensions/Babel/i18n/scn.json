@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gloria sah",
+			"Melos",
+			"Santu"
+		]
+	},
+	"babel": "Nfurmazzioni di Babel supra a l'utenti",
+	"babel-desc": "Junci la parser function <code>#babel</code> pi fari la ginirazzioni autumàtica di na culonna babel utenti cu la pussibbilitati di nclùdiri template pirsunalizzati",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Utenti pi lingua",
+	"babel-autocreate-reason": "Criu autumàticamenti la pàggina dâ catigurìa [[$1|Babel]].",
+	"babel-autocreate-text-levels": "L'utenti nti sta catigurìa dìciunu ca d'aviri nu liveddu di canuscenza $1 dâ lingua $2.",
+	"babel-autocreate-text-main": "L'utenti nti sta catigurìa dìciunu ca canùsciunu la lingua $1.",
+	"babel-autocreate-user": "Babel AutoCreate",
+	"babel-0": "St'utenti [[$1|nun canusci]] lu [[$2|$3]], o sulu pò liggìrilu nanticchia.",
+	"babel-1": "St'utenti pò cuntribbuìricci c'un [[$2|$3]] ôn [[$1|liveddu vasciu]].",
+	"babel-2": "St'utenti pò cuntribbuìricci c'un [[$2|$3]] ôn [[$1|liveddu mediu]].",
+	"babel-3": "St'utenti pò cuntribbuìricci c'un [[$2|$3]] ôn [[$1|liveddu avanzatu]].",
+	"babel-4": "St'utenti canusci lu [[$2|$3]] quasi comu la sò [[$1|lingua matri]].",
+	"babel-5": "St'utenti pò cuntribbuìricci c'un [[$2|$3]] ôn liveddu [[$1|prufissionali]].",
+	"babel-N": "St'utenti pò cuntribbuìricci c'un liveddu [[$1|matrilingua]] 'n [[$2|$3]].",
+	"babel-0-n": "St'utenti [[$1|non sapi cumunicari]] 'n [[$2|sicilianu]] (o sulu lu capisci cu assai difficultati).",
+	"babel-1-n": "St'utenti pò cuntribbuìri cu nu liveddu [[$1|nicu]] 'n [[$2|sicilianu]].",
+	"babel-2-n": "St'utenti pò cuntribbuiri cu nu liveddu [[$1|minzanu]] 'n [[$2|sicilianu]].",
+	"babel-3-n": "St'utenti pò cuntribbuiri cu nu liveddu [[$1|àutu]] 'n [[$2|sicilianu]].",
+	"babel-4-n": "St'utenti pò cuntribbuiri cu nu liveddu [[$1|quasi matrilingua]] 'n [[$2|sicilianu]].",
+	"babel-5-n": "St'utenti pò cuntribbuiri cu nu liveddu [[$1|prufussiunali]] 'n [[$2|sicilianu]].",
+	"babel-N-n": "St'utenti pò cuntribbuiri c'un  liveddu [[$1|matrilingua]] 'n [[$2|sicilianu]].",
+	"babel-footer": "Utenti pi lingua"
+}

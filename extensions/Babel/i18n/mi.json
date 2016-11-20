@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"GerardM"
+		]
+	},
+	"babel-1-n": "He [[$1|tapepa]] rawa [[$2|te reo Māori]] o tēnei tangata.",
+	"babel-2-n": "Kua taea e tēnei tangata te [[$1|takawaenga ]] mō [[$2|te reo Māori]].",
+	"babel-3-n": "He [[$1|matatau]] tēnei tāngata ki [[$2|te reo Māori]].",
+	"babel-4-n": "Ko tēnei tangata he [[$1|tino matatau]] ki te reo [[$2|Māori]]."
+}

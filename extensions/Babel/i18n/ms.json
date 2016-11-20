@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Anakmalaysia",
+			"Aviator",
+			"Iwan Novirion",
+			"Kurniasan"
+		]
+	},
+	"babel": "Maklumat bahasa pengguna",
+	"babel-desc": "Menambah fungsi penghurai <code>#babel</code> untuk membolehkan penjanaan automatik kotak bahasa pengguna dan tempahan templat",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Pengguna mengikut bahasa",
+	"babel-autocreate-reason": "Mencipta laman kategori [[$1|Bahasa]] secara automatik.",
+	"babel-autocreate-text-levels": "Pengguna yang tergolong dalam kategori ini mengisyaratkan bahawa mereka memiliki kemahiran aras $1 dalam bahasa $2.",
+	"babel-autocreate-text-main": "Pengguna yang tergolong dalam kategori ini mengisyaratkan bahawa mereka memiliki pengetahuan dalam bahasa $1.",
+	"babel-autocreate-user": "Babel AutoCreate",
+	"babel-0": "Pengguna ini [[$1|tidak mampu]] bertutur dalam (atau sukar memahami) [[$2|$3]].",
+	"babel-1": "Pengguna ini memiliki kemahiran [[$1|asas]] dalam [[$2|$3]].",
+	"babel-2": "Pengguna ini memiliki kemahiran [[$1|sederhana]] dalam [[$2|$3]].",
+	"babel-3": "Pengguna ini memiliki kemahiran [[$1|tinggi]] dalam [[$2|$3]].",
+	"babel-4": "Pengguna ini memiliki kemahiran [[$1|hampir sempurna]] dalam [[$2|$3]].",
+	"babel-5": "Pengguna ini memiliki kemahiran [[$1|profesional]] dalam [[$2|$3]].",
+	"babel-N": "Pengguna ini adalah penutur [[$1|asli]] [[$2|$3]].",
+	"babel-0-n": "Pengguna ini [[$1|tidak mampu]] bertutur dalam (atau sukar memahami) [[$2|bahasa Melayu]].",
+	"babel-1-n": "Pengguna ini memiliki kemahiran [[$1|asas]] dalam [[$2|bahasa Melayu]].",
+	"babel-2-n": "Pengguna ini memiliki kemahiran [[$1|sederhana]] dalam [[$2|bahasa Melayu]].",
+	"babel-3-n": "Pengguna ini memiliki kemahiran [[$1|tinggi]] dalam [[$2|bahasa Melayu]].",
+	"babel-4-n": "Pengguna ini memiliki kemahiran [[$1|hampir sempurna]] dalam [[$2|bahasa Melayu]].",
+	"babel-5-n": "Pengguna ini memiliki kemahiran [[$1|profesional]] dalam [[$2|bahasa Melayu]].",
+	"babel-N-n": "Pengguna ini adalah penutur [[$1|asli]] [[$2|bahasa Melayu]].",
+	"babel-template": "Template:Pengguna $1",
+	"babel-footer": "Pengguna mengikut bahasa"
+}

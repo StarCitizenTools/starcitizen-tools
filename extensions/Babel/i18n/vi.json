@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minh Nguyen",
+			"Vinhtantran"
+		]
+	},
+	"babel": "Thông tin ngôn ngữ thành viên",
+	"babel-desc": "Thêm hàm cú pháp <code>#babel</code> để cho phép tự động sinh ra một hộp thông tin ngôn ngữ thành viên và có thể thêm vào những bản mẫu tùy chọn",
+	"babel-url": "Project:Ngôn ngữ",
+	"babel-footer-url": ":Category:Babel – Thành viên theo ngôn ngữ",
+	"babel-autocreate-reason": "Tự động tạo trang thể loại [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Người dùng trong thể loại này cho thấy họ thành thạo ngôn ngữ $2 ở mức $1.",
+	"babel-autocreate-text-main": "Người dùng trong thể loại này cho thấy họ có kiến thức về ngôn ngữ $1.",
+	"babel-0": "Thành viên này [[$1|hoàn toàn không biết]] [[$2|$3]] (hoặc rất khó khăn để hiểu).",
+	"babel-1": "Thành viên này biết [[$2|$3]] ở mức độ [[$1|cơ bản]].",
+	"babel-2": "Thành viên này biết [[$2|$3]] ở mức độ [[$1|khá]].",
+	"babel-3": "Thành viên này biết [[$2|$3]] ở mức độ [[$1|tốt]].",
+	"babel-4": "Thành viên này có thể hiểu [[$2|$3]] gần như [[$1|người bản xứ]].",
+	"babel-5": "Thành viên này biết [[$2|$3]] ở mức độ của một [[$1|chuyên gia]].",
+	"babel-N": "Thành viên này xem [[$2|$3]] là ngôn ngữ [[$1|mẹ đẻ]].",
+	"babel-0-n": "Thành viên này [[$1|hoàn toàn không biết]] [[$2|tiếng Việt]] (hoặc rất khó khăn để hiểu).",
+	"babel-1-n": "Người dùng này biết [[$2|tiếng Việt]] với trình độ [[$1|cơ bản]].",
+	"babel-2-n": "Người dùng này biết [[$2|tiếng Việt]] với trình độ [[$1|khá]].",
+	"babel-3-n": "Người dùng này biết [[$2|tiếng Việt]] với trình độ [[$1|tốt]].",
+	"babel-4-n": "Người dùng này có thể hiểu [[$2|tiếng Việt]] [[$1|gần như người Việt]].",
+	"babel-5-n": "Người dùng này biết [[$2|tiếng Việt]] với trình độ của một [[$1|chuyên gia]].",
+	"babel-N-n": "Thành viên này xem [[$2|tiếng Việt]] là ngôn ngữ [[$1|mẹ đẻ]].",
+	"babel-footer": "Thành viên theo ngôn ngữ"
+}

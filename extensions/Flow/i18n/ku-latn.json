@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bikarhêner",
+			"George Animal"
+		]
+	},
+	"flow-board-header": "Di derbarê vê gotûbêjê de",
+	"flow-board-collapse-description": "Danasînê veşêre",
+	"flow-board-expand-description": "Danasînê nîşan bide",
+	"flow-edit-header-link": "Danasînê biguherîne",
+	"flow-thank-link": "{{GENDER:$1|{{GENDER:$2|Spas}}}}",
+	"flow-edit-header-submit": "Danasînê tomar bike",
+	"apihelp-flow-example-1": "Danasîna \"[[Talk:Sandbox]]\" biguherîne",
+	"apihelp-flow+edit-header-param-content": "Naveroka danasînê",
+	"flow-undo-your-text": "Nivîsara te",
+	"flow-undo-edit-header": "Danasîn tê guherandin",
+	"flow-ve-mention-inspector-remove-label": "Jê bibe",
+	"flow-ve-mention-placeholder": "Navê bikarhêner",
+	"flow-mark-revision-patrolled-link-text": "Vê rûpelê wek serrastkirî nîşan bide",
+	"flow-mark-revision-patrolled-link-title": "Vê rûpelê wek serrastkirî nîşan bide",
+	"flow-mark-diff-patrolled-link-text": "Wek serrastkirî nîşan bide",
+	"flow-mark-diff-patrolled-link-title": "Wek serrastkirî nîşan bide"
+}

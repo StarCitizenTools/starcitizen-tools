@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Snævar"
+		]
+	},
+	"commonsmetadata-trackingcategory-no-license": "Skrár með engin vélar-lesanleg leyfi",
+	"commonsmetadata-trackingcategory-no-license-desc": "Skráin hefur ekkert leyfi sem er [{{MediaWiki:Commonsmetadata-doc-url}} lesanlegt af vélum].",
+	"commonsmetadata-trackingcategory-no-description": "Skrár með enga vélar-lesanlega lýsingu",
+	"commonsmetadata-trackingcategory-no-description-desc": "Skráin hefur ekki upplýsingasnið sem er  [{{MediaWiki:Commonsmetadata-doc-url}} lesanlegt af vélum], eða leyfisreiturinn er ekki fylltur út.",
+	"commonsmetadata-trackingcategory-no-author": "Skrár með engan vélar-lesanlegan höfund",
+	"commonsmetadata-trackingcategory-no-author-desc": "Skráin hefur ekki upplýsingasnið sem er [{{MediaWiki:Commonsmetadata-doc-url}} lesanlegt af vélum], eða höfundar reiturinn er ekki fylltur út.",
+	"commonsmetadata-trackingcategory-no-source": "Skrár með engan vélar-lesanlegan uppruna",
+	"commonsmetadata-trackingcategory-no-source-desc": "Skráin hefur ekki upplýsingasnið sem er [{{MediaWiki:Commonsmetadata-doc-url}} lesanlegt af vélum], eða uppruna reiturinn er ekki fylltur út."
+}

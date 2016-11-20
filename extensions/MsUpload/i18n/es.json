@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hernan Hegykozi",
+			"Macofe"
+		]
+	},
+	"msu-desc": "Permite la subida sencilla de uno o varios archivos al mismo tiempo",
+	"msu-button-title": "Seleccionar archivos",
+	"msu-insert-link": "Insertar enlace",
+	"msu-insert-gallery": "Insertar todos como una galería",
+	"msu-insert-files": "Insertar todos como archivos",
+	"msu-insert-links": "Insertar todos como enlaces",
+	"msu-insert-image": "Insertar como imagen",
+	"msu-insert-video": "Insertar vídeo",
+	"msu-cancel-upload": "Cancelar la subida",
+	"msu-replace-file": "¿Reemplazar archivo?",
+	"msu-clean-all": "Vaciar la lista",
+	"msu-ext-not-allowed": "Sólo se {{PLURAL:$1|permite el siguiente tipo|permiten los siguientes tipos}} de archivos:",
+	"msu-upload-this": "Subir este archivo",
+	"msu-upload-all": "Subir todos los archivos",
+	"msu-dropzone": "Soltar los archivos aquí",
+	"msu-comment": "Archivo subido con MsUpload"
+}

@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps"
+		]
+	},
+	"msu-desc": "Umożliwia łatwe przesyłanie jednego pliku lub jednocześnie wielu plików",
+	"msu-button-title": "Wybierz pliki",
+	"msu-insert-link": "Wstaw link",
+	"msu-insert-gallery": "Wstaw wszystko jako galerię",
+	"msu-insert-files": "Wstaw wszystko jako pliki",
+	"msu-insert-links": "Wstaw wszystko jako linki",
+	"msu-insert-image": "Wstaw jako obrazek",
+	"msu-insert-video": "Wstaw film",
+	"msu-cancel-upload": "Anuluj przesyłanie",
+	"msu-replace-file": "Zamienić plik?",
+	"msu-clean-all": "Wyczyść listę",
+	"msu-ext-not-allowed": "{{PLURAL:$1|Dozwolony jest następujący typ pliku|Dozwolone są następujące typy plików}}:",
+	"msu-upload-this": "Prześlij ten plik",
+	"msu-upload-all": "Prześlij wszystkie pliki",
+	"msu-dropzone": "Przeciągnij pliki tutaj",
+	"msu-comment": "Plik przesłany za pomocą MsUpload"
+}

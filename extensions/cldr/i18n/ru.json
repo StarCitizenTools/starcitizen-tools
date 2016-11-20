@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eleferen",
+			"Александр Сигачёв"
+		]
+	},
+	"cldr-desc": "Расширение, предоставляющее переводы названий языков на основе [http://cldr.unicode.org/index/downloads данных CLDR]"
+}

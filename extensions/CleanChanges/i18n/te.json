@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kiranmayee",
+			"Veeven"
+		]
+	},
+	"cleanchanges-changerightslink": "గుంపులను మార్చండి",
+	"cleanchanges-desc": "[[Special:RecentChanges|ఇటీవలి మార్పుల]]ని సంక్షిప్తముగా చూపుము",
+	"cleanchanges-language": "భాష:",
+	"cleanchanges-language-na": "అన్నీ",
+	"cleanchanges-users": "వాడుకరులు (| తో వేరుపరచి):",
+	"cleanchanges-showuserlinks": "వాడుకరి లింకులను చూపుము"
+}

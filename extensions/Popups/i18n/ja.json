@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Shirayuki",
+			"Whym",
+			"赤城。",
+			"Sujiniku",
+			"Otokoume"
+		]
+	},
+	"popups-message": "ホバーカード",
+	"popups-desc": "ページへのリンクにホバーした際に、ページ内容の要約のホバーカードを表示する",
+	"popups-last-edited": "更新: $1",
+	"popups-settings-title": "ページのプレビュー",
+	"popups-settings-option-off": "プレビューを無効にする",
+	"popups-settings-save": "保存",
+	"popups-settings-cancel": "取り消し",
+	"popups-settings-enable": "プレビューを有効にする",
+	"popups-send-feedback": "フィードバックを送信(外部リンク)",
+	"popups-mobile-dismiss": "非表示"
+}

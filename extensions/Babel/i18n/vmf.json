@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Silvicola"
+		]
+	},
+	"babel": "Babel-bajdreechâr-ôôgaawâ",
+	"babel-desc": "Fiichd â <code>#babel</code>-bhaarsâr-fungdsjoon âu, mid därâ mr dan audomaadisch â schbaldâ mid ghäschdlâ aus bearbajdâr-ôôgaawâ bäschdlâ ghôô. Fir diâ ghäschdlâ ghôô mr dâbaj ajchâne foorlaachâ âjsedsâ.",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "Audomaadische erdsajchung fon'râr [[$1|Babel]]-ghadegôrii.",
+	"babel-autocreate-text-levels": "Bearbajdâr, diâ diâ ghadegorii beôôschbruchâ, sôôchâ damid, dase in dr schbrôôch $2 ôôgääblich dâ ghendnis-schdand $1 hen.",
+	"babel-autocreate-text-main": "D'bearbajdr in därâ ghadegorii beôôschbruchâ, dase $1 ghenâ.",
+	"babel-0": "Dr bearbajdâr ghôô [[$2|$3]] [[$1|gôôr ned]] odr fârschdeds doch nôr gands arch schwäär.",
+	"babel-1": "Dr bearbajdâr ghôô [[$2|$3]] iwârhaabd âmôôl uf'm [[$1|grund-niwoo]].",
+	"babel-2": "Dr bearbajdâr ghôô [[$2|$3]] nôr uf [[$1|midlmääsichâm]] niwoo.",
+	"babel-3": "Dr bearbajdâr ghôô [[$2|$3]] doch scho uf rächd [[$1|hoâm]] niwoo.",
+	"babel-4": "Dr bearbajdâr ghôô [[$2|$3]] wiâ ôônâr, däär [[$1|dâmid ufgwachsâ is]].",
+	"babel-5": "Dr bearbajdâr ghôô [[$2|$3]] wiâ ôônâr, däär [[$1|däächlich dâmid schafd]].",
+	"babel-N": "Dr bearbajdâr ghôô [[$2|$3]], [[$1|wiâ's'm sâj muâdr bajbrôchd had]].",
+	"babel-0-n": "Dr bearbajdâr ghôô [[$2|Fränggisch]] [[$1|gôôr ned]], odr s'feld'm doch rächd schwäär.",
+	"babel-1-n": "Dr bearbajdâr ghôô [[$2|Fränggisch]] [[$1|iwârhaabds ärschd âmôôl aweng]].",
+	"babel-2-n": "Dr bearbajdâr ghôô [[$2|Fränggisch]] uf [[$1|midlmääsichâm]] niwoo.",
+	"babel-3-n": "Dr bearbajdâr ghôô [[$2|Fränggisch]] uf [[$1|hôâm]] niwoo.",
+	"babel-4-n": "Dr bearbajdâr ghôô [[$2|Fränggisch]], wiâ ôônâr, däär [[$1|dâmid ufgwachsâ is]].",
+	"babel-5-n": "Dr bearbajdâr ghôô [[$2|Fränggisch]] wiâ ôônâr, [[$1|däär däächlich dâmid schafd]].",
+	"babel-N-n": "Dr bearbajdâr ghôô [[$2|Fränggisch]], [[$1|wiâ's'm sâj muâdr bajbrôchd had]]."
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rancher",
+			"Sasa Stefanovic",
+			"Михајло Анђелковић"
+		]
+	},
+	"cleanchanges-changerightslink": "промени групе",
+	"cleanchanges-desc": "Компактнији приказ списка [[Special:RecentChanges|скорашњих измена]]",
+	"cleanchanges-language": "Језик:",
+	"cleanchanges-language-na": "Све",
+	"cleanchanges-users": "Корисници (раздв. |):",
+	"cleanchanges-showuserlinks": "Прикажи корисничке везе"
+}

@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sdm1985"
+		]
+	},
+	"babel": "Babel; Informashon di Usuario",
+	"babel-desc": "Ta agrega e <code>#babel</code> , ku e funshon di generá un Kaha Babel den e kaha di usuario",
+	"babel-url": "Proyecto: Babel",
+	"babel-0": "E uzadónan aki [[$1|no]] ta komprondé [[$2|$3]].",
+	"babel-1": "E uzadónan aki por papia [[$2|$3]] na un nivel [[$1|básiko]].",
+	"babel-2": "E uzadónan aki por papia [[$2|$3]] na un nivel [[$1|intermedio]].",
+	"babel-3": "E uzadónan aki por kontribuí na [[$2|$3]] na un nivel [[$1|avansá]].",
+	"babel-4": "Pa e uzadónan aki, [[$2|$3]] ta nan di dos idioma.",
+	"babel-N": "E uzadónan aki por papia [[$2|$3]] na un nivel [[$1|nativo]].",
+	"babel-0-n": "E uzadónan aki [[$1|no]] ta komprondé [[$2|Papiamentu]].",
+	"babel-1-n": "E uzadónan aki por papia [[$2|Papiamentu]] na un nivel [[$1|básiko]].",
+	"babel-2-n": "E uzadónan aki por papia [[$2|Papiamentu]] na un nivel [[$1|intermedio]].",
+	"babel-3-n": "E uzadónan aki por kontribuí na [[$2|Papiamentu]] na un nivel [[$1|avansá]].",
+	"babel-4-n": "Pa e uzadónan aki, [[$2|Papiamentu]] ta nan di dos idioma.",
+	"babel-N-n": "E uzadónan aki por papia [[$2|Papiamentu]] na un nivel [[$1|nativo]]."
+}

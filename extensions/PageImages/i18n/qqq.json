@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Shirayuki",
+			"Umherirrender"
+		]
+	},
+	"pageimages-desc": "{{desc|name=Page Images|url=https://www.mediawiki.org/wiki/Extension:PageImages}}",
+	"pageimages-blacklist": "List of images. They will never be selected as page images",
+	"pageimages-info-label": "Label for the page image field on the action=info page.\n\nSee [{{canonicalurl:w:Main Page|action=info}} example].",
+	"apihelp-query+pageimages-description": "{{doc-apihelp-description|query+pageimages}}",
+	"apihelp-query+pageimages-example-1": "{{doc-apihelp-example|query+pageimages}}",
+	"apihelp-query+pageimages-param-prop": "{{doc-apihelp-param|query+pageimages|prop}}",
+	"apihelp-query+pageimages-param-thumbsize": "{{doc-apihelp-param|query+pageimages|thumbsize}}",
+	"apihelp-query+pageimages-param-limit": "{{doc-apihelp-param|query+pageimages|limit}}"
+}

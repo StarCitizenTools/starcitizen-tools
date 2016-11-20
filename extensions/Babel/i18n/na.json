@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel-0": "Amuno eman etsimine [[$1|ekeow]] isitsiet ituga [[$2|$3]].",
+	"babel-1": "Amuno eman etsimine [[$1|ikuri ian]] isitsiet ituga [[$2|$3]].",
+	"babel-2": "Amuno eman etsimine [[$1|iyugaga ian]] isitsiet ituga [[$2|$3]].",
+	"babel-3": "Amuno eman wono [[$1|iduwen omotangitang ]] ituga [[$2|$3]].",
+	"babel-N": "Amuno eman wono [[$1|ubwieda]] amen kakairu ian [[$2|$3]].",
+	"babel-0-n": "Amuno eman etsimine [[$1|ekeow]] isitsiet ituga [[$2|Dorerin Naoero]].",
+	"babel-1-n": "Amuno eman etsimine [[$1|ikuri ian]] isitsiet ituga [[$2|Dorerin Naoero]].",
+	"babel-2-n": "Amuno eman etsimine [[$1|iyugaga ian]] isitsiet ituga [[$2|Dorerin Naoero]].",
+	"babel-3-n": "Amuno eman wono [[$1|iduwen omotangitang ]] ituga [[$2|Dorerin Naoero]].",
+	"babel-N-n": "Amuno eman wono [[$1|ubwieda]] amen kakairu ian [[$2|Dorerin Naoero]]."
+}

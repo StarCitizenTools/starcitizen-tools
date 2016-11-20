@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Enzoreg",
+			"GerardM"
+		]
+	},
+	"babel": "Meĝlomaṫ Babil ĝel l-mosṫeĥdim",
+	"babel-desc": "Zid l-fonksyon <code>#babel</code> baċ ṫṣayeb otomaṫikiyan sendoq Babil o ṫeĝmel fih modélaṫ maḫelliyin.",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "Ĥṫiraĝ otomaṫiki dyal l-katégori [[$1|Babel]].",
+	"babel-autocreate-text-levels": "L-mosṫeĥdimin li fe had n-noĝ ĝendhom mosṫawa $1 fe had l-loġa : $2.",
+	"babel-autocreate-text-main": "L-mosṫeĥdimin li fe had n-noĝ ĝendhom meĝrifa fe had l-loġa : $1.",
+	"babel-0": "Had l-mosṫeĥdim ma ĝendo [[$1|ḫṫa]] meĝrifa fe l-loġa [[$2|l-Meġribiya]] (ola kayfhemha be soĝoba).",
+	"babel-1": "Had l-mosṫeĥdim ĝendo mosṫawa [[$1|asasi]] fe [[$2|l-Meġribiya]].",
+	"babel-2": "Had l-mosṫeĥdim ĝendo mosṫawa [[$1|meṫweṣṣet]] fe [[$2|l-Meġribiya]].",
+	"babel-3": "Had l-mosṫeĥdim ĝendo mosṫawa [[$1|meṫqeddem]] fe [[$2|l-Meġribiya]].",
+	"babel-4": "Had l-mosṫeĥdim ĝendo mosṫawa [[$1|qrib le loġaṫ l-'om]] fe [[$2|l-Meġribiya]].",
+	"babel-5": "Had l-mosṫeĥdim ĝendo meĝrifa [[$1|ḫṫirafiya]] fe [[$2|l-Meġribiya]].",
+	"babel-N": "Had l-mosṫeĥdim kayfhem l-loġa [[$2|l-Meġribiya]] bḫal [[$1|loġṫo l-'om]].",
+	"babel-0-n": "Had l-mosṫeĥdim ma ĝendo [[$1|ḫṫa]] meĝrifa fe l-loġa [[$2|l-Meġribiya]] (ola kayfhemha be soĝoba).",
+	"babel-1-n": "Had l-mosṫeĥdim ĝendo mosṫawa [[$1|asasi]] fe [[$2|l-Meġribiya]].",
+	"babel-2-n": "Had l-mosṫeĥdim ĝendo mosṫawa [[$1|meṫweṣṣet]] fe [[$2|l-Meġribiya]].",
+	"babel-3-n": "Had l-mosṫeĥdim ĝendo mosṫawa [[$1|meṫqeddem]] fe [[$2|l-Meġribiya]].",
+	"babel-4-n": "Had l-mosṫeĥdim ĝendo mosṫawa [[$1|qrib le loġṫo l-'om]] fe [[$2|l-Meġribiya]].",
+	"babel-5-n": "Had l-mosṫeĥdim ĝendo meĝrifa [[$1|ḫṫirafiya]] dyal [[$2|l-Meġribiya]].",
+	"babel-N-n": "Had l-mosṫeĥdim kayfhem l-loġa [[$2|l-Meġribiya]] bḫal [[$1|loġto l-'om]]."
+}

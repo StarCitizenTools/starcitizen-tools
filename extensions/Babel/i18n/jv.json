@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iwan Novirion",
+			"Malafaya",
+			"Meursault2004",
+			"NoiX180"
+		]
+	},
+	"babel": "Informasi Babel Panganggo",
+	"babel-desc": "Nambahaké fungsi parse <code>#babel</code> sing marengaké générasi otomatis kolom kothak panganggo babel mawa kamungkinan nglebokaké cithakan kustomisasi",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Kategori:Babèl - Panganggo miturut basané",
+	"babel-autocreate-reason": "Otomatis nggawé kaca katègori [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Panganggo saka katégori iki dianggep nduwèni kawruh basa $2 undhak $1.",
+	"babel-autocreate-text-main": "Panganggo saka katégori iki dianggep nduwèni kawruh basa $1.",
+	"babel-autocreate-user": "Babel AutoCreate",
+	"babel-0": "Panganggo iki [[$1|ora]] duwé kawruh [[$2|$3]] (utawa angèl banget mangertèni).",
+	"babel-1": "Panganggo iki duwé kawruh [[$1|dhasar]] [[$2|$3]].",
+	"babel-2": "Panganggo iki duwé kawruh [[$1|madya]] [[$2|$3]].",
+	"babel-3": "Panganggo iki duwé kawruh [[$1|dhuwur]] [[$2|$3]].",
+	"babel-4": "Panganggo iki duwé kawruh [[$1|sing nyedhaki panutur ibu]] saka [[$2|$3]].",
+	"babel-5": "Panganggo iki duwé kawruh [[$1|profésional]] [[$2|$3]].",
+	"babel-N": "Panganggo iki [[$1|panutur ibu]] [[$2|$3]].",
+	"babel-0-n": "Panganggo iki [[$1|ora]] bisa [[$2|basa Jawa]] (utawa angèl banget mangertèni).",
+	"babel-1-n": "Panganggo iki duwé kawruh [[$1|dhasar]] [[$2|basa Jawa]].",
+	"babel-2-n": "Panganggo iki duwé kawruh [[$1|madya]] [[$2|basa Jawa]].",
+	"babel-3-n": "Panganggo iki duwé kawruh [[$1|dhuwur]] [[$2|basa Jawa]].",
+	"babel-4-n": "Panganggo iki duwé kawruh [[$1|sing nyedhaki panutur ibu]] saka [[$2|basa Jawa]].",
+	"babel-5-n": "Panganggo iki duwé kawruh [[$1|profésional]] [[$2|basa Jawa]].",
+	"babel-N-n": "Panganggo iki [[$1|panutur ibu]] [[$2|basa Jawa]].",
+	"babel-template": "Template:User $1",
+	"babel-footer": "Panganggo miturut basané"
+}

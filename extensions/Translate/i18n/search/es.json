@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fitoschido",
+			"Ovruni",
+			"Macofe"
+		]
+	},
+	"searchtranslations": "Buscar en las traducciones",
+	"tux-sst-edit": "Editar traducción",
+	"tux-sst-view-foreign": "Ver en $1",
+	"tux-sst-search": "Buscar",
+	"tux-sst-search-ph": "Buscar traducciones",
+	"tux-sst-count": "Se {{PLURAL:$1|encontró un resultado|encontraron $1 resultados}}",
+	"tux-sst-facet-language": "Idiomas",
+	"tux-sst-facet-group": "Grupos de mensajes",
+	"tux-sst-nosolr-title": "Búsqueda no disponible",
+	"tux-sst-nosolr-body": "Este wiki no tiene un servicio de búsqueda de traducciones.",
+	"tux-sst-solr-offline-title": "Búsqueda no disponible",
+	"tux-sst-solr-offline-body": "El servicio de búsqueda no está disponible temporalmente.",
+	"tux-sst-next": "Siguientes ›",
+	"tux-sst-prev": "‹ Anteriores",
+	"tux-sst-default": "Traducciones",
+	"tux-sst-translated": "Traducciones del $1",
+	"tux-sst-untranslated": "Sin traducción del $1",
+	"tux-sst-outdated": "Traducciones desactualizadas del $1",
+	"tux-sst-ellipsis-untranslated": "Sin traducción",
+	"tux-sst-ellipsis-outdated": "Traducciones desactualizadas",
+	"tux-sst-link-all-match": "Requerir todas las palabras que se buscan.",
+	"tux-sst-match-message": "Se muestran las traducciones que coinciden con cualesquiera de las palabras buscadas. $1",
+	"tux-sst-case-sensitive": "Distinguir mayúsculas de minúsculas"
+}

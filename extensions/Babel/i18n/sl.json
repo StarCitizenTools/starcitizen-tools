@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dbc334",
+			"Smihael"
+		]
+	},
+	"babel": "Uporabnikov Babilon",
+	"babel-desc": "Doda funkcijo <code>#babel</code>, ki omogoča avtomatizirano ustvarjanje babilonskih uporabniških polj z zmožnostjo vključevanja predlog po meri",
+	"babel-url": "Project:Babilon",
+	"babel-footer-url": ":Kategorija:Babel – Uporabniki po jeziku",
+	"babel-autocreate-reason": "Samodejno ustvarjanje [[$1|babilonske]] kategorije.",
+	"babel-autocreate-text-levels": "Uporabniki navedeni v tej kategoriji imajo naslednjo jezikovno sposobnost $1 $2.",
+	"babel-autocreate-text-main": "Uporabniki navedeni v tej kategoriji imajo znanje jezika $1.",
+	"babel-0": "Ta uporabnik [[$1|nima]] znanja [[$2|$3]] (ali pa ima težave z razumevanjem).",
+	"babel-1": "Ta uporabnik ima [[$1|osnovno]] znanje [[$2|$3]].",
+	"babel-2": "Uporabnik [[$1|srednje dobro]] govori [[$2|$3]].",
+	"babel-3": "Uporabnik [[$1|zelo dobro]] govori [[$2|$3]].",
+	"babel-4": "Uporabnik govori [[$2|$3]] [[$1|skoraj enako dobro kakor prvi jezik]].",
+	"babel-5": "Uporabnik govori [[$2|$3]] na [[$1|profesionalni]] ravni.",
+	"babel-N": "Ta uporabnik govori [[$2|{{GRAMMAR:akuzativ|$3}}]] kot [[$1|materni jezik]].",
+	"babel-0-n": "Uporabnik [[$1|ne govori]] [[$2|slovenščine]] oz. ima velike težave pri razumevanju.",
+	"babel-1-n": "Uporabnik pozna '''[[$1|osnove]]''' '''[[$2|slovenskega jezika]].",
+	"babel-2-n": "Uporabnik '''[[$1|srednje dobro]]''' govori '''[[$2|slovenščino]].",
+	"babel-3-n": "Uporabnik '''[[$1|zelo dobro]]''' govori '''[[$2|slovenščino]].",
+	"babel-4-n": "Uporabnik govori '''[[$1|slovensko]]''' skoraj '''[[$2|enako dobro kakor prvi jezik]]'''.",
+	"babel-5-n": "Uporabnik govori [[$2|slovenščino]] na [[$1|profesionalni]] ravni.",
+	"babel-N-n": "Uporabnik govori '''[[$1|slovenščino]]''' kot '''[[$2|materni jezik]]'''.",
+	"babel-footer": "Uporabniki po jeziku"
+}

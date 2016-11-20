@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Vitorvicentevalente",
+			"Macofe",
+			"Fúlvio"
+		]
+	},
+	"msu-insert-image": "Inserir como imagem",
+	"msu-insert-video": "Inserir vídeo",
+	"msu-cancel-upload": "Cancelar carregamento",
+	"msu-ext-not-allowed": "Apenas {{PLURAL:$1|o seguinte tipo de ficheiro é permitido|os seguintes tipos de ficheiro são permitidos}}:",
+	"msu-upload-this": "Carregar este ficheiro",
+	"msu-upload-all": "Carregar todos os ficheiros"
+}

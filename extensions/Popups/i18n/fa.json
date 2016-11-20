@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Armin1392",
+			"Ebraminio",
+			"Alirezaaa",
+			"Reza1615",
+			"Huji"
+		]
+	},
+	"popups-message": "کارت‌های معلق",
+	"popups-desc": "نمایش کارت‌های معلق با خلاصهٔ محتویات صفحه هنگامی که کاربر موشواره را بر پیوند یک صفحه نگه می‌دارد.",
+	"popups-last-edited": "آخرین ویرایش در $1",
+	"popups-redirects": "تغییرمسیر به <h3>$1</h3>",
+	"popups-settings-title": "صفحه پیش‌نمایش",
+	"popups-settings-option-simple": "ساده",
+	"popups-settings-option-simple-description": "جمله رهبر یک صفحه و پیش‌نمایش تصویر را ببینید. این پیشنهاد برای خوانندگان است",
+	"popups-settings-option-advanced": "پیشرفته",
+	"popups-settings-option-advanced-description": "دیدن پیش‌نمایش پیوندها و دسترسی برای ویرایش منوهای تابعی. این توسط بسیاری از ویراستاران استفاده می‌شود.",
+	"popups-settings-option-off": "غیرفعال کردن پیش‌نمایش‌ها",
+	"popups-settings-save": "ذخیره",
+	"popups-settings-help-ok": "تأیید",
+	"popups-settings-cancel": "انصراف",
+	"popups-settings-enable": "فعال کردن پیش‌نمایش‌ها"
+}

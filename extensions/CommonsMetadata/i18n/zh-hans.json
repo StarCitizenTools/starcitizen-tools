@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xiaomingyan",
+			"Yfdyh000",
+			"Liuxinyu970226",
+			"Duolaimi"
+		]
+	},
+	"commonsmetadata-desc": "扩展图像信息API模块的“extmetadata”属性，以包含存储在使用维基共享资源常用模板的图像说明页面的信息",
+	"commonsmetadata-trackingcategory-no-license": "没有机器可读许可协议的文件",
+	"commonsmetadata-trackingcategory-no-license-desc": "文件没有任何[{{MediaWiki:Commonsmetadata-doc-url}} 机器可读的]许可协议模板。",
+	"commonsmetadata-trackingcategory-no-description": "没有机器可读说明的文件",
+	"commonsmetadata-trackingcategory-no-description-desc": "文件没有[{{MediaWiki:Commonsmetadata-doc-url}} 机器可读的]信息模板，或其说明字段未填写。",
+	"commonsmetadata-trackingcategory-no-author": "没有机器可读作者的文件",
+	"commonsmetadata-trackingcategory-no-author-desc": "文件没有[{{MediaWiki:Commonsmetadata-doc-url}} 机器可读的]信息模板，或其作者字段未填写。",
+	"commonsmetadata-trackingcategory-no-source": "没有机器可读来源的文件",
+	"commonsmetadata-trackingcategory-no-source-desc": "文件没有[{{MediaWiki:Commonsmetadata-doc-url}} 机器可读的]信息模板，或其来源字段未填写。"
+}

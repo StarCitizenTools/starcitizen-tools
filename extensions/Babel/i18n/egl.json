@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gloria sah",
+			"Lévi",
+			"Reder"
+		]
+	},
+	"babel": "Babel",
+	"babel-desc": "Al zûnta la 'parser function' <code>#babel</code> per permèter ed fêr in avtomâtic 'na caşèla utèin 'babèl' cun la pusibilitê ed zuntêregh di mudē personêl fât a piaşèir.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Categoria:Lèngui d'uteint",
+	"babel-autocreate-reason": "A fâgh in avtomâtich la pàgina 'd la categoréia [[$1|Babel]].",
+	"babel-autocreate-text-levels": "J utèint ed cla categoréia ché dîşen che pōlen comunichêr in $2 cun un livèl ed cgnusèinsa $1.",
+	"babel-autocreate-text-main": "J utèint in cla categoréia ché dîşen che pōlen comunichêr in $1",
+	"babel-0": "Cl' utèint ché [[$1|an n'é mia bòun ed comunichêr ]] in [[$2|$3]] (o la 'l capés sōl cun grôsi dificultê)",
+	"babel-1": "Cl'utèint ché al pōl dêr 'na mân cun un livèl [[$1|bâs]] in [[$2|$3]].",
+	"babel-2": "Cl' utèint ché al pōl dêr 'na mân cun un livèl [[$1|bòun]] in [[$2|$3]].",
+	"babel-3": "Cl' utèint ché al pōl dêr 'na mân cun un livèl [[$1|dimòndi bòun]] in [[$2|$3]].",
+	"babel-4": "Cl' utèint ché al pōl dêr 'na mân cun un livèl [[$1|ed quêşi léngva mêdra]] in [[$2|$3]].",
+	"babel-5": "Cl' utèint ché al pōl dêr 'na mân cun un livèl [[$1|profesionêl]] in [[$2|$3]].",
+	"babel-N": "Cl' utèint ché al pōl dêr 'na mân cun un livèl [[$1|léngva mêdra]] in [[$2|$3]].",
+	"babel-0-n": "Cl' utèint ché  [[$1|an n'é mia bòun ed comunichêr]] in [[$2|Emiliàn]] (o la 'l capés sōl cun grôsi dificultê)",
+	"babel-1-n": "Cl' utèint ché al pōl dêr 'na mân  in [[$2|Emiliàn]] cun un livèl [[$1|bâş]].",
+	"babel-2-n": "Cl' utèint ché al pōl dêr 'na mân in [[$2|Emiliàn]] cun un livèl [[$1|bòun]].",
+	"babel-3-n": "Cl' utèint ché al pōl dêr 'na mân in [[$2|Emiliàn]] cun un livèl [[$1|dimòndi bòun]].",
+	"babel-4-n": "Cl' utèint ché al pōl dêr 'na mân in [[$2|Emiliàn]] cun un livèl [[$1|ed quêşi léngva mêdra]].",
+	"babel-5-n": "Cl' utèint ché al pōl dêr 'na mân in [[$2|Emiliàn]] cun un livèl [[$1|profesionêl]].",
+	"babel-N-n": "Cl' utèint ché al pōl dêr 'na mân in [[$2|Emiliàn]] cun un livèl [[$1|léngva mêdra]].",
+	"babel-footer": "Utèint per léngva"
+}

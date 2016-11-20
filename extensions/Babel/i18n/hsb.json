@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"babel": "Babelowe wužiwarske informacije",
+	"babel-desc": "Přidawa parserowu funkciju <code>#babel</code> za awtomatiske wutworjenje špalty z babelowymi wužiwarskimi kašćikami, z móžnosću, swójske předłohi zapřijeć",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Wužiwarjo po rěči",
+	"babel-autocreate-reason": "Awtomatiske wutworjenje [[$1|Babeloweje]] kategorije.",
+	"babel-autocreate-text-levels": "Wužiwarjo w tutej kategoriji podawaja, zo maja stopjeń znajomosćow $1 za rěč $2.",
+	"babel-autocreate-text-main": "Wužiwarjo w tutej kategoriji podawaja, zo maja znajomosće rěče $1.",
+	"babel-0": "Tutón wužiwar nima [[$1|žane]] znajomosće [[$2|$3]] (abo rozumi ju jenož z wulkimi ćežemi).",
+	"babel-1": "Tutón wužiwar ma [[$1|zakładne]] znajomosće [[$2|$3]].",
+	"babel-2": "Tutón wužiwar ma [[$1|přerězne]] znajomosće [[$2|$3]].",
+	"babel-3": "Tutón wužiwar ma [[$1|pokročene]] znajomosće [[$2|$3]].",
+	"babel-4": "Tutón wužiwar ma znajomosće [[$2|$3]] na [[$1|maćernorěčnym niwowje]].",
+	"babel-5": "Tutón wužiwar ma [[$1|profesionelne]] znajomosće [[$2|$3]].",
+	"babel-N": "[[$1|Maćeršćina]] tutoho wužiwarja je [[$2|$3]].",
+	"babel-0-n": "Tutón wužiwar nima [[$1|žane]] znajomosće [[$2|hornjoserbšćiny]] (abo rozumi ju jenož z wulkimi ćežemi).",
+	"babel-1-n": "Tutón wužiwar ma [[$1|zakładne]] znajomosće [[$2|hornjoserbšćiny]].",
+	"babel-2-n": "Tutón wužiwar ma [[$1|přerězne]] znajomosće [[$2|hornjoserbšćiny]].",
+	"babel-3-n": "Tutón wužiwar ma [[$1|pokročene]] znajomosće [[$2|hornjoserbšćiny]]",
+	"babel-4-n": "Tutón wužiwar [[$2|hornjoserbšćinu]] kaž [[$1|maćernorěčnik]] wobknježi.",
+	"babel-5-n": "Tutón wužiwar ma [[$1|profesionelne]] znajomosće [[$2|hornjoserbšćiny]].",
+	"babel-N-n": "Tutón wužiwar rěči [[$2|hornjoserbšćinu]] jako [[$1|maćeršćinu]].",
+	"babel-footer": "Wužiwarjo po rěči"
+}

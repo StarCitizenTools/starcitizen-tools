@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mjbmr"
+		]
+	},
+	"babel-0": "In karber [[$2|$3]] rā [[$1|na]] pama yā došvār pama.",
+	"babel-1": "In karber [[$2|$3]] rā [[$1|kem]] pama.",
+	"babel-2": "In karber [[$2|$3]] rā [[$1|miāngin]] pama.",
+	"babel-3": "In karber [[$2|$3]] rā [[$1|pišrapta]] pama.",
+	"babel-4": "In karber [[$2|$3]] rā [[$1|dar nezdiki zebun māderi]] pama.",
+	"babel-5": "In karber [[$2|$3]] rā [[$1|ziad]] pama.",
+	"babel-N": "In karber [[$2|$3]] rā [[$1|māderzādi]] pama.",
+	"babel-0-n": "In karber [[$2|Dari-e Mazdeyasnā]] rā [[$1|na]] pama yā došvār pama.",
+	"babel-1-n": "In karber [[$2|Dari-e Mazdeyasnā]] rā [[$1|kem]] pama.",
+	"babel-2-n": "In karber [[$2|Dari-e Mazdeyasnā]] rā [[$1|miāngin]] pama.",
+	"babel-3-n": "In karber [[$2|Dari-e Mazdeyasnā]] rā [[$1|pišrapta]] pama.",
+	"babel-4-n": "In karber [[$2|Dari-e Mazdeyasnā]] rā [[$1|dar nezdiki zebun māderi]] pama.",
+	"babel-5-n": "In karber [[$2|Dari-e Mazdeyasnā]] rā [[$1|ziad]] pama.",
+	"babel-N-n": "In karber [[$2|Dari-e Mazdeyasnā]] rā [[$1|māderzādi]] pama.",
+	"babel-footer": "Karberhā bar pāye zabān"
+}

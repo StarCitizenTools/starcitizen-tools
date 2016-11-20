@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Toliño"
+		]
+	},
+	"commonsmetadata-desc": "Estende a propiedade \"extmetadata\" do módulo da API de información da imaxe para incluír información almacenada nas páxinas de descrición das imaxes que usan modelos comúns da Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "Ficheiros sen licenza lexible por máquina",
+	"commonsmetadata-trackingcategory-no-license-desc": "O ficheiro non ten ningún modelo de licenza [{{MediaWiki:Commonsmetadata-doc-url}} lexible por máquina].",
+	"commonsmetadata-trackingcategory-no-description": "Ficheiros sen descrición lexible por máquina",
+	"commonsmetadata-trackingcategory-no-description-desc": "O ficheiro non ten ningún modelo de información [{{MediaWiki:Commonsmetadata-doc-url}} lexible por máquina] ou o seu campo de descrición non está cuberto.",
+	"commonsmetadata-trackingcategory-no-author": "Ficheiros sen autor lexible por máquina",
+	"commonsmetadata-trackingcategory-no-author-desc": "O ficheiro non ten ningún modelo de información [{{MediaWiki:Commonsmetadata-doc-url}} lexible por máquina] ou o seu campo de autor non está cuberto.",
+	"commonsmetadata-trackingcategory-no-source": "Ficheiros sen orixe lexible por máquina",
+	"commonsmetadata-trackingcategory-no-source-desc": "O ficheiro non ten ningún modelo de información [{{MediaWiki:Commonsmetadata-doc-url}} lexible por máquina] ou o seu campo de orixe non está cuberto."
+}

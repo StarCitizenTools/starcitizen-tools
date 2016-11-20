@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha",
+			"Shirayuki",
+			"The Evil IP address",
+			"Umherirrender"
+		]
+	},
+	"googleanalytics-desc": "{{desc|name=google Analytics|url=https://www.mediawiki.org/wiki/Extension:Google_Analytics_Integration}}",
+	"right-noanalytics": "{{doc-right|noanalytics}}"
+}

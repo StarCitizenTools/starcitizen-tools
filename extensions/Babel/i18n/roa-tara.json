@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras",
+			"Kwj2772"
+		]
+	},
+	"babel": "Babel 'mbormaziune sus a l'utende",
+	"babel-desc": "Aggiunge 'a funzione de analise <code>#babel</code> pe permettere 'a generazione automatezzate de 'na culonne babel cu 'a possibbeletà de 'ngludere template personalizzare",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Utinde pe lènghe",
+	"babel-autocreate-reason": "Stoche a ccreje automatecamende 'a pàgene de categorije [[$1|Babel]].",
+	"babel-autocreate-text-levels": "L'utinde jndr'à sta categorije indichescene ca lore onne 'nu levèlle $1 pa lènghe $2.",
+	"babel-autocreate-text-main": "L'utinde jndr'à sta categorije indichescene ca onne 'na canoscenze d'a lènghe $1.",
+	"babel-0": "'Stu crestiáne ste'''[[$1|'nderre a le carvune]]''' cu 'u '''[[$2|$3]]'''.",
+	"babel-1": "'Stu crestiáne pô ajutà' cu 'na canoscènze '''[[$1|tèrra-tèrre]]''' d'u '''[[$2|$3]]'''.",
+	"babel-2": "'Stu crestiáne pô ajutà' cu 'nna canoscènze '''[[$1|'ndermèdie]]''' d'u '''[[$2|$3]]'''.",
+	"babel-3": "'Stu crestiáne pô ajutà' cu 'nna canoscènze '''[[$1|accellènde]]''' d'u '''[[$2|$3]]'''.",
+	"babel-4": "Stu crestiáne quase quase parle 'u '''[[$2|$3]]''' cumme a 'a '''[[$1|lènga madre]]'''.",
+	"babel-5": "Stu crestiáne è proprie 'nu '''[[$1|professore]]''' de '''[[$2|$3]]'''.",
+	"babel-N": "Quìste utende jè de [[$1|madrelènga]] [[$2|$3]].",
+	"babel-0-n": "'Stu crestiáne ste'''[[$1|'nderre a le carvune]]''' cu 'u '''[[$2|tarandine]]''' (o 'u capisce cu nu sacche de difficoltà).",
+	"babel-1-n": "'Stu crestiáne pô ajutà' cu 'na canoscènze '''[[$1|tèrra-tèrre]]''' d'u '''[[$2|tarandine]]'''.",
+	"babel-2-n": "'Stu crestiáne pô ajutà' cu 'nna canoscènze '''[[$1|'ndermèdie]]''' d'u '''[[$2|tarandine]]'''.",
+	"babel-3-n": "'Stu crestiáne pô ajutà' cu 'nna canoscènze '''[[$1|accellènde]]''' d'u '''[[$2|tarandine]]'''.",
+	"babel-4-n": "Stu crestiáne quase quase parle 'u '''[[$2|tarandine]]''' cumme a 'a '''[[$1|lènga madre]]'''.",
+	"babel-5-n": "Stu crestiáne è proprie 'nu '''[[$1|professore]]''' de '''[[$2|tarandine]]'''.",
+	"babel-N-n": "Quìste utende jè de [[$1|madrelènga]] [[$2|tarandine]].",
+	"babel-footer": "Utinde pe lènghe"
+}

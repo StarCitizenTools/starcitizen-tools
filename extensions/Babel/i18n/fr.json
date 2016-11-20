@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cedric31",
+			"ChrisPtDe",
+			"Crochet.david",
+			"Grondin",
+			"IAlex",
+			"Jens Liebenau",
+			"Louperivois",
+			"UV",
+			"Urhixidur",
+			"Verdy p",
+			"Zebulon84",
+			"Gomoko"
+		]
+	},
+	"babel": "Informations Babel sur l’utilisateur",
+	"babel-desc": "Ajoute une fonction d’analyseur syntaxique <code>#babel</code> permettant la création automatique d’une boîte utilisateur Babel avec la possibilité d’y inclure des modèles locaux",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Catégorie:Babel - Utilisateurs par langue",
+	"babel-autocreate-reason": "Création automatique de la catégorie [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Les utilisateurs dans cette catégorie ont indiqué qu’ils ont le niveau $1 pour la langue $2.",
+	"babel-autocreate-text-main": "Les utilisateurs dans cette catégorie ont indiqué leur connaissance de la langue $1.",
+	"babel-0": "{{GENDER:$4|Cet utilisateur|Cette utilisatrice}} n’a [[$1|aucune]] connaissance en [[$2|$3]] (ou le comprend avec de grandes difficultés).",
+	"babel-1": "Cet utilisateur peut contribuer avec un niveau [[$1|élémentaire]] en [[$2|$3]].",
+	"babel-2": "{{GENDER:$4|Cet utilisateur|Cette utilisatrice}} a une connaissance [[$1|moyenne]] en [[$2|$3]].",
+	"babel-3": "Cet utilisation dispose d’une connaissance [[$1|avancée]] en [[$2|$3]].",
+	"babel-4": "{{GENDER:$4|Cet utilisateur|Cette utilisatrice}} a une connaissance proche de la [[$1|langue maternelle]] en [[$2|$3]].",
+	"babel-5": "Ce contributeur a une connaissance [[$1|professionnelle]] en [[$2|$3]].",
+	"babel-N": "{{GENDER:$4|Cet utilisateur|Cette utilisatrice}} dispose d’une compréhension comme [[$1|langue maternelle]] en [[$2|$3]].",
+	"babel-0-n": "Cet utilisateur n’a [[$1|aucune]] connaissance en [[$2|français]] (ou le comprend avec de grandes difficultés).",
+	"babel-1-n": "{{GENDER:$4|Cet utilisateur|Cette utilisatrice}} dispose de connaissances [[$1|de base]] en [[$2|français]].",
+	"babel-2-n": "{{GENDER:$4|Cet utilisateur|Cette utilisatrice}} dispose d’un [[$1|niveau intermédiaire]] de connaissance en [[$2|français]].",
+	"babel-3-n": "{{GENDER:$4|Cet utilisateur|Cette utilisatrice}} dispose de connaissances [[$1|avancées]] en [[$2|français]].",
+	"babel-4-n": "{{GENDER:$4|Cet utilisateur|Cette utilisatrice}} dispose de connaissances proches de la [[$1|langue maternelle]] en [[$2|français]].",
+	"babel-5-n": "{{GENDER:$4|Cet utilisateur|Cette utilisatrice}} dispose d’un niveau de connaissances [[$1|professionnel]] du [[$2|français]].",
+	"babel-N-n": "{{GENDER:$4|Cet utilisateur|Cette utilisatrice}} a pour [[$1|langue maternelle]] le [[$2|français]].",
+	"babel-template": "Modèle:User $1",
+	"babel-footer": "Utilisateurs par langue"
+}

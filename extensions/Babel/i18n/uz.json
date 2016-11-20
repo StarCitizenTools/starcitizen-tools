@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nataev",
+			"Purodha",
+			"Sociologist",
+			"Ximik1991"
+		]
+	},
+	"babel": "Foydalanuvchi bilgan tillar haqida maʼlumot (Bobil)",
+	"babel-desc": "Avtomatik ravishda tillar haqida oʻzgartirsa boʻladigan maʼlumot ustunini yaratadigan <code>#babel</code> parseri funksiyasini qoʻshadi",
+	"babel-url": "Project:Bobil",
+	"babel-footer-url": ":Category:Bobil - Foydalanuvchilar tillar boʻyicha",
+	"babel-autocreate-reason": "Avtomatik ravishda [[$1|Bolbil]] turkum sahifasini yaratish.",
+	"babel-autocreate-text-levels": "Bu turkumdagi foydalanuvchilar $2 til uchun $1 bilim darajasini koʻrsatishgan.",
+	"babel-autocreate-text-main": "Bu turkumdagi foydalanuvchilar $1 tilini bilishlarini koʻrsatishgan.",
+	"babel-0": "[[$2|$3]] — [[$1|bilmaydi]] (yoki qiyinchilik bilan tushunadi)",
+	"babel-1": "[[$2|$3]] — [[$1|boshlangʻich daraja]]",
+	"babel-2": "[[$2|$3]] — [[$1|oʻrtacha daraja]]",
+	"babel-3": "[[$2|$3]] — [[$1|yaxshi daraja]]",
+	"babel-4": "[[$2|$3]] — [[$1|deyarli ona tili kabi]]",
+	"babel-5": "[[$2|$3]] — [[$1|professional daraja]]",
+	"babel-N": "[[$2|$3]] — [[$1|ona tili]]",
+	"babel-0-n": "Bu foydalanuvchi [[$2|oʻzbek tilini]] [[$1|umuman bilmaydi]].",
+	"babel-1-n": "Bu foydalanuvchi [[$2|oʻzbek tilini]] [[$1|boshlangʻich]] darajada biladi.",
+	"babel-2-n": "Bu foydalanuvchi [[$2|oʻzbek tilini]] [[$1|oʻrtacha darajada]] biladi.",
+	"babel-3-n": "Bu foydalanuvchi [[$2|oʻzbek tilini]] [[$1|mukammal]] biladi.",
+	"babel-4-n": "Bu foydalanuvchi [[$2|oʻzbek tilini]] [[$1|deyarli ona tilidek]] biladi.",
+	"babel-5-n": "Bu foydalanuvchi [[$2|oʻzbek tilini]] [[$1|professional darajada]] biladi.",
+	"babel-N-n": "Bu foydalanuvchining [[$1|ona tili]] [[$2|oʻzbek tili]]dir.",
+	"babel-footer": "Foydalanuvchilar tillari boʻyicha"
+}

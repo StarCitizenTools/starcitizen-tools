@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Vitorvicentevalente"
+		]
+	},
+	"usergroups": "Gestão de grupos de utilizadores",
+	"usergroups-desc": "Fornece um controlo melhor sobre quais os privilégios que podem ser registados com cada grupo de utilizadores.",
+	"usergroupnameexists-error": "Não pode criar um novo grupo de utilizadores com este nome, pois já existe.",
+	"usergroups-createnew": "(criar novo...)",
+	"usergroups-editgroup-delete": "Eliminar este grupo de utilizadores <span class=\"important\" style=\"color:red\">(<strong>AVISO</strong>: Isto é irreversível. Para recriar esta classe, terá de [[Special:UserGroups/new|definir uma nova]].)</span>",
+	"usergroups-editgroup-desc": "Selecione um grupo de utilizadores da lista abaixo ou crie o seu através da opção \"criar novo...\".",
+	"usergroups-editgroup-newgroup": "Introduza o nome do novo grupo de utilizadores:",
+	"usergroups-editgroup-reason": "Motivo:",
+	"usergroups-editgroup-revoke": "Definir este grupo de utilizadores para revogar em vez de conceder permissões",
+	"usergroups-editgroup-save": "Gravar alterações",
+	"usergroups-editgroup-userrights": "Todas as permissões disponíveis",
+	"usergroups-log-name": "Registo de grupos de utilizadores",
+	"usergroups-log-header": "Este registo mostra as alterações aos privilégios de utilizador de cada grupo.",
+	"usergroups-log-none": "(nenhum)",
+	"action-modifygroups": "editar grupos de utilizadores",
+	"invalidusergroupname-title": "Nome de grupo de utilizadores inválido",
+	"invalidusergroupname-error": "O nome que introduziu para o seu novo grupo de utilizadores é inválido.\n\n[[Special:UserGroups|Regressar]].",
+	"nosuchusergroup": "Não foi encontrado nenhum grupo de utilizadores denominado \"$1\". Pretende [[Special:UserGroups/new|criar]] este novo grupo?",
+	"right-modifygroups": "Criar, alterar e eliminar grupos de utilizadores",
+	"logentry-usergroups-delete": "$1 {{GENDER:$2|eliminou}} o grupo de utilizadores \"$4\".",
+	"logentry-usergroups-modify": "$1 {{GENDER:$2|modificou}} o grupo de utilizadores \"$4\". Adicionados: $7 adicionados $5; Removidos: $6"
+}

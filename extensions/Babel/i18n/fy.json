@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Crazymadlover",
+			"SK-luuut",
+			"Snakesteuben"
+		]
+	},
+	"babel": "Babel-meidoggersynformaasje",
+	"babel-desc": "Foeget de <code>#babel</code> automatyske opdielerfunksje ta om it automatysk meitsjen fan in Babel meidoggerskolom ta stean mei de mooglikheid om eigen berjochten ta te foegjen.",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "Makket automatysk in [[$1|Babel]]-kategory oan.",
+	"babel-autocreate-text-levels": "Meidoggers yn dizze kategory jouwe oan dat harren taalkennis foar $2 $1 is.",
+	"babel-autocreate-text-main": "Meidoggers yn dizze kategory jouwe oan dat hja kennis fan $1 hawwe.",
+	"babel-0": "Dizze meidogger hat [[$1|gjin]] kennis fan [[$2|$3]] (of ferstiet it allinnich mei in soad tûkelteammen).",
+	"babel-1": "It [[$2|$3]] fan dizze meidogger is [[$1|minimaal]].",
+	"babel-2": "It [[$2|$3]] fan dizze meidogger is [[$1|ridlik]].",
+	"babel-3": "It [[$2|$3]] fan dizze meidogger is [[$1|treflik]].",
+	"babel-4": "It [[$2|$3]] is benei de [[$1|memmetaal]] fan dizze meidogger.",
+	"babel-5": "It [[$2|$3]] fan dizze meidogger is [[$1|professional]].",
+	"babel-N": "It [[$2|$3]] is de [[$1|memmetaal]] fan dizze meidogger.",
+	"babel-0-n": "Dizze meidogger hat [[$1|gjin]] kennis fan it [[$2|Frysk]] (of ferstiet it allinnich mei in soad tûkelteammen).",
+	"babel-1-n": "It [[$2|Frysk]] fan dizze meidogger is [[$1|minimaal]].",
+	"babel-2-n": "It [[$2|Frysk]] fan dizze meidogger is [[$1|ridlik]].",
+	"babel-3-n": "It [[$2|Frysk]] fan dizze meidogger is [[$1|treflik]].",
+	"babel-4-n": "It [[$2|Frysk]] is benei de [[$1|memmetaal]] fan dizze meidogger.",
+	"babel-5-n": "De kennis fan it [[$2|Frysk]] fan dizze meidogger is [[$1|beropsmatich]].",
+	"babel-N-n": "It [[$2|Frysk]] is de [[$1|memmetaal]] fan dizze meidogger."
+}

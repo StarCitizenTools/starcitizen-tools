@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha",
+			"Snævar",
+			"Sveinn í Felli"
+		]
+	},
+	"babel": "Málkassi",
+	"babel-url": "Project:Málkassi",
+	"babel-footer-url": ":Category:Notendur eftir tungumáli",
+	"babel-autocreate-reason": "Bý sjálfkrafa til [[$1|Málkassa]] flokk.",
+	"babel-autocreate-text-levels": "Notendur í þessum flokk hafa gefið upp að þeir hafi $1-stigs kunnáttu á $2",
+	"babel-autocreate-text-main": "Notendur í þessum flokk hafa gefið upp þeirra  kunnáttu á $1 máli.",
+	"babel-0": "Þessi notandi talar [[$1|ekki]] [[$2|$3]] (á erfitt með að skilja hana eða kýs að tala hana ekki).",
+	"babel-1": "Þessi notandi hefur [[$1|grunnkunnáttu]] í [[$2|$3]] máli.",
+	"babel-2": "Þessi notandi hefur [[$1|miðlungs]]-kunnáttu á [[$2|$3]] máli.",
+	"babel-3": "Þessi notandi hefur [[$1|yfirburðar]]-kunnáttu á [[$2|$3]] máli.",
+	"babel-4": "Þessi notandi talar [[$2|$3]] eins og [[$1|innfæddur]].",
+	"babel-5": "Þessi notandi hefur [[$1|atvinnu]]-færni á [[$2|$3]] máli.",
+	"babel-N": "Þessi notandi hefur [[$2|$3]] að [[$1|móðurmáli]].",
+	"babel-0-n": "Þessi notandi talar [[$1|ekki]] [[$2|íslensku]] (á erfitt með að skilja hana eða kýs að tala hana ekki).",
+	"babel-1-n": "Þessi notandi hefur [[$1|grunnkunnáttu]] í [[$2|íslensku]] máli.",
+	"babel-2-n": "Þessi notandi hefur [[$1|miðlungs]]-kunnáttu á [[$2|íslensku]] máli.",
+	"babel-3-n": "Þessi notandi hefur [[$1|yfirburðar]]-kunnáttu á [[$2|íslensku]] máli.",
+	"babel-4-n": "Þessi notandi talar [[$2|íslensku]] eins og [[$1|innfæddur]].",
+	"babel-5-n": "Þessi notandi hefur [[$1|atvinnu]]-færni á [[$2|íslensku]] máli.",
+	"babel-N-n": "Þessi notandi hefur [[$2|íslensku]] að [[$1|móðurmáli]].",
+	"babel-footer": "Notendur eftir tungumáli"
+}

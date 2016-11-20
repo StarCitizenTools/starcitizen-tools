@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Siebrand"
+		]
+	},
+	"commonsmetadata-desc": "Breidt de eigenschap \"extmetadata\" van de API-module voor afbeeldingengegevens uit met gegevens die zijn opgeslagen in de bestandsbeschrijvingspagina's die veel gebruikte sjablonen van Wikimedia Commons gebruiken",
+	"commonsmetadata-trackingcategory-no-license": "Bestanden zonder machineleesbare licentie",
+	"commonsmetadata-trackingcategory-no-license-desc": "Het bestand heeft geen [{{MediaWiki:Commonsmetadata-doc-url}} machineleesbaar] licentiesjabloon.",
+	"commonsmetadata-trackingcategory-no-description": "Bestanden zonder machineleesbare beschrijving",
+	"commonsmetadata-trackingcategory-no-description-desc": "Het bestand heeft geen [{{MediaWiki:Commonsmetadata-doc-url}} machineleesbaar] informatiesjabloon, of het beschrijvingsveld is niet ingevuld.",
+	"commonsmetadata-trackingcategory-no-author": "Bestanden zonder machineleesbare auteur",
+	"commonsmetadata-trackingcategory-no-author-desc": "Het bestand heeft geen [{{MediaWiki:Commonsmetadata-doc-url}} machineleesbaar] informatiesjabloon, of het auteursveld is niet ingevuld.",
+	"commonsmetadata-trackingcategory-no-source": "Bestanden zonder machineleesbare bron",
+	"commonsmetadata-trackingcategory-no-source-desc": "Het bestand heeft geen [{{MediaWiki:Commonsmetadata-doc-url}} machineleesbaar] informatiesjabloon, of het bronveld is niet ingevuld."
+}

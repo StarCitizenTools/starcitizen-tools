@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"teokraba",
+			"Fringio",
+			"The Polish",
+			"F. Cosoleto",
+			"Beta16"
+		]
+	},
+	"msu-desc": "Consente il caricamento veloce per uno o più file contemporaneamente",
+	"msu-button-title": "Seleziona files",
+	"msu-insert-link": "Inserisci link",
+	"msu-insert-gallery": "Inserisci immagini come galleria",
+	"msu-insert-image": "Inserisci come immagine",
+	"msu-insert-video": "Inserisci video",
+	"msu-cancel-upload": "Cancella upload",
+	"msu-clean-all": "Pulisci elenco",
+	"msu-ext-not-allowed": "Solo {{PLURAL:$1|il seguente tipo di file è permesso|i seguenti tipi di file sono permessi}}:",
+	"msu-upload-this": "Carica questo file",
+	"msu-upload-all": "Carica tutti i file",
+	"msu-dropzone": "Posiziona i file qui",
+	"msu-comment": "MsUpload"
+}

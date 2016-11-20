@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joachim Mos",
+			"Slomox"
+		]
+	},
+	"babel": "Babel-Bruker-Infos",
+	"babel-desc": "Föögt de <code>#babel</code>-Parserfunkschoon för dat automaatsche Opstellen vun Babel-Brukerboxen to. Verlöövt ok dat Inbinnen vun egene Vörlagen.",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Kategorie:Babel - Bruker noh Spraak",
+	"babel-autocreate-reason": "Automaatsch opstellt [[$1|Babel]]-Kategorie.",
+	"babel-autocreate-text-levels": "Brukers in disse Kategorie köönt de Spraak $2 op Niveau $1 snacken.",
+	"babel-autocreate-text-main": "Brukers in disse Kategorie kennt vun de Spraak $1 wat af.",
+	"babel-0": "Disse Bruker versteiht [[$1|nix]] vun [[$2|$3]] (oder versteiht dat blot mit ganz grote Swierigkeiten).",
+	"babel-1": "Disse Bruker versteiht en [[$1|beten]] wat vun [[$2|$3]].",
+	"babel-2": "Disse Bruker versteiht [[$1|good]] wat vun [[$2|$3]].",
+	"babel-3": "Disse Bruker versteiht [[$1|temlich]] wat vun [[$2|$3]].",
+	"babel-4": "Disse Bruker versteiht wat vun [[$2|$3]] as wenn dat sien [[$1|Moderspraak]] weer.",
+	"babel-5": "Disse Bruker versteiht temlich wat vun [[$2|$3]], dat maakt he vun [[$1|Beroop]] ut.",
+	"babel-N": "Disse Bruker hett [[$2|$3]] as [[$1|Moderspraak]].",
+	"babel-0-n": "Disse Bruker versteiht [[$1|nix]] vun [[$2|Plattdüütsch]] (oder versteiht dat blot mit ganz grote Swierigkeiten).",
+	"babel-1-n": "Disse Bruker versteiht en [[$1|beten]] wat vun [[$2|Plattdüütsch]].",
+	"babel-2-n": "Disse Bruker versteiht [[$1|good]] wat vun [[$2|Plattdüütsch]].",
+	"babel-3-n": "Disse Bruker versteiht [[$1|temlich]] wat vun [[$2|Plattdüütsch]].",
+	"babel-4-n": "Disse Bruker versteiht wat vun [[$2|Plattdüütsch]] as wenn dat sien [[$1|Moderspraak]] weer.",
+	"babel-5-n": "Disse Bruker versteiht temlich wat vun [[$2|Plattdüütsch]], dat maakt he vun [[$1|Beroop]] ut.",
+	"babel-N-n": "Disse Bruker hett [[$2|Plattdüütsch]] as [[$1|Moderspraak]].",
+	"babel-footer": "Bruker noh Spraak"
+}

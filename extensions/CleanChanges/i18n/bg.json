@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"DCLXVI",
+			"Spiritia"
+		]
+	},
+	"cleanchanges-changerightslink": "промяна на групите",
+	"cleanchanges-desc": "По-компактно показване на [[Special:RecentChanges|списъка с последните промени]]",
+	"cleanchanges-language": "Език:",
+	"cleanchanges-language-na": "Всички",
+	"cleanchanges-users": "Потребители (Разд: |):",
+	"cleanchanges-showuserlinks": "Показване на потребителските връзки"
+}

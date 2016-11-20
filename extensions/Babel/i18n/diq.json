@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Erdemaslancan",
+			"Gorizon",
+			"Mirzali",
+			"Neribij",
+			"Marmase",
+			"Kumkumuk"
+		]
+	},
+	"babel": "Melumatê karberiyê Babili",
+	"babel-desc": "Menıne de otomatik désé karberi vırazşten da şablonan ré, fonksiyona <code>#babil</code>i kena de",
+	"babel-url": "Project:Babil",
+	"babel-footer-url": ":Kategoriye:Babil - Goreyê zıwanan ra karberi",
+	"babel-autocreate-reason": "Kategoriya [[$1|Babil]]i otomaik vırazéna.",
+	"babel-autocreate-text-levels": "Karberé ke na kategoride yé, $1 sewiye dê zıwané $2 zané.",
+	"babel-autocreate-text-main": "Karberé ke na kategori de yê vané ma zıwané $1 zam.",
+	"babel-autocreate-user": "Babil OtomatikVıraştış",
+	"babel-0": "No/Na karber [[$1|héç]] [[$2|$3]]  nézana (yana çetın fahm kena).",
+	"babel-1": "No/Na karber [[$1|zayıf]] sewiya de [[$2|$3]] zana.",
+	"babel-2": "No karber sewiya [[$1|miyanêne]] de [[$2|$3]] zano.",
+	"babel-3": "No/Na karber [[$1|weş]] sewiya de [[$2|$3]] zana.",
+	"babel-4": "Na/Na karber [[$2|$3]] [[$1|Zey zıwan dé ğo]] qısey keno",
+	"babel-5": "No/Na karber [[$1|profesyonel]] sewiya de [[$2|$3]] zano.",
+	"babel-N": "Zıwané [[$1|may u pérdé]] na/né karberi [[$2|$3]] yo.",
+	"babel-0-n": "No/Na karber [[$1|héç]] [[$2|Zazaki]]  nézana (yana çetın fahm kena).",
+	"babel-1-n": "No/Na karber [[$1|zayıf]] sewiya de [[$2|Zazaki]] zana.",
+	"babel-2-n": "No karber sewiya [[$1|miyanêne]] de [[$2|Zazaki]] zano.",
+	"babel-3-n": "No/Na karber [[$1|weş]] sewiya de [[$2|Zazaki]] zana.",
+	"babel-4-n": "Na/Na karber  [[$1|Zey zıwan dé ğo]] [[$2|Zazaki]] qısey keno",
+	"babel-5-n": "No/Na karber [[$1|profesyonel]] sewiya de [[$2|Zazaki]] zano.",
+	"babel-N-n": "Zıwané [[$1|may u pérdé]] na/né karberi [[$2|Zazaki]] yo.",
+	"babel-template": "Template:User $1",
+	"babel-footer": "Goreyê zıwanan ra karberi"
+}

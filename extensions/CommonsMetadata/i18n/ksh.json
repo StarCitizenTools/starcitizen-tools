@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"commonsmetadata-desc": "Deiht Aanjahbe övver Belder us Medijawikki <i lang=\"en\" xml:lang=\"en\">Commons</i> en de Beldereijeschaffte vum <i lang=\"en\" xml:lang=\"en\">API</i>-Befähl <code lang=\"en\" xml:lang=\"en\">extmetadata</code>, di en de Sigge met de Aanjabe övver Belder änthallde sin un doh de jewöhnlejje Schablohne bruche.",
+	"commonsmetadata-trackingcategory-no-license": "Datteije der ohne en Aanjab övver en Lezänz, di en Maschihn och verwände künnt",
+	"commonsmetadata-trackingcategory-no-license-desc": "Heh di Dattei hät kein Schablohn för en Lezänz, dij_[{{MediaWiki:Commonsmetadata-doc-url}} en Maschih lässe] künnt.",
+	"commonsmetadata-trackingcategory-no-description": "Datteije der ohne en Beschriehvong, di en Maschihn och verwände künnt",
+	"commonsmetadata-trackingcategory-no-description-desc": "Heh di Dattei hät kein Schablohn med Enffomazjuhne, dij_[{{MediaWiki:Commonsmetadata-doc-url}} en Maschih lässe] künnt, udder et es nix öm se ze beschrieve ennjedrahre.",
+	"commonsmetadata-trackingcategory-no-author": "Datteije der ohne en Aanjab övver der Maacher, di en Maschihn och verwände künnt",
+	"commonsmetadata-trackingcategory-no-author-desc": "Heh di Dattei hät kein Schablohn med Enffomazjuhne, dij_[{{MediaWiki:Commonsmetadata-doc-url}} en Maschih lässe] künnt, udder ed es keine Urhävver ennjedrahre.",
+	"commonsmetadata-trackingcategory-no-source": "Datteije der ohne en Aanjab övver en Quäll, di en Maschihn och verwände künnt",
+	"commonsmetadata-trackingcategory-no-source-desc": "Heh di Dattei hät kein Schablohn med Enffomazjuhne, dij_[{{MediaWiki:Commonsmetadata-doc-url}} en Maschih lässe] künnt, udder ed es kein Quäll ennjedrahre."
+}

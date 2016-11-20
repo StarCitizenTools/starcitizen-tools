@@ -1,0 +1,99 @@
+.ui-slider-tick-mark {
+    display: 	inline-block;
+    border: 	1px solid black;
+    height:		9px;
+    position:	absolute;
+    top:		-3px;
+    opacity: 	0.35;
+    z-index:	10;
+}
+
+.ui-slider-tick-mark:hover {
+    opacity: 0.65!important;
+    -webkit-transition: all ease 0.2s;
+    -moz-transition: all ease 0.2s;
+    -o-transition: all ease 0.2s;
+    transition: all ease 0.2s;
+}
+
+.rvslider-legend-box {
+    opacity: 0.35;
+    font-size: 1.4em;
+}
+
+.revisions-legend {
+    text-align: center;
+    font-size: 0.9em;
+    padding: 0.5em 0.5em;
+}
+
+.revisions {
+    height: 150px;
+}
+.revisions-container {
+    width: 90%;
+    position: relative;
+    overflow: hidden;
+}
+.revisions-container, .arrow {
+    float: left;
+}
+.arrow {
+    width: 5%;
+    margin-top: 63px;
+}
+.left-arrow {
+    width: 0;
+    height: 0;
+    margin-right: 20px;
+    border-style: solid;
+    border-width: 12px 20px 12px 0;
+    border-color: transparent #424242 transparent transparent;
+}
+.right-arrow {
+    margin-left: 20px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 12px 0 12px 18px;
+    border-color: transparent transparent transparent #424242;
+}
+
+.revision {
+    margin-top: 75px;
+}
+
+.stopper {
+    position: absolute;
+    top: 50%;
+    height: 50px;
+    width: 0;
+}
+
+.revision-slider {
+    position: relative;
+    margin: auto;
+}
+
+.pointer-container {
+    position: absolute;
+    clear: both;
+    height: 1px;
+    top: 77px;
+    margin: auto;
+    z-index: 10;
+}
+.left-pointer {
+    border-color: transparent transparent #00f transparent;
+}
+.right-pointer {
+    border-color: transparent transparent #f00 transparent;
+}
+.pointer {
+    position: absolute !important;
+    z-index: 11;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 10px 10px 10px;
+}

@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"පසිඳු කාවින්ද"
+		]
+	},
+	"checkuser-logcase": "لاگ ان کریں تلاش کیس حساس ہے.",
+	"checkuser": "صارف کو چیک کریں",
+	"checkuserlog": "صارف لاگ ان کریں چیک کریں",
+	"checkuser-contribs-log": "حال ہی میں صارف کي",
+	"checkuser-reason": "وجہ:",
+	"checkuser-showlog": "شو کے لاگ ان کریں",
+	"checkuser-search": "تلاش",
+	"checkuser-week-1": "گزشتہ ہفتے",
+	"checkuser-week-2": "گزشتہ دو ہفتوں",
+	"checkuser-month": "گزشتہ 30 دن میں",
+	"checkuser-all": "سب",
+	"checkuser-nomatch": "کوئی میچ پایا.",
+	"checkuser-check": "چیک کریں",
+	"checkuser-search-submit": "تلاش",
+	"checkuser-search-target": "ہدف"
+}

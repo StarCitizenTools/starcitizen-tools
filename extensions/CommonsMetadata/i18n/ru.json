@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Okras",
+			"Striking Blue",
+			"Kaganer"
+		]
+	},
+	"commonsmetadata-desc": "Передает свойство изображения «extmetadata» в API-модуль для включения информации, хранящейся на страницах описания изображений, которую используют шаблоны, часто используемые на Викискладе",
+	"commonsmetadata-trackingcategory-no-license": "Файлы без машиночитаемой лицензии",
+	"commonsmetadata-trackingcategory-no-license-desc": "У файла отсутствует [{{MediaWiki:Commonsmetadata-doc-url}} машиночитаемый] шаблон лицензии.",
+	"commonsmetadata-trackingcategory-no-description": "Файлы без машиночитаемого описания",
+	"commonsmetadata-trackingcategory-no-description-desc": "У файла отсутствует [{{MediaWiki:Commonsmetadata-doc-url}} машиночитаемый] шаблон описания, или в нём не заполнено поле «описание» (''description'').",
+	"commonsmetadata-trackingcategory-no-author": "Файлы без машиночитаемого автора",
+	"commonsmetadata-trackingcategory-no-author-desc": "У файла отсутствует [{{MediaWiki:Commonsmetadata-doc-url}} машиночитаемый] шаблон описания, или в нём не заполнено поле «автор» (''author'').",
+	"commonsmetadata-trackingcategory-no-source": "Файлы без машиночитаемого источника",
+	"commonsmetadata-trackingcategory-no-source-desc": "У файла отсутствует [{{MediaWiki:Commonsmetadata-doc-url}} машиночитаемый] шаблон описания, или в нём не заполнено поле «источник» (''source'')."
+}

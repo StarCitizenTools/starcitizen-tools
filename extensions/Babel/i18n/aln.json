@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bresta",
+			"Ammartivari"
+		]
+	},
+	"babel": "Informatat e përdoruesit në babel",
+	"babel-desc": "Shton funksionin interpretues <code>#babel</code> për m'e lejue gjenerimine kutisë babel të përdoruesit me mundësi të përfshimjes së shabllonave të përshtatun",
+	"babel-url": "Project:Babel",
+	"babel-autocreate-reason": "Tue krijue faqen e kategorisë në [[$1|Babel]]",
+	"babel-autocreate-text-levels": "Përdoruesit në këtë kategori bâjnë me dije se kanë njohuni të nivelit $1 të gjuhës $2.",
+	"babel-autocreate-text-main": "Përdoruesit në këtë kategori bâjnë me dije se kanë njohuni të gjuhës $1.",
+	"babel-0": "Ky përdorues [[$1|nuk ka]] njohuni në [[$2|$3]] (apo e kupton me fshtirësi).",
+	"babel-1": "Ky përdorues ka njohuni [[$1|bazike]] në [[$2|$3]].",
+	"babel-2": "Ky përdorues ka njohuni [[$1|mesatare]] në [[$2|$3]].",
+	"babel-3": "Ky përdorues ka njohuni [[$1|të përparueme]] në [[$2|$3]].",
+	"babel-4": "Ky përdorues ka njohuni [[$1|të afërta me folës amtar]] në [[$2|$3]]",
+	"babel-5": "Ky përdorues ka njohuni [[$1|profesionale]] në [[$2|$3]].",
+	"babel-N": "Ky përdorues e kupton [[$2|$3]] si gjuhë [[$1|amtare]].",
+	"babel-0-n": "Ky përdorues [[$1|nuk ka]] njohuni në [[$2|Gegnisht]] (apo e kupton me shumë fshtirësi).",
+	"babel-1-n": "Ky përdorues ka njohuni [[$1|themelore]] në [[$2|Gegnisht]].",
+	"babel-2-n": "Ky përdorues ka njohuni [[$1|mesatare]] në [[$2|Gegnisht]].",
+	"babel-3-n": "Ky përdorues ka njohuni [[$1|të përparueme]] në [[$2|Gegnisht]].",
+	"babel-4-n": "Ky përdorues ka njohuni [[$1|të afërta me nji folës amtar]] në [[$2|Gegnisht]].",
+	"babel-5-n": "Ky përdorues ka njohuni [[$1|profesionale]] në [[$2|Gegnisht]].",
+	"babel-N-n": "Ky përdorues e kupton [[$2|Gegnisht]]en si gjuhë [[$1|amtare]]."
+}

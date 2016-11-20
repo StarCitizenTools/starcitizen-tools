@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Marc MORA",
+			"Windes",
+			"Wladek92",
+			"TomT0m",
+			"Orlodrim",
+			"Gomoko",
+			"Brenloch56"
+		]
+	},
+	"msu-desc": "Permet les téléversements faciles d'un seul ou de plusieurs fichiers en même temps",
+	"msu-button-title": "Sélectionnez les fichiers",
+	"msu-insert-link": "Insère le lien",
+	"msu-insert-gallery": "Insère les images en gallery",
+	"msu-insert-files": "Insérer tout en tant que fichiers",
+	"msu-insert-links": "Insérer tout en tant que liens",
+	"msu-insert-image": "Insérer en tant qu’image",
+	"msu-insert-video": "Insérer une vidéo",
+	"msu-cancel-upload": "Annule téléversement",
+	"msu-replace-file": "Remplacer le fichier ?",
+	"msu-clean-all": "Effacer la liste",
+	"msu-ext-not-allowed": "Seulement {{PLURAL:$1|le type de fichier suivant est autorisé|les types de fichiers suivants sont autorisés}} :",
+	"msu-upload-this": "Téléverser ce fichier",
+	"msu-upload-all": "Téléverser tous les fichiers",
+	"msu-dropzone": "Glisser ici les fichiers",
+	"msu-comment": "MsUpload"
+}

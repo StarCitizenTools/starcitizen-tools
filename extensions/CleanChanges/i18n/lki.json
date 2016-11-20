@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hosseinblue",
+			"Lakzon"
+		]
+	},
+	"cleanchanges-changerightslink": "گروه‌های گؤەڕانن/تغییر",
+	"cleanchanges-desc": "نمایش فشرده‌تری از [[Special:RecentChanges|فهرست تغییرات اخیر]]",
+	"cleanchanges-language": ":زوون",
+	"cleanchanges-language-na": "کؤل(گشت)",
+	"cleanchanges-users": "کاربران (جدا کردن با: |):",
+	"cleanchanges-showuserlinks": "نمایش پیوندهای کاربر"
+}

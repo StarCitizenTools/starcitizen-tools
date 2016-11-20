@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ex13"
+		]
+	},
+	"cleanchanges-changerightslink": "promijeni grupe",
+	"cleanchanges-desc": "Kompaktniji prikaz [[Special:RecentChanges|nedavnih promjena]]",
+	"cleanchanges-language": "Jezik:",
+	"cleanchanges-language-na": "Svi",
+	"cleanchanges-users": "Suradnici (Raz: |):",
+	"cleanchanges-showuserlinks": "Prikaži poveznice suradnika"
+}

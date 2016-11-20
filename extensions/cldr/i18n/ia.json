@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"cldr-desc": "Extension que forni nomines traducite de linguas a base del [http://cldr.unicode.org/index/downloads datos de CLDR]"
+}

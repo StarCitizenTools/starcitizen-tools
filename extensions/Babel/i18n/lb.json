@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Les Meloures",
+			"Robby"
+		]
+	},
+	"babel": "Babel-Benotzer-Informatioun",
+	"babel-desc": "Setzt d'<code>#babel</code> Parserfunktioun derbäi, fir déi automatesch Generatioun vun enger Babel-Benotzerbox Kolonn, mat der Méiglechkeet fir eege Schablounen anzebannen",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Kategorie:Babel - Benotzer no Sprooch",
+	"babel-autocreate-reason": "Automatesch eng [[$1|Babel]]-Kategorie-Säit maachen.",
+	"babel-autocreate-text-levels": "Benotzer an dëser Kategorie ginn un datt si an der Sprooch $2 den Niveau $1 hunn.",
+	"babel-autocreate-text-main": "Benotzer an dëser Kategorie ginn hir Kenntnesser an der Sprooch $1 un.",
+	"babel-autocreate-user": "Babel automatesch uleeën",
+	"babel-0": "Dëse Benotzer huet [[$1|keng]] Kenntnesser vun [[$2|$3]] (oder versteet et just mat grousse Schwieregkeeten).",
+	"babel-1": "Dëse Benotzer huet [[$1|Grondkenntnesser]] vun [[$2|$3]].",
+	"babel-2": "Dëse Benotzer huet [[$1|erweidert]] Kenntnesser vun [[$2|$3]].",
+	"babel-3": "De Benotzer huet [[$1|ganz gutt]] Kenntnesser vun [[$2|$3]].",
+	"babel-4": "De Bemotzer beherrscht [[$2|$3]] [[$1|bal wéi seng Mammesprooch]].",
+	"babel-5": "De Benotzer huet [[$1|professionnell]] Kenntnesser vun [[$2|$3]].",
+	"babel-N": "Dësem Benotzer seng [[$1|Mammesprooch]] ass [[$2|$3]].",
+	"babel-0-n": "Dëse Benotzer versteet [[$1|kee]] [[$2|Lëtzebuergesch]] (oder versteet et just mat grousse Schwieregkeeten).",
+	"babel-1-n": "Dëse Benotzer huet [[$1|Grondkenntnesser]] vun der [[$2|Lëtzebuergescher Sprooch]].",
+	"babel-2-n": "Dëse Benotzer huet [[$1|erweidert]] Kenntnesser vun der [[$2|Lëtzebuergescher Sprooch]].",
+	"babel-3-n": "Dëse Benotzer huet [[$1|ganz gutt]] [[$2|lëtzebuergesch]] Kenntnesser.",
+	"babel-4-n": "Dëse Benotzer beherrscht [[$2|Lëtzebuergesch]] [[$1|bal wéi seng Mammesprooch]].",
+	"babel-5-n": "Dëse Benotzer huet [[$1|professionnell]] Kenntnesser vum [[$2|Lëtzebuergeschen]].",
+	"babel-N-n": "Dësem Benotzer seng [[$1|Mammesprooch]] ass [[$2|Lëtzebuergesch]].",
+	"babel-footer": "Benotzer pro Sprooch"
+}

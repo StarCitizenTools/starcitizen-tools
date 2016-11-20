@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"babel-url": "Project:Babel",
+	"babel-0": "Dor Benutzor hior sprischt [[$1|gorgeen]] [[$2|$3]].",
+	"babel-1": "Dor Benutzor hior kann krad ma' [[$1|ä ganz kleenes bissl]] [[$2|$3]], 's is abbor eing'sch nisch dor Rede wärt.",
+	"babel-2": "Dor Benutzor hior is eing'sch schonn [[$1|nisch ohne]] im [[$2|$3]] Spräschn.",
+	"babel-3": "Dor Benutzor hior sprischt schonn [[$2|$3]] [[$1|wie's beese Tior]].",
+	"babel-4": "Dor Benutzor hior sprischt so dolle [[$2|$3]] [[$1|als wäror aus'm Land]].",
+	"babel-N": "Dor Benutzor hior is ä rüscht'schor [[$1|Muddorsprachlor]] vom [[$2|$3]]n.",
+	"babel-0-n": "Dor Benutzor hior sprischt [[$1|gorgeen]] [[$2|Sächs'sch]].",
+	"babel-1-n": "Dor Benutzor hior kann krad ma' [[$1|ä ganz kleenes bissl]] [[$2|Sächs'sch]], 's is abbor eing'sch nisch dor Rede wärt.",
+	"babel-2-n": "Dor Benutzor hior is eing'sch schonn [[$1|nisch ohne]] im [[$2|Sächs'sch]] Spräschn.",
+	"babel-3-n": "Dor Benutzor hior sprischt schonn [[$2|Sächs'sch]] [[$1|wie's beese Tior]].",
+	"babel-4-n": "Dor Benutzor hior sprischt so dolle [[$2|Sächs'sch]] [[$1|als wäror aus Sachsn]].",
+	"babel-N-n": "Dor Benutzor hior is ä rüscht'schor [[$1|Muddorsprachlor]] vom [[$2|Sächs'sch]]n."
+}
