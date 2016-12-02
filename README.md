@@ -1,1 +1,0 @@
-# starcitizen-wiki
