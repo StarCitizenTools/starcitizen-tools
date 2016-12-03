@@ -32,7 +32,6 @@ cscope.out
 /maintenance/.mwsql_history
 /maintenance/dev/data
 /AdminSettings.php
-/LocalSettings.php
 /StartProfiler.php
 
 # Building & testing
