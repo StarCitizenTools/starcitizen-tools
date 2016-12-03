@@ -60,7 +60,6 @@ Thumbs.db
 .idea
 .metadata*
 .settings
-/favicon.ico
 /static*
 /tags
 /.htaccess
