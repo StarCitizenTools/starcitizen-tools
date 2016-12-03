@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andriykopanytsia",
+			"Ата",
+			"Piramidion"
+		]
+	},
+	"jsonschema-badidref": "Неправильне посилання на id: \"$1\"",
+	"jsonschema-idconvert": "Не вдається конвертувати var у id: <code>$1</code>",
+	"jsonschema-invalidkey": "Неприпустимий ключ \"$1\" у \"$2\"",
+	"jsonschema-invalidempty": "Порожня структура даних не припустима у цій схемі",
+	"jsonschema-invalidnode": "Неприпустимий вузок: очікувано \"$1\", отримано \"$2\". Шлях: \"$3\"",
+	"jsonschema-invalid-missingfield": "Відсутнє обов'язкове поле \"$1\"",
+	"jsonschema-invalid-notinenum": "Значення <code>$1</code> не міститься у переліку для властивості $2",
+	"apihelp-jsonschema-description": "Отримати сторінку JSON-схеми.",
+	"apihelp-jsonschema-param-revid": "ID версії схеми.",
+	"apihelp-jsonschema-param-title": "Назва схеми.",
+	"apihelp-jsonschema-example-1": "Отримати схему для версії 1234"
+}

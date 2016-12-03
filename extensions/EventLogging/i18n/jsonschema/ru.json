@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"DCamer",
+			"Okras",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "Неверный idref: \"$1\"",
+	"jsonschema-idconvert": "Не удается преобразовать var в id: <code>$1</code>",
+	"jsonschema-invalidkey": "Недействительный ключ \"$1\" в \"$2\"",
+	"jsonschema-invalidempty": "Пустая структура данные недопустима для этой схемы",
+	"jsonschema-invalidnode": "Недопустимый узел: ожидался «$1», получен «$2». Путь: «$3»",
+	"jsonschema-invalid-missingfield": "Отсутствует обязательное поле \"$1\"",
+	"jsonschema-invalid-notinenum": "Значения <code>$1</code> нет в перечислении для свойства $2",
+	"apihelp-jsonschema-description": "Получить страницу JSON-схемы.",
+	"apihelp-jsonschema-param-revid": "Идентификатор версии схемы.",
+	"apihelp-jsonschema-param-title": "Имя схемы.",
+	"apihelp-jsonschema-example-1": "Получить схему для версии 1234"
+}

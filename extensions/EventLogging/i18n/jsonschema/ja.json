@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fryed-peach",
+			"Shirayuki",
+			"Otokoume"
+		]
+	},
+	"jsonschema-badidref": "idref の誤り:「$1」",
+	"jsonschema-idconvert": "var を id に変換できません: <code>$1</code>",
+	"jsonschema-invalidkey": "「$2」に無効なキー「$1」",
+	"jsonschema-invalidempty": "このスキーマでは空のデータ構造は有効ではありません"
+}

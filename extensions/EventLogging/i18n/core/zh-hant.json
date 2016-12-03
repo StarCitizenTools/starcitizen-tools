@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Justincheng12345",
+			"Cwlin0416"
+		]
+	},
+	"eventlogging-desc": "可由客戶端程式碼記錄事件日誌的框架",
+	"eventlogging-invalid-json": "無效的 JSON",
+	"eventlogging-revision-id": "修訂 $1",
+	"eventlogging-code-sample-logging-on-server-side": "PHP 日誌記錄",
+	"eventlogging-code-sample-module-setup": "設定 PHP 以供 JavaScript 記錄日誌",
+	"eventlogging-code-sample-logging-on-client-side": "JavaScript 日誌"
+}

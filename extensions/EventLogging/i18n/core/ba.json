@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Айбикә"
+		]
+	},
+	"eventlogging-desc": "Клиент яғындағы ваҡиғаларҙы протоколға теркәү өсөн фреймворк",
+	"eventlogging-invalid-json": "JSON дөрөҫ түгел",
+	"eventlogging-revision-id": "$1 ревизия",
+	"eventlogging-code-sample-logging-on-server-side": "PHP протоколға индереү",
+	"eventlogging-code-sample-module-setup": "JavaScript протоколға теркәү өсөн PHP ҡуйыу",
+	"eventlogging-code-sample-logging-on-client-side": "JavaScript протоколға теркәү",
+	"eventlogging-error-move-source": "Схема биттәренең атамаһы үҙгәртелмәй",
+	"eventlogging-error-move-destination": "Биттәр Схема биттәренә үҙгәртелә алмай"
+}

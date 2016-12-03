@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ebraminio",
+			"Reza1615"
+		]
+	},
+	"eventlogging-desc": "چارچوب برای ثبت سیاههٔ وقایع از سمت کد سرویس‌گیرنده",
+	"eventlogging-invalid-json": "JSON نامعتبر",
+	"eventlogging-revision-id": "نسخه  $1",
+	"eventlogging-code-sample-logging-on-server-side": "سیاههٔ پی‌اچ‌پی",
+	"eventlogging-code-sample-module-setup": "پی‌اچ‌پی را برای نمایش سیاهه جاوااسکریپت نصب کنید",
+	"eventlogging-code-sample-logging-on-client-side": "سیاهه جاوااسکریپت"
+}

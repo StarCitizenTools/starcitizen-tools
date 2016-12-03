@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fohanno"
+		]
+	},
+	"jsonschema-invalidkey": "Alc'hwez direizh \"$1\" e-barzh \"$2\"",
+	"jsonschema-invalid-missingfield": "Maezienn rekis \"$1\" diank"
+}

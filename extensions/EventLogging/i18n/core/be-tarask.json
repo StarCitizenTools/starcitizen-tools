@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wizardist",
+			"Red Winged Duck"
+		]
+	},
+	"eventlogging-desc": "Фрэймворк для даданьня падзеяў у журнал з кліенцкага коду",
+	"eventlogging-invalid-json": "Няслушны JSON",
+	"eventlogging-revision-id": "Вэрсія $1",
+	"eventlogging-code-sample-logging-on-server-side": "Журналяваньне PHP",
+	"eventlogging-code-sample-module-setup": "Наладжваньне PHP для журналяваньня PHP",
+	"eventlogging-code-sample-logging-on-client-side": "Журналяваньне JavaScript",
+	"eventlogging-error-move-source": "Старонкі схемаў ня могуць быць перайменаваныя",
+	"eventlogging-error-move-destination": "Старонкі ня могуць быць перайменаваныя ў старонкі схемаў"
+}

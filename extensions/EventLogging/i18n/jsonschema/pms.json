@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Borichèt",
+			"Dragonòt",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "Idref pa bon: \"$1\"",
+	"jsonschema-idconvert": "As peul pa convertisse var a id: <code>$1</code>",
+	"jsonschema-invalidkey": "Ciav pa bon-a \"$1\" an \"$2\"",
+	"jsonschema-invalidempty": "Strutura ëd dat veuida nen bon-a con cost ëschema",
+	"jsonschema-invalidnode": "Grop pa bon: spetà «$1», rivà «$2». Përcors: «$3»",
+	"jsonschema-invalid-missingfield": "Camp obligatòri \"$1\" mancant"
+}

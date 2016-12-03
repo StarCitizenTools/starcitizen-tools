@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "Погрешен idref: „$1“",
+	"jsonschema-idconvert": "Не можам да го претворам var во id: <code>$1</code>",
+	"jsonschema-invalidkey": "Неважечки клуч „$1“ во „$2“",
+	"jsonschema-invalidempty": "Празната податочна структура не важи за оваа шема",
+	"jsonschema-invalidnode": "Неважечки јазол: очекував „$1“, а добив „$2“. Патека: „$3“",
+	"jsonschema-invalid-missingfield": "Недостасува задолжителното поле „$1“",
+	"jsonschema-invalid-notinenum": "Вредноста <code>$1</code> не се содржи во набројувањето за ствојството $2",
+	"apihelp-jsonschema-description": "Дај страница со JSON-шема.",
+	"apihelp-jsonschema-param-revid": "Назнака на преработка на шемата.",
+	"apihelp-jsonschema-param-title": "Назив на шемата.",
+	"apihelp-jsonschema-example-1": "Дај шема за преработката 1234"
+}

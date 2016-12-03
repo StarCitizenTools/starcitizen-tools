@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Odie2",
+			"Woytecr"
+		]
+	},
+	"eventlogging-desc": "Framework logowania akcji z kodu po stronie klienta",
+	"eventlogging-invalid-json": "Nieprawidłowy JSON",
+	"eventlogging-revision-id": "Wersja $1",
+	"eventlogging-code-sample-logging-on-server-side": "Logowanie PHP",
+	"eventlogging-code-sample-module-setup": "Ustawienia PHP dla logowania JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Logowanie JavaScript"
+}

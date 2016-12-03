@@ -1,0 +1,206 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+  eventlogging-devserver
+  ----------------------
+  Invoking this command-line tool will spawn a web server that can serve
+  as a test logging endpoint. Events logged against this server will be
+  validated verbosely and pretty-printed to the terminal.
+
+  To use this, you probably want to set '$wgEventLoggingBaseUri' on your
+  test wiki to point at the host and port of this web server. The value
+  '//localhost:8080/event.gif' should work.
+
+  Example:
+    event : {"wiki": "devwiki", "schema": "TrackedPageContentSaveComplete", "revision": 7872558, "event": {"revId": 10, "token": "foobar"}}
+    url : http://localhost:8080/event.gif?%7B%22wiki%22%3A+%22devwiki%22%2C+%22schema%22%3A+%22TrackedPageContentSaveComplete%22%2C+%22revision%22%3A+7872558%2C+%22event%22%3A+%7B%22revId%22%3A+10%2C+%22token%22%3A+%22foobar%22%7D%7D
+
+
+  usage: eventlogging-devserver [-h] [--host HOST] [--port PORT]
+
+  optional arguments:
+    -h, --help        show this help message and exit
+    --host HOST       server host (default: 'localhost')
+    --port PORT       server port (default: 8080)
+    --append-to PATH  file to append to (default: stdout)
+    --verbose         print pretty colors to stderr
+
+  :copyright: (c) 2012 by Ori Livneh <ori@wikimedia.org>
+  :license: GNU General Public Licence 2.0 or later
+
+"""  # noqa
+# pylint: disable=E0611
+from __future__ import print_function, unicode_literals
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+import argparse
+import itertools
+
+from wsgiref.simple_server import make_server, WSGIRequestHandler
+
+import eventlogging
+import jsonschema
+
+from pygments import formatters, highlight, lexers
+from pygments.console import ansiformat
+
+
+argparser = argparse.ArgumentParser(fromfile_prefix_chars='@')
+argparser.add_argument('--host', default='localhost',
+                       help='server host (default: localhost)')
+argparser.add_argument('--port', default=8080, type=int,
+                       help='server port (default: 8080)')
+argparser.add_argument('--append-to', type=argparse.FileType('a'),
+                       default=sys.stdout,
+                       help='file to append to (optional)')
+argparser.add_argument('--verbose', action='store_true',
+                       help='print out events to stderr as they come in')
+args = argparser.parse_args()
+
+formatter = formatters.get_formatter_by_name('256', style='rrt')
+colorize = ansiformat
+
+json_lexer = lexers.get_lexer_by_name('json')
+php_lexer = lexers.get_lexer_by_name('php', startinline=True)
+
+server_software = 'EventLogging/%s' % eventlogging.__version__
+
+seq_ids = itertools.count()
+parser = eventlogging.LogParser('%q %{recvFrom}s %{seqId}d %t %h')
+log_fmt = ('?%(QUERY_STRING)s %(SERVER_NAME)s '
+           '%(SEQ_ID)d %(TIME)s %(REMOTE_ADDR)s')
+
+max_qs_size = 900
+
+
+def heading(caption=None):
+    if caption is None:
+        return 74 * '-'
+    return '-- {:-<95}'.format(colorize('*yellow*', caption) + ' ')
+
+
+def prepare_response(status, headers):
+    """Encode a dictionary of HTTP headers to a list of tuples
+    containing bytes."""
+    if eventlogging.compat.PY3:
+        return status, list(headers.items())
+    status = status.encode('utf-8')
+    headers = [(k.encode('utf-8'), v.encode('utf-8')) for k, v in
+               headers.iteritems()]
+    return status, headers
+
+
+class EventLoggingHandler(WSGIRequestHandler):
+    """WSGI request handler; annotates environ dict with seq ID and
+    timestamp in NCSA Common Log Format."""
+
+    def get_environ(self):
+        environ = WSGIRequestHandler.get_environ(self)
+        environ.update(SEQ_ID=next(seq_ids), TIME=eventlogging.ncsa_utcnow())
+        return environ
+
+    def log_message(self, format, *args):  # pylint: disable=W0621
+        pass  # We'll handle logging in the WSGI app.
+
+
+def validate(log_line):
+    """Parse and validate a log line containing an encapsulated event.
+    Returns a tuple of (event, errors). If no object was decoded,
+    'event' will be None."""
+    try:
+        event = parser.parse(log_line)
+    except ValueError as err:
+        return None, [err]
+
+    try:
+        scid = event['schema'], event['revision']
+    except KeyError as err:
+        return event, [err]
+
+    try:
+        schema = eventlogging.get_schema(scid, encapsulate=True)
+    except jsonschema.SchemaError as err:
+        return event, [err]
+
+    validator = jsonschema.Draft3Validator(schema)
+    return event, list(validator.iter_errors(event))
+
+
+def validate_size(environ):
+    """Check whether the query string respects the maximum size.
+    Returns a list with a ValueError if the size exceeds the maximum.
+    Returns an empty list otherwise."""
+    if 'QUERY_STRING' in environ:
+        qs_size = len(environ['QUERY_STRING'])
+        if qs_size > max_qs_size:
+            return [ValueError(
+                'Query string size (%d) is greater than max size (%d)' %
+                (qs_size, max_qs_size))]
+    return []
+
+
+def handle_event(environ, start_response):
+    """WSGI app; parses, validates and pretty-prints incoming event
+    requests."""
+    log_line = log_fmt % environ
+    event, errors = validate(log_line)
+    errors.extend(validate_size(environ))
+
+    headers = {
+        'Server': server_software,
+        'Requested-Event-Valid': str(int(not errors))
+    }
+
+    for i, error in enumerate(errors):
+        headers['Validation-Error-%d' % (i + 1)] = str(error)
+    status, headers = prepare_response('204 No Content', headers)
+    start_response(status, headers)
+
+    args.append_to.write(eventlogging.json.dumps(event) + "\n")
+
+    if args.verbose:
+        print(heading('request'))
+        print(log_line)
+
+        print(heading('event'))
+        pretty_json = eventlogging.json.dumps(event, indent=2, sort_keys=True)
+        print(highlight(pretty_json, json_lexer, formatter), end='')
+
+        print(heading('validation'))
+        for error in errors:
+            print(colorize('_red_', 'Error:'), error)
+
+        if not errors:
+            print(colorize('_green_', 'Valid.'))
+
+        print(heading())
+
+    return []
+
+
+httpd = make_server(args.host, args.port, handle_event,
+                    handler_class=EventLoggingHandler)
+
+sys.stderr.write('''
+   ___                        _
+  / (_)                    \_|_)                 o
+  \__        _   _  _  _|_   |     __   __,  __,     _  _    __,
+  /    |  |_|/  / |/ |  |   _|    /  \_/  | /  | |  / |/ |  /  |
+  \___/ \/  |__/  |  |_/|_/(/\___/\__/ \_/|/\_/|/|_/  |  |_/\_/|/
+-----------------------------------------/|---/|--------------/|----------
+  (C) Wikimedia Foundation, 2013         \|   \|              \|
+
+''' + highlight('''
+# Ensure the following values are set in LocalSettings.php:
+require_once "$IP/extensions/EventLogging/EventLogging.php";
+$wgEventLoggingSchemaApiUri = 'https://meta.wikimedia.org/w/api.php';
+
+# Listening to events.\n''', php_lexer, formatter))
+
+try:
+    httpd.serve_forever()
+except KeyboardInterrupt:
+    pass

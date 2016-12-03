@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko",
+			"Urhixidur"
+		]
+	},
+	"jsonschema-badidref": "Mauvais idref : « $1 »",
+	"jsonschema-idconvert": "Impossible de convertir var en id : <code>$1</code>",
+	"jsonschema-invalidkey": "Clé « $1 » non valide dans « $2 »",
+	"jsonschema-invalidempty": "Structure de donnée vide non valide avec ce schéma",
+	"jsonschema-invalidnode": "Nœud non valide : « $1 » attendu, « $2 » obtenu. Chemin : « $3 »",
+	"jsonschema-invalid-missingfield": "Champ obligatoire « $1 » absent",
+	"jsonschema-invalid-notinenum": "La valeur <code>$1</code> ne fait pas partie de l’énumération pour la propriété $2",
+	"apihelp-jsonschema-description": "Récupérer une page de schéma JSON.",
+	"apihelp-jsonschema-param-revid": "ID de révision de schéma.",
+	"apihelp-jsonschema-param-title": "Nom du schéma.",
+	"apihelp-jsonschema-example-1": "Récupérer le schéma pour la révision 1234"
+}

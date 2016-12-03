@@ -1,0 +1,50 @@
+#!/usr/bin/env python -OO
+# -*- coding: utf-8 -*-
+"""
+  eventlogging-consumer
+  ---------------------
+  Consumes an event stream and writes it to a data store. Input stream and
+  target data store are specified using URIs.
+
+  usage: eventlogging-consumer [-h] input-uri output-uri
+
+  positional arguments:
+    input-uri      URI of raw input stream
+    output-uri     URI of output stream
+
+  optional arguments:
+    -h, --help     show this help message and exit
+    --no-plugins   run without loading plug-ins
+
+  :copyright: (c) 2012 by Ori Livneh <ori@wikimedia.org>
+  :license: GNU General Public Licence 2.0 or later
+
+"""
+from __future__ import unicode_literals
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+import argparse
+import logging
+
+import eventlogging
+
+
+eventlogging.setup_logging()
+
+ap = argparse.ArgumentParser(description='EventLogger',
+                             fromfile_prefix_chars='@')
+ap.add_argument('input', help='URI of raw input stream')
+ap.add_argument('output', help='URI of output stream', default='stdout://')
+ap.add_argument('--no-plugins', help='run without loading plug-ins',
+                action='store_false', dest='load_plugins')
+ap.set_defaults(load_plugins=True)
+args = ap.parse_args()
+
+if args.load_plugins:
+    eventlogging.load_plugins()
+
+logging.info('Driving %s -> %s..', args.input, args.output)
+eventlogging.drive(args.input, args.output)

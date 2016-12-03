@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Yfdyh000",
+			"Liuxinyu970226",
+			"Mywood",
+			"Impersonator 1"
+		]
+	},
+	"jsonschema-badidref": "坏的ref id：“$1”",
+	"jsonschema-idconvert": "无法转换var至ID：<code>$1</code>",
+	"jsonschema-invalidkey": "无效的键“$1”在“$2”",
+	"jsonschema-invalidempty": "空数据结构对此schema无效",
+	"jsonschema-invalidnode": "无效的节点：预期为“$1”，但得到“$2”。路径：“$3”",
+	"jsonschema-invalid-missingfield": "缺少必要的字段“$1”",
+	"jsonschema-invalid-notinenum": "值<code>$1</code>在属性$2的枚举中不存在",
+	"apihelp-jsonschema-description": "检索一个JSON Schema页面。",
+	"apihelp-jsonschema-param-revid": "架构修订ID。",
+	"apihelp-jsonschema-param-title": "模式名称。",
+	"apihelp-jsonschema-example-1": "检索修订版本1234的Schema"
+}

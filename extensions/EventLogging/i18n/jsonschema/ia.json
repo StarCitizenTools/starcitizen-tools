@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "Mal idref: \"$1\"",
+	"jsonschema-idconvert": "Non pote converter var in id: <code>$1</code>",
+	"jsonschema-invalidkey": "Clave invalide \"$1\" in \"$2\"",
+	"jsonschema-invalidempty": "Un structura de datos vacue non es valide con iste schema",
+	"jsonschema-invalidnode": "Nodo invalide: expectava \"$1\", recipeva \"$2\". Cammino: \"$3\"",
+	"jsonschema-invalid-missingfield": "Campo obligatori \"$1\" mancante",
+	"jsonschema-invalid-notinenum": "Valor <code>$1</code> non es in enum pro le proprietate $2"
+}

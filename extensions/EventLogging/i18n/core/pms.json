@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Borichèt",
+			"Dragonòt"
+		]
+	},
+	"eventlogging-desc": "Piataforma dj'event ëd marcage për ël còdes da la banda dël client",
+	"eventlogging-invalid-json": "JSON pa bon",
+	"eventlogging-revision-id": "Revision $1"
+}

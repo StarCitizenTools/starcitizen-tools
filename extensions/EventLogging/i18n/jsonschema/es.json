@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Armando-Martin",
+			"Fitoschido",
+			"Ihojose",
+			"Ryo567",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "Idref erróneo: \"$1\"",
+	"jsonschema-idconvert": "No se puede convertir var a id: <code>$1</code>",
+	"jsonschema-invalidkey": "Clave no válida \"$1\" en \"$2\"",
+	"jsonschema-invalidempty": "No es válida la estructura de datos vacía con este esquema",
+	"jsonschema-invalidnode": "Nodo no válido: se esperaba \"$1\", se obtuvo \"$2\". Ruta: \"$3\"",
+	"jsonschema-invalid-missingfield": "Falta el campo obligatorio «$1»",
+	"jsonschema-invalid-notinenum": "El valor <code>$1</code> no está en la enumeración para la propiedad $2",
+	"apihelp-jsonschema-description": "Recuperar una página de esquema JSON.",
+	"apihelp-jsonschema-param-revid": "Identificador de revisión de esquema.",
+	"apihelp-jsonschema-param-title": "Nombre del esquema.",
+	"apihelp-jsonschema-example-1": "Recuperar esquema para la revisión 1234"
+}
