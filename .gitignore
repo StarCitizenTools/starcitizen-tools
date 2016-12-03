@@ -32,7 +32,6 @@ cscope.out
 /maintenance/.mwsql_history
 /maintenance/dev/data
 /AdminSettings.php
-/LocalSettings.php
 /StartProfiler.php
 
 # Building & testing
@@ -60,7 +59,6 @@ Thumbs.db
 .idea
 .metadata*
 .settings
-/favicon.ico
 /static*
 /tags
 /.htaccess
