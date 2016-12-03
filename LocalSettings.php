@@ -81,6 +81,9 @@ $wgGenerateThumbnailOnParse = true;
 $wgUseImageMagick = true;
 $wgImageMagickConvertCommand = "/usr/bin/convert";
 
+# Needed to make UploadWizard work in IE
+$wgApiFrameOptions = 'SAMEORIGIN';
+
 # InstantCommons allows wiki to use images from https://commons.wikimedia.org
 $wgUseInstantCommons = false;
 
@@ -98,7 +101,7 @@ $wgShellLocale = "en_US.utf8";
 ## Set $wgCacheDirectory to a writable directory on the web server
 ## to make your wiki go slightly faster. The directory should not
 ## be publically accessible from the web.
-#$wgCacheDirectory = "$IP/cache";
+$wgCacheDirectory = "$IP/cache";
 
 # Site language code, should be one of the list in ./languages/Names.php
 $wgLanguageCode = "en";
@@ -170,7 +173,7 @@ wfLoadExtension( 'TextExtracts' );
 wfLoadExtension( 'Popups' );
 $wgExtractsRemoveClasses[] = 'dablink';
 $wgExtractsRemoveClasses[] = 'translate';
-
+require_once( "$IP/extensions/UploadWizard/UploadWizard.php" );
 #CSS
 require_once "$IP/extensions/CSS/CSS.php";
 
@@ -193,6 +196,22 @@ function onBeforePageDisplay( OutputPage &$out, Skin &$skin )
     $out->addHeadItem("head script", $script);
     return true;
 };
+
+#UploadWizard
+$wgUploadNavigationUrl = '/Special:UploadWizard';
+$wgUploadWizardConfig = array(
+	'debug' => false,
+	'altUploadForm' => 'Special:Upload',
+	'fallbackToAltUploadForm' => false,
+	'enableFormData' => true,
+	'enableMultipleFiles' => true,
+	'enableMultiFileSelect' => false,
+	'tutorial' => array(
+	 	'skip' => true
+		),
+	'maxUploads' => 15,
+	'fileExtensions' => $wgFileExtensions
+	);
 
 
 #Translate Plugin
@@ -233,6 +252,10 @@ $wgVirtualRestConfig['modules']['parsoid'] = array(
   'url' => 'http://starcitizen.tools:8142',
 
 );
+#Eventlogging
+require_once "$IP/extensions/EventLogging/EventLogging.php";
+$wgEventLoggingBaseUri = 'http://starcitizen.tools:8080/event.gif';
+$wgEventLoggingFile = '/var/log/mediawiki/events.log';
 
 # Add more configuration options below.
 define("NS_COMMLINK", 3000);
