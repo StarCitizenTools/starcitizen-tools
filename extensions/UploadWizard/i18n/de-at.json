@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"AleXXw",
+			"Man77"
+		]
+	},
+	"mwe-upwiz-source-ownwork-cc-by-sa-3.0-explain": "(Jeder darf {{PLURAL:$1|dieses Werk|diese Werke}} nutzen, weitergeben oder verändern, solange ich als Urheber angegeben werde und Änderungen gemäß der gleichen Lizenz weitergegeben werden.)",
+	"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-at": "Ich, $2, der Rechteinhaber {{PLURAL:$1|dieses Werks|dieser Werke}} gewähre unwiderruflich jedem das Recht, {{PLURAL:$1|es|sie}} gemäß der „Creative Commons“-Lizenz „Namensnennung, Weitergabe unter gleichen Bedingungen 3.0 Österreich“ ([$3 Text der Lizenz]) zu nutzen."
+}

@@ -1,0 +1,5 @@
+wikitools>=1.1
+poster>=0.8
+--allow-external PIL
+--allow-unverified PIL
+PIL>=1.1.7

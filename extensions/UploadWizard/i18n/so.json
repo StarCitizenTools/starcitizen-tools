@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Maax",
+			"Matma Rex"
+		]
+	},
+	"mwe-upwiz-step-tutorial": "Baro",
+	"mwe-upwiz-step-file": "Soo geli",
+	"mwe-upwiz-step-deeds": "Soo deynta ogolaashadeeda",
+	"mwe-upwiz-step-details": "Ka hadal",
+	"mwe-upwiz-step-thanks": "Isticmaal",
+	"mwe-upwiz-tutorial-error-file-missing": "Naga raali noqo, waa weynay wax fayl ah oo ku aadan daadihinta la rabay in ee meeshaan ku qornaato. Fadlan la hadal maamulaha combiyutarka.",
+	"mwe-upwiz-add-file-n": "Ku dar fayl kale",
+	"mwe-upwiz-add-file-0-free": "dooro faylka wararka si aad u tabarucdid",
+	"mwe-upwiz-transport-started": "Woo bilaabanooyaa...",
+	"mwe-upwiz-uploading": "Woo soo galinooyaa...",
+	"mwe-upwiz-transported": "Woo dhamaaday soo gelinta...",
+	"mwe-upwiz-stashed-upload": "waayahay",
+	"mwe-upwiz-published": "Waa la soo bandhigay!",
+	"mwe-upwiz-failed": "Waa ku guul dareysatay.",
+	"mwe-upwiz-remove": "Ka saar",
+	"mwe-upwiz-finished": "Woo dhamaaday",
+	"mwe-upwiz-source-ownwork": "{{PLURAL:$1|Faylkaan waa |Faylyadaan waa}} shaqo oo aniga leeyahay.",
+	"mwe-upwiz-source-thirdparty-intro": "fadlan ku qor ciwaanka aa ka soo heshay fayl kasto",
+	"mwe-upwiz-source-thirdparty-accept": "waayahay",
+	"mwe-upwiz-more-options": "dooqyo badan...",
+	"mwe-upwiz-desc-add-0": "Ku dar ka hadalka",
+	"mwe-upwiz-date-created": "taariikhda la sameeyay",
+	"mwe-upwiz-other": "wax war oo kale",
+	"mwe-upwiz-thanks-intro": "Waad ku mahadsantahay wax soo gelida!",
+	"mwe-upwiz-upload-error-stashed-anyway": "Iska soo gali?",
+	"mwe-upwiz-next-deeds": "Kan ku xiga",
+	"mwe-upwiz-next-details": "Kan ku xiga",
+	"mwe-upwiz-home": "Booqo bogga internetka ee wiki",
+	"mwe-upwiz-deeds-need-license": "fadlan dooro laysinka.",
+	"mwe-upwiz-license-show-all": "Isticmaal laysin kala duwan"
+}

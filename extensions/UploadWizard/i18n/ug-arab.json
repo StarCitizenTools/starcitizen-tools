@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sahran"
+		]
+	},
+	"mwe-upwiz-step-file": "يۈكلە",
+	"mwe-upwiz-step-thanks": "ئىشلەت",
+	"mwe-upwiz-add-flickr-or": "ياكى",
+	"mwe-upwiz-transport-started": "باشلاۋاتىدۇ…",
+	"mwe-upwiz-uploading": "يۈكلەۋاتىدۇ…",
+	"mwe-upwiz-stashed-upload": "يۈكلەندى",
+	"mwe-upwiz-remove": "چىقىرىۋەت",
+	"mwe-upwiz-upload": "يۈكلە",
+	"mwe-upwiz-source-thirdparty-accept": "جەزملە",
+	"mwe-upwiz-copy-metadata-button": "كۆچۈر",
+	"mwe-upwiz-desc": "چۈشەندۈرۈش",
+	"mwe-upwiz-title": "ماۋزۇ",
+	"mwe-upwiz-location": "ئورنى",
+	"mwe-upwiz-location-lat": "كەڭلىك",
+	"mwe-upwiz-location-lon": "ئۇزۇنلۇق",
+	"mwe-upwiz-location-alt": "دېڭىز يۈزىدىن ئېگىزلىك",
+	"mwe-upwiz-author": "يازغۇچى(لار)",
+	"mwe-upwiz-other": "باشقا ئۇچۇرلار",
+	"mwe-upwiz-source": "مەنبە",
+	"mwe-upwiz-ok": "جەزملە",
+	"mwe-upwiz-next": "كەينى",
+	"mwe-upwiz-next-file": "داۋاملاشتۇر",
+	"mwe-upwiz-next-deeds": "كەينى",
+	"mwe-upwiz-next-details": "كەينى",
+	"mwe-upwiz-error-blank": "بۇ زۆرۈر مەزمۇندۇر",
+	"mwe-upwiz-license-custom-preview": "ئالدىن كۆزەت",
+	"mwe-upwiz-license-confirm-remove-title": "چىقىرىۋېتىشنى جەزملەش",
+	"mwe-upwiz-categories": "تۈرلەر",
+	"mwe-upwiz-errordialog-ok": "جەزملە",
+	"prefs-uploads": "يۈكلەر",
+	"prefs-upwiz-licensing": "ئىجازەت"
+}

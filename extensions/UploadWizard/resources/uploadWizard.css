@@ -1,0 +1,559 @@
+form.mwe-upwiz-form {
+	display: inline;
+}
+
+#upload-wizard {
+	margin-top: 18px;
+	min-width: 750px; /* width of tutorial.png plus padding */
+	max-width: 900px; /* wild guess */
+}
+
+#mwe-upwiz-steps {
+	background-color: white;
+	background-image: none;
+	border: none;
+}
+
+#mwe-upwiz-steps li {
+	color: #666666;
+	font-size: 1.2em;
+	margin-right: -1px;
+	border-top: solid 1px #a7d7f9;
+	border-bottom: solid 1px #a7d7f9;
+}
+
+#mwe-upwiz-step-tutorial {
+	border-left: solid 1px #a7d7f9;
+}
+
+#mwe-upwiz-step-thanks {
+	border-right: solid 1px #a7d7f9;
+}
+
+#mwe-upwiz-steps li.head {
+	color: #000000;
+}
+
+.mwe-upwiz-clearing {
+	clear: left;
+	width: 100%;
+}
+
+#mwe-upwiz-content {
+	padding: 1em;
+}
+
+#mwe-upwiz-upload-ctrl-flickr-container {
+	display: inline-block;
+}
+
+.mwe-upwiz-add-files-0 #mwe-upwiz-upload-ctrl-flickr-container {
+	display: block;
+}
+
+.mwe-upwiz-add-files-0, #mwe-upwiz-files {
+	margin-top: 3em;
+	margin-bottom: 1em;
+}
+
+.mwe-upwiz-add-files-0 {
+	text-align: center;
+}
+
+.mwe-upwiz-add-files-0 #mwe-upwiz-add-file {
+	font-size: large;
+}
+
+#mwe-upwiz-add-file {
+	position: relative;
+	overflow: hidden;
+}
+
+#mwe-upwiz-add-file .oo-ui-buttonElement-button .mwe-upwiz-file-input {
+	position: absolute;
+	margin: 0;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	z-index: 1;
+	cursor: pointer;
+	/* Push the button part of the native control out of view, as it changes the cursor */
+	padding-top: 100px;
+}
+
+.mwe-upwiz-file.filled {
+	position: relative;
+}
+
+.mwe-upwiz-file.odd .mwe-upwiz-visible-file {
+	background: #f5f5f5;
+}
+
+.mwe-upwiz-file-indicator, .mwe-upwiz-count {
+	float: right;
+	margin-left: 0.5em;
+	padding: 0.5em;
+}
+
+.mwe-upwiz-visible-file .mwe-upwiz-file-indicator {
+	visibility: hidden;
+}
+
+.mwe-upwiz-visible-file {
+	display: none;
+	position:relative;
+	z-index: 2;
+}
+
+.mwe-upwiz-file.filled .mwe-upwiz-visible-file {
+	display: block;
+}
+
+.mwe-upwiz-visible-file-filename {
+	padding: 0.5em;
+	margin-right: 40px;
+	overflow: hidden;
+}
+
+.mwe-upwiz-filled-filelist {
+	border: 1px solid #d8d8d8;
+}
+
+.mwe-upwiz-file-status {
+	display: none;
+	color: #797979;
+}
+
+.mwe-upwiz-file-status-line ul {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.mwe-upwiz-file-preview {
+	float: left;
+	height: 100px;
+	width: 100px;
+	padding: 0.5em;
+	border: 1px solid #e0e0e0;
+	margin-right: 1em;
+	text-align: center;
+	/* @embed */
+	background: url('images/32px-Blank-document.svg.png') no-repeat center center;
+}
+
+.mwe-upwiz-file-texts {
+	/* This also create a new block formatting context, resulting in the the whole block
+	   displaying next to image thumbnail, rather than wrapping the lines of text around it */
+	overflow: hidden;
+}
+
+.mwe-upwiz-file-preview-broken {
+	/* @embed */
+	background: url('images/32px-Blank-document-broken.svg.png') no-repeat center center !important;
+}
+
+.mwe-upwiz-add-files-n {
+	float: left;
+}
+
+#mwe-upwiz-add-file-container.mwe-upwiz-add-files-n, .mwe-upwiz-progress-bar-etr {
+	width: 300px;
+}
+
+/* Flickr Interface CSS*/
+
+.ui-helper-center-fix {
+	display: inline-block;
+	position: relative;
+}
+
+#mwe-upwiz-upload-ctr-divide {
+	display: block;
+	font-size: 1.3em;
+}
+
+#mwe-upwiz-flickr-input {
+	font-size: 1.2em;
+	width: 250px;
+	padding: 4px;
+}
+
+#mwe-upwiz-upload-add-flickr-container {
+	text-align: center;
+}
+
+#mwe-upwiz-flickr-select-list-container {
+	width: 580px; /* based on values in #mwe-upwiz-flickrSelectlist li */
+	margin: 0 auto;
+	display: none;
+	text-align: center;
+}
+#mwe-upwiz-flickr-select-list {
+	list-style: none;
+	clear: both;
+	overflow: hidden;
+	margin-bottom: 1em;
+}
+
+#mwe-upwiz-flickr-select-list .ui-selecting {
+	background: #FECA40;
+}
+
+#mwe-upwiz-flickr-select-list .ui-selected {
+	background: green;
+}
+
+#mwe-upwiz-flickr-select-list li {
+	margin: 6px;
+	padding: 1px;
+	float: left;
+	display: block;
+	width: 100px;
+	height: 100px;
+	background: none;
+}
+
+#mwe-upwiz-flickr-disclaimer {
+	font-size: 92%;
+	margin: 1em 0;
+	padding: 0.5em;
+	background-color: #DFEFFA;
+}
+
+#mwe-upwiz-flickr-select-list li img {
+	margin: 12.5px;
+	display: block;
+	position: relative;
+}
+
+.mwe-upwiz-visible-file {
+	width: 100%; /* of containing mwe-upwiz-file */
+	overflow: hidden;
+}
+
+.mwe-upwiz-file:hover .mwe-upwiz-visible-file {
+	background: #e0f0ff !important;
+}
+
+#mwe-upwiz-files {
+	margin-right: 8em;
+	margin-left: 8em;
+}
+
+.filled + .filled {
+	border-top: 1px solid #d8d8d8;
+}
+
+#mwe-upwiz-upload-ctrls {
+	margin-top: 1em;
+}
+
+#mwe-upwiz-stepdiv-file .mwe-upwiz-buttons {
+	display: none;
+}
+
+#mwe-upwiz-stepdiv-file .mwe-upwiz-buttons .mwe-upwiz-file-endchoice {
+	display: none;
+}
+
+.mwe-upwiz-file-indicator {
+	height: 40px;
+	width: 40px;
+}
+
+#mwe-upwiz-flickr-select-list li,
+.mwe-upwiz-status-progress {
+	/* @embed */
+	background: url('images/24px-spinner-0645ad.gif') no-repeat center center;
+}
+
+.mwe-upwiz-file.odd .mwe-upwiz-status-progress {
+	/* @embed */
+	background: url('images/24px-spinner-0645ad-f5f5f5.gif') no-repeat center center;
+}
+
+.mwe-upwiz-file:hover .mwe-upwiz-status-progress {
+	/* @embed */
+	background: url('images/24px-spinner-0645ad-e0f0ff.gif') no-repeat center center;
+}
+
+.mwe-upwiz-status-stashed, .mwe-upwiz-status-uploaded {
+	/* @embed */
+	background: url('images/32px-check.png') no-repeat center center;
+}
+
+.mwe-upwiz-license-icon {
+	height: 18px;
+	margin-left: 6px;
+	padding: 9px;
+	width: 18px;
+}
+
+.mwe-upwiz-cc-zero-icon {
+	/* @embed */
+	background: url('images/18px-Cc-zero.svg.png') no-repeat center center;
+}
+
+.mwe-upwiz-cc-sa-icon {
+	/* @embed */
+	background: url('images/18px-Share_Alike.svg.png') no-repeat center center;
+}
+
+.mwe-upwiz-cc-by-icon {
+	/* @embed */
+	background: url('images/18px-Cc-by_new_white.svg.png') no-repeat center center;
+}
+
+.mwe-upwiz-status-error {
+	/* @embed */
+	background: url('images/32px-alert.png') no-repeat center center;
+	font-weight: bold;
+	color: #CC0000;
+}
+
+.mwe-upwiz-progress {
+	margin-top: 15px;
+}
+
+.mwe-upwiz-progress-bar-etr {
+	float: left;
+}
+
+.mwe-upwiz-etr {
+	text-align: center;
+}
+
+.mwe-upwiz-thumbnail {
+	border: 1px solid #cccccc;
+	text-align: center;
+	background: #ffffff;
+	width: 100px;
+	height: 100px;
+	padding: 8px;
+}
+
+.mwe-upwiz-thumbnail-side {
+	float: left;
+	margin-bottom: 1em;
+	margin-right: 1em;
+	width: 116px; /* see .mwe-upwiz-thumbnail, 100 + 8 + 8 */
+}
+
+#mwe-upwiz-deeds-thumbnails {
+	text-align: center;
+	margin: 1em 0;
+	background: #f0f0f0;
+}
+
+#mwe-upwiz-deeds-thumbnails .mwe-upwiz-thumbnail {
+	display: inline-block;
+	margin: 1em;
+	vertical-align: middle;
+}
+
+/* I don't like that this has to have width, to ensure that all the floats work out correctly.*/
+.mwe-upwiz-data {
+	float: left;
+	width: 46em;
+	padding-right: 1em; /* fix for 100% width textareas in mwe-upwiz-data */
+}
+
+.mwe-upwiz-stepdiv {
+	position: relative;
+}
+
+#mwe-upwiz-tutorial {
+	text-align: center;
+}
+
+.mwe-small-print {
+	font-size: x-small;
+}
+
+.mwe-upwiz-deed.selected .mwe-upwiz-deed-name {
+	font-weight: bold;
+}
+
+.mwe-more-options, .mwe-upwiz-macro-deeds-return, .mwe-upwiz-deed-header-link {
+	cursor: pointer;
+}
+
+.mwe-upwiz-deed-license {
+	margin-left: 1.5em;
+}
+
+.mwe-upwiz-info-file {
+	padding: 1em;
+}
+
+.mwe-upwiz-details-fieldname {
+	padding-top:  0.3em;
+}
+
+.mwe-title {
+	font-family: sans-serif;
+	font-size: small;
+	width: 100%;
+}
+
+.mwe-upwiz-details-fieldname-input {
+	margin-bottom: 1em;
+}
+
+.mwe-upwiz-thirdparty-license {
+	margin-top: 8px;
+}
+
+.mwe-upwiz-deed-form-internal {
+	padding: 0.5em 0 1em 2em;
+}
+
+label.mwe-upwiz-copyright-info {
+	display: inline-block;
+	padding-left: 3px;
+	text-indent: 0;
+	padding-top: 2px;
+	width: 93%;
+}
+
+.mwe-upwiz-custom-deed {
+	margin-top: 5px;
+}
+
+.mwe-upwiz-buttons {
+	margin-top: 1em;
+	text-align: right;
+}
+
+a.mwe-upwiz-tooltip-link {
+	cursor: pointer;
+}
+
+input[type='radio'].mwe-upwiz-copyright-info-radio {
+	vertical-align: top;
+}
+
+.mwe-upwiz-details-more-options,
+.mwe-upwiz-details-copy-metadata,
+.mwe-upwiz-deed-license-group-head {
+	margin-top: 10px;
+	padding-left: 1.5em;
+	cursor: pointer;
+	outline: none;
+	display: block;
+}
+
+.mwe-upwiz-details-more-options.mw-collapsible-toggle,
+.mwe-upwiz-details-copy-metadata.mw-collapsible-toggle,
+.mwe-upwiz-deed-license-group-head.mw-collapsible-toggle {
+	/* Override jquery.makeCollapsible styles */
+	float: none;
+	/* Override mediawiki.icon styles */
+	background-position: left center;
+}
+
+.mwe-upwiz-deed-license-group-body {
+	margin-bottom: 1em;
+	padding-left: 1.5em;
+}
+
+.mwe-upwiz-thanks {
+	margin-bottom: 2em;
+}
+
+.mwe-readonly {
+	background-color: #ffffff;
+	padding: 0.25em;
+}
+
+.mwe-upwiz-metadata-copier .mw-collapsible-content,
+.mwe-more-details .mw-collapsible-content {
+	margin-bottom: 1em;
+}
+
+#upload-wizard .ui-corner-tl {
+	border-top-left-radius: 4px;
+}
+
+#upload-wizard .ui-corner-tr {
+	border-top-right-radius: 4px;
+}
+
+#upload-wizard .ui-corner-bl {
+	border-bottom-left-radius: 4px;
+}
+
+#upload-wizard .ui-corner-br {
+	border-bottom-right-radius: 4px;
+}
+
+#upload-wizard .ui-corner-top {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+}
+
+#upload-wizard .ui-corner-bottom {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+}
+
+#upload-wizard .ui-corner-left {
+	border-top-left-radius: 4px;
+	border-bottom-left-radius: 4px;
+}
+
+#upload-wizard .ui-corner-right {
+	border-top-right-radius: 4px;
+	border-bottom-right-radius: 4px;
+}
+
+#upload-wizard .ui-corner-all {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+}
+
+.mwe-upwiz-deed-license-group-subhead {
+	color: #797979;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.mwe-upwiz-details-texts {
+	padding: 0.5em;
+}
+
+.mwe-upwiz-objref-pick-image {
+	font-weight: bold;
+}
+
+.mwe-upwiz-objref-pick-image input:disabled + label {
+	color: grey;
+	font-weight: normal;
+}
+
+.mwe-upwiz-objref-notice-existing-image {
+	font-weight: bold;
+}
+
+/* This is basically a custom widget, ugh */
+.mwe-upwiz-metadata-copier .oo-ui-fieldsetLayout {
+	padding-top: 0.25em;
+	padding-bottom: 0.5em;
+}
+
+.mwe-upwiz-metadata-copier .oo-ui-fieldLayout {
+	margin-bottom: 0;
+}
+
+.mwe-upwiz-sign {
+	max-width: 20em;
+	display: inline-block;
+	margin-right: 0;
+	vertical-align: baseline;
+}

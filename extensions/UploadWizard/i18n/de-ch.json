@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Filzstift",
+			"Geitost",
+			"Das Schäfchen"
+		]
+	},
+	"mwe-upwiz-tutorial-error-cannot-transform": "Es konnte leider kein Bild des Lernprogramms aufgerufen werden, das sich der Bildschirmgrösse anpasst. Dies könnte ein vorübergehendes Problem von ''Wikimedia Commons'' sein. Versuche es später noch einmal.",
+	"mwe-upwiz-source-ownwork-assert": "Ich, $2, der Rechteinhaber {{PLURAL:$1|dieses Werks|dieser Werke}}, räume hiermit jedem das Recht ein, {{PLURAL:$1|es|sie}} für jedweden Zweck nutzen zu können. Voraussetzung ist, dass ich als Rechteinhaber genannt werde und abgeleitete Werke gemäss den gleichen Lizenzbedingungen weitergegeben werden können.",
+	"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0": "Ich, $2, der Rechteinhaber {{PLURAL:$1|dieses Werks|dieser Werke}} gewähre unwiderruflich jedem das Recht, {{PLURAL:$1|es|sie}} gemäss der „Creative Commons“-Lizenz „Namensnennung, Weitergabe unter gleichen Bedingungen 3.0“ ([$3 Text der Lizenz]) zu nutzen.",
+	"mwe-upwiz-source-ownwork-cc-by-sa-3.0-explain": "(Jeder darf {{PLURAL:$1|dieses Werk|diese Werke}} nutzen, weitergeben oder verändern, solange ich als Urheber angegeben werde und Änderungen gemäss der gleichen Lizenz weitergegeben werden.)",
+	"mwe-upwiz-source-ownwork-assert-cc-by-3.0": "Ich, $2, der Rechteinhaber {{PLURAL:$1|dieses Werks|dieser Werke}} gewähre unwiderruflich jedem das Recht, {{PLURAL:$1|es|sie}} gemäss der „Creative Commons“-Lizenz „Namensnennung 3.0“ ([$3 Text der Lizenz]) zu nutzen.",
+	"mwe-upwiz-source-ownwork-assert-cc-zero": "Ich, $2, der Rechteinhaber {{PLURAL:$1|dieses Werks|dieser Werke}} gewähre unwiderruflich jedem das Recht, {{PLURAL:$1|es|sie}} gemäss der «Creative Commons»-Lizenz «Namensnennung 3.0» ([$3 Text der Lizenz]) zu nutzen.",
+	"mwe-upwiz-source-ownwork-assert-custom": "Ich, $2, der Rechteinhaber {{PLURAL:$1|dieses Werks|dieser Werke}}, gewähre unwiderruflich jedem das Recht, {{PLURAL:$1|es|sie}} gemäss der folgenden Lizenz zu nutzen:",
+	"mwe-upwiz-tooltip-title": "Ein eindeutiger wie einzigartiger Titel für die Datei, der als Dateiname genutzt werden wird. Normaler Text einschliesslich Leerschläge ist dabei möglich. Die Dateierweiterung darf aber nicht angegeben werden.",
+	"mwe-upwiz-error-title-hosting": "Diese Datei stammt vermutlich von einem anderen Dateihoster. Bitte einen aussagekräftigeren Namen angeben. Zudem sollte erneut geprüft werden, ob die Datei rechtmässig auf {{SITENAME}} veröffentlicht werden kann.",
+	"mwe-upwiz-file-too-large": "Die Datei ist zu gross.",
+	"mwe-upwiz-dialog-title": "Warnung",
+	"mwe-upwiz-license-own-pd": "Auf alle Rechte wird gemäss der ''Creative-Commons''-Erklärung «CC0 1.0 Universal» verzichtet (entspricht der Gemeinfreiheit).",
+	"mwe-upwiz-license-cc-head": "Der Urheberrechtsinhaber hat {{PLURAL:$1|dieses Werk|diese Werke}} gemäss der richtigen «Creative Commons»-Lizenz lizenziert.",
+	"mwe-upwiz-license-flickr-head": "Der Urheberrechtsinhaber hat {{PLURAL:$1|sein Foto oder Video|seine Fotos oder Videos}} auf Flickr gemäss der richtigen Lizenz veröffentlicht."
+}
