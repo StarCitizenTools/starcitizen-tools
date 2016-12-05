@@ -215,7 +215,11 @@ wfLoadExtension( 'UniversalLanguageSelector' );
 require_once "$IP/extensions/googleAnalytics/googleAnalytics.php";
 $wgGoogleAnalyticsAccount = 'UA-48789297-5';
 
-
+#ExternalData
+require_once "$IP/extensions/ExternalData/ExternalData.php";
+# $edgCacheTable = 'ed_url_cache'; Need to run ExternalData.sql first
+$edgCacheExpireTime = 3 * 24 * 60 * 60;
+$edgAllowExternalDataFrom = 'http://starcitizendb.com/';
 
 #Visual Editor
 require_once "$IP/extensions/VisualEditor/VisualEditor.php";
