@@ -1054,7 +1054,7 @@ class Parameters extends ParametersData {
 		$this->setParameter('defaulttemplatesuffix', '');
 		$this->setParameter('mode', 'userformat');
 		$this->setParameter('inlinetext', '');
-		$withHLink             = "[[%PAGE%|%TITLE%]]\n|";
+		$withHLink             = "[[%PAGE%{{#translation:}}|%TITLE%]]\n|";
 
 		foreach (explode(',', $option) as $tabnr => $tab) {
 			if ($tabnr == 0) {
