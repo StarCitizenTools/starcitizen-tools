@@ -173,9 +173,85 @@ require_once "$IP/extensions/Translate/Translate.php";
 require_once "$IP/extensions/googleAnalytics/googleAnalytics.php";
 require_once "$IP/extensions/VisualEditor/VisualEditor.php";
 require_once "$IP/extensions/Scribunto/Scribunto.php";
+require_once( "$IP/extensions/UploadWizard/UploadWizard.php" );
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================
+
+#UploadWizard
+$wgUploadNavigationUrl = '/Special:UploadWizard';
+$wgUploadWizardConfig = array(
+	'debug' => false,
+	'altUploadForm' => 'Special:Upload',
+	'fallbackToAltUploadForm' => false,
+	'enableFormData' => true,
+	'enableMultipleFiles' => true,
+	'enableMultiFileSelect' => false,
+	'tutorial' => array(
+	 	'skip' => true
+		),
+	'maxUploads' => 15,
+	'fileExtensions' => $wgFileExtensions
+	'licenses' => array(
+		'rsilicense' => array(
+			'msg' => 'mwe-upwiz-license-rsi',
+			'templates' => array('RSIlicense')
+		),
+		'thedamnshameslicense' => array(
+			'msg' => 'mwe-upwiz-license-thedamnshames',
+			'templates' => array('TheDamnShamesLicense')
+		),
+		'hasgahalicense' => array(
+			'msg' => 'mwe-upwiz-license-hasgaha',
+			'templates' => array('HasgahaLicense')
+		),
+		'aelannateslalicense' => array(
+			'msg' => 'mwe-upwiz-license-aelannatesla',
+			'templates' => array('AelannaTeslaLicense')
+		),
+	),
+	'licensing' => array(
+		'thirdparty' => array(
+			'defaults' => 'rsilicense',
+			'licenseGroups' => array(
+				array(
+					'head' => 'mwe-upwiz-license-cc-head',
+					'subhead' => 'mwe-upwiz-license-cc-subhead',
+					'licenses' => array(
+						'cc-by-sa-4.0',
+						'cc-by-sa-3.0',
+						'cc-by-sa-2.5',
+						'cc-by-4.0',
+						'cc-by-3.0',
+						'cc-by-2.5',
+						'cc-zero'
+					)
+				),
+				array(
+					'head' => 'mwe-upwiz-license-sc-head'
+					'licenses' => array(
+						'rsilicense',
+						'thedamnshameslicense',
+						'hasgahalicense',
+						'aelannateslalicense'
+					)
+				),
+				array(
+					'head' => 'mwe-upwiz-license-custom-head',
+					'special' => 'custom',
+					'licenses' => array( 'custom' ),
+				),
+				array(
+					'head' => 'mwe-upwiz-license-none-head',
+					'licenses' => array( 'none' )
+				),
+			),
+		),
+	),
+	);
+$wgApiFrameOptions = 'SAMEORIGIN';
+
+
 
 #TextExtracts
 $wgExtractsRemoveClasses[] = 'dablink';
