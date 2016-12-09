@@ -179,6 +179,7 @@ require_once( "$IP/extensions/UploadWizard/UploadWizard.php" );
 #=============================================== Extension Config ===============================================
 
 #UploadWizard
+$wgApiFrameOptions = 'SAMEORIGIN';
 $wgUploadNavigationUrl = '/Special:UploadWizard';
 $wgUploadWizardConfig = array(
 	'debug' => false,
@@ -249,23 +250,14 @@ $wgUploadWizardConfig = array(
 		),
 	),
 	);
-$wgApiFrameOptions = 'SAMEORIGIN';
-
-
 
 #TextExtracts
 $wgExtractsRemoveClasses[] = 'dablink';
 $wgExtractsRemoveClasses[] = 'translate';
-<<<<<<< HEAD
-require_once( "$IP/extensions/UploadWizard/UploadWizard.php" );
-#CSS
-require_once "$IP/extensions/CSS/CSS.php";
-=======
 
 #MsUpload
 $wgMSU_useDragDrop = true;
 $wgMSU_showAutoCat = true;
->>>>>>> refs/remotes/origin/master
 
 #MultimediaViewer
 $wgMediaViewerEnableByDefault = true;
@@ -276,44 +268,7 @@ $wgCaptchaClass = 'ReCaptchaNoCaptcha';
 $wgReCaptchaSiteKey = 'REDACTED';
 $wgReCaptchaSecretKey = 'REDACTED';
 
-<<<<<<< HEAD
-#Flow
-require_once "$IP/extensions/Flow/Flow.php";
-
-#Javascript
-$wgHooks['BeforePageDisplay'][] ='onBeforePageDisplay';
-
-function onBeforePageDisplay( OutputPage &$out, Skin &$skin )
-{
-    $script = '<script></script>';
-    $out->addHeadItem("head script", $script);
-    return true;
-};
-
-#UploadWizard
-$wgUploadNavigationUrl = '/Special:UploadWizard';
-$wgUploadWizardConfig = array(
-	'debug' => false,
-	'altUploadForm' => 'Special:Upload',
-	'fallbackToAltUploadForm' => false,
-	'enableFormData' => true,
-	'enableMultipleFiles' => true,
-	'enableMultiFileSelect' => false,
-	'tutorial' => array(
-	 	'skip' => true
-		),
-	'maxUploads' => 15,
-	'fileExtensions' => $wgFileExtensions
-	);
-
-
-#Translate Plugin
-wfLoadExtension( 'Babel' );
-wfLoadExtension( 'cldr' );
-wfLoadExtension( 'CleanChanges' );
-=======
 #CleanChanges
->>>>>>> refs/remotes/origin/master
 $wgCCTrailerFilter = true;
 $wgCCUserFilter = false;
 $wgDefaultUserOptions['usenewrc'] = 1;
@@ -323,11 +278,8 @@ $wgLocalisationUpdateDirectory = "$IP/cache";
 $wgTranslateDocumentationLanguageCode = 'qqq';
 $wgExtraLanguageNames['qqq'] = 'Message documentation'; # No linguistic content. Used for documenting messages
 
-
 #Google Analytics
 $wgGoogleAnalyticsAccount = 'UA-48789297-5';
-
-
 
 #Visual Editor
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
@@ -335,13 +287,14 @@ $wgHiddenPrefs[] = 'visualeditor-enable';
 $wgVirtualRestConfig['modules']['parsoid'] = array(
   'url' => 'http://starcitizen.tools:8142',
 );
+
 #Eventlogging
 require_once "$IP/extensions/EventLogging/EventLogging.php";
 $wgEventLoggingBaseUri = 'http://starcitizen.tools:8080/event.gif';
 $wgEventLoggingFile = '/var/log/mediawiki/events.log';
 
 #Scribunto
-$wgScribuntoDefaultEngine = 'luastandalone';
+$wgScribuntoDefaultEngine = 'luasandbox';
 
 #=============================================== Namespaces ===============================================
 
