@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mormegil",
+			"Vks"
+		]
+	},
+	"eventlogging-desc": "Framework pro protokolování událostí z kódu běžícího u klienta",
+	"eventlogging-invalid-json": "Nevalidní JSON",
+	"eventlogging-revision-id": "Revize $1",
+	"eventlogging-code-sample-logging-on-server-side": "Logování v PHP",
+	"eventlogging-code-sample-module-setup": "Nastavení PHP pro logování v JavaScriptu",
+	"eventlogging-code-sample-logging-on-client-side": "Logování v JavaScriptu",
+	"eventlogging-error-move-source": "Stránky schémat nelze přejmenovávat",
+	"eventlogging-error-move-destination": "Stránku nelze přejmenovat na stránku se schématem"
+}

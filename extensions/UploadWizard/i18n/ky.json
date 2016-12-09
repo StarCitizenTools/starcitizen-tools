@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kgbek"
+		]
+	},
+	"uploadwizard": "Жүктөө устаты",
+	"right-upwizcampaigns": "Жүктөөчү компания устатын тууралоо",
+	"group-upwizcampeditors": "Жүктөөчү компания устатынын редакторлору",
+	"grouppage-upwizcampeditors": "{{ns:долбоор}}:Жүктөөчү компания устатынын редакторлору",
+	"mwe-upwiz-feedback-title": "Жүктөө устаты жөнүндө сын-пикир калтыру",
+	"uploadcampaign-text": "Сиз Жүктөө устатынын компаниясын өзгөртүүдөсүз",
+	"mwe-upwiz-prefs-chunked": "Жүктөө устатындагы $1 дан ашкан файлдардын жүктөлүшүн бөлүп салуу"
+}

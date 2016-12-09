@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elfalem"
+		]
+	},
+	"mwe-upwiz-api-warning-exists": "በውኪው ላይ [$1 ሌላ ፋይል] በዚህ ስም አለ።",
+	"mwe-upwiz-tutorial-error-localized-file-missing": "ይቅርታ፣ መማሪያ በእርስዎ ቋንቋ ማግኘት አልተቻለም። በሱ ቦታ የእንግሊዝኛው ይታያል።",
+	"mwe-upwiz-help-desk": "የእርዳታ ቦታ",
+	"mwe-upwiz-transport-started": "እየጀመረ ነው...",
+	"mwe-upwiz-uploading": "በመላክ ላይ ነው...",
+	"mwe-upwiz-transported": "መላኩን በመጨረስ ላይ ነው...",
+	"mwe-upwiz-stashed-upload": "እሺ",
+	"mwe-upwiz-getting-metadata": "የፋይሉን መረጃና ቅድመ-ዕይታ በማግኘት ላይ ነው...",
+	"mwe-upwiz-submitting-details": "ዝርዝሮችን በመላክና በማሳተም ላይ ነው...",
+	"mwe-upwiz-published": "ተጭኗል!",
+	"mwe-upwiz-failed": "አልተቻለም።",
+	"mwe-upwiz-remove": "ለማጥፋት",
+	"mwe-upwiz-remove-upload": "ይህን ፋይል ከሚላኩት ፋይሎች ዝርዝር ላይ አጥፋ",
+	"mwe-upwiz-remove-description": "ይህን ገለፃ አጥፋ",
+	"mwe-upwiz-upload": "ለመላክ",
+	"mwe-upwiz-file-all-ok": "የተላኩት ሁሉ ስኬታማ ናቸው!",
+	"mwe-upwiz-file-some-failed": "አንዳንድ ፋይሎችን መላክ አልተቻለም።",
+	"mwe-upwiz-file-retry": "ለመላክ ያልተቻሉትን እንደገና ሞክር",
+	"mwe-upwiz-next-file-despite-failures": "ቢሆንም ቀጥል",
+	"mwe-upwiz-skip-tutorial-future": "ወደፊት ይህንን ደረጃ ዘልለህ እለፍ",
+	"mwe-upwiz-file-all-failed": "ለመላክ ከተሞከሩት ማናቸውም አልተሳኩም።",
+	"mwe-upwiz-upload-count": "ከ$2 ውስጥ $1 {{PLURAL:$2|ፋይል ተላከ።|ፋይሎች ተላኩ።}}",
+	"mwe-upwiz-progressbar-uploading": "በመላክ ላይ ነው",
+	"mwe-upwiz-finished": "ተጨረሸ!"
+}

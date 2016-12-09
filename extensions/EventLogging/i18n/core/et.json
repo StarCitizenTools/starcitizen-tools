@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pikne"
+		]
+	},
+	"eventlogging-invalid-json": "Vigane JSON",
+	"eventlogging-revision-id": "Redaktsioon $1"
+}

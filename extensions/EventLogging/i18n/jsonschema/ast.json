@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "idref incorreuta: \"$1\"",
+	"jsonschema-idconvert": "Nun pue convertise var a id: <code>$1</code>",
+	"jsonschema-invalidkey": "Clave \"$1\" inválida en \"$2\"",
+	"jsonschema-invalidempty": "Estructura de datos balera inválida con esti esquema",
+	"jsonschema-invalidnode": "Nodu inválidu: Esperabase \"$1\"; recibióse \"$2\". Camín: \"$3\"",
+	"jsonschema-invalid-missingfield": "Falta'l campu obligatoriu \"$1\"",
+	"jsonschema-invalid-notinenum": "El valor <code>$1</code> nun ta na enumeración de la propiedá $2",
+	"apihelp-jsonschema-description": "Recuperar una páxina d'esquema JSON.",
+	"apihelp-jsonschema-param-revid": "ID de revisión d'esquema.",
+	"apihelp-jsonschema-param-title": "Nome del esquema.",
+	"apihelp-jsonschema-example-1": "Recuperar l'esquema de la revisión 1234"
+}

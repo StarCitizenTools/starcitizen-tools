@@ -1,0 +1,60 @@
+/*!
+ * CSS for styling HTML-formatted JSON Schema objects
+ *
+ * @file
+ * @author Munaf Assaf <massaf@wikimedia.org>
+ * @ingroup Extensions
+ */
+
+.mw-json-schema-code-samples {
+	border: 1px solid #ddd;
+	display: none;
+	font-size: 120%;
+	min-width: 30em;
+	position: absolute;
+	background: #fff;
+	padding: 1.4em;
+	box-shadow: rgba(0, 0, 0, 0.3) 0.3em 0.3em 1em;
+	right: 0;
+}
+
+.client-nojs .mw-json-schema-code-glyph {
+	display: none;
+}
+
+.mw-json-schema-code-glyph {
+	font-family: 'entypo';
+	font-size: 3em;
+	background: #f55b65;
+	color: #fff;
+	right: 0;
+	top: -.9em;
+	padding: 0.1em;
+	cursor: pointer;
+	transition: background-color .5s;
+	line-height: 0.46em;
+}
+
+.mw-json-schema-code-glyph:hover {
+	background: #f78088;
+}
+
+/*!
+ * Entypo
+ * Copyright (c) 2012, Daniel Bruce (www.entypo.com).
+ *
+ * This Font Software is licensed under the SIL Open Font License,
+ * Version 1.1. See ENTYPO-LICENSE.txt or http://scripts.sil.org/OFL.
+ */
+@font-face {
+    font-family: 'entypo';
+    src: url('entypo.eot');
+    }
+
+@font-face {
+    font-family: 'entypo';
+    src: url(data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAAAAAT0AA8AAAAAB1wAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABGRlRNAAABWAAAABwAAAAcZiabO0dERUYAAAF0AAAAHAAAACAAMgAET1MvMgAAAZAAAAA8AAAAYBX7Q5tjbWFwAAABzAAAAEwAAAFa7l3cxWN2dCAAAAIYAAAABAAAAAQARAURZ2FzcAAAAhwAAAAIAAAACP//AANnbHlmAAACJAAAAMgAAADYSRas/2hlYWQAAALsAAAALgAAADb+G4CkaGhlYQAAAxwAAAAdAAAAJApoBgZobXR4AAADPAAAABQAAAAUG7gAqmxvY2EAAANQAAAADAAAAAwAYADEbWF4cAAAA1wAAAAfAAAAIABJAE9uYW1lAAADfAAAATwAAAKSODlpy3Bvc3QAAAS4AAAANAAAAEtv7YNQd2ViZgAABOwAAAAGAAAABmqqURsAAAABAAAAAMw9os8AAAAAzKfdRAAAAADNQRsneNpjYGRgYOADYgkGEGBiYARCFjAG8RgABHYAN3jaY2Bmnck4gYGVgYXVmOUsAwPDLAjNBMSMxgxogAmJ7eIEJBwYeJ+LsDH8AzI5IMKMSEoUGBgB420H6XjaY2BgYGaAYBkGRgYQCAHyGMF8FgYLIM3FwMHABIQMDLwPGJ6L/P8PVgVjM/7/qsAs8QGqFwoY2RjgAowgnUwMqICRYdgDAHmpC+UARAURAAAAAf//AAJ42k2NQQqCQBhGv99xlMBxEKJACFLU2RVZtBJaZNAFukFIR+oOrXQVdIU6QNRW2tQFQoZ017f6eG/xYCAHjD3fgcHGpCRMs8o28UlLiz+zihntRck6zDtc2RY1WUUdn3uBFwdekBtjHdFRH/jue8rNGwDC32ZtAgWuZsFSSIxaPehLGg76thWqHi1T3iMrTBYrUslimdJbyqaR0g1dfaatG9KaNvoiI19oLfyIxW7i1C9HCSFIUSyEfui78JXzqh3lt8Uf4oEu6njaY2BkYGBgYmD456nKGs9v85VBnoMBBM46Smsi0yxprKFAigOkloEBANUTBq0AAHjaY2BkYGBj+MfAwMDBAAIsaQyMDKiAFQAnkwF+AAAAAuwARAgAAAAIAAAABAAAAATMAGYAAAAsACwALAA0AGx42mNgZGBgYGWQY2BiAAEQycgAEnNg0AMJAAAGwgCZAHjalZHbSkJBFIa/STtYG7Gb8KKLTXibmCJBdJOmRESFSYdLTQtJ3WJ2eoGeoMvoAXqQqPfpAfr3OJYFQTHM4vvX/GvW7LWBBC9EMNEYsK49ZIMnNeQJ4mw5jrDEoeMoi9w6nmSWB8dTqn1yPM02z45nSPLuOEbSeI7nSJmUY0886pXAM23H88TNqNcrC+be8RsZ80iRPk1qDGhxLfKVCehoBXS5tLqoWOCEZQ7YEGfJsKJYkmPAHT15K6o954q27upTZo9dquzIX2BNqqpciWP2xRWp8Vr/R3WWtDqEa9z1vaJl31bTHqiiRkM3dGz1hXIBZ4qb0l05m7o3/IK+OpxK/Td/Y1daPb7O65+nab3kb57f53UkVdebA+vwNd1wAmG2IVW2p2E2p5ghr4lmWVXM28zwf+Q+AOEBW0x42mNgYgCD/yYM2AErAwMjEyMzIwsjK1t6TmVBhiF7aV6mgYGBC4h2BTLAtLmhCQDn/gorAAFRG2qpAAA=) format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}

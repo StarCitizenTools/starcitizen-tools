@@ -1,0 +1,25 @@
+{
+	// Enforcing
+	"bitwise": true,
+	"eqeqeq": true,
+	"freeze": true,
+	"latedef": true,
+	"noarg": true,
+	"nonew": true,
+	"undef": true,
+	"unused": true,
+
+	// Relaxing
+	"laxbreak": true,
+
+	// Environment
+	"browser": true,
+	"es3": true,
+
+	"predef": [
+		"mediaWiki",
+		"jQuery",
+		"QUnit",
+		"JSON"
+	]
+}

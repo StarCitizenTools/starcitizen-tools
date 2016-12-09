@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minh Nguyen"
+		]
+	},
+	"eventlogging-desc": "Khuôn khổ ghi các sự kiện trong mã nguồn trình khách",
+	"eventlogging-invalid-json": "JSON không hợp lệ",
+	"eventlogging-revision-id": "Phiên bản $1",
+	"eventlogging-code-sample-logging-on-server-side": "Ghi nhật trình trong PHP",
+	"eventlogging-code-sample-module-setup": "Thiết lập PHP để ghi nhật trình trong JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Ghi nhật trình trong JavaScript",
+	"eventlogging-error-move-source": "Không thể đổi tên trang giản đồ",
+	"eventlogging-error-move-destination": "Không thể đưa trang vào không gian tên Giản đồ"
+}

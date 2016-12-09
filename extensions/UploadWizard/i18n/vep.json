@@ -1,0 +1,42 @@
+{
+	"@metadata": {
+		"authors": [
+			"Игорь Бродский"
+		]
+	},
+	"mwe-upwiz-code-unknown": "Tundmatoi kel'",
+	"mwe-upwiz-step-file": "Jügutoitand",
+	"mwe-upwiz-step-details": "Ümbrikirjutamine",
+	"mwe-upwiz-step-thanks": "Kävutagat",
+	"mwe-upwiz-help-desk": "Abun radnikoičend",
+	"mwe-upwiz-help-desk-url": "Abun radnikoičend",
+	"mwe-upwiz-add-file-n": "Ližata völ fail",
+	"mwe-upwiz-transport-started": "Zavodind...",
+	"mwe-upwiz-uploading": "Jügutoitmine serverha...",
+	"mwe-upwiz-stashed-upload": "OK",
+	"mwe-upwiz-published": "Publikuidud!",
+	"mwe-upwiz-remove": "Čuta poiš",
+	"mwe-upwiz-upload": "Jügutoitta",
+	"mwe-upwiz-progressbar-uploading": "jügutoitmine",
+	"mwe-upwiz-source-thirdparty-accept": "OK",
+	"mwe-upwiz-desc": "Ümbrikirjutand",
+	"mwe-upwiz-title": "Pälkirjutez",
+	"mwe-upwiz-location": "Sijaduz",
+	"mwe-upwiz-author": "Tegijad",
+	"mwe-upwiz-other": "Toine informacii",
+	"mwe-upwiz-source": "Purde",
+	"mwe-upwiz-ok": "OK",
+	"mwe-upwiz-next": "Jäl'ghine",
+	"mwe-upwiz-next-deeds": "Jäl'ghine",
+	"mwe-upwiz-next-details": "Jäl'ghine",
+	"mwe-upwiz-upload-another": "Jügutoitta failoid völ",
+	"mwe-upwiz-tooltip-more-info": "Tedustagat völ.",
+	"mwe-upwiz-deeds-need-license": "Olgat hüväd, valikat licenzii.",
+	"mwe-upwiz-license-show-all": "Kävutagat toine licenzii",
+	"mwe-upwiz-license-show-recommended": "Kävutagat rekomenduidud licenzii",
+	"mwe-upwiz-too-many-files": "Äjahko failoid.",
+	"mwe-upwiz-license-misc": "Erazvuiččed süd",
+	"mwe-upwiz-categories": "Kategorijad",
+	"mwe-upwiz-errordialog-ok": "OK",
+	"mwe-upwiz-prefs-def-license": "Licezii järgendusen mödhe"
+}

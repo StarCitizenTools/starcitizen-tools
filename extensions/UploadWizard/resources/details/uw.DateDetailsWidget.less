@@ -1,0 +1,22 @@
+.mwe-upwiz-dateDetailsWidget {
+	.mwe-upwiz-dateDetailsWidget-toggler,
+	.mwe-upwiz-dateDetailsWidget-date {
+		display: inline-block;
+		vertical-align: middle;
+	}
+
+	.mwe-upwiz-dateDetailsWidget-toggler {
+		// HACK Until T97631 is fixed, otherwise the icons look awful
+		.oo-ui-buttonOptionWidget.oo-ui-iconElement > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
+			width: 24px;
+		}
+	}
+
+	.mwe-upwiz-dateDetailsWidget-date {
+		// Force width matching the date input for the text input
+		width: 21em;
+		// Date input has different margins
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rob Lanphier"
+		]
+	},
+	"jsonschema-badidref": "Bad idref: \"$1\"",
+	"jsonschema-idconvert": "Cannot convert var to id: <code>$1</code>",
+	"jsonschema-invalidkey": "Invalid key \"$1\" in \"$2\"",
+	"jsonschema-invalidempty": "Empty data structure not valid with this schema",
+	"jsonschema-invalidnode": "Invalid node: expecting \"$1\", got \"$2\". Path: \"$3\"",
+	"jsonschema-invalid-missingfield": "Missing required field \"$1\"",
+	"jsonschema-invalid-notinenum": "Value <code>$1</code> not in enum for property $2",
+	"apihelp-jsonschema-description": "Retrieve a JSON Schema page.",
+	"apihelp-jsonschema-param-revid": "Schema revision ID.",
+	"apihelp-jsonschema-param-title": "Schema name.",
+	"apihelp-jsonschema-example-1": "Retrieve schema for revision 1234"
+}

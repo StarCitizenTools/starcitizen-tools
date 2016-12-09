@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Armin1392",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "آیدرِف بد: \"$1\"",
+	"jsonschema-idconvert": "وار به آی‌دی نمی‌تواند تبدیل شود: <code>$1</code>",
+	"jsonschema-invalidkey": "کلید نامعتبر \"$1\" در \"$2\"",
+	"jsonschema-invalidempty": "ساختار اطلاعات خالی با این طرح کلی معتبر نیست",
+	"jsonschema-invalidnode": "گره نامعتبر:‌ انتظار می‌رود \"$1\"، \"$2\" شده باشد. مسیر: \"$3\"",
+	"jsonschema-invalid-missingfield": "زمینه‌ٔ مورد نیاز از دست رفتهٔ \"$1\"",
+	"jsonschema-invalid-notinenum": "ارزش <code>$1</code> برای مالکیت $2 در شمارش نیست"
+}

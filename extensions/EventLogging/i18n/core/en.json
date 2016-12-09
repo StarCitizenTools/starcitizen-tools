@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ori.livneh"
+		]
+	},
+	"eventlogging-desc": "Framework for logging events from client-side code",
+	"eventlogging-invalid-json": "Invalid JSON",
+	"eventlogging-revision-id": "Revision $1",
+	"eventlogging-code-sample-logging-on-server-side": "PHP logging",
+	"eventlogging-code-sample-module-setup": "PHP setup for JavaScript logging",
+	"eventlogging-code-sample-logging-on-client-side": "JavaScript logging",
+	"eventlogging-error-move-source": "Schema pages may not be renamed",
+	"eventlogging-error-move-destination": "Pages may not be renamed to Schema pages"
+}

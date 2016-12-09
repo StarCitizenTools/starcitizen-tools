@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16"
+		]
+	},
+	"eventlogging-desc": "Framework per la registrazione degli eventi lato client",
+	"eventlogging-invalid-json": "JSON non valido",
+	"eventlogging-revision-id": "Versione $1",
+	"eventlogging-code-sample-logging-on-server-side": "Registrazione PHP",
+	"eventlogging-code-sample-module-setup": "Installazione PHP per la registrazione JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Registrazione JavaScript"
+}

@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ggajendra",
+			"Manojberma77",
+			"Vinitutpal",
+			"बिप्लब आनन्द"
+		]
+	},
+	"uploadwizard": "उपारोपण तन्त्र",
+	"uploadwizard-desc": "उपारोपण तन्त्र, विकसित कएल गेल दृश्य-श्रव्य उपयोग अनुदान लेल",
+	"mwe-upwiz-js-off": "उपारोपण तंत्र जावास्क्रिप्टक उपयोग विकसित मध्यस्थ लेल करैए। अहाँक गवेषक या तँ जावास्क्रिप्टकेँ नै चलबैए वा जावास्क्रिप्ट अशक्त कएल अछि, से हम सभ अहाँकेँ एकटा सामान्य उपारोपण आवेदन दऽ रहल छी।",
+	"mwe-upwiz-extension-disabled": "ई पन्ना अस्थायी तकनीकी समस्याक कारणसँ अशक्त कएल गेल अछि। ऐ बीच सामान्य उपारोपण आवेदनक प्रयोग करू।",
+	"mwe-upwiz-code-unknown": "अबूझ भाषा",
+	"mwe-upwiz-step-tutorial": "सीखू",
+	"mwe-upwiz-step-file": "उपारोपण",
+	"mwe-upwiz-step-deeds": "अनावरण अधिकार",
+	"mwe-upwiz-step-details": "विस्तारसँ कहू",
+	"mwe-upwiz-step-thanks": "प्रयोग करू",
+	"mwe-upwiz-help-desk": "सहायता कोष्ठ",
+	"mwe-upwiz-add-file-n": "दोसर संचिका जोड़ू",
+	"mwe-upwiz-add-file-0-free": "एकटा दृश्य-श्रव्य संचिका दान लेल चुनू",
+	"mwe-upwiz-transport-started": "शुरू भऽ रहल अछि...",
+	"mwe-upwiz-uploading": "उपारोपण भऽ रहल अछि...",
+	"mwe-upwiz-transported": "उपारोपण समाप्त भेल...",
+	"mwe-upwiz-stashed-upload": "उपारोपण भेल",
+	"mwe-upwiz-getting-metadata": "संचिका सूचना आ पूर्वदृश्य आनि रहल छी ...",
+	"mwe-upwiz-submitting-details": "विवरण द' रहल छी आ प्रकाशित क' रहल छी...",
+	"mwe-upwiz-published": "प्रकाशित भेल !",
+	"mwe-upwiz-failed": "नै भेल।",
+	"mwe-upwiz-remove": "हटाउ",
+	"mwe-upwiz-next-file-despite-failures": "कोनहुना जारी राखू",
+	"mwe-upwiz-skip-tutorial-future": "ई पद भविष्यमे छोड़ि कऽ बढ़ू",
+	"mwe-upwiz-progressbar-uploading": "उपारोपण भऽ रहल अछि।",
+	"mwe-upwiz-finished": "खतम भेल!"
+}

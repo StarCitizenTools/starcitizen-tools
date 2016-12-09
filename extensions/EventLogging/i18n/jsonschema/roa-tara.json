@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "Idref cattive: \"$1\"",
+	"jsonschema-idconvert": "Non ge pozze convertì 'a variabbile jndr'à l'id: <code>$1</code>",
+	"jsonschema-invalidkey": "Chiaev invalide \"$1\" jndr'à \"$2\"",
+	"jsonschema-invalidempty": "Strutture de date vacande non valide cu stu scheme",
+	"jsonschema-invalidnode": "Node invalide: m'aspettave \"$1\", agghie pigghiate \"$2\". Percorse: \"$3\"",
+	"jsonschema-invalid-missingfield": "Cambe richieste mangande \"$1\"",
+	"jsonschema-invalid-notinenum": "'U valore <code>$1</code> non g'è 'n'enumerative pa probbietà $2",
+	"apihelp-jsonschema-description": "Pigghie 'u JSON d'a pàgene de scheme.",
+	"apihelp-jsonschema-param-revid": "ID d'a revisione d'u scheme.",
+	"apihelp-jsonschema-param-title": "Nome d'u scheme.",
+	"apihelp-jsonschema-example-1": "Pigghie 'u scheme pa revisione 1234"
+}

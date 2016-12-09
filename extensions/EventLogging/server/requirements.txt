@@ -1,0 +1,6 @@
+python-etcd>=0.4.0
+jsonschema>=0.7
+pygments>=1.5
+pyzmq>=2.1
+sqlalchemy>=0.7
+kafka-python>=0.9.4

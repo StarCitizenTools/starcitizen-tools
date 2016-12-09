@@ -1,0 +1,7 @@
+.client-js .mwe-upwiz-unavailable {
+	display: none;
+}
+
+.client-nojs #upload-wizard {
+	display: none;
+}

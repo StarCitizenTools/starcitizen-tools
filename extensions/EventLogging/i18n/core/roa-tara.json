@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"eventlogging-desc": "Framework per traccià l'evende da 'u codece late client",
+	"eventlogging-invalid-json": "JSON invalide",
+	"eventlogging-revision-id": "Revisione $1",
+	"eventlogging-code-sample-logging-on-server-side": "Tracciature de PHP",
+	"eventlogging-code-sample-module-setup": "'Mbostaziune de PHP pu tracciamende JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Tracciamende JavaScript",
+	"eventlogging-error-move-source": "Le pàggene d'u scheme non ge ponne essere renominate",
+	"eventlogging-error-move-destination": "Le pàggene non ge ponne essere renominate jndr'à pàggene de scheme"
+}

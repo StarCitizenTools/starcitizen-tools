@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Anakmalaysia",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "Idref tak elok: \"$1\"",
+	"jsonschema-idconvert": "Var tidak boleh ditukar ke id: <code>$1</code>",
+	"jsonschema-invalidkey": "Kunci tidak sah \"$1\" dalam \"$2\"",
+	"jsonschema-invalidempty": "Struktur data kosong tidak sah dengan skema ini",
+	"jsonschema-invalidnode": "Nod tidak sah: \"$1\" diharap, \"$2\" diperoleh. Laluan: \"$3\"",
+	"jsonschema-invalid-missingfield": "Medan wajib \"$1\" tertinggal",
+	"jsonschema-invalid-notinenum": "Nilai <code>$1</code> tiada dalam enum untuk sifat $2"
+}
