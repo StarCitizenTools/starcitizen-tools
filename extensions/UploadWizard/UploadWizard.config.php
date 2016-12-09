@@ -423,6 +423,22 @@ return array(
 			'msg' => 'mwe-upwiz-license-generic',
 			'templates' => array( 'Generic' )
 		)
+		'rsilicense' => array(
+			'msg' => 'mwe-upwiz-license-rsi',
+			'templates' => array('RSIlicense')
+		),
+		'thedamnshameslicense' => array(
+			'msg' => 'mwe-upwiz-license-thedamnshames',
+			'templates' => array('TheDamnShamesLicense')
+		),
+		'hasgahalicense' => array(
+			'msg' => 'mwe-upwiz-license-hasgaha',
+			'templates' => array('HasgahaLicense')
+		),
+		'aelannateslalicense' => array(
+			'msg' => 'mwe-upwiz-license-aelannatesla',
+			'templates' => array('AelannaTeslaLicense')
+		),
 	),
 
 	'licensing' => array(
@@ -468,31 +484,12 @@ return array(
 					)
 				),
 				array(
-					// n.b. as of April 2011, Flickr still uses CC 2.0 licenses.
-					// The White House also has an account there, hence the Public Domain US Government license
-					'head' => 'mwe-upwiz-license-flickr-head',
-					'subhead' => 'mwe-upwiz-license-flickr-subhead',
-					'prependTemplates' => array( 'flickrreview' ),
+					'head' => 'mwe-upwiz-license-sc-head',
 					'licenses' => array(
-						'cc-by-sa-2.0',
-						'cc-by-2.0',
-						'pd-usgov',
-					)
-				),
-				array(
-					'head' => 'mwe-upwiz-license-public-domain-usa-head',
-					'subhead' => 'mwe-upwiz-license-public-domain-usa-subhead',
-					'licenses' => array(
-						'pd-us',
-						'pd-art',
-					)
-				),
-				array(
-					// omitted navy because it is believed only MultiChil uses it heavily. Could add it back
-					'head' => 'mwe-upwiz-license-usgov-head',
-					'licenses' => array(
-						'pd-usgov',
-						'pd-usgov-nasa'
+						'rsilicense',
+						'thedamnshameslicense',
+						'hasgahalicense',
+						'aelannateslalicense'
 					)
 				),
 				array(
