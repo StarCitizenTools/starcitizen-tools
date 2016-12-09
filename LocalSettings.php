@@ -118,6 +118,7 @@ $wgDefaultSkin = "vector";
 # Enabled skins.
 # The following skins were automatically enabled:
 wfLoadSkin( 'Vector' );
+wfLoadSkin( 'Citizen' );
 
 #Maintenance
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
