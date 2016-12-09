@@ -235,7 +235,7 @@ $wgVirtualRestConfig['modules']['parsoid'] = array(
 );
 
 #Eventlogging
-$wgEventLoggingBaseUri = 'http://starcitizen.tools:8080/event.gif';
+$wgEventLoggingBaseUri = 'https://starcitizen.tools:8080/event.gif';
 $wgEventLoggingFile = '/var/log/mediawiki/events.log';
 
 #Scribunto
