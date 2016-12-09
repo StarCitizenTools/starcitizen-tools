@@ -175,6 +175,7 @@ require_once "$IP/extensions/googleAnalytics/googleAnalytics.php";
 require_once "$IP/extensions/VisualEditor/VisualEditor.php";
 require_once "$IP/extensions/Scribunto/Scribunto.php";
 require_once( "$IP/extensions/UploadWizard/UploadWizard.php" );
+require_once "$IP/extensions/EventLogging/EventLogging.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================
@@ -290,7 +291,6 @@ $wgVirtualRestConfig['modules']['parsoid'] = array(
 );
 
 #Eventlogging
-require_once "$IP/extensions/EventLogging/EventLogging.php";
 $wgEventLoggingBaseUri = 'http://starcitizen.tools:8080/event.gif';
 $wgEventLoggingFile = '/var/log/mediawiki/events.log';
 
