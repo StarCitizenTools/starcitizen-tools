@@ -422,7 +422,7 @@ return array(
 		'generic' => array(
 			'msg' => 'mwe-upwiz-license-generic',
 			'templates' => array( 'Generic' )
-		)
+		),
 		'rsilicense' => array(
 			'msg' => 'mwe-upwiz-license-rsi',
 			'templates' => array('RSIlicense')
