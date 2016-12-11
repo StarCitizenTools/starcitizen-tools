@@ -61,7 +61,7 @@
 				errors.push( mw.message( 'mwe-upwiz-error-too-short', minLength ) );
 			} else if ( text.length > maxLength ) {
 				errors.push( mw.message( 'mwe-upwiz-error-too-long', maxLength ) );
-			} else if (re_weburl.test(text) == false || template.test(text) == false) {
+			} else if (re_weburl.test(text) == false && template.test(text) == false) {
 				errors.push( mw.message( 'mwe-upwiz-error-not-url-or-template' ) );
 			}
 

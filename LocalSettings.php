@@ -32,22 +32,12 @@ $wgLogo = "$wgResourceBasePath/resources/assets/sclogo.png";
 $wgEnableEmail = true;
 $wgEnableUserEmail = true; # UPO
 
-$wgEmergencyContact = "apache@starcitizen.tools";
-$wgPasswordSender = "apache@starcitizen.tools";
+$wgEmergencyContact = "root@scw.czen.me";
+$wgPasswordSender = "do-not-reply@starcitizen.tools";
 
 $wgEnotifUserTalk = false; # UPO
 $wgEnotifWatchlist = false; # UPO
 $wgEmailAuthentication = true;
-
-## Database settings
-$wgDBtype = "REDACTED";
-$wgDBserver = "REDACTED";
-$wgDBname = "REDACTED";
-$wgDBuser = "REDACTED";
-$wgDBpassword = "REDACTED";
-
-# MySQL specific settings
-$wgDBprefix = "wiki";
 
 # MySQL table options to use during installation or update
 $wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=utf8";
@@ -56,7 +46,8 @@ $wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=utf8";
 $wgDBmysql5 = false;
 
 ## Shared memory settings
-$wgMainCacheType = CACHE_DB;
+$wgMainCacheType = 'redis';
+$wgSessionCacheType = 'redis';
 $wgMemCachedServers = array();
 
 ## To enable image uploads, make sure the 'images' directory
@@ -65,9 +56,6 @@ $wgEnableUploads = true;
 $wgGenerateThumbnailOnParse = true;
 $wgUseImageMagick = true;
 $wgImageMagickConvertCommand = "/usr/bin/convert";
-
-# Needed to make UploadWizard work in IE
-$wgApiFrameOptions = 'SAMEORIGIN';
 
 # InstantCommons allows wiki to use images from https://commons.wikimedia.org
 $wgUseInstantCommons = false;
@@ -90,12 +78,6 @@ $wgCacheDirectory = "$IP/cache";
 
 # Site language code, should be one of the list in ./languages/Names.php
 $wgLanguageCode = "en";
-
-$wgSecretKey = "REDACTED";
-
-# Site upgrade key. Must be set to a string (default provided) to turn on the
-# web installer while LocalSettings.php is in place
-$wgUpgradeKey = "REDACTED";
 
 ## For attaching licensing metadata to pages, and displaying an
 ## appropriate copyright notice / icon. GNU Free Documentation
@@ -140,7 +122,10 @@ function onBeforePageDisplay( OutputPage &$out, Skin &$skin )
     $out->addHeadItem("head script", $script);
     return true;
 };
+#=============================================== External Includes ===============================================
 
+require_once("/home/www-data/external_includes/mysql_pw.php")
+require_once("/home/www-data/external_includes/secret_keys.php")
 
 #=============================================== Extension Load ===============================================
 
@@ -179,6 +164,9 @@ require_once "$IP/extensions/EventLogging/EventLogging.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================
+#Flow
+$wgFlowEditorList = array( 'visualeditor', 'none' );
+$wgFlowContentFormat = 'html';
 
 #UploadWizard
 $wgApiFrameOptions = 'SAMEORIGIN';
@@ -211,8 +199,6 @@ $wgMediaViewerEnableByDefaultForAnonymous = true;
 
 #ConfirmEdit
 $wgCaptchaClass = 'ReCaptchaNoCaptcha';
-$wgReCaptchaSiteKey = 'REDACTED';
-$wgReCaptchaSecretKey = 'REDACTED';
 
 #CleanChanges
 $wgCCTrailerFilter = true;
@@ -241,6 +227,32 @@ $wgEventLoggingFile = '/var/log/mediawiki/events.log';
 #Scribunto
 $wgScribuntoDefaultEngine = 'luasandbox';
 
+#Redis
+/** @see RedisBagOStuff for a full explanation of these options. **/
+$wgObjectCaches['redis'] = array(
+    'class'                => 'RedisBagOStuff',
+    'servers'              => array( '127.0.0.1:6379' ),
+    // 'connectTimeout'    => 1,
+    // 'persistent'        => false,
+    // 'password'          => 'secret',
+    // 'automaticFailOver' => true,
+);
+
+#$wgJobTypeConf['default'] = array(
+#  'class'          => 'JobQueueRedis',
+#  'redisServer'    => '127.0.0.1:6379',
+#  'redisConfig'    => array(),
+#  'claimTTL'       => 3600
+#);
+
+#parsoid
+$wgVirtualRestConfig['modules']['parsoid'] = array(
+  // URL to the Parsoid instance
+  // Use port 8142 if you use the Debian package
+  'url' => 'http://localhost:8142',
+  'domain' => 'localhost'
+);
+
 #=============================================== Namespaces ===============================================
 
 $wgNamespaceContentModels[NS_TALK] = CONTENT_MODEL_FLOW_BOARD;
@@ -253,9 +265,8 @@ $wgNamespaceContentModels[NS_TEMPLATE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_HELP_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_CATEGORY_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_TRANSLATIONS_TALK] = CONTENT_MODEL_FLOW_BOARD;
+
 $wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
-$wgFlowEditorList = array( 'visualeditor', 'none' );
-$wgFlowContentFormat = 'html';
 
 define("NS_COMMLINK", 3000);
 define("NS_COMMLINK_TALK", 3001);
@@ -263,12 +274,29 @@ $wgExtraNamespaces[NS_COMMLINK] = "Comm-Link";
 $wgExtraNamespaces[NS_COMMLINK_TALK] = "Comm-Link_talk";
 $wgNamespacesWithSubpages[3001] = true;
 $wgNamespacesToBeSearchedDefault[NS_COMMLINK] = true;
+
+define("NS_PROJMGMT", 3002);
+define("NS_PROJMGMT_TALK", 3003);
+$wgExtraNamespaces[NS_PROJMGMT] = "ProjMGMT";
+$wgExtraNamespaces[NS_PROJMGMT_TALK] = "ProjMGMT_talk";
+$wgNamespacesWithSubpages[NS_PROJMGMT] = true;
+#$wgNamespacesToBeSearchedDefault[NS_PROJMGMT] = true;
+
+define("NS_ISSUE", 3004);
+define("NS_ISSUE_TALK", 3005);
+$wgExtraNamespaces[NS_ISSUE] = "Issue";
+$wgExtraNamespaces[NS_ISSUE_TALK] = "Issue_talk";
+$wgNamespacesWithSubpages[NS_ISSUE] = true;
+#$wgNamespacesToBeSearchedDefault[NS_ISSUE] = true;
+
 $wgVisualEditorAvailableNamespaces = array(
 NS_MAIN     => true,
 NS_USER     => true,
 NS_HELP     => true,
 NS_PROJECT  => true,
-NS_COMMLINK => true
+NS_COMMLINK => true,
+NS_PROJMGMT => true,
+NS_ISSUE		=> true
 );
 
 #=============================================== Permissions ===============================================
@@ -346,7 +374,6 @@ $wgGroupPermissions['ChiefEditor']['translate-groupreview'] = true;
 $wgGroupPermissions['ChiefEditor']['replacetext'] = true;
 
 #Administrator
-$wgGroupPermissions['Admin'] = $wgGroupPermissions['ChiefEditor'];
 $wgGroupPermissions['Admin']['userrights'] = true;
 
 #Sysop
