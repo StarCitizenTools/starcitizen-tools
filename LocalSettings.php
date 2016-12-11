@@ -216,9 +216,6 @@ $wgGoogleAnalyticsAccount = 'UA-48789297-5';
 #Visual Editor
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
 $wgHiddenPrefs[] = 'visualeditor-enable';
-$wgVirtualRestConfig['modules']['parsoid'] = array(
-  'url' => 'http://starcitizen.tools:8142',
-);
 
 #Eventlogging
 $wgEventLoggingBaseUri = 'https://starcitizen.tools:8080/event.gif';
