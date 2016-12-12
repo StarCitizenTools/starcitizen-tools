@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby"
+		]
+	},
+	"jsonschema-invalid-missingfield": "Dat obligatorescht Feld \"$1\" feelt"
+}

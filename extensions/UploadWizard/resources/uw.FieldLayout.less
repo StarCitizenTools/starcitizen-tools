@@ -1,0 +1,12 @@
+.mwe-upwiz-fieldLayout {
+	.mwe-upwiz-fieldLayout-indicator {
+		opacity: 0.5;
+	}
+
+	.oo-ui-fieldLayout-help {
+		// HACK Until T97631 is fixed, otherwise the icons look awful
+		&.oo-ui-iconElement > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
+			width: 24px;
+		}
+	}
+}

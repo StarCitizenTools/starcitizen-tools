@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Otogi",
+			"David1010"
+		]
+	},
+	"eventlogging-invalid-json": "არასწორი JSON",
+	"eventlogging-revision-id": "რევიზია $1",
+	"eventlogging-code-sample-logging-on-server-side": "PHP რეგისტრაცია",
+	"eventlogging-code-sample-logging-on-client-side": "JavaScript რეგისტრაცია"
+}

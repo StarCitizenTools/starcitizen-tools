@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bouron"
+		]
+	},
+	"mwe-upwiz-transport-started": "Байдайгæ...",
+	"mwe-upwiz-uploading": "Æвгæнгæ...",
+	"mwe-upwiz-transported": "Æвгæд...",
+	"mwe-upwiz-stashed-upload": "Хорз",
+	"mwe-upwiz-upload": "Бавгæнын",
+	"mwe-upwiz-finished": "Æххæст!",
+	"mwe-upwiz-source-thirdparty-accept": "Хорз",
+	"mwe-upwiz-prefs-license-own": "Хи куыст - $1",
+	"mwe-upwiz-prefs-license-thirdparty": "Æндæр кæйдæр куыст - $1"
+}

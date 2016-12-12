@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"十弌",
+			"飞舞回堂前"
+		]
+	},
+	"mwe-upwiz-campaign-create-account-button": "建個帳號加上傳！",
+	"mwe-upwiz-campaign-upload-button": "上傳！",
+	"mwe-upwiz-campaign-media-count-desc": "{{$1|上传}}",
+	"mwe-upwiz-campaign-view-all-media": "望全部上傳個媒體",
+	"mwe-upwiz-campaign-no-uploads-yet": "嘸眼上傳！"
+}

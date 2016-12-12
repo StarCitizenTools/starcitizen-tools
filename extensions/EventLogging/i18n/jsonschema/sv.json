@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jopparn",
+			"Tobulos1",
+			"Lokal Profil",
+			"WikiPhoenix"
+		]
+	},
+	"jsonschema-badidref": "Fel idref: \"$1\"",
+	"jsonschema-idconvert": "Kan inte konvertera var till id: <code>$1</code>",
+	"jsonschema-invalidkey": "Ogiltig nyckel \"$1\" i \"$2\"",
+	"jsonschema-invalidempty": "Tom datastruktur är inte giltig med detta schema",
+	"jsonschema-invalidnode": "Ogiltig nod: förväntar sig \"$1\", fick \"$2\". Sökväg: \"$3\"",
+	"jsonschema-invalid-missingfield": "Saknar obligatoriskt fält \"$1\"",
+	"jsonschema-invalid-notinenum": "Värdet <code>$1</code> är inte med i uppräkningen för egendom $2",
+	"apihelp-jsonschema-description": "Hämta en JSON-schemasida.",
+	"apihelp-jsonschema-param-revid": "Versions-ID för schema.",
+	"apihelp-jsonschema-param-title": "Schemanamn.",
+	"apihelp-jsonschema-example-1": "Hämta schemat för version 1234"
+}

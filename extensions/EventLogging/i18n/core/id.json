@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Farras"
+		]
+	},
+	"eventlogging-desc": "Kerangka kerja untuk aksi log dari kode sisi klien",
+	"eventlogging-invalid-json": "JSON salah"
+}

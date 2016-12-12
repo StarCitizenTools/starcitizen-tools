@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Siebrand"
+		]
+	},
+	"mwe-upwiz-js-off": "UploadWizard gebruik JavaScript voor een verbeterde gebruikerservaring. Je browser of ondersteunt geen JavaScript of JavaScript staat uitgeschakeld. Daarom wordt een eenvoudig uploadformulier weergegeven.",
+	"mwe-upwiz-api-warning-was-deleted": "Er is een bestand met de naam \"$1\" geweest, maar dit is verwijderd. Je kunt het niet opnieuw uploaden. Als je een ander bestand wilt uploaden, geef het dan een andere naam.",
+	"mwe-upwiz-tutorial-error-localized-file-missing": "Er is geen beschrijving in je taal beschikbaar.\nDe beschrijving wordt weergegeven in het $1.",
+	"mwe-upwiz-deeds-macro-prompt": "Op deze site moet {{GENDER:$2|je}} auteursrechteninformatie opgeven voor {{PLURAL:$1|het bovenstaande bestand|de bovenstaande bestanden}} zodat zeker is dat {{PLURAL:$1|het hergebruikt kan|ze hergebruikt kunnen}} worden.",
+	"mwe-upwiz-source-permission": "De auteur van het werk heeft je expliciete toestemming gegeven het werk te uploaden",
+	"mwe-upwiz-source-thirdparty-intro": "Voer de plaats in waar je elk bestand gevonden hebt.",
+	"mwe-upwiz-source-thirdparty-custom-multiple-intro": "Als alle bestanden dezelfde bron, auteur en auteursrechtenstatus hebben, kan je ze één keer voor allemaal invoeren.",
+	"mwe-upwiz-source-thirdparty-cases": "Geef hier aan waarom je zeker weet dat je het recht hebt om {{PLURAL:$1|dit werk|deze werken}} te publiceren:",
+	"mwe-upwiz-thanks-explain": "Je kunt {{PLURAL:$1|dit bestand|deze bestanden}} nu gebruiken op sites zoals Wikipedia of ernaar verwijzen op het web.",
+	"mwe-upwiz-upload-error-bad-extension-video-firefogg": "Je hebt een te uploaden videobestand geselecteerd in een niet vrije opmaak.\nJe kunt [$1 Firefogg (een Firefox-addon) installeren] om het bestand automatisch om te zetten.\nJe kunt ook andere [$2 mogelijkhden voor omzetten] gebruiken om het bestand in een vrije opmaak beschikbaar te stellen.",
+	"mwe-upwiz-upload-error-duplicate-filename-error": "Je bent het bestand \"$1\" al aan het uploaden.",
+	"mwe-upwiz-fileexists-replace-on-page": "Er bestaat al een bestand met deze naam. Als je het wilt vervangen, ga dan naar de pagina voor [$2 $1] en vervang het daar.",
+	"mwe-prevent-close": "Als je deze pagina verlaat, gaan de wijzigingen die je hebt gemaakt verloren.",
+	"mwe-upwiz-prevent-close": "Je bent nog niet klaar met het uploaden en publiceren van {{PLURAL:$1|dit bestand|deze bestanden}}.",
+	"mwe-upwiz-tooltip-skiptutorial": "Je kunt deze tutorial weer inschakelen in [$1 je voorkeuren], onder $2 → $3.",
+	"mwe-upwiz-tooltip-sign": "Je kunt je wikigebruikersnaam of je echte naam gebruiken.\nIn beide gevallen wordt deze gekoppeld aan je gebruikerspagina in de wiki.",
+	"mwe-upwiz-tooltip-title": "Een korte beschrijvende naam voor het bestand, die als de bestandsnaam wordt gebruikt. Je kunt tekst met spaties gebruiken. Neem de bestandsextensie niet op.",
+	"mwe-upwiz-tooltip-categories": "Voeg [$1 categorieën] toe aan je bestand om het makkelijker vindbaar te maken.",
+	"mwe-upwiz-tooltip-other": "Overige gegevens die je wilt opnemen over dit werk. Denk aan geografische coördinaten, koppelingen naar andere versies, enzovoort.",
+	"mwe-upwiz-deeds-need-deed": "Geef aan hoe je aan {{PLURAL:$1|dit bestand|deze bestanden}} bent gekomen en hoe deze site {{PLURAL:$1|het|ze}} kan gebruiken door een van de volgende opties te selecteren.",
+	"mwe-upwiz-error-signature-blank": "Je moet in het onderstaande veld je gebruikersnaam of echte naam invoeren.",
+	"mwe-upwiz-error-signature-too-long": "Je handtekening is te lang.\nMaak deze korter dan $1 {{PLURAL:$1|teken|tekens}}.",
+	"mwe-upwiz-error-signature-too-short": "Je handtekening is te kort.\nMaak deze langer dan $1 {{PLURAL:$1|teken|tekens}}.",
+	"mwe-upwiz-error-signature-bad-chars": "Je handtekening bevat symbolen die niet zijn toegestaan.\nGebruik geen wikitext of HTML, alleen je gebruikersnaam of echte naam.",
+	"mwe-upwiz-error-nologin": "Je moet <span class=\"plainlinks\">[{{fullurl:{{#Special:UserLogin}}|returnto=$1}} aangemeld zijn]</span> om bestanden te kunnen uploaden.",
+	"mwe-upwiz-error-title-hosting": "Het lijkt alsof je dit bestand hebt gedownload van een andere afbeeldingsdienst. Maak de naam meer betekenisvol. Controleer ook nog een keer of je de rechten hebt om het bestand te publiceren op deze site.",
+	"mwe-upwiz-error-title-extension": "Je hoeft geen bestandsextensie toe te voegen. Maak gewoon een voor mensen leesbare naam en de software zorgt voor de rest.",
+	"mwe-upwiz-error-license-wikitext-missing": "Je hebt een optie geselecteerd waarvoor je wikitekst moet invoeren.",
+	"mwe-upwiz-error-license-wikitext-too-long": "De door jou ingevoerde wikitekst is te lang.",
+	"mwe-upwiz-too-many-files-text": "Je kunt maar {{PLURAL:$1|één bestand|$1 bestanden}} per keer uploaden. Jij probeerde {{PLURAL:$2|één bestand|$2 bestanden}} toe te voegen, dus  {{PLURAL:$3|één bestand is|$3 bestanden zijn}} verwijderd.",
+	"mwe-upwiz-file-too-large-text": "Je kunt alleen bestanden uploaden die niet groter zijn dan $1. Je hebt geprobeerd een bestand te uploaden dat $2 groot is.",
+	"mwe-upwiz-license-confirm-remove": "Weet je zeker dat je deze {{PLURAL:$1|upload|uploads}} wilt verwijderen?",
+	"mwe-upwiz-errordialog-title": "Er is een fout opgetreden in je inzending",
+	"uploadcampaign-text": "Je bent een campagne van de Wizard Uploaden aan het wijzigen."
+}

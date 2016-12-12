@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha",
+			"Macofe"
+		]
+	},
+	"jsonschema-idconvert": "Mer künne <code lang=\"en\" xml:lang=\"en\" dir=\"ltr\">var</code> nit en en Kännong wandelle: <code lang=\"en\" xml:lang=\"en\" dir=\"ltr\">$1</code>",
+	"jsonschema-invalidkey": "Dä Schlößel „$1“ en „$2“ es nit jöltesch.",
+	"jsonschema-invalidempty": "En läddeje Schtroktor vun Daate en met heh dämm Scheema nit zohjelohße.",
+	"jsonschema-invalid-missingfield": "Dat nüüdeje Fäld „$1“ fäält."
+}

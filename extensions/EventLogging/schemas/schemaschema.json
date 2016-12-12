@@ -1,0 +1,127 @@
+{
+  "description":"A schema describing a particular JSON format",
+  "id":"#schemanode",
+  "required":true,
+  "title":"Schema",
+  "type":"object",
+  "properties":
+  {
+    "type":
+    {
+      "enum":
+      [
+        "any",
+        "string",
+        "integer",
+        "number",
+        "boolean",
+        "array",
+        "object"
+      ],
+      "title":"Type (type)",
+      "desc_enum":
+      {
+        "object":"Nested mapping of key/value pairs (a.k.a. 'properties').  You may also have a 'properties' property which is itself a sequence containing a single schema definition",
+        "array":"Nested sequence of items ('array' in many languages).  You must also have a 'sequence' property which is itself a sequence containing a single schema definition",
+        "integer":"Integer number",
+        "number":"Any number (floating point or integer)",
+        "boolean":"Boolean (true or false) value",
+        "string":"String",
+        "any":"Any datatype allowed"
+      },
+      "type":"string",
+      "description":"The datatype of the property (e.g. number, boolean, etc), used for determining the semantics of the variable described"
+    },
+    "format":
+    {
+      "description":"Defines the type of data, content type, or microformat to be expected in the instance property values",
+      "type":"string",
+      "title":"Format (format)"
+    },
+    "title":
+    {
+      "description":"A user-friendly title for the property",
+      "type":"string",
+      "title":"Title (title)"
+    },
+    "id":
+    {
+      "description":"An identifier used to reference this property using the 'idref' property",
+      "type":"string",
+      "title":"Identifier (id)"
+    },
+    "description":
+    {
+      "description":"A description for use in documentation and context help",
+      "type":"string",
+      "title":"Description (desc)"
+    },
+    "$ref":
+    {
+      "description":"Reference to a schema segment with the given 'id' property.",
+      "type":"string",
+      "title":"Identifier reference (idref)"
+    },
+    "enum":
+    {
+      "description":"Enumerated sequence of valid values for this property.",
+      "title":"Enumeration (enum)",
+      "type":"array",
+      "items":
+      [
+        {
+          "type":"any"
+        }
+      ]
+    },
+    "desc_enum":
+    {
+      "type":"object",
+      "properties":
+      {
+      },
+      "additionalProperties":
+      {
+        "description":"A mapping containing a description for each possible value listed in the enumeration (enum) property.  Used for documentation and context help.",
+        "type":"string",
+        "title":"Description for enum value"
+      }
+    },
+    "required":
+    {
+      "type":"boolean",
+      "title":"Required property? (required)",
+      "desc":"If 'true', then this property must always be present"
+    },
+    "properties":
+    {
+      "description":"A mapping containing schema segments describing each property in the mapping.  The 'type' property must be set to 'object' to use this property.",
+      "title":"Properties (properties)",
+      "type":"object",
+      "properties":
+      {
+      },
+      "additionalProperties":
+      {
+        "$ref":"#schemanode"
+      }
+    },
+    "additionalProperties":
+    {
+       "type":"any"
+    },
+    "items":
+    {
+      "description":"A list containing the subschemas for validating list items.  Currently limited to just one.",
+      "title":"Items (items)",
+      "type":"array",
+      "items":
+      [
+        {
+          "$ref":"#schemanode"
+        }
+      ]
+    }
+  },
+  "additionalProperties":false
+}

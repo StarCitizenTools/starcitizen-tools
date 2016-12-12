@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko"
+		]
+	},
+	"eventlogging-desc": "Structure des événements de trace pour le code côté client",
+	"eventlogging-invalid-json": "JSON non valide",
+	"eventlogging-revision-id": "Révision $1",
+	"eventlogging-code-sample-logging-on-server-side": "Journalisation PHP",
+	"eventlogging-code-sample-module-setup": "Paramétrage de PHP pour la journalisation JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Journalisation JavaScript",
+	"eventlogging-error-move-source": "Les pages de schéma peuvent ne pas être renommées",
+	"eventlogging-error-move-destination": "Les pages peuvent ne pas être renommées en pages de schéma"
+}

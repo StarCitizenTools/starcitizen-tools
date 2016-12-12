@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"OTAVIO1981",
+			"Araceletorres"
+		]
+	},
+	"eventlogging-desc": "Estrutura para registro de eventos no código client-Side",
+	"eventlogging-invalid-json": "JSON inválido",
+	"eventlogging-revision-id": "Revisão $1",
+	"eventlogging-code-sample-logging-on-server-side": "Registro de PHP",
+	"eventlogging-code-sample-module-setup": "Instalação PHP para registro de Javascript",
+	"eventlogging-code-sample-logging-on-client-side": "Registro JavaScript",
+	"eventlogging-error-move-source": "Páginas de esquema não podem ser renomeadas",
+	"eventlogging-error-move-destination": "As páginas não podem ser renomeadas para páginas de esquema"
+}

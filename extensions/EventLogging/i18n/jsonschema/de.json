@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Metalhead64",
+			"Purodha"
+		]
+	},
+	"jsonschema-badidref": "idref ungültig: „$1“",
+	"jsonschema-idconvert": "var konnte nicht zu id konvertiert werden: <code>$1</code>",
+	"jsonschema-invalidkey": "Ungültiger Schlüssel „$1“ in „$2“",
+	"jsonschema-invalidempty": "Eine leere Datenstruktur ist mit diesem Schema nicht gültig",
+	"jsonschema-invalidnode": "Ungültiger Knoten: Erwartet „$1“, erhalten „$2“. Pfad: „$3“",
+	"jsonschema-invalid-missingfield": "Es fehlt das erforderliche Feld „$1“.",
+	"jsonschema-invalid-notinenum": "Der Wert <code>$1</code> ist nicht in der Aufzählung für die Eigenschaft $2",
+	"apihelp-jsonschema-description": "Ruft eine JSON-Schemaseite ab.",
+	"apihelp-jsonschema-param-revid": "Versionskennung des Schemas.",
+	"apihelp-jsonschema-param-title": "Name des Schemas.",
+	"apihelp-jsonschema-example-1": "Ruft das Schema für die Version 1234 ab"
+}

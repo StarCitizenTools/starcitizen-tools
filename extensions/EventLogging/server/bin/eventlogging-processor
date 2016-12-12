@@ -1,0 +1,172 @@
+#!/usr/bin/env python -OO
+# -*- coding: utf-8 -*-
+"""
+  eventlogging-processor
+  -----------------------------
+  Transform raw log stream to JSON event stream
+
+  usage: eventlogging-processor [-h] [--sid SID] format \
+              input output [output ...]
+
+  positional arguments:
+    format      Format string
+    input       URI of raw input stream
+    output      URIs of output streams
+
+  optional arguments:
+    -h, --help  show this help message and exit
+    --sid SID   set input socket identity
+    --output-invalid  URI of stream which to send invalid events
+    --etcd-uri ETCD_URI
+
+  formatters:
+     %h         Client IP
+     %j         JSON object
+     %q         Query-string-encoded JSON
+     %t         Timestamp in NCSA format.
+
+  :copyright: (c) 2012 by Ori Livneh <ori@wikimedia.org>
+  :license: GNU General Public Licence 2.0 or later
+
+"""
+from __future__ import unicode_literals
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+import argparse
+import logging
+
+from eventlogging import (capsule_uuid, create_event_error, LogParser,
+                          get_reader, get_writer, validate, setup_logging,
+                          uri_force_raw, uri_append_query_items, keyhasher,
+                          SharedRotatingToken, parse_etcd_uri)
+
+from jsonschema import ValidationError
+
+setup_logging()
+
+ap = argparse.ArgumentParser(description='Raw log -> JSON stream',
+                             fromfile_prefix_chars='@')
+ap.add_argument('format', help='Format string')
+# Read in raw events.  This keeps the reader
+# attempting to parse the input as json.
+ap.add_argument('input', help='URI of raw input stream', type=uri_force_raw)
+ap.add_argument('output', nargs='+', help='URIs of output streams')
+ap.add_argument(
+    '--sid',
+    help='Set ZeroMQ/Kafka identity. '
+    'Only use this if your input URI starts with tcp:// or kafka://'
+)
+ap.add_argument(
+    '--output-invalid',
+    const=True,
+    default=False,
+    nargs='?',
+    action='store',
+    help='URI of output stream for invalid events. '
+    'If this is given without a value, the first of the output URIs will be '
+    'used to write invalid events.  Invalid events are written using the '
+    'EventError schema.'
+)
+
+ap.add_argument(
+    '--etcd-uri',
+    help='If set, etcd will be used to get a rotating shared hash token '
+    'to use for anonymizing IP addresses during processing of raw data. '
+    'This is useful if you are running multiple eventlogging-processors '
+    'and want them all to consistently hash client IPs. '
+    'ETCD_URI is of the form: http(s)://hostA:1234,hostB:2345?cert=/my/cert',
+    default=False,
+    action='store'
+)
+
+args = ap.parse_args()
+
+
+# If --etcd-uri was given, then parse it and instantiate
+# a SharedRotatingToken named 'ip_hash' to use with the
+# keyhasher function.  This function will be used by the
+# LogParser to hash client IPs read in from each event.
+parser_kwargs = {}
+if args.etcd_uri:
+    etcd_kwargs = parse_etcd_uri(args.etcd_uri)
+    parser_kwargs['ip_hasher'] = keyhasher(
+        SharedRotatingToken('ip_hash', **etcd_kwargs)
+    )
+
+# Instantiate the LogParser to use for this processor.
+parser = LogParser(args.format, **parser_kwargs)
+
+# Valid events will be sent to each of these writers
+writers_list = []
+for output_uri in args.output:
+    writers_list.append(get_writer(output_uri))
+    logging.info('Publishing valid JSON events to %s.', output_uri)
+
+if args.output_invalid:
+    # If --output-invalid was supplied without a value,
+    # use the same writer for both invalid and valid events.
+    if args.output_invalid is True:
+        args.output_invalid = args.output[0]
+        writer_invalid = writers_list[0]
+    else:
+        writer_invalid = get_writer(args.output_invalid)
+
+    logging.info('Publishing invalid raw events to %s.', args.output_invalid)
+else:
+    writer_invalid = None
+
+if args.sid:
+    args.input = uri_append_query_items(args.input, {'identity': args.sid})
+
+
+def write_event_error(
+    writer,
+    raw_event,
+    error_message,
+    error_code,
+    parsed_event=None
+):
+    """
+    Constructs an EventError object and sends it to writer.
+    """
+    try:
+        writer.send(
+            create_event_error(
+                raw_event,
+                error_message,
+                error_code,
+                parsed_event
+            )
+        )
+    except Exception as e:
+        logging.error('Unable to create EventError object: %s' % e.message)
+
+for raw_event in get_reader(args.input):
+    event = None
+    try:
+        event = parser.parse(raw_event)
+        event.pop('clientValidated', None)
+        event.pop('isTruncated', None)
+        validate(event)
+        event['uuid'] = capsule_uuid(event)
+
+    except ValidationError as e:
+        logging.error('Unable to validate: %s (%s)', raw_event, e.message)
+        if writer_invalid:
+            write_event_error(
+                writer_invalid, raw_event, e.message, 'validation', event
+            )
+
+    except Exception as e:
+        logging.error('Unable to process: %s (%s)', raw_event, e.message)
+        if writer_invalid:
+            write_event_error(
+                writer_invalid, raw_event, e.message, 'processor', event
+            )
+
+    else:
+        for w in writers_list:
+            w.send(event)

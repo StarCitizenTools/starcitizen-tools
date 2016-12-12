@@ -1,0 +1,67 @@
+#!/usr/bin/env python -OO
+# -*- coding: utf-8 -*-
+"""
+  eventlogging-zmq-mux
+  --------------------
+  Multiplexes ZMQ_PUB sockets.
+
+  Reads messages from one or more ZMQ_SUBs and publishes a muxed stream
+  containing all messages from all inputs.
+
+  usage: eventlogging-zmq-mux [-h] [--sid SID] output input [input ...]
+
+  Multiplex ZMQ_PUB sockets
+
+  positional arguments:
+    output      URI of output stream
+    input       URIs of raw input streams
+
+  optional arguments:
+    -h, --help  show this help message and exit
+    --sid SID   set input socket identity
+
+"""
+from __future__ import unicode_literals
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+import argparse
+import errno
+import logging
+
+import zmq
+
+from eventlogging import pub_socket, sub_socket, setup_logging
+
+
+setup_logging()
+
+ap = argparse.ArgumentParser(description='Multiplex ZMQ_PUB sockets',
+                             fromfile_prefix_chars='@')
+ap.add_argument('output', help='URI of output stream')
+ap.add_argument('input', nargs='+', help='URIs of raw input streams')
+ap.add_argument('--sid', help='set input socket identity')
+args = ap.parse_args()
+
+poller = zmq.Poller()
+pub = pub_socket(args.output)
+logging.info('Writing to %s..', args.output)
+
+
+for uri in args.input:
+    logging.info('Polling %s..', uri)
+    sub = sub_socket(uri, identity=args.sid)
+    poller.register(sub, zmq.POLLIN)
+
+
+while 1:
+    try:
+        for sock, _ in poller.poll():
+            pub.send(sock.recv(zmq.NOBLOCK))
+    except zmq.ZMQError as e:
+        # Calls interrupted by EINTR should be re-tried.
+        if e.errno == errno.EINTR:
+            continue
+        raise

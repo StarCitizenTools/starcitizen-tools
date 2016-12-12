@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Metalhead64",
+			"Ori.livneh",
+			"Shirayuki",
+			"Umherirrender",
+			"Nemo bis"
+		]
+	},
+	"eventlogging-desc": "{{desc|name=Event Logging|url=https://www.mediawiki.org/wiki/Extension:EventLogging}}",
+	"eventlogging-invalid-json": "Error shown when an editor attempts to save a Schema article edit that is not valid JSON.\n{{Identical|Invalid JSON}}",
+	"eventlogging-revision-id": "The numeric ID of the displayed revision, shown in the page subtitle.\n\nParameters:\n* $1 - revision ID\n{{Identical|Revision}}",
+	"eventlogging-code-sample-logging-on-server-side": "Code sample for logging a server-side event",
+	"eventlogging-code-sample-module-setup": "Code sample for setting up a ResourceLoader module",
+	"eventlogging-code-sample-logging-on-client-side": "Code sample for logging a client-side event",
+	"eventlogging-error-move-source": "Error shown when an editor attempts to move a page in the \"Schema\" namespace, which controls the functioning of this extension.",
+	"eventlogging-error-move-destination": "Error shown when an editor attempts to move an article into the Schema namespace"
+}

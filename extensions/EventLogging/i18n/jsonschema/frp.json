@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"ChrisPtDe",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "Crouyo idref : « $1 »",
+	"jsonschema-idconvert": "Empossiblo de convèrtir var en id : <code>$1</code>",
+	"jsonschema-invalidkey": "Cllâf envalida « $1 » dedens « $2 »",
+	"jsonschema-invalidnode": "Nuod envalido : « $1 » atendu, « $2 » avu. Chemin : « $3 »"
+}

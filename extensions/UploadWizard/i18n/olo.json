@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mashoi7",
+			"Ilja.mos"
+		]
+	},
+	"mwe-upwiz-code-unknown": "Tundematoi kieli",
+	"mwe-upwiz-step-tutorial": "Opastu",
+	"mwe-upwiz-step-thanks": "Käytä",
+	"mwe-upwiz-add-flickr-or": "Libo",
+	"mwe-upwiz-publish": "Piästetäh ilmah...",
+	"mwe-upwiz-published": "Piästetty ilmah!",
+	"mwe-upwiz-finished": "Valmis!",
+	"mwe-upwiz-copy-metadata-button": "Kopiruiče",
+	"mwe-upwiz-deleted-duplicate-unknown-filename": "Tundematoi failan nimi",
+	"mwe-upwiz-next": "Tulii",
+	"mwe-upwiz-next-file": "Jatka",
+	"mwe-upwiz-next-deeds": "Tulii",
+	"mwe-upwiz-next-details": "Tulii",
+	"mwe-upwiz-home": "Mene wikin ezisivule",
+	"mwe-upwiz-error-blank": "Tämä tiedo piädy.",
+	"mwe-upwiz-file-too-large": "Failu on liijan suuri.",
+	"mwe-upwiz-dialog-yes": "Muga",
+	"mwe-upwiz-dialog-no": "Ei",
+	"mwe-upwiz-campaign-contributors-count-desc": "{{PLURAL:$1|Kirjuttai|Kirjuttajat}}",
+	"mwe-upwiz-license-custom-preview": "Ezikačo",
+	"mwe-upwiz-license-none-head": "Lövvin sen netaspäi engo ole varmu",
+	"mwe-upwiz-categories": "Kategouriet",
+	"mwe-upwiz-feedback-blacklist-report-prompt": "[$1 Kirjuta omii mielii]",
+	"mwe-upwiz-feedback-blacklist-info-prompt": "[$1 Ližätieduo]",
+	"mwe-upwiz-calendar-date": "Valliče päivy kalenduaraspäi",
+	"mwe-upload-campaigns-pagination-next": "Tulii sivu"
+}

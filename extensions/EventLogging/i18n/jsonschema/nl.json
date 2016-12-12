@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Siebrand",
+			"Esketti",
+			"Macofe"
+		]
+	},
+	"jsonschema-badidref": "Onjuiste idref: \"$1\"",
+	"jsonschema-idconvert": "Het is niet mogelijk var naar id te converteren: <code>$1</code>",
+	"jsonschema-invalidkey": "Ongeldige sleutel \"$1\" in \"$2\"",
+	"jsonschema-invalidempty": "Een lege gegevensstructuur is niet geldig voor dit schema",
+	"jsonschema-invalidnode": "Ongeldige node: \"$1\" werd verwacht, \"$2\" is waargenomen. Pad: \"$3\"",
+	"jsonschema-invalid-missingfield": "Het verplichte veld \"$1\" ontbreekt",
+	"jsonschema-invalid-notinenum": "Waarde <code>$1</code> staat niet in de lijst voor eigenschap \"$2\"",
+	"apihelp-jsonschema-description": "Het ophalen van een JSON-Schema pagina.",
+	"apihelp-jsonschema-param-revid": "Schema herziening ID.",
+	"apihelp-jsonschema-param-title": "Schema naam.",
+	"apihelp-jsonschema-example-1": "Ophalen schema voor herziening 1234"
+}

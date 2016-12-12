@@ -1,0 +1,76 @@
+#firstHeading {
+	display: none;
+}
+
+#mw-campaign-primary-info {
+	float: left;
+	width: 60%; /* Not ideal, but hey, I'm writing CSS! */
+}
+
+#mw-campaign-no-uploads-yet {
+	padding: 24px;
+	text-align: center;
+}
+
+#mw-campaign-title {
+	font-size: 24px;
+	border-bottom: 1px #ddd solid;
+}
+
+#mw-campaign-description {
+	margin-bottom: 24px;
+}
+
+#mw-campaign-header {
+	overflow: hidden;
+	padding: 24px;
+	margin: 12px;
+	background-color: #f9f9f9;
+	border: 1px #ddd solid;
+}
+
+#mw-campaign-numbers {
+	float: right;
+}
+
+.mw-campaign-number-container {
+	text-align: center;
+	float: left;
+	margin-right: 24px;
+}
+
+.mw-campaign-number {
+	font-size: 96px;
+	line-height: 96px;
+	font-weight: lighter;
+}
+
+.mw-campaign-number-desc {
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+#mw-campaign-view-all {
+	display: block;
+	background-color: #f9f9f9;
+	border: 1px #ddd solid;
+	padding: 8px;
+	text-align: center;
+}
+
+#mw-campaign-view-all:hover {
+	text-decoration: none;
+}
+
+.mw-campaign-chevron {
+	background: url('images/down-chevron.png') no-repeat center;
+	width: 16px ;
+}
+
+.mw-campaign-float-left {
+	float: left;
+}
+
+.mw-campaign-float-right {
+	float: right;
+}

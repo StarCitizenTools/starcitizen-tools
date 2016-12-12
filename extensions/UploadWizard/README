@@ -1,0 +1,39 @@
+UploadWizard is an extension for MediaWiki, which adds a more user-friendly wizard for uploading media files.
+
+Although developed with Wikimedia Commons in mind, it should be useful for other users of MediaWiki as well.
+However it has not been tested extensively with non-Wikimedia installations of MediaWiki. Your feedback will
+help greatly.
+
+UploadWizard is licensed under the same terms as MediaWiki itself.
+
+UploadWizard by:
+@author Neil Kandalgaonkar <neilk@wikimedia.org>
+@author Jeroen de Dauw <jereoendedauw@gmail.com>
+@author Ryan Kaldari <rkaldari@wikimedia.org>
+@author Ian Baker <ibaker@wikimedia.org>
+@author Nischay Nahata <nischayn22@gmail.com>
+@author Yuvi Panda <yuvipanda@gmail.com>
+
+If you are using UploadWizard in an environment where licenses are not used, you may want to add the
+configuration below in LocalSettings.php. This will limit the license choices to a single default that
+references the wiki's generic disclaimer. Note that there are many other configuration settings to add
+depending on your use case.
+
+$wgUploadWizardConfig = array(
+    'licensing' => array(
+            'ownWorkDefault' => 'own',
+            'ownWork' => array(
+                'type' => 'or',
+                'template' => 'licensing', // this adds a link to Template:Licensing to the file info page
+                'licenses' => array(
+                     'generic',
+                )
+            ),
+    ),
+
+);
+
+If you wish to modify the generic messages, you can modify them within the wiki at the following pages:
+* MediaWiki:mwe-upwiz-source-ownwork
+* MediaWiki:Mwe-upwiz-source-ownwork-assert-generic
+* MediaWiki:Mwe-upwiz-source-ownwork-generic-explain

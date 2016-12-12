@@ -1,0 +1,21 @@
+.mwe-upwiz-descriptionsDetailsWidget {
+	.mwe-upwiz-descriptionsDetailsWidget-removeItem {
+		// HACK Until T97631 is fixed, otherwise the icons look awful
+		&.oo-ui-iconElement > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
+			width: 24px;
+		}
+	}
+
+	.mwe-upwiz-details-fieldname-input {
+		// Allow the "Remove" button to appear alongside
+		display: inline-block;
+		margin-right: 0.5em;
+		// Spacing between multiple descriptions
+		margin-bottom: 0.5em;
+	}
+
+	.mwe-upwiz-descriptionsDetailsWidget-removeItem {
+		// 'top' because the description text input is autosized
+		vertical-align: top;
+	}
+}

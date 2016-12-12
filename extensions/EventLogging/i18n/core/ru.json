@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"DCamer",
+			"Okras"
+		]
+	},
+	"eventlogging-desc": "Фреймворк для протоколирования событий кода на стороне клиента",
+	"eventlogging-invalid-json": "Неверный JSON",
+	"eventlogging-revision-id": "Ревизия $1",
+	"eventlogging-code-sample-logging-on-server-side": "Протоколирование PHP",
+	"eventlogging-code-sample-module-setup": "Установки PHP для протоколирования JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Протоколирование JavaScript",
+	"eventlogging-error-move-source": "Страницы схем не могут быть переименованы",
+	"eventlogging-error-move-destination": "Страницы не могут быть переименованы в Страницы схем"
+}

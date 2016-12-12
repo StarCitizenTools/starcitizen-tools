@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ori Livneh",
+			"Shirayuki",
+			"Nemo bis"
+		]
+	},
+	"jsonschema-badidref": "JSON Schema validation error, shown when an id ref field is malformed.\n\nParameters:\n* $1 - ID ref",
+	"jsonschema-idconvert": "JSON Schema validation error, shown when no valid HTML id could be generated from input string.\n\nParameters:\n* $1 - var (<code>print_r()</code>'ed)",
+	"jsonschema-invalidkey": "JSON Schema validation error, shown object has a key not specified in schema.\n\nParameters:\n* $1 - invalid key\n* $2 - data path, in user-friendly terms",
+	"jsonschema-invalidempty": "JSON Schema validation error, shown when attempting to validate empty object against a schema that does not allow empty objects.",
+	"jsonschema-invalidnode": "JSON Schema validation error, shown when object node does not match expected type.\n\nParameters:\n* $1 – schema type\n* $2 – data type\n* $3 – data path, in user-friendly terms",
+	"jsonschema-invalid-missingfield": "JSON Schema validation error, shown when a required field is missing.\n\nParameters:\n* $1 - schema key",
+	"jsonschema-invalid-notinenum": "JSON Schema validation error, shown when a value is not in the set of permitted values for a field.\n\nParameters:\n* $1 - value\n* $2 - property",
+	"apihelp-jsonschema-description": "{{doc-apihelp-description|jsonschema}}",
+	"apihelp-jsonschema-param-revid": "{{doc-apihelp-param|jsonschema|revid}}",
+	"apihelp-jsonschema-param-title": "{{doc-apihelp-param|jsonschema|title}}",
+	"apihelp-jsonschema-example-1": "{{doc-apihelp-example|jsonschema}}"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"eventlogging-desc": "Structura pro le registration de eventos del latere del cliente",
+	"eventlogging-invalid-json": "JSON invalide",
+	"eventlogging-revision-id": "Version $1",
+	"eventlogging-code-sample-logging-on-server-side": "Registro PHP",
+	"eventlogging-code-sample-module-setup": "Configuration de PHP pro le registro in JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Rexistro JavaScript",
+	"eventlogging-error-move-source": "Paginas de Schema non pote esser renominate",
+	"eventlogging-error-move-destination": "Paginas non pote esser renominate a paginas de Schema"
+}

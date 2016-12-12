@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16"
+		]
+	},
+	"jsonschema-badidref": "IDref malformato: \"$1\"",
+	"jsonschema-idconvert": "Non è possibile convertire var in ID: <code>$1</code>",
+	"jsonschema-invalidkey": "Chiave non valida \"$1\" in \"$2\"",
+	"jsonschema-invalidempty": "Struttura dati vuota non valida con questo schema",
+	"jsonschema-invalidnode": "Nodo non valido: si aspettava \"$1\", ma ricevuto \"$2\". Percorso: \"$3\"",
+	"jsonschema-invalid-missingfield": "Campo obbligatorio mancante \"$1\"",
+	"jsonschema-invalid-notinenum": "Il valore <code>$1</code> non è fra i valori consentiti per la proprietà $2"
+}

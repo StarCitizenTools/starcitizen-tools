@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"පසිඳු කාවින්ද"
+		]
+	},
+	"jsonschema-badidref": "අයහපත් idref: \"$1\"",
+	"jsonschema-invalidkey": "\"$2\" හී \"$1\" වලංගු නොවන යතුර"
+}

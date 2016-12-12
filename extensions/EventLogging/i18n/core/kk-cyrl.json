@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Arystanbek"
+		]
+	},
+	"eventlogging-invalid-json": "JSON жарамсыз",
+	"eventlogging-code-sample-logging-on-server-side": "PHP журналы енуде"
+}
