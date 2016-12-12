@@ -124,8 +124,8 @@ function onBeforePageDisplay( OutputPage &$out, Skin &$skin )
 };
 #=============================================== External Includes ===============================================
 
-require_once("/home/www-data/external_includes/mysql_pw.php")
-require_once("/home/www-data/external_includes/secret_keys.php")
+require_once("/home/www-data/external_includes/mysql_pw.php");
+require_once("/home/www-data/external_includes/secret_keys.php");
 
 #=============================================== Extension Load ===============================================
 
@@ -149,6 +149,7 @@ wfLoadExtension( 'cldr' );
 wfLoadExtension( 'LocalisationUpdate' );
 wfLoadExtension( 'UniversalLanguageSelector' );
 wfLoadExtensions( array( 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ) );
+require_once "$IP/extensions/CSS/CSS.php";
 require_once "$IP/extensions/Tabber/Tabber.php";
 require_once "$IP/extensions/RSS/RSS.php";
 require_once "$IP/extensions/PageImages/PageImages.php";
