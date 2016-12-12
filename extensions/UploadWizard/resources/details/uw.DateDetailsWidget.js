@@ -109,7 +109,7 @@
 	 * @inheritdoc
 	 */
 	uw.DateDetailsWidget.prototype.getErrors = function () {
-#		var errors = [];
+		var errors = [];
 #		if ( this.dateInputWidget.getValue().trim() === '' ) {
 #			errors.push( mw.message( 'mwe-upwiz-error-blank' ) );
 #		}
