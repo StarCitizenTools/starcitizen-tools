@@ -162,6 +162,7 @@ require_once "$IP/extensions/VisualEditor/VisualEditor.php";
 require_once "$IP/extensions/Scribunto/Scribunto.php";
 require_once( "$IP/extensions/UploadWizard/UploadWizard.php" );
 require_once "$IP/extensions/EventLogging/EventLogging.php";
+require_once "$IP/extensions/ExternalData/ExternalData.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================
@@ -214,6 +215,11 @@ $wgExtraLanguageNames['qqq'] = 'Message documentation'; # No linguistic content.
 
 #Google Analytics
 $wgGoogleAnalyticsAccount = 'UA-48789297-5';
+
+#ExternalData
+# $edgCacheTable = 'ed_url_cache'; Need to run ExternalData.sql first
+$edgCacheExpireTime = 3 * 24 * 60 * 60;
+$edgAllowExternalDataFrom = 'http://starcitizendb.com/';
 
 #Visual Editor
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
