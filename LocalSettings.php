@@ -145,7 +145,7 @@ wfLoadExtension( 'RevisionSlider' );
 wfLoadExtension( 'CheckUser' );
 wfLoadExtension( 'Babel' );
 wfLoadExtension( 'cldr' );
-wfLoadExtension( 'CleanChanges' );
+#wfLoadExtension( 'CleanChanges' );
 wfLoadExtension( 'LocalisationUpdate' );
 wfLoadExtension( 'UniversalLanguageSelector' );
 wfLoadExtensions( array( 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ) );
@@ -164,6 +164,7 @@ require_once "$IP/extensions/EventLogging/EventLogging.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================
+
 #Flow
 $wgFlowEditorList = array( 'visualeditor', 'none' );
 $wgFlowContentFormat = 'html';
@@ -262,6 +263,8 @@ $wgNamespaceContentModels[NS_TEMPLATE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_HELP_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_CATEGORY_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_TRANSLATIONS_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_PROJMGMT_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_ISSUE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 $wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
 
