@@ -1,0 +1,6 @@
+
+User-agent: *
+Disallow: /Special:
+Disallow: /Template:
+Disallow: /ProjMGMT:
+Disallow: /MediaWiki:
