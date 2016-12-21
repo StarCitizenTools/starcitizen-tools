@@ -189,6 +189,7 @@ $wgUploadWizardConfig = array(
 	);
 
 #TextExtracts
+$wgExtractsRemoveClasses[] = 'dd';
 $wgExtractsRemoveClasses[] = 'dablink';
 $wgExtractsRemoveClasses[] = 'translate';
 
@@ -259,22 +260,6 @@ $wgVirtualRestConfig['modules']['parsoid'] = array(
 );
 
 #=============================================== Namespaces ===============================================
-
-$wgNamespaceContentModels[NS_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_USER_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_COMMLINK_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_PROJECT_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_FILE_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_MEDIAWIKI_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_TEMPLATE_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_HELP_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_CATEGORY_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_TRANSLATIONS_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_PROJMGMT_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_ISSUE_TALK] = CONTENT_MODEL_FLOW_BOARD;
-
-$wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
-
 define("NS_COMMLINK", 3000);
 define("NS_COMMLINK_TALK", 3001);
 $wgExtraNamespaces[NS_COMMLINK] = "Comm-Link";
@@ -295,6 +280,21 @@ $wgExtraNamespaces[NS_ISSUE] = "Issue";
 $wgExtraNamespaces[NS_ISSUE_TALK] = "Issue_talk";
 $wgNamespacesWithSubpages[NS_ISSUE] = true;
 #$wgNamespacesToBeSearchedDefault[NS_ISSUE] = true;
+
+$wgNamespaceContentModels[NS_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_USER_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_COMMLINK_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_PROJECT_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_FILE_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_MEDIAWIKI_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_TEMPLATE_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_HELP_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_CATEGORY_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_TRANSLATIONS_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_PROJMGMT_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_ISSUE_TALK] = CONTENT_MODEL_FLOW_BOARD;
+
+$wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
 
 $wgVisualEditorAvailableNamespaces = array(
 NS_MAIN     => true,
