@@ -281,6 +281,9 @@ $wgExtraNamespaces[NS_ISSUE_TALK] = "Issue_talk";
 $wgNamespacesWithSubpages[NS_ISSUE] = true;
 #$wgNamespacesToBeSearchedDefault[NS_ISSUE] = true;
 
+$wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
+$wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
+
 $wgNamespaceContentModels[NS_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_USER_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_COMMLINK_TALK] = CONTENT_MODEL_FLOW_BOARD;
@@ -290,7 +293,7 @@ $wgNamespaceContentModels[NS_MEDIAWIKI_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_TEMPLATE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_HELP_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_CATEGORY_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_TRANSLATIONS_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[$wgPageTranslationNamespace+1] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_PROJMGMT_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_ISSUE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
