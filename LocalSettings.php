@@ -196,7 +196,6 @@ $wgUploadWizardConfig = array(
 	'maxUploads' => 15,
 	'fileExtensions' => $wgFileExtensions,
 	'flickrApiUrl' => 'https://secure.flickr.com/services/rest/?',
-	'flickrApiKey' => 'c7e7405429d26109eb68aa223909a4de',
 	);
 
 #TextExtracts
@@ -214,8 +213,6 @@ $wgMediaViewerEnableByDefaultForAnonymous = true;
 
 #ConfirmEdit
 $wgCaptchaClass = 'ReCaptchaNoCaptcha';
-$wgReCaptchaSiteKey = '6LflQhUUAAAAABrzX2g-cjEhxyG4Q5CNQn6YGPBG';
-$wgReCaptchaSecretKey = '6LflQhUUAAAAAJR-lDuKhtJUnWAXFZco5b16JrX8';
 $wgCaptchaTriggers['edit']          = true;
 $wgCaptchaTriggers['create']        = true;
 
