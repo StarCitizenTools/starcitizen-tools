@@ -439,6 +439,19 @@ return array(
 			'msg' => 'mwe-upwiz-license-aelannatesla',
 			'templates' => array('AelannaTeslaLicense')
 		),
+		'cc-by-nc-sa-2.0' => array(
+			'msg' => 'mwe-upwiz-license-cc-by-nc-sa-2.0',
+			'templates' => array('cc-by-nc-sa-2.0'),
+//			'icons' => array('cc-by','cc-nc','cc-sa'),
+			'url' => '//creativecommons.org/licenses/by-nc-sa/2.0/'
+		),
+                'cc-by-nc-2.0' => array(
+                        'msg' => 'mwe-upwiz-license-cc-by-nc-2.0',
+                        'templates' => array('cc-by-nc-2.0'),
+ //                       'icons' => array('cc-by','cc-nc'),
+                        'url' => '//creativecommons.org/licenses/by-nc/2.0/'
+                ),
+
 	),
 
 	'licensing' => array(
@@ -467,8 +480,17 @@ return array(
 		// checkbox selection of all licenses
 		'thirdParty' => array(
 			'type' => 'or',
-			'defaults' => 'cc-by-sa-4.0',
+			'defaults' => 'rsilicense',
 			'licenseGroups' => array(
+                                array(
+                                        'head' => 'mwe-upwiz-license-sc-head',
+                                        'licenses' => array(
+                                                'rsilicense',
+                                                'thedamnshameslicense',
+                                                'hasgahalicense',
+                                                'aelannateslalicense'
+                                        )
+                                ),
 				array(
 					// This should be a list of all CC licenses we can reasonably expect to find around the web
 					'head' => 'mwe-upwiz-license-cc-head',
@@ -484,12 +506,14 @@ return array(
 					)
 				),
 				array(
-					'head' => 'mwe-upwiz-license-sc-head',
-					'licenses' => array(
-						'rsilicense',
-						'thedamnshameslicense',
-						'hasgahalicense',
-						'aelannateslalicense'
+					// Flickr still uses CC 2.0
+					'head' => 'mwe-upwiz-license-flickr-head',
+					'subhead'=> 'mwe-upwiz-license-flickr-subhead',
+					'licenses'=> array(
+						'cc-by-sa-2.0',
+						'cc-by-nc-2.0',
+						'cc-by-nc-sa-2.0',
+						'cc-by-2.0'
 					)
 				),
 				array(

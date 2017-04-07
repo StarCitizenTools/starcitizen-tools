@@ -515,6 +515,8 @@ $wgResourceModules += array(
 			'mwe-upwiz-license-cc-by-2.5',
 			'mwe-upwiz-license-cc-by-sa-2.0',
 			'mwe-upwiz-license-cc-by-2.0',
+			'mwe-upwiz-license-cc-by-nc-2.0',
+			'mwe-upwiz-license-cc-by-nc-sa-2.0',
 			'mwe-upwiz-license-custom',
 			'mwe-upwiz-license-fal',
 			'mwe-upwiz-license-own-pd',
