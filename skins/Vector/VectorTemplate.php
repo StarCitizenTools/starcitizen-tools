@@ -94,32 +94,8 @@ class VectorTemplate extends BaseTemplate {
 		// Output HTML Page
 		$this->html( 'headelement' );
 		?>
-		<div id="barba-wrapper">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<div id="mw-page-base" class="noprint"></div>
 		<div id="mw-head-base" class="noprint"></div>
-				<div id="mw-navigation">
-			<h2><?php $this->msg( 'navigation-heading' ) ?></h2>
-
-			<div id="mw-head">
-				<?php $this->renderNavigation( 'PERSONAL' ); ?>
-				<div id="left-navigation">
-					<?php $this->renderNavigation( [ 'NAMESPACES', 'VARIANTS' ] ); ?>
-				</div>
-				<div id="right-navigation">
-					<?php $this->renderNavigation( [ 'VIEWS', 'ACTIONS', 'SEARCH' ] ); ?>
-				</div>
-			</div>
-			<div id="mw-panel">
-				<div id="p-logo" role="banner"><a class="mw-wiki-logo" href="<?php
-					echo htmlspecialchars( $this->data['nav_urls']['mainpage']['href'] )
-					?>" <?php
-					echo Xml::expandAttributes( Linker::tooltipAndAccesskeyAttribs( 'p-logo' ) )
-					?>></a></div>
-				<?php $this->renderPortals( $this->data['sidebar'] ); ?>
-			</div>
-		</div>
-		<div id="contfoot-wrapper" class="barba-container">
 		<div id="content" class="mw-body" role="main">
 			<a id="top"></a>
 
@@ -143,7 +119,6 @@ class VectorTemplate extends BaseTemplate {
 			<?php
 			} ?>
 			<?php $this->html( 'prebodyhtml' ) ?>
-
 			<div id="bodyContent" class="mw-body-content">
 				<?php
 				if ( $this->data['isarticle'] ) {
@@ -199,6 +174,27 @@ class VectorTemplate extends BaseTemplate {
 				<?php $this->html( 'debughtml' ); ?>
 			</div>
 		</div>
+		<div id="mw-navigation">
+			<h2><?php $this->msg( 'navigation-heading' ) ?></h2>
+
+			<div id="mw-head">
+				<?php $this->renderNavigation( 'PERSONAL' ); ?>
+				<div id="left-navigation">
+					<?php $this->renderNavigation( [ 'NAMESPACES', 'VARIANTS' ] ); ?>
+				</div>
+				<div id="right-navigation">
+					<?php $this->renderNavigation( [ 'VIEWS', 'ACTIONS', 'SEARCH' ] ); ?>
+				</div>
+			</div>
+			<div id="mw-panel">
+				<div id="p-logo" role="banner"><a class="mw-wiki-logo" href="<?php
+					echo htmlspecialchars( $this->data['nav_urls']['mainpage']['href'] )
+					?>" <?php
+					echo Xml::expandAttributes( Linker::tooltipAndAccesskeyAttribs( 'p-logo' ) )
+					?>></a></div>
+				<?php $this->renderPortals( $this->data['sidebar'] ); ?>
+			</div>
+		</div>
 		<div id="footer" role="contentinfo"<?php $this->html( 'userlangattributes' ) ?>>
 			<?php
 			foreach ( $this->getFooterLinks() as $category => $links ) {
@@ -237,10 +233,6 @@ class VectorTemplate extends BaseTemplate {
 			}
 			?>
 			<div style="clear:both"></div>
-		</div>
-
-		
-		</div>
 		</div>
 		<?php $this->printTrail(); ?>
 
@@ -315,7 +307,6 @@ class VectorTemplate extends BaseTemplate {
 				?></h3>
 
 			<div class="body">
-			
 				<?php
 				if ( is_array( $content ) ) {
 					?>

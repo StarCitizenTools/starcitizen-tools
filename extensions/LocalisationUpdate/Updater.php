@@ -38,7 +38,7 @@ class Updater {
 
 		// This assumes all other keys are used as variables
 		// in the pattern. For example name -> %NAME%.
-		$keys = [];
+		$keys = array();
 		foreach ( array_keys( $info ) as $key ) {
 			$keys[] = '%' . strtoupper( $key ) . '%';
 		}
@@ -55,7 +55,7 @@ class Updater {
 	 * @return array List of translations indexed by language code.
 	 */
 	public function readMessages( ReaderFactory $readerFactory, array $files ) {
-		$messages = [];
+		$messages = array();
 
 		foreach ( $files as $filename => $contents ) {
 			$reader = $readerFactory->getReader( $filename );
@@ -68,7 +68,7 @@ class Updater {
 
 			foreach ( $parsed as $code => $langMessages ) {
 				if ( !isset( $messages[$code] ) ) {
-					$messages[$code] = [];
+					$messages[$code] = array();
 				}
 				$messages[$code] = array_merge( $messages[$code], $langMessages );
 			}
@@ -89,8 +89,8 @@ class Updater {
 	 * @param array [$blacklist] Array of message keys to ignore, keys as as array keys.
 	 * @return array
 	 */
-	public function findChangedTranslations( $origin, $remote, $blacklist = [] ) {
-		$changed = [];
+	public function findChangedTranslations( $origin, $remote, $blacklist = array() ) {
+		$changed = array();
 		foreach ( $remote as $key => $value ) {
 			if ( isset( $blacklist[$key] ) ) {
 				continue;
@@ -116,7 +116,7 @@ class Updater {
 		if ( $this->isDirectory( $path ) ) {
 			$files = $fetcher->fetchDirectory( $path );
 		} else {
-			$files = [ $path => $fetcher->fetchFile( $path ) ];
+			$files = array( $path => $fetcher->fetchFile( $path ) );
 		}
 
 		// Remove files which were not found
@@ -132,13 +132,13 @@ class Updater {
 
 		$components = $finder->getComponents();
 
-		$updatedMessages = [];
+		$updatedMessages = array();
 
 		foreach ( $components as $key => $info ) {
 			$originFiles = $this->fetchFiles( $fetcherFactory, $info['orig'] );
 			$remoteFiles = $this->fetchFiles( $fetcherFactory, $this->expandRemotePath( $info, $repos ) );
 
-			if ( $remoteFiles === [] ) {
+			if ( $remoteFiles === array() ) {
 				// Small optimization: if nothing to compare with, skip
 				continue;
 			}
@@ -165,7 +165,7 @@ class Updater {
 			// message: string in all languages; translation: string in one language.
 			foreach ( $remoteMessages as $language => $remoteTranslations ) {
 				// Check for completely new languages
-				$originTranslations = [];
+				$originTranslations = array();
 				if ( isset( $originMessages[$language] ) ) {
 					$originTranslations = $originMessages[$language];
 				}
@@ -177,12 +177,12 @@ class Updater {
 				);
 
 				// Avoid empty arrays
-				if ( $updatedTranslations === [] ) {
+				if ( $updatedTranslations === array() ) {
 					continue;
 				}
 
 				if ( !isset( $updatedMessages[$language] ) ) {
-					$updatedMessages[$language] = [];
+					$updatedMessages[$language] = array();
 				}
 
 				// In case of conflicts, which should not exist, this prefers the

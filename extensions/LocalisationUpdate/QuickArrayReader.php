@@ -7,23 +7,23 @@
  * Still an order of magnitude slower than eval().
  */
 class QuickArrayReader {
-	private $vars = [];
+	private $vars = array();
 
 	/**
 	 * @param $string string
 	 */
 	function __construct( $string ) {
-		$scalarTypes = [
+		$scalarTypes = array(
 			T_LNUMBER => true,
 			T_DNUMBER => true,
 			T_STRING => true,
 			T_CONSTANT_ENCAPSED_STRING => true,
-		];
-		$skipTypes = [
+		);
+		$skipTypes = array(
 			T_WHITESPACE => true,
 			T_COMMENT => true,
 			T_DOC_COMMENT => true,
-		];
+		);
 		$tokens = token_get_all( $string );
 		$count = count( $tokens );
 		for ( $i = 0; $i < $count; ) {
@@ -75,7 +75,7 @@ class QuickArrayReader {
 						if ( $tokens[$i] !== '(' ) {
 							throw $this->except( $tokens[$i], '(' );
 						}
-						$buildval = [];
+						$buildval = array();
 						do {
 							while ( isset( $skipTypes[$tokens[++$i][0]] ) ) {
 							}
@@ -169,7 +169,7 @@ class QuickArrayReader {
 			// appended to the token; without it we ended up reading in the
 			// extra quote on the end!
 			return strtr( substr( trim( $str ), 1, -1 ),
-				[ '\\\'' => '\'', '\\\\' => '\\' ] );
+				array( '\\\'' => '\'', '\\\\' => '\\' ) );
 		}
 
 		wfSuppressWarnings();
