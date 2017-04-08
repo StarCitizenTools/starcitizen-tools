@@ -7,6 +7,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 #General Settings
 $wgSitename = "Star Citizen";
 $wgMetaNamespace = "Star_Citizen";
+$wgAllowSiteCSSOnRestrictedPages = true;
 
 ## The URL base path to the directory containing the wiki;
 ## defaults for all runtime URL paths are based off of this.
@@ -17,6 +18,9 @@ $wgScriptPath = "";
 $wgScriptExtension = "$wgScriptPath/index.php";
 $wgRedirectScript   = "$wgScriptPath/redirect.php";
 $wgArticlePath = "/$1";
+
+$wgDebugDumpSql = false;
+$wgDebugComments = false;
 
 ## The protocol and server name to use in fully-qualified URLs
 $wgServer = "https://starcitizen.tools";
@@ -54,8 +58,11 @@ $wgMemCachedServers = array();
 ## is writable, then set this to true:
 $wgEnableUploads = true;
 $wgGenerateThumbnailOnParse = true;
-$wgUseImageMagick = true;
+$wgUseImageMagick = false;
+#$wgUseImageMagick = true;
 $wgImageMagickConvertCommand = "/usr/bin/convert";
+
+$wgMaxImageArea = 6.4e7;
 
 # InstantCommons allows wiki to use images from https://commons.wikimedia.org
 $wgUseInstantCommons = false;
@@ -83,7 +90,7 @@ $wgLanguageCode = "en";
 ## appropriate copyright notice / icon. GNU Free Documentation
 ## License and Creative Commons licenses are supported so far.
 $wgRightsPage = ""; # Set to the title of a wiki page that describes your license/copyright
-$wgRightsUrl = "https://creativecommons.org/licenses/by-sa/3.0/";
+$wgRightsUrl = "https://creativecommons.org/licenses/by-sa/4.0/";
 $wgRightsText = "Creative Commons Attribution-ShareAlike";
 $wgRightsIcon = "$wgResourceBasePath/resources/assets/licenses/cc-by-sa.png";
 $wgFavicon = "$wgScriptPath/favicon.png";
@@ -173,6 +180,8 @@ $wgFlowContentFormat = 'html';
 
 #UploadWizard
 $wgApiFrameOptions = 'SAMEORIGIN';
+$wgAllowCopyUploads = true;
+$wgCopyUploadsDomains = array( '*.flickr.com', '*.staticflickr.com' );
 $wgUploadNavigationUrl = '/Special:UploadWizard';
 $wgUploadWizardConfig = array(
 	'debug' => false,
@@ -185,7 +194,8 @@ $wgUploadWizardConfig = array(
 	 	'skip' => true
 		),
 	'maxUploads' => 15,
-	'fileExtensions' => $wgFileExtensions
+	'fileExtensions' => $wgFileExtensions,
+	'flickrApiUrl' => 'https://secure.flickr.com/services/rest/?',
 	);
 
 #TextExtracts
@@ -203,6 +213,8 @@ $wgMediaViewerEnableByDefaultForAnonymous = true;
 
 #ConfirmEdit
 $wgCaptchaClass = 'ReCaptchaNoCaptcha';
+$wgCaptchaTriggers['edit']          = true;
+$wgCaptchaTriggers['create']        = true;
 
 #CleanChanges
 $wgCCTrailerFilter = true;
@@ -214,6 +226,20 @@ $wgLocalisationUpdateDirectory = "$IP/cache";
 $wgTranslateDocumentationLanguageCode = 'qqq';
 $wgExtraLanguageNames['qqq'] = 'Message documentation'; # No linguistic content. Used for documenting messages
 
+$wgTranslateBlacklist = array(
+    '*' => array( // All groups
+      'en' => 'English is the source language.',
+      'zh-cn' => 'This langauge is disabled.',
+      'zh-sg' => 'This langauge is disabled.',
+      'zh-hk' => 'This langauge is disabled.',
+      'zh-mo' => 'This langauge is disabled.',
+      'zh-tw' => 'This langauge is disabled.',
+      'zh-yue' => 'This langauge is disabled.',
+      'zh-my' => 'This langauge is disabled.',
+      'zh' => 'This langauge is disabled.',
+    ),
+);
+
 #Google Analytics
 $wgGoogleAnalyticsAccount = 'UA-48789297-5';
 
@@ -221,6 +247,7 @@ $wgGoogleAnalyticsAccount = 'UA-48789297-5';
 # $edgCacheTable = 'ed_url_cache'; Need to run ExternalData.sql first
 $edgCacheExpireTime = 3 * 24 * 60 * 60;
 $edgAllowExternalDataFrom = 'http://starcitizendb.com/';
+$edgExternalValueVerbose = false;
 
 #Visual Editor
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
@@ -232,6 +259,9 @@ $wgEventLoggingFile = '/var/log/mediawiki/events.log';
 
 #Scribunto
 $wgScribuntoDefaultEngine = 'luasandbox';
+
+#Echo
+$wgAllowHTMLEmail = true;
 
 #Redis
 /** @see RedisBagOStuff for a full explanation of these options. **/
@@ -247,7 +277,7 @@ $wgObjectCaches['redis'] = array(
 #$wgJobTypeConf['default'] = array(
 #  'class'          => 'JobQueueRedis',
 #  'redisServer'    => '127.0.0.1:6379',
-#  'redisConfig'    => array(),
+
 #  'claimTTL'       => 3600
 #);
 
@@ -260,12 +290,28 @@ $wgVirtualRestConfig['modules']['parsoid'] = array(
 );
 
 #=============================================== Namespaces ===============================================
+$wgNamespaceContentModels[NS_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_USER_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_PROJECT_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_FILE_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_MEDIAWIKI_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_TEMPLATE_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_HELP_TALK] = CONTENT_MODEL_FLOW_BOARD;
+$wgNamespaceContentModels[NS_CATEGORY_TALK] = CONTENT_MODEL_FLOW_BOARD;
+#$wgNamespaceContentModels[NS_TRANSLATIONS_TALK] = CONTENT_MODEL_FLOW_BOARD;
+
+$wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
+$wgNamespaceProtection[NS_COMMLINK] = array( 'commlink-edit' );
+$wgNamespaceProtection[NS_PROJMGMT] = array( 'projmgmt-edit' );
+$wgNamespaceProtection[NS_ISSUE] = array( 'issue-edit' );
+
 define("NS_COMMLINK", 3000);
 define("NS_COMMLINK_TALK", 3001);
 $wgExtraNamespaces[NS_COMMLINK] = "Comm-Link";
 $wgExtraNamespaces[NS_COMMLINK_TALK] = "Comm-Link_talk";
-$wgNamespacesWithSubpages[3001] = true;
+$wgNamespacesWithSubpages[NS_COMMLINK] = true;
 $wgNamespacesToBeSearchedDefault[NS_COMMLINK] = true;
+$wgNamespaceContentModels[NS_COMMLINK_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 define("NS_PROJMGMT", 3002);
 define("NS_PROJMGMT_TALK", 3003);
@@ -273,6 +319,7 @@ $wgExtraNamespaces[NS_PROJMGMT] = "ProjMGMT";
 $wgExtraNamespaces[NS_PROJMGMT_TALK] = "ProjMGMT_talk";
 $wgNamespacesWithSubpages[NS_PROJMGMT] = true;
 #$wgNamespacesToBeSearchedDefault[NS_PROJMGMT] = true;
+$wgNamespaceContentModels[NS_PROJMGMT_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 define("NS_ISSUE", 3004);
 define("NS_ISSUE_TALK", 3005);
@@ -280,6 +327,7 @@ $wgExtraNamespaces[NS_ISSUE] = "Issue";
 $wgExtraNamespaces[NS_ISSUE_TALK] = "Issue_talk";
 $wgNamespacesWithSubpages[NS_ISSUE] = true;
 #$wgNamespacesToBeSearchedDefault[NS_ISSUE] = true;
+$wgNamespaceContentModels[NS_ISSUE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 $wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
 $wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
@@ -310,12 +358,31 @@ NS_ISSUE		=> true
 );
 
 #=============================================== Permissions ===============================================
-#All
+$wgAutopromote = array(
+	"autoconfirmed" => array( "&",
+		array( APCOND_EDITCOUNT, &$wgAutoConfirmCount ),
+		array( APCOND_AGE, &$wgAutoConfirmAge ),
+    APCOND_EMAILCONFIRMED,
+	),
+  "Trusted" => array( "&",
+    array( APCOND_EDITCOUNT, 300),
+    array( APCOND_INGROUPS, "Verified"),
+  ),
+);
+
+#all
 $wgGroupPermissions['*']['createaccount'] = true;
 $wgGroupPermissions['*']['edit'] = false;
+$wgGroupPermissions['*']['createpage'] = false;
+$wgGroupPermissions['*']['writeapi'] = false;
+$wgGroupPermissions['*']['flow-hide'] = false;
+$wgGroupPermissions['*']['createtalk'] = false;
 
-#User
-$wgGroupPermissions['user']['edit'] = false;
+#user
+$wgGroupPermissions['user']['edit'] = true;
+$wgGroupPermissions['user']['purge'] = false;
+$wgGroupPermissions['user']['createpage'] = false;
+$wgGroupPermissions['user']['createtalk'] = false;
 $wgGroupPermissions['user']['minoredit'] = false;
 $wgGroupPermissions['user']['move'] = false;
 $wgGroupPermissions['user']['movefile'] = false;
@@ -323,70 +390,74 @@ $wgGroupPermissions['user']['move-categorypages'] = false;
 $wgGroupPermissions['user']['move-rootuserpages'] = false;
 $wgGroupPermissions['user']['move-subpages'] = false;
 $wgGroupPermissions['user']['reupload'] = false;
-$wgGroupPermissions['user']['translate'] = false;
-$wgGroupPermissions['user']['translate-import'] = false;
-$wgGroupPermissions['user']['translate-groupreview'] = false;
-$wgGroupPermissions['user']['flow-lock'] = false;
+$wgGroupPermissions['user']['reupload-own'] = false;
 
-#Verified
-$wgGroupPermissions['Verified'] = $wgGroupPermissions['user'];
-$wgGroupPermissions['Verified']['edit'] = true;
+#autoconfirmed
+$wgAutoConfirmAge = 86400*3; // three days
+$wgAutoConfirmCount = 20;
+$wgGroupPermissions['autoconfirmed'] = $wgGroupPermissions['user'];
+$wgGroupPermissions['autoconfirmed']['upload_by_url'] = true;
+$wgGroupPermissions['autoconfirmed']['createpage'] = true;
+$wgGroupPermissions['autoconfirmed']['createtalk'] = true;
+$wgGroupPermissions['autoconfirmed']['edit'] = true;
+
+#verified
+$wgGroupPermissions['Verified'] = $wgGroupPermissions['autoconfirmed'];
 $wgGroupPermissions['Verified']['skipcaptcha'] = true;
+$wgGroupPermissions['Verified']['purge'] = true;
+$wgGroupPermissions['Verified']['reupload'] = true;
+$wgGroupPermissions['Verified']['reupload-own'] = true;
+$wgGroupPermissions['Verified']['minoredit'] = true;
 
-#Translator
-$wgGroupPermissions['Translator'] = $wgGroupPermissions['Verified'];
+#translator
 $wgGroupPermissions['Translator']['translate'] = true;
-$wgGroupPermissions['Translator']['translate-import'] = true;
 $wgGroupPermissions['Translator']['translate-messagereview'] = true;
 
-#Trusted
+#trusted
 $wgGroupPermissions['Trusted'] = $wgGroupPermissions['Verified'];
-$wgGroupPermissions['Trusted']['minoredit'] = true;
-$wgGroupPermissions['Trusted']['autoconfirmed'] = true;
+$wgGroupPermissions['Trusted']['patrol'] = true;
 $wgGroupPermissions['Trusted']['move'] = true;
+$wgGroupPermissions['Trusted']['movefile'] = true;
+$wgGroupPermissions['Trusted']['move-categorypages'] = true;
+$wgGroupPermissions['Trusted']['writeapi'] = true;
+$wgGroupPermissions['Trusted']['sendemail'] = true;
+$wgGroupPermissions['Trusted']['commlink-edit'] = true;
+$wgGroupPermissions['Trusted']['issue-edit'] = true;
+$wgGroupPermissions['Trusted']['projmgmt-edit'] = true;
 $wgGroupPermissions['Trusted']['move-subpages'] = true;
-$wgGroupPermissions['Trusted']['reupload'] = true;
 
-#Editor
+#editor
 $wgGroupPermissions['Editor'] = $wgGroupPermissions['Trusted'];
-$wgGroupPermissions['Editor']['noratelimit'] = true;
-$wgGroupPermissions['Editor']['patrol'] = true;
-$wgGroupPermissions['Editor']['delete'] = true;
-$wgGroupPermissions['Editor']['movefile'] = true;
-$wgGroupPermissions['Editor']['move-categorypages'] = true;
+$wgAddGroups['Editor'] = array( 'Verified', 'Translator' );
 $wgGroupPermissions['Editor']['template-edit'] = true;
+$wgGroupPermissions['Editor']['rollback'] = true;
+$wgGroupPermissions['Editor']['protect'] = true;
+$wgGroupPermissions['Editor']['editprotected'] = true;
+$wgGroupPermissions['Editor']['suppressredirect'] = true;
+$wgGroupPermissions['Editor']['autopatrol'] = true;
+$wgGroupPermissions['Editor']['checkuser'] = true;
+$wgGroupPermissions['Editor']['translate-proofr'] = true;
+$wgGroupPermissions['Editor']['translate-manage'] = true;
+$wgGroupPermissions['Editor']['translate'] = true;
 $wgGroupPermissions['Editor']['pagetranslation'] = true;
-$wgAddGroups['Editor'] = array( 'Verified' );
+$wgGroupPermissions['Editor']['translate-groupreview'] = true;
+$wgGroupPermissions['Editor']['bigdelete'] = true;
+$wgGroupPermissions['Editor']['deletedhistory'] = true;
+$wgGroupPermissions['Editor']['deletedtext'] = true;
+$wgGroupPermissions['Editor']['block'] = true;
+$wgGroupPermissions['Editor']['undelete'] = true;
+$wgGroupPermissions['Editor']['mergehistory'] = true;
+$wgGroupPermissions['Editor']['browsearchive'] = true;
+$wgGroupPermissions['Editor']['noratelimit'] = true;
+$wgGroupPermissions['Editor']['flow-delete'] = true;
+$wgGroupPermissions['Editor']['flow-lock'] = true;
+$wgGroupPermissions['Editor']['move-rootuserpages'] = true;
 
-#Chief Editor
-$wgAddGroups['ChiefEditor'] = array( 'Verified', 'Trusted', 'Translator' );
-$wgGroupPermissions['ChiefEditor'] = $wgGroupPermissions['Editor'];
-$wgGroupPermissions['ChiefEditor']['autopatrol'] = true;
-$wgGroupPermissions['ChiefEditor']['editinterface'] = true;
-$wgGroupPermissions['ChiefEditor']['block'] = true;
-$wgGroupPermissions['ChiefEditor']['protect'] = true;
-$wgGroupPermissions['ChiefEditor']['editprotected'] = true;
-$wgGroupPermissions['ChiefEditor']['suppressredirect'] = true;
-$wgGroupPermissions['ChiefEditor']['undelete'] = true;
-$wgGroupPermissions['ChiefEditor']['mergehistory'] = true;
-$wgGroupPermissions['ChiefEditor']['bigdelete'] = true;
-$wgGroupPermissions['ChiefEditor']['browserarchive'] = true;
-$wgGroupPermissions['ChiefEditor']['rollback'] = true;
-$wgGroupPermissions['ChiefEditor']['deletedhistory'] = true;
-$wgGroupPermissions['ChiefEditor']['deletedtext'] = true;
-$wgGroupPermissions['ChiefEditor']['checkuser'] = true;
-$wgGroupPermissions['ChiefEditor']['checkuser-log'] = true;
-$wgGroupPermissions['ChiefEditor']['flow-create-board'] = true;
-$wgGroupPermissions['ChiefEditor']['translate-proofr'] = true;
-$wgGroupPermissions['ChiefEditor']['translate-manage'] = true;
-$wgGroupPermissions['ChiefEditor']['translate'] = true;
-$wgGroupPermissions['ChiefEditor']['translate-groupreview'] = true;
-$wgGroupPermissions['ChiefEditor']['replacetext'] = true;
-
-#Administrator
-$wgGroupPermissions['Admin']['userrights'] = true;
-
-#Sysop
-$wgGroupPermissions['sysop']['pagetranslation'] = true;
-$wgGroupPermissions['sysop']['translate-manage'] = true;
-$wgGroupPermissions['sysop']['edit'] = true;
+#sysop
+$wgGroupPermissions['sysop'] = $wgGroupPermissions['Editor'];
+$wgGroupPermissions['sysop']['userrights'] = true;
+$wgGroupPermissions['sysop']['siteadmin'] = true;
+$wgGroupPermissions['sysop']['checkuser-log'] = true;
+$wgGroupPermissions['sysop']['nuke'] = true;
+$wgGroupPermissions['sysop']['editinterface'] = true;
+$wgGroupPermissions['sysop']['delete'] = true;
