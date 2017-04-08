@@ -241,7 +241,7 @@ if ( $wgUseInstantCommons ) {
 		'transformVia404' => true,
 		'fetchDescription' => true,
 		'descriptionCacheExpiry' => 43200,
-		'apiThumbCacheExpiry' => 0,
+		'apiThumbCacheExpiry' => 86400,
 	];
 }
 /*
