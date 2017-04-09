@@ -27,7 +27,7 @@ class GitHubFetcher extends HttpFetcher {
 			throw new \Exception( "Unable to get directory listing for {$m['org']}/{$m['repo']}" );
 		}
 
-		$files = [];
+		$files = array();
 		$json = \FormatJson::decode( $json, true );
 		foreach ( $json as $fileinfo ) {
 			$fileurl = dirname( $pattern ) . '/' . $fileinfo['name'];
