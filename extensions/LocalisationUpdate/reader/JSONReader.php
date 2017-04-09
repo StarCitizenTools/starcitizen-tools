@@ -23,7 +23,7 @@ class JSONReader implements Reader {
 		unset( $messages['@metadata'] );
 
 		if ( $this->code ) {
-			return [ $this->code => $messages ];
+			return array( $this->code => $messages );
 		}
 
 		// Assuming that the array is keyed by language codes

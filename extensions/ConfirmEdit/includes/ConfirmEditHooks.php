@@ -172,24 +172,29 @@ class ConfirmEditHooks {
 	 * Set up $wgWhitelistRead
 	 */
 	public static function confirmEditSetup() {
-		global $wgGroupPermissions, $wgCaptchaTriggers, $wgWikimediaJenkinsCI;
+		global $wgCaptchaTriggers, $wgWikimediaJenkinsCI;
 
 		// There is no need to run (core) tests with enabled ConfirmEdit - bug T44145
 		if ( isset( $wgWikimediaJenkinsCI ) && $wgWikimediaJenkinsCI === true ) {
 			$wgCaptchaTriggers = array_fill_keys( array_keys( $wgCaptchaTriggers ), false );
 		}
+	}
 
-		if ( !$wgGroupPermissions['*']['read'] && $wgCaptchaTriggers['badlogin'] ) {
-			// We need to ensure that the captcha interface is accessible
-			// so that unauthenticated users can actually get in after a
-			// mistaken password typing.
-			global $wgWhitelistRead;
-			$image = SpecialPage::getTitleFor( 'Captcha', 'image' );
-			$help = SpecialPage::getTitleFor( 'Captcha', 'help' );
-			$wgWhitelistRead[] = $image->getPrefixedText();
-			$wgWhitelistRead[] = $help->getPrefixedText();
+	/**
+	 * TitleReadWhitelist hook handler.
+	 *
+	 * @param Title $title
+	 * @param User $user
+	 * @param $whitelisted
+	 */
+	public static function onTitleReadWhitelist( Title $title, User $user, &$whitelisted ) {
+		$image = SpecialPage::getTitleFor( 'Captcha', 'image' );
+		$help = SpecialPage::getTitleFor( 'Captcha', 'help' );
+		if ( $title->equals( $image ) || $title->equals( $help ) ) {
+			$whitelisted = true;
 		}
 	}
+
 	/**
 	 * Callback for extension.json of FancyCaptcha to set a default captcha directory,
 	 * which depends on wgUploadDirectory

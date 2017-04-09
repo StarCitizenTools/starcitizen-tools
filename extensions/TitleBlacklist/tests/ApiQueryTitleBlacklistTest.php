@@ -23,12 +23,18 @@ class ApiQueryTitleBlacklistTest extends ApiTestCase {
 		parent::setUp();
 		$this->doLogin();
 
+		TitleBlacklist::destroySingleton();
 		$wgTitleBlacklistSources = array(
 			array(
 				'type' => 'file',
 				'src'  => __DIR__ . '/testSource',
 			),
 		);
+	}
+
+	function tearDown() {
+		TitleBlacklist::destroySingleton();
+		parent::tearDown();
 	}
 
 	/**
