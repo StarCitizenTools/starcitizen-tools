@@ -289,15 +289,7 @@ class SyntaxHighlight_GeSHi {
 				->getProcess();
 
 			$process->setInput( $code );
-
-			/* Workaround for T151523 (buggy $process->getOutput()).
-				If/when this issue is fixed in HHVM or Symfony,
-				replace this with "$process->run(); $output = $process->getOutput();"
-			*/
-			$output = '';
-			$process->run( function( $type, $capturedOutput ) use ( &$output ) {
-				$output .= $capturedOutput;
-			} );
+			$process->run();
 
 			if ( !$process->isSuccessful() ) {
 				$status->warning( 'syntaxhighlight-error-pygments-invocation-failure' );
@@ -306,6 +298,7 @@ class SyntaxHighlight_GeSHi {
 				return $status;
 			}
 
+			$output = $process->getOutput();
 			$cache->set( $cacheKey, $output );
 		}
 

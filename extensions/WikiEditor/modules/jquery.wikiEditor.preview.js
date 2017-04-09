@@ -118,12 +118,11 @@ $.wikiEditor.modules.preview = {
 						rvprop: '',
 						rvsection: section === '' ? undefined : section
 					};
-					var postPromise = api.post( postdata );
 
-					$.when( postPromise, mw.loader.using( 'mediawiki.action.history.diff' ) )
-					.done( function ( postResult ) {
+					api.post( postdata )
+					.done( function ( data ) {
 						try {
-							var diff = postResult[ 0 ].query.pages[ 0 ]
+							var diff = data.query.pages[ 0 ]
 								.revisions[ 0 ].diff.body;
 
 							context.$changesTab.find( 'table.diff tbody' )

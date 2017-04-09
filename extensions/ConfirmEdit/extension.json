@@ -86,9 +86,6 @@
 		"APIEditBeforeSave": [
 			"ConfirmEditHooks::confirmEditAPI"
 		],
-		"TitleReadWhitelist": [
-			"ConfirmEditHooks::onTitleReadWhitelist"
-		],
 		"UnitTestsList": [
 			"ConfirmEditHooks::onUnitTestsList"
 		]
