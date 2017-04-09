@@ -121,14 +121,21 @@ $wgAllowTitlesInSVG = true;
 $wgSVGConverter = 'ImageMagick';
 
 #Javascript
-$wgHooks['BeforePageDisplay'][] ='onBeforePageDisplay';
+
+$wgResourceModules['SlyJS'] = array(
+    'scripts' => array('Sly.js'),
+);
 
 function onBeforePageDisplay( OutputPage &$out, Skin &$skin )
 {
     $script = '<script></script>';
     $out->addHeadItem("head script", $script);
+    $out->addModules('SlyJS');
     return true;
 };
+
+$wgHooks['BeforePageDisplay'][] ='onBeforePageDisplay';
+
 #=============================================== External Includes ===============================================
 
 require_once("/home/www-data/external_includes/mysql_pw.php");
