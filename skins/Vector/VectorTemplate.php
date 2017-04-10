@@ -95,7 +95,6 @@ class VectorTemplate extends BaseTemplate {
 		$this->html( 'headelement' );
 		?>
 		<div id="barba-wrapper">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<div id="mw-page-base" class="noprint"></div>
 		<div id="mw-head-base" class="noprint"></div>
 				<div id="mw-navigation">
