@@ -49,6 +49,7 @@ class SkinVector extends SkinTemplate {
 		$out->addHeadItem( 'manifest', '<link rel="manifest" href="manifest.json">' );
 		$out->addMeta( 'theme-color', '#0A1B2C' );
 		$out->addMeta( 'apple-mobile-web-app-status-bar-style', 'black-translucent' );
+		$out->addStyles( 'https://fonts.googleapis.com/css?family=Electrolize|Open+Sans' );
 		if ( $this->vectorConfig->get( 'VectorResponsive' ) ) {
 			$out->addMeta( 'viewport', 'width=device-width, initial-scale=1' );
 			$out->addModuleStyles( 'skins.vector.styles.responsive' );
@@ -66,7 +67,6 @@ class SkinVector extends SkinTemplate {
 
 		$styles = [ 'mediawiki.skinning.interface', 'skins.vector.styles' ];
 		Hooks::run( 'SkinVectorStyleModules', [ $this, &$styles ] );
-		$out->addModuleStyles( 'https://fonts.googleapis.com/css?family=Electrolize|Open+Sans' );
 		$out->addModuleStyles( $styles );
 	}
 
