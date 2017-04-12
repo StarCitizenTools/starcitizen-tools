@@ -116,7 +116,7 @@ $wgDplSettings['minCategoryCount'] = 0;
 $wgDplSettings['maxResultCount'] = 500;
 
 //Do recursive tag parsing on <dpl> parser tags converting tags and functions such as magic words like {{PAGENAME}}.  This is similar to the {{#dpl}} parser function call, but may not work exactly the same in all cases.
-$wgDplSettings['recursiveTagParse'] = false;
+$wgDplSettings['recursiveTagParse'] = true;
 
 //Set this to true to allow DPL to run from protected pages only.  This is recommend if wiki administrators are having issues with malicious users creating computationally intensive queries.
 $wgDplSettings['runFromProtectedPagesOnly'] = false;
