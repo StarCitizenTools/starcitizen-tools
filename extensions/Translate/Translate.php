@@ -373,7 +373,7 @@ $wgPageTranslationNamespace = 1198;
  * Special:MyLanguage syntax).
  * @since 2013-03-10
  */
-$wgTranslatePageTranslationULS = false;
+$wgTranslatePageTranslationULS = true;
 
 # </source>
 # === Message group configuration ===
