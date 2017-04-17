@@ -58,7 +58,6 @@ $wgMemCachedServers = array();
 ## is writable, then set this to true:
 $wgEnableUploads = true;
 $wgGenerateThumbnailOnParse = true;
-#$wgUseImageMagick = false;
 $wgUseImageMagick = true;
 $wgImageMagickConvertCommand = "/usr/bin/convert";
 
@@ -229,7 +228,6 @@ $wgDefaultUserOptions['usenewrc'] = 1;
 $wgLocalisationUpdateDirectory = "$IP/cache";
 $wgTranslateDocumentationLanguageCode = 'qqq';
 $wgExtraLanguageNames['qqq'] = 'Message documentation'; # No linguistic content. Used for documenting messages
-
 $wgTranslatePageTranslationULS = true; # Display localized page based on ULS language
 
 $wgTranslateBlacklist = array(
