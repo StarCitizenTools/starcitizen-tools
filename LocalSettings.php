@@ -58,8 +58,8 @@ $wgMemCachedServers = array();
 ## is writable, then set this to true:
 $wgEnableUploads = true;
 $wgGenerateThumbnailOnParse = true;
-$wgUseImageMagick = false;
-#$wgUseImageMagick = true;
+#$wgUseImageMagick = false;
+$wgUseImageMagick = true;
 $wgImageMagickConvertCommand = "/usr/bin/convert";
 
 $wgMaxImageArea = 6.4e7;
@@ -99,9 +99,7 @@ $wgFavicon = "$wgScriptPath/favicon.png";
 $wgDiff3 = "/usr/bin/diff3";
 
 # The following permissions were set based on your choice in the installer
-
 $wgAllowUserCss = true;
-
 
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'vector', 'monobook':
@@ -109,8 +107,8 @@ $wgDefaultSkin = "vector";
 
 # Enabled skins.
 # The following skins were automatically enabled:
-wfLoadSkin( 'Vector' );
-wfLoadSkin( 'Citizen' );
+$wfLoadSkin( 'Vector' );
+#wfLoadSkin( 'Citizen' );
 
 #Maintenance
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
@@ -121,16 +119,15 @@ $wgAllowTitlesInSVG = true;
 $wgSVGConverter = 'ImageMagick';
 
 #Javascript
-
-$wgResourceModules['SlyJS'] = array(
-    'scripts' => array('Sly.js'),
+$wgResourceModules['WaveJS'] = array(
+    'scripts' => array('waves.min.js'),
 );
 
 function onBeforePageDisplay( OutputPage &$out, Skin &$skin )
 {
     $script = '<script></script>';
     $out->addHeadItem("head script", $script);
-    $out->addModules('SlyJS');
+    $out->addModules('WaveJS');
     return true;
 };
 
@@ -232,6 +229,8 @@ $wgDefaultUserOptions['usenewrc'] = 1;
 $wgLocalisationUpdateDirectory = "$IP/cache";
 $wgTranslateDocumentationLanguageCode = 'qqq';
 $wgExtraLanguageNames['qqq'] = 'Message documentation'; # No linguistic content. Used for documenting messages
+
+$wgTranslatePageTranslationULS = true; # Display localized page based on ULS language
 
 $wgTranslateBlacklist = array(
     '*' => array( // All groups
