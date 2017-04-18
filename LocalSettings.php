@@ -19,6 +19,7 @@ $wgScriptExtension = "$wgScriptPath/index.php";
 $wgRedirectScript   = "$wgScriptPath/redirect.php";
 $wgArticlePath = "/$1";
 
+$wgShowSQLErrors = false;
 $wgDebugDumpSql = false;
 $wgDebugComments = false;
 
@@ -250,7 +251,7 @@ $wgGoogleAnalyticsAccount = 'UA-48789297-5';
 #ExternalData
 # $edgCacheTable = 'ed_url_cache'; Need to run ExternalData.sql first
 $edgCacheExpireTime = 3 * 24 * 60 * 60;
-$edgAllowExternalDataFrom = 'http://starcitizendb.com/';
+$edgAllowExternalDataFrom = array('http://starcitizendb.com/','http://pledgetrack.rabbitsraiders.net');
 $edgExternalValueVerbose = false;
 
 #Visual Editor
