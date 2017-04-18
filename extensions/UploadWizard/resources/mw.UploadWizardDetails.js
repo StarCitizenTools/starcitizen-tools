@@ -79,7 +79,7 @@
 		this.dateDetailsField = new uw.FieldLayout( this.dateDetails, {
 			label: mw.message( 'mwe-upwiz-date-created' ).text(),
 			help: mw.message( 'mwe-upwiz-tooltip-date' ).text(),
-			required: false
+			required: true
 		} );
 		this.mainFields.push( this.dateDetailsField );
 
