@@ -107,7 +107,7 @@ $wgDefaultSkin = "vector";
 
 # Enabled skins.
 # The following skins were automatically enabled:
-$wfLoadSkin( 'Vector' );
+wfLoadSkin( 'Vector' );
 #wfLoadSkin( 'Citizen' );
 
 #Maintenance
