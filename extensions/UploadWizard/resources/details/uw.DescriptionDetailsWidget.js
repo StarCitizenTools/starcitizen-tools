@@ -154,7 +154,7 @@
 			language = mw.UploadWizard.config.languageTemplateFixups[ language ];
 		}
 
-		return '{{' + language + '|1=' + description + '}}';
+		return description ;
 	};
 
 	/**

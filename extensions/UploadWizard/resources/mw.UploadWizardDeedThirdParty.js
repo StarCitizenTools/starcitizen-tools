@@ -51,7 +51,9 @@
 				errors = [],
 				minLength = config.minSourceLength,
 				maxLength = config.maxSourceLength,
-				text = this.getValue().trim();
+				text = this.getValue().trim(),
+				template = new RegExp("{{.*}}"),
+				re_weburl = new RegExp("^" + "^http(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$");
 
 			if ( text === '' ) {
 				errors.push( mw.message( 'mwe-upwiz-error-blank' ) );
@@ -59,6 +61,8 @@
 				errors.push( mw.message( 'mwe-upwiz-error-too-short', minLength ) );
 			} else if ( text.length > maxLength ) {
 				errors.push( mw.message( 'mwe-upwiz-error-too-long', maxLength ) );
+			} else if (re_weburl.test(text) == false && template.test(text) == false) {
+				errors.push( mw.message( 'mwe-upwiz-error-not-url-or-template' ) );
 			}
 
 			return $.Deferred().resolve( errors ).promise();

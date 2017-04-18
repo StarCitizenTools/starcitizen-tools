@@ -28,6 +28,12 @@
 			"Matma Rex"
 		]
 	},
+	"mwe-upwiz-license-sc-head": "Custom Star Citizen licenses, author or copyright holder granted rights of reuse",
+	"mwe-upwiz-license-rsi": "Roberts Space Industries grant of public media for use on fan sites.",
+ 	"mwe-upwiz-license-thedamnshames": "Aelanna Tesla - Star Citizen Screenshot/Work",
+ 	"mwe-upwiz-license-hasgaha": "Mr Hasgaha - Star Citizen Screenshot/Work",
+ 	"mwe-upwiz-license-aelannatesla": "TheDamnShames - Star Citizen Screenshot/Work",
+	"mwe-upwiz-error-not-url-or-template": "This source is not a URL or an anchor template",
 	"uploadwizard": "{{doc-special|UploadWizard}}\nUploadWizard is a wizard to upload multimedia files to a MediaWiki website.\nFor more information, see [[mw:UploadWizard]].",
 	"uploadwizard-desc": "{{desc|name=Upload Wizard|url=https://www.mediawiki.org/wiki/Extension:UploadWizard}}\nRefers to [//blog.wikimedia.org/blog/2009/07/02/ford-foundation-awards-300k-grant-for-wikimedia-commons/ this event], i.e. the development was paid with this $300,000 grant.",
 	"mwe-upwiz-uploadcampaigns": "{{doc-special|UploadCampaigns}}\nCan also be worded as \"campaigns for the promotion of uploading\".",
@@ -280,7 +286,9 @@
 	"mwe-upwiz-license-cc-by-2.5": "{{CreativeCommonsLicense|by|2.5}}\nParameters:\n* $1 - (Unused) empty string\n* $2 - the URL \"//creativecommons.org/licenses/by/2.5/\"\nFor more information, see https://www.mediawiki.org/wiki/UploadWizard\n{{Related|Mwe-upwiz-license-cc}}",
 	"mwe-upwiz-license-cc-by-sa-2.0": "{{CreativeCommonsLicense|by-sa|2.0}}\nParameters:\n* $1 - (Unused) empty string\n* $2 - the URL \"//creativecommons.org/licenses/by-sa/2.0/\"\nFor more information, see https://www.mediawiki.org/wiki/UploadWizard\n{{Related|Mwe-upwiz-license-cc}}",
 	"mwe-upwiz-license-cc-by-2.0": "{{CreativeCommonsLicense|by|2.0}}\nParameters:\n* $1 - (Unused) empty string\n* $2 - the URL \"//creativecommons.org/licenses/by/2.0/\"\nFor more information, see https://www.mediawiki.org/wiki/UploadWizard\n{{Related|Mwe-upwiz-license-cc}}",
-	"mwe-upwiz-license-cc-zero": "Parameters:\n* $1 - (Unused) empty string\n* $2 - full URL \"//creativecommons.org/publicdomain/zero/1.0/\"\n{{Related|Mwe-upwiz-license-cc}}",
+        "mwe-upwiz-license-cc-by-nc-sa-2.0": "{{CreativeCommonsLicense|by-nc-sa|2.0}}\nParameters:\n* $1 - (Unused) empty string\n* $2 - the URL \"//creativecommons.org/licenses/by-nc-sa/2.0/\"\nFor more information, see https://www.mediawiki.org/wiki/UploadWizard\n{{Related|Mwe-upwiz-license-cc}}",
+        "mwe-upwiz-license-cc-by-nc-2.0": "{{CreativeCommonsLicense|by-nc|2.0}}\nParameters:\n* $1 - (Unused) empty string\n* $2 - the URL \"//creativecommons.org/licenses/by-nc/2.0/\"\nFor more information, see https://www.mediawiki.org/wiki/UploadWizard\n{{Related|Mwe-upwiz-license-cc}}",
+ 	"mwe-upwiz-license-cc-zero": "Parameters:\n* $1 - (Unused) empty string\n* $2 - full URL \"//creativecommons.org/publicdomain/zero/1.0/\"\n{{Related|Mwe-upwiz-license-cc}}",
 	"mwe-upwiz-license-custom": "Parameters:\n* $1 - (Unused)\n* $2 - full URL, {{msg-mw|mwe-upwiz-license-custom-url}}",
 	"mwe-upwiz-license-custom-url": "{{optional}}\nUsed as <code>$2</code> in {{msg-mw|Mwe-upwiz-license-custom}}.",
 	"mwe-upwiz-license-fal": "Used as license name.",

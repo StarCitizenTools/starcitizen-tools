@@ -110,9 +110,9 @@
 	 */
 	uw.DateDetailsWidget.prototype.getErrors = function () {
 		var errors = [];
-		if ( this.dateInputWidget.getValue().trim() === '' ) {
-			errors.push( mw.message( 'mwe-upwiz-error-blank' ) );
-		}
+//		if ( this.dateInputWidget.getValue().trim() === '' ) {
+//			errors.push( mw.message( 'mwe-upwiz-error-blank' ) );
+//		}
 		return $.Deferred().resolve( errors ).promise();
 	};
 

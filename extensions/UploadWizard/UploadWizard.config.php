@@ -422,7 +422,36 @@ return array(
 		'generic' => array(
 			'msg' => 'mwe-upwiz-license-generic',
 			'templates' => array( 'Generic' )
-		)
+		),
+		'rsilicense' => array(
+			'msg' => 'mwe-upwiz-license-rsi',
+			'templates' => array('RSIlicense')
+		),
+		'thedamnshameslicense' => array(
+			'msg' => 'mwe-upwiz-license-thedamnshames',
+			'templates' => array('TheDamnShamesLicense')
+		),
+		'hasgahalicense' => array(
+			'msg' => 'mwe-upwiz-license-hasgaha',
+			'templates' => array('HasgahaLicense')
+		),
+		'aelannateslalicense' => array(
+			'msg' => 'mwe-upwiz-license-aelannatesla',
+			'templates' => array('AelannaTeslaLicense')
+		),
+		'cc-by-nc-sa-2.0' => array(
+			'msg' => 'mwe-upwiz-license-cc-by-nc-sa-2.0',
+			'templates' => array('cc-by-nc-sa-2.0'),
+//			'icons' => array('cc-by','cc-nc','cc-sa'),
+			'url' => '//creativecommons.org/licenses/by-nc-sa/2.0/'
+		),
+                'cc-by-nc-2.0' => array(
+                        'msg' => 'mwe-upwiz-license-cc-by-nc-2.0',
+                        'templates' => array('cc-by-nc-2.0'),
+ //                       'icons' => array('cc-by','cc-nc'),
+                        'url' => '//creativecommons.org/licenses/by-nc/2.0/'
+                ),
+
 	),
 
 	'licensing' => array(
@@ -451,8 +480,17 @@ return array(
 		// checkbox selection of all licenses
 		'thirdParty' => array(
 			'type' => 'or',
-			'defaults' => 'cc-by-sa-4.0',
+			'defaults' => 'rsilicense',
 			'licenseGroups' => array(
+                                array(
+                                        'head' => 'mwe-upwiz-license-sc-head',
+                                        'licenses' => array(
+                                                'rsilicense',
+                                                'thedamnshameslicense',
+                                                'hasgahalicense',
+                                                'aelannateslalicense'
+                                        )
+                                ),
 				array(
 					// This should be a list of all CC licenses we can reasonably expect to find around the web
 					'head' => 'mwe-upwiz-license-cc-head',
@@ -468,31 +506,14 @@ return array(
 					)
 				),
 				array(
-					// n.b. as of April 2011, Flickr still uses CC 2.0 licenses.
-					// The White House also has an account there, hence the Public Domain US Government license
+					// Flickr still uses CC 2.0
 					'head' => 'mwe-upwiz-license-flickr-head',
-					'subhead' => 'mwe-upwiz-license-flickr-subhead',
-					'prependTemplates' => array( 'flickrreview' ),
-					'licenses' => array(
+					'subhead'=> 'mwe-upwiz-license-flickr-subhead',
+					'licenses'=> array(
 						'cc-by-sa-2.0',
-						'cc-by-2.0',
-						'pd-usgov',
-					)
-				),
-				array(
-					'head' => 'mwe-upwiz-license-public-domain-usa-head',
-					'subhead' => 'mwe-upwiz-license-public-domain-usa-subhead',
-					'licenses' => array(
-						'pd-us',
-						'pd-art',
-					)
-				),
-				array(
-					// omitted navy because it is believed only MultiChil uses it heavily. Could add it back
-					'head' => 'mwe-upwiz-license-usgov-head',
-					'licenses' => array(
-						'pd-usgov',
-						'pd-usgov-nasa'
+						'cc-by-nc-2.0',
+						'cc-by-nc-sa-2.0',
+						'cc-by-2.0'
 					)
 				),
 				array(
