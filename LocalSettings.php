@@ -174,6 +174,7 @@ require_once "$IP/extensions/Scribunto/Scribunto.php";
 require_once( "$IP/extensions/UploadWizard/UploadWizard.php" );
 require_once "$IP/extensions/EventLogging/EventLogging.php";
 require_once "$IP/extensions/ExternalData/ExternalData.php";
+#require_once "$IP/extensions/Lazyload/Lazyload.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================

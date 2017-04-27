@@ -1,0 +1,43 @@
+{
+	"name": "Lazyload",
+	"version": "0.2.5",
+	"author": [
+		"Mudkip",
+		"ikasty"
+	],
+	"url": "https://github.com/mudkipme/mediawiki-lazyload",
+	"descriptionmsg": "lazyload-desc",
+	"type": "other",
+	"license-name": "MIT",
+	"ExtensionMessagesFiles": {
+		"Lazyload": "Lazyload.i18n.php"
+	},
+	"AutoloadClasses": {
+		"Lazyload": "Lazyload.class.php"
+	},
+	"ResourceModules": {
+		"ext.lazyload": {
+			"scripts": [
+				"lazyload.js"
+			],
+			"dependencies": [
+				"mediawiki.hidpi"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "Lazyload/modules"
+	},
+	"Hooks": {
+		"LinkerMakeExternalImage": [
+			"Lazyload::LinkerMakeExternalImage"
+		],
+		"ThumbnailBeforeProduceHTML": [
+			"Lazyload::ThumbnailBeforeProduceHTML"
+		],
+		"BeforePageDisplay": [
+			"Lazyload::BeforePageDisplay"
+		]
+	}
+}

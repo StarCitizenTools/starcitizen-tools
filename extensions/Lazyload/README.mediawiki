@@ -1,0 +1,20 @@
+= MediaWiki Lazyload Extension =
+
+An extension to delay loading of images on MediaWiki pages.
+
+== Requirements ==
+
+Lazyload Extension requires MediaWiki 1.22 or higher.
+
+== Installation ==
+
+To install the extension, place the entire 'Lazyload' directory within your
+MediaWiki 'extensions' directory, then add the following line to your
+'LocalSettings.php' file:
+
+    require_once( "$IP/extensions/Lazyload/Lazyload.php" );
+
+== Contact ==
+
+Advices, questions and bug reports are welcome to be sent to
+i@mudkip.me.
