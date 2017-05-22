@@ -208,7 +208,7 @@
 		// Add the 'Special:MyLanguage/' prefix for all internal links of valid namespaces and
 		// mainspace.
 		// Regex : http://regex101.com/r/zZ9jH9
-		pageContent = pageContent.replace( linkPrefixRegex, '[[Special:MyLanguage/$1]]' );
+		pageContent = pageContent.replace( linkPrefixRegex, '[[$1{{#translation:}}]]' );
 		return pageContent;
 	}
 
