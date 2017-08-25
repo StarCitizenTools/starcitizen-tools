@@ -307,11 +307,6 @@ $wgNamespaceContentModels[NS_HELP_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_CATEGORY_TALK] = CONTENT_MODEL_FLOW_BOARD;
 #$wgNamespaceContentModels[NS_TRANSLATIONS_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
-$wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
-$wgNamespaceProtection[NS_COMMLINK] = array( 'commlink-edit' );
-$wgNamespaceProtection[NS_PROJMGMT] = array( 'projmgmt-edit' );
-$wgNamespaceProtection[NS_ISSUE] = array( 'issue-edit' );
-
 define("NS_COMMLINK", 3000);
 define("NS_COMMLINK_TALK", 3001);
 $wgExtraNamespaces[NS_COMMLINK] = "Comm-Link";
@@ -336,6 +331,14 @@ $wgNamespacesWithSubpages[NS_ISSUE] = true;
 #$wgNamespacesToBeSearchedDefault[NS_ISSUE] = true;
 $wgNamespaceContentModels[NS_ISSUE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
+define("NS_GUIDE", 3006);
+define("NS_GUIDE_TALK", 3007);
+$wgExtraNamespaces[NS_GUIDE] = "Guide";
+$wgExtraNamespaces[NS_GUIDE_TALK] = "Guide_talk";
+$wgNamespacesWithSubpages[NS_GUIDE] = true;
+#$wgNamespacesToBeSearchedDefault[NS_ISSUE] = true;
+$wgNamespaceContentModels[NS_GUIDE_TALK] = CONTENT_MODEL_FLOW_BOARD;
+
 $wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
 $wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
 
@@ -353,6 +356,10 @@ $wgNamespaceContentModels[NS_PROJMGMT_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_ISSUE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 $wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
+$wgNamespaceProtection[NS_COMMLINK] = array( 'commlink-edit' );
+$wgNamespaceProtection[NS_PROJMGMT] = array( 'projmgmt-edit' );
+$wgNamespaceProtection[NS_ISSUE] = array( 'issue-edit' );
+$wgNamespaceProtection[NS_GUIDE] = array( 'guide-edit' );
 
 $wgVisualEditorAvailableNamespaces = array(
 NS_MAIN     => true,
@@ -361,7 +368,8 @@ NS_HELP     => true,
 NS_PROJECT  => true,
 NS_COMMLINK => true,
 NS_PROJMGMT => true,
-NS_ISSUE		=> true
+NS_ISSUE    => true,
+NS_GUIDE    => true
 );
 
 #=============================================== Permissions ===============================================
@@ -448,6 +456,7 @@ $wgGroupPermissions['Editor']['translate-manage'] = true;
 $wgGroupPermissions['Editor']['translate'] = true;
 $wgGroupPermissions['Editor']['pagetranslation'] = true;
 $wgGroupPermissions['Editor']['translate-groupreview'] = true;
+$wgGroupPermissions['Editor']['delete'] = true;
 $wgGroupPermissions['Editor']['bigdelete'] = true;
 $wgGroupPermissions['Editor']['deletedhistory'] = true;
 $wgGroupPermissions['Editor']['deletedtext'] = true;
