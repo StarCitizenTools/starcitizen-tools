@@ -336,8 +336,16 @@ define("NS_GUIDE_TALK", 3007);
 $wgExtraNamespaces[NS_GUIDE] = "Guide";
 $wgExtraNamespaces[NS_GUIDE_TALK] = "Guide_talk";
 $wgNamespacesWithSubpages[NS_GUIDE] = true;
-#$wgNamespacesToBeSearchedDefault[NS_ISSUE] = true;
+$wgNamespacesToBeSearchedDefault[NS_GUIDE] = true;
 $wgNamespaceContentModels[NS_GUIDE_TALK] = CONTENT_MODEL_FLOW_BOARD;
+
+define("NS_ORG", 3008);
+define("NS_ORG_TALK", 3009);
+$wgExtraNamespaces[NS_ORG] = "ORG";
+$wgExtraNamespaces[NS_ORG_TALK] = "ORG_talk";
+$wgNamespacesWithSubpages[NS_ORG] = true;
+#$wgNamespacesToBeSearchedDefault[NS_ORG] = true;
+$wgNamespaceContentModels[NS_ORG_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 $wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
 $wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
@@ -352,14 +360,13 @@ $wgNamespaceContentModels[NS_TEMPLATE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_HELP_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[NS_CATEGORY_TALK] = CONTENT_MODEL_FLOW_BOARD;
 $wgNamespaceContentModels[$wgPageTranslationNamespace+1] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_PROJMGMT_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_ISSUE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 $wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
 $wgNamespaceProtection[NS_COMMLINK] = array( 'commlink-edit' );
 $wgNamespaceProtection[NS_PROJMGMT] = array( 'projmgmt-edit' );
 $wgNamespaceProtection[NS_ISSUE] = array( 'issue-edit' );
 $wgNamespaceProtection[NS_GUIDE] = array( 'guide-edit' );
+$wgNamespaceProtection[NS_ORG] = array( 'org-edit' );
 
 $wgVisualEditorAvailableNamespaces = array(
 NS_MAIN     => true,
@@ -369,7 +376,8 @@ NS_PROJECT  => true,
 NS_COMMLINK => true,
 NS_PROJMGMT => true,
 NS_ISSUE    => true,
-NS_GUIDE    => true
+NS_GUIDE    => true,
+NS_ORG      => true
 );
 
 #=============================================== Permissions ===============================================
@@ -407,6 +415,10 @@ $wgGroupPermissions['user']['move-subpages'] = false;
 $wgGroupPermissions['user']['reupload'] = false;
 $wgGroupPermissions['user']['reupload-own'] = false;
 
+#ORG Editor
+$wgGroupPermissions['ORG Editor'] = $wgGroupPermissions['user'];
+$wgGroupPermissions['ORG Editor']['org-edit'] = true;
+
 #autoconfirmed
 $wgAutoConfirmAge = 86400*3; // three days
 $wgAutoConfirmCount = 20;
@@ -443,7 +455,7 @@ $wgGroupPermissions['Trusted']['move-subpages'] = true;
 
 #editor
 $wgGroupPermissions['Editor'] = $wgGroupPermissions['Trusted'];
-$wgAddGroups['Editor'] = array( 'Verified', 'Translator' );
+$wgAddGroups['Editor'] = array( 'Verified', 'Translator', 'ORG Editor' );
 $wgGroupPermissions['Editor']['template-edit'] = true;
 $wgGroupPermissions['Editor']['rollback'] = true;
 $wgGroupPermissions['Editor']['protect'] = true;
@@ -468,6 +480,7 @@ $wgGroupPermissions['Editor']['noratelimit'] = true;
 $wgGroupPermissions['Editor']['flow-delete'] = true;
 $wgGroupPermissions['Editor']['flow-lock'] = true;
 $wgGroupPermissions['Editor']['move-rootuserpages'] = true;
+$wgGroupPermissions['Editor']['org-edit'] = true;
 
 #sysop
 $wgGroupPermissions['sysop'] = $wgGroupPermissions['Editor'];
