@@ -414,6 +414,7 @@ $wgGroupPermissions['user']['move-rootuserpages'] = false;
 $wgGroupPermissions['user']['move-subpages'] = false;
 $wgGroupPermissions['user']['reupload'] = false;
 $wgGroupPermissions['user']['reupload-own'] = false;
+$wgGroupPermissions['user']['guide-edit'] = true;
 
 #ORG Editor
 $wgGroupPermissions['ORG Editor'] = $wgGroupPermissions['user'];
