@@ -417,7 +417,7 @@ $wgGroupPermissions['user']['reupload-own'] = false;
 $wgGroupPermissions['user']['guide-edit'] = true;
 
 #ORG Editor
-$wgGroupPermissions['ORG Editor']['org-edit'] = true;
+$wgGroupPermissions['ORG-Editor']['org-edit'] = true;
 
 #autoconfirmed
 $wgAutoConfirmAge = 86400*3; // three days
@@ -455,7 +455,7 @@ $wgGroupPermissions['Trusted']['move-subpages'] = true;
 
 #editor
 $wgGroupPermissions['Editor'] = $wgGroupPermissions['Trusted'];
-$wgAddGroups['Editor'] = array( 'Verified', 'Translator', 'ORG Editor' );
+$wgAddGroups['Editor'] = array( 'Verified', 'Translator', 'ORG-Editor' );
 $wgGroupPermissions['Editor']['template-edit'] = true;
 $wgGroupPermissions['Editor']['rollback'] = true;
 $wgGroupPermissions['Editor']['protect'] = true;
