@@ -417,7 +417,6 @@ $wgGroupPermissions['user']['reupload-own'] = false;
 $wgGroupPermissions['user']['guide-edit'] = true;
 
 #ORG Editor
-$wgGroupPermissions['ORG Editor'] = $wgGroupPermissions['user'];
 $wgGroupPermissions['ORG Editor']['org-edit'] = true;
 
 #autoconfirmed
