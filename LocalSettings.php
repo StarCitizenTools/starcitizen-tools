@@ -297,16 +297,6 @@ $wgVirtualRestConfig['modules']['parsoid'] = array(
 );
 
 #=============================================== Namespaces ===============================================
-$wgNamespaceContentModels[NS_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_USER_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_PROJECT_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_FILE_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_MEDIAWIKI_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_TEMPLATE_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_HELP_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_CATEGORY_TALK] = CONTENT_MODEL_FLOW_BOARD;
-#$wgNamespaceContentModels[NS_TRANSLATIONS_TALK] = CONTENT_MODEL_FLOW_BOARD;
-
 define("NS_COMMLINK", 3000);
 define("NS_COMMLINK_TALK", 3001);
 $wgExtraNamespaces[NS_COMMLINK] = "Comm-Link";
@@ -347,6 +337,14 @@ $wgNamespacesWithSubpages[NS_ORG] = true;
 #$wgNamespacesToBeSearchedDefault[NS_ORG] = true;
 $wgNamespaceContentModels[NS_ORG_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
+define("NS_EVENT", 3010);
+define("NS_EVENT_TALK", 3011);
+$wgExtraNamespaces[NS_EVENT] = "EVENT";
+$wgExtraNamespaces[NS_EVENT_TALK] = "EVENT_talk";
+$wgNamespacesWithSubpages[NS_EVENT] = true;
+#$wgNamespacesToBeSearchedDefault[NS_EVENT] = true;
+$wgNamespaceContentModels[NS_EVENT_TALK] = CONTENT_MODEL_FLOW_BOARD;
+
 $wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
 $wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
 
@@ -367,17 +365,19 @@ $wgNamespaceProtection[NS_PROJMGMT] = array( 'projmgmt-edit' );
 $wgNamespaceProtection[NS_ISSUE] = array( 'issue-edit' );
 $wgNamespaceProtection[NS_GUIDE] = array( 'guide-edit' );
 $wgNamespaceProtection[NS_ORG] = array( 'org-edit' );
+$wgNamespaceProtection[NS_EVENT] = array( 'event-edit' );
 
 $wgVisualEditorAvailableNamespaces = array(
-NS_MAIN     => true,
-NS_USER     => true,
-NS_HELP     => true,
-NS_PROJECT  => true,
-NS_COMMLINK => true,
-NS_PROJMGMT => true,
-NS_ISSUE    => true,
-NS_GUIDE    => true,
-NS_ORG      => true
+	NS_MAIN     => true,
+	NS_USER     => true,
+	NS_HELP     => true,
+	NS_PROJECT  => true,
+	NS_COMMLINK => true,
+	NS_PROJMGMT => true,
+	NS_ISSUE    => true,
+	NS_GUIDE    => true,
+	NS_ORG      => true,
+	NS_EVENT    => true
 );
 
 #=============================================== Permissions ===============================================
@@ -435,6 +435,7 @@ $wgGroupPermissions['Verified']['purge'] = true;
 $wgGroupPermissions['Verified']['reupload'] = true;
 $wgGroupPermissions['Verified']['reupload-own'] = true;
 $wgGroupPermissions['Verified']['minoredit'] = true;
+$wgGroupPermissions['Verified']['event-edit'] = true;
 
 #translator
 $wgGroupPermissions['Translator']['translate'] = true;
