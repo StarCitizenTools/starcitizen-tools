@@ -190,7 +190,7 @@
 		// First convert all links into two-party form. If a link is not having a pipe,
 		// add a pipe and duplicate the link text
 		// Regex : http://regex101.com/r/pO9nN2
-		pageContent = pageContent.replace( normalizeRegex, '[[$1{{#translation:}}|$1]]' );
+		pageContent = pageContent.replace( normalizeRegex, '[[$1|$1]]' );
 
 		namespaces = getNamespaces();
 		nsString = namespaces.join( '|' );
@@ -208,7 +208,7 @@
 		// Add the 'Special:MyLanguage/' prefix for all internal links of valid namespaces and
 		// mainspace.
 		// Regex : http://regex101.com/r/zZ9jH9
-		pageContent = pageContent.replace( linkPrefixRegex, '[[$1]]' );
+		pageContent = pageContent.replace( linkPrefixRegex, '[[Special:MyLanguage/$1]]' );
 		return pageContent;
 	}
 
