@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226"
+		]
+	},
+	"codemirror-desc": "在wiki文本编辑器中提供语法高亮显示",
+	"codemirror-enable-label": "启用CodeMirror（Syntaxhighlight）",
+	"codemirror-disable-label": "禁用CodeMirror（Syntaxhighlight）"
+}

@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby"
+		]
+	},
+	"codemirror-enable-label": "CodeMirror aktivéieren (Syntaxhighlight)",
+	"codemirror-disable-label": "CodeMirror desaktivéieren (Syntaxhighlight)"
+}

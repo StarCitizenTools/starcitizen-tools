@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nisargjhaveri"
+		]
+	},
+	"codemirror-enable-label": "CodeMirror (સિન્ટેક્ષ હાઇલાઇટ) ચાલુ કરો",
+	"codemirror-disable-label": "CodeMirror (સિન્ટેક્ષ હાઇલાઇટ) બંધ કરો"
+}

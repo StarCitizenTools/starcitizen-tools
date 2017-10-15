@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Vitorvicentevalente",
+			"Nemo bis"
+		]
+	},
+	"codemirror-desc": "Destaque da sintaxe de edição para páginas wiki usando [http://codemirror.net/ CodeMirror]"
+}

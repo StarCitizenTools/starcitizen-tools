@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"pastakhov",
+			"Raymond",
+			"SkyDaisy9",
+			"Shirayuki"
+		]
+	},
+	"codemirror-desc": "{{desc|name=Code Mirror|url=https://www.mediawiki.org/wiki/Extension:CodeMirror}}\n\nAdditional info: Discription of \"Syntax highlighting\" in wiki\n[[mw:Extension:SyntaxHighlight GeSHi]]",
+	"codemirror-enable-label": "Title tooltip for button to enable CodeMirror in the editing toolbar.",
+	"codemirror-disable-label": "Title tooltip for button to disable CodeMirror in the editing toolbar."
+}

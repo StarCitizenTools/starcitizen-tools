@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aftabuzzaman"
+		]
+	},
+	"codemirror-enable-label": "কোডমিরর সক্রিয় করো (সিনট্যাক্স হাইলাইট)",
+	"codemirror-disable-label": "কোডমিরর নিষ্ক্রিয় করো (সিনট্যাক্স হাইলাইট)"
+}

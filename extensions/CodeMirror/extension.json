@@ -1,0 +1,76 @@
+{
+	"name": "CodeMirror",
+	"version": "3.4.0",
+	"author": [
+		"[https://www.mediawiki.org/wiki/User:Pastakhov Pavel Astakhov]",
+		"[https://www.mediawiki.org/wiki/User:Florianschmidtwelzow Florian Schmidt]"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:CodeMirror",
+	"descriptionmsg": "codemirror-desc",
+	"type": "parserhook",
+	"license-name": "GPL-2.0+",
+	"MessagesDirs": {
+		"CodeMirror": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"CodeMirrorHooks": "CodeMirror.hooks.php"
+	},
+	"ResourceModules": {
+		"ext.CodeMirror.init": {
+			"dependencies": [
+				"ext.CodeMirror.lib",
+				"ext.CodeMirror.other",
+				"mediawiki.api",
+				"jquery.textSelection",
+				"user.options"
+			],
+			"scripts": [
+				"ext.CodeMirror.js"
+			],
+			"messages": [
+				"codemirror-enable-label",
+				"codemirror-disable-label"
+			]
+		},
+		"ext.CodeMirror.lib": {
+			"scripts": [
+				"lib/codemirror/lib/codemirror.js",
+				"lib/codemirror/addon/selection/active-line.js",
+				"mode/mediawiki/mediawiki.js"
+			],
+			"styles": [
+				"lib/codemirror/lib/codemirror.css",
+				"lib/codemirror/addon/lint/lint.css",
+				"mode/mediawiki/mediawiki.css"
+			],
+			"targets": [
+				"mobile",
+				"desktop"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "resources",
+		"remoteExtPath": "CodeMirror/resources"
+	},
+	"Hooks": {
+		"MakeGlobalVariablesScript": [
+			"CodeMirrorHooks::onMakeGlobalVariablesScript"
+		],
+		"BeforePageDisplay": [
+			"CodeMirrorHooks::onBeforePageDisplay"
+		],
+		"GetPreferences": [
+			"CodeMirrorHooks::onGetPreferences"
+		],
+		"ResourceLoaderRegisterModules": [
+			"CodeMirrorHooks::onResourceLoaderRegisterModules"
+		]
+	},
+	"config": {
+		"CodeMirrorEnableFrontend": true
+	},
+	"manifest_version": 1
+}

@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Esketti",
+			"Siebrand"
+		]
+	},
+	"codemirror-desc": "Biedt accentuering van tekst in de wikitekst tekstverwerker"
+}

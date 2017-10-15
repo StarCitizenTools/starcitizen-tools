@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16",
+			"Statix64"
+		]
+	},
+	"codemirror-desc": "Fornisce l'evidenziazione della sintassi nell'editor wikitesto",
+	"codemirror-enable-label": "Attiva CodeMirror (Syntaxhighlight)",
+	"codemirror-disable-label": "Disattiva CodeMirror (Syntaxhighlight)"
+}

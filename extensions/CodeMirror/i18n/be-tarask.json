@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Red Winged Duck"
+		]
+	},
+	"codemirror-desc": "Забясьпечвае вылучэньне сынтаксысу ў рэдактары вікітэксту",
+	"codemirror-enable-label": "Уключыць CodeMirror (вылучэньне сынтаксысу)",
+	"codemirror-disable-label": "Адключыць CodeMirror (вылучэньне сынтаксысу)"
+}

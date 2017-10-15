@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps"
+		]
+	},
+	"codemirror-desc": "Edycja wiki z podświetleniem składni za pomocą [http://codemirror.net/ CodeMirror]"
+}

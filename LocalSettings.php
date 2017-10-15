@@ -160,6 +160,7 @@ wfLoadExtension( 'cldr' );
 wfLoadExtension( 'LocalisationUpdate' );
 wfLoadExtension( 'UniversalLanguageSelector' );
 wfLoadExtensions( array( 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ) );
+wfLoadExtension( 'CodeMirror' );
 require_once "$IP/extensions/CSS/CSS.php";
 require_once "$IP/extensions/Tabber/Tabber.php";
 require_once "$IP/extensions/RSS/RSS.php";
@@ -295,6 +296,9 @@ $wgVirtualRestConfig['modules']['parsoid'] = array(
   'url' => 'http://localhost:8142',
   'domain' => 'localhost'
 );
+
+#CodeMirror
+$wgDefaultUserOptions['usecodemirror'] = 0;
 
 #=============================================== Namespaces ===============================================
 define("NS_COMMLINK", 3000);

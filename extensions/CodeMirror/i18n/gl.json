@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Banjo",
+			"Toliño"
+		]
+	},
+	"codemirror-desc": "Proporciona un resalte da sintaxe no editor de texto wiki",
+	"codemirror-enable-label": "Activar CodeMirror (resalte da sintaxe)",
+	"codemirror-disable-label": "Desactivar CodeMirror (resalte da sintaxe)"
+}

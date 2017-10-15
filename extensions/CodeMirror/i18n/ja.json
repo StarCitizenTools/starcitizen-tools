@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Shirayuki",
+			"SkyDaisy9"
+		]
+	},
+	"codemirror-desc": "ウィキテキストエディターに構文強調の機能を追加する"
+}

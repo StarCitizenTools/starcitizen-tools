@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Waihorace",
+			"LNDDYL",
+			"Cwlin0416"
+		]
+	},
+	"codemirror-desc": "提供 wikitext 編輯器語法醒目標示",
+	"codemirror-enable-label": "開啟 CodeMirror (強調語法顯示)",
+	"codemirror-disable-label": "關閉 CodeMirror (強調語法顯示)"
+}

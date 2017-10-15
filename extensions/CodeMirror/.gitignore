@@ -1,0 +1,7 @@
+*~
+*.kate-swp
+.*.swp
+.directory
+/node_modules/
+/vendor/
+/composer.lock

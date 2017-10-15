@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko"
+		]
+	},
+	"codemirror-desc": "Fournit une mise en évidence de la syntaxe dans l’éditeur wikitexte",
+	"codemirror-enable-label": "Activer CodeMirror (Syntaxhighlight)",
+	"codemirror-disable-label": "Désactiver CodeMirror (Syntaxhighlight)"
+}
