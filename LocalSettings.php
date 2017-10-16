@@ -37,7 +37,7 @@ $wgLogo = "$wgResourceBasePath/resources/assets/sclogo.png";
 $wgEnableEmail = true;
 $wgEnableUserEmail = true; # UPO
 
-$wgEmergencyContact = "root@scw.czen.me";
+$wgEmergencyContact = "webmaster@starcitizen.tools";
 $wgPasswordSender = "do-not-reply@starcitizen.tools";
 
 $wgEnotifUserTalk = false; # UPO
