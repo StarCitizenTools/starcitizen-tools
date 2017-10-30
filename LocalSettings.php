@@ -176,6 +176,7 @@ require_once( "$IP/extensions/UploadWizard/UploadWizard.php" );
 require_once "$IP/extensions/EventLogging/EventLogging.php";
 require_once "$IP/extensions/ExternalData/ExternalData.php";
 require_once "$IP/extensions/Renameuser/Renameuser.php";
+require_once "$IP/extensions/NativeSvgHandler/NativeSvgHandler.php";
 #require_once "$IP/extensions/Lazyload/Lazyload.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
