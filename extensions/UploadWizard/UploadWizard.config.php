@@ -485,11 +485,8 @@ return array(
                                 array(
                                         'head' => 'mwe-upwiz-license-sc-head',
                                         'licenses' => array(
-                                                'rsilicense',
-                                                'thedamnshameslicense',
-                                                'hasgahalicense',
-                                                'aelannateslalicense'
-                                        )
+												'rsilicense'
+										)
                                 ),
 				array(
 					// This should be a list of all CC licenses we can reasonably expect to find around the web
