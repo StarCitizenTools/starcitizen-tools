@@ -4,3 +4,5 @@ Disallow: /Special:
 Disallow: /Template:
 Disallow: /ProjMGMT:
 Disallow: /MediaWiki:
+crawl-delay: 5
+
