@@ -350,6 +350,15 @@ $wgNamespacesWithSubpages[NS_EVENT] = true;
 #$wgNamespacesToBeSearchedDefault[NS_EVENT] = true;
 $wgNamespaceContentModels[NS_EVENT_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
+# Citizen Star News Archive project
+define("NS_CSN", 3012);
+define("NS_CSN_TALK", 3013);
+$wgExtraNamespaces[NS_CSN] = "CSN";
+$wgExtraNamespaces[NS_CSN_TALK] = "EVENT_talk";
+$wgNamespacesWithSubpages[NS_CSN] = true;
+$wgNamespacesToBeSearchedDefault[NS_CSN] = true;
+$wgNamespaceContentModels[NS_CSN_TALK] = CONTENT_MODEL_FLOW_BOARD;
+
 $wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
 $wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
 
@@ -382,7 +391,8 @@ $wgVisualEditorAvailableNamespaces = array(
 	NS_ISSUE    => true,
 	NS_GUIDE    => true,
 	NS_ORG      => true,
-	NS_EVENT    => true
+	NS_EVENT    => true,
+	NS_CSN    => true
 );
 
 #=============================================== Permissions ===============================================
