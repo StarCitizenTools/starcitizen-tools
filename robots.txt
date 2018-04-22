@@ -6,5 +6,5 @@ Disallow: /*_talk:
 Disallow: /Template:
 Disallow: /ProjMGMT:
 Disallow: /MediaWiki:
-Allow: /Special:MyLanguage:
+Allow: /Special:MyLanguage
 crawl-delay: 5
