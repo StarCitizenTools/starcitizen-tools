@@ -1,8 +1,12 @@
-
 User-agent: *
 Disallow: /Special:
+Disallow: /Talk:
+Disallow: /User:
+Disallow: /Category_talk:
+Disallow: /Comm-Link_talk:
+Disallow: /User_talk:
 Disallow: /Template:
 Disallow: /ProjMGMT:
 Disallow: /MediaWiki:
+Allow: /Special:MyLanguage:
 crawl-delay: 5
-
