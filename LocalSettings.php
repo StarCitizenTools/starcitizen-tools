@@ -354,7 +354,7 @@ $wgNamespaceContentModels[NS_EVENT_TALK] = CONTENT_MODEL_FLOW_BOARD;
 define("NS_CSN", 3012);
 define("NS_CSN_TALK", 3013);
 $wgExtraNamespaces[NS_CSN] = "CSN";
-$wgExtraNamespaces[NS_CSN_TALK] = "EVENT_talk";
+$wgExtraNamespaces[NS_CSN_TALK] = "CSN_talk";
 $wgNamespacesWithSubpages[NS_CSN] = true;
 $wgNamespacesToBeSearchedDefault[NS_CSN] = true;
 $wgNamespaceContentModels[NS_CSN_TALK] = CONTENT_MODEL_FLOW_BOARD;
