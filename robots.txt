@@ -2,11 +2,7 @@ User-agent: *
 Disallow: /Special:
 Disallow: /User:
 Disallow: /Talk:
-Disallow: /File_talk:
-Disallow: /Category_talk:
-Disallow: /Comm-Link_talk:
-Disallow: /User_talk:
-Disallow: /ProjMGMT_talk:
+Disallow: /*_talk:
 Disallow: /Template:
 Disallow: /ProjMGMT:
 Disallow: /MediaWiki:
