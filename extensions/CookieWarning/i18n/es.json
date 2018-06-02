@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe"
+		]
+	},
+	"cookiewarning-info": "Las cookies nos ayudan a ofrecer nuestros servicios. Al utilizar nuestros servicios, aceptas nuestro uso de cookies.",
+	"cookiewarning-desc": "Proporciona un aviso en la parte superior de la página acerca de las cookies.",
+	"cookiewarning-moreinfo-label": "Más información",
+	"cookiewarning-ok-label": "Aceptar"
+}

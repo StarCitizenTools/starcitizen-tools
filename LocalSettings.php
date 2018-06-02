@@ -161,6 +161,7 @@ wfLoadExtension( 'LocalisationUpdate' );
 wfLoadExtension( 'UniversalLanguageSelector' );
 wfLoadExtensions( array( 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ) );
 wfLoadExtension( 'CodeMirror' );
+wfLoadExtension( 'CookieWarning' );
 require_once "$IP/extensions/CSS/CSS.php";
 require_once "$IP/extensions/Tabber/Tabber.php";
 require_once "$IP/extensions/RSS/RSS.php";

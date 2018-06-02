@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Okras",
+			"Туллук"
+		]
+	},
+	"cookiewarning-info": "Cookie-файлы помогают нам предоставлять наши услуги. Используя наши сервисы, вы соглашаетесь с использованием cookie-файлов.",
+	"cookiewarning-desc": "Создаёт в верхней части страницы уведомление о cookie-файлах.",
+	"cookiewarning-moreinfo-label": "Дополнительная информация",
+	"cookiewarning-ok-label": "ОК"
+}

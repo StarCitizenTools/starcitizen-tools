@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Florian Schmidt"
+		]
+	},
+	"cookiewarning-info": "Tyto webové stránky vyžadují pro svou funkci cookies. Používáním těchto webových stránek souhlasíte s použitím souborů cookie",
+	"cookiewarning-desc": "Na horním okraji stránky zobrazí upozornění o cookies.",
+	"cookiewarning-moreinfo-label": "Více informací"
+}

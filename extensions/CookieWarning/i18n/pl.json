@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps",
+			"Woytecr"
+		]
+	},
+	"cookiewarning-info": "Pliki Cookie pomagają nam udostępniać nasze usługi. Korzystając z naszych usług, zgadzasz się na wykorzystywanie plików cookie.",
+	"cookiewarning-desc": "Tworzy w górnej części strony powiadomienie o plikach cookie.",
+	"cookiewarning-moreinfo-label": "Więcej informacji",
+	"cookiewarning-ok-label": "OK"
+}

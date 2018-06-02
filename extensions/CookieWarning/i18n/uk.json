@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Piramidion"
+		]
+	},
+	"cookiewarning-info": "Куки допомагають нам здійснювати наші сервіси. Використовуючи наші сервіси, Ви погоджуєтесь на використання куків.",
+	"cookiewarning-desc": "Виводить вгорі сторінки сповіщення про куки.",
+	"cookiewarning-moreinfo-label": "Більше інформації",
+	"cookiewarning-ok-label": "Гаразд"
+}

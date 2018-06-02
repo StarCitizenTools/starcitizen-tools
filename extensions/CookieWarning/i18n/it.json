@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Saracrovetto",
+			"Beta16"
+		]
+	},
+	"cookiewarning-info": "I cookie ci aiutano a fornire i nostri servizi. Utilizzando i nostri servizi, accetti il nostro utilizzo dei cookie.",
+	"cookiewarning-desc": "Fornisce un avviso in cima alla pagina sui cookie.",
+	"cookiewarning-moreinfo-label": "Ulteriori informazioni",
+	"cookiewarning-ok-label": "OK"
+}

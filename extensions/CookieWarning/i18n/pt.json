@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Vitorvicentevalente"
+		]
+	},
+	"cookiewarning-info": "Os cookies ajudam-nos a fornecer os nossos serviços. Ao navegar no sítio, está a consentir a sua utilização.",
+	"cookiewarning-desc": "Fornece um aviso no topo da página sobre cookies.",
+	"cookiewarning-moreinfo-label": "Mais informação",
+	"cookiewarning-ok-label": "OK"
+}

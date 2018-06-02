@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Banjo",
+			"Elisardojm"
+		]
+	},
+	"cookiewarning-info": "As cookies axúdanos a fornecer os nosos servizos. Ó usar os nosos servicios, estás de acordo co noso uso de cookies.",
+	"cookiewarning-desc": "Proporciona un aviso na parte superior da páxina sobre cookies.",
+	"cookiewarning-moreinfo-label": "Máis información",
+	"cookiewarning-ok-label": "Aceptar"
+}

@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226"
+		]
+	},
+	"cookiewarning-info": "Cookie帮助我们提供我们的服务。通过使用我们的服务，您同意我们使用cookie。",
+	"cookiewarning-desc": "在页面顶部提供有关cookie的通知。",
+	"cookiewarning-moreinfo-label": "更多信息",
+	"cookiewarning-ok-label": "确定"
+}

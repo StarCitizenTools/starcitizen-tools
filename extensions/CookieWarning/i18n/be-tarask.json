@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Red Winged Duck"
+		]
+	},
+	"cookiewarning-info": "Файлы-кукі дазваляюць нам аказваць паслугі. Ужываньнем нашых паслугаў, вы пагаджаецеся з выкарыстаньнем файлаў-кукі.",
+	"cookiewarning-desc": "Выводзіць паведамленьне пра файлы-кукі ўверсе старонкі.",
+	"cookiewarning-moreinfo-label": "Болей зьвестак",
+	"cookiewarning-ok-label": "Добра"
+}

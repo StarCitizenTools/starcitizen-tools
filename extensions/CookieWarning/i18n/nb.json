@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jon Harald Søby"
+		]
+	},
+	"cookiewarning-info": "Informasjonskapsler hjelper oss å levere. Ved å bruke tjenesten vår godtar du vår bruk av informasjonskapsler.",
+	"cookiewarning-desc": "Gir en notis om informasjonskapsler på toppen av siden.",
+	"cookiewarning-moreinfo-label": "Mer informasjon",
+	"cookiewarning-ok-label": "OK"
+}

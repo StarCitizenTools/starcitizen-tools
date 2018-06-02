@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ykhwong"
+		]
+	},
+	"cookiewarning-info": "쿠키는 저희의 서비스 전달에 도움을 줍니다. 저희의 서비스를 사용함으로써 당신은 저희의 쿠키 사용에 동의하게 됩니다.",
+	"cookiewarning-desc": "쿠키에 관한 문서 최상단에 안내를 제공합니다.",
+	"cookiewarning-moreinfo-label": "자세한 정보",
+	"cookiewarning-ok-label": "확인"
+}
