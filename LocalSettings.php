@@ -302,6 +302,9 @@ $wgVirtualRestConfig['modules']['parsoid'] = array(
 #CodeMirror
 $wgDefaultUserOptions['usecodemirror'] = 0;
 
+#CookieWarning
+$wgCookieWarningEnabled = true;
+
 #=============================================== Namespaces ===============================================
 define("NS_COMMLINK", 3000);
 define("NS_COMMLINK_TALK", 3001);
