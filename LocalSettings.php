@@ -210,6 +210,7 @@ $wgUploadWizardConfig = array(
 $wgExtractsRemoveClasses[] = 'dd';
 $wgExtractsRemoveClasses[] = 'dablink';
 $wgExtractsRemoveClasses[] = 'translate';
+$wgExtractsRemoveClasses[] = '.noinclude';
 
 #MsUpload
 $wgMSU_useDragDrop = true;
