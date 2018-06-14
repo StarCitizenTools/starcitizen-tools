@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization ImageInfoCache class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -28,6 +28,8 @@ OO.inheritClass( ve.init.mw.ImageInfoCache, ve.init.mw.ApiResponseCache );
 ve.init.mw.ImageInfoCache.static.processPage = function ( page ) {
 	if ( page.imageinfo ) {
 		return page.imageinfo[ 0 ];
+	} else if ( 'missing' in page ) {
+		return { missing: true };
 	}
 };
 
@@ -45,7 +47,7 @@ ve.init.mw.ImageInfoCache.prototype.getRequestPromise = function ( subqueue ) {
 			prop: 'imageinfo',
 			indexpageids: '1',
 			iiprop: 'size|mediatype',
-			titles: subqueue.join( '|' )
+			titles: subqueue
 		},
 		{ type: 'POST' }
 	);

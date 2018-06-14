@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTemplatePlaceholderModel class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -14,9 +14,9 @@
  * @constructor
  * @param {ve.dm.MWTransclusionModel} transclusion Transclusion
  */
-ve.dm.MWTemplatePlaceholderModel = function VeDmMWTemplatePlaceholderModel( transclusion ) {
+ve.dm.MWTemplatePlaceholderModel = function VeDmMWTemplatePlaceholderModel() {
 	// Parent constructor
-	ve.dm.MWTransclusionPartModel.call( this, transclusion );
+	ve.dm.MWTemplatePlaceholderModel.super.apply( this, arguments );
 };
 
 /* Inheritance */

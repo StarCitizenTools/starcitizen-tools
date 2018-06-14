@@ -2,12 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Kening Aldgilles",
-			"Robin0van0der0vliet"
+			"Robin0van0der0vliet",
+			"Robin van der Vliet"
 		]
 	},
 	"uploadwizard": "Wizard uploade",
-	"mwe-upwiz-uploadcampaigns": "Uploadkampanjes",
-	"mwe-upwiz-code-unknown": "Unbekende taal",
 	"mwe-upwiz-step-tutorial": "Leare",
 	"mwe-upwiz-step-file": "Uploade",
 	"mwe-upwiz-step-deeds": "Rjochten frijjaan",
@@ -28,7 +27,6 @@
 	"mwe-upwiz-copy-location": "Lokaasje kopiearje",
 	"mwe-upwiz-copy-other": "Oare gegevens kopiearje",
 	"mwe-upwiz-desc": "Beskriuwing",
-	"mwe-upwiz-desc-add-0": "Beskriuwing tafoegje",
 	"mwe-upwiz-title": "Titel",
 	"mwe-upwiz-location": "Lokaasje",
 	"mwe-upwiz-location-lat": "Breedtegraad",

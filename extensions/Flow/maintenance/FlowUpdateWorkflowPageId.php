@@ -7,10 +7,10 @@ use Flow\OccupationController;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
-	$IP = dirname( __FILE__ ) . '/../../..';
+	$IP = __DIR__ . '/../../..';
 }
-require_once( "$IP/maintenance/Maintenance.php" );
-require_once( "$IP/includes/utils/RowUpdateGenerator.php" );
+require_once "$IP/maintenance/Maintenance.php";
+require_once "$IP/includes/utils/RowUpdateGenerator.php";
 
 /**
  * In some cases we have created workflow instances before the related Title
@@ -22,12 +22,14 @@ class FlowUpdateWorkflowPageId extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->mDescription = "Update workflow_page_id with the page id of its specified ns/title";
+		$this->requireExtension( 'Flow' );
 		$this->setBatchSize( 300 );
 	}
 
 	/**
 	 * Assembles the update components, runs them, and reports
 	 * on what they did
+	 * @return true
 	 */
 	public function doDbUpdates() {
 		global $wgFlowCluster, $wgLang;
@@ -40,10 +42,10 @@ class FlowUpdateWorkflowPageId extends LoggedUpdateMaintenance {
 			'workflow_id',
 			$this->mBatchSize
 		);
-		$it->setFetchColumns( array( '*' ) );
-		$it->addConditions( array(
-			'workflow_wiki' => wfWikiId(),
-		) );
+		$it->setFetchColumns( [ '*' ] );
+		$it->addConditions( [
+			'workflow_wiki' => wfWikiID(),
+		] );
 
 		$gen = new WorkflowPageIdUpdateGenerator( $wgLang );
 		$writer = new BatchRowWriter( $dbw, 'flow_workflow', $wgFlowCluster );
@@ -71,8 +73,8 @@ class WorkflowPageIdUpdateGenerator implements RowUpdateGenerator {
 	 */
 	protected $lang;
 	protected $fixedCount = 0;
-	protected $failures = array();
-	protected $warnings = array();
+	protected $failures = [];
+	protected $warnings = [];
 
 	/**
 	 * @param Language|StubUserLang $lang
@@ -95,8 +97,8 @@ class WorkflowPageIdUpdateGenerator implements RowUpdateGenerator {
 		// at some point, we failed to create page entries for new workflows: only
 		// create that page if the workflow was stored with a 0 page id (otherwise,
 		// we could mistake the $title for a deleted page)
-		if ( (int) $row->workflow_page_id === 0 && $title->getArticleID() === 0 ) {
-			$workflow = Workflow::fromStorageRow( (array) $row );
+		if ( (int)$row->workflow_page_id === 0 && $title->getArticleID() === 0 ) {
+			$workflow = Workflow::fromStorageRow( (array)$row );
 			$status = $this->createPage( $title, $workflow );
 			if ( !$status->isGood() ) {
 				// just warn when we failed to create the page, but keep this code
@@ -107,18 +109,18 @@ class WorkflowPageIdUpdateGenerator implements RowUpdateGenerator {
 		}
 
 		// re-associate the workflow with the correct page; only if a page exists
-		if ( $title->getArticleID() !== 0 && $title->getArticleID() !== (int) $row->workflow_page_id ) {
+		if ( $title->getArticleID() !== 0 && $title->getArticleID() !== (int)$row->workflow_page_id ) {
 			// This makes the assumption the page has not moved or been deleted?
 			++$this->fixedCount;
-			return array(
+			return [
 				'workflow_page_id' => $title->getArticleID(),
-			);
+			];
 		} elseif ( !$row->workflow_page_id ) {
 			// No id exists for this workflow? (reason should likely show up in $this->warnings)
 			$this->failures[] = $row;
 		}
 
-		return array();
+		return [];
 	}
 
 	/**
@@ -157,4 +159,4 @@ class WorkflowPageIdUpdateGenerator implements RowUpdateGenerator {
 }
 
 $maintClass = "FlowUpdateWorkflowPageId";
-require_once( DO_MAINTENANCE );
+require_once RUN_MAINTENANCE_IF_MAIN;

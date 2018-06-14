@@ -14,7 +14,7 @@
 	"nuke-defaultreason": "Mass deletion of pages added by [[Special:Contributions/$1|{{GENDER:$1|$1}}]]",
 	"nuke-multiplepeople": "Mass deletion of recently added pages",
 	"nuke-tools": "This tool allows for mass deletions of pages recently added by a given user or an IP address.\nInput the username or IP address to get a list of pages to delete, or leave blank for all users.",
-	"nuke-submit-user": "Go",
+	"nuke-submit-user": "List pages",
 	"nuke-toggleinvert": "Invert",
 	"nuke-submit-delete": "Delete selected",
 	"right-nuke": "Mass delete pages",
@@ -26,9 +26,10 @@
 	"nuke-not-deleted": "Page [[:$1]] '''could not''' be deleted.",
 	"nuke-delete-more": "[[Special:Nuke|Delete more pages]]",
 	"nuke-pattern": "Pattern for the page name:",
-	"nuke-nopages-global": "There are no new pages in [[Special:RecentChanges|recent changes]].",
+	"nuke-nopages-global": "There are no page titles matching your search.",
 	"nuke-viewchanges": "view changes",
 	"nuke-namespace": "Limit to namespace:",
 	"nuke-linkoncontribs": "mass delete",
-	"nuke-linkoncontribs-text": "Mass delete pages where this user is the only author"
+	"nuke-linkoncontribs-text": "Mass delete pages where {{GENDER:$1|this user}} is the only author",
+	"nuke-confirm": "You are about to delete {{PLURAL:$1|one page|$1 pages}}. Are you sure that you want to delete?"
 }

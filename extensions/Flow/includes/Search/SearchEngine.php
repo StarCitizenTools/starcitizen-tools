@@ -5,7 +5,7 @@ namespace Flow\Search;
 use Elastica\Filter\BoolFilter;
 use Elastica\Filter\Terms;
 use Elastica\Query;
-use Flow\Exception\InvalidInputException;
+use Flow\Exception\InvalidParameterException;
 
 class SearchEngine extends \SearchEngine {
 	/**
@@ -23,17 +23,17 @@ class SearchEngine extends \SearchEngine {
 	 *
 	 * @var int[]
 	 */
-	public $namespaces = array();
+	public $namespaces = [];
 
 	/**
 	 * @var int[]
 	 */
-	protected $pageIds = array();
+	protected $pageIds = [];
 
 	/**
 	 * @var string[]
 	 */
-	protected $moderationStates = array();
+	protected $moderationStates = [];
 
 	/**
 	 * @var string
@@ -95,12 +95,12 @@ class SearchEngine extends \SearchEngine {
 	 * false is allowed (means we'll search *all* types)
 	 *
 	 * @param string|false $type
-	 * @throws InvalidInputException
+	 * @throws InvalidParameterException
 	 */
 	public function setType( $type ) {
-		$allowedTypes = array_merge( Connection::getAllTypes(), array( false ) );
+		$allowedTypes = array_merge( Connection::getAllTypes(), [ false ] );
 		if ( !in_array( $type, $allowedTypes ) ) {
-			throw new InvalidInputException( 'Invalid search sort requested', 'invalid-input' );
+			throw new InvalidParameterException( 'Invalid search index requested' );
 		}
 
 		$this->type = $type;
@@ -120,17 +120,17 @@ class SearchEngine extends \SearchEngine {
 	 *
 	 * @param string[] $moderationStates
 	 */
-	public function setModerationStates( array $moderationStates = array() ) {
+	public function setModerationStates( array $moderationStates = [] ) {
 		$this->moderationStates = $moderationStates;
 	}
 
 	/**
 	 * @param string $sort
-	 * @throws InvalidInputException
+	 * @throws InvalidParameterException
 	 */
 	public function setSort( $sort ) {
 		if ( !in_array( $sort, $this->getValidSorts() ) ) {
-			throw new InvalidInputException( 'Invalid search sort requested', 'invalid-input' );
+			throw new InvalidParameterException( 'Invalid search sort requested' );
 		}
 
 		$this->sort = $sort;
@@ -160,17 +160,17 @@ class SearchEngine extends \SearchEngine {
 	 * @return array [description => [sort field => order]]
 	 */
 	public function getSortArgs() {
-		return array(
-			'relevance' => array( /* default */ ),
-			'timestamp_asc' => array( 'timestamp' => 'asc' ),
-			'timestamp_desc' => array( 'timestamp' => 'desc' ),
-			'update_timestamp_asc' => array( 'update_timestamp' => 'asc' ),
-			'update_timestamp_desc' => array( 'update_timestamp' => 'desc' ),
-		);
+		return [
+			'relevance' => [ /* default */ ],
+			'timestamp_asc' => [ 'timestamp' => 'asc' ],
+			'timestamp_desc' => [ 'timestamp' => 'desc' ],
+			'update_timestamp_asc' => [ 'update_timestamp' => 'asc' ],
+			'update_timestamp_desc' => [ 'update_timestamp' => 'desc' ],
+		];
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function supports( $feature ) {
 		// we're not really an alternative search engine for MW ;)

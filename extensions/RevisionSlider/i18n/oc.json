@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cedric31"
+		]
+	},
+	"revisionslider-toggle-label": "Navigar dins l'istoric",
+	"revisionslider-tutorial": "Tutorial del cursor de revision",
+	"revisionslider-previous-dialog": "Precedent",
+	"revisionslider-next-dialog": "Seguent",
+	"revisionslider-close-dialog": "Tampar"
+}

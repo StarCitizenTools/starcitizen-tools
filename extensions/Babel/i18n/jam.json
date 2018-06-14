@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Yocahuna"
+			"Yocahuna",
+			"StevenJ81"
 		]
 	},
 	"babel": "Biebl yuuza infamieshan",
@@ -16,12 +17,12 @@
 	"babel-3": "Di yuuza ab [[$1|advans]] nalij a [[$2|$3]].",
 	"babel-4": "Di yuuza ab [[$1|nier nietib]] nalij a [[$2|$3]].",
 	"babel-5": "Di yuuza ab [[$1|profeshanal]] nalij a [[$2|$3]].",
-	"babel-N": "Di yuuza ab a [[$1|nietib]] andastanin a [[$2|$3]].",
-	"babel-0-n": "Dis yuuza ab [[$1|no]] nalij a [[$2|Ingglish]] (ar andastani wid kansidarobl difikolti).",
-	"babel-1-n": "Di yuuza ab [[$1|biesik]] nalij a [[$2|Ingglish]].",
-	"babel-2-n": "Di yuuza ab [[$1|intamidiet]] nalij a [[$2|Ingglish]].",
-	"babel-3-n": "Di yuuza ab [[$1|advans]] nalij a [[$2|Ingglish]].",
-	"babel-4-n": "Di yuuza ab [[$1|nier nietib]] nalij a [[$2|Ingglish]].",
-	"babel-5-n": "Di yuuza ab [[$1|profeshanal]] nalij a [[$2|Ingglish]].",
-	"babel-N-n": "Di yuuza ab a [[$1|nietib]] andastanin a [[$2|Ingglish]]."
+	"babel-N": "Di yuuza ab a [[$1|nietib]] andastanin a [[$2|Jumiekan]].",
+	"babel-0-n": "Dis yuuza ab [[$1|no]] nalij a [[$2|Jumiekan]] (ar andastani wid kansidarobl difikolti).",
+	"babel-1-n": "Di yuuza ab [[$1|biesik]] nalij a [[$2|Jumiekan]].",
+	"babel-2-n": "Di yuuza ab [[$1|intamidiet]] nalij a [[$2|Jumiekan]].",
+	"babel-3-n": "Di yuuza ab [[$1|advans]] nalij a [[$2|Jumiekan]].",
+	"babel-4-n": "Di yuuza ab [[$1|nier nietib]] nalij a [[$2|Jumiekan]].",
+	"babel-5-n": "Di yuuza ab [[$1|profeshanal]] nalij a [[$2|Jumiekan]].",
+	"babel-N-n": "Di yuuza ab a [[$1|nietib]] andastanin a [[$2|Jumiekan]]."
 }

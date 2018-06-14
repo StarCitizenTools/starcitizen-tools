@@ -1,20 +1,11 @@
-// Only turning these jscs options off for ''this file''
-/* jscs:disable disallowDanglingUnderscores, requireCamelCaseOrUpperCaseIdentifiers */
+/* eslint-disable camelcase, no-underscore-dangle */
 ( function ( mw, $, OO ) {
-	mw.FlickrChecker = function ( wizard, upload ) {
-		this.wizard = wizard;
-		this.upload = upload;
+	mw.FlickrChecker = function ( ui, selectButton ) {
+		this.ui = ui;
 		this.imageUploads = [];
 		this.apiUrl = mw.UploadWizard.config.flickrApiUrl;
 		this.apiKey = mw.UploadWizard.config.flickrApiKey;
-
-		this.selectButton = new OO.ui.ButtonWidget( {
-			id: 'mwe-upwiz-select-flickr',
-			label: mw.message( 'mwe-upwiz-add-file-0-free' ).text(),
-			flags: [ 'constructive', 'primary' ]
-		} );
-
-		$( '#mwe-upwiz-flickr-select-list-container' ).append( this.selectButton.$element );
+		this.selectButton = selectButton;
 	};
 
 	/**
@@ -53,8 +44,8 @@
 		'Attribution License': '{{FlickrVerifiedByUploadWizard|cc-by-2.0}}{{cc-by-2.0}}',
 		'Attribution-NoDerivs License': 'invalid',
 		'Attribution-NonCommercial-NoDerivs License': 'invalid',
-		'Attribution-NonCommercial License': '{{FlickrVerifiedByUploadWizard|cc-by-nc-2.0}}{{cc-by-nc-2.0}}',
-		'Attribution-NonCommercial-ShareAlike License': '{{FlickrVerifiedByUploadWizard|cc-by-nc-sa-2.0}}{{cc-by-nc-sa-2.0}}',
+		'Attribution-NonCommercial License': 'invalid',
+		'Attribution-NonCommercial-ShareAlike License': 'invalid',
 		'Attribution-ShareAlike License': '{{FlickrVerifiedByUploadWizard|cc-by-sa-2.0}}{{cc-by-sa-2.0}}',
 		'No known copyright restrictions': '{{FlickrVerifiedByUploadWizard|Flickr-no known copyright restrictions}}{{Flickr-no known copyright restrictions}}',
 		'United States Government Work': '{{FlickrVerifiedByUploadWizard|PD-USGov}}{{PD-USGov}}',
@@ -76,17 +67,20 @@
 		checkFlickr: function ( flickrInputUrl ) {
 			var photoIdMatches, albumIdMatches, userCollectionMatches, userPhotostreamMatches, groupPoolMatches, userGalleryMatches, userFavoritesMatches;
 
-			photoIdMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^\/]+\/)?photos\/[^\/]+\/([0-9]+)/ );
-			albumIdMatches = flickrInputUrl.match( /flickr\.com\/photos\/[^\/]+\/(sets|albums)\/([0-9]+)/ );
-			userCollectionMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^\/]+\/)?photos\/[^\/]+\/collections\/?([0-9]+)?/ );
-			userPhotostreamMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^\/]+\/)?photos\/([^\/]+)/ );
-			groupPoolMatches = flickrInputUrl.match( /flickr\.com\/groups\/[^\/]+(?:\/pool\/([^\/]+))?/ );
-			userGalleryMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^\/]+\/)?photos\/[^\/]+\/galleries\/([0-9]+)/ );
-			userFavoritesMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^\/]+\/)?photos\/([^\/]+)\/favorites/ );
+			photoIdMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^/]+\/)?photos\/[^/]+\/([0-9]+)/ );
+			albumIdMatches = flickrInputUrl.match( /flickr\.com\/photos\/[^/]+\/(sets|albums)\/([0-9]+)/ );
+			userCollectionMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^/]+\/)?photos\/[^/]+\/collections\/?([0-9]+)?/ );
+			userPhotostreamMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^/]+\/)?photos\/([^/]+)/ );
+			groupPoolMatches = flickrInputUrl.match( /flickr\.com\/groups\/[^/]+(?:\/pool\/([^/]+))?/ );
+			userGalleryMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^/]+\/)?photos\/[^/]+\/galleries\/([0-9]+)/ );
+			userFavoritesMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^/]+\/)?photos\/([^/]+)\/favorites/ );
+
+			this.$spinner = $.createSpinner( { size: 'large', type: 'block' } );
+			$( '#mwe-upwiz-flickr-select-list-container' ).after( this.$spinner );
 
 			if ( photoIdMatches === null ) {
 				// try static urls
-				photoIdMatches = flickrInputUrl.match( /static\.?flickr\.com\/[^\/]+\/([0-9]+)_/ );
+				photoIdMatches = flickrInputUrl.match( /static\.?flickr\.com\/[^/]+\/([0-9]+)_/ );
 			}
 			if ( albumIdMatches || photoIdMatches || userCollectionMatches || userPhotostreamMatches ||
 				groupPoolMatches || userGalleryMatches || userFavoritesMatches ) {
@@ -110,7 +104,8 @@
 			} else {
 				// XXX show user the message that the URL entered was not valid
 				mw.errorDialog( mw.message( 'mwe-upwiz-url-invalid', 'Flickr' ).escaped() );
-				this.wizard.flickrInterfaceReset();
+				this.$spinner.remove();
+				this.ui.flickrInterfaceReset();
 			}
 		},
 
@@ -230,16 +225,17 @@
 		 * Constructs an unordered list of sets in the collection.
 		 *
 		 * @param {boolean} appendId True if you want to append
-		 * id="mwe-upwiz-files-collection-chooser"; false otherwise
+		 *  id="mwe-upwiz-files-collection-chooser"; false otherwise
 		 * @param {Object} data The retrieved data
 		 * @see {@link getCollection}
+		 * @return {jQuery}
 		 */
 		buildCollectionLinks: function ( appendId, data ) {
-			var elem = $( '<ul>' ),
+			var $elem = $( '<ul>' ),
 				that = this,
 				li, ul;
 			if ( appendId ) {
-				elem.attr( 'id', 'mwe-upwiz-files-collection-chooser' );
+				$elem.attr( 'id', 'mwe-upwiz-files-collection-chooser' );
 			}
 			$.each( data.collection, function ( index, value ) {
 				li = $( '<li>' );
@@ -263,9 +259,9 @@
 					} );
 					li.append( ul );
 				}
-				elem.append( li );
+				$elem.append( li );
 			} );
-			return elem;
+			return $elem;
 		},
 
 		/**
@@ -372,8 +368,11 @@
 			// would be better to use isBlacklisted(), but didn't find a nice way of combining it with $.each
 			return $.when( flickrPromise, this.getBlacklist() ).then( function ( photoset, blacklist ) {
 				var fileName, sourceURL,
-					imagesHTML = '',
+					checkboxes = [],
+					checkboxesWidget = new OO.ui.CheckboxMultiselectWidget(),
 					x = 0;
+
+				checker.$spinner.remove();
 
 				$.each( photoset.photo, function ( i, item ) {
 					var flickrUpload, license, licenseValue, ownerId;
@@ -409,6 +408,7 @@
 						url: '',
 						type: 'JPEG',
 						fromURL: true,
+						source: 'flickr',
 						licenseValue: licenseValue,
 						licenseMessage: license.licenseMessage,
 						license: license.licenseName !== 'Public Domain Mark',
@@ -429,54 +429,69 @@
 
 					// setting up the thumbnail previews in the Selection list
 					if ( item.url_sq ) {
-						imagesHTML += '<li id="upload-' + i + '" class="ui-state-default"><img class="lazy-thumbnail" data-original="' + item.url_sq + '"></li>';
+						checkboxes.push( new OO.ui.CheckboxMultioptionWidget( {
+							data: i,
+							label: $( '<img class="lazy-thumbnail" data-original="' + item.url_sq + '">' )
+						} ) );
 					}
 				} );
-				$( '#mwe-upwiz-flickr-select-list' ).append( imagesHTML );
-				// Lazy-load images
-				$( 'img.lazy-thumbnail' ).lazyload( {
-					// jQuery considers all images without 'src' to not be ':visible'
-					skip_invisible: false
-				} );
-				// Trigger initial update (HACK)
-				setTimeout( function () {
-					$( window ).triggerHandler( 'resize' );
-				} );
-				// Calling jquery ui selectable
-				$( '#mwe-upwiz-flickr-select-list' ).selectable( {
-					filter: 'li',
-					stop: function () {
-						// If at least one item is selected, activate the upload button
-						checker.selectButton.setDisabled( $( '.ui-selected' ).length === 0 );
-					},
-					selecting: function ( event, ui ) {
-						// Limit the number of selectable images
-						if ( $( '.ui-selected, .ui-selecting' ).length > mw.UploadWizard.config.maxUploads ) {
-							$( ui.selecting ).removeClass( 'ui-selecting' );
+				checkboxesWidget.addItems( checkboxes );
+				$( '#mwe-upwiz-flickr-select-list' ).append( checkboxesWidget.$element );
+				// Set up checkboxes
+				checkboxesWidget.on( 'select', function () {
+					var selectedCount = checkboxesWidget.findSelectedItems().length;
+					// If at least one item is selected, activate the upload button
+					checker.selectButton.setDisabled( selectedCount === 0 );
+					// Limit the number of selectable images
+					checkboxesWidget.getItems().forEach( function ( checkbox ) {
+						if ( !checkbox.isSelected() ) {
+							checkbox.setDisabled( selectedCount >= mw.UploadWizard.config.maxUploads );
 						}
-					}
+					} );
 				} );
 				// Set up action for 'Upload selected images' button
 				checker.selectButton.on( 'click', function () {
+					var uploads = [];
+					checker.$spinner = $.createSpinner( { size: 'large', type: 'block' } );
 					$( '#mwe-upwiz-flickr-select-list-container' ).hide();
 					$( '#mwe-upwiz-upload-ctrls' ).show();
-					$( '.ui-selected' ).each( function ( index, image ) {
-						image = $( this ).attr( 'id' );
-						image = image.split( '-' )[ 1 ];
-						checker.setUploadDescription( checker.imageUploads[ image ] );
-						checker.setImageURL( image );
+					$( '#mwe-upwiz-flickr-select-list-container' ).after( checker.$spinner );
+					$.when.apply( $, checkboxesWidget.findSelectedItemsData().map( function ( image ) {
+						uploads.push( checker.imageUploads[ image ] );
+						// For each image, load the description and URL to upload from
+						return $.when(
+							checker.setUploadDescription( checker.imageUploads[ image ] ),
+							checker.setImageURL( image )
+						);
+					} ) ).done( function () {
+						checker.ui.emit( 'files-added', uploads );
+					} ).always( function () {
+						// We'll only bind this once, since that selectButton could be
+						// reused later, with a different flickr set (it is not destroyed)
+						checker.selectButton.off( 'click' );
+						checker.$spinner.remove();
+						checker.ui.flickrInterfaceDestroy();
 					} );
-					checker.wizard.flickrInterfaceDestroy();
 				} );
 
 				if ( checker.imageUploads.length === 0 ) {
 					return $.Deferred().reject( mw.message( 'mwe-upwiz-license-photoset-invalid' ).escaped() );
 				} else {
 					$( '#mwe-upwiz-flickr-select-list-container' ).show();
+					// Lazy-load images
+					$( 'img.lazy-thumbnail' ).lazyload( {
+						// jQuery considers all images without 'src' to not be ':visible'
+						skip_invisible: false
+					} );
+					// Trigger initial update (HACK)
+					setTimeout( function () {
+						$( window ).triggerHandler( 'resize' );
+					} );
 				}
 			} ).fail( function ( message ) {
 				mw.errorDialog( message );
-				checker.wizard.flickrInterfaceReset();
+				checker.$spinner.remove();
+				checker.ui.flickrInterfaceReset();
 			} );
 		},
 
@@ -539,6 +554,7 @@
 					url: '',
 					type: 'JPEG',
 					fromURL: true,
+					source: 'flickr',
 					licenseValue: license.licenseValue,
 					licenseMessage: license.licenseMessage,
 					license: license.licenseName !== 'Public Domain Mark',
@@ -549,13 +565,23 @@
 					photoId: photo.id,
 					sourceURL: sourceURL
 				};
-				checker.setUploadDescription( flickrUpload, photo.description._content );
+
 				checker.imageUploads.push( flickrUpload );
-				checker.setImageURL( 0, checker );
 				checker.reserveFileName( fileName );
+
+				$.when(
+					checker.setUploadDescription( flickrUpload, photo.description._content ),
+					checker.setImageURL( 0 )
+				).done( function () {
+					checker.ui.emit( 'files-added', [ flickrUpload ] );
+				} ).always( function () {
+					checker.$spinner.remove();
+					checker.ui.flickrInterfaceDestroy();
+				} );
 			} ).fail( function ( message ) {
 				mw.errorDialog( message );
-				checker.wizard.flickrInterfaceReset();
+				checker.$spinner.remove();
+				checker.ui.flickrInterfaceReset();
 			} );
 		},
 
@@ -632,24 +658,34 @@
 			return mw.FlickrChecker.licensePromise;
 		},
 
+		/**
+		 * @param {Object} upload
+		 * @param {string} description
+		 * @return {jQuery.Promise}
+		 */
 		setUploadDescription: function ( upload, description ) {
 			if ( description !== undefined ) {
 				// If a Flickr description has a | character in it, it will
 				// mess up the MediaWiki description. Escape them.
 				upload.description = description.replace( /\|/g, '&#124;' );
+				return $.Deferred().resolve();
 			} else {
-				this.setImageDescription( upload );
+				return this.setImageDescription( upload );
 			}
 		},
 
+		/**
+		 * @param {Object} upload
+		 * @return {jQuery.Promise}
+		 */
 		setImageDescription: function ( upload ) {
 			var checker = this,
 				photoId = upload.photoId;
 
-			this.flickrRequest( {
+			return this.flickrRequest( {
 				method: 'flickr.photos.getInfo',
 				photo_id: photoId
-			} ).done( function ( data ) {
+			} ).then( function ( data ) {
 				checker.setUploadDescription( upload, data.photo.description._content );
 			} );
 		},
@@ -659,6 +695,7 @@
 		 * as the upload URL.
 		 *
 		 * @param {number} index Index of the image for which we need to set the URL
+		 * @return {jQuery.Promise}
 		 */
 		setImageURL: function ( index ) {
 			var largestSize,
@@ -666,11 +703,11 @@
 				upload = this.imageUploads[ index ],
 				photoId = upload.photoId;
 
-			this.flickrRequest( {
+			return this.flickrRequest( {
 				method: 'flickr.photos.getSizes',
 				photo_id: photoId
-			} ).done( function ( data ) {
-				var nameParts, uploadObj;
+			} ).then( function ( data ) {
+				var nameParts;
 
 				if (
 					typeof data.sizes !== 'undefined' &&
@@ -691,13 +728,11 @@
 						upload.name = nameParts.join( '.' ) + '.' + upload.originalFormat;
 					}
 					upload.url = largestSize.source;
-					// Need to call the addUpload here, otherwise some code would have to be written to detect the completion of the API call.
-					uploadObj = checker.wizard.addUpload( upload );
-					$( '#mwe-upwiz-filelist' ).append( uploadObj.ui.div );
-					uploadObj.ui.showThumbnail();
 				} else {
 					mw.errorDialog( mw.message( 'mwe-upwiz-error-no-image-retrieved', 'Flickr' ).escaped() );
-					checker.wizard.flickrInterfaceReset();
+					checker.$spinner.remove();
+					checker.ui.flickrInterfaceReset();
+					return $.Deferred().reject();
 				}
 			} );
 		},
@@ -726,4 +761,4 @@
 		}
 	};
 
-} )( mediaWiki, jQuery, OO );
+}( mediaWiki, jQuery, OO ) );

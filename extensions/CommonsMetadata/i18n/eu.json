@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sator"
+		]
+	},
+	"commonsmetadata-trackingcategory-no-license": "Irakurketa mekanikoa egiteko baimenik gabeko fitxategiak",
+	"commonsmetadata-trackingcategory-no-license-desc": "Fitxategiak ez du inongo [{{MediaWiki:Commonsmetadata-doc-url}} irakurketa mekanikorik] egiteko lizentzia txantiloirik.",
+	"commonsmetadata-trackingcategory-no-description": "Irakurketa mekanikorako deskripziorik gabeko fitxategiak",
+	"commonsmetadata-trackingcategory-no-description-desc": "Fitxategiak ez dauda [{{MediaWiki:Commonsmetadata-doc-url}} irakurketa mekanikorako] informazio txantiloirik ala haren deskripzio eremua hutsik dago.",
+	"commonsmetadata-trackingcategory-no-author": "Irakurketa mekanikorako autorerik gabeko fitxategiak",
+	"commonsmetadata-trackingcategory-no-author-desc": "Fitxategiak ez dauka  [{{MediaWiki:Commonsmetadata-doc-url}} irakurketa mekanikorako ] informazio txantiloirik  ala egile eremua hutsik dago.",
+	"commonsmetadata-trackingcategory-no-source": "Irakurketa mekanikorako iturririk gabeko fitxategiak",
+	"commonsmetadata-trackingcategory-no-source-desc": "Fitxategiak ez dauka [{{MediaWiki:Commonsmetadata-doc-url}} irakurketa mekanikorako] informazio txantiloirik ala haren iturri eremua hutsik dago."
+}

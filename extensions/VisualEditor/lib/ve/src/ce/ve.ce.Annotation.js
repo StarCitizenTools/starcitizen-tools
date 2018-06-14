@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Annotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -22,7 +22,7 @@
  */
 ve.ce.Annotation = function VeCeAnnotation( model, parentNode, config ) {
 	// Parent constructor
-	ve.ce.View.call( this, model, config );
+	ve.ce.Annotation.super.call( this, model, config );
 
 	// Properties
 	this.parentNode = parentNode || null;
@@ -114,5 +114,5 @@ ve.ce.Annotation.prototype.destroy = function () {
 	this.parentNode = null;
 
 	// Parent method
-	ve.ce.View.prototype.destroy.call( this );
+	ve.ce.Annotation.super.prototype.destroy.call( this );
 };

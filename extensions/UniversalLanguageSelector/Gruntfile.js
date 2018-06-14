@@ -1,18 +1,14 @@
-/*jshint node:true */
+/* eslint-env node, es6 */
 module.exports = function ( grunt ) {
-	'use strict';
+	var conf = grunt.file.readJSON( 'extension.json' );
 
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
-	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
-	grunt.loadNpmTasks( 'grunt-jscs' );
+	grunt.loadNpmTasks( 'grunt-eslint' );
 	grunt.loadNpmTasks( 'grunt-jsonlint' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 
 	grunt.initConfig( {
-		jshint: {
-			options: {
-				jshintrc: true
-			},
+		eslint: {
 			all: [
 				'**/*.js',
 				'!lib/**',
@@ -20,9 +16,6 @@ module.exports = function ( grunt ) {
 				'!vendor/**',
 				'!resources/js/ext.uls.webfonts.repository.js'
 			]
-		},
-		jscs: {
-			src: '<%= jshint.all %>'
 		},
 		stylelint: {
 			options: {
@@ -43,11 +36,9 @@ module.exports = function ( grunt ) {
 				'!vendor/**'
 			]
 		},
-		banana: {
-			all: 'i18n'
-		}
+		banana: conf.MessagesDirs
 	} );
 
-	grunt.registerTask( 'test', [ 'jshint', 'jscs', 'stylelint', 'jsonlint', 'banana' ] );
+	grunt.registerTask( 'test', [ 'eslint', 'stylelint', 'jsonlint', 'banana' ] );
 	grunt.registerTask( 'default', 'test' );
 };

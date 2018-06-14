@@ -2,9 +2,9 @@
 
 use Flow\Utils\NamespaceIterator;
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: dirname( __FILE__ ) . '/../../../maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
  * Converts a single namespace from wikitext talk pages to flow talk pages.  Does not
@@ -15,7 +15,7 @@ class ConvertNamespaceFromWikitext extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->mDescription = "Converts a single namespace of wikitext talk pages to Flow";
-		$this->addArg( 'namespace', 'Name of the namespace to convert' );
+		$this->addArg( 'namespaceName', 'Name of the namespace to convert' );
 		$this->addOption(
 			'no-convert-templates',
 			'Comma-separated list of templates that indicate a page should not be converted',
@@ -24,12 +24,13 @@ class ConvertNamespaceFromWikitext extends Maintenance {
 			't'
 		);
 		$this->addOption(
-			'archive-pattern',
-			'Naming pattern for archive pages; %s for page title, %d for sequence number',
+			'header-suffix',
+			'Wikitext to add to the end of the header',
 			false, // not required
 			true, // takes argument
 			'a'
 		);
+		$this->requireExtension( 'Flow' );
 	}
 
 	public function execute() {
@@ -50,9 +51,9 @@ class ConvertNamespaceFromWikitext extends Maintenance {
 		}
 
 		$noConvertTemplates = explode( ',', $this->getOption( 'no-convert-templates', '' ) );
-		if ( $noConvertTemplates === array( '' ) ) {
+		if ( $noConvertTemplates === [ '' ] ) {
 			// explode( ',', '' ) returns array( '' )
-			$noConvertTemplates = array();
+			$noConvertTemplates = [];
 		}
 		// Convert to Title objects
 		foreach ( $noConvertTemplates as &$template ) {
@@ -68,17 +69,20 @@ class ConvertNamespaceFromWikitext extends Maintenance {
 		$logger = new MaintenanceDebugLogger( $this );
 
 		$dbw = wfGetDB( DB_MASTER );
+		$talkpageManager = FlowHooks::getOccupationController()->getTalkpageManager();
 		$converter = new \Flow\Import\Converter(
 			$dbw,
 			Flow\Container::get( 'importer' ),
 			$logger,
-			FlowHooks::getOccupationController()->getTalkpageManager(),
+			$talkpageManager,
+
 			new Flow\Import\Wikitext\ConversionStrategy(
 				$wgParser,
-				new Flow\Import\SourceStore\Null(),
+				new Flow\Import\SourceStore\NullImportSourceStore(),
 				$logger,
+				$talkpageManager,
 				$noConvertTemplates,
-				$this->getOption( 'archive-pattern', null )
+				$this->getOption( 'header-suffix', null )
 			)
 		);
 
@@ -97,4 +101,4 @@ class ConvertNamespaceFromWikitext extends Maintenance {
 }
 
 $maintClass = "ConvertNamespaceFromWikitext";
-require_once ( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

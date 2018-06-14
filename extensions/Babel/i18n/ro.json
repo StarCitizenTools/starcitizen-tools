@@ -4,7 +4,8 @@
 			"Cin",
 			"Firilacroco",
 			"KlaudiuMihaila",
-			"Minisarm"
+			"Minisarm",
+			"Strainu"
 		]
 	},
 	"babel": "Informații Babel despre utilizator",
@@ -13,7 +14,7 @@
 	"babel-footer-url": ":Categorie:Babel - Utilizatori după limbă",
 	"babel-autocreate-reason": "Crearea automată a categoriei [[$1|Babel]].",
 	"babel-autocreate-text-levels": "Utilizatorii din această categorie cunosc limba  $2 la nivelul  $1.",
-	"babel-autocreate-text-main": "Utilizatorii din această categorie cunosc limba  $1.",
+	"babel-autocreate-text-main": "Utilizatorii din această categorie cunosc limba $1.",
 	"babel-0": "Acest utilizator [[$1|nu]] are cunoștințe de [[$2|$3]] (sau înțelege cu mare dificultate).",
 	"babel-1": "Acest utilizator poate contribui cu un nivel [[$1|de bază]] de [[$2|$3]].",
 	"babel-2": "Acest utilizator poate contribui cu un nivel [[$1|intermediar]] de [[$2|$3]].",
@@ -28,5 +29,9 @@
 	"babel-4-n": "Acest utilizator poate contribui cu un nivel [[$1|aproape nativ]] de [[$2|română]].",
 	"babel-5-n": "Acest utilizator contribuie folosind un nivel [[$1|profesional]] de [[$2|română]].",
 	"babel-N-n": "Acest utilizator este un vorbitor [[$1|nativ]] al [[$2|limbii române]].",
-	"babel-footer": "Utilizatori după limbă"
+	"babel-footer": "Utilizatori după limbă",
+	"apihelp-query+babel-description": "Obține informații despre limbile cunoscute de utilizator",
+	"apihelp-query+babel-summary": "Obține informații despre limbile cunoscute de utilizator",
+	"apihelp-query+babel-param-user": "Utilizatorul despre care să se obțină informații",
+	"apihelp-query+babel-example-1": "Obțineți informații Babel pentru utilizatorul <kbd>Exemplu</kbd>"
 }

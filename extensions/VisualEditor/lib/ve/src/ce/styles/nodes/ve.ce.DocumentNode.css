@@ -1,13 +1,15 @@
 /*!
  * VisualEditor ContentEditable DocumentNode styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ce-documentNode {
+	cursor: default;
+}
+
+.ve-ce-surface-enabled .ve-ce-documentNode {
 	cursor: text;
-	/* 0.75/0.8, 1.5/0.8 */
-	padding: 0.9375em 1.875em;
 }
 
 /*

@@ -2,11 +2,16 @@
 /**
  * API module for search translations
  * @since 2015.07
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 class ApiSearchTranslations extends ApiBase {
 	public function execute() {
 		global $wgTranslateTranslationServices;
+
+		if ( !$this->getAvailableTranslationServices() ) {
+			$this->dieWithError( 'apierror-translate-notranslationservices' );
+		}
+
 		$params = $this->extractRequestParams();
 
 		$config = $wgTranslateTranslationServices[$params['service']];
@@ -23,19 +28,19 @@ class ApiSearchTranslations extends ApiBase {
 			$searchResults = $server->search(
 				$params['query'],
 				$params,
-				array( '', '' )
+				[ '', '' ]
 			);
 			$documents = $server->getDocuments( $searchResults );
 			$total = $server->getTotalHits( $searchResults );
 		}
-		$result->addValue( array( 'search', 'metadata' ), 'total', $total );
+		$result->addValue( [ 'search', 'metadata' ], 'total', $total );
 		$result->addValue( 'search', 'translations', $documents );
 	}
 
 	protected function getAvailableTranslationServices() {
 		global $wgTranslateTranslationServices;
 
-		$good = array();
+		$good = [];
 		foreach ( $wgTranslateTranslationServices as $id => $config ) {
 			if ( TTMServer::factory( $config ) instanceof SearchableTTMServer ) {
 				$good[] = $id;
@@ -46,72 +51,81 @@ class ApiSearchTranslations extends ApiBase {
 	}
 
 	protected function getAllowedFilters() {
-		return array(
+		return [
 			'',
 			'translated',
 			'fuzzy',
 			'untranslated'
-		);
+		];
 	}
 
 	public function getAllowedParams() {
-		global $wgLanguageCode;
+		global $wgLanguageCode,
+			$wgTranslateTranslationDefaultService;
 		$available = $this->getAvailableTranslationServices();
+
 		$filters = $this->getAllowedFilters();
 
-		return array(
-			'service' => array(
+		$ret = [
+			'service' => [
 				ApiBase::PARAM_TYPE => $available,
-				ApiBase::PARAM_DFLT => 'TTMServer',
-			),
-			'query' => array(
+			],
+			'query' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'sourcelanguage' => array(
+			],
+			'sourcelanguage' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DFLT => $wgLanguageCode,
-			),
-			'language' => array(
+			],
+			'language' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DFLT => '',
-			),
-			'group' => array(
+			],
+			'group' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DFLT => '',
-			),
-			'filter' => array(
+			],
+			'filter' => [
 				ApiBase::PARAM_TYPE => $filters,
 				ApiBase::PARAM_DFLT => '',
-			),
-			'match' => array(
+			],
+			'match' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DFLT => '',
-			),
-			'case' => array(
+			],
+			'case' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DFLT => '0',
-			),
-			'offset' => array(
+			],
+			'offset' => [
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_DFLT => 0,
-			),
-			'limit' => array(
+			],
+			'limit' => [
 				ApiBase::PARAM_DFLT => 25,
-				ApiBase::PARAM_TYPE => 'integer',
+				ApiBase::PARAM_TYPE => 'limit',
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => ApiBase::LIMIT_SML1,
 				ApiBase::PARAM_MAX2 => ApiBase::LIMIT_SML2
-			),
-		);
+			],
+		];
+
+		if ( $available ) {
+			// Don't add this if no services are available, it makes
+			// ApiStructureTest unhappy
+			$ret['service'][ApiBase::PARAM_DFLT] = $wgTranslateTranslationDefaultService;
+		}
+
+		return $ret;
 	}
 
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=searchtranslations&language=fr&query=aide'
 				=> 'apihelp-searchtranslations-example-1',
 			'action=searchtranslations&language=fr&query=edit&filter=untranslated'
 				=> 'apihelp-searchtranslations-example-2',
-		);
+		];
 	}
 }

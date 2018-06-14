@@ -34,7 +34,7 @@
  * @file
  * @author Matthias Palmér
  * @copyright Copyright © 2011-2015, MetaSolutions AB
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -51,23 +51,23 @@ class AmdFFS extends SimpleFFS {
 	 * @return bool
 	 */
 	public static function isValid( $data ) {
-		$data = AmdFFS::extractMessagePart( $data );
+		$data = self::extractMessagePart( $data );
 		return is_array( FormatJson::decode( $data, /*as array*/true ) );
 	}
 
 	public function getFileExtensions() {
-		return array( '.js' );
+		return [ '.js' ];
 	}
 
 	/**
-	 * @param array $data
+	 * @param string $data
 	 * @return array Parsed data.
 	 */
 	public function readFromVariable( $data ) {
-		$authors = AmdFFS::extractAuthors( $data );
-		$data = AmdFFS::extractMessagePart( $data );
-		$messages = (array) FormatJson::decode( $data, /*as array*/true );
-		$metadata = array();
+		$authors = self::extractAuthors( $data );
+		$data = self::extractMessagePart( $data );
+		$messages = (array)FormatJson::decode( $data, /*as array*/true );
+		$metadata = [];
 
 		// Take care of regular language bundles, as well as the root bundle.
 		if ( isset( $messages['root'] ) ) {
@@ -76,11 +76,11 @@ class AmdFFS extends SimpleFFS {
 			$messages = $this->group->getMangler()->mangle( $messages );
 		}
 
-		return array(
+		return [
 			'MESSAGES' => $messages,
 			'AUTHORS' => $authors,
 			'METADATA' => $metadata,
-		);
+		];
 	}
 
 	/**
@@ -88,7 +88,7 @@ class AmdFFS extends SimpleFFS {
 	 * @return string
 	 */
 	protected function writeReal( MessageCollection $collection ) {
-		$messages = array();
+		$messages = [];
 		$mangler = $this->group->getMangler();
 
 		/** @var ThinMessage $m */

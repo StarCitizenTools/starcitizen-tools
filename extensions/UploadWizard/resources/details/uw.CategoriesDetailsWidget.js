@@ -12,10 +12,13 @@
 
 		uw.CategoriesDetailsWidget.parent.call( this );
 
-		this.categoriesWidget = new mw.widgets.CategorySelector();
+		this.categoriesWidget = new mw.widgets.CategoryMultiselectWidget();
 
 		this.categoriesWidget.createItemWidget = function ( data ) {
 			var widget = this.constructor.prototype.createItemWidget.call( this, data );
+			if ( !widget ) {
+				return null;
+			}
 			widget.setMissing = function ( missing ) {
 				this.constructor.prototype.setMissing.call( this, missing );
 				// Aggregate 'change' event
@@ -126,4 +129,4 @@
 		this.categoriesWidget.setItemsFromData( serialized.value );
 	};
 
-} )( mediaWiki, mediaWiki.uploadWizard, jQuery, OO );
+}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );

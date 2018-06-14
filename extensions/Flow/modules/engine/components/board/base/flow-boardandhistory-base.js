@@ -4,12 +4,14 @@
  */
 
 ( function ( $, mw ) {
+	var inTopicNamespace = mw.config.get( 'wgNamespaceNumber' ) === mw.config.get( 'wgNamespaceIds' ).topic;
+
 	/**
 	 *
 	 * @param {jQuery} $container
 	 * @constructor
 	 */
-	function FlowBoardAndHistoryComponentBase( $container ) {
+	function FlowBoardAndHistoryComponentBase() {
 		this.bindNodeHandlers( FlowBoardAndHistoryComponentBase.UI.events );
 	}
 	OO.initClass( FlowBoardAndHistoryComponentBase );
@@ -156,7 +158,7 @@
 
 		// Render the modal itself with mw-ui-modal
 		modal = mw.Modal( {
-			open:  $( mw.flow.TemplateEngine.processTemplateGetFragment( template, params ) ).children(),
+			open: $( mw.flow.TemplateEngine.processTemplateGetFragment( template, params ) ).children(),
 			disableCloseOnOutsideClick: true
 		} );
 
@@ -199,7 +201,7 @@
 
 		// Only log cancel attempt if it was user-initiated, not when the cancel
 		// was triggered by code (as part of a post-submit form destroy)
-		if ( event.which ) {
+		if ( event.which && schemaName ) {
 			flowComponent.logEvent( schemaName, { action: 'cancel-attempt', funnelId: funnelId } );
 		}
 
@@ -213,10 +215,16 @@
 
 		// Only log if user had already entered text (= confirmation was requested)
 		if ( changedFieldCount ) {
+			// TODO: Use an OOUI dialog
+			// eslint-disable-next-line no-alert
 			if ( confirm( flowComponent.constructor.static.TemplateEngine.l10n( 'flow-cancel-warning' ) ) ) {
-				flowComponent.logEvent( schemaName, { action: 'cancel-success', funnelId: funnelId } );
+				if ( schemaName ) {
+					flowComponent.logEvent( schemaName, { action: 'cancel-success', funnelId: funnelId } );
+				}
 			} else {
-				flowComponent.logEvent( schemaName, { action: 'cancel-abort', funnelId: funnelId } );
+				if ( schemaName ) {
+					flowComponent.logEvent( schemaName, { action: 'cancel-abort', funnelId: funnelId } );
+				}
 
 				// User aborted cancel, quit this function & don't destruct the form!
 				return $deferred.reject().promise();
@@ -257,6 +265,4 @@
 		return inTopicNamespace && ( !$el || $el.closest( '.flow-post' ).length === 0 );
 	}
 	FlowBoardAndHistoryComponentBase.static.inTopicNamespace = flowBoardInTopicNamespace;
-
-	var inTopicNamespace = mw.config.get( 'wgNamespaceNumber' ) === mw.config.get( 'wgNamespaceIds' ).topic;
 }( jQuery, mediaWiki ) );

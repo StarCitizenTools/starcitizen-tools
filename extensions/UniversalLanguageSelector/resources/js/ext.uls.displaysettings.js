@@ -153,7 +153,7 @@
 		 * Prepare the UI language selector
 		 */
 		prepareLanguages: function () {
-			var loginUri, $loginCta,
+			var $loginCta,
 				displaySettings = this,
 				SUGGESTED_LANGUAGES_NUMBER = 3,
 				anonsAllowed = mw.config.get( 'wgULSAnonCanChangeLanguage' ),
@@ -162,10 +162,6 @@
 
 			// Don't let anonymous users change interface language
 			if ( !anonsAllowed && mw.user.isAnon() ) {
-				loginUri = new mw.Uri();
-				loginUri.query = {
-					title: 'Special:UserLogin'
-				};
 				$loginCta = $( '<p>' )
 					.attr( 'id', 'uls-display-settings-anon-log-in-cta' );
 				autonym = $.uls.data.getAutonym( this.contentLanguage );
@@ -300,7 +296,7 @@
 				left: displaySettings.$parent.left,
 				top: displaySettings.$parent.top,
 				onReady: function () {
-					var  $wrap,
+					var $wrap,
 						uls = this,
 						$back = $( '<div>' )
 							.addClass( 'uls-icon-back' );
@@ -316,10 +312,11 @@
 					uls.$menu.find( '.uls-search-wrapper' ).wrap( $wrap );
 					uls.$menu.find( '.uls-search-wrapper-wrapper' ).prepend( $back );
 
-					uls.$menu.prepend(
-						$( '<span>' ).addClass( 'caret-before' ),
-						$( '<span>' ).addClass( 'caret-after' )
-					);
+					if ( $( '.uls-settings-trigger' ).offset().left > $( window ).width() / 2 ) {
+						uls.$menu.removeClass( 'selector-left' ).addClass( 'selector-right' );
+					} else {
+						uls.$menu.removeClass( 'selector-right' ).addClass( 'selector-left' );
+					}
 				},
 				onVisible: function () {
 					var $parent;
@@ -359,6 +356,7 @@
 					// the apply button
 					displaySettings.markDirty();
 				},
+				ulsPurpose: 'interface-language',
 				quickList: function () {
 					return mw.uls.getFrequentLanguageList();
 				}
@@ -629,6 +627,8 @@
 
 		/**
 		 * Callback for save preferences
+		 *
+		 * @param {boolean} success
 		 */
 		onSave: function ( success ) {
 			if ( success ) {

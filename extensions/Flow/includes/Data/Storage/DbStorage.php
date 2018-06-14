@@ -37,7 +37,7 @@ abstract class DbStorage implements ObjectStorage {
 	 *
 	 * @var string[] Array of columns to ignore
 	 */
-	protected $obsoleteUpdateColumns = array();
+	protected $obsoleteUpdateColumns = [];
 
 	/**
 	 * @param DbFactory $dbFactory
@@ -49,8 +49,8 @@ abstract class DbStorage implements ObjectStorage {
 	/**
 	 * Runs preprocessSqlArray on each element of an array.
 	 *
-	 * @param  array  $outer The array to check
-	 * @return array         Preprocessed SQL array.
+	 * @param array $outer The array to check
+	 * @return array Preprocessed SQL array.
 	 * @throws DataModelException
 	 */
 	protected function preprocessNestedSqlArray( array $outer ) {
@@ -69,17 +69,17 @@ abstract class DbStorage implements ObjectStorage {
 	 * 2. Checks for unarmoured raw SQL and errors out if it exists.
 	 * 3. Finds armoured raw SQL and expands it out.
 	 *
-	 * @param array $data Query conditions for DatabaseBase::select
+	 * @param array $data Query conditions for IDatabase::select
 	 * @return array query conditions escaped for use
 	 * @throws DataModelException
 	 */
 	protected function preprocessSqlArray( array $data ) {
 		// Assuming that all databases have the same escaping settings.
-		$db = $this->dbFactory->getDB( DB_SLAVE );
+		$db = $this->dbFactory->getDB( DB_REPLICA );
 
 		$data = UUID::convertUUIDs( $data, 'binary' );
 
-		foreach( $data as $key => $value ) {
+		foreach ( $data as $key => $value ) {
 			if ( $value instanceof RawSql ) {
 				$data[$key] = $value->getSql( $db );
 			} elseif ( is_numeric( $key ) ) {
@@ -99,10 +99,10 @@ abstract class DbStorage implements ObjectStorage {
 	 * potentially unsafe characters.
 	 *
 	 * @param array $row The row to check.
-	 * @return boolean True if raw SQL is found
+	 * @return bool True if raw SQL is found
 	 */
 	protected function hasUnescapedSQL( array $row ) {
-		foreach( $row as $key => $value ) {
+		foreach ( $row as $key => $value ) {
 			if ( $value instanceof RawSql ) {
 				// Specifically allowed SQL
 				continue;
@@ -112,7 +112,7 @@ abstract class DbStorage implements ObjectStorage {
 				return true;
 			}
 
-			if ( ! preg_match( '/^' . $this->getFieldRegexFragment() . '$/', $key ) ) {
+			if ( !preg_match( '/^' . $this->getFieldRegexFragment() . '$/', $key ) ) {
 				return true;
 			}
 		}
@@ -133,18 +133,18 @@ abstract class DbStorage implements ObjectStorage {
 	 * Internal security function to check an options array for
 	 * SQL injection and other funkiness
 	 * @todo Currently only supports LIMIT, OFFSET and ORDER BY
-	 * @param  array $options An options array passed to a query.
-	 * @return boolean
+	 * @param array $options An options array passed to a query.
+	 * @return bool
 	 */
 	protected function validateOptions( $options ) {
-		static $validUnaryOptions = array(
+		static $validUnaryOptions = [
 			'UNIQUE',
 			'EXPLAIN',
-		);
+		];
 
 		$fieldRegex = $this->getFieldRegexFragment();
 
-		foreach( $options as $key => $value ) {
+		foreach ( $options as $key => $value ) {
 			if ( is_numeric( $key ) && in_array( strtoupper( $value ), $validUnaryOptions ) ) {
 				continue;
 			} elseif ( is_numeric( $key ) ) {
@@ -154,7 +154,7 @@ abstract class DbStorage implements ObjectStorage {
 
 			if ( $key === 'LIMIT' ) {
 				// LIMIT is one or two integers, separated by a comma.
-				if ( ! preg_match ( '/^\d+(,\d+)?$/', $value ) ) {
+				if ( !preg_match( '/^\d+(,\d+)?$/', $value ) ) {
 					wfDebug( __METHOD__.": Invalid LIMIT $value\n" );
 					return false;
 				}
@@ -165,20 +165,20 @@ abstract class DbStorage implements ObjectStorage {
 				}
 				$orderByRegex = "/^\s*$fieldRegex\s*(ASC|DESC)?\s*$/i";
 
-				foreach( $value as $orderByField ) {
-					if ( ! preg_match( $orderByRegex, $orderByField ) ) {
+				foreach ( $value as $orderByField ) {
+					if ( !preg_match( $orderByRegex, $orderByField ) ) {
 						wfDebug( __METHOD__.": invalid ORDER BY field $orderByField\n" );
 						return false;
 					}
 				}
 			} elseif ( $key === 'OFFSET' ) {
 				// OFFSET is just an integer
-				if ( ! is_numeric( $value ) ) {
+				if ( !is_numeric( $value ) ) {
 					wfDebug( __METHOD__.": non-numeric offset $value\n" );
 					return false;
 				}
 			} elseif ( $key === 'GROUP BY' ) {
-				if ( ! preg_match( "/^{$fieldRegex}(,{$fieldRegex})+$/", $value ) ) {
+				if ( !preg_match( "/^{$fieldRegex}(,{$fieldRegex})+$/", $value ) ) {
 					wfDebug( __METHOD__.": invalid GROUP BY field\n" );
 				}
 			} else {
@@ -192,7 +192,7 @@ abstract class DbStorage implements ObjectStorage {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function validate( array $row ) {
 		return true;

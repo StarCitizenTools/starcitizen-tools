@@ -13,11 +13,11 @@
 		 * Checks if the input placeholder attribute
 		 * is supported on this element in this browser.
 		 *
-		 * @param {jQuery} element
+		 * @param {jQuery} $element
 		 * @return {boolean}
 		 */
-		isPlaceholderSupported: function ( element ) {
-			return ( 'placeholder' in element[ 0 ] );
+		isPlaceholderSupported: function ( $element ) {
+			return ( 'placeholder' in $element[ 0 ] );
 		},
 
 		// Storage for language stats loader functions from API,
@@ -34,7 +34,6 @@
 			if ( !mw.translate.languageStatsLoader[ language ] ) {
 				mw.translate.languageStatsLoader[ language ] = new mw.Api().get( {
 					action: 'query',
-					format: 'json',
 					meta: 'languagestats',
 					lslanguage: language
 				} );
@@ -177,7 +176,7 @@
 		$( window ).on( 'pageshow.translate', pageShowHandler );
 	}
 
-	$( document ).ready( function () {
+	$( function () {
 		translateOnBeforeUnloadRegister();
 	} );
 }( jQuery, mediaWiki ) );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable linear delete key down handler
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -82,8 +82,8 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 		// then preventDefault
 		if (
 			direction > 0 ?
-			skipNode.classList.contains( 've-ce-nail-pre-open' ) :
-			skipNode.classList.contains( 've-ce-nail-post-close' )
+				skipNode.classList.contains( 've-ce-nail-pre-open' ) :
+				skipNode.classList.contains( 've-ce-nail-post-close' )
 		) {
 			position = ve.adjacentDomPosition(
 				position,
@@ -104,19 +104,19 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 			skipNode.classList &&
 			skipNode.classList.contains(
 				direction > 0 ?
-				've-ce-nail-pre-close' :
-				've-ce-nail-post-open'
+					've-ce-nail-pre-close' :
+					've-ce-nail-post-open'
 			) &&
 			( pairNode = (
 				direction > 0 ?
-				skipNode.previousSibling :
-				skipNode.nextSibling
+					skipNode.previousSibling :
+					skipNode.nextSibling
 			) ) &&
 			pairNode.classList &&
 			pairNode.classList.contains(
 				direction > 0 ?
-				've-ce-nail-post-open' :
-				've-ce-nail-pre-close'
+					've-ce-nail-post-open' :
+					've-ce-nail-pre-close'
 			)
 		) {
 			linkNode = skipNode.parentNode;
@@ -142,8 +142,8 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 		// then preventDefault
 		if (
 			direction > 0 ?
-			skipNode.classList.contains( 've-ce-nail-pre-close' ) :
-			skipNode.classList.contains( 've-ce-nail-post-open' )
+				skipNode.classList.contains( 've-ce-nail-pre-close' ) :
+				skipNode.classList.contains( 've-ce-nail-post-open' )
 		) {
 			position = ve.adjacentDomPosition(
 				position,
@@ -204,7 +204,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 		}
 
 		offset = rangeToRemove.start;
-		docLength = documentModel.getInternalList().getListNode().getOuterRange().start;
+		docLength = documentModel.getDocumentRange().getLength();
 		if ( offset < docLength - 1 ) {
 			while ( offset < docLength - 1 && data.isCloseElementData( offset ) ) {
 				offset++;
@@ -230,7 +230,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 			if (
 				// The node is not unwrappable (e.g. table cells, text nodes)
 				!startNode.isUnwrappable() ||
-				// content item at the start / end?
+				// Content item at the start / end?
 				(
 					( startNode.canContainContent() || documentModel.getDocumentNode() === startNode ) &&
 					( nodeRange.start === 0 || nodeRange.end === docLength )
@@ -239,10 +239,10 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 				e.preventDefault();
 				return true;
 			} else {
-				// expand our removal to reflect what we actually need to remove
+				// Expand our removal to reflect what we actually need to remove
 				switch ( startNode.getType() ) {
 					case 'list':
-						// if this is an empty list, we wind up with the list node instead of the list item
+						// If this is an empty list, we wind up with the list node instead of the list item
 						// to make the unwrapping work, we need to remove the list and the item
 						rangeToRemove = new ve.Range( nodeRange.start, nodeRange.start + 2 );
 						break;

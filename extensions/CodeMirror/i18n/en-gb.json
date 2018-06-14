@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ed g2s",
+			"HairyFotr"
+		]
+	},
+	"codemirror-beta-desc": "Syntax highlighting makes editing easier by using colour and shade to visually separate page text from the code for links, references and templates.",
+	"codemirror-popup-desc": "Syntax highlighting will help you easily distinguish different parts of your edit by colour coding them."
+}

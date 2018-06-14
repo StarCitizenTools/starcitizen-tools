@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable ImageNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -20,7 +20,8 @@
 ve.ce.ImageNode = function VeCeImageNode( $figure, $image, config ) {
 	config = ve.extendObject( {
 		enforceMax: false,
-		minDimensions: { width: 1, height: 1 }
+		minDimensions: { width: 1, height: 1 },
+		$bounding: this.$element
 	}, config );
 
 	this.$figure = $figure;
@@ -84,6 +85,11 @@ ve.ce.ImageNode.prototype.onAttributeChange = function ( key, from, to ) {
  * @param {jQuery.Event} e Load event
  */
 ve.ce.ImageNode.prototype.onLoad = function () {
+	if ( !this.model ) {
+		// This node has probably been destroyed. (Currently there's no easy way for
+		// a mixin class to disconnect listeners on destroy)
+		return;
+	}
 	this.setOriginalDimensions( {
 		width: this.$image.prop( 'naturalWidth' ),
 		height: this.$image.prop( 'naturalHeight' )

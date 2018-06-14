@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable NodeFactory tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ce.NodeFactory' );
@@ -19,7 +19,7 @@ ve.ce.NodeFactoryNodeStub.static.name = 'node-factory-node-stub';
 
 /* Tests */
 
-QUnit.test( 'splitNodeOnEnter', 2, function ( assert ) {
+QUnit.test( 'splitNodeOnEnter', function ( assert ) {
 	var factory = new ve.ce.NodeFactory();
 
 	assert.throws(
@@ -38,6 +38,6 @@ QUnit.test( 'splitNodeOnEnter', 2, function ( assert ) {
 	);
 } );
 
-QUnit.test( 'initialization', 1, function ( assert ) {
+QUnit.test( 'initialization', function ( assert ) {
 	assert.ok( ve.ce.nodeFactory instanceof ve.ce.NodeFactory, 'factory is initialized at ve.ce.nodeFactory' );
 } );

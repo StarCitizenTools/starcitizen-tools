@@ -3,8 +3,11 @@
 	"author": "Brian Wolff",
 	"url": "https://www.mediawiki.org/wiki/Extension:CommonsMetadata",
 	"descriptionmsg": "commonsmetadata-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.31.0"
+	},
 	"Hooks": {
 		"GetExtendedMetadata": [
 			"CommonsMetadata\\HookHandler::onGetExtendedMetadata"
@@ -14,9 +17,6 @@
 		],
 		"ContentAlterParserOutput": [
 			"CommonsMetadata\\HookHandler::onContentAlterParserOutput"
-		],
-		"UnitTestsList": [
-			"CommonsMetadata\\HookHandler::onUnitTestsList"
 		]
 	},
 	"MessagesDirs": {
@@ -28,18 +28,15 @@
 		"CommonsMetadataForceRecalculate": false,
 		"CommonsMetadataSetTrackingCategories": false
 	},
-	"AutoloadClasses": {
-		"CommonsMetadata\\HookHandler": "HookHandler.php",
-		"CommonsMetadata\\DataCollector": "DataCollector.php",
-		"CommonsMetadata\\DomNavigator": "DomNavigator.php",
-		"CommonsMetadata\\TemplateParser": "TemplateParser.php",
-		"CommonsMetadata\\LicenseParser": "LicenseParser.php"
+	"AutoloadNamespaces": {
+		"CommonsMetadata\\": "src/"
 	},
 	"TrackingCategories": [
 		"commonsmetadata-trackingcategory-no-license",
 		"commonsmetadata-trackingcategory-no-description",
 		"commonsmetadata-trackingcategory-no-author",
-		"commonsmetadata-trackingcategory-no-source"
+		"commonsmetadata-trackingcategory-no-source",
+		"commonsmetadata-trackingcategory-no-patent"
 	],
 	"manifest_version": 1
 }

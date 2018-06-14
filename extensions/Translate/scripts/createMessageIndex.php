@@ -5,7 +5,7 @@
  * is no other way to know which message group a message belongs to.
  *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -31,4 +31,4 @@ class CreateMessageIndex extends Maintenance {
 }
 
 $maintClass = 'CreateMessageIndex';
-require_once DO_MAINTENANCE;
+require_once RUN_MAINTENANCE_IF_MAIN;

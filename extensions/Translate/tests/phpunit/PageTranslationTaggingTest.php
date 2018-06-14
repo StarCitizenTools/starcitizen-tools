@@ -4,18 +4,18 @@
  * @group Database
  * @group medium
  */
-class PageTranslationTaggingText extends MediaWikiTestCase {
+class PageTranslationTaggingTest extends MediaWikiTestCase {
 	protected function setUp() {
 		parent::setUp();
 
 		global $wgHooks;
-		$this->setMwGlobals( array(
+		$this->setMwGlobals( [
 			'wgHooks' => $wgHooks,
 			'wgEnablePageTranslation' => true,
-			'wgTranslateTranslationServices' => array(),
-		) );
+			'wgTranslateTranslationServices' => [],
+		] );
 		TranslateHooks::setupTranslate();
-		$wgHooks['TranslatePostInitGroups'] = array( 'MessageGroups::getTranslatablePages' );
+		$wgHooks['TranslatePostInitGroups'] = [ 'MessageGroups::getTranslatablePages' ];
 
 		$mg = MessageGroups::singleton();
 		$mg->setCache( wfGetCache( 'hash' ) );
@@ -65,15 +65,15 @@ class PageTranslationTaggingText extends MediaWikiTestCase {
 		$status = $page->doEditContent( $content, 'Test case' );
 		$latest = $status->value['revision']->getId();
 
-		$translatablePage->addMarkedTag( $latest, array( 'foo' ) );
+		$translatablePage->addMarkedTag( $latest, [ 'foo' ] );
 		$this->assertSame( $latest, $translatablePage->getReadyTag(), 'Ready tag was added' );
 		$this->assertSame( $latest, $translatablePage->getMarkedTag(), 'Marked tag was added' );
 
 		global $wgUser;
 		$cascade = false;
 		$page->doUpdateRestrictions(
-			array( 'edit' => 'sysop' ),
-			array(),
+			[ 'edit' => 'sysop' ],
+			[],
 			$cascade,
 			'Test case',
 			$wgUser
@@ -90,6 +90,8 @@ class PageTranslationTaggingText extends MediaWikiTestCase {
 			$translatablePage->getMarkedTag(),
 			'Marked tag was not updated after protection'
 		);
+
+		$page->doUpdateRestrictions( [], [], $cascade, 'Test case', $wgUser );
 	}
 
 	public function testTranslationPageRestrictions() {

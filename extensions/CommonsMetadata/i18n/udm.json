@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kaganer"
+		]
+	},
+	"commonsmetadata-trackingcategory-no-license": "Машинаен лыдӟиськись лицензитэк файлъёс",
+	"commonsmetadata-trackingcategory-no-license-desc": "Файлын ӧвӧл [{{MediaWiki:Commonsmetadata-doc-url}} машинаен лыдӟиськись] лицензилэн шаблонэз.",
+	"commonsmetadata-trackingcategory-no-description": "Машинаен лыдӟиськись описанитэк файлъёс",
+	"commonsmetadata-trackingcategory-no-description-desc": "Файлын ӧвӧл [{{MediaWiki:Commonsmetadata-doc-url}} машинаен лыдӟиськись] описанилэн шаблонэз яке отын «описание» (''description'') чур буш кылемын.",
+	"commonsmetadata-trackingcategory-no-author": "Машинаен лыдӟиськись автортэк файлъёс",
+	"commonsmetadata-trackingcategory-no-author-desc": "Файлын ӧвӧл [{{MediaWiki:Commonsmetadata-doc-url}} машинаен лыдӟиськись] описанилэн шаблонэз яке отын «автор» (''author'') чур буш кылемын.",
+	"commonsmetadata-trackingcategory-no-source": "Машинаен лыдӟиськись источниктэк файлъёс",
+	"commonsmetadata-trackingcategory-no-source-desc": "Файлын ӧвӧл [{{MediaWiki:Commonsmetadata-doc-url}} машинаен лыдӟиськись] описанилэн шаблонэз яке отын «источник» (''source'') чур буш кылемын."
+}

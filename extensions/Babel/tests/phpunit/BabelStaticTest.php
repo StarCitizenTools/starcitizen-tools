@@ -3,17 +3,16 @@
 namespace Babel\Tests;
 
 use BabelStatic;
-use PHPUnit_Framework_TestCase;
 
 /**
  * @covers BabelStatic
  *
  * @group Babel
  *
- * @licence GNU GPL v2+
- * @author Thiemo Mättig
+ * @license GPL-2.0-or-later
+ * @author Thiemo Kreuz
  */
-class BabelStaticTest extends PHPUnit_Framework_TestCase {
+class BabelStaticTest extends \PHPUnit\Framework\TestCase {
 
 	public function testOnParserFirstCallInit() {
 		$parser = $this->getMockBuilder( 'Parser' )

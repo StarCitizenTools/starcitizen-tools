@@ -38,7 +38,7 @@ class JsonSchemaContent extends JsonContent {
 	 * @return array Expanded schema object
 	 */
 	public static function expand( $schema,
-			$recursionLimit = JsonSchemaContent::DEFAULT_RECURSION_LIMIT ) {
+			$recursionLimit = self::DEFAULT_RECURSION_LIMIT ) {
 		return array_map( function ( $value ) use( $recursionLimit ) {
 			if ( is_array( $value ) && $recursionLimit > 0 ) {
 				if ( isset( $value['$ref'] ) ) {
@@ -66,9 +66,9 @@ class JsonSchemaContent extends JsonContent {
 	public function validate() {
 		$schema = $this->getJsonData();
 		if ( !is_array( $schema ) ) {
-			throw new JsonSchemaException( wfMessage( 'eventlogging-invalid-json' )->parse() );
+			throw new JsonSchemaException( 'eventlogging-invalid-json' );
 		}
-		return efSchemaValidate( $schema );
+		return EventLogging::schemaValidate( $schema );
 	}
 
 	/**
@@ -122,9 +122,12 @@ class JsonSchemaContent extends JsonContent {
 				'header' => 'eventlogging-code-sample-logging-on-server-side',
 				'code' => "EventLogging::logEvent( '$dbKey', $revId, \$event );",
 			], [
-				'language' => 'php',
-				'header' => 'eventlogging-code-sample-module-setup',
-				'code' => "\$wgEventLoggingSchemas[ '{$dbKey}' ] = {$revId};",
+				'language' => 'json',
+				'header' => 'eventlogging-code-sample-module-setup-json',
+				'code' => FormatJson::encode( [
+					'attributes' => [ 'EventLogging' => [
+						'Schemas' => [ $dbKey => $revId, ] ]
+					] ], "\t" ),
 			], [
 				'language' => 'javascript',
 				'header' => 'eventlogging-code-sample-logging-on-client-side',

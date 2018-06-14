@@ -3,14 +3,12 @@
 namespace Flow\Data\Utils;
 
 use Flow\Data\ObjectManager;
-use Flow\Exception\InvalidInputException;
+use Flow\Exception\InvalidParameterException;
 
 // Better name?
-//
 // Add query arrays with a multi-dimensional position
 // Merge results with their query value
 // Get back result array with same positions as the original query
-//
 // Maintains merge ordering
 class ResultDuplicator {
 	/**
@@ -43,7 +41,7 @@ class ResultDuplicator {
 	/**
 	 * @var array
 	 */
-	protected $queries = array();
+	protected $queries = [];
 
 	/**
 	 * @param array $queryKeys
@@ -57,11 +55,16 @@ class ResultDuplicator {
 		$this->result = new MultiDimArray;
 	}
 
-	// Add a query and its position.  Positions must be unique.
+	/**
+	 * Add a query and its position.  Positions must be unique.
+	 * @param array $query
+	 * @param array $position
+	 * @throws InvalidParameterException
+	 */
 	public function add( $query, $position ) {
-		$dim = count( (array) $position );
+		$dim = count( (array)$position );
 		if ( $dim !== $this->dimensions ) {
-			throw new InvalidInputException( "Expection position with {$this->dimensions} dimensions, received $dim", 'invalid-input' );
+			throw new InvalidParameterException( "Expected position with {$this->dimensions} dimensions, received $dim" );
 		}
 		$query = ObjectManager::splitFromRow( $query, $this->queryKeys );
 		if ( $query === null ) {
@@ -76,7 +79,11 @@ class ResultDuplicator {
 		}
 	}
 
-	// merge a query into the result set
+	/**
+	 * merge a query into the result set
+	 * @param array $query
+	 * @param array $result
+	 */
 	public function merge( array $query, array $result ) {
 		$query = ObjectManager::splitFromRow( $query, $this->queryKeys );
 		if ( $query === null ) {
@@ -95,10 +102,16 @@ class ResultDuplicator {
 		return self::sortResult( $this->desiredOrder->all(), $this->result, $this->dimensions );
 	}
 
-	// merge() wasn't necessarily called in the same order as add(),  this walks back through
-	// the results to put them in the desired order with the correct keys.
-	static public function sortResult( array $order, MultiDimArray $result, $dimensions ) {
-		$final = array();
+	/**
+	 * merge() wasn't necessarily called in the same order as add(),  this walks back through
+	 * the results to put them in the desired order with the correct keys.
+	 * @param array $order
+	 * @param MultiDimArray $result
+	 * @param int $dimensions
+	 * @return array
+	 */
+	public static function sortResult( array $order, MultiDimArray $result, $dimensions ) {
+		$final = [];
 		foreach ( $order as $position => $query ) {
 			if ( $dimensions > 1 ) {
 				$final[$position] = self::sortResult( $query, $result, $dimensions - 1 );
@@ -111,4 +124,3 @@ class ResultDuplicator {
 		return $final;
 	}
 }
-

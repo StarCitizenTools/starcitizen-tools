@@ -18,6 +18,7 @@
 ( function ( mw ) {
 	/**
 	 * Represents information about an image thumbnail
+	 *
 	 * @class mw.mmv.model.Thumbnail
 	 * @constructor
 	 * @param {string} url URL to the thumbnail
@@ -30,7 +31,7 @@
 		height
 	) {
 		if ( !url || !width || !height ) {
-			throw 'All parameters are required and cannot be empty or zero';
+			throw new Error( 'All parameters are required and cannot be empty or zero' );
 		}
 
 		/** @property {string} url The URL to the thumbnail */

@@ -1,231 +1,282 @@
 <?php
 
-$notificationTemplate = array(
+$notificationTemplate = [
 	'category' => 'flow-discussion',
 	'group' => 'other',
-	'section' => 'message',
-	'formatter-class' => 'Flow\NotificationFormatter',
 	'immediate' => false, // Default
-);
+];
 
-$notifications = array(
-	'flow-new-topic' => array(
-		'presentation-model' => 'Flow\\NewTopicPresentationModel',
-		'formatter-class' => 'Flow\NewTopicFormatter',
-		'user-locators' => array(
+$newTopicNotification = [
+	'presentation-model' => 'Flow\\NewTopicPresentationModel',
+	'bundle' => [
+		'web' => true,
+		'email' => true,
+		'expandable' => true,
+	],
+	'icon' => 'flow-new-topic'
+] + $notificationTemplate;
+
+$descriptionEditedNotification = [
+	'presentation-model' => 'Flow\\HeaderEditedPresentationModel',
+	'bundle' => [
+		'web' => true,
+		'email' => true,
+	],
+	'icon' => 'flow-topic-renamed',
+] + $notificationTemplate;
+
+$postEditedNotification = [
+	'presentation-model' => 'Flow\\PostEditedPresentationModel',
+	'bundle' => [
+		'web' => true,
+		'email' => true,
+	],
+	'icon' => 'flow-post-edited',
+] + $notificationTemplate;
+
+$postReplyNotification = [
+	'presentation-model' => 'Flow\\PostReplyPresentationModel',
+	'bundle' => [
+		'web' => true,
+		'email' => true,
+		'expandable' => true,
+	],
+	'icon' => 'chat',
+] + $notificationTemplate;
+
+$topicRenamedNotification = [
+	'presentation-model' => 'Flow\\TopicRenamedPresentationModel',
+	'primary-link' => [
+		'message' => 'flow-notification-link-text-view-post',
+		'destination' => 'flow-post'
+	],
+	'title-message' => 'flow-notification-rename',
+	'title-params' => [ 'agent', 'topic-permalink', 'old-subject', 'new-subject', 'flow-title', 'title' ],
+	'email-subject-message' => 'flow-notification-rename-email-subject',
+	'email-subject-params' => [ 'agent' ],
+	'email-body-batch-message' => 'flow-notification-rename-email-batch-body',
+	'email-body-batch-params' => [ 'agent', 'old-subject', 'new-subject', 'title' ],
+	'icon' => 'flow-topic-renamed',
+] + $notificationTemplate;
+
+$summaryEditedNotification = [
+	'presentation-model' => 'Flow\\SummaryEditedPresentationModel',
+	'bundle' => [
+		'web' => true,
+		'email' => true,
+	],
+	'primary-link' => [
+		'message' => 'flow-notification-link-text-view-topic',
+		'destination' => 'flow-post'
+	],
+	'title-message' => 'notification-header-flow-summary-edited',
+	'title-params' => [ 'subject', 'agent' ],
+	'email-subject-message' => 'notification-email-subject-flow-summary-edited',
+	'email-subject-params' => [ 'agent', 'subject' ],
+	'email-body-batch-message' => 'notification-email-batch-body-flow-summary-edited',
+	'email-body-batch-params' => [ 'agent', 'subject' ],
+	'email-body-batch-bundle-message' => 'notification-email-batch-bundle-body-flow-summary-edited',
+	'email-body-batch-bundle-params' => [ 'agent', 'subject', 'agent-other-display', 'agent-other-count' ],
+	'icon' => 'flow-topic-renamed',
+] + $notificationTemplate;
+
+$topicResolvedNotification = [
+	'presentation-model' => 'Flow\\TopicResolvedPresentationModel',
+	'primary-link' => [
+		'message' => 'flow-notification-link-text-view-topic',
+		'destination' => 'flow-post'
+	],
+	'title-message' => 'notification-header-flow-topic-resolved',
+	'title-params' => [ 'subject', 'agent' ],
+	'email-subject-message' => 'notification-email-subject-flow-topic-resolved',
+	'email-subject-params' => [ 'agent', 'subject' ],
+	'email-body-batch-message' => 'notification-email-batch-body-flow-topic-resolved',
+	'email-body-batch-params' => [ 'agent', 'subject' ],
+	'icon' => 'flow-topic-resolved',
+] + $notificationTemplate;
+
+$notifications = [
+	'flow-new-topic' => [
+		'section' => 'message',
+		'user-locators' => [
 			'EchoUserLocator::locateUsersWatchingTitle',
-			'EchoUserLocator::locateTalkPageOwner'
-		),
-		'user-filters' => array(
+		],
+		'user-filters' => [
 			'Flow\\NotificationsUserLocator::locateMentionedUsers',
-		),
-		'primary-link' => array(
-			'message' => 'flow-notification-link-text-view-topic',
-			'destination' => 'flow-new-topics'
-		),
-		'title-message' => 'flow-notification-newtopic',
-		'title-params' => array( 'agent', 'flow-title', 'title', 'subject', 'topic-permalink' ),
-		'bundle' => array(
-			'web' => true,
-			'email' => true,
-		),
-		'bundle-type' => 'event',
-		'bundle-message' => 'flow-notification-newtopic-bundle',
-		'bundle-params' => array( 'event-count', 'title', 'new-topics-permalink' ),
-		'email-subject-message' => 'flow-notification-newtopic-email-subject',
-		'email-subject-params' => array( 'agent', 'title' ),
-		'email-body-batch-message' => 'flow-notification-newtopic-email-batch-body',
-		'email-body-batch-params' => array( 'agent', 'subject', 'title' ),
-		'email-body-batch-bundle-message' => 'flow-notification-newtopic-email-batch-bundle-body',
-		'email-body-batch-bundle-params' => array( 'event-count', 'title', 'new-topics-permalink' ),
-		'icon' => 'flow-new-topic'
-	) + $notificationTemplate,
-	'flow-post-reply' => array(
-		'presentation-model' => 'Flow\\PostReplyPresentationModel',
-		'user-locators' => array(
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+	] + $newTopicNotification,
+	'flowusertalk-new-topic' => [
+		'category' => 'edit-user-talk',
+		'section' => 'alert',
+		'user-locators' => [
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+		'user-filters' => [
+			'Flow\\NotificationsUserLocator::locateMentionedUsers',
+		],
+	] + $newTopicNotification,
+	'flow-post-reply' => [
+		'section' => 'message',
+		'user-locators' => [
 			'Flow\\NotificationsUserLocator::locateUsersWatchingTopic',
-			'EchoUserLocator::locateTalkPageOwner'
-		),
-		'user-filters' => array(
+		],
+		'user-filters' => [
 			'Flow\\NotificationsUserLocator::locateMentionedUsers',
-		),
-		'primary-link' => array(
-			'message' => 'flow-notification-link-text-view-post',
-			'destination' => 'flow-post'
-		),
-		'title-message' => 'flow-notification-reply',
-		'title-params' => array( 'agent', 'subject', 'flow-title', 'title', 'post-permalink' ),
-		'bundle' => array(
-			'web' => true,
-			'email' => true,
-		),
-		'bundle-message' => 'flow-notification-reply-bundle',
-		'bundle-params' => array( 'agent', 'subject', 'title', 'post-permalink', 'agent-other-display', 'agent-other-count' ),
-		'email-subject-message' => 'flow-notification-reply-email-subject',
-		'email-subject-params' => array( 'agent', 'subject', 'title' ),
-		'email-body-batch-message' => 'flow-notification-reply-email-batch-body',
-		'email-body-batch-params' => array( 'agent', 'subject', 'title' ),
-		'email-body-batch-bundle-message' => 'flow-notification-reply-email-batch-bundle-body',
-		'email-body-batch-bundle-params' => array( 'agent', 'subject', 'title', 'agent-other-display', 'agent-other-count' ),
-		'icon' => 'chat',
-	) + $notificationTemplate,
-	'flow-post-edited' => array(
-		'presentation-model' => 'Flow\\PostEditedPresentationModel',
-		'user-locators' => array(
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+	] + $postReplyNotification,
+	'flowusertalk-post-reply' => [
+		'category' => 'edit-user-talk',
+		'section' => 'alert',
+		'user-locators' => [
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+		'user-filters' => [
+			'Flow\\NotificationsUserLocator::locateMentionedUsers',
+		],
+	] + $postReplyNotification,
+	'flow-post-edited' => [
+		'section' => 'alert',
+		'user-locators' => [
 			'Flow\\NotificationsUserLocator::locatePostAuthors',
-			'EchoUserLocator::locateTalkPageOwner'
-		),
-		'user-filters' => array(
+		],
+		'user-filters' => [
+			'EchoUserLocator::locateTalkPageOwner',
 			'Flow\\NotificationsUserLocator::locateMentionedUsers',
-		),
-		'primary-link' => array(
-			'message' => 'flow-notification-link-text-view-post',
-			'destination' => 'flow-post'
-		),
-		'title-message' => 'flow-notification-edit',
-		'title-params' => array( 'agent', 'subject', 'flow-title', 'title', 'post-permalink', 'topic-permalink' ),
-		'bundle' => array(
-			'web' => true,
-			'email' => true,
-		),
-		'bundle-message' => 'flow-notification-edit-bundle',
-		'bundle-params' => array( 'agent', 'subject', 'title', 'post-permalink', 'agent-other-display', 'agent-other-count' ),
-		'email-subject-message' => 'flow-notification-edit-email-subject',
-		'email-subject-params' => array( 'agent' ),
-		'email-body-batch-message' => 'flow-notification-edit-email-batch-body',
-		'email-body-batch-params' => array( 'agent', 'subject', 'title' ),
-		'email-body-batch-bundle-message' => 'flow-notification-edit-email-batch-bundle-body',
-		'email-body-batch-bundle-params' => array( 'agent', 'subject', 'title', 'agent-other-display', 'agent-other-count' ),
-		'icon' => 'flow-post-edited',
-	) + $notificationTemplate,
-	'flow-topic-renamed' => array(
-		'presentation-model' => 'Flow\\TopicRenamedPresentationModel',
-		'user-locators' => array(
+		],
+	] + $postEditedNotification,
+	'flowusertalk-post-edited' => [
+		'category' => 'edit-user-talk',
+		'section' => 'alert',
+		'user-locators' => [
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+		'user-filters' => [
+			'Flow\\NotificationsUserLocator::locateMentionedUsers',
+		],
+	] + $postEditedNotification,
+	'flow-topic-renamed' => [
+		'section' => 'message',
+		'user-locators' => [
 			'Flow\\NotificationsUserLocator::locateUsersWatchingTopic',
-			'EchoUserLocator::locateTalkPageOwner'
-		),
-		'user-filters' => array(
+		],
+		'user-filters' => [
 			'Flow\\NotificationsUserLocator::locateMentionedUsers',
-		),
-		'primary-link' => array(
-			'message' => 'flow-notification-link-text-view-post',
-			'destination' => 'flow-post'
-		),
-		'title-message' => 'flow-notification-rename',
-		'title-params' => array( 'agent', 'topic-permalink', 'old-subject', 'new-subject', 'flow-title', 'title' ),
-		'email-subject-message' => 'flow-notification-rename-email-subject',
-		'email-subject-params' => array( 'agent' ),
-		'email-body-batch-message' => 'flow-notification-rename-email-batch-body',
-		'email-body-batch-params' => array( 'agent', 'old-subject', 'new-subject', 'title' ),
-		'icon' => 'flow-topic-renamed',
-	) + $notificationTemplate,
-	'flow-summary-edited' => array(
-		'presentation-model' => 'Flow\\SummaryEditedPresentationModel',
-		'user-locators' => array(
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+	] + $topicRenamedNotification,
+	'flowusertalk-topic-renamed' => [
+		'category' => 'edit-user-talk',
+		'section' => 'alert',
+		'user-locators' => [
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+		'user-filters' => [
+			'Flow\\NotificationsUserLocator::locateMentionedUsers',
+		],
+	] + $topicRenamedNotification,
+	'flow-summary-edited' => [
+		'section' => 'message',
+		'user-locators' => [
 			'Flow\\NotificationsUserLocator::locateUsersWatchingTopic',
-			'EchoUserLocator::locateTalkPageOwner'
-		),
-		'user-filters' => array(
+		],
+		'user-filters' => [
 			'Flow\\NotificationsUserLocator::locateMentionedUsers',
-		),
-		'bundle' => array(
-			'web' => true,
-			'email' => true,
-		),
-		'primary-link' => array(
-			'message' => 'flow-notification-link-text-view-topic',
-			'destination' => 'flow-post'
-		),
-		'title-message' => 'notification-header-flow-summary-edited',
-		'title-params' => array( 'subject', 'agent' ),
-		'email-subject-message' => 'notification-email-subject-flow-summary-edited',
-		'email-subject-params' => array( 'agent', 'subject' ),
-		'email-body-batch-message' => 'notification-email-batch-body-flow-summary-edited',
-		'email-body-batch-params' => array( 'agent', 'subject' ),
-		'email-body-batch-bundle-message' => 'notification-email-batch-bundle-body-flow-summary-edited',
-		'email-body-batch-bundle-params' => array( 'agent', 'subject', 'agent-other-display', 'agent-other-count' ),
-		'icon' => 'flow-topic-renamed',
-	) + $notificationTemplate,
-	'flow-description-edited' => array(
-		'presentation-model' => 'Flow\\HeaderEditedPresentationModel',
-		'user-locators' => array(
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+	] + $summaryEditedNotification,
+	'flowusertalk-summary-edited' => [
+		'category' => 'edit-user-talk',
+		'section' => 'alert',
+		'user-locators' => [
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+		'user-filters' => [
+			'Flow\\NotificationsUserLocator::locateMentionedUsers',
+		],
+	] + $summaryEditedNotification,
+	'flow-description-edited' => [
+		'section' => 'message',
+		'user-locators' => [
 			'EchoUserLocator::locateUsersWatchingTitle',
-			'EchoUserLocator::locateTalkPageOwner'
-		),
-		'user-filters' => array(
+		],
+		'user-filters' => [
+			'EchoUserLocator::locateTalkPageOwner',
 			'Flow\\NotificationsUserLocator::locateMentionedUsers',
-		),
-		'bundle' => array(
-			'web' => true,
-			'email' => true,
-		),
-		'primary-link' => array(
-			'message' => 'notification-links-flow-description-edited-view-page',
-			'destination' => 'title'
-		),
-		'title-message' => 'notification-header-flow-description-edited',
-		'title-params' => array( 'flow-title' ),
-		'email-subject-message' => 'notification-email-subject-flow-description-edited',
-		'email-subject-params' => array( 'agent', 'title' ),
-		'email-body-batch-message' => 'notification-email-batch-body-flow-description-edited',
-		'email-body-batch-params' => array( 'agent', 'title' ),
-		'email-body-batch-bundle-message' => 'notification-email-batch-bundle-body-flow-description-edited',
-		'email-body-batch-bundle-params' => array( 'agent', 'title', 'agent-other-display', 'agent-other-count' ),
-		'icon' => 'flow-topic-renamed',
-	) + $notificationTemplate,
-	'flow-mention' => array(
+		],
+	] + $descriptionEditedNotification,
+	'flowusertalk-description-edited' => [
+		'category' => 'edit-user-talk',
+		'section' => 'alert',
+		'user-locators' => [
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+		'user-filters' => [
+			'Flow\\NotificationsUserLocator::locateMentionedUsers',
+		],
+	] + $descriptionEditedNotification,
+	'flow-mention' => [
+		'category' => 'mention',
 		'presentation-model' => 'Flow\\MentionPresentationModel',
-		'user-locators' => array(
+		'section' => 'alert',
+		'user-locators' => [
 			'Flow\\NotificationsUserLocator::locateMentionedUsers',
-		),
-		'primary-link' => array(
+		],
+		'primary-link' => [
 			'message' => 'notification-link-text-view-mention',
 			'destination' => 'flow-post'
-		),
+		],
 		'title-message' => 'flow-notification-mention',
-		'title-params' => array( 'agent', 'post-permalink', 'subject', 'title', 'user' ),
+		'title-params' => [ 'agent', 'post-permalink', 'subject', 'title', 'user' ],
 		'email-subject-message' => 'flow-notification-mention-email-subject',
-		'email-subject-params' => array( 'agent', 'flow-title', 'user' ),
+		'email-subject-params' => [ 'agent', 'flow-title', 'user' ],
 		'email-body-batch-message' => 'flow-notification-mention-email-batch-body',
-		'email-body-batch-params' => array( 'agent', 'subject', 'title', 'user' ),
+		'email-body-batch-params' => [ 'agent', 'subject', 'title', 'user' ],
 		'icon' => 'mention',
-	) + $notificationTemplate,
-	'flow-enabled-on-talkpage' => array(
+	] + $notificationTemplate,
+	'flow-enabled-on-talkpage' => [
+		'category' => 'system',
 		'presentation-model' => 'Flow\\FlowEnabledOnTalkpagePresentationModel',
-		'section' => null,
-		'user-locators' => array(
+		'section' => 'message',
+		'user-locators' => [
 			'EchoUserLocator::locateTalkPageOwner'
-		),
-		'primary-link' => array(
+		],
+		'primary-link' => [
 			'message' => 'flow-notification-link-text-enabled-on-talkpage',
 			'destination' => 'title'
-		),
+		],
 		'title-message' => 'flow-notification-enabled-on-talkpage-title',
-		'title-params' => array( 'agent', 'title' ),
+		'title-params' => [ 'agent', 'title' ],
 		'email-subject-message' => 'flow-notification-enabled-on-talkpage-email-subject-message',
-		'email-subject-params' => array( 'agent', 'title' ),
+		'email-subject-params' => [ 'agent', 'title' ],
 		'email-body-batch-message' => 'flow-notification-enabled-on-talkpage-email-batch-body',
-		'email-body-batch-params' => array( 'agent', 'title' ),
+		'email-body-batch-params' => [ 'agent', 'title' ],
 		'icon' => 'chat',
-	) + $notificationTemplate,
-	'flow-topic-resolved' => array(
-		'presentation-model' => 'Flow\\TopicResolvedPresentationModel',
-		'user-locators' => array(
-			'EchoUserLocator::locateUsersWatchingTitle',
-			'EchoUserLocator::locateTalkPageOwner'
-		),
-		'primary-link' => array(
-			'message' => 'flow-notification-link-text-view-topic',
-			'destination' => 'flow-post'
-		),
-		'title-message' => 'notification-header-flow-topic-resolved',
-		'title-params' => array( 'subject', 'agent' ),
-		'email-subject-message' => 'notification-email-subject-flow-topic-resolved',
-		'email-subject-params' => array( 'agent', 'subject' ),
-		'email-body-batch-message' => 'notification-email-batch-body-flow-topic-resolved',
-		'email-body-batch-params' => array( 'agent', 'subject' ),
-		'icon' => 'flow-topic-resolved',
-	) + $notificationTemplate,
-);
+	] + $notificationTemplate,
+	'flow-topic-resolved' => [
+		'section' => 'message',
+		'user-locators' => [
+			'Flow\\NotificationsUserLocator::locateUsersWatchingTopic',
+		],
+		'user-filters' => [
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+	] + $topicResolvedNotification,
+	'flowusertalk-topic-resolved' => [
+		'category' => 'edit-user-talk',
+		'section' => 'alert',
+		'user-locators' => [
+			'EchoUserLocator::locateTalkPageOwner',
+		],
+	] + $topicResolvedNotification,
+	'flow-mention-failure-too-many' => [
+		'user-locators' => [
+			'EchoUserLocator::locateEventAgent'
+		],
+		'section' => 'alert',
+		'presentation-model' => 'Flow\\MentionStatusPresentationModel'
+	] + $notificationTemplate,
+];
 
 return $notifications;

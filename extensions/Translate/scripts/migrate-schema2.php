@@ -4,7 +4,7 @@
  *
  * @author Niklas Laxström
  * @copyright Copyright © 2011, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -49,16 +49,16 @@ class TSchema2 extends Maintenance {
 
 		$res = $dbw->select(
 			'revtag_type',
-			array( 'rtt_id', 'rtt_name' ),
-			array(),
+			[ 'rtt_id', 'rtt_name' ],
+			[],
 			__METHOD__
 		);
 
 		foreach ( $res as $row ) {
 			$dbw->update(
 				'revtag',
-				array( 'rt_type' => $row->rtt_name ),
-				array( 'rt_type' => (string)$row->rtt_id ),
+				[ 'rt_type' => $row->rtt_name ],
+				[ 'rt_type' => (string)$row->rtt_id ],
 				__METHOD__
 			);
 		}
@@ -68,4 +68,4 @@ class TSchema2 extends Maintenance {
 }
 
 $maintClass = 'TSchema2';
-require_once DO_MAINTENANCE;
+require_once RUN_MAINTENANCE_IF_MAIN;

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor IME-like testing
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -52,11 +52,15 @@ ve.ce.TestOffset.static = {};
  *
  * @private
  * @static
+ * @param {Node} node Node
+ * @param {number} n Offset
+ * @param {boolean} reversed Reversed
+ * @return {Object} Offset information
  */
 ve.ce.TestOffset.static.findTextOffset = function ( node, n, reversed ) {
 	var i, len, found, slice, offset, childNode, childNodes, consumed = 0;
 	if ( node.nodeType === node.TEXT_NODE ) {
-		// test >= n because one more boundaries than code units
+		// Test length >= n because one more boundaries than code units
 		if ( node.textContent.length >= n ) {
 			offset = reversed ? node.textContent.length - n : n;
 			slice = node.textContent.slice( 0, offset ) + '|' +
@@ -114,13 +118,10 @@ ve.ce.TestOffset.static.findTextOffset = function ( node, n, reversed ) {
  * @param {ve.ce.Surface} surface The UI Surface
  */
 ve.ce.TestRunner = function VeCeTestRunner( surface ) {
-	var testRunner,
-		callId = 0;
 	this.view = surface;
 	this.model = surface.getModel();
 	this.doc = surface.getElementDocument();
 	this.nativeSelection = surface.nativeSelection;
-	this.postponedCalls = {};
 
 	// TODO: The code assumes that the document consists of exactly one paragraph
 	this.lastText = this.getParagraph().textContent;
@@ -129,14 +130,7 @@ ve.ce.TestRunner = function VeCeTestRunner( surface ) {
 	surface.surfaceObserver.pollInterval = null;
 
 	// Take control of eventSequencer 'setTimeouts'
-	testRunner = this;
-	this.view.eventSequencer.postpone = function ( f ) {
-		testRunner.postponedCalls[ ++callId ] = f;
-		return callId;
-	};
-	this.view.eventSequencer.cancelPostponed = function ( callId ) {
-		delete testRunner.postponedCalls[ callId ];
-	};
+	ve.test.utils.hijackEventSequencerTimeouts( this.view.eventSequencer );
 };
 
 /* Methods */
@@ -162,22 +156,10 @@ ve.ce.TestRunner.prototype.getParagraph = function () {
 /**
  * Run any pending postponed calls
  *
- * Exceptions thrown may leave this.postponedCalls in an inconsistent state
+ * Exceptions thrown will leave postponed calls in an inconsistent state
  */
 ve.ce.TestRunner.prototype.endLoop = function () {
-	var callId, postponedCalls,
-		check = true;
-
-	// postponed calls may add more postponed calls
-	while ( check ) {
-		postponedCalls = this.postponedCalls;
-		this.postponedCalls = {};
-		check = false;
-		for ( callId in postponedCalls ) {
-			check = true;
-			postponedCalls[ callId ]();
-		}
-	}
+	this.view.eventSequencer.endLoop();
 };
 
 /**
@@ -187,6 +169,8 @@ ve.ce.TestRunner.prototype.endLoop = function () {
  * @param {Object} ev Fake event object with any necessary properties
  */
 ve.ce.TestRunner.prototype.sendEvent = function ( eventName, ev ) {
+	// Ensure ev has an originalEvent property.
+	ev.originalEvent = ev.originalEvent || {};
 	this.view.eventSequencer.onEvent( eventName, ev );
 };
 
@@ -198,34 +182,33 @@ ve.ce.TestRunner.prototype.sendEvent = function ( eventName, ev ) {
  * @param {string} text The new text
  */
 ve.ce.TestRunner.prototype.changeText = function ( text ) {
-	var focusNode, focusOffset;
+	var paragraph, range, textNode;
 	// TODO: This method doesn't handle arbitrary text changes in a paragraph
 	// with non-text nodes. It just works for the main cases that are important
 	// in the existing IME tests.
 
-	// Store the focus before the selection gets clobbered
-	focusNode = this.nativeSelection.focusNode;
-	focusOffset = this.nativeSelection.focusOffset;
-
-	// Empty all descendent text nodes
+	// Remove all descendent text nodes
 	// This may clobber the selection, so the test had better call changeSel next.
-	$( this.getParagraph() ).find( '*' ).addBack().contents().each( function () {
+	paragraph = this.getParagraph();
+	$( paragraph ).find( '*' ).addBack().contents().each( function () {
 		if ( this.nodeType === Node.TEXT_NODE ) {
-			this.textContent = '';
+			this.parentNode.removeChild( this );
 		}
 	} );
 
-	// Insert text at the focus
-	if ( focusNode === null ) {
-		throw new Error( 'No focus node' );
-	} else if ( focusNode.nodeType === Node.TEXT_NODE ) {
-		focusNode.textContent = text;
+	range = document.createRange();
+	if ( text === '' ) {
+		range.setStart( paragraph, 0 );
 	} else {
-		focusNode.insertBefore(
-			document.createTextNode( text ),
-			focusNode.childNodes[ focusOffset ]
-		);
+		// Insert the text at the start of the paragraph, and put the cursor after
+		// the insertion, to ensure consistency across test environments.
+		// See T176453
+		textNode = document.createTextNode( text );
+		paragraph.insertBefore( textNode, paragraph.firstChild );
+		range.setStart( textNode, text.length );
 	}
+	this.nativeSelection.removeAllRanges();
+	this.nativeSelection.addRange( range );
 	this.lastText = text;
 };
 

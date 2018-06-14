@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Erdemaslancan",
-			"Mirzali"
+			"Mirzali",
+			"Gırd"
 		]
 	},
 	"babel": "Melumatê karberê Babili",
@@ -19,7 +20,7 @@
 	"babel-4": "No karber [[$1|Zey zıwan]] dê xo [[$2|$3]] zano.",
 	"babel-5": "No karber [[$1|profesyonel]] sewiye dı [[$2|$3]] zano.",
 	"babel-N": "[[$1|Zıwanè ]] marda nê karberi [[$2|$3]]o.",
-	"babel-0-n": "No karber [[$1|hêç]]  [[$2|Zazaki]] nêzano (ya zi fahm keno feqet nêzano qısey bıkero).",
+	"babel-0-n": "No karber/Na karbere [[$1|hêç]]  [[$2|Zazaki]] nêzano/nêzana (ya zi fam keno/kena feqet nêzano/nêzana qısey bıkero).",
 	"babel-1-n": "No karber [[$1|tenekê]] [[$2|Zazaki]] zano.",
 	"babel-2-n": "[[$2|Zazakiya]] nê karberi [[$1|hewla]].",
 	"babel-3-n": "No karber [[$1|weş]] [[$2|zazaki]] zano.",

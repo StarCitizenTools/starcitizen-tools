@@ -4,15 +4,15 @@
  * Finds external changes for file based message groups.
  *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @since 2016.02
  */
 class ExternalMessageSourceStateImporter {
 
 	public function importSafe( $changeData ) {
-		$processed = array();
-		$skipped = array();
-		$jobs = array();
+		$processed = [];
+		$skipped = [];
+		$jobs = [];
 		$jobs[] = MessageIndexRebuildJob::newJob();
 
 		foreach ( $changeData as $groupId => $changesForGroup ) {
@@ -65,11 +65,11 @@ class ExternalMessageSourceStateImporter {
 		MessageChangeStorage::writeChanges( $changeData, $file );
 		JobQueueGroup::singleton()->push( $jobs );
 
-		return array(
+		return [
 			'processed' => $processed,
 			'skipped' => $skipped,
 			'name' => $name,
-		);
+		];
 	}
 
 	protected static function isSafe( array $changesForLanguage ) {

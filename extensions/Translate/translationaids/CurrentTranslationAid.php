@@ -4,8 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -25,14 +24,14 @@ class CurrentTranslationAid extends TranslationAid {
 			$title->getNamespace()
 		);
 
-		Hooks::run( 'TranslatePrefillTranslation', array( &$translation, $this->handle ) );
+		Hooks::run( 'TranslatePrefillTranslation', [ &$translation, $this->handle ] );
 		$fuzzy = MessageHandle::hasFuzzyString( $translation ) || $this->handle->isFuzzy();
 		$translation = str_replace( TRANSLATE_FUZZY, '', $translation );
 
-		return array(
+		return [
 			'language' => $this->handle->getCode(),
 			'fuzzy' => $fuzzy,
 			'value' => $translation,
-		);
+		];
 	}
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Context styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-desktopContext {
@@ -19,18 +19,18 @@
 
 .ve-ui-desktopContext-menu .oo-ui-toolbar-bar {
 	white-space: nowrap;
-	border: none;
+	border: 0;
 	background: none;
 }
 
 .ve-ui-desktopContext-menu .oo-ui-toolGroup {
-	border: none;
+	border: 0;
 	margin: 0;
 }
 
 .ve-ui-desktopContext-menu .oo-ui-tool,
 .ve-ui-desktopContext-menu .oo-ui-tool:hover {
-	border: none;
+	border: 0;
 }
 
 .ve-ui-desktopContext-menu .oo-ui-tool:active,
@@ -40,22 +40,4 @@
 
 .ve-ui-desktopContext-floating {
 	position: fixed;
-}
-
-.ve-ui-desktopContext > .oo-ui-popupWidget:not( .oo-ui-popupWidget-anchored ) .oo-ui-popupWidget-popup {
-	margin-top: 0.25em;
-}
-
-/* @noflip */
-.ve-ui-surface-dir-ltr .ve-ui-desktopContext > .oo-ui-popupWidget:not( .oo-ui-popupWidget-anchored ) .oo-ui-popupWidget-popup {
-	margin-left: -0.5em;
-}
-
-/* @noflip */
-.ve-ui-surface-dir-rtl .ve-ui-desktopContext > .oo-ui-popupWidget:not( .oo-ui-popupWidget-anchored ) .oo-ui-popupWidget-popup {
-	margin-left: 0.5em;
-}
-
-.ve-ui-desktopContext > .oo-ui-popupWidget:not( .oo-ui-popupWidget-anchored ) .oo-ui-context-menu {
-	right: 0;
 }

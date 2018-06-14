@@ -6,13 +6,13 @@
  */
 abstract class JavaScriptFFS extends SimpleFFS {
 	public function getFileExtensions() {
-		return array( '.js' );
+		return [ '.js' ];
 	}
 
 	/**
 	 * Message keys format.
 	 *
-	 * @param $key string
+	 * @param string $key
 	 *
 	 * @return string
 	 */
@@ -21,8 +21,8 @@ abstract class JavaScriptFFS extends SimpleFFS {
 	/**
 	 * Header of message file.
 	 *
-	 * @param $code string
-	 * @param $authors array
+	 * @param string $code
+	 * @param array $authors
 	 */
 	abstract protected function header( $code, $authors );
 
@@ -32,14 +32,14 @@ abstract class JavaScriptFFS extends SimpleFFS {
 	abstract protected function footer();
 
 	/**
-	 * @param $data array
+	 * @param string $data
 	 * @return array Parsed data.
 	 */
 	public function readFromVariable( $data ) {
 		/* Parse authors list */
 		$authors = preg_replace( "#/\* Translators\:\n(.*?)\n \*/(.*)#s", '$1', $data );
 		if ( $authors === $data ) {
-			$authors = array();
+			$authors = [];
 		} else {
 			$authors = explode( "\n", $authors );
 			$count = count( $authors );
@@ -86,7 +86,7 @@ abstract class JavaScriptFFS extends SimpleFFS {
 		 */
 		$data = explode( "\",\n", $data );
 
-		$messages = array();
+		$messages = [];
 		foreach ( $data as $segment ) {
 			/**
 			 * Add back trailing quote, removed by explosion.
@@ -128,14 +128,14 @@ abstract class JavaScriptFFS extends SimpleFFS {
 
 		$messages = $this->group->getMangler()->mangle( $messages );
 
-		return array(
+		return [
 			'AUTHORS' => $authors,
 			'MESSAGES' => $messages
-		);
+		];
 	}
 
 	/**
-	 * @param $collection MessageCollection
+	 * @param MessageCollection $collection
 	 * @return string
 	 */
 	public function writeReal( MessageCollection $collection ) {
@@ -177,7 +177,7 @@ abstract class JavaScriptFFS extends SimpleFFS {
 	}
 
 	/**
-	 * @param $authors array
+	 * @param array $authors
 	 * @return string
 	 */
 	protected function authorsList( $authors ) {
@@ -195,7 +195,7 @@ abstract class JavaScriptFFS extends SimpleFFS {
 	}
 
 	// See ECMA 262 section 7.8.4 for string literal format
-	private static $pairs = array(
+	private static $pairs = [
 		"\\" => "\\\\",
 		"\"" => "\\\"",
 		"'" => "\\'",
@@ -217,10 +217,10 @@ abstract class JavaScriptFFS extends SimpleFFS {
 		 */
 		"\xe2\x80\x8c" => "\\u200c", // ZERO WIDTH NON-JOINER
 		"\xe2\x80\x8d" => "\\u200d", // ZERO WIDTH JOINER
-	);
+	];
 
 	/**
-	 * @param $string string
+	 * @param string $string
 	 * @return string
 	 */
 	protected static function escapeJsString( $string ) {
@@ -228,7 +228,7 @@ abstract class JavaScriptFFS extends SimpleFFS {
 	}
 
 	/**
-	 * @param $string string
+	 * @param string $string
 	 * @return string
 	 */
 	protected static function unescapeJsString( $string ) {
@@ -243,7 +243,7 @@ abstract class JavaScriptFFS extends SimpleFFS {
 class ShapadoJsFFS extends JavaScriptFFS {
 
 	/**
-	 * @param $key string
+	 * @param string $key
 	 *
 	 * @return string
 	 */
@@ -252,8 +252,8 @@ class ShapadoJsFFS extends JavaScriptFFS {
 	}
 
 	/**
-	 * @param $code string
-	 * @param $authors array
+	 * @param string $code
+	 * @param array $authors
 	 * @return string
 	 */
 	protected function header( $code, $authors ) {

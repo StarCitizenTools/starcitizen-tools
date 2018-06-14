@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ahmed-Najib-Biabani-Ibrahimkhel"
+			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"Baloch Khan"
 		]
 	},
 	"nuke": "ټول ړنگېدنه",
 	"action-nuke": "نيوک مخونه",
 	"nuke-multiplepeople": "د تازه راگډ شويو مخونو ټول ړنگېدنه",
-	"nuke-submit-user": "ورځه",
+	"nuke-submit-user": "د مخونو لړليک کښل",
 	"nuke-submit-delete": "ټاکل شوی ړنگول",
 	"right-nuke": "د ډله ايز ړنگون مخونه",
 	"nuke-select": "ټاکل: $1",
@@ -16,5 +17,6 @@
 	"nuke-deleted": "د '''$1''' مخ ړنگ شو.",
 	"nuke-not-deleted": "د [[:$1]] مخ '''نشي''' ړنګېدلی.",
 	"nuke-delete-more": "[[Special:Nuke|لا نور مخونه ړنگول]]",
-	"nuke-viewchanges": "بدلونونه کتل"
+	"nuke-viewchanges": "بدلونونه کتل",
+	"nuke-linkoncontribs": "ټول ړنگېدنه"
 }

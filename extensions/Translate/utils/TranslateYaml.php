@@ -6,7 +6,7 @@
  * @author Ævar Arnfjörð Bjarmason
  * @author Niklas Laxström
  * @copyright Copyright © 2009-2013, Niklas Laxström, Ævar Arnfjörð Bjarmason
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -15,7 +15,7 @@
  */
 class TranslateYaml {
 	/**
-	 * @param $text string
+	 * @param string $text
 	 * @return array
 	 * @throws MWException
 	 */
@@ -24,19 +24,23 @@ class TranslateYaml {
 
 		switch ( $wgTranslateYamlLibrary ) {
 			case 'phpyaml':
-				$ret = yaml_parse( $text );
+				// Harden: do not support unserializing objects.
+				// Method 1: PHP ini setting (not supported by HHVM)
+				// Method 2: Callback handler for !php/object
+				$previousValue = ini_set( 'yaml.decode_php', false );
+				$ignored = 0;
+				$callback = function ( $value ) {
+					return $value;
+				};
+				$ret = yaml_parse( $text, 0, $ignored, [ '!php/object' => $callback ] );
+				ini_set( 'yaml.decode_php', $previousValue );
 				if ( $ret === false ) {
 					// Convert failures to exceptions
 					throw new InvalidArgumentException( 'Invalid Yaml string' );
 				}
 
 				return $ret;
-
 			case 'spyc':
-				// Load the bundled version if not otherwise available
-				if ( !class_exists( 'Spyc' ) ) {
-					require_once __DIR__ . '/../libs/spyc/spyc.php';
-				}
 				$yaml = spyc_load( $text );
 
 				return self::fixSpycSpaces( $yaml );
@@ -50,7 +54,7 @@ class TranslateYaml {
 	}
 
 	/**
-	 * @param $yaml array
+	 * @param array &$yaml
 	 * @return array
 	 */
 	public static function fixSyckBooleans( &$yaml ) {
@@ -66,7 +70,7 @@ class TranslateYaml {
 	}
 
 	/**
-	 * @param $yaml array
+	 * @param array &$yaml
 	 * @return array
 	 */
 	public static function fixSpycSpaces( &$yaml ) {
@@ -95,8 +99,6 @@ class TranslateYaml {
 				return yaml_emit( $text, YAML_UTF8_ENCODING );
 
 			case 'spyc':
-				require_once __DIR__ . '/../libs/spyc/spyc.php';
-
 				return Spyc::YAMLDump( $text );
 			case 'syck':
 				return self::syckDump( $text );

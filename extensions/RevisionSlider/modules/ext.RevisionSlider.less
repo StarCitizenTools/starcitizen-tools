@@ -1,0 +1,402 @@
+@import 'mediawiki.mixins';
+
+@new: #1e6db8;
+@old: #fc3;
+/* Use darker color for handle */
+@oldHandle: darken( @old, 18% );
+
+.mw-revslider-container-expanded {
+	margin-bottom: 15px;
+}
+
+.mw-revslider-container-collapsed {
+	margin-bottom: 0;
+}
+
+.mw-revslider-auto-expand-button {
+	position: absolute;
+	top: 0.07em;
+	/* default button width + default button margin ( 1.875em + 0.234375em ) */
+	right: 2.109375em;
+}
+
+.mw-revslider-revision {
+	position: relative;
+	margin-top: 70px;
+	background-color: #e3e3e3;
+	border-color: #e3e3e3;
+	z-index: 1;
+}
+
+.mw-revslider-revision-up {
+	border-bottom: 2px solid transparent;
+}
+
+.mw-revslider-revision-down {
+	border-top: 2px solid transparent;
+}
+
+.mw-revslider-revision-new,
+.mw-revslider-revision-old,
+.mw-revslider-revision-intermediate {
+	.mw-revslider-revision {
+		background-color: #bcbcbc;
+		border-color: #989898;
+	}
+}
+
+.mw-revslider-revision-border-box {
+	height: 100%;
+	width: 100%;
+	border-left: 1px solid #fff;
+
+	.mw-revslider-revision-old & {
+		border-bottom: 2px solid @old;
+	}
+
+	.mw-revslider-revision-new & {
+		border-bottom: 2px solid @new;
+	}
+}
+
+.mw-revslider-revision-wrapper {
+	display: inline-block;
+	height: 140px;
+
+	&:hover,
+	&-hovered {
+		background-color: #f2f2f2;
+	}
+}
+
+.mw-revslider-revision-wrapper-up,
+.mw-revslider-revision-wrapper-down {
+	height: 70px;
+	position: absolute;
+	z-index: 1;
+}
+
+.mw-revslider-revision-wrapper-up {
+	top: 0;
+}
+
+.mw-revslider-revision-wrapper-down {
+	top: 70px;
+}
+
+.mw-revslider-revision-hovered {
+	&.mw-revslider-revision-wrapper-up .mw-revslider-pointer-ghost {
+		background-color: lighten( @new, 30% );
+		border: 2px solid @new;
+		bottom: -4px;
+	}
+
+	&.mw-revslider-revision-wrapper-down .mw-revslider-pointer-ghost {
+		background-color: lighten( @oldHandle, 30% );
+		border: 2px solid @oldHandle;
+		top: -1px;
+	}
+}
+
+.mw-revslider-pointer.mw-revslider-pointer-ghost {
+	z-index: 2;
+	width: 11px;
+	height: 11px;
+	left: 1px;
+	cursor: pointer;
+}
+
+.mw-revslider-revision-wrapper-hovered .mw-revslider-revision-hovered {
+	cursor: pointer;
+	&.mw-revslider-revision-wrapper-up  {
+		background-color: fade( @new, 30% );
+	}
+	&.mw-revslider-revision-wrapper-down  {
+		background-color: fade( @old, 30% );
+	}
+}
+
+.mw-revslider-tooltip {
+	font-size: 0.8em;
+	word-break: break-all;
+	word-wrap: break-word;
+}
+
+.mw-revslider-revision-tooltip {
+	.oo-ui-popupWidget-body {
+		padding-right: 19px;
+	}
+
+	.mw-revslider-change-positive {
+		color: #006400;
+	}
+
+	.mw-revslider-change-negative {
+		color: #8b0000;
+	}
+
+	.mw-revslider-change-none {
+		color: #aaa;
+	}
+}
+
+.mw-revslider-arrow-tooltip,
+.mw-revslider-help-tooltip {
+	text-align: center;
+}
+
+.mw-revslider-revisions {
+	height: 140px;
+	white-space: nowrap;
+}
+
+.mw-revslider-revisions-container {
+	width: 90%;
+	position: relative;
+	overflow: hidden;
+}
+
+.mw-revslider-revisions-container,
+.mw-revslider-arrow {
+	float: left;
+}
+
+.mw-revslider-arrow {
+	width: 22px;
+	height: 142px;
+	&.oo-ui-buttonElement .oo-ui-buttonElement-button {
+		width: 20px;
+		height: 140px;
+		padding: 0;
+		min-height: 0;
+		min-width: 0;
+	}
+
+	&.oo-ui-iconElement > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
+		left: 0;
+		width: 20px;
+		min-width: inherit;
+		min-height: inherit;
+	}
+}
+
+.mw-revslider-arrow-backwards {
+	margin-right: 30px;
+}
+
+.mw-revslider-arrow-forwards {
+	margin-left: 30px;
+}
+
+.mw-revslider-auto-expand-button.oo-ui-buttonElement > .oo-ui-buttonElement-button {
+	border-color: #fff;
+}
+
+/* This is a bit hacky way, the goal being to have a framed toggle button widget with some styles
+of the frameless one (to fit the size of the toggle button */
+.mw-revslider-container .mw-revslider-auto-expand-button .oo-ui-buttonElement-button {
+	padding: 0;
+	box-sizing: border-box;
+	min-height: 0;
+	min-width: 0;
+	width: 1.875em;
+	height: 1.875em;
+	background-color: transparent;
+	border: 0;
+	margin-top: 0.12em;
+}
+
+.mw-revslider-auto-expand-button.oo-ui-iconElement > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
+	position: static;
+	left: auto;
+	top: auto;
+	width: 1.875em;
+	height: 1.875em;
+}
+
+.mw-revslider-revision-slider {
+	position: relative;
+	margin: auto;
+}
+
+.mw-revslider-pointer-container {
+	position: absolute;
+	cursor: pointer;
+	clear: both;
+	top: 65px;
+	z-index: 1;
+}
+
+.mw-revslider-pointer {
+	position: absolute !important; /* stylelint-disable-line declaration-no-important */
+	z-index: 1;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+
+	&:hover,
+	&-cursor {
+		cursor: move; /* fallback if grab cursor is unsupported */
+		cursor: grab;
+		cursor: -moz-grab;
+		cursor: -webkit-grab;
+	}
+
+	&-grabbing,
+	&.mw-revslider-pointer-grabbing:hover {
+		cursor: grabbing;
+		cursor: -moz-grabbing;
+		cursor: -webkit-grabbing;
+	}
+
+	&.mw-revslider-pointer-newer {
+		top: -6px;
+		border: 1px solid @new;
+		.vertical-gradient( lighten( @new, 30% ), @new );
+
+		&:hover {
+			.vertical-gradient( lighten( @new, 40% ), @new );
+		}
+	}
+
+	&.mw-revslider-pointer-older {
+		top: 4px;
+		border: 1px solid @oldHandle;
+		.vertical-gradient( lighten( @oldHandle, 30% ), @oldHandle );
+
+		&:hover {
+			.vertical-gradient( lighten( @oldHandle, 40% ), @oldHandle );
+		}
+	}
+}
+
+.mw-revslider-slider-line {
+	margin: 0 10px;
+	.mw-revslider-pointer-container-newer & {
+		margin-bottom: 4px;
+		border-bottom: 4px solid fade( @new, 50% );
+	}
+
+	.mw-revslider-pointer-container-older & {
+		border-top: 4px solid fade( @old, 50% );
+	}
+
+	.mw-revslider-pointer-container-newer:hover & {
+		border-bottom-color: fade( @new, 80% );
+	}
+
+	.mw-revslider-pointer-container-older:hover & {
+		border-top-color: fade( @old, 80% );
+	}
+}
+
+.mw-revslider-revisions-older {
+	float: left;
+}
+
+.mw-revslider-revisions-newer {
+	float: right;
+}
+
+.mw-revslider-diff-loading {
+	opacity: 0.5;
+}
+
+.oo-ui-windowManager-modal.oo-ui-windowManager-floating > .mw-revslider-help-dialog > .oo-ui-window-frame {
+	top: 30%;
+	bottom: auto;
+}
+
+.mw-revslider-help-dialog-image-landscape {
+	height: 160px;
+	width: 100%;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.mw-revslider-help-dialog-image-portrait {
+	height: 180px;
+	width: 100%;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.mw-revslider-column-image {
+	width: 50%;
+	float: left;
+}
+
+.mw-revslider-column-text {
+	width: 50%;
+	float: right;
+}
+
+.mw-revslider-help-dialog-text {
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.mw-revslider-show-help {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	margin-right: 0;
+	z-index: 1;
+}
+
+.mw-revslider-pointer-line-upper,
+.mw-revslider-pointer-line-lower {
+	border: 0 solid transparent;
+}
+
+.mw-revslider-pointer-line {
+	/* @noflip */
+	margin-left: 1px;
+	position: absolute;
+	top: 73px;
+	.mw-revslider-left-line {
+		/* @noflip */
+		border-left-width: 2px;
+	}
+
+	.mw-revslider-right-line {
+		/* @noflip */
+		border-right-width: 2px;
+	}
+
+	.mw-revslider-bottom-line {
+		border-bottom-width: 2px;
+	}
+
+	.mw-revslider-lower-color {
+		border-color: @old;
+	}
+
+	.mw-revslider-upper-color {
+		border-color: @new;
+	}
+}
+
+.mw-revslider-pointer-older {
+	.mw-revslider-pointer-line-upper {
+		height: 81px;
+	}
+
+	.mw-revslider-pointer-line-lower {
+		height: 17px;
+	}
+}
+
+.mw-revslider-pointer-newer {
+	.mw-revslider-pointer-line-upper {
+		height: 71px;
+	}
+
+	.mw-revslider-pointer-line-lower {
+		height: 27px;
+	}
+}
+
+.mw-revslider-pointer-line-underline {
+	border-bottom: 2px solid;
+}

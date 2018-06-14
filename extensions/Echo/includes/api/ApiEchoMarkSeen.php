@@ -8,7 +8,7 @@ class ApiEchoMarkSeen extends ApiBase {
 
 		$user = $this->getUser();
 		if ( $user->isAnon() ) {
-			$this->dieUsage( 'Login is required', 'login-required' );
+			$this->dieWithError( 'apierror-mustbeloggedin-generic', 'login-required' );
 		}
 
 		$params = $this->extractRequestParams();
@@ -16,22 +16,36 @@ class ApiEchoMarkSeen extends ApiBase {
 		$seenTime = EchoSeenTime::newFromUser( $user );
 		$seenTime->setTime( $timestamp, $params['type'] );
 
-		$this->getResult()->addValue( 'query', $this->getModuleName(), array(
+		if ( $params['timestampFormat'] === 'ISO_8601' ) {
+			$outputTimestamp = wfTimestamp( TS_ISO_8601, $timestamp );
+		} else {
+			// MW
+			$this->addDeprecation( 'apiwarn-echo-deprecation-timestampformat', 'action=echomarkseen&timestampFormat=MW' );
+
+			$outputTimestamp = $timestamp;
+		}
+
+		$this->getResult()->addValue( 'query', $this->getModuleName(), [
 			'result' => 'success',
-			'timestamp' => $timestamp,
-		) );
+			'timestamp' => $outputTimestamp,
+		] );
 	}
 
 	public function getAllowedParams() {
-		return array(
-			'token' => array(
+		return [
+			'token' => [
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'type' => array(
+			],
+			'type' => [
 				ApiBase::PARAM_REQUIRED => true,
-				ApiBase::PARAM_TYPE => array( 'alert', 'message', 'all' ),
-			)
-		);
+				ApiBase::PARAM_TYPE => [ 'alert', 'message', 'all' ],
+			],
+			'timestampFormat' => [
+				// Not using the TS constants, since clients can't.
+				ApiBase::PARAM_DFLT => 'MW',
+				ApiBase::PARAM_TYPE => [ 'ISO_8601', 'MW' ],
+			],
+		];
 	}
 
 	public function needsToken() {
@@ -52,11 +66,12 @@ class ApiEchoMarkSeen extends ApiBase {
 
 	/**
 	 * @see ApiBase::getExamplesMessages()
+	 * @return array
 	 */
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=echomarkseen&type=all' => 'apihelp-echomarkseen-example-1',
-		);
+		];
 	}
 
 	public function getHelpUrls() {

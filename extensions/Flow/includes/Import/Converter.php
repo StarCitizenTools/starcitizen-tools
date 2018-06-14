@@ -2,7 +2,8 @@
 
 namespace Flow\Import;
 
-use DatabaseBase;
+use ActorMigration;
+use Wikimedia\Rdbms\IDatabase;
 use Flow\Exception\FlowException;
 use MovePage;
 use MWExceptionHandler;
@@ -31,7 +32,7 @@ use WikitextContent;
  */
 class Converter {
 	/**
-	 * @var DatabaseBase Master database of the current wiki. Required
+	 * @var IDatabase Master database of the current wiki. Required
 	 *  to lookup past page moves.
 	 */
 	protected $dbw;
@@ -61,16 +62,15 @@ class Converter {
 	protected $strategy;
 
 	/**
-	 * @param DatabaseBase $dbw Master wiki database to read from
+	 * @param IDatabase $dbw Master wiki database to read from
 	 * @param Importer $importer
 	 * @param LoggerInterface $logger
-	 * @param User $user Administrative user for moves and edits related
-	 *  to the conversion process.
+	 * @param User $user User for moves and edits related to the conversion process
 	 * @param IConversionStrategy $strategy
 	 * @throws ImportException When $user does not have an Id
 	 */
 	public function __construct(
-		DatabaseBase $dbw,
+		IDatabase $dbw,
 		Importer $importer,
 		LoggerInterface $logger,
 		User $user,
@@ -184,7 +184,7 @@ class Converter {
 		}
 
 		$source = $this->strategy->createImportSource( $archiveTitle );
-		if ( $this->importer->import( $source, $title, $this->strategy->getSourceStore() ) ) {
+		if ( $this->importer->import( $source, $title, $this->user, $this->strategy->getSourceStore() ) ) {
 			$this->createArchiveCleanupRevision( $title, $archiveTitle );
 			$this->logger->info( "Completed import to $title from $archiveTitle" );
 		} else {
@@ -206,20 +206,21 @@ class Converter {
 	 * @return Title|null
 	 */
 	protected function getPageMovedFrom( Title $title ) {
+		$actorQuery = ActorMigration::newMigration()->getJoin( 'log_user' );
 		$row = $this->dbw->selectRow(
-			array( 'logging', 'page' ),
-			array( 'log_namespace', 'log_title', 'log_user' ),
-			array(
+			[ 'logging', 'page' ] + $actorQuery['tables'],
+			[ 'log_namespace', 'log_title', 'log_user' => $actorQuery['fields']['log_user'] ],
+			[
 				'page_namespace' => $title->getNamespace(),
 				'page_title' => $title->getDBkey(),
-				'log_page = page_id',
 				'log_type' => 'move',
-			),
+			],
 			__METHOD__,
-			array(
+			[
 				'LIMIT' => 1,
 				'ORDER BY' => 'log_timestamp DESC'
-			)
+			],
+			[ 'page' => [ 'JOIN', 'log_page = page_id' ] ] + $actorQuery['joins']
 		);
 
 		// The page has never been moved
@@ -274,7 +275,7 @@ class Converter {
 	 */
 	protected function createArchiveCleanupRevision( Title $title, Title $archiveTitle ) {
 		$page = WikiPage::factory( $archiveTitle );
-		 // doEditContent will do this anyway, but we need to now for the revision.
+		// doEditContent will do this anyway, but we need to now for the revision.
 		$page->loadPageData( 'fromdbmaster' );
 		$revision = $page->getRevision();
 		if ( $revision === null ) {

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Table Selection class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -112,7 +112,14 @@ ve.dm.TableSelection.prototype.expand = function () {
  * @inheritdoc
  */
 ve.dm.TableSelection.prototype.clone = function () {
-	return new this.constructor( this.getDocument(), this.tableRange, this.fromCol, this.fromRow, this.toCol, this.toRow );
+	return new this.constructor(
+		this.getDocument(),
+		this.tableRange,
+		this.fromCol,
+		this.fromRow,
+		this.toCol,
+		this.toRow
+	);
 };
 
 /**
@@ -303,6 +310,21 @@ ve.dm.TableSelection.prototype.translateByTransaction = function ( tx, excludeIn
 };
 
 /**
+ * @inheritdoc
+ */
+ve.dm.TableSelection.prototype.translateByTransactionWithAuthor = function ( tx, authorId ) {
+	var newRange = tx.translateRangeWithAuthor( this.tableRange, authorId );
+
+	if ( newRange.isCollapsed() ) {
+		return new ve.dm.NullSelection( this.getDocument() );
+	}
+	return new this.constructor(
+		this.getDocument(), newRange,
+		this.fromCol, this.fromRow, this.toCol, this.toRow
+	);
+};
+
+/**
  * Check if the selection spans a single cell
  *
  * @return {boolean} The selection spans a single cell
@@ -364,10 +386,11 @@ ve.dm.TableSelection.prototype.getTableNode = function () {
  * @param {number} fromRowOffset Starting row offset
  * @param {number} [toColOffset] End column offset
  * @param {number} [toRowOffset] End row offset
+ * @param {number} [wrap] Wrap to the next/previous row if column limits are exceeded
  * @return {ve.dm.TableSelection} Adjusted selection
  */
-ve.dm.TableSelection.prototype.newFromAdjustment = function ( fromColOffset, fromRowOffset, toColOffset, toRowOffset ) {
-	var fromCell, toCell,
+ve.dm.TableSelection.prototype.newFromAdjustment = function ( fromColOffset, fromRowOffset, toColOffset, toRowOffset, wrap ) {
+	var fromCell, toCell, wrapDir,
 		matrix = this.getTableNode().getMatrix();
 
 	if ( toColOffset === undefined ) {
@@ -387,9 +410,25 @@ ve.dm.TableSelection.prototype.newFromAdjustment = function ( fromColOffset, fro
 		while ( offset !== 0 ) {
 			if ( mode === 'col' ) {
 				col += dir;
-				if ( col >= matrix.getColCount( row ) || col < 0 ) {
-					// Out of bounds
-					break;
+				// Out of bounds
+				if ( col >= matrix.getColCount( row ) ) {
+					if ( wrap && row < matrix.getRowCount() - 1 ) {
+						// Subtract columns in current row
+						col -= matrix.getColCount( row );
+						row++;
+						wrapDir = 1;
+					} else {
+						break;
+					}
+				} else if ( col < 0 ) {
+					if ( wrap && row > 0 ) {
+						row--;
+						// Add columns in previous row
+						col += matrix.getColCount( row );
+						wrapDir = -1;
+					} else {
+						break;
+					}
 				}
 			} else {
 				row += dir;
@@ -425,6 +464,13 @@ ve.dm.TableSelection.prototype.newFromAdjustment = function ( fromColOffset, fro
 		toCell = adjust( 'row', toCell, toRowOffset );
 	}
 
+	// Collapse to end/start if wrapping forwards/backwards
+	if ( wrapDir > 0 ) {
+		fromCell = toCell;
+	} else if ( wrapDir < 0 ) {
+		toCell = fromCell;
+	}
+
 	return new this.constructor(
 		this.getDocument(),
 		this.tableRange,
@@ -440,13 +486,16 @@ ve.dm.TableSelection.prototype.newFromAdjustment = function ( fromColOffset, fro
  * @inheritdoc
  */
 ve.dm.TableSelection.prototype.equals = function ( other ) {
-	return other instanceof ve.dm.TableSelection &&
+	return this === other || (
+		!!other &&
+		other.constructor === this.constructor &&
 		this.getDocument() === other.getDocument() &&
 		this.tableRange.equals( other.tableRange ) &&
 		this.fromCol === other.fromCol &&
 		this.fromRow === other.fromRow &&
 		this.toCol === other.toCol &&
-		this.toRow === other.toRow;
+		this.toRow === other.toRow
+	);
 };
 
 /**

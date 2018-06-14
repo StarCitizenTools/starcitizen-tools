@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"An13sa"
+			"An13sa",
+			"Sator"
 		]
 	},
-	"googleanalytics-desc": "Google Analytics scriptak (ga.js) txertatu MediaWiki orrietan jarraipenerako"
+	"googleanalytics-desc": "Google Universal Analytics scriptak (ga.js) txertatu MediaWiki orrietan jarraipenerako"
 }

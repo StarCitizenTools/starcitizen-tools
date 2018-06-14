@@ -1,107 +1,118 @@
 <?php
 /**
- * Aliases for Special:Flow
+ * Aliases for Special:StructuredDiscussions and Special:EnableStructuredDiscussions
  * @file
- * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
+ * @license GPL-2.0-or-later
  */
-// @codingStandardsIgnoreFile
 
-$specialPageAliases = array();
+$specialPageAliases = [];
 
 /** English (English) */
-$specialPageAliases['en'] = array(
-	'Flow' => array( 'Flow' ),
-	'EnableFlow' => array( 'EnableFlow' ),
-);
+$specialPageAliases['en'] = [
+	'StructuredDiscussions' => [ 'StructuredDiscussions', 'Flow' ],
+	'EnableStructuredDiscussions' => [ 'EnableStructuredDiscussions', 'EnableFlow' ],
+];
 
 /** Arabic (العربية) */
-$specialPageAliases['ar'] = array(
-	'Flow' => array( 'سريان' ),
-	'EnableFlow' => array( 'فعل_سريان' ),
-);
+$specialPageAliases['ar'] = [
+	'StructuredDiscussions' => [ 'سريان' ],
+	'EnableStructuredDiscussions' => [ 'فعل_سريان' ],
+];
 
 /** Egyptian Arabic (مصرى) */
-$specialPageAliases['arz'] = array(
-	'Flow' => array( 'سريان' ),
-);
+$specialPageAliases['arz'] = [
+	'StructuredDiscussions' => [ 'سريان' ],
+];
+
+/** Bengali (বাংলা) */
+$specialPageAliases['bn'] = [
+	'StructuredDiscussions' => [ 'ফ্লো' ],
+	'EnableStructuredDiscussions' => [ 'ফ্লো_সক্রিয়করণ' ],
+];
 
 /** German (Deutsch) */
-$specialPageAliases['de'] = array(
-	'EnableFlow' => array( 'Flow_aktivieren' ),
-);
+$specialPageAliases['de'] = [
+	'EnableStructuredDiscussions' => [ 'Flow_aktivieren' ],
+];
 
 /** Zazaki (Zazaki) */
-$specialPageAliases['diq'] = array(
-	'Flow' => array( 'Rodayış' ),
-);
+$specialPageAliases['diq'] = [
+	'StructuredDiscussions' => [ 'Rodayış' ],
+];
 
 /** Persian (فارسی) */
-$specialPageAliases['fa'] = array(
-	'Flow' => array( 'جریان' ),
-	'EnableFlow' => array( 'فعال‌سازی_جریان' ),
-);
+$specialPageAliases['fa'] = [
+	'StructuredDiscussions' => [ 'جریان' ],
+	'EnableStructuredDiscussions' => [ 'فعال‌سازی_جریان' ],
+];
 
 /** Hebrew (עברית) */
-$specialPageAliases['he'] = array(
-	'Flow' => array( 'זרימה' ),
-	'EnableFlow' => array( 'הפעלת_זרימה' ),
-);
+$specialPageAliases['he'] = [
+	'StructuredDiscussions' => [ 'זרימה' ],
+	'EnableStructuredDiscussions' => [ 'הפעלת_זרימה' ],
+];
 
 /** Hungarian (magyar) */
-$specialPageAliases['hu'] = array(
-	'EnableFlow' => array( 'Flow bekapcsolása' ),
-);
+$specialPageAliases['hu'] = [
+	'EnableStructuredDiscussions' => [ 'Flow bekapcsolása' ],
+];
 
 /** Korean (한국어) */
-$specialPageAliases['ko'] = array(
-	'Flow' => array( '플로우' ),
-	'EnableFlow' => array( '플로우활성화' ),
-);
+$specialPageAliases['ko'] = [
+	'StructuredDiscussions' => [ '플로우' ],
+	'EnableStructuredDiscussions' => [ '플로우활성화' ],
+];
 
 /** Northern Luri (لۊری شومالی) */
-$specialPageAliases['lrc'] = array(
-	'Flow' => array( 'جأریان' ),
-);
+$specialPageAliases['lrc'] = [
+	'StructuredDiscussions' => [ 'جأریان' ],
+];
 
 /** Macedonian (македонски) */
-$specialPageAliases['mk'] = array(
-	'Flow' => array( 'Тек' ),
-	'EnableFlow' => array( 'ОвозможиТек' ),
-);
+$specialPageAliases['mk'] = [
+	'StructuredDiscussions' => [ 'Тек' ],
+	'EnableStructuredDiscussions' => [ 'ОвозможиТек' ],
+];
 
 /** Malayalam (മലയാളം) */
-$specialPageAliases['ml'] = array(
-	'Flow' => array( 'പ്രവാഹം' ),
-);
+$specialPageAliases['ml'] = [
+	'StructuredDiscussions' => [ 'പ്രവാഹം' ],
+];
 
 /** Portuguese (português) */
-$specialPageAliases['pt'] = array(
-	'Flow' => array( 'Fluência', 'Fluencia' ),
-);
+$specialPageAliases['pt'] = [
+	'StructuredDiscussions' => [ 'Fluência', 'Fluencia' ],
+];
 
 /** Brazilian Portuguese (português do Brasil) */
-$specialPageAliases['pt-br'] = array(
-	'EnableFlow' => array( 'Habilitar_Flow' ),
-);
+$specialPageAliases['pt-br'] = [
+	'EnableStructuredDiscussions' => [ 'Habilitar_Flow' ],
+];
 
 /** Swedish (svenska) */
-$specialPageAliases['sv'] = array(
-	'Flow' => array( 'Flöde' ),
-);
+$specialPageAliases['sv'] = [
+	'StructuredDiscussions' => [ 'Flöde' ],
+];
+
+/** Urdu (اردو) */
+$specialPageAliases['ur'] = [
+	'StructuredDiscussions' => [ 'مرتب_گفتگو', 'فلو' ],
+	'EnableStructuredDiscussions' => [ 'مرتب_گفتگو_فعال_کریں', 'فلو_فعال_کریں' ],
+];
 
 /** Vietnamese (Tiếng Việt) */
-$specialPageAliases['vi'] = array(
-	'Flow' => array( 'Flow' ),
-	'EnableFlow' => array( 'Kích_hoạt_Flow' ),
-);
+$specialPageAliases['vi'] = [
+	'StructuredDiscussions' => [ 'Flow' ],
+	'EnableStructuredDiscussions' => [ 'Kích_hoạt_Flow' ],
+];
 
 /** Simplified Chinese (中文（简体）‎) */
-$specialPageAliases['zh-hans'] = array(
-	'EnableFlow' => array( '启用Flow' ),
-);
+$specialPageAliases['zh-hans'] = [
+	'EnableStructuredDiscussions' => [ '启用Flow' ],
+];
 
 /** Traditional Chinese (中文（繁體）‎) */
-$specialPageAliases['zh-hant'] = array(
-	'Flow' => array( '流動量' ),
-	'EnableFlow' => array( '啟用流動量' ),
-);
+$specialPageAliases['zh-hant'] = [
+	'StructuredDiscussions' => [ '流動量' ],
+	'EnableStructuredDiscussions' => [ '啟用流動量' ],
+];

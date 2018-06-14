@@ -2,8 +2,6 @@
 
 namespace Flow\Import;
 
-use Iterator;
-
 interface IImportSource {
 	/**
 	 * @return Iterator<IImportTopic>
@@ -82,4 +80,3 @@ interface IImportHeader extends IRevisionableObject {
 
 interface IImportSummary extends IRevisionableObject {
 }
-

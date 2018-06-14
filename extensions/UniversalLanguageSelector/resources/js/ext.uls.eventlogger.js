@@ -237,13 +237,15 @@
 		/**
 		 * Log search strings which produce no search results.
 		 *
-		 * @param {jQuery.event} event The orignal event
-		 * @param {string} context The query string
+		 * @param {jQuery.event} event The original event
+		 * @param {Object} data Information about the failed search
 		 */
-		noSearchResults: function ( event, context ) {
+		noSearchResults: function ( event, data ) {
 			this.log( {
 				action: 'no-search-results',
-				context: context
+				context: data.query,
+				ulsPurpose: data.ulsPurpose,
+				title: mw.config.get( 'wgPageName' )
 			} );
 		}
 	};

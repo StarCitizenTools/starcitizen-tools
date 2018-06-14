@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWNoParametersResultWidget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,7 +16,7 @@
  */
 ve.ui.MWNoParametersResultWidget = function VeUiMWNoParametersResultWidget( config ) {
 	// Parent constructor
-	OO.ui.OptionWidget.call( this, config );
+	ve.ui.MWNoParametersResultWidget.super.call( this, config );
 
 	// Initialization
 	this.$element.addClass( 've-ui-mwNoParametersResultWidget' );

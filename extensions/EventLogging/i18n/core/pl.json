@@ -9,6 +9,8 @@
 	"eventlogging-invalid-json": "Nieprawidłowy JSON",
 	"eventlogging-revision-id": "Wersja $1",
 	"eventlogging-code-sample-logging-on-server-side": "Logowanie PHP",
-	"eventlogging-code-sample-module-setup": "Ustawienia PHP dla logowania JavaScript",
-	"eventlogging-code-sample-logging-on-client-side": "Logowanie JavaScript"
+	"eventlogging-code-sample-module-setup-json": "konfiguracja extension.json dla logów JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Logowanie JavaScript",
+	"eventlogging-error-move-source": "Strony schematów nie mogą mieć zmienianych nazw",
+	"eventlogging-error-move-destination": "Nie można zmieniać nazw stron na strony Schematów"
 }

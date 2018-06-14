@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minh Nguyen",
+			"Quenhitran"
+		]
+	},
+	"revisionslider": "Thanh trượt Phiên bản",
+	"revisionslider-preference-disable": "Không hiển thị Thanh trượt Phiên bản",
+	"revisionslider-desc": "Hiển thị thanh trượt cho phép lựa chọn và so sánh các phiên bản của một trang",
+	"revisionslider-toggle-label": "Duyệt lịch sử",
+	"revisionslider-page-size": "$1 {{PLURAL:$2}}byte",
+	"revisionslider-change-size": "$1 {{PLURAL:$3}}byte",
+	"revisionslider-label-date": "Ngày tháng",
+	"revisionslider-label-page-size": "Kích thước trang",
+	"revisionslider-label-change-size": "Kích thước thay đổi",
+	"revisionslider-label-comment": "Tóm lược",
+	"revisionslider-label-username": "{{GENDER:$1}}Tên người dùng",
+	"revisionslider-minoredit": "Đây là một sửa đổi nhỏ",
+	"revisionslider-loading-failed": "Không thể tải thanh trượt phiên bản.",
+	"revisionslider-toggle-title-expand": "Mở thanh trượt phiên bản",
+	"revisionslider-toggle-title-collapse": "Đóng thanh trượt phiên bản",
+	"revisionslider-turn-on-auto-expand-title": "Luôn mở rộng thanh trượt phiên bản",
+	"revisionslider-turn-off-auto-expand-title": "Không tự động mở rộng thanh trượt phiên bản",
+	"revisionslider-arrow-tooltip-newer": "Xem các phiên bản mới hơn",
+	"revisionslider-arrow-tooltip-older": "Xem các phiên bản cũ hơn",
+	"revisionslider-show-help-tooltip": "Hiện trợ giúp",
+	"revisionslider-help-dialog-slide1": "Thanh trượt phiên bản giúp bạn điều hướng và so sánh các phiên bản của lịch sử trang. Tiện ích này được thiết kế dựa trên [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider một đề nghị] từ cuộc khảo sát mong muốn cộng đồng của cộng đồng tiếng Đức. Chúng tôi rất mong nhận được ý kiến phản hồi của bạn [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider tại đây].",
+	"revisionslider-help-dialog-slide2": "Mỗi cột tượng trưng cho một phiên bản trang. Các cột hướng lên trên thể hiện những thay đổi làm tăng kích cỡ của trang, trong khi các cột hướng xuống dưới thể hiện những thay đổi làm giảm kích cỡ của trang. Trong hình này, phiên bản 1 là nội dung được bổ sung thêm, còn phiên bản 2 là nội dung bị xóa.",
+	"revisionslider-help-dialog-slide3a": "<p>Để so sánh các phiên bản cụ thể, chọn các phiên bản cần xem bằng các nút chọn màu xanh và màu vàng.</p><p>Dùng nút chọn màu xanh để chọn phiên bản mới hơn, còn nút chọn màu vàng được dùng để chọn phiên bản cũ hơn cần so sánh.</p><p>Di chuyển các nút chọn bằng cách kéo thả chuột hoặc nhấn chuột vào cột đó.</p>",
+	"revisionslider-help-dialog-slide4": "Sử dụng các mũi tên trái và phải để chuyển qua lại các phiên bản cũ hơn và mới hơn.",
+	"revisionslider-tutorial": "Hướng dẫn sử dụng thanh trượt phiên bản",
+	"revisionslider-previous-dialog": "Trước",
+	"revisionslider-next-dialog": "Tiếp",
+	"revisionslider-close-dialog": "Đóng"
+}

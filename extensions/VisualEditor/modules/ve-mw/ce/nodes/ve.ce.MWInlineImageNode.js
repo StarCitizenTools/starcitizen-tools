@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWInlineImageNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -17,30 +17,31 @@
  * @param {Object} [config] Configuration options
  */
 ve.ce.MWInlineImageNode = function VeCeMWInlineImageNode( model, config ) {
-	var isError;
-	// Parent constructor
-	ve.ce.LeafNode.call( this, model, config );
+	var $image;
 
-	isError = this.model.getAttribute( 'isError' );
-
-	if ( isError ) {
+	if ( model.getAttribute( 'isError' ) ) {
 		this.$element = $( '<a>' )
 			.addClass( 'new' )
-			.text( this.model.getFilename() );
-		this.$image = $( '<img>' );
+			.text( model.getFilename() );
+		$image = $( [] );
 	} else {
-		if ( this.model.getAttribute( 'isLinked' ) ) {
+		if ( model.getAttribute( 'isLinked' ) ) {
 			this.$element = $( '<a>' ).addClass( 'image' );
-			this.$image = $( '<img>' ).appendTo( this.$element );
+			$image = $( '<img>' ).appendTo( this.$element );
 		} else {
-			this.$element = this.$image = $( '<img>' ).appendTo( this.$element );
+			this.$element = $image = $( '<img>' );
 		}
 	}
 
-	// Mixin constructors
-	ve.ce.MWImageNode.call( this, this.$element, this.$image );
+	// Parent constructor
+	// this.$element has already been created and styled, so pass through as config.$element
+	// The constructor will add more classes to this.$element, such as ve-ce-leafNode
+	ve.ce.MWInlineImageNode.super.call( this, model, ve.extendObject( {}, config, { $element: this.$element } ) );
 
-	this.$image
+	// Mixin constructors
+	ve.ce.MWImageNode.call( this, this.$element, $image );
+
+	$image
 		.attr( 'src', this.getResolvedAttribute( 'src' ) )
 		.attr( 'width', this.model.getAttribute( 'width' ) )
 		.attr( 'height', this.model.getAttribute( 'height' ) );
@@ -61,7 +62,7 @@ ve.ce.MWInlineImageNode = function VeCeMWInlineImageNode( model, config ) {
 
 OO.inheritClass( ve.ce.MWInlineImageNode, ve.ce.LeafNode );
 
-// Need to mixin base class as well
+// Need to mixin base class as well (T92540)
 OO.mixinClass( ve.ce.MWInlineImageNode, ve.ce.GeneratedContentNode );
 
 OO.mixinClass( ve.ce.MWInlineImageNode, ve.ce.MWImageNode );
@@ -95,6 +96,9 @@ ve.ce.MWInlineImageNode.prototype.updateClasses = function () {
  * @inheritdoc
  */
 ve.ce.MWInlineImageNode.prototype.onAttributeChange = function ( key, from, to ) {
+	// Mixin method
+	ve.ce.MWImageNode.prototype.onAttributeChange.apply( this, arguments );
+
 	if ( key === 'height' || key === 'width' ) {
 		to = parseInt( to, 10 );
 	}

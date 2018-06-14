@@ -2,7 +2,7 @@
 
 namespace Flow;
 
-use Flow\Exception\InvalidInputException;
+use Flow\Exception\InvalidParameterException;
 use Flow\Exception\PermissionException;
 use Flow\Repository\UserNameBatch;
 use Flow\Exception\FlowException;
@@ -82,8 +82,8 @@ class Templating {
 	 *
 	 * Moderation-aware.
 	 *
-	 * @param  AbstractRevision $revision        Revision to display
-	 * @return string                            HTML
+	 * @param AbstractRevision $revision Revision to display
+	 * @return string HTML
 	 * @throws PermissionException
 	 */
 	public function getUserLinks( AbstractRevision $revision ) {
@@ -100,8 +100,9 @@ class Templating {
 		if ( isset( $cache[$userid][$userip] ) ) {
 			return $cache[$userid][$userip];
 		}
-		$username = $this->usernames->get( wfWikiId(), $userid, $userip );
-		return $cache[$userid][$userip] = Linker::userLink( $userid, $username ) . Linker::userToolLinks( $userid, $username );
+		$username = $this->usernames->get( wfWikiID(), $userid, $userip );
+		$cache[$userid][$userip] = Linker::userLink( $userid, $username ) . Linker::userToolLinks( $userid, $username );
+		return $cache[$userid][$userip];
 	}
 
 	/**
@@ -120,11 +121,11 @@ class Templating {
 	 * @param AbstractRevision $revision Revision to display content for
 	 * @param string[optional] $format Format to output content in (fixed-html|html|wikitext|topic-title-html|topic-title-wikitext|topic-title-plaintext)
 	 * @return string HTML if requested, otherwise plain text
-	 * @throws InvalidInputException
+	 * @throws InvalidParameterException
 	 */
 	public function getContent( AbstractRevision $revision, $format = 'fixed-html' ) {
-		if ( !in_array( $format, array( 'fixed-html', 'html', 'wikitext', 'topic-title-html', 'topic-title-wikitext', 'topic-title-plaintext' ) ) ) {
-			throw new InvalidInputException( 'Invalid format: ' . $format );
+		if ( !in_array( $format, [ 'fixed-html', 'html', 'wikitext', 'topic-title-html', 'topic-title-wikitext', 'topic-title-plaintext' ] ) ) {
+			throw new InvalidParameterException( 'Invalid format: ' . $format );
 		}
 
 		$mainPermissionAction = ( $revision instanceof PostRevision && $revision->isTopicTitle() ) ?
@@ -145,21 +146,11 @@ class Templating {
 			return '';
 		}
 
-		try {
-			if ( $format === 'fixed-html' ) {
-				// Parsoid doesn't render redlinks & doesn't strip bad images
-				$content = $this->contentFixer->getContent( $revision );
-			} else {
-				$content = $revision->getContent( $format );
-			}
-		} catch ( \Exception $e ) {
-			wfDebugLog( 'Flow', __METHOD__ . ': Failed to get content for rev_id = ' . $revision->getRevisionId()->getAlphadecimal() );
-			\MWExceptionHandler::logException( $e );
-
-			$content = wfMessage( 'flow-stub-post-content' )->parse();
-			if ( !in_array( $format, array( 'html', 'fixed-html' ) ) ) {
-				$content = strip_tags( $content );
-			}
+		if ( $format === 'fixed-html' ) {
+			// Parsoid doesn't render redlinks & doesn't strip bad images
+			$content = $this->contentFixer->getContent( $revision );
+		} else {
+			$content = $revision->getContent( $format );
 		}
 
 		return $content;

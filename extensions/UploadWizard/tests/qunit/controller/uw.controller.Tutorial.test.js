@@ -15,10 +15,10 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, uw, $ ) {
-	QUnit.module( 'mw.uw.controller.Tutorial', QUnit.newMwEnvironment() );
+( function ( $, mw, uw ) {
+	QUnit.module( 'uw.controller.Tutorial', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Constructor sanity test', 4, function ( assert ) {
+	QUnit.test( 'Constructor sanity test', function ( assert ) {
 		var step = new uw.controller.Tutorial( new mw.Api() );
 		assert.ok( step );
 		assert.ok( step instanceof uw.controller.Step );
@@ -26,7 +26,7 @@
 		assert.ok( step.api );
 	} );
 
-	QUnit.test( 'setSkipPreference', 5, function ( assert ) {
+	QUnit.test( 'setSkipPreference', function ( assert ) {
 		var mnStub,
 			api = new mw.Api(),
 			step = new uw.controller.Tutorial( api ),
@@ -36,7 +36,7 @@
 		this.sandbox.stub( mw, 'confirmCloseWindow' ).returns( acwStub );
 		this.sandbox.stub( api, 'postWithToken' ).returns( pwtd.promise() );
 
-		step.setSkipPreference();
+		step.setSkipPreference( true );
 
 		assert.ok( mw.confirmCloseWindow.called );
 		assert.ok( api.postWithToken.calledWithExactly( 'options', {
@@ -55,10 +55,10 @@
 
 		this.sandbox.stub( api, 'postWithToken' ).returns( pwtd.promise() );
 
-		step.setSkipPreference();
+		step.setSkipPreference( true );
 		assert.ok( !acwStub.release.called );
 
 		pwtd.reject( 'http', { textStatus: 'Foo bar' } );
 		assert.ok( mnStub.calledWith( 'Foo bar' ) );
 	} );
-}( mediaWiki, mediaWiki.uploadWizard, jQuery ) );
+}( jQuery, mediaWiki, mediaWiki.uploadWizard ) );

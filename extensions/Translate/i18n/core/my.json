@@ -7,7 +7,7 @@
 	},
 	"translate": "ဘာသာပြန်ပါ",
 	"translate-page-group": "အုပ်စု",
-	"translate-page-language": "ဘာသာ",
+	"translate-page-language": "ဘာသာစကား",
 	"translate-page-limit": "ကန့်သတ်ချက်",
 	"translate-page-limit-option": "တစ်မျက်နှာလျှင် {{PLURAL:$1|စာလုံး|စာလုံးပေါင်း}} $1",
 	"translate-submit": "ရှာဖွေပါ",
@@ -16,8 +16,14 @@
 	"translate-page-showing-none": "ဖေါ်ပြရန် စကားလုံး မရှိပါ",
 	"translate-next": "နောက်စာမျက်နှာ",
 	"translate-prev": "ပြီးခဲ့သော စာမျက်နှာ",
-	"translate-page-edit": "ပြင်ရန်",
+	"translate-page-edit": "ပြင်ဆင်ရန်",
+	"translate-magic-module": "မော်ဂျူး:",
+	"translate-magic-namespace": "အမည်ညွှန်း အမည်များ",
+	"translate-js-summary": "အကျဉ်းချုပ်:",
 	"translate-gs-score": "ရမှတ်",
 	"translate-documentation-language": "စာလွှာ စာရွက်စာတမ်း",
-	"tux-save-unknown-error": "အကြောင်းရင်းမသိရှိရသော အမှားတစ်ခု ဖြစ်ပေါ်နေသည်။"
+	"translate-msggroupselector-search-all": "အားလုံး",
+	"tux-save-unknown-error": "အကြောင်းရင်းမသိရှိရသော အမှားတစ်ခု ဖြစ်ပေါ်နေသည်။",
+	"tux-editor-page-mode": "စာမျက်နှာ",
+	"translate-search-more-languages-info": "နောက်ထပ် {{PLURAL:$1|ဘာသာစကား|ဘာသာစကားများ}} $1 ခု"
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Linear Selection class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -99,8 +99,15 @@ ve.dm.LinearSelection.prototype.isCollapsed = function () {
 /**
  * @inheritdoc
  */
-ve.dm.Selection.prototype.translateByTransaction = function ( tx, excludeInsertion ) {
+ve.dm.LinearSelection.prototype.translateByTransaction = function ( tx, excludeInsertion ) {
 	return new this.constructor( this.getDocument(), tx.translateRange( this.getRange(), excludeInsertion ) );
+};
+
+/**
+ * @inheritdoc
+ */
+ve.dm.LinearSelection.prototype.translateByTransactionWithAuthor = function ( tx, authorId ) {
+	return new this.constructor( this.getDocument(), tx.translateRangeWithAuthor( this.getRange(), authorId ) );
 };
 
 /**
@@ -130,9 +137,12 @@ ve.dm.LinearSelection.prototype.getRange = function () {
  * @inheritdoc
  */
 ve.dm.LinearSelection.prototype.equals = function ( other ) {
-	return other instanceof ve.dm.LinearSelection &&
+	return this === other || (
+		!!other &&
+		other.constructor === this.constructor &&
 		this.getDocument() === other.getDocument() &&
-		this.getRange().equals( other.getRange() );
+		this.getRange().equals( other.getRange() )
+	);
 };
 
 /* Registration */

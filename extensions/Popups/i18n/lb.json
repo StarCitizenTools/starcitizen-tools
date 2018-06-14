@@ -4,20 +4,22 @@
 			"Robby"
 		]
 	},
-	"popups-message": "Hovercards",
-	"popups-last-edited": "Geännert $1",
-	"popups-redirects": "Viruleedung op <h3>$1</h3",
+	"popups-message": "Biller wéi Säiten ausgesinn",
+	"popups-desc": "Weist Biller wéi et ausgesäit wann de Benotzer mat der Maus iwwer e Säitelink fiert.",
 	"popups-settings-title": "Säit kucken ouni ofzespäicheren",
-	"popups-settings-description": "Dësen Tool erlaabt et Linken op Wikisäiten an op Referenzen ze kucken ouni se ze späicheren.",
-	"popups-settings-option-simple": "Einfach",
+	"popups-settings-option-simple": "Aschalten",
+	"popups-settings-option-simple-description": "Et séieren Iwwerbléck iwwer en Thema kréien iwwer dem Liese vun enger Säit.",
 	"popups-settings-option-advanced": "Erweidert",
-	"popups-settings-option-off-description": "Dir kënnt dës Astellung änneren wann Dir de Link ënnen op der Säit benotzt",
+	"popups-settings-option-off": "Ausschalten",
 	"popups-settings-save": "Späicheren",
-	"popups-settings-help-ok": "OK",
+	"popups-settings-help-ok": "Fäerdeg",
 	"popups-settings-cancel": "Ofbriechen",
 	"popups-settings-enable": "Kucken ouni ze späicheren aktivéieren",
-	"popups-send-feedback": "Feedback schécken (externe Link)",
-	"popups-mobile-continue-to-page": "Virun op d'Säit",
-	"popups-mobile-dismiss": "Verwerfen",
-	"popups-mobile-message": "Hovercards (mobil)"
+	"popups-preview-no-preview": "Et gouf e Problem fir dëst ze weisen",
+	"popups-preview-footer-read": "Op dës Säit goen",
+	"popups-preview-disambiguation": "Dësen Titel bezitt sech op méi wéi eng Säit",
+	"popups-preview-disambiguation-link": "Ähnlech Säite weisen",
+	"prefs-reading": "Lies-Astellungen",
+	"popups-prefs-optin-enabled-label": "Aschalten",
+	"popups-prefs-optin-disabled-label": "Ausschalten"
 }

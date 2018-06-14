@@ -8,6 +8,7 @@
 	 * @constructor
 	 * @param {string} topicId The id of the topic that has the summary we want to edit
 	 * @param {Object} [config] Configuration object
+	 * @cfg {Object} [editor] Config options to pass to mw.flow.ui.EditorWidget
 	 */
 	mw.flow.ui.EditTopicSummaryWidget = function mwFlowUiEditTopicSummaryWidget( topicId, config ) {
 		config = config || {};
@@ -17,12 +18,11 @@
 		// Parent constructor
 		mw.flow.ui.EditTopicSummaryWidget.parent.call( this, config );
 
-		this.editor = new mw.flow.ui.EditorWidget( {
+		this.editor = new mw.flow.ui.EditorWidget( $.extend( {
 			saveMsgKey: 'flow-topic-action-update-topic-summary',
 			classes: [ 'flow-ui-editTopicSummaryWidget-editor' ],
-			placeholder: mw.msg( 'flow-edit-summary-placeholder' ),
-			cancelMsgKey: config.cancelMsgKey
-		} );
+			placeholder: mw.msg( 'flow-edit-summary-placeholder' )
+		}, config.editor ) );
 		this.editor.toggle( true );
 
 		this.anonWarning = new mw.flow.ui.AnonWarningWidget();
@@ -46,12 +46,16 @@
 			cancel: 'onEditorCancel'
 		} );
 
+		this.$messages = $( '<div>' ).addClass( 'flow-ui-editorContainerWidget-messages' );
+
 		this.$element
 			.addClass( 'flow-ui-editTopicSummaryWidget' )
 			.append(
-				this.anonWarning.$element,
-				this.error.$element,
-				this.captchaWidget.$element,
+				this.$messages.append(
+					this.anonWarning.$element,
+					this.error.$element,
+					this.captchaWidget.$element
+				),
 				this.editor.$element
 			);
 	};
@@ -80,24 +84,27 @@
 
 		// Load the editor
 		this.editor.pushPending();
-		this.editor.activate();
+		this.editor.load();
 
 		// Get the post from the API
 		widget = this;
-		contentFormat = this.editor.getContentFormat();
+		contentFormat = this.editor.getPreferredFormat();
 
 		this.api.getTopicSummary( this.topicId, contentFormat ).then(
 			function ( topicSummary ) {
-				var content = OO.getProp( topicSummary, 'content', 'content' ),
+				var contentToLoad,
+					content = OO.getProp( topicSummary, 'content', 'content' ),
 					format = OO.getProp( topicSummary, 'content', 'format' );
 
 				if ( content !== undefined && format !== undefined ) {
-					// Give it to the editor
-					widget.editor.setContent( content, format );
-
 					// Update revisionId in the API
 					widget.api.setCurrentRevision( topicSummary.revisionId );
+
+					contentToLoad = { content: content, format: format };
 				}
+
+				// Load the editor
+				return widget.editor.activate( contentToLoad );
 
 			},
 			// Error fetching description
@@ -123,6 +130,9 @@
 
 	/**
 	 * Respond to editor save
+	 *
+	 * @param {string} content Content
+	 * @param {string} format Format
 	 */
 	mw.flow.ui.EditTopicSummaryWidget.prototype.onEditorSaveContent = function ( content, format ) {
 		var widget = this,
@@ -140,7 +150,7 @@
 
 				widget.emit( 'saveContent', workflow, content, format );
 			} )
-			.then( null, function ( errorCode, errorObj ) {
+			.catch( function ( errorCode, errorObj ) {
 				widget.captcha.update( errorCode, errorObj );
 				if ( !widget.captcha.isRequired() ) {
 					widget.error.setLabel( new OO.ui.HtmlSnippet( errorObj.error && errorObj.error.info || errorObj.exception ) );

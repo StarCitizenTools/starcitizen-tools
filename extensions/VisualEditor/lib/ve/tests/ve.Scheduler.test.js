@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Scheduler tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.Scheduler' );
@@ -10,7 +10,7 @@ QUnit.module( 've.Scheduler' );
 
 ve.TestScheduler = function VeTestScheduler() {
 	// Parent constructor
-	ve.Scheduler.call( this );
+	ve.TestScheduler.super.apply( this, arguments );
 
 	this.nowCounter = 0;
 };
@@ -112,6 +112,7 @@ QUnit.test( 'Test that never succeeds', function ( assert ) {
 		}
 	).done( function () {
 		assert.ok( false, 'promise was wrongly resolved as successful' );
+		done();
 	} ).fail( function () {
 		assert.ok( true, 'promise was rejected' );
 		done();

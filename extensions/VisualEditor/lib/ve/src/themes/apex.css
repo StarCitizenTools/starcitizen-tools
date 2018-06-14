@@ -1,0 +1,43 @@
+/*!
+ * VisualEditor Apex theme customizations.
+ *
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ */
+
+/* ve.ui.TargetWidget */
+
+.ve-ui-targetWidget {
+	border: 1px solid #ccc;
+	border-radius: 0.25em;
+}
+
+.ve-ui-targetWidget > .ve-ui-surface {
+	border-bottom: 1px solid #ccc;
+}
+
+.ve-ui-targetWidget > :last-child {
+	border-bottom: 0;
+}
+
+/* Format tools */
+
+.oo-ui-menuToolGroup .oo-ui-tool-name-heading1 .oo-ui-tool-title,
+.oo-ui-menuToolGroup .oo-ui-tool-name-heading2 .oo-ui-tool-title,
+.oo-ui-menuToolGroup .oo-ui-tool-name-heading3 .oo-ui-tool-title,
+.oo-ui-menuToolGroup .oo-ui-tool-name-heading4 .oo-ui-tool-title,
+.oo-ui-menuToolGroup .oo-ui-tool-name-heading5 .oo-ui-tool-title,
+.oo-ui-menuToolGroup .oo-ui-tool-name-heading6 .oo-ui-tool-title {
+	/* Use px so padding is not changed by font size. This is normally 0.5em. */
+	padding-left: 6.4px;
+}
+
+/* ve.ui.ToolbarDialog */
+
+.ve-ui-toolbarDialog .oo-ui-dialog-content > .oo-ui-window-body {
+	box-shadow: none;
+}
+
+.ve-ui-toolbarDialog-padded {
+	padding-top: 0;
+	border-top: 0;
+}

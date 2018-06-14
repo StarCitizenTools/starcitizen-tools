@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -36,34 +36,34 @@ abstract class ApiStatsQuery extends ApiQueryBase {
 			}
 
 			$data = $this->makeItem( $item, $stats );
-			$result->addValue( array( 'query', $this->getModuleName() ), null, $data );
+			$result->addValue( [ 'query', $this->getModuleName() ], null, $data );
 		}
 
-		$result->addIndexedTagName( array( 'query', $this->getModuleName() ), 'stats' );
+		$result->addIndexedTagName( [ 'query', $this->getModuleName() ], 'stats' );
 	}
 
 	protected function makeItem( $item, $stats ) {
-		return array(
+		return [
 			'total' => $stats[MessageGroupStats::TOTAL],
 			'translated' => $stats[MessageGroupStats::TRANSLATED],
 			'fuzzy' => $stats[MessageGroupStats::FUZZY],
 			'proofread' => $stats[MessageGroupStats::PROOFREAD],
-		);
+		];
 	}
 
 	public function getAllowedParams() {
-		return array(
-			'offset' => array(
-				ApiBase::PARAM_DFLT => 0,
+		return [
+			'offset' => [
+				ApiBase::PARAM_DFLT => '0',
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			),
-			'timelimit' => array(
+			],
+			'timelimit' => [
 				ApiBase::PARAM_DFLT => 8,
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_MAX => 10,
 				ApiBase::PARAM_MIN => 0,
-			),
-		);
+			],
+		];
 	}
 }

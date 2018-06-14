@@ -1,10 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Vitorvicentevalente"
+			"Vitorvicentevalente",
+			"Hamilton Abreu",
+			"Athena in Wonderland"
 		]
 	},
-	"cookiewarning-info": "Os cookies ajudam-nos a fornecer os nossos serviços. Ao navegar no sítio, está a consentir a sua utilização.",
+	"cookiewarning-info": "Os cookies ajudam-nos a fornecer os nossos serviços. Ao navegar no sítio, está a consentir o uso de cookies.",
 	"cookiewarning-desc": "Fornece um aviso no topo da página sobre cookies.",
 	"cookiewarning-moreinfo-label": "Mais informação",
 	"cookiewarning-ok-label": "OK"

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWImageCaptionNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -17,7 +17,7 @@
  */
 ve.dm.MWImageCaptionNode = function VeDmMWImageCaptionNode() {
 	// Parent constructor
-	ve.dm.BranchNode.apply( this, arguments );
+	ve.dm.MWImageCaptionNode.super.apply( this, arguments );
 };
 
 OO.inheritClass( ve.dm.MWImageCaptionNode, ve.dm.BranchNode );

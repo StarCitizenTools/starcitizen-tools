@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization Platform class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -29,6 +29,7 @@ ve.init.mw.Platform = function VeInitMwPlatform() {
 	this.parsedMessages = {};
 	this.linkCache = new ve.init.mw.LinkCache();
 	this.imageInfoCache = new ve.init.mw.ImageInfoCache();
+	this.galleryImageInfoCache = new ve.init.mw.GalleryImageInfoCache();
 };
 
 /* Inheritance */
@@ -45,6 +46,17 @@ ve.init.mw.Platform.prototype.getExternalLinkUrlProtocolsRegExp = function () {
 /** @inheritdoc */
 ve.init.mw.Platform.prototype.getUnanchoredExternalLinkUrlProtocolsRegExp = function () {
 	return this.unanchoredExternalLinkUrlProtocolsRegExp;
+};
+
+/**
+ * Regular expression matching RESTBase IDs
+ *
+ * This isn't perfect, see T147607
+ *
+ * @inheritdoc
+ */
+ve.init.mw.Platform.prototype.getMetadataIdRegExp = function () {
+	return /^mw[a-zA-Z0-9\-_]{2,6}$/;
 };
 
 /** @inheritdoc */
@@ -121,7 +133,30 @@ ve.init.mw.Platform.prototype.setUserConfig = function ( keyOrValueMap, value ) 
 	}
 };
 
-/** @inheritdoc */
+/**
+ * @inheritdoc
+ */
+ve.init.mw.Platform.prototype.getSession = function ( key ) {
+	return mw.storage.session.get( key );
+};
+
+/**
+ * @inheritdoc
+ */
+ve.init.mw.Platform.prototype.setSession = function ( key, value ) {
+	return mw.storage.session.set( key, value );
+};
+
+/**
+ * @inheritdoc
+ */
+ve.init.mw.Platform.prototype.removeSession = function ( key ) {
+	return mw.storage.session.remove( key );
+};
+
+/**
+ * @inheritdoc
+ */
 ve.init.mw.Platform.prototype.addParsedMessages = function ( messages ) {
 	var key;
 	for ( key in messages ) {
@@ -185,16 +220,20 @@ ve.init.mw.Platform.prototype.fetchSpecialCharList = function () {
 	return mw.loader.using( 'mediawiki.language.specialCharacters' ).then( function () {
 		var characters = {},
 			otherGroupName = mw.msg( 'visualeditor-special-characters-group-other' ),
-			otherMsg = mw.msg( 'visualeditor-quick-access-characters.json' ),
-			groupObject;
+			otherMsg = mw.message( 'visualeditor-quick-access-characters.json' ).plain(),
+			// TODO: This information should be available upstream in mw.language.specialCharacters
+			rtlGroups = [ 'arabic', 'arabicextended', 'hebrew' ],
+			other, groupObject;
 
-		if ( otherMsg !== '<visualeditor-quick-access-characters.json>' ) {
-			try {
-				characters[ otherGroupName ] = JSON.parse( otherMsg );
-			} catch ( err ) {
-				ve.log( 've.init.mw.Platform: Could not parse the Special Character list.' );
-				ve.log( err );
+		try {
+			other = JSON.parse( otherMsg );
+			if ( other ) {
+				characters[ otherGroupName ] = other;
+				other.attributes = { dir: mw.config.get( 'wgVisualEditorConfig' ).pageLanguageDir };
 			}
+		} catch ( err ) {
+			ve.log( 've.init.mw.Platform: Could not parse the Special Character list.' );
+			ve.log( err );
 		}
 
 		$.each( mw.language.specialCharacters, function ( groupName, groupCharacters ) {
@@ -210,6 +249,7 @@ ve.init.mw.Platform.prototype.fetchSpecialCharList = function () {
 				}
 			} );
 			characters[ mw.msg( 'special-characters-group-' + groupName ) ] = groupObject;
+			groupObject.attributes = { dir: rtlGroups.indexOf( groupName ) !== -1 ? 'rtl' : 'ltr' };
 		} );
 
 		return characters;

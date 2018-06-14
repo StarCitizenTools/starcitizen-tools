@@ -20,6 +20,6 @@ class JsonSchemaContentHandler extends JsonContentHandler {
 	}
 
 	protected function getContentClass() {
-		return 'JsonSchemaContent';
+		return JsonSchemaContent::class;
 	}
 }

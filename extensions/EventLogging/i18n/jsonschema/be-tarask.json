@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Wizardist",
-			"Macofe"
+			"Macofe",
+			"Red Winged Duck"
 		]
 	},
 	"jsonschema-badidref": "Благі idref: «$1»",
@@ -11,5 +12,10 @@
 	"jsonschema-invalidempty": "Пустая структура зьвестак паводле гэтай схемы недапушчальная",
 	"jsonschema-invalidnode": "Няслушны вузел: чакалася «$1», атрымана «$2». Шлях: «$3»",
 	"jsonschema-invalid-missingfield": "Ня знойдзенае абавязковае поле «$1»",
-	"jsonschema-invalid-notinenum": "Значэньне <code>$1</code> не належыць да enum уласьцівасьці $2"
+	"jsonschema-invalid-notinenum": "Значэньне <code>$1</code> не належыць да enum уласьцівасьці $2",
+	"apihelp-jsonschema-description": "Атрымаць старонку JSON-схемы.",
+	"apihelp-jsonschema-summary": "Атрымаць старонку JSON-схемы.",
+	"apihelp-jsonschema-param-revid": "ID вэрсіі схемы.",
+	"apihelp-jsonschema-param-title": "Назва схемы.",
+	"apihelp-jsonschema-example-1": "Атрымаць схему для вэрсіі 1234"
 }

@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lorenzoitza"
+		]
+	},
+	"revisionslider-label-date": "Ba'ax k'iim",
+	"revisionslider-label-page-size": "U nojchil u wáal",
+	"revisionslider-label-change-size": "K'ex u noojchi",
+	"revisionslider-label-comment": "Tsikbalte",
+	"revisionslider-label-username": "{{GENDER:$1|Patk'aaba'}}"
+}

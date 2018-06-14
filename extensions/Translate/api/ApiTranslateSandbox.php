@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -15,7 +15,11 @@ class ApiTranslateSandbox extends ApiBase {
 	public function execute() {
 		global $wgTranslateUseSandbox;
 		if ( !$wgTranslateUseSandbox ) {
-			$this->dieUsage( 'Sandbox feature is not in use', 'sandboxdisabled' );
+			if ( method_exists( $this, 'dieWithError' ) ) {
+				$this->dieWithError( 'apierror-translate-sandboxdisabled', 'sandboxdisabled' );
+			} else {
+				$this->dieUsage( 'Sandbox feature is not in use', 'sandboxdisabled' );
+			}
 		}
 
 		$params = $this->extractRequestParams();
@@ -41,35 +45,51 @@ class ApiTranslateSandbox extends ApiBase {
 		// Do validations
 		foreach ( explode( '|', 'username|password|email' ) as $field ) {
 			if ( !isset( $params[$field] ) ) {
-				$this->dieUsage( "Missing parameter $field", 'missingparam' );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError( [ 'apierror-missingparam', $field ], 'missingparam' );
+				} else {
+					$this->dieUsage( "Missing parameter $field", 'missingparam' );
+				}
 			}
 		}
 
 		$username = $params['username'];
 		if ( User::getCanonicalName( $username, 'creatable' ) === false ) {
-			$this->dieUsage( 'User name is not acceptable', 'invalidusername' );
+			if ( method_exists( $this, 'dieWithError' ) ) {
+				$this->dieWithError( 'noname', 'invalidusername' );
+			} else {
+				$this->dieUsage( 'User name is not acceptable', 'invalidusername' );
+			}
 		}
 
 		$user = User::newFromName( $username );
 		if ( $user->getId() !== 0 ) {
-			$this->dieUsage( 'User name is in use', 'nonfreeusername' );
+			if ( method_exists( $this, 'dieWithError' ) ) {
+				$this->dieWithError( 'userexists', 'nonfreeusername' );
+			} else {
+				$this->dieUsage( 'User name is in use', 'nonfreeusername' );
+			}
 		}
 
 		$password = $params['password'];
 		if ( !$user->isValidPassword( $password ) ) {
-			$this->dieUsage( 'Password is not acceptable', 'invalidpassword' );
+			$this->dieWithError( 'apierror-translate-sandbox-invalidpassword', 'invalidpassword' );
 		}
 
 		$email = $params['email'];
 		if ( !Sanitizer::validateEmail( $email ) ) {
-			$this->dieUsage( 'Email is not acceptable', 'invalidemail' );
+			if ( method_exists( $this, 'dieWithError' ) ) {
+				$this->dieWithError( 'invalidemailaddress', 'invalidemail' );
+			} else {
+				$this->dieUsage( 'Email is not acceptable', 'invalidemail' );
+			}
 		}
 
 		$user = TranslateSandbox::addUser( $username, $email, $password );
-		$output = array( 'user' => array(
+		$output = [ 'user' => [
 			'name' => $user->getName(),
 			'id' => $user->getId(),
-		) );
+		] ];
 
 		$user->setOption( 'language', $this->getContext()->getLanguage()->getCode() );
 		$user->saveSettings();
@@ -78,8 +98,12 @@ class ApiTranslateSandbox extends ApiBase {
 	}
 
 	protected function doDelete() {
-		if ( !$this->getUser()->isAllowed( 'translate-sandboxmanage' ) ) {
-			$this->dieUsage( 'Access denied', 'missingperms' );
+		if ( method_exists( $this, 'checkUserRightsAny' ) ) {
+			$this->checkUserRightsAny( 'translate-sandboxmanage' );
+		} else {
+			if ( !$this->getUser()->isAllowed( 'translate-sandboxmanage' ) ) {
+				$this->dieUsage( 'Access denied', 'missingperms' );
+			}
 		}
 
 		$params = $this->extractRequestParams();
@@ -93,7 +117,14 @@ class ApiTranslateSandbox extends ApiBase {
 			try {
 				TranslateSandbox::deleteUser( $user );
 			} catch ( MWException $e ) {
-				$this->dieUsage( $e->getMessage(), 'invalidparam' );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError(
+						[ 'apierror-translate-sandbox-invalidparam', wfEscapeWikiText( $e->getMessage() ) ],
+						'invalidparam'
+					);
+				} else {
+					$this->dieUsage( $e->getMessage(), 'invalidparam' );
+				}
 			}
 
 			$logEntry = new ManualLogEntry( 'translatorsandbox', 'rejected' );
@@ -105,8 +136,12 @@ class ApiTranslateSandbox extends ApiBase {
 	}
 
 	protected function doPromote() {
-		if ( !$this->getUser()->isAllowed( 'translate-sandboxmanage' ) ) {
-			$this->dieUsage( 'Access denied', 'missingperms' );
+		if ( method_exists( $this, 'checkUserRightsAny' ) ) {
+			$this->checkUserRightsAny( 'translate-sandboxmanage' );
+		} else {
+			if ( !$this->getUser()->isAllowed( 'translate-sandboxmanage' ) ) {
+				$this->dieUsage( 'Access denied', 'missingperms' );
+			}
 		}
 
 		$params = $this->extractRequestParams();
@@ -117,7 +152,14 @@ class ApiTranslateSandbox extends ApiBase {
 			try {
 				TranslateSandbox::promoteUser( $user );
 			} catch ( MWException $e ) {
-				$this->dieUsage( $e->getMessage(), 'invalidparam' );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError(
+						[ 'apierror-translate-sandbox-invalidparam', wfEscapeWikiText( $e->getMessage() ) ],
+						'invalidparam'
+					);
+				} else {
+					$this->dieUsage( $e->getMessage(), 'invalidparam' );
+				}
 			}
 
 			TranslateSandbox::sendEmail( $this->getUser(), $user, 'promotion' );
@@ -125,9 +167,9 @@ class ApiTranslateSandbox extends ApiBase {
 			$logEntry = new ManualLogEntry( 'translatorsandbox', 'promoted' );
 			$logEntry->setPerformer( $this->getUser() );
 			$logEntry->setTarget( $user->getUserPage() );
-			$logEntry->setParameters( array(
+			$logEntry->setParameters( [
 				'4::userid' => $user->getId(),
-			) );
+			] );
 			$logid = $logEntry->insert();
 			$logEntry->publish( $logid );
 
@@ -144,7 +186,14 @@ class ApiTranslateSandbox extends ApiBase {
 			try {
 				TranslateSandbox::sendEmail( $this->getUser(), $user, 'reminder' );
 			} catch ( MWException $e ) {
-				$this->dieUsage( $e->getMessage(), 'invalidparam' );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError(
+						[ 'apierror-translate-sandbox-invalidparam', wfEscapeWikiText( $e->getMessage() ) ],
+						'invalidparam'
+					);
+				} else {
+					$this->dieUsage( $e->getMessage(), 'invalidparam' );
+				}
 			}
 		}
 	}
@@ -186,23 +235,23 @@ class ApiTranslateSandbox extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return array(
-			'do' => array(
-				ApiBase::PARAM_TYPE => array( 'create', 'delete', 'promote', 'remind' ),
+		return [
+			'do' => [
+				ApiBase::PARAM_TYPE => [ 'create', 'delete', 'promote', 'remind' ],
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'userid' => array(
+			],
+			'userid' => [
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_DFLT => 0,
 				ApiBase::PARAM_ISMULTI => true,
-			),
-			'token' => array(
+			],
+			'token' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'username' => array( ApiBase::PARAM_TYPE => 'string' ),
-			'password' => array( ApiBase::PARAM_TYPE => 'string' ),
-			'email' => array( ApiBase::PARAM_TYPE => 'string' ),
-		);
+			],
+			'username' => [ ApiBase::PARAM_TYPE => 'string' ],
+			'password' => [ ApiBase::PARAM_TYPE => 'string' ],
+			'email' => [ ApiBase::PARAM_TYPE => 'string' ],
+		];
 	}
 }

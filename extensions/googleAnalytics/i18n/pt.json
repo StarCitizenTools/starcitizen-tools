@@ -2,9 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Cainamarques",
-			"Malafaya"
+			"Malafaya",
+			"Hamilton Abreu"
 		]
 	},
-	"googleanalytics-desc": "Insere o script Google Analytics (ga.js) nas páginas MediaWiki para rastreio",
-	"right-noanalytics": "Isento do rastreio do Google Analytics"
+	"googleanalytics-desc": "Insere <i>scripts</i> Google Universal Analytics (e outras ferramentas analíticas da Internet) em páginas MediaWiki para efeitos de rastreio",
+	"right-noanalytics": "Isento do rastreio por ferramentas analíticas da Internet"
 }

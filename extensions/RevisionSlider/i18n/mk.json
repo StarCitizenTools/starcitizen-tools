@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06",
+			"Macofe"
+		]
+	},
+	"revisionslider": "Лизгач на преработки",
+	"revisionslider-preference-disable": "Не го прикажувај Лизгачот на преработки",
+	"revisionslider-desc": "Покажува лизгач за избирање и споредување на преработки на страница со разлики",
+	"revisionslider-toggle-label": "Нагледен преглед на историјата",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|бајт|бајти}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|бајт|бајти}}",
+	"revisionslider-label-date": "Датум",
+	"revisionslider-label-page-size": "Големина на страницата",
+	"revisionslider-label-change-size": "Големина на промената",
+	"revisionslider-label-comment": "Коментар",
+	"revisionslider-label-username": "{{GENDER:$1|Корисничко име}}",
+	"revisionslider-minoredit": "Ова е ситна промена",
+	"revisionslider-loading-failed": "Лизгачот на преработки не се вчита.",
+	"revisionslider-toggle-title-expand": "Отвори го Лизгачот на преработки",
+	"revisionslider-toggle-title-collapse": "Склопи го Лизгачот на преработки",
+	"revisionslider-turn-on-auto-expand-title": "Автоматски отворај го лизгачот на преработки",
+	"revisionslider-turn-off-auto-expand-title": "Не го проширувај лизгачот на преработки автоматски",
+	"revisionslider-arrow-tooltip-newer": "Погл. понови преработки",
+	"revisionslider-arrow-tooltip-older": "Погл. постари преработки",
+	"revisionslider-show-help-tooltip": "Прикажи текст за помош",
+	"revisionslider-help-dialog-slide1": "Лизгачот на преработки ви помага да прегледувате и споредувате преработки на страницата со разлики. Изработена е [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSliderпо желба] од германојазичната заедница. Многу би ценеле доколку [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider тука] ни го дадете вашето мислење.",
+	"revisionslider-help-dialog-slide2": "Секој столб претставува преработка на страница. Столбовите горе го покажуваат порастот на страницата во големина, а столбовите долу покажуваат намалување. На сликата, преработката 1 претставува додадена содржина, а преработката 2 претставува отстранување на содржина.",
+	"revisionslider-help-dialog-slide3a": "<p>За да направите споредба на извесни преработки, одберете ги со жолтиот и синиот покажувач.</p><p>Синиот е за поновата, а жолтиот ја дава постарата преработка.</p><p>Поместувајте ги покажувачите со влечење и пуштање, или пак стиснете на лизгачот.</p>",
+	"revisionslider-help-dialog-slide4": "Користете ги стрелките за напред и назад за да се одите низ историјата, покажувајќи постари и понови преработки.",
+	"revisionslider-tutorial": "Упатство",
+	"revisionslider-previous-dialog": "Претходно",
+	"revisionslider-next-dialog": "Следно",
+	"revisionslider-close-dialog": "Затвори"
+}

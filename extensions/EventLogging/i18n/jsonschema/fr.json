@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Gomoko",
-			"Urhixidur"
+			"Urhixidur",
+			"Wladek92"
 		]
 	},
 	"jsonschema-badidref": "Mauvais idref : « $1 »",
@@ -13,6 +14,7 @@
 	"jsonschema-invalid-missingfield": "Champ obligatoire « $1 » absent",
 	"jsonschema-invalid-notinenum": "La valeur <code>$1</code> ne fait pas partie de l’énumération pour la propriété $2",
 	"apihelp-jsonschema-description": "Récupérer une page de schéma JSON.",
+	"apihelp-jsonschema-summary": "Récupérer une page schéma JSON.",
 	"apihelp-jsonschema-param-revid": "ID de révision de schéma.",
 	"apihelp-jsonschema-param-title": "Nom du schéma.",
 	"apihelp-jsonschema-example-1": "Récupérer le schéma pour la révision 1234"

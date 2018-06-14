@@ -2,11 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Meno25",
-			"OsamaK"
+			"OsamaK",
+			"ديفيد"
 		]
 	},
 	"cleanchanges-changerightslink": "تغيير المجموعات",
-	"cleanchanges-desc": "عرض أكثر ضغطا ل [[Special:RecentChanges|قائمة أحدث التغييرات]]",
+	"cleanchanges-desc": "عرض أكثر ضغطا [[Special:RecentChanges|لقائمة أحدث التغييرات]]",
 	"cleanchanges-language": "اللغة:",
 	"cleanchanges-language-na": "الكل",
 	"cleanchanges-users": "المستخدمون (للفصل: |):",

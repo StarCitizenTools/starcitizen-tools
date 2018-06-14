@@ -29,6 +29,17 @@
 			'deeds'
 		);
 
+		this.addPreviousButton();
+		this.addNextButton();
+	};
+
+	OO.inheritClass( uw.ui.Deed, uw.ui.Step );
+
+	uw.ui.Deed.prototype.load = function ( uploads ) {
+		var ui = this;
+
+		uw.ui.Step.prototype.load.call( this, uploads );
+
 		this.$div.prepend(
 			$( '<div>' )
 				.attr( 'id', 'mwe-upwiz-deeds-thumbnails' )
@@ -41,10 +52,10 @@
 				.addClass( 'ui-helper-clearfix' )
 		);
 
-		this.addNextButton();
-
-		this.nextButton.$element.hide();
+		this.nextButtonPromise.done( function () {
+			// hide "next" button, controller will only show it once license has
+			// been selected
+			ui.nextButton.$element.hide();
+		} );
 	};
-
-	OO.inheritClass( uw.ui.Deed, uw.ui.Step );
 }( mediaWiki, jQuery, mediaWiki.uploadWizard, OO ) );

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kumkumuk",
+			"Macofe"
+		]
+	},
+	"revisionslider-label-date": "Dem",
+	"revisionslider-label-page-size": "Ebadê pele",
+	"revisionslider-label-change-size": "Ebati bıvurnê",
+	"revisionslider-label-comment": "Mışewre",
+	"revisionslider-label-username": "{{GENDER:$1|Nameyê karberi}}"
+}

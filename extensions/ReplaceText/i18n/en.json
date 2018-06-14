@@ -35,7 +35,9 @@
 	"replacetext_warning": "'''Warning:''' There {{PLURAL:$1|is one page that already contains|are $1 pages that already contain}} the replacement string, \"$2\". If you make this replacement you will not be able to separate your replacements from these strings.",
 	"replacetext_blankwarning": "'''Warning:''' Because the replacement string is blank, this operation will not be reversible.",
 	"replacetext_continue": "Continue",
+	"replacetext_announce": "Announce these edits via $1 and watchlists",
 	"replacetext_editsummary": "Text replacement - \"$1\" to \"$2\"",
 	"right-replacetext": "Make string replacements on the entire wiki",
-	"action-replacetext": "make string replacements on the entire wiki"
+	"action-replacetext": "make string replacements on the entire wiki",
+	"replacetext_reminder": "To also modify links to this page in other pages, go to $1."
 }

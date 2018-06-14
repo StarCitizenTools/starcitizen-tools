@@ -1,9 +1,24 @@
 {
 	"@metadata": {
 		"authors": [
-			"Geraki"
+			"Geraki",
+			"Nikosgranturismogt"
 		]
 	},
+	"msu-desc": "Επιτρέπει εύκολες επιφορτώσεις για ένα αρχείο ή για πολλαπλά αρχεία ταυτόχρονα",
+	"msu-button-title": "Επιλογή αρχείων",
+	"msu-insert-link": "Εισαγωγή συνδέσμου",
+	"msu-insert-gallery": "Εισαγωγή όλων ως γκαλερί",
+	"msu-insert-files": "Εισαγωγή όλων ως αρχεία",
+	"msu-insert-links": "Εισαγωγή όλων ως σύνδεσμοι",
+	"msu-insert-image": "Εισαγωγή ως εικόνα",
+	"msu-insert-video": "Εισαγωγή βίντεο",
 	"msu-cancel-upload": "Ακύρωση ανεβάσματος",
-	"msu-dropzone": "Αποθέστε τα αρχεία εδώ"
+	"msu-continue": "Συνέχεια όπως και αν έχει;",
+	"msu-clean-all": "Εκκαθάριση λίστας",
+	"msu-ext-not-allowed": "Επιτρέπονται μόνο οι ακόλουθοι {{PLURAL:$1|τύπος|τύποι}} αρχείων:",
+	"msu-upload-this": "Επιφόρτωση αυτού του αρχείου",
+	"msu-upload-all": "Επιφόρτωση όλων των αρχείων",
+	"msu-dropzone": "Αποθέστε τα αρχεία εδώ",
+	"msu-comment": "Το αρχείο μεταφορτώθηκε με το MsUpload"
 }

@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -21,7 +21,7 @@ class TranslateUtils {
 	 */
 	public static function title( $message, $code, $ns = NS_MEDIAWIKI ) {
 		// Cache some amount of titles for speed.
-		static $cache = array();
+		static $cache = [];
 		$key = $ns . ':' . $message;
 
 		if ( !isset( $cache[$key] ) ) {
@@ -46,7 +46,7 @@ class TranslateUtils {
 		$code = substr( $text, $pos + 1 );
 		$key = substr( $text, 0, $pos );
 
-		return array( $key, $code );
+		return [ $key, $code ];
 	}
 
 	/**
@@ -58,7 +58,7 @@ class TranslateUtils {
 	 */
 	public static function getMessageContent( $key, $language, $namespace = NS_MEDIAWIKI ) {
 		$title = self::title( $key, $language, $namespace );
-		$data = self::getContents( array( $title ), $namespace );
+		$data = self::getContents( [ $title ], $namespace );
 
 		return isset( $data[$title][0] ) ? $data[$title][0] : null;
 	}
@@ -72,24 +72,24 @@ class TranslateUtils {
 	 * text and last author indexed by page name.
 	 */
 	public static function getContents( $titles, $namespace ) {
-		$dbr = wfGetDB( DB_SLAVE );
-		$rows = $dbr->select( array( 'page', 'revision', 'text' ),
-			array( 'page_title', 'old_text', 'old_flags', 'rev_user_text' ),
-			array(
+		$dbr = wfGetDB( DB_REPLICA );
+		$rows = $dbr->select( [ 'page', 'revision', 'text' ],
+			[ 'page_title', 'old_text', 'old_flags', 'rev_user_text' ],
+			[
 				'page_namespace' => $namespace,
 				'page_latest=rev_id',
 				'rev_text_id=old_id',
 				'page_title' => $titles
-			),
+			],
 			__METHOD__
 		);
 
-		$titles = array();
+		$titles = [];
 		foreach ( $rows as $row ) {
-			$titles[$row->page_title] = array(
+			$titles[$row->page_title] = [
 				Revision::getRevisionText( $row ),
 				$row->rev_user_text
-			);
+			];
 		}
 		$rows->free();
 
@@ -106,11 +106,11 @@ class TranslateUtils {
 	 * @return array List of recent changes.
 	 */
 	public static function translationChanges(
-		$hours = 24, $bots = false, $ns = null, array $extraFields = array()
+		$hours = 24, $bots = false, $ns = null, array $extraFields = []
 	) {
 		global $wgTranslateMessageNamespaces;
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$recentchanges = $dbr->tableName( 'recentchanges' );
 		$hours = (int)$hours;
 		$cutoff_unixtime = time() - ( $hours * 3600 );
@@ -122,7 +122,7 @@ class TranslateUtils {
 		}
 
 		$fields = array_merge(
-			array( 'rc_title', 'rc_timestamp', 'rc_user_text', 'rc_namespace' ),
+			[ 'rc_title', 'rc_timestamp', 'rc_user_text', 'rc_namespace' ],
 			$extraFields
 		);
 		$fields = implode( ',', $fields );
@@ -148,7 +148,7 @@ class TranslateUtils {
 	 * @return string Best-effort localisation of wanted language name.
 	 */
 	public static function getLanguageName( $code, $language = 'en' ) {
-		$languages = TranslateUtils::getLanguageNames( $language );
+		$languages = self::getLanguageNames( $language );
 
 		if ( isset( $languages[$code] ) ) {
 			return $languages[$code];
@@ -211,7 +211,7 @@ class TranslateUtils {
 			unset( $languageNames[$dummyLanguageCode] );
 		}
 
-		Hooks::run( 'TranslateSupportedLanguages', array( &$languageNames, $code ) );
+		Hooks::run( 'TranslateSupportedLanguages', [ &$languageNames, $code ] );
 
 		return $languageNames;
 	}
@@ -241,7 +241,7 @@ class TranslateUtils {
 		if ( isset( $mi[$normkey] ) ) {
 			return (array)$mi[$normkey];
 		} else {
-			return array();
+			return [];
 		}
 	}
 
@@ -264,7 +264,7 @@ class TranslateUtils {
 	 * @param array $attributes Html attributes for the fieldset.
 	 * @return string Html.
 	 */
-	public static function fieldset( $legend, $contents, array $attributes = array() ) {
+	public static function fieldset( $legend, $contents, array $attributes = [] ) {
 		return Xml::openElement( 'fieldset', $attributes ) .
 			Xml::tags( 'legend', null, $legend ) . $contents .
 			Xml::closeElement( 'fieldset' );
@@ -347,7 +347,7 @@ class TranslateUtils {
 			return null;
 		}
 
-		$formats = array();
+		$formats = [];
 
 		$filename = substr( $icon, 7 );
 		$file = wfFindFile( $filename );
@@ -385,15 +385,41 @@ class TranslateUtils {
 	/**
 	 * Get a DB handle suitable for read and read-for-write cases
 	 *
-	 * @return DatabaseBase Master for HTTP POST, CLI, DB already changed; slave otherwise
+	 * @return \Wikimedia\Rdbms\IDatabase Master for HTTP POST, CLI, DB already changed;
+	 *  slave otherwise
 	 */
 	public static function getSafeReadDB() {
-		$index = (
-			PHP_SAPI === 'cli' ||
-			RequestContext::getMain()->getRequest()->wasPosted() ||
-			wfGetLB()->hasOrMadeRecentMasterChanges()
-		) ? DB_MASTER : DB_SLAVE;
+		// Parsing APIs need POST for payloads but are read-only, so avoid spamming
+		// the master then. No good way to check this at the moment...
+		if ( PageTranslationHooks::$renderingContext ) {
+			$index = DB_REPLICA;
+		} else {
+			$index = (
+				PHP_SAPI === 'cli' ||
+				RequestContext::getMain()->getRequest()->wasPosted() ||
+				wfGetLB()->hasOrMadeRecentMasterChanges()
+			) ? DB_MASTER : DB_REPLICA;
+		}
 
 		return wfGetDB( $index );
+	}
+
+	/**
+	 * Get an URL that points to an editor for this message handle.
+	 * @param MessageHandle $handle
+	 * @return string Domain relative URL
+	 * @since 2017.10
+	 */
+	public static function getEditorUrl( MessageHandle $handle ) {
+		if ( !$handle->isValid() ) {
+			return $handle->getTitle()->getLocalURL( [ 'action' => 'edit' ] );
+		}
+
+		$title = SpecialPageFactory::getPage( 'Translate' )->getPageTitle();
+		return $title->getLocalURL( [
+			'showMessage' => $handle->getInternalKey(),
+			'group' => $handle->getGroup()->getId(),
+			'language' => $handle->getCode(),
+		] );
 	}
 }

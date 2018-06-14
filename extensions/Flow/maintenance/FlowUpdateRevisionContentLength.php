@@ -4,9 +4,9 @@ use Flow\Container;
 use Flow\Model\AbstractRevision;
 use Flow\Model\UUID;
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: dirname( __FILE__ ) . '/../../../maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
  * @ingroup Maintenance
@@ -19,11 +19,11 @@ class FlowUpdateRevisionContentLength extends LoggedUpdateMaintenance {
 	 *
 	 * @var string[]
 	 */
-	static private $revisionTypes = array(
+	static private $revisionTypes = [
 		'post' => 'Flow\Model\PostRevision',
 		'header' => 'Flow\Model\Header',
 		'post-summary' => 'Flow\Model\PostSummary',
-	);
+	];
 
 	/**
 	 * @var Flow\DbFactory
@@ -48,6 +48,7 @@ class FlowUpdateRevisionContentLength extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->mDescription = "Updates content length for revisions with unset content length.";
+		$this->requireExtension( 'Flow' );
 	}
 
 	public function getUpdateKey() {
@@ -81,11 +82,11 @@ class FlowUpdateRevisionContentLength extends LoggedUpdateMaintenance {
 			$this->mBatchSize
 		);
 		// Only fetch rows created by users from the current wiki.
-		$it->addConditions( array(
-			'rev_user_wiki' => wfWikiId(),
-		) );
+		$it->addConditions( [
+			'rev_user_wiki' => wfWikiID(),
+		] );
 		// We only need the id and type field
-		$it->setFetchColumns( array( 'rev_id', 'rev_type' ) );
+		$it->setFetchColumns( [ 'rev_id', 'rev_type' ] );
 
 		$total = $fail = 0;
 		foreach ( $it as $batch ) {
@@ -160,4 +161,4 @@ class FlowUpdateRevisionContentLength extends LoggedUpdateMaintenance {
 }
 
 $maintClass = 'FlowUpdateRevisionContentLength';
-require_once( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

@@ -2,8 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Shirayuki",
-			"SkyDaisy9"
+			"SkyDaisy9",
+			"Suzukaze-c"
 		]
 	},
-	"codemirror-desc": "ウィキテキストエディターに構文強調の機能を追加する"
+	"codemirror-desc": "ウィキテキストエディターに構文強調の機能を追加する",
+	"codemirror-beta-title": "ウィキテキストをシンタックスハイライト",
+	"codemirror-beta-desc": "シンタックスハイライトを有効にすると編集しやすくなります。色や色合いを以てページのテキストをリンクや参考、テンプレートのコードなどと視覚的に区別する。"
 }

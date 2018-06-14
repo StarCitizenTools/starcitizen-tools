@@ -18,7 +18,7 @@
 	"nuke-defaultreason": "Massenlöschung der Seiten, die von „[[Special:Contributions/$1|{{GENDER:$1|$1}}]]“ angelegt wurden",
 	"nuke-multiplepeople": "Massenlöschung kürzlich erstellter Seiten",
 	"nuke-tools": "Diese Arbeitshilfe ermöglicht die Massenlöschung von Seiten, die von einer IP-Adresse oder einem Benutzer angelegt wurden.\nGib die IP-Adresse oder den Benutzernamen ein, um eine Liste der zu löschenden Seiten zu erhalten. Sofern du keine Angabe machst, werden alle Benutzer ausgewählt.",
-	"nuke-submit-user": "Abrufen",
+	"nuke-submit-user": "Seiten auflisten",
 	"nuke-toggleinvert": "Umkehren",
 	"nuke-submit-delete": "Ausgewählte Seiten löschen",
 	"right-nuke": "Massenlöschungen von Seiten",
@@ -30,9 +30,10 @@
 	"nuke-not-deleted": "Seite [[:$1]] '''konnte nicht''' gelöscht werden.",
 	"nuke-delete-more": "[[Special:Nuke|Weitere Seiten löschen]]",
 	"nuke-pattern": "Muster für den Seitennamen:",
-	"nuke-nopages-global": "Es gibt keine neuen Seiten unter den [[Special:RecentChanges|letzten Änderungen]].",
+	"nuke-nopages-global": "Es gibt keine Seitentitel, die deiner Suche entsprechen.",
 	"nuke-viewchanges": "Änderungen ansehen",
 	"nuke-namespace": "Auf den folgenden Namensraum begrenzen:",
 	"nuke-linkoncontribs": "Massenlöschungen",
-	"nuke-linkoncontribs-text": "Massengelöschte Seiten, bei denen dieser Benutzer der einzige Autor ist."
+	"nuke-linkoncontribs-text": "Massengelöschte Seiten, bei denen {{GENDER:$1|dieser Benutzer der einzige Autor|diese Benutzerin die einzige Autorin}} ist.",
+	"nuke-confirm": "Du bist gerade dabei, {{PLURAL:$1|eine Seite|$1 Seiten}} zu löschen. Möchtest du wirklich fortfahren?"
 }

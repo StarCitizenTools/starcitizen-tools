@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable block image node class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -30,7 +30,7 @@ ve.ce.BlockImageNode = function VeCeBlockImageNode( model, config ) {
 		.prependTo( this.$element );
 
 	// Mixin constructors
-	ve.ce.ImageNode.call( this, this.$element, this.$image, config );
+	ve.ce.ImageNode.call( this, this.$image, this.$image, config );
 	ve.ce.AlignableNode.call( this, this.$element, config );
 
 	// Initialization

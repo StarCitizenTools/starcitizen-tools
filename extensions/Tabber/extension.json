@@ -17,7 +17,7 @@
 		"TabberHooks": "/Tabber.hooks.php"
 	},
 	"ResourceModules": {
-		"ext.Tabber": {
+		"ext.tabber": {
 			"styles": [
 				"css/tabber.css"
 			],

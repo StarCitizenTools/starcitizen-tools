@@ -53,7 +53,7 @@
 		 * Default item for the size menu.
 		 * @property {OO.ui.MenuOptionWidget}
 		 */
-		this.defaultItem = this.downloadSizeMenu.getMenu().getSelectedItem();
+		this.defaultItem = this.downloadSizeMenu.getMenu().findSelectedItem();
 
 		/** @property {mw.mmv.model.Image|null} Image the download button currently points to. */
 		this.image = null;
@@ -61,6 +61,14 @@
 	oo.inheritClass( Pane, mw.mmv.ui.Element );
 	DP = Pane.prototype;
 
+	/**
+	 * @event mmv-download-cta-open
+	 * Fired when the attribution call to action panel is clicked.
+	 */
+	/**
+	 * @event mmv-download-cta-close
+	 * Fired when the attribution area is closed.
+	 */
 
 	/**
 	 * Creates download split button. It is a link with the "download" property set plus an
@@ -73,17 +81,17 @@
 	 * @param {jQuery} $container
 	 */
 	DP.createDownloadButton = function ( $container ) {
-		// TODO:  Use oojs-ui constructive button widget instead
+		// TODO: Use OOUI progressive button widget instead
 		this.$downloadButton = $( '<a>' )
 			.attr( 'target', '_blank' )
 			.attr( 'download', '' )
-			.addClass( 'mw-ui-button mw-ui-constructive mw-mmv-download-go-button' )
+			.addClass( 'mw-ui-button mw-ui-progressive mw-mmv-download-go-button' )
 			.click( function () {
 				mw.mmv.actionLogger.log( 'download' );
 			} );
 
 		this.$selectionArrow = $( '<span>' )
-			.addClass( 'mw-ui-button mw-mmv-download-select-menu' )
+			.addClass( 'mw-ui-button mw-ui-progressive mw-mmv-download-select-menu' )
 			.append(
 				$( '<span>' )
 					.addClass( 'mw-mmv-download-image-size-name' )
@@ -107,10 +115,10 @@
 	 */
 	DP.createSizePulldownMenu = function ( $container ) {
 		this.downloadSizeMenu = this.utils.createPulldownMenu(
-				[ 'original', 'small', 'medium', 'large' ],
-				[ 'mw-mmv-download-size' ],
-				'original'
-				);
+			[ 'original', 'small', 'medium', 'large' ],
+			[ 'mw-mmv-download-size' ],
+			'original'
+		);
 
 		this.downloadSizeMenu.getMenu().on( 'select', function ( item ) {
 			mw.mmv.actionLogger.log( 'download-select-menu-' + item.data.name );
@@ -139,7 +147,7 @@
 		var dl = this,
 			attributionInput = new oo.ui.TextInputWidget( {
 				classes: [ 'mw-mmv-download-attr-input' ],
-			readOnly: true
+				readOnly: true
 			} ),
 			attributionSwitch = new oo.ui.ButtonSelectWidget( {
 				classes: [ 'mw-mmv-download-attr-select' ]
@@ -171,6 +179,7 @@
 			.appendTo( $container )
 			.click( function () {
 				if ( dl.$attributionSection.hasClass( 'mw-mmv-download-attribution-collapsed' ) ) {
+					dl.$container.trigger( 'mmv-download-cta-open' );
 					dl.$attributionSection.removeClass( 'mw-mmv-download-attribution-collapsed' );
 					dl.attributionInput.$element.find( 'input' ).focus();
 				}
@@ -188,6 +197,30 @@
 					.text( mw.message( 'multimediaviewer-download-attribution-cta' ).text() )
 			)
 			.appendTo( this.$attributionSection );
+		this.attributionInput = attributionInput;
+		this.$attributionCopy = this.$copyButton = $( '<button>' )
+			.addClass( 'mw-ui-button mw-mmv-button mw-mmv-dialog-copy' )
+			.click( function () {
+				// Select the text, and then try to copy the text.
+				// If the copy fails or is not supported, continue as if nothing had happened.
+				dl.attributionInput.select();
+				try {
+					if ( document.queryCommandSupported &&
+						document.queryCommandSupported( 'copy' ) ) {
+						document.execCommand( 'copy' );
+					}
+				} catch ( e ) {
+					// queryCommandSupported in Firefox pre-41 can throw errors when used with
+					// clipboard commands. We catch and ignore these and other copy-command-related
+					// errors here.
+				}
+			} )
+			.prop( 'title', mw.msg( 'multimediaviewer-download-attribution-copy' ) )
+			.text( mw.msg( 'multimediaviewer-download-attribution-copy' ) )
+			.tipsy( {
+				delayIn: mw.config.get( 'wgMultimediaViewer' ).tooltipDelay,
+				gravity: this.correctEW( 'se' )
+			} );
 
 		this.$attributionHowHeader = $( '<p>' )
 			.addClass( 'mw-mmv-download-attribution-how-header' )
@@ -196,24 +229,25 @@
 			.addClass( 'mw-mmv-download-attribution-how' )
 			.append(
 				this.$attributionHowHeader,
-				attributionInput.$element,
+				this.attributionInput.$element,
+				this.$attributionCopy,
 				attributionSwitch.$element,
 				$( '<p>' )
-				.addClass( 'mw-mmv-download-attribution-close-button' )
-				.click( function ( e ) {
-					dl.$attributionSection.addClass( 'mw-mmv-download-attribution-collapsed' );
-					e.stopPropagation();
-				} )
-				.text( ' ' )
+					.addClass( 'mw-mmv-download-attribution-close-button' )
+					.click( function ( e ) {
+						dl.$container.trigger( 'mmv-download-cta-close' );
+						dl.$attributionSection.addClass( 'mw-mmv-download-attribution-collapsed' );
+						e.stopPropagation();
+					} )
+					.text( ' ' )
 			)
 			.appendTo( this.$attributionSection );
-
-		this.attributionInput = attributionInput;
 	};
 
 	/**
 	 * Selects the specified attribution type.
-	 * @param {'plain'|'html'} [name='plain'] The attribution type to use.
+	 *
+	 * @param {string} [name='plain'] The attribution type to use ('plain' or 'html')
 	 */
 	DP.selectAttribution = function ( name ) {
 		this.currentAttrView = name;
@@ -286,6 +320,7 @@
 
 	/**
 	 * Sets the URL on the download button.
+	 *
 	 * @param {string} url
 	 */
 	DP.setDownloadUrl = function ( url ) {
@@ -298,6 +333,7 @@
 
 	/**
 	 * Sets the text of the download button.
+	 *
 	 * @param {string} sizeClass A size class such as 'small'
 	 * @param {string} extension file extension
 	 * @param {number} width
@@ -313,13 +349,14 @@
 
 		// Update button label and size strings to reflect new selected size
 		this.$downloadButton.html(
-			'<span class="mw-mmv-download-image-size-name">' + sizeClasMessage + '</span>'
-				+ '<span class="mw-mmv-download-image-size">' + sizeMessage + '</span>'
+			'<span class="mw-mmv-download-image-size-name">' + sizeClasMessage + '</span>' +
+			'<span class="mw-mmv-download-image-size">' + sizeMessage + '</span>'
 		);
 	};
 
 	/**
 	 * Sets the text in the attribution input element.
+	 *
 	 * @param {mw.mmv.model.EmbedFileInfo} embed
 	 */
 	DP.setAttributionText = function ( embed ) {
@@ -330,11 +367,13 @@
 
 	/**
 	 * Chops off the extension part of an URL.
-	 * @param {string} url
+	 *
+	 * @param {string} url URL
+	 * @return {string} Extension
 	 */
 	DP.getExtensionFromUrl = function ( url ) {
 		var urlParts = url.split( '.' );
-		return urlParts[urlParts.length - 1];
+		return urlParts[ urlParts.length - 1 ];
 	};
 
 	/**
@@ -366,8 +405,8 @@
 		}
 
 		attributionCtaMessage = ( license && license.needsAttribution() ) ?
-			'multimediaviewer-download-attribution-cta-header'
-			: 'multimediaviewer-download-optional-attribution-cta-header';
+			'multimediaviewer-download-attribution-cta-header' :
+			'multimediaviewer-download-optional-attribution-cta-header';
 		this.$attributionCtaHeader.text( mw.message( attributionCtaMessage ).text() );
 		this.$attributionHowHeader.text( mw.message( attributionCtaMessage ).text() );
 	};

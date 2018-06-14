@@ -26,8 +26,8 @@ class EDGetData extends SpecialPage {
 		if ( ! $title->userCan( 'read' ) ) {
 			return;
 		}
-		$article = new Article( $title );
-		$page_text = $article->fetchContent();
+		$wikiPage = WikiPage::factory( $title );
+		$page_text = ContentHandler::getContentText( $wikiPage->getContent() );
 		// Remove <noinclude> sections and <includeonly> tags from text
 		$page_text = StringUtils::delimiterReplace( '<noinclude>', '</noinclude>', '', $page_text );
 		$page_text = strtr( $page_text, array( '<includeonly>' => '', '</includeonly>' => '' ) );

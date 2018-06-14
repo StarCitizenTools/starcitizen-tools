@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Teslaton"
+		]
+	},
+	"revisionslider": "Posuvník revízií",
+	"revisionslider-preference-disable": "Nezobrazovať posuvník revízií",
+	"revisionslider-desc": "Na stránke s rozdielmi zobrazuje posuvník umožňujúci výber a porovnanie revízií.",
+	"revisionslider-toggle-label": "Prechádzať históriu",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|bajt|bajty|bajtov}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bajt|bajty|bajtov}}",
+	"revisionslider-label-date": "Dátum",
+	"revisionslider-label-page-size": "Veľkosť stránky",
+	"revisionslider-label-change-size": "Veľkosť zmeny",
+	"revisionslider-label-comment": "Zhrnutie",
+	"revisionslider-label-username": "{{GENDER:$1|Používateľské meno}}",
+	"revisionslider-minoredit": "Toto je drobná úprava",
+	"revisionslider-loading-failed": "Posuvník revízií sa nepodarilo načítať.",
+	"revisionslider-toggle-title-expand": "Zobraziť posuvník revízií",
+	"revisionslider-toggle-title-collapse": "Zavrieť posuvník revízií",
+	"revisionslider-turn-on-auto-expand-title": "Vždy zobrazovať posuvník revízií",
+	"revisionslider-turn-off-auto-expand-title": "Nezobrazovať posuvník revízií automaticky",
+	"revisionslider-arrow-tooltip-newer": "Zobraziť novšie revízie",
+	"revisionslider-arrow-tooltip-older": "Zobraziť staršie revízie",
+	"revisionslider-show-help-tooltip": "Zobraziť text nápovedy",
+	"revisionslider-help-dialog-slide1": "Posuvník revízií pomáha hľadať a porovnávať rozdiely v revíziách stránok. Je vytvorený na základe [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider želania nemecky hovoriacej komunity]. Veľmi oceníme [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider spätnú väzbu].",
+	"revisionslider-help-dialog-slide2": "Každý stĺpec predstavuje revíziu stránky. Nahor smerujúce stĺpce zobrazujú nárast veľkosti stránky, stĺpce nadol zase zmenšenie. Revízia 1 na obrázku predstavuje pridanie obsahu, revízia 2 jeho odobratie.",
+	"revisionslider-help-dialog-slide3a": "<p>Konkrétne revízie pre porovnanie vyberte pomocou žltej a modrej značky.</p><p>Modrá značka označuje novšiu revíziu, žltá označuje staršiu revíziu.</p><p>Značky môžete presúvať stlačením a ťahaním alebo kliknutím na os príslušnej farby.</p>",
+	"revisionslider-help-dialog-slide4": "Pomocou šípok dopredu a dozadu sa môžete posúvať v histórii stránky a zobrazovať staršie alebo novšie revízie.",
+	"revisionslider-tutorial": "Sprievodca posuvníkom revízií",
+	"revisionslider-previous-dialog": "Späť",
+	"revisionslider-next-dialog": "Ďalej",
+	"revisionslider-close-dialog": "Zatvoriť"
+}

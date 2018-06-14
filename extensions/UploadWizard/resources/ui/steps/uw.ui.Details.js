@@ -35,26 +35,15 @@
 			'details'
 		);
 
-		this.$div.prepend(
-			$( '<div>' )
-				.attr( 'id', 'mwe-upwiz-macro-files' )
-				.addClass( 'mwe-upwiz-filled-filelist ui-corner-all' )
-		);
-
 		this.$errorCount = $( '<div>' )
 			.attr( 'id', 'mwe-upwiz-details-error-count' );
 		this.$warningCount = $( '<div>' )
 			.attr( 'id', 'mwe-upwiz-details-warning-count' );
-		this.$buttons.append( this.$errorCount, this.$warningCount );
 
 		this.nextButton = new OO.ui.ButtonWidget( {
 			label: mw.message( 'mwe-upwiz-next-details' ).text(),
 			flags: [ 'progressive', 'primary' ]
 		} ).on( 'click', startDetails );
-
-		this.$buttons.append(
-			$( '<div>' ).addClass( 'mwe-upwiz-start-next mwe-upwiz-file-endchoice' ).append( this.nextButton.$element )
-		);
 
 		this.nextButtonDespiteFailures = new OO.ui.ButtonWidget( {
 			label: mw.message( 'mwe-upwiz-next-file-despite-failures' ).text(),
@@ -68,53 +57,89 @@
 			flags: [ 'progressive', 'primary' ]
 		} ).on( 'click', startDetails );
 
-		this.$buttons.append(
-			$( '<div>' )
-				.addClass( 'mwe-upwiz-file-next-some-failed mwe-upwiz-file-endchoice' )
-				.append(
-					new OO.ui.HorizontalLayout( {
-						items: [
-							new OO.ui.LabelWidget( {
-								label: mw.message( 'mwe-upwiz-file-some-failed' ).text()
-							} ),
-							this.nextButtonDespiteFailures,
-							this.retryButtonSomeFailed
-						]
-					} ).$element
-				)
-		);
-
 		this.retryButtonAllFailed = new OO.ui.ButtonWidget( {
 			label: mw.message( 'mwe-upwiz-file-retry' ).text(),
 			flags: [ 'progressive', 'primary' ]
 		} ).on( 'click', startDetails );
 
-		this.$buttons.append(
-			$( '<div>' )
-				.addClass( 'mwe-upwiz-file-next-all-failed mwe-upwiz-file-endchoice' )
-				.append(
-					new OO.ui.HorizontalLayout( {
-						items: [
-							new OO.ui.LabelWidget( {
-								label: mw.message( 'mwe-upwiz-file-all-failed' ).text()
-							} ),
-							this.retryButtonAllFailed
-						]
-					} ).$element
-				)
-		);
+		this.$buttons.append( this.$errorCount, this.$warningCount );
+		this.addPreviousButton();
+		this.addNextButton();
 	};
 
 	OO.inheritClass( uw.ui.Details, uw.ui.Step );
 
-	/**
-	 * Empty out all upload information.
-	 */
-	uw.ui.Details.prototype.empty = function () {
-		// reset buttons on the details page
+	uw.ui.Details.prototype.load = function ( uploads ) {
+		uw.ui.Step.prototype.load.call( this, uploads );
+
+		if ( uploads.filter( this.needsPatentAgreement.bind( this ) ).length > 0 ) {
+			this.$div.prepend(
+				$( '<div>' )
+					.addClass( 'mwe-upwiz-patent-weapon-policy ui-corner-all' )
+					.append(
+						$( '<p>' ).append( mw.msg( 'mwe-upwiz-patent-weapon-policy' ) ),
+						$( '<p>' ).append(
+							$( '<a>' )
+								.text( mw.msg( 'mwe-upwiz-patent-weapon-policy-link' ) )
+								.attr( { target: '_blank', href: mw.UploadWizard.config.patents.url.weapons } )
+						)
+					)
+			);
+		}
+
+		this.$div.prepend(
+			$( '<div>' )
+				.attr( 'id', 'mwe-upwiz-macro-files' )
+				.addClass( 'mwe-upwiz-filled-filelist ui-corner-all' )
+		);
+
+		// set default buttons visibility (can be altered in controller later)
 		this.$div.find( '.mwe-upwiz-file-next-some-failed' ).hide();
 		this.$div.find( '.mwe-upwiz-file-next-all-failed' ).hide();
-		this.$div.find( '.mwe-upwiz-start-next' ).show();
+		this.$div.find( '.mwe-upwiz-file-next-all-ok' ).show();
+	};
+
+	uw.ui.Details.prototype.addNextButton = function () {
+		var ui = this;
+
+		this.nextButtonPromise.done( function () {
+			ui.$buttons.append(
+				$( '<div>' )
+					.addClass( 'mwe-upwiz-file-next-all-ok mwe-upwiz-file-endchoice' )
+					.append( ui.nextButton.$element )
+			);
+
+			ui.$buttons.append(
+				$( '<div>' )
+					.addClass( 'mwe-upwiz-file-next-some-failed mwe-upwiz-file-endchoice' )
+					.append(
+						new OO.ui.HorizontalLayout( {
+							items: [
+								new OO.ui.LabelWidget( {
+									label: mw.message( 'mwe-upwiz-file-some-failed' ).text()
+								} ),
+								ui.nextButtonDespiteFailures,
+								ui.retryButtonSomeFailed
+							]
+						} ).$element
+					)
+			);
+
+			ui.$buttons.append(
+				$( '<div>' )
+					.addClass( 'mwe-upwiz-file-next-all-failed mwe-upwiz-file-endchoice' )
+					.append(
+						new OO.ui.HorizontalLayout( {
+							items: [
+								new OO.ui.LabelWidget( {
+									label: mw.message( 'mwe-upwiz-file-all-failed' ).text()
+								} ),
+								ui.retryButtonAllFailed
+							]
+						} ).$element
+					)
+			);
+		} );
 	};
 
 	/**
@@ -135,6 +160,17 @@
 		this.$div
 			.find( '.mwe-upwiz-data' )
 			.morphCrossfade( '.mwe-upwiz-submitting' );
+
+		this.previousButton.$element.hide();
+		this.$div.find( '.mwe-upwiz-patent-weapon-policy' ).hide();
+	};
+
+	/**
+	 * Re-enabled edits to the details.
+	 */
+	uw.ui.Details.prototype.enableEdits = function () {
+		this.previousButton.$element.show();
+		this.$div.find( '.mwe-upwiz-patent-weapon-policy' ).show();
 	};
 
 	/**
@@ -201,6 +237,16 @@
 		} else {
 			this.$warningCount.empty();
 		}
+	};
+
+	/**
+	 * @param {mw.UploadWizardUpload} upload
+	 * @return {boolean}
+	 */
+	uw.ui.Details.prototype.needsPatentAgreement = function ( upload ) {
+		var extensions = mw.UploadWizard.config.patents.extensions;
+
+		return $.inArray( upload.title.getExtension().toLowerCase(), extensions ) >= 0;
 	};
 
 }( mediaWiki, jQuery, mediaWiki.uploadWizard, OO ) );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Document tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ce.RangeState' );
@@ -119,8 +119,6 @@ QUnit.test( 'Basic tests', function ( assert ) {
 			hash: state.hash
 		};
 	}
-
-	QUnit.expect( cases.length );
 
 	for ( i = 0; i < cases.length; i++ ) {
 		nativeSelection.removeAllRanges();

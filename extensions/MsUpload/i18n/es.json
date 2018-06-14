@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Hernan Hegykozi",
-			"Macofe"
+			"Macofe",
+			"Fitoschido"
 		]
 	},
 	"msu-desc": "Permite la subida sencilla de uno o varios archivos al mismo tiempo",
@@ -14,7 +15,7 @@
 	"msu-insert-image": "Insertar como imagen",
 	"msu-insert-video": "Insertar vídeo",
 	"msu-cancel-upload": "Cancelar la subida",
-	"msu-replace-file": "¿Reemplazar archivo?",
+	"msu-continue": "¿Quieres continuar de todos modos?",
 	"msu-clean-all": "Vaciar la lista",
 	"msu-ext-not-allowed": "Sólo se {{PLURAL:$1|permite el siguiente tipo|permiten los siguientes tipos}} de archivos:",
 	"msu-upload-this": "Subir este archivo",

@@ -24,8 +24,8 @@ class AudioTransformOutput extends \MediaTransformOutput {
 	public function __construct($file, $parameters) {
 		$this->file = $file;
 		$this->parameters = $parameters;
-		$this->width = $parameters['width'];
-		$this->height = $parameters['height'];
+		$this->width = (isset($parameters['width']) ? $parameters['width'] : null);
+		$this->height = (isset($parameters['height']) ? $parameters['height'] : null);
 		$this->path = $file->getLocalRefPath();
 		$this->lang = false;
 		$this->page = $parameters['page'];
@@ -56,12 +56,26 @@ class AudioTransformOutput extends \MediaTransformOutput {
 	public function toHtml($options = []) {
 		$parameters = $this->parameters;
 
+		$style = [];
+		$style[] = "max-width: 100%;";
+		if (empty($options['no-dimensions'])) {
+			$parameters['width'] = $this->getWidth();
+			$style[] = "width: {$this->getWidth()}px;";
+		}
+
 		if (!empty($options['valign'])) {
-			$style = "vertical-align: {$options['valign']}";
+			$style[] = "vertical-align: {$options['valign']};";
 		}
 
 		if (!empty($options['img-class'])) {
 			$class = $options['img-class'];
+		}
+
+		if (!isset($parameters['start'])) {
+			$parameters['start'] = null;
+		}
+		if (!isset($parameters['end'])) {
+			$parameters['end'] = null;
 		}
 
 		$inOut = false;
@@ -75,7 +89,7 @@ class AudioTransformOutput extends \MediaTransformOutput {
 			}
 		}
 
-		$html = "<audio src='{$this->url}".($inOut !== false ? '#t='.implode(',', $inOut) : '')."'".(!empty($class) ? " class='{$class}'" : "").(!empty($style) ? " style='{$style}'" : "")." controls><a href='{$parameters['descriptionUrl']}'>{$parameters['descriptionUrl']}</a></audio>";
+		$html = "<audio src='{$this->url}".($inOut !== false ? '#t='.implode(',', $inOut) : '')."' width='{$this->getWidth()}'".(!empty($class) ? " class='{$class}'" : "").(!empty($style) ? " style='".implode(" ", $style)."'" : "")." controls><a href='{$parameters['descriptionUrl']}'>{$parameters['descriptionUrl']}</a></audio>";
 
 		return $html;
 	}

@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -63,7 +63,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 		// Yes, the use of getVal() and getText() is wanted, see bug T22365
 		$this->text = $request->getVal( 'wpTitle', $par );
 		$this->title = Title::newFromText( $this->text );
-		$this->reason = $request->getText( 'reason' );
+		$this->reason = $request->getText( 'wpReason' );
 		// Checkboxes that default being checked are tricky
 		$this->doSubpages = $request->getBool( 'subpages', !$request->wasPosted() );
 
@@ -176,13 +176,13 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 	protected function showForm() {
 		$this->getOutput()->addWikiMsg( 'pt-deletepage-intro' );
 
-		$subaction = array( 'name' => 'subaction' );
-		$formParams = array(
+		$subaction = [ 'name' => 'subaction' ];
+		$formParams = [
 			'method' => 'post',
 			'action' => $this->getPageTitle( $this->text )->getLocalURL()
-		);
+		];
 
-		$form = array();
+		$form = [];
 		$form[] = Xml::fieldset( $this->msg( 'pt-deletepage-any-legend' )->text() );
 		$form[] = Html::openElement( 'form', $formParams );
 		$form[] = Html::hidden( 'wpEditToken', $this->getUser()->getEditToken() );
@@ -196,7 +196,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 		$this->addInputLabel(
 			$form,
 			$this->msg( 'pt-deletepage-reason' )->text(),
-			'reason',
+			'wpReason', // For consistency with ?action=delete
 			60,
 			$this->reason
 		);
@@ -213,7 +213,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 	 * Shortcut for keeping the code at least a bit readable. Adds label and
 	 * input into $form array.
 	 *
-	 * @param array $form \list{String} Array where input element and label is appended.
+	 * @param array &$form \list{String} Array where input element and label is appended.
 	 * @param string $label Label text.
 	 * @param string $name Name attribute.
 	 * @param int|bool $size Size attribute of the input element. Default false.
@@ -221,7 +221,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 	 * @param array $attribs Extra attributes. Default empty array.
 	 */
 	protected function addInputLabel( &$form, $label, $name, $size = false, $text = false,
-		array $attribs = array()
+		array $attribs = []
 	) {
 		$br = Html::element( 'br' );
 		list( $label, $input ) = Xml::inputLabelSep( $label, $name, $name, $size, $text, $attribs );
@@ -277,15 +277,15 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 		$out->addWikiMsg( 'pt-deletepage-list-count', $this->getLanguage()->formatNum( $count ) );
 
 		$br = Html::element( 'br' );
-		$readonly = array( 'readonly' => 'readonly' );
+		$readonly = [ 'readonly' => 'readonly' ];
 
-		$subaction = array( 'name' => 'subaction' );
-		$formParams = array(
+		$subaction = [ 'name' => 'subaction' ];
+		$formParams = [
 			'method' => 'post',
 			'action' => $this->getPageTitle( $this->text )->getLocalURL()
-		);
+		];
 
-		$form = array();
+		$form = [];
 		if ( $this->singleLanguage() ) {
 			$form[] = Xml::fieldset( $this->msg( 'pt-deletepage-lang-legend' )->text() );
 		} else {
@@ -302,7 +302,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 		$this->addInputLabel(
 			$form,
 			$this->msg( 'pt-deletepage-reason' )->text(),
-			'reason',
+			'wpReason',
 			60,
 			$this->reason );
 		$form[] = Xml::checkLabel(
@@ -326,8 +326,8 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 	}
 
 	/**
-	 * @param $title Title
-	 * @param $enabled bool
+	 * @param Title $title
+	 * @param bool $enabled
 	 */
 	protected function printChangeLine( $title, $enabled = true ) {
 		if ( $enabled ) {
@@ -338,7 +338,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 	}
 
 	protected function performAction() {
-		$jobs = array();
+		$jobs = [];
 		$target = $this->title;
 		$base = $this->title->getPrefixedText();
 
@@ -397,7 +397,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 
 		$this->clearMetadata();
 		MessageGroups::singleton()->recache();
-		MessageIndexRebuildJob::newJob()->insert();
+		MessageIndexRebuildJob::newJob()->insertIntoJobQueue();
 
 		$this->getOutput()->addWikiMsg( 'pt-deletepage-started' );
 	}
@@ -446,7 +446,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 	 */
 	protected function getTranslationPages() {
 		if ( $this->singleLanguage() ) {
-			return array( $this->title );
+			return [ $this->title ];
 		}
 
 		if ( !isset( $this->translationPages ) ) {

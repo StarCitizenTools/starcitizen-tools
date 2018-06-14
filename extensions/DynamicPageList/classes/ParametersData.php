@@ -778,11 +778,11 @@ class ParametersData {
 		],
 		'updaterules' => [
 			'default'		=> null,
-			'permission'	=> ['dpl_param_update_rules']
+			'permission'	=> 'dpl_param_update_rules'
 		],
 		'deleterules' => [
 			'default'		=> null,
-			'permission'	=> ['dpl_param_delete_rules']
+			'permission'	=> 'dpl_param_delete_rules'
 		],
 
 		/**
@@ -797,7 +797,7 @@ class ParametersData {
 		],
 		'order' => [
 			'default'	=> 'ascending',
-			'values'	=> ['ascending', 'descending']
+			'values'	=> ['ascending', 'descending', 'asc', 'desc']
 		],
 		/**
 		 * we can specify something like "latin1_swedish_ci" for case insensitive sorting

@@ -1,7 +1,7 @@
 <div class="flow-board">
 	<div class="flow-topic-summary-container">
 		<div class="flow-topic-summary">
-			<form class="flow-edit-form" data-flow-initial-state="expanded" method="POST"
+			<form class="flow-edit-form" method="POST"
 				  action="
 					{{~#if isLocked~}}
 						{{~actions.unlock.url~}}
@@ -19,7 +19,7 @@
 				" />
 				<div class="flow-form-actions flow-form-collapsible">
 					<button data-role="submit"
-					        class="mw-ui-button mw-ui-constructive"
+					        class="mw-ui-button mw-ui-progressive"
 					>
 						{{#if isLocked}}
 							{{l10n "flow-topic-action-unlock-topic"}}
@@ -27,7 +27,6 @@
 							{{l10n "flow-topic-action-lock-topic"}}
 						{{/if}}
 					</button>
-					{{> flow_form_cancel_button }}
 					<small class="flow-terms-of-use plainlinks">
 						{{#if isLocked}}
 							{{l10nParse "flow-terms-of-use-unlock-topic"}}

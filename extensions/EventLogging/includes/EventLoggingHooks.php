@@ -17,18 +17,11 @@ class EventLoggingHooks {
 	 * configuration variable (if any).
 	 */
 	public static function onSetup() {
-		global $wgMemc;
-
-		if ( get_class( $wgMemc ) === 'EmptyBagOStuff' ) {
-			wfDebugLog( 'EventLogging', 'No suitable memcached driver found.' );
-		}
-
 		foreach ( [
 			'wgEventLoggingBaseUri',
-			'wgEventLoggingDBname',
-			'wgEventLoggingSchemaApiUri'
+			'wgEventLoggingSchemaApiUri',
 		] as $configVar ) {
-			if ( !isset( $GLOBALS[ $configVar ] ) || $GLOBALS[ $configVar ] === false ) {
+			if ( $GLOBALS[ $configVar ] === false ) {
 				wfDebugLog( 'EventLogging', "$configVar has not been configured." );
 			}
 		}
@@ -58,11 +51,15 @@ class EventLoggingHooks {
 	 *     $schemas[ 'MultimediaViewerNetworkPerformance' ] = 7917896;
 	 * };
 	 * @endcode
-	 * @par Example using extension.json
+	 * @par Example using extension.json (manifest_version 2)
 	 * @code
 	 * {
-	 *     "EventLoggingSchemas": {
-	 *         "MultimediaViewerNetworkPerformance": 7917896
+	 *     "attributes": {
+	 *         "EventLogging": {
+	 *             "Schemas": {
+	 *                 "MultimediaViewerNetworkPerformance": 7917896
+	 *             }
+	 *         }
 	 *     }
 	 * }
 	 * @endcode
@@ -94,15 +91,16 @@ class EventLoggingHooks {
 	 * @return bool
 	 */
 	public static function onResourceLoaderGetConfigVars( &$vars ) {
-		global $wgEventLoggingBaseUri;
+		global $wgEventLoggingBaseUri, $wgEventLoggingSchemaApiUri;
 
 		$vars[ 'wgEventLoggingBaseUri' ] = $wgEventLoggingBaseUri;
+		$vars[ 'wgEventLoggingSchemaApiUri' ] = $wgEventLoggingSchemaApiUri;
 		return true;
 	}
 
 	/**
 	 * @param array &$testModules
-	 * @param ResourceLoader $resourceLoader
+	 * @param ResourceLoader &$resourceLoader
 	 * @return bool
 	 */
 	public static function onResourceLoaderTestModules( &$testModules, &$resourceLoader ) {
@@ -112,6 +110,25 @@ class EventLoggingHooks {
 			'localBasePath' => __DIR__ . '/..',
 			'remoteExtPath' => 'EventLogging',
 		];
+		return true;
+	}
+
+	/**
+	 * @param User $user
+	 * @param array &$preferences
+	 */
+	public static function onGetPreferences( User $user, array &$preferences ) {
+		$preferences['eventlogging-display-web'] = [
+			'type' => 'api',
+		];
+	}
+
+	public static function onCanonicalNamespaces( &$namespaces ) {
+		if ( JsonSchemaHooks::isSchemaNamespaceEnabled() ) {
+			$namespaces[ NS_SCHEMA ] = 'Schema';
+			$namespaces[ NS_SCHEMA_TALK ] = 'Schema_talk';
+		}
+
 		return true;
 	}
 }

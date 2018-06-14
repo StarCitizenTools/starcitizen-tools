@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Termininja",
+			"Macofe",
+			"StanProg",
+			"ShockD"
+		]
+	},
+	"revisionslider-preference-disable": "Скриване на плъзгача на промените",
+	"revisionslider-toggle-label": "Преглед на историята",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|байт|байта}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|байт|байта}}",
+	"revisionslider-label-date": "Дата",
+	"revisionslider-label-page-size": "Размер на страницата",
+	"revisionslider-label-change-size": "Размер на промяната",
+	"revisionslider-label-comment": "Коментар",
+	"revisionslider-label-username": "{{GENDER:$1|Потребителско име}}",
+	"revisionslider-minoredit": "Това е малка промяна",
+	"revisionslider-toggle-title-expand": "Отваряне на салайдера на версии",
+	"revisionslider-toggle-title-collapse": "Свиване на слайдера на версии",
+	"revisionslider-turn-on-auto-expand-title": "Автоматично отворен слайдер на версии",
+	"revisionslider-turn-off-auto-expand-title": "Да не се отваря автоматично слайдера на версии",
+	"revisionslider-arrow-tooltip-newer": "Преглед на по-нови версии",
+	"revisionslider-arrow-tooltip-older": "Преглед на по-стари версии",
+	"revisionslider-show-help-tooltip": "Показва помощна информация",
+	"revisionslider-tutorial": "Ръководство за слайдера на версии",
+	"revisionslider-previous-dialog": "Назад",
+	"revisionslider-next-dialog": "Напред",
+	"revisionslider-close-dialog": "Затваряне"
+}

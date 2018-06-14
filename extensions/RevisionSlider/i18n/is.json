@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sveinn í Felli"
+		]
+	},
+	"revisionslider-page-size": "$1 {{PLURAL:$2|bæti}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bæti}}",
+	"revisionslider-label-date": "Dagsetning",
+	"revisionslider-label-page-size": "Blaðsíðustærð",
+	"revisionslider-label-change-size": "Breyta stærð",
+	"revisionslider-label-comment": "Athugasemd",
+	"revisionslider-label-username": "{{Gender:$1|Notandanafn}}:",
+	"revisionslider-minoredit": "Þetta er minniháttar breyting",
+	"revisionslider-show-help-tooltip": "Birta hjálpartexta",
+	"revisionslider-previous-dialog": "Fyrra",
+	"revisionslider-next-dialog": "Næsta",
+	"revisionslider-close-dialog": "Loka"
+}

@@ -47,8 +47,10 @@ class TopicListQuery extends AbstractQuery {
 			array_keys( $posts )
 		);
 		if ( $missing ) {
-			$needed = array();
+			$needed = [];
 			foreach ( $missing as $alpha ) {
+				wfDebugLog( 'Flow', __METHOD__ . ': Failed to load latest revision for post ID ' . $alpha );
+
 				// convert alpha back into UUID object
 				$needed[] = $allPostIds[$alpha];
 			}
@@ -56,11 +58,11 @@ class TopicListQuery extends AbstractQuery {
 		}
 
 		$this->loadMetadataBatch( $posts );
-		$results = array();
-		$replies = array();
+		$results = [];
+		$replies = [];
 		foreach ( $posts as $post ) {
 			try {
-				if ( !$this->permissions->isAllowed( $post, 'view' )  ) {
+				if ( !$this->permissions->isAllowed( $post, 'view' ) ) {
 					continue;
 				}
 				$row = new TopicRow;
@@ -89,7 +91,7 @@ class TopicListQuery extends AbstractQuery {
 
 		foreach ( $results as $result ) {
 			$alpha = $result->revision->getPostId()->getAlphadecimal();
-			$result->replies = isset( $replies[$alpha] ) ? $replies[$alpha] : array();
+			$result->replies = isset( $replies[$alpha] ) ? $replies[$alpha] : [];
 		}
 
 		return $results;
@@ -101,7 +103,7 @@ class TopicListQuery extends AbstractQuery {
 	 * @return UUID[]
 	 */
 	protected function getTopicIds( array $topicsIdsOrEntries ) {
-		$topicIds = array();
+		$topicIds = [];
 		foreach ( $topicsIdsOrEntries as $entry ) {
 			if ( $entry instanceof UUID ) {
 				$topicIds[] = $entry;
@@ -118,7 +120,7 @@ class TopicListQuery extends AbstractQuery {
 	 */
 	protected function collectPostIds( array $topicIds ) {
 		if ( !$topicIds ) {
-			return array();
+			return [];
 		}
 		// Get the full list of postId's necessary
 		$nodeList = $this->treeRepository->fetchSubtreeNodeList( $topicIds );
@@ -136,7 +138,12 @@ class TopicListQuery extends AbstractQuery {
 
 		// re-index by alphadecimal id
 		return array_combine(
-			array_map( function( UUID $x ) { return $x->getAlphadecimal(); }, $postIds ),
+			array_map(
+				function ( UUID $x ) {
+					return $x->getAlphadecimal();
+				},
+				$postIds
+			),
 			$postIds
 		);
 	}
@@ -146,7 +153,7 @@ class TopicListQuery extends AbstractQuery {
 	 * @return array
 	 */
 	protected function collectWatchStatus( $topicIds ) {
-		$ids = array();
+		$ids = [];
 		foreach ( $topicIds as $topicId ) {
 			$ids[] = $topicId->getAlphadecimal();
 		}
@@ -159,18 +166,18 @@ class TopicListQuery extends AbstractQuery {
 	 */
 	protected function collectSummary( $topicIds ) {
 		if ( !$topicIds ) {
-			return array();
+			return [];
 		}
-		$conds = array();
+		$conds = [];
 		foreach ( $topicIds as $topicId ) {
-			$conds[] = array( 'rev_type_id' => $topicId );
+			$conds[] = [ 'rev_type_id' => $topicId ];
 		}
-		$found = $this->storage->findMulti( 'PostSummary', $conds, array(
+		$found = $this->storage->findMulti( 'PostSummary', $conds, [
 			'sort' => 'rev_id',
 			'order' => 'DESC',
 			'limit' => 1,
-		) );
-		$result = array();
+		] );
+		$result = [];
 		foreach ( $found as $row ) {
 			$summary = reset( $row );
 			$result[$summary->getSummaryTargetId()->getAlphadecimal()] = $summary;
@@ -183,18 +190,18 @@ class TopicListQuery extends AbstractQuery {
 	 * @return PostRevision[] Indexed by alphadecimal post id
 	 */
 	protected function collectRevisions( array $postIds ) {
-		$queries = array();
+		$queries = [];
 		foreach ( $postIds as $postId ) {
-			$queries[] = array( 'rev_type_id' => $postId );
+			$queries[] = [ 'rev_type_id' => $postId ];
 		}
-		$found = $this->storage->findMulti( 'PostRevision', $queries, array(
+		$found = $this->storage->findMulti( 'PostRevision', $queries, [
 			'sort' => 'rev_id',
 			'order' => 'DESC',
 			'limit' => 1,
-		) );
+		] );
 
 		// index results by post id for later filtering
-		$result = array();
+		$result = [];
 		foreach ( $found as $row ) {
 			$revision = reset( $row );
 			$result[$revision->getPostId()->getAlphadecimal()] = $revision;
@@ -206,6 +213,8 @@ class TopicListQuery extends AbstractQuery {
 	/**
 	 * Override parent, we only load the most recent version, so just
 	 * return self.
+	 * @param AbstractRevision $revision
+	 * @return AbstractRevision
 	 */
 	protected function getCurrentRevision( AbstractRevision $revision ) {
 		return $revision;
@@ -217,7 +226,7 @@ class TopicListQuery extends AbstractQuery {
 	 */
 	protected function createFakePosts( array $missing ) {
 		$parents = $this->treeRepository->fetchParentMap( $missing );
-		$posts = array();
+		$posts = [];
 		foreach ( $missing as $uuid ) {
 			$alpha = $uuid->getAlphadecimal();
 			if ( !isset( $parents[$alpha] ) ) {

@@ -5,12 +5,14 @@
 		]
 	},
 	"commonsmetadata-desc": "הרחבת המאפיין \"extmetadata\" של ה־API למידע על תמונות כך שיכלול את המידע שמאוחסן בדפי התיאור של התמונות שמשתמשים בתבניות הנפוצות בוויקישיתוף",
-	"commonsmetadata-trackingcategory-no-license": "קבצים בלי רישיון שתכנה יכולה לקרוא",
-	"commonsmetadata-trackingcategory-no-license-desc": "לקובץ אין שום תבנית רישיון ש[{{MediaWiki:Commonsmetadata-doc-url}} תכנה יכולה לקרוא]",
-	"commonsmetadata-trackingcategory-no-description": "קבצים ללא תיאור שתכנה יכולה לקרוא",
-	"commonsmetadata-trackingcategory-no-description-desc": "לקובץ אין שום תבנית מידע ש[{{MediaWiki:Commonsmetadata-doc-url}} תכנה יכולה לקרוא], או ששדה התיאור שלו לו מולא.",
-	"commonsmetadata-trackingcategory-no-author": "קבצים ללא מידע על מחבר שתכנה יכולה לקרוא",
-	"commonsmetadata-trackingcategory-no-author-desc": "לקובץ הזה אין תבנית מידע ש[{{MediaWiki:Commonsmetadata-doc-url}} תכנה יכולה לקרוא], או ששדה המחבה לא מולא.",
-	"commonsmetadata-trackingcategory-no-source": "קבצים ללא מקור שתכנה יכולה לקרוא",
-	"commonsmetadata-trackingcategory-no-source-desc": "לקובץ הזה אין תבנית מידע ש[{{MediaWiki:Commonsmetadata-doc-url}} תכנה יכולה לקרוא] או ששדה המקור שלו לא מולא."
+	"commonsmetadata-trackingcategory-no-license": "קבצים בלי רישיון שתוכנה יכולה לקרוא",
+	"commonsmetadata-trackingcategory-no-license-desc": "לקובץ אין שום תבנית רישיון ש[{{MediaWiki:Commonsmetadata-doc-url}} תוכנה יכולה לקרוא]",
+	"commonsmetadata-trackingcategory-no-description": "קבצים ללא תיאור שתוכנה יכולה לקרוא",
+	"commonsmetadata-trackingcategory-no-description-desc": "לקובץ אין שום תבנית מידע ש[{{MediaWiki:Commonsmetadata-doc-url}} תוכנה יכולה לקרוא], או ששדה התיאור שלו לא מולא.",
+	"commonsmetadata-trackingcategory-no-author": "קבצים ללא מידע על מחבר שתוכנה יכולה לקרוא",
+	"commonsmetadata-trackingcategory-no-author-desc": "לקובץ הזה אין תבנית מידע ש[{{MediaWiki:Commonsmetadata-doc-url}} תוכנה יכולה לקרוא], או ששדה המחבה לא מולא.",
+	"commonsmetadata-trackingcategory-no-source": "קבצים ללא מקור שתוכנה יכולה לקרוא",
+	"commonsmetadata-trackingcategory-no-source-desc": "לקובץ הזה אין תבנית מידע ש[{{MediaWiki:Commonsmetadata-doc-url}} תוכנה יכולה לקרוא] או ששדה המקור שלו לא מולא.",
+	"commonsmetadata-trackingcategory-no-patent": "קבצים ללא פטנט שתוכנה יכולה לקרוא",
+	"commonsmetadata-trackingcategory-no-patent-desc": "לקובץ הזה אין תבנית פטנט [{{MediaWiki:Commonsmetadata-doc-url}} שתוכנה יכולה לקרוא]."
 }

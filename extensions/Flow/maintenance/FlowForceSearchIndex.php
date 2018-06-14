@@ -5,9 +5,9 @@ use Flow\Model\UUID;
 use Flow\Search\Connection;
 use Flow\Search\Updaters\AbstractUpdater;
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: dirname( __FILE__ ) . '/../../../maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
  * Similar to CirrusSearch's forceSearchIndex, this will force indexing of Flow
@@ -33,6 +33,8 @@ class FlowForceSearchIndex extends Maintenance {
 		$this->addOption( 'fromId', 'Start indexing at a specific revision id (inclusive).', false, true );
 		$this->addOption( 'toId', 'Stop indexing at a specific revision (inclusive).', false, true );
 		$this->addOption( 'namespace', 'Only index revisions in this given namespace', false, true );
+
+		$this->requireExtension( 'Flow' );
 	}
 
 	public function execute() {

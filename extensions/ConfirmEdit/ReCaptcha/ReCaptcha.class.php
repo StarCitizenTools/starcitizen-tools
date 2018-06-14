@@ -13,20 +13,28 @@ class ReCaptcha extends SimpleCaptcha {
 	/**
 	 * Displays the reCAPTCHA widget.
 	 * If $this->recaptcha_error is set, it will display an error in the widget.
-	 * @param OutputPage $out
+	 * @param int $tabIndex
+	 * @return array
 	 */
-	function getForm( OutputPage $out, $tabIndex = 1 ) {
+	function getFormInformation( $tabIndex = 1 ) {
 		global $wgReCaptchaPublicKey, $wgReCaptchaTheme;
 
+		wfDeprecated( 'ConfirmEdit module ReCaptcha', '1.28' );
 		$useHttps = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] == 'on' );
 		$js = 'var RecaptchaOptions = ' . Xml::encodeJsVar(
 			[ 'theme' => $wgReCaptchaTheme, 'tabindex' => $tabIndex ]
 		);
 
-		return Html::inlineScript( $js ) .
-			   recaptcha_get_html( $wgReCaptchaPublicKey, $this->recaptcha_error, $useHttps );
+		return [
+			'html' => Html::inlineScript( $js ) .
+				recaptcha_get_html( $wgReCaptchaPublicKey, $this->recaptcha_error, $useHttps )
+		];
 	}
 
+	/**
+	 * @param WebRequest $request
+	 * @return array
+	 */
 	protected function getCaptchaParamsFromRequest( WebRequest $request ) {
 		// API is hardwired to return captchaId and captchaWord,
 		// so use that if the standard two are empty
@@ -40,7 +48,7 @@ class ReCaptcha extends SimpleCaptcha {
 	 * Sets $this->recaptcha_error if the user is incorrect.
 	 * @param string $challenge Challenge value
 	 * @param string $response Response value
-	 * @return boolean
+	 * @return bool
 	 */
 	function passCaptcha( $challenge, $response ) {
 		global $wgReCaptchaPrivateKey, $wgRequest;
@@ -63,14 +71,19 @@ class ReCaptcha extends SimpleCaptcha {
 		$recaptcha_error = null;
 
 		return true;
-
 	}
 
+	/**
+	 * @param array &$resultArr
+	 */
 	function addCaptchaAPI( &$resultArr ) {
 		$resultArr['captcha'] = $this->describeCaptchaType();
 		$resultArr['captcha']['error'] = $this->recaptcha_error;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function describeCaptchaType() {
 		global $wgReCaptchaPublicKey;
 		return [
@@ -80,37 +93,28 @@ class ReCaptcha extends SimpleCaptcha {
 		];
 	}
 
+	/**
+	 * @param ApiBase &$module
+	 * @param array &$params
+	 * @param int $flags
+	 * @return bool
+	 */
 	public function APIGetAllowedParams( &$module, &$params, $flags ) {
 		if ( $flags && $this->isAPICaptchaModule( $module ) ) {
-			if ( defined( 'ApiBase::PARAM_HELP_MSG' ) ) {
-				$params['recaptcha_challenge_field'] = [
-					ApiBase::PARAM_HELP_MSG => 'recaptcha-apihelp-param-recaptcha_challenge_field',
-				];
-				$params['recaptcha_response_field'] = [
-					ApiBase::PARAM_HELP_MSG => 'recaptcha-apihelp-param-recaptcha_response_field',
-				];
-			} else {
-				// @todo: Remove this branch when support for MediaWiki < 1.25 is dropped
-				$params['recaptcha_challenge_field'] = null;
-				$params['recaptcha_response_field'] = null;
-			}
+			$params['recaptcha_challenge_field'] = [
+				ApiBase::PARAM_HELP_MSG => 'recaptcha-apihelp-param-recaptcha_challenge_field',
+			];
+			$params['recaptcha_response_field'] = [
+				ApiBase::PARAM_HELP_MSG => 'recaptcha-apihelp-param-recaptcha_response_field',
+			];
 		}
 
 		return true;
 	}
 
 	/**
-	 * @deprecated since MediaWiki 1.25
+	 * @return null
 	 */
-	public function APIGetParamDescription( &$module, &$desc ) {
-		if ( $this->isAPICaptchaModule( $module ) ) {
-			$desc['recaptcha_challenge_field'] = 'Field from the ReCaptcha widget';
-			$desc['recaptcha_response_field'] = 'Field from the ReCaptcha widget';
-		}
-
-		return true;
-	}
-
 	public function getError() {
 		// do not treat failed captcha attempts as errors
 		if ( in_array( $this->recaptcha_error, [
@@ -138,14 +142,28 @@ class ReCaptcha extends SimpleCaptcha {
 		return [];
 	}
 
+	/**
+	 * @param array $captchaData
+	 * @param string $id
+	 * @return Message
+	 */
 	public function getCaptchaInfo( $captchaData, $id ) {
 		return wfMessage( 'recaptcha-info' );
 	}
 
+	/**
+	 * @return ReCaptchaAuthenticationRequest
+	 */
 	public function createAuthenticationRequest() {
 		return new ReCaptchaAuthenticationRequest();
 	}
 
+	/**
+	 * @param array $requests
+	 * @param array $fieldInfo
+	 * @param array &$formDescriptor
+	 * @param string $action
+	 */
 	public function onAuthChangeFormFields(
 		array $requests, array $fieldInfo, array &$formDescriptor, $action
 	) {

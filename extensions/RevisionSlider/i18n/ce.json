@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Умар"
+		]
+	},
+	"revisionslider-preference-disable": "Ма гайта RevisionSlider",
+	"revisionslider-toggle-label": "Историн навигаци",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|байт}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|байт}}",
+	"revisionslider-label-date": "Терахь",
+	"revisionslider-label-page-size": "АгӀонан барам",
+	"revisionslider-label-change-size": "Хийцаман барам",
+	"revisionslider-label-comment": "Коммент",
+	"revisionslider-label-username": "{{GENDER:$1|Декъашхо}}",
+	"revisionslider-minoredit": "ХӀара жима нисдар ду",
+	"revisionslider-loading-failed": "Версийн слайдер гайта цаелий.",
+	"revisionslider-toggle-title-expand": "Версийн слайдер схьаелла",
+	"revisionslider-toggle-title-collapse": "Версийн слайдер дӀачӀагӀа",
+	"revisionslider-arrow-tooltip-newer": "Хьажа керла версеш",
+	"revisionslider-arrow-tooltip-older": "Хьажа кхин шира версеш",
+	"revisionslider-show-help-tooltip": "Нисдаран йоза гайта",
+	"revisionslider-previous-dialog": "Хьалха хиларг",
+	"revisionslider-next-dialog": "ТӀаьхьа йогӀург",
+	"revisionslider-close-dialog": "ДӀачӀагӀа"
+}

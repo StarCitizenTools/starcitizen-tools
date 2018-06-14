@@ -2,7 +2,7 @@
 
 namespace Flow\Data\Utils;
 
-use Flow\InvalidInputException;
+use Flow\InvalidParameterException;
 use Flow\Model\AbstractRevision;
 
 /**
@@ -18,11 +18,11 @@ class SortRevisionsByRevisionId {
 
 	/**
 	 * @param string $order ASC or DESC
-	 * @throws InvalidInputException
+	 * @throws InvalidParameterException
 	 */
 	public function __construct( $order ) {
 		if ( $order !== 'ASC' && $order !== 'DESC' ) {
-			throw new InvalidInputException( "Must specify ASC or DESC" );
+			throw new InvalidParameterException( "Must specify ASC or DESC" );
 		}
 
 		$this->order = $order;
@@ -33,6 +33,7 @@ class SortRevisionsByRevisionId {
 	 *
 	 * @param AbstractRevision $a
 	 * @param AbstractRevision $b
+	 * @return int
 	 */
 	public function __invoke( AbstractRevision $a, AbstractRevision $b ) {
 		$aId = $a->getRevisionId()->getAlphadecimal();

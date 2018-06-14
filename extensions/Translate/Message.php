@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2008-2010, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -19,17 +19,17 @@ abstract class TMessage {
 	/// \string Committed in-file translation.
 	protected $infile;
 	/// \list{String} Message tags.
-	protected $tags = array();
+	protected $tags = [];
 	/// \array Message properties.
-	protected $props = array();
+	protected $props = [];
 	/// \list{String} Message reviewers.
-	protected $reviewers = array();
+	protected $reviewers = [];
 
 	/**
 	 * Creates new message object.
 	 *
-	 * @param $key string Unique key identifying this message.
-	 * @param $definition string The authoritave definition of this message.
+	 * @param string $key Unique key identifying this message.
+	 * @param string $definition The authoritave definition of this message.
 	 */
 	public function __construct( $key, $definition ) {
 		$this->key = $key;
@@ -60,7 +60,7 @@ abstract class TMessage {
 
 	/**
 	 * Set the committed translation.
-	 * @param $text \string
+	 * @param \string $text
 	 */
 	public function setInfile( $text ) {
 		$this->infile = $text;
@@ -76,7 +76,7 @@ abstract class TMessage {
 
 	/**
 	 * Add a tag for this message.
-	 * @param $tag \string
+	 * @param \string $tag
 	 */
 	public function addTag( $tag ) {
 		$this->tags[] = $tag;
@@ -84,7 +84,7 @@ abstract class TMessage {
 
 	/**
 	 * Check if this message has a given tag.
-	 * @param $tag \string
+	 * @param \string $tag
 	 * @return \bool
 	 */
 	public function hasTag( $tag ) {
@@ -105,7 +105,7 @@ abstract class TMessage {
 
 	public function appendProperty( $key, $value ) {
 		if ( !isset( $this->props[$key] ) ) {
-			$this->props[$key] = array();
+			$this->props[$key] = [];
 		}
 		$this->props[$key][] = $value;
 	}
@@ -131,10 +131,10 @@ abstract class TMessage {
  */
 class ThinMessage extends TMessage {
 	// This maps properties to fields in the database result row
-	protected static $propertyMap = array(
+	protected static $propertyMap = [
 		'last-translator-text' => 'rev_user_text',
 		'last-translator-id' => 'rev_user',
-	);
+	];
 
 	/**
 	 * @var stdClass Database Result Row

@@ -2,12 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"George Animal",
-			"Bikarhêner"
+			"Bikarhêner",
+			"Ghybu"
 		]
 	},
-	"babel": "Agahiyên bikarhênerê Babîl'ê",
+	"babel": "Agahiyên bikarhênerê Babîlê",
 	"babel-url": "Project:Babîl",
-	"babel-footer-url": "ːKategorîːBabîl - Bikarhênerên li gorî zimanê",
+	"babel-footer-url": ":Kategorî:Babîl - Bikarhênerên li gorî zimanê",
+	"babel-N": "Zimanê [[$1|zikmakî]] yê {{GENDER:{{BASEPAGENAME}}|vî bikarhênerî|vê bikarhênerê|vî/vê bikarhênerî/ê}} [[$2|$3]] ye.",
 	"babel-template": "Template:$1",
-	"babel-footer": "Bikarhêner li gorî ziman"
+	"babel-footer": "Bikarhêner li gorî zimanê"
 }

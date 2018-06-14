@@ -26,5 +26,11 @@
 		"BeforePageDisplay": [
 			"WikiSEO::modifyHTML"
 		]
+	},
+	"config": {
+		"GoogleSiteVerificationKey": "",
+		"FacebookAdmins": [],
+		"FacebookAppID": "",
+		"AddJSONLD": true
 	}
 }

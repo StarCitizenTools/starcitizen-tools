@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"MIKHEIL",
+			"Macofe",
+			"David1010",
+			"Otogi"
+		]
+	},
+	"revisionslider": "ვერსიის სლაიდერი",
+	"revisionslider-preference-disable": "არ აჩვენო RevisionSlider",
+	"revisionslider-toggle-label": "ისტორიის გადახედვა",
+	"revisionslider-label-date": "თარიღი",
+	"revisionslider-label-page-size": "გვერდის ზომა",
+	"revisionslider-label-change-size": "ზომის შეცვლა",
+	"revisionslider-label-comment": "კომენტარი",
+	"revisionslider-minoredit": "ეს არის მცირე რედაქტირება",
+	"revisionslider-loading-failed": "ვერსიის სლაიდერის ჩატვირთვა ვერ მოხერხდა.",
+	"revisionslider-toggle-title-expand": "ვერსიის სლაიდერის გახსნა",
+	"revisionslider-toggle-title-collapse": "ვერსიის სლაიდერის დახურვა",
+	"revisionslider-arrow-tooltip-newer": "ახალი ვერსიების ხილვა",
+	"revisionslider-arrow-tooltip-older": "ძველი ვერსიების ხილვა",
+	"revisionslider-show-help-tooltip": "იხილეთ დახმარების ტექსტი",
+	"revisionslider-help-dialog-slide1": "ვერსიის სლაიდერი გეხმარებათ ნავიგაციაში და საშუალებას გაძლევთ შეადაროთ გვერდის ვერსიები. ის დაფუძნებულია გერმანულენოვანი საზოგადოების ტექნიკური თხოვნების სიაში არსებულ [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider საზოგადოებრივ მოთხოვნებზე]. გამოხმაურებისთვის მოგვწერეთ [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider აქ].",
+	"revisionslider-help-dialog-slide2": "თითოეული სვეტი გვერდის ერთ ვერსიას შეესაბამება. ხაზის ზემოთ მოცემული სვეტები გვერდის ზომის ზრდას აჩვენებენ, ხოლო ხაზის ქვემოთ კი კლებას. ნახატზე, ვერსია 1 აჩვენებს შიგთავსის დამატებას, ხოლო ვერსია 2 შიგთავსის წაშლას.",
+	"revisionslider-help-dialog-slide4": "გვერდის ისტორიაში გადასაადგილებლად ან გვერდის უფრო ძველი და ახალი ვერსიების სანახავად გამოიყენეთ მარცხენა და მარჯვენა ისრები.",
+	"revisionslider-tutorial": "ვერსიის სლაიდერის სახელმძღვანელო",
+	"revisionslider-next-dialog": "შემდეგი"
+}

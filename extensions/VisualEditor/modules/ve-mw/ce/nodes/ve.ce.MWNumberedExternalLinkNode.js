@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWNumberedExternalLinkNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,9 +15,9 @@
  * @param {ve.dm.MWNumberedExternalLinkNode} model Model to observe
  * @param {Object} [config] Configuration options
  */
-ve.ce.MWNumberedExternalLinkNode = function VeCeMWNumberedExternalLinkNode( model, config ) {
+ve.ce.MWNumberedExternalLinkNode = function VeCeMWNumberedExternalLinkNode() {
 	// Parent constructor
-	ve.ce.LeafNode.call( this, model, config );
+	ve.ce.MWNumberedExternalLinkNode.super.apply( this, arguments );
 
 	// Mixin constructors
 	ve.ce.FocusableNode.call( this );
@@ -41,6 +41,7 @@ ve.ce.MWNumberedExternalLinkNode = function VeCeMWNumberedExternalLinkNode( mode
 	this.$link = $( '<a>' )
 		// CSS for numbering needs rel=mw:ExtLink
 		.attr( 'rel', 'mw:ExtLink' )
+		// TODO: Remove when fixed upstream in Parsoid (T58756)
 		.addClass( 'external' )
 		.appendTo( this.$element );
 

@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -13,27 +13,28 @@
 class TranslateHooks {
 	/**
 	 * Hook: ResourceLoaderTestModules
+	 * @param array &$modules
 	 */
 	public static function onResourceLoaderTestModules( array &$modules ) {
-		$modules['qunit']['ext.translate.parsers.test'] = array(
-			'scripts' => array( 'tests/qunit/ext.translate.parsers.test.js' ),
-			'dependencies' => array( 'ext.translate.parsers' ),
+		$modules['qunit']['ext.translate.parsers.test'] = [
+			'scripts' => [ 'tests/qunit/ext.translate.parsers.test.js' ],
+			'dependencies' => [ 'ext.translate.parsers' ],
 			'localBasePath' => __DIR__,
 			'remoteExtPath' => 'Translate',
-		);
+		];
 
-		$modules['qunit']['ext.translate.special.pagemigration.test'] = array(
-			'scripts' => array( 'tests/qunit/ext.translate.special.pagemigration.test.js' ),
-			'dependencies' => array( 'ext.translate.special.pagemigration' ),
+		$modules['qunit']['ext.translate.special.pagemigration.test'] = [
+			'scripts' => [ 'tests/qunit/ext.translate.special.pagemigration.test.js' ],
+			'dependencies' => [ 'ext.translate.special.pagemigration' ],
 			'localBasePath' => __DIR__,
 			'remoteExtPath' => 'Translate',
-		);
+		];
 	}
 
 	/**
 	 * Hook: CanonicalNamespaces
 	 *
-	 * @param array $list
+	 * @param array &$list
 	 */
 	public static function setupNamespaces( array &$list ) {
 		global $wgPageTranslationNamespace, $wgNamespaceRobotPolicies;
@@ -96,20 +97,21 @@ class TranslateHooks {
 				'PageTranslationLogFormatter';
 			$wgLogActionsHandlers['pagetranslation/associate'] = 'PageTranslationLogFormatter';
 			$wgLogActionsHandlers['pagetranslation/dissociate'] = 'PageTranslationLogFormatter';
-			$wgActionFilteredLogs['pagetranslation'] = array(
-				'mark' => array( 'mark' ),
-				'unmark' => array( 'unmark' ),
-				'move' => array( 'moveok', 'movenok' ),
-				'delete' => array( 'deletefok', 'deletefnok', 'deletelok', 'deletelnok' ),
-				'encourage' => array( 'encourage' ),
-				'discourage' => array( 'discourage' ),
-				'prioritylanguages' => array( 'prioritylanguages' ),
-				'aggregategroups' => array( 'associate', 'dissociate' ),
-			);
+			$wgActionFilteredLogs['pagetranslation'] = [
+				'mark' => [ 'mark' ],
+				'unmark' => [ 'unmark' ],
+				'move' => [ 'moveok', 'movenok' ],
+				'delete' => [ 'deletefok', 'deletefnok', 'deletelok', 'deletelnok' ],
+				'encourage' => [ 'encourage' ],
+				'discourage' => [ 'discourage' ],
+				'prioritylanguages' => [ 'prioritylanguages' ],
+				'aggregategroups' => [ 'associate', 'dissociate' ],
+			];
 
 			global $wgJobClasses;
 			$wgJobClasses['TranslateRenderJob'] = 'TranslateRenderJob';
 			$wgJobClasses['RenderJob'] = 'TranslateRenderJob';
+			$wgJobClasses['TranslatablePageMoveJob'] = 'TranslatablePageMoveJob';
 			$wgJobClasses['TranslateMoveJob'] = 'TranslateMoveJob';
 			$wgJobClasses['MoveJob'] = 'TranslateMoveJob';
 			$wgJobClasses['TranslateDeleteJob'] = 'TranslateDeleteJob';
@@ -131,7 +133,7 @@ class TranslateHooks {
 			$wgNamespacesWithSubpages[NS_TRANSLATIONS_TALK] = true;
 
 			// Standard protection and register it for filtering
-			$wgNamespaceProtection[NS_TRANSLATIONS] = array( 'translate' );
+			$wgNamespaceProtection[NS_TRANSLATIONS] = [ 'translate' ];
 			$wgTranslateMessageNamespaces[] = NS_TRANSLATIONS;
 
 			/// Page translation hooks
@@ -154,6 +156,8 @@ class TranslateHooks {
 
 			// Strip \<translate> tags etc. from source pages when rendering
 			$wgHooks['ParserBeforeStrip'][] = 'PageTranslationHooks::renderTagPage';
+			$wgHooks['ParserOutputPostCacheTransform'][] =
+				'PageTranslationHooks::onParserOutputPostCacheTransform';
 
 			// Set the page content language
 			$wgHooks['PageContentLanguage'][] = 'PageTranslationHooks::onPageContentLanguage';
@@ -230,7 +234,7 @@ class TranslateHooks {
 	 * Hook: UserGetReservedNames
 	 * Prevents anyone from registering or logging in as FuzzyBot
 	 *
-	 * @param array $names
+	 * @param array &$names
 	 */
 	public static function onUserGetReservedNames( array &$names ) {
 		global $wgTranslateFuzzyBotName;
@@ -257,7 +261,7 @@ class TranslateHooks {
 			$vars->setLazyLoadVar(
 				'translate_source_text',
 				'translate-get-source',
-				array( 'handle' => $handle )
+				[ 'handle' => $handle ]
 			);
 		}
 	}
@@ -304,13 +308,13 @@ class TranslateHooks {
 	 */
 	public static function setupParserHooks( Parser $parser ) {
 		// For nice language list in-page
-		$parser->setHook( 'languages', array( 'PageTranslationHooks', 'languages' ) );
+		$parser->setHook( 'languages', [ 'PageTranslationHooks', 'languages' ] );
 	}
 
 	/**
 	 * Hook: UnitTestsList
 	 *
-	 * @param array $files
+	 * @param array &$files
 	 */
 	public static function setupUnitTests( array &$files ) {
 		$dir = __DIR__ . '/tests/phpunit';
@@ -333,97 +337,98 @@ class TranslateHooks {
 	public static function schemaUpdates( DatabaseUpdater $updater ) {
 		$dir = __DIR__ . '/sql';
 
-		$updater->addExtensionUpdate( array(
+		$updater->addExtensionUpdate( [
 			'addTable',
 			'translate_sections',
 			"$dir/translate_sections.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addField',
 			'translate_sections',
 			'trs_order',
 			"$dir/translate_sections-trs_order.patch.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addTable',
 			'revtag', "$dir/revtag.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addTable',
 			'translate_groupstats',
 			"$dir/translate_groupstats.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addIndex',
 			'translate_sections',
 			'trs_page_order',
 			"$dir/translate_sections-indexchange.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'dropIndex',
 			'translate_sections',
 			'trs_page',
 			"$dir/translate_sections-indexchange2.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addTable',
 			'translate_reviews',
 			"$dir/translate_reviews.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addTable',
 			'translate_groupreviews',
 			"$dir/translate_groupreviews.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addTable',
 			'translate_tms',
 			"$dir/translate_tm.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addTable',
 			'translate_metadata',
 			"$dir/translate_metadata.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addTable', 'translate_messageindex',
 			"$dir/translate_messageindex.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addIndex',
 			'translate_groupstats',
 			'tgs_lang',
 			"$dir/translate_groupstats-indexchange.sql",
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addField', 'translate_groupstats',
 			'tgs_proofread',
 			"$dir/translate_groupstats-proofread.sql",
 			true
-		) );
+		] );
 
-		$updater->addExtensionUpdate( array(
+		$updater->addExtensionUpdate( [
 			'addTable',
 			'translate_stash',
 			"$dir/translate_stash.sql",
 			true
-		) );
+		] );
 	}
 
 	/**
 	 * Hook: ParserTestTables
+	 * @param array &$tables
 	 */
 	public static function parserTestTables( array &$tables ) {
 		$tables[] = 'revtag';
@@ -437,7 +442,7 @@ class TranslateHooks {
 	 * Set the correct page content language for translation units.
 	 *
 	 * @param Title $title
-	 * @param string $pageLang
+	 * @param Language &$pageLang
 	 */
 	public static function onPageContentLanguage( Title $title, &$pageLang ) {
 		$handle = new MessageHandle( $title );
@@ -449,6 +454,8 @@ class TranslateHooks {
 	/**
 	 * Hook: LanguageGetTranslatedLanguageNames
 	 * Hook: TranslateSupportedLanguages
+	 * @param array &$names
+	 * @param string $code
 	 */
 	public static function translateMessageDocumentationLanguage( array &$names, $code ) {
 		global $wgTranslateDocumentationLanguageCode;
@@ -468,15 +475,16 @@ class TranslateHooks {
 
 	/**
 	 * Hook: SpecialSearchProfiles
+	 * @param array &$profiles
 	 */
 	public static function searchProfile( array &$profiles ) {
 		global $wgTranslateMessageNamespaces;
-		$insert = array();
-		$insert['translation'] = array(
+		$insert = [];
+		$insert['translation'] = [
 			'message' => 'translate-searchprofile',
 			'tooltip' => 'translate-searchprofile-tooltip',
 			'namespaces' => $wgTranslateMessageNamespaces,
-		);
+		];
 
 		// Insert translations before 'all'
 		$index = array_search( 'all', array_keys( $profiles ) );
@@ -496,6 +504,12 @@ class TranslateHooks {
 
 	/**
 	 * Hook: SpecialSearchProfileForm
+	 * @param SpecialSearch $search
+	 * @param string &$form
+	 * @param string $profile
+	 * @param string $term
+	 * @param array $opts
+	 * @return bool
 	 */
 	public static function searchProfileForm(
 		SpecialSearch $search,
@@ -511,7 +525,7 @@ class TranslateHooks {
 		$server = TTMServer::primary();
 		if ( TTMServer::primary() instanceof SearchableTTMServer ) {
 			$href = SpecialPage::getTitleFor( 'SearchTranslations' )
-				->getFullUrl( array( 'query' => $term ) );
+				->getFullUrl( [ 'query' => $term ] );
 			$wrapper = new RawMessage( '<div class="successbox plainlinks">$1</div>' );
 			$form = $wrapper
 				->params( $search->msg( 'translate-searchprofile-note', $href )->plain() )
@@ -549,7 +563,7 @@ class TranslateHooks {
 			wfMessage( 'translate-search-languagefilter' )->text(),
 			'languagefilter'
 		) . '&#160;';
-		$params = array( 'id' => 'mw-searchoptions' );
+		$params = [ 'id' => 'mw-searchoptions' ];
 
 		$form = Xml::fieldset( false, false, $params ) .
 			$hidden . $label . $selector .
@@ -560,6 +574,9 @@ class TranslateHooks {
 
 	/**
 	 * Hook: SpecialSearchSetupEngine
+	 * @param SpecialSearch $search
+	 * @param string $profile
+	 * @param SearchEngine $engine
 	 */
 	public static function searchProfileSetupEngine(
 		SpecialSearch $search,
@@ -580,6 +597,9 @@ class TranslateHooks {
 
 	/**
 	 * Hook: Translate:MessageGroupStats:isIncluded
+	 * @param int $id
+	 * @param string $code
+	 * @return bool
 	 */
 	public static function hideDiscouragedFromStats( $id, $code ) {
 		// Return true to keep, false to exclude
@@ -588,6 +608,9 @@ class TranslateHooks {
 
 	/**
 	 * Hook: Translate:MessageGroupStats:isIncluded
+	 * @param int $id
+	 * @param string $code
+	 * @return false
 	 */
 	public static function hideRestrictedFromStats( $id, $code ) {
 		$filterLangs = TranslateMetadata::get( $id, 'prioritylangs' );
@@ -604,11 +627,12 @@ class TranslateHooks {
 
 	/**
 	 * Hook: LinksUpdate
+	 * @param LinksUpdate $updater
 	 */
 	public static function preventCategorization( LinksUpdate $updater ) {
 		$handle = new MessageHandle( $updater->getTitle() );
 		if ( $handle->isMessageNamespace() && !$handle->isDoc() ) {
-			$updater->mCategories = array();
+			$updater->mCategories = [];
 		}
 	}
 
@@ -617,14 +641,15 @@ class TranslateHooks {
 	 *
 	 * Adds $wgTranslateDocumentationLanguageCode to ResourceLoader configuration
 	 * when Special:Translate is shown.
+	 * @param array &$vars
+	 * @param OutputPage $out
 	 */
 	public static function addConfig( array &$vars, OutputPage $out ) {
 		$request = $out->getRequest();
 		$title = $out->getTitle();
 		list( $alias, ) = SpecialPageFactory::resolveAlias( $title->getText() );
 
-		if ( SpecialTranslate::isBeta( $request )
-			&& $title->isSpecialPage()
+		if ( $title->isSpecialPage()
 			&& ( $alias === 'Translate'
 				|| $alias === 'TranslationStash'
 				|| $alias === 'SearchTranslations' )
@@ -643,6 +668,7 @@ class TranslateHooks {
 
 	/**
 	 * Hook: AdminLinks
+	 * @param ALTree $tree
 	 */
 	public static function onAdminLinks( ALTree $tree ) {
 		global $wgTranslateUseSandbox;
@@ -660,10 +686,10 @@ class TranslateHooks {
 	 *
 	 * @var array
 	 */
-	private static $userMergeTables = array(
+	private static $userMergeTables = [
 		'translate_stash' => 'ts_user',
 		'translate_reviews' => 'trr_user',
-	);
+	];
 
 	/**
 	 * Hook: MergeAccountFromTo
@@ -681,10 +707,10 @@ class TranslateHooks {
 			if ( $dbw->tableExists( $table ) ) {
 				$dbw->update(
 					$table,
-					array( $field => $newUser->getId() ),
-					array( $field => $oldUser->getId() ),
+					[ $field => $newUser->getId() ],
+					[ $field => $oldUser->getId() ],
 					__METHOD__,
-					array( 'IGNORE' )
+					[ 'IGNORE' ]
 				);
 			}
 		}
@@ -704,7 +730,7 @@ class TranslateHooks {
 			if ( $dbw->tableExists( $table ) ) {
 				$dbw->delete(
 					$table,
-					array( $field => $oldUser->getId() ),
+					[ $field => $oldUser->getId() ],
 					__METHOD__
 				);
 			}
@@ -715,6 +741,10 @@ class TranslateHooks {
 	 * Hook: AbortEmailNotification
 	 *
 	 * False aborts the email.
+	 * @param User $editor
+	 * @param Title $title
+	 * @param RecentChange $rc
+	 * @return bool
 	 */
 	public static function onAbortEmailNotificationReview(
 		User $editor,
@@ -761,6 +791,7 @@ class TranslateHooks {
 
 	/**
 	 * Hook: ParserFirstCallInit
+	 * @param Parser $parser
 	 */
 	public static function setupTranslateParserFunction( Parser $parser ) {
 		$parser->setFunctionHook( 'translation', 'TranslateHooks::translateRenderParserFunction' );
@@ -775,5 +806,20 @@ class TranslateHooks {
 			return '/' . $code;
 		}
 		return '';
+	}
+
+	public static function onResourceLoaderRegisterModules( ResourceLoader $resourceLoader ) {
+		$modules = [];
+		$modules['ext.translate.recentgroups'] = [
+			'scripts' => 'resources/js/ext.translate.recentgroups.js',
+			'dependencies' => [
+				'mediawiki.storage'
+			],
+			'localBasePath' => __DIR__,
+			'remoteExtPath' => 'Translate',
+			'targets' => [ 'desktop', 'mobile' ],
+		];
+
+		$resourceLoader->register( $modules );
 	}
 }

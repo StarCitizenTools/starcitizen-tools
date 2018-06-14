@@ -1,17 +1,19 @@
 /*!
  * VisualEditor standalone demo
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
-new ve.init.sa.Platform( ve.messagePaths ).initialize().done( function () {
+new ve.init.sa.Platform( ve.messagePaths ).getInitializedPromise().done( function () {
 
 	var $toolbar = $( '.ve-demo-targetToolbar' ),
 		$editor = $( '.ve-demo-editor' ),
+		// eslint-disable-next-line new-cap
 		target = new ve.demo.target(),
 		hashChanging = false,
+		$divider = $( '<span>' ).addClass( 've-demo-toolbar-divider' ).text( '\u00a0' ),
 
-		currentLang = $.i18n().locale,
+		currentLang = ve.init.platform.getUserLanguages()[ 0 ],
 		currentDir = target.$element.css( 'direction' ) || 'ltr',
 		device = ve.demo.target === ve.init.sa.DesktopTarget ? 'desktop' : 'mobile',
 
@@ -21,12 +23,8 @@ new ve.init.sa.Platform( ve.messagePaths ).initialize().done( function () {
 			label: 'Add surface'
 		} ),
 
-		messageKeyButton = new OO.ui.ButtonWidget( {
-			icon: 'textLanguage',
-			label: 'Lang keys'
-		} ),
 		languageInput = new ve.ui.LanguageInputWidget( {
-			requireDir: true,
+			dirInput: 'no-auto',
 			hideCodeInput: true,
 			availableLanguages: ve.availableLanguages,
 			dialogManager: new OO.ui.WindowManager( { factory: ve.ui.windowFactory, classes: [ 've-demo-languageSearchDialogManager' ] } )
@@ -35,6 +33,23 @@ new ve.init.sa.Platform( ve.messagePaths ).initialize().done( function () {
 			new OO.ui.ButtonOptionWidget( { data: 'desktop', label: 'Desktop' } ),
 			new OO.ui.ButtonOptionWidget( { data: 'mobile', label: 'Mobile' } )
 		] );
+
+	// HACK: Prepend a qqx/message keys option to the list
+	languageInput.dialogs.on( 'opening', function ( window, opening ) {
+		opening.then( function () {
+			var searchWidget = languageInput.dialogs.currentWindow.searchWidget;
+			searchWidget.filteredLanguageResultWidgets.unshift(
+				new ve.ui.LanguageResultWidget( {
+					data: {
+						code: 'qqx',
+						name: 'Message keys',
+						autonym: 'Message keys'
+					}
+				} )
+			);
+			searchWidget.addResults();
+		} );
+	} );
 
 	function updateStylesFromDir() {
 		var oldDir = currentDir === 'ltr' ? 'rtl' : 'ltr';
@@ -58,18 +73,9 @@ new ve.init.sa.Platform( ve.messagePaths ).initialize().done( function () {
 		location.href = location.href.replace( device, item.getData() );
 	} );
 
-	addSurfaceContainerButton.on( 'click', function () {
-		addSurfaceContainer();
-	} );
-
-	messageKeyButton.on( 'click', function () {
-		languageInput.setLangAndDir( 'qqx', currentDir );
-	} );
-
 	languageInput.setLangAndDir( currentLang, currentDir );
 	// Dir doesn't change on init but styles need to be set
 	updateStylesFromDir();
-	target.$element.attr( 'lang', currentLang );
 
 	languageInput.on( 'change', function ( lang, dir ) {
 		if ( dir === currentDir && lang !== 'qqx' && ve.availableLanguages.indexOf( lang ) === -1 ) {
@@ -93,6 +99,7 @@ new ve.init.sa.Platform( ve.messagePaths ).initialize().done( function () {
 		OO.ui.msg = ve.init.platform.getMessage.bind( ve.init.platform );
 
 		// HACK: Re-initialize page to load message files
+		ve.init.target.teardownToolbar();
 		ve.init.platform.initialize().done( function () {
 			var i;
 			for ( i = 0; i < ve.demo.surfaceContainers.length; i++ ) {
@@ -106,10 +113,9 @@ new ve.init.sa.Platform( ve.messagePaths ).initialize().done( function () {
 	$toolbar.append(
 		$( '<div>' ).addClass( 've-demo-toolbar-commands' ).append(
 			addSurfaceContainerButton.$element,
-			$( '<span class="ve-demo-toolbar-divider">&nbsp;</span>' ),
-			messageKeyButton.$element,
+			$divider.clone(),
 			languageInput.$element,
-			$( '<span class="ve-demo-toolbar-divider">&nbsp;</span>' ),
+			$divider.clone(),
 			deviceSelect.$element
 		)
 	);
@@ -123,7 +129,7 @@ new ve.init.sa.Platform( ve.messagePaths ).initialize().done( function () {
 		}
 		if ( history.replaceState ) {
 			for ( i = 0; i < ve.demo.surfaceContainers.length; i++ ) {
-				pages.push( ve.demo.surfaceContainers[ i ].pageMenu.getSelectedItem().getData() );
+				pages.push( ve.demo.surfaceContainers[ i ].pageMenu.findSelectedItem().getData() );
 			}
 			history.replaceState( null, document.title, '#!' + pages.join( ',' ) );
 		}
@@ -133,7 +139,7 @@ new ve.init.sa.Platform( ve.messagePaths ).initialize().done( function () {
 		var surfaceContainer;
 
 		if ( !page && ve.demo.surfaceContainers.length ) {
-			page = ve.demo.surfaceContainers[ ve.demo.surfaceContainers.length - 1 ].pageMenu.getSelectedItem().getData();
+			page = ve.demo.surfaceContainers[ ve.demo.surfaceContainers.length - 1 ].pageMenu.findSelectedItem().getData();
 		}
 
 		surfaceContainer = new ve.demo.SurfaceContainer( target, page, currentLang, currentDir );
@@ -142,9 +148,13 @@ new ve.init.sa.Platform( ve.messagePaths ).initialize().done( function () {
 		target.$element.append( surfaceContainer.$element );
 	}
 
+	addSurfaceContainerButton.on( 'click', function () {
+		addSurfaceContainer();
+	} );
+
 	function createSurfacesFromHash( hash ) {
 		var i, pages = [];
-		if ( /^#!(?:pages|localStorage)\/.+$/.test( hash ) ) {
+		if ( /^#!(?:pages|localStorage|sessionStorage)\/.+$/.test( hash ) ) {
 			pages = hash.slice( 2 ).split( ',' );
 		}
 		if ( pages.length ) {

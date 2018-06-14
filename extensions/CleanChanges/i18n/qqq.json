@@ -5,11 +5,12 @@
 			"Jon Harald Søby",
 			"Meno25",
 			"Purodha",
-			"Shirayuki"
+			"Shirayuki",
+			"Umherirrender"
 		]
 	},
 	"cleanchanges-changerightslink": "Link text for a link in the recent changes page to manage user rights for a user.\nIt is shown after clicking on the \"Show user links\"-picture if you are allowed to manage user rights.",
-	"cleanchanges-desc": "Shown in [[Special:Version]]",
+	"cleanchanges-desc": "{{desc|name=CleanChanges|url=https://www.mediawiki.org/wiki/Extension:CleanChanges}}",
 	"cleanchanges-language": "{{Identical|Language}}",
 	"cleanchanges-language-na": "Used in the trailer selection of [[Special:RecentChanges]] to not filter on any trailer.\n\n{{Identical|All}}",
 	"cleanchanges-users": "Used as label for \"Users\" input box.\n\n\"Sep: |\" stands for \"Separate with |\" or \"|-separated\".",

@@ -1,14 +1,14 @@
 /*!
  * VisualEditor DataModel Null Selection tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.NullSelection' );
 
 /* Tests */
 
-QUnit.test( 'Construction and getters (getDocument, getRanges)', 3, function ( assert ) {
+QUnit.test( 'Construction and getters (getDocument, getRanges)', function ( assert ) {
 	var dummyDoc = { a: 1 },
 		selection = new ve.dm.NullSelection( dummyDoc );
 
@@ -17,7 +17,7 @@ QUnit.test( 'Construction and getters (getDocument, getRanges)', 3, function ( a
 	assert.strictEqual( selection.getName(), 'null', 'getName' );
 } );
 
-QUnit.test( 'Basic methods (clone, collapse*, isCollased, equals, isNull)', 9, function ( assert ) {
+QUnit.test( 'Basic methods (clone, collapse*, isCollased, equals, isNull)', function ( assert ) {
 	var dummyDoc = { a: 1 },
 		dummyDoc2 = { a: 1 },
 		selection = new ve.dm.NullSelection( dummyDoc ),
@@ -34,7 +34,7 @@ QUnit.test( 'Basic methods (clone, collapse*, isCollased, equals, isNull)', 9, f
 	assert.strictEqual( selection.isNull(), true, 'null' );
 } );
 
-QUnit.test( 'Factory methods & serialization (newFromJSON, toJSON, getDescription)', 3, function ( assert ) {
+QUnit.test( 'Factory methods & serialization (newFromJSON, toJSON, getDescription)', function ( assert ) {
 	var dummyDoc = { a: 1 },
 		selection = new ve.dm.NullSelection( dummyDoc );
 

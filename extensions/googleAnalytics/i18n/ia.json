@@ -4,6 +4,6 @@
 			"McDutchie"
 		]
 	},
-	"googleanalytics-desc": "Insere le script de Google Analytics (ga.js) in le paginas de MediaWiki pro facer traciamento",
-	"right-noanalytics": "Exempte del traciamento de Google Analytics"
+	"googleanalytics-desc": "Insere scripts de Google Universal Analytics (e/o altere servicios de analyse web) in le paginas de MediaWiki pro facer traciamento",
+	"right-noanalytics": "Exempte del traciamento per analyse web"
 }

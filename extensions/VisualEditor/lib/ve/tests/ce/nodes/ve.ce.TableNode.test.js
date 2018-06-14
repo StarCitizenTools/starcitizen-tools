@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable TableNode tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ce.TableNode' );
@@ -38,7 +38,6 @@ QUnit.test( 'getNearestCellNode', function ( assert ) {
 			}
 		];
 
-	QUnit.expect( cases.length );
 	for ( i = 0; i < cases.length; i++ ) {
 		assert.strictEqual( tableNode.getNearestCellNode( cases[ i ].element ), cases[ i ].node, cases[ i ].msg );
 	}
@@ -88,7 +87,6 @@ QUnit.test( 'onTableMouseDown', function ( assert ) {
 			}
 		];
 
-	QUnit.expect( cases.length );
 	for ( i = 0; i < cases.length; i++ ) {
 		tableNode.onTableMouseDown( $.extend( mockEvent, cases[ i ].event ) );
 		assert.deepEqual(

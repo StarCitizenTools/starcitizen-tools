@@ -1,7 +1,7 @@
 /*!
  * VisualEditor EventSequencer tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.EventSequencer' );
@@ -9,9 +9,9 @@ QUnit.module( 've.EventSequencer' );
 /* Stubs */
 
 // EventSequencer with script-controlled implementation of "postpone"
-ve.TestEventSequencer = function VeTestEventSequencer( eventNames ) {
+ve.TestEventSequencer = function VeTestEventSequencer() {
 	// Parent constructor
-	ve.EventSequencer.call( this, eventNames );
+	ve.TestEventSequencer.super.apply( this, arguments );
 	// { number: callback } (for faking setTimeout/clearTimeout)
 	this.postponedCallbacks = {};
 	this.postponedCallbackId = 1;
@@ -47,7 +47,7 @@ ve.TestEventSequencer.prototype.runPostponed = function () {
 
 /* Tests */
 
-QUnit.test( 'EventSequencer', 3, function ( assert ) {
+QUnit.test( 'EventSequencer', function ( assert ) {
 	var sequencer,
 		calls = [];
 

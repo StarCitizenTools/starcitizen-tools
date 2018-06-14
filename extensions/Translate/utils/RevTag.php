@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -22,7 +22,7 @@ class RevTag {
 
 	/**
 	 * Converts rt_type field back to the tag name.
-	 * @param $tag int rt_type value
+	 * @param int $tag rt_type value
 	 * @return string
 	 */
 	public static function typeToTag( $tag ) {

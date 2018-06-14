@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTransclusionPartModel class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -76,4 +76,14 @@ ve.dm.MWTransclusionPartModel.prototype.serialize = function () {
  */
 ve.dm.MWTransclusionPartModel.prototype.getWikitext = function () {
 	return '';
+};
+
+/**
+ * Add all non-existing required and suggested parameters, if any.
+ *
+ * @method
+ * @return {number} Number of parameters added
+ */
+ve.dm.MWTransclusionPartModel.prototype.addPromptedParameters = function () {
+	return 0;
 };

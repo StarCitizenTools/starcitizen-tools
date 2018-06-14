@@ -1,7 +1,7 @@
 /*!
  * VisualEditor utilities.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -37,6 +37,12 @@ ve.getProp = OO.getProp;
  * @inheritdoc OO#setProp
  */
 ve.setProp = OO.setProp;
+
+/**
+ * @method
+ * @inheritdoc OO#deleteProp
+ */
+ve.deleteProp = OO.deleteProp;
 
 /**
  * @method
@@ -184,12 +190,23 @@ ve.isEmptyObject = $.isEmptyObject;
 ve.extendObject = $.extend;
 
 /**
+ * Feature detect if the browser supports the Internationalization API
+ *
+ * Should work in Chrome>=24, FF>=29 & IE>=11
+ *
+ * @private
+ * @property {boolean}
+ */
+ve.supportsIntl = !!( window.Intl && typeof Intl.Collator === 'function' );
+
+/**
  * @private
  * @property {boolean}
  */
 ve.supportsSplice = ( function () {
 	var a, n;
 
+	// Support: Safari 8
 	// This returns false in Safari 8
 	a = new Array( 100000 );
 	a.splice( 30, 0, 'x' );
@@ -198,6 +215,7 @@ ve.supportsSplice = ( function () {
 		return false;
 	}
 
+	// Support: Opera 12.15
 	// This returns false in Opera 12.15
 	a = [];
 	n = 256;
@@ -209,7 +227,7 @@ ve.supportsSplice = ( function () {
 
 	// Splice is supported
 	return true;
-} )();
+}() );
 
 /**
  * Splice one array into another.
@@ -224,7 +242,7 @@ ve.supportsSplice = ( function () {
  * Includes a replacement for broken implementations of Array.prototype.splice().
  *
  * @param {Array|ve.dm.BranchNode} arr Target object (must have `splice` method, object will be modified)
- * @param {number} offset Offset in arr to splice at. This may NOT be negative, unlike the
+ * @param {number} offset Offset in arr to splice at. This MUST NOT be negative, unlike the
  *  'index' parameter in Array#splice.
  * @param {number} remove Number of elements to remove at the offset. May be zero
  * @param {Array} data Array of items to insert at the offset. Must be non-empty if remove=0
@@ -246,7 +264,7 @@ ve.batchSplice = function ( arr, offset, remove, data ) {
 			splice = Array.prototype.splice;
 		} else {
 			// Standard Array.prototype.splice() function implemented using .slice() and .push().
-			splice = function ( offset, remove/*, data... */ ) {
+			splice = function ( offset, remove /* , data... */ ) {
 				var data, begin, removed, end;
 
 				data = Array.prototype.slice.call( arguments, 2 );
@@ -287,6 +305,56 @@ ve.batchSplice = function ( arr, offset, remove, data ) {
 };
 
 /**
+ * Splice one array into another, replicating any holes
+ *
+ * Similar to arr.splice.apply( arr, [ offset, remove ].concat( data ) ), except holes in
+ * data remain holes in arr. Optimized for length changes that are negative, zero, or
+ * fairly small positive.
+ *
+ * @param {Array} arr Array to modify
+ * @param {number} offset Offset in arr to splice at. This MUST NOT be negative, unlike the
+ *  'index' parameter in Array#splice.
+ * @param {number} remove Number of elements to remove at the offset. May be zero
+ * @param {Array} data Array of items to insert at the offset
+ * @return {Array} Array of items removed, with holes preserved
+ */
+ve.sparseSplice = function ( arr, offset, remove, data ) {
+	var i,
+		removed = [],
+		endOffset = offset + remove,
+		diff = data.length - remove;
+	if ( data === arr ) {
+		// Pathological case: arr and data are reference-identical
+		data = data.slice();
+	}
+	// Remove content without adjusting length
+	arr.slice( offset, endOffset ).forEach( function ( item, i ) {
+		removed[ i ] = item;
+		delete arr[ offset + i ];
+	} );
+	// Adjust length
+	if ( diff > 0 ) {
+		// Grow with undefined values, then delete. (This is optimised for diff
+		// comparatively small: otherwise, it would sometimes be quicker to relocate
+		// each element of arr that lies above offset).
+		ve.batchSplice( arr, endOffset, 0, new Array( diff ) );
+		for ( i = endOffset + diff - 1; i >= endOffset; i-- ) {
+			delete arr[ i ];
+		}
+	} else if ( diff < 0 ) {
+		// Shrink
+		arr.splice( offset, -diff );
+	}
+	// Insert new content
+	data.forEach( function ( item, i ) {
+		arr[ offset + i ] = item;
+	} );
+	// Set removed.length in case there are holes at the end
+	removed.length = remove;
+	return removed;
+};
+
+/**
  * Insert one array into another.
  *
  * Shortcut for `ve.batchSplice( arr, offset, 0, src )`.
@@ -316,6 +384,10 @@ ve.batchPush = function ( arr, data ) {
 	var length,
 		index = 0,
 		batchSize = 1024;
+	if ( batchSize >= data.length ) {
+		// Avoid slicing for small lists
+		return arr.push.apply( arr, data );
+	}
 	while ( index < data.length ) {
 		// Call arr.push( i0, i1, i2, ..., i1023 );
 		length = arr.push.apply(
@@ -334,7 +406,7 @@ ve.batchPush = function ( arr, data ) {
  * @param {...Mixed} [args] Data to log
  */
 ve.log = ve.log || function () {
-	// don't do anything, this is just a stub
+	// Don't do anything, this is just a stub
 };
 
 /**
@@ -345,7 +417,7 @@ ve.log = ve.log || function () {
  * @param {...Mixed} [args] Data to log
  */
 ve.error = ve.error || function () {
-	// don't do anything, this is just a stub
+	// Don't do anything, this is just a stub
 };
 
 /**
@@ -356,7 +428,7 @@ ve.error = ve.error || function () {
  * @param {Object} obj
  */
 ve.dir = ve.dir || function () {
-	// don't do anything, this is just a stub
+	// Don't do anything, this is just a stub
 };
 
 /**
@@ -370,12 +442,7 @@ ve.selectElement = function ( element ) {
 		nativeSelection = win.getSelection();
 	nativeRange.setStart( element, 0 );
 	nativeRange.setEnd( element, element.childNodes.length );
-	try {
-		nativeSelection.removeAllRanges();
-	} catch ( e ) {
-		// Support: IE9
-		// IE9 can throw an exception if the range is invisible
-	}
+	nativeSelection.removeAllRanges();
 	nativeSelection.addRange( nativeRange );
 };
 
@@ -516,57 +583,6 @@ ve.escapeHtml = ( function () {
 }() );
 
 /**
- * Generate HTML attributes.
- *
- * NOTE: While the values of attributes are escaped, the names of attributes (i.e. the keys in
- * the attributes objects) are NOT ESCAPED. The caller is responsible for making sure these are
- * sane tag/attribute names and do not contain unsanitized content from an external source
- * (e.g. from the user or from the web).
- *
- * @param {Object} [attributes] Key-value map of attributes for the tag
- * @return {string} HTML attributes
- */
-ve.getHtmlAttributes = function ( attributes ) {
-	var attrName, attrValue,
-		parts = [];
-
-	if ( !ve.isPlainObject( attributes ) || ve.isEmptyObject( attributes ) ) {
-		return '';
-	}
-
-	for ( attrName in attributes ) {
-		attrValue = attributes[ attrName ];
-		if ( attrValue === true ) {
-			// Convert name=true to name=name
-			attrValue = attrName;
-		} else if ( attrValue === false ) {
-			// Skip name=false
-			continue;
-		}
-		parts.push( attrName + '="' + ve.escapeHtml( String( attrValue ) ) + '"' );
-	}
-
-	return parts.join( ' ' );
-};
-
-/**
- * Generate an opening HTML tag.
- *
- * NOTE: While the values of attributes are escaped, the tag name and the names of
- * attributes (i.e. the keys in the attributes objects) are NOT ESCAPED. The caller is
- * responsible for making sure these are sane tag/attribute names and do not contain
- * unsanitized content from an external source (e.g. from the user or from the web).
- *
- * @param {string} tagName HTML tag name
- * @param {Object} [attributes] Key-value map of attributes for the tag
- * @return {string} Opening HTML tag
- */
-ve.getOpeningHtmlTag = function ( tagName, attributes ) {
-	var attr = ve.getHtmlAttributes( attributes );
-	return '<' + tagName + ( attr ? ' ' + attr : '' ) + '>';
-};
-
-/**
  * Get the attributes of a DOM element as an object with key/value pairs.
  *
  * @param {HTMLElement} element
@@ -605,6 +621,23 @@ ve.setDomAttributes = function ( element, attributes, whitelist ) {
 		} else {
 			element.setAttribute( key, attributes[ key ] );
 		}
+	}
+};
+
+/**
+ * Get an HTML representation of a DOM element node, text node or comment node
+ *
+ * @param {Node} node The DOM node
+ * @return {string} HTML representation of the node
+ */
+ve.getNodeHtml = function ( node ) {
+	var div;
+	if ( node.nodeType === Node.ELEMENT_NODE ) {
+		return node.outerHTML;
+	} else {
+		div = document.createElement( 'div' );
+		div.appendChild( node.cloneNode( true ) );
+		return div.innerHTML;
 	}
 };
 
@@ -692,20 +725,20 @@ ve.isVoidElement = function ( element ) {
 ve.elementTypes = {
 	block: [
 		'div', 'p',
-		// tables
+		// Tables
 		'table', 'tbody', 'thead', 'tfoot', 'caption', 'th', 'tr', 'td',
-		// lists
+		// Lists
 		'ul', 'ol', 'li', 'dl', 'dt', 'dd',
 		// HTML5 heading content
 		'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hgroup',
 		// HTML5 sectioning content
 		'article', 'aside', 'body', 'nav', 'section', 'footer', 'header', 'figure',
 		'figcaption', 'fieldset', 'details', 'blockquote',
-		// other
+		// Other
 		'hr', 'button', 'canvas', 'center', 'col', 'colgroup', 'embed',
 		'map', 'object', 'pre', 'progress', 'video'
 	],
-	void: [
+	'void': [
 		'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img',
 		'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
 	]
@@ -722,6 +755,27 @@ ve.elementTypes = {
  */
 ve.isContentEditable = function ( node ) {
 	return ( node.nodeType === Node.TEXT_NODE ? node.parentNode : node ).isContentEditable;
+};
+
+/**
+ * Filter out metadata elements
+ *
+ * @param {Node[]} contents DOM nodes
+ * @return {Node[]} Filtered DOM nodes
+ */
+ve.filterMetaElements = function ( contents ) {
+	// Filter out link and style tags for T52043
+	// Previously filtered out meta tags, but restore these as they
+	// can be made visible with CSS.
+	// As of jQuery 3 we can't use $.not( 'tagName' ) as that doesn't
+	// match text nodes. Also we can't $.remove these elements as they
+	// aren't attached to anything.
+	contents = contents.filter( function ( node ) {
+		return node.tagName !== 'LINK' && node.tagName !== 'STYLE';
+	} );
+	// Also remove link and style tags nested inside other tags
+	$( contents ).find( 'link, style' ).remove();
+	return contents;
 };
 
 /**
@@ -784,7 +838,8 @@ ve.createDocumentFromHtmlUsingDomParser = function ( html ) {
  * @return {HTMLDocument|undefined} Document constructed from the HTML string or undefined if it failed
  */
 ve.createDocumentFromHtmlUsingIframe = function ( html ) {
-	var newDocument, $iframe, iframe;
+	var newDocument, iframe;
+
 	// Here's what this fallback code should look like:
 	//
 	//     var newDocument = document.implementation.createHtmlDocument( '' );
@@ -811,11 +866,16 @@ ve.createDocumentFromHtmlUsingIframe = function ( html ) {
 	// value is not actually a Document, but something which behaves just like an empty regular
 	// object...), so we're detecting that and using the innerHTML hack described above.
 
+	// Support: Firefox 20
+	// Support: Opera 12
+
 	html = html || '<body></body>';
 
 	// Create an invisible iframe
-	$iframe = $( '<iframe frameborder="0" width="0" height="0" />' );
-	iframe = $iframe.get( 0 );
+	iframe = document.createElement( 'iframe' );
+	iframe.setAttribute( 'frameborder', '0' );
+	iframe.setAttribute( 'width', '0' );
+	iframe.setAttribute( 'height', '0' );
 	// Attach it to the document. We have to do this to get a new document out of it
 	document.documentElement.appendChild( iframe );
 	// Write the HTML to it
@@ -825,10 +885,6 @@ ve.createDocumentFromHtmlUsingIframe = function ( html ) {
 	newDocument.close();
 	// Detach the iframe
 	iframe.parentNode.removeChild( iframe );
-	// Support: IE9
-	// Prevent garbage collection of iframe as long as newDocument exists, as destroying
-	// the original iframe makes access to the document impossible in IE9
-	newDocument.originalIframe = iframe;
 
 	if ( !newDocument.documentElement || newDocument.documentElement.cloneNode( false ) === undefined ) {
 		// Surprise! The document is not a document! Only happens on Opera.
@@ -895,30 +951,53 @@ ve.resolveUrl = function ( url, base ) {
  *
  * This performs node.setAttribute( 'attr', nodeInDoc[attr] ); for every node.
  *
- * @param {jQuery} $elements Set of DOM elements to modify
+ * Doesn't use jQuery to avoid document switching performance bug
+ *
+ * @param {HTMLElement|HTMLElement[]|NodeList|jQuery} elementsOrJQuery Set of DOM elements to modify. Passing a jQuery selector is deprecated.
  * @param {HTMLDocument} doc Document to resolve against (different from $elements' .ownerDocument)
  * @param {string[]} attrs Attributes to resolve
  */
-ve.resolveAttributes = function ( $elements, doc, attrs ) {
-	var i, len, attr;
+ve.resolveAttributes = function ( elementsOrJQuery, doc, attrs ) {
+	var i, iLen, j, jLen, element, attr,
+		// Convert jQuery selections to plain arrays
+		elements = elementsOrJQuery.toArray ? elementsOrJQuery.toArray() : elementsOrJQuery;
+
+	// Duck typing for array or NodeList :(
+	if ( elements.length === undefined ) {
+		elements = [ elements ];
+	}
 
 	/**
-	 * Callback for jQuery.fn.each that resolves the value of attr to the computed
-	 * property value. Called in the context of an HTMLElement.
+	 * Resolves the value of attr to the computed property value.
 	 *
 	 * @private
+	 * @param {HTMLElement} el Element
 	 */
-	function resolveAttribute() {
-		var nodeInDoc = doc.createElement( this.nodeName );
-		nodeInDoc.setAttribute( attr, this.getAttribute( attr ) );
-		if ( nodeInDoc[ attr ] ) {
-			this.setAttribute( attr, nodeInDoc[ attr ] );
+	function resolveAttribute( el ) {
+		var nodeInDoc = doc.createElement( el.nodeName );
+		nodeInDoc.setAttribute( attr, el.getAttribute( attr ) );
+		try {
+			if ( nodeInDoc[ attr ] ) {
+				el.setAttribute( attr, nodeInDoc[ attr ] );
+			}
+		} catch ( e ) {
+			// Support: IE
+			// IE can throw exceptions if the URL is malformed,
+			// so just leave them as is, as there's no way to
+			// resolve them and hopefully they are absolute
+			// URLs. T148858.
 		}
 	}
 
-	for ( i = 0, len = attrs.length; i < len; i++ ) {
-		attr = attrs[ i ];
-		$elements.find( '[' + attr + ']' ).addBack( '[' + attr + ']' ).each( resolveAttribute );
+	for ( i = 0, iLen = elements.length; i < iLen; i++ ) {
+		element = elements[ i ];
+		for ( j = 0, jLen = attrs.length; j < jLen; j++ ) {
+			attr = attrs[ j ];
+			if ( element.hasAttribute( attr ) ) {
+				resolveAttribute( element );
+			}
+			Array.prototype.forEach.call( element.querySelectorAll( '[' + attr + ']' ), resolveAttribute );
+		}
 	}
 };
 
@@ -937,7 +1016,12 @@ ve.resolveAttributes = function ( $elements, doc, attrs ) {
 ve.fixBase = function ( targetDoc, sourceDoc, fallbackBase ) {
 	var baseNode = targetDoc.getElementsByTagName( 'base' )[ 0 ];
 	if ( baseNode ) {
-		if ( !targetDoc.baseURI ) {
+		// Support: Safari
+		// In Safari a base node with an invalid href (e.g. protocol-relative)
+		// in a document which has been dynamically created results in
+		// 'about:blank' rather than '' or null. The base's href will also be '',
+		// but that works out just setting the base to fallbackBase, so it's okay.
+		if ( !targetDoc.baseURI || targetDoc.baseURI === 'about:blank' ) {
 			// <base> tag present but not valid, try resolving its URL
 			baseNode.setAttribute( 'href', ve.resolveUrl( baseNode.getAttribute( 'href' ), sourceDoc ) );
 			if ( !targetDoc.baseURI && fallbackBase ) {
@@ -945,12 +1029,51 @@ ve.fixBase = function ( targetDoc, sourceDoc, fallbackBase ) {
 				baseNode.setAttribute( 'href', fallbackBase );
 			}
 		}
-		// else: <base> tag present and valid, do nothing
+		// Support: Chrome
+		// Chrome just entirely ignores <base> tags with a protocol-relative href attribute.
+		// Code below is *not a no-op*; reading the href property and setting it back
+		// will expand the href *attribute* to use an absolute URL if it was relative.
+		baseNode.href = baseNode.href;
 	} else if ( fallbackBase ) {
+		// Support: Firefox
 		// No <base> tag, add one
 		baseNode = targetDoc.createElement( 'base' );
 		baseNode.setAttribute( 'href', fallbackBase );
 		targetDoc.head.appendChild( baseNode );
+	}
+};
+
+/**
+ * Make all links within a DOM element open in a new window
+ *
+ * @param {HTMLElement} container DOM element to search for links
+ */
+ve.targetLinksToNewWindow = function ( container ) {
+	// Make all links open in a new window
+	Array.prototype.forEach.call( container.querySelectorAll( 'a[href]' ), function ( el ) {
+		ve.appendToRel( el, 'noopener' );
+		el.setAttribute( 'target', '_blank' );
+	} );
+};
+
+/**
+ * Add a value to an element's rel attribute if it's not already present
+ *
+ * Rel is like class: it's actually a set, represented as a string. We don't
+ * want to add the same value to the attribute if this function is called
+ * repeatedly. This is mostly a placeholder for the relList property someday
+ * becoming widely supported.
+ *
+ * @param  {HTMLElement} element DOM element whose attribute should be checked
+ * @param  {string} value New rel value to be added
+ */
+ve.appendToRel = function ( element, value ) {
+	var rel = element.getAttribute( 'rel' );
+	if ( !rel ) {
+		// Avoid all that string-creation if it's not needed
+		element.setAttribute( 'rel', value );
+	} else if ( ( ' ' + rel + ' ' ).indexOf( ' ' + value + ' ' ) === -1 ) {
+		element.setAttribute( 'rel', rel + ' ' + value );
 	}
 };
 
@@ -1086,7 +1209,8 @@ ve.normalizeAttributeValue = function ( name, value, nodeName ) {
  * Map attributes that are broken in IE to attributes prefixed with data-ve-
  * or vice versa.
  *
- * @param {string} html HTML string. Must also be valid XML
+ * @param {string} html HTML string. Must also be valid XML. Must only have
+ *   one root node (e.g. be a complete document).
  * @param {boolean} unmask Map the masked attributes back to their originals
  * @return {string} HTML string modified to mask/unmask broken attributes
  */
@@ -1111,7 +1235,7 @@ ve.transformStyleAttributes = function ( html, unmask ) {
 	for ( i = 0, len = maskAttrs.length; i < len; i++ ) {
 		fromAttr = unmask ? 'data-ve-' + maskAttrs[ i ] : maskAttrs[ i ];
 		toAttr = unmask ? maskAttrs[ i ] : 'data-ve-' + maskAttrs[ i ];
-		/*jshint loopfunc:true */
+		// eslint-disable-next-line no-loop-func
 		$( xmlDoc ).find( '[' + fromAttr + ']' ).each( function () {
 			var toAttrValue, fromAttrNormalized,
 				fromAttrValue = this.getAttribute( fromAttr );
@@ -1148,7 +1272,8 @@ ve.transformStyleAttributes = function ( html, unmask ) {
  * normalization bugs if a broken browser is detected.
  * Since this process uses an XML parser, the input must be valid XML as well as HTML.
  *
- * @param {string} html HTML string. Must also be valid XML
+ * @param {string} html HTML string. Must also be valid XML. Must only have
+ *   one root node (e.g. be a complete document).
  * @return {HTMLDocument} HTML DOM
  */
 ve.parseXhtml = function ( html ) {
@@ -1171,6 +1296,17 @@ ve.parseXhtml = function ( html ) {
  * @return {string} Serialized HTML string
  */
 ve.serializeXhtml = function ( doc ) {
+	return ve.serializeXhtmlElement( doc.documentElement );
+};
+
+/**
+ * Serialize an HTML element created with #parseXhtml back to an HTML string, unmasking any
+ * attributes that were masked.
+ *
+ * @param {HTMLElement} element HTML element
+ * @return {string} Serialized HTML string
+ */
+ve.serializeXhtmlElement = function ( element ) {
 	var xml;
 	// Support: IE
 	// Feature-detect style attribute breakage in IE
@@ -1178,12 +1314,13 @@ ve.serializeXhtml = function ( doc ) {
 		ve.isStyleAttributeBroken = ve.normalizeAttributeValue( 'style', 'color:#ffd' ) !== 'color:#ffd';
 	}
 	if ( !ve.isStyleAttributeBroken ) {
+		// Support: Firefox
 		// Use outerHTML if possible because in Firefox, XMLSerializer URL-encodes
 		// hrefs but outerHTML doesn't
-		return ve.properOuterHtml( doc.documentElement );
+		return ve.properOuterHtml( element );
 	}
 
-	xml = new XMLSerializer().serializeToString( ve.fixupPreBug( doc.documentElement ) );
+	xml = new XMLSerializer().serializeToString( ve.fixupPreBug( element ) );
 	// FIXME T126035: This strips out xmlns as a quick hack
 	xml = xml.replace( '<html xmlns="http://www.w3.org/1999/xhtml"', '<html' );
 	return ve.transformStyleAttributes( xml, true );
@@ -1272,6 +1409,8 @@ ve.translateRect = function ( rect, x, y ) {
 /**
  * Get the start and end rectangles (in a text flow sense) from a list of rectangles
  *
+ * The start rectangle is the top-most, and the end rectangle is the bottom-most.
+ *
  * @param {Array} rects Full list of rectangles
  * @return {Object|null} Object containing two rectangles: start and end, or null if there are no rectangles
  */
@@ -1307,6 +1446,39 @@ ve.getStartAndEndRects = function ( rects ) {
 };
 
 /**
+ * Find the length of the common start sequence of one or more sequences
+ *
+ * Items are tested for sameness using === .
+ *
+ * @param {Array} sequences Array of sequences (arrays, strings etc)
+ * @return {number} Common start sequence length (0 if sequences is empty)
+ */
+ve.getCommonStartSequenceLength = function ( sequences ) {
+	var i, len, val,
+		commonLength = 0;
+	if ( sequences.length === 0 ) {
+		return 0;
+	}
+	commonLengthLoop:
+	while ( true ) {
+		if ( commonLength >= sequences[ 0 ].length ) {
+			break;
+		}
+		val = sequences[ 0 ][ commonLength ];
+		for ( i = 1, len = sequences.length; i < len; i++ ) {
+			if (
+				sequences[ i ].length <= commonLength ||
+				sequences[ i ][ commonLength ] !== val
+			) {
+				break commonLengthLoop;
+			}
+		}
+		commonLength++;
+	}
+	return commonLength;
+};
+
+/**
  * Find the nearest common ancestor of DOM nodes
  *
  * @param {...Node|null} DOM nodes
@@ -1319,7 +1491,7 @@ ve.getCommonAncestor = function () {
 		args = Array.prototype.slice.call( arguments );
 	nodeCount = args.length;
 	if ( nodeCount === 0 ) {
-		throw new Error( 'Need at least one node' );
+		return null;
 	}
 	// Build every chain
 	for ( i = 0; i < nodeCount; i++ ) {
@@ -1334,7 +1506,7 @@ ve.getCommonAncestor = function () {
 			return null;
 		}
 		if ( i > 0 && chain[ 0 ] !== chains[ chains.length - 1 ][ 0 ] ) {
-			// no common ancestor (different documents or unattached branches)
+			// No common ancestor (different documents or unattached branches)
 			return null;
 		}
 		if ( minHeight === null || minHeight > chain.length ) {
@@ -1556,6 +1728,7 @@ ve.adjacentDomPosition = function ( position, direction, options ) {
 
 		childNode = node.childNodes[ forward ? offset : offset - 1 ];
 
+		// Support: Firefox
 		// If the child is uncursorable, or is an element matching noDescend, do not
 		// descend into it: instead, return the position just beyond it in the current node
 		if (
@@ -1675,8 +1848,50 @@ ve.countEdgeMatches = function ( before, after, equals ) {
  *
  * @param {string} str The string to repeat
  * @param {number} n The number of times to repeat
- * @param {string} The string, repeated n times
+ * @return {string} The string, repeated n times
  */
 ve.repeatString = function ( str, n ) {
 	return new Array( n + 1 ).join( str );
+};
+
+/**
+ * Check whether a jQuery event represents a plain left click, without any modifiers
+ *
+ * @param {jQuery.Event} e The jQuery event object
+ * @return {boolean} Whether it was an unmodified left click
+ */
+ve.isUnmodifiedLeftClick = function ( e ) {
+	return e && e.which && e.which === OO.ui.MouseButtons.LEFT && !( e.shiftKey || e.altKey || e.ctrlKey || e.metaKey );
+};
+
+/**
+ * Are multiple formats for clipboardData items supported?
+ *
+ * If you want to use unknown formats, an additional check for whether we're
+ * on MS Edge needs to be made, as that only supports standard plain text / HTML.
+ *
+ * @param {jQuery.Event} e A jQuery event object for a copy/paste event
+ * @param {boolean} [customTypes] Check whether non-standard formats are supported
+ * @return {boolean} Whether multiple clipboardData item formats are supported
+ */
+ve.isClipboardDataFormatsSupported = function ( e, customTypes ) {
+	var profile, clipboardData,
+		cacheKey = customTypes ? 'cachedCustom' : 'cached';
+
+	if ( ve.isClipboardDataFormatsSupported[ cacheKey ] === undefined ) {
+		profile = $.client.profile();
+		clipboardData = e.originalEvent.clipboardData;
+		ve.isClipboardDataFormatsSupported[ cacheKey ] = !!(
+			clipboardData &&
+			( !customTypes || profile.name !== 'edge' ) && (
+				// Support: Chrome
+				clipboardData.items ||
+				// Support: Firefox >= 48
+				// (but not Firefox Android, which has name='android' and doesn't support this feature)
+				( profile.name === 'firefox' && profile.versionNumber >= 48 )
+			)
+		);
+	}
+
+	return ve.isClipboardDataFormatsSupported[ cacheKey ];
 };

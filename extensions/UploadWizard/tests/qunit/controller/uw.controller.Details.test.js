@@ -15,27 +15,29 @@
  * along with DetailsWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( uw, $ ) {
-	QUnit.module( 'mw.uw.controller.Details', QUnit.newMwEnvironment() );
+( function ( $, mw, uw ) {
+	QUnit.module( 'uw.controller.Details', QUnit.newMwEnvironment() );
 
 	function createTestUpload( sandbox, customDeedChooser, aborted ) {
 		var stubs = {
-			bascm: sandbox.stub(),
-			cd: sandbox.stub(),
-			ucdc: sandbox.stub()
+			ucdc: sandbox.stub(),
+			getSerialized: sandbox.stub(),
+			setSerialized: sandbox.stub(),
+			attach: sandbox.stub()
 		};
 
 		return {
-			chosenDeed: {
-				name: customDeedChooser ? 'custom' : 'cc-by-sa-4.0'
-			},
+			file: { fromUrl: false },
 
-			createDetails: stubs.cd,
+			deedChooser: { deed: { name: customDeedChooser ? 'custom' : 'cc-by-sa-4.0' } },
+
+			on: $.noop,
 
 			details: {
-				buildAndShowCopyMetadata: stubs.bascm,
-
-				useCustomDeedChooser: stubs.ucdc
+				useCustomDeedChooser: stubs.ucdc,
+				getSerialized: stubs.getSerialized,
+				setSerialized: stubs.setSerialized,
+				attach: stubs.attach
 			},
 
 			state: aborted ? 'aborted' : 'stashed',
@@ -44,8 +46,8 @@
 		};
 	}
 
-	QUnit.test( 'Constructor sanity test', 3, function ( assert ) {
-		var step = new uw.controller.Details( {
+	QUnit.test( 'Constructor sanity test', function ( assert ) {
+		var step = new uw.controller.Details( new mw.Api(), {
 			maxSimultaneousConnections: 1
 		} );
 		assert.ok( step );
@@ -53,48 +55,48 @@
 		assert.ok( step.ui );
 	} );
 
-	QUnit.test( 'moveTo', 16, function ( assert ) {
-		var step = new uw.controller.Details( {
+	QUnit.test( 'load', function ( assert ) {
+		var step = new uw.controller.Details( new mw.Api(), {
 				maxSimultaneousConnections: 1
 			} ),
 			testUpload = createTestUpload( this.sandbox ),
-			stepUiStub = this.sandbox.stub( step.ui, 'moveTo' );
+			stepUiStub = this.sandbox.stub( step.ui, 'load' );
 
-		step.moveTo( [ testUpload ] );
+		// replace createDetails with a stub; UploadWizardDetails needs way too
+		// much setup to actually be able to create it
+		step.createDetails = this.sandbox.stub();
 
-		assert.strictEqual( testUpload.stubs.bascm.called, false );
+		step.load( [ testUpload ] );
+
 		assert.strictEqual( testUpload.stubs.ucdc.called, false );
-		assert.ok( testUpload.stubs.cd.called );
+		assert.strictEqual( step.createDetails.callCount, 1 );
 		assert.ok( stepUiStub.called );
 
 		testUpload = createTestUpload( this.sandbox, true );
-		step.moveTo( [ testUpload ] );
+		step.load( [ testUpload ] );
 
-		assert.strictEqual( testUpload.stubs.bascm.called, false );
 		assert.ok( testUpload.stubs.ucdc.called );
-		assert.ok( testUpload.stubs.cd.called );
+		assert.strictEqual( step.createDetails.callCount, 2 );
 		assert.ok( stepUiStub.called );
 
 		testUpload = createTestUpload( this.sandbox );
-		step.moveTo( [ testUpload, createTestUpload( this.sandbox ) ] );
+		step.load( [ testUpload, createTestUpload( this.sandbox ) ] );
 
-		assert.ok( testUpload.stubs.bascm.called );
 		assert.strictEqual( testUpload.stubs.ucdc.called, false );
-		assert.ok( testUpload.stubs.cd.called );
+		assert.strictEqual( step.createDetails.callCount, 4 );
 		assert.ok( stepUiStub.called );
 
 		testUpload = createTestUpload( this.sandbox );
-		step.moveTo( [ testUpload, createTestUpload( this.sandbox, false, true ) ] );
+		step.load( [ testUpload, createTestUpload( this.sandbox, false, true ) ] );
 
-		assert.strictEqual( testUpload.stubs.bascm.called, false );
 		assert.strictEqual( testUpload.stubs.ucdc.called, false );
-		assert.ok( testUpload.stubs.cd.called );
+		assert.strictEqual( step.createDetails.callCount, 6 );
 		assert.ok( stepUiStub.called );
 	} );
 
-	QUnit.test( 'canTransition', 3, function ( assert ) {
+	QUnit.test( 'canTransition', function ( assert ) {
 		var upload = {},
-			step = new uw.controller.Details( {
+			step = new uw.controller.Details( new mw.Api(), {
 				maxSimultaneousConnections: 1
 			} );
 
@@ -105,8 +107,9 @@
 		assert.strictEqual( step.canTransition( upload ), false );
 	} );
 
-	QUnit.asyncTest( 'transitionAll', 4, function ( assert ) {
-		var tostub, promise,
+	QUnit.test( 'transitionAll', function ( assert ) {
+		var tostub,
+			done = assert.async(),
 			donestub = this.sandbox.stub(),
 			ds = [ $.Deferred(), $.Deferred(), $.Deferred() ],
 			ps = [ ds[ 0 ].promise(), ds[ 1 ].promise(), ds[ 2 ].promise() ],
@@ -120,7 +123,7 @@
 
 		this.sandbox.stub( uw.controller.Details.prototype, 'canTransition' ).returns( true );
 
-		step = new uw.controller.Details( {
+		step = new uw.controller.Details( new mw.Api(), {
 			maxSimultaneousConnections: 3
 		} );
 
@@ -131,7 +134,7 @@
 			{ id: 'aoeu' }
 		];
 
-		promise = step.transitionAll().done( donestub );
+		step.transitionAll().done( donestub );
 		setTimeout( function () {
 			calls = [ tostub.getCall( 0 ), tostub.getCall( 1 ), tostub.getCall( 2 ) ];
 
@@ -147,10 +150,10 @@
 				setTimeout( function () {
 					assert.ok( donestub.called );
 
-					QUnit.start();
+					done();
 				} );
 			} );
 		} );
 	} );
 
-}( mediaWiki.uploadWizard, jQuery ) );
+}( jQuery, mediaWiki, mediaWiki.uploadWizard ) );

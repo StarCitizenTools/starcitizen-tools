@@ -15,35 +15,34 @@ class ApiFlowEditPost extends ApiFlowBasePost {
 	}
 
 	protected function getBlockParams() {
-		return array( 'topic' => $this->extractRequestParams() );
+		return [ 'topic' => $this->extractRequestParams() ];
 	}
 
 	public function getAllowedParams() {
-		return array(
-			'postId' => array(
+		return [
+			'postId' => [
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'prev_revision' => array(
+			],
+			'prev_revision' => [
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'content' => array(
+			],
+			'content' => [
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'format' => array(
-				ApiBase::PARAM_REQUIRED => true,
+			],
+			'format' => [
 				ApiBase::PARAM_DFLT => 'wikitext',
-				ApiBase::PARAM_TYPE => array( 'html', 'wikitext' ),
-			),
-		) + parent::getAllowedParams();
+				ApiBase::PARAM_TYPE => [ 'html', 'wikitext' ],
+			],
+		] + parent::getAllowedParams();
 	}
 
 	/**
-	 * @see ApiBase::getExamplesMessages()
+	 * @inheritDoc
 	 */
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=flow&submodule=edit-post&page=Topic:S2tycnas4hcucw8w&eppostId=???&epprev_revision=???&epcontent=Nice%20to&20meet%20you&epformat=wikitext'
 				=> 'apihelp-flow+edit-post-example-1',
-		);
+		];
 	}
 }

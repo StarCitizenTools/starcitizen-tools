@@ -1,7 +1,7 @@
 /*!
  * VisualEditor CommandRegistry class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -110,6 +110,18 @@ ve.ui.commandRegistry.register(
 );
 ve.ui.commandRegistry.register(
 	new ve.ui.Command(
+		'big', 'annotation', 'toggle',
+		{ args: [ 'textStyle/big' ], supportedSelections: [ 'linear', 'table' ] }
+	)
+);
+ve.ui.commandRegistry.register(
+	new ve.ui.Command(
+		'small', 'annotation', 'toggle',
+		{ args: [ 'textStyle/small' ], supportedSelections: [ 'linear', 'table' ] }
+	)
+);
+ve.ui.commandRegistry.register(
+	new ve.ui.Command(
 		'link', 'window', 'open',
 		{ args: [ 'link' ], supportedSelections: [ 'linear' ] }
 	)
@@ -178,6 +190,11 @@ ve.ui.commandRegistry.register(
 );
 ve.ui.commandRegistry.register(
 	new ve.ui.Command(
+		'changeDirectionality', 'content', 'changeDirectionality'
+	)
+);
+ve.ui.commandRegistry.register(
+	new ve.ui.Command(
 		'language', 'window', 'open',
 		{ args: [ 'language' ], supportedSelections: [ 'linear' ] }
 	)
@@ -188,42 +205,17 @@ ve.ui.commandRegistry.register(
 		{ args: [ 'paragraph' ], supportedSelections: [ 'linear' ] }
 	)
 );
-ve.ui.commandRegistry.register(
-	new ve.ui.Command(
-		'heading1', 'format', 'convert',
-		{ args: [ 'heading', { level: 1 } ], supportedSelections: [ 'linear' ] }
-	)
-);
-ve.ui.commandRegistry.register(
-	new ve.ui.Command(
-		'heading2', 'format', 'convert',
-		{ args: [ 'heading', { level: 2 } ], supportedSelections: [ 'linear' ] }
-	)
-);
-ve.ui.commandRegistry.register(
-	new ve.ui.Command(
-		'heading3', 'format', 'convert',
-		{ args: [ 'heading', { level: 3 } ], supportedSelections: [ 'linear' ] }
-	)
-);
-ve.ui.commandRegistry.register(
-	new ve.ui.Command(
-		'heading4', 'format', 'convert',
-		{ args: [ 'heading', { level: 4 } ], supportedSelections: [ 'linear' ] }
-	)
-);
-ve.ui.commandRegistry.register(
-	new ve.ui.Command(
-		'heading5', 'format', 'convert',
-		{ args: [ 'heading', { level: 5 } ], supportedSelections: [ 'linear' ] }
-	)
-);
-ve.ui.commandRegistry.register(
-	new ve.ui.Command(
-		'heading6', 'format', 'convert',
-		{ args: [ 'heading', { level: 6 } ], supportedSelections: [ 'linear' ] }
-	)
-);
+( function () {
+	var level;
+	for ( level = 1; level <= 6; level++ ) {
+		ve.ui.commandRegistry.register(
+			new ve.ui.Command(
+				'heading' + level, 'format', 'convert',
+				{ args: [ 'heading', { level: level } ], supportedSelections: [ 'linear' ] }
+			)
+		);
+	}
+}() );
 ve.ui.commandRegistry.register(
 	new ve.ui.Command(
 		'preformatted', 'format', 'convert',
@@ -252,6 +244,18 @@ ve.ui.commandRegistry.register(
 	new ve.ui.Command(
 		'selectAll', 'content', 'selectAll',
 		{ supportedSelections: [ 'linear', 'table' ] }
+	)
+);
+ve.ui.commandRegistry.register(
+	new ve.ui.Command(
+		'delete', 'content', 'remove',
+		{ args: [ 'delete' ], supportedSelections: [ 'linear', 'table' ] }
+	)
+);
+ve.ui.commandRegistry.register(
+	new ve.ui.Command(
+		'backspace', 'content', 'remove',
+		{ args: [ 'backspace' ], supportedSelections: [ 'linear', 'table' ] }
 	)
 );
 ve.ui.commandRegistry.register(
@@ -331,7 +335,7 @@ ve.ui.commandRegistry.register(
 
 	} );
 
-} )();
+}() );
 
 ve.ui.commandRegistry.register(
 	new ve.ui.Command(

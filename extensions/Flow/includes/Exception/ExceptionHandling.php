@@ -37,6 +37,7 @@ class FlowException extends MWException {
 
 	/**
 	 * Set the output object
+	 * @param OutputPage $output
 	 */
 	public function setOutput( OutputPage $output ) {
 		$this->output = $output;
@@ -44,6 +45,7 @@ class FlowException extends MWException {
 
 	/**
 	 * Get the message key for the localized error message
+	 * @return string
 	 */
 	public function getErrorCode() {
 		$list = $this->getErrorCodeList();
@@ -55,10 +57,11 @@ class FlowException extends MWException {
 
 	/**
 	 * Error code list for this exception
+	 * @return string[]
 	 */
 	protected function getErrorCodeList() {
 		// flow-error-default
-		return array ( 'default' );
+		return [ 'default' ];
 	}
 
 	/**
@@ -102,6 +105,7 @@ class FlowException extends MWException {
 
 	/**
 	 * Error page title
+	 * @return string
 	 */
 	public function getPageTitle() {
 		return $this->parsePageTitle( 'errorpagetitle' );
@@ -130,6 +134,7 @@ class FlowException extends MWException {
 
 	/**
 	 * Default status code is 500, which is server error
+	 * @return int
 	 */
 	public function getStatusCode() {
 		return 500;
@@ -138,26 +143,45 @@ class FlowException extends MWException {
 
 /**
  * Category: invalid input exception
+ *
+ * This is not logged, and must *only* be used when the error is caused by invalid end-user
+ * input.  The same applies to the subclasses.
+ *
+ * If it is a logic error (including a missing or incorrect parameter not directly caused
+ * by user input), or another kind of failure, another (loggable) exception must be used.
  */
 class InvalidInputException extends FlowException {
 	protected function getErrorCodeList() {
 		// Comments are i18n messages, for grepping
-		return array (
+		return [
 			'invalid-input', // flow-error-invalid-input
 			'missing-revision', // flow-error-missing-revision
 			'revision-comparison', // flow-error-revision-comparison
 			'invalid-workflow', // flow-error-invalid-workflow
-		);
+		];
 	}
 
 	/**
 	 * Bad request
+	 * @return int
 	 */
 	public function getStatusCode() {
 		return 400;
 	}
+
+	/**
+	 * Do not log exception resulting from input error
+	 * @return bool
+	 */
+	function isLoggable() {
+		return false;
+	}
 }
 
+/**
+ * This is not logged, and must *only* be used for reference
+ * errors caused by invalid (unprocessable) end-user input
+ */
 class InvalidReferenceException extends InvalidInputException {
 }
 
@@ -167,11 +191,11 @@ class InvalidReferenceException extends InvalidInputException {
 class InvalidActionException extends FlowException {
 	protected function getErrorCodeList() {
 		// flow-error-invalid-action
-		return array ( 'invalid-action' );
+		return [ 'invalid-action' ];
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getPageTitle() {
 		return $this->parsePageTitle( 'nosuchaction' );
@@ -179,13 +203,14 @@ class InvalidActionException extends FlowException {
 
 	/**
 	 * Bad request
+	 * @return int
 	 */
 	public function getStatusCode() {
 		return 400;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getHTML() {
 		// we only want a nice error message here, no stack trace
@@ -197,6 +222,7 @@ class InvalidActionException extends FlowException {
 
 	/**
 	 * Do not log exception resulting from input error
+	 * @return bool
 	 */
 	function isLoggable() {
 		return false;
@@ -209,7 +235,7 @@ class InvalidActionException extends FlowException {
 class FailCommitException extends FlowException {
 	protected function getErrorCodeList() {
 		// flow-error-fail-commit
-		return array ( 'fail-commit' );
+		return [ 'fail-commit' ];
 	}
 }
 
@@ -219,12 +245,13 @@ class FailCommitException extends FlowException {
 class PermissionException extends FlowException {
 	protected function getErrorCodeList() {
 		// flow-error-insufficient-permission
-		return array ( 'insufficient-permission' );
+		return [ 'insufficient-permission' ];
 	}
 
 	/**
 	 * Do not log exception resulting from user requesting
 	 * disallowed content.
+	 * @return bool
 	 */
 	function isLoggable() {
 		return false;
@@ -236,14 +263,15 @@ class PermissionException extends FlowException {
  */
 class InvalidDataException extends FlowException {
 	protected function getErrorCodeList() {
-		return array (
+		return [
 			'invalid-title', // flow-error-invalid-title
 			'fail-load-data', // flow-error-fail-load-data
 			'fail-load-history', // flow-error-fail-load-history
 			'fail-search', // flow-error-fail-search
 			'missing-topic-title', // flow-error-missing-topic-title
 			'missing-metadata', // flow-error-missing-metadata
-		);
+			'different-page', // flow-error-different-page
+		];
 	}
 }
 
@@ -253,7 +281,7 @@ class InvalidDataException extends FlowException {
 class DataModelException extends FlowException {
 	protected function getErrorCodeList() {
 		// flow-error-process-data
-		return array ( 'process-data' );
+		return [ 'process-data' ];
 	}
 }
 
@@ -263,7 +291,7 @@ class DataModelException extends FlowException {
 class DataPersistenceException extends FlowException {
 	protected function getErrorCodeList() {
 		// flow-error-process-data
-		return array ( 'process-data' );
+		return [ 'process-data' ];
 	}
 }
 
@@ -273,7 +301,7 @@ class DataPersistenceException extends FlowException {
 class NoParserException extends FlowException {
 	protected function getErrorCodeList() {
 		// flow-error-process-wikitext
-		return array ( 'process-wikitext' );
+		return [ 'process-wikitext' ];
 	}
 }
 
@@ -283,7 +311,7 @@ class NoParserException extends FlowException {
 class WikitextException extends FlowException {
 	protected function getErrorCodeList() {
 		// flow-error-process-wikitext
-		return array ( 'process-wikitext' );
+		return [ 'process-wikitext' ];
 	}
 }
 
@@ -293,14 +321,15 @@ class WikitextException extends FlowException {
 class NoIndexException extends FlowException {
 	protected function getErrorCodeList() {
 		// flow-error-no-index
-		return array ( 'no-index' );
+		return [ 'no-index' ];
 	}
 }
 
 /**
  * Category: Cross Wiki
  */
-class CrossWikiException extends FlowException {}
+class CrossWikiException extends FlowException {
+}
 
 /**
  * Category: Template helper
@@ -328,7 +357,7 @@ class WrongNumberArgumentsException extends FlowException {
 class UnknownWorkflowIdException extends InvalidInputException {
 	protected function getErrorCodeList() {
 		// flow-error-invalid-input
-		return array( 'invalid-input' );
+		return [ 'invalid-input' ];
 	}
 
 	public function getHTML() {
@@ -347,7 +376,7 @@ class UnknownWorkflowIdException extends InvalidInputException {
 class InvalidTopicUuidException extends InvalidInputException {
 	protected function getErrorCodeList() {
 		// flow-error-invalid-input
-		return array( 'invalid-input' );
+		return [ 'invalid-input' ];
 	}
 
 	public function getHTML() {
@@ -360,18 +389,18 @@ class InvalidTopicUuidException extends InvalidInputException {
 }
 
 /**
- * Category: invalid action exception
+ * Exception for missing or invalid parameters to method calls, when not traced directly to
+ * user input.
+ *
+ * This deliberately does not extend InvalidInputException, and must be loggable
  */
-class InvalidUndeleteException extends InvalidActionException {
-	protected function getErrorCodeList() {
-		// flow-error-invalid-undelete
-		return array ( 'invalid-undelete' );
+class InvalidParameterException extends FlowException {
+	public function __construct( $message ) {
+		parent::__construct( $message, 'invalid-parameter' );
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public function getHTML() {
-		return wfMessage( 'flow-error-invalid-undelete' )->escaped();
+	protected function getErrorCodeList() {
+		// flow-error-invalid-parameter
+		return [ 'invalid-parameter' ];
 	}
 }

@@ -17,7 +17,7 @@ class BoardContentHandler extends \ContentHandler {
 			throw new MWException( __CLASS__." initialised for invalid content model" );
 		}
 
-		parent::__construct( CONTENT_MODEL_FLOW_BOARD, array( CONTENT_FORMAT_JSON ) );
+		parent::__construct( CONTENT_MODEL_FLOW_BOARD, [ CONTENT_FORMAT_JSON ] );
 	}
 
 	public function isSupportedFormat( $format ) {
@@ -41,11 +41,11 @@ class BoardContentHandler extends \ContentHandler {
 	 * @throws MWException
 	 */
 	public function serializeContent( \Content $content, $format = null ) {
-		if ( ! $content instanceof BoardContent ) {
+		if ( !$content instanceof BoardContent ) {
 			throw new MWException( "Expected a BoardContent object, got a " . get_class( $content ) );
 		}
 
-		$info = array();
+		$info = [];
 
 		if ( $content->getWorkflowId() ) {
 			$info['flow-workflow'] = $content->getWorkflowId()->getAlphaDecimal();
@@ -69,9 +69,10 @@ class BoardContentHandler extends \ContentHandler {
 		$uuid = null;
 
 		if ( !$info ) {
-			// For transition from wikitext-type pages
-			// Make a plain content object and then when we get a chance
-			// we can insert a proper object.
+			// Temporary: Fix T167198 and instead throw an exception, to
+			// prevent corruption from software that does not understand
+			// Flow/content models.
+
 			return $this->makeEmptyContent();
 		} elseif ( isset( $info['flow-workflow'] ) ) {
 			$uuid = UUID::create( $info['flow-workflow'] );
@@ -120,9 +121,9 @@ class BoardContentHandler extends \ContentHandler {
 	public function getActionOverrides() {
 		/** @var FlowActions $actions */
 		$actions = Container::get( 'flow_actions' );
-		$output = array();
+		$output = [];
 
-		foreach( $actions->getActions() as $action ) {
+		foreach ( $actions->getActions() as $action ) {
 			$actionData = $actions->getValue( $action );
 			if ( !is_array( $actionData ) ) {
 				continue;
@@ -133,7 +134,7 @@ class BoardContentHandler extends \ContentHandler {
 			}
 
 			if ( $actionData['handler-class'] === 'Flow\Actions\FlowAction' ) {
-				$output[$action] = function( Page $page, IContextSource $source ) use ( $action ) {
+				$output[$action] = function ( Page $page, IContextSource $source ) use ( $action ) {
 					return new FlowAction( $page, $source, $action );
 				};
 			} else {

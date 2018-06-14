@@ -1,0 +1,50 @@
+{
+	"extends": "wikimedia",
+	"parserOptions": {
+		"sourceType": "module",
+		"ecmaVersion": "5"
+	},
+	"env": {
+		"browser": true,
+		"jquery": true,
+		"commonjs": true,
+		"qunit": true
+	},
+	"globals": {
+		"mediaWiki": false,
+		"OO": false,
+		"moment": false,
+		"Redux": false,
+		"ReduxThunk": false
+	},
+	"rules": {
+		"no-restricted-properties": [2,
+			{
+				 "object": "$",
+				 "property": "each",
+				 "message": "Please use Array.forEach"
+			 }
+		],
+		"dot-notation": [ 2, { "allowKeywords": true } ],
+		"no-use-before-define": 0,
+		"no-var": 2,
+		"prefer-const": 1,
+		"prefer-template": 1,
+		"one-var": 0, // Interferes with prefer-const.
+		"max-len": [
+				1,
+				{
+					"tabWidth": 2,
+					// Exclude by default:
+					// - `eslint-` directives. To avoid having to disable
+					//   eslint for a long eslint-disable line.
+					"ignorePattern": "^// eslint-.+",
+					"ignoreUrls": true,
+					"ignoreComments": false,
+					"ignoreRegExpLiterals": true,
+					"ignoreStrings": true,
+					"ignoreTemplateLiterals": true
+				}
+		]
+	}
+}

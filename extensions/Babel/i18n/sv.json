@@ -9,7 +9,8 @@
 			"Lokal Profil",
 			"M.M.S.",
 			"Najami",
-			"WikiPhoenix"
+			"WikiPhoenix",
+			"Skalman"
 		]
 	},
 	"babel": "Babel-användarinformation",
@@ -17,7 +18,7 @@
 	"babel-url": "Project:Babel",
 	"babel-footer-url": ":Kategori:Babel - Användare efter språk",
 	"babel-autocreate-reason": "Skapar automatiskt en [[$1|Babel]]-kategorisida.",
-	"babel-autocreate-text-levels": "Användare i den här kategorin visar att de kan språket $2 på en kunskapsnivå av $1.",
+	"babel-autocreate-text-levels": "Användare i den här kategorin indikerar att de kan språket $2 på en kunskapsnivå av $1.",
 	"babel-autocreate-text-main": "Användare i den här kategorin indikerar att de har kunskap i språket $1.",
 	"babel-0": "Den här användaren förstår [[$1|inte]] [[$2|$3]] (eller förstår det bara med stor svårighet).",
 	"babel-1": "Den här användaren har [[$1|grundläggande]] kunskaper i [[$2|$3]].",
@@ -34,5 +35,9 @@
 	"babel-5-n": "Den här användaren har [[$1|professionella]] kunskaper i [[$2|svenska]].",
 	"babel-N-n": "Den här användaren har [[$2|svenska]] som [[$1|modersmål]].",
 	"babel-template": "Template:Användare $1",
-	"babel-footer": "Användare efter språk"
+	"babel-footer": "Användare efter språk",
+	"apihelp-query+babel-description": "Hämta information om vilka språk användaren kan",
+	"apihelp-query+babel-summary": "Hämta information om vilka språk användaren kan",
+	"apihelp-query+babel-param-user": "Användare att hämta information om",
+	"apihelp-query+babel-example-1": "Hämta Babel-information för användaren <kbd>Example</kbd>"
 }

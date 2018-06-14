@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LinkAction class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,9 +13,9 @@
  * @constructor
  * @param {ve.ui.Surface} surface Surface to act on
  */
-ve.ui.LinkAction = function VeUiLinkAction( surface ) {
+ve.ui.LinkAction = function VeUiLinkAction() {
 	// Parent constructor
-	ve.ui.Action.call( this, surface );
+	ve.ui.LinkAction.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -56,7 +56,7 @@ ve.ui.LinkAction.prototype.autolinkUrl = function () {
 		// Make sure we still have a real URL after trail removal, and not
 		// a bare protocol (or no protocol at all, if we stripped the last
 		// colon from the protocol)
-		return ve.ui.LinkAction.static.autolinkRegExp.test( linktext + ' ' );
+		return ve.ui.LinkAction.static.autolinkRegExp.test( linktext );
 	} );
 };
 
@@ -86,7 +86,7 @@ ve.ui.LinkAction.prototype.autolinkUrl = function () {
  * @return {boolean} Selection was valid and link action was executed.
  */
 ve.ui.LinkAction.prototype.autolink = function ( validateFunc, txFunc ) {
-	var range, rangeEnd, linktext, i, tx,
+	var range, rangeEnd, linktext, i,
 		surfaceModel = this.surface.getModel(),
 		documentModel = surfaceModel.getDocument(),
 		selection = surfaceModel.getSelection();
@@ -119,6 +119,15 @@ ve.ui.LinkAction.prototype.autolink = function ( validateFunc, txFunc ) {
 	// Shrink range to match new linktext.
 	range = range.truncate( linktext.length );
 
+	// If there are word characters (but not punctuation) immediately past the range, don't autolink.
+	// The user did something silly like type a link in the middle of a word.
+	if (
+		range.end + 1 < documentModel.data.getLength() &&
+		/\w/.test( documentModel.data.getText( true, new ve.Range( range.end, range.end + 1 ) ) )
+	) {
+		return false;
+	}
+
 	// Check that none of the range has an existing link annotation.
 	// Otherwise we could autolink an internal link, which would be ungood.
 	for ( i = range.start; i < range.end; i++ ) {
@@ -129,17 +138,16 @@ ve.ui.LinkAction.prototype.autolink = function ( validateFunc, txFunc ) {
 	}
 
 	// Make sure `undo` doesn't expose the selected linktext.
-	surfaceModel.setLinearSelection( new ve.Range( rangeEnd, rangeEnd ) );
+	surfaceModel.setLinearSelection( new ve.Range( rangeEnd ) );
 
 	// Annotate the (previous) range.
-	tx = txFunc ? txFunc( documentModel, range, linktext ) :
-		ve.dm.Transaction.newFromAnnotation(
-			documentModel,
-			range,
-			'set',
-			this.getLinkAnnotation( linktext )
-		);
-	surfaceModel.change( tx );
+	if ( txFunc ) {
+		// TODO: Change this API so that 'txFunc' is given a surface fragment
+		// as an argument, and uses the fragment to directly edit the document.
+		surfaceModel.change( txFunc( documentModel, range, linktext ) );
+	} else {
+		surfaceModel.getLinearFragment( range, true ).annotateContent( 'set', this.getLinkAnnotation( linktext ) );
+	}
 
 	return true;
 };
@@ -157,9 +165,8 @@ ve.ui.LinkAction.prototype.autolink = function ( validateFunc, txFunc ) {
  *   A regular expression matching trailing punctuation which will be
  *   stripped from an autolink.
  */
-ve.ui.LinkAction.prototype.getTrailingPunctuation = function ( candidate ) {
-	/* jshint unused: false */
-	return /[,;.:!?)\]\}"'”’»]+$/;
+ve.ui.LinkAction.prototype.getTrailingPunctuation = function () {
+	return /[,;.:!?)\]}"'”’»]+$/;
 };
 
 /**
@@ -187,11 +194,11 @@ ve.init.Platform.static.initializedPromise.then( function () {
 
 	ve.ui.LinkAction.static.autolinkRegExp =
 		new RegExp(
-			'\\b' + ve.init.platform.getUnanchoredExternalLinkUrlProtocolsRegExp().source + '\\S+(\\s|\\n+)$',
+			'\\b' + ve.init.platform.getUnanchoredExternalLinkUrlProtocolsRegExp().source + '\\S+$',
 			'i'
 		);
 
 	ve.ui.sequenceRegistry.register(
-		new ve.ui.Sequence( 'autolinkUrl', 'autolinkUrl', ve.ui.LinkAction.static.autolinkRegExp, 0, true )
+		new ve.ui.Sequence( 'autolinkUrl', 'autolinkUrl', ve.ui.LinkAction.static.autolinkRegExp, 0, true, true )
 	);
 } );

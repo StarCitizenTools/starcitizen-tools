@@ -3,7 +3,7 @@
  *
  * Subscribes to ve.track() events and routes them to mw.track().
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -33,6 +33,8 @@
 					timing.abort || 0
 				);
 			case 'ready':
+				return timeStamp - timing.init;
+			case 'loaded':
 				return timeStamp - timing.init;
 			case 'saveIntent':
 				return timeStamp - timing.ready;
@@ -67,7 +69,7 @@
 		var action = topic.split( '.' )[ 1 ],
 			event;
 
-		timeStamp = timeStamp || this.timeStamp;  // I8e82acc12 back-compat
+		timeStamp = timeStamp || this.timeStamp; // I8e82acc12 back-compat
 
 		if ( action === 'init' ) {
 			// Regenerate editingSessionId
@@ -92,6 +94,12 @@
 			} else {
 				data.type = 'abandon';
 			}
+		}
+
+		// Convert mode=source/visual to editor name
+		if ( data && data.mode ) {
+			data.editor = data.mode === 'source' ? 'wikitext-2017' : 'visualeditor';
+			delete data.mode;
 		}
 
 		event = $.extend( {
@@ -149,4 +157,4 @@
 		mw.track( topic, data.duration );
 	} );
 
-} )();
+}() );

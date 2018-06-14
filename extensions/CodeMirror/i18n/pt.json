@@ -2,8 +2,18 @@
 	"@metadata": {
 		"authors": [
 			"Vitorvicentevalente",
-			"Nemo bis"
+			"Nemo bis",
+			"Hamilton Abreu",
+			"Fúlvio",
+			"Athena in Wonderland"
 		]
 	},
-	"codemirror-desc": "Destaque da sintaxe de edição para páginas wiki usando [http://codemirror.net/ CodeMirror]"
+	"codemirror-desc": "Fornece realce sintático no editor de texto wiki",
+	"codemirror-toggle-label": "Realce sintático",
+	"codemirror-beta-title": "Realce sintático do texto wiki",
+	"codemirror-beta-desc": "O realce sintático facilita as edições pelo uso da cor e sombra para separar visualmente o texto da página do restante código para hiperligações, referências e predefinições.",
+	"codemirror-popup-label": "Realce sintático",
+	"codemirror-popup-desc": "O realce sintático ajuda a distinguir as diferentes partes da sua edição, atribuindo-lhes diferentes cores.",
+	"codemirror-popup-btn-yes": "Experimentar",
+	"codemirror-popup-btn-no": "Não, obrigado"
 }

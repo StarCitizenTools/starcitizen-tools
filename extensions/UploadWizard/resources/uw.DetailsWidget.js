@@ -57,38 +57,27 @@
 	/**
 	 * Get a wikitext snippet generated from current state of the widget.
 	 *
+	 * @method
 	 * @return {string} Wikitext
 	 */
-	uw.DetailsWidget.prototype.getWikiText = function () {
-		// To satisfy JSCS check for @return without upsetting JSHint check for unreachable code:
-		if ( false ) {
-			return '';
-		}
-		throw new Error( 'Not implemented' );
-	};
+	uw.DetailsWidget.prototype.getWikiText = null;
 
 	/**
 	 * Get a machine-readable representation of the current state of the widget. It can be passed to
 	 * #setSerialized to restore this state (or to set it for another instance of the same class).
 	 *
+	 * @method
 	 * @return {Object}
 	 */
-	uw.DetailsWidget.prototype.getSerialized = function () {
-		// To satisfy JSCS check for @return without upsetting JSHint check for unreachable code:
-		if ( false ) {
-			return {};
-		}
-		throw new Error( 'Not implemented' );
-	};
+	uw.DetailsWidget.prototype.getSerialized = null;
 
 	/**
 	 * Set the state of this widget from machine-readable representation, as returned by
 	 * #getSerialized.
 	 *
+	 * @method
 	 * @param {Object} serialized
 	 */
-	uw.DetailsWidget.prototype.setSerialized = function () {
-		throw new Error( 'Not implemented' );
-	};
+	uw.DetailsWidget.prototype.setSerialized = null;
 
-} )( mediaWiki, mediaWiki.uploadWizard, jQuery, OO );
+}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );

@@ -6,7 +6,7 @@
  * @file
  * @author Niklas Laxström
  * @author Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -19,6 +19,8 @@
  * Rewritten in 2012-04-23
  */
 class SpecialManageGroups extends SpecialPage {
+	use CompatibleLinkRenderer;
+
 	const RIGHT = 'translate-manage';
 
 	/**
@@ -88,12 +90,12 @@ class SpecialManageGroups extends SpecialPage {
 	 * @return int
 	 */
 	protected function getLimit() {
-		$limits = array(
+		$limits = [
 			1000, // Default max
 			ini_get( 'max_input_vars' ),
 			ini_get( 'suhosin.post.max_vars' ),
 			ini_get( 'suhosin.request.max_vars' )
-		);
+		];
 		// Ignore things not set
 		$limits = array_filter( $limits );
 		return min( $limits );
@@ -106,7 +108,7 @@ class SpecialManageGroups extends SpecialPage {
 			$this->msg( 'translate-smg-right' )->escaped()
 		);
 
-		return Html::rawElement( 'div', array( 'class' => 'mw-translate-smg-header' ), $text );
+		return Html::rawElement( 'div', [ 'class' => 'mw-translate-smg-header' ], $text );
 	}
 
 	protected function showChanges( $allowed, $limit ) {
@@ -120,7 +122,7 @@ class SpecialManageGroups extends SpecialPage {
 		$out = $this->getOutput();
 		$out->addHTML(
 			'' .
-				Html::openElement( 'form', array( 'method' => 'post' ) ) .
+				Html::openElement( 'form', [ 'method' => 'post' ] ) .
 				Html::hidden( 'title', $this->getPageTitle()->getPrefixedText() ) .
 				Html::hidden( 'token', $this->getUser()->getEditToken() ) .
 				$this->getLegend()
@@ -138,7 +140,7 @@ class SpecialManageGroups extends SpecialPage {
 			}
 
 			$changes = unserialize( $reader->get( $id ) );
-			$out->addHTML( Html::element( 'h2', array(), $group->getLabel() ) );
+			$out->addHTML( Html::element( 'h2', [], $group->getLabel() ) );
 
 			// Reduce page existance queries to one per group
 			$lb = new LinkBatch();
@@ -175,7 +177,7 @@ class SpecialManageGroups extends SpecialPage {
 			}
 		}
 
-		$attribs = array( 'type' => 'submit', 'class' => 'mw-translate-smg-submit' );
+		$attribs = [ 'type' => 'submit', 'class' => 'mw-translate-smg-submit' ];
 		if ( !$allowed ) {
 			$attribs['disabled'] = 'disabled';
 			$attribs['title'] = $this->msg( 'translate-smg-notallowed' )->text();
@@ -190,7 +192,7 @@ class SpecialManageGroups extends SpecialPage {
 	 * @param string $code
 	 * @param string $type
 	 * @param array $params
-	 * @param int $limit
+	 * @param int &$limit
 	 * @return string HTML
 	 */
 	protected function formatChange( MessageGroup $group, $code, $type, $params, &$limit ) {
@@ -219,14 +221,14 @@ class SpecialManageGroups extends SpecialPage {
 
 			$this->diff->setContent( $oldContent, $newContent );
 
-			$text = $this->diff->getDiff( Linker::link( $title ), '' );
+			$text = $this->diff->getDiff( $this->makeLink( $title ), '' );
 		} elseif ( $type === 'addition' ) {
 			$oldContent = ContentHandler::makeContent( '', $title );
 			$newContent = ContentHandler::makeContent( $params['content'], $title );
 
 			$this->diff->setContent( $oldContent, $newContent );
 
-			$text = $this->diff->getDiff( '', Linker::link( $title ) );
+			$text = $this->diff->getDiff( '', $this->makeLink( $title ) );
 		} elseif ( $type === 'change' ) {
 			$wiki = ContentHandler::getContentText( Revision::newFromTitle( $title )->getContent() );
 
@@ -249,7 +251,7 @@ class SpecialManageGroups extends SpecialPage {
 			$newContent = ContentHandler::makeContent( $params['content'], $title );
 
 			$this->diff->setContent( $oldContent, $newContent );
-			$text .= $this->diff->getDiff( Linker::link( $title ), $actions );
+			$text .= $this->diff->getDiff( $this->makeLink( $title ), $actions );
 		}
 
 		$hidden = Html::hidden( $id, 1 );
@@ -262,20 +264,20 @@ class SpecialManageGroups extends SpecialPage {
 			return '';
 		}
 
-		return Html::rawElement( 'div', array( 'class' => $classes ), $text );
+		return Html::rawElement( 'div', [ 'class' => $classes ], $text );
 	}
 
 	protected function processSubmit() {
 		$req = $this->getRequest();
 		$out = $this->getOutput();
 
-		$jobs = array();
+		$jobs = [];
 		$jobs[] = MessageIndexRebuildJob::newJob();
 
 		$reader = \Cdb\Reader::open( $this->cdb );
 		$groups = unserialize( $reader->get( '#keys' ) );
 
-		$postponed = array();
+		$postponed = [];
 
 		foreach ( $groups as $groupId ) {
 			$group = MessageGroups::getGroup( $groupId );
@@ -330,24 +332,27 @@ class SpecialManageGroups extends SpecialPage {
 	 * Adds the task-based tabs on Special:Translate and few other special pages.
 	 * Hook: SkinTemplateNavigation::SpecialPage
 	 * @since 2012-05-14
+	 * @param Skin $skin
+	 * @param array &$tabs
+	 * @return true
 	 */
 	public static function tabify( Skin $skin, array &$tabs ) {
 		$title = $skin->getTitle();
 		list( $alias, ) = SpecialPageFactory::resolveAlias( $title->getText() );
 
-		$pagesInGroup = array(
+		$pagesInGroup = [
 			'ManageMessageGroups' => 'namespaces',
 			'AggregateGroups' => 'namespaces',
 			'SupportedLanguages' => 'views',
 			'TranslationStats' => 'views',
-		);
+		];
 		if ( !isset( $pagesInGroup[$alias] ) ) {
 			return true;
 		}
 
 		$skin->getOutput()->addModuleStyles( 'ext.translate.tabgroup' );
 
-		$tabs['namespaces'] = array();
+		$tabs['namespaces'] = [];
 		foreach ( $pagesInGroup as $spName => $section ) {
 			$spClass = SpecialPageFactory::getPage( $spName );
 			if ( $spClass === null ) {
@@ -355,11 +360,11 @@ class SpecialManageGroups extends SpecialPage {
 			}
 			$spTitle = $spClass->getPageTitle();
 
-			$tabs[$section][strtolower( $spName )] = array(
+			$tabs[$section][strtolower( $spName )] = [
 				'text' => $spClass->getDescription(),
 				'href' => $spTitle->getLocalURL(),
 				'class' => $alias === $spName ? 'selected' : '',
-			);
+			];
 		}
 
 		return true;

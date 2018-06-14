@@ -1,7 +1,7 @@
 ( function ( $ ) {
 	'use strict';
 
-	$( document ).ready( function () {
+	$( function () {
 		// Hide the dropdown menu when clicking outside of it
 		$( 'html' ).on( 'click', function ( e ) {
 			if ( !e.isDefaultPrevented() ) {
@@ -9,4 +9,4 @@
 			}
 		} );
 	} );
-} )( jQuery );
+}( jQuery ) );

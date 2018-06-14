@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -17,9 +17,8 @@ class MessageGroupStatesUpdaterJob extends Job {
 	/**
 	 * @param Title $title
 	 * @param array $params
-	 * @param int $id
 	 */
-	public function __construct( $title, $params = array() ) {
+	public function __construct( $title, $params = [] ) {
 		parent::__construct( __CLASS__, $title, $params );
 		$this->removeDuplicates = true;
 	}
@@ -27,6 +26,8 @@ class MessageGroupStatesUpdaterJob extends Job {
 	/**
 	 * Hook: TranslateEventTranslationReview
 	 * and also on translation changes
+	 * @param MessageHandle $handle
+	 * @return true
 	 */
 	public static function onChange( MessageHandle $handle ) {
 		$job = self::newJob( $handle->getTitle() );
@@ -36,7 +37,7 @@ class MessageGroupStatesUpdaterJob extends Job {
 	}
 
 	/**
-	 * @param $title
+	 * @param Title $title
 	 * @return MessageGroupStatesUpdaterJob
 	 */
 	public static function newJob( $title ) {
@@ -68,7 +69,7 @@ class MessageGroupStatesUpdaterJob extends Job {
 	}
 
 	public static function getGroupsWithTransitions( MessageHandle $handle ) {
-		$listeners = array();
+		$listeners = [];
 		foreach ( $handle->getGroupIds() as $id ) {
 			$group = MessageGroups::getGroup( $id );
 

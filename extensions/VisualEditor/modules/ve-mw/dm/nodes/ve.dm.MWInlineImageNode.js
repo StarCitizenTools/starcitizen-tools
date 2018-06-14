@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWInlineImage class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -17,7 +17,7 @@
  */
 ve.dm.MWInlineImageNode = function VeDmMWInlineImageNode() {
 	// Parent constructor
-	ve.dm.LeafNode.apply( this, arguments );
+	ve.dm.MWInlineImageNode.super.apply( this, arguments );
 
 	// Mixin constructors
 	ve.dm.MWImageNode.call( this );
@@ -27,17 +27,12 @@ ve.dm.MWInlineImageNode = function VeDmMWInlineImageNode() {
 
 OO.inheritClass( ve.dm.MWInlineImageNode, ve.dm.LeafNode );
 
-// Need to mixin base class as well
+// Need to mixin base class as well (T92540)
 OO.mixinClass( ve.dm.MWInlineImageNode, ve.dm.GeneratedContentNode );
 
 OO.mixinClass( ve.dm.MWInlineImageNode, ve.dm.MWImageNode );
 
 /* Static Properties */
-
-ve.dm.MWInlineImageNode.static.rdfaToType = {
-	'mw:Image': 'none',
-	'mw:Image/Frameless': 'frameless'
-};
 
 ve.dm.MWInlineImageNode.static.isContent = true;
 
@@ -48,23 +43,20 @@ ve.dm.MWInlineImageNode.static.preserveHtmlAttributes = function ( attribute ) {
 	return attributes.indexOf( attribute ) === -1;
 };
 
-ve.dm.MWInlineImageNode.static.matchTagNames = [ 'span' ];
+// <span> is here for backwards compatibility with Parsoid content that may be
+// stored in RESTBase.  This is now generated as <figure-inline>.  It should
+// be safe to remove when verion 1.5 content is no longer acceptable.
+ve.dm.MWInlineImageNode.static.matchTagNames = [ 'span', 'figure-inline' ];
 
 ve.dm.MWInlineImageNode.static.blacklistedAnnotationTypes = [ 'link' ];
 
-ve.dm.MWInlineImageNode.static.getMatchRdfaTypes = function () {
-	return Object.keys( this.rdfaToType );
-};
-
-ve.dm.MWInlineImageNode.static.allowedRdfaTypes = [ 'mw:Error' ];
-
 ve.dm.MWInlineImageNode.static.toDataElement = function ( domElements, converter ) {
-	var dataElement, attributes,
-		$span = $( domElements[ 0 ] ),
-		$firstChild = $span.children().first(), // could be <span> or <a>
+	var dataElement, attributes, types,
+		$figureInline = $( domElements[ 0 ] ),
+		$firstChild = $figureInline.children().first(), // could be <span> or <a>
 		$img = $firstChild.children().first(),
-		typeofAttrs = $span.attr( 'typeof' ).split( ' ' ),
-		classes = $span.attr( 'class' ),
+		typeofAttrs = $figureInline.attr( 'typeof' ).split( ' ' ),
+		classes = $figureInline.attr( 'class' ),
 		recognizedClasses = [],
 		errorIndex = typeofAttrs.indexOf( 'mw:Error' ),
 		width = $img.attr( 'width' ),
@@ -74,8 +66,11 @@ ve.dm.MWInlineImageNode.static.toDataElement = function ( domElements, converter
 		typeofAttrs.splice( errorIndex, 1 );
 	}
 
+	types = this.rdfaToTypes[ typeofAttrs[ 0 ] ];
+
 	attributes = {
-		type: this.rdfaToType[ typeofAttrs[ 0 ] ],
+		mediaClass: types.mediaClass,
+		type: types.frameType,
 		src: $img.attr( 'src' ),
 		resource: $img.attr( 'resource' ),
 		originalClasses: classes
@@ -154,22 +149,17 @@ ve.dm.MWInlineImageNode.static.toDataElement = function ( domElements, converter
 
 ve.dm.MWInlineImageNode.static.toDomElements = function ( data, doc ) {
 	var firstChild,
-		span = doc.createElement( 'span' ),
-		img = doc.createElement( 'img' ),
+		mediaClass = data.attributes.mediaClass,
+		figureInline = doc.createElement( 'figure-inline' ),
+		img = doc.createElement( mediaClass === 'Image' ? 'img' : 'video' ),
 		classes = [],
-		originalClasses = data.attributes.originalClasses,
-		rdfa;
+		originalClasses = data.attributes.originalClasses;
 
-	ve.setDomAttributes( img, data.attributes, [ 'src', 'width', 'height', 'resource' ] );
+	ve.setDomAttributes( img, data.attributes, [ 'width', 'height', 'resource' ] );
+	img.setAttribute( mediaClass === 'Image' ? 'src' : 'poster', data.attributes.src );
 
-	if ( !this.typeToRdfa ) {
-		this.typeToRdfa = {};
-		for ( rdfa in this.rdfaToType ) {
-			this.typeToRdfa[ this.rdfaToType[ rdfa ] ] = rdfa;
-		}
-	}
-
-	span.setAttribute( 'typeof', this.typeToRdfa[ data.attributes.type ] );
+	// RDFa type
+	figureInline.setAttribute( 'typeof', this.getRdfa( mediaClass, data.attributes.type ) );
 
 	if ( data.attributes.defaultSize ) {
 		classes.push( 'mw-default-size' );
@@ -191,9 +181,9 @@ ve.dm.MWInlineImageNode.static.toDomElements = function ( data, doc ) {
 		originalClasses &&
 		ve.compare( originalClasses.trim().split( /\s+/ ).sort(), classes.sort() )
 	) {
-		span.className = originalClasses;
+		figureInline.className = originalClasses;
 	} else if ( classes.length > 0 ) {
-		span.className = classes.join( ' ' );
+		figureInline.className = classes.join( ' ' );
 	}
 
 	if ( data.attributes.isLinked ) {
@@ -203,10 +193,10 @@ ve.dm.MWInlineImageNode.static.toDomElements = function ( data, doc ) {
 		firstChild = doc.createElement( 'span' );
 	}
 
-	span.appendChild( firstChild );
+	figureInline.appendChild( firstChild );
 	firstChild.appendChild( img );
 
-	return [ span ];
+	return [ figureInline ];
 };
 
 /* Registration */

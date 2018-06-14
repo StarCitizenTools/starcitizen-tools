@@ -14,7 +14,6 @@
 	"mwe-upwiz-source-ownwork-assert-cc-zero": "Ich, $2, der Rechteinhaber {{PLURAL:$1|dieses Werks|dieser Werke}} gewähre unwiderruflich jedem das Recht, {{PLURAL:$1|es|sie}} gemäss der «Creative Commons»-Lizenz «Namensnennung 3.0» ([$3 Text der Lizenz]) zu nutzen.",
 	"mwe-upwiz-source-ownwork-assert-custom": "Ich, $2, der Rechteinhaber {{PLURAL:$1|dieses Werks|dieser Werke}}, gewähre unwiderruflich jedem das Recht, {{PLURAL:$1|es|sie}} gemäss der folgenden Lizenz zu nutzen:",
 	"mwe-upwiz-tooltip-title": "Ein eindeutiger wie einzigartiger Titel für die Datei, der als Dateiname genutzt werden wird. Normaler Text einschliesslich Leerschläge ist dabei möglich. Die Dateierweiterung darf aber nicht angegeben werden.",
-	"mwe-upwiz-error-title-hosting": "Diese Datei stammt vermutlich von einem anderen Dateihoster. Bitte einen aussagekräftigeren Namen angeben. Zudem sollte erneut geprüft werden, ob die Datei rechtmässig auf {{SITENAME}} veröffentlicht werden kann.",
 	"mwe-upwiz-file-too-large": "Die Datei ist zu gross.",
 	"mwe-upwiz-dialog-title": "Warnung",
 	"mwe-upwiz-license-own-pd": "Auf alle Rechte wird gemäss der ''Creative-Commons''-Erklärung «CC0 1.0 Universal» verzichtet (entspricht der Gemeinfreiheit).",

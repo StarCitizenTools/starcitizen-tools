@@ -33,8 +33,8 @@
 	settingsPanel = '<div id="languagesettings-settings-panel" class="eight columns">' +
 		'</div>';
 	// Apply and Cancel buttons
-	buttonsRow = '<div class="row language-settings-buttons">' +
-		'<div class="eleven columns">' +
+	buttonsRow = '<div class="row collapse language-settings-buttons">' +
+		'<div class="twelve columns">' +
 		'<button class="mw-ui-button uls-settings-cancel" data-i18n="ext-uls-language-settings-cancel"></button>' +
 		'<button class="mw-ui-button mw-ui-progressive active uls-settings-apply" data-i18n="ext-uls-language-settings-apply" disabled></button>' +
 		'</div>' +
@@ -44,7 +44,7 @@
 		settingsMenu +
 		settingsPanel +
 		'</div>';
-	windowTemplate = '<div style="display: block;" id="language-settings-dialog" class="grid uls-menu uls-wide">' +
+	windowTemplate = '<div style="display: block;" id="language-settings-dialog" class="language-settings-dialog grid uls-menu uls-wide">' +
 		closeRow +
 		panelsRow +
 		buttonsRow +
@@ -86,6 +86,15 @@
 			// ... but when clicked on window do not hide.
 			this.$window.on( 'click', function ( event ) {
 				event.stopPropagation();
+			} );
+
+			// Map Escape to same action as the close button. This is keyup (and not keydown)
+			// because ULS also listens to keyup and we need to stop propagation.
+			this.$window.on( 'keyup', function ( event ) {
+				if ( event.which === 27 ) {
+					event.stopPropagation();
+					mw.hook( 'mw.uls.settings.cancel' ).fire();
+				}
 			} );
 		},
 
@@ -130,7 +139,7 @@
 			$settingsText = $( '<span>' )
 				.addClass( 'settings-text' )
 				.attr( 'data-i18n', module.descriptionI18n );
-			$settingsLink = $( '<div>' )
+			$settingsLink = $( '<button>' )
 				.addClass( moduleName + '-settings-block menu-section' )
 				.prop( 'id', moduleName + '-panel-trigger' )
 				.data( 'module', module )
@@ -149,7 +158,9 @@
 				var $this = $( this );
 
 				$this.data( 'module' ).render();
-				languageSettings.$window.scrollIntoView();
+				if ( languageSettings.$window.is( ':visible' ) ) {
+					languageSettings.$window.scrollIntoView();
+				}
 				$settingsMenuItems.find( '.menu-section' ).removeClass( 'active' );
 				$this.addClass( 'active' );
 			} );
@@ -192,6 +203,8 @@
 			this.$window.show();
 			this.visible();
 			this.$window.scrollIntoView();
+			// For keyboard navigation, put the focus on an element inside the dialog
+			this.$window.find( '.menu-section.active' ).focus();
 		},
 
 		/**

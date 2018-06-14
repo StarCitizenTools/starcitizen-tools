@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWLinkAction class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -84,9 +84,13 @@ ve.ui.MWLinkAction.prototype.getTrailingPunctuation = function ( candidate ) {
 	// * extended with characters banned by EXT_LINK_URL_CLASS: []<>"
 	// * further extended with international close quotes: "'”’›»“‘‹«」』
 	//   https://en.wikipedia.org/wiki/Quotation_mark
+
+	// We could unescape '\[' but better to keep it balanced with '\]'
+	/* eslint-disable no-useless-escape */
 	return /\(/.test( candidate ) ?
-		/[,;.:!?\[\]<>\"\'”’›»“‘‹«」』]+$/ :
-		/[,;.:!?\[\]<>\"\'”’›»“‘‹«」』)]+$/;
+		/[,;.:!?\[\]<>"'”’›»“‘‹«」』]+$/ :
+		/[,;.:!?\[\]<>"'”’›»“‘‹«」』)]+$/;
+	/* eslint-enable no-useless-escape */
 };
 
 /**
@@ -128,8 +132,7 @@ ve.ui.MWLinkAction.prototype.autolinkMagicLink = function () {
 		// Before we get here #autolink has guaranteed that the annotations
 		// do not contain any link annotations.
 		data.setAnnotationsAtOffset( 0, annotations );
-		data.setAnnotationsAtOffset( 1, annotations );
-		return ve.dm.Transaction.newFromReplacement(
+		return ve.dm.TransactionBuilder.static.newFromReplacement(
 			doc, range, data.getData()
 		);
 	} );
@@ -166,10 +169,17 @@ ve.ui.commandRegistry.register(
 	)
 );
 
+// The regexps don't have to be precise; we'll validate the magic
+// link in #autolinkMagicLink above.
 ve.ui.sequenceRegistry.register(
-	// This regexp doesn't have to be precise; we'll validate the magic
-	// link in #autolinkMagicLink above.
-	// The trailing \S* covers any trailing punctuation, which will be
-	// stripped before validating the link.
-	new ve.ui.Sequence( 'autolinkMagicLink', 'autolinkMagicLink', /\b(RFC|PMID|ISBN)\s+[0-9]([- 0-9]*[0-9Xx])?\S*(\s|\n+)$/, 0, true )
+	new ve.ui.Sequence( 'autolinkMagicLinkIsbn10', 'autolinkMagicLink', /\bISBN\s+(?!97[89])([0-9][ -]?){9}[0-9Xx]$/, 0, true, false, true )
+);
+ve.ui.sequenceRegistry.register(
+	new ve.ui.Sequence( 'autolinkMagicLinkIsbn13', 'autolinkMagicLink', /\bISBN\s+(97[89])[ -]?([0-9][ -]?){9}[0-9Xx]$/, 0, true, false, true )
+);
+ve.ui.sequenceRegistry.register(
+	new ve.ui.Sequence( 'autolinkMagicLinkIsbn', 'autolinkMagicLink', /\bISBN\s+(97[89][ -]?)?([0-9][ -]?){9}[0-9Xx]$/, 0, true, true, true )
+);
+ve.ui.sequenceRegistry.register(
+	new ve.ui.Sequence( 'autolinkMagicLinkRfcPmid', 'autolinkMagicLink', /\b(RFC|PMID)\s+[0-9]+$/, 0, true, true, true )
 );

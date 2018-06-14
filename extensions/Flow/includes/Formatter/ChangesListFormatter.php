@@ -39,7 +39,7 @@ class ChangesListFormatter extends AbstractFormatter {
 		// The ' . . ' text between elements
 		$separator = $this->changeSeparator();
 
-		$links = array();
+		$links = [];
 		$links[] = $this->getDiffAnchor( $data['links'], $ctx );
 		$links[] = $this->getHistAnchor( $data['links'], $ctx );
 
@@ -56,9 +56,9 @@ class ChangesListFormatter extends AbstractFormatter {
 			$this->formatTimestamp( $data, 'time' ) .
 			$separator .
 			ChangesList::showCharacterDifference(
-			  $data['size']['old'],
-			  $data['size']['new'],
-			  $ctx
+				$data['size']['old'],
+				$data['size']['new'],
+				$ctx
 			) .
 			( Utils::htmlToPlaintext( $description ) ? $separator . $description : '' ) .
 			$this->getEditSummary( $row, $ctx, $data );
@@ -91,9 +91,9 @@ class ChangesListFormatter extends AbstractFormatter {
 		$prefix = $ctx->msg( 'autocomment-prefix' )->inContentLanguage()->escaped();
 		$link = Linker::link(
 			$title = $row->workflow->getOwnerTitle(),
-			$ctx->getLanguage()->getArrow('backwards'),
-			array(),
-			array(),
+			$ctx->getLanguage()->getArrow( 'backwards' ),
+			[],
+			[],
 			'noclasses'
 		);
 		$summary = '<span class="autocomment">' . $msg->text() . '</span>';
@@ -177,7 +177,7 @@ class ChangesListFormatter extends AbstractFormatter {
 	 * @throws FlowException
 	 * @throws \Flow\Exception\InvalidInputException
 	 */
-	public function getLogTextLinks( RecentChangesRow $row, IContextSource $ctx, array $block, array $links = array() ) {
+	public function getLogTextLinks( RecentChangesRow $row, IContextSource $ctx, array $block, array $links = [] ) {
 		$data = $this->serializer->formatApi( $row, $ctx, 'recentchanges' );
 		if ( !$data ) {
 			return false;
@@ -214,14 +214,13 @@ class ChangesListFormatter extends AbstractFormatter {
 	 * @param IContextSource $ctx
 	 * @return array
 	 */
-	public function getFlags( RecentChangesRow $row, IContextSource $ctx )
-	{
-		return array(
+	public function getFlags( RecentChangesRow $row, IContextSource $ctx ) {
+		return [
 			'newpage' => $row->isFirstReply && $row->revision->isFirstRevision(),
 			'minor' => false,
 			'unpatrolled' => ChangesList::isUnpatrolled( $row->recentChange, $ctx->getUser() ),
 			'bot' => false,
-		);
+		];
 	}
 
 	/**

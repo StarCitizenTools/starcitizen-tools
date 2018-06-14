@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -15,7 +15,7 @@
 class TranslateRenderJob extends Job {
 
 	/**
-	 * @param $target Title
+	 * @param Title $target
 	 * @return TranslateRenderJob
 	 */
 	public static function newJob( Title $target ) {
@@ -30,15 +30,16 @@ class TranslateRenderJob extends Job {
 	/**
 	 * @param Title $title
 	 * @param array $params
-	 * @param int $id
 	 */
-	public function __construct( $title, $params = array(), $id = 0 ) {
-		parent::__construct( __CLASS__, $title, $params, $id );
+	public function __construct( $title, $params = [] ) {
+		parent::__construct( __CLASS__, $title, $params );
 		$this->params = $params;
 		$this->removeDuplicates = true;
 	}
 
 	public function run() {
+		global $wgTranslateKeepOutdatedTranslations;
+
 		// Initialization
 		$title = $this->title;
 		list( , $code ) = TranslateUtils::figureMessage( $title->getPrefixedText() );
@@ -52,7 +53,10 @@ class TranslateRenderJob extends Job {
 		$group = $page->getMessageGroup();
 		$collection = $group->initCollection( $code );
 
-		$text = $page->getParse()->getTranslationPageText( $collection );
+		$text = $page->getParse()->getTranslationPageText(
+			$collection,
+			$wgTranslateKeepOutdatedTranslations
+		);
 
 		// Other stuff
 		$user = $this->getUser();
@@ -88,7 +92,7 @@ class TranslateRenderJob extends Job {
 	}
 
 	/**
-	 * @param $user User|string
+	 * @param User|string $user
 	 */
 	public function setUser( $user ) {
 		if ( $user instanceof User ) {

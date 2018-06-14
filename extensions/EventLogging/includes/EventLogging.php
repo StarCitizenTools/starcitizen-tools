@@ -19,9 +19,12 @@ class EventLogging {
 	 * This is meant to match the Navigator.sendBeacon() API.
 	 *
 	 * @see https://w3c.github.io/beacon/#sec-sendBeacon-method
+	 * @param string $url
+	 * @param array $data
+	 * @return bool
 	 */
 	public static function sendBeacon( $url, array $data = [] ) {
-		DeferredUpdates::addCallableUpdate( function() use ( $url, $data ) {
+		DeferredUpdates::addCallableUpdate( function () use ( $url, $data ) {
 			$options = $data ? [ 'postData' => $data ] : [];
 			return Http::post( $url, $options );
 		} );
@@ -36,7 +39,7 @@ class EventLogging {
 	 * @param int $revId revision ID of schema.
 	 * @param array $event Map of event keys/vals.
 	 * @param int $options Bitmask consisting of EventLogging::OMIT_USER_AGENT.
-	 * @return bool: Whether the event was logged.
+	 * @return bool Whether the event was logged.
 	 */
 	static function logEvent( $schemaName, $revId, $event, $options = 0 ) {
 		global $wgDBname, $wgEventLoggingBaseUri;
@@ -49,7 +52,7 @@ class EventLogging {
 		$schema = $remoteSchema->get();
 
 		try {
-			$isValid = is_array( $schema ) && efSchemaValidate( $event, $schema );
+			$isValid = is_array( $schema ) && self::schemaValidate( $event, $schema );
 		} catch ( JsonSchemaException $e ) {
 			$isValid = false;
 		}
@@ -79,9 +82,8 @@ class EventLogging {
 	 *
 	 * @param array $encapsulatedEvent Encapsulated event
 	 * @return string $json
-	**/
+	 */
 	static function serializeEvent( $encapsulatedEvent ) {
-
 		$event = $encapsulatedEvent['event'];
 
 		if ( count( $event ) === 0 ) {
@@ -97,5 +99,33 @@ class EventLogging {
 		$json = str_replace( ' ', '\u0020', FormatJson::encode( $encapsulatedEvent ) );
 
 		return $json;
+	}
+
+	/**
+	 * Validates object against JSON Schema.
+	 *
+	 * @throws JsonSchemaException If the object fails to validate.
+	 * @param array $object Object to be validated.
+	 * @param array $schema Schema to validate against (default: JSON Schema).
+	 * @return bool True.
+	 */
+	public static function schemaValidate( $object, $schema = null ) {
+		if ( $schema === null ) {
+			// Default to JSON Schema
+			$json = file_get_contents( dirname( __DIR__ ) . '/schemas/schemaschema.json' );
+			$schema = FormatJson::decode( $json, true );
+		}
+
+		// We depart from the JSON Schema specification in disallowing by default
+		// additional event fields not mentioned in the schema.
+		// See <https://bugzilla.wikimedia.org/show_bug.cgi?id=44454> and
+		// <https://tools.ietf.org/html/draft-zyp-json-schema-03#section-5.4>.
+		if ( !array_key_exists( 'additionalProperties', $schema ) ) {
+			$schema[ 'additionalProperties' ] = false;
+		}
+
+		$root = new JsonTreeRef( $object );
+		$root->attachSchema( $schema );
+		return $root->validate();
 	}
 }

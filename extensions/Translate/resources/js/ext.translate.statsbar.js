@@ -3,7 +3,7 @@
  *
  * @author Niklas Laxström
  * @author Santhosh Thottingal
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @since 2012-11-30
  */
 
@@ -77,10 +77,13 @@
 				statsbar.update();
 			} );
 
-			statsbar.$container.hover( function () {
-				statsbar.elements.$info.removeClass( 'hide' );
-			}, function () {
-				statsbar.elements.$info.addClass( 'hide' );
+			statsbar.$container.on( {
+				mouseenter: function () {
+					statsbar.elements.$info.removeClass( 'hide' );
+				},
+				mouseleave: function () {
+					statsbar.elements.$info.addClass( 'hide' );
+				}
 			} );
 		},
 

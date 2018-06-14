@@ -123,8 +123,14 @@ class EDParserFunctions {
 			$cacheExpireTime = $edgCacheExpireTime;
 		}
 
+		if ( array_key_exists( 'json offset', $args) ) {
+			$prefixLength = $args['json offset'];
+		} else {
+			$prefixLength = 0;
+		}
+
 		$postData = array_key_exists( 'post data', $args ) ? $args['post data'] : '';
-		$external_values = EDUtils::getDataFromURL( $url, $format, $mappings, $postData, $cacheExpireTime );
+		$external_values = EDUtils::getDataFromURL( $url, $format, $mappings, $postData, $cacheExpireTime, $prefixLength );
 		if ( is_string( $external_values ) ) {
 			// It's an error message - display it on the screen.
 			return EDUtils::formatErrorMessage( $external_values );
@@ -339,7 +345,6 @@ class EDParserFunctions {
 				}
 			}
 		}
-		return;
 	}
 
 	/**
@@ -367,10 +372,10 @@ class EDParserFunctions {
 			// added in External Data version 1.3.
 			$dbID = $args['server'];
 		} else {
-			return EDUtils::formatErrorMessage( wfMessage( 'externaldata-no-param-specified', 'db')->parse() );
+			return EDUtils::formatErrorMessage( wfMessage( 'externaldata-no-param-specified', 'db' )->parse() );
 		}
 		if ( array_key_exists( 'from', $args ) ) {
-			$table = $args['from'];
+			$from = $args['from'];
 		} else {
 			return EDUtils::formatErrorMessage( wfMessage( 'externaldata-no-param-specified', 'from')->parse() );
 		}
@@ -379,6 +384,7 @@ class EDParserFunctions {
 		$orderBy = ( array_key_exists( 'order by', $args ) ) ? $args['order by'] : null;
 		$groupBy = ( array_key_exists( 'group by', $args ) ) ? $args['group by'] : null;
 		$sqlOptions = array( 'LIMIT' => $limit, 'ORDER BY' => $orderBy, 'GROUP BY' => $groupBy );
+		$joinOn = ( array_key_exists( 'join on', $args ) ) ? $args['join on'] : null;
 		$otherParams = array();
 		if ( array_key_exists('aggregate', $args ) ) {
 			$otherParams['aggregate'] = $args['aggregate'];
@@ -387,14 +393,14 @@ class EDParserFunctions {
 		}
 		$mappings = EDUtils::paramToArray( $data ); // parse the data arg into mappings
 
-		$external_values = EDUtils::getDBData( $dbID, $table, array_values( $mappings ), $conds, $sqlOptions, $otherParams );
+		$external_values = EDUtils::getDBData( $dbID, $from, array_values( $mappings ), $conds, $sqlOptions, $joinOn, $otherParams );
 
 		// Handle error cases.
 		if ( !is_array( $external_values ) ) {
 			return EDUtils::formatErrorMessage( $external_values );
 		}
 
-		// Build $edgValues
+		// Build $edgValues.
 		foreach ( $mappings as $local_var => $external_var ) {
 			if ( array_key_exists( $external_var, $external_values ) ) {
 				foreach ( $external_values[$external_var] as $value ) {
@@ -402,7 +408,6 @@ class EDParserFunctions {
 				}
 			}
 		}
-		return;
 	}
 
 	/**
@@ -533,10 +538,19 @@ class EDParserFunctions {
 
 		$num_loops = 0; // May differ when multiple '#get_'s are used in one page
 		foreach ( $mappings as $template_param => $local_variable ) {
+			if ( !array_key_exists( $local_variable, $edgValues ) ) {
+				// Don't throw an error message - the source may just
+				// not publish this variable.
+				continue;
+			}
 			$num_loops = max( $num_loops, count( $edgValues[$local_variable] ) );
 		}
 
-		$text = "";
+		if ( array_key_exists( 'intro template', $args ) && $num_loops > 0) {
+			$text = '{{' . $args['intro template'] . '}}';
+		} else {
+			$text = "";
+		}
 		for ( $i = 0; $i < $num_loops; $i++ ) {
 			if ( $i > 0 ) {
 				$text .= $delimiter;
@@ -547,6 +561,9 @@ class EDParserFunctions {
 				$text .= "|$template_param=$value";
 			}
 			$text .= "}}";
+		}
+		if ( array_key_exists( 'outro template', $args ) && $num_loops > 0 ) {
+			$text .= '{{' . $args['outro template'] . '}}';
 		}
 
 		// This actually 'calls' the template that we built above
@@ -581,36 +598,16 @@ class EDParserFunctions {
 			if ( $i == 0 ) continue;
 			$subobjectArgs[] = $value;
 		}
-		if ( class_exists( 'SMW\SubobjectParserFunction' ) ) {
-			// SMW 1.9+
-			$instance = \SMW\ParserFunctionFactory::newFromParser( $parser )->getSubobjectParser();
-			return $instance->parse( new SMW\ParserParameterFormatter( $subobjectArgs ) );
-		} elseif ( class_exists( 'SMW\SubobjectHandler' ) ) {
-			// Old version of SMW 1.9 - can be removed at some point
-			call_user_func_array( array( 'SMW\SubobjectHandler', 'render' ), $subobjectArgs );
-		} elseif ( class_exists( 'SMW\SubobjectParser' ) ) {
-			// Old version of SMW 1.9 - can be removed at some point
-			call_user_func_array( array( 'SMW\SubobjectParser', 'render' ), $subobjectArgs );
-		} elseif ( class_exists( 'SMW\Subobject' ) ) {
-			// Old version of SMW 1.9 - can be removed at some point
-			call_user_func_array( array( 'SMW\Subobject', 'render' ), $subobjectArgs );
-		} else {
-			// SMW 1.8
-			call_user_func_array( array( 'SMWSubobject', 'render' ), $subobjectArgs );
-		}
-		return;
+
+		// SMW 1.9+
+		$instance = \SMW\ParserFunctionFactory::newFromParser( $parser )->getSubobjectParser();
+		return $instance->parse( new SMW\ParserParameterFormatter( $subobjectArgs ) );
 	}
 
 	/**
 	 * Render the #store_external_table parser function
 	 */
 	static function doStoreExternalTable( &$parser ) {
-		global $smwgDefaultStore;
-
-		if ( $smwgDefaultStore != 'SMWSQLStore3' && ! class_exists( 'SIOHandler' ) ) {
-			// If SQLStore3 is not installed, we need SIO.
-			return EDUtils::formatErrorMessage( 'Semantic Internal Objects is not installed' );
-		}
 		global $edgValues;
 
 		$params = func_get_args();
@@ -651,26 +648,7 @@ class EDParserFunctions {
 				}
 			}
 
-			// If SQLStore3 is being used, we can call #subobject -
-			// that's what #set_internal would call anyway, so
-			// we're cutting out the middleman.
-			if ( $smwgDefaultStore == 'SMWSQLStore3' ) {
-				self::callSubobject( $parser, $params );
-				continue;
-			}
-
-			// Add $parser to the beginning of the $params array,
-			// and pass the whole thing in as arguments to
-			// doSetInternal, to mimic a call to #set_internal.
-			array_unshift( $params, $parser );
-			// As of PHP 5.3.1, call_user_func_array() requires that
-			// the function params be references. Workaround via
-			// http://stackoverflow.com/questions/2045875/pass-by-reference-problem-with-php-5-3-1
-			$refParams = array();
-			foreach ( $params as $key => $value ) {
-				$refParams[$key] = &$params[$key];
-			}
-			call_user_func_array( array( 'SIOHandler', 'doSetInternal' ), $refParams );
+			self::callSubobject( $parser, $params );
 		}
 		return null;
 	}

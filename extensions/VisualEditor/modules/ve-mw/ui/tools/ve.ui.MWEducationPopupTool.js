@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MediaWiki EducationPopupTool class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -24,16 +24,21 @@ ve.ui.MWEducationPopupTool = function VeUiMwEducationPopupTool( config ) {
 
 	if (
 		!( ve.init.mw.DesktopArticleTarget && ve.init.target instanceof ve.init.mw.DesktopArticleTarget ) ||
-		ve.init.target.dummyToolbar ||
 		(
 			!prefSaysShow &&
 			!(
 				!usePrefs &&
-				localStorage.getItem( 've-hideusered' ) === null &&
+				mw.storage.get( 've-hideusered' ) === null &&
 				$.cookie( 've-hideusered' ) === null
 			)
 		)
 	) {
+		return;
+	}
+
+	if ( !( this.toolGroup instanceof OO.ui.BarToolGroup ) ) {
+		// The popup gets hideously deformed in other cases. Getting it to work would probably be
+		// difficult. Let's just not show it. (T170919)
 		return;
 	}
 
@@ -51,6 +56,7 @@ ve.ui.MWEducationPopupTool = function VeUiMwEducationPopupTool( config ) {
 	);
 
 	this.popup = new OO.ui.PopupWidget( {
+		$floatableContainer: this.$element,
 		$content: $popupContent,
 		padded: true,
 		width: 300
@@ -75,25 +81,9 @@ ve.ui.MWEducationPopupTool = function VeUiMwEducationPopupTool( config ) {
 			tool.$pulsatingDot.hide();
 			tool.$stillDot.hide();
 			tool.popup.toggle( true );
-			tool.popup.$element.css( {
-				left: tool.$element.width() / 2,
-				top: tool.$element.height()
-			} );
 			$shield.remove();
 		}
 	} );
-
-	setTimeout( function () {
-		var radius = tool.$pulsatingDot.width() / 2;
-		tool.$pulsatingDot.css( {
-			left: tool.$element.width() / 2 - radius,
-			top: tool.$element.height() - radius
-		} );
-		tool.$stillDot.css( {
-			left: tool.$element.width() / 2 - radius / 3,
-			top: tool.$element.height() - radius / 3
-		} );
-	}, 0 );
 };
 
 /* Inheritance */
@@ -118,9 +108,7 @@ ve.ui.MWEducationPopupTool.prototype.onPopupCloseButtonClick = function () {
 		new mw.Api().saveOption( 'visualeditor-hideusered', 1 );
 		mw.user.options.set( 'visualeditor-hideusered', 1 );
 	} else if ( !usePrefs ) {
-		try {
-			localStorage.setItem( 've-hideusered', 1 );
-		} catch ( e ) {
+		if ( !mw.storage.set( 've-hideusered', 1 ) ) {
 			$.cookie( 've-hideusered', 1, { path: '/', expires: 30 } );
 		}
 	}

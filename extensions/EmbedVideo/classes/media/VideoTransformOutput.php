@@ -24,8 +24,8 @@ class VideoTransformOutput extends \MediaTransformOutput {
 	public function __construct($file, $parameters) {
 		$this->file = $file;
 		$this->parameters = $parameters;
-		$this->width = $parameters['width'];
-		$this->height = $parameters['height'];
+		$this->width = (isset($parameters['width']) ? $parameters['width'] : null);
+		$this->height = (isset($parameters['height']) ? $parameters['height'] : null);
 		$this->path = $file->getLocalRefPath();
 		$this->lang = false;
 		$this->page = $parameters['page'];
@@ -56,17 +56,29 @@ class VideoTransformOutput extends \MediaTransformOutput {
 	public function toHtml($options = []) {
 		$parameters = $this->parameters;
 
+		$style = [];
+		$style[] = "max-width: 100%;";
+		$style[] = "max-height: 100%;";
 		if (empty($options['no-dimensions'])) {
 			$parameters['width'] = $this->getWidth();
 			$parameters['height'] = $this->getHeight();
+			$style[] = "width: {$this->getWidth()}px;";
+			$style[] = "height: {$this->getHeight()}px;";
 		}
 
 		if (!empty($options['valign'])) {
-			$style = "vertical-align: {$options['valign']}";
+			$style[] = "vertical-align: {$options['valign']};";
 		}
 
 		if (!empty($options['img-class'])) {
 			$class = $options['img-class'];
+		}
+
+		if (!isset($parameters['start'])) {
+			$parameters['start'] = null;
+		}
+		if (!isset($parameters['end'])) {
+			$parameters['end'] = null;
 		}
 
 		$inOut = false;
@@ -80,7 +92,7 @@ class VideoTransformOutput extends \MediaTransformOutput {
 			}
 		}
 
-		$html = "<video src='{$this->url}".($inOut !== false ? '#t='.implode(',', $inOut) : '')."' width='{$this->getWidth()}' height='{$this->getHeight()}'".(!empty($class) ? " class='{$class}'" : "").(!empty($style) ? " style='{$style}'" : "")." controls><a href='{$parameters['descriptionUrl']}'>{$parameters['descriptionUrl']}</a></video>";
+		$html = "<video src='{$this->url}".($inOut !== false ? '#t='.implode(',', $inOut) : '')."' width='{$this->getWidth()}' height='{$this->getHeight()}'".(!empty($class) ? " class='{$class}'" : "").(!empty($style) ? " style='".implode(" ", $style)."'" : "")." controls><a href='{$parameters['descriptionUrl']}'>{$parameters['descriptionUrl']}</a></video>";
 
 		return $html;
 	}

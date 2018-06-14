@@ -8,13 +8,13 @@ class SpecialCampaigns extends SpecialPage {
 
 	public function execute( $subPage ) {
 		$request = $this->getRequest();
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		$start = (int)$request->getVal( 'start' );
 
 		$limit = 50;
 
-		$cond = array( 'campaign_enabled = 1' );
+		$cond = [ 'campaign_enabled = 1' ];
 
 		if ( $start !== null ) {
 			// Not SQL Injection, since $start is cast to (int)
@@ -23,10 +23,10 @@ class SpecialCampaigns extends SpecialPage {
 
 		$res = $dbr->select(
 			'uw_campaigns',
-			array( 'campaign_id', 'campaign_name' ),
+			[ 'campaign_id', 'campaign_name' ],
 			$cond,
 			__METHOD__,
-			array( 'LIMIT' => $limit + 1 )
+			[ 'LIMIT' => $limit + 1 ]
 		);
 
 		$this->getOutput()->setPageTitle( $this->msg( 'mwe-upload-campaigns-list-title' ) );
@@ -62,19 +62,19 @@ class SpecialCampaigns extends SpecialPage {
 		$campaignTitle = array_key_exists( 'title', $config ) ? $config['title'] : $campaign->getName();
 		$campaignDescription = array_key_exists( 'description', $config ) ? $config['description'] : '';
 		$returnHTML =
-			Html::rawElement( 'dt', array(),
-				Html::rawElement( 'a', array( 'href' => $campaignURL ), $campaignTitle )
+			Html::rawElement( 'dt', [],
+				Html::rawElement( 'a', [ 'href' => $campaignURL ], $campaignTitle )
 			) .
-				Html::element( 'dd', array(), $campaignDescription );
+				Html::element( 'dd', [], $campaignDescription );
 		return $returnHTML;
 	}
 
 	private function getHtmlForPagination( $firstId ) {
-		$nextHref = $this->getPageTitle()->getLocalURL( array( 'start' => $firstId ) );
+		$nextHref = $this->getPageTitle()->getLocalURL( [ 'start' => $firstId ] );
 		return Html::rawElement( 'div',
-			array( 'id' => 'mwe-upload-campaigns-pagination' ),
+			[ 'id' => 'mwe-upload-campaigns-pagination' ],
 			Html::element( 'a',
-				array( 'href' => $nextHref ),
+				[ 'href' => $nextHref ],
 				$this->msg( 'mwe-upload-campaigns-pagination-next' )->text()
 			)
 		);

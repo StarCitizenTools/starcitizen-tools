@@ -4,9 +4,9 @@
  *
  * @ingroup Maintenance
  */
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: __DIR__ . '/../../../maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
  * Maintenance script that removes invalid notifications
@@ -16,7 +16,12 @@ require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
 class RemoveInvalidNotification extends Maintenance {
 
 	protected $batchSize = 500;
-	protected $invalidEventType = array( 'article-linked' );
+	protected $invalidEventType = [ 'article-linked' ];
+
+	public function __construct() {
+		$this->mDescription = "Removes invalid notifications from the database.";
+		$this->requireExtension( 'Echo' );
+	}
 
 	public function execute() {
 		if ( !$this->invalidEventType ) {
@@ -28,22 +33,22 @@ class RemoveInvalidNotification extends Maintenance {
 		global $wgEchoCluster;
 
 		$dbw = MWEchoDbFactory::getDB( DB_MASTER );
-		$dbr = MWEchoDbFactory::getDB( DB_SLAVE );
+		$dbr = MWEchoDbFactory::getDB( DB_REPLICA );
 
 		$count = $this->batchSize;
 
 		while ( $count == $this->batchSize ) {
 			$res = $dbr->select(
-				array( 'echo_event' ),
-				array( 'event_id' ),
-				array(
+				[ 'echo_event' ],
+				[ 'event_id' ],
+				[
 					'event_type' => $this->invalidEventType,
-				),
+				],
 				__METHOD__,
-				array( 'LIMIT' => $this->batchSize )
+				[ 'LIMIT' => $this->batchSize ]
 			);
 
-			$event = array();
+			$event = [];
 			$count = 0;
 			foreach ( $res as $row ) {
 				if ( !in_array( $row->event_id, $event ) ) {
@@ -57,12 +62,12 @@ class RemoveInvalidNotification extends Maintenance {
 
 				$dbw->delete(
 					'echo_event',
-					array( 'event_id' => $event ),
+					[ 'event_id' => $event ],
 					__METHOD__
 				);
 				$dbw->delete(
 					'echo_notification',
-					array( 'notification_event' => $event ),
+					[ 'notification_event' => $event ],
 					__METHOD__
 				);
 
@@ -79,4 +84,4 @@ class RemoveInvalidNotification extends Maintenance {
 }
 
 $maintClass = 'RemoveInvalidNotification'; // Tells it to run the class
-require_once ( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

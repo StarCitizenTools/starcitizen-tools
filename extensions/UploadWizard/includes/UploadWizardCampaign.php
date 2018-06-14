@@ -13,7 +13,7 @@
  *
  * @since 1.2
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Yuvi Panda <yuvipanda@gmail.com>
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
@@ -25,13 +25,13 @@ class UploadWizardCampaign {
 	 * @since 1.2
 	 * @var array
 	 */
-	protected $config = array();
+	protected $config = [];
 
 	/**
 	 * The campaign configuration, after wikitext properties have been parsed.
 	 *
 	 * @since 1.2
-	 * @var array
+	 * @var array|null
 	 */
 	protected $parsedConfig = null;
 
@@ -43,13 +43,13 @@ class UploadWizardCampaign {
 	 * @since 1.2
 	 * @var array
 	 */
-	protected $templates = array();
+	protected $templates = [];
 
 	/**
 	 * The Title representing the current campaign
 	 *
 	 * @since 1.4
-	 * @var Title
+	 * @var Title|null
 	 */
 	protected $title = null;
 
@@ -57,7 +57,7 @@ class UploadWizardCampaign {
 	 * The RequestContext to use for operations performed from this object
 	 *
 	 * @since 1.4
-	 * @var RequestContext
+	 * @var RequestContext|null
 	 */
 	protected $context = null;
 
@@ -93,7 +93,7 @@ class UploadWizardCampaign {
 	 *
 	 * @since 1.4
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function getIsEnabled() {
 		return $this->config['enabled'];
@@ -132,19 +132,30 @@ class UploadWizardCampaign {
 		$data = $wgMemc->get( $key );
 		if ( $data === false ) {
 			wfDebug( __METHOD__ . ' cache miss for key ' . $key );
-			$dbr = wfGetDB( DB_SLAVE );
+			$dbr = wfGetDB( DB_REPLICA );
+
+			if ( class_exists( ActorMigration::class ) ) {
+				$actorQuery = ActorMigration::newMigration()->getJoin( 'img_user' );
+			} else {
+				$actorQuery = [
+					'tables' => [],
+					'fields' => [ 'img_user' => 'img_user' ],
+					'joins' => [],
+				];
+			}
+
 			$result = $dbr->select(
-				array( 'categorylinks', 'page', 'image' ),
-				array( 'count' => 'COUNT(DISTINCT img_user)' ),
-				array( 'cl_to' => $this->getTrackingCategory()->getDBKey(), 'cl_type' => 'file' ),
+				[ 'categorylinks', 'page', 'image' ] + $actorQuery['tables'],
+				[ 'count' => 'COUNT(DISTINCT ' . $actorQuery['fields']['img_user'] . ')' ],
+				[ 'cl_to' => $this->getTrackingCategory()->getDBKey(), 'cl_type' => 'file' ],
 				__METHOD__,
-				array(
-					'USE INDEX' => array( 'categorylinks' => 'cl_timestamp' )
-				),
-				array(
-					'page' => array( 'INNER JOIN', 'cl_from=page_id' ),
-					'image' => array( 'INNER JOIN', 'page_title=img_name' )
-				)
+				[
+					'USE INDEX' => [ 'categorylinks' => 'cl_timestamp' ]
+				],
+				[
+					'page' => [ 'INNER JOIN', 'cl_from=page_id' ],
+					'image' => [ 'INNER JOIN', 'page_title=img_name' ]
+				] + $actorQuery['joins']
 			);
 
 			$data = $result->current()->count;
@@ -156,21 +167,21 @@ class UploadWizardCampaign {
 	}
 
 	public function getUploadedMedia( $limit = 24 ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$result = $dbr->select(
-			array( 'categorylinks', 'page' ),
-			array( 'cl_from', 'page_namespace', 'page_title' ),
-			array( 'cl_to' => $this->getTrackingCategory()->getDBKey(), 'cl_type' => 'file' ),
+			[ 'categorylinks', 'page' ],
+			[ 'cl_from', 'page_namespace', 'page_title' ],
+			[ 'cl_to' => $this->getTrackingCategory()->getDBKey(), 'cl_type' => 'file' ],
 			__METHOD__,
-			array(
+			[
 				'ORDER BY' => 'cl_timestamp DESC',
 				'LIMIT' => $limit,
-				'USE INDEX' => array( 'categorylinks' => 'cl_timestamp' )
-			),
-			array( 'page' => array( 'INNER JOIN', 'cl_from=page_id' ) )
+				'USE INDEX' => [ 'categorylinks' => 'cl_timestamp' ]
+			],
+			[ 'page' => [ 'INNER JOIN', 'cl_from=page_id' ] ]
 		);
 
-		$images = array();
+		$images = [];
 		foreach ( $result as $row ) {
 			$images[] = Title::makeTitle( $row->page_namespace, $row->page_title );
 		}
@@ -199,7 +210,7 @@ class UploadWizardCampaign {
 		$templateIds = $parserOutput->getTemplateIds();
 		foreach ( $parserOutput->getTemplates() as $ns => $templates ) {
 			foreach ( $templates as $dbk => $id ) {
-				$this->templates[$ns][$dbk] = array( $id, $templateIds[$ns][$dbk] );
+				$this->templates[$ns][$dbk] = [ $id, $templateIds[$ns][$dbk] ];
 			}
 		}
 	}
@@ -207,8 +218,8 @@ class UploadWizardCampaign {
 	/**
 	 * Wrapper around OutputPage::parseInline
 	 *
-	 * @param $value String Wikitext to parse
-	 * @param $lang Language
+	 * @param string $value Wikitext to parse
+	 * @param Language $lang
 	 *
 	 * @since 1.3
 	 *
@@ -218,7 +229,9 @@ class UploadWizardCampaign {
 		global $wgParser;
 
 		$parserOptions = ParserOptions::newFromContext( $this->context );
-		$parserOptions->setEditSection( false );
+		if ( !defined( 'ParserOutput::SUPPORTS_STATELESS_TRANSFORMS' ) ) {
+			$parserOptions->setEditSection( false );
+		}
 		$parserOptions->setInterfaceMessage( true );
 		$parserOptions->setUserLang( $lang );
 		$parserOptions->setTargetLanguage( $lang );
@@ -226,10 +239,12 @@ class UploadWizardCampaign {
 
 		$output = $wgParser->parse( $value, $this->getTitle(),
 									$parserOptions );
-		$parsed = $output->getText();
+		$parsed = $output->getText( [
+			'enableSectionEditLinks' => false,
+		] );
 
 		// Strip out the surrounding <p> tags
-		$m = array();
+		$m = [];
 		if ( preg_match( '/^<p>(.*)\n?<\/p>\n?/sU', $parsed, $m ) ) {
 			$parsed = $m[1];
 		}
@@ -242,15 +257,15 @@ class UploadWizardCampaign {
 	/**
 	 * Parses the values in an assoc array as wikitext
 	 *
-	 * @param $array Array
-	 * @param $forKeys Array: Array of keys whose values should be parsed
+	 * @param array $array
+	 * @param array $forKeys Array of keys whose values should be parsed
 	 *
 	 * @since 1.3
 	 *
 	 * @return array
 	 */
 	private function parseArrayValues( $array, $lang, $forKeys = null ) {
-		$parsed = array();
+		$parsed = [];
 		foreach ( $array as $key => $value ) {
 			if ( $forKeys !== null ) {
 				if ( in_array( $key, $forKeys ) ) {
@@ -274,6 +289,7 @@ class UploadWizardCampaign {
 	 *
 	 * @since 1.3
 	 *
+	 * @param Language|null $lang
 	 * @return array
 	 */
 	public function getParsedConfig( $lang = null ) {
@@ -289,7 +305,7 @@ class UploadWizardCampaign {
 		$memKey = wfMemcKey(
 			'uploadwizard', 'campaign', $this->getName(), 'parsed-config', $lang->getCode()
 		);
-		$depKeys = array( $this->makeInvalidateTimestampKey() );
+		$depKeys = [ $this->makeInvalidateTimestampKey() ];
 
 		$curTTL = null;
 		$memValue = $cache->get( $memKey, $curTTL, $depKeys );
@@ -298,7 +314,7 @@ class UploadWizardCampaign {
 		}
 
 		if ( $this->parsedConfig === null ) {
-			$parsedConfig = array();
+			$parsedConfig = [];
 			foreach ( $this->config as $key => $value ) {
 				switch ( $key ) {
 				case "title":
@@ -311,7 +327,7 @@ class UploadWizardCampaign {
 							$parsedConfig['display'][$option] = $this->parseArrayValues(
 								$optionValue,
 								$lang,
-								array( 'label' )
+								[ 'label' ]
 							);
 						} else {
 							$parsedConfig['display'][$option] = $this->parseValue( $optionValue, $lang );
@@ -319,12 +335,12 @@ class UploadWizardCampaign {
 					}
 					break;
 				case "fields":
-					$parsedConfig['fields'] = array();
+					$parsedConfig['fields'] = [];
 					foreach ( $value as $field ) {
 						$parsedConfig['fields'][] = $this->parseArrayValues(
 							$field,
 							$lang,
-							array( 'label', 'options' )
+							[ 'label', 'options' ]
 						);
 					}
 					break;
@@ -344,7 +360,7 @@ class UploadWizardCampaign {
 
 			$this->parsedConfig = $parsedConfig;
 
-			$cache->set( $memKey, array( 'timestamp' => time(), 'config' => $parsedConfig ) );
+			$cache->set( $memKey, [ 'timestamp' => time(), 'config' => $parsedConfig ] );
 		}
 
 		$uwDefaults = UploadWizardConfig::getSetting( 'defaults' );
@@ -376,7 +392,7 @@ class UploadWizardCampaign {
 					case "autoAdd":
 					case "display":
 						if ( !array_key_exists( $cnf, $this->parsedConfig ) ) {
-							$this->parsedConfig[$cnf] = array();
+							$this->parsedConfig[$cnf] = [];
 						}
 
 						$this->parsedConfig[$cnf] = array_merge( $this->parsedConfig[$cnf], $modifier );
@@ -397,7 +413,6 @@ class UploadWizardCampaign {
 		}
 		return $this->templates;
 	}
-
 
 	/**
 	 * Invalidate the cache for this campaign, in all languages
@@ -474,7 +489,7 @@ class UploadWizardCampaign {
 	 * @param string $objRef
 	 */
 	private function applyObjectReferenceToButtons( $objRef ) {
-		$customizableButtons = array( 'homeButton', 'beginButton' );
+		$customizableButtons = [ 'homeButton', 'beginButton' ];
 
 		foreach ( $customizableButtons as $button ) {
 			if ( isset( $this->parsedConfig['display'][$button]['target'] ) &&

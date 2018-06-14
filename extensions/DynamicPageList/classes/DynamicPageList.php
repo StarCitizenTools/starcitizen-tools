@@ -73,33 +73,6 @@ class DynamicPageList {
 		// can lead to links not being shown in the original document (probably the UIQ_QINU-tags no longer
 		// get replaced properly; in combination with the patch however, it does not do any harm.
 
-		// The CITE extension registers a hook on parser->clearState
-		// We must UNDO the effect of that call (Cite->clearState) because otherwise all Cititations would be lost
-		// that were made before a DPL call; we borrow a handle to the cite object from the parser´s tag hooks
-
-		$citeObject = null;
-		// store current state of Cite Object
-		if (isset($parser->mTagHooks['references'])) {
-			$citeObject              = $parser->mTagHooks['references'][0];
-			$tmpCiteGroupCnt         = $citeObject->mGroupCnt;
-			$tmpCiteOutCnt           = $citeObject->mOutCnt;
-			$tmpCiteCallCnt          = $citeObject->mCallCnt;
-			$tmpCiteRefs             = $citeObject->mRefs;
-			$tmpCiteReferencesErrors = $citeObject->mReferencesErrors;
-			$tmpCiteRefCallStack     = $citeObject->mRefCallStack;
-		}
-		// now clear the state
-		$this->mParser->clearState(); // eliminated to avoid conflicht with CITE extension
-		// restore Cite Object
-		if ($citeObject != null) {
-			$citeObject->mGroupCnt         = $tmpCiteGroupCnt;
-			$citeObject->mOutCnt           = $tmpCiteOutCnt;
-			$citeObject->mCallCnt          = $tmpCiteCallCnt;
-			$citeObject->mRefs             = $tmpCiteRefs;
-			$citeObject->mReferencesErrors = $tmpCiteReferencesErrors;
-			$citeObject->mRefCallStack     = $tmpCiteRefCallStack;
-		}
-
 		$this->mParserOptions = $parser->mOptions;
 		$this->mParserTitle   = $parser->mTitle;
 
@@ -119,7 +92,7 @@ class DynamicPageList {
 				if ($rest > 0) {
 					$nsize += 1;
 				}
-				$this->mOutput .= "{|" . $sRowColFormat . "\n|\n";
+				$this->mOutput .= "{|".$sRowColFormat."\n|\n";
 				if ($nsize < $hspace + 1) {
 					$nsize = $hspace + 1; // correction for result sets with one entry
 				}
@@ -133,7 +106,7 @@ class DynamicPageList {
 				foreach ($headings as $headingCount) {
 					$headingLink = $articles[$nstart - $offset]->mParentHLink;
 					$this->mOutput .= $hlistmode->sItemStart;
-					$this->mOutput .= $hlistmode->sHeadingStart . $headingLink . $hlistmode->sHeadingEnd;
+					$this->mOutput .= $hlistmode->sHeadingStart.$headingLink.$hlistmode->sHeadingEnd;
 					if ($bHeadingCount) {
 						$this->mOutput .= $this->formatCount($headingCount);
 					}
@@ -181,7 +154,7 @@ class DynamicPageList {
 				foreach ($headings as $headingCount) {
 					$headingLink = $articles[$headingStart]->mParentHLink;
 					$this->mOutput .= $hlistmode->sItemStart;
-					$this->mOutput .= $hlistmode->sHeadingStart . $headingLink . $hlistmode->sHeadingEnd;
+					$this->mOutput .= $hlistmode->sHeadingStart.$headingLink.$hlistmode->sHeadingEnd;
 					if ($bHeadingCount) {
 						$this->mOutput .= $this->formatCount($headingCount);
 					}
@@ -205,7 +178,7 @@ class DynamicPageList {
 			if ($rest > 0) {
 				$nsize += 1;
 			}
-			$this->mOutput .= "{|" . $sRowColFormat . "\n|\n";
+			$this->mOutput .= "{|".$sRowColFormat."\n|\n";
 			for ($g = 0; $g < $iGroup; $g++) {
 				$this->mOutput .= $this->formatList($nstart, $nsize, $iTitleMaxLen, $defaultTemplateSuffix, $bIncludeTrim, $iTableSortCol, $updateRules, $deleteRules);
 				if ($iColumns != 1) {
@@ -225,7 +198,7 @@ class DynamicPageList {
 			$nstart = 0;
 			$nsize  = $iRowSize;
 			$count  = count($articles);
-			$this->mOutput .= '{|' . $sRowColFormat . "\n|\n";
+			$this->mOutput .= '{|'.$sRowColFormat."\n|\n";
 			do {
 				if ($nstart + $nsize > $count) {
 					$nsize = $count - $nstart;
@@ -251,7 +224,7 @@ class DynamicPageList {
 		} else {
 			$message = 'dpl_articlecount';
 		}
-		return '<p>' . $this->msgExt($message, array(), $numart) . '</p>';
+		return '<p>'.$this->msgExt($message, array(), $numart).'</p>';
 	}
 
 	// substitute symbolic names within a user defined format tag
@@ -273,7 +246,7 @@ class DynamicPageList {
 				$title = preg_replace($this->mReplaceInTitle[0], $this->mReplaceInTitle[1], $title);
 			}
 			if (isset($titleMaxLength) && (strlen($title) > $titleMaxLength)) {
-				$title = substr($title, 0, $titleMaxLength) . '...';
+				$title = substr($title, 0, $titleMaxLength).'...';
 			}
 			$sTag = str_replace('%TITLE%', $title, $sTag);
 		}
@@ -295,8 +268,6 @@ class DynamicPageList {
 			$sTag = str_replace('%SIZEFS%', floor(sqrt(log($article->mSize)) * 2.5 - 5), $sTag);
 		}
 		if ($article->mDate != '') {
-			// note: we must avoid literals in the code which could create confusion when transferred via http
-			//       therefore we write '%'.'DA...'
 			if ($article->myDate != '') {
 				$sTag = str_replace('%DATE%', $article->myDate, $sTag);
 			} else {
@@ -318,7 +289,7 @@ class DynamicPageList {
 			if ($article->mSelNamespace == 0) {
 				$sTag = str_replace('%PAGESEL%', str_replace('_', ' ', $article->mSelTitle), $sTag);
 			} else {
-				$sTag = str_replace('%PAGESEL%', $this->nameSpaces[$article->mSelNamespace] . ':' . str_replace('_', ' ', $article->mSelTitle), $sTag);
+				$sTag = str_replace('%PAGESEL%', $this->nameSpaces[$article->mSelNamespace].':'.str_replace('_', ' ', $article->mSelTitle), $sTag);
 			}
 		}
 		if ($article->mImageSelTitle != '') {
@@ -326,13 +297,13 @@ class DynamicPageList {
 		}
 		if (strpos($sTag, "%CAT") >= 0) {
 			if (!empty($article->mCategoryLinks)) {
-				$sTag = str_replace('%' . 'CATLIST%', implode(', ', $article->mCategoryLinks), $sTag);
-				$sTag = str_replace('%' . 'CATBULLETS%', '* ' . implode("\n* ", $article->mCategoryLinks), $sTag);
-				$sTag = str_replace('%' . 'CATNAMES%', implode(', ', $article->mCategoryTexts), $sTag);
+				$sTag = str_replace('%CATLIST%', implode(', ', $article->mCategoryLinks), $sTag);
+				$sTag = str_replace('%CATBULLETS%', '* '.implode("\n* ", $article->mCategoryLinks), $sTag);
+				$sTag = str_replace('%CATNAMES%', implode(', ', $article->mCategoryTexts), $sTag);
 			} else {
-				$sTag = str_replace('%' . 'CATLIST%', '', $sTag);
-				$sTag = str_replace('%' . 'CATBULLETS%', '', $sTag);
-				$sTag = str_replace('%' . 'CATNAMES%', '', $sTag);
+				$sTag = str_replace('%CATLIST%', '', $sTag);
+				$sTag = str_replace('%CATBULLETS%', '', $sTag);
+				$sTag = str_replace('%CATNAMES%', '', $sTag);
 			}
 		}
 		return $sTag;
@@ -362,7 +333,7 @@ class DynamicPageList {
 			if ($article->mNamespace == NS_FILE) {
 				// calculate URL for existing images
 				// $img = Image::newFromName($article->mTitle->getText());
-				$img = wfFindFile(\Title::makeTitle(NS_IMAGE, $article->mTitle->getText()));
+				$img = wfFindFile(\Title::makeTitle(NS_FILE, $article->mTitle->getText()));
 				if ($img && $img->exists()) {
 					$imageUrl = $img->getURL();
 					$imageUrl = preg_replace('~^.*images/(.*)~', '\1', $imageUrl);
@@ -373,7 +344,7 @@ class DynamicPageList {
 			}
 			if ($this->mEscapeLinks && ($article->mNamespace == NS_CATEGORY || $article->mNamespace == NS_FILE)) {
 				// links to categories or images need an additional ":"
-				$pagename = ':' . $pagename;
+				$pagename = ':'.$pagename;
 			}
 
 			// Page transclusion: get contents and apply selection criteria based on that contents
@@ -390,7 +361,7 @@ class DynamicPageList {
 					$text = $this->mParser->fetchTemplate(\Title::newFromText($title));
 					if ((count($this->mIncSecLabelsMatch) <= 0 || $this->mIncSecLabelsMatch[0] == '' || !preg_match($this->mIncSecLabelsMatch[0], $text) == false) && (count($this->mIncSecLabelsNotMatch) <= 0 || $this->mIncSecLabelsNotMatch[0] == '' || preg_match($this->mIncSecLabelsNotMatch[0], $text) == false)) {
 						if ($this->mIncMaxLen > 0 && (strlen($text) > $this->mIncMaxLen)) {
-							$text = LST::limitTranscludedText($text, $this->mIncMaxLen, ' [[' . $title . '|..→]]');
+							$text = LST::limitTranscludedText($text, $this->mIncMaxLen, ' [['.$title.'|..→]]');
 						}
 						$this->filteredCount = $this->filteredCount + 1;
 
@@ -405,7 +376,7 @@ class DynamicPageList {
 							$incwiki .= $message;
 						} else {
 							// append full text to output
-							if (array_key_exists('0', $mode->sSectionTags)) {
+							if (is_array($mode->sSectionTags) && array_key_exists('0', $mode->sSectionTags)) {
 								$incwiki .= $this->substTagParm($mode->sSectionTags[0], $pagename, $article, $imageUrl, $this->filteredCount, $iTitleMaxLen);
 								$pieces = array(
 									0 => $text
@@ -435,7 +406,7 @@ class DynamicPageList {
 						}
 						// if sections are identified by number we have a % at the beginning
 						if ($sSecLabel[0] == '%') {
-							$sSecLabel = '#' . $sSecLabel;
+							$sSecLabel = '#'.$sSecLabel;
 						}
 
 						$maxlen = -1;
@@ -542,7 +513,7 @@ class DynamicPageList {
 								$template1 = preg_replace('/\|.*/', '', $template1);
 								$template2 = preg_replace('/^.+\|/', '', $template2);
 							}
-							$secPieces    = LST::includeTemplate($this->mParser, $this, $s, $article, $template1, $template2, $template2 . $defaultTemplateSuffix, $mustMatch, $mustNotMatch, $this->mIncParsed, $iTitleMaxLen, implode(', ', $article->mCategoryLinks));
+							$secPieces    = LST::includeTemplate($this->mParser, $this, $s, $article, $template1, $template2, $template2.$defaultTemplateSuffix, $mustMatch, $mustNotMatch, $this->mIncParsed, $iTitleMaxLen, implode(', ', $article->mCategoryLinks));
 							$secPiece[$s] = implode(isset($mode->aMultiSecSeparators[$s]) ? $this->substTagParm($mode->aMultiSecSeparators[$s], $pagename, $article, $imageUrl, $this->filteredCount, $iTitleMaxLen) : '', $secPieces);
 							if ($mode->iDominantSection >= 0 && $s == $mode->iDominantSection && count($secPieces) > 1) {
 								$dominantPieces = $secPieces;
@@ -623,12 +594,12 @@ class DynamicPageList {
 				$rBody .= $mode->sItemStart;
 				if ($article->mDate != '') {
 					if ($article->myDate != '') {
-						$rBody .= $article->myDate . ' ';
+						$rBody .= $article->myDate.' ';
 					} else {
-						$rBody .= $wgLang->timeanddate($article->mDate, true) . ' ';
+						$rBody .= $wgLang->timeanddate($article->mDate, true).' ';
 					}
 					if ($article->mRevision != '') {
-						$rBody .= '[{{fullurl:' . $article->mTitle . '|oldid=' . $article->mRevision . '}} ' . htmlspecialchars($article->mTitle) . ']';
+						$rBody .= '[{{fullurl:'.$article->mTitle.'|oldid='.$article->mRevision.'}} '.htmlspecialchars($article->mTitle).']';
 					} else {
 						$rBody .= $article->mLink;
 					}
@@ -638,9 +609,9 @@ class DynamicPageList {
 				}
 				if ($article->mSize != '') {
 					if (strlen($article->mSize) > 3) {
-						$rBody .= ' [' . substr($article->mSize, 0, strlen($article->mSize) - 3) . ' kB]';
+						$rBody .= ' ['.substr($article->mSize, 0, strlen($article->mSize) - 3).' kB]';
 					} else {
-						$rBody .= ' [' . $article->mSize . ' B]';
+						$rBody .= ' ['.$article->mSize.' B]';
 					}
 				}
 				if ($article->mCounter != '') {
@@ -649,25 +620,25 @@ class DynamicPageList {
 					$nv = $this->msgExt('hitcounters-nviews', array(
 						'escape'
 					), $wgLang->formatNum($article->mCounter));
-					$rBody .= ' ' . $wgContLang->getDirMark() . '(' . $nv . ')';
+					$rBody .= ' '.$wgContLang->getDirMark().'('.$nv.')';
 				}
 				if ($article->mUserLink != '') {
-					$rBody .= ' . . [[User:' . $article->mUser . '|' . $article->mUser . ']]';
+					$rBody .= ' . . [[User:'.$article->mUser.'|'.$article->mUser.']]';
 					if ($article->mComment != '') {
-						$rBody .= ' { ' . $article->mComment . ' }';
+						$rBody .= ' { '.$article->mComment.' }';
 					}
 				}
 				if ($article->mContributor != '') {
-					$rBody .= ' . . [[User:' . $article->mContributor . '|' . $article->mContributor . " $article->mContrib]]";
+					$rBody .= ' . . [[User:'.$article->mContributor.'|'.$article->mContributor." $article->mContrib]]";
 				}
 
 
 
 				if (!empty($article->mCategoryLinks)) {
-					$rBody .= ' . . <SMALL>' . wfMsg('categories') . ': ' . implode(' | ', $article->mCategoryLinks) . '</SMALL>';
+					$rBody .= ' . . <small>'.wfMessage('categories').': '.implode(' | ', $article->mCategoryLinks).'</small>';
 				}
 				if ($this->mAddExternalLink && $article->mExternalLink != '') {
-					$rBody .= ' → ' . $article->mExternalLink;
+					$rBody .= ' → '.$article->mExternalLink;
 				}
 			}
 
@@ -706,19 +677,19 @@ class DynamicPageList {
 			}
 			$rBody = "";
 			foreach ($rowsKey as $index => $val) {
-				$rBody .= "\n|-" . $rows[$index];
+				$rBody .= "\n|-".$rows[$index];
 			}
 		}
 		// increase start value of ordered lists at multi-column output
 		$actStart = $mode->sListStart;
 		$start    = preg_replace('/.*start=([0-9]+).*/', '\1', $actStart);
+		$start    = intval($start);
 		if ($start != '') {
 			$start += $iCount;
 			$mode->sListStart = preg_replace('/start=[0-9]+/', "start=$start", $actStart);
 		}
 
-		return $actStart . $rBody . $mode->sListEnd;
-
+		return $actStart.$rBody.$mode->sListEnd;
 	}
 
 	/**
@@ -900,11 +871,11 @@ class DynamicPageList {
 		}
 
 		if ($insertionBefore != '' && $before != '') {
-			$text = preg_replace("/($before)/", $insertionBefore . '\1', $text);
+			$text = preg_replace("/($before)/", $insertionBefore.'\1', $text);
 		}
 
 		if ($insertionAfter != '' && $after != '') {
-			$text = preg_replace("/($after)/", '\1' . $insertionAfter, $text);
+			$text = preg_replace("/($after)/", '\1'.$insertionAfter, $text);
 		}
 
 		// deal with template parameters =================================================
@@ -962,11 +933,11 @@ class DynamicPageList {
 						}
 						$myOptional = array_key_exists($nr, $optional);
 						if ($legendText != '' && $myToolTip == '') {
-							$myToolTip = preg_replace('/^.*\<section\s+begin\s*=\s*' . preg_quote($parm, '/') . '\s*\/\>/s', '', $legendText);
+							$myToolTip = preg_replace('/^.*\<section\s+begin\s*=\s*'.preg_quote($parm, '/').'\s*\/\>/s', '', $legendText);
 							if (strlen($myToolTip) == strlen($legendText)) {
 								$myToolTip = '';
 							} else {
-								$myToolTip = preg_replace('/\<section\s+end\s*=\s*' . preg_quote($parm, '/') . '\s*\/\>.*/s', '', $myToolTip);
+								$myToolTip = preg_replace('/\<section\s+end\s*=\s*'.preg_quote($parm, '/').'\s*\/\>.*/s', '', $myToolTip);
 							}
 						}
 						$myValue = '';
@@ -978,11 +949,11 @@ class DynamicPageList {
 					$form .= "</table>\n<br/><br/>";
 				}
 				foreach ($hidden as $hide) {
-					$form .= "<input type=hidden " . $hide . " />";
+					$form .= "<input type='hidden' ".$hide." />";
 				}
-				$form .= "<input type=hidden name=\"token\" value=\"" . $wgUser->editToken() . "\" />";
+				$form .= "<input type='hidden' name='wpEditToken' value='{$wgUser->getEditToken()}'/>";
 				foreach ($preview as $prev) {
-					$form .= "<input type=submit " . $prev . " /> ";
+					$form .= "<input type='submit' ".$prev." /> ";
 				}
 				$form .= "</form></html>\n";
 				return $form;
@@ -999,7 +970,7 @@ class DynamicPageList {
 							if ($call >= $matchCount) {
 								break;
 							}
-							$myValue = $wgRequest->getVal(urlencode($call . '_' . $parm), '');
+							$myValue = $wgRequest->getVal(urlencode($call.'_'.$parm), '');
 						}
 						$myOptional  = array_key_exists($nr, $optional);
 						$myAfterParm = array();
@@ -1021,7 +992,19 @@ class DynamicPageList {
 			global $wgScriptPath, $wgRequest;
 			$titleX   = \Title::newFromText($title);
 			$articleX = new \Article($titleX);
-			$form     = '<html><form id="editform" name="editform" method="post" action="' . $wgScriptPath . '/index.php?title=' . urlencode($title) . '&action=submit" ' . 'enctype="multipart/form-data">' . "\n" . '<input type="hidden" value="" name="wpSection" />' . "\n" . '<input type="hidden" value="' . wfTimestampNow() . '" name="wpStarttime" />' . "\n" . '<input type="hidden" value="' . $articleX->getTimestamp() . '" name="wpEdittime" />' . "\n" . '<input type="hidden" value="" name="wpScrolltop" id="wpScrolltop" />' . "\n" . '<textarea tabindex="1" accesskey="," name="wpTextbox1" id="wpTextbox1" rows="' . $wgUser->getIntOption('rows') . '" cols="' . $wgUser->getIntOption('cols') . '" >' . htmlspecialchars($text) . '</textarea>' . "\n" . '<input type="hidden" name="wpSummary value="' . $summary . '" id="wpSummary" />' . '<input name="wpAutoSummary" type="hidden" value="" />' . '<input id="wpSave" name="wpSave" type="submit" value="Save page" accesskey="s" title="Save your changes [s]" />' . '<input type="hidden" value="' . $wgRequest->getVal('token') . '" name="wpEditToken" />' . "\n" . '</form></html>' . "\n";
+			$form     = '<html>
+	<form id="editform" name="editform" method="post" action="'.$wgScriptPath.'/index.php?title='.urlencode($title).'&action=submit" enctype="multipart/form-data">
+		<input type="hidden" value="" name="wpSection" />
+		<input type="hidden" value="'.wfTimestampNow().'" name="wpStarttime" />
+		<input type="hidden" value="'.$articleX->getTimestamp().'" name="wpEdittime" />
+		<input type="hidden" value="" name="wpScrolltop" id="wpScrolltop" />
+		<textarea tabindex="1" accesskey="," name="wpTextbox1" id="wpTextbox1" rows="'.$wgUser->getIntOption('rows').'" cols="'.$wgUser->getIntOption('cols').'" >'.htmlspecialchars($text).'</textarea>
+		<input type="hidden" name="wpSummary value="'.$summary.'" id="wpSummary" />
+		<input name="wpAutoSummary" type="hidden" value="" />
+		<input id="wpSave" name="wpSave" type="submit" value="Save page" accesskey="s" title="Save your changes [s]" />
+		<input type="hidden" value="'.$wgRequest->getVal('token').'" name="wpEditToken" />
+	</form>
+</html>';
 			return $form;
 		}
 		return "exec must be one of the following: edit, preview, set";
@@ -1030,16 +1013,17 @@ class DynamicPageList {
 	public function updateArticle($title, $text, $summary) {
 		global $wgUser, $wgRequest, $wgOut;
 
-		if (!$wgUser->matchEditToken($wgRequest->getVal('token'))) {
+		if (!$wgUser->matchEditToken($wgRequest->getVal('wpEditToken'))) {
 			$wgOut->addWikiMsg('sessionfailure');
 			return 'session failure';
 		}
 
-		$titleX            = \Title::newFromText($title);
+		$titleX = \Title::newFromText($title);
 		$permission_errors = $titleX->getUserPermissionsErrors('edit', $wgUser);
 		if (count($permission_errors) == 0) {
-			$articleX = new \Article($titleX);
-			$articleX->doEdit($text, $summary, EDIT_UPDATE | EDIT_DEFER_UPDATES | EDIT_AUTOSUMMARY);
+			$articleX = \WikiPage::factory($titleX);
+			$articleXContent = \ContentHandler::makeContent($text, $titleX);
+			$articleX->doEditContent($articleXContent, $summary, EDIT_UPDATE | EDIT_DEFER_UPDATES | EDIT_AUTOSUMMARY);
 			$wgOut->redirect($titleX->getFullUrl($articleX->isRedirect() ? 'redirect=no' : ''));
 			return '';
 		} else {
@@ -1063,8 +1047,8 @@ class DynamicPageList {
 		if (preg_match('/cols\s*=/', $format) <= 0) {
 			$format .= " cols=$cols";
 		}
-		$textArea = "<textarea name=\"" . urlencode($call . '_' . $parameter) . "\" $format/>" . htmlspecialchars($value) . "</textarea>";
-		return str_replace('%NAME%', htmlspecialchars(str_replace('_', ' ', $parameter)), str_replace('%TYPE%', $type, str_replace('%INPUT%', $textArea, str_replace('%LEGEND%', "</html>" . htmlspecialchars($legend) . "<html>", str_replace('%INSTRUCTION%', "</html>" . htmlspecialchars($instruction) . "<html>", $fieldFormat)))));
+		$textArea = "<textarea name=\"".urlencode($call.'_'.$parameter)."\" $format/>".htmlspecialchars($value)."</textarea>";
+		return str_replace('%NAME%', htmlspecialchars(str_replace('_', ' ', $parameter)), str_replace('%TYPE%', $type, str_replace('%INPUT%', $textArea, str_replace('%LEGEND%', "</html>".htmlspecialchars($legend)."<html>", str_replace('%INSTRUCTION%', "</html>".htmlspecialchars($instruction)."<html>", $fieldFormat)))));
 	}
 
 	/**
@@ -1072,7 +1056,7 @@ class DynamicPageList {
 	 */
 	public function getTemplateParmValues($text, $template) {
 		$matches   = array();
-		$noMatches = preg_match_all('/\{\{\s*' . preg_quote($template, '/') . '\s*[|}]/i', $text, $matches, PREG_OFFSET_CAPTURE);
+		$noMatches = preg_match_all('/\{\{\s*'.preg_quote($template, '/').'\s*[|}]/i', $text, $matches, PREG_OFFSET_CAPTURE);
 		if ($noMatches <= 0) {
 			return '';
 		}
@@ -1145,7 +1129,7 @@ class DynamicPageList {
 		}
 
 		$matches   = array();
-		$noMatches = preg_match_all('/\{\{\s*' . preg_quote($template, '/') . '\s*[|}]/i', $text, $matches, PREG_OFFSET_CAPTURE);
+		$noMatches = preg_match_all('/\{\{\s*'.preg_quote($template, '/').'\s*[|}]/i', $text, $matches, PREG_OFFSET_CAPTURE);
 		if ($noMatches <= 0) {
 			return $text;
 		}
@@ -1200,9 +1184,9 @@ class DynamicPageList {
 									// keep spaces;
 									if ($parmValue == '') {
 										if (strlen($token[1]) > 0 && $token[1][strlen($token[1]) - 1] == "\n") {
-											$substitution = str_replace("\n", $value . "\n", $token[1]);
+											$substitution = str_replace("\n", $value."\n", $token[1]);
 										} else {
-											$substitution = $value . $token[1];
+											$substitution = $value.$token[1];
 										}
 									} else {
 										$substitution = str_replace($parmValue, $value, $token[1]);
@@ -1232,7 +1216,7 @@ class DynamicPageList {
 								$substitution = "|$parameter = $value";
 								if ($text[$beginSubst - 1] == "\n") {
 									--$beginSubst;
-									$substitution = "\n" . $substitution;
+									$substitution = "\n".$substitution;
 								}
 								$endSubst = $beginSubst;
 								break;
@@ -1257,7 +1241,7 @@ class DynamicPageList {
 			return $text;
 		}
 
-		return substr($text, 0, $beginSubst) . $substitution . substr($text, $endSubst);
+		return substr($text, 0, $beginSubst).$substitution.substr($text, $endSubst);
 
 	}
 
@@ -1321,7 +1305,7 @@ class DynamicPageList {
 		} else {
 			$message .= "set 'exec yes' to delete &#160; &#160; <big>'''$title'''</big>\n";
 		}
-		$message .= "<pre><nowiki>" . "\n" . $text . "</nowiki></pre>"; // <pre><nowiki>\n"; // .$text."\n</nowiki></pre>\n";
+		$message .= "<pre><nowiki>\n{$text}</nowiki></pre>"; // <pre><nowiki>\n"; // .$text."\n</nowiki></pre>\n";
 		return $message;
 	}
 
@@ -1330,14 +1314,14 @@ class DynamicPageList {
 		$pagename = $article->mTitle->getPrefixedText();
 		if ($this->mEscapeLinks && ($article->mNamespace == NS_CATEGORY || $article->mNamespace == NS_FILE)) {
 			// links to categories or images need an additional ":"
-			$pagename = ':' . $pagename;
+			$pagename = ':'.$pagename;
 		}
 		return $this->substTagParm($tag, $pagename, $article, $this->filteredCount, '', $iTitleMaxLen);
 	}
 
 	//format one item of an entry in the output list (i.e. the collection of occurences of one item from the include parameter)
 	public function formatItem($piece, $tagStart, $tagEnd) {
-		return $tagStart . $piece . $tagEnd;
+		return $tagStart.$piece.$tagEnd;
 	}
 
 	//format one single item of an entry in the output list (i.e. one occurence of one item from the include parameter)
@@ -1359,13 +1343,13 @@ class DynamicPageList {
 				$pieces[$key] = str_replace('%PAGE%', $article->mTitle->getPrefixedText(), $pieces[$key]);
 				if (strpos($pieces[$key], "%CAT") >= 0) {
 					if (!empty($article->mCategoryLinks)) {
-						$pieces[$key] = str_replace('%' . 'CATLIST%', implode(', ', $article->mCategoryLinks), $pieces[$key]);
-						$pieces[$key] = str_replace('%' . 'CATBULLETS%', '* ' . implode("\n* ", $article->mCategoryLinks), $pieces[$key]);
-						$pieces[$key] = str_replace('%' . 'CATNAMES%', implode(', ', $article->mCategoryTexts), $pieces[$key]);
+						$pieces[$key] = str_replace('%CATLIST%', implode(', ', $article->mCategoryLinks), $pieces[$key]);
+						$pieces[$key] = str_replace('%CATBULLETS%', '* '.implode("\n* ", $article->mCategoryLinks), $pieces[$key]);
+						$pieces[$key] = str_replace('%CATNAMES%', implode(', ', $article->mCategoryTexts), $pieces[$key]);
 					} else {
-						$pieces[$key] = str_replace('%' . 'CATLIST%', '', $pieces[$key]);
-						$pieces[$key] = str_replace('%' . 'CATBULLETS%', '', $pieces[$key]);
-						$pieces[$key] = str_replace('%' . 'CATNAMES%', '', $pieces[$key]);
+						$pieces[$key] = str_replace('%CATLIST%', '', $pieces[$key]);
+						$pieces[$key] = str_replace('%CATBULLETS%', '', $pieces[$key]);
+						$pieces[$key] = str_replace('%CATNAMES%', '', $pieces[$key]);
 					}
 				}
 			}
@@ -1394,14 +1378,14 @@ class DynamicPageList {
 			$result = str_replace('%IMAGE%', self::imageWithPath($arg), $result);
 			$result = $this->cutAt($maxlen, $result);
 			if (strlen($result) > 0 && $result[0] == '-') {
-				return ' ' . $result;
+				return ' '.$result;
 			} else {
 				return $result;
 			}
 		}
 		$result = $this->cutAt($maxlen, $arg);
 		if (strlen($result) > 0 && $result[0] == '-') {
-			return ' ' . $result;
+			return ' '.$result;
 		} else {
 			return $result;
 		}
@@ -1453,7 +1437,7 @@ class DynamicPageList {
 	 * @return $uniq_prefix
 	 */
 	static public function imageWithPath($imgName) {
-		$title = \Title::newfromText('Image:' . $imgName);
+		$title = \Title::newfromText('Image:'.$imgName);
 		if (!is_null($title)) {
 			$iTitle   = \Title::makeTitleSafe(6, $title->getDBKey());
 			$imageUrl = preg_replace('~^.*images/(.*)~', '\1', \RepoGroup::singleton()->getLocalRepo()->newFile($iTitle)->getPath());
@@ -1478,9 +1462,7 @@ class DynamicPageList {
 			);
 		}
 
-		$string = wfMsgNoTrans($key);
-
-		$string = wfMsgReplaceArgs($string, $args);
+		$string = wfMessage($key, $args)->text();
 
 		$this->mParserOptions->setInterfaceMessage(true);
 		$string = $this->mParser->recursiveTagParse($string);

@@ -64,5 +64,5 @@ $countryNames = [
 	'KM' => 'Comorosu',
 	'LY' => 'Libyia',
 	'MV' => 'Maldivesa',
-	'NG' => 'Nigeria',
+	'NG' => 'Naịjịrịa',
 ];

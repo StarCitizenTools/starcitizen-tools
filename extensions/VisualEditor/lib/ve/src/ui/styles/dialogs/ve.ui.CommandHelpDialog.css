@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface CommandHelpDialog styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-commandHelpDialog-container {
@@ -49,7 +49,10 @@
 }
 
 .ve-ui-commandHelpDialog-list dt kbd {
-	font-family: monospace;
+	/* Support: Blink, Gecko, Webkit */
+	/* Specify a valid second value to fix size, see T176636 */
+	font-family: monospace, monospace;
+	font-size: 0.8125em;
 	font-weight: bold;
 	font-style: normal;
 }
@@ -65,11 +68,12 @@
 }
 
 .ve-ui-commandHelpDialog-list dt kbd > kbd {
-	background-color: #f7f7f7;
-	border: 1px solid #ccc;
-	border-radius: 3px;
+	background-color: #f8f9fa;
+	color: #222;
+	font-size: 1em; /* Prevent double shrinking */
+	border: 1px solid #c8ccd1;
+	border-radius: 2px;
 	box-shadow: 0 1px 0 rgba( 0, 0, 0, 0.2 ), 0 0 0 2px #fff inset;
-	color: #333;
 	display: inline-block;
 	line-height: 1.4;
 	padding: 0.1em 0.4em;
@@ -79,18 +83,18 @@
 	text-align: center;
 }
 
-.ve-ui-commandHelpDialog-list dt kbd[ data-label ]::before {
+.ve-ui-commandHelpDialog-list dt kbd[ data-label ]:before {
 	content: attr( data-label );
 	font-weight: normal;
 	font-style: italic;
 	padding-right: 3px;
 }
 
-.ve-ui-commandHelpDialog-sequence kbd:not( [ data-key="space" ] ) {
+.ve-ui-commandHelpDialog-sequence kbd:not( .ve-ui-commandHelpDialog-specialKey ) {
 	box-shadow: none;
 	text-transform: none;
 }
-.ve-ui-commandHelpDialog-sequence kbd:not( [ data-key="space" ] ) + kbd:not( [ data-key="space" ] ) {
+.ve-ui-commandHelpDialog-sequence kbd:not( .ve-ui-commandHelpDialog-specialKey ) + kbd:not( .ve-ui-commandHelpDialog-specialKey ) {
 	margin-left: -0.5em;
 	padding-left: 0;
 	border-left: 0;

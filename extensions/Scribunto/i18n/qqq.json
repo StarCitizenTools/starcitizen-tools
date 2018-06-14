@@ -11,7 +11,8 @@
 			"Siebrand",
 			"Snævar",
 			"Liuxinyu970226",
-			"Umherirrender"
+			"Umherirrender",
+			"Base"
 		]
 	},
 	"scribunto-desc": "{{desc|name=Scribunto|url=https://www.mediawiki.org/wiki/Extension:Scribunto}}",
@@ -51,7 +52,6 @@
 	"scribunto-luastandalone-proc-error": "Exception message.",
 	"scribunto-luastandalone-proc-error-msg": "Exception message. Parameters:\n* $1 - (Unused)\n* $2 - Warning/error text from PHP",
 	"scribunto-luastandalone-proc-error-proc-open": "Exception message displayed when PHP's <tt>proc_open</tt> function is not available, which is needed by the LuaStandalone engine. <tt>proc_open</tt> is a PHP function name and <tt>disable_functions</tt> is the name of a PHP configuration. Both these names aren't localized, thus shouldn't be translated. \n\nSee also:\n* proc_open: http://www.php.net/manual/en/function.proc-open.php\n* disable_functions: http://www.php.net/manual/en/ini.core.php",
-	"scribunto-luastandalone-proc-error-safe-mode": "Exception message displayed when PHP's \"safe_mode\" configuration directive is enabled.",
 	"scribunto-luastandalone-decode-error": "Exception message.",
 	"scribunto-luastandalone-write-error": "Exception message. A [[wikipedia:unix pipe|unix pipe]] is similar to an electronic pipeline for data.\n\nSee also:\n* {{msg-mw|Scribunto-luastandalone-read-error}}",
 	"scribunto-luastandalone-read-error": "Exception message.\nA [[wikipedia:unix pipe|unix pipe]] is similar to an electronic pipeline for data.\n\nSee also:\n* {{msg-mw|Scribunto-luastandalone-write-error}}",
@@ -73,9 +73,12 @@
 	"scribunto-limitreport-profile-percent": "Text to format the time percentage in the \"Lua Profile\" table.\n\nPreceded by {{msg-mw|Scribunto-limitreport-profile}} and {{msg-mw|Scribunto-limitreport-profile-ms}}.\n\nParameters:\n* $1 - the percentage",
 	"scribunto-limitreport-logs": "Label for the \"Lua logs\" row in the limit report table",
 	"apihelp-scribunto-console-description": "{{doc-apihelp-description|scribunto-console}}",
+	"apihelp-scribunto-console-summary": "{{doc-apihelp-summary|scribunto-console}}",
 	"apihelp-scribunto-console-param-title": "{{doc-apihelp-param|scribunto-console|title}}",
 	"apihelp-scribunto-console-param-content": "{{doc-apihelp-param|scribunto-console|content}}",
 	"apihelp-scribunto-console-param-session": "{{doc-apihelp-param|scribunto-console|session}}",
 	"apihelp-scribunto-console-param-question": "{{doc-apihelp-param|scribunto-console|question}}",
-	"apihelp-scribunto-console-param-clear": "Probably a way to delete the history, variables etc. of the Scribunto debug console, i.e. an environment where Lua modules can be tested (not currently documented).\n----\n{{doc-apihelp-param|scribunto-console|clear}}"
+	"apihelp-scribunto-console-param-clear": "Probably a way to delete the history, variables etc. of the Scribunto debug console, i.e. an environment where Lua modules can be tested (not currently documented).\n----\n{{doc-apihelp-param|scribunto-console|clear}}",
+	"nstab-module": "The name for the tab of the Module namespace.\n\nSee also:\n* {{msg-mw|Nstab-module}}\n* {{msg-mw|Tooltip-ca-nstab-module}}\n{{Identical|Module}}",
+	"tooltip-ca-nstab-module": "Tooltip shown when hovering over the {{msg-mw|Nstab-module}} tab.\n\nSee also:\n* {{msg-mw|Nstab-module}}\n* {{msg-mw|Tooltip-ca-nstab-module}}"
 }

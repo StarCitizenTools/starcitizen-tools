@@ -8,7 +8,7 @@
  * @author Santhosh Thottingal
  * @author Sam Reed
  * @copyright Copyright © 2007-2015
- * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
+ * @license GPL-2.0-or-later
  */
 
 // Standard boilerplate to define $IP
@@ -55,12 +55,9 @@ class CLDRRebuild extends Maintenance {
 		ksort( $languages );
 
 		foreach ( $languages as $code => $name ) {
-
 			// Construct the correct name for the input file
-			unset( $codeParts );
 			$codeParts = explode( '-', $code );
 			if ( count( $codeParts ) > 1 ) {
-
 				// ISO 15924 alpha-4 script code
 				if ( strlen( $codeParts[1] ) === 4 ) {
 					$codeParts[1] = ucfirst( $codeParts[1] );
@@ -302,7 +299,7 @@ class CLDRParser {
 		 * Part 1: Stop blowing up on defaults.
 		 * Defaults apparently come in many forms. Listed below in order of scope
 		 * (widest to narrowest)
-		 * 1) The ISO code itself, in the absense of any other defaults
+		 * 1) The ISO code itself, in the absence of any other defaults
 		 * 2) The 'root' language file definition
 		 * 3) Language with no locality - locality will come in as 'DEFAULT'
 		 *
@@ -461,32 +458,31 @@ class CLDRParser {
  * Get the code for the MediaWiki localisation,
  * these are same as the fallback.
  *
- * @param $code string
+ * @param string $code
  * @return string
  */
-// @codingStandardsIgnoreStart
 function getRealCode( $code ) {
 	$realCode = $code;
-	if ( !strcmp( $code, 'kk' ) )
+	if ( !strcmp( $code, 'kk' ) ) {
 		$realCode = 'kk-cyrl';
-	elseif ( !strcmp( $code, 'ku' ) )
+	} elseif ( !strcmp( $code, 'ku' ) ) {
 		$realCode = 'ku-arab';
-	elseif ( !strcmp( $code, 'sr' ) )
+	} elseif ( !strcmp( $code, 'sr' ) ) {
 		$realCode = 'sr-ec';
-	elseif ( !strcmp( $code, 'tg' ) )
+	} elseif ( !strcmp( $code, 'tg' ) ) {
 		$realCode = 'tg-cyrl';
-	elseif ( !strcmp( $code, 'zh' ) )
+	} elseif ( !strcmp( $code, 'zh' ) ) {
 		$realCode = 'zh-hans';
-	elseif ( !strcmp( $code, 'pt' ) )
+	} elseif ( !strcmp( $code, 'pt' ) ) {
 		$realCode = 'pt-br';
-	elseif ( !strcmp( $code, 'pt-pt' ) )
+	} elseif ( !strcmp( $code, 'pt-pt' ) ) {
 		$realCode = 'pt';
-	elseif ( !strcmp( $code, 'az-arab' ) )
+	} elseif ( !strcmp( $code, 'az-arab' ) ) {
 		$realCode = 'azb';
+	}
 
 	return $realCode;
 }
-// @codingStandardsIgnoreEnd
 
 $maintClass = 'CLDRRebuild';
 require_once RUN_MAINTENANCE_IF_MAIN;

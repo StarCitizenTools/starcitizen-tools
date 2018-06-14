@@ -14,35 +14,93 @@
  *
  * @file
  * @ingroup Extensions
- * @licence GNU General Public Licence 2.0 or later
- * @licence MIT License
+ * @license GPL-2.0-or-later
+ * @license MIT License
  */
 class LanguageNameSearch {
-	public static function search( $searchKey, $typos = 0 ) {
-		// Use code's mb_strtolower compatibily code for MW < 1.27
-		$language = Language::factory( 'en' );
+	/**
+	 * Find languages with fuzzy matching.
+	 * The order of results is following:
+	 * 1: exact language code match
+	 * 2: exact language name match in any language
+	 * 3: prefix language name match in any language
+	 * 4: infix language name match in any language
+	 *
+	 * The returned language name for autocompletion is the first one that
+	 * matches in this list:
+	 * 1: exact match in [user, autonym, any other language]
+	 * 2: prefix match in [user, autonum, any other language]
+	 * 3: inline match in [user, autonym, any other language]
+	 *
+	 * @param string $searchKey
+	 * @param int $typos
+	 * @param string $userLanguage Language tag.
+	 * @return array
+	 */
+	public static function search( $searchKey, $typos = 0, $userLanguage = null ) {
+		$results = [];
+		$searchKey = mb_strtolower( $searchKey );
 
-		// @todo: Shouldn't this be unicode aware?
-		$searchKey = $language->lc( $searchKey );
-		$index = self::getIndex( $searchKey );
-
-		if ( !isset( LanguageNameSearchData::$buckets[$index] ) ) {
-			return [];
+		// Always prefer exact language code match
+		if ( Language::isKnownLanguageTag( $searchKey ) ) {
+			$name = mb_strtolower( Language::fetchLanguageName( $searchKey, $userLanguage ) );
+			// Check if language code is a prefix of the name
+			if ( strpos( $name, $searchKey ) === 0 ) {
+				$results[$searchKey] = $name;
+			} else {
+				$results[$searchKey] = "$searchKey – $name";
+			}
 		}
 
-		$bucket = LanguageNameSearchData::$buckets[$index];
+		$index = self::getIndex( $searchKey );
+		$bucketsForIndex = [];
+		if ( isset( LanguageNameSearchData::$buckets[$index] ) ) {
+			$bucketsForIndex = LanguageNameSearchData::$buckets[$index];
+		}
 
-		$results = [];
-		foreach ( $bucket as $name => $code ) {
-			// Prefix search
-			if ( strrpos( $name, $searchKey, -strlen( $name ) ) !== false
-				|| ( $typos > 0 && self::levenshteinDistance( $name, $searchKey ) <= $typos )
-			) {
-				$results[$code] = $name;
+		// types are 'prefix', 'infix' (in this order!)
+		foreach ( $bucketsForIndex as $bucketType => $bucket ) {
+			foreach ( $bucket as $name => $code ) {
+				// We can skip checking languages we already have in the list
+				if ( isset( $results[ $code ] ) ) {
+					continue;
+				}
+
+				// Apply fuzzy search
+				if ( !self::matchNames( $name, $searchKey, $typos ) ) {
+					continue;
+				}
+
+				// Once we find a match, figure out the best name to display to the user
+				// If $userLanguage is not provided (null), it is the same as autonym
+				$candidates = [
+					mb_strtolower( Language::fetchLanguageName( $code, $userLanguage ) ),
+					mb_strtolower( Language::fetchLanguageName( $code, null ) ),
+					$name
+				];
+
+				foreach ( $candidates as $candidate ) {
+					if ( $searchKey === $candidate ) {
+						$results[$code] = $candidate;
+						continue 2;
+					}
+				}
+
+				foreach ( $candidates as $candidate ) {
+					if ( self::matchNames( $candidate, $searchKey, $typos ) ) {
+						$results[$code] = $candidate;
+						continue 2;
+					}
+				}
 			}
 		}
 
 		return $results;
+	}
+
+	public static function matchNames( $name, $searchKey, $typos ) {
+		return strrpos( $name, $searchKey, -strlen( $name ) ) !== false
+			|| ( $typos > 0 && self::levenshteinDistance( $name, $searchKey ) <= $typos );
 	}
 
 	public static function getIndex( $name ) {
@@ -60,8 +118,8 @@ class LanguageNameSearch {
 	/**
 	 * Get the code point of first letter of string
 	 *
-	 * @param $str string
-	 * @return integer Code point of first letter of string
+	 * @param string $str
+	 * @return int Code point of first letter of string
 	 */
 	public static function getCodepoint( $str ) {
 		$values = [];
@@ -104,21 +162,21 @@ class LanguageNameSearch {
 
 	/**
 	 * Calculate the Levenshtein distance between two strings
-	 * @param $str1
-	 * @param $str2
-	 * @return integer
+	 * @param string $str1
+	 * @param string $str2
+	 * @return int
 	 */
 	public static function levenshteinDistance( $str1, $str2 ) {
+		if ( $str1 === $str2 ) {
+			return 0;
+		}
 		$length1 = mb_strlen( $str1, 'UTF-8' );
 		$length2 = mb_strlen( $str2, 'UTF-8' );
-		if ( $length1 < $length2 ) {
-			return self::levenshteinDistance( $str2, $str1 );
-		}
 		if ( $length1 === 0 ) {
 			return $length2;
 		}
-		if ( $str1 === $str2 ) {
-			return 0;
+		if ( $length1 < $length2 ) {
+			return self::levenshteinDistance( $str2, $str1 );
 		}
 		$prevRow = range( 0, $length2 );
 		for ( $i = 0; $i < $length1; $i++ ) {

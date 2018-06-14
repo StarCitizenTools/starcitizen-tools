@@ -1,0 +1,3 @@
+<?php
+
+$wgUsejQueryThree = false;

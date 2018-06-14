@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @author Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -15,8 +15,10 @@
  * @ingroup SpecialPage TranslateSpecialPage Stats
  */
 class SpecialMessageGroupStats extends SpecialLanguageStats {
+	use CompatibleLinkRenderer;
+
 	/// Overwritten from SpecialLanguageStats
-	protected $targetValueName = array( 'group' );
+	protected $targetValueName = [ 'group' ];
 	/// Overwritten from SpecialLanguageStats
 	protected $noComplete = false;
 	/// Overwritten from SpecialLanguageStats
@@ -63,7 +65,7 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 	protected function invalidTarget() {
 		$this->getOutput()->wrapWikiMsg(
 			"<div class='error'>$1</div>",
-			array( 'translate-mgs-invalid-group', $this->target )
+			[ 'translate-mgs-invalid-group', $this->target ]
 		);
 	}
 
@@ -81,24 +83,24 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 		global $wgScript;
 
 		$out = Html::openElement( 'div' );
-		$out .= Html::openElement( 'form', array( 'method' => 'get', 'action' => $wgScript ) );
+		$out .= Html::openElement( 'form', [ 'method' => 'get', 'action' => $wgScript ] );
 		$out .= Html::hidden( 'title', $this->getPageTitle()->getPrefixedText() );
 		$out .= Html::hidden( 'x', 'D' ); // To detect submission
 		$out .= Html::openElement( 'fieldset' );
-		$out .= Html::element( 'legend', array(), $this->msg( 'translate-mgs-fieldset' )->text() );
+		$out .= Html::element( 'legend', [], $this->msg( 'translate-mgs-fieldset' )->text() );
 		$out .= Html::openElement( 'table' );
 
 		$out .= Html::openElement( 'tr' );
-		$out .= Html::openElement( 'td', array( 'class' => 'mw-label' ) );
+		$out .= Html::openElement( 'td', [ 'class' => 'mw-label' ] );
 		$out .= Xml::label( $this->msg( 'translate-mgs-group' )->text(), 'group' );
 		$out .= Html::closeElement( 'td' );
-		$out .= Html::openElement( 'td', array( 'class' => 'mw-input' ) );
+		$out .= Html::openElement( 'td', [ 'class' => 'mw-input' ] );
 		$out .= $this->getGroupSelector( $this->target )->getHTML();
 		$out .= Html::closeElement( 'td' );
 		$out .= Html::closeElement( 'tr' );
 
 		$out .= Html::openElement( 'tr' );
-		$out .= Html::openElement( 'td', array( 'colspan' => 2 ) );
+		$out .= Html::openElement( 'td', [ 'colspan' => 2 ] );
 		$out .= Xml::checkLabel(
 			$this->msg( 'translate-mgs-nocomplete' )->text(),
 			'suppresscomplete',
@@ -109,7 +111,7 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 		$out .= Html::closeElement( 'tr' );
 
 		$out .= Html::openElement( 'tr' );
-		$out .= Html::openElement( 'td', array( 'colspan' => 2 ) );
+		$out .= Html::openElement( 'td', [ 'colspan' => 2 ] );
 		$out .= Xml::checkLabel(
 			$this->msg( 'translate-mgs-noempty' )->text(),
 			'suppressempty',
@@ -120,7 +122,7 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 		$out .= Html::closeElement( 'tr' );
 
 		$out .= Html::openElement( 'tr' );
-		$out .= Html::openElement( 'td', array( 'class' => 'mw-input', 'colspan' => 2 ) );
+		$out .= Html::openElement( 'td', [ 'class' => 'mw-input', 'colspan' => 2 ] );
 		$out .= Xml::submitButton( $this->msg( 'translate-mgs-submit' )->text() );
 		$out .= Html::closeElement( 'td' );
 		$out .= Html::closeElement( 'tr' );
@@ -141,7 +143,7 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 	}
 
 	/**
-	 * Overwriten from SpecialLanguageStats
+	 * Overwritten from SpecialLanguageStats
 	 *
 	 * @return string
 	 */
@@ -158,6 +160,7 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 		MessageGroupStats::setTimeLimit( $this->timelimit );
 		$cache = MessageGroupStats::forGroup( $this->target );
 
+		$this->numberOfShownLanguages = 0;
 		$languages = array_keys(
 			TranslateUtils::getLanguageNames( $this->getLanguage()->getCode() )
 		);
@@ -176,7 +179,11 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 			$out .= Html::closeElement( 'tbody' );
 
 			$out .= Html::openElement( 'tfoot' );
-			$out .= $table->makeTotalRow( $this->msg( 'translate-mgs-totals' ), $this->totals );
+			$out .= $table->makeTotalRow(
+				$this->msg( 'translate-mgs-totals' )
+					->numParams( $this->numberOfShownLanguages ),
+				$this->totals
+			);
 			$out .= Html::closeElement( 'tfoot' );
 
 			$out .= Html::closeElement( 'table' );
@@ -193,9 +200,9 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 	 * Filter an array of languages based on whether a priority set of
 	 * languages present for the passed group. If priority languages are
 	 * present, to that list add languages with more than 0% translation.
-	 * @param $languages Array of Languages to be filtered
-	 * @param $group
-	 * @param $cache
+	 * @param array &$languages Array of Languages to be filtered
+	 * @param string $group
+	 * @param array $cache
 	 */
 	protected function filterPriorityLangs( &$languages, $group, $cache ) {
 		$filterLangs = TranslateMetadata::get( $group, 'prioritylangs' );
@@ -216,8 +223,8 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 	}
 
 	/**
-	 * @param $code
-	 * @param $cache
+	 * @param string $code
+	 * @param array $cache
 	 * @return string
 	 */
 	protected function makeRow( $code, $cache ) {
@@ -228,7 +235,7 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 
 		if ( $total === null ) {
 			$this->incomplete = true;
-			$extra = array();
+			$extra = [];
 		} else {
 			if ( $this->noComplete && $fuzzy === 0 && $translated === $total ) {
 				return '';
@@ -244,12 +251,12 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 			}
 
 			if ( $translated === $total ) {
-				$extra = array( 'action' => 'proofread' );
+				$extra = [ 'action' => 'proofread' ];
 			} else {
-				$extra = array();
+				$extra = [];
 			}
 		}
-
+		$this->numberOfShownLanguages += 1;
 		$this->totals = MessageGroupStats::multiAdd( $this->totals, $stats );
 
 		$out = "\t" . Html::openElement( 'tr' );
@@ -264,8 +271,8 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 	}
 
 	/**
-	 * @param $code
-	 * @param $params
+	 * @param string $code
+	 * @param array $params
 	 * @return string
 	 */
 	protected function getMainColumnCell( $code, $params ) {
@@ -274,19 +281,19 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 			$this->translate = SpecialPage::getTitleFor( 'Translate' );
 		}
 
-		$queryParameters = $params + array(
+		$queryParameters = $params + [
 			'group' => $this->target,
 			'language' => $code
-		);
+		];
 
 		if ( isset( $this->names[$code] ) ) {
 			$text = htmlspecialchars( "$code: {$this->names[$code]}" );
 		} else {
 			$text = htmlspecialchars( $code );
 		}
-		$link = Linker::linkKnown( $this->translate, $text, array(), $queryParameters );
+		$link = $this->makeKnownLink( $this->translate, $text, [], $queryParameters );
 
-		return Html::rawElement( 'td', array(), $link );
+		return Html::rawElement( 'td', [], $link );
 	}
 
 	// @codingStandardsIgnoreStart PHP CodeSniffer warns "Useless method overriding

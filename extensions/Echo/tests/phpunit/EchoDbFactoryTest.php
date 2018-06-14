@@ -1,5 +1,11 @@
 <?php
 
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\ILoadBalancer;
+
+/**
+ * @covers MWEchoDbFactory
+ */
 class MWEchoDbFactoryTest extends MediaWikiTestCase {
 
 	public function testNewFromDefault() {
@@ -13,8 +19,8 @@ class MWEchoDbFactoryTest extends MediaWikiTestCase {
 	 * @depends testNewFromDefault
 	 */
 	public function testGetEchoDb( MWEchoDbFactory $db ) {
-		$this->assertInstanceOf( 'DatabaseBase', $db->getEchoDb( DB_MASTER ) );
-		$this->assertInstanceOf( 'DatabaseBase', $db->getEchoDb( DB_SLAVE ) );
+		$this->assertInstanceOf( IDatabase::class, $db->getEchoDb( DB_MASTER ) );
+		$this->assertInstanceOf( IDatabase::class, $db->getEchoDb( DB_REPLICA ) );
 	}
 
 	/**
@@ -24,7 +30,7 @@ class MWEchoDbFactoryTest extends MediaWikiTestCase {
 		$reflection = new ReflectionClass( 'MWEchoDbFactory' );
 		$method = $reflection->getMethod( 'getLB' );
 		$method->setAccessible( true );
-		$this->assertInstanceOf( 'LoadBalancer', $method->invoke( $db ) );
+		$this->assertInstanceOf( ILoadBalancer::class, $method->invoke( $db ) );
 	}
 
 }

@@ -18,7 +18,7 @@
 ( function ( mw ) {
 	QUnit.module( 'mmv.model.Image', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Image model constructor sanity check', 24, function ( assert ) {
+	QUnit.test( 'Image model constructor sanity check', function ( assert ) {
 		var
 			title = mw.Title.newFromText( 'File:Foobar.jpg' ),
 			name = 'Foo bar',
@@ -39,16 +39,17 @@
 			author = 'Ryan Kaldari',
 			authorCount = 1,
 			permission = 'only use for good, not evil',
+			deletionReason = 'poor quality',
 			license = new mw.mmv.model.License( 'cc0' ),
 			attribution = 'Created by my cats on a winter morning',
 			latitude = 39.12381283,
 			longitude = 100.983829,
-			restrictions = ['trademarked'],
+			restrictions = [ 'trademarked' ],
 			imageData = new mw.mmv.model.Image(
 				title, name, size, width, height, mime, url,
 				descurl, descShortUrl, pageID, repo, datetime, anondatetime, origdatetime,
 				description, source, author, authorCount, license, permission, attribution,
-				latitude, longitude, restrictions );
+				deletionReason, latitude, longitude, restrictions );
 
 		assert.strictEqual( imageData.title, title, 'Title is set correctly' );
 		assert.strictEqual( imageData.name, name, 'Name is set correctly' );
@@ -58,7 +59,7 @@
 		assert.strictEqual( imageData.mimeType, mime, 'MIME type is set correctly' );
 		assert.strictEqual( imageData.url, url, 'URL for original image is set correctly' );
 		assert.strictEqual( imageData.descriptionUrl, descurl, 'URL for image description page is set correctly' );
-		assert.strictEqual( imageData.pageID, pageID, 'Page ID of image description is set correctly');
+		assert.strictEqual( imageData.pageID, pageID, 'Page ID of image description is set correctly' );
 		assert.strictEqual( imageData.repo, repo, 'Repository name is set correctly' );
 		assert.strictEqual( imageData.uploadDateTime, datetime, 'Date and time of last upload is set correctly' );
 		assert.strictEqual( imageData.anonymizedUploadDateTime, anondatetime, 'Anonymized date and time of last upload is set correctly' );
@@ -70,13 +71,14 @@
 		assert.strictEqual( imageData.license, license, 'License is set correctly' );
 		assert.strictEqual( imageData.permission, permission, 'Permission is set correctly' );
 		assert.strictEqual( imageData.attribution, attribution, 'Attribution is set correctly' );
+		assert.strictEqual( imageData.deletionReason, deletionReason, 'Deletion reason is set correctly' );
 		assert.strictEqual( imageData.latitude, latitude, 'Latitude is set correctly' );
 		assert.strictEqual( imageData.longitude, longitude, 'Longitude is set correctly' );
 		assert.deepEqual( imageData.restrictions, restrictions, 'Restrictions is set correctly' );
 		assert.ok( imageData.thumbUrls, 'Thumb URL cache is set up properly' );
 	} );
 
-	QUnit.test( 'hasCoords()', 2, function ( assert ) {
+	QUnit.test( 'hasCoords()', function ( assert ) {
 		var
 			firstImageData = new mw.mmv.model.Image(
 				mw.Title.newFromText( 'File:Foobar.pdf.jpg' ), 'Foo bar',
@@ -89,14 +91,14 @@
 				10, 10, 10, 'image/jpeg', 'http://example.org', 'http://example.com', 42,
 				'example', 'tester', '2013-11-10', '20131110', '2013-11-09', 'Blah blah blah',
 				'A person', 'Another person', 1, 'CC-BY-SA-3.0', 'Permitted', 'My cat',
-				'39.91820938', '78.09812938'
+				undefined, '39.91820938', '78.09812938'
 			);
 
 		assert.strictEqual( firstImageData.hasCoords(), false, 'No coordinates present means hasCoords returns false.' );
 		assert.strictEqual( secondImageData.hasCoords(), true, 'Coordinates present means hasCoords returns true.' );
 	} );
 
-	QUnit.test( 'parseExtmeta()', 14, function ( assert ) {
+	QUnit.test( 'parseExtmeta()', function ( assert ) {
 		var Image = mw.mmv.model.Image,
 			stringData = { value: 'foo' },
 			plaintextData = { value: 'fo<b>o</b>' },
@@ -132,9 +134,9 @@
 			'Extmeta zero-prefixed integer string parsed correctly.' );
 		assert.deepEqual( Image.parseExtmeta( listDataEmpty, 'list' ), [],
 			'Extmeta empty list parsed correctly.' );
-		assert.deepEqual( Image.parseExtmeta( listDataSingle, 'list' ), ['foo'],
+		assert.deepEqual( Image.parseExtmeta( listDataSingle, 'list' ), [ 'foo' ],
 			'Extmeta list with single element parsed correctly.' );
-		assert.deepEqual( Image.parseExtmeta( listDataMultiple, 'list' ), ['foo', 'bar', 'baz'],
+		assert.deepEqual( Image.parseExtmeta( listDataMultiple, 'list' ), [ 'foo', 'bar', 'baz' ],
 			'Extmeta list with multipleelements parsed correctly.' );
 		assert.strictEqual( Image.parseExtmeta( missingData, 'string' ), undefined,
 			'Extmeta missing data parsed correctly.' );

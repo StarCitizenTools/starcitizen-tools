@@ -16,6 +16,7 @@
 	"mwe-upwiz-step-thanks": "İstifadə",
 	"mwe-upwiz-help-desk": "Yardım xidməti",
 	"mwe-upwiz-help-desk-url": "{{ns:project}}:Yardım xidməti",
+	"mwe-upwiz-add-file-0-free": "Paylaşmaq üçün mediafayl seçin",
 	"mwe-upwiz-transport-started": "Başla...",
 	"mwe-upwiz-uploading": "Yüklənir…",
 	"mwe-upwiz-stashed-upload": "Yükləndi",
@@ -27,7 +28,6 @@
 	"mwe-upwiz-finished": "Bitdi!",
 	"mwe-upwiz-source-thirdparty-accept": "OK",
 	"mwe-upwiz-desc": "Təsvir",
-	"mwe-upwiz-desc-add-0": "Təsvir əlavə et",
 	"mwe-upwiz-title": "Başlıq",
 	"mwe-upwiz-location": "Yerləşdiyi yer",
 	"mwe-upwiz-copyright-info": "Əlaqəli hüquqlar",
@@ -66,7 +66,7 @@
 	"mwe-upwiz-license-gfdl": "GNU Azad Sənədləşdirmə Lisenziyası",
 	"mwe-upwiz-license-custom-preview": "Sınaq görüntüsü",
 	"mwe-upwiz-categories": "Kateqoriyalar",
-	"mwe-upwiz-feedback-blacklist-info-prompt": "[$1 Daha ətraflı]",
 	"mwe-upwiz-errordialog-ok": "OK",
-	"mwe-upwiz-calendar-date": "Təqvimdən tarixi seçin"
+	"mwe-upwiz-calendar-date": "Təqvimdən tarixi seçin",
+	"prefs-uploads": "Yükləmə"
 }

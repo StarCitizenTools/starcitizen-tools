@@ -65,6 +65,19 @@ class VideoService {
 				'#^([\d\w\-\+]+)$#is'
 			]
 		],
+		'disclose' => [
+ 			'embed'			=> '<iframe src="//www.disclose.tv/embed/%1$s" width="%2$d" height="%3$d" frameborder="0" allowfullscreen="true"></iframe>',
+ 			'default_width'	=> 640,
+ 			'default_ratio'	=> 1.77777777777778, // (640 / 360)
+ 			'https_enabled'	=> true,
+ 			'url_regex'		=> [
+ 				'#disclose.tv/embed/([\d]+)/([\w-]+)#is',
+ 				'#disclose.tv/action/viewvideo/([\d]+)/([\w-]+)/#is'
+ 			],
+ 			'id_regex'		=> [
+ 				'#^([\d]+)$#is'
+  			]
+  		],
 		'blip' => [
 			'default_width'	=> 640,
 			'default_ratio' => 1.2994923857868, // (640 / 493)
@@ -107,7 +120,7 @@ class VideoService {
 				'#dailymotion\.com/(?:video|embed/video)/([a-zA-Z0-9]+)(?:_\S+?)?#is'
 			],
 			'id_regex'		=> [
-				'#^([a-zA-Z0-9]+)(?:_\S+?)#is'
+				'#^([a-zA-Z0-9]+)(?:_\S+?)?#is'
 			]
 		],
 		'divshare' => [
@@ -223,6 +236,15 @@ class VideoService {
 				'#^([a-zA-Z0-9]+)$#is'
 			]
 		],
+		'soundcloud' => [
+			'embed'			=> '<iframe src="https://w.soundcloud.com/player/?url=%1$s&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true" width="%2$d" height="%3$d" scrolling="no" frameborder="no"></iframe>',
+			'default_width'	=> 186,
+			'default_ratio'	=> 2.66666,
+			'https_enabled'	=> true,
+			'url_regex'		=> [
+				'#^(https://soundcloud\.com/.+?/.+?)$#is',
+			]
+		],
 		'teachertube' => [
 			'embed'			=> '<iframe src="http://www.teachertube.com/embed/video/%1$s" width="%2$d" height="%3$d" frameborder="0" allowfullscreen="true"></iframe>',
 			'default_width'	=> 640,
@@ -247,8 +269,20 @@ class VideoService {
 				'#^([\d\w\-]+)$#is'
 			]
 		],
+		'tubitv' => [
+			'embed'			=> '<iframe src="//tubitv.com/embed/%1$s" width="%2$d" height="%3$d" frameborder="0" allowfullscreen="true"></iframe>',
+			'default_width'	=> 640,
+			'default_ratio'	=> 1.77777777777778, // (640 / 360)
+			'https_enabled'	=> true,
+			'url_regex'		=> [
+				'#tubitv.com/(?:video|embed)/([\d]+)(/[\w-]+)?$#is',
+			],
+			'id_regex'		=> [
+				'#^([\d]+)$#is'
+			]
+		],
 		'tudou' => [
-			'embed'			=> '<iframe src="http://www.tudou.com/programs/view/html5embed.action?code=%1$s&autoPlay=false&playType=AUTO" allowfullscreen="true" width="%2$d" height="%3$d"></iframe>',
+			'embed'			=> '<iframe src="http://www.tudou.com/programs/view/html5embed.action?code=%1$s&autoPlay=false&playType=AUTO" allowfullscreen="true" width="%2$d" height="%3$d" frameborder="0"></iframe>',
 			'default_width'	=> 640,
 			'default_ratio'	=> 1.6,
 			'https_enabled'	=> false,
@@ -273,7 +307,7 @@ class VideoService {
 			]
 		],
 		'twitch' => [
-			'embed'			=> '<iframe src="https://player.twitch.tv/?channel=%1$s" width="%2$d" height="%3$d" frameborder="0" allowfullscreen="true"></iframe>',
+			'embed'			=> '<iframe src="https://player.twitch.tv/?channel=%1$s&%4$s" width="%2$d" height="%3$d" frameborder="0" allowfullscreen="true"></iframe>',
 			'default_width'	=> 640,
 			'default_ratio'	=> 1.64021164021164, // (620 / 378)
 			'https_enabled'	=> false,
@@ -285,21 +319,15 @@ class VideoService {
 			]
 		],
 		'twitchvod' => [
-			'embed'			=> '<object id="clip_embed_player_flash" type="application/x-shockwave-flash" width="%2$d" height="%3$d" data="http://www.twitch.tv/widgets/archive_embed_player.swf" bgcolor="#000000">
-	<param name="movie" value="http://www.twitch.tv/widgets/archive_embed_player.swf" />
-	<param name="allowScriptAccess" value="always" />
-	<param name="allowNetworking" value="all" />
-	<param name="allowFullScreen" value="true" />
-	<param name="flashvars" value="channel=%1$s&amp;auto_play=false&amp;start_volume=100&amp;chapter_id=%4$d" />
-</object>',
+			'embed'			=> '<iframe src="https://player.twitch.tv/?video=%1$s&%4$s" width="%2$d" height="%3$d" frameborder="0" allowfullscreen="true"></iframe>',
 			'default_width'	=> 640,
 			'default_ratio'	=> 1.64021164021164, // (620 / 378)
 			'https_enabled'	=> false,
 			'url_regex'		=> [
-				'#twitch\.tv/([\d\w-]+)/c/([\d]+)(?:/\S+?)?#is'
+				'#twitch\.tv/([\d\w-]+)(?:/\S+?)?#is'
 			],
 			'id_regex'		=> [
-				'#^([\d\w-]+)/c/([\d]+)$#is'
+				'#^([\d\w-]+)$#is'
 			]
 		],
 		'videomaten' => [
@@ -310,7 +338,7 @@ class VideoService {
 		'vimeo' => [
 			'embed'			=> '<iframe src="//player.vimeo.com/video/%1$s" width="%2$d" height="%3$d" frameborder="0" allowfullscreen="true"></iframe>',
 			'default_width'	=> 640,
-			'default_ratio' => 1.2994923857868, // (640 / 493)
+			'default_ratio' => 1.77777777777778, // (640 / 360)
 			'https_enabled'	=> true,
 			'url_regex'		=> [
 				'#vimeo\.com/([\d]+)#is',
@@ -375,7 +403,7 @@ class VideoService {
 			]
 		],
 		'youku' => [
-			'embed'			=> '<iframe src="http://player.youku.com/embed/%1$s" width="%2$d" height="%3$d" frameborder="0" allowfullscreen="true"></iframe>',
+			'embed'			=> '<iframe src="https://player.youku.com/embed/%1$s" width="%2$d" height="%3$d" frameborder="0" allowfullscreen="true"></iframe>',
 			'default_width'	=> 640,
 			'default_ratio'	=> 1.6,
 			'https_enabled'	=> false,
@@ -387,6 +415,43 @@ class VideoService {
 			]
 		]
 	];
+
+	/**
+	 * Mapping of host names to services
+	 * @var array
+	 */
+	static private $serviceHostMap = [
+		'archive.org'				=> 'archiveorg',
+		'embed.bambuser.com'		=> ['bambuser', 'bambuser_channel'],
+		'beam.pro' 					=> 'beam',
+		'blip.tv'					=> 'blip',
+		'bing.com'					=> 'bing',
+		'collegehumor.com'			=> 'collegehumor',
+		'dailymotion.com'			=> 'dailymotion',
+		'divshare.com'				=> 'divshare',
+		'funnyordie.com'			=> 'funnyordie',
+		'gfycat.com'				=> 'gfycat',
+		'hitbox.tv'					=> 'hitbox',
+		'content.jwplatform.com'	=> 'jwplayer',
+		'kickstarter.com'			=> 'kickstarter',
+		'media.ccc.de'				=> 'mideacccde',
+		'metacafe.com'				=> 'metacafe',
+		'nicovideo.jp'				=> 'nico',
+		'rutube.ru'					=> 'rutube',
+		'teachertube.com'			=> 'teachertube',
+		'ted.com'					=> 'ted',
+		'tubitv.com'				=> 'tubitv',
+		'tudou.com'					=> 'todou',
+		'tvpot.daum.net'			=> 'tvpot',
+		'twitch.tv'					=> ['twitch', 'twitchvod'],
+		'89.160.51.62'				=> 'videomaten',
+		'vimeo.com'					=> 'vimeo',
+		'vine.co'					=> 'vine',
+		'screen.yahoo.com'			=> 'yahoo',
+		'youtube.com'				=> ['youtube', 'youtubeplaylist'],
+		'youku.com'					=> 'youku'
+	];
+
 
 	/**
 	 * This object instance's service information.
@@ -461,6 +526,23 @@ class VideoService {
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * return the service host map array
+	 * @return array $serviceHostMap
+	 */
+	public static function getServiceHostMap() {
+		return self::$serviceHostMap;
+	}
+
+	/**
+	 * return an array of defined services
+	 *
+	 * @return array $services
+	 */
+	public static function getAvailableServices() {
+		return array_keys(self::$services);
 	}
 
 	/**
@@ -565,11 +647,11 @@ class VideoService {
 	/**
 	 * Parse the video ID/URL provided.
 	 *
-	 * @access	private
+	 * @access	public
 	 * @param	string	Video ID/URL
 	 * @return	mixed	Parsed Video ID or false on failure.
 	 */
-	private function parseVideoID( $id ) {
+	public function parseVideoID( $id ) {
 		$id = trim( $id );
 		// URL regexes are put into the array first to prevent cases where the ID regexes might accidentally match an incorrect portion of the URL.
 		$regexes = array_merge( (array) $this->service['url_regex'], (array) $this->service['id_regex'] );

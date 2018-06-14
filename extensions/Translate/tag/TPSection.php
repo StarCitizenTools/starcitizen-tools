@@ -4,8 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @copyright Copyright © 2009-2013 Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -40,6 +39,20 @@ class TPSection {
 	public $oldText;
 
 	/**
+	 * @var bool Whether this section is inline section.
+	 * E.g. "Something <translate>foo</translate> bar".
+	 */
+	protected $inline = false;
+
+	public function setIsInline( $value ) {
+		$this->inline = (bool)$value;
+	}
+
+	public function isInline() {
+		return $this->inline;
+	}
+
+	/**
 	 * Returns section text unmodified.
 	 * @return string Wikitext.
 	 */
@@ -53,7 +66,7 @@ class TPSection {
 	 * @since 2014.07
 	 */
 	public function getTextWithVariables() {
-		$re = '~<tvar\|([^>]+)>(.*?)</>~u';
+		$re = '~<tvar\|([^>]+)>(.*?)</>~us';
 
 		return preg_replace( $re, '$\1', $this->text );
 	}
@@ -63,13 +76,14 @@ class TPSection {
 	 * @return string Wikitext.
 	 */
 	public function getTextForTrans() {
-		$re = '~<tvar\|([^>]+)>(.*?)</>~u';
+		$re = '~<tvar\|([^>]+)>(.*?)</>~us';
 
 		return preg_replace( $re, '\2', $this->text );
 	}
 
 	/**
 	 * Returns the section text with updated or added section marker.
+	 *
 	 * @return string Wikitext.
 	 */
 	public function getMarkedText() {
@@ -82,7 +96,11 @@ class TPSection {
 		$text = preg_replace( $re, $rep, $this->text, 1, $count );
 
 		if ( $count === 0 ) {
-			$text = $header . "\n" . $this->text;
+			if ( $this->inline ) {
+				$text = $header . ' ' . $this->text;
+			} else {
+				$text = $header . "\n" . $this->text;
+			}
 		}
 
 		return $text;
@@ -102,10 +120,10 @@ class TPSection {
 	 * prefixed with a dollar sign.
 	 */
 	public function getVariables() {
-		$re = '~<tvar\|([^>]+)>(.*?)</>~u';
-		$matches = array();
+		$re = '~<tvar\|([^>]+)>(.*?)</>~us';
+		$matches = [];
 		preg_match_all( $re, $this->text, $matches, PREG_SET_ORDER );
-		$vars = array();
+		$vars = [];
 
 		foreach ( $matches as $m ) {
 			$vars['$' . $m[1]] = $m[2];

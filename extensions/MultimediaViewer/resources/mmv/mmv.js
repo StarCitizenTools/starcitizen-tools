@@ -22,34 +22,35 @@
 	/**
 	 * Analyses the page, looks for image content and sets up the hooks
 	 * to manage the viewing experience of such content.
+	 *
 	 * @class mw.mmv.MultimediaViewer
 	 * @constructor
-	 * @param {mw.Map} mwConfig mw.config
+	 * @param {mw.mmv.Config} config mw.mmv.Config object
 	 */
-	function MultimediaViewer( mwConfig ) {
-		var apiCacheMaxAge = 86400; // one day (24 hours * 60 min * 60 sec)
-		var apiCacheFiveMinutes = 300; // 5 min * 60 sec
+	function MultimediaViewer( config ) {
+		var apiCacheMaxAge = 86400, // one day (24 hours * 60 min * 60 sec)
+			apiCacheFiveMinutes = 300; // 5 min * 60 sec
 
 		/**
-		 * @property {mw.Map}
+		 * @property {mw.mmv.Config}
 		 * @private
 		 */
-		this.mwConfig = mwConfig;
+		this.config = config;
 
 		/**
 		 * @property {mw.mmv.provider.Image}
 		 * @private
 		 */
-		this.imageProvider = new mw.mmv.provider.Image( mw.config.get( 'wgMultimediaViewer' ).imageQueryParameter );
+		this.imageProvider = new mw.mmv.provider.Image( this.config.imageQueryParameter() );
 
 		/**
 		 * @property {mw.mmv.provider.ImageInfo}
 		 * @private
 		 */
 		this.imageInfoProvider = new mw.mmv.provider.ImageInfo( new mw.mmv.logging.Api( 'imageinfo' ), {
-			language: this.mwConfig.get( 'wgUserLanguage', false ) || this.mwConfig.get( 'wgContentLanguage', 'en' ),
+			language: this.config.language(),
 			maxage: apiCacheFiveMinutes
-		});
+		} );
 
 		/**
 		 * @property {mw.mmv.provider.FileRepoInfo}
@@ -107,7 +108,7 @@
 		/**
 		 * @property {mw.mmv.logging.ViewLogger} view -
 		 */
-		this.viewLogger = new mw.mmv.logging.ViewLogger( this.mwConfig, window, mw.mmv.actionLogger );
+		this.viewLogger = new mw.mmv.logging.ViewLogger( this.config, window, mw.mmv.actionLogger );
 	}
 
 	MMVP = MultimediaViewer.prototype;
@@ -115,6 +116,7 @@
 	/**
 	 * Initialize the lightbox interface given an array of thumbnail
 	 * objects.
+	 *
 	 * @param {Object[]} thumbs Complex structure...TODO, document this better.
 	 */
 	MMVP.initWithThumbs = function ( thumbs ) {
@@ -141,6 +143,7 @@
 
 	/**
 	 * Create an image object for the lightbox to use.
+	 *
 	 * @protected
 	 * @param {string} fileLink Link to the file - generally a thumb URL
 	 * @param {string} filePageLink Link to the File: page
@@ -149,7 +152,7 @@
 	 * @param {HTMLImageElement} thumb The thumbnail that represents this image on the page
 	 * @param {string} [caption] The caption, if any.
 	 * @param {string} [alt] The alt text of the image
-	 * @returns {mw.mmv.LightboxImage}
+	 * @return {mw.mmv.LightboxImage}
 	 */
 	MMVP.createNewImage = function ( fileLink, filePageLink, fileTitle, index, thumb, caption, alt ) {
 		var thisImage = new mw.mmv.LightboxImage( fileLink, filePageLink, fileTitle, index, thumb, caption, alt ),
@@ -167,13 +170,15 @@
 
 	/**
 	 * Handles resize events in viewer.
+	 *
 	 * @protected
 	 * @param {mw.mmv.LightboxInterface} ui lightbox that got resized
 	 */
 	MMVP.resize = function ( ui ) {
 		var imageWidths, canvasDimensions,
 			viewer = this,
-			image = this.thumbs[ this.currentIndex ].image;
+			image = this.thumbs[ this.currentIndex ].image,
+			ext = this.thumbs[ this.currentIndex ].title.ext.toLowerCase();
 
 		this.preloadThumbnails();
 
@@ -186,6 +191,7 @@
 			this.fetchThumbnailForLightboxImage(
 				image, imageWidths.real
 			).then( function ( thumbnail, image ) {
+				image.className = ext;
 				viewer.setImage( ui, thumbnail, image, imageWidths );
 			}, function ( error ) {
 				viewer.ui.canvas.showError( error );
@@ -208,6 +214,7 @@
 
 	/**
 	 * Loads and sets the specified image. It also updates the controls.
+	 *
 	 * @param {mw.mmv.LightboxInterface} ui image container
 	 * @param {mw.mmv.model.Thumbnail} thumbnail thumbnail information
 	 * @param {HTMLImageElement} imageElement
@@ -220,6 +227,7 @@
 
 	/**
 	 * Loads a specified image.
+	 *
 	 * @param {mw.mmv.LightboxImage} image
 	 * @param {HTMLImageElement} initialImage A thumbnail to use as placeholder while the image loads
 	 */
@@ -228,10 +236,13 @@
 			canvasDimensions,
 			imagePromise,
 			metadataPromise,
+			pluginsPromise,
 			start,
 			viewer = this,
 			$initialImage = $( initialImage ),
 			extraStatsDeferred = $.Deferred();
+
+		pluginsPromise = this.loadExtensionPlugins( image.filePageTitle.ext.toLowerCase() );
 
 		this.currentIndex = image.index;
 
@@ -251,6 +262,8 @@
 		// the aspect ratio
 		$initialImage.hide();
 		$initialImage.addClass( 'mw-mmv-placeholder-image' );
+		$initialImage.addClass( image.filePageTitle.ext.toLowerCase() );
+
 		this.ui.canvas.set( image, $initialImage );
 
 		this.preloadImagesMetadata();
@@ -275,58 +288,78 @@
 
 		metadataPromise = this.fetchSizeIndependentLightboxInfo( image.filePageTitle );
 
-		imagePromise.done( function ( thumbnail, imageElement ) {
-			if ( viewer.currentIndex !== image.index ) {
-				return;
-			}
+		imagePromise.then(
+			// done
+			function ( thumbnail, imageElement ) {
+				if ( viewer.currentIndex !== image.index ) {
+					return;
+				}
 
-			if ( viewer.imageDisplayedCount++ === 0 ) {
-				mw.mmv.durationLogger.stop( 'click-to-first-image' );
+				if ( viewer.imageDisplayedCount++ === 0 ) {
+					mw.mmv.durationLogger.stop( 'click-to-first-image' );
 
-				metadataPromise.done( function ( imageInfo ) {
-					if ( !imageInfo || !imageInfo.anonymizedUploadDateTime ) {
-						return;
-					}
+					metadataPromise.then( function ( imageInfo, repoInfo ) {
+						if ( imageInfo && imageInfo.anonymizedUploadDateTime ) {
+							mw.mmv.durationLogger.record( 'click-to-first-image', {
+								uploadTimestamp: imageInfo.anonymizedUploadDateTime
+							} );
+						}
 
-					mw.mmv.durationLogger.record( 'click-to-first-image', {
-						uploadTimestamp: imageInfo.anonymizedUploadDateTime
+						return $.Deferred().resolve( imageInfo, repoInfo );
 					} );
+				}
+
+				imageElement.className = 'mw-mmv-final-image ' + image.filePageTitle.ext.toLowerCase();
+				imageElement.alt = image.alt;
+
+				$.when( metadataPromise, pluginsPromise ).then( function ( metadata ) {
+					$( document ).trigger( $.Event( 'mmv-metadata', { viewer: viewer, image: image, imageInfo: metadata[ 0 ] } ) );
 				} );
+
+				viewer.displayRealThumbnail( thumbnail, imageElement, imageWidths, $.now() - start );
+
+				return $.Deferred().resolve( thumbnail, imageElement );
+			},
+			// fail
+			function ( error ) {
+				viewer.ui.canvas.showError( error );
+				return $.Deferred().reject( error );
 			}
+		);
 
-			imageElement.className = 'mw-mmv-final-image';
-			imageElement.alt = image.alt;
-			viewer.displayRealThumbnail( thumbnail, imageElement, imageWidths, $.now() - start );
-		} ).fail( function ( error ) {
-			viewer.ui.canvas.showError( error );
-		} );
+		metadataPromise.then(
+			// done
+			function ( imageInfo, repoInfo ) {
+				extraStatsDeferred.resolve( { uploadTimestamp: imageInfo.anonymizedUploadDateTime } );
 
-		metadataPromise.done( function ( imageInfo, repoInfo ) {
-			extraStatsDeferred.resolve( { uploadTimestamp: imageInfo.anonymizedUploadDateTime } );
+				if ( viewer.currentIndex !== image.index ) {
+					return;
+				}
 
-			if ( viewer.currentIndex !== image.index ) {
-				return;
+				if ( viewer.metadataDisplayedCount++ === 0 ) {
+					mw.mmv.durationLogger.stop( 'click-to-first-metadata' ).record( 'click-to-first-metadata' );
+				}
+
+				viewer.ui.panel.setImageInfo( image, imageInfo, repoInfo );
+
+				// File reuse steals a bunch of information from the DOM, so do it last
+				viewer.ui.setFileReuseData( imageInfo, repoInfo, image.caption, image.alt );
+
+				return $.Deferred().resolve( imageInfo, repoInfo );
+			},
+			// fail
+			function ( error ) {
+				extraStatsDeferred.reject();
+
+				if ( viewer.currentIndex === image.index ) {
+					// Set title to caption or file name if caption is not available;
+					// see setTitle() in mmv.ui.metadataPanel for extended caption fallback
+					viewer.ui.panel.showError( image.caption || image.filePageTitle.getNameText(), error );
+				}
+
+				return $.Deferred().reject( error );
 			}
-
-			if ( viewer.metadataDisplayedCount++ === 0 ) {
-				mw.mmv.durationLogger.stop( 'click-to-first-metadata' ).record( 'click-to-first-metadata' );
-			}
-
-			viewer.ui.panel.setImageInfo( image, imageInfo, repoInfo );
-
-			// File reuse steals a bunch of information from the DOM, so do it last
-			viewer.ui.setFileReuseData( imageInfo, repoInfo, image.caption, image.alt );
-		} ).fail( function ( error ) {
-			extraStatsDeferred.reject();
-
-			if ( viewer.currentIndex !== image.index ) {
-				return;
-			}
-
-			// Set title to caption or file name if caption is not available;
-			// see setTitle() in mmv.ui.metadataPanel for extended caption fallback
-			viewer.ui.panel.showError( image.caption || image.filePageTitle.getNameText(), error );
-		} );
+		);
 
 		$.when( imagePromise, metadataPromise ).then( function () {
 			if ( viewer.currentIndex !== image.index ) {
@@ -342,6 +375,7 @@
 
 	/**
 	 * Loads an image by its title
+	 *
 	 * @param {mw.Title} title
 	 * @param {boolean} updateHash Viewer should update the location hash when true
 	 */
@@ -363,11 +397,12 @@
 	};
 
 	/**
-	 * @private
 	 * Image loading progress. Keyed by image (database) name + '|' + thumbnail width in pixels,
 	 * value is undefined, 'blurred' or 'real' (meaning respectively that no thumbnail is shown
 	 * yet / the thumbnail that existed on the page is shown, enlarged and blurred / the real,
 	 * correct-size thumbnail is shown).
+	 *
+	 * @private
 	 * @property {Object.<string, string>}
 	 */
 	MMVP.thumbnailStateCache = {};
@@ -394,6 +429,7 @@
 
 	/**
 	 * Display the real, full-resolution, thumbnail that was fetched with fetchThumbnail
+	 *
 	 * @param {mw.mmv.model.Thumbnail} thumbnail
 	 * @param {HTMLImageElement} imageElement
 	 * @param {mw.mmv.model.ThumbnailWidth} imageWidths
@@ -423,6 +459,7 @@
 
 	/**
 	 * Display the blurred thumbnail from the page
+	 *
 	 * @param {mw.mmv.LightboxImage} image
 	 * @param {jQuery} $initialImage The thumbnail from the page
 	 * @param {mw.mmv.model.ThumbnailWidth} imageWidths
@@ -430,7 +467,7 @@
 	 */
 	MMVP.displayPlaceholderThumbnail = function ( image, $initialImage, imageWidths, recursion ) {
 		var viewer = this,
-			size = { width : image.originalWidth, height : image.originalHeight };
+			size = { width: image.originalWidth, height: image.originalHeight };
 
 		// If the actual image has already been displayed, there's no point showing the blurry one.
 		// This can happen if the API request to get the original image size needed to show the
@@ -447,7 +484,7 @@
 			if ( recursion ) {
 				// this should not be possible, but an infinite recursion is nasty
 				// business, so we make a sanity check
-				throw 'MediaViewer internal error: displayPlaceholderThumbnail recursion';
+				throw new Error( 'MediaViewer internal error: displayPlaceholderThumbnail recursion' );
 			}
 			this.imageInfoProvider.get( image.filePageTitle ).done( function ( imageInfo ) {
 				// Make sure the user has not navigated away while we were waiting for the size
@@ -464,9 +501,10 @@
 	};
 
 	/**
-	 * @private
 	 * Image loading progress. Keyed by image (database) name + '|' + thumbnail width in pixels,
 	 * value is a number between 0-100.
+	 *
+	 * @private
 	 * @property {Object.<string, number>}
 	 */
 	MMVP.progressCache = {};
@@ -474,6 +512,7 @@
 	/**
 	 * Displays a progress bar for the image loading, if necessary, and sets up handling of
 	 * all the related callbacks.
+	 *
 	 * @param {mw.mmv.LightboxImage} image
 	 * @param {jQuery.Promise.<mw.mmv.model.Thumbnail, HTMLImageElement>} imagePromise
 	 * @param {number} imageWidth needed for caching progress (FIXME)
@@ -483,52 +522,59 @@
 			progressBar = viewer.ui.panel.progressBar,
 			key = image.filePageTitle.getPrefixedDb() + '|' + imageWidth;
 
-		if ( imagePromise.state() !== 'pending' ) {
-			// image has already loaded (or failed to load) - do not show the progress bar
-			progressBar.hide();
-			return;
-		}
-
-		if ( !this.progressCache[key] ) {
+		if ( !this.progressCache[ key ] ) {
 			// Animate progress bar to 5 to give a sense that something is happening, and make sure
 			// the progress bar is noticeable, even if we're sitting at 0% stuck waiting for
 			// server-side processing, such as thumbnail (re)generation
 			progressBar.jumpTo( 0 );
 			progressBar.animateTo( 5 );
-			viewer.progressCache[key] = 5;
+			viewer.progressCache[ key ] = 5;
 		} else {
-			progressBar.jumpTo( this.progressCache[key] );
+			progressBar.jumpTo( this.progressCache[ key ] );
 		}
 
 		// FIXME would be nice to have a "filtered" promise which does not fire when the image is not visible
-		imagePromise.progress( function ( progress ) {
-			// We pretend progress is always at least 5%, so progress events below 5% should be ignored
-			// 100 will be handled by the done handler, do not mix two animations
-			if ( progress < 5 || progress === 100 ) {
-				return;
-			}
+		imagePromise.then(
+			// done
+			function ( thumbnail, imageElement ) {
+				viewer.progressCache[ key ] = 100;
+				if ( viewer.currentIndex === image.index ) {
+					// Fallback in case the browser doesn't have fancy progress updates
+					progressBar.animateTo( 100 );
 
-			viewer.progressCache[key] = progress;
+					// Hide progress bar, we're done
+					progressBar.hide();
+				}
 
-			// Touch the UI only if the user is looking at this image
-			if ( viewer.currentIndex === image.index ) {
-				progressBar.animateTo( progress );
-			}
-		} ).done( function () {
-			viewer.progressCache[key] = 100;
+				return $.Deferred().resolve( thumbnail, imageElement );
+			},
+			// fail
+			function ( error ) {
+				viewer.progressCache[ key ] = 100;
 
-			if ( viewer.currentIndex === image.index ) {
-				// Fallback in case the browser doesn't have fancy progress updates
-				progressBar.animateTo( 100 );
-			}
-		} ).fail( function () {
-			viewer.progressCache[key] = 100;
+				if ( viewer.currentIndex === image.index ) {
+					// Hide progress bar on error
+					progressBar.hide();
+				}
 
-			if ( viewer.currentIndex === image.index ) {
-				// Hide progress bar on error
-				progressBar.hide();
+				return $.Deferred().reject( error );
+			},
+			// progress
+			function ( progress ) {
+				// We pretend progress is always at least 5%, so progress events below 5% should be ignored
+				// 100 will be handled by the done handler, do not mix two animations
+				if ( progress >= 5 && progress < 100 ) {
+					viewer.progressCache[ key ] = progress;
+
+					// Touch the UI only if the user is looking at this image
+					if ( viewer.currentIndex === image.index ) {
+						progressBar.animateTo( progress );
+					}
+				}
+
+				return progress;
 			}
-		} );
+		);
 	};
 
 	/**
@@ -555,11 +601,13 @@
 	 * Orders lightboximage indexes for preloading. Works similar to $.each, except it only takes
 	 * the callback argument. Calls the callback with each lightboximage index in some sequence
 	 * that is ideal for preloading.
+	 *
 	 * @private
 	 * @param {function(number, mw.mmv.LightboxImage)} callback
 	 */
 	MMVP.eachPrealoadableLightboxIndex = function ( callback ) {
-		for ( var i = 0; i <= this.preloadDistance; i++ ) {
+		var i;
+		for ( i = 0; i <= this.preloadDistance; i++ ) {
 			if ( this.currentIndex + i < this.thumbs.length ) {
 				callback(
 					this.currentIndex + i,
@@ -580,6 +628,7 @@
 	/**
 	 * A helper function to fill up the preload queues.
 	 * taskFactory(lightboxImage) should return a preload task for the given lightboximage.
+	 *
 	 * @private
 	 * @param {function(mw.mmv.LightboxImage): function()} taskFactory
 	 * @return {mw.mmv.model.TaskQueue}
@@ -671,9 +720,11 @@
 
 	/**
 	 * Preload the fullscreen size of the current image.
+	 *
+	 * @param {mw.mmv.LightboxImage} image
 	 */
 	MMVP.preloadFullscreenThumbnail = function ( image ) {
-		var imageWidths = this.ui.canvas.getLightboxImageWidthsForFullscreen( image),
+		var imageWidths = this.ui.canvas.getLightboxImageWidthsForFullscreen( image ),
 			canvasDimensions = this.ui.canvas.getDimensions( true );
 
 		mw.mmv.dimensionLogger.logDimensions( imageWidths, canvasDimensions, 'preload' );
@@ -683,8 +734,9 @@
 	/**
 	 * Loads all the size-independent information needed by the lightbox (image metadata, repo
 	 * information).
+	 *
 	 * @param {mw.Title} fileTitle Title of the file page for the image.
-	 * @returns {jQuery.Promise.<mw.mmv.model.Image, mw.mmv.model.Repo>}
+	 * @return {jQuery.Promise.<mw.mmv.model.Image, mw.mmv.model.Repo>}
 	 */
 	MMVP.fetchSizeIndependentLightboxInfo = function ( fileTitle ) {
 		var imageInfoPromise = this.imageInfoProvider.get( fileTitle ),
@@ -693,16 +745,17 @@
 		return $.when(
 			imageInfoPromise, repoInfoPromise
 		).then( function ( imageInfo, repoInfoHash ) {
-			return $.Deferred().resolve( imageInfo, repoInfoHash[imageInfo.repo] );
+			return $.Deferred().resolve( imageInfo, repoInfoHash[ imageInfo.repo ] );
 		} );
 	};
 
 	/**
 	 * Loads size-dependent components of a lightbox - the thumbnail model and the image itself.
+	 *
 	 * @param {mw.mmv.LightboxImage} image
 	 * @param {number} width the width of the requested thumbnail
 	 * @param {jQuery.Deferred.<string>} [extraStatsDeferred] Promise that resolves to the image's upload timestamp when the metadata is loaded
-	 * @returns {jQuery.Promise.<mw.mmv.model.Thumbnail, HTMLImageElement>}
+	 * @return {jQuery.Promise.<mw.mmv.model.Thumbnail, HTMLImageElement>}
 	 */
 	MMVP.fetchThumbnailForLightboxImage = function ( image, width, extraStatsDeferred ) {
 		return this.fetchThumbnail(
@@ -717,19 +770,21 @@
 
 	/**
 	 * Loads size-dependent components of a lightbox - the thumbnail model and the image itself.
+	 *
 	 * @param {mw.Title} fileTitle
 	 * @param {number} width the width of the requested thumbnail
 	 * @param {string} [sampleUrl] a thumbnail URL for the same file (but with different size) (might be missing)
 	 * @param {number} [originalWidth] the width of the original, full-sized file (might be missing)
 	 * @param {number} [originalHeight] the height of the original, full-sized file (might be missing)
 	 * @param {jQuery.Deferred.<string>} [extraStatsDeferred] Promise that resolves to the image's upload timestamp when the metadata is loaded
-	 * @returns {jQuery.Promise.<mw.mmv.model.Thumbnail, HTMLImageElement>} A promise resolving to
+	 * @return {jQuery.Promise.<mw.mmv.model.Thumbnail, HTMLImageElement>} A promise resolving to
 	 *  a thumbnail model and an <img> element. It might or might not have progress events which
 	 *  return a single number.
 	 */
 	MMVP.fetchThumbnail = function ( fileTitle, width, sampleUrl, originalWidth, originalHeight, extraStatsDeferred ) {
 		var viewer = this,
 			guessing = false,
+			combinedDeferred = $.Deferred(),
 			thumbnailPromise,
 			imagePromise;
 
@@ -741,7 +796,7 @@
 
 		if (
 			sampleUrl && originalWidth && originalHeight &&
-			mw.config.get( 'wgMultimediaViewer' ).useThumbnailGuessing
+			this.config.useThumbnailGuessing()
 		) {
 			guessing = true;
 			thumbnailPromise = this.guessedThumbnailInfoProvider.get(
@@ -774,14 +829,18 @@
 			} );
 		}
 
-		return $.when( thumbnailPromise, imagePromise ).then( null, null, function ( thumbnailProgress, imageProgress ) {
-			// Make progress events have a nice format.
-			return imageProgress[1];
+		// In jQuery<3, $.when used to also relay notify, but that is no longer
+		// the case - but we still want to pass it along...
+		$.when( thumbnailPromise, imagePromise ).then( combinedDeferred.resolve, combinedDeferred.reject );
+		imagePromise.then( null, null, function ( arg, progress ) {
+			combinedDeferred.notify( progress );
 		} );
+		return combinedDeferred;
 	};
 
 	/**
 	 * Loads an image at a specified index in the viewer's thumbnail array.
+	 *
 	 * @param {number} index
 	 */
 	MMVP.loadIndex = function ( index ) {
@@ -791,7 +850,7 @@
 			this.viewLogger.recordViewDuration();
 
 			thumb = this.thumbs[ index ];
-			this.loadImage( thumb.image, thumb.$thumb.clone()[0] );
+			this.loadImage( thumb.image, thumb.$thumb.clone()[ 0 ] );
 		}
 	};
 
@@ -823,7 +882,7 @@
 		windowTitle = this.createDocumentTitle( null );
 
 		if ( comingFromHashChange === false ) {
-			$( document ).trigger( $.Event( 'mmv-hash', { hash : '#', title: windowTitle } ) );
+			$( document ).trigger( $.Event( 'mmv-hash', { hash: '#', title: windowTitle } ) );
 		} else {
 			comingFromHashChange = false;
 		}
@@ -863,12 +922,13 @@
 			route = new mw.mmv.routing.ThumbnailRoute( this.currentImageFileTitle );
 			hashFragment = '#' + this.router.createHash( route );
 			windowTitle = this.createDocumentTitle( this.currentImageFileTitle );
-			$( document ).trigger( $.Event( 'mmv-hash', { hash : hashFragment, title: windowTitle } ) );
+			$( document ).trigger( $.Event( 'mmv-hash', { hash: hashFragment, title: windowTitle } ) );
 		}
 	};
 
 	/**
 	 * Creates a string which can be shown as document title (the text at the top of the browser window).
+	 *
 	 * @param {mw.Title|null} imageTitle the title object for the image which is displayed; null when the
 	 *  viewer is being closed
 	 * @return {string}
@@ -909,8 +969,8 @@
 		var viewer = this;
 
 		this.ui.connect( this, {
-			'next': 'nextImage',
-			'prev': 'prevImage'
+			next: 'nextImage',
+			prev: 'prevImage'
 		} );
 
 		$( document ).on( 'mmv-close.mmvp', function () {
@@ -944,6 +1004,27 @@
 	 */
 	MMVP.preloadDependencies = function () {
 		mw.loader.load( [ 'mmv.ui.reuse.shareembed', 'moment' ] );
+	};
+
+	/**
+	 * Loads the RL module defined for a given file extension, if any
+	 *
+	 * @param {string} extension File extension
+	 * @return {jQuery.Promise}
+	 */
+	MMVP.loadExtensionPlugins = function ( extension ) {
+		var deferred = $.Deferred(),
+			config = this.config.extensions();
+
+		if ( !( extension in config ) || config[ extension ] === 'default' ) {
+			return deferred.resolve();
+		}
+
+		mw.loader.using( config[ extension ], function () {
+			deferred.resolve();
+		} );
+
+		return deferred;
 	};
 
 	mw.mmv.MultimediaViewer = MultimediaViewer;

@@ -1,21 +1,21 @@
 /*!
  * VisualEditor DataModel AnnotationSet tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.AnnotationSet' );
 
 /* Tests */
 
-QUnit.test( 'Basic usage', 32, function ( assert ) {
+QUnit.test( 'Basic usage', function ( assert ) {
 	var annotationSet3,
-		store = new ve.dm.IndexValueStore(),
+		store = new ve.dm.HashValueStore(),
 		bold = new ve.dm.BoldAnnotation(),
 		italic = new ve.dm.ItalicAnnotation(),
 		underline = new ve.dm.UnderlineAnnotation(),
-		annotationSet = new ve.dm.AnnotationSet( store, store.indexes( [ bold, italic ] ) ),
-		annotationSet2 = new ve.dm.AnnotationSet( store, store.indexes( [ italic, underline ] ) ),
+		annotationSet = new ve.dm.AnnotationSet( store, store.hashAll( [ bold, italic ] ) ),
+		annotationSet2 = new ve.dm.AnnotationSet( store, store.hashAll( [ italic, underline ] ) ),
 		emptySet = new ve.dm.AnnotationSet( store );
 
 	assert.strictEqual( annotationSet.getLength(), 2, 'getLength is 2' );
@@ -23,8 +23,8 @@ QUnit.test( 'Basic usage', 32, function ( assert ) {
 	assert.deepEqual( annotationSet.get( 0 ), bold, 'get(0) is bold' );
 	assert.strictEqual( annotationSet.contains( italic ), true, 'contains italic' );
 	assert.strictEqual( annotationSet.contains( underline ), false, 'doesn\'t contain underline' );
-	assert.strictEqual( annotationSet.containsIndex( 1 ), true, 'contains italic by index' );
-	assert.strictEqual( annotationSet.containsIndex( 2 ), false, 'doesn\'t contain underline by index' );
+	assert.strictEqual( annotationSet.containsHash( store.hashOfValue( italic ) ), true, 'contains italic by hash' );
+	assert.strictEqual( annotationSet.containsHash( store.hashOfValue( underline ) ), false, 'doesn\'t contain underline by hash' );
 	assert.strictEqual( annotationSet.containsAnyOf( annotationSet2 ), true, 'containsAnyOf set2 is true' );
 	assert.strictEqual( annotationSet.containsAnyOf( emptySet ), false, 'containsAnyOf empty set is false' );
 	assert.strictEqual( annotationSet.containsAllOf( annotationSet2 ), false, 'containsAllOf set2 set is false' );
@@ -46,7 +46,7 @@ QUnit.test( 'Basic usage', 32, function ( assert ) {
 	assert.strictEqual( annotationSet2.offsetOf( bold ), 0, 'set2 contains bold at 0 after add at 0' );
 	annotationSet2.add( bold, 0 );
 	assert.strictEqual( annotationSet2.getLength(), 3, 'adding existing annotation doesn\'t change length' );
-	// set is now [ bold, italic, underline ]
+	// Set is now [ bold, italic, underline ]
 	annotationSet2.removeAt( 2 );
 	assert.strictEqual( annotationSet2.contains( underline ), false, 'set2 doesn\'t contain underline after removeAt 2' );
 	annotationSet2.removeAll();
@@ -59,7 +59,7 @@ QUnit.test( 'Basic usage', 32, function ( assert ) {
 	annotationSet2.push( italic );
 	assert.deepEqual( annotationSet2.get(), [ bold, italic ], 'set2 contains bold then italic after two pushes' );
 
-	annotationSet2 = new ve.dm.AnnotationSet( store, store.indexes( [ italic, underline ] ) );
+	annotationSet2 = new ve.dm.AnnotationSet( store, store.hashAll( [ italic, underline ] ) );
 	annotationSet2.removeNotInSet( annotationSet );
 	assert.strictEqual( annotationSet.contains( italic ) && !annotationSet.contains( underline ), true, 'contains italic not underline after removeNotInSet' );
 	annotationSet2.add( underline, 1 );
@@ -75,29 +75,29 @@ QUnit.test( 'Basic usage', 32, function ( assert ) {
 	assert.strictEqual( annotationSet3.contains( italic ), true, 'set intersected with set2 contains italic' );
 } );
 
-QUnit.test( 'Comparable', 7, function ( assert ) {
+QUnit.test( 'Comparable', function ( assert ) {
 	var annotationSet3,
-		store = new ve.dm.IndexValueStore(),
+		store = new ve.dm.HashValueStore(),
 		bold = new ve.dm.BoldAnnotation(),
 		italic = new ve.dm.ItalicAnnotation(),
 		strong = new ve.dm.BoldAnnotation( { type: 'textStyle/bold', attributes: { nodeName: 'strong' } } ),
 		underline = new ve.dm.UnderlineAnnotation(),
-		annotationSet = new ve.dm.AnnotationSet( store, store.indexes( [ bold, italic ] ) ),
-		annotationSet2 = new ve.dm.AnnotationSet( store, store.indexes( [ strong, underline ] ) ),
+		annotationSet = new ve.dm.AnnotationSet( store, store.hashAll( [ bold, italic ] ) ),
+		annotationSet2 = new ve.dm.AnnotationSet( store, store.hashAll( [ strong, underline ] ) ),
 		emptySet = new ve.dm.AnnotationSet( store );
 
 	assert.strictEqual( annotationSet.containsComparable( strong ), true, '[b,i] contains comparable strong' );
 	assert.strictEqual( annotationSet.containsComparable( bold ), true, '[b,i] contains comparable b' );
 	assert.strictEqual( annotationSet.containsComparable( underline ), false, '[b,i] doesn\'t contain comparable u' );
 
-	annotationSet3 = new ve.dm.AnnotationSet( store, store.indexes( [ bold ] ) );
+	annotationSet3 = new ve.dm.AnnotationSet( store, store.hashAll( [ bold ] ) );
 	assert.deepEqual( annotationSet.getComparableAnnotations( strong ), annotationSet3, '[b,i] get comparable strong returns [b]' );
 	assert.deepEqual( annotationSet.getComparableAnnotations( underline ), emptySet, '[b,i] get comparable underline returns []' );
 
-	annotationSet3 = new ve.dm.AnnotationSet( store, store.indexes( [ bold ] ) );
+	annotationSet3 = new ve.dm.AnnotationSet( store, store.hashAll( [ bold ] ) );
 	assert.deepEqual( annotationSet.getComparableAnnotationsFromSet( annotationSet2 ), annotationSet3, '[b,i] get comparable from set [strong,u] returns just [b]' );
 
-	annotationSet3 = new ve.dm.AnnotationSet( store, store.indexes( [ italic, strong ] ) );
+	annotationSet3 = new ve.dm.AnnotationSet( store, store.hashAll( [ italic, strong ] ) );
 	assert.strictEqual( annotationSet.compareTo( annotationSet3 ), true, '[b,i] compares to [i,strong]' );
 
 } );

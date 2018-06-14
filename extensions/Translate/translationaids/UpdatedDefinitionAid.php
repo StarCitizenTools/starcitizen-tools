@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -18,13 +18,13 @@
 class UpdatedDefinitionAid extends TranslationAid {
 	public function getData() {
 		$db = TranslateUtils::getSafeReadDB();
-		$conds = array(
+		$conds = [
 			'rt_page' => $this->handle->getTitle()->getArticleID(),
 			'rt_type' => RevTag::getType( 'tp:transver' ),
-		);
-		$options = array(
+		];
+		$options = [
 			'ORDER BY' => 'rt_revision DESC',
-		);
+		];
 
 		$translationRevision = $db->selectField( 'revtag', 'rt_value', $conds, __METHOD__, $options );
 		if ( $translationRevision === false ) {
@@ -47,7 +47,7 @@ class UpdatedDefinitionAid extends TranslationAid {
 		}
 
 		$oldContent = $oldrev->getContent();
-		$newContent = $this->getDefinitionContent();
+		$newContent = $this->dataProvider->getDefinitionContent();
 
 		if ( !$oldContent ) {
 			throw new TranslationHelperException( 'Old definition version does not exist anymore' );
@@ -62,9 +62,7 @@ class UpdatedDefinitionAid extends TranslationAid {
 		}
 
 		$diff = new DifferenceEngine( $this->context );
-		if ( method_exists( 'DifferenceEngine', 'setTextLanguage' ) ) {
-			$diff->setTextLanguage( $this->group->getSourceLanguage() );
-		}
+		$diff->setTextLanguage( $this->group->getSourceLanguage() );
 		$diff->setContent( $oldContent, $newContent );
 		$diff->setReducedLineNumbers();
 		$diff->showDiffStyle();
@@ -74,13 +72,13 @@ class UpdatedDefinitionAid extends TranslationAid {
 			$this->context->msg( 'tpt-diff-new' )->escaped()
 		);
 
-		return array(
+		return [
 			'value_old' => $oldContent->getNativeData(),
 			'value_new' => $newContent->getNativeData(),
 			'revisionid_old' => $oldrev->getId(),
 			'revisionid_new' => $definitionTitle->getLatestRevID(),
 			'language' => $this->group->getSourceLanguage(),
 			'html' => $html,
-		);
+		];
 	}
 }

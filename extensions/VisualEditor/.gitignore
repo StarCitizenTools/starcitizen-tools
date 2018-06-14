@@ -7,13 +7,14 @@ sublime-*
 .settings
 \#*#
 .#*
+/.idea
 
 # Install and build artifacts
 /docs
 node_modules
 composer.lock
 vendor
-
+screenshots/*.png
 
 # OS
 .DS_Store

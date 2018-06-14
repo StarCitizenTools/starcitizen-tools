@@ -4,8 +4,10 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
+
+use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Storage class for stashed translations. This one uses sql tables as storage.
@@ -15,7 +17,7 @@ class TranslationStashStorage {
 	protected $db;
 	protected $dbTable;
 
-	public function __construct( DatabaseBase $db, $table = 'translate_stash' ) {
+	public function __construct( IDatabase $db, $table = 'translate_stash' ) {
 		$this->db = $db;
 		$this->dbTable = $table;
 	}
@@ -27,17 +29,17 @@ class TranslationStashStorage {
 	 * @param StashedTranslation $item
 	 */
 	public function addTranslation( StashedTranslation $item ) {
-		$row = array(
+		$row = [
 			'ts_user' => $item->getUser()->getId(),
 			'ts_title' => $item->getTitle()->getDBkey(),
 			'ts_namespace' => $item->getTitle()->getNamespace(),
 			'ts_value' => $item->getValue(),
 			'ts_metadata' => serialize( $item->getMetadata() ),
-		);
+		];
 
-		$indexes = array(
-			array( 'ts_user', 'ts_namespace', 'ts_title' )
-		);
+		$indexes = [
+			[ 'ts_user', 'ts_namespace', 'ts_title' ]
+		];
 
 		$this->db->replace( $this->dbTable, $indexes, $row, __METHOD__ );
 	}
@@ -48,12 +50,12 @@ class TranslationStashStorage {
 	 * @return StashedTranslation[]
 	 */
 	public function getTranslations( User $user ) {
-		$conds = array( 'ts_user' => $user->getId() );
-		$fields = array( 'ts_namespace', 'ts_title', 'ts_value', 'ts_metadata' );
+		$conds = [ 'ts_user' => $user->getId() ];
+		$fields = [ 'ts_namespace', 'ts_title', 'ts_value', 'ts_metadata' ];
 
 		$res = $this->db->select( $this->dbTable, $fields, $conds, __METHOD__ );
 
-		$objects = array();
+		$objects = [];
 		foreach ( $res as $row ) {
 			$objects[] = new StashedTranslation(
 				$user,
@@ -72,7 +74,7 @@ class TranslationStashStorage {
 	 * @since 2013.10
 	 */
 	public function deleteTranslations( User $user ) {
-		$conds = array( 'ts_user' => $user->getId() );
+		$conds = [ 'ts_user' => $user->getId() ];
 		$this->db->delete( $this->dbTable, $conds, __METHOD__ );
 	}
 }

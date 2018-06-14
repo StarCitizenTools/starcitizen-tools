@@ -1,8 +1,8 @@
 /*!
  * VisualEditor DataModel MWReferenceModel class.
  *
- * @copyright 2011-2016 Cite VisualEditor Team and others; see AUTHORS.txt
- * @license The MIT License (MIT); see LICENSE.txt
+ * @copyright 2011-2018 VisualEditor Team's Cite sub-team and others; see AUTHORS.txt
+ * @license MIT
  */
 
 /**
@@ -98,7 +98,7 @@ ve.dm.MWReferenceModel.prototype.insertInternalItem = function ( surfaceModel ) 
 
 	// Inject reference document into internal reference item
 	surfaceModel.change(
-		ve.dm.Transaction.newFromDocumentInsertion(
+		ve.dm.TransactionBuilder.static.newFromDocumentInsertion(
 			doc,
 			internalList.getItemNode( item.index ).getRange().start,
 			this.getDocument()
@@ -135,7 +135,7 @@ ve.dm.MWReferenceModel.prototype.updateInternalItem = function ( surfaceModel ) 
 		// Update the group name of all references nodes with the same group and key
 		txs = [];
 		for ( i = 0, len = refNodes.length; i < len; i++ ) {
-			txs.push( ve.dm.Transaction.newFromAttributeChanges(
+			txs.push( ve.dm.TransactionBuilder.static.newFromAttributeChanges(
 				doc,
 				refNodes[ i ].getOuterRange().start,
 				{ refGroup: this.group, listGroup: listGroup }
@@ -146,9 +146,9 @@ ve.dm.MWReferenceModel.prototype.updateInternalItem = function ( surfaceModel ) 
 	}
 	// Update internal node content
 	itemNodeRange = internalList.getItemNode( this.listIndex ).getRange();
-	surfaceModel.change( ve.dm.Transaction.newFromRemoval( doc, itemNodeRange, true ) );
+	surfaceModel.change( ve.dm.TransactionBuilder.static.newFromRemoval( doc, itemNodeRange, true ) );
 	surfaceModel.change(
-		ve.dm.Transaction.newFromDocumentInsertion( doc, itemNodeRange.start, this.getDocument() )
+		ve.dm.TransactionBuilder.static.newFromDocumentInsertion( doc, itemNodeRange.start, this.getDocument() )
 	);
 };
 
@@ -226,26 +226,12 @@ ve.dm.MWReferenceModel.prototype.getDocument = function () {
 		if ( this.deferDoc ) {
 			this.doc = this.deferDoc();
 		} else {
-			this.doc = new ve.dm.Document(
-				[
-					{ type: 'paragraph', internal: { generated: 'wrapper' } },
-					{ type: '/paragraph' },
-					{ type: 'internalList' },
-					{ type: '/internalList' }
-				],
-				// htmlDocument
-				this.parentDoc.getHtmlDocument(),
-				// parentDocument
-				null,
-				// internalList
-				null,
-				// innerWhitespace
-				null,
-				// lang
-				this.parentDoc.getLang(),
-				// dir
-				this.parentDoc.getDir()
-			);
+			this.doc = this.parentDoc.cloneWithData( [
+				{ type: 'paragraph', internal: { generated: 'wrapper' } },
+				{ type: '/paragraph' },
+				{ type: 'internalList' },
+				{ type: '/internalList' }
+			] );
 		}
 	}
 	return this.doc;

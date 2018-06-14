@@ -63,4 +63,9 @@ if ( function_exists( 'wfLoadExtension' ) ) {
 
 	//set the tags
 	$wgHooks['BeforePageDisplay'][] = 'WikiSEO::modifyHTML';
+
+	$wgGoogleSiteVerificationKey = null;
+	$wgFacebookAdmins = null;
+	$wgFacebookAppID = null;
+	$wgAddJSONLD = true;
 }

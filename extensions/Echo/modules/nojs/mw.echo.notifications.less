@@ -1,13 +1,13 @@
 @import '../echo.variables';
 @import '../echo.mixins';
+@import 'mediawiki.mixins';
 
-// This needs to be outside the upper selector 'NotificationItemWidget'
-// because the same styles also apply (for the moment, at least) to the notification
-// objects in the Special:Notifications page, which are, individually
-// not wrapped with a NotificationItemWidget.
+// This is only valid for the Special:Notifications page in no-JS mode,
+// where the formatting of the notifications include the following structure
 .mw-echo-state {
 	display: block;
-	padding: 15px 40px 10px 10px;
+	width: 100%;
+	.box-sizing( border-box );
 
 	.mw-echo-notification-primary-link {
 		display: none;
@@ -21,23 +21,19 @@
 		margin-left: 10px;
 	}
 	.mw-echo-notification {
+		background-color: @background-color-base;
+		color: @grey-light;
 		clear: both;
 		display: block;
-		color: #6D6D6D;
 		line-height: 90%;
 		margin: 0;
 		min-height: 30px;
-		background-color: white;
 		position: relative;
 		padding-top: 15px;
 		padding-bottom: 10px;
 		/* Force container to expand to height of floated contents */
 		overflow: hidden;
 		zoom: 1;
-
-		&.mw-echo-unread {
-			color: #252525;
-		}
 
 		span.autocomment {
 			color: inherit;
@@ -46,7 +42,7 @@
 	}
 
 	.mw-echo-notifications {
-		background-color: #EEEEEE;
+		background-color: @notification-background-read;
 	}
 
 	.mw-echo-content {
@@ -79,7 +75,7 @@
 		}
 
 		.mw-echo-notification-footer {
-			color: #6D6D6D;
+			color: @grey-light;
 			font-size: 11px;
 			margin-top: 0.2em;
 

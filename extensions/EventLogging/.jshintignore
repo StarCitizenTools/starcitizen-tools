@@ -1,4 +1,4 @@
-server/.tox
-modules/out
-node_modules
-docs
+/docs
+/modules/out
+/node_modules
+/vendor

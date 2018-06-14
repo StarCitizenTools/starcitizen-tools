@@ -30,12 +30,12 @@ class TopicListFormatter extends BaseTopicListFormatter {
 
 	public function buildEmptyResult( Workflow $workflow ) {
 		$title = $workflow->getArticleTitle();
-		return array(
+		return [
 			'workflowId' => $workflow->getId()->getAlphadecimal(),
 			'title' => $title->getPrefixedText(),
 			'actions' => $this->buildApiActions( $workflow ),
 			'links' => $this->buildLinks( $workflow ),
-		) + parent::buildEmptyResult( $workflow );
+		] + parent::buildEmptyResult( $workflow );
 	}
 
 	public function formatApi(
@@ -66,8 +66,8 @@ class TopicListFormatter extends BaseTopicListFormatter {
 	 * @return array
 	 */
 	public function buildResult( array $workflows, array $found, IContextSource $ctx ) {
-		$revisions = $posts = $replies = array();
-		foreach( $found as $formatterRow ) {
+		$revisions = $posts = $replies = [];
+		foreach ( $found as $formatterRow ) {
 			$serialized = $this->serializer->formatApi( $formatterRow, $ctx );
 			if ( !$serialized ) {
 				continue;
@@ -79,13 +79,13 @@ class TopicListFormatter extends BaseTopicListFormatter {
 
 		foreach ( $revisions as $i => $serialized ) {
 			$alpha = $serialized['postId'];
-			$revisions[$i]['replies'] = isset( $replies[$alpha] ) ? $replies[$alpha] : array();
+			$revisions[$i]['replies'] = isset( $replies[$alpha] ) ? $replies[$alpha] : [];
 		}
 
-		$list = array();
+		$list = [];
 		if ( $workflows ) {
 			$orig = $workflows;
-			$workflows = array();
+			$workflows = [];
 			foreach ( $orig as $workflow ) {
 				$alpha = $workflow->getId()->getAlphadecimal();
 				if ( isset( $posts[$alpha] ) ) {
@@ -105,16 +105,16 @@ class TopicListFormatter extends BaseTopicListFormatter {
 			}
 		}
 
-		return array(
+		return [
 			// array_values must be used to ensure 0-indexed array
 			'roots' => $list,
 			'posts' => $posts,
 			'revisions' => $revisions,
-		);
+		];
 	}
 
 	protected function buildApiActions( Workflow $workflow ) {
-		$actions = array();
+		$actions = [];
 
 		if ( !$workflow->isDeleted() ) {
 			$actions['newtopic'] = $this->urlGenerator->newTopicAction( $workflow->getArticleTitle() );
@@ -128,7 +128,7 @@ class TopicListFormatter extends BaseTopicListFormatter {
 		$user = $ctx->getUser();
 
 		$replies = -1;
-		$authors = array();
+		$authors = [];
 		$stack = new \SplStack;
 		$stack->push( $revisions[$posts[$postAlphaId][0]] );
 		do {
@@ -138,21 +138,21 @@ class TopicListFormatter extends BaseTopicListFormatter {
 			foreach ( $data['replies'] as $postId ) {
 				$stack->push( $revisions[$posts[$postId][0]] );
 			}
-		} while( !$stack->isEmpty() );
+		} while ( !$stack->isEmpty() );
 
 		/** @var Workflow|null $workflow */
 		$workflow = isset( $workflows[$postAlphaId] ) ? $workflows[$postAlphaId] : null;
 		$ts = $workflow ? $workflow->getLastUpdatedObj()->getTimestamp() : 0;
-		return array(
+		return [
 			'reply_count' => $replies,
 			'last_updated_readable' => $language->userTimeAndDate( $ts, $user ),
 			// ms timestamp
 			'last_updated' => $ts * 1000,
-		);
+		];
 	}
 
 	private function buildLinks( Workflow $workflow ) {
-		$links = array();
+		$links = [];
 
 		if ( !$workflow->isDeleted() ) {
 			$title = $workflow->getArticleTitle();

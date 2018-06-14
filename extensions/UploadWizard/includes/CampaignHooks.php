@@ -12,13 +12,45 @@
 class CampaignHooks {
 
 	/**
+	 * 'Campaign' content model must be used in, and only in, the 'Campaign' namespace.
+	 *
+	 * @param string $contentModel
+	 * @param Title $title
+	 * @param bool &$ok
+	 * @return bool
+	 */
+	public static function onContentModelCanBeUsedOn( $contentModel, Title $title, &$ok ) {
+		$isCampaignModel = $contentModel === 'Campaign';
+		$isCampaignNamespace = $title->inNamespace( NS_CAMPAIGN );
+		if ( $isCampaignModel !== $isCampaignNamespace ) {
+			$ok = false;
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * FIXME: This should be done as a DataUpdate
 	 *
 	 * Sets up appropriate entries in the uc_campaigns table for each Campaign
 	 * Acts everytime a page in the NS_CAMPAIGN namespace is saved
+	 *
+	 * @param WikiPage $wikiPage
+	 * @param User $user
+	 * @param Content $content
+	 * @param string $summary
+	 * @param bool $isMinor
+	 * @param bool $isWatch
+	 * @param string $section
+	 * @param int $flags
+	 * @param Revision $revision
+	 * @param Status $status
+	 * @param int $baseRevId
+	 *
+	 * @return bool
 	 */
 	public static function onPageContentSaveComplete(
-		$article, $user, $content, $summary, $isMinor, $isWatch,
+		WikiPage $wikiPage, $user, $content, $summary, $isMinor, $isWatch,
 		$section, $flags, $revision, $status, $baseRevId
 	) {
 		if ( !$content instanceof CampaignContent ) {
@@ -28,19 +60,19 @@ class CampaignHooks {
 		$dbw = wfGetDB( DB_MASTER );
 
 		$campaignData = $content->getJsonData();
-		$insertData = array(
+		$insertData = [
 			'campaign_enabled' => $campaignData['enabled'] ? 1 : 0
-		);
+		];
 		$success = $dbw->upsert(
 			'uw_campaigns',
-			array_merge( array(
-				'campaign_name' => $article->getTitle()->getDBkey()
-			), $insertData ),
-			array( 'campaign_name' ),
+			array_merge( [
+				'campaign_name' => $wikiPage->getTitle()->getDBkey()
+			], $insertData ),
+			[ 'campaign_name' ],
 			$insertData
 		);
 
-		$campaign = new UploadWizardCampaign( $article->getTitle(), $content->getJsonData() );
+		$campaign = new UploadWizardCampaign( $wikiPage->getTitle(), $content->getJsonData() );
 		$dbw->onTransactionPreCommitOrIdle( function () use ( $campaign ) {
 			$campaign->invalidateCache();
 		} );
@@ -54,6 +86,8 @@ class CampaignHooks {
 	 * PageContentSaveComplete hook.
 	 *
 	 * This is usually run via the Job Queue mechanism.
+	 * @param LinksUpdate &$linksupdate
+	 * @return bool
 	 */
 	public static function onLinksUpdateComplete( LinksUpdate &$linksupdate ) {
 		if ( !$linksupdate->getTitle()->inNamespace( NS_CAMPAIGN ) ) {
@@ -67,6 +101,13 @@ class CampaignHooks {
 	}
 	/**
 	 * Deletes entries from uc_campaigns table when a Campaign is deleted
+	 * @param Article $article
+	 * @param User $user
+	 * @param string $reason
+	 * @param int $id
+	 * @param Content $content
+	 * @param ManualLogEntry $logEntry
+	 * @return bool
 	 */
 	public static function onArticleDeleteComplete(
 		$article, $user, $reason, $id, $content, $logEntry
@@ -79,7 +120,7 @@ class CampaignHooks {
 		$dbw->onTransactionPreCommitOrIdle( function () use ( $dbw, $article ) {
 			$dbw->delete(
 				'uw_campaigns',
-				array( 'campaign_name' => $article->getTitle()->getDBKey() )
+				[ 'campaign_name' => $article->getTitle()->getDBKey() ]
 			);
 		} );
 
@@ -88,6 +129,12 @@ class CampaignHooks {
 
 	/**
 	 * Update campaign names when the Campaign page moves
+	 * @param Title $oldTitle
+	 * @param Title $newTitle
+	 * @param User $user
+	 * @param int $pageid
+	 * @param int $redirid
+	 * @return bool
 	 */
 	public static function onTitleMoveComplete(
 		Title $oldTitle, Title $newTitle, $user, $pageid, $redirid
@@ -99,8 +146,8 @@ class CampaignHooks {
 		$dbw = wfGetDB( DB_MASTER );
 		$success = $dbw->update(
 			'uw_campaigns',
-			array( 'campaign_name' => $newTitle->getDBKey() ),
-			array( 'campaign_name' => $oldTitle->getDBKey() )
+			[ 'campaign_name' => $newTitle->getDBKey() ],
+			[ 'campaign_name' => $oldTitle->getDBKey() ]
 		);
 
 		return $success;
@@ -113,7 +160,7 @@ class CampaignHooks {
 	 * @param string &$lang Page language.
 	 * @return bool
 	 */
-	static function onCodeEditorGetPageLanguage( $title, &$lang ) {
+	public static function onCodeEditorGetPageLanguage( $title, &$lang ) {
 		if ( $title->inNamespace( NS_CAMPAIGN ) ) {
 			$lang = 'json';
 		}
@@ -123,23 +170,27 @@ class CampaignHooks {
 	/**
 	 * Validates that the revised contents are valid JSON.
 	 * If not valid, rejects edit with error message.
-	 * @param EditPage $editor
-	 * @param string $text Content of the revised article.
-	 * @param string &$error Error message to return.
-	 * @param string $summary Edit summary provided for edit.
-	 * @return True
+	 * @param IContextSource $context
+	 * @param Content $content
+	 * @param Status $status
+	 * @param string $summary
+	 * @param User $user
+	 * @param bool $minoredit
+	 * @return true
 	 */
-	static function onEditFilterMerged( $editor, $text, &$error, $summary ) {
-		if ( !$editor->getTitle()->inNamespace( NS_CAMPAIGN ) ) {
+	public static function onEditFilterMergedContent( $context, $content, $status, $summary,
+		$user, $minoredit
+	) {
+		if ( !$context->getTitle()->inNamespace( NS_CAMPAIGN )
+			|| !$content instanceof CampaignContent
+		) {
 			return true;
 		}
-
-		$content = new CampaignContent( $text );
 
 		try {
 			$content->validate();
 		} catch ( JsonSchemaException $e ) {
-			$error = $e->getMessage();
+			$status->fatal( $context->msg( $e->getCode(), $e->args ) );
 		}
 
 		return true;

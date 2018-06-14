@@ -14,20 +14,19 @@
  *
  * @file
  * @ingroup Extensions
- * @licence GNU General Public Licence 2.0 or later
- * @licence MIT License
+ * @license GPL-2.0-or-later
+ * @license MIT License
  */
 
 /**
  * @ingroup API
  */
 class ApiLanguageSearch extends ApiBase {
-
 	public function execute() {
 		$params = $this->extractRequestParams();
 		$search = $params['search'];
 		$typos = $params['typos'];
-		$searches = LanguageNameSearch::search( $search, $typos );
+		$searches = LanguageNameSearch::search( $search, $typos, $this->getLanguage()->getCode() );
 		$result = $this->getResult();
 		$result->addValue( null, $this->getModuleName(), $searches );
 	}
@@ -46,7 +45,7 @@ class ApiLanguageSearch extends ApiBase {
 	}
 
 	/**
-	 * @see ApiBase::getExamplesMessages()
+	 * @inheritDoc
 	 */
 	protected function getExamplesMessages() {
 		return [

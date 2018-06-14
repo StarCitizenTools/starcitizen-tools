@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -16,19 +16,19 @@ class GettextFFSTest extends MediaWikiTestCase {
 
 	public function setUp() {
 		parent::setUp();
-		$this->groupConfiguration = array(
-			'BASIC' => array(
+		$this->groupConfiguration = [
+			'BASIC' => [
 				'class' => 'FileBasedMessageGroup',
 				'id' => 'test-id',
 				'label' => 'Test Label',
 				'namespace' => 'NS_MEDIAWIKI',
 				'description' => 'Test description',
-			),
-			'FILES' => array(
+			],
+			'FILES' => [
 				'class' => 'GettextFFS',
 				'sourcePattern' => __DIR__ . '/../data/gettext.po',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -39,44 +39,44 @@ class GettextFFSTest extends MediaWikiTestCase {
 	}
 
 	public static function provideMangling() {
-		return array(
-			array(
+		return [
+			[
 				'3f9999051ce0bc6e98f43224fe6ee1c220e34e49-Hello!_world_loooooooooooooooo',
-				array( 'id' => 'Hello! world loooooooooooooooooooooooooooooooooooooooooong', 'ctxt' => 'baa' ),
+				[ 'id' => 'Hello! world loooooooooooooooooooooooooooooooooooooooooong', 'ctxt' => 'baa' ],
 				'legacy'
-			),
-			array(
+			],
+			[
 				'3f9999-Hello!_world_loooooooooooooooo',
-				array( 'id' => 'Hello! world loooooooooooooooooooooooooooooooooooooooooong', 'ctxt' => 'baa' ),
+				[ 'id' => 'Hello! world loooooooooooooooooooooooooooooooooooooooooong', 'ctxt' => 'baa' ],
 				'simple'
-			),
+			],
 
-			array(
+			[
 				'1437e478b59e220640bf530f7e3bac93950eb8ae-"¤_=FJQ"_¤r_£_ab',
-				array( 'id' => '"¤#=FJQ"<>¤r £}[]}%ab', 'ctxt' => false ),
+				[ 'id' => '"¤#=FJQ"<>¤r £}[]}%ab', 'ctxt' => false ],
 				'legacy'
-			),
-			array(
+			],
+			[
 				'1437e4-"¤#=FJQ"<>¤r_£}[]}%ab',
-				array( 'id' => '"¤#=FJQ"<>¤r £}[]}%ab', 'ctxt' => false ),
+				[ 'id' => '"¤#=FJQ"<>¤r £}[]}%ab', 'ctxt' => false ],
 				'simple'
-			),
+			],
 
-		);
+		];
 	}
 
 	public function testHashing() {
-		$item1 = array(
+		$item1 = [
 			'id' => 'a',
 			'str' => 'b',
 			'ctxt' => false,
-		);
+		];
 
-		$item2 = array(
+		$item2 = [
 			'id' => 'a',
 			'str' => 'b',
 			'ctxt' => '',
-		);
+		];
 
 		$this->assertNotEquals(
 			GettextFFS::generateKeyFromItem( $item1, 'legacy' ),
@@ -113,8 +113,8 @@ class GettextFFSTest extends MediaWikiTestCase {
 		$key = 'key';
 		$m = new FatMessage( 'key', 'definition' );
 		$m->setTranslation( 'translation' );
-		$trans = array();
-		$pot = array();
+		$trans = [];
+		$pot = [];
 		$pluralCount = 0;
 
 		$results = <<<GETTEXT
@@ -154,5 +154,103 @@ GETTEXT;
 			$results[2],
 			trim( $method->invoke( $ffs, $key, $m, $trans, $pot, $pluralCount ) )
 		);
+	}
+
+	/**
+	 * @dataProvider provideShouldOverwrite
+	 */
+	public function testShouldOverwrite( $a, $b, $expected, $comment ) {
+		$group = MessageGroupBase::factory( $this->groupConfiguration );
+		$ffs = new GettextFFS( $group );
+		$actual = $ffs->shouldOverwrite( $a, $b );
+		$this->assertEquals( $expected, $actual, $comment );
+	}
+
+	public function provideShouldOverwrite() {
+		$cases = [];
+
+		$cases[] = [
+<<<GETTEXT
+#
+msgid ""
+msgstr ""
+""
+"PO-Revision-Date: 2017-02-09 07:24:07+0000\\n"
+"X-POT-Import-Date: 2016-08-11 04:53:15+0000\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Language: azb\\n"
+"X-Generator: MediaWiki 1.29.0-alpha; Translate 2017-01-24\\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+
+#: frontend/templates/index.html:38
+msgid "About the map"
+msgstr ""
+GETTEXT
+			,
+<<<GETTEXT
+#
+msgid ""
+msgstr ""
+""
+"PO-Revision-Date: 2017-02-06 07:07:03+0000\\n"
+"X-POT-Import-Date: 2016-08-11 04:53:15+0000\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Language: azb\\n"
+"X-Generator: MediaWiki 1.29.0-alpha; Translate 2017-01-24\\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+
+#: frontend/templates/index.html:38
+msgid "About the map"
+msgstr ""
+GETTEXT
+			,
+			false,
+			"Only date has changed"
+		];
+
+		$cases[] = [
+<<<GETTEXT
+#
+msgid ""
+msgstr ""
+""
+"PO-Revision-Date: 2017-02-09 07:24:07+0000\\n"
+"X-POT-Import-Date: 2016-08-11 04:53:15+0000\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Language: azb\\n"
+"X-Generator: MediaWiki 1.29.0-alpha; Translate 2017-01-24\\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+
+#: frontend/templates/index.html:38
+msgid "About the map"
+msgstr ""
+GETTEXT
+			,
+<<<GETTEXT
+#
+msgid ""
+msgstr ""
+""
+"PO-Revision-Date: 2017-02-06 07:07:03+0000\\n"
+"X-POT-Import-Date: 2016-08-11 04:53:15+0000\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Language: fi\\n"
+"X-Generator: MediaWiki 1.29.0-alpha; Translate 2017-01-24\\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+
+#: frontend/templates/index.html:38
+msgid "About the map"
+msgstr "Tietoja kartasta"
+GETTEXT
+			,
+			true,
+			"Content has changed"
+		];
+
+		return $cases;
 	}
 }

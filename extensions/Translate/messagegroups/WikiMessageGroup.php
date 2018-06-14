@@ -6,7 +6,7 @@
  * @author Niklas Laxström
  * @author Siebrand Mazeland
  * @copyright Copyright © 2008-2013, Niklas Laxström, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -48,12 +48,12 @@ class WikiMessageGroup extends MessageGroupOld {
 	 * @return array Array of messages keys with definitions.
 	 */
 	public function getDefinitions() {
-		$definitions = array();
+		$definitions = [];
 
 		// In theory the page could have templates that are substitued
 		$source = wfMessage( $this->source );
 		if ( $source->isDisabled() ) {
-			return array();
+			return [];
 		}
 
 		$contents = $source->text();

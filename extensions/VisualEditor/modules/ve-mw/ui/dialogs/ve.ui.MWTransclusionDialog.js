@@ -1,7 +1,7 @@
 /*
  * VisualEditor user interface MWTransclusionDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -66,11 +66,11 @@ ve.ui.MWTransclusionDialog.static.bookletLayoutConfig = ve.extendObject(
 /**
  * @inheritdoc
  */
-ve.ui.MWTransclusionDialog.prototype.onTransclusionReady = function () {
-	// Parent method
-	ve.ui.MWTransclusionDialog.super.prototype.onTransclusionReady.call( this );
-
-	this.setMode( 'auto' );
+ve.ui.MWTransclusionDialog.prototype.getReadyProcess = function ( data ) {
+	return ve.ui.MWTransclusionDialog.super.prototype.getReadyProcess.call( this, data )
+		.next( function () {
+			this.setMode( 'auto' );
+		}, this );
 };
 
 /**
@@ -81,7 +81,7 @@ ve.ui.MWTransclusionDialog.prototype.onTransclusionReady = function () {
 ve.ui.MWTransclusionDialog.prototype.onOutlineControlsMove = function ( places ) {
 	var part, promise,
 		parts = this.transclusionModel.getParts(),
-		item = this.bookletLayout.getOutline().getSelectedItem();
+		item = this.bookletLayout.getOutline().findSelectedItem();
 
 	if ( item ) {
 		part = this.transclusionModel.getPartFromId( item.getData() );
@@ -98,7 +98,7 @@ ve.ui.MWTransclusionDialog.prototype.onOutlineControlsMove = function ( places )
  */
 ve.ui.MWTransclusionDialog.prototype.onOutlineControlsRemove = function () {
 	var id, part, param,
-		item = this.bookletLayout.getOutline().getSelectedItem();
+		item = this.bookletLayout.getOutline().findSelectedItem();
 
 	if ( item ) {
 		id = item.getData();
@@ -134,7 +134,7 @@ ve.ui.MWTransclusionDialog.prototype.onAddContentButtonClick = function () {
  */
 ve.ui.MWTransclusionDialog.prototype.onAddParameterButtonClick = function () {
 	var part, param,
-		item = this.bookletLayout.getOutline().getSelectedItem();
+		item = this.bookletLayout.getOutline().findSelectedItem();
 
 	if ( item ) {
 		part = this.transclusionModel.getPartFromId( item.getData() );
@@ -208,7 +208,7 @@ ve.ui.MWTransclusionDialog.prototype.isSingleTemplateTransclusion = function () 
 ve.ui.MWTransclusionDialog.prototype.getPageFromPart = function ( part ) {
 	var page = ve.ui.MWTransclusionDialog.super.prototype.getPageFromPart.call( this, part );
 	if ( !page && part instanceof ve.dm.MWTransclusionContentModel ) {
-		return new ve.ui.MWTransclusionContentPage( part, part.getId() );
+		return new ve.ui.MWTransclusionContentPage( part, part.getId(), { $overlay: this.$overlay } );
 	}
 	return page;
 };
@@ -221,12 +221,10 @@ ve.ui.MWTransclusionDialog.prototype.getPageFromPart = function ( part ) {
  * @param {string} [mode='multiple'] Symbolic name of dialog mode, `multiple`, `single` or 'auto'
  */
 ve.ui.MWTransclusionDialog.prototype.setMode = function ( mode ) {
-	var name, parts, part, single,
+	var name, single,
 		modeCssClasses = ve.ui.MWTransclusionDialog.static.modeCssClasses;
 
 	if ( this.transclusionModel ) {
-		parts = this.transclusionModel.getParts();
-		part = parts.length && parts[ 0 ];
 		if ( mode === 'auto' ) {
 			mode = this.isSingleTemplateTransclusion() ? 'single' : 'multiple';
 		}
@@ -246,7 +244,7 @@ ve.ui.MWTransclusionDialog.prototype.setMode = function ( mode ) {
 		this.setSize( single ? 'medium' : 'large' );
 		this.bookletLayout.toggleOutline( !single );
 		this.updateTitle();
-		this.updateModeActionLabel();
+		this.updateModeActionState();
 
 		// HACK blur any active input so that its dropdown will be hidden and won't end
 		// up being mispositioned
@@ -267,10 +265,11 @@ ve.ui.MWTransclusionDialog.prototype.updateTitle = function () {
 };
 
 /**
- * Update the label for the 'mode' action
+ * Update the state of the 'mode' action
  */
-ve.ui.MWTransclusionDialog.prototype.updateModeActionLabel = function () {
-	var mode = this.mode;
+ve.ui.MWTransclusionDialog.prototype.updateModeActionState = function () {
+	var parts = this.transclusionModel && this.transclusionModel.getParts(),
+		mode = this.mode;
 	this.actions.forEach( { actions: [ 'mode' ] }, function ( action ) {
 		action.setLabel(
 			mode === 'single' ?
@@ -278,6 +277,26 @@ ve.ui.MWTransclusionDialog.prototype.updateModeActionLabel = function () {
 				ve.msg( 'visualeditor-dialog-transclusion-single-mode' )
 		);
 	} );
+
+	// Decide whether the button should be enabled or not. It needs to be:
+	// * disabled when we're in the initial add-new-template phase, because it's
+	//   meaningless
+	// * disabled if we're in a multi-part transclusion, because the sidebar's
+	//   forced open
+	// * enabled if we're in a single-part transclusion, because the sidebar's
+	//   closed but can be opened to add more parts
+	if ( parts ) {
+		if ( parts.length === 1 && parts[ 0 ] instanceof ve.dm.MWTemplatePlaceholderModel ) {
+			// Initial new-template phase: button is meaningless
+			this.actions.setAbilities( { mode: false } );
+		} else if ( !this.isSingleTemplateTransclusion() ) {
+			// Multi-part transclusion: button disabled because sidebar forced-open
+			this.actions.setAbilities( { mode: false } );
+		} else {
+			// Single-part transclusion: button enabled because sidebar is optional
+			this.actions.setAbilities( { mode: true } );
+		}
+	}
 };
 
 /**
@@ -288,7 +307,7 @@ ve.ui.MWTransclusionDialog.prototype.updateModeActionLabel = function () {
 ve.ui.MWTransclusionDialog.prototype.addPart = function ( part ) {
 	var index, promise,
 		parts = this.transclusionModel.getParts(),
-		item = this.bookletLayout.getOutline().getSelectedItem();
+		item = this.bookletLayout.getOutline().findSelectedItem();
 
 	if ( part ) {
 		// Insert after selected part, or at the end if nothing is selected
@@ -326,7 +345,7 @@ ve.ui.MWTransclusionDialog.prototype.initialize = function () {
 	// Properties
 	this.addTemplateButton = new OO.ui.ButtonWidget( {
 		framed: false,
-		icon: 'template',
+		icon: 'puzzle',
 		title: ve.msg( 'visualeditor-dialog-transclusion-add-template' )
 	} );
 	this.addContentButton = new OO.ui.ButtonWidget( {
@@ -360,8 +379,7 @@ ve.ui.MWTransclusionDialog.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.MWTransclusionDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
 			this.setMode( 'single' );
-			this.updateModeActionLabel();
-			this.actions.setAbilities( { mode: false } );
+			this.updateModeActionState();
 		}, this );
 };
 

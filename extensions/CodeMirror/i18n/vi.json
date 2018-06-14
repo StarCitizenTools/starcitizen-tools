@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minh Nguyen"
+		]
+	},
+	"codemirror-desc": "Tô màu cú pháp trong hộp sửa đổi mã wiki",
+	"codemirror-toggle-label": "Tô màu cú pháp",
+	"codemirror-beta-title": "Tô màu cú pháp mã wiki",
+	"codemirror-beta-desc": "Tô màu cú pháp cho phép sửa đổi dễ dàng hơn bằng cách phân biệt văn bản nội dung với mã liên kết, chú thích, và bản mẫu dùng màu văn bản và màu nền.",
+	"codemirror-popup-desc": "Tô màu cú pháp để dễ phân biệt các phần khác nhau của sửa đổi này.",
+	"codemirror-popup-btn-yes": "Thử",
+	"codemirror-popup-btn-no": "Thôi"
+}

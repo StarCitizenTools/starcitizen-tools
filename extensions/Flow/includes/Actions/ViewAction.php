@@ -12,6 +12,10 @@ class ViewAction extends FlowAction {
 		parent::__construct( $page, $context, 'view' );
 	}
 
+	public function doesWrites() {
+		return false;
+	}
+
 	public function showForAction( $action, OutputPage $output = null ) {
 		parent::showForAction( $action, $output );
 
@@ -22,24 +26,23 @@ class ViewAction extends FlowAction {
 			$output = $this->context->getOutput();
 		}
 		$output->addCategoryLinks( $this->getCategories( $title ) );
-
 	}
 
 	protected function getCategories( Title $title ) {
 		$id = $title->getArticleId();
 		if ( !$id ) {
-			return array();
+			return [];
 		}
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$res = $dbr->select(
 			/* from */ 'categorylinks',
-			/* select */ array( 'cl_to', 'cl_sortkey' ),
-			/* conditions */ array( 'cl_from' => $id ),
+			/* select */ [ 'cl_to', 'cl_sortkey' ],
+			/* conditions */ [ 'cl_from' => $id ],
 			__METHOD__
 		);
 
-		$categories = array();
+		$categories = [];
 		foreach ( $res as $row ) {
 			$categories[$row->cl_to] = $row->cl_sortkey;
 		}

@@ -3,7 +3,9 @@
 namespace Flow\SpamFilter;
 
 use ConfirmEditHooks;
+use ExtensionRegistry;
 use Flow\Model\AbstractRevision;
+use Flow\Model\HtmlRenderingInformation;
 use IContextSource;
 use SimpleCaptcha;
 use Status;
@@ -16,10 +18,10 @@ class ConfirmEdit implements SpamFilter {
 	 * @param AbstractRevision $newRevision
 	 * @param AbstractRevision|null $oldRevision
 	 * @param Title $title
+	 * @param Title $ownerTitle
 	 * @return Status
 	 */
-	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title ) {
-		global $wgOut;
+	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title, Title $ownerTitle ) {
 		$newContent = $newRevision->getContentInWikitext();
 		$oldContent = ( $oldRevision !== null ) ? $oldRevision->getContentInWikitext() : '';
 
@@ -35,18 +37,16 @@ class ConfirmEdit implements SpamFilter {
 		) {
 			// getting here means we submitted bad content without good captcha
 			// result (or any captcha result at all) - let's get the captcha
-			// HTML to display as error message!
-			$html = $captcha->getForm( $context->getOutput() );
+			// information (HTML, modules, etc.) to display as error message!
+			$captchaInfo = $captcha->getFormInformation();
+			$captchaRenderingInfo = HtmlRenderingInformation::fromArray(
+				$captchaInfo
+			);
 
-			// some captcha implementations need CSS and/or JS, which is added
-			// via their getForm() methods (which we just called) -
-			// let's extract those and respond them along with the form HTML
-			$html = $wgOut->buildCssLinks() .
-				$wgOut->getScriptsForBottomQueue( true ) .
-				$html;
-
-			$msg = wfMessage( 'flow-spam-confirmedit-form' )->rawParams( $html );
-			return Status::newFatal( $msg );
+			$msg = wfMessage( 'flow-spam-confirmedit-form' )->rawParams( $captchaInfo['html'] );
+			$status = Status::newFatal( $msg );
+			$status->setResult( false, $captchaRenderingInfo );
+			return $status;
 		}
 
 		return Status::newGood();
@@ -58,6 +58,6 @@ class ConfirmEdit implements SpamFilter {
 	 * @return bool
 	 */
 	public function enabled() {
-		return class_exists( 'ConfirmEditHooks' );
+		return ExtensionRegistry::getInstance()->isLoaded( 'ConfirmEdit' );
 	}
 }

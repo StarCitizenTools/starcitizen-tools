@@ -21,6 +21,7 @@
 
 	/**
 	 * Represents the file download dialog and the link to open it.
+	 *
 	 * @class mw.mmv.ui.download.Dialog
 	 * @extends mw.mmv.ui.Dialog
 	 * @param {jQuery} $container the element to which the dialog will be appended
@@ -44,20 +45,40 @@
 	 * Registers listeners.
 	 */
 	DP.attach = function () {
+		var dialog = this;
+
 		this.handleEvent( 'mmv-download-open', $.proxy( this.handleOpenCloseClick, this ) );
 
 		this.handleEvent( 'mmv-reuse-open', $.proxy( this.closeDialog, this ) );
 		this.handleEvent( 'mmv-options-open', $.proxy( this.closeDialog, this ) );
+
+		this.$container.on( 'mmv-download-cta-open', function () {
+			dialog.$warning.hide();
+		} );
+		this.$container.on( 'mmv-download-cta-close', function () {
+			if ( dialog.$dialog.hasClass( 'mw-mmv-warning-visible' ) ) {
+				dialog.$warning.show();
+			}
+		} );
+	};
+
+	/**
+	 * Clears listeners.
+	 */
+	DP.unattach = function () {
+		this.$container.off( 'mmv-download-cta-open mmv-download-cta-close' );
 	};
 
 	/**
 	 * Sets data needed by contaned tabs and makes dialog launch link visible.
+	 *
 	 * @param {mw.mmv.model.Image} image
 	 * @param {mw.mmv.model.Repo} repo
 	 */
 	DP.set = function ( image, repo ) {
 		if ( this.download ) {
 			this.download.set( image, repo );
+			this.showImageWarnings( image );
 		} else {
 			this.setValues = {
 				image: image,
@@ -81,6 +102,7 @@
 
 		if ( this.setValues ) {
 			this.download.set( this.setValues.image, this.setValues.repo );
+			this.showImageWarnings( this.setValues.image );
 			this.setValues = undefined;
 		}
 

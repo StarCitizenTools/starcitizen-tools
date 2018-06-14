@@ -10,7 +10,10 @@
 			"Iltever",
 			"Ernác",
 			"Mailman",
-			"NBS"
+			"NBS",
+			"Mix Gerder",
+			"Jack who built the house",
+			"Mouse21"
 		]
 	},
 	"uls-desc": "Даёт пользователю несколько способов выбрать язык и произвести установки языка",
@@ -19,7 +22,7 @@
 	"ext-uls-undo-language-tooltip-text": "Предыдущий язык: $1",
 	"ext-uls-language-settings-preferences-link": "Дополнительные установки языка",
 	"uls-betafeature-label": "Компактный список языковых ссылок",
-	"uls-betafeature-desc": "Показывает сокращенный вариант списка языков, только с языками, которые являются более актуальными для вас.",
+	"uls-betafeature-desc": "Показывает сокращённый вариант списка языков, включающий только наиболее актуальные для вас языки.",
 	"ext-uls-display-settings-title": "Установки отображения",
 	"ext-uls-display-settings-language-tab": "Язык",
 	"ext-uls-display-settings-fonts-tab": "Шрифты",
@@ -64,13 +67,8 @@
 	"ext-uls-input-disable-notification-info-interlanguage": "Инструменты ввода можно включить в любое время из установок языка рядом со списком языков.",
 	"ext-uls-language-settings-applying": "Применение…",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Ещё $1}}",
-	"apihelp-languagesearch-description": "Поиск названий языков на любом алфавите.",
-	"apihelp-languagesearch-param-search": "Строка поиска.",
-	"apihelp-languagesearch-param-typos": "Количество орфографических ошибок, которое допускается в искомой строке.",
-	"apihelp-languagesearch-example-1": "Поиск «Te»",
-	"apihelp-languagesearch-example-2": "Поиск «ഫി»",
-	"apihelp-languagesearch-example-3": "Поиск «ഫി», допускается одна ошибка",
-	"apihelp-ulslocalization-param-language": "Код языка.",
+	"ext-uls-compact-link-info": "Все языки (изначальная выборка — это языки, которые чаще всего использовались вами и другими)",
 	"prefs-languages": "Языки",
-	"ext-uls-compact-language-links-preference": "Использовать компактный список языков с релевантными вам языками"
+	"ext-uls-compact-language-links-preference": "Использовать [[$1|компактный список языков]] с подходящими вам языками.",
+	"ext-uls-compact-no-results": "Эта страница недоступна на выбранном вами языке."
 }

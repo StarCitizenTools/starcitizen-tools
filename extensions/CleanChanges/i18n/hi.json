@@ -2,11 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Ansumang",
-			"Kaustubh"
+			"Kaustubh",
+			"Innocentbunny"
 		]
 	},
 	"cleanchanges-changerightslink": "ग्रुप बदलें",
 	"cleanchanges-desc": "[[Special:RecentChanges|हाल में हुए बदलाव]] संक्षिप्त रूपमें दर्शायें",
 	"cleanchanges-language": "भाषा:",
-	"cleanchanges-language-na": "सभी"
+	"cleanchanges-language-na": "सभी",
+	"cleanchanges-users": "उपयोक्तागण (\"|\" से विभक्त)",
+	"cleanchanges-showuserlinks": "उपयोक्ता कड़ियाँ दिखाएँ"
 }

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Giromin Cangiaxo"
+		]
+	},
+	"eventlogging-desc": "Framework pe-a registraçion di eventi læto-client",
+	"eventlogging-invalid-json": "JSON non vallido",
+	"eventlogging-revision-id": "Verscion $1",
+	"eventlogging-code-sample-logging-on-server-side": "Registraçion PHP",
+	"eventlogging-code-sample-module-setup-json": "installaçion estenscion.json pe-a registraçion JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Registraçion JavaScript",
+	"eventlogging-error-move-source": "O schema de paggine o no poeu vese rinominou",
+	"eventlogging-error-move-destination": "E paggine no poeuan ese rinominæ a-o Schema de paggine"
+}

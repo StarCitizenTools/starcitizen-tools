@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Milicevic01",
+			"Nikola Smolenski",
+			"Милан Јелисавчић",
+			"Srdjan m",
+			"Сербијана",
+			"Acamicamacaraca",
+			"BadDog"
+		]
+	},
+	"tag-visualeditor": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|Визуелно уређивање]]",
+	"tag-visualeditor-description": "Измена начињена [[{{MediaWiki:visualeditor-descriptionpagelink}}|Визуелним уређивачем]]",
+	"tag-visualeditor-needcheck": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|Визуелно уређивање: провера]]",
+	"tag-visualeditor-needcheck-description": "Измена начињена [[{{MediaWiki:visualeditor-descriptionpagelink}}|Визуелним уређивачем]] где је систем детектовао викитекст с могућим нежељеним изменама.",
+	"tag-visualeditor-wikitext": "Изворно уређивање (2017)",
+	"tag-visualeditor-wikitext-description": "Измена направљена уређивачем викитекста  (2017)",
+	"tag-visualeditor-switched": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|Визуелно уређивање: пребачено]]",
+	"tag-visualeditor-switched-description": "Уређивање започето Визуелним уређивачем, па настављено уређивачем викитекста.",
+	"visualeditor-feedback-link": "Project:VisualEditor/Feedback",
+	"visualeditor-feedback-tool": "Оставите повратну информацију",
+	"visualeditor-help-label": "Кориснички водич",
+	"visualeditor-help-title": "Водич за употребу уређивача",
+	"visualeditor-welcomedialog-action": "Почни уређивање",
+	"visualeditor-welcomedialog-content": "Сви могу да уређују и свако унапређење помаже.",
+	"visualeditor-welcomedialog-content-thanks": "Хвала на помоћи!",
+	"visualeditor-welcomedialog-switch": "Пребаци ме на изворно уређивање",
+	"visualeditor-welcomedialog-switch-ve": "Пребаци ме на визуелно уређивање",
+	"visualeditor-welcomedialog-title": "{{GENDER:$1|Добро дошли}} на $2"
+}

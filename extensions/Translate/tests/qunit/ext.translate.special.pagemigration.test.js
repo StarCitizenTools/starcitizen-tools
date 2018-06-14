@@ -1,7 +1,7 @@
 /*!
  * Tests for ext.translate.special.pagemigration.js.
  *
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 ( function ( $, mw ) {
@@ -13,16 +13,15 @@
 		}
 	} ) );
 
-	QUnit.asyncTest( '-- Source units', function ( assert ) {
-		var data = '{ "query": { "messagecollection": [ { "key": "key_",' +
+	QUnit.test( '-- Source units', function ( assert ) {
+		var done, data = '{ "query": { "messagecollection": [ { "key": "key_",' +
 			' "definition": "definition_", "title": "title_" }, { "key": "key_1",' +
 			' "definition": "definition_1", "title": "title_1" } ] } }';
 
-		QUnit.expect( 1 );
-
+		done = assert.async();
 		mw.translate.getSourceUnits( 'Help:Special pages' ).done( function ( sourceUnits ) {
 			assert.strictEqual( 1, sourceUnits.length, 'Source units retrieved' );
-			QUnit.start();
+			done();
 		} );
 
 		this.server.respond( function ( request ) {
@@ -30,14 +29,13 @@
 		} );
 	} );
 
-	QUnit.asyncTest( '-- Page does not exist', function ( assert ) {
-		var data = '{ "query": { "pages": { "-1": { "missing": "" } } } }';
+	QUnit.test( '-- Page does not exist', function ( assert ) {
+		var done, data = '{ "query": { "pages": { "-1": { "missing": "" } } } }';
 
-		QUnit.expect( 1 );
-
+		done = assert.async();
 		mw.translate.getFuzzyTimestamp( 'ugagagagagaga/uga' ).fail( function ( timestamp ) {
 			assert.strictEqual( undefined, timestamp, 'Page does not exist' );
-			QUnit.start();
+			done();
 		} );
 
 		this.server.respond( function ( request ) {
@@ -45,15 +43,14 @@
 		} );
 	} );
 
-	QUnit.asyncTest( '-- Fuzzy timestamp', function ( assert ) {
-		var data = '{ "query": { "pages": { "19563": {"revisions": ' +
+	QUnit.test( '-- Fuzzy timestamp', function ( assert ) {
+		var done, data = '{ "query": { "pages": { "19563": {"revisions": ' +
 			'[ {"timestamp": "2014-02-18T20:59:58Z" }, { "timestamp": "t2" } ] } } } }';
 
-		QUnit.expect( 1 );
-
+		done = assert.async();
 		mw.translate.getFuzzyTimestamp( 'Help:Special pages/fr' ).done( function ( timestamp ) {
 			assert.strictEqual( '2014-02-18T20:59:57.000Z', timestamp, 'Fuzzy timestamp retrieved' );
-			QUnit.start();
+			done();
 		} );
 
 		this.server.respond( function ( request ) {
@@ -61,15 +58,15 @@
 		} );
 	} );
 
-	QUnit.asyncTest( '-- Split translation page', function ( assert ) {
-		var data = '{ "query": { "pages": { "19563": { "revisions": ' +
+	QUnit.test( '-- Split translation page', function ( assert ) {
+		var done, data = '{ "query": { "pages": { "19563": { "revisions": ' +
 			'[ { "*": "unit1\\n\\nunit2\\n\\nunit3" } ] } } } }';
 
-		QUnit.expect( 1 );
+		done = assert.async();
 		mw.translate.splitTranslationPage( '2014-02-18T20:59:57.000Z', 'Help:Special pages/fr' )
 			.done( function ( translationUnits ) {
 				assert.strictEqual( 3, translationUnits.length, 'Translation page split into units' );
-				QUnit.start();
+				done();
 			} );
 
 		this.server.respond( function ( request ) {
@@ -81,11 +78,9 @@
 		var sourceUnits, translationUnits1, result1,
 			translationUnits2, result2;
 
-		QUnit.expect( 2 );
-
-		sourceUnits = [ { identifier: '1',definition: 'abc' }, { identifier: '2',definition: '==123==' },
-			{ identifier: '3',definition: 'pqr' }, { identifier: '4',definition: 'xyz' },
-			{ identifier: '5',definition: 'mno' }, { identifier: '6',definition: '==456==' } ];
+		sourceUnits = [ { identifier: '1', definition: 'abc' }, { identifier: '2', definition: '==123==' },
+			{ identifier: '3', definition: 'pqr' }, { identifier: '4', definition: 'xyz' },
+			{ identifier: '5', definition: 'mno' }, { identifier: '6', definition: '==456==' } ];
 
 		translationUnits1 = [ '==123==', 'pqr', '==456==' ];
 

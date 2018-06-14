@@ -6,7 +6,9 @@
 			"IvanLanin",
 			"Iwan Novirion",
 			"Meursault2004",
-			"Rex"
+			"Rex",
+			"Rachmat04",
+			"Gombang"
 		]
 	},
 	"babel": "Informasi pengguna Babel",
@@ -15,7 +17,7 @@
 	"babel-footer-url": ":Category:Babel - Pengguna menurut bahasa",
 	"babel-autocreate-reason": "Otomatis membuat halaman kategori [[$1|Babel]].",
 	"babel-autocreate-text-levels": "Pengguna di kategori ini menandakan mereka memiliki kemampuan $1 untuk bahasa $2.",
-	"babel-autocreate-text-main": "Pengguna di kategori ini menandakan mereka memiliki kemampuan berbahasa $1.",
+	"babel-autocreate-text-main": "Pengguna dalam kategori ini menandakan mereka memiliki kemampuan berbahasa $1.",
 	"babel-autocreate-user": "Babel AutoCreate",
 	"babel-0": "Pengguna ini [[$1|tidak]] mengerti [[$2|$3]] (atau hanya dengan sangat sulit).",
 	"babel-1": "Pengguna ini mampu bersumbangsih dengan [[$2|$3]] tingkat [[$1|dasar]].",
@@ -32,5 +34,9 @@
 	"babel-5-n": "Pengguna ini memiliki pengetahuan [[$1|profesional]] [[$2|bahasa Indonesia]].",
 	"babel-N-n": "Pengguna ini adalah [[$1|penutur ibu]] [[$2|bahasa Indonesia]].",
 	"babel-template": "Template:User $1",
-	"babel-footer": "Pengguna berdasarkan bahasa"
+	"babel-footer": "Pengguna berdasarkan bahasa",
+	"apihelp-query+babel-description": "Dapatkan informasi mengenai bahasa apa yang diketahui oleh pengguna ini",
+	"apihelp-query+babel-summary": "Dapatkan informasi mengenai bahasa apa yang diketahui oleh pengguna ini",
+	"apihelp-query+babel-param-user": "Pengguna yang informasinya akan didapatkan",
+	"apihelp-query+babel-example-1": "Dapatkan informasi Babel untuk pengguna <kbd>Contoh</kbd>"
 }

@@ -1,52 +1,146 @@
 {
 	"name": "CodeMirror",
-	"version": "3.4.0",
+	"version": "4.0.0",
 	"author": [
 		"[https://www.mediawiki.org/wiki/User:Pastakhov Pavel Astakhov]",
 		"[https://www.mediawiki.org/wiki/User:Florianschmidtwelzow Florian Schmidt]"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:CodeMirror",
 	"descriptionmsg": "codemirror-desc",
-	"type": "parserhook",
-	"license-name": "GPL-2.0+",
+	"type": "editor",
+	"license-name": "GPL-2.0-or-later",
+	"requires": {
+		"MediaWiki": ">= 1.31.0"
+	},
 	"MessagesDirs": {
 		"CodeMirror": [
 			"i18n"
 		]
 	},
 	"AutoloadClasses": {
-		"CodeMirrorHooks": "CodeMirror.hooks.php"
+		"CodeMirrorHooks": "includes/CodeMirrorHooks.php",
+		"ResourceLoaderCodeMirrorModule": "includes/ResourceLoaderCodeMirrorModule.php"
 	},
 	"ResourceModules": {
-		"ext.CodeMirror.init": {
+		"ext.CodeMirror": {
 			"dependencies": [
+				"ext.CodeMirror.data",
 				"ext.CodeMirror.lib",
-				"ext.CodeMirror.other",
-				"mediawiki.api",
+				"ext.CodeMirror.mode.mediawiki",
 				"jquery.textSelection",
-				"user.options"
+				"mediawiki.api",
+				"mediawiki.api.options",
+				"mediawiki.user",
+				"user.options",
+				"oojs-ui-widgets",
+				"mediawiki.storage",
+				"jquery.ui.resizable",
+				"oojs-ui.styles.icons-editing-styling"
 			],
 			"scripts": [
 				"ext.CodeMirror.js"
 			],
+			"styles": [
+				"ext.CodeMirror.less",
+				"modules/popup.less"
+			],
 			"messages": [
-				"codemirror-enable-label",
-				"codemirror-disable-label"
+				"codemirror-toggle-label",
+				"codemirror-popup-label",
+				"codemirror-popup-desc",
+				"codemirror-popup-btn-yes",
+				"codemirror-popup-btn-no"
 			]
+		},
+		"ext.CodeMirror.data": {
+			"class": "ResourceLoaderCodeMirrorModule"
 		},
 		"ext.CodeMirror.lib": {
 			"scripts": [
-				"lib/codemirror/lib/codemirror.js",
-				"lib/codemirror/addon/selection/active-line.js",
-				"mode/mediawiki/mediawiki.js"
+				"lib/codemirror/lib/codemirror.js"
 			],
 			"styles": [
-				"lib/codemirror/lib/codemirror.css",
-				"lib/codemirror/addon/lint/lint.css",
-				"mode/mediawiki/mediawiki.css"
+				"lib/codemirror/lib/codemirror.css"
+			]
+		},
+		"ext.CodeMirror.mode.mediawiki": {
+			"scripts": "mode/mediawiki/mediawiki.js",
+			"styles": "mode/mediawiki/mediawiki.css",
+			"dependencies": [
+				"ext.CodeMirror.lib"
+			]
+		},
+		"ext.CodeMirror.lib.mode.css": {
+			"scripts": "lib/codemirror/mode/css/css.js",
+			"dependencies": [
+				"ext.CodeMirror.lib"
+			]
+		},
+		"ext.CodeMirror.lib.mode.javascript": {
+			"scripts": "lib/codemirror/mode/javascript/javascript.js",
+			"dependencies": [
+				"ext.CodeMirror.lib"
+			]
+		},
+		"ext.CodeMirror.lib.mode.xml": {
+			"scripts": "lib/codemirror/mode/xml/xml.js",
+			"dependencies": [
+				"ext.CodeMirror.lib"
+			]
+		},
+		"ext.CodeMirror.lib.mode.htmlmixed": {
+			"scripts": "lib/codemirror/mode/htmlmixed/htmlmixed.js",
+			"dependencies": [
+				"ext.CodeMirror.lib.mode.xml",
+				"ext.CodeMirror.lib.mode.javascript",
+				"ext.CodeMirror.lib.mode.css",
+				"ext.CodeMirror.lib"
+			]
+		},
+		"ext.CodeMirror.lib.mode.clike": {
+			"scripts": "lib/codemirror/mode/clike/clike.js",
+			"dependencies": [
+				"ext.CodeMirror.lib"
+			]
+		},
+		"ext.CodeMirror.lib.mode.php": {
+			"scripts": "lib/codemirror/mode/php/php.js",
+			"dependencies": [
+				"ext.CodeMirror.lib.mode.htmlmixed",
+				"ext.CodeMirror.lib.mode.clike",
+				"ext.CodeMirror.lib"
+			]
+		},
+		"ext.CodeMirror.visualEditor.init": {
+			"scripts": [
+				"modules/ve-cm/ve.ui.CodeMirror.init.js"
+			],
+			"styles": [
+				"modules/ve-cm/ve.ui.CodeMirror.init.less"
+			],
+			"messages": [
+				"codemirror-toggle-label"
 			],
 			"targets": [
-				"mobile",
+				"desktop"
+			]
+		},
+		"ext.CodeMirror.visualEditor": {
+			"dependencies": [
+				"ext.CodeMirror.data",
+				"ext.visualEditor.mwcore",
+				"ext.CodeMirror.lib",
+				"ext.CodeMirror.mode.mediawiki",
+				"jquery.client",
+				"mediawiki.api",
+				"mediawiki.api.options",
+				"user.options"
+			],
+			"scripts": [
+				"modules/ve-cm/ve.ui.CodeMirrorAction.js",
+				"modules/ve-cm/ve.ui.CodeMirrorTool.js"
+			],
+			"targets": [
 				"desktop"
 			]
 		}
@@ -56,21 +150,28 @@
 		"remoteExtPath": "CodeMirror/resources"
 	},
 	"Hooks": {
-		"MakeGlobalVariablesScript": [
-			"CodeMirrorHooks::onMakeGlobalVariablesScript"
-		],
 		"BeforePageDisplay": [
 			"CodeMirrorHooks::onBeforePageDisplay"
 		],
 		"GetPreferences": [
 			"CodeMirrorHooks::onGetPreferences"
 		],
-		"ResourceLoaderRegisterModules": [
-			"CodeMirrorHooks::onResourceLoaderRegisterModules"
-		]
+		"GetBetaFeaturePreferences": [
+			"CodeMirrorHooks::onGetBetaFeaturePreferences"
+		],
+		"ResourceLoaderTestModules": "CodeMirrorHooks::onResourceLoaderTestModules"
 	},
+	"VisualEditorPluginModules": [
+		"ext.CodeMirror.visualEditor.init",
+		"ext.CodeMirror.visualEditor"
+	],
 	"config": {
-		"CodeMirrorEnableFrontend": true
+		"CodeMirrorBetaFeature": false
 	},
+	"CodeMirrorTagModes": {
+		"pre": "mw-tag-pre",
+		"nowiki": "mw-tag-nowiki"
+	},
+	"CodeMirrorPluginModules": [],
 	"manifest_version": 1
 }

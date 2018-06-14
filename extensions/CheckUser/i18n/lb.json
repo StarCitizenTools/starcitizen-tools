@@ -39,6 +39,8 @@
 	"checkuser-nomatch": "Et goufe keng Iwwereneestëmmunge fonnt.",
 	"checkuser-nomatch-edits": "Et gouf näischt sou fonnt.\nDéi lescht Ännerung war de() $1 ëm $2.",
 	"checkuser-check": "Kontrolléieren",
+	"checkuser-check-this-user": "Dëse Benotzer iwwerpréiwen",
+	"checkuser-recent-checks": "Rezent Iwwerpréiwunge fir dëse Benotzer",
 	"checkuser-log-fail": "D'Aschreiwung an d'Logbuch konnt net gemaach ginn",
 	"checkuser-nolog": "D'Logbuch gouf net fonnt.",
 	"checkuser-blocked": "Gespaart",
@@ -76,5 +78,6 @@
 	"checkuser-email-action": "dem Benotzer \"$1\" eng E-Mail geschéckt",
 	"checkuser-reset-action": "huet d'Passwuert fir de Benotzer \"$1\" zréckgesat",
 	"checkuser-token-fail": "Sessiouns-Feeler.Probéiert w.e.g. nach eng Kéier.",
+	"checkuser-login-success": "Op {{SITENAME}} ageloggt als $1",
 	"apihelp-query+checkuser-param-reason": "Grond fir nozekucken."
 }

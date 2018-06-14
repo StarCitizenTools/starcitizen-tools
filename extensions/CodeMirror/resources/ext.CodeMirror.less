@@ -1,0 +1,37 @@
+@import 'mediawiki.mixins';
+
+.CodeMirror {
+	line-height: 1.5em;
+	padding: 0.1em;
+}
+
+.wikiEditor-ui .CodeMirror {
+	clear: both;
+}
+
+.mw-codeMirror-classicToolbar {
+	border: 1px solid #a2a9b1;
+}
+
+.CodeMirror pre,
+.CodeMirror-lines {
+	padding: 0;
+}
+
+// Classic toolbar
+&.mw-toolbar-editbutton {
+	.background-image-svg( 'images/old-cm-off.svg', 'images/old-cm-off.png' );
+}
+
+.mw-editbutton-codemirror-active {
+	// Classic toolbar
+	&.mw-toolbar-editbutton {
+		.background-image-svg( 'images/old-cm-on.svg', 'images/old-cm-on.png' );
+	}
+}
+
+.wikiEditor-ui-toolbar,
+.oo-ui-popupWidget.ve-init-mw-switchPopupWidget {
+	// Increase z-index to above scrollbar
+	z-index: 7;
+}

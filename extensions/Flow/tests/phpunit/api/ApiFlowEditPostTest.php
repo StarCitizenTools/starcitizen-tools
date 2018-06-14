@@ -2,6 +2,8 @@
 
 namespace Flow\Tests\Api;
 
+use Sanitizer;
+
 /**
  * @group Flow
  * @group medium
@@ -10,7 +12,7 @@ class ApiFlowEditPostTest extends ApiTestCase {
 	public function testEditPost() {
 		$topic = $this->createTopic();
 
-		$data = $this->doApiRequest( array(
+		$data = $this->doApiRequest( [
 			'page' => $topic['topic-page'],
 			'token' => $this->getEditToken(),
 			'action' => 'flow',
@@ -19,7 +21,7 @@ class ApiFlowEditPostTest extends ApiTestCase {
 			'epprev_revision' => $topic['post-revision-id'],
 			'epcontent' => '⎛ ﾟ∩ﾟ⎞⎛ ⍜⌒⍜⎞⎛ ﾟ⌒ﾟ⎞',
 			'epformat' => 'wikitext',
-		) );
+		] );
 
 		$debug = json_encode( $data );
 		$this->assertEquals( 'ok', $data[0]['flow']['edit-post']['status'], $debug );
@@ -28,13 +30,13 @@ class ApiFlowEditPostTest extends ApiTestCase {
 		$replyPostId = $data[0]['flow']['edit-post']['committed']['topic']['post-id'];
 		$replyRevisionId = $data[0]['flow']['edit-post']['committed']['topic']['post-revision-id'];
 
-		$data = $this->doApiRequest( array(
+		$data = $this->doApiRequest( [
 			'page' => $topic['topic-page'],
 			'action' => 'flow',
 			'submodule' => 'view-post',
 			'vppostId' => $replyPostId,
 			'vpformat' => 'html',
-		) );
+		] );
 
 		$debug = json_encode( $data );
 		$revision = $data[0]['flow']['view-post']['result']['topic']['revisions'][$replyRevisionId];
@@ -42,7 +44,7 @@ class ApiFlowEditPostTest extends ApiTestCase {
 		$this->assertEquals( 'edit-post', $revision['changeType'], $debug );
 		$this->assertEquals(
 			'⎛ ﾟ∩ﾟ⎞⎛ ⍜⌒⍜⎞⎛ ﾟ⌒ﾟ⎞',
-			trim( strip_tags( $revision['content']['content'] ) ),
+			trim( Sanitizer::stripAllTags( $revision['content']['content'] ) ),
 			$debug
 		);
 		$this->assertEquals( 'html', $revision['content']['format'], $debug );

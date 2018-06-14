@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWAlienExtensionNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -24,7 +24,9 @@ OO.initClass( ve.ce.MWAlienExtensionNode );
 
 ve.ce.MWAlienExtensionNode.static.primaryCommandName = 'alienExtension';
 
-ve.ce.MWAlienExtensionNode.static.iconWhenInvisible = 'alienextension';
+ve.ce.MWAlienExtensionNode.static.iconWhenInvisible = 'markup';
+
+ve.ce.MWAlienExtensionNode.static.rendersEmpty = true;
 
 /* Methods */
 

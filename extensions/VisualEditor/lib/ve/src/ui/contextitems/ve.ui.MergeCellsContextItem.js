@@ -1,14 +1,14 @@
 /*!
  * VisualEditor MergeCellsContextItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
  * Context item for mergeable cels.
  *
  * @class
- * @extends ve.ui.TableLineContextItem
+ * @extends ve.ui.LinearContextItem
  *
  * @param {ve.ui.Context} context Context item is in
  * @param {ve.dm.Model} model Model item is related to
@@ -53,7 +53,10 @@ ve.ui.MergeCellsContextItem.static.isCompatibleWith = function ( model ) {
 ve.ui.MergeCellsContextItem.prototype.setup = function () {
 	// If not disabled, selection must be table and spanning multiple matrix cells
 	var selection = this.getFragment().getSurface().getSelection(),
-		isMergeable = selection.isMergeable();
+		// There's some situations involving transclusion table cells which
+		// can make us have a LinearSelection here, so make sure this will
+		// work:
+		isMergeable = ( selection instanceof ve.dm.TableSelection ) && selection.isMergeable();
 
 	if ( !isMergeable ) {
 		// Ideally we Could check this in isCompatibleWith, but on the model node is available there
@@ -61,8 +64,8 @@ ve.ui.MergeCellsContextItem.prototype.setup = function () {
 	} else {
 		this.editButton.setLabel(
 			isMergeable && selection.isSingleCell() ?
-			ve.msg( 'visualeditor-table-merge-cells-unmerge' ) :
-			ve.msg( 'visualeditor-table-merge-cells-merge' )
+				ve.msg( 'visualeditor-table-merge-cells-unmerge' ) :
+				ve.msg( 'visualeditor-table-merge-cells-merge' )
 		);
 	}
 };

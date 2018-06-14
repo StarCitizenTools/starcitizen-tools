@@ -1,13 +1,13 @@
 {
 	"name": "External Data",
-	"version": "1.8.2",
+	"version": "1.8.3",
 	"author": [
 		"Yaron Koren",
 		"..."
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:External_Data",
 	"descriptionmsg": "externaldata-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"SpecialPages": {
 		"GetData": "EDGetData"
@@ -18,7 +18,8 @@
 		]
 	},
 	"ExtensionMessagesFiles": {
-		"ExternalDataMagic": "ExternalData.i18n.magic.php"
+		"ExternalDataMagic": "ExternalData.i18n.magic.php",
+		"ExternalDataAlias": "ExternalData.i18n.alias.php"
 	},
 	"AutoloadClasses": {
 		"ExternalDataHooks": "ExternalData.hooks.php",

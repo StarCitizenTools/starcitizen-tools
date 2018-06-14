@@ -2,7 +2,7 @@
  * TranslationStash front-end logic.
  *
  * @author Santhosh Thottingal
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @since 2013.10
  */
 
@@ -22,7 +22,6 @@
 			action: 'query',
 			list: 'messagecollection',
 			mcgroup: messageGroup,
-			format: 'json',
 			mclanguage: language,
 			mcoffset: offset,
 			mclimit: limit,
@@ -77,7 +76,7 @@
 								dir: targetLanguageDir
 							} )
 							.text( message.translation || '' )
-						),
+					),
 				$( '<div>' )
 					.addClass( 'two columns tux-list-status text-center' )
 					.append(
@@ -201,7 +200,7 @@
 			} );
 	}
 
-	$( 'document' ).ready( function () {
+	$( function () {
 		var $messageTable = $( '.tux-messagelist' ),
 			$ulsTrigger = $( '.ext-translate-language-selector > .uls' );
 
@@ -213,6 +212,7 @@
 		} );
 
 		$ulsTrigger.uls( {
+			ulsPurpose: 'translate-special-translationstash',
 			onSelect: function ( language ) {
 				var direction = $.uls.data.getDir( language ),
 					autonym = $.uls.data.getAutonym( language );

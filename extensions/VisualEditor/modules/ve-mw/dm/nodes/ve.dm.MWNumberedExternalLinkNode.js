@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWNumberedExternalLinkNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -17,7 +17,7 @@
  */
 ve.dm.MWNumberedExternalLinkNode = function VeDmMWNumberedExternalLinkNode() {
 	// Parent constructor
-	ve.dm.LeafNode.apply( this, arguments );
+	ve.dm.MWNumberedExternalLinkNode.super.apply( this, arguments );
 
 	// Mixin constructors
 	ve.dm.FocusableNode.call( this );
@@ -37,13 +37,16 @@ ve.dm.MWNumberedExternalLinkNode.static.isContent = true;
 
 ve.dm.MWNumberedExternalLinkNode.static.matchTagNames = [ 'a' ];
 
-ve.dm.MWNumberedExternalLinkNode.static.matchRdfaTypes = [ 'mw:ExtLink' ];
+ve.dm.MWNumberedExternalLinkNode.static.matchRdfaTypes = [ 'mw:ExtLink', 'mw:NumberedLink' ];
 
 ve.dm.MWNumberedExternalLinkNode.static.blacklistedAnnotationTypes = [ 'link' ];
 
 ve.dm.MWNumberedExternalLinkNode.static.matchFunction = function ( domElement ) {
-	// Must be empty
-	return domElement.childNodes.length === 0;
+	// Must be empty, or explicitly flagged as a numbered link. We can't just
+	// rely on emptiness, because we give the link content for cross-document
+	// pastes so it won't be pruned. (And so it'll be functional in non-wiki
+	// contexts.)
+	return domElement.childNodes.length === 0 || domElement.getAttribute( 'rel' ).indexOf( 'mw:NumberedLink' ) !== -1;
 };
 
 ve.dm.MWNumberedExternalLinkNode.static.toDataElement = function ( domElements ) {
@@ -55,10 +58,29 @@ ve.dm.MWNumberedExternalLinkNode.static.toDataElement = function ( domElements )
 	};
 };
 
-ve.dm.MWNumberedExternalLinkNode.static.toDomElements = function ( dataElement, doc ) {
-	var domElement = doc.createElement( 'a' );
+ve.dm.MWNumberedExternalLinkNode.static.toDomElements = function ( dataElement, doc, converter ) {
+	var counter, offset,
+		node = this,
+		domElement = doc.createElement( 'a' );
+
+	// Ensure there is a text version of the counter in the clipboard
+	// as external documents may not have the same stylesheet - and Firefox
+	// discards empty tags on copy.
+	if ( converter.isForClipboard() ) {
+		counter = 1;
+		offset = converter.documentData.indexOf( dataElement );
+
+		if ( offset !== -1 ) {
+			converter.documentData.slice( 0, offset ).forEach( function ( el ) {
+				if ( el.type && el.type === node.name ) {
+					counter++;
+				}
+			} );
+		}
+		domElement.appendChild( doc.createTextNode( '[' + counter + ']' ) );
+	}
 	domElement.setAttribute( 'href', dataElement.attributes.href );
-	domElement.setAttribute( 'rel', 'mw:ExtLink' );
+	domElement.setAttribute( 'rel', 'mw:ExtLink mw:NumberedLink' );
 	return [ domElement ];
 };
 

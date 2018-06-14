@@ -1,13 +1,13 @@
 <?php
 
-use Flow\Import\SourceStore\File as FileImportSourceStore;
+use Flow\Import\SourceStore\FileImportSourceStore;
 use Flow\Import\LiquidThreadsApi\RemoteApiBackend;
 use Flow\Import\LiquidThreadsApi\ImportSource as LiquidThreadsApiImportSource;
 use Psr\Log\LogLevel;
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: dirname( __FILE__ ) . '/../../../maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
  * This is *only* for use in testing, not production.  The primary purpose is to exercise
@@ -25,6 +25,7 @@ class ConvertLqtPageFromRemoteApiForTesting extends Maintenance {
 		$this->addOption( 'cacheremoteapidir', 'Cache remote api calls to the specified directory', true, true );
 		$this->addOption( 'logfile', 'File to read and store associations between imported items and their sources', true, true );
 		$this->addOption( 'debug', 'Include debug information to progress report' );
+		$this->requireExtension( 'Flow' );
 	}
 
 	public function execute() {
@@ -74,11 +75,11 @@ class ConvertLqtPageFromRemoteApiForTesting extends Maintenance {
 
 		$logger->info( "Starting LQT conversion of page $srcPageName" );
 
-		$importer->import( $source, $dstTitle, $sourceStore );
+		$importer->import( $source, $dstTitle, $talkPageManagerUser, $sourceStore );
 
 		$logger->info( "Finished LQT conversion of page $srcPageName" );
 	}
 }
 
 $maintClass = "ConvertLqtPageFromRemoteApiForTesting";
-require_once ( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

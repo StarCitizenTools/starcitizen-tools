@@ -12,6 +12,5 @@
 	"apihelp-query+extracts-param-intro": "Returnera bara innehåll före första avsnittet.",
 	"apihelp-query+extracts-param-plaintext": "Returnera extrakt som ren text eller begränsad HTML.",
 	"apihelp-query+extracts-param-sectionformat": "Hur stycken formateras i ren-text-läge:\n;plain:Ingen formatering.\n;wiki:Wikitext-stil formatering (== som detta ==).\n;raw:Denna moduls interna representation (avsnittstitlar med prefixet &lt;ASCII 1&gt;&lt;ASCII 2&gt;&lt;section level&gt;&lt;ASCII 2&gt;&lt;ASCII 1&gt;).",
-	"apihelp-query+extracts-param-variant": "Konvertera innehållet till denna språkvariant.",
 	"apihelp-query+extracts-example-1": "FÅ ett extrakt på 175 tecken"
 }

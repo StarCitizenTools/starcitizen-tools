@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWNoContentConvertMetaItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -13,9 +13,9 @@
  * @constructor
  * @param {Object} element Reference to element in meta-linmod
  */
-ve.dm.MWNoContentConvertMetaItem = function VeDmMWNoContentConvertMetaItem( element ) {
+ve.dm.MWNoContentConvertMetaItem = function VeDmMWNoContentConvertMetaItem() {
 	// Parent constructor
-	ve.dm.MetaItem.call( this, element );
+	ve.dm.MWNoContentConvertMetaItem.super.apply( this, arguments );
 };
 
 /* Inheritance */

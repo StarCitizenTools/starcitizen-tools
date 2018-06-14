@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWExternalLinkAnnotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -20,9 +20,9 @@
  * @constructor
  * @param {Object} element
  */
-ve.dm.MWExternalLinkAnnotation = function VeDmMWExternalLinkAnnotation( element ) {
+ve.dm.MWExternalLinkAnnotation = function VeDmMWExternalLinkAnnotation() {
 	// Parent constructor
-	ve.dm.LinkAnnotation.call( this, element );
+	ve.dm.MWExternalLinkAnnotation.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -33,26 +33,27 @@ OO.inheritClass( ve.dm.MWExternalLinkAnnotation, ve.dm.LinkAnnotation );
 
 ve.dm.MWExternalLinkAnnotation.static.name = 'link/mwExternal';
 
-ve.dm.MWExternalLinkAnnotation.static.matchFunction = function ( domElement ) {
-	var rel = domElement.getAttribute( 'rel' );
-	// Match explicity mw:ExtLink, or plain RDFa-less links with an href (e.g. from external paste)
-	return ( !rel && domElement.hasAttribute( 'href' ) ) || rel === 'mw:ExtLink';
-};
-
 ve.dm.MWExternalLinkAnnotation.static.toDataElement = function ( domElements, converter ) {
 	var dataElement, annotation,
-		rel = domElements[ 0 ].getAttribute( 'rel' );
+		domElement = domElements[ 0 ],
+		type = domElement.getAttribute( 'rel' ) || domElement.getAttribute( 'typeof' ) || domElement.getAttribute( 'property' ) || '',
+		types = type.split( ' ' );
 
-	// If a plain link is pasted, auto-convert it to the correct type (internal/external)
-	if ( !rel ) {
-		annotation = ve.ui.MWLinkAction.static.getLinkAnnotation( domElements[ 0 ].getAttribute( 'href' ), converter.getHtmlDocument() );
-		return annotation.element;
+	// If the link doesn't have a known RDFa type, auto-convert it to the correct type (internal/external/span)
+	if ( types.indexOf( 'mw:ExtLink' ) === -1 && types.indexOf( 'mw:WikiLink/Interwiki' ) === -1 ) {
+		if ( domElement.hasAttribute( 'href' ) ) {
+			annotation = ve.ui.MWLinkAction.static.getLinkAnnotation( domElement.getAttribute( 'href' ), converter.getHtmlDocument() );
+			return annotation.element;
+		} else {
+			// Convert href-less links to a plain span, which will get stripped by sanitization
+			return ve.dm.SpanAnnotation.static.toDataElement.apply( ve.dm.SpanAnnotation.static, arguments );
+		}
 	}
 
 	// Parent method
 	dataElement = ve.dm.MWExternalLinkAnnotation.super.static.toDataElement.apply( this, arguments );
 
-	dataElement.attributes.rel = rel;
+	dataElement.attributes.rel = type;
 	return dataElement;
 };
 
@@ -62,6 +63,13 @@ ve.dm.MWExternalLinkAnnotation.static.toDomElements = function ( dataElement ) {
 
 	domElements[ 0 ].setAttribute( 'rel', dataElement.attributes.rel || 'mw:ExtLink' );
 	return domElements;
+};
+
+ve.dm.MWExternalLinkAnnotation.static.describeChange = function ( key, change ) {
+	if ( key === 'href' ) {
+		return ve.msg( 'visualeditor-changedesc-link-href', change.from, change.to );
+	}
+	return null;
 };
 
 /* Methods */

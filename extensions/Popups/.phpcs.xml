@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<ruleset>
+	<rule ref="./vendor/mediawiki/mediawiki-codesniffer/MediaWiki">
+		<exclude name="Squiz.Scope.MethodScope.Missing" />
+	</rule>
+	<file>.</file>
+	<arg name="extensions" value="php,php5,inc" />
+	<arg name="encoding" value="UTF-8" />
+
+	<rule ref="Squiz.Functions.FunctionDeclarationArgumentSpacing">
+		<properties>
+			<property name="equalsSpacing" value="1" />
+			<property name="requiredSpacesAfterOpen" value="1" />
+			<property name="requiredSpacesBeforeClose" value="1" />
+		</properties>
+	</rule>
+</ruleset>

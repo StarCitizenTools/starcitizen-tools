@@ -16,30 +16,30 @@
  */
 
 ( function ( $, mw, uw ) {
-	QUnit.module( 'mw.uw.controller.Deed', QUnit.newMwEnvironment() );
+	QUnit.module( 'uw.controller.Deed', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Constructor sanity test', 3, function ( assert ) {
+	QUnit.test( 'Constructor sanity test', function ( assert ) {
 		var step = new uw.controller.Deed();
 		assert.ok( step );
 		assert.ok( step instanceof uw.controller.Step );
 		assert.ok( step.ui );
 	} );
 
-	QUnit.test( 'moveTo', 1, function ( assert ) {
+	QUnit.test( 'load', function ( assert ) {
 		var step = new uw.controller.Deed(
 				new mw.Api(),
 				{ licensing: { thirdParty: { type: 'test', licenses: [] } } }
 			),
 			ststub = this.sandbox.stub().returns( $.Deferred().promise() ),
 			uploads = [
-				{ fromURL: true, getThumbnail: ststub },
-				{ getThumbnail: ststub },
-				{ fromURL: true, getThumbnail: ststub },
-				{ getThumbnail: ststub }
+				{ file: { fromURL: true }, getThumbnail: ststub, on: $.noop, title: mw.Title.newFromText( 'Test1.jpg', 6 ) },
+				{ file: {}, getThumbnail: ststub, on: $.noop, title: mw.Title.newFromText( 'Test2.jpg', 6 ) },
+				{ file: { fromURL: true }, getThumbnail: ststub, on: $.noop, title: mw.Title.newFromText( 'Test3.jpg', 6 ) },
+				{ file: {}, getThumbnail: ststub, on: $.noop, title: mw.Title.newFromText( 'Test4.jpg', 6 ) }
 			];
 
-		this.sandbox.stub( step.ui, 'moveTo' );
-		step.moveTo( uploads );
+		this.sandbox.stub( step.ui, 'load' );
+		step.load( uploads );
 
 		assert.strictEqual( ststub.callCount, 2 );
 	} );

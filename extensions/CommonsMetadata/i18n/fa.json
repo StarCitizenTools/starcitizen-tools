@@ -2,12 +2,17 @@
 	"@metadata": {
 		"authors": [
 			"Armin1392",
-			"Ebraminio"
+			"Ebraminio",
+			"Ladsgroup"
 		]
 	},
 	"commonsmetadata-desc": "گسترش \"extmetadata\" ویژگی اطلاعات عکس بخش ای‌پی‌آی برای شامل کردن اطلاعات ذخیره شده در صفحات شرح عکسی که از الگوهای رایج استفاده شده در مدیاویکی همگانی، استفاده می‌شود.",
 	"commonsmetadata-trackingcategory-no-license": "پرونده‌های بدون مجوز قابل خواندن برای ماشین",
+	"commonsmetadata-trackingcategory-no-license-desc": "این پرونده هیچ الگوی مجوز [{{MediaWiki:Commonsmetadata-doc-url}} قابل‌پردازش برای ماشین]  ندارد.",
 	"commonsmetadata-trackingcategory-no-description": "پرونده‌های بدون توضیح قابل خواندن برای ماشین",
+	"commonsmetadata-trackingcategory-no-description-desc": "این پرونده هیچ الگوی اطلاعات [{{MediaWiki:Commonsmetadata-doc-url}} قابل‌پردازش برای ماشین] ندارد، یا بخش توضیحات آن کامل نشده‌است.",
 	"commonsmetadata-trackingcategory-no-author": "پرونده‌های بدون ایجادکنندهٔ قابل خواندن برای ماشین",
-	"commonsmetadata-trackingcategory-no-source": "پرونده‌های بدون منبع قابل خواندن برای ماشین"
+	"commonsmetadata-trackingcategory-no-author-desc": "این پرونده هیچ الگوی اطلاعات [{{MediaWiki:Commonsmetadata-doc-url}} قابل‌پردازش برای ماشین] ندارد، یا بخش نویسنده آن کامل نشده‌است.",
+	"commonsmetadata-trackingcategory-no-source": "پرونده‌های بدون منبع قابل خواندن برای ماشین",
+	"commonsmetadata-trackingcategory-no-source-desc": "این پرونده هیچ الگوی اطلاعات [{{MediaWiki:Commonsmetadata-doc-url}} قابل‌پردازش برای ماشین] ندارد، یا بخش منبع آن کامل نشده‌است."
 }

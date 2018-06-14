@@ -5,7 +5,7 @@
  * @author Santhosh Thottingal
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Santhosh Thottingal
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -19,20 +19,32 @@ class ApiAggregateGroups extends ApiBase {
 	protected static $right = 'translate-manage';
 
 	public function execute() {
-		if ( !$this->getUser()->isAllowed( self::$right ) ) {
-			$this->dieUsage( 'Permission denied', 'permissiondenied' );
+		if ( method_exists( $this, 'checkUserRightsAny' ) ) {
+			$this->checkUserRightsAny( self::$right );
+		} else {
+			if ( !$this->getUser()->isAllowed( self::$right ) ) {
+				$this->dieUsage( 'Permission denied', 'permissiondenied' );
+			}
 		}
 
 		$params = $this->extractRequestParams();
 		$action = $params['do'];
-		$output = array();
+		$output = [];
 		if ( $action === 'associate' || $action === 'dissociate' ) {
 			// Group is mandatory only for these two actions
 			if ( !isset( $params['group'] ) ) {
-				$this->dieUsageMsg( array( 'missingparam', 'group' ) );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError( [ 'apierror-missingparam', 'group' ] );
+				} else {
+					$this->dieUsageMsg( [ 'missingparam', 'group' ] );
+				}
 			}
 			if ( !isset( $params['aggregategroup'] ) ) {
-				$this->dieUsageMsg( array( 'missingparam', 'aggregategroup' ) );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError( [ 'apierror-missingparam', 'aggregategroup' ] );
+				} else {
+					$this->dieUsageMsg( [ 'missingparam', 'aggregategroup' ] );
+				}
 			}
 			$aggregateGroup = $params['aggregategroup'];
 			$subgroups = TranslateMetadata::getSubgroups( $aggregateGroup );
@@ -40,9 +52,13 @@ class ApiAggregateGroups extends ApiBase {
 				// For newly created groups the subgroups value might be empty,
 				// but check that.
 				if ( TranslateMetadata::get( $aggregateGroup, 'name' ) === false ) {
-					$this->dieUsage( 'Invalid aggregate message group', 'invalidaggregategroup' );
+					if ( method_exists( $this, 'dieWithError' ) ) {
+						$this->dieWithError( 'apierror-translate-invalidaggregategroup', 'invalidaggregategroup' );
+					} else {
+						$this->dieUsage( 'Invalid aggregate message group', 'invalidaggregategroup' );
+					}
 				}
-				$subgroups = array();
+				$subgroups = [];
 			}
 
 			$subgroupId = $params['group'];
@@ -51,7 +67,11 @@ class ApiAggregateGroups extends ApiBase {
 			// Add or remove from the list
 			if ( $action === 'associate' ) {
 				if ( !$group instanceof WikiPageMessageGroup ) {
-					$this->dieUsage( 'Group does not exist or invalid', 'invalidgroup' );
+					if ( method_exists( $this, 'dieWithError' ) ) {
+						$this->dieWithError( 'apierror-translate-invalidgroup', 'invalidgroup' );
+					} else {
+						$this->dieUsage( 'Group does not exist or invalid', 'invalidgroup' );
+					}
 				}
 
 				$subgroups[] = $subgroupId;
@@ -65,10 +85,10 @@ class ApiAggregateGroups extends ApiBase {
 
 			TranslateMetadata::setSubgroups( $aggregateGroup, $subgroups );
 
-			$logParams = array(
+			$logParams = [
 				'aggregategroup' => TranslateMetadata::get( $aggregateGroup, 'name' ),
 				'aggregategroup-id' => $aggregateGroup,
-			);
+			];
 
 			/* Note that to allow removing no longer existing groups from
 			 * aggregate message groups, the message group object $group
@@ -89,22 +109,40 @@ class ApiAggregateGroups extends ApiBase {
 			$entry->publish( $logid );
 		} elseif ( $action === 'remove' ) {
 			if ( !isset( $params['aggregategroup'] ) ) {
-				$this->dieUsageMsg( array( 'missingparam', 'aggregategroup' ) );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError( [ 'apierror-missingparam', 'aggregategroup' ] );
+				} else {
+					$this->dieUsageMsg( [ 'missingparam', 'aggregategroup' ] );
+				}
 			}
 			TranslateMetadata::deleteGroup( $params['aggregategroup'] );
 			// @todo Logging
 
 		} elseif ( $action === 'add' ) {
 			if ( !isset( $params['groupname'] ) ) {
-				$this->dieUsageMsg( array( 'missingparam', 'groupname' ) );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError( [ 'apierror-missingparam', 'groupname' ] );
+				} else {
+					$this->dieUsageMsg( [ 'missingparam', 'groupname' ] );
+				}
 			}
 			$name = trim( $params['groupname'] );
 			if ( strlen( $name ) === 0 ) {
-				$this->dieUsage( 'Invalid aggregate message group name', 'invalidaggregategroupname' );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError(
+						'apierror-translate-invalidaggregategroupname', 'invalidaggregategroupname'
+					);
+				} else {
+					$this->dieUsage( 'Invalid aggregate message group name', 'invalidaggregategroupname' );
+				}
 			}
 
 			if ( !isset( $params['groupdescription'] ) ) {
-				$this->dieUsageMsg( array( 'missingparam', 'groupdescription' ) );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError( [ 'apierror-missingparam', 'groupdescription' ] );
+				} else {
+					$this->dieUsageMsg( [ 'missingparam', 'groupdescription' ] );
+				}
 			}
 			$desc = trim( $params['groupdescription'] );
 
@@ -113,7 +151,11 @@ class ApiAggregateGroups extends ApiBase {
 			// Throw error if group already exists
 			$nameExists = MessageGroups::labelExists( $name );
 			if ( $nameExists ) {
-				$this->dieUsage( 'Message group already exists', 'duplicateaggregategroup' );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError( 'apierror-translate-duplicateaggregategroup', 'duplicateaggregategroup' );
+				} else {
+					$this->dieUsage( 'Message group already exists', 'duplicateaggregategroup' );
+				}
 			}
 
 			// ID already exists- Generate a new ID by adding a number to it.
@@ -130,7 +172,7 @@ class ApiAggregateGroups extends ApiBase {
 
 			TranslateMetadata::set( $aggregateGroupId, 'name', $name );
 			TranslateMetadata::set( $aggregateGroupId, 'description', $desc );
-			TranslateMetadata::setSubgroups( $aggregateGroupId, array() );
+			TranslateMetadata::setSubgroups( $aggregateGroupId, [] );
 
 			// Once new aggregate group added, we need to show all the pages that can be added to that.
 			$output['groups'] = self::getAllPages();
@@ -138,11 +180,21 @@ class ApiAggregateGroups extends ApiBase {
 			// @todo Logging
 		} elseif ( $action === 'update' ) {
 			if ( !isset( $params['groupname'] ) ) {
-				$this->dieUsageMsg( array( 'missingparam', 'groupname' ) );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError( [ 'apierror-missingparam', 'groupname' ] );
+				} else {
+					$this->dieUsageMsg( [ 'missingparam', 'groupname' ] );
+				}
 			}
 			$name = trim( $params['groupname'] );
 			if ( strlen( $name ) === 0 ) {
-				$this->dieUsage( 'Invalid aggregate message group name', 'invalidaggregategroupname' );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError(
+						'apierror-translate-invalidaggregategroupname', 'invalidaggregategroupname'
+					);
+				} else {
+					$this->dieUsage( 'Invalid aggregate message group name', 'invalidaggregategroupname' );
+				}
 			}
 			$desc = trim( $params['groupdescription'] );
 			$aggregateGroupId = $params['aggregategroup'];
@@ -153,11 +205,19 @@ class ApiAggregateGroups extends ApiBase {
 			// Error if the label exists already
 			$exists = MessageGroups::labelExists( $name );
 			if ( $exists && $oldName !== $name ) {
-				$this->dieUsage( 'Message group name already exists', 'duplicateaggregategroup' );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError( 'apierror-translate-duplicateaggregategroup', 'duplicateaggregategroup' );
+				} else {
+					$this->dieUsage( 'Message group name already exists', 'duplicateaggregategroup' );
+				}
 			}
 
 			if ( $oldName === $name && $oldDesc === $desc ) {
-				$this->dieUsage( 'Invalid update', 'invalidupdate' );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieUsage( 'apierror-translate-invalidupdate', 'invalidupdate' );
+				} else {
+					$this->dieUsage( 'Invalid update', 'invalidupdate' );
+				}
 			}
 			TranslateMetadata::set( $aggregateGroupId, 'name', $name );
 			TranslateMetadata::set( $aggregateGroupId, 'description', $desc );
@@ -168,7 +228,7 @@ class ApiAggregateGroups extends ApiBase {
 		$this->getResult()->addValue( null, $this->getModuleName(), $output );
 		// Cache needs to be cleared after any changes to groups
 		MessageGroups::singleton()->recache();
-		MessageIndexRebuildJob::newJob()->insert();
+		MessageIndexRebuildJob::newJob()->insertIntoJobQueue();
 	}
 
 	protected function generateAggregateGroupId( $aggregateGroupName, $prefix = 'agg-' ) {
@@ -190,41 +250,41 @@ class ApiAggregateGroups extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return array(
-			'do' => array(
-				ApiBase::PARAM_TYPE => array( 'associate', 'dissociate', 'remove', 'add', 'update' ),
+		return [
+			'do' => [
+				ApiBase::PARAM_TYPE => [ 'associate', 'dissociate', 'remove', 'add', 'update' ],
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'aggregategroup' => array(
+			],
+			'aggregategroup' => [
 				ApiBase::PARAM_TYPE => 'string',
-			),
-			'group' => array(
+			],
+			'group' => [
 				// Not providing list of values, to allow dissociation of unknown groups
 				ApiBase::PARAM_TYPE => 'string',
-			),
-			'groupname' => array(
+			],
+			'groupname' => [
 				ApiBase::PARAM_TYPE => 'string',
-			),
-			'groupdescription' => array(
+			],
+			'groupdescription' => [
 				ApiBase::PARAM_TYPE => 'string',
-			),
-			'token' => array(
+			],
+			'token' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-		);
+			],
+		];
 	}
 
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=aggregategroups&do=associate&group=groupId&aggregategroup=aggregateGroupId'
 				=> 'apihelp-aggregategroups-example-1',
-		);
+		];
 	}
 
 	public static function getAllPages() {
 		$groups = MessageGroups::getAllGroups();
-		$pages = array();
+		$pages = [];
 		foreach ( $groups as $group ) {
 			if ( $group instanceof WikiPageMessageGroup ) {
 				$pages[$group->getId()] = $group->getTitle()->getPrefixedText();

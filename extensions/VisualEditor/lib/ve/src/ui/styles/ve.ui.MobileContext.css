@@ -1,7 +1,7 @@
 /*!
- * VisualEditor UserInterface MobileSurface styles.
+ * VisualEditor UserInterface MobileContext styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-body {
@@ -9,7 +9,7 @@
 }
 
 .ve-ui-mobileContext-menu {
-	border-top: 1px solid #ddd;
+	border-top: 1px solid #c8ccd1;
 }
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-label {
@@ -17,24 +17,38 @@
 }
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-title {
-	padding: 0.625em 1em 0.625em 0.5em;
+	padding: 0 1em 0 0.5em;
+	line-height: 3em;
 }
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-description {
-	line-height: 3.125em;
+	line-height: 3em;
 }
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-actions {
 	vertical-align: top;
 	padding: 0;
+	height: 100%;
 }
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonWidget {
-	border-left: 1px solid #ddd;
+	border-left: 1px solid #c8ccd1;
 	vertical-align: top;
 }
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonElement-button {
-	padding: 0.625em 0.5em;
 	vertical-align: top;
+}
+
+.ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonWidget.oo-ui-iconElement:not( .oo-ui-labelElement ) .oo-ui-buttonElement-button {
+	padding-left: 2.875em;
+	padding-top: 2.875em;
+}
+
+.ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonWidget.oo-ui-iconElement .oo-ui-iconElement-icon {
+	left: 0.7232em;
+}
+
+.ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonWidget.oo-ui-iconElement.oo-ui-labelElement .oo-ui-buttonElement-button {
+	padding: 0.90625em 0.5em 0.90625em 2.875em;
 }

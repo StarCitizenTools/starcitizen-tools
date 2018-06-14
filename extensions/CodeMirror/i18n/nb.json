@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jon Harald Søby",
+			"Pmt",
+			"Danmichaelo"
+		]
+	},
+	"codemirror-desc": "Gir syntaksfremheving i wikitekstredigereren",
+	"codemirror-toggle-label": "Syntaksfremheving",
+	"codemirror-beta-title": "Syntaksfremheving for wikitekst",
+	"codemirror-beta-desc": "Syntaksfremheving gjør redigering enklere gjennom å bruke ulike farger og gråtoner for å visuelt skille sidetekst fra koder for lenker, referanser og maler.",
+	"codemirror-popup-label": "Syntaksfremheving",
+	"codemirror-popup-desc": "Syntaksfremheving hjelper deg med å raskt skille mellom ulike deler av redigeringen din ved å fargekode dem.",
+	"codemirror-popup-btn-yes": "Prøv",
+	"codemirror-popup-btn-no": "Nei takk"
+}

@@ -6,32 +6,45 @@
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:Popups",
 	"descriptionmsg": "popups-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "betafeatures",
+	"requires": {
+		"MediaWiki": ">= 1.30.0"
+	},
 	"AutoloadClasses": {
-		"PopupsHooks": "Popups.hooks.php"
+		"Popups\\PopupsHooks": "includes/PopupsHooks.php",
+		"Popups\\PopupsContext": "includes/PopupsContext.php",
+		"Popups\\PopupsGadgetsIntegration": "includes/PopupsGadgetsIntegration.php",
+		"Popups\\UserPreferencesChangeHandler": "includes/UserPreferencesChangeHandler.php",
+		"Popups\\EventLogging\\EventLogger": "includes/EventLogging/EventLogger.php",
+		"Popups\\EventLogging\\NullLogger": "includes/EventLogging/NullLogger.php",
+		"Popups\\EventLogging\\MWEventLogger": "includes/EventLogging/MWEventLogger.php",
+		"Popups\\EventLogging\\EventLoggerFactory": "includes/EventLogging/EventLoggerFactory.php"
 	},
 	"ConfigRegistry": {
 		"popups": "GlobalVarConfig::newInstance"
 	},
 	"Hooks": {
 		"GetBetaFeaturePreferences": [
-			"PopupsHooks::getPreferences"
+			"Popups\\PopupsHooks::onGetBetaPreferences"
 		],
 		"BeforePageDisplay": [
-			"PopupsHooks::onBeforePageDisplay"
-		],
-		"ResourceLoaderTestModules": [
-			"PopupsHooks::onResourceLoaderTestModules"
-		],
-		"ResourceLoaderRegisterModules": [
-			"PopupsHooks::onResourceLoaderRegisterModules"
+			"Popups\\PopupsHooks::onBeforePageDisplay"
 		],
 		"ResourceLoaderGetConfigVars": [
-			"PopupsHooks::onResourceLoaderGetConfigVars"
+			"Popups\\PopupsHooks::onResourceLoaderGetConfigVars"
 		],
-		"BeforePageDisplayMobile": [
-			"PopupsHooks::onBeforePageDisplayMobile"
+		"GetPreferences": [
+			"Popups\\PopupsHooks::onGetPreferences"
+		],
+		"PreferencesFormPreSave": [
+			"Popups\\UserPreferencesChangeHandler::onPreferencesFormPreSave"
+		],
+		"UserGetDefaultOptions": [
+			"Popups\\PopupsHooks::onUserGetDefaultOptions"
+		],
+		"MakeGlobalVariablesScript": [
+			"Popups\\PopupsHooks::onMakeGlobalVariablesScript"
 		]
 	},
 	"MessagesDirs": {
@@ -40,54 +53,95 @@
 		]
 	},
 	"EventLoggingSchemas": {
-		"Popups": 11625443
+		"Popups": 17807993,
+		"VirtualPageView": 17780078
 	},
 	"config": {
+		"@PopupsVirtualPageViews": "@var bool: Whether the extension should log virtual pageviews.",
+		"PopupsVirtualPageViews": false,
 		"@PopupsBetaFeature": "@var bool: Whether the extension should be enabled as an opt-in beta feature. If true, the BetaFeatures extension must be installed. False by default.",
 		"PopupsBetaFeature": false,
-		"PopupsSurveyLink": false,
-		"EnablePopupsMobile": false
-	},
-	"DefaultUserOptions": {
-		"popupsmobile": "1"
+		"@PopupsHideOptInOnPreferencesPage": "@var bool: Whether the option to enable/disable Page Previews should be hidden on Preferences page. Please note if PopupsBetaFeature is set to true this option will be always hidden. False by default",
+		"PopupsHideOptInOnPreferencesPage": false,
+		"@PopupsOptInDefaultState": "@var string:['1'|'0'] Default Page Previews visibility. Has to be a string as a compatibility with beta feature settings",
+		"PopupsOptInDefaultState": "0",
+		"@PopupsConflictingNavPopupsGadgetName": "@var string: Navigation popups gadget name",
+		"PopupsConflictingNavPopupsGadgetName": "Navigation_popups",
+		"@PopupsGateway": "Which gateway to use for fetching Popups data. Available options: [mwApiPlain|restbasePlain|restbaseHTML]. Full and always up to date list is available in src/gateway/index.js",
+		"PopupsGateway": "mwApiPlain",
+		"@PopupsRestGatewayEndpoint": "Specify a REST endpoint where summaries should be sourced from. Endpoint must meet the spec at https://www.mediawiki.org/wiki/Specs/Summary/1.2.0",
+		"PopupsRestGatewayEndpoint": "/api/rest_v1/page/summary/",
+		"@PopupsAnonsExperimentalGroupSize": "Defines the fraction of users that should be subject to an A/B test. When enabled half of users in this group will see page previews. The rest will be divided into one of two buckets where previews will not show and the control group size will match the enabled bucket. If undefined, or 0, no users will be subject to experimentation and previews will be enabled for everyone unless wgPopupsBetaFeature is enabled.",
+		"PopupsAnonsExperimentalGroupSize": 0,
+		"@PopupsEventLogging": "Whether we should log events. This should be used carefully alongside PopupsAnonsExperimentalGroupSize. Note if this is enabled without using that variable events will be logged for all users. Be careful!",
+		"PopupsEventLogging": false,
+		"@PopupsStatsvSamplingRate": "Sampling rate for logging performance data to statsv.",
+		"PopupsStatsvSamplingRate": 0,
+		"@PopupsPageBlacklist": "Blacklisted pages are subject to the HTML cache policy of the wiki. A purge on a blacklisted page maybe needed to see the effect of this configuration variable. Every blacklisted page should be defined by a canonical name, eg: Special:Userlogin",
+		"PopupsPageBlacklist": [ "Special:Userlogin", "Special:CreateAccount" ]
 	},
 	"ResourceModules": {
-		"ext.popups.core": {
+		"ext.popups.images": {
+			"selector": ".mw-ui-icon-{name}:before",
+			"class": "ResourceLoaderImageModule",
+			"images": {
+				"popups-settings": "resources/ext.popups.images/cog.svg",
+				"popups-close": "resources/ext.popups.images/close.svg",
+				"preview-generic": "resources/ext.popups.images/sad-face.svg",
+				"footer": {
+					"file": {
+						"ltr": "resources/ext.popups.images/footer-ltr.svg",
+						"rtl": "resources/ext.popups.images/footer-rtl.svg"
+					}
+				},
+				"preview-disambiguation": {
+					"file": {
+						"ltr": "resources/ext.popups.images/multiple-articles-ltr.svg",
+						"rtl": "resources/ext.popups.images/multiple-articles-rtl.svg"
+					}
+				}
+			}
+		},
+		"ext.popups": {
 			"scripts": [
-				"resources/ext.popups.core.js"
-			],
-			"dependencies": [
-				"mediawiki.api",
-				"mediawiki.Title",
-				"mediawiki.Uri",
-				"mediawiki.RegExp"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
-			],
-			"styles": [
-				"resources/ext.popups.core.less"
+				"resources/ext.popups/index.js"
 			]
 		},
-		"ext.popups.targets.desktopTarget": {
+		"ext.popups.main": {
 			"scripts": [
-				"resources/ext.popups.targets/desktopTarget.js"
+				"resources/dist/index.js"
+			],
+			"styles": [
+				"src/ui/index.less"
+			],
+			"messages": [
+				"popups-settings-title",
+				"popups-settings-option-simple",
+				"popups-settings-option-simple-description",
+				"popups-settings-option-advanced",
+				"popups-settings-option-advanced-description",
+				"popups-settings-option-off",
+				"popups-settings-save",
+				"popups-settings-cancel",
+				"popups-settings-enable",
+				"popups-settings-help",
+				"popups-settings-help-ok",
+				"popups-preview-no-preview",
+				"popups-preview-footer-read",
+				"popups-preview-disambiguation",
+				"popups-preview-disambiguation-link"
 			],
 			"dependencies": [
-				"jquery.jStorage",
-				"jquery.client",
-				"ext.popups.core",
-				"ext.popups.renderer.desktopRenderer"
-			],
-			"targets": [ "desktop" ]
-		},
-		"ext.popups.renderer.desktopRenderer": {
-			"scripts": [
-				"resources/ext.popups.renderer/desktopRenderer.js"
-			],
-			"dependencies": [
-				"ext.popups.core"
+				"ext.popups.images",
+				"mediawiki.experiments",
+				"mediawiki.storage",
+				"mediawiki.Title",
+				"mediawiki.jqueryMsg",
+				"mediawiki.ui.button",
+				"mediawiki.ui.icon",
+				"mediawiki.Uri",
+				"mediawiki.user",
+				"jquery.hidpi"
 			]
 		}
 	},
@@ -95,5 +149,8 @@
 		"localBasePath": "",
 		"remoteExtPath": "Popups"
 	},
+	"ServiceWiringFiles": [
+		"includes/ServiceWirings.php"
+	],
 	"manifest_version": 1
 }

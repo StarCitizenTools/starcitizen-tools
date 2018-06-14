@@ -6,29 +6,15 @@
  * @ingroup Extensions
  */
 
-if ( !defined( 'MEDIAWIKI' ) ) { die(); }
-
-// credits
-$wgExtensionCredits['other'][] = array(
-	'path' => __FILE__,
-	'name' => 'Lazyload',
-	'version' => '0.2.5',
-	'author' => array( 'Mudkip' ),
-	'url' => 'https://github.com/mudkipme/mediawiki-lazyload',
-	'descriptionmsg'  => 'lazyload-desc',
-);
-
-$wgExtensionMessagesFiles['Lazyload'] = dirname( __FILE__ ) . '/Lazyload.i18n.php';
-$wgAutoloadClasses['Lazyload'] = dirname( __FILE__ ) . '/Lazyload.class.php';
-
-$wgResourceModules['ext.lazyload'] = array(
-	'scripts' => array('lazyload.js' ),
-	'dependencies' => array( 'mediawiki.hidpi' ),
-	'localBasePath' => dirname( __FILE__ ) . '/modules',
-	'remoteExtPath' => 'Lazyload/modules',
-	'targets' => array( 'desktop', 'mobile' ),
-);
-
-$wgHooks['LinkerMakeExternalImage'][] = 'Lazyload::LinkerMakeExternalImage';
-$wgHooks['ThumbnailBeforeProduceHTML'][] = 'Lazyload::ThumbnailBeforeProduceHTML';
-$wgHooks['BeforePageDisplay'][] = 'Lazyload::BeforePageDisplay';
+if ( function_exists( 'wfLoadExtension' ) ) {
+    wfLoadExtension( 'Lazyload' );
+    $wgMessagesDirs['Lazyload'] = __DIR__ . '/i18n';
+    wfWarn(
+        'Deprecated PHP entry point used for the Lazyload extension. ' .
+        'Please use wfLoadExtension instead, ' .
+        'see https://www.mediawiki.org/wiki/Extension_registration for more details.'
+    );
+    return;
+} else {
+    die( 'This version of the Lazyload extension requires MediaWiki 1.25+' );
+}

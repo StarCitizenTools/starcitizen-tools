@@ -1,6 +1,6 @@
-/*! jquery.ime - v0.1.0+20160816
+/*! jquery.ime - v0.1.0+20170711
 * https://github.com/wikimedia/jquery.ime
-* Copyright (c) 2016 Santhosh Thottingal; Licensed GPL, MIT */
+* Copyright (c) 2017 Santhosh Thottingal; Licensed GPL, MIT */
 ( function ( $ ) {
 	'use strict';
 	var TextEntryFactory, TextEntry, FormWidgetEntry, ContentEditableEntry,
@@ -1691,11 +1691,11 @@
 			source: 'rules/am/am-transliteration.js'
 		},
 		'ak-qx': {
-			name: 'Akan - QX replacement',
+			name: 'QX replacement',
 			source: 'rules/ak/ak-qx.js'
 		},
 		'ar-kbd': {
-			name: 'أرابيك',
+			name: 'لوحة المفاتيح العربية',
 			source: 'rules/ar/ar-kbd.js'
 		},
 		'as-avro': {
@@ -1754,6 +1754,10 @@
 			name: 'روچ کپتین بلوچی',
 			source: 'rules/bgn/bgn-kbd.js'
 		},
+		'bm-alt': {
+			name: 'Bamanankan Alt',
+			source: 'rules/bm/bm-alt.js'
+		},
 		'bn-avro': {
 			name: 'অভ্র',
 			source: 'rules/bn/bn-avro.js'
@@ -1778,6 +1782,10 @@
 			name: 'Tibetan EWTS',
 			source: 'rules/bo/bo-ewts.js'
 		},
+		'bo-sambhota': {
+			name: 'Tibetan Sambhota',
+			source: 'rules/bo/bo-sambhota.js'
+		},
 		'brx-inscript': {
 			name: 'इनस्क्रिप्ट',
 			source: 'rules/brx/brx-inscript.js'
@@ -1785,6 +1793,10 @@
 		'brx-inscript2': {
 			name: 'इनस्क्रिप्ट २',
 			source: 'rules/brx/brx-inscript2.js'
+		},
+		'byn-geezim': {
+			name: 'ብሊን',
+			source: 'rules/byn/byn-geezim.js'
 		},
 		'ckb-transliteration-arkbd': {
 			name: 'باشووری',
@@ -1817,6 +1829,14 @@
 		'da-normforms': {
 			name: 'normalformer',
 			source: 'rules/da/da-normforms.js'
+		},
+		'dag-alt': {
+			name: 'Dagbani Alt',
+			source: 'rules/dag/dag-alt.js'
+		},
+		'din-fqsx': {
+			name: 'Dinka FQSX',
+			source: 'rules/din/din-fqsx.js'
 		},
 		'doi-inscript2': {
 			name: 'इनस्क्रिप्ट २',
@@ -1854,6 +1874,10 @@
 			name: 'فارسی',
 			source: 'rules/fa/fa-kbd.js'
 		},
+		'ff-alt': {
+			name: 'Fulfulde',
+			source: 'rules/ff/ff-alt.js'
+		},
 		'fo-normforms': {
 			name: 'Føroyskt',
 			source: 'rules/fo/fo-normforms.js'
@@ -1861,6 +1885,14 @@
 		'fi-transliteration': {
 			name: 'translitterointi',
 			source: 'rules/fi/fi-transliteration.js'
+		},
+		'gaa-cqx': {
+			name: 'Ga - CQX replacement',
+			source: 'rules/gaa/gaa-cqx.js'
+		},
+		'got-standard': {
+			name: '𐌲𐌿𐍄𐌹𐍃𐌺𐌰 𐍂𐌰𐌶𐌳𐌰',
+			source: 'rules/got/got-standard.js'
 		},
 		'lud-transliteration': {
 			name: 'lud',
@@ -2072,6 +2104,10 @@
 			name: 'لۊری شومالی',
 			source: 'rules/lrc/lrc-kbd.js'
 		},
+		'lut-tulalip': {
+			name: 'Lushootseed Tulalip',
+			source: 'rules/lut/lut-tulalip.js'
+		},
 		mh: {
 			name: 'Kajin M̧ajeļ',
 			source: 'rules/mh/mh.js'
@@ -2079,6 +2115,34 @@
 		'mn-cyrl': {
 			name: 'Кирилл',
 			source: 'rules/mn/mn-cyrl.js'
+		},
+		'mn-trad': {
+			name: 'ᠮᠣᠩᠭᠣᠯ ᠪᠢᠴᠢᠭ᠌',
+			source: 'rules/mn/mn-trad.js'
+		},
+		'mn-todo': {
+			name: 'ᡐᡆᡑᡆ ᡋᡅᡔᡅᡎ᠌',
+			source: 'rules/mn/mn-todo.js'
+		},
+		'mn-tradali': {
+			name: 'Traditional Mongolian Ali-gali',
+			source: 'rules/mn/mn-tradali.js'
+		},
+		'mn-todoali': {
+			name: 'Todo Mongolian Ali-gali',
+			source: 'rules/mn/mn-todoali.js'
+		},
+		'phagspa': {
+			name: 'PhagsPa',
+			source: 'rules/mn/phagspa.js'
+		},
+		'mnc': {
+			name: 'ᠮᠠᠨᠵᡠ',
+			source: 'rules/mnc/mnc.js'
+		},
+		'mnc-ali': {
+			name: 'Manchu Ali-gali',
+			source: 'rules/mnc/mnc-ali.js'
 		},
 		'mni-inscript2': {
 			name: 'ইনস্ক্ৰিপ্ট ২',
@@ -2099,6 +2163,10 @@
 		'mr-phonetic': {
 			name: 'फोनेटिक',
 			source: 'rules/mr/mr-phonetic.js'
+		},
+		'my-mm3': {
+			name: 'မြန်မာ၃ လက်ကွက်',
+			source: 'rules/my/my-mm3.js'
 		},
 		'my-xkb': {
 			name: 'မြန်မာဘာသာ xkb',
@@ -2219,6 +2287,14 @@
 			name: 'ਫੋਨੇਟਿਕ',
 			source: 'rules/pa/pa-phonetic.js'
 		},
+		'roa-tara-GVU': {
+			name: 'Tarandine',
+			source: 'rules/roa-tara/roa-tara.js',
+		},
+		'pms': {
+			name: 'Piemontèis',
+			source: 'rules/pms/pms.js'
+		},
 		'ru-jcuken': {
 			name: 'ЙЦУКЕН',
 			source: 'rules/ru/ru-jcuken.js'
@@ -2275,6 +2351,18 @@
 			name: 'විජේසේකර',
 			source: 'rules/si/si-wijesekara.js'
 		},
+		'ti-geezim': {
+			name: 'ትግርኛ',
+			source: 'rules/ti/ti-geezim.js'
+		},
+		'tig-geezim': {
+			name: 'ትግረ',
+			source: 'rules/tig/tig-geezim.js'
+		},
+		'sjo': {
+			name: 'ᠰᡞᠪᡝ',
+			source: 'rules/sjo/sjo.js'
+		},
 		'ur-phonetic': {
 			name: 'صوتی',
 			source: 'rules/ur/ur-phonetic.js'
@@ -2308,8 +2396,12 @@
 			source: 'rules/uz/uz-kbd.js'
 		},
 		'vec-GVU': {
-			name: 'Venetian',
+			name: 'Vèneto',
 			source: 'rules/vec/vec-GVU.js'
+		},
+		'wo-alt': {
+			name: 'Wolof Alt',
+			source: 'rules/wo/wo-alt.js'
 		},
 		'yo-alt': {
 			name: 'Yorùbá Alt',
@@ -2374,20 +2466,28 @@
 			autonym: 'भोजपुरी',
 			inputmethods: [ 'hi-transliteration' ]
 		},
+		bm: {
+			autonym: 'Bamanankan',
+			inputmethods: [ 'bm-alt' ]
+		},
 		bn: {
 			autonym: 'বাংলা',
 			inputmethods: [ 'bn-avro', 'bn-inscript', 'bn-nkb', 'bn-probhat', 'bn-inscript2' ]
 		},
 		bo: {
 			autonym: 'བོད་ཡིག།',
-			inputmethods: [ 'bo-ewts' ]
+			inputmethods: [ 'bo-ewts', 'bo-sambhota' ]
 		},
 		brx: {
 			autonym: 'बोड़ो',
 			inputmethods: [ 'brx-inscript', 'brx-inscript2' ]
 		},
+		byn: {
+			autonym: 'ብሊን',
+			inputmethods: [ 'byn-geezim' ]
+		},
 		ckb: {
-			autonym: 'کوردیی ناوەندی',
+			autonym: 'کوردی',
 			inputmethods: [ 'ckb-transliteration-arkbd', 'ckb-transliteration-fakbd', 'ckb-transliteration-lakbd' ]
 		},
 		ce: {
@@ -2402,9 +2502,17 @@
 			autonym: 'Dansk',
 			inputmethods: [ 'da-normforms' ]
 		},
+		dag: {
+			autonym: 'Dagbani',
+			inputmethods: [ 'dag-alt' ]
+		},
 		de: {
 			autonym: 'Deutsch',
 			inputmethods: [ 'de-transliteration' ]
+		},
+		din: {
+			autonym: 'Thuɔŋjäŋ',
+			inputmethods: [ 'din-fqsx' ]
 		},
 		diq: {
 			autonym: 'Kirdkî',
@@ -2430,6 +2538,10 @@
 			autonym: 'فارسی',
 			inputmethods: [ 'fa-kbd' ]
 		},
+		ff: {
+			autonym: 'Fulfulde',
+			inputmethods: [ 'ff-alt' ]
+		},
 		fo: {
 			autonym: 'Føroyskt',
 			inputmethods: [ 'fo-normforms' ]
@@ -2437,6 +2549,14 @@
 		fi: {
 			autonym: 'Suomi',
 			inputmethods: [ 'fi-transliteration' ]
+		},
+		gaa: {
+			autonym: 'Ga',
+			inputmethods: [ 'gaa-cqx' ]
+		},
+		got: {
+			autonym: '𐌲𐌿𐍄𐌹𐍃𐌺𐌰 𐍂𐌰𐌶𐌳𐌰',
+			inputmethods: [ 'got-standard' ]
 		},
 		lrc: {
 			autonym: 'لۊری شومالی',
@@ -2447,7 +2567,7 @@
 			inputmethods: [ 'lud-transliteration' ]
 		},
 		gom: {
-			autonym: 'गोवा कोंकणी / Gova Konknni',
+			autonym: 'गोंयची कोंकणी / Gõychi Konknni',
 			inputmethods: [ 'hi-transliteration', 'hi-inscript', 'gom-inscript2' ]
 		},
 		gu: {
@@ -2534,6 +2654,10 @@
 			autonym: 'ລາວ',
 			inputmethods: [ 'lo-kbd' ]
 		},
+		lut: {
+			autonym: 'dxʷləšucid',
+			inputmethods: [ 'lut-tulalip' ]
+		},
 		mai: {
 			autonym: 'मैथिली',
 			inputmethods: [ 'mai-inscript', 'mai-inscript2' ]
@@ -2548,7 +2672,11 @@
 		},
 		mn: {
 			autonym: 'Монгол',
-			inputmethods: [ 'mn-cyrl' ]
+			inputmethods: [ 'mn-cyrl', 'mn-trad', 'mn-todo', 'mn-tradali', 'mn-todoali', 'phagspa' ]
+		},
+		mnc: {
+			autonym: 'ᠮᠠᠨᠵᡠ',
+			inputmethods: [ 'mnc', 'mnc-ali' ]
 		},
 		mni: {
 			autonym: 'Manipuri',
@@ -2560,7 +2688,7 @@
 		},
 		my: {
 			autonym: 'မြန်မာ',
-			inputmethods: [ 'my-xkb' ]
+			inputmethods: [ 'my-mm3', 'my-xkb' ]
 		},
 		ne: {
 			autonym: 'नेपाली',
@@ -2586,9 +2714,17 @@
 			autonym: 'ਪੰਜਾਬੀ',
 			inputmethods: [ 'pa-transliteration', 'pa-inscript', 'pa-phonetic', 'pa-inscript2', 'pa-jhelum' ]
 		},
+		pms: {
+			autonym: 'Piemontèis',
+			inputmethods: [ 'pms' ]
+		},
 		rif: {
 			autonym: 'ⵜⴰⵔⵉⴼⵉⵜ',
 			inputmethods: [ 'ber-tfng' ]
+		},
+		'roa-tara': {
+			autonym: 'Tarandine',
+			inputmethods: [ 'roa-tara-GVU' ]
 		},
 		ru: {
 			autonym: 'русский',
@@ -2626,6 +2762,10 @@
 			autonym: 'සිංහල',
 			inputmethods: [ 'si-singlish', 'si-wijesekara' ]
 		},
+		sjo: {
+			autonym: 'ᠰᡞᠪᡝ',
+			inputmethods: [ 'sjo' ]
+		},
 		sk: {
 			autonym: 'Slovenčina',
 			inputmethods: [ 'sk-kbd' ]
@@ -2644,7 +2784,7 @@
 		},
 		tcy: {
 			autonym: 'ತುಳು',
-			inputmethods: [ 'kn-transliteration' ]
+			inputmethods: [ 'kn-transliteration', 'kn-inscript', 'kn-kgp', 'kn-inscript2' ]
 		},
 		te: {
 			autonym: 'తెలుగు',
@@ -2654,9 +2794,21 @@
 			autonym: 'ไทย',
 			inputmethods: [ 'th-kedmanee', 'th-pattachote' ]
 		},
+		ti: {
+			autonym: 'ትግርኛ',
+			inputmethods: [ 'ti-geezim' ]
+		},
+		tig: {
+			autonym: 'ትግረ',
+			inputmethods: [ 'tig-geezim' ]
+		},
 		tkr: {
 			autonym: 'цӀаӀхна миз',
 			inputmethods: [ 'cyrl-palochka' ]
+		},
+		tw: {
+			autonym: 'Twi',
+			inputmethods: [ 'ak-qx' ]
 		},
 		tzm: {
 			autonym: 'ⵜⴰⵎⴰⵣⵉⵖⵜ',
@@ -2683,8 +2835,12 @@
 			inputmethods: [ 'uz-kbd' ]
 		},
 		vec: {
-			autonym: 'Venetian',
+			autonym: 'Vèneto',
 			inputmethods: [ 'vec-GVU' ]
+		},
+		wo: {
+			autonym: 'Wolof',
+			inputmethods: [ 'wo-alt' ]
 		},
 		yo: {
 			autonym: 'Yorùbá',

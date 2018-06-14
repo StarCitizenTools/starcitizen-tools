@@ -6,7 +6,7 @@
  * @author Siebrand Mazeland
  * @author Niklas Laxström
  * @copyright Copyright © 2008-2013 Siebrand Mazeland, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -39,7 +39,7 @@ class StatsTable {
 	/**
 	 * @var Message[]
 	 */
-	protected $extraColumns = array();
+	protected $extraColumns = [];
 
 	public function __construct() {
 		$this->lang = RequestContext::getMain()->getLanguage();
@@ -55,7 +55,7 @@ class StatsTable {
 	 * @return string Html td element.
 	 */
 	public function element( $in, $bgcolor = '', $sort = '' ) {
-		$attributes = array();
+		$attributes = [];
 
 		if ( $sort ) {
 			$attributes['data-sort-value'] = $sort;
@@ -72,9 +72,9 @@ class StatsTable {
 	}
 
 	public function getBackgroundColor( $subset, $total, $fuzzy = false ) {
-		wfSuppressWarnings();
+		MediaWiki\suppressWarnings();
 		$v = round( 255 * $subset / $total );
-		wfRestoreWarnings();
+		MediaWiki\restoreWarnings();
 
 		if ( $fuzzy ) {
 			// Weigh fuzzy with factor 20.
@@ -89,16 +89,17 @@ class StatsTable {
 
 		if ( $v < 128 ) {
 			// Red to Yellow
-			$red = 'FF';
-			$green = sprintf( '%02X', 2 * $v );
+			$red = 0.26 * $v + 221;
+			$green = 1.33 * $v + 33;
+			$blue = 51;
 		} else {
 			// Yellow to Green
-			$red = sprintf( '%02X', 2 * ( 255 - $v ) );
-			$green = 'FF';
+			$red = 2 * ( 255 - $v );
+			$green = 0.22 * ( 255 - $v ) + 175;
+			$blue = 0.67 * $v - 34;
 		}
-		$blue = '00';
 
-		return $red . $green . $blue;
+		return sprintf( '%02X%02X%02X', $red, $green, $blue );
 	}
 
 	/**
@@ -120,7 +121,7 @@ class StatsTable {
 	 * @return string HTML
 	 */
 	public function createColumnHeader( Message $msg ) {
-		return Html::element( 'th', array(), $msg->text() );
+		return Html::element( 'th', [], $msg->text() );
 	}
 
 	public function addExtraColumn( Message $column ) {
@@ -131,12 +132,12 @@ class StatsTable {
 	 * @return Message[]
 	 */
 	public function getOtherColumnHeaders() {
-		return array_merge( array(
+		return array_merge( [
 			wfMessage( 'translate-total' ),
 			wfMessage( 'translate-untranslated' ),
 			wfMessage( 'translate-percentage-complete' ),
 			wfMessage( 'translate-percentage-fuzzy' ),
-		), $this->extraColumns );
+		], $this->extraColumns );
 	}
 
 	/**
@@ -146,7 +147,7 @@ class StatsTable {
 		// Create table header
 		$out = Html::openElement(
 			'table',
-			array( 'class' => 'statstable wikitable mw-sp-translate-table' )
+			[ 'class' => 'statstable wikitable' ]
 		);
 
 		$out .= "\n\t" . Html::openElement( 'thead' );
@@ -171,7 +172,7 @@ class StatsTable {
 	 */
 	public function makeTotalRow( Message $message, $stats ) {
 		$out = "\t" . Html::openElement( 'tr' );
-		$out .= "\n\t\t" . Html::element( 'td', array(), $message->text() );
+		$out .= "\n\t\t" . Html::element( 'td', [], $message->text() );
 		$out .= $this->makeNumberColumns( $stats );
 		$out .= "\n\t" . Xml::closeElement( 'tr' ) . "\n";
 
@@ -189,7 +190,7 @@ class StatsTable {
 		$fuzzy = $stats[MessageGroupStats::FUZZY];
 
 		if ( $total === null ) {
-			$na = "\n\t\t" . Html::element( 'td', array( 'data-sort-value' => -1 ), '...' );
+			$na = "\n\t\t" . Html::element( 'td', [ 'data-sort-value' => -1 ], '...' );
 			$nap = "\n\t\t" . $this->element( '...', 'AFAFAF', -1 );
 			$out = $na . $na . $nap . $nap;
 
@@ -197,11 +198,11 @@ class StatsTable {
 		}
 
 		$out = "\n\t\t" . Html::element( 'td',
-			array( 'data-sort-value' => $total ),
+			[ 'data-sort-value' => $total ],
 			$this->lang->formatNum( $total ) );
 
 		$out .= "\n\t\t" . Html::element( 'td',
-			array( 'data-sort-value' => $total - $translated ),
+			[ 'data-sort-value' => $total - $translated ],
 			$this->lang->formatNum( $total - $translated ) );
 
 		if ( $total === 0 ) {
@@ -226,7 +227,7 @@ class StatsTable {
 	/**
 	 * Makes a nice print from plain float.
 	 * @param number $num
-	 * @param string  $to floor or ceil
+	 * @param string $to floor or ceil
 	 * @return string Plain text
 	 */
 	public function formatPercentage( $num, $to = 'floor' ) {
@@ -246,7 +247,7 @@ class StatsTable {
 
 		// Bold for meta groups.
 		if ( $group->isMeta() ) {
-			$groupLabel = Html::rawElement( 'b', array(), $groupLabel );
+			$groupLabel = Html::rawElement( 'b', [], $groupLabel );
 		}
 
 		return $groupLabel;
@@ -260,12 +261,12 @@ class StatsTable {
 	 * @return string Html
 	 */
 	public function makeGroupLink( MessageGroup $group, $code, $params ) {
-		$queryParameters = $params + array(
+		$queryParameters = $params + [
 			'group' => $group->getId(),
 			'language' => $code
-		);
+		];
 
-		$attributes = array();
+		$attributes = [];
 
 		$translateGroupLink = Linker::link(
 			$this->translate, $this->getGroupLabel( $group ), $attributes, $queryParameters
@@ -286,11 +287,11 @@ class StatsTable {
 
 		$blacklisted = null;
 
-		$checks = array(
+		$checks = [
 			$groupId,
 			strtok( $groupId, '-' ),
 			'*'
-		);
+		];
 
 		foreach ( $checks as $check ) {
 			if ( isset( $wgTranslateBlacklist[$check] ) && isset( $wgTranslateBlacklist[$check][$code] ) ) {
@@ -308,7 +309,7 @@ class StatsTable {
 			$blacklisted = true;
 		}
 
-		$include = Hooks::run( 'Translate:MessageGroupStats:isIncluded', array( $groupId, $code ) );
+		$include = Hooks::run( 'Translate:MessageGroupStats:isIncluded', [ $groupId, $code ] );
 		if ( !$include ) {
 			$blacklisted = true;
 		}
@@ -325,11 +326,11 @@ class StatsTable {
 	public static function formatTooltip( $text ) {
 		$wordSeparator = wfMessage( 'word-separator' )->text();
 
-		$text = strtr( $text, array(
+		$text = strtr( $text, [
 			"\n" => $wordSeparator,
 			"\r" => $wordSeparator,
 			"\t" => $wordSeparator,
-		) );
+		] );
 
 		return $text;
 	}

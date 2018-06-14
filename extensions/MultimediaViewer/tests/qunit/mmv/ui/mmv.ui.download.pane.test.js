@@ -18,7 +18,7 @@
 ( function ( mw, $ ) {
 	QUnit.module( 'mmv.ui.download.pane', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Sanity test, object creation and UI construction', 9, function ( assert ) {
+	QUnit.test( 'Sanity test, object creation and UI construction', function ( assert ) {
 		var download = new mw.mmv.ui.download.Pane( $( '#qunit-fixture' ) );
 
 		assert.ok( download, 'download UI element is created.' );
@@ -33,7 +33,7 @@
 		assert.strictEqual( download.$previewLink.attr( 'href' ), undefined, 'Preview link href is empty.' );
 	} );
 
-	QUnit.test( 'set()/empty():', 5, function ( assert ) {
+	QUnit.test( 'set()/empty():', function ( assert ) {
 		var download = new mw.mmv.ui.download.Pane( $( '#qunit-fixture' ) ),
 			src = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
 			image = { // fake mw.mmv.model.Image
@@ -59,7 +59,7 @@
 		assert.strictEqual( download.imageExtension, undefined, 'Image extension is not set.' );
 	} );
 
-	QUnit.test( 'attach()/unattach():', 6, function ( assert ) {
+	QUnit.test( 'attach()/unattach():', function ( assert ) {
 		var hsstub, tstub,
 			download = new mw.mmv.ui.download.Pane( $( '#qunit-fixture' ) ),
 			image = {
@@ -74,7 +74,7 @@
 
 		// Triggering action events before attaching should do nothing
 		download.downloadSizeMenu.getMenu().emit(
-			'choose', download.downloadSizeMenu.getMenu().getSelectedItem() );
+			'choose', download.downloadSizeMenu.getMenu().findSelectedItem() );
 		download.$selectionArrow.click();
 
 		assert.ok( !hsstub.called, 'handleSizeSwitch not called' );
@@ -87,7 +87,7 @@
 
 		// Action events should be handled now
 		download.downloadSizeMenu.getMenu().emit(
-			'choose', download.downloadSizeMenu.getMenu().getSelectedItem() );
+			'choose', download.downloadSizeMenu.getMenu().findSelectedItem() );
 		download.$selectionArrow.click();
 
 		assert.ok( hsstub.called, 'handleSizeSwitch was called' );
@@ -100,14 +100,14 @@
 
 		// Triggering action events now that we are unattached should do nothing
 		download.downloadSizeMenu.getMenu().emit(
-			'choose', download.downloadSizeMenu.getMenu().getSelectedItem() );
+			'choose', download.downloadSizeMenu.getMenu().findSelectedItem() );
 		download.$selectionArrow.click();
 
 		assert.ok( !hsstub.called, 'handleSizeSwitch not called' );
 		assert.ok( !tstub.called, 'Menu selection did not happen' );
 	} );
 
-	QUnit.test( 'handleSizeSwitch():', 3, function ( assert ) {
+	QUnit.test( 'handleSizeSwitch():', function ( assert ) {
 		var download = new mw.mmv.ui.download.Pane( $( '#qunit-fixture' ) ),
 			newImageUrl = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/NewFoobar.jpg';
 
@@ -119,7 +119,7 @@
 			assert.strictEqual( url, newImageUrl, 'URL passed to setDownloadUrl is correct' );
 		};
 
-		download.handleSizeSwitch( download.downloadSizeMenu.getMenu().getSelectedItem() );
+		download.handleSizeSwitch( download.downloadSizeMenu.getMenu().findSelectedItem() );
 
 		assert.ok( download.$downloadButton.html().match( /original.*/ ), 'Button message updated.' );
 
@@ -129,10 +129,10 @@
 			assert.ok( false, 'Should not fetch the thumbnail if the image is original size.' );
 		};
 
-		download.handleSizeSwitch( download.downloadSizeMenu.getMenu().getSelectedItem() );
+		download.handleSizeSwitch( download.downloadSizeMenu.getMenu().findSelectedItem() );
 	} );
 
-	QUnit.test( 'setButtonText() sanity check:', 2, function ( assert ) {
+	QUnit.test( 'setButtonText() sanity check:', function ( assert ) {
 		var download = new mw.mmv.ui.download.Pane( $( '#qunit-fixture' ) ),
 			message;
 
@@ -144,14 +144,14 @@
 		assert.notStrictEqual( download.$downloadButton.html(), message, 'Button text was updated' );
 	} );
 
-	QUnit.test( 'getExtensionFromUrl():', 1, function ( assert ) {
+	QUnit.test( 'getExtensionFromUrl():', function ( assert ) {
 		var download = new mw.mmv.ui.download.Pane( $( '#qunit-fixture' ) );
 
 		assert.strictEqual( download.getExtensionFromUrl( 'http://example.com/bing/foo.bar.png' ),
 			'png', 'Extension is parsed correctly' );
 	} );
 
-	QUnit.test( 'setDownloadUrl', 3, function ( assert ) {
+	QUnit.test( 'setDownloadUrl', function ( assert ) {
 		var download = new mw.mmv.ui.download.Pane( $( '#qunit-fixture' ) ),
 			imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/NewFoobar.jpg';
 

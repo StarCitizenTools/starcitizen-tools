@@ -14,17 +14,23 @@
  *
  * @file
  * @ingroup Extensions
- * @licence GNU General Public Licence 2.0 or later
- * @licence MIT License
+ * @license GPL-2.0-or-later
+ * @license MIT License
  */
-require_once __DIR__ . '/../../data/LanguageNameSearch.php';
-class LanguageSearchTest extends PHPUnit_Framework_TestCase {
+
+/**
+ * @covers LanguageNameSearch
+ */
+class LanguageSearchTest extends PHPUnit\Framework\TestCase {
 	/**
 	 * @dataProvider searchDataProvider
 	 */
 	public function testSearch( $searchKey, $expected ) {
-		$actual = LanguageNameSearch::search( $searchKey, 1 );
+		$actual = LanguageNameSearch::search( $searchKey, 1, 'en' );
+		// This is for better error messages
 		$this->assertEquals( $expected, $actual );
+		// This is for identical order
+		$this->assertSame( $expected, $actual );
 	}
 
 	public function searchDataProvider() {
@@ -34,8 +40,8 @@ class LanguageSearchTest extends PHPUnit_Framework_TestCase {
 			]
 			],
 			[ 'മല', [
-				'ml' => 'മലയാളം',
 				'mg' => 'മലഗാസി',
+				'ml' => 'മലയാളം',
 				'ms' => 'മലെയ്',
 			]
 			],
@@ -43,18 +49,72 @@ class LanguageSearchTest extends PHPUnit_Framework_TestCase {
 				'fi' => 'φινλανδικά',
 			]
 			],
-			[ 'blah', []
+			[ 'blargh', []
 			],
 			[ 'الفرنسية', [
 				'fr' => 'الفرنسية',
-				'fr-ca' => 'الفرنسية الكندية',
 				'fr-ch' => 'الفرنسية السويسرية',
-				'frm' => 'الفرنسية الوسطى',
 				'fro' => 'الفرنسية القديمة',
+				'frc' => 'الفرنسية الكاجونية',
+				'crs' => 'الفرنسية الكريولية السيشيلية',
+				'fr-ca' => 'الفرنسية الكندية',
+				'frm' => 'الفرنسية الوسطى',
 			]
 			],
 			[ 'മലയളം', [
 				'ml' => 'മലയാളം',
+			]
+			],
+			[ 'punja', [
+				'pa' => class_exists( 'LanguageNames' ) ? 'punjabi' : 'punjaabi sennii',
+				'pnb' => 'punjabi western',
+			]
+			],
+			[ 'castellano', [
+				'es' => 'castellano',
+			]
+			],
+			[ 'hayeren', [
+				'hy' => 'hayeren',
+			]
+			],
+			[ 'kartuli', [
+				'ka' => 'kartuli',
+			]
+			],
+			[ 'qartuli', [
+				'ka' => 'qartuli',
+			]
+			],
+			[ 'nihongo', [
+				'ja' => 'nihongo',
+			]
+			],
+			[ 'にほんご', [
+				'ja' => 'にほんご',
+			]
+			],
+			[ 'valencia', [
+				'ca' => 'valencia',
+			]
+			],
+			[ 'chinese', [
+				'zh' => 'chinese',
+				'zh-cn' => 'chinese (china)',
+				'zh-hk' => 'chinese (hong kong)',
+				'zh-min-nan' => 'chinese (min nan)',
+				'zh-sg' => 'chinese (singapore)',
+				'zh-tw' => 'chinese (taiwan)',
+				'zh-hans' => 'chinese simplified',
+				'zh-hant' => 'chinese traditional',
+				'zh-classical' => 'chinese — classical chinese',
+				'gan' => 'chinese — gan chinese',
+				'hak' => 'chinese — hakka chinese',
+				'nan' => 'chinese — isi-min nan chinese',
+				'wuu' => 'chinese — isi-wu chinese',
+				'hsn' => 'chinese — isi-xiang chinese',
+				'lzh' => 'chinese — literary chinese',
+				'cdo' => 'chinese — min dong chinese',
 			]
 			],
 			[ 'finish', [

@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"WikiPhoenix",
+			"Josve05a",
+			"Macofe",
+			"Hannibal-reserv"
+		]
+	},
+	"revisionslider": "Versionsreglage",
+	"revisionslider-preference-disable": "Visa inte versionsreglaget",
+	"revisionslider-desc": "Visar ett skjutreglage för att välja och jämföra versioner av en artikels historik",
+	"revisionslider-toggle-label": "Bläddra i historiken",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte}}",
+	"revisionslider-label-date": "Datum",
+	"revisionslider-label-page-size": "Sidstorlek",
+	"revisionslider-label-change-size": "Ändringsstorlek",
+	"revisionslider-label-comment": "Kommentar",
+	"revisionslider-label-username": "{{GENDER:$1|Användarnamn}}",
+	"revisionslider-minoredit": "Detta är en mindre ändring",
+	"revisionslider-loading-failed": "Versionsreglaget kunde inte laddas.",
+	"revisionslider-toggle-title-expand": "Öppna versionsreglaget",
+	"revisionslider-toggle-title-collapse": "Stäng versionsreglaget",
+	"revisionslider-turn-on-auto-expand-title": "Öppna alltid versionsreglaget",
+	"revisionslider-turn-off-auto-expand-title": "Öppna inte versionsreglaget alltid",
+	"revisionslider-arrow-tooltip-newer": "Se nyare versioner",
+	"revisionslider-arrow-tooltip-older": "Se äldre versioner",
+	"revisionslider-show-help-tooltip": "Visa hjälptext",
+	"revisionslider-help-dialog-slide1": "Versionsreglaget hjälper dig att navigera och jämföra versioner av en artikel. Den baseras på en [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider önskan] från tyskspråkiga Wikipedias gemenskap. Vi tar gärna emot feedback [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider här].",
+	"revisionslider-help-dialog-slide2": "Varje stapel representerar en version av artikeln. Staplar som pekar uppåt visar ökning i artikelstorlek, medan staplar som pekar neråt visar minskning i artikelstorlek, ändring 1 visar att material lagts till, medan ändring 2 visar att material tagits bort.",
+	"revisionslider-help-dialog-slide3a": "<p>För att jämföra specifika versioner, markera versionerna med den gula och blåa markören.</p><p>Den blåa markören avgör vilken den senare versionen ska vara, medan den gula markören avgör den äldre versionen.</p><p>Flytta markörerna genom att dra och släppa eller klicka på en stapel.</p>",
+	"revisionslider-help-dialog-slide4": "Använd framåt- och bakåtpilarna för att flytta genom artikelhistoriken och visa äldre eller nyare versioner.",
+	"revisionslider-tutorial": "Guide för hur versionsreglaget fungerar",
+	"revisionslider-previous-dialog": "Föregående",
+	"revisionslider-next-dialog": "Nästa",
+	"revisionslider-close-dialog": "Stäng"
+}

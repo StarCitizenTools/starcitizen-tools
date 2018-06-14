@@ -4,14 +4,14 @@
  * Finds external changes for file based message groups.
  *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @since 2013.12
  */
 class ExternalMessageSourceStateComparator {
 	/** Process all languages supported by the message group */
 	const ALL_LANGUAGES = 'all languages';
 
-	protected $changes = array();
+	protected $changes = [];
 
 	/**
 	 * Finds changes in external sources compared to wiki state.
@@ -33,7 +33,7 @@ class ExternalMessageSourceStateComparator {
 	 * @return array array[language code][change type] = change.
 	 */
 	public function processGroup( FileBasedMessageGroup $group, $languages ) {
-		$this->changes = array();
+		$this->changes = [];
 
 		if ( $languages === self::ALL_LANGUAGES ) {
 			$languages = $group->getTranslatableLanguages();
@@ -104,9 +104,9 @@ class ExternalMessageSourceStateComparator {
 	) {
 		/* This throws a warning if message definitions are not yet
 		 * cached and will read the file for definitions. */
-		wfSuppressWarnings();
+		MediaWiki\suppressWarnings();
 		$wiki = $group->initCollection( $code );
-		wfRestoreWarnings();
+		MediaWiki\restoreWarnings();
 		$wiki->filter( 'hastranslation', false );
 		$wiki->loadTranslations();
 		$wikiKeys = $wiki->getMessageKeys();
@@ -123,7 +123,6 @@ class ExternalMessageSourceStateComparator {
 
 		// Does not exist
 		if ( $file === false ) {
-
 			return;
 		}
 
@@ -149,6 +148,7 @@ class ExternalMessageSourceStateComparator {
 			$wikiMessage = $wiki[$key];
 			$wikiContent = $wikiMessage->translation();
 
+			// @todo: Fuzzy checking can also be moved to $ffs->isContentEqual();
 			// If FFS doesn't support it, ignore fuzziness as difference
 			$wikiContent = str_replace( TRANSLATE_FUZZY, '', $wikiContent );
 
@@ -157,7 +157,7 @@ class ExternalMessageSourceStateComparator {
 				$wikiContent = TRANSLATE_FUZZY . $wikiContent;
 			}
 
-			if ( self::compareContent( $sourceContent, $wikiContent ) ) {
+			if ( $ffs->isContentEqual( $sourceContent, $wikiContent ) ) {
 				// File and wiki stage agree, nothing to do
 				continue;
 			}
@@ -173,8 +173,8 @@ class ExternalMessageSourceStateComparator {
 				 * Hence we check that source === cache && cache !== wiki
 				 * and if so we skip this string. */
 				if (
-					!self::compareContent( $wikiContent, $cacheContent ) &&
-					self::compareContent( $sourceContent, $cacheContent )
+					!$ffs->isContentEqual( $wikiContent, $cacheContent ) &&
+					$ffs->isContentEqual( $sourceContent, $cacheContent )
 				) {
 					continue;
 				}
@@ -207,26 +207,12 @@ class ExternalMessageSourceStateComparator {
 				$this->addChange( 'deletion', $code, $key, null );
 			}
 		}
-
 	}
 
 	protected function addChange( $type, $language, $key, $content ) {
-		$this->changes[$language][$type][] = array(
+		$this->changes[$language][$type][] = [
 			'key' => $key,
 			'content' => $content,
-		);
-	}
-
-	/**
-	 * Compares two strings.
-	 * @todo Ignore changes in different way inlined plurals.
-	 * @todo Handle fuzzy state changes if FFS supports it.
-	 *
-	 * @param string $a
-	 * @param string $b
-	 * @return bool Whether two strings are equal
-	 */
-	protected static function compareContent( $a, $b ) {
-		return $a === $b;
+		];
 	}
 }

@@ -22,7 +22,7 @@
 				undefined,
 				undefined,
 				options.source,
-				options.author, 
+				options.author,
 				options.authorCount,
 				license ),
 			repoInfo = { displayName: options.siteName, getSiteLink:
@@ -31,12 +31,12 @@
 		return new mw.mmv.model.EmbedFileInfo( imageInfo, repoInfo, options.caption );
 	}
 
-	QUnit.test( 'EmbedFileFormatter constructor sanity check', 1, function ( assert ) {
+	QUnit.test( 'EmbedFileFormatter constructor sanity check', function ( assert ) {
 		var formatter = new mw.mmv.EmbedFileFormatter();
 		assert.ok( formatter, 'constructor with no argument works' );
 	} );
 
-	QUnit.test( 'getByline():', 5, function ( assert ) {
+	QUnit.test( 'getByline():', function ( assert ) {
 		var formatter = new mw.mmv.EmbedFileFormatter(),
 			author = '<span class="mw-mmv-author">Homer</span>',
 			source = '<span class="mw-mmv-source">Iliad</span>',
@@ -47,25 +47,24 @@
 		byline = formatter.getByline();
 		assert.strictEqual( byline, undefined, 'No argument case handled correctly.' );
 
-
 		// Attribution present
 		byline = formatter.getByline( author, source, attribution );
-		assert.ok( byline.match ( /Cat/ ), 'Attribution found in bylines' );
+		assert.ok( byline.match( /Cat/ ), 'Attribution found in bylines' );
 
 		// Author and source present
 		byline = formatter.getByline( author, source );
-		assert.ok( byline.match ( /Homer|Iliad/ ), 'Author and source found in bylines' );
+		assert.ok( byline.match( /Homer|Iliad/ ), 'Author and source found in bylines' );
 
 		// Only author present
 		byline = formatter.getByline( author );
-		assert.ok( byline.match ( /Homer/ ), 'Author found in bylines.' );
+		assert.ok( byline.match( /Homer/ ), 'Author found in bylines.' );
 
 		// Only source present
 		byline = formatter.getByline( undefined, source );
 		assert.ok( byline.match( /Iliad/ ), 'Source found in bylines.' );
 	} );
 
-	QUnit.test( 'getSiteLink():', 2, function ( assert ) {
+	QUnit.test( 'getSiteLink():', function ( assert ) {
 		var repoInfo = new mw.mmv.model.Repo( 'Wikipedia', '//wikipedia.org/favicon.ico', true ),
 			info = new mw.mmv.model.EmbedFileInfo( {}, repoInfo ),
 			formatter = new mw.mmv.EmbedFileFormatter(),
@@ -76,8 +75,7 @@
 		assert.ok( siteLink.indexOf( siteUrl ) !== -1, 'Site URL is present in site link' );
 	} );
 
-
-	QUnit.test( 'getThumbnailHtml():', 36, function ( assert ) {
+	QUnit.test( 'getThumbnailHtml():', function ( assert ) {
 		var formatter = new mw.mmv.EmbedFileFormatter(),
 			titleText = 'Music Room',
 			title = mw.Title.newFromText( titleText ),
@@ -114,7 +112,7 @@
 		assert.ok( generatedHtml.match( width ), 'Width appears in generated HTML' );
 		assert.ok( generatedHtml.match( height ), 'Height appears in generated HTML' );
 		// .includes() for checking the short url since it contains a ? (bad for regex). Could escape instead.
-		assert.ok( generatedHtml.includes( filePageShortUrl ), 'Short URL appears in generated HTML');
+		assert.ok( generatedHtml.includes( filePageShortUrl ), 'Short URL appears in generated HTML' );
 
 		// Bylines, no license and site
 		info = createEmbedFileInfo( { title: title, imgUrl: imgUrl, filePageUrl: filePageUrl,
@@ -130,7 +128,7 @@
 		assert.ok( generatedHtml.match( 'Iliad' ), 'Source appears in generated HTML' );
 		assert.ok( generatedHtml.match( width ), 'Width appears in generated HTML' );
 		assert.ok( generatedHtml.match( height ), 'Height appears in generated HTML' );
-		assert.ok( generatedHtml.includes( filePageShortUrl ), 'Short URL appears in generated HTML');
+		assert.ok( generatedHtml.includes( filePageShortUrl ), 'Short URL appears in generated HTML' );
 
 		// No bylines, license and site
 		info = createEmbedFileInfo( { title: title, imgUrl: imgUrl, filePageUrl: filePageUrl,
@@ -147,7 +145,7 @@
 		assert.ok( !generatedHtml.match( 'Iliad' ), 'Source should not appear in generated HTML' );
 		assert.ok( generatedHtml.match( width ), 'Width appears in generated HTML' );
 		assert.ok( generatedHtml.match( height ), 'Height appears in generated HTML' );
-		assert.ok( generatedHtml.includes( filePageShortUrl ), 'Short URL appears in generated HTML');
+		assert.ok( generatedHtml.includes( filePageShortUrl ), 'Short URL appears in generated HTML' );
 
 		// No bylines, no license and site
 		info = createEmbedFileInfo( { title: title, imgUrl: imgUrl, filePageUrl: filePageUrl,
@@ -162,11 +160,11 @@
 		assert.ok( !generatedHtml.match( 'Iliad' ), 'Source should not appear in generated HTML' );
 		assert.ok( generatedHtml.match( width ), 'Width appears in generated HTML' );
 		assert.ok( generatedHtml.match( height ), 'Height appears in generated HTML' );
-		assert.ok( generatedHtml.includes( filePageShortUrl ), 'Short URL appears in generated HTML');
+		assert.ok( generatedHtml.includes( filePageShortUrl ), 'Short URL appears in generated HTML' );
 
 	} );
 
-	QUnit.test( 'getThumbnailWikitext():', 3, function ( assert ) {
+	QUnit.test( 'getThumbnailWikitext():', function ( assert ) {
 		var formatter = new mw.mmv.EmbedFileFormatter(),
 			title = mw.Title.newFromText( 'File:Foobar.jpg' ),
 			imgUrl = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
@@ -188,7 +186,7 @@
 
 		// Title, width and no caption
 		info = createEmbedFileInfo( { title: title, imgUrl: imgUrl, filePageUrl: filePageUrl } );
-		wikitext = formatter.getThumbnailWikitextFromEmbedFileInfo( info , width );
+		wikitext = formatter.getThumbnailWikitextFromEmbedFileInfo( info, width );
 
 		assert.strictEqual(
 			wikitext,
@@ -205,7 +203,7 @@
 			'Wikitext generated correctly.' );
 	} );
 
-	QUnit.test( 'getCreditText():', 2, function ( assert ) {
+	QUnit.test( 'getCreditText():', function ( assert ) {
 		var txt, formatter = new mw.mmv.EmbedFileFormatter();
 
 		txt = formatter.getCreditText( {
@@ -248,7 +246,7 @@
 		assert.strictEqual( txt, 'By Author - Source, WTFPL v2, link', 'License message works' );
 	} );
 
-	QUnit.test( 'getCreditHtml():', 2, function ( assert ) {
+	QUnit.test( 'getCreditHtml():', function ( assert ) {
 		var html, formatter = new mw.mmv.EmbedFileFormatter();
 
 		html = formatter.getCreditHtml( {
@@ -260,14 +258,14 @@
 			imageInfo: {
 				author: 'Author',
 				source: 'Source',
-				descriptionShortUrl: 'link',
+				descriptionShortUrl: 'some link',
 				title: {
 					getNameText: function () { return 'Image Title'; }
 				}
 			}
 		} );
 
-		assert.strictEqual( html, 'By Author - Source, link', 'Sanity check' );
+		assert.strictEqual( html, 'By Author - Source, <a href="some link">Link</a>', 'Sanity check' );
 
 		html = formatter.getCreditHtml( {
 			repoInfo: {
@@ -278,7 +276,7 @@
 			imageInfo: {
 				author: 'Author',
 				source: 'Source',
-				descriptionShortUrl: 'link',
+				descriptionShortUrl: 'some link',
 				title: {
 					getNameText: function () { return 'Image Title'; }
 				},
@@ -290,6 +288,6 @@
 			}
 		} );
 
-		assert.strictEqual( html, 'By Author - Source, <a href="http://www.wtfpl.net/">WTFPL v2</a>, link', 'Sanity check' );
+		assert.strictEqual( html, 'By Author - Source, <a href="http://www.wtfpl.net/">WTFPL v2</a>, <a href="some link">Link</a>', 'Sanity check' );
 	} );
 }( mediaWiki ) );

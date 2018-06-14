@@ -23,30 +23,30 @@
 		return new mw.mmv.ui.StripeButtons( fixture );
 	}
 
-	QUnit.test( 'Sanity test, object creation and UI construction', 3, function ( assert ) {
+	QUnit.test( 'Sanity test, object creation and UI construction', function ( assert ) {
 		var buttons,
-		oldMwUserIsAnon = mw.user.isAnon;
+			oldMwUserIsAnon = mw.user.isAnon;
 
-	// first pretend we are anonymous
-	mw.user.isAnon = function () { return true; };
-	buttons = createStripeButtons();
+		// first pretend we are anonymous
+		mw.user.isAnon = function () { return true; };
+		buttons = createStripeButtons();
 
-	assert.ok( buttons, 'UI element is created.' );
-	assert.ok( buttons.buttons.$descriptionPage, 'File page button created for anon.' );
+		assert.ok( buttons, 'UI element is created.' );
+		assert.ok( buttons.buttons.$descriptionPage, 'File page button created for anon.' );
 
-	// now pretend we are logged in
-	mw.user.isAnon = function () { return false; };
-	buttons = createStripeButtons();
+		// now pretend we are logged in
+		mw.user.isAnon = function () { return false; };
+		buttons = createStripeButtons();
 
-	assert.strictEqual( buttons.buttons.$descriptionPage.length, 1, 'File page button created for logged in.' );
+		assert.strictEqual( buttons.buttons.$descriptionPage.length, 1, 'File page button created for logged in.' );
 
-	mw.user.isAnon = oldMwUserIsAnon;
+		mw.user.isAnon = oldMwUserIsAnon;
 	} );
 
-	QUnit.test( 'set()/empty() sanity test:', 1, function ( assert ) {
+	QUnit.test( 'set()/empty() sanity test:', function ( assert ) {
 		var buttons = createStripeButtons(),
-		fakeImageInfo = { descriptionUrl: '//commons.wikimedia.org/wiki/File:Foo.jpg' },
-		fakeRepoInfo = { displayName: 'Wikimedia Commons', isCommons: function () { return true; } };
+			fakeImageInfo = { descriptionUrl: '//commons.wikimedia.org/wiki/File:Foo.jpg' },
+			fakeRepoInfo = { displayName: 'Wikimedia Commons', isCommons: function () { return true; } };
 
 		buttons.set( fakeImageInfo, fakeRepoInfo );
 		buttons.empty();
@@ -54,7 +54,7 @@
 		assert.ok( true, 'No error on set()/empty().' );
 	} );
 
-	QUnit.test( 'Description page button', 3, function ( assert ) {
+	QUnit.test( 'Description page button', function ( assert ) {
 		var $qf = $( '#qunit-fixture' ),
 			buttons = new mw.mmv.ui.StripeButtons( $qf ),
 			button = buttons.buttons.$descriptionPage,

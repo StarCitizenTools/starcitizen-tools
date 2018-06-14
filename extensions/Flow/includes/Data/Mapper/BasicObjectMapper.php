@@ -26,8 +26,8 @@ class BasicObjectMapper implements ObjectMapper {
 		$this->fromStorageRow = $fromStorageRow;
 	}
 
-	static public function model( $className ) {
-		return new self( array( $className, 'toStorageRow' ), array( $className, 'fromStorageRow' ) );
+	public static function model( $className ) {
+		return new self( [ $className, 'toStorageRow' ], [ $className, 'fromStorageRow' ] );
 	}
 
 	public function toStorageRow( $object ) {
@@ -43,7 +43,7 @@ class BasicObjectMapper implements ObjectMapper {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function normalizeRow( array $row ) {
 		$object = $this->fromStorageRow( $row );

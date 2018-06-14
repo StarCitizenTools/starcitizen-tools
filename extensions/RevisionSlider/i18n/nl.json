@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sjoerddebruin",
+			"MrLeopold",
+			"Wiki13",
+			"Romaine"
+		]
+	},
+	"revisionslider": "Paginageschiedenisbalk",
+	"revisionslider-preference-disable": "Laat de paginageschiedenisbalk niet zien",
+	"revisionslider-desc": "Laat een balk zien tijdens het vergelijken van versies, waarmee andere versies kunnen worden geselecteerd en met elkaar kunnen worden vergeleken",
+	"revisionslider-toggle-label": "Door geschiedenis bladeren",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte|bytes}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte|bytes}}",
+	"revisionslider-label-date": "Datum",
+	"revisionslider-label-page-size": "Paginagrootte",
+	"revisionslider-label-change-size": "Wijziging in grootte",
+	"revisionslider-label-comment": "Bewerkingssamenvatting",
+	"revisionslider-label-username": "{{GENDER:$1|Gebruikersnaam}}",
+	"revisionslider-minoredit": "Dit is een kleine bewerking",
+	"revisionslider-loading-failed": "De paginageschiedenisbalk kan niet worden geladen.",
+	"revisionslider-toggle-title-expand": "Paginageschiedenisbalk openen",
+	"revisionslider-toggle-title-collapse": "Paginageschiedenisbalk inklappen",
+	"revisionslider-turn-on-auto-expand-title": "Paginageschiedenisbalk altijd uitklappen",
+	"revisionslider-turn-off-auto-expand-title": "Paginageschiedenisbalk niet automatisch uitklappen",
+	"revisionslider-arrow-tooltip-newer": "Nieuwere versies weergeven",
+	"revisionslider-arrow-tooltip-older": "Oudere versies weergeven",
+	"revisionslider-show-help-tooltip": "Hulptekst weergeven",
+	"revisionslider-help-dialog-slide1": "De paginageschiedenisbalk helpt bij het navigeren door en het vergelijken van versies van een pagina. Het is ontwikkeld op [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider wens] van de Duitstalige gemeenschap. Terugkoppeling is zeer welkom en kan [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider hier] worden achtergelaten.",
+	"revisionslider-help-dialog-slide2": "Elke kolom is een wijziging van de pagina (revisie). Kolommen boven de lijn tonen netto een groei in grootte van de pagina, kolommen onder de lijn een reductie. In de afbeelding is revisie 1 een groei, terwijl revisie 2 een netto verwijdering van inhoud representeert.",
+	"revisionslider-help-dialog-slide4": "Gebruik de pijltjes voor achteruit en voorwaarts om door de revisiegeschiedenis te gaan en oudere en nieuwere revisies weer te geven.",
+	"revisionslider-tutorial": "Paginageschiedenisbalk-handleiding",
+	"revisionslider-previous-dialog": "Vorige",
+	"revisionslider-next-dialog": "Volgende",
+	"revisionslider-close-dialog": "Sluiten"
+}

@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Vriullop",
+			"Abella"
+		]
+	},
+	"codemirror-desc": "Proporciona ressaltat de la sintaxi a l'editor de text al wiki",
+	"codemirror-toggle-label": "Ressaltat de la sintaxi",
+	"codemirror-beta-title": "Ressaltat de la sintaxi del text al wiki",
+	"codemirror-beta-desc": "El ressaltat de la sintaxi fa l'edició més fàcil utilitzant color i ombrejat per a distingir visualment el text de les pàgines i el codi per als enllaços, referències i plantilles.",
+	"codemirror-popup-btn-yes": "Proveu-lo",
+	"codemirror-popup-btn-no": "No, gràcies"
+}

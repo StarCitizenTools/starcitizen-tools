@@ -12,8 +12,6 @@ use Flow\Import\IImportTopic;
 use Flow\Import\ImportException;
 use Flow\Import\IObjectRevision;
 use Flow\Import\IRevisionableObject;
-use Flow\Import\LiquidThreadsApi\ConversionStrategy;
-use Iterator;
 use MWTimestamp;
 use Title;
 use User;
@@ -29,7 +27,7 @@ abstract class PageRevisionedObject implements IRevisionableObject {
 
 	/**
 	 * @param ImportSource $source
-	 * @param int          $pageId ID of the remote page
+	 * @param int $pageId ID of the remote page
 	 */
 	function __construct( $source, $pageId ) {
 		$this->importSource = $source;
@@ -58,7 +56,7 @@ abstract class PageRevisionedObject implements IRevisionableObject {
 	public function getRevisions() {
 		$pageData = $this->getRevisionData();
 		$scriptUser = $this->importSource->getScriptUser();
-		return new RevisionIterator( $pageData, $this, function( $data, $parent ) use ( $scriptUser ) {
+		return new RevisionIterator( $pageData, $this, function ( $data, $parent ) use ( $scriptUser ) {
 			return new ImportRevision( $data, $parent, $scriptUser );
 		} );
 	}
@@ -73,7 +71,7 @@ class ImportPost extends PageRevisionedObject implements IImportPost {
 
 	/**
 	 * @param ImportSource $source
-	 * @param array        $apiResponse
+	 * @param array $apiResponse
 	 */
 	public function __construct( ImportSource $source, array $apiResponse ) {
 		parent::__construct( $source, $apiResponse['rootid'] );
@@ -101,6 +99,7 @@ class ImportPost extends PageRevisionedObject implements IImportPost {
 	/**
 	 * Gets the username (or IP) from the provided signature.
 	 *
+	 * @param string $signatureText
 	 * @return string|null Returns username, IP, or null if none could be detected
 	 */
 	public static function extractUserFromSignature( $signatureText ) {
@@ -172,7 +171,7 @@ class ImportPost extends PageRevisionedObject implements IImportPost {
 			$originalRevisions = parent::getRevisions();
 			$iterator = new AppendIterator();
 			$iterator->append( $originalRevisions );
-			$iterator->append( new ArrayIterator( array( $signatureRevision ) ) );
+			$iterator->append( new ArrayIterator( [ $signatureRevision ] ) );
 			return $iterator;
 		} else {
 			return parent::getRevisions();
@@ -187,15 +186,15 @@ class ImportPost extends PageRevisionedObject implements IImportPost {
 	 * @param string $signatureUsername Username extracted from signature
 	 * @return ScriptedImportRevision Generated top import revision
 	 */
-	 protected function createSignatureClarificationRevision( IObjectRevision $lastRevision, $authorUsername, $signatureUsername ) {
+	protected function createSignatureClarificationRevision( IObjectRevision $lastRevision, $authorUsername, $signatureUsername ) {
 		$wikitextForLastRevision = $lastRevision->getText();
 		$newWikitext = $wikitextForLastRevision;
 
 		$templateName = wfMessage( 'flow-importer-lqt-different-author-signature-template' )->inContentLanguage()->plain();
-		$arguments = implode( '|', array(
+		$arguments = implode( '|', [
 			"authorUser=$authorUsername",
 			"signatureUser=$signatureUsername",
-		) );
+		] );
 
 		$newWikitext .= "\n\n{{{$templateName}|$arguments}}";
 		$clarificationRevision = new ScriptedImportRevision(
@@ -229,12 +228,12 @@ class ImportTopic extends ImportPost implements IImportTopic, IObjectRevision {
 
 	public function getRevisions() {
 		// we only have access to a single revision of the topic
-		return new ArrayIterator( array( $this ) );
+		return new ArrayIterator( [ $this ] );
 	}
 
 	public function getReplies() {
 		$topPost = new ImportPost( $this->importSource, $this->apiResponse );
-		return new ArrayIterator( array( $topPost ) );
+		return new ArrayIterator( [ $topPost ] );
 	}
 
 	public function getTimestamp() {
@@ -259,7 +258,7 @@ class ImportTopic extends ImportPost implements IImportTopic, IObjectRevision {
 	}
 
 	/**
-	 * @return integer
+	 * @return int
 	 */
 	protected function getSummaryId() {
 		return $this->apiResponse['summaryid'];
@@ -268,6 +267,7 @@ class ImportTopic extends ImportPost implements IImportTopic, IObjectRevision {
 	/**
 	 * This needs to have a different value than the same apiResponse in an ImportPost.
 	 * The ImportPost version refers to the first response to the topic.
+	 * @return string
 	 */
 	public function getObjectKey() {
 		return 'topic' . $this->importSource->getObjectKey( 'thread_id', $this->apiResponse['id'] );
@@ -278,11 +278,11 @@ class ImportTopic extends ImportPost implements IImportTopic, IObjectRevision {
 	}
 
 	public function getLogParameters() {
-		return array(
+		return [
 			'lqt_thread_id' => $this->apiResponse['id'],
 			'lqt_orig_title' => $this->getTitle()->getPrefixedText(),
 			'lqt_subject' => $this->getText(),
-		);
+		];
 	}
 
 	public function getLqtThreadId() {
@@ -295,7 +295,7 @@ class ImportSummary extends PageRevisionedObject implements IImportSummary {
 	protected $source;
 
 	/**
-	 * @param array        $apiResponse
+	 * @param array $apiResponse
 	 * @param ImportSource $source
 	 * @throws ImportException
 	 */
@@ -310,7 +310,7 @@ class ImportSummary extends PageRevisionedObject implements IImportSummary {
 
 class ImportRevision implements IObjectRevision {
 	/** @var IImportObject **/
-	protected $parentObject;
+	protected $parent;
 
 	/** @var array **/
 	protected $apiResponse;
@@ -323,9 +323,9 @@ class ImportRevision implements IObjectRevision {
 	/**
 	 * Creates an ImportRevision based on a MW page revision
 	 *
-	 * @param array         $apiResponse  An element from api.query.revisions
+	 * @param array $apiResponse An element from api.query.revisions
 	 * @param IImportObject $parentObject
-	 * @param User          $scriptUser Account used when the imported revision is by a suppressed user
+	 * @param User $scriptUser Account used when the imported revision is by a suppressed user
 	 */
 	function __construct( array $apiResponse, IImportObject $parentObject, User $scriptUser ) {
 		$this->apiResponse = $apiResponse;
@@ -373,7 +373,7 @@ class ImportRevision implements IObjectRevision {
 class MovedImportTopic extends ImportTopic {
 	public function getReplies() {
 		$topPost = new MovedImportPost( $this->importSource, $this->apiResponse );
-		return new ArrayIterator( array( $topPost ) );
+		return new ArrayIterator( [ $topPost ] );
 	}
 }
 
@@ -395,6 +395,8 @@ class MovedImportRevision extends ImportRevision {
 	 * here, after importing the referenced thread LqtRedirector will
 	 * make that Thread page a redirect to the Flow topic, essentially
 	 * making these links still work.
+	 * @return string
+	 * @throws ImportException
 	 */
 	public function getText() {
 		$text = parent::getText();
@@ -407,11 +409,11 @@ class MovedImportRevision extends ImportRevision {
 		// To get the new talk page that this belongs to we would need to query the api
 		// for the new topic, for now not bothering.
 		$template = wfMessage( 'flow-importer-lqt-moved-thread-template' )->inContentLanguage()->plain();
-		$arguments = implode( '|', array(
+		$arguments = implode( '|', [
 			'author=' . parent::getAuthor(),
 			'date=' . MWTimestamp::getInstance( $this->apiResponse['timestamp'] )->timestamp->format( 'Y-m-d' ),
 			'title=' . $target->getPrefixedText(),
-		) );
+		] );
 
 		return "{{{$template}|$arguments}}";
 	}
@@ -420,7 +422,7 @@ class MovedImportRevision extends ImportRevision {
 // Represents a revision the script makes on its own behalf, using a script user
 class ScriptedImportRevision implements IObjectRevision {
 	/** @var IImportObject **/
-	protected $parentObject;
+	protected $parent;
 
 	/** @var User */
 	protected $destinationScriptUser;
@@ -493,11 +495,11 @@ class ImportHeader extends PageRevisionedObject implements IImportHeader {
 		if ( $this->pageData === null ) {
 			// Previous revisions of the header are preserved in the underlying wikitext
 			// page history. Only the top revision is imported.
-			$response = $this->api->retrieveTopRevisionByTitle( array( $this->title ) );
+			$response = $this->api->retrieveTopRevisionByTitle( [ $this->title ] );
 			$this->pageData = reset( $response );
 		}
 
-		$revisions = array();
+		$revisions = [];
 
 		if ( isset( $this->pageData['revisions'] ) && count( $this->pageData['revisions'] ) > 0 ) {
 			$lastLqtRevision = new ImportRevision(
@@ -509,7 +511,7 @@ class ImportHeader extends PageRevisionedObject implements IImportHeader {
 			$titleObject = Title::newFromText( $this->title );
 			$cleanupRevision = $this->createHeaderCleanupRevision( $lastLqtRevision, $titleObject );
 
-			$revisions = array( $lastLqtRevision, $cleanupRevision );
+			$revisions = [ $lastLqtRevision, $cleanupRevision ];
 		}
 
 		return new ArrayIterator( $revisions );
@@ -527,10 +529,10 @@ class ImportHeader extends PageRevisionedObject implements IImportHeader {
 		// matter.
 		$newWikitext = ConversionStrategy::removeLqtMagicWord( $wikitextForLastRevision );
 		$templateName = wfMessage( 'flow-importer-lqt-converted-template' )->inContentLanguage()->plain();
-		$arguments = implode( '|', array(
+		$arguments = implode( '|', [
 			'archive=' . $archiveTitle->getPrefixedText(),
 			'date=' . MWTimestamp::getInstance()->timestamp->format( 'Y-m-d' ),
-		) );
+		] );
 
 		$newWikitext .= "\n\n{{{$templateName}|$arguments}}";
 

@@ -18,14 +18,14 @@
 ( function ( mw, $ ) {
 	QUnit.module( 'mmv.provider.ImageInfo', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'ImageInfo constructor sanity check', 1, function ( assert ) {
+	QUnit.test( 'ImageInfo constructor sanity check', function ( assert ) {
 		var api = { get: function () {} },
 			imageInfoProvider = new mw.mmv.provider.ImageInfo( api );
 
 		assert.ok( imageInfoProvider );
 	} );
 
-	QUnit.asyncTest( 'ImageInfo get test', 27, function ( assert ) {
+	QUnit.test( 'ImageInfo get test', function ( assert ) {
 		var apiCallCount = 0,
 			api = { get: function () {
 				apiCallCount++;
@@ -84,7 +84,7 @@
 												source: 'commons-desc-page'
 											},
 											DateTimeOriginal: {
-												value: '<time class=\"dtstart\" datetime=\"2009-02-18\">18 February 2009</time>\u00a0(according to <a href=\"//en.wikipedia.org/wiki/Exchangeable_image_file_format\" class=\"extiw\" title=\"en:Exchangeable image file format\">EXIF</a> data)',
+												value: '<time class="dtstart" datetime="2009-02-18">18 February 2009</time>\u00a0(according to <a href="//en.wikipedia.org/wiki/Exchangeable_image_file_format" class="extiw" title="en:Exchangeable image file format">EXIF</a> data)',
 												source: 'commons-desc-page'
 											},
 											DateTime: {
@@ -97,11 +97,15 @@
 												hidden: ''
 											},
 											Artist: {
-												value: 'Wikimeda',
+												value: 'John Smith',
 												source: 'commons-desc-page'
 											},
 											AuthorCount: {
 												value: '2',
+												source: 'commons-desc-page'
+											},
+											Attribution: {
+												value: 'By John Smith',
 												source: 'commons-desc-page'
 											},
 											Permission: {
@@ -119,6 +123,10 @@
 											Restrictions: {
 												value: 'trademarked|insignia',
 												source: 'commons-desc-page'
+											},
+											DeletionReason: {
+												value: 'copyvio',
+												source: 'commons-desc-page'
 											}
 										},
 										mime: 'image/jpeg',
@@ -133,7 +141,7 @@
 			file = new mw.Title( 'File:Stuff.jpg' ),
 			imageInfoProvider = new mw.mmv.provider.ImageInfo( api );
 
-		imageInfoProvider.get( file ).then( function ( image ) {
+		return imageInfoProvider.get( file ).then( function ( image ) {
 			assert.strictEqual( image.title.getPrefixedDb(), 'File:Stuff.jpg', 'title is set correctly' );
 			assert.strictEqual( image.name, 'Some stuff', 'name is set correctly' );
 			assert.strictEqual( image.size, 346684, 'size is set correctly' );
@@ -148,8 +156,9 @@
 			assert.strictEqual( image.creationDateTime, '18 February 2009\u00a0(according to EXIF data)', 'creationDateTime is set correctly' );
 			assert.strictEqual( image.description, 'Wikis stuff', 'description is set correctly' );
 			assert.strictEqual( image.source, 'Wikipedia', 'source is set correctly' );
-			assert.strictEqual( image.author, 'Wikimeda', 'author is set correctly' );
+			assert.strictEqual( image.author, 'John Smith', 'author is set correctly' );
 			assert.strictEqual( image.authorCount, 2, 'author count is set correctly' );
+			assert.strictEqual( image.attribution, 'By John Smith', 'attribution is set correctly' );
 			assert.strictEqual( image.license.shortName, 'CC0', 'license short name is set correctly' );
 			assert.strictEqual( image.license.internalName, 'cc0', 'license internal name is set correctly' );
 			assert.strictEqual( image.license.longName, 'Creative Commons Public Domain Dedication', 'license long name is set correctly' );
@@ -157,32 +166,33 @@
 			assert.strictEqual( image.license.attributionRequired, false, 'Attribution required flag is honored' );
 			assert.strictEqual( image.license.nonFree, true, 'Non-free flag is honored' );
 			assert.strictEqual( image.permission, 'Do not use. Ever.', 'permission is set correctly' );
+			assert.strictEqual( image.deletionReason, 'copyvio', 'permission is set correctly' );
 			assert.strictEqual( image.latitude, 90, 'latitude is set correctly' );
 			assert.strictEqual( image.longitude, 180, 'longitude is set correctly' );
-			assert.deepEqual( image.restrictions, ['trademarked', 'insignia'], 'restrictions is set correctly' );
+			assert.deepEqual( image.restrictions, [ 'trademarked', 'insignia' ], 'restrictions is set correctly' );
 		} ).then( function () {
 			// call the data provider a second time to check caching
 			return imageInfoProvider.get( file );
 		} ).then( function () {
 			assert.strictEqual( apiCallCount, 1 );
-			QUnit.start();
 		} );
 	} );
 
-	QUnit.asyncTest( 'ImageInfo fail test', 1, function ( assert ) {
+	QUnit.test( 'ImageInfo fail test', function ( assert ) {
 		var api = { get: function () {
 				return $.Deferred().resolve( {} );
 			} },
 			file = new mw.Title( 'File:Stuff.jpg' ),
+			done = assert.async(),
 			imageInfoProvider = new mw.mmv.provider.ImageInfo( api );
 
 		imageInfoProvider.get( file ).fail( function () {
 			assert.ok( true, 'promise rejected when no data is returned' );
-			QUnit.start();
+			done();
 		} );
 	} );
 
-	QUnit.asyncTest( 'ImageInfo fail test 2', 1, function ( assert ) {
+	QUnit.test( 'ImageInfo fail test 2', function ( assert ) {
 		var api = { get: function () {
 				return $.Deferred().resolve( {
 					query: {
@@ -195,15 +205,16 @@
 				} );
 			} },
 			file = new mw.Title( 'File:Stuff.jpg' ),
+			done = assert.async(),
 			imageInfoProvider = new mw.mmv.provider.ImageInfo( api );
 
 		imageInfoProvider.get( file ).fail( function () {
 			assert.ok( true, 'promise rejected when imageinfo is missing' );
-			QUnit.start();
+			done();
 		} );
 	} );
 
-	QUnit.asyncTest( 'ImageInfo missing page test', 1, function ( assert ) {
+	QUnit.test( 'ImageInfo missing page test', function ( assert ) {
 		var api = { get: function () {
 				return $.Deferred().resolve( {
 					query: {
@@ -218,12 +229,13 @@
 				} );
 			} },
 			file = new mw.Title( 'File:Stuff.jpg' ),
+			done = assert.async(),
 			imageInfoProvider = new mw.mmv.provider.ImageInfo( api );
 
 		imageInfoProvider.get( file ).fail( function ( errorMessage ) {
 			assert.strictEqual( errorMessage, 'file does not exist: File:Stuff.jpg',
 				'error message is set correctly for missing file' );
-			QUnit.start();
+			done();
 		} );
 	} );
 }( mediaWiki, jQuery ) );

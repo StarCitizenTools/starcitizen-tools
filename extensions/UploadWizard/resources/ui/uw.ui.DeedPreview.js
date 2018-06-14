@@ -22,15 +22,11 @@
 	 * @class uw.ui.DeedPreview
 	 * @constructor
 	 * @param {mw.UploadWizardUpload} upload
-	 * @param {Object} config The UW config object.
 	 */
-	uw.ui.DeedPreview = function UWUIDeedPreview( upload, config ) {
+	uw.ui.DeedPreview = function UWUIDeedPreview( upload ) {
 		var $thumbnailDiv = $( '<div>' ).addClass( 'mwe-upwiz-thumbnail' );
 		this.$thumbnailDiv = $thumbnailDiv;
-		upload.getThumbnail(
-			config.thumbnailWidth,
-			config.thumbnailMaxHeight
-		).done( function ( thumb ) {
+		upload.getThumbnail().done( function ( thumb ) {
 			mw.UploadWizard.placeThumbnail( $thumbnailDiv, thumb );
 		} );
 		$( '#mwe-upwiz-deeds-thumbnails' ).append( this.$thumbnailDiv );

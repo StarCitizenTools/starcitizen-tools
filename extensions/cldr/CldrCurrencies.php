@@ -5,7 +5,7 @@
  *
  * @author Katie Horn
  * @copyright Copyright © 2007-2013
- * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
+ * @license GPL-2.0-or-later
  */
 class CldrCurrency {
 	private static $cache = [];
@@ -16,13 +16,13 @@ class CldrCurrency {
 	 * @throws Exception
 	 */
 	private static function loadData( $data ) {
-
 		// bail if we already have it
 		if ( isset( self::$cache[$data] ) ) {
 			return;
 		}
 
 		$filename = null;
+		$value = [];
 		switch ( $data ) {
 			case 'symbols' :
 				$filename = __DIR__ . '/CldrCurrency/Symbols.php';
@@ -83,7 +83,6 @@ class CldrCurrency {
 			// language code might or might not exist
 			if ( array_key_exists( $language_code, self::$cache['symbols'][$currency_code] ) ) {
 				if ( is_array( self::$cache['symbols'][$currency_code][$language_code] ) ) {
-
 					// did we specify a country? If not: Default.
 					if ( $country_code !== null &&
 						array_key_exists(

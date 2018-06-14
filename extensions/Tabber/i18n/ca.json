@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"BroOk"
+			"BroOk",
+			"Fitoschido"
 		]
 	},
-	"tabber-desc": "Permet crear tabs dins una pàgina"
+	"tabber-desc": "Permet crear pestanyes dins una pàgina"
 }

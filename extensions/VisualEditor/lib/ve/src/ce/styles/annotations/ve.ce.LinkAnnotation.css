@@ -1,21 +1,15 @@
 /*!
  * VisualEditor ContentEditable LanguageAnnotation styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ce-linkAnnotation-active {
-	box-shadow: 0 0 0 1px #C6E0FF;
-	border-radius: 0.2em;
+	box-shadow: 0 0 0 1px #c6e0ff;
+	border-radius: 2px;
 	padding: 2px;
 	margin: -2px;
-	background-color: #E6F1FF;
-}
-
-.ve-ce-nail {
-	/* Support: IE9 */
-	/* IE9 adds borders to linked images */
-	border: 0;
+	background-color: #e6f1ff;
 }
 
 .ve-ce-nail:not( .ve-ce-nail-debug ) {

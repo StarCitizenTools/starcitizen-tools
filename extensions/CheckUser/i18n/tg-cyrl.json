@@ -20,7 +20,6 @@
 	"checkuser-users": "Феҳрист кардани корбарон",
 	"checkuser-edits": "Намоиши вироишҳои марбут ба ин нишонаи IP",
 	"checkuser-ips": "Феҳрист кардани нишонаҳои IP",
-	"checkuser-search": "Ҷустуҷӯ",
 	"checkuser-period": "Тӯл:",
 	"checkuser-week-1": "ҳафта гузашта",
 	"checkuser-week-2": "ду ҳафтаи гузашта",
@@ -42,11 +41,11 @@
 	"checkuser-block-limit": "Теъдоди беш аз шумораи корбарон интихоб шудаанд.",
 	"checkuser-too-many": "Теъдоди натоиҷ бисёр зиёд аст. Лутфан CIDRро бориктар кунед. Дар зер нишонаҳои IP-ро мебинед (5000 ҳадди аксар, аз рбатартиби нинона):",
 	"checkuser-user-nonexistent": "Корбари мавриди назар вуҷуд надорад.",
-	"checkuser-search-form": "Пайдо кардани маворид дар гузоришҳо, ки $1 дар он $2 аст",
+	"checkuser-search": "Ҷустуҷӯ",
 	"checkuser-search-submit": "Ҷустуҷӯ",
 	"checkuser-search-initiator": "оғозгар",
 	"checkuser-search-target": "ҳадаф",
-	"checkuser-log-return": "Бозгашт ба форми аслии бозрасии корбар",
+	"checkuser-showmain": "Бозгашт ба форми аслии бозрасии корбар",
 	"checkuser-autocreate-action": "ба таври худкор эҷод шуда буд",
 	"checkuser-email-action": "почтаи электронӣ ба корбар \"$1\" фиристода шуд"
 }

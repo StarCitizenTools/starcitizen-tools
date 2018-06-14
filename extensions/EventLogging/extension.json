@@ -1,0 +1,147 @@
+{
+	"name": "EventLogging",
+	"version": "0.9.0",
+	"author": [
+		"Ori Livneh",
+		"Timo Tijhof",
+		"S Page",
+		"Matthew Flaschen"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:EventLogging",
+	"descriptionmsg": "eventlogging-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "other",
+	"namespaces": [
+		{
+			"id": 470,
+			"constant": "NS_SCHEMA",
+			"name": "Schema",
+			"defaultcontentmodel": "JsonSchema",
+			"protection": ["autoconfirmed"],
+			"conditional": true
+		},
+		{
+			"id": 471,
+			"constant": "NS_SCHEMA_TALK",
+			"name": "Schema_talk",
+			"conditional": true
+		}
+	],
+	"DefaultUserOptions": {
+		"eventlogging-display-web": 0
+	},
+	"ContentHandlers": {
+		"JsonSchema": "JsonSchemaContentHandler"
+	},
+	"ExtensionFunctions": [
+		"EventLoggingHooks::onSetup"
+	],
+	"MessagesDirs": {
+		"EventLogging": [
+			"i18n/core"
+		],
+		"JsonSchema": [
+			"i18n/jsonschema"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"EventLoggingNamespaces": "EventLogging.namespaces.php"
+	},
+	"AutoloadClasses": {
+		"EventLogging": "includes/EventLogging.php",
+		"EventLoggingHooks": "includes/EventLoggingHooks.php",
+		"JsonSchemaHooks": "includes/JsonSchemaHooks.php",
+		"JsonSchemaContent": "includes/JsonSchemaContent.php",
+		"JsonSchemaContentHandler": "includes/JsonSchemaContentHandler.php",
+		"RemoteSchema": "includes/RemoteSchema.php",
+		"ResourceLoaderSchemaModule": "includes/ResourceLoaderSchemaModule.php",
+		"JsonSchemaException": "includes/JsonSchema.php",
+		"JsonUtil": "includes/JsonSchema.php",
+		"TreeRef": "includes/JsonSchema.php",
+		"JsonTreeRef": "includes/JsonSchema.php",
+		"JsonSchemaIndex": "includes/JsonSchema.php",
+		"ApiJsonSchema": "includes/ApiJsonSchema.php"
+	},
+	"ResourceModules": {
+		"ext.eventLogging": {
+			"scripts": [
+				"modules/ext.eventLogging.core.js",
+				"modules/ext.eventLogging.debug.js"
+			],
+			"dependencies": [
+				"ext.eventLogging.subscriber",
+				"user.options"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.eventLogging.subscriber": {
+			"scripts": [
+				"modules/ext.eventLogging.subscriber.js",
+				"modules/ext.eventLogging.Schema.js"
+			],
+			"dependencies": [
+				"mediawiki.user"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.eventLogging.Schema": {
+			"dependencies": [
+				"ext.eventLogging.subscriber"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.eventLogging.jsonSchema": {
+			"scripts": "modules/ext.eventLogging.jsonSchema.js",
+			"position": "top"
+		},
+		"ext.eventLogging.jsonSchema.styles": {
+			"styles": "modules/ext.eventLogging.jsonSchema.css",
+			"position": "top"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "EventLogging"
+	},
+	"Hooks": {
+		"CanonicalNamespaces": [
+			"EventLoggingHooks::onCanonicalNamespaces"
+		],
+		"BeforePageDisplay": [
+			"EventLoggingHooks::onBeforePageDisplay",
+			"JsonSchemaHooks::onBeforePageDisplay"
+		],
+		"ResourceLoaderGetConfigVars": [
+			"EventLoggingHooks::onResourceLoaderGetConfigVars"
+		],
+		"ResourceLoaderTestModules": [
+			"EventLoggingHooks::onResourceLoaderTestModules"
+		],
+		"ResourceLoaderRegisterModules": [
+			"EventLoggingHooks::onResourceLoaderRegisterModules"
+		],
+		"GetPreferences": [
+			"EventLoggingHooks::onGetPreferences"
+		],
+		"CodeEditorGetPageLanguage": "JsonSchemaHooks::onCodeEditorGetPageLanguage",
+		"EditFilterMergedContent": "JsonSchemaHooks::onEditFilterMergedContent",
+		"MovePageIsValidMove": "JsonSchemaHooks::onMovePageIsValidMove",
+		"ApiMain::moduleManager": "JsonSchemaHooks::onApiMainModuleManager"
+	},
+	"config": {
+		"EventLoggingBaseUri": false,
+		"EventLoggingSchemaApiUri": "https://meta.wikimedia.org/w/api.php",
+		"EventLoggingDBname": "metawiki",
+		"EventLoggingSchemas": []
+	},
+	"manifest_version": 1
+}

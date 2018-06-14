@@ -18,14 +18,14 @@ class FFProbe {
 	 *
 	 * @var		string
 	 */
-	static private $file;
+	private $file;
 
 	/**
 	 * Meta Data Cache
 	 *
 	 * @var		array
 	 */
-	static private $metadata = null;
+	private $metadata = null;
 
 	/**
 	 * Main Constructor
@@ -125,6 +125,11 @@ class FFProbe {
 	private function invokeFFProbe() {
 		global $wgFFprobeLocation;
 
+		if (!file_exists($wgFFprobeLocation)) {
+			$this->metadata = [];
+			return false;
+		}
+
 		$json = shell_exec(escapeshellcmd($wgFFprobeLocation.' -v quiet -print_format json -show_format -show_streams ').escapeshellarg($this->file));
 
 		$metadata = @json_decode($json, true);
@@ -145,7 +150,7 @@ class StreamInfo {
 	 *
 	 * @var		array
 	 */
-	static private $info = null;
+	private $info = null;
 
 	/**
 	 * Main Constructor
@@ -256,7 +261,7 @@ class FormatInfo {
 	 *
 	 * @var		array
 	 */
-	static private $info = null;
+	private $info = null;
 
 	/**
 	 * Main Constructor

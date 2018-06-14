@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Annotation tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.Annotation' );
@@ -13,44 +13,27 @@ QUnit.test( 'getHashObject', function ( assert ) {
 				msg: 'Bold',
 				annotation: new ve.dm.BoldAnnotation( {
 					type: 'textStyle/bold',
-					attributes: { nodeName: 'b' },
-					originalDomElements: $( '<b>Foo</b>' ).toArray()
+					attributes: { nodeName: 'b' }
 				} ),
 				expected: {
 					type: 'textStyle/bold',
-					attributes: { nodeName: 'b' },
-					originalDomElements: '<b></b>'
+					attributes: { nodeName: 'b' }
 				}
 			},
 			{
-				msg: 'Bold with different content',
-				annotation: new ve.dm.BoldAnnotation( {
-					type: 'textStyle/bold',
-					attributes: { nodeName: 'b' },
-					originalDomElements: $( '<b>Bar</b>' ).toArray()
-				} ),
-				expected: {
-					type: 'textStyle/bold',
-					attributes: { nodeName: 'b' },
-					originalDomElements: '<b></b>'
-				}
-			},
-			{
-				msg: 'Italic with attributes',
+				msg: 'Italic with original DOM elements',
 				annotation: new ve.dm.ItalicAnnotation( {
 					type: 'textStyle/italic',
 					attributes: { nodeName: 'i' },
-					originalDomElements: $( '<i style="color:red;">Foo</i>' ).toArray()
+					originalDomElementsHash: 1
 				} ),
 				expected: {
 					type: 'textStyle/italic',
 					attributes: { nodeName: 'i' },
-					originalDomElements: '<i style="color:red;"></i>'
+					originalDomElementsHash: 1
 				}
 			}
 		];
-
-	QUnit.expect( cases.length );
 
 	for ( i = 0, l = cases.length; i < l; i++ ) {
 		assert.deepEqual( cases[ i ].annotation.getHashObject(), cases[ i ].expected, cases[ i ].msg );

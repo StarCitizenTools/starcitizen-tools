@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Toniher",
-			"Fitoschido"
+			"Fitoschido",
+			"Ssola"
 		]
 	},
 	"searchtranslations": "Cerca a les traduccions",
@@ -20,8 +21,10 @@
 	"tux-sst-prev": "Resultats anteriors",
 	"tux-sst-default": "Traduccions",
 	"tux-sst-translated": "Traduccions de $1",
+	"tux-sst-untranslated": "Sense traducció de $1",
 	"tux-sst-outdated": "Traduccions desactualitzades de $1",
 	"tux-sst-ellipsis-untranslated": "Sense traducció",
 	"tux-sst-ellipsis-outdated": "Traduccions desactualitzades",
-	"tux-sst-match-message": "Es mostren les traduccions que coincideixen amb qualssevol paraules de la cerca. $1"
+	"tux-sst-match-message": "Es mostren les traduccions que coincideixen amb qualssevol paraules de la cerca. $1",
+	"tux-sst-case-sensitive": "Distingeix entre majúscules i minúscules"
 }

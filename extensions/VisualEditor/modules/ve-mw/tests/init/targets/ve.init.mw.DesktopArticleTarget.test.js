@@ -1,15 +1,14 @@
 /*!
  * VisualEditor MediaWiki Initialization DesktopArticleTarget tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
-/*global mw */
 QUnit.module( 've.init.mw.DesktopArticleTarget', ve.test.utils.mwEnvironment );
 
 QUnit.test( 'compatibility', function ( assert ) {
-	var i, profile, list, matches, compatibility,
+	var i, profile, matches, compatibility,
 		cases = [
 			{
 				msg: 'Unidentified browser',
@@ -17,24 +16,14 @@ QUnit.test( 'compatibility', function ( assert ) {
 				matches: []
 			},
 			{
-				msg: 'IE7',
-				userAgent: 'Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 6.0)',
-				matches: [ 'blacklist' ]
-			},
-			{
-				msg: 'IE8',
-				userAgent: 'Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 5.2; Trident/4.0)',
-				matches: [ 'blacklist' ]
-			},
-			{
 				msg: 'IE9',
 				userAgent: 'Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US)',
-				matches: []
+				matches: [ 'blacklist' ]
 			},
 			{
 				msg: 'IE10',
 				userAgent: 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)',
-				matches: [ 'whitelist' ]
+				matches: [ 'blacklist' ]
 			},
 			{
 				msg: 'IE11',
@@ -59,17 +48,17 @@ QUnit.test( 'compatibility', function ( assert ) {
 			{
 				msg: 'Firefox 12',
 				userAgent: 'Mozilla/5.0 (compatible; Windows; U; Windows NT 6.2; WOW64; en-US; rv:12.0) Gecko/20120403211507 Firefox/12.0',
-				matches: [ 'blacklist' ]
+				matches: [ 'whitelist' ]
 			},
 			{
 				msg: 'Firefox 13',
 				userAgent: 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:13.0) Gecko/20100101 Firefox/13.0',
-				matches: [ 'blacklist' ]
+				matches: [ 'whitelist' ]
 			},
 			{
 				msg: 'Firefox 14',
 				userAgent: 'Mozilla/5.0 (Windows NT 6.1; rv:12.0) Gecko/20120403211507 Firefox/14.0.1',
-				matches: [ 'blacklist' ]
+				matches: [ 'whitelist' ]
 			},
 			{
 				msg: 'Firefox 15',
@@ -139,7 +128,7 @@ QUnit.test( 'compatibility', function ( assert ) {
 			{
 				msg: 'Android 2.3',
 				userAgent: 'Mozilla/5.0 (Linux; U; Android 2.3.5; en-us; HTC Vision Build/GRI40) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
-				matches: [ 'blacklist' ]
+				matches: []
 			},
 			{
 				msg: 'Android 3.0',
@@ -157,24 +146,29 @@ QUnit.test( 'compatibility', function ( assert ) {
 				matches: [ 'blacklist' ]
 			},
 			{
-				msg: 'Opera 12',
+				msg: 'Opera 12.16',
 				userAgent: 'Opera/9.80 (Windows NT 5.1) Presto/2.12.388 Version/12.16',
 				matches: []
 			},
 			{
+				msg: 'Opera 15.0',
+				userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.52 Safari/537.36 OPR/15.0.1147.100',
+				matches: [ 'whitelist' ]
+			},
+			{
 				msg: 'BlackBerry',
 				userAgent: 'Mozilla/5.0 (BlackBerry; U; BlackBerry 9900; en) AppleWebKit/534.11+ (KHTML, like Gecko) Version/7.1.0.346 Mobile Safari/534.11+',
-				matches: [ 'blacklist' ]
+				matches: []
 			},
 			{
 				msg: 'Amazon Silk desktop',
 				userAgent: 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us; Silk/1.0.13.81_10003810) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16 Silk-Accelerated=true',
-				matches: [ 'blacklist' ]
+				matches: []
 			},
 			{
 				msg: 'Amazon Silk mobile',
 				userAgent: 'Mozilla/5.0 (Linux; U; Android 4.0.3; en-us; KFTT Build/IML74K) AppleWebKit/535.19 (KHTML, like Gecko) Silk/2.1 Mobile Safari/535.19 Silk-Accelerated=true',
-				matches: [ 'blacklist' ]
+				matches: []
 			}
 		];
 
@@ -184,15 +178,18 @@ QUnit.test( 'compatibility', function ( assert ) {
 		blacklist: mw.libs.ve.blacklist
 	};
 
-	QUnit.expect( cases.length );
 	for ( i = 0; i < cases.length; i++ ) {
 		profile = $.client.profile( { userAgent: cases[ i ].userAgent, platform: '' } );
 		matches = [];
-		for ( list in compatibility ) {
+		// eslint-disable-next-line no-loop-func
+		[ 'blacklist', 'whitelist' ].every( function ( list ) {
 			if ( $.client.test( compatibility[ list ], profile, true ) ) {
 				matches.push( list );
+				// Don't check whitelist if on blacklist
+				return false;
 			}
-		}
+			return true;
+		} );
 		assert.deepEqual( matches, cases[ i ].matches,
 			cases[ i ].msg + ': ' + ( cases[ i ].matches.length ? cases[ i ].matches.join() : 'greylist (no matches)' ) );
 	}

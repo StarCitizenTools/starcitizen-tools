@@ -20,6 +20,7 @@
 
 	/**
 	 * Represents information about a single image
+	 *
 	 * @class mw.mmv.model.Image
 	 * @constructor
 	 * @param {mw.Title} title
@@ -30,6 +31,8 @@
 	 * @param {string} mimeType
 	 * @param {string} url URL to the image itself (original version)
 	 * @param {string} descriptionUrl URL to the image description page
+	 * @param {string} descriptionShortUrl A short URL to the description page for the image, using curid=...
+	 * @param {string} pageID pageId of the description page for the image
 	 * @param {string} repo The repository this image belongs to
 	 * @param {string} uploadDateTime The time and date the last upload occurred
 	 * @param {string} anonymizedUploadDateTime Anonymized and EL-friendly version of uploadDateTime
@@ -41,35 +44,37 @@
 	 * @param {mw.mmv.model.License} license
 	 * @param {string} permission
 	 * @param {string} attribution Custom attribution string that replaces credit line when set
+	 * @param {string} deletionReason
 	 * @param {number} latitude
 	 * @param {number} longitude
 	 * @param {string[]} restrictions
 	 */
 	function Image(
-			title,
-			name,
-			size,
-			width,
-			height,
-			mimeType,
-			url,
-			descriptionUrl,
-			descriptionShortUrl,
-			pageID,
-			repo,
-			uploadDateTime,
-			anonymizedUploadDateTime,
-			creationDateTime,
-			description,
-			source,
-			author,
-			authorCount,
-			license,
-			permission,
-			attribution,
-			latitude,
-			longitude,
-			restrictions
+		title,
+		name,
+		size,
+		width,
+		height,
+		mimeType,
+		url,
+		descriptionUrl,
+		descriptionShortUrl,
+		pageID,
+		repo,
+		uploadDateTime,
+		anonymizedUploadDateTime,
+		creationDateTime,
+		description,
+		source,
+		author,
+		authorCount,
+		license,
+		permission,
+		attribution,
+		deletionReason,
+		latitude,
+		longitude,
+		restrictions
 	) {
 		/** @property {mw.Title} title The title of the image file */
 		this.title = title;
@@ -135,6 +140,9 @@
 		/** @property {string} attribution custom attribution string set by uploader that replaces credit line */
 		this.attribution = attribution;
 
+		/** @property {string|null} reason for pending deletion, null if image is not about to be deleted */
+		this.deletionReason = deletionReason;
+
 		/** @property {number} latitude The latitude of the place where the image was created */
 		this.latitude = latitude;
 
@@ -155,17 +163,19 @@
 
 	/**
 	 * Constructs a new Image object out of an object containing
+	 *
 	 * imageinfo data from an API response.
+	 *
 	 * @static
 	 * @param {mw.Title} title
 	 * @param {Object} imageInfo
-	 * @returns {mw.mmv.model.Image}
+	 * @return {mw.mmv.model.Image}
 	 */
 	Image.newFromImageInfo = function ( title, imageInfo ) {
 		var name, uploadDateTime, anonymizedUploadDateTime, creationDateTime, imageData,
 			description, source, author, authorCount, license, permission, attribution,
-			latitude, longitude, restrictions,
-			innerInfo = imageInfo.imageinfo[0],
+			deletionReason, latitude, longitude, restrictions,
+			innerInfo = imageInfo.imageinfo[ 0 ],
 			extmeta = innerInfo.extmetadata;
 
 		if ( extmeta ) {
@@ -186,10 +196,10 @@
 			author = this.parseExtmeta( extmeta.Artist, 'string' );
 			authorCount = this.parseExtmeta( extmeta.AuthorCount, 'integer' );
 
-
 			license = this.newLicenseFromImageInfo( extmeta );
 			permission = this.parseExtmeta( extmeta.Permission, 'string' );
 			attribution = this.parseExtmeta( extmeta.Attribution, 'string' );
+			deletionReason = this.parseExtmeta( extmeta.DeletionReason, 'string' );
 			restrictions = this.parseExtmeta( extmeta.Restrictions, 'list' );
 
 			latitude = this.parseExtmeta( extmeta.GPSLatitude, 'float' );
@@ -199,7 +209,6 @@
 		if ( !name ) {
 			name = title.getNameText();
 		}
-
 
 		imageData = new Image(
 			title,
@@ -223,6 +232,7 @@
 			license,
 			permission,
 			attribution,
+			deletionReason,
 			latitude,
 			longitude,
 			restrictions
@@ -241,9 +251,10 @@
 	/**
 	 * Constructs a new License object out of an object containing
 	 * imageinfo data from an API response.
+	 *
 	 * @static
 	 * @param {Object} extmeta the extmeta array of the imageinfo data
-	 * @returns {mw.mmv.model.License|undefined}
+	 * @return {mw.mmv.model.License|undefined}
 	 */
 	Image.newLicenseFromImageInfo = function ( extmeta ) {
 		var license;
@@ -264,6 +275,7 @@
 
 	/**
 	 * Reads and parses a value from the imageinfo API extmetadata field.
+	 *
 	 * @param {Array} data
 	 * @param {string} type one of 'plaintext', 'string', 'float', 'boolean', 'list'
 	 * @return {string|number|boolean|Array} value or undefined if it is missing
@@ -282,9 +294,9 @@
 			return parseFloat( value );
 		} else if ( type === 'boolean' ) {
 			value = value.toString().toLowerCase().replace( /^\s+|\s+$/g, '' );
-			if ( value in { '1': null, 'yes': null, 'true': null } ) {
+			if ( value in { 1: null, yes: null, 'true': null } ) {
 				return true;
-			} else if ( value in { '0': null, 'no': null, 'false': null } ) {
+			} else if ( value in { 0: null, no: null, 'false': null } ) {
 				return false;
 			} else {
 				return undefined;
@@ -292,31 +304,34 @@
 		} else if ( type === 'list' ) {
 			return value === '' ? [] : value.split( '|' );
 		} else {
-			throw 'mw.mmv.model.Image.parseExtmeta: unknown type';
+			throw new Error( 'mw.mmv.model.Image.parseExtmeta: unknown type' );
 		}
 	};
 
 	/**
 	 * Add a thumb URL
+	 *
 	 * @param {number} width
 	 * @param {string} url
 	 */
 	IP.addThumbUrl = function ( width, url ) {
-		this.thumbUrls[width] = url;
+		this.thumbUrls[ width ] = url;
 	};
 
 	/**
 	 * Get a thumb URL if we have it.
+	 *
 	 * @param {number} width
-	 * @returns {string|undefined}
+	 * @return {string|undefined}
 	 */
 	IP.getThumbUrl = function ( width ) {
-		return this.thumbUrls[width];
+		return this.thumbUrls[ width ];
 	};
 
 	/**
 	 * Check whether the image has geolocation data.
-	 * @returns {boolean}
+	 *
+	 * @return {boolean}
 	 */
 	IP.hasCoords = function () {
 		return this.hasOwnProperty( 'latitude' ) && this.hasOwnProperty( 'longitude' ) &&

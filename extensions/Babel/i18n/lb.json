@@ -27,5 +27,8 @@
 	"babel-4-n": "Dëse Benotzer beherrscht [[$2|Lëtzebuergesch]] [[$1|bal wéi seng Mammesprooch]].",
 	"babel-5-n": "Dëse Benotzer huet [[$1|professionnell]] Kenntnesser vum [[$2|Lëtzebuergeschen]].",
 	"babel-N-n": "Dësem Benotzer seng [[$1|Mammesprooch]] ass [[$2|Lëtzebuergesch]].",
-	"babel-footer": "Benotzer pro Sprooch"
+	"babel-footer": "Benotzer pro Sprooch",
+	"apihelp-query+babel-description": "Informatioune kréien iwwer déi Sproochen déi de Benotzer kann",
+	"apihelp-query+babel-param-user": "Benotzer fir den d'Informatiounen ugefrot ginn",
+	"apihelp-query+babel-example-1": "Babel-Informatioun fir de Benotzer <kbd>Beispill</kbd> kréien"
 }

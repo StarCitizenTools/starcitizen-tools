@@ -1,8 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"राम प्रसाद जोशी"
+			"राम प्रसाद जोशी",
+			"Nirajan pant"
 		]
 	},
-	"mwe-upwiz-tutorial-error-localized-file-missing": "माफ गर्या, हामीले तमरो भाषामी ट्यूटोरियल पाएनौं, यैको सट्टामी $1 भाषा को प्रदर्शन गरियाको छ ।"
+	"tag-uploadwizard": "अपलोड विजार्ड",
+	"tag-uploadwizard-description": "अपलोड विजार्ड हताँ अरीयाऽ अपलोडअन",
+	"mwe-upwiz-tutorial-error-localized-file-missing": "माफ गर्या, हामीले तमरो भाषामी ट्यूटोरियल पाएनौं, यैको सट्टामी $1 भाषा को प्रदर्शन गरियाको छ ।",
+	"mwe-upwiz-patent-dialog-link-license": "आँजि सिकः"
 }

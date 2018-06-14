@@ -293,6 +293,7 @@
 						$input.focus();
 					},
 					languages: mw.ime.getLanguagesWithIME(),
+					ulsPurpose: 'ime-selector',
 					top: $input.offset().top
 				} );
 
@@ -301,7 +302,7 @@
 			helpHandler: function ( ime ) {
 				return $( '<a>' )
 					.attr( {
-						href: mw.msg( 'uls-ime-helppage' ).replace( '$1', ime ),
+						href: mw.msg( 'uls-ime-helppage', ime ),
 						target: '_blank',
 						title: $.i18n( 'ext-uls-ime-help' )
 					} )

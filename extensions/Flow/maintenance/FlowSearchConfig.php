@@ -21,10 +21,10 @@ use CirrusSearch\Maintenance\Validators\SpecificAliasValidator;
 use CirrusSearch\Maintenance\Validators\Validator;
 use CirrusSearch\Util;
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: dirname( __FILE__ ) . '/../../../maintenance/Maintenance.php' );
-require_once( __DIR__ . '/../../CirrusSearch/includes/Maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
+require_once __DIR__ . '/../../CirrusSearch/includes/Maintenance/Maintenance.php';
 
 /**
  * Similar to CirrusSearch's UpdateOneSearchIndexConfig.
@@ -163,7 +163,7 @@ class FlowSearchConfig extends Maintenance {
 			"rebuilding it.  Once you specify a new indexIdentifier for this wiki you'll have to " .
 			"run this script with the same identifier each time.  Defaults to 'current' which " .
 			"infers the currently in use identifier.  You can also use 'now' to set the identifier " .
-			"to the current time in seconds which should give you a unique identifier.", false, true);
+			"to the current time in seconds which should give you a unique identifier.", false, true );
 		$this->addOption( 'reindexAndRemoveOk', "If the alias is held by another index then " .
 			"reindex all documents from that index (via the alias) to this one, swing the " .
 			"alias to this index, and then remove other index.  You'll have to redo all updates ".
@@ -191,6 +191,8 @@ class FlowSearchConfig extends Maintenance {
 		$this->addOption( 'justAllocation', 'Just validate the shard allocation settings.  Use ' .
 			"when you need to apply new cache warmers but want to be sure that you won't apply any other " .
 			'changes at an inopportune time.' );
+
+		$this->requireExtension( 'Flow' );
 	}
 
 	protected function setProperties() {
@@ -208,7 +210,7 @@ class FlowSearchConfig extends Maintenance {
 
 		$this->indexType = 'flow'; // only 1 index for Flow
 		$this->startOver = $this->getOption( 'startOver', false );
-		$this->indexBaseName = $this->getOption( 'baseName', wfWikiId() );
+		$this->indexBaseName = $this->getOption( 'baseName', wfWikiID() );
 		$this->reindexAndRemoveOk = $this->getOption( 'reindexAndRemoveOk', false );
 		$this->reindexProcesses = $this->getOption( 'reindexProcesses', wfIsWindows() ? 1 : 5 );
 		$this->reindexChunkSize = $this->getOption( 'reindexChunkSize', 100 );
@@ -222,7 +224,7 @@ class FlowSearchConfig extends Maintenance {
 		$this->maintenanceTimeout = $wgFlowSearchMaintenanceTimeout;
 		$this->refreshInterval = $wgFlowSearchRefreshInterval;
 		$this->maxShardsPerNode = isset( $wgFlowSearchMaxShardsPerNode[$this->indexType] ) ? $wgFlowSearchMaxShardsPerNode[$this->indexType] : 'unlimited';
-		$this->cacheWarmers = isset( $wgFlowSearchCacheWarmers[$this->indexType] ) ? $wgFlowSearchCacheWarmers[$this->indexType] : array();
+		$this->cacheWarmers = isset( $wgFlowSearchCacheWarmers[$this->indexType] ) ? $wgFlowSearchCacheWarmers[$this->indexType] : [];
 
 		$this->indexIdentifier = $this->utils->pickIndexIdentifierFromOption( $this->getOption( 'indexIdentifier', 'current' ), $this->getIndexTypeName() );
 		$this->reindexAcceptableCountDeviation = Util::parsePotentialPercent( $this->getOption( 'reindexAcceptableCountDeviation', '5%' ) );
@@ -238,7 +240,7 @@ class FlowSearchConfig extends Maintenance {
 	 * @return Validator[]
 	 */
 	protected function getIndexSettingsValidators() {
-		$validators = array();
+		$validators = [];
 
 		$validators[] = new NumberOfShardsValidator( $this->getIndex(), $this->getShardCount(), $this );
 		$validators[] = new ReplicaRangeValidator( $this->getIndex(), $this->getReplicaCount(), $this );
@@ -252,7 +254,7 @@ class FlowSearchConfig extends Maintenance {
 	 * @return Validator[]
 	 */
 	protected function getValidators() {
-		$validators = array();
+		$validators = [];
 
 		if ( $this->getOption( 'justCacheWarmers', false ) ) {
 			$validators[] = new CacheWarmersValidator( $this->indexType, $this->getTopicType(), $this->cacheWarmers, $this );
@@ -273,7 +275,7 @@ class FlowSearchConfig extends Maintenance {
 		$validator->printDebugCheckConfig( $this->printDebugCheckConfig );
 		$validators[] = $validator;
 
-		$types = array( 'topic' => $this->getTopicType(), 'header' => $this->getHeaderType() );
+		$types = [ 'topic' => $this->getTopicType(), 'header' => $this->getHeaderType() ];
 		$validator = new MappingValidator( $this->getIndex(), $this->optimizeIndexForExperimentalHighlighter, $this->availablePlugins, $this->getMappingConfig(), $types, $this );
 		$validator->printDebugCheckConfig( $this->printDebugCheckConfig );
 		$validators[] = $validator;
@@ -281,10 +283,10 @@ class FlowSearchConfig extends Maintenance {
 		$validators[] = new CacheWarmersValidator( $this->indexType, $this->getTopicType(), $this->cacheWarmers, $this );
 		$validators[] = new CacheWarmersValidator( $this->indexType, $this->getHeaderType(), $this->cacheWarmers, $this );
 
-		$types = array( $this->getTopicType(), $this->getHeaderType() );
-		$oldTypes = array( $this->getOldTopicType(), $this->getOldHeaderType() );
+		$types = [ $this->getTopicType(), $this->getHeaderType() ];
+		$oldTypes = [ $this->getOldTopicType(), $this->getOldHeaderType() ];
 		$reindexer = new Reindexer( $this->getIndex(), Connection::getSingleton(), $types, $oldTypes, $this->getShardCount(), $this->getReplicaCount(), $this->maintenanceTimeout, $this->getMergeSettings(), $this->getMappingConfig(), $this );
-		$reindexParams = array( $this->reindexProcesses, $this->refreshInterval, $this->reindexRetryAttempts, $this->reindexChunkSize, $this->reindexAcceptableCountDeviation );
+		$reindexParams = [ $this->reindexProcesses, $this->refreshInterval, $this->reindexRetryAttempts, $this->reindexChunkSize, $this->reindexAcceptableCountDeviation ];
 		$reindexValidators = $this->getIndexSettingsValidators();
 		$validators[] = new SpecificAliasValidator( $this->getClient(), $this->getIndexTypeName(), $this->getSpecificIndexName(), $this->startOver, $reindexer, $reindexParams, $reindexValidators, $this->reindexAndRemoveOk, $this->tooFewReplicas, $this );
 
@@ -324,7 +326,7 @@ class FlowSearchConfig extends Maintenance {
 				}
 			}
 
-//			$this->updateVersions(); // @todo: might need this some day? (see CirrusSearch's UpdateOneSearchIndexConfig::updateVersions)
+			// $this->updateVersions(); // @todo: might need this some day? (see CirrusSearch's UpdateOneSearchIndexConfig::updateVersions)
 		} catch ( \Elastica\Exception\Connection\HttpException $e ) {
 			$message = $e->getMessage();
 			$this->output( "\nUnexpected Elasticsearch failure.\n" );
@@ -383,7 +385,7 @@ class FlowSearchConfig extends Maintenance {
 	 * @param array $availablePlugins
 	 * @return AnalysisConfigBuilder
 	 */
-	protected function pickAnalyzer( $langCode, array $availablePlugins = array() ) {
+	protected function pickAnalyzer( $langCode, array $availablePlugins = [] ) {
 		$analysisConfigBuilder = new AnalysisConfigBuilder( $langCode, $availablePlugins );
 		$this->outputIndented( 'Picking analyzer...' . $analysisConfigBuilder->getDefaultTextAnalyzerType() . "\n" );
 		return $analysisConfigBuilder;

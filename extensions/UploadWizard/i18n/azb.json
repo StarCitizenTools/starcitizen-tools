@@ -9,7 +9,7 @@
 		]
 	},
 	"uploadwizard": "یوکلمه سئهربازی",
-	"mwe-upwiz-code-unknown": "ناملوم دیل",
+	"api-error-noimageinfo": "یوکله‌مک باشاریلی اولدور، اما خیدمت‌چی فایلا گؤره هئچ بیر بیلگیلر وئرمه‌دی.",
 	"mwe-upwiz-step-tutorial": "اویرن",
 	"mwe-upwiz-step-file": "یوکله",
 	"mwe-upwiz-step-deeds": "یایلما (نشر) حقوق‌لار",
@@ -24,7 +24,6 @@
 	"mwe-upwiz-published": "یایینلانیب!",
 	"mwe-upwiz-failed": "یانلیش.",
 	"mwe-upwiz-remove": "سیل",
-	"mwe-upwiz-show-thumb": "کیچیک شکیل یوخدو",
 	"mwe-upwiz-upload": "یوکله",
 	"mwe-upwiz-progressbar-uploading": "فایل یوکلمه",
 	"mwe-upwiz-finished": "قورتولدی!",
@@ -32,7 +31,6 @@
 	"mwe-upwiz-copy-metadata-button": "اوزوندن گوتور",
 	"mwe-upwiz-copy-categories": "اوزوندن یازما{{PLURAL:$1|بؤلمه|بؤلمه‌لر}}",
 	"mwe-upwiz-desc": "شرح",
-	"mwe-upwiz-desc-add-0": "آچیقلاما آرتیر",
 	"mwe-upwiz-title": "باشلیق",
 	"mwe-upwiz-location": "یئرلشمه‌سی",
 	"mwe-upwiz-location-lat": "جغرافیایی ائنی",
@@ -76,7 +74,6 @@
 	"mwe-upwiz-license-gfdl": "گنو آزاد سندلشدیرمه مجوزلری",
 	"mwe-upwiz-license-custom-preview": "سیناق گؤستریشی",
 	"mwe-upwiz-categories": "بؤلمه‌لر",
-	"mwe-upwiz-feedback-blacklist-info-prompt": "[$1 آرتیق بیلگی]",
 	"mwe-upwiz-errordialog-ok": "اولدو",
 	"prefs-upwiz-licensing": "لیسانس"
 }

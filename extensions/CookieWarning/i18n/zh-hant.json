@@ -1,8 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"1233thehongkonger"
+			"1233thehongkonger",
+			"Kly"
 		]
 	},
+	"cookiewarning-info": "Cookies 幫助我們給予服務內容。依您有使用我們的服務，代表您同意我們使用 cookies。",
+	"cookiewarning-desc": "在頁面頂端提供有關 cookies 的通知",
+	"cookiewarning-moreinfo-label": "更多資訊",
 	"cookiewarning-ok-label": "確定"
 }

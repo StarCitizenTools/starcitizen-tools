@@ -2,8 +2,11 @@
 
 namespace PageImages\Tests;
 
+use IContextSource;
 use MediaWikiTestCase;
+use OutputPage;
 use PageImages;
+use SkinTemplate;
 use Title;
 
 /**
@@ -13,12 +16,13 @@ use Title;
  * @group Database
  *
  * @license WTFPL 2.0
- * @author Thiemo Mättig
+ * @author Thiemo Kreuz
  */
 class PageImagesTest extends MediaWikiTestCase {
 
-	public function testPagePropertyName() {
+	public function testPagePropertyNames() {
 		$this->assertSame( 'page_image', PageImages::PROP_NAME );
+		$this->assertSame( 'page_image_free', PageImages::PROP_NAME_FREE );
 	}
 
 	public function testConstructor() {
@@ -26,11 +30,37 @@ class PageImagesTest extends MediaWikiTestCase {
 		$this->assertInstanceOf( 'PageImages', $pageImages );
 	}
 
-	public function testGivenNonExistingPage_getPageImageReturnsFalse() {
-		$title = Title::newFromText( wfRandomString() );
-		$title->resetArticleID( 0 );
-
+	public function testGivenNonExistingPageGetPageImageReturnsFalse() {
+		$title = $this->newTitle();
 		$this->assertFalse( PageImages::getPageImage( $title ) );
+	}
+
+	public function testGetPropName() {
+		$this->assertSame( 'page_image', PageImages::getPropName( false ) );
+		$this->assertSame( 'page_image_free', PageImages::getPropName( true ) );
+	}
+
+	public function testGivenNonExistingPageOnBeforePageDisplayDoesNotAddMeta() {
+		$context = $this->getMock( IContextSource::class );
+		$context->method( 'getTitle' )
+			->will( $this->returnValue( $this->newTitle() ) );
+
+		$outputPage = $this->getMock(
+			OutputPage::class, [ 'addMeta' ], [ $context ] );
+		$outputPage->expects( $this->never() )
+			->method( 'addMeta' );
+
+		$skinTemplate = new SkinTemplate();
+		PageImages::onBeforePageDisplay( $outputPage, $skinTemplate );
+	}
+
+	/**
+	 * @return Title
+	 */
+	private function newTitle() {
+		$title = Title::newFromText( 'New' );
+		$title->resetArticleID( 0 );
+		return $title;
 	}
 
 }

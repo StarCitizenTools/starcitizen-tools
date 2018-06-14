@@ -13,9 +13,10 @@ class SpamRegex implements SpamFilter {
 	 * @param AbstractRevision $newRevision
 	 * @param AbstractRevision|null $oldRevision
 	 * @param Title $title
+	 * @param Title $ownerTitle
 	 * @return Status
 	 */
-	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title ) {
+	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title, Title $ownerTitle ) {
 		global $wgSpamRegex;
 
 		/*
@@ -28,7 +29,7 @@ class SpamRegex implements SpamFilter {
 		$text = $newRevision->getContentInWikitext();
 
 		// back compat, $wgSpamRegex may be a single string or an array of regexes
-		$regexes = (array) $wgSpamRegex;
+		$regexes = (array)$wgSpamRegex;
 
 		foreach ( $regexes as $regex ) {
 			if ( preg_match( $regex, $text, $matches ) ) {
@@ -46,6 +47,6 @@ class SpamRegex implements SpamFilter {
 	 */
 	public function enabled() {
 		global $wgSpamRegex;
-		return (bool) $wgSpamRegex;
+		return (bool)$wgSpamRegex;
 	}
 }

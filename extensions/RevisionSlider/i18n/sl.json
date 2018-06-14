@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Janezdrilc"
+		]
+	},
+	"revisionslider": "Redakcijski drsnik",
+	"revisionslider-preference-disable": "Ne prikaži redakcijskega drsnika",
+	"revisionslider-desc": "Prikaže drsnik, ki omogoča izbiranje in primerjanje med posameznimi redakcijami na primerjalni strani",
+	"revisionslider-toggle-label": "Brskaj po zgodovini",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|znak|znaka|znaki|znakov}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|znak|znaka|znaki|znakov}}",
+	"revisionslider-label-date": "Datum",
+	"revisionslider-label-page-size": "Velikost strani",
+	"revisionslider-label-change-size": "Razlika v velikosti",
+	"revisionslider-label-comment": "Komentar",
+	"revisionslider-label-username": "{{GENDER:$1|Uporabniško|Uporabničino}} ime",
+	"revisionslider-minoredit": "To je manjše urejanje",
+	"revisionslider-loading-failed": "Redakcijski drsnik se ni uspel naložiti.",
+	"revisionslider-toggle-title-expand": "Odpri redakcijski drsnik",
+	"revisionslider-toggle-title-collapse": "Zapri redakcijski drsnik",
+	"revisionslider-turn-on-auto-expand-title": "Vedno odpri redakcijski drsnik",
+	"revisionslider-turn-off-auto-expand-title": "Ne odpri samodejno redakcijskega drsnika",
+	"revisionslider-arrow-tooltip-newer": "Poglej novejše redakcije",
+	"revisionslider-arrow-tooltip-older": "Poglej starejše redakcije",
+	"revisionslider-show-help-tooltip": "Pokaži pomoč",
+	"revisionslider-help-dialog-slide1": "Redakcijski drsnik ti pomaga primerjati posamezne redakcije na primerjalni strani. Temelji na [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider ideji] iz seznama tehničnih želja nemške wiki skupnosti. Tvoje mnenje je zelo zaželeno in ga lahko podaš [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider tule].",
+	"revisionslider-help-dialog-slide2": "Vsak stolpec predstavlja posamezno redakcijo strani. Višina stolpca predstavlja razliko v velikosti znakov. Če je stolpec obrnjen navzgor (primer 1), pomeni, da je bila vsebina dodana, če je obrnjen navzdol (primer 2), pomeni, da je bila vsebina odvzeta.",
+	"revisionslider-help-dialog-slide3a": "<p>Za primerjanje posameznih redakcij uporabi rumeni in modri kazalnik.</p>\n<p>Modri kazalnik izbira med novejšimi redakcijami, rumeni pa med starejšimi.</p>\n<p>Kazalnika lahko prestavljaš s pomikanjem med držečim klikom ali z neposrednim klikom na stolpec.</p>",
+	"revisionslider-help-dialog-slide4": "Uporabi puščice za naprej in nazaj, da se ti izrišejo novejše in starejše redakcije.",
+	"revisionslider-tutorial": "Navodila za uporabo",
+	"revisionslider-previous-dialog": "Prejšnji",
+	"revisionslider-next-dialog": "Naslednji",
+	"revisionslider-close-dialog": "Zapri"
+}

@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Niharika29",
+			"Sfic"
+		]
+	},
+	"revisionslider": "अवतरन स्लाइडर",
+	"revisionslider-preference-disable": "अवतरन स्लाइडर ना दिखाये",
+	"revisionslider-desc": "अवतरन पृष्ठ पर अवतरन चुन्ने व तुलना करने के लिये अवतरन स्लाइडर दिखाता है",
+	"revisionslider-toggle-label": "बदलाव इतिहास देखें",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|बाइट|बाइटस}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|बाइट|बाइटस}}",
+	"revisionslider-label-date": "दिनांक",
+	"revisionslider-label-page-size": "पृष्ठ का आकार",
+	"revisionslider-label-change-size": "आकार बदलें",
+	"revisionslider-label-comment": "टिप्पणी",
+	"revisionslider-label-username": "{{GENDER:$1|सदस्यनाम}}:",
+	"revisionslider-minoredit": "यह एक छोटा बदलाव है",
+	"revisionslider-loading-failed": "अवतरन स्लाइडर दिखाया ना जा सका|",
+	"revisionslider-toggle-title-expand": "अवतरन स्लाइडर खोले",
+	"revisionslider-toggle-title-collapse": "अवतरन स्लाइडर बन्द करे",
+	"revisionslider-turn-on-auto-expand-title": "अवतरन स्लाइडर हमेशा खोले",
+	"revisionslider-turn-off-auto-expand-title": "अवतरन स्लाइडर अपने आप ना खोले",
+	"revisionslider-arrow-tooltip-newer": "नये अवतरण देखें",
+	"revisionslider-arrow-tooltip-older": "पुराने अवतरण देखें",
+	"revisionslider-show-help-tooltip": "सहायता संदेश देखें",
+	"revisionslider-help-dialog-slide1": "अवतरन स्लाइडर आपको भिन्न पृष्ठ के अवतरनओ की तुलना व उनमे नेविगेट करने में मदद करता है। यह जर्मन समुदाय की तकनीकी इच्छा सूची की एक [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider इच्छा] पर आधारित है। प्रतिक्रिया [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider यहा पर] सराहनीय है|",
+	"revisionslider-help-dialog-slide2": "प्रत्येक बार पृष्ठ के एक अवतरन को दर्शाता है| ऊपर के बार पृष्ठ के आकार मे हुई वृद्धि को दर्शाते है व नीचे के बार आकार मे हुए घटाव को। चित्र मे पेहले अवतरन ने पृष्ठ मे सामग्री जोडी व दूसरे ने सामग्री हटाई।",
+	"revisionslider-help-dialog-slide3a": "<p>दो अवतरनो मे तुलना करने के लिये अवतरनो को पीले व नीले काँटो से चुने।</p><p>नीला काँटा नए अवतरन को निर्धारित करता है व पीला वाला पुराने वाले को।</p><p> काँटो को बार पर खींचकर और छोड़कर प्र्योग करे।</p>",
+	"revisionslider-help-dialog-slide4": "अगले व पिछले तीर के प्रयोग से बदलाव के इतिहास के नए व पुराने अवतरण देखें।",
+	"revisionslider-tutorial": "अवतरन स्लाइडर शिक्षा",
+	"revisionslider-previous-dialog": "पिछला",
+	"revisionslider-next-dialog": "अगला",
+	"revisionslider-close-dialog": "बंद करें"
+}

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface TriggerRegistry class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -106,8 +106,7 @@ ve.ui.triggerRegistry.register(
 ve.ui.triggerRegistry.register(
 	'clear', {
 		mac: [
-			new ve.ui.Trigger( 'cmd+\\' ),
-			new ve.ui.Trigger( 'cmd+m' )
+			new ve.ui.Trigger( 'cmd+\\' )
 		],
 		pc: [
 			new ve.ui.Trigger( 'ctrl+\\' ),
@@ -198,6 +197,9 @@ ve.ui.triggerRegistry.register(
 	'selectAll', { mac: new ve.ui.Trigger( 'cmd+a' ), pc: new ve.ui.Trigger( 'ctrl+a' ) }
 );
 ve.ui.triggerRegistry.register(
+	'delete', { mac: new ve.ui.Trigger( 'ctrl+d' ) }
+);
+ve.ui.triggerRegistry.register(
 	'pasteSpecial', {
 		mac: new ve.ui.Trigger( 'cmd+option+shift+v' ),
 		pc: new ve.ui.Trigger( 'ctrl+shift+v' )
@@ -205,6 +207,9 @@ ve.ui.triggerRegistry.register(
 );
 ve.ui.triggerRegistry.register(
 	'findAndReplace', { mac: new ve.ui.Trigger( 'cmd+f' ), pc: new ve.ui.Trigger( 'ctrl+f' ) }
+);
+ve.ui.triggerRegistry.register(
+	'changeDirectionality', { mac: new ve.ui.Trigger( 'cmd+shift+x' ), pc: new ve.ui.Trigger( 'ctrl+shift+x' ) }
 );
 ve.ui.triggerRegistry.register(
 	'findNext', {

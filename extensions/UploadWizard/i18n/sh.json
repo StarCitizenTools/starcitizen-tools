@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Conquistador"
+			"Conquistador",
+			"OC Ripper"
 		]
 	},
+	"api-error-noimageinfo": "Postavljanje je uspjelo, ali server nam nije dao nikakvu informaciju o datoteci.",
 	"mwe-upwiz-license-custom-preview": "Pregled"
 }

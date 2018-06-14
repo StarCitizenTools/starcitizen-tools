@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Metalhead64",
+			"Cornelius Kibelka (WMDE)",
+			"ThePiscin"
+		]
+	},
+	"revisionslider": "Versionsblätterer",
+	"revisionslider-preference-disable": "Den Versionsblätterer nicht anzeigen",
+	"revisionslider-desc": "Zeigt eine Leiste an, mit der das Auswählen und Vergleichen von Versionen in der Vergleichsansicht ermöglicht wird.",
+	"revisionslider-toggle-label": "Versionsgeschichte durchsuchen",
+	"revisionslider-page-size": "{{PLURAL:$2|Ein Byte|$1 Bytes}}",
+	"revisionslider-change-size": "{{PLURAL:$3|Ein Byte|$1 Bytes}}",
+	"revisionslider-label-date": "Datum",
+	"revisionslider-label-page-size": "Seitengröße",
+	"revisionslider-label-change-size": "Größe der Änderung",
+	"revisionslider-label-comment": "Kommentar",
+	"revisionslider-label-username": "{{GENDER:$1|Benutzername}}",
+	"revisionslider-minoredit": "Dies ist eine kleine Bearbeitung",
+	"revisionslider-loading-failed": "Der Versionsblätterer konnte nicht geladen werden.",
+	"revisionslider-toggle-title-expand": "Versionsblätterer öffnen",
+	"revisionslider-toggle-title-collapse": "Versionsblätterer einklappen",
+	"revisionslider-turn-on-auto-expand-title": "Versionsblätterer immer ausklappen",
+	"revisionslider-turn-off-auto-expand-title": "Versionsblätterer nicht automatisch ausklappen",
+	"revisionslider-arrow-tooltip-newer": "Neuere Versionen ansehen",
+	"revisionslider-arrow-tooltip-older": "Ältere Versionen ansehen",
+	"revisionslider-show-help-tooltip": "Hilfetext anzeigen",
+	"revisionslider-help-dialog-slide1": "Der Versionsblätterer hilft dir bei der Navigation und beim Vergleichen von Versionen in der Vergleichsansicht. Er basiert auf einem [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider Wunsch] der Technischen Wunschliste der deutschsprachigen Gemeinschaft. Rückmeldungen werden [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider hier] sehr geschätzt.",
+	"revisionslider-help-dialog-slide2": "Jeder Balken stellt eine Seitenversion dar. Nach oben zeigende Balken stehen für ein Wachstum der Seitengröße, nach unten zeigende Balken für eine Verminderung der Seitengröße. In dem Bild stellt die Version 1 hinzugefügten Inhalt dar, während Version 2 eine Entfernung von Inhalt darstellt.",
+	"revisionslider-help-dialog-slide3a": "<p>Um bestimmte Versionen zu vergleichen, wähle die Versionen mithilfe der gelben und blauen Knöpfe aus.</p><p>Der blaue Knopf steuert die neuere Version, der gelbe Knopf die ältere Version.</p><p>Verschiebe die Knöpfe durch Ziehen und Ablegen oder Anklicken der Leiste des Versionsblätterers.</p>",
+	"revisionslider-help-dialog-slide4": "Verwende die Rück- und Vorwärtspfeile, um durch die Versionsgeschichte zu blättern sowie ältere und neuere Versionen anzuzeigen.",
+	"revisionslider-tutorial": "Anleitung für den Versionsblätterer",
+	"revisionslider-previous-dialog": "Vorherige",
+	"revisionslider-next-dialog": "Nächste",
+	"revisionslider-close-dialog": "Schließen"
+}

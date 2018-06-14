@@ -26,5 +26,9 @@
 	"babel-4-n": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|cuasi nativu]] d'[[$2|asturianu]].",
 	"babel-5-n": "{{GENDER:$4|Esti usuariu|Esta usuaria}} tien un conocimientu [[$1|profesional]] d'[[$2|asturianu]].",
 	"babel-N-n": "{{GENDER:$4|Esti usuariu|Esta usuaria}} ye {{GENDER:$4|un|una}} falante [[$1|{{GENDER:$4|nativu|nativa}}]] d'[[$2|asturianu]].",
-	"babel-footer": "Usuarios por llingua"
+	"babel-footer": "Usuarios por llingua",
+	"apihelp-query+babel-description": "Algamar información de les llingües que sabe l'usuariu",
+	"apihelp-query+babel-summary": "Ver información de les llingües que conoz l'usuariu",
+	"apihelp-query+babel-param-user": "Usuariu del que recibir información",
+	"apihelp-query+babel-example-1": "Algamar la información de Babel del usuariu <kbd>Exemplu</kbd>"
 }

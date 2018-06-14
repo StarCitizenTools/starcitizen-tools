@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTemplateSpecModel class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -42,7 +42,7 @@ ve.dm.MWTemplateSpecModel = function VeDmMWTemplateSpecModel( template ) {
  * @param {string} [data.description] Template description
  * @param {string[]} [data.paramOrder] Canonically ordered parameter names
  * @param {Object} [data.params] Template param specs keyed by param name
- * @param {string[][]} [data.sets] Lists of param sets
+ * @param {Array} [data.sets] Lists of param sets
  */
 ve.dm.MWTemplateSpecModel.prototype.extend = function ( data ) {
 	var key, param, i, len;
@@ -103,7 +103,7 @@ ve.dm.MWTemplateSpecModel.prototype.getDefaultParameterSpec = function ( name ) 
 	return {
 		label: name,
 		description: null,
-		default: '',
+		'default': '',
 		type: 'string',
 		aliases: [],
 		name: name,

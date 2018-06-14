@@ -2,21 +2,18 @@
 	"@metadata": {
 		"authors": [
 			"Agilight",
-			"Kaganer"
+			"Kaganer",
+			"Көпек"
 		]
 	},
 	"uploadwizard": "Мерген Чүдүрүг",
 	"uploadwizard-desc": "Мерген Чүдүрүг дээрге мультимедиа файлдарны сайтче киир чүдүрер амыр херексел",
-	"mwe-upwiz-uploadcampaigns": "Чүдүрүг кампаниязы",
-	"mwe-upwiz-uploadcampaign": "Чүдүрүг кампанияның аайлалгазы",
 	"right-upwizcampaigns": "Мерген Чүдүрүг кампаниязын өйлээр",
 	"action-upwizcampaigns": "чүдүрүг кампаниязын өйлээр",
 	"group-upwizcampeditors": "Мерген Чүдүрүг кампаниязының эдикчилери",
 	"group-upwizcampeditors-member": "{{GENDER:$1|Мерген Чүдүрүг кампаниязының эдикчизи}}",
 	"grouppage-upwizcampeditors": "{{ns:project}}:Мерген Чүдүрүг кампаниязының эдикчилери",
-	"mwe-upwiz-js-off": "МергенЧүдүрүг бодунуң интерфейзинде JavaScript ажыглап турар. Браузериңер чок болза JavaScript-биле ажылдавас, азы JavaScript өжүк, ынчангаш бис бөдүүн чүдүрүг хевирин көргүзүп тур бис.",
 	"mwe-upwiz-extension-disabled": "Ук арын чай када техникалыг айтырыглар дээш өжүрткен. Амдыызында бөдүүн чүдүрүг хевирин ажыглаңар.",
-	"mwe-upwiz-code-unknown": "Билдинмес дыл",
 	"mwe-upwiz-step-tutorial": "Таныжылга",
 	"mwe-upwiz-step-file": "Чүдүрүг",
 	"mwe-upwiz-step-deeds": "Авторнуң эргези",
@@ -35,7 +32,6 @@
 	"mwe-upwiz-select-flickr": "Шилээн чурумалдарны чүдүрер",
 	"mwe-upwiz-error-no-image-retrieved": "Моон $1 файлды ап чадап калдывыс.",
 	"mwe-upwiz-transport-started": "Эгелээн…",
-	"mwe-upwiz-encoding": "Кодчудуп турар…",
 	"mwe-upwiz-uploading": "Чүдүртүнүп тур…",
 	"mwe-upwiz-queued": "Оочурда...",
 	"mwe-upwiz-assembling": "Чыгдынылга...",
@@ -43,10 +39,9 @@
 	"mwe-upwiz-transported": "Чүдүртүг төнчүзү...",
 	"mwe-upwiz-stashed-upload": "Чүдүртүнген",
 	"mwe-upwiz-published": "Үндүртүнген!",
-	"mwe-upwiz-failed": "Чүдүртүг алдаа.",
+	"mwe-upwiz-failed": "Киир бижиттинмеди",
 	"mwe-upwiz-remove": "Казыыр",
 	"mwe-upwiz-override": "Дөмей-ле чүдүрер",
-	"mwe-upwiz-show-thumb": "Бичезин көргүзер",
 	"mwe-upwiz-upload": "Чүдүрүг",
 	"mwe-upwiz-file-some-failed": "Чамдык чүдүрүглер күүсеттинмээн.",
 	"mwe-upwiz-skip-tutorial-future": "Бо базымны келир үеде эрттириптер",

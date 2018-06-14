@@ -3,8 +3,6 @@
 namespace Flow\Tests\Data;
 
 use Flow\Container;
-use Flow\Data\BagOStuff\BufferedBagOStuff;
-use Flow\Data\BufferedCache;
 use Flow\Data\Index\FeatureIndex;
 use Flow\Data\Index\TopKIndex;
 use Flow\Data\Index\UniqueFeatureIndex;
@@ -16,10 +14,7 @@ use Flow\Tests\FlowTestCase;
 class IndexTest extends FlowTestCase {
 
 	public function testShallow() {
-		global $wgFlowCacheTime;
-
-		$bag = new BufferedBagOStuff( new \HashBagOStuff );
-		$cache = new BufferedCache( $bag, $wgFlowCacheTime );
+		$cache = $this->getCache();
 
 		// fake ObjectMapper that doesn't roundtrip to- & fromStorageRow
 		$mapper = $this->getMockBuilder( 'Flow\Data\Mapper\BasicObjectMapper' )
@@ -35,44 +30,41 @@ class IndexTest extends FlowTestCase {
 
 		$unique = new UniqueFeatureIndex(
 			$cache, $storage, $mapper, 'unique',
-			array( 'id' )
+			[ 'id' ]
 		);
 
 		$secondary = new TopKIndex(
 			$cache, $storage, $mapper, 'secondary',
-			array( 'name' ), // keys indexed in this array
-			array(
+			[ 'name' ], // keys indexed in this array
+			[
 				'shallow' => $unique,
 				'sort' => 'id',
-			)
+			]
 		);
 
 		$db = FeatureIndex::cachedDbId();
 		$v = Container::get( 'cache.version' );
-		$bag->set( "$db:unique:" . md5( '1' ) . ":$v", array( array( 'id' => 1, 'name' => 'foo', 'other' => 'ppp' ) ) );
-		$bag->set( "$db:unique:" . md5( '2' ) . ":$v", array( array( 'id' => 2, 'name' => 'foo', 'other' => 'qqq' ) ) );
-		$bag->set( "$db:unique:" . md5( '3' ) . ":$v", array( array( 'id' => 3, 'name' => 'baz', 'other' => 'lll' ) ) );
+		$cache->set( "$db:unique:" . md5( '1' ) . ":$v", [ [ 'id' => 1, 'name' => 'foo', 'other' => 'ppp' ] ] );
+		$cache->set( "$db:unique:" . md5( '2' ) . ":$v", [ [ 'id' => 2, 'name' => 'foo', 'other' => 'qqq' ] ] );
+		$cache->set( "$db:unique:" . md5( '3' ) . ":$v", [ [ 'id' => 3, 'name' => 'baz', 'other' => 'lll' ] ] );
 
-		$bag->set( "$db:secondary:" . md5( 'foo' ) . ":$v", array( array( 'id' => 1 ), array( 'id' => 2 ) ) );
-		$bag->set( "$db:secondary:" . md5( 'baz' ) . ":$v", array( array( 'id' => 3 ) ) );
+		$cache->set( "$db:secondary:" . md5( 'foo' ) . ":$v", [ [ 'id' => 1 ], [ 'id' => 2 ] ] );
+		$cache->set( "$db:secondary:" . md5( 'baz' ) . ":$v", [ [ 'id' => 3 ] ] );
 
-		$expect = array(
-			array( 'id' => 1, 'name' => 'foo', 'other' => 'ppp', ),
-			array( 'id' => 2, 'name' => 'foo', 'other' => 'qqq', ),
-		);
-		$this->assertEquals( $expect, $secondary->find( array( 'name' => 'foo' ) ) );
+		$expect = [
+			[ 'id' => 1, 'name' => 'foo', 'other' => 'ppp', ],
+			[ 'id' => 2, 'name' => 'foo', 'other' => 'qqq', ],
+		];
+		$this->assertEquals( $expect, $secondary->find( [ 'name' => 'foo' ] ) );
 
-		$expect = array(
-			array( 'id' => 3, 'name' => 'baz', 'other' => 'lll' ),
-		);
-		$this->assertEquals( $expect, $secondary->find( array( 'name' => 'baz' ) ) );
+		$expect = [
+			[ 'id' => 3, 'name' => 'baz', 'other' => 'lll' ],
+		];
+		$this->assertEquals( $expect, $secondary->find( [ 'name' => 'baz' ] ) );
 	}
 
 	public function testCompositeShallow() {
-		global $wgFlowCacheTime;
-
-		$bag = new BufferedBagOStuff( new \HashBagOStuff );
-		$cache = new BufferedCache( $bag, $wgFlowCacheTime );
+		$cache = $this->getCache();
 		$storage = $this->getMock( 'Flow\\Data\\ObjectStorage' );
 
 		// fake ObjectMapper that doesn't roundtrip to- & fromStorageRow
@@ -85,43 +77,43 @@ class IndexTest extends FlowTestCase {
 
 		$unique = new UniqueFeatureIndex(
 			$cache, $storage, $mapper, 'unique',
-			array( 'id', 'ot' )
+			[ 'id', 'ot' ]
 		);
 
 		$secondary = new TopKIndex(
 			$cache, $storage, $mapper, 'secondary',
-			array( 'name' ), // keys indexed in this array
-			array(
+			[ 'name' ], // keys indexed in this array
+			[
 				'shallow' => $unique,
 				'sort' => 'id',
-			)
+			]
 		);
 
 		// remember: unique index still stores an array of results to be consistent with other indexes
 		// even though, due to uniqueness, there is only one value per set of keys
 		$db = FeatureIndex::cachedDbId();
 		$v = Container::get( 'cache.version' );
-		$bag->set( "$db:unique:" . md5( '1:9' ) . ":$v", array( array( 'id' => 1, 'ot' => 9, 'name' => 'foo' ) ) );
-		$bag->set( "$db:unique:" . md5( '1:8' ) . ":$v", array( array( 'id' => 1, 'ot' => 8, 'name' => 'foo' ) ) );
-		$bag->set( "$db:unique:" . md5( '3:7' ) . ":$v", array( array( 'id' => 3, 'ot' => 7, 'name' => 'baz' ) ) );
+		$cache->set( "$db:unique:" . md5( '1:9' ) . ":$v", [ [ 'id' => 1, 'ot' => 9, 'name' => 'foo' ] ] );
+		$cache->set( "$db:unique:" . md5( '1:8' ) . ":$v", [ [ 'id' => 1, 'ot' => 8, 'name' => 'foo' ] ] );
+		$cache->set( "$db:unique:" . md5( '3:7' ) . ":$v", [ [ 'id' => 3, 'ot' => 7, 'name' => 'baz' ] ] );
 
-		$bag->set( "$db:secondary:" . md5( 'foo' ) . ":$v", array(
-			array( 'id' => 1, 'ot' => 9 ),
-			array( 'id' => 1, 'ot' => 8 ),
-		) );
-		$bag->set( "$db:secondary:" . md5( 'baz' ). ":$v", array(
-			array( 'id' => 3, 'ot' => 7 ),
-		) );
+		$cache->set( "$db:secondary:" . md5( 'foo' ) . ":$v", [
+			[ 'id' => 1, 'ot' => 9 ],
+			[ 'id' => 1, 'ot' => 8 ],
+		] );
+		$cache->set( "$db:secondary:" . md5( 'baz' ). ":$v", [
+			[ 'id' => 3, 'ot' => 7 ],
+		] );
 
-		$expect = array(
-			array( 'id' => 1, 'ot' => 9, 'name' => 'foo' ),
-			array( 'id' => 1, 'ot' => 8, 'name' => 'foo' ),
-		);
-		$this->assertEquals( $expect, $secondary->find( array( 'name' => 'foo' ) ) );
+		$expect = [
+			[ 'id' => 1, 'ot' => 9, 'name' => 'foo' ],
+			[ 'id' => 1, 'ot' => 8, 'name' => 'foo' ],
+		];
+		$this->assertEquals( $expect, $secondary->find( [ 'name' => 'foo' ] ) );
 
-		$expect = array(
-			array( 'id' => 3, 'ot' => 7, 'name' => 'baz' ),
-		);
-		$this->assertEquals( $expect, $secondary->find( array( 'name' => 'baz' ) ) );
+		$expect = [
+			[ 'id' => 3, 'ot' => 7, 'name' => 'baz' ],
+		];
+		$this->assertEquals( $expect, $secondary->find( [ 'name' => 'baz' ] ) );
 	}
 }

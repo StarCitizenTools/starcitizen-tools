@@ -45,7 +45,9 @@
 	"replacetext_warning": "Il y a $1 fichier {{PLURAL:$1| qui contient|s qui contiennent}} déjà la chaîne de remplacement « $2 ».\nSi vous effectuez cette substitution, vous ne pourrez pas distinguer vos modifications de ces chaînes.",
 	"replacetext_blankwarning": "Parce que la chaîne de remplacement est vide, cette opération sera irréversible ; voulez-vous continuer ?",
 	"replacetext_continue": "Continuer",
+	"replacetext_announce": "Annoncer ces modifications via $1 et les listes de suivi",
 	"replacetext_editsummary": "Remplacement de texte — « $1 » par « $2 »",
 	"right-replacetext": "Faire des remplacements de texte dans tout le wiki",
-	"action-replacetext": "faire les remplacements de la chaîne dans tout le wiki"
+	"action-replacetext": "faire les remplacements de la chaîne dans tout le wiki",
+	"replacetext_reminder": "Pour modifier aussi les liens vers cette page dans d’autres pages, allez en $1."
 }

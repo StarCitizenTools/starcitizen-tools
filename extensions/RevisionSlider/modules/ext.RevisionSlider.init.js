@@ -1,294 +1,145 @@
 ( function ( mw, $ ) {
-	var revisionTickWidth = 16,
-		containerMargin = 80, // 2 * arrow + margins
-		$container = null,
-		$revisionSlider = null,
-		revs = [],
-		pointerPosL = -1,
-		pointerPosR = -1;
+	var settings = new mw.libs.revisionSlider.Settings(),
+		autoExpand = settings.shouldAutoExpand(),
+		expanded = autoExpand,
+		autoExpandButton,
+		toggleButton = OO.ui.ButtonWidget.static.infuse( $( '.mw-revslider-toggle-button' ) ),
+		initialize = function () {
+			var startTime = mw.now(),
+				api = new mw.libs.revisionSlider.Api( mw.util.wikiScript( 'api' ) );
 
-	// Function called when a tick on the slider is clicked
-	// Params: v1 - Left revision ID; v2 - Right revision ID
-	// function refresh( v1, v2 ) {
-	// 	if( v1 === -1 || v2 === -1 ) return;
-	//
-	// 	var $url = gServer + gScript + '?title=' + gPageName + '&diff=' + v2 + '&oldid=' + v1;
-	// 	location.href = $url;
-	// }
+			toggleButton.$element.children().attr( {
+				'aria-expanded': autoExpand,
+				'aria-controls': 'mw-revslider-slider-wrapper'
+			} );
 
-	function getComposedRevData( revs ) {
-		var max = 0,
-			changeSize = 0,
-			section,
-			sectionMap = {},
-			result,
-			i,
-			sectionName;
+			mw.track( 'counter.MediaWiki.RevisionSlider.event.init' );
+			mw.libs.revisionSlider.userOffset = mw.user.options.get( 'timecorrection' ) ? mw.user.options.get( 'timecorrection' ).split( '|' )[ 1 ] : mw.config.get( 'extRevisionSliderTimeOffset' );
 
-		for ( i = 1; i < revs.length; i++ ) {
-			changeSize = Math.abs( revs[ i ].getSize() - revs[ i - 1 ].getSize() );
-			section = revs[ i ].getSection();
-			if ( changeSize > max ) {
-				max = changeSize;
-			}
-			if ( section.length > 0 && !( section in sectionMap ) ) {
-				sectionMap[ section ] = '';
-			}
-		}
+			mw.libs.revisionSlider.HelpDialog.init();
 
-		i = 0;
-		for ( sectionName in sectionMap ) {
-			sectionMap[ sectionName ] = mw.libs.revisionSlider.rainbow( Object.keys( sectionMap ).length, i );
-			i++;
-		}
+			api.fetchRevisionData( mw.config.get( 'wgPageName' ), {
+				startId: mw.config.get( 'wgDiffNewId' ),
+				limit: mw.libs.revisionSlider.calculateRevisionsPerWindow( 160, 16 )
+			} ).then( function ( data ) {
+				var revs,
+					revisionList,
+					$container,
+					slider;
 
-		result = {
-			maxChangeSize: max,
-			sectionMap: sectionMap
-		};
+				mw.track( 'timing.MediaWiki.RevisionSlider.timing.initFetchRevisionData', mw.now() - startTime );
 
-		return result;
-	}
-
-	// Setting the tick marks on the slider
-	// Params: element - jQuery slider; revs - revisions data from API
-	function setSliderTicks( element, revs ) {
-		var $slider = $( element ),
-			revData = getComposedRevData( revs ),
-			maxChangeSizeLogged = Math.log( revData.maxChangeSize ),
-			i, diffSize, relativeChangeSize, section, html;
-
-		for ( i = 1; i < revs.length; i++ ) {
-			diffSize = revs[ i ].getSize() - revs[ i - 1 ].getSize();
-			relativeChangeSize = Math.ceil( 65.0 * Math.log( Math.abs( diffSize ) ) / maxChangeSizeLogged ) + 5;
-			section = revs[ i ].getSection();
-			html = '<b>' + revs[ i ].getFormattedDate() + '</b><br>';
-
-			html += mw.html.escape( revs[ i ].getUser() ) + '<br>';
-			if ( revs[ i ].getComment() !== '' ) {
-				html += '<br><i>' + mw.html.escape( revs[ i ].getParsedComment() ) + '</i>';
-			}
-			html += '<br>' + diffSize + ' byte';
-
-			$( '<div class="ui-slider-tick-mark revision" title="<center>' + html + '</center>"/>' )
-				.css( {
-					left: revisionTickWidth * ( i - 1 ) + 'px',
-					height: relativeChangeSize + 'px',
-					width: revisionTickWidth + 'px',
-					top: diffSize > 0 ? '-' + relativeChangeSize + 'px' : 0,
-					background: revData.sectionMap[ section ] || 'black'
-				} )
-				.tipsy( {
-					gravity: 's',
-					html: true,
-					fade: true
-				} )
-				.appendTo( $slider );
-			$( '<div class="stopper"/>' )
-				.css( {
-					left: revisionTickWidth * ( i - 1 ) + 'px',
-					width: revisionTickWidth + 'px'
-				} )
-				.appendTo( $slider );
-		}
-	}
-
-	/**
-	 * Checks whether pointerPos is between start and end
-	 *
-	 * @param {int} pointerPos
-	 * @param {int} start
-	 * @param {int} end
-	 * @return {boolean}
-	 */
-	function isPointerInRange( pointerPos, start, end ) {
-		return pointerPos >= start &&
-			pointerPos <= Math.min( revs.length, end );
-	}
-
-	/**
-	 * Slowly slides/scrolls $container one viewport in a given direction
-	 *
-	 * @param {jQuery} $container
-	 * @param {int} direction
-	 */
-	function slide( $container, direction ) {
-		$container.animate( {
-			scrollLeft: $container.scrollLeft() + ( $container.width() * direction )
-		} );
-	}
-
-	/**
-	 * Determines the revision from a position in the revisionsContainer
-	 *
-	 * @param {int} pos
-	 * @return {number}
-	 */
-	function revisionOfPosition( pos ) {
-		return Math.floor( pos / revisionTickWidth );
-	}
-
-	/**
-	 * Slides a $pointer to a position
-	 *
-	 * @param {jQuery} $pointer
-	 * @param {int} pos
-	 */
-	function slideToPosition( $pointer, pos ) {
-		var containerOffset = $container.offset().left - $revisionSlider.offset().left,
-			left = ( pos % 100 ) * revisionTickWidth;
-
-		$pointer.animate( { left: left + containerOffset } );
-	}
-
-	/**
-	 * Slides a $pointer to the side of the slider
-	 *
-	 * @param {jQuery} $pointer
-	 * @param {int} pointerPos
-	 * @param {int} direction
-	 */
-	function slideToSide( $pointer, pointerPos, direction ) {
-		var containerOffset = $revisionSlider.find( '.arrow' ).outerWidth() + 20, // 20 == margin right
-			isLeft = pointerPos < revisionOfPosition( $container.scrollLeft() ) + direction * revisionOfPosition( $container.width() ),
-			sideFactor = isLeft ? -1 : 1,
-			sideOffset = 3 * revisionTickWidth * sideFactor / 2,
-			offsetRight = $pointer.hasClass( 'left-pointer' ) ? -revisionTickWidth : 0,
-			xPos = isLeft ? containerOffset : $container.width() + containerOffset;
-
-		$pointer.animate( { left: xPos + offsetRight + sideOffset } );
-	}
-
-	function getSectionLegend( revs ) {
-		var revData = getComposedRevData( revs ),
-			html = '<div class="revisions-legend">',
-			sectionName;
-		for ( sectionName in revData.sectionMap ) {
-			html += '<span class="rvslider-legend-box" style="color:' + revData.sectionMap[ sectionName ] + ';"> ■</span>' + sectionName;
-		}
-		return html + '</div>';
-	}
-
-	function getMaxTicksPerPage() {
-		return Math.floor( ( $( '#mw-content-text' ).width() - containerMargin ) / revisionTickWidth );
-	}
-
-	function getTickContainerWidth( numberOfTicks, maxNumberOfTicks, maxWidthPerTick ) {
-		return Math.min( numberOfTicks, maxNumberOfTicks ) * maxWidthPerTick;
-	}
-
-	function initializeRevs( revs ) {
-		var revisions = [],
-			i;
-
-		for ( i = 0; i < revs.length; i++ ) {
-			revisions.push( new mw.libs.revisionSlider.Revision( revs[ i ] ) );
-		}
-
-		return revisions;
-	}
-
-	function addSlider( revs ) {
-		var maxNumberOfTicks = getMaxTicksPerPage(),
-			containerWidth = getTickContainerWidth( revs.length, maxNumberOfTicks, revisionTickWidth ),
-			$revisions = $( '<div class="revisions"></div>' ),
-			$leftPointer = $( '<div class="pointer left-pointer" />' ),
-			$rightPointer = $( '<div class="pointer right-pointer" />' );
-
-		$revisionSlider = $( '<div class="revision-slider" />' )
-			.css( {
-				width: containerWidth + containerMargin + 'px'
-			} )
-			.append( $( '<a class="arrow left-arrow" data-dir="-1"></a>' ) )
-			.append( $( '<div class="revisions-container" />' )
-				.css( {
-					width: containerWidth  + 'px'
-				} )
-				.append( $revisions ) )
-			.append( $( '<a class="arrow right-arrow" data-dir="1"></a>' ) )
-			.append( $( '<div style="clear: both" />' ) )
-			.append(
-				$( '<div class="pointer-container" />' )
-					.css( {
-						left: 40 - revisionTickWidth + 'px', // 40 == arrow + margin right
-						width: containerWidth + revisionTickWidth * 1.5 + 'px'
-					} )
-					.append( $leftPointer )
-					.append( $rightPointer )
-			);
-
-		$container = $revisionSlider.find( '.revisions-container' );
-
-		$revisionSlider.find( '.arrow' ).click( function () {
-			var direction = $( this ).data( 'dir' ),
-				newStart = revisionOfPosition(
-						Math.min( $container.find( '.revisions' ).width() - $container.width(), Math.max( 0, $container.scrollLeft() ) )
-					) + ( direction * revisionOfPosition( $container.width() ) ),
-				newEnd = newStart + revisionOfPosition( $container.width() );
-
-			if ( isPointerInRange( pointerPosL, newStart, newEnd ) ) {
-				slideToPosition( $leftPointer, pointerPosL );
-			} else {
-				slideToSide( $leftPointer, pointerPosL, direction );
-			}
-
-			if ( isPointerInRange( pointerPosR, newStart, newEnd ) ) {
-				slideToPosition( $rightPointer, pointerPosR );
-			} else {
-				slideToSide( $rightPointer, pointerPosR, direction );
-			}
-
-			slide( $container, direction );
-		} );
-
-		setSliderTicks( $revisions, revs );
-
-		$revisionSlider.find( '.pointer' ).draggable( {
-			axis: 'x',
-			snap: '.stopper',
-			containment: '.pointer-container',
-			stop: function () {
-				var posLeft = parseInt( $( this ).css( 'left' ), revisionTickWidth ),
-					offset = $revisionSlider.find( '.arrow' ).outerWidth() + 20,
-					pos = Math.round( ( posLeft + $container.scrollLeft() - offset ) / containerWidth );
-
-				if ( $( this ).hasClass( 'left-pointer' ) ) {
-					pointerPosL = pos;
-				} else {
-					pointerPosR = pos;
-				}
-
-				// refresh( pointerPosL, pointerPosR );
-			}
-		} );
-
-		$( '#revision-slider-placeholder' ).remove();
-
-		$( '#revision-slider-container' )
-			.append( $revisionSlider )
-			.append( getSectionLegend( revs ) );
-
-		slideToSide( $leftPointer, -1, 1 );
-		slideToSide( $rightPointer, -1, 1 );
-	}
-
-	mw.loader.using( [ 'jquery.ui.draggable', 'jquery.ui.tooltip', 'jquery.tipsy' ], function () {
-		$( function () {
-			mw.libs.revisionSlider.fetchRevisions( {
-				pageName: mw.config.get( 'wgPageName' ),
-				startId: mw.config.get( 'wgCurRevisionId' ),
-
-				success: function ( data ) {
-					revs = data.query.pages[ 0 ].revisions;
-					if ( !revs ) {
-						return;
-					}
+				try {
+					revs = data.revisions;
 					revs.reverse();
 
-					addSlider( initializeRevs( revs ) );
+					$container = $( '.mw-revslider-slider-wrapper' );
+					$container.attr( 'id', 'mw-revslider-slider-wrapper' );
+
+					revisionList = new mw.libs.revisionSlider.RevisionList( mw.libs.revisionSlider.makeRevisions( revs ) );
+					revisionList.getView().setDir( $container.css( 'direction' ) || 'ltr' );
+
+					slider = new mw.libs.revisionSlider.Slider( revisionList );
+					slider.getView().render( $container );
+
+					$( window ).on( 'resize', OO.ui.throttle( function () {
+						slider.getView().render( $container );
+					}, 250 ) );
+
+					if ( !settings.shouldHideHelpDialogue() ) {
+						mw.libs.revisionSlider.HelpDialog.show();
+						settings.setHideHelpDialogue( true );
+					}
+
+					$( '.mw-revslider-placeholder' ).remove();
+					mw.track( 'timing.MediaWiki.RevisionSlider.timing.init', mw.now() - startTime );
+				} catch ( err ) {
+					$( '.mw-revslider-placeholder' )
+						.text( mw.message( 'revisionslider-loading-failed' ).text() );
+					mw.log.error( err );
+					mw.track( 'counter.MediaWiki.RevisionSlider.error.init' );
 				}
+			}, function ( err ) {
+				$( '.mw-revslider-placeholder' )
+					.text( mw.message( 'revisionslider-loading-failed' ).text() );
+				mw.log.error( err );
+				mw.track( 'counter.MediaWiki.RevisionSlider.error.init' );
 			} );
-		} );
+		},
+
+		expand = function () {
+			toggleButton.setIcon( 'collapse' ).setTitle( mw.message( 'revisionslider-toggle-title-collapse' ).text() );
+			$( '.mw-revslider-container' ).removeClass( 'mw-revslider-container-collapsed' )
+				.addClass( 'mw-revslider-container-expanded' );
+			$( '.mw-revslider-slider-wrapper' ).show();
+			toggleButton.$element.children().attr( 'aria-expanded', 'true' );
+			expanded = true;
+		},
+
+		collapse = function () {
+			toggleButton.setIcon( 'expand' ).setTitle( mw.message( 'revisionslider-toggle-title-expand' ).text() );
+			$( '.mw-revslider-container' ).removeClass( 'mw-revslider-container-expanded' )
+				.addClass( 'mw-revslider-container-collapsed' );
+			$( '.mw-revslider-slider-wrapper' ).hide();
+			toggleButton.$element.children().attr( 'aria-expanded', 'false' );
+		};
+
+	autoExpandButton = new OO.ui.ToggleButtonWidget( {
+		icon: 'pin',
+		classes: [ 'mw-revslider-auto-expand-button' ],
+		title: mw.msg( autoExpand ?
+			'revisionslider-turn-off-auto-expand-title' :
+			'revisionslider-turn-on-auto-expand-title'
+		),
+		value: autoExpand
 	} );
+	autoExpandButton.$element.children().attr(
+		'aria-label',
+		mw.msg( autoExpand ?
+			'revisionslider-turn-off-auto-expand-title' :
+			'revisionslider-turn-on-auto-expand-title'
+		)
+	);
+
+	autoExpandButton.connect( this, {
+		click: function () {
+			autoExpand = !autoExpand;
+			settings.setAutoExpand( autoExpand );
+			if ( autoExpand ) {
+				autoExpandButton.setTitle( mw.msg( 'revisionslider-turn-off-auto-expand-title' ) );
+				autoExpandButton.$element.children().attr(
+					'aria-label', mw.msg( 'revisionslider-turn-off-auto-expand-title' )
+				);
+				expand();
+				mw.track( 'counter.MediaWiki.RevisionSlider.event.autoexpand_on' );
+			} else {
+				autoExpandButton.setTitle( mw.msg( 'revisionslider-turn-on-auto-expand-title' ) );
+				autoExpandButton.$element.children().attr(
+					'aria-label', mw.msg( 'revisionslider-turn-on-auto-expand-title' )
+				);
+				mw.track( 'counter.MediaWiki.RevisionSlider.event.autoexpand_off' );
+			}
+		}
+	} );
+
+	$( '.mw-revslider-container' ).append( autoExpandButton.$element );
+
+	toggleButton.connect( this, {
+		click: function () {
+			expanded = !expanded;
+			if ( expanded ) {
+				expand();
+				mw.track( 'counter.MediaWiki.RevisionSlider.event.expand' );
+				mw.hook( 'revslider.expand' ).fire();
+			} else {
+				collapse();
+				mw.track( 'counter.MediaWiki.RevisionSlider.event.collapse' );
+				mw.hook( 'revslider.collapse' ).fire();
+			}
+		}
+	} );
+
+	expand();
+	initialize();
 
 }( mediaWiki, jQuery ) );

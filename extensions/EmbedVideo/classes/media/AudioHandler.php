@@ -36,7 +36,7 @@ class AudioHandler extends \MediaHandler {
 	 */
 	public function validateParam($name, $value) {
 		if ($name === 'width' || $name === 'width') {
-			return false;
+			return $value > 0;
 		}
 
 		if ($name === 'start' || $name === 'end') {
@@ -64,6 +64,7 @@ class AudioHandler extends \MediaHandler {
 		$parts = array_reverse($parts);
 
 		$magnitude = [1, 60, 3600, 86400];
+		$seconds = 0;
 		foreach ($parts as $index => $part) {
 			$seconds += $part * $magnitude[$index];
 		}
@@ -103,14 +104,26 @@ class AudioHandler extends \MediaHandler {
 	 * @return	boolean	Success
 	 */
 	public function normaliseParams($file, &$parameters) {
-		$parameters['start'] = $this->parseTimeString($parameters['start']);
-		if ($parameters['start'] === false) {
-			unset($parameters['start']);
+		global $wgEmbedVideoDefaultWidth;
+
+		if (isset($parameters['width']) && $parameters['width'] > 0) {
+			$parameters['width'] = intval($parameters['width']);
+		} else {
+			$parameters['width'] = $wgEmbedVideoDefaultWidth;
 		}
 
-		$parameters['end'] = $this->parseTimeString($parameters['end']);
-		if ($parameters['end'] === false) {
-			unset($parameters['end']);
+		if (isset($parameters['start'])) {
+			$parameters['start'] = $this->parseTimeString($parameters['start']);
+			if ($parameters['start'] === false) {
+				unset($parameters['start']);
+			}
+		}
+
+		if (isset($parameters['end'])) {
+			$parameters['end'] = $this->parseTimeString($parameters['end']);
+			if ($parameters['end'] === false) {
+				unset($parameters['end']);
+			}
 		}
 
 		$parameters['page'] = 1;
@@ -194,7 +207,7 @@ class AudioHandler extends \MediaHandler {
 		$stream = $probe->getStream("a:0");
 
 		if ($format === false || $stream === false) {
-			//return self::getGeneralShortDesc($file);
+			return parent::getGeneralShortDesc($file);
 		}
 
 		return wfMessage('ev_audio_short_desc', $wgLang->formatTimePeriod($format->getDuration()), $wgLang->formatSize($file->getSize()))->text();
@@ -216,7 +229,7 @@ class AudioHandler extends \MediaHandler {
 		$stream = $probe->getStream("a:0");
 
 		if ($format === false || $stream === false) {
-			return self::getGeneralLongDesc($file);
+			return parent::getGeneralLongDesc($file);
 		}
 
 		$extension = pathinfo($file->getLocalRefPath(), PATHINFO_EXTENSION);

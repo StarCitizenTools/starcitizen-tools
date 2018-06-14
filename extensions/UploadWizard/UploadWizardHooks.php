@@ -16,20 +16,20 @@ class UploadWizardHooks {
 			$dbfile = __DIR__ . '/UploadWizard.sql';
 		}
 		$updater->addExtensionTable( 'uw_campaigns', $dbfile );
-		$updater->addExtensionUpdate( array(
+		$updater->addExtensionUpdate( [
 			'addIndex',
 			'uw_campaigns',
 			'uw_campaigns_name',
 			__DIR__ . '/sql/UW_IndexCampaignsName.sql',
 			true
-		) );
-		$updater->addExtensionUpdate( array(
+		] );
+		$updater->addExtensionUpdate( [
 			'addIndex',
 			'uw_campaigns',
 			'uw_campaigns_enabled',
 			__DIR__ . '/sql/UW_IndexCampaignsEnabled.sql',
 			true
-		) );
+		] );
 
 		return true;
 	}
@@ -41,7 +41,7 @@ class UploadWizardHooks {
 	 * @since 1.2
 	 *
 	 * @param User $user
-	 * @param array $preferences
+	 * @param array &$preferences
 	 *
 	 * @return true
 	 */
@@ -49,18 +49,25 @@ class UploadWizardHooks {
 		$config = UploadWizardConfig::getConfig();
 
 		// User preference to skip the licensing tutorial, provided it's not globally disabled
-		if ( UploadWizardConfig::getSetting( 'tutorial' ) != array() ) {
-			$preferences['upwiz_skiptutorial'] = array(
+		if ( UploadWizardConfig::getSetting( 'tutorial' ) != [] ) {
+			$preferences['upwiz_skiptutorial'] = [
 				'type' => 'check',
 				'label-message' => 'mwe-upwiz-prefs-skiptutorial',
 				'section' => 'uploads/upwiz-interface'
-			);
+			];
 		}
+
+		$preferences['upwiz_licensename'] = [
+			'type' => 'text',
+			'label-message' => 'mwe-upwiz-prefs-license-name',
+			'help-message' => 'mwe-upwiz-prefs-license-name-help',
+			'section' => 'uploads/upwiz-licensing'
+		];
 
 		if ( UploadWizardConfig::getSetting( 'enableLicensePreference' ) ) {
 			$licenseConfig = UploadWizardConfig::getSetting( 'licenses' );
 
-			$licenses = array();
+			$licenses = [];
 
 			$licensingOptions = UploadWizardConfig::getSetting( 'licensing' );
 
@@ -84,9 +91,9 @@ class UploadWizardHooks {
 			}
 
 			$licenses = array_merge(
-				array(
+				[
 					wfMessage( 'mwe-upwiz-prefs-def-license-def' )->text() => 'default'
-				),
+				],
 				$licenses
 			);
 
@@ -98,20 +105,20 @@ class UploadWizardHooks {
 				$licenses[$licenseKey] = 'thirdparty-custom';
 			};
 
-			$preferences['upwiz_deflicense'] = array(
+			$preferences['upwiz_deflicense'] = [
 				'type' => 'radio',
 				'label-message' => 'mwe-upwiz-prefs-def-license',
 				'section' => 'uploads/upwiz-licensing',
 				'options' => $licenses
-			);
+			];
 
 			if ( $hasCustom ) {
-				$preferences['upwiz_deflicense_custom'] = array(
+				$preferences['upwiz_deflicense_custom'] = [
 					'type' => 'text',
 					'label-message' => 'mwe-upwiz-prefs-def-license-custom',
 					'help-message' => 'mwe-upwiz-prefs-def-license-custom-help',
 					'section' => 'uploads/upwiz-licensing',
-				);
+				];
 			}
 		}
 
@@ -121,12 +128,12 @@ class UploadWizardHooks {
 			$range = range( 0, $config[ 'maxSimultaneousConnections' ] );
 			$range[0] = 'default';
 
-			$preferences['upwiz_maxsimultaneous'] = array(
+			$preferences['upwiz_maxsimultaneous'] = [
 				'type' => 'select',
 				'label-message' => 'mwe-upwiz-prefs-maxsimultaneous-upload',
 				'section' => 'uploads/upwiz-experimental',
 				'options' => $range
-			);
+			];
 		}
 
 		return true;
@@ -134,6 +141,9 @@ class UploadWizardHooks {
 
 	/**
 	 * Hook to blacklist flickr images by intercepting upload from url
+	 * @param string $url
+	 * @param bool &$allowed
+	 * @return true
 	 */
 	public static function onIsUploadAllowedFromUrl( $url, &$allowed ) {
 		if ( $allowed ) {
@@ -150,16 +160,28 @@ class UploadWizardHooks {
 
 	/**
 	 * Get JavaScript test modules
-	 * @param array $testModules
-	 * @param ResourceLoader resourceLoader
-	 * @return bool
+	 * @param array &$testModules
+	 * @param ResourceLoader &$resourceLoader
 	 */
 	public static function onResourceLoaderTestModules(
 		array &$testModules,
 		ResourceLoader &$resourceLoader
 	) {
-		$testModules['qunit']['ext.uploadWizard.unit.tests'] = array(
-			'scripts' => array(
+		$dependencies = [ 'ext.uploadWizard' ];
+
+		// Add our EventLogging schemas (normally lazy-loaded) to dependencies to avoid issues with
+		// tests failing intermittently due to "Pending AJAX requests".
+		$dependencies[] = 'ext.eventLogging';
+		$schemas = array_keys( ExtensionRegistry::getInstance()->getAttribute( 'EventLoggingSchemas' ) );
+		$ourSchemas = array_filter( $schemas, function ( $schema ) {
+			return substr( $schema, 0, 12 ) === 'UploadWizard';
+		} );
+		foreach ( $ourSchemas as $schema ) {
+			$dependencies[] = "schema.$schema";
+		}
+
+		$testModules['qunit']['ext.uploadWizard.unit.tests'] = [
+			'scripts' => [
 				'tests/qunit/controller/uw.controller.Deed.test.js',
 				'tests/qunit/controller/uw.controller.Details.test.js',
 				'tests/qunit/controller/uw.controller.Step.test.js',
@@ -169,30 +191,16 @@ class UploadWizardHooks {
 				'tests/qunit/transports/mw.FormDataTransport.test.js',
 				'tests/qunit/uw.EventFlowLogger.test.js',
 				'tests/qunit/uw.ConcurrentQueue.test.js',
-				'tests/qunit/mw.UploadWizard.test.js',
 				'tests/qunit/mw.UploadWizardUpload.test.js',
 				'tests/qunit/mw.UploadWizardLicenseInput.test.js',
 				'tests/qunit/mw.FlickrChecker.test.js',
-				'tests/qunit/mw.UploadWizardDetails.test.js',
+				'tests/qunit/uw.TitleDetailsWidget.test.js',
 				'tests/qunit/mw.fileApi.test.js',
-			),
-			'dependencies' => array(
-				'ext.uploadWizard',
-			),
+			],
+			'dependencies' => $dependencies,
 			'localBasePath' => __DIR__,
 			'remoteExtPath' => 'UploadWizard',
-		);
-	}
-
-	/**
-	 * Hook to add unit tests
-	 * @param array $files list of testcases
-	 * @return bool
-	 */
-	public static function onUnitTestsList( array &$files ) {
-		$testDir = __DIR__ . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'phpunit';
-		$files = array_merge( $files, glob( $testDir . DIRECTORY_SEPARATOR . '*Test.php' ) );
-		return true;
+		];
 	}
 
 	/**
@@ -215,5 +223,18 @@ class UploadWizardHooks {
 		} else {
 			return wfMessage( $licenseConfig[$licenseName]['msg'] )->text();
 		}
+	}
+
+	/**
+	 * Lists tags used by UploadWizard (via ListDefinedTags,
+	 * ListExplicitlyDefinedTags & ChangeTagsListActive hooks)
+	 *
+	 * @param array &$tags
+	 * @return bool true
+	 */
+	public static function onListDefinedTags( &$tags ) {
+		$tags[] = 'uploadwizard';
+		$tags[] = 'uploadwizard-flickr';
+		return true;
 	}
 }

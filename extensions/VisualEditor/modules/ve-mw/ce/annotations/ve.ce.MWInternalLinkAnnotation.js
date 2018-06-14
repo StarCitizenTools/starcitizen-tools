@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWInternalLinkAnnotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -24,7 +24,7 @@ ve.ce.MWInternalLinkAnnotation = function VeCeMWInternalLinkAnnotation() {
 	this.$anchor.addClass( 've-ce-mwInternalLinkAnnotation' );
 
 	// Style based on link cache information
-	ve.init.platform.linkCache.styleElement( this.model.getAttribute( 'lookupTitle' ), annotation.$anchor );
+	ve.init.platform.linkCache.styleElement( this.model.getAttribute( 'lookupTitle' ), annotation.$anchor, this.model.getFragment() );
 };
 
 /* Inheritance */

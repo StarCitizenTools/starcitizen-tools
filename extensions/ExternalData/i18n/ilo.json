@@ -5,7 +5,7 @@
 		]
 	},
 	"getdata": "Agala ti datos",
-	"externaldata-desc": "Mangpalubos para iti panagala ti naestruktura a datos manipud kadagiti akin-ruar nga URL, dagiti database ken dagiti dadduma pay a taudan",
+	"externaldata-desc": "Mangipalubos para iti panagala ti naestruktura a datos manipud kadagiti akin-ruar nga URL, dagiti database ken dagiti dadduma pay a taudan",
 	"externaldata-no-param-specified": "Biddut: Awan ti parametro ti \"$1\" a nainaganan.",
 	"externaldata-web-invalid-format": "Imbalido a pormat: \"$1\"",
 	"externaldata-ldap-unable-to-connect": "Di mabalin a maikonekta iti $1",

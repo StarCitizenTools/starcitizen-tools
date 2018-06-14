@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable linear escape key down handler
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -19,7 +19,7 @@ ve.ce.LinearTabKeyDownHandler = function VeCeLinearTabKeyDownHandler() {
 
 /* Inheritance */
 
-OO.inheritClass( ve.ce.LinearTabKeyDownHandler, ve.ce.TableArrowKeyDownHandler );
+OO.inheritClass( ve.ce.LinearTabKeyDownHandler, ve.ce.KeyDownHandler );
 
 /* Static properties */
 
@@ -34,24 +34,34 @@ ve.ce.LinearTabKeyDownHandler.static.supportedSelections = [ 'linear' ];
 /**
  * @inheritdoc
  *
- * Handle escape key down events with a linear selection while table editing.
+ * Handle tab key down events with a linear selection while table editing.
  */
 ve.ce.LinearTabKeyDownHandler.static.execute = function ( surface, e ) {
 	var activeTableNode = surface.getActiveNode() && surface.getActiveNode().findParent( ve.ce.TableNode );
-	if ( activeTableNode ) {
+	// Check we have an active table node and that we are inside a cell (editingFragment), and not just a caption
+	if ( activeTableNode && activeTableNode.editingFragment ) {
+		if ( e.ctrlKey || e.altKey || e.metaKey ) {
+			// Support: Firefox
+			// In Firefox, ctrl-tab to switch browser-tabs still triggers the
+			// keydown event.
+			return;
+		}
+
 		e.preventDefault();
 		e.stopPropagation();
 		activeTableNode.setEditing( false );
-		// if this was a merged cell, we're going to have unexpected behavior when the selection moves,
+		// If this was a merged cell, we're going to have unexpected behavior when the selection moves,
 		// so preemptively collapse to the top-left point of the merged cell.
 		surface.getModel().setSelection( surface.getModel().getSelection().collapseToStart() );
-		ve.ce.LinearTabKeyDownHandler.static.moveTableSelection(
+		ve.ce.TableArrowKeyDownHandler.static.moveTableSelection(
 			surface,
-			0, // rows
-			e.shiftKey ? -1 : 1, // columns
-			false, // logical direction, not visual
-			false // don't expand the current selection
+			0, // Rows
+			e.shiftKey ? -1 : 1, // Columns
+			false, // Logical direction, not visual
+			false, // Don't expand the current selection,
+			true // Wrap to next/previous row
 		);
+		activeTableNode.setEditing( true );
 		return true;
 	}
 	return false;

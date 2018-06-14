@@ -2,16 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Yanteng3",
-			"Jason924tw"
+			"Jason924tw",
+			"Davidzdh",
+			"Itsmine"
 		]
 	},
 	"translate": "譯",
 	"translate-desc": "譯MediaWiki訊之[[Special:Translate|特查]]",
-	"translate-taskui-view": "示全之訊",
-	"translate-taskui-untranslated": "示未譯之訊",
-	"translate-taskui-optional": "示選之訊",
-	"translate-taskui-acceptqueue": "示吾能檢校之訊",
-	"translate-taskui-reviewall": "檢校全之譯",
 	"translate-taskui-export-to-file": "出匯以原格式",
 	"translate-taskui-export-as-po": "出匯以離之譯",
 	"translate-taction-translate": "譯",
@@ -41,7 +38,6 @@
 	"translate-edit-contribute": "功績",
 	"translate-edit-information": "述該訊息（$1）",
 	"translate-edit-in-other-languages": "他語之訊",
-	"translate-edit-committed": "今譯",
 	"translate-edit-warnings": "未譯之警",
 	"translate-edit-tmmatch": "$1%符",
 	"translate-edit-nopermission": "汝須獲權方可譯訊。",
@@ -72,7 +68,7 @@
 	"translate-statsf-count-registrations": "新簿",
 	"translate-statsf-count-reviews": "校譯",
 	"translate-statsf-submit": "草覽",
-	"translate-sidebar-alltrans": "他語之譯",
+	"translate-sidebar-alltrans": "他山",
 	"translations": "全譯",
 	"translate-translations-fieldset-title": "訊",
 	"translate-translations-messagename": "名：",
@@ -103,7 +99,6 @@
 	"translate-save": "存 （$1）",
 	"translate-manage-import-deleted": "已刪訊  $1",
 	"translate-manage-action-import": "入匯",
-	"translate-manage-fuzzy-summary": "訊已易",
 	"translate-import-load": "載檔",
 	"translate-js-save": "存",
 	"translate-js-skip": "次譯",
@@ -111,12 +106,6 @@
 	"translate-documentation-language": "訊之檔",
 	"translate-searchprofile": "譯",
 	"translate-searchprofile-tooltip": "尋譯",
-	"translate-messagereview-submit": "記為已校",
-	"translate-messagereview-progress": "記為已校之……",
-	"translate-messagereview-done": "已校",
-	"api-error-unknownmessage": "訊無尋",
-	"api-error-owntranslation": "汝不可記己譯為已校",
-	"translate-messagereview-no-own": "汝不可記己之譯為已校",
 	"log-name-translationreview": "校譯之誌",
 	"translate-dynagroup-recent-label": "近譯",
 	"translate-msggroupselector-projects": "訊息組",
@@ -173,6 +162,7 @@
 	"tux-editor-collapse-tooltip": "摺",
 	"tux-editor-message-tools-history": "誌",
 	"tux-editor-loading": "載之……",
+	"translate-search-more-languages-info": "尚有{{PLURAL:$1|語文|語文}}$1",
 	"translate-statsbar-tooltip": "已譯$1%，已檢校$2%",
 	"translate-statsbar-tooltip-with-fuzzy": "$1%已翻，$2%檢校，$3%過時"
 }

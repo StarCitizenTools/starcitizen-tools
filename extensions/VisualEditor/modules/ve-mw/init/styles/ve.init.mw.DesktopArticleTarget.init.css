@@ -1,12 +1,11 @@
 /*!
  * VisualEditor MediaWiki DesktopArticleTarget init styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
-/*csslint known-properties:false */
-/* Bug: https://github.com/stubbornella/csslint/issues/436 */
+/* stylelint-disable selector-max-id */
 
 /*!
  * State                | <html> classes
@@ -14,25 +13,23 @@
  * Reading              | ve-available
  * Loading editor       | ve-available ve-activated ve-loading
  * - mw.DesktopArticleTarget.css is loaded
- * Activate editor      | ve-available ve-activated ve-activating
+ * Activate editor      | ve-available ve-activated ve-loading ve-activating
  * Active               | ve-available ve-activated ve-active
  * Deactivate editor    | ve-available ve-deactivating
  * Deactivated          | ve-available
  */
 
-.ve-activated #toc,
+/* Only hide the #toc inside the original article, not generated ones in VE (T187636) */
+.ve-activated .ve-init-mw-desktopArticleTarget-editableContent #toc,
 .ve-activated #siteNotice,
 .ve-activated .mw-indicators,
-/* Most of bodyContent can be hidden as VE has an equivalent of most children
-   in ve-init-target (sibling of #bodyContent). However, we can't hide it
-   completely as subs should remain visible (for persistence with read mode),
-   and ve-ui-mwTocWidget is also part of #bodyContent. */
-.ve-active #bodyContent > :not( #siteSub ):not( #contentSub ):not( .ve-ui-mwTocWidget ),
 .ve-activated #t-print,
 .ve-activated #t-permalink,
 .ve-activated #p-coll-print_export,
 .ve-activated #t-cite,
-.ve-deactivating .ve-ui-surface {
+.ve-deactivating .ve-ui-surface,
+.ve-active .ve-init-mw-desktopArticleTarget-editableContent,
+.ve-active .ve-init-mw-tempWikitextEditorWidget {
 	display: none;
 }
 
@@ -41,17 +38,28 @@
    ve.ce.FocusableNode#updateInvisibleIcon */
 .ve-activating .ve-ui-surface {
 	height: 0;
+	padding: 0 !important; /* stylelint-disable-line declaration-no-important */
 	overflow: hidden;
 }
 
-.ve-activated #bodyContent,
-.ve-activated #firstHeading {
-	opacity: 0.6;
+/* While loading, everything except the progress bar */
+.ve-loading #content > :not( .ve-init-mw-desktopArticleTarget-loading-overlay ),
+/* Once activated, all uneditable content except catlinks */
+.ve-activated .ve-init-mw-desktopArticleTarget-uneditableContent {
 	pointer-events: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+	opacity: 0.5;
+}
+
+.ve-activated #catlinks {
+	cursor: pointer;
+}
+
+.ve-activated #catlinks a {
+	opacity: 1;
 }
 
 /* Progress bar mimicking OOUI */
@@ -59,9 +67,11 @@
 .ve-activated #content {
 	position: relative;
 }
+/* stylelint-enable selector-max-id */
 
 .ve-init-mw-desktopArticleTarget-loading-overlay {
 	position: absolute;
+	top: 1.25em;
 	left: 0;
 	right: 0;
 	z-index: 1;
@@ -79,6 +89,17 @@
 	width: 0;
 }
 
+.ve-init-mw-desktopArticleTarget-toolbarPlaceholder {
+	transition: height 250ms ease;
+	height: 0;
+	/* Toolbar placeholder is styled in theme files */
+}
+
+/* OOUI may not have loaded yet */
+.oo-ui-element-hidden {
+	display: none !important; /* stylelint-disable-line declaration-no-important */
+}
+
 /* Section edit links */
 
 .mw-editsection {
@@ -90,5 +111,5 @@
 }
 
 .mw-editsection-divider {
-	color: #555;
+	color: #54595d;
 }

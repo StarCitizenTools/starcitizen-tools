@@ -7,15 +7,15 @@ class MessageGroupBaseTest extends MediaWikiTestCase {
 	 */
 	protected $group;
 
-	protected $groupConfiguration = array(
-		'BASIC' => array(
+	protected $groupConfiguration = [
+		'BASIC' => [
 			'class' => 'FileBasedMessageGroup',
 			'id' => 'test-id',
 			'label' => 'Test Label',
 			'namespace' => 'NS_MEDIAWIKI',
 			'description' => 'Test description',
-		),
-	);
+		],
+	];
 
 	protected function setUp() {
 		parent::setUp();
@@ -61,11 +61,11 @@ class MessageGroupBaseTest extends MediaWikiTestCase {
 
 	public function testGetNamespaceNumber() {
 		$conf = $this->groupConfiguration;
-		$conf['BASIC']['namespace'] = NS_IMAGE;
+		$conf['BASIC']['namespace'] = NS_FILE;
 		$this->group = MessageGroupBase::factory( $conf );
 
 		$this->assertEquals(
-			NS_IMAGE,
+			NS_FILE,
 			$this->group->getNamespace(),
 			'should parse integer namespace number.'
 		);
@@ -77,9 +77,69 @@ class MessageGroupBaseTest extends MediaWikiTestCase {
 		$this->group = MessageGroupBase::factory( $conf );
 
 		$this->assertEquals(
-			NS_IMAGE,
+			NS_FILE,
 			$this->group->getNamespace(),
 			'should parse string namespace name.'
+		);
+	}
+
+	public function testInsertablesSuggesterClass() {
+		$conf = $this->groupConfiguration;
+		$conf['INSERTABLES']['class'] = 'FakeInsertablesSuggester';
+		$this->group = MessageGroupBase::factory( $conf );
+
+		$this->assertArrayEquals(
+			[ new Insertable( 'Fake', 'Insertables', 'Suggester' ) ],
+			$this->group->getInsertablesSuggester()->getInsertables( '' ),
+			'should correctly get an InsertablesSuggester using \'class\' option.'
+		);
+	}
+
+	public function testInsertablesSuggesterClasses() {
+		$conf = $this->groupConfiguration;
+		$conf['INSERTABLES']['classes'] = [
+			'FakeInsertablesSuggester',
+			'AnotherFakeInsertablesSuggester',
+		];
+		$this->group = MessageGroupBase::factory( $conf );
+
+		$this->assertArrayEquals(
+			[
+				new Insertable( 'Fake', 'Insertables', 'Suggester' ),
+				new Insertable( 'AnotherFake', 'Insertables', 'Suggester' ),
+			],
+			$this->group->getInsertablesSuggester()->getInsertables( '' ),
+			'should correctly get InsertablesSuggesters using \'classes\' option.'
+		);
+	}
+
+	public function testInsertablesSuggesterClassAndClasses() {
+		$conf = $this->groupConfiguration;
+		$conf['INSERTABLES']['class'] = 'FakeInsertablesSuggester';
+		$conf['INSERTABLES']['classes'] = [ 'AnotherFakeInsertablesSuggester' ];
+		$this->group = MessageGroupBase::factory( $conf );
+
+		$this->assertArrayEquals(
+			[
+				new Insertable( 'Fake', 'Insertables', 'Suggester' ),
+				new Insertable( 'AnotherFake', 'Insertables', 'Suggester' ),
+			],
+			$this->group->getInsertablesSuggester()->getInsertables( '' ),
+			'should correctly get InsertablesSuggesters using both \'class\' and \'classes\' options.'
+		);
+
+		$conf['INSERTABLES']['classes'][] = 'FakeInsertablesSuggester';
+		$conf['INSERTABLES']['classes'][] = 'AnotherFakeInsertablesSuggester';
+		$this->group = MessageGroupBase::factory( $conf );
+
+		$this->assertArrayEquals(
+			[
+				new Insertable( 'Fake', 'Insertables', 'Suggester' ),
+				new Insertable( 'AnotherFake', 'Insertables', 'Suggester' ),
+			],
+			$this->group->getInsertablesSuggester()->getInsertables( '' ),
+			'should correctly get InsertablesSuggesters using ' .
+			'both \'class\' and \'classes\' options and removing duplicates.'
 		);
 	}
 
@@ -91,5 +151,17 @@ class MessageGroupBaseTest extends MediaWikiTestCase {
 		$conf = $this->groupConfiguration;
 		$conf['BASIC']['namespace'] = 'ergweofijwef';
 		MessageGroupBase::factory( $conf );
+	}
+}
+
+class FakeInsertablesSuggester implements InsertablesSuggester {
+	public function getInsertables( $text ) {
+		return [ new Insertable( 'Fake', 'Insertables', 'Suggester' ) ];
+	}
+}
+
+class AnotherFakeInsertablesSuggester implements InsertablesSuggester {
+	public function getInsertables( $text ) {
+		return [ new Insertable( 'AnotherFake', 'Insertables', 'Suggester' ) ];
 	}
 }

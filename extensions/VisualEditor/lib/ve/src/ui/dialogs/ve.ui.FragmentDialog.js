@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FragmentDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -25,6 +25,18 @@ ve.ui.FragmentDialog = function VeUiFragmentDialog( config ) {
 /* Inheritance */
 
 OO.inheritClass( ve.ui.FragmentDialog, OO.ui.ProcessDialog );
+
+/**
+ * @inheritdoc
+ */
+ve.ui.FragmentDialog.prototype.initialize = function ( data ) {
+	// Parent method
+	ve.ui.FragmentDialog.super.prototype.initialize.call( this, data );
+
+	this.tabIndexScope = new ve.ui.TabIndexScope( {
+		root: this.$content
+	} );
+};
 
 /**
  * @inheritdoc

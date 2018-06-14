@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Akamycoco"
+		]
+	},
+	"revisionslider-page-size": "$1{{PLURAL:$2|qutux llpgan na bzyaqan kkayal}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bzyaqan kkayal na llpgan}}"
+}

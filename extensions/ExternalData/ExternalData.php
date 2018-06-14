@@ -25,16 +25,15 @@ if ( !defined( 'MEDIAWIKI' ) ) die();
 $wgExtensionCredits['parserhook'][] = array(
 	'path'           => __FILE__,
 	'name'           => 'External Data',
-	'version'        => '1.8.2',
+	'version'        => '1.8.3',
 	'author'         => array( 'Yaron Koren', '...' ),
 	'url'            => 'https://www.mediawiki.org/wiki/Extension:External_Data',
 	'descriptionmsg' => 'externaldata-desc',
-	'license-name'   => 'GPL-2.0+'
+	'license-name'   => 'GPL-2.0-or-later'
 );
 
 $wgHooks['ParserFirstCallInit'][] = 'ExternalDataHooks::registerParser';
 $wgMessagesDirs['ExternalData'] = __DIR__ . '/i18n';
-$wgExtensionMessagesFiles['ExternalData'] = __DIR__ . '/ExternalData.i18n.php';
 $wgExtensionMessagesFiles['ExternalDataMagic'] = __DIR__ . '/ExternalData.i18n.magic.php';
 
 // Register all special pages and other classes

@@ -10,7 +10,9 @@
 			"Vito Genovese",
 			"Sadrettin",
 			"Ömer Berkay",
-			"Sayginer"
+			"Sayginer",
+			"McDutchie",
+			"HakanIST"
 		]
 	},
 	"checkuser-summary": "Bu araç bir kullanıcı tarafından kullanılan IP'leri almak için son değişiklikleri tarar ya da bir IP için değişiklik/kullanıcı verisini gösterir.\nAlıcı IP'deki kullanıcı ve değişiklikler, IP'ye \"/xff\" eklenmesiyle XFF başlıklarıyla alınabilir. IPv4 (CIDR $1-32) ve IPv6 (CIDR $2-128) desteklenmektedir.\nPerformans nedeniyle 5000'den fazla değişiklik dönmeyecektir.\nBunu ilkelere uygun olarak kullanın.",
@@ -64,9 +66,10 @@
 	"checkuser-block-failure": "'''Hiçbir kullanıcı engellenmedi.'''",
 	"checkuser-block-limit": "Çok fazla kullanıcı seçildi.",
 	"checkuser-block-noreason": "Engellemeler için bir neden belirtmelisiniz.",
+	"checkuser-centralauth-multilock": "Seçili hesapları toplu kilitle",
 	"checkuser-noreason": "Bu sorgu için bir gerekçe göstermelisiniz.",
 	"checkuser-accounts": "$1 yeni {{PLURAL:$1|hesap|hesap}}",
-	"checkuser-too-many": "Çok fazla sonuç var (sorgu tahminine göre), lütfen CIDR'ı daraltın.\nKullanılan IP'ler (max 5000, adrese göre sıralı):",
+	"checkuser-too-many": "Çok fazla sonuç var (sorgu tahminine göre), lütfen CIDR'ı daraltın.\nKullanılan IP'ler (maks 5000, adrese göre sıralı):",
 	"checkuser-user-nonexistent": "Belirtilen kullanıcı mevcut değil.",
 	"checkuser-search": "Denetçi günlüğünde ara",
 	"checkuser-search-submit": "Ara",
@@ -92,7 +95,7 @@
 	"apihelp-query+checkuser-param-target": "Kullanıcı adı, IP adresi veya CIDR aralığını kontrol et.",
 	"apihelp-query+checkuser-param-reason": "Kontrol nedeni.",
 	"apihelp-query+checkuser-param-limit": "Satır sınırı",
-	"apihelp-query+checkuser-param-timecond": "Kullanıcı verilerinin zaman sınırı (\"-2 hafta\" veya \"2 hafta önce\" gibi).",
+	"apihelp-query+checkuser-param-timecond": "Kullanıcı verilerinin zaman sınırı (\"-2 weeks\" veya \"2 weeks ago\" gibi).",
 	"apihelp-query+checkuser-param-xff": "IP adresi yerine XFF veri kullanın.",
 	"apihelp-query+checkuser-example-1": "[[User:Example]] için IP adreslerini kontrol et",
 	"apihelp-query+checkuser-example-2": "192.0.2.0/24 tarafından yapılan değişiklikleri kontrol et",

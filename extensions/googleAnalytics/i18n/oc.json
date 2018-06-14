@@ -4,6 +4,6 @@
 			"Cedric31"
 		]
 	},
-	"googleanalytics-desc": "Apond un escript Google Analitic (ga.js) dins las paginas MediaWiki per las recèrcas.",
+	"googleanalytics-desc": "Apond un escript Google Analitic (e/o un autre servici d'analisi web) dins las paginas MediaWiki pel traçatge.",
 	"right-noanalytics": "Pas concernit pel seguiment d'analisis web"
 }

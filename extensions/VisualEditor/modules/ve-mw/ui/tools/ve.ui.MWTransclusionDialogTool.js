@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface transclusion tool classes.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -28,7 +28,7 @@ ve.ui.MWTransclusionDialogTool.static.name = 'transclusion';
 
 ve.ui.MWTransclusionDialogTool.static.group = 'object';
 
-ve.ui.MWTransclusionDialogTool.static.icon = 'template';
+ve.ui.MWTransclusionDialogTool.static.icon = 'puzzle';
 
 ve.ui.MWTransclusionDialogTool.static.title =
 	OO.ui.deferMsg( 'visualeditor-dialogbutton-template-tooltip' );

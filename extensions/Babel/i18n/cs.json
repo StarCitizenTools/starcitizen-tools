@@ -8,7 +8,8 @@
 			"Matěj Grabovský",
 			"Mormegil",
 			"Mr. Richard Bolla",
-			"Matěj Suchánek"
+			"Matěj Suchánek",
+			"Clon"
 		]
 	},
 	"babel": "Babylon – informace o&nbsp;{{GENDER:$1|uživateli|uživatelce|uživateli}}",
@@ -32,5 +33,6 @@
 	"babel-4-n": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má znalosti [[$2|češtiny]] [[$1|téměř na úrovni rodilého mluvčího]].",
 	"babel-5-n": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} má [[$1|profesionální]] znalosti [[$2|češtiny]].",
 	"babel-N-n": "{{GENDER:$4|Tento uživatel|Tato uživatelka}} je [[$1|{{GENDER:$4|rodilý|rodilá}} mluvčí]] [[$2|češtiny]].",
-	"babel-footer": "Uživatelé podle jazyka"
+	"babel-footer": "Uživatelé podle jazyka",
+	"apihelp-query+babel-description": "Získat informace o tom, jaké jazyky uživatel zná"
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTemplateModel class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -19,13 +19,13 @@
  */
 ve.dm.MWTemplateModel = function VeDmMWTemplateModel( transclusion, target ) {
 	// Parent constructor
-	ve.dm.MWTransclusionPartModel.call( this, transclusion );
+	ve.dm.MWTemplateModel.super.call( this, transclusion );
 
 	// Properties
 	this.target = target;
 
 	// TODO: Either here or in uses of this constructor we need to validate the title
-	this.title = ( target.href && target.href.replace( /^(\.\.?\/)*/, '' ) ) || null;
+	this.title = target.href ? ve.normalizeParsoidResourceName( target.href ) : null;
 	this.sequence = null;
 	this.params = {};
 	this.spec = new ve.dm.MWTemplateSpecModel( this );
@@ -288,24 +288,32 @@ ve.dm.MWTemplateModel.prototype.removeParameter = function ( param ) {
 };
 
 /**
- * Add all non-existing required and suggested parameters, if any.
- *
- * @method
- * @return {number} Number of parameters added
+ * @inheritdoc
  */
 ve.dm.MWTemplateModel.prototype.addPromptedParameters = function () {
-	var i, len, addedCount = 0,
+	var i, len, name, j, aliases, aliasLen, foundAlias,
+		addedCount = 0,
 		spec = this.getSpec(),
 		names = spec.getParameterNames();
 
 	for ( i = 0, len = names.length; i < len; i++ ) {
+		name = names[ i ];
+		aliases = spec.getParameterAliases( name );
+		foundAlias = false;
+		for ( j = 0, aliasLen = aliases.length; j < aliasLen; j++ ) {
+			if ( Object.prototype.hasOwnProperty.call( this.params, aliases[ j ] ) ) {
+				foundAlias = true;
+				break;
+			}
+		}
 		if (
-				!this.params[ name ] &&
-				(
-					spec.isParameterRequired( names[ i ] ) ||
-					spec.isParameterSuggested( names[ i ] )
-				)
-			) {
+			!foundAlias &&
+			!this.params[ name ] &&
+			(
+				spec.isParameterRequired( name ) ||
+				spec.isParameterSuggested( name )
+			)
+		) {
 			this.addParameter( new ve.dm.MWParameterModel( this, names[ i ] ) );
 			addedCount++;
 		}
@@ -316,6 +324,8 @@ ve.dm.MWTemplateModel.prototype.addPromptedParameters = function () {
 
 /**
  * Set original data, to be used as a base for serialization.
+ *
+ * @param {Object} data Original data
  */
 ve.dm.MWTemplateModel.prototype.setOriginalData = function ( data ) {
 	this.originalData = data;

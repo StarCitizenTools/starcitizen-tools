@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pikne"
+		]
+	},
+	"codemirror-desc": "Võimaldab vikiteksti toimetis süntaksi esiletõstu.",
+	"codemirror-toggle-label": "Süntaksi esiletõst",
+	"codemirror-beta-title": "Vikiteksti süntaksi esiletõst",
+	"codemirror-beta-desc": "Süntaksi esiletõstuga on redigeerimine lihtsam. Et eristada lehekülje tekst visuaalselt linkide, viidete ja mallide koodist, kasutatakse värvusi ja toonimist.",
+	"codemirror-popup-label": "Süntaksi esiletõst",
+	"codemirror-popup-desc": "Süntaksi esiletõstu abil on lihtne eristada muudetava teksti eri osi, mis on värvustega markeeritud.",
+	"codemirror-popup-btn-yes": "Proovi",
+	"codemirror-popup-btn-no": "Ei, aitäh"
+}

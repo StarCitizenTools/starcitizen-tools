@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Linear Selection class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -118,10 +118,10 @@ ve.ce.LinearSelection.prototype.getSelectionBoundingRect = function () {
 
 	try {
 		boundingRect = RangeFix.getBoundingClientRect( nativeRange );
-		if ( !boundingRect ) {
-			throw new Error( 'getBoundingClientRect returned null' );
-		}
 	} catch ( e ) {
+		boundingRect = null;
+	}
+	if ( !boundingRect ) {
 		boundingRect = this.getNodeClientRectFromRange( nativeRange );
 	}
 

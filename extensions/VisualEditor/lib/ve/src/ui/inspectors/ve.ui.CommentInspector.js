@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface CommentInspector class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,9 +13,9 @@
  * @constructor
  * @param {Object} [config] Configuration options
  */
-ve.ui.CommentInspector = function VeUiCommentInspector( config ) {
+ve.ui.CommentInspector = function VeUiCommentInspector() {
 	// Parent constructor
-	ve.ui.NodeInspector.call( this, config );
+	ve.ui.CommentInspector.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -40,7 +40,9 @@ ve.ui.CommentInspector.static.actions = [
 		flags: 'destructive',
 		modes: 'edit'
 	}
-].concat( ve.ui.FragmentInspector.static.actions );
+].concat( ve.ui.CommentInspector.super.static.actions );
+
+/* Methods */
 
 /**
  * Handle frame ready events.
@@ -52,7 +54,6 @@ ve.ui.CommentInspector.prototype.initialize = function () {
 	ve.ui.CommentInspector.super.prototype.initialize.call( this );
 
 	this.textWidget = new ve.ui.WhitespacePreservingTextInputWidget( {
-		multiline: true,
 		autosize: true
 	} );
 	this.textWidget.connect( this, { resize: 'updateSize' } );
@@ -78,6 +79,7 @@ ve.ui.CommentInspector.prototype.getActionProcess = function ( action ) {
  *
  * @method
  * @param {Object} [data] Inspector opening data
+ * @return {OO.ui.Process}
  */
 ve.ui.CommentInspector.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.CommentInspector.super.prototype.getSetupProcess.call( this, data )
@@ -95,7 +97,7 @@ ve.ui.CommentInspector.prototype.getSetupProcess = function ( data ) {
 						attributes: { text: '' }
 					},
 					{ type: '/comment' }
-				] );
+				] ).select();
 				this.commentNode = this.getSelectedNode();
 			}
 		}, this );
@@ -107,7 +109,6 @@ ve.ui.CommentInspector.prototype.getSetupProcess = function ( data ) {
 ve.ui.CommentInspector.prototype.getReadyProcess = function ( data ) {
 	return ve.ui.CommentInspector.super.prototype.getReadyProcess.call( this, data )
 		.next( function () {
-			this.getFragment().getSurface().enable();
 			this.textWidget.focus();
 		}, this );
 };
@@ -121,14 +122,16 @@ ve.ui.CommentInspector.prototype.getTeardownProcess = function ( data ) {
 		.first( function () {
 			var surfaceModel = this.getFragment().getSurface();
 
-			if ( data.action === 'remove' || this.textWidget.getValue() === '' ) {
-				surfaceModel.popStaging();
-				// If popStaging removed the node then this will be a no-op
-				this.getFragment().removeContent();
-			} else {
+			// data.action can be 'done', 'remove' or undefined (cancel)
+			if ( data.action === 'done' && this.textWidget.getValue() !== '' ) {
 				// Edit comment node
 				this.getFragment().changeAttributes( { text: this.textWidget.getValueAndWhitespace() } );
 				surfaceModel.applyStaging();
+			} else {
+				surfaceModel.popStaging();
+				if ( data.action === 'remove' || data.action === 'done' ) {
+					this.getFragment().removeContent();
+				}
 			}
 
 			// Reset inspector

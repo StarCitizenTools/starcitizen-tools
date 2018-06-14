@@ -16,7 +16,7 @@
  */
 class ResourceLoaderSchemaModule extends ResourceLoaderModule {
 
-	/** @var RemoteSchema $schema **/
+	/** @var RemoteSchema **/
 	public $schema;
 
 	/**
@@ -44,9 +44,8 @@ class ResourceLoaderSchemaModule extends ResourceLoaderModule {
 		}
 
 		if ( !is_int( $args['revision'] ) ) {
-			// Events will not validate on the Python server if this is defined
-			// wrong.  Enforce it here as well, so it can be more easily caught
-			// during local development.
+			// Events will not validate on the EventLogging server if this is defined
+			// wrong. Enforce it here as well, so it can be easily caught during development.
 			throw new Exception( "Revision for schema \"{$args['schema']}\" must be given as an integer" );
 		}
 
@@ -55,7 +54,7 @@ class ResourceLoaderSchemaModule extends ResourceLoaderModule {
 	}
 
 	/**
-	 * @param ResourceLoaderContext $context
+	 * @param ResourceLoaderContext|null $context
 	 * @return array Module names
 	 */
 	public function getDependencies( ResourceLoaderContext $context = null ) {
@@ -82,12 +81,28 @@ class ResourceLoaderSchemaModule extends ResourceLoaderModule {
 	 * when run in the browser, adds it to mw.eventLog.schemas. Adds an
 	 * empty schema if the schema could not be retrieved.
 	 * @param ResourceLoaderContext $context
-	 * @return string: JavaScript code.
+	 * @return string JavaScript code.
 	 */
 	public function getScript( ResourceLoaderContext $context ) {
 		$schema = $this->schema->jsonSerialize();
-		efStripKeyRecursive( $schema, 'description' );
+		$this->stripKeyRecursive( $schema, 'description' );
 		$params = [ $this->schema->title, $schema ];
 		return Xml::encodeJsCall( 'mediaWiki.eventLog.declareSchema', $params );
+	}
+
+	/**
+	 * Recursively remove a key from an array and all its subarray members.
+	 * Does not detect cycles.
+	 *
+	 * @param array &$array Array from which key should be stripped.
+	 * @param string $key Key to remove.
+	 */
+	private function stripKeyRecursive( &$array, $key ) {
+		unset( $array[ $key ] );
+		foreach ( $array as $k => &$v ) {
+			if ( is_array( $v ) ) {
+				$this->stripKeyRecursive( $v, $key );
+			}
+		}
 	}
 }

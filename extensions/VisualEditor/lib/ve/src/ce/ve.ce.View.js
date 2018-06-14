@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable View class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -22,7 +22,7 @@ ve.ce.View = function VeCeView( model, config ) {
 	this.model = model;
 
 	// Parent constructor
-	OO.ui.Element.call( this, config );
+	ve.ce.View.super.call( this, config );
 
 	// Mixin constructors
 	OO.EventEmitter.call( this );
@@ -36,18 +36,8 @@ ve.ce.View = function VeCeView( model, config ) {
 		teardown: 'onTeardown'
 	} );
 
-	// Render attributes from original DOM elements
-	ve.dm.Converter.static.renderHtmlAttributeList(
-		this.model.getOriginalDomElements(),
-		this.$element,
-		this.constructor.static.renderHtmlAttributes,
-		// computed attributes
-		true,
-		// deep
-		!ve.dm.nodeFactory.lookup( this.model.getType() ) ||
-			!ve.dm.nodeFactory.canNodeHaveChildren( this.model.getType() ) ||
-			ve.dm.nodeFactory.doesNodeHandleOwnChildren( this.model.getType() )
-	);
+	// Initialize
+	this.initialize();
 };
 
 /* Inheritance */
@@ -68,6 +58,7 @@ OO.mixinClass( ve.ce.View, OO.EventEmitter );
 
 /* Static members */
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Allowed attributes for DOM elements, in the same format as ve.dm.Model#preserveHtmlAttributes
  *
@@ -80,7 +71,7 @@ OO.mixinClass( ve.ce.View, OO.EventEmitter );
  * sense for that view in particular.
  *
  * @static
- * @property {boolean|string|RegExp|Array|Object}
+ * @property {boolean|Function}
  * @inheritable
  */
 ve.ce.View.static.renderHtmlAttributes = function ( attribute ) {
@@ -108,6 +99,27 @@ ve.ce.View.static.renderHtmlAttributes = function ( attribute ) {
  */
 ve.ce.View.prototype.getModelHtmlDocument = function () {
 	return null;
+};
+
+/**
+ * Initialize this.$element. This is called by the constructor and should be called every time
+ * this.$element is replaced.
+ */
+ve.ce.View.prototype.initialize = function () {
+	if ( this.model.element && this.model.element.originalDomElementsHash !== undefined ) {
+		// Render attributes from original DOM elements
+		ve.dm.Converter.static.renderHtmlAttributeList(
+			this.model.getOriginalDomElements( this.model.getStore() ),
+			this.$element,
+			this.constructor.static.renderHtmlAttributes,
+			// Computed
+			true,
+			// Deep
+			!( this.model instanceof ve.dm.Node ) ||
+			!this.model.canHaveChildren() ||
+			this.model.handlesOwnChildren()
+		);
+	}
 };
 
 /**

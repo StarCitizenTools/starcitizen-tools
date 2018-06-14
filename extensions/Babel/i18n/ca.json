@@ -4,16 +4,18 @@
 			"Aleator",
 			"SMP",
 			"Toniher",
-			"Vriullop"
+			"Vriullop",
+			"Fitoschido",
+			"Ssola"
 		]
 	},
 	"babel": "Informació Babel de {{GENDER:$1|l'usuari|la usuària}}",
 	"babel-desc": "Afegeix la funció d'anàlisi <code>#babel</code> per a permetre la generació automàtica d'una columna babel de quadres d'usuari amb l'habilitat d'incloure plantilles personalitzades.",
 	"babel-url": "Project:Babel",
 	"babel-footer-url": ":Category:Usuaris per idioma",
-	"babel-autocreate-reason": "Creant automàticament la categoria de [[$1|Babel]].",
+	"babel-autocreate-reason": "Creació automàtica de la categoria de [[$1|Babel]].",
 	"babel-autocreate-text-levels": "Els usuaris d'aquesta categoria indiquen que tenen un nivell $1 per l'idioma $2.",
-	"babel-autocreate-text-main": "Els usuaris d'aquesta categoria indiquen que tenen coneixements de l'idioma $1.",
+	"babel-autocreate-text-main": "Els usuaris d'aquesta categoria indiquen el seu coneixement de l'idioma $1.",
 	"babel-0": "{{GENDER:$4|Aquest usuari|Aquesta usuària}} [[$1|no té]] cap coneixement de l'idioma [[$2|$3]] (o bé l'entén amb moltes dificultats).",
 	"babel-1": "{{GENDER:$4|Aquest usuari|Aquesta usuària}} té un coneixement [[$1|bàsic]] de l'idioma [[$2|$3]].",
 	"babel-2": "{{GENDER:$4|Aquest usuari|Aquesta usuària}} té un coneixement [[$1|mitjà]] de l'idioma [[$2|$3]].",
@@ -28,5 +30,9 @@
 	"babel-4-n": "{{GENDER:$4|Aquest usuari|Aquesta usuària}} té un coneixement [[$1|gairebé natiu]] de [[$2|català]].",
 	"babel-5-n": "{{GENDER:$4|Aquest usuari|Aquesta usuària}} té coneixement [[$1|professional]] de la llengua [[$2|catalana]].",
 	"babel-N-n": "{{GENDER:$4|Aquest usuari és un|Aquesta usuària és una}} parlant [[$1|{{GENDER:$4|natiu|nativa}}]] de [[$2|català]].",
-	"babel-footer": "Usuaris per idioma"
+	"babel-footer": "Usuaris per idioma",
+	"apihelp-query+babel-description": "Obtenció d'informació sobre les llengües que l'usuari coneix",
+	"apihelp-query+babel-summary": "Obté informació sobre les llengües que l'usuari coneix",
+	"apihelp-query+babel-param-user": "Usuari del qual obtenir informació",
+	"apihelp-query+babel-example-1": "Obtenir la informació Babel per a l'usuari <kbd>Example</kbd>"
 }

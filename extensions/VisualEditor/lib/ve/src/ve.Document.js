@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Document class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -11,7 +11,7 @@
  * @mixins OO.EventEmitter
  *
  * @constructor
- * @param {ve.Node} documentNode Document node
+ * @param {ve.BranchNode} documentNode Document node
  */
 ve.Document = function VeDocument( documentNode ) {
 	// Mixin constructors
@@ -26,20 +26,40 @@ ve.Document = function VeDocument( documentNode ) {
 
 OO.mixinClass( ve.Document, OO.EventEmitter );
 
+/* Events */
+
+/**
+ * A node has been attached with ve.Node#setDocument . Its descendants are guaranteed
+ * to be attached too (and the event is emitted for descendants first, and for siblings
+ * in their order in the children list)
+ *
+ * @event nodeAttached
+ * @param {ve.Node} node The node that has been attached
+ */
+
+/**
+ * A node has been detached with ve.Node#setDocument . Its descendants are guaranteed
+ * to be detached too (and the event is emitted for descendants first, and for siblings
+ * in their order in the children list)
+ *
+ * @event nodeDetached
+ * @param {ve.Node} node The node that has been detached
+ */
+
 /* Methods */
 
 /**
  * Get the root of the document's node tree.
  *
  * @method
- * @return {ve.Node} Root of node tree
+ * @return {ve.BranchNode} Root of node tree
  */
 ve.Document.prototype.getDocumentNode = function () {
 	return this.documentNode;
 };
 
 /**
- * Get a node a an offset.
+ * Get a node at an offset.
  *
  * @method
  * @param {number} offset Offset to get node at
@@ -229,7 +249,7 @@ ve.Document.prototype.selectNodes = function ( range, mode ) {
 				// All of node is covered
 				retval.push( {
 					node: node,
-					// no 'range' because the entire node is covered
+					// No 'range' because the entire node is covered
 					index: currentFrame.index,
 					nodeRange: new ve.Range( left, right ),
 					nodeOuterRange: new ve.Range( left - isWrapped, right + isWrapped ),
@@ -346,7 +366,7 @@ ve.Document.prototype.selectNodes = function ( range, mode ) {
 				// All of node is covered
 				retval.push( {
 					node: node,
-					// no 'range' because the entire node is covered
+					// No 'range' because the entire node is covered
 					index: currentFrame.index,
 					nodeRange: new ve.Range( left, right ),
 					nodeOuterRange: new ve.Range( left - isWrapped, right + isWrapped ),
@@ -417,7 +437,7 @@ ve.Document.prototype.selectNodes = function ( range, mode ) {
 				// All of node is covered
 				retval.push( {
 					node: node,
-					// no 'range' because the entire node is covered
+					// No 'range' because the entire node is covered
 					index: currentFrame.index,
 					nodeRange: new ve.Range( left, right ),
 					nodeOuterRange: new ve.Range( left - isWrapped, right + isWrapped ),
@@ -507,7 +527,7 @@ ve.Document.prototype.selectNodes = function ( range, mode ) {
  *  - grandparent: parent's parent
  */
 ve.Document.prototype.getCoveredSiblingGroups = function ( range ) {
-	var i, firstCoveredSibling, lastCoveredSibling, node, parentNode, siblingNode,
+	var i, firstCoveredSibling, node, parentNode, siblingNode,
 		leaves = this.selectNodes( range, 'leaves' ),
 		groups = [],
 		lastEndOffset = 0;
@@ -537,7 +557,6 @@ ve.Document.prototype.getCoveredSiblingGroups = function ( range ) {
 		do {
 			// Add this to its sibling's group
 			groups[ groups.length - 1 ].nodes.push( siblingNode );
-			lastCoveredSibling = siblingNode;
 			i++;
 			if ( leaves[ i ] === undefined ) {
 				break;
@@ -563,4 +582,28 @@ ve.Document.prototype.getCoveredSiblingGroups = function ( range ) {
 ve.Document.prototype.rangeInsideOneLeafNode = function ( range ) {
 	var selected = this.selectNodes( range, 'leaves' );
 	return selected.length === 1 && selected[ 0 ].nodeRange.containsRange( range ) && selected[ 0 ].indexInNode === undefined;
+};
+
+/**
+ * Callback when a node is attached with ve.Node#setDocument
+ *
+ * The node and all its children are guaranteed to be attached
+ *
+ * @method
+ * @param {ve.Node} node The node attached
+ */
+ve.Document.prototype.nodeAttached = function ( node ) {
+	this.emit( 'nodeAttached', node );
+};
+
+/**
+ * Callback when a node is attached with ve.Node#setDocument
+ *
+ * The node and all its children are guaranteed to be attached
+ *
+ * @method
+ * @param {ve.Node} node The node detached
+ */
+ve.Document.prototype.nodeDetached = function ( node ) {
+	this.emit( 'nodeDetached', node );
 };

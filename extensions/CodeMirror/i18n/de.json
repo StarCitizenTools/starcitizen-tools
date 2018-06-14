@@ -1,10 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Metalhead64"
+			"Metalhead64",
+			"Kghbln"
 		]
 	},
-	"codemirror-desc": "Ermöglicht Syntax-Hervorhebungen im Wikitext-Editor",
-	"codemirror-enable-label": "CodeMirror aktivieren (Syntaxhervorhebung)",
-	"codemirror-disable-label": "CodeMirror deaktivieren (Syntaxhervorhebung)"
+	"codemirror-desc": "Ermöglicht Syntaxhervorhebungen im Wikitext-Editor",
+	"codemirror-toggle-label": "Syntaxhervorhebung",
+	"codemirror-beta-title": "Wikitext-Syntaxhervorhebung",
+	"codemirror-beta-desc": "Syntaxhervorhebung macht das Bearbeiten einfacher durch die Verwendung von Farben und Farbtönen zur visuellen Trennung des Seitentextes vom Code für Links, Einzelnachweise und Vorlagen.",
+	"codemirror-popup-label": "Syntaxhervorhebung",
+	"codemirror-popup-desc": "Syntaxhervorhebung hilft dir bei der einfachen Unterscheidung verschiedener Teile deiner Bearbeitung durch Farbkodierung.",
+	"codemirror-popup-btn-yes": "Ausprobieren",
+	"codemirror-popup-btn-no": "Nein, danke"
 }

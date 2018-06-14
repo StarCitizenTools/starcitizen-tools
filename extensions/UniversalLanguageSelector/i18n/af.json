@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Naudefj",
-			"Fwolff"
+			"Fwolff",
+			"Amire80"
 		]
 	},
 	"uls-desc": "Bied gebruikers verskillende maniere om 'n taal te kies en bybehorende instellings aan te pas",
@@ -57,10 +58,7 @@
 	"ext-uls-language-settings-applying": "Pas toe...",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Een meer|$1 meer}}",
 	"ext-uls-compact-link-info": "Alle tale (beginlys met algemene keuses van andere)",
-	"apihelp-languagesearch-description": "Soek taalname in enige skryfstelsel.",
-	"apihelp-languagesearch-param-search": "Soekstring.",
-	"apihelp-languagesearch-param-typos": "Aantal spelfoute om toe te laat in die soekstring.",
-	"apihelp-ulslocalization-param-language": "Taalkode.",
 	"prefs-languages": "Tale",
-	"ext-uls-compact-language-links-preference": "Wys 'n kompakte lys van tale, wat slegs relevante tale bevat."
+	"ext-uls-compact-language-links-preference": "Wys 'n [[$1|kompakte lys tale]] wat slegs relevante tale bevat.",
+	"ext-uls-compact-no-results": "Dié bladsy is nie beskikbaar in die taal waarin u gesoek."
 }

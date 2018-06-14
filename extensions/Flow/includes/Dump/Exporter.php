@@ -3,7 +3,7 @@
 namespace Flow\Dump;
 
 use BatchRowIterator;
-use DatabaseBase;
+use Wikimedia\Rdbms\IDatabase;
 use Exception;
 use Flow\Collection\PostSummaryCollection;
 use Flow\Container;
@@ -12,17 +12,16 @@ use Flow\Model\AbstractRevision;
 use Flow\Model\Header;
 use Flow\Model\PostRevision;
 use Flow\Model\PostSummary;
-use Flow\Model\UUID;
 use Flow\Model\Workflow;
 use Flow\RevisionActionPermissions;
 use Flow\Search\Iterators\AbstractIterator;
 use Flow\Search\Iterators\HeaderIterator;
 use Flow\Search\Iterators\TopicIterator;
 use ReflectionProperty;
-use TimestampException;
 use User;
 use WikiExporter;
 use Xml;
+use Wikimedia\Timestamp\TimestampException;
 
 class Exporter extends WikiExporter {
 	/**
@@ -30,7 +29,7 @@ class Exporter extends WikiExporter {
 	 *
 	 * @var array
 	 */
-	public static $map = array(
+	public static $map = [
 		'rev_id' => 'id',
 		'rev_user_id' => 'userid',
 		'rev_user_ip' => 'userip',
@@ -61,30 +60,38 @@ class Exporter extends WikiExporter {
 		'tree_orig_user_id' => 'treeoriguserid',
 		'tree_orig_user_ip' => 'treeoriguserip',
 		'tree_orig_user_wiki' => 'treeoriguserwiki',
-	);
+	];
 
 	/**
-	   @var ReflectionProperty $prevRevisionProperty Previous revision property
-	*/
+	 * @var ReflectionProperty $prevRevisionProperty Previous revision property
+	 */
 	protected $prevRevisionProperty;
 
 	/**
-	   @var ReflectionProperty $changeTypeProperty Change type property
-	*/
+	 * @var ReflectionProperty $changeTypeProperty Change type property
+	 */
 	protected $changeTypeProperty;
 
 	/**
-	 * {@inheritDoc}
+	 * To convert between local and global user ids
+	 *
+	 * @var \CentralIdLookup
+	 */
+	protected $lookup;
+
+	/**
+	 * @inheritDoc
 	 */
 	function __construct( $db, $history = WikiExporter::CURRENT,
 		$buffer = WikiExporter::BUFFER, $text = WikiExporter::TEXT ) {
-
 		parent::__construct( $db, $history, $buffer, $text );
 		$this->prevRevisionProperty = new ReflectionProperty( 'Flow\Model\AbstractRevision', 'prevRevision' );
 		$this->prevRevisionProperty->setAccessible( true );
 
 		$this->changeTypeProperty = new ReflectionProperty( 'Flow\Model\AbstractRevision', 'changeType' );
 		$this->changeTypeProperty->setAccessible( true );
+
+		$this->lookup = \CentralIdLookup::factory( 'CentralAuth' );
 	}
 
 	public static function schemaVersion() {
@@ -102,13 +109,13 @@ class Exporter extends WikiExporter {
 
 		$output = Xml::openElement(
 			'mediawiki',
-			array(
+			[
 				'xmlns' => "http://www.mediawiki.org/xml/flow-$version/",
 				'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
 				'xsi:schemaLocation' => "http://www.mediawiki.org/xml/flow-$version/ http://www.mediawiki.org/xml/flow-$version.xsd",
 				'version' => $version,
 				'xml:lang' => $wgLanguageCode
-			)
+			]
 		) . "\n";
 		$this->sink->write( $output );
 	}
@@ -120,34 +127,34 @@ class Exporter extends WikiExporter {
 	 * @return BatchRowIterator
 	 */
 	public function getWorkflowIterator( array $pages = null, $startId = null, $endId = null ) {
-		/** @var DatabaseBase $dbr */
-		$dbr = Container::get( 'db.factory' )->getDB( DB_SLAVE );
+		/** @var IDatabase $dbr */
+		$dbr = Container::get( 'db.factory' )->getDB( DB_REPLICA );
 
 		$iterator = new BatchRowIterator( $dbr, 'flow_workflow', 'workflow_id', 300 );
-		$iterator->setFetchColumns( array( '*' ) );
-		$iterator->addConditions( array( 'workflow_wiki' => wfWikiId() ) );
-		$iterator->addConditions( array( 'workflow_type' => 'discussion' ) );
+		$iterator->setFetchColumns( [ '*' ] );
+		$iterator->addConditions( [ 'workflow_wiki' => wfWikiID() ] );
+		$iterator->addConditions( [ 'workflow_type' => 'discussion' ] );
 
 		if ( $pages ) {
-			$pageConds = array();
+			$pageConds = [];
 			foreach ( $pages as $page ) {
 				$title = \Title::newFromDBkey( $page );
 				$pageConds[] = $dbr->makeList(
-					array(
+					[
 						'workflow_namespace' => $title->getNamespace(),
 						'workflow_title_text' => $title->getDBkey()
-					),
+					],
 					LIST_AND
 				);
 			}
 
-			$iterator->addConditions( array( $dbr->makeList( $pageConds, LIST_OR ) ) );
+			$iterator->addConditions( [ $dbr->makeList( $pageConds, LIST_OR ) ] );
 		}
 		if ( $startId ) {
-			$iterator->addConditions( array( 'workflow_page_id >= ' . $dbr->addQuotes( $startId ) ) );
+			$iterator->addConditions( [ 'workflow_page_id >= ' . $dbr->addQuotes( $startId ) ] );
 		}
 		if ( $endId ) {
-			$iterator->addConditions( array( 'workflow_page_id < ' . $dbr->addQuotes( $endId ) ) );
+			$iterator->addConditions( [ 'workflow_page_id < ' . $dbr->addQuotes( $endId ) ] );
 		}
 
 		return $iterator;
@@ -162,12 +169,13 @@ class Exporter extends WikiExporter {
 	public function dump( BatchRowIterator $workflowIterator ) {
 		foreach ( $workflowIterator as $rows ) {
 			foreach ( $rows as $row ) {
-				$workflow = Workflow::fromStorageRow( (array) $row );
+				$workflow = Workflow::fromStorageRow( (array)$row );
 
 				$headerIterator = Container::get( 'search.index.iterators.header' );
 				$topicIterator = Container::get( 'search.index.iterators.topic' );
+				$topicIterator->orderByUUID = true;
 				/** @var AbstractIterator $iterator */
-				foreach ( array( $headerIterator, $topicIterator ) as $iterator ) {
+				foreach ( [ $headerIterator, $topicIterator ] as $iterator ) {
 					$iterator->setPage( $row->workflow_page_id );
 				}
 
@@ -181,10 +189,10 @@ class Exporter extends WikiExporter {
 			return;
 		}
 
-		$output = Xml::openElement( 'board', array(
+		$output = Xml::openElement( 'board', [
 			'id' => $workflow->getId()->getAlphadecimal(),
 			'title' => $workflow->getOwnerTitle()->getPrefixedDBkey(),
-		) ) . "\n";
+		] ) . "\n";
 		$this->sink->write( $output );
 
 		foreach ( $headerIterator as $revision ) {
@@ -205,9 +213,9 @@ class Exporter extends WikiExporter {
 			return;
 		}
 
-		$output = Xml::openElement( 'topic', array(
+		$output = Xml::openElement( 'topic', [
 			'id' => $revision->getCollectionId()->getAlphadecimal(),
-		) ) . "\n";
+		] ) . "\n";
 		$this->sink->write( $output );
 
 		$this->formatPost( $revision );
@@ -231,9 +239,9 @@ class Exporter extends WikiExporter {
 			return;
 		}
 
-		$output = Xml::openElement( 'description', array(
+		$output = Xml::openElement( 'description', [
 			'id' => $revision->getCollectionId()->getAlphadecimal()
-		) ) . "\n";
+		] ) . "\n";
 		$this->sink->write( $output );
 
 		$this->formatRevisions( $revision );
@@ -247,9 +255,9 @@ class Exporter extends WikiExporter {
 			return;
 		}
 
-		$output = Xml::openElement( 'post', array(
+		$output = Xml::openElement( 'post', [
 			'id' => $revision->getCollectionId()->getAlphadecimal()
-		) ) . "\n";
+		] ) . "\n";
 		$this->sink->write( $output );
 
 		$this->formatRevisions( $revision );
@@ -275,9 +283,9 @@ class Exporter extends WikiExporter {
 			return;
 		}
 
-		$output = Xml::openElement( 'summary', array(
+		$output = Xml::openElement( 'summary', [
 			'id' => $revision->getCollectionId()->getAlphadecimal()
-		) ) . "\n";
+		] ) . "\n";
 		$this->sink->write( $output );
 
 		$this->formatRevisions( $revision );
@@ -372,7 +380,7 @@ class Exporter extends WikiExporter {
 		$attribs = $revision->toStorageRow( $revision );
 
 		// make sure there are no leftover key columns (unknown to $attribs)
-		$keys = array_intersect_key(static::$map, $attribs );
+		$keys = array_intersect_key( static::$map, $attribs );
 		// now make sure $values columns are in the same order as $keys are
 		// (array_merge) and there are no leftover columns (array_intersect_key)
 		$values = array_intersect_key( array_merge( $keys, $attribs ), $keys );
@@ -385,15 +393,33 @@ class Exporter extends WikiExporter {
 
 		// references to external store etc. are useless; we'll include the real
 		// content as node text
-		unset($attribs['content'], $attribs['contenturl']);
+		unset( $attribs['content'], $attribs['contenturl'] );
 		$format = $revision->getContentFormat();
 		$attribs['flags'] = 'utf-8,' . $format;
+
+		if ( $this->lookup ) {
+			$userIdFields = [ 'userid', 'treeoriguserid', 'moduserid', 'edituserid' ];
+			foreach ( $userIdFields as $userIdField ) {
+				if ( isset( $attribs[ $userIdField ] ) ) {
+					$user = User::newFromId( $attribs[ $userIdField ] );
+					$globalUserId = $this->lookup->centralIdFromLocalUser(
+						$user,
+						\CentralIdLookup::AUDIENCE_RAW
+					);
+					if ( $globalUserId ) {
+						$attribs[ 'global' . $userIdField ] = $globalUserId;
+					}
+				}
+			}
+		}
 
 		$output = Xml::element(
 			'revision',
 			$attribs,
 			$revision->getContent( $format )
 		) . "\n";
+		// filter out bad characters that may have crept into old revisions
+		$output = preg_replace( '/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $output );
 		$this->sink->write( $output );
 	}
 

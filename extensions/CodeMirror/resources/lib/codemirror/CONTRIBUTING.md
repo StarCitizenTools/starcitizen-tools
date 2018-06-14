@@ -1,8 +1,8 @@
 # How to contribute
 
-- [Getting help](#getting-help-)
-- [Submitting bug reports](#submitting-bug-reports-)
-- [Contributing code](#contributing-code-)
+- [Getting help](#getting-help)
+- [Submitting bug reports](#submitting-bug-reports)
+- [Contributing code](#contributing-code)
 
 ## Getting help
 
@@ -46,6 +46,10 @@ should be asked on the
   include the resulting link in your bug report.
 
 ## Contributing code
+
+Note that we are not accepting any new addons or modes into the main
+distribution. If you've written such a module, please distribute it as
+a separate NPM package.
 
 - Make sure you have a [GitHub Account](https://github.com/signup/free)
 - Fork [CodeMirror](https://github.com/codemirror/CodeMirror/)

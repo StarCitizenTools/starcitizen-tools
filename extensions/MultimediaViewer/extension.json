@@ -1,6 +1,5 @@
 {
 	"name": "MultimediaViewer",
-	"version": "0.3.0",
 	"author": [
 		"MarkTraceur (Mark Holmquist)",
 		"Gilles Dubuc",
@@ -26,9 +25,8 @@
 	],
 	"url": "https://mediawiki.org/wiki/Extension:MultimediaViewer",
 	"descriptionmsg": "multimediaviewer-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "other",
-	"callback": "MultimediaViewerHooks::registerExtension",
 	"ExtensionFunctions": [
 		"MultimediaViewerHooks::onExtensionFunctions"
 	],
@@ -38,7 +36,7 @@
 		]
 	},
 	"AutoloadClasses": {
-		"MultimediaViewerHooks": "MultimediaViewerHooks.php"
+		"MultimediaViewerHooks": "includes/MultimediaViewerHooks.php"
 	},
 	"ResourceModules": {
 		"mmv": {
@@ -107,6 +105,7 @@
 				"mediawiki.Title",
 				"mediawiki.Uri",
 				"mediawiki.jqueryMsg",
+				"mediawiki.storage",
 				"oojs",
 				"jquery.fullscreen",
 				"jquery.hidpi",
@@ -144,6 +143,8 @@
 				"multimediaviewer-close-popup-text",
 				"multimediaviewer-fullscreen-popup-text",
 				"multimediaviewer-defullscreen-popup-text",
+				"multimediaviewer-next-image-alt-text",
+				"multimediaviewer-prev-image-alt-text",
 				"multimediaviewer-commons-subtitle",
 				"multimediaviewer-credit",
 				"multimediaviewer-credit-fallback",
@@ -168,6 +169,10 @@
 				"multimediaviewer-restriction-trademarked",
 				"multimediaviewer-restriction-default",
 				"multimediaviewer-restriction-default-and-others",
+				"multimediaviewer-reuse-warning-deletion",
+				"multimediaviewer-reuse-warning-nonfree",
+				"multimediaviewer-reuse-warning-noattribution",
+				"multimediaviewer-reuse-warning-generic",
 				"multimediaviewer-geoloc-north",
 				"multimediaviewer-geoloc-east",
 				"multimediaviewer-geoloc-south",
@@ -233,7 +238,8 @@
 				"multimediaviewer-text-embed-credit-text-l",
 				"multimediaviewer-html-embed-credit-text-bl",
 				"multimediaviewer-html-embed-credit-text-b",
-				"multimediaviewer-html-embed-credit-text-l"
+				"multimediaviewer-html-embed-credit-text-l",
+				"multimediaviewer-html-embed-credit-link-text"
 			]
 		},
 		"mmv.ui.download.pane": {
@@ -262,6 +268,7 @@
 				"multimediaviewer-download-attribution-cta-header",
 				"multimediaviewer-download-optional-attribution-cta-header",
 				"multimediaviewer-download-attribution-cta",
+				"multimediaviewer-download-attribution-copy",
 				"multimediaviewer-attr-plain",
 				"multimediaviewer-attr-html"
 			]
@@ -278,6 +285,7 @@
 				"mmv/ui/mmv.ui.reuse.shareembed.less"
 			],
 			"dependencies": [
+				"jquery.tipsy",
 				"oojs",
 				"oojs-ui",
 				"mediawiki.user",
@@ -290,6 +298,8 @@
 				"multimediaviewer-link-to-file",
 				"multimediaviewer-link-to-page",
 				"multimediaviewer-reuse-loading-placeholder",
+				"multimediaviewer-reuse-copy-share",
+				"multimediaviewer-reuse-copy-embed",
 				"multimediaviewer-embed-tab",
 				"multimediaviewer-embed-html",
 				"multimediaviewer-embed-wt",
@@ -327,17 +337,19 @@
 				"mmv/logging/mmv.logging.Logger.js",
 				"mmv/logging/mmv.logging.ActionLogger.js",
 				"mmv/logging/mmv.logging.DurationLogger.js",
-				"jquery.hashchange/jquery.hashchange.js",
-				"jquery.scrollTo/jquery.scrollTo.js"
+				"jquery.hashchange/jquery.hashchange.js"
 			],
 			"styles": [
 				"mmv/mmv.bootstrap.less"
 			],
 			"dependencies": [
+				"mediawiki.api",
+				"mediawiki.api.options",
 				"mediawiki.ui.button",
 				"mediawiki.ui.icon",
 				"mediawiki.Title",
 				"mediawiki.user",
+				"mediawiki.storage",
 				"mmv.head",
 				"oojs"
 			],
@@ -363,7 +375,8 @@
 				"mmv/mmv.head.js"
 			],
 			"dependencies": [
-				"mediawiki.user"
+				"mediawiki.user",
+				"mediawiki.storage"
 			],
 			"position": "top"
 		}
@@ -375,6 +388,9 @@
 	"Hooks": {
 		"EventLoggingRegisterSchemas": [
 			"MultimediaViewerHooks::onEventLoggingRegisterSchemas"
+		],
+		"UserGetDefaultOptions": [
+			"MultimediaViewerHooks::onUserGetDefaultOptions"
 		],
 		"GetPreferences": [
 			"MultimediaViewerHooks::getPreferences"
@@ -401,6 +417,28 @@
 			"MultimediaViewerHooks::thumbnailBeforeProduceHTML"
 		]
 	},
-	"config": {},
+	"config": {
+		"MediaViewerExtensions": {
+			"jpg": "default",
+			"jpeg": "default",
+			"gif": "default",
+			"svg": "default",
+			"png": "default",
+			"tiff": "default",
+			"tif": "default"
+		},
+		"MediaViewerNetworkPerformanceSamplingFactor": false,
+		"MediaViewerDurationLoggingSamplingFactor": false,
+		"MediaViewerDurationLoggingLoggedinSamplingFactor": false,
+		"MediaViewerAttributionLoggingSamplingFactor": false,
+		"MediaViewerDimensionLoggingSamplingFactor": false,
+		"MediaViewerActionLoggingSamplingFactorMap": false,
+		"MediaViewerIsInBeta": false,
+		"MediaViewerUseThumbnailGuessing": false,
+		"MediaViewerEnableByDefault": true,
+		"MediaViewerEnableByDefaultForAnonymous": null,
+		"MediaViewerImageQueryParameter": false,
+		"MediaViewerRecordVirtualViewBeaconURI": false
+	},
 	"manifest_version": 1
 }

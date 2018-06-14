@@ -13,24 +13,24 @@ class WikiReference extends Reference {
 	protected $target;
 
 	/**
-	 * @param UUID   $id          Id of the reference
-	 * @param string $wiki        Wiki ID of the reference source
-	 * @param UUID   $srcWorkflow ID of the source Workflow
-	 * @param Title  $srcTitle    Title of the Workflow from which this reference comes.
-	 * @param string $objectType  Output of getRevisionType for the AbstractRevision that this reference comes from.
-	 * @param UUID   $objectId    Unique identifier for the revisioned object containing the reference.
-	 * @param string $type        Type of reference
-	 * @param Title  $targetTitle Title of the reference's target.
+	 * @param UUID $id Id of the reference
+	 * @param string $wiki Wiki ID of the reference source
+	 * @param UUID $srcWorkflow ID of the source Workflow
+	 * @param Title $srcTitle Title of the Workflow from which this reference comes.
+	 * @param string $objectType Output of getRevisionType for the AbstractRevision that this reference comes from.
+	 * @param UUID $objectId Unique identifier for the revisioned object containing the reference.
+	 * @param string $type Type of reference
+	 * @param Title $targetTitle Title of the reference's target.
 	 */
 	public function __construct( UUID $id, $wiki, UUID $srcWorkflow, Title $srcTitle, $objectType, UUID $objectId, $type, Title $targetTitle ) {
 		$this->target = $targetTitle;
 
 		$this->validTypes = array_merge( $this->validTypes,
-			array(
+			[
 				self::TYPE_FILE,
 				self::TYPE_TEMPLATE,
 				self::TYPE_CATEGORY,
-			)
+			]
 		);
 
 		parent::__construct( $id, $wiki, $srcWorkflow, $srcTitle, $objectType, $objectId, $type );
@@ -42,16 +42,16 @@ class WikiReference extends Reference {
 	 * @return array
 	 */
 	public function getStorageRow() {
-		return parent::getStorageRow() + array(
+		return parent::getStorageRow() + [
 			'ref_target_namespace' => $this->target->getNamespace(),
 			'ref_target_title' => $this->target->getDBkey(),
-		);
+		];
 	}
 
 	/**
 	 * Instantiates a WikiReference object from a storage row.
 	 *
-	 * @param  array $row
+	 * @param array $row
 	 * @return WikiReference
 	 */
 	public static function fromStorageRow( $row ) {
@@ -72,6 +72,8 @@ class WikiReference extends Reference {
 	/**
 	 * Gets the storage row from an object.
 	 * Helper for BasicObjectMapper.
+	 * @param WikiReference $object
+	 * @return array
 	 */
 	public static function toStorageRow( WikiReference $object ) {
 		return $object->getStorageRow();
@@ -89,7 +91,7 @@ class WikiReference extends Reference {
 	 */
 	public static function makeTitle( $namespace, $title ) {
 		try {
-			return Workflow::getFromTitleCache( wfWikiId(), $namespace, $title );
+			return Workflow::getFromTitleCache( wfWikiID(), $namespace, $title );
 		} catch ( InvalidInputException $e ) {
 			// duplicate Title::makeTitleSafe which returns null on failure,
 			// but only for InvalidInputException

@@ -7,7 +7,8 @@
 			"Ladsgroup",
 			"Mjbmr",
 			"Reza1615",
-			"ZxxZxxZ"
+			"ZxxZxxZ",
+			"Rtemis"
 		]
 	},
 	"babel": "اطلاعات کاربری بابل",
@@ -32,5 +33,9 @@
 	"babel-5-n": "این کاربر [[$2|فارسی]] را در حد [[$1|حرفه‌ای]] می‌فهمد.",
 	"babel-N-n": "این کاربر [[$2|فارسی]] را در حد [[$1|زبان مادری]] می‌فهمد.",
 	"babel-template": "Template:User $1",
-	"babel-footer": "کاربران بر پایهٔ زبان"
+	"babel-footer": "کاربران بر پایهٔ زبان",
+	"apihelp-query+babel-description": "درباره اینکه کاربر چه زبان‌هایی می‌داند اطلاعات دریافت کن",
+	"apihelp-query+babel-summary": "درباره زبان‌هایی که کاربر می‌داند اطلاعاتی بگیر",
+	"apihelp-query+babel-param-user": "کاربر برای دریافت اطلاعات",
+	"apihelp-query+babel-example-1": "گرفتن اطلاعات زبانی برای کاربر <kbd>Example</kbd>"
 }

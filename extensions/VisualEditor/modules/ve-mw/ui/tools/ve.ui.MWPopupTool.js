@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface popup tool classes.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,10 +15,11 @@
  * @param {string} title Title
  * @param {OO.ui.ToolGroup} toolGroup
  * @param {Object} [config]
+ * @cfg {number} [width] Popup width. Upstream default is 320.
  */
 ve.ui.MWPopupTool = function VeUiMWPopupTool( title, toolGroup, config ) {
 	// Configuration initialization
-	config = ve.extendObject( { popup: { head: true, label: title } }, config );
+	config = ve.extendObject( { popup: { head: true, label: title, width: config && config.width } }, config );
 
 	// Parent constructor
 	ve.ui.MWPopupTool.super.call( this, toolGroup, config );
@@ -40,33 +41,13 @@ OO.inheritClass( ve.ui.MWPopupTool, OO.ui.PopupTool );
  * @param {Object} [config]
  */
 ve.ui.MWNoticesPopupTool = function VeUiMWNoticesPopupTool( toolGroup, config ) {
-	var tool = this,
-		items = toolGroup.getToolbar().getTarget().getEditNotices(),
-		count = items.length,
-		title = ve.msg( 'visualeditor-editnotices-tool', count );
-
 	// Parent constructor
-	ve.ui.MWNoticesPopupTool.super.call( this, title, toolGroup, config );
-
-	// Properties
-	this.$items = $( '<div>' ).addClass( 've-ui-mwNoticesPopupTool-items' );
-
-	// Initialization
-	items.forEach( function ( itemHtml ) {
-		var $node = $( '<div>' )
-			.addClass( 've-ui-mwNoticesPopupTool-item' )
-			.append( $.parseHTML( itemHtml ) );
-
-		$node.find( 'a' ).attr( 'target', '_blank' );
-
-		tool.$items.append( $node );
-	} );
-
-	this.popup.$body.append( this.$items );
-
-	if ( !count ) {
-		this.$element = $( [] );
-	}
+	ve.ui.MWNoticesPopupTool.super.call(
+		this,
+		ve.msg( 'visualeditor-editnotices-tooltip' ),
+		toolGroup,
+		ve.extendObject( config, { width: 380 } )
+	);
 };
 
 /* Inheritance */
@@ -83,6 +64,42 @@ ve.ui.MWNoticesPopupTool.static.autoAddToCatchall = false;
 ve.ui.MWNoticesPopupTool.static.autoAddToGroup = false;
 
 /* Methods */
+
+/**
+ * Set notices to display
+ *
+ * @param {string[]} notices A (non-empty) list of notices
+ */
+ve.ui.MWNoticesPopupTool.prototype.setNotices = function ( notices ) {
+	var tool = this,
+		count = notices.length;
+
+	this.popup.setLabel( ve.msg(
+		'visualeditor-editnotices-tool',
+		mw.language.convertNumber( count )
+	) );
+
+	if ( this.$items ) {
+		this.$items.remove();
+	}
+
+	this.$items = $( '<div>' ).addClass( 've-ui-mwNoticesPopupTool-items' );
+
+	notices.forEach( function ( itemHtml ) {
+		var $node = $( '<div>' )
+			.addClass( 've-ui-mwNoticesPopupTool-item' )
+			.append( $.parseHTML( itemHtml ) );
+
+		// Ensure that any links in the notices open in a new tab/window
+		$node.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' );
+
+		tool.$items.append( $node );
+	} );
+
+	this.popup.$body.append( this.$items );
+	// Fire content hook
+	mw.hook( 'wikipage.content' ).fire( this.popup.$body );
+};
 
 /**
  * Get the tool title.
@@ -130,7 +147,7 @@ ve.ui.MWHelpPopupTool = function VeUiMWHelpPopupTool( toolGroup, config ) {
 	} );
 	this.feedbackButton = new OO.ui.ButtonWidget( {
 		framed: false,
-		icon: 'comment',
+		icon: 'speechBubble',
 		label: ve.msg( 'visualeditor-feedback-tool' )
 	} );
 
@@ -153,7 +170,7 @@ ve.ui.MWHelpPopupTool = function VeUiMWHelpPopupTool( toolGroup, config ) {
 				.append( this.keyboardShortcutsButton.$element )
 				.append( this.feedbackButton.$element )
 		);
-	this.$items.find( 'a' ).attr( 'target', '_blank' );
+	this.$items.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' );
 	this.popup.$body.append( this.$items );
 };
 
@@ -179,7 +196,8 @@ ve.ui.MWHelpPopupTool.prototype.onFeedbackClick = function () {
 	this.popup.toggle( false );
 	if ( !this.feedbackPromise ) {
 		this.feedbackPromise = mw.loader.using( 'mediawiki.feedback' ).then( function () {
-			var feedbackConfig, veConfig;
+			var feedbackConfig, veConfig,
+				mode = this.toolbar.getSurface().getMode();
 
 			// This can't be constructed until the editor has loaded as it uses special messages
 			feedbackConfig = {
@@ -193,9 +211,15 @@ ve.ui.MWHelpPopupTool.prototype.onFeedbackClick = function () {
 			veConfig = mw.config.get( 'wgVisualEditorConfig' );
 			if ( veConfig.feedbackApiUrl ) {
 				feedbackConfig.apiUrl = veConfig.feedbackApiUrl;
-				feedbackConfig.title = new mw.Title( veConfig.feedbackTitle );
+				feedbackConfig.title = new mw.Title(
+					mode === 'source' ?
+						veConfig.sourceFeedbackTitle : veConfig.feedbackTitle
+				);
 			} else {
-				feedbackConfig.title = new mw.Title( ve.msg( 'visualeditor-feedback-link' ) );
+				feedbackConfig.title = new mw.Title(
+					mode === 'source' ?
+						ve.msg( 'visualeditor-feedback-source-link' ) : ve.msg( 'visualeditor-feedback-link' )
+				);
 			}
 
 			return new mw.Feedback( feedbackConfig );
@@ -233,8 +257,7 @@ ve.ui.MWHelpPopupTool.prototype.onSelect = function () {
 			meta: 'siteinfo',
 			format: 'json',
 			siprop: 'extensions'
-		} )
-		.then( function ( response ) {
+		} ).then( function ( response ) {
 			var extension = response.query.extensions.filter( function ( ext ) {
 				return ext.name === 'VisualEditor';
 			} )[ 0 ];
@@ -251,7 +274,8 @@ ve.ui.MWHelpPopupTool.prototype.onSelect = function () {
 					.append( $( '<a>' )
 						.addClass( 've-ui-mwHelpPopupTool-version-link' )
 						.attr( 'target', '_blank' )
-						.attr( 'href',  extension[ 'vcs-url' ] )
+						.attr( 'rel', 'noopener' )
+						.attr( 'href', extension[ 'vcs-url' ] )
 						.text( extension[ 'vcs-version' ].slice( 0, 7 ) )
 					)
 					.append( ' ' )

@@ -6,19 +6,19 @@ class EchoNotifier {
 	 * Record an EchoNotification for an EchoEvent
 	 * Currently used for web-based notifications.
 	 *
-	 * @param $user User to notify.
-	 * @param $event EchoEvent to notify about.
+	 * @param User $user User to notify.
+	 * @param EchoEvent $event EchoEvent to notify about.
 	 */
 	public static function notifyWithNotification( $user, $event ) {
-		// Only create the notification if the user wants to recieve that type
-		// of notification and they are eligible to recieve it. See bug 47664.
+		// Only create the notification if the user wants to receive that type
+		// of notification and they are eligible to receive it. See bug 47664.
 		$attributeManager = EchoAttributeManager::newFromGlobalVars();
 		$userWebNotifications = $attributeManager->getUserEnabledEvents( $user, 'web' );
 		if ( !in_array( $event->getType(), $userWebNotifications ) ) {
 			return;
 		}
 
-		EchoNotification::create( array( 'user' => $user, 'event' => $event ) );
+		EchoNotification::create( [ 'user' => $user, 'event' => $event ] );
 
 		MWEchoEventLogging::logSchemaEcho( $user, $event, 'web' );
 	}
@@ -26,8 +26,8 @@ class EchoNotifier {
 	/**
 	 * Send a Notification to a user by email
 	 *
-	 * @param $user User to notify.
-	 * @param $event EchoEvent to notify about.
+	 * @param User $user User to notify.
+	 * @param EchoEvent $event EchoEvent to notify about.
 	 * @return bool
 	 */
 	public static function notifyWithEmail( $user, $event ) {
@@ -42,7 +42,7 @@ class EchoNotifier {
 		}
 
 		// Final check on whether to send email for this user & event
-		if ( !Hooks::run( 'EchoAbortEmailNotification', array( $user, $event ) ) ) {
+		if ( !Hooks::run( 'EchoAbortEmailNotification', [ $user, $event ] ) ) {
 			return false;
 		}
 
@@ -50,7 +50,7 @@ class EchoNotifier {
 		$userEmailNotifications = $attributeManager->getUserEnabledEvents( $user, 'email' );
 		// See if the user wants to receive emails for this category or the user is eligible to receive this email
 		if ( in_array( $event->getType(), $userEmailNotifications ) ) {
-			global $wgEchoEnableEmailBatch, $wgEchoNotifications, $wgNotificationSender, $wgNotificationReplyName, $wgEchoBundleEmailInterval;
+			global $wgEchoEnableEmailBatch, $wgEchoNotifications, $wgNotificationSender, $wgNotificationReplyName;
 
 			$priority = $attributeManager->getNotificationPriority( $event->getType() );
 
@@ -59,7 +59,7 @@ class EchoNotifier {
 			// We should have bundling for email digest as long as either web or email bundling is on, for example, talk page
 			// email bundling is off, but if a user decides to receive email digest, we should bundle those messages
 			if ( !empty( $wgEchoNotifications[$event->getType()]['bundle']['web'] ) || !empty( $wgEchoNotifications[$event->getType()]['bundle']['email'] ) ) {
-				Hooks::run( 'EchoGetBundleRules', array( $event, &$bundleString ) );
+				Hooks::run( 'EchoGetBundleRules', [ $event, &$bundleString ] );
 			}
 			if ( $bundleString ) {
 				$bundleHash = md5( $bundleString );
@@ -79,35 +79,52 @@ class EchoNotifier {
 				return true;
 			}
 
-			$addedToQueue = false;
-
-			// only send bundle email if email bundling is on
-			if ( $wgEchoBundleEmailInterval && $bundleHash && !empty( $wgEchoNotifications[$event->getType()]['bundle']['email'] ) ) {
-				$bundler = MWEchoEmailBundler::newFromUserHash( $user, $bundleHash );
-				if ( $bundler ) {
-					$addedToQueue = $bundler->addToEmailBatch( $event->getId(), $priority );
-				}
+			// instant email notification
+			$toAddress = MailAddress::newFromUser( $user );
+			$fromAddress = new MailAddress( $wgNotificationSender, EchoHooks::getNotificationSenderName() );
+			$replyAddress = new MailAddress( $wgNotificationSender, $wgNotificationReplyName );
+			// Since we are sending a single email, should set the bundle hash to null
+			// if it is set with a value from somewhere else
+			$event->setBundleHash( null );
+			$email = self::generateEmail( $event, $user );
+			if ( !$email ) {
+				return false;
 			}
+			$subject = $email['subject'];
+			$body = $email['body'];
+			$options = [ 'replyTo' => $replyAddress ];
 
-			// send single notification if the email wasn't added to queue for bundling
-			if ( !$addedToQueue ) {
-				// instant email notification
-				$toAddress = MailAddress::newFromUser( $user );
-				$fromAddress = new MailAddress( $wgNotificationSender, EchoHooks::getNotificationSenderName() );
-				$replyAddress = new MailAddress( $wgNotificationSender, $wgNotificationReplyName );
-				// Since we are sending a single email, should set the bundle hash to null
-				// if it is set with a value from somewhere else
-				$event->setBundleHash( null );
-				$email = EchoNotificationController::formatNotification( $event, $user, 'email', 'email' );
-				$subject = $email['subject'];
-				$body = $email['body'];
-				$options = array( 'replyTo' => $replyAddress );
-
-				UserMailer::send( $toAddress, $fromAddress, $subject, $body, $options );
-				MWEchoEventLogging::logSchemaEchoMail( $user, 'single' );
-			}
+			UserMailer::send( $toAddress, $fromAddress, $subject, $body, $options );
+			MWEchoEventLogging::logSchemaEchoMail( $user, 'single' );
 		}
 
 		return true;
+	}
+
+	/**
+	 * @param EchoEvent $event
+	 * @param User $user
+	 * @return bool|array An array of 'subject' and 'body', or false if things went wrong
+	 */
+	private static function generateEmail( EchoEvent $event, User $user ) {
+		$emailFormat = MWEchoNotifUser::newFromUser( $user )->getEmailFormat();
+		$lang = wfGetLangObj( $user->getOption( 'language' ) );
+		$formatter = new EchoPlainTextEmailFormatter( $user, $lang );
+		$content = $formatter->format( $event );
+		if ( !$content ) {
+			return false;
+		}
+
+		if ( $emailFormat === EchoEmailFormat::HTML ) {
+			$htmlEmailFormatter = new EchoHtmlEmailFormatter( $user, $lang );
+			$htmlContent = $htmlEmailFormatter->format( $event );
+			$multipartBody = [
+				'text' => $content['body'],
+				'html' => $htmlContent['body']
+			];
+			$content['body'] = $multipartBody;
+		}
+
+		return $content;
 	}
 }

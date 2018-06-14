@@ -5,7 +5,7 @@
  * @author Niklas Laxström
  * @author Siebrand Mazeland
  * @copyright Copyright © 2008-2010 Niklas Laxström, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  * @ingroup Script Stats
  */
@@ -19,7 +19,7 @@ if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 }
 require_once "$IP/maintenance/Maintenance.php";
 
-class LanguageEditStats extends Maintenance {
+class Languageeditstats extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->mDescription = 'Script to show number of edits per language for all message groups.';
@@ -56,7 +56,7 @@ class LanguageEditStats extends Maintenance {
 
 		$bots = $this->hasOption( 'bots' );
 
-		$namespaces = array();
+		$namespaces = [];
 		if ( $this->hasOption( 'ns' ) ) {
 			$input = explode( ',', $this->getOption( 'ns' ) );
 
@@ -75,7 +75,7 @@ class LanguageEditStats extends Maintenance {
 		/**
 		 * Get counts for edits per language code after filtering out edits by FuzzyBot
 		 */
-		$codes = array();
+		$codes = [];
 		global $wgTranslateFuzzyBotName;
 		foreach ( $rows as $_ ) {
 			// Filter out edits by $wgTranslateFuzzyBotName
@@ -107,5 +107,5 @@ class LanguageEditStats extends Maintenance {
 	}
 }
 
-$maintClass = 'LanguageEditStats';
+$maintClass = 'Languageeditstats';
 require_once RUN_MAINTENANCE_IF_MAIN;

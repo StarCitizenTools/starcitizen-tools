@@ -2,13 +2,23 @@
 	"@metadata": {
 		"authors": [
 			"FabianRM",
-			"Sjoerddebruin"
+			"Sjoerddebruin",
+			"Romaine"
 		]
 	},
 	"msu-desc": "Staat enkele of meerdere gelijktijdige uploads toe",
-	"msu-insert-image": "Afbeelding invoegen",
+	"msu-button-title": "Selecteer bestanden",
+	"msu-insert-link": "Koppeling invoegen",
+	"msu-insert-gallery": "Voeg in als galerij",
+	"msu-insert-files": "Voeg alle in als bestanden",
+	"msu-insert-links": "Voeg alle in als links",
+	"msu-insert-image": "Voeg in als afbeelding",
 	"msu-insert-video": "Video invoegen",
-	"msu-ext-not-allowed": "\nAlleen de volgende bestandstypen zijn toegestaan:",
+	"msu-cancel-upload": "Uploaden annuleren",
+	"msu-clean-all": "Lijst wissen",
+	"msu-ext-not-allowed": "Alleen {{PLURAL:$1|het volgende bestandstype is|de volgende bestandstypen zijn}} toegestaan:",
 	"msu-upload-this": "Dit bestand uploaden",
-	"msu-upload-all": "Alle bestanden uploaden"
+	"msu-upload-all": "Alle bestanden uploaden",
+	"msu-dropzone": "Sleep hier bestanden heen",
+	"msu-comment": "Bestand is geüpload met MsUpload"
 }

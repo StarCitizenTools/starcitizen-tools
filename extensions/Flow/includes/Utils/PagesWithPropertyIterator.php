@@ -2,7 +2,7 @@
 
 namespace Flow\Utils;
 
-use DatabaseBase;
+use Wikimedia\Rdbms\IDatabase;
 use BatchRowIterator;
 use EchoCallbackIterator;
 use IteratorAggregate;
@@ -14,7 +14,7 @@ use Title;
  */
 class PagesWithPropertyIterator implements IteratorAggregate {
 	/**
-	 * @var DatabaseBase
+	 * @var IDatabase
 	 */
 	protected $db;
 
@@ -38,12 +38,12 @@ class PagesWithPropertyIterator implements IteratorAggregate {
 	protected $stopId = null;
 
 	/**
-	 * @param DatabaseBase $db
+	 * @param IDatabase $db
 	 * @param string $propName
 	 * @param int|null $startId Page id to start at (inclusive)
 	 * @param int|null $stopId Page id to stop at (exclusive)
 	 */
-	public function __construct( DatabaseBase $db, $propName, $startId = null, $stopId = null ) {
+	public function __construct( IDatabase $db, $propName, $startId = null, $stopId = null ) {
 		$this->db = $db;
 		$this->propName = $propName;
 		$this->startId = $startId;
@@ -51,17 +51,17 @@ class PagesWithPropertyIterator implements IteratorAggregate {
 	}
 
 	/**
-	 * @return Iterator<Title>
+	 * @return \Iterator<Title>
 	 */
 	public function getIterator() {
 		$it = new BatchRowIterator(
 			$this->db,
-			/* tables */ array( 'page_props', 'page' ),
+			/* tables */ [ 'page_props', 'page' ],
 			/* pk */ 'pp_page',
 			/* rows per batch */ 500
 		);
 
-		$conditions = array( 'pp_propname' => $this->propName );
+		$conditions = [ 'pp_propname' => $this->propName ];
 		if ( $this->startId !== null ) {
 			$conditions[] = 'pp_page >= ' . $this->db->addQuotes( $this->startId );
 		}
@@ -70,13 +70,13 @@ class PagesWithPropertyIterator implements IteratorAggregate {
 		}
 		$it->addConditions( $conditions );
 
-		$it->addJoinConditions( array(
-			'page' => array( 'JOIN', 'pp_page=page_id' ),
-		) );
-		$it->setFetchColumns( array( 'page_namespace', 'page_title' ) );
+		$it->addJoinConditions( [
+			'page' => [ 'JOIN', 'pp_page=page_id' ],
+		] );
+		$it->setFetchColumns( [ 'page_namespace', 'page_title' ] );
 		$it = new RecursiveIteratorIterator( $it );
 
-		return new EchoCallbackIterator( $it, function( $row ) {
+		return new EchoCallbackIterator( $it, function ( $row ) {
 			return Title::makeTitle( $row->page_namespace, $row->page_title );
 		} );
 	}

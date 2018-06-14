@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable namespace.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -93,15 +93,13 @@ ve.ce.getDomText = function ( element ) {
  * @return {string} Hash of DOM element
  */
 ve.ce.getDomHash = function ( element ) {
-	var $element,
-		nodeType = element.nodeType,
+	var nodeType = element.nodeType,
 		nodeName = element.nodeName,
 		hash = '';
 
 	if ( nodeType === Node.TEXT_NODE || nodeType === Node.CDATA_SECTION_NODE ) {
 		return '#';
 	} else if ( nodeType === Node.ELEMENT_NODE || nodeType === Node.DOCUMENT_NODE ) {
-		$element = $( element );
 		if ( !(
 			element.classList.contains( 've-ce-branchNode-blockSlug' ) ||
 			element.classList.contains( 've-ce-cursorHolder' ) ||
@@ -517,7 +515,7 @@ ve.ce.modelChangeFromContentChange = function ( oldState, newState ) {
 		}
 
 		return {
-			transaction: ve.dm.Transaction.newFromInsertion(
+			transaction: ve.dm.TransactionBuilder.static.newFromInsertion(
 				dmDoc,
 				oldRange.start,
 				data
@@ -536,7 +534,7 @@ ve.ce.modelChangeFromContentChange = function ( oldState, newState ) {
 		oldText.slice( newStart - lengthDiff ) === newText.slice( newStart )
 	) {
 		return {
-			transaction: ve.dm.Transaction.newFromRemoval(
+			transaction: ve.dm.TransactionBuilder.static.newFromRemoval(
 				dmDoc,
 				new ve.Range( newRange.start, newRange.start - lengthDiff )
 			),
@@ -599,7 +597,7 @@ ve.ce.modelChangeFromContentChange = function ( oldState, newState ) {
 		newRange = new ve.Range( dmDoc.getNearestCursorOffset( newRange.start, 1 ) );
 	}
 	return {
-		transaction: ve.dm.Transaction.newFromReplacement(
+		transaction: ve.dm.TransactionBuilder.static.newFromReplacement(
 			dmDoc,
 			replacementRange,
 			data

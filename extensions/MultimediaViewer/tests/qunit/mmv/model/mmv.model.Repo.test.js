@@ -18,9 +18,9 @@
 ( function ( mw ) {
 	QUnit.module( 'mmv.model.Repo', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Repo constructor sanity check', 3, function ( assert ) {
+	QUnit.test( 'Repo constructor sanity check', function ( assert ) {
 		var displayName = 'Wikimedia Commons',
-			favicon = '//bits.wikimedia.org/favicon/commons.ico',
+			favicon = '//commons.wikimedia.org/favicon.ico',
 			apiUrl = '//commons.wikimedia.org/w/api.php',
 			server = '//commons.wikimedia.org',
 			articlePath = '//commons.wikimedia.org/wiki/$1',
@@ -36,9 +36,9 @@
 		assert.ok( foreignDbRepo, 'Foreign DB repo creation works' );
 	} );
 
-	QUnit.test( 'getArticlePath()', 4, function ( assert ) {
+	QUnit.test( 'getArticlePath()', function ( assert ) {
 		var displayName = 'Wikimedia Commons',
-			favicon = '//bits.wikimedia.org/favicon/commons.ico',
+			favicon = '//commons.wikimedia.org/favicon.ico',
 			apiUrl = '//commons.wikimedia.org/w/api.php',
 			server = '//commons.wikimedia.org',
 			articlePath = '/wiki/$1',
@@ -68,9 +68,9 @@
 		mw.config.set( 'wgServer', oldWgServer );
 	} );
 
-	QUnit.test( 'getSiteLink()', 3, function ( assert ) {
+	QUnit.test( 'getSiteLink()', function ( assert ) {
 		var displayName = 'Wikimedia Commons',
-			favicon = '//bits.wikimedia.org/favicon/commons.ico',
+			favicon = '//commons.wikimedia.org/favicon.ico',
 			apiUrl = '//commons.wikimedia.org/w/api.php',
 			server = '//commons.wikimedia.org',
 			articlePath = '/wiki/$1',

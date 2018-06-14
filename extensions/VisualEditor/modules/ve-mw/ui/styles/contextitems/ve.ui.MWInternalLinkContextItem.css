@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface internal link context item styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -10,22 +10,24 @@
 	white-space: normal;
 }
 
-.ve-ui-mwInternalLinkContextItem-withImage .oo-ui-iconElement-icon {
+.ve-ui-mwInternalLinkContextItem-withImage > .oo-ui-iconElement.oo-ui-iconElement-icon {
 	float: left;
-	width: 3.75em;
-	height: 3.75em;
-	left: -3.75em;
-	background-color: #ccc;
-	border: 0.5em solid #ccc;
+	font-size: 2em; /* double-size icon */
+	background-color: #c8ccd1;
+	border: 0.35714em solid #c8ccd1;
 	opacity: 0.4;
 }
 
-.ve-ui-mwInternalLinkContextItem-withImage .ve-ui-mwInternalLinkContextItem-hasImage {
+.ve-ui-mwInternalLinkContextItem-hasImage {
+	background-color: transparent;
+	background-size: cover;
+}
+
+.ve-ui-mwInternalLinkContextItem-withImage > .ve-ui-mwInternalLinkContextItem-hasImage.oo-ui-iconElement-icon {
 	border: 0;
 	background-size: cover;
 	opacity: 1;
-	width: 4.75em;
-	height: 4.75em;
+	padding: 0.35714em;
 }
 
 .ve-ui-mwInternalLinkContextItem-link,
@@ -34,20 +36,15 @@
 }
 
 .ve-ui-mwInternalLinkContextItem-description {
-	color: #888;
+	color: #72777d;
 	margin-top: 0.5em;
 }
 
 .ve-ui-mwInternalLinkContextItem-withImage .ve-ui-mwInternalLinkContextItem-link,
 .ve-ui-mwInternalLinkContextItem-withImage .ve-ui-mwInternalLinkContextItem-description {
-	margin-left: 5.75em;
+	margin-left: 5.5em;
 }
 
 .ve-ui-mwInternalLinkContextItem-withDescription .ve-ui-mwInternalLinkContextItem-link {
 	font-weight: bold;
-}
-
-.ve-ui-mwInternalLinkContextItem-hasImage {
-	background-color: transparent;
-	background-size: cover;
 }

@@ -1,8 +1,8 @@
 /*!
  * VisualEditor ContentEditable MWReferenceNode class.
  *
- * @copyright 2011-2016 Cite VisualEditor Team and others; see AUTHORS.txt
- * @license The MIT License (MIT); see LICENSE.txt
+ * @copyright 2011-2018 VisualEditor Team's Cite sub-team and others; see AUTHORS.txt
+ * @license MIT
  */
 
 /**
@@ -16,9 +16,9 @@
  * @param {ve.dm.MWReferenceNode} model Model to observe
  * @param {Object} [config] Configuration options
  */
-ve.ce.MWReferenceNode = function VeCeMWReferenceNode( model, config ) {
+ve.ce.MWReferenceNode = function VeCeMWReferenceNode() {
 	// Parent constructor
-	ve.ce.LeafNode.call( this, model, config );
+	ve.ce.MWReferenceNode.super.apply( this, arguments );
 
 	// Mixin constructors
 	ve.ce.FocusableNode.call( this );
@@ -103,7 +103,7 @@ ve.ce.MWReferenceNode.prototype.executeCommand = function () {
 	if ( items.length ) {
 		contextItem = ve.ui.contextItemFactory.lookup( items[ 0 ].name );
 		if ( contextItem ) {
-			command = ve.init.target.commandRegistry.lookup( contextItem.static.commandName );
+			command = this.getRoot().getSurface().getSurface().commandRegistry.lookup( contextItem.static.commandName );
 			if ( command ) {
 				command.execute( this.focusableSurface.getSurface() );
 			}

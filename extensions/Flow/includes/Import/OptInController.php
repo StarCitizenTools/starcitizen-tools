@@ -4,7 +4,9 @@ namespace Flow\Import;
 
 use DateTime;
 use DateTimeZone;
+use DeferredUpdates;
 use DerivativeContext;
+use Flow\DbFactory;
 use Flow\Collection\HeaderCollection;
 use Flow\Content\BoardContent;
 use Flow\Exception\InvalidDataException;
@@ -14,6 +16,7 @@ use Flow\Conversion\Utils;
 use Flow\WorkflowLoader;
 use Flow\WorkflowLoaderFactory;
 use IContextSource;
+use Psr\Log\LoggerInterface;
 use MovePage;
 use Parser;
 use ParserOptions;
@@ -29,6 +32,8 @@ use WikitextContent;
  * Entry point for enabling Flow on a page.
  */
 class OptInController {
+	public static $ENABLE = 'enable';
+	public static $DISABLE = 'disable';
 
 	/**
 	 * @var OccupationController
@@ -46,6 +51,16 @@ class OptInController {
 	private $archiveNameHelper;
 
 	/**
+	 * @var DbFactory
+	 */
+	private $dbFactory;
+
+	/**
+	 * @var LoggerInterface
+	 */
+	private $logger;
+
+	/**
 	 * @var IContextSource
 	 */
 	private $context;
@@ -55,13 +70,76 @@ class OptInController {
 	 */
 	private $user;
 
-	public function __construct() {
-		$this->occupationController = Container::get( 'occupation_controller' );
-		$this->notificationController = Container::get( 'controller.notification' );
-		$this->archiveNameHelper = new ArchiveNameHelper();
-		$this->user = $this->occupationController->getTalkpageManager();
+	/**
+	 * @param OccupationController $occupationController
+	 * @param NotificationController $notificationController
+	 * @param ArchiveNameHelper $archiveNameHelper
+	 * @param DbFactory $dbFactory
+	 * @param LoggerInterface $logger Logger for errors and exceptions
+	 * @param User $scriptUser User that takes actions, such as creating the board or
+	 *   editing descriptions
+	 */
+	public function __construct(
+		OccupationController $occupationController,
+		NotificationController $notificationController,
+		ArchiveNameHelper $archiveNameHelper,
+		DbFactory $dbFactory,
+		LoggerInterface $logger,
+		User $scriptUser
+	) {
+		$this->occupationController = $occupationController;
+		$this->notificationController = $notificationController;
+		$this->archiveNameHelper = $archiveNameHelper;
+		$this->dbFactory = $dbFactory;
+		$this->logger = $logger;
+		$this->user = $scriptUser;
 		$this->context = new DerivativeContext( RequestContext::getMain() );
 		$this->context->setUser( $this->user );
+	}
+
+	/**
+	 * @param string $action Action to take, self::ENABLE or self::DISABLE
+	 * @param Title $talkpage Title of user's talk page
+	 * @param User $user User that owns the talk page
+	 */
+	public function initiateChange( $action, Title $talkpage, User $user ) {
+		$flowDbw = $this->dbFactory->getDB( DB_MASTER );
+		$wikiDbw = $this->dbFactory->getWikiDB( DB_MASTER );
+
+		$outerMethod = __METHOD__;
+		$logger = $this->logger;
+
+		// We need both since we use both databases.
+		DeferredUpdates::addCallableUpdate(
+			function () use ( $logger, $outerMethod, $action, $talkpage, $user, $wikiDbw, $flowDbw ) {
+				try {
+					if ( $action === self::$ENABLE ) {
+						$this->enable( $talkpage, $user );
+					} elseif ( $action === self::$DISABLE ) {
+						$this->disable( $talkpage );
+					} else {
+						$logger->error( $outerMethod . ': unrecognized action: ' . $action );
+					}
+				} catch ( \Throwable $t ) {
+					$logger->error(
+						$outerMethod . ' failed to {action} Flow on \'{talkpage}\' for user \'{user}\'. {message} {trace}',
+						[
+							'action' => $action,
+							'talkpage' => $talkpage->getPrefixedText(),
+							'user' => $user->getName(),
+							'message' => $t->getMessage(),
+							'trace' => $t->getTraceAsString(),
+						]
+					);
+
+					// rollback both Flow and Core DBs
+					$flowDbw->rollback( $outerMethod );
+					$wikiDbw->rollback( $outerMethod );
+				}
+			},
+			DeferredUpdates::POSTSEND,
+			[ $wikiDbw, $flowDbw ]
+		);
 	}
 
 	/**
@@ -165,11 +243,11 @@ class OptInController {
 	}
 
 	/**
-	 * @param $msgKey
+	 * @param string $msgKey
 	 * @param array $args
 	 * @throws ImportException
 	 */
-	private function fatal( $msgKey, $args = array() ) {
+	private function fatal( $msgKey, $args = [] ) {
 		throw new ImportException( wfMessage( $msgKey, $args )->inContentLanguage()->text() );
 	}
 
@@ -248,7 +326,7 @@ class OptInController {
 
 	/**
 	 * @param Title $title
-	 * @param $boardDescription
+	 * @param string $boardDescription
 	 * @throws ImportException
 	 * @throws \Flow\Exception\CrossWikiException
 	 * @throws \Flow\Exception\InvalidInputException
@@ -271,12 +349,12 @@ class OptInController {
 		}
 
 		$action = 'edit-header';
-		$params = array(
-			'header' => array(
+		$params = [
+			'header' => [
 				'content' => $boardDescription,
 				'format' => 'wikitext',
-			),
-		);
+			],
+		];
 
 		$blocksToCommit = $loader->handleSubmit(
 			$this->context,
@@ -328,7 +406,7 @@ class OptInController {
 	private function restoreExistingFlowBoard( Title $archivedFlowPage, Title $title, $currentTemplate = null ) {
 		$this->editBoardDescription(
 			$archivedFlowPage,
-			function( $content ) use ( $currentTemplate, $archivedFlowPage ) {
+			function ( $content ) use ( $currentTemplate, $archivedFlowPage ) {
 				$templateName = wfMessage( 'flow-importer-wt-converted-archive-template' )->inContentLanguage()->plain();
 				$content = TemplateHelper::removeFromHtml( $content, $templateName );
 				if ( $currentTemplate ) {
@@ -341,7 +419,6 @@ class OptInController {
 
 		$restoreReason = wfMessage( 'flow-optin-restore-flow-board' )->inContentLanguage()->text();
 		$this->movePage( $archivedFlowPage, $title, $restoreReason );
-
 	}
 
 	/**
@@ -369,10 +446,10 @@ class OptInController {
 	 */
 	private function getFormattedCurrentTemplate( Title $archiveTitle ) {
 		$now = new DateTime( "now", new DateTimeZone( "GMT" ) );
-		$arguments = array(
+		$arguments = [
 			'archive' => $archiveTitle->getPrefixedText(),
 			'date' => $now->format( 'Y-m-d' ),
-		);
+		];
 		$template = wfMessage( 'flow-importer-wt-converted-template' )->inContentLanguage()->plain();
 		return $this->formatTemplate( $template, $arguments );
 	}
@@ -385,7 +462,7 @@ class OptInController {
 	private function formatTemplate( $name, $args ) {
 		$arguments = implode( '|',
 			array_map(
-				function( $key, $value ) {
+				function ( $key, $value ) {
 					return "$key=$value";
 				},
 				array_keys( $args ),
@@ -443,13 +520,13 @@ class OptInController {
 		$newDescription = call_user_func( $newDescriptionCallback, $content );
 
 		$action = 'edit-header';
-		$params = array(
-			'header' => array(
+		$params = [
+			'header' => [
 				'content' => $newDescription,
 				'format' => $format,
 				'prev_revision' => $revision->getRevisionId()->getAlphadecimal()
-			),
-		);
+			],
+		];
 
 		/** @var WorkflowLoaderFactory $factory */
 		$factory = Container::get( 'factory.loader.workflow' );
@@ -485,10 +562,10 @@ class OptInController {
 	private function getFormattedArchiveTemplate( Title $current ) {
 		$templateName = wfMessage( 'flow-importer-wt-converted-archive-template' )->inContentLanguage()->plain();
 		$now = new DateTime( "now", new DateTimeZone( "GMT" ) );
-		return $this->formatTemplate( $templateName, array(
+		return $this->formatTemplate( $templateName, [
 			'from' => $current->getPrefixedText(),
 			'date' => $now->format( 'Y-m-d' ),
-		) );
+		] );
 	}
 
 	/**
@@ -509,7 +586,7 @@ class OptInController {
 		$this->createRevision(
 			$title,
 			Utils::convert( 'html', 'wikitext', $newContent, $title ),
-			wfMessage( 'flow-beta-feature-remove-archive-template-edit-summary' )->inContentLanguage()->plain());
+			wfMessage( 'flow-beta-feature-remove-archive-template-edit-summary' )->inContentLanguage()->plain() );
 	}
 
 	/**
@@ -545,7 +622,7 @@ class OptInController {
 
 	/**
 	 * @param Title $title
-	 * @param $reason
+	 * @param string $reason
 	 * @param callable $newDescriptionCallback
 	 * @param string $format
 	 * @throws ImportException
@@ -572,8 +649,10 @@ class OptInController {
 		$template = $this->getFormattedCurrentTemplate( $archivedTalkpageTitle );
 		$this->editWikitextContent(
 			$currentTalkpageTitle,
-			null,
-			function( $content ) use ( $template ) { return $template . "\n\n" . $content; },
+			wfMessage( 'flow-beta-feature-add-current-template-edit-summary' )->inContentLanguage()->plain(),
+			function ( $content ) use ( $template ) {
+				return $template . "\n\n" . $content;
+			},
 			'wikitext'
 		);
 	}
@@ -593,7 +672,7 @@ class OptInController {
 
 		$this->editBoardDescription(
 			$flowArchiveTitle,
-			function( $content ) use ( $template ) {
+			function ( $content ) use ( $template ) {
 				$templateName = wfMessage( 'flow-importer-wt-converted-template' )->inContentLanguage()->plain();
 				$content = TemplateHelper::removeFromHtml( $content, $templateName );
 				return $template . "<br/><br/>" . $content;

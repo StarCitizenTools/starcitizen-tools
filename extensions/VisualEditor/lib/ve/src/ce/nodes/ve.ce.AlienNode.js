@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable AlienNode, AlienBlockNode and AlienInlineNode classes.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -11,7 +11,6 @@
  * @abstract
  * @extends ve.ce.LeafNode
  * @mixins ve.ce.FocusableNode
- * @mixins ve.ce.TableCellableNode
  *
  * @constructor
  * @param {ve.dm.AlienNode} model
@@ -22,13 +21,15 @@ ve.ce.AlienNode = function VeCeAlienNode() {
 	ve.ce.AlienNode.super.apply( this, arguments );
 
 	// DOM changes
-	this.$element = $( ve.copyDomElements( this.model.getOriginalDomElements(), document ) );
+	this.$element = $( ve.copyDomElements( this.model.getOriginalDomElements( this.model.getDocument().getStore() ), document ) );
 
 	// Mixin constructors
 	ve.ce.FocusableNode.call( this, this.$element, {
 		classes: [ 've-ce-alienNode-highlights' ]
 	} );
-	ve.ce.TableCellableNode.call( this );
+
+	// Re-initialize after $element changes
+	this.initialize();
 };
 
 /* Inheritance */
@@ -36,8 +37,6 @@ ve.ce.AlienNode = function VeCeAlienNode() {
 OO.inheritClass( ve.ce.AlienNode, ve.ce.LeafNode );
 
 OO.mixinClass( ve.ce.AlienNode, ve.ce.FocusableNode );
-
-OO.mixinClass( ve.ce.AlienNode, ve.ce.TableCellableNode );
 
 /* Static Properties */
 
@@ -102,7 +101,36 @@ OO.inheritClass( ve.ce.AlienInlineNode, ve.ce.AlienNode );
 
 ve.ce.AlienInlineNode.static.name = 'alienInline';
 
+/**
+ * ContentEditable alien block node.
+ *
+ * @class
+ * @extends ve.ce.AlienNode
+ *
+ * @constructor
+ * @param {ve.dm.AlienTableCellNode} model
+ * @param {Object} [config]
+ */
+ve.ce.AlienTableCellNode = function VeCeAlienTableCellNode() {
+	// Parent constructor
+	ve.ce.AlienTableCellNode.super.apply( this, arguments );
+
+	// Mixin constructors
+	ve.ce.TableCellableNode.call( this );
+};
+
+/* Inheritance */
+
+OO.inheritClass( ve.ce.AlienTableCellNode, ve.ce.AlienNode );
+
+OO.mixinClass( ve.ce.AlienTableCellNode, ve.ce.TableCellableNode );
+
+/* Static Properties */
+
+ve.ce.AlienTableCellNode.static.name = 'alienTableCell';
+
 /* Registration */
 
 ve.ce.nodeFactory.register( ve.ce.AlienBlockNode );
 ve.ce.nodeFactory.register( ve.ce.AlienInlineNode );
+ve.ce.nodeFactory.register( ve.ce.AlienTableCellNode );

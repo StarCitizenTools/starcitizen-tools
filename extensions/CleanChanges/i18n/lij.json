@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Giromin Cangiaxo"
+		]
+	},
+	"cleanchanges-changerightslink": "modiffica groppi",
+	"cleanchanges-desc": "Presentaçion ciù compatta da [[Special:RecentChanges|lista di urtime modiffiche]]",
+	"cleanchanges-language": "Lengua:",
+	"cleanchanges-language-na": "Tutti",
+	"cleanchanges-users": "Utenti (Sep: |):",
+	"cleanchanges-showuserlinks": "Mostra collegamenti utente"
+}

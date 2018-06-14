@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Reza1615"
+			"Reza1615",
+			"Alifakoor"
 		]
 	},
-	"msu-insert-link": "درج پیوند"
+	"msu-insert-link": "درج پیوند",
+	"msu-continue": "به هر قیمتی ادامه می‌دهید؟"
 }

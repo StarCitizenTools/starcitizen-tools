@@ -19,7 +19,7 @@
 			// This should usually already be loaded, but not always
 			this.deferred = mw.loader.using( 'ext.eventLogging', function () {
 				mw.eventLog.setDefaults( 'EchoInteraction', {
-					version: mw.config.get( 'wgEchoConfig' ).version,
+					version: mw.config.get( 'wgEchoEventLoggingVersion' ),
 					userId: +mw.config.get( 'wgUserId' ),
 					editCount: +mw.config.get( 'wgUserEditCount' )
 				} );
@@ -41,8 +41,7 @@
 	 * @property {boolean}
 	 */
 	mw.echo.Logger.static.clickThroughEnabled = OO.getProp(
-		mw.config.get( 'wgEchoConfig' ),
-		'eventlogging',
+		mw.config.get( 'wgEchoEventLoggingSchemas' ),
 		'EchoInteraction',
 		'enabled'
 	);
@@ -75,7 +74,9 @@
 	mw.echo.Logger.static.actions = {
 		notificationClick: 'notification-link-click',
 		notificationBundleExpand: 'notification-bundle-expand',
-		notificationImpression: 'notification-impression'
+		notificationImpression: 'notification-impression',
+		markAllReadClick: 'mark-all-read-click',
+		markXWikiReadClick: 'mark-entire-xwiki-bundle-read-click'
 	};
 
 	/* Methods */
@@ -85,7 +86,7 @@
 	 *
 	 * @param {string} action The interaction
 	 * @param {string} [context] 'flyout'/'archive' or undefined for the badge
-	 * @param {int} [eventId] Notification event id
+	 * @param {number} [eventId] Notification event id
 	 * @param {string} [eventType] notification type
 	 * @param {boolean} [mobile] True if interaction was on a mobile device
 	 * @param {string} [notifWiki] Foreign wiki the notification came from
@@ -111,8 +112,8 @@
 		if ( eventType ) {
 			myEvt.notificationType = eventType;
 		}
-		if ( mobile ) {
-			myEvt.mobile = mobile;
+		if ( mobile !== undefined || mw.config.get( 'skin' ) === 'minerva' ) {
+			myEvt.mobile = mobile || mw.config.get( 'skin' ) === 'minerva';
 		}
 
 		if ( notifWiki && notifWiki !== mw.config.get( 'wgDBname' ) && notifWiki !== 'local' ) {
@@ -151,4 +152,4 @@
 	};
 
 	mw.echo.logger = new mw.echo.Logger();
-} )( jQuery, mediaWiki );
+}( jQuery, mediaWiki ) );

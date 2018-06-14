@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Strainu"
+		]
+	},
+	"commonsmetadata-trackingcategory-no-license": "Fișiere fără licență identificabilă automat",
+	"commonsmetadata-trackingcategory-no-license-desc": "Fișierul nu are un format de licențiere [{{MediaWiki:Commonsmetadata-doc-url}} identificabil automat].",
+	"commonsmetadata-trackingcategory-no-description": "Fișiere fără descriere identificabilă automat",
+	"commonsmetadata-trackingcategory-no-description-desc": "Fișierul nu are un format de informații [{{MediaWiki:Commonsmetadata-doc-url}} citibil automat], sau câmpul de descriere nu este completat.",
+	"commonsmetadata-trackingcategory-no-author": "Fișiere fără autor identificabil automat",
+	"commonsmetadata-trackingcategory-no-author-desc": "Fișierul nu are un format de informații [{{MediaWiki:Commonsmetadata-doc-url}} citibil automat], sau câmpul de autor nu este completat.",
+	"commonsmetadata-trackingcategory-no-source": "Fișiere fără sursă identificabilă automat",
+	"commonsmetadata-trackingcategory-no-source-desc": "Fișierul nu are un format de informații [{{MediaWiki:Commonsmetadata-doc-url}} citibil automat], sau câmpul de sursă nu este completat."
+}

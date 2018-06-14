@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FindAndReplaceDialog tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ui.FindAndReplaceDialog' );
@@ -74,19 +74,16 @@ QUnit.test( 'find fragments', function ( assert ) {
 			}
 		];
 
-	QUnit.expect( cases.length );
-
-	surface.getToolbarDialogs().getWindow( 'findAndReplace' ).done( function ( dialog ) {
+	surface.getToolbarDialogs().getWindow( 'findAndReplace' ).then( function ( dialog ) {
 		dialog.open( {
 			surface: surface,
 			fragment: surface.getModel().getFragment()
-		} ).done( function () {
+		} ).then( function () {
 			var i, ranges;
 			for ( i = 0; i < cases.length; i++ ) {
 				dialog.matchCaseToggle.setValue( !!cases[ i ].matchCase );
 				dialog.regexToggle.setValue( !!cases[ i ].regex );
 				dialog.findText.setValue( cases[ i ].find );
-				/* jshint loopfunc:true */
 				ranges = dialog.fragments.map( function ( fragment ) {
 					return fragment.getSelection().getRange();
 				} );
@@ -124,13 +121,11 @@ QUnit.test( 'replace all', function ( assert ) {
 			}
 		];
 
-	QUnit.expect( cases.length );
-
 	surface.getToolbarDialogs().getWindow( 'findAndReplace' ).done( function ( dialog ) {
 		dialog.open( {
 			surface: surface,
 			fragment: surface.getModel().getFragment()
-		} ).done( function () {
+		} ).then( function () {
 			var i;
 			for ( i = 0; i < cases.length; i++ ) {
 				dialog.matchCaseToggle.setValue( !!cases[ i ].matchCase );

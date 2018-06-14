@@ -40,7 +40,7 @@
  *
  * @author Raul Martinez, Jr <juneym@gmail.com>
  *
- * @link http://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-flt-query.html
+ * @link https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-flt-query.html
  *
  * @since 2016.05
  * @ingroup TTMServer
@@ -76,11 +76,11 @@ class FuzzyLikeThis extends \Elastica\Query\AbstractQuery {
 	protected $_maxQueryTerms = 25;
 
 	/**
-	 * minimum similarity.
+	 * fuzziness.
 	 *
-	 * @var int minimum similarity
+	 * @var int fuzziness
 	 */
-	protected $_minSimilarity = 0.5;
+	protected $_fuzziness = 2;
 
 	/**
 	 * Prefix Length.
@@ -88,13 +88,6 @@ class FuzzyLikeThis extends \Elastica\Query\AbstractQuery {
 	 * @var int Prefix Length
 	 */
 	protected $_prefixLength = 0;
-
-	/**
-	 * Boost.
-	 *
-	 * @var float Boost
-	 */
-	protected $_boost = 1.0;
 
 	/**
 	 * Analyzer.
@@ -139,7 +132,7 @@ class FuzzyLikeThis extends \Elastica\Query\AbstractQuery {
 	 * @return $this
 	 */
 	public function setIgnoreTF( $ignoreTF ) {
-		$this->_ignoreTF = (bool) $ignoreTF;
+		$this->_ignoreTF = (bool)$ignoreTF;
 
 		return $this;
 	}
@@ -151,22 +144,9 @@ class FuzzyLikeThis extends \Elastica\Query\AbstractQuery {
 	 *
 	 * @return $this
 	 */
-	public function setMinSimilarity( $value ) {
-		$value = (float) $value;
-		$this->_minSimilarity = $value;
-
-		return $this;
-	}
-
-	/**
-	 * Set boost.
-	 *
-	 * @param float $value Boost value
-	 *
-	 * @return $this
-	 */
-	public function setBoost( $value ) {
-		$this->_boost = (float) $value;
+	public function setFuzziness( $value ) {
+		$value = (int)$value;
+		$this->_fuzziness = $value;
 
 		return $this;
 	}
@@ -179,7 +159,7 @@ class FuzzyLikeThis extends \Elastica\Query\AbstractQuery {
 	 * @return $this
 	 */
 	public function setPrefixLength( $value ) {
-		$this->_prefixLength = (int) $value;
+		$this->_prefixLength = (int)$value;
 
 		return $this;
 	}
@@ -192,7 +172,7 @@ class FuzzyLikeThis extends \Elastica\Query\AbstractQuery {
 	 * @return $this
 	 */
 	public function setMaxQueryTerms( $value ) {
-		$this->_maxQueryTerms = (int) $value;
+		$this->_maxQueryTerms = (int)$value;
 
 		return $this;
 	}
@@ -223,15 +203,11 @@ class FuzzyLikeThis extends \Elastica\Query\AbstractQuery {
 			$args['fields'] = $this->_fields;
 		}
 
-		if ( !empty( $this->_boost ) ) {
-			$args['boost'] = $this->_boost;
-		}
-
 		if ( !empty( $this->_analyzer ) ) {
 			$args['analyzer'] = $this->_analyzer;
 		}
 
-		$args['min_similarity'] = ( $this->_minSimilarity > 0 ) ? $this->_minSimilarity : 0;
+		$args['fuzziness'] = ( $this->_fuzziness > 0 ) ? $this->_fuzziness : 0;
 
 		$args['like_text'] = $this->_likeText;
 		$args['prefix_length'] = $this->_prefixLength;
@@ -241,6 +217,6 @@ class FuzzyLikeThis extends \Elastica\Query\AbstractQuery {
 		$data = parent::toArray();
 		$args = array_merge( $args, $data['fuzzy_like_this'] );
 
-		return array( 'fuzzy_like_this' => $args );
+		return [ 'fuzzy_like_this' => $args ];
 	}
 }

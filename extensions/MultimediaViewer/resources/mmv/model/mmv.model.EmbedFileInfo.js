@@ -18,6 +18,7 @@
 ( function ( mw ) {
 	/**
 	 * Contains information needed to embed and share files.
+	 *
 	 * @class mw.mmv.model.EmbedFileInfo
 	 * @constructor
 	 * @param {mw.mmv.model.Image} imageInfo
@@ -32,7 +33,7 @@
 		alt
 	) {
 		if ( !imageInfo || !repoInfo ) {
-			throw 'imageInfo and repoInfo are required and must have a value';
+			throw new Error( 'imageInfo and repoInfo are required and must have a value' );
 		}
 
 		/** @property {mw.mmv.model.Image} imageInfo The title of the file */

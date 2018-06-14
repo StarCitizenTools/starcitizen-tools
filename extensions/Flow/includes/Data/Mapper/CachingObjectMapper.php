@@ -53,10 +53,10 @@ class CachingObjectMapper implements ObjectMapper {
 	 * @param string[] $primaryKey
 	 * @return CachingObjectMapper
 	 */
-	static public function model( $className, array $primaryKey ) {
+	public static function model( $className, array $primaryKey ) {
 		return new self(
-			array( $className, 'toStorageRow' ),
-			array( $className, 'fromStorageRow' ),
+			[ $className, 'toStorageRow' ],
+			[ $className, 'fromStorageRow' ],
 			$primaryKey
 		);
 	}
@@ -86,7 +86,8 @@ class CachingObjectMapper implements ObjectMapper {
 			throw new \InvalidArgumentException( 'Storage row has no pk' );
 		} elseif ( !isset( $this->loaded[$pk] ) ) {
 			// unserialize the object
-			return $this->loaded[$pk] = call_user_func( $this->fromStorageRow, $row, $object );
+			$this->loaded[$pk] = call_user_func( $this->fromStorageRow, $row, $object );
+			return $this->loaded[$pk];
 		} elseif ( $object === null ) {
 			// provide previously loaded object
 			return $this->loaded[$pk];
@@ -121,7 +122,7 @@ class CachingObjectMapper implements ObjectMapper {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function normalizeRow( array $row ) {
 		$object = call_user_func( $this->fromStorageRow, $row );

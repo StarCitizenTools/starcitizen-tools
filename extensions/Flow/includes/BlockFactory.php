@@ -10,7 +10,7 @@ use Flow\Block\TopicSummaryBlock;
 use Flow\Block\BoardHistoryBlock;
 use Flow\Model\Workflow;
 use Flow\Data\ManagerGroup;
-use Flow\Exception\InvalidInputException;
+use Flow\Exception\DataModelException;
 use Flow\Exception\InvalidDataException;
 use Flow\Repository\RootPostLoader;
 
@@ -36,32 +36,32 @@ class BlockFactory {
 	/**
 	 * @param Workflow $workflow
 	 * @return AbstractBlock[]
-	 * @throws InvalidInputException When the workflow type is unrecognized
+	 * @throws DataModelException When the workflow type is unrecognized
 	 * @throws InvalidDataException When multiple blocks share the same name
 	 */
 	public function createBlocks( Workflow $workflow ) {
-		switch( $workflow->getType() ) {
+		switch ( $workflow->getType() ) {
 			case 'discussion':
-				$blocks = array(
+				$blocks = [
 					new HeaderBlock( $workflow, $this->storage ),
 					new TopicListBlock( $workflow, $this->storage ),
 					new BoardHistoryBlock( $workflow, $this->storage ),
-				);
+				];
 				break;
 
 			case 'topic':
-				$blocks = array(
+				$blocks = [
 					new TopicBlock( $workflow, $this->storage, $this->rootPostLoader ),
 					new TopicSummaryBlock( $workflow, $this->storage ),
-				);
+				];
 				break;
 
 			default:
-				throw new InvalidInputException( 'Not Implemented', 'invalid-definition' );
+				throw new DataModelException( 'Not Implemented', 'process-data' );
 				break;
 		}
 
-		$return = array();
+		$return = [];
 		/** @var AbstractBlock[] $blocks */
 		foreach ( $blocks as $block ) {
 			if ( isset( $return[$block->getName()] ) ) {

@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -23,15 +23,15 @@ class CxserverWebService extends TranslationWebService {
 
 	protected function doPairs() {
 		if ( !isset( $this->config['host'] ) ) {
-			throw new TranslationWebServiceException( 'Cxserver host not set' );
+			throw new TranslationWebServiceConfigurationException( 'Cxserver host not set' );
 		}
 
-		$pairs = array();
+		$pairs = [];
 
 		$url = $this->config['host'] . '/v1/list/mt';
 		$json = Http::get(
 			$url,
-			array( $this->config['timeout'] ),
+			[ $this->config['timeout'] ],
 			__METHOD__
 		);
 		$response = FormatJson::decode( $json, true );
@@ -52,7 +52,7 @@ class CxserverWebService extends TranslationWebService {
 
 	protected function getQuery( $text, $from, $to ) {
 		if ( !isset( $this->config['host'] ) ) {
-			throw new TranslationWebServiceException( 'Cxserver host not set' );
+			throw new TranslationWebServiceConfigurationException( 'Cxserver host not set' );
 		}
 
 		$text = trim( $text );
@@ -61,7 +61,7 @@ class CxserverWebService extends TranslationWebService {
 
 		return TranslationQuery::factory( $url )
 			->timeout( $this->config['timeout'] )
-			->postWithData( array( 'html' => $text ) );
+			->postWithData( wfArrayToCgi( [ 'html' => $text ] ) );
 	}
 
 	protected function parseResponse( TranslationQueryResponse $reply ) {
@@ -71,7 +71,10 @@ class CxserverWebService extends TranslationWebService {
 			throw new TranslationWebServiceException( 'Invalid json: ' . serialize( $body ) );
 		}
 
-		$text = preg_replace( '~^<div>(.*)</div>$~', '\1', $response->contents );
+		$text = $response->contents;
+		if ( preg_match( '~^<div>(.*)</div>$~', $text ) ) {
+			$text = preg_replace( '~^<div>(.*)</div>$~', '\1', $text );
+		}
 		$text = $this->unwrapUntranslatable( $text );
 
 		return trim( $text );

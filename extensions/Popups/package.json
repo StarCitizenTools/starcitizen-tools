@@ -1,15 +1,48 @@
 {
   "private": true,
   "scripts": {
-    "test": "grunt test",
-    "doc": "jsduck"
+    "start": "webpack -dw",
+    "build": "NODE_ENV=production webpack -p",
+    "lint:fix": "grunt fix",
+    "test:node": "node tests/node-qunit/run.js 'tests/node-qunit/**/*.test.js' | tap-dot",
+    "test:dev": "grunt lint && npm run test:node",
+    "test": "npm run check-built-assets && npm run test:dev && npm run doc",
+    "doc": "jsdoc -c jsdoc.json",
+    "doc:start": "nodemon --watch src --exec 'npm run doc'",
+    "check-built-assets": "echo 'CHECKING BUILD SOURCES ARE COMMITTED OR STAGED' && rm -rf resources/dist/ && npm run build && git diff -q resources/dist",
+    "coverage": "istanbul cover node_modules/.bin/mw-node-qunit tests/node-qunit/*.js tests/node-qunit/**/*.js",
+    "precommit": "npm run test:dev && npm run build && git add resources/dist && bundlesize"
   },
   "devDependencies": {
-    "grunt": "0.4.5",
-    "grunt-banana-checker": "0.4.0",
-    "grunt-cli": "0.1.13",
-    "grunt-contrib-jshint": "0.11.3",
-    "grunt-jscs": "2.1.0",
-    "grunt-jsonlint": "1.0.7"
-  }
+    "babel-loader": "7.1.4",
+    "babel-preset-env": "1.6.0",
+    "babel-register": "6.24.1",
+    "bundlesize": "0.15.3",
+    "eslint-config-wikimedia": "0.5.0",
+    "grunt": "1.0.1",
+    "grunt-banana-checker": "0.6.0",
+    "grunt-contrib-watch": "1.0.0",
+    "grunt-eslint": "20.1.0",
+    "grunt-jsonlint": "1.1.0",
+    "grunt-stylelint": "0.9.0",
+    "husky": "0.13.3",
+    "istanbul": "0.4.5",
+    "jsdoc": "3.5.5",
+    "mw-node-qunit": "4.0.0",
+    "nodemon": "1.11.0",
+    "redux": "3.6.0",
+    "redux-thunk": "2.2.0",
+    "stylelint": "8.2.0",
+    "stylelint-config-wikimedia": "0.4.2",
+    "svg-inline-loader": "0.8.0",
+    "tap-dot": "1.0.5",
+    "webpack": "4.1.1",
+    "webpack-cli": "2.0.12"
+  },
+  "bundlesize": [
+    {
+      "path": "resources/dist/index.js",
+      "maxSize": "12KB"
+    }
+  ]
 }

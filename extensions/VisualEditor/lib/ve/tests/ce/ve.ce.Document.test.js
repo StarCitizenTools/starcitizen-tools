@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Document tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ce.Document' );
@@ -10,16 +10,7 @@ QUnit.module( 've.ce.Document' );
 
 QUnit.test( 'Converter tests', function ( assert ) {
 	var msg, model, view, caseItem, $documentElement,
-		expected = 0,
 		cases = ve.dm.example.domToDataCases;
-
-	for ( msg in cases ) {
-		if ( cases[ msg ].ceHtml ) {
-			expected++;
-		}
-	}
-
-	QUnit.expect( expected );
 
 	for ( msg in cases ) {
 		if ( cases[ msg ].ceHtml ) {
@@ -44,8 +35,7 @@ QUnit.test( 'Converter tests', function ( assert ) {
 // TODO: getDirectionFromRange
 
 QUnit.test( 'getNodeAndOffset', function ( assert ) {
-	var tests, i, iLen, test, parts, view, data, ceDoc, rootNode, offsetCount, offset, position,
-		j, jLen, node;
+	var tests, i, iLen, test, parts, view, data, dmDoc, ceDoc, rootNode, offsetCount, offset, j, jLen, node, ex;
 
 	// Each test below has the following:
 	// html: an input document
@@ -54,7 +44,7 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 	// characters on a modified HTML representation in which text nodes are wrapped in
 	// <#text>...</#text> tags (and most attributes are omitted)
 	// dies (optional): a list of DM offsets where getNodeAndOffset is expected to die
-	/*jscs:disable validateQuoteMarks */
+	/* eslint-disable quotes */
 	tests = [
 		{
 			title: 'Simple para',
@@ -72,7 +62,15 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 			title: 'Nested block nodes',
 			html: '<div><p>x</p></div>',
 			data: [ '<div>', '<paragraph>', 'x', '</paragraph>', '</div>' ],
-			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div><div class='ve-ce-branchNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'><#text>|x|</#text></p>|</div><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div></div>"
+			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div>|<div class='ve-ce-branchNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'><#text>|x|</#text></p>|</div><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div></div>"
+		},
+		{
+			title: 'Empty document',
+			html: '<p></p>',
+			unwrap: [ { type: 'paragraph' } ],
+			data: [],
+			positions: "",
+			dies: [ 1 ]
 		},
 		{
 			title: 'Slugless emptied paragraph',
@@ -99,14 +97,33 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 			html: '<p><a href="A"><b>A<img></b></a></p>',
 			data: [ '<paragraph>', 'A', '<inlineImage>', '</inlineImage>', '</paragraph>' ],
 			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'>|<img class='ve-ce-nail ve-ce-nail-pre-open'></img><a class='ve-ce-linkAnnotation'><img class='ve-ce-nail ve-ce-nail-post-open'></img><b class='ve-ce-textStyleAnnotation ve-ce-boldAnnotation'><#text>A|</#text><img class='ve-ce-leafNode ve-ce-focusableNode ve-ce-imageNode ve-ce-inlineImageNode'></img></b><img class='ve-ce-nail ve-ce-nail-pre-close'></img></a><img class='ve-ce-nail ve-ce-nail-post-close'></img>||<span class='ve-ce-branchNode-slug ve-ce-branchNode-inlineSlug'></span></p></div>"
+		},
+		{
+			title: 'About grouped aliens',
+			html: "<p><span rel='ve:Alien' about='x'>Foo</span><span rel='ve:Alien' about='x'>Bar</span></p>",
+			data: [ '<paragraph>', '<alienInline>', '</alienInline>', '</paragraph>' ],
+			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'>|<span class='ve-ce-branchNode-slug ve-ce-branchNode-inlineSlug'></span><span class='ve-ce-focusableNode ve-ce-leafNode'><#text>|Foo</#text></span><span class='ve-ce-focusableNode ve-ce-leafNode'><#text>Bar</#text></span>|<span class='ve-ce-branchNode-slug ve-ce-branchNode-inlineSlug'></span></p></div>"
+		},
+		{
+			title: 'Non-about grouped aliens',
+			html: "<p><span rel='ve:Alien' about='x'>Foo</span><span rel='ve:Alien' about='y'>Bar</span></p>",
+			data: [ '<paragraph>', '<alienInline>', '</alienInline>', '<alienInline>', '</alienInline>', '</paragraph>' ],
+			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'>|<span class='ve-ce-branchNode-slug ve-ce-branchNode-inlineSlug'></span><span class='ve-ce-focusableNode ve-ce-leafNode'><#text>|Foo</#text></span>|<span class='ve-ce-branchNode-slug ve-ce-branchNode-inlineSlug'></span><span class='ve-ce-focusableNode ve-ce-leafNode'><#text>|Bar</#text></span>|<span class='ve-ce-branchNode-slug ve-ce-branchNode-inlineSlug'></span></p></div>"
+		},
+		{
+			title: 'Meta outside of CBN',
+			html: "<p>X</p><!----><p>Y</p>",
+			data: [ '<paragraph>', 'X', '</paragraph>', '<commentMeta>', '</commentMeta>', '<paragraph>', 'Y', '</paragraph>' ],
+			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'><#text>|X|</#text></p>|||<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'><#text>|Y|</#text></p></div>"
+		},
+		{
+			title: 'Meta causing double block slug',
+			html: "<p rel='ve:Alien'>X</p><!---->",
+			data: [ '<alienBlock>', '</alienBlock>', '<commentMeta>', '</commentMeta>' ],
+			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div>|<p class='ve-ce-focusableNode ve-ce-leafNode'>|<#text>X</#text></p><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div>||</div>"
 		}
 	];
-
-	/*jscs:enable validateQuoteMarks */
-
-	QUnit.expect( tests.reduce( function ( total, test ) {
-		return total + test.positions.replace( /[^|]/g, '' ).length + 2;
-	}, 0 ) );
+	/* eslint-enable quotes */
 
 	function showModelItem( item ) {
 		if ( item.type ) {
@@ -124,7 +141,20 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 		test = tests[ i ];
 		parts = test.positions.split( /[|]/ );
 		view = ve.test.utils.createSurfaceViewFromHtml( test.html );
-		data = view.getModel().getDocument().data.data
+		dmDoc = view.getModel().getDocument();
+		if ( test.unwrap ) {
+			new ve.dm.Surface( dmDoc ).change(
+				ve.dm.TransactionBuilder.static.newFromWrap(
+					dmDoc,
+					new ve.Range( 0, dmDoc.data.countNonInternalElements() ),
+					[],
+					[],
+					test.unwrap,
+					[]
+				)
+			);
+		}
+		data = dmDoc.data.data
 			.slice( 0, -2 )
 			.map( showModelItem );
 		ceDoc = view.documentView;
@@ -150,21 +180,6 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 		}
 
 		for ( offset = 0; offset < offsetCount; offset++ ) {
-			try {
-				position = ceDoc.getNodeAndOffset( offset, test.outsideNails );
-				if ( test.dies && test.dies.indexOf( offset ) !== -1 ) {
-					assert.ok( false, test.title + ' (' + offset + ') does not die' );
-					continue;
-				}
-			} catch ( ex ) {
-				assert.ok(
-					test.dies && test.dies.indexOf( offset ) !== -1,
-					test.title + ' (' + offset + ') dies'
-				);
-				continue;
-			}
-
-			position = ceDoc.getNodeAndOffset( offset, test.outsideNails );
 			assert.strictEqual(
 				ve.test.utils.serializePosition(
 					rootNode,
@@ -178,6 +193,16 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 				).join( '' ),
 				test.title + ' (' + offset + ')'
 			);
+		}
+		for ( j = 0; test.dies && j < test.dies.length; j++ ) {
+			offset = test.dies[ j ];
+			ex = null;
+			try {
+				ceDoc.getNodeAndOffset( offset, test.outsideNails );
+			} catch ( e ) {
+				ex = e;
+			}
+			assert.ok( ex !== null, test.title + ' (' + offset + ') dies' );
 		}
 		view.destroy();
 	}

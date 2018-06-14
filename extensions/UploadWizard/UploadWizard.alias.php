@@ -2,303 +2,252 @@
 /**
  * Allows the special page title to be translated to another language.
  * The page title can be customized into another language
-*/
-// @codingStandardsIgnoreFile
+ */
 
-$specialPageAliases = array();
+$specialPageAliases = [];
 
 /** English (English) */
-$specialPageAliases['en'] = array(
-	'Campaigns' => array( 'Campaigns' ),
-	'UploadWizard' => array( 'UploadWizard' ),
-	'UploadCampaigns' => array( 'UploadCampaigns' ),
-	'UploadCampaign' => array( 'UploadCampaign' ),
-);
+$specialPageAliases['en'] = [
+	'Campaigns' => [ 'Campaigns' ],
+	'UploadWizard' => [ 'UploadWizard' ],
+];
 
 /** Arabic (العربية) */
-$specialPageAliases['ar'] = array(
-	'Campaigns' => array( 'حملات' ),
-	'UploadWizard' => array( 'ساحر_الرفع' ),
-	'UploadCampaigns' => array( 'حملات_الرفع' ),
-	'UploadCampaign' => array( 'حملة_الرفع' ),
-);
+$specialPageAliases['ar'] = [
+	'Campaigns' => [ 'حملات' ],
+	'UploadWizard' => [ 'ساحر_الرفع' ],
+];
 
 /** Egyptian Arabic (مصرى) */
-$specialPageAliases['arz'] = array(
-	'Campaigns' => array( 'حملات' ),
-	'UploadWizard' => array( 'ساحر_الرفع' ),
-	'UploadCampaigns' => array( 'حملات_الرفع' ),
-	'UploadCampaign' => array( 'حمله_الرفع' ),
-);
+$specialPageAliases['arz'] = [
+	'Campaigns' => [ 'حملات' ],
+	'UploadWizard' => [ 'ساحر_الرفع' ],
+];
 
 /** Assamese (অসমীয়া) */
-$specialPageAliases['as'] = array(
-	'UploadWizard' => array( 'আপল’ড_প্ৰক্ৰিয়া' ),
-);
+$specialPageAliases['as'] = [
+	'UploadWizard' => [ 'আপল’ড_প্ৰক্ৰিয়া' ],
+];
 
 /** Avaric (авар) */
-$specialPageAliases['av'] = array(
-	'UploadWizard' => array( 'Мастер_загрузки' ),
-	'UploadCampaigns' => array( 'Кампании_по_загрузке' ),
-	'UploadCampaign' => array( 'Кампания_по_загрузке' ),
-);
+$specialPageAliases['av'] = [
+	'UploadWizard' => [ 'Мастер_загрузки' ],
+];
 
 /** Bashkir (башҡортса) */
-$specialPageAliases['ba'] = array(
-	'UploadWizard' => array( 'UploadWizard' ),
-	'UploadCampaigns' => array( 'UploadCampaigns' ),
-	'UploadCampaign' => array( 'UploadCampaign' ),
-);
+$specialPageAliases['ba'] = [
+	'UploadWizard' => [ 'UploadWizard' ],
+];
 
 /** Western Balochi (بلوچی رخشانی) */
-$specialPageAliases['bgn'] = array(
-	'UploadWizard' => array( 'جاوگرین_بُرز_کنۆک' ),
-);
+$specialPageAliases['bgn'] = [
+	'UploadWizard' => [ 'جاوگرین_بُرز_کنۆک' ],
+];
+
+/** Bengali (বাংলা) */
+$specialPageAliases['bn'] = [
+	'Campaigns' => [ 'ক্যাম্পেইন' ],
+	'UploadWizard' => [ 'আপলোড_উইজার্ড' ],
+];
 
 /** буряад (буряад) */
-$specialPageAliases['bxr'] = array(
-	'UploadWizard' => array( 'Ашаалха_Зэмсэг' ),
-);
+$specialPageAliases['bxr'] = [
+	'UploadWizard' => [ 'Ашаалха_Зэмсэг' ],
+];
 
 /** Chechen (нохчийн) */
-$specialPageAliases['ce'] = array(
-	'UploadWizard' => array( 'Чуяхаран_говзанча' ),
-	'UploadCampaigns' => array( 'Чуяхаран_компанеш' ),
-	'UploadCampaign' => array( 'Чуяхаран_компани' ),
-);
+$specialPageAliases['ce'] = [
+	'UploadWizard' => [ 'Чуяхаран_говзанча' ],
+];
 
 /** Danish (dansk) */
-$specialPageAliases['da'] = array(
-	'UploadWizard' => array( 'Vejviser_til_oplægning_af_filer' ),
-	'UploadCampaigns' => array( 'Oplægningskampagner' ),
-	'UploadCampaign' => array( 'Oplægningskampagne' ),
-);
+$specialPageAliases['da'] = [
+	'UploadWizard' => [ 'Vejviser_til_oplægning_af_filer' ],
+];
 
 /** German (Deutsch) */
-$specialPageAliases['de'] = array(
-	'Campaigns' => array( 'Kampagnen' ),
-	'UploadWizard' => array( 'Hochladeassistent' ),
-	'UploadCampaigns' => array( 'Hochladekampagnen' ),
-	'UploadCampaign' => array( 'Hochladekampagne' ),
-);
+$specialPageAliases['de'] = [
+	'Campaigns' => [ 'Kampagnen' ],
+	'UploadWizard' => [ 'Hochladeassistent' ],
+];
 
 /** Zazaki (Zazaki) */
-$specialPageAliases['diq'] = array(
-	'Campaigns' => array( 'Holi' ),
-	'UploadWizard' => array( 'SihirbazêBarkerdışi' ),
-	'UploadCampaigns' => array( 'HolaBarkerdışan' ),
-	'UploadCampaign' => array( 'HolaBarkerdışi' ),
-);
+$specialPageAliases['diq'] = [
+	'Campaigns' => [ 'Holi' ],
+	'UploadWizard' => [ 'SihirbazêBarkerdışi' ],
+];
 
 /** Greek (Ελληνικά) */
-$specialPageAliases['el'] = array(
-	'UploadWizard' => array( 'ΟδηγόςΑνεβάσματος' ),
-);
+$specialPageAliases['el'] = [
+	'UploadWizard' => [ 'ΟδηγόςΑνεβάσματος' ],
+];
 
 /** Spanish (español) */
-$specialPageAliases['es'] = array(
-	'UploadWizard' => array( 'AsistenteCarga' ),
-);
+$specialPageAliases['es'] = [
+	'UploadWizard' => [ 'AsistenteCarga' ],
+];
 
 /** Estonian (eesti) */
-$specialPageAliases['et'] = array(
-	'Campaigns' => array( 'Kampaaniad' ),
-	'UploadWizard' => array( 'Üleslaadimisviisard' ),
-	'UploadCampaigns' => array( 'Üleslaadimiskampaaniad' ),
-	'UploadCampaign' => array( 'Üleslaadimiskampaania' ),
-);
+$specialPageAliases['et'] = [
+	'Campaigns' => [ 'Kampaaniad' ],
+	'UploadWizard' => [ 'Üleslaadimisviisard' ],
+];
 
 /** Persian (فارسی) */
-$specialPageAliases['fa'] = array(
-	'UploadWizard' => array( 'جادوگر_بارگذاری' ),
-);
+$specialPageAliases['fa'] = [
+	'UploadWizard' => [ 'جادوگر_بارگذاری' ],
+];
 
 /** Galician (galego) */
-$specialPageAliases['gl'] = array(
-	'UploadWizard' => array( 'Asistente_de_subidas', 'Asistente_de_cargas' ),
-);
+$specialPageAliases['gl'] = [
+	'UploadWizard' => [ 'Asistente_de_subidas', 'Asistente_de_cargas' ],
+];
 
 /** Swiss German (Alemannisch) */
-$specialPageAliases['gsw'] = array(
-	'UploadWizard' => array( 'Uffelade-Assistent' ),
-	'UploadCampaigns' => array( 'Uffelade-Kampagne_(mehreri)' ),
-	'UploadCampaign' => array( 'Uffelade-Kampagne' ),
-);
+$specialPageAliases['gsw'] = [
+	'UploadWizard' => [ 'Uffelade-Assistent' ],
+];
 
 /** Hebrew (עברית) */
-$specialPageAliases['he'] = array(
-	'Campaigns' => array( 'מבצעים' ),
-	'UploadWizard' => array( 'אשף_ההעלאה' ),
-	'UploadCampaigns' => array( 'מבצעי_העלאה' ),
-	'UploadCampaign' => array( 'מבצע_העלאה' ),
-);
+$specialPageAliases['he'] = [
+	'Campaigns' => [ 'מבצעים' ],
+	'UploadWizard' => [ 'אשף_ההעלאה' ],
+];
 
 /** Upper Sorbian (hornjoserbsce) */
-$specialPageAliases['hsb'] = array(
-	'Campaigns' => array( 'Kampanje' ),
-);
+$specialPageAliases['hsb'] = [
+	'Campaigns' => [ 'Kampanje' ],
+];
 
 /** Haitian (Kreyòl ayisyen) */
-$specialPageAliases['ht'] = array(
-	'UploadWizard' => array( 'AsistanChajman' ),
-);
+$specialPageAliases['ht'] = [
+	'UploadWizard' => [ 'AsistanChajman' ],
+];
 
 /** Interlingua (interlingua) */
-$specialPageAliases['ia'] = array(
-	'UploadWizard' => array( 'Assistente_de_incargamento' ),
-	'UploadCampaigns' => array( 'Campanias_de_incargamento' ),
-	'UploadCampaign' => array( 'Campania_de_incargamento' ),
-);
+$specialPageAliases['ia'] = [
+	'UploadWizard' => [ 'Assistente_de_incargamento' ],
+];
 
 /** Indonesian (Bahasa Indonesia) */
-$specialPageAliases['id'] = array(
-	'UploadWizard' => array( 'Wisaya_pengunggahan', 'WisayaPengunggahan' ),
-);
+$specialPageAliases['id'] = [
+	'UploadWizard' => [ 'Wisaya_pengunggahan', 'WisayaPengunggahan' ],
+];
 
 /** Italian (italiano) */
-$specialPageAliases['it'] = array(
-	'UploadWizard' => array( 'CaricamentoGuidato' ),
-	'UploadCampaigns' => array( 'CampagneCaricamento' ),
-	'UploadCampaign' => array( 'CampagnaCaricamento' ),
-);
+$specialPageAliases['it'] = [
+	'UploadWizard' => [ 'CaricamentoGuidato' ],
+];
 
 /** Japanese (日本語) */
-$specialPageAliases['ja'] = array(
-	'UploadWizard' => array( 'アップロードウィザード' ),
-);
+$specialPageAliases['ja'] = [
+	'UploadWizard' => [ 'アップロードウィザード' ],
+];
 
 /** Korean (한국어) */
-$specialPageAliases['ko'] = array(
-	'Campaigns' => array( '캠페인' ),
-	'UploadWizard' => array( '올리기마법사' ),
-	'UploadCampaigns' => array( '올리기캠페인목록' ),
-	'UploadCampaign' => array( '올리기캠페인' ),
-);
+$specialPageAliases['ko'] = [
+	'Campaigns' => [ '캠페인' ],
+	'UploadWizard' => [ '올리기마법사' ],
+];
 
 /** Luxembourgish (Lëtzebuergesch) */
-$specialPageAliases['lb'] = array(
-	'UploadWizard' => array( 'Assistent_fir_d\'Eroplueden' ),
-);
+$specialPageAliases['lb'] = [
+	'UploadWizard' => [ 'Assistent_fir_d\'Eroplueden' ],
+];
 
 /** Macedonian (македонски) */
-$specialPageAliases['mk'] = array(
-	'Campaigns' => array( 'Кампањи' ),
-	'UploadWizard' => array( 'ПомошникЗаПодигање' ),
-	'UploadCampaigns' => array( 'ПодигниКампањи' ),
-	'UploadCampaign' => array( 'ПодигниКампања' ),
-);
+$specialPageAliases['mk'] = [
+	'Campaigns' => [ 'Кампањи' ],
+	'UploadWizard' => [ 'ПомошникЗаПодигање' ],
+];
 
 /** Malayalam (മലയാളം) */
-$specialPageAliases['ml'] = array(
-	'Campaigns' => array( 'മേളകൾ' ),
-	'UploadWizard' => array( 'അപ്‌ലോഡ്_സഹായി' ),
-	'UploadCampaigns' => array( 'അപ്‌ലോഡ്‌മേളകൾ' ),
-	'UploadCampaign' => array( 'അപ്‌ലോഡ്‌മേള' ),
-);
+$specialPageAliases['ml'] = [
+	'Campaigns' => [ 'മേളകൾ' ],
+	'UploadWizard' => [ 'അപ്‌ലോഡ്_സഹായി' ],
+];
 
 /** Marathi (मराठी) */
-$specialPageAliases['mr'] = array(
-	'UploadWizard' => array( 'चढवय्या_सुक्षमता-प्रणाली' ),
-);
+$specialPageAliases['mr'] = [
+	'UploadWizard' => [ 'चढवय्या_सुक्षमता-प्रणाली' ],
+];
 
 /** Norwegian Bokmål (norsk bokmål) */
-$specialPageAliases['nb'] = array(
-	'UploadWizard' => array( 'Opplastingsveiviser' ),
-	'UploadCampaigns' => array( 'Opplastingskampanjer' ),
-	'UploadCampaign' => array( 'Opplastingskampanje' ),
-);
+$specialPageAliases['nb'] = [
+	'UploadWizard' => [ 'Opplastingsveiviser' ],
+];
 
 /** Low Saxon (Netherlands) (Nedersaksies) */
-$specialPageAliases['nds-nl'] = array(
-	'UploadWizard' => array( 'Opstuurhulpe' ),
-	'UploadCampaigns' => array( 'Kampanjes_opsturen' ),
-	'UploadCampaign' => array( 'Kampanje_opsturen' ),
-);
+$specialPageAliases['nds-nl'] = [
+	'UploadWizard' => [ 'Opstuurhulpe' ],
+];
 
 /** Dutch (Nederlands) */
-$specialPageAliases['nl'] = array(
-	'Campaigns' => array( 'Campagnes' ),
-	'UploadWizard' => array( 'WizardUploaden' ),
-	'UploadCampaigns' => array( 'Uploadcampagnes' ),
-	'UploadCampaign' => array( 'Uploadcampagne' ),
-);
+$specialPageAliases['nl'] = [
+	'Campaigns' => [ 'Campagnes' ],
+	'UploadWizard' => [ 'WizardUploaden' ],
+];
 
 /** Punjabi (ਪੰਜਾਬੀ) */
-$specialPageAliases['pa'] = array(
-	'UploadWizard' => array( 'ਅੱਪਲੋਡ_ਵਿਜ਼ਾਰਡ' ),
-);
+$specialPageAliases['pa'] = [
+	'UploadWizard' => [ 'ਅੱਪਲੋਡ_ਵਿਜ਼ਾਰਡ' ],
+];
 
 /** Russian (русский) */
-$specialPageAliases['ru'] = array(
-	'UploadWizard' => array( 'Мастер_загрузки' ),
-	'UploadCampaigns' => array( 'Кампании_по_загрузке' ),
-	'UploadCampaign' => array( 'Кампания_по_загрузке' ),
-);
+$specialPageAliases['ru'] = [
+	'UploadWizard' => [ 'Мастер_загрузки' ],
+];
 
 /** Sicilian (sicilianu) */
-$specialPageAliases['scn'] = array(
-	'UploadWizard' => array( 'CaricamentoGuidato' ),
-	'UploadCampaigns' => array( 'CampagneCaricamento' ),
-	'UploadCampaign' => array( 'CampagnaCaricamento' ),
-);
+$specialPageAliases['scn'] = [
+	'UploadWizard' => [ 'CaricamentoGuidato' ],
+];
 
 /** Sinhala (සිංහල) */
-$specialPageAliases['si'] = array(
-	'UploadWizard' => array( 'උඩුගත_කිරීමේ_මාය_අඳුන' ),
-);
+$specialPageAliases['si'] = [
+	'UploadWizard' => [ 'උඩුගත_කිරීමේ_මාය_අඳුන' ],
+];
 
 /** Swedish (svenska) */
-$specialPageAliases['sv'] = array(
-	'Campaigns' => array( 'Kampanjer' ),
-	'UploadWizard' => array( 'Uppladdningsguide' ),
-	'UploadCampaigns' => array( 'Uppladdningskampanjer' ),
-	'UploadCampaign' => array( 'Uppladdningskampanj' ),
-);
+$specialPageAliases['sv'] = [
+	'Campaigns' => [ 'Kampanjer' ],
+	'UploadWizard' => [ 'Uppladdningsguide' ],
+];
 
 /** Turkish (Türkçe) */
-$specialPageAliases['tr'] = array(
-	'UploadWizard' => array( 'YüklemeSihirbazı' ),
-);
+$specialPageAliases['tr'] = [
+	'UploadWizard' => [ 'YüklemeSihirbazı' ],
+];
 
 /** Tuvinian (тыва дыл) */
-$specialPageAliases['tyv'] = array(
-	'UploadWizard' => array( 'Мерген_чүдүрүлге' ),
-	'UploadCampaigns' => array( 'Чүдүрүлге_орууктары' ),
-	'UploadCampaign' => array( 'Чүдүрүлге_оруу' ),
-);
+$specialPageAliases['tyv'] = [
+	'UploadWizard' => [ 'Мерген_чүдүрүлге' ],
+];
 
 /** Ukrainian (українська) */
-$specialPageAliases['uk'] = array(
-	'Campaigns' => array( 'Кампанії' ),
-	'UploadWizard' => array( 'Майстер_завантаження' ),
-	'UploadCampaigns' => array( 'Масові_завантаження' ),
-	'UploadCampaign' => array( 'Масове_завантаження' ),
-);
+$specialPageAliases['uk'] = [
+	'Campaigns' => [ 'Кампанії' ],
+	'UploadWizard' => [ 'Майстер_завантаження', 'Мастер_загрузки' ],
+];
 
 /** Vietnamese (Tiếng Việt) */
-$specialPageAliases['vi'] = array(
-	'Campaigns' => array( 'Chiến_dịch' ),
-	'UploadWizard' => array( 'Thuật_sĩ_tải_lên' ),
-	'UploadCampaigns' => array( 'Danh_sách_chiến_dịch_tải_lên' ),
-	'UploadCampaign' => array( 'Chiến_dịch_tải_lên' ),
-);
+$specialPageAliases['vi'] = [
+	'Campaigns' => [ 'Chiến_dịch' ],
+	'UploadWizard' => [ 'Thuật_sĩ_tải_lên' ],
+];
 
 /** Cantonese (粵語) */
-$specialPageAliases['yue'] = array(
-	'UploadWizard' => array( '上載精靈' ),
-);
+$specialPageAliases['yue'] = [
+	'UploadWizard' => [ '上載精靈' ],
+];
 
 /** Simplified Chinese (中文（简体）‎) */
-$specialPageAliases['zh-hans'] = array(
-	'Campaigns' => array( '活动' ),
-	'UploadWizard' => array( '上传向导', '上传精灵' ),
-	'UploadCampaigns' => array( '上传多个活动' ),
-	'UploadCampaign' => array( '上传活动' ),
-);
+$specialPageAliases['zh-hans'] = [
+	'Campaigns' => [ '活动' ],
+	'UploadWizard' => [ '上传向导', '上传精灵' ],
+];
 
 /** Traditional Chinese (中文（繁體）‎) */
-$specialPageAliases['zh-hant'] = array(
-	'UploadWizard' => array( '上載精靈' ),
-	'UploadCampaigns' => array( '上載多個計劃' ),
-	'UploadCampaign' => array( '上載計劃' ),
-);
+$specialPageAliases['zh-hant'] = [
+	'UploadWizard' => [ '上載精靈' ],
+];

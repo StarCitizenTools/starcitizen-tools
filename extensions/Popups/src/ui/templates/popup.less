@@ -1,0 +1,336 @@
+@import 'mediawiki.mixins.less';
+@import 'mediawiki.ui/variables';
+
+// Code adapted from Yair Rand's NavPopupsRestyled.js
+// https://en.wikipedia.org/wiki/User:Yair_rand/NavPopupsRestyled.js
+//
+// "Tall" terminology, although applied to the popup, refers only to the
+// thumbnail and not the popup itself:
+//   Class     Thumbnail  Popup
+//   Tall      Portrait   Landscape
+//   Not tall  Landscape  Portrait
+//   Not tall  Missing    Landscape
+
+@popupPadding: 16px;
+@popupWidth: 320px;
+@popupTallWidth: 215px;
+@cogIconSize: 30px;
+@lineHeight: 20px;
+
+.mwe-popups-border-triangle-top( @size, @left, @color, @extra ) {
+	content: '';
+	position: absolute;
+	border: ( @size + @extra ) solid transparent;
+	border-top: 0;
+	border-bottom: ( @size + @extra ) solid @color;
+	top: -@size;
+	/* @noflip */
+	left: @left;
+}
+
+.mwe-popups-border-triangle-bottom( @size, @left, @color, @extra ) {
+	content: '';
+	position: absolute;
+	border: ( @size + @extra ) solid transparent;
+	border-bottom: 0;
+	border-top: ( @size + @extra ) solid @color;
+	bottom: -@size;
+	/* @noflip */
+	left: @left;
+}
+
+.mwe-popups {
+	background: #fff;
+	position: absolute;
+	z-index: 110;
+	.box-shadow( 0 30px 90px -20px rgba( 0, 0, 0, 0.3 ), 0 0 1px @colorGray10; );
+	padding: 0;
+	display: none;
+	font-size: 14px;
+	line-height: @lineHeight;
+	min-width: 300px;
+	border-radius: @borderRadius;
+
+	.mw-ui-icon {
+		// mw-ui-icon assumes a font size of 16px so we must declare it here
+		font-size: 16px;
+		margin: 21px 0 8px 0;
+	}
+
+	.mwe-popups-container {
+		color: @colorText;
+		margin-top: -9px;
+		padding-top: 9px;
+		text-decoration: none;
+
+		footer {
+			padding: @popupPadding;
+			margin: 0;
+			font-size: 10px;
+			position: absolute;
+			bottom: 0;
+			/* @noflip */
+			left: 0;
+		}
+	}
+
+	.mwe-popups-extract {
+		// T156800, T139297: "Pad" the extract horizontally using a margin so the
+		// SVG element is forced not to occlude the truncating pseudo-element and
+		// the settings cog in IE9-11.
+		margin: @popupPadding;
+
+		display: block;
+		color: @colorText;
+		text-decoration: none;
+		position: relative;
+
+		&:hover {
+			text-decoration: none;
+		}
+
+		&:after {
+			content: ' ';
+			position: absolute;
+			bottom: 0;
+			width: 25%;
+			height: @lineHeight;
+			background-color: transparent;
+		}
+
+		/* Stylelint rule broken for vendor prefixes: https://github.com/stylelint/stylelint/issues/1939 */
+		/* stylelint-disable function-linear-gradient-no-nonstandard-direction */
+		&[ dir='ltr' ]:after {
+			/* @noflip */
+			right: 0;
+			/* @noflip */
+			background-image: -webkit-linear-gradient( to right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+			/* @noflip */
+			background-image: -moz-linear-gradient( to right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+			/* @noflip */
+			background-image: -o-linear-gradient( to right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+			/* @noflip */
+			background-image: linear-gradient( to right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+		}
+
+		&[ dir='rtl' ]:after {
+			/* @noflip */
+			left: 0;
+			/* @noflip */
+			background-image: -webkit-linear-gradient( to left, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+			/* @noflip */
+			background-image: -moz-linear-gradient( to left, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+			/* @noflip */
+			background-image: -o-linear-gradient( to left, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+			/* @noflip */
+			background-image: linear-gradient( to left, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+		}
+		/* stylelint-enable function-linear-gradient-no-nonstandard-direction */
+
+		// Make the text fit in exactly as many lines as we want.
+		p {
+			margin: 0;
+		}
+		ul,
+		ol,
+		li,
+		dl,
+		dd,
+		dt {
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+	}
+
+	svg {
+		overflow: hidden;
+	}
+
+	&.mwe-popups-is-tall {
+		width: 450px;
+
+		> div > a > svg {
+			vertical-align: middle;
+		}
+
+		.mwe-popups-extract {
+			width: @popupTallWidth;
+			height: 9 * @lineHeight;
+			overflow: hidden;
+			/* @noflip */
+			float: left;
+		}
+
+		footer {
+			width: @popupTallWidth;
+		}
+	}
+
+	&.mwe-popups-is-not-tall {
+		width: @popupWidth;
+
+		.mwe-popups-extract {
+			@minHeight: 2 * @lineHeight;
+			// On short summaries, we want to avoid an overlap with the gradient.
+			min-height: @minHeight;
+			max-height: 7 * @lineHeight;
+			overflow: hidden;
+			margin-bottom: @minHeight + 7px;
+			padding-bottom: 0;
+		}
+
+		footer {
+			width: @popupWidth - @cogIconSize;
+		}
+	}
+
+	&.mwe-popups-type-generic,
+	&.mwe-popups-type-disambiguation {
+		.mwe-popups-extract {
+			min-height: auto;
+			padding-top: 4px;
+			margin-bottom: 60px;
+			margin-top: 0;
+		}
+
+		.mwe-popups-read-link {
+			font-weight: bold;
+			font-size: 12px;
+		}
+
+		// When the user dwells on the "There was an issue displaying this preview"
+		// text, which is a link to the page, then highlight the "Go to this page"
+		// link too.
+		.mwe-popups-extract:hover + footer .mwe-popups-read-link {
+			text-decoration: underline;
+		}
+	}
+
+	/* Triangles/Pokeys */
+	&.mwe-popups-no-image-tri {
+		&:after {
+			.mwe-popups-border-triangle-top( 7px, 7px, #fff, 4px );
+		}
+
+		&:before {
+			.mwe-popups-border-triangle-top( 8px, 10px, @colorGray10, 0px );
+		}
+	}
+
+	&.flipped_x.mwe-popups-no-image-tri {
+		&:after {
+			/* @noflip */
+			left: auto;
+			/* @noflip */
+			right: 7px;
+		}
+
+		&:before {
+			/* @noflip */
+			left: auto;
+			/* @noflip */
+			right: 10px;
+		}
+	}
+
+	&.mwe-popups-image-tri {
+		&:before {
+			z-index: 111;
+			.mwe-popups-border-triangle-top( 9px, 9px, @colorGray10, 0px );
+		}
+
+		&:after {
+			.mwe-popups-border-triangle-top( 8px, 6px, #fff, 4px );
+			z-index: 112;
+		}
+
+		&.flipped_x {
+			&:before {
+				z-index: 111;
+				.mwe-popups-border-triangle-top( 9px, 273px, @colorGray10, 0px );
+			}
+
+			&:after {
+				.mwe-popups-border-triangle-top( 8px, 269px, #fff, 4px );
+				z-index: 112;
+			}
+		}
+
+		.mwe-popups-extract {
+			padding-top: 32px;
+			margin-top: 190px;
+		}
+
+		> div > a > svg {
+			margin-top: -8px;
+			position: absolute;
+			z-index: 113;
+			/* @noflip */
+			left: 0;
+		}
+	}
+
+	&.flipped_x.mwe-popups-is-tall {
+		min-height: 242px;
+
+		&:before {
+			z-index: 111;
+			.mwe-popups-border-triangle-top( 9px, 420px, @colorGray10, 0px );
+		}
+
+		> div > a > svg {
+			margin: 0;
+			margin-top: -8px;
+			margin-bottom: -7px;
+			position: absolute;
+			z-index: 113;
+			/* @noflip */
+			right: 0;
+		}
+	}
+
+	&.flipped_x_y {
+		&:before {
+			z-index: 111;
+			.mwe-popups-border-triangle-bottom( 9px, 272px, @colorGray10, 0px );
+		}
+
+		&:after {
+			.mwe-popups-border-triangle-bottom( 8px, 269px, #fff, 4px );
+			z-index: 112;
+		}
+
+		&.mwe-popups-is-tall {
+			min-height: 242px;
+
+			&:after {
+				z-index: 112;
+				.mwe-popups-border-triangle-bottom( 8px, 417px, #fff, 4px );
+			}
+
+			&:before {
+				z-index: 111;
+				.mwe-popups-border-triangle-bottom( 9px, 420px, @colorGray10, 0px );
+			}
+
+			> div > a > svg {
+				position: absolute;
+				z-index: 113;
+				margin: 0;
+				margin-bottom: -9px;
+				/* @noflip */
+				right: 0;
+			}
+		}
+	}
+
+	&.flipped_y {
+		&:after {
+			.mwe-popups-border-triangle-bottom( 7px, 7px, #fff, 4px );
+		}
+
+		&:before {
+			.mwe-popups-border-triangle-bottom( 8px, 10px, @colorGray10, 0px );
+		}
+	}
+}

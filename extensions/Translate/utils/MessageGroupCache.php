@@ -4,7 +4,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2009-2013 Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -26,7 +26,7 @@ class MessageGroupCache {
 	protected $group;
 
 	/**
-	 * @var CdbReader
+	 * @var \Cdb\Reader
 	 */
 	protected $cache;
 
@@ -116,7 +116,7 @@ class MessageGroupCache {
 		$this->close(); // Close the reader instance just to be sure
 
 		$messages = $this->group->load( $this->code );
-		if ( $messages === array() ) {
+		if ( $messages === [] ) {
 			if ( $this->exists() ) {
 				// Delete stale cache files
 				unlink( $this->getCacheFileName() );
@@ -149,7 +149,7 @@ class MessageGroupCache {
 	 * Checks whether the cache still reflects the source file.
 	 * It uses multiple conditions to speed up the checking from file
 	 * modification timestamps to hashing.
-	 * @param int $reason
+	 * @param int &$reason
 	 * @return bool Whether the cache is up to date.
 	 */
 	public function isValid( &$reason ) {

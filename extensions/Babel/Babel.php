@@ -12,7 +12,7 @@
  *
  * @author Robert Leverington <robert@rhl.me.uk>
  * @copyright Copyright © 2008 - 2011 Robert Leverington.
- * @license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
+ * @license GPL-2.0-or-later
  */
 
 if ( function_exists( 'wfLoadExtension' ) ) {

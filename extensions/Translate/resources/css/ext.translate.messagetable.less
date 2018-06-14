@@ -1,10 +1,25 @@
-@import "mediawiki.mixins";
+@import 'mediawiki.mixins';
 
 /* Default colors */
 .tux-messagelist {
-	color: #252525;
-	background-color: #F8F8F8;
+	background-color: #f8f8f8;
+	color: #222;
 	max-width: 800px;
+}
+
+.grid.ext-translate-container .row {
+	min-width: 300px !important;
+}
+
+@media screen and ( max-width: 600px ) {
+	.grid.ext-translate-container .tux-messagelist .tux-list-message {
+		width: 100%;
+	}
+
+	.tux-list-status,
+	.tux-list-edit {
+		display: none;
+	}
 }
 
 .tux-message {
@@ -26,19 +41,19 @@
 	margin-right: 5px !important;
 	margin-left: 5px !important;
 	vertical-align: middle;
-	border-bottom: 1px solid #C9C9C9;
-	background: #FFFFFF;
+	border-bottom: 1px solid #c9c9c9;
+	background: #fff;
 }
 
 .tux-message-item.translated,
 .tux-message-item.translated:hover,
 .tux-message-item.proofread,
 .tux-message-item.proofread:hover {
-	background-color: #F0F0F0;
+	background-color: #f0f0f0;
 }
 
 .tux-message-item:hover {
-	background-color: #F8F8F8;
+	background-color: #f8f8f8;
 }
 
 .tux-list-status span,
@@ -54,7 +69,7 @@
 }
 
 .tux-info {
-	background-color: #F0F0F0;
+	background-color: #f0f0f0;
 }
 
 .tux-list-source {
@@ -66,8 +81,8 @@
 }
 
 .tux-list-translation {
+	color: #54595d;
 	white-space: nowrap;
-	color: #565656;
 	padding-left: 5px;
 	text-overflow: ellipsis;
 	unicode-bidi: -webkit-isolate;
@@ -81,20 +96,20 @@
 }
 
 .tux-status-unsaved {
-	.background-image-svg( '../images/label-pen.svg', '../images/label-pen.png' );
+	.background-image( '../images/label-pen.svg' );
 }
 
 .tux-status-translated,
 .tux-status-proofread {
-	.background-image-svg( '../images/label-tick.svg', '../images/label-tick.png' );
+	.background-image( '../images/label-tick.svg' );
 }
 
 .tux-status-fuzzy {
-	.background-image-svg( '../images/label-clock.svg', '../images/label-clock.png' );
+	.background-image( '../images/label-clock.svg' );
 }
 
 .tux-list-edit a {
-	.background-image-svg( '../images/action-edit.svg', '../images/action-edit.png' );
+	.background-image( '../images/action-edit.svg' );
 	background-position: left center;
 	background-repeat: no-repeat;
 	background-size: 18px 18px;
@@ -102,11 +117,11 @@
 }
 
 .tux-messagetable-loader {
-	color: #565656;
+	color: #54595d;
 	padding: 15px;
 	top: 0;
-	background: #F0F0F0 16px 50%;
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;
+	background: #f0f0f0 16px 50%;
+	box-shadow: 0 1px 4px rgba( 0, 0, 0, 0.3 ), 0 0 20px rgba( 0, 0, 0, 0.1 ) inset;
 }
 
 .tux-messagetable-loader-info {
@@ -114,19 +129,20 @@
 	font-size: 25px;
 }
 
-
 .tux-action-bar {
-	background-color: #F0F0F0;
-	color: #252525;
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+	background-color: #f0f0f0;
+	color: #222;
+	box-shadow: 0 2px 6px rgba( 0, 0, 0, 0.3 );
 	transition: width 250ms;
 }
 
-.tux-action-bar.floating {
-	border-top: 1px solid #DDD;
-	position: fixed;
-	bottom: 0;
-	z-index: 200;
+@media screen and ( min-height: 500px ) {
+	.tux-action-bar.floating {
+		border-top: 1px solid #ddd;
+		position: fixed;
+		bottom: 0;
+		z-index: 200;
+	}
 }
 
 .tux-action-bar .tux-statsbar {
@@ -146,19 +162,19 @@
 	background-color: #e6e6e6;
 	font-weight: bold;
 	line-height: 1;
-	background-image: linear-gradient(#f0f0f0,#e6e6e6);
+	background-image: linear-gradient( #f0f0f0, #e6e6e6 );
 	border: 1px #c9c9c9 solid;
 }
 
 .tux-action-bar button:hover {
 	background-color: #f0f0f0;
-	background-image: linear-gradient(#f8f8f8, #f0f0f0);
+	background-image: linear-gradient( #f8f8f8, #f0f0f0 );
 }
 
 .tux-action-bar button:active,
 .tux-action-bar button.down {
-	color: #FFF;
-	background: #252525;
+	background: #222;
+	color: #fff;
 }
 
 .tux-action-bar button.disabled,
@@ -175,16 +191,16 @@
 
 .tux-view-switcher button:first-child {
 	border-radius: 3px 0 0 3px;
-	border-right: none;
+	border-right: 0;
 }
 
 .tux-view-switcher button:last-child {
 	border-radius: 0 3px 3px 0;
-	border-left: none;
+	border-left: 0;
 }
 
 .tux-view-switcher button:before {
-	content: "";
+	content: '';
 	height: 15px;
 	width: 25px;
 	display: inline-block;
@@ -196,11 +212,11 @@
 }
 
 .tux-action-bar .translate-mode-button:before {
-	.background-image-svg( '../images/view-list.svg', '../images/view-list.png' );
+	.background-image( '../images/view-list.svg' );
 }
 
 .tux-action-bar .translate-mode-button.down:before {
-	.background-image-svg( '../images/view-list-hi.svg', '../images/view-list-hi.png' );
+	.background-image( '../images/view-list-hi.svg' );
 }
 
 .tux-action-bar .page-mode-button {
@@ -208,11 +224,11 @@
 }
 
 .tux-action-bar .page-mode-button:before {
-	.background-image-svg( '../images/view-page.svg', '../images/view-page.png' );
+	.background-image( '../images/view-page.svg' );
 }
 
 .tux-action-bar .page-mode-button.down:before {
-	.background-image-svg( '../images/view-page-hi.svg', '../images/view-page-hi.png' );
+	.background-image( '../images/view-page-hi.svg' );
 }
 
 .tux-action-bar .proofread-mode-button {
@@ -220,33 +236,25 @@
 }
 
 .tux-action-bar .proofread-mode-button:before {
-	.background-image-svg( '../images/view-proofread.svg', '../images/view-proofread.png' );
+	.background-image( '../images/view-proofread.svg' );
 }
 
 .tux-action-bar .proofread-mode-button.down:before {
-	.background-image-svg( '../images/view-proofread-hi.svg', '../images/view-proofread-hi.png' );
+	.background-image( '../images/view-proofread-hi.svg' );
 }
 
-.ext-translate-container .tux-messagelist .tux-message-filter-result {
-	color: #252525;
-	line-height: 35px;
-	font-size: 15px;
-	vertical-align: middle;
-	border-bottom: 1px solid #C9C9C9;
-	margin: 0;
-	padding: 0 5px;
-}
-
-.tux-message-filter-result.highlight {
-	background: #FFF5AA;
-}
-
-.tux-message-filter-result button {
-	float: right;
+.tux-message-filter-result  {
+	color: #222;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #c9c9c9;
+	background: #fff5aa;
 	padding: 5px;
-	margin: 5px 0;
-	font-size: 15px;
-	vertical-align: middle;
+
+	& button {
+		background: inherit;
+	}
 }
 
 .tux-empty-list {
@@ -259,8 +267,8 @@
 }
 
 .tux-empty-list-guide {
+	color: #54595d;
 	font-size: 15px;
-	color: #565656;
 	padding: 5px 0;
 }
 

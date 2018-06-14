@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Armin1392"
+			"Armin1392",
+			"Ladsgroup"
 		]
 	},
-	"textextracts-desc": "ارائه متن ساده یا اچ‌تی‌ام‌ال محدود شده، محتوای صفحه را بیرون می‌کشد"
+	"textextracts-desc": "ارائه متن ساده یا اچ‌تی‌ام‌ال محدود شده، محتوای صفحه را بیرون می‌کشد",
+	"apihelp-query+extracts-param-sentences": "چند جمله بازگرداند."
 }

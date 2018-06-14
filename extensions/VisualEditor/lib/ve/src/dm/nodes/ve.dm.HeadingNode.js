@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel HeadingNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -27,8 +27,6 @@ OO.inheritClass( ve.dm.HeadingNode, ve.dm.ContentBranchNode );
 
 ve.dm.HeadingNode.static.name = 'heading';
 
-ve.dm.HeadingNode.static.canContainContent = true;
-
 ve.dm.HeadingNode.static.defaultAttributes = {
 	level: 1
 };
@@ -51,6 +49,17 @@ ve.dm.HeadingNode.static.toDataElement = function ( domElements ) {
 ve.dm.HeadingNode.static.toDomElements = function ( dataElement, doc ) {
 	var level = dataElement.attributes && dataElement.attributes.level || 1;
 	return [ doc.createElement( 'h' + level ) ];
+};
+
+ve.dm.HeadingNode.static.describeChange = function ( key, change ) {
+	if ( key === 'level' ) {
+		return ve.msg( 'visualeditor-changedesc-no-key',
+			ve.msg( 'visualeditor-formatdropdown-format-heading' + change.from ),
+			ve.msg( 'visualeditor-formatdropdown-format-heading' + change.to )
+		);
+	}
+	// Parent method
+	return ve.dm.HeadingNode.parent.static.describeChange.apply( this, arguments );
 };
 
 /* Registration */

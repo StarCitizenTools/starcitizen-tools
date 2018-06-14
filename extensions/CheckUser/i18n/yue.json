@@ -20,7 +20,6 @@
 	"checkuser-users": "拎用戶",
 	"checkuser-edits": "拎IP嘅編輯",
 	"checkuser-ips": "拎IP",
-	"checkuser-search": "搵",
 	"checkuser-empty": "呢個日誌無任何嘅項目。",
 	"checkuser-nomatch": "搵唔到符合嘅資訊。",
 	"checkuser-check": "检查",
@@ -29,10 +28,10 @@
 	"checkuser-blocked": "已經封鎖",
 	"checkuser-too-many": "太多結果，請收窄個CIDR。\n呢度係個用過嘅IP (最多5000個，按地址排):",
 	"checkuser-user-nonexistent": "指定嘅用戶唔存在。",
-	"checkuser-search-form": "搵當 $1 係 $2 嗰陣時嘅日誌",
+	"checkuser-search": "搵",
 	"checkuser-search-submit": "搵",
 	"checkuser-search-initiator": "創始者",
 	"checkuser-search-target": "目標",
 	"checkuser-ipeditcount": "~響全部用戶度搵$1",
-	"checkuser-log-return": "返去核對用戶主要表格"
+	"checkuser-showmain": "返去核對用戶主要表格"
 }

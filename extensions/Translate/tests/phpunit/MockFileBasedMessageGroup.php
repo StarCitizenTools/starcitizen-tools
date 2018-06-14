@@ -5,12 +5,12 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 class MockFileBasedMessageGroup extends FileBasedMessageGroup {
 	public function load( $code ) {
-		return array( $this->getId() . '-messagekey' => 'üga' );
+		return [ $this->getId() . '-messagekey' => 'üga' ];
 	}
 
 	public function exists() {

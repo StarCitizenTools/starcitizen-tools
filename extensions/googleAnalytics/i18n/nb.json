@@ -2,8 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Harald Khan",
-			"Njardarlogar"
+			"Njardarlogar",
+			"Jon Harald Søby"
 		]
 	},
-	"googleanalytics-desc": "Setter inn Google Analytics-skript (ga.js) på MediaWiki-sider for sporing"
+	"googleanalytics-desc": "Setter inn Google Analytics-skript (og/eller andre analysetjenester) på MediaWiki-sider for sporing",
+	"right-noanalytics": "Unntatt fra analysesporing"
 }

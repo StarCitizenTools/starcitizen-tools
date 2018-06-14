@@ -30,10 +30,6 @@ class ContributionsFormatter extends AbstractFormatter {
 
 		$isNewPage = isset( $data['isNewPage'] ) && $data['isNewPage'];
 
-		if ( $ctx->newOnly && !$isNewPage ) {
-			return false;
-		}
-
 		$charDiff = ChangesList::showCharacterDifference(
 			$data['size']['old'],
 			$data['size']['new']
@@ -41,7 +37,7 @@ class ContributionsFormatter extends AbstractFormatter {
 
 		$separator = $this->changeSeparator();
 
-		$links = array();
+		$links = [];
 		$links[] = $this->getDiffAnchor( $data['links'], $ctx );
 		$links[] = $this->getHistAnchor( $data['links'], $ctx );
 
@@ -53,8 +49,7 @@ class ContributionsFormatter extends AbstractFormatter {
 		}
 
 		// Put it all together
-		return
-			$this->formatTimestamp( $data ) . ' ' .
+		return $this->formatTimestamp( $data ) . ' ' .
 			$this->formatAnchorsAsPipeList( $links, $ctx ) .
 			$separator .
 			$charDiff .
@@ -67,6 +62,10 @@ class ContributionsFormatter extends AbstractFormatter {
 
 	/**
 	 * @todo can be generic?
+	 * @param array $data
+	 * @param FormatterRow $row
+	 * @param IContextSource $ctx
+	 * @return string
 	 */
 	protected function getHideUnhide( array $data, FormatterRow $row, IContextSource $ctx ) {
 		if ( !$row->revision instanceof PostRevision ) {
@@ -91,13 +90,13 @@ class ContributionsFormatter extends AbstractFormatter {
 		$anchor = $data['actions'][$key];
 		$message = ' ' . wfMessage( 'parentheses' )->rawParams( Html::rawElement(
 			'a',
-			array(
+			[
 				'href' => $anchor->getFullURL(),
 				'data-flow-interactive-handler' => 'moderationDialog',
 				'data-flow-template' => "flow_moderate_$type.partial",
 				'data-role' => $key,
 				'class' => 'flow-history-moderation-action flow-click-interactive',
-			),
+			],
 			$ctx->msg( $msg )->escaped()
 		) )->escaped();
 

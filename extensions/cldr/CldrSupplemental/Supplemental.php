@@ -29,6 +29,10 @@ $currencyFractions = [
 		'digits' => '0',
 		'rounding' => '0',
 	],
+	'BYN' => [
+		'digits' => '2',
+		'rounding' => '0',
+	],
 	'CAD' => [
 		'digits' => '2',
 		'rounding' => '0',
@@ -52,8 +56,10 @@ $currencyFractions = [
 		'rounding' => '0',
 	],
 	'CRC' => [
-		'digits' => '0',
+		'digits' => '2',
 		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'CZK' => [
 		'digits' => '2',
@@ -68,6 +74,11 @@ $currencyFractions = [
 	'DJF' => [
 		'digits' => '0',
 		'rounding' => '0',
+	],
+	'DKK' => [
+		'digits' => '2',
+		'rounding' => '0',
+		'cashRounding' => '50',
 	],
 	'ESP' => [
 		'digits' => '0',
@@ -171,6 +182,12 @@ $currencyFractions = [
 		'digits' => '0',
 		'rounding' => '0',
 	],
+	'NOK' => [
+		'digits' => '2',
+		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
+	],
 	'OMR' => [
 		'digits' => '3',
 		'rounding' => '0',
@@ -190,6 +207,12 @@ $currencyFractions = [
 	'RWF' => [
 		'digits' => '0',
 		'rounding' => '0',
+	],
+	'SEK' => [
+		'digits' => '2',
+		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'SLL' => [
 		'digits' => '0',
@@ -383,7 +406,7 @@ $localeCurrencies = [
 		'BWP',
 	],
 	'BY' => [
-		'BYR',
+		'BYN',
 	],
 	'BZ' => [
 		'BZD',
@@ -920,7 +943,7 @@ $localeCurrencies = [
 		'SSP',
 	],
 	'ST' => [
-		'STD',
+		'STN',
 	],
 	'SV' => [
 		'USD',

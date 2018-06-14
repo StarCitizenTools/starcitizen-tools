@@ -3,6 +3,7 @@
 namespace Flow\SpamFilter;
 
 use Flow\Model\AbstractRevision;
+use ExtensionRegistry;
 use IContextSource;
 use Status;
 use Title;
@@ -25,7 +26,7 @@ class AbuseFilter implements SpamFilter {
 	 *
 	 * @param array $emergencyDisable optional AbuseFilter emergency disable values
 	 */
-	public function setup( array $emergencyDisable = array() ) {
+	public function setup( array $emergencyDisable = [] ) {
 		global
 		$wgAbuseFilterValidGroups,
 		$wgAbuseFilterEmergencyDisableThreshold,
@@ -37,11 +38,11 @@ class AbuseFilter implements SpamFilter {
 		}
 
 		// if no Flow-specific emergency disable threshold given, use defaults
-		$emergencyDisable += array(
+		$emergencyDisable += [
 			'threshold' => $wgAbuseFilterEmergencyDisableThreshold['default'],
 			'count' => $wgAbuseFilterEmergencyDisableCount['default'],
 			'age' => $wgAbuseFilterEmergencyDisableAge['default'],
-		);
+		];
 
 		// register Flow's AbuseFilter filter group
 		if ( !in_array( $this->group, $wgAbuseFilterValidGroups ) ) {
@@ -59,11 +60,17 @@ class AbuseFilter implements SpamFilter {
 	 * @param AbstractRevision $newRevision
 	 * @param AbstractRevision|null $oldRevision
 	 * @param Title $title
+	 * @param Title $ownerTitle
 	 * @return Status
 	 */
-	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title ) {
+	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title, Title $ownerTitle ) {
 		$vars = \AbuseFilter::getEditVars( $title );
-		$vars->addHolders( \AbuseFilter::generateUserVars( $context->getUser() ), \AbuseFilter::generateTitleVars( $title , 'ARTICLE' ) );
+		$vars->addHolders(
+			\AbuseFilter::generateUserVars( $context->getUser() ),
+			\AbuseFilter::generateTitleVars( $title, 'ARTICLE' ),
+			\AbuseFilter::generateTitleVars( $ownerTitle, 'BOARD' )
+		);
+
 		$vars->setVar( 'ACTION', $newRevision->getChangeType() );
 
 		/*
@@ -72,16 +79,16 @@ class AbuseFilter implements SpamFilter {
 		 * submitted in wikitext. It will only be transformed once it's being
 		 * saved to DB.
 		 */
-		$vars->setLazyLoadVar( 'new_wikitext', 'FlowRevisionContent', array( 'revision' => $newRevision ) );
-		$vars->setLazyLoadVar( 'new_size', 'length', array( 'length-var' => 'new_wikitext' ) );
+		$vars->setLazyLoadVar( 'new_wikitext', 'FlowRevisionContent', [ 'revision' => $newRevision ] );
+		$vars->setLazyLoadVar( 'new_size', 'length', [ 'length-var' => 'new_wikitext' ] );
 
 		/*
 		 * This may roundtrip to Parsoid if content is stored in HTML.
 		 * Since the variable is lazy-loaded, it will not roundtrip unless the
 		 * variable is actually used.
 		 */
-		$vars->setLazyLoadVar( 'old_wikitext', 'FlowRevisionContent', array( 'revision' => $oldRevision ) );
-		$vars->setLazyLoadVar( 'old_size', 'length', array( 'length-var' => 'old_wikitext' ) );
+		$vars->setLazyLoadVar( 'old_wikitext', 'FlowRevisionContent', [ 'revision' => $oldRevision ] );
+		$vars->setLazyLoadVar( 'old_size', 'length', [ 'length-var' => 'old_wikitext' ] );
 
 		return \AbuseFilter::filterAction( $vars, $title, $this->group );
 	}
@@ -92,7 +99,7 @@ class AbuseFilter implements SpamFilter {
 	 * @return bool
 	 */
 	public function enabled() {
-		return class_exists( 'AbuseFilter' ) && (bool) $this->group;
+		return ExtensionRegistry::getInstance()->isLoaded( 'Abuse Filter' ) && (bool)$this->group;
 	}
 
 	/**
@@ -102,7 +109,7 @@ class AbuseFilter implements SpamFilter {
 	 * @return array
 	 */
 	public function lazyLoadMethods() {
-		return array(
+		return [
 			/**
 			 * @param string $method: Method to generate the variable
 			 * @param \AbuseFilterVariableHolder $vars
@@ -110,16 +117,16 @@ class AbuseFilter implements SpamFilter {
 			 * @param mixed &$result Result of the computation
 			 */
 			'FlowRevisionContent' => function ( \AbuseFilterVariableHolder $vars, $parameters ) {
-					if ( !isset( $parameters['revision'] ) ) {
-						return '';
-					}
-					$revision = $parameters['revision'];
-					if ( $revision instanceof AbstractRevision ) {
-						return $revision->getContentInWikitext();
-					} else {
-						return '';
-					}
+				if ( !isset( $parameters['revision'] ) ) {
+					return '';
 				}
-		);
+				$revision = $parameters['revision'];
+				if ( $revision instanceof AbstractRevision ) {
+					return $revision->getContentInWikitext();
+				} else {
+					return '';
+				}
+			}
+		];
 	}
 }

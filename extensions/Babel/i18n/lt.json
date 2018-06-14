@@ -8,7 +8,8 @@
 			"Matasg",
 			"Vpovilaitis",
 			"Albertas",
-			"Zygimantus"
+			"Zygimantus",
+			"Manvydasz"
 		]
 	},
 	"babel": "Naudotojo informacijos Babelio bokštas",
@@ -31,6 +32,9 @@
 	"babel-3-n": "Šis naudotojas gali rašyti ir skaityti [[$1|aukšto]] lygio [[$2|lietuvių]] kalba",
 	"babel-4-n": "Šis naudotojas gali rašyti ir skaityti [[$2|lietuvių]] kalba [[$1|beveik kaip gimtąja]]",
 	"babel-5-n": "Šis naudotojas gali rašyti ir skaityti [[$1|profesionalia]] [[$2|lietuvių]] kalba",
-	"babel-N-n": "Šis naudotojas gali rašyti ir skaityti [[$1|gimtąja]] [[$2|lietuvių]] kalba",
-	"babel-footer": "Naudotojai pagal kalbą"
+	"babel-N-n": "Šis naudotojas gali rašyti ir skaityti [[$1|gimtąja]] [[$2|lietuvių]] kalba.",
+	"babel-footer": "Naudotojai pagal kalbą",
+	"apihelp-query+babel-description": "Gauti informaciją, kokias kalbas naudotojas žino",
+	"apihelp-query+babel-param-user": "Vartotojas, apie kurį gausite informaciją",
+	"apihelp-query+babel-example-1": "Gauti Babelio informaciją vartotojui <kbd>Example</kbd>"
 }

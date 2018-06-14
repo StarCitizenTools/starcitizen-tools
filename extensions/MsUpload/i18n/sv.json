@@ -4,12 +4,20 @@
 			"WikiPhoenix"
 		]
 	},
+	"msu-desc": "Aktiverar enkelt uppladdning för en eller flera filer samtidigt",
 	"msu-button-title": "Välj filer",
 	"msu-insert-link": "Infoga länk",
-	"msu-insert-image": "Infoga bild",
+	"msu-insert-gallery": "Infoga alla som galleri",
+	"msu-insert-files": "Infoga alla som filer",
+	"msu-insert-links": "Infoga alla som länkar",
+	"msu-insert-image": "Infoga som bild",
 	"msu-insert-video": "Infoga video",
 	"msu-cancel-upload": "Avbryt uppladdning",
+	"msu-continue": "Fortsätt ändå",
 	"msu-clean-all": "Rensa lista",
+	"msu-ext-not-allowed": "Endast följande {{PLURAL:$1|filtyp|filtyper}} tillåts:",
+	"msu-upload-this": "Ladda upp denna fil",
 	"msu-upload-all": "Ladda upp alla filer",
-	"msu-dropzone": "Släpp filer här"
+	"msu-dropzone": "Släpp filer här",
+	"msu-comment": "Fil laddades upp med MsUpload"
 }

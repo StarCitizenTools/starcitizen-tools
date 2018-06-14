@@ -7,6 +7,7 @@ use Flow\Exception\WrongNumberArgumentsException;
 use Flow\Model\UUID;
 use Closure;
 use HTML;
+use OOUI\IconWidget;
 use LightnCandy;
 use MWTimestamp;
 use RequestContext;
@@ -31,7 +32,7 @@ class TemplateHelper {
 
 	/**
 	 * @param string $templateDir
-	 * @param boolean $forceRecompile
+	 * @param bool $forceRecompile
 	 */
 	public function __construct( $templateDir, $forceRecompile = false ) {
 		$this->templateDir = $templateDir;
@@ -65,10 +66,10 @@ class TemplateHelper {
 			throw new FlowException( "Malformed \$templateName: $templateName" );
 		}
 
-		return array(
+		return [
 			'template' => "{$this->templateDir}/{$templateName}.handlebars",
 			'compiled' => "{$this->templateDir}/compiled/{$templateName}.handlebars.php",
-		);
+		];
 	}
 
 	/**
@@ -108,9 +109,10 @@ class TemplateHelper {
 
 		/** @var callable $renderer */
 		$renderer = require $filenames['compiled'];
-		return $this->renderers[$templateName] = function( $args, array $scopes = array() ) use ( $templateName, $renderer ) {
+		$this->renderers[$templateName] = function ( $args, array $scopes = [] ) use ( $templateName, $renderer ) {
 			return $renderer( $args, $scopes );
 		};
+		return $this->renderers[$templateName];
 	}
 
 	/**
@@ -119,18 +121,18 @@ class TemplateHelper {
 	 *
 	 * @return string PHP code
 	 */
-	static public function compile( $code, $templateDir ) {
+	public static function compile( $code, $templateDir ) {
 		return LightnCandy::compile(
 			$code,
-			array(
+			[
 				'flags' => LightnCandy::FLAG_ERROR_EXCEPTION
 					| LightnCandy::FLAG_EXTHELPER
 					| LightnCandy::FLAG_SPVARS
 					| LightnCandy::FLAG_HANDLEBARS
 					| LightnCandy::FLAG_RUNTIMEPARTIAL,
-				'basedir' => array( $templateDir ),
-				'fileext' => array( '.partial.handlebars' ),
-				'helpers' => array(
+				'basedir' => [ $templateDir ],
+				'fileext' => [ '.partial.handlebars' ],
+				'helpers' => [
 					'l10n' => 'Flow\TemplateHelper::l10n',
 					'uuidTimestamp' => 'Flow\TemplateHelper::uuidTimestamp',
 					'timestamp' => 'Flow\TemplateHelper::timestampHelper',
@@ -151,15 +153,15 @@ class TemplateHelper {
 					'escapeContent' => 'Flow\TemplateHelper::escapeContent',
 					'enablePatrollingLink' => 'Flow\TemplateHelper::enablePatrollingLink',
 					'oouify' => 'Flow\TemplateHelper::oouify',
-				),
-				'hbhelpers' => array(
+				],
+				'hbhelpers' => [
 					'eachPost' => 'Flow\TemplateHelper::eachPost',
 					'ifAnonymous' => 'Flow\TemplateHelper::ifAnonymous',
 					'ifCond' => 'Flow\TemplateHelper::ifCond',
 					'tooltip' => 'Flow\TemplateHelper::tooltip',
 					'progressiveEnhancement' => 'Flow\TemplateHelper::progressiveEnhancement',
-				),
-			)
+				],
+			]
 		);
 	}
 
@@ -172,7 +174,7 @@ class TemplateHelper {
 	 *
 	 * @return string
 	 */
-	static public function processTemplate( $templateName, $args, array $scopes = array() ) {
+	public static function processTemplate( $templateName, $args, array $scopes = [] ) {
 		// Undesirable, but lightncandy helpers have to be static methods
 		/** @var TemplateHelper $lightncandy */
 		$lightncandy = Container::get( 'lightncandy' );
@@ -196,7 +198,7 @@ class TemplateHelper {
 	 * @return null|string
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function uuidTimestamp( array $args, array $named ) {
+	public static function uuidTimestamp( array $args, array $named ) {
 		if ( count( $args ) !== 1 ) {
 			throw new WrongNumberArgumentsException( $args, 'one' );
 		}
@@ -219,7 +221,7 @@ class TemplateHelper {
 	 * @return string
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function timestampHelper( array $args, array $named ) {
+	public static function timestampHelper( array $args, array $named ) {
 		if ( count( $args ) < 1 || count( $args ) > 2 ) {
 			throw new WrongNumberArgumentsException( $args, 'one', 'two' );
 		}
@@ -230,11 +232,11 @@ class TemplateHelper {
 	}
 
 	/**
-	 * @param integer $timestamp milliseconds since the unix epoch
+	 * @param int $timestamp milliseconds since the unix epoch
 	 *
 	 * @return string|false
 	 */
-	static protected function timestamp( $timestamp ) {
+	protected static function timestamp( $timestamp ) {
 		global $wgLang, $wgUser;
 
 		if ( !$timestamp ) {
@@ -247,12 +249,12 @@ class TemplateHelper {
 
 		return self::html( self::processTemplate(
 			'timestamp',
-			array(
+			[
 				'time_iso' => $timestamp,
 				'time_ago' => $ts->getHumanTimestamp(),
 				'time_readable' => $wgLang->userTimeAndDate( $timestamp, $wgUser ),
-				'guid' => null, //generated client-side
-			)
+				'guid' => null, // generated client-side
+			]
 		) );
 	}
 
@@ -265,8 +267,8 @@ class TemplateHelper {
 	 *
 	 * @return string[] array(html, 'raw')
 	 */
-	static protected function html( $string ) {
-		return array( $string, 'raw' );
+	protected static function html( $string ) {
+		return [ $string, 'raw' ];
 	}
 
 	/**
@@ -275,7 +277,7 @@ class TemplateHelper {
 	 *
 	 * @return string[] array(html, 'raw')
 	 */
-	static public function htmlHelper( array $args, array $named ) {
+	public static function htmlHelper( array $args, array $named ) {
 		return self::html( isset( $args[0] ) ? $args[0] : 'undefined' );
 	}
 
@@ -286,7 +288,7 @@ class TemplateHelper {
 	 * @return string[]
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function block( array $args, array $named ) {
+	public static function block( array $args, array $named ) {
 		if ( !isset( $args[0] ) ) {
 			throw new WrongNumberArgumentsException( $args, 'one' );
 		}
@@ -309,14 +311,14 @@ class TemplateHelper {
 	 * @return null|string HTML
 	 * @throws FlowException When callbacks are not Closure instances
 	 */
-	static public function eachPost( $context, $postIds, $options ) {
+	public static function eachPost( $context, $postIds, $options ) {
 		/** @var callable $inverse */
 		$inverse = isset( $options['inverse'] ) ? $options['inverse'] : null;
 		/** @var callable $fn */
 		$fn = $options['fn'];
 
 		if ( $postIds && !is_array( $postIds ) ) {
-			$postIds = array( $postIds );
+			$postIds = [ $postIds ];
 		} elseif ( count( $postIds ) === 0 ) {
 			// Failure callback, if any
 			if ( !$inverse ) {
@@ -325,7 +327,7 @@ class TemplateHelper {
 			if ( !$inverse instanceof Closure ) {
 				throw new FlowException( 'Invalid inverse callback, expected Closure' );
 			}
-			return $inverse( $options['cx'], array() );
+			return $inverse( $options['cx'], [] );
 		} else {
 			return null;
 		}
@@ -333,7 +335,7 @@ class TemplateHelper {
 		if ( !$fn instanceof Closure ) {
 			throw new FlowException( 'Invalid callback, expected Closure' );
 		}
-		$html = array();
+		$html = [];
 		foreach ( $postIds as $id ) {
 			$revId = $context['posts'][$id][0];
 
@@ -358,15 +360,15 @@ class TemplateHelper {
 	 * @return string[]
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function post( array $args, array $named ) {
+	public static function post( array $args, array $named ) {
 		if ( count( $args ) !== 2 ) {
 			throw new WrongNumberArgumentsException( $args, 'two' );
 		}
 		list( $rootBlock, $revision ) = $args;
-		return self::html( self::processTemplate( 'flow_post', array(
+		return self::html( self::processTemplate( 'flow_post', [
 			'revision' => $revision,
 			'rootBlock' => $rootBlock,
-		) ) );
+		] ) );
 	}
 
 	/**
@@ -376,23 +378,23 @@ class TemplateHelper {
 	 * @return string[]
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function historyTimestamp( array $args, array $named ) {
+	public static function historyTimestamp( array $args, array $named ) {
 		if ( !$args ) {
 			throw new WrongNumberArgumentsException( $args, 'one', 'two' );
 		}
 		$revision = $args[0];
 		$raw = false;
 		$formattedTime = $revision['dateFormats']['timeAndDate'];
-		$linkKeys = array( 'header-revision', 'topic-revision', 'post-revision', 'summary-revision' );
+		$linkKeys = [ 'header-revision', 'topic-revision', 'post-revision', 'summary-revision' ];
 		foreach ( $linkKeys as $linkKey ) {
 			if ( isset( $revision['links'][$linkKey] ) ) {
 				$link = $revision['links'][$linkKey];
 				$formattedTime = Html::element(
 					'a',
-					array(
+					[
 						'href' => $link['url'],
 						'title' => $link['title'],
-					),
+					],
 					$formattedTime
 				);
 				$raw = true;
@@ -404,14 +406,14 @@ class TemplateHelper {
 			$formattedTime = htmlspecialchars( $formattedTime );
 		}
 
-		$class = array( 'mw-changeslist-date' );
+		$class = [ 'mw-changeslist-date' ];
 		if ( $revision['isModeratedNotLocked'] ) {
 			$class[] = 'history-deleted';
 		}
 
 		return self::html(
 			'<span class="plainlinks">'
-			. Html::rawElement( 'span', array( 'class' => $class ), $formattedTime )
+			. Html::rawElement( 'span', [ 'class' => $class ], $formattedTime )
 			. '</span>'
 		);
 	}
@@ -423,7 +425,7 @@ class TemplateHelper {
 	 * @return string[]
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function historyDescription( array $args, array $named ) {
+	public static function historyDescription( array $args, array $named ) {
 		if ( count( $args ) !== 1 ) {
 			throw new WrongNumberArgumentsException( $args, 'one' );
 		}
@@ -435,8 +437,12 @@ class TemplateHelper {
 		$i18nKey = $revision['properties']['_key'];
 		unset( $revision['properties']['_key'] );
 
-		// a variety of the i18n history messages contain wikitext and require ->parse()
-		return self::html( wfMessage( $i18nKey, $revision['properties'] )->parse() );
+		// $revision['properties'] contains the params for the i18n message, which are named,
+		// so we need array_values() to strip the names. They are in the correct order because
+		// RevisionFormatter::getDescriptionParams() uses a foreach loop to build this array
+		// from the i18n-params definition in FlowActions.php.
+		// A variety of the i18n history messages contain wikitext and require ->parse().
+		return self::html( wfMessage( $i18nKey, array_values( $revision['properties'] ) )->parse() );
 	}
 
 	/**
@@ -446,7 +452,7 @@ class TemplateHelper {
 	 * @return string[]
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function showCharacterDifference( array $args, array $named ) {
+	public static function showCharacterDifference( array $args, array $named ) {
 		if ( count( $args ) !== 2 ) {
 			throw new WrongNumberArgumentsException( $args, 'two' );
 		}
@@ -464,7 +470,7 @@ class TemplateHelper {
 	 *
 	 * @return string[]
 	 */
-	static public function progressiveEnhancement( array $options ) {
+	public static function progressiveEnhancement( array $options ) {
 		$fn = $options['fn'];
 		$input = $options['hash'];
 		$insertionType = empty( $input['type'] ) ? 'insert' : htmlspecialchars( $input['type'] );
@@ -491,39 +497,37 @@ class TemplateHelper {
 	 * @param array $named named object for arguments given by handlebars
 	 * @return string Representation of an ooui widget dom
 	 */
-	static public function oouify( array $args, array $named ) {
+	public static function oouify( array $args, array $named ) {
 		$widgetType = $named[ 'type' ];
-		$data = array();
+		$data = [];
 
-		// Parse label
-		if ( isset( $named['label'] ) ) {
-			$label = $named[ 'label' ];
-		}
-		$classes = array();
+		$classes = [];
 		if ( isset( $named['classes'] ) ) {
 			$classes = explode( ' ', $named[ 'classes' ] );
 		}
 
-		if ( empty( $label ) && !empty( $named['l10n'] ) ) {
-			$label = TemplateHelper::l10n( explode( ' ', $named['l10n'] ), array() );
-		}
-
 		// Push raw arguments
 		$data['args'] = $args;
-		$baseConfig = array(
+		$baseConfig = [
 			// 'infusable' => true,
-			'id' => $named[ 'name' ],
+			'id' => isset( $named[ 'name' ] ) ? isset( $named[ 'name' ] ) : null,
 			'classes' => $classes,
 			'data' => $data
-		);
-		switch( $widgetType ) {
+		];
+		switch ( $widgetType ) {
 			case 'BoardDescriptionWidget':
-				$dataArgs = array(
+				$dataArgs = [
 					'infusable' => false,
 					'description' => $args[0],
 					'editLink' => $args[1]
-				);
+				];
 				$widget = new OOUI\BoardDescriptionWidget( $baseConfig + $dataArgs );
+				break;
+			case 'IconWidget':
+				$dataArgs = [
+					'icon' => $args[0],
+				];
+				$widget = new IconWidget( $baseConfig + $dataArgs );
 				break;
 		}
 
@@ -536,7 +540,7 @@ class TemplateHelper {
 	 *
 	 * @return string Message output, using the 'text' format
 	 */
-	static public function l10n( array $args, array $named ) {
+	public static function l10n( array $args, array $named ) {
 		$message = null;
 		$str = array_shift( $args );
 
@@ -548,20 +552,20 @@ class TemplateHelper {
 	 *
 	 * @return string[] HTML
 	 */
-	static public function l10nParse( array $args, array $named ) {
+	public static function l10nParse( array $args, array $named ) {
 		$str = array_shift( $args );
 		return self::html( wfMessage( $str, $args )->parse() );
 	}
 
 	/**
 	 * @param array $args Expects 1 argument:
-	 *	   array $data RevisionDiffViewFormatter::formatApi return value
+	 * 	   array $data RevisionDiffViewFormatter::formatApi return value
 	 * @param array $named No named arguments expected
 	 *
 	 * @return string[] HTML wrapped in array to prevent lightncandy from escaping
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function diffRevision( array $args, array $named ) {
+	public static function diffRevision( array $args, array $named ) {
 		if ( count( $args ) !== 1 ) {
 			throw new WrongNumberArgumentsException( $args, 'one' );
 		}
@@ -582,22 +586,22 @@ class TemplateHelper {
 
 		return self::html( $differenceEngine->addHeader(
 			$data['diff_content'],
-			$renderer( array(
+			$renderer( [
 				'old' => true,
 				'revision' => $data['old'],
 				'links' => $data['links'],
-			) ),
-			$renderer( array(
+			] ),
+			$renderer( [
 				'new' => true,
 				'revision' => $data['new'],
 				'links' => $data['links'],
-			) ),
+			] ),
 			$multi,
 			$notice
 		) );
 	}
 
-	static public function diffUndo( array $args, array $named ) {
+	public static function diffUndo( array $args, array $named ) {
 		if ( count( $args ) !== 1 ) {
 			throw new WrongNumberArgumentsException( $args, 'one' );
 		}
@@ -629,7 +633,7 @@ class TemplateHelper {
 	 * @return string
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function moderationAction( array $args, array $named ) {
+	public static function moderationAction( array $args, array $named ) {
 		if ( count( $args ) !== 2 ) {
 			throw new WrongNumberArgumentsException( $args, 'two' );
 		}
@@ -643,7 +647,7 @@ class TemplateHelper {
 	 *
 	 * @return string all unnamed arguments joined together
 	 */
-	static public function concat( array $args, array $named ) {
+	public static function concat( array $args, array $named ) {
 		return implode( '', $args );
 	}
 
@@ -655,13 +659,13 @@ class TemplateHelper {
 	 *
 	 * @return string value of property
 	 */
-	static public function user( array $args, array $named ) {
+	public static function user( array $args, array $named ) {
 		$feature = isset( $args[0] ) ? $args[0] : 'name';
 		$user = RequestContext::getMain()->getUser();
-		$userInfo = array(
+		$userInfo = [
 			'id' => $user->getId(),
 			'name' => $user->getName(),
-		);
+		];
 
 		return $userInfo[$feature];
 	}
@@ -674,7 +678,7 @@ class TemplateHelper {
 	 * @return mixed result of callback
 	 * @throws FlowException Fails when callbacks are not Closure instances
 	 */
-	static public function ifAnonymous( $options ) {
+	public static function ifAnonymous( $options ) {
 		if ( RequestContext::getMain()->getUser()->isAnon() ) {
 			$fn = $options['fn'];
 			if ( !$fn instanceof Closure ) {
@@ -699,7 +703,7 @@ class TemplateHelper {
 	 *
 	 * @return string modified url
 	 */
-	static protected function addReturnTo( $url ) {
+	protected static function addReturnTo( $url ) {
 		$ctx = RequestContext::getMain();
 		$returnTo = $ctx->getTitle();
 		if ( !$returnTo ) {
@@ -710,9 +714,9 @@ class TemplateHelper {
 
 		unset( $returnToQuery['title'] );
 
-		$args = array(
+		$args = [
 			'returnto' => $returnTo->getPrefixedUrl(),
-		);
+		];
 		if ( $returnToQuery ) {
 			$args['returntoquery'] = wfArrayToCgi( $returnToQuery );
 		}
@@ -728,7 +732,7 @@ class TemplateHelper {
 	 * @return string modified url
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function linkWithReturnTo( array $args, array $named ) {
+	public static function linkWithReturnTo( array $args, array $named ) {
 		if ( count( $args ) !== 1 ) {
 			throw new WrongNumberArgumentsException( $args, 'one' );
 		}
@@ -756,12 +760,12 @@ class TemplateHelper {
 	 * @return string
 	 * @throws WrongNumberArgumentsException
 	 */
-	static public function escapeContent( array $args, array $named ) {
+	public static function escapeContent( array $args, array $named ) {
 		if ( count( $args ) !== 2 ) {
 			throw new WrongNumberArgumentsException( $args, 'two' );
 		}
 		list( $contentType, $content ) = $args;
-		return in_array( $contentType, array( 'html', 'fixed-html', 'topic-title-html' ) ) ? self::html( $content ) : $content;
+		return in_array( $contentType, [ 'html', 'fixed-html', 'topic-title-html' ] ) ? self::html( $content ) : $content;
 	}
 
 	/**
@@ -775,7 +779,7 @@ class TemplateHelper {
 	 * @return mixed result of callback
 	 * @throws FlowException Fails when callbacks are not Closure instances
 	 */
-	static public function ifCond( $value, $operator, $value2, $options ) {
+	public static function ifCond( $value, $operator, $value2, $options ) {
 		$doCallback = false;
 
 		// Perform operator
@@ -818,25 +822,25 @@ class TemplateHelper {
 	 *
 	 * @return string tooltip
 	 */
-	static public function tooltip( $options ) {
+	public static function tooltip( $options ) {
 		$fn = $options['fn'];
 		$params = $options['hash'];
 
 		return (
-			self::processTemplate( 'flow_tooltip', array(
+			self::processTemplate( 'flow_tooltip', [
 				'positionClass' => $params['positionClass'] ? 'flow-ui-tooltip-' . $params['positionClass'] : null,
 				'contextClass' => $params['contextClass'] ? 'mw-ui-' . $params['contextClass'] : null,
 				'extraClass' => $params['extraClass'] ?: '',
 				'blockClass' => $params['isBlock'] ? 'flow-ui-tooltip-block' : null,
 				'content' => $fn(),
-			) )
+			] )
 		);
 	}
 
 	/**
 	 * Adds required resource and protection for patrolling link.
 	 */
-	static public function enablePatrollingLink() {
+	public static function enablePatrollingLink() {
 		$outputPage = RequestContext::getMain()->getOutput();
 
 		$outputPage->preventClickjacking();

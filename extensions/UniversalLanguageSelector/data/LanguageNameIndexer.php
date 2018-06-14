@@ -14,8 +14,8 @@
  *
  * @file
  * @ingroup Extensions
- * @licence GNU General Public Licence 2.0 or later
- * @licence MIT License
+ * @license GPL-2.0-or-later
+ * @license MIT License
  */
 
 $IP = getenv( 'MW_INSTALL_PATH' );
@@ -31,22 +31,91 @@ class LanguageNameIndexer extends Maintenance {
 	}
 
 	public function execute() {
+		global $wgExtraLanguageNames;
+
+		// Avoid local configuration leaking to this script
+		$wgExtraLanguageNames = [];
+
 		$languages = Language::fetchLanguageNames( null, 'all' );
 
 		$buckets = [];
 		foreach ( $languages as $sourceLanguage => $autonym ) {
 			$translations = LanguageNames::getNames( $sourceLanguage, 0, 2 );
+
 			foreach ( $translations as $targetLanguage => $translation ) {
-				$translation = mb_strtolower( $translation );
 				// Remove directionality markers used in Names.php: users are not
 				// going to type these.
 				$translation = str_replace( "\xE2\x80\x8E", '', $translation );
-				$bucket = LanguageNameSearch::getIndex( $translation );
-				$buckets[$bucket][$translation] = $targetLanguage;
+				$translation = mb_strtolower( $translation );
+				$translation = trim( $translation );
+
+				// Clean up "gjermanishte zvicerane (dialekti i alpeve)" to "gjermanishte zvicerane".
+				// The original name is still shown, but avoid us creating entries such as
+				// "(dialekti" or "alpeve)".
+				$basicForm = preg_replace( '/\(.+\)$/', '', $translation );
+				$words = preg_split( '/[\s]+/u', $basicForm, -1, PREG_SPLIT_NO_EMPTY );
+
+				foreach ( $words as $index => $word ) {
+					$bucket = LanguageNameSearch::getIndex( $word );
+
+					$type = 'prefix';
+					$display = $translation;
+					if ( $index > 0 && count( $words ) > 1 ) {
+						$type = 'infix';
+						$display = "$word — $translation";
+					}
+					$buckets[$bucket][$type][$display] = $targetLanguage;
+				}
 			}
 		}
 
-		$lengths = array_values( array_map( 'count', $buckets ) );
+		// Some languages don't have a conveniently searchable name in CLDR.
+		// For example, the name of Western Punjabi doesn't start with
+		// the string "punjabi" in any language, so it cannot be found
+		// by people who search in English.
+		// To resolve this, some languages are added here locally.
+		$specialLanguages = [
+			// Catalan, sometimes searched as "Valencià"
+			'ca' => [ 'valencia' ],
+			// Spanish, the transliteration of the autonym is often used for searching
+			'es' => [ 'castellano' ],
+			// Armenian, the transliteration of the autonym is often used for searching
+			'hy' => [ 'hayeren' ],
+			// Georgian, the transliteration of the autonym is often used for searching
+			'ka' => [ 'kartuli', 'qartuli' ],
+			// Japanese, the transliteration of the autonym is often used for searching
+			'ja' => [ 'nihongo', 'にほんご' ],
+			// Western Punjabi, doesn't start with the word "Punjabi" in any language
+			'pnb' => [ 'punjabi western' ],
+			// Simplified and Traditional Chinese, because zh-hans and zh-hant
+			// are not mapped to any English name
+			'zh-hans' => [ 'chinese simplified' ],
+			'zh-hant' => [ 'chinese traditional' ],
+		];
+
+		foreach ( $specialLanguages as $targetLanguage => $translations ) {
+			foreach ( $translations as $translation ) {
+				$bucket = LanguageNameSearch::getIndex( $translation );
+				$buckets[$bucket]['prefix'][$translation] = $targetLanguage;
+			}
+		}
+
+		$lengths = [];
+		// Sorting the bucket contents gives two benefits:
+		// - more consistent output across environments
+		// - shortest matches appear first, especially exact matches
+		// Sort buckets by index
+		ksort( $buckets );
+		foreach ( $buckets as $index => &$bucketTypes ) {
+			$lengths[] = array_sum( array_map( 'count', $bucketTypes ) );
+			// Ensure 'prefix' is before 'infix';
+			krsort( $bucketTypes );
+			// Ensure each bucket has entries sorted
+			foreach ( $bucketTypes as $type => &$bucket ) {
+				ksort( $bucket );
+			}
+		}
+
 		$count = count( $buckets );
 		$min = min( $lengths );
 		$max = max( $lengths );
@@ -69,7 +138,6 @@ class LanguageNameSearchData {
 
 PHP;
 
-		ksort( $buckets );
 		// Format for short array format
 		$data = var_export( $buckets, true );
 		$data = str_replace( "array (", '[', $data );

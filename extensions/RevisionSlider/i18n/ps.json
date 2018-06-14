@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"Macofe",
+			"Baloch Khan"
+		]
+	},
+	"revisionslider-toggle-label": "ياداښت ولټوي",
+	"revisionslider-label-date": "نېټه",
+	"revisionslider-label-page-size": "مخ کچه",
+	"revisionslider-label-change-size": "کچه بدلول",
+	"revisionslider-label-comment": "تبصره",
+	"revisionslider-label-username": "{{GENDER:$1|کارن نوم}}",
+	"revisionslider-minoredit": "دا يو وړوکی سمون دی",
+	"revisionslider-show-help-tooltip": "لارښود متن ښکاره کول",
+	"revisionslider-next-dialog": "راتلونکی",
+	"revisionslider-close-dialog": "تړل"
+}

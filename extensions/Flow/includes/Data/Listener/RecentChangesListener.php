@@ -9,6 +9,7 @@ use Flow\Formatter\IRCLineUrlFormatter;
 use Flow\Model\AbstractRevision;
 use Flow\Model\Workflow;
 use Flow\Repository\UserNameBatch;
+use RecentChange;
 
 /**
  * Inserts mw recentchange rows for flow AbstractRevision instances.
@@ -41,7 +42,7 @@ class RecentChangesListener extends AbstractListener {
 	/**
 	 * @param FlowActions $actions
 	 * @param UserNameBatch $usernames
-	 * @param RecentChangeFactory $rcFactory Creates mw RecentChange instances
+	 * @param RecentChangeFactory $rcFactory
 	 * @param IRCLineUrlFormatter $ircFormatter
 	 */
 	public function __construct(
@@ -57,7 +58,7 @@ class RecentChangesListener extends AbstractListener {
 	}
 
 	/**
-	 * @param AbstractRevision $revision Revision object
+	 * @param AbstractRevision $revision
 	 * @param array $row Revision row
 	 * @param array $metadata
 	 */
@@ -81,34 +82,37 @@ class RecentChangesListener extends AbstractListener {
 		}
 
 		$title = $this->getRcTitle( $workflow, $revision->getChangeType() );
-		$attribs = array(
+		$attribs = [
 			'rc_namespace' => $title->getNamespace(),
 			'rc_title' => $title->getDBkey(),
 			'rc_user' => $row['rev_user_id'],
-			'rc_user_text' => $this->usernames->get( wfWikiId(), $row['rev_user_id'], $row['rev_user_ip'] ),
+			'rc_user_text' => $this->usernames->get( wfWikiID(), $row['rev_user_id'], $row['rev_user_ip'] ),
 			'rc_type' => RC_FLOW,
 			'rc_source' => self::SRC_FLOW,
 			'rc_minor' => 0,
 			'rc_bot' => 0, // TODO: is revision by bot
-			'rc_patrolled' => $user->isAllowed( 'autopatrol' ) ? 1 : 0,
+			'rc_new' => 0,
+			'rc_patrolled' => $user->isAllowed( 'autopatrol' ) ? RecentChange::PRC_AUTOPATROLLED : RecentChange::PRC_UNPATROLLED,
 			'rc_old_len' => $revision->getPreviousContentLength(),
 			'rc_new_len' => $revision->getContentLength(),
 			'rc_this_oldid' => 0,
 			'rc_last_oldid' => 0,
 			'rc_log_type' => null,
-			'rc_params' => serialize( array(
-				'flow-workflow-change' => array(
+			'rc_params' => serialize( [
+				'flow-workflow-change' => [
 					'action' => $action,
 					'revision_type' => get_class( $revision ),
 					'revision' => $revisionId,
 					'workflow' => $workflow->getId()->getAlphadecimal(),
-				),
-			) ),
+				],
+			] ),
 			'rc_cur_id' => 0,
 			'rc_comment' => '',
+			'rc_comment_text' => '',
+			'rc_comment_data' => null,
 			'rc_timestamp' => $timestamp,
 			'rc_deleted' => 0,
-		);
+		];
 
 		$rc = $this->rcFactory->newFromRow( (object)$attribs );
 		$rc->save( /* $noudp = */ true );  // Insert into db
@@ -119,9 +123,9 @@ class RecentChangesListener extends AbstractListener {
 			$feeds[$name]['formatter'] = $this->ircFormatter;
 		}
 		// pre-load the irc formatter which will be triggered via hook
-		$this->ircFormatter->associate( $rc, array(
+		$this->ircFormatter->associate( $rc, [
 			'revision' => $revision
-		) + $metadata );
+		] + $metadata );
 		// run the feeds/irc/etc external notifications
 		$rc->notifyRCFeeds( $feeds );
 	}
@@ -150,6 +154,6 @@ class RecentChangesListener extends AbstractListener {
 			$allowed = $allowed( $revision, $this );
 		}
 
-		return (bool) $allowed;
+		return (bool)$allowed;
 	}
 }

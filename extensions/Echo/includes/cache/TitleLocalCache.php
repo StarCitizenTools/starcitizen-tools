@@ -23,7 +23,7 @@ class EchoTitleLocalCache extends EchoLocalCache {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	protected function resolve() {
 		if ( $this->lookups ) {
@@ -31,7 +31,7 @@ class EchoTitleLocalCache extends EchoLocalCache {
 			foreach ( $titles as $title ) {
 				$this->targets->set( $title->getArticleId(), $title );
 			}
-			$this->lookups = array();
+			$this->lookups = [];
 		}
 	}
 

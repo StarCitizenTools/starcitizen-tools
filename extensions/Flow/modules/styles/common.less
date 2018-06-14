@@ -1,6 +1,5 @@
 @import 'mediawiki.mixins';
 @import 'flow.colors';
-@import 'flow.helpers';
 @import 'flow.variables';
 
 .flow-component {
@@ -10,15 +9,9 @@
 		padding: 0;
 
 		li:hover {
-			background: #eee;
+			background: @colorGray14;
 		}
 	}
-}
-
-// Keep a fixed spacing between each individual flow section
-.flow-newtopic-form,
-.flow-topics-bar {
-	padding-top: 1.5em;
 }
 
 // board navigation
@@ -26,11 +19,14 @@
 // The whole board content wrapper
 .flow-board {
 	.box-sizing( border-box );
-	font-size: .875em;
+	font-size: 0.875em;
 	width: 100%;
 	padding-left: 0;
 	padding-top: 0;
-	padding-right: 20px;
+
+	@media all and ( min-width: @medium ) {
+		padding-right: 20px;
+	}
 }
 
 .flow-board {
@@ -41,6 +37,17 @@
 	.flow-board-navigation,
 	.flow-board {
 		max-width: 700px;
+	}
+
+	.flow-board-newtopic {
+		.flow-newtopic-form {
+			padding-top: 1.5em;
+			// Join inputs together
+			> .mw-ui-input {
+				border-bottom-left-radius: 0;
+				border-bottom-right-radius: 0;
+			}
+		}
 	}
 }
 
@@ -58,8 +65,8 @@
 
 // Revision view
 .flow-revision-content {
-	background: none repeat scroll 0 0 #EDEDED;
-	color: #777777;
+	background-color: @colorGray14;
+	color: @colorGray7;
 	margin-top: 20px;
 	padding: 10px;
 }
@@ -68,15 +75,15 @@
 .flow-no-more,
 // "Undo" moderation link
 .flow-undo {
-	font-size: .875em;
-	color: #777777;
+	font-size: 0.875em;
+	color: @colorGray7;
 	// These two will flip in RTL interface
 	text-align: left;
 	direction: ltr;
 }
 
 .flow-topic-meta {
-	font-size: .875em;
+	font-size: 0.875em;
 }
 
 // Decorate as a pipelist, ex: (foo | bar | baz)
@@ -97,7 +104,14 @@
 	height: 100px;
 }
 
-@media all and (min-width: @small) {
+// Override OOUI's frameless-buttons having
+// a white border inside the description area
+// (which has a grey background)
+.flow-ui-boardDescriptionWidget-editButton.oo-ui-widget.oo-ui-buttonElement .oo-ui-buttonElement-button {
+	border-color: transparent;
+}
+
+@media all and ( min-width: @small ) {
 	.flow-topic-meta {
 		font-size: 1em;
 	}
@@ -114,16 +128,17 @@
 	}
 }
 
-@media all and (min-width: @medium) {
+@media all and ( min-width: @medium ) {
 	.flow-component.flow-board-page {
 		.flow-board-header {
 			padding-left: 10px;
+			padding-right: 10px;
 			float: right;
 			width: 34%;
 			min-height: 70vh;
 			box-sizing: border-box;
-			background-color: @colorGrayLightest;
-			box-shadow: -2px 0 0 0 rgba(0,0,0,0.10);
+			background-color: @colorGray14;
+			box-shadow: -2px 0 0 0 rgba( 0, 0, 0, 0.1 );
 
 			.flow-board-header-title {
 				display: block;
@@ -131,9 +146,7 @@
 
 			.side-rail-toggle-button {
 				visibility: visible;
-			}
 
-			.side-rail-toggle-button {
 				.collapse-button {
 					display: block;
 				}
@@ -156,12 +169,25 @@
 	}
 
 	.flow-component.flow-board-page.flow-full-height-side-rail {
-		overflow: hidden;
+		position: relative;
 		.flow-board-header {
-			// this is a hack to make sure the side rail always
-			// stretches all the way to the bottom of the page
-			padding-bottom: 9999999px;
-			margin-bottom: -9999999px;
+			position: static;
+			/* background and box-shadow are moved to :before for full height */
+			background: transparent;
+			box-shadow: none;
+		}
+		.flow-board-header:before {
+			content: '';
+			display: block;
+			position: absolute;
+			height: 100%;
+			top: 0;
+			right: 0;
+			z-index: -1;
+			width: 34%;
+			box-sizing: border-box;
+			background-color: @colorGray14;
+			box-shadow: -2px 0 0 0 rgba( 0, 0, 0, 0.1 );
 		}
 	}
 
@@ -187,10 +213,15 @@
 
 			.flow-board-header-title,
 			.flow-board-header-detail-view,
+			.flow-board-header-restricted,
 			.flow-ui-boardDescriptionWidget,
 			.flow-board-header-footer {
 				display: none;
 			}
+		}
+
+		.flow-board-header:before {
+			width: 30px;
 		}
 
 		.flow-board-navigation,
@@ -218,7 +249,8 @@
 .flow-board-header-footer {
 	margin-top: 2em;
 	font-size: 0.85em;
-	@media (min-width: @medium) {
+
+	@media ( min-width: @medium ) {
 		margin-top: 6em;
 	}
 }
@@ -236,9 +268,9 @@
 	> section {
 		display: inline;
 
-		&:not(:first-of-type) > li {
+		&:not( :first-of-type ) > li {
 			&:first-of-type {
-				border-top: 0px;
+				border-top: 0;
 
 				&:before {
 					content: '(';
@@ -260,12 +292,14 @@
 
 // vector theme overrides
 // makes the layout more compact on Talk (ns-1) and User_Talk (ns-3)
+/* stylelint-disable selector-max-id */
 body.ns-1,
 body.ns-3 {
 	div#content.mw-body {
-		margin-right: 0;
-		padding-right: 0;
-		padding-bottom: 0;
+		@media all and ( min-width: @medium ) {
+			padding-right: 0;
+			padding-bottom: 0;
+		}
 
 		h1.firstHeading {
 			margin-bottom: 0;
@@ -276,15 +310,30 @@ body.ns-3 {
 		}
 	}
 }
+/* stylelint-enable selector-max-id */
 
-span.mw-ui-icon {
-	opacity: 0.7;
-}
+@mw-ui-icon-size-flow: ( 20em / 14 );
 
-span.mw-ui-icon.mw-ui-icon-before:before {
-	margin-right: 0.1em;
-}
+.flow-component .mw-ui-icon {
+	opacity: 0.87; // equals `#222` on background-color `#fff`
+	min-width: @mw-ui-icon-size-flow;
+	min-height: @mw-ui-icon-size-flow;
 
-span.mw-ui-icon.mw-ui-icon-before:after {
-	margin-left: 0.1em;
+	&.mw-ui-icon-before:before {
+		width: @mw-ui-icon-size-flow;
+		min-height: @mw-ui-icon-size-flow;
+		margin-right: 0.5em;
+	}
+
+	&.mw-ui-icon-before:after {
+		margin-left: 0.5em;
+	}
+
+	&.mw-ui-icon-before.mw-ui-icon-only:before {
+		margin-right: 0;
+	}
+
+	&.mw-ui-icon-before.mw-ui-icon-only:after {
+		margin-left: 0;
+	}
 }

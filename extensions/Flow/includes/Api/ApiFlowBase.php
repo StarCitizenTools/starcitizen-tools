@@ -3,22 +3,30 @@
 namespace Flow\Api;
 
 use ApiBase;
+use ApiMessage;
 use Flow\Block\Block;
 use Flow\Container;
 use Flow\Model\AbstractRevision;
 use Flow\WorkflowLoader;
 use Flow\WorkflowLoaderFactory;
+use Status;
 use Title;
 
 abstract class ApiFlowBase extends ApiBase {
 
-	/** @var WorkflowLoader $loader */
+	/**
+	 * @var WorkflowLoader
+	 */
 	protected $loader;
 
-	/** @var Title $page */
+	/**
+	 * @var Title
+	 */
 	protected $page;
 
-	/** @var ApiFlow $apiFlow */
+	/**
+	 * @var ApiFlow
+	 */
 	protected $apiFlow;
 
 	/**
@@ -54,7 +62,7 @@ abstract class ApiFlowBase extends ApiBase {
 		$this->page = $page;
 	}
 
-	/*
+	/**
 	 * Return the name of the flow action
 	 * @return string
 	 */
@@ -65,7 +73,7 @@ abstract class ApiFlowBase extends ApiBase {
 	 */
 	protected function getLoader() {
 		if ( $this->loader === null ) {
- 			/** @var WorkflowLoaderFactory $factory */
+			/** @var WorkflowLoaderFactory $factory */
 			$factory = Container::get( 'factory.loader.workflow' );
 			$this->loader = $factory->createWorkflowLoader( $this->page );
 		}
@@ -78,18 +86,18 @@ abstract class ApiFlowBase extends ApiBase {
 	 * @return string[]
 	 */
 	protected function getModerationStates( $addAliases = true ) {
-		$states = array(
+		$states = [
 			AbstractRevision::MODERATED_NONE,
 			AbstractRevision::MODERATED_DELETED,
 			AbstractRevision::MODERATED_HIDDEN,
 			AbstractRevision::MODERATED_SUPPRESSED,
-		);
+		];
 
 		if ( $addAliases ) {
 			// aliases for AbstractRevision::MODERATED_NONE
-			$states = array_merge( $states, array(
+			$states = array_merge( $states, [
 				'restore', 'unhide', 'undelete', 'unsuppress',
-			) );
+			] );
 		}
 
 		return $states;
@@ -97,47 +105,22 @@ abstract class ApiFlowBase extends ApiBase {
 
 	/**
 	 * Kill the request if errors were encountered.
-	 * Only the first error will be output:
-	 * * dieUsage only outputs one error - we could add more as $extraData, but
-	 *   that would mean we'd have to check for flow-specific errors differently
-	 * * most of our code just quits on the first error that's encountered, so
-	 *   outputting all encountered errors might still not cover everything
-	 *   that's wrong with the request
 	 *
 	 * @param Block[] $blocks
 	 */
 	protected function processError( $blocks ) {
-		foreach( $blocks as $block ) {
+		$status = Status::newGood();
+		foreach ( $blocks as $block ) {
 			if ( $block->hasErrors() ) {
-				$errors = $block->getErrors();
-
-				// API localization is not implemented fully yet.
-				// See https://www.mediawiki.org/wiki/API:Localisation#Errors_and_warnings and T37074
-				// We probably really want to use brief messages with ->text() (like dieUsageMsg).
-				//
-				// But we can't use ->text() with all these messages (though I changed
-				// the Flow messages to support this).  Ones provided by core or extensions are often
-				// long-form and use wikitext.
-				//
-				// The standard mechanism to deal with that is dieUsageMsg, but that is English-only,
-				// so we can't use it until that's solved.  That means we have to use the long-form HTML
-				// rendering, and clients need to support that.
-				//
-				// Also, it would be nice to use dieBlocked to provide detailed block information, but
-				// that is also English-only.
-				foreach( $errors as $key ) {
-					$this->dieUsage(
-						$block->getErrorMessage( $key )->parse(),
-						$key,
-						200,
-						// additional info for this message (e.g. to be used to
-						// enable recovery from error, like returning the most
-						// recent revision ID to re-submit content in the case
-						// of edit conflict)
-						array( $key => $block->getErrorExtra( $key ) )
-					);
+				foreach ( $block->getErrors() as $key ) {
+					$status->fatal( ApiMessage::create(
+						$block->getErrorMessage( $key ), $key, [ $key => $block->getErrorExtra( $key ) ]
+					) );
 				}
 			}
+		}
+		if ( !$status->isGood() ) {
+			$this->dieStatus( $status );
 		}
 	}
 
@@ -156,30 +139,23 @@ abstract class ApiFlowBase extends ApiBase {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getHelpUrls() {
-		return array(
+		return [
 			'https://www.mediawiki.org/wiki/Extension:Flow/API#' . $this->getAction(),
-		);
+		];
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function needsToken() {
 		return 'csrf';
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public function getTokenSalt() {
-		return '';
-	}
-
-	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getParent() {
 		return $this->apiFlow;

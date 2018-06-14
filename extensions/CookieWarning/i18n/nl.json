@@ -1,9 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sjoerddebruin"
+			"Sjoerddebruin",
+			"Mainframe98"
 		]
 	},
+	"cookiewarning-info": "Cookies helpen ons onze services aan te bieden. Door onze services te gebruiken stemt u in met het gebruik van onze cookies.",
+	"cookiewarning-desc": "Laat een melding boven aan de pagina zien over cookies",
 	"cookiewarning-moreinfo-label": "Meer informatie",
 	"cookiewarning-ok-label": "OK"
 }

@@ -102,7 +102,7 @@ class ListMode {
 				$this->sHeadingEnd   = '</'.$listmode.'>';
 				break;
 			case 'userformat':
-				list($this->sListStart, $this->sItemStart, $this->sItemEnd, $this->sListEnd) = $listseparators;
+				list($this->sListStart, $this->sItemStart, $this->sItemEnd, $this->sListEnd) = array_pad($listseparators, 4, null);
 				$this->sInline = $inlinetext;
 				break;
 		}

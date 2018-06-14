@@ -69,7 +69,7 @@ class Parameters extends ParametersData {
 		if (array_key_exists('permission', $parameterData)) {
 			global $wgUser;
 			if (!$wgUser->isAllowed($parameterData['permission'])) {
-				throw new PermissionsError($parameterData['permission']);
+				throw new \PermissionsError($parameterData['permission']);
 				return;
 			}
 		}
@@ -123,11 +123,23 @@ class Parameters extends ParametersData {
 
 			//Timestamps
 			if (array_key_exists('timestamp', $parameterData) && $parameterData['timestamp'] === true) {
-				$option = str_pad(preg_replace('#[^0-9]#', '', $option), 14, '0');
-				$option = wfTimestamp(TS_MW, $option);
+				$option = strtolower($option);
+				switch ($option) {
+					case 'today':
+					case 'last hour':
+					case 'last day':
+					case 'last week':
+					case 'last month':
+					case 'last year':
+						break;
+					default:
+						$option = str_pad(preg_replace('#[^0-9]#', '', $option), 14, '0');
+						$option = wfTimestamp(TS_MW, $option);
 
-				if ($option === false) {
-					$success = false;
+						if ($option === false) {
+							$success = false;
+						}
+						break;
 				}
 			}
 
@@ -188,7 +200,7 @@ class Parameters extends ParametersData {
 	 * @param	array	Unsorted Parameters
 	 * @return	array	Sorted Parameters
 	 */
-	public function sortByPriority($parameters) {
+	static public function sortByPriority($parameters) {
 		if (!is_array($parameters)) {
 			throw new \MWException(__METHOD__.': A non-array was passed.');
 		}
@@ -199,19 +211,23 @@ class Parameters extends ParametersData {
 			'openreferences'	=> 2,
 			'ignorecase'		=> 3,
 			'category'			=> 4,
-			'goal'				=> 5,
-			'ordercollation'	=> 6,
-			'ordermethod'		=> 7,
-			'includepage'		=> 8,
-			'include'			=> 9
+			'title'				=> 5,
+			'goal'				=> 6,
+			'ordercollation'	=> 7,
+			'ordermethod'		=> 8,
+			'includepage'		=> 9,
+			'include'			=> 10
 		];
-		$_first = array_intersect_key($parameters, $priority);
-		if (count($_first)) {
-			foreach ($_first as $key => $value) {
-				unset($parameters[$key]);
+
+		$_first = [];
+		foreach ($priority as $parameter => $order) {
+			if (isset($parameters[$parameter])) {
+				$_first[$parameter] = $parameters[$parameter];
+				unset($parameters[$parameter]);
 			}
-			$parameters = array_merge($_first, $parameters);
 		}
+		$parameters = $_first + $parameters;
+
 		return $parameters;
 	}
 
@@ -313,7 +329,7 @@ class Parameters extends ParametersData {
 	 * @return	array	Parameter => Options
 	 */
 	public function getAllParameters() {
-		return $this->parameterOptions;
+		return self::sortByPriority($this->parameterOptions);
 	}
 
 	/**
@@ -369,6 +385,34 @@ class Parameters extends ParametersData {
 		}
 
 		return $list;
+	}
+
+	/**
+	 * Check if a regular expression is valid.
+	 *
+	 * @access	private
+	 * @param	mixed	Regular Expression(s) in an array or a single expression in a string.
+	 * @param	boolean	Is this a database REGEXP?
+	 * @return	boolean
+	 */
+	private function isRegexValid($regexes, $forDb = false) {
+		if (!is_array($regexes)) {
+			$regexes = [$regexes];
+		}
+
+		foreach ($regexes as $regex) {
+			if (empty(trim($regex))) {
+				continue;
+			}
+			if ($forDb) {
+				$regex = '#'.str_replace('#', '\#', $regex).'#';
+			}
+			if (@preg_match($regex, null) === false) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -452,10 +496,10 @@ class Parameters extends ParametersData {
 			}
 			$this->setParameter('category', $data);
 			if ($heading) {
-				$this->setParameter('catheadings', array_unique(array_merge($this->getParameter('catheadings'), $categories)));
+				$this->setParameter('catheadings', array_unique(array_merge((is_array($this->getParameter('catheadings')) ? $this->getParameter('catheadings') : []), $categories)));
 			}
 			if ($notHeading) {
-				$this->setParameter('catnotheadings', array_unique(array_merge($this->getParameter('catnotheadings'), $categories)));
+				$this->setParameter('catnotheadings', array_unique(array_merge((is_array($this->getParameter('catnotheadings')) ? $this->getParameter('catnotheadings') : []), $categories)));
 			}
 			$this->setOpenReferencesConflict(true);
 			return true;
@@ -471,6 +515,10 @@ class Parameters extends ParametersData {
 	 * @return	boolean	Success
 	 */
 	public function _categoryregexp($option) {
+		if (!$this->isRegexValid($option, true)) {
+			return false;
+		}
+
 		$data = $this->getParameter('category');
 		//REGEXP input only supports AND operator.
 		$data['REGEXP']['AND'][] = [$option]; //Wrapped in an array since the category Query handler expects an array.
@@ -496,7 +544,7 @@ class Parameters extends ParametersData {
 		}
 
 		$data = $this->getParameter('category');
-		if (!is_array($data['LIKE'][$operator])) {
+		if (isset($data['LIKE']) && !is_array($data['LIKE'][$operator])) {
 			$data['LIKE'][$operator] = [];
 		}
 
@@ -533,6 +581,10 @@ class Parameters extends ParametersData {
 	 * @return	boolean	Success
 	 */
 	public function _notcategoryregexp($option) {
+		if (!$this->isRegexValid($option, true)) {
+			return false;
+		}
+
 		$data = $this->getParameter('notcategory');
 		$data['regexp'][] = $option;
 		$this->setParameter('notcategory', $data);
@@ -781,7 +833,6 @@ class Parameters extends ParametersData {
 			$this->setParameter('namespace', $data);
 
 			$this->setParameter('mode', 'userformat');
-			$this->setParameter('ordermethod', []);
 			$this->setSelectionCriteriaFound(true);
 			$this->setOpenReferencesConflict(true);
 			return true;
@@ -802,6 +853,11 @@ class Parameters extends ParametersData {
 			$data['regexp'] = [];
 		}
 		$newMatches = explode('|', str_replace(' ', '\_', $option));
+
+		if (!$this->isRegexValid($newMatches, true)) {
+			return false;
+		}
+
 		$data['regexp'] = array_merge($data['regexp'], $newMatches);
 		$this->setParameter('title', $data);
 		$this->setSelectionCriteriaFound(true);
@@ -841,6 +897,11 @@ class Parameters extends ParametersData {
 		}
 		$newMatches = explode('|', str_replace(' ', '\_', $option));
 		$data['regexp'] = array_merge($data['regexp'], $newMatches);
+
+		if (!$this->isRegexValid($newMatches, true)) {
+			return false;
+		}
+
 		$this->setParameter('nottitle', $data);
 		$this->setSelectionCriteriaFound(true);
 		return true;
@@ -975,7 +1036,13 @@ class Parameters extends ParametersData {
 	 * @return	boolean	Success
 	 */
 	public function _includematch($option) {
-		$this->setParameter('seclabelsmatch', explode(',', $option));
+		$regexes = explode(',', $option);
+
+		if (!$this->isRegexValid($regexes)) {
+			return false;
+		}
+
+		$this->setParameter('seclabelsmatch', $regexes);
 		return true;
 	}
 
@@ -987,8 +1054,14 @@ class Parameters extends ParametersData {
 	 * @return	boolean	Success
 	 */
 	public function _includematchparsed($option) {
+		$regexes = explode(',', $option);
+
+		if (!$this->isRegexValid($regexes)) {
+			return false;
+		}
+
 		$this->setParameter('incparsed', true);
-		$this->setParameter('seclabelsmatch', explode(',', $option));
+		$this->setParameter('seclabelsmatch', $regexes);
 		return true;
 	}
 
@@ -1000,7 +1073,13 @@ class Parameters extends ParametersData {
 	 * @return	boolean	Success
 	 */
 	public function _includenotmatch($option) {
-		$this->setParameter('seclabelsnotmatch', explode(',', $option));
+		$regexes = explode(',', $option);
+
+		if (!$this->isRegexValid($regexes)) {
+			return false;
+		}
+
+		$this->setParameter('seclabelsnotmatch', $regexes);
 		return true;
 	}
 
@@ -1012,8 +1091,14 @@ class Parameters extends ParametersData {
 	 * @return	boolean	Success
 	 */
 	public function _includenotmatchparsed($option) {
+		$regexes = explode(',', $option);
+
+		if (!$this->isRegexValid($regexes)) {
+			return false;
+		}
+
 		$this->setParameter('incparsed', true);
-		$this->setParameter('seclabelsnotmatch', explode(',', $option));
+		$this->setParameter('seclabelsnotmatch', $regexes);
 		return true;
 	}
 

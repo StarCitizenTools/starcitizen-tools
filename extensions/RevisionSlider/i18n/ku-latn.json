@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"George Animal",
+			"Macofe",
+			"Ghybu"
+		]
+	},
+	"revisionslider-toggle-label": "Li dîroka rûpelê bigere",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte|bayt}}",
+	"revisionslider-label-date": "Dem",
+	"revisionslider-label-page-size": "Mezinahiya rûpelê",
+	"revisionslider-label-change-size": "Mezinahiya guherandinê",
+	"revisionslider-label-comment": "Şîrove",
+	"revisionslider-label-username": "{{GENDER:$1|Navê bikarhêner}}",
+	"revisionslider-minoredit": "Ev guhertineke biçûk e",
+	"revisionslider-arrow-tooltip-newer": "Revîzyonên nûtir bibîne",
+	"revisionslider-arrow-tooltip-older": "Revîzyonên kevntir bibîne",
+	"revisionslider-next-dialog": "Pêşve",
+	"revisionslider-close-dialog": "Bigre"
+}

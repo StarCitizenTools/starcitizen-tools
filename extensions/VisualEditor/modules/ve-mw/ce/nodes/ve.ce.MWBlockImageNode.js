@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWBlockImageNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,67 +16,61 @@
  * @param {ve.dm.MWBlockImageNode} model Model to observe
  * @param {Object} [config] Configuration options
  */
-ve.ce.MWBlockImageNode = function VeCeMWBlockImageNode( model, config ) {
-	var type, align, isError;
+ve.ce.MWBlockImageNode = function VeCeMWBlockImageNode() {
+	var type, isError, $image, $focusable;
 
 	// Parent constructor
-	ve.ce.BranchNode.call( this, model, config );
+	ve.ce.MWBlockImageNode.super.apply( this, arguments );
 
 	type = this.model.getAttribute( 'type' );
-	align = this.model.getAttribute( 'align' );
 	isError = this.model.getAttribute( 'isError' );
 
-	// Properties
-	this.captionVisible = false;
-	this.typeToRdfa = this.getTypeToRdfa();
-
-	// DOM Hierarchy for BlockImageNode:
+	// DOM Hierarchy for MWBlockImageNode:
 	//   <figure> this.$element (ve-ce-mwBlockImageNode-{type})
 	//     <a> this.$a
 	//       <img> this.$image
-	//     <figcaption> this.caption.view.$element
+	//     <figcaption> ve.ce.MWImageCaptionNode
 
 	// Build DOM:
-	this.$image = $( '<img>' )
-		.attr( 'src', this.getResolvedAttribute( 'src' ) );
-
 	if ( isError ) {
+		$image = $( [] );
 		this.$a = $( '<a>' )
 			.addClass( 'new' )
 			.text( this.model.getFilename() );
+		$focusable = this.$a;
 	} else {
+		$image = $( '<img>' )
+			.attr( 'src', this.getResolvedAttribute( 'src' ) );
 		this.$a = $( '<a>' )
 			.addClass( 'image' )
 			.attr( 'href', this.getResolvedAttribute( 'href' ) )
-			.append( this.$image );
+			.append( $image );
+		$focusable = $image;
 	}
 
 	this.$element
-		.append( this.$a )
+		.prepend( this.$a )
 		// The following classes can be used here:
 		// ve-ce-mwBlockImageNode-type-thumb
 		// ve-ce-mwBlockImageNode-type-frame
 		// ve-ce-mwBlockImageNode-type-frameless
-		// ve-ce-mwBlockImageNode-type-border
 		// ve-ce-mwBlockImageNode-type-none
 		.addClass( 've-ce-mwBlockImageNode ve-ce-mwBlockImageNode-type-' + type )
 		// 'typeof' should appear with the proper Parsoid-generated
 		// type. The model deals with converting it
-		.attr( 'typeof', this.typeToRdfa[ type ] );
-
-	this.updateCaption();
-
-	this.updateSize();
+		.attr( 'typeof', this.model.getRdfa() );
 
 	// Mixin constructors
-	ve.ce.MWImageNode.call( this, this.$element, this.$image );
+	ve.ce.MWImageNode.call( this, $focusable, $image );
+
+	this.updateSize();
 };
 
 /* Inheritance */
 
 OO.inheritClass( ve.ce.MWBlockImageNode, ve.ce.BranchNode );
 
-// Need to mixin base class as well
+// Need to mixin base class as well (T92540)
 OO.mixinClass( ve.ce.MWBlockImageNode, ve.ce.GeneratedContentNode );
 
 OO.mixinClass( ve.ce.MWBlockImageNode, ve.ce.MWImageNode );
@@ -92,7 +86,7 @@ ve.ce.MWBlockImageNode.static.renderHtmlAttributes = false;
 ve.ce.MWBlockImageNode.static.transition = false;
 
 ve.ce.MWBlockImageNode.static.cssClasses = {
-	default: {
+	'default': {
 		left: 'mw-halign-left',
 		right: 'mw-halign-right',
 		center: 'mw-halign-center',
@@ -107,53 +101,6 @@ ve.ce.MWBlockImageNode.static.cssClasses = {
 };
 
 /* Methods */
-
-/**
- * Set up an object that converts from the type to rdfa, based
- *  on the rdfaToType object in the model.
- *
- * @return {Object.<string,string>} A type to Rdfa conversion object
- */
-ve.ce.MWBlockImageNode.prototype.getTypeToRdfa = function () {
-	var rdfa, obj = {};
-
-	for ( rdfa in this.model.constructor.static.rdfaToType ) {
-		obj[ this.model.constructor.static.rdfaToType[ rdfa ] ] = rdfa;
-	}
-	return obj;
-};
-
-/**
- * Update the caption based on the current model state
- */
-ve.ce.MWBlockImageNode.prototype.updateCaption = function () {
-	var model, view,
-		type = this.model.getAttribute( 'type' );
-
-	this.captionVisible = type !== 'none' &&
-		type !== 'frameless' &&
-		type !== 'border' &&
-		this.model.children.length === 1;
-
-	if ( this.captionVisible ) {
-		// Only create a caption if we need it
-		if ( !this.$caption ) {
-			model = this.model.children[ 0 ];
-			view = ve.ce.nodeFactory.create( model.getType(), model );
-			model.connect( this, { update: 'onModelUpdate' } );
-			this.children.push( view );
-			view.attach( this );
-			if ( this.live !== view.isLive() ) {
-				view.setLive( this.live );
-			}
-			this.$caption = view.$element;
-			this.$element.append( this.$caption );
-		}
-	}
-	if ( this.$caption ) {
-		this.$caption.toggleClass( 'oo-ui-element-hidden', !this.captionVisible );
-	}
-};
 
 /**
  * Update CSS classes based on alignment and type
@@ -175,11 +122,9 @@ ve.ce.MWBlockImageNode.prototype.updateClasses = function ( oldAlign ) {
 	if ( type !== 'none' && type !== 'frameless' ) {
 		alignClass = this.getCssClass( 'default', align );
 		this.$image.addClass( 've-ce-mwBlockImageNode-thumbimage' );
-		this.$element.addClass( 've-ce-mwBlockImageNode-borderwrap' );
 	} else {
 		alignClass = this.getCssClass( 'none', align );
 		this.$image.removeClass( 've-ce-mwBlockImageNode-thumbimage' );
-		this.$element.removeClass( 've-ce-mwBlockImageNode-borderwrap' );
 	}
 	this.$element.addClass( alignClass );
 
@@ -210,6 +155,11 @@ ve.ce.MWBlockImageNode.prototype.updateClasses = function ( oldAlign ) {
  * @param {Object} [dimensions] Dimension object containing width & height
  */
 ve.ce.MWBlockImageNode.prototype.updateSize = function ( dimensions ) {
+	var
+		type = this.model.getAttribute( 'type' ),
+		borderImage = this.model.getAttribute( 'borderImage' ),
+		hasBorderOrFrame = ( type !== 'none' && type !== 'frameless' ) || borderImage;
+
 	if ( !dimensions ) {
 		dimensions = {
 			width: this.model.getAttribute( 'width' ),
@@ -222,8 +172,8 @@ ve.ce.MWBlockImageNode.prototype.updateSize = function ( dimensions ) {
 	// Make sure $element is sharing the dimensions, otherwise 'middle' and 'none'
 	// positions don't work properly
 	this.$element.css( {
-		width: dimensions.width + ( this.captionVisible ? 2 : 0 ),
-		height: this.captionVisible ? 'auto' : dimensions.height
+		width: dimensions.width + ( hasBorderOrFrame ? 2 : 0 ),
+		height: hasBorderOrFrame ? 'auto' : dimensions.height
 	} );
 	this.$element.toggleClass( 'mw-default-size', !!this.model.getAttribute( 'defaultSize' ) );
 };
@@ -233,6 +183,7 @@ ve.ce.MWBlockImageNode.prototype.updateSize = function ( dimensions ) {
  *
  * @param {string} type 'none' or 'default'
  * @param {string} alignment 'left', 'right', 'center', 'none' or 'default'
+ * @return {string} CSS class
  */
 ve.ce.MWBlockImageNode.prototype.getCssClass = function ( type, alignment ) {
 	// TODO use this.model.getAttribute( 'type' ) etc., see bug 52065
@@ -256,7 +207,7 @@ ve.ce.MWBlockImageNode.prototype.getCssClass = function ( type, alignment ) {
  */
 ve.ce.MWBlockImageNode.prototype.onSetup = function () {
 	// Parent method
-	ve.ce.BranchNode.prototype.onSetup.call( this );
+	ve.ce.MWBlockImageNode.super.prototype.onSetup.call( this );
 
 	this.updateClasses();
 };
@@ -265,6 +216,9 @@ ve.ce.MWBlockImageNode.prototype.onSetup = function () {
  * @inheritdoc
  */
 ve.ce.MWBlockImageNode.prototype.onAttributeChange = function ( key, from, to ) {
+	// Mixin method
+	ve.ce.MWImageNode.prototype.onAttributeChange.apply( this, arguments );
+
 	if ( key === 'height' || key === 'width' ) {
 		to = parseInt( to, 10 );
 	}
@@ -293,10 +247,14 @@ ve.ce.MWBlockImageNode.prototype.onAttributeChange = function ( key, from, to ) 
 				this.$element
 					.removeClass( 've-ce-mwBlockImageNode-type-' + from )
 					.addClass( 've-ce-mwBlockImageNode-type-' + to )
-					.attr( 'typeof', this.typeToRdfa[ to ] );
+					.attr( 'typeof', this.model.getRdfa() );
 
 				this.updateClasses();
-				this.updateCaption();
+				this.updateSize();
+				break;
+			case 'borderImage':
+				this.updateClasses();
+				this.updateSize();
 				break;
 			// Other image attributes if they exist
 			case 'alt':
@@ -313,7 +271,9 @@ ve.ce.MWBlockImageNode.prototype.onAttributeChange = function ( key, from, to ) 
 	}
 };
 
-/** */
+/**
+ * @param {Object} dimensions New dimensions
+ */
 ve.ce.MWBlockImageNode.prototype.onResizableResizing = function ( dimensions ) {
 	if ( !this.outline ) {
 		ve.ce.ResizableNode.prototype.onResizableResizing.call( this, dimensions );
@@ -322,14 +282,16 @@ ve.ce.MWBlockImageNode.prototype.onResizableResizing = function ( dimensions ) {
 	}
 };
 
-/** */
-ve.ce.MWBlockImageNode.prototype.setupSlugs = function () {
-	// Intentionally empty
-};
-
-/** */
-ve.ce.MWBlockImageNode.prototype.onSplice = function () {
-	// Intentionally empty
+ve.ce.MWBlockImageNode.prototype.getDomPosition = function () {
+	// We need to override this because this.$element can have children other than renderings of child
+	// CE nodes (specifically, the image itself, this.$a), which throws the calculations out of whack.
+	// Luckily, MWBlockImageNode is very simple and can contain at most one other node: its caption,
+	// which is always inserted at the end.
+	var domNode = this.$element.last()[ 0 ];
+	return {
+		node: domNode,
+		offset: domNode.childNodes.length
+	};
 };
 
 /* Registration */

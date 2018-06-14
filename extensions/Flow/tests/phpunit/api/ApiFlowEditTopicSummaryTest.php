@@ -2,6 +2,8 @@
 
 namespace Flow\Tests\Api;
 
+use Sanitizer;
+
 /**
  * @group Flow
  * @group medium
@@ -12,7 +14,7 @@ class ApiFlowEditTopicSummaryTest extends ApiTestCase {
 
 		$topic = $this->createTopic();
 
-		$data = $this->doApiRequest( array(
+		$data = $this->doApiRequest( [
 			'page' => $topic['topic-page'],
 			'token' => $this->getEditToken(),
 			'action' => 'flow',
@@ -20,18 +22,18 @@ class ApiFlowEditTopicSummaryTest extends ApiTestCase {
 			'etsprev_revision' => '',
 			'etssummary' => $summaryText,
 			'etsformat' => 'wikitext',
-		) );
+		] );
 
 		$debug = json_encode( $data );
 		$this->assertEquals( 'ok', $data[0]['flow']['edit-topic-summary']['status'], $debug );
 		$this->assertCount( 1, $data[0]['flow']['edit-topic-summary']['committed'], $debug );
 
-		$data = $this->doApiRequest( array(
+		$data = $this->doApiRequest( [
 			'page' => $topic['topic-page'],
 			'action' => 'flow',
 			'submodule' => 'view-topic-summary',
 			'vtsformat' => 'html',
-		) );
+		] );
 
 		$debug = json_encode( $data );
 		$revision = $data[0]['flow']['view-topic-summary']['result']['topicsummary']['revision'];
@@ -39,16 +41,16 @@ class ApiFlowEditTopicSummaryTest extends ApiTestCase {
 		$this->assertEquals( 'create-topic-summary', $revision['changeType'], $debug );
 		$this->assertEquals(
 			$summaryText,
-			trim( strip_tags( $revision['content']['content'] ) ),
+			trim( Sanitizer::stripAllTags( $revision['content']['content'] ) ),
 			$debug
 		);
 		$this->assertEquals( 'html', $revision['content']['format'], $debug );
 
-		$data = $this->doApiRequest( array(
+		$data = $this->doApiRequest( [
 			'page' => $topic['topic-page'],
 			'action' => 'flow',
 			'submodule' => 'view-topic',
-		) );
+		] );
 
 		$topicData = $data[0]['flow']['view-topic']['result']['topic'];
 		$rootPostId = $topicData['roots'][0];
@@ -57,7 +59,7 @@ class ApiFlowEditTopicSummaryTest extends ApiTestCase {
 
 		$this->assertEquals(
 			$summaryText,
-			trim( strip_tags( $topicRevision['summary']['revision']['content']['content'] ) ),
+			trim( Sanitizer::stripAllTags( $topicRevision['summary']['revision']['content']['content'] ) ),
 			'Summary content present with correct structure in view-topic response'
 		);
 	}

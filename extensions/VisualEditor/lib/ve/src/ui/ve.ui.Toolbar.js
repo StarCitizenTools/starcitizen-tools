@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Toolbar class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -17,15 +17,16 @@ ve.ui.Toolbar = function VeUiToolbar( config ) {
 	config = config || {};
 
 	// Parent constructor
-	OO.ui.Toolbar.call( this, ve.ui.toolFactory, ve.ui.toolGroupFactory, config );
+	ve.ui.Toolbar.super.call( this, ve.ui.toolFactory, ve.ui.toolGroupFactory, config );
 
+	this.groups = null;
 	// Default directions
 	this.contextDirection = { inline: 'ltr', block: 'ltr' };
 	// The following classes can be used here:
-	// ve-ui-dir-inline-ltr
-	// ve-ui-dir-inline-rtl
-	// ve-ui-dir-block-ltr
-	// ve-ui-dir-block-rtl
+	// * ve-ui-dir-inline-ltr
+	// * ve-ui-dir-inline-rtl
+	// * ve-ui-dir-block-ltr
+	// * ve-ui-dir-block-rtl
 	this.$element
 		.addClass( 've-ui-toolbar' )
 		.addClass( 've-ui-dir-inline-' + this.contextDirection.inline )
@@ -46,6 +47,12 @@ OO.inheritClass( ve.ui.Toolbar, OO.ui.Toolbar );
  */
 
 /**
+ * @event surfaceChange
+ * @param {ve.ui.Surface|null} oldSurface Old surface being controlled
+ * @param {ve.ui.Surface|null} newSurface New surface being controlled
+ */
+
+/**
  * @event resize
  */
 
@@ -58,12 +65,31 @@ OO.inheritClass( ve.ui.Toolbar, OO.ui.Toolbar );
  * @param {ve.ui.Surface} [surface] Surface to attach to
  */
 ve.ui.Toolbar.prototype.setup = function ( groups, surface ) {
+	var oldSurface,
+		surfaceChange = false;
+
 	this.detach();
 
-	this.surface = surface;
+	if ( surface !== this.surface ) {
+		// this.surface should be changed before we fire the event
+		oldSurface = this.surface;
+		this.surface = surface;
+		surfaceChange = true;
+	}
 
-	// Parent method
-	ve.ui.Toolbar.super.prototype.setup.call( this, groups );
+	// The parent method just rebuilds the tool groups so only
+	// do this if they have changed
+	if ( groups !== this.groups ) {
+		// Parent method
+		ve.ui.Toolbar.super.prototype.setup.call( this, groups );
+	}
+
+	this.groups = groups;
+
+	if ( surfaceChange ) {
+		// Emit surface change event after tools have been setup
+		this.emit( 'surfaceChange', oldSurface, surface );
+	}
 
 	// Events
 	this.getSurface().getModel().connect( this, { contextChange: 'onContextChange' } );
@@ -144,19 +170,19 @@ ve.ui.Toolbar.prototype.updateToolState = function () {
 	}
 
 	if ( dirInline !== this.contextDirection.inline ) {
-		// remove previous class:
+		// Remove previous class:
 		this.$element.removeClass( 've-ui-dir-inline-rtl ve-ui-dir-inline-ltr' );
 		// The following classes can be used here:
-		// ve-ui-dir-inline-ltr
-		// ve-ui-dir-inline-rtl
+		// * ve-ui-dir-inline-ltr
+		// * ve-ui-dir-inline-rtl
 		this.$element.addClass( 've-ui-dir-inline-' + dirInline );
 		this.contextDirection.inline = dirInline;
 	}
 	if ( dirBlock !== this.contextDirection.block ) {
 		this.$element.removeClass( 've-ui-dir-block-rtl ve-ui-dir-block-ltr' );
 		// The following classes can be used here:
-		// ve-ui-dir-block-ltr
-		// ve-ui-dir-block-rtl
+		// * ve-ui-dir-block-ltr
+		// * ve-ui-dir-block-rtl
 		this.$element.addClass( 've-ui-dir-block-' + dirBlock );
 		this.contextDirection.block = dirBlock;
 	}
@@ -209,7 +235,9 @@ ve.ui.Toolbar.prototype.getToolAccelerator = function ( name ) {
 /**
  * Gets the surface which the toolbar controls.
  *
- * @return {ve.ui.Surface} Surface being controlled
+ * Returns null if the toolbar hasn't been set up yet.
+ *
+ * @return {ve.ui.Surface|null} Surface being controlled
  */
 ve.ui.Toolbar.prototype.getSurface = function () {
 	return this.surface;
@@ -233,7 +261,7 @@ ve.ui.Toolbar.prototype.detach = function () {
  */
 ve.ui.Toolbar.prototype.destroy = function () {
 	// Parent method
-	OO.ui.Toolbar.prototype.destroy.call( this );
+	ve.ui.Toolbar.super.prototype.destroy.call( this );
 
 	// Detach surface last, because tool destructors need getSurface()
 	this.detach();

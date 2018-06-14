@@ -56,7 +56,7 @@ class ShallowCompactor implements Compactor {
 	 * @return array
 	 */
 	public function compactRows( array $rows ) {
-		return array_map( array( $this, 'compactRow' ), $rows );
+		return array_map( [ $this, 'compactRow' ], $rows );
 	}
 
 	/**
@@ -78,7 +78,7 @@ class ShallowCompactor implements Compactor {
 		$duplicator = new ResultDuplicator( $this->shallow->getPrimaryKeyColumns(), 2 );
 		foreach ( $results as $i => $rows ) {
 			foreach ( $rows as $j => $row ) {
-				$duplicator->add( $row, array( $i, $j ) );
+				$duplicator->add( $row, [ $i, $j ] );
 			}
 		}
 
@@ -94,6 +94,7 @@ class ShallowCompactor implements Compactor {
 		$duplicator = $this->getResultDuplicator( $cached, $keyToQuery );
 		$queries = $duplicator->getUniqueQueries();
 		$innerResult = $this->shallow->findMulti( $queries );
+
 		foreach ( $innerResult as $rows ) {
 			// __construct guaranteed the shallow backing index is a unique, so $first is only result
 			$first = reset( $rows );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable BlockquoteNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -14,9 +14,9 @@
  * @param {ve.dm.BlockquoteNode} model Model to observe
  * @param {Object} [config] Configuration options
  */
-ve.ce.BlockquoteNode = function VeCeBlockquoteNode( model, config ) {
+ve.ce.BlockquoteNode = function VeCeBlockquoteNode() {
 	// Parent constructor
-	ve.ce.ContentBranchNode.call( this, model, config );
+	ve.ce.BlockquoteNode.super.apply( this, arguments );
 };
 
 /* Inheritance */

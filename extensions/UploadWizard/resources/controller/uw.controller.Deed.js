@@ -19,99 +19,125 @@
 	/**
 	 * Deed step controller.
 	 *
+	 * @class
+	 * @extends uw.controller.Step
 	 * @param {mw.Api} api
-	 * @param {Object} config Only the licensing section of the UploadWizard config.
+	 * @param {Object} config UploadWizard config object.
 	 */
 	uw.controller.Deed = function UWControllerDeed( api, config ) {
-		this.api = api;
-
 		uw.controller.Step.call(
 			this,
 			new uw.ui.Deed(),
+			api,
 			config
 		);
 
 		this.stepName = 'deeds';
+
+		this.deeds = {};
 	};
 
 	OO.inheritClass( uw.controller.Deed, uw.controller.Step );
 
-	uw.controller.Deed.prototype.moveFrom = function () {
+	uw.controller.Deed.prototype.moveNext = function () {
 		var
 			deedController = this,
-			valid = true,
-			fields;
+			valid, fields, validityPromises;
 
 		if ( !this.deedChooser ) {
-			uw.controller.Step.prototype.moveFrom.call( this );
+			uw.controller.Step.prototype.moveNext.call( this );
 			return;
 		}
 
 		valid = this.deedChooser.valid();
 		if ( valid ) {
 			fields = this.deedChooser.deed.getFields();
-
-			// Update any error/warning messages
-			fields.forEach( function ( fieldLayout ) {
-				fieldLayout.checkValidity();
+			validityPromises = fields.map( function ( fieldLayout ) {
+				// Update any error/warning messages
+				return fieldLayout.checkValidity( true );
 			} );
+			if ( validityPromises.length === 1 ) {
+				// validityPromises will hold all promises for all uploads;
+				// adding a bogus promise (no warnings & errors) to
+				// ensure $.when always resolves with an array of multiple
+				// results (if there's just 1, it would otherwise have just
+				// that one's arguments, instead of a multi-dimensional array
+				// of upload warnings & failures)
+				validityPromises.push( $.Deferred().resolve( [], [] ).promise() );
+			}
 
-			// TODO Handle warnings with a confirmation dialog
-			$.when.apply( $, fields.map( function ( fieldLayout ) {
-				return fieldLayout.fieldWidget.getErrors();
-			} ) ).done( function () {
+			$.when.apply( $, validityPromises ).then( function () {
+				// `arguments` will be an array of all fields, with their warnings & errors
+				// e.g. `[[something], []], [[], [something]]` for 2 fields, where the first one has
+				// a warning and the last one an error
+
+				// TODO Handle warnings with a confirmation dialog
+
 				var i;
 				for ( i = 0; i < arguments.length; i++ ) {
-					if ( arguments[ i ].length ) {
-						// One of the fields has errors
+					if ( arguments[ i ][ 1 ].length ) {
+						// One of the fields has errors; refuse to proceed!
 						return;
 					}
 				}
 
-				uw.controller.Step.prototype.moveFrom.call( deedController );
+				uw.controller.Step.prototype.moveNext.call( deedController );
 			} );
 		}
 	};
 
 	/**
 	 * Move to this step.
+	 *
+	 * @param {mw.UploadWizardUpload[]} uploads
 	 */
-	uw.controller.Deed.prototype.moveTo = function ( uploads ) {
-		var customDeed, deeds,
-			showDeed = false,
-			step = this;
+	uw.controller.Deed.prototype.load = function ( uploads ) {
+		var customDeed, previousDeed, fromStepName,
+			showDeed = false;
 
-		uw.controller.Step.prototype.moveTo.call( this, uploads );
-
-		$.each( this.uploads, function ( i, upload ) {
-			if ( !upload.fromURL ) {
+		$.each( uploads, function ( i, upload ) {
+			fromStepName = upload.state;
+			if ( !upload.file.fromURL ) {
 				showDeed = true;
 				return false;
 			}
 		} );
 
+		uw.controller.Step.prototype.load.call( this, uploads );
+
 		// If all of the uploads are from URLs, then we know the licenses
 		// already, we don't need this step.
 		if ( !showDeed ) {
-			this.moveFrom();
+			uw.eventFlowLogger.logSkippedStep( this.stepName );
+			// this is a bit of a hack: when images from flickr are uploaded, we
+			// don't get to choose the license anymore, and this step will be
+			// skipped ... but we could reach this step from either direction
+			if ( fromStepName === 'details' ) {
+				this.movePrevious();
+			} else {
+				this.moveNext();
+			}
 			return;
 		}
 
-		deeds = mw.UploadWizard.getLicensingDeeds( this.uploads.length, this.config );
+		// grab a serialized copy of previous deeds' details (if any)
+		if ( this.deedChooser ) {
+			previousDeed = this.deedChooser.getSerialized();
+		}
+
+		this.deeds = mw.UploadWizard.getLicensingDeeds( this.uploads, this.config );
 
 		// if we have multiple uploads, also give them the option to set
 		// licenses individually
 		if ( this.uploads.length > 1 && this.shouldShowIndividualDeed( this.config ) ) {
-			customDeed = $.extend( new mw.UploadWizardDeed(), {
-				name: 'custom'
-			} );
-			deeds.push( customDeed );
+			customDeed = new uw.deed.Custom( this.config );
+			this.deeds[ customDeed.name ] = customDeed;
 		}
 
 		this.deedChooser = new mw.UploadWizardDeedChooser(
 			this.config,
 			'#mwe-upwiz-deeds',
-			deeds,
+			this.deeds,
 			this.uploads
 		);
 
@@ -121,12 +147,17 @@
 
 		$.each( uploads, function ( i, upload ) {
 			// Add previews and details to the DOM
-			if ( !upload.fromURL ) {
-				upload.deedPreview = new uw.ui.DeedPreview( upload, step.config );
+			if ( !upload.file.fromURL ) {
+				upload.deedPreview = new uw.ui.DeedPreview( upload );
 			}
 		} );
 
 		this.deedChooser.onLayoutReady();
+
+		// restore the previous input (if any) for all deeds
+		if ( previousDeed ) {
+			this.deedChooser.setSerialized( previousDeed );
+		}
 	};
 
 	/**
@@ -134,6 +165,8 @@
 	 * individual files on the details step.
 	 *
 	 * @private
+	 * @param {Object} config
+	 * @return {boolean}
 	 */
 	uw.controller.Deed.prototype.shouldShowIndividualDeed = function ( config ) {
 		var ownWork;
@@ -149,11 +182,13 @@
 	};
 
 	/**
-	 * Empty out all upload information.
+	 * @param {UploadWizardUpload} upload
 	 */
-	uw.controller.Deed.prototype.empty = function () {
-		if ( this.deedChooser !== undefined ) {
-			this.deedChooser.remove();
+	uw.controller.Deed.prototype.removeUpload = function ( upload ) {
+		uw.controller.Step.prototype.removeUpload.call( this, upload );
+
+		if ( upload.deedPreview ) {
+			upload.deedPreview.remove();
 		}
 	};
 

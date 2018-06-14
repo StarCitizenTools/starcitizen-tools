@@ -16,22 +16,33 @@ class WikiSEO{
 		'keywords',
 		'description',
 		'google-site-verification',
+		'robots',
+		'google',
+		'googlebot',
 		'og:image',
-		'article:author',
-		'article:publisher',
+		'og:image:width',
+		'og:image:height',
 		'og:type',
 		'og:site_name',
 		'og:locale',
-		'article:tag',
+		'og:url',
+		'og:title',
+		'og:updated_time',
+		'article:author',
+		'article:publisher',
+		'article:published_time',
+		'article:modified_time',
 		'article:section',
-		'fb:admins',
-		'fb:app_id',
+		'article:tag',
 		'twitter:card',
 		'twitter:site',
 		'twitter:domain',
 		'twitter:creator',
 		'twitter:image:src',
-		'twitter:description'
+		'twitter:description',
+		'DC.date.issued',
+		'DC.date.created',
+		'name',
 		);
 
 	protected static $tag_types = array(
@@ -39,14 +50,24 @@ class WikiSEO{
 		'keywords' => 'meta',
 		'description' => 'meta',
 		'google-site-verification' => 'meta',
+		'robots' => 'meta',
+		'google' => 'meta',
+		'googlebot' => 'meta',
 		'og:image' => 'property',
-		'article:author' => 'property',
-		'article:publisher' => 'property',
+		'og:image:width' => 'property',
+		'og:image:height' => 'property',
 		'og:type' => 'property',
 		'og:site_name' => 'property',
 		'og:locale' => 'property',
-		'article:tag' => 'property',
+		'og:url' => 'property',
+		'og:title' => 'property',
+		'og:updated_time' => 'property',
+		'article:author' => 'property',
+		'article:publisher' => 'property',
+		'article:published_time' => 'property',
+		'article:modified_time' => 'property',
 		'article:section' => 'property',
+		'article:tag' => 'property',
 		'fb:admins' => 'property',
 		'fb:app_id' => 'property',
 		'twitter:card' => 'meta',
@@ -54,7 +75,11 @@ class WikiSEO{
 		'twitter:domain' => 'meta',
 		'twitter:creator' => 'meta',
 		'twitter:image:src' => 'meta',
-		'twitter:description' => 'meta'
+		'twitter:description' => 'meta',
+		'DC.date.issued' => 'property',
+		'DC.date.created' => 'property',
+		'name' => 'property',
+		'google-site-verification' => 'meta'
 	);
 	//valid title modes
 	protected static 	$valid_title_modes = array('prepend', 'append', 'replace');
@@ -104,15 +129,15 @@ class WikiSEO{
 
 		$params = self::processParams($params, $parser);
 
-    //ensure at least one of the required parameters has been set, otherwise display an error
+		//ensure at least one of the required parameters has been set, otherwise display an error
 		if( empty($params) ){
-    	return '<div class="errorbox">' . wfMsgForContent('seo-empty-attr') . '</div>';
-    }
+			return '<div class="errorbox">' . wfMsgForContent('seo-empty-attr') . '</div>';
+		}
 
-	  //render the tags
-    $html = self::renderParamsAsHtmlComments( $params );
+		//render the tags
+		$html = self::renderParamsAsHtmlComments( $params );
 
-    return $html;
+		return $html;
 
 	}
 
@@ -151,6 +176,7 @@ class WikiSEO{
 	 * @return Array An array of processed params
 	 */
 	protected static function processParams($params, $parser=null){
+		global $wgGoogleSiteVerificationKey, $wgFacebookAdmins, $wgFacebookAppID;
 
 		//correct params for compatibility with "HTML Meta and Title" extension
 		foreach(self::$convert_params as $from => $to){
@@ -162,11 +188,35 @@ class WikiSEO{
 
 		$processed = array();
 
+		if ($wgGoogleSiteVerificationKey !== null) {
+			$processed['google-site-verification'] = $wgGoogleSiteVerificationKey;
+		}
+
+		if ($wgFacebookAppID !== null) {
+			$processed['fb:app_id'] = filter_var($wgFacebookAppID, FILTER_SANITIZE_NUMBER_INT);
+		}
+
+		if ($wgFacebookAdmins !== null && is_array($wgFacebookAdmins)) {
+			$admins = '';
+			foreach ($wgFacebookAdmins as $admin) {
+				$admins .= filter_var($admin, FILTER_SANITIZE_NUMBER_INT).',';
+			}
+			rtrim($admins, ',');
+			$processed['fb:admins'] = $admins;
+		} elseif ($wgFacebookAdmins !== null) {
+			$processed['fb:admins'] = filter_var($wgFacebookAdmins, FILTER_SANITIZE_NUMBER_INT);
+		}
+
 		//ensure only valid parameter names are processed
 		foreach(self::$valid_params as $p){
 			if( isset($params[$p]) ){
 				//if the parser has been passed and the param is parsable parse it, else simply assign it
-				$processed[$p] = ($parser && in_array($p, self::$parse_params)) ? $parser->recursiveTagParse($params[$p]) : $params[$p];
+				if ($parser !== null && in_array($p, self::$parse_params)) {
+					$processed[$p] = $parser->recursiveTagParseFully($params[$p]);
+					$processed[$p] = strip_tags($processed[$p]);
+				} else {
+					$processed[$p] = $params[$p];
+				}
 			}
 		}
 		//set the processed values as class properties
@@ -206,11 +256,14 @@ class WikiSEO{
 	 * @return String A HTML string of comments
 	 */
 	protected static function renderParamsAsHtmlComments( $params ){
-		$html = '';
+		$html = '<!--seostart--><p id="wikiseo'.wfRandomString(4).'"><!--'."\n";
 		foreach($params as $k => $v){
-			$html .= '<!-- WikiSEO:'.$k.';'.base64_encode($v).' -->';
+			if (!empty($v))
+			{
+				$html .= 'WikiSEO:'.$k.';'.base64_encode($v)."\n";
+			}
 		}
-		return $html;
+		return $html.'--></p><!--seoend-->';
 	}
 
 	/**
@@ -223,22 +276,23 @@ class WikiSEO{
 	 */
 	public static function loadParamsFromWikitext( $out, &$text ) {
 
-    # Extract meta keywords
-    if (!preg_match_all(
-        '/<!-- WikiSEO:([:a-zA-Z_-]+);([0-9a-zA-Z\\+\\/]+=*) -->\n?/m',
-        $text,
-        $matches,
-        PREG_SET_ORDER)
-    ){
-    	return true;
-   	}
+		# Extract meta keywords
+		if (!preg_match_all(
+			'/^(?:<p>)?WikiSEO:([\.:a-zA-Z_-]+);([0-9a-zA-Z\+\/]+=*)\n?\r?$/m',
+			$text,
+			$matches,
+			PREG_SET_ORDER)
+		){
+			return true;
+		}
 
-   	foreach($matches as $match){
-   		$params[$match[1]] = base64_decode($match[2]);
-   		$text = str_replace($match[0], '', $text);
-   	}
-   	self::processParams($params);
- 		return true;
+		$params = array();
+		foreach($matches as $match){
+			$params[$match[1]] = base64_decode($match[2]);
+		}
+		$text = preg_replace('/<!--seostart--><p id="wikiseo[a-zA-Z0-9]{4}">.*<\/p><!--seoend-->/s', '', $text);
+		self::processParams($params);
+		return true;
 	}
 
 	/**
@@ -249,6 +303,10 @@ class WikiSEO{
 	 * @param OutputPage $out
 	 */
 	public static function modifyHTML ( $out ) {
+		global $wgAddJSONLD;
+
+		$jsonLD = '<script type="application/ld+json">{"@context" : "http://schema.org",';
+
 		//set title
 		if(!empty(self::$title)){
 			switch(self::$title_mode){
@@ -262,19 +320,24 @@ class WikiSEO{
 				default:
 					$title = self::$title;
 			}
+			$title = preg_replace( "/\r|\n/", "", $title );
 			$out->setHTMLTitle($title);
-			$out->addMeta( "twitter:title", $title );
-			$out->addHeadItem("og:title", "<meta property=\"og:title\" content=\"$title\" />" . "\n");
+			$out->addHeadItem("og:title", Html::element( 'meta', array( 'property' => 'og:title', 'content' => $title ) ));
+			$jsonLD .= '"name":"'.$title.'","headline":"'.$title.'",';
 		}
 		//set meta tags
 		if(!empty(self::$meta)){
 			foreach(self::$meta as $name => $content){
+				$content = preg_replace( "/\r|\n/", "", $content );
 				if ($name == 'description') {
+					if (strlen($content) > 150) {
+						$content = substr($content, 0, 150).'...';
+					}
 					$out->addMeta( $name, $content );
 					$out->addMeta( "twitter:description", $content );
-					$out->addHeadItem("og:description", Html::element( 'meta', array( 'property' => 'og:description', 'content' => $content ) ) . "\n");
-				}
-				else {
+					$out->addHeadItem("og:description", Html::element( 'meta', array( 'property' => 'og:description', 'content' => $content ) ));
+					$jsonLD .= '"description":"'.$content.'",';
+				} else {
 					$out->addMeta( $name, $content );
 				}
 
@@ -282,8 +345,39 @@ class WikiSEO{
 		}
 		//set property tags
 		if(!empty(self::$property)){
+			if (isset(self::$property['og:type'])) {
+				$jsonLD .= '"@type" : "'.ucfirst(self::$property['og:type']).'"';
+			}
+
+			if (isset(self::$property['name'])) {
+				$jsonLD .= ',"name" : "'.self::$property['name'].'","headline":"'.self::$property['name'].'"';
+			}
+
+			if (isset(self::$property['article:modified_time'])) {
+				$jsonLD .= ',"datePublished" : "'.self::$property['article:modified_time'].'","dateModified" : "'.self::$property['article:modified_time'].'"';
+			}
+
+			if (isset(self::$property['og:image'])) {
+				$jsonLD .= ',"image" : "'.self::$property['og:image'].'"';
+			}
+
+			if (isset(self::$property['og:url'])) {
+				$jsonLD .= ',"url" : "'.self::$property['og:url'].'", "mainEntityOfPage":"'.self::$property['og:url'].'"';
+			}
+
+			if (isset(self::$property['article:author'])) {
+				$jsonLD .= ',"publisher":{"@type" : "Organization","name" : "Star Citizen Wiki", "logo": { "@type": "ImageObject", "url": "https://v3.star-citizen.wiki/images/e/ef/Star_Citizen_Wiki_Logo.png"}}, "author":{"@type":"Person","name":"'.self::$property['article:author'].'"}';
+			}
+
+			$jsonLD = $jsonLD.'}</script>';
+
+			if ($wgAddJSONLD === true){
+				$out->addHeadItem('jsonld', $jsonLD);
+			}
+
 			foreach(self::$property as $property => $content){
-				$out->addHeadItem("$property", Html::element( 'meta', array( 'property' => $property, 'content' => $content ) ) . "\n");
+				$content = preg_replace( "/\r|\n/", "", $content );
+				$out->addHeadItem($property, Html::element( 'meta', array( 'property' => $property, 'content' => $content ) ) . "\n");
 			}
 		}
 

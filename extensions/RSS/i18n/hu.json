@@ -1,10 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"TK-999"
+			"TK-999",
+			"Bencemac"
 		]
 	},
 	"rss-desc": "RSS.hírcsatornákat jelenít meg MediaWiki oldalakon szabványos vagy felhasználó által meghatározott formátumban sablonok használatával",
+	"rss-tracking-category": "RSS-hírfolyammal rendelkező lapok",
+	"rss-tracking-category-desc": "Az oldal rendelkezik RSS-hírfolyammal",
 	"rss-error": "Nem sikerült betölteni az RSS-hírcsatornát innen: $1 ($2)",
 	"rss-empty": "Nem sikerült betölteni az RSS-hírcsatornát innen: $1!",
 	"rss-fetch-nourl": "Nincs megadva URL!",

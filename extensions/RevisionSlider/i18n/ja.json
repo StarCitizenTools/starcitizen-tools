@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Otokoume",
+			"Macofe",
+			"にょきにょき",
+			"Mirinano",
+			"Yusuke1109"
+		]
+	},
+	"revisionslider": "リビジョンスライダー",
+	"revisionslider-preference-disable": "リビジョンスライダーを表示しない",
+	"revisionslider-desc": "版間の差分を表示する際にスライダーを使って版の選択ができるようになります。",
+	"revisionslider-toggle-label": "履歴の閲覧",
+	"revisionslider-page-size": "$1{{PLURAL:$2|バイト}}",
+	"revisionslider-change-size": "$1{{PLURAL:$3|バイト}}",
+	"revisionslider-label-date": "日時",
+	"revisionslider-label-page-size": "ページのサイズ",
+	"revisionslider-label-change-size": "変更されたサイズ",
+	"revisionslider-label-comment": "編集の要約",
+	"revisionslider-label-username": "{{GENDER:$1|利用者名}}",
+	"revisionslider-minoredit": "細部の編集",
+	"revisionslider-loading-failed": "リビジョンスライダーの読み込みに失敗しました。",
+	"revisionslider-toggle-title-expand": "リビジョンスライダーを開く",
+	"revisionslider-toggle-title-collapse": "リビジョンスライダーを閉じる",
+	"revisionslider-turn-on-auto-expand-title": "常にリビジョンスライダーを開いておく",
+	"revisionslider-turn-off-auto-expand-title": "自動的にリビジョンスライダーが開かないようにする",
+	"revisionslider-arrow-tooltip-newer": "新しい履歴の表示",
+	"revisionslider-arrow-tooltip-older": "古い履歴の表示",
+	"revisionslider-show-help-tooltip": "ヘルプを見る",
+	"revisionslider-help-dialog-slide1": "リビジョンスライダーは版間の差分を比較するときに役立つツールです。ドイツ語版コミュニティーで上がった[//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider 要望]を基に作成されました。もしよろしければ[//www.mediawiki.org/wiki/Extension_talk:RevisionSlider こちら]にフィードバックをお送りください。",
+	"revisionslider-help-dialog-slide2": "それぞれのバーはページの版を表しています。バーが上向きになっていればページサイズが増加したことを意味し、下向きならば減少したことを意味します。上の画像中、1の版ではサイズが増加し、2の版ではサイズが減少しています。",
+	"revisionslider-help-dialog-slide3a": "<p>特定の版同士を比較するには、黄色と青のポインタを使用して版を選択します。</p><p>青のポインタは新しい版を、黄色のポインタは古い版を選択するのに使います。</p><p>ポインタは、ドラッグアンドドロップするか、バーをクリックすることで移動できます。</p>",
+	"revisionslider-help-dialog-slide4": "履歴グラフの左右にある矢印を使って、現在表示されているものより古い版または新しい版を表示することができます。",
+	"revisionslider-tutorial": "チュートリアル",
+	"revisionslider-previous-dialog": "前へ",
+	"revisionslider-next-dialog": "次へ",
+	"revisionslider-close-dialog": "閉じる"
+}

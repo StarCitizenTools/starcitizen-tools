@@ -24,7 +24,7 @@ interface Block {
 	 * Perform validation of data model
 	 *
 	 * @param array $data
-	 * @return boolean True if data model is valid
+	 * @return bool True if data model is valid
 	 */
 	function onSubmit( array $data );
 
@@ -93,7 +93,7 @@ abstract class AbstractBlock implements Block {
 	/** @var array|null */
 	protected $submitted = null;
 	/** @var array */
-	protected $errors = array();
+	protected $errors = [];
 
 	/**
 	 * @var string|null The commitable action being submitted, or null
@@ -108,19 +108,19 @@ abstract class AbstractBlock implements Block {
 	 * A list of supported post actions
 	 * @var array
 	 */
-	protected $supportedPostActions = array();
+	protected $supportedPostActions = [];
 
 	/**
 	 * A list of supported get actions
 	 * @var array
 	 */
-	protected $supportedGetActions = array();
+	protected $supportedGetActions = [];
 
 	/**
 	 * Templates for each view actions
 	 * @var array
 	 */
-	protected $templates = array();
+	protected $templates = [];
 
 	public function __construct( Workflow $workflow, ManagerGroup $storage ) {
 		$this->workflow = $workflow;
@@ -134,13 +134,13 @@ abstract class AbstractBlock implements Block {
 	abstract protected function validate();
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	abstract public function commit();
 
 	/**
-	 * @var IContextSource $context
-	 * @var string $action
+	 * @param IContextSource $context
+	 * @param string $action
 	 */
 	public function init( IContextSource $context, $action ) {
 		$this->context = $context;
@@ -174,8 +174,7 @@ abstract class AbstractBlock implements Block {
 	 * @return bool
 	 */
 	public function canRender( $action ) {
-		return
-			// GET actions can be rendered
+		return // GET actions can be rendered
 			in_array( $this->getActionName( $action ), $this->supportedGetActions ) ||
 			// POST actions are usually redirected to 'view' after successfully
 			// completing the request, but can also be rendered (e.g. to show
@@ -187,7 +186,7 @@ abstract class AbstractBlock implements Block {
 	 * Get the template name for a specific action or an array of template
 	 * for all possible view actions in this block
 	 *
-	 * @param string|null
+	 * @param string|null $action
 	 * @return string|array
 	 * @throws InvalidInputException
 	 */
@@ -230,7 +229,7 @@ abstract class AbstractBlock implements Block {
 	 */
 	public function hasErrors( $type = null ) {
 		if ( $type === null ) {
-			return (bool) $this->errors;
+			return (bool)$this->errors;
 		}
 		return isset( $this->errors[$type] );
 	}
@@ -248,7 +247,7 @@ abstract class AbstractBlock implements Block {
 	}
 
 	/**
-	 * @param $type
+	 * @param string $type
 	 * @return \Message
 	 */
 	public function getErrorMessage( $type ) {
@@ -256,7 +255,7 @@ abstract class AbstractBlock implements Block {
 	}
 
 	/**
-	 * @param $type
+	 * @param string $type
 	 * @return mixed
 	 */
 	public function getErrorExtra( $type ) {
@@ -269,10 +268,10 @@ abstract class AbstractBlock implements Block {
 	 * @param mixed[optional] $extra
 	 */
 	public function addError( $type, \Message $message, $extra = null ) {
-		$this->errors[$type] = array(
+		$this->errors[$type] = [
 			'message' => $message,
 			'extra' => $extra,
-		);
+		];
 	}
 
 	public function getWorkflow() {
@@ -314,18 +313,24 @@ abstract class AbstractBlock implements Block {
 	 *
 	 * @param AbstractRevision|null $old null when $new is first revision
 	 * @param AbstractRevision $new
-	 * @return boolean True when content is allowed by spam filter
+	 * @return bool True when content is allowed by spam filter
 	 */
 	protected function checkSpamFilters( AbstractRevision $old = null, AbstractRevision $new ) {
 		/** @var SpamFilterController $spamFilter */
 		$spamFilter = Container::get( 'controller.spamfilter' );
-		$status = $spamFilter->validate( $this->context, $new, $old, $this->workflow->getArticleTitle() );
+		$status = $spamFilter->validate( $this->context, $new, $old, $this->workflow->getArticleTitle(), $this->workflow->getOwnerTitle() );
 		if ( $status->isOK() ) {
 			return true;
 		}
 
 		$message = $status->getMessage();
-		$this->addError( 'spamfilter', $message, $message->getKey() );
+
+		$details = $status->getValue();
+
+		$this->addError( 'spamfilter', $message, [
+			'messageKey' => $message->getKey(),
+			'details' => $details,
+		] );
 		return false;
 	}
 

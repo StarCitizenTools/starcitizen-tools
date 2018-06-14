@@ -5,13 +5,13 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 class ResourcesOrderTest extends MediaWikiTestCase {
 	public function setUp() {
 		parent::setUp();
-		$this->setMwGlobals( 'wgResourceModules', array() );
+		$this->setMwGlobals( 'wgResourceModules', [] );
 	}
 
 	public function testAlphabeticalOrder() {

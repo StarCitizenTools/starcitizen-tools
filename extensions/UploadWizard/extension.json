@@ -1,0 +1,991 @@
+{
+	"name": "Upload Wizard",
+	"version": "1.5.0",
+	"author": [
+		"Neil Kandalgaonkar",
+		"Jeroen De Dauw",
+		"Mark Holmquist",
+		"Ryan Kaldari",
+		"Michael Dale",
+		"Ankur Anand",
+		"Ian Baker",
+		"Nischay Nahata",
+		"Yuvi Panda",
+		"Bartosz Dziewoński",
+		"Matthias Mullie"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:UploadWizard",
+	"descriptionmsg": "uploadwizard-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.27.0"
+	},
+	"DefaultUserOptions": {
+		"upwiz_deflicense": "default",
+		"upwiz_maxsimultaneous": "default"
+	},
+	"GroupPermissions": {
+		"*": {
+			"upwizcampaigns": false
+		},
+		"user": {
+			"upwizcampaigns": false
+		},
+		"autoconfirmed": {
+			"upwizcampaigns": false
+		},
+		"bot": {
+			"upwizcampaigns": false
+		},
+		"sysop": {
+			"upwizcampaigns": true,
+			"mass-upload": true
+		},
+		"upwizcampeditors": {
+			"upwizcampaigns": true
+		},
+		"Image-reviewer": {
+			"mass-upload": true
+		}
+	},
+	"AddGroups": {
+		"sysop": [
+			"upwizcampeditors"
+		]
+	},
+	"RemoveGroups": {
+		"sysop": [
+			"upwizcampeditors"
+		]
+	},
+	"AvailableRights": [
+		"upwizcampaigns",
+		"mass-upload"
+	],
+	"ContentHandlers": {
+		"Campaign": "CampaignContentHandler"
+	},
+	"SpecialPages": {
+		"UploadWizard": "SpecialUploadWizard",
+		"Campaigns": "SpecialCampaigns"
+	},
+	"APIModules": {
+		"flickrblacklist": "ApiFlickrBlacklist"
+	},
+	"APIListModules": {
+		"allcampaigns": "ApiQueryAllCampaigns"
+	},
+	"MessagesDirs": {
+		"UploadWizard": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"UploadWizardAlias": "UploadWizard.alias.php"
+	},
+	"AutoloadClasses": {
+		"UploadWizardHooks": "UploadWizardHooks.php",
+		"UploadWizardConfig": "includes/UploadWizardConfig.php",
+		"UploadWizardTutorial": "includes/UploadWizardTutorial.php",
+		"UploadWizardCampaign": "includes/UploadWizardCampaign.php",
+		"UploadWizardFlickrBlacklist": "includes/UploadWizardFlickrBlacklist.php",
+		"CampaignContentHandler": "includes/CampaignContentHandler.php",
+		"CampaignContent": "includes/CampaignContent.php",
+		"CampaignPageFormatter": "includes/CampaignPageFormatter.php",
+		"CampaignHooks": "includes/CampaignHooks.php",
+		"SpecialUploadWizard": "includes/specials/SpecialUploadWizard.php",
+		"SpecialCampaigns": "includes/specials/SpecialCampaigns.php",
+		"ApiQueryAllCampaigns": "includes/ApiQueryAllCampaigns.php",
+		"ApiFlickrBlacklist": "includes/ApiFlickrBlacklist.php",
+		"UploadWizardSimpleForm": "includes/specials/UploadWizardSimpleForm.php"
+	},
+	"ResourceModules": {
+		"ext.uploadWizard.formDataTransport": {
+			"scripts": "resources/transports/mw.FormDataTransport.js",
+			"dependencies": [
+				"oojs"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"ext.uploadWizard.apiUploadHandler": {
+			"scripts": "resources/handlers/mw.ApiUploadHandler.js",
+			"dependencies": [
+				"uw.EventFlowLogger"
+			],
+			"messages": "mwe-upwiz-transport-started",
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"ext.uploadWizard.apiUploadPostHandler": {
+			"scripts": "resources/handlers/mw.ApiUploadPostHandler.js",
+			"dependencies": [
+				"ext.uploadWizard.apiUploadHandler",
+				"oojs"
+			],
+			"messages": "mwe-upwiz-transport-started",
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"ext.uploadWizard.apiUploadFormDataHandler": {
+			"scripts": "resources/handlers/mw.ApiUploadFormDataHandler.js",
+			"dependencies": [
+				"ext.uploadWizard.apiUploadHandler",
+				"ext.uploadWizard.formDataTransport",
+				"oojs"
+			],
+			"messages": "mwe-upwiz-transport-started",
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"ext.uploadWizard.page": {
+			"scripts": "resources/mw.UploadWizardPage.js",
+			"dependencies": "ext.uploadWizard",
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"ext.uploadWizard.page.styles": {
+			"styles": "resources/uploadWizard.noWizard.css",
+			"targets": [ "desktop", "mobile" ]
+		},
+		"ext.uploadWizard.uploadCampaign.display": {
+			"styles": "resources/ext.uploadWizard.uploadCampaign.display.css",
+			"targets": [ "desktop", "mobile" ]
+		},
+		"ext.uploadWizard.uploadCampaign.list": {
+			"styles": "resources/ext.uploadWizard.uploadCampaign.list.css",
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.EventFlowLogger": {
+			"scripts": [
+				"resources/uw.EventFlowLogger.js"
+			],
+			"dependencies": [
+				"uw.base",
+				"oojs"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "uw.EventFlowLogger"
+		},
+		"ext.uploadWizard.jquery.arrowSteps": {
+			"scripts": [
+				"resources/jquery.arrowSteps/jquery.arrowSteps.js"
+			],
+			"styles": [
+				"resources/jquery.arrowSteps/jquery.arrowSteps.css"
+			],
+			"targets": [ "desktop", "mobile" ]
+		},
+		"ext.uploadWizard": {
+			"dependencies": [
+				"ext.uploadWizard.jquery.arrowSteps",
+				"jquery.client",
+				"jquery.spinner",
+				"jquery.makeCollapsible",
+				"mediawiki.icon",
+				"mediawiki.Uri",
+				"mediawiki.util",
+				"mediawiki.libs.jpegmeta",
+				"mediawiki.jqueryMsg",
+				"mediawiki.api",
+				"mediawiki.api.edit",
+				"mediawiki.api.messages",
+				"mediawiki.api.parse",
+				"mediawiki.confirmCloseWindow",
+				"mediawiki.RegExp",
+				"mediawiki.Title",
+				"mediawiki.user",
+				"mediawiki.feedback",
+				"moment",
+				"uw.base",
+				"ext.uploadWizard.apiUploadPostHandler",
+				"ext.uploadWizard.apiUploadFormDataHandler",
+				"uw.EventFlowLogger",
+				"uw.ui.Wizard",
+				"uw.controller.Deed",
+				"uw.controller.Details",
+				"uw.controller.Thanks",
+				"uw.controller.Tutorial",
+				"uw.controller.Upload",
+				"uw.deed.OwnWork",
+				"uw.deed.ThirdParty",
+				"uw.deed.Custom",
+				"uw.deed.External",
+				"uw.units",
+				"oojs",
+				"oojs-ui",
+				"oojs-ui.styles.icons-alerts",
+				"oojs-ui.styles.icons-content",
+				"oojs-ui.styles.icons-editing-core",
+				"oojs-ui.styles.icons-editing-advanced",
+				"oojs-ui.styles.icons-location",
+				"oojs-ui.styles.icons-moderation",
+				"mediawiki.widgets.DateInputWidget",
+				"mediawiki.widgets.CategoryMultiselectWidget"
+			],
+			"scripts": [
+				"resources/jquery/jquery.morphCrossfade.js",
+				"resources/jquery/jquery.lazyload.js",
+				"resources/uw.ValidationMessageElement.js",
+				"resources/uw.DetailsWidget.js",
+				"resources/uw.FieldLayout.js",
+				"resources/details/uw.TitleDetailsWidget.js",
+				"resources/details/uw.DateDetailsWidget.js",
+				"resources/details/uw.CategoriesDetailsWidget.js",
+				"resources/details/uw.DeedChooserDetailsWidget.js",
+				"resources/details/uw.LanguageDropdownWidget.js",
+				"resources/details/uw.UlsWidget.js",
+				"resources/details/uw.SingleLanguageInputWidget.js",
+				"resources/details/uw.MultipleLanguageInputWidget.js",
+				"resources/details/uw.LocationDetailsWidget.js",
+				"resources/details/uw.OtherDetailsWidget.js",
+				"resources/details/uw.CampaignDetailsWidget.js",
+				"resources/mw.fileApi.js",
+				"resources/mw.canvas.js",
+				"resources/mw.errorDialog.js",
+				"resources/mw.Escaper.js",
+				"resources/mw.DestinationChecker.js",
+				"resources/mw.QuickTitleChecker.js",
+				"resources/mw.FlickrChecker.js",
+				"resources/mw.GroupProgressBar.js",
+				"resources/mw.UploadWizardDeedChooser.js",
+				"resources/mw.UploadWizardLicenseInput.js",
+				"resources/mw.UploadWizard.js",
+				"resources/mw.UploadWizardUpload.js",
+				"resources/mw.UploadWizardDetails.js",
+				"resources/mw.UploadWizardUploadInterface.js"
+			],
+			"styles": [
+				"resources/uploadWizard.css",
+				"resources/uw.FieldLayout.less",
+				"resources/details/uw.DateDetailsWidget.less",
+				"resources/details/uw.SingleLanguageInputWidget.less",
+				"resources/details/uw.MultipleLanguageInputWidget.less",
+				"resources/details/uw.LocationDetailsWidget.less"
+			],
+			"messages": [
+				"uploadwizard",
+				"uploadwizard-desc",
+				"mwe-upwiz-step-tutorial",
+				"mwe-upwiz-step-file",
+				"mwe-upwiz-step-deeds",
+				"mwe-upwiz-step-details",
+				"mwe-upwiz-step-thanks",
+				"api-error-aborted",
+				"api-error-noimageinfo",
+				"api-error-parsererror",
+				"api-error-unknown-warning",
+				"unknown-error",
+				"apierror-offline",
+				"apierror-timeout",
+				"apierror-unknownerror",
+				"apierror-stashfailed-complete",
+				"file-exists-duplicate",
+				"file-deleted-duplicate",
+				"mwe-upwiz-api-warning-was-deleted",
+				"mwe-upwiz-api-warning-exists",
+				"mwe-upwiz-tutorial-error-localized-file-missing",
+				"mwe-upwiz-tutorial-error-file-missing",
+				"mwe-upwiz-tutorial-error-cannot-transform",
+				"mwe-upwiz-help-desk",
+				"mwe-upwiz-multi-file-select2",
+				"mwe-upwiz-flickr-input-placeholder",
+				"mwe-upwiz-add-flickr-or",
+				"mwe-upwiz-add-flickr",
+				"mwe-upwiz-select-flickr",
+				"mwe-upwiz-flickr-disclaimer1",
+				"mwe-upwiz-flickr-disclaimer2",
+				"mwe-upwiz-uploading",
+				"mwe-upwiz-queued",
+				"mwe-upwiz-assembling",
+				"mwe-upwiz-publish",
+				"mwe-upwiz-transported",
+				"mwe-upwiz-stashed-upload",
+				"mwe-upwiz-getting-metadata",
+				"mwe-upwiz-submitting-details",
+				"mwe-upwiz-submitting-captions",
+				"mwe-upwiz-published",
+				"mwe-upwiz-failed",
+				"mwe-upwiz-remove",
+				"mwe-upwiz-remove-upload",
+				"mwe-upwiz-remove-caption",
+				"mwe-upwiz-remove-description",
+				"mwe-upwiz-deleted-duplicate-unknown-filename",
+				"mwe-upwiz-upload",
+				"mwe-upwiz-file-upload-notcapable",
+				"mwe-upwiz-file-retry",
+				"mwe-upwiz-next-file-despite-failures",
+				"mwe-upwiz-upload-count",
+				"mwe-upwiz-progressbar-uploading",
+				"mwe-upwiz-almost-finished",
+				"mwe-upwiz-finished",
+				"mwe-upwiz-deeds-macro-prompt",
+				"mwe-upwiz-source-ownwork",
+				"disclaimerpage",
+				"mwe-upwiz-source-permission",
+				"mwe-upwiz-source-thirdparty",
+				"mwe-upwiz-source-custom",
+				"mwe-upwiz-more-options",
+				"mwe-upwiz-caption",
+				"mwe-upwiz-caption-add",
+				"mwe-upwiz-desc",
+				"mwe-upwiz-desc-add",
+				"mwe-upwiz-title",
+				"mwe-upwiz-date-created",
+				"mwe-upwiz-select-date",
+				"mwe-upwiz-location",
+				"mwe-upwiz-location-button",
+				"mwe-upwiz-location-lat",
+				"mwe-upwiz-location-lon",
+				"mwe-upwiz-location-alt",
+				"mwe-upwiz-location-heading",
+				"mwe-upwiz-copyright-info",
+				"mwe-upwiz-objref-pick-image",
+				"mwe-upwiz-objref-notice-existing-image",
+				"mwe-upwiz-autoconverted",
+				"mwe-upwiz-other",
+				"mwe-upwiz-upload-error-bad-filename-extension",
+				"mwe-upwiz-upload-error-bad-filename-no-extension",
+				"mwe-upwiz-upload-error-duplicate-filename-error",
+				"mwe-upwiz-allowed-filename-extensions",
+				"mwe-upwiz-upload-error-duplicate",
+				"mwe-upwiz-upload-error-duplicate-archive",
+				"mwe-upwiz-upload-error-stashed-anyway",
+				"mwe-upwiz-ok",
+				"mwe-upwiz-fileexists-replace-on-page",
+				"mwe-upwiz-fileexists-replace-no-link",
+				"mwe-upwiz-blacklisted-details",
+				"mwe-upwiz-blacklisted-details-feedback",
+				"mwe-upwiz-override",
+				"mwe-upwiz-override-upload",
+				"mwe-upwiz-next",
+				"mwe-upwiz-next-file",
+				"mwe-upwiz-next-deeds",
+				"mwe-upwiz-next-details",
+				"mwe-upwiz-previous",
+				"mwe-upwiz-home",
+				"mwe-upwiz-upload-another",
+				"mwe-upwiz-tooltip-title",
+				"mwe-upwiz-tooltip-caption",
+				"mwe-upwiz-tooltip-description",
+				"mwe-upwiz-tooltip-date",
+				"mwe-upwiz-tooltip-categories",
+				"mwe-upwiz-tooltip-other",
+				"mwe-upwiz-tooltip-location",
+				"mwe-upwiz-tooltip-more-info",
+				"mwe-upwiz-file-need-file",
+				"mwe-upwiz-deeds-need-deed",
+				"mwe-upwiz-deeds-need-license",
+				"mwe-upwiz-error-latitude",
+				"mwe-upwiz-error-longitude",
+				"mwe-upwiz-error-altitude",
+				"mwe-upwiz-error-heading",
+				"mwe-upwiz-error-blank",
+				"mwe-upwiz-error-date-license-mismatch",
+				"mwe-upwiz-error-date-license-unlikely",
+				"mwe-upwiz-error-too-long",
+				"mwe-upwiz-error-too-short",
+				"mwe-upwiz-error-bad-captions",
+				"mwe-upwiz-error-bad-descriptions",
+				"mwe-upwiz-error-title-blacklisted",
+				"mwe-upwiz-error-title-senselessimagename",
+				"mwe-upwiz-error-title-invalid",
+				"mwe-upwiz-error-title-thumbnail",
+				"mwe-upwiz-error-title-extension",
+				"mwe-upwiz-error-title-protected",
+				"mwe-upwiz-error-title-duplicate",
+				"mwe-upwiz-error-license-wikitext-missing",
+				"mwe-upwiz-error-license-wikitext-too-short",
+				"mwe-upwiz-error-license-wikitext-too-long",
+				"mwe-upwiz-error-license-wikitext-missing-template",
+				"mwe-upwiz-error-pageprops-missing-page",
+				"mwe-upwiz-error-pageprops-missing-prop",
+				"mwe-upwiz-error-submit-captions",
+				"mwe-upwiz-warning-categories-missing",
+				"mwe-upwiz-warning-postdate",
+				"mwe-upwiz-details-error-count",
+				"mwe-upwiz-details-warning-count",
+				"mwe-upwiz-license-cc-by-sa-4.0",
+				"mwe-upwiz-license-cc-by-sa-3.0",
+				"mwe-upwiz-license-cc-by-sa-3.0-at",
+				"mwe-upwiz-license-cc-by-sa-3.0-de",
+				"mwe-upwiz-license-cc-by-sa-3.0-ee",
+				"mwe-upwiz-license-cc-by-sa-3.0-es",
+				"mwe-upwiz-license-cc-by-sa-3.0-hr",
+				"mwe-upwiz-license-cc-by-sa-3.0-lu",
+				"mwe-upwiz-license-cc-by-sa-3.0-nl",
+				"mwe-upwiz-license-cc-by-sa-3.0-no",
+				"mwe-upwiz-license-cc-by-sa-3.0-pl",
+				"mwe-upwiz-license-cc-by-sa-3.0-ro",
+				"mwe-upwiz-license-cc-by-4.0",
+				"mwe-upwiz-license-cc-by-3.0",
+				"mwe-upwiz-license-cc-zero",
+				"mwe-upwiz-license-cc-by-sa-2.5",
+				"mwe-upwiz-license-cc-by-2.5",
+				"mwe-upwiz-license-cc-by-sa-2.0",
+				"mwe-upwiz-license-cc-by-2.0",
+				"mwe-upwiz-license-custom",
+				"mwe-upwiz-license-fal",
+				"mwe-upwiz-license-own-pd",
+				"mwe-upwiz-license-pd-old-100",
+				"mwe-upwiz-license-pd-old-70-1923",
+				"mwe-upwiz-license-pd-old",
+				"mwe-upwiz-license-pd-art-70",
+				"mwe-upwiz-license-pd-us",
+				"mwe-upwiz-license-pd-usgov",
+				"mwe-upwiz-license-pd-usgov-nasa",
+				"mwe-upwiz-license-pd-usgov-military-navy",
+				"mwe-upwiz-license-pd-ineligible",
+				"mwe-upwiz-license-pd-ineligible-help",
+				"mwe-upwiz-license-pd-textlogo",
+				"mwe-upwiz-license-copyrighted-free-use",
+				"mwe-upwiz-license-attribution",
+				"mwe-upwiz-license-gfdl",
+				"mwe-upwiz-license-cc-by-sa-3.0-gfdl",
+				"mwe-upwiz-license-cc-head",
+				"mwe-upwiz-license-cc-subhead",
+				"mwe-upwiz-license-flickr-head",
+				"mwe-upwiz-license-flickr-subhead",
+				"mwe-upwiz-license-public-domain-usa-head",
+				"mwe-upwiz-license-public-domain-usa-subhead",
+				"mwe-upwiz-license-usgov-head",
+				"mwe-upwiz-license-misc",
+				"mwe-upwiz-license-custom-head",
+				"mwe-upwiz-license-custom-preview",
+				"mwe-upwiz-license-none",
+				"mwe-upwiz-license-none-head",
+				"mwe-upwiz-license-generic",
+				"mwe-upwiz-license-generic-head",
+				"mwe-upwiz-license-confirm-remove",
+				"mwe-upwiz-license-confirm-remove-title",
+				"mwe-upwiz-license-external",
+				"mwe-upwiz-license-external-invalid",
+				"mwe-upwiz-license-photoset-invalid",
+				"mwe-upwiz-url-invalid",
+				"mwe-upwiz-user-blacklisted",
+				"mwe-upwiz-categories",
+				"mwe-upwiz-categories-missing",
+				"mwe-upwiz-thumbnail-failed",
+				"mwe-upwiz-unparseable-filename",
+				"mwe-upwiz-subhead-bugs",
+				"mwe-upwiz-subhead-alt-upload",
+				"mwe-upwiz-subhead-alternatives",
+				"mwe-upwiz-feedback-prompt",
+				"mwe-upwiz-feedback-title",
+				"mwe-upwiz-feedback-blacklist-line-intro",
+				"mwe-upwiz-feedback-blacklist-subject",
+				"mwe-upwiz-errordialog-title",
+				"mwe-upwiz-errordialog-ok",
+				"mwe-upwiz-calendar-date",
+				"mwe-upwiz-custom-date",
+				"wm-license-cc-by-sa-3.0-at-text",
+				"wm-license-cc-by-sa-3.0-de-text",
+				"wm-license-cc-by-sa-3.0-ee-text",
+				"wm-license-cc-by-sa-3.0-es-text",
+				"wm-license-cc-by-sa-3.0-hr-text",
+				"wm-license-cc-by-sa-3.0-lu-text",
+				"wm-license-cc-by-sa-3.0-nl-text",
+				"wm-license-cc-by-sa-3.0-no-text",
+				"wm-license-cc-by-sa-3.0-pl-text",
+				"wm-license-cc-by-sa-3.0-ro-text",
+				"mwe-upwiz-too-many-files-text",
+				"mwe-upwiz-too-many-files",
+				"mwe-upwiz-file-too-large-text",
+				"mwe-upwiz-file-too-large",
+				"mwe-upwiz-dialog-warning",
+				"mwe-upwiz-dialog-yes",
+				"mwe-upwiz-dialog-no",
+				"mwe-upwiz-dialog-title",
+				"colon-separator"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.base": {
+			"scripts": [
+				"resources/uw/uw.base.js"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.controller.base": {
+			"scripts": [
+				"resources/controller/uw.controller.base.js"
+			],
+			"dependencies": [
+				"uw.base"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.controller.Deed": {
+			"scripts": [
+				"resources/controller/uw.controller.Deed.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.controller.Step",
+				"uw.controller.base",
+				"uw.ui.Deed",
+				"uw.ui.DeedPreview"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.controller.Details": {
+			"scripts": [
+				"resources/uw.CopyMetadataWidget.js",
+				"resources/controller/uw.controller.Details.js"
+			],
+			"styles": [
+				"resources/uw.CopyMetadataWidget.less"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.controller.base",
+				"uw.controller.Step",
+				"uw.ui.Details",
+				"jquery.makeCollapsible",
+				"mediawiki.icon"
+			],
+			"messages": [
+				"mwe-upwiz-copy-metadata",
+				"mwe-upwiz-copy-metadata-button",
+				"mwe-upwiz-copy-metadata-button-undo",
+				"mwe-upwiz-copied-metadata",
+				"mwe-upwiz-undid-metadata",
+				"mwe-upwiz-copy-title",
+				"mwe-upwiz-copy-caption",
+				"mwe-upwiz-copy-description",
+				"mwe-upwiz-copy-date",
+				"mwe-upwiz-copy-categories",
+				"mwe-upwiz-copy-location",
+				"mwe-upwiz-copy-other"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.controller.Step": {
+			"scripts": [
+				"resources/uw.ConcurrentQueue.js",
+				"resources/controller/uw.controller.Step.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.controller.base"
+			],
+			"messages": [
+				"mwe-upwiz-prevent-close"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.controller.Thanks": {
+			"scripts": [
+				"resources/controller/uw.controller.Thanks.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.controller.Step",
+				"uw.controller.base",
+				"uw.ui.Thanks"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.controller.Tutorial": {
+			"scripts": [
+				"resources/controller/uw.controller.Tutorial.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.controller.Step",
+				"uw.controller.base",
+				"uw.ui.Tutorial"
+			],
+			"messages": [
+				"mwe-upwiz-prevent-close-wait"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.controller.Upload": {
+			"scripts": [
+				"resources/controller/uw.controller.Upload.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.controller.Step",
+				"uw.ui.Upload"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.ui.base": {
+			"scripts": [
+				"resources/ui/uw.ui.base.js"
+			],
+			"dependencies": [
+				"uw.base"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.ui.Wizard": {
+			"scripts": [
+				"resources/ui/uw.ui.Wizard.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.ui.base"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.ui.Step": {
+			"scripts": [
+				"resources/ui/uw.ui.Step.js"
+			],
+			"dependencies": [
+				"oojs",
+				"oojs-ui",
+				"uw.ui.base"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.ui.Deed": {
+			"scripts": [
+				"resources/ui/steps/uw.ui.Deed.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.ui.Step"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.ui.DeedPreview": {
+			"scripts": [
+				"resources/ui/uw.ui.DeedPreview.js"
+			],
+			"dependencies": [
+				"uw.ui.base"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.ui.Details": {
+			"scripts": [
+				"resources/ui/steps/uw.ui.Details.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.ui.Step"
+			],
+			"messages": [
+				"mwe-upwiz-file-some-failed",
+				"mwe-upwiz-file-all-failed",
+				"mwe-upwiz-patent-weapon-policy",
+				"mwe-upwiz-patent-weapon-policy-link"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.ui.Thanks": {
+			"scripts": [
+				"resources/ui/steps/uw.ui.Thanks.js"
+			],
+			"styles": [
+				"resources/ui/steps/uw.ui.Thanks.less"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.ui.base",
+				"uw.ui.Step"
+			],
+			"messages": [
+				"mwe-upwiz-thanks-intro",
+				"mwe-upwiz-thanks-explain",
+				"mwe-upwiz-thanks-wikitext",
+				"mwe-upwiz-objref-notice-update-delay",
+				"mwe-upwiz-thanks-url"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.ui.Tutorial": {
+			"scripts": [
+				"resources/ui/steps/uw.ui.Tutorial.js"
+			],
+			"styles": [
+				"resources/ui/steps/uw.ui.Tutorial.css"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.ui.base",
+				"uw.ui.Step"
+			],
+			"messages": [
+				"mwe-upwiz-skip-tutorial-future",
+				"mwe-upwiz-tooltip-skiptutorial",
+				"prefs-uploads",
+				"prefs-upwiz-interface"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.ui.Upload": {
+			"scripts": [
+				"resources/ui/steps/uw.ui.Upload.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.ui.Step",
+				"uw.units"
+			],
+			"messages": [
+				"mwe-upwiz-add-file-n",
+				"mwe-upwiz-add-file-0-free",
+				"mwe-upwiz-add-file-flickr-n",
+				"mwe-upwiz-add-file-flickr",
+				"mwe-upwiz-file-all-ok",
+				"mwe-upwiz-file-some-failed",
+				"mwe-upwiz-file-all-failed"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.deed.base": {
+			"scripts": [
+				"resources/deed/uw.deed.base.js"
+			],
+			"dependencies": [
+				"uw.base"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.deed.Abstract": {
+			"scripts": [
+				"resources/deed/uw.deed.Abstract.js"
+			],
+			"dependencies": [
+				"uw.deed.base"
+			],
+			"messages": [
+				"mwe-upwiz-patent-dialog-title-filename"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.deed.OwnWork": {
+			"scripts": [
+				"resources/deed/uw.deed.OwnWork.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.deed.Abstract",
+				"uw.deed.dialog.PatentDialog"
+			],
+			"messages": [
+				"mwe-upwiz-tooltip-sign",
+				"mwe-upwiz-source-ownwork-assert-any-license",
+				"mwe-upwiz-source-ownwork-assert",
+				"mwe-upwiz-source-ownwork-assert-custom",
+				"mwe-upwiz-source-ownwork-assert-note",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-4.0",
+				"mwe-upwiz-source-ownwork-cc-by-sa-4.0-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-at",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-at-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-de",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-de-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-ee",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-ee-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-es",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-es-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-hr",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-hr-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-lu",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-lu-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-nl",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-nl-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-no",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-no-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-pl",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-pl-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-ro",
+				"mwe-upwiz-source-ownwork-cc-by-sa-3.0-ro-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-4.0",
+				"mwe-upwiz-source-ownwork-cc-by-4.0-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-by-3.0",
+				"mwe-upwiz-source-ownwork-cc-by-3.0-explain",
+				"mwe-upwiz-source-ownwork-assert-cc-zero",
+				"mwe-upwiz-source-ownwork-cc-zero-explain",
+				"mwe-upwiz-source-ownwork-assert-generic",
+				"mwe-upwiz-source-ownwork-generic-explain",
+				"mwe-upwiz-patent",
+				"mwe-upwiz-error-patent-disagree",
+				"mwe-upwiz-error-signature-blank",
+				"mwe-upwiz-error-signature-too-long",
+				"mwe-upwiz-error-signature-too-short",
+				"mwe-upwiz-license-show-all",
+				"mwe-upwiz-license-show-recommended"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.deed.ThirdParty": {
+			"scripts": [
+				"resources/deed/uw.deed.ThirdParty.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.deed.Abstract"
+			],
+			"messages": [
+				"mwe-upwiz-error-blank",
+				"mwe-upwiz-error-too-short",
+				"mwe-upwiz-error-too-long",
+				"mwe-upwiz-source",
+				"mwe-upwiz-author",
+				"mwe-upwiz-tooltip-author",
+				"mwe-upwiz-tooltip-source",
+				"mwe-upwiz-source-thirdparty-cases",
+				"mwe-upwiz-source-thirdparty-custom-multiple-intro",
+				"mwe-upwiz-source-thirdparty-intro",
+				"mwe-upwiz-source-thirdparty-accept"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.deed.Custom": {
+			"scripts": [
+				"resources/deed/uw.deed.Custom.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.deed.Abstract"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.deed.External": {
+			"scripts": [
+				"resources/deed/uw.deed.External.js"
+			],
+			"dependencies": [
+				"oojs",
+				"uw.deed.Custom"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.deed.dialog.base": {
+			"scripts": [
+				"resources/deed/dialog/uw.deed.dialog.base.js"
+			],
+			"dependencies": [
+				"uw.deed.base"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.deed.dialog.PatentDialog": {
+			"scripts": [
+				"resources/deed/dialog/uw.deed.dialog.PatentDialog.js"
+			],
+			"dependencies": [
+				"mediawiki.language",
+				"oojs",
+				"oojs-ui-core",
+				"oojs-ui-windows",
+				"uw.deed.dialog.base"
+			],
+			"messages": [
+				"mwe-upwiz-patent-dialog-title",
+				"mwe-upwiz-patent-dialog-button-back",
+				"mwe-upwiz-patent-dialog-button-next",
+				"mwe-upwiz-patent-dialog-title-warranty",
+				"mwe-upwiz-patent-dialog-text-warranty",
+				"mwe-upwiz-patent-dialog-link-warranty",
+				"mwe-upwiz-patent-dialog-title-license",
+				"mwe-upwiz-patent-dialog-text-license",
+				"mwe-upwiz-patent-dialog-link-license",
+				"mwe-upwiz-patent-dialog-checkbox-label"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		},
+		"uw.units": {
+			"scripts": [
+				"resources/uw.units.js"
+			],
+			"dependencies": [
+				"uw.base"
+			],
+			"messages": [
+				"size-gigabytes",
+				"size-megabytes",
+				"size-kilobytes",
+				"size-bytes"
+			],
+			"targets": [ "desktop", "mobile" ],
+			"group": "ext.uploadWizard"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "UploadWizard"
+	},
+	"Hooks": {
+		"LoadExtensionSchemaUpdates": "UploadWizardHooks::onSchemaUpdate",
+		"GetPreferences": "UploadWizardHooks::onGetPreferences",
+		"IsUploadAllowedFromUrl": "UploadWizardHooks::onIsUploadAllowedFromUrl",
+		"ResourceLoaderTestModules": "UploadWizardHooks::onResourceLoaderTestModules",
+		"ListDefinedTags": "UploadWizardHooks::onListDefinedTags",
+		"ChangeTagsListActive": "UploadWizardHooks::onListDefinedTags",
+		"ChangeTagsAllowedAdd": "UploadWizardHooks::onListDefinedTags",
+
+		"ContentModelCanBeUsedOn": "CampaignHooks::onContentModelCanBeUsedOn",
+		"EditFilterMergedContent": "CampaignHooks::onEditFilterMergedContent",
+		"CodeEditorGetPageLanguage": "CampaignHooks::onCodeEditorGetPageLanguage",
+		"PageContentSaveComplete": "CampaignHooks::onPageContentSaveComplete",
+		"ArticleDeleteComplete": "CampaignHooks::onArticleDeleteComplete",
+		"TitleMoveComplete": "CampaignHooks::onTitleMoveComplete",
+		"LinksUpdateComplete": "CampaignHooks::onLinksUpdateComplete"
+	},
+	"EventLoggingSchemas": {
+		"UploadWizardTutorialActions": 5803466,
+		"UploadWizardUploadActions": 5811620,
+		"UploadWizardStep": 11772724,
+		"UploadWizardFlowEvent": 11772723,
+		"UploadWizardErrorFlowEvent": 11772725,
+		"UploadWizardExceptionFlowEvent": 11772722,
+		"UploadWizardUploadFlowEvent": 11772717
+	},
+	"namespaces": [
+		{
+			"id": 460,
+			"constant": "NS_CAMPAIGN",
+			"name": "Campaign",
+			"defaultcontentmodel": "Campaign",
+			"protection": "upwizcampaigns",
+			"capitallinkoverride": false
+		},
+		{
+			"id": 461,
+			"constant": "NS_CAMPAIGN_TALK",
+			"name": "Campaign_talk",
+			"capitallinkoverride": false
+		}
+	],
+	"config": {
+		"UploadWizardConfig": []
+	},
+	"manifest_version": 1
+}

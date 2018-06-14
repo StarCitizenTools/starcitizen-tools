@@ -1,9 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Byulent"
+			"Byulent",
+			"Kirsan",
+			"Kaszeba"
 		]
 	},
-	"checkuser-search": "Szëkba",
-	"checkuser-all": "wszëtczé"
+	"checkuser-all": "wszëtczé",
+	"checkuser-search": "Szëkna w registrze sprôwdzających brëkòwników",
+	"checkuser-search-target": "cél",
+	"checkuser-log-search-target": "Cél:"
 }

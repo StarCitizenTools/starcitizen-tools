@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ToolbarDialog styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-toolbarDialog-padded .oo-ui-window-body {
@@ -11,11 +11,17 @@
 .ve-ui-toolbarDialog-position-above {
 	overflow-y: hidden;
 	max-height: 0;
-	border-top: 1px solid #ddd;
 	-webkit-transition: max-height 250ms;
 	-moz-transition: max-height 250ms;
-	-o-transition: max-height 250ms;
 	transition: max-height 250ms;
+}
+
+.oo-ui-toolbar-position-top .ve-ui-toolbarDialog-position-above {
+	border-top: 1px solid #c8ccd1;
+}
+
+.oo-ui-toolbar-position-bottom .ve-ui-toolbarDialog-position-above {
+	border-bottom: 1px solid #c8ccd1;
 }
 
 .ve-ui-toolbarDialog-position-above.oo-ui-window-ready {
@@ -27,13 +33,12 @@
 	position: absolute;
 	right: 0;
 	background: #fff;
-	border-left: 1px solid #ddd;
+	border-left: 1px solid #c8ccd1;
 	overflow-x: hidden;
 	width: 0;
 	margin-top: 1px;
 	-webkit-transition: width 250ms;
 	-moz-transition: width 250ms;
-	-o-transition: width 250ms;
 	transition: width 250ms;
 }
 
@@ -41,7 +46,6 @@
 	min-height: 0;
 	-webkit-transition: margin 250ms, min-height 250ms;
 	-moz-transition: margin 250ms, min-height 250ms;
-	-o-transition: margin 250ms, min-height 250ms;
 	transition: margin 250ms, min-height 250ms;
 }
 

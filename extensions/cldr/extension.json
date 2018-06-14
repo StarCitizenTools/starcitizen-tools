@@ -1,6 +1,6 @@
 {
 	"name": "CLDR",
-	"version": "4.2.0",
+	"version": "4.5.0",
 	"author": [
 		"Niklas Laxström",
 		"Siebrand Mazeland",
@@ -9,7 +9,7 @@
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:CLDR",
 	"descriptionmsg": "cldr-desc",
-	"license-name" : "GPL-2.0+",
+	"license-name" : "GPL-2.0-or-later",
 	"Hooks": {
 		"LanguageGetTranslatedLanguageNames": [
 			"LanguageNames::coreHook"
@@ -18,17 +18,17 @@
 			"TimeUnits::onGetHumanTimestamp"
 		]
 	},
-	"MessageDirs": {
+	"MessagesDirs": {
 		"CLDR": [
 			"i18n"
 		]
 	},
 	"AutoloadClasses": {
-		"CldrNames": "CldrNames.php",
-		"LanguageNames": "LanguageNames.body.php",
-		"CountryNames": "CountryNames.body.php",
-		"CurrencyNames": "CurrencyNames.body.php",
-		"TimeUnits": "TimeUnits.body.php"
+		"CldrNames": "includes/CldrNames.php",
+		"LanguageNames": "includes/LanguageNames.php",
+		"CountryNames": "includes/CountryNames.php",
+		"CurrencyNames": "includes/CurrencyNames.php",
+		"TimeUnits": "includes/TimeUnits.php"
 	},
 	"manifest_version": 1
 }

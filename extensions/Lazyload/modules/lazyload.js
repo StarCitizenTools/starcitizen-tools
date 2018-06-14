@@ -1,5 +1,4 @@
 $.fn.lazyload = function(options) {
-
     var opt = $.extend({
         threshold: 50,
         effect: "show"
@@ -7,6 +6,17 @@ $.fn.lazyload = function(options) {
 
     var elements = this;
     var timer;
+
+    function replaceHost(url) {
+        var host = mw.config.get('Lazyload.imageHost');
+        if (!host) {
+            return url;
+        }
+        if (host.indexOf('//') === -1) {
+            host = '//' + host;
+        }
+        return url.replace(/(https?:)?\/\/[^\s\/]+/g, host);
+    }
 
     function update() {
         clearTimeout(timer);
@@ -36,15 +46,15 @@ $.fn.lazyload = function(options) {
                     }
                     img.hide()[opt.effect]();
                     if ($this.hasClass('apng') && window.APNG) {
-                       APNG.ifNeeded(function () {
+                       APNG.ifNeeded().then(function () {
                            APNG.animateImage(img.get(0));
                        });
                     }
                 });
 
-                img.attr('src', $this.data('url'));
-                if (img.data('srcset')) {
-                    img.attr('srcset', img.data('srcset'));
+                img.attr('src', replaceHost($this.data('url')));
+                if (img.data('srcset') && !mw.config.get('Lazyload.disableHidpi')) {
+                    img.attr('srcset', replaceHost(img.data('srcset')));
                     var testImage = new Image();
 
                     if ($.fn.hidpi && $.devicePixelRatio() > 1 && testImage.srcset === undefined) {

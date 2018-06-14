@@ -6,7 +6,7 @@
  * @defgroup MessageGroup Message group
  * @author Niklas Laxström
  * @copyright Copyright © 2010-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -48,7 +48,6 @@ interface MessageGroup {
 	 * @param IContextSource $context Context can be used by subclasses to provide
 	 *   translated descriptions, for example.
 	 * @return string
-	 *
 	 */
 	public function getDescription( IContextSource $context = null );
 
@@ -105,7 +104,7 @@ interface MessageGroup {
 	/**
 	 * Initialises a message collection with the given language code,
 	 * message definitions and message tags.
-	 * @param $code
+	 * @param string $code
 	 * @return MessageCollection
 	 */
 	public function initCollection( $code );
@@ -115,7 +114,7 @@ interface MessageGroup {
 	 * that list may be identical with the translation in the wiki. For other
 	 * groups the messages may be loaded from a file (and differ from the
 	 * current translations or definitions).
-	 * @param $code
+	 * @param string $code
 	 * @return array
 	 */
 	public function load( $code );
@@ -128,7 +127,7 @@ interface MessageGroup {
 	/**
 	 * Returns message tags. If type is given, only message keys with that
 	 * tag are returned. Otherwise an array[tag => keys] is returned.
-	 * @param $type string
+	 * @param string $type
 	 * @return array
 	 */
 	public function getTags( $type = null );

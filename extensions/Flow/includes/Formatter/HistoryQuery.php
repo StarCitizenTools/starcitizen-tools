@@ -2,7 +2,6 @@
 
 namespace Flow\Formatter;
 
-use Flow\Exception\InvalidDataException;
 use Flow\FlowActions;
 use Flow\Data\ManagerGroup;
 use Flow\Model\AbstractRevision;
@@ -14,7 +13,6 @@ abstract class HistoryQuery extends AbstractQuery {
 	// to try to reduce the number of rounds (preferably to 1).
 	// If you raise this, also increase history_index_limit and bump the
 	// key of the indexes using history_index_limit
-	//
 	// This magic number is based on new-post/new-topic being about 26% of post revisions.
 	// (queried from production), since that is the only thing currently excluded.
 	const POST_OVERFETCH_FACTOR = 1.36;
@@ -32,8 +30,8 @@ abstract class HistoryQuery extends AbstractQuery {
 	public function __construct(
 		ManagerGroup $storage,
 		TreeRepository $treeRepo,
-		FlowActions $actions )
-	{
+		FlowActions $actions
+	) {
 		parent::__construct( $storage, $treeRepo );
 		$this->actions = $actions;
 	}
@@ -58,15 +56,15 @@ abstract class HistoryQuery extends AbstractQuery {
 	 * @param UUID $offset UUID to use as offset (optional)
 	 * @return array Associative array of options for query
 	 */
-	protected function getOptions( $direction, $limit, UUID $offset = null) {
-		return array(
+	protected function getOptions( $direction, $limit, UUID $offset = null ) {
+		return [
 			'sort' => 'rev_id',
 			'order' => $direction === 'fwd' ? 'DESC' : 'ASC',
 			'limit' => $limit,
 			'offset-id' => $offset,
 			'offset-dir' => $direction,
 			'offset-include' => false,
-		);
+		];
 	}
 
 	/**
@@ -82,10 +80,10 @@ abstract class HistoryQuery extends AbstractQuery {
 	 * @param array $attributes Query attriutes
 	 * @param array $options Query options, including offset-id and limit
 	 * @param int $overfetchFactor Factor to overfetch by to anticipate excludes
-	 * @return array() Array of history rows
+	 * @return array Array of history rows
 	 */
 	protected function doInternalQueries( $storageClass, $attributes, $options, $overfetchFactor ) {
-		$result = array();
+		$result = [];
 
 		$limit = $options['limit'];
 		$internalOffset = $options['offset-id'];
@@ -113,7 +111,7 @@ abstract class HistoryQuery extends AbstractQuery {
 				$internalOverfetched = array_pop( $resultBeforeFiltering );
 			}
 
-			$resultAfterFiltering = array_filter( $resultBeforeFiltering, array( $this, 'includeInHistory' ) );
+			$resultAfterFiltering = array_filter( $resultBeforeFiltering, [ $this, 'includeInHistory' ] );
 
 			if ( count( $resultBeforeFiltering ) >= 1 ) {
 				$internalOffset = end( $resultBeforeFiltering )->getRevisionId();
@@ -121,7 +119,7 @@ abstract class HistoryQuery extends AbstractQuery {
 
 			$trimmedResultAfterFiltering = array_slice( $resultAfterFiltering, 0, $remainingNeeded );
 			$result = array_merge( $result, $trimmedResultAfterFiltering );
-		} while( count( $result ) < $limit && $internalOverfetched !== null );
+		} while ( count( $result ) < $limit && $internalOverfetched !== null );
 
 		return $result;
 	}

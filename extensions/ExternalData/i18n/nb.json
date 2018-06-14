@@ -4,17 +4,22 @@
 			"Harald Khan",
 			"Nghtwlkr",
 			"Njardarlogar",
-			"Danmichaelo"
+			"Danmichaelo",
+			"Jon Harald Søby"
 		]
 	},
 	"getdata": "Hent data",
 	"externaldata-desc": "Gir mulighet til å hente strukturerte data fra eksterne internettadresser, databaser og andre kilder",
+	"externaldata-no-param-specified": "Feil: Ingen parameter «$1» oppgitt.",
+	"externaldata-web-invalid-format": "Ugyldig format: «$1»",
 	"externaldata-ldap-unable-to-connect": "Klarte ikke å koble til $1",
 	"externaldata-xml-error": "XML-feil: $1 på linje $2",
+	"externaldata-invalid-json": "Feil: Ugyldig JSON.",
 	"externaldata-db-incomplete-information": "Feil: Ufullstendig informasjon for denne tjener-IDen.",
 	"externaldata-db-could-not-get-url": "Klarte ikke hente URL etter {{PLURAL:$1|ett forsøk|$1 forsøk}}.",
 	"externaldata-db-unknown-type": "Feil: Ukjent databasetype.",
 	"externaldata-db-could-not-connect": "Feil: Kunne ikke koble til database.",
+	"externaldata-db-unknown-collection": "Feil: Ukjent MongoDB-samling.",
 	"externaldata-db-no-return-values": "Feil: Ingen returverdi spesifisert.",
 	"externaldata-db-invalid-query": "Ugyldig spørring."
 }

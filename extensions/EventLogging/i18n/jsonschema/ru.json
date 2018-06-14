@@ -3,7 +3,8 @@
 		"authors": [
 			"DCamer",
 			"Okras",
-			"Macofe"
+			"Macofe",
+			"Facenapalm"
 		]
 	},
 	"jsonschema-badidref": "Неверный idref: \"$1\"",
@@ -14,6 +15,7 @@
 	"jsonschema-invalid-missingfield": "Отсутствует обязательное поле \"$1\"",
 	"jsonschema-invalid-notinenum": "Значения <code>$1</code> нет в перечислении для свойства $2",
 	"apihelp-jsonschema-description": "Получить страницу JSON-схемы.",
+	"apihelp-jsonschema-summary": "Получить страницу JSON-схемы.",
 	"apihelp-jsonschema-param-revid": "Идентификатор версии схемы.",
 	"apihelp-jsonschema-param-title": "Имя схемы.",
 	"apihelp-jsonschema-example-1": "Получить схему для версии 1234"

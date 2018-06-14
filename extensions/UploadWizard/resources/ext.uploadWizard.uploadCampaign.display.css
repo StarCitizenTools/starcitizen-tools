@@ -14,7 +14,7 @@
 
 #mw-campaign-title {
 	font-size: 24px;
-	border-bottom: 1px #ddd solid;
+	border-bottom: 1px solid #c8ccd1;
 }
 
 #mw-campaign-description {
@@ -22,11 +22,11 @@
 }
 
 #mw-campaign-header {
+	background-color: #f8f9fa;
 	overflow: hidden;
 	padding: 24px;
 	margin: 12px;
-	background-color: #f9f9f9;
-	border: 1px #ddd solid;
+	border: 1px solid #c8ccd1;
 }
 
 #mw-campaign-numbers {
@@ -51,9 +51,9 @@
 }
 
 #mw-campaign-view-all {
+	background-color: #f8f9fa;
 	display: block;
-	background-color: #f9f9f9;
-	border: 1px #ddd solid;
+	border: 1px solid #c8ccd1;
 	padding: 8px;
 	text-align: center;
 }
@@ -63,8 +63,8 @@
 }
 
 .mw-campaign-chevron {
-	background: url('images/down-chevron.png') no-repeat center;
-	width: 16px ;
+	background: url( images/down-chevron.png ) no-repeat center;
+	width: 16px;
 }
 
 .mw-campaign-float-left {

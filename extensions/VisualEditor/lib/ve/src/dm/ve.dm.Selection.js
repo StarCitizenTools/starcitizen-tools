@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Selection class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -55,6 +55,11 @@ ve.dm.Selection.static.newFromJSON = function ( doc, json ) {
 ve.dm.Selection.static.newFromHash = null;
 
 /* Methods */
+
+/**
+ * Test for selection equality
+ */
+ve.dm.Selection.prototype.equals = null;
 
 /**
  * Get a JSON serialization of this selection
@@ -140,6 +145,17 @@ ve.dm.Selection.prototype.isCollapsed = null;
 ve.dm.Selection.prototype.translateByTransaction = null;
 
 /**
+ * Apply translations from a transaction, with bias depending on author ID comparison
+ *
+ * @abstract
+ * @method
+ * @param {ve.dm.Transaction} tx Transaction
+ * @param {number} authorId The selection's author ID
+ * @return {ve.dm.Selection} A new translated selection
+ */
+ve.dm.Selection.prototype.translateByTransactionWithAuthor = null;
+
+/**
  * Apply translations from a set of transactions
  *
  * @param {ve.dm.Transaction[]} txs Transactions
@@ -150,6 +166,25 @@ ve.dm.Selection.prototype.translateByTransactions = function ( txs, excludeInser
 	var i, l, selection = this;
 	for ( i = 0, l = txs.length; i < l; i++ ) {
 		selection = selection.translateByTransaction( txs[ i ], excludeInsertion );
+	}
+	return selection;
+};
+
+/**
+ * Apply translations from a change
+ *
+ * @param {ve.dm.Change} change The change
+ * @param {number} authorId The author ID of this selection
+ * @return {ve.dm.Selection} A new translated selection
+ */
+ve.dm.Selection.prototype.translateByChange = function ( change, authorId ) {
+	var i, len,
+		selection = this;
+	for ( i = 0, len = change.transactions.length; i < len; i++ ) {
+		selection = selection.translateByTransactionWithAuthor(
+			change.transactions[ i ],
+			authorId
+		);
 	}
 	return selection;
 };

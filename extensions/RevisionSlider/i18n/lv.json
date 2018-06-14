@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Papuass",
+			"Macofe"
+		]
+	},
+	"revisionslider-toggle-label": "Pārlūkot vēsturi",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|baitu|baits|baitu}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|baitu|baits|baitu}}",
+	"revisionslider-label-date": "Datums",
+	"revisionslider-label-page-size": "Lapas izmērs",
+	"revisionslider-label-change-size": "Izmaiņas izmērs",
+	"revisionslider-label-comment": "Komentārs",
+	"revisionslider-label-username": "{{GENDER:$1|Dalībnieks|Dalībniece}}",
+	"revisionslider-minoredit": "Šis ir maznozīmīgs labojums",
+	"revisionslider-show-help-tooltip": "Rādīt palīdzības tekstu",
+	"revisionslider-tutorial": "Versiju slīdņa pamācība",
+	"revisionslider-previous-dialog": "Iepriekšējais",
+	"revisionslider-next-dialog": "Nākamais",
+	"revisionslider-close-dialog": "Aizvērt"
+}

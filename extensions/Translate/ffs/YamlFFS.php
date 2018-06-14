@@ -8,17 +8,25 @@
  * @ingroup FFS
  */
 class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
+	/**
+	 * @param FileBasedMessageGroup $group
+	 */
+	public function __construct( FileBasedMessageGroup $group ) {
+		parent::__construct( $group );
+		$this->flattener = $this->getFlattener();
+	}
+
 	public function getFileExtensions() {
-		return array( '.yaml', '.yml' );
+		return [ '.yaml', '.yml' ];
 	}
 
 	/**
-	 * @param $data
+	 * @param string $data
 	 * @return array Parsed data.
 	 */
 	public function readFromVariable( $data ) {
 		// Authors first.
-		$matches = array();
+		$matches = [];
 		preg_match_all( '/^#\s*Author:\s*(.*)$/m', $data, $matches );
 		$authors = $matches[1];
 
@@ -36,14 +44,14 @@ class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 			$value = rtrim( $value, "\n" );
 		}
 
-		return array(
+		return [
 			'AUTHORS' => $authors,
 			'MESSAGES' => $messages,
-		);
+		];
 	}
 
 	/**
-	 * @param $collection MessageCollection
+	 * @param MessageCollection $collection
 	 * @return string
 	 */
 	protected function writeReal( MessageCollection $collection ) {
@@ -52,7 +60,7 @@ class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 
 		$mangler = $this->group->getMangler();
 
-		$messages = array();
+		$messages = [];
 		/**
 		 * @var $m TMessage
 		 */
@@ -77,7 +85,7 @@ class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 		// Some groups have messages under language code.
 		if ( isset( $this->extra['codeAsRoot'] ) ) {
 			$code = $this->group->mapCode( $collection->code );
-			$messages = array( $code => $messages );
+			$messages = [ $code => $messages ];
 		}
 
 		$output .= TranslateYaml::dump( $messages );
@@ -86,7 +94,7 @@ class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 	}
 
 	/**
-	 * @param $collection MessageCollection
+	 * @param MessageCollection $collection
 	 * @return string
 	 */
 	protected function doHeader( MessageCollection $collection ) {
@@ -107,7 +115,7 @@ class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 	}
 
 	/**
-	 * @param $collection MessageCollection
+	 * @param MessageCollection $collection
 	 * @return string
 	 */
 	protected function doAuthors( MessageCollection $collection ) {
@@ -123,147 +131,71 @@ class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 	}
 
 	/**
+	 * Obtains object used to flatten and unflatten arrays. In this implementation
+	 * we use the ArrayFlattener class which also supports CLDR pluralization rules.
+	 *
+	 * @return object with flatten, unflatten methods
+	 */
+	protected function getFlattener() {
+		$nestingSeparator = isset( $this->extra['nestingSeparator'] ) ?
+			$this->extra['nestingSeparator'] : '.';
+		$parseCLDRPlurals = isset( $this->extra['parseCLDRPlurals'] ) ?
+			$this->extra['parseCLDRPlurals'] : false;
+
+		// Instantiate helper class for flattening and unflattening nested arrays
+		return new ArrayFlattener( $nestingSeparator, $parseCLDRPlurals );
+	}
+
+	/**
 	 * Flattens multidimensional array by using the path to the value as key
 	 * with each individual key separated by a dot.
 	 *
-	 * @param $messages array
+	 * @param array $messages
 	 *
 	 * @return array
 	 */
 	protected function flatten( $messages ) {
-		$flat = true;
-
-		foreach ( $messages as $v ) {
-			if ( !is_array( $v ) ) {
-				continue;
-			}
-
-			$flat = false;
-			break;
-		}
-
-		if ( $flat ) {
-			return $messages;
-		}
-
-		$array = array();
-		foreach ( $messages as $key => $value ) {
-			if ( !is_array( $value ) ) {
-				$array[$key] = $value;
-			} else {
-				$plural = $this->flattenPlural( $value );
-				if ( $plural ) {
-					$array[$key] = $plural;
-				} else {
-					$newArray = array();
-					foreach ( $value as $newKey => $newValue ) {
-						$newArray["$key.$newKey"] = $newValue;
-					}
-					$array += $this->flatten( $newArray );
-				}
-			}
-
-			/**
-			 * Can as well keep only one copy around.
-			 */
-			unset( $messages[$key] );
-		}
-
-		return $array;
+		return $this->flattener->flatten( $messages );
 	}
 
 	/**
-	 * Performs the reverse operation of flatten. Each dot in the key starts a
-	 * new subarray in the final array.
+	 * Performs the reverse operation of flatten. Each dot (or custom separator)
+	 * in the key starts a new subarray in the final array.
 	 *
-	 * @param $messages array
+	 * @param array $messages
 	 *
 	 * @return array
 	 */
 	protected function unflatten( $messages ) {
-		$array = array();
-		foreach ( $messages as $key => $value ) {
-			$plurals = $this->unflattenPlural( $key, $value );
-
-			if ( $plurals === false ) {
-				continue;
-			}
-
-			foreach ( $plurals as $keyPlural => $valuePlural ) {
-				$path = explode( '.', $keyPlural );
-				if ( count( $path ) === 1 ) {
-					$array[$keyPlural] = $valuePlural;
-					continue;
-				}
-
-				$pointer = &$array;
-				do {
-					/**
-					 * Extract the level and make sure it exists.
-					 */
-					$level = array_shift( $path );
-					if ( !isset( $pointer[$level] ) ) {
-						$pointer[$level] = array();
-					}
-
-					/**
-					 * Update the pointer to the new reference.
-					 */
-					$tmpPointer = &$pointer[$level];
-					unset( $pointer );
-					$pointer = &$tmpPointer;
-					unset( $tmpPointer );
-
-					/**
-					 * If next level is the last, add it into the array.
-					 */
-					if ( count( $path ) === 1 ) {
-						$lastKey = array_shift( $path );
-						$pointer[$lastKey] = $valuePlural;
-					}
-				} while ( count( $path ) );
-			}
-		}
-
-		return $array;
+		return $this->flattener->unflatten( $messages );
 	}
 
-	/**
-	 * @param $value
-	 * @return bool
-	 */
-	public function flattenPlural( $value ) {
-		return false;
-	}
-
-	/**
-	 * Override this. Return false to skip processing this value. Otherwise
-	 *
-	 * @param $key string
-	 * @param $value string
-	 *
-	 * @return array with keys and values.
-	 */
-	public function unflattenPlural( $key, $value ) {
-		return array( $key => $value );
+	public function isContentEqual( $a, $b ) {
+		return $this->flattener->compareContent( $a, $b );
 	}
 
 	public static function getExtraSchema() {
-		$schema = array(
-			'root' => array(
+		$schema = [
+			'root' => [
 				'_type' => 'array',
-				'_children' => array(
-					'FILES' => array(
+				'_children' => [
+					'FILES' => [
 						'_type' => 'array',
-						'_children' => array(
-							'codeAsRoot' => array(
+						'_children' => [
+							'codeAsRoot' => [
 								'_type' => 'boolean',
-							),
-						)
-					)
-				)
-			)
-		);
+							],
+							'nestingSeparator' => [
+								'_type' => 'text',
+							],
+							'parseCLDRPlurals' => [
+								'_type' => 'boolean',
+							]
+						]
+					]
+				]
+			]
+		];
 
 		return $schema;
 	}

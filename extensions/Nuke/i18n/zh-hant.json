@@ -9,7 +9,8 @@
 			"Mark85296341",
 			"Shinjiman",
 			"LNDDYL",
-			"EagerLin"
+			"EagerLin",
+			"Hello903hello"
 		]
 	},
 	"nuke": "大量刪除",
@@ -33,9 +34,9 @@
 	"nuke-not-deleted": "'''無法'''刪除頁面 [[:$1]]。",
 	"nuke-delete-more": "[[Special:Nuke|刪除更多頁面]]",
 	"nuke-pattern": "頁面名稱模式：",
-	"nuke-nopages-global": "[[Special:RecentChanges|最近更改]] 中沒有新的頁面。",
+	"nuke-nopages-global": "沒有頁面標題符合您的搜尋。",
 	"nuke-viewchanges": "檢視變更",
 	"nuke-namespace": "限制命名空間為：",
 	"nuke-linkoncontribs": "大量刪除",
-	"nuke-linkoncontribs-text": "大量刪除此使用者是唯一作者的頁面"
+	"nuke-linkoncontribs-text": "大量刪除{{GENDER:$1|此使用者}}是唯一作者的頁面"
 }

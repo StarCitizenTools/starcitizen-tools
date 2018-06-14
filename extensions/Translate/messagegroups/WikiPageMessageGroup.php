@@ -5,14 +5,14 @@
  * @file
  * @author Niklas Laxström
  * @author Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
  * Wraps the translatable page sections into a message group.
  * @ingroup PageTranslation MessageGroup
  */
-class WikiPageMessageGroup extends WikiMessageGroup {
+class WikiPageMessageGroup extends WikiMessageGroup implements IDBAccessObject {
 	/**
 	 * @var Title|string
 	 */
@@ -59,12 +59,12 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 
 		$dbr = TranslateUtils::getSafeReadDB();
 		$tables = 'translate_sections';
-		$vars = array( 'trs_key', 'trs_text' );
-		$conds = array( 'trs_page' => $this->getTitle()->getArticleID() );
-		$options = array( 'ORDER BY' => 'trs_order' );
+		$vars = [ 'trs_key', 'trs_text' ];
+		$conds = [ 'trs_page' => $this->getTitle()->getArticleID() ];
+		$options = [ 'ORDER BY' => 'trs_order' ];
 		$res = $dbr->select( $tables, $vars, $conds, __METHOD__, $options );
 
-		$defs = array();
+		$defs = [];
 		$prefix = $this->getTitle()->getPrefixedDBkey() . '/';
 
 		foreach ( $res as $r ) {
@@ -73,13 +73,14 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 			$defs[$r->trs_key] = $section->getTextWithVariables();
 		}
 
-		$new_defs = array();
+		$new_defs = [];
 		foreach ( $defs as $k => $v ) {
 			$k = str_replace( ' ', '_', $k );
 			$new_defs[$prefix . $k] = $v;
 		}
 
-		return $this->definitions = $new_defs;
+		$this->definitions = $new_defs;
+		return $this->definitions;
 	}
 
 	/**
@@ -99,7 +100,7 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 			return $this->getDefinitions();
 		}
 
-		return array();
+		return [];
 	}
 
 	/**
@@ -108,9 +109,10 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 	 *
 	 * @param string $key Message key
 	 * @param string $code Language code
+	 * @param int $flags READ_* class constant bitfield
 	 * @return string|null Stored translation or null.
 	 */
-	public function getMessage( $key, $code ) {
+	public function getMessage( $key, $code, $flags = self::READ_LATEST ) {
 		if ( $this->isSourceLanguage( $code ) ) {
 			$stuff = $this->load( $code );
 
@@ -123,10 +125,14 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 		}
 
 		$title = Title::makeTitleSafe( $this->getNamespace(), "$key/$code" );
-		$flags = RequestContext::getMain()->getRequest()->wasPosted()
-			? Revision::READ_LATEST
-			: 0; // bug T95753
-		$rev = Revision::newFromTitle( $title, false, $flags );
+		if ( PageTranslationHooks::$renderingContext ) {
+			$revFlags = Revision::READ_NORMAL; // bug T95753
+		} else {
+			$revFlags = ( $flags & self::READ_LATEST ) == self::READ_LATEST
+				? Revision::READ_LATEST
+				: Revision::READ_NORMAL;
+		}
+		$rev = Revision::newFromTitle( $title, false, $revFlags );
 
 		if ( !$rev ) {
 			return null;
@@ -140,13 +146,11 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 	 */
 	public function getChecker() {
 		$checker = new MediaWikiMessageChecker( $this );
-		$checker->setChecks( array(
-			array( $checker, 'pluralCheck' ),
-			array( $checker, 'XhtmlCheck' ),
-			array( $checker, 'braceBalanceCheck' ),
-			array( $checker, 'pagenameMessagesCheck' ),
-			array( $checker, 'miscMWChecks' )
-		) );
+		$checker->setChecks( [
+			[ $checker, 'pluralCheck' ],
+			[ $checker, 'braceBalanceCheck' ],
+			[ $checker, 'miscMWChecks' ]
+		] );
 
 		return $checker;
 	}

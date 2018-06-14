@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWInternalLinkContextItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -33,35 +33,39 @@ ve.ui.MWInternalLinkContextItem.static.name = 'link/internal';
 
 ve.ui.MWInternalLinkContextItem.static.modelClasses = [ ve.dm.MWInternalLinkAnnotation ];
 
-/* Methods */
+/* Static methods */
 
 /**
- * @inheritdoc
+ * Generate the body of the link context item
+ *
+ * @param {ve.init.mw.LinkCache} linkCache The link cache to use
+ * @param {ve.dm.MWInternalLinkAnnotation} model The annotation model
+ * @param {HTMLDocument} htmlDoc The HTML document (for URL resolution)
+ * @param {ve.ui.Context} context Context (for resizing)
+ * @return {jQuery} The jQuery object of the link context item
  */
-ve.ui.MWInternalLinkContextItem.prototype.getDescription = function () {
-	return this.model.getAttribute( 'normalizedTitle' );
-};
-
-/**
- * @inheritdoc
- */
-ve.ui.MWInternalLinkContextItem.prototype.renderBody = function () {
+ve.ui.MWInternalLinkContextItem.static.generateBody = function ( linkCache, model, htmlDoc, context ) {
 	var icon, $description,
+		title = model.getAttribute( 'lookupTitle' ),
+		description = model.getAttribute( 'normalizedTitle' ),
+		href = model.getHref(),
+		fragment = model.getFragment(),
 		usePageImages = mw.config.get( 'wgVisualEditor' ).usePageImages,
 		usePageDescriptions = mw.config.get( 'wgVisualEditor' ).usePageDescriptions,
-		title = this.model.getAttribute( 'lookupTitle' ),
-		htmlDoc = this.context.getSurface().getModel().getDocument().getHtmlDocument(),
 		$wrapper = $( '<div>' ),
 		$link = $( '<a>' )
 			.addClass( 've-ui-mwInternalLinkContextItem-link' )
-			.text( this.getDescription() )
+			.text( description )
 			.attr( {
-				href: ve.resolveUrl( this.model.getHref(), htmlDoc ),
-				target: '_blank'
+				href: ve.resolveUrl( href, htmlDoc ),
+				target: '_blank',
+				rel: 'noopener'
 			} );
 
 	// Style based on link cache information
-	ve.init.platform.linkCache.styleElement( title, $link );
+	ve.init.platform.linkCache.styleElement( title, $link, fragment );
+	// Don't style as a self-link in the context menu (but do elsewhere)
+	$link.removeClass( 'mw-selflink' );
 
 	if ( usePageImages ) {
 		icon = new OO.ui.IconWidget( { icon: 'page-existing' } );
@@ -76,10 +80,8 @@ ve.ui.MWInternalLinkContextItem.prototype.renderBody = function () {
 		$wrapper.addClass( 've-ui-mwInternalLinkContextItem-withDescription' );
 	}
 
-	this.$body.empty().append( $wrapper );
-
 	if ( usePageImages || usePageDescriptions ) {
-		ve.init.platform.linkCache.get( title ).then( function ( linkData ) {
+		linkCache.get( title ).then( function ( linkData ) {
 			if ( usePageImages ) {
 				if ( linkData.imageUrl ) {
 					icon.$element
@@ -94,9 +96,33 @@ ve.ui.MWInternalLinkContextItem.prototype.renderBody = function () {
 					.addClass( 've-ui-mwInternalLinkContextItem-description' )
 					.text( linkData.description );
 				$wrapper.append( $description );
+				// Multiline descriptions may make the context bigger (T183650)
+				context.updateDimensions();
 			}
 		} );
 	}
+	return $wrapper;
+};
+
+/* Methods */
+
+/**
+ * @inheritdoc
+ */
+ve.ui.MWInternalLinkContextItem.prototype.getDescription = function () {
+	return this.model.getAttribute( 'normalizedTitle' );
+};
+
+/**
+ * @inheritdoc
+ */
+ve.ui.MWInternalLinkContextItem.prototype.renderBody = function () {
+	this.$body.empty().append( this.constructor.static.generateBody(
+		ve.init.platform.linkCache,
+		this.model,
+		this.context.getSurface().getModel().getDocument().getHtmlDocument(),
+		this.context
+	) );
 };
 
 /* Registration */

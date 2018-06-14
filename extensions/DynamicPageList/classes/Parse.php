@@ -172,7 +172,7 @@ class Parse {
 			$this->logger->addMessage(\DynamicPageListHooks::FATAL_NOSELECTION);
 			return $this->getFullOutput();
 		}
-		$cleanParameters = $this->parameters->sortByPriority($cleanParameters);
+		$cleanParameters = Parameters::sortByPriority($cleanParameters);
 		$this->parameters->setParameter('includeuncat', false); // to check if pseudo-category of Uncategorized pages is included
 
 		foreach ($cleanParameters as $parameter => $option) {
@@ -230,6 +230,11 @@ class Parse {
 		$numRows = $this->DB->numRows($result);
 		$articles = $this->processQueryResults($result);
 
+		global $wgDebugDumpSql;
+		if (\DynamicPageListHooks::getDebugLevel() >= 4 && $wgDebugDumpSql) {
+			$this->addOutput($this->query->getSqlQuery()."\n");
+		}
+
 		$this->addOutput('{{Extension DPL}}');
 
 		//Preset these to defaults.
@@ -271,7 +276,7 @@ class Parse {
 			$this->parameters->getParameter('inlinetext'),
 			$this->parameters->getParameter('listattr'),
 			$this->parameters->getParameter('itemattr'),
-			$this->parameters->getParameter('listseparators'),
+			(array) $this->parameters->getParameter('listseparators'),
 			$offset,
 			$this->parameters->getParameter('dominantsection')
 		);
@@ -283,7 +288,7 @@ class Parse {
 			'',
 			$this->parameters->getParameter('hlistattr'),
 			$this->parameters->getParameter('hitemattr'),
-			$this->parameters->getParameter('listseparators'),
+			(array) $this->parameters->getParameter('listseparators'),
 			$offset,
 			$this->parameters->getParameter('dominantsection')
 		);
@@ -500,6 +505,7 @@ class Parse {
 				$parameter = str_replace('>', 'gt', $parameter);
 			}
 
+			$parameter = strtolower($parameter); //Force lower case for ease of use.
 			if (empty($parameter) || substr($parameter, 0, 1) == '#' || ($this->parameters->exists($parameter) && !$this->parameters->testRichness($parameter))) {
 				continue;
 			}
@@ -794,18 +800,6 @@ class Parse {
 			return false;
 		}
 
-		/**
-		 * If including the Uncategorized, we need the 'dpl_clview': VIEW of the categorylinks table where we have cl_to='' (empty string) for all uncategorized pages. This VIEW must have been created by the administrator of the mediawiki DB at installation. See the documentation.
-		 */
-		if ($this->parameters->getParameter('includeuncat')) {
-			//If the view is not there, we can't perform logical operations on the Uncategorized.
-			if (!$this->DB->tableExists('dpl_clview')) {
-				$sql = 'CREATE VIEW '.$this->tableNames['dpl_clview']." AS SELECT IFNULL(cl_from, page_id) AS cl_from, IFNULL(cl_to, '') AS cl_to, cl_sortkey FROM ".$this->tableNames['page'].' LEFT OUTER JOIN '.$this->tableNames['categorylinks'].' ON '.$this->tableNames['page'].'.page_id=cl_from';
-				$this->logger->addMessage(\DynamicPageListHooks::FATAL_NOCLVIEW, $this->tableNames['dpl_clview'], $sql);
-				return false;
-			}
-		}
-
 		//add*** parameters have no effect with 'mode=category' (only namespace/title can be viewed in this mode)
 		if ($this->parameters->getParameter('mode') == 'category' && ($this->parameters->getParameter('addcategories') || $this->parameters->getParameter('addeditdate') || $this->parameters->getParameter('addfirstcategorydate') || $this->parameters->getParameter('addpagetoucheddate') || $this->parameters->getParameter('incpage') || $this->parameters->getParameter('adduser') || $this->parameters->getParameter('addauthor') || $this->parameters->getParameter('addcontribution') || $this->parameters->getParameter('addlasteditor'))) {
 			$this->logger->addMessage(\DynamicPageListHooks::WARN_CATOUTPUTBUTWRONGPARAMS);
@@ -941,12 +935,12 @@ class Parse {
 		if (!is_array($reset)) {
 			$reset = [];
 		}
-		$reset = array_merge($reset, $this->parameters->getParameter('reset'));
+		$reset = array_merge($reset, (array)$this->parameters->getParameter('reset'));
 
 		if (!is_array($eliminate)) {
 			$eliminate = [];
 		}
-		$eliminate = array_merge($eliminate, $this->parameters->getParameter('eliminate'));
+		$eliminate = array_merge($eliminate, (array)$this->parameters->getParameter('eliminate'));
 		if ($isParserTag === true) {
 			//In tag mode 'eliminate' is the same as 'reset' for templates, categories, and images.
 			if (isset($eliminate['templates']) && $eliminate['templates']) {

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWCategoriesPage class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -21,7 +21,7 @@ ve.ui.MWCategoriesPage = function VeUiMWCategoriesPage( name, config ) {
 	config = config || {};
 
 	// Parent constructor
-	OO.ui.PageLayout.call( this, name, config );
+	ve.ui.MWCategoriesPage.super.apply( this, arguments );
 
 	// Properties
 	this.metaList = null;
@@ -31,13 +31,25 @@ ve.ui.MWCategoriesPage = function VeUiMWCategoriesPage( name, config ) {
 		label: ve.msg( 'visualeditor-dialog-meta-categories-data-label' ),
 		icon: 'tag'
 	} );
+
 	this.categoryOptionsFieldset = new OO.ui.FieldsetLayout( {
 		label: ve.msg( 'visualeditor-dialog-meta-categories-options' ),
-		icon: 'settings'
+		icon: 'advanced'
 	} );
+
 	this.categoryWidget = new ve.ui.MWCategoryWidget( {
 		$overlay: config.$overlay
 	} );
+
+	this.addCategory = new OO.ui.FieldLayout(
+		this.categoryWidget,
+		{
+			$overlay: config.$overlay,
+			align: 'top',
+			label: ve.msg( 'visualeditor-dialog-meta-categories-addcategory-label' )
+		}
+	);
+
 	this.defaultSortInput = new OO.ui.TextInputWidget( {
 		placeholder: this.fallbackDefaultSortKey
 	} );
@@ -47,6 +59,7 @@ ve.ui.MWCategoriesPage = function VeUiMWCategoriesPage( name, config ) {
 	this.defaultSort = new OO.ui.FieldLayout(
 		this.defaultSortInput,
 		{
+			$overlay: config.$overlay,
 			align: 'top',
 			label: ve.msg( 'visualeditor-dialog-meta-categories-defaultsort-label' ),
 			help: ve.msg( 'visualeditor-dialog-meta-categories-defaultsort-help' )
@@ -63,7 +76,7 @@ ve.ui.MWCategoriesPage = function VeUiMWCategoriesPage( name, config ) {
 	} );
 
 	// Initialization
-	this.categoriesFieldset.$element.append( this.categoryWidget.$element );
+	this.categoriesFieldset.addItems( [ this.addCategory ] );
 	this.categoryOptionsFieldset.addItems( [ this.defaultSort ] );
 	this.$element.append( this.categoriesFieldset.$element, this.categoryOptionsFieldset.$element );
 };
@@ -77,9 +90,9 @@ OO.inheritClass( ve.ui.MWCategoriesPage, OO.ui.PageLayout );
 /**
  * @inheritdoc
  */
-ve.ui.MWCategoriesPage.prototype.setOutlineItem = function ( outlineItem ) {
+ve.ui.MWCategoriesPage.prototype.setOutlineItem = function () {
 	// Parent method
-	OO.ui.PageLayout.prototype.setOutlineItem.call( this, outlineItem );
+	ve.ui.MWCategoriesPage.super.prototype.setOutlineItem.apply( this, arguments );
 
 	if ( this.outlineItem ) {
 		this.outlineItem
@@ -106,16 +119,16 @@ ve.ui.MWCategoriesPage.prototype.onDefaultSortChange = function ( value ) {
  *  or undefined to go at the end
  */
 ve.ui.MWCategoriesPage.prototype.onNewCategory = function ( item, beforeMetaItem ) {
+	var args = [ this.getCategoryItemForInsertion( item ) ];
+
 	// Insert new metaList item
 	if ( beforeMetaItem ) {
-		this.insertMetaListItem(
-			this.getCategoryItemForInsertion( item ),
-			beforeMetaItem.getOffset(),
-			beforeMetaItem.getIndex()
-		);
-	} else {
-		this.insertMetaListItem( this.getCategoryItemForInsertion( item ) );
+		args.push( beforeMetaItem.getOffset() );
+		if ( beforeMetaItem.getIndex ) {
+			args.push( beforeMetaItem.getIndex() );
+		}
 	}
+	this.metaList.insertMeta.apply( this.metaList, args );
 };
 
 /**
@@ -134,11 +147,14 @@ ve.ui.MWCategoriesPage.prototype.onUpdateSortKey = function ( item ) {
  * @param {ve.dm.MetaItem} metaItem
  */
 ve.ui.MWCategoriesPage.prototype.onMetaListInsert = function ( metaItem ) {
+	var index;
+
 	// Responsible for adding UI components
 	if ( metaItem.element.type === 'mwCategory' ) {
+		index = this.metaList.getItemsInGroup( 'mwCategory' ).indexOf( metaItem );
 		this.categoryWidget.addItems(
 			[ this.getCategoryItemFromMetaListItem( metaItem ) ],
-			this.metaList.findItem( metaItem.getOffset(), metaItem.getIndex(), 'mwCategory' )
+			index
 		);
 	}
 };
@@ -221,17 +237,6 @@ ve.ui.MWCategoriesPage.prototype.getCategoryItemForInsertion = function ( item, 
 };
 
 /**
- * Inserts a meta list item
- *
- * @param {Object} metaBase meta list insert object
- * @param {number} [offset] Offset of the meta items within the document
- * @param {number} [index] Index of the meta item within the group of meta items at this offset
- */
-ve.ui.MWCategoriesPage.prototype.insertMetaListItem = function ( metaBase, offset, index ) {
-	this.metaList.insertMeta( metaBase, offset, index );
-};
-
-/**
  * Setup categories page.
  *
  * @param {ve.dm.MetaList} metaList Meta list
@@ -259,7 +264,7 @@ ve.ui.MWCategoriesPage.prototype.setup = function ( metaList ) {
 	// Update input position after transition
 	setTimeout( function () {
 		page.categoryWidget.fitInput();
-	}, 250 );
+	}, OO.ui.theme.getDialogTransitionDuration() );
 };
 
 /**
@@ -282,26 +287,24 @@ ve.ui.MWCategoriesPage.prototype.teardown = function ( data ) {
 			attributes: { content: newDefaultSortKey }
 		};
 
-	data = data || {};
-	if ( data.action !== 'apply' ) {
-		return;
-	}
-
-	// Alter the default sort key iff it's been touched & is actually different
-	if ( this.defaultSortKeyTouched ) {
-		if ( newDefaultSortKey === '' ) {
-			if ( currentDefaultSortKeyItem ) {
-				currentDefaultSortKeyItem.remove();
-			}
-		} else {
-			if ( !currentDefaultSortKeyItem ) {
-				this.metaList.insertMeta( newDefaultSortKeyData );
-			} else if ( currentDefaultSortKeyItem.getAttribute( 'content' ) !== newDefaultSortKey ) {
-				currentDefaultSortKeyItem.replaceWith(
-					ve.extendObject( true, {},
-						currentDefaultSortKeyItem.getElement(),
-						newDefaultSortKeyData
-				) );
+	if ( data && data.action === 'apply' ) {
+		// Alter the default sort key iff it's been touched & is actually different
+		if ( this.defaultSortKeyTouched ) {
+			if ( newDefaultSortKey === '' ) {
+				if ( currentDefaultSortKeyItem ) {
+					currentDefaultSortKeyItem.remove();
+				}
+			} else {
+				if ( !currentDefaultSortKeyItem ) {
+					this.metaList.insertMeta( newDefaultSortKeyData );
+				} else if ( currentDefaultSortKeyItem.getAttribute( 'content' ) !== newDefaultSortKey ) {
+					currentDefaultSortKeyItem.replaceWith(
+						ve.extendObject( true, {},
+							currentDefaultSortKeyItem.getElement(),
+							newDefaultSortKeyData
+						)
+					);
+				}
 			}
 		}
 	}

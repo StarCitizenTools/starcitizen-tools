@@ -7,7 +7,7 @@
  * @author Niklas Laxström
  * @author Santhosh Thottingal
  * @copyright Copyright © 2012-2013, Niklas Laxström, Santhosh Thottingal
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 class TranslateMetadata {
@@ -15,14 +15,14 @@ class TranslateMetadata {
 
 	/**
 	 * Get a metadata value for the given group and key.
-	 * @param $group string The group name
-	 * @param $key string Metadata key
-	 * @return String
+	 * @param string $group The group name
+	 * @param string $key Metadata key
+	 * @return string|bool
 	 */
 	public static function get( $group, $key ) {
 		if ( self::$cache === null ) {
-			$dbr = wfGetDB( DB_SLAVE );
-			$res = $dbr->select( 'translate_metadata', '*', array(), __METHOD__ );
+			$dbr = wfGetDB( DB_REPLICA );
+			$res = $dbr->select( 'translate_metadata', '*', [], __METHOD__ );
 			foreach ( $res as $row ) {
 				self::$cache[$row->tmd_group][$row->tmd_key] = $row->tmd_value;
 			}
@@ -38,20 +38,20 @@ class TranslateMetadata {
 	/**
 	 * Set a metadata value for the given group and metadata key. Updates the
 	 * value if already existing.
-	 * @param $group string The group id
-	 * @param $key string Metadata key
-	 * @param $value string Metadata value
+	 * @param string $group The group id
+	 * @param string $key Metadata key
+	 * @param string $value Metadata value
 	 */
 	public static function set( $group, $key, $value ) {
 		$dbw = wfGetDB( DB_MASTER );
-		$data = array( 'tmd_group' => $group, 'tmd_key' => $key, 'tmd_value' => $value );
+		$data = [ 'tmd_group' => $group, 'tmd_key' => $key, 'tmd_value' => $value ];
 		if ( $value === false ) {
 			unset( $data['tmd_value'] );
 			$dbw->delete( 'translate_metadata', $data );
 		} else {
 			$dbw->replace(
 				'translate_metadata',
-				array( array( 'tmd_group', 'tmd_key' ) ),
+				[ [ 'tmd_group', 'tmd_key' ] ],
 				$data,
 				__METHOD__
 			);
@@ -63,9 +63,8 @@ class TranslateMetadata {
 	/**
 	 * Wrapper for getting subgroups.
 	 * @param string $groupId
-	 * @return array|String
+	 * @return array|bool
 	 * @since 2012-05-09
-	 * return array|false
 	 */
 	public static function getSubgroups( $groupId ) {
 		$groups = self::get( $groupId, 'subgroups' );
@@ -104,7 +103,7 @@ class TranslateMetadata {
 	 */
 	public static function deleteGroup( $groupId ) {
 		$dbw = wfGetDB( DB_MASTER );
-		$conds = array( 'tmd_group' => $groupId );
+		$conds = [ 'tmd_group' => $groupId ];
 		$dbw->delete( 'translate_metadata', $conds );
 	}
 }

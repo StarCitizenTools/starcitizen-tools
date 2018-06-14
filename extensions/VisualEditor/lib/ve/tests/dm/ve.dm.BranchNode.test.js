@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel BranchNode tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.BranchNode' );
@@ -10,7 +10,7 @@ QUnit.module( 've.dm.BranchNode' );
 
 ve.dm.BranchNodeStub = function VeDmBranchNodeStub() {
 	// Parent constructor
-	ve.dm.BranchNode.apply( this, arguments );
+	ve.dm.BranchNodeStub.super.apply( this, arguments );
 };
 
 OO.inheritClass( ve.dm.BranchNodeStub, ve.dm.BranchNode );
@@ -19,21 +19,29 @@ ve.dm.BranchNodeStub.static.name = 'branch-stub';
 
 ve.dm.BranchNodeStub.static.matchTagNames = [];
 
+// Throw in nodeAttached so BranchNodeStub better passes duck type scrutiny as a Document
+// (e.g. for setDocument test below)
+ve.dm.BranchNodeStub.prototype.nodeAttached = ve.Document.prototype.nodeAttached;
+
+// Throw in nodeDetached so BranchNodeStub better passes duck type scrutiny as a Document
+// (e.g. for setDocument test below)
+ve.dm.BranchNodeStub.prototype.nodeDetached = ve.Document.prototype.nodeDetached;
+
 ve.dm.nodeFactory.register( ve.dm.BranchNodeStub );
 
 /* Tests */
 
-QUnit.test( 'canHaveChildren', 1, function ( assert ) {
+QUnit.test( 'canHaveChildren', function ( assert ) {
 	var node = new ve.dm.BranchNodeStub();
 	assert.strictEqual( node.canHaveChildren(), true );
 } );
 
-QUnit.test( 'canHaveChildrenNotContent', 1, function ( assert ) {
+QUnit.test( 'canHaveChildrenNotContent', function ( assert ) {
 	var node = new ve.dm.BranchNodeStub();
 	assert.strictEqual( node.canHaveChildrenNotContent(), true );
 } );
 
-QUnit.test( 'setRoot', 3, function ( assert ) {
+QUnit.test( 'setRoot', function ( assert ) {
 	var node1 = new ve.dm.BranchNodeStub(),
 		node2 = new ve.dm.BranchNodeStub( {}, [ node1 ] ),
 		node3 = new ve.dm.BranchNodeStub( {}, [ node2 ] ),
@@ -44,7 +52,7 @@ QUnit.test( 'setRoot', 3, function ( assert ) {
 	assert.strictEqual( node1.getRoot(), node4 );
 } );
 
-QUnit.test( 'setDocument', 3, function ( assert ) {
+QUnit.test( 'setDocument', function ( assert ) {
 	var node1 = new ve.dm.BranchNodeStub(),
 		node2 = new ve.dm.BranchNodeStub( {}, [ node1 ] ),
 		node3 = new ve.dm.BranchNodeStub( {}, [ node2 ] ),
@@ -55,7 +63,7 @@ QUnit.test( 'setDocument', 3, function ( assert ) {
 	assert.strictEqual( node1.getDocument(), node4 );
 } );
 
-QUnit.test( 'push', 3, function ( assert ) {
+QUnit.test( 'push', function ( assert ) {
 	var node1 = new ve.dm.BranchNodeStub(),
 		node2 = new ve.dm.BranchNodeStub(),
 		node3 = new ve.dm.BranchNodeStub( {}, [ node1 ] );
@@ -67,7 +75,7 @@ QUnit.test( 'push', 3, function ( assert ) {
 	assert.deepEqual( node3.getChildren(), [ node1, node2 ] );
 } );
 
-QUnit.test( 'pop', 3, function ( assert ) {
+QUnit.test( 'pop', function ( assert ) {
 	var node1 = new ve.dm.BranchNodeStub(),
 		node2 = new ve.dm.BranchNodeStub(),
 		node3 = new ve.dm.BranchNodeStub( {}, [ node1, node2 ] );
@@ -79,7 +87,7 @@ QUnit.test( 'pop', 3, function ( assert ) {
 	assert.deepEqual( node3.getChildren(), [ node1 ] );
 } );
 
-QUnit.test( 'unshift', 3, function ( assert ) {
+QUnit.test( 'unshift', function ( assert ) {
 	var node1 = new ve.dm.BranchNodeStub(),
 		node2 = new ve.dm.BranchNodeStub(),
 		node3 = new ve.dm.BranchNodeStub( {}, [ node1 ] );
@@ -91,7 +99,7 @@ QUnit.test( 'unshift', 3, function ( assert ) {
 	assert.deepEqual( node3.getChildren(), [ node2, node1 ] );
 } );
 
-QUnit.test( 'shift', 3, function ( assert ) {
+QUnit.test( 'shift', function ( assert ) {
 	var node1 = new ve.dm.BranchNodeStub(),
 		node2 = new ve.dm.BranchNodeStub(),
 		node3 = new ve.dm.BranchNodeStub( {}, [ node1, node2 ] );
@@ -103,7 +111,7 @@ QUnit.test( 'shift', 3, function ( assert ) {
 	assert.deepEqual( node3.getChildren(), [ node2 ] );
 } );
 
-QUnit.test( 'splice', 9, function ( assert ) {
+QUnit.test( 'splice', function ( assert ) {
 	var node1 = new ve.dm.BranchNodeStub(),
 		node2 = new ve.dm.BranchNodeStub(),
 		node3 = new ve.dm.BranchNodeStub(),

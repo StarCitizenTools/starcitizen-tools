@@ -9,7 +9,8 @@
 			"Stens51",
 			"Abbedabb",
 			"Warrakkk",
-			"Hangsna"
+			"Hangsna",
+			"Bengtsson96"
 		]
 	},
 	"multimediaviewer-desc": "Expandera miniatyrer i en större storlek i fulkskärmsgränssnitt.",
@@ -68,6 +69,7 @@
 	"multimediaviewer-text-embed-credit-text-b": "Av $1, $2",
 	"multimediaviewer-html-embed-credit-text-bl": "Av $1, $2, $3",
 	"multimediaviewer-html-embed-credit-text-b": "Av $1, $2",
+	"multimediaviewer-html-embed-credit-link-text": "Länk",
 	"multimediaviewer-embed-byline": "Av $1",
 	"multimediaviewer-embed-license": "Licenserat under $1.",
 	"multimediaviewer-embed-via": "Via $1.",
@@ -84,6 +86,8 @@
 	"multimediaviewer-close-popup-text": "Stäng detta verktyg (Esc)",
 	"multimediaviewer-fullscreen-popup-text": "Visa i helskärmsläge",
 	"multimediaviewer-defullscreen-popup-text": "Lämnar helskärmsläge",
+	"multimediaviewer-next-image-alt-text": "Visa nästa bild",
+	"multimediaviewer-prev-image-alt-text": "Visa föregående bild",
 	"multimediaviewer-title-popup-text": "Beskrivning",
 	"multimediaviewer-credit-popup-text": "Information om skapare och källa",
 	"multimediaviewer-title-popup-text-more": "Visa full beskrivning",
@@ -91,6 +95,9 @@
 	"multimediaviewer-download-attribution-cta-header": "Du måste ge skaparen erkännande",
 	"multimediaviewer-download-optional-attribution-cta-header": "Du kan ge skaparen erkännande",
 	"multimediaviewer-download-attribution-cta": "Visa mig hur",
+	"multimediaviewer-reuse-warning-deletion": "Filen är föreslagen för radering.",
+	"multimediaviewer-reuse-warning-nonfree": "Filen har inte en fri licens.",
+	"multimediaviewer-reuse-warning-generic": "Kontrollera [$1 filens detaljer] före användning.",
 	"multimediaviewer-attr-plain": "Klartext",
 	"multimediaviewer-options-tooltip": "Aktivera eller inaktivera Mediavisaren",
 	"multimediaviewer-options-dialog-header": "Inaktivera Mediavisaren?",

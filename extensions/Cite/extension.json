@@ -12,8 +12,11 @@
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:Cite",
 	"descriptionmsg": "cite-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.30.0"
+	},
 	"MessagesDirs": {
 		"cite": "i18n",
 		"ve-cite": "modules/ve-cite/i18n"
@@ -33,12 +36,19 @@
 		"ResourceLoaderTestModules": [
 			"CiteHooks::onResourceLoaderTestModules"
 		],
+		"ResourceLoaderRegisterModules": [
+			"CiteHooks::onResourceLoaderRegisterModules"
+		],
 		"LinksUpdate": [
 			"CiteHooks::onLinksUpdate"
 		],
 		"LinksUpdateComplete": [
 			"CiteHooks::onLinksUpdateComplete"
-		]
+		],
+		"ResourceLoaderGetConfigVars": [
+			"CiteHooks::onResourceLoaderGetConfigVars"
+		],
+		"APIQuerySiteInfoGeneralInfo": "CiteHooks::onAPIQuerySiteInfoGeneralInfo"
 	},
 	"ResourceModules": {
 		"ext.cite.styles": {
@@ -48,7 +58,13 @@
 					"media": "print"
 				}
 			},
-			"position": "bottom"
+			"skinStyles": {
+				"minerva": "ext.cite.styles.minerva.less"
+			},
+			"targets": [
+				"desktop",
+				"mobile"
+			]
 		},
 		"ext.cite.a11y": {
 			"scripts": "ext.cite.a11y.js",
@@ -56,100 +72,11 @@
 			"messages": [
 				"cite_references_link_accessibility_label",
 				"cite_references_link_many_accessibility_label"
-			],
-			"position": "bottom"
+			]
 		},
 		"ext.cite.style": {
 			"class": "CiteCSSFileModule",
 			"styles": "ext.cite.style.css",
-			"position": "top",
-			"targets": [
-				"desktop",
-				"mobile"
-			]
-		},
-		"ext.cite.visualEditor.core": {
-			"scripts": [
-				"ve-cite/ve.dm.MWReferenceModel.js",
-				"ve-cite/ve.dm.MWReferencesListNode.js",
-				"ve-cite/ve.dm.MWReferenceNode.js",
-				"ve-cite/ve.ce.MWReferencesListNode.js",
-				"ve-cite/ve.ce.MWReferenceNode.js",
-				"ve-cite/ve.ui.MWReferencesListCommand.js"
-			],
-			"styles": [
-				"ve-cite/ve.ce.MWReferencesListNode.css",
-				"ve-cite/ve.ce.MWReferenceNode.css"
-			],
-			"dependencies": [
-				"ext.visualEditor.mwcore"
-			],
-			"messages": [
-				"cite-ve-referenceslist-isempty",
-				"cite-ve-referenceslist-isempty-default",
-				"cite-ve-referenceslist-missingref"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
-			]
-		},
-		"ext.cite.visualEditor.data": {
-			"class": "CiteDataModule"
-		},
-		"ext.cite.visualEditor": {
-			"scripts": [
-				"ve-cite/ve.ui.MWReferenceGroupInputWidget.js",
-				"ve-cite/ve.ui.MWReferenceSearchWidget.js",
-				"ve-cite/ve.ui.MWReferenceResultWidget.js",
-				"ve-cite/ve.ui.MWUseExistingReferenceCommand.js",
-				"ve-cite/ve.ui.MWCitationDialog.js",
-				"ve-cite/ve.ui.MWReferencesListDialog.js",
-				"ve-cite/ve.ui.MWReferenceDialog.js",
-				"ve-cite/ve.ui.MWReferenceDialogTool.js",
-				"ve-cite/ve.ui.MWCitationDialogTool.js",
-				"ve-cite/ve.ui.MWReferenceContextItem.js",
-				"ve-cite/ve.ui.MWReferencesListContextItem.js",
-				"ve-cite/ve.ui.MWCitationContextItem.js",
-				"ve-cite/ve.ui.MWCitationAction.js",
-				"ve-cite/ve.ui.MWReference.init.js"
-			],
-			"styles": [
-				"ve-cite/ve.ui.MWReferenceContextItem.css",
-				"ve-cite/ve.ui.MWReferenceGroupInputWidget.css",
-				"ve-cite/ve.ui.MWReferenceIcons.css",
-				"ve-cite/ve.ui.MWReferenceResultWidget.css",
-				"ve-cite/ve.ui.MWReferenceSearchWidget.css"
-			],
-			"dependencies": [
-				"ext.cite.visualEditor.core",
-				"ext.cite.visualEditor.data",
-				"ext.cite.style",
-				"ext.visualEditor.mwtransclusion",
-				"ext.visualEditor.mediawiki"
-			],
-			"messages": [
-				"cite-ve-dialog-reference-editing-reused",
-				"cite-ve-dialog-reference-options-group-label",
-				"cite-ve-dialog-reference-options-group-placeholder",
-				"cite-ve-dialog-reference-options-name-label",
-				"cite-ve-dialog-reference-options-section",
-				"cite-ve-dialog-reference-title",
-				"cite-ve-dialog-reference-useexisting-full-label",
-				"cite-ve-dialog-reference-useexisting-label",
-				"cite-ve-dialog-reference-useexisting-tool",
-				"cite-ve-dialog-referenceslist-contextitem-description-general",
-				"cite-ve-dialog-referenceslist-contextitem-description-named",
-				"cite-ve-dialog-referenceslist-title",
-				"cite-ve-dialogbutton-citation-educationpopup-title",
-				"cite-ve-dialogbutton-citation-educationpopup-text",
-				"cite-ve-dialogbutton-reference-full-label",
-				"cite-ve-dialogbutton-reference-tooltip",
-				"cite-ve-dialogbutton-reference-title",
-				"cite-ve-dialogbutton-referenceslist-tooltip",
-				"cite-ve-reference-input-placeholder",
-				"cite-ve-toolbar-group-label"
-			],
 			"targets": [
 				"desktop",
 				"mobile"
@@ -167,21 +94,18 @@
 		"cite": "GlobalVarConfig::newInstance"
 	},
 	"config": {
-		"AllowCiteGroups": true,
-		"CiteCacheReferences": false,
 		"CiteStoreReferencesData": false,
-		"CiteCacheReferencesDataOnParse": false
+		"CiteCacheReferencesDataOnParse": false,
+		"CiteVisualEditorOtherGroup": false,
+		"CiteResponsiveReferences": true
 	},
 	"AutoloadClasses": {
-		"ApiQueryReferences": "ApiQueryReferences.php",
-		"Cite": "Cite_body.php",
-		"CiteHooks": "CiteHooks.php",
-		"CiteDataModule": "CiteDataModule.php",
-		"CiteCSSFileModule": "CiteCSSFileModule.php"
+		"ApiQueryReferences": "includes/ApiQueryReferences.php",
+		"Cite": "includes/Cite.php",
+		"CiteHooks": "includes/CiteHooks.php",
+		"CiteDataModule": "includes/CiteDataModule.php",
+		"CiteCSSFileModule": "includes/CiteCSSFileModule.php"
 	},
-	"ParserTestFiles": [
-		"citeParserTests.txt"
-	],
 	"TrackingCategories": [
 		"cite-tracking-category-cite-error"
 	],

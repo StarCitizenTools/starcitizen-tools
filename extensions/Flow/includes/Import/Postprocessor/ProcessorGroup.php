@@ -3,7 +3,6 @@
 namespace Flow\Import\Postprocessor;
 
 use Flow\Model\PostRevision;
-use Flow\Model\UUID;
 use Flow\Import\IImportHeader;
 use Flow\Import\IImportPost;
 use Flow\Import\IImportTopic;
@@ -14,8 +13,8 @@ class ProcessorGroup implements Postprocessor {
 	/** @var array<Postprocessor> **/
 	protected $processors;
 
-	public function __construct( ) {
-		$this->processors = array();
+	public function __construct() {
+		$this->processors = [];
 	}
 
 	public function add( Postprocessor $proc ) {
@@ -39,8 +38,8 @@ class ProcessorGroup implements Postprocessor {
 	}
 
 	protected function call( $name, $args ) {
-		foreach( $this->processors as $proc ) {
-			call_user_func_array( array( $proc, $name ), $args );
+		foreach ( $this->processors as $proc ) {
+			call_user_func_array( [ $proc, $name ], $args );
 		}
 	}
 }

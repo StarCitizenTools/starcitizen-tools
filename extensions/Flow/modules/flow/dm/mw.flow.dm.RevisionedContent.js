@@ -123,11 +123,11 @@
 
 		this.toggleOriginalContent(
 			data.isOriginalContent !== undefined ?
-			data.isOriginalContent :
-			// If 'isOriginalContent' isn't at all defined, we will
-			// define it by whether there is a previous revision id
-			// present
-			!this.getPreviousRevisionId()
+				data.isOriginalContent :
+				// If 'isOriginalContent' isn't at all defined, we will
+				// define it by whether there is a previous revision id
+				// present
+				!this.getPreviousRevisionId()
 		);
 
 		this.setLastEditId( data.lastEditId );
@@ -138,7 +138,7 @@
 			this.toggleWatchable( !!data.watchable );
 		}
 
-		this.toggleEditable( ( data.actions && data.actions.edit ) );
+		this.toggleEditable( !!( data.actions && data.actions.edit ) );
 
 		this.actions = data.actions;
 	};
@@ -185,6 +185,8 @@
 
 	/**
 	 * @see mw.flow.dm.Content
+	 * @param {string} format
+	 * @return {string}
 	 */
 	mw.flow.dm.RevisionedContent.prototype.getContent = function ( format ) {
 		return this.content.get( format );
@@ -192,9 +194,10 @@
 
 	/**
 	 * @see mw.flow.dm.Content
+	 * @param {Object} representations
 	 */
 	mw.flow.dm.RevisionedContent.prototype.setContent = function ( representations ) {
-		return this.content.set( representations );
+		this.content.set( representations );
 	};
 
 	/**
@@ -240,7 +243,7 @@
 	/**
 	 * Set the revision change type
 	 *
-	 * @param {string} Revision change type
+	 * @param {string} type Revision change type
 	 */
 	mw.flow.dm.RevisionedContent.prototype.setChangeType = function ( type ) {
 		if ( type !== undefined && this.changeType !== type ) {

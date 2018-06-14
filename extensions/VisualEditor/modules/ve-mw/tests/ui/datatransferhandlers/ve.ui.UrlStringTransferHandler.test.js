@@ -1,10 +1,8 @@
 /*!
  * VisualEditor UserInterface UrlStringTransferHandler tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
-
-/* global runUrlStringHandlerTest */
 
 QUnit.module( 've.ui.UrlStringTransferHandler (MW)' );
 
@@ -19,6 +17,7 @@ QUnit.test( 'paste', function ( assert ) {
 				pasteType: 'text/plain',
 				expectedData: function () {
 					// Explicitly create an internal link so we can assert this behaviour is working
+					// eslint-disable-next-line new-cap
 					var a = ve.dm.MWInternalLinkAnnotation.static.newFromTitle( new mw.Title.newFromText( 'Main Page' ) ).element;
 					return [
 						[ 'M', [ a ] ],
@@ -35,8 +34,7 @@ QUnit.test( 'paste', function ( assert ) {
 			}
 		];
 
-	QUnit.expect( cases.length );
 	for ( i = 0; i < cases.length; i++ ) {
-		runUrlStringHandlerTest( assert, cases[ i ].pasteString, cases[ i ].pasteHtml, cases[ i ].pasteType, cases[ i ].expectedData, cases[ i ].msg );
+		ve.test.utils.runUrlStringHandlerTest( assert, cases[ i ].pasteString, cases[ i ].pasteHtml, cases[ i ].pasteType, cases[ i ].expectedData, cases[ i ].msg );
 	}
 } );

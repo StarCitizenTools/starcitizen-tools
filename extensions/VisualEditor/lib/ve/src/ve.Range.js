@@ -1,19 +1,23 @@
 /*!
  * VisualEditor Range class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
  * @class
  *
  * @constructor
- * @param {number} from Anchor offset
+ * @param {number} [from=0] Anchor offset
  * @param {number} [to=from] Focus offset
  */
 ve.Range = function VeRange( from, to ) {
-	this.from = from || 0;
-	this.to = to === undefined ? this.from : to;
+	// For ease of debugging, check arguments.length when applying defaults, to preserve
+	// invalid arguments such as undefined and NaN that indicate a programming error.
+	// Range calculation errors can often propagate quite far before surfacing, so the
+	// indication is important.
+	this.from = arguments.length >= 1 ? from : 0;
+	this.to = arguments.length >= 2 ? to : this.from;
 	this.start = this.from < this.to ? this.from : this.to;
 	this.end = this.from < this.to ? this.to : this.from;
 };
@@ -68,13 +72,13 @@ ve.Range.static.newFromHash = function ( hash ) {
  * Create a range object that covers all of the given ranges.
  *
  * @static
- * @param {Array} ranges Array of ve.Range objects (at least one)
+ * @param {ve.Range[]} ranges Array of ve.Range objects (at least one)
  * @param {boolean} backwards Return a backwards range
  * @return {ve.Range} Range that spans all of the given ranges
  */
 ve.Range.static.newCoveringRange = function ( ranges, backwards ) {
 	var minStart, maxEnd, i, range;
-	if ( !ranges || ranges.length === 0 ) {
+	if ( ranges.length === 0 ) {
 		throw new Error( 'newCoveringRange() requires at least one range' );
 	}
 	minStart = ranges[ 0 ].start;
@@ -130,18 +134,33 @@ ve.Range.prototype.containsRange = function ( range ) {
 };
 
 /**
- * Check if another range overlaps this range.
+ * Check if another range is touching this one
  *
- * This includes ranges which touch, e.g. [1,3] & [3,5], and ranges
- * which cover this one completely, e.g. [1,3] & [0,5].
+ * This includes ranges which touch this one, e.g. [1,3] & [3,5],
+ * ranges which overlap this one, and ranges which cover
+ * this one completely, e.g. [1,3] & [0,5].
  *
  * Useful for testing if two ranges can be joined (using #expand)
+ *
+ * @param {ve.Range} range Range to check
+ * @return {boolean} If other range touches this range
+ */
+ve.Range.prototype.touchesRange = function ( range ) {
+	return range.end >= this.start && range.start <= this.end;
+};
+
+/**
+ * Check if another range overlaps this one
+ *
+ * This includes ranges which intersect this one, e.g. [1,3] & [2,4],
+ * and ranges which cover this one completely, e.g. [1,3] & [0,5],
+ * but *not* ranges which only touch, e.g. [0,2] & [2,4].
  *
  * @param {ve.Range} range Range to check
  * @return {boolean} If other range overlaps this range
  */
 ve.Range.prototype.overlapsRange = function ( range ) {
-	return range.end >= this.start && range.start <= this.end;
+	return range.end > this.start && range.start < this.end;
 };
 
 /**

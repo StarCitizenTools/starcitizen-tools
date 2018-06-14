@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWImageNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -21,16 +21,15 @@ ve.dm.MWImageNode = function VeDmMWImageNode() {
 	ve.dm.GeneratedContentNode.call( this );
 
 	// Mixin constructors
-	ve.dm.ResizableNode.call( this );
 	ve.dm.FocusableNode.call( this );
+	// ve.dm.MWResizableNode doesn't exist
+	ve.dm.ResizableNode.call( this );
 
 	this.scalablePromise = null;
 
 	// Use 'bitmap' as default media type until we can
 	// fetch the actual media type from the API
 	this.mediaType = 'BITMAP';
-	// Get wiki defaults
-	this.svgMaxSize = mw.config.get( 'wgVisualEditorConfig' ).svgMaxSize;
 
 	// Initialize
 	this.constructor.static.syncScalableToType(
@@ -53,13 +52,112 @@ OO.mixinClass( ve.dm.MWImageNode, ve.dm.ResizableNode );
 
 /* Static methods */
 
-ve.dm.MWImageNode.static.getHashObject = function ( dataElement ) {
+ve.dm.MWImageNode.static.rdfaToTypes = ( function () {
+	var rdfaToType = {};
+
+	[ 'Image', 'Video', 'Audio' ].forEach( function ( mediaClass ) {
+		rdfaToType[ 'mw:' + mediaClass ] = { mediaClass: mediaClass, frameType: 'none' };
+		rdfaToType[ 'mw:' + mediaClass + '/Frameless' ] = { mediaClass: mediaClass, frameType: 'frameless' };
+		// Block image only:
+		rdfaToType[ 'mw:' + mediaClass + '/Thumb' ] = { mediaClass: mediaClass, frameType: 'thumb' };
+		rdfaToType[ 'mw:' + mediaClass + '/Frame' ] = { mediaClass: mediaClass, frameType: 'frame' };
+	} );
+
+	return rdfaToType;
+}() );
+
+/**
+ * Get RDFa type
+ *
+ * @static
+ * @param {string} mediaClass Media class, one of 'Image', 'Video' or 'Audio'
+ * @param {string} frameType Frame type, one of 'none', 'frameless', 'thumb' or 'frame'
+ * @return {string} RDFa type
+ */
+ve.dm.MWImageNode.static.getRdfa = function ( mediaClass, frameType ) {
+	return 'mw:' + mediaClass + {
+		none: '',
+		frameless: '/Frameless',
+		// Block image only:
+		thumb: '/Thumb',
+		frame: '/Frame'
+	}[ frameType ];
+};
+
+/**
+ * @inheritdoc ve.dm.GeneratedContentNode
+ */
+ve.dm.MWImageNode.static.getHashObjectForRendering = function ( dataElement ) {
+	// "Rendering" is just the URL of the thumbnail, so we only
+	// care about src & dimensions
 	return {
-		type: dataElement.type,
+		type: 'mwImage',
 		resource: dataElement.attributes.resource,
 		width: dataElement.attributes.width,
 		height: dataElement.attributes.height
 	};
+};
+
+ve.dm.MWImageNode.static.getMatchRdfaTypes = function () {
+	return Object.keys( this.rdfaToTypes );
+};
+
+ve.dm.MWImageNode.static.allowedRdfaTypes = [ 'mw:Error' ];
+
+ve.dm.MWImageNode.static.describeChanges = function ( attributeChanges, attributes ) {
+	var key, sizeFrom, sizeTo, change,
+		customKeys = [ 'width', 'height', 'defaultSize', 'src', 'href' ],
+		descriptions = [];
+
+	function describeSize( width, height ) {
+		return width + ve.msg( 'visualeditor-dimensionswidget-times' ) + height + ve.msg( 'visualeditor-dimensionswidget-px' );
+	}
+
+	if ( 'width' in attributeChanges || 'height' in attributeChanges ) {
+		if ( attributeChanges.defaultSize && attributeChanges.defaultSize.from === true ) {
+			sizeFrom = ve.msg( 'visualeditor-mediasizewidget-sizeoptions-default' );
+		} else {
+			sizeFrom = describeSize(
+				'width' in attributeChanges ? attributeChanges.width.from : attributes.width,
+				'height' in attributeChanges ? attributeChanges.height.from : attributes.height
+			);
+		}
+		if ( attributeChanges.defaultSize && attributeChanges.defaultSize.to === true ) {
+			sizeTo = ve.msg( 'visualeditor-mediasizewidget-sizeoptions-default' );
+		} else {
+			sizeTo = describeSize(
+				'width' in attributeChanges ? attributeChanges.width.to : attributes.width,
+				'height' in attributeChanges ? attributeChanges.height.to : attributes.height
+			);
+		}
+
+		descriptions.push( ve.msg( 'visualeditor-changedesc-image-size', sizeFrom, sizeTo ) );
+	}
+	for ( key in attributeChanges ) {
+		if ( customKeys.indexOf( key ) === -1 ) {
+			if ( key === 'borderImage' && !attributeChanges.borderImage.from && !attributeChanges.borderImage.to ) {
+				// Skip noise from the data model
+				continue;
+			}
+			change = this.describeChange( key, attributeChanges[ key ] );
+			descriptions.push( change );
+		}
+	}
+	return descriptions;
+};
+
+ve.dm.MWImageNode.static.describeChange = function ( key, change ) {
+	if ( key === 'align' ) {
+		return ve.msg( 'visualeditor-changedesc-align',
+			// Messages used:
+			// visualeditor-align-widget-left, visualeditor-align-widget-right,
+			// visualeditor-align-widget-center, visualeditor-align-widget-default
+			ve.msg( 'visualeditor-align-widget-' + change.from ),
+			ve.msg( 'visualeditor-align-widget-' + change.to )
+		);
+	}
+	// Parent method
+	return ve.dm.Node.static.describeChange.apply( this, arguments );
 };
 
 /**
@@ -155,9 +253,13 @@ ve.dm.MWImageNode.static.syncScalableToType = function ( type, mediaType, scalab
 		} else {
 			scalable.setEnforcedMax( false );
 		}
+	} else {
+		// EnforcedMax may have previously been set to true
+		scalable.setEnforcedMax( false );
 	}
 	// TODO: Some day, when svgMaxSize works properly in MediaWiki
-	// we can add it back as max dimension consideration.
+	// we can add it back as max dimension consideration:
+	// mw.config.get( 'wgVisualEditorConfig' ).svgMaxSize
 };
 
 /**
@@ -171,7 +273,7 @@ ve.dm.MWImageNode.static.getScalablePromise = function ( filename ) {
 	// original dimensions from the API.
 	if ( ve.init.platform.imageInfoCache ) {
 		return ve.init.platform.imageInfoCache.get( filename ).then( function ( info ) {
-			if ( !info ) {
+			if ( !info || info.missing ) {
 				return $.Deferred().reject().promise();
 			}
 			return info;
@@ -202,23 +304,10 @@ ve.dm.MWImageNode.prototype.onAttributeChange = function ( key, from, to ) {
 /**
  * Get the normalised filename of the image
  *
- * @return {string} Filename
+ * @return {string} Filename (including namespace)
  */
 ve.dm.MWImageNode.prototype.getFilename = function () {
-	// Strip ./ stuff and decode URI encoding
-	var resource = this.getAttribute( 'resource' ) || '',
-		filename = resource.replace( /^(\.+\/)*/, '' );
-
-	return ve.safeDecodeURIComponent( filename );
-};
-
-/**
- * Get the store hash for the original dimensions of the image
- *
- * @return {string} Store hash
- */
-ve.dm.MWImageNode.prototype.getSizeHash = function () {
-	return 'MWImageOriginalSize:' + this.getFilename();
+	return ve.normalizeParsoidResourceName( this.getAttribute( 'resource' ) || '' );
 };
 
 /**
@@ -247,7 +336,7 @@ ve.dm.MWImageNode.prototype.getScalable = function () {
 			}
 		} );
 	}
-	// Parent method
+	// Mixin method
 	return ve.dm.ResizableNode.prototype.getScalable.call( this );
 };
 
@@ -276,4 +365,13 @@ ve.dm.MWImageNode.prototype.createScalable = function () {
  */
 ve.dm.MWImageNode.prototype.getMediaType = function () {
 	return this.mediaType;
+};
+
+/**
+ * Get RDFa type
+ *
+ * @return {string} RDFa type
+ */
+ve.dm.MWImageNode.prototype.getRdfa = function () {
+	return this.constructor.static.getRdfa( this.getAttribute( 'mediaClass' ), this.getAttribute( 'type' ) );
 };

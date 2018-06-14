@@ -1,9 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Malafaya"
+			"Malafaya",
+			"Joao Xavier"
 		]
 	},
+	"mwe-upwiz-tutorial-error-localized-file-missing": "Pardonez, ni ne trovis uzado-instrucioni en vua linguo. Vice, ni montras la versiono $1.",
+	"mwe-upwiz-source-ownwork-cc-by-3.0-explain": "(Irgu povas uzar, partigar od adaptar {{PLURAL:$1|ica laboro|ici labori}}, se mencionez me kom lua kreinto.)",
+	"mwe-upwiz-source-thirdparty-intro": "Mencionez l'adreso interretala ube vu trovis singla arkivo.",
 	"mwe-upwiz-ok": "O.K.",
-	"mwe-upwiz-tooltip-more-info": "Lernez pluse."
+	"mwe-upwiz-tooltip-more-info": "Lernez pluse.",
+	"mwe-upwiz-license-custom": "La permiso deskriptesas per la sequanta wikitexto (mustas kontenar valida [$2 informo pri autoroyuro]):"
 }

@@ -27,6 +27,7 @@
 	"ext-uls-display-settings-anon-same-as-content": "$1 (նույնը ինչ բովանդակությունը)",
 	"ext-uls-display-settings-anon-log-in-cta": "[[Special:UserLogin|Մուտք գործեք]] միջերեսի այլ լեզու ընտրելու համար։",
 	"ext-uls-webfonts-settings-title": "Անհրաժեշտության դեպքում ներբեռնել տառատեսակները",
+	"ext-uls-webfonts-settings-info": "Ավտոմատ ներբեռնել բացակայող տառատեսակները և թույլ տար նախընտրելի տառատեսակների ընտրությունը։",
 	"ext-uls-webfonts-settings-info-link": "Հավելյալ տեղեկություն",
 	"ext-uls-webfonts-select-for": "Ընտրեք $1ի տառատեսակը",
 	"ext-uls-webfonts-select-for-ui-info": "Միջերեսի համար օգտագործվող տառատեսակը",
@@ -55,8 +56,6 @@
 	"ext-uls-input-disable-notification-info-interlanguage": "Դուք ցանկացած պահին կարող եք միացնել ներածման գործիքները լեզվական կարգավորումներում, լեզուների ցանկի կողքը։",
 	"ext-uls-language-settings-applying": "Կիրառում․․․",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Եվս մեկը|Եվս $1}}",
-	"ext-uls-compact-link-info": "Բոլոր լեզուները (սկզբնապես բերված են քո և մյուսների կողմից ընտրված տարածված տարբերակները)",
-	"apihelp-languagesearch-description": "Լեզվի անվանման որոնում ցանկացած այբուբենով",
-	"apihelp-ulslocalization-param-language": "Լեզվի կոդը",
+	"ext-uls-compact-link-info": "Բոլոր լեզուները (նախնական ցանկը կազմված է ձեր և մյուսների կողմից հաճախ ընտրված տարբերակները)",
 	"prefs-languages": "Լեզուներ"
 }

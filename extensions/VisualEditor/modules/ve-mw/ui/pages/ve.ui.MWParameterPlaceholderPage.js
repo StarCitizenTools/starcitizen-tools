@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWParameterPlaceholderPage class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,6 +15,7 @@
  * @param {ve.dm.MWTemplateModel} parameter Template
  * @param {string} name Unique symbolic name of page
  * @param {Object} [config] Configuration options
+ * @cfg {jQuery} [$overlay] Overlay to render dropdowns in
  */
 ve.ui.MWParameterPlaceholderPage = function VeUiMWParameterPlaceholderPage( parameter, name, config ) {
 	// Configuration initialization
@@ -23,7 +24,7 @@ ve.ui.MWParameterPlaceholderPage = function VeUiMWParameterPlaceholderPage( para
 	}, config );
 
 	// Parent constructor
-	OO.ui.PageLayout.call( this, name, config );
+	ve.ui.MWParameterPlaceholderPage.super.call( this, name, config );
 
 	// Properties
 	this.name = name;
@@ -39,7 +40,7 @@ ve.ui.MWParameterPlaceholderPage = function VeUiMWParameterPlaceholderPage( para
 
 	this.removeButton = new OO.ui.ButtonWidget( {
 		framed: false,
-		icon: 'remove',
+		icon: 'trash',
 		title: ve.msg( 'visualeditor-dialog-transclusion-remove-param' ),
 		flags: [ 'destructive' ],
 		classes: [ 've-ui-mwTransclusionDialog-removeButton' ]
@@ -77,9 +78,9 @@ ve.ui.MWParameterPlaceholderPage.prototype.onParameterShowAll = function () {
 /**
  * @inheritdoc
  */
-ve.ui.MWParameterPlaceholderPage.prototype.setOutlineItem = function ( outlineItem ) {
+ve.ui.MWParameterPlaceholderPage.prototype.setOutlineItem = function () {
 	// Parent method
-	OO.ui.PageLayout.prototype.setOutlineItem.call( this, outlineItem );
+	ve.ui.MWParameterPlaceholderPage.super.prototype.setOutlineItem.apply( this, arguments );
 
 	if ( this.outlineItem ) {
 		this.outlineItem

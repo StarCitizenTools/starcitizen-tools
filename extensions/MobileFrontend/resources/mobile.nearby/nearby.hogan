@@ -1,3 +1,0 @@
-{{#errorOptions}}{{>messageBox}}{{/errorOptions}}
-{{{spinner}}}
-{{>pageList}}

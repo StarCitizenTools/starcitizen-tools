@@ -4,6 +4,7 @@
 			"Tacsipacsi"
 		]
 	},
+	"commonsmetadata-desc": "Kiterjeszti a képinformáció API „extmetadata” tulajdonságát a kép leírólapján használt, a Wikimédia Commonson gyakori sablonokban tárolt információkkal.",
 	"commonsmetadata-trackingcategory-no-license": "Géppel nem olvasható licencű fájlok",
 	"commonsmetadata-trackingcategory-no-license-desc": "A fájl nem tartalmaz [{{MediaWiki:Commonsmetadata-doc-url}} géppel olvasható] licencsablont.",
 	"commonsmetadata-trackingcategory-no-description": "Géppel nem olvasható leírású fájlok",

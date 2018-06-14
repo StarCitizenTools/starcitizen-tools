@@ -1,5 +1,0 @@
-plugins:
-  - removeXMLProcInst: false
-  - cleanupIDs: false
-  - collapseGroups: false
-  - mergePaths: false

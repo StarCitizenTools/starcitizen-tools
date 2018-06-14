@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jawadywn"
+		]
+	},
+	"babel-0": "Wong ini [[$1|lum pacak]]  bebaso [[$2|$3]] (pun pacak jugo cuman sepintil).",
+	"babel-1": "Wong ini [[$1|terti]] bebaso [[$2|$3]].",
+	"babel-2": "Wong ini [[$1|lumayan]] pacak bebaso [[$2|$3]].",
+	"babel-3": "Wong ini la [[$1|pacak]] bebaso [[$2|$3]].",
+	"babel-4": "Wong ini la [[$1|hibat]] bebaso [[$2|$3]].",
+	"babel-5": "Wong ini la [[$1|dewo]] bebaso [[$2|$3]].",
+	"babel-N": "Wong ini [[$1|aslinyo]] bebaso [[$2|$3]].",
+	"babel-0-n": "Wong ini [[$1|lum pacak]] bebaso [[$2|Musi]] (pun pacak cuman sepintil).",
+	"babel-1-n": "Wong ini la [[$1|terti]] dikit bebaso [[$2|Musi]].",
+	"babel-2-n": "Wong ini [[$1|lumayan]] pacak bebaso [[$2|Musi]].",
+	"babel-3-n": "Wong ini la [[$1|pacak]] bebaso [[$2|Musi]].",
+	"babel-4-n": "Wong ini la [[$1|hibat]] bebaso [[$2|Musi]].",
+	"babel-5-n": "Wong ini la dewo [[$1|professional]] bebaso [[$2|Musi]].",
+	"babel-N-n": "Wong ini [[$1|aslinyo]] bebaso [[$2|Musi]].",
+	"babel-footer": "Jingok wong dari basonyo"
+}

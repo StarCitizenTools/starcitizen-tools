@@ -3,17 +3,16 @@
 namespace Babel\Tests;
 
 use BabelLanguageCodes;
-use PHPUnit_Framework_TestCase;
 
 /**
  * @covers BabelLanguageCodes
  *
  * @group Babel
  *
- * @licence GNU GPL v2+
- * @author Thiemo Mättig
+ * @license GPL-2.0-or-later
+ * @author Thiemo Kreuz
  */
-class BabelLanguageCodesTest extends PHPUnit_Framework_TestCase {
+class BabelLanguageCodesTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @dataProvider getCodeProvider
@@ -29,6 +28,7 @@ class BabelLanguageCodesTest extends PHPUnit_Framework_TestCase {
 			[ 'eng', 'en' ],
 			[ 'en-gb', 'en-gb' ],
 			[ 'de', 'de' ],
+			[ 'be-x-old', 'be-tarask' ],
 		];
 	}
 

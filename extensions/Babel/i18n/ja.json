@@ -9,7 +9,9 @@
 			"Shirayuki",
 			"Vigorous action",
 			"青子守歌",
-			"Sujiniku"
+			"Sujiniku",
+			"ネイ",
+			"Yusuke1109"
 		]
 	},
 	"babel": "バベル利用者情報",
@@ -35,5 +37,8 @@
 	"babel-5-n": "この利用者は[[$1|専門的な]][[$2|日本語]]の知識を有しています。",
 	"babel-N-n": "この利用者は[[$2|日本語]]を[[$1|母語]]としています。",
 	"babel-template": "Template:利用者 $1",
-	"babel-footer": "言語別の利用者"
+	"babel-footer": "言語別の利用者",
+	"apihelp-query+babel-description": "利用者が知識を有する言語の情報を取得",
+	"apihelp-query+babel-summary": "ユーザーが知っている言語に関する情報を取得する",
+	"apihelp-query+babel-example-1": "利用者<kbd>Example</kbd>のバベル情報を取得"
 }

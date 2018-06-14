@@ -2,10 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Fluence",
-			"Teòtlalili"
+			"Teòtlalili",
+			"Akapochtli"
 		]
 	},
 	"checkuser-reason": "Īxtlamatiliztli:",
-	"checkuser-search": "Motèmòs",
-	"checkuser-search-submit": "Motèmòs"
+	"checkuser-search": "Motemoz icalaquiyan CheckUser",
+	"checkuser-search-submit": "Tlatemoliztli"
 }

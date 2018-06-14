@@ -15,6 +15,11 @@ class RevisionUndoViewFormatter {
 
 	/**
 	 * Undoes the change that occurred between $start and $stop
+	 * @param FormatterRow $start
+	 * @param FormatterRow $stop
+	 * @param FormatterRow $current
+	 * @param IContextSource $context
+	 * @return array
 	 */
 	public function formatApi(
 		FormatterRow $start,
@@ -39,21 +44,20 @@ class RevisionUndoViewFormatter {
 		$this->revisionViewFormatter->setContentFormat( 'wikitext' );
 
 		// @todo if stop === current we could do a little less processing
-		return array(
+		return [
 			'start' => $this->revisionViewFormatter->formatApi( $start, $context ),
 			'stop' => $this->revisionViewFormatter->formatApi( $stop, $context ),
 			'current' => $this->revisionViewFormatter->formatApi( $current, $context ),
-			'undo' => array(
+			'undo' => [
 				'possible' => $undoContent !== false,
 				'content' => $undoContent,
 				'diff_content' => $differenceEngine->getDiffBody(),
-			),
+			],
 			'articleTitle' => $start->workflow->getArticleTitle(),
-		);
+		];
 	}
 
 	protected function getUndoContent( $startContent, $stopContent, $currentContent ) {
-
 		if ( $currentContent === $stopContent ) {
 			return $startContent;
 		} else {

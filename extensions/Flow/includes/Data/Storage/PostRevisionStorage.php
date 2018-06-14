@@ -39,12 +39,12 @@ class PostRevisionStorage extends RevisionStorage {
 	}
 
 	protected function insertRelated( array $rows ) {
-		if ( ! is_array( reset( $rows ) ) ) {
-			$rows = array( $rows );
+		if ( !is_array( reset( $rows ) ) ) {
+			$rows = [ $rows ];
 		}
 
-		$trees = array();
-		foreach( $rows as $key => $row ) {
+		$trees = [];
+		foreach ( $rows as $key => $row ) {
 			$trees[$key] = $this->splitUpdate( $row, 'tree' );
 		}
 
@@ -58,7 +58,7 @@ class PostRevisionStorage extends RevisionStorage {
 		// If this is a brand new root revision it needs to be added to the tree
 		// If it has a rev_parent_id then its already a part of the tree
 		if ( $res ) {
-			foreach( $rows as $row ) {
+			foreach ( $rows as $row ) {
 				if ( $row['rev_parent_id'] === null ) {
 					$res = $res && $this->treeRepo->insert(
 						UUID::create( $row['tree_rev_descendant_id'] ),
@@ -69,15 +69,20 @@ class PostRevisionStorage extends RevisionStorage {
 		}
 
 		if ( !$res ) {
-			return array();
+			return [];
 		}
 
 		return $rows;
 	}
 
-	// Topic split will primarily be done through the TreeRepository directly,  but
-	// we will need to accept updates to the denormalized tree_parent_id field for
-	// the new root post
+	/**
+	 * Topic split will primarily be done through the TreeRepository directly,  but
+	 * we will need to accept updates to the denormalized tree_parent_id field for
+	 * the new root post
+	 * @param array $changes
+	 * @param array $old
+	 * @return array
+	 */
 	protected function updateRelated( array $changes, array $old ) {
 		$treeChanges = $this->splitUpdate( $changes, 'tree' );
 
@@ -90,24 +95,28 @@ class PostRevisionStorage extends RevisionStorage {
 		$res = $dbw->update(
 			$this->joinTable(),
 			$this->preprocessSqlArray( $treeChanges ),
-			array( 'tree_rev_id' => $old['tree_rev_id'] ),
+			[ 'tree_rev_id' => $old['tree_rev_id'] ],
 			__METHOD__
 		);
 
 		if ( !$res ) {
-			return array();
+			return [];
 		}
 
 		return $changes;
 	}
 
-	// this doesn't delete the whole post, it just deletes the revision.
-	// The post will *always* exist in the tree structure, its just a tree
-	// and we aren't going to re-parent its children;
+	/**
+	 * this doesn't delete the whole post, it just deletes the revision.
+	 * The post will *always* exist in the tree structure, its just a tree
+	 * and we aren't going to re-parent its children;
+	 * @param array $row
+	 * @return bool|\Wikimedia\Rdbms\IResultWrapper
+	 */
 	protected function removeRelated( array $row ) {
 		return $this->dbFactory->getDB( DB_MASTER )->delete(
 			$this->joinTable(),
-			$this->preprocessSqlArray( array( $this->joinField() => $row['rev_id'] ) )
+			$this->preprocessSqlArray( [ $this->joinField() => $row['rev_id'] ] )
 		);
 	}
 }

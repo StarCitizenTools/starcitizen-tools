@@ -6,7 +6,7 @@
  * @author Tim Gerundt
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Tim Gerundt
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -23,9 +23,17 @@ class ApiQueryMessageGroupStats extends ApiStatsQuery {
 		$params = $this->extractRequestParams();
 		$group = MessageGroups::getGroup( $params['group'] );
 		if ( !$group ) {
-			$this->dieUsageMsg( array( 'missingparam', 'mcgroup' ) );
+			if ( method_exists( $this, 'dieWithError' ) ) {
+				$this->dieWithError( [ 'apierror-missingparam', 'mgsgroup' ] );
+			} else {
+				$this->dieUsageMsg( [ 'missingparam', 'mgsgroup' ] );
+			}
 		} elseif ( MessageGroups::isDynamic( $group ) ) {
-			$this->dieUsage( 'Dynamic message groups are not supported here', 'invalidparam' );
+			if ( method_exists( $this, 'dieWithError' ) ) {
+				$this->dieWithError( 'apierror-translate-nodynamicgroups', 'invalidparam' );
+			} else {
+				$this->dieUsage( 'Dynamic message groups are not supported here', 'invalidparam' );
+			}
 		}
 
 		return MessageGroupStats::forGroup( $group->getId() );
@@ -41,18 +49,18 @@ class ApiQueryMessageGroupStats extends ApiStatsQuery {
 
 	public function getAllowedParams() {
 		$params = parent::getAllowedParams();
-		$params['group'] = array(
+		$params['group'] = [
 			ApiBase::PARAM_TYPE => 'string',
 			ApiBase::PARAM_REQUIRED => true,
-		);
+		];
 
 		return $params;
 	}
 
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=query&meta=messagegroupstats&mgsgroup=page-Example'
 				=> 'apihelp-query+messagegroupstats-example-1',
-		);
+		];
 	}
 }

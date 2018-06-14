@@ -4,7 +4,6 @@ namespace Flow\Import;
 
 use Article;
 use DeferredUpdates;
-use Flow\Data\BufferedCache;
 use Flow\Data\ManagerGroup;
 use Flow\DbFactory;
 use Flow\Import\Postprocessor\Postprocessor;
@@ -43,8 +42,6 @@ class Importer {
 	protected $workflowLoaderFactory;
 	/** @var LoggerInterface|null */
 	protected $logger;
-	/** @var BufferedCache */
-	protected $cache;
 	/** @var DbFactory */
 	protected $dbFactory;
 	/** @var bool */
@@ -59,14 +56,12 @@ class Importer {
 	public function __construct(
 		ManagerGroup $storage,
 		WorkflowLoaderFactory $workflowLoaderFactory,
-		BufferedCache $cache,
 		DbFactory $dbFactory,
 		SplQueue $deferredQueue,
 		OccupationController $occupationController
 	) {
 		$this->storage = $storage;
 		$this->workflowLoaderFactory = $workflowLoaderFactory;
-		$this->cache = $cache;
 		$this->dbFactory = $dbFactory;
 		$this->postprocessors = new ProcessorGroup;
 		$this->deferredQueue = $deferredQueue;
@@ -106,13 +101,16 @@ class Importer {
 	/**
 	 * Imports topics from a data source to a given page.
 	 *
-	 * @param IImportSource     $source
-	 * @param Title             $targetPage
+	 * @param IImportSource $source
+	 * @param Title $targetPage
+	 * @param User $user User doing the conversion actions (e.g. initial description,
+	 *    wikitext archive edit).  However, actions will be attributed to the original
+	 *    user when possible (e.g. the user who did the original LQT reply)
 	 * @param ImportSourceStore $sourceStore
 	 * @return bool True When the import completes with no failures
 	 */
-	public function import( IImportSource $source, Title $targetPage, ImportSourceStore $sourceStore ) {
-		$operation = new TalkpageImportOperation( $source, $this->occupationController );
+	public function import( IImportSource $source, Title $targetPage, User $user, ImportSourceStore $sourceStore ) {
+		$operation = new TalkpageImportOperation( $source, $user, $this->occupationController );
 		$pageImportState = new PageImportState(
 			$this->workflowLoaderFactory
 				->createWorkflowLoader( $targetPage )
@@ -120,7 +118,6 @@ class Importer {
 			$this->storage,
 			$sourceStore,
 			$this->logger ?: new NullLogger,
-			$this->cache,
 			$this->dbFactory,
 			$this->postprocessors,
 			$this->deferredQueue,
@@ -150,19 +147,19 @@ class HistoricalUIDGenerator extends UIDGenerator {
 			$counter = mt_rand( 0, $COUNTER_MAX );
 		}
 
-		$time = array(
+		$time = [
 			// seconds
 			wfTimestamp( TS_UNIX, $timestamp ),
 			// milliseconds
 			mt_rand( 0, 999 )
-		);
+		];
 
 		// The UIDGenerator is implemented very specifically to have
 		// a single instance, we have to reuse that instance.
 		$gen = self::singleton();
 		self::rotateNodeId( $gen );
 		$binaryUUID = $gen->getTimestampedID88(
-			array( $time, ++$counter % ( $COUNTER_MAX + 1) )
+			[ $time, ++$counter % ( $COUNTER_MAX + 1 ) ]
 		);
 
 		return \Wikimedia\base_convert( $binaryUUID, 2, $base );
@@ -180,7 +177,7 @@ class HistoricalUIDGenerator extends UIDGenerator {
 		// 4 bytes = 32 bits
 		$gen->nodeId32 = \Wikimedia\base_convert( MWCryptRand::generateHex( 8, true ), 16, 2, 32 );
 		// 6 bytes = 48 bits, used for 128bit uid's
-		//$gen->nodeId48 = \Wikimedia\base_convert( MWCryptRand::generateHex( 12, true ), 16, 2, 48 );
+		// $gen->nodeId48 = \Wikimedia\base_convert( MWCryptRand::generateHex( 12, true ), 16, 2, 48 );
 	}
 }
 
@@ -240,17 +237,15 @@ class PageImportState {
 		ManagerGroup $storage,
 		ImportSourceStore $sourceStore,
 		LoggerInterface $logger,
-		BufferedCache $cache,
 		DbFactory $dbFactory,
 		Postprocessor $postprocessor,
 		SplQueue $deferredQueue,
 		$allowUnknownUsernames = false
 	) {
-		$this->storage = $storage;;
+		$this->storage = $storage;
 		$this->boardWorkflow = $boardWorkflow;
 		$this->sourceStore = $sourceStore;
 		$this->logger = $logger;
-		$this->cache = $cache;
 		$this->dbw = $dbFactory->getDB( DB_MASTER );
 		$this->postprocessor = $postprocessor;
 		$this->deferredQueue = $deferredQueue;
@@ -271,7 +266,7 @@ class PageImportState {
 
 	/**
 	 * @param object|object[] $object
-	 * @param array           $metadata
+	 * @param array $metadata
 	 */
 	public function put( $object, array $metadata ) {
 		$metadata['imported'] = true;
@@ -288,8 +283,8 @@ class PageImportState {
 	 * WARNING: Before calling this method, ensure that you follow the rule
 	 * given in clearManagerGroup.
 	 *
-	 * @param  string $type Class name to retrieve
-	 * @param  UUID   $id   ID of the object to retrieve
+	 * @param string $type Class name to retrieve
+	 * @param UUID $id ID of the object to retrieve
 	 * @return Object|false
 	 */
 	public function get( $type, UUID $id ) {
@@ -313,15 +308,15 @@ class PageImportState {
 	/**
 	 * Gets the top revision of an item by ID
 	 *
-	 * @param  string $type The type of the object to return (e.g. PostRevision).
-	 * @param  UUID   $id   The ID (e.g. post ID, topic ID, etc)
+	 * @param string $type The type of the object to return (e.g. PostRevision).
+	 * @param UUID $id The ID (e.g. post ID, topic ID, etc)
 	 * @return object|false The top revision of the requested object, or false if not found.
 	 */
 	public function getTopRevision( $type, UUID $id ) {
 		$result = $this->storage->find(
 			$type,
-			array( 'rev_type_id' => $id ),
-			array( 'sort' => 'rev_id', 'order' => 'DESC', 'limit' => 1 )
+			[ 'rev_type_id' => $id ],
+			[ 'sort' => 'rev_id', 'order' => 'DESC', 'limit' => 1 ]
 		);
 
 		if ( count( $result ) ) {
@@ -341,12 +336,11 @@ class PageImportState {
 		return UUID::create( HistoricalUIDGenerator::historicalTimestampedUID88( $timestamp ) );
 	}
 
-
 	/**
 	 * Update the id of the workflow to match the provided timestamp
 	 *
 	 * @param Workflow $workflow
-	 * @param string   $timestamp
+	 * @param string $timestamp
 	 */
 	public function setWorkflowTimestamp( Workflow $workflow, $timestamp ) {
 		$uid = $this->getTimestampId( $timestamp );
@@ -354,8 +348,8 @@ class PageImportState {
 	}
 
 	/**
-	 * @var AbstractRevision $summary
-	 * @var string           $timestamp
+	 * @param AbstractRevision $revision
+	 * @param string $timestamp
 	 */
 	public function setRevisionTimestamp( AbstractRevision $revision, $timestamp ) {
 		$uid = $this->getTimestampId( $timestamp );
@@ -376,8 +370,8 @@ class PageImportState {
 	/**
 	 * Records an association between a created object and its source.
 	 *
-	 * @param  UUID          $objectId UUID representing the object that was created.
-	 * @param  IImportObject $object   Output from getObjectKey
+	 * @param UUID $objectId UUID representing the object that was created.
+	 * @param IImportObject $object Output from getObjectKey
 	 */
 	public function recordAssociation( UUID $objectId, IImportObject $object ) {
 		$this->sourceStore->setAssociation( $objectId, $object->getObjectKey() );
@@ -410,19 +404,16 @@ class PageImportState {
 	public function begin() {
 		$this->flushDeferredQueue();
 		$this->dbw->begin( __METHOD__ );
-		$this->cache->begin();
 	}
 
 	public function commit() {
 		$this->dbw->commit( __METHOD__ );
-		$this->cache->commit();
 		$this->sourceStore->save();
 		$this->flushDeferredQueue();
 	}
 
 	public function rollback() {
 		$this->dbw->rollback( __METHOD__ );
-		$this->cache->rollback();
 		$this->sourceStore->rollback();
 		$this->clearDeferredQueue();
 		$this->postprocessor->importAborted();
@@ -430,9 +421,12 @@ class PageImportState {
 
 	protected function flushDeferredQueue() {
 		while ( !$this->deferredQueue->isEmpty() ) {
-			DeferredUpdates::addCallableUpdate( $this->deferredQueue->dequeue() );
+			DeferredUpdates::addCallableUpdate(
+				$this->deferredQueue->dequeue(),
+				DeferredUpdates::PRESEND
+			);
+			DeferredUpdates::tryOpportunisticExecute();
 		}
-		DeferredUpdates::doUpdates();
 	}
 
 	protected function clearDeferredQueue() {
@@ -480,11 +474,11 @@ class TopicImportState {
 	}
 
 	public function getMetadata() {
-		return array(
+		return [
 			'workflow' => $this->topicWorkflow,
 			'board-workflow' => $this->parent->boardWorkflow,
 			'topic-title' => $this->topicTitle,
-		);
+		];
 	}
 
 	/**
@@ -521,14 +515,24 @@ class TalkpageImportOperation {
 	 */
 	protected $importSource;
 
+	/** @var User User doing the conversion actions (e.g. initial description, wikitext
+	 *    archive edit).  However, actions will be attributed to the original user when
+	 *    possible (e.g. the user who did the original LQT reply)
+	 */
+	protected $user;
+
 	/** @var OccupationController */
 	protected $occupationController;
 
 	/**
 	 * @param IImportSource $source
+	 * @param User $user The import user; this will only be used when there is no
+	 *   'original' user
+	 * @param OccupationController $occupationController
 	 */
-	public function __construct( IImportSource $source, OccupationController $occupationController ) {
+	public function __construct( IImportSource $source, User $user, OccupationController $occupationController ) {
 		$this->importSource = $source;
+		$this->user = $user;
 		$this->occupationController = $occupationController;
 	}
 
@@ -547,7 +551,7 @@ class TalkpageImportOperation {
 			// Explicitly allow creation of board
 			$creationStatus = $this->occupationController->safeAllowCreation(
 				$destinationTitle,
-				$this->occupationController->getTalkpageManager(),
+				$this->user,
 				/* $mustNotExist = */ true
 			);
 			if ( !$creationStatus->isGood() ) {
@@ -570,7 +574,7 @@ class TalkpageImportOperation {
 				$pageId = $revision->getTitle()->getArticleId( Title::GAID_FOR_UPDATE );
 				$state->logger->debug( "ensureFlowRevision revision ID: $revisionId, page ID: $pageId" );
 
-				$state->put( $state->boardWorkflow, array() );
+				$state->put( $state->boardWorkflow, [] );
 			} else {
 				throw new ImportException( "ensureFlowRevision failed to create the Flow board" );
 			}
@@ -598,7 +602,7 @@ class TalkpageImportOperation {
 			$failed++;
 		}
 
-		foreach( $this->importSource->getTopics() as $topic ) {
+		foreach ( $this->importSource->getTopics() as $topic ) {
 			try {
 				// @todo this may be too large of a chunk for one commit, unsure
 				$state->begin();
@@ -630,17 +634,25 @@ class TalkpageImportOperation {
 
 	/**
 	 * @param PageImportState $pageState
-	 * @param IImportHeader   $importHeader
+	 * @param IImportHeader $importHeader
 	 */
 	public function importHeader( PageImportState $pageState, IImportHeader $importHeader ) {
 		$pageState->logger->info( 'Importing header' );
-		if ( ! $importHeader->getRevisions()->valid() ) {
+		if ( !$importHeader->getRevisions()->valid() ) {
 			$pageState->logger->info( 'no revisions located for header' );
 			// No revisions
 			return;
 		}
 
-		$existingId = $pageState->getImportedId( $importHeader );
+		/*
+		 * We don't need $pageState->getImportedId( $importHeader ) here, there
+		 * can only be 1 header per workflow and we already know the workflow,
+		 * might as well query it from the workflow instead of using the id from
+		 * the source store.
+		 * reason I prefer not to use source store is that a header import is
+		 * incomplete (it doesn't import full history, just the last revision.
+		 */
+		$existingId = $pageState->boardWorkflow->getId();
 		if ( $existingId && $pageState->getTopRevision( 'Header', $existingId ) ) {
 			$pageState->logger->info( 'header previously imported' );
 			return;
@@ -648,7 +660,7 @@ class TalkpageImportOperation {
 
 		$revisions = $this->importObjectWithHistory(
 			$importHeader,
-			function( IObjectRevision $rev ) use ( $pageState ) {
+			function ( IObjectRevision $rev ) use ( $pageState ) {
 				return Header::create(
 					$pageState->boardWorkflow,
 					$pageState->createUser( $rev->getAuthor() ),
@@ -662,9 +674,9 @@ class TalkpageImportOperation {
 			$pageState->boardWorkflow->getArticleTitle()
 		);
 
-		$pageState->put( $revisions, array(
+		$pageState->put( $revisions, [
 			'workflow' => $pageState->boardWorkflow,
-		) );
+		] );
 		$pageState->recordAssociation(
 			reset( $revisions )->getCollectionId(),
 			$importHeader
@@ -675,7 +687,7 @@ class TalkpageImportOperation {
 
 	/**
 	 * @param TopicImportState $topicState
-	 * @param IImportTopic    $importTopic
+	 * @param IImportTopic $importTopic
 	 */
 	public function importTopic( TopicImportState $topicState, IImportTopic $importTopic ) {
 		$summary = $importTopic->getTopicSummary();
@@ -693,7 +705,7 @@ class TalkpageImportOperation {
 
 	/**
 	 * @param PageImportState $state
-	 * @param IImportTopic    $importTopic
+	 * @param IImportTopic $importTopic
 	 * @return TopicImportState
 	 */
 	protected function getTopicState( PageImportState $state, IImportTopic $importTopic ) {
@@ -715,7 +727,7 @@ class TalkpageImportOperation {
 
 	/**
 	 * @param PageImportState $state
-	 * @param IImportTopic    $importTopic
+	 * @param IImportTopic $importTopic
 	 * @return TopicImportState
 	 */
 	protected function createTopicState( PageImportState $state, IImportTopic $importTopic ) {
@@ -736,7 +748,7 @@ class TalkpageImportOperation {
 
 		$titleRevisions = $this->importObjectWithHistory(
 			$importTopic,
-			function( IObjectRevision $rev ) use ( $state, $topicWorkflow ) {
+			function ( IObjectRevision $rev ) use ( $state, $topicWorkflow ) {
 				return PostRevision::createTopicPost(
 					$topicWorkflow,
 					$state->createUser( $rev->getAuthor() ),
@@ -769,7 +781,7 @@ class TalkpageImportOperation {
 
 	/**
 	 * @param PageImportState $state
-	 * @param IImportTopic    $importTopic
+	 * @param IImportTopic $importTopic
 	 * @return TopicImportState|null
 	 */
 	protected function getExistingTopicState( PageImportState $state, IImportTopic $importTopic ) {
@@ -787,7 +799,7 @@ class TalkpageImportOperation {
 
 	/**
 	 * @param TopicImportState $state
-	 * @param IImportSummary   $importSummary
+	 * @param IImportSummary $importSummary
 	 */
 	public function importSummary( TopicImportState $state, IImportSummary $importSummary ) {
 		$state->parent->logger->info( "Importing summary" );
@@ -803,7 +815,7 @@ class TalkpageImportOperation {
 
 		$revisions = $this->importObjectWithHistory(
 			$importSummary,
-			function( IObjectRevision $rev ) use ( $state ) {
+			function ( IObjectRevision $rev ) use ( $state ) {
 				return PostSummary::create(
 					$state->topicWorkflow->getArticleTitle(),
 					$state->topicTitle,
@@ -818,9 +830,9 @@ class TalkpageImportOperation {
 			$state->topicWorkflow->getArticleTitle()
 		);
 
-		$metadata = array(
+		$metadata = [
 			'workflow' => $state->topicWorkflow,
-		);
+		];
 		$state->parent->put( $revisions, $metadata );
 		$state->parent->recordAssociation(
 			reset( $revisions )->getCollectionId(), // Summary ID
@@ -833,9 +845,9 @@ class TalkpageImportOperation {
 
 	/**
 	 * @param TopicImportState $state
-	 * @param IImportPost      $post
-	 * @param PostRevision     $replyTo
-	 * @param string           $logPrefix
+	 * @param IImportPost $post
+	 * @param PostRevision $replyTo
+	 * @param string $logPrefix
 	 */
 	public function importPost(
 		TopicImportState $state,
@@ -855,7 +867,7 @@ class TalkpageImportOperation {
 		} else {
 			$replyRevisions = $this->importObjectWithHistory(
 				$post,
-				function( IObjectRevision $rev ) use ( $replyTo, $state ) {
+				function ( IObjectRevision $rev ) use ( $replyTo, $state ) {
 					return $replyTo->reply(
 						$state->topicWorkflow,
 						$state->parent->createUser( $rev->getAuthor() ),
@@ -870,12 +882,12 @@ class TalkpageImportOperation {
 
 			$topRevision = end( $replyRevisions );
 
-			$metadata = array(
+			$metadata = [
 				'workflow' => $state->topicWorkflow,
 				'board-workflow' => $state->parent->boardWorkflow,
 				'topic-title' => $state->topicTitle,
 				'reply-to' => $replyTo,
-			);
+			];
 
 			$state->parent->put( $replyRevisions, $metadata );
 			$state->parent->recordAssociation(
@@ -896,11 +908,11 @@ class TalkpageImportOperation {
 	/**
 	 * Imports an object with all its revisions
 	 *
-	 * @param IRevisionableObject $object              Object to import.
-	 * @param callable            $importFirstRevision Function which, given the appropriate import revision, creates the Flow revision.
-	 * @param string              $editChangeType      The Flow change type (from FlowActions.php) for each new operation.
-	 * @param PageImportState     $state               State of the import operation.
-	 * @param Title               $title               Title content is rendered against
+	 * @param IRevisionableObject $object Object to import.
+	 * @param callable $importFirstRevision Function which, given the appropriate import revision, creates the Flow revision.
+	 * @param string $editChangeType The Flow change type (from FlowActions.php) for each new operation.
+	 * @param PageImportState $state State of the import operation.
+	 * @param Title $title Title content is rendered against
 	 * @return AbstractRevision[] Objects to insert into the database.
 	 * @throws ImportException
 	 */
@@ -911,7 +923,7 @@ class TalkpageImportOperation {
 		PageImportState $state,
 		Title $title
 	) {
-		$insertObjects = array();
+		$insertObjects = [];
 		$revisions = $object->getRevisions();
 		$revisions->rewind();
 
@@ -929,7 +941,7 @@ class TalkpageImportOperation {
 		$state->recordAssociation( $lastRevision->getCollectionId(), $importRevision );
 
 		$revisions->next();
-		while( $revisions->valid() ) {
+		while ( $revisions->valid() ) {
 			$importRevision = $revisions->current();
 			$insertObjects[] = $lastRevision =
 				$lastRevision->newNextRevision(

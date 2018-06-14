@@ -1,17 +1,18 @@
 <?php
 
 use Flow\Container;
-use Flow\Import\SourceStore\File as FileImportSourceStore;
+use Flow\Import\SourceStore\FileImportSourceStore;
 use Flow\Import\SourceStore\FlowRevisionsDb as FlowRevisionsDBImportSourceStore;
 use Flow\Import\LiquidThreadsApi\ConversionStrategy;
 use Flow\Import\LiquidThreadsApi\LocalApiBackend;
 use Flow\Utils\NamespaceIterator;
 use Flow\Utils\PagesWithPropertyIterator;
 use Psr\Log\LogLevel;
+use Wikimedia\Rdbms\IDatabase;
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: dirname( __FILE__ ) . '/../../../maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
  * Converts all LiquidThreads pages on a wiki to Flow. When using the logfile
@@ -25,6 +26,7 @@ class ConvertAllLqtPages extends Maintenance {
 		$this->addOption( 'logfile', 'File to read and store associations between imported items and their sources. This is required for the import to be idempotent.', false, true );
 		$this->addOption( 'force-recovery-conversion', 'If a previous logfile was lost, this option can be set to attempt to map threads to topics that have already been imported to prevent doubles.' );
 		$this->addOption( 'debug', 'Include debug information with progress report' );
+		$this->requireExtension( 'Flow' );
 	}
 
 	public function execute() {
@@ -34,7 +36,7 @@ class ConvertAllLqtPages extends Maintenance {
 		} elseif ( $this->getOption( 'force-recovery-conversion' ) ) {
 			// fallback: if we don't have a sourcestore to go on, at least look
 			// at DB to figure out what's already imported...
-			$dbr = Container::get( 'db.factory' )->getDB( DB_SLAVE );
+			$dbr = Container::get( 'db.factory' )->getDB( DB_REPLICA );
 			$sourceStore = new FlowRevisionsDBImportSourceStore( $dbr );
 		} else {
 			$this->error( 'Param logfile or force-recovery-conversion required!' );
@@ -78,8 +80,8 @@ class ConvertAllLqtPages extends Maintenance {
 	}
 
 	/**
-	 * @param $logger
-	 * @param $dbw
+	 * @param AbstractLogger $logger
+	 * @param IDatabase $dbw
 	 * @return AppendIterator
 	 */
 	private function buildIterator( $logger, $dbw ) {
@@ -104,4 +106,4 @@ class ConvertAllLqtPages extends Maintenance {
 }
 
 $maintClass = "ConvertAllLqtPages";
-require_once ( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

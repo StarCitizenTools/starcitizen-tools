@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel PreformattedNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -26,8 +26,6 @@ OO.inheritClass( ve.dm.PreformattedNode, ve.dm.ContentBranchNode );
 /* Static Properties */
 
 ve.dm.PreformattedNode.static.name = 'preformatted';
-
-ve.dm.PreformattedNode.static.canContainContent = true;
 
 ve.dm.PreformattedNode.static.hasSignificantWhitespace = true;
 

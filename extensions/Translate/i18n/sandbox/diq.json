@@ -2,12 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Marmase",
-			"Kumkumuk"
+			"Kumkumuk",
+			"Mirzali",
+			"Gırd",
+			"Gambollar",
+			"Dılmıc"
 		]
 	},
 	"tsb-request-count": "$1 {{PLURAL:$1|waştış|waştışi}}",
 	"tsb-all-languages-button-label": "Zıwani pêro",
-	"tsb-search-requests": "Neticeyê geyrayışi",
+	"tsb-search-requests": "Telebê cıgeyrayışi",
 	"tsb-accept-button-label": "Qebul",
 	"tsb-reject-button-label": "Red ke",
 	"tsb-selected-count": "{{PLURAL:$1|$1 kerber weçineya|$1 karberi weçineyay}}",
@@ -15,6 +19,9 @@
 	"tsb-reject-all-button-label": "Hemın red ke",
 	"tsb-user-posted-a-comment": "Açarnayış niyo",
 	"tsb-translations-source": "Çıme",
-	"tsb-translations-user": "Açarnayışa {{GENDER:$1|karberi}}",
-	"translationstash": "Xeyr amey"
+	"tsb-translations-user": "Tadayışê (çarnayışê) {{GENDER:$1|karberi}}",
+	"translationstash": "Xeyr amey",
+	"translate-translationstash-skip-button-label": "Yewbina bıcerrebne",
+	"tsb-limit-reached-title": "Çarnayışê to rê teşekur kenime",
+	"log-name-translatorsandbox": "Qumdora açarnayışi"
 }

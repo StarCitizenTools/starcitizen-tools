@@ -10,7 +10,7 @@
 
 			<div class="flow-editor">
 				<textarea name="header_content"
-				          class="mw-ui-input"
+				          class="mw-ui-input mw-editfont-{{@root.editFont}}"
 				          placeholder="{{l10n "flow-edit-header-placeholder"}}"
 				          data-role="content"
 				>
@@ -24,10 +24,9 @@
 
 			<div class="flow-form-actions flow-form-collapsible">
 				<button data-role="submit"
-					class="mw-ui-button mw-ui-constructive">
+					class="mw-ui-button mw-ui-progressive">
 						{{~l10n "flow-edit-header-submit"~}}
 				</button>
-				{{> flow_form_cancel_button }}
 				<small class="flow-terms-of-use plainlinks">{{l10nParse "flow-terms-of-use-edit"}}</small>
 			</div>
 		</form>

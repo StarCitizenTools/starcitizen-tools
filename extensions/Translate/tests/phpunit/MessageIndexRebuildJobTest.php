@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -13,18 +13,18 @@
  * @group medium
  */
 class MessageIndexRebuildJobTest extends MediaWikiTestCase {
-	protected $config = array();
+	protected $config = [];
 
 	public function setUp() {
 		parent::setUp();
 
 		global $wgHooks;
-		$this->setMwGlobals( array(
+		$this->setMwGlobals( [
 			'wgHooks' => $wgHooks,
-			'wgTranslateTranslationServices' => array(),
+			'wgTranslateTranslationServices' => [],
 			'wgTranslateDelayedMessageIndexRebuild' => false
-		) );
-		$wgHooks['TranslatePostInitGroups'] = array();
+		] );
+		$wgHooks['TranslatePostInitGroups'] = [];
 
 		$mg = MessageGroups::singleton();
 		$mg->setCache( wfGetCache( 'hash' ) );
@@ -37,7 +37,7 @@ class MessageIndexRebuildJobTest extends MediaWikiTestCase {
 	public function testInsertImmediate() {
 		global $wgTranslateDelayedMessageIndexRebuild;
 		$wgTranslateDelayedMessageIndexRebuild = false;
-		MessageIndexRebuildJob::newJob()->insert();
+		MessageIndexRebuildJob::newJob()->insertIntoJobQueue();
 		$this->assertFalse(
 			JobQueueGroup::singleton()->get( 'MessageIndexRebuildJob' )->pop(),
 			'There is no job in the JobQueue'
@@ -47,7 +47,7 @@ class MessageIndexRebuildJobTest extends MediaWikiTestCase {
 	public function testInsertDelayed() {
 		global $wgTranslateDelayedMessageIndexRebuild;
 		$wgTranslateDelayedMessageIndexRebuild = true;
-		MessageIndexRebuildJob::newJob()->insert();
+		MessageIndexRebuildJob::newJob()->insertIntoJobQueue();
 		$job = JobQueueGroup::singleton()->get( 'MessageIndexRebuildJob' )->pop();
 		$this->assertInstanceOf(
 			'MessageIndexRebuildJob',

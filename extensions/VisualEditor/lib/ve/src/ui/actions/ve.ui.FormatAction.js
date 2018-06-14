@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FormatAction class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,9 +13,9 @@
  * @constructor
  * @param {ve.ui.Surface} surface Surface to act on
  */
-ve.ui.FormatAction = function VeUiFormatAction( surface ) {
+ve.ui.FormatAction = function VeUiFormatAction() {
 	// Parent constructor
-	ve.ui.Action.call( this, surface );
+	ve.ui.FormatAction.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -48,20 +48,19 @@ ve.ui.FormatAction.static.methods = [ 'convert' ];
  * @return {boolean} Action was executed
  */
 ve.ui.FormatAction.prototype.convert = function ( type, attributes ) {
-	var selected, i, length, contentBranch, txs,
+	var selected, i, length, contentBranch,
 		surfaceModel = this.surface.getModel(),
-		selection = surfaceModel.getSelection(),
-		fragmentForSelection = surfaceModel.getFragment( selection, true ),
-		doc = surfaceModel.getDocument(),
+		fragment = surfaceModel.getFragment(),
+		fragmentSelection = fragment.getSelection(),
 		fragments = [];
 
-	if ( !( selection instanceof ve.dm.LinearSelection ) ) {
+	if ( !( fragmentSelection instanceof ve.dm.LinearSelection ) ) {
 		return;
 	}
 
 	// We can't have headings or pre's in a list, so if we're trying to convert
 	// things that are in lists to a heading or a pre, split the list
-	selected = doc.selectNodes( selection.getRange(), 'leaves' );
+	selected = fragment.getLeafNodes();
 	for ( i = 0, length = selected.length; i < length; i++ ) {
 		contentBranch = selected[ i ].node.isContent() ?
 			selected[ i ].node.getParent() :
@@ -73,10 +72,17 @@ ve.ui.FormatAction.prototype.convert = function ( type, attributes ) {
 	for ( i = 0, length = fragments.length; i < length; i++ ) {
 		fragments[ i ].isolateAndUnwrap( type );
 	}
-	selection = fragmentForSelection.getSelection();
 
-	txs = ve.dm.Transaction.newFromContentBranchConversion( doc, selection.getRange(), type, attributes );
-	surfaceModel.change( txs, selection );
+	fragment.convertNodes( type, attributes );
+	if ( fragmentSelection.isCollapsed() ) {
+		// Converting an empty node needs a small selection fixup afterwards,
+		// otherwise the selection will be displayed outside the new empty
+		// node. This causes issues with the display of the current format in
+		// the toolbar, and with hitting enter if no content is entered. Don't
+		// always reapply the selection, because the automatic behavior is
+		// better if isolateAndUnwrap has actually acted. (T151594)
+		surfaceModel.setSelection( fragmentSelection );
+	}
 	this.surface.getView().focus();
 	return true;
 };

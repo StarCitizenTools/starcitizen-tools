@@ -12,12 +12,12 @@ class Controller {
 	/**
 	 * @var SpamFilter[] Array of SpamFilter objects
 	 */
-	protected $spamfilters = array();
+	protected $spamfilters = [];
 
 	/**
 	 * Accepts multiple spamfilters.
 	 *
-	 * @param SpamFilter $spamfilter...
+	 * @param SpamFilter $spamfilter,...
 	 * @throws FlowException When provided arguments are not an instance of SpamFilter
 	 */
 	public function __construct( SpamFilter $spamfilter /* [, SpamFilter $spamfilter2 [, ...]] */ ) {
@@ -35,22 +35,24 @@ class Controller {
 	 * @param IContextSource $context
 	 * @param AbstractRevision $newRevision
 	 * @param AbstractRevision|null $oldRevision
-	 * @param Title $title
+	 * @param Title $title Title that is most specific to the action, e.g. topic for
+	 *   replies and board for header edits.
+	 * @param Title $ownerTitle Board title
 	 * @return Status
 	 */
-	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title ) {
+	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title, Title $ownerTitle ) {
 		foreach ( $this->spamfilters as $spamfilter ) {
 			if ( !$spamfilter->enabled() ) {
 				continue;
 			}
 
-			$status = $spamfilter->validate( $context, $newRevision, $oldRevision, $title );
+			$status = $spamfilter->validate( $context, $newRevision, $oldRevision, $title, $ownerTitle );
 
 			// no need to go through other filters when invalid data is discovered
 			if ( !$status->isOK() ) {
 				$titleString = $title->getPrefixedDBkey();
-				$oldRevid = ( $oldRevision !== null ) ? $oldRevision->getRevisionId() : 'None';
-				$newRevid = $newRevision->getRevisionId();
+				$oldRevid = ( $oldRevision !== null ) ? $oldRevision->getRevisionId()->getAlphadecimal() : 'None';
+				$newRevid = $newRevision->getRevisionId()->getAlphadecimal();
 				$klass = get_class( $spamfilter );
 				wfDebugLog( 'Flow', __METHOD__ . ": Spam filter failed on '" . $titleString . "'.  Old revid: $oldRevid.  New revid: $newRevid.  Filter: $klass" );
 				return $status;

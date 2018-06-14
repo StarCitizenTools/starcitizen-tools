@@ -17,7 +17,6 @@
 
 ( function ( mw, $ ) {
 	/**
-	 * @class mw.mmv.provider.GuessedThumbnailInfo
 	 * This provider is similar to mw.mmv.provider.ThumbnailInfo, but instead of making an API call
 	 * to get the thumbnail URL, it tries to guess it. There are two failure modes:
 	 * - known failure: in the given situation it does not seem possible or safe to guess the URL.
@@ -27,6 +26,8 @@
 	 *   with anyway. On other wikis (especially ones which do not generate thumbnails on demand
 	 *   via the 404 handler) this could be more frequent. Again, it is the caller's resonsibility
 	 *   to handle this by detecting image loading errors and falling back to the normal provider.
+	 *
+	 * @class mw.mmv.provider.GuessedThumbnailInfo
 	 * @constructor
 	 */
 	function GuessedThumbnailInfo() {}
@@ -72,8 +73,8 @@
 			return $.Deferred().resolve( new mw.mmv.model.Thumbnail(
 				url,
 				this.guessWidth( file, width, originalWidth ),
-				this.guessHeight( file, width, originalWidth, originalHeight
-			) ) );
+				this.guessHeight( file, width, originalWidth, originalHeight )
+			) );
 		} else {
 			return $.Deferred().reject( 'Could not guess thumbnail URL' );
 		}
@@ -82,6 +83,7 @@
 	/**
 	 * Try to guess the URL of a thumbnail without doing an API request.
 	 * See #get().
+	 *
 	 * @param {mw.Title} file
 	 * @param {string} sampleUrl a thumbnail URL for the same file (but with different size)
 	 * @param {number} width thumbnail width in pixels
@@ -116,30 +118,35 @@
 	};
 
 	/**
-	 * @protected
 	 * True if the the original image needs to be used as a thumbnail.
+	 *
+	 * @protected
 	 * @param {mw.Title} file
 	 * @param {number} width thumbnail width in pixels
 	 * @param {number} originalWidth width of original image in pixels
+	 * @return {boolean}
 	 */
 	GuessedThumbnailInfo.prototype.needsOriginal = function ( file, width, originalWidth ) {
 		return width >= originalWidth && !this.canHaveLargerThumbnailThanOriginal( file );
 	};
 
 	/**
-	 * @protected
 	 * Checks if a given thumbnail URL is full-size (the original image) or scaled
+	 *
+	 * @protected
 	 * @param {string} url a thumbnail URL
 	 * @param {mw.Title} file
+	 * @return {boolean}
 	 */
 	GuessedThumbnailInfo.prototype.isFullSizeUrl = function ( url, file ) {
 		return !this.obscureFilename( url, file ).match( '/thumb/' );
 	};
 
 	/**
-	 * @protected
 	 * Removes the filename in a reversible way. This is useful because the filename can be nearly
 	 * anything and could cause false positives when looking for patterns.
+	 *
+	 * @protected
 	 * @param {string} url a thumbnail URL
 	 * @param {mw.Title} file
 	 * @return {string} thumbnnail URL with occurences of the filename replaced by `<filename>`
@@ -154,8 +161,9 @@
 	};
 
 	/**
-	 * @protected
 	 * Undoes #obscureFilename().
+	 *
+	 * @protected
 	 * @param {string} url a thumbnail URL (with obscured filename)
 	 * @param {mw.Title} file
 	 * @return {string} original thumbnnail URL
@@ -169,8 +177,9 @@
 	};
 
 	/**
-	 * @protected
 	 * True if the file is of a type for which the thumbnail can be scaled beyond the original size.
+	 *
+	 * @protected
 	 * @param {mw.Title} file
 	 * @return {boolean}
 	 */
@@ -179,8 +188,9 @@
 	};
 
 	/**
-	 * @protected
 	 * True if the file type can be displayed in most browsers, false if it needs thumbnailing
+	 *
+	 * @protected
 	 * @param {mw.Title} file
 	 * @return {boolean}
 	 */
@@ -189,9 +199,10 @@
 	};
 
 	/**
-	 * @protected
 	 * Guess what will be the width of the thumbnail. (Thumbnails for most file formats cannot be
 	 * larger than the original file so this might be smaller than the requested width.)
+	 *
+	 * @protected
 	 * @param {mw.Title} file
 	 * @param {number} width thumbnail width in pixels
 	 * @param {number} originalWidth width of original image in pixels
@@ -206,8 +217,9 @@
 	};
 
 	/**
-	 * @protected
 	 * Guess what will be the height of the thumbnail, given its width.
+	 *
+	 * @protected
 	 * @param {mw.Title} file
 	 * @param {number} width thumbnail width in pixels
 	 * @param {number} originalWidth width of original image in pixels
@@ -225,8 +237,9 @@
 	};
 
 	/**
-	 * @protected
 	 * Given a thumbnail URL with a wrong size, returns one with the right size.
+	 *
+	 * @protected
 	 * @param {mw.Title} file
 	 * @param {string} sampleUrl a thumbnail URL for the same file (but with different size)
 	 * @param {number} width thumbnail width in pixels
@@ -250,8 +263,9 @@
 	};
 
 	/**
-	 * @protected
 	 * Try to guess the original URL to the file, from a thumb URL.
+	 *
+	 * @protected
 	 * @param {mw.Title} file
 	 * @param {string} thumbnailUrl
 	 * @return {string} URL of the original file
@@ -272,15 +286,15 @@
 	};
 
 	/**
-	 * @protected
 	 * Hardest version: try to guess thumbnail URL from original
+	 *
+	 * @protected
 	 * @param {mw.Title} file
 	 * @param {string} originalUrl URL for the original file
 	 * @param {number} width thumbnail width in pixels
 	 * @return {string|undefined} thumbnail URL
 	 */
-	GuessedThumbnailInfo.prototype.guessThumbUrl = function ( file, originalUrl, width ) {
-		/* jshint unused:false */
+	GuessedThumbnailInfo.prototype.guessThumbUrl = function () {
 		// Not implemented. This can be very complicated (the thumbnail might have other
 		// parameters than the size, which are impossible to guess, might be converted to some
 		// other format, might have a special shortened format depending on the length of the

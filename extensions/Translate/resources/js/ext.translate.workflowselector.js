@@ -3,7 +3,7 @@
  * workflow sates.
  *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 ( function ( $, mw ) {
@@ -65,12 +65,10 @@
 				action: 'groupreview',
 				group: this.groupId,
 				language: this.language,
-				state: state,
-				format: 'json'
+				state: state
 			};
 
-			// Change to csrf when support for MW 1.25 is dropped
-			return api.postWithToken( 'edit', params );
+			return api.postWithToken( 'csrf', params );
 		},
 
 		/**
@@ -144,7 +142,8 @@
 						instance.receiveState( instance.groupId, instance.language, state );
 					} )
 					.fail( function () {
-						window.alert( 'Change of state failed' );
+						// eslint-disable-next-line no-alert
+						alert( 'Change of state failed' );
 					} );
 			} );
 			instance.$container.append( $display, $list );

@@ -3,7 +3,7 @@
 namespace Flow\Tests\Import;
 
 use Flow\Container;
-use Flow\Import\SourceStore\Null as NullImportSourceStore;
+use Flow\Import\SourceStore\NullImportSourceStore;
 use Flow\Import\PageImportState;
 use Flow\Import\Postprocessor\ProcessorGroup;
 use Flow\Import\TalkpageImportOperation;
@@ -28,12 +28,13 @@ use User;
  * @group Database
  */
 class TalkpageImportOperationTest extends \MediaWikiTestCase {
-	protected $tablesUsed = array(
+	protected $tablesUsed = [
 		// importer will ensureFlowRevision(), which will insert into these core tables
 		'page',
 		'revision',
+		'ip_changes',
 		'text',
-	);
+	];
 
 	protected function setUp() {
 		parent::setUp();
@@ -58,71 +59,74 @@ class TalkpageImportOperationTest extends \MediaWikiTestCase {
 		$storage = $this->getMockBuilder( 'Flow\Data\ManagerGroup' )
 			->disableOriginalConstructor()
 			->getMock();
-		$stored = array();
+		$stored = [];
 		$storage->expects( $this->any() )
 			->method( 'put' )
-			->will( $this->returnCallback( function( $obj ) use( &$stored ) {
+			->will( $this->returnCallback( function ( $obj ) use( &$stored ) {
 				$stored[] = $obj;
 			} ) );
 		$storage->expects( $this->any() )
 			->method( 'multiPut' )
-			->will( $this->returnCallback( function( $objs ) use( &$stored ) {
+			->will( $this->returnCallback( function ( $objs ) use( &$stored ) {
 				$stored = array_merge( $stored, $objs );
 			} ) );
 
 		$now = time();
 		$source = new MockImportSource(
-			new MockImportHeader( array(
+			new MockImportHeader( [
 				// header revisions
-				new MockImportRevision( array( 'createdTimestamp' => $now ) ),
-			) ),
-			array(
+				new MockImportRevision( [ 'createdTimestamp' => $now ] ),
+			] ),
+			[
 				new MockImportTopic(
-					new MockImportSummary( array(
-						new MockImportRevision( array( 'createdTimestamp' => $now - 250 ) ),
-					) ),
-					array(
+					new MockImportSummary( [
+						new MockImportRevision( [ 'createdTimestamp' => $now - 250 ] ),
+					] ),
+					[
 						// topic title revisions
-						new MockImportRevision( array( 'createdTimestamp' => $now - 1000 ) ),
-					),
-					array(
-						//replies
+						new MockImportRevision( [ 'createdTimestamp' => $now - 1000 ] ),
+					],
+					[
+						// replies
 						new MockImportPost(
-							array(
+							[
 								// revisions
-								new MockImportRevision( array( 'createdTimestmap' => $now - 1000 ) ),
-							),
-							array(
+								new MockImportRevision( [ 'createdTimestmap' => $now - 1000 ] ),
+							],
+							[
 								// replies
 								new MockImportPost(
-									array(
+									[
 										// revisions
-										new MockImportRevision( array(
+										new MockImportRevision( [
 											'createdTimestmap' => $now - 500,
 											'user' => User::newFromNAme( '10.0.0.2', false ),
-										) ),
-									),
-									array(
+										] ),
+									],
+									[
 										// replies
-									)
+									]
 								),
-							)
+							]
 						),
-					)
+					]
 				)
-			)
+			]
 		);
 
-		$op = new TalkpageImportOperation( $source, Container::get( 'occupation_controller' ) );
+		$occupationController = Container::get( 'occupation_controller' );
+		$op = new TalkpageImportOperation(
+			$source,
+			$occupationController->getTalkpageManager(),
+			$occupationController
+		);
+
 		$store = new NullImportSourceStore;
 		$op->import( new PageImportState(
 			$workflow,
 			$storage,
 			$store,
 			new NullLogger(),
-			$this->getMockBuilder( 'Flow\Data\BufferedCache' )
-				->disableOriginalConstructor()
-				->getMock(),
 			Container::get( 'db.factory' ),
 			new ProcessorGroup,
 			new SplQueue

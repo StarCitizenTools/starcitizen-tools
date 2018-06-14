@@ -2,19 +2,19 @@
  * Collapsing script for Special:LanguageStats in MediaWiki Extension:Translate
  * @author Krinkle <krinklemail (at) gmail (dot) com>
  * @author Niklas Laxström
- * @license GPL-2.0+, CC-BY-SA-3.0
+ * @license GPL-2.0-or-later, CC-BY-SA-3.0
  */
 
 ( function ( mw, $ ) {
 	'use strict';
 
-	$( document ).ready( function () {
+	$( function () {
 		var $allChildRows, $allTogglesCache, $toggleAllButton,
-			$translateTable = $( '.mw-sp-translate-table' ),
+			$translateTable = $( '.statstable' ),
 			$metaRows = $( 'tr.AggregateMessageGroup', $translateTable );
 
 		// Quick return
-		if ( !$metaRows.size() ) {
+		if ( !$metaRows.length ) {
 			return;
 		}
 
@@ -25,7 +25,7 @@
 				$children = $( 'tr[data-parentgroup="' + thisGroupId + '"]', $translateTable );
 
 			// Only do the collapse stuff if this Meta-group actually has children on this page
-			if ( !$children.size() ) {
+			if ( !$children.length ) {
 				return;
 			}
 
@@ -72,7 +72,7 @@
 			.append( ']' )
 			.click( function ( e ) {
 				var $el = $( this ),
-					$allToggles = !!$allTogglesCache ? $allTogglesCache : $( '.groupexpander', $translateTable );
+					$allToggles = $allTogglesCache || $( '.groupexpander', $translateTable );
 
 				// Switch the state and toggle the rows
 				// and update the local toggles too
@@ -101,34 +101,37 @@
 	// When hovering a row, adjust brightness of the last two custom-colored cells as well
 	// See also translate.langstats.css for the highlighting for the other normal rows
 	mw.loader.using( 'jquery.colorUtil', function () {
-		$( document ).ready( function () {
+		$( function () {
 			// It is possible that the first event we get is hover-out, in
 			// which case the colors will get stuck wrong. Ignore it.
-			var seenHoverIn = false;
+			var eventHandlers, seenHoverIn = false;
 
-			$( '.mw-sp-translate-table.wikitable tr' ).hover( function () {
-				seenHoverIn = true;
-				$( '> td.hover-color', this )
-					// 30% more brightness
-					.css( 'background-color', function ( i, val ) {
-						// @codingStandardsIgnoreStart Bug in CodeSniffer?
-						return $.colorUtil.getColorBrightness( val, +0.3 );
-						// codingStandardsIgnoreEnd
-					} );
-			}, function () {
-				if ( !seenHoverIn ) {
-					return;
+			eventHandlers = {
+				mouseenter: function () {
+					seenHoverIn = true;
+					$( this ).children( '.hover-color' )
+						// 30% more brightness
+						.css( 'background-color', function ( i, val ) {
+							return $.colorUtil.getColorBrightness( val, +0.3 );
+						} );
+				},
+				mouseleave: function () {
+					if ( !seenHoverIn ) {
+						return;
+					}
+					$( this ).children( '.hover-color' )
+						// 30% less brightness
+						.css( 'background-color', function ( i, val ) {
+							return $.colorUtil.getColorBrightness( val, -0.3 );
+						} );
 				}
-				$( '> td.hover-color', this )
-					// 30% less brightness
-					.css( 'background-color', function ( i, val ) {
-						return $.colorUtil.getColorBrightness( val, -0.3 );
-					} );
-			} );
+			};
+
+			$( '.statstable' ).on( eventHandlers, 'tr' );
 		} );
 	} );
 
-	$( document ).ready( function () {
+	$( function () {
 		var index,
 			sort = {},
 			re = /#sortable:(\d+)=(asc|desc)/,
@@ -145,7 +148,7 @@
 			var $table = $( this );
 			$table.find( '.headerSortDown, .headerSortUp' ).each( function () {
 				var index = $table.find( 'th' ).index( $( this ) ),
-					dir = $( this ).hasClass( 'headerSortUp' ) ? 'desc' : 'asc';
+					dir = $( this ).hasClass( 'headerSortUp' ) ? 'asc' : 'desc';
 				window.location.hash = 'sortable:' + index + '=' + dir;
 			} );
 		} );

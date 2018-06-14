@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"פוילישער"
+		]
+	},
+	"revisionslider": "ווערסיע־בלעטערער",
+	"revisionslider-toggle-label": "בלעטערן געשיכטע",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|בייט|בייטן}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|בייט|בייטן}}",
+	"revisionslider-label-date": "דאַטע",
+	"revisionslider-label-page-size": "בלאטגרייס",
+	"revisionslider-label-change-size": "ענדערן גרייס",
+	"revisionslider-label-comment": "באמערקונג",
+	"revisionslider-label-username": "{{GENDER:$1|באַניצער־נאָמען}}:",
+	"revisionslider-minoredit": "דאָס איז אַ מינערדיקע רעדאַקטירונג",
+	"revisionslider-previous-dialog": "פֿריערדיקער",
+	"revisionslider-next-dialog": "נעקסטער",
+	"revisionslider-close-dialog": "פארמאכן"
+}

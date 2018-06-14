@@ -1,11 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Malafaya"
+			"Malafaya",
+			"Robin van der Vliet",
+			"Joao Xavier"
 		]
 	},
+	"group-checkuser": "Kontroleri dil uzeri",
 	"checkuser-reason": "Motivo:",
-	"checkuser-target": "IP-adreso od uzanto-nomo:",
+	"checkuser-target": "IP-adreso od uzeronomo:",
 	"checkuser-week-1": "lasta semano",
 	"checkuser-week-2": "lasta du semani",
 	"checkuser-month": "lasta 30 dii",

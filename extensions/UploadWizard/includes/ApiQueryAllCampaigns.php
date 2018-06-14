@@ -39,15 +39,15 @@ class ApiQueryAllCampaigns extends ApiQueryBase {
 
 		$this->addTables( 'uw_campaigns' );
 
-		$this->addWhereIf( array( 'campaign_enabled' => 1 ), $params['enabledonly'] );
+		$this->addWhereIf( [ 'campaign_enabled' => 1 ], $params['enabledonly'] );
 		$this->addOption( 'LIMIT', $limit + 1 );
 		$this->addOption( 'ORDER BY', 'campaign_id' ); // Not sure if required?
 
-		$this->addFields( array(
+		$this->addFields( [
 			'campaign_id',
 			'campaign_name',
 			'campaign_enabled'
-		) );
+		] );
 
 		if ( !is_null( $params['continue'] ) ) {
 			$from_id = (int)$params['continue'];
@@ -70,7 +70,7 @@ class ApiQueryAllCampaigns extends ApiQueryBase {
 
 			$campaign = UploadWizardCampaign::newFromName( $row->campaign_name );
 
-			$campaignPath = array( 'query', $this->getModuleName(), $row->campaign_id );
+			$campaignPath = [ 'query', $this->getModuleName(), $row->campaign_id ];
 
 			$result->addValue(
 				$campaignPath,
@@ -100,11 +100,7 @@ class ApiQueryAllCampaigns extends ApiQueryBase {
 				);
 			}
 		}
-		if ( defined( 'ApiResult::META_CONTENT' ) ) {
-			$result->addIndexedTagName( array( 'query', $this->getModuleName() ), 'campaign' );
-		} else {
-			$result->setIndexedTagName_internal( array( 'query', $this->getModuleName() ), 'campaign' );
-		}
+		$result->addIndexedTagName( [ 'query', $this->getModuleName() ], 'campaign' );
 	}
 
 	public function getCacheMode( $params ) {
@@ -112,29 +108,29 @@ class ApiQueryAllCampaigns extends ApiQueryBase {
 	}
 
 	public function getAllowedParams() {
-		return array(
+		return [
 			'enabledonly' => false,
-			'limit' => array(
+			'limit' => [
 				ApiBase::PARAM_DFLT => 50,
 				ApiBase::PARAM_TYPE => 'limit',
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => ApiBase::LIMIT_BIG1,
 				ApiBase::PARAM_MAX2 => ApiBase::LIMIT_BIG2
-			),
-			'continue' => array(
+			],
+			'continue' => [
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			),
-		);
+			],
+		];
 	}
 
 	/**
-	 * @see ApiBase::getExamplesMessages()
+	 * @inheritDoc
 	 */
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=query&list=allcampaigns&uwcenabledonly='
 				=> 'apihelp-query+allcampaigns-example-1',
-		);
+		];
 	}
 
 	public function getHelpUrls() {

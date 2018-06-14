@@ -5,7 +5,7 @@
  * @author Niklas Laxström
  * @author Siebrand Mazeland
  * @copyright Copyright © 2009-2013, Niklas Laxström, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -73,7 +73,7 @@ class MwCoreExport extends Maintenance {
 				continue;
 			}
 
-			$matches = array();
+			$matches = [];
 			preg_match( '~^(\$[a-zA-Z]+)\s*=~m', $export, $matches );
 
 			if ( !isset( $matches[1] ) ) {

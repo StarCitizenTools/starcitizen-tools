@@ -1,4 +1,4 @@
-@import "mediawiki.mixins";
+@import 'mediawiki.mixins';
 
 /*
  * CSS for WikiEditor jQuery plugin
@@ -8,14 +8,13 @@
 	position: relative;
 	clear: both;
 	width: 100%;
-	background-color: #e0eef7;
 
 	textarea {
 		width: 100%;
 		border: 0;
 
 		&:focus {
-			outline: none;
+			outline: 0;
 		}
 	}
 
@@ -24,12 +23,12 @@
 	}
 
 	.wikiEditor-ui-view {
-		border: 1px solid silver;
+		border: 1px solid #c8ccd1;
 	}
 
 	.wikiEditor-ui-top {
 		position: relative;
-		border-bottom: 1px solid silver;
+		border-bottom: 1px solid #c8ccd1;
 	}
 
 	.wikiEditor-ui-left {
@@ -39,7 +38,7 @@
 
 	.wikiEditor-ui-right {
 		float: right;
-		background: #f3f3f3;
+		background: #f8f9fa;
 		overflow: hidden;
 	}
 }
@@ -52,23 +51,23 @@
 .wikiEditor-ui-controls {
 	float: left;
 	width: 100%;
-	background-color: white;
+	background-color: #fff;
 }
 
 .wikiEditor-ui-tabs {
 	float: left;
 	height: 2.5em;
 	margin-right: -1px;
-	background-color: white;
-	border-left: 1px solid silver;
-	border-top: 1px solid silver;
+	background-color: #fff;
+	border-left: 1px solid #c8ccd1;
+	border-top: 1px solid #c8ccd1;
 
 	div {
 		float: left;
 		height: 2.5em;
-		background-color: #f3f3f3;
-		border-right: 1px solid silver;
-		border-bottom: 1px solid silver;
+		background-color: #f8f9fa;
+		border-right: 1px solid #c8ccd1;
+		border-bottom: 1px solid #c8ccd1;
 
 		a {
 			display: inline-block;
@@ -78,11 +77,11 @@
 		}
 
 		&.current {
-			border-bottom: 1px solid white;
-			background-color: white;
+			border-bottom: 1px solid #fff;
+			background-color: #fff;
 
 			a {
-				color: #333;
+				color: #222;
 
 				&:hover {
 					text-decoration: none;
@@ -96,9 +95,9 @@
 	float: right;
 	height: 2.5em;
 	margin-right: -1px;
-	background-color: white;
+	background-color: #fff;
 	padding-left: 1em;
-	border-top: 1px solid white;
+	border-top: 1px solid #fff;
 
 	button {
 		margin-left: 0.5em;
@@ -110,8 +109,8 @@
 }
 
 .wikiEditor-ui-loading {
-	background: #f3f3f3;
-	border: 1px solid silver;
+	background: #f8f9fa;
+	border: 1px solid #c8ccd1;
 	left: 0;
 	height: 100%;
 	margin: -1px;

@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -30,12 +30,31 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 		$this->run( $resultPageSet );
 	}
 
+	private function validateLanguageCode( $code ) {
+		if ( !Language::isValidBuiltInCode( $code ) ) {
+			if ( method_exists( $this, 'dieWithError' ) ) {
+				$this->dieWithError( [ 'apierror-translate-invalidlanguage' ] );
+			} else {
+				$this->dieUsage(
+					'The requested language is invalid.',
+					'translate-invalidlanguage'
+				);
+			}
+		}
+	}
+
 	private function run( ApiPageSet $resultPageSet = null ) {
 		$params = $this->extractRequestParams();
+		$languageCode = $params['language'];
+		$this->validateLanguageCode( $languageCode );
 
 		$group = MessageGroups::getGroup( $params['group'] );
 		if ( !$group ) {
-			$this->dieUsageMsg( array( 'missingparam', 'mcgroup' ) );
+			if ( method_exists( $this, 'dieWithError' ) ) {
+				$this->dieWithError( [ 'apierror-missingparam', 'mcgroup' ] );
+			} else {
+				$this->dieUsageMsg( [ 'missingparam', 'mcgroup' ] );
+			}
 		}
 
 		if ( MessageGroups::isDynamic( $group ) ) {
@@ -50,10 +69,14 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 		$languages = $group->getTranslatableLanguages();
 
 		if ( $languages !== null && !isset( $languages[$params['language']] ) ) {
-			$this->dieUsage(
-				'Translation to this language is disabled',
-				'translate-language-disabled'
-			);
+			if ( method_exists( $this, 'dieWithError' ) ) {
+				$this->dieWithError( 'apierror-translate-language-disabled' );
+			} else {
+				$this->dieUsage(
+					'Translation to this language is disabled',
+					'translate-language-disabled'
+				);
+			}
 		}
 
 		$messages = $group->initCollection( $params['language'] );
@@ -73,7 +96,14 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 					$messages->filter( $filter, false, $value );
 				}
 			} catch ( MWException $e ) {
-				$this->dieUsage( $e->getMessage(), 'invalidfilter' );
+				if ( method_exists( $this, 'dieWithError' ) ) {
+					$this->dieWithError(
+						[ 'apierror-translate-invalidfilter', wfEscapeWikiText( $e->getMessage() ) ],
+						'invalidfilter'
+					);
+				} else {
+					$this->dieUsage( $e->getMessage(), 'invalidfilter' );
+				}
 			}
 		}
 
@@ -83,21 +113,21 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 		list( /*$backwardsOffset*/, $forwardsOffset, $startOffset ) = $offsets;
 
 		$result->addValue(
-			array( 'query', 'metadata' ),
+			[ 'query', 'metadata' ],
 			'state',
 			self::getWorkflowState( $group->getId(), $params['language'] )
 		);
 
-		$result->addValue( array( 'query', 'metadata' ), 'resultsize', $resultSize );
+		$result->addValue( [ 'query', 'metadata' ], 'resultsize', $resultSize );
 		$result->addValue(
-			array( 'query', 'metadata' ),
+			[ 'query', 'metadata' ],
 			'remaining',
 			$resultSize - $startOffset - $batchSize
 		);
 
 		$messages->loadTranslations();
 
-		$pages = array();
+		$pages = [];
 
 		if ( $forwardsOffset !== false ) {
 			$this->setContinueEnumParameter( 'offset', $forwardsOffset );
@@ -110,8 +140,13 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 			if ( is_null( $resultPageSet ) ) {
 				$data = $this->extractMessageData( $result, $props, $messages[$mkey] );
 				$data['title'] = $title->getPrefixedText();
+				$handle = new MessageHandle( $title );
 
-				$result->addValue( array( 'query', $this->getModuleName() ), null, $data );
+				if ( $handle->isValid() ) {
+					$data['primaryGroup'] = $handle->getGroup()->getId();
+				}
+
+				$result->addValue( [ 'query', $this->getModuleName() ], null, $data );
 			} else {
 				$pages[] = $title;
 			}
@@ -119,7 +154,7 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 
 		if ( is_null( $resultPageSet ) ) {
 			$result->addIndexedTagName(
-				array( 'query', $this->getModuleName() ),
+				[ 'query', $this->getModuleName() ],
 				'message'
 			);
 		} else {
@@ -128,9 +163,9 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 	}
 
 	/**
-	 * @param $result ApiResult
-	 * @param $props array
-	 * @param $message ThinMessage
+	 * @param ApiResult $result
+	 * @param array $props
+	 * @param ThinMessage $message
 	 * @return array
 	 */
 	public function extractMessageData( $result, $props, $message ) {
@@ -173,64 +208,64 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 	 * @return string|bool State id or false.
 	 */
 	protected static function getWorkflowState( $groupId, $language ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		return $dbr->selectField(
 			'translate_groupreviews',
 			'tgr_state',
-			array(
+			[
 				'tgr_group' => $groupId,
 				'tgr_lang' => $language
-			),
+			],
 			__METHOD__
 		);
 	}
 
 	public function getAllowedParams() {
-		return array(
-			'group' => array(
+		return [
+			'group' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'language' => array(
+			],
+			'language' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DFLT => 'en',
-			),
-			'limit' => array(
+			],
+			'limit' => [
 				ApiBase::PARAM_DFLT => 500,
 				ApiBase::PARAM_TYPE => 'limit',
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => ApiBase::LIMIT_BIG2,
 				ApiBase::PARAM_MAX2 => ApiBase::LIMIT_BIG2,
-			),
-			'offset' => array(
+			],
+			'offset' => [
 				ApiBase::PARAM_DFLT => '',
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
-			),
-			'filter' => array(
+			],
+			'filter' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DFLT => '!optional|!ignored',
 				ApiBase::PARAM_ISMULTI => true,
-			),
-			'prop' => array(
-				ApiBase::PARAM_TYPE => array(
+			],
+			'prop' => [
+				ApiBase::PARAM_TYPE => [
 					'definition',
 					'translation',
 					'tags',
 					'revision',
 					'properties'
-				),
+				],
 				ApiBase::PARAM_DFLT => 'definition|translation',
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_HELP_MSG =>
-					array( 'apihelp-query+messagecollection-param-prop', '!!FUZZY!!' ),
-			),
-		);
+					[ 'apihelp-query+messagecollection-param-prop', '!!FUZZY!!' ],
+			],
+		];
 	}
 
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=query&meta=siteinfo&siprop=languages'
 				=> 'apihelp-query+messagecollection-example-1',
 			'action=query&list=messagecollection&mcgroup=page-Example'
@@ -240,6 +275,6 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 				=> 'apihelp-query+messagecollection-example-3',
 			'action=query&generator=messagecollection&gmcgroup=page-Example&gmclanguage=nl&prop=revisions'
 				=> 'apihelp-query+messagecollection-example-4',
-		);
+		];
 	}
 }

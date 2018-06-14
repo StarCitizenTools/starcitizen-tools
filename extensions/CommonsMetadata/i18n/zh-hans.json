@@ -15,5 +15,7 @@
 	"commonsmetadata-trackingcategory-no-author": "没有机器可读作者的文件",
 	"commonsmetadata-trackingcategory-no-author-desc": "文件没有[{{MediaWiki:Commonsmetadata-doc-url}} 机器可读的]信息模板，或其作者字段未填写。",
 	"commonsmetadata-trackingcategory-no-source": "没有机器可读来源的文件",
-	"commonsmetadata-trackingcategory-no-source-desc": "文件没有[{{MediaWiki:Commonsmetadata-doc-url}} 机器可读的]信息模板，或其来源字段未填写。"
+	"commonsmetadata-trackingcategory-no-source-desc": "文件没有[{{MediaWiki:Commonsmetadata-doc-url}} 机器可读的]信息模板，或其来源字段未填写。",
+	"commonsmetadata-trackingcategory-no-patent": "没有机器可读专利的文件",
+	"commonsmetadata-trackingcategory-no-patent-desc": "文件没有任何[{{MediaWiki:Commonsmetadata-doc-url}} 机器可读的]专利模板。"
 }

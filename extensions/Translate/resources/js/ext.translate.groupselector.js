@@ -6,11 +6,20 @@
 	/**
 	 * options
 	 *  - position: accepts same values as jquery.ui.position
-	 *  - onSelect: callback with message group id when selected
-	 *  - language: language for statistics.
+	 *  - onSelect:
+	 *  - language:
 	 *  - preventSelector: boolean to load but not show the group selector.
 	 *  - recent: list of recent group ids
 	 * groups: list of message group ids
+	 *
+	 * @param {Element} element
+	 * @param {Object} options
+	 * @param {Object} [options.position] Accepts same values as jquery.ui.position.
+	 * @param {Function} [options.onSelect] Callback with message group id when selected.
+	 * @param {string} options.language Language code for statistics.
+	 * @param {boolean} [options.preventSelector] Whether not to show the group selector.
+	 * @param {string[]} [options.recent] List of recent message group ids.
+	 * @param {string[]} [groups] List of message group ids to show.
 	 */
 	function TranslateMessageGroupSelector( element, options, groups ) {
 		this.$trigger = $( element );
@@ -47,8 +56,7 @@
 		 * Prepare the selector menu rendering
 		 */
 		prepareSelectorMenu: function () {
-			var $groupTitle,
-				$listFilters,
+			var $listFilters,
 				$listFiltersGroup,
 				$search,
 				$searchIcon,
@@ -57,15 +65,6 @@
 			this.$menu = $( '<div>' )
 				.addClass( 'tux-groupselector' )
 				.addClass( 'grid' );
-
-			$groupTitle = $( '<div>' )
-				.addClass( 'row' )
-				.append(
-					$( '<h3>' )
-						.addClass( 'tux-groupselector__title' )
-						.addClass( 'ten columns' )
-						.text( mw.msg( 'translate-msggroupselector-projects' ) )
-				);
 
 			$searchIcon = $( '<div>' )
 				.addClass( 'two columns tux-groupselector__filter__search__icon' );
@@ -116,7 +115,7 @@
 			this.$loader = $( '<div>' )
 				.addClass( 'tux-loading-indicator tux-loading-indicator--centered' );
 
-			this.$menu.append( $groupTitle, $listFiltersGroup, this.$loader, this.$list );
+			this.$menu.append( $listFiltersGroup, this.$loader, this.$list );
 
 			$( 'body' ).append( this.$menu );
 		},
@@ -139,6 +138,8 @@
 
 		/**
 		 * Hide the selector
+		 *
+		 * @param {jQuery.Event} e
 		 */
 		hide: function ( e ) {
 			// Do not hide if the trigger is clicked
@@ -431,7 +432,6 @@
 
 			params = {
 				action: 'query',
-				format: 'json',
 				meta: 'messagegroups',
 				mgformat: 'tree',
 				mgprop: 'id|label|icon|priority|prioritylangs|priorityforce',
@@ -537,9 +537,7 @@
 			}
 
 			if ( messagegroup.icon && messagegroup.icon.vector ) {
-				style +=
-					'background-image: -webkit-linear-gradient(transparent, transparent), url(--);' +
-					'background-image: linear-gradient(transparent, transparent), url(--);';
+				style += 'background-image: linear-gradient(transparent, transparent), url(--);';
 				style = style.replace( /--/g, messagegroup.icon.vector );
 			}
 
@@ -621,7 +619,7 @@
 	 * @return {string} Escaped string that is safe to use for a search.
 	 */
 	function escapeRegex( value ) {
-		return value.replace( /[\-\[\]{}()*+?.,\\\^$\|#\s]/g, '\\$&' );
+		return value.replace( /[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&' );
 	}
 
 	delay = ( function () {

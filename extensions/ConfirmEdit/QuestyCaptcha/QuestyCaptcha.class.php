@@ -8,12 +8,19 @@
  * @ingroup Extensions
  */
 
+use MediaWiki\Auth\AuthenticationRequest;
+
 class QuestyCaptcha extends SimpleCaptcha {
 	// used for questycaptcha-edit, questycaptcha-addurl, questycaptcha-badlogin,
 	// questycaptcha-createaccount, questycaptcha-create, questycaptcha-sendemail via getMessage()
 	protected static $messagePrefix = 'questycaptcha-';
 
-	/** Validate a captcha response */
+	/**
+	 * Validate a captcha response
+	 * @param string $answer
+	 * @param array $info
+	 * @return bool
+	 */
 	function keyMatch( $answer, $info ) {
 		if ( is_array( $info['answer'] ) ) {
 			return in_array( strtolower( $answer ), array_map( 'strtolower', $info['answer'] ) );
@@ -22,6 +29,9 @@ class QuestyCaptcha extends SimpleCaptcha {
 		}
 	}
 
+	/**
+	 * @param array &$resultArr
+	 */
 	function addCaptchaAPI( &$resultArr ) {
 		$captcha = $this->getCaptcha();
 		$index = $this->storeCaptcha( $captcha );
@@ -30,13 +40,19 @@ class QuestyCaptcha extends SimpleCaptcha {
 		$resultArr['captcha']['question'] = $captcha['question'];
 	}
 
+	/**
+	 * @return array
+	 */
 	public function describeCaptchaType() {
 		return [
 			'type' => 'question',
-			'mime' => 'text/plain',
+			'mime' => 'text/html',
 		];
 	}
 
+	/**
+	 * @return array
+	 */
 	function getCaptcha() {
 		global $wgCaptchaQuestions;
 
@@ -50,7 +66,11 @@ class QuestyCaptcha extends SimpleCaptcha {
 		return [ 'question' => $question, 'answer' => $answer ];
 	}
 
-	function getForm( OutputPage $out, $tabIndex = 1 ) {
+	/**
+	 * @param int $tabIndex
+	 * @return array
+	 */
+	function getFormInformation( $tabIndex = 1 ) {
 		$captcha = $this->getCaptcha();
 		if ( !$captcha ) {
 			die(
@@ -58,20 +78,22 @@ class QuestyCaptcha extends SimpleCaptcha {
 			);
 		}
 		$index = $this->storeCaptcha( $captcha );
-		return "<p><label for=\"wpCaptchaWord\">{$captcha['question']}</label> " .
-			Html::element( 'input', [
-				'name' => 'wpCaptchaWord',
-				'id'   => 'wpCaptchaWord',
-				'class' => 'mw-ui-input',
-				'required',
-				'autocomplete' => 'off',
-				'tabindex' => $tabIndex ] ) . // tab in before the edit textarea
-			"</p>\n" .
-			Xml::element( 'input', [
-				'type'  => 'hidden',
-				'name'  => 'wpCaptchaId',
-				'id'    => 'wpCaptchaId',
-				'value' => $index ] );
+		return [
+			'html' => "<p><label for=\"wpCaptchaWord\">{$captcha['question']}</label> " .
+				Html::element( 'input', [
+					'name' => 'wpCaptchaWord',
+					'id'   => 'wpCaptchaWord',
+					'class' => 'mw-ui-input',
+					'required',
+					'autocomplete' => 'off',
+					'tabindex' => $tabIndex ] ) . // tab in before the edit textarea
+				"</p>\n" .
+				Xml::element( 'input', [
+					'type'  => 'hidden',
+					'name'  => 'wpCaptchaId',
+					'id'    => 'wpCaptchaId',
+					'value' => $index ] )
+		];
 	}
 
 	function showHelp() {
@@ -83,7 +105,33 @@ class QuestyCaptcha extends SimpleCaptcha {
 		}
 	}
 
+	/**
+	 * @param array $captchaData
+	 * @param string $id
+	 * @return mixed
+	 */
 	public function getCaptchaInfo( $captchaData, $id ) {
 		return $captchaData['question'];
+	}
+
+	/**
+	 * @param array $requests
+	 * @param array $fieldInfo
+	 * @param array &$formDescriptor
+	 * @param string $action
+	 */
+	public function onAuthChangeFormFields( array $requests, array $fieldInfo,
+		array &$formDescriptor, $action ) {
+		/** @var CaptchaAuthenticationRequest $req */
+		$req =
+			AuthenticationRequest::getRequestByClass( $requests,
+				CaptchaAuthenticationRequest::class, true );
+		if ( !$req ) {
+			return;
+		}
+
+		// declare RAW HTML output.
+		$formDescriptor['captchaInfo']['raw'] = true;
+		$formDescriptor['captchaWord']['label-message'] = null;
 	}
 }

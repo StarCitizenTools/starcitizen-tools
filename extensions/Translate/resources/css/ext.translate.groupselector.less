@@ -1,0 +1,142 @@
+@import 'mediawiki.mixins';
+
+/**
+ * Group selector
+ */
+.tux-groupselector {
+	position: absolute;
+	top: 14px;
+	right: 0;
+	z-index: 1000;
+	display: none;
+	margin-top: 13px;
+	width: 600px;
+	padding: 0;
+	border: 1px solid #a2a9b1;
+	background-color: #f0f0f0;
+	border-radius: 5px;
+	box-shadow: 0 5px 10px rgba( 0, 0, 0, 0.2 );
+}
+
+/* The triangle shaped callout */
+.tux-groupselector:before {
+	border-bottom: 7px solid #a2a9b1;
+	border-left: 7px solid transparent;
+	border-right: 7px solid transparent;
+	content: '';
+	display: inline-block;
+	left: 99px;
+	position: absolute;
+	top: -7px;
+}
+
+.tux-groupselector:after {
+	border-bottom: 6px solid #f0f0f0;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	content: '';
+	display: inline-block;
+	left: 100px;
+	position: absolute;
+	top: -6px;
+}
+
+/* Remove the triangle shaped callout */
+.tux-groupselector.removecallout:before,
+.tux-groupselector.removecallout:after {
+	content: none;
+}
+
+.tux-groupselector__filter {
+	padding-top: 10px;
+}
+
+.tux-groupselector__filter__search__input {
+	font-size: 14px;
+	width: 100%;
+	height: 28px;
+	border: 1px solid #c9c9c9;
+	padding: 2px;
+}
+
+.tux-groupselector__filter__search__icon {
+	.background-image( '../images/search.svg' );
+	background-repeat: no-repeat;
+	background-position: right center;
+	background-size: 25px;
+	height: 28px;
+}
+
+/*
+ * Group tab
+ */
+.tux-grouptab {
+	color: #222;
+	line-height: 30px;
+	height: 30px;
+	cursor: pointer;
+	padding: 2px 5px;
+	margin: 0 4px;
+	display: inline-block;
+}
+
+.tux-grouptab--selected {
+	border-bottom: 2px solid #0645ad;
+}
+
+/*
+ * Group list
+ */
+.tux-grouplist {
+	max-height: 400px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	background-color: #fff;
+	min-height: 200px;
+	border-radius: 0 0 5px 5px;
+}
+
+.tux-grouplist__item {
+	position: relative;
+	border-bottom: 1px solid #eee;
+	height: 50px;
+	cursor: pointer;
+
+	&:hover {
+		background-color: #f8f8f8;
+	}
+}
+
+.grid .tux-grouplist__item__label {
+	padding-bottom: 0; /* grid override */
+	padding-left: 15px; /* grid override */
+	line-height: 32px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.tux-grouplist__item__label .tux-statsbar {
+	position: absolute;
+	bottom: 0;
+	width: 150px;
+}
+
+.tux-grouplist__item__icon {
+	.background-image( '../images/project.svg' );
+	background-repeat: no-repeat;
+	background-position: right center;
+	/* Keep this in sync with js! */
+	background-size: 32px;
+	height: 50px;
+}
+
+.grid .row .tux-grouplist__item__subgroups {
+	color: #72777d;
+	position: absolute; /* grid override */
+	padding: 0 15px 2px 0; /* grid override */
+	line-height: 1.25em;
+	bottom: 0;
+	right: 0;
+	text-align: right;
+	font-size: 10pt;
+}

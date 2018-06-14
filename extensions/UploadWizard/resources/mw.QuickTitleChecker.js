@@ -20,9 +20,10 @@
 
 	mw.QuickTitleChecker.regexSets = {
 
-		badchars: [
+		invalid: [
 			/[\u00A0\u1680\u180E\u2000-\u200B\u2028\u2029\u202F\u205F\u3000]/, // NBSP and other unusual spaces
 			/[\u202A-\u202E]/, // BiDi overrides
+			// eslint-disable-next-line no-control-regex
 			/[\x00-\x1f]/, // Control characters
 			/\uFEFF/, // Byte order mark
 			/\u00AD/, // Soft-hyphen
@@ -66,7 +67,7 @@
 	 *
 	 * @param {string} title
 	 * @return {string[]} Array of error codes; if it's empty, the title is acceptable.
-	 *   Possible error codes are 'badchars', 'senselessimagename', 'thumbnail', 'extension'.
+	 *   Possible error codes are 'invalid', 'senselessimagename', 'thumbnail', 'extension'.
 	 */
 	mw.QuickTitleChecker.checkTitle = function ( title ) {
 		var errors = [];
@@ -80,4 +81,4 @@
 		return errors;
 	};
 
-} )( mediaWiki, jQuery );
+}( mediaWiki, jQuery ) );

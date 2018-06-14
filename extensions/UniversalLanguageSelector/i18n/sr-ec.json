@@ -3,16 +3,18 @@
 		"authors": [
 			"Milicevic01",
 			"Милан Јелисавчић",
-			"Сербијана"
+			"Сербијана",
+			"Acamicamacaraca",
+			"Prevodim"
 		]
 	},
-	"uls-desc": "Даје кориснику неколико начина да изабере језик и да прилагоди поставке језика",
+	"uls-desc": "Даје кориснику неколико начина да изабере језик и да прилагоди подешавања језика",
 	"uls-plang-title-languages": "Језици",
 	"ext-uls-select-language-settings-icon-tooltip": "Подешавања језика",
 	"ext-uls-undo-language-tooltip-text": "Језик промењен са $1",
-	"ext-uls-language-settings-preferences-link": "Додатне језичке поставке",
+	"ext-uls-language-settings-preferences-link": "Додатна језичка подешавања",
 	"uls-betafeature-label": "Сажете везе ка другим језицима",
-	"uls-betafeature-desc": "Прикажује сажет списак језика, само са вама битним језицима.",
+	"uls-betafeature-desc": "Прикажује сажет списак језика, само са Вама битним језицима.",
 	"ext-uls-display-settings-title": "Подешавања приказа",
 	"ext-uls-display-settings-language-tab": "Језик",
 	"ext-uls-display-settings-fonts-tab": "Фонтови",
@@ -49,15 +51,16 @@
 	"jquery-ime-help": "Помоћ",
 	"ext-uls-input-disable": "Онемогући алате за унос",
 	"ext-uls-input-enable": "Омогући алате за унос",
-	"ext-uls-input-disable-info": "Алати за унос су онемогућени.",
+	"ext-uls-input-disable-info": "Алатке за унос су онемогућене.",
 	"ext-uls-input-settings-noime": "Нема доступне методе уноса за овај језик.",
-	"ext-uls-input-disable-notification": "Алати за унос су онемогућени",
+	"ext-uls-input-disable-notification": "Алатке за унос су онемогућене",
 	"ext-uls-input-disable-notification-undo": "Опозови",
 	"ext-uls-input-disable-notification-info-personal": "Можете омогућити алате за унос у било које време на подешавањима језика.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Можете омогућити алатке за унос у било које време на подешавањима језика поред списка језика.",
 	"ext-uls-language-settings-applying": "Примењујем...",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|Још један|Још $1}}",
+	"ext-uls-compact-link-count": "Још {{PLURAL:$1|1=један|$1}} {{PLURAL:$1|језик|језика}}",
 	"ext-uls-compact-link-info": "Сви језици (првобитни одабир заснован је на најчешћим одабирима Вас и других корисника)",
 	"prefs-languages": "Језици",
-	"ext-uls-compact-language-links-preference": "Користи сажет списак језика, само са вама битним језицима."
+	"ext-uls-compact-language-links-preference": "Користи [[$1|сажет списак језика]], само са Вама битним језицима.",
+	"ext-uls-compact-no-results": "Ова страница није доступна на језику који тражите."
 }

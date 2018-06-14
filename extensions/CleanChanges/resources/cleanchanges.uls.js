@@ -1,7 +1,7 @@
 /*!
  *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 ( function ( $, mw ) {
 	'use strict';
@@ -50,7 +50,7 @@
 		} );
 	}
 
-	$( document ).ready( function () {
+	$( function () {
 		var $trigger = $( '#sp-rc-language' );
 
 		if ( $trigger.length ) {

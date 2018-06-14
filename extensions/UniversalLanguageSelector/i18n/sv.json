@@ -4,7 +4,8 @@
 			"Jopparn",
 			"WikiPhoenix",
 			"Lokal Profil",
-			"Albinomamba"
+			"Albinomamba",
+			"Ainali"
 		]
 	},
 	"uls-desc": "Ger användaren flera sätt att välja ett språk och justera språkinställningar",
@@ -57,15 +58,8 @@
 	"ext-uls-input-disable-notification-info-personal": "Du kan aktivera verktygen för indata när som helst från språkinställningarna.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Du kan aktivera verktygen för indata när som helst från språkinställningarna bredvid språklistan.",
 	"ext-uls-language-settings-applying": "Tillämpar...",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|Ett till|$1 till}}",
-	"apihelp-languagesearch-description": "Sök efter språknamn i valfritt skriftsystem.",
-	"apihelp-languagesearch-param-search": "Söksträng.",
-	"apihelp-languagesearch-param-typos": "Antalet felstavningar som tillåts i söksträngen.",
-	"apihelp-languagesearch-example-1": "Sök efter \"Te\"",
-	"apihelp-languagesearch-example-2": "Sök efter \"ഫി\"",
-	"apihelp-languagesearch-example-3": "Sök efter \"ഫി\", tillåter ett stavfel",
-	"apihelp-ulslocalization-description": "Få lokalanpassningen av ULS på ett visst språk.",
-	"apihelp-ulslocalization-param-language": "Språkkod.",
-	"apihelp-ulslocalization-example-1": "Få lokalanpassning för Tamil",
-	"apihelp-ulslocalization-example-2": "Få lokalanpassning för Hindi"
+	"ext-uls-compact-link-count": "{{PLURAL:$1|Ett till|$1 fler}}",
+	"ext-uls-compact-link-info": "Alla språk (urval baserat på vanliga val av dig och andra)",
+	"prefs-languages": "Språk",
+	"ext-uls-compact-language-links-preference": "Använd en [[$1|kompakt språklista]] med språk som är relevanta för dig."
 }

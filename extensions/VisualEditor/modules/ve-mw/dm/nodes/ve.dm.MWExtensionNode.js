@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWExtensionNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -59,13 +59,19 @@ ve.dm.MWExtensionNode.static.getMatchRdfaTypes = function () {
 	return [ 'mw:Extension/' + this.extensionName ];
 };
 
-ve.dm.MWExtensionNode.static.toDataElement = function ( domElements, converter ) {
+/**
+ * @inheritdoc
+ * @param {Node[]} domElements
+ * @param {ve.dm.Converter} converter
+ * @param {string} [type] Type to give dataElement, defaults to static.name
+ */
+ve.dm.MWExtensionNode.static.toDataElement = function ( domElements, converter, type ) {
 	var dataElement,
 		mwDataJSON = domElements[ 0 ].getAttribute( 'data-mw' ),
 		mwData = mwDataJSON ? JSON.parse( mwDataJSON ) : {};
 
 	dataElement = {
-		type: this.name,
+		type: type || this.name,
 		attributes: {
 			mw: mwData,
 			originalMw: mwDataJSON
@@ -73,59 +79,47 @@ ve.dm.MWExtensionNode.static.toDataElement = function ( domElements, converter )
 	};
 
 	this.storeGeneratedContents( dataElement, domElements, converter.getStore() );
+	// Sub-classes should not modify dataElement beyond this point as it will invalidate the cache
 
 	return dataElement;
 };
 
 /** */
 ve.dm.MWExtensionNode.static.cloneElement = function () {
-	// TODO: This is the same as ve.dm.MWTransclusionnode.static.cloneElement, find a way
-	// to de-duplicate this method.
-	var i, len,
-		// Parent method
-		clone = ve.dm.MWExtensionNode.super.static.cloneElement.apply( this, arguments );
-
+	// Parent method
+	var clone = ve.dm.MWExtensionNode.super.static.cloneElement.apply( this, arguments );
 	delete clone.attributes.originalMw;
-	// Remove about attribute to prevent about grouping of duplicated transclusions
-	if ( clone.originalDomElements ) {
-		for ( i = 0, len = clone.originalDomElements.length; i < len; i++ ) {
-			clone.originalDomElements[ i ].removeAttribute( 'about' );
-		}
-	}
 	return clone;
 };
 
 ve.dm.MWExtensionNode.static.toDomElements = function ( dataElement, doc, converter ) {
-	var el, els, index,
+	var el, els, value,
 		store = converter.getStore(),
 		originalMw = dataElement.attributes.originalMw;
 
 	// If the transclusion is unchanged just send back the
 	// original DOM elements so selser can skip over it
 	if (
-		( originalMw && ve.compare( dataElement.attributes.mw, JSON.parse( originalMw ) ) )
+		dataElement.originalDomElementsHash &&
+		originalMw && ve.compare( dataElement.attributes.mw, JSON.parse( originalMw ) )
 	) {
 		// originalDomElements is also used for CE rendering so return a copy
-		els = ve.copyDomElements( dataElement.originalDomElements, doc );
+		els = ve.copyDomElements( converter.getStore().value( dataElement.originalDomElementsHash ), doc );
 	} else {
 		if (
 			converter.isForClipboard() &&
 			// Use getHashObjectForRendering to get the rendering from the store
-			( index = store.indexOfHash( OO.getHash( [ this.getHashObjectForRendering( dataElement ), undefined ] ) ) ) !== null
+			( value = store.value( store.hashOfValue( null, OO.getHash( [ this.getHashObjectForRendering( dataElement ), undefined ] ) ) ) )
 		) {
 			// For the clipboard use the current DOM contents so the user has something
 			// meaningful to paste into external applications
-			els = ve.copyDomElements( store.value( index ), doc );
+			els = ve.copyDomElements( value, doc );
 		} else {
 			el = doc.createElement( this.tagName );
 			el.setAttribute( 'typeof', 'mw:Extension/' + this.getExtensionName( dataElement ) );
 			el.setAttribute( 'data-mw', JSON.stringify( dataElement.attributes.mw ) );
 			els = [ el ];
 		}
-	}
-	if ( converter.isForClipboard() ) {
-		// Resolve attributes
-		ve.resolveAttributes( $( els ), doc, ve.dm.Converter.static.computedAttributes );
 	}
 	return els;
 };
@@ -148,6 +142,27 @@ ve.dm.MWExtensionNode.static.getHashObject = function ( dataElement ) {
  */
 ve.dm.MWExtensionNode.static.getExtensionName = function () {
 	return this.extensionName;
+};
+
+ve.dm.MWExtensionNode.static.describeChanges = function ( attributeChanges, change, element ) {
+	// HACK: Try to generate an '<Extension> has changed' message using associated tool's title
+	// Extensions should provide more detailed change descriptions
+	var tools = ve.ui.toolFactory.getRelatedItems( [ ve.dm.nodeFactory.createFromElement( element ) ] );
+	if ( tools.length ) {
+		return [ ve.msg( 'visualeditor-changedesc-unknown',
+			OO.ui.resolveMsg( ve.ui.toolFactory.lookup( tools[ 0 ].name ).static.title )
+		) ];
+	}
+	// Parent method
+	return ve.dm.MWExtensionNode.super.static.describeChanges.apply( this, arguments );
+};
+
+ve.dm.MWExtensionNode.static.describeChange = function ( key ) {
+	if ( key === 'originalMw' ) {
+		return null;
+	}
+	// Parent method
+	return ve.dm.MWExtensionNode.super.static.describeChange.apply( this, arguments );
 };
 
 /* Methods */
@@ -185,6 +200,8 @@ OO.inheritClass( ve.dm.MWInlineExtensionNode, ve.dm.MWExtensionNode );
 
 ve.dm.MWInlineExtensionNode.static.isContent = true;
 
+ve.dm.MWInlineExtensionNode.static.tagName = 'span';
+
 /**
  * DataModel MediaWiki block extension node.
  *
@@ -204,3 +221,7 @@ ve.dm.MWBlockExtensionNode = function VeDmMWBlockExtensionNode() {
 /* Inheritance */
 
 OO.inheritClass( ve.dm.MWBlockExtensionNode, ve.dm.MWExtensionNode );
+
+/* Static members */
+
+ve.dm.MWBlockExtensionNode.static.tagName = 'div';

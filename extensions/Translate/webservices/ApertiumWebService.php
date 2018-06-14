@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -23,10 +23,10 @@ class ApertiumWebService extends TranslationWebService {
 	}
 
 	protected function doPairs() {
-		$pairs = array();
+		$pairs = [];
 		$json = Http::get(
 			$this->config['pairs'],
-			array( 'timeout' => $this->config['timeout'] ),
+			[ 'timeout' => $this->config['timeout'] ],
 			__METHOD__
 		);
 		$response = FormatJson::decode( $json );
@@ -47,21 +47,21 @@ class ApertiumWebService extends TranslationWebService {
 
 	protected function getQuery( $text, $from, $to ) {
 		if ( !isset( $this->config['key'] ) ) {
-			throw new TranslationWebServiceException( 'API key is not set' );
+			throw new TranslationWebServiceConfigurationException( 'API key is not set' );
 		}
 
 		$text = trim( $text );
 		$text = $this->wrapUntranslatable( $text );
 
-		$params = array(
+		$params = [
 			'q' => $text,
 			'langpair' => "$from|$to",
-			'x-application' => 'Translate ' . TRANSLATE_VERSION . ')',
-		);
+			'x-application' => 'MediaWiki Translate extension ' . TRANSLATE_VERSION,
+		];
 
 		return TranslationQuery::factory( $this->config['url'] )
 			->timeout( $this->config['timeout'] )
-			->queryParamaters( $params );
+			->queryParameters( $params );
 	}
 
 	protected function parseResponse( TranslationQueryResponse $reply ) {

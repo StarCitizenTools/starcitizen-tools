@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LinearContextItem styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-linearContextItem-head {
@@ -10,29 +10,13 @@
 }
 
 .ve-ui-linearContextItem-title {
-	display: table-cell;
-	width: 1%;
-	text-align: left;
 	padding: 0.5em 1em;
-	overflow: hidden;
-	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.ve-ui-linearContextItem-icon {
-	display: inline-block;
+.ve-ui-linearContextItem-title > .oo-ui-labelWidget {
 	vertical-align: middle;
-	width: 1.875em;
-	height: 1.875em;
-	background-position: center center;
-	background-repeat: no-repeat;
-}
-
-.ve-ui-linearContextItem-label {
-	min-width: 4em;
-	display: inline-block;
-	vertical-align: middle;
-	margin-left: 0.5em;
+	margin-left: 0.3em;
 }
 
 .ve-ui-linearContextItem-info {
@@ -42,6 +26,7 @@
 }
 
 .ve-ui-linearContextItem-description {
+	color: #72777d;
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -51,7 +36,6 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	color: #888;
 }
 
 .ve-ui-linearContextItem-actions {

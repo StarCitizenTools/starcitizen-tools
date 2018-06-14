@@ -2,6 +2,11 @@
 
 namespace Flow;
 
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Rdbms\DBReplicationWaitError;
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IMaintainableDatabase;
+
 /**
  * All classes within Flow that need to access the Flow db will go through
  * this class.  Having it separated into an object greatly simplifies testing
@@ -31,8 +36,8 @@ class DbFactory {
 	protected $forceMaster = false;
 
 	/**
-	 * @var string|boolean $wiki Wiki ID, or false for the current wiki
-	 * @var string|boolean $cluster External storage cluster, or false for core
+	 * @param string|bool $wiki Wiki ID, or false for the current wiki
+	 * @param string|bool $cluster External storage cluster, or false for core
 	 */
 	public function __construct( $wiki = false, $cluster = false ) {
 		$this->wiki = $wiki;
@@ -46,55 +51,72 @@ class DbFactory {
 	/**
 	 * Gets a database connection for the Flow-specific database.
 	 *
-	 * @param integer $db index of the connection to get.  DB_MASTER|DB_SLAVE.
-	 * @param mixed $groups query groups. An array of group names that this query
-	 *   belongs to.
-	 * @return \DatabaseBase
+	 * @param int $db index of the connection to get.  DB_MASTER|DB_REPLICA.
+	 * @return IMaintainableDatabase
 	 */
-	public function getDB( $db, $groups = array() ) {
-		return $this->getLB()->getConnection( $this->forceMaster ? DB_MASTER : $db, $groups, $this->wiki );
+	public function getDB( $db ) {
+		return $this->getLB()->getConnection( $this->forceMaster ? DB_MASTER : $db, [], $this->wiki );
 	}
 
 	/**
 	 * Gets a load balancer for the Flow-specific database.
 	 *
-	 * @return \LoadBalancer
+	 * @return \Wikimedia\Rdbms\LoadBalancer
 	 */
 	public function getLB() {
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 		if ( $this->cluster !== false ) {
-			return wfGetLBFactory()->getExternalLB( $this->cluster, $this->wiki );
+			return $lbFactory->getExternalLB( $this->cluster, $this->wiki );
 		} else {
-			return wfGetLB( $this->wiki );
+			return $lbFactory->getMainLB( $this->wiki );
 		}
 	}
 
 	/**
 	 * Gets a database connection for the main wiki database.  Mockable version of wfGetDB.
 	 *
-	 * @param integer $db index of the connection to get.  DB_MASTER|DB_SLAVE.
-	 * @param array $groups query groups. An array of group names that this query
-	 *   belongs to.
-	 * @param string|boolean $wiki The wiki ID, or false for the current wiki
-	 * @return \DatabaseBase
+	 * @param int $db index of the connection to get.  DB_MASTER|DB_REPLICA.
+	 * @param string|bool $wiki The wiki ID, or false for the current wiki
+	 * @return IDatabase
 	 */
-	public function getWikiDB( $db, $groups = array(), $wiki = false ) {
-		return wfGetDB( $this->forceMaster ? DB_MASTER : $db, $groups, $wiki );
+	public function getWikiDB( $db, $wiki = false ) {
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		return $lbFactory->getMainLB( $wiki )->getConnection( $this->forceMaster ? DB_MASTER : $db, [], $wiki );
 	}
 
 	/**
-	 * Gets a load balancer for the main wiki database. Mockable version of wfGetLB.
+	 * Gets a load balancer for the main wiki database.
 	 *
-	 * @param string|boolean $wiki wiki ID, or false for the current wiki
-	 * @return \LoadBalancer
+	 * @param string|bool $wiki wiki ID, or false for the current wiki
+	 * @return \Wikimedia\Rdbms\LoadBalancer
 	 */
 	public function getWikiLB( $wiki = false ) {
-		return wfGetLB( $wiki );
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		return $lbFactory->getMainLB( $wiki );
 	}
 
 	/**
 	 * Wait for the slaves of the Flow database
 	 */
 	public function waitForSlaves() {
-		wfWaitForSlaves( false, $this->wiki, $this->cluster );
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		try {
+			$lbFactory->waitForReplication( [
+				'wiki' => $this->wiki,
+				'cluster' => $this->cluster,
+				'ifWritesSince' => false
+			] );
+		} catch ( DBReplicationWaitError $e ) {
+		}
+	}
+
+	/**
+	 * Roll back changes on all databases.
+	 * @see LBFactory::rollbackMasterChanges
+	 * @param string $fname
+	 */
+	public function rollbackMasterChanges( $fname = __METHOD__ ) {
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		$lbFactory->rollbackMasterChanges( $fname );
 	}
 }

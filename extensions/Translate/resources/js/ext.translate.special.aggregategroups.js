@@ -1,5 +1,3 @@
-/*global alert:false */
-
 ( function ( $, mw ) {
 	'use strict';
 
@@ -24,11 +22,11 @@
 			group: $target.data( 'groupid' )
 		} );
 
-		// Change to csrf when support for MW 1.25 is dropped
-		api.postWithToken( 'edit', params )
+		api.postWithToken( 'csrf', params )
 			.done( successFunction )
 			.fail( function ( code, data ) {
-				window.alert( data.error && data.error.info );
+				// eslint-disable-next-line no-alert
+				alert( data.error && data.error.info );
 			} );
 	}
 
@@ -77,13 +75,14 @@
 				group: subgroupId
 			} );
 
-			// Change to csrf when support for MW 1.25 is dropped
-			api.postWithToken( 'edit', params )
+			api.postWithToken( 'csrf', params )
 				.done( successFunction )
 				.fail( function ( code, data ) {
-					window.alert( data.error && data.error.info );
+					// eslint-disable-next-line no-alert
+					alert( data.error && data.error.info );
 				} );
 		} else {
+			// eslint-disable-next-line no-alert
 			alert( mw.msg( 'tpt-invalid-group' ) );
 		}
 	}
@@ -99,16 +98,17 @@
 
 		// XXX: 'confirm' is nonstandard.
 		if ( $.isFunction( window.confirm ) &&
+			// eslint-disable-next-line no-alert
 			window.confirm( mw.msg( 'tpt-aggregategroup-remove-confirm' ) ) ) {
 			params = $.extend( getApiParams( $target ), {
 				'do': 'remove'
 			} );
 
-			// Change to csrf when support for MW 1.25 is dropped
-			api.postWithToken( 'edit', params )
+			api.postWithToken( 'csrf', params )
 				.done( successFunction )
 				.fail( function ( code, data ) {
-					window.alert( data.error && data.error.info );
+					// eslint-disable-next-line no-alert
+					alert( data.error && data.error.info );
 				} );
 		}
 	}
@@ -116,7 +116,7 @@
 	function editGroup( event ) {
 		var $target = $( event.target ),
 			$parent = $target.closest( '.mw-tpa-group' ),
-			aggregateGroupId =  $parent.data( 'groupid' ),
+			aggregateGroupId = $parent.data( 'groupid' ),
 			$displayGroup = $parent.children( '.tp-display-group' ),
 			$editGroup = $parent.children( '.tp-edit-group' ),
 			successFunction,
@@ -142,15 +142,14 @@
 			'do': 'update',
 			groupname: aggregateGroupName,
 			groupdescription: aggregateGroupDesc,
-			aggregategroup: aggregateGroupId,
-			format: 'json'
+			aggregategroup: aggregateGroupId
 		};
 
-		// Change to csrf when support for MW 1.25 is dropped
-		api.postWithToken( 'edit', params )
+		api.postWithToken( 'csrf', params )
 			.done( successFunction )
 			.fail( function ( code, data ) {
-				window.alert( data.error.info );
+				// eslint-disable-next-line no-alert
+				alert( data.error.info );
 			} );
 	}
 
@@ -161,7 +160,7 @@
 		$parent.children( '.tp-edit-group' ).addClass( 'hidden' );
 	}
 
-	$( document ).ready( function () {
+	$( function () {
 		var excludeFunction, autocompleteFunction, resp,
 			api = new mw.Api(),
 			exclude = [],
@@ -175,7 +174,6 @@
 				// Get list of subgroups using API
 				api.get( {
 					action: 'query',
-					format: 'json',
 					meta: 'messagegroups',
 					mgformat: 'tree',
 					mgroot: 'all',
@@ -271,20 +269,18 @@
 					.append( $displayHeader )
 					.append( $( '<p>' ).addClass( 'tp-desc' ).text( aggregateGroupDesc ) );
 
-				$saveButton = ( $( '<input>' )
+				$saveButton = $( '<input>' )
 					.attr( {
 						type: 'button',
 						'class': 'tp-aggregategroup-update'
 					} )
-					.val( mw.msg( 'tpt-aggregategroup-update' ) )
-					);
-				$cancelButton = ( $( '<input>' )
+					.val( mw.msg( 'tpt-aggregategroup-update' ) );
+				$cancelButton = $( '<input>' )
 					.attr( {
 						type: 'button',
 						'class': 'tp-aggregategroup-update-cancel'
 					} )
-					.val( mw.msg( 'tpt-aggregategroup-update-cancel' ) )
-					);
+					.val( mw.msg( 'tpt-aggregategroup-update-cancel' ) );
 				$divEdit = $( '<div>' )
 					.addClass( 'tp-edit-group hidden' )
 					.append( $( '<label>' )
@@ -354,15 +350,14 @@
 				action: 'aggregategroups',
 				'do': 'add',
 				groupname: aggregateGroupName,
-				groupdescription: aggregateGroupDesc,
-				format: 'json'
+				groupdescription: aggregateGroupDesc
 			};
 
-			// Change to csrf when support for MW 1.25 is dropped
-			api.postWithToken( 'edit', params )
+			api.postWithToken( 'csrf', params )
 				.done( successFunction )
 				.fail( function ( code, data ) {
-					window.alert( data.error && data.error.info );
+					// eslint-disable-next-line no-alert
+					alert( data.error && data.error.info );
 				} );
 		} );
 	} );

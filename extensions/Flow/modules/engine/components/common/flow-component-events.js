@@ -13,6 +13,7 @@
 	 * @class
 	 * @extends OO.EventEmitter
 	 * @constructor
+	 * @param {jQuery} $container Container
 	 */
 	function FlowComponentEventsMixin( $container ) {
 		var self = this;
@@ -186,7 +187,7 @@
 				if ( !self.UI.events[ type ][ name ] ) {
 					self.UI.events[ type ][ name ] = [];
 				}
-				if ( $.isArray( fn ) ) {
+				if ( Array.isArray( fn ) ) {
 					// eg. UI.events.interactiveHandlers.foo concat [Function, Function];
 					self.UI.events[ type ][ name ] = self.UI.events[ type ][ name ].concat( fn );
 				} else {
@@ -229,7 +230,7 @@
 	 *
 	 * @param {string} code
 	 * @param {Object} result
-	 * @return string
+	 * @return {string}
 	 */
 	function flowGetApiErrorMessage( code, result ) {
 		if ( result.error && result.error.info ) {
@@ -427,6 +428,8 @@
 	 * @todo Perhaps use name="flow-load-handler" for performance in older browsers
 	 */
 	function flowMakeContentInteractiveCallback( $container ) {
+		var component;
+
 		if ( !$container.jquery ) {
 			$container = $container.$container;
 		}
@@ -437,7 +440,7 @@
 		}
 
 		// Get the FlowComponent
-		var component = mw.flow.getPrototypeMethod( 'component', 'getInstanceByElement' )( $container );
+		component = mw.flow.getPrototypeMethod( 'component', 'getInstanceByElement' )( $container );
 
 		// Find all load-handlers and trigger them
 		$container.find( '.flow-load-interactive' ).add( $container.filter( '.flow-load-interactive' ) ).each( function () {
@@ -453,39 +456,15 @@
 			component.emitWithReturn( 'loadHandler', handlerName, $this );
 		} );
 
-		// Find all the forms
+		// Trigger for flow-actions-disabler
 		// @todo move this into a flow-load-handler
-		$container.find( 'form' ).add( $container.filter( 'form' ) ).each( function () {
-			var $this = $( this ),
-				initialState = $this.data( 'flow-initial-state' );
-
-			// Trigger for flow-actions-disabler
-			$this.find( 'input, textarea' ).trigger( 'keyup' );
-
-			// Find this form's inputs
-			$this.find( 'textarea' ).filter( '[data-flow-expandable]' ).each( function () {
-				// Compress textarea if:
-				// the textarea isn't already focused
-				// and the textarea doesn't have text typed into it
-				if ( !$( this ).is( ':focus' ) && this.value === this.defaultValue ) {
-					component.emitWithReturn( 'compressTextarea', $( this ) );
-				}
-			} );
-
-			if ( initialState === 'collapsed' ) {
-				component.emitWithReturn( 'hideForm', $this );
-			} else if ( initialState === 'expanded' ) {
-				component.emitWithReturn( 'showForm', $this );
-			}
-		} );
+		$container.find( 'input, textarea' ).trigger( 'keyup' );
 	}
 	FlowComponentEventsMixin.eventHandlers.makeContentInteractive = flowMakeContentInteractiveCallback;
 
-	/**
-	 * Triggers load handlers.
-	 */
+	// Triggers load handlers
 	function flowLoadHandlerCallback( handlerName, args, context ) {
-		args = $.isArray( args ) ? args : ( args ? [ args ] : [] );
+		args = Array.isArray( args ) ? args : ( args ? [ args ] : [] );
 		context = context || this;
 
 		if ( this.UI.events.loadHandlers[ handlerName ] ) {
@@ -531,30 +510,35 @@
 	/**
 	 * Triggers both API and interactive handlers.
 	 * To manually trigger a handler on an element, you can use extraParameters via $el.trigger.
+	 *
 	 * @param {Event} event
 	 * @param {Object} [extraParameters]
 	 * @param {string} [extraParameters.interactiveHandler]
 	 * @param {string} [extraParameters.apiHandler]
 	 */
 	function flowInteractiveHandlerCallback( event, extraParameters ) {
+		var args, $context, interactiveHandlerName, apiHandlerName;
+
 		// Only trigger with enter key & no modifier keys, if keypress
 		if ( event.type === 'keypress' && ( event.charCode !== 13 || event.metaKey || event.shiftKey || event.ctrlKey || event.altKey ) ) {
 			return;
 		}
 
-		var args = Array.prototype.slice.call( arguments, 0 ),
-			$context = $( event.currentTarget || event.delegateTarget || event.target ),
-			// Have either of these been forced via trigger extraParameters?
-			interactiveHandlerName = ( extraParameters || {} ).interactiveHandler || $context.data( 'flow-interactive-handler' ),
-			apiHandlerName = ( extraParameters || {} ).apiHandler || $context.data( 'flow-api-handler' );
+		args = Array.prototype.slice.call( arguments, 0 );
+		$context = $( event.currentTarget || event.delegateTarget || event.target );
+		// Have either of these been forced via trigger extraParameters?
+		interactiveHandlerName = ( extraParameters || {} ).interactiveHandler || $context.data( 'flow-interactive-handler' );
+		apiHandlerName = ( extraParameters || {} ).apiHandler || $context.data( 'flow-api-handler' );
 
-		return flowExecuteInteractiveHandler.call( this, args, $context, interactiveHandlerName, apiHandlerName );
+		flowExecuteInteractiveHandler.call( this, args, $context, interactiveHandlerName, apiHandlerName );
 	}
 	FlowComponentEventsMixin.eventHandlers.interactiveHandler = flowInteractiveHandlerCallback;
 	FlowComponentEventsMixin.eventHandlers.apiRequest = flowInteractiveHandlerCallback;
 
 	/**
 	 * Triggers both API and interactive handlers, on focus.
+	 *
+	 * @param {Event} event
 	 */
 	function flowInteractiveHandlerFocusCallback( event ) {
 		var args = Array.prototype.slice.call( arguments, 0 ),
@@ -562,7 +546,7 @@
 			interactiveHandlerName = $context.data( 'flow-interactive-handler-focus' ),
 			apiHandlerName = $context.data( 'flow-api-handler-focus' );
 
-		return flowExecuteInteractiveHandler.call( this, args, $context, interactiveHandlerName, apiHandlerName );
+		flowExecuteInteractiveHandler.call( this, args, $context, interactiveHandlerName, apiHandlerName );
 	}
 	FlowComponentEventsMixin.eventHandlers.interactiveHandlerFocus = flowInteractiveHandlerFocusCallback;
 
@@ -585,19 +569,22 @@
 	 *
 	 * Additionally:
 	 * * data-flow-eventlog-forward: Selectors to forward funnel data to
+	 *
+	 * @param {Event} event
 	 */
 	function flowEventLogCallback( event ) {
+		var $context, data, component, $promise, eventInstance, key, value;
+
 		// Only trigger with enter key & no modifier keys, if keypress
 		if ( event.type === 'keypress' && ( event.charCode !== 13 || event.metaKey || event.shiftKey || event.ctrlKey || event.altKey ) ) {
 			return;
 		}
 
-		var $context = $( event.currentTarget ),
-			data = $context.data(),
-			component = mw.flow.getPrototypeMethod( 'component', 'getInstanceByElement' )( $context ),
-			$promise = data.flowInteractiveHandlerPromise || $.Deferred().resolve().promise(),
-			eventInstance = {},
-			key, value;
+		$context = $( event.currentTarget );
+		data = $context.data();
+		component = mw.flow.getPrototypeMethod( 'component', 'getInstanceByElement' )( $context );
+		$promise = data.flowInteractiveHandlerPromise || $.Deferred().resolve().promise();
+		eventInstance = {};
 
 		// Fetch loggable data: everything prefixed flowEventlog except
 		// flowEventLogForward and flowEventLogSchema
@@ -636,7 +623,7 @@
 	 * When the whole class has been instantiated fully (after every constructor has been called).
 	 * @param {FlowComponent} component
 	 */
-	function flowEventsMixinInstantiationComplete( component ) {
+	function flowEventsMixinInstantiationComplete() {
 		$( window ).trigger( 'scroll.flow-window-scroll' );
 	}
 	FlowComponentEventsMixin.eventHandlers.instantiationComplete = flowEventsMixinInstantiationComplete;
@@ -647,24 +634,6 @@
 	 * @todo Move this to a separate file
 	 */
 	function flowEventsMixinHideForm( $form ) {
-		var component = mw.flow.getPrototypeMethod( 'component', 'getInstanceByElement' )( $form );
-
-		$form.find( 'textarea' ).each( function () {
-			var $editor = $( this );
-
-			// Kill editor instances
-			if ( mw.flow.editor && mw.flow.editor.exists( $editor ) ) {
-				mw.flow.editor.destroy( $editor );
-			}
-
-			// Drop the new input in place if:
-			// the textarea isn't already focused
-			// and the textarea doesn't have text typed into it
-			if ( !$editor.is( ':focus' ) && this.value === this.defaultValue ) {
-				component.emitWithReturn( 'compressTextarea', $editor );
-			}
-		} );
-
 		// Hide its actions
 		// @todo Use TemplateEngine to find and hide actions?
 		$form.find( '.flow-form-collapsible' ).toggleClass( 'flow-form-collapsible-collapsed', true );
@@ -672,22 +641,7 @@
 	FlowComponentEventsMixin.eventHandlers.hideForm = flowEventsMixinHideForm;
 
 	/**
-	 * "Compresses" a textarea by adding a class to it, which CSS will pick up
-	 * to force a smaller display size.
-	 * @param {jQuery} $textarea
-	 * @todo Move this to a separate file
-	 */
-	function flowEventsMixinCompressTextarea( $textarea ) {
-		$textarea.addClass( 'flow-input-compressed' );
-		if ( mw.flow.editor && mw.flow.editor.exists( $textarea ) ) {
-			mw.flow.editor.destroy( $textarea );
-		}
-	}
-	FlowComponentEventsMixin.eventHandlers.compressTextarea = flowEventsMixinCompressTextarea;
-
-	/**
-	 * If input is focused, expand it if compressed (into textarea).
-	 * Otherwise, trigger the form to unhide.
+	 * Show form when input is focused.
 	 * @param {Event} event
 	 * @todo Move this to a separate file
 	 */
@@ -695,7 +649,7 @@
 		var $context = $( event.currentTarget || event.delegateTarget || event.target ),
 			component = mw.flow.getPrototypeMethod( 'component', 'getInstanceByElement' )( $context );
 
-		// Show the form (and swap it for textarea if needed)
+		// Show the form
 		component.emitWithReturn( 'showForm', $context.closest( 'form' ) );
 	}
 	FlowComponentEventsMixin.eventHandlers.focusField = flowEventsMixinFocusField;
@@ -705,66 +659,10 @@
 	 * @param {jQuery} $form
 	 */
 	function flowEventsMixinShowForm( $form ) {
-		var self = this;
-
 		// Show its actions
 		$form.find( '.flow-form-collapsible' ).toggleClass( 'flow-form-collapsible-collapsed', false );
-
-		// Expand all textareas if needed
-		$form.find( '.flow-input-compressed' ).each( function () {
-			self.emitWithReturn( 'expandTextarea', $( this ) );
-		} );
-
-		// Initialize editors, turning them from textareas into editor objects
-		self.emitWithReturn( 'initializeEditors', $form );
 	}
 	FlowComponentEventsMixin.eventHandlers.showForm = flowEventsMixinShowForm;
-
-	/**
-	 * Expand the textarea by removing the CSS class that will make it appear
-	 * smaller.
-	 * @param {jQuery} $textarea
-	 */
-	function flowEventsMixinExpandTextarea( $textarea ) {
-		$textarea.removeClass( 'flow-input-compressed' );
-	}
-	FlowComponentEventsMixin.eventHandlers.expandTextarea = flowEventsMixinExpandTextarea;
-
-	/**
-	 * Initialize all editors, turning them from textareas into editor objects.
-	 *
-	 * @param {jQuery} $container
-	 */
-	function flowEventsMixinInitializeEditors( $container ) {
-		var flowComponent = this;
-
-		$container
-			.find( '.flow-editor:not(:has(.flow-editor-initialized)) textarea:not(.flow-input-compressed)' )
-			.each( function () {
-				var $textarea = $( this ),
-					$form = $textarea.closest( 'form' ),
-					content = $textarea.val();
-
-				// Mark the editor as initialized so we don't try to init it again
-				$textarea.addClass( 'flow-editor-initialized' );
-
-				// Blank editor while loading
-				$textarea.val( '' );
-
-				mw.loader.using( 'ext.flow.editor', function () {
-					mw.flow.editor.load( $textarea, content );
-
-					// Kill editor instance when the form it's in is cancelled
-					flowComponent.emitWithReturn( 'addFormCancelCallback', $form, function () {
-						$textarea.removeClass( 'flow-editor-initialized' );
-						if ( mw.flow.editor.exists( $textarea ) ) {
-							mw.flow.editor.destroy( $textarea );
-						}
-					} );
-				} );
-			} );
-	}
-	FlowComponentEventsMixin.eventHandlers.initializeEditors = flowEventsMixinInitializeEditors;
 
 	/**
 	 * Adds a flow-cancel-callback to a given form, to be triggered on click of the "cancel" button.
@@ -806,7 +704,7 @@
 	 * to this topic|board
 	 * @param  {jQuery} $tooltipTarget Element to attach tooltip to.
 	 * @param  {string} type           'topic' or 'board'
-	 * @param  {string} dir            Direction to point the pointer. 'left' or 'up'
+	 * @param  {string} dir            Direction to point the pointer. 'left', 'right', 'up' or 'down'
 	 */
 	function flowEventsMixinShowSubscribedTooltip( $tooltipTarget, type, dir ) {
 		dir = dir || 'left';
@@ -814,7 +712,8 @@
 		mw.tooltip.show(
 			$tooltipTarget,
 			// tooltipTarget will not always be part of a FlowBoardComponent
-			$( mw.flow.TemplateEngine.processTemplateGetFragment(
+			$(
+				mw.flow.TemplateEngine.processTemplateGetFragment(
 					'flow_tooltip_subscribed.partial',
 					{
 						unsubscribe: false,
@@ -869,7 +768,7 @@
 	 *
 	 * @param {jQuery} $node
 	 * @param {string} selector
-	 * @return jQuery
+	 * @return {jQuery}
 	 */
 	function _flowFindUpward( $node, selector ) {
 		// first check if result can already be found inside $node

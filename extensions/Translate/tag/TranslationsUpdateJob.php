@@ -14,10 +14,9 @@ class TranslationsUpdateJob extends Job {
 	/**
 	 * @param Title $title
 	 * @param array $params
-	 * @param int $id
 	 */
-	public function __construct( Title $title, array $params, $id = 0 ) {
-		parent::__construct( __CLASS__, $title, $params, $id );
+	public function __construct( Title $title, array $params ) {
+		parent::__construct( __CLASS__, $title, $params );
 
 		$this->page = TranslatablePage::newFromTitle( $title );
 		$this->sections = $params['sections'];
@@ -61,7 +60,7 @@ class TranslationsUpdateJob extends Job {
 	 * @since 2013-01-28
 	 */
 	public static function getTranslationUnitJobs( TranslatablePage $page, array $sections ) {
-		$jobs = array();
+		$jobs = [];
 
 		$code = $page->getSourceLanguageCode();
 		$prefix = $page->getTitle()->getPrefixedText();
@@ -84,7 +83,7 @@ class TranslationsUpdateJob extends Job {
 	 * @since 2013-01-28
 	 */
 	public static function getRenderJobs( TranslatablePage $page ) {
-		$jobs = array();
+		$jobs = [];
 
 		$jobTitles = $page->getTranslationPages();
 		// $jobTitles may have the source language title already but duplicate TranslateRenderJobs

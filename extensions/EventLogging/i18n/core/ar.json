@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"ديفيد"
+		]
+	},
+	"eventlogging-desc": "إطار لتسجيل الأحداث من التعليمات البرمجية من جانب العميل",
+	"eventlogging-invalid-json": "جسون غير صالح",
+	"eventlogging-revision-id": "المراجعة $1",
+	"eventlogging-code-sample-logging-on-server-side": "تسجيل PHP",
+	"eventlogging-code-sample-module-setup-json": "الإعداد extension.json لتسجيل جافا سكريبت",
+	"eventlogging-code-sample-logging-on-client-side": "تسجيل جافا سكريبت",
+	"eventlogging-error-move-source": "لا يمكن إعادة تسمية صفحات المخطط",
+	"eventlogging-error-move-destination": "لا تجوز إعادة تسمية الصفحات إلى صفحات مخطط"
+}

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWCommandHelpDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -36,16 +36,3 @@ ve.ui.MWCommandHelpDialog.static.commandGroups = ve.extendObject( {}, ve.ui.MWCo
 /* Registration */
 
 ve.ui.windowFactory.register( ve.ui.MWCommandHelpDialog );
-
-( function () {
-	var accessKeyPrefix = $.fn.updateTooltipAccessKeys.getAccessKeyPrefix().toUpperCase().replace( /-/g, ' + ' ),
-		save = ve.msg( 'accesskey-save' );
-
-	if ( save !== '-' && save !== '' ) {
-		ve.ui.commandHelpRegistry.register( 'other', 'save', {
-			shortcuts: [ accessKeyPrefix + save.toUpperCase() ],
-			label: OO.ui.deferMsg( 'visualeditor-savedialog-label-save' ),
-			demote: true
-		} );
-	}
-} )();

@@ -24,14 +24,14 @@
 
 	QUnit.module( 'mmv.ui.reuse.Dialog', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Sanity test, object creation and UI construction', 2, function ( assert ) {
+	QUnit.test( 'Sanity test, object creation and UI construction', function ( assert ) {
 		var reuseDialog = makeReuseDialog( this.sandbox );
 
 		assert.ok( reuseDialog, 'Reuse UI element is created.' );
 		assert.strictEqual( reuseDialog.$dialog.length, 1, 'Reuse dialog div created.' );
 	} );
 
-	QUnit.test( 'handleOpenCloseClick():', 2, function ( assert ) {
+	QUnit.test( 'handleOpenCloseClick():', function ( assert ) {
 		var reuseDialog = makeReuseDialog( this.sandbox );
 
 		reuseDialog.openDialog = function () {
@@ -56,7 +56,7 @@
 		reuseDialog.handleOpenCloseClick();
 	} );
 
-	QUnit.test( 'handleTabSelection():', 5, function ( assert ) {
+	QUnit.test( 'handleTabSelection():', function ( assert ) {
 		var reuseDialog = makeReuseDialog( this.sandbox );
 
 		reuseDialog.initTabs();
@@ -74,7 +74,7 @@
 		assert.ok( reuseDialog.tabs.embed.$pane.hasClass( 'active' ), 'Embed tab shown.' );
 	} );
 
-	QUnit.test( 'default tab:', 2, function ( assert ) {
+	QUnit.test( 'default tab:', function ( assert ) {
 		var reuseDialog;
 
 		reuseDialog = makeReuseDialog( this.sandbox );
@@ -87,7 +87,7 @@
 		assert.strictEqual( reuseDialog.selectedTab, 'share', 'Default can be overridden' );
 	} );
 
-	QUnit.test( 'attach()/unattach():', 2, function ( assert ) {
+	QUnit.test( 'attach()/unattach():', function ( assert ) {
 		var reuseDialog = makeReuseDialog( this.sandbox );
 
 		reuseDialog.initTabs();
@@ -131,19 +131,19 @@
 		reuseDialog.reuseTabs.emit( 'select' );
 	} );
 
-	QUnit.test( 'start/stopListeningToOutsideClick():', 11, function ( assert ) {
+	QUnit.test( 'start/stopListeningToOutsideClick():', function ( assert ) {
 		var reuseDialog = makeReuseDialog( this.sandbox ),
 			realCloseDialog = reuseDialog.closeDialog;
 
 		reuseDialog.initTabs();
 
 		function clickOutsideDialog() {
-			var event = new $.Event( 'click', { target: reuseDialog.$container[0] } );
+			var event = new $.Event( 'click', { target: reuseDialog.$container[ 0 ] } );
 			reuseDialog.$container.trigger( event );
 			return event;
 		}
 		function clickInsideDialog() {
-			var event = new $.Event( 'click', { target: reuseDialog.$dialog[0] } );
+			var event = new $.Event( 'click', { target: reuseDialog.$dialog[ 0 ] } );
 			reuseDialog.$dialog.trigger( event );
 			return event;
 		}
@@ -177,19 +177,19 @@
 		assertDialogDoesNotCatchClicks();
 	} );
 
-	QUnit.test( 'set()/empty() sanity check:', 1, function ( assert ) {
+	QUnit.test( 'set()/empty() sanity check:', function ( assert ) {
 		var reuseDialog = makeReuseDialog( this.sandbox ),
-		title = mw.Title.newFromText( 'File:Foobar.jpg' ),
-		src = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
-		url = 'https://commons.wikimedia.org/wiki/File:Foobar.jpg',
-		image = { // fake mw.mmv.model.Image
-			title: title,
-			url: src,
-			descriptionUrl: url,
-			width: 100,
-			height: 80
-		},
-		embedFileInfo = new mw.mmv.model.EmbedFileInfo( title, src, url );
+			title = mw.Title.newFromText( 'File:Foobar.jpg' ),
+			src = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
+			url = 'https://commons.wikimedia.org/wiki/File:Foobar.jpg',
+			image = { // fake mw.mmv.model.Image
+				title: title,
+				url: src,
+				descriptionUrl: url,
+				width: 100,
+				height: 80
+			},
+			embedFileInfo = new mw.mmv.model.EmbedFileInfo( title, src, url );
 
 		reuseDialog.set( image, embedFileInfo );
 		reuseDialog.empty();
@@ -197,19 +197,19 @@
 		assert.ok( true, 'Set/empty did not cause an error.' );
 	} );
 
-	QUnit.test( 'openDialog()/closeDialog():', 3, function ( assert ) {
+	QUnit.test( 'openDialog()/closeDialog():', function ( assert ) {
 		var reuseDialog = makeReuseDialog( this.sandbox ),
-		title = mw.Title.newFromText( 'File:Foobar.jpg' ),
-		src = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
-		url = 'https://commons.wikimedia.org/wiki/File:Foobar.jpg',
-		image = { // fake mw.mmv.model.Image
-			title: title,
-			url: src,
-			descriptionUrl: url,
-			width: 100,
-			height: 80
-		},
-		repoInfo = new mw.mmv.model.Repo( 'Wikipedia', '//wikipedia.org/favicon.ico', true );
+			title = mw.Title.newFromText( 'File:Foobar.jpg' ),
+			src = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
+			url = 'https://commons.wikimedia.org/wiki/File:Foobar.jpg',
+			image = { // fake mw.mmv.model.Image
+				title: title,
+				url: src,
+				descriptionUrl: url,
+				width: 100,
+				height: 80
+			},
+			repoInfo = new mw.mmv.model.Repo( 'Wikipedia', '//wikipedia.org/favicon.ico', true );
 
 		reuseDialog.initTabs();
 
@@ -224,6 +224,27 @@
 		reuseDialog.closeDialog();
 
 		assert.ok( !reuseDialog.isOpen, 'Dialog closed now.' );
+	} );
+
+	QUnit.test( 'getImageWarnings():', function ( assert ) {
+		var reuseDialog = makeReuseDialog( this.sandbox ),
+			title = mw.Title.newFromText( 'File:Foobar.jpg' ),
+			src = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
+			url = 'https://commons.wikimedia.org/wiki/File:Foobar.jpg',
+			image = { // fake mw.mmv.model.Image
+				title: title,
+				url: src,
+				descriptionUrl: url,
+				width: 100,
+				height: 80
+			},
+			imageDeleted = $.extend( { deletionReason: 'deleted file test' }, image );
+
+		// Test that the lack of license is picked up
+		assert.equal( 1, reuseDialog.getImageWarnings( image ).length, 'Lack of license detected' );
+
+		// Test that deletion supersedes other warnings and only that one is reported
+		assert.equal( 1, reuseDialog.getImageWarnings( imageDeleted ).length, 'Deletion detected' );
 	} );
 
 }( mediaWiki, jQuery ) );

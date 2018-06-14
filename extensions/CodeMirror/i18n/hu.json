@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tacsipacsi",
+			"Urbalazs",
+			"Bencemac"
+		]
+	},
+	"codemirror-desc": "Szintaxiskiemelő hozzáadása a wikiszöveges szerkesztőhöz",
+	"codemirror-toggle-label": "Szintaxiskiemelés",
+	"codemirror-beta-title": "Wikiszöveges szintaxiskiemelő",
+	"codemirror-beta-desc": "A szintaxiskiemelő megkönnyíti a szerkesztést, eltérő színezéssel elkülönítve a belső hivatkozásokat, jegyzeteket és sablonokat.",
+	"codemirror-popup-label": "Szintaxiskiemelő",
+	"codemirror-popup-desc": "A szintaxiskiemelő megkönnyíti a szerkesztést, eltérő színezéssel elkülönítve a belső hivatkozásokat, jegyzeteket és sablonokat.",
+	"codemirror-popup-btn-yes": "Kipróbálom",
+	"codemirror-popup-btn-no": "Köszönöm, nem"
+}

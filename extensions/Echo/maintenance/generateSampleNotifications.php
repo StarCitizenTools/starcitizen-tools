@@ -4,14 +4,14 @@ $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
 	$IP = __DIR__ . '/../../..';
 }
-require_once ( "$IP/maintenance/Maintenance.php" );
+require_once "$IP/maintenance/Maintenance.php";
 
 /**
  * A maintenance script that generates sample notifications for testing purposes.
  */
 class GenerateSampleNotifications extends Maintenance {
 
-	private $supportedNotificationTypes = array(
+	private $supportedNotificationTypes = [
 		'welcome',
 		'edit-user-talk',
 		'mention',
@@ -21,7 +21,10 @@ class GenerateSampleNotifications extends Maintenance {
 		'user-rights',
 		'cx',
 		'osm',
-	);
+		'edit-thanks',
+		'edu',
+		'page-connection',
+	];
 
 	public function __construct() {
 		parent::__construct();
@@ -52,13 +55,11 @@ class GenerateSampleNotifications extends Maintenance {
 			'other',
 			'Name of another user involved with the notifications',
 			true, true, 'o' );
+
+		$this->requireExtension( 'Echo' );
 	}
 
 	public function execute() {
-		if ( !class_exists( 'EchoHooks' ) ) {
-			$this->error( "Echo isn't enabled on this wiki\n", 1 );
-		}
-
 		$user = $this->getOptionUser( 'user' );
 		$agent = $this->getOptionUser( 'agent' );
 		$otherUser = $this->getOptionUser( 'other' );
@@ -109,6 +110,18 @@ class GenerateSampleNotifications extends Maintenance {
 
 		if ( $this->shouldGenerate( 'osm', $types ) ) {
 			$this->generateOpenStackManager( $user, $agent );
+		}
+
+		if ( $this->shouldGenerate( 'edit-thanks', $types ) ) {
+			$this->generateEditThanks( $user, $agent, $otherUser );
+		}
+
+		if ( $this->shouldGenerate( 'edu', $types ) ) {
+			$this->generateEducationProgram( $user, $agent );
+		}
+
+		if ( $this->shouldGenerate( 'page-connection', $types ) ) {
+			$this->generateWikibase( $user, $agent );
 		}
 
 		$this->output( "Completed \n" );
@@ -175,6 +188,8 @@ class GenerateSampleNotifications extends Maintenance {
 		if ( !$status->isGood() ) {
 			$this->error( "Failed to edit {$title->getPrefixedText()}: {$status->getMessage()}" );
 		}
+
+		return $status->getValue()['revision'];
 	}
 
 	private function generateMention( User $user, User $agent, User $otherUser, Title $title ) {
@@ -207,7 +222,6 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function generateReverted( User $user, User $agent ) {
-		global $wgRequest;
 		$agent->addGroup( 'sysop' );
 
 		// revert (undo)
@@ -216,10 +230,8 @@ class GenerateSampleNotifications extends Maintenance {
 		$this->output( "{$agent->getName()} is reverting {$user->getName()}'s edit on {$moai->getPrefixedText()}\n" );
 		$this->addToPageContent( $moai, $agent, "\ncreating a good revision here\n" );
 		$this->addToPageContent( $moai, $user, "\nadding a line here\n" );
-		// hack: EchoHooks::onArticleSaved depends on the request to know which revision is being reverted
-		$wgRequest->setVal( 'wpUndidRevision', $page->getRevision()->getId() );
 		$content = $page->getUndoContent( $page->getRevision(), $page->getRevision()->getPrevious() );
-		$status = $page->doEditContent( $content, 'undo', 0, false, $agent );
+		$status = $page->doEditContent( $content, 'undo', 0, false, $agent, null, [], $page->getRevision()->getId() );
 		if ( !$status->isGood() ) {
 			$this->error( "Failed to undo {$moai->getPrefixedText()}: {$status->getMessage()}" );
 		}
@@ -231,85 +243,84 @@ class GenerateSampleNotifications extends Maintenance {
 		$this->addToPageContent( $moai2, $agent, "\ncreating a good revision here\n" );
 		$this->addToPageContent( $moai2, $user, "\nadding a line here\n" );
 		$this->addToPageContent( $moai2, $user, "\nadding a line here\n" );
-		$details = array();
-		$token = $agent->getEditToken( array( $moai2->getPrefixedText(), $user->getName() ), null );
+		$details = [];
+		$token = $agent->getEditToken( 'rollback', null );
 		$errors = $page->doRollback( $user->getName(), 'generating reverted notification', $token, false, $details, $agent );
 		if ( $errors ) {
-			$errorAsString = serialize( $errors );
-			$this->error( $errorAsString );
+			$this->error( serialize( $errors ) );
 		}
 	}
 
 	private function generateWelcome( User $user ) {
 		$this->output( "Welcoming {$user->getName()}\n" );
-		EchoEvent::create( array(
+		EchoEvent::create( [
 			'type' => 'welcome',
 			'agent' => $user,
-			'extra' => array(
+			'extra' => [
 				'notifyAgent' => true
-			)
-		) );
+			]
+		] );
 	}
 
 	private function generateEmail( User $user, User $agent ) {
 		$this->output( "{$agent->getName()} is emailing {$user->getName()}\n" );
-		EchoEvent::create( array(
+		EchoEvent::create( [
 			'type' => 'emailuser',
-			'extra' => array(
+			'extra' => [
 				'to-user-id' => $user->getId(),
 				'subject' => 'Long time no see',
-			),
+			],
 			'agent' => $agent,
-		) );
+		] );
 	}
 
 	private function generateUserRights( User $user, User $agent ) {
 		$this->output( "{$agent->getName()} is changing {$user->getName()}'s rights\n" );
-		$this->createUserRightsNotification( $user, $agent, array( 'OnlyAdd-1' ), null );
-		$this->createUserRightsNotification( $user, $agent, null, array( 'JustRemove-1', 'JustRemove-2' ) );
-		$this->createUserRightsNotification( $user, $agent, array( 'Add-1', 'Add-2' ), array( 'Remove-1', 'Remove-2' ) );
+		$this->createUserRightsNotification( $user, $agent, [ 'OnlyAdd-1' ], null );
+		$this->createUserRightsNotification( $user, $agent, null, [ 'JustRemove-1', 'JustRemove-2' ] );
+		$this->createUserRightsNotification( $user, $agent, [ 'Add-1', 'Add-2' ], [ 'Remove-1', 'Remove-2' ] );
 	}
 
 	private function createUserRightsNotification( User $user, User $agent, $add, $remove ) {
 		EchoEvent::create(
-			array(
+			[
 				'type' => 'user-rights',
-				'title' => Title::newMainPage(),
-				'extra' => array(
+				'extra' => [
 					'user' => $user->getID(),
 					'add' => $add,
 					'remove' => $remove,
-				),
+					'reason' => 'This is the [[reason]] for changing your user rights.',
+				],
 				'agent' => $agent,
-			)
+			]
 		);
 	}
 
 	private function generateContentTranslation( User $user ) {
-		if ( !class_exists( 'ContentTranslationHooks' ) ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'ContentTranslation' ) ) {
 			return;
 		}
 
 		$this->output( "Generating CX notifications\n" );
-		foreach ( array( 'cx-first-translation', 'cx-tenth-translation', 'cx-hundredth-translation' ) as $eventType ) {
+		foreach ( [ 'cx-first-translation', 'cx-tenth-translation', 'cx-hundredth-translation' ] as $eventType ) {
 			EchoEvent::create(
-				array(
+				[
 					'type' => $eventType,
-					'extra' => array(
+					'extra' => [
 						'recipient' => $user->getId(),
-					),
-				)
+					],
+				]
 			);
 		}
 
 		EchoEvent::create(
-			array(
+			[
 				'type' => 'cx-suggestions-available',
-				'extra' => array(
+				'extra' => [
 					'recipient' => $user->getId(),
 					'lastTranslationTitle' => 'History of the People\'s Republic of China'
-				),
-			)
+				],
+			]
 		);
 	}
 
@@ -341,31 +352,144 @@ class GenerateSampleNotifications extends Maintenance {
 
 		$this->output( "Generating OpenStackManager notifications\n" );
 
-		foreach ( array( 'build-completed', 'reboot-completed', 'deleted' ) as $action ) {
-			EchoEvent::create( array(
+		foreach ( [ 'build-completed', 'reboot-completed', 'deleted' ] as $action ) {
+			EchoEvent::create( [
 				'type' => "osm-instance-$action",
 				'title' => Title::newFromText( "Moai" ),
 				'agent' => $user,
-				'extra' => array(
+				'extra' => [
 					'instanceName' => 'instance1',
 					'projectName' => 'TheProject',
 					'notifyAgent' => true,
-				)
-			) );
+				]
+			] );
 		}
 
-		EchoEvent::create( array(
+		EchoEvent::create( [
 			'type' => 'osm-projectmembers-add',
 			'title' => Title::newFromText( "Moai" ),
 			'agent' => $agent,
-			'extra' => array( 'userAdded' => $user->getId() ),
-		) );
+			'extra' => [ 'userAdded' => $user->getId() ],
+		] );
 	}
 
 	private function shouldGenerate( $type, $types ) {
 		return array_search( $type, $types ) !== false;
 	}
+
+	private function generateEditThanks( User $user, User $agent, User $otherUser ) {
+		$this->generateOneEditThanks( $user, $agent );
+		$this->generateMultipleEditThanks( $user, $agent, $otherUser );
+	}
+
+	private function generateOneEditThanks( User $user, User $agent ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Thanks' ) ) {
+			return;
+		}
+		// make an edit, thank it once
+		$title = $this->generateNewPageTitle();
+		$revision = $this->addToPageContent( $title, $user, "an awesome edit! ~~~~" );
+		EchoEvent::create( [
+			'type' => 'edit-thank',
+			'title' => $title,
+			'extra' => [
+				'revid' => $revision->getId(),
+				'thanked-user-id' => $user->getId(),
+				'source' => 'generateSampleNotifications.php',
+			],
+			'agent' => $agent,
+		] );
+		$this->output( "{$agent->getName()} is thanking {$user->getName()} for edit {$revision->getId()} on {$title->getPrefixedText()}\n" );
+	}
+	private function generateMultipleEditThanks( User $user, User $agent, User $otherUser ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Thanks' ) ) {
+			return;
+		}
+		// make an edit, thank it twice
+		$title = $this->generateNewPageTitle();
+		$revision = $this->addToPageContent( $title, $user, "an even better edit! ~~~~" );
+		EchoEvent::create( [
+			'type' => 'edit-thank',
+			'title' => $title,
+			'extra' => [
+				'revid' => $revision->getId(),
+				'thanked-user-id' => $user->getId(),
+				'source' => 'generateSampleNotifications.php',
+			],
+			'agent' => $agent,
+		] );
+		EchoEvent::create( [
+			'type' => 'edit-thank',
+			'title' => $title,
+			'extra' => [
+				'revid' => $revision->getId(),
+				'thanked-user-id' => $user->getId(),
+				'source' => 'generateSampleNotifications.php',
+			],
+			'agent' => $otherUser,
+		] );
+		$this->output( "{$agent->getName()} and {$otherUser->getName()} are thanking {$user->getName()} for edit {$revision->getId()} on {$title->getPrefixedText()}\n" );
+	}
+
+	private function generateEducationProgram( User $user, User $agent ) {
+		if ( !class_exists( 'EducationProgram\Extension' ) ) {
+			$this->output( 'class EducationProgram\Extension not found' );
+			return;
+		}
+
+		$chem101 = Title::newFromText( 'School/Chemistry101' );
+		if ( !$chem101->exists() ) {
+			$this->addToPageContent( $chem101, $agent, "\nThis is the main page for the Chemistry 101 course\n" );
+		}
+
+		$notificationManager = EducationProgram\Extension::globalInstance()->getNotificationsManager();
+
+		$this->output( "{$agent->getName()} is adding {$user->getName()} to {$chem101->getPrefixedText()} as instructor, student, campus volunteer and online volunteer.\n" );
+
+		$types = [
+			'ep-instructor-add-notification',
+			'ep-online-add-notification',
+			'ep-campus-add-notification',
+			'ep-student-add-notification',
+		];
+		foreach ( $types as $type ) {
+			$notificationManager->trigger(
+				$type,
+				[
+					'role-add-title' => $chem101,
+					'agent' => $agent,
+					'users' => [ $user->getId() ],
+				]
+			);
+		}
+
+		// NOTE: Not generating 'ep-course-talk-notification' for now
+		// as it requires a full setup to actually work (institution, course, instructors, students).
+	}
+
+	private function generateWikibase( User $user, User $agent ) {
+		if ( !class_exists( 'Wikibase\Client\Hooks\EchoNotificationsHandlers' ) ) {
+			$this->output( 'class Wikibase\Client\Hooks\EchoNotificationsHandlers not found' );
+			return;
+		}
+
+		$title = $this->generateNewPageTitle();
+		$this->addToPageContent( $title, $user, "this is a new page" );
+		$helpPage = Title::newFromText( 'Project:Wikidata' );
+		$this->addToPageContent( $helpPage, $user, "this is the help page" );
+
+		$this->output( "{$agent->getName()} is connecting {$user->getName()}'s page {$title->getPrefixedText()} to an item\n" );
+		EchoEvent::create( [
+			'type' => Wikibase\Client\Hooks\EchoNotificationsHandlers::NOTIFICATION_TYPE,
+			'title' => $title,
+			'extra' => [
+				'url' => Title::newFromText( 'Item:Q1' )->getFullURL(),
+				'repoSiteName' => 'Wikidata'
+			],
+			'agent' => $agent,
+		] );
+	}
 }
 
 $maintClass = "GenerateSampleNotifications";
-require_once ( DO_MAINTENANCE );
+require_once RUN_MAINTENANCE_IF_MAIN;

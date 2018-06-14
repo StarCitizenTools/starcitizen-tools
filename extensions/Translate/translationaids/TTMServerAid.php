@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -15,7 +15,7 @@
  */
 class TTMServerAid extends QueryAggregatorAwareTranslationAid {
 	public function populateQueries() {
-		$text = $this->getDefinition();
+		$text = $this->dataProvider->getDefinition();
 		$from = $this->group->getSourceLanguage();
 		$to = $this->handle->getCode();
 
@@ -25,11 +25,15 @@ class TTMServerAid extends QueryAggregatorAwareTranslationAid {
 	}
 
 	public function getData() {
-		$suggestions = array();
+		$suggestions = [];
 
-		$text = $this->getDefinition();
+		$text = $this->dataProvider->getDefinition();
 		$from = $this->group->getSourceLanguage();
 		$to = $this->handle->getCode();
+
+		if ( trim( $text ) === '' ) {
+			return $suggestions;
+		}
 
 		// "Local" queries using a client can't be run in parallel with web services
 		global $wgTranslateTranslationServices;
@@ -80,13 +84,18 @@ class TTMServerAid extends QueryAggregatorAwareTranslationAid {
 		$sourceLanguage = $queryData['language'];
 		$sourceText = $queryData['text'];
 
+		// getResultData returns a null on failure instead of throwing an exception
 		$sugs = $service->getResultData( $response );
+		if ( $sugs === null ) {
+			return [];
+		}
+
 		foreach ( $sugs as &$sug ) {
-			$sug += array(
+			$sug += [
 				'service' => $service->getName(),
 				'source_language' => $sourceLanguage,
 				'source' => $sourceText,
-			);
+			];
 		}
 		return $sugs;
 	}

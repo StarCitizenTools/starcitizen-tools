@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Red Winged Duck"
+		]
+	},
+	"revisionslider": "Слайдэр вэрсіяў",
+	"revisionslider-preference-disable": "Не паказваць слайдэр вэрсіяў",
+	"revisionslider-desc": "Паказвае слайдэр, які дазваляе выбраць і параўнаць вэрсіі на старонцы адрозьненьняў",
+	"revisionslider-toggle-label": "Прагляд гісторыі",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|байт|байты|байтаў}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|байт|байты|байтаў}}",
+	"revisionslider-label-date": "Дата",
+	"revisionslider-label-page-size": "Памер старонкі",
+	"revisionslider-label-change-size": "Памер зьмены",
+	"revisionslider-label-comment": "Камэнтар",
+	"revisionslider-label-username": "{{GENDER:$1|Удзельнік|Удзельніца}}",
+	"revisionslider-minoredit": "Гэта дробная праўка",
+	"revisionslider-loading-failed": "Не атрымалася загрузіць слайдэр вэрсіяў.",
+	"revisionslider-toggle-title-expand": "Адкрыць слайдэр вэрсіяў",
+	"revisionslider-toggle-title-collapse": "Згарнуць слайдэр вэрсіяў",
+	"revisionslider-turn-on-auto-expand-title": "Заўсёды разгортваць слайдэр вэрсіяў",
+	"revisionslider-turn-off-auto-expand-title": "Не разгортваць слайдэр вэрсіяў аўтаматычна",
+	"revisionslider-arrow-tooltip-newer": "Паглядзець навейшыя вэрсіі",
+	"revisionslider-arrow-tooltip-older": "Паглядзець старэйшыя вэрсіі",
+	"revisionslider-show-help-tooltip": "Паказаць тэкст даведкі",
+	"revisionslider-help-dialog-slide1": "Слайдэр вэрсіяў дапамагае ў навігацыі і параўнаньні вэрсіяў на старонцы розьніцы вэрсіяў. Ён заснаваны на [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider пажаданьні] нямецкамоўнай супольнасьці. Водгукі вітаюцца [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider тут].",
+	"revisionslider-help-dialog-slide2": "Кожны слупок адпавядае вэрсіі старонкі. Слупкі, накіраваныя ўверх, паказваюць рост памеру старонкі, слупкі, накіраваныя ўніз, паказваюць зьмяншэньне. На выяве вэрсія 1 паказвае даданьне зьместу, а вэрсія 2 — выдаленьне зьместу.",
+	"revisionslider-help-dialog-slide3a": "<p>Каб параўнаць пэўныя вэрсіі, абярыце вэрсіі з дапамогай жоўтага і блакітнага шарыкаў.</p><p>Блакітны шарык кантралюе навейшую вэрсію, жоўты шарык — старэйшую вэрсію.</p><p>Перасоўвайце шарыкі перацягваньнем або націскайце на лініі слайдэру.</p>",
+	"revisionslider-help-dialog-slide4": "Выкарыстоўвайце стрэлкі ўлева і ўправа, каб рухацца па гісторыі вэрсіяў і паказваць старэйшыя і навейшыя вэрсіі.",
+	"revisionslider-tutorial": "Інструкцыя слайдэру вэрсіяў",
+	"revisionslider-previous-dialog": "Назад",
+	"revisionslider-next-dialog": "Далей",
+	"revisionslider-close-dialog": "Закрыць"
+}

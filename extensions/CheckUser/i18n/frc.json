@@ -1,10 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"JeanVoisin"
+			"JeanVoisin",
+			"Urhixidur"
 		]
 	},
-	"checkuser-summary": "Cet outil observe les derniers changements pour récupérer l’adresse IP de l’useur ou pour montrer les données de modification et de l’useur de cette adresse IP.\nLes useurs et les modifications par l’adresse IP d’un client peuvent être récupérés par les en-têtes XFF en ajoutant « /xff » à l’adresse IP. Les adresses IPv4 (CIDR $1–32) et IPv6 (CIDR $2-128) sont supportées.\nPour des raisons de performance, cet outil ne retourne pas plus de 5&nbsp;000 modifications.\nUsez ça ici en accord avec les régulations.",
+	"checkuser-summary": "Cet outil parcourt la liste des changements récents à la recherche des adresses IP employées par un utilisateur ou affiche toutes les données utilisateur d’une adresse IP.\nLes comptes et les modifications faites par une adresse IP cliente peuvent être récupérés via les entêtes XFF en suffixant l’adresse IP avec \"/xff\". Les adresses IPv4 (CIDR /$1 à /32) et IPv6 (CIDR /$2 à /128) sont prises en charge.\nPas plus de 5000 modifications ne seront renvoyées, pour des questions de performance.\nVeuillez utiliser cet outil dans le respect de la charte d’utilisation.",
 	"checkuser-logcase": "La charche des notes est sensible aux lettres basses ou hautes.",
 	"checkuser": "'Gardez-voir à l'useur encore",
 	"checkuserlog": "Notes de la Garde d'useur",
@@ -18,10 +19,10 @@
 	"checkuser-users": "Obtenir les useurs",
 	"checkuser-edits": "Obtenir les modifications du IP",
 	"checkuser-ips": "Obtenir les adresses IP",
-	"checkuser-search": "Charche",
 	"checkuser-empty": "Les notes sont vides.",
 	"checkuser-nomatch": "Rien pareil trouvé.",
 	"checkuser-check": "Charche",
 	"checkuser-log-fail": "Pas capable d'additionner la note",
-	"checkuser-nolog": "Rien trouvé dans les notes."
+	"checkuser-nolog": "Rien trouvé dans les notes.",
+	"checkuser-search": "Charche"
 }

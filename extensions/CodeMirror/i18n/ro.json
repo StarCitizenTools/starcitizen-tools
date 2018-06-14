@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Strainu"
+		]
+	},
+	"codemirror-desc": "Oferă evidențierea sintaxei în editorul wikitext",
+	"codemirror-toggle-label": "Evidențierea sintaxei",
+	"codemirror-beta-title": "Evidențierea sintaxei wikitext",
+	"codemirror-beta-desc": "Evidențierea sintaxei ușurează editarea folosind culori și umbre pentru a separa vizual textul paginii de codul pentru legături, referințe și formate.",
+	"codemirror-popup-label": "Evidențierea sintaxei",
+	"codemirror-popup-desc": "Evidențierea sintaxei vă va ajuta să distingeți diferitele părți ale editării dumneavoastră codându-le în culor diferite.",
+	"codemirror-popup-btn-yes": "Încercați-o",
+	"codemirror-popup-btn-no": "Nu, mulțumesc"
+}

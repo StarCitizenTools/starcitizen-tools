@@ -1,19 +1,25 @@
 {
 	"@metadata": {
 		"authors": [
-			"Michael Siegwarth (msiegwarth@gmail.com)"
+			"Michael Siegwarth (msiegwarth@gmail.com)",
+			"Felipe L. Ewald",
+			"Eduardo Addad de Oliveira"
 		]
 	},
-	"msu-desc": "Habilita uploads fáceis (quando disponível, também por drag&drop), para um ou vários arquivos, simultaneamente",
+	"msu-desc": "Habilita uploads fáceis para um ou vários arquivos, simultaneamente",
 	"msu-button-title": "Selecionar arquivos",
 	"msu-insert-link": "Inserir link",
 	"msu-insert-gallery": "Inserir imagem como galeria",
+	"msu-insert-files": "Inserir todos como arquivos",
+	"msu-insert-links": "Inserir todos como links",
+	"msu-insert-image": "Inserir como imagem",
+	"msu-insert-video": "Inserir vídeo",
 	"msu-cancel-upload": "Cancelar upload",
+	"msu-continue": "Continuar mesmo assim?",
 	"msu-clean-all": "Clear list",
-	"msu-upload-possible": "Upload habilitado",
-	"msu-ext-not-allowed": "Somente esses tipos de arquivo são permitidos:",
-	"msu-upload-this": "Clique aqui para fazer upload deste arquivo",
-	"msu-upload-all": "Clique aqui para fazer upload de todos os arquivos",
+	"msu-ext-not-allowed": "Somente {{PLURAL:$1|o seguinte tipo de arquivo é permitido|os seguintes tipos de arquivos são permitidos}}:",
+	"msu-upload-this": "Enviar este arquivo",
+	"msu-upload-all": "Enviar todos os arquivos",
 	"msu-dropzone": "Arraste arquivos para cá",
 	"msu-comment": "MsUpload"
 }

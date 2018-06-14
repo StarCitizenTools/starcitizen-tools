@@ -243,14 +243,24 @@
 		 * If the user expressed a preference not to be tracked, or if
 		 * $wgEventLoggingBaseUri is unset, this method is a no-op.
 		 *
+		 * See https://developer.mozilla.org/en-US/docs/Web/API/Navigator/doNotTrack
+		 *
 		 * @param {string} url URL to request from the server.
 		 * @return undefined
 		 */
-		sendBeacon: ( /1|yes/.test( navigator.doNotTrack ) || !baseUrl )
-			? $.noop
-			: navigator.sendBeacon
-				? function ( url ) { try { navigator.sendBeacon( url ); } catch ( e ) {} }
-				: function ( url ) { document.createElement( 'img' ).src = url; },
+		sendBeacon: (
+			// Support: Firefox < 32 (yes/no)
+			/1|yes/.test( navigator.doNotTrack ) ||
+				// Support: IE 11, Safari 7.1.3+ (window.doNotTrack)
+				window.doNotTrack === '1' ||
+				// Support: IE 9, IE 10 (navigator.msDoNotTrack)
+				navigator.msDoNotTrack === '1' ||
+				!baseUrl
+			) ?
+			$.noop :
+			navigator.sendBeacon ?
+				function ( url ) { try { navigator.sendBeacon( url ); } catch ( e ) {} } :
+				function ( url ) { document.createElement( 'img' ).src = url; },
 
 		/**
 		 * Construct and transmit to a remote server a record of some event

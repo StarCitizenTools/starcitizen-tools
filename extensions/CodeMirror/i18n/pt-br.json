@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"!Silent",
+			"Felipe L. Ewald",
+			"Eduardo Addad de Oliveira"
+		]
+	},
+	"codemirror-desc": "Fornece um realce de sintaxe no editor de wikitexto",
+	"codemirror-toggle-label": "Realce de sintaxe",
+	"codemirror-beta-title": "Realce de sintaxe do texto wiki",
+	"codemirror-beta-desc": "O destaque de sintaxe facilita a edição usando cor e sombra para separar visualmente o texto da página do código para links, referências e predefinições.",
+	"codemirror-popup-label": "Realce sintático",
+	"codemirror-popup-desc": "O destaque de sintaxe irá ajudá-lo a distinguir facilmente diferentes partes de sua edição codificando as cores.",
+	"codemirror-popup-btn-yes": "Experimente",
+	"codemirror-popup-btn-no": "Não, obrigado"
+}

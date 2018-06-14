@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2008-2010, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -16,10 +16,10 @@
  */
 class TranslateMoveJob extends Job {
 	/**
-	 * @param $source Title
-	 * @param $target Title
-	 * @param $params array, should include base-source and base-target
-	 * @param $performer
+	 * @param Title $source
+	 * @param Title $target
+	 * @param array $params should include base-source and base-target
+	 * @param User $performer
 	 * @return TranslateMoveJob
 	 */
 	public static function newJob( Title $source, Title $target, array $params,
@@ -41,10 +41,9 @@ class TranslateMoveJob extends Job {
 	/**
 	 * @param Title $title
 	 * @param array $params
-	 * @param int $id
 	 */
-	public function __construct( $title, $params = array(), $id = 0 ) {
-		parent::__construct( __CLASS__, $title, $params, $id );
+	public function __construct( $title, $params = [] ) {
+		parent::__construct( __CLASS__, $title, $params );
 	}
 
 	public function run() {
@@ -71,10 +70,10 @@ class TranslateMoveJob extends Job {
 		// Don't check perms, don't leave a redirect
 		$ok = $title->moveTo( $target, false, $summary, false );
 		if ( !$ok ) {
-			$params = array(
+			$params = [
 				'target' => $target->getPrefixedText(),
 				'error' => $ok,
-			);
+			];
 
 			$entry = new ManualLogEntry( 'pagetranslation', 'movenok' );
 			$entry->setPerformer( $doer );
@@ -98,9 +97,9 @@ class TranslateMoveJob extends Job {
 		if ( $last ) {
 			$cache->delete( $key );
 
-			$params = array(
+			$params = [
 				'target' => $this->params['base-target'],
-			);
+			];
 
 			$entry = new ManualLogEntry( 'pagetranslation', 'moveok' );
 			$entry->setPerformer( $doer );
@@ -185,7 +184,7 @@ class TranslateMoveJob extends Job {
 
 	/**
 	 * Adapted from wfSuppressWarnings to allow not leaving redirects.
-	 * @param $end bool
+	 * @param bool $end
 	 */
 	public static function forceRedirects( $end = false ) {
 		static $suppressCount = 0;

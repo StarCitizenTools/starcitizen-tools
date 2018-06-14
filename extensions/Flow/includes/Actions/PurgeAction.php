@@ -7,7 +7,6 @@ use Flow\Container;
 use Flow\Data\ManagerGroup;
 use Flow\Data\Pager\Pager;
 use Flow\Formatter\TopicListQuery;
-use Flow\Model\TopicListEntry;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
 use Flow\WorkflowLoaderFactory;
@@ -29,7 +28,7 @@ class PurgeAction extends \PurgeAction {
 	protected $hashBag;
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function onSubmit( $data ) {
 		// Replace $c['memcache'] with a hash bag o stuff.  This will look to the
@@ -41,14 +40,14 @@ class PurgeAction extends \PurgeAction {
 		// will initialize memcache before this is run when UseSquid is enabled.
 		Container::reset();
 		$container = Container::getContainer();
-		$container->extend( 'memcache', function( $memcache, $c ) {
+		$container->extend( 'memcache', function ( $memcache, $c ) {
 			$c['memcache.purge_backup'] = $memcache;
 			return new HashBagOStuff;
 		} );
 		$this->hashBag = $container['memcache'];
 		$this->realMemcache = $container['memcache.purge_backup'];
 
-		if ( !parent::onSubmit( array() ) ) {
+		if ( !parent::onSubmit( [] ) ) {
 			return false;
 		}
 
@@ -58,13 +57,13 @@ class PurgeAction extends \PurgeAction {
 			->createWorkflowLoader( $this->page->getTitle() )
 			->getWorkflow();
 
-		switch( $workflow->getType() ) {
+		switch ( $workflow->getType() ) {
 		case 'discussion':
 			$this->fetchDiscussion( $workflow );
 			break;
 
 		case 'topic':
-			$this->fetchTopics( array( $workflow->getId()->getAlphadecimal() => $workflow->getId() ) );
+			$this->fetchTopics( [ $workflow->getId()->getAlphadecimal() => $workflow->getId() ] );
 			break;
 
 		default:
@@ -84,34 +83,34 @@ class PurgeAction extends \PurgeAction {
 	 * @param Workflow $workflow
 	 */
 	protected function fetchDiscussion( Workflow $workflow ) {
-		$results = array();
-		$pagers = array();
+		$results = [];
+		$pagers = [];
 		/** @var ManagerGroup $storage */
 		$storage = Container::get( 'storage' );
 
 		// 'newest' sort order
 		$pagers[] = new Pager(
 			$storage->getStorage( 'TopicListEntry' ),
-			array( 'topic_list_id' => $workflow->getId() ),
-			array( 'pager-limit' => 499 )
+			[ 'topic_list_id' => $workflow->getId() ],
+			[ 'pager-limit' => 499 ]
 		);
 
 		// 'updated' sort order
 		$pagers[] = new Pager(
 			$storage->getStorage( 'TopicListEntry' ),
-			array( 'topic_list_id' => $workflow->getId() ),
-			array(
+			[ 'topic_list_id' => $workflow->getId() ],
+			[
 				'pager-limit' => 499,
 				'sort' => 'workflow_last_update_timestamp',
 				'order' => 'desc',
-			)
+			]
 		);
 
 		// Based on Header::init.
 		$storage->find(
 			'Header',
-			array( 'rev_type_id' => $workflow->getId() ),
-			array( 'sort' => 'rev_id', 'order' => 'DESC', 'limit' => 1 )
+			[ 'rev_type_id' => $workflow->getId() ],
+			[ 'sort' => 'rev_id', 'order' => 'DESC', 'limit' => 1 ]
 		);
 
 		foreach ( $pagers as $pager ) {
@@ -127,7 +126,6 @@ class PurgeAction extends \PurgeAction {
 		$boardHistoryQuery = Container::get( 'query.board.history' );
 		$boardHistoryQuery->getResults( $workflow->getId(), 499 );
 	}
-
 
 	/**
 	 * Load the requested topics.  Does not return anything, the goal
@@ -151,6 +149,7 @@ class PurgeAction extends \PurgeAction {
 
 	/**
 	 * Purge all keys written to $this->hashBag that match our cache prefix key.
+	 * @return true
 	 */
 	protected function purgeCache() {
 		$prefix = $this->cacheKeyPrefix();
@@ -160,7 +159,7 @@ class PurgeAction extends \PurgeAction {
 		// that contain our prefix.
 		$keys = array_filter(
 			array_keys( $reflProp->getValue( $this->hashBag ) ),
-			function( $key ) use( $prefix ) {
+			function ( $key ) use( $prefix ) {
 				if ( strpos( $key, $prefix ) === 0 ) {
 					return true;
 				} else {
@@ -182,7 +181,7 @@ class PurgeAction extends \PurgeAction {
 	protected function cacheKeyPrefix() {
 		global $wgFlowDefaultWikiDb;
 		if ( $wgFlowDefaultWikiDb === false ) {
-			return wfWikiId();
+			return wfWikiID();
 		} else {
 			return $wgFlowDefaultWikiDb;
 		}

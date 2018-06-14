@@ -4,5 +4,13 @@
 			"McDutchie"
 		]
 	},
-	"commonsmetadata-desc": "Extende le proprietate \"extmetadate\" del modulo de API \"info de imagine\" pro includer le information continite in paginas de description de imagine que usa le patronos commun de Wikimedia Commons."
+	"commonsmetadata-desc": "Extende le proprietate \"extmetadate\" del modulo de API \"info de imagine\" pro includer le information continite in paginas de description de imagine que usa le patronos commun de Wikimedia Commons.",
+	"commonsmetadata-trackingcategory-no-license": "Files sin licentia legibile per machina",
+	"commonsmetadata-trackingcategory-no-license-desc": "Le file non ha un patrono de licentia [{{MediaWiki:Commonsmetadata-doc-url}} legibile per machina].",
+	"commonsmetadata-trackingcategory-no-description": "Files sin description legibile per machina",
+	"commonsmetadata-trackingcategory-no-description-desc": "Le file non ha un patrono de information [{{MediaWiki:Commonsmetadata-doc-url}} legibile per machina], o su campo de description non es completate.",
+	"commonsmetadata-trackingcategory-no-author": "Files sin autor legibile per machina",
+	"commonsmetadata-trackingcategory-no-author-desc": "Le file non ha un patrono de information [{{MediaWiki:Commonsmetadata-doc-url}} legibile per machina], o su campo de autor non es completate.",
+	"commonsmetadata-trackingcategory-no-source": "Files sin fonte legibile per machina",
+	"commonsmetadata-trackingcategory-no-source-desc": "Le file non ha un patrono de information [{{MediaWiki:Commonsmetadata-doc-url}} legibile per machina], o su campo de fonte non es completate."
 }

@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"محمد أحمد عبد الفتاح",
+			"Leszek Manicki (WMDE)",
+			"زكريا",
+			"Macofe",
+			"Shbib Al-Subaie"
+		]
+	},
+	"revisionslider": "مقارن النسخ",
+	"revisionslider-preference-disable": "لا تظهر مقارن النسخ",
+	"revisionslider-desc": "إظهار مقارن النسخ لمقارنة نسختين من الصفحة",
+	"revisionslider-toggle-label": "تصفح التاريخ",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|بايت}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|بايت}}",
+	"revisionslider-label-date": "التاريخ",
+	"revisionslider-label-page-size": "حجم الصفحة",
+	"revisionslider-label-change-size": "حجم التغيير",
+	"revisionslider-label-comment": "التعليق",
+	"revisionslider-label-username": "اسم المستخدم{{GENDER:$1||ة}}",
+	"revisionslider-minoredit": "هذا تعديل طفيف",
+	"revisionslider-loading-failed": "لم يحمل مقارن النسخ.",
+	"revisionslider-toggle-title-expand": "افتح مقارن النسخ",
+	"revisionslider-toggle-title-collapse": "طي مقارن النسخ",
+	"revisionslider-turn-on-auto-expand-title": "أظهر دائما مقارن النسخ",
+	"revisionslider-turn-off-auto-expand-title": "لا تظهر تلقائيا مقارن النسخ",
+	"revisionslider-arrow-tooltip-newer": "إظهار نسخ أحدث",
+	"revisionslider-arrow-tooltip-older": "إظهار نسخ أقدم",
+	"revisionslider-show-help-tooltip": "أظهر نص المساعدة",
+	"revisionslider-help-dialog-slide1": "يسهل مقارن النسخ تصفح النسخ ومقارنتها في صفحة الفرق. مقارن النسخ مبنيٌّ على ([//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider أمنية مجتمع]) من قائمة الأمنيات التقنية لمجتمع متحدثي اللغة الألمانية. ملاحظاتكم مرحب بها [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider هنا].",
+	"revisionslider-help-dialog-slide2": "يمثل كل عمود نسخة من الصفحة. الأعمدة فوق الخط عبارة عن التعديلات زيادة المحتوى والتي تحت الخط تعبر عن نقصان المحتوى. تظهر الصورة 1 الزيادة و2 النقصان.",
+	"revisionslider-help-dialog-slide3a": "<p>اختر النسختين المراد مقارنتهما مستعملا المؤشرين الأصفر والأزرق.</p><p>\nالأزرق لتحريك النسخة الأحدث والأصفر للأقدم.</p><p>حرك المؤشر بإبقاء الضغط عليه وتحريكه أو بالنقر على العمود.</p>",
+	"revisionslider-help-dialog-slide4": "استعمل الأسهم المتجهة يمينا ويسارا لتصفح تاريخ الصفحة وعرض النسخ الأقدم والأحدث.",
+	"revisionslider-tutorial": "شرح مقارن النسخ",
+	"revisionslider-previous-dialog": "السابق",
+	"revisionslider-next-dialog": "التالي",
+	"revisionslider-close-dialog": "أغلق"
+}

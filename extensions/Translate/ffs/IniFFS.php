@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -17,16 +17,16 @@
  */
 class IniFFS extends SimpleFFS {
 	public static function isValid( $data ) {
-		$conf = array( 'BASIC' => array( 'class' => 'FileBasedMessageGroup', 'namespace' => 8 ) );
+		$conf = [ 'BASIC' => [ 'class' => 'FileBasedMessageGroup', 'namespace' => 8 ] ];
 		/**
 		 * @var FileBasedMessageGroup $group
 		 */
 		$group = MessageGroupBase::factory( $conf );
 
-		wfSuppressWarnings();
+		MediaWiki\suppressWarnings();
 		$ffs = new IniFFS( $group );
 		$parsed = $ffs->readFromVariable( $data );
-		wfRestoreWarnings();
+		MediaWiki\restoreWarnings();
 
 		return (bool)count( $parsed['MESSAGES'] );
 	}
@@ -36,7 +36,7 @@ class IniFFS extends SimpleFFS {
 	}
 
 	public function getFileExtensions() {
-		return array( '.ini' );
+		return [ '.ini' ];
 	}
 
 	/**
@@ -44,7 +44,7 @@ class IniFFS extends SimpleFFS {
 	 * @return array Parsed data.
 	 */
 	public function readFromVariable( $data ) {
-		$authors = array();
+		$authors = [];
 		preg_match_all( '/^; Author: (.*)$/m', $data, $matches, PREG_SET_ORDER );
 		foreach ( $matches as $match ) {
 			$authors[] = $match[1];
@@ -62,10 +62,10 @@ class IniFFS extends SimpleFFS {
 			$messages = null;
 		}
 
-		return array(
+		return [
 			'MESSAGES' => $messages,
 			'AUTHORS' => $authors,
-		);
+		];
 	}
 
 	protected function writeReal( MessageCollection $collection ) {

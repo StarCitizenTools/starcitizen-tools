@@ -22,7 +22,7 @@
 	// Static
 	mw.flow.ve.ui.MentionContextItem.static.name = 'flowMention';
 
-	mw.flow.ve.ui.MentionContextItem.static.icon = 'flow-mention';
+	mw.flow.ve.ui.MentionContextItem.static.icon = 'userAdd';
 
 	mw.flow.ve.ui.MentionContextItem.static.label = OO.ui.deferMsg( 'flow-ve-mention-context-item-label' );
 
@@ -44,7 +44,7 @@
 	/**
 	 * Returns a short description emphasizing the relevant data (currently just the user name)
 	 *
-	 * @return string User name
+	 * @return {string} User name
 	 */
 	mw.flow.ve.ui.MentionContextItem.prototype.getDescription = function () {
 		var key = mw.flow.ve.ui.MentionInspector.static.templateParameterKey;

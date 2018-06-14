@@ -4,6 +4,8 @@
 			"Nike"
 		]
 	},
+	"msu-insert-image": "Lisää kuva",
+	"msu-insert-video": "Lisää elokuva",
 	"msu-cancel-upload": "Peru tallennus",
 	"msu-dropzone": "Pudota tiedostoja tähän"
 }

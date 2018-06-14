@@ -2,7 +2,6 @@
 
 namespace Flow\Tests\SpamFilter;
 
-
 use Flow\Model\PostRevision;
 use Flow\Model\Workflow;
 use Flow\SpamFilter\ConfirmEdit;
@@ -18,7 +17,8 @@ class ConfirmEditTest extends \MediaWikiTestCase {
 		}
 
 		$user = User::newFromName( '127.0.0.1', false );
-		$title = Title::newMainPage();
+		$title = Title::newFromText( 'Topic:Tnprd6ksfu1v1nme' );
+		$ownerTitle = Title::newMainPage();
 		$workflow = Workflow::create( 'topic', $title );
 
 		$oldRevision = PostRevision::createTopicPost( $workflow, $user, 'foo' );
@@ -39,7 +39,7 @@ class ConfirmEditTest extends \MediaWikiTestCase {
 			->method( 'getRequest' )
 			->will( $this->returnValue( $request ) );
 
-		$status = $filter->validate( $context, $newRevision, $oldRevision, $title );
+		$status = $filter->validate( $context, $newRevision, $oldRevision, $title, $ownerTitle );
 		$this->assertInstanceOf( 'Status', $status );
 		$this->assertTrue( $status->isGood() );
 	}

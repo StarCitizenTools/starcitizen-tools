@@ -70,17 +70,19 @@
 	 * @return {boolean|jQuery}
 	 */
 	function flowBoardComponentReinitializeContainer( $container ) {
+		var $retObj, $header, $boardNavigation, $board;
+
 		if ( $container === false ) {
 			return false;
 		}
 
 		// Trigger this on FlowBoardAndHistoryComponentBase
 		// @todo use EventEmitter to do this?
-		var $retObj = FlowBoardComponent.parent.prototype.reinitializeContainer.call( this, $container ),
+		$retObj = FlowBoardComponent.parent.prototype.reinitializeContainer.call( this, $container );
 		// Find any new (or previous) elements
-			$header = $container.find( '.flow-board-header' ).addBack().filter( '.flow-board-header:first' ),
-			$boardNavigation = $container.find( '.flow-board-navigation' ).addBack().filter( '.flow-board-navigation:first' ),
-			$board = $container.find( '.flow-board' ).addBack().filter( '.flow-board:first' );
+		$header = $container.find( '.flow-board-header' ).addBack().filter( '.flow-board-header:first' );
+		$boardNavigation = $container.find( '.flow-board-navigation' ).addBack().filter( '.flow-board-navigation:first' );
+		$board = $container.find( '.flow-board' ).addBack().filter( '.flow-board:first' );
 
 		if ( $retObj === false ) {
 			return false;
@@ -120,23 +122,6 @@
 		}
 
 		this.emitWithReturn( 'makeContentInteractive', this );
-
-		// Initialize editors, turning them from textareas into editor objects
-		if ( typeof this.editorTimer === 'undefined' ) {
-			/*
-			 * When this method is first run, all page elements are initialized.
-			 * We probably don't need editor immediately, so defer loading it
-			 * to speed up the rest of the work that needs to be done.
-			 */
-			this.editorTimer = setTimeout( $.proxy( function ( $container ) { this.emitWithReturn( 'initializeEditors', $container ); }, this, $container ), 20000 );
-		} else {
-			/*
-			 * Subsequent calls here (e.g. when rendering the edit header form)
-			 * should immediately initialize the editors!
-			 */
-			clearTimeout( this.editorTimer );
-			this.emitWithReturn( 'initializeEditors', $container );
-		}
 
 		return $retObj;
 	}

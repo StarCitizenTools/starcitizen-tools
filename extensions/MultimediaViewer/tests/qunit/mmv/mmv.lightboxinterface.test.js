@@ -17,8 +17,7 @@
 		}
 	} ) );
 
-
-	QUnit.test( 'Sanity test, object creation and ui construction', 20, function ( assert ) {
+	QUnit.test( 'Sanity test, object creation and ui construction', function ( assert ) {
 		var lightbox = new mw.mmv.LightboxInterface();
 
 		stubScrollTo();
@@ -55,9 +54,10 @@
 		restoreScrollTo();
 	} );
 
-	QUnit.test( 'Handler registration and clearance work OK', 2, function ( assert ) {
+	QUnit.test( 'Handler registration and clearance work OK', function ( assert ) {
 		var lightbox = new mw.mmv.LightboxInterface(),
-			handlerCalls = 0;
+			handlerCalls = 0,
+			clock = this.sandbox.useFakeTimers();
 
 		function handleEvent() {
 			handlerCalls++;
@@ -65,13 +65,19 @@
 
 		lightbox.handleEvent( 'test', handleEvent );
 		$( document ).trigger( 'test' );
+		clock.tick( 10 );
 		assert.strictEqual( handlerCalls, 1, 'The handler was called when we triggered the event.' );
+
 		lightbox.clearEvents();
+
 		$( document ).trigger( 'test' );
+		clock.tick( 10 );
 		assert.strictEqual( handlerCalls, 1, 'The handler was not called after calling lightbox.clearEvents().' );
+
+		clock.restore();
 	} );
 
-	QUnit.test( 'Fullscreen mode', 8, function ( assert ) {
+	QUnit.test( 'Fullscreen mode', function ( assert ) {
 		var lightbox = new mw.mmv.LightboxInterface(),
 			oldFnEnterFullscreen = $.fn.enterFullscreen,
 			oldFnExitFullscreen = $.fn.exitFullscreen,
@@ -99,22 +105,22 @@
 		$.support.fullscreen = true;
 		lightbox.setupCanvasButtons();
 
-		assert.strictEqual( lightbox.$fullscreenButton.css( 'display' ), 'block',
+		assert.strictEqual( lightbox.$fullscreenButton.css( 'display' ), '',
 			'Fullscreen button is visible when fullscreen mode is available' );
 
 		// Entering fullscreen
 		lightbox.$fullscreenButton.click();
 
-		assert.strictEqual( lightbox.$main.hasClass( 'jq-fullscreened' ) , true,
+		assert.strictEqual( lightbox.$main.hasClass( 'jq-fullscreened' ), true,
 			'Fullscreened area has the fullscreen class' );
-		assert.strictEqual( lightbox.isFullscreen , true, 'Lightbox knows it\'s in fullscreen mode' );
+		assert.strictEqual( lightbox.isFullscreen, true, 'Lightbox knows it\'s in fullscreen mode' );
 
 		// Exiting fullscreen
 		lightbox.$fullscreenButton.click();
 
-		assert.strictEqual( lightbox.$main.hasClass( 'jq-fullscreened' ) , false,
+		assert.strictEqual( lightbox.$main.hasClass( 'jq-fullscreened' ), false,
 			'Fullscreened area doesn\'t have the fullscreen class anymore' );
-		assert.strictEqual( lightbox.isFullscreen , false, 'Lightbox knows it\'s not in fullscreen mode' );
+		assert.strictEqual( lightbox.isFullscreen, false, 'Lightbox knows it\'s not in fullscreen mode' );
 
 		// Entering fullscreen
 		lightbox.$fullscreenButton.click();
@@ -125,9 +131,9 @@
 		// Re-attach after hard-exit
 		lightbox.attach( '#qunit-fixture' );
 
-		assert.strictEqual( lightbox.$main.hasClass( 'jq-fullscreened' ) , false,
+		assert.strictEqual( lightbox.$main.hasClass( 'jq-fullscreened' ), false,
 			'Fullscreened area doesn\'t have the fullscreen class anymore' );
-		assert.strictEqual( lightbox.isFullscreen , false, 'Lightbox knows it\'s not in fullscreen mode' );
+		assert.strictEqual( lightbox.isFullscreen, false, 'Lightbox knows it\'s not in fullscreen mode' );
 
 		// Unattach lightbox from document
 		lightbox.unattach();
@@ -138,11 +144,11 @@
 		restoreScrollTo();
 	} );
 
-	QUnit.test( 'Fullscreen mode', 8, function ( assert ) {
+	QUnit.test( 'Fullscreen mode', function ( assert ) {
 		var buttonOffset, panelBottom,
 			oldRevealButtonsAndFadeIfNeeded,
 			lightbox = new mw.mmv.LightboxInterface(),
-			viewer = new mw.mmv.MultimediaViewer( { get: $.noop } ),
+			viewer = mw.mmv.testHelpers.getMultimediaViewer(),
 			oldFnEnterFullscreen = $.fn.enterFullscreen,
 			oldFnExitFullscreen = $.fn.exitFullscreen;
 
@@ -196,6 +202,12 @@
 
 		assert.ok( panelBottom === $( window ).height(), 'Image metadata does not extend beyond the viewport' );
 
+		lightbox.buttons.revealAndFade = function ( position ) {
+			assert.ok( true, 'Closing fullscreen triggers a reveal + fade' );
+
+			oldRevealButtonsAndFadeIfNeeded.call( this, position );
+		};
+
 		// Exiting fullscreen
 		lightbox.buttons.$fullscreen.click();
 
@@ -212,7 +224,7 @@
 		restoreScrollTo();
 	} );
 
-	QUnit.test( 'isAnyActiveButtonHovered', 35, function ( assert ) {
+	QUnit.test( 'isAnyActiveButtonHovered', function ( assert ) {
 		var lightbox = new mw.mmv.LightboxInterface();
 
 		stubScrollTo();
@@ -220,7 +232,7 @@
 		// Attach lightbox to testing fixture to avoid interference with other tests.
 		lightbox.attach( '#qunit-fixture' );
 
-		$.each ( lightbox.buttons.$buttons, function ( idx, e ) {
+		$.each( lightbox.buttons.$buttons, function ( idx, e ) {
 			var $e = $( e ),
 				offset = $e.show().offset(),
 				width = $e.width(),
@@ -239,10 +251,13 @@
 			assert.strictEqual( lightbox.buttons.isAnyActiveButtonHovered( offset.left + width, offset.top + height ),
 				!disabled,
 				'Hover detection works for bottom-right corner of element' );
-			assert.strictEqual( lightbox.buttons.isAnyActiveButtonHovered(
-				offset.left + ( width / 2 ), offset.top + ( height / 2 ) ),
+			assert.strictEqual(
+				lightbox.buttons.isAnyActiveButtonHovered(
+					offset.left + ( width / 2 ), offset.top + ( height / 2 )
+				),
 				!disabled,
-				'Hover detection works for center of element' );
+				'Hover detection works for center of element'
+			);
 		} );
 
 		// Unattach lightbox from document
@@ -250,8 +265,8 @@
 		restoreScrollTo();
 	} );
 
-	QUnit.test( 'Keyboard prev/next', 2, function ( assert ) {
-		var viewer = new mw.mmv.MultimediaViewer( { get: $.noop } ),
+	QUnit.test( 'Keyboard prev/next', function ( assert ) {
+		var viewer = mw.mmv.testHelpers.getMultimediaViewer(),
 			lightbox = new mw.mmv.LightboxInterface();
 
 		viewer.setupEventHandlers();

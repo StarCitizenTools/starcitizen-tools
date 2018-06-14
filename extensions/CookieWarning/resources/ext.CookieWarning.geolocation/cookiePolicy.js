@@ -1,11 +1,10 @@
-/* global Geo, mediaWiki */
 ( function ( mw, $ ) {
 	'use strict';
 	var geoLocation;
 
 	geoLocation = {
 		/**
-		 * @return string Two-letter country code
+		 * @return {string} Two-letter country code
 		 */
 		getCountryCode: function () {
 			/**

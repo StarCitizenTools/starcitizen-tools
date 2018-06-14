@@ -2,12 +2,13 @@
 	position: relative;
 	overflow-y: auto;
 
-	&-locked, &-locked:hover {
-		color: #999;
+	&-locked,
+	&-locked:hover {
+		color: #72777d;
 	}
 
 	// Override border-color and margin-top from OOUI MenuSelectWidget
-	border-color: #ccc;
+	border-color: #c8ccd1;
 	margin-top: 0;
 
 	// Override hidden scrollbars configuration in OS X users
@@ -15,13 +16,13 @@
 	&::-webkit-scrollbar {
 		-webkit-appearance: none;
 	}
-	&::-webkit-scrollbar:vertical {
+	&::-webkit-scrollbar:vertical { /* stylelint-disable-line selector-pseudo-class-no-unknown */
 		width: 11px;
 	}
 	&::-webkit-scrollbar-thumb {
 		border-radius: 8px;
-		border: 2px solid white; /* should match background, can't be transparent */
-		background-color: rgba(0, 0, 0, .5);
+		border: 2px solid #fff; /* should match background, can't be transparent */
+		background-color: rgba( 0, 0, 0, 0.5 );
 	}
 	&::-webkit-scrollbar-track {
 		background-color: #fff;

@@ -3,7 +3,7 @@
 namespace Flow\Data\Index;
 
 use Flow\Container;
-use Flow\Data\BufferedCache;
+use Flow\Data\FlowObjectCache;
 use Flow\Data\Compactor;
 use Flow\Data\Compactor\FeatureCompactor;
 use Flow\Data\Compactor\ShallowCompactor;
@@ -21,7 +21,7 @@ use Flow\Exception\DataModelException;
 abstract class FeatureIndex implements Index {
 
 	/**
-	 * @var BufferedCache
+	 * @var FlowObjectCache
 	 */
 	protected $cache;
 
@@ -62,7 +62,7 @@ abstract class FeatureIndex implements Index {
 	protected $options;
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	abstract public function getLimit();
 
@@ -79,13 +79,6 @@ abstract class FeatureIndex implements Index {
 	abstract public function limitIndexSize( array $values );
 
 	/**
-	 * @todo Could the cache key be passed in instead of $indexed?
-	 * @param array $indexed The portion of $row that makes up the cache key
-	 * @param array $row A single row of data to add to its related feature bucket
-	 */
-	abstract protected function addToIndex( array $indexed, array $row );
-
-	/**
 	 * @todo Similar, Could the cache key be passed in instead of $indexed?
 	 * @param array $indexed The portion of $row that makes up the cache key
 	 * @param array $row A single row of data to remove from its related feature bucket
@@ -93,13 +86,13 @@ abstract class FeatureIndex implements Index {
 	abstract protected function removeFromIndex( array $indexed, array $row );
 
 	/**
-	 * @param BufferedCache $cache
+	 * @param FlowObjectCache $cache
 	 * @param ObjectStorage $storage
 	 * @param ObjectMapper $mapper
 	 * @param string $prefix Prefix to utilize for all cache keys
 	 * @param array $indexedColumns List of columns to index,
 	 */
-	public function __construct( BufferedCache $cache, ObjectStorage $storage, ObjectMapper $mapper, $prefix, array $indexedColumns ) {
+	public function __construct( FlowObjectCache $cache, ObjectStorage $storage, ObjectMapper $mapper, $prefix, array $indexedColumns ) {
 		$this->cache = $cache;
 		$this->storage = $storage;
 		$this->mapper = $mapper;
@@ -121,7 +114,7 @@ abstract class FeatureIndex implements Index {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function canAnswer( array $featureColumns, array $options ) {
 		sort( $featureColumns );
@@ -154,7 +147,7 @@ abstract class FeatureIndex implements Index {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getOrder() {
 		if ( isset( $this->options['order'] ) && strtoupper( $this->options['order'] ) === 'ASC' ) {
@@ -182,24 +175,20 @@ abstract class FeatureIndex implements Index {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function onAfterInsert( $object, array $new, array $metadata ) {
-		$indexed = ObjectManager::splitFromRow( $new , $this->indexed );
+		$indexed = ObjectManager::splitFromRow( $new, $this->indexed );
 		// is un-indexable a bail-worthy occasion? Probably not but makes debugging easier
 		if ( !$indexed ) {
 			throw new DataModelException( 'Un-indexable row: ' . FormatJson::encode( $new ), 'process-data' );
 		}
 		$compacted = $this->rowCompactor->compactRow( UUID::convertUUIDs( $new, 'alphadecimal' ) );
-		// give implementing index option to create rather than append
-		if ( !$this->maybeCreateIndex( $indexed, $new, $compacted ) ) {
-			// fall back to append
-			$this->addToIndex( $indexed, $compacted );
-		}
+		$this->removeFromIndex( $indexed, $compacted );
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function onAfterUpdate( $object, array $old, array $new, array $metadata ) {
 		$oldIndexed = ObjectManager::splitFromRow( $old, $this->indexed );
@@ -218,16 +207,15 @@ abstract class FeatureIndex implements Index {
 				return;
 			}
 			// object representation in feature bucket has changed
-			$this->replaceInIndex( $oldIndexed, $oldCompacted, $newCompacted );
+			$this->removeFromIndex( $oldIndexed, $oldCompacted );
 		} else {
 			// object has moved from one feature bucket to another
 			$this->removeFromIndex( $oldIndexed, $oldCompacted );
-			$this->addToIndex( $newIndexed, $newCompacted );
 		}
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function onAfterRemove( $object, array $old, array $metadata ) {
 		$indexed = ObjectManager::splitFromRow( $old, $this->indexed );
@@ -239,33 +227,33 @@ abstract class FeatureIndex implements Index {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function onAfterLoad( $object, array $old ) {
 		// nothing to do
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function onAfterClear() {
 		// nothing to do
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
-	public function find( array $attributes, array $options = array() ) {
-		$results = $this->findMulti( array( $attributes ), $options );
+	public function find( array $attributes, array $options = [] ) {
+		$results = $this->findMulti( [ $attributes ], $options );
 		return reset( $results );
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
-	public function findMulti( array $queries, array $options = array() ) {
+	public function findMulti( array $queries, array $options = [] ) {
 		if ( !$queries ) {
-			return array();
+			return [];
 		}
 
 		// get cache keys for all queries
@@ -287,9 +275,13 @@ abstract class FeatureIndex implements Index {
 		// $fromStorage will be an array containing (expanded) results as value
 		// and indexes matching $query as key
 		$storageQueries = array_diff_key( $queries, $keysFromCache );
-		$fromStorage = array();
+		$fromStorage = [];
 		if ( $storageQueries ) {
 			$fromStorage = $this->backingStoreFindMulti( $storageQueries );
+			foreach ( $fromStorage as $idx => $resultFromStorage ) {
+				$key = $this->cacheKey( $storageQueries[$idx] );
+				$this->cache->set( $key, $resultFromStorage );
+			}
 		}
 
 		$results = $fromStorage;
@@ -318,7 +310,7 @@ abstract class FeatureIndex implements Index {
 		$order = array_intersect_key( $queries, $results );
 		$results = array_replace( $order, $results );
 
-		$keyToQuery = array();
+		$keyToQuery = [];
 		foreach ( $keysFromCache as $index => $key ) {
 			// all redundant data has been stripped, now expand all cache values
 			// (we're only doing this now to avoid expanding redundant data)
@@ -353,7 +345,7 @@ abstract class FeatureIndex implements Index {
 	 * @param array[optional] $options
 	 * @return array
 	 */
-	protected function filterResults( array $results, array $options = array() ) {
+	protected function filterResults( array $results, array $options = [] ) {
 		// Overriden in TopKIndex
 		return $results;
 	}
@@ -369,8 +361,8 @@ abstract class FeatureIndex implements Index {
 	 * @param array[optional] $options Options to find()
 	 * @return bool
 	 */
-	public function found( array $attributes, array $options = array() ) {
-		return $this->foundMulti( array( $attributes ), $options );
+	public function found( array $attributes, array $options = [] ) {
+		return $this->foundMulti( [ $attributes ], $options );
 	}
 
 	/**
@@ -384,7 +376,7 @@ abstract class FeatureIndex implements Index {
 	 * @param array[optional] $options Options to findMulti()
 	 * @return bool
 	 */
-	public function foundMulti( array $queries, array $options = array() ) {
+	public function foundMulti( array $queries, array $options = [] ) {
 		if ( !$queries ) {
 			return true;
 		}
@@ -404,7 +396,7 @@ abstract class FeatureIndex implements Index {
 			}
 		}
 
-		$keyToQuery = array();
+		$keyToQuery = [];
 		foreach ( $cacheKeys as $i => $key ) {
 			// These results will be merged into the query results, and as such need binary
 			// uuid's as would be received from storage
@@ -442,7 +434,7 @@ abstract class FeatureIndex implements Index {
 	 * @throws DataModelException
 	 */
 	protected function getCacheKeys( $queries ) {
-		$idxToKey = array();
+		$idxToKey = [];
 		foreach ( $queries as $idx => $query ) {
 			ksort( $query );
 			if ( array_keys( $query ) !== $this->indexedOrdered ) {
@@ -471,7 +463,7 @@ abstract class FeatureIndex implements Index {
 		// query backing store
 		$options = $this->queryOptions();
 		$stored = $this->storage->findMulti( $queries, $options );
-		$results = array();
+		$results = [];
 
 		// map store results to cache key
 		foreach ( $stored as $idx => $rows ) {
@@ -491,44 +483,12 @@ abstract class FeatureIndex implements Index {
 	}
 
 	/**
-	 * Called prior to self::addToIndex only when new objects as inserted.  Gives the
-	 * opportunity for indexes to create rather than append if this object signifies a new
-	 * feature list.
-	 *
-	 * @todo again, could just pass cache key instead of $indexed?
-	 * @param array $indexed The values that make up the cache key
-	 * @param array $sourceRow The input database row
-	 * @param array $compacted The database row reduced in size for storage within the index
-	 * @return boolean True if an index was created, or false if $sourceRow should be merged
-	 *  into the index via self::addToIndex
-	 */
-	protected function maybeCreateIndex( array $indexed, array $sourceRow, array $compacted ) {
-		return false;
-	}
-
-	/**
-	 * Called to update a row's data within a feature bucket.
-	 *
-	 * Note that this naive implementation does two round trips, likely an implementing
-	 * class can do this in a single round trip.
-	 *
-	 * @todo again, could just pass cache key instead of $indexed?
-	 * @param array $indexed The values that make up the cache key
-	 * @param array $old The database row that was previously retrieved from cache
-	 * @param array $new The new version of that replacement row
-	 */
-	protected function replaceInIndex( array $indexed, array $old, array $new ) {
-		$this->removeFromIndex( $indexed, $old );
-		$this->addToIndex( $indexed, $new );
-	}
-
-	/**
 	 * Generate the cache key representing the attributes
 	 * @param array $attributes
 	 * @return string
 	 */
 	protected function cacheKey( array $attributes ) {
-		foreach( $attributes as $key => $attr ) {
+		foreach ( $attributes as $key => $attr ) {
 			if ( $attr instanceof UUID ) {
 				$attributes[$key] = $attr->getAlphadecimal();
 			} elseif ( strlen( $attr ) === UUID::BIN_LEN && substr( $key, -3 ) === '_id' ) {
@@ -546,10 +506,10 @@ abstract class FeatureIndex implements Index {
 	/**
 	 * @return string The id of the database being cached
 	 */
-	static public function cachedDbId() {
+	public static function cachedDbId() {
 		global $wgFlowDefaultWikiDb;
 		if ( $wgFlowDefaultWikiDb === false ) {
-			return wfWikiId();
+			return wfWikiID();
 		} else {
 			return $wgFlowDefaultWikiDb;
 		}

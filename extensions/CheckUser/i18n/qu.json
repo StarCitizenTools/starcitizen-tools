@@ -18,7 +18,6 @@
 	"checkuser-users": "Ruraqkunata chaskiy",
 	"checkuser-edits": "Llamk'apusqakunata chaskiy",
 	"checkuser-ips": "IP huchhakunata chaskiy",
-	"checkuser-search": "Maskay",
 	"checkuser-period": "Kay mit'alla:",
 	"checkuser-week-1": "qayna simana",
 	"checkuser-week-2": "qayna iskay simana",
@@ -37,6 +36,7 @@
 	"checkuser-massblock": "Akllasqa ruraqkunata hark'ay",
 	"checkuser-too-many": "Nisyum tarisqakuna (chhikaynasqakama), ama hina kaspa CIDR nisqata k'ichkichay. Kaymi llamk'achisqa IP huchhakuna (5000-kama, tiyay sutikama siq'inchasqa):",
 	"checkuser-user-nonexistent": "Nisqayki ruraqqa manam kanchu.",
+	"checkuser-search": "Maskay",
 	"checkuser-search-submit": "Maskay",
 	"checkuser-search-initiator": "qallarichiq",
 	"checkuser-search-target": "taripana"

@@ -10,7 +10,7 @@
 	 * @constructor
 	 * @param {jQuery} $container
 	 */
-	function FlowBoardComponentApiEventsMixin( $container ) {
+	function FlowBoardComponentApiEventsMixin() {
 		// Bind event callbacks
 		this.bindNodeHandlers( FlowBoardComponentApiEventsMixin.UI.events );
 	}
@@ -30,42 +30,6 @@
 	//
 
 	/** @class FlowBoardComponentApiEventsMixin.UI.events.globalApiPreHandlers */
-
-	/**
-	 * Textareas are turned into editor objects, so we can't rely on
-	 * textareas to properly return the real content we're looking for (the
-	 * real editor can be anything, depending on the type of editor)
-	 *
-	 * @param {Event} event
-	 * @param {Object} info
-	 * @param {Object} queryMap
-	 * @return {Object}
-	 */
-	FlowBoardComponentApiEventsMixin.UI.events.globalApiPreHandlers.prepareEditor = function ( event, info, queryMap ) {
-		var $textareas = $( this ).closest( 'form' ).find( 'textarea' ),
-			override = {};
-
-		$textareas.each( function () {
-			var $editor = $( this );
-
-			// Doublecheck that this textarea is actually an editor instance
-			// (the editor may have added a textarea itself...)
-			if ( mw.flow.editor && mw.flow.editor.exists( $editor ) ) {
-				override[ $editor.attr( 'name' ) ] = mw.flow.editor.getRawContent( $editor );
-				override.flow_format = mw.flow.editor.getFormat( $editor );
-			}
-
-			// @todo: we have to make sure we get rid of all unwanted data
-			// in the form (whatever "editor instance" may have added)
-			// because we'll $form.serializeArray() to get the content.
-			// This is currently not an issue since we only have "none"
-			// editor type, which just uses the existing textarea. Someday,
-			// however, we may have VE (or wikieditor or ...) which could
-			// add its own nodes, which may be picked up by serializeArray()
-		} );
-
-		return $.extend( {}, queryMap, override );
-	};
 
 	/**
 	 * When presented with an error conflict, the conflicting content can
@@ -136,7 +100,7 @@
 	 * @param {jqXHR} jqxhr
 	 * @return {jQuery.Promise}
 	 */
-	FlowBoardComponentApiEventsMixin.UI.events.apiHandlers.board = function ( info, data, jqxhr ) {
+	FlowBoardComponentApiEventsMixin.UI.events.apiHandlers.board = function ( info, data ) {
 		var $rendered,
 			flowBoard = info.component,
 			dfd = $.Deferred();
@@ -172,7 +136,7 @@
 	 * @param {jqXHR} jqxhr
 	 * @return {jQuery.Promise}
 	 */
-	FlowBoardComponentApiEventsMixin.UI.events.apiHandlers.submitTopicTitle = function ( info, data, jqxhr ) {
+	FlowBoardComponentApiEventsMixin.UI.events.apiHandlers.submitTopicTitle = function ( info, data ) {
 		if ( info.status !== 'done' ) {
 			// Error will be displayed by default & edit conflict handled, nothing else to wrap up
 			return $.Deferred().resolve().promise();
@@ -193,7 +157,7 @@
 	 * @param {jqXHR} jqxhr
 	 * @return {jQuery.Promise}
 	 */
-	FlowBoardComponentApiEventsMixin.UI.events.apiHandlers.watchItem = function ( info, data, jqxhr ) {
+	FlowBoardComponentApiEventsMixin.UI.events.apiHandlers.watchItem = function ( info, data ) {
 		var watchUrl, unwatchUrl,
 			watchType, watchLinkTemplate, $newLink,
 			$target = $( this ),
@@ -240,7 +204,12 @@
 
 		if ( data.watch[ 0 ].watched !== undefined ) {
 			// Successful watch: show tooltip
-			flowBoard.emitWithReturn( 'showSubscribedTooltip', $newLink.find( '.mw-ui-icon' ), watchType );
+			flowBoard.emitWithReturn(
+				'showSubscribedTooltip',
+				$newLink.find( '.mw-ui-anchor' ),
+				watchType,
+				$newLink.css( 'direction' ) === 'ltr' ? 'left' : 'right'
+			);
 		}
 
 		return $.Deferred().resolve().promise();
@@ -316,17 +285,19 @@
 	 * @return {jQuery.Promise} return.return
 	 */
 	function _genModerateHandler( action, successCallback ) {
-		return function ( info, data, jqxhr ) {
+		return function ( info, data ) {
+			var $form, revisionId, $target, flowBoard,
+				$this = $( this );
+
 			if ( info.status !== 'done' ) {
 				// Error will be displayed by default, nothing else to wrap up
 				return $.Deferred().resolve().promise();
 			}
 
-			var $this = $( this ),
-				$form = $this.closest( 'form' ),
-				revisionId = data.flow[ action ].committed.topic[ 'post-revision-id' ],
-				$target = $form.data( 'flow-dialog-owner' ) || $form,
-				flowBoard = mw.flow.getPrototypeMethod( 'board', 'getInstanceByElement' )( $this );
+			$form = $this.closest( 'form' );
+			revisionId = data.flow[ action ].committed.topic[ 'post-revision-id' ];
+			$target = $form.data( 'flow-dialog-owner' ) || $form;
+			flowBoard = mw.flow.getPrototypeMethod( 'board', 'getInstanceByElement' )( $this );
 
 			// @todo: add 3rd argument (target selector); there's no need to refresh entire topic if only post was moderated
 			return _flowBoardComponentRefreshTopic( $target, data.flow[ action ].workflow )

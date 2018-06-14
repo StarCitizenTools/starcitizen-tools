@@ -2,7 +2,7 @@
 /**
  *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -75,6 +75,7 @@ class GenerateFontTestPage extends Maintenance {
 		// Charset is needed, because Edge is so brilliant that it thinks this page full of UTF-8
 		// is actually in some legacy encoding and does not provide way to change it ;)
 		$html = <<<HTML
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -93,4 +94,4 @@ HTML;
 }
 
 $maintClass = 'GenerateFontTestPage';
-require_once DO_MAINTENANCE;
+require_once RUN_MAINTENANCE_IF_MAIN;

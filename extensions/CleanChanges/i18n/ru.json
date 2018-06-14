@@ -3,7 +3,8 @@
 		"authors": [
 			"Ferrer",
 			"Innv",
-			"Александр Сигачёв"
+			"Александр Сигачёв",
+			"RDmitriyS"
 		]
 	},
 	"cleanchanges-changerightslink": "изменить группы",
@@ -11,5 +12,5 @@
 	"cleanchanges-language": "Язык:",
 	"cleanchanges-language-na": "Все",
 	"cleanchanges-users": "Участники (разделитель: |):",
-	"cleanchanges-showuserlinks": "Показывать ссылки участников"
+	"cleanchanges-showuserlinks": "Показать ссылки участника"
 }

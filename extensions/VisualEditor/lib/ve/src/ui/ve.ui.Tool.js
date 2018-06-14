@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Tool classes.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -15,9 +15,9 @@
  * @param {OO.ui.ToolGroup} toolGroup
  * @param {Object} [config] Configuration options
  */
-ve.ui.Tool = function VeUiTool( toolGroup, config ) {
+ve.ui.Tool = function VeUiTool() {
 	// Parent constructor
-	OO.ui.Tool.call( this, toolGroup, config );
+	ve.ui.Tool.super.apply( this, arguments );
 
 	// Disable initially
 	this.setDisabled( true );
@@ -104,22 +104,33 @@ ve.ui.Tool.prototype.onUpdateState = function ( fragment ) {
  * @inheritdoc
  */
 ve.ui.Tool.prototype.onSelect = function () {
-	var command = this.getCommand(),
-		surface = this.toolbar.getSurface();
+	var contextClosePromise,
+		command = this.getCommand(),
+		surface = this.toolbar.getSurface(),
+		tool = this;
+
 	if ( command instanceof ve.ui.Command ) {
 		if ( surface.context.inspector ) {
-			surface.context.inspector.close().done( function () {
-				command.execute( surface );
-			} );
+			contextClosePromise = surface.context.inspector.close().closed;
 		} else {
-			command.execute( surface );
+			contextClosePromise = $.Deferred().resolve().promise();
 		}
 	}
 	if ( this.constructor.static.deactivateOnSelect ) {
-		// Even if the promise route was taken above, it's fine to call setActive here; it
+		// It's fine to call setActive here before the promise resolves; it
 		// just disables the button, stopping double-clicks and making it feel more responsive
 		// if the promise is slow.
 		this.setActive( false );
+	}
+	if ( contextClosePromise ) {
+		// N.B. If contextClosePromise is already resolved, then the handler is called
+		// before the call to .done returns
+		contextClosePromise.done( function () {
+			if ( !command.execute( surface ) ) {
+				// If the command fails, ensure the tool is not active
+				tool.setActive( false );
+			}
+		} );
 	}
 };
 

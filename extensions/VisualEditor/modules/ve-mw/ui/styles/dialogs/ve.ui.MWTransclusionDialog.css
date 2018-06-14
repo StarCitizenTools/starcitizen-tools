@@ -1,13 +1,9 @@
 /*!
  * VisualEditor MediaWiki UserInterface MWTransclusionDialog styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
-
-.ve-ui-mwTransclusionDialog-addTemplateFieldset {
-	margin-left: 3.5em;
-}
 
 .ve-ui-mwTransclusionDialog-addTemplateFieldset > .oo-ui-widget {
 	display: inline-block;
@@ -18,13 +14,12 @@
 }
 
 .ve-ui-mwTransclusionDialog-addTemplateFieldset .mw-widget-titleInputWidget {
-	width: 20em;
+	min-width: 10em;
 }
 
 .ve-ui-mwTransclusionDialog-addParameterFieldset .ve-ui-mwParameterSearchWidget {
 	position: relative;
 	overflow: hidden;
-	box-shadow: 0 0 0.5em rgba( 0, 0, 0, 0.2 );
 	margin-bottom: 1em;
 }
 
@@ -43,6 +38,27 @@
 	white-space: nowrap;
 }
 
+.ve-ui-mwTemplateDialog .oo-ui-outlineOptionWidget.oo-ui-flaggedElement-empty .oo-ui-iconElement-icon {
+	opacity: 0.51;
+}
+
+.ve-ui-mwTemplateDialog .oo-ui-outlineOptionWidget.oo-ui-flaggedElement-empty .oo-ui-labelElement-label {
+	color: #72777d;
+}
+
+.ve-ui-mwTransclusionDialog .oo-ui-bookletLayout .oo-ui-fieldsetLayout > .oo-ui-labelElement-label {
+	height: 1.5em;
+	overflow: hidden;
+}
+
+.ve-ui-mwTransclusionDialog-single .oo-ui-bookletLayout .oo-ui-fieldsetLayout > .oo-ui-iconElement-icon,
+.ve-ui-mwTransclusionDialog-single .oo-ui-bookletLayout .oo-ui-fieldsetLayout > .oo-ui-labelElement-label,
+.ve-ui-mwTransclusionDialog-single .oo-ui-bookletLayout .ve-ui-mwTransclusionDialog-removeButton,
+.ve-ui-mwTransclusionDialog-multiple .oo-ui-bookletLayout .ve-ui-mwTemplatePage-more,
+.ve-ui-mwTransclusionDialog-multiple .oo-ui-bookletLayout .ve-ui-mwParameterPage-more {
+	display: none;
+}
+
 .ve-ui-mwTransclusionDialog.ve-ui-mwTemplateDialog-ready .oo-ui-bookletLayout .oo-ui-fieldsetLayout > .oo-ui-labelElement-label,
 .ve-ui-mwTransclusionDialog.ve-ui-mwTemplateDialog-ready .oo-ui-bookletLayout .oo-ui-fieldsetLayout > .oo-ui-iconElement-icon,
 .ve-ui-mwTransclusionDialog.ve-ui-mwTemplateDialog-ready .oo-ui-bookletLayout .ve-ui-mwTransclusionDialog-removeButton,
@@ -51,22 +67,5 @@
 .ve-ui-mwTransclusionDialog.ve-ui-mwTemplateDialog-ready .oo-ui-bookletLayout > .oo-ui-gridLayout > .oo-ui-panelLayout {
 	-webkit-transition: all 250ms ease-in-out;
 	-moz-transition: all 250ms ease-in-out;
-	-o-transition: all 250ms ease-in-out;
 	transition: all 250ms ease-in-out;
-}
-
-.ve-ui-mwTransclusionDialog .oo-ui-bookletLayout .oo-ui-fieldsetLayout > .oo-ui-labelElement-label {
-	height: 1.5em;
-	overflow: hidden;
-}
-
-.ve-ui-mwTransclusionDialog-single .oo-ui-bookletLayout .oo-ui-fieldsetLayout > .oo-ui-labelElement-label {
-	display: none;
-}
-
-.ve-ui-mwTransclusionDialog-single .oo-ui-bookletLayout .oo-ui-fieldsetLayout > .oo-ui-iconElement-icon,
-.ve-ui-mwTransclusionDialog-single .oo-ui-bookletLayout .ve-ui-mwTransclusionDialog-removeButton,
-.ve-ui-mwTransclusionDialog-multiple .oo-ui-bookletLayout .ve-ui-mwTemplatePage-more,
-.ve-ui-mwTransclusionDialog-multiple .oo-ui-bookletLayout .ve-ui-mwParameterPage-more {
-	display: none;
 }

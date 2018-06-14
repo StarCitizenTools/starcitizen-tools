@@ -26,6 +26,7 @@ class TopicIterator extends AbstractIterator {
 	public function __construct( DbFactory $dbFactory, RootPostLoader $rootPostLoader ) {
 		parent::__construct( $dbFactory );
 		$this->rootPostLoader = $rootPostLoader;
+		$this->orderByUUID = false;
 	}
 
 	/**
@@ -81,25 +82,30 @@ class TopicIterator extends AbstractIterator {
 	 * collection id, so we can pass that to the root post loader and *poof*, we
 	 * have our revisions!
 	 *
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	protected function query() {
+		if ( $this->orderByUUID ) {
+			$order = 'workflow_id ASC';
+		} else {
+			$order = 'workflow_last_update_timestamp ASC';
+		}
 		return $this->dbr->select(
-			array( 'flow_workflow' ),
+			[ 'flow_workflow' ],
 			// for root post (topic title), workflow_id is the same as its rev_type_id
-			array( 'workflow_id', 'workflow_last_update_timestamp' ),
-			array(
+			[ 'workflow_id', 'workflow_last_update_timestamp' ],
+			[
 				'workflow_type' => 'topic'
-			) + $this->conditions,
+			] + $this->conditions,
 			__METHOD__,
-			array(
-				'ORDER BY' => 'workflow_last_update_timestamp ASC',
-			)
+			[
+				'ORDER BY' => $order,
+			]
 		);
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	protected function transform( stdClass $row ) {
 		$root = UUID::create( $row->workflow_id );

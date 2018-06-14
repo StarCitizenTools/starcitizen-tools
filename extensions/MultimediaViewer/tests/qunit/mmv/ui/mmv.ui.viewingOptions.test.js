@@ -13,12 +13,12 @@
 
 	QUnit.module( 'mmv.ui.viewingOptions', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Constructor sanity test', 1, function ( assert ) {
+	QUnit.test( 'Constructor sanity test', function ( assert ) {
 		var dialog = makeDialog();
 		assert.ok( dialog, 'Dialog is created successfully' );
 	} );
 
-	QUnit.test( 'Initialisation functions', 4, function ( assert ) {
+	QUnit.test( 'Initialisation functions', function ( assert ) {
 		var dialog = makeDialog( true );
 
 		assert.ok( dialog.$disableDiv, 'Disable div is created.' );
@@ -27,7 +27,7 @@
 		assert.ok( dialog.$enableConfirmation, 'Enable confirmation is created.' );
 	} );
 
-	QUnit.test( 'Disable', 20, function ( assert ) {
+	QUnit.test( 'Disable', function ( assert ) {
 		var $header, $icon, $text, $textHeader, $textBody,
 			$submitButton, $cancelButton, $aboutLink,
 			dialog = makeDialog(),
@@ -64,7 +64,6 @@
 
 		assert.strictEqual( $aboutLink.length, 1, 'About link created successfully.' );
 		assert.strictEqual( $aboutLink.text(), 'Learn more', 'About link has correct text (if this fails, it may be due to i18n differences)' );
-		assert.strictEqual( $aboutLink.prop( 'href' ), 'http://mediawiki.org/wiki/Special:MyLanguage/Help:Extension:Media_Viewer', 'About link has correct href (depends on your current protocol, so if you are on https, this will fail).' );
 
 		assert.strictEqual( $submitButton.length, 1, 'Disable button created successfully.' );
 		assert.strictEqual( $submitButton.text(), 'Disable Media Viewer', 'Disable button has correct text (if this fails, it may be due to i18n differences)' );
@@ -85,7 +84,7 @@
 		assert.ok( dialog.$dialog.hasClass( 'mw-mmv-disable-confirmation-shown' ), 'Disable confirmation shown' );
 	} );
 
-	QUnit.test( 'Enable', 18, function ( assert ) {
+	QUnit.test( 'Enable', function ( assert ) {
 		var $header, $icon, $text, $textHeader, $aboutLink,
 			$submitButton, $cancelButton,
 			dialog = makeDialog(),
@@ -118,7 +117,6 @@
 
 		assert.strictEqual( $aboutLink.length, 1, 'About link created successfully.' );
 		assert.strictEqual( $aboutLink.text(), 'Learn more', 'About link has correct text (if this fails, it may be due to i18n differences)' );
-		assert.strictEqual( $aboutLink.prop( 'href' ), 'http://mediawiki.org/wiki/Special:MyLanguage/Help:Extension:Media_Viewer', 'About link has correct href (depends on your current protocol, so if you are on https, this will fail).' );
 
 		assert.strictEqual( $submitButton.length, 1, 'Enable button created successfully.' );
 		assert.strictEqual( $submitButton.text(), 'Enable Media Viewer', 'Enable button has correct text (if this fails, it may be due to i18n differences)' );

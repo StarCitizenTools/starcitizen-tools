@@ -4,6 +4,12 @@
 			"Robby"
 		]
 	},
-	"codemirror-enable-label": "CodeMirror aktivéieren (Syntaxhighlight)",
-	"codemirror-disable-label": "CodeMirror desaktivéieren (Syntaxhighlight)"
+	"codemirror-desc": "Erméiglecht et am Wikitext-Editeur d'Syntax ervirzehiewen",
+	"codemirror-toggle-label": "Ervirhiewe vun der Syntax",
+	"codemirror-beta-title": "Ervirhiewe vun der Wikitext-Syntax",
+	"codemirror-beta-desc": "D'Ervirhiewe vun der Syntax mécht d'Änneren duerch d'Benotze vu Faarwen a Schieter méi einfach fir de Säitentext vum Code fir Linken, Referenzen a Schablounen ze trennen.",
+	"codemirror-popup-label": "Ervirhiewe vun der Syntax",
+	"codemirror-popup-desc": "D'Ervirhiewe vun der Syntax hëlleft Iech fir déi verschidden Deeler vun Ärer Ännerung duerch verschidde Faarwen z'ënnerscheeden.",
+	"codemirror-popup-btn-yes": "Probéiert et",
+	"codemirror-popup-btn-no": "Nee Merci"
 }

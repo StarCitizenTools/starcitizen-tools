@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWAlienExtensionContextItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -33,7 +33,7 @@ OO.inheritClass( ve.ui.MWAlienExtensionContextItem, ve.ui.LinearContextItem );
 
 ve.ui.MWAlienExtensionContextItem.static.name = 'alienExtension';
 
-ve.ui.MWAlienExtensionContextItem.static.icon = 'alienextension';
+ve.ui.MWAlienExtensionContextItem.static.icon = 'markup';
 
 ve.ui.MWAlienExtensionContextItem.static.modelClasses = [
 	ve.dm.MWAlienInlineExtensionNode,

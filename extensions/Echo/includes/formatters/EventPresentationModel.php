@@ -1,5 +1,7 @@
 <?php
 
+use Wikimedia\Timestamp\TimestampException;
+
 /**
  * Class that returns structured data based
  * on the provided event.
@@ -52,20 +54,22 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	private $user;
 
 	/**
-	 * @var EchoEvent[]|null
+	 * @var string 'web' or 'email'
 	 */
-	private $bundledEvents;
+	private $distributionType;
 
 	/**
 	 * @param EchoEvent $event
 	 * @param Language|string $language
 	 * @param User $user Only used for permissions checking and GENDER
+	 * @param string $distributionType
 	 */
-	protected function __construct( EchoEvent $event, $language, User $user ) {
+	protected function __construct( EchoEvent $event, $language, User $user, $distributionType ) {
 		$this->event = $event;
 		$this->type = $event->getType();
 		$this->language = wfGetLangObj( $language );
 		$this->user = $user;
+		$this->distributionType = $distributionType;
 	}
 
 	/**
@@ -84,14 +88,42 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * @param EchoEvent $event
 	 * @param Language|string $language
 	 * @param User $user
+	 * @param string $distributionType 'web' or 'email'
 	 * @return EchoEventPresentationModel
 	 */
-	public static function factory( EchoEvent $event, $language, User $user ) {
+	public static function factory( EchoEvent $event, $language, User $user, $distributionType = 'web' ) {
 		global $wgEchoNotifications;
 		// @todo don't depend upon globals
 
 		$class = $wgEchoNotifications[$event->getType()]['presentation-model'];
-		return new $class( $event, $language, $user );
+		return new $class( $event, $language, $user, $distributionType );
+	}
+
+	/**
+	 * Get the type of event
+	 *
+	 * @return string
+	 */
+	final public function getType() {
+		return $this->type;
+	}
+
+	/**
+	 * Get the user receiving the notification
+	 *
+	 * @return User
+	 */
+	final public function getUser() {
+		return $this->user;
+	}
+
+	/**
+	 * Get the category of event
+	 *
+	 * @return string
+	 */
+	final public function getCategory() {
+		return $this->event->getCategory();
 	}
 
 	/**
@@ -107,6 +139,10 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 		$msg = call_user_func_array( 'wfMessage', func_get_args() );
 		$msg->inLanguage( $this->language );
 
+		// Notifications are considered UI (and should be in UI language, not
+		// content), and this flag is set false by inLanguage.
+		$msg->setInterfaceMessageFlag( true );
+
 		return $msg;
 	}
 
@@ -114,23 +150,21 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * @return EchoEvent[]
 	 */
 	final protected function getBundledEvents() {
-		if ( !$this->event->getBundleHash() ) {
-			return array();
-		}
-		if ( $this->bundledEvents !== null ) {
-			return $this->bundledEvents;
-		}
+		return $this->event->getBundledEvents() ?: [];
+	}
 
-		// FIXME: We really shouldn't be making db queries like this
-		// in the presentation model
-		$eventMapper = new EchoEventMapper();
-		$this->bundledEvents = $eventMapper->fetchByUserBundleHash(
-			$this->user,
-			$this->event->getBundleHash()
-			// default params: web, DESC, limit=250
-		);
-
-		return $this->bundledEvents;
+	/**
+	 * Get the ids of the bundled notifications or false if it's not bundled
+	 *
+	 * @return int[]|bool
+	 */
+	public function getBundledIds() {
+		if ( $this->isBundled() ) {
+			return array_map( function ( EchoEvent $event ) {
+				return $event->getId();
+			}, $this->getBundledEvents() );
+		}
+		return false;
 	}
 
 	/**
@@ -159,7 +193,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * @throws InvalidArgumentException
 	 */
 	final protected function getBundleCount( $includeCurrent = true, $groupCallback = null ) {
-		$events = array_merge( $this->getBundledEvents(), array( $this->event ) );
+		$events = array_merge( $this->getBundledEvents(), [ $this->event ] );
 		if ( $groupCallback ) {
 			if ( !is_callable( $groupCallback ) ) {
 				// If we pass an invalid callback to array_map(), it'll just throw a warning
@@ -184,7 +218,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 *
 	 * @param bool $includeCurrent
 	 * @param callable $groupCallback
-	 * @return count
+	 * @return int count
 	 */
 	final protected function getNotificationCountForOutput( $includeCurrent = true, $groupCallback = null ) {
 		$count = $this->getBundleCount( $includeCurrent, $groupCallback );
@@ -234,15 +268,15 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 
 		if ( $this->userCan( Revision::DELETED_USER ) ) {
 			// Not deleted
-			return array(
+			return [
 				$this->getTruncatedUsername( $agent ),
 				$agent->getName()
-			);
+			];
 		} else {
 			// Deleted/hidden
 			$msg = $this->msg( 'rev-deleted-user' )->plain();
 			// HACK: Pass an invalid username to GENDER to force the default
-			return array( '<span class="history-deleted">' . $msg . '</span>', '[]' );
+			return [ '<span class="history-deleted">' . $msg . '</span>', '[]' ];
 		}
 	}
 
@@ -310,6 +344,64 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	}
 
 	/**
+	 * @return string Message key that will be used in getCompactHeaderMessage
+	 */
+	public function getCompactHeaderMessageKey() {
+		return "notification-compact-header-{$this->type}";
+	}
+
+	/**
+	 * Get a message object and add the performer's name as
+	 * a parameter. It is expected that subclasses will override
+	 * this.
+	 *
+	 * This message should be more compact than the header message
+	 * ( getHeaderMessage() ). It is displayed when a
+	 * notification is part of an expanded bundle.
+	 *
+	 * @return Message
+	 */
+	public function getCompactHeaderMessage() {
+		$msg = $this->getMessageWithAgent( $this->getCompactHeaderMessageKey() );
+		if ( $msg->isDisabled() ) {
+			// Back-compat for models that haven't been updated yet
+			$msg = $this->getHeaderMessage();
+		}
+
+		return $msg;
+	}
+
+	/**
+	 * @return string Message key that will be used in getSubjectMessage
+	 */
+	protected function getSubjectMessageKey() {
+		return "notification-subject-{$this->type}";
+	}
+
+	/**
+	 * Get a message object and add the performer's name as
+	 * a parameter. It is expected that subclasses will override
+	 * this. The output of the message should be plaintext.
+	 *
+	 * This message is used as the subject line in
+	 * single-notification emails.
+	 *
+	 * For backward compatibility, if this is not defined,
+	 * the header message ( getHeaderMessage() ) is used instead.
+	 *
+	 * @return Message
+	 */
+	public function getSubjectMessage() {
+		$msg = $this->getMessageWithAgent( $this->getSubjectMessageKey() );
+		if ( $msg->isDisabled() ) {
+			// Back-compat for models that haven't been updated yet
+			$msg = $this->getHeaderMessage();
+		}
+
+		return $msg;
+	}
+
+	/**
 	 * Get a message for the notification's body, false if it has no body
 	 *
 	 * @return bool|Message
@@ -329,12 +421,20 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	/**
 	 * Like getPrimaryLink(), but with the URL altered to add ?markasread=XYZ. When this link is followed,
 	 * the notification is marked as read.
+	 *
+	 * When the notification is a bundle, the notification IDs are added to the parameter value
+	 * separated by a "|".
+	 *
 	 * @return array|bool
 	 */
-	public function getPrimaryLinkWithMarkAsRead() {
+	final public function getPrimaryLinkWithMarkAsRead() {
 		$primaryLink = $this->getPrimaryLink();
 		if ( $primaryLink ) {
-			$primaryLink['url'] = wfAppendQuery( $primaryLink['url'], array( 'markasread' => $this->event->getId() ) );
+			$eventIds = [ $this->event->getId() ];
+			if ( $this->getBundledIds() ) {
+				$eventIds = array_merge( $eventIds, $this->getBundledIds() );
+			}
+			$primaryLink['url'] = wfAppendQuery( $primaryLink['url'], [ 'markasread' => implode( '|', $eventIds ) ] );
 		}
 		return $primaryLink;
 	}
@@ -346,8 +446,23 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * @return array Array of links in the format of:
 	 *               [['url' => (string) url,
 	 *                 'label' => (string) link text (non-escaped),
-	 *                 'description' => (string) descriptive text (non-escaped),
-	 *                 'icon' => (bool|string) symbolic icon name (or false if there is none),
+	 *                 'description' => (string) descriptive text (optional, non-escaped),
+	 *                 'icon' => (bool|string) symbolic ooui icon name (or false if there is none),
+	 *                 'type' => (string) optional action type. Used to note a dynamic action, by setting it to 'dynamic-action'
+	 *                 'data' => (array) optional array containing information about the dynamic action. It must include 'tokenType' (string), 'messages' (array) with messages supplied for the item and the confirmation dialog and 'params' (array) for the API operation needed to complete the action. For example:
+	 *                 'data' => [
+	 *                     'tokenType' => 'watch',
+	 *                     'params' => [
+	 *                         'action' => 'watch',
+	 *                         'titles' => 'Namespace:SomeTitle'
+	 *                     ],
+	 *                     'messages' => [
+	 *                         'confirmation' => [
+	 *                         	'title' => 'message (parsed as HTML)',
+	 *                         	'description' => 'optional message (parsed as HTML)'
+	 *                         ]
+	 *                     ]
+	 *                 	]
 	 *                 'prioritized' => (bool) true if the link should be outside the
 	 *                                  action menu, false for inside)],
 	 *                ...]
@@ -356,7 +471,15 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 *               result of this function (FIXME).
 	 */
 	public function getSecondaryLinks() {
-		return array();
+		return [];
+	}
+
+	/**
+	 * Get the ID of the associated event
+	 * @return int Event id
+	 */
+	public function getEventId() {
+		return $this->event->getId();
 	}
 
 	/**
@@ -366,33 +489,34 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	public function jsonSerialize() {
 		$body = $this->getBodyMessage();
 
-		return array(
+		return [
 			'header' => $this->getHeaderMessage()->parse(),
+			'compactHeader' => $this->getCompactHeaderMessage()->parse(),
 			'body' => $body ? $body->escaped() : '',
 			'icon' => $this->getIconType(),
-			'links' => array(
-				'primary' => $this->getPrimaryLinkWithMarkAsRead() ?: array(),
+			'links' => [
+				'primary' => $this->getPrimaryLinkWithMarkAsRead() ?: [],
 				'secondary' => array_values( array_filter( $this->getSecondaryLinks() ) ),
-			),
-		);
+			],
+		];
 	}
 
+	/**
+	 * @param User $user
+	 * @return string
+	 */
 	protected function getTruncatedUsername( User $user ) {
 		return $this->language->embedBidi( $this->language->truncate( $user->getName(), self::USERNAME_RECOMMENDED_LENGTH, '...', false ) );
 	}
 
+	/**
+	 * @param Title $title
+	 * @param bool $includeNamespace
+	 * @return string
+	 */
 	protected function getTruncatedTitleText( Title $title, $includeNamespace = false ) {
 		$text = $includeNamespace ? $title->getPrefixedText() : $title->getText();
 		return $this->language->embedBidi( $this->language->truncate( $text, self::PAGE_NAME_RECOMMENDED_LENGTH, '...', false ) );
-	}
-
-	protected function getTruncatedSectionTitle( $section ) {
-		return $this->language->embedBidi( $this->language->truncate(
-			EchoDiscussionParser::getTextSnippet( $section, $this->language ),
-			self::SECTION_TITLE_RECOMMENDED_LENGTH,
-			'...',
-			false
-		) );
 	}
 
 	/**
@@ -416,14 +540,14 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 		$truncatedLabel = $this->language->truncate( $label, self::USERNAME_AS_LABEL_RECOMMENDED_LENGTH, '...', false );
 		$isTruncated = $label !== $truncatedLabel;
 
-		return array(
+		return [
 			'url' => $url,
 			'label' => $this->language->embedBidi( $truncatedLabel ),
 			'tooltip' => $isTruncated ? $label : '',
 			'description' => '',
 			'icon' => 'userAvatar',
 			'prioritized' => true,
-		);
+		];
 	}
 
 	/**
@@ -433,7 +557,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * @param array $query
 	 * @return array
 	 */
-	final protected function getPageLink( Title $title, $description, $prioritized, $query = array() ) {
+	final protected function getPageLink( Title $title, $description, $prioritized, $query = [] ) {
 		if ( $title->getNamespace() === NS_USER_TALK ) {
 			$icon = 'userSpeechBubble';
 		} elseif ( $title->isTalkPage() ) {
@@ -442,7 +566,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 			$icon = 'article';
 		}
 
-		return array(
+		return [
 			'url' => $title->getFullURL( $query ),
 			'label' => $this->language->embedBidi(
 				$this->language->truncate( $title->getText(), self::PAGE_NAME_AS_LABEL_RECOMMENDED_LENGTH, '...', false )
@@ -451,6 +575,104 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 			'description' => $description,
 			'icon' => $icon,
 			'prioritized' => $prioritized,
+		];
+	}
+
+	/**
+	 * Get a dynamic action link
+	 *
+	 * @param Title $title Title relating to this action
+	 * @param bool $icon Optional. Symbolic name of the OOUI icon to use
+	 * @param string $label link text (non-escaped)
+	 * @param string $description descriptive text (optional, non-escaped)
+	 * @param array $data Action data
+	 * @param array $query
+	 * @return array Array compatible with the structure of
+	 *  secondary links
+	 */
+	final protected function getDynamicActionLink( Title $title, $icon, $label, $description = null, $data = [], $query = [] ) {
+		if ( !$icon && $title->getNamespace() === NS_USER_TALK ) {
+			$icon = 'userSpeechBubble';
+		} elseif ( !$icon && $title->isTalkPage() ) {
+			$icon = 'speechBubbles';
+		} elseif ( !$icon ) {
+			$icon = 'article';
+		}
+
+		return [
+			'type' => 'dynamic-action',
+			'label' => $label,
+			'description' => $description,
+			'data' => $data,
+			'url' => $title->getFullURL( $query ),
+			'icon' => $icon,
+		];
+	}
+
+	/**
+	 * Get an 'watch' or 'unwatch' dynamic action link
+	 *
+	 * @param Title $title Title to watch or unwatch
+	 * @return array Array compatible with dynamic action link
+	 */
+	final protected function getWatchActionLink( Title $title ) {
+		$isTitleWatched = $this->getUser()->isWatched( $title );
+		$availableAction = $isTitleWatched ? 'unwatch' : 'watch';
+
+		$data = [
+			'tokenType' => 'watch',
+			'params' => [
+				'action' => 'watch',
+				'titles' => $title->getPrefixedText(),
+			],
+			'messages' => [
+				'confirmation' => [
+					// notification-dynamic-actions-watch-confirmation
+					// notification-dynamic-actions-unwatch-confirmation
+					'title' => $this
+						->msg( 'notification-dynamic-actions-' . $availableAction . '-confirmation' )
+						->params(
+							$this->getTruncatedTitleText( $title ),
+							$title->getFullURL(),
+							$this->getUser()->getName()
+						),
+					// notification-dynamic-actions-watch-confirmation-description
+					// notification-dynamic-actions-unwatch-confirmation-description
+					'description' => $this
+						->msg( 'notification-dynamic-actions-' . $availableAction . '-confirmation-description' )
+						->params(
+							$this->getTruncatedTitleText( $title ),
+							$title->getFullURL(),
+							$this->getUser()->getName()
+						),
+				],
+			],
+		];
+
+		// "Unwatching" action requires another parameter
+		if ( $isTitleWatched ) {
+			$data[ 'params' ][ 'unwatch' ] = 1;
+		}
+
+		return $this->getDynamicActionLink(
+			$title,
+			// Design requirements are to flip the star icons
+			// in their meaning; that is, for the 'unwatch' action
+			// we should display an empty star, and for the 'watch'
+			// action a full star. In OOUI icons, their names
+			// are reversed.
+			$isTitleWatched ? 'star' : 'unStar',
+			// notification-dynamic-actions-watch
+			// notification-dynamic-actions-unwatch
+			$this->msg( 'notification-dynamic-actions-' . $availableAction )
+				->params(
+					$this->getTruncatedTitleText( $title ),
+					$title->getFullURL( [ 'action' => $availableAction ] ),
+					$this->getUser()->getName()
+				),
+			null,
+			$data,
+			[ 'action' => $availableAction ]
 		);
 	}
 }

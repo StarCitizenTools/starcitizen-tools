@@ -7,25 +7,54 @@
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:CheckUser",
 	"descriptionmsg": "checkuser-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.27.0"
+		"MediaWiki": ">= 1.31.0"
 	},
 	"ExtensionMessagesFiles": {
 		"CheckUserAliases": "CheckUser.alias.php"
 	},
 	"config": {
-		"@doc": "see CheckUser.php",
 		"CheckUserCIDRLimit": {
-			"IPv4": 16,
-			"IPv6": 32
+			"value": {
+				"IPv4": 16,
+				"IPv6": 19
+			},
+			"description": "Shortest CIDR limits that can be checked in any individual range check"
 		},
-		"CheckUserMaxBlocks": 200,
-		"CheckUserLog": "/home/wikipedia/logs/checkuser.log",
-		"CUPublicKey": "",
-		"CUDMaxAge": 7776000,
-		"CheckUserForceSummary": false
+		"CheckUserMaxBlocks": {
+			"value": 200,
+			"description": "Maximum number of users that can be mass blocked simultaneously"
+		},
+		"CUPublicKey": {
+			"value": "",
+			"description": "Public key to encrypt private data that may need to be read later. Generate a public key with something like: `openssl genrsa -out cu.key 2048; openssl rsa -in cu.key -pubout > cu.pub` and paste the contents of cu.pub here."
+		},
+		"CUDMaxAge": {
+			"value": 7776000,
+			"description": "How long to keep CheckUser data (in seconds)"
+		},
+		"CheckUserForceSummary": {
+			"value": false,
+			"description": "Whether to force checkusers into giving a reason for each check they do through Special:CheckUser."
+		},
+		"CheckUserCAMultiLock": {
+			"value": false,
+			"description": "Whether to add a link to Special:MultiLock by CentralAuth to the Special:CheckUser's mass block form. This requires CentralAuth extension to be installed on the wiki. To enable this, set this to an array with a central wiki's database name and an array with the name(s) of the global group(s) to add the link for. Example: [ 'centralDB' => 'metawiki', 'groups' => [ 'steward' ] ]"
+		},
+		"CheckUserCAtoollink": {
+			"value": false,
+			"description": "Whether to add links to CentralAuth in Special:CheckUser results"
+		},
+		"CheckUserGBtoollink": {
+			"value": false,
+			"description": "Whether to add links for glboally blocking accounts shown in Special:CheckUser results"
+		},
+		"CheckUserLogLogins": {
+			"value": false,
+			"description": "Whehter login attempts should be logged in CheckUser logs"
+		}
 	},
 	"APIListModules": {
 		"checkuser": "ApiQueryCheckUser",
@@ -57,13 +86,16 @@
 			"CheckUserHooks::checkUserParserTestTables"
 		],
 		"LoadExtensionSchemaUpdates": [
-			"CheckUserHooks::checkUserSchemaUpdates"
+			"CheckUserHooks::onLoadExtensionSchemaUpdates"
 		],
 		"ContributionsToolLinks": [
 			"CheckUserHooks::checkUserContributionsLinks"
 		],
 		"PerformRetroactiveAutoblock": [
 			"CheckUserHooks::doRetroactiveAutoblock"
+		],
+		"AuthManagerLoginAuthenticateAudit": [
+			"CheckUserHooks::onAuthManagerLoginAuthenticateAudit"
 		]
 	},
 	"MessagesDirs": {
@@ -76,6 +108,15 @@
 			"scripts": "modules/ext.checkuser.cidr.js",
 			"dependencies": [
 				"mediawiki.util"
+			]
+		},
+		"ext.checkUser.caMultiLock": {
+			"scripts": "modules/ext.checkuser.caMultiLock.js",
+			"dependencies": [
+				"mediawiki.util"
+			],
+			"messages": [
+				"checkuser-centralauth-multilock"
 			]
 		}
 	},
@@ -94,17 +135,18 @@
 		"checkuser-log"
 	],
 	"SpecialPages": {
-		"CheckUser": "CheckUser",
+		"CheckUser": "SpecialCheckUser",
 		"CheckUserLog": "SpecialCheckUserLog"
 	},
 	"AutoloadClasses": {
-		"CheckUser": "specials/SpecialCheckUser.php",
-		"CheckUserHooks": "CheckUser.hooks.php",
-		"CheckUserLogPager": "CheckUserLogPager.php",
-		"SpecialCheckUserLog": "specials/SpecialCheckUserLog.php",
-		"CheckUserEncryptedData": "CheckUserEncryptedData.php",
-		"ApiQueryCheckUser": "api/ApiQueryCheckUser.php",
-		"ApiQueryCheckUserLog": "api/ApiQueryCheckUserLog.php"
+		"CheckUserHooks": "includes/CheckUserHooks.php",
+		"CheckUserLogPager": "includes/CheckUserLogPager.php",
+		"SpecialCheckUser": "includes/specials/SpecialCheckUser.php",
+		"SpecialCheckUserLog": "includes/specials/SpecialCheckUserLog.php",
+		"CheckUserEncryptedData": "includes/CheckUserEncryptedData.php",
+		"ApiQueryCheckUser": "includes/api/ApiQueryCheckUser.php",
+		"ApiQueryCheckUserLog": "includes/api/ApiQueryCheckUserLog.php",
+		"PopulateCheckUserTable": "maintenance/populateCheckUserTable.php"
 	},
-	"manifest_version": 1
+	"manifest_version": 2
 }

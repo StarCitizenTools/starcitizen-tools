@@ -5,17 +5,30 @@
 			"Whym",
 			"赤城。",
 			"Sujiniku",
-			"Otokoume"
+			"Otokoume",
+			"Omotecho",
+			"Kkairri",
+			"Suzukaze-c",
+			"S2KTS",
+			"Yusuke1109"
 		]
 	},
-	"popups-message": "ホバーカード",
-	"popups-desc": "ページへのリンクにホバーした際に、ページ内容の要約のホバーカードを表示する",
-	"popups-last-edited": "更新: $1",
+	"popups-message": "ページのプレビュー",
+	"popups-desc": "ページへのリンクにホバーした際に、プレビューを表示する",
 	"popups-settings-title": "ページのプレビュー",
-	"popups-settings-option-off": "プレビューを無効にする",
+	"popups-settings-option-simple": "有効化",
+	"popups-settings-option-off": "無効化",
 	"popups-settings-save": "保存",
+	"popups-settings-help-ok": "完了",
 	"popups-settings-cancel": "取り消し",
+	"popups-settings-help": "ページのフッターにあるリンクから、プレビューを元に戻すことができます。",
 	"popups-settings-enable": "プレビューを有効にする",
-	"popups-send-feedback": "フィードバックを送信(外部リンク)",
-	"popups-mobile-dismiss": "非表示"
+	"popups-preview-no-preview": "このプレビューを表示する際に問題が発生しました",
+	"popups-preview-footer-read": "このページへ移動する",
+	"prefs-reading": "閲覧設定",
+	"popups-prefs-optin-title": "ページのプレビュー\n\n<em>ページを読みながら題目をプレビュー</em>",
+	"popups-prefs-optin-enabled-label": "有効",
+	"popups-prefs-optin-disabled-label": "無効",
+	"popups-prefs-disable-nav-gadgets-info": "Page Previews を有効にするには、ガジェットタブから[[$1 | ナビゲーション・ポップアップを無効]]にしてください",
+	"popups-prefs-conflicting-gadgets-info": "一部のガジェットやカスタマイズが、この機能の動作に影響を与える可能性があります。不具合を経験されましたら、グローバルの設定とローカルのガジェットやユーザースクリプトをご確認ください。"
 }

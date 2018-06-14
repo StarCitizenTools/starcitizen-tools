@@ -14,7 +14,7 @@
 		}
 	} ) );
 
-	QUnit.test( 'Smoke test', 1, function ( assert ) {
+	QUnit.test( 'Smoke test', function ( assert ) {
 		var values,
 			config = { type: 'or', licenses: [] },
 			uwLicenseInput;
@@ -24,7 +24,7 @@
 		assert.ok( uwLicenseInput, 'LicenseInput object created !' );
 	} );
 
-	QUnit.test( 'createInputs()', 2, function ( assert ) {
+	QUnit.test( 'createInputs()', function ( assert ) {
 		var values,
 			config = { type: 'or', licenses: [ 'cc-by-sa-3.0' ] },
 			uwLicenseInput;
@@ -39,7 +39,7 @@
 		assert.strictEqual( $( '.mwe-upwiz-copyright-info' ).length, 1, 'Label created.' );
 	} );
 
-	QUnit.test( 'createGroupedInputs()', 3, function ( assert ) {
+	QUnit.test( 'createGroupedInputs()', function ( assert ) {
 		var values,
 			config = {
 				type: 'or',

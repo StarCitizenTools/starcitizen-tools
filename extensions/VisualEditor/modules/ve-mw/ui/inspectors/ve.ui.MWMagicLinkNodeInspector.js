@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWMagicLinkNodeInspector class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -14,9 +14,9 @@
  * @constructor
  * @param {Object} [config] Configuration options
  */
-ve.ui.MWMagicLinkNodeInspector = function VeUiMWMagicLinkNodeInspector( config ) {
+ve.ui.MWMagicLinkNodeInspector = function VeUiMWMagicLinkNodeInspector() {
 	// Parent constructor
-	ve.ui.NodeInspector.call( this, config );
+	ve.ui.MWMagicLinkNodeInspector.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -63,6 +63,8 @@ ve.ui.MWMagicLinkNodeInspector.prototype.initialize = function () {
  * appropriate type.
  *
  * @private
+ * @param {string} str String to validate
+ * @return {boolean} String is valid
  */
 ve.ui.MWMagicLinkNodeInspector.prototype.validate = function ( str ) {
 	var node = this.getFragment().getSelectedNode();
@@ -150,7 +152,7 @@ ve.ui.MWMagicLinkNodeInspector.prototype.getTeardownProcess = function ( data ) 
 
 			if ( remove ) {
 				surfaceModel.change(
-					ve.dm.Transaction.newFromRemoval( doc, nodeRange )
+					ve.dm.TransactionBuilder.static.newFromRemoval( doc, nodeRange )
 				);
 			} else if ( convert ) {
 				annotation = ve.dm.MWMagicLinkNode.static.annotationFromContent(
@@ -162,12 +164,12 @@ ve.ui.MWMagicLinkNodeInspector.prototype.getTeardownProcess = function ( data ) 
 					content = value.split( '' );
 					ve.dm.Document.static.addAnnotationsToData( content, annotations );
 					surfaceModel.change(
-						ve.dm.Transaction.newFromReplacement( doc, nodeRange, content )
+						ve.dm.TransactionBuilder.static.newFromReplacement( doc, nodeRange, content )
 					);
 				}
 			} else if ( done && this.validate( value ) ) {
 				surfaceModel.change(
-					ve.dm.Transaction.newFromAttributeChanges(
+					ve.dm.TransactionBuilder.static.newFromAttributeChanges(
 						doc, nodeRange.start, { content: value }
 					)
 				);

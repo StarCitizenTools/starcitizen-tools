@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Obsuser"
+		]
+	},
+	"codemirror-desc": "Omogućava označavanje sintakse u uređivaču vikiteksta",
+	"codemirror-beta-title": "Isticanje sintakse vikiteksta",
+	"codemirror-beta-desc": "Označavanje sintakse čini uređivanje lakšim upotrebom boja i nijansi za vizuelno odvajanje teksta stranice od koda za veze, reference i šablone."
+}

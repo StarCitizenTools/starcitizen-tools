@@ -1,6 +1,6 @@
 {
 	"name": "Lazyload",
-	"version": "0.2.5",
+	"version": "0.3.1",
 	"author": [
 		"Mudkip",
 		"ikasty"
@@ -9,8 +9,10 @@
 	"descriptionmsg": "lazyload-desc",
 	"type": "other",
 	"license-name": "MIT",
-	"ExtensionMessagesFiles": {
-		"Lazyload": "Lazyload.i18n.php"
+	"MessagesDirs": {
+		"Lazyload": [
+			"i18n"
+		]
 	},
 	"AutoloadClasses": {
 		"Lazyload": "Lazyload.class.php"
@@ -19,6 +21,10 @@
 		"ext.lazyload": {
 			"scripts": [
 				"lazyload.js"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			],
 			"dependencies": [
 				"mediawiki.hidpi"

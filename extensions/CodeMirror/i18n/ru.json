@@ -2,10 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Okras",
-			"Kaganer"
+			"Kaganer",
+			"Facenapalm"
 		]
 	},
 	"codemirror-desc": "Обеспечивает подсветку синтаксиса в редакторе вики-текста.",
-	"codemirror-enable-label": "Включить CodeMirror (подсветка синтаксиса)",
-	"codemirror-disable-label": "Выключить CodeMirror (подсветка синтаксиса)"
+	"codemirror-toggle-label": "Подсветка синтаксиса",
+	"codemirror-beta-title": "Подсветка синтаксиса вики-текста",
+	"codemirror-beta-desc": "Подсветка синтаксиса упрощает редактирование, используя цвета и тени для визуального отделения текста страницы от кода ссылок, сносок и шаблонов.",
+	"codemirror-popup-label": "Подсветка синтаксиса",
+	"codemirror-popup-desc": "Подсветка синтаксиса поможет вам с лёгкостью различать разные части вашей правки, кодируя их цветами.",
+	"codemirror-popup-btn-yes": "Попробовать",
+	"codemirror-popup-btn-no": "Нет, спасибо"
 }

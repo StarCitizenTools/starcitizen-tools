@@ -18,20 +18,16 @@
 ( function ( uw, $ ) {
 	QUnit.module( 'uw.ConcurrentQueue', QUnit.newMwEnvironment() );
 
-	// This returns a function that returns a Promise. At first it resolves after 20 ms. Then, for
-	// each call of the returned function, the Promise it returns will take 10 ms longer to resolve.
-	// This ensures that actions in ConcurrentQueue don't all finish at the same instant, which would
-	// break tests (they make stronger assumptions about the order than ConcurrentQueue guarantees).
-	function incrementallyDelayedPromise() {
-		var delay = 20;
-		return function () {
-			var deferred = $.Deferred();
-			setTimeout( function () {
-				deferred.resolve();
-			}, delay );
-			delay += 10;
-			return deferred.promise();
-		};
+	// This is a bogus action that will be executed for every item added to the
+	// queue. We just need to make sure that the action doesn't complete
+	// immediately, or the order some methods are called in could be slightly
+	// different (e.g. when adding a new item after one has just completed will
+	// trigger the next one to execute, which would terminate immediately,
+	// instead of giving time for a second new thingy to be added)
+	function queueAction() {
+		var deferred = $.Deferred();
+		setTimeout( deferred.resolve, 10 );
+		return deferred.promise();
 	}
 
 	// Asserts that the given stub functions were called in the given order.
@@ -67,7 +63,7 @@
 	QUnit.test( 'Basic behavior', function ( assert ) {
 		var done, action, queue;
 		done = assert.async();
-		action = sinon.spy( incrementallyDelayedPromise() );
+		action = sinon.spy( queueAction );
 		queue = new uw.ConcurrentQueue( {
 			count: 3,
 			action: action
@@ -105,7 +101,7 @@
 		completeHandler = sinon.stub();
 		queue = new uw.ConcurrentQueue( {
 			count: 3,
-			action: incrementallyDelayedPromise()
+			action: queueAction
 		} );
 
 		queue.connect( null, {
@@ -143,27 +139,27 @@
 		done = assert.async();
 		queue = new uw.ConcurrentQueue( {
 			count: 3,
-			action: incrementallyDelayedPromise()
+			action: queueAction
 		} );
 
 		queue.addItem( 'a' );
 		queue.addItem( 'b' );
 		queue.addItem( 'c' );
-		queue.startExecuting();
-		QUnit.assert.equal( queue.completed, false );
 
 		queue.once( 'complete', function () {
 			QUnit.assert.equal( queue.completed, true );
 			queue.addItem( 'd' );
 			queue.addItem( 'e' );
-			queue.startExecuting();
-			QUnit.assert.equal( queue.completed, false );
 
 			queue.once( 'complete', function () {
 				QUnit.assert.equal( queue.completed, true );
 				done();
 			} );
+
+			queue.startExecuting();
 		} );
+
+		queue.startExecuting();
 	} );
 
 	QUnit.test( 'Empty queue completes', function ( assert ) {
@@ -171,17 +167,16 @@
 		done = assert.async();
 		queue = new uw.ConcurrentQueue( {
 			count: 3,
-			action: incrementallyDelayedPromise()
+			action: queueAction
 		} );
-
-		queue.startExecuting();
-		QUnit.assert.equal( queue.completed, false );
 
 		queue.on( 'complete', function () {
 			QUnit.assert.equal( queue.completed, true );
 
 			done();
 		} );
+
+		queue.startExecuting();
 	} );
 
 	QUnit.test( 'Adding new items while queue running', function ( assert ) {
@@ -192,7 +187,7 @@
 		completeHandler = sinon.stub();
 		queue = new uw.ConcurrentQueue( {
 			count: 2,
-			action: incrementallyDelayedPromise()
+			action: queueAction
 		} );
 
 		queue.connect( null, {
@@ -202,44 +197,39 @@
 		} );
 
 		queue.on( 'complete', function () {
-			setTimeout( function () {
-				sinon.assert.callCount( changeHandler, 6 );
-				sinon.assert.callCount( progressHandler, 5 );
-				sinon.assert.callCount( completeHandler, 1 );
+			sinon.assert.callCount( changeHandler, 6 );
+			sinon.assert.callCount( progressHandler, 6 );
+			sinon.assert.callCount( completeHandler, 1 );
 
-				assertCalledInOrder(
-					changeHandler, // Added 'a'
-					changeHandler, // Added 'b'
-					changeHandler, // Added 'c'
-					progressHandler, // Finished 'a' or 'b'
-					changeHandler, // Added 'd'
-					changeHandler, // Added 'e'
-					progressHandler, // Finished 'a', 'b' or 'c'
-					progressHandler, // Finished 'a', 'b', 'c' or 'd'
-					progressHandler, // Finished 'a', 'b', 'c', 'd' or 'e'
-					progressHandler, // Finished 'a', 'b', 'c', 'd' or 'e'
-					completeHandler,
-					changeHandler // Added 'f', but it's not going to be executed
-				);
+			assertCalledInOrder(
+				changeHandler, // Added 'a'
+				changeHandler, // Added 'b'
+				changeHandler, // Added 'c'
+				progressHandler, // Finished 'a' or 'b'
+				changeHandler, // Added 'd'
+				changeHandler, // Added 'e'
+				progressHandler, // Finished 'a', 'b' or 'c'
+				progressHandler, // Finished 'a', 'b', 'c' or 'd'
+				progressHandler, // Finished 'a', 'b', 'c', 'd' or 'e'
+				progressHandler, // Finished 'a', 'b', 'c', 'd' or 'e'
+				changeHandler, // Added 'f'
+				progressHandler, // Finished f'
+				completeHandler
+			);
 
-				done();
-			} );
+			done();
 		} );
 
 		queue.addItem( 'a' );
 		queue.addItem( 'b' );
 		queue.addItem( 'c' );
 		queue.once( 'progress', function () {
-			setTimeout( function () {
-				queue.addItem( 'd' );
-				queue.addItem( 'e' );
-			} );
+			queue.addItem( 'd' );
+			queue.addItem( 'e' );
 		} );
 		queue.on( 'progress', function () {
 			if ( queue.done.length === 5 ) {
-				setTimeout( function () {
-					queue.addItem( 'f' );
-				} );
+				queue.addItem( 'f' );
 			}
 		} );
 		queue.startExecuting();
@@ -253,7 +243,7 @@
 		completeHandler = sinon.stub();
 		queue = new uw.ConcurrentQueue( {
 			count: 2,
-			action: incrementallyDelayedPromise()
+			action: queueAction
 		} );
 
 		queue.connect( null, {
@@ -263,29 +253,27 @@
 		} );
 
 		queue.on( 'complete', function () {
-			setTimeout( function () {
-				sinon.assert.callCount( changeHandler, 8 );
-				sinon.assert.callCount( progressHandler, 4 );
-				sinon.assert.callCount( completeHandler, 1 );
+			sinon.assert.callCount( changeHandler, 8 );
+			sinon.assert.callCount( progressHandler, 4 );
+			sinon.assert.callCount( completeHandler, 1 );
 
-				assertCalledInOrder(
-					changeHandler, // Added 'a'
-					changeHandler, // Added 'b'
-					changeHandler, // Added 'c'
-					changeHandler, // Added 'd'
-					changeHandler, // Added 'e'
-					changeHandler, // Added 'f'
-					progressHandler, // Finished 'a' or 'b'
-					changeHandler, // Removed first of the queued (not executing), which is 'd'
-					progressHandler, // Finished 'a', 'b' or 'c'
-					changeHandler, // Removed the last one queued (not executing), which is 'f'
-					progressHandler, // Finished 'a', 'b', 'c' or 'e'
-					progressHandler, // Finished 'a', 'b', 'c' or 'e'
-					completeHandler
-				);
+			assertCalledInOrder(
+				changeHandler, // Added 'a'
+				changeHandler, // Added 'b'
+				changeHandler, // Added 'c'
+				changeHandler, // Added 'd'
+				changeHandler, // Added 'e'
+				changeHandler, // Added 'f'
+				progressHandler, // Finished 'a' or 'b'
+				changeHandler, // Removed first of the queued (not executing), which is 'd'
+				progressHandler, // Finished 'a', 'b' or 'c'
+				changeHandler, // Removed the last one queued (not executing), which is 'f'
+				progressHandler, // Finished 'a', 'b', 'c' or 'e'
+				progressHandler, // Finished 'a', 'b', 'c' or 'e'
+				completeHandler
+			);
 
-				done();
-			} );
+			done();
 		} );
 
 		queue.addItem( 'a' );
@@ -295,14 +283,10 @@
 		queue.addItem( 'e' );
 		queue.addItem( 'f' );
 		queue.once( 'progress', function () {
-			setTimeout( function () {
-				queue.removeItem( queue.queued[ 0 ] );
-			} );
+			queue.removeItem( queue.queued[ 0 ] );
 
 			queue.once( 'progress', function () {
-				setTimeout( function () {
-					queue.removeItem( queue.queued[ 0 ] );
-				} );
+				queue.removeItem( queue.queued[ 0 ] );
 			} );
 		} );
 		queue.startExecuting();
@@ -311,7 +295,7 @@
 	QUnit.test( 'Deleting currently running item', function ( assert ) {
 		var done, action, changeHandler, progressHandler, completeHandler, queue;
 		done = assert.async();
-		action = sinon.spy( incrementallyDelayedPromise() );
+		action = sinon.spy( queueAction );
 		changeHandler = sinon.stub();
 		progressHandler = sinon.stub();
 		completeHandler = sinon.stub();
@@ -327,33 +311,31 @@
 		} );
 
 		queue.on( 'complete', function () {
-			setTimeout( function () {
-				// Every item in the queue was executed...
-				sinon.assert.callCount( action, 4 );
+			// Every item in the queue was executed...
+			sinon.assert.callCount( action, 4 );
 
-				sinon.assert.callCount( changeHandler, 5 );
-				// ...but the one we removed wasn't registered as finished
-				sinon.assert.callCount( progressHandler, 3 );
-				sinon.assert.callCount( completeHandler, 1 );
+			sinon.assert.callCount( changeHandler, 5 );
+			// ...but the one we removed wasn't registered as finished
+			sinon.assert.callCount( progressHandler, 3 );
+			sinon.assert.callCount( completeHandler, 1 );
 
-				assertCalledInOrder(
-					changeHandler, // Added 'a'
-					changeHandler, // Added 'b'
-					changeHandler, // Added 'c'
-					changeHandler, // Added 'd'
-					action, // Started 'a'
-					action, // Started 'b'
-					progressHandler, // Finished 'a' or 'b'
-					changeHandler, // Removed first of the executing, which is 'a' or 'b'
-					action, // Started 'c'
-					action, // Started 'd' - note how two threads are running still
-					progressHandler, // Finished 'c' or 'd'
-					progressHandler, // Finished 'c' or 'd'
-					completeHandler
-				);
+			assertCalledInOrder(
+				changeHandler, // Added 'a'
+				changeHandler, // Added 'b'
+				changeHandler, // Added 'c'
+				changeHandler, // Added 'd'
+				action, // Started 'a'
+				action, // Started 'b'
+				progressHandler, // Finished 'a' or 'b'
+				changeHandler, // Removed first of the executing, which is 'a' or 'b'
+				action, // Started 'c'
+				action, // Started 'd' - note how two threads are running still
+				progressHandler, // Finished 'c' or 'd'
+				progressHandler, // Finished 'c' or 'd'
+				completeHandler
+			);
 
-				done();
-			} );
+			done();
 		} );
 
 		queue.addItem( 'a' );
@@ -361,9 +343,7 @@
 		queue.addItem( 'c' );
 		queue.addItem( 'd' );
 		queue.once( 'progress', function () {
-			setTimeout( function () {
-				queue.removeItem( queue.running[ 0 ] );
-			} );
+			queue.removeItem( queue.running[ 0 ] );
 		} );
 		queue.startExecuting();
 	} );
@@ -371,7 +351,8 @@
 	QUnit.test( 'Adding a new item when almost done', function ( assert ) {
 		var done, action, changeHandler, progressHandler, completeHandler, queue, onProgress;
 		done = assert.async();
-		action = sinon.spy( incrementallyDelayedPromise() );
+		// This test seems extra flaky and was occasionally failing, double the delays
+		action = sinon.spy( queueAction );
 		changeHandler = sinon.stub();
 		progressHandler = sinon.stub();
 		completeHandler = sinon.stub();
@@ -387,33 +368,31 @@
 		} );
 
 		queue.on( 'complete', function () {
-			setTimeout( function () {
-				sinon.assert.callCount( action, 5 );
-				sinon.assert.callCount( changeHandler, 5 );
-				sinon.assert.callCount( progressHandler, 5 );
-				sinon.assert.callCount( completeHandler, 1 );
+			sinon.assert.callCount( action, 5 );
+			sinon.assert.callCount( changeHandler, 5 );
+			sinon.assert.callCount( progressHandler, 5 );
+			sinon.assert.callCount( completeHandler, 1 );
 
-				assertCalledInOrder(
-					changeHandler, // Added 'a'
-					changeHandler, // Added 'b'
-					changeHandler, // Added 'c'
-					changeHandler, // Added 'd'
-					action, // Started 'a'
-					action, // Started 'b'
-					progressHandler, // Finished 'a' or 'b'
-					action, // Started 'c'
-					progressHandler, // Finished 'a', 'b' or 'c'
-					action, // Started 'd'
-					progressHandler, // Finished 'a', 'b', 'c' or 'd'
-					changeHandler, // Added 'e'
-					action, // Started 'e' -- this starts a new thread
-					progressHandler, // Finished 'a', 'b', 'c', 'd' or 'e'
-					progressHandler, // Finished 'a', 'b', 'c', 'd' or 'e'
-					completeHandler
-				);
+			assertCalledInOrder(
+				changeHandler, // Added 'a'
+				changeHandler, // Added 'b'
+				changeHandler, // Added 'c'
+				changeHandler, // Added 'd'
+				action, // Started 'a'
+				action, // Started 'b'
+				progressHandler, // Finished 'a' or 'b'
+				action, // Started 'c'
+				progressHandler, // Finished 'a', 'b' or 'c'
+				action, // Started 'd'
+				progressHandler, // Finished 'a', 'b', 'c' or 'd'
+				changeHandler, // Added 'e'
+				action, // Started 'e' -- this starts a new thread
+				progressHandler, // Finished 'a', 'b', 'c', 'd' or 'e'
+				progressHandler, // Finished 'a', 'b', 'c', 'd' or 'e'
+				completeHandler
+			);
 
-				done();
-			} );
+			done();
 		} );
 
 		queue.addItem( 'a' );
@@ -421,14 +400,10 @@
 		queue.addItem( 'c' );
 		queue.addItem( 'd' );
 		onProgress = function () {
-			// queue.running.length is always 1 here, because one action just finished.
-			// Let the queue potentially start the next one and check then.
-			setTimeout( function () {
-				if ( queue.running.length === 1 ) {
-					queue.addItem( 'e' );
-					queue.off( 'progress', onProgress );
-				}
-			} );
+			if ( queue.done.length === 3 ) {
+				queue.addItem( 'e' );
+				queue.off( 'progress', onProgress );
+			}
 		};
 		queue.on( 'progress', onProgress );
 		queue.startExecuting();

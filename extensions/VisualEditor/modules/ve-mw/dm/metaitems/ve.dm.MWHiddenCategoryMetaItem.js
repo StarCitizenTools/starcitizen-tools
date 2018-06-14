@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWHiddenCategoryMetaItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -13,9 +13,9 @@
  * @constructor
  * @param {Object} element Reference to element in meta-linmod
  */
-ve.dm.MWHiddenCategoryMetaItem = function VeDmMWHiddenCategoryMetaItem( element ) {
+ve.dm.MWHiddenCategoryMetaItem = function VeDmMWHiddenCategoryMetaItem() {
 	// Parent constructor
-	ve.dm.MetaItem.call( this, element );
+	ve.dm.MWHiddenCategoryMetaItem.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -32,7 +32,7 @@ ve.dm.MWHiddenCategoryMetaItem.static.matchTagNames = [ 'meta' ];
 
 ve.dm.MWHiddenCategoryMetaItem.static.matchRdfaTypes = [ 'mw:PageProp/hiddencat' ];
 
-ve.dm.MWHiddenCategoryMetaItem.static.toDataElement = function ( ) {
+ve.dm.MWHiddenCategoryMetaItem.static.toDataElement = function () {
 	return { type: this.name };
 };
 

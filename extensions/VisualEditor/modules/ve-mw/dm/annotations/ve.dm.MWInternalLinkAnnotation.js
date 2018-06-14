@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWInternalLinkAnnotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -17,9 +17,9 @@
  * @constructor
  * @param {Object} element
  */
-ve.dm.MWInternalLinkAnnotation = function VeDmMWInternalLinkAnnotation( element ) {
+ve.dm.MWInternalLinkAnnotation = function VeDmMWInternalLinkAnnotation() {
 	// Parent constructor
-	ve.dm.LinkAnnotation.call( this, element );
+	ve.dm.MWInternalLinkAnnotation.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -42,10 +42,10 @@ ve.dm.MWInternalLinkAnnotation.static.toDataElement = function ( domElements, co
 		type: this.name,
 		attributes: {
 			hrefPrefix: targetData.hrefPrefix,
-			title: ve.safeDecodeURIComponent( targetData.title ).replace( /_/g, ' ' ),
+			title: targetData.title,
 			normalizedTitle: this.normalizeTitle( targetData.title ),
 			lookupTitle: this.getLookupTitle( targetData.title ),
-			origTitle: targetData.title
+			origTitle: targetData.rawTitle
 		}
 	};
 };
@@ -54,10 +54,12 @@ ve.dm.MWInternalLinkAnnotation.static.toDataElement = function ( domElements, co
  * Build a ve.dm.MWInternalLinkAnnotation from a given mw.Title.
  *
  * @param {mw.Title} title The title to link to.
+ * @param {string} [rawTitle] String from which the title was created
  * @return {ve.dm.MWInternalLinkAnnotation} The annotation.
  */
-ve.dm.MWInternalLinkAnnotation.static.newFromTitle = function ( title ) {
-	var target = title.toText(),
+ve.dm.MWInternalLinkAnnotation.static.newFromTitle = function ( title, rawTitle ) {
+	var element,
+		target = title.toText(),
 		namespaceIds = mw.config.get( 'wgNamespaceIds' );
 
 	if ( title.getNamespaceId() === namespaceIds.file || title.getNamespaceId() === namespaceIds.category ) {
@@ -66,15 +68,22 @@ ve.dm.MWInternalLinkAnnotation.static.newFromTitle = function ( title ) {
 		// rather than an image inclusion or categorization
 		target = ':' + target;
 	}
+	if ( title.getFragment() ) {
+		target += '#' + title.getFragment();
+	}
 
-	return new ve.dm.MWInternalLinkAnnotation( {
+	element = {
 		type: 'link/mwInternal',
 		attributes: {
 			title: target,
 			normalizedTitle: ve.dm.MWInternalLinkAnnotation.static.normalizeTitle( title ),
 			lookupTitle: ve.dm.MWInternalLinkAnnotation.static.getLookupTitle( title )
 		}
-	} );
+	};
+	if ( rawTitle ) {
+		element.attributes.origTitle = rawTitle;
+	}
+	return new ve.dm.MWInternalLinkAnnotation( element );
 };
 
 /**
@@ -85,13 +94,15 @@ ve.dm.MWInternalLinkAnnotation.static.newFromTitle = function ( title ) {
  * @return {Object} Information about the given href
  * @return {string} return.title
  *    The title of the internal link, else the original href if href is external
+ * @return {string} return.rawTitle
+ *    The title without URL decoding and underscore normalization applied
  * @return {string} return.hrefPrefix
  *    Any ./ or ../ prefixes on a relative link
  * @return {boolean} return.isInternal
  *    True if the href pointed to the local wiki, false if href is external
  */
 ve.dm.MWInternalLinkAnnotation.static.getTargetDataFromHref = function ( href, doc ) {
-	var relativeBase, relativeBaseRegex, relativeHref, isInternal, matches;
+	var relativeBase, relativeBaseRegex, relativeHref, isInternal, matches, data;
 
 	function regexEscape( str ) {
 		return str.replace( /([.?*+^$[\]\\(){}|-])/g, '\\$1' );
@@ -107,17 +118,22 @@ ve.dm.MWInternalLinkAnnotation.static.getTargetDataFromHref = function ( href, d
 	// Check if this matches the server's article path
 	matches = relativeHref.match( relativeBaseRegex );
 
-	if ( matches ) {
+	if ( matches && matches[ 1 ].indexOf( '?' ) === -1 ) {
 		// Take the relative path
 		href = matches[ 1 ];
 		isInternal = true;
 	}
 
-	// The href is simply the title, unless we're dealing with a page that has slashes in its name
-	// in which case it's preceded by one or more instances of "./" or "../", so strip those
-	matches = href.match( /^((?:\.\.?\/)*)(.*)$/ );
+	// This href doesn't necessarily come from Parsoid (and it might not have the "./" prefix), but
+	// this method will work fine.
+	data = ve.parseParsoidResourceName( href );
 
-	return { title: matches[ 2 ], hrefPrefix: matches[ 1 ], isInternal: isInternal };
+	return {
+		title: data.title,
+		rawTitle: data.rawTitle,
+		hrefPrefix: data.hrefPrefix,
+		isInternal: isInternal
+	};
 };
 
 ve.dm.MWInternalLinkAnnotation.static.toDomElements = function () {
@@ -130,7 +146,7 @@ ve.dm.MWInternalLinkAnnotation.static.getHref = function ( dataElement ) {
 	var href,
 		title = dataElement.attributes.title,
 		origTitle = dataElement.attributes.origTitle;
-	if ( origTitle !== undefined && ve.safeDecodeURIComponent( origTitle ).replace( /_/g, ' ' ) === title ) {
+	if ( origTitle !== undefined && ve.decodeURIComponentIntoArticleTitle( origTitle ) === title ) {
 		// Restore href from origTitle
 		href = origTitle;
 		// Only use hrefPrefix if restoring from origTitle
@@ -139,7 +155,13 @@ ve.dm.MWInternalLinkAnnotation.static.getHref = function ( dataElement ) {
 		}
 	} else {
 		// Don't escape slashes in the title; they represent subpages.
-		href = title.split( '/' ).map( encodeURIComponent ).join( '/' );
+		href = title.split( /(\/|#)/ ).map( function ( part ) {
+			if ( part === '/' || part === '#' ) {
+				return part;
+			} else {
+				return encodeURIComponent( part );
+			}
+		} ).join( '' );
 	}
 	return href;
 };
@@ -173,6 +195,28 @@ ve.dm.MWInternalLinkAnnotation.static.getLookupTitle = function ( original ) {
 	return title.getPrefixedText();
 };
 
+/**
+ * Get the fragment for a title
+ *
+ * @static
+ * @param {string|mw.Title} original Original title
+ * @return {string|null} Fragment for the title, or null if it was invalid or missing
+ */
+ve.dm.MWInternalLinkAnnotation.static.getFragment = function ( original ) {
+	var title = original instanceof mw.Title ? original : mw.Title.newFromText( original );
+	if ( !title ) {
+		return null;
+	}
+	return title.getFragment();
+};
+
+ve.dm.MWInternalLinkAnnotation.static.describeChange = function ( key, change ) {
+	if ( key === 'title' ) {
+		return ve.msg( 'visualeditor-changedesc-link-href', change.from, change.to );
+	}
+	return null;
+};
+
 /* Methods */
 
 /**
@@ -199,6 +243,16 @@ ve.dm.MWInternalLinkAnnotation.prototype.getComparableHtmlAttributes = function 
  */
 ve.dm.MWInternalLinkAnnotation.prototype.getDisplayTitle = function () {
 	return this.getAttribute( 'normalizedTitle' );
+};
+
+/**
+ * Convenience wrapper for .getFragment() on the current element.
+ *
+ * @see #static-getFragment
+ * @return {string} Fragment for the title, or an empty string if it was invalid
+ */
+ve.dm.MWInternalLinkAnnotation.prototype.getFragment = function () {
+	return this.constructor.static.getFragment( this.getAttribute( 'normalizedTitle' ) );
 };
 
 /* Registration */

@@ -54,7 +54,7 @@
 		'<div class="row">' +
 		'<div class="twelve columns uls-input-settings-disable-info"></div>' +
 		'<div class="ten columns uls-input-settings-toggle">' +
-		'<button class="active mw-ui-constructive mw-ui-button uls-input-toggle-button"></button>' +
+		'<button class="mw-ui-button mw-ui-progressive active uls-input-toggle-button"></button>' +
 		'</div>' +
 		'</div>';
 
@@ -178,7 +178,7 @@
 				id: imeId,
 				value: imeId
 			} )
-			.prop( 'checked', selected );
+				.prop( 'checked', selected );
 
 			if ( imeId === 'system' ) {
 				name = $.i18n( 'ext-uls-disable-input-method' );
@@ -189,7 +189,7 @@
 				$helplink = $( '<a>' )
 					.addClass( 'uls-ime-help' )
 					.text( $.i18n( 'ext-uls-ime-help' ) )
-					.attr( 'href', mw.msg( 'uls-ime-helppage' ).replace( '$1', imeId ) )
+					.attr( 'href', mw.msg( 'uls-ime-helppage', imeId ) )
 					.attr( 'target', '_blank' );
 				if ( !inputmethod ) {
 					// The input method definition(rules) not loaded.
@@ -203,8 +203,12 @@
 			}
 
 			$imeLabel.append(
-				$( '<strong>' ).text( name ),
-				$( '<span>' ).text( description ),
+				$( '<strong>' )
+					.addClass( 'uls-input-settings-name' )
+					.text( name + ' ' ),
+				$( '<span>' )
+					.addClass( 'uls-input-settings-description' )
+					.text( description ),
 				$helplink
 			);
 
@@ -346,10 +350,11 @@
 					uls.$menu.find( '.uls-search-wrapper' ).wrap( $wrap );
 					uls.$menu.find( '.uls-search-wrapper-wrapper' ).prepend( $back );
 
-					uls.$menu.prepend(
-						$( '<span>' ).addClass( 'caret-before' ),
-						$( '<span>' ).addClass( 'caret-after' )
-					);
+					if ( $( '.uls-settings-trigger' ).offset().left > $( window ).width() / 2 ) {
+						uls.$menu.removeClass( 'selector-left' ).addClass( 'selector-right' );
+					} else {
+						uls.$menu.removeClass( 'selector-right' ).addClass( 'selector-left' );
+					}
 				},
 				onVisible: function () {
 					var $parent;
@@ -385,7 +390,8 @@
 					inputSettings.prepareLanguages();
 					inputSettings.markDirty();
 				},
-				languages: mw.ime.getLanguagesWithIME()
+				languages: mw.ime.getLanguagesWithIME(),
+				ulsPurpose: 'input-settings'
 			} );
 
 			$moreLanguagesButton.on( 'click', function () {
@@ -498,6 +504,8 @@
 
 		/**
 		 * Callback for save preferences
+		 *
+		 * @param {boolean} success
 		 */
 		onSave: function ( success ) {
 			if ( success ) {

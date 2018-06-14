@@ -1,7 +1,7 @@
 /*
  * VisualEditor user interface MWCancelConfirmDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -26,10 +26,6 @@ OO.inheritClass( ve.ui.MWCancelConfirmDialog, OO.ui.MessageDialog );
 /* Static Properties */
 
 ve.ui.MWCancelConfirmDialog.static.name = 'cancelconfirm';
-
-ve.ui.MWCancelConfirmDialog.static.verbose = true;
-
-ve.ui.MWCancelConfirmDialog.static.size = 'small';
 
 ve.ui.MWCancelConfirmDialog.static.title =
 	OO.ui.deferMsg( 'visualeditor-viewpage-savewarning-title' );

@@ -7,7 +7,9 @@ use Flow\Model\UUID;
 use Flow\Model\Workflow;
 use Flow\Data\ManagerGroup;
 use Flow\Exception\CrossWikiException;
+use Flow\Exception\InvalidDataException;
 use Flow\Exception\InvalidInputException;
+use Flow\Exception\InvalidParameterException;
 use Flow\Exception\InvalidTopicUuidException;
 use Flow\Exception\UnknownWorkflowIdException;
 use Title;
@@ -60,12 +62,12 @@ class WorkflowLoaderFactory {
 	 * @throws CrossWikiException
 	 */
 	public function createWorkflowLoader( Title $pageTitle, $workflowId = null ) {
-		if ( $pageTitle === null ) {
-			throw new InvalidInputException( 'Invalid article requested', 'invalid-title' );
+		if ( $pageTitle->isExternal() ) {
+			throw new CrossWikiException( 'Interwiki to ' . $pageTitle->getInterwiki() . ' not implemented ', 'default' );
 		}
 
-		if ( $pageTitle && $pageTitle->isExternal() ) {
-			throw new CrossWikiException( 'Interwiki to ' . $pageTitle->getInterwiki() . ' not implemented ', 'default' );
+		if ( $pageTitle->getNamespace() < 0 ) {
+			throw new InvalidDataException( 'Can not load workflow for special (< 0) namespace', 'invalid-title' );
 		}
 
 		// @todo: ideally, workflowId is always set and this stuff is done in the places that call this
@@ -112,10 +114,10 @@ class WorkflowLoaderFactory {
 	 * @param Title|false $title
 	 * @param UUID $workflowId
 	 * @return Workflow
-	 * @throws InvalidInputException
+	 * @throws InvalidDataException
 	 * @throws UnknownWorkflowIdException
 	 */
-	protected function loadWorkflowById( /* Title or false */ $title, $workflowId ) {
+	public function loadWorkflowById( /* Title or false */ $title, $workflowId ) {
 		/** @var Workflow $workflow */
 		$workflow = $this->storage->getStorage( 'Workflow' )->get( $workflowId );
 		if ( !$workflow ) {
@@ -125,7 +127,7 @@ class WorkflowLoaderFactory {
 			throw new UnknownWorkflowIdException( 'The requested workflow does not exist on this wiki.' );
 		}
 		if ( $title !== false && $this->pageMoveInProgress === false && !$workflow->matchesTitle( $title ) ) {
-			throw new InvalidInputException( 'Flow workflow is for different page', 'invalid-input' );
+			throw new InvalidDataException( 'Flow workflow is for different page', 'different-page' );
 		}
 
 		return $workflow;
@@ -145,14 +147,14 @@ class WorkflowLoaderFactory {
 	/**
 	 * Create a UUID for a ns/dbkey title pair
 	 *
-	 * @param integer $ns
+	 * @param int $ns
 	 * @param string $dbKey
 	 * @return UUID
 	 * @throws InvalidInputException When the pair does not represent a valid uuid
 	 */
 	public static function uuidFromTitlePair( $ns, $dbKey ) {
 		if ( $ns !== NS_TOPIC ) {
-			throw new InvalidInputException( "Title is not from NS_TOPIC: $ns", 'invalid-input' );
+			throw new InvalidParameterException( "Title is not from NS_TOPIC: $ns" );
 		}
 
 		try {

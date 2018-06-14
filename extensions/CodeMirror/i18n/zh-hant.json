@@ -3,10 +3,17 @@
 		"authors": [
 			"Waihorace",
 			"LNDDYL",
-			"Cwlin0416"
+			"Cwlin0416",
+			"A2093064",
+			"Kly"
 		]
 	},
 	"codemirror-desc": "提供 wikitext 編輯器語法醒目標示",
-	"codemirror-enable-label": "開啟 CodeMirror (強調語法顯示)",
-	"codemirror-disable-label": "關閉 CodeMirror (強調語法顯示)"
+	"codemirror-toggle-label": "語法醒目標示",
+	"codemirror-beta-title": "Wiki文字語法醒目標示",
+	"codemirror-beta-desc": "語法醒目標示透過使用顏色和陰影在視覺上將頁面文字從連結、參考資料和模板的原始碼中分隔出來，使編輯更容易。",
+	"codemirror-popup-label": "語法突顯",
+	"codemirror-popup-desc": "語法突顯會透過色彩編碼來協助您容易區別在您編輯內容上的不同部份。",
+	"codemirror-popup-btn-yes": "試看看",
+	"codemirror-popup-btn-no": "不用了，謝謝"
 }

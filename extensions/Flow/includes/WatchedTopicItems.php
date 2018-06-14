@@ -2,7 +2,7 @@
 
 namespace Flow;
 
-use DatabaseBase;
+use Wikimedia\Rdbms\IDatabase;
 use Flow\Exception\DataModelException;
 use Title;
 use User;
@@ -14,9 +14,9 @@ class WatchedTopicItems {
 
 	protected $user;
 	protected $watchListDb;
-	protected $overrides = array();
+	protected $overrides = [];
 
-	public function __construct( User $user, DatabaseBase $watchListDb ) {
+	public function __construct( User $user, IDatabase $watchListDb ) {
 		$this->user = $user;
 		$this->watchListDb = $watchListDb;
 	}
@@ -25,6 +25,7 @@ class WatchedTopicItems {
 	 * Helps prevent reading our own writes.  If we have explicitly
 	 * watched this title in this request set it here instead of
 	 * querying a slave and possibly not noticing due to slave lag.
+	 * @param Title $title
 	 */
 	public function addOverrideWatched( Title $title ) {
 		$this->overrides[$title->getNamespace()][$title->getDBkey()] = true;
@@ -43,7 +44,7 @@ class WatchedTopicItems {
 			return $result;
 		}
 
-		$queryTitles = array();
+		$queryTitles = [];
 		foreach ( $titles as $id ) {
 			$obj = Title::makeTitleSafe( NS_TOPIC, $id );
 			if ( $obj ) {
@@ -61,13 +62,13 @@ class WatchedTopicItems {
 		}
 
 		$res = $this->watchListDb->select(
-			array( 'watchlist' ),
-			array( 'wl_title' ),
-			array(
+			[ 'watchlist' ],
+			[ 'wl_title' ],
+			[
 				'wl_user' => $this->user->getId(),
 				'wl_namespace' => NS_TOPIC,
 				'wl_title' => $queryTitles
-			),
+			],
 			__METHOD__
 		);
 		if ( !$res ) {
@@ -87,7 +88,7 @@ class WatchedTopicItems {
 	}
 
 	/**
-	 * @return DatabaseBase
+	 * @return IDatabase
 	 */
 	public function getWatchlistDb() {
 		return $this->watchListDb;

@@ -11,7 +11,10 @@ class ApiQueryPropFlowInfo extends ApiQueryBase {
 		parent::__construct( $query, $moduleName, 'fli' );
 	}
 
-	// Use action=query&prop=info instead; check for 'contentmodel' 'flow-board'.
+	/**
+	 * Use action=query&prop=info instead; check for 'contentmodel' 'flow-board'.
+	 * @return bool
+	 */
 	public function isDeprecated() {
 		return true;
 	}
@@ -31,7 +34,7 @@ class ApiQueryPropFlowInfo extends ApiQueryBase {
 	 * @return array
 	 */
 	protected function getPageInfo( Title $title ) {
-		$result = array( 'flow' => array() );
+		$result = [ 'flow' => [] ];
 		if ( $title->getContentModel() === CONTENT_MODEL_FLOW_BOARD ) {
 			$result['flow']['enabled'] = '';
 		}
@@ -40,13 +43,13 @@ class ApiQueryPropFlowInfo extends ApiQueryBase {
 	}
 
 	/**
-	 * @see ApiBase::getExamplesMessages()
+	 * @inheritDoc
 	 */
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=query&prop=flowinfo&titles=Talk:Sandbox|Main_Page|Talk:Flow'
 				=> 'apihelp-query+flowinfo-example-1',
-		);
+		];
 	}
 
 	public function getHelpUrls() {

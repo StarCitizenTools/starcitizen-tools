@@ -1,0 +1,32 @@
+{
+	"name": "CSS",
+	"version": "3.5.0",
+	"author": [
+		"Aran Dunkley",
+		"Rusty Burchfield"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:CSS",
+	"descriptionmsg": "css-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "parserhook",
+	"ExtensionMessagesFiles": {
+		"CSSMagic": "CSS.i18n.magic.php"
+	},
+	"MessagesDirs": {
+		"CSS": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"CSS": "CSS.class.php"
+	},
+	"Hooks": {
+		"ParserFirstCallInit": "CSS::onParserFirstCallInit",
+		"RawPageViewBeforeOutput": "CSS::onRawPageViewBeforeOutput"
+	},
+	"config": {
+		"CSSPath": false,
+		"CSSIdentifier": "css-extension"
+	},
+	"manifest_version": 1
+}

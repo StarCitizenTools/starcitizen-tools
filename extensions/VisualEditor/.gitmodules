@@ -1,3 +1,0 @@
-[submodule "lib/ve"]
-	path = lib/ve
-	url = https://gerrit.wikimedia.org/r/p/VisualEditor/VisualEditor.git

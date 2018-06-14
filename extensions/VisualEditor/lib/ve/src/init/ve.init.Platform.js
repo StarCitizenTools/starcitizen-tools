@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Initialization Platform class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -72,9 +72,6 @@ ve.init.Platform.static.getSystemPlatform = function () {
 /**
  * Check whether we are running in Internet Explorer.
  *
- * FIXME T126026: This should not be needed, and it should eventually be removed.
- * If this hasn't died in a fire by the end of September 2015, Roan has failed.
- *
  * @static
  * @method
  * @inheritable
@@ -82,6 +79,18 @@ ve.init.Platform.static.getSystemPlatform = function () {
  */
 ve.init.Platform.static.isInternetExplorer = function () {
 	return $.client.profile().name === 'msie';
+};
+
+/**
+ * Check whether we are running in Edge.
+ *
+ * @static
+ * @method
+ * @inheritable
+ * @return {boolean} We are in Edge
+ */
+ve.init.Platform.static.isEdge = function () {
+	return $.client.profile().name === 'edge';
 };
 
 /**
@@ -119,6 +128,17 @@ ve.init.Platform.prototype.getExternalLinkUrlProtocolsRegExp = null;
 ve.init.Platform.prototype.getUnanchoredExternalLinkUrlProtocolsRegExp = null;
 
 /**
+ * Get a regular expression that matches IDs used only for linking document
+ * data to metadata. Use null if your document format does not have such IDs.
+ *
+ * @method
+ * @return {RegExp|null} Regular expression object
+ */
+ve.init.Platform.prototype.getMetadataIdRegExp = function () {
+	return null;
+};
+
+/**
  * Get a platform config value
  *
  * @method
@@ -147,6 +167,104 @@ ve.init.Platform.prototype.getUserConfig = null;
  * @param {Mixed} [value] Value to set (optional, only in use when key is a string)
  */
 ve.init.Platform.prototype.setUserConfig = null;
+
+/**
+ * Get a session storage value
+ *
+ * @method
+ * @abstract
+ * @param {string} key Key to get
+ * @return {string|boolean} Value, false if storage not available
+ */
+ve.init.Platform.prototype.getSession = null;
+
+/**
+ * Set a session storage value
+ *
+ * @method
+ * @abstract
+ * @param {string} key Key to set value for
+ * @param {string} value Value to set
+ * @return {boolean} The value was set
+ */
+ve.init.Platform.prototype.setSession = null;
+
+/**
+ * Remove a session storage value
+ *
+ * @method
+ * @abstract
+ * @param {string} key Key to remove
+ * @return {boolean} Key was removed
+ */
+ve.init.Platform.prototype.removeSession = null;
+
+/**
+ * Append a value to a list stored in session storage
+ *
+ * @method
+ * @param {string} key Key of list to set value for
+ * @param {string} value Value to set
+ * @return {boolean} The value was set
+ */
+ve.init.Platform.prototype.appendToSessionList = function ( key, value ) {
+	var length = this.getSessionListLength( key );
+
+	if ( this.setSession( key + '__' + length, value ) ) {
+		length++;
+		return this.setSession( key + '__length', length.toString() );
+	}
+	return false;
+};
+
+/**
+ * Get the length of a list in session storage
+ *
+ * @method
+ * @param {string} key Key of list
+ * @return {number} List length, 0 if the list doesn't exist
+ */
+ve.init.Platform.prototype.getSessionListLength = function ( key ) {
+	return +this.getSession( key + '__length' ) || 0;
+};
+
+/**
+ * Append a value to a list stored in session storage
+ *
+ * Internally this will use items with the keys:
+ *  - key__length
+ *  - key__0 ... key__N
+ *
+ * @method
+ * @param {string} key Key of list
+ * @return {string[]} List
+ */
+ve.init.Platform.prototype.getSessionList = function ( key ) {
+	var i,
+		list = [],
+		length = this.getSessionListLength( key );
+
+	for ( i = 0; i < length; i++ ) {
+		list.push( this.getSession( key + '__' + i ) );
+	}
+	return list;
+};
+
+/**
+ * Remove a list stored in session storage
+ *
+ * @method
+ * @param {string} key Key of list
+ */
+ve.init.Platform.prototype.removeSessionList = function ( key ) {
+	var i,
+		length = this.getSessionListLength( key );
+
+	for ( i = 0; i < length; i++ ) {
+		this.removeSession( key + '__' + i );
+	}
+	this.removeSession( key + '__length' );
+};
 
 /**
  * Add multiple messages to the localization system.

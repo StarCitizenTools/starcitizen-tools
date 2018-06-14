@@ -1,6 +1,6 @@
 External Data extension
 
-        Version 1.8.2
+        Version 1.8.3
         Yaron Koren and (many) others
 
 This is free software licensed under the GNU General Public License. Please
@@ -10,8 +10,9 @@ full text and terms of the license.
 == Overview ==
 
 External Data is an extension to MediaWiki that allows for retrieving data
-from various sources: external URLs and local wiki pages (in CSV, GFF, JSON
-and XML formats), database tables, and LDAP servers.
+from various sources: external URLs, local wiki pages and files on the
+server (all in CSV, GFF, JSON and XML formats), plus database tables and
+LDAP servers.
 
 The extension defines the following parser functions: #get_web_data,
 #get_soap_data, #get_file_data, #get_db_data, #get_ldap_data,
@@ -23,7 +24,7 @@ JSON or XML, and assigns it to local variables or arrays.
 
 * #get_soap_data retrieves data from a URL via SOAP.
 
-* #get_file_data retrieves data from a local file, that can be in any of
+* #get_file_data retrieves data from a local file, which can be in any of
 the same formats that #get_web_data handles.
 
 * #get_db_data retrieves data from a database, using (in most cases)
@@ -41,14 +42,14 @@ any of the #get_*_data functions
 * #display_external_table is like #for_external_table, but passes the
 values of each row to a template, which handles the formatting.
 
-* #store_external_table mimics a call to the Semantic Internal Objects
-extension's #set_internal parser function onto each row retrieved by
+* #store_external_table mimics a call to the Semantic MediaWiki
+extension's #subobject parser function onto each row retrieved by
 any of the #get_*_data functions, in order to store the entire array
 of data semantically.
 
 * #clear_external_data erases the current set of retrieved data.
 
-In addition, the extension defines a new special page, 'GetData', that
+In addition, the extension defines a new special page, 'GetData', which
 exports selected rows from a wiki page that holds CSV data, in a format
 that is readable by #get_web_data.
 
@@ -57,7 +58,8 @@ http://www.mediawiki.org/wiki/Extension:External_Data
 
 == Requirements ==
 
-This version of the External Data extension requires MediaWiki 1.17 or higher.
+This version of the External Data extension requires MediaWiki 1.17 or
+higher.
 
 == Installation ==
 
@@ -97,15 +99,9 @@ information.
 == Contact ==
 
 Most comments, questions, suggestions and bug reports should be sent to
-the Semantic MediaWiki mailing list:
+the main MediaWiki mailing list:
 
- https://lists.sourceforge.net/lists/listinfo/semediawiki-user
-
-Although the External Data extension in general is independent of Semantic
-MediaWiki, the fact that it uses Semantic Internal Objects for one of its
-functions, along with the fact that the two extensions are often used
-together, means that it can be considered part of the Semantic MediaWiki
-family for communication purposes.
+     https://lists.wikimedia.org/mailman/listinfo/mediawiki-l
 
 If possible, please add "[ED]" at the beginning of the subject line, to
 clarify the subject matter.

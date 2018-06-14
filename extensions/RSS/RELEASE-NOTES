@@ -151,7 +151,7 @@ git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/RSS.git
 === Version 1.7 2010-07-23 ===
 * cleaned up, included MagpieRSS library
 * put into the WMF subversion repository by Jeroen De Dauw
-  http://www.mediawiki.org/wiki/User:Jeroen_De_Dauw
+  https://www.mediawiki.org/wiki/User:Jeroen_De_Dauw
 * i18n file added by TranslateWiki.net people
 
 == Change Log of pre-1.7 versions 2010 and before ==
@@ -161,10 +161,10 @@ git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/RSS.git
   Added htmlspecialchars escaping to the displayed strings
 * [User:Cmreigrut|Cmreigrut]] 19:05, 19 November 2008 (UTC)
   added date (if specified) to short output
-* [[User:Wikinaut|Wikinaut]] 11:17, 7 May 2008 (UTC) 
+* [[User:Wikinaut|Wikinaut]] 11:17, 7 May 2008 (UTC)
   changed method to disable chaching; Extension is now compatible to MW 1.12
 * Svanslyck 02.2008, replacing all « and » with "
-  [[User:Duesentrieb]]. 
+  [[User:Duesentrieb]].
   [User:CryptoQuick|CryptoQuick]] 14:26, 24 January 2007 (UTC)
   ([[User talk:Alxndr|t]]) 02:02, 16 June 2007 (UTC)
 * Alxndr 09.2006

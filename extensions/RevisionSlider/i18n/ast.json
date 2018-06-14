@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tokvo",
+			"Xuacu"
+		]
+	},
+	"revisionslider": "RevisionSlider",
+	"revisionslider-preference-disable": "Nun amosar l'esnidiante de revisiones",
+	"revisionslider-desc": "Amuesa un esnidiante que permite seleicionar y comparar les revisiones d'una páxina de diferencies",
+	"revisionslider-toggle-label": "Navegar pel historial",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte|bytes}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte|bytes}}",
+	"revisionslider-label-date": "Data",
+	"revisionslider-label-page-size": "Tamañu de la páxina",
+	"revisionslider-label-change-size": "Tamañu del cambéu",
+	"revisionslider-label-comment": "Comentariu",
+	"revisionslider-label-username": "Nome d'{{GENDER:$1|usuariu|usuaria}}",
+	"revisionslider-minoredit": "Esta ye una edición menor",
+	"revisionslider-loading-failed": "L'esnidiante de revisiones nun pudo cargase.",
+	"revisionslider-toggle-title-expand": "Abrir l'esnidiante de revisiones",
+	"revisionslider-toggle-title-collapse": "Despintar l'esnidiante de revisiones",
+	"revisionslider-turn-on-auto-expand-title": "Espander siempre l'esnidiante de revisiones",
+	"revisionslider-turn-off-auto-expand-title": "Nun espander automáticamente l'esnidiante de revisiones",
+	"revisionslider-arrow-tooltip-newer": "Ver revisiones más recién",
+	"revisionslider-arrow-tooltip-older": "Ver revisiones anteriores",
+	"revisionslider-show-help-tooltip": "Amosar el testu d'ayuda",
+	"revisionslider-help-dialog-slide1": "L'esnidiante de revisiones te ayuda a navegar y comparar revisiones na páxina de diferencies. Ta basáu nun [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider pidimientu de la comunidá] de la llista de solicitúes técniques de la comunidá de falantes d'alemán. Prestaríanos enforma recibir comentarios [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider equí].",
+	"revisionslider-help-dialog-slide2": "Cada barra representa una revisión d'una páxina. Les barres de riba amuesen la medría nel tamañu de la páxina, les barres de baxo amuesen un amenorgamientu. Na imaxe, la revisión 1 representa'l conteníu añadíu, ente que la revisión 2 representa'l desaniciu de conteníu.",
+	"revisionslider-help-dialog-slide3a": "<p>Pa comparar les revisiones, escuéyeles utilizando los punteros mariellu y l'azul.</p><p>El punteru azul controla la revisión recién, el punteru mariellu la versión más vieya.</p><p>Mueve los punteros abasnando y soltando o faciendo clic na barra d'esnidiamientu.</p>",
+	"revisionslider-help-dialog-slide4": "Usa les fleches d'avanzar y recular pa movete pel historial de revisiones y amosar revisiones más nueves y más antigües.",
+	"revisionslider-tutorial": "Tutorial sobro l'esnidiante de revisiones",
+	"revisionslider-previous-dialog": "Anterior",
+	"revisionslider-next-dialog": "Siguiente",
+	"revisionslider-close-dialog": "Zarrar"
+}

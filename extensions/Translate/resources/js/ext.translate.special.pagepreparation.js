@@ -11,10 +11,8 @@
 	function savePage( pageName, pageContent ) {
 		var api = new mw.Api();
 
-		// Change to csrf when support for MW 1.25 is dropped
-		return api.postWithToken( 'edit', {
+		return api.postWithToken( 'csrf', {
 			action: 'edit',
-			format: 'json',
 			title: pageName,
 			text: pageContent,
 			summary: $( '#pp-summary' ).val()
@@ -36,7 +34,6 @@
 		return api.post( {
 			action: 'query',
 			prop: 'revisions',
-			format: 'json',
 			rvprop: 'content',
 			rvlimit: '1',
 			titles: pageName,
@@ -98,7 +95,7 @@
 			}
 
 			aliasList = aliases.join( '|' );
-			// Regex: http://regex101.com/r/sJ3gZ4/2
+			// Regex: https://regex101.com/r/sJ3gZ4/2
 			categoryRegex = new RegExp( '\\[\\[((' + aliasList + ')' +
 				':[^\\|]+)(\\|[^\\|]*?)?\\]\\]', 'gi' );
 			pageContent = pageContent.replace( categoryRegex, '\n</translate>\n' +
@@ -148,7 +145,7 @@
 
 		headerText = mw.RegExp.escape( headerText );
 		// Search for the header having text as headerText
-		// Regex: http://regex101.com/r/fD6iL1
+		// Regex: https://regex101.com/r/fD6iL1
 		headerSearchRegex = new RegExp( '(==+[ ]*' + headerText + '[ ]*==+)', 'gi' );
 		// This is to ensure the tags and the anchor are added only once
 
@@ -164,7 +161,7 @@
 		}
 
 		// Replace the link text with the anchorID defined above
-		// Regex: http://regex101.com/r/kB5bK3
+		// Regex: https://regex101.com/r/kB5bK3
 		replaceAnchorRegex = new RegExp( '(\\[\\[#)' + headerText + '(.*\\]\\])', 'gi' );
 		pageContent = pageContent.replace( replaceAnchorRegex, '$1' +
 			anchorID.replace( '$', '$$$' ) + '$2' );
@@ -189,13 +186,13 @@
 		normalizeRegex = new RegExp( /\[\[(?!Category)([^|]*?)\]\]/gi );
 		// First convert all links into two-party form. If a link is not having a pipe,
 		// add a pipe and duplicate the link text
-		// Regex : http://regex101.com/r/pO9nN2
+		// Regex: https://regex101.com/r/pO9nN2
 		pageContent = pageContent.replace( normalizeRegex, '[[$1|$1]]' );
 
 		namespaces = getNamespaces();
 		nsString = namespaces.join( '|' );
 		// Finds all the links to sections on the same page.
-		// Regex: http://regex101.com/r/cX6jT3
+		// Regex: https://regex101.com/r/cX6jT3
 		sectionLinksRegex = new RegExp( /\[\[#(.*?)(\|(.*?))?\]\]/gi );
 		match = sectionLinksRegex.exec( searchText );
 		while ( match !== null ) {
@@ -207,7 +204,7 @@
 			'):)?[^:]*?)\\]\\]', 'gi' );
 		// Add the 'Special:MyLanguage/' prefix for all internal links of valid namespaces and
 		// mainspace.
-		// Regex : http://regex101.com/r/zZ9jH9
+		// Regex: https://regex101.com/r/zZ9jH9
 		pageContent = pageContent.replace( linkPrefixRegex, '[[Special:MyLanguage/$1]]' );
 		return pageContent;
 	}
@@ -281,7 +278,7 @@
 	 */
 	function doTemplates( pageContent ) {
 		var templateRegex;
-		// Regex: http://regex101.com/r/wA3iX0
+		// Regex: https://regex101.com/r/wA3iX0
 		templateRegex = new RegExp( /^({{[\s\S]*?}})/gm );
 
 		pageContent = pageContent.replace( templateRegex, '</translate>\n$1\n<translate>' );
@@ -319,7 +316,6 @@
 		return api.get( {
 			action: 'query',
 			prop: 'revisions',
-			format: 'json',
 			rvprop: 'content',
 			rvlimit: '1',
 			titles: pageName
@@ -363,7 +359,7 @@
 		return namespaces;
 	}
 
-	$( document ).ready( function () {
+	$( function () {
 		var pageContent,
 			$input = $( '#page' );
 
@@ -372,14 +368,16 @@
 		} );
 
 		$( '#action-save' ).click( function () {
-			var serverName, pageName,
+			var pageName,
 				pageUrl = '';
 
 			pageName = $.trim( $input.val() );
-			serverName = mw.config.get( 'wgServerName' );
 			savePage( pageName, pageContent ).done( function () {
 				pageUrl = mw.Title.newFromText( pageName ).getUrl( { action: 'edit' } );
-				$( '.messageDiv' ).html( mw.message( 'pp-save-message', pageUrl ).parse() ).show();
+				$( '.messageDiv' )
+					.empty()
+					.append( mw.message( 'pp-save-message', pageUrl ).parseDom() )
+					.show();
 				$( '.divDiff' ).hide( 'fast' );
 				$( '#action-prepare' ).show();
 				$input.val( '' );
@@ -394,7 +392,8 @@
 			pageName = $.trim( $input.val() );
 			messageDiv.hide();
 			if ( pageName === '' ) {
-				window.alert( mw.msg( 'pp-pagename-missing' ) );
+				// eslint-disable-next-line no-alert
+				alert( mw.msg( 'pp-pagename-missing' ) );
 				return;
 			}
 
@@ -407,21 +406,19 @@
 				pageContent = addNewLines( pageContent );
 				pageContent = fixInternalLinks( pageContent );
 				pageContent = doTemplates( pageContent );
-				doFiles( pageContent )
-				.then( doCategories )
-				.done( function ( pageContent ) {
+				doFiles( pageContent ).then( doCategories ).done( function ( pageContent ) {
 					pageContent = postPreparationCleanup( pageContent );
 					pageContent = $.trim( pageContent );
 					getDiff( pageName, pageContent ).done( function ( diff ) {
 						$( '.diff tbody' ).append( diff );
 						$( '.divDiff' ).show( 'fast' );
 						if ( diff !== '' ) {
-							messageDiv.html( mw.msg( 'pp-prepare-message' ) ).show();
+							messageDiv.text( mw.msg( 'pp-prepare-message' ) ).show();
 							$( '#action-prepare' ).hide();
 							$( '#action-save' ).show();
 							$( '#action-cancel' ).show();
 						} else {
-							messageDiv.html( mw.msg( 'pp-already-prepared-message' ) ).show();
+							messageDiv.text( mw.msg( 'pp-already-prepared-message' ) ).show();
 						}
 					} );
 				} );

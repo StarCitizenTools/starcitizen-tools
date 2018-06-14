@@ -21,9 +21,10 @@ class EDUtils {
 	// XML-handling functions based on code found at
 	// http://us.php.net/xml_set_element_handler
 	static function startElement( $parser, $name, $attrs ) {
-		global $edgCurrentXMLTag, $edgXMLValues;
+		global $edgCurrentXMLTag, $edgCurrentValue, $edgXMLValues;
 		// set to all lowercase to avoid casing issues
 		$edgCurrentXMLTag = strtolower( $name );
+		$edgCurrentValue = '';
 		foreach ( $attrs as $attr => $value ) {
 			$attr = strtolower( $attr );
 			$value = str_replace( self::$ampersandReplacement, '&amp;', $value );
@@ -36,12 +37,26 @@ class EDUtils {
 	}
 
 	static function endElement( $parser, $name ) {
-		global $edgCurrentXMLTag;
-		$edgCurrentXMLTag = "";
+		global $edgCurrentXMLTag, $edgCurrentValue, $edgXMLValues;
+
+		if ( array_key_exists( $edgCurrentXMLTag, $edgXMLValues ) ) {
+			$edgXMLValues[$edgCurrentXMLTag][] = $edgCurrentValue;
+		} else {
+			$edgXMLValues[$edgCurrentXMLTag] = array( $edgCurrentValue );
+		}
+		// Clear the value both here and in startElement(), in case this
+		// is an embedded tag.
+		$edgCurrentValue = '';
 	}
 
+	/**
+	 * Due to the strange way xml_set_character_data_handler() runs,
+	 * getContent() may get called multiple times, once for each fragment
+	 * of the text, for very long XML values. Given that, we keep a global
+	 * variable with the current value and add to it.
+	 */
 	static function getContent( $parser, $content ) {
-		global $edgCurrentXMLTag, $edgXMLValues;
+		global $edgCurrentValue;
 
 		// Replace ampersands, to avoid the XML getting split up
 		// around them.
@@ -49,10 +64,7 @@ class EDUtils {
 		// this is unrelated to the fact that bare ampersands aren't
 		// allowed in XML.
 		$content = str_replace( self::$ampersandReplacement, '&amp;', $content );
-		if ( array_key_exists( $edgCurrentXMLTag, $edgXMLValues ) )
-			$edgXMLValues[$edgCurrentXMLTag][] = $content;
-		else
-			$edgXMLValues[$edgCurrentXMLTag] = array( $content );
+		$edgCurrentValue .= $content;
 	}
 
 	static function parseParams( $params ) {
@@ -157,7 +169,7 @@ END;
 		}
 	}
 
-	static function getDBData( $dbID, $from, $columns, $where, $sqlOptions, $otherParams ) {
+	static function getDBData( $dbID, $from, $columns, $where, $sqlOptions, $joinOn, $otherParams ) {
 		global $edgDBServerType;
 		global $edgDBServer;
 		global $edgDBDirectory;
@@ -211,10 +223,23 @@ END;
 		}
 
 		// DatabaseBase::newFromType() was added in MW 1.17 - it was
-		// then replaced by DatabaseBase::factory() in MW 1.18
-		$factoryFunction = array( 'DatabaseBase', 'factory' );
-		//$newFromTypeFunction = array( 'DatabaseBase', 'newFromType' );
-		if ( is_callable( $factoryFunction ) ) {
+		// then replaced by DatabaseBase::factory() in MW 1.18, and
+		// and renamed to Database::factory() in MW 1.28.
+		if ( method_exists( 'Database', 'factory' ) ) {
+			$db = Database::factory( $db_type,
+				array(
+					'host' => $db_server,
+					'user' => $db_username,
+					'password' => $db_password,
+					// Both 'dbname' and 'dbName' have been
+					// used in different versions.
+					'dbname' => $db_name,
+					'dbName' => $db_name,
+					'flags' => $db_flags,
+					'tablePrefix' => $db_tableprefix,
+				)
+			);
+		} elseif ( method_exists( 'DatabaseBase', 'factory' ) ) {
 			$db = DatabaseBase::factory( $db_type,
 				array(
 					'host' => $db_server,
@@ -228,7 +253,7 @@ END;
 					'tablePrefix' => $db_tableprefix,
 				)
 			);
-		} else { //if ( is_callable( $newFromTypeFunction ) ) {
+		} else {
 			$db = DatabaseBase::newFromType( $db_type,
 				array(
 					'host' => $db_server,
@@ -253,7 +278,7 @@ END;
 			return wfMessage( "externaldata-db-no-return-values" )->text();
 		}
 
-		$rows = self::searchDB( $db, $from, $columns, $where, $sqlOptions );
+		$rows = self::searchDB( $db, $from, $columns, $where, $sqlOptions, $joinOn );
 		$db->close();
 
 		if ( !is_array( $rows ) ) {
@@ -463,34 +488,59 @@ END;
 		return $values;
 	}
 
-	static function searchDB( $db, $table, $vars, $conds, $sqlOptions ) {
-		// Add on a space at the beginning of $table so that
-		// $db->select() will treat it as a literal, instead of
-		// putting quotes around it or otherwise trying to parse it,
-		// so that aliases like "users u" will be accepted.
-		// However, if a table prefix has been set, we need it added,
-		// so don't make it a literal in that case.
-		if ( $db->tablePrefix() == '' ) {
-			$table = ' ' . $table;
+	static function searchDB( $db, $from, $vars, $conds, $sqlOptions, $joinOn ) {
+		// The format of $from can be just "TableName", or the more
+		// complex "Table1=Alias1,Table2=Alias2,...".
+		$tables = array();
+		$tableStrings = explode( ',', $from );
+		foreach ( $tableStrings as $tableString ) {
+			if ( strpos( $tableString, '=' ) !== false ) {
+				$tableStringParts = explode( '=', $tableString, 2 );
+				$tableName = trim( $tableStringParts[0] );
+				$alias = trim( $tableStringParts[1] );
+			} else {
+				$tableName = $alias = trim( $tableString);
+			}
+			$tables[$alias] = $tableName;
 		}
-		$result = $db->select( $table, $vars, $conds, 'EDUtils::searchDB', $sqlOptions );
+		$joinConds = array();
+		$joinStrings = explode( ',', $joinOn );
+		foreach ( $joinStrings as $i => $joinString ) {
+			if ( $joinString == '' ) {
+				continue;
+			}
+			if ( strpos( $joinString, '=' ) === false ) {
+				return "Error: every \"join on\" string must contain an \"=\" sign.";
+			}
+			if ( count( $tables ) <= $i + 1 ) {
+				return "Error: too many \"join on\" conditions.";
+			}
+			$aliases = array_keys( $tables );
+			$alias = $aliases[$i + 1];
+			$joinConds[$alias] = array( 'JOIN', $joinString );
+		}
+		$result = $db->select( $tables, $vars, $conds, 'EDUtils::searchDB', $sqlOptions, $joinConds );
 		if ( !$result ) {
 			return wfMessage( "externaldata-db-invalid-query" )->text();
 		}
 
 		$rows = array();
 		while ( $row = $db->fetchRow( $result ) ) {
-			// Create a new row object, that uses the passed-in
+			// Create a new row object that uses the passed-in
 			// column names as keys, so that there's always an
 			// exact match between what's in the query and what's
 			// in the return value (so that "a.b", for instance,
 			// doesn't get chopped off to just "b").
 			$new_row = array();
 			foreach ( $vars as $i => $column_name ) {
+				$dbField = $row[$i];
+				// This can happen with MSSQL.
+				if ( $dbField instanceof DateTime ) {
+					$dbField = $dbField->format('Y-m-d H:i:s');
+				}
 				// Convert the encoding to UTF-8
 				// if necessary - based on code at
 				// http://www.php.net/manual/en/function.mb-detect-encoding.php#102510
-				$dbField = $row[$i];
 				if ( !function_exists( 'mb_detect_encoding' ) ||
 					mb_detect_encoding( $dbField, 'UTF-8', true ) == 'UTF-8' ) {
 					$new_row[$column_name] = $dbField;
@@ -826,7 +876,8 @@ END;
 		}
 	}
 
-	static function getJSONData( $json ) {
+	static function getJSONData( $json, $prefixLength ) {
+		$json = substr( $json, $prefixLength );
 		$json_tree = FormatJson::decode( $json, true );
 		if ( is_null( $json_tree ) ) {
 			// It's probably invalid JSON.
@@ -905,7 +956,7 @@ END;
 		}
 	}
 
-	static private function getDataFromText( $contents, $format, $mappings, $source ) {
+	static private function getDataFromText( $contents, $format, $mappings, $source, $prefixLength = 0 ) {
 		// For now, this is only done for the CSV formats.
 		if ( is_array( $format ) ) {
 			list( $format, $delimiter ) = $format;
@@ -922,7 +973,7 @@ END;
 		} elseif ( $format == 'csv with header' ) {
 			return self::getCSVData( $contents, true, $delimiter );
 		} elseif ( $format == 'json' ) {
-			return self::getJSONData( $contents );
+			return self::getJSONData( $contents, $prefixLength );
 		} elseif ( $format == 'gff' ) {
 			return self::getGFFData( $contents );
 		} else {
@@ -957,14 +1008,14 @@ END;
 		}
 	}
 
-	static public function getDataFromURL( $url, $format, $mappings, $postData = null, $cacheExpireTime ) {
+	static public function getDataFromURL( $url, $format, $mappings, $postData = null, $cacheExpireTime, $prefixLength ) {
 		$url_contents = self::fetchURL( $url, $postData, $cacheExpireTime );
 		// Show an error message if there's nothing there.
 		if ( empty( $url_contents ) ) {
 			return "Error: No contents found at URL $url.";
 		}
 
-		return self::getDataFromText( $url_contents, $format, $mappings, $url );
+		return self::getDataFromText( $url_contents, $format, $mappings, $url, $prefixLength );
 	}
 
 	static private function getDataFromPath( $path, $format, $mappings ) {

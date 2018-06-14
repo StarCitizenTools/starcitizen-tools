@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTransclusionModel class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -50,19 +50,82 @@
 	/**
 	 * Insert transclusion at the end of a surface fragment.
 	 *
-	 * @param {ve.dm.SurfaceFragment} surfaceFragment Surface fragment to insert at
+	 * If forceType is not specified and this is used in async mode, users of this method
+	 * should ensure the surface is not accessible while the type is being evaluated.
+	 *
+	 * @param {ve.dm.SurfaceFragment} surfaceFragment Surface fragment after which to insert.
+	 * @param {boolean|undefined} [forceType] Force the type to 'inline' or 'block'. If not
+	 *   specified it will be evaluated asynchronously.
+	 * @return {jQuery.Promise} Promise which resolves when the node has been inserted. If
+	 *   forceType was specified this will be instant.
 	 */
-	ve.dm.MWTransclusionModel.prototype.insertTransclusionNode = function ( surfaceFragment ) {
-		surfaceFragment
-			.insertContent( [
-				{
-					type: 'mwTransclusionInline',
-					attributes: {
-						mw: this.getPlainObject()
-					}
-				},
-				{ type: '/mwTransclusionInline' }
-			] );
+	ve.dm.MWTransclusionModel.prototype.insertTransclusionNode = function ( surfaceFragment, forceType ) {
+		var model = this,
+			deferred = $.Deferred(),
+			baseNodeClass = ve.dm.MWTransclusionNode;
+
+		function insertNode( isInline, generatedContents ) {
+			var hash, store, nodeClass,
+				type = isInline ? baseNodeClass.static.inlineType : baseNodeClass.static.blockType,
+				range = surfaceFragment.getSelection().getCoveringRange(),
+				data = [
+					{
+						type: type,
+						attributes: {
+							mw: model.getPlainObject()
+						}
+					},
+					{ type: '/' + type }
+				];
+
+			// If we just fetched the generated contents, put them in the store
+			// so we don't do a duplicate API call later.
+			if ( generatedContents ) {
+				nodeClass = ve.dm.modelRegistry.lookup( type );
+				store = surfaceFragment.getDocument().getStore();
+				hash = OO.getHash( [ nodeClass.static.getHashObjectForRendering( data[ 0 ] ), undefined ] );
+				store.hash( generatedContents, hash );
+			}
+
+			if ( range.isCollapsed() ) {
+				surfaceFragment.insertContent( data );
+			} else {
+				// Generate a replacement transaction instead of using surfaceFragment.insertContent
+				// (which generates a removal and insertion) as blanking a reference triggers T135127.
+				// TODO: Once T135127 is fixed, revert to using surfaceFragment.insert.
+				surfaceFragment.getSurface().change(
+					ve.dm.TransactionBuilder.static.newFromReplacement( surfaceFragment.getDocument(), range, data )
+				);
+			}
+			deferred.resolve();
+		}
+
+		if ( forceType ) {
+			insertNode( forceType === 'inline' );
+		} else {
+			ve.init.target.parseWikitextFragment(
+				baseNodeClass.static.getWikitext( this.getPlainObject() ),
+				true,
+				surfaceFragment.getDocument()
+			).then( function ( response ) {
+				var contentNodes;
+
+				if ( ve.getProp( response, 'visualeditor', 'result' ) === 'success' ) {
+					contentNodes = $.parseHTML( response.visualeditor.content, surfaceFragment.getDocument().getHtmlDocument() ) || [];
+					contentNodes = ve.ce.MWTransclusionNode.static.filterRendering( contentNodes );
+					insertNode(
+						baseNodeClass.static.isHybridInline( contentNodes, ve.dm.converter ),
+						contentNodes
+					);
+				} else {
+					// Request failed - just assume inline
+					insertNode( true );
+				}
+			}, function () {
+				insertNode( true );
+			} );
+		}
+		return deferred.promise();
 	};
 
 	/**
@@ -195,6 +258,7 @@
 	/** */
 	ve.dm.MWTransclusionModel.prototype.fetch = function () {
 		var i, len, item, title, queue,
+			templateNamespaceId = mw.config.get( 'wgNamespaceIds' ).template,
 			titles = [],
 			specs = {};
 
@@ -216,7 +280,10 @@
 					// Skip titles that don't have a resolvable href
 					title &&
 					// Skip titles outside the template namespace
-					title.charAt( 0 ) !== ':' &&
+					mw.Title.newFromText(
+						title,
+						templateNamespaceId
+					).namespace === templateNamespaceId &&
 					// Skip already cached data
 					!hasOwn.call( specCache, title ) &&
 					// Skip duplicate titles in the same batch
@@ -239,8 +306,11 @@
 	ve.dm.MWTransclusionModel.prototype.fetchRequest = function ( titles, specs, queue ) {
 		var xhr = new mw.Api().get( {
 			action: 'templatedata',
-			titles: titles.join( '|' ),
+			titles: titles,
 			lang: mw.config.get( 'wgUserLanguage' ),
+			format: 'json',
+			formatversion: '2',
+			doNotIgnoreMissingTitles: '1',
 			redirects: '1'
 		} ).done( this.fetchRequestDone.bind( this, titles, specs ) );
 		xhr.always( this.fetchRequestAlways.bind( this, queue, xhr ) );
@@ -248,12 +318,25 @@
 	};
 
 	ve.dm.MWTransclusionModel.prototype.fetchRequestDone = function ( titles, specs, data ) {
-		var i, len, id, title, aliasMap = [];
+		var i, len, id, title, missingTitle, aliasMap = [];
 
 		if ( data && data.pages ) {
 			// Keep spec data on hand for future use
 			for ( id in data.pages ) {
-				specs[ data.pages[ id ].title ] = data.pages[ id ];
+				title = data.pages[ id ].title;
+
+				if ( data.pages[ id ].missing ) {
+					// Remmeber templates that don't exist in the link cache
+					// { title: { missing: true|false }
+					missingTitle = {};
+					missingTitle[ title ] = { missing: true };
+					ve.init.platform.linkCache.setMissing( missingTitle );
+				} else if ( data.pages[ id ].notemplatedata ) {
+					// Prevent asking again for templates that have no specs
+					specs[ title ] = null;
+				} else {
+					specs[ title ] = data.pages[ id ];
+				}
 			}
 			// Follow redirects
 			if ( data.redirects ) {
@@ -269,14 +352,6 @@
 				// we create a new property with an invalid "undefined" value.
 				if ( hasOwn.call( specs, aliasMap[ i ].to ) ) {
 					specs[ aliasMap[ i ].from ] = specs[ aliasMap[ i ].to ];
-				}
-			}
-
-			// Prevent asking again for templates that have no specs
-			for ( i = 0, len = titles.length; i < len; i++ ) {
-				title = titles[ i ];
-				if ( !specs[ title ] ) {
-					specs[ title ] = null;
 				}
 			}
 
@@ -485,6 +560,16 @@
 			}
 		}
 		return -1;
+	};
+
+	/*
+	 * Add missing required and suggested parameters to each transclusion.
+	 */
+	ve.dm.MWTransclusionModel.prototype.addPromptedParameters = function () {
+		var i;
+		for ( i = 0; i < this.parts.length; i++ ) {
+			this.parts[ i ].addPromptedParameters();
+		}
 	};
 
 }() );

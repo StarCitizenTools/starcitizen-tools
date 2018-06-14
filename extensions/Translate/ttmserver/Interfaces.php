@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @ingroup TTMServer
  */
 
@@ -18,9 +18,9 @@ interface ReadableTTMServer {
 	/**
 	 * Fetches all relevant suggestions for given text.
 	 *
-	 * @param $sourceLanguage String: language code for the provide text
-	 * @param $targetLanguage String: language code for the suggestions
-	 * @param $text String: the text for which to search suggestions
+	 * @param string $sourceLanguage language code for the provide text
+	 * @param string $targetLanguage language code for the suggestions
+	 * @param string $text the text for which to search suggestions
 	 * @return array List: unordered suggestions, which each has fields:
 	 *   - source: String: the original text of the suggestion
 	 *   - target: String: the suggestion
@@ -98,6 +98,24 @@ interface WritableTTMServer {
 	 * Do any cleanup, optimizing etc.
 	 */
 	public function endBootstrap();
+
+	/**
+	 * Get the list of services to duplicate writes to make them "mirrors"
+	 * of this service.
+	 *
+	 * @since 2017.04
+	 * @return string[]
+	 */
+	public function getMirrors();
+
+	/**
+	 * Check if the service is frozen, attempting to write to
+	 * a frozen service may lead to errors or unexpected behaviors.
+	 *
+	 * @since 2017.04
+	 * @return bool true if the service is frozen
+	 */
+	public function isFrozen();
 }
 
 /**
@@ -117,18 +135,19 @@ interface SearchableTTMServer {
 	public function search( $queryString, $opts, $highlight );
 
 	/**
-	 * ...
+	 * @param stdClass $resultset
+	 * @return array
 	 */
 	public function getFacets( $resultset );
 
 	/**
-	 * @param $resultset
+	 * @param stdClass $resultset
 	 * @return int
 	 */
 	public function getTotalHits( $resultset );
 
 	/**
-	 * @param $resultset
+	 * @param stdClass $resultset
 	 * @return array[]
 	 */
 	public function getDocuments( $resultset );

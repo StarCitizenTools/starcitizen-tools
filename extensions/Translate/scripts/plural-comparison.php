@@ -5,7 +5,7 @@
  * @author Niklas Laxström
  *
  * @copyright Copyright © 2010, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -111,10 +111,10 @@ class PluralCompare extends Maintenance {
 		$doc = new DOMDocument;
 		$doc->load( $fileName );
 		$rulesets = $doc->getElementsByTagName( 'pluralRules' );
-		$plurals = array();
+		$plurals = [];
 		foreach ( $rulesets as $ruleset ) {
 			$codes = $ruleset->getAttribute( 'locales' );
-			$rules = array();
+			$rules = [];
 			$ruleElements = $ruleset->getElementsByTagName( 'pluralRule' );
 			foreach ( $ruleElements as $elt ) {
 				$rules[] = $elt->nodeValue;
@@ -148,7 +148,7 @@ class PluralCompare extends Maintenance {
 
 	public function loadGettext() {
 		$gtData = file_get_contents( __DIR__ . '/../data/plural-gettext.txt' );
-		$gtLanguages = array();
+		$gtLanguages = [];
 		foreach ( preg_split( '/\n|\r/', $gtData, -1, PREG_SPLIT_NO_EMPTY ) as $line ) {
 			list( $code, $rule ) = explode( "\t", $line );
 			$rule = preg_replace( '/^.*?plural=/', '', $rule );
@@ -160,4 +160,4 @@ class PluralCompare extends Maintenance {
 }
 
 $maintClass = 'PluralCompare';
-require_once DO_MAINTENANCE;
+require_once RUN_MAINTENANCE_IF_MAIN;

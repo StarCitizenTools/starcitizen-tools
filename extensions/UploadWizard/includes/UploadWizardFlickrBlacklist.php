@@ -86,7 +86,7 @@ class UploadWizardFlickrBlacklist {
 	 */
 	public function getBlacklist() {
 		if ( !isset( self::$blacklist ) ) {
-			self::$blacklist = array();
+			self::$blacklist = [];
 			if ( $this->flickrBlacklistPage ) {
 				$title = Title::newFromText( $this->flickrBlacklistPage );
 				$page = WikiPage::factory( $title );
@@ -123,17 +123,17 @@ class UploadWizardFlickrBlacklist {
 	 *     if there is no such photo (or some other error happened), the array will be empty.
 	 */
 	protected function getUserIdsFromPhotoId( $flickrPhotoId ) {
-		$userIds = array();
-		$params = array(
-			'postData' => array(
+		$userIds = [];
+		$params = [
+			'postData' => [
 				'method' => 'flickr.photos.getInfo',
 				'api_key' => $this->flickrApiKey,
 				'photo_id' => $flickrPhotoId,
 				'format' => 'json',
 				'nojsoncallback' => 1,
-			),
-		);
-		$response = HTTP::post( $this->flickrApiUrl, $params );
+			],
+		];
+		$response = Http::post( $this->flickrApiUrl, $params );
 		if ( $response !== false ) {
 			$response = json_decode( $response, true );
 		}

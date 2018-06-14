@@ -1,8 +1,8 @@
 <?php
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: __DIR__ . '/../../../maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
  * Sets Flow beta feature preference to true
@@ -16,6 +16,7 @@ class FlowUpdateBetaFeaturePreference extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->setBatchSize( 300 );
+		$this->requireExtension( 'Flow' );
 	}
 
 	/**
@@ -38,27 +39,27 @@ class FlowUpdateBetaFeaturePreference extends LoggedUpdateMaintenance {
 		$innerQuery = $db->selectSQLText(
 			'user_properties',
 			'up_user',
-			array(
+			[
 				'up_property' => BETA_FEATURE_FLOW_USER_TALK_PAGE,
 				'up_value' => 1
-			)
+			]
 		);
 
 		$result = $db->select(
-			array( 'page', 'user' ),
+			[ 'page', 'user' ],
 			'user_id',
-			array(
+			[
 				'page_content_model' => CONTENT_MODEL_FLOW_BOARD,
 				"user_id NOT IN($innerQuery)"
-			),
+			],
 			__METHOD__,
-			array(),
-			array(
-				'user' => array( 'JOIN', array(
+			[],
+			[
+				'user' => [ 'JOIN', [
 					'page_namespace' => NS_USER_TALK,
 					"page_title = REPLACE(user_name, ' ', '_')"
-				) ),
-			)
+				] ],
+			]
 		);
 
 		$i = 0;
@@ -91,4 +92,4 @@ class FlowUpdateBetaFeaturePreference extends LoggedUpdateMaintenance {
 }
 
 $maintClass = 'FlowUpdateBetaFeaturePreference'; // Tells it to run the class
-require_once( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2010-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -31,7 +31,7 @@ abstract class MessageGroupBase implements MessageGroup {
 	}
 
 	/**
-	 * @param $conf
+	 * @param array $conf
 	 *
 	 * @return MessageGroup
 	 */
@@ -124,7 +124,7 @@ abstract class MessageGroupBase implements MessageGroup {
 		}
 
 		foreach ( $checks as $check ) {
-			$checker->addCheck( array( $checker, $check ) );
+			$checker->addCheck( [ $checker, $check ] );
 		}
 
 		return $checker;
@@ -157,19 +157,34 @@ abstract class MessageGroupBase implements MessageGroup {
 	/**
 	 * Returns the configured InsertablesSuggester if any.
 	 * @since 2013.09
+	 * @return CombinedInsertablesSuggester
 	 */
 	public function getInsertablesSuggester() {
+		$allClasses = [];
+
 		$class = $this->getFromConf( 'INSERTABLES', 'class' );
-
-		if ( !$class ) {
-			return null;
+		if ( $class !== null ) {
+			$allClasses[] = $class;
 		}
 
-		if ( !class_exists( $class ) ) {
-			throw new MWException( "InsertablesSuggester class $class does not exist." );
+		$classes = $this->getFromConf( 'INSERTABLES', 'classes' );
+		if ( $classes !== null ) {
+			$allClasses = array_merge( $allClasses, $classes );
 		}
 
-		return new $class();
+		array_unique( $allClasses, SORT_REGULAR );
+
+		$suggesters = [];
+
+		foreach ( $allClasses as $class ) {
+			if ( !class_exists( $class ) ) {
+				throw new MWException( "InsertablesSuggester class $class does not exist." );
+			}
+
+			$suggesters[] = new $class();
+		}
+
+		return new CombinedInsertablesSuggester( $suggesters );
 	}
 
 	/**
@@ -192,7 +207,7 @@ abstract class MessageGroupBase implements MessageGroup {
 	 */
 	public function initCollection( $code ) {
 		$namespace = $this->getNamespace();
-		$messages = array();
+		$messages = [];
 
 		$cache = new MessageGroupCache( $this, $this->getSourceLanguage() );
 		if ( !$cache->exists() ) {
@@ -243,7 +258,7 @@ abstract class MessageGroupBase implements MessageGroup {
 
 	public function getTags( $type = null ) {
 		if ( $type === null ) {
-			$taglist = array();
+			$taglist = [];
 
 			foreach ( $this->getRawTags() as $type => $patterns ) {
 				$taglist[$type] = $this->parseTags( $patterns );
@@ -258,7 +273,7 @@ abstract class MessageGroupBase implements MessageGroup {
 	protected function parseTags( $patterns ) {
 		$messageKeys = $this->getKeys();
 
-		$matches = array();
+		$matches = [];
 
 		/**
 		 * Collect exact keys, no point running them trough string matcher
@@ -291,7 +306,7 @@ abstract class MessageGroupBase implements MessageGroup {
 
 	protected function getRawTags( $type = null ) {
 		if ( !isset( $this->conf['TAGS'] ) ) {
-			return array();
+			return [];
 		}
 
 		$tags = $this->conf['TAGS'];
@@ -303,7 +318,7 @@ abstract class MessageGroupBase implements MessageGroup {
 			return $tags[$type];
 		}
 
-		return array();
+		return [];
 	}
 
 	protected function setTags( MessageCollection $collection ) {
@@ -345,7 +360,7 @@ abstract class MessageGroupBase implements MessageGroup {
 		global $wgTranslateWorkflowStates;
 		if ( !$wgTranslateWorkflowStates ) {
 			// Not configured
-			$conf = array();
+			$conf = [];
 		} else {
 			$conf = $wgTranslateWorkflowStates;
 		}
@@ -377,7 +392,7 @@ abstract class MessageGroupBase implements MessageGroup {
 		}
 
 		$lists = $groupConfiguration['LANGUAGES'];
-		$codes = array(); // The list of languages to return
+		$codes = []; // The list of languages to return
 
 		if ( isset( $lists['blacklist'] ) ) {
 			$blacklist = $lists['blacklist'];
@@ -388,11 +403,11 @@ abstract class MessageGroupBase implements MessageGroup {
 				}
 			} else {
 				// All languages blacklisted. This is very rare but not impossible.
-				$codes = array();
+				$codes = [];
 			}
 		}
 
-		$whitelist = array();
+		$whitelist = [];
 		if ( isset( $lists['whitelist'] ) ) {
 			$whitelist = $lists['whitelist'];
 			if ( $whitelist === '*' ) {

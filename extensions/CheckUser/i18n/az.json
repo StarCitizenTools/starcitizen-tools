@@ -14,7 +14,6 @@
 	"grouppage-checkuser": "{{ns:project}}:Təftişçi",
 	"checkuser-reason": "Səbəb:",
 	"checkuser-reason-api": "API: $1",
-	"checkuser-search": "Axtar",
 	"checkuser-period": "Müddəti:",
 	"checkuser-week-1": "Son həftə",
 	"checkuser-week-2": "son iki həftə",
@@ -25,6 +24,7 @@
 	"checkuser-blocked": "Bloklanmış",
 	"checkuser-gblocked": "Qlobal bloklanmış",
 	"checkuser-locked": "Bloklanıb",
+	"checkuser-search": "Axtar",
 	"checkuser-search-submit": "Axtar",
 	"checkuser-create-action": "yaradılıb"
 }

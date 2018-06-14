@@ -19,10 +19,11 @@
 	var SBP;
 
 	/**
-	 * @class mw.mmv.ui.StripeButtons
-	 * @extends mw.mmv.ui.Element
 	 * Class for buttons which are placed on the metadata stripe (the always visible part of the
 	 * metadata panel).
+	 *
+	 * @class mw.mmv.ui.StripeButtons
+	 * @extends mw.mmv.ui.Element
 	 * @constructor
 	 * @param {jQuery} $container the title block (.mw-mmv-title-contain) which wraps the buttons and all
 	 *  other title elements
@@ -46,9 +47,11 @@
 	SBP = StripeButtons.prototype;
 
 	/**
-	 * @protected
 	 * Creates a new button on the metadata stripe.
+	 *
+	 * @protected
 	 * @param {string} cssClass CSS class name for the button
+	 * @return {jQuery} Button
 	 */
 	SBP.createButton = function ( cssClass ) {
 		var $button;
@@ -56,14 +59,16 @@
 		$button = $( '<a>' )
 			.addClass( 'mw-mmv-stripe-button empty ' + cssClass )
 			// elements are right-floated so we use prepend instead of append to keep the order
-			.prependTo( this.$buttonContainer );
+			.prependTo( this.$buttonContainer )
+			.attr( 'tabindex', '0' );
 
 		return $button;
 	};
 
 	/**
-	 * @protected
 	 * Creates a button linking to the file description page.
+	 *
+	 * @protected
 	 */
 	SBP.initDescriptionPageButton = function () {
 		this.buttons.$descriptionPage = this.createButton(
@@ -74,14 +79,15 @@
 	};
 
 	/**
-	 * @protected
 	 * Runs code for each button, similarly to $.each.
+	 *
+	 * @protected
 	 * @param {function(jQuery, string)} callback a function that will be called with each button
 	 */
 	SBP.eachButton = function ( callback ) {
 		var buttonName;
 		for ( buttonName in this.buttons ) {
-			callback( this.buttons[buttonName], buttonName );
+			callback( this.buttons[ buttonName ], buttonName );
 		}
 	};
 
@@ -99,8 +105,9 @@
 	};
 
 	/**
-	 * @protected
 	 * Updates the button linking to the file page.
+	 *
+	 * @protected
 	 * @param {mw.mmv.model.Image} imageInfo
 	 * @param {mw.mmv.model.Repo} repoInfo
 	 */

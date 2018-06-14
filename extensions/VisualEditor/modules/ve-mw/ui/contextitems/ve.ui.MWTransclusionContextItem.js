@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWTransclusionContextItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -34,7 +34,7 @@ OO.inheritClass( ve.ui.MWTransclusionContextItem, ve.ui.LinearContextItem );
 
 ve.ui.MWTransclusionContextItem.static.name = 'transclusion';
 
-ve.ui.MWTransclusionContextItem.static.icon = 'template';
+ve.ui.MWTransclusionContextItem.static.icon = 'puzzle';
 
 ve.ui.MWTransclusionContextItem.static.label =
 	OO.ui.deferMsg( 'visualeditor-dialogbutton-template-tooltip' );

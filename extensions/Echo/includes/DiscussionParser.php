@@ -1,26 +1,30 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 abstract class EchoDiscussionParser {
 	const HEADER_REGEX = '^(==+)\s*([^=].*)\s*\1$';
 
 	static protected $timestampRegex;
-	static protected $revisionInterpretationCache = array();
+	static protected $revisionInterpretationCache = [];
 	static protected $diffParser;
 
 	/**
 	 * Given a Revision object, generates EchoEvent objects for
 	 * the discussion-related actions that occurred in that Revision.
 	 *
-	 * @param $revision Revision object
+	 * @param Revision $revision
+	 * @param bool $isRevert
 	 * @return null
 	 */
-	static function generateEventsForRevision( $revision ) {
-		$interpretation = self::getChangeInterpretationForRevision( $revision );
+	static function generateEventsForRevision( Revision $revision, $isRevert ) {
+		global $wgEchoMentionsOnMultipleSectionEdits;
+		global $wgEchoMentionOnChanges;
 
 		// use slave database if there is a previous revision
 		if ( $revision->getPrevious() ) {
 			$title = Title::newFromID( $revision->getPage() );
-		// use master database for new page
+			// use master database for new page
 		} else {
 			$title = Title::newFromID( $revision->getPage(), Title::GAID_FOR_UPDATE );
 		}
@@ -30,6 +34,8 @@ abstract class EchoDiscussionParser {
 			return;
 		}
 
+		$interpretation = self::getChangeInterpretationForRevision( $revision );
+
 		$userID = $revision->getUser();
 		$userName = $revision->getUserText();
 		$user = $userID != 0 ? User::newFromId( $userID ) : User::newFromName( $userName, false );
@@ -38,11 +44,28 @@ abstract class EchoDiscussionParser {
 			if ( $action['type'] == 'add-comment' ) {
 				$fullSection = $action['full-section'];
 				$header = self::extractHeader( $fullSection );
-				self::generateMentionEvents( $header, $action['content'], $revision, $user );
+				$userLinks = self::getUserLinks( $action['content'], $title );
+				self::generateMentionEvents( $header, $userLinks, $action['content'], $revision, $user );
 			} elseif ( $action['type'] == 'new-section-with-comment' ) {
 				$content = $action['content'];
 				$header = self::extractHeader( $content );
-				self::generateMentionEvents( $header, $content, $revision, $user );
+				$userLinks = self::getUserLinks( $content, $title );
+				self::generateMentionEvents( $header, $userLinks, $content, $revision, $user );
+			} elseif ( $action['type'] == 'add-section-multiple' && $wgEchoMentionsOnMultipleSectionEdits ) {
+				$content = self::stripHeader( $action['content'] );
+				$content = self::stripSignature( $content );
+				$userLinks = self::getUserLinks( $content, $title );
+				self::generateMentionEvents( $action['header'], $userLinks, $content, $revision, $user );
+			} elseif ( $action['type'] === 'unknown-signed-change' ) {
+				$userLinks = array_diff_key(
+					self::getUserLinks( $action['new_content'], $title ) ?: [],
+					self::getUserLinks( $action['old_content'], $title ) ?: []
+				);
+				$header = self::extractHeader( $action['full-section'] );
+
+				if ( $wgEchoMentionOnChanges ) {
+					self::generateMentionEvents( $header, $userLinks, $action['new_content'], $revision, $user );
+				}
 			}
 		}
 
@@ -50,26 +73,65 @@ abstract class EchoDiscussionParser {
 			$notifyUser = User::newFromName( $title->getText() );
 			// If the recipient is a valid non-anonymous user and hasn't turned
 			// off their notifications, generate a talk page post Echo notification.
-			if ( $notifyUser && $notifyUser->getID() ) {
-				// if this is a minor edit, only notify if the agent doesn't have talk page minor edit notification blocked
+			if ( $notifyUser && $notifyUser->getId() ) {
+				// If this is a minor edit, only notify if the agent doesn't have talk page minor
+				// edit notification blocked
 				if ( !$revision->isMinor() || !$user->isAllowed( 'nominornewtalk' ) ) {
 					$section = self::detectSectionTitleAndText( $interpretation, $title );
 					if ( $section['section-text'] === '' ) {
 						$section['section-text'] = $revision->getComment();
 					}
-					EchoEvent::create( array(
+					EchoEvent::create( [
 						'type' => 'edit-user-talk',
 						'title' => $title,
-						'extra' => array(
-							'revid' => $revision->getID(),
+						'extra' => [
+							'revid' => $revision->getId(),
 							'minoredit' => $revision->isMinor(),
 							'section-title' => $section['section-title'],
 							'section-text' => $section['section-text'],
 							'target-page' => $title->getArticleID(),
-						),
+						],
 						'agent' => $user,
-					) );
+					] );
 				}
+			}
+		}
+
+		// Notify users mentioned in edit summary
+		global $wgEchoMaxMentionsInEditSummary;
+
+		if ( $wgEchoMaxMentionsInEditSummary > 0 && !$user->isBot() && !$isRevert ) {
+			$summaryParser = new EchoSummaryParser();
+			$usersInSummary = $summaryParser->parse( $revision->getComment() );
+
+			// Don't allow pinging yourself
+			unset( $usersInSummary[$userName] );
+
+			$count = 0;
+			$mentionedUsers = [];
+			foreach ( $usersInSummary as $summaryUser ) {
+				if ( $summaryUser->getTalkPage()->equals( $title ) ) {
+					// Users already get a ping when their talk page is edited
+					continue;
+				}
+				if ( $count >= $wgEchoMaxMentionsInEditSummary ) {
+					break;
+				}
+				$mentionedUsers[] = $summaryUser;
+				$count++;
+			}
+
+			if ( $mentionedUsers ) {
+				$info = [
+					'type' => 'mention-summary',
+					'title' => $title,
+					'extra' => [
+						'revid' => $revision->getId(),
+						'mentioned-users' => $mentionedUsers,
+					],
+					'agent' => $user,
+				];
+				EchoEvent::create( $info );
 			}
 		}
 	}
@@ -77,16 +139,13 @@ abstract class EchoDiscussionParser {
 	/**
 	 * Attempts to determine what section title the edit was performed under (if any)
 	 *
-	 * @param $interpretation array Results of self::getChangeInterpretationForRevision
+	 * @param array $interpretation Results of self::getChangeInterpretationForRevision
 	 * @return array Array containing section title and text
-	 * @param Title $title
+	 * @param Title|null $title
 	 */
 	public static function detectSectionTitleAndText( array $interpretation, Title $title = null ) {
-		global $wgLang;
 		$header = $snippet = '';
 		$found = false;
-
-		StubObject::unstub( $wgLang );
 
 		foreach ( $interpretation as $action ) {
 			switch ( $action['type'] ) {
@@ -94,15 +153,17 @@ abstract class EchoDiscussionParser {
 					$header = self::extractHeader( $action['full-section'] );
 					$snippet = self::getTextSnippet(
 						self::stripSignature( self::stripHeader( $action['content'] ), $title ),
-						$wgLang,
-						150 );
+						RequestContext::getMain()->getLanguage(),
+						150,
+						$title );
 					break;
 				case 'new-section-with-comment':
 					$header = self::extractHeader( $action['content'] );
 					$snippet = self::getTextSnippet(
 						self::stripSignature( self::stripHeader( $action['content'] ), $title ),
-						$wgLang,
-						150 );
+						RequestContext::getMain()->getLanguage(),
+						150,
+						$title );
 					break;
 			}
 			if ( $header ) {
@@ -116,73 +177,235 @@ abstract class EchoDiscussionParser {
 			}
 		}
 		if ( $found === false ) {
-			return array( 'section-title' => '', 'section-text' => '' );
+			return [ 'section-title' => '', 'section-text' => '' ];
 		}
 
-		return array( 'section-title' => $header, 'section-text' => $snippet );
+		return [ 'section-title' => $header, 'section-text' => $snippet ];
 	}
 
 	/**
 	 * For an action taken on a talk page, notify users whose user pages
 	 * are linked.
-	 * @param $header string The subject line for the discussion.
-	 * @param $content string The content of the post, as a wikitext string.
-	 * @param $revision Revision object.
-	 * @param $agent User The user who made the comment.
+	 * @param string $header The subject line for the discussion.
+	 * @param array $userLinks
+	 * @param string $content The content of the post, as a wikitext string.
+	 * @param Revision $revision
+	 * @param User $agent The user who made the comment.
 	 */
-	public static function generateMentionEvents( $header, $content, $revision, $agent ) {
+	public static function generateMentionEvents(
+		$header,
+		$userLinks,
+		$content,
+		Revision $revision,
+		User $agent
+	) {
+		global $wgEchoMaxMentionsCount, $wgEchoMentionStatusNotifications;
+
 		$title = $revision->getTitle();
 		if ( !$title ) {
 			return;
 		}
+		$content = self::stripHeader( $content );
+		$content = self::stripSignature( $content, $title );
 
+		if ( !$userLinks ) {
+			return;
+		}
+
+		$userMentions = self::getUserMentions( $title, $revision->getUser( Revision::RAW ), $userLinks );
+		$overallMentionsCount = self::getOverallUserMentionsCount( $userMentions );
+		if ( $overallMentionsCount === 0 ) {
+			return;
+		}
+
+		$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
+
+		if ( $overallMentionsCount > $wgEchoMaxMentionsCount ) {
+			if ( $wgEchoMentionStatusNotifications ) {
+				EchoEvent::create( [
+					'type' => 'mention-failure-too-many',
+					'title' => $title,
+					'extra' => [
+						'max-mentions' => $wgEchoMaxMentionsCount,
+						'section-title' => $header,
+						'notifyAgent' => true
+					],
+					'agent' => $agent,
+				] );
+				$stats->increment( 'echo.event.mention.notification.failure-too-many' );
+			}
+			return;
+		}
+
+		if ( $userMentions['validMentions'] ) {
+			EchoEvent::create( [
+				'type' => 'mention',
+				'title' => $title,
+				'extra' => [
+					'content' => $content,
+					'section-title' => $header,
+					'revid' => $revision->getId(),
+					'mentioned-users' => $userMentions['validMentions'],
+				],
+				'agent' => $agent,
+			] );
+		}
+
+		if ( $wgEchoMentionStatusNotifications ) {
+			// TODO batch?
+			foreach ( $userMentions['validMentions'] as $mentionedUserId ) {
+				EchoEvent::create( [
+					'type' => 'mention-success',
+					'title' => $title,
+					'extra' => [
+						'subject-name' => User::newFromId( $mentionedUserId )->getName(),
+						'section-title' => $header,
+						'revid' => $revision->getId(),
+						'notifyAgent' => true
+					],
+					'agent' => $agent,
+				] );
+				$stats->increment( 'echo.event.mention.notification.success' );
+			}
+
+			// TODO batch?
+			foreach ( $userMentions['anonymousUsers'] as $anonymousUser ) {
+				EchoEvent::create( [
+					'type' => 'mention-failure',
+					'title' => $title,
+					'extra' => [
+						'failure-type' => 'user-anonymous',
+						'subject-name' => $anonymousUser,
+						'section-title' => $header,
+						'revid' => $revision->getId(),
+						'notifyAgent' => true
+					],
+					'agent' => $agent,
+				] );
+				$stats->increment( 'echo.event.mention.notification.failure-user-anonymous' );
+			}
+
+			// TODO batch?
+			foreach ( $userMentions['unknownUsers'] as $unknownUser ) {
+				EchoEvent::create( [
+					'type' => 'mention-failure',
+					'title' => $title,
+					'extra' => [
+						'failure-type' => 'user-unknown',
+						'subject-name' => $unknownUser,
+						'section-title' => $header,
+						'revid' => $revision->getId(),
+						'notifyAgent' => true
+					],
+					'agent' => $agent,
+				] );
+				$stats->increment( 'echo.event.mention.notification.failure-user-unknown' );
+			}
+		}
+	}
+
+	private static function getOverallUserMentionsCount( $userMentions ) {
+		return count( $userMentions, COUNT_RECURSIVE ) - count( $userMentions );
+	}
+
+	/**
+	 * @param Title $title
+	 * @param int $revisionUserId
+	 * @param array $userLinks
+	 * @return array[]
+	 * Set of arrays containing valid mentions and possible intended but failed mentions.
+	 * - [validMentions]: An array of valid users to mention with ID => ID.
+	 * - [unknownUsers]: An array of DBKey strings representing unknown users.
+	 * - [anonymousUsers]: An array of DBKey strings representing anonymous IP users.
+	 */
+	private static function getUserMentions( Title $title, $revisionUserId, array $userLinks ) {
+		global $wgEchoMaxMentionsCount;
+		$userMentions = [
+			'validMentions' => [],
+			'unknownUsers' => [],
+			'anonymousUsers' => [],
+		];
+
+		$count = 0;
+		$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
+
+		foreach ( $userLinks as $dbk => $page_id ) {
+			// If more users are being pinged this is likely a spam/attack vector
+			// Don't send any mention notifications.
+			if ( $count > $wgEchoMaxMentionsCount ) {
+				$stats->increment( 'echo.event.mention.error.tooMany' );
+				break;
+			}
+
+			// we should not add user to 'mention' notification list if
+			// 1. the user link links to a subpage
+			if ( self::hasSubpage( $dbk ) ) {
+				continue;
+			}
+
+			// 2. user is an anonymous IP
+			if ( User::isIP( $dbk ) ) {
+				$userMentions['anonymousUsers'][] = $dbk;
+				$count++;
+				$stats->increment( 'echo.event.mention.error.anonUser' );
+				continue;
+			}
+
+			$user = User::newFromName( $dbk );
+			// 3. the user name is not valid
+			if ( !$user ) {
+				$userMentions['unknownUsers'][] = str_replace( '_', ' ', $dbk );
+				$count++;
+				$stats->increment( 'echo.event.mention.error.invalidUser' );
+				continue;
+			}
+
+			// 4. the user mentions themselves
+			if ( $user->getId() === $revisionUserId ) {
+				$stats->increment( 'echo.event.mention.error.sameUser' );
+				continue;
+			}
+
+			// 5. the user is the owner of the talk page
+			if ( $title->getNamespace() === NS_USER_TALK && $title->getDBkey() === $dbk ) {
+				$stats->increment( 'echo.event.mention.error.ownPage' );
+				continue;
+			}
+
+			// 6. user does not exist
+			if ( $user->getId() === 0 ) {
+				$userMentions['unknownUsers'][] = str_replace( '_', ' ', $dbk );
+				$count++;
+				$stats->increment( 'echo.event.mention.error.unknownUser' );
+				continue;
+			}
+
+			$userMentions['validMentions'][$user->getId()] = $user->getId();
+			$count++;
+		}
+
+		return $userMentions;
+	}
+
+	/**
+	 * @param string $content
+	 * @param Title $title
+	 * @return bool|array
+	 * Array of links in the user namespace with DBKey => ID.
+	 */
+	private static function getUserLinks( $content, Title $title ) {
 		$output = self::parseNonEditWikitext( $content, new Article( $title ) );
 		$links = $output->getLinks();
 
 		if ( !isset( $links[NS_USER] ) || !is_array( $links[NS_USER] ) ) {
-			return;
-		}
-		$mentionedUsers = array();
-		$count = 0;
-
-		foreach ( $links[NS_USER] as $dbk => $page_id ) {
-			$user = User::newFromName( $dbk );
-
-			// we should not add user to 'mention' notification list if
-			// 1. the user name is not valid
-			// 2. the user mentions themselves
-			// 3. the user is the owner of the talk page
-			// 4. user is anonymous
-			if (
-				!$user || $user->isAnon() || $user->getId() == $revision->getUser() ||
-				( $title->getNamespace() === NS_USER_TALK && $title->getDBkey() === $dbk )
-			) {
-				continue;
-			}
-			$mentionedUsers[$user->getId()] = $user->getId();
-			$count++;
-			// If more than 50 users are being pinged this is likely a spam/attack vector
-			// Don't send any mention notifications.
-			if ( $count > 50 ) {
-				return;
-			}
+			return false;
 		}
 
-		if ( !$mentionedUsers ) {
-			return;
-		}
+		return $links[NS_USER];
+	}
 
-		EchoEvent::create( array(
-			'type' => 'mention',
-			'title' => $title,
-			'extra' => array(
-				'content' => $content,
-				'section-title' => $header,
-				'revid' => $revision->getId(),
-				'mentioned-users' => $mentionedUsers,
-			),
-			'agent' => $agent,
-		) );
+	private static function hasSubpage( $dbk ) {
+		return strpos( $dbk, '/' ) !== false;
 	}
 
 	/**
@@ -190,13 +413,13 @@ abstract class EchoDiscussionParser {
 	 *  but not for editing (old wikitext usually)
 	 * Stolen from AbuseFilterVariableHolder
 	 *
-	 * @param $wikitext String
-	 * @param $article Article
+	 * @param string $wikitext
+	 * @param Article $article
 	 *
 	 * @return ParserOutput
 	 */
-	static function parseNonEditWikitext( $wikitext, $article ) {
-		static $cache = array();
+	static function parseNonEditWikitext( $wikitext, Article $article ) {
+		static $cache = [];
 
 		$cacheKey = md5( $wikitext ) . ':' . $article->getTitle()->getPrefixedText();
 
@@ -217,13 +440,13 @@ abstract class EchoDiscussionParser {
 	 * Given a Revision object, returns a talk-page-centric interpretation
 	 * of the changes made in it.
 	 *
-	 * @param $revision Revision object
+	 * @param Revision $revision
 	 * @see EchoDiscussionParser::interpretDiff
-	 * @return Array, see interpretDiff for details.
+	 * @return array see interpretDiff for details.
 	 */
-	static function getChangeInterpretationForRevision( $revision ) {
-		if ( $revision->getID() && isset( self::$revisionInterpretationCache[$revision->getID()] ) ) {
-			return self::$revisionInterpretationCache[$revision->getID()];
+	static function getChangeInterpretationForRevision( Revision $revision ) {
+		if ( $revision->getId() && isset( self::$revisionInterpretationCache[$revision->getId()] ) ) {
+			return self::$revisionInterpretationCache[$revision->getId()];
 		}
 
 		$userID = $revision->getUser();
@@ -233,14 +456,17 @@ abstract class EchoDiscussionParser {
 		if ( $revision->getParentId() ) {
 			$prevRevision = Revision::newFromId( $revision->getParentId() );
 			if ( $prevRevision ) {
-				$prevText = $prevRevision->getText();
+				$prevText = ContentHandler::getContentText( $prevRevision->getContent() );
 			}
 		}
 
-		$changes = self::getMachineReadableDiff( $prevText, $revision->getText() );
+		$changes = self::getMachineReadableDiff(
+			$prevText,
+			ContentHandler::getContentText( $revision->getContent() )
+		);
 		$output = self::interpretDiff( $changes, $user->getName(), $revision->getTitle() );
 
-		self::$revisionInterpretationCache[$revision->getID()] = $output;
+		self::$revisionInterpretationCache[$revision->getId()] = $output;
 
 		return $output;
 	}
@@ -250,10 +476,12 @@ abstract class EchoDiscussionParser {
 	 * in terms of discussion page actions
 	 *
 	 * @todo Expand recognisable actions.
+	 *
 	 * @param array $changes Output of EchoEvent::getMachineReadableDiff
-	 * @param string $user Username
-	 * @param Title $title
-	 * @return Array of associative arrays.
+	 * @param string $username Username
+	 * @param Title|null $title
+	 * @return array[] Array of associative arrays.
+	 *
 	 * Each entry represents an action, which is classified in the 'action' field.
 	 * All types contain a 'content' field except 'unknown'
 	 *  (which instead passes through the machine-readable diff in 'details')
@@ -263,9 +491,8 @@ abstract class EchoDiscussionParser {
 	 *    existing section.
 	 * - new-section-with-comment: A new section is added, containing
 	 *    a single comment signed by the user in question.
-	 * - unknown-signed-addition: Some signed content is added, but it
-	 *    includes section headers, is signed by another user or
-	 *    otherwise confuses the interpretation engine.
+	 * - add-section-multiple: A new section or additions to a section
+	 *    while editing multiple sections at once.
 	 * - unknown-multi-signed-addition: Some signed content is added,
 	 *    but it contains multiple signatures.
 	 * - unknown-unsigned-addition: Some content is added, but it is
@@ -273,12 +500,15 @@ abstract class EchoDiscussionParser {
 	 * - unknown-subtraction: Some content was removed. These actions are
 	 *    not currently analysed.
 	 * - unknown-change: Some content was replaced with other content.
-	 *    These actions are not currently analysed.
+	 * - unknown-signed-change: Same as unknown-change, but signed.
+	 * - unknown-multi-signed-change: Same as unknown-change,
+	 *    but it contains multiple signatures.
 	 * - unknown: Unrecognised change type.
 	 */
-	static function interpretDiff( $changes, $user, Title $title = null ) {
+	static function interpretDiff( $changes, $username, Title $title = null ) {
 		// One extra item in $changes for _info
-		$actions = array();
+		$actions = [];
+		$signedSections = [];
 
 		foreach ( $changes as $index => $change ) {
 			if ( !is_numeric( $index ) ) {
@@ -292,8 +522,8 @@ abstract class EchoDiscussionParser {
 
 			if ( $change['action'] == 'add' ) {
 				$content = trim( $change['content'] );
-				// The \A means the regex must match at the begining of the string.
-				// This is slightly different than ^ which matches begining of each
+				// The \A means the regex must match at the beginning of the string.
+				// This is slightly different than ^ which matches beginning of each
 				// line in multiline mode.
 				$startSection = preg_match( "/\A" . self::HEADER_REGEX . '/um', $content );
 				$sectionCount = self::getSectionCount( $content );
@@ -301,112 +531,214 @@ abstract class EchoDiscussionParser {
 
 				if (
 					count( $signedUsers ) == 1 &&
-					in_array( $user, $signedUsers )
+					in_array( $username, $signedUsers )
 				) {
 					if ( $sectionCount === 0 ) {
+						$signedSections[] = self::getSectionSpan( $change['right-pos'], $changes['_info']['rhs'] );
 						$fullSection = self::getFullSection( $changes['_info']['rhs'], $change['right-pos'] );
-						$actions[] = array(
+						$actions[] = [
 							'type' => 'add-comment',
 							'content' => $content,
 							'full-section' => $fullSection,
-						);
+						];
 					} elseif ( $startSection && $sectionCount === 1 ) {
-						$actions[] = array(
+						$signedSections[] = self::getSectionSpan( $change['right-pos'], $changes['_info']['rhs'] );
+						$actions[] = [
 							'type' => 'new-section-with-comment',
 							'content' => $content,
-						);
+						];
 					} else {
-						$actions[] = array(
-							'type' => 'unknown-signed-addition',
-							'content' => $content,
-						);
+						$nextSectionStart = $change['right-pos'];
+						$sectionData = self::extractSections( $content );
+						foreach ( $sectionData as $section ) {
+							$sectionSpan = self::getSectionSpan( $nextSectionStart, $changes['_info']['rhs'] );
+							$nextSectionStart = $sectionSpan[1] + 1;
+							$sectionSignedUsers = self::extractSignatures( $section['content'], $title );
+							if ( !empty( $sectionSignedUsers ) ) {
+								$signedSections[] = $sectionSpan;
+								if ( !$section['header'] ) {
+									$fullSection = self::getFullSection( $changes['_info']['rhs'], $change['right-pos'] );
+									$section['header'] = self::extractHeader( $fullSection );
+								}
+								$actions[] = [
+									'type' => 'add-section-multiple',
+									'content' => $section['content'],
+									'header' => $section['header'],
+								];
+							} else {
+								$actions[] = [
+									'type' => 'unknown-unsigned-addition',
+									'content' => $section['content'],
+								];
+							}
+						}
 					}
 				} elseif ( count( $signedUsers ) >= 1 ) {
-					$actions[] = array(
+					$actions[] = [
 						'type' => 'unknown-multi-signed-addition',
 						'content' => $content,
-					);
+					];
 				} else {
-					$actions[] = array(
+					$actions[] = [
 						'type' => 'unknown-unsigned-addition',
 						'content' => $content,
-					);
+					];
 				}
 			} elseif ( $change['action'] == 'subtract' ) {
-				$actions[] = array(
+				$actions[] = [
 					'type' => 'unknown-subtraction',
 					'content' => $change['content'],
-				);
+				];
 			} elseif ( $change['action'] == 'change' ) {
-				$actions[] = array(
+				$actions[] = [
 					'type' => 'unknown-change',
 					'old_content' => $change['old_content'],
 					'new_content' => $change['new_content'],
-				);
+					'right-pos' => $change['right-pos'],
+					'full-section' => self::getFullSection( $changes['_info']['rhs'], $change['right-pos'] ),
+				];
+
+				if ( self::hasNewSignature(
+					$change['old_content'],
+					$change['new_content'],
+					$username,
+					$title
+				) ) {
+					$signedSections[] = self::getSectionSpan( $change['right-pos'], $changes['_info']['rhs'] );
+				}
 			} else {
-				$actions[] = array(
+				$actions[] = [
 					'type' => 'unknown',
 					'details' => $change,
-				);
+				];
 			}
 		}
 
-		// $actions['_diff'] = $changes;
-		// unset( $actions['_diff']['_info'] );
+		if ( !empty( $signedSections ) ) {
+			$actions = self::convertToUnknownSignedChanges( $signedSections, $actions );
+		}
 
 		return $actions;
+	}
+
+	static function getSignedUsers( $content, $title ) {
+		return array_keys( self::extractSignatures( $content, $title ) );
+	}
+
+	static function hasNewSignature( $oldContent, $newContent, $username, $title ) {
+		$oldSignedUsers = self::getSignedUsers( $oldContent, $title );
+		$newSignedUsers = self::getSignedUsers( $newContent, $title );
+
+		return !in_array( $username, $oldSignedUsers ) && in_array( $username, $newSignedUsers );
+	}
+
+	/**
+	 * Converts actions of type "unknown-change" to "unknown-signed-change" if the change is in a signed section.
+	 *
+	 * @param array $signedSections Array of arrays containing first and last line number of signed sections
+	 * @param array $actions
+	 * @return array converted actions
+	 */
+	static function convertToUnknownSignedChanges( $signedSections, $actions ) {
+		return array_map( function ( $action ) use( $signedSections ) {
+			if (
+				$action['type'] === 'unknown-change' &&
+				self::isInSignedSection( $action['right-pos'], $signedSections )
+			) {
+				$signedUsers = self::getSignedUsers( $action['new_content'], null );
+				if ( count( $signedUsers ) === 1 ) {
+					$action['type'] = 'unknown-signed-change';
+				} else {
+					$action['type'] = 'unknown-multi-signed-change';
+				}
+			}
+
+			return $action;
+		}, $actions );
+	}
+
+	static function isInSignedSection( $line, $signedSections ) {
+		foreach ( $signedSections as $section ) {
+			if ( $line > $section[0] && $line <= $section[1] ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
 	 * Finds the section that a given line is in.
 	 *
-	 * @param $lines Array of lines in the page.
-	 * @param $offset int The line to find the full section for.
+	 * @param array $lines of lines in the page.
+	 * @param int $offset The line to find the full section for.
 	 * @return string Content of the section.
 	 */
-	static function getFullSection( $lines, $offset ) {
-		$content = $lines[$offset - 1];
-		$headerRegex = '/' . self::HEADER_REGEX . '/um';
-
-		// Expand backwards...
-		$continue = !preg_match( $headerRegex, $lines[$offset - 1] );
-		$i = $offset - 1;
-		while ( $continue && $i > 0 ) {
-			--$i;
-			$line = $lines[$i];
-			$content = "$line\n$content";
-			if ( preg_match( $headerRegex, $line ) ) {
-				$continue = false;
-			}
-		}
-
-		// And then forwards...
-
-		$continue = true;
-		$i = $offset - 1;
-		while ( $continue && $i < count( $lines ) - 1 ) {
-			++$i;
-			$line = $lines[$i];
-			if ( preg_match( $headerRegex, $line ) ) {
-				$continue = false;
-			} else {
-				$content .= "\n$line";
-			}
-		}
+	static function getFullSection( array $lines, $offset ) {
+		$start = self::getSectionStartIndex( $offset, $lines );
+		$end = self::getSectionEndIndex( $offset, $lines );
+		$content = implode( "\n", array_slice( $lines, $start, $end - $start ) );
 
 		return trim( $content, "\n" );
 	}
 
 	/**
+	 * Given a line number and a text, find the first and last line of the section the line number is in.
+	 * If there are subsections, the last line index will be the line before the beginning of the first subsection.
+	 * @param int $offset line number
+	 * @param array $lines
+	 * @return array tuple [$firstLine, $lastLine]
+	 */
+	static function getSectionSpan( $offset, $lines ) {
+		return [
+			self::getSectionStartIndex( $offset, $lines ),
+			self::getSectionEndIndex( $offset, $lines )
+		];
+	}
+
+	/**
+	 * Finds the line number of the start of the section that $offset is in.
+	 * @param int $offset
+	 * @param array $lines
+	 * @return int
+	 */
+	static function getSectionStartIndex( $offset, array $lines ) {
+		for ( $i = $offset - 1; $i >= 0; $i-- ) {
+			if ( self::getSectionCount( $lines[$i] ) ) {
+				break;
+			}
+		}
+
+		return $i;
+	}
+
+	/**
+	 * Finds the line number of the end of the section that $offset is in.
+	 * @param int $offset
+	 * @param array $lines
+	 * @return int
+	 */
+	static function getSectionEndIndex( $offset, array $lines ) {
+		$lastLine = count( $lines );
+		for ( $i = $offset; $i < $lastLine; $i++ ) {
+			if ( self::getSectionCount( $lines[$i] ) ) {
+				break;
+			}
+		}
+
+		return $i;
+	}
+
+	/**
 	 * Gets the number of section headers in a string.
 	 *
-	 * @param $text string The text.
+	 * @param string $text The text.
 	 * @return int Number of section headers found.
 	 */
 	static function getSectionCount( $text ) {
 		$text = trim( $text );
 
-		$matches = array();
+		$matches = [];
 		preg_match_all( '/' . self::HEADER_REGEX . '/um', $text, $matches );
 
 		return count( $matches[0] );
@@ -415,13 +747,13 @@ abstract class EchoDiscussionParser {
 	/**
 	 * Gets the title of a section or sub section
 	 *
-	 * @param $text string The text of the section.
-	 * @return string The title of the section.
+	 * @param string $text The text of the section.
+	 * @return string|false The title of the section or false if not found
 	 */
 	static function extractHeader( $text ) {
 		$text = trim( $text );
 
-		$matches = array();
+		$matches = [];
 
 		if ( !preg_match_all( '/' . self::HEADER_REGEX . '/um', $text, $matches ) ) {
 			return false;
@@ -431,10 +763,53 @@ abstract class EchoDiscussionParser {
 	}
 
 	/**
+	 * Extracts sections and their contents from text.
+	 *
+	 * @param string $text The text to parse.
+	 * @return array[]
+	 * Array of arrays containing sections with header and content.
+	 * - [header]: The full header string of the section or false if there is preceding text without header.
+	 * - [content]: The content of the section including the header string.
+	 */
+	private static function extractSections( $text ) {
+		$matches = [];
+
+		if ( !preg_match_all( '/' . self::HEADER_REGEX . '/um', $text, $matches, PREG_OFFSET_CAPTURE ) ) {
+			return [ [
+				'header' => false,
+				'content' => $text
+			] ];
+		}
+
+		$sectionNum = count( $matches[0] );
+		$sections = [];
+
+		if ( $matches[0][0][1] > 1 ) { // is there text before the first headline?
+			$sections[] = [
+				'header' => false,
+				'content' => substr( $text, 0, $matches[0][0][1] - 1 )
+			];
+		}
+		for ( $i = 0; $i < $sectionNum; $i++ ) {
+			if ( $i + 1 < $sectionNum ) {
+				$content = substr( $text, $matches[0][$i][1], $matches[0][$i + 1][1] - $matches[0][$i][1] );
+			} else {
+				$content = substr( $text, $matches[0][$i][1] );
+			}
+			$sections[] = [
+				'header' => self::extractHeader( $matches[0][$i][0] ),
+				'content' => trim( $content )
+			];
+		}
+
+		return $sections;
+	}
+
+	/**
 	 * Strips out a signature if possible.
 	 *
-	 * @param $text string The wikitext to strip
-	 * @param Title $title
+	 * @param string $text The wikitext to strip
+	 * @param Title|null $title
 	 * @return string
 	 */
 	static function stripSignature( $text, Title $title = null ) {
@@ -453,31 +828,9 @@ abstract class EchoDiscussionParser {
 	}
 
 	/**
-	 * Strips unnecessary indentation and so on from comments
-	 *
-	 * @param $text string The text to strip from
-	 * @return string Stripped wikitext
-	 */
-	static function stripIndents( $text ) {
-		// First strip all indentation from the beginning of lines
-		$text = preg_replace( '/^\s*\:+/m', '', $text );
-
-		// Now if there is only one list item, strip that too
-		$listRegex = '/^\s*(?:[\:#*]\s*)*[#*]/m';
-		$matches = array();
-		if ( preg_match_all( $listRegex, $text, $matches ) ) {
-			if ( count( $matches ) == 1 ) {
-				$text = preg_replace( $listRegex, '', $text );
-			}
-		}
-
-		return $text;
-	}
-
-	/**
 	 * Strips out a section header
-	 * @param $text string The text to strip out the section header from.
-	 * @return string: The same text, with the section header stripped out.
+	 * @param string $text The text to strip out the section header from.
+	 * @return string The same text, with the section header stripped out.
 	 */
 	static function stripHeader( $text ) {
 		$text = preg_replace( '/' . self::HEADER_REGEX . '/um', '', $text );
@@ -488,11 +841,11 @@ abstract class EchoDiscussionParser {
 	/**
 	 * Determines whether the input is a signed comment.
 	 *
-	 * @param $text string The text to check.
-	 * @param $user User|bool If set, will only return true if the comment is
+	 * @param string $text The text to check.
+	 * @param User|bool $user If set, will only return true if the comment is
 	 *  signed by this user.
-	 * @param Title $title
-	 * @return bool: true or false.
+	 * @param Title|null $title
+	 * @return bool
 	 */
 	static function isSignedComment( $text, $user = false, Title $title = null ) {
 		$userData = self::getUserFromLine( $text, $title );
@@ -511,13 +864,13 @@ abstract class EchoDiscussionParser {
 	/**
 	 * Finds the start position, if any, of the timestamp on a line
 	 *
-	 * @param $line string The line to search for a signature on
+	 * @param string $line The line to search for a signature on
 	 * @return int|bool Integer position
 	 */
 	static function getTimestampPosition( $line ) {
 		$timestampRegex = self::getTimestampRegex();
 		$endOfLine = self::getLineEndingRegex();
-		$tsMatches = array();
+		$tsMatches = [];
 		if ( !preg_match(
 			"/$timestampRegex$endOfLine/mu",
 			$line,
@@ -534,10 +887,10 @@ abstract class EchoDiscussionParser {
 	 * Finds differences between $oldText and $newText
 	 * and returns the result in a machine-readable format.
 	 *
-	 * @param $oldText string The "left hand side" of the diff.
-	 * @param $newText string The "right hand side" of the diff.
+	 * @param string $oldText The "left hand side" of the diff.
+	 * @param string $newText The "right hand side" of the diff.
 	 * @throws MWException
-	 * @return Array of changes.
+	 * @return array of changes.
 	 * Each change consists of:
 	 * * An 'action', one of:
 	 *   - add
@@ -558,15 +911,15 @@ abstract class EchoDiscussionParser {
 	/**
 	 * Finds and extracts signatures in $text
 	 *
-	 * @param $text string The text in which to look for signed comments.
-	 * @param Title $title
-	 * @return array. Associative array, the key is the username, the value
+	 * @param string $text The text in which to look for signed comments.
+	 * @param Title|null $title
+	 * @return array Associative array, the key is the username, the value
 	 *  is the last signature that was found.
 	 */
 	static function extractSignatures( $text, Title $title = null ) {
 		$lines = explode( "\n", $text );
 
-		$output = array();
+		$output = [];
 
 		$lineNumber = 0;
 
@@ -596,23 +949,22 @@ abstract class EchoDiscussionParser {
 	 *
 	 * @param string $line Line of text potentially including linked user, user talk,
 	 *  and contribution pages
-	 * @return array Array of users; empty array for none detected
+	 * @return string[] array of usernames, empty array for none detected
 	 */
 	public static function extractUsersFromLine( $line ) {
 		/*
 		 * Signatures can look like anything (as defined by i18n messages
 		 * "signature" & "signature-anon").
 		 * A signature can, e.g., be both a link to user & user-talk page.
-		 *
 		 */
 		// match all title-like excerpts in this line
 		if ( !preg_match_all( '/\[\[([^\[]+)\]\]/', $line, $matches ) ) {
-			return array();
+			return [];
 		}
 
 		$matches = $matches[1];
 
-		$usernames = array();
+		$usernames = [];
 
 		foreach ( $matches as $match ) {
 			/*
@@ -627,7 +979,10 @@ abstract class EchoDiscussionParser {
 			$title = Title::newFromText( $match[0] );
 
 			// figure out if we the link is related to a user
-			if ( $title && ( $title->getNamespace() === NS_USER || $title->getNamespace() === NS_USER_TALK ) ) {
+			if (
+				$title &&
+				( $title->getNamespace() === NS_USER || $title->getNamespace() === NS_USER_TALK )
+			) {
 				$usernames[] = $title->getText();
 			} elseif ( $title && $title->isSpecial( 'Contributions' ) ) {
 				$parts = explode( '/', $title->getText(), 2 );
@@ -646,7 +1001,7 @@ abstract class EchoDiscussionParser {
 	 *  has signed it.
 	 *
 	 * @param string $line The line.
-	 * @param Title $title
+	 * @param Title|null $title
 	 * @return bool|array false for none, Array for success.
 	 * - First element is the position of the signature.
 	 * - Second element is the normalised user name.
@@ -667,12 +1022,17 @@ abstract class EchoDiscussionParser {
 			// discovered the signature from
 			// don't validate the username - anon (IP) is fine!
 			$user = User::newFromName( $username, false );
-			$sig = $wgParser->preSaveTransform( '~~~', $title ?: Title::newMainPage(), $user, new ParserOptions() );
+			$sig = $wgParser->preSaveTransform(
+				'~~~',
+				$title ?: Title::newMainPage(),
+				$user,
+				new ParserOptions()
+			);
 
 			// see if we can find this user's generated signature in the content
 			$pos = strrpos( $line, $sig );
 			if ( $pos !== false ) {
-				return array( $pos, $username );
+				return [ $pos, $username ];
 			}
 			// couldn't find sig, move on to next link excerpt and try there
 		}
@@ -684,10 +1044,10 @@ abstract class EchoDiscussionParser {
 	/**
 	 * Find the last link beginning with a given prefix on a line.
 	 *
-	 * @param $line string The line to search.
-	 * @param $linkPrefix string The prefix to search for.
-	 * @param $failureOffset bool
-	 * @return bool false for failure, array for success.
+	 * @param string $line The line to search.
+	 * @param string $linkPrefix The prefix to search for.
+	 * @param bool $failureOffset
+	 * @return array|bool false for failure, array for success.
 	 * - First element is the string offset of the link.
 	 * - Second element is the user the link refers to.
 	 */
@@ -718,22 +1078,22 @@ abstract class EchoDiscussionParser {
 			// Look for another place.
 			return self::getLinkFromLine( $line, $linkPrefix, $linkPos );
 		} else {
-			return array( $linkPos, $linkUser );
+			return [ $linkPos, $linkUser ];
 		}
 	}
 
 	/**
 	 * Given text including a link, gives the user that that link refers to
 	 *
-	 * @param $text string The text to extract from.
-	 * @param $prefix string The link prefix that was used to find the link.
-	 * @param $offset int Optionally, the offset of the start of the link.
+	 * @param string $text The text to extract from.
+	 * @param string $prefix The link prefix that was used to find the link.
+	 * @param int $offset Optionally, the offset of the start of the link.
 	 * @return bool|string Type description
 	 */
 	static function extractUserFromLink( $text, $prefix, $offset = 0 ) {
 		$userPart = substr( $text, strlen( $prefix ) + $offset );
 
-		$userMatches = array();
+		$userMatches = [];
 		if ( !preg_match(
 			'/^[^\|\]\#]+/u',
 			$userPart,
@@ -763,16 +1123,16 @@ abstract class EchoDiscussionParser {
 	 * Gets a regular expression fragmentmatching characters that
 	 * can appear in a line after the signature.
 	 *
-	 * @return String regular expression fragment.
+	 * @return string regular expression fragment.
 	 */
 	static function getLineEndingRegex() {
-		$ignoredEndings = array(
+		$ignoredEndings = [
 			'\s*',
 			preg_quote( '}' ),
 			preg_quote( '{' ),
 			'\<[^\>]+\>',
 			preg_quote( '{{' ) . '[^}]+' . preg_quote( '}}' ),
-		);
+		];
 
 		$regex = '(?:' . implode( '|', $ignoredEndings ) . ')*';
 
@@ -784,7 +1144,7 @@ abstract class EchoDiscussionParser {
 	 * timestamps as given by ~~~~.
 	 *
 	 * @throws MWException
-	 * @return String regular expression fragment.
+	 * @return string regular expression fragment.
 	 */
 	static function getTimestampRegex() {
 		if ( self::$timestampRegex !== null ) {
@@ -804,7 +1164,7 @@ abstract class EchoDiscussionParser {
 		// Trim off the timezone to replace at the end
 		$output = $exemplarTimestamp;
 		$tzRegex = '/\s*\(\w+\)\s*$/';
-		$tzMatches = array();
+		$tzMatches = [];
 		if ( preg_match( $tzRegex, $output, $tzMatches ) ) {
 			$output = preg_replace( $tzRegex, '', $output );
 		}
@@ -827,31 +1187,46 @@ abstract class EchoDiscussionParser {
 
 	/**
 	 * Parse wikitext into truncated plain text.
-	 * @param $text string
+	 * @param string $text
 	 * @param Language $lang
-	 * @param $length int default 150
+	 * @param int $length default 150
+	 * @param Title|null $title Page from which the text snippet is being extracted
 	 * @return string
 	 */
-	static function getTextSnippet( $text, Language $lang, $length = 150 ) {
+	static function getTextSnippet( $text, Language $lang, $length = 150, $title = null ) {
 		// Parse wikitext
-		$html = MessageCache::singleton()->parse( $text )->getText();
-		// Remove HTML tags and decode HTML entities
-		$plaintext = trim( html_entity_decode( strip_tags( $html ), ENT_QUOTES ) );
+		$html = MessageCache::singleton()->parse( $text, $title )->getText( [
+			'enableSectionEditLinks' => false
+		] );
+		$plaintext = trim( Sanitizer::stripAllTags( $html ) );
 		return $lang->truncate( $plaintext, $length );
 	}
 
 	/**
 	 * Parse an edit summary into truncated plain text.
-	 * @param $text string
+	 * @param string $text
 	 * @param Language $lang
-	 * @param $length int default 150
+	 * @param int $length default 150
 	 * @return string
 	 */
 	static function getTextSnippetFromSummary( $text, Language $lang, $length = 150 ) {
 		// Parse wikitext with summary parser
 		$html = Linker::formatLinksInComment( Sanitizer::escapeHtmlAllowEntities( $text ) );
-		// Remove HTML tags and decode HTML entities
-		$plaintext = trim( html_entity_decode( strip_tags( $html ), ENT_QUOTES ) );
+		$plaintext = trim( Sanitizer::stripAllTags( $html ) );
 		return $lang->truncate( $plaintext, $length );
+	}
+
+	/**
+	 * Extract an edit excerpt from a revision
+	 *
+	 * @param Revision $revision
+	 * @param Language $lang
+	 * @param int $length
+	 * @return string
+	 */
+	public static function getEditExcerpt( Revision $revision, Language $lang, $length = 150 ) {
+		$interpretation = self::getChangeInterpretationForRevision( $revision );
+		$section = self::detectSectionTitleAndText( $interpretation );
+		return $lang->truncate( $section['section-title'] . ' ' . $section['section-text'], $length );
 	}
 }

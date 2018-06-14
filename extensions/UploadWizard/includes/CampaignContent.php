@@ -9,7 +9,6 @@
  * @author Ori Livneh <ori@wikimedia.org>
  */
 
-
 /**
  * Represents the configuration of an Upload Campaign
  */
@@ -22,8 +21,8 @@ class CampaignContent extends JsonContent {
 	/**
 	 * Checks user input JSON to make sure that it produces a valid campaign object
 	 *
-	 * @throws JsonSchemaException: If invalid.
-	 * @return bool: True if valid.
+	 * @throws JsonSchemaException If invalid.
+	 * @return bool True if valid.
 	 */
 	function validate() {
 		$campaign = $this->getJsonData();
@@ -31,14 +30,14 @@ class CampaignContent extends JsonContent {
 			throw new JsonSchemaException( wfMessage( 'eventlogging-invalid-json' )->parse() );
 		}
 
-		$schema = include ( __DIR__ . '/CampaignSchema.php' );
+		$schema = include __DIR__ . '/CampaignSchema.php';
 
 		// Only validate fields we care about
 		$campaignFields = array_keys( $schema['properties'] );
 
 		$fullConfig = UploadWizardConfig::getConfig();
 
-		$defaultCampaignConfig = array();
+		$defaultCampaignConfig = [];
 
 		foreach ( $fullConfig as $key => $value ) {
 			if ( in_array( $key, $campaignFields ) ) {
@@ -47,11 +46,11 @@ class CampaignContent extends JsonContent {
 		}
 
 		$mergedConfig = UploadWizardConfig::array_replace_sanely( $defaultCampaignConfig, $campaign );
-		return efSchemaValidate( $mergedConfig, $schema );
+		return EventLogging::schemaValidate( $mergedConfig, $schema );
 	}
 
 	/**
-	 * @return bool: Whether content is valid JSON Schema.
+	 * @return bool Whether content is valid JSON Schema.
 	 */
 	function isValid() {
 		try {
@@ -63,10 +62,15 @@ class CampaignContent extends JsonContent {
 
 	/**
 	 * Override getParserOutput, since we require $title to generate our output
+	 * @param Title $title
+	 * @param int|null $revId
+	 * @param ParserOptions|null $options
+	 * @param bool $generateHtml
+	 * @return ParserOutput
 	 */
 	function getParserOutput( Title $title,
 		$revId = null,
-		ParserOptions $otpions = null, $generateHtml = true
+		ParserOptions $options = null, $generateHtml = true
 	) {
 		$po = new ParserOutput();
 		$campaign = new UploadWizardCampaign( $title, $this->getJsonData() );
@@ -91,7 +95,6 @@ class CampaignContent extends JsonContent {
 	}
 
 	function generateHtml( $campaign ) {
-
 		$formatter = new CampaignPageFormatter( $campaign );
 
 		return $formatter->generateReadHtml();

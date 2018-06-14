@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Njardarlogar"
+		]
+	},
+	"revisionslider": "Versjonsglidar",
+	"revisionslider-preference-disable": "Ikkje vis versjonsglidaren",
+	"revisionslider-toggle-label": "Gå gjennom historikken",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte}}",
+	"revisionslider-label-date": "Dato",
+	"revisionslider-label-page-size": "Sidestorleik",
+	"revisionslider-label-change-size": "Endringsstorleik",
+	"revisionslider-label-comment": "Endringssamandrag",
+	"revisionslider-label-username": "{{GENDER:$1|Brukarnamn}}",
+	"revisionslider-minoredit": "Endringa er småplukk",
+	"revisionslider-loading-failed": "Versjonsglidaren kunne ikkja lastast",
+	"revisionslider-toggle-title-expand": "Opna versjonsglidaren",
+	"revisionslider-toggle-title-collapse": "Slå saman versjonsglidaren",
+	"revisionslider-turn-on-auto-expand-title": "Vid ut versjonsglidaren automatisk",
+	"revisionslider-turn-off-auto-expand-title": "Ikkje vid ut versjonsglidaren automatisk",
+	"revisionslider-arrow-tooltip-newer": "Sjå nyare versjonar",
+	"revisionslider-arrow-tooltip-older": "Sjå eldre versjonar",
+	"revisionslider-show-help-tooltip": "Vis hjelpetekst",
+	"revisionslider-help-dialog-slide1": "Versjonsglidaren hjelper deg med å navigera gjennom og samanlikna versjonar på skilnadsvisinga. Han er basert på eit [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider ynske] frå tyskspråklege wikimedianarar. Attendemelding vert sett stor pris på [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider her].",
+	"revisionslider-tutorial": "Rettleiing for versjonsglidaren",
+	"revisionslider-previous-dialog": "Førre",
+	"revisionslider-next-dialog": "Neste",
+	"revisionslider-close-dialog": "Lat att"
+}

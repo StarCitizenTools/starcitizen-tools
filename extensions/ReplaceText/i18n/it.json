@@ -5,7 +5,8 @@
 			"Civvì",
 			"Darth Kule",
 			"Marco 27",
-			"Malore"
+			"Malore",
+			"Nemo bis"
 		]
 	},
 	"replacetext": "Sostituzione testo",
@@ -18,7 +19,7 @@
 	"replacetext_optionalfilters": "Filtri opzionali:",
 	"replacetext_categorysearch": "Sostituire solo nella categoria:",
 	"replacetext_prefixsearch": "Sostituire solo nelle pagine con il prefisso:",
-	"replacetext_editpages": "Sostituire il testo nella pagina di contenuti",
+	"replacetext_editpages": "Sostituire il testo nel contenuto delle pagine",
 	"replacetext_movepages": "Sostituisci il testo nei titoli delle pagine, quando possibile",
 	"replacetext_givetarget": "È necessario specificare il testo da sostituire.",
 	"replacetext_nonamespace": "È necessario selezionare almeno un namespace",

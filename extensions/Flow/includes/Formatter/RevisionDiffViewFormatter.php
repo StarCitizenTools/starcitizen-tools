@@ -28,6 +28,10 @@ class RevisionDiffViewFormatter {
 
 	/**
 	 * Diff would format against two revisions
+	 * @param FormatterRow $newRow
+	 * @param FormatterRow $oldRow
+	 * @param IContextSource $ctx
+	 * @return array
 	 */
 	public function formatApi( FormatterRow $newRow, FormatterRow $oldRow, IContextSource $ctx ) {
 		$oldRes = $this->revisionViewFormatter->formatApi( $oldRow, $ctx );
@@ -67,14 +71,14 @@ class RevisionDiffViewFormatter {
 			)->getLocalURL();
 		}
 
-		return array(
+		return [
 			'new' => $newRes,
 			'old' => $oldRes,
 			'diff_content' => $differenceEngine->getDiffBody(),
-			'links' => array(
+			'links' => [
 				'previous' => $prevLink,
 				'next' => $nextLink,
-			),
-		);
+			],
+		];
 	}
 }

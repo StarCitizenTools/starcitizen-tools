@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWSaveDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -12,7 +12,7 @@
  * noted otherwise.
  *
  * @class
- * @extends ve.ui.FragmentDialog
+ * @extends OO.ui.ProcessDialog
  *
  * @constructor
  * @param {Object} [config] Config options
@@ -22,13 +22,19 @@ ve.ui.MWSaveDialog = function VeUiMwSaveDialog( config ) {
 	ve.ui.MWSaveDialog.super.call( this, config );
 
 	// Properties
-	this.editSummaryByteLimit = 255;
+	this.editSummaryByteLimit = mw.config.get( 'wgCommentByteLimit' );
+	this.editSummaryCodePointLimit = mw.config.get( 'wgCommentCodePointLimit' );
 	this.restoring = false;
 	this.messages = {};
 	this.setupDeferred = $.Deferred();
-	this.target = null;
 	this.checkboxesByName = null;
 	this.changedEditSummary = false;
+	this.canReview = false;
+	this.canPreview = false;
+	this.hasDiff = false;
+	this.diffElement = null;
+	this.diffElementPromise = null;
+	this.getDiffElementPromise = null;
 
 	// Initialization
 	this.$element.addClass( 've-ui-mwSaveDialog' );
@@ -36,7 +42,7 @@ ve.ui.MWSaveDialog = function VeUiMwSaveDialog( config ) {
 
 /* Inheritance */
 
-OO.inheritClass( ve.ui.MWSaveDialog, ve.ui.FragmentDialog );
+OO.inheritClass( ve.ui.MWSaveDialog, OO.ui.ProcessDialog );
 
 /* Static Properties */
 
@@ -45,34 +51,51 @@ ve.ui.MWSaveDialog.static.name = 'mwSave';
 ve.ui.MWSaveDialog.static.title =
 	OO.ui.deferMsg( 'visualeditor-savedialog-title-save' );
 
+ve.ui.MWSaveDialog.static.feedbackUrl = 'https://www.mediawiki.org/wiki/Talk:VisualEditor/Diffs';
+
 ve.ui.MWSaveDialog.static.actions = [
 	{
 		action: 'save',
-		label: OO.ui.deferMsg( 'visualeditor-savedialog-label-save' ),
-		flags: [ 'primary', 'constructive' ],
-		modes: [ 'save', 'review' ],
-		accessKey: 's'
+		// May be overridden by config.saveButtonLabel
+		label: OO.ui.deferMsg( 'visualeditor-savedialog-label-review' ),
+		flags: [ 'primary', 'progressive' ],
+		modes: [ 'save', 'review', 'preview' ]
 	},
 	{
 		label: OO.ui.deferMsg( 'visualeditor-savedialog-label-resume-editing' ),
 		flags: [ 'safe', 'back' ],
-		modes: [ 'save', 'review', 'conflict' ]
+		modes: [ 'save', 'review', 'preview', 'conflict' ]
 	},
 	{
 		action: 'review',
 		label: OO.ui.deferMsg( 'visualeditor-savedialog-label-review' ),
-		modes: 'save'
+		modes: [ 'save', 'preview' ]
+	},
+	{
+		action: 'preview',
+		label: OO.ui.deferMsg( 'showpreview' ),
+		modes: [ 'save', 'review' ]
 	},
 	{
 		action: 'approve',
 		label: OO.ui.deferMsg( 'visualeditor-savedialog-label-review-good' ),
-		modes: 'review'
+		modes: [ 'review', 'preview' ]
 	},
 	{
 		action: 'resolve',
 		label: OO.ui.deferMsg( 'visualeditor-savedialog-label-resolve-conflict' ),
-		flags: [ 'primary', 'constructive' ],
+		flags: [ 'primary', 'progressive' ],
 		modes: 'conflict'
+	},
+	{
+		action: 'report',
+		label: OO.ui.deferMsg( 'visualeditor-savedialog-label-visual-diff-report' ),
+		flags: [ 'progressive' ],
+		modes: 'review',
+		framed: false,
+		icon: 'feedback',
+		classes: [ 've-ui-mwSaveDialog-visualDiffFeedback' ],
+		href: ve.ui.MWSaveDialog.static.feedbackUrl
 	}
 ];
 
@@ -91,6 +114,11 @@ ve.ui.MWSaveDialog.static.actions = [
  */
 
 /**
+ * @event preview
+ * Emitted when the user clicks the show preview button
+ */
+
+/**
  * @event resolve
  * Emitted when the user clicks the resolve conflict button
  */
@@ -105,20 +133,165 @@ ve.ui.MWSaveDialog.static.actions = [
 /**
  * Set review content and show review panel.
  *
- * @param {string} content Diff HTML or wikitext
+ * @param {jQuery.Promise} wikitextDiffPromise Wikitext diff HTML promise
+ * @param {jQuery.Promise} visualDiffGeneratorPromise Visual diff promise
+ * @param {HTMLDocument} [baseDoc] Base document against which to normalise links when rendering visualDiff
  */
-ve.ui.MWSaveDialog.prototype.setDiffAndReview = function ( content ) {
-	this.$reviewViewer.empty().append( content );
-	this.actions.setAbilities( { approve: true } );
+ve.ui.MWSaveDialog.prototype.setDiffAndReview = function ( wikitextDiffPromise, visualDiffGeneratorPromise, baseDoc ) {
+	var dialog = this;
+
+	this.clearDiff();
+
+	function createDiffElement( visualDiff ) {
+		var diffElement = new ve.ui.DiffElement( visualDiff );
+		diffElement.$document.addClass( 'mw-body-content mw-parser-output' );
+		// Run styles so links render with their appropriate classes
+		ve.init.platform.linkCache.styleParsoidElements( diffElement.$document, baseDoc );
+		return diffElement;
+	}
+
+	// Visual diff
+	this.$reviewVisualDiff.append( new OO.ui.ProgressBarWidget().$element );
+	// Don't generate the DiffElement until the tab is switched to
+	this.getDiffElementPromise = function () {
+		return visualDiffGeneratorPromise.then( function ( visualDiffGenerator ) {
+			return createDiffElement( visualDiffGenerator() );
+		} );
+	};
+
+	this.baseDoc = baseDoc;
+
+	// Wikitext diff
+	this.$reviewWikitextDiff.append( new OO.ui.ProgressBarWidget().$element );
+	wikitextDiffPromise.then( function ( wikitextDiff ) {
+		if ( wikitextDiff ) {
+			dialog.$reviewWikitextDiff.empty().append( wikitextDiff );
+		} else {
+			dialog.$reviewWikitextDiff.empty().append(
+				$( '<div>' ).addClass( 've-ui-mwSaveDialog-no-changes' ).text( ve.msg( 'visualeditor-diff-no-changes' ) )
+			);
+		}
+	}, function ( error ) {
+		dialog.$reviewWikitextDiff.empty().append( error );
+	} ).always( function () {
+		dialog.updateSize();
+	} );
+
+	this.hasDiff = true;
 	this.popPending();
 	this.swapPanel( 'review' );
+};
+
+/**
+ * Set preview content and show preview panel.
+ *
+ * @param {HTMLDocument|string} docOrMsg Document to preview, or error message
+ * @param {HTMLDocument} [baseDoc] Base document against which to normalise links, if document provided
+ */
+ve.ui.MWSaveDialog.prototype.showPreview = function ( docOrMsg, baseDoc ) {
+	var body, contents, $heading, redirectMeta,
+		$redirect = $(),
+		categories = [],
+		modules = [];
+
+	if ( docOrMsg instanceof HTMLDocument ) {
+		// Extract required modules for stylesheet tags (avoids re-loading styles)
+		Array.prototype.forEach.call( docOrMsg.head.querySelectorAll( 'link[rel~=stylesheet]' ), function ( link ) {
+			var uri = new mw.Uri( link.href );
+			if ( uri.query.modules ) {
+				modules = modules.concat( ve.expandModuleNames( uri.query.modules ) );
+			}
+		} );
+		// Remove skin-specific modules (T187075)
+		modules = modules.filter( function ( module ) {
+			return module.indexOf( 'skins.' ) !== 0;
+		} );
+		mw.loader.using( modules );
+		body = docOrMsg.body;
+		// Take a snapshot of all categories
+		Array.prototype.forEach.call( body.querySelectorAll( 'link[rel~="mw:PageProp/Category"]' ), function ( element ) {
+			categories.push( ve.dm.MWCategoryMetaItem.static.toDataElement( [ element ] ).attributes.category );
+		} );
+		// Import body to current document, then resolve attributes against original document (parseDocument called #fixBase)
+		document.adoptNode( body );
+
+		// TODO: This code is very similar to ve.ui.PreviewElement+ve.ui.MWPreviewElement
+		ve.resolveAttributes( body, docOrMsg, ve.dm.Converter.static.computedAttributes );
+
+		// Remove metadata
+		contents = ve.filterMetaElements( Array.prototype.slice.call( body.childNodes ) );
+
+		$heading = $( '<h1>' ).addClass( 'firstHeading' );
+
+		// Document title will only be set if wikitext contains {{DISPLAYTITLE}}
+		if ( docOrMsg.title ) {
+			// HACK: Parse title as it can contain basic wikitext (T122976)
+			new mw.Api().post( {
+				action: 'parse',
+				title: ve.init.target.pageName,
+				prop: 'displaytitle',
+				text: '{{DISPLAYTITLE:' + docOrMsg.title + '}}\n'
+			} ).then( function ( response ) {
+				if ( ve.getProp( response, 'parse', 'displaytitle' ) ) {
+					$heading.html( response.parse.displaytitle );
+				}
+			} );
+		}
+
+		// Redirect
+		redirectMeta = body.querySelector( 'link[rel="mw:PageProp/redirect"]' );
+		if ( redirectMeta ) {
+			$redirect = ve.init.mw.ArticleTarget.static.buildRedirectMsg(
+				ve.dm.MWInternalLinkAnnotation.static.getTargetDataFromHref(
+					redirectMeta.getAttribute( 'href' ),
+					document
+				).title
+			);
+		}
+
+		this.$previewViewer.empty().append(
+			// TODO: This won't work with formatted titles (T122976)
+			$heading.text( docOrMsg.title || mw.Title.newFromText( ve.init.target.pageName ).getPrefixedText() ),
+			$redirect,
+			$( '<div>' ).addClass( 'mw-content-' + mw.config.get( 'wgVisualEditor' ).pageLanguageDir ).append(
+				contents
+			)
+		);
+
+		if ( categories.length ) {
+			// Simple category list rendering
+			this.$previewViewer.append(
+				$( '<div>' ).addClass( 'catlinks' ).append(
+					document.createTextNode( ve.msg( 'pagecategories', categories.length ) + ve.msg( 'colon-separator' ) ),
+					$( '<ul>' ).append( categories.map( function ( category ) {
+						var title = mw.Title.newFromText( category );
+						return $( '<li>' ).append( $( '<a>' ).attr( 'rel', 'mw:WikiLink' ).attr( 'href', title.getUrl() ).text( title.getMainText() ) );
+					} ) )
+				)
+			);
+		}
+
+		ve.targetLinksToNewWindow( this.$previewViewer[ 0 ] );
+		// Add styles so links render with their appropriate classes
+		ve.init.platform.linkCache.styleParsoidElements( this.$previewViewer, baseDoc );
+
+		// Run hooks so other things can alter the document
+		mw.hook( 'wikipage.content' ).fire( this.$previewViewer );
+	} else {
+		this.$previewViewer.empty().append(
+			$( '<em>' ).text( docOrMsg )
+		);
+	}
+
+	this.popPending();
+	this.swapPanel( 'preview' );
 };
 
 /**
  * @inheritdoc
  */
 ve.ui.MWSaveDialog.prototype.pushPending = function () {
-	this.getActions().setAbilities( { review: false } );
+	this.getActions().setAbilities( { review: false, preview: false } );
 	return ve.ui.MWSaveDialog.super.prototype.pushPending.call( this );
 };
 
@@ -128,7 +301,7 @@ ve.ui.MWSaveDialog.prototype.pushPending = function () {
 ve.ui.MWSaveDialog.prototype.popPending = function () {
 	var ret = ve.ui.MWSaveDialog.super.prototype.popPending.call( this );
 	if ( !this.isPending() ) {
-		this.getActions().setAbilities( { review: true } );
+		this.getActions().setAbilities( { review: true, preview: true } );
 	}
 	return ret;
 };
@@ -137,53 +310,65 @@ ve.ui.MWSaveDialog.prototype.popPending = function () {
  * Clear the diff displayed in the review panel, if any.
  */
 ve.ui.MWSaveDialog.prototype.clearDiff = function () {
-	this.$reviewViewer.empty();
+	this.$reviewWikitextDiff.empty();
+	this.$reviewVisualDiff.empty();
+	this.$previewViewer.empty();
+	this.hasDiff = false;
+	this.diffElement = null;
+	this.diffElementPromise = null;
+	this.getDiffElementPromise = null;
 };
 
 /**
  * Swap state in the save dialog.
  *
- * @param {string} panel One of 'save', 'review', 'conflict' or 'nochanges'
- * @return {jQuery} The now active panel
+ * @param {string} panel One of 'save', 'review' or 'conflict'
+ * @param {boolean} [noFocus] Don't attempt to focus anything (e.g. while setting up)
  * @throws {Error} Unknown saveDialog panel
  */
-ve.ui.MWSaveDialog.prototype.swapPanel = function ( panel ) {
+ve.ui.MWSaveDialog.prototype.swapPanel = function ( panel, noFocus ) {
 	var currentEditSummaryWikitext,
+		mode = panel,
 		size = 'medium',
 		dialog = this,
 		panelObj = dialog[ panel + 'Panel' ];
 
-	if ( ( [ 'save', 'review', 'conflict', 'nochanges' ].indexOf( panel ) ) === -1 ) {
+	if ( ( [ 'save', 'review', 'preview', 'conflict' ].indexOf( panel ) ) === -1 ) {
 		throw new Error( 'Unknown saveDialog panel: ' + panel );
 	}
 
 	// Update the window title
 	// The following messages can be used here:
-	// visualeditor-savedialog-title-save
-	// visualeditor-savedialog-title-reviews
 	// visualeditor-savedialog-title-conflict
-	// visualeditor-savedialog-title-nochanges
+	// visualeditor-savedialog-title-preview
+	// visualeditor-savedialog-title-review
+	// visualeditor-savedialog-title-save
 	this.title.setLabel( ve.msg( 'visualeditor-savedialog-title-' + panel ) );
 
 	// Reset save button if we disabled it for e.g. unrecoverable spam error
 	this.actions.setAbilities( { save: true } );
 
-	// On panels without inputs, ensure the dialog is focused so events
-	// are captured, e.g. 'Esc' to close
-	this.$content[ 0 ].focus();
+	if ( !noFocus ) {
+		// On panels without inputs, ensure the dialog is focused so events
+		// are captured, e.g. 'Esc' to close
+		this.$content[ 0 ].focus();
+	}
 
 	switch ( panel ) {
 		case 'save':
-			this.actions.setMode( 'save' );
-			// HACK: FF needs *another* defer
-			setTimeout( function () {
-				dialog.editSummaryInput.moveCursorToEnd();
-			} );
+			if ( !noFocus && this.panels.getCurrentItem() !== this.savePanel ) {
+				// HACK: FF needs *another* defer
+				setTimeout( function () {
+					dialog.editSummaryInput.moveCursorToEnd();
+				} );
+			}
 			break;
 		case 'conflict':
-			this.actions
-				.setAbilities( { save: false } )
-				.setMode( 'conflict' );
+			this.actions.setAbilities( { save: false } );
+			break;
+		case 'preview':
+			size = 'full';
+			this.previewPanel.$element[ 0 ].focus();
 			break;
 		case 'review':
 			size = 'larger';
@@ -197,7 +382,7 @@ ve.ui.MWSaveDialog.prototype.swapPanel = function ( panel ) {
 
 				if ( !currentEditSummaryWikitext || currentEditSummaryWikitext.trim() === '' ) {
 					// Don't bother with an API request for an empty summary
-					this.$reviewEditSummary.parent().addClass( 'oo-ui-element-hidden' );
+					this.$reviewEditSummary.text( ve.msg( 'visualeditor-savedialog-review-nosummary' ) );
 				} else {
 					this.$reviewEditSummary.parent()
 						.removeClass( 'oo-ui-element-hidden' )
@@ -209,6 +394,7 @@ ve.ui.MWSaveDialog.prototype.swapPanel = function ( panel ) {
 						if ( result.parse.parsedsummary[ '*' ] === '' ) {
 							dialog.$reviewEditSummary.parent().addClass( 'oo-ui-element-hidden' );
 						} else {
+							// Intentionally treated as HTML
 							dialog.$reviewEditSummary.html( ve.msg( 'parentheses', result.parse.parsedsummary[ '*' ] ) );
 						}
 					} ).fail( function () {
@@ -219,9 +405,9 @@ ve.ui.MWSaveDialog.prototype.swapPanel = function ( panel ) {
 					} );
 				}
 			}
-			/* falls through */
-		case 'nochanges':
-			this.actions.setMode( 'review' );
+			setTimeout( function () {
+				dialog.updateReviewMode();
+			} );
 			break;
 	}
 
@@ -229,9 +415,20 @@ ve.ui.MWSaveDialog.prototype.swapPanel = function ( panel ) {
 	this.panels.setItem( panelObj );
 	this.setSize( size );
 
-	mw.hook( 've.saveDialog.stateChanged' ).fire();
+	// Set mode after setting size so that the footer is measured correctly
+	this.actions.setMode( mode );
 
-	return dialog;
+	// Only show preview in source mode
+	this.actions.forEach( { actions: 'preview' }, function ( action ) {
+		action.toggle( dialog.canPreview );
+	} );
+
+	// Diff API doesn't support section=new
+	this.actions.forEach( { actions: 'review' }, function ( action ) {
+		action.toggle( dialog.canReview );
+	} );
+
+	mw.hook( 've.saveDialog.stateChanged' ).fire();
 };
 
 /**
@@ -251,7 +448,7 @@ ve.ui.MWSaveDialog.prototype.showMessage = function ( name, message, options ) {
 		if ( options.wrap === undefined ) {
 			options.wrap = 'warning';
 		}
-		$message = $( '<div class="ve-ui-mwSaveDialog-message"></div>' );
+		$message = $( '<div>' ).addClass( 've-ui-mwSaveDialog-message' );
 		if ( options.wrap !== false ) {
 			$message.append( $( '<p>' ).append(
 				// visualeditor-savedialog-label-error
@@ -265,6 +462,12 @@ ve.ui.MWSaveDialog.prototype.showMessage = function ( name, message, options ) {
 		}
 		this.$saveMessages.append( $message );
 
+		$message.slideDown( {
+			progress: this.updateSize.bind( this )
+		} );
+
+		this.swapPanel( 'save' );
+
 		this.messages[ name ] = $message;
 	}
 };
@@ -276,7 +479,9 @@ ve.ui.MWSaveDialog.prototype.showMessage = function ( name, message, options ) {
  */
 ve.ui.MWSaveDialog.prototype.clearMessage = function ( name ) {
 	if ( this.messages[ name ] ) {
-		this.messages[ name ].remove();
+		this.messages[ name ].slideUp( {
+			progress: this.updateSize.bind( this )
+		} );
 		delete this.messages[ name ];
 	}
 };
@@ -301,8 +506,7 @@ ve.ui.MWSaveDialog.prototype.reset = function () {
 	if ( this.checkboxesByName.wpMinoredit ) {
 		this.checkboxesByName.wpMinoredit.setSelected( false );
 	}
-	// Clear the diff
-	this.$reviewViewer.empty();
+	this.clearDiff();
 };
 
 /**
@@ -339,8 +543,8 @@ ve.ui.MWSaveDialog.prototype.setEditSummary = function ( summary ) {
  * @inheritdoc
  */
 ve.ui.MWSaveDialog.prototype.initialize = function () {
-	var saveAccessKey,
-		dialog = this;
+	var dialog = this,
+		mwString = require( 'mediawiki.String' );
 
 	// Parent method
 	ve.ui.MWSaveDialog.super.prototype.initialize.call( this );
@@ -357,16 +561,16 @@ ve.ui.MWSaveDialog.prototype.initialize = function () {
 	// Byte counter in edit summary
 	this.editSummaryCountLabel = new OO.ui.LabelWidget( {
 		classes: [ 've-ui-mwSaveDialog-editSummary-count' ],
-		label: String( this.editSummaryByteLimit ),
-		title: ve.msg( 'visualeditor-editsummary-bytes-remaining' )
+		label: String( this.editSummaryCodePointLimit || this.editSummaryByteLimit ),
+		title: ve.msg( this.editSummaryCodePointLimit ?
+			'visualeditor-editsummary-characters-remaining' : 'visualeditor-editsummary-bytes-remaining' )
 	} );
 
 	// Save panel
 	this.$editSummaryLabel = $( '<div>' ).addClass( 've-ui-mwSaveDialog-summaryLabel' )
 		.html( ve.init.platform.getParsedMessage( 'summary' ) )
-		.find( 'a' ).attr( 'target', '_blank' ).end();
-	this.editSummaryInput = new OO.ui.TextInputWidget( {
-		multiline: true,
+		.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' ).end();
+	this.editSummaryInput = new OO.ui.MultilineTextInputWidget( {
 		placeholder: ve.msg( 'visualeditor-editsummary' ),
 		classes: [ 've-ui-mwSaveDialog-summary' ],
 		inputFilter: function ( value ) {
@@ -378,39 +582,58 @@ ve.ui.MWSaveDialog.prototype.initialize = function () {
 	this.editSummaryInput.$input.on( 'keypress', function ( e ) {
 		if ( e.which === OO.ui.Keys.ENTER ) {
 			e.preventDefault();
+
+			dialog.showMessage(
+				'keyboard-shortcut-submit',
+				$( '<p>' ).msg(
+					'visualeditor-savedialog-keyboard-shortcut-submit',
+					new ve.ui.Trigger( ve.ui.commandHelpRegistry.lookup( 'dialogConfirm' ).shortcuts[ 0 ] ).getMessage()
+				),
+				{ wrap: false }
+			);
 		}
 	} );
-	// Limit byte length, and display the remaining bytes
-	this.editSummaryInput.$input.byteLimit( this.editSummaryByteLimit );
-	this.editSummaryInput.on( 'change', function () {
-		dialog.changedEditSummary = true;
-		// TODO: This looks a bit weird, there is no unit in the UI, just numbers
-		// Users likely assume characters but then it seems to count down quicker
-		// than expected. Facing users with the word "byte" is bad? (bug 40035)
-		dialog.editSummaryCountLabel.setLabel(
-			String( dialog.editSummaryByteLimit - $.byteLength( dialog.editSummaryInput.getValue() ) )
-		);
-	} );
+	// Limit length, and display the remaining bytes/characters
+	if ( this.editSummaryCodePointLimit ) {
+		this.editSummaryInput.$input.codePointLimit( this.editSummaryCodePointLimit );
+		this.editSummaryInput.on( 'change', function () {
+			dialog.changedEditSummary = true;
+			dialog.editSummaryCountLabel.setLabel(
+				String( dialog.editSummaryCodePointLimit -
+					mwString.codePointLength( dialog.editSummaryInput.getValue() ) )
+			);
+		} );
+	} else {
+		this.editSummaryInput.$input.byteLimit( this.editSummaryByteLimit );
+		this.editSummaryInput.on( 'change', function () {
+			// TODO: This looks a bit weird, there is no unit in the UI, just numbers
+			// Users likely assume characters but then it seems to count down quicker
+			// than expected. Facing users with the word "byte" is bad? (bug 40035)
+			dialog.changedEditSummary = true;
+			dialog.editSummaryCountLabel.setLabel(
+				String( dialog.editSummaryByteLimit -
+					mwString.byteLength( dialog.editSummaryInput.getValue() ) )
+			);
+		} );
+	}
 
 	this.$saveCheckboxes = $( '<div>' ).addClass( 've-ui-mwSaveDialog-checkboxes' );
 	this.$saveOptions = $( '<div>' ).addClass( 've-ui-mwSaveDialog-options' ).append(
 		this.$saveCheckboxes,
 		this.editSummaryCountLabel.$element
 	);
-	this.$saveMessages = $( '<div>' );
-	this.$saveActions = $( '<div>' );
+	this.$saveMessages = $( '<div>' ).addClass( 've-ui-mwSaveDialog-messages' );
 	this.$saveFoot = $( '<div>' ).addClass( 've-ui-mwSaveDialog-foot' ).append(
 		$( '<p>' ).addClass( 've-ui-mwSaveDialog-license' )
 			.html( ve.init.platform.getParsedMessage( 'copyrightwarning' ) )
-			.find( 'a' ).attr( 'target', '_blank' ).end()
+			.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' ).end()
 	);
 	this.savePanel.$element.append(
 		this.$editSummaryLabel,
 		this.editSummaryInput.$element,
 		this.$saveOptions,
-		this.$saveMessages,
-		this.$saveActions,
-		this.$saveFoot
+		this.$saveFoot,
+		this.$saveMessages
 	);
 
 	// Review panel
@@ -419,17 +642,43 @@ ve.ui.MWSaveDialog.prototype.initialize = function () {
 		scrollable: true,
 		padded: true
 	} );
-	this.$reviewViewer = $( '<div>' ).addClass( 've-ui-mwSaveDialog-viewer' );
+
+	this.$reviewVisualDiff = $( '<div>' ).addClass( 've-ui-mwSaveDialog-viewer' );
+	this.$reviewWikitextDiff = $( '<div>' ).addClass( 've-ui-mwSaveDialog-viewer' );
+
+	this.reviewModeButtonSelect = new OO.ui.ButtonSelectWidget( {
+		items: [
+			new OO.ui.ButtonOptionWidget( { data: 'visual', icon: 'eye', label: ve.msg( 'visualeditor-savedialog-review-visual' ) } ),
+			new OO.ui.ButtonOptionWidget( { data: 'source', icon: 'wikiText', label: ve.msg( 'visualeditor-savedialog-review-wikitext' ) } )
+		],
+		classes: [ 've-ui-mwSaveDialog-reviewMode' ]
+	} );
+	this.reviewModeButtonSelect.connect( this, { select: 'updateReviewMode' } );
+
 	this.$reviewEditSummary = $( '<span>' ).addClass( 've-ui-mwSaveDialog-summaryPreview' ).addClass( 'comment' );
 	this.$reviewActions = $( '<div>' ).addClass( 've-ui-mwSaveDialog-actions' );
 	this.reviewPanel.$element.append(
+		this.reviewModeButtonSelect.$element,
 		$( '<div>' )
 			.addClass( 'mw-summary-preview' )
 			.text( ve.msg( 'summary-preview' ) )
 			.append( $( '<br>' ), this.$reviewEditSummary ),
-		this.$reviewViewer,
+		this.$reviewVisualDiff,
+		this.$reviewWikitextDiff,
 		this.$reviewActions
 	);
+
+	// Preview panel
+	this.previewPanel = new OO.ui.PanelLayout( {
+		expanded: false,
+		scrollable: true,
+		padded: true
+	} );
+	this.$previewViewer = $( '<div>' ).addClass( 'mw-body-content mw-parser-output' );
+	this.previewPanel.$element
+		// Make focusable for keyboard accessible scrolling
+		.prop( 'tabIndex', 0 )
+		.append( this.$previewViewer );
 
 	// Conflict panel
 	this.conflictPanel = new OO.ui.PanelLayout( {
@@ -439,35 +688,16 @@ ve.ui.MWSaveDialog.prototype.initialize = function () {
 	} );
 	this.$conflict = $( '<div>' ).addClass( 've-ui-mwSaveDialog-conflict' )
 		.html( ve.init.platform.getParsedMessage( 'visualeditor-editconflict' ) )
-		.find( 'a' ).attr( 'target', '_blank' ).end();
+		.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' ).end();
 	this.conflictPanel.$element.append( this.$conflict );
-
-	// No changes panel
-	this.nochangesPanel = new OO.ui.PanelLayout( {
-		expanded: false,
-		scrollable: true,
-		padded: true
-	} );
-	this.$noChanges = $( '<div>' ).addClass( 've-ui-mwSaveDialog-nochanges' )
-		.html( ve.init.platform.getParsedMessage( 'visualeditor-diff-nochanges' ) )
-		.find( 'a' ).attr( 'target', '_blank' ).end();
-	this.nochangesPanel.$element.append( this.$noChanges );
 
 	// Panel stack
 	this.panels.addItems( [
 		this.savePanel,
 		this.reviewPanel,
-		this.conflictPanel,
-		this.nochangesPanel
+		this.previewPanel,
+		this.conflictPanel
 	] );
-
-	// Save button for "save" panel
-	saveAccessKey = ve.msg( 'accesskey-save' );
-	if ( saveAccessKey !== '-' && saveAccessKey !== '' ) {
-		this.actions.forEach( { actions: 'save' }, function ( action ) {
-			action.setAccessKey( saveAccessKey );
-		} );
-	}
 
 	// Initialization
 	this.$body.append( this.panels.$element );
@@ -475,33 +705,130 @@ ve.ui.MWSaveDialog.prototype.initialize = function () {
 	this.setupDeferred.resolve();
 };
 
+ve.ui.MWSaveDialog.prototype.updateReviewMode = function () {
+	var dialog = this,
+		diffMode = this.reviewModeButtonSelect.findSelectedItem().getData(),
+		surfaceMode = ve.init.target.getSurface().getMode(),
+		isVisual = diffMode === 'visual';
+
+	if ( !this.hasDiff ) {
+		return;
+	}
+
+	// Config values used here:
+	// * visualeditor-diffmode-visual
+	// * visualeditor-diffmode-source
+	ve.userConfig( 'visualeditor-diffmode-' + surfaceMode, diffMode );
+
+	// Hack: cache report action so it is getable even when hidden (see T174497)
+	if ( !this.report ) {
+		this.report = this.getActions().get( { actions: 'report' } )[ 0 ];
+	}
+
+	this.$reviewVisualDiff.toggleClass( 'oo-ui-element-hidden', !isVisual );
+	this.$reviewWikitextDiff.toggleClass( 'oo-ui-element-hidden', isVisual );
+	if ( isVisual ) {
+		this.report.toggle( true );
+		if ( !this.diffElement ) {
+			if ( !this.diffElementPromise ) {
+				this.diffElementPromise = this.getDiffElementPromise().then( function ( diffElement ) {
+					dialog.diffElement = diffElement;
+					dialog.$reviewVisualDiff.empty().append( diffElement.$element );
+					dialog.positionDiffElement();
+				} );
+			}
+			return;
+		}
+		this.positionDiffElement();
+	} else {
+		this.report.toggle( false );
+	}
+	this.updateSize();
+};
+
 /**
  * @inheritdoc
+ */
+ve.ui.MWSaveDialog.prototype.setDimensions = function () {
+	// Parent method
+	ve.ui.MWSaveDialog.parent.prototype.setDimensions.apply( this, arguments );
+
+	if ( !this.positioning ) {
+		this.positionDiffElement();
+	}
+};
+
+/**
+ * Re-position elements within the diff element
+ *
+ * Should be called whenever the diff element's container has changed width.
+ */
+ve.ui.MWSaveDialog.prototype.positionDiffElement = function () {
+	var dialog = this;
+	if ( this.panels.getCurrentItem() === this.reviewPanel ) {
+		setTimeout( function () {
+			dialog.withoutSizeTransitions( function () {
+				// This is delayed, so check the visual diff is still visible
+				if ( dialog.diffElement && dialog.isVisible() && dialog.reviewModeButtonSelect.findSelectedItem().getData() === 'visual' ) {
+					dialog.diffElement.positionDescriptions();
+					dialog.positioning = true;
+					dialog.updateSize();
+					dialog.positioning = false;
+				}
+			} );
+		}, OO.ui.theme.getDialogTransitionDuration() );
+	}
+};
+
+/**
+ * @inheritdoc
+ * @param {Object} [data]
+ * @param {boolean} [data.canReview] User can review changes
+ * @param {boolean} [data.canPreview] User can preview changes
+ * @param {OO.ui.FieldLayout[]} [data.checkboxFields] Checkbox fields
+ * @param {Object} [data.checkboxesByName] Checkbox widgets, indexed by name
+ * @param {string} [data.sectionTitle] Section title, if in new section mode
+ * @param {string} [data.editSummary] Edit summary
+ * @param {string} [data.initialPanel='save'] Initial panel to show
+ * @param {jQuery|string|OO.ui.HtmlSnippet|Function|null} [data.saveButtonLabel] Label for the save button
  */
 ve.ui.MWSaveDialog.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.MWSaveDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
-			this.target = data.target;
-			if ( !this.changedEditSummary ) {
-				this.setEditSummary( data.editSummary );
-			}
+			var surfaceMode = ve.init.target.getSurface().getMode();
+
+			this.canReview = !!data.canReview;
+			this.canPreview = !!data.canPreview;
 			this.setupCheckboxes( data.checkboxFields || [] );
 			this.checkboxesByName = data.checkboxesByName || {};
+
+			if ( data.sectionTitle ) {
+				this.setEditSummary( ve.msg( 'newsectionsummary', data.sectionTitle ) );
+				this.editSummaryInput.setDisabled( true );
+			} else {
+				this.editSummaryInput.setDisabled( false );
+				if ( !this.changedEditSummary ) {
+					this.setEditSummary( data.editSummary );
+				}
+			}
+
+			// Config values used here:
+			// * visualeditor-diffmode-visual
+			// * visualeditor-diffmode-source
+			this.reviewModeButtonSelect.selectItemByData(
+				ve.userConfig( 'visualeditor-diffmode-' + surfaceMode ) || surfaceMode
+			);
+
 			// Old messages should not persist
 			this.clearAllMessages();
-			this.swapPanel( 'save' );
+			// Don't focus during setup to prevent scroll jumping (T153010)
+			this.swapPanel( data.initialPanel || 'save', true );
 			// Update save button label
-			this.actions.forEach( { actions: 'save' }, function ( action ) {
-				action.setLabel(
-					ve.msg(
-						// TODO: Actually populate this.restoring with information. Right now it is
-						// always false because of an oversight when migrating this code from init.
-						// Possible messages:
-						// visualeditor-savedialog-label-restore, visualeditor-savedialog-label-save
-						'visualeditor-savedialog-label-' + ( this.restoring ? 'restore' : 'save' )
-					)
-				);
-			} );
+			if ( data.saveButtonLabel ) {
+				this.actions.forEach( { actions: 'save' }, function ( action ) {
+					action.setLabel( data.saveButtonLabel );
+				} );
+			}
 		}, this );
 };
 
@@ -511,7 +838,14 @@ ve.ui.MWSaveDialog.prototype.getSetupProcess = function ( data ) {
 ve.ui.MWSaveDialog.prototype.getReadyProcess = function ( data ) {
 	return ve.ui.MWSaveDialog.super.prototype.getReadyProcess.call( this, data )
 		.next( function () {
-			this.editSummaryInput.focus();
+			// Support: Firefox
+			// In Firefox, trying to focus a hidden input will throw an
+			// exception. This would happen when opening the preview via
+			// keyboard shortcut.
+			if ( this.panels.getCurrentItem() === this.savePanel ) {
+				// This includes a #focus call
+				this.editSummaryInput.moveCursorToEnd();
+			}
 		}, this );
 };
 
@@ -522,7 +856,7 @@ ve.ui.MWSaveDialog.prototype.getTeardownProcess = function ( data ) {
 	return ve.ui.MWSaveDialog.super.prototype.getTeardownProcess.call( this, data )
 		.next( function () {
 			this.emit( 'close' );
-			this.target = null;
+			this.report = null;
 		}, this );
 };
 
@@ -533,12 +867,12 @@ ve.ui.MWSaveDialog.prototype.getActionProcess = function ( action ) {
 	if ( action === 'save' ) {
 		return new OO.ui.Process( function () {
 			var saveDeferred = $.Deferred();
-			this.swapPanel( 'save' );
+			this.clearMessage( 'keyboard-shortcut-submit' );
 			this.emit( 'save', saveDeferred );
 			return saveDeferred.promise();
 		}, this );
 	}
-	if ( action === 'review' || action === 'resolve' ) {
+	if ( action === 'review' || action === 'preview' || action === 'resolve' ) {
 		return new OO.ui.Process( function () {
 			this.emit( action );
 		}, this );
@@ -546,6 +880,11 @@ ve.ui.MWSaveDialog.prototype.getActionProcess = function ( action ) {
 	if ( action === 'approve' ) {
 		return new OO.ui.Process( function () {
 			this.swapPanel( 'save' );
+		}, this );
+	}
+	if ( action === 'report' ) {
+		return new OO.ui.Process( function () {
+			window.open( this.constructor.static.feedbackUrl, '_new' );
 		}, this );
 	}
 

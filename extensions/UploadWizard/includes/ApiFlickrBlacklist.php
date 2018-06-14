@@ -9,7 +9,7 @@
  * @ingroup Upload
  * @ingroup API
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Nischay Nahata <nischayn22@gmail.com>
  */
 class ApiFlickrBlacklist extends ApiBase {
@@ -36,26 +36,26 @@ class ApiFlickrBlacklist extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return array(
-			'url' => array(
+		return [
+			'url' => [
 				ApiBase::PARAM_TYPE => 'string',
-			),
-			'list' => array(
+			],
+			'list' => [
 				ApiBase::PARAM_TYPE => 'boolean',
 				ApiBase::PARAM_DFLT => false,
-			),
-		);
+			],
+		];
 	}
 
 	/**
-	 * @see ApiBase::getExamplesMessages()
+	 * @inheritDoc
 	 */
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=flickrblacklist&url=http%3A//farm1.staticflickr.com/44/147426941_98baf36fd1_o.jpg'
 				=> 'apihelp-flickrblacklist-example-1',
 			'action=flickrblacklist&list='
 				=> 'apihelp-flickrblacklist-example-2',
-		);
+		];
 	}
 }

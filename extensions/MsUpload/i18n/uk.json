@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Ата",
-			"Piramidion"
+			"Piramidion",
+			"Movses"
 		]
 	},
 	"msu-desc": "Дозволяє легко вивантажувати один файл або декілька файлів одночасно",
@@ -14,7 +15,7 @@
 	"msu-insert-image": "Вставити як зображення",
 	"msu-insert-video": "Вставити відео",
 	"msu-cancel-upload": "Скасування завантаження",
-	"msu-replace-file": "Замінити файл?",
+	"msu-continue": "Все одно продовжити?",
 	"msu-clean-all": "Очистити список",
 	"msu-ext-not-allowed": "Дозволено лише {{PLURAL:$1|такий тип|такі типи}} файлів:",
 	"msu-upload-this": "Завантажити цей файл",

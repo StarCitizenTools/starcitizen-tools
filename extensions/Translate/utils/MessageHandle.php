@@ -4,7 +4,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2011-2013 Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -56,7 +56,7 @@ class MessageHandle {
 			$title = $this->getTitle();
 			// Check if this is a valid message first
 			$this->key = $title->getDBkey();
-			$known = MessageIndex::singleton()->getGroupIds( $this ) !== array();
+			$known = MessageIndex::singleton()->getGroupIds( $this ) !== [];
 
 			$pos = strrpos( $this->key, '/' );
 			if ( $known || $pos === false ) {
@@ -68,7 +68,7 @@ class MessageHandle {
 			}
 		}
 
-		return array( $this->key, $this->code );
+		return [ $this->key, $this->code ];
 	}
 
 	/**
@@ -222,7 +222,7 @@ class MessageHandle {
 	/**
 	 * Check if a string contains the fuzzy string.
 	 *
-	 * @param $text string Arbitrary text
+	 * @param string $text Arbitrary text
 	 * @return bool If string contains fuzzy string.
 	 */
 	public static function hasFuzzyString( $text ) {
@@ -234,20 +234,58 @@ class MessageHandle {
 	 * @return bool If title is marked fuzzy.
 	 */
 	public function isFuzzy() {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
-		$tables = array( 'page', 'revtag' );
+		$tables = [ 'page', 'revtag' ];
 		$field = 'rt_type';
-		$conds = array(
+		$conds = [
 			'page_namespace' => $this->title->getNamespace(),
 			'page_title' => $this->title->getDBkey(),
 			'rt_type' => RevTag::getType( 'fuzzy' ),
 			'page_id=rt_page',
 			'page_latest=rt_revision'
-		);
+		];
 
 		$res = $dbr->selectField( $tables, $field, $conds, __METHOD__ );
 
 		return $res !== false;
+	}
+
+	/**
+	 * This returns the key that can be used for showMessage parameter for Special:Translate
+	 * for regular message groups. It is not possible to automatically determine this key
+	 * from the title alone.
+	 * @return string
+	 * @since 2017.10
+	 */
+	public function getInternalKey() {
+		global $wgContLang;
+
+		$key = $this->getKey();
+
+		if ( !MWNamespace::isCapitalized( $this->getTitle()->getNamespace() ) ) {
+			return $key;
+		}
+
+		$group = $this->getGroup();
+		$keys = [];
+		// We cannot reliably map from the database key to the internal key if
+		// capital links setting is enabled for the namespace.
+		if ( method_exists( $group, 'getKeys' ) ) {
+			$keys = $group->getKeys();
+		} else {
+			$keys = array_keys( $group->getDefinitions() );
+		}
+
+		if ( in_array( $key, $keys, true ) ) {
+			return $key;
+		}
+
+		$lcKey = $wgContLang->lcfirst( $key );
+		if ( in_array( $lcKey, $keys, true ) ) {
+			return $lcKey;
+		}
+
+		return "BUG:$key";
 	}
 }

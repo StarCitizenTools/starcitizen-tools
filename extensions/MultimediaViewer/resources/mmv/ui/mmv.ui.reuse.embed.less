@@ -1,7 +1,7 @@
-@switch-color: #f2f2f2;
-@active-switch-color: #666666;
-@embed-dimensions-color: #aaaaaa;
-@textarea-text-color: #333333;
+@switch-color: #f8f9fa;
+@active-switch-color: #54595d;
+@embed-dimensions-color: #72777d;
+@textarea-text-color: #222;
 
 .mw-mmv-reuse-pane {
 	.mw-mmv-embed-text-html,
@@ -13,8 +13,8 @@
 			display: block;
 		}
 
-		// The selector has to be that deep and include [readonly] to override OOJS UI's definition
-		textarea[readonly] {
+		// The selector has to be that deep and include [readonly] to override OOUI's definition
+		textarea[ readonly ] {
 			color: @textarea-text-color;
 			text-shadow: none;
 			word-wrap: break-word;
@@ -26,12 +26,20 @@
 	padding: 20px 27px;
 
 	.mw-mmv-embed-explanation {
-		margin: 0 0 10px 0;
+		margin: 10px 0 20px 0;
 		padding: 0;
 	}
 
-	p, textarea {
+	p,
+	textarea {
 		margin: 0;
+	}
+
+	.mw-mmv-dialog-copy {
+		float: right;
+		width: 1.5em;
+		height: 1.5em;
+		margin: 10px 0.75em 20px 0.75em;
 	}
 }
 
@@ -48,6 +56,7 @@
 
 .mw-mmv-embed-size {
 	display: none;
+	margin: 10px 0 0 0;
 
 	&.active {
 		display: block;
@@ -63,6 +72,6 @@
 	font-size: small;
 
 	.oo-ui-optionWidget-selected & {
-		color: lighten(@embed-dimensions-color, 20%); // selected option has dark background
+		color: lighten( @embed-dimensions-color, 20% ); // selected option has dark background
 	}
 }

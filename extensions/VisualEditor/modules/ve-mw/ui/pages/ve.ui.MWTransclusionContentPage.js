@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWTransclusionContentPage class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,6 +15,7 @@
  * @param {ve.dm.MWTransclusionContentModel} content Transclusion content
  * @param {string} name Unique symbolic name of page
  * @param {Object} [config] Configuration options
+ * @cfg {jQuery} [$overlay] Overlay to render dropdowns in
  */
 ve.ui.MWTransclusionContentPage = function VeUiMWTransclusionContentPage( content, name, config ) {
 	// Configuration initialization
@@ -23,12 +24,11 @@ ve.ui.MWTransclusionContentPage = function VeUiMWTransclusionContentPage( conten
 	}, config );
 
 	// Parent constructor
-	OO.ui.PageLayout.call( this, name, config );
+	ve.ui.MWTransclusionContentPage.super.call( this, name, config );
 
 	// Properties
 	this.content = content;
-	this.textInput = new OO.ui.TextInputWidget( {
-		multiline: true,
+	this.textInput = new OO.ui.MultilineTextInputWidget( {
 		autosize: true,
 		classes: [ 've-ui-mwTransclusionDialog-input' ]
 	} )
@@ -36,7 +36,7 @@ ve.ui.MWTransclusionContentPage = function VeUiMWTransclusionContentPage( conten
 		.connect( this, { change: 'onTextInputChange' } );
 	this.removeButton = new OO.ui.ButtonWidget( {
 		framed: false,
-		icon: 'remove',
+		icon: 'trash',
 		title: ve.msg( 'visualeditor-dialog-transclusion-remove-content' ),
 		flags: [ 'destructive' ],
 		classes: [ 've-ui-mwTransclusionDialog-removeButton' ]
@@ -63,9 +63,9 @@ OO.inheritClass( ve.ui.MWTransclusionContentPage, OO.ui.PageLayout );
 /**
  * @inheritdoc
  */
-ve.ui.MWTransclusionContentPage.prototype.setOutlineItem = function ( outlineItem ) {
+ve.ui.MWTransclusionContentPage.prototype.setOutlineItem = function () {
 	// Parent method
-	OO.ui.PageLayout.prototype.setOutlineItem.call( this, outlineItem );
+	ve.ui.MWTransclusionContentPage.super.prototype.setOutlineItem.apply( this, arguments );
 
 	if ( this.outlineItem ) {
 		this.outlineItem

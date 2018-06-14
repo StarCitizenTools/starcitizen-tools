@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Armando-Martin"
+			"Armando-Martin",
+			"Fitoschido"
 		]
 	},
-	"tabber-desc": "Permite para fichas dentro de una página"
+	"tabber-desc": "Permite crear pestañas dentro de una página"
 }

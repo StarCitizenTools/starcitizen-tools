@@ -21,18 +21,32 @@ namespace TextExtracts;
 use ApiBase;
 use ApiMain;
 use ApiQueryBase;
+use BagOStuff;
 use Config;
-use ConfigFactory;
 use FauxRequest;
+use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
 use MWTidy;
-use ParserCache;
+
 use ParserOptions;
 use Title;
+use ApiUsageException;
 use UsageException;
 use User;
 use WikiPage;
 
 class ApiQueryExtracts extends ApiQueryBase {
+
+	/**
+	 * Bump when memcache needs clearing
+	 */
+	const CACHE_VERSION = 2;
+
+	/**
+	 * @var string
+	 */
+	const PREFIX = 'ex';
+
 	/**
 	 * @var ParserOptions
 	 */
@@ -48,19 +62,30 @@ class ApiQueryExtracts extends ApiQueryBase {
 	/**
 	 * @var array
 	 */
-	private $supportedContentModels  = array( 'wikitext' );
+	private $supportedContentModels = [ 'wikitext' ];
 
+	/**
+	 * @param \ApiQuery $query API query module object
+	 * @param string $moduleName Name of this query module
+	 * @param Config $conf MediaWiki configuration
+	 */
 	public function __construct( $query, $moduleName, Config $conf ) {
-		parent::__construct( $query, $moduleName, 'ex' );
+		parent::__construct( $query, $moduleName, self::PREFIX );
 		$this->config = $conf;
 	}
 
+	/**
+	 * Evaluates the parameters, performs the requested extraction of text,
+	 * and sets up the result
+	 * @return null
+	 */
 	public function execute() {
 		$titles = $this->getPageSet()->getGoodTitles();
 		if ( count( $titles ) == 0 ) {
 			return;
 		}
-		$isXml = $this->getMain()->isInternalMode() || $this->getMain()->getPrinter()->getFormat() == 'XML';
+		$isXml = $this->getMain()->isInternalMode()
+			|| $this->getMain()->getPrinter()->getFormat() == 'XML';
 		$result = $this->getResult();
 		$params = $this->params = $this->extractRequestParams();
 		$this->requireMaxOneParameter( $params, 'chars', 'sentences' );
@@ -68,40 +93,58 @@ class ApiQueryExtracts extends ApiQueryBase {
 		$limit = intval( $params['limit'] );
 		if ( $limit > 1 && !$params['intro'] ) {
 			$limit = 1;
-			$this->setWarning( "exlimit was too large for a whole article extracts request, lowered to $limit" );
+			$this->addWarning( [ 'apiwarn-textextracts-limit', $limit ] );
 		}
 		if ( isset( $params['continue'] ) ) {
 			$continue = intval( $params['continue'] );
-			if ( $continue < 0 || $continue > count( $titles ) ) {
-				$this->dieUsageMsg( '_badcontinue' );
-			}
+			$this->dieContinueUsageIf( $continue < 0 || $continue > count( $titles ) );
 			$titles = array_slice( $titles, $continue, null, true );
 		}
 		$count = 0;
+		$titleInFileNamespace = false;
 		/** @var Title $t */
 		foreach ( $titles as $id => $t ) {
 			if ( ++$count > $limit ) {
 				$this->setContinueEnumParameter( 'continue', $continue + $count - 1 );
 				break;
 			}
-			$text = $this->getExtract( $t );
-			$text = $this->truncate( $text );
-			if ( $this->params['plaintext'] ) {
-				$text = $this->doSections( $text );
+
+			if ( $t->inNamespace( NS_FILE ) ) {
+				$text = '';
+				$titleInFileNamespace = true;
+			} else {
+				$params = $this->params;
+				$text = $this->getExtract( $t );
+				$text = $this->truncate( $text );
+				if ( $params['plaintext'] ) {
+					$text = $this->doSections( $text );
+				} else {
+					if ( $params['sentences'] ) {
+						$this->addWarning( $this->msg( 'apiwarn-textextracts-sentences-and-html', self::PREFIX ) );
+					}
+					$this->addWarning( 'apiwarn-textextracts-malformed-html' );
+				}
 			}
 
 			if ( $isXml ) {
-				$fit = $result->addValue( array( 'query', 'pages', $id ), 'extract', array( '*' => $text ) );
+				$fit = $result->addValue( [ 'query', 'pages', $id ], 'extract', [ '*' => $text ] );
 			} else {
-				$fit = $result->addValue( array( 'query', 'pages', $id ), 'extract', $text );
+				$fit = $result->addValue( [ 'query', 'pages', $id ], 'extract', $text );
 			}
 			if ( !$fit ) {
 				$this->setContinueEnumParameter( 'continue', $continue + $count - 1 );
 				break;
 			}
 		}
+		if ( $titleInFileNamespace ) {
+			$this->addWarning( 'apiwarn-textextracts-title-in-file-namespace' );
+		}
 	}
 
+	/**
+	 * @param array $params Ignored parameters
+	 * @return string
+	 */
 	public function getCacheMode( $params ) {
 		return 'public';
 	}
@@ -114,7 +157,11 @@ class ApiQueryExtracts extends ApiQueryBase {
 	private function getExtract( Title $title ) {
 		$contentModel = $title->getContentModel();
 		if ( !in_array( $contentModel, $this->supportedContentModels, true ) ) {
-			$this->setWarning( "{$title->getPrefixedDBkey()} has content model '$contentModel', which is not supported; returning an empty extract." );
+			$this->addWarning( [
+				'apiwarn-textextracts-unsupportedmodel',
+				wfEscapeWikiText( $title->getPrefixedText() ),
+				$contentModel
+			] );
 			return '';
 		}
 
@@ -131,14 +178,15 @@ class ApiQueryExtracts extends ApiQueryBase {
 		}
 		if ( $text === false ) {
 			$text = $this->parse( $page );
-			$text = $this->convertText( $text, $title, $this->params['plaintext'] );
+			$text = $this->convertText( $text );
 			$this->setCache( $page, $text );
 		}
 		return $text;
 	}
 
-	private function cacheKey( WikiPage $page, $introOnly ) {
-		return wfMemcKey( 'textextracts', $page->getId(), $page->getTouched(),
+	private function cacheKey( BagOStuff $cache, WikiPage $page, $introOnly ) {
+		return $cache->makeKey( 'textextracts', self::CACHE_VERSION,
+			$page->getId(), $page->getTouched(),
 			$page->getTitle()->getPageLanguage()->getPreferredVariant(),
 			$this->params['plaintext'], $introOnly
 		);
@@ -147,15 +195,15 @@ class ApiQueryExtracts extends ApiQueryBase {
 	private function getFromCache( WikiPage $page, $introOnly ) {
 		global $wgMemc;
 
-		$key = $this->cacheKey( $page, $introOnly );
+		$key = $this->cacheKey( $wgMemc, $page, $introOnly );
 		return $wgMemc->get( $key );
 	}
 
 	private function setCache( WikiPage $page, $text ) {
 		global $wgMemc;
 
-		$key = $this->cacheKey( $page, $this->params['intro'] );
-		$wgMemc->set( $key, $text );
+		$key = $this->cacheKey( $wgMemc, $page, $this->params['intro'] );
+		$wgMemc->set( $key, $text, $this->getConfig()->get( 'ParserCacheExpireTime' ) );
 	}
 
 	private function getFirstSection( $text, $plainText ) {
@@ -173,81 +221,107 @@ class ApiQueryExtracts extends ApiQueryBase {
 	/**
 	 * Returns page HTML
 	 * @param WikiPage $page
-	 * @return string
+	 * @return string|null
+	 * @throws ApiUsageException
+	 * @throws UsageException
 	 */
 	private function parse( WikiPage $page ) {
+		$apiException = null;
 		if ( !$this->parserOptions ) {
 			$this->parserOptions = new ParserOptions( new User( '127.0.0.1' ) );
+			if ( is_callable( [ $this->parserOptions, 'setWrapOutputClass' ] ) &&
+				!defined( 'ParserOutput::SUPPORTS_UNWRAP_TRANSFORM' )
+			) {
+				$this->parserOptions->setWrapOutputClass( false );
+			}
 		}
 		// first try finding full page in parser cache
-		if ( method_exists( $page, 'isParserCachedUsed' ) ) {
-			$useCache = $page->isParserCacheUsed( $this->parserOptions, 0 );
-		} else {
-			$useCache = $page->shouldCheckParserCache( $this->parserOptions, 0 );
-		}
-		if ( $useCache ) {
-			$pout = ParserCache::singleton()->get( $page, $this->parserOptions );
+		if ( $page->shouldCheckParserCache( $this->parserOptions, 0 ) ) {
+			$pout = MediaWikiServices::getInstance()->getParserCache()->get( $page, $this->parserOptions );
 			if ( $pout ) {
-				$pout->setTOCEnabled( false );
-				$text = $pout->getText();
+				$text = $pout->getText( [ 'unwrap' => true ] );
 				if ( $this->params['intro'] ) {
 					$text = $this->getFirstSection( $text, false );
 				}
 				return $text;
 			}
 		}
-		$request = array(
+		$request = [
 			'action' => 'parse',
 			'page' => $page->getTitle()->getPrefixedText(),
-			'prop' => 'text'
-		);
+			'prop' => 'text',
+			// Invokes special handling when using partial wikitext (T168743)
+			'sectionpreview' => 1,
+			'wrapoutputclass' => '',
+		];
 		if ( $this->params['intro'] ) {
 			$request['section'] = 0;
 		}
 		// in case of cache miss, render just the needed section
-		$api = new ApiMain( new FauxRequest( $request )	);
+		$api = new ApiMain( new FauxRequest( $request ) );
 		try {
 			$api->execute();
-			if ( defined( 'ApiResult::META_CONTENT' ) ) {
-				$data = $api->getResult()->getResultData( null, array(
-					'BC' => array(),
-					'Types' => array(),
-				) );
+			$data = $api->getResult()->getResultData( null, [
+				'BC' => [],
+				'Types' => [],
+			] );
+		} catch ( ApiUsageException $e ) {
+			$apiException = $e->__toString();
+			if ( $e->getStatusValue()->hasMessage( 'apierror-nosuchsection' ) ) {
+				// Looks like we tried to get the intro to a page without
+				// sections!  Lets just grab what we can get.
+				unset( $request['section'] );
+				$api = new ApiMain( new FauxRequest( $request ) );
+				$api->execute();
+				$data = $api->getResult()->getResultData( null, [
+					'BC' => [],
+					'Types' => [],
+				] );
 			} else {
-				$data = $api->getResultData();
+				// Some other unexpected error - lets just report it to the user
+				// on the off chance that is the right thing.
+				throw $e;
 			}
 		} catch ( UsageException $e ) {
+			$apiException = $e->__toString();
 			if ( $e->getCodeString() === 'nosuchsection' ) {
 				// Looks like we tried to get the intro to a page without
 				// sections!  Lets just grab what we can get.
 				unset( $request['section'] );
-				$api = new ApiMain( new FauxRequest( $request )	);
+				$api = new ApiMain( new FauxRequest( $request ) );
 				$api->execute();
-				if ( defined( 'ApiResult::META_CONTENT' ) ) {
-					$data = $api->getResult()->getResultData( null, array(
-						'BC' => array(),
-						'Types' => array(),
-					) );
-				} else {
-					$data = $api->getResultData();
-				}
+				$data = $api->getResult()->getResultData( null, [
+					'BC' => [],
+					'Types' => [],
+				] );
 			} else {
 				// Some other unexpected error - lets just report it to the user
 				// on the off chance that is the right thing.
 				throw $e;
 			}
 		}
+		if ( !array_key_exists( 'parse', $data ) ) {
+			LoggerFactory::getInstance( 'textextracts' )->warning(
+				'API Parse request failed while generating text extract', [
+					'title' => $page->getTitle()->getFullText(),
+					'url' => $this->getRequest()->getFullRequestURL(),
+					'exception' => $apiException,
+					'request' => $request
+			] );
+			return null;
+		}
+
 		return $data['parse']['text']['*'];
 	}
 
 	/**
-	 * @param \ApiQuery $query
-	 * @param string $action
+	 * @param \ApiQuery $query API query module
+	 * @param string $name Name of this query module
 	 * @return ApiQueryExtracts
 	 */
-	public static function factory( $query, $action ) {
-		$config = ConfigFactory::getDefaultInstance()->makeConfig( 'textextracts' );
-		return new self( $query, $action, $config );
+	public static function factory( $query, $name ) {
+		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'textextracts' );
+		return new self( $query, $name, $config );
 	}
 
 	/**
@@ -311,16 +385,19 @@ class ApiQueryExtracts extends ApiQueryBase {
 	 * @return string
 	 */
 	private function tidy( $text ) {
-		if ( $this->getConfig()->get( 'UseTidy' ) && !$this->params['plaintext'] ) {
-			$text = trim ( MWTidy::tidy( $text ) );
+		$tidyConfig = $this->getConfig()->get( 'TidyConfig' );
+
+		if ( $tidyConfig !== null && !$this->params['plaintext'] ) {
+			$text = trim( MWTidy::tidy( $text ) );
 		}
 		return $text;
 	}
 
 	private function doSections( $text ) {
 		$text = preg_replace_callback(
-			"/" . ExtractFormatter::SECTION_MARKER_START . '(\d)'. ExtractFormatter::SECTION_MARKER_END . "(.*?)$/m",
-			array( $this, 'sectionCallback' ),
+			"/" . ExtractFormatter::SECTION_MARKER_START . '(\d)' .
+				ExtractFormatter::SECTION_MARKER_END . "(.*?)$/m",
+			[ $this, 'sectionCallback' ],
 			$text
 		);
 		return $text;
@@ -330,103 +407,71 @@ class ApiQueryExtracts extends ApiQueryBase {
 		if ( $this->params['sectionformat'] == 'raw' ) {
 			return $matches[0];
 		}
-		$func = __CLASS__ . "::doSection_{$this->params['sectionformat']}";
+		$sectionformat = ucfirst( $this->params['sectionformat'] );
+		$func = __CLASS__ . "::doSection{$sectionformat}";
 		return call_user_func( $func, $matches[1], trim( $matches[2] ) );
 	}
 
-	private static function doSection_wiki( $level, $text ) {
+	private static function doSectionWiki( $level, $text ) {
 		$bars = str_repeat( '=', $level );
 		return "\n$bars $text $bars";
 	}
 
-	private static function doSection_plain( $level, $text ) {
+	private static function doSectionPlain( $level, $text ) {
 		return "\n$text";
 	}
 
+	/**
+	 * Return an array describing all possible parameters to this module
+	 * @return array
+	 */
 	public function getAllowedParams() {
-		return array(
-			'chars' => array(
+		return [
+			'chars' => [
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_MIN => 1,
-			),
-			'sentences' => array(
+				ApiBase::PARAM_MAX => 1200,
+			],
+			'sentences' => [
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => 10,
-			),
-			'limit' => array(
-				ApiBase::PARAM_DFLT => 1,
+			],
+			'limit' => [
+				ApiBase::PARAM_DFLT => 20,
 				ApiBase::PARAM_TYPE => 'limit',
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => 20,
 				ApiBase::PARAM_MAX2 => 20,
-			),
+			],
 			'intro' => false,
 			'plaintext' => false,
-			'sectionformat' => array(
-				ApiBase::PARAM_TYPE => array( 'plain', 'wiki', 'raw' ),
+			'sectionformat' => [
+				ApiBase::PARAM_TYPE => [ 'plain', 'wiki', 'raw' ],
 				ApiBase::PARAM_DFLT => 'wiki',
-			),
-			'continue' => array(
+			],
+			'continue' => [
 				ApiBase::PARAM_TYPE => 'integer',
-				/** @todo Once support for MediaWiki < 1.25 is dropped, just use ApiBase::PARAM_HELP_MSG directly */
-				defined( 'ApiBase::PARAM_HELP_MSG' ) ? ApiBase::PARAM_HELP_MSG : '' => 'api-help-param-continue',
-			),
-			// Used implicitly by LanguageConverter
-			'variant' => array(
-				ApiBase::PARAM_TYPE => 'string',
-				ApiBase::PARAM_DFLT => false,
-			),
-		);
-	}
-
-	/**
-	 * @deprecated since MediaWiki core 1.25
-	 */
-	public function getParamDescription() {
-		return array(
-			'chars' => 'How many characters to return, actual text returned might be slightly longer.',
-			'sentences' => 'How many sentences to return',
-			'limit' => 'How many extracts to return',
-			'intro' => 'Return only content before the first section',
-			'plaintext' => 'Return extracts as plaintext instead of limited HTML',
-			'sectionformat' => array(
-				'How to format sections in plaintext mode:',
-				' plain - No formatting',
-				' wiki - Wikitext-style formatting == like this ==',
-				" raw - This module's internal representation (section titles prefixed with <ASCII 1><ASCII 2><section level><ASCII 2><ASCII 1>",
-			),
-			'continue' => 'When more results are available, use this to continue',
-			'variant' => 'Convert content into this language variant`',
-		);
-	}
-
-	/**
-	 * @deprecated since MediaWiki core 1.25
-	 */
-	public function getDescription() {
-		return 'Returns plain-text or limited HTML extracts of the given page(s)';
-	}
-
-	/**
-	 * @deprecated since MediaWiki core 1.25
-	 */
-	public function getExamples() {
-		return array(
-			'api.php?action=query&prop=extracts&exchars=175&titles=Therion' => 'Get a 175-character extract',
-		);
+				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
+			],
+		];
 	}
 
 	/**
 	 * @see ApiBase::getExamplesMessages()
+	 * @return array
 	 */
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=query&prop=extracts&exchars=175&titles=Therion'
 				=> 'apihelp-query+extracts-example-1',
-		);
+		];
 	}
 
+	/**
+	 * @see ApiBase::getHelpUrls()
+	 * @return string
+	 */
 	public function getHelpUrls() {
 		return 'https://www.mediawiki.org/wiki/Extension:TextExtracts#API';
 	}

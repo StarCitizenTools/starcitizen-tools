@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Rubentl134",
+			"Dgstranz",
+			"-jem-"
+		]
+	},
+	"revisionslider": "Deslizador de revisiones",
+	"revisionslider-preference-disable": "No mostrar el deslizador de revisiones",
+	"revisionslider-desc": "Muestra un control deslizante que permite la selección y comparación de las revisiones en una página de diferencias",
+	"revisionslider-toggle-label": "Explorar historial",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte|bytes}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte|bytes}}",
+	"revisionslider-label-date": "Fecha",
+	"revisionslider-label-page-size": "Tamaño de la página",
+	"revisionslider-label-change-size": "Tamaño del cambio",
+	"revisionslider-label-comment": "Comentario",
+	"revisionslider-label-username": "Nombre de {{GENDER:$1|usuario|usuaria}}",
+	"revisionslider-minoredit": "Esta es una edición menor",
+	"revisionslider-loading-failed": "El deslizador de revisiones no se pudo cargar.",
+	"revisionslider-toggle-title-expand": "Abrir el deslizador de revisiones",
+	"revisionslider-toggle-title-collapse": "Ocultar el deslizador de revisiones",
+	"revisionslider-turn-on-auto-expand-title": "Expandir siempre el deslizador de revisiones",
+	"revisionslider-turn-off-auto-expand-title": "No expandir automáticamente el deslizador de revisiones",
+	"revisionslider-arrow-tooltip-newer": "Ver revisiones más recientes",
+	"revisionslider-arrow-tooltip-older": "Ver revisiones anteriores",
+	"revisionslider-show-help-tooltip": "Mostrar el texto de ayuda",
+	"revisionslider-help-dialog-slide1": "El Deslizador de revisiones te ayuda a navegar y comparar revisiones en la página de diferencias. Está basado en una [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider solicitud comunitaria] de la lista de solicitudes técnicas de la comunidad germanoparlante. Se agradecerán los comentarios [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider aquí].",
+	"revisionslider-help-dialog-slide2": "Cada barra representa una revisión de una página. Las barras de arriba muestran un crecimiento en el tamaño de la página, las barras de abajo muestran una reducción. En la imagen, la revisión 1 representa el contenido agregado, mientras que la revisión 2 representa la eliminación de contenido.",
+	"revisionslider-help-dialog-slide4": "Usa las flechas de avanzar y retroceder para moverte en el historial de revisiones y mostrar revisiones más nuevas y más antiguas.",
+	"revisionslider-tutorial": "Tutorial sobre el Deslizador de revisiones",
+	"revisionslider-previous-dialog": "Anterior",
+	"revisionslider-next-dialog": "Siguiente",
+	"revisionslider-close-dialog": "Cerrar"
+}

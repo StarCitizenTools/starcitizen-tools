@@ -20,6 +20,7 @@
 
 	/**
 	 * Converts data in various formats needed by the Embed sub-dialog
+	 *
 	 * @class mw.mmv.EmbedFileFormatter
 	 * @constructor
 	 */
@@ -36,6 +37,7 @@
 
 	/**
 	 * Returns the caption of the image (possibly a fallback generated from image metadata).
+	 *
 	 * @param {mw.mmv.model.EmbedFileInfo} info
 	 * @return {string}
 	 */
@@ -49,6 +51,7 @@
 
 	/**
 	 * Helper function to generate thumbnail wikicode
+	 *
 	 * @param {mw.Title} title
 	 * @param {number} [width]
 	 * @param {string} [caption]
@@ -57,7 +60,6 @@
 	 */
 	EFFP.getThumbnailWikitext = function ( title, width, caption, alt ) {
 		var widthSection, captionSection, altSection;
-
 
 		widthSection = width ? '|' + width + 'px' : '';
 		captionSection = caption ? '|' + caption : '';
@@ -68,6 +70,7 @@
 
 	/**
 	 * Helper function to generate thumbnail wikicode
+	 *
 	 * @param {mw.mmv.model.EmbedFileInfo} info
 	 * @param {number} [width]
 	 * @return {string}
@@ -78,6 +81,7 @@
 
 	/**
 	 * Byline construction
+	 *
 	 * @param {string} [author] author name (can contain HTML)
 	 * @param {string} [source] source name (can contain HTML)
 	 * @param {string} [attribution] custom attribution line (can contain HTML)
@@ -112,6 +116,7 @@
 
 	/**
 	 * Generates the plain text embed code for the image credit line.
+	 *
 	 * @param {mw.mmv.model.EmbedFileInfo} info
 	 * @return {string}
 	 */
@@ -134,12 +139,12 @@
 		];
 
 		if ( byline ) {
-			creditParams[0] += 'b';
+			creditParams[ 0 ] += 'b';
 			creditParams.push( byline );
 		}
 
 		if ( license ) {
-			creditParams[0] += 'l';
+			creditParams[ 0 ] += 'l';
 			creditParams.push( this.htmlUtils.htmlToText( license.getShortName() ) );
 		}
 
@@ -151,17 +156,19 @@
 
 	/**
 	 * Generates the HTML embed code for the image credit line.
+	 *
 	 * @param {mw.mmv.model.EmbedFileInfo} info
 	 * @return {string}
 	 */
 	EFFP.getCreditHtml = function ( info ) {
 		var creditText, creditParams,
 			shortURL = info.imageInfo.descriptionShortUrl,
+			shortLink = this.htmlUtils.makeLinkText( mw.message( 'multimediaviewer-html-embed-credit-link-text' ), { href: shortURL } ),
 			license = info.imageInfo.license,
 			byline = this.getByline( info.imageInfo.author, info.imageInfo.source, info.imageInfo.attribution );
 
 		if ( !byline && !license ) {
-			return shortURL;
+			return shortLink;
 		}
 
 		creditParams = [
@@ -169,15 +176,15 @@
 		];
 
 		if ( byline ) {
-			creditParams[0] += 'b';
+			creditParams[ 0 ] += 'b';
 			creditParams.push( byline );
 		}
 		if ( license ) {
-			creditParams[0] += 'l';
+			creditParams[ 0 ] += 'l';
 			creditParams.push( license.getShortLink() );
 		}
 
-		creditParams.push( shortURL );
+		creditParams.push( shortLink );
 		creditText = mw.message.apply( mw, creditParams ).plain();
 
 		return creditText;
@@ -185,6 +192,7 @@
 
 	/**
 	 * Returns HTML code for a link to the site of the image.
+	 *
 	 * @param {mw.mmv.model.EmbedFileInfo} info
 	 * @return {string}
 	 */
@@ -230,7 +238,9 @@
 
 	/**
 	 * Generate a link which we will be using for sharing stuff.
+	 *
 	 * @param {mw.mmv.model.EmbedFileInfo} info
+	 * @return {string} URL
 	 */
 	EFFP.getLinkUrl = function ( info ) {
 		var route = new mw.mmv.routing.ThumbnailRoute( info.imageInfo.title );

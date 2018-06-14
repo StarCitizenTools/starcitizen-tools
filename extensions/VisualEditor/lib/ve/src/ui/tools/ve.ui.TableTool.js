@@ -1,14 +1,14 @@
 /*!
  * VisualEditor UserInterface ListTool classes.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 /* Tools */
 
-ve.ui.InsertTableTool = function VeUiInsertTableTool( toolGroup, config ) {
-	ve.ui.Tool.call( this, toolGroup, config );
+ve.ui.InsertTableTool = function VeUiInsertTableTool() {
+	ve.ui.InsertTableTool.super.apply( this, arguments );
 };
 OO.inheritClass( ve.ui.InsertTableTool, ve.ui.Tool );
 ve.ui.InsertTableTool.static.name = 'insertTable';

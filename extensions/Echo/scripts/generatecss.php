@@ -9,20 +9,20 @@ $outputFile = $argv[2];
 define( 'MEDIAWIKI', true );
 const NS_MAIN = 0;
 $wgVersion = 1.23;
-$wgSpecialPages = array();
-$wgResourceModules = array();
+$wgSpecialPages = [];
+$wgResourceModules = [];
 
 include "Resources.php";
 
-$query = array();
-$blacklist = array();
+$query = [];
+$blacklist = [];
 foreach ( $wgResourceModules as $moduleName => $def ) {
 	if ( !in_array( $moduleName, $blacklist ) ) {
 		$query[] = $moduleName;
 	}
 }
 
-$url = $loadUrl . '?only=styles&skin=vector&modules=' . implode( $query, '|' );
+$url = $loadUrl . '?only=styles&skin=vector&modules=' . implode( '|', $query );
 echo $url;
 $css = file_get_contents( $url );
 file_put_contents( $outputFile, $css );

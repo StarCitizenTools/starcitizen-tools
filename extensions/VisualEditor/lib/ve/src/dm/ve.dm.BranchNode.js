@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel BranchNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -22,7 +22,7 @@ ve.dm.BranchNode = function VeDmBranchNode( element, children ) {
 	ve.BranchNode.call( this );
 
 	// Parent constructor
-	ve.dm.Node.call( this, element );
+	ve.dm.BranchNode.super.call( this, element );
 
 	// Properties
 	this.slugPositions = {};
@@ -155,6 +155,8 @@ ve.dm.BranchNode.prototype.splice = function () {
 
 /**
  * Setup a sparse array of booleans indicating where to place slugs
+ *
+ * TODO: The function name is misleading: in ContentBranchNodes it sets up inline slugs
  */
 ve.dm.BranchNode.prototype.setupBlockSlugs = function () {
 	var i, len,

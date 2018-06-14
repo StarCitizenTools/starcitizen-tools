@@ -58,14 +58,14 @@ class PostRevision extends AbstractRevision {
 	 *  topic-title-wikitext format.
 	 * @return PostRevision
 	 */
-	static public function createTopicPost( Workflow $topic, User $user, $content ) {
+	public static function createTopicPost( Workflow $topic, User $user, $content ) {
 		$format = 'topic-title-wikitext';
 		$obj = static::newFromId( $topic->getId(), $user, $content, $format, $topic->getArticleTitle() );
 
 		$obj->changeType = 'new-post';
 		// A newly created post has no children, a depth of 0, and
 		// is the root of its tree.
-		$obj->setChildren( array() );
+		$obj->setChildren( [] );
 		$obj->setDepth( 0 );
 		$obj->rootPost = $obj;
 
@@ -96,7 +96,7 @@ class PostRevision extends AbstractRevision {
 	 * @param Title|null $title
 	 * @return PostRevision
 	 */
-	static public function newFromId( UUID $uuid, User $user, $content, $format, Title $title = null ) {
+	public static function newFromId( UUID $uuid, User $user, $content, $format, Title $title = null ) {
 		$obj = new self;
 		$obj->revId = UUID::create();
 		$obj->postId = $uuid;
@@ -112,17 +112,17 @@ class PostRevision extends AbstractRevision {
 	}
 
 	/**
-	 * @var string[] $row
-	 * @var PostRevision|null $obj
+	 * @param string[] $row
+	 * @param PostRevision|null $obj
 	 * @return PostRevision
 	 * @throws DataModelException
 	 */
-	static public function fromStorageRow( array $row, $obj = null ) {
+	public static function fromStorageRow( array $row, $obj = null ) {
 		/** @var $obj PostRevision */
 		$obj = parent::fromStorageRow( $row, $obj );
 		$treeRevId = UUID::create( $row['tree_rev_id'] );
 
-		if ( ! $obj->revId->equals( $treeRevId ) ) {
+		if ( !$obj->revId->equals( $treeRevId ) ) {
 			$treeRevIdStr = ( $treeRevId !== null )
 				? $treeRevId->getAlphadecimal()
 				: var_export( $row['tree_rev_id'], true );
@@ -146,8 +146,8 @@ class PostRevision extends AbstractRevision {
 	 * @param PostRevision $rev
 	 * @return string[]
 	 */
-	static public function toStorageRow( $rev ) {
-		return parent::toStorageRow( $rev ) + array(
+	public static function toStorageRow( $rev ) {
+		return parent::toStorageRow( $rev ) + [
 			'tree_parent_id' => $rev->replyToId ? $rev->replyToId->getAlphadecimal() : null,
 			'tree_rev_descendant_id' => $rev->postId->getAlphadecimal(),
 			'tree_rev_id' => $rev->revId->getAlphadecimal(),
@@ -155,7 +155,7 @@ class PostRevision extends AbstractRevision {
 			'tree_orig_user_id' => $rev->origUser->id,
 			'tree_orig_user_ip' => $rev->origUser->ip,
 			'tree_orig_user_wiki' => $rev->origUser->wiki,
-		);
+		];
 	}
 
 	/**
@@ -179,7 +179,7 @@ class PostRevision extends AbstractRevision {
 		$reply->replyToId = $this->postId;
 		$reply->setContent( $content, $format, $workflow->getArticleTitle() );
 		$reply->changeType = $changeType;
-		$reply->setChildren( array() );
+		$reply->setChildren( [] );
 		$reply->setDepth( $this->getDepth() + 1 );
 		$reply->rootPost = $this->rootPost;
 
@@ -201,7 +201,7 @@ class PostRevision extends AbstractRevision {
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isTopicTitle() {
 		return $this->replyToId === null;
@@ -293,14 +293,14 @@ class PostRevision extends AbstractRevision {
 	}
 
 	/**
-	 * @param integer $depth
+	 * @param int $depth
 	 */
 	public function setDepth( $depth ) {
 		$this->depth = (int)$depth;
 	}
 
 	/**
-	 * @return integer
+	 * @return int
 	 * @throws DataModelException
 	 */
 	public function getDepth() {
@@ -386,7 +386,7 @@ class PostRevision extends AbstractRevision {
 
 	/**
 	 * @param User $user
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isCreator( User $user ) {
 		if ( $user->isAnon() ) {

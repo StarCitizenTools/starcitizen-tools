@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface media transfer handler class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /* global File */
@@ -45,11 +45,9 @@ ve.ui.MWMediaTransferHandler.prototype.process = function () {
 	var action,
 		file = this.item.getAsFile();
 
-	// File upload doesn't support pasted Blobs yet
-	if ( file instanceof File ) {
-		action = ve.ui.actionFactory.create( 'window', this.surface );
-		action.open( 'media', { file: file } );
-	}
+	action = ve.ui.actionFactory.create( 'window', this.surface );
+	action.open( 'media', { file: file } );
+
 	this.insertableDataDeferred.reject();
 };
 

@@ -49,7 +49,10 @@ class IRCLineUrlFormatter extends AbstractFormatter implements RCFeedFormatter {
 			return null;
 		}
 
+		// @todo Public access to $rc->mAttribs should be deprecated in core.
 		$rc->mAttribs['rc_comment'] = $this->formatDescription( $serialized, $ctx );
+		$rc->mAttribs['rc_comment_text'] = $rc->mAttribs['rc_comment'];
+		$rc->mAttribs['rc_comment_data'] = null;
 
 		/** @var RCFeedFormatter $formatter */
 		$formatter = new $feed['original_formatter']();
@@ -69,7 +72,7 @@ class IRCLineUrlFormatter extends AbstractFormatter implements RCFeedFormatter {
 	protected function serializeRcRevision( RecentChange $rc, IContextSource $ctx ) {
 		/** @var RecentChangesQuery $query */
 		$query = Container::get( 'query.changeslist' );
-		$query->loadMetadataBatch( array( (object)$rc->mAttribs ) );
+		$query->loadMetadataBatch( [ (object)$rc->mAttribs ] );
 		$rcRow = $query->getResult( null, $rc );
 		if ( !$rcRow ) {
 			return false;
@@ -110,12 +113,12 @@ class IRCLineUrlFormatter extends AbstractFormatter implements RCFeedFormatter {
 		$links = $this->serializer->buildLinks( $row );
 
 		// Listed in order of preference
-		$accept = array(
+		$accept = [
 			'diff',
 			'post-history', 'topic-history', 'board-history',
 			'post', 'topic',
 			'workflow'
-		);
+		];
 
 		foreach ( $accept as $key ) {
 			if ( isset( $links[$key] ) ) {

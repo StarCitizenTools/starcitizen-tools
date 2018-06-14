@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Shirayuki"
+			"Shirayuki",
+			"Umherirrender"
 		]
 	},
-	"tabber-desc": "{{desc|name=Tabber|url=http://www.mediawiki.org/wiki/Extension:Tabber}}"
+	"tabber-desc": "{{desc|name=Tabber|url=https://www.mediawiki.org/wiki/Extension:Tabber}}"
 }

@@ -14,8 +14,8 @@
  *
  * @file
  * @ingroup Extensions
- * @licence GNU General Public Licence 2.0 or later
- * @licence MIT License
+ * @license GPL-2.0-or-later
+ * @license MIT License
  * @since 2013.11
  */
 
@@ -44,7 +44,7 @@ class ULSJsonMessageLoader {
 			$filenames[] = __DIR__ . "/../i18n/$language.json";
 		}
 
-		$filenames = array_filter( $filenames, function( $filename ) {
+		$filenames = array_filter( $filenames, function ( $filename ) {
 			return file_exists( $filename );
 		} );
 

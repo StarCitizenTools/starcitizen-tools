@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow sidebar expand widget
 	 *
@@ -48,23 +48,21 @@
 	 * @param {boolean} collapse Widget is collapsed
 	 */
 	mw.flow.ui.SidebarExpandWidget.prototype.toggleCollapsed = function ( collapse ) {
-		var action, siderailState;
+		var siderailState;
 
 		collapse = collapse !== undefined ? collapse : !this.collapsed;
 
 		if ( this.collapsed !== collapse ) {
 			this.collapsed = collapse;
-			action = this.collapsed ? 'expand' : 'collapse';
 
-			this.$element
-				.toggleClass( 'flow-ui-sidebarExpandWidget-collapsed', this.collapsed );
+			this.$element.toggleClass( 'flow-ui-sidebarExpandWidget-collapsed', this.collapsed );
 
-			this.button.setIcon( 'topic-' + action );
+			this.button.setIcon( this.collapsed ? 'topicExpand' : 'topicCollapse' );
 			this.button.setTitle( this.collapsed ? this.collapsedButtonTitle : this.expandedButtonTitle );
 
 			// Change the preference
 			siderailState = this.collapsed ? 'collapsed' : 'expanded';
-			if ( !mw.user.isAnon() &&  mw.user.options.get( 'flow-side-rail-state' ) !== siderailState ) {
+			if ( !mw.user.isAnon() && mw.user.options.get( 'flow-side-rail-state' ) !== siderailState ) {
 				// update the user preferences; no preferences for anons
 
 				new mw.Api().saveOption( 'flow-side-rail-state', siderailState );
@@ -84,4 +82,4 @@
 	mw.flow.ui.SidebarExpandWidget.prototype.isCollapsed = function () {
 		return this.collapsed;
 	};
-}( jQuery ) );
+}() );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Surface class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -58,7 +58,7 @@ ve.ce.SurfaceObserver.prototype.detach = function () {
  */
 ve.ce.SurfaceObserver.prototype.startTimerLoop = function () {
 	this.polling = true;
-	this.timerLoop( true ); // will not sync immediately, because timeoutId should be null
+	this.timerLoop( true ); // Will not sync immediately, because timeoutId should be null
 };
 
 /**
@@ -69,14 +69,14 @@ ve.ce.SurfaceObserver.prototype.startTimerLoop = function () {
  */
 ve.ce.SurfaceObserver.prototype.timerLoop = function ( firstTime ) {
 	if ( this.timeoutId ) {
-		// in case we're not running from setTimeout
+		// In case we're not running from setTimeout
 		clearTimeout( this.timeoutId );
 		this.timeoutId = null;
 	}
 	if ( !firstTime ) {
 		this.pollOnce();
 	}
-	// only reach this point if pollOnce does not throw an exception
+	// Only reach this point if pollOnce does not throw an exception
 	if ( this.pollInterval !== null ) {
 		this.timeoutId = this.setTimeout(
 			this.timerLoop.bind( this ),
@@ -166,8 +166,6 @@ ve.ce.SurfaceObserver.prototype.pollOnceInternal = function ( signalChanges, sel
 
 	if ( signalChanges && (
 		newState.contentChanged ||
-		// TODO: The prior code signalled branchNode changes even if !signalChanges .
-		// Was this needed?
 		newState.branchNodeChanged ||
 		newState.selectionChanged
 	) ) {
@@ -180,6 +178,7 @@ ve.ce.SurfaceObserver.prototype.pollOnceInternal = function ( signalChanges, sel
  *
  * @param {Function} callback Callback
  * @param {number} timeout Timeout ms
+ * @return {number} Timeout ID
  */
 ve.ce.SurfaceObserver.prototype.setTimeout = function ( callback, timeout ) {
 	return setTimeout( callback, timeout );

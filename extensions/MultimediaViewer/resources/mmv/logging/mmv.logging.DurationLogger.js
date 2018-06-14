@@ -20,6 +20,7 @@
 
 	/**
 	 * Writes EventLogging entries for duration measurements
+	 *
 	 * @class mw.mmv.logging.DurationLogger
 	 * @extends mw.mmv.logging.Logger
 	 * @constructor
@@ -50,16 +51,19 @@
 	 */
 	L.schema = 'MultimediaViewerDuration';
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Saves the start of a duration
-	 * @param {string|string[]} type_or_types Type(s) of duration being measured.
+	 *
+	 * @param {string|string[]} typeOrTypes Type(s) of duration being measured.
+	 * @chainable
 	 */
 	L.start = function ( typeOrTypes ) {
 		var i,
 			start = $.now();
 
 		if ( !typeOrTypes ) {
-			throw 'Must specify type';
+			throw new Error( 'Must specify type' );
 		}
 
 		if ( !$.isArray( typeOrTypes ) ) {
@@ -76,16 +80,19 @@
 		return this;
 	};
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Saves the stop of a duration
+	 *
 	 * @param {string} type Type of duration being measured.
 	 * @param {number} start Start timestamp to substitute the one coming from start()
+	 * @chainable
 	 */
 	L.stop = function ( type, start ) {
 		var stop = $.now();
 
 		if ( !type ) {
-			throw 'Must specify type';
+			throw new Error( 'Must specify type' );
 		}
 
 		// Don't overwrite an existing value
@@ -101,16 +108,19 @@
 		return this;
 	};
 
+	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Records the duration log event
+	 *
 	 * @param {string} type Type of duration being measured.
 	 * @param {Object} extraData Extra information to add to the log event data
+	 * @chainable
 	 */
 	L.record = function ( type, extraData ) {
 		var e, duration;
 
 		if ( !type ) {
-			throw 'Must specify type';
+			throw new Error( 'Must specify type' );
 		}
 
 		if ( !this.starts.hasOwnProperty( type ) || this.starts[ type ] === undefined ) {
@@ -124,10 +134,10 @@
 		duration = this.stops[ type ] - this.starts[ type ];
 
 		e = {
-			type : type,
-			duration : duration,
-			loggedIn : !mw.user.isAnon(),
-			samplingFactor : this.samplingFactor
+			type: type,
+			duration: duration,
+			loggedIn: !mw.user.isAnon(),
+			samplingFactor: this.samplingFactor
 		};
 
 		if ( extraData ) {

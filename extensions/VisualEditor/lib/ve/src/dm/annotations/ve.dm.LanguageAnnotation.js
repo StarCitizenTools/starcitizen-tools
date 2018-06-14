@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel LanguageAnnotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -57,6 +57,26 @@ ve.dm.LanguageAnnotation.static.toDomElements = function ( dataElement, doc ) {
 	}
 
 	return [ domElement ];
+};
+
+ve.dm.LanguageAnnotation.static.describeChange = function ( key, change ) {
+	if ( key === 'lang' ) {
+		return ve.msg( 'visualeditor-changedesc-language',
+			ve.init.platform.getLanguageName( change.from.toLowerCase() ),
+			ve.init.platform.getLanguageName( change.to.toLowerCase() )
+		);
+	}
+
+	// TODO: Show something nicer than 'null', 'ltr', and 'rtl'.
+	if ( key === 'dir' ) {
+		return ve.msg( 'visualeditor-changedesc-direction',
+			change.from.toLowerCase(),
+			change.to.toLowerCase()
+		);
+	}
+
+	// Parent method
+	return ve.dm.LanguageAnnotation.parent.static.describeChange.apply( this, arguments );
 };
 
 /* Methods */

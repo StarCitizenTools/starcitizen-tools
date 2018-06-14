@@ -45,7 +45,7 @@ class ReferenceExtractor {
 			);
 		} else {
 			throw new \Exception( "No extractors available for $objectType" );
-			return array();
+			return [];
 		}
 	}
 
@@ -60,11 +60,11 @@ class ReferenceExtractor {
 	protected function extractReferences( ReferenceFactory $factory, array $extractors, $text ) {
 		$dom = Utils::createDOM( $text );
 
-		$output = array();
+		$output = [];
 
 		$xpath = new DOMXPath( $dom );
 
-		foreach( $extractors as $extractor ) {
+		foreach ( $extractors as $extractor ) {
 			$elements = $xpath->query( $extractor->getXPath() );
 
 			if ( !$elements ) {
@@ -72,7 +72,7 @@ class ReferenceExtractor {
 				throw new MWException( "Malformed xpath from $class: " . $extractor->getXPath() );
 			}
 
-			foreach( $elements as $element ) {
+			foreach ( $elements as $element ) {
 				try {
 					$ref = $extractor->perform( $factory, $element );
 				} catch ( InvalidReferenceException $e ) {

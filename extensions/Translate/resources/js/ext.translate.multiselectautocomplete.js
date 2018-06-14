@@ -4,12 +4,12 @@
  * Autocompleted values will be available in input filed as comma separated values.
  * The values for autocompletion is from the language selector in this case.
  * The input field is created in PHP code.
- * Credits: http://jqueryui.com/demos/autocomplete/#multiple
+ * Credits: https://jqueryui.com/autocomplete/#multiple
  */
 jQuery( function ( $ ) {
 	'use strict';
 
-	// jscs:disable disallowDanglingUnderscores
+	/* eslint-disable no-underscore-dangle */
 
 	$.widget( 'ui.multiselectautocomplete', {
 		options: {
@@ -37,18 +37,22 @@ jQuery( function ( $ ) {
 					matcher = new RegExp( $.ui.autocomplete.escapeRegex( term ), 'i' );
 
 					response( select.children( 'option' ).map( function () {
-						var text = $( this ).text(),
+						var text = $( this ).html(),
 							value = $( this ).val(),
 							term = split( request.term ).pop();
 
 						if ( this.value && ( !request.term || matcher.test( text ) ) ) {
-							return {
-								label: text.replace(
+							if ( term.trim() !== '' ) {
+								text = text.replace(
 									new RegExp(
 										'(?![^&;]+;)(?!<[^<>]*)(' +
 											$.ui.autocomplete.escapeRegex( term ) +
 											')(?![^<>]*>)(?![^&;]+;)', 'gi'
-									), '<strong>$1</strong>' ),
+									), '<strong>$1</strong>' );
+							}
+
+							return {
+								label: text,
 								value: value,
 								option: this
 							};

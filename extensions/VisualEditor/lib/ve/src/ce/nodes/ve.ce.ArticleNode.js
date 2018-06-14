@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable ArticleNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -29,6 +29,8 @@ OO.inheritClass( ve.ce.ArticleNode, ve.ce.BranchNode );
 /* Static Properties */
 
 ve.ce.ArticleNode.static.name = 'article';
+
+ve.ce.ArticleNode.static.tagName = 'article';
 
 /* Registration */
 

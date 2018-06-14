@@ -15,12 +15,13 @@
  * along with MediaViewer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, $ ) {
+( function ( mw ) {
 	var LP;
 
 	/**
 	 * Class for storing license information about an image. For available fields, see
 	 * TemplateParser::$licenseFieldClasses in the CommonsMetadata extension.
+	 *
 	 * @class mw.mmv.model.License
 	 * @param {string} shortName see {@link #shortName}
 	 * @param {string} [internalName] see {@link #internalName}
@@ -39,7 +40,7 @@
 		nonFree
 	) {
 		if ( !shortName ) {
-			throw 'mw.mmv.model.License: shortName is required';
+			throw new Error( 'mw.mmv.model.License: shortName is required' );
 		}
 
 		/** @property {string} shortName short (abbreviated) name of the license (e.g. CC-BY-SA-3.0) */
@@ -67,7 +68,8 @@
 
 	/**
 	 * Check whether this is a Creative Commons license.
-	 * @returns {boolean}
+	 *
+	 * @return {boolean}
 	 */
 	LP.isCc = function () {
 		return this.internalName ? this.internalName.substr( 0, 2 ) === 'cc' : false;
@@ -75,7 +77,8 @@
 
 	/**
 	 * Check whether this is a public domain "license".
-	 * @returns {boolean}
+	 *
+	 * @return {boolean}
 	 */
 	LP.isPd = function () {
 		return this.internalName === 'pd';
@@ -83,6 +86,7 @@
 
 	/**
 	 * Check whether this is a free license.
+	 *
 	 * @return {boolean}
 	 */
 	LP.isFree = function () {
@@ -92,6 +96,7 @@
 
 	/**
 	 * Check whether reusers need to attribute the author
+	 *
 	 * @return {boolean}
 	 */
 	LP.needsAttribution = function () {
@@ -104,6 +109,7 @@
 	 * - if we have interface messages for this license (basically just CC and PD), use those
 	 * - otherwise use the short name from the license template (might or might not be translated
 	 *   still, depending on how the template is set up)
+	 *
 	 * @return {string}
 	 * FIXME a model should not depend on an i18n class. We should probably use view models.
 	 */
@@ -116,25 +122,23 @@
 		}
 	};
 
-
 	/**
 	 * Returns a short HTML representation of the license.
+	 *
 	 * @return {string}
 	 */
 	LP.getShortLink = function () {
 		var shortName = this.getShortName();
 
 		if ( this.deedUrl ) {
-			return this.htmlUtils.jqueryToHtml(
-				$( '<a>' ).prop( {
-					href: this.deedUrl,
-					title: this.longName || shortName
-				} ).text( shortName )
-			);
+			return this.htmlUtils.makeLinkText( shortName, {
+				href: this.deedUrl,
+				title: this.longName || shortName
+			} );
 		} else {
 			return shortName;
 		}
 	};
 
 	mw.mmv.model.License = License;
-}( mediaWiki, jQuery ) );
+}( mediaWiki ) );

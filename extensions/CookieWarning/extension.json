@@ -10,6 +10,9 @@
 	"descriptionmsg": "cookiewarning-desc",
 	"type": "other",
 	"license-name": "MIT",
+	"requires": {
+		"MediaWiki": ">= 1.25.0"
+	},
 	"MessagesDirs": {
 		"CookieWarning": [
 			"i18n"
@@ -81,7 +84,9 @@
 		"ext.CookieWarning": {
 			"dependencies": [
 				"mediawiki.api",
-				"mediawiki.cookie"
+				"mediawiki.api.options",
+				"mediawiki.cookie",
+				"mediawiki.user"
 			],
 			"scripts": "resources/ext.CookieWarning/ext.CookieWarning.js",
 			"targets": [
@@ -90,7 +95,6 @@
 			]
 		},
 		"ext.CookieWarning.styles": {
-			"position": "top",
 			"styles": "resources/ext.CookieWarning/ext.CookieWarning.less"
 		},
 		"ext.CookieWarning.mobile.styles": {
@@ -101,14 +105,16 @@
 		},
 		"ext.CookieWarning.geolocation": {
 			"scripts": "resources/ext.CookieWarning.geolocation/cookiePolicy.js",
-			"dependencies": "ext.CookieWarning",
+			"dependencies": [
+				"ext.CookieWarning",
+				"jquery.cookie"
+			],
 			"targets": [
 				"mobile",
 				"desktop"
 			]
 		},
 		"ext.CookieWarning.geolocation.styles": {
-			"position": "top",
 			"styles": "resources/ext.CookieWarning.geolocation/styles.css",
 			"targets": [
 				"mobile",
@@ -121,7 +127,8 @@
 		"remoteExtPath": "CookieWarning"
 	},
 	"AutoloadClasses": {
-		"CookieWarningHooks": "includes/CookieWarning.hooks.php",
+		"CookieWarningHooks": "includes/CookieWarningHooks.php",
+		"CookieWarningTestTemplate": "tests/phpunit/includes/CookieWarningTestTemplate.php",
 		"GeoLocation": "includes/GeoLocation.php"
 	},
 	"ConfigRegistry": {

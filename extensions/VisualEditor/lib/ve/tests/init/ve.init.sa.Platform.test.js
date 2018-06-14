@@ -1,31 +1,34 @@
 /*!
  * VisualEditor tests for ve.init.sa.Platform.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.init.sa.Platform', {
-	setup: function () {
+	beforeEach: function () {
+		// Ensure that ve.init.platform is not permanently overwritten
+		// by creating an sa.Platform
+		this.originalPlatform = ve.init.platform;
 		this.purgeKeys = function () {
-			var i, keys = [];
-			for ( i = 0; i < localStorage.length; i++ ) {
-				keys.push( localStorage.key( i ) );
-			}
-			// Get keys first since key index is live
-			keys.forEach( function ( key ) {
+			var key,
+				i = localStorage.length;
+			// Loop backwards since removal affects the key index
+			while ( i-- ) {
+				key = localStorage.key( i );
 				if ( key.indexOf( 've-test-' ) === 0 ) {
 					localStorage.removeItem( key );
 				}
-			} );
+			}
 		};
 		this.purgeKeys();
 	},
-	teardown: function () {
+	afterEach: function () {
+		ve.init.platform = this.originalPlatform;
 		this.purgeKeys();
 	}
 } );
 
-QUnit.test( 'getUserConfig', 4, function ( assert ) {
+QUnit.test( 'getUserConfig', function ( assert ) {
 	var platform = new ve.init.sa.Platform();
 
 	assert.strictEqual( platform.getUserConfig( 'test-1' ), null, 'unknown key' );
@@ -45,7 +48,7 @@ QUnit.test( 'getUserConfig', 4, function ( assert ) {
 	);
 } );
 
-QUnit.test( 'setUserConfig', 4, function ( assert ) {
+QUnit.test( 'setUserConfig', function ( assert ) {
 	var platform = new ve.init.sa.Platform();
 
 	assert.strictEqual( platform.setUserConfig( 'test-1', 'one' ), true, 'set key' );
@@ -61,4 +64,69 @@ QUnit.test( 'setUserConfig', 4, function ( assert ) {
 		{ 'test-1': 'one more', 'test-2': 'two' },
 		'multiple values persist'
 	);
+} );
+
+QUnit.test( 'messages', function ( assert ) {
+	var platform = new ve.init.sa.Platform();
+
+	return platform.getInitializedPromise().then( function () {
+		assert.ok(
+			/^<?platformtest-foo>?$/.test( platform.getMessage( 'platformtest-foo' ) ),
+			'return plain key as fallback, possibly wrapped in brackets'
+		);
+
+		platform.addMessages( {
+			'platformtest-foo': 'Foo & Bar <quux action="followed">by</quux>!',
+			'platformtest-lorem': 'Lorem <&> Ipsum: $1'
+		} );
+
+		assert.strictEqual(
+			platform.getMessage( 'platformtest-foo' ),
+			'Foo & Bar <quux action="followed">by</quux>!',
+			'return plain message'
+		);
+
+		assert.strictEqual(
+			platform.getMessage( 'platformtest-lorem', 10 ),
+			'Lorem <&> Ipsum: 10',
+			'return plain message with $# replacements'
+		);
+
+		assert.ok(
+			/^<?platformtest-quux>?$/.test( platform.getMessage( 'platformtest-quux' ) ),
+			'return plain key as fallback, possibly wrapped in brackets (after set up)'
+		);
+	} );
+} );
+
+QUnit.test( 'parsedMessage', function ( assert ) {
+	var platform = new ve.init.sa.Platform();
+
+	return platform.getInitializedPromise().then( function () {
+		assert.ok(
+			/^(&lt;)?platformtest-quux(&gt;)?$/.test( platform.getParsedMessage( 'platformtest-quux' ) ),
+			'any brackets in fallbacks are HTML-escaped'
+		);
+
+		platform.addMessages( {
+			'platformtest-foo': 'Foo & Bar <quux action="followed">by</quux>!',
+			'platformtest-lorem': 'Lorem <&> Ipsum: $1'
+		} );
+
+		platform.addParsedMessages( {
+			'platformtest-foo': 'Foo <quux>&lt;html&gt;</quux>'
+		} );
+
+		assert.strictEqual(
+			platform.getParsedMessage( 'platformtest-foo' ),
+			'Foo <quux>&lt;html&gt;</quux>',
+			'prefer value from parsedMessage store'
+		);
+
+		assert.strictEqual(
+			platform.getParsedMessage( 'platformtest-lorem', 10 ),
+			'Lorem &lt;&amp;&gt; Ipsum: $1',
+			'fall back to html-escaped version of plain message, no $# replacements'
+		);
+	} );
 } );

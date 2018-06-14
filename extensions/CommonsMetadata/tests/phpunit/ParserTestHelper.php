@@ -5,17 +5,20 @@ namespace CommonsMetadata;
 class ParserTestHelper {
 	/**
 	 * Maps test names to filenames in the test subdirectory.
-	 * This array only exists to have a place where the intentions of test files can be conveniently commented.
+	 * This array only exists to have a place where the intentions of test files
+	 * can be conveniently commented.
 	 * Files have been saved from the Commons images of the same name via action=render.
 	 * @var array name => filename
 	 */
-	public static $testHTMLFiles = array(
+	public static $testHTMLFiles = [
 		// an image with no information template
 		'noinfo' => 'File_Pentacle_3.svg',
-		// a fairly simple page with a basic information template (with no language markup) and a single CC license
+		// a fairly simple page with a basic information template (with no language markup) and
+		// a single CC license
 		'simple' => 'File_Sunrise_over_fishing_boats_in_Kerala.jpg',
 		// language markup, but some of the description (a WLM reference number) is outside it
-		'outside_lang' => 'File_Colonial_Williamsburg_(December,_2011)_-_Christmas_decorations_20.JPG',
+		'outside_lang' =>
+			'File_Colonial_Williamsburg_(December,_2011)_-_Christmas_decorations_20.JPG',
 		// English description only
 		'singlelang' => 'File_Dala_Kyrka.JPG',
 		// non-English description only
@@ -33,7 +36,8 @@ class ParserTestHelper {
 		// complex HTML in the author field
 		'creator_template' => 'File_Elizabeth_I_George_Gower.jpg',
 		// an image with many languages
-		'manylang' => 'File_Sikh_pilgrim_at_the_Golden_Temple_(Harmandir_Sahib)_in_Amritsar,_India.jpg',
+		'manylang' =>
+			'File_Sikh_pilgrim_at_the_Golden_Temple_(Harmandir_Sahib)_in_Amritsar,_India.jpg',
 		// an image with a relatively long description
 		'big' => 'File_Askaris_im_Warschauer_Getto_-_1943.jpg',
 		// information-like template with a title field
@@ -50,7 +54,7 @@ class ParserTestHelper {
 		'deletion' => 'File_Kerameikos_October_2012_15.JPG',
 		// file with restrictions e.g. trademarked
 		'restrict' => 'File_Logo_NIKE.svg',
-	);
+	];
 
 	/**
 	 * @var \PHPUnit_Framework_TestCase
@@ -65,7 +69,7 @@ class ParserTestHelper {
 	}
 
 	/**
-	 * Loads a test file (usually the saved output of action=render for some image description page).
+	 * Loads a test file (usually the saved output of action=render for some image description page)
 	 * @param string $name
 	 * @throws \InvalidArgumentException
 	 * @return string
@@ -85,7 +89,7 @@ class ParserTestHelper {
 
 	/**
 	 * Loads an expected metadata test result.
-	 * @param $name
+	 * @param string $name
 	 * @throws \InvalidArgumentException
 	 * @return array
 	 */
@@ -98,16 +102,17 @@ class ParserTestHelper {
 		if ( !file_exists( $filename ) ) {
 			throw new \InvalidArgumentException( 'no metadata file named ' . $filename );
 		}
-		$metadata = require( $filename );
+		$metadata = require $filename;
 		return $metadata;
 	}
 
 	/**
 	 * @param string $description file page text
 	 * @param string[] $categories list of category names, without namespace
+	 * @param string $mime mimetype of the image
 	 * @return \LocalFile
 	 */
-	public function getLocalFile( $description, $categories ) {
+	public function getLocalFile( $description, $categories, $mime = 'image/jpeg' ) {
 		$file = $this->testCase->getMockBuilder( 'LocalFile' )
 			->setMockClassName( 'LocalFileMock' )
 			->disableOriginalConstructor()
@@ -121,6 +126,9 @@ class ParserTestHelper {
 		$file->expects( $this->testCase->any() )
 			->method( 'getDescriptionTouched' )
 			->will( $this->testCase->returnValue( time() ) );
+		$file->expects( $this->testCase->any() )
+			->method( 'getMimeType' )
+			->will( $this->testCase->returnValue( $mime ) );
 		$file->mockedCategories = $categories;
 		return $file;
 	}
@@ -151,7 +159,7 @@ class ParserTestHelper {
 	 * @return \ForeignDBFile
 	 */
 	public function getForeignDbFile( $description, $categories ) {
-		$file = $this->testCase->getMockBuilder( 'ForeignDbFile' )
+		$file = $this->testCase->getMockBuilder( 'ForeignDBFile' )
 			->setMockClassName( 'ForeignDBFileMock' )
 			->disableOriginalConstructor()
 			->getMock();

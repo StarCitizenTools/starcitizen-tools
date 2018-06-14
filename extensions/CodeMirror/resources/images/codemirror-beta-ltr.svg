@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" height="162" width="264" viewBox="0 0 264 162">
+	<defs>
+		<clipPath id="jagged-edge">
+			<path d="M0 0v152l12 10 12-10 12 10 12-10 12 10 12-10 12 10 12-10 12 10 12-10 12 10 12-10 12 10 12-10 12 10 12-10 12 10 12-10 12 10 12-10 12 10 12-10V0z"/>
+		</clipPath>
+	</defs>
+	<g fill="#eaecf0" clip-path="url(#jagged-edge)">
+		<path id="background" fill="#fff" d="M0 0h264v162H0"/>
+		<path id="logo" d="M11 22c0-8 6-14 14-14s14 6 14 14-6 14-14 14-14-6-14-14M38 45v-5H13v5h25"/>
+		<path id="sidebar" d="M38 163V58H13v106h25"/>
+		<path id="personal-tools" d="M233 5h26v6h-26zm-24 0h22v6h-22zm-24 0h22v6h-22zm-23 0h13v6h-13zm15 0h6v6h-6zm-23 0h6v6h-6z"/>
+		<g id="search">
+			<path id="input" d="M258 16v4h-92v-4h92m1-1h-94v6h94z"/>
+			<path id="icon" d="M168 17h2v2h-2z"/>
+		</g>
+		<path id="article" d="M252 162V29H48v133z"/>
+		<path id="border" d="M0 0v162h264V0zm1 1h262v150.533l-11 9.166-12-10-12 10-12-10-12 10-12-10-12 10-12-10-12 10-12-10-12 10-12-10-12 10-12-10-12 10-12-10-12 10-12-10-12 10-12-10-12 10-11-9.167z"/>
+	</g>
+	<g fill="#36c" transform="translate(-13.885 -39.345) scale(1.30738)">
+		<path d="M54.7 78.9V64.2h3.4v1H56v12.7h2.1v1h-3.4z"/>
+		<path d="M60 78.9V64.2h3.4v1h-2.2v12.7h2.1v1H60z"/>
+	</g>
+	<g fill="#36c" transform="translate(-13.885 -39.345) scale(1.30738)">
+		<path d="M197.6 112.5V127h-3.3v-1h2.1v-12.5h-2.1v-1z"/>
+		<path d="M192.5 112.5V127h-3.3v-1h2.1v-12.5h-2.1v-1z"/>
+	</g>
+	<g fill="#fff" transform="translate(-13.885 -39.345) scale(1.30738)">
+		<path d="M67.7 63.9h96.7v2H67.7z"/>
+		<path d="M67.7 91.5h117.4v2H67.7z"/>
+		<path d="M67.7 70.8h96.7v2H67.7z"/>
+		<path d="M67.7 84.6h96.7v2H67.7z"/>
+		<path d="M67.7 77.7h96.7v2H67.7z"/>
+		<path stroke-width="1.085" d="M67.7 98.4h117.4v2H67.7z"/>
+		<path fill="#72777d" opacity="0.1" stroke-width="1.085" d="M67.7 126h117.4v2H67.7z"/>
+		<path stroke-width="1.195" d="M67.7 105.3h117.4v2H67.7z"/>
+		<path stroke-width="1.085" d="M67.7 119.1h117.4v2H67.7z"/>
+		<path fill="#72777d" opacity="0.1" stroke-width="1.118" d="M67.7 112.2h117.4v2H67.7z"/>
+	</g>
+	<g transform="translate(209 50)">
+		<path fill="#36c" d="M18.29 6.29l-3.58-3.58a1 1 0 0 0-1.41 0l-9.59 9.58a1 1 0 0 0 0 1.41L4 14l-3 4h5l1-1 .29.29a1 1 0 0 0 1.41 0l9.59-9.59a1 1 0 0 0 0-1.41zM7 15l-2-2 9-9 2 2z"/>
+	</g>
+	<g transform="translate(-16.814 -39.345) scale(1.30738)">
+		<path fill="#00af89" d="M83.8 63.9h19.1V66H83.8z"/>
+		<path fill="#00af89" stroke-width=".956" d="M140.7 70.728h17.7v2.1h-17.7z"/>
+		<path fill="#fc3" opacity="0.23" stroke-width=".764" d="M82.1 77.708h27v2.1h-27z"/>
+		<path fill="#fc3" opacity="0.23" stroke-width=".764" d="M110.6 77.708h27v2.1h-27z"/>
+		<path fill="#00af89" d="M83.8 98.414h63.3v2.1H83.8z"/>
+		<path fill="#fc3" d="M143.2 91.428h40.7v2.1h-40.7z"/>
+		<path fill="#fc3" d="M135.3 112.128h34.1v2.1h-34.1z"/>
+	</g>
+</svg>

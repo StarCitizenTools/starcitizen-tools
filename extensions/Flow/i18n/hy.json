@@ -5,10 +5,11 @@
 			"Vadgt",
 			"Xelgen",
 			"Aram1985",
-			"Աշոտ1997"
+			"Աշոտ1997",
+			"Kareyac"
 		]
 	},
-	"enableflow": "Միացնել հոսքը",
+	"enablestructureddiscussions": "Միացնել հոսքը",
 	"flow-board-header-browse-topics-link": "Դիտել թեմաները",
 	"flow-board-expand-description": "Ցուցադրել նկարագրությունը",
 	"flow-edit-header-link": "Խմբագրել նկարագրությունը",
@@ -18,6 +19,7 @@
 	"flow-post-actions": "Գործողություններ",
 	"flow-topic-actions": "Գործողություններ",
 	"flow-cancel": "Չեղարկել",
+	"flow-skip-summary": "Բաց թողնել",
 	"flow-show-change": "Կատարված փոփոխությունները",
 	"flow-newtopic-title-placeholder": "Նոր թեմա",
 	"flow-newtopic-start-placeholder": "Սկսել նոր թեմա",
@@ -71,7 +73,7 @@
 	"flow-ve-mention-placeholder": "Մասնակցային անուն",
 	"flow-wikitext-editor-help-preview-the-result": "նախադիտել արդյունքը",
 	"flow-dialog-cancelconfirm-title": "Դուք վստա՞հ եք",
-	"flow-dialog-cancelconfirm-message": "Համոզվա՞ծ եք, որ ցանկանում եք չեղարկել նախքան պահպանումը",
+	"flow-dialog-cancelconfirm-message": "Չեղարկե՞լ առանց փոփոխությունները պահելու",
 	"flow-dialog-cancelconfirm-keep": "Շարունակել խմբագրել",
 	"flow-dialog-cancelconfirm-discard": "Չեղարկել փոփոխությունները",
 	"flow-guidedtour-optin-find-old-conversations": "Գտնել Ձեր հին խոսակցությունները"

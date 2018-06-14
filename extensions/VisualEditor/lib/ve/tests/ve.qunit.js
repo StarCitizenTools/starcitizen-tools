@@ -1,10 +1,10 @@
 /*!
  * VisualEditor plugin for QUnit.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
-/*global difflib,diffview */
+/* global difflib,diffview */
 
 ( function ( QUnit ) {
 	/**
@@ -104,17 +104,17 @@
 	 */
 	function unescapeText( s ) {
 		return s.replace( /&(#039|quot|lt|gt|amp);/g, function ( match, seq ) {
-			switch ( seq )  {
-			case '#039':
-				return '\'';
-			case 'quot':
-				return '"';
-			case 'lt':
-				return '<';
-			case 'gt':
-				return '>';
-			case 'amp':
-				return '&';
+			switch ( seq ) {
+				case '#039':
+					return '\'';
+				case 'quot':
+					return '"';
+				case 'lt':
+					return '<';
+				case 'gt':
+					return '>';
+				case 'amp':
+					return '&';
 			}
 		} );
 	}
@@ -129,6 +129,10 @@
 	 *
 	 * @method
 	 * @static
+	 * @param {ve.Node} actual
+	 * @param {ve.Node} expected
+	 * @param {boolean} shallow
+	 * @param {string} message
 	 */
 	QUnit.assert.equalNodeTree = function ( actual, expected, shallow, message ) {
 		var actualSummary, expectedSummary;
@@ -138,14 +142,20 @@
 		}
 		actualSummary = getNodeTreeSummary( actual, shallow );
 		expectedSummary = getNodeTreeSummary( expected, shallow );
-		QUnit.push(
-			QUnit.equiv( actualSummary, expectedSummary ), actualSummary, expectedSummary, message
-		);
+		this.pushResult( {
+			result: QUnit.equiv( actualSummary, expectedSummary ),
+			actual: actualSummary,
+			expected: expectedSummary,
+			message: message
+		} );
 	};
 
 	/**
 	 * @method
 	 * @static
+	 * @param {Object[]} actual
+	 * @param {Object[]} expected
+	 * @param {string} message
 	 */
 	QUnit.assert.equalNodeSelection = function ( actual, expected, message ) {
 		var i,
@@ -154,20 +164,29 @@
 
 		for ( i = 0; i < actual.length; i++ ) {
 			if ( expected[ i ] && expected[ i ].node !== actual[ i ].node ) {
-				QUnit.push( false, actualSummary, expectedSummary,
-					message + ' (reference equality for selection[' + i + '].node)'
-				);
+				this.pushResult( {
+					result: false,
+					actual: actualSummary,
+					expected: expectedSummary,
+					message: message + ' (reference equality for selection[' + i + '].node)'
+				} );
 				return;
 			}
 		}
-		QUnit.push(
-			QUnit.equiv( actualSummary, expectedSummary ), actualSummary, expectedSummary, message
-		);
+		this.pushResult( {
+			result: QUnit.equiv( actualSummary, expectedSummary ),
+			actual: actualSummary,
+			expected: expectedSummary,
+			message: message
+		} );
 	};
 
 	/**
 	 * @method
 	 * @static
+	 * @param {HTMLElement} actual
+	 * @param {HTMLElement} expected
+	 * @param {string} message
 	 */
 	QUnit.assert.equalDomElement = function ( actual, expected, message ) {
 		var actualSummary = ve.getDomElementSummary( actual ),
@@ -175,50 +194,99 @@
 			actualSummaryHtml = ve.getDomElementSummary( actual, true ),
 			expectedSummaryHtml = ve.getDomElementSummary( expected, true );
 
-		QUnit.push(
-			QUnit.equiv( actualSummary, expectedSummary ), actualSummaryHtml, expectedSummaryHtml, message
-		);
-	};
-
-	QUnit.assert.equalLinearData = function ( actual, expected, message ) {
-		function removeOriginalDomElements( arr ) {
-			var i = 0,
-				len = arr.length;
-			for ( ; i < len; i++ ) {
-				if ( arr[ i ].originalDomElements ) {
-					delete arr[ i ].originalDomElements;
-				}
-			}
-		}
-
-		if ( Array.isArray( actual ) ) {
-			actual = actual.slice();
-			removeOriginalDomElements( actual );
-		}
-		if ( Array.isArray( expected ) ) {
-			expected = expected.slice();
-			removeOriginalDomElements( expected );
-		}
-
-		// FIXME domElements handling here shouldn't be necessary, but it is because of AlienNode
-		actual = ve.copy( actual, ve.convertDomElements );
-		expected = ve.copy( expected, ve.convertDomElements );
-
-		QUnit.push( QUnit.equiv( actual, expected ), actual, expected, message );
+		this.pushResult( {
+			result: QUnit.equiv( actualSummary, expectedSummary ),
+			actual: actualSummaryHtml,
+			expected: expectedSummaryHtml,
+			message: message
+		} );
 	};
 
 	/**
-	 * Assert that two objects which may contain dom elements are equal.
+	 * @method
+	 * @static
+	 * @param {HTMLElement} actual
+	 * @param {HTMLElement} expected
+	 * @param {string} message
+	 */
+	QUnit.assert.notEqualDomElement = function ( actual, expected, message ) {
+		var actualSummary = ve.getDomElementSummary( actual ),
+			expectedSummary = ve.getDomElementSummary( expected ),
+			actualSummaryHtml = ve.getDomElementSummary( actual, true ),
+			expectedSummaryHtml = ve.getDomElementSummary( expected, true );
+
+		this.pushResult( {
+			result: !QUnit.equiv( actualSummary, expectedSummary ),
+			actual: actualSummaryHtml,
+			expected: 'Not: ' + expectedSummaryHtml,
+			message: message
+		} );
+	};
+
+	QUnit.assert.equalLinearData = function ( actual, expected, message ) {
+		function removeOriginalDomElements( val ) {
+			if ( val && val.type ) {
+				ve.deleteProp( val, 'originalDomElementsHash' );
+				ve.deleteProp( val, 'originalDomElements' );
+				ve.deleteProp( val, 'internal', 'changesSinceLoad' );
+				ve.deleteProp( val, 'internal', 'metaItems' );
+			}
+		}
+
+		actual = ve.copy( actual );
+		expected = ve.copy( expected );
+		actual = ve.copy( actual, null, removeOriginalDomElements );
+		expected = ve.copy( expected, null, removeOriginalDomElements );
+
+		this.pushResult( {
+			result: QUnit.equiv( actual, expected ),
+			actual: actual,
+			expected: expected,
+			message: message
+		} );
+	};
+
+	QUnit.assert.equalLinearDataWithDom = function ( store, actual, expected, message ) {
+		function addOriginalDomElements( val ) {
+			if ( val && val.originalDomElementsHash !== undefined ) {
+				val.originalDomElements = store.value( val.originalDomElementsHash );
+				delete val.originalDomElementsHash;
+			}
+		}
+
+		actual = ve.copy( actual );
+		expected = ve.copy( expected );
+		actual = ve.copy( actual, ve.convertDomElements, addOriginalDomElements );
+		expected = ve.copy( expected, ve.convertDomElements, addOriginalDomElements );
+
+		this.pushResult( {
+			result: QUnit.equiv( actual, expected ),
+			actual: actual,
+			expected: expected,
+			message: message
+		} );
+	};
+
+	/**
+	 * Assert that two objects which may contain DOM elements are equal.
 	 *
 	 * @method
 	 * @static
+	 * @param {Object} actual
+	 * @param {Object} expected
+	 * @param {string} message
 	 */
 	QUnit.assert.deepEqualWithDomElements = function ( actual, expected, message ) {
 		// Recursively copy objects or arrays, converting any dom elements found to comparable summaries
 		actual = ve.copy( actual, ve.convertDomElements );
 		expected = ve.copy( expected, ve.convertDomElements );
 
-		QUnit.push( QUnit.equiv( actual, expected ), actual, expected, message );
+		this.pushResult( {
+			result: QUnit.equiv( actual, expected ),
+			actual: actual,
+			expected: expected,
+			message: message
+		} );
 	};
 
 	/**
@@ -226,13 +294,21 @@
 	 *
 	 * @method
 	 * @static
+	 * @param {Object} actual
+	 * @param {Object} expected
+	 * @param {string} message
 	 */
 	QUnit.assert.deepEqualWithNodeTree = function ( actual, expected, message ) {
 		// Recursively copy objects or arrays, converting any dom elements found to comparable summaries
 		actual = ve.copy( actual, convertNodes );
 		expected = ve.copy( expected, convertNodes );
 
-		QUnit.push( QUnit.equiv( actual, expected ), actual, expected, message );
+		this.pushResult( {
+			result: QUnit.equiv( actual, expected ),
+			actual: actual,
+			expected: expected,
+			message: message
+		} );
 	};
 
 	QUnit.assert.equalRange = function ( actual, expected, message ) {
@@ -244,13 +320,23 @@
 			from: expected.from,
 			to: expected.to
 		};
-		QUnit.push( QUnit.equiv( actual, expected ), actual, expected, message );
+		this.pushResult( {
+			result: QUnit.equiv( actual, expected ),
+			actual: actual,
+			expected: expected,
+			message: message
+		} );
 	};
 
 	QUnit.assert.equalHash = function ( actual, expected, message ) {
-		actual = actual && actual.toJSON();
-		expected = expected && expected.toJSON();
-		QUnit.push( QUnit.equiv( actual, expected ), actual, expected, message );
+		actual = JSON.parse( JSON.stringify( actual ) );
+		expected = JSON.parse( JSON.stringify( expected ) );
+		this.pushResult( {
+			result: QUnit.equiv( actual, expected ),
+			actual: actual,
+			expected: expected,
+			message: message
+		} );
 	};
 
 	QUnit.diff = function ( o, n ) {
@@ -259,9 +345,7 @@
 		var oLines = difflib.stringAsLines( unescapeText( o ) ),
 			nLines = difflib.stringAsLines( unescapeText( n ) ),
 			sm = new difflib.SequenceMatcher( oLines, nLines ),
-			// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 			opcodes = sm.get_opcodes(),
-			// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 			$div = $( '<div>' );
 
 		$div.append( diffview.buildView( {
@@ -276,5 +360,4 @@
 
 		return $div.html();
 	};
-
 }( QUnit ) );

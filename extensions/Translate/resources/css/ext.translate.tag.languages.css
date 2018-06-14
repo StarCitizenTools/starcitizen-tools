@@ -1,7 +1,8 @@
 .mw-pt-languages {
 	display: table;
-	border: 1px solid rgb(170, 170, 170);
-	background: rgb(246, 249, 237) none repeat scroll 0 0;
+	border: 1px solid #a2a9b1;
+	box-sizing: border-box;
+	background: #f8f9fa none repeat scroll 0 0;
 	border-collapse: collapse;
 	line-height: 1.2;
 	width: 100%;
@@ -11,9 +12,9 @@
 
 .mw-pt-languages-label {
 	display: table-cell;
-	border-right: 1px solid rgb(170, 170, 170);
+	border-right: 1px solid #a2a9b1;
 	padding: 0.5em;
-	background: rgb(238, 243, 226) none repeat scroll 0 0;
+	background: #eaecf0 none repeat scroll 0 0;
 	font-weight: bold;
 	width: 15%;
 }
@@ -41,21 +42,21 @@
 }
 
 .mw-pt-progress--stub {
-	background-image: url('../images/prog-1.png');
+	background-image: url( ../images/prog-1.png );
 }
 
 .mw-pt-progress--low {
-	background-image: url('../images/prog-2.png');
+	background-image: url( ../images/prog-2.png );
 }
 
 .mw-pt-progress--med {
-	background-image: url('../images/prog-3.png');
+	background-image: url( ../images/prog-3.png );
 }
 
 .mw-pt-progress--high {
-	background-image: url('../images/prog-4.png');
+	background-image: url( ../images/prog-4.png );
 }
 
 .mw-pt-progress--complete {
-	background-image: url('../images/prog-5.png');
+	background-image: url( ../images/prog-5.png );
 }

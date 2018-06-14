@@ -4,7 +4,7 @@ $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
 	$IP = __DIR__ . '/../../..';
 }
-require_once ( "$IP/maintenance/Maintenance.php" );
+require_once "$IP/maintenance/Maintenance.php";
 
 class TestDiscussionParser extends Maintenance {
 	public function __construct() {
@@ -12,6 +12,8 @@ class TestDiscussionParser extends Maintenance {
 		$this->mDescription = "Takes enwiki revision IDs and attempts to identify interested users";
 
 		$this->addArg( 'revisions', 'Revision IDs, separated by commas', true /*required*/ );
+
+		$this->requireExtension( 'Echo' );
 	}
 
 	public function execute() {
@@ -20,18 +22,18 @@ class TestDiscussionParser extends Maintenance {
 		$revisions = explode( ',', $this->getArg( 0 ) );
 
 		// Retrieve original revisions and their predecessors
-		$requestData = array(
+		$requestData = [
 			'format' => 'php',
 			'action' => 'query',
 			'prop' => 'revisions',
 			'revids' => implode( '|', $revisions ),
-		);
+		];
 
 		$originalData = Http::post(
 			$apiURL,
-			array(
+			[
 				'postData' => $requestData,
-			)
+			]
 		);
 
 		$data = unserialize( $originalData );
@@ -45,7 +47,7 @@ class TestDiscussionParser extends Maintenance {
 
 			$revid = $page['revisions'][0]['revid'];
 
-			$newRequest = array(
+			$newRequest = [
 				'format' => 'php',
 				'action' => 'query',
 				'prop' => 'revisions',
@@ -53,13 +55,13 @@ class TestDiscussionParser extends Maintenance {
 				'rvstartid' => $revid,
 				'rvlimit' => 2,
 				'rvprop' => 'ids|content|user',
-			);
+			];
 
 			$newData = Http::post(
 				$apiURL,
-				array(
+				[
 					'postData' => $newRequest,
-				)
+				]
 			);
 
 			$newData = unserialize( $newData );
@@ -88,4 +90,4 @@ class TestDiscussionParser extends Maintenance {
 }
 
 $maintClass = "TestDiscussionParser";
-require_once ( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

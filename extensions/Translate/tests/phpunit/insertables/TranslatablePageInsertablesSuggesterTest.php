@@ -4,10 +4,10 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
-class TranslatablePageInsertablesSuggesterTest extends MediaWikiInsertablesSuggesterTest {
+class TranslatablePageInsertablesSuggesterTest extends PHPUnit\Framework\TestCase {
 	/**
 	 * @dataProvider getInsertablesProvider
 	 */
@@ -17,23 +17,23 @@ class TranslatablePageInsertablesSuggesterTest extends MediaWikiInsertablesSugge
 	}
 
 	public function getInsertablesProvider() {
-		return array(
-			array(
+		return [
+			[
 				'Hi $1, I am $myname $myLastName.',
-				array(
+				[
 					new Insertable( '$1', '$1', '' ),
 					new Insertable( '$myname', '$myname', '' ),
 					new Insertable( '$myLastName', '$myLastName', '' ),
-				)
-			),
-			array(
+				]
+			],
+			[
 				'Insertables can $have-hyphens, $number9 and $under_scores',
-				array(
+				[
 					new Insertable( '$have-hyphens', '$have-hyphens', '' ),
 					new Insertable( '$number9', '$number9', '' ),
 					new Insertable( '$under_scores', '$under_scores', '' ),
-				)
-			),
-		);
+				]
+			],
+		];
 	}
 }

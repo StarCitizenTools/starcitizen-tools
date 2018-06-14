@@ -1,12 +1,12 @@
 /*!
  * VisualEditor UserInterface PreviewElement class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 /**
- * Creates an ve.ui.PreviewElement object.
+ * Creates a ve.ui.PreviewElement object.
  *
  * @class
  * @extends OO.ui.Element
@@ -18,7 +18,7 @@
  */
 ve.ui.PreviewElement = function VeUiPreviewElement( model, config ) {
 	// Parent constructor
-	OO.ui.Element.call( this, config );
+	ve.ui.PreviewElement.super.call( this, config );
 
 	// Mixin constructor
 	OO.EventEmitter.call( this );
@@ -60,63 +60,56 @@ ve.ui.PreviewElement.prototype.setModel = function ( model ) {
 /**
  * Replace the content of the body with the model DOM
  *
+ * Doesn't use jQuery to avoid document switching performance bug
+ *
  * @fires render
  */
 ve.ui.PreviewElement.prototype.replaceWithModelDom = function () {
-	var htmlDocument = ve.dm.converter.getDomFromNode( this.model, true ),
-		$preview = $( htmlDocument.body );
+	var
+		// FIXME: The 'true' means 'for clipboard'. This is not really true, but changing it to 'false'
+		// breaks the rendering of pretty much everything that checks for 'converter.isForClipboard()',
+		// e.g. nodes in MW like MWTransclusionNode and MWNumberedExternalLinkNode.
+		htmlDocument = ve.dm.converter.getDomFromNode( this.model, true ),
+		body = htmlDocument.body,
+		element = this.$element[ 0 ];
 
-	// Resolve attributes
+	// Resolve attributes (in particular, expand 'href' and 'src' using the right base)
 	ve.resolveAttributes(
-		$preview,
+		body,
 		this.model.getDocument().getHtmlDocument(),
 		ve.dm.Converter.static.computedAttributes
 	);
 
-	// Make all links open in a new window (sync view)
-	$preview.find( 'a' ).attr( 'target', '_blank' );
+	ve.targetLinksToNewWindow( body );
 
-	// Replace content
-	this.$element.empty().append( $preview.contents() );
-
-	// Event
-	this.emit( 'render' );
+	// Move content to element
+	element.innerHTML = '';
+	while ( body.childNodes.length ) {
+		element.appendChild(
+			element.ownerDocument.adoptNode( body.childNodes[ 0 ] )
+		);
+	}
 
 	// Cleanup
 	this.view.destroy();
 	this.view = null;
+
+	// Event
+	this.emit( 'render' );
 };
 
 /**
  * Update the preview
  */
 ve.ui.PreviewElement.prototype.updatePreview = function () {
-	var promises = [],
-		element = this;
+	var element = this;
 
 	// Initial CE node
 	this.view = ve.ce.nodeFactory.create( this.model.getType(), this.model );
-
-	function queueNode( node ) {
-		var promise;
-		if ( typeof node.generateContents === 'function' ) {
-			if ( node.isGenerating() ) {
-				promise = $.Deferred();
-				node.once( 'rerender', promise.resolve );
-				promises.push( promise );
-			}
-		}
-	}
-
-	// Traverse children to see when they are all rerendered
-	if ( this.view instanceof ve.ce.BranchNode ) {
-		ve.BranchNode.static.traverse( this.view, queueNode );
-	} else {
-		queueNode( this.view );
-	}
+	this.$element.append( this.view.$element );
 
 	// When all children are rerendered, replace with dm DOM
-	$.when.apply( $, promises )
+	ve.ce.GeneratedContentNode.static.awaitGeneratedContent( this.view )
 		.then( function () {
 			// Verify that the element and/or the ce node weren't destroyed
 			if ( element.view ) {
@@ -131,5 +124,5 @@ ve.ui.PreviewElement.prototype.updatePreview = function () {
  * @return {boolean} Still generating
  */
 ve.ui.PreviewElement.prototype.isGenerating = function () {
-	return !!( this.view && this.view.isGenerating && this.view.isGenerating() );
+	return !!this.view;
 };

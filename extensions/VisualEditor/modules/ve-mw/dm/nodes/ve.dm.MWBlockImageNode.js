@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWBlockImageNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -19,7 +19,7 @@
  */
 ve.dm.MWBlockImageNode = function VeDmMWBlockImageNode() {
 	// Parent constructor
-	ve.dm.BranchNode.apply( this, arguments );
+	ve.dm.MWBlockImageNode.super.apply( this, arguments );
 
 	// Mixin constructors
 	ve.dm.MWImageNode.call( this );
@@ -30,7 +30,7 @@ ve.dm.MWBlockImageNode = function VeDmMWBlockImageNode() {
 
 OO.inheritClass( ve.dm.MWBlockImageNode, ve.dm.BranchNode );
 
-// Need to mixin base class as well
+// Need to mixin base class as well (T92540)
 OO.mixinClass( ve.dm.MWBlockImageNode, ve.dm.GeneratedContentNode );
 
 OO.mixinClass( ve.dm.MWBlockImageNode, ve.dm.MWImageNode );
@@ -38,13 +38,6 @@ OO.mixinClass( ve.dm.MWBlockImageNode, ve.dm.MWImageNode );
 OO.mixinClass( ve.dm.MWBlockImageNode, ve.dm.ClassAttributeNode );
 
 /* Static Properties */
-
-ve.dm.MWBlockImageNode.static.rdfaToType = {
-	'mw:Image/Thumb': 'thumb',
-	'mw:Image/Frame': 'frame',
-	'mw:Image/Frameless': 'frameless',
-	'mw:Image': 'none'
-};
 
 ve.dm.MWBlockImageNode.static.name = 'mwBlockImage';
 
@@ -63,12 +56,6 @@ ve.dm.MWBlockImageNode.static.matchTagNames = [ 'figure' ];
 
 ve.dm.MWBlockImageNode.static.blacklistedAnnotationTypes = [ 'link' ];
 
-ve.dm.MWBlockImageNode.static.getMatchRdfaTypes = function () {
-	return Object.keys( this.rdfaToType );
-};
-
-ve.dm.MWBlockImageNode.static.allowedRdfaTypes = [ 'mw:Error' ];
-
 ve.dm.MWBlockImageNode.static.classAttributes = {
 	'mw-image-border': { borderImage: true },
 	'mw-halign-left': { align: 'left' },
@@ -81,7 +68,7 @@ ve.dm.MWBlockImageNode.static.classAttributes = {
 ve.dm.MWBlockImageNode.static.toDataElement = function ( domElements, converter ) {
 	var dataElement, newDimensions, attributes,
 		figure, imgWrapper, img, caption,
-		classAttr, typeofAttrs, errorIndex, width, height, altText;
+		classAttr, typeofAttrs, errorIndex, width, height, altText, types;
 
 	// Workaround for jQuery's .children() being expensive due to
 	// https://github.com/jquery/sizzle/issues/311
@@ -93,7 +80,7 @@ ve.dm.MWBlockImageNode.static.toDataElement = function ( domElements, converter 
 
 	figure = domElements[ 0 ];
 	imgWrapper = findChildren( figure, [ 'a', 'span' ] )[ 0 ] || null;
-	img = imgWrapper && findChildren( imgWrapper, [ 'img' ] )[ 0 ] || null;
+	img = imgWrapper && findChildren( imgWrapper, [ 'img', 'video' ] )[ 0 ] || null;
 	caption = findChildren( figure, [ 'figcaption' ] )[ 0 ] || null;
 	classAttr = figure.getAttribute( 'class' );
 	typeofAttrs = figure.getAttribute( 'typeof' ).split( ' ' );
@@ -105,10 +92,14 @@ ve.dm.MWBlockImageNode.static.toDataElement = function ( domElements, converter 
 	if ( errorIndex !== -1 ) {
 		typeofAttrs.splice( errorIndex, 1 );
 	}
+
+	types = this.rdfaToTypes[ typeofAttrs[ 0 ] ];
+
 	attributes = {
-		type: this.rdfaToType[ typeofAttrs[ 0 ] ],
-		href: imgWrapper && imgWrapper.getAttribute( 'href' ) || '',
-		src: img && img.getAttribute( 'src' ),
+		mediaClass: types.mediaClass,
+		type: types.frameType,
+		href: ( imgWrapper && imgWrapper.getAttribute( 'href' ) ) || '',
+		src: ( img && ( img.getAttribute( 'src' ) || img.getAttribute( 'poster' ) ) ) || '',
 		resource: img && img.getAttribute( 'resource' )
 	};
 
@@ -171,24 +162,18 @@ ve.dm.MWBlockImageNode.static.toDataElement = function ( domElements, converter 
 // TODO: At this moment node is not resizable but when it will be then adding defaultSize class
 // should be more conditional.
 ve.dm.MWBlockImageNode.static.toDomElements = function ( data, doc, converter ) {
-	var rdfa, width, height,
+	var width, height,
 		dataElement = data[ 0 ],
+		mediaClass = dataElement.attributes.mediaClass,
 		figure = doc.createElement( 'figure' ),
 		imgWrapper = doc.createElement( dataElement.attributes.href !== '' ? 'a' : 'span' ),
-		img = doc.createElement( 'img' ),
+		img = doc.createElement( mediaClass === 'Image' ? 'img' : 'video' ),
 		wrapper = doc.createElement( 'div' ),
 		classAttr = this.getClassAttrFromAttributes( dataElement.attributes ),
 		captionData = data.slice( 1, -1 );
 
-	if ( !this.typeToRdfa ) {
-		this.typeToRdfa = {};
-		for ( rdfa in this.rdfaToType ) {
-			this.typeToRdfa[ this.rdfaToType[ rdfa ] ] = rdfa;
-		}
-	}
-
-	// Type
-	figure.setAttribute( 'typeof', this.typeToRdfa[ dataElement.attributes.type ] );
+	// RDFa type
+	figure.setAttribute( 'typeof', this.getRdfa( mediaClass, dataElement.attributes.type ) );
 
 	if ( classAttr ) {
 		figure.className = classAttr;
@@ -211,7 +196,7 @@ ve.dm.MWBlockImageNode.static.toDomElements = function ( data, doc, converter ) 
 		}
 	}
 
-	img.setAttribute( 'src', dataElement.attributes.src );
+	img.setAttribute( mediaClass === 'Image' ? 'src' : 'poster', dataElement.attributes.src );
 	img.setAttribute( 'width', width );
 	img.setAttribute( 'height', height );
 	img.setAttribute( 'resource', dataElement.attributes.resource );

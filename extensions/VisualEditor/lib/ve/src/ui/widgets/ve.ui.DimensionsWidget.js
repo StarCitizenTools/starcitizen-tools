@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface DimensionsWidget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -23,7 +23,7 @@ ve.ui.DimensionsWidget = function VeUiDimensionsWidget( config ) {
 	config = config || {};
 
 	// Parent constructor
-	OO.ui.Widget.call( this, config );
+	ve.ui.DimensionsWidget.super.call( this, config );
 
 	this.widthInput = new OO.ui.TextInputWidget( {
 		validate: config.validate || $.isNumeric

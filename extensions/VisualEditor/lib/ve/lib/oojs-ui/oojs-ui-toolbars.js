@@ -1,12 +1,12 @@
 /*!
- * OOjs UI v0.17.1
- * https://www.mediawiki.org/wiki/OOjs_UI
+ * OOUI v0.26.3
+ * https://www.mediawiki.org/wiki/OOUI
  *
- * Copyright 2011–2016 OOjs UI Team and other contributors.
+ * Copyright 2011–2018 OOUI Team and other contributors.
  * Released under the MIT license
  * http://oojs.mit-license.org
  *
- * Date: 2016-05-03T22:58:02Z
+ * Date: 2018-04-10T22:15:39Z
  */
 ( function ( OO ) {
 
@@ -292,7 +292,7 @@
  * @cfg {boolean} [actions] Add an actions section to the toolbar. Actions are commands that are included
  *  in the toolbar, but are not configured as tools. By default, actions are displayed on the right side of
  *  the toolbar.
- * @cfg {boolean} [shadow] Add a shadow below the toolbar.
+ * @cfg {string} [position='top'] Whether the toolbar is positioned above ('top') or below ('bottom') content.
  */
 OO.ui.Toolbar = function OoUiToolbar( toolFactory, toolGroupFactory, config ) {
 	// Allow passing positional parameters inside the config object
@@ -317,9 +317,11 @@ OO.ui.Toolbar = function OoUiToolbar( toolFactory, toolGroupFactory, config ) {
 	this.toolGroupFactory = toolGroupFactory;
 	this.groups = [];
 	this.tools = {};
+	this.position = config.position || 'top';
 	this.$bar = $( '<div>' );
 	this.$actions = $( '<div>' );
 	this.initialized = false;
+	this.narrowThreshold = null;
 	this.onWindowResizeHandler = this.onWindowResize.bind( this );
 
 	// Events
@@ -335,10 +337,8 @@ OO.ui.Toolbar = function OoUiToolbar( toolFactory, toolGroupFactory, config ) {
 	this.$bar
 		.addClass( 'oo-ui-toolbar-bar' )
 		.append( this.$group, '<div style="clear:both"></div>' );
-	if ( config.shadow ) {
-		this.$bar.append( '<div class="oo-ui-toolbar-shadow"></div>' );
-	}
-	this.$element.addClass( 'oo-ui-toolbar' ).append( this.$bar );
+	// Possible classes: oo-ui-toolbar-position-top, oo-ui-toolbar-position-bottom
+	this.$element.addClass( 'oo-ui-toolbar oo-ui-toolbar-position-' + this.position ).append( this.$bar );
 };
 
 /* Setup */
@@ -402,8 +402,22 @@ OO.ui.Toolbar.prototype.onPointerDown = function ( e ) {
 OO.ui.Toolbar.prototype.onWindowResize = function () {
 	this.$element.toggleClass(
 		'oo-ui-toolbar-narrow',
-		this.$bar.width() <= this.narrowThreshold
+		this.$bar[ 0 ].clientWidth <= this.getNarrowThreshold()
 	);
+};
+
+/**
+ * Get the (lazily-computed) width threshold for applying the oo-ui-toolbar-narrow
+ * class.
+ *
+ * @private
+ * @return {number} Width threshold in pixels
+ */
+OO.ui.Toolbar.prototype.getNarrowThreshold = function () {
+	if ( this.narrowThreshold === null ) {
+		this.narrowThreshold = this.$group[ 0 ].offsetWidth + this.$actions[ 0 ].offsetWidth;
+	}
+	return this.narrowThreshold;
 };
 
 /**
@@ -413,7 +427,6 @@ OO.ui.Toolbar.prototype.onWindowResize = function () {
 OO.ui.Toolbar.prototype.initialize = function () {
 	if ( !this.initialized ) {
 		this.initialized = true;
-		this.narrowThreshold = this.$group.width() + this.$actions.width();
 		$( this.getElementWindow() ).on( 'resize', this.onWindowResizeHandler );
 		this.onWindowResize();
 	}
@@ -521,7 +534,7 @@ OO.ui.Toolbar.prototype.releaseTool = function ( tool ) {
 /**
  * Get accelerator label for tool.
  *
- * The OOjs UI library does not contain an accelerator system, but this is the hook for one. To
+ * The OOUI library does not contain an accelerator system, but this is the hook for one. To
  * use an accelerator system, subclass the toolbar and override this method, which is meant to return a label
  * that describes the accelerator keys for the tool passed (by symbolic name) to the method.
  *
@@ -547,8 +560,8 @@ OO.ui.Toolbar.prototype.getToolAccelerator = function () {
  * {@link OO.ui.BarToolGroup BarToolGroup}, or {@link OO.ui.MenuToolGroup MenuToolGroup}), which determine how
  * the tool is displayed in the toolbar. See {@link OO.ui.Toolbar toolbars} for an example.
  *
- * For more information, please see the [OOjs UI documentation on MediaWiki][1].
- * [1]: https://www.mediawiki.org/wiki/OOjs_UI/Toolbars
+ * For more information, please see the [OOUI documentation on MediaWiki][1].
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Toolbars
  *
  * @abstract
  * @class
@@ -592,6 +605,10 @@ OO.ui.Tool = function OoUiTool( toolGroup, config ) {
 	this.$accel = $( '<span>' );
 	this.$link = $( '<a>' );
 	this.title = null;
+	this.checkIcon = new OO.ui.IconWidget( {
+		icon: 'check',
+		classes: [ 'oo-ui-tool-checkIcon' ]
+	} );
 
 	// Mixin constructors
 	OO.ui.mixin.IconElement.call( this, config );
@@ -613,14 +630,12 @@ OO.ui.Tool = function OoUiTool( toolGroup, config ) {
 		} );
 	this.$link
 		.addClass( 'oo-ui-tool-link' )
-		.append( this.$icon, this.$title, this.$accel )
+		.append( this.checkIcon.$element, this.$icon, this.$title, this.$accel )
 		.attr( 'role', 'button' );
 	this.$element
 		.data( 'oo-ui-tool', this )
-		.addClass(
-			'oo-ui-tool ' + 'oo-ui-tool-name-' +
-			this.constructor.static.name.replace( /^([^\/]+)\/([^\/]+).*$/, '$1-$2' )
-		)
+		.addClass( 'oo-ui-tool' )
+		.addClass( 'oo-ui-tool-name-' + this.constructor.static.name.replace( /^([^/]+)\/([^/]+).*$/, '$1-$2' ) )
 		.toggleClass( 'oo-ui-tool-with-label', this.constructor.static.displayBothIconAndLabel )
 		.append( this.$link );
 	this.setTitle( config.title || this.constructor.static.title );
@@ -779,11 +794,8 @@ OO.ui.Tool.prototype.isActive = function () {
  */
 OO.ui.Tool.prototype.setActive = function ( state ) {
 	this.active = !!state;
-	if ( this.active ) {
-		this.$element.addClass( 'oo-ui-tool-active' );
-	} else {
-		this.$element.removeClass( 'oo-ui-tool-active' );
-	}
+	this.$element.toggleClass( 'oo-ui-tool-active', this.active );
+	this.updateThemeClasses();
 };
 
 /**
@@ -863,9 +875,9 @@ OO.ui.Tool.prototype.destroy = function () {
  * The options `exclude`, `promote`, and `demote` support the same formats.
  *
  * See {@link OO.ui.Toolbar toolbars} for a full example. For more information about toolbars in general,
- * please see the [OOjs UI documentation on MediaWiki][1].
+ * please see the [OOUI documentation on MediaWiki][1].
  *
- * [1]: https://www.mediawiki.org/wiki/OOjs_UI/Toolbars
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Toolbars
  *
  * @abstract
  * @class
@@ -957,7 +969,7 @@ OO.ui.ToolGroup.static.titleTooltips = false;
 /**
  * Show acceleration labels in tooltips.
  *
- * Note: The OOjs UI library does not include an accelerator system, but does contain
+ * Note: The OOUI library does not include an accelerator system, but does contain
  * a hook for one. To use an accelerator system, subclass the {@link OO.ui.Toolbar toolbar} and
  * override the {@link OO.ui.Toolbar#getToolAccelerator getToolAccelerator} method, which is
  * meant to return a label that describes the accelerator keys for a given tool (e.g., 'Ctrl + M').
@@ -976,6 +988,14 @@ OO.ui.ToolGroup.static.accelTooltips = false;
  * @property {boolean}
  */
 OO.ui.ToolGroup.static.autoDisable = true;
+
+/**
+ * @abstract
+ * @static
+ * @inheritable
+ * @property {string}
+ */
+OO.ui.ToolGroup.static.name = null;
 
 /* Methods */
 
@@ -1016,13 +1036,13 @@ OO.ui.ToolGroup.prototype.onMouseKeyDown = function ( e ) {
 		!this.isDisabled() &&
 		( e.which === OO.ui.MouseButtons.LEFT || e.which === OO.ui.Keys.SPACE || e.which === OO.ui.Keys.ENTER )
 	) {
-		this.pressed = this.getTargetTool( e );
+		this.pressed = this.findTargetTool( e );
 		if ( this.pressed ) {
 			this.pressed.setActive( true );
 			this.getElementDocument().addEventListener( 'mouseup', this.onCapturedMouseKeyUpHandler, true );
 			this.getElementDocument().addEventListener( 'keyup', this.onCapturedMouseKeyUpHandler, true );
+			return false;
 		}
-		return false;
 	}
 };
 
@@ -1047,7 +1067,7 @@ OO.ui.ToolGroup.prototype.onCapturedMouseKeyUp = function ( e ) {
  * @param {MouseEvent|KeyboardEvent} e Mouse up or key up event
  */
 OO.ui.ToolGroup.prototype.onMouseKeyUp = function ( e ) {
-	var tool = this.getTargetTool( e );
+	var tool = this.findTargetTool( e );
 
 	if (
 		!this.isDisabled() && this.pressed && this.pressed === tool &&
@@ -1069,7 +1089,7 @@ OO.ui.ToolGroup.prototype.onMouseKeyUp = function ( e ) {
  * @param {jQuery.Event} e Mouse over or focus event
  */
 OO.ui.ToolGroup.prototype.onMouseOverFocus = function ( e ) {
-	var tool = this.getTargetTool( e );
+	var tool = this.findTargetTool( e );
 
 	if ( this.pressed && this.pressed === tool ) {
 		this.pressed.setActive( true );
@@ -1083,7 +1103,7 @@ OO.ui.ToolGroup.prototype.onMouseOverFocus = function ( e ) {
  * @param {jQuery.Event} e Mouse out or blur event
  */
 OO.ui.ToolGroup.prototype.onMouseOutBlur = function ( e ) {
-	var tool = this.getTargetTool( e );
+	var tool = this.findTargetTool( e );
 
 	if ( this.pressed && this.pressed === tool ) {
 		this.pressed.setActive( false );
@@ -1100,7 +1120,7 @@ OO.ui.ToolGroup.prototype.onMouseOutBlur = function ( e ) {
  * @param {jQuery.Event} e
  * @return {OO.ui.Tool|null} Tool, `null` if none was found
  */
-OO.ui.ToolGroup.prototype.getTargetTool = function ( e ) {
+OO.ui.ToolGroup.prototype.findTargetTool = function ( e ) {
 	var tool,
 		$item = $( e.target ).closest( '.oo-ui-tool-link' );
 
@@ -1216,9 +1236,9 @@ OO.ui.ToolGroup.prototype.destroy = function () {
  * and {@link OO.ui.ToolGroupTool ToolGroupTools}) must be registered with a tool factory. Tools are
  * registered by their symbolic name. See {@link OO.ui.Toolbar toolbars} for an example.
  *
- * For more information about toolbars in general, please see the [OOjs UI documentation on MediaWiki][1].
+ * For more information about toolbars in general, please see the [OOUI documentation on MediaWiki][1].
  *
- * [1]: https://www.mediawiki.org/wiki/OOjs_UI/Toolbars
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Toolbars
  *
  * @class
  * @extends OO.Factory
@@ -1292,24 +1312,26 @@ OO.ui.ToolFactory.prototype.extract = function ( collection, used ) {
 	var i, len, item, name, tool,
 		names = [];
 
-	if ( collection === '*' ) {
-		for ( name in this.registry ) {
-			tool = this.registry[ name ];
-			if (
-				// Only add tools by group name when auto-add is enabled
-				tool.static.autoAddToCatchall &&
-				// Exclude already used tools
-				( !used || !used[ name ] )
-			) {
-				names.push( name );
-				if ( used ) {
-					used[ name ] = true;
+	collection = !Array.isArray( collection ) ? [ collection ] : collection;
+
+	for ( i = 0, len = collection.length; i < len; i++ ) {
+		item = collection[ i ];
+		if ( item === '*' ) {
+			for ( name in this.registry ) {
+				tool = this.registry[ name ];
+				if (
+					// Only add tools by group name when auto-add is enabled
+					tool.static.autoAddToCatchall &&
+					// Exclude already used tools
+					( !used || !used[ name ] )
+				) {
+					names.push( name );
+					if ( used ) {
+						used[ name ] = true;
+					}
 				}
 			}
-		}
-	} else if ( Array.isArray( collection ) ) {
-		for ( i = 0, len = collection.length; i < len; i++ ) {
-			item = collection[ i ];
+		} else {
 			// Allow plain strings as shorthand for named tools
 			if ( typeof item === 'string' ) {
 				item = { name: item };
@@ -1356,9 +1378,9 @@ OO.ui.ToolFactory.prototype.extract = function ( collection, used ) {
  *
  * See {@link OO.ui.Toolbar toolbars} for an example.
  *
- * For more information about toolbars in general, please see the [OOjs UI documentation on MediaWiki][1].
+ * For more information about toolbars in general, please see the [OOUI documentation on MediaWiki][1].
  *
- * [1]: https://www.mediawiki.org/wiki/OOjs_UI/Toolbars
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Toolbars
  *
  * @class
  * @extends OO.Factory
@@ -1418,9 +1440,9 @@ OO.ui.ToolGroupFactory.static.getDefaultClasses = function () {
  *     toolFactory.register( HelpTool );
  *
  * For an example of a toolbar that contains a popup tool, see {@link OO.ui.Toolbar toolbars}. For more information about
- * toolbars in genreral, please see the [OOjs UI documentation on MediaWiki][1].
+ * toolbars in general, please see the [OOUI documentation on MediaWiki][1].
  *
- * [1]: https://www.mediawiki.org/wiki/OOjs_UI/Toolbars
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Toolbars
  *
  * @abstract
  * @class
@@ -1445,6 +1467,7 @@ OO.ui.PopupTool = function OoUiPopupTool( toolGroup, config ) {
 	OO.ui.mixin.PopupElement.call( this, config );
 
 	// Initialization
+	this.popup.setPosition( toolGroup.getToolbar().position === 'bottom' ? 'above' : 'below' );
 	this.$element
 		.addClass( 'oo-ui-popupTool' )
 		.append( this.popup.$element );
@@ -1501,11 +1524,11 @@ OO.ui.PopupTool.prototype.onUpdateState = function () {
  *     };
  *     toolFactory.register( SettingsTool );
  *
- * For more information, please see the [OOjs UI documentation on MediaWiki][1].
+ * For more information, please see the [OOUI documentation on MediaWiki][1].
  *
  * Please note that this implementation is subject to change per [T74159] [2].
  *
- * [1]: https://www.mediawiki.org/wiki/OOjs_UI/Toolbars#ToolGroupTool
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Toolbars#ToolGroupTool
  * [2]: https://phabricator.wikimedia.org/T74159
  *
  * @abstract
@@ -1692,9 +1715,9 @@ OO.ui.ToolGroupTool.prototype.createGroup = function ( group ) {
  *     toolbar.initialize();
  *
  * For more information about how to add tools to a bar tool group, please see {@link OO.ui.ToolGroup toolgroup}.
- * For more information about toolbars in general, please see the [OOjs UI documentation on MediaWiki][1].
+ * For more information about toolbars in general, please see the [OOUI documentation on MediaWiki][1].
  *
- * [1]: https://www.mediawiki.org/wiki/OOjs_UI/Toolbars
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Toolbars
  *
  * @class
  * @extends OO.ui.ToolGroup
@@ -1723,10 +1746,22 @@ OO.inheritClass( OO.ui.BarToolGroup, OO.ui.ToolGroup );
 
 /* Static Properties */
 
+/**
+ * @static
+ * @inheritdoc
+ */
 OO.ui.BarToolGroup.static.titleTooltips = true;
 
+/**
+ * @static
+ * @inheritdoc
+ */
 OO.ui.BarToolGroup.static.accelTooltips = true;
 
+/**
+ * @static
+ * @inheritdoc
+ */
 OO.ui.BarToolGroup.static.name = 'bar';
 
 /**
@@ -1741,6 +1776,7 @@ OO.ui.BarToolGroup.static.name = 'bar';
  * @mixins OO.ui.mixin.IndicatorElement
  * @mixins OO.ui.mixin.LabelElement
  * @mixins OO.ui.mixin.TitledElement
+ * @mixins OO.ui.mixin.FlaggedElement
  * @mixins OO.ui.mixin.ClippableElement
  * @mixins OO.ui.mixin.TabIndexedElement
  *
@@ -1757,7 +1793,9 @@ OO.ui.PopupToolGroup = function OoUiPopupToolGroup( toolbar, config ) {
 	}
 
 	// Configuration initialization
-	config = config || {};
+	config = $.extend( {
+		indicator: config.indicator === undefined ? ( toolbar.position === 'bottom' ? 'up' : 'down' ) : config.indicator
+	}, config );
 
 	// Parent constructor
 	OO.ui.PopupToolGroup.parent.call( this, toolbar, config );
@@ -1773,6 +1811,7 @@ OO.ui.PopupToolGroup = function OoUiPopupToolGroup( toolbar, config ) {
 	OO.ui.mixin.IndicatorElement.call( this, config );
 	OO.ui.mixin.LabelElement.call( this, config );
 	OO.ui.mixin.TitledElement.call( this, config );
+	OO.ui.mixin.FlaggedElement.call( this, config );
 	OO.ui.mixin.ClippableElement.call( this, $.extend( {}, config, { $clippable: this.$group } ) );
 	OO.ui.mixin.TabIndexedElement.call( this, $.extend( {}, config, { $tabIndexed: this.$handle } ) );
 
@@ -1787,6 +1826,7 @@ OO.ui.PopupToolGroup = function OoUiPopupToolGroup( toolbar, config ) {
 	// Initialization
 	this.$handle
 		.addClass( 'oo-ui-popupToolGroup-handle' )
+		.attr( 'role', 'button' )
 		.append( this.$icon, this.$label, this.$indicator );
 	// If the pop-up should have a header, add it to the top of the toolGroup.
 	// Note: If this feature is useful for other widgets, we could abstract it into an
@@ -1810,10 +1850,38 @@ OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.IconElement );
 OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.IndicatorElement );
 OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.LabelElement );
 OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.TitledElement );
+OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.FlaggedElement );
 OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.ClippableElement );
 OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.TabIndexedElement );
 
 /* Methods */
+
+/**
+ * @inheritdoc OO.ui.mixin.ClippableElement
+ */
+OO.ui.PopupToolGroup.prototype.getHorizontalAnchorEdge = function () {
+	var out;
+	if ( this.$element.hasClass( 'oo-ui-popupToolGroup-right' ) ) {
+		out = 'right';
+	} else {
+		out = 'left';
+	}
+	// Flip for RTL
+	if ( this.$element.css( 'direction' ) === 'rtl' ) {
+		out = ( out === 'left' ) ? 'right' : 'left';
+	}
+	return out;
+};
+
+/**
+ * @inheritdoc OO.ui.mixin.ClippableElement
+ */
+OO.ui.PopupToolGroup.prototype.getVerticalAnchorEdge = function () {
+	if ( this.toolbar.position === 'bottom' ) {
+		return 'bottom';
+	}
+	return 'top';
+};
 
 /**
  * @inheritdoc
@@ -1848,7 +1916,7 @@ OO.ui.PopupToolGroup.prototype.onBlur = function ( e ) {
 OO.ui.PopupToolGroup.prototype.onMouseKeyUp = function ( e ) {
 	// Only close toolgroup when a tool was actually selected
 	if (
-		!this.isDisabled() && this.pressed && this.pressed === this.getTargetTool( e ) &&
+		!this.isDisabled() && this.pressed && this.pressed === this.findTargetTool( e ) &&
 		( e.which === OO.ui.MouseButtons.LEFT || e.which === OO.ui.Keys.SPACE || e.which === OO.ui.Keys.ENTER )
 	) {
 		this.setActive( false );
@@ -1888,10 +1956,21 @@ OO.ui.PopupToolGroup.prototype.onHandleMouseKeyDown = function ( e ) {
 };
 
 /**
+ * Check if the tool group is active.
+ *
+ * @return {boolean} Tool group is active
+ */
+OO.ui.PopupToolGroup.prototype.isActive = function () {
+	return this.active;
+};
+
+/**
  * Switch into 'active' mode.
  *
  * When active, the popup is visible. A mouseup event anywhere in the document will trigger
  * deactivation.
+ *
+ * @param {boolean} value The active state to set
  */
 OO.ui.PopupToolGroup.prototype.setActive = function ( value ) {
 	var containerWidth, containerLeft;
@@ -1917,7 +1996,9 @@ OO.ui.PopupToolGroup.prototype.setActive = function ( value ) {
 			if ( this.isClippedHorizontally() ) {
 				// Anchoring to the right also caused the popup to clip, so just make it fill the container
 				containerWidth = this.$clippableScrollableContainer.width();
-				containerLeft = this.$clippableScrollableContainer.offset().left;
+				containerLeft = this.$clippableScrollableContainer[ 0 ] === document.documentElement ?
+					0 :
+					this.$clippableScrollableContainer.offset().left;
 
 				this.toggleClipping( false );
 				this.$element.removeClass( 'oo-ui-popupToolGroup-right' );
@@ -1931,10 +2012,11 @@ OO.ui.PopupToolGroup.prototype.setActive = function ( value ) {
 			this.getElementDocument().removeEventListener( 'mouseup', this.onBlurHandler, true );
 			this.getElementDocument().removeEventListener( 'keyup', this.onBlurHandler, true );
 			this.$element.removeClass(
-				'oo-ui-popupToolGroup-active oo-ui-popupToolGroup-left  oo-ui-popupToolGroup-right'
+				'oo-ui-popupToolGroup-active oo-ui-popupToolGroup-left oo-ui-popupToolGroup-right'
 			);
 			this.toggleClipping( false );
 		}
+		this.updateThemeClasses();
 	}
 };
 
@@ -1990,7 +2072,6 @@ OO.ui.PopupToolGroup.prototype.setActive = function ( value ) {
  *             // Configurations for list toolgroup.
  *             type: 'list',
  *             label: 'ListToolGroup',
- *             indicator: 'down',
  *             icon: 'ellipsis',
  *             title: 'This is the title, displayed when user moves the mouse over the list toolgroup',
  *             header: 'This is the header',
@@ -2011,9 +2092,9 @@ OO.ui.PopupToolGroup.prototype.setActive = function ( value ) {
  *     // Build the toolbar. This must be done after the toolbar has been appended to the document.
  *     toolbar.initialize();
  *
- * For more information about toolbars in general, please see the [OOjs UI documentation on MediaWiki][1].
+ * For more information about toolbars in general, please see the [OOUI documentation on MediaWiki][1].
  *
- * [1]: https://www.mediawiki.org/wiki/OOjs_UI/Toolbars
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Toolbars
  *
  * @class
  * @extends OO.ui.PopupToolGroup
@@ -2061,6 +2142,10 @@ OO.inheritClass( OO.ui.ListToolGroup, OO.ui.PopupToolGroup );
 
 /* Static Properties */
 
+/**
+ * @static
+ * @inheritdoc
+ */
 OO.ui.ListToolGroup.static.name = 'list';
 
 /* Methods */
@@ -2142,15 +2227,24 @@ OO.ui.ListToolGroup.prototype.onMouseKeyUp = function ( e ) {
 };
 
 OO.ui.ListToolGroup.prototype.updateCollapsibleState = function () {
-	var i, len;
+	var i, icon, len;
+
+	if ( this.toolbar.position !== 'bottom' ) {
+		icon = this.expanded ? 'collapse' : 'expand';
+	} else {
+		icon = this.expanded ? 'expand' : 'collapse';
+	}
 
 	this.getExpandCollapseTool()
-		.setIcon( this.expanded ? 'collapse' : 'expand' )
+		.setIcon( icon )
 		.setTitle( OO.ui.msg( this.expanded ? 'ooui-toolgroup-collapse' : 'ooui-toolgroup-expand' ) );
 
 	for ( i = 0, len = this.collapsibleTools.length; i < len; i++ ) {
 		this.collapsibleTools[ i ].toggle( this.expanded );
 	}
+
+	// Re-evaluate clipping, because our height has changed
+	this.clip();
 };
 
 /**
@@ -2220,7 +2314,6 @@ OO.ui.ListToolGroup.prototype.updateCollapsibleState = function () {
  *             type: 'menu',
  *             header: 'This is the (optional) header',
  *             title: 'This is the (optional) title',
- *             indicator: 'down',
  *             include: [ 'settings', 'stuff' ]
  *         }
  *     ] );
@@ -2246,9 +2339,9 @@ OO.ui.ListToolGroup.prototype.updateCollapsibleState = function () {
  *     toolbar.emit( 'updateState' );
  *
  * For more information about how to add tools to a MenuToolGroup, please see {@link OO.ui.ToolGroup toolgroup}.
- * For more information about toolbars in general, please see the [OOjs UI documentation on MediaWiki] [1].
+ * For more information about toolbars in general, please see the [OOUI documentation on MediaWiki] [1].
  *
- * [1]: https://www.mediawiki.org/wiki/OOjs_UI/Toolbars
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Toolbars
  *
  * @class
  * @extends OO.ui.PopupToolGroup
@@ -2283,6 +2376,10 @@ OO.inheritClass( OO.ui.MenuToolGroup, OO.ui.PopupToolGroup );
 
 /* Static Properties */
 
+/**
+ * @static
+ * @inheritdoc
+ */
 OO.ui.MenuToolGroup.static.name = 'menu';
 
 /* Methods */
@@ -2309,3 +2406,5 @@ OO.ui.MenuToolGroup.prototype.onUpdateState = function () {
 };
 
 }( OO ) );
+
+//# sourceMappingURL=oojs-ui-toolbars.js.map

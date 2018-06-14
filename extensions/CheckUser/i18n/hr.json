@@ -31,7 +31,6 @@
 	"checkuser-users": "Suradnička imena",
 	"checkuser-edits": "Nađi izmjene",
 	"checkuser-ips": "IP adrese",
-	"checkuser-search": "Traži",
 	"checkuser-period": "Vrijeme:",
 	"checkuser-week-1": "posljednji tjedan",
 	"checkuser-week-2": "posljednja dva tjedna",
@@ -63,15 +62,15 @@
 	"checkuser-accounts": "$1 {{PLURAL:$1|novi račun|novih računa}}",
 	"checkuser-too-many": "Previše rezultata, molimo suzite opseg (CIDR). Slijede korištene IP adrese (max 5000, poredano adresno):",
 	"checkuser-user-nonexistent": "Traženi suradnik (suradničko ime) ne postoji.",
-	"checkuser-search-form": "Nađi zapise u evidenciji gdje $1 je $2",
+	"checkuser-search": "Traži",
 	"checkuser-search-submit": "Traži",
 	"checkuser-search-initiator": "provjeritelj",
 	"checkuser-search-target": "cilj (traženi pojam)",
 	"checkuser-ipeditcount": "~$1 od svih suradnika",
-	"checkuser-log-return": "Vrati se na stranicu za provjeru",
+	"checkuser-showmain": "Vrati se na stranicu za provjeru",
 	"checkuser-limited": "'''Ovi rezultati su skraćeni zbog veće učinkovitosti izvođenja.'''",
 	"checkuser-autocreate-action": "je automatski stvoren",
 	"checkuser-create-action": "je napravljen",
 	"checkuser-email-action": "poslan email za \"$1\"",
-	"checkuser-reset-action": "ponovno postavi lozinku za suradnika \"$1\""
+	"checkuser-reset-action": "ponovno postavi zaporku za suradnika \"$1\""
 }

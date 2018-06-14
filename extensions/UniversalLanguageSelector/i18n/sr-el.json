@@ -1,14 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Milicevic01"
+			"Milicevic01",
+			"Сербијана",
+			"Amire80",
+			"Srdjan m",
+			"Prevodim"
 		]
 	},
-	"uls-desc": "Daje korisniku nekoliko načina da izabere jezik i da prilagodi postavke jezika",
+	"uls-desc": "Daje korisniku nekoliko načina da izabere jezik i da prilagodi podešavanja jezika",
 	"uls-plang-title-languages": "Jezici",
 	"ext-uls-select-language-settings-icon-tooltip": "Podešavanja jezika",
 	"ext-uls-undo-language-tooltip-text": "Jezik promenjen sa $1",
-	"ext-uls-language-settings-preferences-link": "Dodatne jezičke postavke",
+	"ext-uls-language-settings-preferences-link": "Dodatna jezička podešavanja",
 	"uls-betafeature-label": "Sažete veze ka drugim jezicima",
 	"uls-betafeature-desc": "Prikažuje sažet spisak jezika, samo sa vama bitnim jezicima.",
 	"ext-uls-display-settings-title": "Podešavanja prikaza",
@@ -54,5 +58,7 @@
 	"ext-uls-input-disable-notification-info-personal": "Možete omogućiti alate za unos u bilo koje vreme na podešavanjima jezika.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Možete omogućiti alatke za unos u bilo koje vreme na podešavanjima jezika pored spiska jezika.",
 	"ext-uls-language-settings-applying": "Primenjujem...",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|Još jedan jezik|Još $1 jezika}}"
+	"ext-uls-compact-link-count": "Još {{PLURAL:$1|1=jedan|$1}} {{PLURAL:$1|jezik|jezika}}",
+	"prefs-languages": "Jezici",
+	"ext-uls-compact-language-links-preference": "Koristi [[$1|sažet spisak jezika]], samo sa vama bitnim jezicima."
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MobileWindowManager class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -19,9 +19,6 @@ ve.ui.MobileWindowManager = function VeUiMobileWindowManager( surface, config ) 
 	// Parent constructor
 	ve.ui.MobileWindowManager.super.call( this, surface, config );
 
-	// Events
-	this.connect( this, { opening: 'onMobileOpening' } );
-
 	// Initialization
 	this.$element.addClass( 've-ui-mobileWindowManager' );
 };
@@ -32,35 +29,10 @@ OO.inheritClass( ve.ui.MobileWindowManager, ve.ui.SurfaceWindowManager );
 
 /* Static Properties */
 
+// Only allow 'small' and 'full' sizes, defaulting to 'full'
 ve.ui.MobileWindowManager.static.sizes = {
-	full: {
-		width: '100%',
-		height: '100%'
-	}
+	small: ve.ui.MobileWindowManager.super.static.sizes.small,
+	full: ve.ui.MobileWindowManager.super.static.sizes.full
 };
+
 ve.ui.MobileWindowManager.static.defaultSize = 'full';
-
-/* Methods */
-
-/**
- * Handle window opening events
- */
-ve.ui.MobileWindowManager.prototype.onMobileOpening = function ( win, opening ) {
-	// FIXME T126029: un-frame buttons and convert 'back' buttons to icon only
-	opening.done( function () {
-		var i, l, list, action;
-		if ( win instanceof OO.ui.ProcessDialog ) {
-			list = win.actions.list;
-			for ( i = 0, l = list.length; i < l; i++ ) {
-				action = list[ i ];
-				action.toggleFramed( false );
-				if ( action.hasFlag( 'back' ) ) {
-					action
-						.setIcon( 'previous' )
-						.setLabel( '' );
-				}
-			}
-			win.fitLabel();
-		}
-	} );
-};

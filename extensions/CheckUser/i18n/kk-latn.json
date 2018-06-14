@@ -14,7 +14,6 @@
 	"checkuser-users": "Qatıswşılardı keltirw",
 	"checkuser-edits": "IP jaýdan jasalğan tüzetwlerdi keltirw",
 	"checkuser-ips": "IP jaýlardı keltirw",
-	"checkuser-search": "İzdew",
 	"checkuser-empty": "Jwrnalda eş jazba joq.",
 	"checkuser-nomatch": "Säýkes tabılmadı.",
 	"checkuser-check": "Sınaw",
@@ -23,9 +22,9 @@
 	"checkuser-blocked": "Buğattalğan",
 	"checkuser-too-many": "Tım köp nätïje keltirildi, CIDR degendi tarıltıp köriñiz. Mında paýdalanılğan IP jaýlar körsetilgen (barınşa 5000, jaýımen surıptalğan):",
 	"checkuser-user-nonexistent": "Engizilgen qatıswşı joq.",
-	"checkuser-search-form": "Jwrnaldağı oqïğalardı tabw ($1 degen $2 eken jaýındağı)",
+	"checkuser-search": "İzdew",
 	"checkuser-search-submit": "İzdew",
 	"checkuser-search-initiator": "bastamaşı",
 	"checkuser-search-target": "nısana",
-	"checkuser-log-return": "CheckUser basqı pişinine  oralw"
+	"checkuser-showmain": "CheckUser basqı pişinine  oralw"
 }

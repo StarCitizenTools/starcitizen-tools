@@ -1,11 +1,39 @@
 {
-    "@metadata": {
-        "authors": [
-            "WMDE"
-        ]
-    },
-    "revisionslider": "Revision Slider",
-    "revisionslider-desc": "{{desc|name=RevisionSlider|url=https://www.mediawiki.org/wiki/Extension:RevisionSlider}}",
-    "revisionslider-loading-placeholder": "Message shown while the RevisionSlider is still loading on a diff page. Once loaded the message is removed.",
-    "revisionslider-loading-noscript": "Message shown while the RevisionSlider is trying to load but when JavaScript is disabled and thus it will not be successful."
+	"@metadata": {
+		"authors": [
+			"WMDE",
+			"Liuxinyu970226",
+			"Purodha",
+			"Amire80",
+			"Umherirrender"
+		]
+	},
+	"revisionslider": "{{name}}\nSee https://www.mediawiki.org/wiki/Extension:RevisionSlider",
+	"revisionslider-preference-disable": "Label for the user preference that disables the RevisionSlider",
+	"revisionslider-desc": "{{desc|name=RevisionSlider|url=https://www.mediawiki.org/wiki/Extension:RevisionSlider}}",
+	"revisionslider-toggle-label": "Label of the button toggling the visibility of RevisionSlider",
+	"revisionslider-page-size": "Page size after the revision.\n\nParameters:\n$1 - number of bytes formatted for output (with mw.language.converNumber)\n$2 - number of bytes, could be used with PLURAL\n{{Identical|Byte}}",
+	"revisionslider-change-size": "Change size, ie. number of bytes added or removed in the revision.\n\nParameters:\n* $1 - change size formatted for output (colour-coded HTML element, including plus or minus sign)\n* $3 - change size (in bytes) without a sign\n{{Identical|Byte}}",
+	"revisionslider-label-date": "Label for the creation date of the revision.\n{{Identical|Date}}",
+	"revisionslider-label-page-size": "Label for the size of the revision.\n{{Identical|Page size}}",
+	"revisionslider-label-change-size": "Label for the size of the change compared to the revision before.",
+	"revisionslider-label-comment": "Label for the edit summary of the revision.\n{{Identical|Comment}}",
+	"revisionslider-label-username": "Label for the revision's author's username.\n\nParameters:\n$1 - Gender as in user preferences (suitable for GENDER)\n{{Identical|Username}}",
+	"revisionslider-minoredit": "Text labeling a minor edit.",
+	"revisionslider-loading-failed": "Message shown if the RevisionSlider fails to initially load.",
+	"revisionslider-toggle-title-expand": "Message shown as a \"title\" of the exand button",
+	"revisionslider-toggle-title-collapse": "Message shown as a \"title\" of the collapse button",
+	"revisionslider-turn-on-auto-expand-title": "Message shown as a \"title\" of the \"Expand automatically\" button",
+	"revisionslider-turn-off-auto-expand-title": "Message shown as a \"title\" of the \"Do not expand automatically\" button",
+	"revisionslider-arrow-tooltip-newer": "Text shown after hovering the button scrolling to newer revisions.",
+	"revisionslider-arrow-tooltip-older": "Text shown after hovering the button scrolling to older revisions.",
+	"revisionslider-show-help-tooltip": "Text shown in a tooltip for the \"Show help\" button.",
+	"revisionslider-help-dialog-slide1": "Text shown on the first slide of the help dialog.",
+	"revisionslider-help-dialog-slide2": "Text shown on the second slide of the help dialog.",
+	"revisionslider-help-dialog-slide3a": "Text shown on the third slide of the help dialog for the new slider layout.",
+	"revisionslider-help-dialog-slide4": "Text shown on the fourth slide of the help dialog.",
+	"revisionslider-tutorial": "Text shown above the RevisionSlider tutorial. This should contain as few words as possible to avoid being truncated.",
+	"revisionslider-previous-dialog": "Label of the button to go to the previous tutorial slide.\n{{Identical|Previous}}",
+	"revisionslider-next-dialog": "Label of the button to go to the next tutorial slide.\n{{Identical|Next}}",
+	"revisionslider-close-dialog": "Label of the button to close the RevisionSlider tutorial.\n{{Identical|Close}}"
 }

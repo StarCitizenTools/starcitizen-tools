@@ -3,13 +3,14 @@
 		"authors": [
 			"DzWiki",
 			"Srdjan m",
-			"Semso98"
+			"Semso98",
+			"Prevodim"
 		]
 	},
 	"uls-desc": "Daje korisniku nekoliko načina da izabere jezik i da prilagodi postavke jezika",
 	"uls-plang-title-languages": "Jezici",
 	"ext-uls-select-language-settings-icon-tooltip": "Postavke jezika",
-	"ext-uls-undo-language-tooltip-text": "Jezik promijenjen, prethodno je bio postavljen $1",
+	"ext-uls-undo-language-tooltip-text": "Jezik promijenjen; prethodno je bio postavljen $1",
 	"ext-uls-language-settings-preferences-link": "Više jezičkih postavki",
 	"uls-betafeature-label": "Sažeti linkovi na druge jezike",
 	"uls-betafeature-desc": "Prikaži kraći spisak s linkovima na druge jezike, samo s jezicima koji su Vam najvažniji.",
@@ -20,7 +21,7 @@
 	"ext-uls-display-settings-desc": "Postavi jezik koji će se koristiti za menije i fontove.",
 	"ext-uls-language-settings-title": "Postavke jezika",
 	"ext-uls-language-settings-apply": "Primijeni postavke",
-	"ext-uls-language-settings-cancel": "Odustani",
+	"ext-uls-language-settings-cancel": "Otkaži",
 	"ext-uls-language-buttons-help": "Promijenite jezik menija. Jezik sadržaja neće biti promijenjen.",
 	"ext-uls-display-settings-font-settings": "Postavke fonta",
 	"ext-uls-display-settings-ui-language": "Jezik prikaza",
@@ -54,10 +55,10 @@
 	"ext-uls-input-disable-notification": "Alati za unos su isključeni",
 	"ext-uls-input-disable-notification-undo": "Poništi",
 	"ext-uls-input-disable-notification-info-personal": "Možete omogućiti alate za unos bilo koje vrijeme na postavke jezika.",
-	"ext-uls-input-disable-notification-info-interlanguage": "Alate za unos možete u svakom trenutku omogućiti u jezičnim postavkama pored jezičnog spiska.",
+	"ext-uls-input-disable-notification-info-interlanguage": "Alate za unos možete u svakom trenutku omogućiti u jezičkim postavkama pored spiska jezika.",
 	"ext-uls-language-settings-applying": "Primjenjujem...",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|Još jedan|Još $1}}",
+	"ext-uls-compact-link-count": "Još {{PLURAL:$1|1=jedan|$1}}",
 	"ext-uls-compact-link-info": "Svi jezici (prvobitni odabir zasnovan je na najčešćim odabirima Vas i drugih korisnika)",
 	"prefs-languages": "Jezici",
-	"ext-uls-compact-language-links-preference": "Koristi sažeti spisak jezika s jezicima koji su Vam važni."
+	"ext-uls-compact-language-links-preference": "Koristi [[$1|sažeti spisak jezika]], s jezicima koji su Vam važni."
 }

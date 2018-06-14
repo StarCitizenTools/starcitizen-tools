@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization LinkCache class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -51,6 +51,7 @@ ve.init.mw.LinkCache.static.getIconForLink = function ( linkData ) {
 ve.init.mw.LinkCache.static.processPage = function ( page ) {
 	return {
 		missing: page.missing !== undefined,
+		known: page.known !== undefined,
 		redirect: page.redirect !== undefined,
 		disambiguation: ve.getProp( page, 'pageprops', 'disambiguation' ) !== undefined,
 		imageUrl: ve.getProp( page, 'thumbnail', 'source' ),
@@ -65,9 +66,11 @@ ve.init.mw.LinkCache.static.processPage = function ( page ) {
  *
  * @param {string} title
  * @param {jQuery} $element Element to style
+ * @param {boolean} hasFragment Whether the link goes to a fragment
  */
-ve.init.mw.LinkCache.prototype.styleElement = function ( title, $element ) {
+ve.init.mw.LinkCache.prototype.styleElement = function ( title, $element, hasFragment ) {
 	var promise,
+		cache = this,
 		cachedMissingData = this.getCached( '_missing/' + title );
 
 	// Use the synchronous missing link cache data if it exists
@@ -78,9 +81,13 @@ ve.init.mw.LinkCache.prototype.styleElement = function ( title, $element ) {
 	}
 
 	promise.done( function ( data ) {
-		if ( data.missing ) {
+		if ( data.missing && !data.known ) {
 			$element.addClass( 'new' );
 		} else {
+			// Provided by core MediaWiki, styled like a <strong> element by default.
+			if ( !hasFragment && cache.constructor.static.normalizeTitle( title ) === cache.constructor.static.normalizeTitle( mw.config.get( 'wgRelevantPageName' ) ) ) {
+				$element.addClass( 'mw-selflink' );
+			}
 			// Provided by core MediaWiki, no styles by default.
 			if ( data.redirect ) {
 				$element.addClass( 'mw-redirect' );
@@ -91,6 +98,44 @@ ve.init.mw.LinkCache.prototype.styleElement = function ( title, $element ) {
 			}
 		}
 	} );
+};
+
+/**
+ * Given a chunk of Parsoid HTML, requests information about each link's title, then adds classes
+ * to each such element as appropriate.
+ *
+ * TODO: Most/all of this code should be done upstream, either by Parsoid itself or by an
+ * intermediary service – see T64803 and others.
+ *
+ * @param {jQuery} $element Elements to style
+ * @param {HTMLDocument} doc Base document to use for normalisation
+ */
+ve.init.mw.LinkCache.prototype.styleParsoidElements = function ( $elements, doc ) {
+	if ( ve.dm.MWLanguageVariantNode ) {
+		// Render the user's preferred variant in language converter markup
+		ve.dm.MWLanguageVariantNode.static.processVariants( $elements );
+	}
+
+	// TODO: Remove when fixed upstream in Parsoid (T58756)
+	$elements
+		.find( 'a[rel~="mw:ExtLink"]' ).addBack( 'a[rel~="mw:ExtLink"]' )
+		.addClass( 'external' );
+
+	// TODO: Remove when moved upstream into Parsoid or another service (T64803)
+	// If the element isn't attached, doc will be null, so we don't know how to normalise titles
+	if ( doc ) {
+		$elements
+			.find( 'a[rel~="mw:WikiLink"]' ).addBack( 'a[rel~="mw:WikiLink"]' )
+			.each( function () {
+				var title,
+					href = this.href || mw.config.get( 'wgArticlePath' );
+
+				title = ve.init.platform.linkCache.constructor.static.normalizeTitle(
+					ve.dm.MWInternalLinkAnnotation.static.getTargetDataFromHref( href, doc ).title
+				);
+				ve.init.platform.linkCache.styleElement( title, $( this ), href.indexOf( '#' ) !== -1 );
+			} );
+	}
 };
 
 /**
@@ -145,7 +190,7 @@ ve.init.mw.LinkCache.prototype.getRequestPromise = function ( subqueue ) {
 		pilimit: subqueue.length,
 		wbptterms: 'description',
 		ppprop: 'disambiguation',
-		titles: subqueue.join( '|' ),
-		continue: ''
+		titles: subqueue,
+		'continue': ''
 	} );
 };

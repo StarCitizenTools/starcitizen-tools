@@ -4,6 +4,7 @@
 			"Elfalem"
 		]
 	},
+	"api-error-noimageinfo": "ፋይል መላኩ ተሳክቷል ግን አቅራቢው ምንም ዓይነት መረጃ ስለ ፋይሉ አልሰጠም።",
 	"mwe-upwiz-api-warning-exists": "በውኪው ላይ [$1 ሌላ ፋይል] በዚህ ስም አለ።",
 	"mwe-upwiz-tutorial-error-localized-file-missing": "ይቅርታ፣ መማሪያ በእርስዎ ቋንቋ ማግኘት አልተቻለም። በሱ ቦታ የእንግሊዝኛው ይታያል።",
 	"mwe-upwiz-help-desk": "የእርዳታ ቦታ",

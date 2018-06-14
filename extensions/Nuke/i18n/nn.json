@@ -29,5 +29,6 @@
 	"nuke-viewchanges": "vis endringar",
 	"nuke-namespace": "Avgrens til namnerom:",
 	"nuke-linkoncontribs": "masseslett",
-	"nuke-linkoncontribs-text": "Masseslett sider der denne brukaren er den einaste bidragsytaren"
+	"nuke-linkoncontribs-text": "Masseslett sider der denne brukaren er den einaste bidragsytaren",
+	"nuke-confirm": "Du er i ferd med å sletta {{PLURAL:$1|éi side|$1 sider}}. Er du viss på at du vil gjera dette?"
 }

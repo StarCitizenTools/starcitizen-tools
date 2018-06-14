@@ -8,17 +8,17 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2008, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /// Memory usage at checkpoints
-$wgMemUse = array();
+$wgMemUse = [];
 /// Tracks the deepness of the stack
 $wgMemStack = 0;
 
 /**
  * Call to start memory counting for a block.
- * @param $a \string Block name.
+ * @param \string $a Block name.
  */
 function wfMemIn( $a ) {
 	global $wgLang, $wgMemUse, $wgMemStack;
@@ -26,7 +26,7 @@ function wfMemIn( $a ) {
 	$mem = memory_get_usage();
 	$memR = memory_get_usage();
 
-	$wgMemUse[$a][] = array( $mem, $memR );
+	$wgMemUse[$a][] = [ $mem, $memR ];
 
 	$memF = $wgLang->formatNum( $mem );
 	$memRF = $wgLang->formatNum( $memR );
@@ -38,7 +38,7 @@ function wfMemIn( $a ) {
 
 /**
  * Call to start stop counting for a block. Difference from start is shown.
- * @param $a \string Block name.
+ * @param \string $a Block name.
  */
 function wfMemOut( $a ) {
 	global $wgLang, $wgMemUse, $wgMemStack;

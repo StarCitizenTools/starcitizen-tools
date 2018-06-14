@@ -1,10 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
-			"Lokal Profil"
+			"Lokal Profil",
+			"WikiPhoenix"
 		]
 	},
 	"codemirror-desc": "Ger syntaxmarkerad redigering för redigering av wikitext",
-	"codemirror-enable-label": "Aktivera CodeMirror (Syntaxmarkering)",
-	"codemirror-disable-label": "Inaktivera CodeMirror (Syntaxmarkering)"
+	"codemirror-toggle-label": "Syntaxmarkering",
+	"codemirror-beta-title": "Syntaxmarkering av wikitext",
+	"codemirror-beta-desc": "Syntaxmarkering gör det lättare att redigera genom att använda färger och nyanser för att visuellt separera sidtext från kod för länkar, referenser och mallar.",
+	"codemirror-popup-desc": "Syntaxmarkering hjälper dig att enkelt särskilja olika delar av din redigering genom att färgkoda dem.",
+	"codemirror-popup-btn-yes": "Prova",
+	"codemirror-popup-btn-no": "Nej, tack"
 }

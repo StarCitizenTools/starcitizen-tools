@@ -2,9 +2,19 @@
 
 .mwe-upwiz-locationDetailsWidget {
 	.oo-ui-fieldLayout {
-		display: inline-block;
 		margin-right: 1em;
 		margin-bottom: 0;
-		width: 13em;
+		width: 12em;
+	}
+
+	.oo-ui-popupWidget {
+		// Add extra spacing at the bottom if the popup is touching the bottom of viewport
+		margin-bottom: 1em;
+	}
+
+	.oo-ui-fieldLayout,
+	.oo-ui-popupButtonWidget {
+		display: inline-block;
+		vertical-align: bottom;
 	}
 }

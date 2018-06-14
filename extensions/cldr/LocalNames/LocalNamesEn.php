@@ -36,6 +36,11 @@ $languageNames = [
 	'cjy-hans' => 'Jinyu (Simplified)',
 	'cjy-hant' => 'Jinyu (Traditional)',
 
+	/* Not in CLDR 32.0.1 Montenegrin language
+	 * https://www.ethnologue.com/language/cnr
+	 */
+	'cnr' => 'Montenegrin',
+
 	/* Not in CLDR 27.0.1. Swedish language
 	 * https://www.ethnologue.com/language/dlc
 	 * Added 2008-02-16.
@@ -117,17 +122,25 @@ $languageNames = [
 
 	/* Not in CLDR 27.0.1. Used for MediaWiki localisation
 	 */
+	'azb' => 'South Azerbaijani',
 	'bat-smg' => 'Samogitian',
+	'bcl' => 'Central Bikol',
 	'be-tarask' => 'Belarusian (Taraškievica orthography)',
+	'be-x-old' => 'Belarusian (Taraškievica orthography)', # internal code of be-tarask.wikipedia.org
+	'bh' => 'Bhojpuri',
+	'bxr' => 'Russia Buriat',
+	'cbk-zam' => 'Chavacano',
 	'cdo' => 'Min Dong Chinese',
-	'crh-cyrl' => 'Crimean Turkish (Cyrillic script)',
-	'crh-latn' => 'Crimean Turkish (Latin script)',
+	'crh-cyrl' => 'Crimean Tatar (Cyrillic script)',
+	'crh-latn' => 'Crimean Tatar (Latin script)',
 	'de-formal' => 'German (formal address)',
+	'dty' => 'Doteli',
 	'gan-hans' => 'Simplified Gan script',
 	'gan-hant' => 'Traditional Gan script',
 	'hif-latn' => 'Fiji Hindi (Latin script)',
 	'ike-cans' => 'Eastern Canadian (Aboriginal syllabics)',
 	'ike-latn' => 'Eastern Canadian (Latin script)',
+	'kbp' => 'Kabiye',
 	'kk-cn' => 'Kazakh (China)',
 	'kk-kz' => 'Kazakh (Kazakhstan)',
 	'kk-tr' => 'Kazakh (Turkey)',
@@ -137,7 +150,10 @@ $languageNames = [
 	'ks-arab' => 'Kashmiri (Arabic script)',
 	'ks-deva' => 'Kashmiri (Devanagari script)',
 	'ku-latn' => 'Kurdish (Latin script)',
+	'lbe' => 'Lak',
+	'nrm' => 'Norman',
 	'roa-rup' => 'Aromanian',
+	'roa-tara' => 'Tarantino',
 	'sr-ec' => 'Serbian (Cyrillic script)',
 	'sr-el' => 'Serbian (Latin script)',
 	'tg-cyrl' => 'Tajik (Cyrillic script)',

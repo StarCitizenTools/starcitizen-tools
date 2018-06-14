@@ -1,8 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Kwj2772"
+			"Kwj2772",
+			"Ykhwong"
 		]
 	},
-	"codemirror-desc": "위키텍스트 편집기에서 구문 강조 기능을 제공합니다"
+	"codemirror-desc": "위키텍스트 편집기에서 구문 강조 기능을 제공합니다",
+	"codemirror-toggle-label": "문법 강조",
+	"codemirror-beta-title": "위키텍스트 문법 강조",
+	"codemirror-beta-desc": "문법 강조는 색과 그림자를 사용하여 문서의 본문을 링크, 참조, 틀의 코드와 시각적으로 구분함으로써 편집을 더 쉽게 할 수 있게 합니다.",
+	"codemirror-popup-label": "문법 강조",
+	"codemirror-popup-desc": "문법 강조는 각기 다른 부분에 색을 입혀서 구별을 쉽게 할 수 있게 도와줍니다.",
+	"codemirror-popup-btn-yes": "시험해 보기",
+	"codemirror-popup-btn-no": "아니요, 괜찮습니다"
 }

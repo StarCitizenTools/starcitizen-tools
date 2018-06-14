@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Slomox"
+			"Slomox",
+			"Joachim Mos"
 		]
 	},
 	"checkuser-summary": "Dit Warktüüch dörsöcht de lesten Ännern na de IP-Adressen, de en Bruker bruukt hett, oder na de Ännern un Brukernaams, de vun en bestimmte IP maakt/bruukt worrn sünd.\nBrukers un Ännern vun XFF-IPs ut köönt ankeken warrn, wenn „/xff“ achter de IP toschreven warrt. IPv4 (CIDR $1-32) un IPv6 (CIDR $2-128) warrt all beid ünnerstütt.\nDe Maximaltall vun trüchlevert Ännern is 5000.\nDit Warktüüch dröff blot na de Regeln mit de Richtlienen bruukt warrn.",
@@ -11,18 +12,17 @@
 	"checkuserlog": "Checkuser-Logbook",
 	"checkuser-contribs": "IP-Adressen vun Bruker prüfen",
 	"group-checkuser": "Brukers nakieken",
-	"group-checkuser-member": "Bruker nakieken",
+	"group-checkuser-member": "{{GENDER:$1|Bruker nakieken}}",
 	"right-checkuser": "IP-Adressen un annere Infos vun Brukers bekieken",
 	"right-checkuser-log": "Checkuser-Logbook ankieken",
 	"grouppage-checkuser": "{{ns:project}}:Checkuser",
 	"checkuser-reason": "Grund:",
 	"checkuser-showlog": "Logbook wiesen",
 	"checkuser-query": "Toletzt ännert affragen",
-	"checkuser-target": "Bruker oder IP",
+	"checkuser-target": "IP-Adress oder Brukernaam:",
 	"checkuser-users": "Brukers kriegen",
 	"checkuser-edits": "Ännern vun IP-Adress wiesen",
 	"checkuser-ips": "IPs kriegen",
-	"checkuser-search": "Söken",
 	"checkuser-period": "Duur:",
 	"checkuser-week-1": "leste Week",
 	"checkuser-week-2": "leste twee Weken",
@@ -53,12 +53,12 @@
 	"checkuser-accounts": "$1 {{PLURAL:$1|nee Brukerkonto|ne’e Brukerkonten}}",
 	"checkuser-too-many": "To veel funnen, grenz de IP-Reeg wieder in. Dit sünd de bruukten IP-Adressen (maximal 5000, sorteert na Adress):",
 	"checkuser-user-nonexistent": "Den angevene Bruker gifft dat nich.",
-	"checkuser-search-form": "Söök na Logbook-Indrääg, bi de $1 $2 is.",
+	"checkuser-search": "Söken",
 	"checkuser-search-submit": "Söök",
 	"checkuser-search-initiator": "Initiater",
 	"checkuser-search-target": "Ziel",
 	"checkuser-ipeditcount": "~$1 vun all Brukers",
-	"checkuser-log-return": "Trüch na dat CheckUser-Hööftformular",
+	"checkuser-showmain": "Trüch na dat CheckUser-Hööftformular",
 	"checkuser-limited": "'''De List mit Resultaten is to lang wesen un körter maakt worrn.'''",
 	"checkuser-autocreate-action": "automaatsch opstellt",
 	"checkuser-email-action": "hett Bruker „$1“ en E-Mail tostüürt",

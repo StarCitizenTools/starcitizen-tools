@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2008-2010, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -24,20 +24,20 @@ abstract class ComplexMessages {
 	protected $targetDir;
 	protected $id = '__BUG__';
 	protected $variable = '__BUG__';
-	protected $data = array();
+	protected $data = [];
 	protected $elementsInArray = true;
 	protected $databaseMsg = '__BUG__';
 	protected $chainable = false;
 	protected $firstMagic = false;
-	protected $constants = array();
+	protected $constants = [];
 
-	protected $tableAttributes = array(
+	protected $tableAttributes = [
 		'class' => 'wikitable',
 		'border' => '2',
 		'cellpadding' => '4',
 		'cellspacing' => '0',
 		'style' => 'background-color: #F9F9F9; border: 1px #AAAAAA solid; border-collapse: collapse;',
-	);
+	];
 
 	public function __construct( $langCode ) {
 		$this->language = $langCode;
@@ -124,7 +124,7 @@ abstract class ComplexMessages {
 			$chain = $this->mergeMagic( $defs, $chain );
 		}
 
-		$data = $group['data'] = array( $defs, $chain, $current );
+		$data = $group['data'] = [ $defs, $chain, $current ];
 
 		return $data;
 	}
@@ -132,7 +132,7 @@ abstract class ComplexMessages {
 	/**
 	 * Gets data from request. Needs to be run before the form is displayed and
 	 * validation. Not needed for export, which uses request directly.
-	 * @param $request WebRequest
+	 * @param WebRequest $request
 	 */
 	public function loadFromRequest( WebRequest $request ) {
 		$saved = $this->parse( $this->formatForSave( $request ) );
@@ -149,7 +149,7 @@ abstract class ComplexMessages {
 		$data = TranslateUtils::getMessageContent( $this->databaseMsg, $this->language );
 
 		if ( !$data ) {
-			return array();
+			return [];
 		} else {
 			return $this->parse( $data );
 		}
@@ -157,7 +157,7 @@ abstract class ComplexMessages {
 
 	protected function parse( $data ) {
 		$lines = array_map( 'trim', explode( "\n", $data ) );
-		$array = array();
+		$array = [];
 		foreach ( $lines as $line ) {
 			if ( $line === '' || $line[0] === '#' || $line[0] === '<' ) {
 				continue;
@@ -181,7 +181,7 @@ abstract class ComplexMessages {
 
 	/**
 	 * Return an array of keys that can be used to iterate over all keys
-	 * @param $group
+	 * @param string $group
 	 * @return Array of keys for data
 	 */
 	protected function getIterator( $group ) {
@@ -192,29 +192,29 @@ abstract class ComplexMessages {
 
 	protected function val( $group, $type, $key ) {
 		$array = $this->getGroups();
-		wfSuppressWarnings();
+		MediaWiki\suppressWarnings();
 		$subarray = $array[$group]['data'][$type][$key];
-		wfRestoreWarnings();
+		MediaWiki\restoreWarnings();
 		if ( $this->elementsInArray ) {
 			if ( !$subarray || !count( $subarray ) ) {
-				return array();
+				return [];
 			}
 		} else {
 			if ( !$subarray ) {
-				return array();
+				return [];
 			}
 		}
 
 		if ( !is_array( $subarray ) ) {
-			$subarray = array( $subarray );
+			$subarray = [ $subarray ];
 		}
 
 		return $subarray;
 	}
 
 	/**
-	 * @param $group
-	 * @param $code
+	 * @param string $group
+	 * @param string $code
 	 * @return array
 	 */
 	protected function readVariable( $group, $code ) {
@@ -223,15 +223,15 @@ abstract class ComplexMessages {
 			$file = str_ireplace( self::PLACEHOLDER, str_replace( '-', '_', ucfirst( $code ) ), $file );
 		}
 
-		${$group['var']} = array(); # Initialize
+		${$group['var']} = []; # Initialize
 		if ( file_exists( $file ) ) {
 			require $file; # Include
 		}
 
 		if ( $group['code'] ) {
-			wfSuppressWarnings();
-			$data = (array) ${$group['var']} [$code];
-			wfRestoreWarnings();
+			MediaWiki\suppressWarnings();
+			$data = (array)${$group['var']} [$code];
+			MediaWiki\restoreWarnings();
 		} else {
 			$data = ${$group['var']};
 		}
@@ -251,11 +251,11 @@ abstract class ComplexMessages {
 		return $data;
 	}
 
-	// /Data retrieval
+	// Data retrieval
 
 	// Output
 	public function header( $title ) {
-		$colspan = array( 'colspan' => 3 );
+		$colspan = [ 'colspan' => 3 ];
 		$header = Xml::element( 'th', $colspan, $this->getTitle() . ' - ' . $title );
 		$subheading[] = '<th>' . wfMessage( 'translate-magic-cm-original' )->escaped() . '</th>';
 		$subheading[] = '<th>' . wfMessage( 'translate-magic-cm-current' )->escaped() . '</th>';
@@ -266,7 +266,7 @@ abstract class ComplexMessages {
 	}
 
 	public function output() {
-		$colspan = array( 'colspan' => 3 );
+		$colspan = [ 'colspan' => 3 ];
 
 		$s = Xml::openElement( 'table', $this->tableAttributes );
 
@@ -304,7 +304,7 @@ abstract class ComplexMessages {
 				$rowContents .= $this->editElement( $key, $this->formatElement( $value ) );
 				$rowContents .= '</td>';
 
-				$s .= Xml::tags( 'tr', array( 'id' => "mw-sp-magic-$key" ), $rowContents );
+				$s .= Xml::tags( 'tr', [ 'id' => "mw-sp-magic-$key" ], $rowContents );
 			}
 		}
 
@@ -318,10 +318,10 @@ abstract class ComplexMessages {
 
 		return Xml::tags(
 			'form',
-			array(
+			[
 				'method' => 'post',
 				'action' => $context->getRequest()->getRequestURL()
-			),
+			],
 			$s
 		);
 	}
@@ -334,7 +334,7 @@ abstract class ComplexMessages {
 		) .
 		Xml::submitButton(
 			wfMessage( 'translate-magic-cm-save' )->text(),
-			array( 'name' => 'savetodb' )
+			[ 'name' => 'savetodb' ]
 		);
 	}
 
@@ -356,16 +356,15 @@ abstract class ComplexMessages {
 	}
 
 	public function editElement( $key, $contents ) {
-		return Xml::input( $this->getKeyForEdit( $key ), 40, $contents, array(
+		return Xml::input( $this->getKeyForEdit( $key ), 40, $contents, [
 			'lang' => $this->targetHtmlCode,
 			'dir' => $this->targetDir,
-		) );
+		] );
 	}
 
-	// /Output
+	// Output
 
 	// Save to database
-
 
 	protected function getKeyForSave() {
 		return $this->databaseMsg . '/' . $this->language;
@@ -430,11 +429,11 @@ abstract class ComplexMessages {
 		$this->init = false;
 	}
 
-	// /Save to database
+	// Save to database
 
 	// Export
 	public function validate( array &$errors, $filter = false ) {
-		$used = array();
+		$used = [];
 		foreach ( array_keys( $this->data ) as $group ) {
 			if ( $filter !== false && !in_array( $group, (array)$filter, true ) ) {
 				continue;
@@ -447,7 +446,7 @@ abstract class ComplexMessages {
 	protected function validateEach( array &$errors, $group, &$used ) {
 		foreach ( $this->getIterator( $group ) as $key ) {
 			$values = $this->val( $group, self::LANG_CURRENT, $key );
-			$link = Xml::element( 'a', array( 'href' => "#mw-sp-magic-$key" ), $key );
+			$link = Xml::element( 'a', [ 'href' => "#mw-sp-magic-$key" ], $key );
 
 			if ( count( $values ) !== count( array_filter( $values ) ) ) {
 				$errors[] = "There is empty value in $link.";
@@ -458,7 +457,7 @@ abstract class ComplexMessages {
 					$otherkey = $used[$v];
 					$first = Xml::element(
 						'a',
-						array( 'href' => "#mw-sp-magic-$otherkey" ),
+						[ 'href' => "#mw-sp-magic-$otherkey" ],
 						$otherkey
 					);
 					$errors[] = "Translation <strong>$v</strong> is used more than once " .
@@ -472,7 +471,7 @@ abstract class ComplexMessages {
 
 	public function export( $filter = false ) {
 		$text = '';
-		$errors = array();
+		$errors = [];
 		$this->validate( $errors, $filter );
 		foreach ( $errors as $_ ) {
 			$text .= "#!!# $_\n";
@@ -497,7 +496,7 @@ abstract class ComplexMessages {
 
 		$out = '';
 
-		$indexKeys = array();
+		$indexKeys = [];
 		foreach ( array_keys( $items[self::LANG_MASTER] ) as $key ) {
 			$indexKeys[$key] = isset( $this->constants[$key] ) ?
 				$this->constants[$key] :
@@ -544,7 +543,7 @@ abstract class ComplexMessages {
 				continue;
 			}
 
-			$normalized = array_map( array( $this, 'normalize' ), $val );
+			$normalized = array_map( [ $this, 'normalize' ], $val );
 			if ( $this->elementsInArray ) {
 				$temp .= '=> array( ' . implode( ', ', $normalized ) . ' ),';
 			} else {
@@ -565,7 +564,7 @@ abstract class ComplexMessages {
 
 	/**
 	 * Returns string with quotes that should be valid php
-	 * @param $data string
+	 * @param string $data
 	 * @throws MWException
 	 * @return string
 	 */
@@ -579,7 +578,7 @@ abstract class ComplexMessages {
 		return "'$data'";
 	}
 
-	// /Export
+	// Export
 	public function highlight( $key, $values ) {
 		return $values;
 	}
@@ -596,12 +595,12 @@ class SpecialPageAliasesCM extends ComplexMessages {
 
 	public function __construct( $code ) {
 		parent::__construct( $code );
-		$this->data['core'] = array(
+		$this->data['core'] = [
 			'label' => 'MediaWiki Core',
 			'var' => 'specialPageAliases',
 			'file' => Language::getMessagesFileName( self::PLACEHOLDER ),
 			'code' => false,
-		);
+		];
 
 		$groups = MessageGroups::singleton()->getGroups();
 		foreach ( $groups as $g ) {
@@ -614,12 +613,12 @@ class SpecialPageAliasesCM extends ComplexMessages {
 			}
 			$file = $g->replaceVariables( $conf['FILES']['aliasFileSource'], 'en' );
 			if ( file_exists( $file ) ) {
-				$this->data[$g->getId()] = array(
+				$this->data[$g->getId()] = [
 					'label' => $g->getLabel(),
 					'var' => 'specialPageAliases',
 					'file' => $file,
 					'code' => $code,
-				);
+				];
 			}
 		}
 	}
@@ -643,10 +642,10 @@ class SpecialPageAliasesCM extends ComplexMessages {
 			$values = $this->val( $group, self::LANG_CURRENT, $key );
 
 			foreach ( $values as $_ ) {
-				wfSuppressWarnings();
+				MediaWiki\suppressWarnings();
 				$title = SpecialPage::getTitleFor( $_ );
-				wfRestoreWarnings();
-				$link = Xml::element( 'a', array( 'href' => "#mw-sp-magic-$key" ), $key );
+				MediaWiki\restoreWarnings();
+				$link = Xml::element( 'a', [ 'href' => "#mw-sp-magic-$key" ], $key );
 				if ( $title === null ) {
 					if ( $_ !== '' ) {
 						// Empty values checked elsewhere
@@ -677,12 +676,12 @@ class MagicWordsCM extends ComplexMessages {
 
 	public function __construct( $code ) {
 		parent::__construct( $code );
-		$this->data['core'] = array(
+		$this->data['core'] = [
 			'label' => 'MediaWiki Core',
 			'var' => 'magicWords',
 			'file' => Language::getMessagesFileName( self::PLACEHOLDER ),
 			'code' => false,
-		);
+		];
 
 		$groups = MessageGroups::singleton()->getGroups();
 		foreach ( $groups as $g ) {
@@ -695,12 +694,12 @@ class MagicWordsCM extends ComplexMessages {
 			}
 			$file = $g->replaceVariables( $conf['FILES']['magicFileSource'], 'en' );
 			if ( file_exists( $file ) ) {
-				$this->data[$g->getId()] = array(
+				$this->data[$g->getId()] = [
 					'label' => $g->getLabel(),
 					'var' => 'magicWords',
 					'file' => $file,
 					'code' => $code,
-				);
+				];
 			}
 		}
 	}
@@ -725,15 +724,15 @@ class NamespaceCM extends ComplexMessages {
 
 	public function __construct( $code ) {
 		parent::__construct( $code );
-		$this->data['core'] = array(
+		$this->data['core'] = [
 			'label' => 'MediaWiki Core',
 			'var' => 'namespaceNames',
 			'file' => Language::getMessagesFileName( self::PLACEHOLDER ),
 			'code' => false,
-		);
+		];
 	}
 
-	protected $constants = array(
+	protected $constants = [
 		-2 => 'NS_MEDIA',
 		-1 => 'NS_SPECIAL',
 		0 => 'NS_MAIN',
@@ -752,7 +751,7 @@ class NamespaceCM extends ComplexMessages {
 		13 => 'NS_HELP_TALK',
 		14 => 'NS_CATEGORY',
 		15 => 'NS_CATEGORY_TALK',
-	);
+	];
 
 	protected function validateEach( array &$errors, $group, &$used ) {
 		parent::validateEach( $errors, $group, $used );
@@ -760,7 +759,7 @@ class NamespaceCM extends ComplexMessages {
 			$values = $this->val( $group, self::LANG_CURRENT, $key );
 
 			if ( count( $values ) > 1 ) {
-				$link = Xml::element( 'a', array( 'href' => "#mw-sp-magic-$key" ), $key );
+				$link = Xml::element( 'a', [ 'href' => "#mw-sp-magic-$key" ], $key );
 				$errors[] = "Namespace $link can have only one translation. Replace the " .
 					'translation with a new one, and notify staff about the change.';
 			}

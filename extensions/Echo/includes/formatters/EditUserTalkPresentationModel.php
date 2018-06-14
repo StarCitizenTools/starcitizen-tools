@@ -12,26 +12,26 @@ class EchoEditUserTalkPresentationModel extends EchoEventPresentationModel {
 	}
 
 	public function getPrimaryLink() {
-		return array(
+		return [
 			// Need FullURL so the section is included
 			'url' => $this->getTitleWithSection()->getFullURL(),
 			'label' => $this->msg( 'notification-link-text-view-message' )->text()
-		);
+		];
 	}
 
 	public function getSecondaryLinks() {
-		$diffLink = array(
+		$diffLink = [
 			'url' => $this->getDiffLinkUrl(),
 			'label' => $this->msg( 'notification-link-text-view-changes', $this->getViewingUserForGender() )->text(),
 			'description' => '',
 			'icon' => 'changes',
 			'prioritized' => true
-		);
+		];
 
 		if ( $this->isBundled() ) {
-			return array( $diffLink );
+			return [ $diffLink ];
 		} else {
-			return array( $this->getAgentLink(), $diffLink );
+			return [ $this->getAgentLink(), $diffLink ];
 		}
 	}
 
@@ -47,7 +47,7 @@ class EchoEditUserTalkPresentationModel extends EchoEventPresentationModel {
 		} elseif ( $this->hasSection() ) {
 			$msg = $this->getMessageWithAgent( "notification-header-{$this->type}-with-section" );
 			$msg->params( $this->getViewingUserForGender() );
-			$msg->plaintextParams( $this->getTruncatedSectionTitle( $this->getSection() ) );
+			$msg->plaintextParams( $this->getTruncatedSectionTitle() );
 			return $msg;
 		} else {
 			$msg = parent::getHeaderMessage();
@@ -56,11 +56,25 @@ class EchoEditUserTalkPresentationModel extends EchoEventPresentationModel {
 		}
 	}
 
+	public function getCompactHeaderMessage() {
+		$hasSection = $this->hasSection();
+		$key = $hasSection
+			? "notification-compact-header-{$this->type}-with-section"
+			: "notification-compact-header-{$this->type}";
+		$msg = $this->getMessageWithAgent( $key );
+		$msg->params( $this->getViewingUserForGender() );
+		if ( $hasSection ) {
+			$msg->params( $this->getTruncatedSectionTitle() );
+		}
+		return $msg;
+	}
+
 	public function getBodyMessage() {
-		if ( !$this->isBundled() && $this->hasSection() ) {
+		$sectionText = $this->event->getExtraParam( 'section-text' );
+		if ( !$this->isBundled() && $this->hasSection() && $sectionText !== null ) {
 			$msg = $this->msg( 'notification-body-edit-user-talk-with-section' );
 			// section-text is safe to use here, because hasSection() returns false if the revision is deleted
-			$msg->plaintextParams( $this->event->getExtraParam( 'section-text' ) );
+			$msg->plaintextParams( $sectionText );
 			return $msg;
 		} else {
 			return false;
@@ -70,10 +84,10 @@ class EchoEditUserTalkPresentationModel extends EchoEventPresentationModel {
 	private function getDiffLinkUrl() {
 		$revId = $this->event->getExtraParam( 'revid' );
 		$oldId = $this->isBundled() ? $this->getRevBeforeFirstNotification() : 'prev';
-		$query = array(
+		$query = [
 			'oldid' => $oldId,
 			'diff' => $revId,
-		);
+		];
 		return $this->event->getTitle()->getFullURL( $query );
 	}
 
@@ -81,5 +95,9 @@ class EchoEditUserTalkPresentationModel extends EchoEventPresentationModel {
 		$events = $this->getBundledEvents();
 		$firstNotificationRevId = end( $events )->getExtraParam( 'revid' );
 		return $this->event->getTitle()->getPreviousRevisionID( $firstNotificationRevId );
+	}
+
+	protected function getSubjectMessageKey() {
+		return 'notification-edit-talk-page-email-subject2';
 	}
 }

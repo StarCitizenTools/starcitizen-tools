@@ -4,7 +4,7 @@ $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
 	$IP = __DIR__ . '/../../..';
 }
-require_once ( "$IP/maintenance/Maintenance.php" );
+require_once "$IP/maintenance/Maintenance.php";
 
 /**
  * A maintenance script that processes email digest
@@ -25,14 +25,12 @@ class ProcessEchoEmailBatch extends Maintenance {
 			"ignoreConfiguredSchedule",
 			"Send all pending notifications immediately even if configured to be weekly or daily.",
 			false, false, "i" );
+
+		$this->requireExtension( 'Echo' );
 	}
 
 	public function execute() {
 		global $wgEchoCluster;
-
-		if ( !class_exists( 'EchoHooks' ) ) {
-			$this->error( "Echo isn't enabled on this wiki\n", 1 );
-		}
 
 		$ignoreConfiguredSchedule = $this->getOption( "ignoreConfiguredSchedule", 0 );
 
@@ -75,4 +73,4 @@ class ProcessEchoEmailBatch extends Maintenance {
 }
 
 $maintClass = "ProcessEchoEmailBatch";
-require_once ( DO_MAINTENANCE );
+require_once RUN_MAINTENANCE_IF_MAIN;

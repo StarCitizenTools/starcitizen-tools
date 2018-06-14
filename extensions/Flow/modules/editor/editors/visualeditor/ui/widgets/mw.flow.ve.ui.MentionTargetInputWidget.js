@@ -1,4 +1,4 @@
-( function ( $, mw, OO, ve ) {
+( function ( $, mw, OO ) {
 	'use strict';
 
 	/**
@@ -63,7 +63,7 @@
 		// Then check the user exists
 		return mw.flow.ve.userCache.get( this.value ).then(
 			function ( user ) {
-				return !user.missing;
+				return !user.missing && !user.invalid;
 			},
 			function () {
 				// If the API is down or behaving strangely, we shouldn't prevent
@@ -133,17 +133,17 @@
 	mw.flow.ve.ui.MentionTargetInputWidget.prototype.initializeLookupMenuSelection = function () {
 		var item;
 		if ( this.username ) {
-			this.lookupMenu.selectItem( this.lookupMenu.getItemFromData( this.username ) );
+			this.lookupMenu.selectItem( this.lookupMenu.findItemFromData( this.username ) );
 		}
 
-		item = this.lookupMenu.getSelectedItem();
+		item = this.lookupMenu.findSelectedItem();
 		if ( !item ) {
 			OO.ui.mixin.LookupElement.prototype.initializeLookupMenuSelection.call( this );
 		}
 
-		item = this.lookupMenu.getSelectedItem();
+		item = this.lookupMenu.findSelectedItem();
 		if ( item ) {
 			this.username = item.getData();
 		}
 	};
-}( jQuery, mediaWiki, OO, ve ) );
+}( jQuery, mediaWiki, OO ) );

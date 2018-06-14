@@ -1,11 +1,21 @@
 {
 	"name": "Babel",
-	"version": "1.10.0",
-	"author": "Robert Leverington",
+	"version": "1.11.0",
+	"author": [
+		"Robert Leverington",
+		"Thiemo Mättig",
+		"Legoktm",
+		"Nikerabbit",
+		"Amir Aharoni",
+		"Ricordisamoa"
+	],
 	"url": "https://www.mediawiki.org/wiki/Extension:Babel",
 	"descriptionmsg": "babel-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.29.0"
+	},
 	"MessagesDirs": {
 		"Babel": [
 			"i18n"
@@ -15,18 +25,22 @@
 		"BabelMagic": "Babel.i18n.magic.php"
 	},
 	"AutoloadClasses": {
-		"Babel": "Babel.class.php",
-		"BabelLanguageCodes": "BabelLanguageCodes.class.php",
-		"BabelStatic": "BabelStatic.class.php",
-		"BabelAutoCreate": "BabelAutoCreate.class.php",
-		"MediaWiki\\Babel\\BabelBox\\BabelBox": "BabelBox/BabelBox.php",
-		"MediaWiki\\Babel\\BabelBox\\LanguageBabelBox": "BabelBox/LanguageBabelBox.php",
-		"MediaWiki\\Babel\\BabelBox\\NotBabelBox": "BabelBox/NotBabelBox.php",
-		"MediaWiki\\Babel\\BabelBox\\NullBabelBox": "BabelBox/NullBabelBox.php"
+		"Babel": "includes/Babel.php",
+		"BabelLanguageCodes": "includes/BabelLanguageCodes.php",
+		"BabelStatic": "includes/BabelStatic.php",
+		"BabelAutoCreate": "includes/BabelAutoCreate.php",
+		"MediaWiki\\Babel\\ApiQueryBabel": "includes/ApiQueryBabel.php",
+		"MediaWiki\\Babel\\Database": "includes/Database.php",
+		"MediaWiki\\Babel\\BabelBox\\BabelBox": "includes/BabelBox/BabelBox.php",
+		"MediaWiki\\Babel\\BabelBox\\LanguageBabelBox": "includes/BabelBox/LanguageBabelBox.php",
+		"MediaWiki\\Babel\\BabelBox\\NotBabelBox": "includes/BabelBox/NotBabelBox.php",
+		"MediaWiki\\Babel\\BabelBox\\NullBabelBox": "includes/BabelBox/NullBabelBox.php"
+	},
+	"APIMetaModules": {
+		"babel": "MediaWiki\\Babel\\ApiQueryBabel"
 	},
 	"ResourceModules": {
 		"ext.babel": {
-			"position": "top",
 			"styles": "resources/ext.babel.css"
 		}
 	},
@@ -36,9 +50,12 @@
 	},
 	"Hooks": {
 		"ParserFirstCallInit": "BabelStatic::onParserFirstCallInit",
+		"LinksUpdate": "BabelStatic::onLinksUpdate",
+		"LoadExtensionSchemaUpdates": "BabelStatic::onLoadExtensionSchemaUpdates",
 		"UserGetReservedNames": "BabelAutoCreate::onUserGetReservedNames"
 	},
 	"config": {
+		"BabelCategorizeNamespaces": null,
 		"BabelCategoryNames": {
 			"0": "%code%-0",
 			"1": "%code%-1",
@@ -52,7 +69,9 @@
 		"BabelMainCategory": "%code%",
 		"BabelDefaultLevel": "N",
 		"BabelUseUserLanguage": false,
-		"BabelPreferISO639_3": false
+		"BabelUseDatabase": false,
+		"BabelCentralDb": false,
+		"BabelCentralApi": false
 	},
 	"manifest_version": 1
 }

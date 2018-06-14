@@ -24,26 +24,26 @@ class UserNameBatch {
 	/**
 	 * @var array[] map from wikiid to list of userid's to request
 	 */
-	protected $queued = array();
+	protected $queued = [];
 
 	/**
 	 * @var array Map from wiki id to MapCacheLRU.  MapCacheLRU is a map of user ID (as
 	 *  string, though to PHP it's the same anyway...) to username.
 	 */
-	protected $usernames = array();
+	protected $usernames = [];
 
 	/**
 	 * @param UserName\UserNameQuery $query
 	 * @param array $queued map from wikiid to list of userid's to request
 	 */
-	public function __construct( UserName\UserNameQuery $query, array $queued = array() ) {
+	public function __construct( UserName\UserNameQuery $query, array $queued = [] ) {
 		$this->query = $query;
 		foreach ( $queued as $wiki => $userIds ) {
 			$this->queued[$wiki] = array_map( 'intval', $userIds );
 		}
 	}
 
-	/*
+	/**
 	 * Make sure the LRU for the given wiki is in place.
 	 *
 	 * @param string $wiki Wiki identifier
@@ -55,13 +55,13 @@ class UserNameBatch {
 	}
 
 	public function clear() {
-		$this->queued = array();
-		$this->usernames = array();
+		$this->queued = [];
+		$this->usernames = [];
 	}
 
 	/**
 	 * @param string $wiki
-	 * @param integer $userId
+	 * @param int $userId
 	 * @param string $userName Non null to set known usernames like $wgUser
 	 */
 	public function add( $wiki, $userId, $userName = null ) {
@@ -69,8 +69,8 @@ class UserNameBatch {
 
 		$this->ensureLRU( $wiki );
 		if ( $userName !== null ) {
-			$this->usernames[$wiki]->set( (string) $userId, $userName );
-		} elseif ( !$this->usernames[$wiki]->has( (string) $userId ) ) {
+			$this->usernames[$wiki]->set( (string)$userId, $userName );
+		} elseif ( !$this->usernames[$wiki]->has( (string)$userId ) ) {
 			$this->queued[$wiki][] = $userId;
 		}
 	}
@@ -86,9 +86,9 @@ class UserNameBatch {
 	 * Get the displayable username
 	 *
 	 * @param string $wiki
-	 * @param integer $userId
-	 * @param string|boolean $userIp
-	 * @return string|boolean false if username is not found or display is suppressed
+	 * @param int $userId
+	 * @param string|bool $userIp
+	 * @return string|bool false if username is not found or display is suppressed
 	 * @todo Return something better for not found / suppressed, but what? Making
 	 *   return type string|Message would suck.
 	 */
@@ -99,16 +99,16 @@ class UserNameBatch {
 		}
 
 		$this->ensureLRU( $wiki );
-		if ( !$this->usernames[$wiki]->has( (string) $userId ) ) {
+		if ( !$this->usernames[$wiki]->has( (string)$userId ) ) {
 			$this->queued[$wiki][] = $userId;
 			$this->resolve( $wiki );
 		}
-		return $this->usernames[$wiki]->get( (string) $userId );
+		return $this->usernames[$wiki]->get( (string)$userId );
 	}
 
 	/**
 	 * @param UserTuple $tuple
-	 * @return string|boolean false if username is not found or display is suppressed
+	 * @return string|bool false if username is not found or display is suppressed
 	 */
 	public function getFromTuple( UserTuple $tuple ) {
 		return $this->get( $tuple->wiki, $tuple->id, $tuple->ip );
@@ -133,11 +133,11 @@ class UserNameBatch {
 		$res = $this->query->execute( $wiki, $queued );
 		unset( $this->queued[$wiki] );
 		if ( $res ) {
-			$usernames = array();
+			$usernames = [];
 			foreach ( $res as $row ) {
 				$id = (int)$row->user_id;
 				$usernames[$id] = $row->user_name;
-				$this->usernames[$wiki]->set( (string) $id, $row->user_name );
+				$this->usernames[$wiki]->set( (string)$id, $row->user_name );
 			}
 			$this->resolveUserPages( $wiki, $usernames );
 			$missing = array_diff( $queued, array_keys( $usernames ) );
@@ -145,7 +145,7 @@ class UserNameBatch {
 			$missing = $queued;
 		}
 		foreach ( $missing as $id ) {
-			$this->usernames[$wiki]->set( (string) $id, false );
+			$this->usernames[$wiki]->set( (string)$id, false );
 		}
 	}
 
@@ -158,7 +158,7 @@ class UserNameBatch {
 	 */
 	protected function resolveUserPages( $wiki, array $usernames ) {
 		// LinkBatch currently only supports the current wiki
-		if ( $wiki !== wfWikiId() || !$usernames ) {
+		if ( $wiki !== wfWikiID() || !$usernames ) {
 			return;
 		}
 

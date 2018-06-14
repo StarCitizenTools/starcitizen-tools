@@ -1,11 +1,12 @@
 {
 	"name": "UniversalLanguageSelector",
-	"version": "2016-04-06",
+	"version": "2018-04-10",
 	"author": [
 		"Alolita Sharma",
 		"Amir Aharoni",
 		"Arun Ganesh",
 		"Brandon Harris",
+		"Kartik Mistry",
 		"Niharika Kohli",
 		"Niklas Laxström",
 		"Pau Giner",
@@ -14,7 +15,10 @@
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:UniversalLanguageSelector",
 	"descriptionmsg": "uls-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
+	"requires": {
+		"MediaWiki": ">= 1.29.0"
+	},
 	"Hooks": {
 		"BeforePageDisplay": "UniversalLanguageSelectorHooks::addModules",
 		"EnterMobileMode": "UniversalLanguageSelectorHooks::onEnterMobileMode",
@@ -36,7 +40,8 @@
 	},
 	"MessagesDirs": {
 		"UniversalLanguageSelector": [
-			"i18n"
+			"i18n",
+			"i18n/api"
 		]
 	},
 	"AutoloadClasses": {
@@ -120,9 +125,9 @@
 				"ext.uls.mediawiki",
 				"ext.uls.webfonts",
 				"mediawiki.api.parse",
-				"mediawiki.Uri",
 				"mediawiki.ui.checkbox",
-				"mediawiki.ui.button"
+				"mediawiki.ui.button",
+				"mediawiki.user"
 			],
 			"localBasePath": "resources",
 			"remoteExtPath": "UniversalLanguageSelector/resources"
@@ -130,7 +135,6 @@
 		"ext.uls.geoclient": {
 			"scripts": "js/ext.uls.geoclient.js",
 			"dependencies": [
-				"json",
 				"mediawiki.cookie"
 			],
 			"localBasePath": "resources",
@@ -152,12 +156,6 @@
 			"localBasePath": "resources",
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
-		"ext.uls.nojs": {
-			"styles": "css/ext.uls.nojs.css",
-			"position": "top",
-			"localBasePath": "resources",
-			"remoteExtPath": "UniversalLanguageSelector/resources"
-		},
 		"ext.uls.init": {
 			"targets": [ "desktop" ],
 			"dependencies": [ "ext.uls.common" ]
@@ -165,17 +163,18 @@
 		"ext.uls.common": {
 			"targets": [ "desktop", "mobile" ],
 			"scripts": "js/ext.uls.common.js",
-			"styles": "css/ext.uls.css",
+			"styles": "css/ext.uls.less",
 			"skinStyles": {
-				"monobook": "css/ext.uls-monobook.css"
+				"monobook": "css/ext.uls-monobook.css",
+				"vector": "css/ext.uls-vector.less"
 			},
 			"dependencies": [
 				"mediawiki.api",
 				"mediawiki.api.options",
 				"mediawiki.cookie",
+				"mediawiki.user",
 				"jquery.uls.data"
 			],
-			"position": "top",
 			"localBasePath": "resources",
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
@@ -205,9 +204,11 @@
 		},
 		"ext.uls.interface": {
 			"scripts": "js/ext.uls.interface.js",
+			"styles": "css/ext.uls.interface.less",
 			"dependencies": [
 				"ext.uls.common",
 				"mediawiki.jqueryMsg",
+				"mediawiki.storage",
 				"mediawiki.user",
 				"ext.uls.webfonts"
 			],
@@ -217,13 +218,12 @@
 				"ext-uls-undo-language-tooltip-text",
 				"ext-uls-language-settings-preferences-link"
 			],
-			"position": "top",
 			"localBasePath": "resources",
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
 		"ext.uls.languagesettings": {
 			"scripts": "js/ext.uls.languagesettings.js",
-			"styles": "css/ext.uls.languagesettings.css",
+			"styles": "css/ext.uls.languagesettings.less",
 			"dependencies": [
 				"ext.uls.messages",
 				"ext.uls.preferences",
@@ -243,22 +243,6 @@
 			"localBasePath": "resources",
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
-		"ext.uls.compactlinks": {
-			"scripts": "js/ext.uls.compactlinks.js",
-			"styles": "css/ext.uls.compactlinks.less",
-			"dependencies": [
-				"es5-shim",
-				"mediawiki.language",
-				"mediawiki.ui.button",
-				"ext.uls.init"
-			],
-			"messages": [
-				"ext-uls-compact-link-count",
-				"ext-uls-compact-link-info"
-			],
-			"localBasePath": "resources",
-			"remoteExtPath": "UniversalLanguageSelector/resources"
-		},
 		"ext.uls.webfonts": {
 			"scripts": "js/ext.uls.webfonts.js",
 			"dependencies": [
@@ -272,7 +256,6 @@
 		"ext.uls.webfonts.fonts": {
 			"dependencies": [
 				"jquery.webfonts",
-				"jquery.uls.data",
 				"ext.uls.webfonts.repository"
 			],
 			"localBasePath": "resources",
@@ -352,7 +335,6 @@
 		},
 		"jquery.uls.grid": {
 			"targets": [ "desktop", "mobile" ],
-			"position": "top",
 			"styles": "jquery.uls/css/jquery.uls.grid.css",
 			"localBasePath": "lib",
 			"remoteExtPath": "UniversalLanguageSelector/lib"
@@ -369,6 +351,9 @@
 		"ext.uls.pt": {
 			"styles": "css/ext.uls.pt.less",
 			"localBasePath": "resources",
+			"skinStyles": {
+				"monobook": "css/ext.uls.pt-monobook.less"
+			},
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
 		"ext.uls.interlanguage": {

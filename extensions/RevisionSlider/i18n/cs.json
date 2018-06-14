@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dvorapa",
+			"Danny B.",
+			"Mormegil"
+		]
+	},
+	"revisionslider": "Posuvník revizí",
+	"revisionslider-preference-disable": "Nezobrazovat posuvník revizí",
+	"revisionslider-desc": "Na stránce s rozdíly zobrazuje posuvník umožňující výběr a porovnání revizí.",
+	"revisionslider-toggle-label": "Procházet historii",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|bajt|bajty|bajtů}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bajt|bajty|bajtů}}",
+	"revisionslider-label-date": "Datum",
+	"revisionslider-label-page-size": "Velikost stránky",
+	"revisionslider-label-change-size": "Velikost změny",
+	"revisionslider-label-comment": "Komentář",
+	"revisionslider-label-username": "{{GENDER:$1|Uživatelské jméno}}",
+	"revisionslider-minoredit": "Toto je malá editace",
+	"revisionslider-loading-failed": "Časovou osu historie se nepodařilo načíst.",
+	"revisionslider-toggle-title-expand": "Otevřít posuvník revizí",
+	"revisionslider-toggle-title-collapse": "Sbalit posuvník revizí",
+	"revisionslider-turn-on-auto-expand-title": "Vždy zobrazovat posuvník revizí",
+	"revisionslider-turn-off-auto-expand-title": "Nezobrazovat posuvník revizí automaticky",
+	"revisionslider-arrow-tooltip-newer": "Zobrazit novější revize",
+	"revisionslider-arrow-tooltip-older": "Zobrazit starší revize",
+	"revisionslider-show-help-tooltip": "Zobrazit text nápovědy",
+	"revisionslider-help-dialog-slide1": "Posuvník revizí pomáhá najít a porovnávat revize v rozdílu verzí. Je vytvořen na základě [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider přání německy mluvící komunity]. Velmi oceníme [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider komentáře].",
+	"revisionslider-help-dialog-slide2": "Každý sloupec představuje revizi stránky. Sloupce nahoru zobrazují nárůst velikosti stránky, sloupce dolů pak zmenšení. Na obrázku představuje revize 1 přidání obsahu, zatímco revize 2 jeho odebrání.",
+	"revisionslider-help-dialog-slide3a": "<p>Pro porovnání konkrétních revizí je vyberte pomocí žlutého a modrého knoflíku.</p><p>Modrý knoflík ovládá novější revizi, žlutý knoflík označuje starší revizi.</p><p>Knoflíky můžete přesouvat stisknutím a tažením nebo kliknutím na osu posuvníku.</p>",
+	"revisionslider-help-dialog-slide4": "Pomocí šipek vpřed a vzad se můžete posouvat historií verzí a zobrazovat starší či novější verze.",
+	"revisionslider-tutorial": "Průvodce časovou osou historie",
+	"revisionslider-previous-dialog": "Předchozí",
+	"revisionslider-next-dialog": "Další",
+	"revisionslider-close-dialog": "Zavřít"
+}

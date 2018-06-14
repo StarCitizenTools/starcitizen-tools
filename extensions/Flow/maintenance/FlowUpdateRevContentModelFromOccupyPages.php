@@ -1,8 +1,8 @@
 <?php
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: dirname( __FILE__ ) . '/../../../maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
  * This script should be run immediately before dropping the wgFlowOccupyPages
@@ -19,6 +19,8 @@ class FlowUpdateRevContentModelFromOccupyPages extends Maintenance {
 		parent::__construct();
 
 		$this->mDescription = 'Sets rev_content_model from wgFlowOccupyPages, in preparation for dropping that config variable.';
+
+		$this->requireExtension( 'Flow' );
 
 		// Given the number of occupied pages, this probably doesn't need to be
 		// batched; just being cautious.
@@ -38,18 +40,18 @@ class FlowUpdateRevContentModelFromOccupyPages extends Maintenance {
 		while ( $overallInd < $pageCount ) {
 			$this->beginTransaction( $dbw, __METHOD__ );
 			$batchInd = 0;
-			while( $overallInd < $pageCount && $batchInd < $this->mBatchSize ) {
+			while ( $overallInd < $pageCount && $batchInd < $this->mBatchSize ) {
 				$pageName = $wgFlowOccupyPages[$overallInd];
 				$title = Title::newFromTextThrow( $pageName );
 				$revId = $title->getLatestRevID( Title::GAID_FOR_UPDATE );
 				if ( $revId !== 0 ) {
 					$dbw->update(
 						'revision',
-						array(
+						[
 							'rev_content_model' =>
 							CONTENT_MODEL_FLOW_BOARD
-						),
-						array( 'rev_id' => $revId ),
+						],
+						[ 'rev_id' => $revId ],
 						__METHOD__
 					);
 					$updatedCount++;
@@ -72,4 +74,4 @@ class FlowUpdateRevContentModelFromOccupyPages extends Maintenance {
 }
 
 $maintClass = 'FlowUpdateRevContentModelFromOccupyPages';
-require_once( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

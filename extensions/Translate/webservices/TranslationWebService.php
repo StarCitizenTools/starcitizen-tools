@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -28,13 +28,15 @@ abstract class TranslationWebService {
 	 * @return TranslationWebService|null
 	 */
 	public static function factory( $name, $config ) {
-		$handlers = array(
+		$handlers = [
 			'microsoft' => 'MicrosoftWebService',
 			'apertium' => 'ApertiumWebService',
 			'yandex' => 'YandexWebService',
 			'remote-ttmserver' => 'RemoteTTMServerWebService',
 			'cxserver' => 'CxserverWebService',
-		);
+			'restbase' => 'RESTBaseWebService',
+			'caighdean' => 'CaighdeanWebService',
+		];
 
 		if ( !isset( $config['timeout'] ) ) {
 			$config['timeout'] = 3;
@@ -82,13 +84,17 @@ abstract class TranslationWebService {
 	 * @param string $to Target language
 	 * @return TranslationQuery[]
 	 * @since 2015.12
+	 * @throws TranslationWebServiceConfigurationException
 	 */
 	public function getQueries( $text, $from, $to ) {
 		try {
-			return array( $this->getQuery( $text, $from, $to ) );
-		} catch ( Exception $e ) {
+			return [ $this->getQuery( $text, $from, $to ) ];
+		} catch ( TranslationWebServiceException $e ) {
 			$this->reportTranslationServiceFailure( $e->getMessage() );
-			return array();
+			return [];
+		} catch ( TranslationWebServiceInvalidInputException $e ) {
+			// Not much we can do about this, just ignore.
+			return [];
 		}
 	}
 
@@ -96,20 +102,20 @@ abstract class TranslationWebService {
 	 * Get the web service specific response returned by QueryAggregator.
 	 *
 	 * @param TranslationQueryResponse $response
-	 * @return mixed
+	 * @return mixed|null Returns null on error.
 	 * @since 2015.12
 	 */
 	public function getResultData( TranslationQueryResponse $response ) {
 		if ( $response->getStatusCode() !== 200 ) {
 			$this->reportTranslationServiceFailure( $response->getStatusMessage() );
-			return array();
+			return null;
 		}
 
 		try {
 			return $this->parseResponse( $response );
-		} catch ( Exception $e ) {
+		} catch ( TranslationWebServiceException $e ) {
 			$this->reportTranslationServiceFailure( $e->getMessage() );
-			return array();
+			return null;
 		}
 	}
 
@@ -137,6 +143,8 @@ abstract class TranslationWebService {
 	 * getSupportedLanguagePairs.
 	 *
 	 * @return array $list[source language][target language] = true
+	 * @throws TranslationWebServiceException
+	 * @throws TranslationWebServiceConfigurationException
 	 */
 	abstract protected function doPairs();
 
@@ -148,6 +156,9 @@ abstract class TranslationWebService {
 	 * @param string $to Language code of the translation, as used by the service.
 	 * @return TranslationQuery
 	 * @since 2015.02
+	 * @throws TranslationWebServiceException
+	 * @throws TranslationWebServiceConfigurationException
+	 * @throws TranslationWebServiceInvalidInputException
 	 */
 	abstract protected function getQuery( $text, $from, $to );
 
@@ -155,8 +166,9 @@ abstract class TranslationWebService {
 	 * Get the response. See getResultData for the public method.
 	 *
 	 * @param TranslationQueryResponse $response
-	 * @return mixed
+	 * @return string
 	 * @since 2015.02
+	 * @throws TranslationWebServiceException
 	 */
 	abstract protected function parseResponse( TranslationQueryResponse $response );
 
@@ -189,6 +201,7 @@ abstract class TranslationWebService {
 	 * @param string $to Target language
 	 * @return bool
 	 * @since 2015.12
+	 * @throws TranslationWebServiceConfigurationException
 	 */
 	public function isSupportedLanguagePair( $from, $to ) {
 		$pairs = $this->getSupportedLanguagePairs();
@@ -196,7 +209,9 @@ abstract class TranslationWebService {
 	}
 
 	/**
-	 * @see doPairs
+	 * @see self::doPairs
+	 * @return array
+	 * @throws TranslationWebServiceConfigurationException
 	 */
 	protected function getSupportedLanguagePairs() {
 		$key = wfMemcKey( 'translate-tmsug-pairs-' . $this->service );
@@ -206,7 +221,7 @@ abstract class TranslationWebService {
 				$pairs = $this->doPairs();
 			} catch ( Exception $e ) {
 				$this->reportTranslationServiceFailure( $e->getMessage() );
-				return array();
+				return [];
 			}
 			// Cache the result for a day
 			wfGetCache( CACHE_ANYTHING )->set( $key, $pairs, 60 * 60 * 24 );

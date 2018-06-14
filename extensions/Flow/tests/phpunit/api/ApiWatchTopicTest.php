@@ -3,7 +3,7 @@
 namespace Flow\Tests\Api;
 
 use Title;
-use WatchedItem;
+use User;
 
 /**
  * @group Flow
@@ -12,26 +12,30 @@ use WatchedItem;
 class ApiWatchTopicTest extends ApiTestCase {
 
 	public function watchTopicProvider() {
-		return array(
-			array(
+		return [
+			[
 				'Watch a topic',
 				// expected key in api result
 				'watched',
 				// initialization
-				function( WatchedItem $item ) { $item->removeWatch(); },
+				function ( User $user, Title $title ) {
+					$user->removeWatch( $title, false );
+				},
 				// extra request parameters
-				array(),
-			),
-			array(
+				[],
+			],
+			[
 				'Unwatch a topic',
 				// expected key in api result
 				'unwatched',
 				// initialization
-				function( WatchedItem $item ) { $item->addWatch(); },
+				function ( User $user, Title $title ) {
+					$user->addWatch( $title, false );
+				},
 				// extra request parameters
-				array( 'unwatch' => 1 ),
-			),
-		);
+				[ 'unwatch' => 1 ],
+			],
+		];
 	}
 
 	/**
@@ -41,15 +45,15 @@ class ApiWatchTopicTest extends ApiTestCase {
 		$topic = $this->createTopic();
 
 		$title = Title::newFromText( $topic['topic-page'] );
-		$init( WatchedItem::fromUserTitle( self::$users['sysop']->getUser(), $title, false ) );
+		$init( self::$users['sysop']->getUser(), $title );
 
 		// issue a watch api request
-		$data = $this->doApiRequest( $request + array(
+		$data = $this->doApiRequest( $request + [
 				'action' => 'watch',
 				'format' => 'json',
 				'titles' => $topic['topic-page'],
 				'token' => $this->getEditToken( null, 'watchtoken' ),
-		) );
+		] );
 		$this->assertArrayHasKey( $expect, $data[0]['watch'][0], $message );
 	}
 }

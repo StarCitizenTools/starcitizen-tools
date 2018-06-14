@@ -13,12 +13,12 @@ class ContentFixer {
 	/**
 	 * @var Fixer[] Array of Fixer objects
 	 */
-	protected $contentFixers = array();
+	protected $contentFixers = [];
 
 	/**
 	 * Accepts multiple content fixers.
 	 *
-	 * @param Fixer $contentFixer...
+	 * @param Fixer $contentFixer,...
 	 * @throws FlowException When provided arguments are not an instance of Fixer
 	 */
 	public function __construct( Fixer $contentFixer /* [, Fixer $contentFixer2 [, ...]] */ ) {
@@ -77,12 +77,15 @@ class ContentFixer {
 	 * @param string $content HTML from parsoid
 	 * @return DOMDocument
 	 */
-	static public function createDOM( $content ) {
+	public static function createDOM( $content ) {
 		/*
 		 * The body tag is required otherwise <meta> tags at the top are
 		 * magic'd into <head> rather than kept with the content.
 		 */
-		if ( substr( $content, 0, 5 ) !== '<body' ) {
+		if (
+			substr( $content, 0, 5 ) !== '<body'
+			&& substr( $content, 0, 9 ) !== '<!DOCTYPE'
+		) {
 			// BC: content currently comes from parsoid and is stored
 			// wrapped in <body> tags, but prior to I0d9659f we were
 			// storing only the contents and not the body tag itself.

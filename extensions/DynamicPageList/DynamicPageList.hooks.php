@@ -39,9 +39,6 @@ class DynamicPageListHooks {
 
 	const FATAL_DOMINANTSECTIONRANGE				= 1010;	// $1: the number of arguments in includepage
 
-	const FATAL_NOCLVIEW							= 1011;	// $1: prefix_dpl_clview where 'prefix' is the prefix of your mediawiki table names
-															// $2: SQL query to create the prefix_dpl_clview on your mediawiki DB
-
 	const FATAL_OPENREFERENCES						= 1012;
 
 	const FATAL_MISSINGPARAMFUNCTION				= 1022;
@@ -114,7 +111,7 @@ class DynamicPageListHooks {
 	 */
 	static public function onRegistration() {
 		if (!defined('DPL_VERSION')) {
-			define('DPL_VERSION', '3.0.9');
+			define('DPL_VERSION', '3.1.3');
 		}
 	}
 
@@ -366,9 +363,10 @@ class DynamicPageListHooks {
 		return false;
 	}
 
-	static public function dplReplaceParserFunction(&$parser, $text, $pat, $repl = '') {
-		if ($text == '' || $pat == '')
+	static public function dplReplaceParserFunction(&$parser, $text, $pat = '', $repl = '') {
+		if ($text == '' || $pat == '') {
 			return '';
+		}
 		# convert \n to a real newline character
 		$repl = str_replace('\n', "\n", $repl);
 
@@ -377,7 +375,7 @@ class DynamicPageListHooks {
 			$pat = '`' . str_replace('`', '\`', $pat) . '`';
 		}
 
-		return preg_replace($pat, $repl, $text);
+		return @preg_replace($pat, $repl, $text);
 	}
 
 	static public function dplChapterParserFunction(&$parser, $text = '', $heading = ' ', $maxLength = -1, $page = '?page?', $link = 'default', $trim = false) {
@@ -385,7 +383,7 @@ class DynamicPageListHooks {
 		return $output[0];
 	}
 
-	static public function dplMatrixParserFunction(&$parser, $name, $yes, $no, $flip, $matrix) {
+	static public function dplMatrixParserFunction(&$parser, $name = '', $yes = '', $no = '', $flip = '', $matrix = '') {
 		$lines   = explode("\n", $matrix);
 		$m       = [];
 		$sources = [];
@@ -609,6 +607,11 @@ class DynamicPageListHooks {
 
 		$updater->addExtensionUpdate([[__CLASS__, 'createDPLTemplate']]);
 
+		$db = wfGetDB(DB_MASTER);
+		if (!$db->tableExists('dpl_clview')) {
+			$db->query("CREATE VIEW {$db->tablePrefix()}dpl_clview AS SELECT IFNULL(cl_from, page_id) AS cl_from, IFNULL(cl_to, '') AS cl_to, cl_sortkey FROM {$db->tablePrefix()}page LEFT OUTER JOIN {$db->tablePrefix()}categorylinks ON {$db->tablePrefix()}page.page_id=cl_from;");
+		}
+
 		return true;
 	}
 
@@ -623,9 +626,10 @@ class DynamicPageListHooks {
 		$title = Title::newFromText('Template:Extension DPL');
 
 		if (!$title->exists()) {
-			$article = new Article($title);
-			$article->doEdit(
-				"<noinclude>This page was automatically created. It serves as an anchor page for all '''[[Special:WhatLinksHere/Template:Extension_DPL|invocations]]''' of [http://mediawiki.org/wiki/Extension:DynamicPageList Extension:DynamicPageList (DPL)].</noinclude>",
+			$page = WikiPage::factory($title);
+			$pageContent = ContentHandler::makeContent("<noinclude>This page was automatically created. It serves as an anchor page for all '''[[Special:WhatLinksHere/Template:Extension_DPL|invocations]]''' of [http://mediawiki.org/wiki/Extension:DynamicPageList Extension:DynamicPageList (DPL)].</noinclude>", $title);
+			$page->doEditContent(
+				$pageContent,
 				$title,
 				EDIT_NEW | EDIT_FORCE_BOT
 			);

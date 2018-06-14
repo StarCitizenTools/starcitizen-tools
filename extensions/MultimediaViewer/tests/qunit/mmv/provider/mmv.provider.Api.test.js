@@ -18,7 +18,7 @@
 ( function ( mw, $ ) {
 	QUnit.module( 'mmv.provider.Api', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Api constructor sanity check', 2, function ( assert ) {
+	QUnit.test( 'Api constructor sanity check', function ( assert ) {
 		var api = { get: function () {} },
 			options = {},
 			apiProvider = new mw.mmv.provider.Api( api, options ),
@@ -28,36 +28,36 @@
 		assert.ok( ApiProviderWithNoOptions );
 	} );
 
-	QUnit.test( 'apiGetWithMaxAge()', 8, function ( assert ) {
+	QUnit.test( 'apiGetWithMaxAge()', function ( assert ) {
 		var api = {},
 			options = {},
 			apiProvider = new mw.mmv.provider.Api( api, options );
 
 		api.get = this.sandbox.stub();
 		apiProvider.apiGetWithMaxAge( {} );
-		assert.ok( !( 'maxage' in api.get.getCall( 0 ).args[0] ), 'maxage is not set by default' );
-		assert.ok( !( 'smaxage' in api.get.getCall( 0 ).args[0] ), 'smaxage is not set by default' );
+		assert.ok( !( 'maxage' in api.get.getCall( 0 ).args[ 0 ] ), 'maxage is not set by default' );
+		assert.ok( !( 'smaxage' in api.get.getCall( 0 ).args[ 0 ] ), 'smaxage is not set by default' );
 
 		options = { maxage: 123 };
 		apiProvider = new mw.mmv.provider.Api( api, options );
 
 		api.get = this.sandbox.stub();
 		apiProvider.apiGetWithMaxAge( {} );
-		assert.strictEqual( api.get.getCall( 0 ).args[0].maxage, 123, 'maxage falls back to provider default' );
-		assert.strictEqual( api.get.getCall( 0 ).args[0].smaxage, 123, 'smaxage falls back to provider default' );
+		assert.strictEqual( api.get.getCall( 0 ).args[ 0 ].maxage, 123, 'maxage falls back to provider default' );
+		assert.strictEqual( api.get.getCall( 0 ).args[ 0 ].smaxage, 123, 'smaxage falls back to provider default' );
 
 		api.get = this.sandbox.stub();
 		apiProvider.apiGetWithMaxAge( {}, null, 456 );
-		assert.strictEqual( api.get.getCall( 0 ).args[0].maxage, 456, 'maxage can be overridden' );
-		assert.strictEqual( api.get.getCall( 0 ).args[0].smaxage, 456, 'smaxage can be overridden' );
+		assert.strictEqual( api.get.getCall( 0 ).args[ 0 ].maxage, 456, 'maxage can be overridden' );
+		assert.strictEqual( api.get.getCall( 0 ).args[ 0 ].smaxage, 456, 'smaxage can be overridden' );
 
 		api.get = this.sandbox.stub();
 		apiProvider.apiGetWithMaxAge( {}, null, null );
-		assert.ok( !( 'maxage' in api.get.getCall( 0 ).args[0] ), 'maxage can be overridden to unset' );
-		assert.ok( !( 'smaxage' in api.get.getCall( 0 ).args[0] ), 'smaxage can be overridden to unset' );
+		assert.ok( !( 'maxage' in api.get.getCall( 0 ).args[ 0 ] ), 'maxage can be overridden to unset' );
+		assert.ok( !( 'smaxage' in api.get.getCall( 0 ).args[ 0 ] ), 'smaxage can be overridden to unset' );
 	} );
 
-	QUnit.test( 'getCachedPromise success', 5, function ( assert ) {
+	QUnit.test( 'getCachedPromise success', function ( assert ) {
 		var api = { get: function () {} },
 			apiProvider = new mw.mmv.provider.Api( api ),
 			oldMwLog = mw.log,
@@ -91,7 +91,7 @@
 		mw.log = oldMwLog;
 	} );
 
-	QUnit.test( 'getCachedPromise failure', 7, function ( assert ) {
+	QUnit.test( 'getCachedPromise failure', function ( assert ) {
 		var api = { get: function () {} },
 			apiProvider = new mw.mmv.provider.Api( api ),
 			oldMwLog = mw.log,
@@ -125,7 +125,7 @@
 		mw.log = oldMwLog;
 	} );
 
-	QUnit.test( 'getErrorMessage', 2, function ( assert ) {
+	QUnit.test( 'getErrorMessage', function ( assert ) {
 		var api = { get: function () {} },
 			apiProvider = new mw.mmv.provider.Api( api ),
 			errorMessage;
@@ -144,7 +144,7 @@
 		assert.strictEqual( apiProvider.getErrorMessage( {} ), 'unknown error', 'missing error message is handled' );
 	} );
 
-	QUnit.test( 'getNormalizedTitle', 3, function ( assert ) {
+	QUnit.test( 'getNormalizedTitle', function ( assert ) {
 		var api = { get: function () {} },
 			apiProvider = new mw.mmv.provider.Api( api ),
 			title = new mw.Title( 'Image:Stuff.jpg' ),
@@ -178,9 +178,10 @@
 		assert.strictEqual( normalizedTitle.getPrefixedDb(), 'File:Stuff.jpg', 'normalization happens' );
 	} );
 
-	QUnit.test( 'getQueryField', 3, function ( assert ) {
+	QUnit.test( 'getQueryField', function ( assert ) {
 		var api = { get: function () {} },
 			apiProvider = new mw.mmv.provider.Api( api ),
+			done = assert.async( 3 ),
 			data;
 
 		data = {
@@ -194,31 +195,29 @@
 				]
 			}
 		};
-		QUnit.stop();
+
 		apiProvider.getQueryField( 'imageusage', data ).then( function ( field ) {
 			assert.strictEqual( field, data.query.imageusage, 'specified field is found' );
-			QUnit.start();
+			done();
 		} );
-
-		QUnit.stop();
 		apiProvider.getQueryField( 'imageusage', {} ).fail( function () {
 			assert.ok( true, 'promise rejected when data is missing' );
-			QUnit.start();
+			done();
 		} );
 
-		QUnit.stop();
 		apiProvider.getQueryField( 'imageusage', { data: { query: {} } } ).fail( function () {
 			assert.ok( true, 'promise rejected when field is missing' );
-			QUnit.start();
+			done();
 		} );
 	} );
 
-	QUnit.test( 'getQueryPage', 6, function ( assert ) {
+	QUnit.test( 'getQueryPage', function ( assert ) {
 		var api = { get: function () {} },
 			apiProvider = new mw.mmv.provider.Api( api ),
 			title = new mw.Title( 'File:Stuff.jpg' ),
 			titleWithNamespaceAlias = new mw.Title( 'Image:Stuff.jpg' ),
 			otherTitle = new mw.Title( 'File:Foo.jpg' ),
+			done = assert.async( 6 ),
 			data;
 
 		data = {
@@ -236,39 +235,36 @@
 				}
 			}
 		};
-		QUnit.stop();
+
 		apiProvider.getQueryPage( title, data ).then( function ( field ) {
-			assert.strictEqual( field, data.query.pages['-1'], 'specified page is found' );
-			QUnit.start();
+			assert.strictEqual( field, data.query.pages[ '-1' ], 'specified page is found' );
+			done();
 		} );
-		QUnit.stop();
+
 		apiProvider.getQueryPage( titleWithNamespaceAlias, data ).then( function ( field ) {
-			assert.strictEqual( field, data.query.pages['-1'],
+			assert.strictEqual( field, data.query.pages[ '-1' ],
 				'specified page is found even if its title was normalized' );
-			QUnit.start();
+			done();
 		} );
-		QUnit.stop();
+
 		apiProvider.getQueryPage( otherTitle, {} ).fail( function () {
 			assert.ok( true, 'promise rejected when page has different title' );
-			QUnit.start();
+			done();
 		} );
 
-		QUnit.stop();
 		apiProvider.getQueryPage( title, {} ).fail( function () {
 			assert.ok( true, 'promise rejected when data is missing' );
-			QUnit.start();
+			done();
 		} );
 
-		QUnit.stop();
 		apiProvider.getQueryPage( title, { data: { query: {} } } ).fail( function () {
 			assert.ok( true, 'promise rejected when pages are missing' );
-			QUnit.start();
+			done();
 		} );
 
-		QUnit.stop();
 		apiProvider.getQueryPage( title, { data: { query: { pages: {} } } } ).fail( function () {
 			assert.ok( true, 'promise rejected when pages are empty' );
-			QUnit.start();
+			done();
 		} );
 	} );
 }( mediaWiki, jQuery ) );

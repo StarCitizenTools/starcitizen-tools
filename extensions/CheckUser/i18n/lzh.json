@@ -1,9 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"LNDDYL"
+			"LNDDYL",
+			"逆襲的天邪鬼",
+			"WAN233"
 		]
 	},
+	"group-checkuser": "知簿",
+	"group-checkuser-member": "{{GENDER:$1|知簿}}",
 	"checkuser-search": "尋",
 	"checkuser-search-submit": "尋"
 }

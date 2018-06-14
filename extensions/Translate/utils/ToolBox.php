@@ -6,7 +6,7 @@
  * @author Siebrand Mazeland
  * @author Niklas Laxström
  * @copyright Copyright © 2008-2010, Siebrand Mazeland, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -18,22 +18,25 @@ class TranslateToolbox {
 	 * available translations for a message. Only shown when it
 	 * actually is a translatable/translated message.
 	 *
-	 * @param $quickTemplate QuickTemplate
+	 * @param BaseTemplate $baseTemplate The base skin template
+	 * @param array &$toolbox An array of toolbox items
 	 *
 	 * @return bool
 	 */
-	public static function toolboxAllTranslations( &$quickTemplate ) {
-		$title = $quickTemplate->getSkin()->getTitle();
+	public static function toolboxAllTranslations( $baseTemplate, &$toolbox ) {
+		$title = $baseTemplate->getSkin()->getTitle();
 		$handle = new MessageHandle( $title );
 		if ( $handle->isValid() ) {
 			$message = $title->getNsText() . ':' . $handle->getKey();
-			$desc = wfMessage( 'translate-sidebar-alltrans' )->escaped();
-			$url = htmlspecialchars( SpecialPage::getTitleFor( 'Translations' )
-				->getLocalURL( array( 'message' => $message ) ) );
+			$url = SpecialPage::getTitleFor( 'Translations' )
+				->getLocalURL( [ 'message' => $message ] );
 
 			// Add the actual toolbox entry.
-			// Add newlines and tabs for nicer HTML output.
-			echo "\n\t\t\t\t<li id=\"t-alltrans\"><a href=\"$url\">$desc</a></li>\n";
+			$toolbox[ 'alltrans' ] = [
+				'href' => $url,
+				'id' => 't-alltrans',
+				'msg' => 'translate-sidebar-alltrans',
+			];
 		}
 
 		return true;
