@@ -23,6 +23,9 @@
 
 require_once __DIR__ . '/Maintenance.php';
 
+use Wikimedia\Rdbms\ResultWrapper;
+use Wikimedia\Rdbms\IDatabase;
+
 /**
  * Maintenance script to convert user options to the new `user_properties` table.
  *
@@ -58,7 +61,7 @@ class ConvertUserOptions extends Maintenance {
 				__METHOD__,
 				[
 					'ORDER BY' => 'user_id',
-					'LIMIT' => $this->mBatchSize,
+					'LIMIT' => $this->getBatchSize(),
 				]
 			);
 			$id = $this->convertOptionBatch( $res, $dbw );
@@ -74,7 +77,7 @@ class ConvertUserOptions extends Maintenance {
 
 	/**
 	 * @param ResultWrapper $res
-	 * @param DatabaseBase $dbw
+	 * @param IDatabase $dbw
 	 * @return null|int
 	 */
 	function convertOptionBatch( $res, $dbw ) {
@@ -117,5 +120,5 @@ class ConvertUserOptions extends Maintenance {
 	}
 }
 
-$maintClass = "ConvertUserOptions";
+$maintClass = ConvertUserOptions::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

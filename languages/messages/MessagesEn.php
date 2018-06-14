@@ -104,9 +104,9 @@ $namespaceAliases = [];
  * Mapping NS_xxx to array of GENDERKEY to alias.
  * Example:
  * @code
- * $namespaceGenderAliases = array(
- * 	NS_USER => array( 'male' => 'Male_user', 'female' => 'Female_user' ),
- * );
+ * $namespaceGenderAliases = [
+ *   NS_USER => [ 'male' => 'Male_user', 'female' => 'Female_user' ],
+ * ];
  * @endcode
  */
 $namespaceGenderAliases = [];
@@ -187,7 +187,7 @@ $dateFormats = [
 $bookstoreList = [
 	'AddALL' => 'http://www.addall.com/New/Partner.cgi?query=$1&type=ISBN',
 	'Barnes & Noble' => 'http://search.barnesandnoble.com/bookSearch/isbnInquiry.asp?isbn=$1',
-	'Amazon.com' => 'http://www.amazon.com/gp/search/?field-isbn=$1'
+	'Amazon.com' => 'https://www.amazon.com/gp/search/?field-isbn=$1'
 ];
 
 /**
@@ -349,6 +349,7 @@ $magicWords = [
 	'directionmark'           => [ 1, 'DIRECTIONMARK', 'DIRMARK' ],
 	'language'                => [ 0, '#LANGUAGE:' ],
 	'contentlanguage'         => [ 1, 'CONTENTLANGUAGE', 'CONTENTLANG' ],
+	'pagelanguage'            => [ 1, 'PAGELANGUAGE' ],
 	'pagesinnamespace'        => [ 1, 'PAGESINNAMESPACE:', 'PAGESINNS:' ],
 	'numberofadmins'          => [ 1, 'NUMBEROFADMINS' ],
 	'formatnum'               => [ 0, 'FORMATNUM' ],
@@ -399,6 +400,7 @@ $specialPageAliases = [
 	'ApiHelp'                   => [ 'ApiHelp' ],
 	'ApiSandbox'                => [ 'ApiSandbox' ],
 	'Ancientpages'              => [ 'AncientPages' ],
+	'AutoblockList'             => [ 'AutoblockList', 'ListAutoblocks' ],
 	'Badtitle'                  => [ 'Badtitle' ],
 	'Blankpage'                 => [ 'BlankPage' ],
 	'Block'                     => [ 'Block', 'BlockIP', 'BlockUser' ],
@@ -464,6 +466,7 @@ $specialPageAliases = [
 	'Newimages'                 => [ 'NewFiles', 'NewImages' ],
 	'Newpages'                  => [ 'NewPages' ],
 	'PagesWithProp'             => [ 'PagesWithProp', 'Pageswithprop', 'PagesByProp', 'Pagesbyprop' ],
+	'PageData'                  => [ 'PageData' ],
 	'PageLanguage'              => [ 'PageLanguage' ],
 	'PasswordReset'             => [ 'PasswordReset' ],
 	'PermanentLink'             => [ 'PermanentLink', 'PermaLink' ],
@@ -485,7 +488,7 @@ $specialPageAliases = [
 	'Search'                    => [ 'Search' ],
 	'Shortpages'                => [ 'ShortPages' ],
 	'Specialpages'              => [ 'SpecialPages' ],
-	'Statistics'                => [ 'Statistics' ],
+	'Statistics'                => [ 'Statistics', 'Stats' ],
 	'Tags'                      => [ 'Tags' ],
 	'TrackingCategories'        => [ 'TrackingCategories' ],
 	'Unblock'                   => [ 'Unblock' ],

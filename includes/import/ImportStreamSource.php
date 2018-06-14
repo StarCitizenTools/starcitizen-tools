@@ -23,6 +23,7 @@
  * @file
  * @ingroup SpecialPage
  */
+use MediaWiki\MediaWikiServices;
 
 /**
  * Imports a XML dump from a file (either from file upload, files on disk, or HTTP)
@@ -52,9 +53,9 @@ class ImportStreamSource implements ImportSource {
 	 * @return Status
 	 */
 	static function newFromFile( $filename ) {
-		MediaWiki\suppressWarnings();
+		Wikimedia\suppressWarnings();
 		$file = fopen( $filename, 'rt' );
-		MediaWiki\restoreWarnings();
+		Wikimedia\restoreWarnings();
 		if ( !$file ) {
 			return Status::newFatal( "importcantopen" );
 		}
@@ -92,7 +93,7 @@ class ImportStreamSource implements ImportSource {
 		}
 		$fname = $upload['tmp_name'];
 		if ( is_uploaded_file( $fname ) ) {
-			return ImportStreamSource::newFromFile( $fname );
+			return self::newFromFile( $fname );
 		} else {
 			return Status::newFatal( 'importnofile' );
 		}
@@ -104,12 +105,21 @@ class ImportStreamSource implements ImportSource {
 	 * @return Status
 	 */
 	static function newFromURL( $url, $method = 'GET' ) {
+		global $wgHTTPImportTimeout;
 		wfDebug( __METHOD__ . ": opening $url\n" );
 		# Use the standard HTTP fetch function; it times out
 		# quicker and sorts out user-agent problems which might
 		# otherwise prevent importing from large sites, such
 		# as the Wikimedia cluster, etc.
-		$data = Http::request( $method, $url, [ 'followRedirects' => true ], __METHOD__ );
+		$data = Http::request(
+			$method,
+			$url,
+			[
+				'followRedirects' => true,
+				'timeout' => $wgHTTPImportTimeout
+			],
+			__METHOD__
+		);
 		if ( $data !== false ) {
 			$file = tmpfile();
 			fwrite( $file, $data );
@@ -139,7 +149,8 @@ class ImportStreamSource implements ImportSource {
 		# Look up the first interwiki prefix, and let the foreign site handle
 		# subsequent interwiki prefixes
 		$firstIwPrefix = strtok( $interwiki, ':' );
-		$firstIw = Interwiki::fetch( $firstIwPrefix );
+		$interwikiLookup = MediaWikiServices::getInstance()->getInterwikiLookup();
+		$firstIw = $interwikiLookup->fetch( $firstIwPrefix );
 		if ( !$firstIw ) {
 			return Status::newFatal( 'importbadinterwiki' );
 		}
@@ -167,6 +178,6 @@ class ImportStreamSource implements ImportSource {
 
 		$url = wfAppendQuery( $link, $params );
 		# For interwikis, use POST to avoid redirects.
-		return ImportStreamSource::newFromURL( $url, "POST" );
+		return self::newFromURL( $url, "POST" );
 	}
 }

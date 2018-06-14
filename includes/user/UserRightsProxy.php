@@ -20,6 +20,8 @@
  * @file
  */
 
+use Wikimedia\Rdbms\IDatabase;
+
 /**
  * Cut-down copy of User interface for local-interwiki-database
  * user rights manipulation.
@@ -27,8 +29,6 @@
 class UserRightsProxy {
 
 	/**
-	 * Constructor.
-	 *
 	 * @see newFromId()
 	 * @see newFromName()
 	 * @param IDatabase $db Db connection
@@ -198,50 +198,47 @@ class UserRightsProxy {
 	 * @return array
 	 */
 	function getGroups() {
-		$res = $this->db->select( 'user_groups',
-			[ 'ug_group' ],
-			[ 'ug_user' => $this->id ],
-			__METHOD__ );
-		$groups = [];
-		foreach ( $res as $row ) {
-			$groups[] = $row->ug_group;
-		}
-		return $groups;
+		return array_keys( self::getGroupMemberships() );
 	}
 
 	/**
-	 * Replaces User::addUserGroup()
-	 * @param string $group
+	 * Replaces User::getGroupMemberships()
 	 *
+	 * @return array
+	 * @since 1.29
+	 */
+	function getGroupMemberships() {
+		return UserGroupMembership::getMembershipsForUser( $this->id, $this->db );
+	}
+
+	/**
+	 * Replaces User::addGroup()
+	 *
+	 * @param string $group
+	 * @param string|null $expiry
 	 * @return bool
 	 */
-	function addGroup( $group ) {
-		$this->db->insert( 'user_groups',
-			[
-				'ug_user' => $this->id,
-				'ug_group' => $group,
-			],
-			__METHOD__,
-			[ 'IGNORE' ] );
+	function addGroup( $group, $expiry = null ) {
+		if ( $expiry ) {
+			$expiry = wfTimestamp( TS_MW, $expiry );
+		}
 
-		return true;
+		$ugm = new UserGroupMembership( $this->id, $group, $expiry );
+		return $ugm->insert( true, $this->db );
 	}
 
 	/**
-	 * Replaces User::removeUserGroup()
-	 * @param string $group
+	 * Replaces User::removeGroup()
 	 *
+	 * @param string $group
 	 * @return bool
 	 */
 	function removeGroup( $group ) {
-		$this->db->delete( 'user_groups',
-			[
-				'ug_user' => $this->id,
-				'ug_group' => $group,
-			],
-			__METHOD__ );
-
-		return true;
+		$ugm = UserGroupMembership::getMembership( $this->id, $group, $this->db );
+		if ( !$ugm ) {
+			return false;
+		}
+		return $ugm->delete( $this->db );
 	}
 
 	/**
@@ -273,15 +270,20 @@ class UserRightsProxy {
 	 * Replaces User::touchUser()
 	 */
 	function invalidateCache() {
-		$this->db->update( 'user',
+		$this->db->update(
+			'user',
 			[ 'user_touched' => $this->db->timestamp() ],
 			[ 'user_id' => $this->id ],
-			__METHOD__ );
+			__METHOD__
+		);
 
-		$wikiId = $this->db->getWikiID();
+		$domainId = $this->db->getDomainID();
 		$userId = $this->id;
-		$this->db->onTransactionPreCommitOrIdle( function() use ( $wikiId, $userId ) {
-			User::purge( $wikiId, $userId );
-		} );
+		$this->db->onTransactionPreCommitOrIdle(
+			function () use ( $domainId, $userId ) {
+				User::purge( $domainId, $userId );
+			},
+			__METHOD__
+		);
 	}
 }

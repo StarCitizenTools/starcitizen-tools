@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on Oct 3, 2014 as a split from ApiQueryRevisions
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -70,10 +66,7 @@ abstract class ApiQueryRevisionsBase extends ApiQueryGeneratorBase {
 				&& $params['diffto'] != 'prev' && $params['diffto'] != 'next'
 			) {
 				$p = $this->getModulePrefix();
-				$this->dieUsage(
-					"{$p}diffto must be set to a non-negative number, \"prev\", \"next\" or \"cur\"",
-					'diffto'
-				);
+				$this->dieWithError( [ 'apierror-baddiffto', $p ], 'diffto' );
 			}
 			// Check whether the revision exists and is readable,
 			// DifferenceEngine returns a rather ambiguous empty
@@ -81,10 +74,10 @@ abstract class ApiQueryRevisionsBase extends ApiQueryGeneratorBase {
 			if ( $params['diffto'] != 0 ) {
 				$difftoRev = Revision::newFromId( $params['diffto'] );
 				if ( !$difftoRev ) {
-					$this->dieUsageMsg( [ 'nosuchrevid', $params['diffto'] ] );
+					$this->dieWithError( [ 'apierror-nosuchrevid', $params['diffto'] ] );
 				}
 				if ( !$difftoRev->userCan( Revision::DELETED_TEXT, $this->getUser() ) ) {
-					$this->setWarning( "Couldn't diff to r{$difftoRev->getId()}: content is hidden" );
+					$this->addWarning( [ 'apiwarn-difftohidden', $difftoRev->getId() ] );
 					$params['diffto'] = null;
 				}
 			}
@@ -106,6 +99,17 @@ abstract class ApiQueryRevisionsBase extends ApiQueryGeneratorBase {
 		$this->fld_user = isset( $prop['user'] );
 		$this->fld_tags = isset( $prop['tags'] );
 		$this->fld_parsetree = isset( $prop['parsetree'] );
+
+		if ( $this->fld_parsetree ) {
+			$encParam = $this->encodeParamName( 'prop' );
+			$name = $this->getModuleName();
+			$parent = $this->getParent();
+			$parentParam = $parent->encodeParamName( $parent->getModuleManager()->getModuleGroup( $name ) );
+			$this->addDeprecation(
+				[ 'apiwarn-deprecation-parameter', "{$encParam}=parsetree" ],
+				"action=query&{$parentParam}={$name}&{$encParam}=parsetree"
+			);
+		}
 
 		if ( !empty( $params['contentformat'] ) ) {
 			$this->contentFormat = $params['contentformat'];
@@ -262,8 +266,12 @@ abstract class ApiQueryRevisionsBase extends ApiQueryGeneratorBase {
 			if ( $content && $this->section !== false ) {
 				$content = $content->getSection( $this->section, false );
 				if ( !$content ) {
-					$this->dieUsage(
-						"There is no section {$this->section} in r" . $revision->getId(),
+					$this->dieWithError(
+						[
+							'apierror-nosuchsection-what',
+							wfEscapeWikiText( $this->section ),
+							$this->msg( 'revid', $revision->getId() )
+						],
 						'nosuchsection'
 					);
 				}
@@ -294,9 +302,14 @@ abstract class ApiQueryRevisionsBase extends ApiQueryGeneratorBase {
 					$vals['parsetree'] = $xml;
 				} else {
 					$vals['badcontentformatforparsetree'] = true;
-					$this->setWarning( 'Conversion to XML is supported for wikitext only, ' .
-						$title->getPrefixedDBkey() .
-						' uses content model ' . $content->getModel() );
+					$this->addWarning(
+						[
+							'apierror-parsetree-notwikitext-title',
+							wfEscapeWikiText( $title->getPrefixedText() ),
+							$content->getModel()
+						],
+						'parsetree-notwikitext'
+					);
 				}
 			}
 		}
@@ -315,9 +328,11 @@ abstract class ApiQueryRevisionsBase extends ApiQueryGeneratorBase {
 						ParserOptions::newFromContext( $this->getContext() )
 					);
 				} else {
-					$this->setWarning( 'Template expansion is supported for wikitext only, ' .
-						$title->getPrefixedDBkey() .
-						' uses content model ' . $content->getModel() );
+					$this->addWarning( [
+						'apierror-templateexpansion-notwikitext',
+						wfEscapeWikiText( $title->getPrefixedText() ),
+						$content->getModel()
+					] );
 					$vals['badcontentformat'] = true;
 					$text = false;
 				}
@@ -336,9 +351,8 @@ abstract class ApiQueryRevisionsBase extends ApiQueryGeneratorBase {
 				$model = $content->getModel();
 
 				if ( !$content->isSupportedFormat( $format ) ) {
-					$name = $title->getPrefixedDBkey();
-					$this->setWarning( "The requested format {$this->contentFormat} is not " .
-						"supported for content model $model used by $name" );
+					$name = wfEscapeWikiText( $title->getPrefixedText() );
+					$this->addWarning( [ 'apierror-badformat', $this->contentFormat, $model, $name ] );
 					$vals['badcontentformat'] = true;
 					$text = false;
 				} else {
@@ -370,9 +384,8 @@ abstract class ApiQueryRevisionsBase extends ApiQueryGeneratorBase {
 					if ( $this->contentFormat
 						&& !ContentHandler::getForModelID( $model )->isSupportedFormat( $this->contentFormat )
 					) {
-						$name = $title->getPrefixedDBkey();
-						$this->setWarning( "The requested format {$this->contentFormat} is not " .
-							"supported for content model $model used by $name" );
+						$name = wfEscapeWikiText( $title->getPrefixedText() );
+						$this->addWarning( [ 'apierror-badformat', $this->contentFormat, $model, $name ] );
 						$vals['diff']['badcontentformat'] = true;
 						$engine = null;
 					} else {
@@ -471,6 +484,7 @@ abstract class ApiQueryRevisionsBase extends ApiQueryGeneratorBase {
 			'expandtemplates' => [
 				ApiBase::PARAM_DFLT => false,
 				ApiBase::PARAM_HELP_MSG => 'apihelp-query+revisions+base-param-expandtemplates',
+				ApiBase::PARAM_DEPRECATED => true,
 			],
 			'generatexml' => [
 				ApiBase::PARAM_DFLT => false,
@@ -480,19 +494,23 @@ abstract class ApiQueryRevisionsBase extends ApiQueryGeneratorBase {
 			'parse' => [
 				ApiBase::PARAM_DFLT => false,
 				ApiBase::PARAM_HELP_MSG => 'apihelp-query+revisions+base-param-parse',
+				ApiBase::PARAM_DEPRECATED => true,
 			],
 			'section' => [
 				ApiBase::PARAM_HELP_MSG => 'apihelp-query+revisions+base-param-section',
 			],
 			'diffto' => [
 				ApiBase::PARAM_HELP_MSG => 'apihelp-query+revisions+base-param-diffto',
+				ApiBase::PARAM_DEPRECATED => true,
 			],
 			'difftotext' => [
 				ApiBase::PARAM_HELP_MSG => 'apihelp-query+revisions+base-param-difftotext',
+				ApiBase::PARAM_DEPRECATED => true,
 			],
 			'difftotextpst' => [
 				ApiBase::PARAM_DFLT => false,
 				ApiBase::PARAM_HELP_MSG => 'apihelp-query+revisions+base-param-difftotextpst',
+				ApiBase::PARAM_DEPRECATED => true,
 			],
 			'contentformat' => [
 				ApiBase::PARAM_TYPE => ContentHandler::getAllContentFormats(),

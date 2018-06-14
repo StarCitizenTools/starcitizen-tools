@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on May 13, 2007
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -85,15 +81,19 @@ class ApiQueryImages extends ApiQueryGeneratorBase {
 		}
 		$this->addOption( 'LIMIT', $params['limit'] + 1 );
 
-		if ( !is_null( $params['images'] ) ) {
+		if ( $params['images'] ) {
 			$images = [];
 			foreach ( $params['images'] as $img ) {
 				$title = Title::newFromText( $img );
 				if ( !$title || $title->getNamespace() != NS_FILE ) {
-					$this->setWarning( "\"$img\" is not a file" );
+					$this->addWarning( [ 'apiwarn-notfile', wfEscapeWikiText( $img ) ] );
 				} else {
 					$images[] = $title->getDBkey();
 				}
+			}
+			if ( !$images ) {
+				// No titles so no results
+				return;
 			}
 			$this->addWhereFld( 'il_to', $images );
 		}
@@ -172,6 +172,6 @@ class ApiQueryImages extends ApiQueryGeneratorBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Images';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Images';
 	}
 }

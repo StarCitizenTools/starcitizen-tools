@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on Sep 7, 2006
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,6 +20,8 @@
  * @file
  */
 
+use Wikimedia\Rdbms\IDatabase;
+
 /**
  * This is the main query class. It behaves similar to ApiMain: based on the
  * parameters given, it will create a list of titles to work on (an ApiPageSet
@@ -42,26 +40,26 @@ class ApiQuery extends ApiBase {
 	 * @var array
 	 */
 	private static $QueryPropModules = [
-		'categories' => 'ApiQueryCategories',
-		'categoryinfo' => 'ApiQueryCategoryInfo',
-		'contributors' => 'ApiQueryContributors',
-		'deletedrevisions' => 'ApiQueryDeletedRevisions',
-		'duplicatefiles' => 'ApiQueryDuplicateFiles',
-		'extlinks' => 'ApiQueryExternalLinks',
-		'fileusage' => 'ApiQueryBacklinksprop',
-		'images' => 'ApiQueryImages',
-		'imageinfo' => 'ApiQueryImageInfo',
-		'info' => 'ApiQueryInfo',
-		'links' => 'ApiQueryLinks',
-		'linkshere' => 'ApiQueryBacklinksprop',
-		'iwlinks' => 'ApiQueryIWLinks',
-		'langlinks' => 'ApiQueryLangLinks',
-		'pageprops' => 'ApiQueryPageProps',
-		'redirects' => 'ApiQueryBacklinksprop',
-		'revisions' => 'ApiQueryRevisions',
-		'stashimageinfo' => 'ApiQueryStashImageInfo',
-		'templates' => 'ApiQueryLinks',
-		'transcludedin' => 'ApiQueryBacklinksprop',
+		'categories' => ApiQueryCategories::class,
+		'categoryinfo' => ApiQueryCategoryInfo::class,
+		'contributors' => ApiQueryContributors::class,
+		'deletedrevisions' => ApiQueryDeletedRevisions::class,
+		'duplicatefiles' => ApiQueryDuplicateFiles::class,
+		'extlinks' => ApiQueryExternalLinks::class,
+		'fileusage' => ApiQueryBacklinksprop::class,
+		'images' => ApiQueryImages::class,
+		'imageinfo' => ApiQueryImageInfo::class,
+		'info' => ApiQueryInfo::class,
+		'links' => ApiQueryLinks::class,
+		'linkshere' => ApiQueryBacklinksprop::class,
+		'iwlinks' => ApiQueryIWLinks::class,
+		'langlinks' => ApiQueryLangLinks::class,
+		'pageprops' => ApiQueryPageProps::class,
+		'redirects' => ApiQueryBacklinksprop::class,
+		'revisions' => ApiQueryRevisions::class,
+		'stashimageinfo' => ApiQueryStashImageInfo::class,
+		'templates' => ApiQueryLinks::class,
+		'transcludedin' => ApiQueryBacklinksprop::class,
 	];
 
 	/**
@@ -69,41 +67,41 @@ class ApiQuery extends ApiBase {
 	 * @var array
 	 */
 	private static $QueryListModules = [
-		'allcategories' => 'ApiQueryAllCategories',
-		'alldeletedrevisions' => 'ApiQueryAllDeletedRevisions',
-		'allfileusages' => 'ApiQueryAllLinks',
-		'allimages' => 'ApiQueryAllImages',
-		'alllinks' => 'ApiQueryAllLinks',
-		'allpages' => 'ApiQueryAllPages',
-		'allredirects' => 'ApiQueryAllLinks',
-		'allrevisions' => 'ApiQueryAllRevisions',
-		'mystashedfiles' => 'ApiQueryMyStashedFiles',
-		'alltransclusions' => 'ApiQueryAllLinks',
-		'allusers' => 'ApiQueryAllUsers',
-		'backlinks' => 'ApiQueryBacklinks',
-		'blocks' => 'ApiQueryBlocks',
-		'categorymembers' => 'ApiQueryCategoryMembers',
-		'deletedrevs' => 'ApiQueryDeletedrevs',
-		'embeddedin' => 'ApiQueryBacklinks',
-		'exturlusage' => 'ApiQueryExtLinksUsage',
-		'filearchive' => 'ApiQueryFilearchive',
-		'imageusage' => 'ApiQueryBacklinks',
-		'iwbacklinks' => 'ApiQueryIWBacklinks',
-		'langbacklinks' => 'ApiQueryLangBacklinks',
-		'logevents' => 'ApiQueryLogEvents',
-		'pageswithprop' => 'ApiQueryPagesWithProp',
-		'pagepropnames' => 'ApiQueryPagePropNames',
-		'prefixsearch' => 'ApiQueryPrefixSearch',
-		'protectedtitles' => 'ApiQueryProtectedTitles',
-		'querypage' => 'ApiQueryQueryPage',
-		'random' => 'ApiQueryRandom',
-		'recentchanges' => 'ApiQueryRecentChanges',
-		'search' => 'ApiQuerySearch',
-		'tags' => 'ApiQueryTags',
-		'usercontribs' => 'ApiQueryContributions',
-		'users' => 'ApiQueryUsers',
-		'watchlist' => 'ApiQueryWatchlist',
-		'watchlistraw' => 'ApiQueryWatchlistRaw',
+		'allcategories' => ApiQueryAllCategories::class,
+		'alldeletedrevisions' => ApiQueryAllDeletedRevisions::class,
+		'allfileusages' => ApiQueryAllLinks::class,
+		'allimages' => ApiQueryAllImages::class,
+		'alllinks' => ApiQueryAllLinks::class,
+		'allpages' => ApiQueryAllPages::class,
+		'allredirects' => ApiQueryAllLinks::class,
+		'allrevisions' => ApiQueryAllRevisions::class,
+		'mystashedfiles' => ApiQueryMyStashedFiles::class,
+		'alltransclusions' => ApiQueryAllLinks::class,
+		'allusers' => ApiQueryAllUsers::class,
+		'backlinks' => ApiQueryBacklinks::class,
+		'blocks' => ApiQueryBlocks::class,
+		'categorymembers' => ApiQueryCategoryMembers::class,
+		'deletedrevs' => ApiQueryDeletedrevs::class,
+		'embeddedin' => ApiQueryBacklinks::class,
+		'exturlusage' => ApiQueryExtLinksUsage::class,
+		'filearchive' => ApiQueryFilearchive::class,
+		'imageusage' => ApiQueryBacklinks::class,
+		'iwbacklinks' => ApiQueryIWBacklinks::class,
+		'langbacklinks' => ApiQueryLangBacklinks::class,
+		'logevents' => ApiQueryLogEvents::class,
+		'pageswithprop' => ApiQueryPagesWithProp::class,
+		'pagepropnames' => ApiQueryPagePropNames::class,
+		'prefixsearch' => ApiQueryPrefixSearch::class,
+		'protectedtitles' => ApiQueryProtectedTitles::class,
+		'querypage' => ApiQueryQueryPage::class,
+		'random' => ApiQueryRandom::class,
+		'recentchanges' => ApiQueryRecentChanges::class,
+		'search' => ApiQuerySearch::class,
+		'tags' => ApiQueryTags::class,
+		'usercontribs' => ApiQueryContributions::class,
+		'users' => ApiQueryUsers::class,
+		'watchlist' => ApiQueryWatchlist::class,
+		'watchlistraw' => ApiQueryWatchlistRaw::class,
 	];
 
 	/**
@@ -111,12 +109,12 @@ class ApiQuery extends ApiBase {
 	 * @var array
 	 */
 	private static $QueryMetaModules = [
-		'allmessages' => 'ApiQueryAllMessages',
-		'authmanagerinfo' => 'ApiQueryAuthManagerInfo',
-		'siteinfo' => 'ApiQuerySiteinfo',
-		'userinfo' => 'ApiQueryUserInfo',
-		'filerepoinfo' => 'ApiQueryFileRepoInfo',
-		'tokens' => 'ApiQueryTokens',
+		'allmessages' => ApiQueryAllMessages::class,
+		'authmanagerinfo' => ApiQueryAuthManagerInfo::class,
+		'siteinfo' => ApiQuerySiteinfo::class,
+		'userinfo' => ApiQueryUserInfo::class,
+		'filerepoinfo' => ApiQueryFileRepoInfo::class,
+		'tokens' => ApiQueryTokens::class,
 	];
 
 	/**
@@ -167,8 +165,8 @@ class ApiQuery extends ApiBase {
 	 * as the first, regardless of the values of $db and $groups
 	 * @param string $name Name to assign to the database connection
 	 * @param int $db One of the DB_* constants
-	 * @param array $groups Query groups
-	 * @return DatabaseBase
+	 * @param string|string[] $groups Query groups
+	 * @return IDatabase
 	 */
 	public function getNamedDB( $name, $db, $groups ) {
 		if ( !array_key_exists( $name, $this->mNamedDB ) ) {
@@ -243,7 +241,7 @@ class ApiQuery extends ApiBase {
 		$cacheMode = $this->mPageSet->getCacheMode();
 
 		// Execute all unfinished modules
-		/** @var $module ApiQueryBase */
+		/** @var ApiQueryBase $module */
 		foreach ( $modules as $module ) {
 			$params = $module->extractRequestParams();
 			$cacheMode = $this->mergeCacheMode(
@@ -258,6 +256,11 @@ class ApiQuery extends ApiBase {
 		// Write the continuation data into the result
 		$this->setContinuationManager( null );
 		if ( $this->mParams['rawcontinue'] ) {
+			$data = $continuationManager->getRawNonContinuation();
+			if ( $data ) {
+				$this->getResult()->addValue( null, 'query-noncontinue', $data,
+					ApiResult::ADD_ON_TOP | ApiResult::NO_SIZE_CHECK );
+			}
 			$data = $continuationManager->getRawContinuation();
 			if ( $data ) {
 				$this->getResult()->addValue( null, 'query-continue', $data,
@@ -305,7 +308,7 @@ class ApiQuery extends ApiBase {
 					ApiBase::dieDebug( __METHOD__, 'Error instantiating module' );
 				}
 				if ( !$wasPosted && $instance->mustBePosted() ) {
-					$this->dieUsageMsgOrDebug( [ 'mustbeposted', $moduleName ] );
+					$this->dieWithErrorOrDebug( [ 'apierror-mustbeposted', $moduleName ] );
 				}
 				// Ignore duplicates. TODO 2.0: die()?
 				if ( !array_key_exists( $moduleName, $modules ) ) {
@@ -357,6 +360,9 @@ class ApiQuery extends ApiBase {
 			$vals = [];
 			ApiQueryBase::addTitleInfo( $vals, $title );
 			$vals['missing'] = true;
+			if ( $title->isKnown() ) {
+				$vals['known'] = true;
+			}
 			$pages[$fakeId] = $vals;
 		}
 		// Report any invalid titles
@@ -367,22 +373,16 @@ class ApiQuery extends ApiBase {
 		foreach ( $pageSet->getMissingPageIDs() as $pageid ) {
 			$pages[$pageid] = [
 				'pageid' => $pageid,
-				'missing' => true
+				'missing' => true,
 			];
 		}
 		// Report special pages
-		/** @var $title Title */
+		/** @var Title $title */
 		foreach ( $pageSet->getSpecialTitles() as $fakeId => $title ) {
 			$vals = [];
 			ApiQueryBase::addTitleInfo( $vals, $title );
 			$vals['special'] = true;
-			if ( $title->isSpecialPage() &&
-				!SpecialPageFactory::exists( $title->getDBkey() )
-			) {
-				$vals['missing'] = true;
-			} elseif ( $title->getNamespace() == NS_MEDIA &&
-				!wfFindFile( $title )
-			) {
+			if ( !$title->isKnown() ) {
 				$vals['missing'] = true;
 			}
 			$pages[$fakeId] = $vals;
@@ -413,11 +413,7 @@ class ApiQuery extends ApiBase {
 		}
 
 		if ( !$fit ) {
-			$this->dieUsage(
-				'The value of $wgAPIMaxResultSize on this wiki is ' .
-					'too small to hold basic result information',
-				'badconfig'
-			);
+			$this->dieWithError( 'apierror-badconfig-resulttoosmall', 'badconfig' );
 		}
 
 		if ( $this->mParams['export'] ) {
@@ -434,7 +430,7 @@ class ApiQuery extends ApiBase {
 		$titles = $pageSet->getGoodTitles();
 		if ( count( $titles ) ) {
 			$user = $this->getUser();
-			/** @var $title Title */
+			/** @var Title $title */
 			foreach ( $titles as $title ) {
 				if ( $title->userCan( 'read', $user ) ) {
 					$exportTitles[] = $title;
@@ -443,16 +439,13 @@ class ApiQuery extends ApiBase {
 		}
 
 		$exporter = new WikiExporter( $this->getDB() );
-		// WikiExporter writes to stdout, so catch its
-		// output with an ob
-		ob_start();
+		$sink = new DumpStringOutput;
+		$exporter->setOutputSink( $sink );
 		$exporter->openStream();
 		foreach ( $exportTitles as $title ) {
 			$exporter->pageByTitle( $title );
 		}
 		$exporter->closeStream();
-		$exportxml = ob_get_contents();
-		ob_end_clean();
 
 		// Don't check the size of exported stuff
 		// It's not continuable, so it would cause more
@@ -460,10 +453,11 @@ class ApiQuery extends ApiBase {
 		if ( $this->mParams['exportnowrap'] ) {
 			$result->reset();
 			// Raw formatter will handle this
-			$result->addValue( null, 'text', $exportxml, ApiResult::NO_SIZE_CHECK );
+			$result->addValue( null, 'text', $sink, ApiResult::NO_SIZE_CHECK );
 			$result->addValue( null, 'mime', 'text/xml', ApiResult::NO_SIZE_CHECK );
+			$result->addValue( null, 'filename', 'export.xml', ApiResult::NO_SIZE_CHECK );
 		} else {
-			$result->addValue( 'query', 'export', $exportxml, ApiResult::NO_SIZE_CHECK );
+			$result->addValue( 'query', 'export', $sink, ApiResult::NO_SIZE_CHECK );
 			$result->addValue( 'query', ApiResult::META_BC_SUBELEMENTS, [ 'export' ] );
 		}
 	}
@@ -496,61 +490,6 @@ class ApiQuery extends ApiBase {
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Override the parent to generate help messages for all available query modules.
-	 * @deprecated since 1.25
-	 * @return string
-	 */
-	public function makeHelpMsg() {
-		wfDeprecated( __METHOD__, '1.25' );
-
-		// Use parent to make default message for the query module
-		$msg = parent::makeHelpMsg();
-
-		$querySeparator = str_repeat( '--- ', 12 );
-		$moduleSeparator = str_repeat( '*** ', 14 );
-		$msg .= "\n$querySeparator Query: Prop  $querySeparator\n\n";
-		$msg .= $this->makeHelpMsgHelper( 'prop' );
-		$msg .= "\n$querySeparator Query: List  $querySeparator\n\n";
-		$msg .= $this->makeHelpMsgHelper( 'list' );
-		$msg .= "\n$querySeparator Query: Meta  $querySeparator\n\n";
-		$msg .= $this->makeHelpMsgHelper( 'meta' );
-		$msg .= "\n\n$moduleSeparator Modules: continuation  $moduleSeparator\n\n";
-
-		return $msg;
-	}
-
-	/**
-	 * For all modules of a given group, generate help messages and join them together
-	 * @deprecated since 1.25
-	 * @param string $group Module group
-	 * @return string
-	 */
-	private function makeHelpMsgHelper( $group ) {
-		$moduleDescriptions = [];
-
-		$moduleNames = $this->mModuleMgr->getNames( $group );
-		sort( $moduleNames );
-		foreach ( $moduleNames as $name ) {
-			/**
-			 * @var $module ApiQueryBase
-			 */
-			$module = $this->mModuleMgr->getModule( $name );
-
-			$msg = ApiMain::makeHelpMsgHeader( $module, $group );
-			$msg2 = $module->makeHelpMsg();
-			if ( $msg2 !== false ) {
-				$msg .= $msg2;
-			}
-			if ( $module instanceof ApiQueryGeneratorBase ) {
-				$msg .= "Generator:\n  This module may be used as a generator\n";
-			}
-			$moduleDescriptions[] = $msg;
-		}
-
-		return implode( "\n", $moduleDescriptions );
 	}
 
 	public function isReadMode() {
@@ -596,10 +535,10 @@ class ApiQuery extends ApiBase {
 
 	public function getHelpUrls() {
 		return [
-			'https://www.mediawiki.org/wiki/API:Query',
-			'https://www.mediawiki.org/wiki/API:Meta',
-			'https://www.mediawiki.org/wiki/API:Properties',
-			'https://www.mediawiki.org/wiki/API:Lists',
+			'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Query',
+			'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Meta',
+			'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Properties',
+			'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Lists',
 		];
 	}
 }

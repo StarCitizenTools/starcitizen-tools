@@ -21,6 +21,9 @@
  * @ingroup Deployment
  */
 
+use Wikimedia\Rdbms\Database;
+use Wikimedia\Rdbms\DBConnectionError;
+
 /**
  * Class for setting up the MediaWiki database using Oracle.
  *
@@ -43,7 +46,8 @@ class OracleInstaller extends DatabaseInstaller {
 		'_InstallUser' => 'SYSTEM',
 	];
 
-	public $minimumVersion = '9.0.1'; // 9iR1
+	public static $minimumVersion = '9.0.1'; // 9iR1
+	protected static $notMiniumumVerisonMessage = 'config-oracle-old';
 
 	protected $connError = null;
 
@@ -150,49 +154,41 @@ class OracleInstaller extends DatabaseInstaller {
 		}
 
 		/**
-		 * @var $conn DatabaseBase
+		 * @var Database $conn
 		 */
 		$conn = $status->value;
 
 		// Check version
-		$version = $conn->getServerVersion();
-		if ( version_compare( $version, $this->minimumVersion ) < 0 ) {
-			return Status::newFatal( 'config-oracle-old', $this->minimumVersion, $version );
-		}
+		$status->merge( static::meetsMinimumRequirement( $conn->getServerVersion() ) );
 
 		return $status;
 	}
 
 	public function openConnection() {
-		$status = Status::newGood();
-		try {
-			$db = new DatabaseOracle(
-				$this->getVar( 'wgDBserver' ),
-				$this->getVar( '_InstallUser' ),
-				$this->getVar( '_InstallPassword' ),
-				$this->getVar( '_InstallDBname' ),
-				0,
-				$this->getVar( 'wgDBprefix' )
-			);
-			$status->value = $db;
-		} catch ( DBConnectionError $e ) {
-			$this->connError = $e->db->lastErrno();
-			$status->fatal( 'config-connection-error', $e->getMessage() );
-		}
-
-		return $status;
+		return $this->doOpenConnection();
 	}
 
 	public function openSYSDBAConnection() {
+		return $this->doOpenConnection( DatabaseOracle::DBO_SYSDBA );
+	}
+
+	/**
+	 * @param int $flags
+	 * @return Status Status with DatabaseOracle or null as the value
+	 */
+	private function doOpenConnection( $flags = 0 ) {
 		$status = Status::newGood();
 		try {
-			$db = new DatabaseOracle(
-				$this->getVar( 'wgDBserver' ),
-				$this->getVar( '_InstallUser' ),
-				$this->getVar( '_InstallPassword' ),
-				$this->getVar( '_InstallDBname' ),
-				DBO_SYSDBA,
-				$this->getVar( 'wgDBprefix' )
+			$db = Database::factory(
+				'oracle',
+				[
+					'host' => $this->getVar( 'wgDBserver' ),
+					'user' => $this->getVar( '_InstallUser' ),
+					'password' => $this->getVar( '_InstallPassword' ),
+					'dbname' => $this->getVar( '_InstallDBname' ),
+					'tablePrefix' => $this->getVar( 'wgDBprefix' ),
+					'flags' => $flags
+				]
 			);
 			$status->value = $db;
 		} catch ( DBConnectionError $e ) {
@@ -334,11 +330,11 @@ class OracleInstaller extends DatabaseInstaller {
 	 * @return bool Whether the connection string is valid.
 	 */
 	public static function checkConnectStringFormat( $connect_string ) {
-		// @@codingStandardsIgnoreStart Long lines with regular expressions.
+		// phpcs:disable Generic.Files.LineLength
 		// @todo Very long regular expression. Make more readable?
 		$isValid = preg_match( '/^[[:alpha:]][\w\-]*(?:\.[[:alpha:]][\w\-]*){0,2}$/', $connect_string ); // TNS name
 		$isValid |= preg_match( '/^(?:\/\/)?[\w\-\.]+(?::[\d]+)?(?:\/(?:[\w\-\.]+(?::(pooled|dedicated|shared))?)?(?:\/[\w\-\.]+)?)?$/', $connect_string ); // EZConnect
-		// @@codingStandardsIgnoreEnd
+		// phpcs:enable
 		return (bool)$isValid;
 	}
 }

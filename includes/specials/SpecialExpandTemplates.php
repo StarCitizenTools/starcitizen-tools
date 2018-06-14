@@ -56,6 +56,7 @@ class SpecialExpandTemplates extends SpecialPage {
 		global $wgParser;
 
 		$this->setHeaders();
+		$this->addHelpLink( 'Help:ExpandTemplates' );
 
 		$request = $this->getRequest();
 		$titleStr = $request->getText( 'wpContextTitle' );
@@ -163,7 +164,6 @@ class SpecialExpandTemplates extends SpecialPage {
 				'size' => 60,
 				'default' => $title,
 				'autofocus' => true,
-				'cssclass' => 'mw-ui-input-inline',
 			],
 			'input' => [
 				'type' => 'textarea',
@@ -172,6 +172,7 @@ class SpecialExpandTemplates extends SpecialPage {
 				'rows' => 10,
 				'default' => $input,
 				'id' => 'input',
+				'useeditfont' => true,
 			],
 			'removecomments' => [
 				'type' => 'check',
@@ -226,7 +227,11 @@ class SpecialExpandTemplates extends SpecialPage {
 			$output,
 			10,
 			10,
-			[ 'id' => 'output', 'readonly' => 'readonly' ]
+			[
+				'id' => 'output',
+				'readonly' => 'readonly',
+				'class' => 'mw-editfont-' . $this->getUser()->getOption( 'editfont' )
+			]
 		);
 
 		return $out;
@@ -263,7 +268,7 @@ class SpecialExpandTemplates extends SpecialPage {
 			$user = $this->getUser();
 
 			// To prevent cross-site scripting attacks, don't show the preview if raw HTML is
-			// allowed and a valid edit token is not provided (bug 71111). However, MediaWiki
+			// allowed and a valid edit token is not provided (T73111). However, MediaWiki
 			// does not currently provide logged-out users with CSRF protection; in that case,
 			// do not show the preview unless anonymous editing is allowed.
 			if ( $user->isAnon() && !$user->isAllowed( 'edit' ) ) {

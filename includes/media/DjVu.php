@@ -170,7 +170,7 @@ class DjVuHandler extends ImageHandler {
 				'thumbnail_error',
 				$width,
 				$height,
-				wfMessage( 'thumbnail_dest_directory' )->text()
+				wfMessage( 'thumbnail_dest_directory' )
 			);
 		}
 
@@ -197,7 +197,7 @@ class DjVuHandler extends ImageHandler {
 
 			return new MediaTransformError( 'thumbnail_error',
 				$params['width'], $params['height'],
-				wfMessage( 'filemissing' )->text()
+				wfMessage( 'filemissing' )
 			);
 		}
 
@@ -235,7 +235,7 @@ class DjVuHandler extends ImageHandler {
 	/**
 	 * Cache an instance of DjVuImage in an Image object, return that instance
 	 *
-	 * @param File $image
+	 * @param File|FSFile $image
 	 * @param string $path
 	 * @return DjVuImage
 	 */
@@ -265,9 +265,9 @@ class DjVuHandler extends ImageHandler {
 			return $metadata;
 		}
 
-		MediaWiki\suppressWarnings();
+		Wikimedia\suppressWarnings();
 		$unser = unserialize( $metadata );
-		MediaWiki\restoreWarnings();
+		Wikimedia\restoreWarnings();
 		if ( is_array( $unser ) ) {
 			if ( isset( $unser['error'] ) ) {
 				return false;
@@ -304,30 +304,10 @@ class DjVuHandler extends ImageHandler {
 			return false;
 		}
 
-		MediaWiki\suppressWarnings();
-		try {
-			// Set to false rather than null to avoid further attempts
-			$image->dejaMetaTree = false;
-			$image->djvuTextTree = false;
-			$tree = new SimpleXMLElement( $metadata, LIBXML_PARSEHUGE );
-			if ( $tree->getName() == 'mw-djvu' ) {
-				/** @var SimpleXMLElement $b */
-				foreach ( $tree->children() as $b ) {
-					if ( $b->getName() == 'DjVuTxt' ) {
-						// @todo File::djvuTextTree and File::dejaMetaTree are declared
-						// dynamically. Add a public File::$data to facilitate this?
-						$image->djvuTextTree = $b;
-					} elseif ( $b->getName() == 'DjVuXML' ) {
-						$image->dejaMetaTree = $b;
-					}
-				}
-			} else {
-				$image->dejaMetaTree = $tree;
-			}
-		} catch ( Exception $e ) {
-			wfDebug( "Bogus multipage XML metadata on '{$image->getName()}'\n" );
-		}
-		MediaWiki\restoreWarnings();
+		$trees = $this->extractTreesFromMetadata( $metadata );
+		$image->djvuTextTree = $trees['TextTree'];
+		$image->dejaMetaTree = $trees['MetaTree'];
+
 		if ( $gettext ) {
 			return $image->djvuTextTree;
 		} else {
@@ -336,10 +316,39 @@ class DjVuHandler extends ImageHandler {
 	}
 
 	/**
-	 * @param File $image
-	 * @param string $path
-	 * @return bool|array False on failure
+	 * Extracts metadata and text trees from metadata XML in string form
+	 * @param string $metadata XML metadata as a string
+	 * @return array
 	 */
+	protected function extractTreesFromMetadata( $metadata ) {
+		Wikimedia\suppressWarnings();
+		try {
+			// Set to false rather than null to avoid further attempts
+			$metaTree = false;
+			$textTree = false;
+			$tree = new SimpleXMLElement( $metadata, LIBXML_PARSEHUGE );
+			if ( $tree->getName() == 'mw-djvu' ) {
+				/** @var SimpleXMLElement $b */
+				foreach ( $tree->children() as $b ) {
+					if ( $b->getName() == 'DjVuTxt' ) {
+						// @todo File::djvuTextTree and File::dejaMetaTree are declared
+						// dynamically. Add a public File::$data to facilitate this?
+						$textTree = $b;
+					} elseif ( $b->getName() == 'DjVuXML' ) {
+						$metaTree = $b;
+					}
+				}
+			} else {
+				$metaTree = $tree;
+			}
+		} catch ( Exception $e ) {
+			wfDebug( "Bogus multipage XML metadata\n" );
+		}
+		Wikimedia\restoreWarnings();
+
+		return [ 'MetaTree' => $metaTree, 'TextTree' => $textTree ];
+	}
+
 	function getImageSize( $image, $path ) {
 		return $this->getDjVuImage( $image, $path )->getImageSize();
 	}
@@ -348,7 +357,7 @@ class DjVuHandler extends ImageHandler {
 		global $wgDjvuOutputExtension;
 		static $mime;
 		if ( !isset( $mime ) ) {
-			$magic = MimeMagic::singleton();
+			$magic = MediaWiki\MediaWikiServices::getInstance()->getMimeAnalyzer();
 			$mime = $magic->guessTypesForExtension( $wgDjvuOutputExtension );
 		}
 
@@ -399,28 +408,37 @@ class DjVuHandler extends ImageHandler {
 			$cache::TTL_INDEFINITE,
 			function () use ( $file ) {
 				$tree = $this->getMetaTree( $file );
-				if ( !$tree ) {
-					return false;
-				}
-
-				$dimsByPage = [];
-				$count = count( $tree->xpath( '//OBJECT' ) );
-				for ( $i = 0; $i < $count; $i++ ) {
-					$o = $tree->BODY[0]->OBJECT[$i];
-					if ( $o ) {
-						$dimsByPage[$i] = [
-							'width' => (int)$o['width'],
-							'height' => (int)$o['height'],
-						];
-					} else {
-						$dimsByPage[$i] = false;
-					}
-				}
-
-				return [ 'pageCount' => $count, 'dimensionsByPage' => $dimsByPage ];
+				return $this->getDimensionInfoFromMetaTree( $tree );
 			},
 			[ 'pcTTL' => $cache::TTL_INDEFINITE ]
 		);
+	}
+
+	/**
+	 * Given an XML metadata tree, returns dimension information about the document
+	 * @param bool|SimpleXMLElement $metatree The file's XML metadata tree
+	 * @return bool|array
+	 */
+	protected function getDimensionInfoFromMetaTree( $metatree ) {
+		if ( !$metatree ) {
+			return false;
+		}
+
+		$dimsByPage = [];
+		$count = count( $metatree->xpath( '//OBJECT' ) );
+		for ( $i = 0; $i < $count; $i++ ) {
+			$o = $metatree->BODY[0]->OBJECT[$i];
+			if ( $o ) {
+				$dimsByPage[$i] = [
+					'width' => (int)$o['width'],
+					'height' => (int)$o['height'],
+				];
+			} else {
+				$dimsByPage[$i] = false;
+			}
+		}
+
+		return [ 'pageCount' => $count, 'dimensionsByPage' => $dimsByPage ];
 	}
 
 	/**

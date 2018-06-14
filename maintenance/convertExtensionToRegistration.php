@@ -59,13 +59,14 @@ class ConvertExtensionToRegistration extends Maintenance {
 		$this->addArg( 'path', 'Location to the PHP entry point you wish to convert',
 			/* $required = */ true );
 		$this->addOption( 'skin', 'Whether to write to skin.json', false, false );
+		$this->addOption( 'config-prefix', 'Custom prefix for configuration settings', false, true );
 	}
 
 	protected function getAllGlobals() {
-		$processor = new ReflectionClass( 'ExtensionProcessor' );
+		$processor = new ReflectionClass( ExtensionProcessor::class );
 		$settings = $processor->getProperty( 'globalSettings' );
 		$settings->setAccessible( true );
-		return $settings->getValue() + $this->formerGlobals;
+		return array_merge( $settings->getValue(), $this->formerGlobals );
 	}
 
 	public function execute() {
@@ -81,7 +82,7 @@ class ConvertExtensionToRegistration extends Maintenance {
 		unset( $var );
 		$arg = $this->getArg( 0 );
 		if ( !is_file( $arg ) ) {
-			$this->error( "$arg is not a file.", true );
+			$this->fatalError( "$arg is not a file." );
 		}
 		require $arg;
 		unset( $arg );
@@ -92,8 +93,15 @@ class ConvertExtensionToRegistration extends Maintenance {
 		$this->dir = dirname( realpath( $this->getArg( 0 ) ) );
 		$this->json = [];
 		$globalSettings = $this->getAllGlobals();
+		$configPrefix = $this->getOption( 'config-prefix', 'wg' );
+		if ( $configPrefix !== 'wg' ) {
+			$this->json['config']['_prefix'] = $configPrefix;
+		}
 		foreach ( $vars as $name => $value ) {
 			$realName = substr( $name, 2 ); // Strip 'wg'
+			if ( $realName === false ) {
+				continue;
+			}
 
 			// If it's an empty array that we likely set, skip it
 			if ( is_array( $value ) && count( $value ) === 0 && in_array( $realName, $__settings ) ) {
@@ -110,9 +118,14 @@ class ConvertExtensionToRegistration extends Maintenance {
 					$this->noLongerSupportedGlobals[$realName] . '). ' .
 					"Please update the entry point before convert to registration.\n" );
 				$this->hasWarning = true;
-			} elseif ( strpos( $name, 'wg' ) === 0 ) {
+			} elseif ( strpos( $name, $configPrefix ) === 0 ) {
 				// Most likely a config setting
-				$this->json['config'][$realName] = $value;
+				$this->json['config'][substr( $name, strlen( $configPrefix ) )] = [ 'value' => $value ];
+			} elseif ( $configPrefix !== 'wg' && strpos( $name, 'wg' ) === 0 ) {
+				// Warn about this
+				$this->output( 'Warning: Skipped global "' . $name . '" (' .
+					'config prefix is "' . $configPrefix . '"). ' .
+					"Please check that this setting isn't needed.\n" );
 			}
 		}
 
@@ -131,6 +144,11 @@ class ConvertExtensionToRegistration extends Maintenance {
 				unset( $this->json[$key] );
 			}
 		}
+		// Set a requirement on the MediaWiki version that the current MANIFEST_VERSION
+		// was introduced in.
+		$out['requires'] = [
+			ExtensionRegistry::MEDIAWIKI_CORE => ExtensionRegistry::MANIFEST_VERSION_MW_VERSION
+		];
 		$out += $this->json;
 		// Put this at the bottom
 		$out['manifest_version'] = ExtensionRegistry::MANIFEST_VERSION;
@@ -147,14 +165,14 @@ class ConvertExtensionToRegistration extends Maintenance {
 	protected function handleExtensionFunctions( $realName, $value ) {
 		foreach ( $value as $func ) {
 			if ( $func instanceof Closure ) {
-				$this->error( "Error: Closures cannot be converted to JSON. " .
-					"Please move your extension function somewhere else.", 1
+				$this->fatalError( "Error: Closures cannot be converted to JSON. " .
+					"Please move your extension function somewhere else."
 				);
 			}
 			// check if $func exists in the global scope
 			if ( function_exists( $func ) ) {
-				$this->error( "Error: Global functions cannot be converted to JSON. " .
-					"Please move your extension function ($func) into a class.", 1
+				$this->fatalError( "Error: Global functions cannot be converted to JSON. " .
+					"Please move your extension function ($func) into a class."
 				);
 			}
 		}
@@ -217,16 +235,23 @@ class ConvertExtensionToRegistration extends Maintenance {
 
 	public function handleHooks( $realName, $value ) {
 		foreach ( $value as $hookName => &$handlers ) {
+			if ( $hookName === 'UnitTestsList' ) {
+				$this->output( "Note: the UnitTestsList hook is no longer necessary as " .
+					"long as your tests are located in the \"tests/phpunit/\" directory. " .
+					"Please see <https://www.mediawiki.org/wiki/Manual:PHP_unit_testing/" .
+					"Writing_unit_tests_for_extensions#Register_your_tests> for more details.\n"
+				);
+			}
 			foreach ( $handlers as $func ) {
 				if ( $func instanceof Closure ) {
-					$this->error( "Error: Closures cannot be converted to JSON. " .
-						"Please move the handler for $hookName somewhere else.", 1
+					$this->fatalError( "Error: Closures cannot be converted to JSON. " .
+						"Please move the handler for $hookName somewhere else."
 					);
 				}
 				// Check if $func exists in the global scope
 				if ( function_exists( $func ) ) {
-					$this->error( "Error: Global functions cannot be converted to JSON. " .
-						"Please move the handler for $hookName inside a class.", 1
+					$this->fatalError( "Error: Global functions cannot be converted to JSON. " .
+						"Please move the handler for $hookName inside a class."
 					);
 				}
 			}
@@ -283,5 +308,5 @@ class ConvertExtensionToRegistration extends Maintenance {
 	}
 }
 
-$maintClass = 'ConvertExtensionToRegistration';
+$maintClass = ConvertExtensionToRegistration::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

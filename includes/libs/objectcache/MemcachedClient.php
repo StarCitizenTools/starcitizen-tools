@@ -1,5 +1,5 @@
 <?php
-// @codingStandardsIgnoreFile It's an external lib and it isn't. Let's not bother.
+// phpcs:ignoreFile -- It's an external lib and it isn't. Let's not bother.
 /**
  * Memcached client for PHP.
  *
@@ -361,6 +361,48 @@ class MemcachedClient {
 	}
 
 	/**
+	 * Changes the TTL on a key from the server to $time
+	 *
+	 * @param string $key
+	 * @param int $time TTL in seconds
+	 *
+	 * @return bool True on success, false on failure
+	 */
+	public function touch( $key, $time = 0 ) {
+		if ( !$this->_active ) {
+			return false;
+		}
+
+		$sock = $this->get_sock( $key );
+		if ( !is_resource( $sock ) ) {
+			return false;
+		}
+
+		$key = is_array( $key ) ? $key[1] : $key;
+
+		if ( isset( $this->stats['touch'] ) ) {
+			$this->stats['touch']++;
+		} else {
+			$this->stats['touch'] = 1;
+		}
+		$cmd = "touch $key $time\r\n";
+		if ( !$this->_fwrite( $sock, $cmd ) ) {
+			return false;
+		}
+		$res = $this->_fgets( $sock );
+
+		if ( $this->_debug ) {
+			$this->_debugprint( sprintf( "MemCache: touch %s (%s)", $key, $res ) );
+		}
+
+		if ( $res == "TOUCHED" ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * @param string $key
 	 * @param int $timeout
 	 * @return bool
@@ -427,7 +469,6 @@ class MemcachedClient {
 	 * @return mixed
 	 */
 	public function get( $key, &$casToken = null ) {
-
 		if ( $this->_debug ) {
 			$this->_debugprint( "get($key)" );
 		}
@@ -487,7 +528,7 @@ class MemcachedClient {
 	 */
 	public function get_multi( $keys ) {
 		if ( !$this->_active ) {
-			return false;
+			return array();
 		}
 
 		if ( isset( $this->stats['get_multi'] ) ) {
@@ -747,13 +788,13 @@ class MemcachedClient {
 		$timeout = $this->_connect_timeout;
 		$errno = $errstr = null;
 		for ( $i = 0; !$sock && $i < $this->_connect_attempts; $i++ ) {
-			MediaWiki\suppressWarnings();
+			Wikimedia\suppressWarnings();
 			if ( $this->_persistent == 1 ) {
 				$sock = pfsockopen( $ip, $port, $errno, $errstr, $timeout );
 			} else {
 				$sock = fsockopen( $ip, $port, $errno, $errstr, $timeout );
 			}
-			MediaWiki\restoreWarnings();
+			Wikimedia\restoreWarnings();
 		}
 		if ( !$sock ) {
 			$this->_error_log( "Error connecting to $host: $errstr" );
@@ -1072,9 +1113,13 @@ class MemcachedClient {
 		if ( $this->_debug ) {
 			$this->_debugprint( sprintf( "%s %s (%s)", $cmd, $key, $line ) );
 		}
-		if ( $line == "STORED" ) {
+		if ( $line === "STORED" ) {
+			return true;
+		} elseif ( $line === "NOT_STORED" && $cmd === "set" ) {
+			// "Not stored" is always used as the mcrouter response with AllAsyncRoute
 			return true;
 		}
+
 		return false;
 	}
 

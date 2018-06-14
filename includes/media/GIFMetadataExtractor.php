@@ -54,9 +54,9 @@ class GIFMetadataExtractor {
 	 * @return array
 	 */
 	static function getMetadata( $filename ) {
-		self::$gifFrameSep = pack( "C", ord( "," ) );
-		self::$gifExtensionSep = pack( "C", ord( "!" ) );
-		self::$gifTerm = pack( "C", ord( ";" ) );
+		self::$gifFrameSep = pack( "C", ord( "," ) ); // 2C
+		self::$gifExtensionSep = pack( "C", ord( "!" ) ); // 21
+		self::$gifTerm = pack( "C", ord( ";" ) ); // 3B
 
 		$frameCount = 0;
 		$duration = 0.0;
@@ -82,8 +82,11 @@ class GIFMetadataExtractor {
 			throw new Exception( "Not a valid GIF file; header: $buf" );
 		}
 
-		// Skip over width and height.
-		fread( $fh, 4 );
+		// Read width and height.
+		$buf = fread( $fh, 2 );
+		$width = unpack( 'v', $buf )[1];
+		$buf = fread( $fh, 2 );
+		$height = unpack( 'v', $buf )[1];
 
 		// Read BPP
 		$buf = fread( $fh, 1 );
@@ -158,9 +161,9 @@ class GIFMetadataExtractor {
 					UtfNormal\Validator::quickIsNFCVerify( $dataCopy );
 
 					if ( $dataCopy !== $data ) {
-						MediaWiki\suppressWarnings();
+						Wikimedia\suppressWarnings();
 						$data = iconv( 'windows-1252', 'UTF-8', $data );
-						MediaWiki\restoreWarnings();
+						Wikimedia\restoreWarnings();
 					}
 
 					$commentCount = count( $comment );

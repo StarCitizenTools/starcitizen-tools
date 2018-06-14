@@ -141,7 +141,7 @@ class UploadFromUrl extends UploadBase {
 
 	/**
 	 * Entry point for SpecialUpload
-	 * @param WebRequest $request
+	 * @param WebRequest &$request
 	 */
 	public function initializeFromRequest( &$request ) {
 		$desiredDestName = $request->getText( 'wpDestFile' );
@@ -202,7 +202,7 @@ class UploadFromUrl extends UploadBase {
 	 * @return string Path to the file
 	 */
 	protected function makeTemporaryFile() {
-		$tmpFile = TempFSFile::factory( 'URL' );
+		$tmpFile = TempFSFile::factory( 'URL', 'urlupload_', wfTempDir() );
 		$tmpFile->bind( $this );
 
 		return $tmpFile->getPath();
@@ -225,7 +225,7 @@ class UploadFromUrl extends UploadBase {
 			// Well... that's not good!
 			wfDebugLog(
 				'fileupload',
-				'Short write ' . $this->nbytes . '/' . strlen( $buffer ) .
+				'Short write ' . $nbytes . '/' . strlen( $buffer ) .
 					' bytes, aborting with ' . $this->mFileSize . ' uploaded so far'
 			);
 			fclose( $this->mTmpHandle );
@@ -287,7 +287,7 @@ class UploadFromUrl extends UploadBase {
 
 		wfDebugLog( 'fileupload', $status );
 		if ( $status->isOK() ) {
-			wfDebugLog( 'fileupload', 'Download by URL completed successfuly.' );
+			wfDebugLog( 'fileupload', 'Download by URL completed successfully.' );
 		} else {
 			wfDebugLog(
 				'fileupload',

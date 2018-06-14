@@ -40,17 +40,22 @@
  * @since 1.25
  */
 class StatusValue {
+
 	/** @var bool */
 	protected $ok = true;
-	/** @var array */
+
+	/** @var array[] */
 	protected $errors = [];
 
 	/** @var mixed */
 	public $value;
-	/** @var array Map of (key => bool) to indicate success of each part of batch operations */
+
+	/** @var bool[] Map of (key => bool) to indicate success of each part of batch operations */
 	public $success = [];
+
 	/** @var int Counter for batch operations */
 	public $successCount = 0;
+
 	/** @var int Counter for batch operations */
 	public $failCount = 0;
 
@@ -58,7 +63,7 @@ class StatusValue {
 	 * Factory function for fatal errors
 	 *
 	 * @param string|MessageSpecifier $message Message key or object
-	 * @return StatusValue
+	 * @return static
 	 */
 	public static function newFatal( $message /*, parameters...*/ ) {
 		$params = func_get_args();
@@ -71,12 +76,40 @@ class StatusValue {
 	 * Factory function for good results
 	 *
 	 * @param mixed $value
-	 * @return StatusValue
+	 * @return static
 	 */
 	public static function newGood( $value = null ) {
 		$result = new static();
 		$result->value = $value;
 		return $result;
+	}
+
+	/**
+	 * Splits this StatusValue object into two new StatusValue objects, one which contains only
+	 * the error messages, and one that contains the warnings, only. The returned array is
+	 * defined as:
+	 * [
+	 *     0 => object(StatusValue) # the StatusValue with error messages, only
+	 *     1 => object(StatusValue) # The StatusValue with warning messages, only
+	 * ]
+	 *
+	 * @return StatusValue[]
+	 */
+	public function splitByErrorType() {
+		$errorsOnlyStatusValue = clone $this;
+		$warningsOnlyStatusValue = clone $this;
+		$warningsOnlyStatusValue->ok = true;
+
+		$errorsOnlyStatusValue->errors = $warningsOnlyStatusValue->errors = [];
+		foreach ( $this->errors as $item ) {
+			if ( $item['type'] === 'warning' ) {
+				$warningsOnlyStatusValue->errors[] = $item;
+			} else {
+				$errorsOnlyStatusValue->errors[] = $item;
+			}
+		};
+
+		return [ $errorsOnlyStatusValue, $warningsOnlyStatusValue ];
 	}
 
 	/**
@@ -110,7 +143,7 @@ class StatusValue {
 	 *
 	 * Each error is a (message:string or MessageSpecifier,params:array) map
 	 *
-	 * @return array
+	 * @return array[]
 	 */
 	public function getErrors() {
 		return $this->errors;
@@ -126,13 +159,13 @@ class StatusValue {
 	}
 
 	/**
-	 * Change operation resuklt
+	 * Change operation result
 	 *
 	 * @param bool $ok Whether the operation completed
 	 * @param mixed $value
 	 */
 	public function setResult( $ok, $value = null ) {
-		$this->ok = $ok;
+		$this->ok = (bool)$ok;
 		$this->value = $value;
 	}
 
@@ -181,7 +214,7 @@ class StatusValue {
 	/**
 	 * Merge another status object into this one
 	 *
-	 * @param StatusValue $other Other StatusValue object
+	 * @param StatusValue $other
 	 * @param bool $overwriteValue Whether to override the "value" member
 	 */
 	public function merge( $other, $overwriteValue = false ) {
@@ -202,7 +235,7 @@ class StatusValue {
 	 *   - params: array list of parameters
 	 *
 	 * @param string $type
-	 * @return array
+	 * @return array[]
 	 */
 	public function getErrorsByType( $type ) {
 		$result = [];
@@ -246,8 +279,8 @@ class StatusValue {
 	 * Note, due to the lack of tools for comparing IStatusMessage objects, this
 	 * function will not work when using such an object as the search parameter.
 	 *
-	 * @param IStatusMessage|string $source Message key or object to search for
-	 * @param IStatusMessage|string $dest Replacement message key or object
+	 * @param MessageSpecifier|string $source Message key or object to search for
+	 * @param MessageSpecifier|string $dest Replacement message key or object
 	 * @return bool Return true if the replacement was done, false otherwise.
 	 */
 	public function replaceMessage( $source, $dest ) {

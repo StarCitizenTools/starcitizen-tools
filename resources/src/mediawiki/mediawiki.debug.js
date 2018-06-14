@@ -4,6 +4,15 @@
 	var debug,
 		hovzer = $.getFootHovzer();
 
+	OO.ui.getViewportSpacing = function () {
+		return {
+			top: 0,
+			right: 0,
+			bottom: hovzer.$.outerHeight(),
+			left: 0
+		};
+	};
+
 	/**
 	 * Debug toolbar.
 	 *
@@ -118,8 +127,7 @@
 				return $( '<div>' ).prop( {
 					id: 'mw-debug-' + id,
 					className: 'mw-debug-bit'
-				} )
-				.appendTo( $bits );
+				} ).appendTo( $bits );
 			}
 
 			/**
@@ -156,8 +164,8 @@
 					id: 'mw-debug-' + id,
 					className: 'mw-debug-bit mw-debug-panelink'
 				} )
-				.append( paneLabel( id, text ) )
-				.appendTo( $bits );
+					.append( paneLabel( id, text ) )
+					.appendTo( $bits );
 			}
 
 			paneTriggerBitDiv( 'console', 'Console', this.data.log.length );
@@ -190,9 +198,9 @@
 			}
 
 			bitDiv( 'phpversion' )
-				.append( $( this.data.phpEngine === 'HHVM'
-					? '<a href="http://hhvm.com/">HHVM</a>'
-					: '<a href="https://php.net/">PHP</a>'
+				.append( $( this.data.phpEngine === 'HHVM' ?
+					'<a href="http://hhvm.com/">HHVM</a>' :
+					'<a href="https://php.net/">PHP</a>'
 				) )
 				.append( ': ' + this.data.phpVersion );
 
@@ -231,6 +239,8 @@
 
 		/**
 		 * Build the console panel
+		 *
+		 * @return {jQuery} Console panel
 		 */
 		buildConsoleTable: function () {
 			var $table, entryTypeText, i, length, entry;
@@ -282,11 +292,11 @@
 			$table = $( '<table id="mw-debug-querylist"></table>' );
 
 			$( '<tr>' )
-				.append( $( '<th>#</th>' ).css( 'width', '4em' )    )
+				.append( $( '<th>#</th>' ).css( 'width', '4em' ) )
 				.append( $( '<th>SQL</th>' ) )
-				.append( $( '<th>Time</th>' ).css( 'width', '8em'  ) )
+				.append( $( '<th>Time</th>' ).css( 'width', '8em' ) )
 				.append( $( '<th>Call</th>' ).css( 'width', '18em' ) )
-			.appendTo( $table );
+				.appendTo( $table );
 
 			for ( i = 0, length = this.data.queries.length; i < length; i += 1 ) {
 				query = this.data.queries[ i ];
@@ -296,7 +306,7 @@
 					.append( $( '<td>' ).text( query.sql ) )
 					.append( $( '<td class="stats">' ).text( ( query.time * 1000 ).toFixed( 4 ) + 'ms' ) )
 					.append( $( '<td>' ).text( query[ 'function' ] ) )
-				.appendTo( $table );
+					.appendTo( $table );
 			}
 
 			return $table;
@@ -380,5 +390,9 @@
 			return $table;
 		}
 	};
+
+	$( function () {
+		debug.init();
+	} );
 
 }( mediaWiki, jQuery ) );

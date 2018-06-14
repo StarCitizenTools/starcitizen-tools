@@ -106,7 +106,7 @@ class PurgeChangedFiles extends Maintenance {
 		}
 
 		// Validate the timestamps
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = $this->getDB( DB_REPLICA );
 		$this->startTimestamp = $dbr->timestamp( $this->getOption( 'starttime' ) );
 		$this->endTimestamp = $dbr->timestamp( $this->getOption( 'endtime' ) );
 
@@ -137,7 +137,7 @@ class PurgeChangedFiles extends Maintenance {
 	 */
 	protected function purgeFromLogType( $type ) {
 		$repo = RepoGroup::singleton()->getLocalRepo();
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = $this->getDB( DB_REPLICA );
 
 		foreach ( self::$typeMappings[$type] as $logType => $logActions ) {
 			$this->verbose( "Scanning for {$logType}/" . implode( ',', $logActions ) . "\n" );
@@ -164,8 +164,12 @@ class PurgeChangedFiles extends Maintenance {
 					continue;
 				}
 
-				// Purge current version and any versions in oldimage table
+				// Purge current version and its thumbnails
 				$file->purgeCache();
+				// Purge the old versions and their thumbnails
+				foreach ( $file->getHistory() as $oldFile ) {
+					$oldFile->purgeCache();
+				}
 
 				if ( $logType === 'delete' ) {
 					// If there is an orphaned storage file... delete it
@@ -196,7 +200,7 @@ class PurgeChangedFiles extends Maintenance {
 
 				$this->verbose( "Purged file {$row->log_title}; {$type} @{$row->log_timestamp}.\n" );
 
-				if ( $this->hasOption( 'sleep-per-batch' ) && ++$bSize > $this->mBatchSize ) {
+				if ( $this->hasOption( 'sleep-per-batch' ) && ++$bSize > $this->getBatchSize() ) {
 					$bSize = 0;
 					// sleep-per-batch is milliseconds, usleep wants micro seconds.
 					usleep( 1000 * (int)$this->getOption( 'sleep-per-batch' ) );
@@ -206,7 +210,7 @@ class PurgeChangedFiles extends Maintenance {
 	}
 
 	protected function purgeFromArchiveTable( LocalRepo $repo, LocalFile $file ) {
-		$dbr = $repo->getSlaveDB();
+		$dbr = $repo->getReplicaDB();
 		$res = $dbr->select(
 			'filearchive',
 			[ 'fa_archive_name' ],
@@ -254,5 +258,5 @@ class PurgeChangedFiles extends Maintenance {
 	}
 }
 
-$maintClass = "PurgeChangedFiles";
+$maintClass = PurgeChangedFiles::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

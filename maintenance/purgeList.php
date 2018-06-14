@@ -86,7 +86,7 @@ class PurgeList extends Maintenance {
 	 * @param int|bool $namespace
 	 */
 	private function purgeNamespace( $namespace = false ) {
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = $this->getDB( DB_REPLICA );
 		$startId = 0;
 		if ( $namespace === false ) {
 			$conds = [];
@@ -99,7 +99,7 @@ class PurgeList extends Maintenance {
 				$conds + [ 'page_id > ' . $dbr->addQuotes( $startId ) ],
 				__METHOD__,
 				[
-					'LIMIT' => $this->mBatchSize,
+					'LIMIT' => $this->getBatchSize(),
 					'ORDER BY' => 'page_id'
 
 				]
@@ -143,5 +143,5 @@ class PurgeList extends Maintenance {
 	}
 }
 
-$maintClass = "PurgeList";
+$maintClass = PurgeList::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

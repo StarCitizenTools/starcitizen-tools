@@ -8,13 +8,21 @@
 		padding: 0;
 		margin: 0;
 		background: none;
-		border: none;
+		border: 0;
 	}
 
 	table {
 		border-spacing: 0;
 		width: 100%;
 		table-layout: fixed;
+
+		tr {
+			background-color: #fff;
+
+			&:nth-child( even ) {
+				background-color: #f9f9f9;
+			}
+		}
 
 		td,
 		th {
@@ -30,15 +38,7 @@
 			}
 
 			span.stats {
-				color: #808080;
-			}
-		}
-
-		tr {
-			background-color: #fff;
-
-			&:nth-child(even) {
-				background-color: #f9f9f9;
+				color: #727272;
 			}
 		}
 	}
@@ -63,9 +63,6 @@
 	display: inline-block;
 	padding: 10px 5px;
 	font-size: 13px;
-	/* IE-hack for display: inline-block */
-	zoom: 1;
-	*display:inline;
 }
 
 .mw-debug-panelink {
@@ -95,6 +92,7 @@ a.mw-debug-panelabel:visited {
 	height: 300px;
 	overflow: scroll;
 	display: none;
+	font-family: monospace, monospace;
 	font-size: 11px;
 	background-color: #e1eff2;
 	box-sizing: border-box;
@@ -115,7 +113,7 @@ a.mw-debug-panelabel:visited {
 	th,
 	td,
 	table {
-		border: 1px solid #D0DBB3;
+		border: 1px solid #d0dbb3;
 		border-collapse: collapse;
 		margin: 0;
 	}
@@ -127,12 +125,12 @@ a.mw-debug-panelabel:visited {
 	}
 
 	th {
-		background-color: #F1F7E2;
+		background-color: #f1f7e2;
 		font-weight: bold;
 	}
 
 	td {
-		background-color: white;
+		background-color: #fff;
 	}
 }
 
@@ -184,6 +182,6 @@ a.mw-debug-panelabel:visited {
 }
 
 /* Cheapo hack to hide the first 3 lines of the backtrace */
-.mw-debug-backtrace li:nth-child(-n+3) {
+.mw-debug-backtrace li:nth-child( -n+3 ) {
 	display: none;
 }

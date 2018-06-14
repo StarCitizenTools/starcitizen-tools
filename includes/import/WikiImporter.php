@@ -38,12 +38,17 @@ class WikiImporter {
 	private $mNoticeCallback, $mDebug;
 	private $mImportUploads, $mImageBasePath;
 	private $mNoUpdates = false;
+	private $pageOffset = 0;
 	/** @var Config */
 	private $config;
 	/** @var ImportTitleFactory */
 	private $importTitleFactory;
 	/** @var array */
 	private $countableCache = [];
+	/** @var bool */
+	private $disableStatisticsUpdate = false;
+	/** @var ExternalUserNames */
+	private $externalUserNames;
 
 	/**
 	 * Creates an ImportXMLReader drawing from the source provided
@@ -51,20 +56,16 @@ class WikiImporter {
 	 * @param Config $config
 	 * @throws Exception
 	 */
-	function __construct( ImportSource $source, Config $config = null ) {
+	function __construct( ImportSource $source, Config $config ) {
 		if ( !class_exists( 'XMLReader' ) ) {
 			throw new Exception( 'Import requires PHP to have been compiled with libxml support' );
 		}
 
 		$this->reader = new XMLReader();
-		if ( !$config ) {
-			wfDeprecated( __METHOD__ . ' without a Config instance', '1.25' );
-			$config = ConfigFactory::getDefaultInstance()->makeConfig( 'main' );
-		}
 		$this->config = $config;
 
 		if ( !in_array( 'uploadsource', stream_get_wrappers() ) ) {
-			stream_wrapper_register( 'uploadsource', 'UploadSourceAdapter' );
+			stream_wrapper_register( 'uploadsource', UploadSourceAdapter::class );
 		}
 		$id = UploadSourceAdapter::registerSource( $source );
 
@@ -92,6 +93,7 @@ class WikiImporter {
 		$this->setPageOutCallback( [ $this, 'finishImportPage' ] );
 
 		$this->importTitleFactory = new NaiveImportTitleFactory();
+		$this->externalUserNames = new ExternalUserNames( 'imported', false );
 	}
 
 	/**
@@ -123,7 +125,9 @@ class WikiImporter {
 		if ( is_callable( $this->mNoticeCallback ) ) {
 			call_user_func( $this->mNoticeCallback, $msg, $params );
 		} else { # No ImportReporter -> CLI
-			echo wfMessage( $msg, $params )->text() . "\n";
+			// T177997: the command line importers should call setNoticeCallback()
+			// for their own custom callback to echo the notice
+			wfDebug( wfMessage( $msg, $params )->text() . "\n" );
 		}
 	}
 
@@ -141,6 +145,16 @@ class WikiImporter {
 	 */
 	function setNoUpdates( $noupdates ) {
 		$this->mNoUpdates = $noupdates;
+	}
+
+	/**
+	 * Sets 'pageOffset' value. So it will skip the first n-1 pages
+	 * and start from the nth page. It's 1-based indexing.
+	 * @param int $nthPage
+	 * @since 1.29
+	 */
+	function setPageOffset( $nthPage ) {
+		$this->pageOffset = $nthPage;
 	}
 
 	/**
@@ -303,6 +317,23 @@ class WikiImporter {
 	}
 
 	/**
+	 * @since 1.31
+	 * @param string $usernamePrefix Prefix to apply to unknown (and possibly also known) usernames
+	 * @param bool $assignKnownUsers Whether to apply the prefix to usernames that exist locally
+	 */
+	public function setUsernamePrefix( $usernamePrefix, $assignKnownUsers ) {
+		$this->externalUserNames = new ExternalUserNames( $usernamePrefix, $assignKnownUsers );
+	}
+
+	/**
+	 * Statistics update can cause a lot of time
+	 * @since 1.29
+	 */
+	public function disableStatisticsUpdate() {
+		$this->disableStatisticsUpdate = true;
+	}
+
+	/**
 	 * Default per-page callback. Sets up some things related to site statistics
 	 * @param array $titleAndForeignTitle Two-element array, with Title object at
 	 * index 0 and ForeignTitle object at index 1
@@ -332,8 +363,7 @@ class WikiImporter {
 		}
 
 		try {
-			$dbw = wfGetDB( DB_MASTER );
-			return $dbw->deadlockLoop( [ $revision, 'importOldRevision' ] );
+			return $revision->importOldRevision();
 		} catch ( MWContentSerializationException $ex ) {
 			$this->notice( 'import-error-unserialize',
 				$revision->getTitle()->getPrefixedText(),
@@ -351,8 +381,7 @@ class WikiImporter {
 	 * @return bool
 	 */
 	public function importLogItem( $revision ) {
-		$dbw = wfGetDB( DB_MASTER );
-		return $dbw->deadlockLoop( [ $revision, 'importLogItem' ] );
+		return $revision->importLogItem();
 	}
 
 	/**
@@ -361,8 +390,7 @@ class WikiImporter {
 	 * @return bool
 	 */
 	public function importUpload( $revision ) {
-		$dbw = wfGetDB( DB_MASTER );
-		return $dbw->deadlockLoop( [ $revision, 'importUpload' ] );
+		return $revision->importUpload();
 	}
 
 	/**
@@ -375,29 +403,31 @@ class WikiImporter {
 	 * @return bool
 	 */
 	public function finishImportPage( $title, $foreignTitle, $revCount,
-			$sRevCount, $pageInfo ) {
-
+		$sRevCount, $pageInfo
+	) {
 		// Update article count statistics (T42009)
 		// The normal counting logic in WikiPage->doEditUpdates() is designed for
 		// one-revision-at-a-time editing, not bulk imports. In this situation it
-		// suffers from issues of slave lag. We let WikiPage handle the total page
+		// suffers from issues of replica DB lag. We let WikiPage handle the total page
 		// and revision count, and we implement our own custom logic for the
 		// article (content page) count.
-		$page = WikiPage::factory( $title );
-		$page->loadPageData( 'fromdbmaster' );
-		$content = $page->getContent();
-		if ( $content === null ) {
-			wfDebug( __METHOD__ . ': Skipping article count adjustment for ' . $title .
-				' because WikiPage::getContent() returned null' );
-		} else {
-			$editInfo = $page->prepareContentForEdit( $content );
-			$countKey = 'title_' . $title->getPrefixedText();
-			$countable = $page->isCountable( $editInfo );
-			if ( array_key_exists( $countKey, $this->countableCache ) &&
-				$countable != $this->countableCache[$countKey] ) {
-				DeferredUpdates::addUpdate( SiteStatsUpdate::factory( [
-					'articles' => ( (int)$countable - (int)$this->countableCache[$countKey] )
-				] ) );
+		if ( !$this->disableStatisticsUpdate ) {
+			$page = WikiPage::factory( $title );
+			$page->loadPageData( 'fromdbmaster' );
+			$content = $page->getContent();
+			if ( $content === null ) {
+				wfDebug( __METHOD__ . ': Skipping article count adjustment for ' . $title .
+					' because WikiPage::getContent() returned null' );
+			} else {
+				$editInfo = $page->prepareContentForEdit( $content );
+				$countKey = 'title_' . $title->getPrefixedText();
+				$countable = $page->isCountable( $editInfo );
+				if ( array_key_exists( $countKey, $this->countableCache ) &&
+					$countable != $this->countableCache[$countKey] ) {
+					DeferredUpdates::addUpdate( SiteStatsUpdate::factory( [
+						'articles' => ( (int)$countable - (int)$this->countableCache[$countKey] )
+					] ) );
+				}
 			}
 		}
 
@@ -407,7 +437,7 @@ class WikiImporter {
 
 	/**
 	 * Alternate per-revision callback, for debugging.
-	 * @param WikiRevision $revision
+	 * @param WikiRevision &$revision
 	 */
 	public function debugRevisionHandler( &$revision ) {
 		$this->debug( "Got revision:" );
@@ -514,13 +544,13 @@ class WikiImporter {
 		$buffer = "";
 		while ( $this->reader->read() ) {
 			switch ( $this->reader->nodeType ) {
-			case XMLReader::TEXT:
-			case XMLReader::CDATA:
-			case XMLReader::SIGNIFICANT_WHITESPACE:
-				$buffer .= $this->reader->value;
-				break;
-			case XMLReader::END_ELEMENT:
-				return $buffer;
+				case XMLReader::TEXT:
+				case XMLReader::CDATA:
+				case XMLReader::SIGNIFICANT_WHITESPACE:
+					$buffer .= $this->reader->value;
+					break;
+				case XMLReader::END_ELEMENT:
+					return $buffer;
 			}
 		}
 
@@ -530,13 +560,14 @@ class WikiImporter {
 
 	/**
 	 * Primary entry point
+	 * @throws Exception
 	 * @throws MWException
 	 * @return bool
 	 */
 	public function doImport() {
 		// Calls to reader->read need to be wrapped in calls to
 		// libxml_disable_entity_loader() to avoid local file
-		// inclusion attacks (bug 46932).
+		// inclusion attacks (T48932).
 		$oldDisable = libxml_disable_entity_loader( true );
 		$this->reader->read();
 
@@ -552,9 +583,19 @@ class WikiImporter {
 		$keepReading = $this->reader->read();
 		$skip = false;
 		$rethrow = null;
+		$pageCount = 0;
 		try {
 			while ( $keepReading ) {
 				$tag = $this->reader->localName;
+				if ( $this->pageOffset ) {
+					if ( $tag === 'page' ) {
+						$pageCount++;
+					}
+					if ( $pageCount < $this->pageOffset ) {
+						$keepReading = $this->reader->next();
+						continue;
+					}
+				}
 				$type = $this->reader->nodeType;
 
 				if ( !Hooks::run( 'ImportHandleToplevelXMLTag', [ $this ] ) ) {
@@ -660,7 +701,6 @@ class WikiImporter {
 	 * @return bool|mixed
 	 */
 	private function processLogItem( $logInfo ) {
-
 		$revision = new WikiRevision( $this->config );
 
 		if ( isset( $logInfo['id'] ) ) {
@@ -691,9 +731,11 @@ class WikiImporter {
 		}
 
 		if ( !isset( $logInfo['contributor']['username'] ) ) {
-			$revision->setUsername( 'Unknown user' );
+			$revision->setUsername( $this->externalUserNames->addPrefix( 'Unknown user' ) );
 		} else {
-			$revision->setUsername( $logInfo['contributor']['username'] );
+			$revision->setUsername(
+				$this->externalUserNames->applyPrefix( $logInfo['contributor']['username'] )
+			);
 		}
 
 		return $this->logItemCallback( $revision );
@@ -787,7 +829,7 @@ class WikiImporter {
 		$this->debug( "Enter revision handler" );
 		$revisionInfo = [];
 
-		$normalFields = [ 'id', 'timestamp', 'comment', 'minor', 'model', 'format', 'text' ];
+		$normalFields = [ 'id', 'timestamp', 'comment', 'minor', 'model', 'format', 'text', 'sha1' ];
 
 		$skip = false;
 
@@ -822,6 +864,7 @@ class WikiImporter {
 	/**
 	 * @param array $pageInfo
 	 * @param array $revisionInfo
+	 * @throws MWException
 	 * @return bool|mixed
 	 */
 	private function processRevision( $pageInfo, $revisionInfo ) {
@@ -840,7 +883,7 @@ class WikiImporter {
 				'text',
 				''
 			] ) ) &&
-			(int)( strlen( $revisionInfo['text'] ) / 1024 ) > $wgMaxArticleSize
+			strlen( $revisionInfo['text'] ) > $wgMaxArticleSize * 1024
 		) {
 			throw new MWException( 'The text of ' .
 				( isset( $revisionInfo['id'] ) ?
@@ -886,9 +929,14 @@ class WikiImporter {
 		if ( isset( $revisionInfo['contributor']['ip'] ) ) {
 			$revision->setUserIP( $revisionInfo['contributor']['ip'] );
 		} elseif ( isset( $revisionInfo['contributor']['username'] ) ) {
-			$revision->setUsername( $revisionInfo['contributor']['username'] );
+			$revision->setUsername(
+				$this->externalUserNames->applyPrefix( $revisionInfo['contributor']['username'] )
+			);
 		} else {
-			$revision->setUsername( 'Unknown user' );
+			$revision->setUsername( $this->externalUserNames->addPrefix( 'Unknown user' ) );
+		}
+		if ( isset( $revisionInfo['sha1'] ) ) {
+			$revision->setSha1Base36( $revisionInfo['sha1'] );
 		}
 		$revision->setNoUpdates( $this->mNoUpdates );
 
@@ -992,7 +1040,9 @@ class WikiImporter {
 			$revision->setUserIP( $uploadInfo['contributor']['ip'] );
 		}
 		if ( isset( $uploadInfo['contributor']['username'] ) ) {
-			$revision->setUsername( $uploadInfo['contributor']['username'] );
+			$revision->setUsername(
+				$this->externalUserNames->applyPrefix( $uploadInfo['contributor']['username'] )
+			);
 		}
 		$revision->setNoUpdates( $this->mNoUpdates );
 

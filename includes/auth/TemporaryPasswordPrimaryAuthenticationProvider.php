@@ -126,8 +126,8 @@ class TemporaryPasswordPrimaryAuthenticationProvider
 			return AuthenticationResponse::newAbstain();
 		}
 
-		$dbw = wfGetDB( DB_MASTER );
-		$row = $dbw->selectRow(
+		$dbr = wfGetDB( DB_REPLICA );
+		$row = $dbr->selectRow(
 			'user',
 			[
 				'user_id', 'user_newpassword', 'user_newpass_time',
@@ -140,7 +140,7 @@ class TemporaryPasswordPrimaryAuthenticationProvider
 		}
 
 		$status = $this->checkPasswordValidity( $username, $req->password );
-		if ( !$status->isOk() ) {
+		if ( !$status->isOK() ) {
 			// Fatal, can't log in
 			return AuthenticationResponse::newFail( $status->getMessage() );
 		}
@@ -154,6 +154,16 @@ class TemporaryPasswordPrimaryAuthenticationProvider
 			return $this->failResponse( $req );
 		}
 
+		// Add an extra log entry since a temporary password is
+		// an unusual way to log in, so its important to keep track
+		// of in case of abuse.
+		$this->logger->info( "{user} successfully logged in using temp password",
+			[
+				'user' => $username,
+				'requestIP' => $this->manager->getRequest()->getIP()
+			]
+		);
+
 		$this->setPasswordResetFlag( $username, $status );
 
 		return AuthenticationResponse::newPass( $username );
@@ -165,8 +175,8 @@ class TemporaryPasswordPrimaryAuthenticationProvider
 			return false;
 		}
 
-		$dbw = wfGetDB( DB_MASTER );
-		$row = $dbw->selectRow(
+		$dbr = wfGetDB( DB_REPLICA );
+		$row = $dbr->selectRow(
 			'user',
 			[ 'user_newpassword', 'user_newpass_time' ],
 			[ 'user_name' => $username ],
@@ -236,7 +246,7 @@ class TemporaryPasswordPrimaryAuthenticationProvider
 			$sv->merge( $this->checkPasswordValidity( $username, $req->password ) );
 
 			if ( $req->mailpassword ) {
-				if ( !$this->emailEnabled && !$req->hasBackchannel ) {
+				if ( !$this->emailEnabled ) {
 					return \StatusValue::newFatal( 'passwordreset-emaildisabled' );
 				}
 
@@ -303,7 +313,14 @@ class TemporaryPasswordPrimaryAuthenticationProvider
 		);
 
 		if ( $sendMail ) {
-			$this->sendPasswordResetEmail( $req );
+			// Send email after DB commit
+			$dbw->onTransactionIdle(
+				function () use ( $req ) {
+					/** @var TemporaryPasswordAuthenticationRequest $req */
+					$this->sendPasswordResetEmail( $req );
+				},
+				__METHOD__
+			);
 		}
 	}
 
@@ -319,7 +336,7 @@ class TemporaryPasswordPrimaryAuthenticationProvider
 
 		$ret = \StatusValue::newGood();
 		if ( $req ) {
-			if ( $req->mailpassword && !$req->hasBackchannel ) {
+			if ( $req->mailpassword ) {
 				if ( !$this->emailEnabled ) {
 					$ret->merge( \StatusValue::newFatal( 'emaildisabled' ) );
 				} elseif ( !$user->getEmail() ) {
@@ -343,7 +360,7 @@ class TemporaryPasswordPrimaryAuthenticationProvider
 			if ( $req->username !== null && $req->password !== null ) {
 				// Nothing we can do yet, because the user isn't in the DB yet
 				if ( $req->username !== $user->getName() ) {
-					$req = clone( $req );
+					$req = clone $req;
 					$req->username = $user->getName();
 				}
 
@@ -370,7 +387,13 @@ class TemporaryPasswordPrimaryAuthenticationProvider
 		$this->providerChangeAuthenticationData( $req );
 
 		if ( $mailpassword ) {
-			$this->sendNewAccountEmail( $user, $creator, $req->password );
+			// Send email after DB commit
+			wfGetDB( DB_MASTER )->onTransactionIdle(
+				function () use ( $user, $creator, $req ) {
+					$this->sendNewAccountEmail( $user, $creator, $req->password );
+				},
+				__METHOD__
+			);
 		}
 
 		return $mailpassword ? 'byemail' : null;

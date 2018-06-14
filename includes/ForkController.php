@@ -19,6 +19,7 @@
  *
  * @file
  */
+use MediaWiki\MediaWikiServices;
 
 /**
  * Class for managing forking command line scripts.
@@ -53,7 +54,7 @@ class ForkController {
 	const RESTART_ON_ERROR = 1;
 
 	public function __construct( $numProcs, $flags = 0 ) {
-		if ( PHP_SAPI != 'cli' ) {
+		if ( !wfIsCLI() ) {
 			throw new MWException( "ForkController cannot be used from the web." );
 		}
 		$this->procsToStart = $numProcs;
@@ -150,7 +151,7 @@ class ForkController {
 	protected function prepareEnvironment() {
 		global $wgMemc;
 		// Don't share DB, storage, or memcached connections
-		wfGetLBFactory()->destroyInstance();
+		MediaWikiServices::resetChildProcessServices();
 		FileBackendGroup::destroySingleton();
 		LockManagerGroup::destroySingletons();
 		JobQueueGroup::destroySingletons();

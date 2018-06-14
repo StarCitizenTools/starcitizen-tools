@@ -49,23 +49,60 @@ class MapCacheLRU {
 	}
 
 	/**
+	 * @param array $values Key/value map in order of increasingly recent access
+	 * @param int $maxKeys
+	 * @return MapCacheLRU
+	 * @since 1.30
+	 */
+	public static function newFromArray( array $values, $maxKeys ) {
+		$mapCache = new self( $maxKeys );
+		$mapCache->cache = ( count( $values ) > $maxKeys )
+			? array_slice( $values, -$maxKeys, null, true )
+			: $values;
+
+		return $mapCache;
+	}
+
+	/**
+	 * @return array Key/value map in order of increasingly recent access
+	 * @since 1.30
+	 */
+	public function toArray() {
+		return $this->cache;
+	}
+
+	/**
 	 * Set a key/value pair.
 	 * This will prune the cache if it gets too large based on LRU.
 	 * If the item is already set, it will be pushed to the top of the cache.
 	 *
+	 * To reduce evictions due to one-off use of many new keys, $rank can be
+	 * set to have keys start at the top of a bottom fraction of the list. A value
+	 * of 3/8 means values start at the top of the bottom 3/8s of the list and are
+	 * moved to the top of the list when accessed a second time.
+	 *
 	 * @param string $key
 	 * @param mixed $value
+	 * @param float $rank Bottom fraction of the list where keys start off [Default: 1.0]
 	 * @return void
 	 */
-	public function set( $key, $value ) {
-		if ( array_key_exists( $key, $this->cache ) ) {
+	public function set( $key, $value, $rank = 1.0 ) {
+		if ( $this->has( $key ) ) {
 			$this->ping( $key );
 		} elseif ( count( $this->cache ) >= $this->maxCacheKeys ) {
 			reset( $this->cache );
 			$evictKey = key( $this->cache );
 			unset( $this->cache[$evictKey] );
 		}
-		$this->cache[$key] = $value;
+
+		if ( $rank < 1.0 && $rank > 0 ) {
+			$offset = intval( $rank * count( $this->cache ) );
+			$this->cache = array_slice( $this->cache, 0, $offset, true )
+				+ [ $key => $value ]
+				+ array_slice( $this->cache, $offset, null, true );
+		} else {
+			$this->cache[$key] = $value;
+		}
 	}
 
 	/**
@@ -75,6 +112,10 @@ class MapCacheLRU {
 	 * @return bool
 	 */
 	public function has( $key ) {
+		if ( !is_int( $key ) && !is_string( $key ) ) {
+			throw new UnexpectedValueException(
+				__METHOD__ . ' called with invalid key. Must be string or integer.' );
+		}
 		return array_key_exists( $key, $this->cache );
 	}
 
@@ -84,13 +125,15 @@ class MapCacheLRU {
 	 * If the item is already set, it will be pushed to the top of the cache.
 	 *
 	 * @param string $key
-	 * @return mixed
+	 * @return mixed Returns null if the key was not found
 	 */
 	public function get( $key ) {
-		if ( !array_key_exists( $key, $this->cache ) ) {
+		if ( !$this->has( $key ) ) {
 			return null;
 		}
+
 		$this->ping( $key );
+
 		return $this->cache[$key];
 	}
 
@@ -100,6 +143,30 @@ class MapCacheLRU {
 	 */
 	public function getAllKeys() {
 		return array_keys( $this->cache );
+	}
+
+	/**
+	 * Get an item with the given key, producing and setting it if not found.
+	 *
+	 * If the callback returns false, then nothing is stored.
+	 *
+	 * @since 1.28
+	 * @param string $key
+	 * @param callable $callback Callback that will produce the value
+	 * @param float $rank Bottom fraction of the list where keys start off [Default: 1.0]
+	 * @return mixed The cached value if found or the result of $callback otherwise
+	 */
+	public function getWithSetCallback( $key, callable $callback, $rank = 1.0 ) {
+		if ( $this->has( $key ) ) {
+			$value = $this->get( $key );
+		} else {
+			$value = call_user_func( $callback );
+			if ( $value !== false ) {
+				$this->set( $key, $value, $rank );
+			}
+		}
+
+		return $value;
 	}
 
 	/**

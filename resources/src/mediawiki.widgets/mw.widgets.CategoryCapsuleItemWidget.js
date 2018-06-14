@@ -6,6 +6,8 @@
  */
 ( function ( $, mw ) {
 
+	var hasOwn = Object.prototype.hasOwnProperty;
+
 	/**
 	 * @class mw.widgets.PageExistenceCache
 	 * @private
@@ -38,10 +40,10 @@
 		queue = this.existenceCheckQueue;
 		this.existenceCheckQueue = {};
 		titles = Object.keys( queue ).filter( function ( title ) {
-			if ( cache.existenceCache.hasOwnProperty( title ) ) {
+			if ( hasOwn.call( cache.existenceCache, title ) ) {
 				queue[ title ].resolve( cache.existenceCache[ title ] );
 			}
-			return !cache.existenceCache.hasOwnProperty( title );
+			return !hasOwn.call( cache.existenceCache, title );
 		} );
 		if ( !titles.length ) {
 			return;
@@ -52,9 +54,21 @@
 			prop: [ 'info' ],
 			titles: titles
 		} ).done( function ( response ) {
+			var
+				normalized = {},
+				pages = {};
+			$.each( response.query.normalized || [], function ( index, data ) {
+				normalized[ data.fromencoded ? decodeURIComponent( data.from ) : data.from ] = data.to;
+			} );
 			$.each( response.query.pages, function ( index, page ) {
-				var title = new ForeignTitle( page.title ).getPrefixedText();
-				cache.existenceCache[ title ] = !page.missing;
+				pages[ page.title ] = !page.missing;
+			} );
+			titles.forEach( function ( title ) {
+				var normalizedTitle = title;
+				while ( hasOwn.call( normalized, normalizedTitle ) ) {
+					normalizedTitle = normalized[ normalizedTitle ];
+				}
+				cache.existenceCache[ title ] = pages[ normalizedTitle ];
 				queue[ title ].resolve( cache.existenceCache[ title ] );
 			} );
 		} );
@@ -69,7 +83,7 @@
 	 */
 	PageExistenceCache.prototype.checkPageExistence = function ( title ) {
 		var key = title.getPrefixedText();
-		if ( !this.existenceCheckQueue[ key ] ) {
+		if ( !hasOwn.call( this.existenceCheckQueue, key ) ) {
 			this.existenceCheckQueue[ key ] = $.Deferred();
 		}
 		this.processExistenceCheckQueueDebounced();
@@ -82,7 +96,8 @@
 	 * @extends mw.Title
 	 *
 	 * @constructor
-	 * @inheritdoc
+	 * @param {string} title
+	 * @param {number} [namespace]
 	 */
 	function ForeignTitle( title, namespace ) {
 		// We only need to handle categories here... but we don't know the target language.
@@ -97,11 +112,10 @@
 	};
 
 	/**
-	 * @class mw.widgets.CategoryCapsuleItemWidget
-	 *
 	 * Category selector capsule item widget. Extends OO.ui.CapsuleItemWidget with the ability to link
 	 * to the given page, and to show its existence status (i.e., whether it is a redlink).
 	 *
+	 * @class mw.widgets.CategoryCapsuleItemWidget
 	 * @uses mw.Api
 	 * @extends OO.ui.CapsuleItemWidget
 	 *
@@ -125,7 +139,7 @@
 			.text( this.label )
 			.attr( 'target', '_blank' )
 			.on( 'click', function ( e ) {
-				// CapsuleMultiSelectWidget really wants to prevent you from clicking the link, don't let it
+				// CapsuleMultiselectWidget really wants to prevent you from clicking the link, don't let it
 				e.stopPropagation();
 			} );
 
@@ -134,7 +148,6 @@
 		this.$label.replaceWith( this.$link );
 		this.setLabelElement( this.$link );
 
-		/*jshint -W024*/
 		if ( !this.constructor.static.pageExistenceCaches[ this.apiUrl ] ) {
 			this.constructor.static.pageExistenceCaches[ this.apiUrl ] =
 				new PageExistenceCache( new mw.ForeignApi( this.apiUrl ) );
@@ -144,7 +157,6 @@
 			.done( function ( exists ) {
 				widget.setMissing( !exists );
 			} );
-		/*jshint +W024*/
 	};
 
 	/* Setup */
@@ -153,7 +165,6 @@
 
 	/* Static Properties */
 
-	/*jshint -W024*/
 	/**
 	 * Map of API URLs to PageExistenceCache objects.
 	 *
@@ -164,7 +175,6 @@
 	mw.widgets.CategoryCapsuleItemWidget.static.pageExistenceCaches = {
 		'': new PageExistenceCache()
 	};
-	/*jshint +W024*/
 
 	/* Methods */
 

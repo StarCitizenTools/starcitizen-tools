@@ -22,13 +22,11 @@
 namespace MediaWiki\Auth;
 
 use BagOStuff;
-use Config;
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
-use Psr\Log\NullLogger;
-use User;
 
 /**
  * A helper class for throttling authentication attempts.
@@ -71,7 +69,7 @@ class Throttler implements LoggerAwareInterface {
 		}
 
 		if ( $conditions === null ) {
-			$config = \ConfigFactory::getDefaultInstance()->makeConfig( 'main' );
+			$config = MediaWikiServices::getInstance()->getMainConfig();
 			$conditions = $config->get( 'PasswordAttemptThrottle' );
 			$params += [
 				'type' => 'password',
@@ -129,16 +127,16 @@ class Throttler implements LoggerAwareInterface {
 				continue;
 			}
 
-			$throttleKey = wfGlobalCacheKey( 'throttler', $this->type, $index, $ipKey, $userKey );
+			$throttleKey = $this->cache->makeGlobalKey( 'throttler', $this->type, $index, $ipKey, $userKey );
 			$throttleCount = $this->cache->get( $throttleKey );
 
-			if ( !$throttleCount ) {  // counter not started yet
+			if ( !$throttleCount ) { // counter not started yet
 				$this->cache->add( $throttleKey, 1, $expiry );
 			} elseif ( $throttleCount < $count ) { // throttle limited not yet reached
 				$this->cache->incr( $throttleKey );
 			} else { // throttled
 				$this->logRejection( [
-					'type' => $this->type,
+					'throttle' => $this->type,
 					'index' => $index,
 					'ip' => $ipKey,
 					'username' => $username,
@@ -172,7 +170,7 @@ class Throttler implements LoggerAwareInterface {
 		$userKey = $username ? md5( $username ) : null;
 		foreach ( $this->conditions as $index => $specificThrottle ) {
 			$ipKey = isset( $specificThrottle['allIPs'] ) ? null : $ip;
-			$throttleKey = wfGlobalCacheKey( 'throttler', $this->type, $index, $ipKey, $userKey );
+			$throttleKey = $this->cache->makeGlobalKey( 'throttler', $this->type, $index, $ipKey, $userKey );
 			$this->cache->delete( $throttleKey );
 		}
 	}
@@ -194,7 +192,7 @@ class Throttler implements LoggerAwareInterface {
 	}
 
 	protected function logRejection( array $context ) {
-		$logMsg = 'Throttle {type} hit, throttled for {expiry} seconds due to {count} attempts '
+		$logMsg = 'Throttle {throttle} hit, throttled for {expiry} seconds due to {count} attempts '
 			. 'from username {username} and IP {ip}';
 
 		// If we are hitting a throttle for >= warningLimit attempts, it is much more likely to be

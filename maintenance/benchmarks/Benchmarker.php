@@ -26,7 +26,11 @@
  * @ingroup Benchmark
  */
 
+use Wikimedia\RunningStat;
+
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/../Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Base class for benchmark scripts.
@@ -34,67 +38,128 @@ require_once __DIR__ . '/../Maintenance.php';
  * @ingroup Benchmark
  */
 abstract class Benchmarker extends Maintenance {
-	private $results;
+	protected $defaultCount = 100;
+	private $lang;
 
 	public function __construct() {
 		parent::__construct();
-		$this->addOption( 'count', "How many times to run a benchmark", false, true );
+		$this->addOption( 'count', 'How many times to run a benchmark', false, true );
+		$this->addOption( 'verbose', 'Verbose logging of resource usage', false, false, 'v' );
 	}
 
 	public function bench( array $benchs ) {
-		$bench_number = 0;
-		$count = $this->getOption( 'count', 100 );
+		$this->lang = Language::factory( 'en' );
 
-		foreach ( $benchs as $bench ) {
-			// handle empty args
-			if ( !array_key_exists( 'args', $bench ) ) {
+		$this->startBench();
+		$count = $this->getOption( 'count', $this->defaultCount );
+		$verbose = $this->hasOption( 'verbose' );
+		foreach ( $benchs as $key => $bench ) {
+			// Shortcut for simple functions
+			if ( is_callable( $bench ) ) {
+				$bench = [ 'function' => $bench ];
+			}
+
+			// Default to no arguments
+			if ( !isset( $bench['args'] ) ) {
 				$bench['args'] = [];
 			}
 
-			$bench_number++;
-			$start = microtime( true );
+			// Optional setup called outside time measure
+			if ( isset( $bench['setup'] ) ) {
+				call_user_func( $bench['setup'] );
+			}
+
+			// Run benchmarks
+			$stat = new RunningStat();
 			for ( $i = 0; $i < $count; $i++ ) {
+				$t = microtime( true );
 				call_user_func_array( $bench['function'], $bench['args'] );
-			}
-			$delta = microtime( true ) - $start;
-
-			// function passed as a callback
-			if ( is_array( $bench['function'] ) ) {
-				$ret = get_class( $bench['function'][0] ) . '->' . $bench['function'][1];
-				$bench['function'] = $ret;
+				$t = ( microtime( true ) - $t ) * 1000;
+				if ( $verbose ) {
+					$this->verboseRun( $i );
+				}
+				$stat->addObservation( $t );
 			}
 
-			$this->results[$bench_number] = [
-				'function' => $bench['function'],
-				'arguments' => $bench['args'],
-				'count' => $count,
-				'delta' => $delta,
-				'average' => $delta / $count,
-			];
+			// Name defaults to name of called function
+			if ( is_string( $key ) ) {
+				$name = $key;
+			} else {
+				if ( is_array( $bench['function'] ) ) {
+					$name = get_class( $bench['function'][0] ) . '::' . $bench['function'][1];
+				} else {
+					$name = strval( $bench['function'] );
+				}
+				$name = sprintf( "%s(%s)",
+					$name,
+					implode( ', ', $bench['args'] )
+				);
+			}
+
+			$this->addResult( [
+				'name' => $name,
+				'count' => $stat->getCount(),
+				// Get rate per second from mean (in ms)
+				'rate' => $stat->getMean() == 0 ? INF : ( 1.0 / ( $stat->getMean() / 1000.0 ) ),
+				'total' => $stat->getMean() * $stat->getCount(),
+				'mean' => $stat->getMean(),
+				'max' => $stat->max,
+				'stddev' => $stat->getStdDev(),
+				'usage' => [
+					'mem' => memory_get_usage( true ),
+					'mempeak' => memory_get_peak_usage( true ),
+				],
+			] );
 		}
 	}
 
-	public function getFormattedResults() {
-		$ret = sprintf( "Running PHP version %s (%s) on %s %s %s\n\n",
-			phpversion(),
-			php_uname( 'm' ),
-			php_uname( 's' ),
-			php_uname( 'r' ),
-			php_uname( 'v' )
+	public function startBench() {
+		$this->output(
+			sprintf( "Running PHP version %s (%s) on %s %s %s\n\n",
+				phpversion(),
+				php_uname( 'm' ),
+				php_uname( 's' ),
+				php_uname( 'r' ),
+				php_uname( 'v' )
+			)
 		);
-		foreach ( $this->results as $res ) {
-			// show function with args
-			$ret .= sprintf( "%s times: function %s(%s) :\n",
-				$res['count'],
-				$res['function'],
-				implode( ', ', $res['arguments'] )
-			);
-			$ret .= sprintf( "   %6.2fms (%6.2fms each)\n",
-				$res['delta'] * 1000,
-				$res['average'] * 1000
+	}
+
+	public function addResult( $res ) {
+		$ret = sprintf( "%s\n  %' 6s: %d\n",
+			$res['name'],
+			'count',
+			$res['count']
+		);
+		$ret .= sprintf( "  %' 6s: %8.1f/s\n",
+			'rate',
+			$res['rate']
+		);
+		foreach ( [ 'total', 'mean', 'max', 'stddev' ] as $metric ) {
+			$ret .= sprintf( "  %' 6s: %8.2fms\n",
+				$metric,
+				$res[$metric]
 			);
 		}
 
-		return $ret;
+		foreach ( [
+			'mem' => 'Current memory usage',
+			'mempeak' => 'Peak memory usage'
+		] as $key => $label ) {
+			$ret .= sprintf( "%' 20s: %s\n",
+				$label,
+				$this->lang->formatSize( $res['usage'][$key] )
+			);
+		}
+
+		$this->output( "$ret\n" );
+	}
+
+	protected function verboseRun( $iteration ) {
+		$this->output( sprintf( "#%3d - memory: %-10s - peak: %-10s\n",
+			$iteration,
+			$this->lang->formatSize( memory_get_usage( true ) ),
+			$this->lang->formatSize( memory_get_peak_usage( true ) )
+		) );
 	}
 }

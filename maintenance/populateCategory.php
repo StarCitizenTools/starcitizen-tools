@@ -71,7 +71,7 @@ TEXT
 	public function execute() {
 		$begin = $this->getOption( 'begin', '' );
 		$throttle = $this->getOption( 'throttle', 0 );
-		$force = $this->getOption( 'force', false );
+		$force = $this->hasOption( 'force' );
 
 		$dbw = $this->getDB( DB_MASTER );
 
@@ -150,5 +150,5 @@ TEXT
 	}
 }
 
-$maintClass = "PopulateCategory";
+$maintClass = PopulateCategory::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

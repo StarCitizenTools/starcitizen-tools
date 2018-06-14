@@ -42,6 +42,29 @@ class SearchResultSet {
 
 	protected $containedSyntax = false;
 
+	/**
+	 * Cache of titles.
+	 * Lists titles of the result set, in the same order as results.
+	 * @var Title[]
+	 */
+	private $titles;
+
+	/**
+	 * Cache of results - serialization of the result iterator
+	 * as an array.
+	 * @var SearchResult[]
+	 */
+	private $results;
+
+	/**
+	 * Set of result's extra data, indexed per result id
+	 * and then per data item name.
+	 * The structure is:
+	 * PAGE_ID => [ augmentor name => data, ... ]
+	 * @var array[]
+	 */
+	protected $extraData = [];
+
 	public function __construct( $containedSyntax = false ) {
 		$this->containedSyntax = $containedSyntax;
 	}
@@ -129,6 +152,7 @@ class SearchResultSet {
 	/**
 	 * Return a result set of hits on other (multiple) wikis associated with this one
 	 *
+	 * @param int $type
 	 * @return SearchResultSet[]
 	 */
 	function getInterwikiResults( $type = self::SECONDARY_RESULTS ) {
@@ -138,6 +162,7 @@ class SearchResultSet {
 	/**
 	 * Check if there are results on other wikis
 	 *
+	 * @param int $type
 	 * @return bool
 	 */
 	function hasInterwikiResults( $type = self::SECONDARY_RESULTS ) {
@@ -147,15 +172,15 @@ class SearchResultSet {
 	/**
 	 * Fetches next search result, or false.
 	 * STUB
-	 *
-	 * @return SearchResult
+	 * FIXME: refactor as iterator, so we could use nicer interfaces.
+	 * @return SearchResult|false
 	 */
 	function next() {
 		return false;
 	}
 
 	/**
-	 * Rewind result set back to begining
+	 * Rewind result set back to beginning
 	 */
 	function rewind() {
 	}
@@ -175,5 +200,80 @@ class SearchResultSet {
 	 */
 	public function searchContainedSyntax() {
 		return $this->containedSyntax;
+	}
+
+	/**
+	 * Extract all the results in the result set as array.
+	 * @return SearchResult[]
+	 */
+	public function extractResults() {
+		if ( is_null( $this->results ) ) {
+			$this->results = [];
+			if ( $this->numRows() == 0 ) {
+				// Don't bother if we've got empty result
+				return $this->results;
+			}
+			$this->rewind();
+			while ( ( $result = $this->next() ) != false ) {
+				$this->results[] = $result;
+			}
+			$this->rewind();
+		}
+		return $this->results;
+	}
+
+	/**
+	 * Extract all the titles in the result set.
+	 * @return Title[]
+	 */
+	public function extractTitles() {
+		if ( is_null( $this->titles ) ) {
+			if ( $this->numRows() == 0 ) {
+				// Don't bother if we've got empty result
+				$this->titles = [];
+			} else {
+				$this->titles = array_map(
+					function ( SearchResult $result ) {
+						return $result->getTitle();
+					},
+					$this->extractResults() );
+			}
+		}
+		return $this->titles;
+	}
+
+	/**
+	 * Sets augmented data for result set.
+	 * @param string $name Extra data item name
+	 * @param array[] $data Extra data as PAGEID => data
+	 */
+	public function setAugmentedData( $name, $data ) {
+		foreach ( $data as $id => $resultData ) {
+			$this->extraData[$id][$name] = $resultData;
+		}
+	}
+
+	/**
+	 * Returns extra data for specific result and store it in SearchResult object.
+	 * @param SearchResult $result
+	 * @return array|null List of data as name => value or null if none present.
+	 */
+	public function augmentResult( SearchResult $result ) {
+		$id = $result->getTitle()->getArticleID();
+		if ( !$id || !isset( $this->extraData[$id] ) ) {
+			return null;
+		}
+		$result->setExtensionData( $this->extraData[$id] );
+		return $this->extraData[$id];
+	}
+
+	/**
+	 * @return int|null The offset the current page starts at. Typically
+	 *  this should be null to allow the UI to decide on its own, but in
+	 *  special cases like interleaved AB tests specifying explicitly is
+	 *  necessary.
+	 */
+	public function getOffset() {
+		return null;
 	}
 }

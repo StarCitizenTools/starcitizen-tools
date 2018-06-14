@@ -18,6 +18,8 @@
  * @author Yanteng3
  */
 
+$fallback = 'zh-hant'; // T125373
+
 $specialPageAliases = [
 	'Activeusers'               => [ '躍簿' ],
 	'Allmessages'               => [ '官話' ],
@@ -74,7 +76,7 @@ $specialPageAliases = [
 	'Protectedpages'            => [ '頁錮' ],
 	'Randompage'                => [ '清風翻書' ],
 	'Randomredirect'            => [ '任渡' ],
-	'Recentchanges'             => [ '近易' ],
+	'Recentchanges'             => [ '監修', '近易' ],
 	'Recentchangeslinked'       => [ '援引' ],
 	'Search'                    => [ '尋' ],
 	'Shortpages'                => [ '短篇' ],
@@ -146,7 +148,9 @@ $digitTransformTable = [
 	'7' => '七',
 	'8' => '八',
 	'9' => '九',
+];
+
+$separatorTransformTable = [
 	'.' => '點',
 	',' => '',
 ];
-

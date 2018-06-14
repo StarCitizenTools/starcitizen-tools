@@ -44,7 +44,7 @@ $specialPageAliases = [
 	'Allpages'                  => [ 'Todas', 'Todas_las_páginas' ],
 	'Ancientpages'              => [ 'PáginasAntiguas', 'Páginas_antiguas' ],
 	'Badtitle'                  => [ 'Título_incorrecto' ],
-	'Blankpage'                 => [ 'Blanquear_página', 'PáginaEnBlanco', 'BlanquearPágina', 'Página_en_blanco' ],
+	'Blankpage'                 => [ 'PáginaEnBlanco', 'Blanquear_página', 'BlanquearPágina', 'Página_en_blanco' ],
 	'Block'                     => [ 'Bloquear' ],
 	'Booksources'               => [ 'FuentesDeLibros', 'Fuentes_de_libros' ],
 	'BrokenRedirects'           => [ 'RedireccionesRotas', 'Redirecciones_rotas' ],
@@ -299,5 +299,6 @@ $dateFormats = [
 ];
 
 $separatorTransformTable = [ ',' => "\xc2\xa0", '.' => ',' ];
-$linkTrail = '/^([a-záéíóúñ]+)(.*)$/sDu';
+$minimumGroupingDigits = 2;
 
+$linkTrail = '/^([a-záéíóúñ]+)(.*)$/sDu';

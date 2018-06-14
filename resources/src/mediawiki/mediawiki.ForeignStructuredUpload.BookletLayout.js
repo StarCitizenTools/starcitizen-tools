@@ -1,4 +1,4 @@
-/*global moment */
+/* global moment, Uint8Array */
 ( function ( $, mw ) {
 
 	/**
@@ -18,6 +18,9 @@
 	 * @class mw.ForeignStructuredUpload.BookletLayout
 	 * @uses mw.ForeignStructuredUpload
 	 * @extends mw.Upload.BookletLayout
+	 *
+	 * @constructor
+	 * @param {Object} config Configuration options
 	 * @cfg {string} [target] Used to choose the target repository.
 	 *     If nothing is passed, the {@link mw.ForeignUpload#property-target default} is used.
 	 */
@@ -43,11 +46,11 @@
 		return mw.ForeignStructuredUpload.BookletLayout.parent.prototype.initialize.call( this ).then(
 			function () {
 				return $.when(
-					// Point the CategorySelector to the right wiki
+					// Point the CategoryMultiselectWidget to the right wiki
 					booklet.upload.getApi().then( function ( api ) {
 						// If this is a ForeignApi, it will have a apiUrl, otherwise we don't need to do anything
 						if ( api.apiUrl ) {
-							// Can't reuse the same object, CategorySelector calls #abort on its mw.Api instance
+							// Can't reuse the same object, CategoryMultiselectWidget calls #abort on its mw.Api instance
 							booklet.categoriesWidget.api = new mw.ForeignApi( api.apiUrl );
 						}
 						return $.Deferred().resolve();
@@ -83,21 +86,34 @@
 
 						// Update license messages
 						return msgPromise.then( function () {
-							booklet.$ownWorkMessage
-								.msg( 'upload-form-label-own-work-message-' + msgs )
-								.find( 'a' ).attr( 'target', '_blank' );
-							booklet.$notOwnWorkMessage
-								.msg( 'upload-form-label-not-own-work-message-' + msgs )
-								.find( 'a' ).attr( 'target', '_blank' );
-							booklet.$notOwnWorkLocal
-								.msg( 'upload-form-label-not-own-work-local-' + msgs )
-								.find( 'a' ).attr( 'target', '_blank' );
+							var $labels;
+							booklet.$ownWorkMessage.msg( 'upload-form-label-own-work-message-' + msgs );
+							booklet.$notOwnWorkMessage.msg( 'upload-form-label-not-own-work-message-' + msgs );
+							booklet.$notOwnWorkLocal.msg( 'upload-form-label-not-own-work-local-' + msgs );
+
+							$labels = $( [
+								booklet.$ownWorkMessage[ 0 ],
+								booklet.$notOwnWorkMessage[ 0 ],
+								booklet.$notOwnWorkLocal[ 0 ]
+							] );
+
+							// Improve the behavior of links inside these labels, which may point to important
+							// things like licensing requirements or terms of use
+							$labels.find( 'a' )
+								.attr( 'target', '_blank' )
+								.on( 'click', function ( e ) {
+									// OO.ui.FieldLayout#onLabelClick is trying to prevent default on all clicks,
+									// which causes the links to not be openable. Don't let it do that.
+									e.stopPropagation();
+								} );
 						} );
+					}, function ( errorMsg ) {
+						booklet.getPage( 'upload' ).$element.msg( errorMsg );
+						return $.Deferred().resolve();
 					} )
 				);
 			}
-		).then(
-			null,
+		).catch(
 			// Always resolve, never reject
 			function () { return $.Deferred().resolve(); }
 		);
@@ -111,7 +127,14 @@
 	 * @return {mw.Upload}
 	 */
 	mw.ForeignStructuredUpload.BookletLayout.prototype.createUpload = function () {
-		return new mw.ForeignStructuredUpload( this.target );
+		return new mw.ForeignStructuredUpload( this.target, {
+			parameters: {
+				errorformat: 'html',
+				errorlang: mw.config.get( 'wgUserLanguage' ),
+				errorsuselocal: 1,
+				formatversion: 2
+			}
+		} );
 	};
 
 	/* Form renderers */
@@ -212,13 +235,12 @@
 			required: true,
 			validate: /.+/
 		} );
-		this.descriptionWidget = new OO.ui.TextInputWidget( {
+		this.descriptionWidget = new OO.ui.MultilineTextInputWidget( {
 			required: true,
 			validate: /\S+/,
-			multiline: true,
 			autosize: true
 		} );
-		this.categoriesWidget = new mw.widgets.CategorySelector( {
+		this.categoriesWidget = new mw.widgets.CategoryMultiselectWidget( {
 			// Can't be done here because we don't know the target wiki yet... done in #initialize.
 			// api: new mw.ForeignApi( ... ),
 			$overlay: this.$overlay
@@ -298,6 +320,50 @@
 		} );
 	};
 
+	/**
+	 * @param {mw.Title} filename
+	 * @return {jQuery.Promise} Resolves (on success) or rejects with OO.ui.Error
+	 */
+	mw.ForeignStructuredUpload.BookletLayout.prototype.validateFilename = function ( filename ) {
+		return ( new mw.Api() ).get( {
+			action: 'query',
+			prop: 'info',
+			titles: filename.getPrefixedDb(),
+			formatversion: 2
+		} ).then(
+			function ( result ) {
+				// if the file already exists, reject right away, before
+				// ever firing finishStashUpload()
+				if ( !result.query.pages[ 0 ].missing ) {
+					return $.Deferred().reject( new OO.ui.Error(
+						$( '<p>' ).msg( 'fileexists', filename.getPrefixedDb() ),
+						{ recoverable: false }
+					) );
+				}
+			},
+			function () {
+				// API call failed - this could be a connection hiccup...
+				// Let's just ignore this validation step and turn this
+				// failure into a successful resolve ;)
+				return $.Deferred().resolve();
+			}
+		);
+	};
+
+	/**
+	 * @inheritdoc
+	 */
+	mw.ForeignStructuredUpload.BookletLayout.prototype.saveFile = function () {
+		var title = mw.Title.newFromText(
+			this.getFilename(),
+			mw.config.get( 'wgNamespaceIds' ).file
+		);
+
+		return this.uploadPromise
+			.then( this.validateFilename.bind( this, title ) )
+			.then( mw.ForeignStructuredUpload.BookletLayout.parent.prototype.saveFile.bind( this ) );
+	};
+
 	/* Getters */
 
 	/**
@@ -326,7 +392,8 @@
 		if ( file && file.type === 'image/jpeg' ) {
 			fileReader = new FileReader();
 			fileReader.onload = function () {
-				var fileStr, arr, i, metadata;
+				var fileStr, arr, i, metadata,
+					jpegmeta = mw.loader.require( 'mediawiki.libs.jpegmeta' );
 
 				if ( typeof fileReader.result === 'string' ) {
 					fileStr = fileReader.result;
@@ -340,7 +407,7 @@
 				}
 
 				try {
-					metadata = mw.libs.jpegmeta( this.result, file.name );
+					metadata = jpegmeta( fileStr, file.name );
 				} catch ( e ) {
 					metadata = null;
 				}

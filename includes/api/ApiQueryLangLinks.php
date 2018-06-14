@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on May 13, 2007
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,7 +40,14 @@ class ApiQueryLangLinks extends ApiQueryBase {
 		$prop = array_flip( (array)$params['prop'] );
 
 		if ( isset( $params['title'] ) && !isset( $params['lang'] ) ) {
-			$this->dieUsageMsg( [ 'missingparam', 'lang' ] );
+			$this->dieWithError(
+				[
+					'apierror-invalidparammix-mustusewith',
+					$this->encodeParamName( 'title' ),
+					$this->encodeParamName( 'lang' ),
+				],
+				'invalidparammix'
+			);
 		}
 
 		// Handle deprecated param
@@ -183,6 +186,6 @@ class ApiQueryLangLinks extends ApiQueryBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Langlinks';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Langlinks';
 	}
 }

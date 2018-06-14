@@ -18,8 +18,6 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
- * @ingroup Upload
  */
 
 /**
@@ -31,6 +29,9 @@
  *
  * Since this is based on the user's session, in effect this creates a private temporary file area.
  * However, the URLs for the files cannot be shared.
+ *
+ * @ingroup SpecialPage
+ * @ingroup Upload
  */
 class SpecialUploadStash extends UnlistedSpecialPage {
 	// UploadStash
@@ -60,7 +61,7 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 	 * Execute page -- can output a file directly or show a listing of them.
 	 *
 	 * @param string $subPage Subpage, e.g. in
-	 *   http://example.com/wiki/Special:UploadStash/foo.jpg, the "foo.jpg" part
+	 *   https://example.com/wiki/Special:UploadStash/foo.jpg, the "foo.jpg" part
 	 * @return bool Success
 	 */
 	public function execute( $subPage ) {
@@ -106,8 +107,7 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 			$message = $e->getMessage();
 		} catch ( SpecialUploadStashTooLargeException $e ) {
 			$code = 500;
-			$message = 'Cannot serve a file larger than ' . self::MAX_SERVE_BYTES .
-				' bytes. ' . $e->getMessage();
+			$message = $e->getMessage();
 		} catch ( Exception $e ) {
 			$code = 500;
 			$message = $e->getMessage();
@@ -129,7 +129,9 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 		$type = strtok( $key, '/' );
 
 		if ( $type !== 'file' && $type !== 'thumb' ) {
-			throw new UploadStashBadPathException( "Unknown type '$type'" );
+			throw new UploadStashBadPathException(
+				wfMessage( 'uploadstash-bad-path-unknown-type', $type )
+			);
 		}
 		$fileName = strtok( '/' );
 		$thumbPart = strtok( '/' );
@@ -137,7 +139,9 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 		if ( $type === 'thumb' ) {
 			$srcNamePos = strrpos( $thumbPart, $fileName );
 			if ( $srcNamePos === false || $srcNamePos < 1 ) {
-				throw new UploadStashBadPathException( 'Unrecognized thumb name' );
+				throw new UploadStashBadPathException(
+					wfMessage( 'uploadstash-bad-path-unrecognized-thumb-name' )
+				);
 			}
 			$paramString = substr( $thumbPart, 0, $srcNamePos - 1 );
 
@@ -147,8 +151,9 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 
 				return [ 'file' => $file, 'type' => $type, 'params' => $params ];
 			} else {
-				throw new UploadStashBadPathException( 'No handler found for ' .
-					"mime {$file->getMimeType()} of file {$file->getPath()}" );
+				throw new UploadStashBadPathException(
+					wfMessage( 'uploadstash-bad-path-no-handler', $file->getMimeType(), $file->getPath() )
+				);
 			}
 		}
 
@@ -181,7 +186,7 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 	 * Scale a file (probably with a locally installed imagemagick, or similar)
 	 * and output it to STDOUT.
 	 * @param File $file
-	 * @param array $params Scaling parameters ( e.g. array( width => '50' ) );
+	 * @param array $params Scaling parameters ( e.g. [ width => '50' ] );
 	 * @param int $flags Scaling flags ( see File:: constants )
 	 * @throws MWException|UploadStashFileNotFoundException
 	 * @return bool Success
@@ -194,12 +199,16 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 
 		$thumbnailImage = $file->transform( $params, $flags );
 		if ( !$thumbnailImage ) {
-			throw new MWException( 'Could not obtain thumbnail' );
+			throw new UploadStashFileNotFoundException(
+				wfMessage( 'uploadstash-file-not-found-no-thumb' )
+			);
 		}
 
 		// we should have just generated it locally
 		if ( !$thumbnailImage->getStoragePath() ) {
-			throw new UploadStashFileNotFoundException( "no local path for scaled item" );
+			throw new UploadStashFileNotFoundException(
+				wfMessage( 'uploadstash-file-not-found-no-local-path' )
+			);
 		}
 
 		// now we should construct a File, so we can get MIME and other such info in a standard way
@@ -207,7 +216,9 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 		$thumbFile = new UnregisteredLocalFile( false,
 			$this->stash->repo, $thumbnailImage->getStoragePath(), false );
 		if ( !$thumbFile ) {
-			throw new UploadStashFileNotFoundException( "couldn't create local file object for thumbnail" );
+			throw new UploadStashFileNotFoundException(
+				wfMessage( 'uploadstash-file-not-found-no-object' )
+			);
 		}
 
 		return $this->outputLocalFile( $thumbFile );
@@ -227,7 +238,7 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 	 * client to cache it forever.
 	 *
 	 * @param File $file
-	 * @param array $params Scaling parameters ( e.g. array( width => '50' ) );
+	 * @param array $params Scaling parameters ( e.g. [ width => '50' ] );
 	 * @param int $flags Scaling flags ( see File:: constants )
 	 * @throws MWException
 	 * @return bool Success
@@ -261,13 +272,19 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 		$status = $req->execute();
 		if ( !$status->isOK() ) {
 			$errors = $status->getErrorsArray();
-			$errorStr = "Fetching thumbnail failed: " . print_r( $errors, 1 );
-			$errorStr .= "\nurl = $scalerThumbUrl\n";
-			throw new MWException( $errorStr );
+			throw new UploadStashFileNotFoundException(
+				wfMessage(
+					'uploadstash-file-not-found-no-remote-thumb',
+					print_r( $errors, 1 ),
+					$scalerThumbUrl
+				)
+			);
 		}
 		$contentType = $req->getResponseHeader( "content-type" );
 		if ( !$contentType ) {
-			throw new MWException( "Missing content-type header" );
+			throw new UploadStashFileNotFoundException(
+				wfMessage( 'uploadstash-file-not-found-missing-content-type' )
+			);
 		}
 
 		return $this->outputContents( $req->getContent(), $contentType );
@@ -284,7 +301,9 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 	 */
 	private function outputLocalFile( File $file ) {
 		if ( $file->getSize() > self::MAX_SERVE_BYTES ) {
-			throw new SpecialUploadStashTooLargeException();
+			throw new SpecialUploadStashTooLargeException(
+				wfMessage( 'uploadstash-file-too-large', self::MAX_SERVE_BYTES )
+			);
 		}
 
 		return $file->getRepo()->streamFile( $file->getPath(),
@@ -296,7 +315,7 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 	/**
 	 * Output HTTP response of raw content
 	 * Side effect: writes HTTP response to STDOUT.
-	 * @param string $content Content
+	 * @param string $content
 	 * @param string $contentType MIME type
 	 * @throws SpecialUploadStashTooLargeException
 	 * @return bool
@@ -304,7 +323,9 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 	private function outputContents( $content, $contentType ) {
 		$size = strlen( $content );
 		if ( $size > self::MAX_SERVE_BYTES ) {
-			throw new SpecialUploadStashTooLargeException();
+			throw new SpecialUploadStashTooLargeException(
+				wfMessage( 'uploadstash-file-too-large', self::MAX_SERVE_BYTES )
+			);
 		}
 		// Cancel output buffering and gzipping if set
 		wfResetOutputBuffers();
@@ -327,7 +348,7 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 		header( "Content-Type: $contentType", true );
 		header( 'Content-Transfer-Encoding: binary', true );
 		header( 'Expires: Sun, 17-Jan-2038 19:14:07 GMT', true );
-		// Bug 53032 - It shouldn't be a problem here, but let's be safe and not cache
+		// T55032 - It shouldn't be a problem here, but let's be safe and not cache
 		header( 'Cache-Control: private' );
 		header( "Content-Length: $size", true );
 	}
@@ -391,17 +412,21 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 		if ( $files && count( $files ) ) {
 			sort( $files );
 			$fileListItemsHtml = '';
+			$linkRenderer = $this->getLinkRenderer();
 			foreach ( $files as $file ) {
-				$itemHtml = Linker::linkKnown( $this->getPageTitle( "file/$file" ), htmlspecialchars( $file ) );
+				$itemHtml = $linkRenderer->makeKnownLink(
+					$this->getPageTitle( "file/$file" ),
+					$file
+				);
 				try {
 					$fileObj = $this->stash->getFile( $file );
 					$thumb = $fileObj->generateThumbName( $file, [ 'width' => 220 ] );
 					$itemHtml .=
 						$this->msg( 'word-separator' )->escaped() .
 						$this->msg( 'parentheses' )->rawParams(
-							Linker::linkKnown(
+							$linkRenderer->makeKnownLink(
 								$this->getPageTitle( "thumb/$file/$thumb" ),
-								$this->msg( 'uploadstash-thumbnail' )->escaped()
+								$this->msg( 'uploadstash-thumbnail' )->text()
 							)
 						)->escaped();
 				} catch ( Exception $e ) {
@@ -423,5 +448,9 @@ class SpecialUploadStash extends UnlistedSpecialPage {
 	}
 }
 
-class SpecialUploadStashTooLargeException extends MWException {
+/**
+ * @ingroup SpecialPage
+ * @ingroup Upload
+ */
+class SpecialUploadStashTooLargeException extends UploadStashException {
 }

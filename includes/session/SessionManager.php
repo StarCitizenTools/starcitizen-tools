@@ -23,6 +23,7 @@
 
 namespace MediaWiki\Session;
 
+use MediaWiki\MediaWikiServices;
 use MWException;
 use Psr\Log\LoggerInterface;
 use BagOStuff;
@@ -31,12 +32,20 @@ use Config;
 use FauxRequest;
 use User;
 use WebRequest;
+use Wikimedia\ObjectFactory;
 
 /**
  * This serves as the entry point to the MediaWiki session handling system.
  *
+ * Most methods here are for internal use by session handling code. Other callers
+ * should only use getGlobalSession and the methods of SessionManagerInterface;
+ * the rest of the functionality is exposed via MediaWiki\Session\Session methods.
+ *
+ * To provide custom session handling, implement a MediaWiki\Session\SessionProvider.
+ *
  * @ingroup Session
  * @since 1.27
+ * @see https://www.mediawiki.org/wiki/Manual:SessionManager_and_AuthManager
  */
 final class SessionManager implements SessionManagerInterface {
 	/** @var SessionManager|null */
@@ -145,7 +154,7 @@ final class SessionManager implements SessionManagerInterface {
 				);
 			}
 		} else {
-			$this->config = \ConfigFactory::getDefaultInstance()->makeConfig( 'main' );
+			$this->config = MediaWikiServices::getInstance()->getMainConfig();
 		}
 
 		if ( isset( $options['logger'] ) ) {
@@ -206,7 +215,7 @@ final class SessionManager implements SessionManagerInterface {
 		}
 
 		// Test if the session is in storage, and if so try to load it.
-		$key = wfMemcKey( 'MWSession', $id );
+		$key = $this->store->makeKey( 'MWSession', $id );
 		if ( is_array( $this->store->get( $key ) ) ) {
 			$create = false; // If loading fails, don't bother creating because it probably will fail too.
 			if ( $this->loadSessionInfoFromStore( $info, $request ) ) {
@@ -247,7 +256,7 @@ final class SessionManager implements SessionManagerInterface {
 				throw new \InvalidArgumentException( 'Invalid session ID' );
 			}
 
-			$key = wfMemcKey( 'MWSession', $id );
+			$key = $this->store->makeKey( 'MWSession', $id );
 			if ( is_array( $this->store->get( $key ) ) ) {
 				throw new \InvalidArgumentException( 'Session ID already exists' );
 			}
@@ -421,7 +430,7 @@ final class SessionManager implements SessionManagerInterface {
 		if ( $this->sessionProviders === null ) {
 			$this->sessionProviders = [];
 			foreach ( $this->config->get( 'SessionProviders' ) as $spec ) {
-				$provider = \ObjectFactory::getObjectFromSpec( $spec );
+				$provider = ObjectFactory::getObjectFromSpec( $spec );
 				$provider->setLogger( $this->logger );
 				$provider->setConfig( $this->config );
 				$provider->setManager( $this );
@@ -537,7 +546,7 @@ final class SessionManager implements SessionManagerInterface {
 	 * @return bool Whether the session info matches the stored data (if any)
 	 */
 	private function loadSessionInfoFromStore( SessionInfo &$info, WebRequest $request ) {
-		$key = wfMemcKey( 'MWSession', $info->getId() );
+		$key = $this->store->makeKey( 'MWSession', $info->getId() );
 		$blob = $this->store->get( $key );
 
 		// If we got data from the store and the SessionInfo says to force use,
@@ -765,7 +774,8 @@ final class SessionManager implements SessionManagerInterface {
 					return $failHandler();
 				}
 			} elseif ( !$info->getUserInfo()->isVerified() ) {
-				$this->logger->warning(
+				// probably just a session timeout
+				$this->logger->info(
 					'Session "{session}": Unverified user provided and no metadata to auth it',
 					[
 						'session' => $info,
@@ -819,9 +829,9 @@ final class SessionManager implements SessionManagerInterface {
 	}
 
 	/**
-	 * Create a session corresponding to the passed SessionInfo
+	 * Create a Session corresponding to the passed SessionInfo
 	 * @private For use by a SessionProvider that needs to specially create its
-	 *  own session.
+	 *  own Session. Most session providers won't need this.
 	 * @param SessionInfo $info
 	 * @param WebRequest $request
 	 * @return Session
@@ -873,7 +883,7 @@ final class SessionManager implements SessionManagerInterface {
 			$session->resetId();
 		}
 
-		\ScopedCallback::consume( $delay );
+		\Wikimedia\ScopedCallback::consume( $delay );
 		return $session;
 	}
 
@@ -924,8 +934,8 @@ final class SessionManager implements SessionManagerInterface {
 	 */
 	public function generateSessionId() {
 		do {
-			$id = wfBaseConvert( \MWCryptRand::generateHex( 40 ), 16, 32, 32 );
-			$key = wfMemcKey( 'MWSession', $id );
+			$id = \Wikimedia\base_convert( \MWCryptRand::generateHex( 40 ), 16, 32, 32 );
+			$key = $this->store->makeKey( 'MWSession', $id );
 		} while ( isset( $this->allSessionIds[$id] ) || is_array( $this->store->get( $key ) ) );
 		return $id;
 	}
@@ -941,6 +951,7 @@ final class SessionManager implements SessionManagerInterface {
 
 	/**
 	 * Reset the internal caching for unit testing
+	 * @protected Unit tests only
 	 */
 	public static function resetCache() {
 		if ( !defined( 'MW_PHPUNIT_TEST' ) ) {

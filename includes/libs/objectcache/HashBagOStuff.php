@@ -20,7 +20,6 @@
  * @file
  * @ingroup Cache
  */
-use Wikimedia\Assert\Assert;
 
 /**
  * Simple store for keeping values in an associative array for the current process.
@@ -32,7 +31,7 @@ use Wikimedia\Assert\Assert;
 class HashBagOStuff extends BagOStuff {
 	/** @var mixed[] */
 	protected $bag = [];
-	/** @var integer Max entries allowed */
+	/** @var int Max entries allowed */
 	protected $maxCacheKeys;
 
 	const KEY_VAL = 0;
@@ -46,12 +45,14 @@ class HashBagOStuff extends BagOStuff {
 		parent::__construct( $params );
 
 		$this->maxCacheKeys = isset( $params['maxKeys'] ) ? $params['maxKeys'] : INF;
-		Assert::parameter( $this->maxCacheKeys > 0, 'maxKeys', 'must be above zero' );
+		if ( $this->maxCacheKeys <= 0 ) {
+			throw new InvalidArgumentException( '$maxKeys parameter must be above zero' );
+		}
 	}
 
 	protected function expire( $key ) {
 		$et = $this->bag[$key][self::KEY_EXP];
-		if ( $et == self::TTL_INDEFINITE || $et > time() ) {
+		if ( $et == self::TTL_INDEFINITE || $et > $this->getCurrentTime() ) {
 			return false;
 		}
 
@@ -113,5 +114,9 @@ class HashBagOStuff extends BagOStuff {
 
 	public function clear() {
 		$this->bag = [];
+	}
+
+	protected function getCurrentTime() {
+		return time();
 	}
 }

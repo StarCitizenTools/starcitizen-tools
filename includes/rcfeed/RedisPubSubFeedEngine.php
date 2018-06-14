@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +19,7 @@
  */
 
 /**
- * Emit a recent change notification via Redis Pub/Sub
+ * Send recent change notifications via Redis Pub/Sub
  *
  * If the feed URI contains a path component, it will be used to generate a
  * channel name by stripping the leading slash and replacing any remaining
@@ -28,18 +27,23 @@
  * 'rc'. If the URI contains a query string, its parameters will be parsed
  * as RedisConnectionPool options.
  *
- * @example
+ * @par Example:
+ * @code
  * $wgRCFeeds['redis'] = array(
  *      'formatter' => 'JSONRCFeedFormatter',
  *      'uri'       => "redis://127.0.0.1:6379/rc.$wgDBname",
  * );
+ * @endcode
  *
  * @since 1.22
  */
-class RedisPubSubFeedEngine implements RCFeedEngine {
+class RedisPubSubFeedEngine extends RCFeedEngine {
 
 	/**
-	 * @see RCFeedEngine::send
+	 * @see FormattedRCFeed::send
+	 * @param array $feed
+	 * @param string $line
+	 * @return bool
 	 */
 	public function send( array $feed, $line ) {
 		$parsed = wfParseUrl( $feed['uri'] );

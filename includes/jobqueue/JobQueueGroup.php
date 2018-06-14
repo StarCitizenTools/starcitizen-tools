@@ -18,7 +18,6 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @author Aaron Schulz
  */
 
 /**
@@ -38,6 +37,8 @@ class JobQueueGroup {
 	protected $wiki;
 	/** @var string|bool Read only rationale (or false if r/w) */
 	protected $readOnlyReason;
+	/** @var bool Whether the wiki is not recognized in configuration */
+	protected $invalidWiki = false;
 
 	/** @var array Map of (bucket => (queue => JobQueue, types => list of types) */
 	protected $coalescedQueues;
@@ -69,9 +70,17 @@ class JobQueueGroup {
 	 * @return JobQueueGroup
 	 */
 	public static function singleton( $wiki = false ) {
+		global $wgLocalDatabases;
+
 		$wiki = ( $wiki === false ) ? wfWikiID() : $wiki;
+
 		if ( !isset( self::$instances[$wiki] ) ) {
 			self::$instances[$wiki] = new self( $wiki, wfConfiguredReadOnlyReason() );
+			// Make sure jobs are not getting pushed to bogus wikis. This can confuse
+			// the job runner system into spawning endless RPC requests that fail (T171371).
+			if ( $wiki !== wfWikiID() && !in_array( $wiki, $wgLocalDatabases ) ) {
+				self::$instances[$wiki]->invalidWiki = true;
+			}
 		}
 
 		return self::$instances[$wiki];
@@ -120,6 +129,15 @@ class JobQueueGroup {
 	 * @return void
 	 */
 	public function push( $jobs ) {
+		global $wgJobTypesExcludedFromDefaultQueue;
+
+		if ( $this->invalidWiki ) {
+			// Do not enqueue job that cannot be run (T171371)
+			$e = new LogicException( "Domain '{$this->wiki}' is not recognized." );
+			MWExceptionHandler::logException( $e );
+			return;
+		}
+
 		$jobs = is_array( $jobs ) ? $jobs : [ $jobs ];
 		if ( !count( $jobs ) ) {
 			return;
@@ -149,7 +167,7 @@ class JobQueueGroup {
 			'true',
 			15
 		);
-		if ( array_intersect( array_keys( $jobsByType ), $this->getDefaultQueueTypes() ) ) {
+		if ( array_diff( array_keys( $jobsByType ), $wgJobTypesExcludedFromDefaultQueue ) ) {
 			$cache->set(
 				$cache->makeGlobalKey( 'jobqueue', $this->wiki, 'hasjobs', self::TYPE_DEFAULT ),
 				'true',
@@ -161,14 +179,21 @@ class JobQueueGroup {
 	/**
 	 * Buffer jobs for insertion via push() or call it now if in CLI mode
 	 *
-	 * Note that MediaWiki::restInPeace() calls pushLazyJobs()
+	 * Note that pushLazyJobs() is registered as a deferred update just before
+	 * DeferredUpdates::doUpdates() in MediaWiki and JobRunner classes in order
+	 * to be executed as the very last deferred update (T100085, T154425).
 	 *
 	 * @param IJobSpecification|IJobSpecification[] $jobs A single Job or a list of Jobs
 	 * @return void
 	 * @since 1.26
 	 */
 	public function lazyPush( $jobs ) {
-		if ( PHP_SAPI === 'cli' ) {
+		if ( $this->invalidWiki ) {
+			// Do not enqueue job that cannot be run (T171371)
+			throw new LogicException( "Domain '{$this->wiki}' is not recognized." );
+		}
+
+		if ( PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg' ) {
 			$this->push( $jobs );
 			return;
 		}
@@ -269,7 +294,7 @@ class JobQueueGroup {
 	}
 
 	/**
-	 * Wait for any slaves or backup queue servers to catch up.
+	 * Wait for any replica DBs or backup queue servers to catch up.
 	 *
 	 * This does nothing for certain queue classes.
 	 *
@@ -421,7 +446,7 @@ class JobQueueGroup {
 
 					return [ 'v' => $wgConf->getConfig( $wiki, $name ) ];
 				},
-				[ 'pcTTL' => 30 ]
+				[ 'pcTTL' => WANObjectCache::TTL_PROC_LONG ]
 			);
 
 			return $value['v'];

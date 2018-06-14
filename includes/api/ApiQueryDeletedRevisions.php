@@ -1,8 +1,6 @@
 <?php
 /**
- * Created on Oct 3, 2014
- *
- * Copyright © 2014 Brad Jorsch "bjorsch@wikimedia.org"
+ * Copyright © 2014 Wikimedia Foundation and contributors
  *
  * Heavily based on ApiQueryDeletedrevs,
  * Copyright © 2007 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
@@ -39,12 +37,7 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 	protected function run( ApiPageSet $resultPageSet = null ) {
 		$user = $this->getUser();
 		// Before doing anything at all, let's check permissions
-		if ( !$user->isAllowed( 'deletedhistory' ) ) {
-			$this->dieUsage(
-				'You don\'t have permission to view deleted revision information',
-				'permissiondenied'
-			);
-		}
+		$this->checkUserRightsAny( 'deletedhistory' );
 
 		$pageSet = $this->getPageSet();
 		$pageMap = $pageSet->getGoodAndMissingTitlesByNamespace();
@@ -63,17 +56,18 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 
 		$db = $this->getDB();
 
-		if ( !is_null( $params['user'] ) && !is_null( $params['excludeuser'] ) ) {
-			$this->dieUsage( 'user and excludeuser cannot be used together', 'badparams' );
-		}
+		$this->requireMaxOneParameter( $params, 'user', 'excludeuser' );
 
-		$this->addTables( 'archive' );
 		if ( $resultPageSet === null ) {
 			$this->parseParameters( $params );
-			$this->addFields( Revision::selectArchiveFields() );
+			$arQuery = Revision::getArchiveQueryInfo();
+			$this->addTables( $arQuery['tables'] );
+			$this->addFields( $arQuery['fields'] );
+			$this->addJoinConds( $arQuery['joins'] );
 			$this->addFields( [ 'ar_title', 'ar_namespace' ] );
 		} else {
 			$this->limit = $this->getParameter( 'limit' ) ?: 10;
+			$this->addTables( 'archive' );
 			$this->addFields( [ 'ar_title', 'ar_namespace', 'ar_timestamp', 'ar_rev_id', 'ar_id' ] );
 		}
 
@@ -94,24 +88,14 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 		}
 
 		if ( $this->fetchContent ) {
-			// Modern MediaWiki has the content for deleted revs in the 'text'
-			// table using fields old_text and old_flags. But revisions deleted
-			// pre-1.5 store the content in the 'archive' table directly using
-			// fields ar_text and ar_flags, and no corresponding 'text' row. So
-			// we have to LEFT JOIN and fetch all four fields.
 			$this->addTables( 'text' );
 			$this->addJoinConds(
 				[ 'text' => [ 'LEFT JOIN', [ 'ar_text_id=old_id' ] ] ]
 			);
-			$this->addFields( [ 'ar_text', 'ar_flags', 'old_text', 'old_flags' ] );
+			$this->addFields( [ 'old_text', 'old_flags' ] );
 
 			// This also means stricter restrictions
-			if ( !$user->isAllowedAny( 'undelete', 'deletedtext' ) ) {
-				$this->dieUsage(
-					'You don\'t have permission to view deleted revision content',
-					'permissiondenied'
-				);
-			}
+			$this->checkUserRightsAny( [ 'deletedtext', 'undelete' ] );
 		}
 
 		$dir = $params['dir'];
@@ -128,14 +112,23 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 		}
 
 		if ( !is_null( $params['user'] ) ) {
-			$this->addWhereFld( 'ar_user_text', $params['user'] );
+			// Don't query by user ID here, it might be able to use the ar_usertext_timestamp index.
+			$actorQuery = ActorMigration::newMigration()
+				->getWhere( $db, 'ar_user', User::newFromName( $params['user'], false ), false );
+			$this->addTables( $actorQuery['tables'] );
+			$this->addJoinConds( $actorQuery['joins'] );
+			$this->addWhere( $actorQuery['conds'] );
 		} elseif ( !is_null( $params['excludeuser'] ) ) {
-			$this->addWhere( 'ar_user_text != ' .
-				$db->addQuotes( $params['excludeuser'] ) );
+			// Here there's no chance of using ar_usertext_timestamp.
+			$actorQuery = ActorMigration::newMigration()
+				->getWhere( $db, 'ar_user', User::newFromName( $params['excludeuser'], false ) );
+			$this->addTables( $actorQuery['tables'] );
+			$this->addJoinConds( $actorQuery['joins'] );
+			$this->addWhere( 'NOT(' . $actorQuery['conds'] . ')' );
 		}
 
 		if ( !is_null( $params['user'] ) || !is_null( $params['excludeuser'] ) ) {
-			// Paranoia: avoid brute force searches (bug 17342)
+			// Paranoia: avoid brute force searches (T19342)
 			// (shouldn't be able to get here without 'deletedhistory', but
 			// check it again just in case)
 			if ( !$user->isAllowed( 'deletedhistory' ) ) {
@@ -300,6 +293,6 @@ class ApiQueryDeletedRevisions extends ApiQueryRevisionsBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Deletedrevisions';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Deletedrevisions';
 	}
 }

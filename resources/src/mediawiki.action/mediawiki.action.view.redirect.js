@@ -28,10 +28,10 @@
 		}
 
 		// Note that this will update the hash in a modern browser, retaining back behaviour
-		history.replaceState( /*data=*/ history.state, /*title=*/ document.title, /*url=*/ canonical );
+		history.replaceState( /* data= */ history.state, /* title= */ document.title, /* url= */ canonical );
 		if ( shouldChangeFragment ) {
 			// Specification for history.replaceState() doesn't require browser to scroll,
-			// so scroll to be sure (see also T110501). Support for IE9 and IE10.
+			// so scroll to be sure (see also T110501). Support for IE10.
 			node = document.getElementById( fragment.slice( 1 ) );
 			if ( node ) {
 				node.scrollIntoView();

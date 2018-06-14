@@ -1,8 +1,6 @@
 <?php
 /**
- * Created on Jan 29, 2015
- *
- * Copyright © 2015 Brad Jorsch bjorsch@wikimedia.org
+ * Copyright © 2015 Wikimedia Foundation and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +20,8 @@
  * @file
  */
 
+use MediaWiki\Session\Token;
+
 /**
  * @since 1.25
  * @ingroup API
@@ -39,6 +39,11 @@ class ApiCheckToken extends ApiBase {
 		$tokenObj = ApiQueryTokens::getToken(
 			$this->getUser(), $this->getRequest()->getSession(), $salts[$params['type']]
 		);
+
+		if ( substr( $token, -strlen( urldecode( Token::SUFFIX ) ) ) === urldecode( Token::SUFFIX ) ) {
+			$this->addWarning( 'apiwarn-checktoken-percentencoding' );
+		}
+
 		if ( $tokenObj->match( $token, $maxage ) ) {
 			$res['result'] = 'valid';
 		} elseif ( $maxage !== null && $tokenObj->match( $token ) ) {
@@ -47,7 +52,7 @@ class ApiCheckToken extends ApiBase {
 			$res['result'] = 'invalid';
 		}
 
-		$ts = MediaWiki\Session\Token::getTimestamp( $token );
+		$ts = Token::getTimestamp( $token );
 		if ( $ts !== null ) {
 			$mwts = new MWTimestamp();
 			$mwts->timestamp->setTimestamp( $ts );

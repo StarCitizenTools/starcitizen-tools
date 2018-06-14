@@ -118,7 +118,7 @@ class SpecialJavaScriptTest extends SpecialPage {
 			. 'window.__karma__.loaded = function () {};'
 			. '}';
 
-		// The below is essentially a pure-javascript version of OutputPage::getHeadScripts.
+		// The below is essentially a pure-javascript version of OutputPage::headElement().
 		$startup = $rl->makeModuleResponse( $startupContext, [
 			'startup' => $rl->getModule( 'startup' ),
 		] );
@@ -134,12 +134,26 @@ class SpecialJavaScriptTest extends SpecialPage {
 		// Catch exceptions (such as "dependency missing" or "unknown module") so that we
 		// always start QUnit. Re-throw so that they are caught and reported as global exceptions
 		// by QUnit and Karma.
-		$code .= '(function () {'
-			. 'var start = window.__karma__ ? window.__karma__.start : QUnit.start;'
-			. 'try {'
-			. 'mw.loader.using( ' . Xml::encodeJsVar( $modules ) . ' ).always( start );'
-			. '} catch ( e ) { start(); throw e; }'
-			. '}());';
+		$modules = Xml::encodeJsVar( $modules );
+		$code .= <<<CODE
+(function () {
+	var start = window.__karma__ ? window.__karma__.start : QUnit.start;
+	try {
+		mw.loader.using( $modules )
+			.always( function () {
+				start();
+			} )
+			.fail( function ( e ) {
+				setTimeout( function () {
+					throw e;
+				} );
+			} );
+	} catch ( e ) {
+		start();
+		throw e;
+	}
+}());
+CODE;
 
 		header( 'Content-Type: text/javascript; charset=utf-8' );
 		header( 'Cache-Control: private, no-cache, must-revalidate' );
@@ -166,7 +180,7 @@ class SpecialJavaScriptTest extends SpecialPage {
 			[ 'raw' => true, 'sync' => true ]
 		);
 
-		$head = implode( "\n", array_merge( $styles['html'], $scripts['html'] ) );
+		$head = implode( "\n", [ $styles, $scripts ] );
 		$summary = $this->getSummaryHtml();
 		$html = <<<HTML
 <!DOCTYPE html>
@@ -183,15 +197,6 @@ HTML;
 
 		header( 'Content-Type: text/html; charset=utf-8' );
 		echo $html;
-	}
-
-	/**
-	 * Return an array of subpages that this special page will accept.
-	 *
-	 * @return string[] subpages
-	 */
-	public function getSubpagesForPrefixSearch() {
-		return self::$frameworks;
 	}
 
 	protected function getGroupName() {

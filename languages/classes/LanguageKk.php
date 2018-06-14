@@ -86,7 +86,6 @@ class KkConverter extends LanguageConverter {
 	}
 
 	function loadRegs() {
-
 		$this->mCyrl2Latn = [
 			# # Punctuation
 			'/№/u' => 'No.',
@@ -217,31 +216,6 @@ class KkConverter extends LanguageConverter {
 	}
 
 	/**
-	 * rules should be defined as -{ekavian | iyekavian-} -or-
-	 * -{code:text | code:text | ...}-
-	 *
-	 * update: delete all rule parsing because it's not used
-	 *      currently, and just produces a couple of bugs
-	 *
-	 * @param string $rule
-	 * @param array $flags
-	 * @return array
-	 */
-	function parseManualRule( $rule, $flags = [] ) {
-		if ( in_array( 'T', $flags ) ) {
-			return parent::parseManualRule( $rule, $flags );
-		}
-
-		$carray = [];
-		// otherwise ignore all formatting
-		foreach ( $this->mVariants as $v ) {
-			$carray[$v] = $rule;
-		}
-
-		return $carray;
-	}
-
-	/**
 	 * A function wrapper:
 	 *  - if there is no selected variant, leave the link
 	 *    names as they were
@@ -308,7 +282,7 @@ class KkConverter extends LanguageConverter {
 		$ret = '';
 
 		foreach ( $matches as $m ) {
-			$ret .= substr( $text, $mstart, $m[1] -$mstart );
+			$ret .= substr( $text, $mstart, $m[1] - $mstart );
 			$ret .= $this->regsConverter( $m[0], $toVariant );
 			$mstart = $m[1] + strlen( $m[0] );
 		}
@@ -415,8 +389,8 @@ class LanguageKk extends LanguageKk_cyrl {
 	 *
 	 * @return string
 	 */
-	function ucfirst( $string ) {
-		if ( $string[0] == 'i' ) {
+	public function ucfirst( $string ) {
+		if ( substr( $string, 0, 1 ) === 'i' ) {
 			$variant = $this->getPreferredVariant();
 			if ( $variant == 'kk-latn' || $variant == 'kk-tr' ) {
 				return 'İ' . substr( $string, 1 );
@@ -433,7 +407,7 @@ class LanguageKk extends LanguageKk_cyrl {
 	 * @return string
 	 */
 	function lcfirst( $string ) {
-		if ( $string[0] == 'I' ) {
+		if ( substr( $string, 0, 1 ) === 'I' ) {
 			$variant = $this->getPreferredVariant();
 			if ( $variant == 'kk-latn' || $variant == 'kk-tr' ) {
 				return 'ı' . substr( $string, 1 );
@@ -448,7 +422,6 @@ class LanguageKk extends LanguageKk_cyrl {
 	 * @return string
 	 */
 	function convertGrammar( $word, $case ) {
-
 		$variant = $this->getPreferredVariant();
 		switch ( $variant ) {
 			case 'kk-arab':

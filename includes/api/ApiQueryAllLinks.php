@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on July 7, 2007
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -116,9 +112,13 @@ class ApiQueryAllLinks extends ApiQueryGeneratorBase {
 			$matches = array_intersect_key( $prop, $this->props + [ 'ids' => 1 ] );
 			if ( $matches ) {
 				$p = $this->getModulePrefix();
-				$this->dieUsage(
-					"Cannot use {$p}prop=" . implode( '|', array_keys( $matches ) ) . " with {$p}unique",
-					'params'
+				$this->dieWithError(
+					[
+						'apierror-invalidparammix-cannotusewith',
+						"{$p}prop=" . implode( '|', array_keys( $matches ) ),
+						"{$p}unique"
+					],
+					'invalidparammix'
 				);
 			}
 			$this->addOption( 'DISTINCT' );
@@ -259,7 +259,8 @@ class ApiQueryAllLinks extends ApiQueryGeneratorBase {
 			],
 			'namespace' => [
 				ApiBase::PARAM_DFLT => $this->dfltNamespace,
-				ApiBase::PARAM_TYPE => 'namespace'
+				ApiBase::PARAM_TYPE => 'namespace',
+				ApiBase::PARAM_EXTRA_NAMESPACES => [ NS_MEDIA, NS_SPECIAL ],
 			],
 			'limit' => [
 				ApiBase::PARAM_DFLT => 10,
@@ -303,6 +304,6 @@ class ApiQueryAllLinks extends ApiQueryGeneratorBase {
 	public function getHelpUrls() {
 		$name = ucfirst( $this->getModuleName() );
 
-		return "https://www.mediawiki.org/wiki/API:{$name}";
+		return "https://www.mediawiki.org/wiki/Special:MyLanguage/API:{$name}";
 	}
 }

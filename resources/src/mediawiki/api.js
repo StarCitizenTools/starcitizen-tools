@@ -9,6 +9,9 @@
 	 *     `options` to mw.Api constructor.
 	 * @property {Object} defaultOptions.parameters Default query parameters for API requests.
 	 * @property {Object} defaultOptions.ajax Default options for jQuery#ajax.
+	 * @property {boolean} defaultOptions.useUS Whether to use U+001F when joining multi-valued
+	 *     parameters (since 1.28). Default is true if ajax.url is not set, false otherwise for
+	 *     compatibility.
 	 * @private
 	 */
 	var defaultOptions = {
@@ -39,7 +42,7 @@
 			'import',
 			'options'
 		];
-		if ( $.inArray( action, csrfActions ) !== -1 ) {
+		if ( csrfActions.indexOf( action ) !== -1 ) {
 			mw.track( 'mw.deprecate', 'apitoken_' + action );
 			mw.log.warn( 'Use of the "' + action + '" token is deprecated. Use "csrf" instead.' );
 			return 'csrf';
@@ -48,7 +51,7 @@
 	}
 
 	// Pre-populate with fake ajax promises to save http requests for tokens
-	// we already have on the page via the user.tokens module (bug 34733).
+	// we already have on the page via the user.tokens module (T36733).
 	promises[ defaultOptions.ajax.url ] = {};
 	$.each( mw.user.tokens.get(), function ( key, value ) {
 		// This requires #getToken to use the same key as user.tokens.
@@ -95,6 +98,8 @@
 			options.ajax.url = String( options.ajax.url );
 		}
 
+		options = $.extend( { useUS: !options.ajax || !options.ajax.url }, options );
+
 		options.parameters = $.extend( {}, defaultOptions.parameters, options.parameters );
 		options.ajax = $.extend( {}, defaultOptions.ajax, options.ajax );
 
@@ -109,7 +114,7 @@
 		 * @method
 		 */
 		abort: function () {
-			$.each( this.requests, function ( index, request ) {
+			this.requests.forEach( function ( request ) {
 				if ( request ) {
 					request.abort();
 				}
@@ -145,19 +150,26 @@
 		/**
 		 * Massage parameters from the nice format we accept into a format suitable for the API.
 		 *
+		 * NOTE: A value of undefined/null in an array will be represented by Array#join()
+		 * as the empty string. Should we filter silently? Warn? Leave as-is?
+		 *
 		 * @private
 		 * @param {Object} parameters (modified in-place)
+		 * @param {boolean} useUS Whether to use U+001F when joining multi-valued parameters.
 		 */
-		preprocessParameters: function ( parameters ) {
+		preprocessParameters: function ( parameters, useUS ) {
 			var key;
 			// Handle common MediaWiki API idioms for passing parameters
 			for ( key in parameters ) {
 				// Multiple values are pipe-separated
-				if ( $.isArray( parameters[ key ] ) ) {
-					parameters[ key ] = parameters[ key ].join( '|' );
-				}
-				// Boolean values are only false when not given at all
-				if ( parameters[ key ] === false || parameters[ key ] === undefined ) {
+				if ( Array.isArray( parameters[ key ] ) ) {
+					if ( !useUS || parameters[ key ].join( '' ).indexOf( '|' ) === -1 ) {
+						parameters[ key ] = parameters[ key ].join( '|' );
+					} else {
+						parameters[ key ] = '\x1f' + parameters[ key ].join( '\x1f' );
+					}
+				} else if ( parameters[ key ] === false || parameters[ key ] === undefined ) {
+					// Boolean values are only false when not given at all
 					delete parameters[ key ];
 				}
 			}
@@ -186,7 +198,7 @@
 				delete parameters.token;
 			}
 
-			this.preprocessParameters( parameters );
+			this.preprocessParameters( parameters, this.defaults.useUS );
 
 			// If multipart/form-data has been requested and emulation is possible, emulate it
 			if (
@@ -243,6 +255,7 @@
 				} )
 				// AJAX success just means "200 OK" response, also check API error codes
 				.done( function ( result, textStatus, jqXHR ) {
+					var code;
 					if ( result === undefined || result === null || result === '' ) {
 						apiDeferred.reject( 'ok-but-empty',
 							'OK response but empty result (check HTTP headers?)',
@@ -250,7 +263,12 @@
 							jqXHR
 						);
 					} else if ( result.error ) {
-						var code = result.error.code === undefined ? 'unknown' : result.error.code;
+						// errorformat=bc
+						code = result.error.code === undefined ? 'unknown' : result.error.code;
+						apiDeferred.reject( code, result, result, jqXHR );
+					} else if ( result.errors ) {
+						// errorformat!=bc
+						code = result.errors[ 0 ].code === undefined ? 'unknown' : result.errors[ 0 ].code;
 						apiDeferred.reject( code, result, result, jqXHR );
 					} else {
 						apiDeferred.resolve( result, jqXHR );
@@ -288,30 +306,50 @@
 		 * @since 1.22
 		 */
 		postWithToken: function ( tokenType, params, ajaxOptions ) {
-			var api = this;
+			var api = this,
+				abortedPromise = $.Deferred().reject( 'http',
+					{ textStatus: 'abort', exception: 'abort' } ).promise(),
+				abortable,
+				aborted;
 
 			return api.getToken( tokenType, params.assert ).then( function ( token ) {
 				params.token = token;
-				return api.post( params, ajaxOptions ).then(
-					// If no error, return to caller as-is
-					null,
+				// Request was aborted while token request was running, but we
+				// don't want to unnecessarily abort token requests, so abort
+				// a fake request instead
+				if ( aborted ) {
+					return abortedPromise;
+				}
+
+				return ( abortable = api.post( params, ajaxOptions ) ).catch(
 					// Error handler
 					function ( code ) {
 						if ( code === 'badtoken' ) {
 							api.badToken( tokenType );
 							// Try again, once
 							params.token = undefined;
+							abortable = null;
 							return api.getToken( tokenType, params.assert ).then( function ( token ) {
 								params.token = token;
-								return api.post( params, ajaxOptions );
+								if ( aborted ) {
+									return abortedPromise;
+								}
+
+								return ( abortable = api.post( params, ajaxOptions ) );
 							} );
 						}
 
-						// Different error, pass on to let caller handle the error code
-						return this;
+						// Let caller handle the error code
+						return $.Deferred().rejectWith( this, arguments );
 					}
 				);
-			} );
+			} ).promise( { abort: function () {
+				if ( abortable ) {
+					abortable.abort();
+				} else {
+					aborted = true;
+				}
+			} } );
 		},
 
 		/**
@@ -321,6 +359,7 @@
 		 *
 		 * @since 1.22
 		 * @param {string} type Token type
+		 * @param {string} [assert]
 		 * @return {jQuery.Promise} Received token.
 		 */
 		getToken: function ( type, assert ) {
@@ -328,6 +367,10 @@
 			type = mapLegacyToken( type );
 			promiseGroup = promises[ this.defaults.ajax.url ];
 			d = promiseGroup && promiseGroup[ type + 'Token' ];
+
+			if ( !promiseGroup ) {
+				promiseGroup = promises[ this.defaults.ajax.url ] = {};
+			}
 
 			if ( !d ) {
 				apiPromise = this.get( {
@@ -348,16 +391,13 @@
 						// Clear promise. Do not cache errors.
 						delete promiseGroup[ type + 'Token' ];
 
-						// Pass on to allow the caller to handle the error
-						return this;
+						// Let caller handle the error code
+						return $.Deferred().rejectWith( this, arguments );
 					} )
 					// Attach abort handler
 					.promise( { abort: apiPromise.abort } );
 
 				// Store deferred now so that we can use it again even if it isn't ready yet
-				if ( !promiseGroup ) {
-					promiseGroup = promises[ this.defaults.ajax.url ] = {};
-				}
 				promiseGroup[ type + 'Token' ] = d;
 			}
 
@@ -387,9 +427,8 @@
 	/**
 	 * @static
 	 * @property {Array}
-	 * List of errors we might receive from the API.
-	 * For now, this just documents our expectation that there should be similar messages
-	 * available.
+	 * Very incomplete and outdated list of errors we might receive from the API. Do not use.
+	 * @deprecated since 1.29
 	 */
 	mw.Api.errors = [
 		// occurs when POST aborted
@@ -447,17 +486,18 @@
 		'stashwrongowner',
 		'stashnosuchfilekey'
 	];
+	mw.log.deprecate( mw.Api, 'errors', mw.Api.errors, null, 'mw.Api.errors' );
 
 	/**
 	 * @static
 	 * @property {Array}
-	 * List of warnings we might receive from the API.
-	 * For now, this just documents our expectation that there should be similar messages
-	 * available.
+	 * Very incomplete and outdated list of warnings we might receive from the API. Do not use.
+	 * @deprecated since 1.29
 	 */
 	mw.Api.warnings = [
 		'duplicate',
 		'exists'
 	];
+	mw.log.deprecate( mw.Api, 'warnings', mw.Api.warnings, null, 'mw.Api.warnings' );
 
 }( mediaWiki, jQuery ) );

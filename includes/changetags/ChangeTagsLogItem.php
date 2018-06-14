@@ -19,6 +19,8 @@
  * @ingroup Change tagging
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Item class for a logging table row with its associated change tags.
  * @todo Abstract out a base class for this and RevDelLogItem, similar to the
@@ -40,6 +42,10 @@ class ChangeTagsLogItem extends RevisionItemBase {
 
 	public function getAuthorNameField() {
 		return 'log_user_text';
+	}
+
+	public function getAuthorActorField() {
+		return 'log_actor';
 	}
 
 	public function canView() {
@@ -70,9 +76,9 @@ class ChangeTagsLogItem extends RevisionItemBase {
 		$formatter->setAudience( LogFormatter::FOR_THIS_USER );
 
 		// Log link for this page
-		$loglink = Linker::link(
+		$loglink = MediaWikiServices::getInstance()->getLinkRenderer()->makeLink(
 			SpecialPage::getTitleFor( 'Log' ),
-			$this->list->msg( 'log' )->escaped(),
+			$this->list->msg( 'log' )->text(),
 			[],
 			[ 'page' => $title->getPrefixedText() ]
 		);

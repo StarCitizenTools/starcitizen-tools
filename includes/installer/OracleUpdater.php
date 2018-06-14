@@ -113,6 +113,41 @@ class OracleUpdater extends DatabaseUpdater {
 			[ 'dropTable', 'msg_resource' ],
 			[ 'addField', 'watchlist', 'wl_id', 'patch-watchlist-wl_id.sql' ],
 
+			// 1.28
+			[ 'addIndex', 'recentchanges', 'rc_name_type_patrolled_timestamp',
+				'patch-add-rc_name_type_patrolled_timestamp_index.sql' ],
+			[ 'addField', 'change_tag', 'ct_id', 'patch-change_tag-ct_id.sql' ],
+			[ 'addField', 'tag_summary', 'ts_id', 'patch-tag_summary-ts_id.sql' ],
+
+			// 1.29
+			[ 'addField', 'externallinks', 'el_index_60', 'patch-externallinks-el_index_60.sql' ],
+			[ 'addField', 'user_groups', 'ug_expiry', 'patch-user_groups-ug_expiry.sql' ],
+
+			// 1.30
+			[ 'doAutoIncrementTriggers' ],
+			[ 'addIndex', 'site_stats', 'PRIMARY', 'patch-site_stats-pk.sql' ],
+
+			// Should have been in 1.30
+			[ 'addTable', 'comment', 'patch-comment-table.sql' ],
+			// This field was added in 1.31, but is put here so it can be used by 'migrateComments'
+			[ 'addField', 'image', 'img_description_id', 'patch-image-img_description_id.sql' ],
+			// Should have been in 1.30
+			[ 'migrateComments' ],
+
+			// 1.31
+			[ 'addTable', 'slots', 'patch-slots.sql' ],
+			[ 'addField', 'slots', 'slot_origin', 'patch-slot-origin.sql' ],
+			[ 'addTable', 'content', 'patch-content.sql' ],
+			[ 'addTable', 'slot_roles', 'patch-slot_roles.sql' ],
+			[ 'addTable', 'content_models', 'patch-content_models.sql' ],
+			[ 'migrateArchiveText' ],
+			[ 'addTable', 'actor', 'patch-actor-table.sql' ],
+			[ 'migrateActors' ],
+			[ 'modifyTable', 'site_stats', 'patch-site_stats-modify.sql' ],
+			[ 'populateArchiveRevId' ],
+			[ 'addIndex', 'recentchanges', 'rc_namespace_title_timestamp',
+				'patch-recentchanges-nttindex.sql' ],
+
 			// KEEP THIS AT THE BOTTOM!!
 			[ 'doRebuildDuplicateFunction' ],
 
@@ -264,6 +299,30 @@ class OracleUpdater extends DatabaseUpdater {
 	}
 
 	/**
+	 * Add auto-increment triggers
+	 */
+	protected function doAutoIncrementTriggers() {
+		$this->output( "Adding auto-increment triggers ... " );
+
+		$meta = $this->db->query( 'SELECT trigger_name FROM user_triggers WHERE table_owner = \'' .
+			strtoupper( $this->db->getDBname() ) .
+			'\' AND trigger_name = \'' .
+			$this->db->tablePrefix() .
+			'PAGE_DEFAULT_PAGE_ID\''
+		);
+		$row = $meta->fetchRow();
+		if ( $row['column_name'] ) {
+			$this->output( "seems to be up to date.\n" );
+
+			return;
+		}
+
+		$this->applyPatch( 'patch-auto_increment_triggers.sql', false );
+
+		$this->output( "ok\n" );
+	}
+
+	/**
 	 * rebuilding of the function that duplicates tables for tests
 	 */
 	protected function doRebuildDuplicateFunction() {
@@ -275,7 +334,7 @@ class OracleUpdater extends DatabaseUpdater {
 	 *
 	 * @param array $what
 	 */
-	public function doUpdates( $what = [ 'core', 'extensions', 'purge', 'stats' ] ) {
+	public function doUpdates( array $what = [ 'core', 'extensions', 'purge', 'stats' ] ) {
 		parent::doUpdates( $what );
 
 		$this->db->query( 'BEGIN fill_wiki_info; END;' );

@@ -77,7 +77,7 @@ class MovePageForm extends UnlistedSpecialPage {
 		$request = $this->getRequest();
 		$target = !is_null( $par ) ? $par : $request->getVal( 'target' );
 
-		// Yes, the use of getVal() and getText() is wanted, see bug 20365
+		// Yes, the use of getVal() and getText() is wanted, see T22365
 
 		$oldTitleText = $request->getVal( 'wpOldTitle', $target );
 		$this->oldTitle = Title::newFromText( $oldTitleText );
@@ -105,7 +105,7 @@ class MovePageForm extends UnlistedSpecialPage {
 		$permErrors = $this->oldTitle->getUserPermissionsErrors( 'move', $user );
 		if ( count( $permErrors ) ) {
 			// Auto-block user's IP if the account was "hard" blocked
-			DeferredUpdates::addCallableUpdate( function() use ( $user ) {
+			DeferredUpdates::addCallableUpdate( function () use ( $user ) {
 				$user->spreadAnyEditBlock();
 			} );
 			throw new PermissionsError( 'move', $permErrors );
@@ -139,8 +139,6 @@ class MovePageForm extends UnlistedSpecialPage {
 	 *    parameters, like the second argument to OutputPage::wrapWikiMsg().
 	 */
 	function showForm( $err ) {
-		global $wgContLang;
-
 		$this->getSkin()->setRelevantTitle( $this->oldTitle );
 
 		$out = $this->getOutput();
@@ -225,7 +223,7 @@ class MovePageForm extends UnlistedSpecialPage {
 			( $oldTalk->exists()
 				|| ( $oldTitleTalkSubpages && $canMoveSubpage ) );
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		if ( $this->getConfig()->get( 'FixDoubleRedirects' ) ) {
 			$hasRedirects = $dbr->selectField( 'redirect', '1',
 				[
@@ -237,18 +235,18 @@ class MovePageForm extends UnlistedSpecialPage {
 		}
 
 		if ( count( $err ) ) {
-			$out->addHTML( "<div class='errorbox'>\n" );
 			$action_desc = $this->msg( 'action-move' )->plain();
-			$out->addWikiMsg( 'permissionserrorstext-withaction', count( $err ), $action_desc );
+			$errMsgHtml = $this->msg( 'permissionserrorstext-withaction',
+				count( $err ), $action_desc )->parseAsBlock();
 
 			if ( count( $err ) == 1 ) {
 				$errMsg = $err[0];
 				$errMsgName = array_shift( $errMsg );
 
 				if ( $errMsgName == 'hookaborted' ) {
-					$out->addHTML( "<p>{$errMsg[0]}</p>\n" );
+					$errMsgHtml .= "<p>{$errMsg[0]}</p>\n";
 				} else {
-					$out->addWikiMsgArray( $errMsgName, $errMsg );
+					$errMsgHtml .= $this->msg( $errMsgName, $errMsg )->parseAsBlock();
 				}
 			} else {
 				$errStr = [];
@@ -262,9 +260,9 @@ class MovePageForm extends UnlistedSpecialPage {
 					}
 				}
 
-				$out->addHTML( '<ul><li>' . implode( "</li>\n<li>", $errStr ) . "</li></ul>\n" );
+				$errMsgHtml .= '<ul><li>' . implode( "</li>\n<li>", $errStr ) . "</li></ul>\n";
 			}
-			$out->addHTML( "</div>\n" );
+			$out->addHTML( Html::errorBox( $errMsgHtml ) );
 		}
 
 		if ( $this->oldTitle->isProtected( 'move' ) ) {
@@ -289,8 +287,8 @@ class MovePageForm extends UnlistedSpecialPage {
 			$out->addHTML( "</div>\n" );
 		}
 
-		// Byte limit (not string length limit) for wpReason and wpNewTitleMain
-		// is enforced in the mediawiki.special.movePage module
+		// Length limit for wpReason and wpNewTitleMain is enforced in the
+		// mediawiki.special.movePage module
 
 		$immovableNamespaces = [];
 		foreach ( array_keys( $this->getLanguage()->getNamespaces() ) as $nsId ) {
@@ -316,7 +314,7 @@ class MovePageForm extends UnlistedSpecialPage {
 				'title' => [
 					'id' => 'wpNewTitleMain',
 					'name' => 'wpNewTitleMain',
-					'value' => $wgContLang->recodeForEdit( $newTitle->getText() ),
+					'value' => $newTitle->getText(),
 					// Inappropriate, since we're expecting the user to input a non-existent page's title
 					'suggestions' => false,
 				],
@@ -328,11 +326,16 @@ class MovePageForm extends UnlistedSpecialPage {
 			]
 		);
 
+		// HTML maxlength uses "UTF-16 code units", which means that characters outside BMP
+		// (e.g. emojis) count for two each. This limit is overridden in JS to instead count
+		// Unicode codepoints (or 255 UTF-8 bytes for old schema).
+		$conf = $this->getConfig();
+		$oldCommentSchema = $conf->get( 'CommentTableSchemaMigrationStage' ) === MIGRATION_OLD;
 		$fields[] = new OOUI\FieldLayout(
 			new OOUI\TextInputWidget( [
 				'name' => 'wpReason',
 				'id' => 'wpReason',
-				'maxLength' => 200,
+				'maxLength' => $oldCommentSchema ? 200 : CommentStore::COMMENT_CHARACTER_LIMIT,
 				'infusable' => true,
 				'value' => $this->reason,
 			] ),
@@ -355,6 +358,7 @@ class MovePageForm extends UnlistedSpecialPage {
 					'help' => new OOUI\HtmlSnippet( $this->msg( 'movepagetalktext' )->parseAsBlock() ),
 					'align' => 'inline',
 					'infusable' => true,
+					'id' => 'wpMovetalk-field',
 				]
 			);
 		}
@@ -463,7 +467,7 @@ class MovePageForm extends UnlistedSpecialPage {
 				'name' => 'wpMove',
 				'value' => $this->msg( 'movepagebtn' )->text(),
 				'label' => $this->msg( 'movepagebtn' )->text(),
-				'flags' => [ 'constructive', 'primary' ],
+				'flags' => [ 'primary', 'progressive' ],
 				'type' => 'submit',
 			] ),
 			[
@@ -601,13 +605,14 @@ class MovePageForm extends UnlistedSpecialPage {
 		$out = $this->getOutput();
 		$out->setPageTitle( $this->msg( 'pagemovedsub' ) );
 
-		$oldLink = Linker::link(
+		$linkRenderer = $this->getLinkRenderer();
+		$oldLink = $linkRenderer->makeLink(
 			$ot,
 			null,
 			[ 'id' => 'movepage-oldlink' ],
 			[ 'redirect' => 'no' ]
 		);
-		$newLink = Linker::linkKnown(
+		$newLink = $linkRenderer->makeKnownLink(
 			$nt,
 			null,
 			[ 'id' => 'movepage-newlink' ]
@@ -620,7 +625,7 @@ class MovePageForm extends UnlistedSpecialPage {
 			// a redirect to the new title. This is not safe, but what we did before was
 			// even worse: we just determined whether a redirect should have been created,
 			// and reported that it was created if it should have, without any checks.
-			// Also note that isRedirect() is unreliable because of bug 37209.
+			// Also note that isRedirect() is unreliable because of T39209.
 			$msgName = 'movepage-moved-redirect';
 		} else {
 			$msgName = 'movepage-moved-noredirect';
@@ -630,7 +635,9 @@ class MovePageForm extends UnlistedSpecialPage {
 			$newLink )->params( $oldText, $newText )->parseAsBlock() );
 		$out->addWikiMsg( $msgName );
 
-		Hooks::run( 'SpecialMovepageAfterMove', [ &$this, &$ot, &$nt ] );
+		// Avoid PHP 7.1 warning from passing $this by reference
+		$movePage = $this;
+		Hooks::run( 'SpecialMovepageAfterMove', [ &$movePage, &$ot, &$nt ] );
 
 		# Now we move extra pages we've been asked to move: subpages and talk
 		# pages.  First, if the old page or the new page is a talk page, we
@@ -706,7 +713,7 @@ class MovePageForm extends UnlistedSpecialPage {
 
 			$newPageName = preg_replace(
 				'#^' . preg_quote( $ot->getDBkey(), '#' ) . '#',
-				StringUtils::escapeRegexReplacement( $nt->getDBkey() ), # bug 21234
+				StringUtils::escapeRegexReplacement( $nt->getDBkey() ), # T23234
 				$oldSubpage->getDBkey()
 			);
 
@@ -719,11 +726,11 @@ class MovePageForm extends UnlistedSpecialPage {
 				$newNs = $nt->getSubjectPage()->getNamespace();
 			}
 
-			# Bug 14385: we need makeTitleSafe because the new page names may
+			# T16385: we need makeTitleSafe because the new page names may
 			# be longer than 255 characters.
 			$newSubpage = Title::makeTitleSafe( $newNs, $newPageName );
 			if ( !$newSubpage ) {
-				$oldLink = Linker::linkKnown( $oldSubpage );
+				$oldLink = $linkRenderer->makeKnownLink( $oldSubpage );
 				$extraOutput[] = $this->msg( 'movepage-page-unmoved' )->rawParams( $oldLink )
 					->params( Title::makeName( $newNs, $newPageName ) )->escaped();
 				continue;
@@ -731,7 +738,7 @@ class MovePageForm extends UnlistedSpecialPage {
 
 			# This was copy-pasted from Renameuser, bleh.
 			if ( $newSubpage->exists() && !$oldSubpage->isValidMoveTarget( $newSubpage ) ) {
-				$link = Linker::linkKnown( $newSubpage );
+				$link = $linkRenderer->makeKnownLink( $newSubpage );
 				$extraOutput[] = $this->msg( 'movepage-page-exists' )->rawParams( $link )->escaped();
 			} else {
 				$success = $oldSubpage->moveTo( $newSubpage, true, $this->reason, $createRedirect );
@@ -740,14 +747,14 @@ class MovePageForm extends UnlistedSpecialPage {
 					if ( $this->fixRedirects ) {
 						DoubleRedirectJob::fixRedirects( 'move', $oldSubpage, $newSubpage );
 					}
-					$oldLink = Linker::link(
+					$oldLink = $linkRenderer->makeLink(
 						$oldSubpage,
 						null,
 						[],
 						[ 'redirect' => 'no' ]
 					);
 
-					$newLink = Linker::linkKnown( $newSubpage );
+					$newLink = $linkRenderer->makeKnownLink( $newSubpage );
 					$extraOutput[] = $this->msg( 'movepage-page-moved' )
 						->rawParams( $oldLink, $newLink )->escaped();
 					++$count;
@@ -759,8 +766,8 @@ class MovePageForm extends UnlistedSpecialPage {
 						break;
 					}
 				} else {
-					$oldLink = Linker::linkKnown( $oldSubpage );
-					$newLink = Linker::link( $newSubpage );
+					$oldLink = $linkRenderer->makeKnownLink( $oldSubpage );
+					$newLink = $linkRenderer->makeLink( $newSubpage );
 					$extraOutput[] = $this->msg( 'movepage-page-unmoved' )
 						->rawParams( $oldLink, $newLink )->escaped();
 				}
@@ -774,6 +781,12 @@ class MovePageForm extends UnlistedSpecialPage {
 		# Deal with watches (we don't watch subpages)
 		WatchAction::doWatchOrUnwatch( $this->watch, $ot, $user );
 		WatchAction::doWatchOrUnwatch( $this->watch, $nt, $user );
+
+		/**
+		 * T163966
+		 * Increment user_editcount during page moves
+		 */
+		$user->incEditCount();
 	}
 
 	function showLogFragment( $title ) {
@@ -783,29 +796,59 @@ class MovePageForm extends UnlistedSpecialPage {
 		LogEventsList::showLogExtract( $out, 'move', $title );
 	}
 
+	/**
+	 * Show subpages of the page being moved. Section is not shown if both current
+	 * namespace does not support subpages and no talk subpages were found.
+	 *
+	 * @param Title $title Page being moved.
+	 */
 	function showSubpages( $title ) {
-		if ( !MWNamespace::hasSubpages( $title->getNamespace() ) ) {
-			return;
-		}
-
+		$nsHasSubpages = MWNamespace::hasSubpages( $title->getNamespace() );
 		$subpages = $title->getSubpages();
 		$count = $subpages instanceof TitleArray ? $subpages->count() : 0;
 
-		$out = $this->getOutput();
-		$out->wrapWikiMsg( '== $1 ==', [ 'movesubpage', $count ] );
+		$titleIsTalk = $title->isTalkPage();
+		$subpagesTalk = $title->getTalkPage()->getSubpages();
+		$countTalk = $subpagesTalk instanceof TitleArray ? $subpagesTalk->count() : 0;
+		$totalCount = $count + $countTalk;
 
-		# No subpages.
-		if ( $count == 0 ) {
-			$out->addWikiMsg( 'movenosubpage' );
-
+		if ( !$nsHasSubpages && $countTalk == 0 ) {
 			return;
 		}
 
-		$out->addWikiMsg( 'movesubpagetext', $this->getLanguage()->formatNum( $count ) );
+		$this->getOutput()->wrapWikiMsg(
+			'== $1 ==',
+			[ 'movesubpage', ( $titleIsTalk ? $count : $totalCount ) ]
+		);
+
+		if ( $nsHasSubpages ) {
+			$this->showSubpagesList( $subpages, $count, 'movesubpagetext', true );
+		}
+
+		if ( !$titleIsTalk && $countTalk > 0 ) {
+			$this->showSubpagesList( $subpagesTalk, $countTalk, 'movesubpagetalktext' );
+		}
+	}
+
+	function showSubpagesList( $subpages, $pagecount, $wikiMsg, $noSubpageMsg = false ) {
+		$out = $this->getOutput();
+
+		# No subpages.
+		if ( $pagecount == 0 && $noSubpageMsg ) {
+			$out->addWikiMsg( 'movenosubpage' );
+			return;
+		}
+
+		$out->addWikiMsg( $wikiMsg, $this->getLanguage()->formatNum( $pagecount ) );
 		$out->addHTML( "<ul>\n" );
 
+		$linkBatch = new LinkBatch( $subpages );
+		$linkBatch->setCaller( __METHOD__ );
+		$linkBatch->execute();
+		$linkRenderer = $this->getLinkRenderer();
+
 		foreach ( $subpages as $subpage ) {
-			$link = Linker::link( $subpage );
+			$link = $linkRenderer->makeLink( $subpage );
 			$out->addHTML( "<li>$link</li>\n" );
 		}
 		$out->addHTML( "</ul>\n" );

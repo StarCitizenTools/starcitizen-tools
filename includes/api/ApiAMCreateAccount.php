@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Brad Jorsch <bjorsch@wikimedia.org>
+ * Copyright © 2016 Wikimedia Foundation and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
  */
 
 use MediaWiki\Auth\AuthManager;
-use MediaWiki\Auth\AuthenticationRequest;
 use MediaWiki\Auth\AuthenticationResponse;
 
 /**
@@ -57,8 +56,8 @@ class ApiAMCreateAccount extends ApiBase {
 			$bits = wfParseUrl( $params['returnurl'] );
 			if ( !$bits || $bits['scheme'] === '' ) {
 				$encParamName = $this->encodeParamName( 'returnurl' );
-				$this->dieUsage(
-					"Invalid value '{$params['returnurl']}' for url parameter $encParamName",
+				$this->dieWithError(
+					[ 'apierror-badurl', $encParamName, wfEscapeWikiText( $params['returnurl'] ) ],
 					"badurl_{$encParamName}"
 				);
 			}
@@ -67,13 +66,15 @@ class ApiAMCreateAccount extends ApiBase {
 		$helper = new ApiAuthManagerHelper( $this );
 		$manager = AuthManager::singleton();
 
-		// Make sure it's possible to log in
+		// Make sure it's possible to create accounts
 		if ( !$manager->canCreateAccounts() ) {
 			$this->getResult()->addValue( null, 'createaccount', $helper->formatAuthenticationResponse(
 				AuthenticationResponse::newFail(
 					$this->msg( 'userlogin-cannot-' . AuthManager::ACTION_CREATE )
 				)
 			) );
+			$helper->logAuthenticationResult( 'accountcreation',
+				'userlogin-cannot-' . AuthManager::ACTION_CREATE );
 			return;
 		}
 
@@ -94,6 +95,7 @@ class ApiAMCreateAccount extends ApiBase {
 
 		$this->getResult()->addValue( null, 'createaccount',
 			$helper->formatAuthenticationResponse( $res ) );
+		$helper->logAuthenticationResult( 'accountcreation', $res );
 	}
 
 	public function isReadMode() {
@@ -130,6 +132,6 @@ class ApiAMCreateAccount extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Account_creation';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Account_creation';
 	}
 }

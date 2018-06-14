@@ -10,50 +10,51 @@
 	/* Override the right margin of the form to give space in case a benefits
 	 * column appears to the side. */
 	margin-right: 100px;
+	/* Override `.mw-body-content` to ensure useful, readable paragraphs */
+	line-height: 1.4;
 }
 
-div.mw-createacct-benefits-container {
+.mw-createacct-benefits-container {
 	/* Keeps this column compact and close to the form, but tends to squish contents. */
 	float: left;
 }
 
-div.mw-createacct-benefits-container h2 {
+.mw-createacct-benefits-container h2 {
 	margin-bottom: 30px;
 }
 
 .mw-number-text.icon-edits {
 	/* @embed */
-	background: url(images/icon-edits.png) no-repeat left center;
+	background: url( images/icon-edits.png ) no-repeat left center;
 }
 
 .mw-number-text.icon-pages {
 	/* @embed */
-	background: url(images/icon-pages.png) no-repeat left center;
+	background: url( images/icon-pages.png ) no-repeat left center;
 }
 
 .mw-number-text.icon-contributors {
 	/* @embed */
-	background: url(images/icon-contributors.png) no-repeat left center;
+	background: url( images/icon-contributors.png ) no-repeat left center;
 }
 
 /*
- * Special font for numbers in benefits, same as Vector's @content-heading-font-family.
+ * Special font for numbers in benefits, same as Vector's `@content-heading-font-family`.
  * Needs an ID so that it's more specific than Vector's div#content h3.
  */
-#bodyContent div.mw-number-text h3 {
-	top: 0;
+#bodyContent .mw-number-text h3 {
+	color: #222;
 	margin: 0;
 	padding: 0;
-	color: #252525;
-	font-family: "Linux Libertine", Georgia, Times, serif;
+	font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
 	font-weight: normal;
 	font-size: 2.2em;
 	line-height: 1.2;
 	text-align: center;
 }
 
-/* Contains a number and explanatory text, with space for an icon */
-div.mw-number-text {
+/* Contains a “headlined” number and explanatory text, with space for an icon */
+.mw-number-text {
 	display: block;
 	font-size: 1.2em;
 	color: #444;

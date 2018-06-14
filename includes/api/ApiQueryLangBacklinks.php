@@ -2,8 +2,6 @@
 /**
  * API for MediaWiki 1.17+
  *
- * Created on May 14, 2011
- *
  * Copyright © 2011 Sam Reed
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
@@ -51,7 +49,14 @@ class ApiQueryLangBacklinks extends ApiQueryGeneratorBase {
 		$params = $this->extractRequestParams();
 
 		if ( isset( $params['title'] ) && !isset( $params['lang'] ) ) {
-			$this->dieUsageMsg( [ 'missingparam', 'lang' ] );
+			$this->dieWithError(
+				[
+					'apierror-invalidparammix-mustusewith',
+					$this->encodeParamName( 'title' ),
+					$this->encodeParamName( 'lang' )
+				],
+				'nolang'
+			);
 		}
 
 		if ( !is_null( $params['continue'] ) ) {
@@ -207,6 +212,6 @@ class ApiQueryLangBacklinks extends ApiQueryGeneratorBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Langbacklinks';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Langbacklinks';
 	}
 }

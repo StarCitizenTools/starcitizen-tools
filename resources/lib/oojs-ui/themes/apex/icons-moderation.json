@@ -2,32 +2,52 @@
 	"prefix": "oo-ui-icon",
 	"intro": "@import '../../../../src/styles/common';",
 	"images": {
-		"block": { "file": "images/icons/block.svg" },
-		"blockUndo": { "file": {
-			"ltr": "images/icons/blockUndo-ltr.svg",
-			"rtl": "images/icons/blockUndo-rtl.svg"
-		} },
+		"bookmarkOutline": {
+			"file": "../wikimediaui/images/icons/bookmarkOutline.svg"
+		},
+		"bookmark": {
+			"file": "../wikimediaui/images/icons/bookmark.svg"
+		},
+		"block": { "file": "../wikimediaui/images/icons/block.svg" },
+		"unBlock": {
+			"file": "../wikimediaui/images/icons/unBlock.svg"
+		},
+		"clip": {
+			"file": "../wikimediaui/images/icons/bookmarkOutline.svg",
+			"deprecated": "Renamed since v0.26.1, use 'bookmarkOutline' instead."
+		},
+		"unClip": {
+			"file": "../wikimediaui/images/icons/bookmark.svg",
+			"deprecated": "Renamed since v0.26.1, use 'bookmark' instead."
+		},
 		"flag": { "file": {
-			"ltr": "images/icons/flag-ltr.svg",
-			"rtl": "images/icons/flag-rtl.svg"
+			"ltr": "../wikimediaui/images/icons/flag-ltr.svg",
+			"rtl": "../wikimediaui/images/icons/flag-rtl.svg"
 		} },
-		"flagUndo": { "file": {
-			"ltr": "images/icons/flagUndo-ltr.svg",
-			"rtl": "images/icons/flagUndo-rtl.svg"
+		"unFlag": { "file": {
+			"ltr": "../wikimediaui/images/icons/unFlag-ltr.svg",
+			"rtl": "../wikimediaui/images/icons/unFlag-rtl.svg"
 		} },
-		"lock": { "file": "images/icons/lock.svg" },
-		"star": { "file": "images/icons/star.svg" },
-		"trash": { "file": "images/icons/trash.svg" },
-		"trashUndo": { "file": {
-			"ltr": "images/icons/trashUndo-ltr.svg",
-			"rtl": "images/icons/trashUndo-rtl.svg"
+		"lock": {
+			"file": "../wikimediaui/images/icons/lock.svg"
+		},
+		"unLock": {
+			"file": "../wikimediaui/images/icons/unLock.svg"
+		},
+		"star": { "file": "../wikimediaui/images/icons/star.svg" },
+		"halfStar": { "file": {
+			"ltr": "../wikimediaui/images/icons/halfStar-ltr.svg",
+			"rtl": "../wikimediaui/images/icons/halfStar-rtl.svg"
 		} },
-		"unLock": { "file": {
-			"ltr": "images/icons/unLock-ltr.svg",
-			"rtl": "images/icons/unLock-rtl.svg"
-		} },
-		"unStar": { "file": "images/icons/unStar.svg" }
-
-
+		"unStar": { "file": "../wikimediaui/images/icons/unStar.svg" },
+		"trash": { "file": "../wikimediaui/images/icons/trash.svg" },
+		"unTrash": {
+			"file": "../wikimediaui/images/icons/unTrash.svg"
+		},
+		"pushPin": { "file": "../wikimediaui/images/icons/pushPin.svg" },
+		"ongoingConversation": { "file": {
+			"ltr": "../wikimediaui/images/icons/ongoingConversation-ltr.svg",
+			"rtl": "../wikimediaui/images/icons/ongoingConversation-rtl.svg"
+		} }
 	}
 }

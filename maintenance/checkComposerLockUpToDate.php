@@ -24,9 +24,8 @@ class CheckComposerLockUpToDate extends Maintenance {
 			// Maybe they're using mediawiki/vendor?
 			$lockLocation = "$IP/vendor/composer.lock";
 			if ( !file_exists( $lockLocation ) ) {
-				$this->error(
-					'Could not find composer.lock file. Have you run "composer install"?',
-					1
+				$this->fatalError(
+					'Could not find composer.lock file. Have you run "composer install --no-dev"?'
 				);
 			}
 		}
@@ -51,18 +50,16 @@ class CheckComposerLockUpToDate extends Maintenance {
 			}
 		}
 		if ( $found ) {
-			$this->error(
+			$this->fatalError(
 				'Error: your composer.lock file is not up to date. ' .
-					'Run "composer update" to install newer dependencies',
-				1
+					'Run "composer update --no-dev" to install newer dependencies'
 			);
 		} else {
 			// We couldn't find any out-of-date dependencies, so assume everything is ok!
 			$this->output( "Your composer.lock file is up to date with current dependencies!\n" );
 		}
-
 	}
 }
 
-$maintClass = 'CheckComposerLockUpToDate';
+$maintClass = CheckComposerLockUpToDate::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

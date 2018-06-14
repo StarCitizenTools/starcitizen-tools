@@ -2,7 +2,7 @@
 /**
  * Contain classes to list log entries
  *
- * Copyright © 2004 Brion Vibber <brion@pobox.com>, 2008 Aaron Schulz
+ * Copyright © 2004 Brion Vibber <brion@pobox.com>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,10 @@
  *
  * @file
  */
+
+use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Rdbms\IDatabase;
 
 class LogEventsList extends ContextSource {
 	const NO_ACTION_LINK = 1;
@@ -46,17 +50,21 @@ class LogEventsList extends ContextSource {
 	protected $allowedActions = null;
 
 	/**
-	 * Constructor.
+	 * @var LinkRenderer|null
+	 */
+	private $linkRenderer;
+
+	/**
 	 * The first two parameters used to be $skin and $out, but now only a context
 	 * is needed, that's why there's a second unused parameter.
 	 *
 	 * @param IContextSource|Skin $context Context to use; formerly it was
 	 *   a Skin object. Use of Skin is deprecated.
-	 * @param null $unused Unused; used to be an OutputPage object.
+	 * @param LinkRenderer|null $linkRenderer previously unused
 	 * @param int $flags Can be a combination of self::NO_ACTION_LINK,
 	 *   self::NO_EXTRA_USER_LINKS or self::USE_CHECKBOXES.
 	 */
-	public function __construct( $context, $unused = null, $flags = 0 ) {
+	public function __construct( $context, $linkRenderer = null, $flags = 0 ) {
 		if ( $context instanceof IContextSource ) {
 			$this->setContext( $context );
 		} else {
@@ -66,6 +74,21 @@ class LogEventsList extends ContextSource {
 
 		$this->flags = $flags;
 		$this->showTagEditUI = ChangeTags::showTagEditingUI( $this->getUser() );
+		if ( $linkRenderer instanceof LinkRenderer ) {
+			$this->linkRenderer = $linkRenderer;
+		}
+	}
+
+	/**
+	 * @since 1.30
+	 * @return LinkRenderer
+	 */
+	protected function getLinkRenderer() {
+		if ( $this->linkRenderer !== null ) {
+			return $this->linkRenderer;
+		} else {
+			return MediaWikiServices::getInstance()->getLinkRenderer();
+		}
 	}
 
 	/**
@@ -75,8 +98,9 @@ class LogEventsList extends ContextSource {
 	 * @param string $user
 	 * @param string $page
 	 * @param string $pattern
-	 * @param int $year Year
-	 * @param int $month Month
+	 * @param int|string $year Use 0 to start with no year preselected.
+	 * @param int|string $month A month in the 1..12 range. Use 0 to start with no month
+	 *  preselected.
 	 * @param array $filter
 	 * @param string $tagFilter Tag to select by default
 	 * @param string $action
@@ -91,7 +115,7 @@ class LogEventsList extends ContextSource {
 		// For B/C, we take strings, but make sure they are converted...
 		$types = ( $types === '' ) ? [] : (array)$types;
 
-		$tagSelector = ChangeTags::buildTagFilterSelector( $tagFilter );
+		$tagSelector = ChangeTags::buildTagFilterSelector( $tagFilter, false, $this->getContext() );
 
 		$html = Html::hidden( 'title', $title->getPrefixedDBkey() );
 
@@ -142,10 +166,11 @@ class LogEventsList extends ContextSource {
 	 */
 	private function getFilterLinks( $filter ) {
 		// show/hide links
-		$messages = [ $this->msg( 'show' )->escaped(), $this->msg( 'hide' )->escaped() ];
+		$messages = [ $this->msg( 'show' )->text(), $this->msg( 'hide' )->text() ];
 		// Option value -> message mapping
 		$links = [];
 		$hiddens = ''; // keep track for "go" button
+		$linkRenderer = $this->getLinkRenderer();
 		foreach ( $filter as $type => $val ) {
 			// Should the below assignment be outside the foreach?
 			// Then it would have to be copied. Not certain what is more expensive.
@@ -155,7 +180,7 @@ class LogEventsList extends ContextSource {
 			$hideVal = 1 - intval( $val );
 			$query[$queryKey] = $hideVal;
 
-			$link = Linker::linkKnown(
+			$link = $linkRenderer->makeKnownLink(
 				$this->getTitle(),
 				$messages[$hideVal],
 				[],
@@ -310,7 +335,7 @@ class LogEventsList extends ContextSource {
 			return '';
 		}
 		$html = '';
-		$html .= xml::label( wfMessage( 'log-action-filter-' . $types[0] )->text(),
+		$html .= Xml::label( wfMessage( 'log-action-filter-' . $types[0] )->text(),
 			'action-filter-' .$types[0] ) . "\n";
 		$select = new XmlSelect( 'subtype' );
 		$select->addOption( wfMessage( 'log-action-filter-all' )->text(), '' );
@@ -319,7 +344,7 @@ class LogEventsList extends ContextSource {
 			$select->addOption( wfMessage( $msgKey )->text(), $value );
 		}
 		$select->setDefault( $action );
-		$html .= $select->getHtml();
+		$html .= $select->getHTML();
 		return $html;
 	}
 
@@ -355,6 +380,7 @@ class LogEventsList extends ContextSource {
 		$entry = DatabaseLogEntry::newFromRow( $row );
 		$formatter = LogFormatter::newFromEntry( $entry );
 		$formatter->setContext( $this->getContext() );
+		$formatter->setLinkRenderer( $this->getLinkRenderer() );
 		$formatter->setShowUserToolLinks( !( $this->flags & self::NO_EXTRA_USER_LINKS ) );
 
 		$time = htmlspecialchars( $this->getLanguage()->userTimeAndDate(
@@ -386,13 +412,22 @@ class LogEventsList extends ContextSource {
 			[ 'mw-logline-' . $entry->getType() ],
 			$newClasses
 		);
+		$attribs = [
+			'data-mw-logid' => $entry->getId(),
+			'data-mw-logaction' => $entry->getFullType(),
+		];
+		$ret = "$del $time $action $comment $revert $tagDisplay";
 
-		return Html::rawElement( 'li', [ 'class' => $classes ],
-			"$del $time $action $comment $revert $tagDisplay" ) . "\n";
+		// Let extensions add data
+		Hooks::run( 'LogEventsListLineEnding', [ $this, &$ret, $entry, &$classes, &$attribs ] );
+		$attribs = wfArrayFilterByKey( $attribs, [ Sanitizer::class, 'isReservedDataAttribute' ] );
+		$attribs['class'] = implode( ' ', $classes );
+
+		return Html::rawElement( 'li', $attribs, $ret ) . "\n";
 	}
 
 	/**
-	 * @param stdClass $row Row
+	 * @param stdClass $row
 	 * @return string
 	 */
 	private function getShowHideLinks( $row ) {
@@ -462,7 +497,7 @@ class LogEventsList extends ContextSource {
 	}
 
 	/**
-	 * @param stdClass $row Row
+	 * @param stdClass $row
 	 * @param string|array $type
 	 * @param string|array $action
 	 * @param string $right
@@ -487,7 +522,7 @@ class LogEventsList extends ContextSource {
 	 * Determine if the current user is allowed to view a particular
 	 * field of this log row, if it's marked as deleted.
 	 *
-	 * @param stdClass $row Row
+	 * @param stdClass $row
 	 * @param int $field
 	 * @param User $user User to check, or null to use $wgUser
 	 * @return bool
@@ -524,7 +559,7 @@ class LogEventsList extends ContextSource {
 	}
 
 	/**
-	 * @param stdClass $row Row
+	 * @param stdClass $row
 	 * @param int $field One of DELETED_* bitfield constants
 	 * @return bool
 	 */
@@ -535,13 +570,14 @@ class LogEventsList extends ContextSource {
 	/**
 	 * Show log extract. Either with text and a box (set $msgKey) or without (don't set $msgKey)
 	 *
-	 * @param OutputPage|string $out By-reference
+	 * @param OutputPage|string &$out
 	 * @param string|array $types Log types to show
 	 * @param string|Title $page The page title to show log entries for
 	 * @param string $user The user who made the log entries
 	 * @param array $param Associative Array with the following additional options:
 	 * - lim Integer Limit of items to show, default is 50
-	 * - conds Array Extra conditions for the query (e.g. "log_action != 'revision'")
+	 * - conds Array Extra conditions for the query
+	 *   (e.g. 'log_action != ' . $dbr->addQuotes( 'revision' ))
 	 * - showIfEmpty boolean Set to false if you don't want any output in case the loglist is empty
 	 *   if set to true (default), "No matching items in log" is displayed if loglist is empty
 	 * - msgKey Array If you want a nice box with a message, set this to the key of the message.
@@ -553,6 +589,7 @@ class LogEventsList extends ContextSource {
 	 * - flags Integer display flags (NO_ACTION_LINK,NO_EXTRA_USER_LINKS)
 	 * - useRequestParams boolean Set true to use Pager-related parameters in the WebRequest
 	 * - useMaster boolean Use master DB
+	 * - extraUrlParams array|bool Additional url parameters for "full log" link (if it is shown)
 	 * @return int Number of total log items (not limited by $lim)
 	 */
 	public static function showLogExtract(
@@ -567,6 +604,7 @@ class LogEventsList extends ContextSource {
 			'flags' => 0,
 			'useRequestParams' => false,
 			'useMaster' => false,
+			'extraUrlParams' => false,
 		];
 		# The + operator appends elements of remaining keys from the right
 		# handed array to the left handed, whereas duplicated keys are NOT overwritten.
@@ -578,6 +616,8 @@ class LogEventsList extends ContextSource {
 		$msgKey = $param['msgKey'];
 		$wrap = $param['wrap'];
 		$flags = $param['flags'];
+		$extraUrlParams = $param['extraUrlParams'];
+
 		$useRequestParams = $param['useRequestParams'];
 		if ( !is_array( $msgKey ) ) {
 			$msgKey = [ $msgKey ];
@@ -589,8 +629,11 @@ class LogEventsList extends ContextSource {
 			$context = RequestContext::getMain();
 		}
 
+		// FIXME: Figure out how to inject this
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+
 		# Insert list of top 50 (or top $lim) items
-		$loglist = new LogEventsList( $context, null, $flags );
+		$loglist = new LogEventsList( $context, $linkRenderer, $flags );
 		$pager = new LogPager( $loglist, $types, $user, $page, '', $conds );
 		if ( !$useRequestParams ) {
 			# Reset vars that may have been taken from the request
@@ -664,9 +707,13 @@ class LogEventsList extends ContextSource {
 				$urlParam['type'] = $types[0];
 			}
 
-			$s .= Linker::link(
+			if ( $extraUrlParams !== false ) {
+				$urlParam = array_merge( $urlParam, $extraUrlParams );
+			}
+
+			$s .= $linkRenderer->makeKnownLink(
 				SpecialPage::getTitleFor( 'Log' ),
-				$context->msg( 'log-fulllog' )->escaped(),
+				$context->msg( 'log-fulllog' )->text(),
 				[],
 				$urlParam
 			);

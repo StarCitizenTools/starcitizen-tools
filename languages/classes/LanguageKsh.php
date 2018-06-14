@@ -63,13 +63,11 @@ class LanguageKsh extends Language {
 	 *
 	 * Possible values for the type of genitive are:
 	 *	Sing, Iehr            prepositioned genitive = possessive dative
-	 *	Vun, Fon, -omitted-   postpositioned genitive
-	 *	                               = preposition "vun" with dative
+	 *	Vun, Fon, -omitted-   postpositioned genitive = preposition "vun" with dative
 	 *
 	 * Values of case overrides & prepositions, in the order of preceedence:
 	 *	Sing, Iehr            possessive dative = prepositioned genitive
-	 *	Vun, Fon              preposition "vun" with dative
-	 *	                                     = postpositioned genitive
+	 *	Vun, Fon              preposition "vun" with dative = postpositioned genitive
 	 *	En, em                preposition "en" with dative
 	 *
 	 * Values for object gender specifiers of the possessive dative, or
@@ -163,21 +161,6 @@ class LanguageKsh extends Language {
 			$word = $lord . ' ' . $word;
 		}
 		return $word;
-	}
-
-	/**
-	 * Avoid grouping whole numbers between 0 to 9999
-	 *
-	 * @param string $_
-	 *
-	 * @return string
-	 */
-	public function commafy( $_ ) {
-		if ( !preg_match( '/^\d{1,4}$/', $_ ) ) {
-			return strrev( (string)preg_replace( '/(\d{3})(?=\d)(?!\d*\.)/', '$1,', strrev( $_ ) ) );
-		} else {
-			return $_;
-		}
 	}
 
 	/**

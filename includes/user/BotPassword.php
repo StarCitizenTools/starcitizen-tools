@@ -18,7 +18,9 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Session\BotPasswordSessionProvider;
+use Wikimedia\Rdbms\IMaintainableDatabase;
 
 /**
  * Utility class for bot passwords
@@ -67,15 +69,16 @@ class BotPassword implements IDBAccessObject {
 
 	/**
 	 * Get a database connection for the bot passwords database
-	 * @param int $db Index of the connection to get, e.g. DB_MASTER or DB_SLAVE.
-	 * @return DatabaseBase
+	 * @param int $db Index of the connection to get, e.g. DB_MASTER or DB_REPLICA.
+	 * @return IMaintainableDatabase
 	 */
 	public static function getDB( $db ) {
 		global $wgBotPasswordsCluster, $wgBotPasswordsDatabase;
 
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 		$lb = $wgBotPasswordsCluster
-			? wfGetLBFactory()->getExternalLB( $wgBotPasswordsCluster )
-			: wfGetLB( $wgBotPasswordsDatabase );
+			? $lbFactory->getExternalLB( $wgBotPasswordsCluster )
+			: $lbFactory->getMainLB( $wgBotPasswordsDatabase );
 		return $lb->getConnectionRef( $db, [], $wgBotPasswordsDatabase );
 	}
 
@@ -389,6 +392,46 @@ class BotPassword implements IDBAccessObject {
 	}
 
 	/**
+	 * Returns a (raw, unhashed) random password string.
+	 * @param Config $config
+	 * @return string
+	 */
+	public static function generatePassword( $config ) {
+		return PasswordFactory::generateRandomPasswordString(
+			max( 32, $config->get( 'MinimalPasswordLength' ) ) );
+	}
+
+	/**
+	 * There are two ways to login with a bot password: "username@appId", "password" and
+	 * "username", "appId@password". Transform it so it is always in the first form.
+	 * Returns [bot username, bot password, could be normal password?] where the last one is a flag
+	 * meaning this could either be a bot password or a normal password, it cannot be decided for
+	 * certain (although in such cases it almost always will be a bot password).
+	 * If this cannot be a bot password login just return false.
+	 * @param string $username
+	 * @param string $password
+	 * @return array|false
+	 */
+	public static function canonicalizeLoginData( $username, $password ) {
+		$sep = self::getSeparator();
+		// the strlen check helps minimize the password information obtainable from timing
+		if ( strlen( $password ) >= 32 && strpos( $username, $sep ) !== false ) {
+			// the separator is not valid in new usernames but might appear in legacy ones
+			if ( preg_match( '/^[0-9a-w]{32,}$/', $password ) ) {
+				return [ $username, $password, true ];
+			}
+		} elseif ( strlen( $password ) > 32 && strpos( $password, $sep ) !== false ) {
+			$segments = explode( $sep, $password );
+			$password = array_pop( $segments );
+			$appId = implode( $sep, $segments );
+			if ( preg_match( '/^[0-9a-w]{32,}$/', $password ) ) {
+				return [ $username . $sep . $appId, $password, true ];
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Try to log the user in
 	 * @param string $username Combined user name and app ID
 	 * @param string $password Supplied password
@@ -396,7 +439,7 @@ class BotPassword implements IDBAccessObject {
 	 * @return Status On success, the good status's value is the new Session object
 	 */
 	public static function login( $username, $password, WebRequest $request ) {
-		global $wgEnableBotPasswords;
+		global $wgEnableBotPasswords, $wgPasswordAttemptThrottle;
 
 		if ( !$wgEnableBotPasswords ) {
 			return Status::newFatal( 'botpasswords-disabled' );
@@ -421,6 +464,20 @@ class BotPassword implements IDBAccessObject {
 			return Status::newFatal( 'nosuchuser', $name );
 		}
 
+		// Throttle
+		$throttle = null;
+		if ( !empty( $wgPasswordAttemptThrottle ) ) {
+			$throttle = new MediaWiki\Auth\Throttler( $wgPasswordAttemptThrottle, [
+				'type' => 'botpassword',
+				'cache' => ObjectCache::getLocalClusterInstance(),
+			] );
+			$result = $throttle->increase( $user->getName(), $request->getIP(), __METHOD__ );
+			if ( $result ) {
+				$msg = wfMessage( 'login-throttled' )->durationParams( $result['wait'] );
+				return Status::newFatal( $msg );
+			}
+		}
+
 		// Get the bot password
 		$bp = self::newFromUser( $user, $appId );
 		if ( !$bp ) {
@@ -439,6 +496,9 @@ class BotPassword implements IDBAccessObject {
 		}
 
 		// Ok! Create the session.
+		if ( $throttle ) {
+			$throttle->clear( $user->getName(), $request->getIP() );
+		}
 		return Status::newGood( $provider->newSessionForRequest( $user, $bp, $request ) );
 	}
 }

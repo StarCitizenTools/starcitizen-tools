@@ -18,6 +18,9 @@
  * @file
  * @ingroup Language
  */
+use MediaWiki\MediaWikiServices;
+
+use MediaWiki\Logger\LoggerFactory;
 
 /**
  * Base class for language conversion.
@@ -35,6 +38,8 @@ class LanguageConverter {
 	 * @var array
 	 */
 	static public $languagesWithVariants = [
+		'en',
+		'crh',
 		'gan',
 		'iu',
 		'kk',
@@ -47,16 +52,17 @@ class LanguageConverter {
 	];
 
 	public $mMainLanguageCode;
-	public $mVariants, $mVariantFallbacks, $mVariantNames;
+
+	/**
+	 * @var string[]
+	 */
+	public $mVariants;
+	public $mVariantFallbacks;
+	public $mVariantNames;
 	public $mTablesLoaded = false;
 	public $mTables;
 	// 'bidirectional' 'unidirectional' 'disable' for each variant
 	public $mManualLevel;
-
-	/**
-	 * @var string Memcached key name
-	 */
-	public $mCacheKey;
 
 	public $mLangObj;
 	public $mFlags;
@@ -72,11 +78,9 @@ class LanguageConverter {
 	const CACHE_VERSION_KEY = 'VERSION 7';
 
 	/**
-	 * Constructor
-	 *
 	 * @param Language $langobj
 	 * @param string $maincode The main language code of this language
-	 * @param array $variants The supported variants of this language
+	 * @param string[] $variants The supported variants of this language
 	 * @param array $variantfallbacks The fallback language of each variant
 	 * @param array $flags Defining the custom strings that maps to the flags
 	 * @param array $manualLevel Limit for supported variants
@@ -90,19 +94,18 @@ class LanguageConverter {
 		$this->mVariants = array_diff( $variants, $wgDisabledVariants );
 		$this->mVariantFallbacks = $variantfallbacks;
 		$this->mVariantNames = Language::fetchLanguageNames();
-		$this->mCacheKey = wfMemcKey( 'conversiontables', $maincode );
 		$defaultflags = [
 			// 'S' show converted text
 			// '+' add rules for alltext
 			// 'E' the gave flags is error
 			// these flags above are reserved for program
-			'A' => 'A',	  // add rule for convert code (all text convert)
-			'T' => 'T',	  // title convert
-			'R' => 'R',	  // raw content
-			'D' => 'D',	  // convert description (subclass implement)
-			'-' => '-',	  // remove convert (not implement)
-			'H' => 'H',	  // add rule for convert code (but no display in placed code)
-			'N' => 'N'	  // current variant name
+			'A' => 'A',   // add rule for convert code (all text convert)
+			'T' => 'T',   // title convert
+			'R' => 'R',   // raw content
+			'D' => 'D',   // convert description (subclass implement)
+			'-' => '-',   // remove convert (not implement)
+			'H' => 'H',   // add rule for convert code (but no display in placed code)
+			'N' => 'N',   // current variant name
 		];
 		$this->mFlags = array_merge( $defaultflags, $flags );
 		foreach ( $this->mVariants as $v ) {
@@ -119,7 +122,7 @@ class LanguageConverter {
 	 * Get all valid variants.
 	 * Call this instead of using $this->mVariants directly.
 	 *
-	 * @return array Contains all valid variants
+	 * @return string[] Contains all valid variants
 	 */
 	public function getVariants() {
 		return $this->mVariants;
@@ -159,6 +162,8 @@ class LanguageConverter {
 		global $wgDefaultLanguageVariant, $wgUser;
 
 		$req = $this->getURLVariant();
+
+		Hooks::run( 'GetLangPreferredVariant', [ &$req ] );
 
 		if ( $wgUser->isSafeToLoad() && $wgUser->isLoggedIn() && !$req ) {
 			$req = $this->getUserVariant();
@@ -339,7 +344,6 @@ class LanguageConverter {
 	 * @return string The converted text
 	 */
 	public function autoConvert( $text, $toVariant = false ) {
-
 		$this->loadTables();
 
 		if ( !$toVariant ) {
@@ -352,44 +356,80 @@ class LanguageConverter {
 		if ( $this->guessVariant( $text, $toVariant ) ) {
 			return $text;
 		}
-
 		/* we convert everything except:
 		   1. HTML markups (anything between < and >)
 		   2. HTML entities
 		   3. placeholders created by the parser
+		   IMPORTANT: Beware of failure from pcre.backtrack_limit (T124404).
+		   Minimize use of backtracking where possible.
 		*/
-		$marker = '|' . Parser::MARKER_PREFIX . '[\-a-zA-Z0-9]+';
+		$marker = '|' . Parser::MARKER_PREFIX . '[^\x7f]++\x7f';
 
 		// this one is needed when the text is inside an HTML markup
-		$htmlfix = '|<[^>]+$|^[^<>]*>';
+		$htmlfix = '|<[^>\004]++(?=\004$)|^[^<>]*+>';
+
+		// Optimize for the common case where these tags have
+		// few or no children. Thus try and possesively get as much as
+		// possible, and only engage in backtracking when we hit a '<'.
 
 		// disable convert to variants between <code> tags
-		$codefix = '<code>.+?<\/code>|';
+		$codefix = '<code>[^<]*+(?:(?:(?!<\/code>).)[^<]*+)*+<\/code>|';
 		// disable conversion of <script> tags
-		$scriptfix = '<script.*?>.*?<\/script>|';
+		$scriptfix = '<script[^>]*+>[^<]*+(?:(?:(?!<\/script>).)[^<]*+)*+<\/script>|';
 		// disable conversion of <pre> tags
-		$prefix = '<pre.*?>.*?<\/pre>|';
+		$prefix = '<pre[^>]*+>[^<]*+(?:(?:(?!<\/pre>).)[^<]*+)*+<\/pre>|';
+		// The "|.*+)" at the end, is in case we missed some part of html syntax,
+		// we will fail securely (hopefully) by matching the rest of the string.
+		$htmlFullTag = '<(?:[^>=]*+(?>[^>=]*+=\s*+(?:"[^"]*"|\'[^\']*\'|[^\'">\s]*+))*+[^>=]*+>|.*+)|';
 
-		$reg = '/' . $codefix . $scriptfix . $prefix .
-			'<[^>]+>|&[a-zA-Z#][a-z0-9]+;' . $marker . $htmlfix . '/s';
+		$reg = '/' . $codefix . $scriptfix . $prefix . $htmlFullTag .
+			'&[a-zA-Z#][a-z0-9]++;' . $marker . $htmlfix . '|\004$/s';
 		$startPos = 0;
 		$sourceBlob = '';
 		$literalBlob = '';
 
 		// Guard against delimiter nulls in the input
+		// (should never happen: see T159174)
 		$text = str_replace( "\000", '', $text );
+		$text = str_replace( "\004", '', $text );
 
 		$markupMatches = null;
 		$elementMatches = null;
+
+		// We add a marker (\004) at the end of text, to ensure we always match the
+		// entire text (Otherwise, pcre.backtrack_limit might cause silent failure)
 		while ( $startPos < strlen( $text ) ) {
-			if ( preg_match( $reg, $text, $markupMatches, PREG_OFFSET_CAPTURE, $startPos ) ) {
+			if ( preg_match( $reg, $text . "\004", $markupMatches, PREG_OFFSET_CAPTURE, $startPos ) ) {
 				$elementPos = $markupMatches[0][1];
 				$element = $markupMatches[0][0];
+				if ( $element === "\004" ) {
+					// We hit the end.
+					$elementPos = strlen( $text );
+					$element = '';
+				} elseif ( substr( $element, -1 ) === "\004" ) {
+					// This can sometimes happen if we have
+					// unclosed html tags (For example
+					// when converting a title attribute
+					// during a recursive call that contains
+					// a &lt; e.g. <div title="&lt;">.
+					$element = substr( $element, 0, -1 );
+				}
 			} else {
-				$elementPos = strlen( $text );
-				$element = '';
+				// If we hit here, then Language Converter could be tricked
+				// into doing an XSS, so we refuse to translate.
+				// If non-crazy input manages to reach this code path,
+				// we should consider it a bug.
+				$log = LoggerFactory::getInstance( 'languageconverter' );
+				$log->error( "Hit pcre.backtrack_limit in " . __METHOD__
+					. ". Disabling language conversion for this page.",
+					[
+						"method" => __METHOD__,
+						"variant" => $toVariant,
+						"startOfText" => substr( $text, 0, 500 )
+					]
+				);
+				return $text;
 			}
-
 			// Queue the part before the markup for translation in a batch
 			$sourceBlob .= substr( $text, $startPos, $elementPos - $startPos ) . "\000";
 
@@ -398,9 +438,16 @@ class LanguageConverter {
 
 			// Translate any alt or title attributes inside the matched element
 			if ( $element !== ''
-				&& preg_match( '/^(<[^>\s]*)\s([^>]*)(.*)$/', $element, $elementMatches )
+				&& preg_match( '/^(<[^>\s]*+)\s([^>]*+)(.*+)$/', $element, $elementMatches )
 			) {
+				// FIXME, this decodes entities, so if you have something
+				// like <div title="foo&lt;bar"> the bar won't get
+				// translated since after entity decoding it looks like
+				// unclosed html and we call this method recursively
+				// on attributes.
 				$attrs = Sanitizer::decodeTagAttributes( $elementMatches[2] );
+				// Ensure self-closing tags stay self-closing.
+				$close = substr( $elementMatches[2], -1 ) === '/' ? ' /' : '';
 				$changed = false;
 				foreach ( [ 'title', 'alt' ] as $attrName ) {
 					if ( !isset( $attrs[$attrName] ) ) {
@@ -412,8 +459,6 @@ class LanguageConverter {
 						$attr = $this->recursiveConvertTopLevel( $attr, $toVariant );
 					}
 
-					// Remove HTML tags to avoid disrupting the layout
-					$attr = preg_replace( '/<[^>]+>/', '', $attr );
 					if ( $attr !== $attrs[$attrName] ) {
 						$attrs[$attrName] = $attr;
 						$changed = true;
@@ -421,7 +466,7 @@ class LanguageConverter {
 				}
 				if ( $changed ) {
 					$element = $elementMatches[1] . Html::expandAttributes( $attrs ) .
-						$elementMatches[3];
+						$close . $elementMatches[3];
 				}
 			}
 			$literalBlob .= $element . "\000";
@@ -488,7 +533,7 @@ class LanguageConverter {
 	protected function applyManualConv( $convRule ) {
 		// Use syntax -{T|zh-cn:TitleCN; zh-tw:TitleTw}- to custom
 		// title conversion.
-		// Bug 24072: $mConvRuleTitle was overwritten by other manual
+		// T26072: $mConvRuleTitle was overwritten by other manual
 		// rule(s) not for title, this breaks the title conversion.
 		$newConvRuleTitle = $convRule->getTitle();
 		if ( $newConvRuleTitle ) {
@@ -550,8 +595,8 @@ class LanguageConverter {
 			$variant = $this->getPreferredVariant();
 		}
 
-		$cache = ObjectCache::newAccelerator( CACHE_NONE );
-		$key = wfMemcKey( 'languageconverter', 'namespace-text', $index, $variant );
+		$cache = MediaWikiServices::getInstance()->getLocalServerObjectCache();
+		$key = $cache->makeKey( 'languageconverter', 'namespace-text', $index, $variant );
 		$nsVariantText = $cache->get( $key );
 		if ( $nsVariantText !== false ) {
 			return $nsVariantText;
@@ -633,29 +678,42 @@ class LanguageConverter {
 		$out = '';
 		$length = strlen( $text );
 		$shouldConvert = !$this->guessVariant( $text, $variant );
+		$continue = 1;
 
-		while ( $startPos < $length ) {
-			$pos = strpos( $text, '-{', $startPos );
+		$noScript = '<script.*?>.*?<\/script>(*SKIP)(*FAIL)';
+		$noStyle = '<style.*?>.*?<\/style>(*SKIP)(*FAIL)';
+		// phpcs:ignore Generic.Files.LineLength
+		$noHtml = '<(?:[^>=]*+(?>[^>=]*+=\s*+(?:"[^"]*"|\'[^\']*\'|[^\'">\s]*+))*+[^>=]*+>|.*+)(*SKIP)(*FAIL)';
+		while ( $startPos < $length && $continue ) {
+			$continue = preg_match(
+				// Only match -{ outside of html.
+				"/$noScript|$noStyle|$noHtml|-\{/",
+				$text,
+				$m,
+				PREG_OFFSET_CAPTURE,
+				$startPos
+			);
 
-			if ( $pos === false ) {
+			if ( !$continue ) {
 				// No more markup, append final segment
 				$fragment = substr( $text, $startPos );
 				$out .= $shouldConvert ? $this->autoConvert( $fragment, $variant ) : $fragment;
 				return $out;
 			}
 
-			// Markup found
+			// Offset of the match of the regex pattern.
+			$pos = $m[0][1];
+
 			// Append initial segment
 			$fragment = substr( $text, $startPos, $pos - $startPos );
 			$out .= $shouldConvert ? $this->autoConvert( $fragment, $variant ) : $fragment;
-
-			// Advance position
+			// -{ marker found, not in attribute
+			// Advance position up to -{ marker.
 			$startPos = $pos;
-
 			// Do recursive conversion
+			// Note: This passes $startPos by reference, and advances it.
 			$out .= $this->recursiveConvertRule( $text, $variant, $startPos, $depth + 1 );
 		}
-
 		return $out;
 	}
 
@@ -664,7 +722,7 @@ class LanguageConverter {
 	 *
 	 * @param string $text Text to be converted
 	 * @param string $variant The target variant code
-	 * @param int $startPos
+	 * @param int &$startPos
 	 * @param int $depth Depth of recursion
 	 *
 	 * @throws MWException
@@ -843,9 +901,8 @@ class LanguageConverter {
 	 * @throws MWException
 	 */
 	function loadDefaultTables() {
-		$name = get_class( $this );
-
-		throw new MWException( "Must implement loadDefaultTables() method in class $name" );
+		$class = static::class;
+		throw new MWException( "Must implement loadDefaultTables() method in class $class" );
 	}
 
 	/**
@@ -863,13 +920,11 @@ class LanguageConverter {
 		$this->mTablesLoaded = true;
 		$this->mTables = false;
 		$cache = ObjectCache::getInstance( $wgLanguageConverterCacheType );
+		$cacheKey = $cache->makeKey( 'conversiontables', $this->mMainLanguageCode );
 		if ( $fromCache ) {
-			wfProfileIn( __METHOD__ . '-cache' );
-			$this->mTables = $cache->get( $this->mCacheKey );
-			wfProfileOut( __METHOD__ . '-cache' );
+			$this->mTables = $cache->get( $cacheKey );
 		}
 		if ( !$this->mTables || !array_key_exists( self::CACHE_VERSION_KEY, $this->mTables ) ) {
-			wfProfileIn( __METHOD__ . '-recache' );
 			// not in cache, or we need a fresh reload.
 			// We will first load the default tables
 			// then update them using things in MediaWiki:Conversiontable/*
@@ -882,8 +937,7 @@ class LanguageConverter {
 			$this->postLoadTables();
 			$this->mTables[self::CACHE_VERSION_KEY] = true;
 
-			$cache->set( $this->mCacheKey, $this->mTables, 43200 );
-			wfProfileOut( __METHOD__ . '-recache' );
+			$cache->set( $cacheKey, $this->mTables, 43200 );
 		}
 	}
 
@@ -896,9 +950,11 @@ class LanguageConverter {
 	/**
 	 * Reload the conversion tables.
 	 *
+	 * Also used by test suites which need to reset the converter state.
+	 *
 	 * @private
 	 */
-	function reloadTables() {
+	private function reloadTables() {
 		if ( $this->mTables ) {
 			unset( $this->mTables );
 		}
@@ -1084,13 +1140,13 @@ class LanguageConverter {
 			// text should be splited by ";" only if a valid variant
 			// name exist after the markup, for example:
 			//  -{zh-hans:<span style="font-size:120%;">xxx</span>;zh-hant:\
-			// 	<span style="font-size:120%;">yyy</span>;}-
+			//  <span style="font-size:120%;">yyy</span>;}-
 			// we should split it as:
-			//  array(
-			// 	  [0] => 'zh-hans:<span style="font-size:120%;">xxx</span>'
-			// 	  [1] => 'zh-hant:<span style="font-size:120%;">yyy</span>'
-			// 	  [2] => ''
-			// 	 )
+			//  [
+			//    [0] => 'zh-hans:<span style="font-size:120%;">xxx</span>'
+			//    [1] => 'zh-hant:<span style="font-size:120%;">yyy</span>'
+			//    [2] => ''
+			//  ]
 			$pat = '/;\s*(?=';
 			foreach ( $this->mVariants as $variant ) {
 				// zh-hans:xxx;zh-hant:yyy

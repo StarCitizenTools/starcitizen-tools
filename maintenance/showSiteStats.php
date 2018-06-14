@@ -52,8 +52,8 @@ class ShowSiteStats extends Maintenance {
 			'ss_images' => 'Number of images',
 		];
 
-		// Get cached stats from slave database
-		$dbr = $this->getDB( DB_SLAVE );
+		// Get cached stats from a replica DB
+		$dbr = $this->getDB( DB_REPLICA );
 		$stats = $dbr->selectRow( 'site_stats', '*', '', __METHOD__ );
 
 		// Get maximum size for each column
@@ -74,5 +74,5 @@ class ShowSiteStats extends Maintenance {
 	}
 }
 
-$maintClass = "ShowSiteStats";
+$maintClass = ShowSiteStats::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

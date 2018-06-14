@@ -18,6 +18,7 @@
  * @file
  * @ingroup Pager
  */
+use MediaWiki\Linker\LinkRenderer;
 
 /**
  * @ingroup Pager
@@ -25,16 +26,16 @@
 class CategoryPager extends AlphabeticPager {
 
 	/**
-	 * @var PageLinkRenderer
+	 * @var LinkRenderer
 	 */
 	protected $linkRenderer;
 
 	/**
 	 * @param IContextSource $context
 	 * @param string $from
-	 * @param PageLinkRenderer $linkRenderer
+	 * @param LinkRenderer $linkRenderer
 	 */
-	public function __construct( IContextSource $context, $from, PageLinkRenderer $linkRenderer
+	public function __construct( IContextSource $context, $from, LinkRenderer $linkRenderer
 	) {
 		parent::__construct( $context );
 		$from = str_replace( ' ', '_', $from );
@@ -51,7 +52,6 @@ class CategoryPager extends AlphabeticPager {
 		return [
 			'tables' => [ 'category' ],
 			'fields' => [ 'cat_title', 'cat_pages' ],
-			'conds' => [ 'cat_pages > 0' ],
 			'options' => [ 'USE INDEX' => 'cat_title' ],
 		];
 	}
@@ -74,7 +74,7 @@ class CategoryPager extends AlphabeticPager {
 		$this->mResult->rewind();
 
 		foreach ( $this->mResult as $row ) {
-			$batch->addObj( Title::makeTitleSafe( NS_CATEGORY, $row->cat_title ) );
+			$batch->addObj( new TitleValue( NS_CATEGORY, $row->cat_title ) );
 		}
 		$batch->execute();
 		$this->mResult->rewind();
@@ -85,28 +85,31 @@ class CategoryPager extends AlphabeticPager {
 	function formatRow( $result ) {
 		$title = new TitleValue( NS_CATEGORY, $result->cat_title );
 		$text = $title->getText();
-		$link = $this->linkRenderer->renderHtmlLink( $title, $text );
+		$link = $this->linkRenderer->makeLink( $title, $text );
 
 		$count = $this->msg( 'nmembers' )->numParams( $result->cat_pages )->escaped();
 		return Html::rawElement( 'li', null, $this->getLanguage()->specialList( $link, $count ) ) . "\n";
 	}
 
 	public function getStartForm( $from ) {
-		return Xml::tags(
-			'form',
-			[ 'method' => 'get', 'action' => wfScript() ],
-			Html::hidden( 'title', $this->getTitle()->getPrefixedText() ) .
-			Xml::fieldset(
-				$this->msg( 'categories' )->text(),
-				Xml::inputLabel(
-					$this->msg( 'categoriesfrom' )->text(),
-					'from', 'from', 20, $from, [ 'class' => 'mw-ui-input-inline' ] ) .
-				' ' .
-				Html::submitButton(
-					$this->msg( 'categories-submit' )->text(),
-					[], [ 'mw-ui-progressive' ]
-				)
-			)
-		);
+		$formDescriptor = [
+			'from' => [
+				'type' => 'title',
+				'namespace' => NS_CATEGORY,
+				'relative' => true,
+				'label-message' => 'categoriesfrom',
+				'name' => 'from',
+				'id' => 'from',
+				'size' => 20,
+				'default' => $from,
+			],
+		];
+
+		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
+			->setSubmitTextMsg( 'categories-submit' )
+			->setWrapperLegendMsg( 'categories' )
+			->setMethod( 'get' );
+		return $htmlForm->prepareForm()->getHTML( false );
 	}
+
 }

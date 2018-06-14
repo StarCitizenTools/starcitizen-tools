@@ -19,8 +19,8 @@
  *
  * @file
  * @defgroup JobQueue JobQueue
- * @author Aaron Schulz
  */
+use MediaWiki\MediaWikiServices;
 
 /**
  * Class to handle enqueueing and running of background jobs
@@ -378,7 +378,7 @@ abstract class JobQueue {
 		// Flag this job as an old duplicate based on its "root" job...
 		try {
 			if ( $job && $this->isRootJobOldDuplicate( $job ) ) {
-				JobQueue::incrStats( 'dupe_pops', $this->type );
+				self::incrStats( 'dupe_pops', $this->type );
 				$job = DuplicateJob::newFromJob( $job ); // convert to a no-op
 			}
 		} catch ( Exception $e ) {
@@ -553,7 +553,7 @@ abstract class JobQueue {
 	}
 
 	/**
-	 * Wait for any slaves or backup servers to catch up.
+	 * Wait for any replica DBs or backup servers to catch up.
 	 *
 	 * This does nothing for certain queue classes.
 	 *
@@ -709,7 +709,7 @@ abstract class JobQueue {
 	public static function incrStats( $key, $type, $delta = 1 ) {
 		static $stats;
 		if ( !$stats ) {
-			$stats = RequestContext::getMain()->getStats();
+			$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
 		}
 		$stats->updateCount( "jobqueue.{$key}.all", $delta );
 		$stats->updateCount( "jobqueue.{$key}.{$type}", $delta );

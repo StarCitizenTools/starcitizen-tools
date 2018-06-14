@@ -36,9 +36,9 @@ use Psr\Log\NullLogger;
  *   getEntryByName().
  *
  * The in-line documentation incorporates content from the User Timing Specification
- * http://www.w3.org/TR/user-timing/
+ * https://www.w3.org/TR/user-timing/
  * Copyright © 2013 World Wide Web Consortium, (MIT, ERCIM, Keio, Beihang).
- * http://www.w3.org/Consortium/Legal/2015/doc-license
+ * https://www.w3.org/Consortium/Legal/2015/doc-license
  *
  * @since 1.27
  */
@@ -94,9 +94,7 @@ class Timing implements LoggerAwareInterface {
 				'requestStart' => [
 					'name'      => 'requestStart',
 					'entryType' => 'mark',
-					'startTime' => isset( $_SERVER['REQUEST_TIME_FLOAT'] )
-						? $_SERVER['REQUEST_TIME_FLOAT']
-						: $_SERVER['REQUEST_TIME'],
+					'startTime' => $_SERVER['REQUEST_TIME_FLOAT'],
 					'duration'  => 0,
 				],
 			];

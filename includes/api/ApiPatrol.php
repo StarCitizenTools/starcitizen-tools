@@ -2,8 +2,6 @@
 /**
  * API for MediaWiki 1.14+
  *
- * Created on Sep 2, 2008
- *
  * Copyright © 2008 Soxred93 soxred93@gmail.com,
  *
  * This program is free software; you can redistribute it and/or modify
@@ -40,19 +38,16 @@ class ApiPatrol extends ApiBase {
 		if ( isset( $params['rcid'] ) ) {
 			$rc = RecentChange::newFromId( $params['rcid'] );
 			if ( !$rc ) {
-				$this->dieUsageMsg( [ 'nosuchrcid', $params['rcid'] ] );
+				$this->dieWithError( [ 'apierror-nosuchrcid', $params['rcid'] ] );
 			}
 		} else {
 			$rev = Revision::newFromId( $params['revid'] );
 			if ( !$rev ) {
-				$this->dieUsageMsg( [ 'nosuchrevid', $params['revid'] ] );
+				$this->dieWithError( [ 'apierror-nosuchrevid', $params['revid'] ] );
 			}
 			$rc = $rev->getRecentChange();
 			if ( !$rc ) {
-				$this->dieUsage(
-					'The revision ' . $params['revid'] . " can't be patrolled as it's too old",
-					'notpatrollable'
-				);
+				$this->dieWithError( [ 'apierror-notpatrollable', $params['revid'] ] );
 			}
 		}
 
@@ -70,7 +65,7 @@ class ApiPatrol extends ApiBase {
 		$retval = $rc->doMarkPatrolled( $user, false, $tags );
 
 		if ( $retval ) {
-			$this->dieUsageMsg( reset( $retval ) );
+			$this->dieStatus( $this->errorArrayToStatus( $retval, $user ) );
 		}
 
 		$result = [ 'rcid' => intval( $rc->getAttribute( 'rc_id' ) ) ];
@@ -115,6 +110,6 @@ class ApiPatrol extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Patrol';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Patrol';
 	}
 }

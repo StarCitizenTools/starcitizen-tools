@@ -24,13 +24,15 @@
  * @file
  */
 
+use Wikimedia\Rdbms\IResultWrapper;
+
 /**
  * The TitleArray class only exists to provide the newFromResult method at pre-
  * sent.
  */
 abstract class TitleArray implements Iterator {
 	/**
-	 * @param ResultWrapper $res A SQL result including at least page_namespace and
+	 * @param IResultWrapper $res A SQL result including at least page_namespace and
 	 *   page_title -- also can have page_id, page_len, page_is_redirect,
 	 *   page_latest (if those will be used).  See Title::newFromRow.
 	 * @return TitleArrayFromResult
@@ -47,7 +49,7 @@ abstract class TitleArray implements Iterator {
 	}
 
 	/**
-	 * @param ResultWrapper $res
+	 * @param IResultWrapper $res
 	 * @return TitleArrayFromResult
 	 */
 	protected static function newFromResult_internal( $res ) {

@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on Feb 4, 2009
- *
  * Copyright © 2009 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -42,10 +38,10 @@ class ApiImport extends ApiBase {
 		$isUpload = false;
 		if ( isset( $params['interwikisource'] ) ) {
 			if ( !$user->isAllowed( 'import' ) ) {
-				$this->dieUsageMsg( 'cantimport' );
+				$this->dieWithError( 'apierror-cantimport' );
 			}
 			if ( !isset( $params['interwikipage'] ) ) {
-				$this->dieUsageMsg( [ 'missingparam', 'interwikipage' ] );
+				$this->dieWithError( [ 'apierror-missingparam', 'interwikipage' ] );
 			}
 			$source = ImportStreamSource::newFromInterwiki(
 				$params['interwikisource'],
@@ -53,15 +49,29 @@ class ApiImport extends ApiBase {
 				$params['fullhistory'],
 				$params['templates']
 			);
+			$usernamePrefix = $params['interwikisource'];
 		} else {
 			$isUpload = true;
 			if ( !$user->isAllowed( 'importupload' ) ) {
-				$this->dieUsageMsg( 'cantimport-upload' );
+				$this->dieWithError( 'apierror-cantimport-upload' );
 			}
 			$source = ImportStreamSource::newFromUpload( 'xml' );
+			$usernamePrefix = (string)$params['interwikiprefix'];
+			if ( $usernamePrefix === '' ) {
+				$encParamName = $this->encodeParamName( 'interwikiprefix' );
+				$this->dieWithError( [ 'apierror-missingparam', $encParamName ] );
+			}
 		}
 		if ( !$source->isOK() ) {
 			$this->dieStatus( $source );
+		}
+
+		// Check if user can add the log entry tags which were requested
+		if ( $params['tags'] ) {
+			$ableToTag = ChangeTags::canAddTagsAccompanyingChange( $params['tags'], $user );
+			if ( !$ableToTag->isOK() ) {
+				$this->dieStatus( $ableToTag );
+			}
 		}
 
 		$importer = new WikiImporter( $source->value, $this->getConfig() );
@@ -73,17 +83,21 @@ class ApiImport extends ApiBase {
 				$this->dieStatus( $statusRootPage );
 			}
 		}
+		$importer->setUsernamePrefix( $usernamePrefix, $params['assignknownusers'] );
 		$reporter = new ApiImportReporter(
 			$importer,
 			$isUpload,
 			$params['interwikisource'],
 			$params['summary']
 		);
+		if ( $params['tags'] ) {
+			$reporter->setChangeTags( $params['tags'] );
+		}
 
 		try {
 			$importer->doImport();
 		} catch ( Exception $e ) {
-			$this->dieUsageMsg( [ 'import-unknownerror', $e->getMessage() ] );
+			$this->dieWithException( $e, [ 'wrap' => 'apierror-import-unknownerror' ] );
 		}
 
 		$resultData = $reporter->getData();
@@ -130,6 +144,9 @@ class ApiImport extends ApiBase {
 			'xml' => [
 				ApiBase::PARAM_TYPE => 'upload',
 			],
+			'interwikiprefix' => [
+				ApiBase::PARAM_TYPE => 'string',
+			],
 			'interwikisource' => [
 				ApiBase::PARAM_TYPE => $this->getAllowedImportSources(),
 			],
@@ -139,7 +156,12 @@ class ApiImport extends ApiBase {
 			'namespace' => [
 				ApiBase::PARAM_TYPE => 'namespace'
 			],
+			'assignknownusers' => false,
 			'rootpage' => null,
+			'tags' => [
+				ApiBase::PARAM_TYPE => 'tags',
+				ApiBase::PARAM_ISMULTI => true,
+			],
 		];
 	}
 
@@ -156,7 +178,7 @@ class ApiImport extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Import';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Import';
 	}
 }
 

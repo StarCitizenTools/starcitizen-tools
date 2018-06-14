@@ -6,8 +6,6 @@
  * @author Moriel Schottlender, 2015
  * @since 1.19
  */
-/*jshint esversion:5 */
-/*global OO*/
 ( function ( mw, $ ) {
 	/**
 	 * This is a way of getting simple feedback from users. It's useful
@@ -59,6 +57,7 @@
 		this.feedbackPageTitle = config.title || new mw.Title( 'Feedback' );
 
 		this.messagePosterPromise = mw.messagePoster.factory.create( this.feedbackPageTitle, config.apiUrl );
+		this.foreignApi = config.apiUrl ? new mw.ForeignApi( config.apiUrl ) : null;
 
 		// Links
 		this.bugsTaskSubmissionLink = config.bugsLink || '//phabricator.wikimedia.org/maniphest/task/edit/form/1/';
@@ -85,62 +84,46 @@
 
 	/**
 	 * Respond to dialog submit event. If the information was
-	 * submitted, either successfully or with an error, open
-	 * a MessageDialog to thank the user.
+	 * submitted successfully, open a MessageDialog to thank the user.
 	 *
-	 * @param {string} [status] A status of the end of operation
+	 * @param {string} status A status of the end of operation
 	 *  of the main feedback dialog. Empty if the dialog was
 	 *  dismissed with no action or the user followed the button
 	 *  to the external task reporting site.
+	 * @param {string} feedbackPageName
+	 * @param {string} feedbackPageUrl
 	 */
-	mw.Feedback.prototype.onDialogSubmit = function ( status ) {
-		var dialogConfig = {};
-		switch ( status ) {
-			case 'submitted':
-				dialogConfig = {
-					title: mw.msg( 'feedback-thanks-title' ),
-					message: $( '<span>' ).msg(
-						'feedback-thanks',
-						this.feedbackPageTitle.getNameText(),
-						$( '<a>' ).attr( {
-							target: '_blank',
-							href: this.feedbackPageTitle.getUrl()
-						} )
-					),
-					actions: [
-						{
-							action: 'accept',
-							label: mw.msg( 'feedback-close' ),
-							flags: 'primary'
-						}
-					]
-				};
-				break;
-			case 'error1':
-			case 'error2':
-			case 'error3':
-			case 'error4':
-				dialogConfig = {
-					title: mw.msg( 'feedback-error-title' ),
-					message: mw.msg( 'feedback-' + status ),
-					actions: [
-						{
-							action: 'accept',
-							label: mw.msg( 'feedback-close' ),
-							flags: 'primary'
-						}
-					]
-				};
-				break;
+	mw.Feedback.prototype.onDialogSubmit = function ( status, feedbackPageName, feedbackPageUrl ) {
+		var dialogConfig;
+
+		if ( status !== 'submitted' ) {
+			return;
 		}
 
+		dialogConfig = {
+			title: mw.msg( 'feedback-thanks-title' ),
+			message: $( '<span>' ).msg(
+				'feedback-thanks',
+				feedbackPageName,
+				$( '<a>' ).attr( {
+					target: '_blank',
+					href: feedbackPageUrl
+				} )
+			),
+			actions: [
+				{
+					action: 'accept',
+					label: mw.msg( 'feedback-close' ),
+					flags: 'primary'
+				}
+			]
+		};
+
 		// Show the message dialog
-		if ( !$.isEmptyObject( dialogConfig ) ) {
-			this.constructor.static.windowManager.openWindow(
-				this.thankYouDialog,
-				dialogConfig
-			);
-		}
+		this.constructor.static.windowManager.openWindow(
+			this.thankYouDialog,
+			dialogConfig
+		);
 	};
 
 	/**
@@ -170,6 +153,7 @@
 			this.constructor.static.dialog,
 			{
 				title: mw.msg( this.dialogTitleMessageKey ),
+				foreignApi: this.foreignApi,
 				settings: {
 					messagePosterPromise: this.messagePosterPromise,
 					title: this.feedbackPageTitle,
@@ -216,12 +200,12 @@
 		{
 			action: 'submit',
 			label: mw.msg( 'feedback-submit' ),
-			flags: [ 'primary', 'constructive' ]
+			flags: [ 'primary', 'progressive' ]
 		},
 		{
 			action: 'external',
 			label: mw.msg( 'feedback-external-bug-report-button' ),
-			flags: 'constructive'
+			flags: 'progressive'
 		},
 		{
 			action: 'cancel',
@@ -254,12 +238,10 @@
 			classes: [ 'mw-feedbackDialog-welcome-message' ]
 		} );
 		this.feedbackSubjectInput = new OO.ui.TextInputWidget( {
-			indicator: 'required',
-			multiline: false
+			indicator: 'required'
 		} );
-		this.feedbackMessageInput = new OO.ui.TextInputWidget( {
-			autosize: true,
-			multiline: true
+		this.feedbackMessageInput = new OO.ui.MultilineTextInputWidget( {
+			autosize: true
 		} );
 		feedbackSubjectFieldLayout = new OO.ui.FieldLayout( this.feedbackSubjectInput, {
 			label: mw.msg( 'feedback-subject' )
@@ -305,14 +287,14 @@
 	 */
 	mw.Feedback.Dialog.prototype.validateFeedbackForm = function () {
 		var isValid = (
-				(
-					!this.useragentMandatory ||
-					this.useragentCheckbox.isSelected()
-				) &&
-				this.feedbackSubjectInput.getValue()
-			);
+			(
+				!this.useragentMandatory ||
+				this.useragentCheckbox.isSelected()
+			) &&
+			this.feedbackSubjectInput.getValue()
+		);
 
-		this.actions.setAbilities( { submit:  isValid } );
+		this.actions.setAbilities( { submit: isValid } );
 	};
 
 	/**
@@ -328,6 +310,24 @@
 	mw.Feedback.Dialog.prototype.getSetupProcess = function ( data ) {
 		return mw.Feedback.Dialog.parent.prototype.getSetupProcess.call( this, data )
 			.next( function () {
+				// Get the URL of the target page, we want to use that in links in the intro
+				// and in the success dialog
+				var dialog = this;
+				if ( data.foreignApi ) {
+					return data.foreignApi.get( {
+						action: 'query',
+						prop: 'info',
+						inprop: 'url',
+						formatversion: 2,
+						titles: data.settings.title.getPrefixedText()
+					} ).then( function ( data ) {
+						dialog.feedbackPageUrl = OO.getProp( data, 'query', 'pages', 0, 'canonicalurl' );
+					} );
+				} else {
+					this.feedbackPageUrl = data.settings.title.getUrl();
+				}
+			}, this )
+			.next( function () {
 				var plainMsg, parsedMsg,
 					settings = data.settings;
 				data.contents = data.contents || {};
@@ -341,7 +341,6 @@
 				this.setBugReportLink( settings.bugsTaskSubmissionLink );
 				this.feedbackPageTitle = settings.title;
 				this.feedbackPageName = settings.title.getNameText();
-				this.feedbackPageUrl = settings.title.getUrl();
 
 				// Useragent checkbox
 				if ( settings.useragentCheckbox.show ) {
@@ -422,13 +421,27 @@
 				}, function () {
 					fb.status = 'error4';
 					mw.log.warn( 'Feedback report failed because MessagePoster could not be fetched' );
-				} ).always( function () {
+				} ).then( function () {
 					fb.close();
+				}, function () {
+					return fb.getErrorMessage();
 				} );
 			}, this );
 		}
 		// Fallback to parent handler
 		return mw.Feedback.Dialog.parent.prototype.getActionProcess.call( this, action );
+	};
+
+	/**
+	 * Returns an error message for the current status.
+	 *
+	 * @private
+	 *
+	 * @return {OO.ui.Error}
+	 */
+	mw.Feedback.Dialog.prototype.getErrorMessage = function () {
+		// Messages: feedback-error1, feedback-error2, feedback-error3, feedback-error4
+		return new OO.ui.Error( mw.msg( 'feedback-' + this.status ) );
 	};
 
 	/**
@@ -454,10 +467,10 @@
 				if ( secondaryCode === 'http' ) {
 					fb.status = 'error3';
 					// ajax request failed
-					mw.log.warn( 'Feedback report failed with HTTP error: ' +  details.textStatus );
+					mw.log.warn( 'Feedback report failed with HTTP error: ' + details.textStatus );
 				} else {
 					fb.status = 'error2';
-					mw.log.warn( 'Feedback report failed with API error: ' +  secondaryCode );
+					mw.log.warn( 'Feedback report failed with API error: ' + secondaryCode );
 				}
 			} else {
 				fb.status = 'error1';

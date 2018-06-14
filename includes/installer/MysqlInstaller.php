@@ -21,6 +21,10 @@
  * @ingroup Deployment
  */
 
+use Wikimedia\Rdbms\Database;
+use Wikimedia\Rdbms\DBQueryError;
+use Wikimedia\Rdbms\DBConnectionError;
+
 /**
  * Class for setting up the MediaWiki database using MySQL.
  *
@@ -36,7 +40,6 @@ class MysqlInstaller extends DatabaseInstaller {
 		'wgDBpassword',
 		'wgDBprefix',
 		'wgDBTableOptions',
-		'wgDBmysql5',
 	];
 
 	protected $internalDefaults = [
@@ -47,7 +50,8 @@ class MysqlInstaller extends DatabaseInstaller {
 
 	public $supportedEngines = [ 'InnoDB', 'MyISAM' ];
 
-	public $minimumVersion = '5.0.3';
+	public static $minimumVersion = '5.5.8';
+	protected static $notMiniumumVerisonMessage = 'config-mysql-old';
 
 	public $webUserPrivs = [
 		'DELETE',
@@ -68,7 +72,7 @@ class MysqlInstaller extends DatabaseInstaller {
 	 * @return bool
 	 */
 	public function isCompiled() {
-		return self::checkExtension( 'mysql' ) || self::checkExtension( 'mysqli' );
+		return self::checkExtension( 'mysqli' );
 	}
 
 	/**
@@ -124,17 +128,12 @@ class MysqlInstaller extends DatabaseInstaller {
 			return $status;
 		}
 		/**
-		 * @var $conn DatabaseBase
+		 * @var $conn Database
 		 */
 		$conn = $status->value;
 
 		// Check version
-		$version = $conn->getServerVersion();
-		if ( version_compare( $version, $this->minimumVersion ) < 0 ) {
-			return Status::newFatal( 'config-mysql-old', $this->minimumVersion, $version );
-		}
-
-		return $status;
+		return static::meetsMinimumRequirement( $conn->getServerVersion() );
 	}
 
 	/**
@@ -143,7 +142,7 @@ class MysqlInstaller extends DatabaseInstaller {
 	public function openConnection() {
 		$status = Status::newGood();
 		try {
-			$db = DatabaseBase::factory( 'mysql', [
+			$db = Database::factory( 'mysql', [
 				'host' => $this->getVar( 'wgDBserver' ),
 				'user' => $this->getVar( '_InstallUser' ),
 				'password' => $this->getVar( '_InstallPassword' ),
@@ -168,15 +167,15 @@ class MysqlInstaller extends DatabaseInstaller {
 			return;
 		}
 		/**
-		 * @var $conn DatabaseBase
+		 * @var $conn Database
 		 */
 		$conn = $status->value;
 		$conn->selectDB( $this->getVar( 'wgDBname' ) );
 
 		# Determine existing default character set
 		if ( $conn->tableExists( "revision", __METHOD__ ) ) {
-			$revision = $conn->buildLike( $this->getVar( 'wgDBprefix' ) . 'revision' );
-			$res = $conn->query( "SHOW TABLE STATUS $revision", __METHOD__ );
+			$revision = $this->escapeLikeInternal( $this->getVar( 'wgDBprefix' ) . 'revision', '\\' );
+			$res = $conn->query( "SHOW TABLE STATUS LIKE '$revision'", __METHOD__ );
 			$row = $conn->fetchObject( $res );
 			if ( !$row ) {
 				$this->parent->showMessage( 'config-show-table-status' );
@@ -218,6 +217,17 @@ class MysqlInstaller extends DatabaseInstaller {
 	}
 
 	/**
+	 * @param string $s
+	 * @param string $escapeChar
+	 * @return string
+	 */
+	protected function escapeLikeInternal( $s, $escapeChar = '`' ) {
+		return str_replace( [ $escapeChar, '%', '_' ],
+			[ "{$escapeChar}{$escapeChar}", "{$escapeChar}%", "{$escapeChar}_" ],
+			$s );
+	}
+
+	/**
 	 * Get a list of storage engines that are available and supported
 	 *
 	 * @return array
@@ -226,7 +236,7 @@ class MysqlInstaller extends DatabaseInstaller {
 		$status = $this->getConnection();
 
 		/**
-		 * @var $conn DatabaseBase
+		 * @var $conn Database
 		 */
 		$conn = $status->value;
 
@@ -261,7 +271,7 @@ class MysqlInstaller extends DatabaseInstaller {
 		if ( !$status->isOK() ) {
 			return false;
 		}
-		/** @var $conn DatabaseBase */
+		/** @var Database $conn */
 		$conn = $status->value;
 
 		// Get current account name
@@ -312,7 +322,7 @@ class MysqlInstaller extends DatabaseInstaller {
 				'IS_GRANTABLE' => 1,
 			], __METHOD__ );
 		foreach ( $res as $row ) {
-			$regex = $conn->likeToRegex( $row->TABLE_SCHEMA );
+			$regex = $this->likeToRegex( $row->TABLE_SCHEMA );
 			if ( preg_match( $regex, $this->getVar( 'wgDBname' ) ) ) {
 				unset( $grantOptions[$row->PRIVILEGE_TYPE] );
 			}
@@ -323,6 +333,21 @@ class MysqlInstaller extends DatabaseInstaller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Convert a wildcard (as used in LIKE) to a regex
+	 * Slashes are escaped, slash terminators included
+	 * @param string $wildcard
+	 * @return string
+	 */
+	protected function likeToRegex( $wildcard ) {
+		$r = preg_quote( $wildcard, '/' );
+		$r = strtr( $r, [
+			'%' => '.*',
+			'_' => '.'
+		] );
+		return "/$r/s";
 	}
 
 	/**
@@ -388,20 +413,6 @@ class MysqlInstaller extends DatabaseInstaller {
 			$this->setVar( '_MysqlCharset', reset( $charsets ) );
 		}
 
-		// Do charset selector
-		if ( count( $charsets ) >= 2 ) {
-			// getRadioSet() builds a set of labeled radio buttons.
-			// For grep: The following messages are used as the item labels:
-			// config-mysql-binary, config-mysql-utf8
-			$s .= $this->getRadioSet( [
-				'var' => '_MysqlCharset',
-				'label' => 'config-mysql-charset',
-				'itemLabelPrefix' => 'config-mysql-',
-				'values' => $charsets
-			] );
-			$s .= $this->parent->getHelpBox( 'config-mysql-charset-help' );
-		}
-
 		return $s;
 	}
 
@@ -427,7 +438,7 @@ class MysqlInstaller extends DatabaseInstaller {
 		if ( !$create ) {
 			// Test the web account
 			try {
-				DatabaseBase::factory( 'mysql', [
+				Database::factory( 'mysql', [
 					'host' => $this->getVar( 'wgDBserver' ),
 					'user' => $this->getVar( 'wgDBuser' ),
 					'password' => $this->getVar( 'wgDBpassword' ),
@@ -471,7 +482,7 @@ class MysqlInstaller extends DatabaseInstaller {
 		if ( !$status->isOK() ) {
 			return $status;
 		}
-		/** @var DatabaseBase $conn */
+		/** @var Database $conn */
 		$conn = $status->value;
 		$dbName = $this->getVar( 'wgDBname' );
 		if ( !$conn->selectDB( $dbName ) ) {
@@ -509,7 +520,7 @@ class MysqlInstaller extends DatabaseInstaller {
 		if ( $this->getVar( '_CreateDBAccount' ) ) {
 			// Before we blindly try to create a user that already has access,
 			try { // first attempt to connect to the database
-				DatabaseBase::factory( 'mysql', [
+				Database::factory( 'mysql', [
 					'host' => $server,
 					'user' => $dbUser,
 					'password' => $password,
@@ -557,7 +568,7 @@ class MysqlInstaller extends DatabaseInstaller {
 							// If we couldn't create for some bizzare reason and the
 							// user probably doesn't exist, skip the grant
 							$this->db->rollback( __METHOD__ );
-							$status->warning( 'config-install-user-create-failed', $dbUser, $dqe->getText() );
+							$status->warning( 'config-install-user-create-failed', $dbUser, $dqe->getMessage() );
 						}
 					}
 				} else {
@@ -577,7 +588,7 @@ class MysqlInstaller extends DatabaseInstaller {
 				$this->db->commit( __METHOD__ );
 			} catch ( DBQueryError $dqe ) {
 				$this->db->rollback( __METHOD__ );
-				$status->fatal( 'config-install-user-grant-failed', $dbUser, $dqe->getText() );
+				$status->fatal( 'config-install-user-grant-failed', $dbUser, $dqe->getMessage() );
 			}
 		}
 
@@ -645,7 +656,6 @@ class MysqlInstaller extends DatabaseInstaller {
 	}
 
 	public function getLocalSettings() {
-		$dbmysql5 = wfBoolToStr( $this->getVar( 'wgDBmysql5', true ) );
 		$prefix = LocalSettingsGenerator::escapePhpString( $this->getVar( 'wgDBprefix' ) );
 		$tblOpts = LocalSettingsGenerator::escapePhpString( $this->getTableOptions() );
 
@@ -653,9 +663,6 @@ class MysqlInstaller extends DatabaseInstaller {
 \$wgDBprefix = \"{$prefix}\";
 
 # MySQL table options to use during installation or update
-\$wgDBTableOptions = \"{$tblOpts}\";
-
-# Experimental charset support for MySQL 5.0.
-\$wgDBmysql5 = {$dbmysql5};";
+\$wgDBTableOptions = \"{$tblOpts}\";";
 	}
 }

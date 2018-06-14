@@ -8,7 +8,7 @@
  * - hooks names in code are the first parameter of wfRunHooks.
  *
  * if --online option is passed, the script will compare the hooks in the code
- * with the ones at http://www.mediawiki.org/wiki/Manual:Hooks
+ * with the ones at https://www.mediawiki.org/wiki/Manual:Hooks
  *
  * Any instance of wfRunHooks that doesn't meet these parameters will be noted.
  *
@@ -48,7 +48,7 @@ class FindHooks extends Maintenance {
 	/*
 	 * Hooks that are ignored
 	 */
-	protected static $ignore = [ 'testRunLegacyHooks', 'Test' ];
+	protected static $ignore = [ 'Test' ];
 
 	public function __construct() {
 		parent::__construct();
@@ -79,6 +79,9 @@ class FindHooks extends Maintenance {
 		$nonRecurseDirs = [
 			"$IP/",
 		];
+		$extraFiles = [
+			"$IP/tests/phpunit/MediaWikiTestCase.php",
+		];
 
 		foreach ( $recurseDirs as $dir ) {
 			$ret = $this->getHooksFromDir( $dir, self::FIND_RECURSIVE );
@@ -89,6 +92,10 @@ class FindHooks extends Maintenance {
 			$ret = $this->getHooksFromDir( $dir );
 			$potentialHooks = array_merge( $potentialHooks, $ret['good'] );
 			$badHooks = array_merge( $badHooks, $ret['bad'] );
+		}
+		foreach ( $extraFiles as $file ) {
+			$potentialHooks = array_merge( $potentialHooks, $this->getHooksFromFile( $file ) );
+			$badHooks = array_merge( $badHooks, $this->getBadHooksFromFile( $file ) );
 		}
 
 		$documented = array_keys( $documentedHooks );
@@ -136,7 +143,7 @@ class FindHooks extends Maintenance {
 		) {
 			$this->output( "Looks good!\n" );
 		} else {
-			$this->error( 'The script finished with errors.', 1 );
+			$this->fatalError( 'The script finished with errors.' );
 		}
 	}
 
@@ -210,7 +217,7 @@ class FindHooks extends Maintenance {
 		$retval = [];
 		while ( true ) {
 			$json = Http::get(
-				wfAppendQuery( 'http://www.mediawiki.org/w/api.php', $params ),
+				wfAppendQuery( 'https://www.mediawiki.org/w/api.php', $params ),
 				[],
 				__METHOD__
 			);
@@ -238,7 +245,7 @@ class FindHooks extends Maintenance {
 		$m = [];
 		preg_match_all(
 			// All functions which runs hooks
-			'/(?:wfRunHooks|Hooks\:\:run|ContentHandler\:\:runLegacyHooks)\s*\(\s*' .
+			'/(?:wfRunHooks|Hooks\:\:run|Hooks\:\:runWithoutAbort)\s*\(\s*' .
 				// First argument is the hook name as string
 				'([\'"])(.*?)\1' .
 				// Comma for second argument
@@ -262,6 +269,8 @@ class FindHooks extends Maintenance {
 				$n = [];
 				if ( preg_match_all( '/((?:[^,\(\)]|\([^\(\)]*\))+)/', $match[4], $n ) ) {
 					$args = array_map( 'trim', $n[1] );
+					// remove empty entries from trailing spaces
+					$args = array_filter( $args );
 				}
 			} elseif ( isset( $match[3] ) ) {
 				// Found a parameter for Hooks::run,
@@ -340,5 +349,5 @@ class FindHooks extends Maintenance {
 	}
 }
 
-$maintClass = 'FindHooks';
+$maintClass = FindHooks::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

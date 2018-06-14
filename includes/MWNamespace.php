@@ -28,7 +28,6 @@
  *
  * These are synonyms for the names given in the language file
  * Users and translators should not change them
- *
  */
 class MWNamespace {
 
@@ -38,6 +37,15 @@ class MWNamespace {
 	 * but some things are just too ingrained now. :)
 	 */
 	private static $alwaysCapitalizedNamespaces = [ NS_SPECIAL, NS_USER, NS_MEDIAWIKI ];
+
+	/** @var string[]|null Canonical namespaces cache */
+	private static $canonicalNamespaces = null;
+
+	/** @var array|false Canonical namespaces index cache */
+	private static $namespaceIndexes = false;
+
+	/** @var int[]|null Valid namespaces cache */
+	private static $validNamespaces = null;
 
 	/**
 	 * Throw an exception when trying to get the subject or talk page
@@ -56,6 +64,19 @@ class MWNamespace {
 			throw new MWException( "$method does not make any sense for given namespace $index" );
 		}
 		return true;
+	}
+
+	/**
+	 * Clear internal caches
+	 *
+	 * For use in unit testing when namespace configuration is changed.
+	 *
+	 * @since 1.31
+	 */
+	public static function clearCaches() {
+		self::$canonicalNamespaces = null;
+		self::$namespaceIndexes = false;
+		self::$validNamespaces = null;
 	}
 
 	/**
@@ -201,23 +222,28 @@ class MWNamespace {
 	 * (English) names.
 	 *
 	 * @param bool $rebuild Rebuild namespace list (default = false). Used for testing.
+	 *  Deprecated since 1.31, use self::clearCaches() instead.
 	 *
 	 * @return array
 	 * @since 1.17
 	 */
 	public static function getCanonicalNamespaces( $rebuild = false ) {
-		static $namespaces = null;
-		if ( $namespaces === null || $rebuild ) {
-			global $wgExtraNamespaces, $wgCanonicalNamespaceNames;
-			$namespaces = [ NS_MAIN => '' ] + $wgCanonicalNamespaceNames;
-			// Add extension namespaces
-			$namespaces += ExtensionRegistry::getInstance()->getAttribute( 'ExtensionNamespaces' );
-			if ( is_array( $wgExtraNamespaces ) ) {
-				$namespaces += $wgExtraNamespaces;
-			}
-			Hooks::run( 'CanonicalNamespaces', [ &$namespaces ] );
+		if ( $rebuild ) {
+			self::clearCaches();
 		}
-		return $namespaces;
+
+		if ( self::$canonicalNamespaces === null ) {
+			global $wgExtraNamespaces, $wgCanonicalNamespaceNames;
+			self::$canonicalNamespaces = [ NS_MAIN => '' ] + $wgCanonicalNamespaceNames;
+			// Add extension namespaces
+			self::$canonicalNamespaces +=
+				ExtensionRegistry::getInstance()->getAttribute( 'ExtensionNamespaces' );
+			if ( is_array( $wgExtraNamespaces ) ) {
+				self::$canonicalNamespaces += $wgExtraNamespaces;
+			}
+			Hooks::run( 'CanonicalNamespaces', [ &self::$canonicalNamespaces ] );
+		}
+		return self::$canonicalNamespaces;
 	}
 
 	/**
@@ -243,15 +269,14 @@ class MWNamespace {
 	 * @return int
 	 */
 	public static function getCanonicalIndex( $name ) {
-		static $xNamespaces = false;
-		if ( $xNamespaces === false ) {
-			$xNamespaces = [];
+		if ( self::$namespaceIndexes === false ) {
+			self::$namespaceIndexes = [];
 			foreach ( self::getCanonicalNamespaces() as $i => $text ) {
-				$xNamespaces[strtolower( $text )] = $i;
+				self::$namespaceIndexes[strtolower( $text )] = $i;
 			}
 		}
-		if ( array_key_exists( $name, $xNamespaces ) ) {
-			return $xNamespaces[$name];
+		if ( array_key_exists( $name, self::$namespaceIndexes ) ) {
+			return self::$namespaceIndexes[$name];
 		} else {
 			return null;
 		}
@@ -263,28 +288,40 @@ class MWNamespace {
 	 * @return array
 	 */
 	public static function getValidNamespaces() {
-		static $mValidNamespaces = null;
-
-		if ( is_null( $mValidNamespaces ) ) {
+		if ( is_null( self::$validNamespaces ) ) {
 			foreach ( array_keys( self::getCanonicalNamespaces() ) as $ns ) {
 				if ( $ns >= 0 ) {
-					$mValidNamespaces[] = $ns;
+					self::$validNamespaces[] = $ns;
 				}
 			}
 			// T109137: sort numerically
-			sort( $mValidNamespaces, SORT_NUMERIC );
+			sort( self::$validNamespaces, SORT_NUMERIC );
 		}
 
-		return $mValidNamespaces;
+		return self::$validNamespaces;
 	}
 
 	/**
-	 * Can this namespace ever have a talk namespace?
+	 * Does this namespace ever have a talk namespace?
+	 *
+	 * @deprecated since 1.30, use hasTalkNamespace() instead.
 	 *
 	 * @param int $index Namespace index
-	 * @return bool
+	 * @return bool True if this namespace either is or has a corresponding talk namespace.
 	 */
 	public static function canTalk( $index ) {
+		return self::hasTalkNamespace( $index );
+	}
+
+	/**
+	 * Does this namespace ever have a talk namespace?
+	 *
+	 * @since 1.30
+	 *
+	 * @param int $index Namespace ID
+	 * @return bool True if this namespace either is or has a corresponding talk namespace.
+	 */
+	public static function hasTalkNamespace( $index ) {
 		return $index >= NS_MAIN;
 	}
 
@@ -357,7 +394,7 @@ class MWNamespace {
 	 */
 	public static function getSubjectNamespaces() {
 		return array_filter(
-			MWNamespace::getValidNamespaces(),
+			self::getValidNamespaces(),
 			'MWNamespace::isSubject'
 		);
 	}
@@ -370,7 +407,7 @@ class MWNamespace {
 	 */
 	public static function getTalkNamespaces() {
 		return array_filter(
-			MWNamespace::getValidNamespaces(),
+			self::getValidNamespaces(),
 			'MWNamespace::isTalk'
 		);
 	}

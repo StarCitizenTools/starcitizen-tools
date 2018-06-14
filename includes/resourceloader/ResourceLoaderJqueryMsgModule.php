@@ -18,7 +18,6 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @author Brad Jorsch
  */
 
 /**
@@ -43,15 +42,32 @@ class ResourceLoaderJqueryMsgModule extends ResourceLoaderFileModule {
 			)
 		);
 
-		$dataScript = Xml::encodeJsCall( 'mw.jqueryMsg.setParserDefaults', [ $parserDefaults ] );
+		$mainDataScript = Xml::encodeJsCall( 'mw.jqueryMsg.setParserDefaults', [ $parserDefaults ] );
 
-		return $fileScript . $dataScript;
+		// Associative array mapping magic words (e.g. SITENAME)
+		// to their values.
+		$magicWords = [
+			'SITENAME' => $this->getConfig()->get( 'Sitename' ),
+		];
+
+		Hooks::run( 'ResourceLoaderJqueryMsgModuleMagicWords', [ $context, &$magicWords ] );
+
+		$magicWordExtendData = [
+			'magic' => $magicWords,
+		];
+
+		$magicWordDataScript = Xml::encodeJsCall( 'mw.jqueryMsg.setParserDefaults', [
+			$magicWordExtendData,
+			/* deep= */ true
+		] );
+
+		return $fileScript . $mainDataScript . $magicWordDataScript;
 	}
 
 	/**
-	* @param ResourceLoaderContext $context
-	* @return array
-	*/
+	 * @param ResourceLoaderContext $context
+	 * @return array
+	 */
 	public function getScriptURLsForDebug( ResourceLoaderContext $context ) {
 		// Bypass file module urls
 		return ResourceLoaderModule::getScriptURLsForDebug( $context );

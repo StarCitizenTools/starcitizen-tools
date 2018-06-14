@@ -1,8 +1,6 @@
 <?php
 /**
- * Created on Oct 3, 2014
- *
- * Copyright © 2014 Brad Jorsch "bjorsch@wikimedia.org"
+ * Copyright © 2014 Wikimedia Foundation and contributors
  *
  * Heavily based on ApiQueryDeletedrevs,
  * Copyright © 2007 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
@@ -41,19 +39,22 @@ class ApiQueryAllDeletedRevisions extends ApiQueryRevisionsBase {
 	 * @return void
 	 */
 	protected function run( ApiPageSet $resultPageSet = null ) {
-		$user = $this->getUser();
 		// Before doing anything at all, let's check permissions
-		if ( !$user->isAllowed( 'deletedhistory' ) ) {
-			$this->dieUsage(
-				'You don\'t have permission to view deleted revision information',
-				'permissiondenied'
-			);
-		}
+		$this->checkUserRightsAny( 'deletedhistory' );
 
+		$user = $this->getUser();
 		$db = $this->getDB();
 		$params = $this->extractRequestParams( false );
 
 		$result = $this->getResult();
+
+		// If the user wants no namespaces, they get no pages.
+		if ( $params['namespace'] === [] ) {
+			if ( $resultPageSet === null ) {
+				$result->addValue( 'query', $this->getModuleName(), [] );
+			}
+			return;
+		}
 
 		// This module operates in two modes:
 		// 'user': List deleted revs by a certain user
@@ -67,16 +68,20 @@ class ApiQueryAllDeletedRevisions extends ApiQueryRevisionsBase {
 			foreach ( [ 'from', 'to', 'prefix', 'excludeuser' ] as $param ) {
 				if ( !is_null( $params[$param] ) ) {
 					$p = $this->getModulePrefix();
-					$this->dieUsage( "The '{$p}{$param}' parameter cannot be used with '{$p}user'",
-						'badparams' );
+					$this->dieWithError(
+						[ 'apierror-invalidparammix-cannotusewith', $p.$param, "{$p}user" ],
+						'invalidparammix'
+					);
 				}
 			}
 		} else {
 			foreach ( [ 'start', 'end' ] as $param ) {
 				if ( !is_null( $params[$param] ) ) {
 					$p = $this->getModulePrefix();
-					$this->dieUsage( "The '{$p}{$param}' parameter may only be used with '{$p}user'",
-						'badparams' );
+					$this->dieWithError(
+						[ 'apierror-invalidparammix-mustusewith', $p.$param, "{$p}user" ],
+						'invalidparammix'
+					);
 				}
 			}
 		}
@@ -92,17 +97,20 @@ class ApiQueryAllDeletedRevisions extends ApiQueryRevisionsBase {
 				$optimizeGenerateTitles = true;
 			} else {
 				$p = $this->getModulePrefix();
-				$this->setWarning( "For better performance when generating titles, set {$p}dir=newer" );
+				$this->addWarning( [ 'apiwarn-alldeletedrevisions-performance', $p ], 'performance' );
 			}
 		}
 
-		$this->addTables( 'archive' );
 		if ( $resultPageSet === null ) {
 			$this->parseParameters( $params );
-			$this->addFields( Revision::selectArchiveFields() );
+			$arQuery = Revision::getArchiveQueryInfo();
+			$this->addTables( $arQuery['tables'] );
+			$this->addJoinConds( $arQuery['joins'] );
+			$this->addFields( $arQuery['fields'] );
 			$this->addFields( [ 'ar_title', 'ar_namespace' ] );
 		} else {
 			$this->limit = $this->getParameter( 'limit' ) ?: 10;
+			$this->addTables( 'archive' );
 			$this->addFields( [ 'ar_title', 'ar_namespace' ] );
 			if ( $optimizeGenerateTitles ) {
 				$this->addOption( 'DISTINCT' );
@@ -128,24 +136,14 @@ class ApiQueryAllDeletedRevisions extends ApiQueryRevisionsBase {
 		}
 
 		if ( $this->fetchContent ) {
-			// Modern MediaWiki has the content for deleted revs in the 'text'
-			// table using fields old_text and old_flags. But revisions deleted
-			// pre-1.5 store the content in the 'archive' table directly using
-			// fields ar_text and ar_flags, and no corresponding 'text' row. So
-			// we have to LEFT JOIN and fetch all four fields.
 			$this->addTables( 'text' );
 			$this->addJoinConds(
 				[ 'text' => [ 'LEFT JOIN', [ 'ar_text_id=old_id' ] ] ]
 			);
-			$this->addFields( [ 'ar_text', 'ar_flags', 'old_text', 'old_flags' ] );
+			$this->addFields( [ 'old_text', 'old_flags' ] );
 
 			// This also means stricter restrictions
-			if ( !$user->isAllowedAny( 'undelete', 'deletedtext' ) ) {
-				$this->dieUsage(
-					'You don\'t have permission to view deleted revision content',
-					'permissiondenied'
-				);
-			}
+			$this->checkUserRightsAny( [ 'deletedtext', 'undelete' ] );
 		}
 
 		$miser_ns = null;
@@ -153,10 +151,10 @@ class ApiQueryAllDeletedRevisions extends ApiQueryRevisionsBase {
 		if ( $mode == 'all' ) {
 			if ( $params['namespace'] !== null ) {
 				$namespaces = $params['namespace'];
-				$this->addWhereFld( 'ar_namespace', $namespaces );
 			} else {
 				$namespaces = MWNamespace::getValidNamespaces();
 			}
+			$this->addWhereFld( 'ar_namespace', $namespaces );
 
 			// For from/to/prefix, we have to consider the potential
 			// transformations of the title in all specified namespaces.
@@ -221,14 +219,23 @@ class ApiQueryAllDeletedRevisions extends ApiQueryRevisionsBase {
 		}
 
 		if ( !is_null( $params['user'] ) ) {
-			$this->addWhereFld( 'ar_user_text', $params['user'] );
+			// Don't query by user ID here, it might be able to use the ar_usertext_timestamp index.
+			$actorQuery = ActorMigration::newMigration()
+				->getWhere( $db, 'ar_user', User::newFromName( $params['user'], false ), false );
+			$this->addTables( $actorQuery['tables'] );
+			$this->addJoinConds( $actorQuery['joins'] );
+			$this->addWhere( $actorQuery['conds'] );
 		} elseif ( !is_null( $params['excludeuser'] ) ) {
-			$this->addWhere( 'ar_user_text != ' .
-				$db->addQuotes( $params['excludeuser'] ) );
+			// Here there's no chance of using ar_usertext_timestamp.
+			$actorQuery = ActorMigration::newMigration()
+				->getWhere( $db, 'ar_user', User::newFromName( $params['excludeuser'], false ) );
+			$this->addTables( $actorQuery['tables'] );
+			$this->addJoinConds( $actorQuery['joins'] );
+			$this->addWhere( 'NOT(' . $actorQuery['conds'] . ')' );
 		}
 
 		if ( !is_null( $params['user'] ) || !is_null( $params['excludeuser'] ) ) {
-			// Paranoia: avoid brute force searches (bug 17342)
+			// Paranoia: avoid brute force searches (T19342)
 			// (shouldn't be able to get here without 'deletedhistory', but
 			// check it again just in case)
 			if ( !$user->isAllowed( 'deletedhistory' ) ) {
@@ -447,12 +454,12 @@ class ApiQueryAllDeletedRevisions extends ApiQueryRevisionsBase {
 		return [
 			'action=query&list=alldeletedrevisions&adruser=Example&adrlimit=50'
 				=> 'apihelp-query+alldeletedrevisions-example-user',
-			'action=query&list=alldeletedrevisions&adrdir=newer&adrlimit=50'
+			'action=query&list=alldeletedrevisions&adrdir=newer&adrnamespace=0&adrlimit=50'
 				=> 'apihelp-query+alldeletedrevisions-example-ns-main',
 		];
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Alldeletedrevisions';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Alldeletedrevisions';
 	}
 }

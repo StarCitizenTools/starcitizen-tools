@@ -56,7 +56,7 @@ class Token {
 	 * be able to extract the timestamp.
 	 *
 	 * @param string $token
-	 * @param int|null
+	 * @return int|null
 	 */
 	public static function getTimestamp( $token ) {
 		$suffixLen = strlen( self::SUFFIX );
@@ -73,7 +73,7 @@ class Token {
 
 	/**
 	 * Get the string representation of the token at a timestamp
-	 * @param int timestamp
+	 * @param int $timestamp
 	 * @return string
 	 */
 	protected function toStringAtTimestamp( $timestamp ) {

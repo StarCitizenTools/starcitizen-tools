@@ -158,10 +158,11 @@ class SpecialEditTags extends UnlistedSpecialPage {
 			// Also set header tabs to be for the target.
 			$this->getSkin()->setRelevantTitle( $this->targetObj );
 
+			$linkRenderer = $this->getLinkRenderer();
 			$links = [];
-			$links[] = Linker::linkKnown(
+			$links[] = $linkRenderer->makeKnownLink(
 				SpecialPage::getTitleFor( 'Log' ),
-				$this->msg( 'viewpagelogs' )->escaped(),
+				$this->msg( 'viewpagelogs' )->text(),
 				[],
 				[
 					'page' => $this->targetObj->getPrefixedText(),
@@ -170,17 +171,17 @@ class SpecialEditTags extends UnlistedSpecialPage {
 			);
 			if ( !$this->targetObj->isSpecialPage() ) {
 				// Give a link to the page history
-				$links[] = Linker::linkKnown(
+				$links[] = $linkRenderer->makeKnownLink(
 					$this->targetObj,
-					$this->msg( 'pagehist' )->escaped(),
+					$this->msg( 'pagehist' )->text(),
 					[],
 					[ 'action' => 'history' ]
 				);
 			}
 			// Link to Special:Tags
-			$links[] = Linker::linkKnown(
+			$links[] = $linkRenderer->makeKnownLink(
 				SpecialPage::getTitleFor( 'Tags' ),
-				$this->msg( 'tags-edit-manage-link' )->escaped()
+				$this->msg( 'tags-edit-manage-link' )->text()
 			);
 			// Logs themselves don't have histories or archived revisions
 			$this->getOutput()->addSubtitle( $this->getLanguage()->pipeList( $links ) );
@@ -221,9 +222,8 @@ class SpecialEditTags extends UnlistedSpecialPage {
 		$numRevisions = 0;
 		// Live revisions...
 		$list = $this->getList();
-		// @codingStandardsIgnoreStart Generic.CodeAnalysis.ForLoopWithTestFunctionCall.NotAllowed
+		// phpcs:ignore Generic.CodeAnalysis.ForLoopWithTestFunctionCall
 		for ( $list->reset(); $list->current(); $list->next() ) {
-			// @codingStandardsIgnoreEnd
 			$item = $list->current();
 			$numRevisions++;
 			$out->addHTML( $item->getHTML() );
@@ -239,6 +239,9 @@ class SpecialEditTags extends UnlistedSpecialPage {
 
 		// Show form if the user can submit
 		if ( $this->isAllowed ) {
+			$conf = $this->getConfig();
+			$oldCommentSchema = $conf->get( 'CommentTableSchemaMigrationStage' ) === MIGRATION_OLD;
+
 			$form = Xml::openElement( 'form', [ 'method' => 'post',
 					'action' => $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] ),
 					'id' => 'mw-revdel-form-revisions' ] ) .
@@ -251,12 +254,14 @@ class SpecialEditTags extends UnlistedSpecialPage {
 						Xml::label( $this->msg( 'tags-edit-reason' )->text(), 'wpReason' ) .
 					'</td>' .
 					'<td class="mw-input">' .
-						Xml::input(
-							'wpReason',
-							60,
-							$this->reason,
-							[ 'id' => 'wpReason', 'maxlength' => 100 ]
-						) .
+						Xml::input( 'wpReason', 60, $this->reason, [
+							'id' => 'wpReason',
+							// HTML maxlength uses "UTF-16 code units", which means that characters outside BMP
+							// (e.g. emojis) count for two each. This limit is overridden in JS to instead count
+							// Unicode codepoints (or 255 UTF-8 bytes for old schema).
+							// "- 155" is to leave room for the auto-generated part of the log entry.
+							'maxlength' => $oldCommentSchema ? 100 : CommentStore::COMMENT_CHARACTER_LIMIT - 155,
+						] ) .
 					'</td>' .
 				"</tr><tr>\n" .
 					'<td></td>' .
@@ -309,9 +314,8 @@ class SpecialEditTags extends UnlistedSpecialPage {
 			// Otherwise, use a multi-select field for adding tags, and a list of
 			// checkboxes for removing them
 
-			// @codingStandardsIgnoreStart Generic.CodeAnalysis.ForLoopWithTestFunctionCall.NotAllowed
+			// phpcs:ignore Generic.CodeAnalysis.ForLoopWithTestFunctionCall
 			for ( $list->reset(); $list->current(); $list->next() ) {
-				// @codingStandardsIgnoreEnd
 				$currentTags = $list->current()->getTags();
 				if ( $currentTags ) {
 					$tags = array_merge( $tags, explode( ',', $currentTags ) );
@@ -450,9 +454,8 @@ class SpecialEditTags extends UnlistedSpecialPage {
 	 */
 	protected function failure( $status ) {
 		$this->getOutput()->setPageTitle( $this->msg( 'actionfailed' ) );
-		$this->getOutput()->addWikiText( '<div class="errorbox">' .
-			$status->getWikiText( 'tags-edit-failure' ) .
-			'</div>'
+		$this->getOutput()->addWikiText(
+			Html::errorBox( $status->getWikiText( 'tags-edit-failure' ) )
 		);
 		$this->showForm();
 	}

@@ -19,9 +19,13 @@
  *
  * @file
  */
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Rdbms\LBFactory;
 
 /**
  * Job to add recent change entries mentioning category membership changes
+ *
+ * This allows users to easily scan categories for recent page membership changes
  *
  * Parameters include:
  *   - pageId : page ID
@@ -32,6 +36,9 @@
  * @since 1.27
  */
 class CategoryMembershipChangeJob extends Job {
+	/** @var int|null */
+	private $ticket;
+
 	const ENQUEUE_FUDGE_SEC = 60;
 
 	public function __construct( Title $title, array $params ) {
@@ -42,57 +49,68 @@ class CategoryMembershipChangeJob extends Job {
 	}
 
 	public function run() {
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		$lb = $lbFactory->getMainLB();
+		$dbw = $lb->getConnection( DB_MASTER );
+
+		$this->ticket = $lbFactory->getEmptyTransactionTicket( __METHOD__ );
+
 		$page = WikiPage::newFromID( $this->params['pageId'], WikiPage::READ_LATEST );
 		if ( !$page ) {
 			$this->setLastError( "Could not find page #{$this->params['pageId']}" );
 			return false; // deleted?
 		}
 
-		$dbw = wfGetDB( DB_MASTER );
+		// Cut down on the time spent in safeWaitForMasterPos() in the critical section
+		$dbr = $lb->getConnection( DB_REPLICA, [ 'recentchanges' ] );
+		if ( !$lb->safeWaitForMasterPos( $dbr ) ) {
+			$this->setLastError( "Timed out while pre-waiting for replica DB to catch up" );
+			return false;
+		}
+
 		// Use a named lock so that jobs for this page see each others' changes
 		$lockKey = "CategoryMembershipUpdates:{$page->getId()}";
-		$scopedLock = $dbw->getScopedLockAndFlush( $lockKey, __METHOD__, 10 );
+		$scopedLock = $dbw->getScopedLockAndFlush( $lockKey, __METHOD__, 3 );
 		if ( !$scopedLock ) {
 			$this->setLastError( "Could not acquire lock '$lockKey'" );
 			return false;
 		}
 
-		$dbr = wfGetDB( DB_SLAVE, [ 'recentchanges' ] );
-		// Wait till the slave is caught up so that jobs for this page see each others' changes
-		if ( !wfGetLB()->safeWaitForMasterPos( $dbr ) ) {
-			$this->setLastError( "Timed out while waiting for slave to catch up" );
+		// Wait till replica DB is caught up so that jobs for this page see each others' changes
+		if ( !$lb->safeWaitForMasterPos( $dbr ) ) {
+			$this->setLastError( "Timed out while waiting for replica DB to catch up" );
 			return false;
 		}
 		// Clear any stale REPEATABLE-READ snapshot
-		$dbr->commit( __METHOD__, 'flush' );
+		$dbr->flushSnapshot( __METHOD__ );
 
 		$cutoffUnix = wfTimestamp( TS_UNIX, $this->params['revTimestamp'] );
 		// Using ENQUEUE_FUDGE_SEC handles jobs inserted out of revision order due to the delay
 		// between COMMIT and actual enqueueing of the CategoryMembershipChangeJob job.
 		$cutoffUnix -= self::ENQUEUE_FUDGE_SEC;
 
-		// Get the newest revision that has a SRC_CATEGORIZE row...
+		// Get the newest page revision that has a SRC_CATEGORIZE row.
+		// Assume that category changes before it were already handled.
 		$row = $dbr->selectRow(
-			[ 'revision', 'recentchanges' ],
+			'revision',
 			[ 'rev_timestamp', 'rev_id' ],
 			[
 				'rev_page' => $page->getId(),
-				'rev_timestamp >= ' . $dbr->addQuotes( $dbr->timestamp( $cutoffUnix ) )
-			],
-			__METHOD__,
-			[ 'ORDER BY' => 'rev_timestamp DESC, rev_id DESC' ],
-			[
-				'recentchanges' => [
-					'INNER JOIN',
+				'rev_timestamp >= ' . $dbr->addQuotes( $dbr->timestamp( $cutoffUnix ) ),
+				'EXISTS (' . $dbr->selectSQLText(
+					'recentchanges',
+					'1',
 					[
 						'rc_this_oldid = rev_id',
 						'rc_source' => RecentChange::SRC_CATEGORIZE,
 						// Allow rc_cur_id or rc_timestamp index usage
 						'rc_cur_id = rev_page',
-						'rc_timestamp >= rev_timestamp'
+						'rc_timestamp = rev_timestamp'
 					]
-				]
-			]
+				) . ')'
+			],
+			__METHOD__,
+			[ 'ORDER BY' => 'rev_timestamp DESC, rev_id DESC' ]
 		);
 		// Only consider revisions newer than any such revision
 		if ( $row ) {
@@ -105,32 +123,37 @@ class CategoryMembershipChangeJob extends Job {
 		// Find revisions to this page made around and after this revision which lack category
 		// notifications in recent changes. This lets jobs pick up were the last one left off.
 		$encCutoff = $dbr->addQuotes( $dbr->timestamp( $cutoffUnix ) );
+		$revQuery = Revision::getQueryInfo();
 		$res = $dbr->select(
-			'revision',
-			Revision::selectFields(),
+			$revQuery['tables'],
+			$revQuery['fields'],
 			[
 				'rev_page' => $page->getId(),
 				"rev_timestamp > $encCutoff" .
 					" OR (rev_timestamp = $encCutoff AND rev_id > $lastRevId)"
 			],
 			__METHOD__,
-			[ 'ORDER BY' => 'rev_timestamp ASC, rev_id ASC' ]
+			[ 'ORDER BY' => 'rev_timestamp ASC, rev_id ASC' ],
+			$revQuery['joins']
 		);
 
 		// Apply all category updates in revision timestamp order
 		foreach ( $res as $row ) {
-			$this->notifyUpdatesForRevision( $page, Revision::newFromRow( $row ) );
+			$this->notifyUpdatesForRevision( $lbFactory, $page, Revision::newFromRow( $row ) );
 		}
 
 		return true;
 	}
 
 	/**
+	 * @param LBFactory $lbFactory
 	 * @param WikiPage $page
 	 * @param Revision $newRev
 	 * @throws MWException
 	 */
-	protected function notifyUpdatesForRevision( WikiPage $page, Revision $newRev ) {
+	protected function notifyUpdatesForRevision(
+		LBFactory $lbFactory, WikiPage $page, Revision $newRev
+	) {
 		$config = RequestContext::getMain()->getConfig();
 		$title = $page->getTitle();
 
@@ -156,7 +179,6 @@ class CategoryMembershipChangeJob extends Job {
 			return; // nothing to do
 		}
 
-		$dbw = wfGetDB( DB_MASTER );
 		$catMembChange = new CategoryMembershipChange( $title, $newRev );
 		$catMembChange->checkTemplateLinks();
 
@@ -167,8 +189,7 @@ class CategoryMembershipChangeJob extends Job {
 			$categoryTitle = Title::makeTitle( NS_CATEGORY, $categoryName );
 			$catMembChange->triggerCategoryAddedNotification( $categoryTitle );
 			if ( $insertCount++ && ( $insertCount % $batchSize ) == 0 ) {
-				$dbw->commit( __METHOD__, 'flush' );
-				wfGetLBFactory()->waitForReplication();
+				$lbFactory->commitAndWaitForReplication( __METHOD__, $this->ticket );
 			}
 		}
 
@@ -176,8 +197,7 @@ class CategoryMembershipChangeJob extends Job {
 			$categoryTitle = Title::makeTitle( NS_CATEGORY, $categoryName );
 			$catMembChange->triggerCategoryRemovedNotification( $categoryTitle );
 			if ( $insertCount++ && ( $insertCount++ % $batchSize ) == 0 ) {
-				$dbw->commit( __METHOD__, 'flush' );
-				wfGetLBFactory()->waitForReplication();
+				$lbFactory->commitAndWaitForReplication( __METHOD__, $this->ticket );
 			}
 		}
 	}

@@ -28,7 +28,7 @@
  *
  *
  * Based on:
- *   - http://en.wikipedia.org/wiki/Shilha_language
+ *   - https://en.wikipedia.org/wiki/Shilha_language
  *   - LanguageSr.php
  *
  * @ingroup Language
@@ -70,44 +70,6 @@ class ShiConverter extends LanguageConverter {
 			'shi-latn' => new ReplacementArray( $this->mToLatin ),
 			'shi' => new ReplacementArray()
 		];
-	}
-
-	/**
-	 * rules should be defined as -{Tifinagh | Latin-} -or-
-	 * -{code:text | code:text | ...}-
-	 * update: delete all rule parsing because it's not used
-	 * currently, and just produces a couple of bugs
-	 *
-	 * @param string $rule
-	 * @param array $flags
-	 * @return array
-	 */
-	function parseManualRule( $rule, $flags = [] ) {
-		if ( in_array( 'T', $flags ) ) {
-			return parent::parseManualRule( $rule, $flags );
-		}
-
-		$carray = [];
-		// otherwise ignore all formatting
-		foreach ( $this->mVariants as $v ) {
-			$carray[$v] = $rule;
-		}
-
-		return $carray;
-	}
-
-	/**
-	 * Do not convert content on talk pages
-	 *
-	 * @param string $text
-	 * @param Parser $parser
-	 * @return string
-	 */
-	function parserConvert( $text, &$parser ) {
-		$this->mDoContentConvert = !( is_object( $parser->getTitle() )
-			&& $parser->getTitle()->isTalkPage() );
-
-		return parent::parserConvert( $text, $parser );
 	}
 
 	/**

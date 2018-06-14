@@ -22,6 +22,9 @@
 /**
  * @ingroup Pager
  */
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Rdbms\IResultWrapper;
+
 class BlockListPager extends TablePager {
 
 	protected $conds;
@@ -72,16 +75,18 @@ class BlockListPager extends TablePager {
 			];
 
 			foreach ( $keys as $key ) {
-				$msg[$key] = $this->msg( $key )->escaped();
+				$msg[$key] = $this->msg( $key )->text();
 			}
 		}
 
-		/** @var $row object */
+		/** @var object $row */
 		$row = $this->mCurrentRow;
 
 		$language = $this->getLanguage();
 
 		$formatted = '';
+
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 
 		switch ( $name ) {
 			case 'ipb_timestamp':
@@ -117,18 +122,18 @@ class BlockListPager extends TablePager {
 				) );
 				if ( $this->getUser()->isAllowed( 'block' ) ) {
 					if ( $row->ipb_auto ) {
-						$links[] = Linker::linkKnown(
+						$links[] = $linkRenderer->makeKnownLink(
 							SpecialPage::getTitleFor( 'Unblock' ),
 							$msg['unblocklink'],
 							[],
 							[ 'wpTarget' => "#{$row->ipb_id}" ]
 						);
 					} else {
-						$links[] = Linker::linkKnown(
+						$links[] = $linkRenderer->makeKnownLink(
 							SpecialPage::getTitleFor( 'Unblock', $row->ipb_address ),
 							$msg['unblocklink']
 						);
-						$links[] = Linker::linkKnown(
+						$links[] = $linkRenderer->makeKnownLink(
 							SpecialPage::getTitleFor( 'Block', $row->ipb_address ),
 							$msg['change-blocklink']
 						);
@@ -168,27 +173,28 @@ class BlockListPager extends TablePager {
 				break;
 
 			case 'ipb_reason':
+				$value = CommentStore::getStore()->getComment( 'ipb_reason', $row )->text;
 				$formatted = Linker::formatComment( $value );
 				break;
 
 			case 'ipb_params':
 				$properties = [];
 				if ( $row->ipb_anon_only ) {
-					$properties[] = $msg['anononlyblock'];
+					$properties[] = htmlspecialchars( $msg['anononlyblock'] );
 				}
 				if ( $row->ipb_create_account ) {
-					$properties[] = $msg['createaccountblock'];
+					$properties[] = htmlspecialchars( $msg['createaccountblock'] );
 				}
 				if ( $row->ipb_user && !$row->ipb_enable_autoblock ) {
-					$properties[] = $msg['noautoblockblock'];
+					$properties[] = htmlspecialchars( $msg['noautoblockblock'] );
 				}
 
 				if ( $row->ipb_block_email ) {
-					$properties[] = $msg['emailblock'];
+					$properties[] = htmlspecialchars( $msg['emailblock'] );
 				}
 
 				if ( !$row->ipb_allow_usertalk ) {
-					$properties[] = $msg['blocklist-nousertalk'];
+					$properties[] = htmlspecialchars( $msg['blocklist-nousertalk'] );
 				}
 
 				$formatted = $language->commaList( $properties );
@@ -203,16 +209,18 @@ class BlockListPager extends TablePager {
 	}
 
 	function getQueryInfo() {
+		$commentQuery = CommentStore::getStore()->getJoin( 'ipb_reason' );
+		$actorQuery = ActorMigration::newMigration()->getJoin( 'ipb_by' );
+
 		$info = [
-			'tables' => [ 'ipblocks', 'user' ],
+			'tables' => array_merge(
+				[ 'ipblocks' ], $commentQuery['tables'], $actorQuery['tables'], [ 'user' ]
+			),
 			'fields' => [
 				'ipb_id',
 				'ipb_address',
 				'ipb_user',
-				'ipb_by',
-				'ipb_by_text',
 				'by_user_name' => 'user_name',
-				'ipb_reason',
 				'ipb_timestamp',
 				'ipb_auto',
 				'ipb_anon_only',
@@ -224,9 +232,11 @@ class BlockListPager extends TablePager {
 				'ipb_deleted',
 				'ipb_block_email',
 				'ipb_allow_usertalk',
-			],
+			] + $commentQuery['fields'] + $actorQuery['fields'],
 			'conds' => $this->conds,
-			'join_conds' => [ 'user' => [ 'LEFT JOIN', 'user_id = ipb_by' ] ]
+			'join_conds' => [
+				'user' => [ 'LEFT JOIN', 'user_id = ' . $actorQuery['fields']['ipb_by'] ]
+			] + $commentQuery['joins'] + $actorQuery['joins']
 		];
 
 		# Filter out any expired blocks
@@ -239,6 +249,26 @@ class BlockListPager extends TablePager {
 		}
 
 		return $info;
+	}
+
+	/**
+	 * Get total number of autoblocks at any given time
+	 *
+	 * @return int Total number of unexpired active autoblocks
+	 */
+	function getTotalAutoblocks() {
+		$dbr = $this->getDatabase();
+		$res = $dbr->selectField( 'ipblocks',
+			[ 'COUNT(*) AS totalautoblocks' ],
+			[
+				'ipb_auto' => '1',
+				'ipb_expiry >= ' . $dbr->addQuotes( $dbr->timestamp() ),
+			]
+		);
+		if ( $res ) {
+			return $res;
+		}
+		return 0; // We found nothing
 	}
 
 	protected function getTableClass() {
@@ -259,7 +289,7 @@ class BlockListPager extends TablePager {
 
 	/**
 	 * Do a LinkBatch query to minimise database load when generating all these links
-	 * @param ResultWrapper $result
+	 * @param IResultWrapper $result
 	 */
 	function preprocessResults( $result ) {
 		# Do a link batch query

@@ -23,9 +23,11 @@
 	 * @alternateClassName mw.Notification
 	 * @constructor
 	 * @private
+	 * @param {mw.Message|jQuery|HTMLElement|string} message
+	 * @param {Object} options
 	 */
 	function Notification( message, options ) {
-		var $notification, $notificationTitle, $notificationContent;
+		var $notification, $notificationContent;
 
 		$notification = $( '<div class="mw-notification"></div>' )
 			.data( 'mw.notification', this )
@@ -33,7 +35,7 @@
 
 		if ( options.tag ) {
 			// Sanitize options.tag before it is used by any code. (Including Notification class methods)
-			options.tag = options.tag.replace( /[ _\-]+/g, '-' ).replace( /[^\-a-z0-9]+/ig, '' );
+			options.tag = options.tag.replace( /[ _-]+/g, '-' ).replace( /[^-a-z0-9]+/ig, '' );
 			if ( options.tag ) {
 				$notification.addClass( 'mw-notification-tag-' + options.tag );
 			} else {
@@ -43,12 +45,12 @@
 
 		if ( options.type ) {
 			// Sanitize options.type
-			options.type = options.type.replace( /[ _\-]+/g, '-' ).replace( /[^\-a-z0-9]+/ig, '' );
+			options.type = options.type.replace( /[ _-]+/g, '-' ).replace( /[^-a-z0-9]+/ig, '' );
 			$notification.addClass( 'mw-notification-type-' + options.type );
 		}
 
 		if ( options.title ) {
-			$notificationTitle = $( '<div class="mw-notification-title"></div>' )
+			$( '<div class="mw-notification-title"></div>' )
 				.text( options.title )
 				.appendTo( $notification );
 		}
@@ -69,6 +71,7 @@
 		$notificationContent.appendTo( $notification );
 
 		// Private state parameters, meant for internal use only
+		// autoHideSeconds: String alias for number of seconds for timeout of auto-hiding notifications.
 		// isOpen: Set to true after .start() is called to avoid double calls.
 		//         Set back to false after .close() to avoid duplicating the close animation.
 		// isPaused: false after .resume(), true after .pause(). Avoids duplicating or breaking the hide timeouts.
@@ -77,11 +80,23 @@
 		//          to stop replacement of a tagged notification with another notification using the same message.
 		// options: The options passed to the notification with a little sanitization. Used by various methods.
 		// $notification: jQuery object containing the notification DOM node.
+		// timeout: Holds appropriate methods to set/clear timeouts
+		this.autoHideSeconds = options.autoHideSeconds &&
+			notification.autoHideSeconds[ options.autoHideSeconds ] ||
+			notification.autoHideSeconds.short;
 		this.isOpen = false;
 		this.isPaused = true;
 		this.message = message;
 		this.options = options;
 		this.$notification = $notification;
+		if ( options.visibleTimeout ) {
+			this.timeout = require( 'mediawiki.visibleTimeout' );
+		} else {
+			this.timeout = {
+				set: setTimeout,
+				clear: clearTimeout
+			};
+		}
 	}
 
 	/**
@@ -96,7 +111,7 @@
 	Notification.prototype.start = function () {
 		var options, $notification, $tagMatches, autohideCount;
 
-		$area.show();
+		$area.css( 'display', '' );
 
 		if ( this.isOpen ) {
 			return;
@@ -165,9 +180,9 @@
 		}
 		this.isPaused = true;
 
-		if ( this.timeout ) {
-			clearTimeout( this.timeout );
-			delete this.timeout;
+		if ( this.timeoutId ) {
+			this.timeout.clear( this.timeoutId );
+			delete this.timeoutId;
 		}
 	};
 
@@ -178,17 +193,18 @@
 	 */
 	Notification.prototype.resume = function () {
 		var notif = this;
+
 		if ( !notif.isPaused ) {
 			return;
 		}
 		// Start any autoHide timeouts
 		if ( notif.options.autoHide ) {
 			notif.isPaused = false;
-			notif.timeout = setTimeout( function () {
+			notif.timeoutId = notif.timeout.set( function () {
 				// Already finished, so don't try to re-clear it
-				delete notif.timeout;
+				delete notif.timeoutId;
 				notif.close();
-			}, notification.autoHideSeconds * 1000 );
+			}, this.autoHideSeconds * 1000 );
 		}
 	};
 
@@ -224,10 +240,10 @@
 				if ( openNotificationCount === 0 ) {
 					// Hide the area after the last notification closes. Otherwise, the padding on
 					// the area can be obscure content, despite the area being empty/invisible (T54659). // FIXME
-					$area.hide();
+					$area.css( 'display', 'none' );
 					notif.$notification.remove();
 				} else {
-					notif.$notification.slideUp( 'fast',  function () {
+					notif.$notification.slideUp( 'fast', function () {
 						$( this ).remove();
 					} );
 				}
@@ -260,8 +276,22 @@
 	 * @ignore
 	 */
 	function init() {
-		var offset, $window = $( window );
+		var offset, notif,
+			isFloating = false;
 
+		function updateAreaMode() {
+			var shouldFloat = window.pageYOffset > offset.top;
+			if ( isFloating === shouldFloat ) {
+				return;
+			}
+			isFloating = shouldFloat;
+			$area
+				.toggleClass( 'mw-notification-area-floating', isFloating )
+				.toggleClass( 'mw-notification-area-layout', !isFloating );
+		}
+
+		// Write to the DOM:
+		// Prepend the notification area to the content area and save its object.
 		$area = $( '<div id="mw-notification-area" class="mw-notification-area mw-notification-area-layout"></div>' )
 			// Pause auto-hide timers when the mouse is in the notification area.
 			.on( {
@@ -281,22 +311,30 @@
 				e.stopPropagation();
 			} );
 
-		// Prepend the notification area to the content area and save it's object.
 		mw.util.$content.prepend( $area );
-		offset = $area.offset();
-		$area.hide();
 
-		function updateAreaMode() {
-			var isFloating = $window.scrollTop() > offset.top;
-			$area
-				.toggleClass( 'mw-notification-area-floating', isFloating )
-				.toggleClass( 'mw-notification-area-layout', !isFloating );
-		}
+		// Read from the DOM:
+		// Must be in the next frame to avoid synchronous layout
+		// computation from offset()/getBoundingClientRect().
+		rAF( function () {
+			offset = $area.offset();
 
-		$window.on( 'scroll', updateAreaMode );
+			// Initial mode (reads, and then maybe writes)
+			updateAreaMode();
 
-		// Initial mode
-		updateAreaMode();
+			// Once we have the offset for where it would normally render, set the
+			// initial state of the (currently empty) notification area to be hidden.
+			$area.css( 'display', 'none' );
+
+			$( window ).on( 'scroll', updateAreaMode );
+
+			// Handle pre-ready queue.
+			isPageReady = true;
+			while ( preReadyNotifQueue.length ) {
+				notif = preReadyNotifQueue.shift();
+				notif.start();
+			}
+		} );
 	}
 
 	/**
@@ -363,6 +401,10 @@
 		 *   A boolean indicating whether the notifification should automatically
 		 *   be hidden after shown. Or if it should persist.
 		 *
+		 * - autoHideSeconds:
+		 *   Key to #autoHideSeconds for number of seconds for timeout of auto-hide
+		 *   notifications.
+		 *
 		 * - tag:
 		 *   An optional string. When a notification is tagged only one message
 		 *   with that tag will be displayed. Trying to display a new notification
@@ -377,45 +419,43 @@
 		 * - type:
 		 *   An optional string for the type of the message used for styling:
 		 *   Examples: 'info', 'warn', 'error'.
+		 *
+		 * - visibleTimeout:
+		 *   A boolean indicating if the autoHide timeout should be based on
+		 *   time the page was visible to user. Or if it should use wall clock time.
 		 */
 		defaults: {
 			autoHide: true,
-			tag: false,
-			title: undefined,
-			type: false
+			autoHideSeconds: 'short',
+			tag: null,
+			title: null,
+			type: null,
+			visibleTimeout: true
+		},
+
+		/**
+		 * @private
+		 * @property {Object}
+		 */
+		autoHideSeconds: {
+			'short': 5,
+			'long': 30
 		},
 
 		/**
 		 * @property {number}
-		 * Number of seconds to wait before auto-hiding notifications.
-		 */
-		autoHideSeconds: 5,
-
-		/**
-		 * @property {number}
-		 * Maximum number of notifications to count down auto-hide timers for.
-		 * Only the first #autoHideLimit notifications being displayed will
-		 * auto-hide. Any notifications further down in the list will only start
-		 * counting down to auto-hide after the first few messages have closed.
+		 * Maximum number of simultaneous notifications to start auto-hide timers for.
+		 * Only this number of notifications being displayed will be auto-hidden at one time.
+		 * Any additional notifications in the list will only start counting their timeout for
+		 * auto-hiding after the previous messages have been closed.
 		 *
-		 * This basically represents the number of notifications the user should
-		 * be able to process in #autoHideSeconds time.
+		 * This basically represents the minimal number of notifications the user should
+		 * be able to process during the {@link #defaults default} #autoHideSeconds time.
 		 */
 		autoHideLimit: 3
 	};
 
-	$( function () {
-		var notif;
-
-		init();
-
-		// Handle pre-ready queue.
-		isPageReady = true;
-		while ( preReadyNotifQueue.length ) {
-			notif = preReadyNotifQueue.shift();
-			notif.start();
-		}
-	} );
+	$( init );
 
 	mw.notification = notification;
 

@@ -43,7 +43,7 @@ use Wikimedia\Assert\Assert;
  * @see docs/injection.txt for an overview of using dependency injection in the
  *      MediaWiki code base.
  */
-class ServiceContainer {
+class ServiceContainer implements DestructibleService {
 
 	/**
 	 * @var object[]
@@ -56,9 +56,19 @@ class ServiceContainer {
 	private $serviceInstantiators = [];
 
 	/**
+	 * @var bool[] disabled status, per service name
+	 */
+	private $disabled = [];
+
+	/**
 	 * @var array
 	 */
 	private $extraInstantiationParams;
+
+	/**
+	 * @var bool
+	 */
+	private $destroyed = false;
 
 	/**
 	 * @param array $extraInstantiationParams Any additional parameters to be passed to the
@@ -67,6 +77,25 @@ class ServiceContainer {
 	 */
 	public function __construct( array $extraInstantiationParams = [] ) {
 		$this->extraInstantiationParams = $extraInstantiationParams;
+	}
+
+	/**
+	 * Destroys all contained service instances that implement the DestructibleService
+	 * interface. This will render all services obtained from this MediaWikiServices
+	 * instance unusable. In particular, this will disable access to the storage backend
+	 * via any of these services. Any future call to getService() will throw an exception.
+	 *
+	 * @see resetGlobalInstance()
+	 */
+	public function destroy() {
+		foreach ( $this->getServiceNames() as $name ) {
+			$service = $this->peekService( $name );
+			if ( $service !== null && $service instanceof DestructibleService ) {
+				$service->destroy();
+			}
+		}
+
+		$this->destroyed = true;
 	}
 
 	/**
@@ -103,6 +132,28 @@ class ServiceContainer {
 	}
 
 	/**
+	 * Imports all wiring defined in $container. Wiring defined in $container
+	 * will override any wiring already defined locally. However, already
+	 * existing service instances will be preserved.
+	 *
+	 * @since 1.28
+	 *
+	 * @param ServiceContainer $container
+	 * @param string[] $skip A list of service names to skip during import
+	 */
+	public function importWiring( ServiceContainer $container, $skip = [] ) {
+		$newInstantiators = array_diff_key(
+			$container->serviceInstantiators,
+			array_flip( $skip )
+		);
+
+		$this->serviceInstantiators = array_merge(
+			$this->serviceInstantiators,
+			$newInstantiators
+		);
+	}
+
+	/**
 	 * Returns true if a service is defined for $name, that is, if a call to getService( $name )
 	 * would return a service instance.
 	 *
@@ -112,6 +163,29 @@ class ServiceContainer {
 	 */
 	public function hasService( $name ) {
 		return isset( $this->serviceInstantiators[$name] );
+	}
+
+	/**
+	 * Returns the service instance for $name only if that service has already been instantiated.
+	 * This is intended for situations where services get destroyed/cleaned up, so we can
+	 * avoid creating a service just to destroy it again.
+	 *
+	 * @note This is intended for internal use and for test fixtures.
+	 * Application logic should use getService() instead.
+	 *
+	 * @see getService().
+	 *
+	 * @param string $name
+	 *
+	 * @return object|null The service instance, or null if the service has not yet been instantiated.
+	 * @throws RuntimeException if $name does not refer to a known service.
+	 */
+	public function peekService( $name ) {
+		if ( !$this->hasService( $name ) ) {
+			throw new NoSuchServiceException( $name );
+		}
+
+		return isset( $this->services[$name] ) ? $this->services[$name] : null;
 	}
 
 	/**
@@ -139,7 +213,7 @@ class ServiceContainer {
 		Assert::parameterType( 'string', $name, '$name' );
 
 		if ( $this->hasService( $name ) ) {
-			throw new RuntimeException( 'Service already defined: ' . $name );
+			throw new ServiceAlreadyDefinedException( $name );
 		}
 
 		$this->serviceInstantiators[$name] = $instantiator;
@@ -165,14 +239,76 @@ class ServiceContainer {
 		Assert::parameterType( 'string', $name, '$name' );
 
 		if ( !$this->hasService( $name ) ) {
-			throw new RuntimeException( 'Service not defined: ' . $name );
+			throw new NoSuchServiceException( $name );
 		}
 
 		if ( isset( $this->services[$name] ) ) {
-			throw new RuntimeException( 'Cannot redefine a service that is already in use: ' . $name );
+			throw new CannotReplaceActiveServiceException( $name );
 		}
 
 		$this->serviceInstantiators[$name] = $instantiator;
+		unset( $this->disabled[$name] );
+	}
+
+	/**
+	 * Disables a service.
+	 *
+	 * @note Attempts to call getService() for a disabled service will result
+	 * in a DisabledServiceException. Calling peekService for a disabled service will
+	 * return null. Disabled services are listed by getServiceNames(). A disabled service
+	 * can be enabled again using redefineService().
+	 *
+	 * @note If the service was already active (that is, instantiated) when getting disabled,
+	 * and the service instance implements DestructibleService, destroy() is called on the
+	 * service instance.
+	 *
+	 * @see redefineService()
+	 * @see resetService()
+	 *
+	 * @param string $name The name of the service to disable.
+	 *
+	 * @throws RuntimeException if $name is not a known service.
+	 */
+	public function disableService( $name ) {
+		$this->resetService( $name );
+
+		$this->disabled[$name] = true;
+	}
+
+	/**
+	 * Resets a service by dropping the service instance.
+	 * If the service instances implements DestructibleService, destroy()
+	 * is called on the service instance.
+	 *
+	 * @warning This is generally unsafe! Other services may still retain references
+	 * to the stale service instance, leading to failures and inconsistencies. Subclasses
+	 * may use this method to reset specific services under specific instances, but
+	 * it should not be exposed to application logic.
+	 *
+	 * @note This is declared final so subclasses can not interfere with the expectations
+	 * disableService() has when calling resetService().
+	 *
+	 * @see redefineService()
+	 * @see disableService().
+	 *
+	 * @param string $name The name of the service to reset.
+	 * @param bool $destroy Whether the service instance should be destroyed if it exists.
+	 *        When set to false, any existing service instance will effectively be detached
+	 *        from the container.
+	 *
+	 * @throws RuntimeException if $name is not a known service.
+	 */
+	final protected function resetService( $name, $destroy = true ) {
+		Assert::parameterType( 'string', $name, '$name' );
+
+		$instance = $this->peekService( $name );
+
+		if ( $destroy && $instance instanceof DestructibleService ) {
+			$instance->destroy();
+		}
+
+		unset( $this->services[$name] );
+		unset( $this->disabled[$name] );
 	}
 
 	/**
@@ -189,10 +325,21 @@ class ServiceContainer {
 	 *
 	 * @param string $name The service name
 	 *
-	 * @throws InvalidArgumentException if $name is not a known service.
+	 * @throws NoSuchServiceException if $name is not a known service.
+	 * @throws ContainerDisabledException if this container has already been destroyed.
+	 * @throws ServiceDisabledException if the requested service has been disabled.
+	 *
 	 * @return object The service instance
 	 */
 	public function getService( $name ) {
+		if ( $this->destroyed ) {
+			throw new ContainerDisabledException();
+		}
+
+		if ( isset( $this->disabled[$name] ) ) {
+			throw new ServiceDisabledException( $name );
+		}
+
 		if ( !isset( $this->services[$name] ) ) {
 			$this->services[$name] = $this->createService( $name );
 		}
@@ -212,11 +359,20 @@ class ServiceContainer {
 				$this->serviceInstantiators[$name],
 				array_merge( [ $this ], $this->extraInstantiationParams )
 			);
+			// NOTE: when adding more wiring logic here, make sure copyWiring() is kept in sync!
 		} else {
-			throw new InvalidArgumentException( 'Unknown service: ' . $name );
+			throw new NoSuchServiceException( $name );
 		}
 
 		return $service;
 	}
 
+	/**
+	 * @param string $name
+	 * @return bool Whether the service is disabled
+	 * @since 1.28
+	 */
+	public function isServiceDisabled( $name ) {
+		return isset( $this->disabled[$name] );
+	}
 }

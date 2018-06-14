@@ -28,6 +28,11 @@
 	 *  current cursor position.
 	 * @param {string} [button.imageId] `id` attribute of the button HTML element. Can be
 	 *  used to define the image with CSS if it's not provided as `imageFile`.
+	 * @param {string} [speedTip]
+	 * @param {string} [tagOpen]
+	 * @param {string} [tagClose]
+	 * @param {string} [sampleText]
+	 * @param {string} [imageId]
 	 */
 	function insertButton( button, speedTip, tagOpen, tagClose, sampleText, imageId ) {
 		var $button;
@@ -79,7 +84,7 @@
 	/**
 	 * @private
 	 * @property {Array}
-	 * Contains button objects (and for backwards compatibilty, it can
+	 * Contains button objects (and for backwards compatibility, it can
 	 * also contains an arguments array for insertButton).
 	 */
 	queue = [];
@@ -119,12 +124,12 @@
 		 *  button object in a list of variadic arguments.
 		 */
 		addButtons: function ( buttons ) {
-			if ( !$.isArray( buttons ) ) {
+			if ( !Array.isArray( buttons ) ) {
 				buttons = slice.call( arguments );
 			}
 			if ( isReady ) {
-				$.each( buttons, function () {
-					insertButton( this );
+				buttons.forEach( function ( button ) {
+					insertButton( button );
 				} );
 			} else {
 				// Push each button into the queue
@@ -159,10 +164,11 @@
 	mw.log.deprecate( window, 'insertTags', toolbar.insertTags, 'Use mw.toolbar.insertTags instead.' );
 
 	// For backwards compatibility. Used to be called from EditPage.php, maybe other places as well.
-	mw.log.deprecate( toolbar, 'init', $.noop );
+	toolbar.init = $.noop;
 
 	// Expose API publicly
-	mw.toolbar = toolbar;
+	// @deprecated since MW 1.29
+	mw.log.deprecate( mw, 'toolbar', toolbar, null, 'mw.toolbar' );
 
 	$( function () {
 		var i, button;
@@ -175,7 +181,7 @@
 
 		for ( i = 0; i < queue.length; i++ ) {
 			button = queue[ i ];
-			if ( $.isArray( button ) ) {
+			if ( Array.isArray( button ) ) {
 				// Forwarded arguments array from mw.toolbar.addButton
 				insertButton.apply( toolbar, button );
 			} else {

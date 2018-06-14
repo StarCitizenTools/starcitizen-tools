@@ -2,8 +2,6 @@
 	var UP;
 
 	/**
-	 * @class mw.Upload
-	 *
 	 * Used to represent an upload in progress on the frontend.
 	 * Most of the functionality is implemented in mw.Api.plugin.upload,
 	 * but this model class will tie it together as well as let you perform
@@ -42,6 +40,8 @@
 	 *         console.log( 'Done!' );
 	 *       } );
 	 *     } );
+	 *
+	 * @class mw.Upload
 	 *
 	 * @constructor
 	 * @param {Object|mw.Api} [apiconfig] A mw.Api object (or subclass), or configuration
@@ -276,7 +276,7 @@
 
 		this.setState( Upload.State.UPLOADING );
 
-		return this.api.upload( this.getFile(), {
+		return this.api.chunkedUpload( this.getFile(), {
 			watchlist: ( this.getWatchlist() ) ? 1 : undefined,
 			comment: this.getComment(),
 			filename: this.getFilename(),
@@ -313,7 +313,7 @@
 
 		this.setState( Upload.State.UPLOADING );
 
-		this.stashPromise = this.api.uploadToStash( this.getFile(), {
+		this.stashPromise = this.api.chunkedUploadToStash( this.getFile(), {
 			filename: this.getFilename()
 		} ).then( function ( finishStash ) {
 			upload.setState( Upload.State.STASHED );

@@ -6,6 +6,8 @@
  */
 ( function ( $, mw ) {
 
+	var trimByteLength = require( 'mediawiki.String' ).trimByteLength;
+
 	/**
 	 * Creates an mw.widgets.TitleInputWidget object.
 	 *
@@ -15,6 +17,7 @@
 	 * @mixins OO.ui.mixin.LookupElement
 	 *
 	 * @constructor
+	 * @param {Object} [config] Configuration options
 	 * @cfg {boolean} [suggestions=true] Display search suggestions
 	 * @cfg {RegExp|Function|string} [validate] Perform title validation
 	 */
@@ -129,8 +132,8 @@
 		// Parent method
 		value = mw.widgets.TitleInputWidget.parent.prototype.cleanUpValue.call( this, value );
 
-		return $.trimByteLength( this.value, value, this.maxLength, function ( value ) {
-			var title = widget.getTitle( value );
+		return trimByteLength( this.value, value, this.maxLength, function ( value ) {
+			var title = widget.getMWTitle( value );
 			return title ? title.getMain() : value;
 		} ).newVal;
 	};

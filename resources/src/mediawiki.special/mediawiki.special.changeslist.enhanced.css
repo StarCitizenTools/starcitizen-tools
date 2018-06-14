@@ -16,11 +16,11 @@ table.mw-enhanced-rc td {
 
 td.mw-enhanced-rc {
 	white-space: nowrap;
-	font-family: monospace;
+	font-family: monospace, monospace;
 }
 
 .mw-enhanced-rc-time {
-	font-family: monospace;
+	font-family: monospace, monospace;
 }
 
 table.mw-enhanced-rc td.mw-enhanced-rc-nested {
@@ -46,6 +46,10 @@ table.mw-enhanced-rc td.mw-enhanced-rc-nested {
  */
 .client-js table.mw-enhanced-rc.mw-collapsed tr + tr {
 	display: none;
+}
+
+.mw-enhancedchanges-arrow {
+	padding-top: 2px;
 }
 
 .mw-enhancedchanges-arrow-space {

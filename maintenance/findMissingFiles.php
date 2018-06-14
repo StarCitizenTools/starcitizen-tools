@@ -16,7 +16,6 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @author Aaron Schulz
  */
 
 require_once __DIR__ . '/Maintenance.php';
@@ -36,8 +35,9 @@ class FindMissingFiles extends Maintenance {
 		$lastName = $this->getOption( 'start', '' );
 
 		$repo = RepoGroup::singleton()->getLocalRepo();
-		$dbr = $repo->getSlaveDB();
+		$dbr = $repo->getReplicaDB();
 		$be = $repo->getBackend();
+		$batchSize = $this->getBatchSize();
 
 		$mtime1 = $dbr->timestampOrNull( $this->getOption( 'mtimeafter', null ) );
 		$mtime2 = $dbr->timestampOrNull( $this->getOption( 'mtimebefore', null ) );
@@ -67,7 +67,7 @@ class FindMissingFiles extends Maintenance {
 				__METHOD__,
 				// DISTINCT causes a pointless filesort
 				[ 'ORDER BY' => 'name', 'GROUP BY' => 'name',
-					'LIMIT' => $this->mBatchSize ],
+					'LIMIT' => $batchSize ],
 				$joinConds
 			);
 
@@ -102,7 +102,7 @@ class FindMissingFiles extends Maintenance {
 					$checkPaths[] = $file->getPath();
 				}
 
-				foreach ( array_chunk( $checkPaths, $this->mBatchSize ) as $paths ) {
+				foreach ( array_chunk( $checkPaths, $batchSize ) as $paths ) {
 					$be->preloadFileStat( [ 'srcs' => $paths ] );
 					foreach ( $paths as $path ) {
 						if ( $be->fileExists( [ 'src' => $path ] ) === false ) {
@@ -111,9 +111,9 @@ class FindMissingFiles extends Maintenance {
 					}
 				}
 			}
-		} while ( $res->numRows() >= $this->mBatchSize );
+		} while ( $res->numRows() >= $batchSize );
 	}
 }
 
-$maintClass = 'FindMissingFiles';
+$maintClass = FindMissingFiles::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

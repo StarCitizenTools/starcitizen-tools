@@ -54,7 +54,7 @@ class SyncFileBackend extends Maintenance {
 		if ( $this->hasOption( 'posdump' ) ) {
 			// Just dump the current position into the specified position dir
 			if ( !$this->hasOption( 'posdir' ) ) {
-				$this->error( "Param posdir required!", 1 );
+				$this->fatalError( "Param posdir required!" );
 			}
 			if ( $this->hasOption( 'postime' ) ) {
 				$id = (int)$src->getJournal()->getPositionAtTime( $this->getOption( 'postime' ) );
@@ -76,7 +76,7 @@ class SyncFileBackend extends Maintenance {
 		}
 
 		if ( !$this->hasOption( 'dst' ) ) {
-			$this->error( "Param dst required!", 1 );
+			$this->fatalError( "Param dst required!" );
 		}
 		$dst = FileBackendGroup::singleton()->get( $this->getOption( 'dst' ) );
 
@@ -156,12 +156,12 @@ class SyncFileBackend extends Maintenance {
 		$first = true; // first batch
 
 		if ( $start > $end ) { // sanity
-			$this->error( "Error: given starting ID greater than ending ID.", 1 );
+			$this->fatalError( "Error: given starting ID greater than ending ID." );
 		}
 
 		$next = null;
 		do {
-			$limit = min( $this->mBatchSize, $end - $start + 1 ); // don't go pass ending ID
+			$limit = min( $this->getBatchSize(), $end - $start + 1 ); // don't go pass ending ID
 			$this->output( "Doing id $start to " . ( $start + $limit - 1 ) . "...\n" );
 
 			$entries = $src->getJournal()->getChangeEntries( $start, $limit, $next );
@@ -268,9 +268,9 @@ class SyncFileBackend extends Maintenance {
 			sleep( 10 ); // wait and retry copy again
 			$status = $dst->doQuickOperations( $ops, [ 'bypassReadOnly' => 1 ] );
 		}
-		$ellapsed_ms = floor( ( microtime( true ) - $t_start ) * 1000 );
+		$elapsed_ms = floor( ( microtime( true ) - $t_start ) * 1000 );
 		if ( $status->isOK() && $this->getOption( 'verbose' ) ) {
-			$this->output( "Synchronized these file(s) [{$ellapsed_ms}ms]:\n" .
+			$this->output( "Synchronized these file(s) [{$elapsed_ms}ms]:\n" .
 				implode( "\n", $dPaths ) . "\n" );
 		}
 
@@ -303,5 +303,5 @@ class SyncFileBackend extends Maintenance {
 	}
 }
 
-$maintClass = "SyncFileBackend";
+$maintClass = SyncFileBackend::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

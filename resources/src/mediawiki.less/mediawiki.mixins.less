@@ -1,7 +1,7 @@
 // Common Less mixin library for MediaWiki
 //
 // By default the folder containing this file is included in $wgResourceLoaderLESSImportPaths,
-// which makes this file importable by all less files via '@import "mediawiki.mixins";'.
+// which makes this file importable by all less files via `@import 'mediawiki.mixins';`.
 //
 // The mixins included below are considered a public interface for MediaWiki extensions.
 // The signatures of parametrized mixins should be kept as stable as possible.
@@ -21,7 +21,6 @@
 
 .vertical-gradient( @startColor: gray, @endColor: white, @startPos: 0, @endPos: 100% ) {
 	background-color: @endColor;
-	background-image: -webkit-gradient( linear, left top, left bottom, color-stop( @startPos, @startColor ), color-stop( @endPos, @endColor ) ); // Safari 4+, Chrome 2+
 	background-image: -webkit-linear-gradient( top, @startColor @startPos, @endColor @endPos ); // Safari 5.1+, Chrome 10+
 	background-image: -moz-linear-gradient( top, @startColor @startPos, @endColor @endPos ); // Firefox 3.6+
 	background-image: linear-gradient( @startColor @startPos, @endColor @endPos ); // Standard
@@ -31,15 +30,17 @@
 // compatibility (browsers able to understand gradient syntax support also SVG).
 // http://pauginer.tumblr.com/post/36614680636/invisible-gradient-technique
 //
-// We use gzip compression, which means that it is okay to embed twice.
-//
 // We do not embed the fallback image on the assumption that the gain for old browsers
 // is not worth the harm done to modern ones.
 .background-image-svg( @svg, @fallback ) {
 	background-image: url( @fallback );
 	background-image: linear-gradient( transparent, transparent ), e( '/* @embed */' ) url( @svg );
-	// Do not serve SVG to Opera 12, bad rendering with border-radius or background-size (T87504)
-	background-image: -o-linear-gradient( transparent, transparent ), url( @fallback );
+}
+
+// Shorthand for background-image-svg. Use if your PNG and SVG have the same name
+// and only if you cannot use ResourceLoaderImage module for some particular reason.
+.background-image-svg-quick( @url ) {
+	.background-image-svg( ~'@{url}.svg', ~'@{url}.png' );
 }
 
 .list-style-image( @url ) {
@@ -52,10 +53,49 @@
 	list-style-image: e( '/* @embed */' ) url( @fallback ) e( '\9' );
 }
 
+.hyphens( @value: auto ) {
+	& when ( @value = auto ){
+		// Legacy `word-wrap`; IE 6-11, Edge 12+, Firefox 3.5+, Chrome 4+, Safari 3.1+,
+		//   Opera 11.5+, iOS 3.2+, Android 2.1+
+		// `overflow-wrap` is W3 standard, but it doesn't seem as if browser vendors
+		//   will abandon `word-wrap` (it has wider support), therefore no duplication.
+		word-wrap: break-word;
+	}
+	& when ( @value = none ) {
+		word-wrap: normal;
+	}
+
+	// CSS3 hyphenation
+	-webkit-hyphens: @value; // Safari 5.1+, iOS 4.3+
+	-moz-hyphens: @value;    // Firefox 6-42
+	-ms-hyphens: @value;     // IE 10-11, Edge 12+
+	hyphens: @value;         // Firefox 43+, Chrome 55+, Android 62+, UC Browser 11.8+, Samsung 6.2+
+}
+
+.transform( @value ) {
+	-webkit-transform: @value; // Safari 3.1-8.0, iOS 3.2-8.4, Android 2.1-4.4.4
+	-moz-transform: @value; // Firefox 3.5-15
+	transform: @value; // Chrome 36+, Firefox 16+, IE 10+, Safari 9+, Opera 23+, iOS 9.2+, Android 5+
+}
+
 .transition( @value ) {
 	-webkit-transition: @value; // Safari 3.1-6.0, iOS 3.2-6.1, Android 2.1-4.3
 	-moz-transition: @value; // Firefox 4-15
 	transition: @value; // Chrome 26+, Firefox 16+, IE 10+, Safari 6.1+, Opera 12.1+, iOS 7+, Android 4.4+
+}
+
+// Provide a hardware accelerated transform transition
+// We can't use `.transition()` because WebKit requires `-webkit-` prefix before `transform`
+// Example usage: `.transition-transform( 1s, opacity 2s );`
+// First parameter is additional options for `transform` transition commencing with
+// duration property @see https://www.w3.org/TR/css3-transitions/#transition-duration-property
+// and remaining parameters are additional transitions."
+.transition-transform( ... ) {
+	-webkit-backface-visibility: hidden; // Older Webkit browsers: Promote element to a composite layer & involve the GPU
+
+	-webkit-transition: -webkit-transform @arguments; // Safari 3.1-8, iOS 3.2-8.4, Android 2.1-4.4.4
+	-moz-transition: -moz-transform @arguments; // Firefox 4-15 for `-moz-transition`
+	transition: transform @arguments; // Chrome 36+, Firefox 16+, IE 10+, Safari 9+, Opera 12.1+, iOS 9.2+, Android 36+
 }
 
 .box-sizing( @value ) {
@@ -88,10 +128,17 @@
 }
 
 .flex-display( @display: flex ) {
-	display: ~"-webkit-@{display}"; // iOS 6-, Safari 3.1-6
-	display: ~"-moz-@{display}"; // Firefox 21-
-	display: ~"-ms-@{display}box"; // IE 10
+	display: ~'-webkit-@{display}'; // iOS 6-, Safari 3.1-6
+	display: ~'-moz-@{display}'; // Firefox 21-
+	display: ~'-ms-@{display}box'; // IE 10
 	display: @display;
+}
+
+.flex-wrap( @wrap: wrap ) {
+	-webkit-flex-wrap: @wrap; // iOS 6-, Safari 3.1-6
+	-moz-flex-wrap: @wrap; // Firefox 21-
+	-ms-flex-wrap: @wrap; // IE 10
+	flex-wrap: @wrap;
 }
 
 .flex( @grow: 1, @shrink: 1, @width: auto, @order: 1 ) {
@@ -116,11 +163,35 @@
 	order: @order;
 }
 
+/* stylelint-disable selector-no-vendor-prefix, at-rule-no-unknown */
+.mixin-placeholder( @rules ) {
+	// WebKit, Blink, Edge
+	&::-webkit-input-placeholder {
+		@rules();
+	}
+	// Internet Explorer 10-11
+	&:-ms-input-placeholder {
+		@rules();
+	}
+	// Firefox 19-
+	&::-moz-placeholder {
+		@rules();
+	}
+	// Firefox 4-18
+	&:-moz-placeholder {
+		@rules();
+	}
+	// W3C Standard Selectors Level 4
+	&::placeholder {
+		@rules();
+	}
+}
+/* stylelint-enable selector-no-vendor-prefix, at-rule-no-unknown */
 
 // Screen Reader Helper Mixin
 .mixin-screen-reader-text() {
 	display: block;
-	position: absolute !important;
+	position: absolute !important; /* stylelint-disable-line declaration-no-important */
 	clip: rect( 1px, 1px, 1px, 1px );
 	width: 1px;
 	height: 1px;

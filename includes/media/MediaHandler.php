@@ -20,6 +20,7 @@
  * @file
  * @ingroup Media
  */
+use MediaWiki\MediaWikiServices;
 
 /**
  * Base media handler class
@@ -36,39 +37,15 @@ abstract class MediaHandler {
 	 */
 	const MAX_ERR_LOG_SIZE = 65535;
 
-	/** @var MediaHandler[] Instance cache with array of MediaHandler */
-	protected static $handlers = [];
-
 	/**
 	 * Get a MediaHandler for a given MIME type from the instance cache
 	 *
 	 * @param string $type
-	 * @return MediaHandler
+	 * @return MediaHandler|bool
 	 */
 	static function getHandler( $type ) {
-		global $wgMediaHandlers;
-		if ( !isset( $wgMediaHandlers[$type] ) ) {
-			wfDebug( __METHOD__ . ": no handler found for $type.\n" );
-
-			return false;
-		}
-		$class = $wgMediaHandlers[$type];
-		if ( !isset( self::$handlers[$class] ) ) {
-			self::$handlers[$class] = new $class;
-			if ( !self::$handlers[$class]->isEnabled() ) {
-				wfDebug( __METHOD__ . ": $class is not enabled\n" );
-				self::$handlers[$class] = false;
-			}
-		}
-
-		return self::$handlers[$class];
-	}
-
-	/**
-	 * Resets all static caches
-	 */
-	public static function resetCache() {
-		self::$handlers = [];
+		return MediaWikiServices::getInstance()
+			->getMediaHandlerFactory()->getHandler( $type );
 	}
 
 	/**
@@ -108,7 +85,7 @@ abstract class MediaHandler {
 	 * Should be idempotent.
 	 * Returns false if the parameters are unacceptable and the transform should fail
 	 * @param File $image
-	 * @param array $params
+	 * @param array &$params
 	 */
 	abstract function normaliseParams( $image, &$params );
 
@@ -123,21 +100,22 @@ abstract class MediaHandler {
 	 * @note If this is a multipage file, return the width and height of the
 	 *  first page.
 	 *
-	 * @param File $image The image object, or false if there isn't one
+	 * @param File|FSFile $image The image object, or false if there isn't one.
+	 *   Warning, FSFile::getPropsFromPath might pass an FSFile instead of File (!)
 	 * @param string $path The filename
-	 * @return array Follow the format of PHP getimagesize() internal function.
-	 *   See http://www.php.net/getimagesize. MediaWiki will only ever use the
+	 * @return array|bool Follow the format of PHP getimagesize() internal function.
+	 *   See https://secure.php.net/getimagesize. MediaWiki will only ever use the
 	 *   first two array keys (the width and height), and the 'bits' associative
 	 *   key. All other array keys are ignored. Returning a 'bits' key is optional
-	 *   as not all formats have a notion of "bitdepth".
+	 *   as not all formats have a notion of "bitdepth". Returns false on failure.
 	 */
 	abstract function getImageSize( $image, $path );
 
 	/**
 	 * Get handler-specific metadata which will be saved in the img_metadata field.
 	 *
-	 * @param File $image The image object, or false if there isn't one.
-	 *   Warning, FSFile::getPropsFromPath might pass an (object)array() instead (!)
+	 * @param File|FSFile $image The image object, or false if there isn't one.
+	 *   Warning, FSFile::getPropsFromPath might pass an FSFile instead of File (!)
 	 * @param string $path The filename
 	 * @return string A string of metadata in php serialized form (Run through serialize())
 	 */
@@ -179,11 +157,10 @@ abstract class MediaHandler {
 	 */
 	function convertMetadataVersion( $metadata, $version = 1 ) {
 		if ( !is_array( $metadata ) ) {
-
 			// unserialize to keep return parameter consistent.
-			MediaWiki\suppressWarnings();
+			Wikimedia\suppressWarnings();
 			$ret = unserialize( $metadata );
-			MediaWiki\restoreWarnings();
+			Wikimedia\restoreWarnings();
 
 			return $ret;
 		}
@@ -278,7 +255,7 @@ abstract class MediaHandler {
 	 * Get a MediaTransformOutput object representing the transformed output. Does not
 	 * actually do the transform.
 	 *
-	 * @param File $image The image object
+	 * @param File $image
 	 * @param string $dstPath Filesystem destination path
 	 * @param string $dstUrl Destination URL to use in output HTML
 	 * @param array $params Arbitrary set of parameters validated by $this->validateParam()
@@ -292,7 +269,7 @@ abstract class MediaHandler {
 	 * Get a MediaTransformOutput object representing the transformed output. Does the
 	 * transform unless $flags contains self::TRANSFORM_LATER.
 	 *
-	 * @param File $image The image object
+	 * @param File $image
 	 * @param string $dstPath Filesystem destination path
 	 * @param string $dstUrl Destination URL to use in output HTML
 	 * @param array $params Arbitrary set of parameters validated by $this->validateParam()
@@ -311,7 +288,7 @@ abstract class MediaHandler {
 	 * @return array Thumbnail extension and MIME type
 	 */
 	function getThumbType( $ext, $mime, $params = null ) {
-		$magic = MimeMagic::singleton();
+		$magic = MediaWiki\MediaWikiServices::getInstance()->getMimeAnalyzer();
 		if ( !$ext || $magic->isMatchingExtension( $ext, $mime ) === false ) {
 			// The extension is not valid for this MIME type and we do
 			// recognize the MIME type
@@ -327,13 +304,13 @@ abstract class MediaHandler {
 	}
 
 	/**
-	 * Get useful response headers for GET/HEAD requests for a file with the given metadata
-	 *
-	 * @param mixed $metadata Result of the getMetadata() function of this handler for a file
+	 * @deprecated since 1.30, use MediaHandler::getContentHeaders instead
+	 * @param array $metadata
 	 * @return array
 	 */
 	public function getStreamHeaders( $metadata ) {
-		return [];
+		wfDeprecated( __METHOD__, '1.30' );
+		return $this->getContentHeaders( $metadata );
 	}
 
 	/**
@@ -485,16 +462,16 @@ abstract class MediaHandler {
 	/**
 	 * Get an array structure that looks like this:
 	 *
-	 * array(
-	 *    'visible' => array(
+	 * [
+	 *    'visible' => [
 	 *       'Human-readable name' => 'Human readable value',
 	 *       ...
-	 *    ),
-	 *    'collapsed' => array(
+	 *    ],
+	 *    'collapsed' => [
 	 *       'Human-readable name' => 'Human readable value',
 	 *       ...
-	 *    )
-	 * )
+	 *    ]
+	 * ]
 	 * The UI will format this into a table where the visible fields are always
 	 * visible, and the collapsed fields are optionally visible.
 	 *
@@ -520,7 +497,7 @@ abstract class MediaHandler {
 	 *
 	 * This is used by the media handlers that use the FormatMetadata class
 	 *
-	 * @param array $metadataArray Metadata array
+	 * @param array $metadataArray
 	 * @param bool|IContextSource $context Context to use (optional)
 	 * @return array Array for use displaying metadata.
 	 */
@@ -737,7 +714,7 @@ abstract class MediaHandler {
 	 *
 	 * @see LocalFile::purgeThumbnails
 	 *
-	 * @param array $files
+	 * @param array &$files
 	 * @param array $options Purge options. Currently will always be
 	 *  an array with a single key 'forThumbRefresh' set to true.
 	 */
@@ -784,7 +761,7 @@ abstract class MediaHandler {
 	 * @param string $cmd
 	 */
 	protected function logErrorForExternalProcess( $retval, $err, $cmd ) {
-		# Keep error output limited (bug 57985)
+		# Keep error output limited (T59985)
 		$errMessage = trim( substr( $err, 0, self::MAX_ERR_LOG_SIZE ) );
 
 		wfDebugLog( 'thumbnail',
@@ -865,11 +842,11 @@ abstract class MediaHandler {
 	/**
 	 * Gets configuration for the file warning message. Return value of
 	 * the following structure:
-	 *   array(
+	 *   [
 	 *     // Required, module with messages loaded for the client
 	 *     'module' => 'example.filewarning.messages',
 	 *     // Required, array of names of messages
-	 *     'messages' => array(
+	 *     'messages' => [
 	 *       // Required, main warning message
 	 *       'main' => 'example-filewarning-main',
 	 *       // Optional, header for warning dialog
@@ -878,10 +855,10 @@ abstract class MediaHandler {
 	 *       'footer' => 'example-filewarning-footer',
 	 *       // Optional, text for more-information link (see below)
 	 *       'info' => 'example-filewarning-info',
-	 *     ),
+	 *     ],
 	 *     // Optional, link for more information
 	 *     'link' => 'http://example.com',
-	 *   )
+	 *   ]
 	 *
 	 * Returns null if no warning is necessary.
 	 * @param File $file
@@ -889,5 +866,61 @@ abstract class MediaHandler {
 	 */
 	public function getWarningConfig( $file ) {
 		return null;
+	}
+
+	/**
+	 * Converts a dimensions array about a potentially multipage document from an
+	 * exhaustive list of ordered page numbers to a list of page ranges
+	 * @param Array $pagesByDimensions
+	 * @return String
+	 * @since 1.30
+	 */
+	public static function getPageRangesByDimensions( $pagesByDimensions ) {
+		$pageRangesByDimensions = [];
+
+		foreach ( $pagesByDimensions as $dimensions => $pageList ) {
+			$ranges = [];
+			$firstPage = $pageList[0];
+			$lastPage = $firstPage - 1;
+
+			foreach ( $pageList as $page ) {
+				if ( $page > $lastPage + 1 ) {
+					if ( $firstPage != $lastPage ) {
+						$ranges[] = "$firstPage-$lastPage";
+					} else {
+						$ranges[] = "$firstPage";
+					}
+
+					$firstPage = $page;
+				}
+
+				$lastPage = $page;
+			}
+
+			if ( $firstPage != $lastPage ) {
+				$ranges[] = "$firstPage-$lastPage";
+			} else {
+				$ranges[] = "$firstPage";
+			}
+
+			$pageRangesByDimensions[ $dimensions ] = $ranges;
+		}
+
+		$dimensionsString = [];
+		foreach ( $pageRangesByDimensions as $dimensions => $pageRanges ) {
+			$dimensionsString[] = "$dimensions:" . implode( ',', $pageRanges );
+		}
+
+		return implode( '/', $dimensionsString );
+	}
+
+	/**
+	 * Get useful response headers for GET/HEAD requests for a file with the given metadata
+	 * @param array $metadata Contains this handler's unserialized getMetadata() for a file
+	 * @return array
+	 * @since 1.30
+	 */
+	public function getContentHeaders( $metadata ) {
+		return [ 'X-Content-Dimensions' => '' ]; // T175689
 	}
 }

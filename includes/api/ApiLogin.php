@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on Sep 19, 2006
- *
  * Copyright © 2006-2007 Yuri Astrakhan "<Firstname><Lastname>@gmail.com",
  * Daniel Cannon (cannon dot danielc at gmail dot com)
  *
@@ -41,11 +37,28 @@ class ApiLogin extends ApiBase {
 		parent::__construct( $main, $action, 'lg' );
 	}
 
-	protected function getDescriptionMessage() {
+	protected function getExtendedDescription() {
 		if ( $this->getConfig()->get( 'EnableBotPasswords' ) ) {
-			return 'apihelp-login-description';
+			return 'apihelp-login-extended-description';
 		} else {
-			return 'apihelp-login-description-nobotpasswords';
+			return 'apihelp-login-extended-description-nobotpasswords';
+		}
+	}
+
+	/**
+	 * Format a message for the response
+	 * @param Message|string|array $message
+	 * @return string|array
+	 */
+	private function formatMessage( $message ) {
+		$message = Message::newFromSpecifier( $message );
+		$errorFormatter = $this->getErrorFormatter();
+		if ( $errorFormatter instanceof ApiErrorFormatter_BackCompat ) {
+			return ApiErrorFormatter::stripMarkup(
+				$message->useDatabase( false )->inLanguage( 'en' )->text()
+			);
+		} else {
+			return $errorFormatter->formatMessage( $message );
 		}
 	}
 
@@ -64,19 +77,13 @@ class ApiLogin extends ApiBase {
 		if ( $this->lacksSameOriginSecurity() ) {
 			$this->getResult()->addValue( null, 'login', [
 				'result' => 'Aborted',
-				'reason' => 'Cannot log in when the same-origin policy is not applied',
+				'reason' => $this->formatMessage( 'api-login-fail-sameorigin' ),
 			] );
 
 			return;
 		}
 
-		try {
-			$this->requirePostedParameters( [ 'password', 'token' ] );
-		} catch ( UsageException $ex ) {
-			// Make this a warning for now, upgrade to an error in 1.29.
-			$this->setWarning( $ex->getMessage() );
-			$this->logFeatureUsage( 'login-params-in-query-string' );
-		}
+		$this->requirePostedParameters( [ 'password', 'token' ] );
 
 		$params = $this->extractRequestParams();
 
@@ -90,8 +97,10 @@ class ApiLogin extends ApiBase {
 		if ( !$session->canSetUser() ) {
 			$this->getResult()->addValue( null, 'login', [
 				'result' => 'Aborted',
-				'reason' => 'Cannot log in when using ' .
-					$session->getProvider()->describe( Language::factory( 'en' ) ),
+				'reason' => $this->formatMessage( [
+					'api-login-fail-badsessionprovider',
+					$session->getProvider()->describe( $this->getErrorFormatter()->getLanguage() ),
+				] )
 			] );
 
 			return;
@@ -110,20 +119,21 @@ class ApiLogin extends ApiBase {
 		}
 
 		// Try bot passwords
-		if ( $authRes === false && $this->getConfig()->get( 'EnableBotPasswords' ) &&
-			strpos( $params['name'], BotPassword::getSeparator() ) !== false
+		if (
+			$authRes === false && $this->getConfig()->get( 'EnableBotPasswords' ) &&
+			( $botLoginData = BotPassword::canonicalizeLoginData( $params['name'], $params['password'] ) )
 		) {
 			$status = BotPassword::login(
-				$params['name'], $params['password'], $this->getRequest()
+				$botLoginData[0], $botLoginData[1], $this->getRequest()
 			);
 			if ( $status->isOK() ) {
 				$session = $status->getValue();
 				$authRes = 'Success';
 				$loginType = 'BotPassword';
-			} else {
+			} elseif ( !$botLoginData[2] || $status->hasMessage( 'login-throttled' ) ) {
 				$authRes = 'Failed';
 				$message = $status->getMessage();
-				LoggerFactory::getInstance( 'authmanager' )->info(
+				LoggerFactory::getInstance( 'authentication' )->info(
 					'BotPassword login failed: ' . $status->getWikiText( false, false, 'en' )
 				);
 			}
@@ -145,15 +155,10 @@ class ApiLogin extends ApiBase {
 			switch ( $res->status ) {
 				case AuthenticationResponse::PASS:
 					if ( $this->getConfig()->get( 'EnableBotPasswords' ) ) {
-						$warn = 'Main-account login via action=login is deprecated and may stop working ' .
-							'without warning.';
-						$warn .= ' To continue login with action=login, see [[Special:BotPasswords]].';
-						$warn .= ' To safely continue using main-account login, see action=clientlogin.';
+						$this->addDeprecation( 'apiwarn-deprecation-login-botpw', 'main-account-login' );
 					} else {
-						$warn = 'Login via action=login is deprecated and may stop working without warning.';
-						$warn .= ' To safely log in, see action=clientlogin.';
+						$this->addDeprecation( 'apiwarn-deprecation-login-nobotpw', 'main-account-login' );
 					}
-					$this->setWarning( $warn );
 					$authRes = 'Success';
 					$loginType = 'AuthManager';
 					break;
@@ -163,10 +168,14 @@ class ApiLogin extends ApiBase {
 					$authRes = 'Failed';
 					$message = $res->message;
 					\MediaWiki\Logger\LoggerFactory::getInstance( 'authentication' )
-						->info( __METHOD__ . ': Authentication failed: ' . $message->plain() );
+						->info( __METHOD__ . ': Authentication failed: '
+						. $message->inLanguage( 'en' )->plain() );
 					break;
 
 				default:
+					\MediaWiki\Logger\LoggerFactory::getInstance( 'authentication' )
+						->info( __METHOD__ . ': Authentication failed due to unsupported response type: '
+						. $res->status, $this->getAuthenticationResponseLogData( $res ) );
 					$authRes = 'Aborted';
 					break;
 			}
@@ -181,48 +190,30 @@ class ApiLogin extends ApiBase {
 
 				// Deprecated hook
 				$injected_html = '';
-				Hooks::run( 'UserLoginComplete', [ &$user, &$injected_html ] );
+				Hooks::run( 'UserLoginComplete', [ &$user, &$injected_html, true ] );
 
 				$result['lguserid'] = intval( $user->getId() );
 				$result['lgusername'] = $user->getName();
-
-				// @todo: These are deprecated, and should be removed at some
-				// point (1.28 at the earliest, and see T121527). They were ok
-				// when the core cookie-based login was the only thing, but
-				// CentralAuth broke that a while back and
-				// SessionManager/AuthManager *really* break it.
-				$result['lgtoken'] = $user->getToken();
-				$result['cookieprefix'] = $this->getConfig()->get( 'CookiePrefix' );
-				$result['sessionid'] = $session->getId();
 				break;
 
 			case 'NeedToken':
 				$result['token'] = $token->toString();
-				$this->setWarning( 'Fetching a token via action=login is deprecated. ' .
-				   'Use action=query&meta=tokens&type=login instead.' );
-				$this->logFeatureUsage( 'action=login&!lgtoken' );
-
-				// @todo: See above about deprecation
-				$result['cookieprefix'] = $this->getConfig()->get( 'CookiePrefix' );
-				$result['sessionid'] = $session->getId();
+				$this->addDeprecation( 'apiwarn-deprecation-login-token', 'action=login&!lgtoken' );
 				break;
 
 			case 'WrongToken':
 				break;
 
 			case 'Failed':
-				$result['reason'] = $message->useDatabase( 'false' )->inLanguage( 'en' )->text();
+				$result['reason'] = $this->formatMessage( $message );
 				break;
 
 			case 'Aborted':
-				$result['reason'] = 'Authentication requires user interaction, ' .
-				   'which is not supported by action=login.';
-				if ( $this->getConfig()->get( 'EnableBotPasswords' ) ) {
-					$result['reason'] .= ' To be able to login with action=login, see [[Special:BotPasswords]].';
-					$result['reason'] .= ' To continue using main-account login, see action=clientlogin.';
-				} else {
-					$result['reason'] .= ' To log in, see action=clientlogin.';
-				}
+				$result['reason'] = $this->formatMessage(
+					$this->getConfig()->get( 'EnableBotPasswords' )
+						? 'api-login-fail-aborted'
+						: 'api-login-fail-aborted-nobotpw'
+				);
 				break;
 
 			default:
@@ -234,7 +225,7 @@ class ApiLogin extends ApiBase {
 		if ( $loginType === 'LoginForm' && isset( LoginForm::$statusCodes[$authRes] ) ) {
 			$authRes = LoginForm::$statusCodes[$authRes];
 		}
-		LoggerFactory::getInstance( 'authmanager' )->info( 'Login attempt', [
+		LoggerFactory::getInstance( 'authevents' )->info( 'Login attempt', [
 			'event' => 'login',
 			'successful' => $authRes === 'Success',
 			'loginType' => $loginType,
@@ -280,6 +271,34 @@ class ApiLogin extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Login';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Login';
+	}
+
+	/**
+	 * Turns an AuthenticationResponse into a hash suitable for passing to Logger
+	 * @param AuthenticationResponse $response
+	 * @return array
+	 */
+	protected function getAuthenticationResponseLogData( AuthenticationResponse $response ) {
+		$ret = [
+			'status' => $response->status,
+		];
+		if ( $response->message ) {
+			$ret['message'] = $response->message->inLanguage( 'en' )->plain();
+		};
+		$reqs = [
+			'neededRequests' => $response->neededRequests,
+			'createRequest' => $response->createRequest,
+			'linkRequest' => $response->linkRequest,
+		];
+		foreach ( $reqs as $k => $v ) {
+			if ( $v ) {
+				$v = is_array( $v ) ? $v : [ $v ];
+				$reqClasses = array_unique( array_map( 'get_class', $v ) );
+				sort( $reqClasses );
+				$ret[$k] = implode( ', ', $reqClasses );
+			}
+		}
+		return $ret;
 	}
 }

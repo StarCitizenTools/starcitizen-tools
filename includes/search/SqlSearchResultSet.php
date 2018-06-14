@@ -1,4 +1,7 @@
 <?php
+
+use Wikimedia\Rdbms\ResultWrapper;
+
 /**
  * This class is used for different SQL-based search engines shipped with MediaWiki
  * @ingroup Search
@@ -37,7 +40,7 @@ class SqlSearchResultSet extends SearchResultSet {
 		}
 
 		return SearchResult::newFromTitle(
-			Title::makeTitle( $row->page_namespace, $row->page_title )
+			Title::makeTitle( $row->page_namespace, $row->page_title ), $this
 		);
 	}
 

@@ -12,6 +12,7 @@ $separatorTransformTable = [
 	',' => "\xc2\xa0", # nbsp
 	'.' => ','
 ];
+$minimumGroupingDigits = 2;
 
 $fallback8bitEncoding = 'UTF-8';
 
@@ -76,7 +77,7 @@ $dateFormats = [
 ];
 
 $bookstoreList = [
-	'Amazon.com' => 'http://www.amazon.com/exec/obidos/ISBN=$1'
+	'Amazon.com' => 'https://www.amazon.com/exec/obidos/ISBN=$1'
 ];
 
 $magicWords = [
@@ -255,4 +256,3 @@ $specialPageAliases = [
 ];
 
 $linkTrail = '/^([a-zաբգդեզէըթժիլխծկհձղճմյնշոչպջռսվտրցւփքօֆև«»]+)(.*)$/sDu';
-

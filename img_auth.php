@@ -68,7 +68,7 @@ function wfImageAuthMain() {
 		$path = "/" . $path;
 	}
 
-	// Check for bug 28235: QUERY_STRING overriding the correct extension
+	// Check for T30235: QUERY_STRING overriding the correct extension
 	$whitelist = [];
 	$extension = FileBackend::extensionFromPath( $path, 'rawcase' );
 	if ( $extension != '' ) {
@@ -162,13 +162,21 @@ function wfImageAuthMain() {
 		}
 	}
 
+	$options = []; // HTTP header options
+	if ( isset( $_SERVER['HTTP_RANGE'] ) ) {
+		$options['range'] = $_SERVER['HTTP_RANGE'];
+	}
+	if ( isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) ) {
+		$options['if-modified-since'] = $_SERVER['HTTP_IF_MODIFIED_SINCE'];
+	}
+
 	if ( $request->getCheck( 'download' ) ) {
 		$headers[] = 'Content-Disposition: attachment';
 	}
 
 	// Stream the requested file
 	wfDebugLog( 'img_auth', "Streaming `" . $filename . "`." );
-	$repo->streamFile( $filename, $headers );
+	$repo->streamFile( $filename, $headers, $options );
 }
 
 /**

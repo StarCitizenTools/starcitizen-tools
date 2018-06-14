@@ -75,7 +75,7 @@ class IPTC {
 					 * Title, person. Not sure if this is best
 					 * approach since we no longer have the two fields
 					 * separate. each byline title entry corresponds to a
-					 * specific byline.                          */
+					 * specific byline. */
 
 					$bylines = self::convIPTC( $val, $c );
 					if ( isset( $parsed['2#085'] ) ) {
@@ -97,7 +97,7 @@ class IPTC {
 				case '2#025': /* keywords */
 					$data['Keywords'] = self::convIPTC( $val, $c );
 					break;
-				case '2#101': /* Country (shown)*/
+				case '2#101': /* Country (shown) */
 					$data['CountryDest'] = self::convIPTC( $val, $c );
 					break;
 				case '2#095': /* state/province (shown) */
@@ -115,7 +115,7 @@ class IPTC {
 				case '2#040': /* special instructions */
 					$data['SpecialInstructions'] = self::convIPTC( $val, $c );
 					break;
-				case '2#105': /* headline*/
+				case '2#105': /* headline */
 					$data['Headline'] = self::convIPTC( $val, $c );
 					break;
 				case '2#110': /* credit */
@@ -353,20 +353,20 @@ class IPTC {
 	 * @todo Potentially this should also capture the timezone offset.
 	 * @param array $date The date tag
 	 * @param array $time The time tag
-	 * @param string $c The charset
+	 * @param string $charset
 	 * @return string Date in EXIF format.
 	 */
-	private static function timeHelper( $date, $time, $c ) {
+	private static function timeHelper( $date, $time, $charset ) {
 		if ( count( $date ) === 1 ) {
 			// the standard says this should always be 1
 			// just double checking.
-			list( $date ) = self::convIPTC( $date, $c );
+			list( $date ) = self::convIPTC( $date, $charset );
 		} else {
 			return null;
 		}
 
 		if ( count( $time ) === 1 ) {
-			list( $time ) = self::convIPTC( $time, $c );
+			list( $time ) = self::convIPTC( $time, $charset );
 			$dateOnly = false;
 		} else {
 			$time = '000000+0000'; // placeholder
@@ -420,7 +420,7 @@ class IPTC {
 	/**
 	 * Helper function to convert charset for iptc values.
 	 * @param string|array $data The iptc string
-	 * @param string $charset The charset
+	 * @param string $charset
 	 *
 	 * @return string|array
 	 */
@@ -439,15 +439,15 @@ class IPTC {
 	/**
 	 * Helper function of a helper function to convert charset for iptc values.
 	 * @param string|array $data The IPTC string
-	 * @param string $charset The charset
+	 * @param string $charset
 	 *
 	 * @return string
 	 */
 	private static function convIPTCHelper( $data, $charset ) {
 		if ( $charset ) {
-			MediaWiki\suppressWarnings();
+			Wikimedia\suppressWarnings();
 			$data = iconv( $charset, "UTF-8//IGNORE", $data );
-			MediaWiki\restoreWarnings();
+			Wikimedia\restoreWarnings();
 			if ( $data === false ) {
 				$data = "";
 				wfDebugLog( 'iptc', __METHOD__ . " Error converting iptc data charset $charset to utf-8" );
@@ -476,7 +476,6 @@ class IPTC {
 	 * only code that seems to have wide use. It does detect that code.
 	 */
 	static function getCharset( $tag ) {
-
 		// According to iim standard, charset is defined by the tag 1:90.
 		// in which there are iso 2022 escape sequences to specify the character set.
 		// the iim standard seems to encourage that all necessary escape sequences are

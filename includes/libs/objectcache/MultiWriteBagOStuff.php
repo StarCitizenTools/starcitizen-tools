@@ -20,6 +20,7 @@
  * @file
  * @ingroup Cache
  */
+use Wikimedia\ObjectFactory;
 
 /**
  * A cache class that replicates all writes to multiple child caches. Reads
@@ -83,6 +84,7 @@ class MultiWriteBagOStuff extends BagOStuff {
 				$this->caches[] = ObjectFactory::getObjectFromSpec( $cacheInfo );
 			}
 		}
+		$this->mergeFlagMaps( $this->caches );
 
 		$this->asyncWrites = (
 			isset( $params['replication'] ) &&
@@ -170,15 +172,21 @@ class MultiWriteBagOStuff extends BagOStuff {
 	/**
 	 * Apply a write method to the first $count backing caches
 	 *
-	 * @param integer $count
+	 * @param int $count
 	 * @param bool $asyncWrites
 	 * @param string $method
-	 * @param mixed ...
+	 * @param mixed $args,...
 	 * @return bool
 	 */
 	protected function doWrite( $count, $asyncWrites, $method /*, ... */ ) {
 		$ret = true;
 		$args = array_slice( func_get_args(), 3 );
+
+		if ( $count > 1 && $asyncWrites ) {
+			// Deep-clone $args to prevent misbehavior when something writes an
+			// object to the BagOStuff then modifies it afterwards, e.g. T168040.
+			$args = unserialize( serialize( $args ) );
+		}
 
 		foreach ( $this->caches as $i => $cache ) {
 			if ( $i >= $count ) {
@@ -224,5 +232,13 @@ class MultiWriteBagOStuff extends BagOStuff {
 		}
 
 		return $ret;
+	}
+
+	public function makeKey( $class, $component = null ) {
+		return call_user_func_array( [ $this->caches[0], __FUNCTION__ ], func_get_args() );
+	}
+
+	public function makeGlobalKey( $class, $component = null ) {
+		return call_user_func_array( [ $this->caches[0], __FUNCTION__ ], func_get_args() );
 	}
 }

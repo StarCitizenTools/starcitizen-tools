@@ -123,7 +123,7 @@ class SpecialBotPasswords extends FormSpecialPage {
 					$showGrants
 				),
 				'default' => array_map(
-					function( $g ) {
+					function ( $g ) {
 						return "grant-$g";
 					},
 					$this->botPassword->getGrants()
@@ -131,14 +131,14 @@ class SpecialBotPasswords extends FormSpecialPage {
 				'tooltips' => array_combine(
 					array_map( 'MWGrants::getGrantsLink', $showGrants ),
 					array_map(
-						function( $rights ) use ( $lang ) {
+						function ( $rights ) use ( $lang ) {
 							return $lang->semicolonList( array_map( 'User::getRightDescription', $rights ) );
 						},
 						array_intersect_key( MWGrants::getRightsByGrant(), array_flip( $showGrants ) )
 					)
 				),
 				'force-options-on' => array_map(
-					function( $g ) {
+					function ( $g ) {
 						return "grant-$g";
 					},
 					MWGrants::getHiddenGrants()
@@ -146,23 +146,14 @@ class SpecialBotPasswords extends FormSpecialPage {
 			];
 
 			$fields['restrictions'] = [
-				'type' => 'textarea',
-				'label-message' => 'botpasswords-label-restrictions',
+				'class' => HTMLRestrictionsField::class,
 				'required' => true,
-				'default' => $this->botPassword->getRestrictions()->toJson( true ),
-				'rows' => 5,
-				'validation-callback' => function ( $v ) {
-					try {
-						MWRestrictions::newFromJson( $v );
-						return true;
-					} catch ( InvalidArgumentException $ex ) {
-						return $ex->getMessage();
-					}
-				},
+				'default' => $this->botPassword->getRestrictions(),
 			];
 
 		} else {
-			$dbr = BotPassword::getDB( DB_SLAVE );
+			$linkRenderer = $this->getLinkRenderer();
+			$dbr = BotPassword::getDB( DB_REPLICA );
 			$res = $dbr->select(
 				'bot_passwords',
 				[ 'bp_app_id' ],
@@ -174,12 +165,9 @@ class SpecialBotPasswords extends FormSpecialPage {
 					'section' => 'existing',
 					'type' => 'info',
 					'raw' => true,
-					'default' => Linker::link(
+					'default' => $linkRenderer->makeKnownLink(
 						$this->getPageTitle( $row->bp_app_id ),
-						htmlspecialchars( $row->bp_app_id ),
-						[],
-						[],
-						[ 'known' ]
+						$row->bp_app_id
 					),
 				];
 			}
@@ -236,7 +224,7 @@ class SpecialBotPasswords extends FormSpecialPage {
 					'name' => 'op',
 					'value' => 'create',
 					'label-message' => 'botpasswords-label-create',
-					'flags' => [ 'primary', 'constructive' ],
+					'flags' => [ 'primary', 'progressive' ],
 				] );
 			}
 
@@ -284,7 +272,7 @@ class SpecialBotPasswords extends FormSpecialPage {
 		$bp = BotPassword::newUnsaved( [
 			'centralId' => $this->userId,
 			'appId' => $this->par,
-			'restrictions' => MWRestrictions::newFromJson( $data['restrictions'] ),
+			'restrictions' => $data['restrictions'],
 			'grants' => array_merge(
 				MWGrants::getHiddenGrants(),
 				preg_replace( '/^grant-/', '', $data['grants'] )
@@ -292,9 +280,7 @@ class SpecialBotPasswords extends FormSpecialPage {
 		] );
 
 		if ( $this->operation === 'insert' || !empty( $data['resetPassword'] ) ) {
-			$this->password = PasswordFactory::generateRandomPasswordString(
-				max( 32, $this->getConfig()->get( 'MinimalPasswordLength' ) )
-			);
+			$this->password = BotPassword::generatePassword( $this->getConfig() );
 			$passwordFactory = new PasswordFactory();
 			$passwordFactory->init( RequestContext::getMain()->getConfig() );
 			$password = $passwordFactory->newFromPlaintext( $this->password );
@@ -337,7 +323,9 @@ class SpecialBotPasswords extends FormSpecialPage {
 			$out->addWikiMsg(
 				'botpasswords-newpassword',
 				htmlspecialchars( $username . $sep . $this->par ),
-				htmlspecialchars( $this->password )
+				htmlspecialchars( $this->password ),
+				htmlspecialchars( $username ),
+				htmlspecialchars( $this->par . $sep . $this->password )
 			);
 			$this->password = null;
 		}

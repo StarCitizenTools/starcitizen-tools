@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on May 13, 2007
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -69,15 +65,19 @@ class ApiQueryCategories extends ApiQueryGeneratorBase {
 
 		$this->addTables( 'categorylinks' );
 		$this->addWhereFld( 'cl_from', array_keys( $this->getPageSet()->getGoodTitles() ) );
-		if ( !is_null( $params['categories'] ) ) {
+		if ( $params['categories'] ) {
 			$cats = [];
 			foreach ( $params['categories'] as $cat ) {
 				$title = Title::newFromText( $cat );
 				if ( !$title || $title->getNamespace() != NS_CATEGORY ) {
-					$this->setWarning( "\"$cat\" is not a category" );
+					$this->addWarning( [ 'apiwarn-invalidcategory', wfEscapeWikiText( $cat ) ] );
 				} else {
 					$cats[] = $title->getDBkey();
 				}
+			}
+			if ( !$cats ) {
+				// No titles so no results
+				return;
 			}
 			$this->addWhereFld( 'cl_to', $cats );
 		}
@@ -96,7 +96,7 @@ class ApiQueryCategories extends ApiQueryGeneratorBase {
 		}
 
 		if ( isset( $show['hidden'] ) && isset( $show['!hidden'] ) ) {
-			$this->dieUsageMsg( 'show' );
+			$this->dieWithError( 'apierror-show' );
 		}
 		if ( isset( $show['hidden'] ) || isset( $show['!hidden'] ) || isset( $prop['hidden'] ) ) {
 			$this->addOption( 'STRAIGHT_JOIN' );
@@ -227,6 +227,6 @@ class ApiQueryCategories extends ApiQueryGeneratorBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Categories';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Categories';
 	}
 }

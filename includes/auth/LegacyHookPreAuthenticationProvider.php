@@ -58,14 +58,14 @@ class LegacyHookPreAuthenticationProvider extends AbstractPreAuthenticationProvi
 		$msg = null;
 		if ( !\Hooks::run( 'LoginUserMigrated', [ $user, &$msg ] ) ) {
 			return $this->makeFailResponse(
-				$user, null, LoginForm::USER_MIGRATED, $msg, 'LoginUserMigrated'
+				$user, LoginForm::USER_MIGRATED, $msg, 'LoginUserMigrated'
 			);
 		}
 
 		$abort = LoginForm::ABORTED;
 		$msg = null;
 		if ( !\Hooks::run( 'AbortLogin', [ $user, $password, &$abort, &$msg ] ) ) {
-			return $this->makeFailResponse( $user, null, $abort, $msg, 'AbortLogin' );
+			return $this->makeFailResponse( $user, $abort, $msg, 'AbortLogin' );
 		}
 
 		return StatusValue::newGood();
@@ -96,36 +96,15 @@ class LegacyHookPreAuthenticationProvider extends AbstractPreAuthenticationProvi
 		return StatusValue::newGood();
 	}
 
-	public function testUserForCreation( $user, $autocreate ) {
+	public function testUserForCreation( $user, $autocreate, array $options = [] ) {
 		if ( $autocreate !== false ) {
 			$abortError = '';
 			if ( !\Hooks::run( 'AbortAutoAccount', [ $user, &$abortError ] ) ) {
 				// Hook point to add extra creation throttles and blocks
 				$this->logger->debug( __METHOD__ . ": a hook blocked auto-creation: $abortError\n" );
 				return $this->makeFailResponse(
-					$user, $user, LoginForm::ABORTED, $abortError, 'AbortAutoAccount'
+					$user, LoginForm::ABORTED, $abortError, 'AbortAutoAccount'
 				);
-			}
-		} else {
-			$abortError = '';
-			$abortStatus = null;
-			if ( !\Hooks::run( 'AbortNewAccount', [ $user, &$abortError, &$abortStatus ] ) ) {
-				// Hook point to add extra creation throttles and blocks
-				$this->logger->debug( __METHOD__ . ': a hook blocked creation' );
-				if ( $abortStatus === null ) {
-					// Report back the old string as a raw message status.
-					// This will report the error back as 'createaccount-hook-aborted'
-					// with the given string as the message.
-					// To return a different error code, return a StatusValue object.
-					$msg = wfMessage( 'createaccount-hook-aborted' )->rawParams( $abortError );
-					return StatusValue::newFatal( $msg );
-				} else {
-					// For MediaWiki 1.23+ and updated hooks, return the Status object
-					// returned from the hook.
-					$ret = StatusValue::newGood();
-					$ret->merge( $abortStatus );
-					return $ret;
-				}
 			}
 		}
 
@@ -135,13 +114,12 @@ class LegacyHookPreAuthenticationProvider extends AbstractPreAuthenticationProvi
 	/**
 	 * Construct an appropriate failure response
 	 * @param User $user
-	 * @param User|null $creator
-	 * @param int $constant LoginForm constant
-	 * @param string|null $msg Message
-	 * @param string $hook Hook
+	 * @param int $constant One of the LoginForm::… constants
+	 * @param string|null $msg Optional message key, will be derived from $constant otherwise
+	 * @param string $hook Name of the hook for error logging and exception messages
 	 * @return StatusValue
 	 */
-	protected function makeFailResponse( $user, $creator, $constant, $msg, $hook ) {
+	private function makeFailResponse( User $user, $constant, $msg, $hook ) {
 		switch ( $constant ) {
 			case LoginForm::SUCCESS:
 				// WTF?

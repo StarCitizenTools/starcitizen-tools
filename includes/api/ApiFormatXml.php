@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on Sep 19, 2006
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -269,17 +265,17 @@ class ApiFormatXml extends ApiFormatBase {
 	protected function addXslt() {
 		$nt = Title::newFromText( $this->mXslt );
 		if ( is_null( $nt ) || !$nt->exists() ) {
-			$this->setWarning( 'Invalid or non-existent stylesheet specified' );
+			$this->addWarning( 'apiwarn-invalidxmlstylesheet' );
 
 			return;
 		}
 		if ( $nt->getNamespace() != NS_MEDIAWIKI ) {
-			$this->setWarning( 'Stylesheet should be in the MediaWiki namespace.' );
+			$this->addWarning( 'apiwarn-invalidxmlstylesheetns' );
 
 			return;
 		}
 		if ( substr( $nt->getText(), -4 ) !== '.xsl' ) {
-			$this->setWarning( 'Stylesheet should have .xsl extension.' );
+			$this->addWarning( 'apiwarn-invalidxmlstylesheetext' );
 
 			return;
 		}

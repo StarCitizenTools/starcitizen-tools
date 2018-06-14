@@ -32,16 +32,18 @@ require_once __DIR__ . '/Benchmarker.php';
 class BenchUtf8TitleCheck extends Benchmarker {
 	private $data;
 
+	private $isutf8;
+
 	public function __construct() {
 		parent::__construct();
 
-		// @codingStandardsIgnoreStart Ignore long line warnings.
+		// phpcs:disable Generic.Files.LineLength
 		$this->data = [
 			"",
 			"United States of America", // 7bit ASCII
 			"S%C3%A9rie%20t%C3%A9l%C3%A9vis%C3%A9e",
 			"Acteur%7CAlbert%20Robbins%7CAnglais%7CAnn%20Donahue%7CAnthony%20E.%20Zuiker%7CCarol%20Mendelsohn",
-			// This comes from bug 36839
+			// This comes from T38839
 			"Acteur%7CAlbert%20Robbins%7CAnglais%7CAnn%20Donahue%7CAnthony%20E.%20Zuiker%7CCarol%20Mendelsohn%7C"
 			. "Catherine%20Willows%7CDavid%20Hodges%7CDavid%20Phillips%7CGil%20Grissom%7CGreg%20Sanders%7CHodges%7C"
 			. "Internet%20Movie%20Database%7CJim%20Brass%7CLady%20Heather%7C"
@@ -57,7 +59,7 @@ class BenchUtf8TitleCheck extends Benchmarker {
 			. "Sara%20Sidle%7CSofia%20Curtis%7CS%C3%A9rie%20t%C3%A9l%C3%A9vis%C3%A9e%7CWallace%20Langham%7C"
 			. "Warrick%20Brown%7CWendy%20Simms%7C%C3%89tats-Unis"
 		];
-		// @codingStandardsIgnoreEnd
+		// phpcs:enable
 
 		$this->addDescription( "Benchmark for using a regexp vs. mb_check_encoding " .
 			"to check for UTF-8 encoding." );
@@ -84,32 +86,29 @@ class BenchUtf8TitleCheck extends Benchmarker {
 			];
 		}
 		$this->bench( $benchmarks );
-		print $this->getFormattedResults();
 	}
 
-	private $isutf8;
-
-	function use_regexp( $s ) {
+	protected function use_regexp( $s ) {
 		$this->isutf8 = preg_match( '/^([\x00-\x7f]|[\xc0-\xdf][\x80-\xbf]|' .
 			'[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xf7][\x80-\xbf]{3})+$/', $s );
 	}
 
-	function use_regexp_non_capturing( $s ) {
+	protected function use_regexp_non_capturing( $s ) {
 		// Same as above with a non-capturing subgroup.
 		$this->isutf8 = preg_match( '/^(?:[\x00-\x7f]|[\xc0-\xdf][\x80-\xbf]|' .
 			'[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xf7][\x80-\xbf]{3})+$/', $s );
 	}
 
-	function use_regexp_once_only( $s ) {
+	protected function use_regexp_once_only( $s ) {
 		// Same as above with a once-only subgroup.
 		$this->isutf8 = preg_match( '/^(?>[\x00-\x7f]|[\xc0-\xdf][\x80-\xbf]|' .
 			'[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xf7][\x80-\xbf]{3})+$/', $s );
 	}
 
-	function use_mb_check_encoding( $s ) {
+	protected function use_mb_check_encoding( $s ) {
 		$this->isutf8 = mb_check_encoding( $s, 'UTF-8' );
 	}
 }
 
-$maintClass = 'BenchUtf8TitleCheck';
+$maintClass = BenchUtf8TitleCheck::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

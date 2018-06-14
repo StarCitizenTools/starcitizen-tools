@@ -30,6 +30,8 @@
 
 require_once __DIR__ . '/Maintenance.php';
 
+use Wikimedia\Rdbms\IMaintainableDatabase;
+
 /**
  * Maintenance script that looks for 'orphan' revisions hooked to pages which
  * don't exist and 'childless' pages with no revisions.
@@ -56,8 +58,8 @@ class Orphans extends Maintenance {
 
 	/**
 	 * Lock the appropriate tables for the script
-	 * @param DatabaseBase $db
-	 * @param string $extraTable The name of any extra tables to lock (eg: text)
+	 * @param IMaintainableDatabase $db
+	 * @param string[] $extraTable The name of any extra tables to lock (eg: text)
 	 */
 	private function lockTables( $db, $extraTable = [] ) {
 		$tbls = [ 'page', 'revision', 'redirect' ];
@@ -73,20 +75,26 @@ class Orphans extends Maintenance {
 	 */
 	private function checkOrphans( $fix ) {
 		$dbw = $this->getDB( DB_MASTER );
-		$page = $dbw->tableName( 'page' );
-		$revision = $dbw->tableName( 'revision' );
+		$commentStore = CommentStore::getStore();
 
 		if ( $fix ) {
 			$this->lockTables( $dbw );
 		}
 
+		$commentQuery = $commentStore->getJoin( 'rev_comment' );
+		$actorQuery = ActorMigration::newMigration()->getJoin( 'rev_user' );
+
 		$this->output( "Checking for orphan revision table entries... "
 			. "(this may take a while on a large wiki)\n" );
-		$result = $dbw->query( "
-			SELECT *
-			FROM $revision LEFT OUTER JOIN $page ON rev_page=page_id
-			WHERE page_id IS NULL
-		" );
+		$result = $dbw->select(
+			[ 'revision', 'page' ] + $commentQuery['tables'] + $actorQuery['tables'],
+			[ 'rev_id', 'rev_page', 'rev_timestamp' ] + $commentQuery['fields'] + $actorQuery['fields'],
+			[ 'page_id' => null ],
+			__METHOD__,
+			[],
+			[ 'page' => [ 'LEFT JOIN', [ 'rev_page=page_id' ] ] ] + $commentQuery['joins']
+				+ $actorQuery['joins']
+		);
 		$orphans = $result->numRows();
 		if ( $orphans > 0 ) {
 			global $wgContLang;
@@ -98,9 +106,10 @@ class Orphans extends Maintenance {
 			) );
 
 			foreach ( $result as $row ) {
-				$comment = ( $row->rev_comment == '' )
-					? ''
-					: '(' . $wgContLang->truncate( $row->rev_comment, 40 ) . ')';
+				$comment = $commentStore->getComment( 'rev_comment', $row )->text;
+				if ( $comment !== '' ) {
+					$comment = '(' . $wgContLang->truncate( $comment, 40 ) . ')';
+				}
 				$this->output( sprintf( "%10d %10d %14s %20s %s\n",
 					$row->rev_id,
 					$row->rev_page,
@@ -195,8 +204,8 @@ class Orphans extends Maintenance {
 			$result2 = $dbw->query( "
 				SELECT MAX(rev_timestamp) as max_timestamp
 				FROM $revision
-				WHERE rev_page=$row->page_id
-			" );
+				WHERE rev_page=" . (int)( $row->page_id )
+			);
 			$row2 = $dbw->fetchObject( $result2 );
 			if ( $row2 ) {
 				if ( $row->rev_timestamp != $row2->max_timestamp ) {
@@ -245,5 +254,5 @@ class Orphans extends Maintenance {
 	}
 }
 
-$maintClass = "Orphans";
+$maintClass = Orphans::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

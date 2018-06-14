@@ -68,6 +68,7 @@ class CLIParser extends Maintenance {
 			false,
 			true
 		);
+		$this->addOption( 'tidy', 'Tidy the output' );
 		$this->addArg( 'file', 'File containing wikitext (Default: stdin)', false );
 	}
 
@@ -127,13 +128,17 @@ class CLIParser extends Maintenance {
 	 * @return ParserOutput
 	 */
 	protected function parse( $wikitext ) {
+		$options = new ParserOptions;
+		if ( $this->getOption( 'tidy' ) ) {
+			$options->setTidy( true );
+		}
 		return $this->parser->parse(
 			$wikitext,
 			$this->getTitle(),
-			new ParserOptions()
+			$options
 		);
 	}
 }
 
-$maintClass = "CLIParser";
+$maintClass = CLIParser::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

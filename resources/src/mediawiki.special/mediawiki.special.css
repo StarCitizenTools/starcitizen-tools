@@ -1,22 +1,23 @@
 /* Special:AllMessages */
-#mw-allmessagestable .allmessages-customised td.am_default {
+#mw-allmessagestable .allmessages-customised .am_default {
 	background-color: #fcffc4;
 }
 
-#mw-allmessagestable tr.allmessages-customised:hover td.am_default {
+#mw-allmessagestable .allmessages-customised:hover .am_default {
 	background-color: #faff90;
 }
 
-#mw-allmessagestable td.am_actual {
+#mw-allmessagestable .am_actual {
 	background-color: #e2ffe2;
 }
 
-#mw-allmessagestable tr.allmessages-customised:hover + tr.allmessages-customised td.am_actual {
+#mw-allmessagestable .allmessages-customised:hover + .allmessages-customised .am_actual {
 	background-color: #b1ffb1;
 }
 
 /* Common for Special:Allpages and Special:PrefixIndex */
-.mw-allpages-body, .mw-prefixindex-body {
+.mw-allpages-body,
+.mw-prefixindex-body {
 	columns: 22em 3;
 	-moz-columns: 22em 3;
 	-webkit-columns: 22em 3;
@@ -24,19 +25,41 @@
 	page-break-inside: avoid;
 	-webkit-column-break-inside: avoid;
 }
+
+.mw-allpages-chunk,
+.mw-prefixindex-list {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
 .allpagesredirect {
 	font-style: italic;
 }
 
 /* Special:Block */
-p.mw-ipb-conveniencelinks {
+.mw-ipb-conveniencelinks {
 	font-size: 90%;
 	text-align: right;
 }
 
+.mw-block-hideuser,
+.mw-block-confirm {
+	font-weight: bold;
+}
+
+#mw-input-wpReason .oo-ui-dropdownInputWidget,
+#mw-input-wpReason .oo-ui-textInputWidget {
+	display: block;
+	max-width: 50em;
+}
+
+#mw-input-wpReason .oo-ui-textInputWidget {
+	margin-top: 0.5em;
+}
+
 /* Special:BlockList */
-table.mw-blocklist span.mw-usertoollinks,
-span.mw-blocklist-actions {
+.mw-blocklist .mw-usertoollinks,
+.mw-blocklist-actions {
 	white-space: nowrap;
 	font-size: 90%;
 }
@@ -55,8 +78,8 @@ span.mw-blocklist-actions {
 }
 
 /* Special:EmailUser */
-td#mw-emailuser-sender,
-td#mw-emailuser-recipient {
+#mw-emailuser-sender,
+#mw-emailuser-recipient {
 	font-weight: bold;
 }
 
@@ -66,7 +89,7 @@ td#mw-emailuser-recipient {
 }
 
 /* Special:ListGroupRights */
-table.mw-listgrouprights-table tr {
+.mw-listgrouprights-table tr {
 	vertical-align: top;
 }
 .listgrouprights-revoked {
@@ -74,7 +97,7 @@ table.mw-listgrouprights-table tr {
 }
 
 /* Special:RevisionDelete */
-p.mw-revdel-editreasons {
+.mw-revdel-editreasons {
 	font-size: 90%;
 	text-align: right;
 }
@@ -90,34 +113,24 @@ p.mw-revdel-editreasons {
 	columns: 16em 2;
 }
 
+.mw-specialpages-list ul {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
 /* Special:Statistics */
-td.mw-statistics-numbers {
+.mw-statistics-numbers {
 	text-align: right;
 }
 
 /* Special:ProtectedPages */
-table.mw-protectedpages span.mw-usertoollinks,
-span.mw-protectedpages-length,
-span.mw-protectedpages-actions {
+.mw-protectedpages .mw-usertoollinks,
+.mw-protectedpages-length,
+.mw-protectedpages-actions {
 	white-space: nowrap;
 	font-size: 90%;
 }
-span.mw-protectedpages-unknown {
-	color: grey;
+.mw-protectedpages-unknown {
+	color: #72777d;
 	font-size: 90%;
-}
-
-/* Special:UserRights */
-.mw-userrights-disabled {
-	color: #888;
-}
-table.mw-userrights-groups * td,
-table.mw-userrights-groups * th {
-	padding-right: 1.5em;
-}
-
-/* Special:Upload */
-p.mw-upload-editlicenses {
-	font-size: 90%;
-	text-align: right;
 }

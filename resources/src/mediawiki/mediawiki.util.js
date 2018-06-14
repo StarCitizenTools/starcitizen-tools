@@ -1,48 +1,59 @@
 ( function ( mw, $ ) {
 	'use strict';
 
+	var util;
+
+	/**
+	 * Encode the string like PHP's rawurlencode
+	 * @ignore
+	 *
+	 * @param {string} str String to be encoded.
+	 * @return {string} Encoded string
+	 */
+	function rawurlencode( str ) {
+		str = String( str );
+		return encodeURIComponent( str )
+			.replace( /!/g, '%21' ).replace( /'/g, '%27' ).replace( /\(/g, '%28' )
+			.replace( /\)/g, '%29' ).replace( /\*/g, '%2A' ).replace( /~/g, '%7E' );
+	}
+
+	/**
+	 * Private helper function used by util.escapeId*()
+	 * @ignore
+	 *
+	 * @param {string} str String to be encoded
+	 * @param {string} mode Encoding mode, see documentation for $wgFragmentMode
+	 *     in DefaultSettings.php
+	 * @return {string} Encoded string
+	 */
+	function escapeIdInternal( str, mode ) {
+		str = String( str );
+
+		switch ( mode ) {
+			case 'html5':
+				return str.replace( / /g, '_' );
+			case 'html5-legacy':
+				str = str.replace( /[ \t\n\r\f_'"&#%]+/g, '_' )
+					.replace( /^_+|_+$/, '' );
+				if ( str === '' ) {
+					str = '_';
+				}
+				return str;
+			case 'legacy':
+				return rawurlencode( str.replace( / /g, '_' ) )
+					.replace( /%3A/g, ':' )
+					.replace( /%/g, '.' );
+			default:
+				throw new Error( 'Unrecognized ID escaping mode ' + mode );
+		}
+	}
+
 	/**
 	 * Utility library
 	 * @class mw.util
 	 * @singleton
 	 */
-	var util = {
-
-		/**
-		 * Initialisation
-		 * (don't call before document ready)
-		 */
-		init: function () {
-			util.$content = ( function () {
-				var i, l, $node, selectors;
-
-				selectors = [
-					// The preferred standard is class "mw-body".
-					// You may also use class "mw-body mw-body-primary" if you use
-					// mw-body in multiple locations. Or class "mw-body-primary" if
-					// you use mw-body deeper in the DOM.
-					'.mw-body-primary',
-					'.mw-body',
-
-					// If the skin has no such class, fall back to the parser output
-					'#mw-content-text',
-
-					// Should never happen... well, it could if someone is not finished writing a
-					// skin and has not yet inserted bodytext yet.
-					'body'
-				];
-
-				for ( i = 0, l = selectors.length; i < l; i++ ) {
-					$node = $( selectors[ i ] );
-					if ( $node.length ) {
-						return $node.first();
-					}
-				}
-
-				// Preserve existing customized value in case it was preset
-				return util.$content;
-			}() );
-		},
+	util = {
 
 		/* Main body */
 
@@ -50,24 +61,38 @@
 		 * Encode the string like PHP's rawurlencode
 		 *
 		 * @param {string} str String to be encoded.
+		 * @return {string} Encoded string
 		 */
-		rawurlencode: function ( str ) {
-			str = String( str );
-			return encodeURIComponent( str )
-				.replace( /!/g, '%21' ).replace( /'/g, '%27' ).replace( /\(/g, '%28' )
-				.replace( /\)/g, '%29' ).replace( /\*/g, '%2A' ).replace( /~/g, '%7E' );
+		rawurlencode: rawurlencode,
+
+		/**
+		 * Encode string into HTML id compatible form suitable for use in HTML
+		 * Analog to PHP Sanitizer::escapeIdForAttribute()
+		 *
+		 * @since 1.30
+		 *
+		 * @param {string} str String to encode
+		 * @return {string} Encoded string
+		 */
+		escapeIdForAttribute: function ( str ) {
+			var mode = mw.config.get( 'wgFragmentMode' )[ 0 ];
+
+			return escapeIdInternal( str, mode );
 		},
 
 		/**
-		 * Encode the string like Sanitizer::escapeId in PHP
+		 * Encode string into HTML id compatible form suitable for use in links
+		 * Analog to PHP Sanitizer::escapeIdForLink()
 		 *
-		 * @param {string} str String to be encoded.
+		 * @since 1.30
+		 *
+		 * @param {string} str String to encode
+		 * @return {string} Encoded string
 		 */
-		escapeId: function ( str ) {
-			str = String( str );
-			return util.rawurlencode( str.replace( / /g, '_' ) )
-				.replace( /%3A/g, ':' )
-				.replace( /%/g, '.' );
+		escapeIdForLink: function ( str ) {
+			var mode = mw.config.get( 'wgFragmentMode' )[ 0 ];
+
+			return escapeIdInternal( str, mode );
 		},
 
 		/**
@@ -80,6 +105,7 @@
 		 * of `wfUrlencode` in PHP.
 		 *
 		 * @param {string} str String to be encoded.
+		 * @return {string} Encoded string
 		 */
 		wikiUrlencode: function ( str ) {
 			return util.rawurlencode( str )
@@ -124,16 +150,17 @@
 				query = $.param( params );
 			}
 			if ( query ) {
-				url = title
-					? util.wikiScript() + '?title=' + util.wikiUrlencode( title ) + '&' + query
-					: util.wikiScript() + '?' + query;
+				url = title ?
+					util.wikiScript() + '?title=' + util.wikiUrlencode( title ) + '&' + query :
+					util.wikiScript() + '?' + query;
 			} else {
-				url = mw.config.get( 'wgArticlePath' ).replace( '$1', util.wikiUrlencode( title ) );
+				url = mw.config.get( 'wgArticlePath' )
+					.replace( '$1', util.wikiUrlencode( title ).replace( /\$/g, '$$$$' ) );
 			}
 
 			// Append the encoded fragment
 			if ( fragment.length ) {
-				url += '#' + util.escapeId( fragment );
+				url += '#' + util.escapeIdForLink( fragment );
 			}
 
 			return url;
@@ -164,7 +191,7 @@
 		 * This function returns the styleSheet object for convience (due to cross-browsers
 		 * difference as to where it is located).
 		 *
-		 *     var sheet = mw.util.addCSS( '.foobar { display: none; }' );
+		 *     var sheet = util.addCSS( '.foobar { display: none; }' );
 		 *     $( foo ).click( function () {
 		 *         // Toggle the sheet on and off
 		 *         sheet.disabled = !sheet.disabled;
@@ -187,12 +214,10 @@
 		 * @return {Mixed} Parameter value or null.
 		 */
 		getParamValue: function ( param, url ) {
-			if ( url === undefined ) {
-				url = location.href;
-			}
 			// Get last match, stop at hash
 			var	re = new RegExp( '^[^#]*[&?]' + mw.RegExp.escape( param ) + '=([^&#]*)' ),
-				m = re.exec( url );
+				m = re.exec( url !== undefined ? url : location.href );
+
 			if ( m ) {
 				// Beware that decodeURIComponent is not required to understand '+'
 				// by spec, as encodeURIComponent does not produce it.
@@ -204,10 +229,10 @@
 		/**
 		 * The content wrapper of the skin (e.g. `.mw-body`).
 		 *
-		 * Populated on document ready by #init. To use this property,
-		 * wait for `$.ready` and be sure to have a module depedendency on
-		 * `mediawiki.util` and `mediawiki.page.startup` which will ensure
-		 * your document ready handler fires after #init.
+		 * Populated on document ready. To use this property,
+		 * wait for `$.ready` and be sure to have a module dependency on
+		 * `mediawiki.util` which will ensure
+		 * your document ready handler fires after initialization.
 		 *
 		 * Because of the lazy-initialised nature of this property,
 		 * you're discouraged from using it.
@@ -236,12 +261,12 @@
 		 * (e.g. `document.getElementById( 'foobar' )`) or a jQuery-selector
 		 * (e.g. `'#foobar'`) for that item.
 		 *
-		 *     mw.util.addPortletLink(
+		 *     util.addPortletLink(
 		 *         'p-tb', 'https://www.mediawiki.org/',
 		 *         'mediawiki.org', 't-mworg', 'Go to mediawiki.org', 'm', '#t-print'
 		 *     );
 		 *
-		 *     var node = mw.util.addPortletLink(
+		 *     var node = util.addPortletLink(
 		 *         'p-tb',
 		 *         new mw.Title( 'Special:Example' ).getUrl(),
 		 *         'Example'
@@ -356,7 +381,7 @@
 			}
 
 			// Update tooltip for the access key after inserting into DOM
-			// to get a localized access key label (bug 67946).
+			// to get a localized access key label (T69946).
 			$link.updateTooltipAccessKeys();
 
 			return $item[ 0 ];
@@ -387,7 +412,7 @@
 			// - atext   : defined in RFC 5322 section 3.2.3
 			// - ldh-str : defined in RFC 1034 section 3.5
 			//
-			// (see STD 68 / RFC 5234 http://tools.ietf.org/html/std68)
+			// (see STD 68 / RFC 5234 https://tools.ietf.org/html/std68)
 			// First, define the RFC 5322 'atext' which is pretty easy:
 			// atext = ALPHA / DIGIT / ; Printable US-ASCII
 			//     "!" / "#" /    ; characters not including
@@ -413,20 +438,15 @@
 
 			html5EmailRegexp = new RegExp(
 				// start of string
-				'^'
-				+
+				'^' +
 				// User part which is liberal :p
-				'[' + rfc5322Atext + '\\.]+'
-				+
+				'[' + rfc5322Atext + '\\.]+' +
 				// 'at'
-				'@'
-				+
+				'@' +
 				// Domain first part
-				'[' + rfc1034LdhStr + ']+'
-				+
+				'[' + rfc1034LdhStr + ']+' +
 				// Optional second part and following are separated by a dot
-				'(?:\\.[' + rfc1034LdhStr + ']+)*'
-				+
+				'(?:\\.[' + rfc1034LdhStr + ']+)*' +
 				// End of string
 				'$',
 				// RegExp is case insensitive
@@ -439,52 +459,71 @@
 		 * Note: borrows from IP::isIPv4
 		 *
 		 * @param {string} address
-		 * @param {boolean} allowBlock
+		 * @param {boolean} [allowBlock=false]
 		 * @return {boolean}
 		 */
 		isIPv4Address: function ( address, allowBlock ) {
+			var block, RE_IP_BYTE, RE_IP_ADD;
+
 			if ( typeof address !== 'string' ) {
 				return false;
 			}
 
-			var	block = allowBlock ? '(?:\\/(?:3[0-2]|[12]?\\d))?' : '',
-				RE_IP_BYTE = '(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|0?[0-9]?[0-9])',
-				RE_IP_ADD = '(?:' + RE_IP_BYTE + '\\.){3}' + RE_IP_BYTE;
+			block = allowBlock ? '(?:\\/(?:3[0-2]|[12]?\\d))?' : '';
+			RE_IP_BYTE = '(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|0?[0-9]?[0-9])';
+			RE_IP_ADD = '(?:' + RE_IP_BYTE + '\\.){3}' + RE_IP_BYTE;
 
-			return address.search( new RegExp( '^' + RE_IP_ADD + block + '$' ) ) !== -1;
+			return ( new RegExp( '^' + RE_IP_ADD + block + '$' ).test( address ) );
 		},
 
 		/**
 		 * Note: borrows from IP::isIPv6
 		 *
 		 * @param {string} address
-		 * @param {boolean} allowBlock
+		 * @param {boolean} [allowBlock=false]
 		 * @return {boolean}
 		 */
 		isIPv6Address: function ( address, allowBlock ) {
+			var block, RE_IPV6_ADD;
+
 			if ( typeof address !== 'string' ) {
 				return false;
 			}
 
-			var	block = allowBlock ? '(?:\\/(?:12[0-8]|1[01][0-9]|[1-9]?\\d))?' : '',
-				RE_IPV6_ADD =
-			'(?:' + // starts with "::" (including "::")
-			':(?::|(?::' + '[0-9A-Fa-f]{1,4}' + '){1,7})' +
-			'|' + // ends with "::" (except "::")
-			'[0-9A-Fa-f]{1,4}' + '(?::' + '[0-9A-Fa-f]{1,4}' + '){0,6}::' +
-			'|' + // contains no "::"
-			'[0-9A-Fa-f]{1,4}' + '(?::' + '[0-9A-Fa-f]{1,4}' + '){7}' +
-			')';
+			block = allowBlock ? '(?:\\/(?:12[0-8]|1[01][0-9]|[1-9]?\\d))?' : '';
+			RE_IPV6_ADD =
+				'(?:' + // starts with "::" (including "::")
+					':(?::|(?::' +
+						'[0-9A-Fa-f]{1,4}' +
+					'){1,7})' +
+					'|' + // ends with "::" (except "::")
+					'[0-9A-Fa-f]{1,4}' +
+					'(?::' +
+						'[0-9A-Fa-f]{1,4}' +
+					'){0,6}::' +
+					'|' + // contains no "::"
+					'[0-9A-Fa-f]{1,4}' +
+					'(?::' +
+						'[0-9A-Fa-f]{1,4}' +
+					'){7}' +
+				')';
 
-			if ( address.search( new RegExp( '^' + RE_IPV6_ADD + block + '$' ) ) !== -1 ) {
+			if ( new RegExp( '^' + RE_IPV6_ADD + block + '$' ).test( address ) ) {
 				return true;
 			}
 
-			RE_IPV6_ADD = // contains one "::" in the middle (single '::' check below)
-				'[0-9A-Fa-f]{1,4}' + '(?:::?' + '[0-9A-Fa-f]{1,4}' + '){1,6}';
+			// contains one "::" in the middle (single '::' check below)
+			RE_IPV6_ADD =
+				'[0-9A-Fa-f]{1,4}' +
+				'(?:::?' +
+					'[0-9A-Fa-f]{1,4}' +
+				'){1,6}';
 
-			return address.search( new RegExp( '^' + RE_IPV6_ADD + block + '$' ) ) !== -1
-				&& address.search( /::/ ) !== -1 && address.search( /::.*::/ ) === -1;
+			return (
+				new RegExp( '^' + RE_IPV6_ADD + block + '$' ).test( address ) &&
+				/::/.test( address ) &&
+				!/::.*::/.test( address )
+			);
 		},
 
 		/**
@@ -492,7 +531,7 @@
 		 *
 		 * @since 1.25
 		 * @param {string} address String to check
-		 * @param {boolean} allowBlock True if a block of IPs should be allowed
+		 * @param {boolean} [allowBlock=false] If a block of IPs should be allowed
 		 * @return {boolean}
 		 */
 		isIPAddress: function ( address, allowBlock ) {
@@ -506,41 +545,13 @@
 	 * @inheritdoc #getUrl
 	 * @deprecated since 1.23 Use #getUrl instead.
 	 */
-	mw.log.deprecate( util, 'wikiGetlink', util.getUrl, 'Use mw.util.getUrl instead.' );
-
-	/**
-	 * Access key prefix. Might be wrong for browsers implementing the accessKeyLabel property.
-	 * @property {string} tooltipAccessKeyPrefix
-	 * @deprecated since 1.24 Use the module jquery.accessKeyLabel instead.
-	 */
-	mw.log.deprecate( util, 'tooltipAccessKeyPrefix', $.fn.updateTooltipAccessKeys.getAccessKeyPrefix(), 'Use jquery.accessKeyLabel instead.' );
-
-	/**
-	 * Regex to match accesskey tooltips.
-	 *
-	 * Should match:
-	 *
-	 * - "[ctrl-option-x]"
-	 * - "[alt-shift-x]"
-	 * - "[ctrl-alt-x]"
-	 * - "[ctrl-x]"
-	 *
-	 * The accesskey is matched in group $6.
-	 *
-	 * Will probably not work for browsers implementing the accessKeyLabel property.
-	 *
-	 * @property {RegExp} tooltipAccessKeyRegexp
-	 * @deprecated since 1.24 Use the module jquery.accessKeyLabel instead.
-	 */
-	mw.log.deprecate( util, 'tooltipAccessKeyRegexp', /\[(ctrl-)?(option-)?(alt-)?(shift-)?(esc-)?(.)\]$/, 'Use jquery.accessKeyLabel instead.' );
+	mw.log.deprecate( util, 'wikiGetlink', util.getUrl, 'Use mw.util.getUrl instead.', 'mw.util.wikiGetlink' );
 
 	/**
 	 * Add the appropriate prefix to the accesskey shown in the tooltip.
 	 *
 	 * If the `$nodes` parameter is given, only those nodes are updated;
-	 * otherwise, depending on browser support, we update either all elements
-	 * with accesskeys on the page or a bunch of elements which are likely to
-	 * have them on core skins.
+	 * otherwise we update all elements with accesskeys on the page.
 	 *
 	 * @method updateTooltipAccessKeys
 	 * @param {Array|jQuery} [$nodes] A jQuery object, or array of nodes to update.
@@ -548,25 +559,13 @@
 	 */
 	mw.log.deprecate( util, 'updateTooltipAccessKeys', function ( $nodes ) {
 		if ( !$nodes ) {
-			if ( document.querySelectorAll ) {
-				// If we're running on a browser where we can do this efficiently,
-				// just find all elements that have accesskeys. We can't use jQuery's
-				// polyfill for the selector since looping over all elements on page
-				// load might be too slow.
-				$nodes = $( document.querySelectorAll( '[accesskey]' ) );
-			} else {
-				// Otherwise go through some elements likely to have accesskeys rather
-				// than looping over all of them. Unfortunately this will not fully
-				// work for custom skins with different HTML structures. Input, label
-				// and button should be rare enough that no optimizations are needed.
-				$nodes = $( '#column-one a, #mw-head a, #mw-panel a, #p-logo a, input, label, button' );
-			}
+			$nodes = $( '[accesskey]' );
 		} else if ( !( $nodes instanceof $ ) ) {
 			$nodes = $( $nodes );
 		}
 
 		$nodes.updateTooltipAccessKeys();
-	}, 'Use jquery.accessKeyLabel instead.' );
+	}, 'Use jquery.accessKeyLabel instead.', 'mw.util.updateTooltipAccessKeys' );
 
 	/**
 	 * Add a little box at the top of the screen to inform the user of
@@ -587,8 +586,63 @@
 		}
 		mw.notify( message, { autoHide: true, tag: 'legacy' } );
 		return true;
-	}, 'Use mw.notify instead.' );
+	}, 'Use mw.notify instead.', 'mw.util.jsMessage' );
+
+	/**
+	 * Encode the string like Sanitizer::escapeId() in PHP
+	 *
+	 * @method escapeId
+	 * @deprecated since 1.30 use escapeIdForAttribute() or escapeIdForLink()
+	 * @param {string} str String to be encoded.
+	 * @return {string} Encoded string
+	 */
+	mw.log.deprecate( util, 'escapeId', function ( str ) {
+		return escapeIdInternal( str, 'legacy' );
+	}, 'Use mw.util.escapeIdForAttribute or mw.util.escapeIdForLink instead.', 'mw.util.escapeId' );
+
+	/**
+	 * Initialisation of mw.util.$content
+	 */
+	function init() {
+		util.$content = ( function () {
+			var i, l, $node, selectors;
+
+			selectors = [
+				// The preferred standard is class "mw-body".
+				// You may also use class "mw-body mw-body-primary" if you use
+				// mw-body in multiple locations. Or class "mw-body-primary" if
+				// you use mw-body deeper in the DOM.
+				'.mw-body-primary',
+				'.mw-body',
+
+				// If the skin has no such class, fall back to the parser output
+				'#mw-content-text'
+			];
+
+			for ( i = 0, l = selectors.length; i < l; i++ ) {
+				$node = $( selectors[ i ] );
+				if ( $node.length ) {
+					return $node.first();
+				}
+			}
+
+			// Should never happen... well, it could if someone is not finished writing a
+			// skin and has not yet inserted bodytext yet.
+			return $( 'body' );
+		}() );
+	}
+
+	/**
+	 * Former public initialisation. Now a no-op function.
+	 *
+	 * @method util_init
+	 * @deprecated since 1.30
+	 */
+	mw.log.deprecate( util, 'init', $.noop, 'Remove the call of mw.util.init().', 'mw.util.init' );
+
+	$( init );
 
 	mw.util = util;
+	module.exports = util;
 
 }( mediaWiki, jQuery ) );

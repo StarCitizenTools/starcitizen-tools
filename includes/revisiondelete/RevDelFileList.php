@@ -19,6 +19,8 @@
  * @ingroup RevisionDelete
  */
 
+use Wikimedia\Rdbms\IDatabase;
+
 /**
  * List for oldimage table items
  */
@@ -58,15 +60,17 @@ class RevDelFileList extends RevDelList {
 			$archiveNames[] = $timestamp . '!' . $this->title->getDBkey();
 		}
 
+		$oiQuery = OldLocalFile::getQueryInfo();
 		return $db->select(
-			'oldimage',
-			OldLocalFile::selectFields(),
+			$oiQuery['tables'],
+			$oiQuery['fields'],
 			[
 				'oi_name' => $this->title->getDBkey(),
 				'oi_archive_name' => $archiveNames
 			],
 			__METHOD__,
-			[ 'ORDER BY' => 'oi_timestamp DESC' ]
+			[ 'ORDER BY' => 'oi_timestamp DESC' ],
+			$oiQuery['joins']
 		);
 	}
 
@@ -104,7 +108,7 @@ class RevDelFileList extends RevDelList {
 		return $status;
 	}
 
-	public function doPostCommitUpdates() {
+	public function doPostCommitUpdates( array $visibilityChangeMap ) {
 		$file = wfLocalFile( $this->title );
 		$file->purgeCache();
 		$file->purgeDescription();

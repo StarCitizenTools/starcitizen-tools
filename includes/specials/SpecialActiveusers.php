@@ -2,8 +2,6 @@
 /**
  * Implements Special:Activeusers
  *
- * Copyright © 2008 Aaron Schulz
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -24,13 +22,12 @@
  */
 
 /**
+ * Implements Special:Activeusers
+ *
  * @ingroup SpecialPage
  */
 class SpecialActiveUsers extends SpecialPage {
 
-	/**
-	 * Constructor
-	 */
 	public function __construct() {
 		parent::__construct( 'Activeusers' );
 	}
@@ -41,17 +38,112 @@ class SpecialActiveUsers extends SpecialPage {
 	 * @param string $par Parameter passed to the page or null
 	 */
 	public function execute( $par ) {
-		$days = $this->getConfig()->get( 'ActiveUserDays' );
+		$out = $this->getOutput();
 
 		$this->setHeaders();
 		$this->outputHeader();
 
-		$out = $this->getOutput();
-		$out->wrapWikiMsg( "<div class='mw-activeusers-intro'>\n$1\n</div>",
-			[ 'activeusers-intro', $this->getLanguage()->formatNum( $days ) ] );
+		$opts = new FormOptions();
+
+		$opts->add( 'username', '' );
+		$opts->add( 'groups', [] );
+		$opts->add( 'excludegroups', [] );
+		// Backwards-compatibility with old URLs
+		$opts->add( 'hidebots', false, FormOptions::BOOL );
+		$opts->add( 'hidesysops', false, FormOptions::BOOL );
+
+		$opts->fetchValuesFromRequest( $this->getRequest() );
+
+		if ( $par !== null ) {
+			$opts->setValue( 'username', $par );
+		}
+
+		$pager = new ActiveUsersPager( $this->getContext(), $opts );
+		$usersBody = $pager->getBody();
+
+		$this->buildForm();
+
+		if ( $usersBody ) {
+			$out->addHTML(
+				$pager->getNavigationBar() .
+				Html::rawElement( 'ul', [], $usersBody ) .
+				$pager->getNavigationBar()
+			);
+		} else {
+			$out->addWikiMsg( 'activeusers-noresult' );
+		}
+	}
+
+	/**
+	 * Generate and output the form
+	 */
+	protected function buildForm() {
+		$groups = User::getAllGroups();
+
+		foreach ( $groups as $group ) {
+			$msg = htmlspecialchars( UserGroupMembership::getGroupName( $group ) );
+			$options[$msg] = $group;
+		}
+
+		// Backwards-compatibility with old URLs
+		$req = $this->getRequest();
+		$excludeDefault = [];
+		if ( $req->getCheck( 'hidebots' ) ) {
+			$excludeDefault[] = 'bot';
+		}
+		if ( $req->getCheck( 'hidesysops' ) ) {
+			$excludeDefault[] = 'sysop';
+		}
+
+		$formDescriptor = [
+			'username' => [
+				'type' => 'user',
+				'name' => 'username',
+				'label-message' => 'activeusers-from',
+			],
+			'groups' => [
+				'type' => 'multiselect',
+				'dropdown' => true,
+				'flatlist' => true,
+				'name' => 'groups',
+				'label-message' => 'activeusers-groups',
+				'options' => $options,
+			],
+			'excludegroups' => [
+				'type' => 'multiselect',
+				'dropdown' => true,
+				'flatlist' => true,
+				'name' => 'excludegroups',
+				'label-message' => 'activeusers-excludegroups',
+				'options' => $options,
+				'default' => $excludeDefault,
+			],
+		];
+
+		HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
+			// For the 'multiselect' field values to be preserved on submit
+			->setFormIdentifier( 'specialactiveusers' )
+			->setIntro( $this->getIntroText() )
+			->setWrapperLegendMsg( 'activeusers' )
+			->setSubmitTextMsg( 'activeusers-submit' )
+			// prevent setting subpage and 'username' parameter at the same time
+			->setAction( $this->getPageTitle()->getLocalURL() )
+			->setMethod( 'get' )
+			->prepareForm()
+			->displayForm( false );
+	}
+
+	/**
+	 * Return introductory message.
+	 * @return string
+	 */
+	protected function getIntroText() {
+		$days = $this->getConfig()->get( 'ActiveUserDays' );
+
+		$intro = $this->msg( 'activeusers-intro' )->numParams( $days )->parse();
 
 		// Mention the level of cache staleness...
-		$dbr = wfGetDB( DB_SLAVE, 'recentchanges' );
+		$dbr = wfGetDB( DB_REPLICA, 'recentchanges' );
 		$rcMax = $dbr->selectField( 'recentchanges', 'MAX(rc_timestamp)', '', __METHOD__ );
 		if ( $rcMax ) {
 			$cTime = $dbr->selectField( 'querycache_info',
@@ -66,26 +158,12 @@ class SpecialActiveUsers extends SpecialPage {
 				$secondsOld = time() - wfTimestamp( TS_UNIX, $rcMin );
 			}
 			if ( $secondsOld > 0 ) {
-				$out->addWikiMsg( 'cachedspecial-viewing-cached-ttl',
-				$this->getLanguage()->formatDuration( $secondsOld ) );
+				$intro .= $this->msg( 'cachedspecial-viewing-cached-ttl' )
+					->durationParams( $secondsOld )->parseAsBlock();
 			}
 		}
 
-		$up = new ActiveUsersPager( $this->getContext(), null, $par );
-
-		# getBody() first to check, if empty
-		$usersbody = $up->getBody();
-
-		$out->addHTML( $up->getPageHeader() );
-		if ( $usersbody ) {
-			$out->addHTML(
-				$up->getNavigationBar() .
-				Html::rawElement( 'ul', [], $usersbody ) .
-				$up->getNavigationBar()
-			);
-		} else {
-			$out->addWikiMsg( 'activeusers-noresult' );
-		}
+		return $intro;
 	}
 
 	protected function getGroupName() {

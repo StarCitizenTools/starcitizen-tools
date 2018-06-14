@@ -56,7 +56,7 @@ class XCFHandler extends BitmapHandler {
 	/**
 	 * Get width and height from the XCF header.
 	 *
-	 * @param File $image
+	 * @param File|FSFile $image
 	 * @param string $filename
 	 * @return array
 	 */
@@ -67,7 +67,7 @@ class XCFHandler extends BitmapHandler {
 		}
 
 		# Forge a return array containing metadata information just like getimagesize()
-		# See PHP documentation at: http://www.php.net/getimagesize
+		# See PHP documentation at: https://secure.php.net/getimagesize
 		return [
 			0 => $header['width'],
 			1 => $header['height'],
@@ -149,9 +149,9 @@ class XCFHandler extends BitmapHandler {
 	 *
 	 * Greyscale files need different command line options.
 	 *
-	 * @param File $file The image object, or false if there isn't one.
+	 * @param File|FSFile $file The image object, or false if there isn't one.
 	 *   Warning, FSFile::getPropsFromPath might pass an (object)array() instead (!)
-	 * @param string $filename The filename
+	 * @param string $filename
 	 * @return string
 	 */
 	public function getMetadata( $file, $filename ) {
@@ -162,18 +162,17 @@ class XCFHandler extends BitmapHandler {
 			// Unclear from base media type if it has an alpha layer,
 			// so just assume that it does since it "potentially" could.
 			switch ( $header['base_type'] ) {
-			case 0:
-				$metadata['colorType'] = 'truecolour-alpha';
-				break;
-			case 1:
-				$metadata['colorType'] = 'greyscale-alpha';
-				break;
-			case 2:
-				$metadata['colorType'] = 'index-coloured';
-				break;
-			default:
-				$metadata['colorType'] = 'unknown';
-
+				case 0:
+					$metadata['colorType'] = 'truecolour-alpha';
+					break;
+				case 1:
+					$metadata['colorType'] = 'greyscale-alpha';
+					break;
+				case 2:
+					$metadata['colorType'] = 'index-coloured';
+					break;
+				default:
+					$metadata['colorType'] = 'unknown';
 			}
 		} else {
 			// Marker to prevent repeated attempted extraction
@@ -218,9 +217,9 @@ class XCFHandler extends BitmapHandler {
 	 * @return bool
 	 */
 	public function canRender( $file ) {
-		MediaWiki\suppressWarnings();
+		Wikimedia\suppressWarnings();
 		$xcfMeta = unserialize( $file->getMetadata() );
-		MediaWiki\restoreWarnings();
+		Wikimedia\restoreWarnings();
 		if ( isset( $xcfMeta['colorType'] ) && $xcfMeta['colorType'] === 'index-coloured' ) {
 			return false;
 		}

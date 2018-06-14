@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on Sep 19, 2006
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,9 +26,10 @@
  * @ingroup API
  */
 abstract class ApiFormatBase extends ApiBase {
-	private $mIsHtml, $mFormat, $mUnescapeAmps, $mHelp;
+	private $mIsHtml, $mFormat;
 	private $mBuffer, $mDisabled = false;
 	private $mIsWrappedHtml = false;
+	private $mHttpStatus = false;
 	protected $mForceDefaultParams = false;
 
 	/**
@@ -62,6 +59,26 @@ abstract class ApiFormatBase extends ApiBase {
 	 * @return string
 	 */
 	abstract public function getMimeType();
+
+	/**
+	 * Return a filename for this module's output.
+	 * @note If $this->getIsWrappedHtml() || $this->getIsHtml(), you'll very
+	 *  likely want to fall back to this class's version.
+	 * @since 1.27
+	 * @return string Generally this should be "api-result.$ext"
+	 */
+	public function getFilename() {
+		if ( $this->getIsWrappedHtml() ) {
+			return 'api-result-wrapped.json';
+		} elseif ( $this->getIsHtml() ) {
+			return 'api-result.html';
+		} else {
+			$exts = MediaWiki\MediaWikiServices::getInstance()->getMimeAnalyzer()
+				->getExtensionsForType( $this->getMimeType() );
+			$ext = $exts ? strtok( $exts, ' ' ) : strtolower( $this->mFormat );
+			return "api-result.$ext";
+		}
+	}
 
 	/**
 	 * Get the internal format name
@@ -131,6 +148,7 @@ abstract class ApiFormatBase extends ApiBase {
 
 	/**
 	 * Overridden to honor $this->forceDefaultParams(), if applicable
+	 * @inheritDoc
 	 * @since 1.26
 	 */
 	protected function getParameterFromSettings( $paramName, $paramSettings, $parseLimit ) {
@@ -144,6 +162,23 @@ abstract class ApiFormatBase extends ApiBase {
 			return $paramSettings[self::PARAM_DFLT];
 		} else {
 			return null;
+		}
+	}
+
+	/**
+	 * Set the HTTP status code to be used for the response
+	 * @since 1.29
+	 * @param int $code
+	 */
+	public function setHttpStatus( $code ) {
+		if ( $this->mDisabled ) {
+			return;
+		}
+
+		if ( $this->getIsHtml() ) {
+			$this->mHttpStatus = $code;
+		} else {
+			$this->getMain()->getRequest()->response()->statusHeader( $code );
 		}
 	}
 
@@ -168,11 +203,33 @@ abstract class ApiFormatBase extends ApiBase {
 
 		$this->getMain()->getRequest()->response()->header( "Content-Type: $mime; charset=utf-8" );
 
-		// Set X-Frame-Options API results (bug 39180)
+		// Set X-Frame-Options API results (T41180)
 		$apiFrameOptions = $this->getConfig()->get( 'ApiFrameOptions' );
 		if ( $apiFrameOptions ) {
 			$this->getMain()->getRequest()->response()->header( "X-Frame-Options: $apiFrameOptions" );
 		}
+
+		// Set a Content-Disposition header so something downloading an API
+		// response uses a halfway-sensible filename (T128209).
+		$header = 'Content-Disposition: inline';
+		$filename = $this->getFilename();
+		$compatFilename = mb_convert_encoding( $filename, 'ISO-8859-1' );
+		if ( preg_match( '/^[0-9a-zA-Z!#$%&\'*+\-.^_`|~]+$/', $compatFilename ) ) {
+			$header .= '; filename=' . $compatFilename;
+		} else {
+			$header .= '; filename="'
+				. preg_replace( '/([\0-\x1f"\x5c\x7f])/', '\\\\$1', $compatFilename ) . '"';
+		}
+		if ( $compatFilename !== $filename ) {
+			$value = "UTF-8''" . rawurlencode( $filename );
+			// rawurlencode() encodes more characters than RFC 5987 specifies. Unescape the ones it allows.
+			$value = strtr( $value, [
+				'%21' => '!', '%23' => '#', '%24' => '$', '%26' => '&', '%2B' => '+', '%5E' => '^',
+				'%60' => '`', '%7C' => '|',
+			] );
+			$header .= '; filename*=' . $value;
+		}
+		$this->getMain()->getRequest()->response()->header( $header );
 	}
 
 	/**
@@ -201,7 +258,14 @@ abstract class ApiFormatBase extends ApiBase {
 			if ( !$this->getIsWrappedHtml() ) {
 				// When the format without suffix 'fm' is defined, there is a non-html version
 				if ( $this->getMain()->getModuleManager()->isDefined( $lcformat, 'format' ) ) {
-					$msg = $context->msg( 'api-format-prettyprint-header' )->params( $format, $lcformat );
+					if ( !$this->getRequest()->wasPosted() ) {
+						$nonHtmlUrl = strtok( $this->getRequest()->getFullRequestURL(), '?' )
+							. '?' . $this->getRequest()->appendQueryValue( 'format', $lcformat );
+						$msg = $context->msg( 'api-format-prettyprint-header-hyperlinked' )
+							->params( $format, $lcformat, $nonHtmlUrl );
+					} else {
+						$msg = $context->msg( 'api-format-prettyprint-header' )->params( $format, $lcformat );
+					}
 				} else {
 					$msg = $context->msg( 'api-format-prettyprint-header-only-html' )->params( $format );
 				}
@@ -212,6 +276,18 @@ abstract class ApiFormatBase extends ApiBase {
 						ApiHelp::fixHelpLinks( $header )
 					)
 				);
+
+				if ( $this->mHttpStatus && $this->mHttpStatus !== 200 ) {
+					$out->addHTML(
+						Html::rawElement( 'div', [ 'class' => 'api-pretty-header api-pretty-status' ],
+							$this->msg(
+								'api-format-prettyprint-status',
+								$this->mHttpStatus,
+								HttpStatus::getMessage( $this->mHttpStatus )
+							)->parse()
+						)
+					);
+				}
 			}
 
 			if ( Hooks::run( 'ApiFormatHighlight', [ $context, $result, $mime, $format ] ) ) {
@@ -222,21 +298,24 @@ abstract class ApiFormatBase extends ApiBase {
 
 			if ( $this->getIsWrappedHtml() ) {
 				// This is a special output mode mainly intended for ApiSandbox use
-				$time = microtime( true ) - $this->getConfig()->get( 'RequestTime' );
+				$time = $this->getMain()->getRequest()->getElapsedTime();
 				$json = FormatJson::encode(
 					[
+						'status' => (int)( $this->mHttpStatus ?: 200 ),
+						'statustext' => HttpStatus::getMessage( $this->mHttpStatus ?: 200 ),
 						'html' => $out->getHTML(),
 						'modules' => array_values( array_unique( array_merge(
 							$out->getModules(),
 							$out->getModuleScripts(),
 							$out->getModuleStyles()
 						) ) ),
+						'continue' => $this->getResult()->getResultData( 'continue' ),
 						'time' => round( $time * 1000 ),
 					],
 					false, FormatJson::ALL_OK
 				);
 
-				// Bug 66776: wfMangleFlashPolicy() is needed to avoid a nasty bug in
+				// T68776: OutputHandler::mangleFlashPolicy() avoids a nasty bug in
 				// Flash, but what it does isn't friendly for the API, so we need to
 				// work around it.
 				if ( preg_match( '/\<\s*cross-domain-policy\s*\>/i', $json ) ) {
@@ -297,147 +376,9 @@ abstract class ApiFormatBase extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Data_formats';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Data_formats';
 	}
 
-	/************************************************************************//**
-	 * @name   Deprecated
-	 * @{
-	 */
-
-	/**
-	 * Specify whether or not sequences like &amp;quot; should be unescaped
-	 * to &quot; . This should only be set to true for the help message
-	 * when rendered in the default (xmlfm) format. This is a temporary
-	 * special-case fix that should be removed once the help has been
-	 * reworked to use a fully HTML interface.
-	 *
-	 * @deprecated since 1.25
-	 * @param bool $b Whether or not ampersands should be escaped.
-	 */
-	public function setUnescapeAmps( $b ) {
-		wfDeprecated( __METHOD__, '1.25' );
-		$this->mUnescapeAmps = $b;
-	}
-
-	/**
-	 * Whether this formatter can format the help message in a nice way.
-	 * By default, this returns the same as getIsHtml().
-	 * When action=help is set explicitly, the help will always be shown
-	 * @deprecated since 1.25
-	 * @return bool
-	 */
-	public function getWantsHelp() {
-		wfDeprecated( __METHOD__, '1.25' );
-		return $this->getIsHtml();
-	}
-
-	/**
-	 * Sets whether the pretty-printer should format *bold*
-	 * @deprecated since 1.25
-	 * @param bool $help
-	 */
-	public function setHelp( $help = true ) {
-		wfDeprecated( __METHOD__, '1.25' );
-		$this->mHelp = $help;
-	}
-
-	/**
-	 * Pretty-print various elements in HTML format, such as xml tags and
-	 * URLs. This method also escapes characters like <
-	 * @deprecated since 1.25
-	 * @param string $text
-	 * @return string
-	 */
-	protected function formatHTML( $text ) {
-		wfDeprecated( __METHOD__, '1.25' );
-
-		// Escape everything first for full coverage
-		$text = htmlspecialchars( $text );
-
-		if ( $this->mFormat === 'XML' ) {
-			// encode all comments or tags as safe blue strings
-			$text = str_replace( '&lt;', '<span style="color:blue;">&lt;', $text );
-			$text = str_replace( '&gt;', '&gt;</span>', $text );
-		}
-
-		// identify requests to api.php
-		$text = preg_replace( '#^(\s*)(api\.php\?[^ <\n\t]+)$#m', '\1<a href="\2">\2</a>', $text );
-		if ( $this->mHelp ) {
-			// make lines inside * bold
-			$text = preg_replace( '#^(\s*)(\*[^<>\n]+\*)(\s*)$#m', '$1<b>$2</b>$3', $text );
-		}
-
-		// Armor links (bug 61362)
-		$masked = [];
-		$text = preg_replace_callback( '#<a .*?</a>#', function ( $matches ) use ( &$masked ) {
-			$sha = sha1( $matches[0] );
-			$masked[$sha] = $matches[0];
-			return "<$sha>";
-		}, $text );
-
-		// identify URLs
-		$protos = wfUrlProtocolsWithoutProtRel();
-		// This regex hacks around bug 13218 (&quot; included in the URL)
-		$text = preg_replace(
-			"#(((?i)$protos).*?)(&quot;)?([ \\'\"<>\n]|&lt;|&gt;|&quot;)#",
-			'<a href="\\1">\\1</a>\\3\\4',
-			$text
-		);
-
-		// Unarmor links
-		$text = preg_replace_callback( '#<([0-9a-f]{40})>#', function ( $matches ) use ( &$masked ) {
-			$sha = $matches[1];
-			return isset( $masked[$sha] ) ? $masked[$sha] : $matches[0];
-		}, $text );
-
-		/**
-		 * Temporary fix for bad links in help messages. As a special case,
-		 * XML-escaped metachars are de-escaped one level in the help message
-		 * for legibility. Should be removed once we have completed a fully-HTML
-		 * version of the help message.
-		 */
-		if ( $this->mUnescapeAmps ) {
-			$text = preg_replace( '/&amp;(amp|quot|lt|gt);/', '&\1;', $text );
-		}
-
-		return $text;
-	}
-
-	/**
-	 * @see ApiBase::getDescription
-	 * @deprecated since 1.25
-	 */
-	public function getDescription() {
-		return $this->getIsHtml() ? ' (pretty-print in HTML)' : '';
-	}
-
-	/**
-	 * Set the flag to buffer the result instead of printing it.
-	 * @deprecated since 1.25, output is always buffered
-	 * @param bool $value
-	 */
-	public function setBufferResult( $value ) {
-	}
-
-	/**
-	 * Formerly indicated whether the formatter needed metadata from ApiResult.
-	 *
-	 * ApiResult previously (indirectly) used this to decide whether to add
-	 * metadata or to ignore calls to metadata-setting methods, which
-	 * unfortunately made several methods that should have been static have to
-	 * be dynamic instead. Now ApiResult always stores metadata and formatters
-	 * are required to ignore it or filter it out.
-	 *
-	 * @deprecated since 1.25
-	 * @return bool Always true
-	 */
-	public function getNeedsRawData() {
-		wfDeprecated( __METHOD__, '1.25' );
-		return true;
-	}
-
-	/**@}*/
 }
 
 /**

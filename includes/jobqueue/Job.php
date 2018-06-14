@@ -50,6 +50,12 @@ abstract class Job implements IJobSpecification {
 	/** @var callable[] */
 	protected $teardownCallbacks = [];
 
+	/** @var int Bitfield of JOB_* class constants */
+	protected $executionFlags = 0;
+
+	/** @var int Job must not be wrapped in the usual explicit LBFactory transaction round */
+	const JOB_NO_EXPLICIT_TRX_ROUND = 1;
+
 	/**
 	 * Run the job
 	 * @return bool Success
@@ -69,12 +75,22 @@ abstract class Job implements IJobSpecification {
 		global $wgJobClasses;
 
 		if ( isset( $wgJobClasses[$command] ) ) {
-			$class = $wgJobClasses[$command];
+			$handler = $wgJobClasses[$command];
 
-			$job = new $class( $title, $params );
-			$job->command = $command;
+			if ( is_callable( $handler ) ) {
+				$job = call_user_func( $handler, $title, $params );
+			} elseif ( class_exists( $handler ) ) {
+				$job = new $handler( $title, $params );
+			} else {
+				$job = null;
+			}
 
-			return $job;
+			if ( $job instanceof Job ) {
+				$job->command = $command;
+				return $job;
+			} else {
+				throw new InvalidArgumentException( "Cannot instantiate job '$command': bad spec!" );
+			}
 		}
 
 		throw new InvalidArgumentException( "Invalid job command '{$command}'" );
@@ -96,6 +112,15 @@ abstract class Job implements IJobSpecification {
 		if ( !isset( $this->params['requestId'] ) ) {
 			$this->params['requestId'] = WebRequest::getRequestId();
 		}
+	}
+
+	/**
+	 * @param int $flag JOB_* class constant
+	 * @return bool
+	 * @since 1.31
+	 */
+	public function hasExecutionFlag( $flag ) {
+		return ( $this->executionFlags && $flag ) === $flag;
 	}
 
 	/**
@@ -301,7 +326,9 @@ abstract class Job implements IJobSpecification {
 	}
 
 	/**
-	 * @param callable $callback
+	 * @param callable $callback A function with one parameter, the success status, which will be
+	 *   false if the job failed or it succeeded but the DB changes could not be committed or
+	 *   any deferred updates threw an exception. (This parameter was added in 1.28.)
 	 * @since 1.27
 	 */
 	protected function addTeardownCallback( $callback ) {
@@ -310,12 +337,12 @@ abstract class Job implements IJobSpecification {
 
 	/**
 	 * Do any final cleanup after run(), deferred updates, and all DB commits happen
-	 *
+	 * @param bool $status Whether the job, its deferred updates, and DB commit all succeeded
 	 * @since 1.27
 	 */
-	public function teardown() {
+	public function teardown( $status ) {
 		foreach ( $this->teardownCallbacks as $callback ) {
-			call_user_func( $callback );
+			call_user_func( $callback, $status );
 		}
 	}
 
@@ -325,6 +352,7 @@ abstract class Job implements IJobSpecification {
 	 * @deprecated since 1.21
 	 */
 	public function insert() {
+		wfDeprecated( __METHOD__, '1.21' );
 		JobQueueGroup::singleton()->push( $this );
 		return true;
 	}

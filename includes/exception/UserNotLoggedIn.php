@@ -32,7 +32,7 @@
  * @par Example:
  * @code
  * if( $user->isAnon() ) {
- * 	throw new UserNotLoggedIn();
+ *   throw new UserNotLoggedIn();
  * }
  * @endcode
  *
@@ -42,11 +42,11 @@
  * @par Example:
  * @code
  * if( $user->isAnon() ) {
- * 	throw new UserNotLoggedIn( 'action-require-loggedin' );
+ *   throw new UserNotLoggedIn( 'action-require-loggedin' );
  * }
  * @endcode
  *
- * @see bug 37627
+ * @see T39627
  * @since 1.20
  * @ingroup Exception
  */
@@ -62,7 +62,7 @@ class UserNotLoggedIn extends ErrorPageError {
 	 * @param string $titleMsg A message key to set the page title.
 	 *        Optional, default: 'exception-nologin'
 	 * @param array $params Parameters to wfMessage().
-	 *        Optional, default: array()
+	 *        Optional, default: []
 	 */
 	public function __construct(
 		$reasonMsg = 'exception-nologin-text',

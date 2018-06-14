@@ -19,7 +19,6 @@
  *
  * @file
  * @ingroup SpecialPage
- * @author Aaron Schulz
  */
 
 use MediaWiki\Logger\LoggerFactory;
@@ -42,38 +41,37 @@ class SpecialRunJobs extends UnlistedSpecialPage {
 		$this->getOutput()->disable();
 
 		if ( wfReadOnly() ) {
-			// HTTP 423 Locked
-			HttpStatus::header( 423 );
-			print 'Wiki is in read-only mode';
-
-			return;
-		} elseif ( !$this->getRequest()->wasPosted() ) {
-			HttpStatus::header( 400 );
-			print 'Request must be POSTed';
+			wfHttpError( 423, 'Locked', 'Wiki is in read-only mode.' );
 			return;
 		}
 
+		// Validate request method
+		if ( !$this->getRequest()->wasPosted() ) {
+			wfHttpError( 400, 'Bad Request', 'Request must be POSTed.' );
+			return;
+		}
+
+		// Validate request parameters
 		$optional = [ 'maxjobs' => 0, 'maxtime' => 30, 'type' => false, 'async' => true ];
 		$required = array_flip( [ 'title', 'tasks', 'signature', 'sigexpiry' ] );
-
 		$params = array_intersect_key( $this->getRequest()->getValues(), $required + $optional );
 		$missing = array_diff_key( $required, $params );
 		if ( count( $missing ) ) {
-			HttpStatus::header( 400 );
-			print 'Missing parameters: ' . implode( ', ', array_keys( $missing ) );
+			wfHttpError( 400, 'Bad Request',
+				'Missing parameters: ' . implode( ', ', array_keys( $missing ) )
+			);
 			return;
 		}
 
+		// Validate request signature
 		$squery = $params;
 		unset( $squery['signature'] );
 		$correctSignature = self::getQuerySignature( $squery, $this->getConfig()->get( 'SecretKey' ) );
 		$providedSignature = $params['signature'];
-
 		$verified = is_string( $providedSignature )
 			&& hash_equals( $correctSignature, $providedSignature );
 		if ( !$verified || $params['sigexpiry'] < time() ) {
-			HttpStatus::header( 400 );
-			print 'Invalid or stale signature provided';
+			wfHttpError( 400, 'Bad Request', 'Invalid or stale signature provided.' );
 			return;
 		}
 
@@ -81,39 +79,34 @@ class SpecialRunJobs extends UnlistedSpecialPage {
 		$params += $optional;
 
 		if ( $params['async'] ) {
-			// Client will usually disconnect before checking the response,
-			// but it needs to know when it is safe to disconnect. Until this
-			// reaches ignore_user_abort(), it is not safe as the jobs won't run.
-			ignore_user_abort( true ); // jobs may take a bit of time
 			// HTTP 202 Accepted
 			HttpStatus::header( 202 );
-			ob_flush();
-			flush();
-			// Once the client receives this response, it can disconnect
-			set_error_handler( function ( $errno, $errstr ) {
-				if ( strpos( $errstr, 'Cannot modify header information' ) !== false ) {
-					return true; // bug T115413
-				}
-				// Delegate unhandled errors to the default MediaWiki handler
-				// so that fatal errors get proper logging (T89169)
-				return call_user_func_array(
-					'MWExceptionHandler::handleError', func_get_args()
-				);
-			} );
+			// Clients are meant to disconnect without waiting for the full response.
+			// Let the page output happen before the jobs start, so that clients know it's
+			// safe to disconnect. MediaWiki::preOutputCommit() calls ignore_user_abort()
+			// or similar to make sure we stay alive to run the deferred update.
+			DeferredUpdates::addUpdate(
+				new TransactionRoundDefiningUpdate(
+					function () use ( $params ) {
+						$this->doRun( $params );
+					},
+					__METHOD__
+				),
+				DeferredUpdates::POSTSEND
+			);
+		} else {
+			$this->doRun( $params );
+			print "Done\n";
 		}
+	}
 
-		// Do all of the specified tasks...
-		if ( in_array( 'jobs', explode( '|', $params['tasks'] ) ) ) {
-			$runner = new JobRunner( LoggerFactory::getInstance( 'runJobs' ) );
-			$response = $runner->run( [
-				'type'     => $params['type'],
-				'maxJobs'  => $params['maxjobs'] ? $params['maxjobs'] : 1,
-				'maxTime'  => $params['maxtime'] ? $params['maxjobs'] : 30
-			] );
-			if ( !$params['async'] ) {
-				print FormatJson::encode( $response, true );
-			}
-		}
+	protected function doRun( array $params ) {
+		$runner = new JobRunner( LoggerFactory::getInstance( 'runJobs' ) );
+		$runner->run( [
+			'type'     => $params['type'],
+			'maxJobs'  => $params['maxjobs'] ?: 1,
+			'maxTime'  => $params['maxtime'] ?: 30
+		] );
 	}
 
 	/**

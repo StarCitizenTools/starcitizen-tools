@@ -24,8 +24,10 @@
  * @file
  */
 
+use Wikimedia\Rdbms\IResultWrapper;
+
 class TitleArrayFromResult extends TitleArray implements Countable {
-	/** @var ResultWrapper */
+	/** @var IResultWrapper */
 	public $res;
 
 	public $key;
@@ -39,7 +41,7 @@ class TitleArrayFromResult extends TitleArray implements Countable {
 	}
 
 	/**
-	 * @param bool|ResultWrapper $row
+	 * @param bool|IResultWrapper $row
 	 * @return void
 	 */
 	protected function setCurrent( $row ) {
