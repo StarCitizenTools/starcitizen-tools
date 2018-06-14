@@ -305,6 +305,9 @@ $wgDefaultUserOptions['usecodemirror'] = 0;
 #CookieWarning
 $wgCookieWarningEnabled = true;
 
+#DynamicPageList
+$wgDplSettings['recursiveTagParse'] = true;
+
 #=============================================== Namespaces ===============================================
 define("NS_COMMLINK", 3000);
 define("NS_COMMLINK_TALK", 3001);
