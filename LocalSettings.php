@@ -364,7 +364,7 @@ $wgExtraNamespaces[NS_CSN] = "CSN";
 $wgExtraNamespaces[NS_CSN_TALK] = "CSN_talk";
 $wgNamespacesWithSubpages[NS_CSN] = true;
 $wgNamespacesToBeSearchedDefault[NS_CSN] = true;
-$wgNamespaceContentModels[NS_CSN_TALK] = C'flow-board';
+$wgNamespaceContentModels[NS_CSN_TALK] = 'flow-board';
 
 $wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
 $wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
