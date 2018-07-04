@@ -35,8 +35,6 @@ class DynamicPageList {
 	public function __construct($headings, $bHeadingCount, $iColumns, $iRows, $iRowSize, $sRowColFormat, $articles, $headingtype, $hlistmode, $listmode, $bescapelinks, $baddexternallink, $includepage, $includemaxlen, $includeseclabels, $includeseclabelsmatch, $includeseclabelsnotmatch, $includematchparsed, &$parser, $replaceInTitle, $iTitleMaxLen, $defaultTemplateSuffix, $aTableRow, $bIncludeTrim, $iTableSortCol, $updateRules, $deleteRules) {
 		global $wgContLang;
 
-		wfProfileIn(__METHOD__);
-
 		$this->nameSpaces       = $wgContLang->getNamespaces();
 		$this->mArticles        = $articles;
 		$this->mListMode        = $listmode;
@@ -214,7 +212,6 @@ class DynamicPageList {
 		} else {
 			$this->mOutput .= $this->formatList(0, count($articles), $iTitleMaxLen, $defaultTemplateSuffix, $bIncludeTrim, $iTableSortCol, $updateRules, $deleteRules);
 		}
-		wfProfileOut(__METHOD__);
 	}
 
 	public function formatCount($numart) {
@@ -443,12 +440,12 @@ class DynamicPageList {
 						}
 
 						// find out if the user specified an includematch / includenotmatch condition
-						if (count($this->mIncSecLabelsMatch) > $s && $this->mIncSecLabelsMatch[$s] != '') {
+						if (is_array($this->mIncSecLabelsMatch) && count($this->mIncSecLabelsMatch) > $s && $this->mIncSecLabelsMatch[$s] != '') {
 							$mustMatch = $this->mIncSecLabelsMatch[$s];
 						} else {
 							$mustMatch = '';
 						}
-						if (count($this->mIncSecLabelsNotMatch) > $s && $this->mIncSecLabelsNotMatch[$s] != '') {
+						if (is_array($this->mIncSecLabelsNotMatch) && count($this->mIncSecLabelsNotMatch) > $s && $this->mIncSecLabelsNotMatch[$s] != '') {
 							$mustNotMatch = $this->mIncSecLabelsNotMatch[$s];
 						} else {
 							$mustNotMatch = '';
@@ -536,7 +533,7 @@ class DynamicPageList {
 						}
 
 						// separator tags
-						if (count($mode->sSectionTags) == 1) {
+						if (is_array($mode->sSectionTags) && count($mode->sSectionTags) == 1) {
 							// If there is only one separator tag use it always
 							$septag[$s * 2] = str_replace('%SECTION%', $sectionHeading[0], $this->substTagParm($mode->sSectionTags[0], $pagename, $article, $imageUrl, $this->filteredCount, $iTitleMaxLen));
 						} elseif (isset($mode->sSectionTags[$s * 2])) {
@@ -631,8 +628,6 @@ class DynamicPageList {
 				if ($article->mContributor != '') {
 					$rBody .= ' . . [[User:'.$article->mContributor.'|'.$article->mContributor." $article->mContrib]]";
 				}
-
-
 
 				if (!empty($article->mCategoryLinks)) {
 					$rBody .= ' . . <small>'.wfMessage('categories').': '.implode(' | ', $article->mCategoryLinks).'</small>';
@@ -1251,7 +1246,6 @@ class DynamicPageList {
 
 		// return "deletion of articles by DPL is disabled.";
 
-
 		// we use ; as command delimiter; \; stands for a semicolon
 		// \n is translated to a real linefeed
 		$rulesText = str_replace(";", '°', $rulesText);
@@ -1261,7 +1255,6 @@ class DynamicPageList {
 		$exec      = false;
 		$message   = '';
 		$reason    = '';
-
 
 		foreach ($rules as $rule) {
 			if (preg_match('/^\s*#/', $rule) > 0) {
