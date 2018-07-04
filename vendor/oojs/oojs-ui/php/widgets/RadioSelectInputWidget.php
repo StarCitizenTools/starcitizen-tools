@@ -7,10 +7,6 @@ namespace OOUI;
  */
 class RadioSelectInputWidget extends InputWidget {
 
-	/* Static Properties */
-
-	public static $supportsSimpleLabel = false;
-
 	/* Properties */
 
 	/**
@@ -28,7 +24,7 @@ class RadioSelectInputWidget extends InputWidget {
 	/**
 	 * @param array $config Configuration options
 	 * @param array[] $config['options'] Array of menu options in the format
-	 *   `array( 'data' => …, 'label' => … )`
+	 *   `[ 'data' => …, 'label' => … ]`
 	 */
 	public function __construct( array $config = [] ) {
 		// Parent constructor
@@ -45,7 +41,7 @@ class RadioSelectInputWidget extends InputWidget {
 
 	protected function getInputElement( $config ) {
 		// Actually unused
-		return new Tag( 'div' );
+		return new Tag( 'unused' );
 	}
 
 	public function setValue( $value ) {
@@ -60,7 +56,7 @@ class RadioSelectInputWidget extends InputWidget {
 	 * Set the options available for this input.
 	 *
 	 * @param array[] $options Array of menu options in the format
-	 *   `array( 'data' => …, 'label' => … )`
+	 *   `[ 'data' => …, 'label' => … ]`
 	 * @return $this
 	 */
 	public function setOptions( $options ) {
@@ -71,7 +67,8 @@ class RadioSelectInputWidget extends InputWidget {
 		// Rebuild the radio buttons
 		$this->clearContent();
 		// Need a unique name, otherwise more than one radio will be selectable
-		$name = $this->name ?: 'oo-ui-radioSelectInputWidget' . mt_rand();
+		// Note: This is not going in the ID attribute, not that it matters
+		$name = $this->name ?: Tag::generateElementId();
 		foreach ( $options as $opt ) {
 			$optValue = $this->cleanUpValue( $opt['data'] );
 			$field = new FieldLayout(

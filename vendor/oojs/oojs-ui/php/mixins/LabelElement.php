@@ -25,7 +25,7 @@ trait LabelElement {
 	 * @param string|HtmlSnippet $config['label'] Label text
 	 */
 	public function initializeLabelElement( array $config = [] ) {
-		// Parent constructor
+		// Properties
 		// FIXME 'labelElement' is a very stupid way to call '$label'
 		$this->label = isset( $config['labelElement'] ) ? $config['labelElement'] : new Tag( 'span' );
 
@@ -33,7 +33,7 @@ trait LabelElement {
 		$this->label->addClasses( [ 'oo-ui-labelElement-label' ] );
 		$this->setLabel( isset( $config['label'] ) ? $config['label'] : null );
 
-		$this->registerConfigCallback( function( &$config ) {
+		$this->registerConfigCallback( function ( &$config ) {
 			if ( $this->labelValue !== null ) {
 				$config['label'] = $this->labelValue;
 			}
