@@ -162,7 +162,7 @@ wfLoadExtension( 'UniversalLanguageSelector' );
 wfLoadExtensions( array( 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ) );
 wfLoadExtension( 'CodeMirror' );
 wfLoadExtension( 'CookieWarning' );
-wfLoadExtension( 'UploadWizard.php' );
+wfLoadExtension( 'UploadWizard' );
 wfLoadExtension( 'MultimediaViewer' );
 wfLoadExtension( 'Echo' );
 wfLoadExtension( 'Flow' );
