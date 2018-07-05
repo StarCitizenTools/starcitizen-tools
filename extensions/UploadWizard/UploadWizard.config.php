@@ -471,7 +471,7 @@ return [
             'url' => '//creativecommons.org/licenses/by-nc/2.0/'
 		],
 
-	),
+	],
 		'generic' => [
 			'msg' => 'mwe-upwiz-license-generic',
 			'templates' => [ 'Generic' ]
