@@ -262,6 +262,10 @@ $edgExternalValueVerbose = false;
 #Visual Editor
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
 $wgHiddenPrefs[] = 'visualeditor-enable';
+$wgVisualEditorEnableWikitext = true;
+$wgDefaultUserOptions['visualeditor-newwikitext'] = 1;
+$wgVisualEditorEnableDiffPage = true;
+
 
 #Eventlogging
 $wgEventLoggingBaseUri = 'https://starcitizen.tools:8080/event.gif';
