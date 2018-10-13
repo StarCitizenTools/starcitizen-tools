@@ -4,7 +4,7 @@
  * DPL Logger Class
  *
  * @author		IlyaHaykinson, Unendlich, Dangerville, Algorithmix, Theaitetos, Alexia E. Smith
- * @license		GPL-2.0-or-later
+ * @license		GPL
  * @package		DynamicPageList3
  *
  **/
@@ -71,10 +71,11 @@ class Logger {
 				}
 			}
 			if (empty($text)) {
-				$text = wfMessage('dpl_log_' . $errorMessageId, $args)->text();
+				$text = wfMessage('dpl_log_'.$errorMessageId, $args)->text();
 			}
-			$this->buffer[] = '<p>Extension:DynamicPageList (DPL), version ' . DPL_VERSION . ': ' . $text . '</p>';
+			$this->buffer[] = '<p>Extension:DynamicPageList (DPL), version '.DPL_VERSION.': '.$text.'</p>';
 		}
 		return false;
 	}
 }
+?>

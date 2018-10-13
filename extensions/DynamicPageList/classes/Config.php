@@ -4,7 +4,7 @@
  * DPL Config Class
  *
  * @author		IlyaHaykinson, Unendlich, Dangerville, Algorithmix, Theaitetos, Alexia E. Smith
- * @license		GPL-2.0-or-later
+ * @license		GPL
  * @package		DynamicPageList3
  *
  **/
@@ -25,7 +25,7 @@ class Config {
 	 * @param	array	Settings to initialize for DPL.
 	 * @return	void
 	 */
-	public static function init($settings = false) {
+	static public function init($settings = false) {
 		if ($settings === false) {
 			global $wgDplSettings;
 
@@ -33,7 +33,7 @@ class Config {
 		}
 
 		if (!is_array($settings)) {
-			throw new MWException(__METHOD__ . ": Invalid settings passed.");
+			throw new MWException(__METHOD__.": Invalid settings passed.");
 		}
 
 		self::$settings = array_merge(self::$settings, $settings);
@@ -46,7 +46,7 @@ class Config {
 	 * @param	string	Setting Key
 	 * @return	mixed	The setting's actual setting or null if it does not exist.
 	 */
-	public static function getSetting($setting) {
+	static public function getSetting($setting) {
 		return (array_key_exists($setting, self::$settings) ? self::$settings[$setting] : null);
 	}
 
@@ -56,7 +56,7 @@ class Config {
 	 * @access	public
 	 * @return	array	All settings
 	 */
-	public static function getAllSettings() {
+	static public function getAllSettings() {
 		return self::$settings;
 	}
 
@@ -68,10 +68,11 @@ class Config {
 	 * @param	mixed	[Optional] Appropriate value for the setting key.
 	 * @return	void
 	 */
-	public static function setSetting($setting, $value = null) {
+	static public function setSetting($setting, $value = null) {
 		if (empty($setting) || !is_string($setting)) {
-			throw new MWException(__METHOD__ . ": Setting keys can not be blank.");
+			throw new MWException(__METHOD__.": Setting keys can not be blank.");
 		}
 		self::$settings[$setting] = $value;
 	}
 }
+?>

@@ -1,17 +1,14 @@
 {
 	"name": "DynamicPageList3",
-	"version": "3.3.2",
+	"version": "3.0.9",
 	"author": [
 		"[http://de.wikipedia.org/wiki/Benutzer:Algorithmix Gero Scholz]",
 		"Alexia E. Smith"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:DynamicPageList3",
 	"descriptionmsg": "dpl-desc",
-	"license-name": "GPL-2.0-or-later",
+	"license-name": "GPL-2.0",
 	"type": "parserhook",
-	"requires": {
-		"MediaWiki": ">= 1.27.4"
-	},
 	"GroupPermissions": {
 		"sysop": {
 			"dpl_param_update_rules": true,
@@ -31,32 +28,18 @@
 		"DynamicPageListMagic": "DynamicPageList.i18n.magic.php"
 	},
 	"AutoloadClasses": {
+		"DynamicPageListHooks": "DynamicPageList.hooks.php",
 		"DPL\\Article": "classes/Article.php",
 		"DPL\\Config": "classes/Config.php",
-		"DPL\\DB\\CreateTemplateUpdateMaintenance": "classes/db/CreateTemplateUpdateMaintenance.php",
-		"DPL\\Heading\\DefinitionHeading": "classes/heading/DefinitionHeading.php",
-		"DPL\\Heading\\Heading": "classes/heading/Heading.php",
-		"DPL\\Heading\\OrderedHeading": "classes/heading/OrderedHeading.php",
-		"DPL\\Heading\\TieredHeading": "classes/heading/TieredHeading.php",
-		"DPL\\Heading\\UnorderedHeading": "classes/heading/UnorderedHeading.php",
-		"DPL\\Lister\\CategoryList": "classes/lister/CategoryList.php",
-		"DPL\\Lister\\DefinitionList": "classes/lister/DefinitionList.php",
-		"DPL\\Lister\\GalleryList": "classes/lister/GalleryList.php",
-		"DPL\\Lister\\InlineList": "classes/lister/InlineList.php",
-		"DPL\\Lister\\Lister": "classes/lister/Lister.php",
-		"DPL\\Lister\\OrderedList": "classes/lister/OrderedList.php",
-		"DPL\\Lister\\SubPageList": "classes/lister/SubPageList.php",
-		"DPL\\Lister\\UnorderedList": "classes/lister/UnorderedList.php",
-		"DPL\\Lister\\UserFormatList": "classes/lister/UserFormatList.php",
+		"DPL\\DynamicPageList": "classes/DynamicPageList.php",
 		"DPL\\Logger": "classes/Logger.php",
+		"DPL\\ListMode": "classes/ListMode.php",
 		"DPL\\LST": "classes/LST.php",
 		"DPL\\Parameters": "classes/Parameters.php",
 		"DPL\\ParametersData": "classes/ParametersData.php",
 		"DPL\\Parse": "classes/Parse.php",
 		"DPL\\Query": "classes/Query.php",
-		"DPL\\UpdateArticle": "classes/UpdateArticle.php",
-		"DPL\\Variables": "classes/Variables.php",
-		"DynamicPageListHooks": "DynamicPageListHooks.php"
+		"DPL\\Variables": "classes/Variables.php"
 	},
 	"Hooks": {
 		"ParserFirstCallInit": [

@@ -4,7 +4,7 @@
  * Magic Words
  *
  * @author		Alexia E. Smith
- * @license		GPL-2.0-or-later
+ * @license		GPL
  * @package		DynamicPageList3
  *
 **/
@@ -20,3 +20,4 @@ $magicWords['en'] = [
 	'dplmatrix'			=> [0, 'dplmatrix'],
 	'DynamicPageList'	=> [0, 'DynamicPageList']
 ];
+?>

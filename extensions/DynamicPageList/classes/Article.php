@@ -4,7 +4,7 @@
  * DPL Article Class
  *
  * @author		IlyaHaykinson, Unendlich, Dangerville, Algorithmix, Theaitetos, Alexia E. Smith
- * @license		GPL-2.0-or-later
+ * @license		GPL
  * @package		DynamicPageList3
  *
 **/
@@ -37,7 +37,7 @@ class Article {
 	 *
 	 * @var		string
 	 */
-	public $mSelTitle = null;
+	public $mSelTitle = '';
 
 	/**
 	 * Selected namespace ID of initial page.
@@ -51,7 +51,7 @@ class Article {
 	 *
 	 * @var		string
 	 */
-	public $mImageSelTitle = null;
+	public $mImageSelTitle = '';
 
 	/**
 	 * HTML link to page.
@@ -65,7 +65,7 @@ class Article {
 	 *
 	 * @var		string
 	 */
-	public $mExternalLink = null;
+	public $mExternalLink = '';
 
 	/**
 	 * First character of the page title.
@@ -100,14 +100,14 @@ class Article {
 	 *
 	 * @var		integer
 	 */
-	public $mCounter = null;
+	public $mCounter = 0;
 
 	/**
 	 * Article length in bytes of wiki text
 	 *
-	 * @var		integer
+	 * @var		string
 	 */
-	public $mSize = null;
+	public $mSize = '';
 
 	/**
 	 * Timestamp depending on the user's request (can be first/last edit, page_touched, ...)
@@ -203,7 +203,7 @@ class Article {
 	 * @param	string	Page Title as Selected from Query
 	 * @return	object	\DPL\Article Object
 	 */
-	public static function newFromRow($row, Parameters $parameters, \Title $title, $pageNamespace, $pageTitle) {
+	static public function newFromRow($row, Parameters $parameters, \Title $title, $pageNamespace, $pageTitle) {
 		global $wgLang, $wgContLang;
 
 		$article = new Article($title, $pageNamespace);
@@ -218,12 +218,12 @@ class Article {
 
 		//Chop off title if longer than the 'titlemaxlen' parameter.
 		if ($parameters->getParameter('titlemaxlen') !== null && strlen($titleText) > $parameters->getParameter('titlemaxlen')) {
-			$titleText = substr($titleText, 0, $parameters->getParameter('titlemaxlen')) . '...';
+			$titleText = substr($titleText, 0, $parameters->getParameter('titlemaxlen')).'...';
 		}
 		if ($parameters->getParameter('showcurid') === true && isset($row['page_id'])) {
-			$articleLink = '[' . $title->getLinkURL(['curid' => $row['page_id']]) . ' ' . htmlspecialchars($titleText) . ']';
+			$articleLink = '['.$title->getLinkURL(['curid' => $row['page_id']]).' '.htmlspecialchars($titleText).']';
 		} else {
-			$articleLink = '[[' . ($parameters->getParameter('escapelinks') && ($pageNamespace == NS_CATEGORY || $pageNamespace == NS_FILE) ? ':' : '') . $title->getFullText() . '|' . htmlspecialchars($titleText) . ']]';
+			$articleLink = '[['.($parameters->getParameter('escapelinks') && ($pageNamespace == NS_CATEGORY || $pageNamespace == NS_FILE) ? ':' : '').$title->getFullText().'|'.htmlspecialchars($titleText).']]';
 		}
 
 		$article->mLink = $articleLink;
@@ -244,15 +244,15 @@ class Article {
 
 		//SHOW PAGE_COUNTER
 		if (isset($row['page_counter'])) {
-			$article->mCounter = intval($row['page_counter']);
+			$article->mCounter = $row['page_counter'];
 		}
 
 		//SHOW PAGE_SIZE
 		if (isset($row['page_len'])) {
-			$article->mSize = intval($row['page_len']);
+			$article->mSize = $row['page_len'];
 		}
 		//STORE initially selected PAGE
-		if (is_array($parameters->getParameter('linksto')) && (count($parameters->getParameter('linksto')) || count($parameters->getParameter('linksfrom')))) {
+		if (count($parameters->getParameter('linksto')) || count($parameters->getParameter('linksfrom'))) {
 			if (!isset($row['sel_title'])) {
 				$article->mSelTitle     = 'unknown page';
 				$article->mSelNamespace = 0;
@@ -263,7 +263,7 @@ class Article {
 		}
 
 		//STORE selected image
-		if (is_array($parameters->getParameter('imageused')) && count($parameters->getParameter('imageused')) > 0) {
+		if (count($parameters->getParameter('imageused')) > 0) {
 			if (!isset($row['image_sel_title'])) {
 				$article->mImageSelTitle = 'unknown image';
 			} else {
@@ -304,14 +304,15 @@ class Article {
 			if ($parameters->getParameter('addcontribution')) {
 				$article->mContribution = $row['contribution'];
 				$article->mContributor  = $row['contributor'];
-				$article->mContrib      = substr('*****************', 0, (int) round(log($row['contribution'])));
+				$article->mContrib      = substr('*****************', 0, round(log($row['contribution'])));
 			}
+
 
 			//USER/AUTHOR(S)
 			// because we are going to do a recursive parse at the end of the output phase
 			// we have to generate wiki syntax for linking to a user´s homepage
 			if ($parameters->getParameter('adduser') || $parameters->getParameter('addauthor') || $parameters->getParameter('addlasteditor')) {
-				$article->mUserLink = '[[User:' . $row['rev_user_text'] . '|' . $row['rev_user_text'] . ']]';
+				$article->mUserLink = '[[User:'.$row['rev_user_text'].'|'.$row['rev_user_text'].']]';
 				$article->mUser     = $row['rev_user_text'];
 			}
 
@@ -319,7 +320,7 @@ class Article {
 			if ($parameters->getParameter('addcategories') && ($row['cats'])) {
 				$artCatNames = explode(' | ', $row['cats']);
 				foreach ($artCatNames as $artCatName) {
-					$article->mCategoryLinks[] = '[[:Category:' . $artCatName . '|' . str_replace('_', ' ', $artCatName) . ']]';
+					$article->mCategoryLinks[] = '[[:Category:'.$artCatName.'|'.str_replace('_', ' ', $artCatName).']]';
 					$article->mCategoryTexts[] = str_replace('_', ' ', $artCatName);
 				}
 			}
@@ -331,17 +332,17 @@ class Article {
 						self::$headings[$row['cl_to']] = (isset(self::$headings[$row['cl_to']]) ? self::$headings[$row['cl_to']] + 1 : 1);
 						if ($row['cl_to'] == '') {
 							//uncategorized page (used if ordermethod=category,...)
-							$article->mParentHLink = '[[:Special:Uncategorizedpages|' . wfMessage('uncategorizedpages') . ']]';
+							$article->mParentHLink = '[[:Special:Uncategorizedpages|'.wfMsg('uncategorizedpages').']]';
 						} else {
-							$article->mParentHLink = '[[:Category:' . $row['cl_to'] . '|' . str_replace('_', ' ', $row['cl_to']) . ']]';
+							$article->mParentHLink = '[[:Category:'.$row['cl_to'].'|'.str_replace('_', ' ', $row['cl_to']).']]';
 						}
 						break;
 					case 'user':
 						self::$headings[$row['rev_user_text']] = (isset(self::$headings[$row['rev_user_text']]) ? self::$headings[$row['rev_user_text']] + 1 : 1);
 						if ($row['rev_user'] == 0) { //anonymous user
-							$article->mParentHLink = '[[User:' . $row['rev_user_text'] . '|' . $row['rev_user_text'] . ']]';
+							$article->mParentHLink = '[[User:'.$row['rev_user_text'].'|'.$row['rev_user_text'].']]';
 						} else {
-							$article->mParentHLink = '[[User:' . $row['rev_user_text'] . '|' . $row['rev_user_text'] . ']]';
+							$article->mParentHLink = '[[User:'.$row['rev_user_text'].'|'.$row['rev_user_text'].']]';
 						}
 						break;
 				}
@@ -357,35 +358,20 @@ class Article {
 	 * @access	public
 	 * @return	array	Headings
 	 */
-	public static function getHeadings() {
+	static public function getHeadings() {
 		return self::$headings;
 	}
 
 	/**
 	 * Reset the headings to their initial state.
 	 * Ideally this Article class should not exist and be handled by the built in MediaWiki class.
-	 * Bug: https://jira/browse/HYD-913
+	 * @Bug https://jira/browse/HYD-913
 	 *
 	 * @access	public
 	 * @return	void
 	 */
-	public static function resetHeadings() {
+	static public function resetHeadings() {
 		self::$headings = [];
 	}
-
-	/**
-	 * Get the formatted date for this article if available.
-	 *
-	 * @access	public
-	 * @return	mixed	Formatted string or null for none set.
-	 */
-	public function getDate() {
-		global $wgLang;
-		if ($this->myDate !== null) {
-			return $this->myDate;
-		} elseif ($this->mDate !== null) {
-			return $wgLang->timeanddate($article->mDate, true);
-		}
-		return null;
-	}
 }
+?>

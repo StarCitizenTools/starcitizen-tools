@@ -4,7 +4,7 @@
  * DPL ParametersData Class
  *
  * @author		IlyaHaykinson, Unendlich, Dangerville, Algorithmix, Theaitetos, Alexia E. Smith
- * @license		GPL-2.0-or-later
+ * @license		GPL
  * @package		DynamicPageList3
  *
  **/
@@ -364,23 +364,12 @@ class ParametersData {
 			'open_ref_conflict'	=> true
 		],
 
-		//Include the lowercase variants of header tiers for ease of use.
 		'headingmode' => [
 			'default'	=> 'none',
 			'values'	=> [
-				'H1',
 				'H2',
 				'H3',
 				'H4',
-				'H5',
-				'H6',
-				'h1',
-				'h2',
-				'h3',
-				'h4',
-				'h5',
-				'h6',
-				//'header',
 				'definition',
 				'none',
 				'ordered',
@@ -388,7 +377,6 @@ class ParametersData {
 			],
 			'open_ref_conflict'	=> true
 		],
-
 		/**
 		 * we can display the number of articles within a heading group
 		 */
@@ -397,7 +385,6 @@ class ParametersData {
 			'boolean'			=> true,
 			'open_ref_conflict'	=> true
 		],
-
 		/**
 		 * Attributes for HTML list items (headings) at the heading level, depending on 'headingmode' (e.g. 'li' for ordered/unordered)
 		 * Not yet applicable to 'headingmode=none | definition | H2 | H3 | H4'.
@@ -407,7 +394,6 @@ class ParametersData {
 		'hitemattr' => [
 			'default'	=> null
 		],
-
 		/**
 		 * Attributes for the HTML list element at the heading/top level, depending on 'headingmode' (e.g. 'ol' for ordered, 'ul' for unordered, 'dl' for definition)
 		 * Not yet applicable to 'headingmode=none'.
@@ -417,7 +403,6 @@ class ParametersData {
 		'hlistattr' => [
 			'default'	=> null
 		],
-
 		/**
 		 * PAGE TRANSCLUSION: includepage=... or include=...
 		 * To include the whole page, use a wildcard:
@@ -435,7 +420,6 @@ class ParametersData {
 		'includepage' => [
 			'default'	=> null
 		],
-
 		/**
 		 * make comparisons (linksto, linksfrom ) case insensitive
 		 */
@@ -446,7 +430,6 @@ class ParametersData {
 		'include'			   => [
 			'default'	=> null
 		],
-
 		/**
 		 * includesubpages
 		 */
@@ -454,7 +437,6 @@ class ParametersData {
 			'default'	=> true,
 			'boolean'	=> true
 		],
-
 		/**
 		 * includematch=..,..	 allows to specify regular expressions which must match the included contents
 		 */
@@ -516,7 +498,7 @@ class ParametersData {
 		 *		   : listseparators={|,\n|-\n|[[%PAGE%]],,\n|}
 		 */
 		'listseparators' => [
-			'default'	=> []
+			'default'	=> null
 		],
 		/**
 		 * sequence of four wiki tags (separated by ",") to be used together with mode = 'userformat'
@@ -696,12 +678,10 @@ class ParametersData {
 			'default'	=> 'unordered',
 			'values'	=> [
 				'category',
-				'definition',
-				'gallery',
 				'inline',
+				'gallery',
 				'none',
 				'ordered',
-				'subpage',
 				'unordered',
 				'userformat'
 			]
@@ -798,11 +778,11 @@ class ParametersData {
 		],
 		'updaterules' => [
 			'default'		=> null,
-			'permission'	=> 'dpl_param_update_rules'
+			'permission'	=> ['dpl_param_update_rules']
 		],
 		'deleterules' => [
 			'default'		=> null,
-			'permission'	=> 'dpl_param_delete_rules'
+			'permission'	=> ['dpl_param_delete_rules']
 		],
 
 		/**
@@ -817,7 +797,7 @@ class ParametersData {
 		],
 		'order' => [
 			'default'	=> 'ascending',
-			'values'	=> ['ascending', 'descending', 'asc', 'desc']
+			'values'	=> ['ascending', 'descending']
 		],
 		/**
 		 * we can specify something like "latin1_swedish_ci" for case insensitive sorting
@@ -1007,14 +987,12 @@ class ParametersData {
 				'none'
 			]
 		],
-
 		/**
 		 * fixcategory=..	prevents a category from being reset
 		 */
 		'fixcategory' => [
 			'default' => null
 		],
-
 		/**
 		 * Number of rows for output, default is 1
 		 * Note: a "row" is a group of lines for which the heading tags defined in listseparators/format will be repeated
@@ -1023,7 +1001,6 @@ class ParametersData {
 			'default'	=> 1,
 			'integer'	=> true
 		],
-
 		/**
 		 * Number of elements in a rows for output, default is "all"
 		 * Note: a "row" is a group of lines for which the heading tags defined in listeseparators will be repeated
@@ -1032,9 +1009,8 @@ class ParametersData {
 			'default'	=> 0,
 			'integer'	=> true
 		],
-
 		/**
-		 * The HTML attribute tags(class, cellspacing) used for columns and rows in MediaWiki table markup.
+		 * the html tags used for columns and rows
 		 */
 		'rowcolformat' => [
 			'default'		=> null,
@@ -1046,14 +1022,14 @@ class ParametersData {
 		 * if only one tag is given it will be used for all sections as a start tag (end tag will be empty then)
 		 */
 		'secseparators' => [
-			'default' => []
+			'default' => null
 		],
 		/**
 		 * multisecseparators is a list of tags (which correspond to the items in includepage)
 		 * and which are put between identical sections included from the same file
 		 */
 		'multisecseparators' => [
-			'default' => []
+			'default' => null
 		],
 		/**
 		 * dominantSection is the number (starting from 1) of an includepage argument which shall be used
@@ -1095,13 +1071,13 @@ class ParametersData {
 		 * tablerow allows to define individual formats for table columns
 		 */
 		'tablerow' => [
-			'default'	=> []
+			'default'	=> null
 		],
 		/**
 		 * The number (starting with 1) of the column to be used for sorting
 		 */
 		'tablesortcol' => [
-			'default'	=> null,
+			'default'	=> 0,
 			'integer'	=> true
 		],
 		/**
@@ -1188,7 +1164,7 @@ class ParametersData {
 	 * @param	integer	Integer level.
 	 * @return	void
 	 */
-	public function setRichness($level) {
+    public function setRichness($level) {
 		$this->parameterRichness = intval($level);
 	}
 
@@ -1251,11 +1227,11 @@ class ParametersData {
 	public function getDefault($parameter) {
 		if (array_key_exists($parameter, $this->data)) {
 			if (array_key_exists('default', $this->data[$parameter])) {
-				return (bool)$this->data[$parameter]['default'];
+				return (bool) $this->data[$parameter]['default'];
 			}
 			return null;
 		}
-		throw new MWException(__METHOD__ . ": Attempted to load a parameter that does not exist.");
+		throw new MWException(__METHOD__.": Attempted to load a parameter that does not exist.");
 	}
 
 	/**
@@ -1268,11 +1244,11 @@ class ParametersData {
 	public function getValues($parameter) {
 		if (array_key_exists($parameter, $this->data)) {
 			if (array_key_exists('values', $this->data[$parameter])) {
-				return (bool)$this->data[$parameter]['values'];
+				return (bool) $this->data[$parameter]['values'];
 			}
 			return false;
 		}
-		throw new MWException(__METHOD__ . ": Attempted to load a parameter that does not exist.");
+		throw new MWException(__METHOD__.": Attempted to load a parameter that does not exist.");
 	}
 
 	/**
@@ -1280,16 +1256,16 @@ class ParametersData {
 	 *
 	 * @access	public
 	 * @param	string	Parameter Name
-	 * @return	bool
+	 * @return	boolean
 	 */
 	public function setsCriteriaFound($parameter) {
 		if (array_key_exists($parameter, $this->data)) {
 			if (array_key_exists('set_criteria_found', $this->data[$parameter])) {
-				return (bool)$this->data[$parameter]['set_criteria_found'];
+				return (bool) $this->data[$parameter]['set_criteria_found'];
 			}
 			return false;
 		}
-		throw new MWException(__METHOD__ . ": Attempted to load a parameter that does not exist.");
+		throw new MWException(__METHOD__.": Attempted to load a parameter that does not exist.");
 	}
 
 	/**
@@ -1297,16 +1273,16 @@ class ParametersData {
 	 *
 	 * @access	public
 	 * @param	string	Parameter Name
-	 * @return	bool
+	 * @return	boolean
 	 */
 	public function isOpenReferenceConflict($parameter) {
 		if (array_key_exists($parameter, $this->data)) {
 			if (array_key_exists('open_ref_conflict', $this->data[$parameter])) {
-				return (bool)$this->data[$parameter]['open_ref_conflict'];
+				return (bool) $this->data[$parameter]['open_ref_conflict'];
 			}
 			return false;
 		}
-		throw new MWException(__METHOD__ . ": Attempted to load a parameter that does not exist.");
+		throw new MWException(__METHOD__.": Attempted to load a parameter that does not exist.");
 	}
 
 	/**
@@ -1314,16 +1290,16 @@ class ParametersData {
 	 *
 	 * @access	public
 	 * @param	string	Parameter Name
-	 * @return	bool
+	 * @return	boolean
 	 */
 	public function shouldPreserveCase($parameter) {
 		if (array_key_exists($parameter, $this->data)) {
 			if (array_key_exists('preserve_case', $this->data[$parameter])) {
-				return (bool)$this->data[$parameter]['preserve_case'];
+				return (bool) $this->data[$parameter]['preserve_case'];
 			}
 			return false;
 		}
-		throw new MWException(__METHOD__ . ": Attempted to load a parameter that does not exist.");
+		throw new MWException(__METHOD__.": Attempted to load a parameter that does not exist.");
 	}
 
 	/**
@@ -1331,16 +1307,16 @@ class ParametersData {
 	 *
 	 * @access	public
 	 * @param	string	Parameter Name
-	 * @return	bool
+	 * @return	boolean
 	 */
 	public function isPageNameList($parameter) {
 		if (array_key_exists($parameter, $this->data)) {
 			if (array_key_exists('page_name_list', $this->data[$parameter])) {
-				return (bool)$this->data[$parameter]['page_name_list'];
+				return (bool) $this->data[$parameter]['page_name_list'];
 			}
 			return false;
 		}
-		throw new MWException(__METHOD__ . ": Attempted to load a parameter that does not exist.");
+		throw new MWException(__METHOD__.": Attempted to load a parameter that does not exist.");
 	}
 
 	/**
@@ -1348,16 +1324,16 @@ class ParametersData {
 	 *
 	 * @access	public
 	 * @param	string	Parameter Name
-	 * @return	bool
+	 * @return	boolean
 	 */
 	public function isBoolean($parameter) {
 		if (array_key_exists($parameter, $this->data)) {
 			if (array_key_exists('boolean', $this->data[$parameter])) {
-				return (bool)$this->data[$parameter]['boolean'];
+				return (bool) $this->data[$parameter]['boolean'];
 			}
 			return false;
 		}
-		throw new MWException(__METHOD__ . ": Attempted to load a parameter that does not exist.");
+		throw new MWException(__METHOD__.": Attempted to load a parameter that does not exist.");
 	}
 
 	/**
@@ -1365,15 +1341,16 @@ class ParametersData {
 	 *
 	 * @access	public
 	 * @param	string	Parameter Name
-	 * @return	bool
+	 * @return	boolean
 	 */
 	public function isTimestamp($parameter) {
 		if (array_key_exists($parameter, $this->data)) {
 			if (array_key_exists('timestamp', $this->data[$parameter])) {
-				return (bool)$this->data[$parameter]['timestamp'];
+				return (bool) $this->data[$parameter]['timestamp'];
 			}
 			return false;
 		}
-		throw new MWException(__METHOD__ . ": Attempted to load a parameter that does not exist.");
+		throw new MWException(__METHOD__.": Attempted to load a parameter that does not exist.");
 	}
 }
+?>
