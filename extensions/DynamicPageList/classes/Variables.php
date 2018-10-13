@@ -4,7 +4,7 @@
  * DPL Variables Class
  *
  * @author		IlyaHaykinson, Unendlich, Dangerville, Algorithmix, Theaitetos, Alexia E. Smith
- * @license		GPL
+ * @license		GPL-2.0-or-later
  * @package		DynamicPageList3
  *
  **/
@@ -27,7 +27,7 @@ class Variables {
 
 	// expects pairs of 'variable name' and 'value'
 	// if the first parameter is empty it will be ignored {{#vardefine:|a|b}} is the same as {{#vardefine:a|b}}
-	static public function setVar($arg) {
+	public static function setVar($arg) {
 		$numargs = count($arg);
 		if ($numargs >= 3 && $arg[2] == '') {
 			$start = 3;
@@ -45,7 +45,7 @@ class Variables {
 		return '';
 	}
 
-	static public function setVarDefault($arg) {
+	public static function setVarDefault($arg) {
 		$numargs = count($arg);
 		if ($numargs > 3) {
 			$value = $arg[3];
@@ -59,14 +59,14 @@ class Variables {
 		return '';
 	}
 
-	static public function getVar($var) {
+	public static function getVar($var) {
 		if (array_key_exists($var, self::$memoryVar)) {
 			return self::$memoryVar[$var];
 		}
 		return '';
 	}
 
-	static public function setArray($arg) {
+	public static function setArray($arg) {
 		$numargs = count($arg);
 		if ($numargs < 5) {
 			return '';
@@ -78,13 +78,13 @@ class Variables {
 			return '';
 		}
 		if ($value == '') {
-			self::$memoryArray[$var] = array();
+			self::$memoryArray[$var] = [];
 			return;
 		}
 		if ($delimiter == '') {
-			self::$memoryArray[$var] = array(
+			self::$memoryArray[$var] = [
 				$value
-			);
+			];
 			return;
 		}
 		if (0 !== strpos($delimiter, '/') || (strlen($delimiter) - 1) !== strrpos($delimiter, '/')) {
@@ -94,7 +94,7 @@ class Variables {
 		return "value={$value}, delimiter={$delimiter}," . count(self::$memoryArray[$var]);
 	}
 
-	static public function dumpArray($arg) {
+	public static function dumpArray($arg) {
 		$numargs = count($arg);
 		if ($numargs < 3) {
 			return '';
@@ -113,7 +113,7 @@ class Variables {
 		return $text . "}\n";
 	}
 
-	static public function printArray($var, $delimiter, $search, $subject) {
+	public static function printArray($var, $delimiter, $search, $subject) {
 		$var = trim($var);
 		if ($var == '') {
 			return '';
@@ -122,16 +122,15 @@ class Variables {
 			return '';
 		}
 		$values          = self::$memoryArray[$var];
-		$rendered_values = array();
+		$rendered_values = [];
 		foreach ($values as $v) {
 			$temp_result_value = str_replace($search, $v, $subject);
 			$rendered_values[] = $temp_result_value;
 		}
-		return array(
+		return [
 			implode($delimiter, $rendered_values),
 			'noparse'	=> false,
 			'isHTML'	=> false
-		);
+		];
 	}
 }
-?>

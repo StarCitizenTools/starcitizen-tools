@@ -4,11 +4,14 @@
  * DPL Parse Class
  *
  * @author		IlyaHaykinson, Unendlich, Dangerville, Algorithmix, Theaitetos, Alexia E. Smith
- * @license		GPL
+ * @license		GPL-2.0-or-later
  * @package		DynamicPageList3
  *
  **/
 namespace DPL;
+
+use DPL\Heading\Heading;
+use DPL\Lister\Lister;
 
 class Parse {
 	/**
@@ -75,13 +78,6 @@ class Parse {
 	private $output = '';
 
 	/**
-	 * DynamicPageList Object Holder
-	 *
-	 * @var		object
-	 */
-	private $dpl = null;
-
-	/**
 	 * Replacement Variables
 	 *
 	 * @var		array
@@ -110,7 +106,7 @@ class Parse {
 	public function __construct() {
 		global $wgRequest;
 
-		$this->DB			= wfGetDB(DB_SLAVE);
+		$this->DB			= wfGetDB(DB_REPLICA);
 		$this->parameters	= new Parameters();
 		$this->logger		= new Logger($this->parameters->getData('debug')['default']);
 		$this->tableNames	= Query::getTableNames();
@@ -129,7 +125,6 @@ class Parse {
 	 * @return	string	Wiki/HTML Output
 	 */
 	public function parse($input, \Parser $parser, &$reset, &$eliminate, $isParserTag = false) {
-		wfProfileIn(__METHOD__);
 		$dplStartTime = microtime(true);
 		$this->parser = $parser;
 
@@ -154,7 +149,7 @@ class Parse {
 		/************************************/
 		if (strpos($input, '{%DPL_') >= 0) {
 			for ($i = 1; $i <= 5; $i++) {
-				$this->urlArguments[] = 'DPL_arg'.$i;
+				$this->urlArguments[] = 'DPL_arg' . $i;
 			}
 		}
 		$input = $this->resolveUrlArguments($input, $this->urlArguments);
@@ -172,7 +167,7 @@ class Parse {
 			$this->logger->addMessage(\DynamicPageListHooks::FATAL_NOSELECTION);
 			return $this->getFullOutput();
 		}
-		$cleanParameters = $this->parameters->sortByPriority($cleanParameters);
+		$cleanParameters = Parameters::sortByPriority($cleanParameters);
 		$this->parameters->setParameter('includeuncat', false); // to check if pseudo-category of Uncategorized pages is included
 
 		foreach ($cleanParameters as $parameter => $option) {
@@ -198,7 +193,8 @@ class Parse {
 		}
 
 		//Construct internal keys for TableRow according to the structure of "include".  This will be needed in the output phase.
-		if ($this->parameters->getParameter('seclabels') !== null) {
+		$secLabels = $this->parameters->getParameter('seclabels');
+		if (is_array($secLabels) && !empty($this->parameters->getParameter('seclabels'))) {
 			$this->parameters->setParameter('tablerow', $this->updateTableRowKeys($this->parameters->getParameter('tablerow'), $this->parameters->getParameter('seclabels')));
 		}
 
@@ -212,7 +208,7 @@ class Parse {
 		}
 
 		$calcRows = false;
-		if (!Config::getSetting('allowUnlimitedResults') && $this->parameters->getParameter('goal') != 'categories' && strpos($this->parameters->getParameter('resultsheader').$this->parameters->getParameter('noresultsheader').$this->parameters->getParameter('resultsfooter'), '%TOTALPAGES%') !== false) {
+		if (!Config::getSetting('allowUnlimitedResults') && $this->parameters->getParameter('goal') != 'categories' && strpos($this->parameters->getParameter('resultsheader') . $this->parameters->getParameter('noresultsheader') . $this->parameters->getParameter('resultsfooter'), '%TOTALPAGES%') !== false) {
 			$calcRows = true;
 		}
 
@@ -229,6 +225,11 @@ class Parse {
 
 		$numRows = $this->DB->numRows($result);
 		$articles = $this->processQueryResults($result);
+
+		global $wgDebugDumpSql;
+		if (\DynamicPageListHooks::getDebugLevel() >= 4 && $wgDebugDumpSql) {
+			$this->addOutput($this->query->getSqlQuery() . "\n");
+		}
 
 		$this->addOutput('{{Extension DPL}}');
 
@@ -264,70 +265,24 @@ class Parse {
 		/*******************/
 		/* Generate Output */
 		/*******************/
-		$listMode = new ListMode(
-			$this->parameters->getParameter('mode'),
-			$this->parameters->getParameter('secseparators'),
-			$this->parameters->getParameter('multisecseparators'),
-			$this->parameters->getParameter('inlinetext'),
-			$this->parameters->getParameter('listattr'),
-			$this->parameters->getParameter('itemattr'),
-			$this->parameters->getParameter('listseparators'),
-			$offset,
-			$this->parameters->getParameter('dominantsection')
-		);
-
-		$hListMode = new ListMode(
-			$this->parameters->getParameter('headingmode'),
-			$this->parameters->getParameter('secseparators'),
-			$this->parameters->getParameter('multisecseparators'),
-			'',
-			$this->parameters->getParameter('hlistattr'),
-			$this->parameters->getParameter('hitemattr'),
-			$this->parameters->getParameter('listseparators'),
-			$offset,
-			$this->parameters->getParameter('dominantsection')
-		);
-
-		$this->dpl = new DynamicPageList(
-			Article::getHeadings(),
-			$this->parameters->getParameter('headingcount'),
-			$this->parameters->getParameter('columns'),
-			$this->parameters->getParameter('rows'),
-			$this->parameters->getParameter('rowsize'),
-			$this->parameters->getParameter('rowcolformat'),
-			$articles,
-			$this->parameters->getParameter('ordermethods')[0],
-			$hListMode,
-			$listMode,
-			$this->parameters->getParameter('escapelinks'),
-			$this->parameters->getParameter('addexternallink'),
-			$this->parameters->getParameter('incpage'),
-			$this->parameters->getParameter('includemaxlen'),
-			$this->parameters->getParameter('seclabels'),
-			$this->parameters->getParameter('seclabelsmatch'),
-			$this->parameters->getParameter('seclabelsnotmatch'),
-			$this->parameters->getParameter('incparsed'),
-			$this->parser,
-			$this->parameters->getParameter('replaceintitle'),
-			$this->parameters->getParameter('titlemaxlen'),
-			$this->parameters->getParameter('defaulttemplatesuffix'),
-			$this->parameters->getParameter('tablerow'),
-			$this->parameters->getParameter('includetrim'),
-			$this->parameters->getParameter('tablesortcol'),
-			$this->parameters->getParameter('updaterules'),
-			$this->parameters->getParameter('deleterules')
-		);
-
-		if ($foundRows === null) {
-			$foundRows = $this->dpl->getRowCount();
+		$lister = Lister::newFromStyle($this->parameters->getParameter('mode'), $this->parameters, $this->parser);
+		$heading = Heading::newFromStyle($this->parameters->getParameter('headingmode'), $this->parameters);
+		if ($heading !== null) {
+			$this->addOutput($heading->format($articles, $lister));
+		} else {
+			$this->addOutput($lister->format($articles));
 		}
-		$this->addOutput($this->dpl->getText());
+
+		//$this->addOutput($lister->format($articles));
+		if ($foundRows === null) {
+			$foundRows = $lister->getRowCount(); //Get row count after calling format() otherwise the count will be inaccurate.
+		}
 
 		/*******************************/
 		/* Replacement Variables       */
 		/*******************************/
 		$this->setVariable('TOTALPAGES', $foundRows); //Guaranteed to be an accurate count if SQL_CALC_FOUND_ROWS was used.  Otherwise only accurate if results are less than the SQL LIMIT.
-		$this->setVariable('PAGES', $this->dpl->getRowCount()); //This could be different than TOTALPAGES.  PAGES represents the total results within the constraints of SQL LIMIT.
+		$this->setVariable('PAGES', $lister->getRowCount()); //This could be different than TOTALPAGES.  PAGES represents the total results within the constraints of SQL LIMIT.
 
 		//Replace %DPLTIME% by execution time and timestamp in header and footer
 		$nowTimeStamp   = date('Y/m/d H:i:s');
@@ -360,7 +315,7 @@ class Parse {
 			'DPL_time'				=> $dplTime,
 			'DPL_count'				=> $this->parameters->getParameter('count'),
 			'DPL_totalPages'		=> $foundRows,
-			'DPL_pages'				=> $this->dpl->getRowCount()
+			'DPL_pages'				=> $lister->getRowCount()
 		];
 		$this->defineScrollVariables($scrollVariables);
 
@@ -373,8 +328,6 @@ class Parse {
 		$finalOutput = $this->getFullOutput($foundRows, false);
 
 		$this->triggerEndResets($finalOutput, $reset, $eliminate, $isParserTag);
-
-		wfProfileOut(__METHOD__);
 
 		return $finalOutput;
 	}
@@ -500,6 +453,7 @@ class Parse {
 				$parameter = str_replace('>', 'gt', $parameter);
 			}
 
+			$parameter = strtolower($parameter); //Force lower case for ease of use.
 			if (empty($parameter) || substr($parameter, 0, 1) == '#' || ($this->parameters->exists($parameter) && !$this->parameters->testRichness($parameter))) {
 				continue;
 			}
@@ -573,7 +527,7 @@ class Parse {
 		}
 		$messages = $this->logger->getMessages(false);
 
-		return (count($messages) ? implode("<br/>\n", $messages) : null).$this->getHeader().$this->getOutput().$this->getFooter();
+		return (count($messages) ? implode("<br/>\n", $messages) : null) . $this->getHeader() . $this->getOutput() . $this->getFooter();
 	}
 
 	/**
@@ -585,7 +539,7 @@ class Parse {
 	 */
 	private function setHeader($header) {
 		if (\DynamicPageListHooks::getDebugLevel() == 5) {
-			$header = '<pre><nowiki>'.$header;
+			$header = '<pre><nowiki>' . $header;
 		}
 		$this->header = $this->replaceVariables($header);
 	}
@@ -638,12 +592,12 @@ class Parse {
 			return false;
 		}
 
-		if ($this->parameters->getParameter('results'.$position) !== null && ($count >= 2 || ($this->parameters->getParameter('oneresult'.$position) === null && $count >= 1))) {
-			$_type = 'results'.$position;
-		} elseif ($count === 1 && $this->parameters->getParameter('oneresult'.$position) !== null) {
-			$_type = 'oneresult'.$position;
-		} elseif ($count === 0 && $this->parameters->getParameter('noresults'.$position) !== null) {
-			$_type = 'noresults'.$position;
+		if ($this->parameters->getParameter('results' . $position) !== null && ($count >= 2 || ($this->parameters->getParameter('oneresult' . $position) === null && $count >= 1))) {
+			$_type = 'results' . $position;
+		} elseif ($count === 1 && $this->parameters->getParameter('oneresult' . $position) !== null) {
+			$_type = 'oneresult' . $position;
+		} elseif ($count === 0 && $this->parameters->getParameter('noresults' . $position) !== null) {
+			$_type = 'noresults' . $position;
 		} else {
 			$_type = false;
 		}
@@ -659,7 +613,7 @@ class Parse {
 	 * @return	void
 	 */
 	private function setVariable($variable, $replacement) {
-		$variable = "%".mb_strtoupper($variable, "UTF-8")."%";
+		$variable = "%" . mb_strtoupper($variable, "UTF-8") . "%";
 		$this->replacementVariables[$variable] = $replacement;
 	}
 
@@ -685,7 +639,7 @@ class Parse {
 	 * @param	string	Text
 	 * @return	string	New Lined Text
 	 */
-	static public function replaceNewLines($text) {
+	public static function replaceNewLines($text) {
 		return str_replace(['\n', "¶"], "\n", $text);
 	}
 
@@ -705,7 +659,9 @@ class Parse {
 			foreach ($this->parameters->getParameter('category') as $comparisonType => $operatorTypes) {
 				foreach ($operatorTypes as $operatorType => $categoryGroups) {
 					foreach ($categoryGroups as $categories) {
-						$totalCategories += count($categories);
+						if (is_array($categories)) {
+							$totalCategories += count($categories);
+						}
 					}
 				}
 			}
@@ -713,7 +669,9 @@ class Parse {
 		if (is_array($this->parameters->getParameter('notcategory'))) {
 			foreach ($this->parameters->getParameter('notcategory') as $comparisonType => $operatorTypes) {
 				foreach ($operatorTypes as $operatorType => $categories) {
-					$totalCategories += count($categories);
+					if (is_array($categories)) {
+						$totalCategories += count($categories);
+					}
 				}
 			}
 		}
@@ -740,7 +698,7 @@ class Parse {
 		//Delayed to the construction of the SQL query, see near line 2211, gs
 		//if (in_array('sortkey',$aOrderMethods) && ! in_array('category',$aOrderMethods)) $aOrderMethods[] = 'category';
 
-		$orderMethods = (array) $this->parameters->getParameter('ordermethod');
+		$orderMethods = (array)$this->parameters->getParameter('ordermethod');
 		//Throw an error in no categories were selected when using category sorting modes or requesting category information.
 		if ($totalCategories == 0 && (in_array('categoryadd', $orderMethods) || $this->parameters->getParameter('addfirstcategorydate') === true)) {
 			$this->logger->addMessage(\DynamicPageListHooks::FATAL_CATDATEBUTNOINCLUDEDCATS);
@@ -794,25 +752,13 @@ class Parse {
 			return false;
 		}
 
-		/**
-		 * If including the Uncategorized, we need the 'dpl_clview': VIEW of the categorylinks table where we have cl_to='' (empty string) for all uncategorized pages. This VIEW must have been created by the administrator of the mediawiki DB at installation. See the documentation.
-		 */
-		if ($this->parameters->getParameter('includeuncat')) {
-			//If the view is not there, we can't perform logical operations on the Uncategorized.
-			if (!$this->DB->tableExists('dpl_clview')) {
-				$sql = 'CREATE VIEW '.$this->tableNames['dpl_clview']." AS SELECT IFNULL(cl_from, page_id) AS cl_from, IFNULL(cl_to, '') AS cl_to, cl_sortkey FROM ".$this->tableNames['page'].' LEFT OUTER JOIN '.$this->tableNames['categorylinks'].' ON '.$this->tableNames['page'].'.page_id=cl_from';
-				$this->logger->addMessage(\DynamicPageListHooks::FATAL_NOCLVIEW, $this->tableNames['dpl_clview'], $sql);
-				return false;
-			}
-		}
-
 		//add*** parameters have no effect with 'mode=category' (only namespace/title can be viewed in this mode)
 		if ($this->parameters->getParameter('mode') == 'category' && ($this->parameters->getParameter('addcategories') || $this->parameters->getParameter('addeditdate') || $this->parameters->getParameter('addfirstcategorydate') || $this->parameters->getParameter('addpagetoucheddate') || $this->parameters->getParameter('incpage') || $this->parameters->getParameter('adduser') || $this->parameters->getParameter('addauthor') || $this->parameters->getParameter('addcontribution') || $this->parameters->getParameter('addlasteditor'))) {
 			$this->logger->addMessage(\DynamicPageListHooks::WARN_CATOUTPUTBUTWRONGPARAMS);
 		}
 
 		//headingmode has effects with ordermethod on multiple components only
-		if ($this->parameters->getParameter('headingmode') != 'none' && count($orderMethods) < 2) {
+		if ($this->parameters->getParameter('headingmode') !== 'none' && count($orderMethods) < 2) {
 			$this->logger->addMessage(\DynamicPageListHooks::WARN_HEADINGBUTSIMPLEORDERMETHOD, $this->parameters->getParameter('headingmode'), 'none');
 			$this->parameters->setParameter('headingmode', 'none');
 		}
@@ -834,7 +780,7 @@ class Parse {
 	 * @return	array	Updated 'tablerow' parameter.
 	 */
 	private static function updateTableRowKeys($tableRow, $sectionLabels) {
-		$_tableRow	= (array) $tableRow;
+		$_tableRow	= (array)$tableRow;
 		$tableRow	= [];
 		$groupNr	= -1;
 		$t			= -1;
@@ -854,7 +800,7 @@ class Parse {
 					$colNr++;
 					$t++;
 					if (array_key_exists($t, $_tableRow)) {
-						$tableRow[$groupNr.'.'.$colNr] = $_tableRow[$t];
+						$tableRow[$groupNr . '.' . $colNr] = $_tableRow[$t];
 					}
 				}
 			}
@@ -871,7 +817,7 @@ class Parse {
 	 * @return	string	Raw input with variables replaced
 	 */
 	private function resolveUrlArguments($input, $arguments) {
-		$arguments = (array) $arguments;
+		$arguments = (array)$arguments;
 		foreach ($arguments as $arg) {
 			$dplArg = $this->wgRequest->getVal($arg, '');
 			if ($dplArg == '') {
@@ -912,7 +858,7 @@ class Parse {
 	 * @return	void
 	 */
 	private function defineScrollVariables($scrollVariables) {
-		$scrollVariables = (array) $scrollVariables;
+		$scrollVariables = (array)$scrollVariables;
 
 		foreach ($scrollVariables as $variable => $value) {
 			Variables::setVar(['', '', $variable, $value]);
@@ -941,12 +887,12 @@ class Parse {
 		if (!is_array($reset)) {
 			$reset = [];
 		}
-		$reset = array_merge($reset, $this->parameters->getParameter('reset'));
+		$reset = array_merge($reset, (array)$this->parameters->getParameter('reset'));
 
 		if (!is_array($eliminate)) {
 			$eliminate = [];
 		}
-		$eliminate = array_merge($eliminate, $this->parameters->getParameter('eliminate'));
+		$eliminate = array_merge($eliminate, (array)$this->parameters->getParameter('eliminate'));
 		if ($isParserTag === true) {
 			//In tag mode 'eliminate' is the same as 'reset' for templates, categories, and images.
 			if (isset($eliminate['templates']) && $eliminate['templates']) {
@@ -990,13 +936,13 @@ class Parse {
 
 			if (isset($eliminate['links']) && $eliminate['links']) {
 				//Trigger the mediawiki parser to find links, images, categories etc. which are contained in the DPL output.  This allows us to remove these links from the link list later.  If the article containing the DPL statement itself uses one of these links they will be thrown away!
-				\DynamicPageListHooks::$createdLinks[0] = array();
+				\DynamicPageListHooks::$createdLinks[0] = [];
 				foreach ($parserOutput->getLinks() as $nsp => $link) {
 					\DynamicPageListHooks::$createdLinks[0][$nsp] = $link;
 				}
 			}
 			if (isset($eliminate['templates']) && $eliminate['templates']) {
-				\DynamicPageListHooks::$createdLinks[1] = array();
+				\DynamicPageListHooks::$createdLinks[1] = [];
 				foreach ($parserOutput->getTemplates() as $nsp => $tpl) {
 					\DynamicPageListHooks::$createdLinks[1][$nsp] = $tpl;
 				}
@@ -1058,4 +1004,3 @@ class Parse {
 		return $sortedArticles;
 	}
 }
-?>
