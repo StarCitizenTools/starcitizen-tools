@@ -319,23 +319,18 @@ $wgExtraNamespaces[NS_COMMLINK] = "Comm-Link";
 $wgExtraNamespaces[NS_COMMLINK_TALK] = "Comm-Link_talk";
 $wgNamespacesWithSubpages[NS_COMMLINK] = true;
 $wgNamespacesToBeSearchedDefault[NS_COMMLINK] = true;
-$wgNamespaceContentModels[NS_COMMLINK_TALK] = 'flow-board';
 
 define("NS_PROJMGMT", 3002);
 define("NS_PROJMGMT_TALK", 3003);
 $wgExtraNamespaces[NS_PROJMGMT] = "ProjMGMT";
 $wgExtraNamespaces[NS_PROJMGMT_TALK] = "ProjMGMT_talk";
 $wgNamespacesWithSubpages[NS_PROJMGMT] = true;
-#$wgNamespacesToBeSearchedDefault[NS_PROJMGMT] = true;
-$wgNamespaceContentModels[NS_PROJMGMT_TALK] = 'flow-board';
 
 define("NS_ISSUE", 3004);
 define("NS_ISSUE_TALK", 3005);
 $wgExtraNamespaces[NS_ISSUE] = "Issue";
 $wgExtraNamespaces[NS_ISSUE_TALK] = "Issue_talk";
 $wgNamespacesWithSubpages[NS_ISSUE] = true;
-#$wgNamespacesToBeSearchedDefault[NS_ISSUE] = true;
-$wgNamespaceContentModels[NS_ISSUE_TALK] = 'flow-board';
 
 define("NS_GUIDE", 3006);
 define("NS_GUIDE_TALK", 3007);
@@ -343,23 +338,19 @@ $wgExtraNamespaces[NS_GUIDE] = "Guide";
 $wgExtraNamespaces[NS_GUIDE_TALK] = "Guide_talk";
 $wgNamespacesWithSubpages[NS_GUIDE] = true;
 $wgNamespacesToBeSearchedDefault[NS_GUIDE] = true;
-$wgNamespaceContentModels[NS_GUIDE_TALK] = 'flow-board';
+
 
 define("NS_ORG", 3008);
 define("NS_ORG_TALK", 3009);
 $wgExtraNamespaces[NS_ORG] = "ORG";
 $wgExtraNamespaces[NS_ORG_TALK] = "ORG_talk";
 $wgNamespacesWithSubpages[NS_ORG] = true;
-#$wgNamespacesToBeSearchedDefault[NS_ORG] = true;
-$wgNamespaceContentModels[NS_ORG_TALK] = 'flow-board';
 
 define("NS_EVENT", 3010);
 define("NS_EVENT_TALK", 3011);
 $wgExtraNamespaces[NS_EVENT] = "EVENT";
 $wgExtraNamespaces[NS_EVENT_TALK] = "EVENT_talk";
 $wgNamespacesWithSubpages[NS_EVENT] = true;
-#$wgNamespacesToBeSearchedDefault[NS_EVENT] = true;
-$wgNamespaceContentModels[NS_EVENT_TALK] = 'flow-board';
 
 # Citizen Star News Archive project
 define("NS_CSN", 3012);
@@ -368,21 +359,9 @@ $wgExtraNamespaces[NS_CSN] = "CSN";
 $wgExtraNamespaces[NS_CSN_TALK] = "CSN_talk";
 $wgNamespacesWithSubpages[NS_CSN] = true;
 $wgNamespacesToBeSearchedDefault[NS_CSN] = true;
-$wgNamespaceContentModels[NS_CSN_TALK] = 'flow-board';
 
 $wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
 $wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
-
-$wgNamespaceContentModels[NS_TALK] = 'flow-board';
-$wgNamespaceContentModels[NS_USER_TALK] = 'flow-board';
-$wgNamespaceContentModels[NS_COMMLINK_TALK] = 'flow-board';
-$wgNamespaceContentModels[NS_PROJECT_TALK] = 'flow-board';
-$wgNamespaceContentModels[NS_FILE_TALK] = 'flow-board';
-$wgNamespaceContentModels[NS_MEDIAWIKI_TALK] = 'flow-board';
-$wgNamespaceContentModels[NS_TEMPLATE_TALK] = 'flow-board';
-$wgNamespaceContentModels[NS_HELP_TALK] = 'flow-board';
-$wgNamespaceContentModels[NS_CATEGORY_TALK] = 'flow-board';
-$wgNamespaceContentModels[$wgPageTranslationNamespace+1] = 'flow-board';
 
 $wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
 $wgNamespaceProtection[NS_COMMLINK] = array( 'commlink-edit' );
@@ -424,7 +403,6 @@ $wgGroupPermissions['*']['createaccount'] = true;
 $wgGroupPermissions['*']['edit'] = false;
 $wgGroupPermissions['*']['createpage'] = false;
 $wgGroupPermissions['*']['writeapi'] = false;
-$wgGroupPermissions['*']['flow-hide'] = false;
 $wgGroupPermissions['*']['createtalk'] = false;
 
 #user
@@ -504,8 +482,6 @@ $wgGroupPermissions['Editor']['undelete'] = true;
 $wgGroupPermissions['Editor']['mergehistory'] = true;
 $wgGroupPermissions['Editor']['browsearchive'] = true;
 $wgGroupPermissions['Editor']['noratelimit'] = true;
-$wgGroupPermissions['Editor']['flow-delete'] = true;
-$wgGroupPermissions['Editor']['flow-lock'] = true;
 $wgGroupPermissions['Editor']['move-rootuserpages'] = true;
 $wgGroupPermissions['Editor']['org-edit'] = true;
 
