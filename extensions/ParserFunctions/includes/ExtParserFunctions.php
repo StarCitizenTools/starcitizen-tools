@@ -642,7 +642,7 @@ class ExtParserFunctions {
 			$inNeedle = ' ';
 		}
 
-		$pos = mb_strpos( $inStr, $inNeedle, (int)$inOffset );
+		$pos = mb_strpos( $inStr, $inNeedle, min( (int)$inOffset, mb_strlen( $inStr ) ) );
 		if ( $pos === false ) {
 			$pos = '';
 		}
