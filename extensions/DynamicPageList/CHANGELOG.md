@@ -654,3 +654,28 @@ Many thanks to GreenReaper on GitHub for reporting and finding issues with core 
 * Use LoggedUpdateMaintenance to create Template
 	* https://github.com/Alexia/DynamicPageList/pull/56
 * Remove deprecated legacy extension entry point.
+
+# Version 3.2.1
+* Eliminate parameter was broken.
+	* https://github.com/Alexia/DynamicPageList/issues/64
+	* https://github.com/Alexia/DynamicPageList/issues/65
+	* https://github.com/Alexia/DynamicPageList/pull/66
+* Fix for PHP 7.2 support and a non-countable variable.
+	* https://github.com/Alexia/DynamicPageList/pull/62
+
+# Version 3.2.2
+* Minor bug fix for the category parameter to stop producing a warning.
+
+# Version 3.3.0
+* Overhaul and rewrite of the list generation class(DynamicPageList).
+	* Two new class bases, Lister and Heading.
+* New listing mode, subpage.
+
+# Version 3.3.1
+* Fixed regression with parameter tablesortcol breaking table output.
+* Fixed regression with page tranclusion parsing that was done to improve performance.
+
+# Version 3.3.2
+* Fixed UserFormat improperly using sprintf on list start which sometimes would break output.
+* Fixed instances of formatItem() declaration being slightly incorrect.
+* Fixed $article->mContrib passing a rounded float to function expecting an integer.
