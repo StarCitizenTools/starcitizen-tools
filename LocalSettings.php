@@ -426,11 +426,9 @@ $wgGroupPermissions['ORG-Editor']['org-edit'] = true;
 #autoconfirmed
 $wgAutoConfirmAge = 86400*3; // three days
 $wgAutoConfirmCount = 20;
-$wgGroupPermissions['autoconfirmed'] = $wgGroupPermissions['user'];
 $wgGroupPermissions['autoconfirmed']['upload_by_url'] = true;
 $wgGroupPermissions['autoconfirmed']['createpage'] = true;
 $wgGroupPermissions['autoconfirmed']['createtalk'] = true;
-$wgGroupPermissions['autoconfirmed']['edit'] = true;
 
 #verified
 $wgGroupPermissions['Verified'] = $wgGroupPermissions['autoconfirmed'];
