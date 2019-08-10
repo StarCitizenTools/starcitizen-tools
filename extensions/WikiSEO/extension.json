@@ -1,36 +1,58 @@
 {
 	"name": "WikiSEO",
-	"version": "1.2.1",
+	"version": "2.0.1",
 	"author": [
+		"Octfx",
 		"Andru Vallance",
 		"..."
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:WikiSEO",
-	"descriptionmsg": "seo-desc",
+	"descriptionmsg": "wiki-seo-desc",
 	"license-name": "GPL-2.0+",
 	"type": "parserhook",
-	"ExtensionMessagesFiles": {
-		"WikiSEOMagic": "WikiSEO.i18n.magic.php",
-		"WikiSEO": "WikiSEO.i18n.php"
-	},
-	"AutoloadClasses": {
-		"WikiSEO": "WikiSEO.body.php"
-	},
-	"Hooks": {
-		"ParserFirstCallInit": [
-			"WikiSEO::init"
-		],
-		"OutputPageBeforeHTML": [
-			"WikiSEO::loadParamsFromWikitext"
-		],
-		"BeforePageDisplay": [
-			"WikiSEO::modifyHTML"
-		]
+	"requires": {
+		"MediaWiki": ">= 1.27.0"
 	},
 	"config": {
-		"GoogleSiteVerificationKey": "",
-		"FacebookAdmins": [],
-		"FacebookAppID": "",
-		"AddJSONLD": true
-	}
+		"GoogleSiteVerificationKey": {
+			"description": "Site verification key for Google WebmasterTools",
+			"value": null
+		},
+		"FacebookAppId":  {
+			"description": "App Id for Facebook Insights",
+			"value": null
+		},
+		"BingSiteVerificationKey": {
+			"description": "Site verification key for Bing WebmasterTools",
+			"value": null
+		},
+		"TwitterSiteHandle": {
+			"description": "Twitter Site handle to add globally",
+			"value": null
+		},
+		"MetadataGenerators":  {
+			"description": "Array with metadata generators",
+			"value": [
+				"OpenGraph",
+				"Twitter",
+				"SchemaOrg"
+			]
+		}
+	},
+	"MessagesDirs": {
+		"WikiSEO": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"WikiSEOMagic" : "WikiSEO.i18n.magic.php"
+	},
+	"AutoloadNamespaces": {
+		"Octfx\\WikiSEO\\": "includes/"
+	},
+	"Hooks": {
+		"ParserFirstCallInit": "Octfx\\WikiSEO\\Hooks::onParserFirstCallInit",
+		"BeforePageDisplay": "Octfx\\WikiSEO\\Hooks::onBeforePageDisplay"
+	},
+	"manifest_version": 2
 }

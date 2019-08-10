@@ -1,0 +1,5 @@
+{
+  "wiki-se-desc": "Allows per page meta settings (keywords, description) and to change the title",
+  "wiki-seo-empty-attr": "Error: &lt;seo&gt; tag must contain at least one non-empty &quot;title&quot; or &quot;metakeywords&quot; or &quot;metadescription&quot; attribute.",
+  "wiki-seo-invalid-generator": "Error: $1 is not a valid metadata generator."
+}
