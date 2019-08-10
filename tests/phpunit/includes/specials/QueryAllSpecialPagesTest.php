@@ -5,27 +5,32 @@
  * Copyright © 2011, Antoine Musso
  *
  * @author Antoine Musso
- * @group Database
  */
 
 /**
+ * @group Database
  * @covers QueryPage<extended>
  */
 class QueryAllSpecialPagesTest extends MediaWikiTestCase {
 
+	/**
+	 * @var SpecialPage[]
+	 */
+	private $queryPages;
+
 	/** List query pages that can not be tested automatically */
 	protected $manualTest = [
-		'LinkSearchPage'
+		LinkSearchPage::class
 	];
 
 	/**
 	 * Pages whose query use the same DB table more than once.
 	 * This is used to skip testing those pages when run against a MySQL backend
 	 * which does not support reopening a temporary table. See upstream bug:
-	 * http://bugs.mysql.com/bug.php?id=10327
+	 * https://bugs.mysql.com/bug.php?id=10327
 	 */
 	protected $reopensTempTable = [
-		'BrokenRedirects',
+		BrokenRedirects::class,
 	];
 
 	/**
@@ -36,8 +41,9 @@ class QueryAllSpecialPagesTest extends MediaWikiTestCase {
 
 		foreach ( QueryPage::getPages() as $page ) {
 			$class = $page[0];
+			$name = $page[1];
 			if ( !in_array( $class, $this->manualTest ) ) {
-				$this->queryPages[$class] = new $class;
+				$this->queryPages[$class] = SpecialPageFactory::getPage( $name );
 			}
 		}
 	}
@@ -51,7 +57,7 @@ class QueryAllSpecialPagesTest extends MediaWikiTestCase {
 
 		foreach ( $this->queryPages as $page ) {
 			// With MySQL, skips special pages reopening a temporary table
-			// See http://bugs.mysql.com/bug.php?id=10327
+			// See https://bugs.mysql.com/bug.php?id=10327
 			if (
 				$wgDBtype === 'mysql'
 				&& in_array( $page->getName(), $this->reopensTempTable )

@@ -209,68 +209,102 @@ class LanguageTest extends LanguageClassesTestCase {
 	}
 
 	/**
-	 * @covers Language::truncate
+	 * @covers Language::truncateForDatabase
+	 * @covers Language::truncateInternal
 	 */
-	public function testTruncate() {
+	public function testTruncateForDatabase() {
 		$this->assertEquals(
 			"XXX",
-			$this->getLang()->truncate( "1234567890", 0, 'XXX' ),
+			$this->getLang()->truncateForDatabase( "1234567890", 0, 'XXX' ),
 			'truncate prefix, len 0, small ellipsis'
 		);
 
 		$this->assertEquals(
 			"12345XXX",
-			$this->getLang()->truncate( "1234567890", 8, 'XXX' ),
+			$this->getLang()->truncateForDatabase( "1234567890", 8, 'XXX' ),
 			'truncate prefix, small ellipsis'
 		);
 
 		$this->assertEquals(
 			"123456789",
-			$this->getLang()->truncate( "123456789", 5, 'XXXXXXXXXXXXXXX' ),
+			$this->getLang()->truncateForDatabase( "123456789", 5, 'XXXXXXXXXXXXXXX' ),
 			'truncate prefix, large ellipsis'
 		);
 
 		$this->assertEquals(
 			"XXX67890",
-			$this->getLang()->truncate( "1234567890", -8, 'XXX' ),
+			$this->getLang()->truncateForDatabase( "1234567890", -8, 'XXX' ),
 			'truncate suffix, small ellipsis'
 		);
 
 		$this->assertEquals(
 			"123456789",
-			$this->getLang()->truncate( "123456789", -5, 'XXXXXXXXXXXXXXX' ),
+			$this->getLang()->truncateForDatabase( "123456789", -5, 'XXXXXXXXXXXXXXX' ),
 			'truncate suffix, large ellipsis'
 		);
 		$this->assertEquals(
 			"123XXX",
-			$this->getLang()->truncate( "123                ", 9, 'XXX' ),
+			$this->getLang()->truncateForDatabase( "123                ", 9, 'XXX' ),
 			'truncate prefix, with spaces'
 		);
 		$this->assertEquals(
 			"12345XXX",
-			$this->getLang()->truncate( "12345            8", 11, 'XXX' ),
+			$this->getLang()->truncateForDatabase( "12345            8", 11, 'XXX' ),
 			'truncate prefix, with spaces and non-space ending'
 		);
 		$this->assertEquals(
 			"XXX234",
-			$this->getLang()->truncate( "1              234", -8, 'XXX' ),
+			$this->getLang()->truncateForDatabase( "1              234", -8, 'XXX' ),
 			'truncate suffix, with spaces'
 		);
 		$this->assertEquals(
 			"12345XXX",
-			$this->getLang()->truncate( "1234567890", 5, 'XXX', false ),
+			$this->getLang()->truncateForDatabase( "1234567890", 5, 'XXX', false ),
 			'truncate without adjustment'
 		);
 		$this->assertEquals(
 			"泰乐菌...",
-			$this->getLang()->truncate( "泰乐菌素123456789", 11, '...', false ),
+			$this->getLang()->truncateForDatabase( "泰乐菌素123456789", 11, '...', false ),
 			'truncate does not chop Unicode characters in half'
 		);
 		$this->assertEquals(
 			"\n泰乐菌...",
-			$this->getLang()->truncate( "\n泰乐菌素123456789", 12, '...', false ),
+			$this->getLang()->truncateForDatabase( "\n泰乐菌素123456789", 12, '...', false ),
 			'truncate does not chop Unicode characters in half if there is a preceding newline'
 		);
+	}
+
+	/**
+	 * @dataProvider provideTruncateData
+	 * @covers Language::truncateForVisual
+	 * @covers Language::truncateInternal
+	 */
+	public function testTruncateForVisual(
+		$expected, $string, $length, $ellipsis = '...', $adjustLength = true
+	) {
+		$this->assertEquals(
+			$expected,
+			$this->getLang()->truncateForVisual( $string, $length, $ellipsis, $adjustLength )
+		);
+	}
+
+	/**
+	 * @return array Format is ($expected, $string, $length, $ellipsis, $adjustLength)
+	 */
+	public static function provideTruncateData() {
+		return [
+			[ "XXX", "тестирам да ли ради", 0, "XXX" ],
+			[ "testnXXX", "testni scenarij", 8, "XXX" ],
+			[ "حالة اختبار", "حالة اختبار", 5, "XXXXXXXXXXXXXXX" ],
+			[ "XXXедент", "прецедент", -8, "XXX" ],
+			[ "XXപിൾ", "ആപ്പിൾ", -5, "XX" ],
+			[ "神秘XXX", "神秘                ", 9, "XXX" ],
+			[ "ΔημιουργXXX", "Δημιουργία           Σύμπαντος", 11, "XXX" ],
+			[ "XXXの家です", "地球は私たちの唯               の家です", -8, "XXX" ],
+			[ "زندگیXXX", "زندگی زیباست", 6, "XXX", false ],
+			[ "ცხოვრება...", "ცხოვრება არის საოცარი", 8, "...", false ],
+			[ "\nທ່ານ...", "\nທ່ານບໍ່ຮູ້ຫນັງສື", 5, "...", false ],
+		];
 	}
 
 	/**
@@ -479,7 +513,6 @@ class LanguageTest extends LanguageClassesTestCase {
 			[ 'fr', true, 'Two letters, minor case' ],
 			[ 'EN', false, 'Two letters, upper case' ],
 			[ 'tyv', true, 'Three letters' ],
-			[ 'tokipona', true, 'long language code' ],
 			[ 'be-tarask', true, 'With dash' ],
 			[ 'be-x-old', true, 'With extension (two dashes)' ],
 			[ 'be_tarask', false, 'Reject underscores' ],
@@ -636,6 +669,24 @@ class LanguageTest extends LanguageClassesTestCase {
 			$this->getLang()->sprintfDate( $format, $ts, $tz ),
 			"sprintfDate('$format', '$ts', 'Asia/Seoul'): $msg"
 		);
+	}
+
+	/**
+	 * sprintfDate should only calculate a TTL if the caller is going to use it.
+	 * @covers Language::sprintfDate
+	 */
+	public function testSprintfDateNoTtlIfNotNeeded() {
+		$noTtl = 'unused'; // Value used to represent that the caller didn't pass a variable in.
+		$ttl = null;
+		$this->getLang()->sprintfDate( 'YmdHis', wfTimestampNow(), null, $noTtl );
+		$this->getLang()->sprintfDate( 'YmdHis', wfTimestampNow(), null, $ttl );
+
+		$this->assertSame(
+			'unused',
+			$noTtl,
+			'If the caller does not set the $ttl variable, do not compute it.'
+		);
+		$this->assertInternalType( 'int', $ttl, 'TTL should have been computed.' );
 	}
 
 	public static function provideSprintfDateSamples() {
@@ -993,6 +1044,27 @@ class LanguageTest extends LanguageClassesTestCase {
 				'nengo'
 			],
 			[
+				'xtY',
+				'20190430235959',
+				'平成31',
+				'平成31',
+				'nengo - last day of heisei'
+			],
+			[
+				'xtY',
+				'20190501000000',
+				'令和元',
+				'令和元',
+				'nengo - first day of reiwa'
+			],
+			[
+				'xtY',
+				'20200501000000',
+				'令和2',
+				'令和2',
+				'nengo - second year of reiwa'
+			],
+			[
 				'xrxkYY',
 				'20120102090705',
 				'MMDLV2012',
@@ -1309,7 +1381,7 @@ class LanguageTest extends LanguageClassesTestCase {
 	}
 
 	public static function provideCheckTitleEncodingData() {
-		// @codingStandardsIgnoreStart Ignore Generic.Files.LineLength.TooLong
+		// phpcs:disable Generic.Files.LineLength
 		return [
 			[ "" ],
 			[ "United States of America" ], // 7bit ASCII
@@ -1319,7 +1391,7 @@ class LanguageTest extends LanguageClassesTestCase {
 					"Acteur%7CAlbert%20Robbins%7CAnglais%7CAnn%20Donahue%7CAnthony%20E.%20Zuiker%7CCarol%20Mendelsohn"
 				)
 			],
-			// The following two data sets come from bug 36839. They fail if checkTitleEncoding uses a regexp to test for
+			// The following two data sets come from T38839. They fail if checkTitleEncoding uses a regexp to test for
 			// valid UTF-8 encoding and the pcre.recursion_limit is low (like, say, 1024). They succeed if checkTitleEncoding
 			// uses mb_check_encoding for its test.
 			[
@@ -1360,7 +1432,7 @@ class LanguageTest extends LanguageClassesTestCase {
 				)
 			]
 		];
-		// @codingStandardsIgnoreEnd
+		// phpcs:enable
 	}
 
 	/**
@@ -1567,7 +1639,7 @@ class LanguageTest extends LanguageClassesTestCase {
 	 * @covers Language::translateBlockExpiry()
 	 * @dataProvider provideTranslateBlockExpiry
 	 */
-	public function testTranslateBlockExpiry( $expectedData, $str, $desc ) {
+	public function testTranslateBlockExpiry( $expectedData, $str, $now, $desc ) {
 		$lang = $this->getLang();
 		if ( is_array( $expectedData ) ) {
 			list( $func, $arg ) = $expectedData;
@@ -1575,31 +1647,72 @@ class LanguageTest extends LanguageClassesTestCase {
 		} else {
 			$expected = $expectedData;
 		}
-		$this->assertEquals( $expected, $lang->translateBlockExpiry( $str ), $desc );
+		$this->assertEquals( $expected, $lang->translateBlockExpiry( $str, null, $now ), $desc );
 	}
 
 	public static function provideTranslateBlockExpiry() {
 		return [
-			[ '2 hours', '2 hours', 'simple data from ipboptions' ],
-			[ 'indefinite', 'infinite', 'infinite from ipboptions' ],
-			[ 'indefinite', 'infinity', 'alternative infinite from ipboptions' ],
-			[ 'indefinite', 'indefinite', 'another alternative infinite from ipboptions' ],
-			[ [ 'formatDuration', 1023 * 60 * 60 ], '1023 hours', 'relative' ],
-			[ [ 'formatDuration', -1023 ], '-1023 seconds', 'negative relative' ],
-			[ [ 'formatDuration', 0 ], 'now', 'now' ],
+			[ '2 hours', '2 hours', 0, 'simple data from ipboptions' ],
+			[ 'indefinite', 'infinite', 0, 'infinite from ipboptions' ],
+			[ 'indefinite', 'infinity', 0, 'alternative infinite from ipboptions' ],
+			[ 'indefinite', 'indefinite', 0, 'another alternative infinite from ipboptions' ],
+			[ [ 'formatDuration', 1023 * 60 * 60 ], '1023 hours', 0, 'relative' ],
+			[ [ 'formatDuration', -1023 ], '-1023 seconds', 0, 'negative relative' ],
+			[
+				[ 'formatDuration', 1023 * 60 * 60 ],
+				'1023 hours',
+				wfTimestamp( TS_UNIX, '19910203040506' ),
+				'relative with initial timestamp'
+			],
+			[ [ 'formatDuration', 0 ], 'now', 0, 'now' ],
 			[
 				[ 'timeanddate', '20120102070000' ],
 				'2012-1-1 7:00 +1 day',
+				0,
 				'mixed, handled as absolute'
 			],
-			[ [ 'timeanddate', '19910203040506' ], '1991-2-3 4:05:06', 'absolute' ],
-			[ [ 'timeanddate', '19700101000000' ], '1970-1-1 0:00:00', 'absolute at epoch' ],
-			[ [ 'timeanddate', '19691231235959' ], '1969-12-31 23:59:59', 'time before epoch' ],
-			[ 'dummy', 'dummy', 'return garbage as is' ],
+			[ [ 'timeanddate', '19910203040506' ], '1991-2-3 4:05:06', 0, 'absolute' ],
+			[ [ 'timeanddate', '19700101000000' ], '1970-1-1 0:00:00', 0, 'absolute at epoch' ],
+			[ [ 'timeanddate', '19691231235959' ], '1969-12-31 23:59:59', 0, 'time before epoch' ],
+			[
+				[ 'timeanddate', '19910910000000' ],
+				'10 september',
+				wfTimestamp( TS_UNIX, '19910203040506' ),
+				'partial'
+			],
+			[ 'dummy', 'dummy', 0, 'return garbage as is' ],
 		];
 	}
 
 	/**
+	 * @dataProvider provideFormatNum
+	 * @covers Language::formatNum
+	 */
+	public function testFormatNum(
+		$translateNumerals, $langCode, $number, $nocommafy, $expected
+	) {
+		$this->setMwGlobals( [ 'wgTranslateNumerals' => $translateNumerals ] );
+		$lang = Language::factory( $langCode );
+		$formattedNum = $lang->formatNum( $number, $nocommafy );
+		$this->assertType( 'string', $formattedNum );
+		$this->assertEquals( $expected, $formattedNum );
+	}
+
+	public function provideFormatNum() {
+		return [
+			[ true, 'en', 100, false, '100' ],
+			[ true, 'en', 101, true, '101' ],
+			[ false, 'en', 103, false, '103' ],
+			[ false, 'en', 104, true, '104' ],
+			[ true, 'en', '105', false, '105' ],
+			[ true, 'en', '106', true, '106' ],
+			[ false, 'en', '107', false, '107' ],
+			[ false, 'en', '108', true, '108' ],
+		];
+	}
+
+	/**
+	 * @covers Language::parseFormattedNumber
 	 * @dataProvider parseFormattedNumberProvider
 	 */
 	public function testParseFormattedNumber( $langCode, $number ) {
@@ -1708,9 +1821,8 @@ class LanguageTest extends LanguageClassesTestCase {
 			[ 'zh', 'zh', 'zh is defined as the parent language of zh, '
 				. 'because zh converter can convert zh-cn to zh' ],
 			[ 'zh-invalid', null, 'do not be fooled by arbitrarily composed language codes' ],
-			[ 'en-gb', null, 'en does not have converter' ],
-			[ 'en', null, 'en does not have converter. Although FakeConverter '
-					. 'handles en -> en conversion but it is useless' ],
+			[ 'de-formal', null, 'de does not have converter' ],
+			[ 'de', null, 'de does not have converter' ],
 		];
 	}
 
@@ -1737,5 +1849,21 @@ class LanguageTest extends LanguageClassesTestCase {
 				],
 			],
 		];
+	}
+
+	/**
+	 * @covers Language::equals
+	 */
+	public function testEquals() {
+		$en1 = new Language();
+		$en1->setCode( 'en' );
+
+		$en2 = Language::factory( 'en' );
+		$en2->setCode( 'en' );
+
+		$this->assertTrue( $en1->equals( $en2 ), 'en equals en' );
+
+		$fr = Language::factory( 'fr' );
+		$this->assertFalse( $en1->equals( $fr ), 'en not equals fr' );
 	}
 }

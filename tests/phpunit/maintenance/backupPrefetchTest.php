@@ -1,6 +1,9 @@
 <?php
 
-require_once __DIR__ . "/../../../maintenance/backupPrefetch.inc";
+namespace MediaWiki\Tests\Maintenance;
+
+use BaseDump;
+use MediaWikiTestCase;
 
 /**
  * Tests for BaseDump
@@ -22,7 +25,7 @@ class BaseDumpTest extends MediaWikiTestCase {
 			$this->dump->close();
 		}
 
-		// Bug 37458, parent teardown need to be done after closing the
+		// T39458, parent teardown need to be done after closing the
 		// dump or it might cause some permissions errors.
 		parent::tearDown();
 	}
@@ -151,7 +154,7 @@ class BaseDumpTest extends MediaWikiTestCase {
 		$fname = $this->getNewTempFile();
 
 		// The header of every prefetch file
-		// @codingStandardsIgnoreStart Ignore Generic.Files.LineLength.TooLong
+		// phpcs:ignore Generic.Files.LineLength
 		$header = '<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.7/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.7/ http://www.mediawiki.org/xml/export-0.7.xsd" version="0.7" xml:lang="en">
   <siteinfo>
     <sitename>wikisvn</sitename>
@@ -180,7 +183,6 @@ class BaseDumpTest extends MediaWikiTestCase {
     </namespaces>
   </siteinfo>
 ';
-		// @codingStandardsIgnoreEnd
 
 		// An array holding the pages that are available for prefetch
 		$available_pages = [];

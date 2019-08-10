@@ -8,7 +8,7 @@
 		"skin"
 	],
 	"homepage": "https://www.mediawiki.org/wiki/Skin:Vector",
-	"license": "GPL-2.0+",
+	"license": "GPL-2.0-or-later",
 	"authors": [
 		{
 			"name": "Trevor Parscal"
@@ -20,7 +20,7 @@
 	"support": {
 		"wiki": "https://www.mediawiki.org/wiki/Skin:Vector",
 		"forum": "https://www.mediawiki.org/wiki/Skin_talk:Vector",
-		"source": "https://git.wikimedia.org/summary/mediawiki%2Fskins%2FVector",
+		"source": "https://phabricator.wikimedia.org/diffusion/SVEC/",
 		"irc": "irc://irc.freenode.org/mediawiki"
 	},
 	"require": {
@@ -34,14 +34,20 @@
 		"installer-name": "Vector"
 	},
 	"require-dev": {
-		"jakub-onderka/php-parallel-lint": "0.9.*",
-		"mediawiki/mediawiki-codesniffer": "0.6.0"
+		"jakub-onderka/php-parallel-lint": "1.0.0",
+		"mediawiki/mediawiki-codesniffer": "18.0.0",
+		"jakub-onderka/php-console-highlighter": "0.3.2",
+		"mediawiki/minus-x": "0.3.1"
 	},
 	"scripts": {
-		"fix": "phpcbf",
+		"fix": [
+			"phpcbf",
+			"minus-x fix ."
+		],
 		"test": [
-			"parallel-lint . --exclude vendor",
-			"phpcs -p -s"
+			"parallel-lint . --exclude node_modules --exclude vendor",
+			"phpcs -p -s",
+			"minus-x check ."
 		]
 	}
 }

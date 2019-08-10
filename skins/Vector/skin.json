@@ -8,10 +8,10 @@
 	"url": "https://www.mediawiki.org/wiki/Skin:Vector",
 	"descriptionmsg": "vector-skin-desc",
 	"namemsg": "skinname-vector",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "skin",
 	"requires": {
-		"MediaWiki": ">= 1.25.0"
+		"MediaWiki": ">= 1.29.0"
 	},
 	"ConfigRegistry": {
 		"vector": "GlobalVarConfig::newInstance"
@@ -25,38 +25,43 @@
 		]
 	},
 	"AutoloadClasses": {
-		"SkinVector": "SkinVector.php",
-		"VectorTemplate": "VectorTemplate.php"
+		"Vector\\Hooks": "includes/Hooks.php",
+		"SkinVector": "includes/SkinVector.php",
+		"VectorTemplate": "includes/VectorTemplate.php",
+		"Vector\\ResourceLoaderLessModule": "includes/ResourceLoaderLessModule.php"
+	},
+	"Hooks": {
+		"BeforePageDisplayMobile": [
+			"Vector\\Hooks::onBeforePageDisplayMobile"
+		]
 	},
 	"@note": "When modifying skins.vector.styles definition, make sure the installer still works",
 	"ResourceModules": {
 		"skins.vector.styles": {
+			"class": "Vector\\ResourceLoaderLessModule",
 			"targets": [ "desktop", "mobile" ],
-			"position": "top",
 			"styles": {
 				"screen.less": {
 					"media": "screen"
 				},
 				"screen-hd.less": {
 					"media": "screen and (min-width: 982px)"
-				}
+				},
+				"print.less": {}
 			}
 		},
+
 		"skins.vector.styles.responsive": {
 			"targets": [ "desktop", "mobile" ],
-			"position": "top",
-			"styles": {
-				"responsive.less": {
-					"media": "screen and (max-width: 768px)"
-				}
-			}
+			"styles": [
+				"responsive.less"
+			]
 		},
 		"skins.vector.js": {
 			"scripts": [
 				"collapsibleTabs.js",
 				"vector.js"
 			],
-			"position": "top",
 			"dependencies": [
 				"jquery.throttle-debounce",
 				"jquery.tabIndex"
@@ -87,6 +92,7 @@
 			"jquery.ui.spinner": "skinStyles/jquery.ui/jquery.ui.spinner.css",
 			"jquery.ui.tabs": "skinStyles/jquery.ui/jquery.ui.tabs.css",
 			"jquery.ui.tooltips": "skinStyles/jquery.ui/jquery.ui.tooltips.css",
+			"+mediawiki.action.view.redirectPage": "skinStyles/mediawiki.action.view.redirectPage.less",
 			"+mediawiki.notification": "skinStyles/mediawiki.notification.less",
 			"+oojs-ui-core.styles": "skinStyles/ooui.less",
 			"mediawiki.special": "skinStyles/mediawiki.special.less",
@@ -96,7 +102,8 @@
 	"config": {
 		"VectorUseSimpleSearch": true,
 		"VectorUseIconWatch": true,
-		"VectorResponsive": false
+		"VectorResponsive": false,
+		"VectorPrintLogo": false
 	},
 	"manifest_version": 1
 }

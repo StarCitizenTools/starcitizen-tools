@@ -19,7 +19,6 @@
 
 	li {
 		line-height: 1.125em;
-		/* @noflip */
 		float: left;
 		margin-left: 0.75em;
 		margin-top: 0.5em;
@@ -36,7 +35,7 @@
 	/* SVG support using a transparent gradient to guarantee cross-browser
 	 * compatibility (browsers able to understand gradient syntax support also SVG) */
 	.background-image-svg('images/user-icon.svg', 'images/user-icon.png');
-	padding-left: 15px !important;
+	padding-left: 15px !important; // stylelint-disable-line declaration-no-important
 }
 
 /* Show "Not logged in" text in gray */

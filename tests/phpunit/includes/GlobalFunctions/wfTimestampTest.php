@@ -21,7 +21,7 @@ class WfTimestampTest extends MediaWikiTestCase {
 			[ -30281104, TS_MW, '19690115123456', 'Negative TS_UNIX to TS_MW' ],
 			[ $t, TS_UNIX, 979562096, 'TS_UNIX to TS_UNIX' ],
 			[ $t, TS_DB, '2001-01-15 12:34:56', 'TS_UNIX to TS_DB' ],
-			[ $t + .01, TS_MW, '20010115123456', 'TS_UNIX float to TS_MW' ],
+			[ $t + 0.01, TS_MW, '20010115123456', 'TS_UNIX float to TS_MW' ],
 
 			[ $t, TS_ISO_8601_BASIC, '20010115T123456Z', 'TS_ISO_8601_BASIC to TS_DB' ],
 
@@ -87,13 +87,13 @@ class WfTimestampTest extends MediaWikiTestCase {
 	/**
 	 * This test checks wfTimestamp() with values outside.
 	 * It needs PHP 64 bits or PHP > 5.1.
-	 * See r74778 and bug 25451
+	 * See r74778 and T27451
 	 * @dataProvider provideOldTimestamps
 	 */
 	public function testOldTimestamps( $input, $outputType, $output, $message ) {
 		$timestamp = wfTimestamp( $outputType, $input );
 		if ( substr( $output, 0, 1 ) === '/' ) {
-			// Bug 64946: Day of the week calculations for very old
+			// T66946: Day of the week calculations for very old
 			// timestamps varies from system to system.
 			$this->assertRegExp( $output, $timestamp, $message );
 		} else {

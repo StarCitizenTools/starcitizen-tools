@@ -5,6 +5,7 @@ class MultiConfigTest extends MediaWikiTestCase {
 	/**
 	 * Tests that settings are fetched in the right order
 	 *
+	 * @covers MultiConfig::__construct
 	 * @covers MultiConfig::get
 	 */
 	public function testGet() {
@@ -16,7 +17,7 @@ class MultiConfigTest extends MediaWikiTestCase {
 
 		$this->assertEquals( 'bar', $multi->get( 'foo' ) );
 		$this->assertEquals( 'foo', $multi->get( 'bar' ) );
-		$this->setExpectedException( 'ConfigException', 'MultiConfig::get: undefined option:' );
+		$this->setExpectedException( ConfigException::class, 'MultiConfig::get: undefined option:' );
 		$multi->get( 'notset' );
 	}
 

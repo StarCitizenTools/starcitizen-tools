@@ -2,6 +2,7 @@
 
 /**
  * @group Templates
+ * @covers TemplateParser
  */
 class TemplateParserTest extends MediaWikiTestCase {
 
@@ -19,9 +20,6 @@ class TemplateParserTest extends MediaWikiTestCase {
 
 	/**
 	 * @dataProvider provideProcessTemplate
-	 * @covers TemplateParser::processTemplate
-	 * @covers TemplateParser::getTemplate
-	 * @covers TemplateParser::getTemplateFilename
 	 */
 	public function testProcessTemplate( $name, $args, $result, $exception = false ) {
 		if ( $exception ) {
@@ -52,6 +50,43 @@ class TemplateParserTest extends MediaWikiTestCase {
 				'UnexpectedValueException'
 			],
 			[
+				"\000../foobar",
+				[],
+				false,
+				'UnexpectedValueException'
+			],
+			[
+				'/',
+				[],
+				false,
+				'UnexpectedValueException'
+			],
+			[
+				// Allegedly this can strip ext in windows.
+				'baz<',
+				[],
+				false,
+				'UnexpectedValueException'
+			],
+			[
+				'\\foo',
+				[],
+				false,
+				'UnexpectedValueException'
+			],
+			[
+				'C:\bar',
+				[],
+				false,
+				'UnexpectedValueException'
+			],
+			[
+				"foo\000bar",
+				[],
+				false,
+				'UnexpectedValueException'
+			],
+			[
 				'nonexistenttemplate',
 				[],
 				false,
@@ -72,4 +107,17 @@ class TemplateParserTest extends MediaWikiTestCase {
 			],
 		];
 	}
+
+	public function testEnableRecursivePartials() {
+		$tp = new TemplateParser( $this->templateDir );
+		$data = [ 'r' => [ 'r' => [ 'r' => [] ] ] ];
+
+		$tp->enableRecursivePartials( true );
+		$this->assertEquals( 'rrr', $tp->processTemplate( 'recurse', $data ) );
+
+		$tp->enableRecursivePartials( false );
+		$this->setExpectedException( Exception::class );
+		$tp->processTemplate( 'recurse', $data );
+	}
+
 }

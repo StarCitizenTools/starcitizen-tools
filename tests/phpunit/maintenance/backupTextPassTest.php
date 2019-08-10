@@ -1,5 +1,14 @@
 <?php
 
+namespace MediaWiki\Tests\Maintenance;
+
+use MediaWikiLangTestCase;
+use TextContentHandler;
+use TextPassDumper;
+use Title;
+use WikiExporter;
+use WikiPage;
+
 require_once __DIR__ . "/../../../maintenance/dumpTextPass.php";
 
 /**
@@ -30,10 +39,11 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 	function addDBData() {
 		$this->tablesUsed[] = 'page';
 		$this->tablesUsed[] = 'revision';
+		$this->tablesUsed[] = 'ip_changes';
 		$this->tablesUsed[] = 'text';
 
 		$this->mergeMwGlobalArrayValue( 'wgContentHandlers', [
-			"BackupTextPassTestModel" => "BackupTextPassTestModelHandler"
+			"BackupTextPassTestModel" => BackupTextPassTestModelHandler::class,
 		] );
 
 		$ns = $this->getDefaultWikitextNS();
@@ -103,7 +113,7 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 		// increasing
 		$this->assertEquals(
 			[ $this->pageId2, $this->pageId3, $this->pageId4 ],
-			[ $this->pageId1 + 1, $this->pageId2 + 1, $this->pageId3 + 1 ],
+			[ $this->pageId1 + 1, $this->pageId1 + 2, $this->pageId1 + 3 ],
 			"Page ids increasing without holes" );
 	}
 
@@ -169,7 +179,10 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 		];
 
 		// The mock itself
-		$prefetchMock = $this->getMock( 'BaseDump', [ 'prefetch' ], [], '', false );
+		$prefetchMock = $this->getMockBuilder( BaseDump::class )
+			->setMethods( [ 'prefetch' ] )
+			->disableOriginalConstructor()
+			->getMock();
 		$prefetchMock->expects( $this->exactly( 6 ) )
 			->method( 'prefetch' )
 			->will( $this->returnValueMap( $prefetchMap ) );
@@ -262,7 +275,6 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 		// duration. If the dump did not take long enough increase the iteration
 		// count, to generate a bigger stub file next time.
 		while ( $lastDuration < $minDuration ) {
-
 			// Setting up the dump
 			wfRecursiveRemoveDir( $nameOutputDir );
 			$this->assertTrue( wfMkdirParents( $nameOutputDir ),
@@ -320,7 +332,6 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 		// Each run of the following loop body tries to handle exactly 1 /page/ (not
 		// iteration of stub content). $i is only increased after having treated page 4.
 		for ( $i = 0; $i < $iterations; ) {
-
 			// 1. Assuring a file is opened and ready. Skipping across header if
 			//    necessary.
 			if ( !$fileOpened ) {
@@ -508,7 +519,6 @@ class TextPassDumperDatabaseTest extends DumpTestCase {
 		$content = $header;
 		$iterations = intval( $iterations );
 		for ( $i = 0; $i < $iterations; $i++ ) {
-
 			$page1 = '  <page>
     <title>BackupDumperTestP1</title>
     <ns>0</ns>

@@ -9,7 +9,7 @@
  * the child selector. You can spot this by looking for the "OVERRIDDEN BY COMPLIANT BROWSERS" and
  * "IGNORED BY IE6" comments.
  */
-@import "mediawiki.mixins";
+@import 'mediawiki.mixins';
 
 /* Framework */
 html {
@@ -27,43 +27,80 @@ body {
 }
 
 /* Content */
+.mw-body,
+.parsoid-body {
+	padding: @content-padding;
+	background-color: @body-background-color;
+	color: @content-font-color;
+	direction: ltr;
+}
+
 .mw-body {
 	margin-left: 10em;
-	padding: @content-padding;
 	/* Border on top, left, and bottom side */
 	border: 1px solid @content-border-color;
 	border-right-width: 0;
 	/* Merge the border with tabs' one (in their background image) */
 	margin-top: -1px;
-	background-color: @body-background-color;
-	color: @content-font-color;
-	direction: ltr;
 
-	.mw-editsection,
-	.mw-editsection-like {
-		font-family: @content-font-family;
+	// h1's can exist outside of mw-body-content so some heading styles
+	// need to be defined in mw-body as well
+	& h1,
+	&-content h1,
+	&-content h2 {
+		font-family: @content-heading-font-family;
+		line-height: @heading-line-height;
+		margin-bottom: 0.25em;
+		padding: 0;
+
+		/* Fallback heading font for scripts which render poorly in @content-heading-font-family. */
+		/* See T73240 */
+		&:lang( ja ), /* See T65817 */
+		&:lang( he ), /* See T65843 and T65844 */
+		&:lang( ko ) { /* See T65827 */
+			font-family: @content-heading-font-family-generic;
+		}
 	}
+
+	& h1,
+	&-content h1 {
+		font-size: @content-heading-font-size;
+	}
+
+	.firstHeading {
+		/* Change the default from mediawiki.skinning CSS to let indicators float into heading area */
+		overflow: visible;
+	}
+
+	.mw-indicators {
+		float: right;
+		line-height: @content-line-height;
+		font-size: @content-font-size;
+		/* Ensure that this is displayed on top of .mw-body-content and clickable */
+		position: relative;
+		z-index: 1;
+	}
+
+	.mw-indicator {
+		display: inline-block;
+		zoom: 1;
+		*display: inline; // stylelint-disable declaration-block-no-duplicate-properties
+	}
+}
+
+.mw-body-content {
+	position: relative;
+	line-height: @content-line-height;
+	font-size: @content-font-size;
+	z-index: 0;
 
 	p {
 		line-height: inherit;
 		margin: 0.5em 0;
 	}
 
-	h1,
-	h2 {
-		font-family: @content-heading-font-family;
-		line-height: @heading-line-height;
-		margin-bottom: 0.25em;
-		padding: 0;
-	}
-
 	h1 {
-		font-size: @content-heading-font-size;
-	}
-	.mw-body-content {
-		h1 {
-			margin-top: 1em;
-		}
+		margin-top: 1em;
 	}
 
 	h2 {
@@ -96,31 +133,16 @@ body {
 		font-size: 100%; /* (reset) */
 	}
 
-	#toc h2,
 	.toc h2 {
 		font-size: 100%; /* (reset) */
 		font-family: @content-font-family;
 	}
+}
 
-	.firstHeading {
-		/* Change the default from mediawiki.skinning CSS to let indicators float into heading area */
-		overflow: visible;
-	}
-
-	.mw-indicators {
-		float: right;
-		line-height: @content-line-height;
-		font-size: @content-font-size;
-		/* Ensure that this is displayed on top of .mw-body-content and clickable */
-		position: relative;
-		z-index: 1;
-	}
-
-	.mw-indicator {
-		display: inline-block;
-		zoom: 1;
-		*display: inline;
-	}
+/* Allow edit sections outside of mw-body-content (T160269) */
+.mw-editsection,
+.mw-editsection-like {
+	font-family: @content-font-family;
 }
 
 /* Hide empty portlets */
@@ -141,19 +163,4 @@ pre,
 /* Site Notice (includes notices from CentralNotice extension) */
 #siteNotice {
 	font-size: 0.8em;
-}
-
-.redirectText {
-	font-size: 140%;
-}
-
-.redirectMsg p {
-	margin: 0;
-}
-
-.mw-body-content {
-	position: relative;
-	line-height: @content-line-height;
-	font-size: @content-font-size;
-	z-index: 0;
 }

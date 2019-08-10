@@ -1,13 +1,16 @@
 <?php
 
+require __DIR__ . "/../../../maintenance/runJobs.php";
+
 /**
  * @group Database
  */
-require __DIR__ . "/../../../maintenance/runJobs.php";
-
 class TemplateCategoriesTest extends MediaWikiLangTestCase {
 
 	/**
+	 * Broken per T165099.
+	 *
+	 * @group Broken
 	 * @covers Title::getParentCategories
 	 */
 	public function testTemplateCategories() {
@@ -91,6 +94,5 @@ class TemplateCategoriesTest extends MediaWikiLangTestCase {
 			$title->getParentCategories(),
 			'Verify that the page is no longer in the category after template deletion'
 		);
-
 	}
 }

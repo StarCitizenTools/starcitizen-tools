@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @covers NewUsersLogFormatter
  * @group Database
  */
 class NewUsersLogFormatterTest extends LogFormatterTestCase {
@@ -10,11 +11,11 @@ class NewUsersLogFormatterTest extends LogFormatterTestCase {
 
 		// Register LogHandler, see $wgNewUserLog in Setup.php
 		$this->mergeMwGlobalArrayValue( 'wgLogActionsHandlers', [
-			'newusers/newusers' => 'NewUsersLogFormatter',
-			'newusers/create' => 'NewUsersLogFormatter',
-			'newusers/create2' => 'NewUsersLogFormatter',
-			'newusers/byemail' => 'NewUsersLogFormatter',
-			'newusers/autocreate' => 'NewUsersLogFormatter',
+			'newusers/newusers' => NewUsersLogFormatter::class,
+			'newusers/create' => NewUsersLogFormatter::class,
+			'newusers/create2' => NewUsersLogFormatter::class,
+			'newusers/byemail' => NewUsersLogFormatter::class,
+			'newusers/autocreate' => NewUsersLogFormatter::class,
 		] );
 	}
 
@@ -107,16 +108,10 @@ class NewUsersLogFormatterTest extends LogFormatterTestCase {
 					'user' => 0,
 					'user_text' => 'User',
 					'namespace' => NS_USER,
-					'title' => 'UTSysop',
-					'params' => [
-						'4::userid' => 1,
-					],
+					'title' => 'UTSysop'
 				],
 				[
-					'text' => 'User account UTSysop was created by User',
-					'api' => [
-						'userid' => 1,
-					],
+					'text' => 'User account UTSysop was created by User'
 				],
 			],
 		];
@@ -126,6 +121,10 @@ class NewUsersLogFormatterTest extends LogFormatterTestCase {
 	 * @dataProvider provideCreate2LogDatabaseRows
 	 */
 	public function testCreate2LogDatabaseRows( $row, $extra ) {
+		// Make UTSysop user and use its user_id (sequence does not reset to 1 for postgres)
+		$user = static::getTestSysop()->getUser();
+		$row['params']['4::userid'] = $user->getId();
+		$extra['api']['userid'] = $user->getId();
 		$this->doTestLogFormatter( $row, $extra );
 	}
 
@@ -145,16 +144,10 @@ class NewUsersLogFormatterTest extends LogFormatterTestCase {
 					'user' => 0,
 					'user_text' => 'Sysop',
 					'namespace' => NS_USER,
-					'title' => 'UTSysop',
-					'params' => [
-						'4::userid' => 1,
-					],
+					'title' => 'UTSysop'
 				],
 				[
-					'text' => 'User account UTSysop was created by Sysop and password was sent by email',
-					'api' => [
-						'userid' => 1,
-					],
+					'text' => 'User account UTSysop was created by Sysop and password was sent by email'
 				],
 			],
 		];
@@ -164,6 +157,10 @@ class NewUsersLogFormatterTest extends LogFormatterTestCase {
 	 * @dataProvider provideByemailLogDatabaseRows
 	 */
 	public function testByemailLogDatabaseRows( $row, $extra ) {
+		// Make UTSysop user and use its user_id (sequence does not reset to 1 for postgres)
+		$user = static::getTestSysop()->getUser();
+		$row['params']['4::userid'] = $user->getId();
+		$extra['api']['userid'] = $user->getId();
 		$this->doTestLogFormatter( $row, $extra );
 	}
 

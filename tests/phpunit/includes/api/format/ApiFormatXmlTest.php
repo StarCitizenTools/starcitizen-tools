@@ -12,11 +12,11 @@ class ApiFormatXmlTest extends ApiFormatTestBase {
 	public static function setUpBeforeClass() {
 		parent::setUpBeforeClass();
 		$page = WikiPage::factory( Title::newFromText( 'MediaWiki:ApiFormatXmlTest.xsl' ) );
-		// @codingStandardsIgnoreStart Generic.Files.LineLength
+		// phpcs:disable Generic.Files.LineLength
 		$page->doEditContent( new WikitextContent(
 			'<?xml version="1.0"?><xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" />'
 		), 'Summary' );
-		// @codingStandardsIgnoreEnd
+		// phpcs:enable
 		$page = WikiPage::factory( Title::newFromText( 'MediaWiki:ApiFormatXmlTest' ) );
 		$page->doEditContent( new WikitextContent( 'Bogus' ), 'Summary' );
 		$page = WikiPage::factory( Title::newFromText( 'ApiFormatXmlTest' ) );
@@ -24,7 +24,7 @@ class ApiFormatXmlTest extends ApiFormatTestBase {
 	}
 
 	public static function provideGeneralEncoding() {
-		// @codingStandardsIgnoreStart Generic.Files.LineLength
+		// phpcs:disable Generic.Files.LineLength
 		return [
 			// Basic types
 			[ [ null, 'a' => null ], '<?xml version="1.0"?><api><_v _idx="0" /></api>' ],
@@ -105,11 +105,11 @@ class ApiFormatXmlTest extends ApiFormatTestBase {
 				[ 'includexmlnamespace' => 1 ] ],
 
 			// xslt param
-			[ [], '<?xml version="1.0"?><api><warnings><xml xml:space="preserve">Invalid or non-existent stylesheet specified</xml></warnings></api>',
+			[ [], '<?xml version="1.0"?><api><warnings><xml xml:space="preserve">Invalid or non-existent stylesheet specified.</xml></warnings></api>',
 				[ 'xslt' => 'DoesNotExist' ] ],
 			[ [], '<?xml version="1.0"?><api><warnings><xml xml:space="preserve">Stylesheet should be in the MediaWiki namespace.</xml></warnings></api>',
 				[ 'xslt' => 'ApiFormatXmlTest' ] ],
-			[ [], '<?xml version="1.0"?><api><warnings><xml xml:space="preserve">Stylesheet should have .xsl extension.</xml></warnings></api>',
+			[ [], '<?xml version="1.0"?><api><warnings><xml xml:space="preserve">Stylesheet should have &quot;.xsl&quot; extension.</xml></warnings></api>',
 				[ 'xslt' => 'MediaWiki:ApiFormatXmlTest' ] ],
 			[ [],
 				'<?xml version="1.0"?><?xml-stylesheet href="' .
@@ -117,7 +117,7 @@ class ApiFormatXmlTest extends ApiFormatTestBase {
 					'" type="text/xsl" ?><api />',
 				[ 'xslt' => 'MediaWiki:ApiFormatXmlTest.xsl' ] ],
 		];
-		// @codingStandardsIgnoreEnd
+		// phpcs:enable
 	}
 
 }

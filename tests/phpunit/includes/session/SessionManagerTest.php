@@ -2,10 +2,10 @@
 
 namespace MediaWiki\Session;
 
-use AuthPlugin;
 use MediaWikiTestCase;
 use Psr\Log\LogLevel;
 use User;
+use Wikimedia\TestingAccessWrapper;
 
 /**
  * @group Session
@@ -14,7 +14,14 @@ use User;
  */
 class SessionManagerTest extends MediaWikiTestCase {
 
-	protected $config, $logger, $store;
+	/** @var \HashConfig */
+	private $config;
+
+	/** @var \TestLogger */
+	private $logger;
+
+	/** @var TestBagOStuff */
+	private $store;
 
 	protected function getManager() {
 		\ObjectCache::$instances['testSessionStore'] = new TestBagOStuff();
@@ -23,7 +30,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 			'SessionCacheType' => 'testSessionStore',
 			'ObjectCacheSessionExpiry' => 100,
 			'SessionProviders' => [
-				[ 'class' => 'DummySessionProvider' ],
+				[ 'class' => \DummySessionProvider::class ],
 			]
 		] );
 		$this->logger = new \TestLogger( false, function ( $m ) {
@@ -60,9 +67,9 @@ class SessionManagerTest extends MediaWikiTestCase {
 		}
 		$rProp = new \ReflectionProperty( PHPSessionHandler::class, 'instance' );
 		$rProp->setAccessible( true );
-		$handler = \TestingAccessWrapper::newFromObject( $rProp->getValue() );
+		$handler = TestingAccessWrapper::newFromObject( $rProp->getValue() );
 		$oldEnable = $handler->enable;
-		$reset[] = new \ScopedCallback( function () use ( $handler, $oldEnable ) {
+		$reset[] = new \Wikimedia\ScopedCallback( function () use ( $handler, $oldEnable ) {
 			if ( $handler->enable ) {
 				session_write_close();
 			}
@@ -75,6 +82,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 		$context->setRequest( $request );
 		$id = $request->getSession()->getId();
 
+		session_write_close();
 		session_id( '' );
 		$session = SessionManager::getGlobalSession();
 		$this->assertSame( $id, $session->getId() );
@@ -101,15 +109,15 @@ class SessionManagerTest extends MediaWikiTestCase {
 	}
 
 	public function testConstructor() {
-		$manager = \TestingAccessWrapper::newFromObject( $this->getManager() );
+		$manager = TestingAccessWrapper::newFromObject( $this->getManager() );
 		$this->assertSame( $this->config, $manager->config );
 		$this->assertSame( $this->logger, $manager->logger );
 		$this->assertSame( $this->store, $manager->store );
 
-		$manager = \TestingAccessWrapper::newFromObject( new SessionManager() );
+		$manager = TestingAccessWrapper::newFromObject( new SessionManager() );
 		$this->assertSame( \RequestContext::getMain()->getConfig(), $manager->config );
 
-		$manager = \TestingAccessWrapper::newFromObject( new SessionManager( [
+		$manager = TestingAccessWrapper::newFromObject( new SessionManager( [
 			'config' => $this->config,
 		] ) );
 		$this->assertSame( \ObjectCache::$instances['testSessionStore'], $manager->store );
@@ -138,7 +146,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 		$id2 = '';
 		$idEmpty = 'empty-session-------------------';
 
-		$providerBuilder = $this->getMockBuilder( 'DummySessionProvider' )
+		$providerBuilder = $this->getMockBuilder( \DummySessionProvider::class )
 			->setMethods(
 				[ 'provideSessionInfo', 'newSessionInfo', '__toString', 'describe', 'unpersistSession' ]
 			);
@@ -397,7 +405,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 
 		// Failure to create an empty session
 		$manager = $this->getManager();
-		$provider = $this->getMockBuilder( 'DummySessionProvider' )
+		$provider = $this->getMockBuilder( \DummySessionProvider::class )
 			->setMethods( [ 'provideSessionInfo', 'newSessionInfo', '__toString' ] )
 			->getMock();
 		$provider->expects( $this->any() )->method( 'provideSessionInfo' )
@@ -419,10 +427,10 @@ class SessionManagerTest extends MediaWikiTestCase {
 
 	public function testGetEmptySession() {
 		$manager = $this->getManager();
-		$pmanager = \TestingAccessWrapper::newFromObject( $manager );
+		$pmanager = TestingAccessWrapper::newFromObject( $manager );
 		$request = new \FauxRequest();
 
-		$providerBuilder = $this->getMockBuilder( 'DummySessionProvider' )
+		$providerBuilder = $this->getMockBuilder( \DummySessionProvider::class )
 			->setMethods( [ 'provideSessionInfo', 'newSessionInfo', '__toString' ] );
 
 		$expectId = null;
@@ -646,7 +654,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 		$user = User::newFromName( 'UTSysop' );
 		$manager = $this->getManager();
 
-		$providerBuilder = $this->getMockBuilder( 'DummySessionProvider' )
+		$providerBuilder = $this->getMockBuilder( \DummySessionProvider::class )
 			->setMethods( [ 'invalidateSessionsForUser', '__toString' ] );
 
 		$provider1 = $providerBuilder->getMock();
@@ -674,7 +682,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 	public function testGetVaryHeaders() {
 		$manager = $this->getManager();
 
-		$providerBuilder = $this->getMockBuilder( 'DummySessionProvider' )
+		$providerBuilder = $this->getMockBuilder( \DummySessionProvider::class )
 			->setMethods( [ 'getVaryHeaders', '__toString' ] );
 
 		$provider1 = $providerBuilder->getMock();
@@ -718,7 +726,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 	public function testGetVaryCookies() {
 		$manager = $this->getManager();
 
-		$providerBuilder = $this->getMockBuilder( 'DummySessionProvider' )
+		$providerBuilder = $this->getMockBuilder( \DummySessionProvider::class )
 			->setMethods( [ 'getVaryCookies', '__toString' ] );
 
 		$provider1 = $providerBuilder->getMock();
@@ -748,21 +756,21 @@ class SessionManagerTest extends MediaWikiTestCase {
 
 	public function testGetProviders() {
 		$realManager = $this->getManager();
-		$manager = \TestingAccessWrapper::newFromObject( $realManager );
+		$manager = TestingAccessWrapper::newFromObject( $realManager );
 
 		$this->config->set( 'SessionProviders', [
-			[ 'class' => 'DummySessionProvider' ],
+			[ 'class' => \DummySessionProvider::class ],
 		] );
 		$providers = $manager->getProviders();
 		$this->assertArrayHasKey( 'DummySessionProvider', $providers );
-		$provider = \TestingAccessWrapper::newFromObject( $providers['DummySessionProvider'] );
+		$provider = TestingAccessWrapper::newFromObject( $providers['DummySessionProvider'] );
 		$this->assertSame( $manager->logger, $provider->logger );
 		$this->assertSame( $manager->config, $provider->config );
 		$this->assertSame( $realManager, $provider->getManager() );
 
 		$this->config->set( 'SessionProviders', [
-			[ 'class' => 'DummySessionProvider' ],
-			[ 'class' => 'DummySessionProvider' ],
+			[ 'class' => \DummySessionProvider::class ],
+			[ 'class' => \DummySessionProvider::class ],
 		] );
 		$manager->sessionProviders = null;
 		try {
@@ -777,10 +785,11 @@ class SessionManagerTest extends MediaWikiTestCase {
 	}
 
 	public function testShutdown() {
-		$manager = \TestingAccessWrapper::newFromObject( $this->getManager() );
+		$manager = TestingAccessWrapper::newFromObject( $this->getManager() );
 		$manager->setLogger( new \Psr\Log\NullLogger() );
 
-		$mock = $this->getMock( 'stdClass', [ 'shutdown' ] );
+		$mock = $this->getMockBuilder( stdClass::class )
+			->setMethods( [ 'shutdown' ] )->getMock();
 		$mock->expects( $this->once() )->method( 'shutdown' );
 
 		$manager->allSessionBackends = [ $mock ];
@@ -788,7 +797,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 	}
 
 	public function testGetSessionFromInfo() {
-		$manager = \TestingAccessWrapper::newFromObject( $this->getManager() );
+		$manager = TestingAccessWrapper::newFromObject( $this->getManager() );
 		$request = new \FauxRequest();
 
 		$id = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
@@ -800,11 +809,11 @@ class SessionManagerTest extends MediaWikiTestCase {
 			'userInfo' => UserInfo::newFromName( 'UTSysop', true ),
 			'idIsSafe' => true,
 		] );
-		\TestingAccessWrapper::newFromObject( $info )->idIsSafe = true;
-		$session1 = \TestingAccessWrapper::newFromObject(
+		TestingAccessWrapper::newFromObject( $info )->idIsSafe = true;
+		$session1 = TestingAccessWrapper::newFromObject(
 			$manager->getSessionFromInfo( $info, $request )
 		);
-		$session2 = \TestingAccessWrapper::newFromObject(
+		$session2 = TestingAccessWrapper::newFromObject(
 			$manager->getSessionFromInfo( $info, $request )
 		);
 
@@ -813,7 +822,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 		$this->assertSame( $session1->getSessionId(), $session2->getSessionId() );
 		$this->assertSame( $id, $session1->getId() );
 
-		\TestingAccessWrapper::newFromObject( $info )->idIsSafe = false;
+		TestingAccessWrapper::newFromObject( $info )->idIsSafe = false;
 		$session3 = $manager->getSessionFromInfo( $info, $request );
 		$this->assertNotSame( $id, $session3->getId() );
 	}
@@ -822,7 +831,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 		$manager = $this->getManager();
 
 		$session = $manager->getSessionForRequest( new \FauxRequest );
-		$backend = \TestingAccessWrapper::newFromObject( $session )->backend;
+		$backend = TestingAccessWrapper::newFromObject( $session )->backend;
 		$sessionId = $session->getSessionId();
 		$id = (string)$sessionId;
 
@@ -870,7 +879,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 	public function testPreventSessionsForUser() {
 		$manager = $this->getManager();
 
-		$providerBuilder = $this->getMockBuilder( 'DummySessionProvider' )
+		$providerBuilder = $this->getMockBuilder( \DummySessionProvider::class )
 			->setMethods( [ 'preventSessionsForUser', '__toString' ] );
 
 		$provider1 = $providerBuilder->getMock();
@@ -959,7 +968,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 		$provider3->expects( $this->any() )->method( '__toString' )
 			->will( $this->returnValue( 'Mock3' ) );
 
-		\TestingAccessWrapper::newFromObject( $manager )->sessionProviders = [
+		TestingAccessWrapper::newFromObject( $manager )->sessionProviders = [
 			(string)$provider => $provider,
 			(string)$provider2 => $provider2,
 			(string)$provider3 => $provider3,
@@ -1005,7 +1014,7 @@ class SessionManagerTest extends MediaWikiTestCase {
 		$this->assertFalse( $loadSessionInfoFromStore( $info ) );
 		$this->assertSame( [
 			[
-				LogLevel::WARNING,
+				LogLevel::INFO,
 				'Session "{session}": Unverified user provided and no metadata to auth it',
 			]
 		], $logger->getBuffer() );

@@ -311,7 +311,7 @@ class LoadBalancer implements ILoadBalancer {
 						": server {host} is not replicating?", [ 'host' => $host ] );
 					unset( $loads[$i] );
 				} elseif ( $lag > $maxServerLag ) {
-					$this->replLogger->info(
+					$this->replLogger->debug(
 						__METHOD__ .
 						": server {host} has {lag} seconds of lag (>= {maxlag})",
 						[ 'host' => $host, 'lag' => $lag, 'maxlag' => $maxServerLag ]
@@ -1171,6 +1171,14 @@ class LoadBalancer implements ILoadBalancer {
 		}
 
 		return ( $name != '' ) ? $name : 'localhost';
+	}
+
+	public function getServerInfo( $i ) {
+		if ( isset( $this->servers[$i] ) ) {
+			return $this->servers[$i];
+		} else {
+			return false;
+		}
 	}
 
 	public function getServerType( $i ) {

@@ -1,10 +1,10 @@
 <?php
 /**
- * Specificly for testing Media handlers. Sets up a FSFile backend
+ * Specificly for testing Media handlers. Sets up a FileRepo backend
  */
 abstract class MediaWikiMediaTestCase extends MediaWikiTestCase {
 
-	/** @var FSRepo */
+	/** @var FileRepo */
 	protected $repo;
 	/** @var FSFileBackend */
 	protected $backend;
@@ -19,20 +19,21 @@ abstract class MediaWikiMediaTestCase extends MediaWikiTestCase {
 		if ( $this->createsThumbnails() ) {
 			// We need a temp directory for the thumbnails
 			// the container is named 'temp-thumb' because it is the
-			// thumb directory for a FSRepo named "temp".
+			// thumb directory for a repo named "temp".
 			$containers['temp-thumb'] = $this->getNewTempDirectory();
 		}
 
 		$this->backend = new FSFileBackend( [
 			'name' => 'localtesting',
 			'wikiId' => wfWikiID(),
-			'containerPaths' => $containers
+			'containerPaths' => $containers,
+			'tmpDirectory' => $this->getNewTempDirectory()
 		] );
-		$this->repo = new FSRepo( $this->getRepoOptions() );
+		$this->repo = new FileRepo( $this->getRepoOptions() );
 	}
 
 	/**
-	 * @return array Argument for FSRepo constructor
+	 * @return array Argument for FileRepo constructor
 	 */
 	protected function getRepoOptions() {
 		return [
@@ -75,7 +76,7 @@ abstract class MediaWikiMediaTestCase extends MediaWikiTestCase {
 	protected function dataFile( $name, $type = null ) {
 		if ( !$type ) {
 			// Autodetect by file extension for the lazy.
-			$magic = MimeMagic::singleton();
+			$magic = MediaWiki\MediaWikiServices::getInstance()->getMimeAnalyzer();
 			$parts = explode( $name, '.' );
 			$type = $magic->guessTypesForExtension( $parts[count( $parts ) - 1] );
 		}

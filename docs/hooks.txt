@@ -74,9 +74,7 @@ Using a hook-running strategy, we can avoid having all this option-specific
 stuff in our mainline code. Using hooks, the function becomes:
 
 	function showAnArticle( $article ) {
-
 		if ( Hooks::run( 'ArticleShow', array( &$article ) ) ) {
-
 			# code to actually show the article goes here
 
 			Hooks::run( 'ArticleShowComplete', array( &$article ) );
@@ -212,9 +210,13 @@ related to a particular event, like so:
 		# ...
 		function protect() {
 			global $wgUser;
-			if ( Hooks::run( 'ArticleProtect', array( &$this, &$wgUser ) ) ) {
+
+			// Avoid PHP 7.1 warning from passing $this by reference
+			$article = $this;
+
+			if ( Hooks::run( 'ArticleProtect', [ &$article, &$wgUser ] ) ) {
 				# protect the article
-				Hooks::run( 'ArticleProtectComplete', array( &$this, &$wgUser ) );
+				Hooks::run( 'ArticleProtectComplete', [ &$article, &$wgUser ] );
 			}
 		}
 	}
@@ -297,16 +299,6 @@ After a user account is created.
 $user: the User object that was created. (Parameter added in 1.7)
 $byEmail: true when account was created "by email" (added in 1.12)
 
-'AddNewAccountApiForm': Allow modifying internal login form when creating an
-account via API.
-$apiModule: the ApiCreateAccount module calling
-$loginForm: the LoginForm used
-
-'AddNewAccountApiResult': Modify API output when creating a new account via API.
-$apiModule: the ApiCreateAccount module calling
-$loginForm: the LoginForm used
-&$result: associative array for API result data
-
 'AfterBuildFeedLinks': Executed in OutputPage.php after all feed links (atom, rss,...)
 are created. Can be used to omit specific feeds from being outputted. You must not use
 this hook to add feeds, use OutputPage::addFeedLink() instead.
@@ -368,10 +360,20 @@ authenticate and authorize API clients before executing the module. Return
 false and set a message to cancel the request.
 $module: Module object
 $user: Current user
-&$message: API usage message to die with, as a message key or array
-  as accepted by ApiBase::dieUsageMsg.
+&$message: API message to die with. Specific values accepted depend on the
+ MediaWiki version:
+ * 1.29+: IApiMessage, Message, string message key, or key+parameters array to
+   pass to ApiBase::dieWithError().
+ * 1.27+: IApiMessage, or a key or key+parameters in ApiBase::$messageMap.
+ * Earlier: A key or key+parameters in ApiBase::$messageMap.
 
-'APIEditBeforeSave': Before saving a page with api.php?action=edit, after
+'ApiDeprecationHelp': Add messages to the 'deprecation-help' warning generated
+from ApiBase::addDeprecation().
+&$msgs: Message[] Messages to include in the help. Multiple messages will be
+  joined with spaces.
+
+'APIEditBeforeSave': DEPRECATED! Use EditFilterMergedContent instead.
+Before saving a page with api.php?action=edit, after
 processing request parameters. Return false to let the request fail, returning
 an error message or an <edit result="Failure"> tag if $resultArr was filled.
 Unlike for example 'EditFilterMergedContent' this also being run on undo.
@@ -443,6 +445,15 @@ an exception is thrown during API action execution.
 $apiMain: Calling ApiMain instance.
 $e: Exception object.
 
+'ApiMakeParserOptions': Called from ApiParse and ApiExpandTemplates to allow
+extensions to adjust the ParserOptions before parsing.
+$options: ParserOptions object
+$title: Title to be parsed
+$params: Parameter array for the API module
+$module: API module (which is also a ContextSource)
+&$reset: Set to a ScopedCallback used to reset any hooks after the parse is done.
+&$suppressCache: Set true if cache should be suppressed.
+
 'ApiOpenSearchSuggest': Called when constructing the OpenSearch results. Hooks
 can alter or append to the array.
 &$results: array with integer keys to associative arrays. Keys in associative
@@ -463,6 +474,41 @@ $moduleManager: ApiModuleManager Module manager instance
 'APIQueryAfterExecute': After calling the execute() method of an
 action=query submodule. Use this to extend core API modules.
 &$module: Module object
+
+'ApiQueryBaseAfterQuery': Called for (some) API query modules after the
+database query has returned. An API query module wanting to use this hook
+should see the ApiQueryBase::select() and ApiQueryBase::processRow()
+documentation.
+$module: ApiQueryBase module in question
+$result: ResultWrapper|bool returned from the IDatabase::select()
+&$hookData: array that was passed to the 'ApiQueryBaseBeforeQuery' hook and
+ will be passed to the 'ApiQueryBaseProcessRow' hook, intended for inter-hook
+ communication.
+
+'ApiQueryBaseBeforeQuery': Called for (some) API query modules before a
+database query is made. WARNING: It would be very easy to misuse this hook and
+break the module! Any joins added *must* join on a unique key of the target
+table unless you really know what you're doing. An API query module wanting to
+use this hook should see the ApiQueryBase::select() and
+ApiQueryBase::processRow() documentation.
+$module: ApiQueryBase module in question
+&$tables: array of tables to be queried
+&$fields: array of columns to select
+&$conds: array of WHERE conditionals for query
+&$query_options: array of options for the database request
+&$join_conds: join conditions for the tables
+&$hookData: array that will be passed to the 'ApiQueryBaseAfterQuery' and
+ 'ApiQueryBaseProcessRow' hooks, intended for inter-hook communication.
+
+'ApiQueryBaseProcessRow': Called for (some) API query modules as each row of
+the database result is processed. Return false to stop processing the result
+set. An API query module wanting to use this hook should see the
+ApiQueryBase::select() and ApiQueryBase::processRow() documentation.
+$module: ApiQueryBase module in question
+$row: stdClass Database result row
+&$data: array to be included in the ApiResult.
+&$hookData: array that was be passed to the 'ApiQueryBaseBeforeQuery' and
+ 'ApiQueryBaseAfterQuery' hooks, intended for inter-hook communication.
 
 'APIQueryGeneratorAfterExecute': After calling the executeGenerator() method of
 an action=query submodule. Use this to extend core API modules.
@@ -530,6 +576,18 @@ your callback to the $tokenFunctions array and return true (returning false
 makes no sense).
 &$tokenFunctions: array(action => callback)
 
+'ApiQueryWatchlistExtractOutputData': Extract row data for ApiQueryWatchlist.
+$module: ApiQueryWatchlist instance
+$watchedItem: WatchedItem instance
+$recentChangeInfo: Array of recent change info data
+&$vals: Associative array of data to be output for the row
+
+'ApiQueryWatchlistPrepareWatchedItemQueryServiceOptions': Populate the options
+to be passed from ApiQueryWatchlist to WatchedItemQueryService.
+$module: ApiQueryWatchlist instance
+$params: Array of parameters, as would be returned by $module->extractRequestParams()
+&$options: Array of options for WatchedItemQueryService::getWatchedItemsWithRecentChangeInfo()
+
 'ApiRsdServiceApis': Add or remove APIs from the RSD services list. Each service
 should have its own entry in the $apis array and have a unique name, passed as
 key for the array that represents the service data. In this data array, the
@@ -541,18 +599,16 @@ Use this hook to extend action=tokens with new token types.
 &$tokenTypes: supported token types in format 'type' => callback function
   used to retrieve this type of tokens.
 
+'ApiValidatePassword': Called from ApiValidatePassword.
+$module: ApiValidatePassword instance.
+&$r: Result array.
+
 'Article::MissingArticleConditions': Before fetching deletion & move log entries
 to display a message of a non-existing page being deleted/moved, give extensions
 a chance to hide their (unrelated) log entries.
 &$conds: Array of query conditions (all of which have to be met; conditions will
   AND in the final query)
 $logTypes: Array of log types being queried
-
-'ArticleAfterFetchContent': DEPRECATED! Use ArticleAfterFetchContentObject
-instead.
-After fetching content of an article from the database.
-&$article: the article (object) being loaded from the database
-&$content: the content (string) of the article
 
 'ArticleAfterFetchContentObject': After fetching content of an article from the
 database.
@@ -596,8 +652,9 @@ $outputPage: OutputPage that can be used to append the output.
 &$user: the user that deleted the article
 $reason: the reason the article was deleted
 $id: id of the article that was deleted
-$content: the Content of the deleted page
+$content: the Content of the deleted page (or null, when deleting a broken page)
 $logEntry: the ManualLogEntry used to record the deletion
+$archivedRevisionCount: the number of revisions archived during the deletion
 
 'ArticleEditUpdateNewTalk': Before updating user_newtalk when a user talk page
 was changed.
@@ -621,18 +678,6 @@ Wiki::articleFromTitle().
 &$article: Article (object) that will be returned
 $context: IContextSource (object)
 
-'ArticleInsertComplete': DEPRECATED! Use PageContentInsertComplete.
-After a new article is created.
-$wikiPage: WikiPage created
-$user: User creating the article
-$text: New content
-$summary: Edit summary/comment
-$isMinor: Whether or not the edit was marked as minor
-$isWatch: (No longer used)
-$section: (No longer used)
-$flags: Flags passed to WikiPage::doEditContent()
-$revision: New Revision of the article
-
 'ArticleMergeComplete': After merging to article using Special:Mergehistory.
 $targetTitle: target title (object)
 $destTitle: destination title (object)
@@ -644,6 +689,8 @@ $destTitle: destination title (object)
 'ArticlePageDataBefore': Before loading data of an article from the database.
 &$wikiPage: WikiPage (object) that data will be loaded
 &$fields: fields (array) to load from the database
+&$tables: tables (array) to load from the database
+&$joinConds: join conditions (array) to load from the database
 
 'ArticlePrepareTextForEdit': Called when preparing text to be saved.
 $wikiPage: the WikiPage being saved
@@ -673,6 +720,10 @@ $oldPageID: the page ID of the revision when archived (may be null)
 revisions of an article.
 $title: Title object of the article
 $ids: Ids to set the visibility for
+$visibilityChangeMap: Map of revision id to oldBits and newBits.  This array can be
+  examined to determine exactly what visibility bits have changed for each
+  revision.  This array is of the form
+  [id => ['oldBits' => $oldBits, 'newBits' => $newBits], ... ]
 
 'ArticleRollbackComplete': After an article rollback is completed.
 $wikiPage: the WikiPage that was edited
@@ -680,36 +731,15 @@ $user: the user who did the rollback
 $revision: the revision the page was reverted back to
 $current: the reverted revision
 
-'ArticleSave': DEPRECATED! Use PageContentSave instead.
-Before an article is saved.
-$wikiPage: the WikiPage (object) being saved
-$user: the user (object) saving the article
-$text: the new article text
-$summary: the article summary (comment)
-$isminor: minor flag
-$iswatch: watch flag
-$section: section #
-
-'ArticleSaveComplete': DEPRECATED! Use PageContentSaveComplete instead.
-After an article has been updated.
-$wikiPage: WikiPage modified
-$user: User performing the modification
-$text: New content
-$summary: Edit summary/comment
-$isMinor: Whether or not the edit was marked as minor
-$isWatch: (No longer used)
-$section: (No longer used)
-$flags: Flags passed to WikiPage::doEditContent()
-$revision: New Revision of the article
-$status: Status object about to be returned by doEditContent()
-$baseRevId: the rev ID (or false) this edit was based on
-
 'ArticleUndelete': When one or more revisions of an article are restored.
 &$title: Title corresponding to the article restored
 $create: Whether or not the restoration caused the page to be created (i.e. it
   didn't exist before).
 $comment: The comment associated with the undeletion.
-$oldPageId: ID of page previously deleted (from archive table)
+$oldPageId: ID of page previously deleted (from archive table). This ID will be used
+  for the restored page.
+$restoredPages: Set of page IDs that have revisions restored for this undelete,
+  with keys being page IDs and values are 'true'.
 
 'ArticleUndeleteLogEntry': When a log entry is generated but not yet saved.
 $pageArchive: the PageArchive object
@@ -721,14 +751,6 @@ the user is redirected back to the page.
 $article: the article
 &$sectionanchor: The section anchor link (e.g. "#overview" )
 &$extraq: Extra query parameters which can be added via hooked functions
-
-'ArticleViewCustom': DEPRECATED! Use ArticleContentViewCustom instead.
-Allows to output the text of the article in a different format than wikitext.
-Note that it is preferable to implement proper handing for a custom data type
-using the ContentHandler facility.
-$text: text of the page
-$title: title of the page
-$output: reference to $wgOut
 
 'ArticleViewFooter': After showing the footer section of an ordinary page view
 $article: Article object
@@ -889,6 +911,7 @@ $image: File
 'BlockIpComplete': After an IP address or user is blocked.
 $block: the Block object that was saved
 $user: the user who did the block (not the one being blocked)
+$priorBlock: the Block object for the prior block or null if there was none
 
 'BookInformation': Before information output on Special:Booksources.
 $isbn: ISBN to show information for
@@ -919,6 +942,7 @@ $wikiPage: WikiPage that was added
 'CategoryAfterPageRemoved': After a page is removed from a category.
 $category: Category that page was removed from
 $wikiPage: WikiPage that was removed
+$id: the page ID (original ID in case of page deletions)
 
 'CategoryPageView': Before viewing a categorypage in CategoryPage::view.
 &$catpage: CategoryPage instance
@@ -927,7 +951,7 @@ $wikiPage: WikiPage that was removed
 in a Category page. Gives extensions the opportunity to batch load any
 related data about the pages.
 $type: The category type. Either 'page', 'file' or 'subcat'
-$res: Query result from DatabaseBase::select()
+$res: Query result from Wikimedia\Rdbms\IDatabase::select()
 
 'CategoryViewer::generateLink': Before generating an output link allow
 extensions opportunity to generate a more specific or relevant link.
@@ -961,7 +985,9 @@ $rows: The data that will be rendered. May be a ResultWrapper instance or
 $unpatrolled: Whether or not we are showing unpatrolled changes.
 $watched: Whether or not the change is watched by the user.
 
-'ChangesListSpecialPageFilters': Called after building form options on pages
+'ChangesListSpecialPageFilters': DEPRECATED! Use 'ChangesListSpecialPageStructuredFilters'
+instead.
+Called after building form options on pages
 inheriting from ChangesListSpecialPage (in core: RecentChanges,
 RecentChangesLinked and Watchlist).
 $special: ChangesListSpecialPage instance
@@ -972,6 +998,12 @@ $special: ChangesListSpecialPage instance
 'ChangesListSpecialPageQuery': Called when building SQL query on pages
 inheriting from ChangesListSpecialPage (in core: RecentChanges,
 RecentChangesLinked and Watchlist).
+Do not use this to implement individual filters if they are compatible with the
+ChangesListFilter and ChangesListFilterGroup structure.
+Instead, use sub-classes of those classes, in conjunction with the
+ChangesListSpecialPageStructuredFilters hook.
+This hook can be used to implement filters that do not implement that structure,
+or custom behavior that is not an individual filter.
 $name: name of the special page, e.g. 'Watchlist'
 &$tables: array of tables to be queried
 &$fields: array of columns to select
@@ -979,6 +1011,22 @@ $name: name of the special page, e.g. 'Watchlist'
 &$query_options: array of options for the database request
 &$join_conds: join conditions for the tables
 $opts: FormOptions for this request
+
+'ChangesListSpecialPageStructuredFilters': Called to allow extensions to register
+filters for pages inheriting from ChangesListSpecialPage (in core: RecentChanges,
+RecentChangesLinked, and Watchlist).  Generally, you will want to construct
+new ChangesListBooleanFilter or ChangesListStringOptionsFilter objects.
+When constructing them, you specify which group they belong to.  You can reuse
+existing groups (accessed through $special->getFilterGroup), or create your own
+(ChangesListBooleanFilterGroup or ChangesListStringOptionsFilterGroup).
+If you create new groups, you must register them with $special->registerFilterGroup.
+Note that this is called regardless of whether the user is currently using
+the new (structured) or old (unstructured) filter UI.  If you want your boolean
+filter to show on both the new and old UI, specify all the supported fields.
+These include showHide, label, and description.
+See the constructor of each ChangesList* class for documentation of supported
+fields.
+$special: ChangesListSpecialPage instance
 
 'ChangeTagAfterDelete': Called after a change tag has been deleted (that is,
 removed from all revisions and log entries to which it was applied). This gives
@@ -1011,6 +1059,31 @@ $user: user initiating the action
 'ChangeTagsListActive': Allows you to nominate which of the tags your extension
 uses are in active use.
 &$tags: list of all active tags. Append to this array.
+
+'ChangeTagsAfterUpdateTags': Called after tags have been updated with the
+ChangeTags::updateTags function. Params:
+$addedTags: tags effectively added in the update
+$removedTags: tags effectively removed in the update
+$prevTags: tags that were present prior to the update
+$rc_id: recentchanges table id
+$rev_id: revision table id
+$log_id: logging table id
+$params: tag params
+$rc: RecentChange being tagged when the tagging accompanies the action or null
+$user: User who performed the tagging when the tagging is subsequent to the action or null
+
+'ChangeTagsAllowedAdd': Called when checking if a user can add tags to a change.
+&$allowedTags: List of all the tags the user is allowed to add. Any tags the
+  user wants to add ($addTags) that are not in this array will cause it to fail.
+  You may add or remove tags to this array as required.
+$addTags: List of tags user intends to add.
+$user: User who is adding the tags.
+
+'ChangeUserGroups': Called before user groups are changed.
+$performer: The User who will perform the change
+$user: The User whose groups will be changed
+&$add: The groups that will be added
+&$remove: The groups that will be removed
 
 'Collation::factory': Called if $wgCategoryCollation is an unknown collation.
 $collationName: Name of the collation in question
@@ -1053,6 +1126,8 @@ $title: the Title in question
 'ContentHandlerForModelID': Called when a ContentHandler is requested for
 a given content model name, but no entry for that model exists in
 $wgContentHandlers.
+Note: if your extension implements additional models via this hook, please
+use GetContentModels hook to make them known to core.
 $modeName: the requested content model name
 &$handler: set this to a ContentHandler object, if desired.
 
@@ -1082,11 +1157,17 @@ $page: SpecialPage object for contributions
 &$ret: the HTML line
 $row: the DB row for this line
 &$classes: the classes to add to the surrounding <li>
+&$attribs: associative array of other HTML attributes for the <li> element.
+  Currently only data attributes reserved to MediaWiki are allowed
+  (see Sanitizer::isReservedDataAttribute).
 
 'ContributionsToolLinks': Change tool links above Special:Contributions
 $id: User identifier
 $title: User page title
 &$tools: Array of tool links
+$specialPage: SpecialPage instance for context and services. Can be either
+  SpecialContributions or DeletedContributionsPage. Extensions should type
+  hint against a generic SpecialPage though.
 
 'ConvertContent': Called by AbstractContent::convert when a conversion to
 another content model is requested.
@@ -1124,6 +1205,113 @@ $page: SpecialPage object for DeletedContributions
 &$ret: the HTML line
 $row: the DB row for this line
 &$classes: the classes to add to the surrounding <li>
+&$attribs: associative array of other HTML attributes for the <li> element.
+  Currently only data attributes reserved to MediaWiki are allowed
+  (see Sanitizer::isReservedDataAttribute).
+
+'DeleteUnknownPreferences': Called by the cleanupPreferences.php maintenance script to build a WHERE clause with which
+to delete preferences that are not known about. This hook is used by extensions that have dynamically-named preferences
+that should not be deleted in the usual cleanup process. For example, the Gadgets extension creates preferences prefixed
+with 'gadget-', and so anything with that prefix is excluded from the deletion.
+&where: An array that will be passed as the $cond parameter to IDatabase::select() to determine what will be deleted
+  from the user_properties table.
+$db: The IDatabase object, useful for accessing $db->buildLike() etc.
+
+'DifferenceEngineAfterLoadNewText': called in DifferenceEngine::loadNewText()
+after the new revision's content has been loaded into the class member variable
+$differenceEngine->mNewContent but before returning true from this function.
+$differenceEngine: DifferenceEngine object
+
+'DifferenceEngineLoadTextAfterNewContentIsLoaded': called in
+DifferenceEngine::loadText() after the new revision's content has been loaded
+into the class member variable $differenceEngine->mNewContent but before
+checking if the variable's value is null.
+This hook can be used to inject content into said class member variable.
+$differenceEngine: DifferenceEngine object
+
+'DifferenceEngineMarkPatrolledLink': Allows extensions to change the "mark as patrolled" link
+which is shown both on the diff header as well as on the bottom of a page, usually
+wrapped in a span element which has class="patrollink".
+$differenceEngine: DifferenceEngine object
+&$markAsPatrolledLink: The "mark as patrolled" link HTML (string)
+$rcid: Recent change ID (rc_id) for this change (int)
+
+'DifferenceEngineMarkPatrolledRCID': Allows extensions to possibly change the rcid parameter.
+For example the rcid might be set to zero due to the user being the same as the
+performer of the change but an extension might still want to show it under certain
+conditions.
+&$rcid: rc_id (int) of the change or 0
+$differenceEngine: DifferenceEngine object
+$change: RecentChange object
+$user: User object representing the current user
+
+'DifferenceEngineNewHeader': Allows extensions to change the $newHeader variable, which
+contains information about the new revision, such as the revision's author, whether
+the revision was marked as a minor edit or not, etc.
+$differenceEngine: DifferenceEngine object
+&$newHeader: The string containing the various #mw-diff-otitle[1-5] divs, which
+include things like revision author info, revision comment, RevisionDelete link and more
+$formattedRevisionTools: Array containing revision tools, some of which may have
+been injected with the DiffRevisionTools hook
+$nextlink: String containing the link to the next revision (if any); also included in $newHeader
+$rollback: Rollback link (string) to roll this revision back to the previous one, if any
+$newminor: String indicating if the new revision was marked as a minor edit
+$diffOnly: Boolean parameter passed to DifferenceEngine#showDiffPage, indicating
+whether we should show just the diff; passed in as a query string parameter to the
+various URLs constructed here (i.e. $nextlink)
+$rdel: RevisionDelete link for the new revision, if the current user is allowed
+to use the RevisionDelete feature
+$unhide: Boolean parameter indicating whether to show RevisionDeleted revisions
+
+'DifferenceEngineOldHeader': Allows extensions to change the $oldHeader variable, which
+contains information about the old revision, such as the revision's author, whether
+the revision was marked as a minor edit or not, etc.
+$differenceEngine: DifferenceEngine object
+&$oldHeader: The string containing the various #mw-diff-otitle[1-5] divs, which
+include things like revision author info, revision comment, RevisionDelete link and more
+$prevlink: String containing the link to the previous revision (if any); also included in $oldHeader
+$oldminor: String indicating if the old revision was marked as a minor edit
+$diffOnly: Boolean parameter passed to DifferenceEngine#showDiffPage, indicating
+whether we should show just the diff; passed in as a query string parameter to the
+various URLs constructed here (i.e. $prevlink)
+$ldel: RevisionDelete link for the old revision, if the current user is allowed
+to use the RevisionDelete feature
+$unhide: Boolean parameter indicating whether to show RevisionDeleted revisions
+
+'DifferenceEngineOldHeaderNoOldRev': Change the $oldHeader variable in cases when
+there is no old revision
+&$oldHeader: empty string by default
+
+'DifferenceEngineRenderRevisionAddParserOutput': Allows extensions to change the parser output.
+Return false to not add parser output via OutputPage's addParserOutput method.
+$differenceEngine: DifferenceEngine object
+$out: OutputPage object
+$parserOutput: ParserOutput object
+$wikiPage: WikiPage object
+
+'DifferenceEngineRenderRevisionShowFinalPatrolLink': An extension can hook into this hook
+point and return false to not show the final "mark as patrolled" link on the bottom
+of a page.
+This hook has no arguments.
+
+'DifferenceEngineShowDiff': Allows extensions to affect the diff text which
+eventually gets sent to the OutputPage object.
+$differenceEngine: DifferenceEngine object
+
+'DifferenceEngineShowEmptyOldContent': Allows extensions to change the diff table
+body (without header) in cases when there is no old revision or the old and new
+revisions are identical.
+$differenceEngine: DifferenceEngine object
+
+'DifferenceEngineShowDiffPage': Add additional output via the available OutputPage
+object into the diff view
+$out: OutputPage object
+
+'DifferenceEngineShowDiffPageMaybeShowMissingRevision': called in
+DifferenceEngine::showDiffPage() when revision data cannot be loaded.
+Return false in order to prevent displaying the missing revision message
+(i.e. to prevent DifferenceEngine::showMissingRevision() from being called).
+$differenceEngine: DifferenceEngine object
 
 'DiffRevisionTools': Override or extend the revision tools available from the
 diff view, i.e. undo, etc.
@@ -1162,12 +1350,6 @@ $section: Section being edited
 &$error: Error message to return
 $summary: Edit summary for page
 
-'EditFilterMerged': DEPRECATED! Use EditFilterMergedContent instead.
-Post-section-merge edit filter.
-$editor: EditPage instance (object)
-$text: content of the edit box
-&$error: error message to return
-$summary: Edit summary for page
 
 'EditFilterMergedContent': Post-section-merge edit filter.
 This may be triggered by the EditPage or any other facility that modifies page
@@ -1248,15 +1430,18 @@ textarea in the edit form.
 &$buttons: Array of edit buttons "Save", "Preview", "Live", and "Diff"
 &$tabindex: HTML tabindex of the last edit check/button
 
-'EditPageBeforeEditChecks': Allows modifying the edit checks below the textarea
-in the edit form.
+'EditPageBeforeEditChecks': DEPRECATED! Use 'EditPageGetCheckboxesDefinition' instead,
+or 'EditPage::showStandardInputs:options' if you don't actually care about checkboxes
+and just want to add some HTML to the page.
+Allows modifying the edit checks below the textarea in the edit form.
 &$editpage: The current EditPage object
-&$checks: Array of edit checks like "watch this page"/"minor edit"
+&$checks: Array of the HTML for edit checks like "watch this page"/"minor edit"
 &$tabindex: HTML tabindex of the last edit check/button
 
 'EditPageBeforeEditToolbar': Allows modifying the edit toolbar above the
 textarea in the edit form.
-&$toolbar: The toolbar HTMl
+&$toolbar: The toolbar HTML
+Hook subscribers can return false to avoid the default toolbar code being loaded.
 
 'EditPageCopyrightWarning': Allow for site and per-namespace customization of
 contribution/copyright notice.
@@ -1264,16 +1449,15 @@ $title: title of page being edited
 &$msg: localization message name, overridable. Default is either
   'copyrightwarning' or 'copyrightwarning2'.
 
+'EditPageGetCheckboxesDefinition': Allows modifying the edit checkboxes
+below the textarea in the edit form.
+$editpage: The current EditPage object
+&$checkboxes: Array of checkbox definitions. See EditPage::getCheckboxesDefinition()
+for the format.
+
 'EditPageGetDiffContent': Allow modifying the wikitext that will be used in
 "Show changes". Note that it is preferable to implement diff handling for
 different data types using the ContentHandler facility.
-$editPage: EditPage object
-&$newtext: wikitext that will be used as "your version"
-
-'EditPageGetDiffText': DEPRECATED! Use EditPageGetDiffContent instead.
-Allow modifying the wikitext that will be used in "Show changes". Note that it
-is preferable to implement diff handling for different data types using the
-ContentHandler facility.
 $editPage: EditPage object
 &$newtext: wikitext that will be used as "your version"
 
@@ -1282,13 +1466,6 @@ previewed. Note that it is preferable to implement previews for different data
 types using the ContentHandler facility.
 $editPage: EditPage object
 &$content: Content object to be previewed (may be replaced by hook function)
-
-'EditPageGetPreviewText': DEPRECATED! Use EditPageGetPreviewContent instead.
-Allow modifying the wikitext that will be previewed. Note that it is preferable
-to implement previews for different data types using the ContentHandler
-facility.
-$editPage: EditPage object
-&$toparse: wikitext that will be parsed
 
 'EditPageNoSuchSection': When a section edit request is given for an
 non-existent section
@@ -1312,7 +1489,7 @@ true to allow those checks to occur, and false if checking is done.
 &$from: MailAddress object of sending user
 &$subject: subject of the mail
 &$text: text of the mail
-&$error: Out-param for an error
+&$error: Out-param for an error. Should be set to a Status object or boolean false.
 
 'EmailUserCC': Before sending the copy of the email to the author.
 &$to: MailAddress object of receiving user
@@ -1350,6 +1527,10 @@ $changesList: EnhancedChangesList object
 &$data: An array with all the components that will be joined in order to create the line
 $block: An array of RecentChange objects in that block
 $rc: The RecentChange object for this line
+&$classes: An array of classes to change
+&$attribs: associative array of other HTML attributes for the <tr> element.
+  Currently only data attributes reserved to MediaWiki are allowed
+  (see Sanitizer::isReservedDataAttribute).
 
 'EnhancedChangesListModifyBlockLineData': to alter data used to build
 a non-grouped recent change line in EnhancedChangesList.
@@ -1364,13 +1545,6 @@ $ip: The ip address of the user
 'ExtensionTypes': Called when generating the extensions credits, use this to
 change the tables headers.
 &$extTypes: associative array of extensions types
-
-'ExtractThumbParameters': DEPRECATED! Media handler should override
-MediaHandler::parseParamString instead.
-Called when extracting thumbnail parameters from a thumbnail file name.
-$thumbname: the base name of the thumbnail file
-&$params: the currently extracted params (has source name, temp or archived
-zone)
 
 'FetchChangesList': When fetching the ChangesList derivative for a particular
 user.
@@ -1443,6 +1617,9 @@ notifications.
 &$url: string value as output (out parameter, can modify)
 $query: query options passed to Title::getCanonicalURL()
 
+'GetContentModels': Add content models to the list of available models.
+&$models: array containing current model list, as strings. Extensions should add to this list.
+
 'GetDefaultSortkey': Override the default sortkey for a page.
 $title: Title object that we need to get a sortkey for
 &$sortkey: Sortkey to use.
@@ -1496,6 +1673,13 @@ $query: query options passed to Title::getInternalURL()
 
 'GetIP': modify the ip of the current user (called only once).
 &$ip: string holding the ip as determined so far
+
+'GetLangPreferredVariant': Called in LanguageConverter#getPreferredVariant() to
+  allow fetching the language variant code from cookies or other such
+  alternative storage.
+&$req: language variant from the URL (string) or boolean false if no variant
+  was specified in the URL; the value of this variable comes from
+  LanguageConverter#getURLVariant()
 
 'GetLinkColours': modify the CSS class of an array of page links.
 $linkcolour_ids: array of prefixed DB keys of the pages linked to,
@@ -1671,6 +1855,11 @@ $revisionInfo: Array of revision information
 Return false to stop further processing of the tag
 $reader: XMLReader object
 
+'ImportHandleUnknownUser': When a user doesn't exist locally, this hook is called
+to give extensions an opportunity to auto-create it. If the auto-creation is
+successful, return false.
+$name: User name
+
 'ImportHandleUploadXMLTag': When parsing a XML tag in a file upload.
 Return false to stop further processing of the tag
 $reader: XMLReader object
@@ -1777,8 +1966,8 @@ $code: language of the preferred translations
 in various places to allow extensions to define the effective language
 links for a page.
 $title: The page's Title.
-&$links: Associative array mapping language codes to prefixed links of the
-  form "language:title".
+&$links: Array with elements of the form "language:title" in the order
+  that they will be output.
 &$linkFlags: Associative array mapping prefixed links to arrays of flags.
   Currently unused, but planned to provide support for marking individual
   language links in the UI, e.g. for featured articles.
@@ -1787,7 +1976,8 @@ $title: The page's Title.
 $out: The output page.
 $cssClassName: CSS class name of the language selector.
 
-'LinkBegin': Used when generating internal and interwiki links in
+'LinkBegin': DEPRECATED! Use HtmlPageLinkRendererBegin instead.
+Used when generating internal and interwiki links in
 Linker::link(), before processing starts.  Return false to skip default
 processing and return $ret. See documentation for Linker::link() for details on
 the expected meanings of parameters.
@@ -1804,7 +1994,8 @@ $target: the Title that the link is pointing to
 &$options: array of options.  Can include 'known', 'broken', 'noclasses'.
 &$ret: the value to return if your hook returns false.
 
-'LinkEnd': Used when generating internal and interwiki links in Linker::link(),
+'LinkEnd': DEPRECATED! Use HtmlPageLinkRendererEnd hook instead
+Used when generating internal and interwiki links in Linker::link(),
 just before the function returns a value.  If you return true, an <a> element
 with HTML attributes $attribs and contents $html will be returned.  If you
 return false, $ret will be returned.
@@ -1839,6 +2030,46 @@ $file: the File object or false if broken link
 &$attribs: the attributes to be applied
 &$ret: the value to return if your hook returns false
 
+'LogEventsListLineEnding': Called before a Special:Log line is finished
+$page: the LogEventsList object
+&$ret: the HTML line
+$entry: the DatabaseLogEntry object for this row
+&$classes: the classes to add to the surrounding <li>
+&$attribs: associative array of other HTML attributes for the <li> element.
+  Currently only data attributes reserved to MediaWiki are allowed
+  (see Sanitizer::isReservedDataAttribute).
+
+
+'HtmlPageLinkRendererBegin':
+Used when generating internal and interwiki links in
+LinkRenderer, before processing starts.  Return false to skip default
+processing and return $ret.
+$linkRenderer: the LinkRenderer object
+$target: the LinkTarget that the link is pointing to
+&$text: the contents that the <a> tag should have; either a plain, unescaped
+  string or a HtmlArmor object; null means "default".
+&$customAttribs: the HTML attributes that the <a> tag should have, in
+  associative array form, with keys and values unescaped.  Should be merged
+  with default values, with a value of false meaning to suppress the
+  attribute.
+&$query: the query string to add to the generated URL (the bit after the "?"),
+  in associative array form, with keys and values unescaped.
+&$ret: the value to return if your hook returns false.
+
+'HtmlPageLinkRendererEnd':
+Used when generating internal and interwiki links in LinkRenderer,
+just before the function returns a value.  If you return true, an <a> element
+with HTML attributes $attribs and contents $html will be returned.  If you
+return false, $ret will be returned.
+$linkRenderer: the LinkRenderer object
+$target: the LinkTarget object that the link is pointing to
+$isKnown: boolean indicating whether the page is known or not
+&$text: the contents that the <a> tag should have; either a plain, unescaped
+  string or a HtmlArmor object.
+&$attribs: the final HTML attributes of the <a> tag, after processing, in
+  associative array form.
+&$ret: the value to return if your hook returns false.
+
 'LinksUpdate': At the beginning of LinksUpdate::doUpdate() just before the
 actual update.
 &$linksUpdate: the LinksUpdate object
@@ -1852,6 +2083,7 @@ $insertions: an array of links to insert
 'LinksUpdateComplete': At the end of LinksUpdate::doUpdate() when updating,
 including delete and insert, has completed for all link tables
 &$linksUpdate: the LinksUpdate object
+$ticket: prior result of LBFactory::getEmptyTransactionTicket()
 
 'LinksUpdateConstructed': At the end of LinksUpdate() is construction.
 &$linksUpdate: the LinksUpdate object
@@ -1938,13 +2170,6 @@ $e: The exception (in case of a plain old PHP error, a wrapping ErrorException)
 $suppressed: true if the error was suppressed via
   error_reporting()/wfSuppressWarnings()
 
-'LoginAuthenticateAudit': A login attempt for a valid user account either
-succeeded or failed. No return data is accepted; this hook is for auditing only.
-$user: the User object being authenticated against
-$password: the password being submitted and found wanting
-$retval: a LoginForm class constant with authenticateUserData() return
-  value (SUCCESS, WRONG_PASS, etc.).
-
 'LoginFormValidErrorMessages': Called in LoginForm when a function gets valid
 error messages. Allows to add additional error messages (except messages already
 in LoginForm::$validErrorMessages).
@@ -2019,9 +2244,10 @@ $user: $wgUser
 $request: $wgRequest
 $mediaWiki: The $mediawiki object
 
-'MediaWikiServices': Override services in the default MediaWikiServices instance.
-Extensions may use this to define, replace, or wrap existing services.
-However, the preferred way to define a new service is the $wgServiceWiringFiles array.
+'MediaWikiServices': Called when a global MediaWikiServices instance is
+initialized. Extensions may use this to define, replace, or wrap services.
+However, the preferred way to define a new service is
+the $wgServiceWiringFiles array.
 $services: MediaWikiServices
 
 'MessageCache::get': When fetching a message. Can be used to override the key
@@ -2038,6 +2264,7 @@ $text: new contents of the page.
 'MessagesPreLoad': When loading a message from the database.
 $title: title of the message (string)
 &$message: value (string), change it to the message you want to define
+$code: code (string) denoting the language to try.
 
 'MimeMagicGuessFromContent': Allows MW extensions guess the MIME by content.
 $mimeMagic: Instance of MimeMagic.
@@ -2098,19 +2325,33 @@ $title: the diff page title (nullable)
 $old: the ?old= param value from the url
 $new: the ?new= param value from the url
 
+'NewPagesLineEnding': Called before a NewPages line is finished.
+$page: the SpecialNewPages object
+&$ret: the HTML line
+$row: the database row for this page (the recentchanges record and a few extras - see
+  NewPagesPager::getQueryInfo)
+&$classes: the classes to add to the surrounding <li>
+&$attribs: associative array of other HTML attributes for the <li> element.
+  Currently only data attributes reserved to MediaWiki are allowed
+  (see Sanitizer::isReservedDataAttribute).
+
 'NewRevisionFromEditComplete': Called when a revision was inserted due to an
 edit.
 $wikiPage: the WikiPage edited
 $rev: the new revision
 $baseID: the revision ID this was based off, if any
 $user: the editing user
+&$tags: tags to apply to the edit and recent change
 
 'OldChangesListRecentChangesLine': Customize entire recent changes line, or
 return false to omit the line from RecentChanges and Watchlist special pages.
 &$changeslist: The OldChangesList instance.
 &$s: HTML of the form "<li>...</li>" containing one RC entry.
 $rc: The RecentChange object.
-&$classes: array of css classes for the <li> element
+&$classes: array of css classes for the <li> element.
+&$attribs: associative array of other HTML attributes for the <li> element.
+  Currently only data attributes reserved to MediaWiki are allowed
+  (see Sanitizer::isReservedDataAttribute).
 
 'OpenSearchUrls': Called when constructing the OpenSearch description XML. Hooks
 can alter or append to the array of URLs for search & suggestion formats.
@@ -2126,6 +2367,10 @@ without triggering any updates.
 $page: the Page that was rendered.
 $title: the Title of the rendered page.
 $parserOutput: ParserOutput resulting from rendering the page.
+
+'OtherAutoblockLogLink': Get links to the autoblock log from extensions which
+autoblocks users and/or IP addresses too.
+&$otherBlockLink: An array with links to other autoblock logs
 
 'OtherBlockLogLink': Get links to the block log from extensions which blocks
 users and/or IP addresses too.
@@ -2149,6 +2394,7 @@ $sk: The Skin that called OutputPage::headElement
 since the last visit.
 &$modifiedTimes: array of timestamps.
   The following keys are set: page, user, epoch
+$out: OutputPage object (since 1.28)
 
 'OutputPageMakeCategoryLinks': Links are about to be generated for the page's
 categories. Implementations should return false if they generate the category
@@ -2202,6 +2448,7 @@ $revision: New Revision of the article (can be null for edits that change
   nothing)
 $status: Status object about to be returned by doEditContent()
 $baseRevId: the rev ID (or false) this edit was based on
+$undidRevId: the rev ID (or 0) this edit undid
 
 'PageHistoryBeforeList': When a history page list is about to be constructed.
 &$article: the article that the history is loading for
@@ -2212,6 +2459,9 @@ $historyAction: the action object
 &$row: the revision row for this line
 &$s: the string representing this parsed line
 &$classes: array containing the <li> element classes
+&$attribs: associative array of other HTML attributes for the <li> element.
+  Currently only data attributes reserved to MediaWiki are allowed
+  (see Sanitizer::isReservedDataAttribute).
 
 'PageHistoryPager::doBatchLookups': Called after the pager query was run, before
 any output is generated, to allow batch lookups for prefetching information
@@ -2225,7 +2475,8 @@ constructed.
 &$pager: the pager
 &$queryInfo: the query parameters
 
-'PageRenderingHash': Alter the parser cache option hash key. A parser extension
+'PageRenderingHash': NOTE: Consider using ParserOptionsRegister instead.
+Alter the parser cache option hash key. A parser extension
 which depends on user options should install this hook and append its values to
 the key.
 &$confstr: reference to a hash key string which can be modified
@@ -2288,6 +2539,13 @@ $revId: ID of the revision that was parsed to create $parserOutput
 'ParserCloned': Called when the parser is cloned.
 $parser: Newly-cloned Parser object
 
+'ParserFetchTemplate': Called when the parser fetches a template
+$parser: Parser Parser object or false
+$title: Title object of the template to be fetched
+$rev: Revision object of the template
+&$text: Transclusion text of the template or false or null
+&$deps: Array of template dependencies with 'title', 'page_id', 'rev_id' keys
+
 'ParserFirstCallInit': Called when the parser initialises for the first time.
 &$parser: Parser object being cleared
 
@@ -2342,6 +2600,22 @@ $file: file object that will be used to create the image
 &$params: 2-D array of parameters
 $parser: Parser object that called the hook
 
+'ParserOptionsRegister': Register additional parser options. Note that if you
+change the default value for an option, all existing parser cache entries will
+be invalid. To avoid bugs, you'll need to handle that somehow (e.g. with the
+RejectParserCacheValue hook) because MediaWiki won't do it for you.
+&$defaults: Set the default value for your option here.
+&$inCacheKey: To fragment the parser cache on your option, set a truthy value here.
+&$lazyLoad: To lazy-initialize your option, set it null in $defaults and set a
+  callable here. The callable is passed the ParserOptions object and the option
+  name.
+
+'ParserOutputPostCacheTransform': Called from ParserOutput::getText() to do
+post-cache transforms.
+$parserOutput: The ParserOutput object.
+&$text: The text being transformed, before core transformations are done.
+&$options: The options array being used for the transformation.
+
 'ParserSectionCreate': Called each time the parser creates a document section
 from wikitext. Use this to apply per-section modifications to HTML (like
 wrapping the section in a DIV).  Caveat: DIVs are valid wikitext, and a DIV
@@ -2356,10 +2630,6 @@ $showEditLinks: boolean describing whether this section has an edit link
 &$globals: Array with all the globals which should be set for parser tests.
   The arrays keys serve as the globals names, its values are the globals values.
 
-'ParserTestParser': Called when creating a new instance of Parser in
-tests/parser/parserTest.inc.
-&$parser: Parser object created
-
 'ParserTestTables': Alter the list of tables to duplicate when parser tests are
 run. Use when page save hooks require the presence of custom tables to ensure
 that tests continue to run properly.
@@ -2369,12 +2639,12 @@ that tests continue to run properly.
 $page: the WikiPage of the candidate edit
 $content: the Content object of the candidate edit
 $output: the ParserOutput result of the candidate edit
+$summary: the change summary of the candidate edit
+$user: the User considering the edit
 
 'PasswordPoliciesForUser': Alter the effective password policy for a user.
 $user: User object whose policy you are modifying
 &$effectivePolicy: Array of policy statements that apply to this user
-$purpose: string indicating purpose of the check, one of 'login', 'create',
-  or 'reset'
 
 'PerformRetroactiveAutoblock': Called before a retroactive autoblock is applied
 to a user.
@@ -2418,6 +2688,7 @@ $formData: array of user submitted data
 $form: PreferencesForm object, also a ContextSource
 $user: User object with preferences to be saved set
 &$result: boolean indicating success
+$oldUserOptions: array with user old options (before save)
 
 'PreferencesGetLegend': Override the text used for the <legend> of a
 preferences section.
@@ -2476,6 +2747,11 @@ random pages.
 'RecentChange_save': Called at the end of RecentChange::save().
 &$recentChange: RecentChange object
 
+'RecentChangesPurgeRows': Called when old recentchanges rows are purged, after
+deleting those rows but within the same transaction.
+$rows: The deleted rows as an array of recentchanges row objects (with up to
+  $wgUpdateRowsPerQuery items).
+
 'RedirectSpecialArticleRedirectParams': Lets you alter the set of parameter
 names such as "oldid" that are preserved when using redirecting special pages
 such as Special:MyPage and Special:MyTalk.
@@ -2519,10 +2795,12 @@ configuration variables to JavaScript. Things that depend on the current page
 or request state must be added through MakeGlobalVariablesScript instead.
 &$vars: array( variable name => value )
 
-'ResourceLoaderGetLessVars': Called in ResourceLoader::getLessVars after
-variables from $wgResourceLoaderLESSVars are added. Can be used to add
-context-based variables.
-&$lessVars: array of variables already added
+'ResourceLoaderJqueryMsgModuleMagicWords': Called in
+ResourceLoaderJqueryMsgModule to allow adding magic words for jQueryMsg.
+The value should be a string, and they can depend only on the
+ResourceLoaderContext.
+$context: ResourceLoaderContext
+&$magicWords: Associative array mapping all-caps magic word to a string value
 
 'ResourceLoaderRegisterModules': Right before modules information is required,
 such as when responding to a resource
@@ -2542,14 +2820,14 @@ called after the addition of 'qunit' and MediaWiki testing resources.
   added to any module.
 &$ResourceLoader: object
 
-'RevisionInsertComplete': Called after a revision is inserted into the database.
-&$revision: the Revision
-$data: the data stored in old_text.  The meaning depends on $flags: if external
-  is set, it's the URL of the revision text in external storage; otherwise,
-  it's the revision text itself.  In either case, if gzip is set, the revision
-  text is gzipped.
-$flags: a comma-delimited list of strings representing the options used.  May
-  include: utf8 (this will always be set for new revisions); gzip; external.
+'RevisionRecordInserted': Called after a revision is inserted into the database.
+$revisionRecord: the RevisionRecord that has just been inserted.
+
+'RevisionInsertComplete': DEPRECATED! Use RevisionRecordInserted hook instead.
+Called after a revision is inserted into the database.
+$revision: the Revision
+$data: DEPRECATED! Always null!
+$flags: DEPRECATED! Always null!
 
 'SearchableNamespaces': An option to modify which namespaces are searchable.
 &$arr: Array of namespaces ($nsId => $name) which will be used.
@@ -2579,6 +2857,25 @@ $term: Search term string
 search results.
 $title: Current Title object being displayed in search results.
 &$id: Revision ID (default is false, for latest)
+
+'SearchIndexFields': Add fields to search index mapping.
+&$fields: Array of fields, all implement SearchIndexField
+$engine: SearchEngine instance for which mapping is being built.
+
+'SearchDataForIndex': Add data to search document. Allows to add any data to
+the field map used to index the document.
+&$fields: Array of name => value pairs for fields
+$handler: ContentHandler for the content being indexed
+$page: WikiPage that is being indexed
+$output: ParserOutput that is produced from the page
+$engine: SearchEngine for which the indexing is intended
+
+'SearchResultsAugment': Allows extension to add its code to the list of search
+result augmentors.
+&$setAugmentors: List of whole-set augmentor objects, must implement ResultSetAugmentor
+&$rowAugmentors: List of per-row augmentor objects, must implement ResultAugmentor.
+Note that lists should be in the format name => object and the names in both lists should
+be distinct.
 
 'SecondaryDataUpdates': Allows modification of the list of DataUpdates to
 perform when page content is modified. Currently called by
@@ -2643,12 +2940,6 @@ Special:ShortPages.
 'ShowMissingArticle': Called when generating the output for a non-existent page.
 $article: The article object corresponding to the page
 
-'ShowRawCssJs': DEPRECATED! Use the ContentGetParserOutput hook instead.
-Customise the output of raw CSS and JavaScript in page views.
-$text: Text being shown
-$title: Title of the custom script/stylesheet page
-$output: Current OutputPage object
-
 'ShowSearchHit': Customize display of search hit.
 $searchPage: The SpecialSearch instance.
 $result: The SearchResult to show
@@ -2667,11 +2958,12 @@ $terms: Search terms, for highlighting
 
 'ShowSearchHitTitle': Customise display of search hit title/link.
 &$title: Title to link to
-&$text: Text to use for the link
-$result: The search result
-$terms: The search terms entered
-$page: The SpecialSearch object
-&$query: Query string to be appended to the link
+&$titleSnippet: Label for the link representing the search result. Typically the article title.
+$result: The SearchResult object
+$terms: String of the search terms entered
+$specialSearch: The SpecialSearch object
+&$query: Array of query string parameters for the link representing the search result.
+&$attributes: Array of title link attributes, can be modified by extension.
 
 'SidebarBeforeOutput': Allows to edit sidebar just before it is output by skins.
 Warning: This hook is run on each display. You should consider to use
@@ -2830,6 +3122,12 @@ $id: User id number, only provided for backwards-compatibility
 $user: User object representing user contributions are being fetched for
 $sp: SpecialPage instance, providing context
 
+'SpecialContributions::formatRow::flags': Called before rendering a
+Special:Contributions row.
+$context: IContextSource object
+$row: Revision information from the database
+&$flags: List of flags on this row
+
 'SpecialContributions::getForm::filters': Called with a list of filters to render
 on Special:Contributions.
 $sp: SpecialContributions object, for context
@@ -2845,7 +3143,7 @@ UsersPager::formatRow().
 &$item: HTML to be returned. Will be wrapped in <li></li> after the hook finishes
 $row: Database row object
 
-'SpecialListusersHeader': Called before closing the <fieldset> in
+'SpecialListusersHeader': Called after adding the submit button in
 UsersPager::getPageHeader().
 $pager: The UsersPager instance
 &$out: The header HTML
@@ -2919,7 +3217,7 @@ use this to change some selection criteria or substitute a different title.
 &$title: If the hook returns false, a Title object to use instead of the
   result from the normal query
 
-'SpecialRecentChangesFilters': DEPRECATED! Use ChangesListSpecialPageFilters
+'SpecialRecentChangesFilters': DEPRECATED! Use ChangesListSpecialPageStructuredFilters
 instead.
 Called after building form options at RecentChanges.
 $special: the special page object
@@ -2932,8 +3230,8 @@ SpecialRecentChanges.
 &$extraOpts: array of added items, to which can be added
 $opts: FormOptions for this request
 
-'SpecialRecentChangesQuery': DEPRECATED! Use ChangesListSpecialPageQuery
-instead.
+'SpecialRecentChangesQuery': DEPRECATED! Use ChangesListSpecialPageStructuredFilters
+or ChangesListSpecialPageQuery instead.
 Called when building SQL query for SpecialRecentChanges and
 SpecialRecentChangesLinked.
 &$conds: array of WHERE conditionals for query
@@ -2960,12 +3258,14 @@ $t: title object searched for
 canceled and a normal search will be performed. Returning true without setting
 $url does a standard redirect to $title. Setting $url redirects to the
 specified URL.
-$term - The string the user searched for
-$title - The title the 'go' feature has decided to forward the user to
-&$url - Initially null, hook subscribers can set this to specify the final url to redirect to
+$term: The string the user searched for
+$title: The title the 'go' feature has decided to forward the user to
+&$url: Initially null, hook subscribers can set this to specify the final url to redirect to
 
-'SpecialSearchNogomatch': Called when user clicked the "Go" button but the
-target doesn't exist.
+'SpecialSearchNogomatch': Called when the 'Go' feature is triggered (generally
+from autocomplete search other than the main bar on Special:Search) and the
+target doesn't exist. Full text search results are generated after this hook is
+called.
 &$title: title object generated from the text entered by the user
 
 'SpecialSearchPowerBox': The equivalent of SpecialSearchProfileForm for
@@ -3018,6 +3318,15 @@ $engine: the search engine
   message key to use in the name column,
 $context: IContextSource object
 
+'SpecialTrackingCategories::preprocess': Called after LinkBatch on Special:TrackingCategories
+$specialPage: The SpecialTrackingCategories object
+$trackingCategories: Array of data from Special:TrackingCategories with msg and cats
+
+'SpecialTrackingCategories::generateCatLink': Called for each cat link on Special:TrackingCategories
+$specialPage: The SpecialTrackingCategories object
+$catTitle: The Title object of the linked category
+&$html: The Result html
+
 'SpecialUploadComplete': Called after successfully uploading a file from
 Special:Upload.
 &$form: The SpecialUpload object
@@ -3026,7 +3335,7 @@ Special:Upload.
 $wgVersion: Current $wgVersion for you to use
 &$versionUrl: Raw url to link to (eg: release notes)
 
-'SpecialWatchlistFilters': DEPRECATED! Use ChangesListSpecialPageFilters
+'SpecialWatchlistFilters': DEPRECATED! Use ChangesListSpecialPageStructuredFilters
 instead.
 Called after building form options at Watchlist.
 $special: the special page object
@@ -3039,7 +3348,8 @@ SpecialWatchlist. Allows extensions to register custom values they have
 inserted to rc_type so they can be returned as part of the watchlist.
 &$nonRevisionTypes: array of values in the rc_type field of recentchanges table
 
-'SpecialWatchlistQuery': DEPRECATED! Use ChangesListSpecialPageQuery instead.
+'SpecialWatchlistQuery': DEPRECATED! Use ChangesListSpecialPageStructuredFilters
+or ChangesListSpecialPageQuery instead.
 Called when building sql query for SpecialWatchlist.
 &$conds: array of WHERE conditionals for query
 &$tables: array of tables to be queried
@@ -3088,13 +3398,6 @@ by the isKnown method.
 $title: Title object that is being checked
 &$isKnown: Boolean|null; whether MediaWiki currently thinks this page is known
 
-'TitleIsCssOrJsPage': DEPRECATED! Use ContentHandlerDefaultModelFor instead.
-Called when determining if a page is a CSS or JS page.
-$title: Title object that is being checked
-&$result: Boolean; whether MediaWiki currently thinks this is a CSS/JS page.
-  Hooks may change this value to override the return value of
-  Title::isCssOrJsPage().
-
 'TitleIsMovable': Called when determining if it is possible to move a page. Note
 that this hook is not called for interwiki pages or pages in immovable
 namespaces: for these, isMovable() always returns false.
@@ -3103,13 +3406,6 @@ $title: Title object that is being checked
   Hooks may change this value to override the return value of
   Title::isMovable().
 
-'TitleIsWikitextPage': DEPRECATED! Use ContentHandlerDefaultModelFor instead.
-Called when determining if a page is a wikitext or should
-be handled by separate handler (via ArticleViewCustom).
-$title: Title object that is being checked
-&$result: Boolean; whether MediaWiki currently thinks this is a wikitext page.
-  Hooks may change this value to override the return value of
-  Title::isWikitextPage()
 
 'TitleMove': Before moving an article (title).
 $old: old title
@@ -3159,6 +3455,15 @@ $user: Current user object
 $title: Title object to purge
 &$urls: An array of URLs to purge from the caches, to be manipulated.
 
+'UnblockUser': Before an IP address or user is unblocked.
+&$block: The Block object about to be saved
+&$user: The user performing the unblock (not the one being unblocked)
+&$reason: If the hook is aborted, the error message to be returned in an array
+
+'UnblockUserComplete': After an IP address or user has been unblocked.
+$block: The Block object that was saved
+$user: The user who performed the unblock (not the one being unblocked)
+
 'UndeleteForm::showHistory': Called in UndeleteForm::showHistory, after a
 PageArchive object has been created but before any further processing is done.
 &$archive: PageArchive object
@@ -3169,7 +3474,7 @@ PageArchive object has been created but before any further processing is done.
 &$archive: PageArchive object
 $title: Title object of the page that we're viewing
 
-'UndeleteForm::undelete': Called un UndeleteForm::undelete, after checking that
+'UndeleteForm::undelete': Called in UndeleteForm::undelete, after checking that
 the site is not in read-only mode, that the Title object is not null and after
 a PageArchive object has been constructed but before performing any further
 processing.
@@ -3180,13 +3485,22 @@ $title: Title object of the page that we're about to undelete
 $title: title object related to the revision
 $rev: revision (object) that will be viewed
 
+'UnitTestsAfterDatabaseSetup': Called right after MediaWiki's test infrastructure
+has finished creating/duplicating core tables for unit tests.
+$database: Database in question
+$prefix: Table prefix to be used in unit tests
+
+'UnitTestsBeforeDatabaseTeardown': Called right before MediaWiki tears down its
+database infrastructure used for unit tests.
+
 'UnitTestsList': Called when building a list of paths containing PHPUnit tests.
 Since 1.24: Paths pointing to a directory will be recursively scanned for
 test case files matching the suffix "Test.php".
 &$paths: list of test cases and directories to search.
 
-'UnknownAction': An unknown "action" has occurred (useful for defining your own
-actions).
+'UnknownAction': DEPRECATED! To add an action in an extension,
+create a subclass of Action, and add a new key to $wgActions.
+An unknown "action" has occurred (useful for defining your own actions).
 $action: action name
 $article: article "acted on"
 
@@ -3217,6 +3531,12 @@ blank form with no error message; use UploadVerification and UploadVerifyFile
 instead.
 &$form: UploadForm object
 
+'UploadForm:getInitialPageText': After the initial page text for file uploads
+is generated, to allow it to be altered.
+&$pageText: the page text
+$msg: array of header messages
+$config: Config object
+
 'UploadForm:initial': Before the upload form is generated. You might set the
 member-variables $uploadFormTextTop and $uploadFormTextAfterSummary to inject
 text (HTML) either before or after the editform.
@@ -3232,8 +3552,20 @@ added to the descriptor
 &$radio: Boolean, if source type should be shown as radio button
 $selectedSourceType: The selected source type
 
-'UploadVerification': Additional chances to reject an uploaded file. Consider
-using UploadVerifyFile instead.
+'UploadStashFile': Before a file is stashed (uploaded to stash).
+Note that code which has not been updated for MediaWiki 1.28 may not call this
+hook. If your extension absolutely, positively must prevent some files from
+being uploaded, use UploadVerifyFile or UploadVerifyUpload.
+$upload: (object) An instance of UploadBase, with all info about the upload
+$user: (object) An instance of User, the user uploading this file
+$props: (array) File properties, as returned by FSFile::getPropsFromPath()
+&$error: output: If the file stashing should be prevented, set this to the reason
+  in the form of array( messagename, param1, param2, ... ) or a MessageSpecifier
+  instance (you might want to use ApiMessage to provide machine-readable details
+  for the API).
+
+'UploadVerification': DEPRECATED! Use UploadVerifyFile instead.
+Additional chances to reject an uploaded file.
 $saveName: (string) destination file name
 $tempName: (string) filesystem path to the temporary file for checks
 &$error: (string) output: message key for message to show if upload canceled by
@@ -3245,9 +3577,27 @@ in most cases over UploadVerification.
 $upload: (object) an instance of UploadBase, with all info about the upload
 $mime: (string) The uploaded file's MIME type, as detected by MediaWiki.
   Handlers will typically only apply for specific MIME types.
-&$error: (object) output: true if the file is valid. Otherwise, an indexed array
-  representing the problem with the file, where the first element is the message
-  key and the remaining elements are used as parameters to the message.
+&$error: (object) output: true if the file is valid. Otherwise, set this to the reason
+  in the form of array( messagename, param1, param2, ... ) or a MessageSpecifier
+  instance (you might want to use ApiMessage to provide machine-readable details
+  for the API).
+
+'UploadVerifyUpload': Upload verification, based on both file properties like
+MIME type (same as UploadVerifyFile) and the information entered by the user
+(upload comment, file page contents etc.).
+$upload: (object) An instance of UploadBase, with all info about the upload
+$user: (object) An instance of User, the user uploading this file
+$props: (array) File properties, as returned by FSFile::getPropsFromPath()
+$comment: (string) Upload log comment (also used as edit summary)
+$pageText: (string) File description page text (only used for new uploads)
+&$error: output: If the file upload should be prevented, set this to the reason
+  in the form of array( messagename, param1, param2, ... ) or a MessageSpecifier
+  instance (you might want to use ApiMessage to provide machine-readable details
+  for the API).
+
+'UserIsBot': when determining whether a user is a bot account
+$user: the user
+&$isBot: whether this is user a bot or not (boolean)
 
 'User::mailPasswordInternal': before creation and mailing of a user's new
 temporary password
@@ -3255,10 +3605,12 @@ temporary password
 &$ip: IP of the user who sent the message out
 &$u: the account whose new password will be set
 
-'UserAddGroup': Called when adding a group; return false to override
-stock group addition.
+'UserAddGroup': Called when adding a group or changing a group's expiry; return
+false to override stock group addition.
 $user: the user object that is to have a group added
-&$group: the group to add, can be modified
+&$group: the group to add; can be modified
+&$expiry: the expiry time in TS_MW format, or null if the group is not to
+expire; can be modified
 
 'UserArrayFromResult': Called when creating an UserArray object from a database
 result.
@@ -3333,6 +3685,10 @@ $removed: Groups removed
 $performer: User who performed the change, false if via autopromotion
 $reason: The reason, if any, given by the user performing the change,
 false if via autopromotion.
+$oldUGMs: An associative array (group name => UserGroupMembership object) of
+the user's group memberships before the change.
+$newUGMs: An associative array (group name => UserGroupMembership object) of
+the user's current group memberships.
 
 'UserIsBlockedFrom': Check if a user is blocked from a specific page (for
 specific block exemptions).
@@ -3391,6 +3747,9 @@ $user: User object for the logged-in user
 For functionality that needs to run after any login (API or web) use UserLoggedIn.
 &$user: the user object that was created on login
 &$inject_html: Any HTML to inject after the "logged in" message.
+$direct: (bool) The hook is called directly after a successful login. This will only happen once
+  per login. A UserLoginComplete call with direct=false can happen when the user visits the login
+  page while already logged in.
 
 'UserLoginForm': DEPRECATED! Create an AuthenticationProvider instead.
 Manipulate the login form.
@@ -3460,12 +3819,16 @@ After a user's group memberships are changed.
 $add: Array of strings corresponding to groups added
 $remove: Array of strings corresponding to groups removed
 
-'UserSaveOptions': Called just before saving user preferences/options.
-$user: User object
-&$options: Options, modifiable
+'UserSaveOptions': Called just before saving user preferences. Hook handlers can either add or
+manipulate options, or reset one back to it's default to block changing it. Hook handlers are also
+allowed to abort the process by returning false, e.g. to save to a global profile instead. Compare
+to the UserSaveSettings hook, which is called after the preferences have been saved.
+$user: The User for which the options are going to be saved
+&$options: The users options as an associative array, modifiable
 
-'UserSaveSettings': Called when saving user settings.
-$user: User object
+'UserSaveSettings': Called directly after user preferences (user_properties in the database) have
+been saved. Compare to the UserSaveOptions hook, which is called before.
+$user: The User for which the options have been saved
 
 'UserSetCookies': DEPRECATED! If you're trying to replace core session cookie
 handling, you want to create a subclass of MediaWiki\Session\CookieSessionProvider
@@ -3492,6 +3855,17 @@ $userId: User id of the current user
 $userText: User name of the current user
 &$items: Array of user tool links as HTML fragments
 
+'UsersPagerDoBatchLookups': Called in UsersPager::doBatchLookups() to give
+extensions providing user group data from an alternate source a chance to add
+their data into the cache array so that things like global user groups are
+displayed correctly in Special:ListUsers.
+$dbr: Read-only database handle
+$userIds: Array of user IDs whose groups we should look up
+&$cache: Array of user ID -> (array of internal group name (e.g. 'sysop') ->
+UserGroupMembership object)
+&$groups: Array of group name -> bool true mappings for members of a given user
+group
+
 'ValidateExtendedMetadataCache': Called to validate the cached metadata in
 FormatMetadata::getExtendedMeta (return false means cache will be
 invalidated and GetExtendedMetadata hook called again).
@@ -3511,6 +3885,10 @@ used to alter the SQL query which gets the list of wanted pages.
 'WatchArticleComplete': After a watch is added to an article.
 &$user: user that watched
 &$page: WikiPage object watched
+
+'WatchedItemQueryServiceExtensions': Create a WatchedItemQueryServiceExtension.
+&$extensions: Add WatchedItemQueryServiceExtension objects to this array
+$watchedItemQueryService: Service object
 
 'WatchlistEditorBeforeFormRender': Before building the Special:EditWatchlist
 form, used to manipulate the list of pages or preload data based on that list.
@@ -3559,13 +3937,19 @@ dumps. One, and only one hook should set this, and return false.
 &$opts: Options to use for the query
 &$join: Join conditions
 
-'WikiPageDeletionUpdates': manipulate the list of DataUpdates to be applied when
+'WikiPageDeletionUpdates': manipulate the list of DeferrableUpdates to be applied when
 a page is deleted. Called in WikiPage::getDeletionUpdates(). Note that updates
 specific to a content model should be provided by the respective Content's
 getDeletionUpdates() method.
 $page: the WikiPage
-$content: the Content to generate updates for
-&$updates: the array of DataUpdate objects. Hook function may want to add to it.
+$content: the Content to generate updates for, or null in case the page revision could not be
+  loaded. The delete will succeed despite this.
+&$updates: the array of objects that implement DeferrableUpdate. Hook function may want to add to
+  it.
+
+'WikiPageFactory': Override WikiPage class used for a title
+$title: Title of the page
+&$page: Variable to set the created WikiPage to.
 
 'XmlDumpWriterOpenPage': Called at the end of XmlDumpWriter::openPage, to allow
 extra metadata to be added.
