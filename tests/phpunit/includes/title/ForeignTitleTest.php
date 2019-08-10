@@ -51,8 +51,8 @@ class ForeignTitleTest extends MediaWikiTestCase {
 	 * @dataProvider basicProvider
 	 */
 	public function testBasic( ForeignTitle $title, $expectedId, $expectedName,
-		$expectedText ) {
-
+		$expectedText
+	) {
 		$this->assertEquals( true, $title->isNamespaceIdKnown() );
 		$this->assertEquals( $expectedId, $title->getNamespaceId() );
 		$this->assertEquals( $expectedName, $title->getNamespaceName() );
@@ -68,7 +68,7 @@ class ForeignTitleTest extends MediaWikiTestCase {
 	}
 
 	public function testUnknownNamespaceError() {
-		$this->setExpectedException( 'MWException' );
+		$this->setExpectedException( MWException::class );
 		$title = new ForeignTitle( null, 'this', 'that' );
 		$title->getNamespaceId();
 	}

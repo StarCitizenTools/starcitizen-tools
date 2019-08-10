@@ -11,7 +11,6 @@
  * @copyright © 2012, Niklas Laxström
  * @copyright © 2012, Santhosh Thottingal
  * @copyright © 2012, Timo Tijhof
- *
  */
 class ResourcesTest extends MediaWikiTestCase {
 
@@ -40,20 +39,29 @@ class ResourcesTest extends MediaWikiTestCase {
 		$data = self::getAllModules();
 		foreach ( $data['modules'] as $moduleName => $module ) {
 			$version = $module->getVersionHash( $data['context'] );
-			$this->assertEquals( 8, strlen( $version ), "$moduleName must use ResourceLoader::makeHash" );
+			$this->assertEquals( 7, strlen( $version ), "$moduleName must use ResourceLoader::makeHash" );
 		}
 	}
 
 	/**
-	 * Verify that nothing explicitly depends on the 'jquery' and 'mediawiki' modules.
-	 * They are always loaded, depending on them is unsupported and leads to unexpected behaviour.
+	 * Verify that nothing explicitly depends on base modules, or other raw modules.
+	 *
+	 * Depending on them is unsupported as they are not registered client-side by the startup module.
+	 *
 	 * TODO Modules can dynamically choose dependencies based on context. This method does not
 	 * test such dependencies. The same goes for testMissingDependencies() and
 	 * testUnsatisfiableDependencies().
 	 */
 	public function testIllegalDependencies() {
 		$data = self::getAllModules();
-		$illegalDeps = [ 'jquery', 'mediawiki' ];
+
+		$illegalDeps = ResourceLoaderStartUpModule::getStartupModules();
+		foreach ( $data['modules'] as $moduleName => $module ) {
+			if ( $module->isRaw() ) {
+				$illegalDeps[] = $moduleName;
+			}
+		}
+		$illegalDeps = array_unique( $illegalDeps );
 
 		/** @var ResourceLoaderModule $module */
 		foreach ( $data['modules'] as $moduleName => $module ) {
@@ -87,6 +95,24 @@ class ResourcesTest extends MediaWikiTestCase {
 	}
 
 	/**
+	 * Verify that all specified messages actually exist.
+	 */
+	public function testMissingMessages() {
+		$data = self::getAllModules();
+		$lang = Language::factory( 'en' );
+
+		/** @var ResourceLoaderModule $module */
+		foreach ( $data['modules'] as $moduleName => $module ) {
+			foreach ( $module->getMessages() as $msgKey ) {
+				$this->assertTrue(
+					wfMessage( $msgKey )->useDatabase( false )->inLanguage( $lang )->exists(),
+					"Message '$msgKey' required by '$moduleName' must exist"
+				);
+			}
+		}
+	}
+
+	/**
 	 * Verify that all dependencies of all modules are always satisfiable with the 'targets' defined
 	 * for the involved modules.
 	 *
@@ -95,7 +121,6 @@ class ResourcesTest extends MediaWikiTestCase {
 	 */
 	public function testUnsatisfiableDependencies() {
 		$data = self::getAllModules();
-		$validDeps = array_keys( $data['modules'] );
 
 		/** @var ResourceLoaderModule $module */
 		foreach ( $data['modules'] as $moduleName => $module ) {

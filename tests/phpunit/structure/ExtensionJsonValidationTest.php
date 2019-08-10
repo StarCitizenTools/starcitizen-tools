@@ -20,16 +20,20 @@
  * Validates all loaded extensions and skins using the ExtensionRegistry
  * against the extension.json schema in the docs/ folder.
  */
-class ExtensionJsonValidationTest extends PHPUnit_Framework_TestCase {
+class ExtensionJsonValidationTest extends PHPUnit\Framework\TestCase {
+
+	use MediaWikiCoversValidator;
+
+	/**
+	 * @var ExtensionJsonValidator
+	 */
+	protected $validator;
 
 	public function setUp() {
 		parent::setUp();
-		if ( !class_exists( 'JsonSchema\Uri\UriRetriever' ) ) {
-			$this->markTestSkipped(
-				'The JsonSchema library cannot be found,' .
-				' please install it through composer to run extension.json validation tests.'
-			);
-		}
+
+		$this->validator = new ExtensionJsonValidator( [ $this, 'markTestSkipped' ] );
+		$this->validator->checkDependencies();
 
 		if ( !ExtensionRegistry::getInstance()->getAllThings() ) {
 			$this->markTestSkipped(
@@ -52,42 +56,12 @@ class ExtensionJsonValidationTest extends PHPUnit_Framework_TestCase {
 	 * @param string $path Path to thing's json file
 	 */
 	public function testPassesValidation( $path ) {
-		$data = json_decode( file_get_contents( $path ) );
-		$this->assertInstanceOf( 'stdClass', $data, "$path is not valid JSON" );
-
-		$this->assertObjectHasAttribute( 'manifest_version', $data,
-			"$path does not have manifest_version set." );
-		$version = $data->manifest_version;
-		if ( $version !== ExtensionRegistry::MANIFEST_VERSION ) {
-			$schemaPath = __DIR__ . "/../../../docs/extension.schema.v$version.json";
-		} else {
-			$schemaPath = __DIR__ . '/../../../docs/extension.schema.json';
-		}
-
-		// Not too old
-		$this->assertTrue(
-			$version >= ExtensionRegistry::OLDEST_MANIFEST_VERSION,
-			"$path is using a non-supported schema version"
-		);
-		// Not too new
-		$this->assertTrue(
-			$version <= ExtensionRegistry::MANIFEST_VERSION,
-			"$path is using a non-supported schema version"
-		);
-		$retriever = new JsonSchema\Uri\UriRetriever();
-		$schema = $retriever->retrieve( 'file://' . $schemaPath );
-
-		$validator = new JsonSchema\Validator();
-		$validator->check( $data, $schema );
-		if ( $validator->isValid() ) {
-			// All good.
+		try {
+			$this->validator->validate( $path );
+			// All good
 			$this->assertTrue( true );
-		} else {
-			$out = "$path did pass validation.\n";
-			foreach ( $validator->getErrors() as $error ) {
-				$out .= "[{$error['property']}] {$error['message']}\n";
-			}
-			$this->assertTrue( false, $out );
+		} catch ( ExtensionJsonValidationError $e ) {
+			$this->assertEquals( false, $e->getMessage() );
 		}
 	}
 }

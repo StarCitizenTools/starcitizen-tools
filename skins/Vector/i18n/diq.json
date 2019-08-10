@@ -5,21 +5,27 @@
 			"Calak",
 			"Erdemaslancan",
 			"Mirzali",
-			"Gorizon"
+			"Gorizon",
+			"Kumkumuk",
+			"Gırd",
+			"Velg",
+			"1917 Ekim Devrimi",
+			"Dılmıc",
+			"Gambollar"
 		]
 	},
 	"skinname-vector": "Vektor",
 	"vector-skin-desc": "Asayışo de newe be versiyonê MonoBookiyo modern ra û weşkerdışê ke şenê bıgureniyê",
 	"vector-action-addsection": "Mewzu vıraze",
 	"vector-action-delete": "Bestere",
-	"vector-action-move": "Bere",
-	"vector-action-protect": "Bışevekne",
-	"vector-action-undelete": "Esterıtışi peyser bıgê",
-	"vector-action-unprotect": "Starkerdışi bıvurne",
+	"vector-action-move": "Bıkırışe",
+	"vector-action-protect": "Bısıtarne",
+	"vector-action-undelete": "Peyser biya",
+	"vector-action-unprotect": "Sıtarnayışi bıvurne",
 	"vector-view-create": "Vıraze",
-	"vector-view-edit": "Bıvurne",
-	"vector-view-history": "Tarixê pele bıvêne",
-	"vector-view-view": "Bıwane",
-	"vector-view-viewsource": "Çımey bıvêne",
-	"vector-more-actions": "Zêde"
+	"vector-view-edit": "Bıvırnê",
+	"vector-view-history": "Verênan bıvênê",
+	"vector-view-view": "Bıwanê",
+	"vector-view-viewsource": "Rêçi bıvin",
+	"vector-more-actions": "Tayêna"
 }

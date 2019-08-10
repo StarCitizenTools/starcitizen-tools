@@ -4,7 +4,7 @@ namespace MediaWiki\Session;
 
 use Psr\Log\LogLevel;
 use MediaWikiTestCase;
-use User;
+use Wikimedia\TestingAccessWrapper;
 
 /**
  * @group Session
@@ -65,11 +65,10 @@ class BotPasswordSessionProviderTest extends MediaWikiTestCase {
 	public function addDBDataOnce() {
 		$passwordFactory = new \PasswordFactory();
 		$passwordFactory->init( \RequestContext::getMain()->getConfig() );
-		// A is unsalted MD5 (thus fast) ... we don't care about security here, this is test only
-		$passwordFactory->setDefaultType( 'A' );
-		$pwhash = $passwordFactory->newFromPlaintext( 'foobaz' );
+		$passwordHash = $passwordFactory->newFromPlaintext( 'foobaz' );
 
-		$userId = \CentralIdLookup::factory( 'local' )->centralIdFromName( 'UTSysop' );
+		$sysop = static::getTestSysop()->getUser();
+		$userId = \CentralIdLookup::factory( 'local' )->centralIdFromName( $sysop->getName() );
 
 		$dbw = wfGetDB( DB_MASTER );
 		$dbw->delete(
@@ -82,7 +81,7 @@ class BotPasswordSessionProviderTest extends MediaWikiTestCase {
 			[
 				'bp_user' => $userId,
 				'bp_app_id' => 'BotPasswordSessionProvider',
-				'bp_password' => $pwhash->toString(),
+				'bp_password' => $passwordHash->toString(),
 				'bp_token' => 'token!',
 				'bp_restrictions' => '{"IPAddresses":["127.0.0.0/8"]}',
 				'bp_grants' => '["test"]',
@@ -129,7 +128,7 @@ class BotPasswordSessionProviderTest extends MediaWikiTestCase {
 		$provider = new BotPasswordSessionProvider( [
 			'priority' => 40
 		] );
-		$priv = \TestingAccessWrapper::newFromObject( $provider );
+		$priv = TestingAccessWrapper::newFromObject( $provider );
 		$this->assertSame( 40, $priv->priority );
 		$this->assertSame( '_BPsession', $priv->sessionCookieName );
 		$this->assertSame( [], $priv->sessionCookieOptions );
@@ -138,7 +137,7 @@ class BotPasswordSessionProviderTest extends MediaWikiTestCase {
 			'priority' => 40,
 			'sessionCookieName' => null,
 		] );
-		$priv = \TestingAccessWrapper::newFromObject( $provider );
+		$priv = TestingAccessWrapper::newFromObject( $provider );
 		$this->assertSame( '_BPsession', $priv->sessionCookieName );
 
 		$provider = new BotPasswordSessionProvider( [
@@ -146,7 +145,7 @@ class BotPasswordSessionProviderTest extends MediaWikiTestCase {
 			'sessionCookieName' => 'Foo',
 			'sessionCookieOptions' => [ 'Bar' ],
 		] );
-		$priv = \TestingAccessWrapper::newFromObject( $provider );
+		$priv = TestingAccessWrapper::newFromObject( $provider );
 		$this->assertSame( 'Foo', $priv->sessionCookieName );
 		$this->assertSame( [ 'Bar' ], $priv->sessionCookieOptions );
 	}
@@ -184,8 +183,9 @@ class BotPasswordSessionProviderTest extends MediaWikiTestCase {
 
 	public function testNewSessionInfoForRequest() {
 		$provider = $this->getProvider();
-		$user = \User::newFromName( 'UTSysop' );
-		$request = $this->getMock( 'FauxRequest', [ 'getIP' ] );
+		$user = static::getTestSysop()->getUser();
+		$request = $this->getMockBuilder( \FauxRequest::class )
+			->setMethods( [ 'getIP' ] )->getMock();
 		$request->expects( $this->any() )->method( 'getIP' )
 			->will( $this->returnValue( '127.0.0.1' ) );
 		$bp = \BotPassword::newFromUser( $user, 'BotPasswordSessionProvider' );
@@ -211,8 +211,9 @@ class BotPasswordSessionProviderTest extends MediaWikiTestCase {
 		$provider = $this->getProvider();
 		$provider->setLogger( $logger );
 
-		$user = \User::newFromName( 'UTSysop' );
-		$request = $this->getMock( 'FauxRequest', [ 'getIP' ] );
+		$user = static::getTestSysop()->getUser();
+		$request = $this->getMockBuilder( \FauxRequest::class )
+			->setMethods( [ 'getIP' ] )->getMock();
 		$request->expects( $this->any() )->method( 'getIP' )
 			->will( $this->returnValue( '127.0.0.1' ) );
 		$bp = \BotPassword::newFromUser( $user, 'BotPasswordSessionProvider' );
@@ -263,7 +264,8 @@ class BotPasswordSessionProviderTest extends MediaWikiTestCase {
 		], $logger->getBuffer() );
 		$logger->clearBuffer();
 
-		$request2 = $this->getMock( 'FauxRequest', [ 'getIP' ] );
+		$request2 = $this->getMockBuilder( \FauxRequest::class )
+			->setMethods( [ 'getIP' ] )->getMock();
 		$request2->expects( $this->any() )->method( 'getIP' )
 			->will( $this->returnValue( '10.0.0.1' ) );
 		$data['metadata'] = $dataMD;
@@ -288,7 +290,7 @@ class BotPasswordSessionProviderTest extends MediaWikiTestCase {
 		$provider->setLogger( $logger );
 
 		$backend = TestUtils::getDummySessionBackend();
-		$backendPriv = \TestingAccessWrapper::newFromObject( $backend );
+		$backendPriv = TestingAccessWrapper::newFromObject( $backend );
 
 		try {
 			$provider->getAllowedUserRights( $backend );

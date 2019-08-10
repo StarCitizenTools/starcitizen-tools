@@ -17,9 +17,9 @@ class AuthenticationRequestTest extends \MediaWikiTestCase {
 		$ret = $mock->describeCredentials();
 		$this->assertInternalType( 'array', $ret );
 		$this->assertArrayHasKey( 'provider', $ret );
-		$this->assertInstanceOf( 'Message', $ret['provider'] );
+		$this->assertInstanceOf( \Message::class, $ret['provider'] );
 		$this->assertArrayHasKey( 'account', $ret );
-		$this->assertInstanceOf( 'Message', $ret['account'] );
+		$this->assertInstanceOf( \Message::class, $ret['account'] );
 	}
 
 	public function testLoadRequestsFromSubmission() {
@@ -138,7 +138,7 @@ class AuthenticationRequestTest extends \MediaWikiTestCase {
 	public function testMergeFieldInfo() {
 		$msg = wfMessage( 'foo' );
 
-		$req1 = $this->getMock( AuthenticationRequest::class );
+		$req1 = $this->createMock( AuthenticationRequest::class );
 		$req1->required = AuthenticationRequest::REQUIRED;
 		$req1->expects( $this->any() )->method( 'getFieldInfo' )->will( $this->returnValue( [
 			'string1' => [
@@ -165,13 +165,14 @@ class AuthenticationRequestTest extends \MediaWikiTestCase {
 			],
 		] ) );
 
-		$req2 = $this->getMock( AuthenticationRequest::class );
+		$req2 = $this->createMock( AuthenticationRequest::class );
 		$req2->required = AuthenticationRequest::REQUIRED;
 		$req2->expects( $this->any() )->method( 'getFieldInfo' )->will( $this->returnValue( [
 			'string1' => [
 				'type' => 'string',
 				'label' => $msg,
 				'help' => $msg,
+				'sensitive' => true,
 			],
 			'string3' => [
 				'type' => 'string',
@@ -186,7 +187,7 @@ class AuthenticationRequestTest extends \MediaWikiTestCase {
 			],
 		] ) );
 
-		$req3 = $this->getMock( AuthenticationRequest::class );
+		$req3 = $this->createMock( AuthenticationRequest::class );
 		$req3->required = AuthenticationRequest::REQUIRED;
 		$req3->expects( $this->any() )->method( 'getFieldInfo' )->will( $this->returnValue( [
 			'string1' => [
@@ -196,7 +197,7 @@ class AuthenticationRequestTest extends \MediaWikiTestCase {
 			],
 		] ) );
 
-		$req4 = $this->getMock( AuthenticationRequest::class );
+		$req4 = $this->createMock( AuthenticationRequest::class );
 		$req4->required = AuthenticationRequest::REQUIRED;
 		$req4->expects( $this->any() )->method( 'getFieldInfo' )->will( $this->returnValue( [] ) );
 
@@ -206,6 +207,7 @@ class AuthenticationRequestTest extends \MediaWikiTestCase {
 		$expect = $req1->getFieldInfo();
 		foreach ( $expect as $name => &$options ) {
 			$options['optional'] = !empty( $options['optional'] );
+			$options['sensitive'] = !empty( $options['sensitive'] );
 		}
 		unset( $options );
 		$this->assertEquals( $expect, $fields );
@@ -225,8 +227,10 @@ class AuthenticationRequestTest extends \MediaWikiTestCase {
 
 		$fields = AuthenticationRequest::mergeFieldInfo( [ $req1, $req2 ] );
 		$expect += $req2->getFieldInfo();
+		$expect['string1']['sensitive'] = true;
 		$expect['string2']['optional'] = false;
 		$expect['string3']['optional'] = false;
+		$expect['string3']['sensitive'] = false;
 		$expect['select']['options']['bar'] = $msg;
 		$this->assertEquals( $expect, $fields );
 
@@ -237,6 +241,7 @@ class AuthenticationRequestTest extends \MediaWikiTestCase {
 		$fields = AuthenticationRequest::mergeFieldInfo( [ $req1, $req2 ] );
 		$expect += $req2->getFieldInfo();
 		$expect['string1']['optional'] = false;
+		$expect['string1']['sensitive'] = true;
 		$expect['string3']['optional'] = false;
 		$expect['select']['optional'] = false;
 		$expect['select']['options']['bar'] = $msg;
@@ -246,7 +251,11 @@ class AuthenticationRequestTest extends \MediaWikiTestCase {
 
 		$fields = AuthenticationRequest::mergeFieldInfo( [ $req1, $req2 ] );
 		$expect = $req1->getFieldInfo() + $req2->getFieldInfo();
+		foreach ( $expect as $name => &$options ) {
+			$options['sensitive'] = !empty( $options['sensitive'] );
+		}
 		$expect['string1']['optional'] = false;
+		$expect['string1']['sensitive'] = true;
 		$expect['string2']['optional'] = true;
 		$expect['string3']['optional'] = true;
 		$expect['select']['optional'] = false;

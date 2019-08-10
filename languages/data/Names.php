@@ -459,7 +459,6 @@ class Names {
 		'wo' => 'Wolof', # Wolof
 		'wuu' => '吴语', # Wu Chinese
 		'xal' => 'хальмг', # Kalmyk-Oirat
-		'xian' => 'Xi\'an', # Xian
 		'xh' => 'isiXhosa', # Xhosan
 		'xmf' => 'მარგალური', # Mingrelian
 		'yi' => 'ייִדיש', # Yiddish

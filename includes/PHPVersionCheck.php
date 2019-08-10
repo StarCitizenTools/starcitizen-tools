@@ -94,7 +94,7 @@ class PHPVersionCheck {
 			'version' => PHP_VERSION,
 			'vendor' => 'the PHP Group',
 			'upstreamSupported' => '5.6.0',
-			'minSupported' => '7.0.0',
+			'minSupported' => '7.0.13',
 			'upgradeURL' => 'https://secure.php.net/downloads.php',
 		);
 	}
@@ -134,7 +134,7 @@ class PHPVersionCheck {
 			If for some reason you are unable to upgrade your {$phpInfo['implementation']} version,
 			you will need to <a href="https://www.mediawiki.org/wiki/Download">download</a> an
 			older version of MediaWiki from our website.
-			See our<a href="https://www.mediawiki.org/wiki/Compatibility#PHP">compatibility page</a>
+			See our <a href="https://www.mediawiki.org/wiki/Compatibility#PHP">compatibility page</a>
 			for details of which versions are compatible with prior versions of {$phpInfo['implementation']}.
 HTML;
 			// phpcs:enable Generic.Files.LineLength

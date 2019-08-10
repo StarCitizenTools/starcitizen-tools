@@ -4,8 +4,12 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 	exit;
 }
 
+/* DEBUG ONLY */
+$wgShowExceptionDetails = true;
+
+$wgTidyConfig = null;
 #General Settings
-$wgSitename = "Star Citizen";
+$wgSitename = "Star Citizen Wiki";
 $wgMetaNamespace = "Star_Citizen";
 $wgAllowSiteCSSOnRestrictedPages = true;
 
@@ -24,7 +28,7 @@ $wgDebugDumpSql = false;
 $wgDebugComments = false;
 
 ## The protocol and server name to use in fully-qualified URLs
-$wgServer = "https://starcitizen.tools";
+$wgServer = "https://scwdev.czen.me";
 
 ## The URL path to static resources (images, scripts, etc.)
 $wgResourceBasePath = $wgScriptPath;
@@ -108,7 +112,7 @@ $wgDefaultSkin = "vector";
 # Enabled skins.
 # The following skins were automatically enabled:
 wfLoadSkin( 'Vector' );
-#wfLoadSkin( 'Citizen' );
+wfLoadSkin( 'Citizen' );
 
 #Maintenance
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
@@ -494,3 +498,44 @@ $wgGroupPermissions['sysop']['nuke'] = true;
 $wgGroupPermissions['sysop']['editinterface'] = true;
 $wgGroupPermissions['sysop']['delete'] = true;
 $wgGroupPermissions['sysop']['renameuser'] = true;
+
+#=============================================== Misc ===============================================
+
+$wgFooterIcons = [
+    "copyright" => [
+        "copyright" => [
+      "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default,
+            "url" => $wgRightsUrl,
+            "alt" => $wgRightsText,
+    ],
+    ],
+    "poweredby" => [
+        "mediawiki" => [
+            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+            "url" => "https://www.mediawiki.org",
+            "alt" => "Powered by MediaWiki",
+        ]
+    ],
+  "monitoredby" => [
+        "wikiapiary" => [
+            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+            "url" => "https://wikiapiary.com/wiki/The_Star_Citizen_Wiki",
+            "alt" => "Monitored By Wikiapiary",
+        ]
+    ],
+  "gdprcompliance" => [
+        "gdpr" => [
+            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+            "url" => "https://gdpr.eu",
+            "alt" => "GDPR compliant",
+        ]
+    ],
+  "madeby" => [
+        "thecommunity" => [
+            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+            "url" => "https://robertsspaceindustries.com",
+            "alt" => "Made by the community",
+        ]
+    ]
+];
+

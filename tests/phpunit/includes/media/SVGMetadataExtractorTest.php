@@ -75,7 +75,7 @@ class SVGMetadataExtractorTest extends MediaWikiTestCase {
 			],
 			[
 				"$base/Toll_Texas_1.svg",
-				// This file triggered bug 31719, needs entity expansion in the xmlns checks
+				// This file triggered T33719, needs entity expansion in the xmlns checks
 				[
 					'width' => 385,
 					'height' => 385,
@@ -128,14 +128,14 @@ class SVGMetadataExtractorTest extends MediaWikiTestCase {
 
 	public static function provideSvgFilesWithXMLMetadata() {
 		$base = __DIR__ . '/../../data/media';
-		// @codingStandardsIgnoreStart Ignore Generic.Files.LineLength.TooLong
+		// phpcs:disable Generic.Files.LineLength
 		$metadata = '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
       <ns4:Work xmlns:ns4="http://creativecommons.org/ns#" rdf:about="">
         <ns5:format xmlns:ns5="http://purl.org/dc/elements/1.1/">image/svg+xml</ns5:format>
         <ns5:type xmlns:ns5="http://purl.org/dc/elements/1.1/" rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
       </ns4:Work>
     </rdf:RDF>';
-		// @codingStandardsIgnoreEnd
+		// phpcs:enable
 
 		$metadata = str_replace( "\r", '', $metadata ); // Windows compat
 		return [

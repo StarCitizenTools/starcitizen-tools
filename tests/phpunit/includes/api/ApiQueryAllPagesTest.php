@@ -4,23 +4,23 @@
  * @group API
  * @group Database
  * @group medium
+ *
+ * @covers ApiQueryAllPages
  */
 class ApiQueryAllPagesTest extends ApiTestCase {
-
-	protected function setUp() {
-		parent::setUp();
-		$this->doLogin();
-	}
-
 	/**
-	 *Test bug 25702
-	 *Prefixes of API search requests are not handled with case sensitivity and may result
-	 *in wrong search results
+	 * Test T27702
+	 * Prefixes of API search requests are not handled with case sensitivity and may result
+	 * in wrong search results
 	 */
 	public function testPrefixNormalizationSearchBug() {
 		$title = Title::newFromText( 'Category:Template:xyz' );
 		$page = WikiPage::factory( $title );
-		$page->doEdit( 'Some text', 'inserting content' );
+
+		$page->doEditContent(
+			ContentHandler::makeContent( 'Some text', $page->getTitle() ),
+			'inserting content'
+		);
 
 		$result = $this->doApiRequest( [
 			'action' => 'query',

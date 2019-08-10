@@ -2,6 +2,10 @@
 
 namespace MediaWiki\Auth;
 
+use MediaWiki\MediaWikiServices;
+use Wikimedia\ScopedCallback;
+use Wikimedia\TestingAccessWrapper;
+
 /**
  * @group AuthManager
  * @group Database
@@ -30,7 +34,7 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		}
 		$config = new \MultiConfig( [
 			$this->config,
-			\ConfigFactory::getDefaultInstance()->makeConfig( 'main' )
+			MediaWikiServices::getInstance()->getMainConfig()
 		] );
 
 		if ( !$this->manager ) {
@@ -39,11 +43,10 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$this->validity = \Status::newGood();
 
 		$mockedMethods[] = 'checkPasswordValidity';
-		$provider = $this->getMock(
-			TemporaryPasswordPrimaryAuthenticationProvider::class,
-			$mockedMethods,
-			[ $params ]
-		);
+		$provider = $this->getMockBuilder( TemporaryPasswordPrimaryAuthenticationProvider::class )
+			->setMethods( $mockedMethods )
+			->setConstructorArgs( [ $params ] )
+			->getMock();
 		$provider->expects( $this->any() )->method( 'checkPasswordValidity' )
 			->will( $this->returnCallback( function () {
 				return $this->validity;
@@ -70,7 +73,7 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 			} );
 		}
 
-		return new \ScopedCallback( function () {
+		return new ScopedCallback( function () {
 			\Hooks::clear( 'AlternateUserMailer' );
 			\Hooks::register( 'AlternateUserMailer', function () {
 				return false;
@@ -104,13 +107,13 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 			'PasswordReminderResendTime' => 101,
 		] );
 
-		$p = \TestingAccessWrapper::newFromObject( new TemporaryPasswordPrimaryAuthenticationProvider() );
+		$p = TestingAccessWrapper::newFromObject( new TemporaryPasswordPrimaryAuthenticationProvider() );
 		$p->setConfig( $config );
 		$this->assertSame( false, $p->emailEnabled );
 		$this->assertSame( 100, $p->newPasswordExpiry );
 		$this->assertSame( 101, $p->passwordReminderResendTime );
 
-		$p = \TestingAccessWrapper::newFromObject( new TemporaryPasswordPrimaryAuthenticationProvider( [
+		$p = TestingAccessWrapper::newFromObject( new TemporaryPasswordPrimaryAuthenticationProvider( [
 			'emailEnabled' => true,
 			'newPasswordExpiry' => 42,
 			'passwordReminderResendTime' => 43,
@@ -122,6 +125,8 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 	}
 
 	public function testTestUserCanAuthenticate() {
+		$user = self::getMutableTestUser()->getUser();
+
 		$dbw = wfGetDB( DB_MASTER );
 
 		$passwordFactory = new \PasswordFactory();
@@ -131,7 +136,7 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$pwhash = $passwordFactory->newFromPlaintext( 'password' )->toString();
 
 		$provider = $this->getProvider();
-		$providerPriv = \TestingAccessWrapper::newFromObject( $provider );
+		$providerPriv = TestingAccessWrapper::newFromObject( $provider );
 
 		$this->assertFalse( $provider->testUserCanAuthenticate( '<invalid>' ) );
 		$this->assertFalse( $provider->testUserCanAuthenticate( 'DoesNotExist' ) );
@@ -142,9 +147,9 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 				'user_newpassword' => \PasswordFactory::newInvalidPassword()->toString(),
 				'user_newpass_time' => null,
 			],
-			[ 'user_name' => 'UTSysop' ]
+			[ 'user_id' => $user->getId() ]
 		);
-		$this->assertFalse( $provider->testUserCanAuthenticate( 'UTSysop' ) );
+		$this->assertFalse( $provider->testUserCanAuthenticate( $user->getName() ) );
 
 		$dbw->update(
 			'user',
@@ -152,10 +157,10 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 				'user_newpassword' => $pwhash,
 				'user_newpass_time' => null,
 			],
-			[ 'user_name' => 'UTSysop' ]
+			[ 'user_id' => $user->getId() ]
 		);
-		$this->assertTrue( $provider->testUserCanAuthenticate( 'UTSysop' ) );
-		$this->assertTrue( $provider->testUserCanAuthenticate( 'uTSysop' ) );
+		$this->assertTrue( $provider->testUserCanAuthenticate( $user->getName() ) );
+		$this->assertTrue( $provider->testUserCanAuthenticate( lcfirst( $user->getName() ) ) );
 
 		$dbw->update(
 			'user',
@@ -163,12 +168,12 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 				'user_newpassword' => $pwhash,
 				'user_newpass_time' => $dbw->timestamp( time() - 10 ),
 			],
-			[ 'user_name' => 'UTSysop' ]
+			[ 'user_id' => $user->getId() ]
 		);
 		$providerPriv->newPasswordExpiry = 100;
-		$this->assertTrue( $provider->testUserCanAuthenticate( 'UTSysop' ) );
+		$this->assertTrue( $provider->testUserCanAuthenticate( $user->getName() ) );
 		$providerPriv->newPasswordExpiry = 1;
-		$this->assertFalse( $provider->testUserCanAuthenticate( 'UTSysop' ) );
+		$this->assertFalse( $provider->testUserCanAuthenticate( $user->getName() ) );
 
 		$dbw->update(
 			'user',
@@ -176,7 +181,7 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 				'user_newpassword' => \PasswordFactory::newInvalidPassword()->toString(),
 				'user_newpass_time' => null,
 			],
-			[ 'user_name' => 'UTSysop' ]
+			[ 'user_id' => $user->getId() ]
 		);
 	}
 
@@ -229,13 +234,15 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 	}
 
 	public function testAuthentication() {
+		$user = self::getMutableTestUser()->getUser();
+
 		$password = 'TemporaryPassword';
 		$hash = ':A:' . md5( $password );
 		$dbw = wfGetDB( DB_MASTER );
 		$dbw->update(
 			'user',
 			[ 'user_newpassword' => $hash, 'user_newpass_time' => $dbw->timestamp( time() - 10 ) ],
-			[ 'user_name' => 'UTSysop' ]
+			[ 'user_id' => $user->getId() ]
 		);
 
 		$req = new PasswordAuthenticationRequest();
@@ -243,7 +250,7 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$reqs = [ PasswordAuthenticationRequest::class => $req ];
 
 		$provider = $this->getProvider();
-		$providerPriv = \TestingAccessWrapper::newFromObject( $provider );
+		$providerPriv = TestingAccessWrapper::newFromObject( $provider );
 
 		$providerPriv->newPasswordExpiry = 100;
 
@@ -284,7 +291,7 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		);
 
 		// Validation failure
-		$req->username = 'UTSysop';
+		$req->username = $user->getName();
 		$req->password = $password;
 		$this->validity = \Status::newFatal( 'arbitrary-failure' );
 		$ret = $provider->beginPrimaryAuthentication( $reqs );
@@ -301,20 +308,20 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$this->manager->removeAuthenticationSessionData( null );
 		$this->validity = \Status::newGood();
 		$this->assertEquals(
-			AuthenticationResponse::newPass( 'UTSysop' ),
+			AuthenticationResponse::newPass( $user->getName() ),
 			$provider->beginPrimaryAuthentication( $reqs )
 		);
 		$this->assertNotNull( $this->manager->getAuthenticationSessionData( 'reset-pass' ) );
 
 		$this->manager->removeAuthenticationSessionData( null );
 		$this->validity = \Status::newGood();
-		$req->username = 'uTSysop';
+		$req->username = lcfirst( $user->getName() );
 		$this->assertEquals(
-			AuthenticationResponse::newPass( 'UTSysop' ),
+			AuthenticationResponse::newPass( $user->getName() ),
 			$provider->beginPrimaryAuthentication( $reqs )
 		);
 		$this->assertNotNull( $this->manager->getAuthenticationSessionData( 'reset-pass' ) );
-		$req->username = 'UTSysop';
+		$req->username = $user->getName();
 
 		// Expired password
 		$providerPriv->newPasswordExpiry = 1;
@@ -341,7 +348,6 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 			'wrongpassword',
 			$ret->message->getKey()
 		);
-
 	}
 
 	/**
@@ -360,7 +366,7 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		) {
 			$req = new $type();
 		} else {
-			$req = $this->getMock( $type );
+			$req = $this->createMock( $type );
 		}
 		$req->action = AuthManager::ACTION_CHANGE;
 		$req->username = $user;
@@ -408,19 +414,18 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$oldpass = 'OldTempPassword';
 		$newpass = 'NewTempPassword';
 
-		$hash = ':A:' . md5( $oldpass );
 		$dbw = wfGetDB( DB_MASTER );
+		$oldHash = $dbw->selectField( 'user', 'user_newpassword', [ 'user_name' => $cuser ] );
+		$cb = new ScopedCallback( function () use ( $dbw, $cuser, $oldHash ) {
+			$dbw->update( 'user', [ 'user_newpassword' => $oldHash ], [ 'user_name' => $cuser ] );
+		} );
+
+		$hash = ':A:' . md5( $oldpass );
 		$dbw->update(
 			'user',
 			[ 'user_newpassword' => $hash, 'user_newpass_time' => $dbw->timestamp( time() + 10 ) ],
-			[ 'user_name' => 'UTSysop' ]
+			[ 'user_name' => $cuser ]
 		);
-
-		$dbw = wfGetDB( DB_MASTER );
-		$oldHash = $dbw->selectField( 'user', 'user_newpassword', [ 'user_name' => $cuser ] );
-		$cb = new \ScopedCallback( function () use ( $dbw, $cuser, $oldHash ) {
-			$dbw->update( 'user', [ 'user_newpassword' => $oldHash ], [ 'user_name' => $cuser ] );
-		} );
 
 		$provider = $this->getProvider();
 
@@ -441,14 +446,14 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		) {
 			$changeReq = new $type();
 		} else {
-			$changeReq = $this->getMock( $type );
+			$changeReq = $this->createMock( $type );
 		}
 		$changeReq->action = AuthManager::ACTION_CHANGE;
 		$changeReq->username = $user;
 		$changeReq->password = $newpass;
 		$resetMailer = $this->hookMailer();
 		$provider->providerChangeAuthenticationData( $changeReq );
-		\ScopedCallback::consume( $resetMailer );
+		ScopedCallback::consume( $resetMailer );
 
 		$loginReq->password = $oldpass;
 		$ret = $provider->beginPrimaryAuthentication( $loginReqs );
@@ -500,21 +505,14 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 	}
 
 	public function testProviderChangeAuthenticationDataEmail() {
+		$user = self::getMutableTestUser()->getUser();
+
 		$dbw = wfGetDB( DB_MASTER );
 		$dbw->update(
 			'user',
 			[ 'user_newpass_time' => $dbw->timestamp( time() - 5 * 3600 ) ],
-			[ 'user_name' => 'UTSysop' ]
+			[ 'user_id' => $user->getId() ]
 		);
-
-		$user = \User::newFromName( 'UTSysop' );
-		$reset = new \ScopedCallback( function ( $email ) use ( $user ) {
-			$user->setEmail( $email );
-			$user->saveSettings();
-		}, [ $user->getEmail() ] );
-
-		$user->setEmail( 'test@localhost.localdomain' );
-		$user->saveSettings();
 
 		$req = TemporaryPasswordAuthenticationRequest::newRandom();
 		$req->username = $user->getName();
@@ -523,10 +521,6 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$provider = $this->getProvider( [ 'emailEnabled' => false ] );
 		$status = $provider->providerAllowsAuthenticationDataChange( $req, true );
 		$this->assertEquals( \StatusValue::newFatal( 'passwordreset-emaildisabled' ), $status );
-		$req->hasBackchannel = true;
-		$status = $provider->providerAllowsAuthenticationDataChange( $req, true );
-		$this->assertFalse( $status->hasMessage( 'passwordreset-emaildisabled' ) );
-		$req->hasBackchannel = false;
 
 		$provider = $this->getProvider( [ 'passwordReminderResendTime' => 10 ] );
 		$status = $provider->providerAllowsAuthenticationDataChange( $req, true );
@@ -539,7 +533,7 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$dbw->update(
 			'user',
 			[ 'user_newpass_time' => $dbw->timestamp( time() + 5 * 3600 ) ],
-			[ 'user_name' => 'UTSysop' ]
+			[ 'user_id' => $user->getId() ]
 		);
 		$provider = $this->getProvider( [ 'passwordReminderResendTime' => 0 ] );
 		$status = $provider->providerAllowsAuthenticationDataChange( $req, true );
@@ -563,24 +557,24 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$status = $provider->providerAllowsAuthenticationDataChange( $req, true );
 		$this->assertEquals( \StatusValue::newGood(), $status );
 
-		$req->caller = 'UTSysop';
+		$req->caller = $user->getName();
 		$status = $provider->providerAllowsAuthenticationDataChange( $req, true );
 		$this->assertEquals( \StatusValue::newGood(), $status );
 
 		$mailed = false;
 		$resetMailer = $this->hookMailer( function ( $headers, $to, $from, $subject, $body )
-			use ( &$mailed, $req )
+			use ( &$mailed, $req, $user )
 		{
 			$mailed = true;
-			$this->assertSame( 'test@localhost.localdomain', $to[0]->address );
+			$this->assertSame( $user->getEmail(), $to[0]->address );
 			$this->assertContains( $req->password, $body );
 			return false;
 		} );
 		$provider->providerChangeAuthenticationData( $req );
-		\ScopedCallback::consume( $resetMailer );
+		ScopedCallback::consume( $resetMailer );
 		$this->assertTrue( $mailed );
 
-		$priv = \TestingAccessWrapper::newFromObject( $provider );
+		$priv = TestingAccessWrapper::newFromObject( $provider );
 		$req->username = '<invalid>';
 		$status = $priv->sendPasswordResetEmail( $req );
 		$this->assertEquals( \Status::newFatal( 'noname' ), $status );
@@ -653,17 +647,15 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$req->password = 'bar';
 
 		$expect = AuthenticationResponse::newPass( 'Foo' );
-		$expect->createRequest = clone( $req );
+		$expect->createRequest = clone $req;
 		$expect->createRequest->username = 'Foo';
 		$this->assertEquals( $expect, $provider->beginPrimaryAccountCreation( $user, $user, $reqs ) );
 		$this->assertNull( $this->manager->getAuthenticationSessionData( 'no-email' ) );
 
-		// We have to cheat a bit to avoid having to add a new user to
-		// the database to test the actual setting of the password works right
-		$user = \User::newFromName( 'UTSysop' );
+		$user = self::getMutableTestUser()->getUser();
 		$req->username = $authreq->username = $user->getName();
 		$req->password = $authreq->password = 'NewPassword';
-		$expect = AuthenticationResponse::newPass( 'UTSysop' );
+		$expect = AuthenticationResponse::newPass( $user->getName() );
 		$expect->createRequest = $req;
 
 		$res2 = $provider->beginPrimaryAccountCreation( $user, $user, $reqs );
@@ -680,12 +672,8 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 
 	public function testAccountCreationEmail() {
 		$creator = \User::newFromName( 'Foo' );
-		$user = \User::newFromName( 'UTSysop' );
-		$reset = new \ScopedCallback( function ( $email ) use ( $user ) {
-			$user->setEmail( $email );
-			$user->saveSettings();
-		}, [ $user->getEmail() ] );
 
+		$user = self::getMutableTestUser()->getUser();
 		$user->setEmail( null );
 
 		$req = TemporaryPasswordAuthenticationRequest::newRandom();
@@ -695,18 +683,10 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$provider = $this->getProvider( [ 'emailEnabled' => false ] );
 		$status = $provider->testForAccountCreation( $user, $creator, [ $req ] );
 		$this->assertEquals( \StatusValue::newFatal( 'emaildisabled' ), $status );
-		$req->hasBackchannel = true;
-		$status = $provider->testForAccountCreation( $user, $creator, [ $req ] );
-		$this->assertFalse( $status->hasMessage( 'emaildisabled' ) );
-		$req->hasBackchannel = false;
 
 		$provider = $this->getProvider( [ 'emailEnabled' => true ] );
 		$status = $provider->testForAccountCreation( $user, $creator, [ $req ] );
 		$this->assertEquals( \StatusValue::newFatal( 'noemailcreate' ), $status );
-		$req->hasBackchannel = true;
-		$status = $provider->testForAccountCreation( $user, $creator, [ $req ] );
-		$this->assertFalse( $status->hasMessage( 'noemailcreate' ) );
-		$req->hasBackchannel = false;
 
 		$user->setEmail( 'test@localhost.localdomain' );
 		$status = $provider->testForAccountCreation( $user, $creator, [ $req ] );
@@ -722,9 +702,9 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 			return false;
 		} );
 
-		$expect = AuthenticationResponse::newPass( 'UTSysop' );
-		$expect->createRequest = clone( $req );
-		$expect->createRequest->username = 'UTSysop';
+		$expect = AuthenticationResponse::newPass( $user->getName() );
+		$expect->createRequest = clone $req;
+		$expect->createRequest->username = $user->getName();
 		$res = $provider->beginPrimaryAccountCreation( $user, $creator, [ $req ] );
 		$this->assertEquals( $expect, $res );
 		$this->assertTrue( $this->manager->getAuthenticationSessionData( 'no-email' ) );
@@ -733,7 +713,7 @@ class TemporaryPasswordPrimaryAuthenticationProviderTest extends \MediaWikiTestC
 		$this->assertSame( 'byemail', $provider->finishAccountCreation( $user, $creator, $res ) );
 		$this->assertTrue( $mailed );
 
-		\ScopedCallback::consume( $resetMailer );
+		ScopedCallback::consume( $resetMailer );
 		$this->assertTrue( $mailed );
 	}
 

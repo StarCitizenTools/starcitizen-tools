@@ -1,4 +1,7 @@
 <?php
+
+use Wikimedia\ScopedCallback;
+
 /**
  * @author Matthias Mullie <mmullie@wikimedia.org>
  * @group BagOStuff
@@ -89,12 +92,12 @@ class BagOStuffTest extends MediaWikiTestCase {
 		// merge on non-existing value
 		$merged = $this->cache->merge( $key, $callback, 0 );
 		$this->assertTrue( $merged );
-		$this->assertEquals( $this->cache->get( $key ), 'merged' );
+		$this->assertEquals( 'merged', $this->cache->get( $key ) );
 
 		// merge on existing value
 		$merged = $this->cache->merge( $key, $callback, 0 );
 		$this->assertTrue( $merged );
-		$this->assertEquals( $this->cache->get( $key ), 'mergedmerged' );
+		$this->assertEquals( 'mergedmerged', $this->cache->get( $key ) );
 
 		/*
 		 * Test concurrent merges by forking this process, if:
@@ -139,6 +142,20 @@ class BagOStuffTest extends MediaWikiTestCase {
 	}
 
 	/**
+	 * @covers BagOStuff::changeTTL
+	 */
+	public function testChangeTTL() {
+		$key = wfMemcKey( 'test' );
+		$value = 'meow';
+
+		$this->cache->add( $key, $value );
+		$this->assertTrue( $this->cache->changeTTL( $key, 5 ) );
+		$this->assertEquals( $this->cache->get( $key ), $value );
+		$this->cache->delete( $key );
+		$this->assertFalse( $this->cache->changeTTL( $key, 5 ) );
+	}
+
+	/**
 	 * @covers BagOStuff::add
 	 */
 	public function testAdd() {
@@ -146,6 +163,9 @@ class BagOStuffTest extends MediaWikiTestCase {
 		$this->assertTrue( $this->cache->add( $key, 'test' ) );
 	}
 
+	/**
+	 * @covers BagOStuff::get
+	 */
 	public function testGet() {
 		$value = [ 'this' => 'is', 'a' => 'test' ];
 
@@ -237,20 +257,20 @@ class BagOStuffTest extends MediaWikiTestCase {
 		$value1 = $this->cache->getScopedLock( $key, 0 );
 		$value2 = $this->cache->getScopedLock( $key, 0 );
 
-		$this->assertType( 'ScopedCallback', $value1, 'First call returned lock' );
+		$this->assertType( ScopedCallback::class, $value1, 'First call returned lock' );
 		$this->assertNull( $value2, 'Duplicate call returned no lock' );
 
 		unset( $value1 );
 
 		$value3 = $this->cache->getScopedLock( $key, 0 );
-		$this->assertType( 'ScopedCallback', $value3, 'Lock returned callback after release' );
+		$this->assertType( ScopedCallback::class, $value3, 'Lock returned callback after release' );
 		unset( $value3 );
 
 		$value1 = $this->cache->getScopedLock( $key, 0, 5, 'reentry' );
 		$value2 = $this->cache->getScopedLock( $key, 0, 5, 'reentry' );
 
-		$this->assertType( 'ScopedCallback', $value1, 'First reentrant call returned lock' );
-		$this->assertType( 'ScopedCallback', $value1, 'Second reentrant call returned lock' );
+		$this->assertType( ScopedCallback::class, $value1, 'First reentrant call returned lock' );
+		$this->assertType( ScopedCallback::class, $value1, 'Second reentrant call returned lock' );
 	}
 
 	/**
@@ -258,7 +278,7 @@ class BagOStuffTest extends MediaWikiTestCase {
 	 * @covers BagOStuff::trackDuplicateKeys
 	 */
 	public function testReportDupes() {
-		$logger = $this->getMock( 'Psr\Log\NullLogger' );
+		$logger = $this->createMock( Psr\Log\NullLogger::class );
 		$logger->expects( $this->once() )
 			->method( 'warning' )
 			->with( 'Duplicate get(): "{key}" fetched {count} times', [

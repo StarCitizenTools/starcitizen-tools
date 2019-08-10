@@ -24,8 +24,6 @@
  * @ingroup Site
  * @ingroup Test
  *
- * @group Site
- *
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class TestSites {
@@ -109,6 +107,6 @@ class TestSites {
 	public static function insertIntoDb() {
 		$sitesTable = \MediaWiki\MediaWikiServices::getInstance()->getSiteStore();
 		$sitesTable->clear();
-		$sitesTable->saveSites( TestSites::getSites() );
+		$sitesTable->saveSites( self::getSites() );
 	}
 }

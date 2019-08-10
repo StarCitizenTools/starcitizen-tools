@@ -1775,7 +1775,7 @@ class User implements IDBAccessObject, UserIdentity {
 	 *   Check when actually saving should be done against master.
 	 */
 	private function getBlockedStatus( $bFromSlave = true ) {
-		global $wgProxyWhitelist, $wgUser, $wgApplyIpBlocksToXff, $wgSoftBlockRanges;
+		global $wgProxyWhitelist, $wgApplyIpBlocksToXff, $wgSoftBlockRanges;
 
 		if ( -1 != $this->mBlockedby ) {
 			return;
@@ -1794,15 +1794,14 @@ class User implements IDBAccessObject, UserIdentity {
 		# user is not immune to autoblocks/hardblocks, and they are the current user so we
 		# know which IP address they're actually coming from
 		$ip = null;
-		if ( !$this->isAllowed( 'ipblock-exempt' ) ) {
-			// $wgUser->getName() only works after the end of Setup.php. Until
-			// then, assume it's a logged-out user.
-			$globalUserName = $wgUser->isSafeToLoad()
-				? $wgUser->getName()
-				: IP::sanitizeIP( $wgUser->getRequest()->getIP() );
-			if ( $this->getName() === $globalUserName ) {
-				$ip = $this->getRequest()->getIP();
-			}
+		$sessionUser = RequestContext::getMain()->getUser();
+		// the session user is set up towards the end of Setup.php. Until then,
+		// assume it's a logged-out user.
+		$globalUserName = $sessionUser->isSafeToLoad()
+			? $sessionUser->getName()
+			: IP::sanitizeIP( $sessionUser->getRequest()->getIP() );
+		if ( $this->getName() === $globalUserName && !$this->isAllowed( 'ipblock-exempt' ) ) {
+			$ip = $this->getRequest()->getIP();
 		}
 
 		// User/IP blocking
@@ -1881,9 +1880,9 @@ class User implements IDBAccessObject, UserIdentity {
 		}
 
 		// Avoid PHP 7.1 warning of passing $this by reference
-		$user = $this;
+		$thisUser = $this;
 		// Extensions
-		Hooks::run( 'GetBlockedStatus', [ &$user ] );
+		Hooks::run( 'GetBlockedStatus', [ &$thisUser ] );
 	}
 
 	/**
@@ -2108,10 +2107,6 @@ class User implements IDBAccessObject, UserIdentity {
 			if ( isset( $limits['user'] ) ) {
 				$userLimit = $limits['user'];
 			}
-			// limits for newbie logged-in users
-			if ( $isNewbie && isset( $limits['newbie'] ) ) {
-				$keys[$cache->makeKey( 'limiter', $action, 'user', $id )] = $limits['newbie'];
-			}
 		}
 
 		// limits for anons and for newbie logged-in users
@@ -2141,6 +2136,11 @@ class User implements IDBAccessObject, UserIdentity {
 					$userLimit = $limits[$group];
 				}
 			}
+		}
+
+		// limits for newbie logged-in users (override all the normal user limits)
+		if ( $id !== 0 && $isNewbie && isset( $limits['newbie'] ) ) {
+			$userLimit = $limits['newbie'];
 		}
 
 		// Set the user limit key
@@ -2464,8 +2464,14 @@ class User implements IDBAccessObject, UserIdentity {
 					$this->mActorId = (int)$dbw->insertId();
 				} else {
 					// Outdated cache?
-					list( , $options ) = DBAccessObjectUtils::getDBOptions( $this->queryFlagsUsed );
-					$this->mActorId = (int)$dbw->selectField( 'actor', 'actor_id', $q, __METHOD__, $options );
+					// Use LOCK IN SHARE MODE to bypass any MySQL REPEATABLE-READ snapshot.
+					$this->mActorId = (int)$dbw->selectField(
+						'actor',
+						'actor_id',
+						$q,
+						__METHOD__,
+						[ 'LOCK IN SHARE MODE' ]
+					);
 					if ( !$this->mActorId ) {
 						throw new CannotCreateActorException(
 							"Cannot create actor ID for user_id={$this->getId()} user_name={$this->getName()}"

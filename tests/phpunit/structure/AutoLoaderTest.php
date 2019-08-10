@@ -58,9 +58,9 @@ class AutoLoaderTest extends MediaWikiTestCase {
 				continue;
 			}
 
-			MediaWiki\suppressWarnings();
+			Wikimedia\suppressWarnings();
 			$contents = file_get_contents( $filePath );
-			MediaWiki\restoreWarnings();
+			Wikimedia\restoreWarnings();
 
 			if ( $contents === false ) {
 				$actual[$class] = "[couldn't read file '$filePath']";
@@ -68,6 +68,7 @@ class AutoLoaderTest extends MediaWikiTestCase {
 			}
 
 			// We could use token_get_all() here, but this is faster
+			// Note: Keep in sync with ClassCollector
 			$matches = [];
 			preg_match_all( '/
 				^ [\t ]* (?:
@@ -77,6 +78,11 @@ class AutoLoaderTest extends MediaWikiTestCase {
 					class_alias \s* \( \s*
 						([\'"]) (?P<original> [^\'"]+) \g{-2} \s* , \s*
 						([\'"]) (?P<alias> [^\'"]+ ) \g{-2} \s*
+					\) \s* ;
+				|
+					class_alias \s* \( \s*
+						(?P<originalStatic> [a-zA-Z0-9_]+)::class \s* , \s*
+						([\'"]) (?P<aliasString> [^\'"]+ ) \g{-2} \s*
 					\) \s* ;
 				)
 			/imx', $contents, $matches, PREG_SET_ORDER );
@@ -95,11 +101,18 @@ class AutoLoaderTest extends MediaWikiTestCase {
 
 			foreach ( $matches as $match ) {
 				if ( !empty( $match['class'] ) ) {
+					// 'class Foo {}'
 					$class = $fileNamespace . $match['class'];
 					$actual[$class] = $file;
 					$classesInFile[$class] = true;
 				} else {
-					$aliasesInFile[$match['alias']] = $match['original'];
+					if ( !empty( $match['original'] ) ) {
+						// 'class_alias( "Foo", "Bar" );'
+						$aliasesInFile[$match['alias']] = $match['original'];
+					} else {
+						// 'class_alias( Foo::class, "Bar" );'
+						$aliasesInFile[$match['aliasString']] = $fileNamespace . $match['originalStatic'];
+					}
 				}
 			}
 
@@ -142,5 +155,17 @@ class AutoLoaderTest extends MediaWikiTestCase {
 		$uncerealized = unserialize( $dummyCereal );
 		$this->assertFalse( $uncerealized instanceof __PHP_Incomplete_Class,
 			"unserialize() can load classes case-insensitively." );
+	}
+
+	function testAutoloadOrder() {
+		$path = realpath( __DIR__ . '/../../..' );
+		$oldAutoload = file_get_contents( $path . '/autoload.php' );
+		$generator = new AutoloadGenerator( $path, 'local' );
+		$generator->setExcludePaths( array_values( AutoLoader::getAutoloadNamespaces() ) );
+		$generator->initMediaWikiDefault();
+		$newAutoload = $generator->getAutoload( 'maintenance/generateLocalAutoload.php' );
+
+		$this->assertEquals( $oldAutoload, $newAutoload, 'autoload.php does not match' .
+			' output of generateLocalAutoload.php script.' );
 	}
 }

@@ -1,5 +1,4 @@
 <?php
-/** tests for includes/Html.php */
 
 class HtmlTest extends MediaWikiTestCase {
 
@@ -41,12 +40,15 @@ class HtmlTest extends MediaWikiTestCase {
 
 	/**
 	 * @covers Html::element
+	 * @covers Html::rawElement
+	 * @covers Html::openElement
+	 * @covers Html::closeElement
 	 */
 	public function testElementBasics() {
 		$this->assertEquals(
 			'<img/>',
 			Html::element( 'img', null, '' ),
-			'No close tag for short-tag elements'
+			'Self-closing tag for short-tag elements'
 		);
 
 		$this->assertEquals(
@@ -59,12 +61,6 @@ class HtmlTest extends MediaWikiTestCase {
 			'<element></element>',
 			Html::element( 'element', [], '' ),
 			'Close tag for empty element (array, string)'
-		);
-
-		$this->assertEquals(
-			'<img/>',
-			Html::element( 'img', null, '' ),
-			'Self-closing tag for short-tag elements'
 		);
 	}
 
@@ -98,7 +94,6 @@ class HtmlTest extends MediaWikiTestCase {
 	 * @covers Html::expandAttributes
 	 */
 	public function testExpandAttributesSkipsNullAndFalse() {
-
 		# ## EMPTY ########
 		$this->assertEmpty(
 			Html::expandAttributes( [ 'foo' => null ] ),
@@ -139,12 +134,6 @@ class HtmlTest extends MediaWikiTestCase {
 			' selected=""',
 			Html::expandAttributes( [ 'selected' ] ),
 			'Boolean attributes have no value when value is true (passed as numerical array)'
-		);
-
-		$this->assertEquals(
-			' selected=""',
-			Html::expandAttributes( [ 'selected' => true ] ),
-			'Boolean attributes have empty string value when value is true'
 		);
 	}
 
@@ -202,7 +191,6 @@ class HtmlTest extends MediaWikiTestCase {
 			Html::expandAttributes( [ 'zero' => 0 ] ),
 			'Number 0 value needs no quotes'
 		);
-
 	}
 
 	/**
@@ -283,7 +271,7 @@ class HtmlTest extends MediaWikiTestCase {
 	/**
 	 * How do we handle duplicate keys in HTML attributes expansion?
 	 * We could pass a "class" the values: 'GREEN' and array( 'GREEN' => false )
-	 * The later will take precedence.
+	 * The latter will take precedence.
 	 *
 	 * Feature added by r96188
 	 * @covers Html::expandAttributes
@@ -316,6 +304,7 @@ class HtmlTest extends MediaWikiTestCase {
 
 	/**
 	 * @covers Html::namespaceSelector
+	 * @covers Html::namespaceSelectorOptions
 	 */
 	public function testNamespaceSelector() {
 		$this->assertEquals(
@@ -396,6 +385,9 @@ class HtmlTest extends MediaWikiTestCase {
 		);
 	}
 
+	/**
+	 * @covers Html::namespaceSelector
+	 */
 	public function testCanFilterOutNamespaces() {
 		$this->assertEquals(
 			'<select id="namespace" name="namespace">' . "\n" .
@@ -418,6 +410,9 @@ class HtmlTest extends MediaWikiTestCase {
 		);
 	}
 
+	/**
+	 * @covers Html::namespaceSelector
+	 */
 	public function testCanDisableANamespaces() {
 		$this->assertEquals(
 			'<select id="namespace" name="namespace">' . "\n" .
@@ -458,8 +453,49 @@ class HtmlTest extends MediaWikiTestCase {
 	}
 
 	/**
+	 * @covers Html::warningBox
+	 * @covers Html::messageBox
+	 */
+	public function testWarningBox() {
+		$this->assertEquals(
+			Html::warningBox( 'warn' ),
+			'<div class="warningbox">warn</div>'
+		);
+	}
+
+	/**
+	 * @covers Html::errorBox
+	 * @covers Html::messageBox
+	 */
+	public function testErrorBox() {
+		$this->assertEquals(
+			Html::errorBox( 'err' ),
+			'<div class="errorbox">err</div>'
+		);
+		$this->assertEquals(
+			Html::errorBox( 'err', 'heading' ),
+			'<div class="errorbox"><h2>heading</h2>err</div>'
+		);
+	}
+
+	/**
+	 * @covers Html::successBox
+	 * @covers Html::messageBox
+	 */
+	public function testSuccessBox() {
+		$this->assertEquals(
+			Html::successBox( 'great' ),
+			'<div class="successbox">great</div>'
+		);
+		$this->assertEquals(
+			Html::successBox( '<script>beware no escaping!</script>' ),
+			'<div class="successbox"><script>beware no escaping!</script></div>'
+		);
+	}
+
+	/**
 	 * List of input element types values introduced by HTML5
-	 * Full list at http://www.w3.org/TR/html-markup/input.html
+	 * Full list at https://www.w3.org/TR/html-markup/input.html
 	 */
 	public static function provideHtml5InputTypes() {
 		$types = [
@@ -524,10 +560,6 @@ class HtmlTest extends MediaWikiTestCase {
 		];
 		$cases[] = [ '<canvas></canvas>',
 			'canvas', [ 'width' => 300 ]
-		];
-
-		$cases[] = [ '<command/>',
-			'command', [ 'type' => 'command' ]
 		];
 
 		$cases[] = [ '<form></form>',
@@ -602,7 +634,7 @@ class HtmlTest extends MediaWikiTestCase {
 		];
 
 		# <button> specific handling
-		# see remarks on http://msdn.microsoft.com/en-us/library/ie/ms535211%28v=vs.85%29.aspx
+		# see remarks on https://msdn.microsoft.com/library/ms535211(v=vs.85).aspx
 		$cases[] = [ '<button type="submit"></button>',
 			'button', [ 'type' => 'submit' ],
 			'According to standard the default type is "submit". '
@@ -652,34 +684,8 @@ class HtmlTest extends MediaWikiTestCase {
 	}
 
 	/**
-	 * @covers Html::expandAttributes
+	 * @covers Html::input
 	 */
-	public function testFormValidationBlacklist() {
-		$this->assertEmpty(
-			Html::expandAttributes( [
-				'min' => 1,
-				'max' => 100,
-				'pattern' => 'abc',
-				'required' => true,
-				'step' => 2
-			] ),
-			'Blacklist form validation attributes.'
-		);
-		$this->assertEquals(
-			' step="any"',
-			Html::expandAttributes(
-				[
-					'min' => 1,
-					'max' => 100,
-					'pattern' => 'abc',
-					'required' => true,
-					'step' => 'any'
-				],
-				'Allow special case "step=any".'
-			)
-		);
-	}
-
 	public function testWrapperInput() {
 		$this->assertEquals(
 			'<input type="radio" value="testval" name="testname"/>',
@@ -693,6 +699,9 @@ class HtmlTest extends MediaWikiTestCase {
 		);
 	}
 
+	/**
+	 * @covers Html::check
+	 */
 	public function testWrapperCheck() {
 		$this->assertEquals(
 			'<input type="checkbox" value="1" name="testname"/>',
@@ -711,6 +720,9 @@ class HtmlTest extends MediaWikiTestCase {
 		);
 	}
 
+	/**
+	 * @covers Html::radio
+	 */
 	public function testWrapperRadio() {
 		$this->assertEquals(
 			'<input type="radio" value="1" name="testname"/>',
@@ -729,6 +741,9 @@ class HtmlTest extends MediaWikiTestCase {
 		);
 	}
 
+	/**
+	 * @covers Html::label
+	 */
 	public function testWrapperLabel() {
 		$this->assertEquals(
 			'<label for="testid">testlabel</label>',
@@ -749,6 +764,16 @@ class HtmlTest extends MediaWikiTestCase {
 				[ '1'  => '1x.png', '1.5' => '1_5x.png', '2'  => '2x.png' ],
 				'1x.png 1x, 1_5x.png 1.5x, 2x.png 2x',
 				'pixel depth keys may omit a trailing "x"'
+			],
+			[
+				[ '1'  => 'small.png', '1.5' => 'large.png', '2'  => 'large.png' ],
+				'small.png 1x, large.png 1.5x',
+				'omit larger duplicates'
+			],
+			[
+				[ '1'  => 'small.png', '2'  => 'large.png', '1.5' => 'large.png' ],
+				'small.png 1x, large.png 1.5x',
+				'omit larger duplicates in irregular order'
 			],
 		];
 	}
