@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mainframe98",
+			"MarcoSwart"
+		]
+	},
+	"templatestyles": "SjabloonStijlen",
+	"templatestyles-desc": "Implementeer sjabloon-specifieke stijlbladen",
+	"templatestyles-missing-src": "Het SjabloonStijlen <code>src</code> attribuut mag niet leeg zijn.",
+	"templatestyles-invalid-src": "Ongeldige titel in het SjabloonStijlen <code>src</code> attribuut.",
+	"templatestyles-bad-src-missing": "Pagina [[:$1|$2]] heeft geen inhoud.",
+	"templatestyles-bad-src": "Pagina [[:$1|$2]] moet het inhoudsmodel \"{{int:content-model-sanitized-css}}\" hebben voor SjabloonStijlen (inhoudmodel is \"$3\").",
+	"templatestyles-errorcomment": "Fouten tijdens het verwerken van stijlblad [[:$1]] (versie $2): $3",
+	"templatestyles-size-exceeded": "Het stijlblad is groter dan de maximum grootte $2",
+	"templatestyles-end-tag-injection": "Het meegeleverde stijlblad bevat <code>&lt;/style</code>, wat niet is toegestaan.",
+	"content-model-sanitized-css": "Opgeschoonde CSS",
+	"templatestyles-error-bad-character-in-url": "Ongeldig teken in de URL op regel $1, positie $2.",
+	"templatestyles-error-bad-value-for-property": "Ongeldig of niet ondersteunde waarde voor eigenschap <code>$3</code> op regel $1, positie $2.",
+	"templatestyles-error-expected-at-rule": "<code>@$3</code> ontbreekt op regel $1, positie $2.",
+	"templatestyles-error-expected-colon": "Dubbele punt ontbreekt op regel $1, positie $2.",
+	"templatestyles-error-expected-declaration": "Toewijzing ontbreekt op regel $1, positie $2.",
+	"templatestyles-error-expected-eof": "Einde stijlblad ontbreekt op regel $1, positie $2.",
+	"templatestyles-error-expected-qualified-rule": "Stijlregel ontbreekt op regel $1, positie $2.",
+	"templatestyles-error-expected-stylesheet": "Stijlblad ontbreekt op regel $1, positie $2.",
+	"templatestyles-error-invalid-namespace-value": "Ongeldige waarde ingesteld bij <code>@namespace</code> op regel $1, positie $2",
+	"templatestyles-error-invalid-page-rule-content": "Ongeldige inhoud voor <code>@page</code> op regel $1, positie $2."
+}

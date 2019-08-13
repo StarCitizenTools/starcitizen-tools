@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jorn Ari"
+		]
+	},
+	"templatedata-modal-errormsg-duplicate-name": "Fejl fundet. Det valgte navn bruges allerede af et andet parameter."
+}

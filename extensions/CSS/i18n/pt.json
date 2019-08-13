@@ -1,9 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Hamilton Abreu",
-			"Waldir"
-		]
-	},
-	"css-desc": "Uma função do analisador sintático que permite que folhas de estilo CSS sejam incluídas em páginas específicas"
-}

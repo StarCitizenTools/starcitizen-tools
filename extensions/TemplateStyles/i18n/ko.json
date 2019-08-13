@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Revi",
+			"Ykhwong"
+		]
+	},
+	"templatestyles": "틀스타일",
+	"templatestyles-desc": "각각의 틀을 위한 스타일시트 구현",
+	"templatestyles-bad-src-missing": "[[:$1|$2]] 문서에 내용이 없습니다.",
+	"templatestyles-errorcomment": "스타일시트 [[:$1]] ($2 판) 처리 오류:\n$3",
+	"templatestyles-size-exceeded": "스타일시트가 $2 단위의 최대 크기 보다 더 큽니다.",
+	"templatestyles-error-bad-character-in-url": "URL에 유효하지 않은 $2 문자가 $1번째 줄에 있습니다."
+}

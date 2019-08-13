@@ -172,7 +172,8 @@ wfLoadExtension( 'Echo' );
 wfLoadExtension( 'Flow' );
 wfLoadExtension( 'Tabber' );
 wfLoadExtension( 'RSS' );
-wfLoadExtension( 'CSS' );
+wfLoadExtension( 'TemplateData' );
+wfLoadExtension( 'TemplateStyles' );
 wfLoadExtension( 'PageImages' );
 wfLoadExtension( 'VisualEditor' );
 wfLoadExtension( 'Scribunto' );
@@ -538,4 +539,3 @@ $wgFooterIcons = [
         ]
     ]
 ];
-
