@@ -505,7 +505,7 @@ $wgFooterIcons = [
       "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default,
             "url" => $wgRightsUrl,
             "alt" => $wgRightsText,
-    ],
+    	]
     ],
     "poweredby" => [
         "mediawiki" => [
@@ -521,6 +521,7 @@ $wgFooterIcons = [
             "alt" => "Monitored By Wikiapiary",
         ]
     ],
+/*
   "gdprcompliance" => [
         "gdpr" => [
             "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
@@ -528,6 +529,7 @@ $wgFooterIcons = [
             "alt" => "GDPR compliant",
         ]
     ],
+*/
   "madeby" => [
         "thecommunity" => [
             "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
