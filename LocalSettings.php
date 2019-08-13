@@ -35,7 +35,13 @@ $wgResourceBasePath = $wgScriptPath;
 
 ## The URL path to the logo.  Make sure you change this from the default,
 ## or else you'll overwrite your logo when you upgrade!
-$wgLogo = "$wgResourceBasePath/resources/assets/sclogo.png";
+$wgLogo = "$wgResourceBasePath/resources/assets/sitelogo.png";
+$wgLogoHD = [
+  "1.5x" => "$wgResourceBasePath/resources/assets/sitelogo-1.5x.png",
+  "2x" => "$wgResourceBasePath/resources/assets/sitelogo-2x.png"
+];
+$wgFavicon = "$wgResourceBasePath/resources/assets/favicon.ico";
+$wgAppleTouchIcon = "$wgResourceBasePath/resources/assets/apple-touch-icon.png";
 
 ## UPO means: this is also a user preference option
 $wgEnableEmail = true;
@@ -97,7 +103,6 @@ $wgRightsPage = ""; # Set to the title of a wiki page that describes your licens
 $wgRightsUrl = "https://creativecommons.org/licenses/by-sa/4.0/";
 $wgRightsText = "Creative Commons Attribution-ShareAlike";
 $wgRightsIcon = "$wgResourceBasePath/resources/assets/licenses/cc-by-sa.png";
-$wgFavicon = "$wgScriptPath/favicon.ico";
 
 # Path to the GNU diff3 utility. Used for conflict resolution.
 $wgDiff3 = "/usr/bin/diff3";
