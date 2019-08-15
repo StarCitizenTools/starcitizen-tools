@@ -127,21 +127,6 @@ $wgFileExtensions[] = 'svg';
 $wgAllowTitlesInSVG = true;
 $wgSVGConverter = 'ImageMagick';
 
-#Javascript
-$wgResourceModules['WaveJS'] = array(
-    'scripts' => array('waves.min.js'),
-);
-
-function onBeforePageDisplay( OutputPage &$out, Skin &$skin )
-{
-    $script = '<script></script>';
-    $out->addHeadItem("head script", $script);
-    $out->addModules('WaveJS');
-    return true;
-};
-
-$wgHooks['BeforePageDisplay'][] ='onBeforePageDisplay';
-
 #=============================================== External Includes ===============================================
 
 require_once("/home/www-data/external_includes/mysql_pw.php");
