@@ -245,6 +245,9 @@ $wgTranslateBlacklist = array(
     ),
 );
 
+#Universal Language Selector
+$wgULSGeoService = false;
+
 #Google Analytics
 $wgGoogleAnalyticsAccount = 'UA-48789297-5';
 
