@@ -70,7 +70,7 @@ $wgMemCachedServers = array();
 $wgEnableUploads = true;
 $wgGenerateThumbnailOnParse = true;
 $wgUseImageMagick = true;
-$wgImageMagickConvertCommand = "/usr/bin/convert";
+$wgThumbnailEpoch = 20190815000000
 
 $wgDefaultUserOptions['imagesize'] = 5; // image size 1280, 1024
 
