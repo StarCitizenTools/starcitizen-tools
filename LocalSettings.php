@@ -72,7 +72,7 @@ $wgGenerateThumbnailOnParse = true;
 $wgUseImageMagick = true;
 $wgThumbnailEpoch = "20190815000000";
 
-$wgDefaultUserOptions['imagesize'] = 5; // image size 1280, 1024
+$wgDefaultUserOptions['imagesize'] = 4; // image size 1280, 1024
 
 $wgThumbLimits = array(
 	10, // placeholder thumbnail for lazyload, thumb size 0
