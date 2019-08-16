@@ -72,14 +72,20 @@ $wgGenerateThumbnailOnParse = true;
 $wgUseImageMagick = true;
 $wgImageMagickConvertCommand = "/usr/bin/convert";
 
-$wgImageLimits = array(
-	array( 10, 240 ), // placeholder thumbnail for lazyload
-	array( 320, 240 ), // image size 0
-	array( 640, 480 ), // image size 1
-	array( 800, 600 ), // image size 2
-	array( 1024, 768 ), // image size 3
-	array( 1280, 1024 ) // image size 4
+$wgDefaultUserOptions['imagesize'] = 5; // image size 1280, 1024
+
+$wgThumbLimits = array(
+	10, // placeholder thumbnail for lazyload, thumb size 0
+   120, // thumb size 1
+   150, // thumb size 2
+   180, // thumb size 3
+   200, // thumb size 4
+   250, // thumb size 5
+   300 // thumb size 6
 );
+
+$wgDefaultUserOptions['thumbsize'] = 6; // thumb size 300
+
 
 $wgMaxImageArea = 6.4e7;
 
