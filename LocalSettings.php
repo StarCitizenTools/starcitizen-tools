@@ -72,6 +72,15 @@ $wgGenerateThumbnailOnParse = true;
 $wgUseImageMagick = true;
 $wgImageMagickConvertCommand = "/usr/bin/convert";
 
+$wgImageLimits = array(
+	array( 10, 240 ), // placeholder thumbnail for lazyload
+	array( 320, 240 ), // image size 0
+	array( 640, 480 ), // image size 1
+	array( 800, 600 ), // image size 2
+	array( 1024, 768 ), // image size 3
+	array( 1280, 1024 ) // image size 4
+);
+
 $wgMaxImageArea = 6.4e7;
 
 # InstantCommons allows wiki to use images from https://commons.wikimedia.org
