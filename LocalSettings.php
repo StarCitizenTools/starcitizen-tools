@@ -89,6 +89,18 @@ $wgDefaultUserOptions['thumbsize'] = 6; // thumb size 300
 
 $wgMaxImageArea = 6.4e7;
 
+# Gallery settings
+$wgGalleryOptions = [
+  'imagesPerRow' => 0, // Default number of images per-row in the gallery. 0: Adapt to screensize
+  'imageWidth' => 250, // Width of the cells containing images in galleries (in "px")
+  'imageHeight' => 250, // Height of the cells containing images in galleries (in "px")
+  'captionLength' => true, // Length of caption to truncate (in characters) in special pages or when the showfilename parameter is used
+                           // A value of 'true' will truncate the filename to one line using CSS.
+                           // Deprecated since 1.28. Default value of 25 before 1.28.
+  'showBytes' => true, // Show the filesize in bytes in categories
+    'mode' => 'packed', // One of "traditional", "nolines", "packed", "packed-hover", "packed-overlay", "slideshow" (1.28+)
+];
+
 # InstantCommons allows wiki to use images from https://commons.wikimedia.org
 $wgUseInstantCommons = true;
 
