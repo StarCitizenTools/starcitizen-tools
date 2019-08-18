@@ -75,13 +75,13 @@ $wgThumbnailEpoch = "20190815000000";
 $wgDefaultUserOptions['imagesize'] = 4; // image size 1280, 1024
 
 $wgThumbLimits = array(
-	10, // placeholder thumbnail for lazyload, thumb size 0
-   120, // thumb size 1
-   150, // thumb size 2
-   180, // thumb size 3
-   200, // thumb size 4
-   250, // thumb size 5
-   300 // thumb size 6
+	 10, // placeholder thumbnail for lazyload, thumb size 0
+  120, // thumb size 1
+  150, // thumb size 2
+  180, // thumb size 3
+  200, // thumb size 4
+  250, // thumb size 5
+  300 // thumb size 6
 );
 
 $wgDefaultUserOptions['thumbsize'] = 6; // thumb size 300
@@ -92,8 +92,8 @@ $wgMaxImageArea = 6.4e7;
 # Gallery settings
 $wgGalleryOptions = [
   'imagesPerRow' => 0, // Default number of images per-row in the gallery. 0: Adapt to screensize
-  'imageWidth' => 250, // Width of the cells containing images in galleries (in "px")
-  'imageHeight' => 250, // Height of the cells containing images in galleries (in "px")
+  'imageWidth' => 180, // Width of the cells containing images in galleries (in "px")
+  'imageHeight' => 180, // Height of the cells containing images in galleries (in "px")
   'captionLength' => true, // Length of caption to truncate (in characters) in special pages or when the showfilename parameter is used
                            // A value of 'true' will truncate the filename to one line using CSS.
                            // Deprecated since 1.28. Default value of 25 before 1.28.
