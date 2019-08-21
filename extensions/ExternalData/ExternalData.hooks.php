@@ -9,6 +9,13 @@
  */
 class ExternalDataHooks {
 
+	public static function registerExtension() {
+		// Backward compatibility for MW < 1.28.
+		if ( !defined( 'DB_REPLICA' ) ) {
+			define( 'DB_REPLICA', DB_SLAVE );
+		}
+	}
+
 	public static function registerParser( &$parser ) {
 		$parser->setFunctionHook( 'get_web_data', array( 'EDParserFunctions', 'doGetWebData' ) );
 		$parser->setFunctionHook( 'get_file_data', array( 'EDParserFunctions', 'doGetFileData' ) );

@@ -855,11 +855,17 @@ END;
 	}
 
 	static function fetchURL( $url, $post_vars = array(), $cacheExpireTime = 0, $get_fresh = false, $try_count = 1 ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		global $edgStringReplacements, $edgCacheTable, $edgAllowSSL;
 
 		if ( $post_vars ) {
-			return Http::post( $url, array( 'postData' => $post_vars ) );
+			$options = array( 'postData' => $post_vars );
+			Hooks::run( 'ExternalDataBeforeWebCall', [
+				'post',
+				&$url,
+				&$options
+			]);
+			return HttpWithHeaders::post( $url,  $options);
 		}
 
 		// do any special variable replacements in the URLs, for
@@ -870,10 +876,22 @@ END;
 
 		if ( !isset( $edgCacheTable ) || is_null( $edgCacheTable ) ) {
 			if ( $edgAllowSSL ) {
-				$contents = Http::get( $url, 'default', array( 'sslVerifyCert' => false, 'followRedirects' => false ) );
+				$options = array( 
+					'sslVerifyCert' => false, 
+					'followRedirects' => false ,
+					'timeout' => 'default',
+				);
 			} else {
-				$contents = Http::get( $url );
+				$options = array( 
+					'timeout' => 'default',
+				);
 			}
+			Hooks::run( 'ExternalDataBeforeWebCall', [
+				'get',
+				&$url,
+				&$options
+			]);
+			$contents = HttpWithHeaders::get( $url ,$options );
 			// Handle non-UTF-8 encodings.
 			// Copied from http://www.php.net/manual/en/function.file-get-contents.php#85008
 			// Unfortunately, 'mbstring' functions are not available
@@ -893,11 +911,18 @@ END;
 		}
 
 		if ( !$row || $get_fresh ) {
+			$options = [
+				'timeout' => 'default'
+			];
 			if ( $edgAllowSSL ) {
-				$page = Http::get( $url, 'default', array( CURLOPT_SSL_VERIFYPEER => false ) );
-			} else {
-				$page = Http::get( $url );
-			}
+				$options[CURLOPT_SSL_VERIFYPEER] = FALSE;
+			}	
+			Hooks::run( 'ExternalDataBeforeWebCall', [
+				'get',
+				&$url,
+				&$options
+			]);
+			$page = HttpWithHeaders::get( $url );
 			if ( $page === false ) {
 				sleep( 1 );
 				if ( $try_count >= self::$http_number_of_tries ) {
@@ -978,7 +1003,6 @@ END;
 		if ( empty( $url_contents ) ) {
 			return "Error: No contents found at URL $url.";
 		}
-
 		return self::getDataFromText( $url_contents, $format, $mappings, $url, $prefixLength );
 	}
 

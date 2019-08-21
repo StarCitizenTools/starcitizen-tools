@@ -54,7 +54,7 @@ exports selected rows from a wiki page that holds CSV data, in a format
 that is readable by #get_web_data.
 
 For more information, see the extension homepage at:
-http://www.mediawiki.org/wiki/Extension:External_Data
+https://www.mediawiki.org/wiki/Extension:External_Data
 
 == Requirements ==
 

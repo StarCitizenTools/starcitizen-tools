@@ -9,6 +9,7 @@
 	"descriptionmsg": "externaldata-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
+	"callback": "ExternalDataHooks::registerExtension",
 	"SpecialPages": {
 		"GetData": "EDGetData"
 	},
@@ -24,6 +25,7 @@
 	"AutoloadClasses": {
 		"ExternalDataHooks": "ExternalData.hooks.php",
 		"EDUtils": "includes/ED_Utils.php",
+		"HttpWithHeaders": "includes/ED_HttpWithHeaders.php",
 		"EDParserFunctions": "includes/ED_ParserFunctions.php",
 		"EDGetData": "includes/ED_GetData.php"
 	},

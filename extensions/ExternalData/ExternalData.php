@@ -42,6 +42,11 @@ $wgAutoloadClasses['EDParserFunctions'] = __DIR__ . '/includes/ED_ParserFunction
 $wgSpecialPages['GetData'] = 'EDGetData';
 $wgAutoloadClasses['EDGetData'] = __DIR__ . '/includes/ED_GetData.php';
 
+// Backward compatibility for MW < 1.28.
+if ( !defined( 'DB_REPLICA' ) ) {
+	define( 'DB_REPLICA', DB_SLAVE );
+}
+
 $edgValues = array();
 $edgStringReplacements = array();
 $edgCacheTable = null;

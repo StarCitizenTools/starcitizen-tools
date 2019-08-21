@@ -4,21 +4,22 @@
 			"Charmed94",
 			"Milicevic01",
 			"Михајло Анђелковић",
-			"Zoranzoki21"
+			"Zoranzoki21",
+			"BadDog"
 		]
 	},
 	"getdata": "Преузми податке",
 	"externaldata-desc": "Омогућава преузимање података из спољашњих адреса, бази података и других извора",
-	"externaldata-no-param-specified": "Грешка: Није наведен параметар \"$1\".",
-	"externaldata-web-invalid-format": "Невалидан формат: \"$1\".",
+	"externaldata-no-param-specified": "Грешка: Није наведен параметар „$1”.",
+	"externaldata-web-invalid-format": "Неважећи формат: „$1”.",
 	"externaldata-ldap-unable-to-connect": "Повезивање на $1 није успело",
 	"externaldata-xml-error": "XML грешка: $1 по линији $2",
-	"externaldata-invalid-json": "Грешка: Невалидан JSON.",
+	"externaldata-invalid-json": "Грешка: Неважећи JSON.",
 	"externaldata-db-incomplete-information": "Грешка: Непотпуни подаци за овај ID сервера.",
 	"externaldata-db-could-not-get-url": "Преузимање адресе после $1 {{PLURAL:$1|покушаја}} није успело.",
 	"externaldata-db-unknown-type": "Грешка: Непозната врста базе података.",
 	"externaldata-db-could-not-connect": "Грешка: Повезивање с базом података није успело.",
-	"externaldata-db-unknown-collection": "Грешка: Невалидна MongoDB колекција.",
+	"externaldata-db-unknown-collection": "Грешка: Непозната MongoDB колекција.",
 	"externaldata-db-no-return-values": "Грешка: Повратне вредности нису одређене.",
 	"externaldata-db-invalid-query": "Неисправан упит."
 }
