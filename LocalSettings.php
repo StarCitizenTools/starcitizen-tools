@@ -68,7 +68,7 @@ $wgMemCachedServers = array();
 ## To enable image uploads, make sure the 'images' directory
 ## is writable, then set this to true:
 $wgEnableUploads = true;
-$wgGenerateThumbnailOnParse = false;
+#$wgGenerateThumbnailOnParse = false;
 $wgUseImageMagick = true;
 $wgThumbnailEpoch = "20190815000000";
 
@@ -143,8 +143,9 @@ $wgDefaultSkin = 'citizen';
 
 # Enabled skins.
 # The following skins were automatically enabled:
-wfLoadSkin( 'Vector' );
 wfLoadSkin( 'Citizen' );
+wfLoadSkin( 'Vector' );
+wfLoadSkin( 'Timeless' );
 
 #Maintenance
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
