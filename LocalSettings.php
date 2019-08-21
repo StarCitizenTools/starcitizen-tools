@@ -281,7 +281,7 @@ $wgGoogleAnalyticsAccount = 'UA-48789297-5';
 #ExternalData
 # $edgCacheTable = 'ed_url_cache'; Need to run ExternalData.sql first
 $edgCacheExpireTime = 3 * 24 * 60 * 60;
-$edgAllowExternalDataFrom = array('https://starcitizen.tools','http://starcitizendb.com/api');
+$edgAllowExternalDataFrom = array('https://starcitizen.tools','http://starcitizendb.com/');
 $edgExternalValueVerbose = false;
 
 #Visual Editor
