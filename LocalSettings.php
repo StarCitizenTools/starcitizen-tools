@@ -68,7 +68,7 @@ $wgMemCachedServers = array();
 ## To enable image uploads, make sure the 'images' directory
 ## is writable, then set this to true:
 $wgEnableUploads = true;
-$wgGenerateThumbnailOnParse = true;
+$wgGenerateThumbnailOnParse = false;
 $wgUseImageMagick = true;
 $wgThumbnailEpoch = "20190815000000";
 
