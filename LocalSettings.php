@@ -334,6 +334,7 @@ $wgDefaultUserOptions['usecodemirror'] = 0;
 
 #CookieWarning
 $wgCookieWarningEnabled = true;
+$wgCookieWarningMoreUrl = 'Star Citizen:Cookie statement';
 
 #DynamicPageList
 $wgDplSettings['recursiveTagParse'] = true;
