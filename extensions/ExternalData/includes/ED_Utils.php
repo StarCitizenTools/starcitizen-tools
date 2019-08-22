@@ -212,58 +212,28 @@ END;
 			}
 		}
 
-		// Additional settings
-		if ( $db_type == 'sqlite' ) {
-			global $wgSQLiteDataDir;
-			$oldDataDir = $wgSQLiteDataDir;
-			$wgSQLiteDataDir = $db_directory;
-		}
 		if ( $db_flags == '' ) {
 			$db_flags = DBO_DEFAULT;
 		}
 
-		// DatabaseBase::newFromType() was added in MW 1.17 - it was
-		// then replaced by DatabaseBase::factory() in MW 1.18, and
-		// and renamed to Database::factory() in MW 1.28.
+		$dbConnectionParams = array(
+			'host' => $db_server,
+			'user' => $db_username,
+			'password' => $db_password,
+			'dbname' => $db_name,
+			'flags' => $db_flags,
+			'tablePrefix' => $db_tableprefix,
+		);
+		if ( $db_type == 'sqlite' ) {
+			$dbConnectionParams['dbDirectory'] = $db_directory;
+		}
+
+		// DatabaseBase::factory() was replaced by Database::factory()
+		// in MW 1.28.
 		if ( method_exists( 'Database', 'factory' ) ) {
-			$db = Database::factory( $db_type,
-				array(
-					'host' => $db_server,
-					'user' => $db_username,
-					'password' => $db_password,
-					// Both 'dbname' and 'dbName' have been
-					// used in different versions.
-					'dbname' => $db_name,
-					'dbName' => $db_name,
-					'flags' => $db_flags,
-					'tablePrefix' => $db_tableprefix,
-				)
-			);
-		} elseif ( method_exists( 'DatabaseBase', 'factory' ) ) {
-			$db = DatabaseBase::factory( $db_type,
-				array(
-					'host' => $db_server,
-					'user' => $db_username,
-					'password' => $db_password,
-					// Both 'dbname' and 'dbName' have been
-					// used in different versions.
-					'dbname' => $db_name,
-					'dbName' => $db_name,
-					'flags' => $db_flags,
-					'tablePrefix' => $db_tableprefix,
-				)
-			);
+			$db = Database::factory( $db_type, $dbConnectionParams );
 		} else {
-			$db = DatabaseBase::newFromType( $db_type,
-				array(
-					'host' => $db_server,
-					'user' => $db_username,
-					'password' => $db_password,
-					'dbname' => $db_name,
-					'flags' => $db_flags,
-					'tableprefix' => $db_tableprefix,
-				)
-			);
+			$db = DatabaseBase::factory( $db_type, $dbConnectionParams );
 		}
 
 		if ( $db == null ) {
@@ -284,12 +254,6 @@ END;
 		if ( !is_array( $rows ) ) {
 			// It's an error message.
 			return $rows;
-		}
-
-		if ( $db_type == 'sqlite' ) {
-			// Reset global variable back to its original value.
-			global $wgSQLiteDataDir;
-			$wgSQLiteDataDir = $oldDataDir;
 		}
 
 		$values = array();
