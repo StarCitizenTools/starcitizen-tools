@@ -71,7 +71,7 @@ $wgEnableUploads = true;
 $wgGenerateThumbnailOnParse = true;
 $wgUseImageMagick = true;
 $wgThumbnailEpoch = "20190815000000";
-$wgThumbnailScriptPath = "{$wgScriptPath}/thumb.php";
+#$wgThumbnailScriptPath = "{$wgScriptPath}/thumb.php";
 
 $wgDefaultUserOptions['imagesize'] = 4; // image size 1280, 1024
 
