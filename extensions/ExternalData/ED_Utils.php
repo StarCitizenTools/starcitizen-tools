@@ -212,28 +212,58 @@ END;
 			}
 		}
 
+		// Additional settings
+		if ( $db_type == 'sqlite' ) {
+			global $wgSQLiteDataDir;
+			$oldDataDir = $wgSQLiteDataDir;
+			$wgSQLiteDataDir = $db_directory;
+		}
 		if ( $db_flags == '' ) {
 			$db_flags = DBO_DEFAULT;
 		}
 
-		$dbConnectionParams = array(
-			'host' => $db_server,
-			'user' => $db_username,
-			'password' => $db_password,
-			'dbname' => $db_name,
-			'flags' => $db_flags,
-			'tablePrefix' => $db_tableprefix,
-		);
-		if ( $db_type == 'sqlite' ) {
-			$dbConnectionParams['dbDirectory'] = $db_directory;
-		}
-
-		// DatabaseBase::factory() was replaced by Database::factory()
-		// in MW 1.28.
+		// DatabaseBase::newFromType() was added in MW 1.17 - it was
+		// then replaced by DatabaseBase::factory() in MW 1.18, and
+		// and renamed to Database::factory() in MW 1.28.
 		if ( method_exists( 'Database', 'factory' ) ) {
-			$db = Database::factory( $db_type, $dbConnectionParams );
+			$db = Database::factory( $db_type,
+				array(
+					'host' => $db_server,
+					'user' => $db_username,
+					'password' => $db_password,
+					// Both 'dbname' and 'dbName' have been
+					// used in different versions.
+					'dbname' => $db_name,
+					'dbName' => $db_name,
+					'flags' => $db_flags,
+					'tablePrefix' => $db_tableprefix,
+				)
+			);
+		} elseif ( method_exists( 'DatabaseBase', 'factory' ) ) {
+			$db = DatabaseBase::factory( $db_type,
+				array(
+					'host' => $db_server,
+					'user' => $db_username,
+					'password' => $db_password,
+					// Both 'dbname' and 'dbName' have been
+					// used in different versions.
+					'dbname' => $db_name,
+					'dbName' => $db_name,
+					'flags' => $db_flags,
+					'tablePrefix' => $db_tableprefix,
+				)
+			);
 		} else {
-			$db = DatabaseBase::factory( $db_type, $dbConnectionParams );
+			$db = DatabaseBase::newFromType( $db_type,
+				array(
+					'host' => $db_server,
+					'user' => $db_username,
+					'password' => $db_password,
+					'dbname' => $db_name,
+					'flags' => $db_flags,
+					'tableprefix' => $db_tableprefix,
+				)
+			);
 		}
 
 		if ( $db == null ) {
@@ -254,6 +284,12 @@ END;
 		if ( !is_array( $rows ) ) {
 			// It's an error message.
 			return $rows;
+		}
+
+		if ( $db_type == 'sqlite' ) {
+			// Reset global variable back to its original value.
+			global $wgSQLiteDataDir;
+			$wgSQLiteDataDir = $oldDataDir;
 		}
 
 		$values = array();
@@ -855,17 +891,11 @@ END;
 	}
 
 	static function fetchURL( $url, $post_vars = array(), $cacheExpireTime = 0, $get_fresh = false, $try_count = 1 ) {
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = wfGetDB( DB_SLAVE );
 		global $edgStringReplacements, $edgCacheTable, $edgAllowSSL;
 
 		if ( $post_vars ) {
-			$options = array( 'postData' => $post_vars );
-			Hooks::run( 'ExternalDataBeforeWebCall', [
-				'post',
-				&$url,
-				&$options
-			]);
-			return HttpWithHeaders::post( $url,  $options);
+			return Http::post( $url, array( 'postData' => $post_vars ) );
 		}
 
 		// do any special variable replacements in the URLs, for
@@ -876,22 +906,10 @@ END;
 
 		if ( !isset( $edgCacheTable ) || is_null( $edgCacheTable ) ) {
 			if ( $edgAllowSSL ) {
-				$options = array( 
-					'sslVerifyCert' => false, 
-					'followRedirects' => false ,
-					'timeout' => 'default',
-				);
+				$contents = Http::get( $url, 'default', array( 'sslVerifyCert' => false, 'followRedirects' => false ) );
 			} else {
-				$options = array( 
-					'timeout' => 'default',
-				);
+				$contents = Http::get( $url );
 			}
-			Hooks::run( 'ExternalDataBeforeWebCall', [
-				'get',
-				&$url,
-				&$options
-			]);
-			$contents = HttpWithHeaders::get( $url ,$options );
 			// Handle non-UTF-8 encodings.
 			// Copied from http://www.php.net/manual/en/function.file-get-contents.php#85008
 			// Unfortunately, 'mbstring' functions are not available
@@ -911,18 +929,11 @@ END;
 		}
 
 		if ( !$row || $get_fresh ) {
-			$options = [
-				'timeout' => 'default'
-			];
 			if ( $edgAllowSSL ) {
-				$options[CURLOPT_SSL_VERIFYPEER] = FALSE;
-			}	
-			Hooks::run( 'ExternalDataBeforeWebCall', [
-				'get',
-				&$url,
-				&$options
-			]);
-			$page = HttpWithHeaders::get( $url );
+				$page = Http::get( $url, 'default', array( CURLOPT_SSL_VERIFYPEER => false ) );
+			} else {
+				$page = Http::get( $url );
+			}
 			if ( $page === false ) {
 				sleep( 1 );
 				if ( $try_count >= self::$http_number_of_tries ) {
@@ -1003,6 +1014,7 @@ END;
 		if ( empty( $url_contents ) ) {
 			return "Error: No contents found at URL $url.";
 		}
+
 		return self::getDataFromText( $url_contents, $format, $mappings, $url, $prefixLength );
 	}
 

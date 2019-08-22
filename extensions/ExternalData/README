@@ -1,6 +1,6 @@
 External Data extension
 
-        Version 1.9.1
+        Version 1.8.3
         Yaron Koren and (many) others
 
 This is free software licensed under the GNU General Public License. Please
@@ -54,11 +54,11 @@ exports selected rows from a wiki page that holds CSV data, in a format
 that is readable by #get_web_data.
 
 For more information, see the extension homepage at:
-https://www.mediawiki.org/wiki/Extension:External_Data
+http://www.mediawiki.org/wiki/Extension:External_Data
 
 == Requirements ==
 
-This version of the External Data extension requires MediaWiki 1.23 or
+This version of the External Data extension requires MediaWiki 1.17 or
 higher.
 
 == Installation ==
