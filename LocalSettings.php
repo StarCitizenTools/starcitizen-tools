@@ -197,11 +197,11 @@ wfLoadExtension( 'PageImages' );
 wfLoadExtension( 'VisualEditor' );
 wfLoadExtension( 'Scribunto' );
 wfLoadExtension( 'Renameuser' );
+wfLoadExtension( 'ExternalData' );
 require_once "$IP/extensions/Translate/Translate.php";
 require_once "$IP/extensions/googleAnalytics/googleAnalytics.php";
 require_once "$IP/extensions/EventLogging/EventLogging.php";
-require_once "$IP/extensions/ExternalData/ExternalData.php";
-require_once "$IP/extensions/NativeSvgHandler/NativeSvgHandler.php";
+#require_once "$IP/extensions/NativeSvgHandler/NativeSvgHandler.php";
 #require_once "$IP/extensions/Lazyload/Lazyload.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
