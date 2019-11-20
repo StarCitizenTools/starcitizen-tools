@@ -562,3 +562,7 @@ $wgFooterIcons = [
         ]
     ]
 ];
+
+#============================== Final External Includes ===============================================
+
+require_once("/home/www-data/external_includes/misc_server_settings.php");
