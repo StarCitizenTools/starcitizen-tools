@@ -1,13 +1,13 @@
 <?php
 
-namespace Octfx\WikiSEO\Tests\Generator;
+namespace MediaWiki\Extension\WikiSEO\Tests\Generator;
 
-use Octfx\WikiSEO\Generator\MetaTag;
+use MediaWiki\Extension\WikiSEO\Generator\MetaTag;
 
 class MetaTagTest extends GeneratorTest {
 	/**
-	 * @covers \Octfx\WikiSEO\Generator\MetaTag::init
-	 * @covers \Octfx\WikiSEO\Generator\MetaTag::addMetadata
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::init
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::addMetadata
 	 */
 	public function testAddMetadata() {
 		$metadata = [
@@ -26,11 +26,11 @@ class MetaTagTest extends GeneratorTest {
 	}
 
 	/**
-	 * @covers \Octfx\WikiSEO\Generator\MetaTag::init
-	 * @covers \Octfx\WikiSEO\Generator\MetaTag::addGoogleSiteVerification
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::init
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::addGoogleSiteVerification
 	 */
 	public function testAddGoogleSiteKey() {
-		$this->setMwGlobals( 'wgGoogleSiteVerificationKey', 'TestKey' );
+		$this->setMwGlobals( 'wgGoogleSiteVerificationKey', 'google-key' );
 
 		$out = $this->newInstance();
 
@@ -38,12 +38,90 @@ class MetaTagTest extends GeneratorTest {
 		$generator->init( [], $out );
 		$generator->addMetadata();
 
-		$this->assertContains( [ 'google-site-verification', 'TestKey' ], $out->getMetaTags() );
+		$this->assertContains( [ 'google-site-verification', 'google-key' ], $out->getMetaTags() );
 	}
 
 	/**
-	 * @covers \Octfx\WikiSEO\Generator\MetaTag::init
-	 * @covers \Octfx\WikiSEO\Generator\MetaTag::addFacebookAppId
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::addNortonSiteVerification
+	 */
+	public function testAddNortonSiteVerification() {
+		$this->setMwGlobals( 'wgNortonSiteVerificationKey', 'norton-key' );
+
+		$out = $this->newInstance();
+
+		$generator = new MetaTag();
+		$generator->init( [], $out );
+		$generator->addMetadata();
+
+		$this->assertContains( [
+			'norton-safeweb-site-verification',
+			'norton-key',
+		], $out->getMetaTags() );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::addPinterestSiteVerification
+	 */
+	public function testAddPinterestSiteVerification() {
+		$this->setMwGlobals( 'wgPinterestSiteVerificationKey', 'pinterest-key' );
+
+		$out = $this->newInstance();
+
+		$generator = new MetaTag();
+		$generator->init( [], $out );
+		$generator->addMetadata();
+
+		$this->assertContains( [ 'p:domain_verify', 'pinterest-key' ], $out->getMetaTags() );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::addAlexaSiteVerification
+	 */
+	public function testAddAlexaSiteVerification() {
+		$this->setMwGlobals( 'wgAlexaSiteVerificationKey', 'alexa-key' );
+
+		$out = $this->newInstance();
+
+		$generator = new MetaTag();
+		$generator->init( [], $out );
+		$generator->addMetadata();
+
+		$this->assertContains( [ 'alexaVerifyID', 'alexa-key' ], $out->getMetaTags() );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::addYandexSiteVerification
+	 */
+	public function testAddYandexSiteVerification() {
+		$this->setMwGlobals( 'wgYandexSiteVerificationKey', 'yandex-key' );
+
+		$out = $this->newInstance();
+
+		$generator = new MetaTag();
+		$generator->init( [], $out );
+		$generator->addMetadata();
+
+		$this->assertContains( [ 'yandex-verification', 'yandex-key' ], $out->getMetaTags() );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::addBingSiteVerification
+	 */
+	public function testAddBingSiteVerification() {
+		$this->setMwGlobals( 'wgBingSiteVerificationKey', 'bing-key' );
+
+		$out = $this->newInstance();
+
+		$generator = new MetaTag();
+		$generator->init( [], $out );
+		$generator->addMetadata();
+
+		$this->assertContains( [ 'msvalidate.01', 'bing-key' ], $out->getMetaTags() );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::init
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::addFacebookAppId
 	 */
 	public function testAddFacebookAppId() {
 		$this->setMwGlobals( 'wgFacebookAppId', '0011223344' );
@@ -55,6 +133,7 @@ class MetaTagTest extends GeneratorTest {
 		$generator->addMetadata();
 
 		$this->assertArrayHasKey( 'fb:app_id', $out->getHeadItemsArray() );
-		$this->assertEquals( '<meta property="fb:app_id" content="0011223344"/>', $out->getHeadItemsArray()['fb:app_id'] );
+		$this->assertEquals( '<meta property="fb:app_id" content="0011223344"/>',
+			$out->getHeadItemsArray()['fb:app_id'] );
 	}
 }

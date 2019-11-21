@@ -9,5 +9,5 @@ $magicWords = [];
 
 /** English (English) */
 $magicWords['en'] = [
-    'seo' => [0, 'seo'],
+	'seo' => [ 0, 'seo' ],
 ];

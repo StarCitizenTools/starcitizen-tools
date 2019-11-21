@@ -1,6 +1,23 @@
 <?php
+/**
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * @file
+ */
 
-namespace Octfx\WikiSEO\Generator;
+namespace MediaWiki\Extension\WikiSEO\Generator;
 
 use Html;
 use OutputPage;
@@ -9,10 +26,10 @@ use OutputPage;
  * Basic metadata tag generator
  * Adds metadata for description, keywords and robots
  *
- * @package Octfx\WikiSEO\Generator
+ * @package MediaWiki\Extension\WikiSEO\Generator
  */
 class MetaTag implements GeneratorInterface {
-	private static $tags = [ 'description', 'keywords', 'robots' ];
+	private static $tags = [ 'description', 'keywords', 'robots', 'google_bot' ];
 
 	/**
 	 * @var array
@@ -45,6 +62,10 @@ class MetaTag implements GeneratorInterface {
 	public function addMetadata() {
 		$this->addGoogleSiteVerification();
 		$this->addBingSiteVerification();
+		$this->addYandexSiteVerification();
+		$this->addAlexaSiteVerification();
+		$this->addPinterestSiteVerification();
+		$this->addNortonSiteVerification();
 		$this->addFacebookAppId();
 
 		foreach ( self::$tags as $tag ) {
@@ -73,6 +94,50 @@ class MetaTag implements GeneratorInterface {
 
 		if ( $wgBingSiteVerificationKey !== null ) {
 			$this->outputPage->addMeta( 'msvalidate.01', $wgBingSiteVerificationKey );
+		}
+	}
+
+	/**
+	 * Add $wgYandexSiteVerificationKey from LocalSettings
+	 */
+	private function addYandexSiteVerification() {
+		global $wgYandexSiteVerificationKey;
+
+		if ( $wgYandexSiteVerificationKey !== null ) {
+			$this->outputPage->addMeta( 'yandex-verification', $wgYandexSiteVerificationKey );
+		}
+	}
+
+	/**
+	 * Add $wgAlexaSiteVerificationKey from LocalSettings
+	 */
+	private function addAlexaSiteVerification() {
+		global $wgAlexaSiteVerificationKey;
+
+		if ( $wgAlexaSiteVerificationKey !== null ) {
+			$this->outputPage->addMeta( 'alexaVerifyID', $wgAlexaSiteVerificationKey );
+		}
+	}
+
+	/**
+	 * Add $wgPinterestSiteVerificationKey from LocalSettings
+	 */
+	private function addPinterestSiteVerification() {
+		global $wgPinterestSiteVerificationKey;
+
+		if ( $wgPinterestSiteVerificationKey !== null ) {
+			$this->outputPage->addMeta( 'p:domain_verify', $wgPinterestSiteVerificationKey );
+		}
+	}
+
+	/**
+	 * Add $wgNortonSiteVerificationKey from LocalSettings
+	 */
+	private function addNortonSiteVerification() {
+		global $wgNortonSiteVerificationKey;
+
+		if ( $wgNortonSiteVerificationKey !== null ) {
+			$this->outputPage->addMeta( 'norton-safeweb-site-verification', $wgNortonSiteVerificationKey );
 		}
 	}
 

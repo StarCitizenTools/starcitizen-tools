@@ -1,29 +1,43 @@
 {
 	"name": "WikiSEO",
-	"version": "2.0.1",
+	"version": "2.2.1",
 	"author": [
-		"Octfx",
-		"Andru Vallance",
-		"..."
+		"Octfx"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:WikiSEO",
 	"descriptionmsg": "wiki-seo-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.27.0"
+		"MediaWiki": ">= 1.31.0"
 	},
 	"config": {
 		"GoogleSiteVerificationKey": {
-			"description": "Site verification key for Google WebmasterTools",
+			"description": "Site verification key for Google Search Console",
+			"value": null
+		},
+		"BingSiteVerificationKey": {
+			"description": "Site verification key for Bing Webmaster Center",
 			"value": null
 		},
 		"FacebookAppId":  {
 			"description": "App Id for Facebook Insights",
 			"value": null
 		},
-		"BingSiteVerificationKey": {
-			"description": "Site verification key for Bing WebmasterTools",
+		"YandexSiteVerificationKey": {
+			"description": "Site verification key for Yandex Webmasters",
+			"value": null
+		},
+		"AlexaSiteVerificationKey": {
+			"description": "Site verification key for Alexa Console",
+			"value": null
+		},
+		"PinterestSiteVerificationKey": {
+			"description": "Site verification key for Pinterest Console",
+			"value": null
+		},
+		"NortonSiteVerificationKey": {
+			"description": "Site verification key for Norton Safe Web",
 			"value": null
 		},
 		"TwitterSiteHandle": {
@@ -48,11 +62,11 @@
 		"WikiSEOMagic" : "WikiSEO.i18n.magic.php"
 	},
 	"AutoloadNamespaces": {
-		"Octfx\\WikiSEO\\": "includes/"
+		"MediaWiki\\Extension\\WikiSEO\\": "includes/"
 	},
 	"Hooks": {
-		"ParserFirstCallInit": "Octfx\\WikiSEO\\Hooks::onParserFirstCallInit",
-		"BeforePageDisplay": "Octfx\\WikiSEO\\Hooks::onBeforePageDisplay"
+		"ParserFirstCallInit": "MediaWiki\\Extension\\WikiSEO\\Hooks::onParserFirstCallInit",
+		"BeforePageDisplay": "MediaWiki\\Extension\\WikiSEO\\Hooks::onBeforePageDisplay"
 	},
 	"manifest_version": 2
 }

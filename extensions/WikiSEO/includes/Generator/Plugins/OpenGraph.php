@@ -1,17 +1,40 @@
 <?php
+/**
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * @file
+ */
 
-namespace Octfx\WikiSEO\Generator\Plugins;
+namespace MediaWiki\Extension\WikiSEO\Generator\Plugins;
 
 use Html;
-use Octfx\WikiSEO\Generator\GeneratorInterface;
+use MediaWiki\Extension\WikiSEO\Generator\GeneratorInterface;
+use MediaWiki\Extension\WikiSEO\Generator\Plugins\FileMetadataTrait as FileMetadata;
+use MediaWiki\Extension\WikiSEO\Generator\Plugins\RevisionMetadataTrait as RevisionMetadata;
+use MediaWiki\Extension\WikiSEO\WikiSEO;
 use OutputPage;
 
 /**
  * OpenGraph metadata generator
  *
- * @package Octfx\WikiSEO\Generator\Plugins
+ * @package MediaWiki\Extension\WikiSEO\Generator\Plugins
  */
 class OpenGraph implements GeneratorInterface {
+	use FileMetadata;
+	use RevisionMetadata;
+
 	protected static $htmlElementPropertyKey = 'property';
 	protected static $htmlElementContentKey = 'content';
 
@@ -20,12 +43,13 @@ class OpenGraph implements GeneratorInterface {
 	 *
 	 * @var array
 	 */
-	protected static $tags = [
+	protected $tags = [
 		'author',
 		'description',
 		'image',
 		'image_width',
 		'image_height',
+		'image_alt',
 		'keywords',
 		'locale',
 		'modified_time',
@@ -40,10 +64,11 @@ class OpenGraph implements GeneratorInterface {
 	 *
 	 * @var array
 	 */
-	protected static $conversions = [
+	protected $conversions = [
 		'image'        => 'og:image',
 		'image_width'  => 'og:image:width',
 		'image_height' => 'og:image:height',
+		'image_alt'    => 'og:image:alt',
 
 		'locale'      => 'og:locale',
 		'type'        => 'og:type',
@@ -85,6 +110,13 @@ class OpenGraph implements GeneratorInterface {
 	public function init( array $metadata, OutputPage $out ) {
 		$this->metadata = $metadata;
 		$this->outputPage = $out;
+
+		$this->preprocessFileMetadata();
+		$this->metadata['modified_time'] = $this->getRevisionTimestamp();
+
+		if ( !isset( $this->metadata['published_time'] ) ) {
+			$this->metadata['published_time'] = $this->metadata['modified_time'];
+		}
 	}
 
 	/**
@@ -96,15 +128,19 @@ class OpenGraph implements GeneratorInterface {
 		$this->addTitleMeta();
 
 		if ( $this->outputPage->getTitle() !== null ) {
+			$url = $this->outputPage->getTitle()->getFullURL();
+
+			$url = WikiSEO::protocolizeUrl( $url, $this->outputPage->getRequest() );
+
 			$this->outputPage->addHeadItem( 'og:url', Html::element( 'meta', [
 				self::$htmlElementPropertyKey => 'og:url',
-				self::$htmlElementContentKey  => $this->outputPage->getTitle()->getFullURL()
+				self::$htmlElementContentKey  => $url,
 			] ) );
 		}
 
-		foreach ( static::$tags as $tag ) {
+		foreach ( $this->tags as $tag ) {
 			if ( array_key_exists( $tag, $this->metadata ) ) {
-				$convertedTag = static::$conversions[$tag];
+				$convertedTag = $this->conversions[$tag];
 
 				$this->outputPage->addHeadItem( $convertedTag, Html::element( 'meta', [
 					self::$htmlElementPropertyKey => $convertedTag,

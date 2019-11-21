@@ -1,9 +1,9 @@
 <?php
 
-namespace Octfx\WikiSEO\Tests;
+namespace MediaWiki\Extension\WikiSEO\Tests;
 
+use MediaWiki\Extension\WikiSEO\TagParser;
 use MediaWikiTestCase;
-use Octfx\WikiSEO\TagParser;
 
 class TagParserTest extends MediaWikiTestCase {
 	/**
@@ -11,18 +11,18 @@ class TagParserTest extends MediaWikiTestCase {
 	 */
 	private $tagParser;
 
-	protected function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		$this->tagParser = new TagParser();
 	}
 
-	protected function tearDown() {
+	protected function tearDown(): void {
 		unset( $this->tagParser );
 		parent::tearDown();
 	}
 
 	/**
-	 * @covers \Octfx\WikiSEO\TagParser::parseArgs
+	 * @covers \MediaWiki\Extension\WikiSEO\TagParser::parseArgs
 	 */
 	public function testParseArgs() {
 		$args = [
@@ -41,7 +41,7 @@ class TagParserTest extends MediaWikiTestCase {
 	}
 
 	/**
-	 * @covers \Octfx\WikiSEO\TagParser::parseArgs
+	 * @covers \MediaWiki\Extension\WikiSEO\TagParser::parseArgs
 	 */
 	public function testParseArgsMultipleEquals() {
 		$args = [
@@ -54,11 +54,12 @@ class TagParserTest extends MediaWikiTestCase {
 
 		$this->assertCount( 1, $parsedArgs );
 		$this->assertArrayHasKey( 'description', $parsedArgs );
-		$this->assertEquals( 'First Equal separates = Second Equal is included', $parsedArgs['description'] );
+		$this->assertEquals( 'First Equal separates = Second Equal is included',
+			$parsedArgs['description'] );
 	}
 
 	/**
-	 * @covers \Octfx\WikiSEO\TagParser::parseText
+	 * @covers \MediaWiki\Extension\WikiSEO\TagParser::parseText
 	 */
 	public function testParseText() {
 		$text = <<<EOL
@@ -74,40 +75,5 @@ EOL;
 		$this->assertCount( 2, $parsedArgs );
 		$this->assertArrayHasKey( 'title', $parsedArgs );
 		$this->assertArrayNotHasKey( 'emptyContent', $parsedArgs );
-	}
-
-	/**
-	 * @covers \Octfx\WikiSEO\TagParser::extractSeoDataFromHtml
-	 */
-	public function testExtractSeoDataFromHtml() {
-		$text = <<<EOL
-<html>
-<!-- Fake HTML Document -->
-<head>
-<title>Test Page</title>
-</head>
-<body>
-<p>Lorem Ipsum Dolor Sit Amet</p>
-<p><!--wiki-seo-data-start
-WikiSEO:title_mode;cmVwbGFjZQ==
-WikiSEO:title;VGl0bGUgZnJvbSBXaWtpU0VPIEV4dGVuc2lvbg==
-WikiSEO:keywords;S2V5d29yZCAxLCBLZXl3b3JkIDIsIEtleXdvcmQgMw==
-WikiSEO:locale;ZGVfREU=
-wiki-seo-data-end--></p>
-</body>
-</html>
-EOL;
-
-		$expectedKeys = [
-			'title_mode',
-			'title',
-			'keywords',
-			'locale',
-		];
-
-		$parsedArgs = TagParser::extractSeoDataFromHtml( $text );
-
-		$this->assertCount( 4, $parsedArgs );
-		$this->assertArrayEquals( $expectedKeys, array_keys( $parsedArgs ) );
 	}
 }

@@ -1,9 +1,9 @@
 <?php
 
-namespace Octfx\WikiSEO\Tests;
+namespace MediaWiki\Extension\WikiSEO\Tests;
 
 use MediaWikiTestCase;
-use Octfx\WikiSEO\Validator;
+use MediaWiki\Extension\WikiSEO\Validator;
 
 class ValidatorTest extends MediaWikiTestCase {
 	/**
@@ -11,18 +11,18 @@ class ValidatorTest extends MediaWikiTestCase {
 	 */
 	private $validator;
 
-	protected function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		$this->validator = new Validator();
 	}
 
-	protected function tearDown() {
+	protected function tearDown(): void {
 		unset( $this->validator );
 		parent::tearDown();
 	}
 
 	/**
-	 * @covers \Octfx\WikiSEO\Validator::validateParams
+	 * @covers \MediaWiki\Extension\WikiSEO\Validator::validateParams
 	 */
 	public function testValidateParamsAllValid() {
 		$params = [
@@ -39,7 +39,7 @@ class ValidatorTest extends MediaWikiTestCase {
 	}
 
 	/**
-	 * @covers \Octfx\WikiSEO\Validator::validateParams
+	 * @covers \MediaWiki\Extension\WikiSEO\Validator::validateParams
 	 */
 	public function testValidateParamsAllInvalid() {
 		$params = [
@@ -56,7 +56,7 @@ class ValidatorTest extends MediaWikiTestCase {
 	}
 
 	/**
-	 * @covers \Octfx\WikiSEO\Validator::validateParams
+	 * @covers \MediaWiki\Extension\WikiSEO\Validator::validateParams
 	 */
 	public function testMixedParams() {
 		$valid = [

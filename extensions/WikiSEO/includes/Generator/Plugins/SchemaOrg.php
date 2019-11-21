@@ -1,23 +1,50 @@
 <?php
+/**
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * @file
+ */
 
-namespace Octfx\WikiSEO\Generator\Plugins;
+namespace MediaWiki\Extension\WikiSEO\Generator\Plugins;
 
-use Octfx\WikiSEO\Generator\GeneratorInterface;
+use ConfigException;
+use Exception;
+use InvalidArgumentException;
+use MediaWiki\Extension\WikiSEO\Generator\GeneratorInterface;
+use MediaWiki\Extension\WikiSEO\Generator\Plugins\FileMetadataTrait as FileMetadata;
+use MediaWiki\Extension\WikiSEO\Generator\Plugins\RevisionMetadataTrait as RevisionMetadata;
+use MediaWiki\Extension\WikiSEO\WikiSEO;
+use MediaWiki\MediaWikiServices;
 use OutputPage;
+use Title;
 
 class SchemaOrg implements GeneratorInterface {
+	use FileMetadata;
+	use RevisionMetadata;
+
 	/**
 	 * Valid Tags for this generator
 	 *
 	 * @var array
 	 */
-	protected static $tags = [
+	protected $tags = [
 		'type',
-		'image',
 		'description',
 		'keywords',
-		'published_time',
 		'modified_time',
+		'published_time',
 		'section'
 	];
 
@@ -26,8 +53,10 @@ class SchemaOrg implements GeneratorInterface {
 	 *
 	 * @var array
 	 */
-	protected static $conversions = [
+	protected $conversions = [
 		'type' => '@type',
+
+		'section' => 'articleSection',
 
 		'published_time' => 'datePublished',
 		'modified_time'  => 'dateModified'
@@ -44,6 +73,12 @@ class SchemaOrg implements GeneratorInterface {
 	public function init( array $metadata, OutputPage $out ) {
 		$this->metadata = $metadata;
 		$this->outputPage = $out;
+
+		$this->metadata['modified_time'] = $this->getRevisionTimestamp();
+
+		if ( !isset( $this->metadata['published_time'] ) ) {
+			$this->metadata['published_time'] = $this->metadata['modified_time'];
+		}
 	}
 
 	/**
@@ -71,21 +106,107 @@ class SchemaOrg implements GeneratorInterface {
 		];
 
 		if ( $this->outputPage->getTitle() !== null ) {
-			$meta['identifier'] = $this->outputPage->getTitle()->getFullURL();
-			$meta['url'] = $this->outputPage->getTitle()->getFullURL();
+			$url = $this->outputPage->getTitle()->getFullURL();
+
+			$url = WikiSEO::protocolizeUrl( $url, $this->outputPage->getRequest() );
+
+			$meta['identifier'] = $url;
+			$meta['url'] = $url;
 		}
 
-		foreach ( static::$tags as $tag ) {
+		foreach ( $this->tags as $tag ) {
 			if ( array_key_exists( $tag, $this->metadata ) ) {
-				$convertedTag = $tag;
-				if ( isset( static::$conversions[$tag] ) ) {
-					$convertedTag = static::$conversions[$tag];
-				}
+
+				$convertedTag = $this->conversions[$tag] ?? $tag;
 
 				$meta[$convertedTag] = $this->metadata[$tag];
 			}
 		}
 
+		$meta['image'] = $this->getImageMetadata();
+		$meta['author'] = $this->getAuthorMetadata();
+		$meta['publisher'] = $this->getAuthorMetadata();
+		$meta['potentialAction'] = $this->getSearchActionMetadata();
+
 		$this->outputPage->addHeadItem( 'jsonld-metadata', sprintf( $template, json_encode( $meta ) ) );
+	}
+
+	/**
+	 * Generate jsonld metadata from the wiki logo or supplied file name
+	 *
+	 * @return array
+	 */
+	private function getImageMetadata() {
+		$data = [
+			'@type' => 'ImageObject',
+		];
+
+		if ( isset( $this->metadata['image'] ) ) {
+			$image = $this->metadata['image'];
+
+			try {
+				$file = $this->getFileObject( $image );
+
+				return array_merge( $data, $this->getFileInfo( $file ) );
+			} catch ( InvalidArgumentException $e ) {
+				// Fallthrough
+			}
+		}
+
+		try {
+			$logo = MediaWikiServices::getInstance()->getMainConfig()->get( 'Logo' );
+			$logo = wfExpandUrl( $logo );
+			$data['url'] = $logo;
+		} catch ( Exception $e ) {
+			// Uh oh either there was a ConfigException or there was an error expanding the URL.
+			// We'll bail out.
+			$data = [];
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Add the sitename as the author
+	 *
+	 * @return array
+	 */
+	private function getAuthorMetadata() {
+		try {
+			$sitename = MediaWikiServices::getInstance()->getMainConfig()->get( 'Sitename' );
+		} catch ( ConfigException $e ) {
+			// Empty tags will be ignored
+			$sitename = '';
+		}
+
+		return [
+			'@type' => 'Organization',
+			'name' => $sitename,
+		];
+	}
+
+	/**
+	 * Add search action metadata
+	 * https://gitlab.com/hydrawiki/extensions/seo/blob/master/SEOHooks.php
+	 *
+	 * @return array
+	 */
+	private function getSearchActionMetadata() {
+		$searchPage = Title::newFromText( 'Special:Search' );
+
+		if ( $searchPage !== null ) {
+			$search =
+				$searchPage->getFullURL( [ 'search' => 'search_term' ], false,
+					$this->outputPage->getRequest()->getProtocol() );
+			$search = str_replace( 'search_term', '{search_term}', $search );
+
+			return [
+				'@type' => 'SearchAction',
+				'target' => $search,
+				'query-input' => 'required name=search_term',
+			];
+		}
+
+		return [];
 	}
 }

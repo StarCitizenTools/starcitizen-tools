@@ -1,16 +1,32 @@
 <?php
+/**
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * @file
+ */
 
-namespace Octfx\WikiSEO\Generator\Plugins;
+namespace MediaWiki\Extension\WikiSEO\Generator\Plugins;
 
 use Html;
 
 /**
  * Twitter metadata generator
  *
- * @package Octfx\WikiSEO\Generator\Plugins
+ * @package MediaWiki\Extension\WikiSEO\Generator\Plugins
  */
 class Twitter extends OpenGraph {
-	protected static $tags = [ 'type', 'image', 'image_width', 'image_height', 'description', 'keywords', 'locale', 'site_name', 'published_time', 'modified_time', 'twitter_site', ];
 
 	/**
 	 * Page title property name
@@ -24,10 +40,14 @@ class Twitter extends OpenGraph {
 	 * Updates some tag name conversions
 	 */
 	public function __construct() {
-		self::$conversions['twitter_site'] = 'twitter:site';
+		$this->tags[] = 'twitter_site';
 
-		self::$conversions['description'] = 'twitter:description';
-		self::$conversions['image'] = 'twitter:image';
+		$this->conversions = array_merge( $this->conversions, [
+			'twitter_site' => 'twitter:site',
+			'description' => 'twitter:description',
+			'image' => 'twitter:image',
+			'image_alt' => 'twitter:image:alt'
+		] );
 	}
 
 	/**
@@ -40,7 +60,10 @@ class Twitter extends OpenGraph {
 
 		parent::addMetadata();
 
-		$this->outputPage->addHeadItem( 'twitter:card', Html::element( 'meta', [ self::$htmlElementPropertyKey => 'twitter:card', self::$htmlElementContentKey => 'summary' ] ) );
+		$this->outputPage->addHeadItem( 'twitter:card', Html::element( 'meta', [
+			self::$htmlElementPropertyKey => 'twitter:card',
+			self::$htmlElementContentKey => 'summary',
+		] ) );
 	}
 
 	/**
@@ -51,9 +74,13 @@ class Twitter extends OpenGraph {
 		global $wgTwitterSiteHandle;
 
 		if ( $wgTwitterSiteHandle !== null ) {
-			unset( self::$tags['twitter_site'], self::$conversions['twitter_site'], $this->metadata['twitter_site'] );
+			unset( $this->metadata['twitter_site'] );
+			unset( $this->tags['twitter_site'], $this->conversions['twitter_site'] );
 
-			$this->outputPage->addHeadItem( 'twitter:site', Html::element( 'meta', [ self::$htmlElementPropertyKey => 'twitter:site', self::$htmlElementContentKey => $wgTwitterSiteHandle ] ) );
+			$this->outputPage->addHeadItem( 'twitter:site', Html::element( 'meta', [
+				self::$htmlElementPropertyKey => 'twitter:site',
+				self::$htmlElementContentKey => $wgTwitterSiteHandle,
+			] ) );
 		}
 	}
 }
