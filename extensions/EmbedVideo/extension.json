@@ -1,6 +1,6 @@
 {
 	"name": "EmbedVideo",
-	"version": "2.7.3",
+	"version": "2.8.0",
 	"author": [
 		"Jim R. Wilson",
 		"Andrew Whitworth",
@@ -11,6 +11,9 @@
 	"descriptionmsg": "embedvideo_description",
 	"license-name": "MIT",
 	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.29.0"
+	},
 	"callback": "EmbedVideoHooks::onExtension",
 	"MessagesDirs": {
 		"EmbedVideo": [
@@ -32,8 +35,8 @@
 		"EmbedVideo\\VideoTransformOutput": "classes/media/VideoTransformOutput.php"
 	},
 	"APIModules": {
-        "embedvideo": "ApiEmbedVideo"
-    },
+		"embedvideo": "ApiEmbedVideo"
+	},
 	"ResourceModules": {
 		"ext.embedVideo": {
 			"scripts": [
@@ -53,6 +56,9 @@
 			"targets": [
 				"desktop",
 				"mobile"
+			],
+			"dependencies": [
+				"mediawiki.api"
 			]
 		},
 		"ext.embedVideo.styles": {
@@ -73,12 +79,12 @@
 		"EmbedVideoAddFileExtensions": true,
 		"EmbedVideoEnableVideoHandler": true,
 		"EmbedVideoEnableAudioHandler": true,
-		"FFmpegLocation": "/usr/bin/ffmpeg",
 		"FFprobeLocation": "/usr/bin/ffprobe"
 	},
 	"Hooks": {
 		"ParserFirstCallInit": [
 			"EmbedVideoHooks::onParserFirstCallInit"
 		]
-	}
+	},
+	"manifest_version": 1
 }
