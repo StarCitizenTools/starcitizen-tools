@@ -192,18 +192,16 @@ wfLoadExtension( 'Flow' );
 wfLoadExtension( 'Tabber' );
 wfLoadExtension( 'RSS' );
 wfLoadExtension( 'TemplateData' );
-wfLoadExtension( 'TemplateStyles' );
 wfLoadExtension( 'PageImages' );
 wfLoadExtension( 'VisualEditor' );
 wfLoadExtension( 'Scribunto' );
 wfLoadExtension( 'Renameuser' );
 wfLoadExtension( 'ExternalData' );
+wfLoadExtension( 'TemplateStyles' );
 require_once "$IP/extensions/Translate/Translate.php";
 require_once "$IP/extensions/googleAnalytics/googleAnalytics.php";
 require_once "$IP/extensions/EventLogging/EventLogging.php";
-require_once "$IP/extensions/ExternalData/ExternalData.php";
 require_once "$IP/extensions/NativeSvgHandler/NativeSvgHandler.php";
-#require_once "$IP/extensions/Lazyload/Lazyload.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================
@@ -289,11 +287,13 @@ $edgExternalValueVerbose = false;
 
 #Visual Editor
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
+$wgDefaultUserOptions['visualeditor-editor'] = "visualeditor";
+$wgDefaultUserOptions['visualeditor-newwikitext'] = 1;
 $wgHiddenPrefs[] = 'visualeditor-enable';
 $wgVisualEditorEnableWikitext = true;
-$wgDefaultUserOptions['visualeditor-newwikitext'] = 1;
 $wgVisualEditorEnableDiffPage = true;
-
+$wgVisualEditorUseSingleEditTab = true;
+$wgVisualEditorEnableVisualSectionEditing = true;
 
 #Eventlogging
 $wgEventLoggingBaseUri = 'https://starcitizen.tools:8080/event.gif';
