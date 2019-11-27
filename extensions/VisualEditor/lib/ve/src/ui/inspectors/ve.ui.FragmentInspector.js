@@ -104,6 +104,7 @@ ve.ui.FragmentInspector.prototype.initialize = function () {
 	this.container = new OO.ui.PanelLayout( {
 		classes: [ 've-ui-fragmentInspector-container' ],
 		scrollable: true,
+		expanded: false,
 		padded: this.padded
 	} );
 	this.form = new OO.ui.FormLayout( {
@@ -170,7 +171,7 @@ ve.ui.FragmentInspector.prototype.getTeardownProcess = function ( data ) {
  */
 ve.ui.FragmentInspector.prototype.getReadyProcess = function ( data ) {
 	return ve.ui.FragmentInspector.super.prototype.getReadyProcess.call( this, data )
-		// Add a 0ms timeout before doing anything. Because... Internet Explorer :(
+		// Add a 0ms timeout before doing anything. Because… Internet Explorer :(
 		.first( 0 );
 };
 

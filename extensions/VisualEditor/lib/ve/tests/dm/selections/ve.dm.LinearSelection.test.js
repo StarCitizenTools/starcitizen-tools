@@ -14,12 +14,12 @@ QUnit.test( 'Construction and getters (getDocument, getRange(s))', function ( as
 		selection = new ve.dm.LinearSelection( dummyDoc, range );
 
 	assert.strictEqual( selection.getDocument(), dummyDoc, 'getDocument' );
-	assert.deepEqual( selection.getRange(), range, 'getRange' );
+	assert.equalRange( selection.getRange(), range, 'getRange' );
 	assert.deepEqual( selection.getRanges(), [ range ], 'getRanges' );
 	assert.strictEqual( selection.getName(), 'linear', 'getName' );
 } );
 
-QUnit.test( 'Basic methods (clone, collapse*, isCollased, equals, isNull)', function ( assert ) {
+QUnit.test( 'Basic methods (collapse*, isCollased, equals, isNull)', function ( assert ) {
 	var dummyDoc = { a: 1 },
 		dummyDoc2 = { a: 1 },
 		range = new ve.Range( 200, 100 ),
@@ -28,7 +28,6 @@ QUnit.test( 'Basic methods (clone, collapse*, isCollased, equals, isNull)', func
 		startSelection = new ve.dm.LinearSelection( dummyDoc, new ve.Range( 100 ) ),
 		endSelection = new ve.dm.LinearSelection( dummyDoc, new ve.Range( 200 ) );
 
-	assert.deepEqual( selection.clone(), selection, 'clone' );
 	assert.deepEqual( selection.collapseToStart(), startSelection, 'collapseToStart' );
 	assert.deepEqual( selection.collapseToEnd(), endSelection, 'collapseToEnd' );
 	assert.deepEqual( selection.collapseToFrom(), endSelection, 'collapseToFrom' );

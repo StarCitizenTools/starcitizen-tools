@@ -2,7 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Milicevic01",
-			"Srdjan m"
+			"Srdjan m",
+			"Obsuser",
+			"Zoranzoki21"
 		]
 	},
 	"visualeditor": "Vizuelni uređivač",
@@ -19,7 +21,7 @@
 	"visualeditor-annotationbutton-subscript-tooltip": "Indeks",
 	"visualeditor-annotationbutton-superscript-tooltip": "Eksponent",
 	"visualeditor-annotationbutton-underline-tooltip": "Podvučeno",
-	"visualeditor-clearbutton-tooltip": "Ukloni formatiranje",
+	"visualeditor-clearbutton-tooltip": "Ukloni",
 	"visualeditor-clipboard-copy": "Kopiraj",
 	"visualeditor-clipboard-cut": "Iseci",
 	"visualeditor-clipboard-paste": "Nalepi",
@@ -76,10 +78,8 @@
 	"visualeditor-languageinspector-widget-label-langcode": "Jezični kod",
 	"visualeditor-languageinspector-widget-label-language": "Jezik",
 	"visualeditor-linkinspector-title": "Veza",
-	"visualeditor-listbutton-bullet-tooltip": "Nabrojivi spisak",
+	"visualeditor-listbutton-bullet-tooltip": "Spisak s buletima",
 	"visualeditor-listbutton-number-tooltip": "Numerisani spisak",
-	"visualeditor-mediasizewidget-button-originaldimensions": "Puna veličina",
-	"visualeditor-mediasizewidget-label-custom": "Prilagođeno",
 	"visualeditor-mediasizewidget-label-defaulterror": "Vrednosti nisu valjane.",
 	"visualeditor-mediasizewidget-label-scale": "Razmera",
 	"visualeditor-mediasizewidget-label-scale-percent": "% veličine minijature",
@@ -88,6 +88,7 @@
 	"visualeditor-mediasizewidget-sizeoptions-scale": "Razmera",
 	"visualeditor-shortcuts-formatting": "Formatiranje paragrafa",
 	"visualeditor-shortcuts-history": "Istorija",
+	"visualeditor-shortcuts-insert": "Ubaci",
 	"visualeditor-shortcuts-other": "Ostalo",
 	"visualeditor-shortcuts-sequence-notice": "Otkucaj",
 	"visualeditor-shortcuts-text-style": "Stil teksta",

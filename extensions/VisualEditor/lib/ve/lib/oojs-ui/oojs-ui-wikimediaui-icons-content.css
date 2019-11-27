@@ -1,16 +1,12 @@
 /*!
- * OOUI v0.26.3
+ * OOUI v0.29.2
  * https://www.mediawiki.org/wiki/OOUI
  *
  * Copyright 2011–2018 OOUI Team and other contributors.
  * Released under the MIT license
  * http://oojs.mit-license.org
  *
- * Date: 2018-04-10T22:15:43Z
- */
-/**
- * WikimediaUI Base v0.10.0
- * Wikimedia Foundation user interface base variables
+ * Date: 2018-10-08T22:43:02Z
  */
 .oo-ui-icon-article {
   background-image: url('themes/wikimediaui/images/icons/article-ltr.png');
@@ -72,30 +68,6 @@
   background-image: url('themes/wikimediaui/images/icons/articleRedirect-ltr-progressive.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/articleRedirect-ltr-progressive.svg');
 }
-.oo-ui-icon-book {
-  background-image: url('themes/wikimediaui/images/icons/book-ltr.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/book-ltr.svg');
-}
-.oo-ui-image-invert.oo-ui-icon-book {
-  background-image: url('themes/wikimediaui/images/icons/book-ltr-invert.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/book-ltr-invert.svg');
-}
-.oo-ui-image-progressive.oo-ui-icon-book {
-  background-image: url('themes/wikimediaui/images/icons/book-ltr-progressive.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/book-ltr-progressive.svg');
-}
-.oo-ui-icon-citeArticle {
-  background-image: url('themes/wikimediaui/images/icons/citeArticle.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/citeArticle.svg');
-}
-.oo-ui-image-invert.oo-ui-icon-citeArticle {
-  background-image: url('themes/wikimediaui/images/icons/citeArticle-invert.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/citeArticle-invert.svg');
-}
-.oo-ui-image-progressive.oo-ui-icon-citeArticle {
-  background-image: url('themes/wikimediaui/images/icons/citeArticle-progressive.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/citeArticle-progressive.svg');
-}
 .oo-ui-icon-die {
   background-image: url('themes/wikimediaui/images/icons/die.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/die.svg');
@@ -148,37 +120,28 @@
   background-image: url('themes/wikimediaui/images/icons/info.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/info.svg');
 }
+/* @noflip */
+.oo-ui-icon-info:lang(ar) {
+  background-image: url('themes/wikimediaui/images/icons/lightbulb.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/lightbulb.svg');
+}
 .oo-ui-image-invert.oo-ui-icon-info {
   background-image: url('themes/wikimediaui/images/icons/info-invert.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/info-invert.svg');
+}
+/* @noflip */
+.oo-ui-image-invert.oo-ui-icon-info:lang(ar) {
+  background-image: url('themes/wikimediaui/images/icons/lightbulb-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/lightbulb-invert.svg');
 }
 .oo-ui-image-progressive.oo-ui-icon-info {
   background-image: url('themes/wikimediaui/images/icons/info-progressive.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/info-progressive.svg');
 }
-.oo-ui-icon-journal {
-  background-image: url('themes/wikimediaui/images/icons/journal-ltr.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/journal-ltr.svg');
-}
-.oo-ui-image-invert.oo-ui-icon-journal {
-  background-image: url('themes/wikimediaui/images/icons/journal-ltr-invert.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/journal-ltr-invert.svg');
-}
-.oo-ui-image-progressive.oo-ui-icon-journal {
-  background-image: url('themes/wikimediaui/images/icons/journal-ltr-progressive.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/journal-ltr-progressive.svg');
-}
-.oo-ui-icon-newspaper {
-  background-image: url('themes/wikimediaui/images/icons/newspaper-ltr.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/newspaper-ltr.svg');
-}
-.oo-ui-image-invert.oo-ui-icon-newspaper {
-  background-image: url('themes/wikimediaui/images/icons/newspaper-ltr-invert.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/newspaper-ltr-invert.svg');
-}
-.oo-ui-image-progressive.oo-ui-icon-newspaper {
-  background-image: url('themes/wikimediaui/images/icons/newspaper-ltr-progressive.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/newspaper-ltr-progressive.svg');
+/* @noflip */
+.oo-ui-image-progressive.oo-ui-icon-info:lang(ar) {
+  background-image: url('themes/wikimediaui/images/icons/lightbulb-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/lightbulb-progressive.svg');
 }
 .oo-ui-icon-tag {
   background-image: url('themes/wikimediaui/images/icons/tag-ltr.png');

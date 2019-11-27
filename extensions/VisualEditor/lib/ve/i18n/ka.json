@@ -12,7 +12,8 @@
 			"Chavch",
 			"Silovan",
 			"OpusDEI",
-			"Kintrbr"
+			"Kintrbr",
+			"SHOTHA"
 		]
 	},
 	"visualeditor": "ვიზუალური რედაქტორი",
@@ -34,6 +35,9 @@
 	"visualeditor-annotationbutton-subscript-tooltip": "ქვეხაზური",
 	"visualeditor-annotationbutton-superscript-tooltip": "ზეხაზური",
 	"visualeditor-annotationbutton-underline-tooltip": "ხაზგასმული",
+	"visualeditor-changedesc-changed": "$1 შეიცვალა $2-დან $3-ზე",
+	"visualeditor-changedesc-comment": "კომენტარი შეიცვალა $1-დან $2-ზე",
+	"visualeditor-changedesc-language": "ენა შეიცვალა $1-დან $2-ზე",
 	"visualeditor-changedesc-unknown": "$1 შეიცვალა",
 	"visualeditor-changedir": "ლექსიკონის შეცვლა",
 	"visualeditor-clearbutton-tooltip": "ფორმატირების გასუფთავება",
@@ -117,8 +121,6 @@
 	"visualeditor-linkinspector-title": "ბმული",
 	"visualeditor-listbutton-bullet-tooltip": "მარკირებული სია",
 	"visualeditor-listbutton-number-tooltip": "დანომრილი სია",
-	"visualeditor-mediasizewidget-button-originaldimensions": "სრულ ზომაზე დაყენება",
-	"visualeditor-mediasizewidget-label-custom": "ჩვეულებრივი",
 	"visualeditor-mediasizewidget-label-defaulterror": "ზომების პარამეტრები არასწორია.",
 	"visualeditor-mediasizewidget-label-scale": "მასშტაბი",
 	"visualeditor-mediasizewidget-label-scale-percent": "მინიატურის ზომის %",
@@ -129,6 +131,7 @@
 	"visualeditor-shortcuts-clipboard": "ბუფერში გაცვლა",
 	"visualeditor-shortcuts-formatting": "აბზაცის ფორმატირება",
 	"visualeditor-shortcuts-history": "ისტორია",
+	"visualeditor-shortcuts-insert": "ჩასმა",
 	"visualeditor-shortcuts-other": "სხვა",
 	"visualeditor-shortcuts-sequence-notice": "ტიპი",
 	"visualeditor-shortcuts-text-style": "ტექსტის ფორმატირება",

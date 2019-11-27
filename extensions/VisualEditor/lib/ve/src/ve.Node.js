@@ -147,6 +147,14 @@ ve.Node.prototype.isContent = null;
 ve.Node.prototype.isInternal = null;
 
 /**
+ * Check if the node is a meta data node
+ * @method
+ * @abstract
+ * @return {boolean} Node is a meta data node
+ */
+ve.Node.prototype.isMetaData = null;
+
+/**
  * Check if the node has a wrapped element in the document data.
  *
  * @method
@@ -201,6 +209,24 @@ ve.Node.prototype.isCellable = null;
  * @return {boolean} Node can be edited in place
  */
 ve.Node.prototype.isCellEditable = null;
+
+/**
+ * Check if the node behaves like a list for diffing
+ *
+ * @method
+ * @abstract
+ * @return {boolean} Node behaves like a list
+ */
+ve.Node.prototype.isDiffedAsList = null;
+
+/**
+ * Check if the node behaves like a leaf for diffing
+ *
+ * @method
+ * @abstract
+ * @return {boolean} Node behaves like a leaf
+ */
+ve.Node.prototype.isDiffedAsLeaf = null;
 
 /**
  * Check if the node has significant whitespace.

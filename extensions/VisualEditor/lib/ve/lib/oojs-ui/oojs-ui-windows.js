@@ -1,12 +1,12 @@
 /*!
- * OOUI v0.26.3
+ * OOUI v0.29.2
  * https://www.mediawiki.org/wiki/OOUI
  *
  * Copyright 2011–2018 OOUI Team and other contributors.
  * Released under the MIT license
  * http://oojs.mit-license.org
  *
- * Date: 2018-04-10T22:15:39Z
+ * Date: 2018-10-08T22:42:55Z
  */
 ( function ( OO ) {
 
@@ -1034,8 +1034,10 @@ OO.ui.WindowManager = function OoUiWindowManager( config ) {
 	// Initialization
 	this.$element
 		.addClass( 'oo-ui-windowManager' )
-		.attr( 'aria-hidden', true )
 		.toggleClass( 'oo-ui-windowManager-modal', this.modal );
+	if ( this.modal ) {
+		this.$element.attr( 'aria-hidden', true );
+	}
 };
 
 /* Setup */
@@ -1134,8 +1136,16 @@ OO.ui.WindowManager.prototype.onWindowResize = function () {
  * @param {jQuery.Event} e Window resize event
  */
 OO.ui.WindowManager.prototype.afterWindowResize = function () {
+	var currentFocusedElement = document.activeElement;
 	if ( this.currentWindow ) {
 		this.updateWindowSize( this.currentWindow );
+
+		// Restore focus to the original element if it has changed.
+		// When a layout change is made on resize inputs lose focus
+		// on Android (Chrome and Firefox). See T162127.
+		if ( currentFocusedElement !== document.activeElement ) {
+			currentFocusedElement.focus();
+		}
 	}
 };
 
@@ -1209,7 +1219,7 @@ OO.ui.WindowManager.prototype.getSetupDelay = function () {
  * @return {number} Milliseconds to wait
  */
 OO.ui.WindowManager.prototype.getReadyDelay = function () {
-	return 0;
+	return this.modal ? OO.ui.theme.getDialogTransitionDuration() : 0;
 };
 
 /**
@@ -1232,7 +1242,7 @@ OO.ui.WindowManager.prototype.getHoldDelay = function () {
  * @return {number} Milliseconds to wait
  */
 OO.ui.WindowManager.prototype.getTeardownDelay = function () {
-	return this.modal ? 250 : 0;
+	return this.modal ? OO.ui.theme.getDialogTransitionDuration() : 0;
 };
 
 /**
@@ -1291,7 +1301,7 @@ OO.ui.WindowManager.prototype.getCurrentWindow = function () {
  * @param {Object} [data] Window opening data
  * @param {jQuery|null} [data.$returnFocusTo] Element to which the window will return focus when closed.
  *  Defaults the current activeElement. If set to null, focus isn't changed on close.
- * @return {OO.ui.WindowInstance|jQuery.Promise} A lifecycle object representing this particular
+ * @return {OO.ui.WindowInstance} A lifecycle object representing this particular
  *  opening of the window. For backwards-compatibility, then object is also a Thenable that is resolved
  *  when the window is done opening, with nested promise for when closing starts. This behaviour
  *  is deprecated and is not compatible with jQuery 3. See T163510.
@@ -1366,7 +1376,6 @@ OO.ui.WindowManager.prototype.openWindow = function ( win, data, lifecycle, comp
 		setTimeout( function () {
 			manager.compatOpened = $.Deferred();
 			win.setup( data ).then( function () {
-				manager.updateWindowSize( win );
 				compatOpening.notify( { state: 'setup' } );
 				setTimeout( function () {
 					win.ready( data ).then( function () {
@@ -1395,7 +1404,7 @@ OO.ui.WindowManager.prototype.openWindow = function ( win, data, lifecycle, comp
  *
  * @param {OO.ui.Window|string} win Window object or symbolic name of window to close
  * @param {Object} [data] Window closing data
- * @return {OO.ui.WindowInstance|jQuery.Promise} A lifecycle object representing this particular
+ * @return {OO.ui.WindowInstance} A lifecycle object representing this particular
  *  opening of the window. For backwards-compatibility, the object is also a Thenable that is resolved
  *  when the window is done closing, see T163510.
  * @fires closing
@@ -2067,9 +2076,10 @@ OO.ui.Window.prototype.getDir = function () {
 /**
  * Get the 'setup' process.
  *
- * The setup process is used to set up a window for use in a particular context,
- * based on the `data` argument. This method is called during the opening phase of the window’s
- * lifecycle.
+ * The setup process is used to set up a window for use in a particular context, based on the `data`
+ * argument. This method is called during the opening phase of the window’s lifecycle (before the
+ * opening animation). You can add elements to the window in this process or set their default
+ * values.
  *
  * Override this method to add additional steps to the ‘setup’ process the parent method provides
  * using the {@link OO.ui.Process#first first} and {@link OO.ui.Process#next next} methods
@@ -2088,9 +2098,10 @@ OO.ui.Window.prototype.getSetupProcess = function () {
 /**
  * Get the ‘ready’ process.
  *
- * The ready process is used to ready a window for use in a particular
- * context, based on the `data` argument. This method is called during the opening phase of
- * the window’s lifecycle, after the window has been {@link #getSetupProcess setup}.
+ * The ready process is used to ready a window for use in a particular context, based on the `data`
+ * argument. This method is called during the opening phase of the window’s lifecycle, after the
+ * window has been {@link #getSetupProcess setup} (after the opening animation). You can focus
+ * elements in the window in this process, or open their dropdowns.
  *
  * Override this method to add additional steps to the ‘ready’ process the parent method
  * provides using the {@link OO.ui.Process#first first} and {@link OO.ui.Process#next next}
@@ -2106,9 +2117,10 @@ OO.ui.Window.prototype.getReadyProcess = function () {
 /**
  * Get the 'hold' process.
  *
- * The hold process is used to keep a window from being used in a particular context,
- * based on the `data` argument. This method is called during the closing phase of the window’s
- * lifecycle.
+ * The hold process is used to keep a window from being used in a particular context, based on the
+ * `data` argument. This method is called during the closing phase of the window’s lifecycle (before
+ * the closing animation). You can close dropdowns of elements in the window in this process, if
+ * they do not get closed automatically.
  *
  * Override this method to add additional steps to the 'hold' process the parent method provides
  * using the {@link OO.ui.Process#first first} and {@link OO.ui.Process#next next} methods
@@ -2124,9 +2136,10 @@ OO.ui.Window.prototype.getHoldProcess = function () {
 /**
  * Get the ‘teardown’ process.
  *
- * The teardown process is used to teardown a window after use. During teardown,
- * user interactions within the window are conveyed and the window is closed, based on the `data`
- * argument. This method is called during the closing phase of the window’s lifecycle.
+ * The teardown process is used to teardown a window after use. During teardown, user interactions
+ * within the window are conveyed and the window is closed, based on the `data` argument. This
+ * method is called during the closing phase of the window’s lifecycle (after the closing
+ * animation). You can remove elements in the window in this process or clear their values.
  *
  * Override this method to add additional steps to the ‘teardown’ process the parent method provides
  * using the {@link OO.ui.Process#first first} and {@link OO.ui.Process#next next} methods
@@ -2292,15 +2305,13 @@ OO.ui.Window.prototype.onFocusTrapFocused = function ( event ) {
 /**
  * Open the window.
  *
- * This method is a wrapper around a call to the window manager’s {@link OO.ui.WindowManager#openWindow openWindow}
- * method, which returns a promise resolved when the window is done opening.
+ * This method is a wrapper around a call to the window
+ * manager’s {@link OO.ui.WindowManager#openWindow openWindow} method.
  *
  * To customize the window each time it opens, use #getSetupProcess or #getReadyProcess.
  *
  * @param {Object} [data] Window opening data
- * @return {jQuery.Promise} Promise resolved with a value when the window is opened, or rejected
- *  if the window fails to open. When the promise is resolved successfully, the first argument of the
- *  value is a new promise, which is resolved when the window begins closing.
+ * @return {OO.ui.WindowInstance} See OO.ui.WindowManager#openWindow
  * @throws {Error} An error is thrown if the window is not attached to a window manager
  */
 OO.ui.Window.prototype.open = function ( data ) {
@@ -2315,15 +2326,14 @@ OO.ui.Window.prototype.open = function ( data ) {
  * Close the window.
  *
  * This method is a wrapper around a call to the window
- * manager’s {@link OO.ui.WindowManager#closeWindow closeWindow} method,
- * which returns a closing promise resolved when the window is done closing.
+ * manager’s {@link OO.ui.WindowManager#closeWindow closeWindow} method.
  *
  * The window's #getHoldProcess and #getTeardownProcess methods are called during the closing
  * phase of the window’s lifecycle and can be used to specify closing behavior each time
  * the window closes.
  *
  * @param {Object} [data] Window closing data
- * @return {jQuery.Promise} Promise resolved when window is closed
+ * @return {OO.ui.WindowInstance} See OO.ui.WindowManager#closeWindow
  * @throws {Error} An error is thrown if the window is not attached to a window manager
  */
 OO.ui.Window.prototype.close = function ( data ) {
@@ -2337,8 +2347,8 @@ OO.ui.Window.prototype.close = function ( data ) {
 /**
  * Setup window.
  *
- * This is called by OO.ui.WindowManager during window opening, and should not be called directly
- * by other systems.
+ * This is called by OO.ui.WindowManager during window opening (before the animation), and should
+ * not be called directly by other systems.
  *
  * @param {Object} [data] Window opening data
  * @return {jQuery.Promise} Promise resolved when window is setup
@@ -2352,6 +2362,7 @@ OO.ui.Window.prototype.setup = function ( data ) {
 	this.$focusTraps.on( 'focus', this.focusTrapHandler );
 
 	return this.getSetupProcess( data ).execute().then( function () {
+		win.updateSize();
 		// Force redraw by asking the browser to measure the elements' widths
 		win.$element.addClass( 'oo-ui-window-active oo-ui-window-setup' ).width();
 		win.$content.addClass( 'oo-ui-window-content-setup' ).width();
@@ -2361,8 +2372,8 @@ OO.ui.Window.prototype.setup = function ( data ) {
 /**
  * Ready window.
  *
- * This is called by OO.ui.WindowManager during window opening, and should not be called directly
- * by other systems.
+ * This is called by OO.ui.WindowManager during window opening (after the animation), and should not
+ * be called directly by other systems.
  *
  * @param {Object} [data] Window opening data
  * @return {jQuery.Promise} Promise resolved when window is ready
@@ -2381,8 +2392,8 @@ OO.ui.Window.prototype.ready = function ( data ) {
 /**
  * Hold window.
  *
- * This is called by OO.ui.WindowManager during window closing, and should not be called directly
- * by other systems.
+ * This is called by OO.ui.WindowManager during window closing (before the animation), and should
+ * not be called directly by other systems.
  *
  * @param {Object} [data] Window closing data
  * @return {jQuery.Promise} Promise resolved when window is held
@@ -2400,15 +2411,15 @@ OO.ui.Window.prototype.hold = function ( data ) {
 		}
 
 		// Force redraw by asking the browser to measure the elements' widths
-		win.$element.removeClass( 'oo-ui-window-ready' ).width();
-		win.$content.removeClass( 'oo-ui-window-content-ready' ).width();
+		win.$element.removeClass( 'oo-ui-window-ready oo-ui-window-setup' ).width();
+		win.$content.removeClass( 'oo-ui-window-content-ready oo-ui-window-content-setup' ).width();
 	} );
 };
 
 /**
  * Teardown window.
  *
- * This is called by OO.ui.WindowManager during window closing, and should not be called directly
+ * This is called by OO.ui.WindowManager during window closing (after the animation), and should not be called directly
  * by other systems.
  *
  * @param {Object} [data] Window closing data
@@ -2419,8 +2430,8 @@ OO.ui.Window.prototype.teardown = function ( data ) {
 
 	return this.getTeardownProcess( data ).execute().then( function () {
 		// Force redraw by asking the browser to measure the elements' widths
-		win.$element.removeClass( 'oo-ui-window-active oo-ui-window-setup' ).width();
-		win.$content.removeClass( 'oo-ui-window-content-setup' ).width();
+		win.$element.removeClass( 'oo-ui-window-active' ).width();
+
 		win.$focusTraps.off( 'focus', win.focusTrapHandler );
 		win.toggle( false );
 	} );
@@ -2599,6 +2610,10 @@ OO.ui.Dialog.prototype.onActionsChange = function () {
 	this.detachActions();
 	if ( !this.isClosing() ) {
 		this.attachActions();
+		if ( !this.isOpening() ) {
+			// If the dialog is currently opening, this will be called automatically soon.
+			this.updateSize();
+		}
 	}
 };
 
@@ -2697,11 +2712,33 @@ OO.ui.Dialog.prototype.initialize = function () {
 OO.ui.Dialog.prototype.getActionWidgets = function ( actions ) {
 	var i, len, widgets = [];
 	for ( i = 0, len = actions.length; i < len; i++ ) {
-		widgets.push(
-			new OO.ui.ActionWidget( actions[ i ] )
-		);
+		widgets.push( this.getActionWidget( actions[ i ] ) );
 	}
 	return widgets;
+};
+
+/**
+ * Get action widget from config
+ *
+ * Override this method to change the action widget class used.
+ *
+ * @param {Object} config Action widget config
+ * @return {OO.ui.ActionWidget} Action widget
+ */
+OO.ui.Dialog.prototype.getActionWidget = function ( config ) {
+	return new OO.ui.ActionWidget( this.getActionWidgetConfig( config ) );
+};
+
+/**
+ * Get action widget config
+ *
+ * Override this method to modify the action widget config
+ *
+ * @param {Object} config Initial action widget config
+ * @return {Object} Action widget config
+ */
+OO.ui.Dialog.prototype.getActionWidgetConfig = function ( config ) {
+	return config;
 };
 
 /**
@@ -2850,34 +2887,6 @@ OO.ui.MessageDialog.static.actions = [
 /* Methods */
 
 /**
- * @inheritdoc
- */
-OO.ui.MessageDialog.prototype.setManager = function ( manager ) {
-	OO.ui.MessageDialog.parent.prototype.setManager.call( this, manager );
-
-	// Events
-	this.manager.connect( this, {
-		resize: 'onResize'
-	} );
-
-	return this;
-};
-
-/**
- * Handle window resized events.
- *
- * @private
- */
-OO.ui.MessageDialog.prototype.onResize = function () {
-	var dialog = this;
-	dialog.fitActions();
-	// Wait for CSS transition to finish and do it again :(
-	setTimeout( function () {
-		dialog.fitActions();
-	}, 300 );
-};
-
-/**
  * Toggle action layout between vertical and horizontal.
  *
  * @private
@@ -2977,7 +2986,9 @@ OO.ui.MessageDialog.prototype.getBodyHeight = function () {
  * @inheritdoc
  */
 OO.ui.MessageDialog.prototype.setDimensions = function ( dim ) {
-	var $scrollable = this.container.$element;
+	var
+		dialog = this,
+		$scrollable = this.container.$element;
 	OO.ui.MessageDialog.parent.prototype.setDimensions.call( this, dim );
 
 	// Twiddle the overflow property, otherwise an unnecessary scrollbar will be produced.
@@ -2997,6 +3008,12 @@ OO.ui.MessageDialog.prototype.setDimensions = function ( dim ) {
 		}
 
 		$scrollable[ 0 ].style.overflow = oldOverflow;
+	}, 300 );
+
+	dialog.fitActions();
+	// Wait for CSS transition to finish and do it again :(
+	setTimeout( function () {
+		dialog.fitActions();
 	}, 300 );
 
 	return this;
@@ -3034,8 +3051,16 @@ OO.ui.MessageDialog.prototype.initialize = function () {
 /**
  * @inheritdoc
  */
+OO.ui.MessageDialog.prototype.getActionWidgetConfig = function ( config ) {
+	// Force unframed
+	return $.extend( {}, config, { framed: false } );
+};
+
+/**
+ * @inheritdoc
+ */
 OO.ui.MessageDialog.prototype.attachActions = function () {
-	var i, len, other, special, others;
+	var i, len, special, others;
 
 	// Parent method
 	OO.ui.MessageDialog.parent.prototype.attachActions.call( this );
@@ -3045,24 +3070,15 @@ OO.ui.MessageDialog.prototype.attachActions = function () {
 
 	if ( special.safe ) {
 		this.$actions.append( special.safe.$element );
-		special.safe.toggleFramed( false );
+		special.safe.toggleFramed( true );
 	}
-	if ( others.length ) {
-		for ( i = 0, len = others.length; i < len; i++ ) {
-			other = others[ i ];
-			this.$actions.append( other.$element );
-			other.toggleFramed( false );
-		}
+	for ( i = 0, len = others.length; i < len; i++ ) {
+		this.$actions.append( others[ i ].$element );
+		others[ i ].toggleFramed( true );
 	}
 	if ( special.primary ) {
 		this.$actions.append( special.primary.$element );
-		special.primary.toggleFramed( false );
-	}
-
-	if ( !this.isOpening() ) {
-		// If the dialog is currently opening, this will be called automatically soon.
-		// This also calls #fitActions.
-		this.updateSize();
+		special.primary.toggleFramed( true );
 	}
 };
 
@@ -3082,7 +3098,7 @@ OO.ui.MessageDialog.prototype.fitActions = function () {
 	this.toggleVerticalActionLayout( false );
 	for ( i = 0, len = actions.length; i < len; i++ ) {
 		action = actions[ i ];
-		if ( action.$element.innerWidth() < action.$label.outerWidth( true ) ) {
+		if ( action.$element[ 0 ].scrollWidth > action.$element[ 0 ].clientWidth ) {
 			this.toggleVerticalActionLayout( true );
 			break;
 		}
@@ -3253,26 +3269,23 @@ OO.ui.ProcessDialog.prototype.initialize = function () {
 /**
  * @inheritdoc
  */
-OO.ui.ProcessDialog.prototype.getActionWidgets = function ( actions ) {
-	var i, len, config,
-		isMobile = OO.ui.isMobile(),
-		widgets = [];
+OO.ui.ProcessDialog.prototype.getActionWidgetConfig = function ( config ) {
+	var isMobile = OO.ui.isMobile();
 
-	for ( i = 0, len = actions.length; i < len; i++ ) {
-		config = $.extend( { framed: !OO.ui.isMobile() }, actions[ i ] );
-		if ( isMobile &&
-			( config.flags === 'back' || ( Array.isArray( config.flags ) && config.flags.indexOf( 'back' ) !== -1 ) )
-		) {
-			$.extend( config, {
-				icon: 'previous',
-				label: ''
-			} );
-		}
-		widgets.push(
-			new OO.ui.ActionWidget( config )
-		);
+	// Default to unframed on mobile
+	config = $.extend( { framed: !isMobile }, config );
+	// Change back buttons to icon only on mobile
+	if (
+		isMobile &&
+		( config.flags === 'back' || ( Array.isArray( config.flags ) && config.flags.indexOf( 'back' ) !== -1 ) )
+	) {
+		$.extend( config, {
+			icon: 'previous',
+			label: ''
+		} );
 	}
-	return widgets;
+
+	return config;
 };
 
 /**
@@ -3296,9 +3309,6 @@ OO.ui.ProcessDialog.prototype.attachActions = function () {
 	if ( special.safe ) {
 		this.$safeActions.append( special.safe.$element );
 	}
-
-	this.fitLabel();
-	this.$body.css( 'bottom', this.$foot.outerHeight( true ) );
 };
 
 /**
@@ -3316,10 +3326,20 @@ OO.ui.ProcessDialog.prototype.executeAction = function ( action ) {
  * @inheritdoc
  */
 OO.ui.ProcessDialog.prototype.setDimensions = function () {
+	var dialog = this;
+
 	// Parent method
 	OO.ui.ProcessDialog.parent.prototype.setDimensions.apply( this, arguments );
 
 	this.fitLabel();
+
+	// If there are many actions, they might be shown on multiple lines. Their layout can change when
+	// resizing the dialog and when changing the actions. Adjust the height of the footer to fit them.
+	dialog.$body.css( 'bottom', dialog.$foot.outerHeight( true ) );
+	// Wait for CSS transition to finish and do it again :(
+	setTimeout( function () {
+		dialog.$body.css( 'bottom', dialog.$foot.outerHeight( true ) );
+	}, 300 );
 };
 
 /**
@@ -3582,4 +3602,4 @@ OO.ui.prompt = function ( text, options ) {
 
 }( OO ) );
 
-//# sourceMappingURL=oojs-ui-windows.js.map
+//# sourceMappingURL=oojs-ui-windows.js.map.json

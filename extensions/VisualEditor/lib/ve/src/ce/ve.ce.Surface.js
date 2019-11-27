@@ -31,7 +31,6 @@ ve.ce.Surface = function VeCeSurface( model, ui, config ) {
 	this.documentView = new ve.ce.Document( model.getDocument(), this );
 	this.selection = null;
 	this.surfaceObserver = new ve.ce.SurfaceObserver( this );
-	this.synchronizer = null;
 	this.$window = $( this.getElementWindow() );
 	this.$document = $( this.getElementDocument() );
 	this.$documentNode = this.getDocument().getDocumentNode().$element;
@@ -47,11 +46,13 @@ ve.ce.Surface = function VeCeSurface( model, ui, config ) {
 	this.clipboardIndex = 0;
 	this.renderLocks = 0;
 	this.dragging = false;
-	this.relocatingNode = false;
+	this.relocatingSelection = null;
+	this.relocatingNode = null;
 	this.allowedFile = null;
 	this.resizing = false;
 	this.focused = false;
 	this.deactivated = false;
+	this.deactivatedForCopy = false;
 	this.$deactivatedSelection = $( '<div>' );
 	this.activeNode = null;
 	this.contentBranchNodeChanged = false;
@@ -77,6 +78,7 @@ ve.ce.Surface = function VeCeSurface( model, ui, config ) {
 	this.pointerEvents = null;
 	this.focusedBlockSlug = null;
 	this.focusedNode = null;
+	this.activeAnnotations = [];
 	// This is set on entering changeModel, then unset when leaving.
 	// It is used to test whether a reflected change event is emitted.
 	this.newModelSelection = null;
@@ -95,12 +97,23 @@ ve.ce.Surface = function VeCeSurface( model, ui, config ) {
 	this.hasSelectionChangeEvents = 'onselectionchange' in this.getElementDocument();
 
 	// Events
-	this.connect( this, { position: 'onPosition' } );
+	// Debounce to prevent trying to draw every cursor position in history.
+	this.onPositionDebounced = ve.debounce( this.onPosition.bind( this ) );
+	this.connect( this, { position: this.onPositionDebounced } );
 	this.model.connect( this, {
 		select: 'onModelSelect',
 		documentUpdate: 'onModelDocumentUpdate',
 		insertionAnnotationsChange: 'onInsertionAnnotationsChange'
 	} );
+
+	if ( this.model.synchronizer ) {
+		this.model.synchronizer.connect( this, {
+			authorSelect: 'onSynchronizerAuthorUpdate',
+			authorChange: 'onSynchronizerAuthorUpdate',
+			authorDisconnect: 'onSynchronizerAuthorDisconnect',
+			wrongDoc: 'onSynchronizerWrongDoc'
+		} );
+	}
 
 	this.onDocumentMouseUpHandler = this.onDocumentMouseUp.bind( this );
 	this.$documentNode.on( {
@@ -112,13 +125,13 @@ ve.ce.Surface = function VeCeSurface( model, ui, config ) {
 		copy: this.onCopy.bind( this )
 	} );
 
-	this.onWindowResizeHandler = this.onWindowResize.bind( this );
+	this.onWindowResizeHandler = ve.debounce( this.onWindowResize.bind( this ), 50 );
 	this.$window.on( 'resize', this.onWindowResizeHandler );
 
 	this.onDocumentFocusInOutHandler = this.onDocumentFocusInOut.bind( this );
 	this.$document.on( 'focusin focusout', this.onDocumentFocusInOutHandler );
 
-	this.debounceFocusChange = ve.debounce( this.onFocusChange ).bind( this );
+	this.debounceFocusChange = ve.debounce( this.onFocusChange.bind( this ) );
 	// If the document is blurred (but still has a selection) it is
 	// possible to clear the selection by clicking elsewhere without
 	// triggering a focus or blur event, so listen to mousedown globally.
@@ -385,6 +398,12 @@ ve.ce.Surface.prototype.destroy = function () {
 		this.$document.off( 'selectionchange', this.onDocumentSelectionChangeDebounced );
 	}
 
+	if ( this.model.synchronizer ) {
+		// TODO: Move destroy to ve.dm.Surface#destroy
+		this.model.synchronizer.destroy();
+		this.model.synchronizer.disconnect( this );
+	}
+
 	// Disconnect DOM events on the window
 	this.$window.off( 'resize', this.onWindowResizeHandler );
 
@@ -562,14 +581,24 @@ ve.ce.Surface.prototype.blur = function () {
 		this.getModel().setNullSelection();
 		this.activate();
 	}
-	this.nativeSelection.removeAllRanges();
-	if ( this.getElementDocument().activeElement ) {
-		// Support: IE<=11
-		// While switching between editor modes, there's sometimes no activeElement.
-		this.getElementDocument().activeElement.blur();
-	}
+	this.removeRangesAndBlur();
 	// This won't trigger focusin/focusout events, so trigger focus change manually
 	this.onFocusChange();
+};
+
+/**
+ * Remove all native selection ranges, and blur any active element
+ *
+ * This should hide all virtual keyboards when present.
+ */
+ve.ce.Surface.prototype.removeRangesAndBlur = function () {
+	this.nativeSelection.removeAllRanges();
+	// Support: IE<=11
+	// While switching between editor modes, there's sometimes no activeElement.
+	if ( this.getElementDocument().activeElement ) {
+		// Blurring the activeElement ensures the keyboard is hidden on iOS
+		this.getElementDocument().activeElement.blur();
+	}
 };
 
 /**
@@ -624,16 +653,20 @@ ve.ce.Surface.prototype.onFocusChange = function () {
  * range with a fake rendered one.
  *
  * Used by dialogs so they can take focus without losing the original document selection.
+ *
+ * @param {boolean} [deactivatedForCopy] Surface was deactivated by preparePasteTargetForCopy
  */
-ve.ce.Surface.prototype.deactivate = function () {
+ve.ce.Surface.prototype.deactivate = function ( deactivatedForCopy ) {
+	this.deactivatedForCopy = !!deactivatedForCopy;
 	if ( !this.deactivated ) {
 		// Disable the surface observer, there can be no observable changes
 		// until the surface is activated
 		this.surfaceObserver.disable();
 		this.deactivated = true;
 		this.checkDelayedSequences();
-		// Remove ranges so the user can't accidentally type into the document
-		this.nativeSelection.removeAllRanges();
+		// Remove ranges so the user can't accidentally type into the document,
+		// and so virtual keyboards are hidden.
+		this.removeRangesAndBlur();
 		this.updateDeactivatedSelection();
 		this.clearKeyDownState();
 	}
@@ -643,8 +676,9 @@ ve.ce.Surface.prototype.deactivate = function () {
  * Reactivate the surface and restore the native selection
  */
 ve.ce.Surface.prototype.activate = function () {
-	if ( this.deactivated ) {
+	if ( this.deactivated && this.getModel().enabled ) {
 		this.deactivated = false;
+		this.deactivatedForCopy = false;
 		this.updateDeactivatedSelection();
 		this.surfaceObserver.enable();
 		if ( OO.ui.contains( this.$documentNode[ 0 ], this.nativeSelection.anchorNode, true ) ) {
@@ -786,7 +820,7 @@ ve.ce.Surface.prototype.onDocumentMouseDown = function ( e ) {
 			.collapseToStart()
 			// Cover the CBN we're in
 			.expandLinearSelection( 'closest', ve.dm.ContentBranchNode )
-			// ...but that covered the entire CBN, we only want the contents
+			// …but that covered the entire CBN, we only want the contents
 			.adjustLinearSelection( 1, -1 );
 		// If something weird happened (e.g. no CBN found), newFragment will be null.
 		// Don't select it in that case, because that'll blur the surface.
@@ -881,7 +915,7 @@ ve.ce.Surface.prototype.onDocumentSelectionChange = function () {
 		return;
 	}
 	this.fixupCursorPosition( 0, this.dragging );
-	this.updateActiveLink();
+	this.updateActiveAnnotations();
 	this.surfaceObserver.pollOnceSelection();
 };
 
@@ -890,17 +924,11 @@ ve.ce.Surface.prototype.onDocumentSelectionChange = function () {
  *
  * @method
  * @param {jQuery.Event} e Drag start event
+ * @fires relocationStart
  */
 ve.ce.Surface.prototype.onDocumentDragStart = function ( e ) {
-	var dataTransfer = e.originalEvent.dataTransfer;
-	try {
-		dataTransfer.setData( 'application-x/VisualEditor', JSON.stringify( this.getModel().getSelection() ) );
-	} catch ( err ) {
-		// Support: IE, Edge
-		// IE doesn't support custom data types, but overwriting the actual drag data should be avoided
-		// TODO: Do this with an internal state to avoid overwriting drag data even in IE
-		dataTransfer.setData( 'text', '__ve__' + JSON.stringify( this.getModel().getSelection() ) );
-	}
+	this.onCopy( e );
+	this.startRelocation();
 };
 
 /**
@@ -1049,16 +1077,18 @@ ve.ce.Surface.prototype.onDocumentDragLeave = function () {
  *
  * @method
  * @param {jQuery.Event} e Drop event
+ * @fires relocationEnd
  */
 ve.ce.Surface.prototype.onDocumentDrop = function ( e ) {
 	// Properties may be nullified by other events, so cache before setTimeout
-	var selectionJSON, dragSelection, dragRange, originFragment, originData,
+	var originFragment, originData,
 		targetRange, targetOffset, targetFragment,
 		targetViewNode, isMultiline, slice, linearData,
 		surfaceModel = this.getModel(),
 		dataTransfer = e.originalEvent.dataTransfer,
 		$dropTarget = this.$lastDropTarget,
-		dropPosition = this.lastDropPosition;
+		dropPosition = this.lastDropPosition,
+		platformKey = ve.getSystemPlatform() === 'mac' ? 'mac' : 'pc';
 
 	// Prevent native drop event from modifying view
 	e.preventDefault();
@@ -1084,47 +1114,19 @@ ve.ce.Surface.prototype.onDocumentDrop = function ( e ) {
 	}
 	targetFragment = surfaceModel.getLinearFragment( new ve.Range( targetOffset ) );
 
-	// Get source range from drag data
-	try {
-		selectionJSON = dataTransfer.getData( 'application-x/VisualEditor' );
-	} catch ( err ) {
-		// Support: IE
-		// IE throws an error when trying to read custom data.
-		// Edge also fails but doesn't throw an error.
-	}
-
-	if ( !selectionJSON ) {
-		// Support: IE, Edge (selectionJSON not set; T75240)
-		selectionJSON = dataTransfer.getData( 'text' );
-		if ( selectionJSON && selectionJSON.slice( 0, 6 ) === '__ve__' ) {
-			selectionJSON = selectionJSON.slice( 6 );
-		} else {
-			selectionJSON = null;
-		}
-	}
-
-	if ( this.relocatingNode ) {
-		dragRange = this.relocatingNode.getModel().getOuterRange();
-	} else if ( selectionJSON ) {
-		dragSelection = ve.dm.Selection.static.newFromJSON( surfaceModel.getDocument(), selectionJSON );
-		if ( dragSelection instanceof ve.dm.LinearSelection ) {
-			dragRange = dragSelection.getRange();
-		}
-	}
-
-	targetViewNode = this.getSurface().getView().getDocument().getBranchNodeFromOffset(
+	targetViewNode = this.getDocument().getBranchNodeFromOffset(
 		targetFragment.getSelection().getCoveringRange().from
 	);
 	// TODO: Support sanitized drop on a single line node (removing line breaks)
 	isMultiline = targetViewNode.isMultiline();
 
 	// Internal drop
-	if ( dragRange ) {
+	if ( this.relocatingSelection ) {
 		// Get a fragment and data of the node being dragged
-		originFragment = surfaceModel.getLinearFragment( dragRange );
+		originFragment = surfaceModel.getFragment( this.relocatingSelection );
 		if ( !isMultiline ) {
 			// Data needs to be balanced to be sanitized
-			slice = this.model.documentModel.shallowCloneFromRange( dragRange );
+			slice = this.model.documentModel.shallowCloneFromRange( originFragment.getSelection().getCoveringRange() );
 			linearData = new ve.dm.ElementLinearData(
 				originFragment.getDocument().getStore(),
 				slice.getBalancedData()
@@ -1142,8 +1144,11 @@ ve.ce.Surface.prototype.onDocumentDrop = function ( e ) {
 		// Start staging so we can abort in the catch later
 		surfaceModel.pushStaging();
 
-		// Remove node from old location
-		originFragment.removeContent();
+		// Dragging performs cut-and-paste by default (remove content from old location).
+		// If Ctrl on PC, or Opt (alt) on Mac, is held, it performs copy-and-paste instead.
+		if ( ( platformKey === 'pc' && !e.ctrlKey ) || ( platformKey === 'mac' && !e.altKey ) ) {
+			originFragment.removeContent();
+		}
 
 		try {
 			// Re-insert data at new location
@@ -1298,10 +1303,11 @@ ve.ce.Surface.prototype.onDocumentKeyPress = function ( e ) {
  * @param {jQuery.Event} e keydown event
  */
 ve.ce.Surface.prototype.afterDocumentKeyDown = function ( e ) {
-	var keyDownSelectionState, direction, focusableNode, startOffset, endOffset,
+	var keyDownSelectionState, direction, focusableNode, captionNode, startOffset, endOffset,
 		offsetDiff, dmFocus, dmSelection, inNonSlug, ceSelection, ceNode, range,
-		fixupCursorForUnicorn, matrix, col, row, $focusNode, removedUnicorns,
+		fixupCursorForUnicorn, matrix, col, row, $focusNode, removedUnicorns, tableNode,
 		surface = this,
+		documentModel = this.getModel().getDocument(),
 		isArrow = (
 			e.keyCode === OO.ui.Keys.UP ||
 			e.keyCode === OO.ui.Keys.DOWN ||
@@ -1481,7 +1487,7 @@ ve.ce.Surface.prototype.afterDocumentKeyDown = function ( e ) {
 			if ( Math.abs( offsetDiff ) === 2 ) {
 				// Test whether we crossed a focusable node
 				// (this applies even if we cursored up/down)
-				focusableNode = this.model.documentModel.documentNode
+				focusableNode = documentModel.documentNode
 					.getNodeFromOffset( ( startOffset + endOffset ) / 2 );
 
 				if ( focusableNode.isFocusable() ) {
@@ -1493,6 +1499,17 @@ ve.ce.Surface.prototype.afterDocumentKeyDown = function ( e ) {
 		}
 	}
 
+	if (
+		isArrow &&
+		direction > 0 &&
+		this.getActiveNode() instanceof ve.ce.TableCaptionNode &&
+		this.getActiveNode() !== $focusNode.closest( '.ve-ce-tableCaptionNode' ).data( 'view' )
+	) {
+		// We cursored down out of the table caption; move to the first table cell
+		tableNode = this.getActiveNode().getParent();
+		this.model.setSelection( new ve.dm.TableSelection( documentModel, tableNode.getOuterRange(), 0, 0 ) );
+	}
+
 	if ( focusableNode ) {
 		if ( !range ) {
 			range = focusableNode.getOuterRange();
@@ -1502,15 +1519,21 @@ ve.ce.Surface.prototype.afterDocumentKeyDown = function ( e ) {
 		}
 		if ( focusableNode instanceof ve.ce.TableNode ) {
 			if ( direction > 0 ) {
-				this.model.setSelection( new ve.dm.TableSelection(
-					this.model.documentModel, range, 0, 0
-				) );
+				if ( ( captionNode = focusableNode.getModel().getCaptionNode() ) ) {
+					this.model.setLinearSelection(
+						documentModel.getRelativeRange( new ve.Range( captionNode.getRange().start ), 1 )
+					);
+				} else {
+					this.model.setSelection( new ve.dm.TableSelection(
+						documentModel, range, 0, 0
+					) );
+				}
 			} else {
 				matrix = focusableNode.getModel().getMatrix();
 				row = matrix.getRowCount() - 1;
 				col = matrix.getColCount( row ) - 1;
 				this.model.setSelection( new ve.dm.TableSelection(
-					this.model.documentModel, range, col, row
+					documentModel, range, col, row
 				) );
 			}
 		} else {
@@ -1683,10 +1706,11 @@ ve.ce.Surface.prototype.onCut = function ( e ) {
  */
 ve.ce.Surface.prototype.onCopy = function ( e ) {
 	var originalSelection, clipboardKey, scrollTop, unsafeSelector, slice,
+		isClipboard = e.type === 'copy' || e.type === 'cut',
 		selection = this.getModel().getSelection(),
 		view = this,
 		htmlDoc = this.getModel().getDocument().getHtmlDocument(),
-		clipboardData = e.originalEvent.clipboardData;
+		clipboardData = isClipboard ? e.originalEvent.clipboardData : e.originalEvent.dataTransfer;
 
 	this.$pasteTarget.empty();
 
@@ -1699,16 +1723,16 @@ ve.ce.Surface.prototype.onCopy = function ( e ) {
 	// Clone the elements in the slice
 	slice.data.cloneElements( true );
 
-	ve.dm.converter.getDomSubtreeFromModel( slice, this.$pasteTarget[ 0 ], true );
+	ve.dm.converter.getDomSubtreeFromModel( slice, this.$pasteTarget[ 0 ], ve.dm.Converter.static.CLIPBOARD_MODE );
 
 	// Some browsers strip out spans when they match the styling of the
 	// paste target (e.g. plain spans) so we must protect against this
 	// by adding a dummy class, which we can remove after paste.
 	this.$pasteTarget.find( 'span' ).addClass( 've-pasteProtect' );
 
-	// When paste has no text content browsers do extreme normalization...
+	// When paste has no text content browsers do extreme normalization…
 	if ( this.$pasteTarget.text() === '' ) {
-		// ...so put nbsp's in empty leaves
+		// …so put nbsp's in empty leaves
 		this.$pasteTarget.find( '*:not( :has( * ) )' ).html( '&nbsp;' );
 	}
 
@@ -1743,7 +1767,7 @@ ve.ce.Surface.prototype.onCopy = function ( e ) {
 	// Support: IE, Firefox<48
 	// Writing the key to text/xcustom won't work in IE & Firefox<48, so write
 	// it to the HTML instead
-	if ( !ve.isClipboardDataFormatsSupported( e ) ) {
+	if ( isClipboard && !ve.isClipboardDataFormatsSupported( e ) ) {
 		this.$pasteTarget.prepend(
 			$( '<span>' ).attr( 'data-ve-clipboard-key', clipboardKey ).html( '&nbsp;' )
 		);
@@ -1757,19 +1781,25 @@ ve.ce.Surface.prototype.onCopy = function ( e ) {
 	// Support: Edge
 	// Despite having the clipboard API, Edge only supports Text and URL types.
 	if ( clipboardData && !ve.init.platform.constructor.static.isEdge() ) {
-		// Disable the default event so we can override the data
-		e.preventDefault();
+		if ( isClipboard ) {
+			// Disable the default event so we can override the data
+			e.preventDefault();
+		}
 
 		// Only write a custom mime type if we think the browser supports it, otherwise
 		// we will have already written a key to the HTML above.
-		if ( ve.isClipboardDataFormatsSupported( e, true ) ) {
+		if ( isClipboard && ve.isClipboardDataFormatsSupported( e, true ) ) {
 			clipboardData.setData( 'text/xcustom', clipboardKey );
 		}
-		clipboardData.setData( 'text/html', this.$pasteTarget.html() );
-		// innerText "approximates the text the user would get if they highlighted the
-		// contents of the element with the cursor and then copied to the clipboard." - MDN
-		// Use $.text as a fallback for Firefox <= 44
-		clipboardData.setData( 'text/plain', this.$pasteTarget[ 0 ].innerText || this.$pasteTarget.text() );
+		try {
+			// Support IE
+			// This fails when dragging in IE.
+			clipboardData.setData( 'text/html', this.$pasteTarget.html() );
+			// innerText "approximates the text the user would get if they highlighted the
+			// contents of the element with the cursor and then copied to the clipboard." - MDN
+			// Use $.text as a fallback for Firefox <= 44
+			clipboardData.setData( 'text/plain', this.$pasteTarget[ 0 ].innerText || this.$pasteTarget.text() || ' ' );
+		} catch ( err ) {}
 	} else {
 		// Support: IE
 		// If direct clipboard editing is not allowed, we must use the pasteTarget to
@@ -1802,7 +1832,7 @@ ve.ce.Surface.prototype.onCopy = function ( e ) {
 				view.surfaceObserver.enable();
 			} );
 		} else {
-			// If the selection is non-native, the pasteTarget *should* already be selected...
+			// If the selection is non-native, the pasteTarget *should* already be selected…
 			ve.selectElement( this.$pasteTarget[ 0 ] );
 		}
 	}
@@ -1962,413 +1992,49 @@ ve.ce.Surface.prototype.beforePaste = function ( e ) {
  * @return {jQuery.Promise} Promise which resolves when the content has been pasted
  */
 ve.ce.Surface.prototype.afterPaste = function () {
-	var clipboardKey, clipboardHash,
-		$elements, pasteData, slice, documentRange,
-		data, pastedDocumentModel, htmlDoc, $body, $images, i,
-		context, left, right, contextRange,
-		tableAction, htmlBlacklist, pastedNodes, targetViewNode, isMultiline,
-		done = $.Deferred().resolve().promise(),
-		items = [],
-		metadataIdRegExp = ve.init.platform.getMetadataIdRegExp(),
-		importantElement = '[id],[typeof],[rel]',
-		importRules = !this.pasteSpecial ? this.getSurface().getImportRules() : { all: { plainText: true, keepEmptyContentBranches: true } },
-		beforePasteData = this.beforePasteData || {},
+	var pasteData, isMultiline, pending, tableAction,
 		surfaceModel = this.getModel(),
 		fragment = surfaceModel.getFragment(),
 		targetFragment = surfaceModel.getFragment( null, true ),
-		documentModel = surfaceModel.getDocument(),
-		view = this;
-
-	function sanitize( linearData ) {
-		// If the clipboardKey isn't set (paste from non-VE instance) use external import rules
-		if ( !clipboardKey ) {
-			linearData.sanitize( importRules.external || {} );
-		}
-		linearData.sanitize( importRules.all || {} );
-	}
+		view = this,
+		beforePasteData = this.beforePasteData || {},
+		done = $.Deferred().resolve().promise();
 
 	// If the selection doesn't collapse after paste then nothing was inserted
 	if ( !this.nativeSelection.isCollapsed ) {
 		return done;
 	}
 
-	if ( fragment.isNull() ) {
+	if ( this.getModel().getFragment().isNull() ) {
 		return done;
 	}
 
-	// Find the clipboard key
-	if ( beforePasteData.custom ) {
-		clipboardKey = beforePasteData.custom;
-	} else {
-		if ( beforePasteData.html ) {
-			$elements = $( $.parseHTML( beforePasteData.html ) );
+	pasteData = this.afterPasteExtractClipboardData();
 
-			// Try to find the clipboard key hidden in the HTML
-			$elements = $elements.filter( function () {
-				var val = this.getAttribute && this.getAttribute( 'data-ve-clipboard-key' );
-				if ( val ) {
-					clipboardKey = val;
-					// Remove the clipboard key span once read
-					return false;
-				}
-				return true;
-			} );
-			clipboardHash = this.constructor.static.getClipboardHash( $elements );
-		} else {
-			// HTML in pasteTarget my get wrapped, so use the recursive $.find to look for the clipboard key
-			clipboardKey = this.$pasteTarget.find( 'span[data-ve-clipboard-key]' ).data( 've-clipboard-key' );
-			// Pass beforePasteData so context gets stripped
-			clipboardHash = this.constructor.static.getClipboardHash( this.$pasteTarget, beforePasteData );
-		}
-	}
-
-	// Remove the clipboard key
-	this.$pasteTarget.find( 'span[data-ve-clipboard-key]' ).remove();
-
-	// Remove style tags (T185532)
-	this.$pasteTarget.find( 'style' ).remove();
-
-	// If we have a clipboard key, validate it and fetch data
-	if ( clipboardKey === this.clipboardId + '-' + this.clipboardIndex ) {
-		// Hash validation: either text/xcustom was used or the hash must be
-		// equal to the hash of the pasted HTML to assert that the HTML
-		// hasn't been modified in another editor before being pasted back.
-		if ( beforePasteData.custom || clipboardHash === this.clipboard.hash ) {
-			slice = this.clipboard.slice;
-		}
-	}
-
-	// All $pasteTarget sanitization can be skipped for internal paste
-	if ( !slice ) {
-		// Do some simple transforms to catch content that is using
-		// spans+styles instead of regular tags. This is very much targeted at
-		// the output of Google Docs, but should work with anything fairly-
-		// similar. This is *fragile*, but more in the sense that small
-		// deviations will stop it from working, rather than it being terribly
-		// likely to incorrectly over-format things.
-		// TODO: This might be cleaner if we could move the sanitization into
-		// dm.converter entirely.
-		this.$pasteTarget.find( 'span' ).each( function ( i, node ) {
-			var $node;
-			// Later sanitization will replace completely-empty spans with
-			// their contents, so we can lazily-wrap here without cleaning
-			// up.
-			if ( !node.style ) {
-				return;
-			}
-			$node = $( node );
-			if ( node.style.fontWeight === '700' ) {
-				$node.wrap( '<b>' );
-			}
-			if ( node.style.fontStyle === 'italic' ) {
-				$node.wrap( '<i>' );
-			}
-			if ( node.style.textDecorationLine === 'underline' ) {
-				$node.wrap( '<u>' );
-			}
-			if ( node.style.textDecorationLine === 'line-through' ) {
-				$node.wrap( '<s>' );
-			}
-			if ( node.style.verticalAlign === 'super' ) {
-				$node.wrap( '<sup>' );
-			}
-			if ( node.style.verticalAlign === 'sub' ) {
-				$node.wrap( '<sub>' );
-			}
-		} );
-
-		// Remove style attributes. Any valid styles will be restored by data-ve-attributes.
-		this.$pasteTarget.find( '[style]' ).removeAttr( 'style' );
-
-		if ( metadataIdRegExp ) {
-			this.$pasteTarget.find( '[id]' ).each( function () {
-				var $this = $( this );
-				if ( $this.attr( 'id' ).match( metadataIdRegExp ) ) {
-					$this.removeAttr( 'id' );
-				}
-			} );
-		}
-
-		// Remove the pasteProtect class (see #onCopy) and unwrap empty spans.
-		this.$pasteTarget.find( 'span' ).each( function () {
-			var $this = $( this );
-			$this.removeClass( 've-pasteProtect' );
-			if ( $this.attr( 'class' ) === '' ) {
-				$this.removeAttr( 'class' );
-			}
-			// Unwrap empty spans
-			if ( !this.attributes.length ) {
-				$this.replaceWith( this.childNodes );
-			}
-		} );
-
-		// Restore attributes. See #onCopy.
-		this.$pasteTarget.find( '[data-ve-attributes]' ).each( function () {
-			var attrs;
-			try {
-				attrs = JSON.parse( this.getAttribute( 'data-ve-attributes' ) );
-			} catch ( e ) {
-				// Invalid JSON
-				return;
-			}
-			$( this ).attr( attrs );
-			this.removeAttribute( 'data-ve-attributes' );
-		} );
-	} else {
-		// Clone again. The elements were cloned on copy, but we need to clone
-		// on paste too in case the same thing is pasted multiple times.
-		slice.data.cloneElements( true );
-	}
-
+	// Handle pastes into a table
 	if ( fragment.getSelection() instanceof ve.dm.TableSelection ) {
-		// Internal table-into-table paste
-		if ( fragment.getSelection() instanceof ve.dm.TableSelection && slice instanceof ve.dm.TableSlice ) {
+		// Internal table-into-table paste can be shortcut
+		if ( fragment.getSelection() instanceof ve.dm.TableSelection && pasteData.slice instanceof ve.dm.TableSlice ) {
 			tableAction = new ve.ui.TableAction( this.getSurface() );
-			tableAction.importTable( slice.getTableNode() );
-			return done;
+			tableAction.importTable( pasteData.slice.getTableNode() );
+			return $.Deferred().resolve().promise();
 		}
 
 		// For table selections the target is the first cell
 		targetFragment = surfaceModel.getLinearFragment( fragment.getSelection().getRanges()[ 0 ], true );
 	}
 
-	targetViewNode = this.getSurface().getView().getDocument().getBranchNodeFromOffset(
+	// Are we pasting into a multiline context?
+	isMultiline = this.getDocument().getBranchNodeFromOffset(
 		targetFragment.getSelection().getCoveringRange().from
-	);
-	isMultiline = targetViewNode.isMultiline();
-	if ( !isMultiline ) {
-		importRules = {
-			all: ve.extendObject( {}, importRules.all, { singleLine: true } ),
-			external: ve.extendObject( {}, importRules.external, { singleLine: true } )
-		};
-	}
+	).isMultiline();
 
-	if ( slice ) {
-		// Pasting non-table content into table: just replace the the first cell with the pasted content
-		if ( fragment.getSelection() instanceof ve.dm.TableSelection ) {
-			// Cell was not deleted in beforePaste to prevent flicker when table-into-table paste is
-			// about to be triggered.
-			targetFragment.removeContent();
-		}
-
-		// Internal paste
-		try {
-			// Try to paste in the original data
-			// Take a copy to prevent the data being annotated a second time in the catch block
-			// and to prevent actions in the data model affecting view.clipboard
-			pasteData = new ve.dm.ElementLinearData(
-				slice.getStore(),
-				ve.copy( slice.getOriginalData() )
-			);
-
-			if ( !isMultiline ) {
-				// Force a jump to the catch branch
-				throw new Error( 'Must use balanced data' );
-			}
-
-			if ( this.pasteSpecial ) {
-				sanitize( pasteData );
-			}
-
-			// Insert content
-			targetFragment.insertContent( pasteData.getData(), true );
-		} catch ( err ) {
-			// If that fails, use the balanced data
-			// Take a copy to prevent actions in the data model affecting view.clipboard
-			pasteData = new ve.dm.ElementLinearData(
-				slice.getStore(),
-				ve.copy( slice.getBalancedData() )
-			);
-
-			if ( this.pasteSpecial || !isMultiline ) {
-				sanitize( pasteData );
-			}
-
-			data = pasteData.getData();
-
-			if ( !isMultiline ) {
-				// Unwrap CBN
-				if ( data[ 0 ].type ) {
-					data = data.slice( 1, data.length - 1 );
-				}
-			}
-
-			// Insert content
-			targetFragment.insertContent( data, true );
-		}
+	if ( pasteData.slice ) {
+		pending = this.afterPasteAddToFragmentFromInternal( pasteData.slice, fragment, targetFragment, isMultiline );
 	} else {
-		if ( clipboardKey && beforePasteData.html ) {
-			// If the clipboardKey is set (paste from other VE instance), and clipboard
-			// data is available, then make sure important elements haven't been dropped
-			if ( !$elements ) {
-				$elements = $( $.parseHTML( beforePasteData.html ) );
-			}
-			if (
-				// FIXME T126045: Allow the test runner to force the use of clipboardData
-				clipboardKey === 'useClipboardData-0' ||
-				$elements.find( importantElement ).addBack().filter( importantElement ).length > this.$pasteTarget.find( importantElement ).length
-			) {
-				// CE destroyed an important element, so revert to using clipboard data
-				htmlDoc = ve.createDocumentFromHtml( beforePasteData.html );
-				// Remove the pasteProtect class. See #onCopy.
-				$( htmlDoc ).find( 'span' ).removeClass( 've-pasteProtect' );
-				// Remove the clipboard key
-				$( htmlDoc ).find( 'span[data-ve-clipboard-key]' ).remove();
-				beforePasteData.context = null;
-			}
-		}
-		if ( !htmlDoc ) {
-			// If there were no problems, let CE do its sanitizing as it may
-			// contain all sorts of horrible metadata (head tags etc.)
-			// TODO: IE will always take this path, and so may have bugs with span unwrapping
-			// in edge cases (e.g. pasting a single MWReference)
-			htmlDoc = ve.createDocumentFromHtml( this.$pasteTarget.html() );
-		}
-		// Some browsers don't provide pasted image data through the clipboardData API and
-		// instead create img tags with data URLs, so detect those here
-		$body = $( htmlDoc.body );
-		$images = $body.children( 'img[src^=data\\:]' );
-		// Check the body contained just children.
-		// TODO: In the future this may want to trigger image uploads *and* paste the HTML.
-		if ( $images.length === $body.children().length ) {
-			for ( i = 0; i < $images.length; i++ ) {
-				items.push( ve.ui.DataTransferItem.static.newFromDataUri(
-					$images.eq( i ).attr( 'src' ),
-					$images[ i ].outerHTML
-				) );
-			}
-			if ( this.handleDataTransferItems( items, true ) ) {
-				return done;
-			}
-		}
-
-		// HACK: Fix invalid HTML from Google Docs nested lists (T98100).
-		// Converts
-		// <ul><li>A</li><ul><li>B</li></ul></ul>
-		// to
-		// <ul><li>A<ul><li>B</li></ul></li></ul>
-		$( htmlDoc.body ).find( 'ul > ul, ul > ol, ol > ul, ol > ol' ).each( function () {
-			if ( this.previousSibling ) {
-				this.previousSibling.appendChild( this );
-			} else {
-				// List starts double indented. This is invalid and a semantic nightmare.
-				// Just wrap with an extra list item
-				$( this ).wrap( '<li>' );
-			}
-		} );
-
-		// HTML sanitization
-		htmlBlacklist = ve.getProp( importRules, 'external', 'htmlBlacklist' );
-		if ( htmlBlacklist && !clipboardKey ) {
-			if ( htmlBlacklist.remove ) {
-				htmlBlacklist.remove.forEach( function ( selector ) {
-					$( htmlDoc.body ).find( selector ).remove();
-				} );
-			}
-			if ( htmlBlacklist.unwrap ) {
-				htmlBlacklist.unwrap.forEach( function ( selector ) {
-					$( htmlDoc.body ).find( selector ).contents().unwrap();
-				} );
-			}
-		}
-
-		// External paste
-		pastedDocumentModel = ve.dm.converter.getModelFromDom( htmlDoc, {
-			targetDoc: documentModel.getHtmlDocument(),
-			fromClipboard: true
-		} );
-		data = pastedDocumentModel.data;
-		// Clone again
-		data.cloneElements( true );
-		// Sanitize
-		sanitize( data );
-		data.remapInternalListKeys( documentModel.getInternalList() );
-
-		// Initialize node tree
-		pastedDocumentModel.buildNodeTree();
-
-		if ( fragment.getSelection() instanceof ve.dm.TableSelection ) {
-			// External table-into-table paste
-			if (
-				pastedDocumentModel.documentNode.children.length === 2 &&
-				pastedDocumentModel.documentNode.children[ 0 ] instanceof ve.dm.TableNode
-			) {
-				tableAction = new ve.ui.TableAction( this.getSurface() );
-				tableAction.importTable( pastedDocumentModel.documentNode.children[ 0 ], true );
-				return done;
-			}
-
-			// Pasting non-table content into table: just replace the the first cell with the pasted content
-			// Cell was not deleted in beforePaste to prevent flicker when table-into-table paste is about to be triggered.
-			targetFragment.removeContent();
-		}
-
-		documentRange = pastedDocumentModel.getDocumentRange();
-
-		// If the paste was given context, calculate the range of the inserted data
-		if ( beforePasteData.context ) {
-			context = new ve.dm.ElementLinearData(
-				pastedDocumentModel.getStore(),
-				ve.copy( beforePasteData.context )
-			);
-			// Sanitize context to match data
-			sanitize( context );
-
-			// Remove matching context from the left
-			left = 0;
-			while (
-				context.getLength() &&
-				ve.dm.ElementLinearData.static.compareElementsUnannotated(
-					data.getData( left ),
-					data.isElementData( left ) ? context.getData( 0 ) : beforePasteData.leftText
-				)
-			) {
-				left++;
-				context.splice( 0, 1 );
-			}
-
-			// Remove matching context from the right
-			right = documentRange.end;
-			while (
-				right > 0 &&
-				context.getLength() &&
-				ve.dm.ElementLinearData.static.compareElementsUnannotated(
-					data.getData( right - 1 ),
-					data.isElementData( right - 1 ) ? context.getData( context.getLength() - 1 ) : beforePasteData.rightText
-				)
-			) {
-				right--;
-				context.splice( context.getLength() - 1, 1 );
-			}
-			// Support: Chrome
-			// FIXME T126046: Strip trailing linebreaks probably introduced by Chrome bug
-			while ( right > 0 && data.getType( right - 1 ) === 'break' ) {
-				right--;
-			}
-			contextRange = new ve.Range( left, right );
-		} else {
-			contextRange = documentRange;
-		}
-		pastedNodes = pastedDocumentModel.selectNodes( contextRange, 'siblings' ).filter( function ( node ) {
-			// Ignore nodes where nothing is selected
-			return !( node.range && node.range.isCollapsed() );
-		} );
-
-		// Unwrap single content branch nodes to match internal copy/paste behaviour
-		// (which wouldn't put the open and close tags in the clipboard to begin with).
-		if (
-			pastedNodes.length === 1 &&
-			pastedNodes[ 0 ].node.canContainContent()
-		) {
-			if ( contextRange.containsRange( pastedNodes[ 0 ].nodeRange ) ) {
-				contextRange = pastedNodes[ 0 ].nodeRange;
-			}
-		}
-
-		targetFragment.insertDocument( pastedDocumentModel, contextRange, true );
+		pending = this.afterPasteAddToFragmentFromExternal( pasteData.clipboardKey, pasteData.$clipboardHtml, fragment, targetFragment, isMultiline );
 	}
-
-	return targetFragment.getPending().then( function () {
+	return pending.then( function () {
 		if ( view.getSelection().isNativeCursor() ) {
 			// Restore focus and scroll position
 			view.$documentNode[ 0 ].focus();
@@ -2380,11 +2046,530 @@ ve.ce.Surface.prototype.afterPaste = function () {
 			} );
 		}
 
-		// If orignal selection was linear, switch to end of pasted text
+		// If original selection was linear, switch to end of pasted text
 		if ( fragment.getSelection() instanceof ve.dm.LinearSelection ) {
 			targetFragment.collapseToEnd().select();
 			view.checkSequences( /* isPaste */ true );
 		}
+	} );
+};
+
+/**
+ * Extract the clipboard key and other relevant data from beforePasteData / the paste target
+ * @return {Object} Data
+ * @return {string|undefined} return.clipboardKey Clipboard key, if present
+ * @return {jQuery|undefined} return.$clipboardHtml Clipboard html, if used to extract the clipboard key
+ * @return {ve.dm.DocumentSlice|undefined} return.slice Relevant slice of this document, if the key points to it
+ */
+ve.ce.Surface.prototype.afterPasteExtractClipboardData = function () {
+	var clipboardKey, clipboardHash, $clipboardHtml, slice,
+		beforePasteData = this.beforePasteData || {};
+
+	// Find the clipboard key
+	if ( beforePasteData.custom ) {
+		// text/xcustom was present, and requires no further processing
+		clipboardKey = beforePasteData.custom;
+	} else {
+		if ( beforePasteData.html ) {
+			// text/html was present, so we can check if a key was hidden in it
+			$clipboardHtml = $( $.parseHTML( beforePasteData.html ) ).filter( function () {
+				var val = this.getAttribute && this.getAttribute( 'data-ve-clipboard-key' );
+				if ( val ) {
+					clipboardKey = val;
+					// Remove the clipboard key span once read
+					return false;
+				}
+				return true;
+			} );
+			clipboardHash = this.constructor.static.getClipboardHash( $clipboardHtml );
+		} else {
+			// fall back on checking the pasteTarget
+
+			// HTML in pasteTarget may get wrapped, so use the recursive $.find to look for the clipboard key
+			clipboardKey = this.$pasteTarget.find( 'span[data-ve-clipboard-key]' ).data( 've-clipboard-key' );
+			// Pass beforePasteData so context gets stripped
+			clipboardHash = this.constructor.static.getClipboardHash( this.$pasteTarget, beforePasteData );
+		}
+	}
+
+	// If we have a clipboard key, validate it and fetch data
+	if ( clipboardKey === this.clipboardId + '-' + this.clipboardIndex ) {
+		// Hash validation: either text/xcustom was used or the hash must be
+		// equal to the hash of the pasted HTML to assert that the HTML
+		// hasn't been modified in another editor before being pasted back.
+		if ( beforePasteData.custom || clipboardHash === this.clipboard.hash ) {
+			slice = this.clipboard.slice;
+			// Clone again. The elements were cloned on copy, but we need to clone
+			// on paste too in case the same thing is pasted multiple times.
+			slice.data.cloneElements( true );
+		}
+	}
+
+	if ( !slice && !$clipboardHtml && beforePasteData.html ) {
+		$clipboardHtml = $( $.parseHTML( beforePasteData.html ) );
+	}
+
+	return {
+		clipboardKey: clipboardKey,
+		$clipboardHtml: $clipboardHtml,
+		slice: slice
+	};
+};
+
+/**
+ * LinearData sanitize helper, for pasted data
+ *
+ * @param {ve.dm.LinearData} linearData Data to sanitize
+ * @param {boolean} isMultiline Sanitize for a multiline context
+ * @param {boolean} isExternal Treat as external content
+ */
+ve.ce.Surface.prototype.afterPasteSanitize = function ( linearData, isMultiline, isExternal ) {
+	var importRules = this.afterPasteImportRules( isMultiline );
+	if ( isExternal ) {
+		linearData.sanitize( importRules.external || {} );
+	}
+	linearData.sanitize( importRules.all || {} );
+};
+
+/**
+ * Helper to build import rules for pasted data
+ * @param {boolean} isMultiline Get rules for a multiline context
+ * @return {Object} Import rules
+ */
+ve.ce.Surface.prototype.afterPasteImportRules = function ( isMultiline ) {
+	var importRules = !this.pasteSpecial ? this.getSurface().getImportRules() : { all: { plainText: true, keepEmptyContentBranches: true } };
+	if ( !isMultiline ) {
+		importRules = {
+			all: ve.extendObject( {}, importRules.all, { singleLine: true } ),
+			external: ve.extendObject( {}, importRules.external, { singleLine: true } )
+		};
+	}
+	return importRules;
+};
+
+/**
+ * After paste handler for pastes from the same document
+ * @param {ve.dm.DocumentSlice} slice Slice of document to paste
+ * @param {ve.dm.SurfaceFragment} fragment Current fragment
+ * @param {ve.dm.SurfaceFragment} targetFragment Fragment to insert into
+ * @param {boolean} isMultiline Pasting to a multiline context
+ * @return {jQuery.Promise} Promise which resolves when the content has been inserted
+ */
+ve.ce.Surface.prototype.afterPasteAddToFragmentFromInternal = function ( slice, fragment, targetFragment, isMultiline ) {
+	var linearData, data, insertionPromise;
+
+	// Pasting non-table content into table: just replace the first cell with the pasted content
+	if ( fragment.getSelection() instanceof ve.dm.TableSelection ) {
+		// Cell was not deleted in beforePaste to prevent flicker when table-into-table paste is
+		// about to be triggered.
+		targetFragment.removeContent();
+	}
+
+	// Only try original data in multiline contexts, for single line we must use balanced data
+
+	// Original data + fixupInsertion
+	if ( isMultiline ) {
+		// Take a copy to prevent the data being annotated a second time in the balanced data path
+		// and to prevent actions in the data model affecting view.clipboard
+		linearData = new ve.dm.ElementLinearData(
+			slice.getStore(),
+			ve.copy( slice.getOriginalData() )
+		);
+
+		if ( this.pasteSpecial ) {
+			this.afterPasteSanitize( linearData, isMultiline );
+		}
+
+		// ve.dm.Document#fixupInsertion may fail, in which case we fall back to balanced data
+		try {
+			insertionPromise = this.afterPasteInsertInternalData( targetFragment, linearData.getData() );
+		} catch ( e ) {}
+	}
+
+	// Balanaced data
+	if ( !insertionPromise ) {
+		// Take a copy to prevent actions in the data model affecting view.clipboard
+		linearData = new ve.dm.ElementLinearData(
+			slice.getStore(),
+			ve.copy( slice.getBalancedData() )
+		);
+
+		if ( this.pasteSpecial || !isMultiline ) {
+			this.afterPasteSanitize( linearData, isMultiline );
+		}
+
+		data = linearData.getData();
+
+		if ( !isMultiline ) {
+			// Unwrap single CBN
+			if ( data[ 0 ].type ) {
+				data = data.slice( 1, data.length - 1 );
+			}
+		}
+
+		insertionPromise = this.afterPasteInsertInternalData( targetFragment, data );
+	}
+
+	return insertionPromise;
+};
+
+/**
+ * Insert some pasted data from an internal source
+ * @param {ve.dm.SurfaceFragment} targetFragment Fragment to insert into
+ * @param {Array} data Data to insert
+ * @return {jQuery.Promise} Promise which resolves when the content has been inserted
+ */
+ve.ce.Surface.prototype.afterPasteInsertInternalData = function ( targetFragment, data ) {
+	targetFragment.insertContent( data, true );
+	return targetFragment.getPending();
+};
+
+/**
+ * After paste handler for pastes from the another document
+ * @param {string|undefined} clipboardKey] Clipboard key for pasted data
+ * @param {jQuery|undefined} $clipboardHtml Clipboard HTML, if used to find the key
+ * @param {ve.dm.SurfaceFragment} fragment Current fragment
+ * @param {ve.dm.SurfaceFragment} targetFragment Fragment to insert into
+ * @param {boolean} [isMultiline] Pasting to a multiline context
+ * @param {boolean} [forceClipboardData] Ignore the paste target, and use only clipboard html
+ * @return {jQuery.Promise} Promise which resolves when the content has been inserted
+ */
+ve.ce.Surface.prototype.afterPasteAddToFragmentFromExternal = function ( clipboardKey, $clipboardHtml, fragment, targetFragment, isMultiline, forceClipboardData ) {
+	var data, $body, $images, i, htmlDoc, htmlBlacklist, pastedDocumentModel, tableAction, contextRange, pastedNodes,
+		importantElement = '[id],[typeof],[rel]',
+		items = [],
+		surfaceModel = this.getModel(),
+		documentModel = surfaceModel.getDocument(),
+		beforePasteData = this.beforePasteData || {};
+
+	if ( ( clipboardKey || forceClipboardData ) && $clipboardHtml ) {
+		// If the clipboardKey is set (paste from other VE instance), and clipboard
+		// data is available, then make sure important elements haven't been dropped
+		if (
+			forceClipboardData ||
+			// FIXME T126045: Allow the test runner to force the use of clipboardData
+			clipboardKey === 'useClipboardData-0' ||
+			$clipboardHtml.find( importantElement ).addBack( importantElement ).length > this.$pasteTarget.find( importantElement ).length
+		) {
+			// CE destroyed an important element, so revert to using clipboard data
+			htmlDoc = ve.createDocumentFromHtml( beforePasteData.html );
+			$( htmlDoc )
+				// Remove the pasteProtect class. See #onCopy.
+				.find( 'span' ).removeClass( 've-pasteProtect' ).end()
+				// Remove the clipboard key
+				.find( 'span[data-ve-clipboard-key]' ).remove().end()
+				// Remove ve-attributes
+				.find( '[data-ve-attributes]' ).removeAttr( 'data-ve-attributes' );
+			beforePasteData.context = null;
+		}
+	}
+	if ( !htmlDoc ) {
+		// If there were no problems, let CE do its sanitizing as it may
+		// contain all sorts of horrible metadata (head tags etc.)
+		// TODO: IE will always take this path, and so may have bugs with span unwrapping
+		// in edge cases (e.g. pasting a single MWReference)
+		htmlDoc = ve.createDocumentFromHtml( this.$pasteTarget.html() );
+	}
+	// Some browsers don't provide pasted image data through the clipboardData API and
+	// instead create img tags with data URLs, so detect those here
+	$body = $( htmlDoc.body );
+	$images = $body.children( 'img[src^=data\\:]' );
+	// Check the body contained just children.
+	// TODO: In the future this may want to trigger image uploads *and* paste the HTML.
+	if ( $images.length === $body.children().length ) {
+		for ( i = 0; i < $images.length; i++ ) {
+			items.push( ve.ui.DataTransferItem.static.newFromDataUri(
+				$images.eq( i ).attr( 'src' ),
+				$images[ i ].outerHTML
+			) );
+		}
+		if ( this.handleDataTransferItems( items, true ) ) {
+			return $.Deferred().resolve().promise();
+		}
+	}
+
+	this.afterPasteSanitizeExternal( $( htmlDoc.body ) );
+
+	// HACK: Fix invalid HTML from Google Docs nested lists (T98100).
+	// Converts
+	// <ul><li>A</li><ul><li>B</li></ul></ul>
+	// to
+	// <ul><li>A<ul><li>B</li></ul></li></ul>
+	$( htmlDoc.body ).find( 'ul > ul, ul > ol, ol > ul, ol > ol' ).each( function () {
+		if ( this.previousSibling ) {
+			this.previousSibling.appendChild( this );
+		} else {
+			// List starts double indented. This is invalid and a semantic nightmare.
+			// Just wrap with an extra list item
+			$( this ).wrap( '<li>' );
+		}
+	} );
+
+	// HTML sanitization
+	htmlBlacklist = ve.getProp( this.afterPasteImportRules( isMultiline ), 'external', 'htmlBlacklist' );
+	if ( htmlBlacklist && !clipboardKey ) {
+		if ( htmlBlacklist.remove ) {
+			htmlBlacklist.remove.forEach( function ( selector ) {
+				$( htmlDoc.body ).find( selector ).remove();
+			} );
+		}
+		if ( htmlBlacklist.unwrap ) {
+			htmlBlacklist.unwrap.forEach( function ( selector ) {
+				$( htmlDoc.body ).find( selector ).contents().unwrap();
+			} );
+		}
+	}
+
+	// External paste
+	pastedDocumentModel = ve.dm.converter.getModelFromDom( htmlDoc, {
+		targetDoc: documentModel.getHtmlDocument(),
+		fromClipboard: true
+	} );
+	data = pastedDocumentModel.data;
+	// Clone again
+	data.cloneElements( true );
+
+	// Sanitize
+	this.afterPasteSanitize( data, isMultiline, !clipboardKey );
+
+	data.remapInternalListKeys( documentModel.getInternalList() );
+
+	// Initialize node tree
+	pastedDocumentModel.buildNodeTree();
+
+	if ( fragment.getSelection() instanceof ve.dm.TableSelection ) {
+		// External table-into-table paste
+		if (
+			pastedDocumentModel.documentNode.children.length === 2 &&
+			pastedDocumentModel.documentNode.children[ 0 ] instanceof ve.dm.TableNode
+		) {
+			tableAction = new ve.ui.TableAction( this.getSurface() );
+			tableAction.importTable( pastedDocumentModel.documentNode.children[ 0 ], true );
+			return $.Deferred().resolve().promise();
+		}
+
+		// Pasting non-table content into table: just replace the first cell with the pasted content
+		// Cell was not deleted in beforePaste to prevent flicker when table-into-table paste is about to be triggered.
+		targetFragment.removeContent();
+	}
+
+	if ( beforePasteData.context ) {
+		// If the paste was given context, calculate the range of the inserted data
+		contextRange = this.afterPasteFromExternalContextRange( pastedDocumentModel, isMultiline, forceClipboardData );
+		if ( !contextRange ) {
+			return this.afterPasteAddToFragmentFromExternal( clipboardKey, $clipboardHtml, fragment, targetFragment, isMultiline, true );
+		}
+	} else {
+		contextRange = pastedDocumentModel.getDocumentRange();
+	}
+	pastedNodes = pastedDocumentModel.selectNodes( contextRange, 'siblings' ).filter( function ( node ) {
+		// Ignore nodes where nothing is selected
+		return !( node.range && node.range.isCollapsed() );
+	} );
+
+	// Unwrap single content branch nodes to match internal copy/paste behaviour
+	// (which wouldn't put the open and close tags in the clipboard to begin with).
+	if (
+		pastedNodes.length === 1 &&
+		pastedNodes[ 0 ].node.canContainContent()
+	) {
+		if ( contextRange.containsRange( pastedNodes[ 0 ].nodeRange ) ) {
+			contextRange = pastedNodes[ 0 ].nodeRange;
+		}
+	}
+
+	return this.afterPasteInsertExternalData( targetFragment, pastedDocumentModel, contextRange );
+};
+
+/**
+ * Insert some pasted data from an external source
+ * @param {ve.dm.SurfaceFragment} targetFragment Fragment to insert into
+ * @param {ve.dm.Document} pastedDocumentModel Model generated from pasted data
+ * @param {ve.Range} contextRange Range of data in generated model to consider
+ * @return {jQuery.Promise} Promise which resolves when the content has been inserted
+ */
+ve.ce.Surface.prototype.afterPasteInsertExternalData = function ( targetFragment, pastedDocumentModel, contextRange ) {
+	var pastedText, handled;
+	// If the external HTML turned out to be plain text after sanitization
+	// then run it as a plain text transfer item. In core this will never
+	// do anything, but implementations can provide their own handler for
+	// conversion actions here.
+	if ( pastedDocumentModel.data.isPlainText( contextRange, true, undefined, true ) ) {
+		pastedText = pastedDocumentModel.data.getText( true, contextRange );
+		if ( pastedText ) {
+			handled = this.handleDataTransferItems(
+				[ ve.ui.DataTransferItem.static.newFromString( pastedText ) ],
+				true,
+				targetFragment
+			);
+		}
+	}
+	if ( !handled ) {
+		targetFragment.insertDocument( pastedDocumentModel, contextRange, true );
+	}
+	return targetFragment.getPending();
+};
+
+/**
+ * Helper to work out the context range for an external paste
+ * @param {ve.dm.Document} pastedDocumentModel Model for pasted data
+ * @param {boolean} isMultiline Whether pasting to a multiline context
+ * @param {boolean} forceClipboardData Whether the current attempted paste is the result of forcing use of clipboard data
+ * @return {ve.Range|boolean} Context range, or false if data appeared corrupted
+ */
+ve.ce.Surface.prototype.afterPasteFromExternalContextRange = function ( pastedDocumentModel, isMultiline, forceClipboardData ) {
+	var leftText, rightText, left, right,
+		data = pastedDocumentModel.data,
+		documentRange = pastedDocumentModel.getDocumentRange(),
+		beforePasteData = this.beforePasteData || {},
+		context = new ve.dm.ElementLinearData(
+			pastedDocumentModel.getStore(),
+			ve.copy( beforePasteData.context )
+		);
+	// Sanitize context to match data
+	this.afterPasteSanitize( context, isMultiline );
+
+	leftText = beforePasteData.leftText;
+	rightText = beforePasteData.rightText;
+
+	// Remove matching context from the left
+	left = 0;
+	while (
+		context.getLength() &&
+		ve.dm.ElementLinearData.static.compareElementsUnannotated(
+			data.getData( left ),
+			data.isElementData( left ) ? context.getData( 0 ) : leftText
+		)
+	) {
+		if ( !data.isElementData( left ) ) {
+			// Text context is removed
+			leftText = '';
+		}
+		left++;
+		context.splice( 0, 1 );
+	}
+
+	// Remove matching context from the right
+	right = documentRange.end;
+	while (
+		right > 0 &&
+		context.getLength() &&
+		ve.dm.ElementLinearData.static.compareElementsUnannotated(
+			data.getData( right - 1 ),
+			data.isElementData( right - 1 ) ? context.getData( context.getLength() - 1 ) : rightText
+		)
+	) {
+		if ( !data.isElementData( right - 1 ) ) {
+			// Text context is removed
+			rightText = '';
+		}
+		right--;
+		context.splice( context.getLength() - 1, 1 );
+	}
+	if ( ( leftText || rightText ) && !forceClipboardData ) {
+		// If any text context is left over, assume the paste target got corrupted
+		// so we should start again and try to use clipboardData instead. T193110
+		return false;
+	}
+	// Support: Chrome
+	// FIXME T126046: Strip trailing linebreaks probably introduced by Chrome bug
+	while ( right > 0 && data.getType( right - 1 ) === 'break' ) {
+		right--;
+	}
+	return new ve.Range( left, right );
+};
+
+/**
+ * Helper to clean up externally pasted HTML (via pasteTarget).
+ *
+ * @param {jQuery} $element Root element containing pasted stuff to sanitize
+ */
+ve.ce.Surface.prototype.afterPasteSanitizeExternal = function ( $element ) {
+	var metadataIdRegExp = ve.init.platform.getMetadataIdRegExp();
+
+	// Remove the clipboard key
+	$element.find( 'span[data-ve-clipboard-key]' ).remove();
+	// Remove style tags (T185532)
+	$element.find( 'style' ).remove();
+	// If this is from external, run extra sanitization:
+
+	// Do some simple transforms to catch content that is using
+	// spans+styles instead of regular tags. This is very much targeted at
+	// the output of Google Docs, but should work with anything fairly-
+	// similar. This is *fragile*, but more in the sense that small
+	// deviations will stop it from working, rather than it being terribly
+	// likely to incorrectly over-format things.
+	// TODO: This might be cleaner if we could move the sanitization into
+	// dm.converter entirely.
+	$element.find( 'span' ).each( function ( i, node ) {
+		var $node;
+		// Later sanitization will replace completely-empty spans with
+		// their contents, so we can lazily-wrap here without cleaning
+		// up.
+		if ( !node.style ) {
+			return;
+		}
+		$node = $( node );
+		if ( node.style.fontWeight === '700' ) {
+			$node.wrap( '<b>' );
+		}
+		if ( node.style.fontStyle === 'italic' ) {
+			$node.wrap( '<i>' );
+		}
+		if ( node.style.textDecorationLine === 'underline' ) {
+			$node.wrap( '<u>' );
+		}
+		if ( node.style.textDecorationLine === 'line-through' ) {
+			$node.wrap( '<s>' );
+		}
+		if ( node.style.verticalAlign === 'super' ) {
+			$node.wrap( '<sup>' );
+		}
+		if ( node.style.verticalAlign === 'sub' ) {
+			$node.wrap( '<sub>' );
+		}
+	} );
+
+	// Remove style attributes. Any valid styles will be restored by data-ve-attributes.
+	$element.find( '[style]' ).removeAttr( 'style' );
+
+	if ( metadataIdRegExp ) {
+		$element.find( '[id]' ).each( function () {
+			var $this = $( this );
+			if ( $this.attr( 'id' ).match( metadataIdRegExp ) ) {
+				$this.removeAttr( 'id' );
+			}
+		} );
+	}
+
+	// Remove the pasteProtect class (see #onCopy) and unwrap empty spans.
+	$element.find( 'span' ).each( function () {
+		var $this = $( this );
+		$this.removeClass( 've-pasteProtect' );
+		if ( $this.attr( 'class' ) === '' ) {
+			$this.removeAttr( 'class' );
+		}
+		// Unwrap empty spans
+		if ( !this.attributes.length ) {
+			$this.replaceWith( this.childNodes );
+		}
+	} );
+
+	// Restore attributes. See #onCopy.
+	$element.find( '[data-ve-attributes]' ).each( function () {
+		var attrs,
+			attrsJSON = this.getAttribute( 'data-ve-attributes' );
+
+		// Always remove the attribute, even if the JSON has been corrupted
+		this.removeAttribute( 'data-ve-attributes' );
+
+		try {
+			attrs = JSON.parse( attrsJSON );
+		} catch ( err ) {
+			// Invalid JSON
+			return;
+		}
+		$( this ).attr( attrs );
 	} );
 };
 
@@ -2540,7 +2725,10 @@ ve.ce.Surface.prototype.onDocumentInput = function ( e ) {
 	var inputType = e.originalEvent ? e.originalEvent.inputType : null,
 		inputTypeCommands = this.constructor.static.inputTypeCommands;
 
-	if ( inputType && inputTypeCommands.hasOwnProperty( inputType ) ) {
+	if (
+		inputType &&
+		Object.prototype.hasOwnProperty.call( inputTypeCommands, inputType )
+	) {
 		// Value can be null, in which case we still want to preventDefault.
 		if ( inputTypeCommands[ inputType ] ) {
 			this.getSurface().executeCommand( this.constructor.static.inputTypeCommands[ inputType ] );
@@ -2621,6 +2809,12 @@ ve.ce.Surface.prototype.onModelSelect = function () {
 
 		focusedNode = this.findFocusedNode( selection.getRange() );
 
+		if ( this.deactivatedForCopy && !blockSlug && !focusedNode ) {
+			// If preparePasteTargetForCopy deactivated the surface then
+			// reactivate it here (no-op if already active). See T147304
+			this.activate();
+		}
+
 		// If focus has changed, update nodes and this.focusedNode
 		if ( focusedNode !== this.focusedNode ) {
 			if ( this.focusedNode ) {
@@ -2674,7 +2868,7 @@ ve.ce.Surface.prototype.preparePasteTargetForCopy = function () {
 	// whitespace, use a single unicode character as this is required for programmatic
 	// selection to work correctly in all browsers (e.g. Safari won't select a single space).
 	// #onCopy will ignore this native selection and use the DM selection
-	if ( !this.getSurface().isMobile() ) {
+	if ( !OO.ui.isMobile() ) {
 		this.$pasteTarget.text( ( this.focusedNode && this.focusedNode.$element.text().trim() ) || '☢' );
 		ve.selectElement( this.$pasteTarget[ 0 ] );
 		this.$pasteTarget[ 0 ].focus();
@@ -2684,8 +2878,8 @@ ve.ce.Surface.prototype.preparePasteTargetForCopy = function () {
 		// * The user is unlikely to be able to trigger a keyboard copy anyway
 		// Instead just deactivate the surface so the native cursor doesn't
 		// get in the way and the on screen keyboard doesn't show.
-		// TODO: Provide a copy tool in the context menu
-		this.deactivate();
+		// TODO: Provide a copy tool in the context menu (T202278)
+		this.deactivate( true );
 	}
 };
 
@@ -2825,7 +3019,7 @@ ve.ce.Surface.prototype.renderSelectedContentBranchNode = function () {
  */
 ve.ce.Surface.prototype.handleObservedChanges = function ( oldState, newState ) {
 	var newSelection, transaction, removedUnicorns,
-		activeNode, coveringRange, nodeRange, containsStart, containsEnd,
+		activeNode, coveringRange, nodeRange, containsStart, containsEnd, blockSlug,
 		surface = this,
 		dmDoc = this.getModel().getDocument(),
 		insertedText = false;
@@ -2894,6 +3088,15 @@ ve.ce.Surface.prototype.handleObservedChanges = function ( oldState, newState ) 
 		this.incRenderLock();
 		try {
 			this.changeModel( null, newSelection );
+			if ( newSelection instanceof ve.dm.LinearSelection && newSelection.isCollapsed() ) {
+				blockSlug = this.findBlockSlug( newSelection.getRange() );
+				if ( blockSlug ) {
+					// Set the DOM selection, in case the model selection did not change but
+					// the DOM selection did (T201599).
+					this.preparePasteTargetForCopy();
+					this.surfaceObserver.pollOnceNoCallback();
+				}
+			}
 		} finally {
 			this.decRenderLock();
 		}
@@ -2911,8 +3114,7 @@ ve.ce.Surface.prototype.handleObservedChanges = function ( oldState, newState ) 
 			containsEnd = nodeRange.containsRange( new ve.Range( coveringRange.end ) );
 			// If the range starts xor ends in the active node, but not both, then it must
 			// span an active node boundary, so fixup.
-			// eslint-disable-next-line no-bitwise
-			if ( containsStart ^ containsEnd ) {
+			if ( containsStart !== containsEnd ) {
 				newSelection = oldState && oldState.veRange ?
 					new ve.dm.LinearSelection( dmDoc, oldState.veRange ) :
 					new ve.dm.NullSelection( dmDoc );
@@ -3183,36 +3385,37 @@ ve.ce.Surface.prototype.maybeSetBreakpoint = function () {
  *
  * @param {jQuery.Event} e Window resize event
  */
-ve.ce.Surface.prototype.onWindowResize = ve.debounce( function () {
+ve.ce.Surface.prototype.onWindowResize = function () {
 	this.emit( 'position' );
-}, 50 );
+	if ( OO.ui.isMobile() ) {
+		// A resize event on mobile is probably a keyboard open/close (or rotate).
+		// Either way, ensure the cursor is still visible (T204388).
+		this.getSurface().scrollCursorIntoView();
+	}
+};
 
 /* Relocation */
 
 /**
  * Start a relocation action.
- *
- * @see ve.ce.FocusableNode
- *
- * @param {ve.ce.Node} node Node being relocated
  */
-ve.ce.Surface.prototype.startRelocation = function ( node ) {
-	this.relocatingNode = node;
-	this.emit( 'relocationStart', node );
+ve.ce.Surface.prototype.startRelocation = function () {
+	// Cache the selection and selectedNode when the drag starts, to
+	// avoid having to recompute them while dragging.
+	this.relocatingSelection = this.getModel().getSelection();
+	this.relocatingNode = this.getModel().getSelectedNode();
+	this.emit( 'relocationStart' );
 };
 
 /**
  * Complete a relocation action.
- *
- * @see ve.ce.FocusableNode
  */
 ve.ce.Surface.prototype.endRelocation = function () {
-	if ( this.relocatingNode ) {
-		this.emit( 'relocationEnd', this.relocatingNode );
-		this.relocatingNode = null;
-	}
+	this.relocatingSelection = null;
+	this.relocatingNode = null;
 	// Trigger a drag leave event to clear markers
 	this.onDocumentDragLeave();
+	this.emit( 'relocationEnd' );
 };
 
 /**
@@ -3310,17 +3513,21 @@ ve.ce.Surface.prototype.getFocusedNodeDirectionality = function () {
 };
 
 /**
- * Restore the selection from the model if it is outside the active node
+ * Restore the selection from the model if expands outside the active node
  *
  * This is only useful if the DOM selection and the model selection are out of sync.
  *
  * @return {boolean} Whether the selection was restored
  */
 ve.ce.Surface.prototype.restoreActiveNodeSelection = function () {
-	var range;
+	var currentRange,
+		activeNode = this.getActiveNode(),
+		activeRange = activeNode && activeNode.getRange();
 	if (
-		( range = this.getActiveNode() && this.getActiveNode().getRange() ) &&
-		!range.containsRange( ve.ce.veRangeFromSelection( this.nativeSelection ) )
+		activeRange &&
+		( currentRange = ve.ce.veRangeFromSelection( this.nativeSelection ) ) &&
+		( !currentRange.isCollapsed() || activeNode.trapsCursor() ) &&
+		!activeRange.containsRange( currentRange )
 	) {
 		this.showModelSelection();
 		return true;
@@ -3377,7 +3584,7 @@ ve.ce.Surface.prototype.findAdjacentUneditableBranchNode = function ( direction 
 				$.data( node, 'view' ) instanceof ve.ce.ContentBranchNode ||
 				// We shouldn't ever hit a raw text node, because they
 				// should all be wrapped in CBNs or focusable nodes, but
-				// just in case...
+				// just in case…
 				node.nodeType === Node.TEXT_NODE
 			) {
 				// This is cursorable (must have content or slugs)
@@ -3479,7 +3686,7 @@ ve.ce.Surface.prototype.handleInsertion = function () {
 
 	// Handles removing expanded selection before inserting new text
 	if (
-		this.selectionSplitsLink() ||
+		this.selectionSplitsNailedAnnotation() ||
 		( !range.isCollapsed() && !this.documentView.rangeInsideOneLeafNode( range ) )
 	) {
 		// Remove the selection to force its re-application from the DM (even if the
@@ -3650,8 +3857,15 @@ ve.ce.Surface.prototype.showSelectionState = function ( selection ) {
 	}
 
 	if ( newSel.equalsSelection( sel ) ) {
-		this.updateActiveLink();
+		this.updateActiveAnnotations();
 		return false;
+	}
+
+	if ( !newSel.getNativeRange( this.getElementDocument() ) ) {
+		// You can still set a linear selection if the document doesn't have any cursorable positions.
+		// That's when you end up here.
+		sel.removeAllRanges();
+		return true;
 	}
 
 	if ( newSel.isBackwards ) {
@@ -3674,7 +3888,7 @@ ve.ce.Surface.prototype.showSelectionState = function ( selection ) {
 			// Fallback: Apply the corresponding forward selection
 			newSel = newSel.flip();
 			if ( newSel.equalsSelection( sel ) ) {
-				this.updateActiveLink();
+				this.updateActiveAnnotations();
 				return false;
 			}
 		}
@@ -3707,26 +3921,45 @@ ve.ce.Surface.prototype.showSelectionState = function ( selection ) {
 			$( newSel.focusNode ).closest( '*' ).get( 0 )
 		);
 	}
-	this.updateActiveLink();
+	this.updateActiveAnnotations();
 	return true;
 };
 
 /**
- * Update the activeLink property and apply CSS classes accordingly
+ * Update the activeAnnotations property and apply CSS classes accordingly
+ *
+ * An active annotation is one containing the DOM cursor, which may not be well
+ * defined at annotation boundaries, except for links which use nails.
+ *
+ * Also the order of .activeAnnotations may not be well defined.
  */
-ve.ce.Surface.prototype.updateActiveLink = function () {
-	var activeLink = this.linkAnnotationAtFocus();
-	if ( activeLink === this.activeLink ) {
-		return;
+ve.ce.Surface.prototype.updateActiveAnnotations = function () {
+	var changed = false,
+		surface = this,
+		activeAnnotations = this.annotationsAtFocus();
+
+	// Iterate over previously active annotations
+	this.activeAnnotations.forEach( function ( annotation ) {
+		// If not in the new list, turn off
+		if ( activeAnnotations.indexOf( annotation ) === -1 ) {
+			annotation.$element.removeClass( 've-ce-annotation-active' );
+			changed = true;
+		}
+	} );
+
+	// Iterate over newly active annotations
+	activeAnnotations.forEach( function ( annotation ) {
+		// If not in the old list, turn on
+		if ( surface.activeAnnotations.indexOf( annotation ) === -1 ) {
+			annotation.$element.addClass( 've-ce-annotation-active' );
+			changed = true;
+		}
+	} );
+
+	if ( changed ) {
+		this.activeAnnotations = activeAnnotations;
+		this.model.emit( 'contextChange' );
 	}
-	if ( this.activeLink ) {
-		this.activeLink.classList.remove( 've-ce-linkAnnotation-active' );
-	}
-	this.activeLink = activeLink;
-	if ( activeLink ) {
-		this.activeLink.classList.add( 've-ce-linkAnnotation-active' );
-	}
-	this.model.emit( 'contextChange' );
 };
 
 /**
@@ -3752,24 +3985,19 @@ ve.ce.Surface.prototype.selectNodeContents = function ( node ) {
 };
 
 /**
- * Update the selection to contain the contents of the activeLink, if it exists
+ * Get the annotation views containing the cursor focus
  *
- * @return {boolean} Whether the selection changed
+ * @return {ve.ce.Annotation[]} The annotations containing the focus
  */
-ve.ce.Surface.prototype.selectActiveLinkContents = function () {
-	return this.selectLinkContents( this.activeLink );
-};
-
-/**
- * Get the linkAnnotation node containing the cursor focus
- *
- * If there is no focus, or it is not inside a linkAnnotation, return null
- *
- * @return {Node|null} the linkAnnotation node containing the focus
- *
- */
-ve.ce.Surface.prototype.linkAnnotationAtFocus = function () {
-	return $( this.nativeSelection.focusNode ).closest( '.ve-ce-linkAnnotation' )[ 0 ] || null;
+ve.ce.Surface.prototype.annotationsAtFocus = function () {
+	var annotations = [];
+	$( this.nativeSelection.focusNode ).parents( '.ve-ce-annotation' ).addBack( '.ve-ce-annotation' ).each( function () {
+		var view = $( this ).data( 'view' );
+		if ( view && view.canBeActive() ) {
+			annotations.push( view );
+		}
+	} );
+	return annotations;
 };
 
 /**
@@ -3782,32 +4010,33 @@ ve.ce.Surface.prototype.linkAnnotationAtFocus = function () {
  *
  * @method
  * @param {ve.Range} range Range to get selection for
- * @return {Object} The selection
- * @return {Node} return.anchorNode The anchor node
+ * @return {ve.SelectionState} The selection
+ * @return {Node|null} return.anchorNode The anchor node
  * @return {number} return.anchorOffset The anchor offset
- * @return {Node} return.focusNode The focus node
+ * @return {Node|null} return.focusNode The focus node
  * @return {number} return.focusOffset The focus offset
  * @return {boolean} return.isCollapsed True if the focus and anchor are in the same place
  * @return {boolean} return.isBackwards True if the focus is before the anchor
  */
 ve.ce.Surface.prototype.getSelectionState = function ( range ) {
-	var anchor, focus,
+	var anchor, focus, from, to,
 		dmDoc = this.getModel().getDocument();
 
 	// Anchor/focus at the nearest correct position in the direction that
-	// grows the selection. If we're not yet fully focused, move the selection
-	// outside any nails to avoid popping up a context menu.
-	anchor = this.documentView.getNodeAndOffset(
-		dmDoc.getNearestCursorOffset( range.from, range.isBackwards() ? 1 : -1 ),
-		!this.focused
-	);
+	// grows the selection.
+	from = dmDoc.getNearestCursorOffset( range.from, range.isBackwards() ? 1 : -1 );
+	if ( from === -1 ) {
+		return ve.SelectionState.static.newNullSelection();
+	}
+	anchor = this.documentView.getNodeAndOffset( from );
 	if ( range.isCollapsed() ) {
 		focus = anchor;
 	} else {
-		focus = this.documentView.getNodeAndOffset(
-			dmDoc.getNearestCursorOffset( range.to, range.isBackwards() ? -1 : 1 ),
-			!this.focused
-		);
+		to = dmDoc.getNearestCursorOffset( range.to, range.isBackwards() ? -1 : 1 );
+		if ( to === -1 ) {
+			return ve.SelectionState.static.newNullSelection();
+		}
+		focus = this.documentView.getNodeAndOffset( to );
 	}
 	return new ve.SelectionState( {
 		anchorNode: anchor.node,
@@ -4021,13 +4250,13 @@ ve.ce.Surface.prototype.setNotUnicorningAll = function ( node ) {
 /**
  * Get list of selected nodes and annotations.
  *
- * Exclude link annotations unless the CE focus is inside a link
+ * Exclude active annotations unless the CE focus is inside a link
  *
  * @param {boolean} [all] Include nodes and annotations which only cover some of the fragment
  * @return {ve.dm.Model[]} Selected models
  */
 ve.ce.Surface.prototype.getSelectedModels = function () {
-	var models, fragmentAfter;
+	var models, fragmentAfter, activeModels;
 	if ( !( this.model.selection instanceof ve.dm.LinearSelection ) ) {
 		return [];
 	}
@@ -4047,41 +4276,27 @@ ve.ce.Surface.prototype.getSelectedModels = function () {
 		) );
 	}
 
-	if ( this.activeLink ) {
-		return models;
-	}
+	activeModels = this.activeAnnotations.map( function ( view ) {
+		return view.getModel();
+	} );
+
 	return models.filter( function ( annModel ) {
-		return !( annModel instanceof ve.dm.LinkAnnotation );
+		// If the model is an annotation that can be active, only show it if it *is* active
+		if ( annModel instanceof ve.dm.Annotation && ve.ce.annotationFactory.canAnnotationBeActive( annModel.getType() ) ) {
+			return activeModels.indexOf( annModel ) !== -1;
+		}
+		return true;
 	} );
 };
 
 /**
- * Tests whether the selection covers part but not all of a link
+ * Tests whether the selection covers part but not all of a nailed annotation
  *
- * @return {boolean} True if a link is split either at the focus or at the anchor (or both)
+ * @return {boolean} True if a nailed annotation is split either at the focus or at the anchor (or both)
  */
-ve.ce.Surface.prototype.selectionSplitsLink = function () {
-	return ve.ce.linkAt( this.nativeSelection.anchorNode ) !==
-		ve.ce.linkAt( this.nativeSelection.focusNode );
-};
-
-/**
- * Listen to a surface synchronizer, for remote author selection changes to display
- *
- * Document content itself is handled by the synchronizer, as is document history.
- *
- * @param {ve.dm.SurfaceSynchronizer} synchronizer The synchronizer to listen to
- */
-ve.ce.Surface.prototype.setSynchronizer = function ( synchronizer ) {
-	if ( this.synchronizer ) {
-		this.synchronizer.disconnect( this );
-	}
-	this.synchronizer = synchronizer;
-	this.synchronizer.connect( this, {
-		authorSelect: 'onSynchronizerAuthorUpdate',
-		authorNameChange: 'onSynchronizerAuthorUpdate',
-		authorColorChange: 'onSynchronizerAuthorUpdate'
-	} );
+ve.ce.Surface.prototype.selectionSplitsNailedAnnotation = function () {
+	return ve.ce.nailedAnnotationAt( this.nativeSelection.anchorNode ) !==
+		ve.ce.nailedAnnotationAt( this.nativeSelection.focusNode );
 };
 
 /**
@@ -4094,16 +4309,43 @@ ve.ce.Surface.prototype.onSynchronizerAuthorUpdate = function ( authorId ) {
 };
 
 /**
+ * Called when the synchronizer receives a remote author disconnect
+ *
+ * @param {number} authorId The author ID
+ */
+ve.ce.Surface.prototype.onSynchronizerAuthorDisconnect = function ( authorId ) {
+	var overlays = this.userSelectionOverlays[ authorId ];
+
+	if ( overlays ) {
+		overlays.$cursor.detach();
+		overlays.$selection.detach();
+		delete this.userSelectionOverlays[ authorId ];
+	}
+};
+
+/**
+ * Called when the synchronizer reconnects and their is a server doc ID mismatch
+ */
+ve.ce.Surface.prototype.onSynchronizerWrongDoc = function () {
+	OO.ui.alert(
+		ve.msg( 'visualeditor-missing-document-error' ),
+		{ title: ve.msg( 'visualeditor-missing-document-title' ) }
+	);
+};
+
+/**
  * Paint a remote author's current selection, as stored in the synchronizer
  *
  * @param {number} authorId The author ID
  */
 ve.ce.Surface.prototype.paintAuthor = function ( authorId ) {
 	var i, l, rects, rect, overlays,
-		color = '#' + this.synchronizer.authorColors[ authorId ],
-		selection = this.synchronizer.authorSelections[ authorId ];
+		synchronizer = this.model.synchronizer,
+		authorData = synchronizer.getAuthorData( authorId ),
+		color = '#' + authorData.color,
+		selection = synchronizer.authorSelections[ authorId ];
 
-	if ( authorId === this.authorId ) {
+	if ( authorId === synchronizer.getAuthorId() ) {
 		return;
 	}
 
@@ -4157,7 +4399,7 @@ ve.ce.Surface.prototype.paintAuthor = function ( authorId ) {
 		} ).append(
 			$( '<span>' )
 				.addClass( 've-ce-surface-highlights-user-cursor-label' )
-				.text( this.synchronizer.authorNames[ authorId ] )
+				.text( authorData.name )
 				.css( { background: color } )
 		)
 	);
@@ -4172,13 +4414,13 @@ ve.ce.Surface.prototype.paintAuthor = function ( authorId ) {
  */
 ve.ce.Surface.prototype.onPosition = function () {
 	var surface = this;
-	if ( !this.synchronizer ) {
+	if ( !this.model.synchronizer ) {
 		return;
 	}
 	// Defer to allow surface synchronizer to adjust for transactions
 	setTimeout( function () {
 		var authorId,
-			authorSelections = surface.synchronizer.authorSelections;
+			authorSelections = surface.model.synchronizer.authorSelections;
 		for ( authorId in authorSelections ) {
 			surface.onSynchronizerAuthorUpdate( authorId );
 		}

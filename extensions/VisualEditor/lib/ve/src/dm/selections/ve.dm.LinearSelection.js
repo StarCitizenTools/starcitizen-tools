@@ -57,13 +57,6 @@ ve.dm.LinearSelection.prototype.getDescription = function () {
 /**
  * @inheritdoc
  */
-ve.dm.LinearSelection.prototype.clone = function () {
-	return new this.constructor( this.getDocument(), this.getRange() );
-};
-
-/**
- * @inheritdoc
- */
 ve.dm.LinearSelection.prototype.collapseToStart = function () {
 	return new this.constructor( this.getDocument(), new ve.Range( this.getRange().start ) );
 };

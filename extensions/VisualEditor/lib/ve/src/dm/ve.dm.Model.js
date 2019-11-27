@@ -270,14 +270,27 @@ ve.dm.Model.static.describeChanges = function ( attributeChanges ) {
  */
 ve.dm.Model.static.describeChange = function ( key, change ) {
 	if ( ( typeof change.from === 'object' && change.from !== null ) || ( typeof change.to === 'object' && change.to !== null ) ) {
-		return ve.msg( 'visualeditor-changedesc-unknown', key );
+		return ve.htmlMsg( 'visualeditor-changedesc-unknown', key );
 	} else if ( change.from === undefined ) {
-		return ve.msg( 'visualeditor-changedesc-set', key, change.to );
+		return ve.htmlMsg( 'visualeditor-changedesc-set', key, this.wrapText( 'ins', change.to ) );
 	} else if ( change.to === undefined ) {
-		return ve.msg( 'visualeditor-changedesc-unset', key, change.from );
+		return ve.htmlMsg( 'visualeditor-changedesc-unset', key, this.wrapText( 'del', change.from ) );
 	} else {
-		return ve.msg( 'visualeditor-changedesc-changed', key, change.from, change.to );
+		return ve.htmlMsg( 'visualeditor-changedesc-changed', key, this.wrapText( 'del', change.from ), this.wrapText( 'ins', change.to ) );
 	}
+};
+
+/**
+ * Utility function for wrapping text in a tag, equivalent to `$( '<tag>' ).text( text )`
+ *
+ * @param {string} tag Wrapping element's tag
+ * @param {string} text Text
+ * @return {HTMLElement} Element wrapping text
+ */
+ve.dm.Model.static.wrapText = function ( tag, text ) {
+	var wrapper = document.createElement( tag );
+	wrapper.appendChild( document.createTextNode( text ) );
+	return wrapper;
 };
 
 /**
@@ -286,6 +299,8 @@ ve.dm.Model.static.describeChange = function ( key, change ) {
  * @static
  * @param {Object} element This element
  * @param {Object} other Another element
+ * @param {ve.dm.HashValueStore} elementStore Store used by this element
+ * @param {ve.dm.HashValueStore} otherStore Store used by other elements
  * @return {boolean} Elements are of a comparable type
  */
 ve.dm.Model.static.isDiffComparable = function ( element, other ) {
@@ -440,5 +455,5 @@ ve.dm.Model.prototype.getHashObject = function () {
  * @return {boolean} Elements are of a comparable type
  */
 ve.dm.Model.prototype.isDiffComparable = function ( other ) {
-	return this.constructor.static.isDiffComparable( this.element, other.element );
+	return this.constructor.static.isDiffComparable( this.element, other.element, this.getStore(), other.getStore() );
 };

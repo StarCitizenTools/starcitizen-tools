@@ -1,5 +1,5 @@
 /*!
- * VisualEditor WikimediaUI UserInterface DiffElement styles.
+ * VisualEditor UserInterface DiffElement styles.
  *
  * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  * @license The MIT License (MIT); see LICENSE.txt
@@ -19,11 +19,23 @@
 	border-right: 1px solid #c8ccd1;
 }
 
+@media ( max-width: 400px ) {
+	.ve-ui-diffElement-hasDescriptions .ve-ui-diffElement-content {
+		margin-right: 6em;
+	}
+}
+
 .ve-ui-diffElement-hasDescriptions .ve-ui-diffElement-sidebar {
 	position: absolute;
 	top: 0;
 	right: 0;
 	width: 15em;
+}
+
+@media ( max-width: 400px ) {
+	.ve-ui-diffElement-hasDescriptions .ve-ui-diffElement-sidebar {
+		width: 5em;
+	}
 }
 
 .ve-ui-diffElement-overlays {
@@ -60,6 +72,21 @@
 
 .ve-ui-diffElement-attributeChange {
 	color: #72777d;
+}
+
+.ve-ui-diffElement-attributeChange del,
+.ve-ui-diffElement-attributeChange ins {
+	text-decoration: none;
+}
+
+.ve-ui-diffElement-attributeChange del {
+	background-color: #f2c2bf;
+	box-shadow: 0 0 0 1px #f2c2bf;
+}
+
+.ve-ui-diffElement-attributeChange ins {
+	background-color: #c4ede4;
+	box-shadow: 0 0 0 1px #c4ede4;
 }
 
 .ve-ui-diffElement-attributeChange.oo-ui-labelElement .oo-ui-labelElement-label {
@@ -123,14 +150,6 @@ del[ data-diff-action='remove' ],
 del[ data-diff-action='remove' ]:hover,
 [ data-diff-action='remove' ]:hover > del {
 	text-decoration: none;
-}
-
-[ data-diff-action='insert' ] [ rel='ve:Comment' ],
-[ data-diff-action='remove' ] [ rel='ve:Comment' ],
-[ data-diff-action='change-insert' ] [ rel='ve:Comment' ],
-[ data-diff-action='change-remove' ] [ rel='ve:Comment' ] {
-	display: inline-block;
-	width: 1em;
 }
 
 /* TODO: These sibling selectors still match when there is a text node in-between, should be fixed in JS */

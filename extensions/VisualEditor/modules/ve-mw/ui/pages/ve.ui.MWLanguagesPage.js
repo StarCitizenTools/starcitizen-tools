@@ -131,7 +131,7 @@ ve.ui.MWLanguagesPage.prototype.onAllLanguageItemsSuccess = function ( deferred,
  * @return {Object} item
  */
 ve.ui.MWLanguagesPage.prototype.getLanguageItemFromMetaListItem = function ( metaItem ) {
-	// TODO: get real values from metaItem once Parsoid actually provides them - bug 48970
+	// TODO: get real values from metaItem once Parsoid actually provides them - T50970
 	return {
 		lang: 'lang',
 		langname: 'langname',
@@ -167,10 +167,10 @@ ve.ui.MWLanguagesPage.prototype.getLocalLanguageItems = function () {
 ve.ui.MWLanguagesPage.prototype.getAllLanguageItems = function () {
 	var deferred = $.Deferred();
 	// TODO: Detect paging token if results exceed limit
-	new mw.Api().get( {
+	ve.init.target.getContentApi().get( {
 		action: 'visualeditor',
 		paction: 'getlanglinks',
-		page: ve.init.target.pageName
+		page: ve.init.target.getPageName()
 	} )
 		.done( this.onAllLanguageItemsSuccess.bind( this, deferred ) )
 		.fail( this.onAllLanguageItemsError.bind( this, deferred ) );

@@ -30,7 +30,7 @@
  */
 ve.init.sa.Target = function VeInitSaTarget( config ) {
 	config = config || {};
-	config.toolbarConfig = $.extend( { shadow: true, actions: true, floatable: true }, config.toolbarConfig );
+	config.toolbarConfig = ve.extendObject( { shadow: true, actions: true, floatable: true }, config.toolbarConfig );
 
 	// Parent constructor
 	ve.init.sa.Target.super.call( this, config );
@@ -48,6 +48,7 @@ OO.inheritClass( ve.init.sa.Target, ve.init.Target );
 
 ve.init.sa.Target.static.actionGroups = [
 	{
+		name: 'pageMenu',
 		type: 'list',
 		icon: 'menu',
 		indicator: null,

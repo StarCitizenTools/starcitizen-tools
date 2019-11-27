@@ -42,7 +42,7 @@ OO.mixinClass( ve.dm.MWBlockImageNode, ve.dm.ClassAttributeNode );
 ve.dm.MWBlockImageNode.static.name = 'mwBlockImage';
 
 ve.dm.MWBlockImageNode.static.preserveHtmlAttributes = function ( attribute ) {
-	var attributes = [ 'typeof', 'class', 'src', 'resource', 'width', 'height', 'href', 'rel' ];
+	var attributes = [ 'typeof', 'class', 'src', 'resource', 'width', 'height', 'href', 'rel', 'data-mw' ];
 	return attributes.indexOf( attribute ) === -1;
 };
 
@@ -67,27 +67,21 @@ ve.dm.MWBlockImageNode.static.classAttributes = {
 
 ve.dm.MWBlockImageNode.static.toDataElement = function ( domElements, converter ) {
 	var dataElement, newDimensions, attributes,
-		figure, imgWrapper, img, caption,
-		classAttr, typeofAttrs, errorIndex, width, height, altText, types;
-
-	// Workaround for jQuery's .children() being expensive due to
-	// https://github.com/jquery/sizzle/issues/311
-	function findChildren( parent, nodeNames ) {
-		return Array.prototype.filter.call( parent.childNodes, function ( element ) {
-			return nodeNames.indexOf( element.nodeName.toLowerCase() ) !== -1;
-		} );
-	}
+		figure, imgWrapper, img, captionNode, caption,
+		classAttr, typeofAttrs, errorIndex, width, height, types,
+		mwDataJSON, mwData;
 
 	figure = domElements[ 0 ];
-	imgWrapper = findChildren( figure, [ 'a', 'span' ] )[ 0 ] || null;
-	img = imgWrapper && findChildren( imgWrapper, [ 'img', 'video' ] )[ 0 ] || null;
-	caption = findChildren( figure, [ 'figcaption' ] )[ 0 ] || null;
+	imgWrapper = figure.children[ 0 ]; // <a> or <span>
+	img = imgWrapper.children[ 0 ]; // <img>, <video> or <audio>
+	captionNode = figure.children[ 1 ]; // <figcaption> or undefined
 	classAttr = figure.getAttribute( 'class' );
-	typeofAttrs = figure.getAttribute( 'typeof' ).split( ' ' );
+	typeofAttrs = figure.getAttribute( 'typeof' ).trim().split( /\s+/ );
+	mwDataJSON = figure.getAttribute( 'data-mw' );
+	mwData = mwDataJSON ? JSON.parse( mwDataJSON ) : {};
 	errorIndex = typeofAttrs.indexOf( 'mw:Error' );
-	width = img && img.getAttribute( 'width' );
-	height = img && img.getAttribute( 'height' );
-	altText = img && img.getAttribute( 'alt' );
+	width = img.getAttribute( 'width' );
+	height = img.getAttribute( 'height' );
 
 	if ( errorIndex !== -1 ) {
 		typeofAttrs.splice( errorIndex, 1 );
@@ -98,24 +92,19 @@ ve.dm.MWBlockImageNode.static.toDataElement = function ( domElements, converter 
 	attributes = {
 		mediaClass: types.mediaClass,
 		type: types.frameType,
-		href: ( imgWrapper && imgWrapper.getAttribute( 'href' ) ) || '',
-		src: ( img && ( img.getAttribute( 'src' ) || img.getAttribute( 'poster' ) ) ) || '',
-		resource: img && img.getAttribute( 'resource' )
+		src: img.getAttribute( 'src' ) || img.getAttribute( 'poster' ),
+		href: imgWrapper.getAttribute( 'href' ),
+		resource: img.getAttribute( 'resource' ),
+		width: width !== null && width !== '' ? +width : null,
+		height: height !== null && height !== '' ? +height : null,
+		alt: img.getAttribute( 'alt' ),
+		mw: mwData,
+		isError: errorIndex !== -1
 	};
-
-	if ( altText !== null ) {
-		attributes.alt = altText;
-	}
-	if ( errorIndex !== -1 ) {
-		attributes.isError = true;
-	}
 
 	this.setClassAttributes( attributes, classAttr );
 
 	attributes.align = attributes.align || 'default';
-
-	attributes.width = width !== null && width !== '' ? Number( width ) : null;
-	attributes.height = height !== null && height !== '' ? Number( height ) : null;
 
 	// Default-size
 	if ( attributes.defaultSize ) {
@@ -133,7 +122,7 @@ ve.dm.MWBlockImageNode.static.toDataElement = function ( domElements, converter 
 			// rather than default MediaWiki configuration dimensions.
 			// We must force local wiki default in edit mode for default
 			// size images.
-			newDimensions = ve.dm.MWImageNode.static.scaleToThumbnailSize( attributes );
+			newDimensions = this.scaleToThumbnailSize( attributes );
 			if ( newDimensions ) {
 				attributes.width = newDimensions.width;
 				attributes.height = newDimensions.height;
@@ -141,45 +130,50 @@ ve.dm.MWBlockImageNode.static.toDataElement = function ( domElements, converter 
 		}
 	}
 
+	if ( captionNode ) {
+		caption = converter.getDataFromDomClean( captionNode, { type: 'mwImageCaption' } );
+	} else {
+		caption = [
+			{ type: 'mwImageCaption' },
+			{ type: 'paragraph', internal: { generated: 'wrapper' } },
+			{ type: '/paragraph' },
+			{ type: '/mwImageCaption' }
+		];
+	}
+
 	dataElement = { type: this.name, attributes: attributes };
 
 	this.storeGeneratedContents( dataElement, dataElement.attributes.src, converter.getStore() );
 
-	if ( caption ) {
-		return [ dataElement ]
-			.concat( converter.getDataFromDomClean( caption, { type: 'mwImageCaption' } ) )
-			.concat( [ { type: '/' + this.name } ] );
-	} else {
-		return [
-			dataElement,
-			{ type: 'mwImageCaption' },
-			{ type: '/mwImageCaption' },
-			{ type: '/' + this.name }
-		];
-	}
+	return [ dataElement ]
+		.concat( caption )
+		.concat( { type: '/' + this.name } );
 };
 
 // TODO: At this moment node is not resizable but when it will be then adding defaultSize class
 // should be more conditional.
 ve.dm.MWBlockImageNode.static.toDomElements = function ( data, doc, converter ) {
-	var width, height,
+	var width, height, srcAttr,
 		dataElement = data[ 0 ],
 		mediaClass = dataElement.attributes.mediaClass,
 		figure = doc.createElement( 'figure' ),
-		imgWrapper = doc.createElement( dataElement.attributes.href !== '' ? 'a' : 'span' ),
-		img = doc.createElement( mediaClass === 'Image' ? 'img' : 'video' ),
+		imgWrapper = doc.createElement( dataElement.attributes.href ? 'a' : 'span' ),
+		img = doc.createElement( this.typesToTags[ mediaClass ] ),
 		wrapper = doc.createElement( 'div' ),
 		classAttr = this.getClassAttrFromAttributes( dataElement.attributes ),
 		captionData = data.slice( 1, -1 );
 
 	// RDFa type
 	figure.setAttribute( 'typeof', this.getRdfa( mediaClass, dataElement.attributes.type ) );
+	if ( !ve.isEmptyObject( dataElement.attributes.mw ) ) {
+		figure.setAttribute( 'data-mw', JSON.stringify( dataElement.attributes.mw ) );
+	}
 
 	if ( classAttr ) {
 		figure.className = classAttr;
 	}
 
-	if ( dataElement.attributes.href !== '' ) {
+	if ( dataElement.attributes.href ) {
 		imgWrapper.setAttribute( 'href', dataElement.attributes.href );
 	}
 
@@ -196,11 +190,14 @@ ve.dm.MWBlockImageNode.static.toDomElements = function ( data, doc, converter ) 
 		}
 	}
 
-	img.setAttribute( mediaClass === 'Image' ? 'src' : 'poster', dataElement.attributes.src );
+	srcAttr = this.typesToSrcAttrs[ mediaClass ];
+	if ( srcAttr ) {
+		img.setAttribute( srcAttr, dataElement.attributes.src );
+	}
 	img.setAttribute( 'width', width );
 	img.setAttribute( 'height', height );
 	img.setAttribute( 'resource', dataElement.attributes.resource );
-	if ( dataElement.attributes.alt !== undefined ) {
+	if ( typeof dataElement.attributes.alt === 'string' ) {
 		img.setAttribute( 'alt', dataElement.attributes.alt );
 	}
 	figure.appendChild( imgWrapper );

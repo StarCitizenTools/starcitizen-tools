@@ -48,20 +48,20 @@ OO.inheritClass( ve.init.mw.Target, ve.init.Target );
 ve.init.mw.Target.static.name = null;
 
 ve.init.mw.Target.static.toolbarGroups = [
-	// History
-	{ include: [ 'undo', 'redo' ] },
-	// Format
 	{
-		classes: [ 've-test-toolbar-format' ],
+		name: 'history',
+		include: [ 'undo', 'redo' ]
+	},
+	{
+		name: 'format',
 		type: 'menu',
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-format-tooltip' ),
 		include: [ { group: 'format' } ],
 		promote: [ 'paragraph' ],
 		demote: [ 'preformatted', 'blockquote', 'heading1' ]
 	},
-	// Style
 	{
-		classes: [ 've-test-toolbar-style' ],
+		name: 'style',
 		type: 'list',
 		icon: 'textStyle',
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-style-tooltip' ),
@@ -70,28 +70,34 @@ ve.init.mw.Target.static.toolbarGroups = [
 		promote: [ 'bold', 'italic' ],
 		demote: [ 'strikethrough', 'code', 'underline', 'language', 'big', 'small', 'clear' ]
 	},
-	// Link
-	{ include: [ 'link' ] },
-	// Structure
 	{
-		classes: [ 've-test-toolbar-structure' ],
+		name: 'link',
+		include: [ 'link' ]
+	},
+	// Placeholder for reference tools (e.g. Cite and/or Citoid)
+	{
+		name: 'reference'
+	},
+	{
+		name: 'structure',
 		type: 'list',
 		icon: 'listBullet',
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
 		include: [ { group: 'structure' } ],
 		demote: [ 'outdent', 'indent' ]
 	},
-	// Insert
 	{
-		classes: [ 've-test-toolbar-insert' ],
+		name: 'insert',
 		label: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
 		include: '*',
 		forceExpand: [ 'media', 'transclusion', 'insertTable' ],
 		promote: [ 'media', 'transclusion', 'insertTable' ]
 	},
-	// SpecialCharacter
-	{ include: [ 'specialCharacter' ] }
+	{
+		name: 'specialCharacter',
+		include: [ 'specialCharacter' ]
+	}
 ];
 
 ve.init.mw.Target.static.importRules = {
@@ -103,6 +109,7 @@ ve.init.mw.Target.static.importRules = {
 			'article', 'section', 'div', 'alienInline', 'alienBlock', 'comment'
 		],
 		htmlBlacklist: {
+			// Remove reference numbers copied from MW read mode (T150418)
 			remove: [ 'sup.reference:not( [typeof] )' ],
 			unwrap: [ 'fieldset', 'legend' ]
 		},
@@ -150,34 +157,18 @@ ve.init.mw.Target.static.fixBase = function ( doc ) {
 };
 
 /**
- * Create a document model from an HTML document.
- *
- * @param {HTMLDocument} doc HTML document
- * @param {string} mode Editing mode
- * @return {ve.dm.Document} Document model
+ * @inheritdoc
  */
-ve.init.mw.Target.static.createModelFromDom = function ( doc, mode ) {
-	var i, l, children, data,
-		conf = mw.config.get( 'wgVisualEditor' );
+ve.init.mw.Target.static.createModelFromDom = function ( doc, mode, options ) {
+	var conf = mw.config.get( 'wgVisualEditor' );
 
-	if ( mode === 'source' ) {
-		children = doc.body.children;
-		data = [];
+	options = ve.extendObject( {
+		lang: conf.pageLanguageCode,
+		dir: conf.pageLanguageDir
+	}, options );
 
-		// Wikitext documents are just plain text paragraphs, so we can just do a simple manual conversion.
-		for ( i = 0, l = children.length; i < l; i++ ) {
-			data.push( { type: 'paragraph' } );
-			ve.batchPush( data, children[ i ].textContent.split( '' ) );
-			data.push( { type: '/paragraph' } );
-		}
-		data.push( { type: 'internalList' }, { type: '/internalList' } );
-		return new ve.dm.Document( data, doc, null, null, null, conf.pageLanguageCode, conf.pageLanguageDir );
-	} else {
-		return ve.dm.converter.getModelFromDom( doc, {
-			lang: conf.pageLanguageCode,
-			dir: conf.pageLanguageDir
-		} );
-	}
+	// Parent method
+	return ve.init.mw.Target.super.static.createModelFromDom.call( this, doc, mode, options );
 };
 
 // Deprecated alias
@@ -208,9 +199,9 @@ ve.init.mw.Target.static.parseDocument = function ( documentString, mode, sectio
 		ve.unwrapParsoidSections( doc.body );
 		// Strip legacy IDs, for example in section headings
 		ve.stripParsoidFallbackIds( doc.body );
+		// Fix relative or missing base URL if needed
+		this.fixBase( doc );
 	}
-	// Fix relative or missing base URL if needed
-	this.fixBase( doc );
 
 	return doc;
 };
@@ -220,10 +211,10 @@ ve.init.mw.Target.static.parseDocument = function ( documentString, mode, sectio
 /**
  * Handle both DOM and modules being loaded and ready.
  *
- * @param {HTMLDocument} doc HTML document
+ * @param {HTMLDocument|string} doc HTML document or source text
  */
 ve.init.mw.Target.prototype.documentReady = function ( doc ) {
-	this.setupSurface( doc, this.surfaceReady.bind( this ) );
+	this.setupSurface( doc );
 };
 
 /**
@@ -313,7 +304,7 @@ ve.init.mw.Target.prototype.createTargetWidget = function ( config ) {
  * @inheritdoc
  */
 ve.init.mw.Target.prototype.createSurface = function ( dmDoc, config ) {
-	var importRules, surface, documentView;
+	var importRules;
 
 	if ( config && config.mode === 'source' ) {
 		importRules = ve.copy( this.constructor.static.importRules );
@@ -326,25 +317,7 @@ ve.init.mw.Target.prototype.createSurface = function ( dmDoc, config ) {
 		return new ve.ui.MWWikitextSurface( dmDoc, config );
 	}
 
-	// Parent method
-	surface = ve.init.mw.Target.super.prototype.createSurface.apply( this, arguments );
-
-	documentView = surface.getView().getDocument();
-
-	// T164790
-	documentView.getDocumentNode().$element.addClass( 'mw-parser-output' );
-
-	function onLangChange() {
-		// Add appropriately mw-content-ltr or mw-content-rtl class
-		documentView.getDocumentNode().$element
-			.removeClass( 'mw-content-ltr mw-content-rtl' )
-			.addClass( 'mw-content-' + documentView.getDir() );
-	}
-
-	documentView.on( 'langChange', onLangChange );
-	onLangChange();
-
-	return surface;
+	return new ve.ui.MWSurface( dmDoc, this.getSurfaceConfig( config ) );
 };
 
 /**
@@ -365,10 +338,9 @@ ve.init.mw.Target.prototype.getSurfaceConfig = function ( config ) {
  * Switch to editing mode.
  *
  * @method
- * @param {HTMLDocument} doc HTML document
- * @param {Function} [callback] Callback to call when done
+ * @param {HTMLDocument|string} doc HTML document or source text
  */
-ve.init.mw.Target.prototype.setupSurface = function ( doc, callback ) {
+ve.init.mw.Target.prototype.setupSurface = function ( doc ) {
 	var target = this;
 	setTimeout( function () {
 		// Build model
@@ -384,36 +356,49 @@ ve.init.mw.Target.prototype.setupSurface = function ( doc, callback ) {
 		target.track( 'trace.buildModelTree.exit' );
 
 		setTimeout( function () {
-			var surface;
-			// Clear dummy surfaces
-			target.clearSurfaces();
-
-			// Create ui.Surface (also creates ce.Surface and dm.Surface and builds CE tree)
-			target.track( 'trace.createSurface.enter' );
-			surface = target.addSurface( dmDoc );
-			// Add classes specific to surfaces attached directly to the target,
-			// as opposed to TargetWidget surfaces
-			surface.$element.addClass( 've-init-mw-target-surface' );
-			target.track( 'trace.createSurface.exit' );
-
-			target.dummyToolbar = false;
-
-			target.setSurface( surface );
-
-			setTimeout( function () {
-				// Initialize surface
-				target.track( 'trace.initializeSurface.enter' );
-
-				target.active = true;
-				// Now that the surface is attached to the document and ready,
-				// let it initialize itself
-				surface.initialize();
-
-				target.track( 'trace.initializeSurface.exit' );
-				setTimeout( callback );
-			} );
+			target.addSurface( dmDoc );
 		} );
 	} );
+};
+
+/**
+ * @inheritdoc
+ */
+ve.init.mw.Target.prototype.addSurface = function () {
+	var surface,
+		target = this;
+
+	// Clear dummy surfaces
+	// TODO: Move to DesktopArticleTarget
+	this.clearSurfaces();
+
+	// Create ui.Surface (also creates ce.Surface and dm.Surface and builds CE tree)
+	this.track( 'trace.createSurface.enter' );
+	// Parent method
+	surface = ve.init.mw.Target.super.prototype.addSurface.apply( this, arguments );
+	// Add classes specific to surfaces attached directly to the target,
+	// as opposed to TargetWidget surfaces
+	surface.$element.addClass( 've-init-mw-target-surface' );
+	this.track( 'trace.createSurface.exit' );
+
+	this.dummyToolbar = false;
+
+	this.setSurface( surface );
+
+	setTimeout( function () {
+		// Initialize surface
+		target.track( 'trace.initializeSurface.enter' );
+
+		target.active = true;
+		// Now that the surface is attached to the document and ready,
+		// let it initialize itself
+		surface.initialize();
+
+		target.track( 'trace.initializeSurface.exit' );
+		target.surfaceReady();
+	} );
+
+	return surface;
 };
 
 /**
@@ -435,10 +420,11 @@ ve.init.mw.Target.prototype.setSurface = function ( surface ) {
  * token was expired / the user changed. If the user did change, this updates
  * the current user.
  *
+ * @param {ve.dm.Document} [doc] Document to associate with the API request
  * @return {jQuery.Promise} Promise resolved with whether we switched users
  */
-ve.init.mw.Target.prototype.refreshEditToken = function () {
-	var api = new mw.Api(),
+ve.init.mw.Target.prototype.refreshEditToken = function ( doc ) {
+	var api = this.getContentApi( doc ),
 		deferred = $.Deferred(),
 		target = this;
 	api.get( {
@@ -506,7 +492,7 @@ ve.init.mw.Target.prototype.getWikitextFragment = function ( doc, useRevision, i
 			token: this.editToken,
 			paction: 'serialize',
 			html: ve.dm.converter.getDomFromModel( doc ).body.innerHTML,
-			page: this.pageName
+			page: this.getPageName()
 		};
 
 	// Optimise as a no-op
@@ -519,7 +505,7 @@ ve.init.mw.Target.prototype.getWikitextFragment = function ( doc, useRevision, i
 		params.etag = this.etag;
 	}
 
-	xhr = new mw.Api().post(
+	xhr = this.getContentApi( doc ).post(
 		params,
 		{ contentType: 'multipart/form-data' }
 	);
@@ -531,7 +517,7 @@ ve.init.mw.Target.prototype.getWikitextFragment = function ( doc, useRevision, i
 		return $.Deferred().reject();
 	}, function ( error ) {
 		if ( error === 'badtoken' && !isRetry ) {
-			return target.refreshEditToken().then( function () {
+			return target.refreshEditToken( doc ).then( function () {
 				return target.getWikitextFragment( doc, useRevision, true );
 			} );
 		}
@@ -549,15 +535,52 @@ ve.init.mw.Target.prototype.getWikitextFragment = function ( doc, useRevision, i
  *
  * @param {string} wikitext Wikitext
  * @param {boolean} pst Perform pre-save transform
- * @param {ve.dm.Document} [doc] Parse for a specific document
+ * @param {ve.dm.Document} [doc] Parse for a specific document, defaults to current surface's
  * @return {jQuery.Promise} Abortable promise
  */
-ve.init.mw.Target.prototype.parseWikitextFragment = function ( wikitext, pst ) {
-	return new mw.Api().post( {
+ve.init.mw.Target.prototype.parseWikitextFragment = function ( wikitext, pst, doc ) {
+	return this.getContentApi( doc ).post( {
 		action: 'visualeditor',
 		paction: 'parsefragment',
-		page: this.pageName,
+		page: this.getPageName( doc ),
 		wikitext: wikitext,
 		pst: pst
 	} );
+};
+
+/**
+ * Get the page name associated with a specific document
+ *
+ * @param {ve.dm.Document} [doc] Document, defaults to current surface's
+ * @return {string} Page name
+ */
+ve.init.mw.Target.prototype.getPageName = function () {
+	return this.pageName;
+};
+
+/**
+ * Get an API object associated with the wiki where the document
+ * content is hosted.
+ *
+ * This would be overridden if editing content on another wiki.
+ *
+ * @param {ve.dm.Document} [doc] API for a specific document, should default to document of current surface.
+ * @param {Object} [options] API options
+ * @return {mw.Api} API object
+ */
+ve.init.mw.Target.prototype.getContentApi = function ( doc, options ) {
+	return new mw.Api( options );
+};
+
+/**
+ * Get an API object associated with the local wiki.
+ *
+ * For example you would always use getLocalApi for actions
+ * associated with the current user.
+ *
+ * @param {Object} [options] API options
+ * @return {mw.Api} API object
+ */
+ve.init.mw.Target.prototype.getLocalApi = function ( options ) {
+	return new mw.Api( options );
 };

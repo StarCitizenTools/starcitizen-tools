@@ -39,7 +39,8 @@ ve.ui.DebugBar = function VeUiDebugBar( surface, config ) {
 	this.showModelToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-showmodel' ) } );
 	this.updateModelToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-updatemodel' ) } );
 	this.transactionsToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-showtransactions' ) } );
-	this.inputDebuggingToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-inputdebug' ) } );
+	this.testSquasherToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-testsquasher' ) } );
+	this.inputDebuggingToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-inputdebug' ) } ).setValue( ve.inputDebug );
 	this.filibusterToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-startfilibuster' ) } );
 
 	this.$dump =
@@ -70,11 +71,14 @@ ve.ui.DebugBar = function VeUiDebugBar( surface, config ) {
 	this.inputDebuggingToggle.on( 'change', this.onInputDebuggingToggleChange.bind( this ) );
 	this.filibusterToggle.on( 'click', this.onFilibusterToggleClick.bind( this ) );
 	this.transactionsToggle.on( 'change', this.onTransactionsToggleChange.bind( this ) );
+	this.testSquasherToggle.on( 'change', this.onTestSquasherToggleChange.bind( this ) );
 	closeButton.on( 'click', this.$element.remove.bind( this.$element ) );
+
+	this.onHistoryDebounced = ve.debounce( this.onHistory.bind( this ) );
 
 	this.getSurface().getModel().connect( this, {
 		select: 'onSurfaceSelect',
-		history: 'onHistory'
+		history: 'onHistoryDebounced'
 	} );
 	this.onSurfaceSelect( this.getSurface().getModel().getSelection() );
 
@@ -88,6 +92,7 @@ ve.ui.DebugBar = function VeUiDebugBar( surface, config ) {
 			this.inputDebuggingToggle.$element,
 			this.filibusterToggle.$element,
 			this.transactionsToggle.$element,
+			this.testSquasherToggle.$element,
 			$( this.constructor.static.dividerTemplate ),
 			closeButton.$element
 		),
@@ -137,11 +142,11 @@ ve.ui.DebugBar.prototype.onSurfaceSelect = function () {
 /**
  * Handle history events on the attached surface
  */
-ve.ui.DebugBar.prototype.onHistory = ve.debounce( function () {
+ve.ui.DebugBar.prototype.onHistory = function () {
 	if ( this.transactionsToggle.getValue() ) {
 		this.updateTransactions();
 	}
-} );
+};
 
 /**
  * Handle click events on the log range button
@@ -381,6 +386,21 @@ ve.ui.DebugBar.prototype.onTransactionsToggleChange = function ( value ) {
 };
 
 /**
+ * Handle click events on the test squasher toggle button
+ *
+ * @param {boolean} value Value
+ */
+ve.ui.DebugBar.prototype.onTestSquasherToggleChange = function ( value ) {
+	var doc = this.getSurface().getModel().getDocument();
+	if ( value ) {
+		doc.connect( this, { transact: 'testSquasher' } );
+		this.testSquasher();
+	} else {
+		doc.disconnect( this, { transact: 'testSquasher' } );
+	}
+};
+
+/**
  * Update the transaction dump
  */
 ve.ui.DebugBar.prototype.updateTransactions = function () {
@@ -395,6 +415,50 @@ ve.ui.DebugBar.prototype.updateTransactions = function () {
 	} );
 
 	this.$transactions.empty().append( $transactionsList );
+};
+
+ve.ui.DebugBar.prototype.testSquasher = function () {
+	var i, iLen, squashed, squashedBefore, squashedAfter, doubleSquashed,
+		dump, doubleDump,
+		transactions = this.getSurface().getModel().getDocument().completeHistory.transactions;
+
+	function squashTransactions( transactions ) {
+		var change = new ve.dm.Change(
+			0,
+			transactions.map( function ( tx ) {
+				return tx.clone();
+			} ),
+			transactions.map( function () {
+				return new ve.dm.HashValueStore();
+			} ),
+			{}
+		);
+		change.squash();
+		return change.transactions;
+	}
+	if ( transactions.length < 3 ) {
+		// Nothing interesting here
+		return;
+	}
+
+	squashed = squashTransactions( transactions );
+	for ( i = 1, iLen = transactions.length - 1; i < iLen; i++ ) {
+		squashedBefore = squashTransactions( transactions.slice( 0, i ) );
+		squashedAfter = squashTransactions( transactions.slice( i ) );
+		doubleSquashed = squashTransactions( [].concat(
+			squashedBefore,
+			squashedAfter
+		) );
+		dump = JSON.stringify( squashed.map( function ( tx ) {
+			return tx.serialize();
+		} ) );
+		doubleDump = JSON.stringify( doubleSquashed.map( function ( tx ) {
+			return tx.serialize();
+		} ) );
+		if ( dump !== doubleDump ) {
+			throw new Error( 'Discrepancy splitting at i=' + i );
+		}
+	}
 };
 
 /**

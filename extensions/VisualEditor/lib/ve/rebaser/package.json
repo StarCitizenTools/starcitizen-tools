@@ -3,14 +3,14 @@
 	"description": "Rebase server for VisualEditor",
 	"version": "0.0.1",
 	"dependencies": {
-		"express": "4.x",
-		"ejs": "2.x",
-		"socket.io": "1.x",
-		"oojs": "1.x"
+		"ejs": "2.6",
+		"express": "4.16",
+		"oojs": "2.2",
+		"socket.io": "2.1"
 	},
 	"devDependencies": {},
 	"scripts": {
-		"start": "node server.js"
+		"start": "node src/server.js"
 	},
 	"repository": {
 		"type": "git"

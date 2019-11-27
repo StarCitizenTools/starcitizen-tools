@@ -4,11 +4,9 @@
  * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
-/* eslint-env es6 */
-
 QUnit.module( 've.dm.RebaseServer' );
 
-QUnit.test( 'Rebase', assert => ve.spawn( function* () {
+QUnit.test( 'Rebase', function ( assert ) {
 	var i, j, op, server, client, clients, action, txs, summary,
 		cases = [
 			{
@@ -69,6 +67,9 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 					[ '2', 'assertHist', 'AB?/CD!' ],
 					// Client 2 receives abc and rebases over it
 					[ '2', 'receive' ],
+					[ '2', 'assert', function ( assert, client ) {
+						assert.ok( Array.isArray( client.doc.completeHistory.storeLengthAtTransaction ), 'storeLengthAtTransaction array not clobbered by rebase' );
+					} ],
 					[ '2', 'assertHist', 'abc/AB?/CD!' ],
 					// Client 2 receives confirmation of AB
 					[ '2', 'receive' ],
@@ -245,7 +246,7 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 					} ],
 					[ '1', 'assert', function ( assert, client ) {
 						var unsubmitted = client.getChangeSince( client.sentLength, false );
-						assert.deepEqual( unsubmitted.stores[ 0 ].hashes, [ 'h123' ], 'h123 is in the store' );
+						assert.deepEqual( unsubmitted.getStore( 0 ).hashes, [ 'h123' ], 'h123 is in the store' );
 					} ],
 
 					// Client 2 submits two changes
@@ -265,7 +266,7 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 					[ '1', 'assertHist', 'a/XYZ!' ],
 					[ '1', 'assert', function ( assert, client ) {
 						var unsubmitted = client.getChangeSince( client.sentLength, false );
-						assert.deepEqual( unsubmitted.stores[ 0 ].hashes, [ 'h123' ], 'h123 is still in the store after the first rebase' );
+						assert.deepEqual( unsubmitted.getStore( 0 ).hashes, [ 'h123' ], 'h123 is still in the store after the first rebase' );
 					} ],
 
 					[ '2', 'deliver' ],
@@ -274,7 +275,7 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 					[ '1', 'assertHist', 'ab/XYZ!' ],
 					[ '1', 'assert', function ( assert, client ) {
 						var unsubmitted = client.getChangeSince( client.sentLength, false );
-						assert.deepEqual( unsubmitted.stores[ 0 ].hashes, [ 'h123' ], 'h123 is still in the store after the second rebase' );
+						assert.deepEqual( unsubmitted.getStore( 0 ).hashes, [ 'h123' ], 'h123 is still in the store after the second rebase' );
 					} ],
 
 					// Client 1 submits its local change
@@ -318,7 +319,7 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 
 					// Client 1 applies a local change that introduces an annotation
 					[ '1', 'apply', {
-						start: 1,
+						start: 2,
 						transactions: [
 							{
 								o: [
@@ -359,7 +360,7 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 					} ],
 					[ '1', 'assert', function ( assert, client ) {
 						var unsubmitted = client.getChangeSince( client.sentLength, false );
-						assert.deepEqual( unsubmitted.stores[ 0 ].hashes, [ 'h123' ], 'h123 is in the store' );
+						assert.deepEqual( unsubmitted.getStore( 0 ).hashes, [ 'h123' ], 'h123 is in the store' );
 					} ],
 
 					// Client 1 rebases its local changes over client 2's second change
@@ -370,8 +371,8 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 					[ '1', 'assert', function ( assert, client ) {
 						var unsubmitted = client.getChangeSince( client.sentLength, false );
 						// FIXME this fails. If uncommitted = client.getChangeSince( client.commitLength, false );
-						// then we expect uncommitted.stores[1] to contain 'h123', but instead uncommitted.stores[0] does.
-						assert.deepEqual( unsubmitted.stores[ 0 ].hashes, [ 'h123' ], 'h123 is still in the store after receiving a foreign change' );
+						// then we expect uncommitted.getStore( 1 ) to contain 'h123', but instead uncommitted.getStore( 0 ) does.
+						assert.deepEqual( unsubmitted.getStore( 0 ).hashes, [ 'h123' ], 'h123 is still in the store after receiving a foreign change' );
 					} ],
 
 					// Client 1 receives its first change
@@ -381,7 +382,7 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 					[ '1', 'assertHist', 'abQ/XYZ!' ],
 					[ '1', 'assert', function ( assert, client ) {
 						var unsubmitted = client.getChangeSince( client.sentLength, false );
-						assert.deepEqual( unsubmitted.stores[ 0 ].hashes, [ 'h123' ], 'h123 is still in the store after receiving our own change' );
+						assert.deepEqual( unsubmitted.getStore( 0 ).hashes, [ 'h123' ], 'h123 is still in the store after receiving our own change' );
 					} ],
 
 					// Client 1 submits its second change
@@ -396,7 +397,7 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 					[ '2', 'receive' ],
 					[ '2', 'assert', function ( assert, client ) {
 						var lastChange = client.getChangeSince( 3, false );
-						assert.deepEqual( lastChange.stores[ 0 ].hashes, [ 'h123' ], 'h123 is in the store on the other side' );
+						assert.deepEqual( lastChange.getStore( 0 ).hashes, [ 'h123' ], 'h123 is in the store on the other side' );
 					} ]
 				]
 			}
@@ -424,9 +425,6 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 		}
 		return builder.getTransaction();
 	}
-
-	// HACK: A version of spawn that supports this would be better
-	ve.dm.RebaseServer.qunitAssertAsync = assert.async();
 
 	for ( i = 0; i < cases.length; i++ ) {
 		server = new ve.dm.TestRebaseServer();
@@ -458,15 +456,15 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 				}
 			} else if ( action === 'assertHist' ) {
 				if ( op[ 0 ] === 'server' ) {
-					summary = yield server.getHistorySummary();
+					summary = server.getHistorySummary();
 				} else {
 					summary = client.getHistorySummary();
 				}
-				assert.equal( summary, op[ 2 ], cases[ i ].name + ': ' + ( op[ 3 ] || j ) );
+				assert.strictEqual( summary, op[ 2 ], cases[ i ].name + ': ' + ( op[ 3 ] || j ) );
 			} else if ( action === 'submit' ) {
 				client.submitChange();
 			} else if ( action === 'deliver' ) {
-				yield client.deliverOne();
+				client.deliverOne();
 			} else if ( action === 'receive' ) {
 				client.receiveOne();
 			} else if ( action === 'assert' ) {
@@ -474,8 +472,4 @@ QUnit.test( 'Rebase', assert => ve.spawn( function* () {
 			}
 		}
 	}
-}() ).catch( function ( err ) {
-	assert.ok( false, err.stack );
-} ).then( function () {
-	ve.dm.RebaseServer.qunitAssertAsync();
-} ) );
+} );

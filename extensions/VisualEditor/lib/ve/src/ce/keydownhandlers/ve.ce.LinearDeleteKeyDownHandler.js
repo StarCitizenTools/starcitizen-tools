@@ -94,7 +94,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 			range.setStart( position.node, position.offset );
 			surface.nativeSelection.removeAllRanges();
 			surface.nativeSelection.addRange( range );
-			surface.updateActiveLink();
+			surface.updateActiveAnnotations();
 			e.preventDefault();
 			return true;
 		}
@@ -123,7 +123,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 			range = document.createRange();
 			// Set start to link's offset, minus 1 to allow for outer nail deletion
 			// (browsers actually tend to adjust range offsets automatically
-			// for previous sibling deletion, but just in case ...)
+			// for previous sibling deletion, but just in case …)
 			range.setStart( linkNode.parentNode, ve.parentIndex( linkNode ) - 1 );
 			// Remove the outer nails, then the link itself
 			linkNode.parentNode.removeChild( linkNode.previousSibling );
@@ -132,7 +132,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 
 			surface.nativeSelection.removeAllRanges();
 			surface.nativeSelection.addRange( range );
-			surface.updateActiveLink();
+			surface.updateActiveAnnotations();
 			e.preventDefault();
 			return true;
 		}
@@ -154,7 +154,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 			range.setStart( position.node, position.offset );
 			surface.nativeSelection.removeAllRanges();
 			surface.nativeSelection.addRange( range );
-			surface.updateActiveLink();
+			surface.updateActiveAnnotations();
 			e.preventDefault();
 			return true;
 		}

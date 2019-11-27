@@ -23,12 +23,12 @@ class ApiVisualEditorEdit extends ApiVisualEditor {
 	/**
 	 * Attempt to save a given page's wikitext to MediaWiki's storage layer via its API
 	 *
-	 * @param string $title The title of the page to write
+	 * @param Title $title The title of the page to write
 	 * @param string $wikitext The wikitext to write
 	 * @param array $params The edit parameters
 	 * @return Status The result of the save attempt
 	 */
-	protected function saveWikitext( $title, $wikitext, $params ) {
+	protected function saveWikitext( Title $title, $wikitext, $params ) {
 		$apiParams = [
 			'action' => 'edit',
 			'title' => $title->getPrefixedDBkey(),
@@ -136,39 +136,14 @@ class ApiVisualEditorEdit extends ApiVisualEditor {
 	}
 
 	/**
-	 * Attempt to compress a given text string via deflate
-	 *
-	 * @param string $content The string to compress
-	 * @return string The compressed string, or the original if deflating failed
-	 */
-	public static function tryDeflate( $content ) {
-		if ( substr( $content, 0, 11 ) === 'rawdeflate,' ) {
-			$deflated = base64_decode( substr( $content, 11 ) );
-			Wikimedia\suppressWarnings();
-			$inflated = gzinflate( $deflated );
-			Wikimedia\restoreWarnings();
-			if ( $deflated === $inflated || $inflated === false ) {
-				// Static equivalent of $this->dieWithError
-				throw ApiUsageException::newWithMessage(
-					null,
-					'apierror-visualeditor-invaliddeflate',
-					'invaliddeflate'
-				);
-			}
-			return $inflated;
-		}
-		return $content;
-	}
-
-	/**
 	 * Create and load the parsed wikitext of an edit, or from the serialisation cache if available.
 	 *
-	 * @param string $title The title of the page
+	 * @param Title $title The title of the page
 	 * @param array $params The edit parameters
 	 * @param array $parserParams The parser parameters
 	 * @return string The wikitext of the edit
 	 */
-	protected function getWikitext( $title, $params, $parserParams ) {
+	protected function getWikitext( Title $title, $params, $parserParams ) {
 		if ( $params['cachekey'] !== null ) {
 			$wikitext = $this->trySerializationCache( $params['cachekey'] );
 			if ( !is_string( $wikitext ) ) {
@@ -183,15 +158,24 @@ class ApiVisualEditorEdit extends ApiVisualEditor {
 	/**
 	 * Create and load the parsed wikitext of an edit, ignoring the serialisation cache.
 	 *
-	 * @param string $title The title of the page
+	 * @param Title $title The title of the page
 	 * @param array $params The edit parameters
 	 * @param array $parserParams The parser parameters
 	 * @return string The wikitext of the edit
 	 */
-	protected function getWikitextNoCache( $title, $params, $parserParams ) {
+	protected function getWikitextNoCache( Title $title, $params, $parserParams ) {
 		$this->requireOnlyOneParameter( $params, 'html' );
+		if ( EasyDeflate::isDeflated( $params['html'] ) ) {
+			$status = EasyDeflate::inflate( $params['html'] );
+			if ( !$status->isGood() ) {
+				$this->dieWithError( 'easydeflate-invaliddeflate', 'invaliddeflate' );
+			}
+			$html = $status->getValue();
+		} else {
+			$html = $params['html'];
+		}
 		$wikitext = $this->postHTML(
-			$title, self::tryDeflate( $params['html'] ), $parserParams, $params['etag']
+			$title, $html, $parserParams, $params['etag']
 		);
 		if ( $wikitext === false ) {
 			$this->dieWithError( 'apierror-visualeditor-docserver', 'docserver' );
@@ -202,11 +186,11 @@ class ApiVisualEditorEdit extends ApiVisualEditor {
 	/**
 	 * Load the parsed wikitext of an edit into the serialisation cache.
 	 *
-	 * @param string $title The title of the page
+	 * @param Title $title The title of the page
 	 * @param string $wikitext The wikitext of the edit
 	 * @return string The key of the wikitext in the serialisation cache
 	 */
-	protected function storeInSerializationCache( $title, $wikitext ) {
+	protected function storeInSerializationCache( Title $title, $wikitext ) {
 		global $wgMemc;
 
 		if ( $wikitext === false ) {
@@ -215,7 +199,7 @@ class ApiVisualEditorEdit extends ApiVisualEditor {
 
 		// Store the corresponding wikitext, referenceable by a new key
 		$hash = md5( $wikitext );
-		$key = wfMemcKey( 'visualeditor', 'serialization', $hash );
+		$key = $wgMemc->makeKey( 'visualeditor', 'serialization', $hash );
 		$wgMemc->set( $key, $wikitext,
 			$this->veConfig->get( 'VisualEditorSerializationCacheTimeout' ) );
 
@@ -243,7 +227,7 @@ class ApiVisualEditorEdit extends ApiVisualEditor {
 	 */
 	protected function trySerializationCache( $hash ) {
 		global $wgMemc;
-		$key = wfMemcKey( 'visualeditor', 'serialization', $hash );
+		$key = $wgMemc->makeKey( 'visualeditor', 'serialization', $hash );
 		return $wgMemc->get( $key );
 	}
 
@@ -251,18 +235,19 @@ class ApiVisualEditorEdit extends ApiVisualEditor {
 	 * Transform HTML to wikitext via Parsoid through RESTbase.
 	 *
 	 * @param string $path The RESTbase path of the transform endpoint
-	 * @param string $title The title of the page
+	 * @param Title $title The title of the page
 	 * @param array $data An array of the HTML and the 'scrub_wikitext' option
 	 * @param array $parserParams Parsoid parser paramters to pass in
 	 * @param string $etag The ETag to set in the HTTP request header
 	 * @return string Body of the RESTbase server's response
 	 */
-	protected function postData( $path, $title, $data, $parserParams, $etag ) {
+	protected function postData( $path, Title $title, $data, $parserParams, $etag ) {
 		$path .= urlencode( $title->getPrefixedDBkey() );
 		if ( isset( $parserParams['oldid'] ) && $parserParams['oldid'] ) {
 			$path .= '/' . $parserParams['oldid'];
 		}
 		return $this->requestRestbase(
+			$title,
 			'POST', $path, $data,
 			[ 'If-Match' => $etag ]
 		);
@@ -271,13 +256,13 @@ class ApiVisualEditorEdit extends ApiVisualEditor {
 	/**
 	 * Transform HTML to wikitext via Parsoid through RESTbase. Wrapper for ::postData().
 	 *
-	 * @param string $title The title of the page
+	 * @param Title $title The title of the page
 	 * @param string $html The HTML of the page to be transformed
 	 * @param array $parserParams Parsoid parser paramters to pass in
 	 * @param string $etag The ETag to set in the HTTP request header
 	 * @return string Body of the RESTbase server's response
 	 */
-	protected function postHTML( $title, $html, $parserParams, $etag ) {
+	protected function postHTML( Title $title, $html, $parserParams, $etag ) {
 		return $this->postData(
 			'transform/html/to/wikitext/', $title,
 			[ 'html' => $html, 'scrub_wikitext' => 1 ], $parserParams, $etag
@@ -287,13 +272,13 @@ class ApiVisualEditorEdit extends ApiVisualEditor {
 	/**
 	 * Calculate the different between the wikitext of an edit and an existing revision.
 	 *
-	 * @param string $title The title of the page
+	 * @param Title $title The title of the page
 	 * @param int $fromId The existing revision of the page to compare with
 	 * @param string $wikitext The wikitext to compare against
 	 * @param int|null $section Whether the wikitext refers to a given section or the whole page
 	 * @return array The comparison, or `[ 'result' => 'nochanges' ]` if there are none
 	 */
-	protected function diffWikitext( $title, $fromId, $wikitext, $section = null ) {
+	protected function diffWikitext( Title $title, $fromId, $wikitext, $section = null ) {
 		$apiParams = [
 			'action' => 'compare',
 			'prop' => 'diff',

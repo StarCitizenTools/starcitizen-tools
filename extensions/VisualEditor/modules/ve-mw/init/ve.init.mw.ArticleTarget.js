@@ -37,7 +37,7 @@ ve.init.mw.ArticleTarget = function VeInitMwArticleTarget( config ) {
 	this.toolbarSaveButton = null;
 	this.pageExists = mw.config.get( 'wgRelevantArticleId', 0 ) !== 0;
 	this.toolbarScrollOffset = mw.config.get( 'wgVisualEditorToolbarScrollOffset', 0 );
-	// A workaround, as default URI does not get updated after pushState (bug 72334)
+	// A workaround, as default URI does not get updated after pushState (T74334)
 	this.currentUri = new mw.Uri( location.href );
 	this.section = null;
 	this.sectionTitle = null;
@@ -58,7 +58,7 @@ ve.init.mw.ArticleTarget = function VeInitMwArticleTarget( config ) {
 	this.edited = false;
 	this.restoring = !!this.requestedRevId && this.requestedRevId !== this.currentRevisionId;
 	this.pageDeletedWarning = false;
-	this.submitUrl = ( new mw.Uri( mw.util.getUrl( this.pageName ) ) )
+	this.submitUrl = ( new mw.Uri( mw.util.getUrl( this.getPageName() ) ) )
 		.extend( {
 			action: 'submit',
 			veswitched: 1
@@ -362,7 +362,7 @@ ve.init.mw.ArticleTarget.prototype.loadSuccess = function ( response ) {
 
 		this.initialSourceRange = data.initialSourceRange;
 
-		aboutDoc = this.doc.documentElement.getAttribute( 'about' );
+		aboutDoc = this.doc.documentElement && this.doc.documentElement.getAttribute( 'about' );
 		if ( aboutDoc ) {
 			docRevIdMatches = aboutDoc.match( /revision\/([0-9]*)$/ );
 			if ( docRevIdMatches.length >= 2 ) {
@@ -422,7 +422,7 @@ ve.init.mw.ArticleTarget.prototype.loadSuccess = function ( response ) {
 	this.checkboxesByName = {};
 	if ( [ 'edit', 'submit' ].indexOf( mw.util.getParamValue( 'action' ) ) !== -1 ) {
 		$( '#firstHeading' ).text(
-			mw.Title.newFromText( this.pageName ).getPrefixedText()
+			mw.Title.newFromText( this.getPageName() ).getPrefixedText()
 		);
 	}
 
@@ -510,15 +510,17 @@ ve.init.mw.ArticleTarget.prototype.surfaceReady = function () {
 		// Restore auto-saved transactions if document state was recovered
 		try {
 			surfaceModel.restoreChanges();
-			mw.notify( ve.msg( 'visualeditor-autosave-recovered-text' ), {
-				title: ve.msg( 'visualeditor-autosave-recovered-title' )
-			} );
+			ve.init.platform.notify(
+				ve.msg( 'visualeditor-autosave-recovered-text' ),
+				ve.msg( 'visualeditor-autosave-recovered-title' )
+			);
 		} catch ( e ) {
 			mw.log.warn( e );
-			mw.notify( ve.msg( 'visualeditor-autosave-not-recovered-text' ), {
-				title: ve.msg( 'visualeditor-autosave-not-recovered-title' ),
-				type: 'error'
-			} );
+			ve.init.platform.notify(
+				ve.msg( 'visualeditor-autosave-not-recovered-text' ),
+				ve.msg( 'visualeditor-autosave-not-recovered-title' ),
+				{ type: 'error' }
+			);
 		}
 	} else {
 		// ...otherwise store this document state for later recovery
@@ -540,6 +542,12 @@ ve.init.mw.ArticleTarget.prototype.surfaceReady = function () {
 	surfaceModel.startStoringChanges();
 	// TODO: Listen to autosaveFailed event to notify user
 
+	// Start loading easy-deflate module in the background, so it's
+	// already loaded when the save dialog is opened.
+	setTimeout( function () {
+		mw.loader.load( 'easy-deflate.deflate' );
+	}, 500 );
+
 	// Parent method
 	ve.init.mw.ArticleTarget.super.prototype.surfaceReady.apply( this, arguments );
 };
@@ -553,7 +561,7 @@ ve.init.mw.ArticleTarget.prototype.storeDocState = function ( html ) {
 	var mode = this.getSurface().getMode();
 	this.getSurface().getModel().storeDocState( {
 		request: {
-			pageName: this.pageName,
+			pageName: this.getPageName(),
 			mode: mode,
 			// Only source mode fetches data by section
 			section: mode === 'source' ? this.section : null
@@ -1122,10 +1130,10 @@ ve.init.mw.ArticleTarget.prototype.onSaveDialogPreview = function () {
 			wikitext = '== ' + this.sectionTitle.getValue() + ' ==\n\n' + wikitext;
 		}
 
-		new mw.Api().post( {
+		this.getContentApi().post( {
 			action: 'visualeditor',
 			paction: 'parsedoc',
-			page: this.pageName,
+			page: this.getPageName(),
 			wikitext: wikitext,
 			pst: true
 		} ).always( function ( response, details ) {
@@ -1197,20 +1205,21 @@ ve.init.mw.ArticleTarget.prototype.getVisualDiffGeneratorPromise = function () {
 				// re-fetch the HTML
 				target.originalDmDocPromise = $.Deferred().resolve( target.constructor.static.createModelFromDom( target.doc, 'visual' ) ).promise();
 			} else {
-				target.originalDmDocPromise = mw.libs.ve.diffLoader.fetchRevision( target.revid, target.pageName, undefined, target.section !== null ? target.section : undefined );
+				target.originalDmDocPromise = mw.libs.ve.diffLoader.fetchRevision( target.revid, target.getPageName(), undefined, target.section !== null ? target.section : undefined );
 			}
 		}
 
 		if ( target.getSurface().getMode() === 'source' ) {
-			newRevPromise = mw.libs.ve.targetLoader.requestParsoidData(
-				mw.config.get( 'wgRelevantPageName' ),
-				{
-					oldId: target.revid,
-					targetName: 'diff',
-					modified: true,
-					wikitext: ve.init.target.getSurface().getDom()
-				}
-			).then( mw.libs.ve.diffLoader.getModelFromResponse );
+			newRevPromise = target.getContentApi().post( {
+				action: 'visualeditor',
+				paction: 'parsedoc',
+				page: target.getPageName(),
+				wikitext: ve.init.target.getSurface().getDom(),
+				pst: true
+			} ).then( function ( response ) {
+				// Use anonymous function to avoid passing through API promise argument
+				return mw.libs.ve.diffLoader.getModelFromResponse( response );
+			} );
 
 			return mw.libs.ve.diffLoader.getVisualDiffGeneratorPromise( target.originalDmDocPromise, newRevPromise );
 		} else {
@@ -1293,7 +1302,7 @@ ve.init.mw.ArticleTarget.prototype.load = function ( dataPromise ) {
 	this.events.trackActivationStart( mw.libs.ve.activationStart );
 	mw.libs.ve.activationStart = null;
 
-	this.loading = dataPromise || mw.libs.ve.targetLoader.requestPageData( this.getDefaultMode(), this.pageName, {
+	this.loading = dataPromise || mw.libs.ve.targetLoader.requestPageData( this.getDefaultMode(), this.getPageName(), {
 		sessionStore: true,
 		section: this.section,
 		oldId: this.requestedRevId,
@@ -1411,12 +1420,12 @@ ve.init.mw.ArticleTarget.prototype.prepareCacheKey = function ( doc ) {
 			if ( aborted ) {
 				return $.Deferred().reject();
 			}
-			xhr = new mw.Api().postWithToken( 'csrf',
+			xhr = target.getContentApi().postWithToken( 'csrf',
 				{
 					action: 'visualeditoredit',
 					paction: 'serializeforcache',
 					html: deflatedHtml,
-					page: target.pageName,
+					page: target.getPageName(),
 					oldid: target.revid,
 					etag: target.etag
 				},
@@ -1497,7 +1506,7 @@ ve.init.mw.ArticleTarget.prototype.clearPreparedCacheKey = function () {
  * @return {jQuery.Promise}
  */
 ve.init.mw.ArticleTarget.prototype.tryWithPreparedCacheKey = function ( doc, options, eventName ) {
-	var data, postData, preparedCacheKey,
+	var data, postData, preparedCacheKey, api,
 		target = this;
 
 	if ( this.getSurface().getMode() === 'source' ) {
@@ -1513,10 +1522,11 @@ ve.init.mw.ArticleTarget.prototype.tryWithPreparedCacheKey = function ( doc, opt
 			postData.sectiontitle = this.sectionTitle.getValue();
 			postData.summary = undefined;
 		}
+		api = this.getContentApi();
 		if ( postData.token ) {
-			return new mw.Api().post( postData, { contentType: 'multipart/form-data' } );
+			return api.post( postData, { contentType: 'multipart/form-data' } );
 		}
-		return new mw.Api().postWithToken( 'csrf', postData, { contentType: 'multipart/form-data' } );
+		return api.postWithToken( 'csrf', postData, { contentType: 'multipart/form-data' } );
 	}
 
 	preparedCacheKey = this.getPreparedCacheKey( doc );
@@ -1542,10 +1552,11 @@ ve.init.mw.ArticleTarget.prototype.tryWithPreparedCacheKey = function ( doc, opt
 		}
 		return deflatePromise
 			.then( function () {
+				var api = target.getContentApi();
 				if ( data.token ) {
-					return new mw.Api().post( data, { contentType: 'multipart/form-data' } );
+					return api.post( data, { contentType: 'multipart/form-data' } );
 				}
-				return new mw.Api().postWithToken( 'csrf', data, { contentType: 'multipart/form-data' } );
+				return api.postWithToken( 'csrf', data, { contentType: 'multipart/form-data' } );
 			} )
 			.then(
 				function ( response, jqxhr ) {
@@ -1738,7 +1749,7 @@ ve.init.mw.ArticleTarget.prototype.save = function ( doc, options, isRetry ) {
 	data = ve.extendObject( {}, options, {
 		action: 'visualeditoredit',
 		paction: 'save',
-		page: this.pageName,
+		page: this.getPageName(),
 		oldid: this.revid,
 		basetimestamp: this.baseTimeStamp,
 		starttimestamp: this.startTimeStamp,
@@ -1797,7 +1808,7 @@ ve.init.mw.ArticleTarget.prototype.getWikitextDiffPromise = function ( doc ) {
 		this.wikitextDiffPromise = this.tryWithPreparedCacheKey( doc, {
 			action: 'visualeditoredit',
 			paction: 'diff',
-			page: this.pageName,
+			page: this.getPageName(),
 			oldid: this.revid,
 			etag: this.etag
 		}, 'diff' ).then( function ( response ) {
@@ -1854,8 +1865,11 @@ ve.init.mw.ArticleTarget.prototype.submit = function ( wikitext, fields ) {
 		wpStarttime: this.startTimeStamp,
 		wpEdittime: this.baseTimeStamp,
 		wpTextbox1: wikitext,
+		wpEditToken: this.editToken,
+		// MediaWiki function-verification parameters, mostly relevant to the
+		// classic editpage, but still required here:
 		wpUnicodeCheck: 'ℳ𝒲♥𝓊𝓃𝒾𝒸ℴ𝒹ℯ',
-		wpEditToken: this.editToken
+		wpUltimateParam: true
 	}, fields );
 	// Add params as hidden fields
 	for ( key in params ) {
@@ -1893,7 +1907,7 @@ ve.init.mw.ArticleTarget.prototype.serialize = function ( doc, callback ) {
 	this.serializing = this.tryWithPreparedCacheKey( doc, {
 		action: 'visualeditoredit',
 		paction: 'serialize',
-		page: this.pageName,
+		page: this.getPageName(),
 		oldid: this.revid,
 		etag: this.etag
 	}, 'serialize' )
@@ -1946,6 +1960,8 @@ ve.init.mw.ArticleTarget.prototype.teardown = function () {
 	if ( surface ) {
 		// If target is closed cleanly (after save or deliberate close) then remove autosave state
 		surface.getModel().removeDocStateAndChanges();
+		// Disconnect history listener
+		surface.getModel().disconnect( this );
 	}
 	return ve.init.mw.ArticleTarget.super.prototype.teardown.call( this );
 };
@@ -2239,8 +2255,7 @@ ve.init.mw.ArticleTarget.prototype.restoreEditSection = function () {
 				.replace( /\[\[:?([^[]+)\|?\]\]/, '$1' )
 				.replace( new RegExp( '\\[(?:' + ve.init.platform.getUnanchoredExternalLinkUrlProtocolsRegExp().source + ')([^ ]+?) ([^\\[]+)\\]', 'i' ), '$3' )
 				// Cheap HTML removal
-				.replace( /<[^>]+?>/g, '' )
-			;
+				.replace( /<[^>]+?>/g, '' );
 		}
 		if ( headingText ) {
 			this.initialEditSummary =
@@ -2369,7 +2384,7 @@ ve.init.mw.ArticleTarget.prototype.maybeShowWelcomeDialog = function () {
 		}
 
 		if ( prefSaysShow ) {
-			new mw.Api().saveOption( 'visualeditor-hidebetawelcome', '1' );
+			ve.init.target.getLocalApi().saveOption( 'visualeditor-hidebetawelcome', '1' );
 			mw.user.options.set( 'visualeditor-hidebetawelcome', '1' );
 
 			// No need to set a cookie every time for logged-in users that have already
@@ -2401,7 +2416,7 @@ ve.init.mw.ArticleTarget.prototype.switchToWikitextEditor = function ( discardCh
 
 	if ( ve.init.target.isModeAvailable( 'source' ) && !leaveVE ) {
 		if ( discardChanges ) {
-			dataPromise = mw.libs.ve.targetLoader.requestPageData( 'source', this.pageName, {
+			dataPromise = mw.libs.ve.targetLoader.requestPageData( 'source', this.getPageName(), {
 				sessionStore: true,
 				section: this.section,
 				oldId: this.requestedRevId,
@@ -2457,6 +2472,12 @@ ve.init.mw.ArticleTarget.prototype.switchToVisualEditor = function () {
 	var dataPromise, windowManager, switchWindow,
 		target = this;
 
+	if ( !this.edited ) {
+		this.section = null;
+		this.reloadSurface( 'visual' );
+		return;
+	}
+
 	// Show a discard-only confirm dialog, and then reload the whole page, if:
 	if (
 		// * section editing in WT, as WT -> VE is not yet supported, or
@@ -2477,7 +2498,7 @@ ve.init.mw.ArticleTarget.prototype.switchToVisualEditor = function () {
 				windowManager.destroy();
 			} );
 	} else {
-		dataPromise = mw.libs.ve.targetLoader.requestParsoidData( this.pageName, {
+		dataPromise = mw.libs.ve.targetLoader.requestParsoidData( this.getPageName(), {
 			oldId: this.revid,
 			targetName: this.constructor.static.trackingName,
 			modified: this.edited,
@@ -2492,7 +2513,7 @@ ve.init.mw.ArticleTarget.prototype.switchToVisualEditor = function () {
  * Switch to a different wikitext section
  *
  * @param {number|string|null} section New section, number, 'new' or null (whole document)
- * @param {boolean} noConfirm Swtich without prompting (changes will be lost either way)
+ * @param {boolean} noConfirm Switch without prompting (changes will be lost either way)
  */
 ve.init.mw.ArticleTarget.prototype.switchToWikitextSection = function ( section, noConfirm ) {
 	var promise,
@@ -2583,24 +2604,69 @@ ve.init.mw.ArticleTarget.prototype.updateRedirectInterface = function ( $sub, $m
 };
 
 /**
- * Set temporary redirect interface to match the current state of redirection in the editor.
+ * Render a list of categories
  *
- * @param {string|null} title Current redirect target, or null if none
+ * @param {ve.dm.MetaItem[]} categoryItems Array of category metaitems to display
+ * @return {jQuery.Promise} A promise which will be resolved with the rendered categories
  */
-ve.init.mw.ArticleTarget.prototype.setFakeRedirectInterface = function ( title ) {
-	this.updateRedirectInterface(
-		title ? this.constructor.static.buildRedirectSub() : $(),
-		title ? this.constructor.static.buildRedirectMsg( title ) : $()
-	);
-};
-
-/**
- * Set the redirect interface to match the page's redirect state.
- */
-ve.init.mw.ArticleTarget.prototype.setRealRedirectInterface = function () {
-	this.updateRedirectInterface(
-		mw.config.get( 'wgIsRedirect' ) ? this.buildRedirectSub() : $(),
-		// Remove our custom content header - the original one in #mw-content-text will be shown
-		$()
-	);
+ve.init.mw.ArticleTarget.prototype.renderCategories = function ( categoryItems ) {
+	var $normal, $hidden,
+		promises = [],
+		categories = { hidden: [], normal: [] };
+	categoryItems.forEach( function ( categoryItem, index ) {
+		var attributes = ve.cloneObject( ve.getProp( categoryItem, 'element', 'attributes' ) );
+		attributes.index = index;
+		promises.push( ve.init.platform.linkCache.get( attributes.category ).done( function ( result ) {
+			if ( result.hidden ) {
+				categories.hidden.push( attributes );
+			} else {
+				categories.normal.push( attributes );
+			}
+		} ) );
+	} );
+	return $.when.apply( $, promises ).then( function () {
+		var $output = $( '<div class="catlinks" />' );
+		function renderPageLink( page ) {
+			var title = mw.Title.newFromText( page.category || page );
+			return $( '<a>' ).attr( 'rel', 'mw:WikiLink' ).attr( 'href', title.getUrl() ).text( title.getMainText() );
+		}
+		function renderPageLinks( pages ) {
+			var i, $list = $( '<ul />' );
+			for ( i = 0; i < pages.length; i++ ) {
+				$list.append( $( '<li />' ).append( renderPageLink( pages[ i ] ) ) );
+			}
+			return $list;
+		}
+		function categorySort( a, b ) {
+			return a.index - b.index;
+		}
+		if ( categories.normal.length ) {
+			categories.normal.sort( categorySort );
+			$normal = $( '<div class="mw-normal-catlinks" />' );
+			$normal.append(
+				renderPageLink( ve.msg( 'pagecategorieslink' ) ).text( ve.msg( 'pagecategories', categories.normal.length ) ),
+				ve.msg( 'colon-separator' ),
+				renderPageLinks( categories.normal )
+			);
+			$output.append( $normal );
+		}
+		if ( categories.hidden.length ) {
+			categories.hidden.sort( categorySort );
+			$hidden = $( '<div class="mw-hidden-catlinks" />' );
+			if ( mw.user.options.get( 'showhiddencats' ) ) {
+				$hidden.addClass( 'mw-hidden-cats-user-shown' );
+			} else if ( mw.config.get( 'wgNamespaceIds' ).category === mw.config.get( 'wgNamespaceNumber' ) ) {
+				$hidden.addClass( 'mw-hidden-cats-ns-shown' );
+			} else {
+				$hidden.addClass( 'mw-hidden-cats-hidden' );
+			}
+			$hidden.append(
+				ve.msg( 'hidden-categories', categories.hidden.length ),
+				ve.msg( 'colon-separator' ),
+				renderPageLinks( categories.hidden )
+			);
+			$output.append( $hidden );
+		}
+		return $output;
+	} );
 };

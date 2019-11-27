@@ -23,6 +23,12 @@
 	padding: 1em 2em;
 }
 
+@media ( max-width: 400px ) {
+	.ve-ui-mwMediaDialog-panel-imageinfo-info {
+		padding: 1em 0;
+	}
+}
+
 .ve-ui-mwMediaDialog-panel-imageinfo-main {
 	margin-bottom: 1em;
 }
@@ -71,10 +77,6 @@
 /* HACK: Override ooui specific 2em top margin */
 .ve-ui-mwMediaDialog-caption-fieldset.oo-ui-labelElement.oo-ui-fieldsetLayout {
 	margin-top: 0;
-}
-
-.ve-ui-mwMediaDialog-borderCheckbox {
-	margin-top: 0.4em;
 }
 
 .visualeditor-dialog-media-content-description-link {

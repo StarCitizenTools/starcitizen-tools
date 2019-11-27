@@ -14,7 +14,9 @@
  * @param {ve.ui.Surface} surface
  * @param {Object} [config] Configuration options
  */
-ve.ui.DesktopContext = function VeUiDesktopContext() {
+ve.ui.DesktopContext = function VeUiDesktopContext( surface, config ) {
+	config = config || {};
+
 	// Parent constructor
 	ve.ui.DesktopContext.super.apply( this, arguments );
 
@@ -22,7 +24,7 @@ ve.ui.DesktopContext = function VeUiDesktopContext() {
 	this.popup = new OO.ui.PopupWidget( {
 		hideWhenOutOfView: false,
 		autoFlip: false,
-		$container: this.surface.$element
+		$container: config.$popupContainer || this.surface.$element
 	} );
 	this.position = null;
 	this.embeddable = null;
@@ -49,9 +51,9 @@ ve.ui.DesktopContext = function VeUiDesktopContext() {
 		resize: 'onInspectorResize'
 	} );
 	this.$window.on( {
-		resize: this.onWindowResizeHandler,
-		scroll: this.onWindowScrollDebounced
+		resize: this.onWindowResizeHandler
 	} );
+	ve.addPassiveEventListener( this.$window[ 0 ], 'scroll', this.onWindowScrollDebounced );
 
 	// Initialization
 	this.$element
@@ -431,9 +433,9 @@ ve.ui.DesktopContext.prototype.destroy = function () {
 	this.surface.getModel().disconnect( this );
 	this.inspectors.disconnect( this );
 	this.$window.off( {
-		resize: this.onWindowResizeHandler,
-		scroll: this.onWindowScrollDebounced
+		resize: this.onWindowResizeHandler
 	} );
+	ve.removePassiveEventListener( this.$window[ 0 ], 'scroll', this.onWindowScrollDebounced );
 	// Popups bind scroll events if they're in positioning mode, so make sure that's disabled
 	this.popup.togglePositioning( false );
 

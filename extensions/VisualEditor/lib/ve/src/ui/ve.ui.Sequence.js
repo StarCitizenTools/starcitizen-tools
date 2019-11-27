@@ -115,19 +115,26 @@ ve.ui.Sequence.prototype.execute = function ( surface, range ) {
 		args[ 1 ].strippedSequence = !!this.strip;
 	}
 
-	executed = command.execute( surface, args );
-
-	if ( executed && stripFragment ) {
+	if ( stripFragment ) {
 		// Strip the typed text. This will be undone if the action triggered was
 		// window/open and the window is dismissed
 		stripFragment.removeContent();
 	}
+
+	executed = command.execute( surface, args );
 
 	// Restore user's selection if:
 	// * This sequence was not executed after all
 	// * This sequence is delayed, so it only executes after the user changed the selection
 	if ( !executed || this.delayed ) {
 		originalSelectionFragment.select();
+	}
+
+	if ( stripFragment && !executed ) {
+		surfaceModel.undo();
+		// Prevent redoing (which would remove the typed text)
+		surfaceModel.truncateUndoStack();
+		surfaceModel.emit( 'history' );
 	}
 
 	return executed;
@@ -161,7 +168,7 @@ ve.ui.Sequence.prototype.getCommandName = function () {
  * @param {boolean} explode Whether to return the message split up into some
  *        reasonable sequence of inputs required to trigger the sequence (regexps
  *        in sequences will be considered a single "input" as a toString of
- *        the regexp, because they're hard to display no matter what...)
+ *        the regexp, because they're hard to display no matter what…)
  * @return {string} Message for display
  */
 ve.ui.Sequence.prototype.getMessage = function ( explode ) {

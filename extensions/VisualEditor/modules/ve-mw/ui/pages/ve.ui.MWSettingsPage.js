@@ -31,7 +31,7 @@ ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 
 	this.settingsFieldset = new OO.ui.FieldsetLayout( {
 		label: ve.msg( 'visualeditor-dialog-meta-settings-label' ),
-		icon: 'settings'
+		icon: 'pageSettings'
 	} );
 
 	// Initialization
@@ -78,7 +78,8 @@ ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 	);
 	this.redirectTargetInput = new mw.widgets.TitleInputWidget( {
 		placeholder: ve.msg( 'visualeditor-dialog-meta-settings-redirect-placeholder' ),
-		$overlay: config.$overlay
+		$overlay: config.$overlay,
+		api: ve.init.target.getContentApi()
 	} );
 	this.redirectTargetField = new OO.ui.FieldLayout(
 		this.redirectTargetInput,
@@ -177,7 +178,7 @@ ve.ui.MWSettingsPage.prototype.setOutlineItem = function () {
 
 	if ( this.outlineItem ) {
 		this.outlineItem
-			.setIcon( 'settings' )
+			.setIcon( 'pageSettings' )
 			.setLabel( ve.msg( 'visualeditor-dialog-meta-settings-section' ) );
 	}
 };

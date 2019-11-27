@@ -48,13 +48,8 @@ ve.dm.ElementLinearData.static.endWordRegExp = new RegExp(
  * @return {boolean} Elements are comparable
  */
 ve.dm.ElementLinearData.static.compareElementsUnannotated = function ( a, b ) {
-	var aType, bType,
-		aPlain = a,
+	var aPlain = a,
 		bPlain = b;
-
-	if ( a === undefined || b === undefined ) {
-		return false;
-	}
 
 	if ( Array.isArray( a ) ) {
 		aPlain = a[ 0 ];
@@ -62,34 +57,35 @@ ve.dm.ElementLinearData.static.compareElementsUnannotated = function ( a, b ) {
 	if ( Array.isArray( b ) ) {
 		bPlain = b[ 0 ];
 	}
-	if ( aPlain === bPlain ) {
+	if ( typeof aPlain === 'string' && typeof bPlain === 'string' ) {
+		return aPlain === bPlain;
+	}
+
+	if ( typeof a !== typeof b ) {
+		// Different types
+		return false;
+	}
+
+	// By this point, both must be objects, so must have equal types
+	if ( a.type !== b.type ) {
+		return false;
+	}
+
+	// Both objects are open elements, so compare hashes.
+	// (NB we only need to check one as they have equal .type)
+	if ( ve.dm.LinearData.static.isOpenElementData( a ) ) {
+		// As we are using hashes, we don't need to worry about annotations
+		aPlain = ve.dm.modelRegistry.lookup( a.type ).static.getHashObject( a );
+		delete aPlain.originalDomElementsHash;
+
+		bPlain = ve.dm.modelRegistry.lookup( b.type ).static.getHashObject( b );
+		delete bPlain.originalDomElementsHash;
+
+		return ve.compare( aPlain, bPlain );
+	} else {
+		// Both objects are close elements, no need to compare attributes
 		return true;
 	}
-	if ( a && a.type ) {
-		aType = a.type;
-		if ( ve.dm.LinearData.static.isOpenElementData( a ) ) {
-			// Ignore semantically irrelevant differences
-			aPlain = ve.dm.modelRegistry.lookup( aType ).static.getHashObject( a );
-			delete aPlain.originalDomElementsHash;
-		} else {
-			aPlain = {
-				type: aType
-			};
-		}
-	}
-	if ( b && b.type ) {
-		bType = b.type;
-		if ( ve.dm.LinearData.static.isOpenElementData( b ) ) {
-			// Ignore semantically irrelevant differences
-			bPlain = ve.dm.modelRegistry.lookup( bType ).static.getHashObject( b );
-			delete bPlain.originalDomElementsHash;
-		} else {
-			bPlain = {
-				type: bType
-			};
-		}
-	}
-	return ve.compare( aPlain, bPlain );
 };
 
 /**
@@ -106,19 +102,19 @@ ve.dm.ElementLinearData.static.compareElementsUnannotated = function ( a, b ) {
  * @return {boolean} Elements are comparable
  */
 ve.dm.ElementLinearData.static.compareElements = function ( a, b, aStore, bStore ) {
-	var aType, aSet, bSet, aAnnotations, bAnnotations;
+	var typeofA, aSet, bSet, aAnnotations, bAnnotations;
 
 	if ( a === b ) {
 		return true;
 	}
 
-	aType = typeof a;
+	typeofA = typeof a;
 
-	if ( aType !== typeof b ) {
+	if ( typeofA !== typeof b ) {
 		// Different types
 		return false;
 	}
-	if ( aType === 'string' ) {
+	if ( typeofA === 'string' ) {
 		// Both strings, and not equal
 		return false;
 	}
@@ -763,6 +759,36 @@ ve.dm.ElementLinearData.prototype.isPlainText = function ( range, allowNonConten
 };
 
 /**
+ * Execute a callback function for each group of consecutive content data (text or content element).
+ *
+ * @param {ve.Range} range Range in which to search
+ * @param {Function} callback Function called with the following parameters:
+ * @param {number} callback.offset Offset of the first datum of the run.
+ * @param {string} callback.text Text of the run (with content element opening/closing data
+ *   replaced with U+FFFC).
+ */
+ve.dm.ElementLinearData.prototype.forEachRunOfContent = function ( range, callback ) {
+	var i,
+		text = '';
+
+	for ( i = range.start; i < range.end; i++ ) {
+		if ( !this.isElementData( i ) ) {
+			text += this.getCharacterData( i );
+		} else if ( ve.dm.nodeFactory.isNodeContent( this.getType( i ) ) ) {
+			text += '\uFFFC'; // U+FFFC OBJECT REPLACEMENT CHARACTER
+		} else {
+			if ( text ) {
+				callback( i - text.length, text );
+			}
+			text = '';
+		}
+	}
+	if ( text ) {
+		callback( range.end - text.length, text );
+	}
+};
+
+/**
  * Get the data as plain text
  *
  * @param {boolean} [maintainIndices] Maintain data offset to string index alignment by replacing elements with line breaks
@@ -793,21 +819,7 @@ ve.dm.ElementLinearData.prototype.getText = function ( maintainIndices, range ) 
  * @return {string} Data as original source text
  */
 ve.dm.ElementLinearData.prototype.getSourceText = function ( range ) {
-	var i,
-		data = this.data,
-		text = '';
-
-	range = range || new ve.Range( 0, this.getLength() );
-
-	for ( i = range.start; i < range.end; i++ ) {
-		if ( data[ i ].type === '/paragraph' && ( !data[ i + 1 ] || data[ i + 1 ].type === 'paragraph' ) ) {
-			text += '\n';
-		} else if ( !data[ i ].type ) {
-			text += data[ i ];
-		}
-	}
-
-	return text;
+	return ve.dm.sourceConverter.getSourceTextFromDataRange( this.data, range );
 };
 
 /**
@@ -1336,7 +1348,7 @@ ve.dm.ElementLinearData.prototype.sanitize = function ( rules ) {
 					i--;
 					continue;
 				} else {
-					// ...otherwise replace it with a space
+					// …otherwise replace it with a space
 					if ( typeof this.getData( i ) === 'string' ) {
 						this.data[ i ] = ' ';
 					} else {
@@ -1450,4 +1462,19 @@ ve.dm.ElementLinearData.prototype.hasContent = function () {
 			!ve.dm.nodeFactory.canNodeContainContent( this.getType( 0 ) ) &&
 			!ve.dm.nodeFactory.isNodeInternal( this.getType( 0 ) )
 		);
+};
+
+/**
+ * Get the length of the common start sequence of annotations that applies to a whole range
+ *
+ * @param {ve.Range} range The document range
+ * @return {number} Common start sequence length (0 if the range is empty)
+ */
+ve.dm.ElementLinearData.prototype.getCommonAnnotationArrayLength = function ( range ) {
+	var i,
+		annotationHashesForOffset = [];
+	for ( i = range.start; i < range.end; i++ ) {
+		annotationHashesForOffset.push( this.getAnnotationHashesFromOffset( i ) );
+	}
+	return ve.getCommonStartSequenceLength( annotationHashesForOffset );
 };

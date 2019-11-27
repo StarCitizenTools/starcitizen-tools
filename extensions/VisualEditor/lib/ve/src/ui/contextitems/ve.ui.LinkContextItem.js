@@ -20,6 +20,22 @@ ve.ui.LinkContextItem = function VeUiLinkContextItem( context, model, config ) {
 
 	// Initialization
 	this.$element.addClass( 've-ui-linkContextItem' );
+
+	this.labelPreview = new OO.ui.LabelWidget();
+	this.labelButton = new OO.ui.ButtonWidget( {
+		label: OO.ui.deferMsg( 'visualeditor-linkcontext-label-change' ),
+		framed: false,
+		flags: [ 'progressive' ]
+	} ).connect( this, { click: 'onLabelButtonClick' } );
+
+	this.$labelLayout = $( '<div>' ).addClass( 've-ui-linkContextItem-label' ).append(
+		$( '<div>' ).addClass( 've-ui-linkContextItem-label-label' ).append(
+			new OO.ui.IconWidget( { icon: 'quotes' } ).$element,
+			new OO.ui.LabelWidget( { label: OO.ui.deferMsg( 'visualeditor-linkcontext-label-label' ) } ).$element
+		),
+		$( '<div>' ).addClass( 've-ui-linkContextItem-label-preview' ).append( this.labelPreview.$element ),
+		$( '<div>' ).addClass( 've-ui-linkContextItem-label-action' ).append( this.labelButton.$element )
+	);
 };
 
 /* Inheritance */
@@ -42,6 +58,8 @@ ve.ui.LinkContextItem.static.commandName = 'link';
 
 ve.ui.LinkContextItem.static.clearable = true;
 
+ve.ui.LinkContextItem.static.clearMsg = OO.ui.deferMsg( 'visualeditor-linkcontext-remove' );
+
 /* Methods */
 
 /**
@@ -63,8 +81,34 @@ ve.ui.LinkContextItem.prototype.renderBody = function () {
 				href: ve.resolveUrl( this.model.getHref(), htmlDoc ),
 				target: '_blank',
 				rel: 'noopener'
-			} )
+			} ),
+		this.$labelLayout
 	);
+	this.updateLabelPreview();
+};
+
+/**
+ * Set the preview of the label
+ *
+ * @protected
+ */
+ve.ui.LinkContextItem.prototype.updateLabelPreview = function () {
+	var annotationView = this.getAnnotationView(),
+		label = annotationView && annotationView.$element[ 0 ].innerText.trim();
+	this.labelPreview.setLabel( label || ve.msg( 'visualeditor-linkcontext-label-fallback' ) );
+};
+
+/**
+ * Handle label-edit button click events.
+ *
+ * @localdoc Selects the contents of the link annotation
+ *
+ * @protected
+ */
+ve.ui.LinkContextItem.prototype.onLabelButtonClick = function () {
+	var surface = this.context.getSurface().getView(),
+		annotationView = this.getAnnotationView();
+	surface.selectNodeContents( annotationView.$element[ 0 ] );
 };
 
 /* Registration */

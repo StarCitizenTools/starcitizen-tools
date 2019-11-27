@@ -101,10 +101,10 @@ ve.dm.TableCellNode.static.createData = function ( options ) {
 
 ve.dm.TableCellNode.static.describeChange = function ( key, change ) {
 	if ( key === 'style' ) {
-		return ve.msg( 'visualeditor-changedesc-no-key',
+		return ve.htmlMsg( 'visualeditor-changedesc-no-key',
 			// Either visualeditor-table-format-data or visualeditor-table-format-header
-			ve.msg( 'visualeditor-table-format-' + change.from ),
-			ve.msg( 'visualeditor-table-format-' + change.to )
+			this.wrapText( 'del', ve.msg( 'visualeditor-table-format-' + change.from ) ),
+			this.wrapText( 'ins', ve.msg( 'visualeditor-table-format-' + change.to ) )
 		);
 	}
 	// Parent method

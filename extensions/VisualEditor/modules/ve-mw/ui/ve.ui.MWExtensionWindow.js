@@ -240,7 +240,7 @@ ve.ui.MWExtensionWindow.prototype.removeNode = function () {
 };
 
 /**
- * Update mwData object with the new values from the inspector
+ * Update mwData object with the new values from the inspector or dialog
  *
  * @param {Object} mwData MediaWiki data object
  */
@@ -250,11 +250,11 @@ ve.ui.MWExtensionWindow.prototype.updateMwData = function ( mwData ) {
 
 	// XML-like tags in wikitext are not actually XML and don't expect their contents to be escaped.
 	// This means that it is not possible for a tag '<foo>…</foo>' to contain the string '</foo>'.
-	// Prevent that by escaping the first angle bracket '<' to '&lt;'. (bug 57429)
+	// Prevent that by escaping the first angle bracket '<' to '&lt;'. (T59429)
 	value = value.replace( new RegExp( '<(/' + tagName + '\\s*>)', 'gi' ), '&lt;$1' );
 
 	if ( value.trim() === '' && this.constructor.static.selfCloseEmptyBody ) {
-		mwData.body = null;
+		delete mwData.body;
 	} else {
 		mwData.body = mwData.body || {};
 		mwData.body.extsrc = value;

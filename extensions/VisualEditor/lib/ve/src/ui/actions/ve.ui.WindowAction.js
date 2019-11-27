@@ -139,16 +139,21 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 					}
 				} );
 
-				instance.closing.then( function () {
-					if ( !win.constructor.static.activeSurface ) {
+				if ( !win.constructor.static.activeSurface ) {
+					// Use windowManager events, instead of instance.closing, as the re-activation needs
+					// to happen in the same event cycle as the user click event that closed the window (T203517).
+					windowManager.once( 'closing', function () {
 						surface.getView().activate();
-					}
-				} );
+					} );
+				}
 
 				instance.closed.then( function ( closedData ) {
 					// Sequence-triggered window closed without action, undo
 					if ( data.strippedSequence && !( closedData && closedData.action ) ) {
 						surface.getModel().undo();
+						// Prevent redoing (which would remove the typed text)
+						surface.getModel().truncateUndoStack();
+						surface.getModel().emit( 'history' );
 					}
 					if ( sourceMode && fragment && fragment.getSurface().hasBeenModified() ) {
 						// Action may be async, so we use auto select to ensure the content is selected

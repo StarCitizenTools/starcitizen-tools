@@ -16,6 +16,8 @@
 ve.ui.TableDialog = function VeUiTableDialog( config ) {
 	// Parent constructor
 	ve.ui.TableDialog.super.call( this, config );
+
+	this.$element.addClass( 've-ui-tableDialog' );
 };
 
 /* Inheritance */
@@ -33,7 +35,7 @@ ve.ui.TableDialog.static.title = OO.ui.deferMsg( 'visualeditor-dialog-table-titl
 ve.ui.TableDialog.static.actions = [
 	{
 		action: 'done',
-		label: OO.ui.deferMsg( 'visualeditor-dialog-action-done' ),
+		label: OO.ui.deferMsg( 'visualeditor-dialog-action-apply' ),
 		flags: [ 'primary', 'progressive' ]
 	},
 	{
@@ -55,7 +57,8 @@ ve.ui.TableDialog.prototype.initialize = function () {
 
 	this.panel = new OO.ui.PanelLayout( {
 		padded: true,
-		expanded: false
+		expanded: false,
+		classes: [ 've-ui-tableDialog-panel' ]
 	} );
 
 	this.captionToggle = new OO.ui.ToggleSwitchWidget();

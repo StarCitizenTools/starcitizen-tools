@@ -143,7 +143,7 @@ ve.dm.HashValueStore.prototype.hash = function ( value, stringified ) {
 	if ( !this.hashStore[ hash ] ) {
 		if ( Array.isArray( value ) ) {
 			this.hashStore[ hash ] = ve.copy( value );
-		} else if ( typeof value === 'object' ) {
+		} else if ( value !== null && typeof value === 'object' ) {
 			this.hashStore[ hash ] = ve.cloneObject( value );
 		} else {
 			this.hashStore[ hash ] = value;
@@ -290,46 +290,6 @@ ve.dm.HashValueStore.prototype.difference = function ( omit ) {
 		if ( !Object.prototype.hasOwnProperty.call( omit, hash ) ) {
 			store.hashes.push( hash );
 			store.hashStore[ hash ] = this.hashStore[ hash ];
-		}
-	}
-	return store;
-};
-
-/**
- * @param {ve.dm.Transaction[]} transactions List of transactions
- * @return {ve.dm.HashValueStore} The values in the transactions, in the order they occur
- */
-ve.dm.HashValueStore.prototype.filter = function ( transactions ) {
-	var t, tLen, operations, o, oLen, op, hash, e, eLen, annotations, a, aLen,
-		store = new ve.dm.HashValueStore();
-
-	for ( t = 0, tLen = transactions.length; t < tLen; t++ ) {
-		operations = transactions[ t ].operations;
-		for ( o = 0, oLen = operations.length; o < oLen; o++ ) {
-			op = operations[ o ];
-			if ( op.type === 'annotate' && op.bias === 'start' ) {
-				hash = op.index;
-				if ( !Object.prototype.hasOwnProperty.call( store.hashSet, hash ) ) {
-					store.hashSet[ hash ] = this.hashSet[ hash ];
-					store.hashes.push( hash );
-				}
-			}
-			if ( op.type !== 'replace' ) {
-				continue;
-			}
-			for ( e = 0, eLen = op.insert.length; e < eLen; e++ ) {
-				annotations = op.insert[ e ][ 1 ];
-				if ( !annotations ) {
-					continue;
-				}
-				for ( a = 0, aLen = annotations.length; a < aLen; a++ ) {
-					hash = annotations[ a ];
-					if ( !Object.prototype.hasOwnProperty.call( store.hashSet, hash ) ) {
-						store.hashSet[ hash ] = this.hashSet[ hash ];
-						store.hashes.push( hash );
-					}
-				}
-			}
 		}
 	}
 	return store;

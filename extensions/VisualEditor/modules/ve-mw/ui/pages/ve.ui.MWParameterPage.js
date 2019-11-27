@@ -250,7 +250,7 @@ ve.ui.MWParameterPage.prototype.createValueInput = function () {
 		type === 'wiki-page-name' &&
 		( value === '' || mw.Title.newFromText( value ) )
 	) {
-		return new mw.widgets.TitleInputWidget( valueInputConfig );
+		return new mw.widgets.TitleInputWidget( valueInputConfig, { api: ve.init.target.getContentApi() } );
 	} else if (
 		type === 'wiki-user-name' &&
 		( value === '' || mw.Title.newFromText( value ) )
@@ -260,13 +260,14 @@ ve.ui.MWParameterPage.prototype.createValueInput = function () {
 			// TODO: Check against unicode blacklist regex from MW core's User::isValidUserName
 			return !!mw.Title.newFromText( value );
 		};
-		return new mw.widgets.UserInputWidget( valueInputConfig );
+		return new mw.widgets.UserInputWidget( valueInputConfig, { api: ve.init.target.getContentApi() } );
 	} else if (
 		type === 'wiki-template-name' &&
 		( value === '' || mw.Title.newFromText( value ) )
 	) {
 		return new mw.widgets.TitleInputWidget( $.extend( {}, valueInputConfig, {
-			namespace: mw.config.get( 'wgNamespaceIds' ).template
+			namespace: mw.config.get( 'wgNamespaceIds' ).template,
+			api: ve.init.target.getContentApi()
 		} ) );
 	} else if ( type === 'boolean' && ( value === '1' || value === '0' ) ) {
 		return new ve.ui.MWParameterCheckboxInputWidget( valueInputConfig );
@@ -278,9 +279,13 @@ ve.ui.MWParameterPage.prototype.createValueInput = function () {
 		)
 	) {
 		return ve.ui.MWExternalLinkAnnotationWidget.static.createExternalLinkInputWidget( valueInputConfig );
-	} else if ( type !== 'line' ) {
+	} else if ( type !== 'line' || value.indexOf( '\n' ) !== -1 ) {
+		// If the type is line, but there are already newlines in the provided
+		// value, don't break the existing content by only providing a single-
+		// line field. (This implies that the TemplateData for the field isn't
+		// complying with its use in practice...)
 		this.rawValueInput = true;
-		return new OO.ui.MultilineTextInputWidget( valueInputConfig );
+		return new ve.ui.MWLazyMultilineTextInputWidget( valueInputConfig );
 	}
 
 	return new OO.ui.TextInputWidget( valueInputConfig );

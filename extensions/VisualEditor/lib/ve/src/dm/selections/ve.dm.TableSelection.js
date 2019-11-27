@@ -111,20 +111,6 @@ ve.dm.TableSelection.prototype.expand = function () {
 /**
  * @inheritdoc
  */
-ve.dm.TableSelection.prototype.clone = function () {
-	return new this.constructor(
-		this.getDocument(),
-		this.tableRange,
-		this.fromCol,
-		this.fromRow,
-		this.toCol,
-		this.toRow
-	);
-};
-
-/**
- * @inheritdoc
- */
 ve.dm.TableSelection.prototype.toJSON = function () {
 	return {
 		type: this.constructor.static.name,
@@ -371,14 +357,15 @@ ve.dm.TableSelection.prototype.isMergeable = function () {
  * @return {ve.dm.TableNode} Table node
  */
 ve.dm.TableSelection.prototype.getTableNode = function () {
-	if ( !this.tableNode ) {
+	// Also check if tableNode has been detached
+	if ( !this.tableNode || !this.tableNode.root ) {
 		this.tableNode = this.getDocument().getBranchNodeFromOffset( this.tableRange.start + 1 );
 	}
 	return this.tableNode;
 };
 
 /**
- * Clone this selection with adjusted row and column positions
+ * Get a new selection with adjusted row and column positions
  *
  * Placeholder cells are skipped over so this method can be used for cursoring.
  *

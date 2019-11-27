@@ -64,13 +64,13 @@ ve.dm.MWInternalLinkAnnotation.static.toDataElement = function ( domElements, co
 };
 
 /**
- * Build a ve.dm.MWInternalLinkAnnotation from a given mw.Title.
+ * Build element from a given mw.Title and raw title
  *
  * @param {mw.Title} title The title to link to.
  * @param {string} [rawTitle] String from which the title was created
- * @return {ve.dm.MWInternalLinkAnnotation} The annotation.
+ * @return {Object} The element.
  */
-ve.dm.MWInternalLinkAnnotation.static.newFromTitle = function ( title, rawTitle ) {
+ve.dm.MWInternalLinkAnnotation.static.dataElementFromTitle = function ( title, rawTitle ) {
 	var element,
 		target = title.toText(),
 		namespaceIds = mw.config.get( 'wgNamespaceIds' );
@@ -86,16 +86,31 @@ ve.dm.MWInternalLinkAnnotation.static.newFromTitle = function ( title, rawTitle 
 	}
 
 	element = {
-		type: 'link/mwInternal',
+		type: this.name,
 		attributes: {
 			title: target,
-			normalizedTitle: ve.dm.MWInternalLinkAnnotation.static.normalizeTitle( title ),
-			lookupTitle: ve.dm.MWInternalLinkAnnotation.static.getLookupTitle( title )
+			normalizedTitle: this.normalizeTitle( title ),
+			lookupTitle: this.getLookupTitle( title )
 		}
 	};
+
 	if ( rawTitle ) {
 		element.attributes.origTitle = rawTitle;
 	}
+
+	return element;
+};
+
+/**
+ * Build a ve.dm.MWInternalLinkAnnotation from a given mw.Title.
+ *
+ * @param {mw.Title} title The title to link to.
+ * @param {string} [rawTitle] String from which the title was created
+ * @return {ve.dm.MWInternalLinkAnnotation} The annotation.
+ */
+ve.dm.MWInternalLinkAnnotation.static.newFromTitle = function ( title, rawTitle ) {
+	var element = this.dataElementFromTitle( title, rawTitle );
+
 	return new ve.dm.MWInternalLinkAnnotation( element );
 };
 
@@ -131,7 +146,7 @@ ve.dm.MWInternalLinkAnnotation.static.getTargetDataFromHref = function ( href, d
 	// Check if this matches the server's article path
 	matches = relativeHref.match( relativeBaseRegex );
 
-	if ( matches && matches[ 1 ].indexOf( '?' ) === -1 ) {
+	if ( matches && matches[ 1 ].split( '#' )[ 0 ].indexOf( '?' ) === -1 ) {
 		// Take the relative path
 		href = matches[ 1 ];
 		isInternal = true;
@@ -225,7 +240,7 @@ ve.dm.MWInternalLinkAnnotation.static.getFragment = function ( original ) {
 
 ve.dm.MWInternalLinkAnnotation.static.describeChange = function ( key, change ) {
 	if ( key === 'title' ) {
-		return ve.msg( 'visualeditor-changedesc-link-href', change.from, change.to );
+		return ve.htmlMsg( 'visualeditor-changedesc-link-href', this.wrapText( 'del', change.from ), this.wrapText( 'ins', change.to ) );
 	}
 	return null;
 };

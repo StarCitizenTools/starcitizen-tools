@@ -1,4 +1,4 @@
-/*
+/*!
  * VisualEditor user interface MWTransclusionDialog class.
  *
  * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
@@ -62,16 +62,6 @@ ve.ui.MWTransclusionDialog.static.bookletLayoutConfig = ve.extendObject(
 );
 
 /* Methods */
-
-/**
- * @inheritdoc
- */
-ve.ui.MWTransclusionDialog.prototype.getReadyProcess = function ( data ) {
-	return ve.ui.MWTransclusionDialog.super.prototype.getReadyProcess.call( this, data )
-		.next( function () {
-			this.setMode( 'auto' );
-		}, this );
-};
 
 /**
  * Handle outline controls move events.
@@ -378,8 +368,8 @@ ve.ui.MWTransclusionDialog.prototype.initialize = function () {
 ve.ui.MWTransclusionDialog.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.MWTransclusionDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
-			this.setMode( 'single' );
 			this.updateModeActionState();
+			this.setMode( 'auto' );
 		}, this );
 };
 
