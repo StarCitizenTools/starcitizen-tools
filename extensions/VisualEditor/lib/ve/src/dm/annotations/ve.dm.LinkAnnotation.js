@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel LinkAnnotation class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -49,7 +49,7 @@ ve.dm.LinkAnnotation.static.toDomElements = function ( dataElement, doc ) {
 
 ve.dm.LinkAnnotation.static.describeChange = function ( key, change ) {
 	if ( key === 'href' ) {
-		return ve.msg( 'visualeditor-changedesc-link-href', change.from, change.to );
+		return ve.htmlMsg( 'visualeditor-changedesc-link-href', this.wrapText( 'del', change.from ), this.wrapText( 'ins', change.to ) );
 	}
 	// Parent method
 	return ve.dm.LinkAnnotation.parent.static.describeChange.apply( this, arguments );

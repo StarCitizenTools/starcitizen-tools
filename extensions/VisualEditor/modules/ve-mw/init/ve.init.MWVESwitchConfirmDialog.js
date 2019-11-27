@@ -1,7 +1,7 @@
-/*
+/*!
  * VisualEditor user interface MWVESwitchConfirmDialog class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -67,6 +67,7 @@ mw.libs.ve.SwitchConfirmDialog.prototype.getSetupProcess = function ( data ) {
 				this.actions.setMode( data.mode );
 			} else if (
 				mw.config.get( 'wgVisualEditorConfig' ).fullRestbaseUrl &&
+				// eslint-disable-next-line no-jquery/no-global-selector
 				!$( 'input[name=wpSection]' ).val()
 			) {
 				this.actions.setMode( 'restbase' );

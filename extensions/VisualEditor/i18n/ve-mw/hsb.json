@@ -36,7 +36,6 @@
 	"visualeditor-dialog-media-size-choosecustom": "Swójsku wulkosć nastajić",
 	"visualeditor-dialog-media-size-choosedefault": "Na standardnu wulkosć stajić",
 	"visualeditor-dialog-media-size-choosefull": "Na połnu wulkosć stajić",
-	"visualeditor-dialog-media-size-originalsize-error": "Originalna datajowa wulkosć njeda so wotwołać.",
 	"visualeditor-dialog-media-size-section": "Wobrazowa wulkosć",
 	"visualeditor-dialog-media-title": "Medijowe nastajenja",
 	"visualeditor-dialog-media-type-border": "Ramik",
@@ -156,7 +155,6 @@
 	"visualeditor-toolbar-savedialog": "Stronu składować",
 	"visualeditor-usernamespacepagelink": "Project:Wužiwarski mjenowy rum",
 	"visualeditor-version-label": "Wersija",
-	"visualeditor-viewpage-savewarning": "Chceš so woprawdźe k napohladowemu modusej wróćić, bjeztoho zo by prjedy składował?",
 	"visualeditor-wikitext-warning": "Wužiwaš VisualEditor - [[{{MediaWiki:visualeditor-wikitext-warning-link}}|wikitekst]] tu njefunguje. Zo by kóždy čas k wobdźěłowanju žórłoweho teksta přešoł, bjeztoho zo by swoje změny zhubił, wočiń padacy meni pódla \"{{int:visualeditor-toolbar-savedialog}}\" a wubjer \"{{int:visualeditor-mweditmodesource-title}}\".",
 	"visualeditor-wikitext-warning-title": "Wikitekst namakany"
 }

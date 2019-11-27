@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTransclusionModel class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,17 +16,20 @@
 	 * @mixins OO.EventEmitter
 	 *
 	 * @constructor
+	 * @param {ve.dm.Document} doc Document to use associate with API requests
 	 */
-	ve.dm.MWTransclusionModel = function VeDmMWTransclusionModel() {
+	ve.dm.MWTransclusionModel = function VeDmMWTransclusionModel( doc ) {
 		// Mixin constructors
 		OO.EventEmitter.call( this );
 
 		// Properties
+		this.doc = doc;
 		this.parts = [];
 		this.uid = 0;
 		this.requests = [];
 		this.queue = [];
 		this.specCache = specCache;
+
 	};
 
 	/* Inheritance */
@@ -67,7 +70,6 @@
 		function insertNode( isInline, generatedContents ) {
 			var hash, store, nodeClass,
 				type = isInline ? baseNodeClass.static.inlineType : baseNodeClass.static.blockType,
-				range = surfaceFragment.getSelection().getCoveringRange(),
 				data = [
 					{
 						type: type,
@@ -87,16 +89,8 @@
 				store.hash( generatedContents, hash );
 			}
 
-			if ( range.isCollapsed() ) {
-				surfaceFragment.insertContent( data );
-			} else {
-				// Generate a replacement transaction instead of using surfaceFragment.insertContent
-				// (which generates a removal and insertion) as blanking a reference triggers T135127.
-				// TODO: Once T135127 is fixed, revert to using surfaceFragment.insert.
-				surfaceFragment.getSurface().change(
-					ve.dm.TransactionBuilder.static.newFromReplacement( surfaceFragment.getDocument(), range, data )
-				);
-			}
+			surfaceFragment.insertContent( data );
+
 			deferred.resolve();
 		}
 
@@ -304,7 +298,7 @@
 	};
 
 	ve.dm.MWTransclusionModel.prototype.fetchRequest = function ( titles, specs, queue ) {
-		var xhr = new mw.Api().get( {
+		var xhr = ve.init.target.getContentApi( this.doc ).get( {
 			action: 'templatedata',
 			titles: titles,
 			lang: mw.config.get( 'wgUserLanguage' ),

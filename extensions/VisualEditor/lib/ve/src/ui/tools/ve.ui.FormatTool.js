@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FormatTool classes.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -17,9 +17,6 @@
 ve.ui.FormatTool = function VeUiFormatTool() {
 	// Parent constructor
 	ve.ui.FormatTool.super.apply( this, arguments );
-
-	// Properties
-	this.convertible = false;
 };
 
 /* Inheritance */
@@ -65,7 +62,6 @@ ve.ui.FormatTool.prototype.onUpdateState = function ( fragment ) {
 
 	isMatching = fragment.hasMatchingAncestor( format.type, format.attributes );
 
-	this.convertible = !isMatching;
 	this.setActive( isMatching );
 };
 

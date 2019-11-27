@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface NodeInspector class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -27,6 +27,8 @@ ve.ui.NodeInspector = function VeUiNodeInspector() {
 OO.inheritClass( ve.ui.NodeInspector, ve.ui.FragmentInspector );
 
 OO.mixinClass( ve.ui.NodeInspector, ve.ui.NodeWindow );
+
+/* Methods */
 
 /**
  * @inheritdoc

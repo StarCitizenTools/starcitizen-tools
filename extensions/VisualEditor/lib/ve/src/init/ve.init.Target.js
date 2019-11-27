@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Initialization Target class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -41,6 +41,9 @@ ve.init.Target = function VeInitTarget( config ) {
 	this.toolbarConfig = config.toolbarConfig || {};
 	this.$scrollContainer = this.getScrollContainer();
 	this.toolbarScrollOffset = 0;
+	this.activeToolbars = 0;
+	this.wasSurfaceActive = null;
+	this.teardownPromise = null;
 
 	this.modes = config.modes || this.constructor.static.modes;
 	this.setDefaultMode( config.defaultMode );
@@ -62,6 +65,8 @@ ve.init.Target = function VeInitTarget( config ) {
 
 	// Events
 	this.onDocumentKeyDownHandler = this.onDocumentKeyDown.bind( this );
+	this.onDocumentKeyUpHandler = this.onDocumentKeyUp.bind( this );
+	this.onDocumentVisibilityChangeHandler = this.onDocumentVisibilityChange.bind( this );
 	this.onTargetKeyDownHandler = this.onTargetKeyDown.bind( this );
 	this.onContainerScrollHandler = this.onContainerScroll.bind( this );
 	this.bindHandlers();
@@ -87,10 +92,12 @@ OO.mixinClass( ve.init.Target, OO.EventEmitter );
 ve.init.Target.static.modes = [ 'visual' ];
 
 ve.init.Target.static.toolbarGroups = [
-	// History
-	{ include: [ 'undo', 'redo' ] },
-	// Format
 	{
+		name: 'history',
+		include: [ 'undo', 'redo' ]
+	},
+	{
+		name: 'format',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-paragraph-format' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-format-tooltip' ),
 		type: 'menu',
@@ -98,16 +105,18 @@ ve.init.Target.static.toolbarGroups = [
 		promote: [ 'paragraph' ],
 		demote: [ 'preformatted', 'blockquote' ]
 	},
-	// Text style
 	{
+		name: 'style',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-text-style' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-style-tooltip' ),
 		include: [ 'bold', 'italic', 'moreTextStyle' ]
 	},
-	// Link
-	{ include: [ 'link' ] },
-	// Structure
 	{
+		name: 'link',
+		include: [ 'link' ]
+	},
+	{
+		name: 'structure',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
 		type: 'list',
@@ -115,8 +124,8 @@ ve.init.Target.static.toolbarGroups = [
 		include: [ { group: 'structure' } ],
 		demote: [ 'outdent', 'indent' ]
 	},
-	// Insert
 	{
+		name: 'insert',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
 		type: 'list',
@@ -124,8 +133,10 @@ ve.init.Target.static.toolbarGroups = [
 		label: '',
 		include: '*'
 	},
-	// Special character toolbar
-	{ include: [ 'specialCharacter' ] }
+	{
+		name: 'specialCharacter',
+		include: [ 'specialCharacter' ]
+	}
 ];
 
 ve.init.Target.static.actionGroups = [];
@@ -191,28 +202,34 @@ ve.init.Target.static.importRules = {
 /* Static methods */
 
 /**
+ * Create a document model from an HTML document.
+ *
+ * @param {HTMLDocument|string} doc HTML document or source text
+ * @param {string} mode Editing mode
+ * @param {Object} options Conversion options
+ * @return {ve.dm.Document} Document model
+ */
+ve.init.Target.static.createModelFromDom = function ( doc, mode, options ) {
+	if ( mode === 'source' ) {
+		return ve.dm.sourceConverter.getModelFromSourceText( doc, options );
+	} else {
+		return ve.dm.converter.getModelFromDom( doc, options );
+	}
+};
+
+/**
  * Parse document string into an HTML document
  *
  * @param {string} documentString Document. Note that this must really be a whole document
  *   with a single root tag.
  * @param {string} mode Editing mode
- * @return {HTMLDocument} HTML document
+ * @return {HTMLDocument|string} HTML document, or document string (source mode)
  */
 ve.init.Target.static.parseDocument = function ( documentString, mode ) {
-	var doc;
 	if ( mode === 'source' ) {
-		// Parse as plain text in source mode
-		doc = ve.createDocumentFromHtml( '' );
-
-		documentString.split( '\n' ).forEach( function ( line ) {
-			var p = doc.createElement( 'p' );
-			p.appendChild( doc.createTextNode( line ) );
-			doc.body.appendChild( p );
-		} );
-	} else {
-		doc = ve.createDocumentFromHtml( documentString );
+		return documentString;
 	}
-	return doc;
+	return ve.createDocumentFromHtml( documentString );
 };
 
 // Deprecated alias
@@ -273,18 +290,26 @@ ve.init.Target.prototype.isModeAvailable = function ( mode ) {
  * Bind event handlers to target and document
  */
 ve.init.Target.prototype.bindHandlers = function () {
-	$( this.getElementDocument() ).on( 'keydown', this.onDocumentKeyDownHandler );
+	$( this.getElementDocument() ).on( {
+		keydown: this.onDocumentKeyDownHandler,
+		keyup: this.onDocumentKeyUpHandler,
+		visibilitychange: this.onDocumentVisibilityChangeHandler
+	} );
 	this.$element.on( 'keydown', this.onTargetKeyDownHandler );
-	this.$scrollContainer.on( 'scroll', this.onContainerScrollHandler );
+	ve.addPassiveEventListener( this.$scrollContainer[ 0 ], 'scroll', this.onContainerScrollHandler );
 };
 
 /**
  * Unbind event handlers on target and document
  */
 ve.init.Target.prototype.unbindHandlers = function () {
-	$( this.getElementDocument() ).off( 'keydown', this.onDocumentKeyDownHandler );
+	$( this.getElementDocument() ).off( {
+		keydown: this.onDocumentKeyDownHandler,
+		keyup: this.onDocumentKeyUpHandler,
+		visibilitychange: this.onDocumentVisibilityChangeHandler
+	} );
 	this.$element.off( 'keydown', this.onTargetKeyDownHandler );
-	this.$scrollContainer.off( 'scroll', this.onContainerScrollHandler );
+	ve.removePassiveEventListener( this.$scrollContainer[ 0 ], 'scroll', this.onContainerScrollHandler );
 };
 
 /**
@@ -293,18 +318,23 @@ ve.init.Target.prototype.unbindHandlers = function () {
  * @return {jQuery.Promise} Promise which resolves when the target has been torn down
  */
 ve.init.Target.prototype.teardown = function () {
-	this.unbindHandlers();
-	// Wait for the toolbar to teardown before clearing surfaces,
-	// as it may want to transition away
-	return this.teardownToolbar().then( this.clearSurfaces.bind( this ) );
+	if ( !this.teardownPromise ) {
+		this.unbindHandlers();
+		// Wait for the toolbar to teardown before clearing surfaces,
+		// as it may want to transition away
+		this.teardownPromise = this.teardownToolbar().then( this.clearSurfaces.bind( this ) );
+	}
+	return this.teardownPromise;
 };
 
 /**
  * Destroy the target
+ *
+ * @return {jQuery.Promise} Promise which resolves when the target has been destroyed
  */
 ve.init.Target.prototype.destroy = function () {
 	var target = this;
-	this.teardown().then( function () {
+	return this.teardown().then( function () {
 		target.$element.remove();
 		ve.init.target = null;
 	} );
@@ -332,16 +362,27 @@ ve.init.Target.prototype.getScrollContainer = function () {
  * Handle scroll container scroll events
  */
 ve.init.Target.prototype.onContainerScroll = function () {
-	var scrollTop,
+	var scrollTop, wasFloating,
 		toolbar = this.getToolbar();
 
 	if ( toolbar.isFloatable() ) {
+		wasFloating = toolbar.isFloating();
 		scrollTop = this.$scrollContainer.scrollTop();
 
 		if ( scrollTop + this.toolbarScrollOffset > toolbar.getElementOffset().top ) {
 			toolbar.float();
 		} else {
 			toolbar.unfloat();
+		}
+
+		if ( toolbar.isFloating() !== wasFloating ) {
+			// HACK: Re-position any active toolgroup popups. We can't rely on normal event handler order
+			// because we're mixing jQuery and non-jQuery events. T205924#4657203
+			toolbar.getItems().forEach( function ( toolgroup ) {
+				if ( toolgroup instanceof OO.ui.PopupToolGroup && toolgroup.isActive() ) {
+					toolgroup.position();
+				}
+			} );
 		}
 	}
 };
@@ -360,6 +401,27 @@ ve.init.Target.prototype.onDocumentKeyDown = function ( e ) {
 			e.preventDefault();
 		}
 	}
+	// Allows elements to re-style for ctrl+click behaviour, e.g. ve.ce.LinkAnnotation
+	this.$element.toggleClass( 've-init-target-ctrl-meta-down', e.ctrlKey || e.metaKey );
+};
+
+/**
+ * Handle key up events on the document
+ *
+ * @param {jQuery.Event} e Key up event
+ */
+ve.init.Target.prototype.onDocumentKeyUp = function ( e ) {
+	this.$element.toggleClass( 've-init-target-ctrl-meta-down', e.ctrlKey || e.metaKey );
+};
+
+/**
+ * Handle visibility change events on the document
+ *
+ * @param {jQuery.Event} e Visibility change event
+ */
+ve.init.Target.prototype.onDocumentVisibilityChange = function () {
+	// keyup event will be missed if you ctrl+tab away from the page
+	this.$element.removeClass( 've-init-target-ctrl-meta-down' );
 };
 
 /**
@@ -400,12 +462,12 @@ ve.init.Target.prototype.createTargetWidget = function ( config ) {
  * Create a surface.
  *
  * @method
- * @param {ve.dm.Document} dmDoc Document model
+ * @param {ve.dm.Document|ve.dm.Surface} dmDocOrSurface Document model or surface model
  * @param {Object} [config] Configuration options
  * @return {ve.ui.Surface}
  */
-ve.init.Target.prototype.createSurface = function ( dmDoc, config ) {
-	return new ve.ui.Surface( dmDoc, this.getSurfaceConfig( config ) );
+ve.init.Target.prototype.createSurface = function ( dmDocOrSurface, config ) {
+	return new ve.ui.Surface( dmDocOrSurface, this.getSurfaceConfig( config ) );
 };
 
 /**
@@ -433,12 +495,12 @@ ve.init.Target.prototype.getSurfaceConfig = function ( config ) {
 /**
  * Add a surface to the target
  *
- * @param {ve.dm.Document} dmDoc Document model
+ * @param {ve.dm.Document|ve.dm.Surface} dmDocOrSurface Document model or surface model
  * @param {Object} [config] Configuration options
  * @return {ve.ui.Surface}
  */
-ve.init.Target.prototype.addSurface = function ( dmDoc, config ) {
-	var surface = this.createSurface( dmDoc, ve.extendObject( { mode: this.getDefaultMode() }, config ) );
+ve.init.Target.prototype.addSurface = function ( dmDocOrSurface, config ) {
+	var surface = this.createSurface( dmDocOrSurface, ve.extendObject( { mode: this.getDefaultMode() }, config ) );
 	this.surfaces.push( surface );
 	surface.getView().connect( this, {
 		focus: this.onSurfaceViewFocus.bind( this, surface )
@@ -510,7 +572,10 @@ ve.init.Target.prototype.getToolbar = function () {
  */
 ve.init.Target.prototype.getActions = function () {
 	if ( !this.actionsToolbar ) {
-		this.actionsToolbar = new ve.ui.TargetToolbar( this, { position: this.toolbarConfig.position } );
+		this.actionsToolbar = new ve.ui.TargetToolbar( this, {
+			position: this.toolbarConfig.position,
+			$overlay: this.toolbarConfig.$overlay
+		} );
 	}
 	return this.actionsToolbar;
 };
@@ -525,13 +590,43 @@ ve.init.Target.prototype.setupToolbar = function ( surface ) {
 		actions = this.getActions(),
 		rAF = window.requestAnimationFrame || setTimeout;
 
-	toolbar.connect( this, { resize: 'onToolbarResize' } );
+	toolbar.connect( this, {
+		resize: 'onToolbarResize',
+		active: 'onToolbarActive'
+	} );
+	actions.connect( this, { active: 'onToolbarActive' } );
 
 	toolbar.setup( this.constructor.static.toolbarGroups, surface );
 	actions.setup( this.constructor.static.actionGroups, surface );
 	this.attachToolbar();
 	toolbar.$actions.append( actions.$element );
 	rAF( this.onContainerScrollHandler );
+};
+
+/**
+ * Handle active events from the toolbar
+ *
+ * @param {boolean} active The toolbar is active
+ */
+ve.init.Target.prototype.onToolbarActive = function ( active ) {
+	var view = this.getSurface().getView();
+	// Deactivate the surface when the toolbar is active (T109529, T201329)
+	if ( active ) {
+		this.activeToolbars++;
+		if ( this.activeToolbars === 1 ) {
+			// Surface may already be deactived (e.g. link inspector is open)
+			this.wasSurfaceActive = !view.deactivated;
+			if ( this.wasSurfaceActive ) {
+				this.getSurface().getView().deactivate();
+			}
+		}
+	} else {
+		this.activeToolbars--;
+		// Re-active surface if it was active when the toolbar first became active
+		if ( !this.activeToolbars && this.wasSurfaceActive ) {
+			this.getSurface().getView().activate();
+		}
+	}
 };
 
 /**
@@ -548,7 +643,7 @@ ve.init.Target.prototype.teardownToolbar = function () {
 		this.actionsToolbar.destroy();
 		this.actionsToolbar = null;
 	}
-	return $.Deferred().resolve().promise();
+	return ve.createDeferred().resolve().promise();
 };
 
 /**

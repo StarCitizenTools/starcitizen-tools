@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Node class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -54,6 +54,15 @@ ve.ce.Node.static.splitOnEnter = false;
  * @inheritable
  */
 ve.ce.Node.static.isMultiline = null;
+
+/**
+ * Whether a node traps the cursor when active, e.g. in table cells
+ *
+ * @static
+ * @property {boolean}
+ * @inheritable
+ */
+ve.ce.Node.static.trapsCursor = false;
 
 /**
  * Command to execute when Enter is pressed while this node is selected, or when the node is double-clicked.
@@ -120,6 +129,13 @@ ve.ce.Node.prototype.canHaveChildrenNotContent = function () {
  */
 ve.ce.Node.prototype.isInternal = function () {
 	return this.model.isInternal();
+};
+
+/**
+ * @inheritdoc ve.Node
+ */
+ve.ce.Node.prototype.isMetaData = function () {
+	return this.model.isMetaData();
 };
 
 /**
@@ -251,6 +267,15 @@ ve.ce.Node.prototype.isMultiline = function () {
 	} else {
 		return !this.root || this.getRoot().getSurface().getSurface().isMultiline();
 	}
+};
+
+/**
+ * Check if the node traps cursor when active
+ *
+ * @return {boolean} Node traps cursor
+ */
+ve.ce.Node.prototype.trapsCursor = function () {
+	return this.constructor.static.trapsCursor;
 };
 
 /**

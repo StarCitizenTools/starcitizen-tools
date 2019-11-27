@@ -1,6 +1,6 @@
 {
 	"name": "VisualEditor",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"author": [
 		"Alex Monk",
 		"Bartosz Dziewoński",
@@ -22,7 +22,7 @@
 	"license-name": "MIT",
 	"type": "editor",
 	"requires": {
-		"MediaWiki": ">= 1.31.0"
+		"MediaWiki": ">= 1.33.0"
 	},
 	"callback": "VisualEditorHooks::onRegistration",
 	"config": {
@@ -52,6 +52,7 @@
 		"VisualEditorEnableWikitextBetaFeature": false,
 		"VisualEditorEnableDiffPage": false,
 		"VisualEditorEnableDiffPageBetaFeature": false,
+		"VisualEditorEnableVisualSectionEditing": false,
 		"VisualEditorUseSingleEditTab": false,
 		"VisualEditorSingleEditTabSwitchTime": 20160101000000,
 		"VisualEditorTabPosition": "before",
@@ -60,9 +61,11 @@
 			"editsource": "visualeditor-ca-editsource",
 			"create": null,
 			"createsource": "visualeditor-ca-createsource",
+			"editlocaldescription": "edit-local",
 			"editlocaldescriptionsource": "visualeditor-ca-editlocaldescriptionsource",
+			"createlocaldescription": "create-local",
 			"createlocaldescriptionsource": "visualeditor-ca-createlocaldescriptionsource",
-			"editsection": null,
+			"editsection": "editsection",
 			"editsectionsource": "visualeditor-ca-editsource-section"
 		},
 		"VisualEditorAutoAccountEnable": false,
@@ -93,12 +96,6 @@
 					"<",
 					12
 				]
-			],
-			"msie": [
-				[
-					"<",
-					11
-				]
 			]
 		},
 		"VisualEditorEnableTocWidget": false,
@@ -118,6 +115,7 @@
 		"VisualEditor": [
 			"lib/ve/i18n",
 			"i18n/ve-mw",
+			"i18n/ve-mw/api",
 			"i18n/ve-wmf"
 		]
 	},
@@ -161,11 +159,11 @@
 		"ResourceLoaderRegisterModules": [
 			"VisualEditorHooks::onResourceLoaderRegisterModules"
 		],
-		"ResourceLoaderTestModules": [
-			"VisualEditorHooks::onResourceLoaderTestModules"
-		],
 		"SkinTemplateNavigation": [
 			"VisualEditorHooks::onSkinTemplateNavigation"
+		],
+		"SkinTemplateNavigation::SpecialPage": [
+			"SpecialCollabPad::onSkinTemplateNavigationSpecialPage"
 		],
 		"ParserTestGlobals": [
 			"VisualEditorHooks::onParserTestGlobals"
@@ -190,35 +188,22 @@
 		]
 	},
 	"ResourceModules": {
-		"easy-deflate.core": {
-			"scripts": [
-				"lib/Easy-Deflate/easydeflate.js"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
-			]
-		},
-		"easy-deflate.deflate": {
-			"scripts": [
-				"lib/Easy-Deflate/deflate.js"
-			],
-			"dependencies": [
-				"easy-deflate.core"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
-			]
-		},
 		"socket.io": {
 			"scripts": [
 				"lib/ve/lib/socket.io-client/socket.io.min.js"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"dompurify": {
 			"scripts": [
 				"lib/ve/lib/dompurify/purify.js"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"color-picker": {
@@ -227,6 +212,10 @@
 			],
 			"styles": [
 				"lib/ve/lib/color-picker/color-picker.css"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"unicodejs": {
@@ -266,6 +255,44 @@
 				"mobile"
 			]
 		},
+		"ext.visualEditor.sanitize": {
+			"scripts": [
+				"lib/ve/src/ve.sanitize.js"
+			],
+			"dependencies": [
+				"ext.visualEditor.base",
+				"dompurify"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.visualEditor.progressBarWidget": {
+			"scripts": "modules/ve-mw/init/ve.init.mw.ProgressBarWidget.js",
+			"styles": "modules/ve-mw/init/styles/ve.init.mw.ProgressBarWidget.css",
+			"skinStyles": {
+				"default": [
+					"modules/ve-mw/init/styles/ve.init.mw.ProgressBarWidget-wikimediatheme.css"
+				],
+				"vector": [
+					"modules/ve-mw/init/styles/ve.init.mw.ProgressBarWidget-wikimediatheme.css"
+				],
+				"monobook": [
+					"modules/ve-mw/init/styles/ve.init.mw.ProgressBarWidget-apextheme.css"
+				],
+				"apex": [
+					"modules/ve-mw/init/styles/ve.init.mw.ProgressBarWidget-apextheme.css"
+				],
+				"minerva": [
+					"modules/ve-mw/init/styles/ve.init.mw.ProgressBarWidget-wikimediatheme.css"
+				]
+			},
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
 		"ext.visualEditor.tempWikitextEditorWidget": {
 			"scripts": "modules/ve-mw/init/ve.init.mw.TempWikitextEditorWidget.js",
 			"styles": "modules/ve-mw/init/styles/ve.init.mw.TempWikitextEditorWidget.less",
@@ -286,11 +313,19 @@
 				"default": [
 					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget.init-wikimediatheme.css"
 				],
+				"vector": [
+					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget.init-wikimediatheme.css",
+					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget.init-vector.css"
+				],
 				"monobook": [
 					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget.init-apextheme.css"
 				],
 				"apex": [
 					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget.init-apextheme.css"
+				],
+				"minerva": [
+					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget.init-wikimediatheme.css",
+					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget.init-minerva.css"
 				]
 			},
 			"dependencies": [
@@ -303,9 +338,10 @@
 				"mediawiki.Uri",
 				"mediawiki.user",
 				"mediawiki.util",
-				"mediawiki.api.options",
+				"mediawiki.api",
 				"ext.visualEditor.supportCheck",
 				"ext.visualEditor.track",
+				"ext.visualEditor.progressBarWidget",
 				"ext.visualEditor.tempWikitextEditorWidget"
 			],
 			"messages": [
@@ -381,6 +417,9 @@
 				],
 				"monobook": [
 					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget-monobook.css"
+				],
+				"minerva": [
+					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget-minerva.css"
 				]
 			},
 			"dependencies": [
@@ -399,7 +438,6 @@
 				"creating",
 				"editing",
 				"lastmodifiedat",
-				"apierror-readonly",
 				"redirectpagesub",
 				"subject",
 				"visualeditor-loadwarning",
@@ -428,7 +466,6 @@
 				"ext.visualEditor.core.mobile",
 				"ext.visualEditor.articleTarget",
 				"ext.visualEditor.mwextensions",
-				"ext.visualEditor.mwimage.core",
 				"ext.visualEditor.mwlink"
 			],
 			"messages" : [
@@ -441,10 +478,31 @@
 		},
 		"ext.visualEditor.collabTarget": {
 			"scripts": [
-				"modules/ve-mw-collab/ve.init.mw.CollabTarget.js"
+				"modules/ve-mw-collab/ve.init.mw.CollabTarget.js",
+				"modules/ve-mw-collab/ve.ui.MWExportWikitextDialog.js"
+			],
+			"dependencies": [
+				"ext.visualEditor.targetLoader",
+				"ext.visualEditor.base",
+				"ext.visualEditor.mediawiki",
+				"ext.visualEditor.rebase",
+				"oojs-ui.styles.icons-interactions",
+				"oojs-ui.styles.icons-layout"
+			],
+			"messages": [
+				"visualeditor-rebase-client-export",
+				"visualeditor-rebase-client-import-name"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.visualEditor.collabTarget.desktop": {
+			"scripts": [
+				"modules/ve-mw-collab/ve.init.mw.DesktopCollabTarget.js"
 			],
 			"styles": [
-				"modules/ve-mw/init/styles/ve.init.mw.ArticleTarget.css",
 				"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget.css"
 			],
 			"skinStyles": {
@@ -456,15 +514,40 @@
 				],
 				"monobook": [
 					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget-monobook.css"
+				],
+				"minerva": [
+					"modules/ve-mw/init/styles/ve.init.mw.DesktopArticleTarget-minerva.css"
 				]
 			},
 			"dependencies": [
-				"ext.visualEditor.base",
-				"ext.visualEditor.mediawiki",
+				"ext.visualEditor.collabTarget",
 				"ext.visualEditor.core.desktop",
 				"ext.visualEditor.mwextensions.desktop",
-				"ext.visualEditor.desktopTarget",
-				"ext.visualEditor.rebase"
+				"ext.visualEditor.desktopTarget"
+			],
+			"messages" : [
+				"collabpad",
+				"collabpad-doctitle",
+				"collabpad-import-subtitle"
+			],
+			"targets": [
+				"desktop"
+			]
+		},
+		"ext.visualEditor.collabTarget.mobile": {
+			"scripts": [
+				"modules/ve-mw-collab/ve.init.mw.MobileCollabTarget.js"
+			],
+			"styles": [
+				"modules/ve-mw/init/styles/ve.init.mw.MobileArticleTarget.less"
+			],
+			"dependencies": [
+				"ext.visualEditor.collabTarget",
+				"ext.visualEditor.core.mobile",
+				"ext.visualEditor.mwextensions"
+			],
+			"targets": [
+				"mobile"
 			]
 		},
 		"ext.visualEditor.collabTarget.init": {
@@ -472,16 +555,26 @@
 				"modules/ve-mw-collab/ve.init.mw.CollabTarget.init.js"
 			],
 			"dependencies": [
-				"oojs-ui"
+				"oojs-ui",
+				"mediawiki.widgets",
+				"ext.visualEditor.supportCheck"
 			],
 			"messages" : [
 				"collabpad",
 				"collabpad-doctitle"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"ext.visualEditor.collabTarget.init.styles": {
 			"styles": [
 				"modules/ve-mw-collab/ve.init.mw.CollabTarget.css"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"ext.visualEditor.ve": {
@@ -502,13 +595,15 @@
 		"ext.visualEditor.base": {
 			"scripts": [
 				"lib/ve/src/ve.utils.js",
+				"lib/ve/src/ve.utils.client.js",
 				"lib/ve/src/ve.TriggerListener.js",
 				"lib/ve/src/init/ve.init.js",
 				"lib/ve/src/init/ve.init.Platform.js",
 				"lib/ve/src/init/ve.init.Target.js"
 			],
 			"debugScripts": [
-				"lib/ve/src/ve.debug.js"
+				"lib/ve/src/ve.debug.js",
+				"lib/ve/src/ve.freeze.js"
 			],
 			"dependencies": [
 				"oojs",
@@ -533,11 +628,13 @@
 				"modules/ve-mw/init/ve.init.mw.Target.js",
 				"modules/ve-mw/init/ve.init.mw.trackSubscriber.js"
 			],
+			"styles": [
+				"modules/ve-mw/init/styles/ve.init.mw.Target.css"
+			],
 			"dependencies": [
 				"mediawiki.String",
 				"jquery.client",
 				"mediawiki.api",
-				"mediawiki.api.options",
 				"mediawiki.language",
 				"mediawiki.storage",
 				"mediawiki.Title",
@@ -557,28 +654,21 @@
 				"mobile"
 			]
 		},
-		"ext.visualEditor.articleTarget": {
+		"ext.visualEditor.mwsave": {
 			"scripts": [
-				"modules/ve-mw/init/ve.init.mw.ArticleTarget.js",
-				"modules/ve-mw/init/ve.init.mw.ArticleTargetEvents.js",
 				"modules/ve-mw/ui/dialogs/ve.ui.MWSaveDialog.js",
-				"modules/ve-mw/ui/actions/ve.ui.MWSaveDialogAction.js",
-				"modules/ve-mw/ui/tools/ve.ui.MWEditModeTool.js"
+				"modules/ve-mw/ui/actions/ve.ui.MWSaveDialogAction.js"
 			],
 			"styles": [
-				"modules/ve-mw/init/styles/ve.init.mw.ArticleTarget.css",
 				"modules/ve-mw/ui/styles/dialogs/ve.ui.MWSaveDialog.css"
 			],
 			"dependencies": [
 				"mediawiki.String",
 				"jquery.lengthLimit",
-				"ext.visualEditor.mediawiki",
-				"ext.visualEditor.core",
 				"ext.visualEditor.mwcore",
-				"ext.visualEditor.mwextensions",
 				"oojs-ui.styles.icons-accessibility",
 				"oojs-ui.styles.icons-editing-advanced",
-				"oojs-ui.styles.icons-layout"
+				"oojs-ui.styles.icons-interactions"
 			],
 			"messages": [
 				"accesskey-diff",
@@ -588,16 +678,44 @@
 				"accesskey-watch",
 				"colon-separator",
 				"newsectionsummary",
-				"pagecategories",
+				"hidden-categories",
 				"parentheses",
-				"redirectto",
 				"tooltip-minoredit",
 				"tooltip-watch",
+				"visualeditor-diff-no-changes"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.visualEditor.articleTarget": {
+			"scripts": [
+				"modules/ve-mw/init/ve.init.mw.SaveErrorHandler.js",
+				"modules/ve-mw/init/ve.init.mw.ArticleTarget.js",
+				"modules/ve-mw/init/ve.init.mw.ArticleTargetEvents.js",
+				"modules/ve-mw/ui/tools/ve.ui.MWEditModeTool.js"
+			],
+			"dependencies": [
+				"ext.visualEditor.mediawiki",
+				"ext.visualEditor.core",
+				"ext.visualEditor.mwcore",
+				"ext.visualEditor.mwextensions",
+				"ext.visualEditor.mwsave",
+				"mediawiki.widgets.AbandonEditDialog"
+			],
+			"messages": [
+				"accesskey-save",
+				"apierror-readonly",
+				"colon-separator",
+				"pagecategories",
+				"pagecategorieslink",
+				"hidden-categories",
+				"redirectto",
 				"visualeditor-autosave-not-recovered-text",
 				"visualeditor-autosave-not-recovered-title",
 				"visualeditor-autosave-recovered-text",
 				"visualeditor-autosave-recovered-title",
-				"visualeditor-diff-no-changes",
 				"visualeditor-redirect-description"
 			],
 			"targets": [
@@ -633,8 +751,6 @@
 				"lib/ve/src/dm/ve.dm.ResizableNode.js",
 				"lib/ve/src/dm/ve.dm.TableCellableNode.js",
 				"lib/ve/src/dm/ve.dm.Scalable.js",
-				"lib/ve/src/dm/ve.dm.APIResultsProvider.js",
-				"lib/ve/src/dm/ve.dm.APIResultsQueue.js",
 				"lib/ve/src/dm/ve.dm.BranchNode.js",
 				"lib/ve/src/dm/ve.dm.ContentBranchNode.js",
 				"lib/ve/src/dm/ve.dm.LeafNode.js",
@@ -660,6 +776,7 @@
 				"lib/ve/src/dm/ve.dm.LinearData.js",
 				"lib/ve/src/dm/ve.dm.HashValueStore.js",
 				"lib/ve/src/dm/ve.dm.Converter.js",
+				"lib/ve/src/dm/ve.dm.SourceConverter.js",
 				"lib/ve/src/dm/selections/ve.dm.LinearSelection.js",
 				"lib/ve/src/dm/selections/ve.dm.NullSelection.js",
 				"lib/ve/src/dm/selections/ve.dm.TableSelection.js",
@@ -667,11 +784,16 @@
 				"lib/ve/src/dm/lineardata/ve.dm.ElementLinearData.js",
 				"lib/ve/src/dm/nodes/ve.dm.GeneratedContentNode.js",
 				"lib/ve/src/dm/nodes/ve.dm.AlienNode.js",
+				"lib/ve/src/dm/nodes/ve.dm.AlienBlockNode.js",
+				"lib/ve/src/dm/nodes/ve.dm.AlienInlineNode.js",
+				"lib/ve/src/dm/nodes/ve.dm.AlienTableCellNode.js",
 				"lib/ve/src/dm/nodes/ve.dm.ArticleNode.js",
 				"lib/ve/src/dm/nodes/ve.dm.BlockquoteNode.js",
 				"lib/ve/src/dm/nodes/ve.dm.BreakNode.js",
 				"lib/ve/src/dm/nodes/ve.dm.CenterNode.js",
 				"lib/ve/src/dm/nodes/ve.dm.CommentNode.js",
+				"lib/ve/src/dm/nodes/ve.dm.FakeCommentNode.js",
+				"lib/ve/src/dm/nodes/ve.dm.RealCommentNode.js",
 				"lib/ve/src/dm/nodes/ve.dm.DefinitionListItemNode.js",
 				"lib/ve/src/dm/nodes/ve.dm.DefinitionListNode.js",
 				"lib/ve/src/dm/nodes/ve.dm.DivNode.js",
@@ -754,12 +876,14 @@
 				"lib/ve/src/ce/keydownhandlers/ve.ce.LinearEscapeKeyDownHandler.js",
 				"lib/ve/src/ce/keydownhandlers/ve.ce.TableArrowKeyDownHandler.js",
 				"lib/ve/src/ce/keydownhandlers/ve.ce.TableDeleteKeyDownHandler.js",
-				"lib/ve/src/ce/keydownhandlers/ve.ce.TableEnterKeyDownHandler.js",
 				"lib/ve/src/ce/keydownhandlers/ve.ce.LinearTabKeyDownHandler.js",
 				"lib/ve/src/ce/nodes/ve.ce.GeneratedContentNode.js",
 				"lib/ve/src/ce/nodes/ve.ce.ContentEditableNode.js",
 				"lib/ve/src/ce/nodes/ve.ce.ActiveNode.js",
 				"lib/ve/src/ce/nodes/ve.ce.AlienNode.js",
+				"lib/ve/src/ce/nodes/ve.ce.AlienBlockNode.js",
+				"lib/ve/src/ce/nodes/ve.ce.AlienInlineNode.js",
+				"lib/ve/src/ce/nodes/ve.ce.AlienTableCellNode.js",
 				"lib/ve/src/ce/nodes/ve.ce.ArticleNode.js",
 				"lib/ve/src/ce/nodes/ve.ce.BlockquoteNode.js",
 				"lib/ve/src/ce/nodes/ve.ce.BreakNode.js",
@@ -788,6 +912,7 @@
 				"lib/ve/src/ce/nodes/ve.ce.BlockImageNode.js",
 				"lib/ve/src/ce/nodes/ve.ce.BlockImageCaptionNode.js",
 				"lib/ve/src/ce/nodes/ve.ce.InlineImageNode.js",
+				"lib/ve/src/ce/annotations/ve.ce.NailedAnnotation.js",
 				"lib/ve/src/ce/annotations/ve.ce.LinkAnnotation.js",
 				"lib/ve/src/ce/annotations/ve.ce.TextStyleAnnotation.js",
 				"lib/ve/src/ce/annotations/ve.ce.AbbreviationAnnotation.js",
@@ -840,6 +965,7 @@
 				"lib/ve/src/ui/ve.ui.DataTransferHandlerFactory.js",
 				"lib/ve/src/ui/ve.ui.DataTransferItem.js",
 				"lib/ve/src/ui/ve.ui.WindowManager.js",
+				"lib/ve/src/ui/ve.ui.FragmentWindow.js",
 				"lib/ve/src/ui/ve.ui.NodeWindow.js",
 				"lib/ve/src/ui/ve.ui.TabIndexScope.js",
 				"lib/ve/src/ui/windowmanagers/ve.ui.SurfaceWindowManager.js",
@@ -897,6 +1023,8 @@
 				"lib/ve/src/ui/tools/ve.ui.WindowTool.js",
 				"lib/ve/src/ui/tools/ve.ui.FragmentWindowTool.js",
 				"lib/ve/src/ui/tools/ve.ui.FragmentInspectorTool.js",
+				"lib/ve/src/ui/tools/ve.ui.LinkInspectorTool.js",
+				"lib/ve/src/ui/tools/ve.ui.CommentInspectorTool.js",
 				"lib/ve/src/ui/tools/ve.ui.ToolbarDialogTool.js",
 				"lib/ve/src/ui/tools/ve.ui.FormatTool.js",
 				"lib/ve/src/ui/tools/ve.ui.HistoryTool.js",
@@ -911,6 +1039,7 @@
 				"lib/ve/src/ui/pages/ve.ui.SpecialCharacterPage.js"
 			],
 			"debugScripts": [
+				"lib/ve/src/ce/ve.ce.debug.js",
 				"lib/ve/src/ui/ve.ui.DebugBar.js",
 				"lib/ve/src/ve.Filibuster.js"
 			],
@@ -920,7 +1049,7 @@
 				"lib/ve/src/ce/styles/nodes/ve.ce.AlienNode.css",
 				"lib/ve/src/ce/styles/nodes/ve.ce.BranchNode.css",
 				"lib/ve/src/ce/styles/nodes/ve.ce.ContentBranchNode.css",
-				"lib/ve/src/ce/styles/nodes/ve.ce.DocumentNode.css",
+				"lib/ve/src/ce/styles/nodes/ve.ce.RootNode.css",
 				"lib/ve/src/ce/styles/nodes/ve.ce.GeneratedContentNode.css",
 				"lib/ve/src/ce/styles/nodes/ve.ce.HorizontalRuleNode.css",
 				"lib/ve/src/ce/styles/nodes/ve.ce.CommentNode.css",
@@ -936,6 +1065,8 @@
 				"lib/ve/src/ui/styles/dialogs/ve.ui.FindAndReplaceDialog.css",
 				"lib/ve/src/ui/styles/dialogs/ve.ui.ProgressDialog.css",
 				"lib/ve/src/ui/styles/dialogs/ve.ui.SpecialCharacterDialog.css",
+				"lib/ve/src/ui/styles/dialogs/ve.ui.TableDialog.css",
+				"lib/ve/src/ui/styles/elements/ve.ui.PreviewElement.css",
 				"lib/ve/src/ui/styles/tools/ve.ui.FormatTool.css",
 				"lib/ve/src/ui/styles/widgets/ve.ui.ContextOptionWidget.css",
 				"lib/ve/src/ui/styles/widgets/ve.ui.ContextSelectWidget.css",
@@ -962,6 +1093,9 @@
 				"vector": [
 					"lib/ve/src/themes/wikimediaui.css"
 				],
+				"minerva": [
+					"lib/ve/src/themes/wikimediaui.css"
+				],
 				"apex": [
 					"lib/ve/src/themes/apex.css"
 				],
@@ -982,6 +1116,11 @@
 				"visualeditor",
 				"visualeditor-aliencontextitem-title",
 				"visualeditor-aliennode-tooltip",
+				"visualeditor-align-desc-center",
+				"visualeditor-align-desc-default",
+				"visualeditor-align-desc-left",
+				"visualeditor-align-desc-none",
+				"visualeditor-align-desc-right",
 				"visualeditor-align-widget-center",
 				"visualeditor-align-widget-default",
 				"visualeditor-align-widget-left",
@@ -1013,6 +1152,7 @@
 				"visualeditor-content-select-all",
 				"visualeditor-contextitemwidget-label-remove",
 				"visualeditor-contextitemwidget-label-secondary",
+				"visualeditor-contextitemwidget-label-view",
 				"visualeditor-debugbar-close",
 				"visualeditor-debugbar-inputdebug",
 				"visualeditor-debugbar-logrange",
@@ -1020,6 +1160,7 @@
 				"visualeditor-debugbar-showtransactions",
 				"visualeditor-debugbar-startfilibuster",
 				"visualeditor-debugbar-stopfilibuster",
+				"visualeditor-debugbar-testsquasher",
 				"visualeditor-debugbar-updatemodel",
 				"visualeditor-dialog-action-apply",
 				"visualeditor-dialog-action-cancel",
@@ -1062,6 +1203,7 @@
 				"visualeditor-help-tool",
 				"visualeditor-historybutton-redo-tooltip",
 				"visualeditor-historybutton-undo-tooltip",
+				"visualeditor-horizontalrule-tooltip",
 				"visualeditor-indentationbutton-indent-tooltip",
 				"visualeditor-indentationbutton-outdent-tooltip",
 				"visualeditor-inspector-close-tooltip",
@@ -1085,11 +1227,14 @@
 				"visualeditor-key-space",
 				"visualeditor-key-tab",
 				"visualeditor-key-up",
+				"visualeditor-languagecontext-remove",
+				"visualeditor-linkcontext-label-change",
+				"visualeditor-linkcontext-label-fallback",
+				"visualeditor-linkcontext-label-label",
+				"visualeditor-linkcontext-remove",
 				"visualeditor-linkinspector-title",
 				"visualeditor-listbutton-bullet-tooltip",
 				"visualeditor-listbutton-number-tooltip",
-				"visualeditor-mediasizewidget-button-originaldimensions",
-				"visualeditor-mediasizewidget-label-custom",
 				"visualeditor-mediasizewidget-label-defaulterror",
 				"visualeditor-mediasizewidget-label-scale",
 				"visualeditor-mediasizewidget-label-scale-percent",
@@ -1100,6 +1245,7 @@
 				"visualeditor-shortcuts-dialog",
 				"visualeditor-shortcuts-formatting",
 				"visualeditor-shortcuts-history",
+				"visualeditor-shortcuts-insert",
 				"visualeditor-shortcuts-other",
 				"visualeditor-shortcuts-sequence-notice",
 				"visualeditor-shortcuts-text-style",
@@ -1139,6 +1285,25 @@
 				"mobile"
 			]
 		},
+		"ext.visualEditor.commentAnnotation": {
+			"scripts": [
+				"lib/ve/src/dm/annotations/ve.dm.CommentAnnotation.js",
+				"lib/ve/src/ce/annotations/ve.ce.CommentAnnotation.js",
+				"lib/ve/src/ui/contextitems/ve.ui.CommentAnnotationContextItem.js",
+				"lib/ve/src/ui/tools/ve.ui.CommentAnnotationInspectorTool.js",
+				"lib/ve/src/ui/inspectors/ve.ui.CommentAnnotationInspector.js"
+			],
+			"styles": [
+				"lib/ve/src/ce/styles/annotations/ve.ce.CommentAnnotation.css"
+			],
+			"dependencies": [
+				"ext.visualEditor.core"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
 		"ext.visualEditor.rebase": {
 			"scripts": [
 				"lib/ve/src/dm/ve.dm.RebaseClient.js",
@@ -1151,13 +1316,22 @@
 			],
 			"dependencies": [
 				"ext.visualEditor.core",
-				"dompurify",
+				"ext.visualEditor.sanitize",
 				"socket.io",
 				"color-picker",
-				"oojs-ui.styles.icons-user"
+				"oojs-ui.styles.icons-user",
+				"ext.visualEditor.commentAnnotation",
+				"ext.visualEditor.checkList"
 			],
 			"messages": [
-				"visualeditor-rebase-client-author-name"
+				"visualeditor-missing-document-error",
+				"visualeditor-missing-document-title",
+				"visualeditor-rebase-client-author-name",
+				"visualeditor-rebase-client-connecting"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
 			]
 		},
 		"ext.visualEditor.core.desktop": {
@@ -1230,9 +1404,6 @@
 				"modules/ve-mw/init/styles/ve.init.MWVESwitchPopupWidget.css"
 			],
 			"skinStyles": {
-				"vector": [
-					"modules/ve-mw/init/styles/ve.init.MWVESwitchConfirmDialog-vector.css"
-				],
 				"monobook": [
 					"modules/ve-mw/init/styles/ve.init.MWVESwitchConfirmDialog-monobook.css"
 				]
@@ -1277,28 +1448,33 @@
 				"modules/ve-mw/ve.MWutils.js",
 				"modules/ve-mw/dm/nodes/ve.dm.MWEntityNode.js",
 				"modules/ve-mw/dm/nodes/ve.dm.MWExtensionNode.js",
+				"modules/ve-mw/dm/nodes/ve.dm.MWBlockExtensionNode.js",
+				"modules/ve-mw/dm/nodes/ve.dm.MWInlineExtensionNode.js",
 				"modules/ve-mw/dm/nodes/ve.dm.MWPreNode.js",
 				"modules/ve-mw/dm/nodes/ve.dm.MWTableNode.js",
 				"modules/ve-mw/dm/annotations/ve.dm.MWNowikiAnnotation.js",
 				"modules/ve-mw/dm/metaitems/ve.dm.MWAlienMetaItem.js",
 				"modules/ve-mw/ce/nodes/ve.ce.MWEntityNode.js",
 				"modules/ve-mw/ce/nodes/ve.ce.MWExtensionNode.js",
+				"modules/ve-mw/ce/nodes/ve.ce.MWBlockExtensionNode.js",
+				"modules/ve-mw/ce/nodes/ve.ce.MWInlineExtensionNode.js",
 				"modules/ve-mw/ce/nodes/ve.ce.MWPreNode.js",
 				"modules/ve-mw/ce/nodes/ve.ce.MWTableNode.js",
 				"modules/ve-mw/ce/annotations/ve.ce.MWNowikiAnnotation.js",
 				"modules/ve-mw/ui/ve.ui.MWCommandRegistry.js",
 				"modules/ve-mw/ui/ve.ui.MWSequenceRegistry.js",
+				"modules/ve-mw/ui/ve.ui.MWSurface.js",
 				"modules/ve-mw/ui/ve.ui.MWExtensionWindow.js",
 				"modules/ve-mw/ui/ve.ui.MWWikitextTransferRegistry.js",
 				"modules/ve-mw/ui/commands/ve.ui.MWWikitextWarningCommand.js",
 				"modules/ve-mw/ui/datatransferhandlers/ve.ui.MWWikitextStringTransferHandler.js",
 				"modules/ve-mw/ui/widgets/ve.ui.MWAceEditorWidget.js",
+				"modules/ve-mw/ui/widgets/ve.ui.MWLazyMultilineTextInputWidget.js",
 				"modules/ve-mw/ui/widgets/ve.ui.MWTargetWidget.js",
 				"modules/ve-mw/ui/widgets/ve.ui.MWTocWidget.js",
 				"modules/ve-mw/ui/dialogs/ve.ui.MWExtensionDialog.js",
 				"modules/ve-mw/ui/dialogs/ve.ui.MWExtensionPreviewDialog.js",
 				"modules/ve-mw/ui/dialogs/ve.ui.MWCommandHelpDialog.js",
-				"modules/ve-mw/ui/dialogs/ve.ui.MWCancelConfirmDialog.js",
 				"modules/ve-mw/ui/dialogs/ve.ui.MWWikitextSwitchConfirmDialog.js",
 				"modules/ve-mw/ui/widgets/ve.ui.MWPreTextInputWidget.js",
 				"modules/ve-mw/ui/dialogs/ve.ui.MWPreDialog.js",
@@ -1319,6 +1495,7 @@
 				"modules/ve-mw/ui/styles/inspectors/ve.ui.MWExtensionInspector.css",
 				"modules/ve-mw/ui/styles/inspectors/ve.ui.MWLiveExtensionInspector.css",
 				"modules/ve-mw/ui/styles/elements/ve.ui.MWExpandableErrorElement.css",
+				"modules/ve-mw/ui/styles/elements/ve.ui.MWPreviewElement.css",
 				"modules/ve-mw/ui/styles/tools/ve.ui.MWPopupTool.css",
 				"modules/ve-mw/ui/styles/widgets/ve.ui.MWAceEditorWidget.css",
 				"modules/ve-mw/ui/styles/tools/ve.ui.MWEducationPopupTool.css"
@@ -1327,6 +1504,12 @@
 				"vector": [
 					"modules/ve-mw/themes/wikimediaui.css"
 				],
+				"minerva": [
+					"modules/ve-mw/themes/wikimediaui.css"
+				],
+				"apex": [
+					"modules/ve-mw/themes/apex.css"
+				],
 				"monobook": [
 					"modules/ve-mw/themes/apex.css"
 				]
@@ -1334,6 +1517,7 @@
 			"dependencies": [
 				"ext.visualEditor.core",
 				"ext.visualEditor.mediawiki",
+				"ext.visualEditor.diffing",
 				"mediawiki.Title",
 				"mediawiki.diff.styles",
 				"mediawiki.user",
@@ -1421,17 +1605,11 @@
 				"visualeditor-savedialog-warning-dirty",
 				"visualeditor-saveerror",
 				"visualeditor-saveerror-hookaborted",
-				"visualeditor-saveerror-titleblacklist",
 				"visualeditor-serializeerror",
-				"visualeditor-shortcuts-insert",
 				"visualeditor-recreate",
 				"visualeditor-toolbar-savedialog",
 				"visualeditor-toolbar-savedialog-short",
 				"visualeditor-version-label",
-				"visualeditor-viewpage-savewarning",
-				"visualeditor-viewpage-savewarning-discard",
-				"visualeditor-viewpage-savewarning-keep",
-				"visualeditor-viewpage-savewarning-title",
 				"visualeditor-wikitext-progress",
 				"visualeditor-wikitext-warning-title"
 			],
@@ -1447,8 +1625,8 @@
 				"ext.visualEditor.data",
 				"ext.visualEditor.mwtransclusion",
 				"ext.visualEditor.mwgallery",
+				"ext.visualEditor.mwimage",
 				"ext.visualEditor.mwalienextension",
-				"ext.visualEditor.mwdiffing",
 				"ext.visualEditor.language",
 				"ext.visualEditor.mwlanguage",
 				"ext.visualEditor.icons"
@@ -1461,8 +1639,8 @@
 		"ext.visualEditor.mwextensions.desktop": {
 			"dependencies": [
 				"ext.visualEditor.mwextensions",
-				"ext.visualEditor.mwimage",
-				"ext.visualEditor.mwmeta"
+				"ext.visualEditor.mwmeta",
+				"mediawiki.ForeignStructuredUpload.BookletLayout"
 			]
 		},
 		"ext.visualEditor.mwformatting": {
@@ -1475,7 +1653,13 @@
 			],
 			"skinStyles": {
 				"vector": [
-					"modules/ve-mw/ui/themes/vector/ve.ui.MWFormatTool.css"
+					"modules/ve-mw/ui/styles/tools/ve.ui.MWFormatTool-vector.css"
+				],
+				"minerva": [
+					"modules/ve-mw/ui/styles/tools/ve.ui.MWFormatTool-minerva.css"
+				],
+				"monobook": [
+					"modules/ve-mw/ui/styles/tools/ve.ui.MWFormatTool-monobook.css"
 				]
 			},
 			"dependencies": [
@@ -1536,7 +1720,6 @@
 				"mediawiki.widgets.MediaSearch",
 				"oojs-ui.styles.icons-media",
 				"oojs-ui.styles.icons-wikimedia",
-				"mediawiki.ForeignStructuredUpload.BookletLayout",
 				"moment"
 			],
 			"messages": [
@@ -1562,7 +1745,6 @@
 				"visualeditor-dialog-media-info-readmore",
 				"visualeditor-dialog-media-info-separator",
 				"visualeditor-dialog-media-info-uploaded",
-				"visualeditor-dialog-media-originaldimensions",
 				"visualeditor-dialog-media-page-advanced",
 				"visualeditor-dialog-media-page-general",
 				"visualeditor-dialog-media-position-center",
@@ -1577,7 +1759,6 @@
 				"visualeditor-dialog-media-search-tab-search",
 				"visualeditor-dialog-media-search-tab-upload",
 				"visualeditor-dialog-media-searchselect",
-				"visualeditor-dialog-media-size-originalsize-error",
 				"visualeditor-dialog-media-size-section",
 				"visualeditor-dialog-media-size-section-help",
 				"visualeditor-dialog-media-thumbdimensions",
@@ -1596,7 +1777,8 @@
 				"visualeditor-media-title-video"
 			],
 			"targets": [
-				"desktop"
+				"desktop",
+				"mobile"
 			]
 		},
 		"ext.visualEditor.mwlink": {
@@ -1681,7 +1863,6 @@
 				"modules/ve-mw/ui/tools/ve.ui.MWMetaDialogTool.js"
 			],
 			"styles": [
-				"modules/ve-mw/ui/styles/pages/ve.ui.MWCategoriesPage.css",
 				"modules/ve-mw/ui/styles/widgets/ve.ui.MWCategoryInputWidget.css",
 				"modules/ve-mw/ui/styles/widgets/ve.ui.MWCategoryItemWidget.css",
 				"modules/ve-mw/ui/styles/widgets/ve.ui.MWCategoryPopupWidget.css",
@@ -1697,6 +1878,7 @@
 			"messages": [
 				"visualeditor-advancedsettings-tool",
 				"visualeditor-categories-tool",
+				"visualeditor-changedesc-mwredirect",
 				"visualeditor-dialog-meta-advancedsettings-label",
 				"visualeditor-dialog-meta-advancedsettings-section",
 				"visualeditor-dialog-meta-categories-addcategory-label",
@@ -1761,7 +1943,8 @@
 				"visualeditor-languages-tool",
 				"visualeditor-meta-tool",
 				"visualeditor-settings-tool",
-				"visualeditor-templatesused-tool"
+				"visualeditor-templatesused-tool",
+				"visualeditor-title-error"
 			],
 			"targets": [
 				"desktop",
@@ -1771,7 +1954,13 @@
 		"ext.visualEditor.mwtransclusion": {
 			"scripts": [
 				"modules/ve-mw/dm/nodes/ve.dm.MWTransclusionNode.js",
+				"modules/ve-mw/dm/nodes/ve.dm.MWTransclusionBlockNode.js",
+				"modules/ve-mw/dm/nodes/ve.dm.MWTransclusionInlineNode.js",
+				"modules/ve-mw/dm/nodes/ve.dm.MWTransclusionTableCellNode.js",
 				"modules/ve-mw/ce/nodes/ve.ce.MWTransclusionNode.js",
+				"modules/ve-mw/ce/nodes/ve.ce.MWTransclusionBlockNode.js",
+				"modules/ve-mw/ce/nodes/ve.ce.MWTransclusionInlineNode.js",
+				"modules/ve-mw/ce/nodes/ve.ce.MWTransclusionTableCellNode.js",
 				"modules/ve-mw/dm/models/ve.dm.MWTransclusionModel.js",
 				"modules/ve-mw/dm/models/ve.dm.MWTransclusionPartModel.js",
 				"modules/ve-mw/dm/models/ve.dm.MWTransclusionContentModel.js",
@@ -1808,11 +1997,11 @@
 			],
 			"skinStyles": {
 				"default": [
-					"modules/ve-mw/ui/themes/default/pages/ve.ui.MWParameterPage.css",
-					"modules/ve-mw/ui/themes/default/pages/ve.ui.MWTemplatePage.css"
+					"modules/ve-mw/ui/styles/pages/ve.ui.MWParameterPage-default.css",
+					"modules/ve-mw/ui/styles/pages/ve.ui.MWTemplatePage-default.css"
 				],
 				"minerva": [
-					"modules/ve-mw/ui/themes/minerva/pages/ve.ui.MWParameterPage.css"
+					"modules/ve-mw/ui/styles/pages/ve.ui.MWParameterPage-minerva.css"
 				]
 			},
 			"dependencies": [
@@ -1823,6 +2012,8 @@
 			],
 			"messages": [
 				"quotation-marks",
+				"templatedata-doc-subpage",
+				"visualeditor-changedesc-mwtransclusion",
 				"visualeditor-dialog-template-title",
 				"visualeditor-dialog-transclusion-add-content",
 				"visualeditor-dialog-transclusion-add-param",
@@ -1884,12 +2075,22 @@
 				"mobile"
 			]
 		},
-		"ext.visualEditor.mwdiffing": {
-			"dependencies": [
-				"ext.visualEditor.diffing"
+		"ext.visualEditor.checkList": {
+			"scripts": [
+				"lib/ve/src/dm/nodes/ve.dm.CheckListNode.js",
+				"lib/ve/src/dm/nodes/ve.dm.CheckListItemNode.js",
+				"lib/ve/src/ce/nodes/ve.ce.CheckListNode.js",
+				"lib/ve/src/ce/nodes/ve.ce.CheckListItemNode.js",
+				"lib/ve/src/ui/tools/ve.ui.CheckListTool.js"
 			],
-			"messages": [
-				"visualeditor-changedesc-mwtransclusion"
+			"styles": [
+				"lib/ve/src/ce/styles/nodes/ve.ce.CheckListNode.css"
+			],
+			"dependencies": [
+				"ext.visualEditor.core"
+			],
+			"messages":[
+				"visualeditor-listbutton-check-tooltip"
 			],
 			"targets": [
 				"desktop",
@@ -1977,6 +2178,7 @@
 				"lib/ve/src/ui/widgets/ve.ui.LanguageInputWidget.js"
 			],
 			"styles": [
+				"lib/ve/src/ui/styles/inspectors/ve.ui.LanguageInspector.css",
 				"lib/ve/src/ui/styles/widgets/ve.ui.LanguageInputWidget.css",
 				"lib/ve/src/ui/styles/widgets/ve.ui.LanguageSearchWidget.css"
 			],
@@ -2006,13 +2208,18 @@
 		"ext.visualEditor.mwlanguage": {
 			"scripts": [
 				"modules/ve-mw/dm/nodes/ve.dm.MWLanguageVariantNode.js",
+				"modules/ve-mw/dm/nodes/ve.dm.MWLanguageVariantBlockNode.js",
+				"modules/ve-mw/dm/nodes/ve.dm.MWLanguageVariantHiddenNode.js",
+				"modules/ve-mw/dm/nodes/ve.dm.MWLanguageVariantInlineNode.js",
 				"modules/ve-mw/ce/nodes/ve.ce.MWLanguageVariantNode.js",
+				"modules/ve-mw/ce/nodes/ve.ce.MWLanguageVariantBlockNode.js",
+				"modules/ve-mw/ce/nodes/ve.ce.MWLanguageVariantHiddenNode.js",
+				"modules/ve-mw/ce/nodes/ve.ce.MWLanguageVariantInlineNode.js",
 				"modules/ve-mw/ui/contextitems/ve.ui.MWLanguageVariantNodeContextItem.js",
 				"modules/ve-mw/ui/inspectors/ve.ui.MWLanguageVariantInspector.js"
 			],
 			"styles": [
-				"modules/ve-mw/ui/styles/contextitems/ve.ui.MWLanguageVariantNodeContextItem.css",
-				"modules/ve-mw/ce/styles/nodes/ve.ce.MWLanguageVariantNode.css"
+				"modules/ve-mw/ui/styles/contextitems/ve.ui.MWLanguageVariantNodeContextItem.css"
 			],
 			"dependencies": [
 				"ext.visualEditor.core"
@@ -2066,7 +2273,11 @@
 		"ext.visualEditor.mwalienextension": {
 			"scripts": [
 				"modules/ve-mw/dm/nodes/ve.dm.MWAlienExtensionNode.js",
+				"modules/ve-mw/dm/nodes/ve.dm.MWAlienBlockExtensionNode.js",
+				"modules/ve-mw/dm/nodes/ve.dm.MWAlienInlineExtensionNode.js",
 				"modules/ve-mw/ce/nodes/ve.ce.MWAlienExtensionNode.js",
+				"modules/ve-mw/ce/nodes/ve.ce.MWAlienBlockExtensionNode.js",
+				"modules/ve-mw/ce/nodes/ve.ce.MWAlienInlineExtensionNode.js",
 				"modules/ve-mw/ui/inspectors/ve.ui.MWAlienExtensionInspector.js",
 				"modules/ve-mw/ui/contextitems/ve.ui.MWAlienExtensionContextItem.js"
 			],
@@ -2092,7 +2303,9 @@
 				"modules/ve-mw/ui/ve.ui.MWWikitextDataTransferHandlerFactory.js",
 				"modules/ve-mw/ui/ve.ui.MWWikitextSurface.js",
 				"modules/ve-mw/ui/actions/ve.ui.MWWikitextAction.js",
-				"modules/ve-mw/ui/inspectors/ve.ui.MWWikitextLinkAnnotationInspector.js"
+				"modules/ve-mw/ui/dialogs/ve.ui.MWWikitextConvertConfirmDialog.js",
+				"modules/ve-mw/ui/inspectors/ve.ui.MWWikitextLinkAnnotationInspector.js",
+				"modules/ve-mw/ui/datatransferhandlers/ve.ui.MWWikitextPlainTextStringTransferHandler.js"
 			],
 			"styles": [
 				"modules/ve-mw/ui/styles/ve.ui.MWWikitextSurface.css"
@@ -2104,7 +2317,11 @@
 				"ext.visualEditor.mediawiki"
 			],
 			"messages": [
-				"visualeditor-generating-wikitext-progress"
+				"visualeditor-generating-wikitext-progress",
+				"visualeditor-wikitextconvert-title",
+				"visualeditor-wikitextconvert-message",
+				"visualeditor-wikitextconvert-plain",
+				"visualeditor-wikitextconvert-convert"
 			],
 			"targets": [
 				"desktop",
@@ -2138,6 +2355,7 @@
 			"messages": [
 				"visualeditor-dialog-media-alttext-section",
 				"visualeditor-dialog-media-content-filename",
+				"visualeditor-dialog-media-content-description-link",
 				"visualeditor-dialog-media-content-section",
 				"visualeditor-mwgallerydialog-caption-field-label",
 				"visualeditor-mwgallerydialog-caption-input-placeholder",
@@ -2205,11 +2423,14 @@
 				"oojs-ui.styles.icons-editing-styling",
 				"oojs-ui.styles.icons-editing-list",
 				"oojs-ui.styles.icons-interactions",
+				"oojs-ui.styles.icons-layout",
 				"oojs-ui.styles.icons-moderation",
 				"oojs-ui.styles.icons-movement",
+				"oojs-ui.styles.icons-user",
 				"oojs-ui.styles.indicators",
 				"oojs-ui.styles.textures",
-				"ext.visualEditor.moduleIcons"
+				"ext.visualEditor.moduleIcons",
+				"ext.visualEditor.moduleIndicators"
 			],
 			"targets": [
 				"desktop",
@@ -2226,7 +2447,183 @@
 				"desktop",
 				"mobile"
 			]
+		},
+		"ext.visualEditor.moduleIndicators": {
+			"class": "ResourceLoaderOOUIImageModule",
+			"name": "ve.ui.Indicators",
+			"rootPath": "modules/ve-mw/ui/styles",
+			"selectorWithoutVariant": ".oo-ui-indicator-{name}",
+			"selectorWithVariant": ".oo-ui-image-{variant}.oo-ui-indicator-{name}",
+			"targets": [
+				"desktop",
+				"mobile"
+			]
 		}
+	},
+	"QUnitTestModule": {
+		"localBasePath": "",
+		"remoteExtPath": "VisualEditor",
+		"styles": "lib/ve/lib/jsdifflib/diffview.css",
+		"scripts": [
+			"lib/proposal-promise-finally/polyfill.js",
+			"modules/ve-mw/tests/mw-preload.js",
+			"lib/ve/lib/jsdifflib/diffview.js",
+			"lib/ve/lib/jsdifflib/difflib.js",
+			"lib/ve/tests/ve.qunit.js",
+			"lib/ve/tests/ve.test.utils.js",
+			"modules/ve-mw/tests/ve.test.utils.js",
+			"lib/ve/tests/ve.test.js",
+			"lib/ve/tests/ve.EventSequencer.test.js",
+			"lib/ve/tests/ve.Scheduler.test.js",
+			"lib/ve/tests/ve.Range.test.js",
+			"lib/ve/tests/ve.Document.test.js",
+			"lib/ve/tests/ve.Node.test.js",
+			"lib/ve/tests/ve.BranchNode.test.js",
+			"lib/ve/tests/ve.LeafNode.test.js",
+			"lib/ve/tests/dm/ve.dm.example.js",
+			"lib/ve/tests/dm/ve.dm.Annotation.test.js",
+			"lib/ve/tests/dm/ve.dm.AnnotationSet.test.js",
+			"lib/ve/tests/dm/ve.dm.LinkAnnotation.test.js",
+			"lib/ve/tests/dm/ve.dm.NodeFactory.test.js",
+			"lib/ve/tests/dm/ve.dm.Node.test.js",
+			"lib/ve/tests/dm/ve.dm.Converter.test.js",
+			"lib/ve/tests/dm/ve.dm.SourceConverter.test.js",
+			"lib/ve/tests/dm/ve.dm.BranchNode.test.js",
+			"lib/ve/tests/dm/ve.dm.LeafNode.test.js",
+			"lib/ve/tests/dm/nodes/ve.dm.TextNode.test.js",
+			"modules/ve-mw/tests/dm/nodes/ve.dm.MWTransclusionNode.test.js",
+			"lib/ve/tests/dm/ve.dm.Document.test.js",
+			"modules/ve-mw/tests/dm/ve.dm.Document.test.js",
+			"lib/ve/tests/dm/ve.dm.HashValueStore.test.js",
+			"lib/ve/tests/dm/ve.dm.InternalList.test.js",
+			"lib/ve/tests/dm/ve.dm.LinearData.test.js",
+			"lib/ve/tests/dm/ve.dm.Transaction.test.js",
+			"lib/ve/tests/dm/ve.dm.TransactionBuilder.test.js",
+			"lib/ve/tests/dm/ve.dm.Change.test.js",
+			"lib/ve/tests/dm/ve.dm.TreeModifier.test.js",
+			"lib/ve/tests/dm/ve.dm.TransactionProcessor.test.js",
+			"lib/ve/tests/dm/ve.dm.Surface.test.js",
+			"lib/ve/tests/dm/ve.dm.SurfaceFragment.test.js",
+			"modules/ve-mw/tests/dm/ve.dm.SurfaceFragment.test.js",
+			"lib/ve/tests/dm/ve.dm.SourceSurfaceFragment.test.js",
+			"lib/ve/tests/dm/ve.dm.ModelRegistry.test.js",
+			"lib/ve/tests/dm/ve.dm.MetaList.test.js",
+			"lib/ve/tests/dm/ve.dm.Scalable.test.js",
+			"lib/ve/tests/dm/selections/ve.dm.LinearSelection.test.js",
+			"lib/ve/tests/dm/selections/ve.dm.NullSelection.test.js",
+			"lib/ve/tests/dm/selections/ve.dm.TableSelection.test.js",
+			"lib/ve/tests/dm/lineardata/ve.dm.FlatLinearData.test.js",
+			"lib/ve/tests/dm/lineardata/ve.dm.ElementLinearData.test.js",
+			"modules/ve-mw/tests/dm/ve.dm.mwExample.js",
+			"modules/ve-mw/tests/dm/ve.dm.Converter.test.js",
+			"modules/ve-mw/tests/dm/ve.dm.MWImageModel.test.js",
+			"modules/ve-mw/tests/dm/ve.dm.MWInternalLinkAnnotation.test.js",
+			"lib/ve/tests/ce/ve.ce.test.js",
+			"lib/ve/tests/ce/ve.ce.Document.test.js",
+			"modules/ve-mw/tests/ce/ve.ce.Document.test.js",
+			"lib/ve/tests/ce/ve.ce.Surface.test.js",
+			"modules/ve-mw/tests/ce/ve.ce.Surface.test.js",
+			"lib/ve/tests/ce/ve.ce.RangeState.test.js",
+			"lib/ve/tests/ce/ve.ce.TextState.test.js",
+			"lib/ve/tests/ce/ve.ce.NodeFactory.test.js",
+			"lib/ve/tests/ce/ve.ce.AnnotationFactory.test.js",
+			"lib/ve/tests/ce/ve.ce.Node.test.js",
+			"lib/ve/tests/ce/ve.ce.BranchNode.test.js",
+			"lib/ve/tests/ce/ve.ce.ContentBranchNode.test.js",
+			"modules/ve-mw/tests/ce/ve.ce.ContentBranchNode.test.js",
+			"lib/ve/tests/ce/ve.ce.LeafNode.test.js",
+			"lib/ve/tests/ce/ve.ce.Selection.test.js",
+			"lib/ve/tests/ce/keydownhandlers/ve.ce.LinearArrowKeyDownHandler.test.js",
+			"lib/ve/tests/ce/keydownhandlers/ve.ce.LinearDeleteKeyDownHandler.test.js",
+			"lib/ve/tests/ce/keydownhandlers/ve.ce.LinearEnterKeyDownHandler.test.js",
+			"lib/ve/tests/ce/keydownhandlers/ve.ce.LinearEscapeKeyDownHandler.test.js",
+			"lib/ve/tests/ce/keydownhandlers/ve.ce.TableArrowKeyDownHandler.test.js",
+			"lib/ve/tests/ce/keydownhandlers/ve.ce.TableDeleteKeyDownHandler.test.js",
+			"lib/ve/tests/ce/keydownhandlers/ve.ce.TableEnterKeyDownHandler.test.js",
+			"lib/ve/tests/ce/keydownhandlers/ve.ce.TableF2KeyDownHandler.test.js",
+			"lib/ve/tests/ce/nodes/ve.ce.ResizableNode.test.js",
+			"lib/ve/tests/ce/nodes/ve.ce.TextNode.test.js",
+			"lib/ve/tests/ce/nodes/ve.ce.TableNode.test.js",
+			"lib/ve/tests/ui/ve.ui.Trigger.test.js",
+			"lib/ve/tests/ui/ve.ui.Sequence.test.js",
+			"lib/ve/tests/ui/ve.ui.DiffElement.test.js",
+			"lib/ve/tests/ui/ve.ui.PreviewElement.test.js",
+			"modules/ve-mw/tests/ui/ve.ui.DiffElement.test.js",
+			"lib/ve/tests/ui/actions/ve.ui.AnnotationAction.test.js",
+			"lib/ve/tests/ui/actions/ve.ui.ContentAction.test.js",
+			"lib/ve/tests/ui/actions/ve.ui.FormatAction.test.js",
+			"modules/ve-mw/tests/ui/actions/ve.ui.FormatAction.test.js",
+			"lib/ve/tests/ui/actions/ve.ui.IndentationAction.test.js",
+			"lib/ve/tests/ui/actions/ve.ui.LinkAction.test.js",
+			"modules/ve-mw/tests/ui/actions/ve.ui.MWLinkAction.test.js",
+			"lib/ve/tests/ui/actions/ve.ui.ListAction.test.js",
+			"lib/ve/tests/ui/actions/ve.ui.TableAction.test.js",
+			"lib/ve/tests/ui/actions/ve.ui.WindowAction.test.js",
+			"lib/ve/tests/ui/ve.ui.DataTransferHandlerFactory.test.js",
+			"lib/ve/tests/ui/datatransferhandlers/ve.ui.DSVFileTransferHandler.test.js",
+			"lib/ve/tests/ui/datatransferhandlers/ve.ui.UrlStringTransferHandler.test.js",
+			"modules/ve-mw/tests/ui/datatransferhandlers/ve.ui.MWWikitextStringTransferHandler.test.js",
+			"modules/ve-mw/tests/ui/datatransferhandlers/ve.ui.UrlStringTransferHandler.test.js",
+			"modules/ve-mw/tests/init/targets/ve.init.mw.DesktopArticleTarget.test.js",
+			"lib/ve/tests/ce/ve.ce.TestRunner.js",
+			"lib/ve/tests/ce/ve.ce.imetests.test.js",
+			"lib/ve/tests/ce/imetests/backspace-chromium-ubuntu-none.js",
+			"lib/ve/tests/ce/imetests/backspace-firefox-ubuntu-none.js",
+			"lib/ve/tests/ce/imetests/backspace-ie9-win7-none.js",
+			"lib/ve/tests/ce/imetests/home-firefox-win7-none.js",
+			"lib/ve/tests/ce/imetests/input-chrome-mac-native-japanese-hiragana.js",
+			"lib/ve/tests/ce/imetests/input-chrome-mac-native-japanese-katakana.js",
+			"lib/ve/tests/ce/imetests/input-chrome-win7-chinese-traditional-handwriting.js",
+			"lib/ve/tests/ce/imetests/input-chrome-win7-greek.js",
+			"lib/ve/tests/ce/imetests/input-chrome-win7-polish.js",
+			"lib/ve/tests/ce/imetests/input-chrome-win7-welsh.js",
+			"lib/ve/tests/ce/imetests/input-chromium-ubuntu-ibus-chinese-cantonese.js",
+			"lib/ve/tests/ce/imetests/input-chromium-ubuntu-ibus-japanese-anthy--hiraganaonly.js",
+			"lib/ve/tests/ce/imetests/input-chromium-ubuntu-ibus-japanese-mozc.js",
+			"lib/ve/tests/ce/imetests/input-chromium-ubuntu-ibus-korean-korean.js",
+			"lib/ve/tests/ce/imetests/input-chromium-ubuntu-ibus-malayalam-swanalekha.js",
+			"lib/ve/tests/ce/imetests/input-firefox-mac-native-japanese-hiragana.js",
+			"lib/ve/tests/ce/imetests/input-firefox-mac-native-japanese-katakana.js",
+			"lib/ve/tests/ce/imetests/input-firefox-ubuntu-ibus-chinese-cantonese.js",
+			"lib/ve/tests/ce/imetests/input-firefox-ubuntu-ibus-japanese-anthy--hiraganaonly.js",
+			"lib/ve/tests/ce/imetests/input-firefox-ubuntu-ibus-japanese-mozc.js",
+			"lib/ve/tests/ce/imetests/input-firefox-ubuntu-ibus-korean-korean.js",
+			"lib/ve/tests/ce/imetests/input-firefox-ubuntu-ibus-malayalam.swanalekha.js",
+			"lib/ve/tests/ce/imetests/input-firefox-win7-chinese-traditional-handwriting.js",
+			"lib/ve/tests/ce/imetests/input-firefox-win7-greek.js",
+			"lib/ve/tests/ce/imetests/input-firefox-win7-welsh.js",
+			"lib/ve/tests/ce/imetests/input-ie9-win7-chinese-traditional-handwriting.js",
+			"lib/ve/tests/ce/imetests/input-ie9-win7-greek.js",
+			"lib/ve/tests/ce/imetests/input-ie9-win7-korean.js",
+			"lib/ve/tests/ce/imetests/input-ie9-win7-welsh.js",
+			"lib/ve/tests/ce/imetests/input-ie11-win8.1-korean.js",
+			"lib/ve/tests/ce/imetests/input-safari-mac-native-japanese-hiragana.js",
+			"lib/ve/tests/ce/imetests/input-safari-mac-native-japanese-katakana.js",
+			"lib/ve/tests/ce/imetests/leftarrow-chromium-ubuntu-none.js",
+			"lib/ve/tests/ce/imetests/leftarrow-firefox-ubuntu-none.js",
+			"lib/ve/tests/ce/imetests/leftarrow-ie9-win7-none.js",
+			"lib/ve/src/ve.freeze.js",
+			"lib/ve/rebaser/src/dm/ve.dm.RebaseServer.js",
+			"lib/ve/tests/dm/ve.dm.TestRebaseClient.js",
+			"lib/ve/tests/dm/ve.dm.TestRebaseServer.js"
+		],
+		"dependencies": [
+			"unicodejs",
+			"ext.visualEditor.core",
+			"ext.visualEditor.mwcore",
+			"ext.visualEditor.mwformatting",
+			"ext.visualEditor.mwlink",
+			"ext.visualEditor.mwgallery",
+			"ext.visualEditor.mwimage",
+			"ext.visualEditor.mwmeta",
+			"ext.visualEditor.mwtransclusion",
+			"ext.visualEditor.mwalienextension",
+			"ext.visualEditor.language",
+			"ext.visualEditor.experimental",
+			"ext.visualEditor.desktopArticleTarget.init",
+			"ext.visualEditor.desktopArticleTarget",
+			"ext.visualEditor.rebase"
+		]
 	},
 	"ResourceFileModulePaths": {
 		"localBasePath": "",

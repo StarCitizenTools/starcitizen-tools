@@ -1,10 +1,8 @@
 /*!
  * VisualEditor DataModel Change class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
-
-/* global DOMPurify */
 
 /**
  * DataModel change.
@@ -38,11 +36,11 @@
  * is no reasonable way to do this; e.g. when f and g both change the same word to something
  * different. In this case we make f.rebasedOnto(g) return null and we say it conflicts.
  *
- * Given f: D1 -> D2 , g: D1 -> D3, and x: D1 -> D4, we give three guarantees about rebasing:
+ * Given f: D1 -> D2 , g: D2 -> D3, and x: D1 -> D4, we give three guarantees about rebasing:
  *
- * 1. g.rebasedOnto(f) conflicts if and only if f.rebasedOnto(g) conflicts.
- * 2. If there is no conflict, f.concat(g.rebasedOnto(f)) equals g.concat(g.rebasedOnto(f)).
- * 3. If there is no conflict, x.rebasedOnto(f).rebasedOnto(g) equals x.rebasedOnto(f + g).
+ * 1. x.rebasedOnto(f) conflicts if and only if f.rebasedOnto(x) conflicts.
+ * 2. If there is no conflict, f.concat(x.rebasedOnto(f)) equals x.concat(f.rebasedOnto(x)).
+ * 3. If there is no conflict, x.rebasedOnto(f).rebasedOnto(g) equals x.rebasedOnto(f * g).
  *
  * We can consider a conflicting transaction starting at some document D to be 0: D->null,
  * and regard any two conflicting transactions starting at D to be equal, and just write 0
@@ -50,9 +48,9 @@
  *
  * x|y := x.rebasedOnto(y),
  *
- * we can write our guarantees. Given f: D1 -> D2 , g: D1 -> D3, and x: D1 -> D4:
+ * we can write our guarantees. Given f: D1 -> D2 , g: D2 -> D3, and x: D1 -> D4:
  *
- * 1. Change conflict well definedness: g|f = 0 if and only if f|g = 0.
+ * 1. Change conflict well definedness: x|f = 0 if and only if f|x = 0.
  * 2. Change commutativity: f * g|f equals g * f|g .
  * 3. Rebasing piecewise: if (x|f)|g != 0, then (x|f)|g equals x|(f * g) .
  *
@@ -62,8 +60,8 @@
  * maps from D1 to some D4, and conceptually it is g modified to apply without f having been
  * applied.
  *
- * Note that rebasing piecewise is *not* equivalent for changes that conflict: if you conflict
- * with f you might not conflict with f*g. For example, if x|f = 0 then
+ * Note that rebasing piecewise is *not* equivalent for changes that conflict: if a change
+ * conflicts f, it might not conflict with f*g. For example, if x|f = 0 then
  *
  * (x|f)|inv(f) = 0 but x|(f * inv(f)) = x.
  *
@@ -75,9 +73,15 @@
  * @param {Object} selections For each author ID (key), latest ve.dm.Selection
  */
 ve.dm.Change = function VeDmChange( start, transactions, stores, selections ) {
+	var change = this;
 	this.start = start;
 	this.transactions = transactions;
-	this.stores = stores;
+	this.store = new ve.dm.HashValueStore();
+	this.storeLengthAtTransaction = [];
+	stores.forEach( function ( store ) {
+		change.store.merge( store );
+		change.storeLengthAtTransaction.push( change.store.getLength() );
+	} );
 	this.selections = selections;
 };
 
@@ -126,7 +130,6 @@ ve.dm.Change.static.deserialize = function ( data, doc, preserveStoreValues, uns
 
 	for ( authorId in data.selections ) {
 		selections[ authorId ] = ve.dm.Selection.static.newFromJSON(
-			doc,
 			data.selections[ authorId ]
 		);
 	}
@@ -184,42 +187,23 @@ ve.dm.Change.static.serializeValue = function ( value ) {
 	if ( value instanceof ve.dm.Annotation ) {
 		return { type: 'annotation', value: value.element };
 	} else if ( Array.isArray( value ) && value[ 0 ] instanceof Node ) {
-		return { type: 'domNodeArray', value: value.map( ve.getNodeHtml ) };
+		return { type: 'domNodes', value: value.map( ve.getNodeHtml ).join( '' ) };
 	} else {
 		return { type: 'plain', value: value };
 	}
 };
 
 ve.dm.Change.static.deserializeValue = function ( serialized, unsafe ) {
-	var addTags, addAttrs;
 	if ( serialized.type === 'annotation' ) {
 		return ve.dm.annotationFactory.createFromElement( serialized.value );
-	} else if ( serialized.type === 'domNodeArray' ) {
+	} else if ( serialized.type === 'domNodes' ) {
 		if ( unsafe ) {
-			return serialized.value.map( function ( nodeHtml ) {
-				return $.parseHTML( nodeHtml )[ 0 ];
-			} );
+			// We can use jQuery here because unsafe sanitization
+			// only happens in browser clients.
+			return $.parseHTML( serialized.value, undefined, true );
 		} else {
-			// TODO: Move MW-specific rules to ve-mw
-			addTags = [ 'figure-inline' ];
-			addAttrs = [
-				'srcset',
-				// RDFa
-				'about', 'rel', 'resource', 'property', 'content', 'datatype', 'typeof'
-			];
-			return serialized.value.map( function ( nodeHtml ) {
-				return DOMPurify.sanitize( $.parseHTML( nodeHtml )[ 0 ], {
-					ADD_TAGS: addTags,
-					ADD_ATTR: addAttrs,
-					ADD_URI_SAFE_ATTR: addAttrs,
-					FORBID_TAGS: [ 'style' ],
-					RETURN_DOM_FRAGMENT: true
-				} ).childNodes[ 0 ];
-			} ).filter( function ( node ) {
-				// Nodes can be sanitized to nothing (empty string or undefined)
-				// so check it is truthy
-				return node;
-			} );
+			// Convert NodeList to Array
+			return Array.prototype.slice.call( ve.sanitizeHtml( serialized.value ) );
 		}
 	} else if ( serialized.type === 'plain' ) {
 		return serialized.value;
@@ -275,102 +259,25 @@ ve.dm.Change.static.deserializeValue = function ( serialized, unsafe ) {
  */
 ve.dm.Change.static.rebaseTransactions = function ( transactionA, transactionB ) {
 	var infoA, infoB;
-	/**
-	 * Calculate a transaction's active range and length change
-	 *
-	 * @param {ve.dm.Transaction} transaction The transaction
-	 * @return {Object} Active range and length change
-	 * @return {number|undefined} return.start Start offset of the active range
-	 * @return {number|undefined} return.end End offset of the active range
-	 * @return {number} return.diff Length change the transaction causes
-	 */
-	function getActiveRangeAndLengthDiff( transaction ) {
-		var i, len, op, start, end, active,
-			offset = 0,
-			annotations = 0,
-			diff = 0;
-
-		for ( i = 0, len = transaction.operations.length; i < len; i++ ) {
-			op = transaction.operations[ i ];
-			if ( op.type === 'annotate' ) {
-				annotations += ( op.bias === 'start' ? 1 : -1 );
-				continue;
-			}
-			active = annotations > 0 || (
-				op.type !== 'retain' && op.type !== 'retainMetadata'
-			);
-			// Place start marker
-			if ( active && start === undefined ) {
-				start = offset;
-			}
-			// Adjust offset and diff
-			if ( op.type === 'retain' ) {
-				offset += op.length;
-			} else if ( op.type === 'replace' ) {
-				offset += op.remove.length;
-				diff += op.insert.length - op.remove.length;
-			}
-			// Place/move end marker
-			if ( op.type === 'attribute' || op.type === 'replaceMetadata' ) {
-				// Op with length 0 but that effectively modifies 1 position
-				end = offset + 1;
-			} else if ( active ) {
-				end = offset;
-			}
-		}
-		return { start: start, end: end, diff: diff };
-	}
-
-	/**
-	 * Adjust (in place) the retain length at the start/end of an operations list
-	 *
-	 * @param {Object[]} ops Operations list
-	 * @param {string} place Where to adjust, start|end
-	 * @param {number} diff Adjustment; must not cause negative retain length
-	 */
-	function adjustRetain( ops, place, diff ) {
-		var start = place === 'start',
-			i = start ? 0 : ops.length - 1;
-
-		if ( diff === 0 ) {
-			return;
-		}
-		if ( !start && ops[ i ] && ops[ i ].type === 'retainMetadata' ) {
-			i = ops.length - 2;
-		}
-		if ( ops[ i ] && ops[ i ].type === 'retain' ) {
-			ops[ i ].length += diff;
-			if ( ops[ i ].length < 0 ) {
-				throw new Error( 'Negative retain length' );
-			} else if ( ops[ i ].length === 0 ) {
-				ops.splice( i, 1 );
-			}
-			return;
-		}
-		if ( diff < 0 ) {
-			throw new Error( 'Negative retain length' );
-		}
-		ops.splice( start ? 0 : ops.length, 0, { type: 'retain', length: diff } );
-	}
 
 	transactionA = transactionA.clone();
 	transactionB = transactionB.clone();
-	infoA = getActiveRangeAndLengthDiff( transactionA );
-	infoB = getActiveRangeAndLengthDiff( transactionB );
+	infoA = transactionA.getActiveRangeAndLengthDiff();
+	infoB = transactionB.getActiveRangeAndLengthDiff();
 
 	if ( infoA.start === undefined || infoB.start === undefined ) {
 		// One of the transactions is a no-op: only need to adjust its retain length.
 		// We can safely adjust both, because the no-op must have diff 0
-		adjustRetain( transactionA.operations, 'start', infoB.diff );
-		adjustRetain( transactionB.operations, 'start', infoA.diff );
+		transactionA.adjustRetain( 'start', infoB.diff );
+		transactionB.adjustRetain( 'start', infoA.diff );
 	} else if ( infoA.end <= infoB.start ) {
 		// This includes the case where both transactions are insertions at the same
 		// point
-		adjustRetain( transactionB.operations, 'start', infoA.diff );
-		adjustRetain( transactionA.operations, 'end', infoB.diff );
+		transactionB.adjustRetain( 'start', infoA.diff );
+		transactionA.adjustRetain( 'end', infoB.diff );
 	} else if ( infoB.end <= infoA.start ) {
-		adjustRetain( transactionA.operations, 'start', infoB.diff );
-		adjustRetain( transactionB.operations, 'end', infoA.diff );
+		transactionA.adjustRetain( 'start', infoB.diff );
+		transactionB.adjustRetain( 'end', infoA.diff );
 	} else {
 		// The active ranges overlap: conflict
 		return [ null, null ];
@@ -390,18 +297,18 @@ ve.dm.Change.static.rebaseTransactions = function ( transactionA, transactionB )
  * 2. Transaction commutativity: a * x|a equals x * a|x .
  * 3. Rebasing piecewise: if (x|a)|b != 0, then (x|a)|b equals x|(a * b) .
  *
- * Given committed history consisting of transactions a1,a2,...,aN, and an uncommitted update
- * consisting of transactions b1,b2,...,bM, our approach is to rebase the whole list a1,...,aN
- * over b1, and at the same time rebase b1 onto a1*...*aN.
- * Then we repeat the process for b2, and so on. To rebase a1,...,aN over b1, the the following
+ * Given committed history consisting of transactions a1,a2,…,aN, and an uncommitted update
+ * consisting of transactions b1,b2,…,bM, our approach is to rebase the whole list a1,…,aN
+ * over b1, and at the same time rebase b1 onto a1*…*aN.
+ * Then we repeat the process for b2, and so on. To rebase a1,…,aN over b1, the following
  * approach would work:
  *
  * a1' := a1|b1
  * a2' := a2|(inv(a1) * b1 * a1')
  * a3' := a3|(inv(a2) * inv(a1) * b1 * a1' * a2')
- * ...
+ * ⋮
  *
- * That is, rebase a_i under a_i-1,...,a_1, then over b1,...,bM, then over a'1,...,a_i-1' .
+ * That is, rebase a_i under a_i-1,…,a_1, then over b1,…,bM, then over a'1,…,a_i-1' .
  *
  * However, because of the way transactions are written, it's not actually easy to implement
  * transaction concatenation, so we would want to calculate a2' as piecewise rebases
@@ -415,7 +322,7 @@ ve.dm.Change.static.rebaseTransactions = function ( transactionA, transactionB )
  * So observe that by transaction commutivity we can rewrite a2' as:
  *
  * a2' := a2|(inv(a1) * a1 * b1|a1)
- * 	= a2|(b1|a1)
+ *      = a2|(b1|a1)
  *
  * and that b1|a1 conflicts only if a1|b1 conflicts (so this introduces no new conflicts). In
  * general we can write:
@@ -427,12 +334,12 @@ ve.dm.Change.static.rebaseTransactions = function ( transactionA, transactionB )
  * a3' := a3|b1''
  * b1''' := a1''|a3
  *
- * Continuing in this way, we obtain a1',...,aN' rebased over b1, and b1''''''' (N primes)
- * rebased onto a1 * ... * aN . Iteratively we can take the same approach to rebase over
- * b2,...,bM, giving both rebased lists as required.
+ * Continuing in this way, we obtain a1',…,aN' rebased over b1, and b1''''''' (N primes)
+ * rebased onto a1 * … * aN . Iteratively we can take the same approach to rebase over
+ * b2,…,bM, giving both rebased lists as required.
  *
  * If any of the transaction rebases conflict, then we rebase the largest possible
- * non-conflicting initial segment b1,...,bK onto all of a1,...,aN (so clearly K < M).
+ * non-conflicting initial segment b1,…,bK onto all of a1,…,aN (so clearly K < M).
  *
  * If there are two parallel inserts at the same location, then ordering is ambiguous. We
  * resolve this by putting the insert for the transaction with the highest author ID
@@ -451,8 +358,8 @@ ve.dm.Change.static.rebaseUncommittedChange = function ( history, uncommitted ) 
 		storeB, rebasedStoresA, storeA, authorId,
 		transactionsA = history.transactions.slice(),
 		transactionsB = uncommitted.transactions.slice(),
-		storesA = history.stores.slice(),
-		storesB = uncommitted.stores.slice(),
+		storesA = history.getStores(),
+		storesB = uncommitted.getStores(),
 		selectionsA = OO.cloneObject( history.selections ),
 		selectionsB = OO.cloneObject( uncommitted.selections ),
 		rejected = null;
@@ -462,7 +369,7 @@ ve.dm.Change.static.rebaseUncommittedChange = function ( history, uncommitted ) 
 	}
 
 	// For each element b_i of transactionsB, rebase the whole list transactionsA over b_i.
-	// To rebase a1, a2, a3, ..., aN over b_i, first we rebase a1 onto b_i. Then we rebase
+	// To rebase a1, a2, a3, …, aN over b_i, first we rebase a1 onto b_i. Then we rebase
 	// a2 onto some b', defined as
 	//
 	// b_i' := b_i|a1 , that is b_i.rebasedOnto(a1)
@@ -670,6 +577,20 @@ ve.dm.Change.static.getTransactionInfo = function ( tx ) {
 /* Methods */
 
 /**
+ * Create a clone of this Change
+ *
+ * @return {ve.dm.Change} Clone of this change
+ */
+ve.dm.Change.prototype.clone = function () {
+	var authorId, doc;
+	for ( authorId in this.selections ) {
+		doc = this.selections[ authorId ].getDocument();
+		break;
+	}
+	return this.constructor.static.unsafeDeserialize( this.serialize(), doc );
+};
+
+/**
  * @return {boolean} True if this change has no transactions or selections
  */
 ve.dm.Change.prototype.isEmpty = function () {
@@ -681,6 +602,36 @@ ve.dm.Change.prototype.isEmpty = function () {
  */
 ve.dm.Change.prototype.getLength = function () {
 	return this.transactions.length;
+};
+
+/**
+ * Get the store items introduced by transaction n
+ *
+ * @param {number} n The index of a transaction within the change
+ * @return {ve.dm.HashValueStore} The store items introduced by transaction n
+ */
+ve.dm.Change.prototype.getStore = function ( n ) {
+	return this.store.slice(
+		n > 0 ? this.storeLengthAtTransaction[ n - 1 ] : 0,
+		this.storeLengthAtTransaction[ n ]
+	);
+};
+
+/**
+ * Get the stores for each transaction
+ *
+ * @return {ve.dm.HashValueStore[]} Each transaction's store items (shallow copied store)
+ */
+ve.dm.Change.prototype.getStores = function () {
+	var i, len, end,
+		stores = [],
+		start = 0;
+	for ( i = 0, len = this.getLength(); i < len; i++ ) {
+		end = this.storeLengthAtTransaction[ i ];
+		stores.push( this.store.slice( start, end ) );
+		start = end;
+	}
+	return stores;
 };
 
 /**
@@ -758,9 +709,19 @@ ve.dm.Change.prototype.concat = function ( other ) {
 	return new ve.dm.Change(
 		this.start,
 		this.transactions.concat( other.transactions ),
-		this.stores.concat( other.stores ),
+		this.getStores().concat( other.getStores() ),
 		other.selections
 	);
+};
+
+/**
+ * Push a transaction, after having pushed to the hash value store if it needs to grow
+ *
+ * @param {ve.dm.Transaction} transaction The transaction
+ */
+ve.dm.Change.prototype.pushTransaction = function ( transaction ) {
+	this.transactions.push( transaction );
+	this.storeLengthAtTransaction.push( this.store.getLength() );
 };
 
 /**
@@ -770,12 +731,16 @@ ve.dm.Change.prototype.concat = function ( other ) {
  * @throws {Error} If other does not start immediately after this
  */
 ve.dm.Change.prototype.push = function ( other ) {
+	var change = this;
 	if ( other.start !== this.start + this.getLength() ) {
 		throw new Error( 'this ends at ' + ( this.start + this.getLength() ) +
 			' but other starts at ' + other.start );
 	}
 	Array.prototype.push.apply( this.transactions, other.transactions );
-	Array.prototype.push.apply( this.stores, other.stores );
+	other.getStores().forEach( function ( store ) {
+		change.store.merge( store );
+		change.storeLengthAtTransaction.push( change.store.getLength() );
+	} );
 	this.selections = OO.cloneObject( other.selections );
 };
 
@@ -803,7 +768,7 @@ ve.dm.Change.prototype.mostRecent = function ( start ) {
 	return new ve.dm.Change(
 		start,
 		this.transactions.slice( start - this.start ),
-		this.stores.slice( start - this.start ),
+		this.getStores().slice( start - this.start ),
 		OO.cloneObject( this.selections )
 	);
 };
@@ -823,7 +788,7 @@ ve.dm.Change.prototype.truncate = function ( length ) {
 	return new ve.dm.Change(
 		this.start,
 		this.transactions.slice( 0, length ),
-		this.stores.slice( 0, length ),
+		this.getStores().slice( 0, length ),
 		{}
 	);
 };
@@ -832,15 +797,33 @@ ve.dm.Change.prototype.truncate = function ( length ) {
  * Apply change to surface
  *
  * @param {ve.dm.Surface} surface Surface in change start state
+ * @param {boolean} [applySelection] Apply a selection based on the modified range
  */
-ve.dm.Change.prototype.applyTo = function ( surface ) {
-	this.stores.forEach( function ( store ) {
+ve.dm.Change.prototype.applyTo = function ( surface, applySelection ) {
+	var doc = surface.getDocument();
+	if ( this.start !== doc.completeHistory.getLength() ) {
+		throw new Error( 'Change starts at ' + this.start + ', but doc is at ' + doc.completeHistory.getLength() );
+	}
+	this.getStores().forEach( function ( store ) {
 		surface.documentModel.store.merge( store );
 	} );
 	this.transactions.forEach( function ( tx ) {
+		var range, offset;
 		surface.change( tx );
 		// Don't mark as applied: this.start already tracks this
 		tx.applied = false;
+
+		// TODO: This would be better fixed by T202730
+		if ( applySelection ) {
+			range = tx.getModifiedRange( doc );
+			// If the transaction only touched the internal list, there is no modified range within the main document
+			if ( range ) {
+				offset = doc.getNearestCursorOffset( range.end, -1 );
+				if ( offset !== -1 ) {
+					surface.setSelection( new ve.dm.LinearSelection( new ve.Range( offset ) ) );
+				}
+			}
+		}
 	} );
 };
 
@@ -850,14 +833,17 @@ ve.dm.Change.prototype.applyTo = function ( surface ) {
  * @param {ve.dm.Surface} surface Surface in change end state
  */
 ve.dm.Change.prototype.unapplyTo = function ( surface ) {
-	var doc = surface.documentModel,
-		historyLength = doc.completeHistory.length - this.getLength();
+	var doc = surface.getDocument(),
+		historyLength = doc.completeHistory.getLength() - this.getLength();
+	if ( this.start !== historyLength ) {
+		throw new Error( 'Invalid start: change starts at ' + this.start + ', but doc would be at ' + historyLength );
+	}
 	this.transactions.slice().reverse().forEach( function ( tx ) {
 		surface.change( tx.reversed() );
 	} );
-	doc.completeHistory.length = historyLength;
-	doc.storeLengthAtHistoryLength.length = historyLength + 1;
-	doc.store.truncate( doc.storeLengthAtHistoryLength[ historyLength ] );
+	doc.completeHistory.transactions.length = historyLength;
+	doc.completeHistory.storeLengthAtTransaction.length = historyLength;
+	doc.store.truncate( doc.completeHistory.storeLengthAtTransaction[ historyLength - 1 ] );
 };
 
 /**
@@ -867,16 +853,7 @@ ve.dm.Change.prototype.unapplyTo = function ( surface ) {
  * @throws {Error} If this change does not start at the top of the history
  */
 ve.dm.Change.prototype.addToHistory = function ( documentModel ) {
-	if ( this.start !== documentModel.completeHistory.length ) {
-		throw new Error( 'this starts at ' + this.start +
-			' but history ends at ' + documentModel.completeHistory.length );
-	}
-	// FIXME this code should probably be in dm.Document
-	this.stores.forEach( function ( store ) {
-		documentModel.store.merge( store );
-	} );
-	ve.batchPush( documentModel.completeHistory, this.transactions );
-	documentModel.storeLengthAtHistoryLength[ documentModel.completeHistory.length ] = documentModel.store.getLength();
+	documentModel.completeHistory.push( this );
 };
 
 /**
@@ -886,13 +863,13 @@ ve.dm.Change.prototype.addToHistory = function ( documentModel ) {
  * @throws {Error} If this change does not end at the top of the history
  */
 ve.dm.Change.prototype.removeFromHistory = function ( doc ) {
-	if ( this.start + this.getLength() !== doc.completeHistory.length ) {
+	if ( this.start + this.getLength() !== doc.completeHistory.getLength() ) {
 		throw new Error( 'this ends at ' + ( this.start + this.getLength() ) +
-			' but history ends at ' + doc.completeHistory.length );
+			' but history ends at ' + doc.completeHistory.getLength() );
 	}
-	doc.completeHistory.length -= this.transactions.length;
-	doc.storeLengthAtHistoryLength -= this.transactions.length;
-	doc.store.truncate( doc.storeLengthAtHistoryLength[ doc.completeHistory.length ] );
+	doc.completeHistory.transactions.length -= this.transactions.length;
+	doc.completeHistory.storeLengthAtTransaction.length -= this.transactions.length;
+	doc.store.truncate( doc.completeHistory.storeLengthAtTransaction[ doc.completeHistory.getLength() - 1 ] );
 };
 
 /**
@@ -942,17 +919,72 @@ ve.dm.Change.prototype.serialize = function ( preserveStoreValues ) {
 		}
 		prevInfo = info;
 	}
-	stores = this.stores.map( serializeStore );
+	stores = this.getStores().map( serializeStore );
 	data = {
 		start: this.start,
 		transactions: transactions
 	};
 	// Only set stores if at least one is non-null
-	if ( stores.some( function ( store ) { return store !== null; } ) ) {
+	if ( stores.some( function ( store ) {
+		return store !== null;
+	} ) ) {
 		data.stores = stores;
 	}
 	if ( Object.keys( selections ).length ) {
 		data.selections = selections;
 	}
 	return data;
+};
+
+/**
+ * Squash a change in-place, to use as few transactions as possible
+ */
+ve.dm.Change.prototype.squash = function () {
+	var transactionA, transactionB, infoA, infoB, offset,
+		i = 0;
+	while ( i < this.transactions.length - 1 ) {
+		transactionA = this.transactions[ i ];
+		// (re)calculate infoA (it can change between iterations, even if i does not)
+		infoA = transactionA.getActiveRangeAndLengthDiff();
+		if ( infoA.start === undefined ) {
+			// No-op: remove, putting any store items into the next transaction
+			this.transactions.splice( i, 1 );
+			this.storeLengthAtTransaction[ i + 1 ] += this.storeLengthAtTransaction[ i ];
+			this.storeLengthAtTransaction.splice( i, 1 );
+			continue;
+		}
+		transactionB = this.transactions[ i + 1 ];
+		infoB = transactionB.getActiveRangeAndLengthDiff();
+		if ( infoB.start === undefined ) {
+			// No-op: remove, putting any store items into the previous transaction
+			this.transactions.splice( i + 1, 1 );
+			this.storeLengthAtTransaction[ i ] += this.storeLengthAtTransaction[ i + 1 ];
+			this.storeLengthAtTransaction.splice( i + 1, 1 );
+			continue;
+		}
+
+		if ( infoB.end <= infoA.start ) {
+			// Remove from A's start the retained content affected by B
+			transactionA.adjustRetain( 'start', infoB.start - infoB.end );
+			offset = infoB.start;
+		} else if ( infoA.end <= infoB.start - infoA.diff ) {
+			// Remove from A's end the retained content affected by B
+			transactionA.adjustRetain( 'end', infoB.start - infoB.end );
+			offset = infoB.start - infoA.diff;
+		} else {
+			// The active ranges overlap: continue without squashing this pair
+			i++;
+			continue;
+		}
+		transactionA.insertOperations(
+			offset,
+			transactionB.operations.slice(
+				infoB.startOpIndex,
+				infoB.endOpIndex
+			)
+		);
+		this.transactions.splice( i + 1, 1 );
+		this.storeLengthAtTransaction[ i ] += this.storeLengthAtTransaction[ i + 1 ];
+		this.storeLengthAtTransaction.splice( i + 1, 1 );
+	}
 };

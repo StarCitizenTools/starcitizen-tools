@@ -1,7 +1,7 @@
 /*!
  * VisualEditor debugging methods.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /* eslint-disable no-console */
@@ -125,7 +125,7 @@ ve.summarizeTransaction = function ( tx ) {
 		} else if ( op.type === 'annotate' ) {
 			annotations += op.bias === 'start' ? 1 : -1;
 			return 'annotate';
-		} else if ( op.type.endsWith( 'Metadata' ) ) {
+		} else if ( op.type.slice( -8 ) === 'Metadata' ) {
 			// We don't care much because we're deprecating metadata ops
 			return 'metadata';
 		} else {

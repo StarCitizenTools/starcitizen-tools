@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWCategoryItemWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -49,6 +49,9 @@ ve.ui.MWCategoryItemWidget = function VeUiMWCategoryItemWidget( config ) {
 		ve.init.platform.linkCache.styleElement( this.name, this.$label );
 	}
 
+	// Events
+	this.on( 'click', this.onButtonClick.bind( this ) );
+
 	this.$element.addClass( 've-ui-mwCategoryItemWidget' );
 };
 
@@ -68,15 +71,11 @@ OO.mixinClass( ve.ui.MWCategoryItemWidget, OO.ui.mixin.DraggableElement );
 /* Methods */
 
 /**
- * Handle mouse click events.
+ * Handle button widget click events.
  *
  * @method
- * @param {jQuery.Event} e Mouse click event
  * @fires togglePopupMenu on click.
  */
-ve.ui.MWCategoryItemWidget.prototype.onClick = function () {
+ve.ui.MWCategoryItemWidget.prototype.onButtonClick = function () {
 	this.emit( 'togglePopupMenu', this );
-
-	// Parent method
-	return ve.ui.MWCategoryItemWidget.super.prototype.onClick.apply( this, arguments );
 };

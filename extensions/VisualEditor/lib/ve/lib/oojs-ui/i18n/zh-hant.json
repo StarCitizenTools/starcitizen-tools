@@ -16,7 +16,8 @@
 			"Cwlin0416",
 			"LNDDYL",
 			"Shangkuanlc",
-			"A2093064"
+			"A2093064",
+			"Kly"
 		]
 	},
 	"ooui-outline-control-move-down": "項目下移",
@@ -32,8 +33,10 @@
 	"ooui-dialog-process-dismiss": "關閉",
 	"ooui-dialog-process-retry": "再試一次",
 	"ooui-dialog-process-continue": "繼續",
+	"ooui-combobox-button-label": "拖曳下拉式方塊",
 	"ooui-selectfile-button-select": "選擇一個檔案",
 	"ooui-selectfile-not-supported": "無法支援所選擇的檔案",
 	"ooui-selectfile-placeholder": "尚未選擇檔案",
-	"ooui-selectfile-dragdrop-placeholder": "拖曳檔案到此處"
+	"ooui-selectfile-dragdrop-placeholder": "拖曳檔案到此處",
+	"ooui-field-help": "說明"
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Context class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -199,7 +199,7 @@ ve.ui.Context.prototype.toggle = function ( show ) {
 		this.$element.toggleClass( 'oo-ui-element-hidden', !this.visible );
 	}
 	this.emit( 'resize' );
-	return $.Deferred().resolve().promise();
+	return ve.createDeferred().resolve().promise();
 };
 
 /**

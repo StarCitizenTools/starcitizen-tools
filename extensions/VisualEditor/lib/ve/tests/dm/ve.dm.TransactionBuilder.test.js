@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Transaction tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.TransactionBuilder' );
@@ -287,15 +287,15 @@ QUnit.test( 'newFromInsertion', function ( assert ) {
 					{ type: 'retain', length: 3 }
 				]
 			},
-			'inserting one paragraph into empty paragraph moves insertion before': {
+			'inserting one paragraph into empty paragraph replaces it': {
 				args: [ doc2, 1, [ { type: 'paragraph' }, 'F', 'O', 'O', { type: '/paragraph' } ] ],
 				ops: [
 					{
 						type: 'replace',
-						remove: [],
+						remove: [ { type: 'paragraph' }, { type: '/paragraph' } ],
 						insert: [ { type: 'paragraph' }, 'F', 'O', 'O', { type: '/paragraph' } ]
 					},
-					{ type: 'retain', length: 4 }
+					{ type: 'retain', length: 2 }
 				],
 				range: new ve.Range( 0, 5 )
 			},
@@ -1012,7 +1012,8 @@ QUnit.test( 'newFromDocumentInsertion', function ( assert ) {
 } );
 
 QUnit.test( 'newFromAttributeChanges', function ( assert ) {
-	var doc = ve.dm.example.createExampleDocument(),
+	var val, tx,
+		doc = ve.dm.example.createExampleDocument(),
 		cases = {
 			'first element': {
 				args: [ doc, 0, { level: 2 } ],
@@ -1069,6 +1070,18 @@ QUnit.test( 'newFromAttributeChanges', function ( assert ) {
 		};
 
 	ve.test.utils.runTransactionConstructorTests( assert, ve.dm.TransactionBuilder.static.newFromAttributeChanges, cases );
+
+	val = { foo: { bar: 'baz' } };
+	tx = ve.dm.TransactionBuilder.static.newFromAttributeChanges( doc, 0, val );
+	val.foo.bar = 'qux';
+	assert.deepEqual(
+		tx.getOperations(),
+		[
+			{ type: 'attribute', key: 'foo', from: undefined, to: { bar: 'baz' } },
+			{ type: 'retain', length: 63 }
+		],
+		'Attribute value mutated after transaction built (T193062)'
+	);
 } );
 
 QUnit.test( 'newFromAnnotation', function ( assert ) {
@@ -1095,17 +1108,9 @@ QUnit.test( 'newFromAnnotation', function ( assert ) {
 				ops: [
 					{ type: 'retain', length: 1 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 1 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [ 'a' ],
+						insert: [ [ 'a', [ ve.dm.example.boldHash ] ] ]
 					},
 					{ type: 'retain', length: 61 }
 				]
@@ -1115,31 +1120,15 @@ QUnit.test( 'newFromAnnotation', function ( assert ) {
 				ops: [
 					{ type: 'retain', length: 1 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [ 'a' ],
+						insert: [ [ 'a', [ ve.dm.example.boldHash ] ] ]
 					},
 					{ type: 'retain', length: 1 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 1 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 1 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [ [ 'c', [ ve.dm.example.italicHash ] ] ],
+						insert: [ [ 'c', [ ve.dm.example.italicHash, ve.dm.example.boldHash ] ] ]
 					},
 					{ type: 'retain', length: 59 }
 				]
@@ -1149,31 +1138,15 @@ QUnit.test( 'newFromAnnotation', function ( assert ) {
 				ops: [
 					{ type: 'retain', length: 1 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.strongHash
+						type: 'replace',
+						remove: [ 'a' ],
+						insert: [ [ 'a', [ ve.dm.example.strongHash ] ] ]
 					},
 					{ type: 'retain', length: 1 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.strongHash
-					},
-					{ type: 'retain', length: 1 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.strongHash
-					},
-					{ type: 'retain', length: 1 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.strongHash
+						type: 'replace',
+						remove: [ [ 'c', [ ve.dm.example.italicHash ] ] ],
+						insert: [ [ 'c', [ ve.dm.example.italicHash, ve.dm.example.strongHash ] ] ]
 					},
 					{ type: 'retain', length: 59 }
 				]
@@ -1183,17 +1156,13 @@ QUnit.test( 'newFromAnnotation', function ( assert ) {
 				ops: [
 					{ type: 'retain', length: 4 },
 					{
-						type: 'annotate',
-						method: 'clear',
-						bias: 'start',
-						index: ve.dm.example.strongHash
-					},
-					{ type: 'retain', length: 3 },
-					{
-						type: 'annotate',
-						method: 'clear',
-						bias: 'stop',
-						index: ve.dm.example.strongHash
+						type: 'replace',
+						remove: [
+							[ 'B', [ ve.dm.example.strongHash ] ],
+							[ 'a', [ ve.dm.example.strongHash ] ],
+							[ 'r', [ ve.dm.example.strongHash ] ]
+						],
+						insert: [ 'B', 'a', 'r' ]
 					},
 					{ type: 'retain', length: 3 }
 				]
@@ -1209,31 +1178,15 @@ QUnit.test( 'newFromAnnotation', function ( assert ) {
 				ops: [
 					{ type: 'retain', length: 3 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 1 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [ [ 'c', [ ve.dm.example.italicHash ] ] ],
+						insert: [ [ 'c', [ ve.dm.example.italicHash, ve.dm.example.boldHash ] ] ]
 					},
 					{ type: 'retain', length: 6 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 1 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [ 'd' ],
+						insert: [ [ 'd', [ ve.dm.example.boldHash ] ] ]
 					},
 					{ type: 'retain', length: 52 }
 				]
@@ -1243,17 +1196,29 @@ QUnit.test( 'newFromAnnotation', function ( assert ) {
 				ops: [
 					{ type: 'retain', length: 38 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 4 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [
+							'h',
+							{ type: 'inlineImage', attributes: {
+								src: 'https://upload.wikimedia.org/wikipedia/commons/b/b3/Wikipedia-logo-v2-en.svg',
+								alt: 'Example',
+								width: 100,
+								height: 50
+							} },
+							{ type: '/inlineImage' },
+							'i'
+						],
+						insert: [
+							[ 'h', [ ve.dm.example.boldHash ] ],
+							{ type: 'inlineImage', attributes: {
+								src: 'https://upload.wikimedia.org/wikipedia/commons/b/b3/Wikipedia-logo-v2-en.svg',
+								alt: 'Example',
+								width: 100,
+								height: 50
+							}, annotations: [ ve.dm.example.boldHash ] },
+							{ type: '/inlineImage', annotations: [ ve.dm.example.boldHash ] },
+							[ 'i', [ ve.dm.example.boldHash ] ]
+						]
 					},
 					{ type: 'retain', length: 21 }
 				]
@@ -1263,31 +1228,23 @@ QUnit.test( 'newFromAnnotation', function ( assert ) {
 				ops: [
 					{ type: 'retain', length: 1 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 3 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [ 'F', 'o', 'o' ],
+						insert: [
+							[ 'F', [ ve.dm.example.boldHash ] ],
+							[ 'o', [ ve.dm.example.boldHash ] ],
+							[ 'o', [ ve.dm.example.boldHash ] ]
+						]
 					},
 					{ type: 'retain', length: 2 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 3 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [ 'B', 'a', 'r' ],
+						insert: [
+							[ 'B', [ ve.dm.example.boldHash ] ],
+							[ 'a', [ ve.dm.example.boldHash ] ],
+							[ 'r', [ ve.dm.example.boldHash ] ]
+						]
 					},
 					{ type: 'retain', length: 21 }
 				]
@@ -1297,45 +1254,33 @@ QUnit.test( 'newFromAnnotation', function ( assert ) {
 				ops: [
 					{ type: 'retain', length: 1 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 3 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [ 'F', 'o', 'o' ],
+						insert: [
+							[ 'F', [ ve.dm.example.boldHash ] ],
+							[ 'o', [ ve.dm.example.boldHash ] ],
+							[ 'o', [ ve.dm.example.boldHash ] ]
+						]
 					},
 					{ type: 'retain', length: 2 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 3 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [ 'B', 'a', 'r' ],
+						insert: [
+							[ 'B', [ ve.dm.example.boldHash ] ],
+							[ 'a', [ ve.dm.example.boldHash ] ],
+							[ 'r', [ ve.dm.example.boldHash ] ]
+						]
 					},
 					{ type: 'retain', length: 15 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.boldHash
-					},
-					{ type: 'retain', length: 3 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.boldHash
+						type: 'replace',
+						remove: [ 'B', 'a', 'z' ],
+						insert: [
+							[ 'B', [ ve.dm.example.boldHash ] ],
+							[ 'a', [ ve.dm.example.boldHash ] ],
+							[ 'z', [ ve.dm.example.boldHash ] ]
+						]
 					},
 					{ type: 'retain', length: 3 }
 				]
@@ -1920,90 +1865,12 @@ QUnit.test( 'pushReplaceElementAttribute', function ( assert ) {
 	ve.test.utils.runTransactionBuilderTests( assert, cases );
 } );
 
-QUnit.test( 'push*Annotating', function ( assert ) {
-	var cases = {
-		'start annotating': {
-			calls: [
-				[ 'pushStartAnnotating', 'set', 'h000' ]
-			],
-			ops: [
-				{
-					type: 'annotate',
-					method: 'set',
-					bias: 'start',
-					index: 'h000'
-				}
-			],
-			diff: 0
-		},
-		'stop annotating': {
-			calls: [
-				[ 'pushStopAnnotating', 'set', 'h000' ]
-			],
-			ops: [
-				{
-					type: 'annotate',
-					method: 'set',
-					bias: 'stop',
-					index: 'h000'
-				}
-			],
-			diff: 0
-		},
-		'start multiple annotations': {
-			calls: [
-				[ 'pushStartAnnotating', 'set', 'h000' ],
-				[ 'pushStartAnnotating', 'set', 'h111' ]
-			],
-			ops: [
-				{
-					type: 'annotate',
-					method: 'set',
-					bias: 'start',
-					index: 'h000'
-				},
-				{
-					type: 'annotate',
-					method: 'set',
-					bias: 'start',
-					index: 'h111'
-				}
-			],
-			diff: 0
-		},
-		'stop multiple annotations': {
-			calls: [
-				[ 'pushStopAnnotating', 'set', 'h000' ],
-				[ 'pushStopAnnotating', 'set', 'h111' ]
-			],
-			ops: [
-				{
-					type: 'annotate',
-					method: 'set',
-					bias: 'stop',
-					index: 'h000'
-				},
-				{
-					type: 'annotate',
-					method: 'set',
-					bias: 'stop',
-					index: 'h111'
-				}
-			],
-			diff: 0
-		}
-	};
-
-	ve.test.utils.runTransactionBuilderTests( assert, cases );
-} );
-
 QUnit.test( 'isNoOp', function ( assert ) {
 	var tx,
 		doc = ve.dm.example.createExampleDocument(),
 		metaDoc = ve.dm.example.createExampleDocument( 'withMeta' ),
 		listMetaDoc = ve.dm.example.createExampleDocument( 'listWithMeta' );
 
-	assert.expect( 3 * 6 - 1 );
 	[ doc, metaDoc, listMetaDoc ].forEach( function ( d, i ) {
 		var isListMetaDoc = ( i === 2 );
 
@@ -2096,17 +1963,17 @@ QUnit.test( 'operations/build from operations', function ( assert ) {
 				expected: [
 					{ type: 'retain', length: 1 },
 					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'start',
-						index: ve.dm.example.underlineHash
-					},
-					{ type: 'retain', length: 3 },
-					{
-						type: 'annotate',
-						method: 'set',
-						bias: 'stop',
-						index: ve.dm.example.underlineHash
+						type: 'replace',
+						remove: [
+							'a',
+							[ 'b', [ ve.dm.example.boldHash ] ],
+							[ 'c', [ ve.dm.example.italicHash ] ]
+						],
+						insert: [
+							[ 'a', [ ve.dm.example.underlineHash ] ],
+							[ 'b', [ ve.dm.example.underlineHash, ve.dm.example.boldHash ] ],
+							[ 'c', [ ve.dm.example.underlineHash, ve.dm.example.italicHash ] ]
+						]
 					},
 					{ type: 'retain', length: 59 }
 				]
@@ -2247,7 +2114,6 @@ QUnit.test( 'newFromRemoval preserving metadata', function ( assert ) {
 			]
 		}
 	];
-	assert.expect( cases.length );
 
 	for ( i = 0, len = cases.length; i < len; i++ ) {
 		doc = ve.dm.converter.getModelFromDom( ve.createDocumentFromHtml( cases[ i ].html ) );

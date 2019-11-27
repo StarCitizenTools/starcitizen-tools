@@ -7,18 +7,6 @@
 			"McDutchie"
 		]
 	},
-	"apihelp-visualeditor-description": "A rëspond con n'HTML5 për na pàgina dal sërvissi Parsoid.",
-	"apihelp-visualeditor-param-basetimestamp": "Durant l'argistrassion, ch'a ampòsta sòn con lë stamp orari dla revision ch'a l'é stàita modificà. Dovrà për trové ij conflit ëd modìfica.",
-	"apihelp-visualeditor-param-cachekey": "Për la serialisassion o ël dif, dovré l'arzultà 'd n'arcesta serializeforcache precedenta con sta ciav. A coata $1html.",
-	"apihelp-visualeditor-param-html": "HTML da mandé a Parsoid për convertì an test wiki.",
-	"apihelp-visualeditor-param-oldid": "Nùmer ëd revision da dovré (për stàndard col ëd l'ùltima revision).",
-	"apihelp-visualeditor-param-paction": "Assion da fé.",
-	"apihelp-visualeditor-param-page": "La pàgina andoa fé j'assion.",
-	"apihelp-visualeditor-param-pst": "A pre-argistra 'l test wiki trasformà prima 'd mandelo a Parsoid (paction=parsefragment).",
-	"apihelp-visualeditor-param-starttimestamp": "Durant l'argistrassion, ch'a ampòsta sòn a lë stamp orari ëd quand la pàgina a l'é stàita carià. Dovrà për trové ij conflit ëd modìfica.",
-	"apihelp-visualeditor-param-wikitext": "Test wiki da mandé a Parsoid për convertilo an HTML (paction=parsefragment).",
-	"apihelp-visualeditoredit-description": "Salvé na pàgina HTML5 vers MediaWiki (convertìa an test wiki con ël servissi Parsoid).",
-	"apihelp-visualeditoredit-param-basetimestamp": "Durant l'argistrassion, ch'a ampòsta sòn a lë stamp orari dla revision ch'a l'é stàita modificà. Dovrà për trové ij conflit ëd modìfica.",
 	"tooltip-ca-createsource": "Creé ël còdes sorgiss ëd costa pàgina",
 	"tooltip-ca-editsource": "Modifiché ël còdes sorgiss ëd sa pàgina",
 	"tooltip-ca-ve-edit": "Modifiché costa pàgina",
@@ -48,7 +36,6 @@
 	"visualeditor-dialog-media-position-section": "Posission",
 	"visualeditor-dialog-media-size-choosecustom": "Fissé na dimension përsonalisà",
 	"visualeditor-dialog-media-size-choosedefault": "Fissé a la dimension predefinìa",
-	"visualeditor-dialog-media-size-originalsize-error": "Impossìbil artrové la taja dl'archivi original.",
 	"visualeditor-dialog-media-size-section": "Dimension dla plancia",
 	"visualeditor-dialog-media-title": "Paràmeter dël mojen",
 	"visualeditor-dialog-media-type-border": "Bordura",
@@ -156,7 +143,6 @@
 	"visualeditor-toolbar-savedialog": "Argistré la pàgina",
 	"visualeditor-usernamespacepagelink": "Project:Spassi nominal utent",
 	"visualeditor-version-label": "Version",
-	"visualeditor-viewpage-savewarning": "É-lo sigur ëd vorèj andé andré a la manera preuva sensa salvé prima?",
 	"visualeditor-wikitext-warning": "A l'é an camin ch'a deuvra l'Editor visual - ël [[{{MediaWiki:visualeditor-wikitext-warning-link}}|wikitest]] a marcia nen ambelessì. Ch'a sgnaca su «{{int:visualeditor-ca-editsource}}» për modifiché la pàgina an manera wikitest - le modìfiche nen salvà a saran përdùe.",
 	"visualeditor-wikitext-warning-title": "Tichëttagi wikitest trovà"
 }

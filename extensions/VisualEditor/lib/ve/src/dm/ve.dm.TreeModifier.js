@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel TreeModifier class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -105,8 +105,8 @@ ve.dm.TreeModifier.prototype.processImplicitFinalRetain = function () {
 	// TODO: fix our tests so this is unnecessary, then check for exhaustion instead
 	var node, retainLength, item;
 	while ( true ) {
-		this.inserter.normalize();
-		this.remover.normalize();
+		this.inserter.normalizeCursor();
+		this.remover.normalizeCursor();
 		node = this.remover.node;
 		if ( !node || (
 			node === this.remover.root &&
@@ -327,8 +327,8 @@ ve.dm.TreeModifier.prototype.processRetain = function ( maxLength ) {
 		remover = this.remover,
 		inserter = this.inserter;
 
-	remover.normalize();
-	inserter.normalize();
+	remover.normalizeCursor();
+	inserter.normalizeCursor();
 	if ( this.cursorsMatch() ) {
 		// Pointers are in the same location, so advance them together.
 		// This is the only way both pointers can ever enter the same node;
@@ -368,8 +368,7 @@ ve.dm.TreeModifier.prototype.processRetain = function ( maxLength ) {
 		}
 		inserterStep = inserter.stepOut();
 		if ( inserterStep.item.type !== removerStep.item.type ) {
-			throw new Error( 'Expected ' + removerStep.item.type + ', not ' +
-inserterStep.item.type );
+			throw new Error( 'Expected ' + removerStep.item.type + ', not ' + inserterStep.item.type );
 		}
 		if ( this.deletions.indexOf( removerStep.item ) !== -1 ) {
 			this.removeLast();
@@ -460,12 +459,12 @@ ve.dm.TreeModifier.prototype.processInsert = function ( itemOrData ) {
 			// content in either processRemove or processRetain).
 			inserter.stepOut();
 		}
-		data = [ item, { type: '/' + item.type } ];
+		data = [ ve.copy( item ), { type: '/' + item.type } ];
 		// Put undefined at the close tag offset, for the time being
 		this.create( data );
 		inserter.stepIn();
 	} else if ( type === 'crosstext' ) {
-		data = data.slice();
+		data = ve.copy( data );
 		this.insertText( data );
 	} else if ( type === 'close' ) {
 		// Step past the next close tag, even if that skips past some content (in which
@@ -550,7 +549,7 @@ ve.dm.TreeModifier.prototype.removeLastCrossText = function () {
 	this.remover.offset -= length;
 	this.remover.linearOffset -= length;
 
-	this.inserter.normalize();
+	this.inserter.normalizeCursor();
 	pathsMatch = this.pathsMatch();
 	if ( pathsMatch ) {
 		if ( this.inserter.offset >= offset + length ) {

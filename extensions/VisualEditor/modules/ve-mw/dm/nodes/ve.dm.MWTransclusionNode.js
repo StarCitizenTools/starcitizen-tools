@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTransclusionNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -134,6 +134,7 @@ ve.dm.MWTransclusionNode.static.toDataElement = function ( domElements, converte
 
 ve.dm.MWTransclusionNode.static.toDomElements = function ( dataElement, doc, converter ) {
 	var els, i, len, span, value,
+		modelNode, viewNode,
 		store = converter.getStore(),
 		originalMw = dataElement.attributes.originalMw,
 		originalDomElements = store.value( dataElement.originalDomElementsHash );
@@ -158,7 +159,7 @@ ve.dm.MWTransclusionNode.static.toDomElements = function ( dataElement, doc, con
 		els = ve.copyDomElements( originalDomElements, doc );
 	} else {
 		if (
-			converter.isForClipboard() &&
+			converter.doesModeNeedRendering() &&
 			// Use getHashObjectForRendering to get the rendering from the store
 			( value = store.value( store.hashOfValue( null, OO.getHash( [ this.getHashObjectForRendering( dataElement ), undefined ] ) ) ) )
 		) {
@@ -203,12 +204,26 @@ ve.dm.MWTransclusionNode.static.toDomElements = function ( dataElement, doc, con
 			els[ i ] = wrapTextNode( els[ i ] );
 			els[ i ].setAttribute( 'data-ve-ignore', 'true' );
 		}
+	} else if ( converter.isForPreview() ) {
+		modelNode = ve.dm.nodeFactory.createFromElement( dataElement );
+		modelNode.setDocument( converter.internalList.getDocument() );
+		viewNode = ve.ce.nodeFactory.createFromModel( modelNode );
+		if ( !viewNode.hasRendering() ) {
+			viewNode.onSetup();
+			viewNode.$element
+				.append( viewNode.createInvisibleIcon() )
+				.attr( 'title', dataElement.attributes.text );
+			els = viewNode.$element.toArray();
+			viewNode.destroy();
+			return els;
+		}
 	}
 	return els;
 };
 
 ve.dm.MWTransclusionNode.static.describeChanges = function ( attributeChanges ) {
-	var change, params, param, $descriptions;
+	var change, params, param, paramChanges, listItem, from, to,
+		descriptions = [ ve.msg( 'visualeditor-changedesc-mwtransclusion' ) ];
 
 	// This method assumes that the behavior of isDiffComparable above remains
 	// the same, so it doesn't have to consider whether the actual template
@@ -244,25 +259,31 @@ ve.dm.MWTransclusionNode.static.describeChanges = function ( attributeChanges ) 
 			// All we know is that *something* changed, without the normal
 			// helpful just-being-given-the-changed-bits, so we have to filter
 			// this ourselves.
-			if ( params[ param ].from !== params[ param ].to ) {
-				change = this.describeChange( param, params[ param ] );
+			// Trim string values, and convert empty strings to undefined
+			from = ( params[ param ].from || '' ).trim() || undefined;
+			to = ( params[ param ].to || '' ).trim() || undefined;
+			if ( from !== to ) {
+				change = this.describeChange( param, { from: from, to: to } );
 				if ( change ) {
-					if ( !$descriptions ) {
-						$descriptions = $( '<ul>' );
+					if ( !paramChanges ) {
+						paramChanges = document.createElement( 'ul' );
+						descriptions.push( paramChanges );
 					}
-					if ( change instanceof jQuery ) {
-						$descriptions.append( $( '<li>' ).append( change ) );
+					listItem = document.createElement( 'li' );
+					if ( typeof change === 'string' ) {
+						listItem.appendChild( document.createTextNode( change ) );
 					} else {
-						$descriptions.append( $( '<li>' ).text( change ) );
+						// eslint-disable-next-line no-loop-func
+						change.forEach( function ( node ) {
+							listItem.appendChild( node );
+						} );
 					}
+					paramChanges.appendChild( listItem );
 				}
 			}
 		}
-		if ( $descriptions ) {
-			return [ ve.msg( 'visualeditor-changedesc-mwtransclusion' ), $descriptions ];
-		}
 	}
-	return [ ve.msg( 'visualeditor-changedesc-mwtransclusion' ) ];
+	return descriptions;
 };
 
 /** */
@@ -468,79 +489,6 @@ ve.dm.MWTransclusionNode.prototype.getWikitext = function () {
 	return this.constructor.static.getWikitext( this.getAttribute( 'mw' ) );
 };
 
-/* Concrete subclasses */
-
-/**
- * DataModel MediaWiki transclusion block node.
- *
- * @class
- * @extends ve.dm.MWTransclusionNode
- *
- * @constructor
- * @param {Object} [element] Reference to element in linear model
- */
-ve.dm.MWTransclusionBlockNode = function VeDmMWTransclusionBlockNode() {
-	// Parent constructor
-	ve.dm.MWTransclusionBlockNode.super.apply( this, arguments );
-};
-
-OO.inheritClass( ve.dm.MWTransclusionBlockNode, ve.dm.MWTransclusionNode );
-
-ve.dm.MWTransclusionBlockNode.static.matchTagNames = [];
-
-ve.dm.MWTransclusionBlockNode.static.name = 'mwTransclusionBlock';
-
-/**
- * DataModel MediaWiki transclusion inline node.
- *
- * @class
- * @extends ve.dm.MWTransclusionNode
- *
- * @constructor
- * @param {Object} [element] Reference to element in linear model
- */
-ve.dm.MWTransclusionInlineNode = function VeDmMWTransclusionInlineNode() {
-	// Parent constructor
-	ve.dm.MWTransclusionInlineNode.super.apply( this, arguments );
-};
-
-OO.inheritClass( ve.dm.MWTransclusionInlineNode, ve.dm.MWTransclusionNode );
-
-ve.dm.MWTransclusionInlineNode.static.matchTagNames = [];
-
-ve.dm.MWTransclusionInlineNode.static.name = 'mwTransclusionInline';
-
-ve.dm.MWTransclusionInlineNode.static.isContent = true;
-
-/**
- * DataModel MediaWiki transclusion table cell node.
- *
- * @class
- * @extends ve.dm.MWTransclusionNode
- * @mixins ve.dm.TableCellableNode
- *
- * @constructor
- * @param {Object} [element] Reference to element in linear model
- */
-ve.dm.MWTransclusionTableCellNode = function VeDmMWTransclusionTableCellNode() {
-	// Parent constructor
-	ve.dm.MWTransclusionTableCellNode.super.apply( this, arguments );
-
-	// Mixin constructors
-	ve.dm.TableCellableNode.call( this );
-};
-
-OO.inheritClass( ve.dm.MWTransclusionTableCellNode, ve.dm.MWTransclusionNode );
-
-OO.mixinClass( ve.dm.MWTransclusionTableCellNode, ve.dm.TableCellableNode );
-
-ve.dm.MWTransclusionTableCellNode.static.matchTagNames = [];
-
-ve.dm.MWTransclusionTableCellNode.static.name = 'mwTransclusionTableCell';
-
 /* Registration */
 
 ve.dm.modelRegistry.register( ve.dm.MWTransclusionNode );
-ve.dm.modelRegistry.register( ve.dm.MWTransclusionBlockNode );
-ve.dm.modelRegistry.register( ve.dm.MWTransclusionInlineNode );
-ve.dm.modelRegistry.register( ve.dm.MWTransclusionTableCellNode );

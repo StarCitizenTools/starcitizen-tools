@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel AnnotationSet class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -54,7 +54,9 @@ ve.dm.AnnotationSet.prototype.clone = function () {
  * @return {ve.dm.AnnotationSet} Copy of annotation set
  */
 ve.dm.AnnotationSet.prototype.getAnnotationsByName = function ( name ) {
-	return this.filter( function ( annotation ) { return annotation.name === name; } );
+	return this.filter( function ( annotation ) {
+		return annotation.name === name;
+	} );
 };
 
 /**
@@ -96,7 +98,9 @@ ve.dm.AnnotationSet.prototype.getComparableAnnotationsFromSet = function ( annot
  * @return {boolean} Annotation of given type exists in the set
  */
 ve.dm.AnnotationSet.prototype.hasAnnotationWithName = function ( name ) {
-	return this.containsMatching( function ( annotation ) { return annotation.name === name; } );
+	return this.containsMatching( function ( annotation ) {
+		return annotation.name === name;
+	} );
 };
 
 /**
@@ -114,6 +118,7 @@ ve.dm.AnnotationSet.prototype.get = function ( offset ) {
 	if ( offset !== undefined ) {
 		return this.getStore().value( this.getHash( offset ) );
 	} else {
+		// eslint-disable-next-line no-restricted-syntax
 		return this.getStore().values( this.getHashes() );
 	}
 };

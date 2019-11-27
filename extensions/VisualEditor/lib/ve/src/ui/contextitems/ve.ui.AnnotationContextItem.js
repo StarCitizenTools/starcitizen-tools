@@ -1,7 +1,7 @@
 /*!
  * VisualEditor AnnotationContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -35,7 +35,7 @@ ve.ui.AnnotationContextItem = function VeUiAnnotationContextItem( context, model
 			flags: [ 'destructive' ]
 		} );
 	}
-	if ( this.isClearable() ) {
+	if ( this.isClearable() && !this.isReadOnly() ) {
 		this.actionButtons.addItems( [ this.clearButton ], 0 );
 	}
 	this.clearButton.connect( this, { click: 'onClearButtonClick' } );
@@ -70,6 +70,7 @@ ve.ui.AnnotationContextItem.prototype.isClearable = function () {
  * @protected
  */
 ve.ui.AnnotationContextItem.prototype.onClearButtonClick = function () {
+	ve.track( 'activity.' + this.constructor.static.name, { action: 'clear' } );
 	this.applyToAnnotations( function ( fragment, annotation ) {
 		fragment.annotateContent( 'clear', annotation );
 	} );
@@ -102,4 +103,25 @@ ve.ui.AnnotationContextItem.prototype.applyToAnnotations = function ( callback )
 	for ( i = 0, len = annotations.length; i < len; i++ ) {
 		callback( fragment.expandLinearSelection( 'annotation', annotations[ i ] ), annotations[ i ] );
 	}
+};
+
+/**
+ * Find the CE view for the annotation related to this context item
+ *
+ * Problem: Going from the model to the view is difficult, as there can be many views of any given model.
+ * Assumption: an active annotation context item must mean the focus is within the relevant annotation.
+ *
+ * @return {ve.ce.Annotation|undefined} The annotation view, if it's found, or undefined if not
+ */
+ve.ui.AnnotationContextItem.prototype.getAnnotationView = function () {
+	var annotation,
+		model = this.model;
+
+	this.context.getSurface().getView().annotationsAtFocus().some( function ( ann ) {
+		if ( model === ann.model ) {
+			annotation = ann;
+			return true;
+		}
+	} );
+	return annotation;
 };

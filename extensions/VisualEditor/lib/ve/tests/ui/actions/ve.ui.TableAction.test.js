@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Actions TableAction tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ui.TableAction' );
@@ -255,6 +255,32 @@ QUnit.test( 'create / insert / mergeCells / delete / changeCellStyle / moveRelat
 					);
 				},
 				msg: 'insert row in middle of table'
+			},
+			{
+				html: '<table><tr><th>a</th><td>b</td></tr></table>',
+				rangeOrSelection: {
+					type: 'table',
+					tableRange: new ve.Range( 0, 16 ),
+					fromCol: 0,
+					fromRow: 0,
+					toCol: 0,
+					toRow: 0
+				},
+				method: 'insert',
+				args: [ 'row', 'after' ],
+				expectedData: function ( data ) {
+					data.splice.apply( data, [ 14, 0 ].concat(
+						[
+							{ type: 'tableRow' }
+						],
+						tableHeader,
+						tableData,
+						[
+							{ type: '/tableRow' }
+						] )
+					);
+				},
+				msg: 'insert row of mixed styles'
 			},
 			{
 				html: ve.dm.example.mergedCellsHtml,

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWWikitextSurface class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -26,6 +26,7 @@ ve.ui.MWWikitextSurface = function VeUiMWWikitextSurface() {
 	this.$element.addClass( 've-ui-mwWikitextSurface' );
 	this.getView().$element.addClass( 'mw-editfont-' + mw.user.options.get( 'editfont' ) );
 	this.$placeholder.addClass( 'mw-editfont-' + mw.user.options.get( 'editfont' ) );
+	// eslint-disable-next-line no-jquery/no-global-selector
 	this.$textbox = $( '#wpTextbox1' );
 
 	if ( !this.$textbox.length ) {
@@ -64,7 +65,7 @@ ve.ui.MWWikitextSurface = function VeUiMWWikitextSurface() {
 		getCaretPosition: function ( options ) {
 			var range = surface.getModel().getSelection().getCoveringRange(),
 				surfaceModel = surface.getModel(),
-				caretPos = surfaceModel.getSourceOffsetFromOffset( range.start );
+				caretPos = range ? surfaceModel.getSourceOffsetFromOffset( range.start ) : 0;
 
 			return options.startAndEnd ?
 				[ caretPos, surfaceModel.getSourceOffsetFromOffset( range.end ) ] :
@@ -84,7 +85,7 @@ ve.ui.MWWikitextSurface = function VeUiMWWikitextSurface() {
 
 /* Inheritance */
 
-OO.inheritClass( ve.ui.MWWikitextSurface, ve.ui.Surface );
+OO.inheritClass( ve.ui.MWWikitextSurface, ve.ui.MWSurface );
 
 /* Methods */
 

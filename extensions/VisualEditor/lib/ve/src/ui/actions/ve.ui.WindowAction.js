@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface WindowAction class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -54,11 +54,12 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 		autoClosePromises = [],
 		surface = this.surface,
 		fragment = surface.getModel().getFragment( undefined, true ),
-		dir = surface.getView().getSelection().getDirection(),
+		dir = surface.getView().getSelectionDirectionality(),
 		windowClass = ve.ui.windowFactory.lookup( name ),
-		mayContainFragment = windowClass.prototype instanceof ve.ui.FragmentDialog ||
-			windowClass.prototype instanceof ve.ui.FragmentInspector ||
-			windowType === 'toolbar' || windowType === 'inspector',
+		isFragmentWindow = !!windowClass.prototype.getFragment,
+		mayRequireFragment = isFragmentWindow ||
+			// HACK: Pass fragment to toolbar dialogs as well
+			windowType === 'toolbar',
 		// TODO: Add 'doesHandleSource' method to factory
 		sourceMode = surface.getMode() === 'source' && !windowClass.static.handlesSource;
 
@@ -66,8 +67,10 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 		return false;
 	}
 
-	if ( !mayContainFragment ) {
-		fragmentPromise = $.Deferred().resolve().promise();
+	ve.track( 'activity.' + name, { action: 'window-open' } );
+
+	if ( !mayRequireFragment ) {
+		fragmentPromise = ve.createDeferred().resolve().promise();
 	} else if ( sourceMode ) {
 		text = fragment.getText( true );
 		originalFragment = fragment;
@@ -85,7 +88,7 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 			return tempFragment;
 		} );
 	} else {
-		fragmentPromise = $.Deferred().resolve( fragment ).promise();
+		fragmentPromise = ve.createDeferred().resolve( fragment ).promise();
 	}
 
 	data = ve.extendObject( { dir: dir }, data, { $returnFocusTo: null } );
@@ -112,7 +115,7 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 	fragmentPromise.then( function ( fragment ) {
 		ve.extendObject( data, { fragment: fragment } );
 
-		$.when.apply( $, autoClosePromises ).always( function () {
+		ve.promiseAll( autoClosePromises ).always( function () {
 			windowManager.getWindow( name ).then( function ( win ) {
 				var instance = windowManager.openWindow( win, data );
 
@@ -139,16 +142,21 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 					}
 				} );
 
-				instance.closing.then( function () {
-					if ( !win.constructor.static.activeSurface ) {
+				if ( !win.constructor.static.activeSurface ) {
+					// Use windowManager events, instead of instance.closing, as the re-activation needs
+					// to happen in the same event cycle as the user click event that closed the window (T203517).
+					windowManager.once( 'closing', function () {
 						surface.getView().activate();
-					}
-				} );
+					} );
+				}
 
 				instance.closed.then( function ( closedData ) {
 					// Sequence-triggered window closed without action, undo
 					if ( data.strippedSequence && !( closedData && closedData.action ) ) {
 						surface.getModel().undo();
+						// Prevent redoing (which would remove the typed text)
+						surface.getModel().truncateUndoStack();
+						surface.getModel().emit( 'history' );
 					}
 					if ( sourceMode && fragment && fragment.getSurface().hasBeenModified() ) {
 						// Action may be async, so we use auto select to ensure the content is selected

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Standalone Initialization Platform class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -10,7 +10,7 @@
  *     @example
  *     var platform = new ve.init.sa.Platform( ve.messagePaths );
  *     platform.initialize().done( function () {
- *         $( 'body' ).append( $( '<p>' ).text(
+ *         $( document.body ).append( $( '<p>' ).text(
  *             platform.getMessage( 'visualeditor' )
  *         ) );
  *     } );
@@ -49,6 +49,58 @@ ve.init.sa.Platform.prototype.getUnanchoredExternalLinkUrlProtocolsRegExp = func
 	return this.unanchoredExternalLinkUrlProtocolsRegExp;
 };
 
+/** @inheritdoc */
+ve.init.sa.Platform.prototype.notify = function ( message, title ) {
+	var closeId,
+		rAF = window.requestAnimationFrame || setTimeout,
+		$notificationWrapper = $( '<div>' ).addClass( 've-init-notification-wrapper' ),
+		$notification = $( '<div>' ).addClass( 've-init-notification' );
+
+	if ( title ) {
+		$notification.append(
+			$( '<div>' ).addClass( 've-init-notification-title' ).append(
+				typeof title === 'string' ? document.createTextNode( title ) : title
+			)
+		);
+	}
+	$notification.append(
+		$( '<div>' ).addClass( 've-init-notification-message' ).append(
+			typeof message === 'string' ? document.createTextNode( message ) : message
+		)
+	);
+
+	$notificationWrapper.append( $notification );
+
+	if ( !this.$notifications ) {
+		this.$notifications = $( '<div>' ).addClass( 've-init-notifications' );
+		$( document.body ).append( this.$notifications );
+	}
+
+	function remove() {
+		$notificationWrapper.remove();
+	}
+	function collapse() {
+		$notificationWrapper.addClass( 've-init-notification-collapse' );
+		setTimeout( remove, 250 );
+	}
+	function close() {
+		clearTimeout( closeId );
+		$notificationWrapper.removeClass( 've-init-notification-open' );
+		$notificationWrapper.css( 'height', $notificationWrapper[ 0 ].clientHeight );
+		setTimeout( collapse, 250 );
+	}
+	function open() {
+		$notificationWrapper.addClass( 've-init-notification-open' );
+		closeId = setTimeout( close, 5000 );
+	}
+
+	rAF( open );
+
+	$notification.on( 'click', close );
+
+	this.$notifications.append( $notificationWrapper );
+};
+
 /**
  * Get message folder paths
  *
@@ -68,6 +120,31 @@ ve.init.sa.Platform.prototype.addMessages = function ( messages ) {
  * @inheritdoc
  */
 ve.init.sa.Platform.prototype.getMessage = $.i18n;
+
+/**
+ * @inheritdoc
+ */
+ve.init.sa.Platform.prototype.getHtmlMessage = function ( key ) {
+	var $message = $( [] ),
+		lastOffset = 0,
+		args = arguments,
+		message = this.getMessage( key );
+	message.replace( /\$[0-9]+/g, function ( placeholder, offset ) {
+		var arg,
+			placeholderIndex = +( placeholder.slice( 1 ) );
+		$message = $message.add( ve.sanitizeHtml( message.slice( lastOffset, offset ) ) );
+		arg = args[ placeholderIndex ];
+		$message = $message.add(
+			typeof arg === 'string' ?
+				// Arguments come from the code so shouldn't be sanitized
+				document.createTextNode( arg ) :
+				arg
+		);
+		lastOffset = offset + placeholder.length;
+	} );
+	$message = $message.add( ve.sanitizeHtml( message.slice( lastOffset ) ) );
+	return $message.toArray();
+};
 
 /**
  * @inheritdoc
@@ -104,7 +181,7 @@ ve.init.sa.Platform.prototype.setUserConfig = function ( keyOrValueMap, value ) 
 	var i;
 	if ( typeof keyOrValueMap === 'object' ) {
 		for ( i in keyOrValueMap ) {
-			if ( keyOrValueMap.hasOwnProperty( i ) ) {
+			if ( Object.prototype.hasOwnProperty.call( keyOrValueMap, i ) ) {
 				if ( !this.setUserConfig( i, keyOrValueMap[ i ] ) ) {
 					// localStorage will fail if the quota is full, so further
 					// sets won't work anyway.
@@ -233,7 +310,7 @@ ve.init.sa.Platform.prototype.initialize = function () {
 		fallbacks = $.i18n.fallbacks[ locale ];
 
 	if ( !VisualEditorSupportCheck() ) {
-		return $.Deferred().reject().promise();
+		return ve.createDeferred().reject().promise();
 	}
 
 	if ( !fallbacks ) {
@@ -267,11 +344,11 @@ ve.init.sa.Platform.prototype.initialize = function () {
 		filename = languages[ i ].toLowerCase() + '.json';
 
 		for ( j = 0, jLen = messagePaths.length; j < jLen; j++ ) {
-			deferred = $.Deferred();
+			deferred = ve.createDeferred();
 			$.i18n().load( messagePaths[ j ] + filename, languages[ i ] )
 				.always( deferred.resolve );
 			promises.push( deferred.promise() );
 		}
 	}
-	return $.when.apply( $, promises );
+	return ve.promiseAll( promises );
 };

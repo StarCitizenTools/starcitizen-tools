@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable linear escape key down handler
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,8 +13,8 @@
  * @constructor
  */
 ve.ce.LinearEscapeKeyDownHandler = function VeCeLinearEscapeKeyDownHandler() {
-	// Parent constructor
-	ve.ui.LinearEscapeKeyDownHandler.super.apply( this, arguments );
+	// Parent constructor - never called because class is fully static
+	// ve.ui.LinearEscapeKeyDownHandler.super.apply( this, arguments );
 };
 
 /* Inheritance */

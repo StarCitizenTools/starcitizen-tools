@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Trigger class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -29,7 +29,7 @@ ve.ui.Trigger = function VeUiTrigger( e, allowInvalidPrimary ) {
 	this.primary = false;
 
 	// Initialization
-	if ( e instanceof jQuery.Event ) {
+	if ( e instanceof $.Event ) {
 		this.modifiers.meta = e.metaKey || false;
 		this.modifiers.ctrl = e.ctrlKey || false;
 		this.modifiers.alt = e.altKey || false;
@@ -181,7 +181,7 @@ ve.ui.Trigger.static.platformMapping = {
 		alt: '⌥',
 		backspace: '⌫',
 		ctrl: '^',
-		'delete': '⌦',
+		delete: '⌦',
 		down: '↓',
 		end: '↗',
 		// Technically 'enter' is ⌤, but JS doesn't distinguish between 'enter' and
@@ -209,7 +209,7 @@ ve.ui.Trigger.static.platformMapping = {
  * @inheritable
  */
 ve.ui.Trigger.static.platformStringJoiners = {
-	'default': '+',
+	default: '+',
 	mac: ''
 };
 
@@ -255,7 +255,7 @@ ve.ui.Trigger.static.keyAliases = {
 	apple: 'meta',
 	windows: 'meta',
 	option: 'alt',
-	'return': 'enter',
+	return: 'enter',
 	// Shorthand
 	esc: 'escape',
 	cmd: 'meta',

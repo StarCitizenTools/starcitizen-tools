@@ -4,7 +4,8 @@ $( function () {
 				placeholder: OO.ui.msg( 'visualeditor-rebase-client-document-name' )
 			} ),
 			submitButton = new OO.ui.ButtonWidget( {
-				label: OO.ui.msg( 'visualeditor-rebase-client-document-create-edit' )
+				label: OO.ui.msg( 'visualeditor-rebase-client-document-create-edit' ),
+				flags: [ 'primary', 'progressive' ]
 			} ),
 			documentNameField = new OO.ui.ActionFieldLayout( documentNameInput, submitButton, {
 				align: 'top'
@@ -22,6 +23,7 @@ $( function () {
 		submitButton.on( 'click', onSubmit );
 		documentNameInput.on( 'enter', onSubmit );
 
+		// eslint-disable-next-line no-jquery/no-global-selector
 		$( '.ve-demo-index' ).append( documentNameField.$element );
 
 		documentNameInput.focus();

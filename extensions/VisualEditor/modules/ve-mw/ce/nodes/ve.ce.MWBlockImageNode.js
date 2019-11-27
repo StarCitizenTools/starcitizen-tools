@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWBlockImageNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -86,7 +86,7 @@ ve.ce.MWBlockImageNode.static.renderHtmlAttributes = false;
 ve.ce.MWBlockImageNode.static.transition = false;
 
 ve.ce.MWBlockImageNode.static.cssClasses = {
-	'default': {
+	default: {
 		left: 'mw-halign-left',
 		right: 'mw-halign-right',
 		center: 'mw-halign-center',
@@ -155,10 +155,15 @@ ve.ce.MWBlockImageNode.prototype.updateClasses = function ( oldAlign ) {
  * @param {Object} [dimensions] Dimension object containing width & height
  */
 ve.ce.MWBlockImageNode.prototype.updateSize = function ( dimensions ) {
-	var
+	var isError = this.model.getAttribute( 'isError' ),
 		type = this.model.getAttribute( 'type' ),
 		borderImage = this.model.getAttribute( 'borderImage' ),
 		hasBorderOrFrame = ( type !== 'none' && type !== 'frameless' ) || borderImage;
+
+	if ( isError ) {
+		this.$element.css( { width: '', height: '' } );
+		return;
+	}
 
 	if ( !dimensions ) {
 		dimensions = {
@@ -186,7 +191,7 @@ ve.ce.MWBlockImageNode.prototype.updateSize = function ( dimensions ) {
  * @return {string} CSS class
  */
 ve.ce.MWBlockImageNode.prototype.getCssClass = function ( type, alignment ) {
-	// TODO use this.model.getAttribute( 'type' ) etc., see bug 52065
+	// TODO use this.model.getAttribute( 'type' ) etc., see T54065
 	// Default is different between RTL and LTR wikis:
 	if ( type === 'default' && alignment === 'default' ) {
 		if ( this.getModel().getDocument().getDir() === 'rtl' ) {

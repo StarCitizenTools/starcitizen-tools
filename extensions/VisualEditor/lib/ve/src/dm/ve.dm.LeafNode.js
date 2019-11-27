@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel LeafNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -33,6 +33,8 @@ OO.mixinClass( ve.dm.LeafNode, ve.LeafNode );
 /* Static properties */
 
 ve.dm.LeafNode.static.childNodeTypes = [];
+
+ve.dm.LeafNode.static.isDiffedAsLeaf = true;
 
 /* Methods */
 

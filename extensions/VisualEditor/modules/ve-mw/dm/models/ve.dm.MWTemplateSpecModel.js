@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTemplateSpecModel class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -26,7 +26,17 @@ ve.dm.MWTemplateSpecModel = function VeDmMWTemplateSpecModel( template ) {
 	this.maps = {};
 
 	// Initialization
-	this.fill();
+	this.fillFromTemplate();
+};
+
+OO.initClass( ve.dm.MWTemplateSpecModel );
+
+/* Static methods */
+
+ve.dm.MWTemplateSpecModel.static.getLocalValue = function ( stringOrObject, lang ) {
+	return stringOrObject && typeof stringOrObject === 'object' ?
+		OO.ui.getLocalValue( stringOrObject, lang ) :
+		stringOrObject;
 };
 
 /* Methods */
@@ -53,7 +63,7 @@ ve.dm.MWTemplateSpecModel.prototype.extend = function ( data ) {
 	if ( Array.isArray( data.paramOrder ) ) {
 		this.paramOrder = data.paramOrder.slice();
 	}
-	if ( ve.isPlainObject( data.params ) ) {
+	if ( data.params ) {
 		for ( key in data.params ) {
 			// Pre-fill spec
 			if ( !this.params[ key ] ) {
@@ -83,7 +93,7 @@ ve.dm.MWTemplateSpecModel.prototype.extend = function ( data ) {
  * after a parameter is added to ensure it's still complete, and this is safe because existing data
  * is never overwritten.
  */
-ve.dm.MWTemplateSpecModel.prototype.fill = function () {
+ve.dm.MWTemplateSpecModel.prototype.fillFromTemplate = function () {
 	var key;
 
 	for ( key in this.template.getParameters() ) {
@@ -103,7 +113,7 @@ ve.dm.MWTemplateSpecModel.prototype.getDefaultParameterSpec = function ( name ) 
 	return {
 		label: name,
 		description: null,
-		'default': '',
+		default: '',
 		type: 'string',
 		aliases: [],
 		name: name,
@@ -141,8 +151,7 @@ ve.dm.MWTemplateSpecModel.prototype.getLabel = function () {
  * @return {string|null} Template description or null if not available
  */
 ve.dm.MWTemplateSpecModel.prototype.getDescription = function ( lang ) {
-	var value = this.description;
-	return ve.isPlainObject( value ) ? OO.ui.getLocalValue( value, lang ) : value;
+	return this.constructor.static.getLocalValue( this.description, lang );
 };
 
 /**
@@ -185,8 +194,7 @@ ve.dm.MWTemplateSpecModel.prototype.isParameterAlias = function ( name ) {
  * @return {string} Parameter label
  */
 ve.dm.MWTemplateSpecModel.prototype.getParameterLabel = function ( name, lang ) {
-	var value = this.params[ name ].label || name;
-	return ve.isPlainObject( value ) ? OO.ui.getLocalValue( value, lang ) : value;
+	return this.constructor.static.getLocalValue( this.params[ name ].label || name, lang );
 };
 
 /**
@@ -197,8 +205,7 @@ ve.dm.MWTemplateSpecModel.prototype.getParameterLabel = function ( name, lang ) 
  * @return {string|null} Parameter description
  */
 ve.dm.MWTemplateSpecModel.prototype.getParameterDescription = function ( name, lang ) {
-	var value = this.params[ name ].description;
-	return ve.isPlainObject( value ) ? OO.ui.getLocalValue( value, lang ) : value;
+	return this.constructor.static.getLocalValue( this.params[ name ].description, lang );
 };
 
 /**
@@ -219,8 +226,7 @@ ve.dm.MWTemplateSpecModel.prototype.getParameterDefaultValue = function ( name )
  * @return {string} Example parameter value
  */
 ve.dm.MWTemplateSpecModel.prototype.getParameterExampleValue = function ( name, lang ) {
-	var value = this.params[ name ].example;
-	return ve.isPlainObject( value ) ? OO.ui.getLocalValue( value, lang ) : value;
+	return this.constructor.static.getLocalValue( this.params[ name ].example, lang );
 };
 
 /**

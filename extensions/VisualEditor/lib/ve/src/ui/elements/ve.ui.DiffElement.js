@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface DiffElement class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -39,10 +39,10 @@ ve.ui.DiffElement = function VeUiDiffElement( visualDiff, config ) {
 	this.oldDocInternalListNode = visualDiff.oldDocInternalListNode;
 
 	// Diff
-	this.oldToNew = diff.docDiff.rootChildrenOldToNew;
-	this.newToOld = diff.docDiff.rootChildrenNewToOld;
-	this.insert = diff.docDiff.rootChildrenInsert;
-	this.remove = diff.docDiff.rootChildrenRemove;
+	this.oldToNew = diff.docDiff.oldToNew;
+	this.newToOld = diff.docDiff.newToOld;
+	this.insert = diff.docDiff.insert;
+	this.remove = diff.docDiff.remove;
 	this.moves = diff.docDiff.moves;
 	this.internalListDiff = diff.internalListDiff;
 	this.timedOut = visualDiff.timedOut;
@@ -126,7 +126,7 @@ ve.ui.DiffElement.static.compareAttributes = function ( oldAttributes, newAttrib
 		}
 	}
 	for ( key in newAttributes ) {
-		if ( !oldAttributes.hasOwnProperty( key ) && newAttributes[ key ] !== undefined ) {
+		if ( !Object.prototype.hasOwnProperty.call( oldAttributes, key ) && newAttributes[ key ] !== undefined ) {
 			attributeChanges[ key ] = { from: oldAttributes[ key ], to: newAttributes[ key ] };
 		}
 	}
@@ -285,20 +285,20 @@ ve.ui.DiffElement.prototype.renderDiff = function () {
 
 			if ( internalListItem.diff === 1 ) {
 
-				internalListDiffQueue.push( [ 'getInternalListNodeElements', internalListItem, 'insert' ] );
+				internalListDiffQueue.push( [ 'getInternalListNodeElements', internalListItem, 'insert', null ] );
 
 			} else if ( internalListItem.diff === -1 ) {
 
-				internalListDiffQueue.push( [ 'getInternalListNodeElements', internalListItem, 'remove' ] );
+				internalListDiffQueue.push( [ 'getInternalListNodeElements', internalListItem, 'remove', null ] );
 
 			} else if ( internalListItem.diff === 0 ) {
 
-				move = internalListGroup.moves[ i ] === 0 ? undefined : internalListGroup.moves[ i ];
+				move = internalListGroup.moves[ i ] === 0 ? null : internalListGroup.moves[ i ];
 				internalListDiffQueue.push( [ 'getInternalListNodeElements', internalListItem, 'none', move ] );
 
 			} else {
 
-				move = internalListGroup.moves[ i ] === 0 ? undefined : internalListGroup.moves[ i ];
+				move = internalListGroup.moves[ i ] === 0 ? null : internalListGroup.moves[ i ];
 				internalListDiffQueue.push( [ 'getInternalListChangedNodeElements', internalListItem, move ] );
 
 			}
@@ -318,13 +318,13 @@ ve.ui.DiffElement.prototype.renderDiff = function () {
 
 	for ( i = 0, j = 0; i < ilen || j < jlen; i++, j++ ) {
 
-		move = this.moves[ j ] === 0 ? undefined : this.moves[ j ];
+		move = this.moves[ j ] === 0 ? null : this.moves[ j ];
 
 		if ( this.oldDocChildren[ i ] === undefined ) {
 
 			// Everything else in the new doc is an insert
 			while ( j < this.newDocChildren.length ) {
-				diffQueue.push( [ 'getNodeElements', this.newDocChildren[ j ], 'insert' ] );
+				diffQueue.push( [ 'getNodeElements', this.newDocChildren[ j ], 'insert', null ] );
 				j++;
 			}
 
@@ -332,7 +332,7 @@ ve.ui.DiffElement.prototype.renderDiff = function () {
 
 			// Everything else in the old doc is a remove
 			while ( i < this.oldDocChildren.length ) {
-				diffQueue.push( [ 'getNodeElements', this.oldDocChildren[ i ], 'remove' ] );
+				diffQueue.push( [ 'getNodeElements', this.oldDocChildren[ i ], 'remove', null ] );
 				i++;
 			}
 
@@ -340,14 +340,14 @@ ve.ui.DiffElement.prototype.renderDiff = function () {
 
 			// The old node is a remove. Decrement the new node index
 			// to compare the same new node to the next old node
-			diffQueue.push( [ 'getNodeElements', this.oldDocChildren[ i ], 'remove' ] );
+			diffQueue.push( [ 'getNodeElements', this.oldDocChildren[ i ], 'remove', null ] );
 			j--;
 
 		} else if ( this.insert.indexOf( j ) !== -1 ) {
 
 			// The new node is an insert. Decrement the old node index
 			// to compare the same old node to the next new node
-			diffQueue.push( [ 'getNodeElements', this.newDocChildren[ j ], 'insert' ] );
+			diffQueue.push( [ 'getNodeElements', this.newDocChildren[ j ], 'insert', null ] );
 			i--;
 
 		} else if (
@@ -386,7 +386,6 @@ ve.ui.DiffElement.prototype.renderDiff = function () {
 	this.descriptionItemsStack = [];
 
 	ve.resolveAttributes( documentNode, this.newDoc.getHtmlDocument(), ve.dm.Converter.static.computedAttributes );
-	ve.targetLinksToNewWindow( documentNode );
 
 	if ( !hasChanges ) {
 		noChanges = document.createElement( 'div' );
@@ -402,30 +401,23 @@ ve.ui.DiffElement.prototype.renderDiff = function () {
 };
 
 /**
- * Get the HTML for the diff of a single child of the document node that has
- * been removed from the old document, inserted into the new document, or that
- * has moved but is otherwise unchanged.
+ * Get the HTML for the diff of a removed, inserted, or unchanged-but-moved node.
  *
  * @param {ve.dm.Node} node The node being diffed. Will be from the old
  * document if it has been removed, or the new document if it has been inserted
  * or moved
  * @param {string} action 'remove', 'insert' or, if moved, 'none'
- * @param {string} [move] 'up' or 'down' if the node has moved
+ * @param {string|null} move 'up' or 'down' if the node has moved
  * @return {HTMLElement[]} Elements (not owned by window.document)
  */
 ve.ui.DiffElement.prototype.getNodeElements = function ( node, action, move ) {
-	var nodeData, doc, body, element, actionElement,
-		nodeDoc = action === 'remove' ? this.oldDoc : this.newDoc,
-		documentSlice = nodeDoc.shallowCloneFromRange( node.getOuterRange() );
+	var nodeData, doc, body, element, actionElement, documentSlice,
+		nodeDoc = action === 'remove' ? this.oldDoc : this.newDoc;
 
-	// Get the linear model for the node
-	nodeData = documentSlice.data.data;
+	nodeData = this.getNodeData( node, action, move );
+	documentSlice = nodeDoc.cloneWithData( nodeData );
 
-	// Add the classes to the outer element (in case there was a move)
-	this.addAttributesToNode( nodeData[ 0 ], { 'data-diff-action': action, 'data-diff-move': move } );
-
-	// forClipboard is true, so that we can render otherwise invisible nodes
-	doc = ve.dm.converter.getDomFromModel( documentSlice, true );
+	doc = ve.dm.converter.getDomFromModel( documentSlice, ve.dm.Converter.static.PREVIEW_MODE );
 	body = doc.body;
 
 	if ( action !== 'none' ) {
@@ -451,28 +443,307 @@ ve.ui.DiffElement.prototype.getNodeElements = function ( node, action, move ) {
 };
 
 /**
- * Get the HTML for the diff of a single child of the document node that has
- * changed from the old document to the new document. It may also have moved.
+ * Get the DOM from linear data and wrap it for the diff.
  *
- * @param {number} oldNodeIndex The index of the old node in this.oldDocChildren
- * @param {string} [move] 'up' or 'down' if the node has moved
- * @return {HTMLElement[]} HTML elements to display the action/move
+ * @param {Array} nodeData Linear data for the diff
+ * @return {HTMLElement[]} Elements (not owned by window.document)
+ */
+ve.ui.DiffElement.prototype.wrapNodeData = function ( nodeData ) {
+	var documentSlice, nodeElements, element = document.createElement( 'div' );
+
+	documentSlice = this.newDoc.cloneWithData( nodeData );
+	documentSlice.getStore().merge( this.newDoc.getStore() );
+	nodeElements = ve.dm.converter.getDomFromModel( documentSlice, ve.dm.Converter.static.PREVIEW_MODE ).body;
+
+	element.setAttribute( 'class', 've-ui-diffElement-doc-child-change' );
+
+	while ( nodeElements.childNodes.length ) {
+		element.appendChild(
+			element.ownerDocument.adoptNode( nodeElements.childNodes[ 0 ] )
+		);
+	}
+
+	return [ element ];
+};
+
+/**
+ * Get the linear data for the diff of a removed, inserted, or
+ * unchanged-but-moved node.
+ *
+ * @param {ve.dm.Node} node
+ * @param {string} action  'remove', 'insert' or, if moved, 'none'
+ * @param {string|null} move 'up' or 'down' if the node has moved
+ * @return {Array} Linear Data
+ */
+ve.ui.DiffElement.prototype.getNodeData = function ( node, action, move ) {
+	var nodeData, doc = action === 'remove' ? this.oldDoc : this.newDoc;
+
+	// Get the linear model for the node
+	nodeData = doc.getData( node.getOuterRange() );
+
+	// Add the classes to the outer element
+	this.addAttributesToElement( nodeData[ 0 ], { 'data-diff-action': action } );
+	if ( move ) {
+		this.addAttributesToElement( nodeData[ 0 ], { 'data-diff-move': move } );
+	}
+
+	return nodeData;
+};
+
+/**
+ * Get the HTML for the diff of a node that has been changed.
+ *
+ * @param {number} oldNodeIndex Index of the old node
+ * @param {string|null} move 'up' or 'down' if the node has moved
+ * @return {HTMLElement[]} Elements (not owned by window.document)
  */
 ve.ui.DiffElement.prototype.getChangedNodeElements = function ( oldNodeIndex, move ) {
+	var nodeData,
+		oldNode = this.oldDocChildren[ oldNodeIndex ],
+		newNode = this.newDocChildren[ this.oldToNew[ oldNodeIndex ].node ],
+		diff = this.oldToNew[ oldNodeIndex ].diff;
+
+	nodeData = this.getChangedNodeData( diff, move, newNode, oldNode );
+
+	return this.wrapNodeData( nodeData, move );
+};
+
+/**
+ * Get the linear data for the diff of a node that has been changed.
+ *
+ * @param {Object} diff Object describing the diff
+ * @param {string|null} move 'up' or 'down' if the node has moved
+ * @param {ve.dm.Node} newNode Corresponding node from the new document
+ * @param {ve.dm.Node} [oldNode] Node from the old document
+ * @return {Array} Linear data for the diff
+ */
+ve.ui.DiffElement.prototype.getChangedNodeData = function ( diff, move, newNode, oldNode ) {
+	var nodeData;
+
+	// Choose the appropriate method for the type of node
+	if ( newNode.isDiffedAsLeaf() ) {
+		nodeData = this.getChangedLeafNodeData( newNode, diff, move );
+	} else if ( newNode.isDiffedAsList() ) {
+		nodeData = this.getChangedListNodeData( newNode, diff );
+	} else {
+		nodeData = this.getChangedTreeNodeData( oldNode, newNode, diff );
+	}
+
+	if ( move ) {
+		// Add move class to the outer element
+		this.addAttributesToElement( nodeData[ 0 ], { 'data-diff-move': move } );
+	}
+
+	return nodeData;
+};
+
+/**
+ * Get the linear data for the diff of a leaf-like node that has been changed.
+ *
+ * @param {ve.dm.Node} newNode Corresponding node from the new document
+ * @param {Object} diff Object describing the diff
+ * @return {Array} Linear data for the diff
+ */
+ve.ui.DiffElement.prototype.getChangedLeafNodeData = function ( newNode, diff ) {
+	var nodeDiffData, annotatedData, item,
+		nodeRange = newNode.getOuterRange(),
+		nodeData = this.newDoc.getData( nodeRange ),
+		linearDiff = diff.linearDiff,
+		attributeChange = diff.attributeChange;
+
+	if ( linearDiff ) {
+		// If there is a content change, splice it in
+		nodeDiffData = linearDiff;
+		annotatedData = this.annotateNode( nodeDiffData );
+		ve.batchSplice( nodeData, 1, newNode.length, annotatedData );
+	}
+	if ( attributeChange ) {
+		// If there is no content change, just add change class
+		this.addAttributesToElement(
+			nodeData[ 0 ], { 'data-diff-action': 'structural-change' }
+		);
+		item = this.compareNodeAttributes( nodeData, 0, this.newDoc, attributeChange );
+		if ( item ) {
+			this.descriptionItemsStack.push( item );
+		}
+	}
+
+	return nodeData;
+};
+
+/**
+ * Get the linear data for the diff of a list-like node that has been changed.
+ *
+ * @param {ve.dm.Node} newNode Corresponding node from the new document
+ * @param {Object} diff Object describing the diff
+ * @return {Array} Linear data for the diff
+ */
+ve.ui.DiffElement.prototype.getChangedListNodeData = function ( newNode, diff ) {
+	var i, ilen, item, depth, newDepth, action, nodes,
+		insertIndex, listNode, listItemData, doc, change,
+		depthChange, contentData, listNodeData,
+		nodeRange = newNode.getOuterRange(),
+		diffData = this.newDoc.getData( nodeRange ),
+		oldNodes = diff.oldList,
+		newNodes = diff.newList;
+
+	function appendListItem( diffData, insertIndex, listNode, listNodeData, listItemData, depthChange ) {
+		var i, ilen, linearData, listItemNode;
+		if ( depthChange === 0 ) {
+
+			// Current list item belongs to the same list as the previous list item
+			ve.batchSplice( diffData, insertIndex, 0, listItemData );
+			insertIndex += listItemData.length;
+
+		} else if ( depthChange > 0 ) {
+
+			// Begin a new nested list, with this node's ancestor nodes
+			linearData = [];
+			linearData.unshift( listNodeData[ 0 ] );
+
+			// Nested list may be nested by multiple levels
+			for ( i = 0, ilen = depthChange - 1; i < ilen; i++ ) {
+				listItemNode = listNode.parent;
+				linearData.unshift( this.newDoc.data.data[ listItemNode.getOuterRange().from ] );
+				listNode = listItemNode.parent;
+				linearData.unshift( this.newDoc.data.data[ listNode.getOuterRange().from ] );
+			}
+
+			// Splice in the content, and splice that into the diff data
+			ve.batchSplice( linearData, linearData.length, 0, listItemData );
+			for ( i = 0, ilen = depthChange - 1; i < ilen; i++ ) {
+				linearData.push( { type: '/list' } );
+				linearData.push( { type: '/listItem' } );
+			}
+			linearData.push( { type: '/list' } );
+
+			// Splice into previous list item
+			insertIndex -= 1;
+			ve.batchSplice( diffData, insertIndex, 0, linearData );
+
+			// Adjust the insertIndex to be at the end of this content
+			insertIndex += 2 * ( depthChange - 1 ) + 1 + listItemData.length;
+
+		} else if ( depthChange < 0 ) {
+
+			// Skip over close elements to get out of nested list(s)
+			insertIndex += 2 * -depthChange;
+
+			// Splice in the data and adjust the insert index
+			ve.batchSplice( diffData, insertIndex, 0, listItemData );
+			insertIndex += listItemData.length;
+		}
+
+		return insertIndex;
+	}
+
+	// Keep only the root list node
+	ve.batchSplice( diffData, 1, diffData.length - 2, [] );
+
+	// These will be adjusted for each item
+	insertIndex = 1;
+	depth = 0;
+
+	// Splice in each item with its diff annotations
+	for ( i = 0, ilen = diff.length; i < ilen; i++ ) {
+
+		item = diff[ i ];
+		nodes = newNodes;
+		doc = this.newDoc;
+
+		if ( typeof item.diff === 'number' ) {
+
+			// Item is removed, inserted or unchanged
+			action = item.diff === 0 ? 'none' : ( item.diff === -1 ? 'remove' : 'insert' );
+
+			// Choose the appropriate nodes and document for the action
+			if ( action === 'remove' ) {
+				nodes = oldNodes;
+				doc = this.oldDoc;
+			}
+
+			// Get the linear data for the list item's content
+			contentData = this.getNodeData( nodes.nodes[ item.indexOrder ], action, diff.moves[ i ] || null );
+
+		} else {
+
+			// Item is changed. Get the linear data for the diff
+			contentData = this.getChangedNodeData(
+				{
+					linearDiff: item.diff.linearDiff,
+					attributeChange: item.diff.attributeChange.depthChange
+				},
+				diff.moves[ i ] || null,
+				newNodes.nodes[ item.indexOrder ]
+			);
+
+		}
+
+		// Calculate the change in depth
+		newDepth = nodes.metadata[ item.indexOrder ].depth;
+		depthChange = newDepth - depth;
+
+		// Get linear data. Also get list node, since may need ancestors
+		listNode = nodes.metadata[ item.indexOrder ].listNode;
+		listNodeData = [ doc.getData( listNode.getOuterRange() )[ 0 ] ];
+		listItemData = doc.getData( nodes.metadata[ item.indexOrder ].listItem.getOuterRange() );
+		ve.batchSplice( listItemData, 1, listItemData.length - 2, contentData );
+
+		// Check for attribute changes
+		if ( item.diff.attributeChange ) {
+			if ( item.diff.attributeChange.listNodeAttributeChange ) {
+				change = this.compareNodeAttributes(
+					listNodeData,
+					0,
+					this.newDoc,
+					item.diff.attributeChange.listNodeAttributeChange
+				);
+				if ( change ) {
+					this.descriptionItemsStack.push( change );
+				}
+			}
+			if ( item.diff.attributeChange.listItemAttributeChange ) {
+				change = this.compareNodeAttributes(
+					listItemData,
+					0,
+					this.newDoc,
+					item.diff.attributeChange.listItemAttributeChange
+				);
+				if ( change ) {
+					this.descriptionItemsStack.push( change );
+				}
+			}
+		}
+
+		// Record the index to splice in the next list item data into the diffData
+		insertIndex = appendListItem.call(
+			this, diffData, insertIndex, listNode, listNodeData, listItemData, depthChange
+		);
+		depth = newDepth;
+	}
+
+	return diffData;
+};
+
+/**
+ * Get the linear data for the diff of a tree-like node that has been changed.
+ * Any node that is not leaf-like or list-like is treated as tree-like.
+ *
+ * @param {ve.dm.Node} oldNode Node from the old document
+ * @param {ve.dm.Node} newNode Corresponding node from the new document
+ * @param {Object} diff Object describing the diff
+ * @return {Array} Linear data for the diff
+ */
+ve.ui.DiffElement.prototype.getChangedTreeNodeData = function ( oldNode, newNode, diff ) {
 	var i, ilen, j, jlen, k, klen,
-		newIndex, oldIndex, element, body,
-		newNodeIndex = this.oldToNew[ oldNodeIndex ].node,
-		nodeRange = this.newDocChildren[ newNodeIndex ].getOuterRange(),
-		documentSlice = this.newDoc.shallowCloneFromRange( nodeRange ),
-		nodeData = documentSlice.data.data,
-		diff = this.oldToNew[ oldNodeIndex ].diff,
+		newIndex, oldIndex,
+		nodeRange = newNode.getOuterRange(),
+		nodeData = this.newDoc.getData( nodeRange ),
 		treeDiff = diff.treeDiff,
 		diffInfo = diff.diffInfo,
-		oldTree = diff.oldTree,
-		newTree = diff.newTree,
-		oldNodes = oldTree.orderedNodes,
-		newNodes = newTree.orderedNodes,
-		correspondingNodes = this.oldToNew[ oldNodeIndex ].correspondingNodes,
+		oldNodes = diff.oldTreeOrderedNodes,
+		newNodes = diff.newTreeOrderedNodes,
+		correspondingNodes = diff.correspondingNodes,
 		structuralRemoves = [],
 		highestRemovedAncestors = {};
 
@@ -500,7 +771,7 @@ ve.ui.DiffElement.prototype.getChangedNodeElements = function ( oldNodeIndex, mo
 			var removeData, tempData;
 
 			removeData = this.oldDoc.getData( orderedNode.node.getOuterRange() );
-			this.addAttributesToNode( removeData[ 0 ], {
+			this.addAttributesToElement( removeData[ 0 ], {
 				'data-diff-action': 'remove'
 			} );
 
@@ -509,7 +780,7 @@ ve.ui.DiffElement.prototype.getChangedNodeElements = function ( oldNodeIndex, mo
 				tempData = this.oldDoc.getData( orderedNode.node.getOuterRange() );
 				removeData.unshift( tempData[ 0 ] );
 				removeData.push( tempData[ tempData.length - 1 ] );
-				this.addAttributesToNode( removeData[ 0 ], {
+				this.addAttributesToElement( removeData[ 0 ], {
 					'data-diff-action': 'structural-remove'
 				} );
 			}
@@ -603,7 +874,7 @@ ve.ui.DiffElement.prototype.getChangedNodeElements = function ( oldNodeIndex, mo
 		nodeRangeStart = node.getOuterRange().from - nodeRange.from;
 
 		// Add insert class
-		this.addAttributesToNode(
+		this.addAttributesToElement(
 			nodeData[ nodeRangeStart ], {
 				'data-diff-action': ( !node.canContainContent() && node.hasChildren() ) ? 'structural-insert' : 'insert'
 			}
@@ -634,12 +905,12 @@ ve.ui.DiffElement.prototype.getChangedNodeElements = function ( oldNodeIndex, mo
 		}
 		if ( diffInfo.attributeChange ) {
 			// If there is no content change, just add change class
-			this.addAttributesToNode(
+			this.addAttributesToElement(
 				nodeData[ nodeRangeStart ], { 'data-diff-action': 'structural-change' }
 			);
 			item = this.compareNodeAttributes( nodeData, nodeRangeStart, this.newDoc, diffInfo.attributeChange );
 			if ( item ) {
-				this.descriptionItemsStack.unshift( item );
+				this.descriptionItemsStack.push( item );
 			}
 		}
 	}
@@ -669,7 +940,7 @@ ve.ui.DiffElement.prototype.getChangedNodeElements = function ( oldNodeIndex, mo
 			for ( k = 0, klen = treeDiff.length; k < klen; k++ ) {
 				if ( treeDiff[ k ][ 0 ] === oldIndex && treeDiff[ k ][ 1 ] === newIndex ) {
 
-					if ( diffInfo[ k ].replacement ) {
+					if ( !diffInfo[ k ] ) {
 
 						// We are treating these nodes as removed and inserted
 						highlightInsertedNode.call( this, newIndex );
@@ -704,23 +975,7 @@ ve.ui.DiffElement.prototype.getChangedNodeElements = function ( oldNodeIndex, mo
 	this.descriptions.addItems( this.descriptionItemsStack );
 	this.descriptionItemsStack = [];
 
-	element = document.createElement( 'div' );
-	element.setAttribute( 'class', 've-ui-diffElement-doc-child-change' );
-	if ( move ) {
-		element.setAttribute( 'data-diff-move', move );
-	}
-
-	documentSlice.getStore().merge( this.newDoc.getStore() );
-	// forClipboard is true, so that we can render otherwise invisible nodes
-	body = ve.dm.converter.getDomFromModel( documentSlice, true ).body;
-
-	while ( body.childNodes.length ) {
-		element.appendChild(
-			element.ownerDocument.adoptNode( body.childNodes[ 0 ] )
-		);
-	}
-
-	return [ element ];
+	return nodeData;
 };
 
 /**
@@ -749,7 +1004,7 @@ ve.ui.DiffElement.prototype.getRefListNodeElements = function ( referencesListDi
  *
  * @param {Object} internalListItem Information about the internal list item's diff
  * @param {string} action 'remove', 'insert' or 'none'
- * @param {string} [move] 'up' or 'down' if the node has moved
+ * @param {string|null} move 'up' or 'down' if the node has moved
  * @return {HTMLElement[]} Elements (not owned by window.document)
  */
 ve.ui.DiffElement.prototype.getInternalListNodeElements = function ( internalListItem, action, move ) {
@@ -785,7 +1040,7 @@ ve.ui.DiffElement.prototype.getInternalListNodeElements = function ( internalLis
  * from the old document to the new document.
  *
  * @param {Object} internalListItem Information about the internal list item's diff
- * @param {string} [move] 'up' or 'down' if the node has moved
+ * @param {string|null} move 'up' or 'down' if the node has moved
  * @return {HTMLElement[]} HTML elements to display the linear diff
  */
 ve.ui.DiffElement.prototype.getInternalListChangedNodeElements = function ( internalListItem, move ) {
@@ -801,7 +1056,7 @@ ve.ui.DiffElement.prototype.getInternalListChangedNodeElements = function ( inte
 		element.setAttribute( 'data-diff-move', move );
 	}
 	documentSlice = this.newDoc.cloneWithData( annotatedData, true, true );
-	body = ve.dm.converter.getDomFromModel( documentSlice, true ).body;
+	body = ve.dm.converter.getDomFromModel( documentSlice, ve.dm.Converter.static.PREVIEW_MODE ).body;
 	while ( body.childNodes.length ) {
 		element.appendChild(
 			element.ownerDocument.adoptNode( body.childNodes[ 0 ] )
@@ -832,18 +1087,25 @@ ve.ui.DiffElement.prototype.compareNodeAttributes = function ( data, offset, doc
 		attributeChanges = this.constructor.static.compareAttributes( attributeChange.oldAttributes, attributeChange.newAttributes );
 
 	changes = ve.dm.modelRegistry.lookup( data[ offset ].type ).static.describeChanges( attributeChanges, attributeChange.newAttributes, data[ offset ] );
-	if ( changes.length ) {
+
+	// Don't describe the same change twice
+	if ( changes.length && (
+		!( data[ offset ].internal ) ||
+		!( data[ offset ].internal.diff ) ||
+		data[ offset ].internal.diff[ 'data-diff-id' ] === undefined )
+	) {
 		item = this.getChangeDescriptionItem( changes );
-		this.addAttributesToNode( data[ offset ], { 'data-diff-id': item.getData() } );
+		this.addAttributesToElement( data[ offset ], { 'data-diff-id': item.getData() } );
 		return item;
 	}
+
 	return null;
 };
 
 /**
  * Get a change description item from a set of changes
  *
- * @param {Array} changes List of changes, each change being either text or a jQuery object
+ * @param {Array} changes List of changes, each change being either text or a Node array
  * @return {OO.ui.OptionWidget} Change description item
  */
 ve.ui.DiffElement.prototype.getChangeDescriptionItem = function ( changes ) {
@@ -853,10 +1115,10 @@ ve.ui.DiffElement.prototype.getChangeDescriptionItem = function ( changes ) {
 
 	for ( i = 0, l = changes.length; i < l; i++ ) {
 		$change = $( '<div>' );
-		if ( changes[ i ] instanceof jQuery ) {
-			$change.append( changes[ i ] );
-		} else {
+		if ( typeof changes[ i ] === 'string' ) {
 			$change.text( changes[ i ] );
+		} else {
+			$change.append( changes[ i ] );
 		}
 		$label = $label.add( $change );
 	}
@@ -870,23 +1132,23 @@ ve.ui.DiffElement.prototype.getChangeDescriptionItem = function ( changes ) {
 };
 
 /**
- * Mark a node with attributes to be added later by the converter.
+ * Mark an element with attributes to be added later by the converter.
  *
- * @param {Object} node Node to be marked
+ * @param {Object} element Element to be marked
  * @param {Object} attributes Attributes to set
  */
-ve.ui.DiffElement.prototype.addAttributesToNode = function ( node, attributes ) {
+ve.ui.DiffElement.prototype.addAttributesToElement = function ( element, attributes ) {
 	var key;
 
 	// NB we modify the linear data here, but then this is a cloned document.
 	for ( key in attributes ) {
 		if ( attributes[ key ] !== undefined ) {
-			ve.setProp( node, 'internal', 'diff', key, attributes[ key ] );
+			ve.setProp( element, 'internal', 'diff', key, attributes[ key ] );
 		}
 	}
 
 	// Don't let any nodes get unwrapped
-	ve.deleteProp( node, 'internal', 'generated' );
+	ve.deleteProp( element, 'internal', 'generated' );
 };
 
 /**
@@ -1033,7 +1295,7 @@ ve.ui.DiffElement.prototype.annotateNode = function ( linearDiff ) {
 		}
 		start = end;
 	}
-	this.descriptionItemsStack.unshift.apply( this.descriptionItemsStack, items );
+	this.descriptionItemsStack.push.apply( this.descriptionItemsStack, items );
 
 	// Merge the stores and get the data
 	this.newDoc.getStore().merge( diffDoc.getStore() );

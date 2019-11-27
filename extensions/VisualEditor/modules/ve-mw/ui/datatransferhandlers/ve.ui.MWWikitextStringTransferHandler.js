@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWWikitextStringTransferHandler class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -145,6 +145,9 @@ ve.ui.MWWikitextStringTransferHandler.prototype.process = function () {
 				);
 			}
 		}
+
+		// Clone elements to avoid about attribute conflicts (T204007)
+		doc.data.cloneElements( true );
 
 		if ( !doc.data.hasContent() ) {
 			return failure();

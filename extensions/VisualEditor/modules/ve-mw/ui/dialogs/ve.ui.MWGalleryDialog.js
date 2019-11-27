@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWGalleryDialog class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -26,26 +26,6 @@ ve.ui.MWGalleryDialog = function VeUiMWGalleryDialog() {
 OO.inheritClass( ve.ui.MWGalleryDialog, ve.ui.NodeDialog );
 
 /* Static properties */
-
-ve.ui.MWGalleryDialog.static.actions = [
-	{
-		label: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' ),
-		flags: [ 'safe', 'back' ],
-		modes: [ 'edit', 'insert' ]
-	},
-	{
-		action: 'done',
-		label: OO.ui.deferMsg( 'visualeditor-dialog-action-apply' ),
-		flags: [ 'progressive', 'primary' ],
-		modes: 'edit'
-	},
-	{
-		action: 'done',
-		label: OO.ui.deferMsg( 'visualeditor-dialog-action-insert' ),
-		flags: [ 'progressive', 'primary' ],
-		modes: 'insert'
-	}
-];
 
 ve.ui.MWGalleryDialog.static.name = 'gallery';
 
@@ -125,11 +105,12 @@ ve.ui.MWGalleryDialog.static.getImportRules = function () {
  * @inheritdoc
  */
 ve.ui.MWGalleryDialog.prototype.initialize = function () {
-	var imagesTabPanel, optionsTabPanel, menuLayout,
-		innerMenuLayout, innerMenuPanel, innerContentPanel,
+	var imagesTabPanel, optionsTabPanel,
+		imageListMenuLayout, imageListMenuPanel, imageListContentPanel,
 		modeField, captionField, widthsField, heightsField,
 		perrowField, showFilenameField, classesField, stylesField,
-		highlightedCaptionFieldset, highlightedAltTextFieldset;
+		highlightedCaptionField, highlightedCaptionFieldset,
+		highlightedAltTextField, highlightedAltTextFieldset;
 
 	// Parent method
 	ve.ui.MWGalleryDialog.super.prototype.initialize.call( this );
@@ -139,47 +120,47 @@ ve.ui.MWGalleryDialog.prototype.initialize = function () {
 	this.searchPanelVisible = false;
 	this.selectedFilenames = {};
 	this.initialImageData = [];
+	this.originalMwDataNormalized = null;
+	this.originalGalleryGroupItems = [];
 	this.imageData = {};
+	this.isMobile = OO.ui.isMobile();
 
 	// Default settings
 	this.defaults = mw.config.get( 'wgVisualEditorConfig' ).galleryOptions;
 
 	// Images and options tab panels
-	this.indexLayout = new OO.ui.IndexLayout( {
-		scrollable: false,
-		expanded: true
-	} );
+	this.indexLayout = new OO.ui.IndexLayout();
 	imagesTabPanel = new OO.ui.TabPanelLayout( 'images', {
 		label: ve.msg( 'visualeditor-mwgallerydialog-card-images' ),
-		expandable: false,
+		// Contains a menu layout which handles its own scrolling
 		scrollable: false,
 		padded: true
 	} );
 	optionsTabPanel = new OO.ui.TabPanelLayout( 'options', {
 		label: ve.msg( 'visualeditor-mwgallerydialog-card-options' ),
-		expandable: false,
-		scrollable: false,
 		padded: true
 	} );
 
 	// Images tab panel
 
 	// General layout
-	menuLayout = new OO.ui.MenuLayout( {
-		classes: [ 've-ui-mwGalleryDialog-menuLayout' ]
-	} );
-	innerMenuLayout = new OO.ui.MenuLayout( {
-		menuPosition: 'bottom',
-		classes: [ 've-ui-mwGalleryDialog-innerMenuLayout' ]
-	} );
-	innerMenuPanel = new OO.ui.PanelLayout( {
+	imageListContentPanel = new OO.ui.PanelLayout( {
 		padded: true,
 		expanded: true,
 		scrollable: true
 	} );
-	innerContentPanel = new OO.ui.PanelLayout( {
+	imageListMenuPanel = new OO.ui.PanelLayout( {
 		padded: true,
 		expanded: true
+	} );
+	imageListMenuLayout = new OO.ui.MenuLayout( {
+		menuPosition: this.isMobile ? 'after' : 'bottom',
+		classes: [
+			've-ui-mwGalleryDialog-imageListMenuLayout',
+			've-ui-mwGalleryDialog-imageListMenuLayout' + ( this.isMobile ? '-mobile' : '-desktop' )
+		],
+		contentPanel: imageListContentPanel,
+		menuPanel: imageListMenuPanel
 	} );
 	this.editPanel = new OO.ui.PanelLayout( {
 		padded: true,
@@ -191,14 +172,30 @@ ve.ui.MWGalleryDialog.prototype.initialize = function () {
 		expanded: true,
 		scrollable: true
 	} ).toggle( false );
+	this.editSearchStack = new OO.ui.StackLayout( {
+		items: [ this.editPanel, this.searchPanel ]
+	} );
+	this.imageTabMenuLayout = new OO.ui.MenuLayout( {
+		menuPosition: this.isMobile ? 'top' : 'before',
+		classes: [
+			've-ui-mwGalleryDialog-menuLayout',
+			've-ui-mwGalleryDialog-menuLayout' + ( this.isMobile ? '-mobile' : '-desktop' )
+		],
+		menuPanel: imageListMenuLayout,
+		contentPanel: this.editSearchStack
+	} );
 
 	// Menu
 	this.$emptyGalleryMessage = $( '<div>' )
 		.addClass( 'oo-ui-element-hidden' )
 		.text( ve.msg( 'visualeditor-mwgallerydialog-empty-gallery-message' ) );
-	this.galleryGroup = new ve.ui.MWGalleryGroupWidget();
+	this.galleryGroup = new ve.ui.MWGalleryGroupWidget( {
+		orientation: this.isMobile ? 'horizontal' : 'vertical'
+	} );
 	this.showSearchPanelButton = new OO.ui.ButtonWidget( {
-		label: ve.msg( 'visualeditor-mwgallerydialog-search-button-label' ),
+		label: this.isMobile ? undefined : ve.msg( 'visualeditor-mwgallerydialog-search-button-label' ),
+		icon: 'add',
+		framed: false,
 		flags: [ 'progressive' ],
 		classes: [ 've-ui-mwGalleryDialog-show-search-panel-button' ]
 	} );
@@ -223,25 +220,30 @@ ve.ui.MWGalleryDialog.prototype.initialize = function () {
 	} );
 	this.removeButton = new OO.ui.ButtonWidget( {
 		label: ve.msg( 'visualeditor-mwgallerydialog-remove-button-label' ),
+		icon: 'trash',
 		flags: [ 'destructive' ],
 		classes: [ 've-ui-mwGalleryDialog-remove-button' ]
 	} );
 
+	highlightedCaptionField = new OO.ui.FieldLayout( this.highlightedCaptionTarget, {
+		align: 'top'
+	} );
 	highlightedCaptionFieldset = new OO.ui.FieldsetLayout( {
-		label: ve.msg( 'visualeditor-dialog-media-content-section' ),
-		icon: 'parameter'
+		label: ve.msg( 'visualeditor-dialog-media-content-section' )
 	} );
-	highlightedCaptionFieldset.$element.append( this.highlightedCaptionTarget.$element );
+	highlightedCaptionFieldset.addItems( highlightedCaptionField );
 
-	highlightedAltTextFieldset = new OO.ui.FieldsetLayout( {
-		label: ve.msg( 'visualeditor-dialog-media-alttext-section' ),
-		icon: 'parameter'
+	highlightedAltTextField = new OO.ui.FieldLayout( this.highlightedAltTextInput, {
+		align: 'top'
 	} );
-	highlightedAltTextFieldset.$element.append( this.highlightedAltTextInput.$element );
+	highlightedAltTextFieldset = new OO.ui.FieldsetLayout( {
+		label: ve.msg( 'visualeditor-dialog-media-alttext-section' )
+	} );
+	highlightedAltTextFieldset.addItems( highlightedAltTextField );
 
 	// Search panel
 	this.searchWidget = new mw.widgets.MediaSearchWidget( {
-		rowHeight: 150
+		rowHeight: this.isMobile ? 100 : 150
 	} );
 
 	// Options tab panel
@@ -279,10 +281,8 @@ ve.ui.MWGalleryDialog.prototype.initialize = function () {
 	} );
 	this.captionTarget = ve.init.target.createTargetWidget( {
 		tools: ve.init.target.constructor.static.toolbarGroups,
-		// PHP parser only allows internal links in gallery captions (T187958).
-		// Perhaps that will be changed to something more reasonable, but in the meantime, do this.
-		includeCommands: [ 'undo', 'redo', 'clear', 'link', 'specialCharacter' ],
-		excludeCommands: [],
+		includeCommands: this.constructor.static.includeCommands,
+		excludeCommands: this.constructor.static.excludeCommands,
 		importRules: this.constructor.static.getImportRules(),
 		multiline: false
 	} );
@@ -319,7 +319,8 @@ ve.ui.MWGalleryDialog.prototype.initialize = function () {
 		label: ve.msg( 'visualeditor-mwgallerydialog-mode-field-label' )
 	} );
 	captionField = new OO.ui.FieldLayout( this.captionTarget, {
-		label: ve.msg( 'visualeditor-mwgallerydialog-caption-field-label' )
+		label: ve.msg( 'visualeditor-mwgallerydialog-caption-field-label' ),
+		align: this.isMobile ? 'top' : 'left'
 	} );
 	widthsField = new OO.ui.FieldLayout( this.widthsInput, {
 		label: ve.msg( 'visualeditor-mwgallerydialog-widths-field-label' )
@@ -341,33 +342,24 @@ ve.ui.MWGalleryDialog.prototype.initialize = function () {
 	} );
 
 	// Append everything
-	innerMenuLayout.$menu.append(
-		innerContentPanel.$element.append(
-			this.showSearchPanelButton.$element
-		)
+	imageListMenuPanel.$element.append(
+		this.showSearchPanelButton.$element
 	);
-	innerMenuLayout.$content.append(
-		innerMenuPanel.$element.append(
-			this.$emptyGalleryMessage,
-			this.galleryGroup.$element
-		)
+	imageListContentPanel.$element.append(
+		this.$emptyGalleryMessage,
+		this.galleryGroup.$element
 	);
-	menuLayout.$menu.append(
-		innerMenuLayout.$element
+	this.editPanel.$element.append(
+		this.filenameFieldset.$element,
+		highlightedCaptionFieldset.$element,
+		highlightedAltTextFieldset.$element,
+		this.removeButton.$element
 	);
-	menuLayout.$content.append(
-		this.editPanel.$element.append(
-			this.filenameFieldset.$element,
-			highlightedCaptionFieldset.$element,
-			highlightedAltTextFieldset.$element,
-			this.removeButton.$element
-		),
-		this.searchPanel.$element.append(
-			this.searchWidget.$element
-		)
+	this.searchPanel.$element.append(
+		this.searchWidget.$element
 	);
 	imagesTabPanel.$element.append(
-		menuLayout.$element
+		this.imageTabMenuLayout.$element
 	);
 	optionsTabPanel.$element.append(
 		modeField.$element,
@@ -398,11 +390,13 @@ ve.ui.MWGalleryDialog.prototype.getSetupProcess = function ( data ) {
 				showFilename, classes, styles,
 				namespaceIds = mw.config.get( 'wgNamespaceIds' ),
 				dialog = this,
-				attributes = this.selectedNode && this.selectedNode.getAttribute( 'mw' ).attrs,
+				mwData = this.selectedNode && this.selectedNode.getAttribute( 'mw' ),
+				attributes = mwData && mwData.attrs,
 				captionNode = this.selectedNode && this.selectedNode.getCaptionNode(),
-				imageNodes = this.selectedNode && this.selectedNode.getImageNodes();
+				imageNodes = this.selectedNode && this.selectedNode.getImageNodes(),
+				isReadOnly = this.isReadOnly();
 
-			this.actions.setMode( this.fragment.getSelectedModels().length ? 'edit' : 'insert' );
+			this.anyItemModified = false;
 
 			// Images tab panel
 			// If editing an existing gallery, populate with the images...
@@ -461,18 +455,37 @@ ve.ui.MWGalleryDialog.prototype.getSetupProcess = function ( data ) {
 			this.stylesInput.setValue( styles );
 			// Caption
 			this.captionTarget.setDocument( this.captionDocument );
+			this.captionTarget.setReadOnly( isReadOnly );
 			this.captionTarget.initialize();
+
+			if ( mwData ) {
+				this.originalMwDataNormalized = ve.copy( mwData );
+				this.updateMwData( this.originalMwDataNormalized );
+			}
+
+			this.highlightedAltTextInput.setReadOnly( isReadOnly );
+			this.modeDropdown.setDisabled( isReadOnly );
+			this.widthsInput.setReadOnly( isReadOnly );
+			this.heightsInput.setReadOnly( isReadOnly );
+			this.perrowInput.setReadOnly( isReadOnly );
+			this.showFilenameCheckbox.setDisabled( isReadOnly );
+			this.classesInput.setReadOnly( isReadOnly );
+			this.stylesInput.setReadOnly( isReadOnly );
+
+			this.showSearchPanelButton.setDisabled( isReadOnly );
+			this.removeButton.setDisabled( isReadOnly );
+
+			this.galleryGroup.toggleDraggable( !isReadOnly );
 
 			// Disable fields depending on mode
 			this.onModeDropdownChange();
 
 			// Add event handlers
 			this.indexLayout.connect( this, { set: 'updateDialogSize' } );
-			this.highlightedAltTextInput.connect( this, { change: 'updateActions' } );
 			this.searchWidget.getResults().connect( this, { choose: 'onSearchResultsChoose' } );
 			this.showSearchPanelButton.connect( this, { click: 'onShowSearchPanelButtonClick' } );
 			this.galleryGroup.connect( this, { editItem: 'onHighlightItem' } );
-			this.galleryGroup.connect( this, { itemDragEnd: 'updateActions' } );
+			this.galleryGroup.connect( this, { change: 'updateActions' } );
 			this.removeButton.connect( this, { click: 'onRemoveItem' } );
 			this.modeDropdown.getMenu().connect( this, { choose: 'onModeDropdownChange' } );
 			this.widthsInput.connect( this, { change: 'updateActions' } );
@@ -481,6 +494,11 @@ ve.ui.MWGalleryDialog.prototype.getSetupProcess = function ( data ) {
 			this.showFilenameCheckbox.connect( this, { change: 'updateActions' } );
 			this.classesInput.connect( this, { change: 'updateActions' } );
 			this.stylesInput.connect( this, { change: 'updateActions' } );
+			this.captionTarget.connect( this, { change: 'updateActions' } );
+			this.highlightedAltTextInput.connect( this, { change: 'updateActions' } );
+			this.highlightedCaptionTarget.connect( this, { change: 'updateActions' } );
+
+			return this.imagesPromise;
 		}, this );
 };
 
@@ -511,7 +529,6 @@ ve.ui.MWGalleryDialog.prototype.getReadyProcess = function ( data ) {
 	return ve.ui.MWGalleryDialog.super.prototype.getReadyProcess.call( this, data )
 		.next( function () {
 			this.searchWidget.getQuery().focus().select();
-			return this.imagesPromise;
 		}, this );
 };
 
@@ -521,6 +538,11 @@ ve.ui.MWGalleryDialog.prototype.getReadyProcess = function ( data ) {
 ve.ui.MWGalleryDialog.prototype.getTeardownProcess = function ( data ) {
 	return ve.ui.MWGalleryDialog.super.prototype.getTeardownProcess.call( this, data )
 		.first( function () {
+			// Layouts
+			this.indexLayout.setTabPanel( 'images' );
+			this.indexLayout.resetScroll();
+			this.imageTabMenuLayout.resetScroll();
+
 			// Widgets
 			this.galleryGroup.clearItems();
 			this.searchWidget.getQuery().setValue( '' );
@@ -531,10 +553,11 @@ ve.ui.MWGalleryDialog.prototype.getTeardownProcess = function ( data ) {
 			this.searchPanelVisible = false;
 			this.selectedFilenames = {};
 			this.initialImageData = [];
+			this.originalMwDataNormalized = null;
+			this.originalGalleryGroupItems = [];
 
 			// Disconnect events
 			this.indexLayout.disconnect( this );
-			this.highlightedAltTextInput.disconnect( this );
 			this.searchWidget.getResults().disconnect( this );
 			this.showSearchPanelButton.disconnect( this );
 			this.galleryGroup.disconnect( this );
@@ -546,6 +569,10 @@ ve.ui.MWGalleryDialog.prototype.getTeardownProcess = function ( data ) {
 			this.showFilenameCheckbox.disconnect( this );
 			this.classesInput.disconnect( this );
 			this.stylesInput.disconnect( this );
+			this.highlightedAltTextInput.disconnect( this );
+			this.captionTarget.disconnect( this );
+			this.highlightedCaptionTarget.disconnect( this );
+
 		}, this );
 };
 
@@ -600,7 +627,8 @@ ve.ui.MWGalleryDialog.prototype.requestImages = function ( options ) {
 ve.ui.MWGalleryDialog.prototype.onRequestImagesSuccess = function ( response ) {
 	var title,
 		thumbUrls = {},
-		items = [];
+		items = [],
+		config = { isMobile: this.isMobile, draggable: !this.isReadOnly() };
 
 	for ( title in response ) {
 		thumbUrls[ title ] = {
@@ -613,9 +641,10 @@ ve.ui.MWGalleryDialog.prototype.onRequestImagesSuccess = function ( response ) {
 	if ( this.initialImageData.length > 0 ) {
 		this.initialImageData.forEach( function ( image ) {
 			image.thumbUrl = thumbUrls[ image.resource ].thumbUrl;
-			items.push( new ve.ui.MWGalleryItemWidget( image ) );
+			items.push( new ve.ui.MWGalleryItemWidget( image, config ) );
 		} );
 		this.initialImageData = [];
+		this.originalGalleryGroupItems = ve.copy( items );
 	} else {
 		for ( title in this.selectedFilenames ) {
 			if ( Object.prototype.hasOwnProperty.call( thumbUrls, title ) ) {
@@ -627,11 +656,12 @@ ve.ui.MWGalleryDialog.prototype.onRequestImagesSuccess = function ( response ) {
 					width: thumbUrls[ title ].width,
 					thumbUrl: thumbUrls[ title ].thumbUrl,
 					captionDocument: this.createCaptionDocument( null )
-				} ) );
+				}, config ) );
 				delete this.selectedFilenames[ title ];
 			}
 		}
 	}
+
 	this.galleryGroup.addItems( items );
 
 	// Gallery is no longer empty
@@ -643,7 +673,7 @@ ve.ui.MWGalleryDialog.prototype.onRequestImagesSuccess = function ( response ) {
 /**
  * Request a new image and highlight it
  *
- * @param {string} title File name for the new image
+ * @param {string} title Normalized title of the new image
  */
 ve.ui.MWGalleryDialog.prototype.addNewImage = function ( title ) {
 	var dialog = this;
@@ -668,6 +698,8 @@ ve.ui.MWGalleryDialog.prototype.addNewImage = function ( title ) {
  * in this dialog (currently only the image caption).
  */
 ve.ui.MWGalleryDialog.prototype.updateHighlightedItem = function () {
+	this.anyItemModified = this.anyItemModified || this.isHighlightedItemModified();
+
 	// TODO: Support link, page and lang
 	if ( this.highlightedItem ) {
 		// No need to call setCaptionDocument(), the document object is updated on every change
@@ -683,7 +715,9 @@ ve.ui.MWGalleryDialog.prototype.updateHighlightedItem = function () {
 ve.ui.MWGalleryDialog.prototype.onSearchResultsChoose = function ( item ) {
 	var title = mw.Title.newFromText( item.getData().title ).getPrefixedText();
 
-	if ( !Object.prototype.hasOwnProperty( this.selectedFilenames, title ) ) {
+	// Check title against pending insertions
+	// TODO: Prevent two 'choose' events firing from the UI
+	if ( !Object.prototype.hasOwnProperty.call( this.selectedFilenames, title ) ) {
 		this.addNewImage( title );
 	}
 
@@ -699,8 +733,6 @@ ve.ui.MWGalleryDialog.prototype.onRemoveItem = function () {
 
 	// Highlight another item, or show the search panel if the gallery is now empty
 	this.onHighlightItem();
-
-	this.updateActions();
 };
 
 /**
@@ -744,7 +776,7 @@ ve.ui.MWGalleryDialog.prototype.onHighlightItem = function ( item ) {
 		$( '<span>' ).append(
 			document.createTextNode( title.getMainText() + ' ' ),
 			$( '<a>' )
-				.addClass( 'visualeditor-dialog-media-content-description-link' )
+				.addClass( 've-ui-mwMediaDialog-description-link' )
 				.attr( 'href', title.getUrl() )
 				.attr( 'target', '_blank' )
 				.attr( 'rel', 'noopener' )
@@ -754,6 +786,7 @@ ve.ui.MWGalleryDialog.prototype.onHighlightItem = function ( item ) {
 	this.$highlightedImage
 		.css( 'background-image', 'url(' + item.thumbUrl + ')' );
 	this.highlightedCaptionTarget.setDocument( item.captionDocument );
+	this.highlightedCaptionTarget.setReadOnly( this.isReadOnly() );
 	this.highlightedCaptionTarget.initialize();
 	this.highlightedAltTextInput.setValue( item.altText );
 };
@@ -805,8 +838,7 @@ ve.ui.MWGalleryDialog.prototype.toggleSearchPanel = function ( visible ) {
 	this.searchPanelVisible = visible;
 
 	// Toggle the search panel, and do the opposite for the edit panel
-	this.searchPanel.toggle( visible );
-	this.editPanel.toggle( !visible );
+	this.editSearchStack.setItem( visible ? this.searchPanel : this.editPanel );
 
 	// If the edit panel is visible, focus the caption target
 	if ( !visible ) {
@@ -861,7 +893,65 @@ ve.ui.MWGalleryDialog.prototype.toggleEmptyGalleryMessage = function ( empty ) {
  * TODO Disable the button until the user makes any changes
  */
 ve.ui.MWGalleryDialog.prototype.updateActions = function () {
-	this.actions.setAbilities( { done: this.galleryGroup.items.length > 0 } );
+	this.actions.setAbilities( { done: this.isModified() } );
+};
+
+/**
+ * Check if gallery attributes or contents would be modified if changes were applied.
+ *
+ * @return {boolean}
+ */
+ve.ui.MWGalleryDialog.prototype.isModified = function () {
+	var mwDataCopy, i;
+
+	// Check attributes
+	if ( this.originalMwDataNormalized ) {
+		mwDataCopy = ve.copy( this.selectedNode.getAttribute( 'mw' ) );
+		this.updateMwData( mwDataCopy );
+		if ( !ve.compare( mwDataCopy, this.originalMwDataNormalized ) ) {
+			return true;
+		}
+	}
+	if ( this.captionTarget.hasBeenModified() ) {
+		return true;
+	}
+
+	// Check contents: each image's attributes and contents (caption)
+	if ( this.anyItemModified || this.isHighlightedItemModified() ) {
+		return true;
+	}
+
+	// Check contents: added/removed/reordered images
+	if ( this.originalGalleryGroupItems ) {
+		if ( this.galleryGroup.items.length !== this.originalGalleryGroupItems.length ) {
+			return true;
+		}
+		for ( i = 0; i < this.galleryGroup.items.length; i++ ) {
+			if ( this.galleryGroup.items[ i ] !== this.originalGalleryGroupItems[ i ] ) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+};
+
+/**
+ * Check if currently highlighted item's attributes or contents would be modified if changes were
+ * applied.
+ *
+ * @return {boolean}
+ */
+ve.ui.MWGalleryDialog.prototype.isHighlightedItemModified = function () {
+	if ( this.highlightedItem ) {
+		if ( this.highlightedAltTextInput.getValue() !== this.highlightedItem.altText ) {
+			return true;
+		}
+		if ( this.highlightedCaptionTarget.hasBeenModified() ) {
+			return true;
+		}
+	}
+	return false;
 };
 
 /**
@@ -977,15 +1067,13 @@ ve.ui.MWGalleryDialog.prototype.insertOrUpdateNode = function () {
 	captionInsertionOffset = innerRange.from + data.length - 2;
 	// Update image captions. In reverse order to avoid having to adjust offsets for each insertion.
 	for ( i = items.length - 1; i >= 0; i-- ) {
-		if ( items[ i ].captionDocument.data.hasContent() ) {
-			surfaceModel.change(
-				ve.dm.TransactionBuilder.static.newFromDocumentInsertion(
-					surfaceModel.getDocument(),
-					captionInsertionOffset,
-					items[ i ].captionDocument
-				)
-			);
-		}
+		surfaceModel.change(
+			ve.dm.TransactionBuilder.static.newFromDocumentInsertion(
+				surfaceModel.getDocument(),
+				captionInsertionOffset,
+				items[ i ].captionDocument
+			)
+		);
 		// Skip past </mwGalleryImageCaption></mwGalleryImage><mwGalleryImage><mwGalleryImageCaption>
 		captionInsertionOffset -= 4;
 	}

@@ -1,18 +1,17 @@
 /*!
  * VisualEditor MediaWiki Initialization MobileArticleTarget styles.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
-.oo-ui-panelLayout-scrollable {
-	-webkit-overflow-scrolling: touch;
-}
-
 .ve-init-mw-target-surface {
-	padding: 1em 0;
+	// margin-left and margin-right defined by the skin
+	// (see .content styles in Minerva)
+	margin-top: 1em;
+	margin-bottom: 1em;
 
-	.ve-ce-documentNode,
+	.ve-ce-attachedRootNode,
 	.ve-ui-surface-placeholder {
 		padding: 0;
 	}
@@ -28,7 +27,7 @@
 }
 
 .ve-ui-debugBar {
-	padding: 0.8em 16px;
+	padding-top: 0.8em;
 	border-top: 1px solid #c8ccd1;
 	box-shadow: 0 10px 10px -10px rgba( 0, 0, 0, 0.15 ) inset;
 }
@@ -39,7 +38,7 @@
 }
 
 /* Hide toolbar shortcuts, no use on mobile */
-.oo-ui-popupToolGroup .oo-ui-tool-link .oo-ui-tool-accel {
+.oo-ui-popupToolGroup-tools .oo-ui-tool-link .oo-ui-tool-accel {
 	display: none;
 }
 
@@ -81,6 +80,7 @@
 		> .oo-ui-indicatorElement-indicator {
 			left: 50%;
 		}
+
 		> .oo-ui-iconElement-icon {
 			margin-left: -1.875em;
 		}
@@ -91,14 +91,17 @@
 
 		> .oo-ui-toolGroup-tools > .oo-ui-tool {
 			width: 100%;
+
 			> .oo-ui-tool-link {
-				padding: 0.85em;
+				padding: 0.875em;
+
 				> .oo-ui-iconElement-icon:not( .oo-ui-tool-checkIcon ) {
 					position: static;
 					display: inline-block;
 					vertical-align: middle;
 					margin-right: 0.25em;
 				}
+
 				> .oo-ui-tool-title {
 					vertical-align: middle;
 
@@ -120,7 +123,6 @@
 			border-right: 0;
 		}
 	}
-
 }
 
 .ve-init-mw-mobileArticleTarget-editTools-hidden,

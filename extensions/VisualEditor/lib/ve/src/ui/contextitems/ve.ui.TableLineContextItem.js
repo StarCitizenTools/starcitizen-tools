@@ -1,7 +1,7 @@
 /*!
  * VisualEditor TableLineContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -150,12 +150,13 @@ ve.ui.TableLineContextItem.prototype.setup = function () {
 				OO.ui.deferMsg( 'visualeditor-table-move-' + mode + '-' + side );
 			ve.ui[ className ].static.commandName = 'move' + modeName + sideName;
 			ve.ui[ className ].prototype.setup = function () {
-				var selection, matrix;
+				var selection, documentModel, matrix;
 
 				// Parent method
 				ve.ui.TableLineContextItem.prototype.setup.call( this );
 
 				selection = this.context.getSurface().getModel().getSelection();
+				documentModel = this.context.getSurface().getModel().getDocument();
 
 				if ( !( selection instanceof ve.dm.TableSelection ) ) {
 					this.actionButton.setDisabled( true );
@@ -168,7 +169,7 @@ ve.ui.TableLineContextItem.prototype.setup = function () {
 						( mode === 'col' && selection.startCol === 0 )
 					);
 				} else {
-					matrix = selection.getTableNode().getMatrix();
+					matrix = selection.getTableNode( documentModel ).getMatrix();
 					this.actionButton.setDisabled(
 						( mode === 'row' && selection.endRow === matrix.getRowCount() - 1 ) ||
 						( mode === 'col' && selection.endCol === matrix.getMaxColCount() - 1 )
@@ -184,6 +185,8 @@ ve.ui.TableLineContextItem.prototype.setup = function () {
 		className = 'Delete' + modeName + 'ContextItem';
 		ve.ui[ className ] = function VeUiDeleteRowOrColumnContextItem() {
 			ve.ui.TableLineContextItem.apply( this, arguments );
+
+			this.actionButton.setFlags( { destructive: true } );
 		};
 		OO.inheritClass( ve.ui[ className ], ve.ui.TableLineContextItem );
 		ve.ui[ className ].static.name = 'delete' + modeName;

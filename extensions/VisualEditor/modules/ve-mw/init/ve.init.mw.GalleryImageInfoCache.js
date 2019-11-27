@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization GalleryImageInfoCache class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -11,9 +11,11 @@
  * @class
  * @extends ve.init.mw.ImageInfoCache
  * @constructor
+ * @param {mw.Api} [api]
  */
 ve.init.mw.GalleryImageInfoCache = function VeInitMwGalleryImageInfoCache() {
-	ve.init.mw.GalleryImageInfoCache.super.call( this );
+	// Parent constructor
+	ve.init.mw.GalleryImageInfoCache.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -26,7 +28,7 @@ OO.inheritClass( ve.init.mw.GalleryImageInfoCache, ve.init.mw.ImageInfoCache );
  * @inheritdoc
  */
 ve.init.mw.GalleryImageInfoCache.prototype.getRequestPromise = function ( subqueue ) {
-	return new mw.Api().get(
+	return this.api.get(
 		{
 			action: 'query',
 			prop: 'imageinfo',

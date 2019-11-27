@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Initialization Platform class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -39,7 +39,7 @@ OO.mixinClass( ve.init.Platform, OO.EventEmitter );
  * A jQuery.Deferred that tracks when the platform has been created.
  * @private
  */
-ve.init.Platform.static.deferredPlatform = $.Deferred();
+ve.init.Platform.static.deferredPlatform = ve.createDeferred();
 
 /**
  * A promise that tracks when ve.init.platform is ready for use.  When
@@ -139,6 +139,16 @@ ve.init.Platform.prototype.getMetadataIdRegExp = function () {
 };
 
 /**
+ * Show a read-only notification to the user.
+ *
+ * @method
+ * @abstract
+ * @param {jQuery|string} message Message
+ * @param {jQuery|string} [title] Title
+ */
+ve.init.Platform.prototype.notify = null;
+
+/**
  * Get a platform config value
  *
  * @method
@@ -174,7 +184,7 @@ ve.init.Platform.prototype.setUserConfig = null;
  * @method
  * @abstract
  * @param {string} key Key to get
- * @return {string|boolean} Value, false if storage not available
+ * @return {string|null|boolean} Value, null if not set, false if storage not available
  */
 ve.init.Platform.prototype.getSession = null;
 
@@ -198,6 +208,42 @@ ve.init.Platform.prototype.setSession = null;
  * @return {boolean} Key was removed
  */
 ve.init.Platform.prototype.removeSession = null;
+
+/**
+ * Get a session storage object
+ *
+ * Object must be JSON-able.
+ *
+ * @param {string} key Key to get
+ * @return {Object|null|boolean}  Value, null if not set, false if storage not available
+ */
+ve.init.Platform.prototype.getSessionObject = function ( key ) {
+	var value,
+		json = this.getSession( key );
+	if ( json ) {
+		try {
+			value = JSON.parse( json );
+			return value;
+		} catch ( e ) {}
+	}
+	return json;
+};
+
+/**
+ * Set a session storage object
+ *
+ * @param {string} key Key to set value for
+ * @param {Object} value Value to set
+ * @return {boolean} The value was set
+ */
+ve.init.Platform.prototype.setSessionObject = function ( key, value ) {
+	var json;
+	try {
+		json = JSON.stringify( value );
+		return this.setSession( key, json );
+	} catch ( e ) {}
+	return false;
+};
 
 /**
  * Append a value to a list stored in session storage
@@ -233,7 +279,7 @@ ve.init.Platform.prototype.getSessionListLength = function ( key ) {
  *
  * Internally this will use items with the keys:
  *  - key__length
- *  - key__0 ... key__N
+ *  - key__0 … key__N
  *
  * @method
  * @param {string} key Key of list
@@ -285,6 +331,17 @@ ve.init.Platform.prototype.addMessages = null;
  * @return {string} Localized message, or key or '<' + key + '>' if message not found
  */
 ve.init.Platform.prototype.getMessage = null;
+
+/**
+ * Get an HTML message from the localization system, with HTML or DOM arguments
+ *
+ * @method
+ * @abstract
+ * @param {string} key Message key
+ * @param {...Mixed} [args] List of arguments which will be injected at $1, $2, etc. in the message
+ * @return {Node[]} Localized message, or key or '<' + key + '>' if message not found
+ */
+ve.init.Platform.prototype.getHtmlMessage = null;
 
 /**
  * Add multiple parsed messages to the localization system.
@@ -376,9 +433,9 @@ ve.init.Platform.prototype.getLanguageDirection = null;
  */
 ve.init.Platform.prototype.initialize = function () {
 	if ( !VisualEditorSupportCheck() ) {
-		return $.Deferred().reject().promise();
+		return ve.createDeferred().reject().promise();
 	}
-	return $.Deferred().resolve().promise();
+	return ve.createDeferred().resolve().promise();
 };
 
 /**
@@ -421,5 +478,5 @@ ve.init.Platform.prototype.fetchSpecialCharList = function () {
 	}
 
 	// This implementation always resolves instantly
-	return $.Deferred().resolve( charsObj ).promise();
+	return ve.createDeferred().resolve( charsObj ).promise();
 };

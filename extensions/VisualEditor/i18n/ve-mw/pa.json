@@ -11,8 +11,6 @@
 			"Tow"
 		]
 	},
-	"apihelp-visualeditoredit-param-minor": "ਛੋਟੀ ਸੋਧ ਦਾ ਨਿਸ਼ਾਨ",
-	"apihelp-visualeditoredit-param-summary": "ਸੋਧ ਸਾਰ।",
 	"tooltip-ca-createsource": "ਇਸ ਸਫ਼ੇ ਦੇ ਸਰੋਤ ਦਾ ਕੋਡ ਬਣਾਉ",
 	"tooltip-ca-edit": "ਤੁਸੀਂ ਇਹ ਸਫ਼ਾ ਸੋਧ ਸਕਦੇ ਹੋ। ਕਿਰਪਾ ਕਰਕੇ ਤਬਦੀਲੀ ਸਾਂਭਣ ਤੋਂ ਪਹਿਲਾਂ ਝਲਕ ਵੇਖੋ।",
 	"tooltip-ca-editsource": "ਇਸ ਸਫ਼ੇ ਦੇ ਸਰੋਤ ਦਾ ਕੋਡ ਸੋਧੋ",
@@ -154,8 +152,5 @@
 	"visualeditor-toolbar-savedialog": "ਸਫ਼ਾ ਸਾਂਭੋ",
 	"visualeditor-toolbar-savedialog-short": "ਸਾਂਭੋ",
 	"visualeditor-version-label": "ਵਰਸ਼ਨ",
-	"visualeditor-viewpage-savewarning-discard": "ਸੋਧਾਂ ਰੱਦ ਕਰੋ",
-	"visualeditor-viewpage-savewarning-keep": "ਸੋਧ ਕਰਦੇ ਰਹੋ",
-	"visualeditor-viewpage-savewarning-title": "ਕੀ ਤੁਸੀਂ ਨਿਸ਼ਚਿਤ ਹੋ?",
 	"visualeditor-wikitext-progress": "ਵਿਕੀਲਿਖਤ ਬਦਲੀ ਜਾ ਰਹੀ ਹੈ"
 }

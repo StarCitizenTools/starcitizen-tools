@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Range class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -100,15 +100,6 @@ ve.Range.static.newCoveringRange = function ( ranges, backwards ) {
 };
 
 /* Methods */
-
-/**
- * Get a clone.
- *
- * @return {ve.Range} Clone of range
- */
-ve.Range.prototype.clone = function () {
-	return new this.constructor( this.from, this.to );
-};
 
 /**
  * Check if an offset is within the range.

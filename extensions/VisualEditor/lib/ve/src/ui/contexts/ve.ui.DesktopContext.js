@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface DesktopContext class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -14,7 +14,9 @@
  * @param {ve.ui.Surface} surface
  * @param {Object} [config] Configuration options
  */
-ve.ui.DesktopContext = function VeUiDesktopContext() {
+ve.ui.DesktopContext = function VeUiDesktopContext( surface, config ) {
+	config = config || {};
+
 	// Parent constructor
 	ve.ui.DesktopContext.super.apply( this, arguments );
 
@@ -22,7 +24,7 @@ ve.ui.DesktopContext = function VeUiDesktopContext() {
 	this.popup = new OO.ui.PopupWidget( {
 		hideWhenOutOfView: false,
 		autoFlip: false,
-		$container: this.surface.$element
+		$container: config.$popupContainer || this.surface.$element
 	} );
 	this.position = null;
 	this.embeddable = null;
@@ -49,9 +51,9 @@ ve.ui.DesktopContext = function VeUiDesktopContext() {
 		resize: 'onInspectorResize'
 	} );
 	this.$window.on( {
-		resize: this.onWindowResizeHandler,
-		scroll: this.onWindowScrollDebounced
+		resize: this.onWindowResizeHandler
 	} );
+	ve.addPassiveEventListener( this.$window[ 0 ], 'scroll', this.onWindowScrollDebounced );
 
 	// Initialization
 	this.$element
@@ -169,10 +171,10 @@ ve.ui.DesktopContext.prototype.toggle = function ( show ) {
 	}
 	show = show === undefined ? !this.visible : !!show;
 	if ( show === this.visible ) {
-		return $.Deferred().resolve().promise();
+		return ve.createDeferred().resolve().promise();
 	}
 
-	this.transitioning = $.Deferred();
+	this.transitioning = ve.createDeferred();
 	promise = this.transitioning.promise();
 
 	// Parent method
@@ -217,11 +219,14 @@ ve.ui.DesktopContext.prototype.updateDimensions = function () {
 	focusedNode = surface.getFocusedNode();
 	// Selection when the inspector was opened. Used to stop the context from
 	// jumping when an inline selection expands, e.g. to cover a long word
-	startingSelection = !focusedNode && this.inspector && this.inspector.previousSelection;
-	// Don't use start selection if it comes from another document, e.g. the fake document used in
-	// source mode.
-	if ( startingSelection && startingSelection.getDocument() !== surface.getModel().getDocument ) {
-		startingSelection = null;
+	if (
+		!focusedNode && this.inspector && this.inspector.previousSelection &&
+		// Don't use start selection if it comes from another document, e.g. the fake document used in
+		// source mode.
+		this.inspector.getFragment() &&
+		this.inspector.getFragment().getDocument() === surface.getModel().getDocument()
+	) {
+		startingSelection = this.inspector.previousSelection;
 	}
 	currentSelection = this.surface.getModel().getSelection();
 	isTableSelection = ( startingSelection || currentSelection ) instanceof ve.dm.TableSelection;
@@ -229,6 +234,8 @@ ve.ui.DesktopContext.prototype.updateDimensions = function () {
 	boundingRect = isTableSelection ?
 		surface.getSelection( startingSelection ).getTableBoundingRect() :
 		surface.getSelection( startingSelection ).getSelectionBoundingRect();
+
+	this.$element.removeClass( 've-ui-desktopContext-embedded' );
 
 	if ( !boundingRect ) {
 		// If !boundingRect, the surface apparently isn't selected.
@@ -243,6 +250,7 @@ ve.ui.DesktopContext.prototype.updateDimensions = function () {
 			boundingRect.height > this.$group.outerHeight() + 5 &&
 			boundingRect.width > this.$group.outerWidth() + 10;
 		this.popup.toggleAnchor( !embeddable );
+		this.$element.toggleClass( 've-ui-desktopContext-embedded', !!embeddable );
 		if ( embeddable ) {
 			// Embedded context position depends on directionality
 			position = {
@@ -426,14 +434,16 @@ ve.ui.DesktopContext.prototype.setPopupSizeAndPosition = function ( repositionOn
  * @inheritdoc
  */
 ve.ui.DesktopContext.prototype.destroy = function () {
+	// Hide, so a debounced updateDimensions does nothing
+	this.toggle( false );
 	// Disconnect
 	this.surface.getView().disconnect( this );
 	this.surface.getModel().disconnect( this );
 	this.inspectors.disconnect( this );
 	this.$window.off( {
-		resize: this.onWindowResizeHandler,
-		scroll: this.onWindowScrollDebounced
+		resize: this.onWindowResizeHandler
 	} );
+	ve.removePassiveEventListener( this.$window[ 0 ], 'scroll', this.onWindowScrollDebounced );
 	// Popups bind scroll events if they're in positioning mode, so make sure that's disabled
 	this.popup.togglePositioning( false );
 

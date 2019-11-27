@@ -1,14 +1,17 @@
 /*!
  * VisualEditor trigger demo
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 ( function () {
 	var i, len, key,
+		/* eslint-disable no-jquery/no-global-selector */
 		$primary = $( '#primary' ),
 		$modifiers = $( '#modifiers' ),
 		$aliases = $( '#aliases' ),
+		$trigger = $( '#trigger' ),
+		/* eslint-enable no-jquery/no-global-selector */
 		primaryKeys = ve.ui.Trigger.static.primaryKeys,
 		modifierKeys = ve.ui.Trigger.static.modifierKeys,
 		keyAliases = ve.ui.Trigger.static.keyAliases;
@@ -17,7 +20,7 @@
 		var i, len, key, parts;
 		trigger = trigger.toString();
 		parts = trigger.split( '+' );
-		$( '#trigger' ).text( trigger );
+		$trigger.text( trigger );
 		for ( i = 0, len = parts.length; i < len; i++ ) {
 			key = parts[ i ].replace( '\\', '\\\\' ).replace( '"', '\\"' );
 			$( '.key[rel~="' + key + '"]' ).addClass( 'active' );
@@ -57,13 +60,15 @@
 
 	// Events
 
-	$( 'body' ).on( {
+	$( document.body ).on( {
 		keydown: function ( e ) {
+			// eslint-disable-next-line no-jquery/no-global-selector
 			$( '.active' ).removeClass( 'active' );
 			setTrigger( new ve.ui.Trigger( e ) );
 			e.preventDefault();
 		}
 	} );
+	// eslint-disable-next-line no-jquery/no-global-selector
 	$( '#primary .key, #modifiers .key' ).on( {
 		mousedown: function ( e ) {
 			var $target = $( e.target );
@@ -84,6 +89,7 @@
 					$target.removeClass( 'active' );
 				}
 				$target.removeClass( 'activating' );
+				// eslint-disable-next-line no-jquery/no-global-selector
 				$( '.active' ).each( function () {
 					parts.push( $( this ).attr( 'rel' ) );
 				} );

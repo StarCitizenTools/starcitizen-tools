@@ -1,14 +1,13 @@
 /*!
  * VisualEditor UserInterface CommandHelpDialog styles.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-commandHelpDialog-container {
-	-ms-column-count: 3;
-	-moz-column-count: 3;
-	-webkit-column-count: 3;
-	column-count: 3;
+	-moz-columns: 3 19.5em;
+	-webkit-columns: 3 19.5em;
+	columns: 3 19.5em;
 }
 
 .ve-ui-commandHelpDialog-section {
@@ -94,6 +93,7 @@
 	box-shadow: none;
 	text-transform: none;
 }
+
 .ve-ui-commandHelpDialog-sequence kbd:not( .ve-ui-commandHelpDialog-specialKey ) + kbd:not( .ve-ui-commandHelpDialog-specialKey ) {
 	margin-left: -0.5em;
 	padding-left: 0;

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -115,7 +115,8 @@ ve.init.mw.ArticleTargetEvents.prototype.onSaveComplete = function ( content, ca
 	this.timings.saveRetries = 0;
 	this.track( 'mwedit.saveSuccess', {
 		timing: ve.now() - this.timings.saveInitiated + ( this.timings.serializeForCache || 0 ),
-		'page.revid': newRevId
+		// eslint-disable-next-line camelcase
+		revision_id: newRevId
 	} );
 };
 

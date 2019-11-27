@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki edit mode tool classes.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -46,7 +46,6 @@ mw.libs.ve.MWEditModeTool.static.unavailableTooltip = null;
  * Switch editors
  *
  * @method
- * @abstract
  */
 mw.libs.ve.MWEditModeTool.prototype.switch = function () {
 	this.toolbar.emit( 'switchEditor', this.constructor.static.editMode );

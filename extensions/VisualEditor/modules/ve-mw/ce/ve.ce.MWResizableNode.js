@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWResizableNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -37,6 +37,10 @@ ve.ce.MWResizableNode.prototype.getAttributeChanges = function ( width, height )
 	var attrChanges = ve.ce.ResizableNode.prototype.getAttributeChanges.call( this, width, height );
 	if ( !ve.isEmptyObject( attrChanges ) ) {
 		attrChanges.defaultSize = false;
+	}
+	// type=frame is not resizeable, so change it to type=thumb
+	if ( this.getModel().getAttribute( 'type' ) === 'frame' ) {
+		attrChanges.type = 'thumb';
 	}
 	return attrChanges;
 };

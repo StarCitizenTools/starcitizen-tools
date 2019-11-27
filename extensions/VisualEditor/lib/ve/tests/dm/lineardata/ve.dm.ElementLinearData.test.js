@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ElementLinearData tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.ElementLinearData' );
@@ -612,7 +612,7 @@ QUnit.test( 'trimOuterSpaceFromRange', function ( assert ) {
 	linearData = ve.dm.example.preprocessAnnotations( data );
 	elementData = new ve.dm.ElementLinearData( linearData.getStore(), linearData.getData() );
 	for ( i = 0; i < cases.length; i++ ) {
-		assert.deepEqual(
+		assert.equalRange(
 			elementData.trimOuterSpaceFromRange( cases[ i ].range ),
 			cases[ i ].trimmed,
 			cases[ i ].msg
@@ -808,6 +808,48 @@ QUnit.test( 'getText', function ( assert ) {
 	);
 } );
 
+QUnit.test( 'getSourceText', function ( assert ) {
+	var i,
+		data = new ve.dm.ElementLinearData(
+			new ve.dm.HashValueStore(),
+			[
+				{ type: 'paragraph' }, 'f', 'o', 'o', { type: '/paragraph' },
+				{ type: 'paragraph' }, 'b', 'a', 'r', { type: '/paragraph' },
+				{ type: 'internalList' }, { type: '/internalList' }
+			]
+		),
+		cases = [
+			{
+				msg: 'Whole document',
+				range: undefined,
+				expected: 'foo\nbar'
+			},
+			{
+				msg: 'Simple text range',
+				range: new ve.Range( 1, 4 ),
+				expected: 'foo'
+			},
+			{
+				msg: 'Newline spanning',
+				range: new ve.Range( 3, 7 ),
+				expected: 'o\nb'
+			},
+			{
+				msg: 'Whole line',
+				range: new ve.Range( 0, 5 ),
+				expected: 'foo\n'
+			}
+		];
+
+	for ( i = 0; i < cases.length; i++ ) {
+		assert.strictEqual(
+			data.getSourceText( cases[ i ].range ),
+			cases[ i ].expected,
+			cases[ i ].msg
+		);
+	}
+} );
+
 QUnit.test( 'isContentData', function ( assert ) {
 	var i, data,
 		cases = [
@@ -880,6 +922,8 @@ QUnit.test( 'getRelativeOffset', function ( assert ) {
 					'b'
 				],
 				callback: ve.dm.ElementLinearData.prototype.isContentOffset,
+				// The results here look incorrect. It should "turn around" and return 7.
+				// It should only return -1 if the imageCaption has no valid offsets inside (it is empty).
 				expected: -1
 			}
 		];
@@ -1670,6 +1714,18 @@ QUnit.test( 'sanitize', function ( assert ) {
 				msg: 'Span stripped when removing original DOM elements'
 			},
 			{
+				html: '<p><span style="color:red;"><span style="color:red;">Foo</span></span></p>',
+				data: [
+					{ type: 'paragraph' },
+					'F', 'o', 'o',
+					{ type: '/paragraph' },
+					{ type: 'internalList' },
+					{ type: '/internalList' }
+				],
+				rules: { removeOriginalDomElements: true },
+				msg: 'Double annotation sanitized'
+			},
+			{
 				html: '<p>F<br>o</p><h1>B<br>a</h1><p>B<br></p>',
 				data: [
 					{ type: 'paragraph' },
@@ -2097,13 +2153,31 @@ QUnit.test( 'compareElements and compareElementsUnannotated', function ( assert 
 				b: [ 'F', [ ve.dm.example.italicHash ] ],
 				comparison: false,
 				comparisonUnannotated: true,
-				msg: 'Identical characters, non-identically-annotated'
+				msg: 'Identical characters, differently-annotated'
 			},
 			{
 				a: [ 'F', [ ve.dm.example.boldHash ] ],
 				b: [ 'F', [ ve.dm.example.strongHash ] ],
 				comparison: true,
 				msg: 'Identical characters, comparably-annotated'
+			},
+			{
+				a: [ 'F', [ ve.dm.example.boldHash ] ],
+				b: [ 'G', [ ve.dm.example.boldHash ] ],
+				comparison: false,
+				msg: 'Different characters, identically-annotated'
+			},
+			{
+				a: [ 'F', [ ve.dm.example.boldHash ] ],
+				b: [ 'G', [ ve.dm.example.strongHash ] ],
+				comparison: false,
+				msg: 'Different characters, comparably-annotated'
+			},
+			{
+				a: 'F',
+				b: [ 'G', [ ve.dm.example.boldHash ] ],
+				comparison: false,
+				msg: 'Different characters, one annotated, one not'
 			},
 			{
 				a: 'F',
@@ -2114,9 +2188,47 @@ QUnit.test( 'compareElements and compareElementsUnannotated', function ( assert 
 			},
 			{
 				a: { type: 'paragraph' },
+				b: 'F',
+				comparison: false,
+				msg: 'Element with character'
+			},
+			{
+				a: { type: 'paragraph' },
+				b: [ 'F', [ ve.dm.example.boldHash ] ],
+				comparison: false,
+				msg: 'Element with annotated character'
+			},
+			{
+				a: { type: 'paragraph' },
 				b: { type: 'paragraph' },
 				comparison: true,
 				msg: 'Identical opening paragraphs'
+			},
+			{
+				a: { type: 'inlineImage', annotations: [ ve.dm.example.boldHash ] },
+				b: { type: 'inlineImage', annotations: [ ve.dm.example.boldHash ] },
+				comparison: true,
+				msg: 'Identical elements, identically-annotated'
+			},
+			{
+				a: { type: 'inlineImage', annotations: [ ve.dm.example.boldHash ] },
+				b: { type: 'inlineImage', annotations: [ ve.dm.example.strongHash ] },
+				comparison: true,
+				msg: 'Identical elements, comparably-annotated'
+			},
+			{
+				a: { type: 'inlineImage', annotations: [ ve.dm.example.boldHash ] },
+				b: { type: 'inlineImage', annotations: [ ve.dm.example.italicHash ] },
+				comparison: false,
+				comparisonUnannotated: true,
+				msg: 'Identical elements, differently-annotated'
+			},
+			{
+				a: { type: 'inlineImage', annotations: [ ve.dm.example.boldHash ] },
+				b: { type: 'inlineImage' },
+				comparison: false,
+				comparisonUnannotated: true,
+				msg: 'Identical elements, one annotated, one not'
 			},
 			{
 				a: { type: 'heading' },
@@ -2155,12 +2267,12 @@ QUnit.test( 'compareElements and compareElementsUnannotated', function ( assert 
 	store.hash( new ve.dm.ItalicAnnotation( ve.dm.example.italic ) );
 
 	for ( i = 0; i < cases.length; i++ ) {
-		assert.equal(
+		assert.strictEqual(
 			ve.dm.ElementLinearData.static.compareElements( cases[ i ].a, cases[ i ].b, store ),
 			cases[ i ].comparison,
 			cases[ i ].msg
 		);
-		assert.equal(
+		assert.strictEqual(
 			ve.dm.ElementLinearData.static.compareElementsUnannotated( cases[ i ].a, cases[ i ].b ),
 			cases[ i ].comparisonUnannotated || cases[ i ].comparison,
 			cases[ i ].msg + ' (unannotated)'

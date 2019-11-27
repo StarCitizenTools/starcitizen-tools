@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWLanuageVariantNodeContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -63,7 +63,7 @@ ve.ui.MWLanguageVariantNodeContextItem.prototype.setup = function () {
 ve.ui.MWLanguageVariantNodeContextItem.prototype.renderBody = function () {
 	var $body = this.$body,
 		$table = $( '<table>' ),
-		$header = $( '<tr> ' ),
+		$header = $( '<tr>' ),
 		variantInfo = this.model.getVariantInfo(),
 		type = this.model.getRuleType(),
 		isHidden = this.model.isHidden(),

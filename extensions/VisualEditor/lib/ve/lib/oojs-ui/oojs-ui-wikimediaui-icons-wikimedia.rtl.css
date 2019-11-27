@@ -1,16 +1,12 @@
 /*!
- * OOUI v0.26.3
+ * OOUI v0.31.1
  * https://www.mediawiki.org/wiki/OOUI
  *
- * Copyright 2011–2018 OOUI Team and other contributors.
+ * Copyright 2011–2019 OOUI Team and other contributors.
  * Released under the MIT license
  * http://oojs.mit-license.org
  *
- * Date: 2018-04-10T22:15:43Z
- */
-/**
- * WikimediaUI Base v0.10.0
- * Wikimedia Foundation user interface base variables
+ * Date: 2019-03-21T15:54:46Z
  */
 .oo-ui-icon-logoCC {
   background-image: url('themes/wikimediaui/images/icons/logo-CC.png');
@@ -19,6 +15,22 @@
 .oo-ui-image-invert.oo-ui-icon-logoCC {
   background-image: url('themes/wikimediaui/images/icons/logo-CC-invert.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/logo-CC-invert.svg');
+}
+.oo-ui-icon-logoWikidata {
+  background-image: url('themes/wikimediaui/images/icons/logo-Wikidata.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/logo-Wikidata.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-logoWikidata {
+  background-image: url('themes/wikimediaui/images/icons/logo-Wikidata-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/logo-Wikidata-invert.svg');
+}
+.oo-ui-icon-logoWikimedia {
+  background-image: url('themes/wikimediaui/images/icons/logo-Wikimedia.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/logo-Wikimedia.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-logoWikimedia {
+  background-image: url('themes/wikimediaui/images/icons/logo-Wikimedia-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/logo-Wikimedia-invert.svg');
 }
 .oo-ui-icon-logoWikimediaCommons {
   background-image: url('themes/wikimediaui/images/icons/logo-Wikimedia-Commons.png');

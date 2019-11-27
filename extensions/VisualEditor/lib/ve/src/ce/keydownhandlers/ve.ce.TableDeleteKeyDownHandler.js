@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable table delete key down handler
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,8 +13,8 @@
  * @constructor
  */
 ve.ce.TableDeleteKeyDownHandler = function VeCeTableDeleteKeyDownHandler() {
-	// Parent constructor
-	ve.ui.TableDeleteKeyDownHandler.super.apply( this, arguments );
+	// Parent constructor - never called because class is fully static
+	// ve.ui.TableDeleteKeyDownHandler.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -41,11 +41,16 @@ ve.ce.TableDeleteKeyDownHandler.static.supportedSelections = [ 'table' ];
 ve.ce.TableDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 	var i, l,
 		surfaceModel = surface.getModel(),
+		documentModel = surfaceModel.getDocument(),
 		fragments = [],
-		cells = surfaceModel.getSelection().getMatrixCells();
+		cells = surfaceModel.getSelection().getMatrixCells( documentModel );
 
 	if ( e ) {
 		e.preventDefault();
+	}
+
+	if ( surface.isReadOnly() ) {
+		return true;
 	}
 
 	for ( i = 0, l = cells.length; i < l; i++ ) {

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWHeadingNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -29,7 +29,7 @@ OO.inheritClass( ve.dm.MWHeadingNode, ve.dm.HeadingNode );
 ve.dm.MWHeadingNode.static.name = 'mwHeading';
 
 // Headings in wikitext only work in some contexts, they're impossible e.g. in list items
-ve.dm.MWHeadingNode.static.suggestedParentNodeTypes = [ 'document', 'tableCell', 'div' ];
+ve.dm.MWHeadingNode.static.suggestedParentNodeTypes = [ 'document', 'tableCell', 'div', 'section' ];
 
 /* Registration */
 

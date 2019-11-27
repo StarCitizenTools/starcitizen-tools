@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki ArticleTargetLoader.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -17,6 +17,7 @@
 ( function () {
 	var prefName, prefValue,
 		uri = new mw.Uri(),
+		namespaces = mw.config.get( 'wgNamespaceIds' ),
 		conf = mw.config.get( 'wgVisualEditorConfig' ),
 		pluginCallbacks = [],
 		modules = [ 'ext.visualEditor.articleTarget' ]
@@ -35,8 +36,13 @@
 		modules.push( 'ext.visualEditor.mwwikitext' );
 	}
 
-	// Allow signing posts in select namespaces
-	if ( conf.signatureNamespaces.length ) {
+	// Load signature tool if *any* namespace supports it.
+	// It will be shown disabled on namespaces that don't support it.
+	if (
+		Object.keys( namespaces ).some( function ( name ) {
+			return mw.Title.wantSignaturesNamespace( namespaces[ name ] );
+		} )
+	) {
 		modules.push( 'ext.visualEditor.mwsignature' );
 	}
 
@@ -46,6 +52,15 @@
 		// Check "0" (T89513)
 		if ( prefValue && prefValue !== '0' ) {
 			modules.push( conf.preferenceModules[ prefName ] );
+		}
+	}
+
+	// T218851: Section editing A/B test
+	if ( conf.enableVisualSectionEditing === 'mobile-ab' ) {
+		if ( !mw.user.isAnon() && mw.user.getId() % 2 ) {
+			conf.enableVisualSectionEditing = 'mobile';
+		} else {
+			conf.enableVisualSectionEditing = false;
 		}
 	}
 
@@ -66,7 +81,7 @@
 		addPlugin: function ( plugin ) {
 			if ( typeof plugin === 'string' ) {
 				modules.push( plugin );
-			} else if ( $.isFunction( plugin ) ) {
+			} else {
 				pluginCallbacks.push( plugin );
 			}
 		},
@@ -99,10 +114,10 @@
 		 * Parsoid or RESTBase).
 		 *
 		 * @param {string} mode Target mode: 'visual' or 'source'
-		 * @param {string} pageName Page name to request
+		 * @param {string} pageName Page name to request, in prefixed DB key form (underscores instead of spaces)
 		 * @param {Object} [options] Options
 		 * @param {boolean} [options.sessionStore] Store result in session storage (by page+mode+section) for auto-save
-		 * @param {number|string} [options.section] Section to edit, number or 'new' (currently just source mode)
+		 * @param {number|null|string} [options.section] Section to edit; number, null or 'new' (currently just source mode)
 		 * @param {number} [options.oldId] Old revision ID. Current if omitted.
 		 * @param {string} [options.targetName] Optional target name for tracking
 		 * @param {boolean} [options.modified] The page was been modified before loading (e.g. in source mode)
@@ -112,25 +127,30 @@
 		 * @return {jQuery.Promise} Abortable promise resolved with a JSON object
 		 */
 		requestPageData: function ( mode, pageName, options ) {
-			var sessionState, request, dataPromise,
-				apiRequest = mode === 'source' ?
-					this.requestWikitext.bind( this, pageName, options ) :
-					this.requestParsoidData.bind( this, pageName, options );
+			var sessionState, request, section, dataPromise, apiRequest, enableVisualSectionEditing;
+
+			options = options || {};
+			apiRequest = mode === 'source' ?
+				this.requestWikitext.bind( this, pageName, options ) :
+				this.requestParsoidData.bind( this, pageName, options );
 
 			if ( options.sessionStore ) {
 				try {
-					// ve.init.platform.getSession is not available yet
+					// ve.init.platform.getSessionObject is not available yet
 					sessionState = JSON.parse( mw.storage.session.get( 've-docstate' ) );
 				} catch ( e ) {}
 
 				if ( sessionState ) {
 					request = sessionState.request || {};
+					// Check true section editing is in use
+					enableVisualSectionEditing = conf.enableVisualSectionEditing;
+					section = request.mode === 'source' || enableVisualSectionEditing === true || enableVisualSectionEditing === options.targetName ?
+						options.section : null;
 					// Check the requested page, mode and section match the stored one
 					if (
 						request.pageName === pageName &&
 						request.mode === mode &&
-						// Only check sections in source mode
-						( request.mode !== 'source' || request.section === options.section )
+						request.section === section
 						// NB we don't cache by oldid so that cached results can be recovered
 						// even if the page has been since edited
 					) {
@@ -185,20 +205,20 @@
 		 * @return {jQuery.Promise} Abortable promise resolved with a JSON object
 		 */
 		requestParsoidData: function ( pageName, options ) {
-			var start, apiXhr, restbaseXhr, apiPromise, restbasePromise, dataPromise, pageHtmlUrl, headers,
+			var start, apiXhr, restbaseXhr, apiPromise, restbasePromise, dataPromise, pageHtmlUrl, headers, data,
 				switched = false,
-				fromEditedState = false,
-				data = {
-					action: 'visualeditor',
-					paction: ( conf.fullRestbaseUrl || conf.restbaseUrl ) ? 'metadata' : 'parse',
-					page: pageName,
-					uselang: mw.config.get( 'wgUserLanguage' ),
-					editintro: uri.query.editintro,
-					preload: options.preload,
-					preloadparams: options.preloadparams
-				};
+				fromEditedState = false;
 
 			options = options || {};
+			data = {
+				action: 'visualeditor',
+				paction: ( conf.fullRestbaseUrl || conf.restbaseUrl ) ? 'metadata' : 'parse',
+				page: pageName,
+				uselang: mw.config.get( 'wgUserLanguage' ),
+				editintro: uri.query.editintro,
+				preload: options.preload,
+				preloadparams: options.preloadparams
+			};
 
 			// Only request the API to explicitly load the currently visible revision if we're restoring
 			// from oldid. Otherwise we should load the latest version. This prevents us from editing an
@@ -234,9 +254,10 @@
 			if ( conf.fullRestbaseUrl || conf.restbaseUrl ) {
 				ve.track( 'trace.restbaseLoad.enter', { mode: 'visual' } );
 
-				// Should be synchronised with ApiVisualEditor.php
 				headers = {
-					Accept: 'text/html; charset=utf-8; profile="mediawiki.org/specs/html/1.6.0"',
+					// Should be synchronised with ApiVisualEditor.php
+					Accept: 'text/html; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/HTML/2.0.0"',
+					'Accept-Language': mw.config.get( 'wgVisualEditor' ).pageLanguageCode,
 					'Api-User-Agent': 'VisualEditor-MediaWiki/' + mw.config.get( 'wgVersion' )
 				};
 
@@ -244,6 +265,7 @@
 				if (
 					// wikitext can be an empty string
 					options.wikitext !== undefined &&
+					// eslint-disable-next-line no-jquery/no-global-selector
 					!$( '[name=wpSection]' ).val()
 				) {
 					if ( conf.fullRestbaseUrl ) {
@@ -340,7 +362,10 @@
 		 * @return {jQuery.Promise} Abortable promise resolved with a JSON object
 		 */
 		requestWikitext: function ( pageName, options ) {
-			var data = {
+			var data;
+
+			options = options || {};
+			data = {
 				action: 'visualeditor',
 				paction: 'wikitext',
 				page: pageName,

@@ -36,7 +36,6 @@
 	"visualeditor-dialog-media-size-choosecustom": "Sedzä maßgschnaidadi Greeß",
 	"visualeditor-dialog-media-size-choosedefault": "Uff Schdandodgreeß",
 	"visualeditor-dialog-media-size-choosefull": "Uff volli Greeß",
-	"visualeditor-dialog-media-size-originalsize-error": "Uaschbringlisch Dadaigreeß hodds nedd.",
 	"visualeditor-dialog-media-size-section": "Bildagreeß",
 	"visualeditor-dialog-media-title": "Medium-Oischdellunge",
 	"visualeditor-dialog-media-type-border": "Rohme",
@@ -152,8 +151,6 @@
 	"visualeditor-toolbar-savedialog": "Said sischere",
 	"visualeditor-usernamespacepagelink": "Project:Benudzanomeraum",
 	"visualeditor-version-label": "Ausfiarung",
-	"visualeditor-viewpage-savewarning": "Bischda sischa, dassde uffde Onsischdmodus geje megschd, ohne dvoa zu schbaischare?",
-	"visualeditor-viewpage-savewarning-keep": "Waida schaffe",
 	"visualeditor-wikitext-warning": "Du schaffschd middm VisualEditor. [[{{MediaWiki:visualeditor-wikitext-warning-link}}|Wikitegschd]] ged do nedd. Gligg uff „{{int:visualeditor-ca-editsource}}“, um onde Said im Wikitegschdmodus zu schaffe. Uugsischade Ännarunge sinn valore.",
 	"visualeditor-wikitext-warning-title": "Wikitegschd gfunne"
 }

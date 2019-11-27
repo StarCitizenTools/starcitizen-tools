@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface popup tool classes.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -25,11 +25,27 @@ ve.ui.MWPopupTool = function VeUiMWPopupTool( title, toolGroup, config ) {
 	ve.ui.MWPopupTool.super.call( this, toolGroup, config );
 
 	this.$element.addClass( 've-ui-mwPopupTool' );
+
+	this.$link.on( 'click', this.onToolLinkClick.bind( this ) );
 };
 
 /* Inheritance */
 
 OO.inheritClass( ve.ui.MWPopupTool, OO.ui.PopupTool );
+
+/**
+ * Handle clicks on the main tool button.
+ *
+ * @param {jQuery.Event} e Click event
+ */
+ve.ui.MWPopupTool.prototype.onToolLinkClick = function () {
+	if ( this.popup.isVisible() ) {
+		// Popup will be visible if this just opened, thanks to sequencing.
+		// Can't just track this with toggle, because the notices popup is auto-opened and we
+		// want to know about deliberate interactions.
+		ve.track( 'activity.' + this.constructor.static.name + 'Popup', { action: 'show' } );
+	}
+};
 
 /**
  * MediaWiki UserInterface notices popup tool.
@@ -84,16 +100,20 @@ ve.ui.MWNoticesPopupTool.prototype.setNotices = function ( notices ) {
 	}
 
 	this.$items = $( '<div>' ).addClass( 've-ui-mwNoticesPopupTool-items' );
+	this.noticeItems = [];
 
-	notices.forEach( function ( itemHtml ) {
-		var $node = $( '<div>' )
+	notices.forEach( function ( item ) {
+		var $element = $( '<div>' )
 			.addClass( 've-ui-mwNoticesPopupTool-item' )
-			.append( $.parseHTML( itemHtml ) );
+			.html( typeof item === 'string' ? item : item.message );
+		ve.targetLinksToNewWindow( $element[ 0 ] );
 
-		// Ensure that any links in the notices open in a new tab/window
-		$node.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' );
+		tool.noticeItems.push( {
+			$element: $element,
+			type: item.type
+		} );
 
-		tool.$items.append( $node );
+		tool.$items.append( $element );
 	} );
 
 	this.popup.$body.append( this.$items );
@@ -170,7 +190,7 @@ ve.ui.MWHelpPopupTool = function VeUiMWHelpPopupTool( toolGroup, config ) {
 				.append( this.keyboardShortcutsButton.$element )
 				.append( this.feedbackButton.$element )
 		);
-	this.$items.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' );
+	ve.targetLinksToNewWindow( this.$items[ 0 ] );
 	this.popup.$body.append( this.$items );
 };
 
@@ -193,11 +213,12 @@ ve.ui.MWHelpPopupTool.static.autoAddToGroup = false;
  * Handle clicks on the feedback button.
  */
 ve.ui.MWHelpPopupTool.prototype.onFeedbackClick = function () {
+	var tool = this;
 	this.popup.toggle( false );
 	if ( !this.feedbackPromise ) {
 		this.feedbackPromise = mw.loader.using( 'mediawiki.feedback' ).then( function () {
 			var feedbackConfig, veConfig,
-				mode = this.toolbar.getSurface().getMode();
+				mode = tool.toolbar.getSurface().getMode();
 
 			// This can't be constructed until the editor has loaded as it uses special messages
 			feedbackConfig = {
@@ -252,7 +273,7 @@ ve.ui.MWHelpPopupTool.prototype.onSelect = function () {
 	if ( !this.versionPromise && this.popup.isVisible() ) {
 		$version = $( '<div>' ).addClass( 've-ui-mwHelpPopupTool-item oo-ui-pendingElement-pending' ).text( '\u00a0' );
 		this.$items.append( $version );
-		this.versionPromise = new mw.Api().get( {
+		this.versionPromise = ve.init.target.getLocalApi().get( {
 			action: 'query',
 			meta: 'siteinfo',
 			format: 'json',

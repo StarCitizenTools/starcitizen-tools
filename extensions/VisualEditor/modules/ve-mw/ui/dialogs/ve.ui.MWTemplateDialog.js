@@ -1,7 +1,7 @@
-/*
+/*!
  * VisualEditor user interface MWTemplateDialog class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -29,7 +29,7 @@ ve.ui.MWTemplateDialog = function VeUiMWTemplateDialog( config ) {
 	this.confirmOverlay = new ve.ui.Overlay( { classes: [ 've-ui-overlay-global' ] } );
 	this.confirmDialogs = new ve.ui.WindowManager( { factory: ve.ui.windowFactory, isolate: true } );
 	this.confirmOverlay.$element.append( this.confirmDialogs.$element );
-	$( 'body' ).append( this.confirmOverlay.$element );
+	$( document.body ).append( this.confirmOverlay.$element );
 };
 
 /* Inheritance */
@@ -39,26 +39,6 @@ OO.inheritClass( ve.ui.MWTemplateDialog, ve.ui.NodeDialog );
 /* Static Properties */
 
 ve.ui.MWTemplateDialog.static.modelClasses = [ ve.dm.MWTransclusionNode ];
-
-ve.ui.MWTemplateDialog.static.actions = [
-	{
-		action: 'apply',
-		label: OO.ui.deferMsg( 'visualeditor-dialog-action-apply' ),
-		flags: [ 'progressive', 'primary' ],
-		modes: 'edit'
-	},
-	{
-		action: 'insert',
-		label: OO.ui.deferMsg( 'visualeditor-dialog-action-insert' ),
-		flags: [ 'primary', 'progressive' ],
-		modes: 'insert'
-	},
-	{
-		label: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' ),
-		flags: [ 'safe', 'back' ],
-		modes: [ 'insert', 'edit' ]
-	}
-];
 
 /**
  * Configuration for booklet layout.
@@ -80,11 +60,6 @@ ve.ui.MWTemplateDialog.static.bookletLayoutConfig = {
 ve.ui.MWTemplateDialog.prototype.getReadyProcess = function ( data ) {
 	return ve.ui.MWTemplateDialog.super.prototype.getReadyProcess.call( this, data )
 		.next( function () {
-			// Add missing required and suggested parameters to each transclusion.
-			this.transclusionModel.addPromptedParameters();
-			this.loaded = true;
-			this.$element.addClass( 've-ui-mwTemplateDialog-ready' );
-			this.$body.append( this.bookletLayout.$element );
 			this.bookletLayout.focus( 1 );
 		}, this );
 };
@@ -198,7 +173,7 @@ ve.ui.MWTemplateDialog.prototype.onAddParameter = function ( param ) {
 	var page;
 
 	if ( param.getName() ) {
-		page = new ve.ui.MWParameterPage( param, param.getId(), { $overlay: this.$overlay } );
+		page = new ve.ui.MWParameterPage( param, param.getId(), { $overlay: this.$overlay, readOnly: this.isReadOnly() } );
 	} else {
 		page = new ve.ui.MWParameterPlaceholderPage( param, param.getId(), {
 			$overlay: this.$overlay,
@@ -235,12 +210,15 @@ ve.ui.MWTemplateDialog.prototype.onRemoveParameter = function ( param ) {
 	var page = this.bookletLayout.getPage( param.getId() ),
 		reselect = this.bookletLayout.findClosestPage( page );
 
-	this.bookletLayout.removePages( [ page ] );
-	if ( this.loaded ) {
-		if ( !this.preventReselection ) {
-			this.setPageByName( reselect.getName() );
-		}
+	// Select the desired page first. Otherwise, if the page we are removing is selected,
+	// OOUI will try to select the first page after it is removed, and scroll to the top.
+	if ( this.loaded && !this.preventReselection ) {
+		this.setPageByName( reselect.getName() );
+	}
 
+	this.bookletLayout.removePages( [ page ] );
+
+	if ( this.loaded ) {
 		this.altered = true;
 		this.setApplicableStatus();
 	}
@@ -256,10 +234,10 @@ ve.ui.MWTemplateDialog.prototype.setApplicableStatus = function () {
 	var parts = this.transclusionModel && this.transclusionModel.getParts();
 
 	if ( parts.length && !( parts[ 0 ] instanceof ve.dm.MWTemplatePlaceholderModel ) ) {
-		this.actions.setAbilities( { apply: this.altered, insert: true } );
+		this.actions.setAbilities( { done: this.altered, insert: true } );
 	} else {
 		// Loading is resolved. We have either: 1) no parts, or 2) the a placeholder as the first part
-		this.actions.setAbilities( { apply: parts.length === 0 && this.altered, insert: false } );
+		this.actions.setAbilities( { done: parts.length === 0 && this.altered, insert: false } );
 	}
 };
 
@@ -278,7 +256,7 @@ ve.ui.MWTemplateDialog.prototype.getBodyHeight = function () {
  */
 ve.ui.MWTemplateDialog.prototype.getPageFromPart = function ( part ) {
 	if ( part instanceof ve.dm.MWTemplateModel ) {
-		return new ve.ui.MWTemplatePage( part, part.getId(), { $overlay: this.$overlay } );
+		return new ve.ui.MWTemplatePage( part, part.getId(), { $overlay: this.$overlay, isReadOnly: this.isReadOnly() } );
 	} else if ( part instanceof ve.dm.MWTemplatePlaceholderModel ) {
 		return new ve.ui.MWTemplatePlaceholderPage(
 			part,
@@ -357,7 +335,7 @@ ve.ui.MWTemplateDialog.prototype.initialize = function () {
 
 	// Initialization
 	this.$content.addClass( 've-ui-mwTemplateDialog' );
-	// bookletLayout is appended after the form has been built in getReadyProcess for performance
+	// bookletLayout is appended after the form has been built in getSetupProcess for performance
 };
 
 /**
@@ -371,14 +349,15 @@ ve.ui.MWTemplateDialog.prototype.initialize = function () {
 ve.ui.MWTemplateDialog.prototype.checkRequiredParameters = function () {
 	var blankRequired = [],
 		deferred = $.Deferred();
-	$.each( this.bookletLayout.pages, function () {
-		if ( !( this instanceof ve.ui.MWParameterPage ) ) {
-			return true;
+
+	this.bookletLayout.stackLayout.getItems().forEach( function ( page ) {
+		if ( !( page instanceof ve.ui.MWParameterPage ) ) {
+			return;
 		}
-		if ( this.parameter.isRequired() && !this.valueInput.getValue() ) {
+		if ( page.parameter.isRequired() && !page.valueInput.getValue() ) {
 			blankRequired.push( mw.msg(
 				'quotation-marks',
-				this.parameter.template.getSpec().getParameterLabel( this.parameter.getName() )
+				page.parameter.template.getSpec().getParameterLabel( page.parameter.getName() )
 			) );
 		}
 	} );
@@ -411,7 +390,7 @@ ve.ui.MWTemplateDialog.prototype.checkRequiredParameters = function () {
  */
 ve.ui.MWTemplateDialog.prototype.getActionProcess = function ( action ) {
 	var dialog = this;
-	if ( action === 'apply' || action === 'insert' ) {
+	if ( action === 'done' || action === 'insert' ) {
 		return new OO.ui.Process( function () {
 			var deferred = $.Deferred();
 			dialog.checkRequiredParameters().done( function () {
@@ -450,12 +429,13 @@ ve.ui.MWTemplateDialog.prototype.getSetupProcess = function ( data ) {
 	data = data || {};
 	return ve.ui.MWTemplateDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
-			var template, promise;
+			var template, promise,
+				dialog = this;
 
 			// Properties
 			this.loaded = false;
 			this.altered = false;
-			this.transclusionModel = new ve.dm.MWTransclusionModel();
+			this.transclusionModel = new ve.dm.MWTransclusionModel( this.getFragment().getDocument() );
 
 			// Events
 			this.transclusionModel.connect( this, {
@@ -465,10 +445,12 @@ ve.ui.MWTemplateDialog.prototype.getSetupProcess = function ( data ) {
 
 			// Detach the form while building for performance
 			this.bookletLayout.$element.detach();
+			// HACK: Prevent any setPage() calls (from #onReplacePart) from focussing stuff, it messes
+			// with OOUI logic for marking fields as invalid (T199838). We set it back to true below.
+			this.bookletLayout.autoFocus = false;
 
 			// Initialization
 			if ( !this.selectedNode ) {
-				this.actions.setMode( 'insert' );
 				if ( data.template ) {
 					// New specified template
 					template = ve.dm.MWTemplateModel.newFromName(
@@ -484,14 +466,23 @@ ve.ui.MWTemplateDialog.prototype.getSetupProcess = function ( data ) {
 					);
 				}
 			} else {
-				this.actions.setMode( 'edit' );
 				// Load existing template
 				promise = this.transclusionModel
 					.load( ve.copy( this.selectedNode.getAttribute( 'mw' ) ) )
 					.then( this.initializeTemplateParameters.bind( this ) );
 			}
-			this.actions.setAbilities( { apply: false, insert: false } );
-			return promise;
+			this.actions.setAbilities( { done: false, insert: false } );
+
+			return promise.then( function () {
+				// Add missing required and suggested parameters to each transclusion.
+				dialog.transclusionModel.addPromptedParameters();
+
+				dialog.loaded = true;
+				dialog.$element.addClass( 've-ui-mwTemplateDialog-ready' );
+				dialog.$body.append( dialog.bookletLayout.$element );
+
+				dialog.bookletLayout.autoFocus = true;
+			} );
 		}, this );
 };
 

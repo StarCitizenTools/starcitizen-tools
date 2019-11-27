@@ -16,14 +16,10 @@ module.exports = function ( grunt ) {
 		coreBuildFilesWikimediaUI = moduleUtils.makeBuildList( modules, [ 'visualEditor.build.wikimediaui' ] ),
 		testFiles = moduleUtils.makeBuildList( modules, [ 'visualEditor.test' ] ).scripts,
 		demoPages = ( function () {
-			var pages = {},
+			var pages = [],
 				files = grunt.file.expand( 'demos/ve/pages/*.html' );
-			files.forEach( function ( file ) {
-				var matches = file.match( /^.*(pages\/(.+).html)$/ ),
-					path = matches[ 1 ],
-					name = matches[ 2 ];
-
-				pages[ name ] = path;
+			pages = files.map( function ( file ) {
+				return file.match( /^.*pages\/(.+).html$/ )[ 1 ];
 			} );
 			return pages;
 		}() );
@@ -62,7 +58,8 @@ module.exports = function ( grunt ) {
 			},
 			'visualEditor.rebase.scripts': {
 				options: {
-					banner: grunt.file.read( 'build/banner.txt' )
+					banner: grunt.file.read( 'build/banner.txt' ),
+					sourceMap: true
 				},
 				dest: 'dist/visualEditor-rebase.js',
 				src: veRebaseFiles.scripts
@@ -76,7 +73,8 @@ module.exports = function ( grunt ) {
 			},
 			js: {
 				options: {
-					banner: grunt.file.read( 'build/banner.txt' )
+					banner: grunt.file.read( 'build/banner.txt' ),
+					sourceMap: true
 				},
 				dest: 'dist/visualEditor.js',
 				src: coreBuildFiles.scripts
@@ -146,8 +144,10 @@ module.exports = function ( grunt ) {
 		svgmin: {
 			options: {
 				js2svg: {
+					indent: '\t',
 					pretty: true
 				},
+				multipass: true,
 				plugins: [ {
 					cleanupIDs: false
 				}, {
@@ -190,15 +190,15 @@ module.exports = function ( grunt ) {
 				indent: '\t\t',
 				dir: 'ltr'
 			},
-			desktopDemo: {
+			desktopDemoApex: {
 				targetFile: 'demos/ve/desktop.html',
 				template: 'demos/ve/demo.html.template',
 				modules: modules,
 				load: [
-					'visualEditor.desktop.standalone',
+					'visualEditor.desktop.standalone.apex',
 					'visualEditor.standalone.read'
 				],
-				run: [ 'visualEditor.desktop.standalone.demo' ],
+				run: [ 'visualEditor.desktop.standalone.apex.demo' ],
 				env: {
 					debug: true
 				},
@@ -207,15 +207,46 @@ module.exports = function ( grunt ) {
 				indent: '\t\t',
 				demoPages: demoPages
 			},
-			desktopDemoDist: {
+			desktopDemoApexDist: {
 				targetFile: 'demos/ve/desktop-dist.html',
 				template: 'demos/ve/demo.html.template',
 				modules: modules,
 				load: [
-					'visualEditor.desktop.standalone.dist',
+					'visualEditor.desktop.standalone.apex.dist',
 					'visualEditor.standalone.read'
 				],
-				run: [ 'visualEditor.desktop.standalone.demo' ],
+				run: [ 'visualEditor.desktop.standalone.apex.demo' ],
+				pathPrefix: '../../',
+				i18n: [ 'dist/i18n/', 'lib/oojs-ui/i18n/' ],
+				indent: '\t\t',
+				demoPages: demoPages
+			},
+			desktopDemoWikimediaUI: {
+				targetFile: 'demos/ve/desktop-wikimediaui.html',
+				template: 'demos/ve/demo.html.template',
+				modules: modules,
+				load: [
+					'visualEditor.desktop.standalone.wikimediaui',
+					'visualEditor.standalone.read'
+				],
+				run: [ 'visualEditor.desktop.standalone.wikimediaui.demo' ],
+				env: {
+					debug: true
+				},
+				pathPrefix: '../../',
+				i18n: [ 'i18n/', 'lib/oojs-ui/i18n/' ],
+				indent: '\t\t',
+				demoPages: demoPages
+			},
+			desktopDemoWikimediaUIDist: {
+				targetFile: 'demos/ve/desktop-wikimediaui-dist.html',
+				template: 'demos/ve/demo.html.template',
+				modules: modules,
+				load: [
+					'visualEditor.desktop.standalone.wikimediaui.dist',
+					'visualEditor.standalone.read'
+				],
+				run: [ 'visualEditor.desktop.standalone.wikimediaui.demo' ],
 				pathPrefix: '../../',
 				i18n: [ 'dist/i18n/', 'lib/oojs-ui/i18n/' ],
 				indent: '\t\t',
@@ -309,11 +340,28 @@ module.exports = function ( grunt ) {
 			]
 		},
 		eslint: {
+			options: {
+				reportUnusedDisableDirectives: true,
+				cache: true
+			},
 			main: [
-				'*.{js,html}',
-				'{bin,build,demos,src,tests,rebaser}/**/*.{js,html}',
+				'*.js',
+				'{bin,build,demos,src,tests,rebaser}/**/*.js',
 				'!rebaser/node_modules/**'
-			]
+			],
+			html: {
+				options: {
+					// TODO: reportUnusedDisableDirectives doesn't work with plugin-html
+					// (https://github.com/BenoitZugmeyer/eslint-plugin-html/issues/111)
+					// Once that is fixed, merge main and html
+					reportUnusedDisableDirectives: false
+				},
+				src: [
+					'*.html',
+					'{bin,build,demos,src,tests,rebaser}/**/*.html',
+					'!rebaser/node_modules/**'
+				]
+			}
 		},
 		stylelint: {
 			all: [
@@ -347,11 +395,19 @@ module.exports = function ( grunt ) {
 				browserDisconnectTimeout: 5000,
 				browserDisconnectTolerance: 2,
 				browserNoActivityTimeout: 30000,
+				customLaunchers: {
+					ChromeCustom: {
+						base: 'ChromeHeadless',
+						// Chrome requires --no-sandbox in Docker/CI.
+						flags: ( process.env.CHROMIUM_FLAGS || '' ).split( ' ' )
+					}
+				},
 				autoWatch: false
 			},
 			main: {
-				browsers: [ 'Chrome', 'Firefox' ],
+				browsers: [ 'ChromeCustom' ], // T200347: Temporarily disabled `, 'Firefox'*/ ],`
 				preprocessors: {
+					'rebaser/src/**/*.js': [ 'coverage' ],
 					'src/**/*.js': [ 'coverage' ]
 				},
 				reporters: [ 'mocha', 'coverage' ],
@@ -363,27 +419,13 @@ module.exports = function ( grunt ) {
 						{ type: 'html' },
 						{ type: 'text-summary' }
 					],
-					// https://github.com/karma-runner/karma-coverage/blob/v1.1.1/docs/configuration.md#check
+					// https://github.com/karma-runner/karma-coverage/blob/v1.1.2/docs/configuration.md#check
 					check: {
 						global: {
 							functions: 60,
 							branches: 60,
 							statements: 60,
-							lines: 60,
-							overrides: {
-								'src/dm/*.js': {
-									functions: 80,
-									branches: 80,
-									statements: 80,
-									lines: 80
-								},
-								'src/dm/**/*.js': {
-									functions: 80,
-									branches: 80,
-									statements: 80,
-									lines: 80
-								}
-							}
+							lines: 60
 						},
 						each: {
 							functions: 20,
@@ -391,11 +433,14 @@ module.exports = function ( grunt ) {
 							statements: 20,
 							lines: 20,
 							excludes: [
+								'rebaser/src/dm/ve.dm.DocumentStore.js',
+								'rebaser/src/dm/ve.dm.ProtocolServer.js',
+								'rebaser/src/dm/ve.dm.RebaseDocState.js',
+								'rebaser/src/dm/ve.dm.TransportServer.js',
 								'src/ve.track.js',
 								'src/init/**/*.js',
 								'src/ce/**/*.js',
 								'src/ui/**/*.js',
-								'src/dm/ve.dm.RebaseDocState.js',
 								'src/dm/ve.dm.SurfaceSynchronizer.js',
 								'src/dm/ve.dm.TableSlice.js',
 								'src/dm/annotations/ve.dm.BidiAnnotation.js',
@@ -453,13 +498,11 @@ module.exports = function ( grunt ) {
 	grunt.registerTask( 'ci', [ '_test', 'svgmin', 'git-status' ] );
 	grunt.registerTask( 'watch', [ 'karma:bg:start', 'runwatch' ] );
 
-	/* eslint-disable no-process-env */
 	if ( process.env.JENKINS_HOME ) {
 		grunt.registerTask( 'test', 'ci' );
 	} else {
 		grunt.registerTask( 'test', '_test' );
 	}
-	/* eslint-enable no-process-env */
 
 	grunt.registerTask( 'default', 'test' );
 };

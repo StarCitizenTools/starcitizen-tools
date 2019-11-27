@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface TargetWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -23,6 +23,7 @@
  * @cfg {Object} [importRules] Import rules
  * @cfg {boolean} [multiline] Multi-line surface
  * @cfg {string} [placeholder] Placeholder text to display when the surface is empty
+ * @cfg {boolean} [readOnly] Surface is read-only
  * @cfg {string} [inDialog] The name of the dialog this surface widget is in
  */
 ve.ui.TargetWidget = function VeUiTargetWidget( config ) {
@@ -42,6 +43,7 @@ ve.ui.TargetWidget = function VeUiTargetWidget( config ) {
 	this.excludeCommands = config.excludeCommands;
 	this.multiline = config.multiline !== false;
 	this.placeholder = config.placeholder;
+	this.readOnly = config.readOnly;
 	this.importRules = config.importRules;
 	this.inDialog = config.inDialog;
 	// TODO: Support source widgets
@@ -60,6 +62,10 @@ ve.ui.TargetWidget = function VeUiTargetWidget( config ) {
 	// Initialization
 	this.$element.addClass( 've-ui-targetWidget' )
 		.append( this.$toolbarContainer, this.$surfaceContainer );
+
+	// Events
+	this.$element.on( 'focusin focusout', this.onFocusChange.bind( this ) );
+
 };
 
 /* Inheritance */
@@ -106,6 +112,7 @@ ve.ui.TargetWidget.prototype.setDocument = function ( doc ) {
 		importRules: this.importRules,
 		multiline: this.multiline,
 		placeholder: this.placeholder,
+		readOnly: this.readOnly,
 		inDialog: this.inDialog
 	} );
 
@@ -142,6 +149,26 @@ ve.ui.TargetWidget.prototype.onSurfaceModelHistory = function () {
  */
 ve.ui.TargetWidget.prototype.hasBeenModified = function () {
 	return !!this.getSurface() && this.getSurface().getModel().hasBeenModified();
+};
+
+/**
+ * Set the read-only state of the widget
+ *
+ * @param {boolean} readOnly Make widget read-only
+ */
+ve.ui.TargetWidget.prototype.setReadOnly = function ( readOnly ) {
+	this.readOnly = !!readOnly;
+	this.getSurface().setReadOnly( this.readOnly );
+	this.$element.toggleClass( 've-ui-targetWidget-readOnly', this.readOnly );
+};
+
+/**
+ * Check if the widget is read-only
+ *
+ * @return {boolean}
+ */
+ve.ui.TargetWidget.prototype.isReadOnly = function () {
+	return this.readOnly;
 };
 
 /**
@@ -202,6 +229,17 @@ ve.ui.TargetWidget.prototype.clear = function () {
 		this.toolbar.destroy();
 		this.toolbar = null;
 	}
+};
+
+/**
+ * Handle focusin and focusout events
+ *
+ * @param {jQuery.Event} e Focus event
+ */
+ve.ui.TargetWidget.prototype.onFocusChange = function ( e ) {
+	// Replacement for the :focus pseudo selector one would be able to
+	// use on a regular input widget
+	this.$element.toggleClass( 've-ui-targetWidget-focused', e.type === 'focusin' );
 };
 
 /**

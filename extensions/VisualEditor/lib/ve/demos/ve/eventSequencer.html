@@ -4,7 +4,7 @@
 	/*!
 	 * VisualEditor event sequencer page
 	 *
-	 * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+	 * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
 	 */
 	-->
 	<head>
@@ -31,7 +31,7 @@
 		<div id="bad" contenteditable="true"></div>
 		<script>
 			/* eslint-disable no-console */
-			$( function () {
+			( function () {
 				var i, len, eventName,
 					onEvents = {},
 					afterEvents = {},
@@ -39,8 +39,10 @@
 						'compositionstart', 'compositionend',
 						'keydown', 'keyup', 'keypress'
 					],
-					$badDiv = $( '#bad' ),
-					$goodDiv = $( '#good' );
+					/* eslint-disable no-jquery/no-global-selector */
+					$bad = $( '#bad' ),
+					$good = $( '#good' );
+					/* eslint-enable no-jquery/no-global-selector */
 
 				function showEventCode( e ) {
 					return ( e && e.keyCode ) ? '(keyCode=' + e.keyCode + ')' : '';
@@ -50,7 +52,7 @@
 					return function ( e ) {
 						console.log(
 							message + showEventCode( e ) + ' ' + JSON.stringify(
-								$goodDiv[ 0 ].innerHTML
+								$good[ 0 ].innerHTML
 							)
 						);
 					};
@@ -73,15 +75,14 @@
 					onEvents[ eventName ] = makeListener( 'on ' + eventName );
 					afterEvents[ eventName ] = makeListener(
 						'after ' + eventName );
-					addSetTimeoutListeners( $badDiv[ 0 ], eventName );
+					addSetTimeoutListeners( $bad[ 0 ], eventName );
 				}
 
-				// eslint-disable-next-line no-new
 				new ve.EventSequencer( eventNames )
 					.on( onEvents )
 					.after( afterEvents )
-					.attach( $goodDiv );
-				$goodDiv.focus();
+					.attach( $good );
+				$good.trigger( 'focus' );
 			}() );
 		</script>
 	</body>

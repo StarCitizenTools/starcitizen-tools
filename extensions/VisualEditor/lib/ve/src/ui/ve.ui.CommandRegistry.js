@@ -1,7 +1,7 @@
 /*!
  * VisualEditor CommandRegistry class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -260,8 +260,34 @@ ve.ui.commandRegistry.register(
 );
 ve.ui.commandRegistry.register(
 	new ve.ui.Command(
+		'submit', 'content', 'submit',
+		{ supportedSelections: [ 'linear', 'table' ] }
+	)
+);
+ve.ui.commandRegistry.register(
+	new ve.ui.Command(
 		'comment', 'window', 'open',
 		{ args: [ 'comment' ], supportedSelections: [ 'linear' ] }
+	)
+);
+ve.ui.commandRegistry.register(
+	new ve.ui.Command(
+		'insertHorizontalRule', 'content', 'insert', {
+			args: [
+				[
+					{ type: 'horizontalRule' },
+					{ type: '/horizontalRule' },
+					{ type: 'paragraph' }
+					// omit /p to leave the cursor in the correct place,
+					// fixupInsertion will balance the insertion
+				],
+				// annotate
+				false,
+				// collapseToEnd
+				true
+			],
+			supportedSelections: [ 'linear' ]
+		}
 	)
 );
 ve.ui.commandRegistry.register(

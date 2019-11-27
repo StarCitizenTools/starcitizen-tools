@@ -5,11 +5,6 @@
 			"Mashoi7"
 		]
 	},
-	"apihelp-visualeditoredit-param-captchaword": "Vastavus captchah (tallendettajes captcha-pakičuksenke).",
-	"apihelp-visualeditoredit-param-html": "HTML kudai muutetah wikitekstakse Parsoid-palvelun vuoh.",
-	"apihelp-visualeditoredit-param-minor": "Merkiče flavunke pienekse kohenduksekse.",
-	"apihelp-visualeditoredit-param-page": "Sivu, kudamua toimindot koskietah.",
-	"apihelp-visualeditoredit-param-summary": "Edituiče yhtehveduo.",
 	"tooltip-ca-createsource": "Luaji tämän sivun lähtehkoudu",
 	"tooltip-ca-edit": "Kohendele tädä sivuu wikitekstan vuoh",
 	"tooltip-ca-editsource": "Edituiče tämän sivun lähtehkoudua",
@@ -45,7 +40,6 @@
 	"visualeditor-dialog-media-info-readmore": "Luve ližiä",
 	"visualeditor-dialog-media-info-uploaded": "Ližätty: $1",
 	"visualeditor-dialog-media-noresults": "Ei löydynyh tuloksii",
-	"visualeditor-dialog-media-originaldimensions": "Alguperäzet miärät",
 	"visualeditor-dialog-media-page-advanced": "Ližäazetukset",
 	"visualeditor-dialog-media-page-general": "Perusazetukset",
 	"visualeditor-dialog-media-position-center": "Keskel",
@@ -61,7 +55,6 @@
 	"visualeditor-dialog-media-searchselect": "Valliče",
 	"visualeditor-dialog-media-size-choosecustom": "Azeta mugavutettu kogo",
 	"visualeditor-dialog-media-size-choosefull": "Azeta täyzi kogo",
-	"visualeditor-dialog-media-size-originalsize-error": "Alguperästy failukoguo ei lövvy.",
 	"visualeditor-dialog-media-size-section": "Kuvan kogo",
 	"visualeditor-dialog-media-thumbdimensions": "Kuvazen miärät",
 	"visualeditor-dialog-media-title": "Mediiazetukset",
@@ -192,7 +185,6 @@
 	"visualeditor-savedialog-title-review": "Tarkista sinun muutokset",
 	"visualeditor-savedialog-title-save": "Tallenda muutokset",
 	"visualeditor-saveerror": "Haireh tallendajes tiedoloi palvelimele: $1",
-	"visualeditor-saveerror-titleblacklist": "Haireh tallendajes sivuu: Tämän sivun rubriekku on estoluvettelos",
 	"visualeditor-serializeerror": "Haireh lad'd'attajes tiedoloi palvelimelpäi: $1",
 	"visualeditor-settings-tool": "Sivun azetukset",
 	"visualeditor-special-characters-group-other": "Puaksuh käytetyt",
@@ -200,9 +192,5 @@
 	"visualeditor-toolbar-savedialog-short": "Tallenda",
 	"visualeditor-usernamespacepagelink": "Project:Käyttäjän nimitila",
 	"visualeditor-version-label": "Versii",
-	"visualeditor-viewpage-savewarning": "Tovengo tahtot mennä järilleh kačondutilah tallendamattah ezmäi?",
-	"visualeditor-viewpage-savewarning-discard": "Hylgiä kohendukset",
-	"visualeditor-viewpage-savewarning-keep": "Jatka edituičendua",
-	"visualeditor-viewpage-savewarning-title": "Oletgo varmu?",
 	"visualeditor-wikitext-warning-title": "Wikikoudua lövvetty"
 }

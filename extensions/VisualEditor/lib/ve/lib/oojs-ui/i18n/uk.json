@@ -17,7 +17,8 @@
 			"Ата",
 			"Piramidion",
 			"A1",
-			"Dars"
+			"Dars",
+			"Esk78"
 		]
 	},
 	"ooui-outline-control-move-down": "Перемістити елемент униз",
@@ -33,8 +34,10 @@
 	"ooui-dialog-process-dismiss": "Приховати",
 	"ooui-dialog-process-retry": "Спробуйте ще раз",
 	"ooui-dialog-process-continue": "Продовжити",
+	"ooui-combobox-button-label": "Випадне вікно для комбінованого списку",
 	"ooui-selectfile-button-select": "Оберіть файл",
 	"ooui-selectfile-not-supported": "Вибір файлу не підтримується",
 	"ooui-selectfile-placeholder": "Жодного файлу не вибрано",
-	"ooui-selectfile-dragdrop-placeholder": "Помістіть файл сюди"
+	"ooui-selectfile-dragdrop-placeholder": "Помістіть файл сюди",
+	"ooui-field-help": "Допомога"
 }

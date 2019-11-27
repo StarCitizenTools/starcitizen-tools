@@ -8,7 +8,7 @@
 		<link rel=stylesheet href="../lib/jsdifflib/diffview.css">
 
 		<!-- qunit -->
-		<link rel=stylesheet href="../node_modules/qunitjs/qunit/qunit.css">
+		<link rel=stylesheet href="../node_modules/qunit/qunit/qunit.css">
 
 	</head>
 	<body>
@@ -20,7 +20,7 @@
 		<script src="../lib/jsdifflib/difflib.js"></script>
 
 		<!-- qunit -->
-		<script src="../node_modules/qunitjs/qunit/qunit.js"></script>
+		<script src="../node_modules/qunit/qunit/qunit.js"></script>
 
 		<!-- jquery -->
 		<script src="../lib/jquery/jquery.js"></script>
@@ -73,9 +73,6 @@
 		<!-- papaparse -->
 		<script src="../lib/papaparse/papaparse.js"></script>
 
-		<!-- visualEditor.supportCheck -->
-		<script src="../src/init/ve.init.SupportCheck.js"></script>
-
 		<!-- unicodejs -->
 		<script src="../lib/unicodejs/unicodejs.js"></script>
 
@@ -85,16 +82,24 @@
 		<!-- spark-md5 -->
 		<script src="../lib/spark-md5/spark-md5.js"></script>
 
-		<!-- visualEditor.base.build -->
+		<!-- visualEditor.core.utils -->
 		<script src="../src/ve.js"></script>
 		<script src="../src/ve.utils.js"></script>
 		<script src="../src/ve.TriggerListener.js"></script>
 		<script src="../src/ve.track.js"></script>
+
+		<!-- visualEditor.supportCheck -->
+		<script src="../src/init/ve.init.SupportCheck.js"></script>
+
+		<!-- visualEditor.core.init -->
 		<script src="../src/init/ve.init.js"></script>
 		<script src="../src/init/ve.init.Platform.js"></script>
 		<script src="../src/init/ve.init.Target.js"></script>
 
-		<!-- visualEditor.core.build -->
+		<!-- visualEditor.core.utils.client -->
+		<script src="../src/ve.utils.client.js"></script>
+
+		<!-- visualEditor.core.root -->
 		<script src="../src/ve.Range.js"></script>
 		<script src="../src/ve.SelectionState.js"></script>
 		<script src="../src/ve.Node.js"></script>
@@ -104,6 +109,8 @@
 		<script src="../src/ve.Document.js"></script>
 		<script src="../src/ve.EventSequencer.js"></script>
 		<script src="../src/ve.Scheduler.js"></script>
+
+		<!-- visualEditor.core.model -->
 		<script src="../src/dm/ve.dm.js"></script>
 		<script src="../src/dm/ve.dm.Model.js"></script>
 		<script src="../src/dm/ve.dm.ModelFactory.js"></script>
@@ -117,8 +124,6 @@
 		<script src="../src/dm/ve.dm.ResizableNode.js"></script>
 		<script src="../src/dm/ve.dm.TableCellableNode.js"></script>
 		<script src="../src/dm/ve.dm.Scalable.js"></script>
-		<script src="../src/dm/ve.dm.APIResultsProvider.js"></script>
-		<script src="../src/dm/ve.dm.APIResultsQueue.js"></script>
 		<script src="../src/dm/ve.dm.Node.js"></script>
 		<script src="../src/dm/ve.dm.BranchNode.js"></script>
 		<script src="../src/dm/ve.dm.ContentBranchNode.js"></script>
@@ -145,6 +150,7 @@
 		<script src="../src/dm/ve.dm.LinearData.js"></script>
 		<script src="../src/dm/ve.dm.HashValueStore.js"></script>
 		<script src="../src/dm/ve.dm.Converter.js"></script>
+		<script src="../src/dm/ve.dm.SourceConverter.js"></script>
 		<script src="../src/dm/selections/ve.dm.LinearSelection.js"></script>
 		<script src="../src/dm/selections/ve.dm.NullSelection.js"></script>
 		<script src="../src/dm/selections/ve.dm.TableSelection.js"></script>
@@ -152,6 +158,9 @@
 		<script src="../src/dm/lineardata/ve.dm.ElementLinearData.js"></script>
 		<script src="../src/dm/nodes/ve.dm.GeneratedContentNode.js"></script>
 		<script src="../src/dm/nodes/ve.dm.AlienNode.js"></script>
+		<script src="../src/dm/nodes/ve.dm.AlienBlockNode.js"></script>
+		<script src="../src/dm/nodes/ve.dm.AlienInlineNode.js"></script>
+		<script src="../src/dm/nodes/ve.dm.AlienTableCellNode.js"></script>
 		<script src="../src/dm/nodes/ve.dm.ArticleNode.js"></script>
 		<script src="../src/dm/nodes/ve.dm.BlockquoteNode.js"></script>
 		<script src="../src/dm/nodes/ve.dm.BreakNode.js"></script>
@@ -207,6 +216,10 @@
 		<script src="../src/dm/metaitems/ve.dm.AlienMetaItem.js"></script>
 		<script src="../src/dm/metaitems/ve.dm.CommentMetaItem.js"></script>
 		<script src="../src/dm/nodes/ve.dm.CommentNode.js"></script>
+		<script src="../src/dm/nodes/ve.dm.FakeCommentNode.js"></script>
+		<script src="../src/dm/nodes/ve.dm.RealCommentNode.js"></script>
+
+		<!-- visualEditor.core.view -->
 		<script src="../src/ce/ve.ce.js"></script>
 		<script src="../src/ce/ve.ce.TextStateChunk.js"></script>
 		<script src="../src/ce/ve.ce.TextState.js"></script>
@@ -240,12 +253,14 @@
 		<script src="../src/ce/keydownhandlers/ve.ce.LinearEscapeKeyDownHandler.js"></script>
 		<script src="../src/ce/keydownhandlers/ve.ce.TableArrowKeyDownHandler.js"></script>
 		<script src="../src/ce/keydownhandlers/ve.ce.TableDeleteKeyDownHandler.js"></script>
-		<script src="../src/ce/keydownhandlers/ve.ce.TableEnterKeyDownHandler.js"></script>
 		<script src="../src/ce/keydownhandlers/ve.ce.LinearTabKeyDownHandler.js"></script>
 		<script src="../src/ce/nodes/ve.ce.GeneratedContentNode.js"></script>
 		<script src="../src/ce/nodes/ve.ce.ContentEditableNode.js"></script>
 		<script src="../src/ce/nodes/ve.ce.ActiveNode.js"></script>
 		<script src="../src/ce/nodes/ve.ce.AlienNode.js"></script>
+		<script src="../src/ce/nodes/ve.ce.AlienBlockNode.js"></script>
+		<script src="../src/ce/nodes/ve.ce.AlienInlineNode.js"></script>
+		<script src="../src/ce/nodes/ve.ce.AlienTableCellNode.js"></script>
 		<script src="../src/ce/nodes/ve.ce.ArticleNode.js"></script>
 		<script src="../src/ce/nodes/ve.ce.BlockquoteNode.js"></script>
 		<script src="../src/ce/nodes/ve.ce.BreakNode.js"></script>
@@ -274,6 +289,7 @@
 		<script src="../src/ce/nodes/ve.ce.BlockImageNode.js"></script>
 		<script src="../src/ce/nodes/ve.ce.BlockImageCaptionNode.js"></script>
 		<script src="../src/ce/nodes/ve.ce.InlineImageNode.js"></script>
+		<script src="../src/ce/annotations/ve.ce.NailedAnnotation.js"></script>
 		<script src="../src/ce/annotations/ve.ce.LanguageAnnotation.js"></script>
 		<script src="../src/ce/annotations/ve.ce.LinkAnnotation.js"></script>
 		<script src="../src/ce/annotations/ve.ce.TextStyleAnnotation.js"></script>
@@ -299,6 +315,8 @@
 		<script src="../src/ce/annotations/ve.ce.UnderlineAnnotation.js"></script>
 		<script src="../src/ce/annotations/ve.ce.UserInputAnnotation.js"></script>
 		<script src="../src/ce/annotations/ve.ce.VariableAnnotation.js"></script>
+
+		<!-- visualEditor.core.ui -->
 		<script src="../src/ui/ve.ui.js"></script>
 		<script src="../src/ui/ve.ui.Overlay.js"></script>
 		<script src="../src/ui/ve.ui.Surface.js"></script>
@@ -338,6 +356,7 @@
 		<script src="../src/ui/ve.ui.DataTransferHandlerFactory.js"></script>
 		<script src="../src/ui/ve.ui.DataTransferItem.js"></script>
 		<script src="../src/ui/ve.ui.WindowManager.js"></script>
+		<script src="../src/ui/ve.ui.FragmentWindow.js"></script>
 		<script src="../src/ui/ve.ui.NodeWindow.js"></script>
 		<script src="../src/ui/ve.ui.TabIndexScope.js"></script>
 		<script src="../src/ui/windowmanagers/ve.ui.SurfaceWindowManager.js"></script>
@@ -389,6 +408,8 @@
 		<script src="../src/ui/tools/ve.ui.WindowTool.js"></script>
 		<script src="../src/ui/tools/ve.ui.FragmentWindowTool.js"></script>
 		<script src="../src/ui/tools/ve.ui.FragmentInspectorTool.js"></script>
+		<script src="../src/ui/tools/ve.ui.LinkInspectorTool.js"></script>
+		<script src="../src/ui/tools/ve.ui.CommentInspectorTool.js"></script>
 		<script src="../src/ui/tools/ve.ui.ToolbarDialogTool.js"></script>
 		<script src="../src/ui/tools/ve.ui.FormatTool.js"></script>
 		<script src="../src/ui/tools/ve.ui.HistoryTool.js"></script>
@@ -420,6 +441,12 @@
 		<!-- visualEditor.diffing.standalone -->
 		<script src="../src/ui/dialogs/ve.ui.DiffDialog.js"></script>
 
+		<!-- dompurify -->
+		<script src="../lib/dompurify/purify.js"></script>
+
+		<!-- visualEditor.sanitize -->
+		<script src="../src/ve.sanitize.js"></script>
+
 		<!-- visualEditor.standalone.build -->
 		<script src="../src/init/sa/ve.init.sa.js"></script>
 		<script src="../src/init/sa/ve.init.sa.Platform.js"></script>
@@ -432,14 +459,25 @@
 		<!-- visualEditor.desktop.standalone -->
 		<script src="../src/init/sa/ve.init.sa.DesktopTarget.js"></script>
 
-		<!-- dompurify -->
-		<script src="../lib/dompurify/purify.js"></script>
-
 		<!-- socket.io -->
 		<script src="../lib/socket.io-client/socket.io.min.js"></script>
 
 		<!-- color-picker -->
 		<script src="../lib/color-picker/color-picker.js"></script>
+
+		<!-- visualEditor.commentAnnotation -->
+		<script src="../src/dm/annotations/ve.dm.CommentAnnotation.js"></script>
+		<script src="../src/ce/annotations/ve.ce.CommentAnnotation.js"></script>
+		<script src="../src/ui/contextitems/ve.ui.CommentAnnotationContextItem.js"></script>
+		<script src="../src/ui/tools/ve.ui.CommentAnnotationInspectorTool.js"></script>
+		<script src="../src/ui/inspectors/ve.ui.CommentAnnotationInspector.js"></script>
+
+		<!-- visualEditor.checkList -->
+		<script src="../src/dm/nodes/ve.dm.CheckListNode.js"></script>
+		<script src="../src/dm/nodes/ve.dm.CheckListItemNode.js"></script>
+		<script src="../src/ce/nodes/ve.ce.CheckListNode.js"></script>
+		<script src="../src/ce/nodes/ve.ce.CheckListItemNode.js"></script>
+		<script src="../src/ui/tools/ve.ui.CheckListTool.js"></script>
 
 		<!-- visualEditor.rebase -->
 		<script src="../src/dm/ve.dm.RebaseClient.js"></script>
@@ -448,9 +486,12 @@
 		<script src="../src/ui/tools/ve.ui.AuthorListPopupTool.js"></script>
 
 		<!-- visualEditor.test -->
-		<script src="../src/ve.utils-es6.js"></script>
-		<script src="../src/dm/ve.dm.RebaseDocState.js"></script>
-		<script src="../src/dm/ve.dm.RebaseServer.js"></script>
+		<script src="../src/ve.freeze.js"></script>
+		<script src="../rebaser/src/dm/ve.dm.RebaseDocState.js"></script>
+		<script src="../rebaser/src/dm/ve.dm.RebaseServer.js"></script>
+		<script src="../rebaser/src/dm/ve.dm.DocumentStore.js"></script>
+		<script src="../rebaser/src/dm/ve.dm.ProtocolServer.js"></script>
+		<script src="../rebaser/src/dm/ve.dm.TransportServer.js"></script>
 		<script src="../tests/ve.qunit.js"></script>
 		<script src="../tests/ve.qunit.local.js"></script>
 		<script src="../tests/ve.test.utils.js"></script>
@@ -469,6 +510,7 @@
 		<script src="../tests/dm/ve.dm.NodeFactory.test.js"></script>
 		<script src="../tests/dm/ve.dm.Node.test.js"></script>
 		<script src="../tests/dm/ve.dm.Converter.test.js"></script>
+		<script src="../tests/dm/ve.dm.SourceConverter.test.js"></script>
 		<script src="../tests/dm/ve.dm.BranchNode.test.js"></script>
 		<script src="../tests/dm/ve.dm.LeafNode.test.js"></script>
 		<script src="../tests/dm/nodes/ve.dm.TextNode.test.js"></script>
@@ -482,9 +524,12 @@
 		<script src="../tests/dm/ve.dm.TestRebaseClient.js"></script>
 		<script src="../tests/dm/ve.dm.TestRebaseServer.js"></script>
 		<script src="../tests/dm/ve.dm.RebaseServer.test.js"></script>
+		<script src="../tests/dm/ve.dm.FakeMongo.js"></script>
+		<script src="../tests/dm/ve.dm.FakeSocket.js"></script>
+		<script src="../tests/dm/ve.dm.DocumentStore.test.js"></script>
+		<script src="../tests/dm/ve.dm.TransportServer.test.js"></script>
 		<script src="../tests/dm/ve.dm.TreeModifier.test.js"></script>
 		<script src="../tests/dm/ve.dm.TransactionProcessor.test.js"></script>
-		<script src="../tests/dm/ve.dm.APIResultsQueue.test.js"></script>
 		<script src="../tests/dm/ve.dm.Surface.test.js"></script>
 		<script src="../tests/dm/ve.dm.SurfaceFragment.test.js"></script>
 		<script src="../tests/dm/ve.dm.SourceSurfaceFragment.test.js"></script>
@@ -502,16 +547,29 @@
 		<script src="../tests/ce/ve.ce.RangeState.test.js"></script>
 		<script src="../tests/ce/ve.ce.TextState.test.js"></script>
 		<script src="../tests/ce/ve.ce.NodeFactory.test.js"></script>
+		<script src="../tests/ce/ve.ce.AnnotationFactory.test.js"></script>
 		<script src="../tests/ce/ve.ce.Node.test.js"></script>
 		<script src="../tests/ce/ve.ce.BranchNode.test.js"></script>
 		<script src="../tests/ce/ve.ce.ContentBranchNode.test.js"></script>
 		<script src="../tests/ce/ve.ce.LeafNode.test.js"></script>
+		<script src="../tests/ce/ve.ce.Selection.test.js"></script>
+		<script src="../tests/ce/keydownhandlers/ve.ce.LinearArrowKeyDownHandler.test.js"></script>
+		<script src="../tests/ce/keydownhandlers/ve.ce.LinearDeleteKeyDownHandler.test.js"></script>
+		<script src="../tests/ce/keydownhandlers/ve.ce.LinearEnterKeyDownHandler.test.js"></script>
+		<script src="../tests/ce/keydownhandlers/ve.ce.LinearEscapeKeyDownHandler.test.js"></script>
+		<script src="../tests/ce/keydownhandlers/ve.ce.TableArrowKeyDownHandler.test.js"></script>
+		<script src="../tests/ce/keydownhandlers/ve.ce.TableDeleteKeyDownHandler.test.js"></script>
+		<script src="../tests/ce/keydownhandlers/ve.ce.TableEnterKeyDownHandler.test.js"></script>
+		<script src="../tests/ce/keydownhandlers/ve.ce.TableF2KeyDownHandler.test.js"></script>
+		<script src="../tests/ce/nodes/ve.ce.ResizableNode.test.js"></script>
 		<script src="../tests/ce/nodes/ve.ce.TextNode.test.js"></script>
 		<script src="../tests/ce/nodes/ve.ce.TableNode.test.js"></script>
 		<script src="../tests/init/ve.init.sa.Platform.test.js"></script>
 		<script src="../tests/ui/ve.ui.DataTransferHandlerFactory.test.js"></script>
 		<script src="../tests/ui/ve.ui.Trigger.test.js"></script>
+		<script src="../tests/ui/ve.ui.Sequence.test.js"></script>
 		<script src="../tests/ui/ve.ui.DiffElement.test.js"></script>
+		<script src="../tests/ui/ve.ui.PreviewElement.test.js"></script>
 		<script src="../tests/ui/actions/ve.ui.AnnotationAction.test.js"></script>
 		<script src="../tests/ui/actions/ve.ui.ContentAction.test.js"></script>
 		<script src="../tests/ui/actions/ve.ui.FormatAction.test.js"></script>
@@ -519,9 +577,11 @@
 		<script src="../tests/ui/actions/ve.ui.LinkAction.test.js"></script>
 		<script src="../tests/ui/actions/ve.ui.ListAction.test.js"></script>
 		<script src="../tests/ui/actions/ve.ui.TableAction.test.js"></script>
+		<script src="../tests/ui/actions/ve.ui.WindowAction.test.js"></script>
 		<script src="../tests/ui/datatransferhandlers/ve.ui.DSVFileTransferHandler.test.js"></script>
 		<script src="../tests/ui/datatransferhandlers/ve.ui.UrlStringTransferHandler.test.js"></script>
 		<script src="../tests/ui/dialogs/ve.ui.FindAndReplaceDialog.test.js"></script>
+		<script src="../tests/ui/inspectors/ve.ui.FragmentInspector.test.js"></script>
 		<script src="../tests/ce/ve.ce.TestRunner.js"></script>
 		<script src="../tests/ce/ve.ce.imetests.test.js"></script>
 		<script src="../tests/ce/imetests/backspace-chromium-ubuntu-none.js"></script>

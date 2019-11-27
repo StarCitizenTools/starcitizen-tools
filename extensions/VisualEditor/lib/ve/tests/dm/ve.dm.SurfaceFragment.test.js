@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel SurfaceFragment tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.SurfaceFragment' );
@@ -102,17 +102,17 @@ QUnit.test( 'getAnnotations', function ( assert ) {
 		tableRange = new ve.Range( 0, 52 ),
 		surface = new ve.dm.Surface( doc );
 
-	tableSelection = new ve.dm.TableSelection( doc, tableRange, 0, 0, 1, 0 );
+	tableSelection = new ve.dm.TableSelection( tableRange, 0, 0, 1, 0 );
 
 	assert.deepEqual( surface.getFragment( tableSelection ).getAnnotations().getHashes(), [ ve.dm.example.boldHash, ve.dm.example.strongHash ], 'Comparable annotations: [B] ∩ [Strong] = [B,Strong] ' );
 
-	tableSelection = new ve.dm.TableSelection( doc, tableRange, 0, 0, 2, 0 );
+	tableSelection = new ve.dm.TableSelection( tableRange, 0, 0, 2, 0 );
 	assert.deepEqual( surface.getFragment( tableSelection ).getAnnotations().getHashes(), [], 'Non-comparable annotations: [B] ∩ [Strong] ∩ [I] = [] ' );
 
-	tableSelection = new ve.dm.TableSelection( doc, tableRange, 0, 1, 1, 1 );
+	tableSelection = new ve.dm.TableSelection( tableRange, 0, 1, 1, 1 );
 	assert.deepEqual( surface.getFragment( tableSelection ).getAnnotations().getHashes(), [ ve.dm.example.boldHash, ve.dm.example.strongHash ], 'Non-comparable in first cell: [B,I] ∩ [Strong] = [B,Strong]' );
 
-	tableSelection = new ve.dm.TableSelection( doc, tableRange, 0, 0, 2, 0 );
+	tableSelection = new ve.dm.TableSelection( tableRange, 0, 0, 2, 0 );
 	assert.deepEqual( surface.getFragment( tableSelection ).getAnnotations( true ).getHashes(), [ ve.dm.example.boldHash, ve.dm.example.strongHash, ve.dm.example.italicHash ], 'Get all annotations' );
 } );
 
@@ -130,7 +130,7 @@ QUnit.test( 'adjustLinearSelection', function ( assert ) {
 		fragment = surface.getLinearFragment( new ve.Range( 20, 21 ) ),
 		adjustedFragment = fragment.adjustLinearSelection( -19, 35 );
 
-	assert.ok( fragment !== adjustedFragment, 'adjustLinearSelection produces a new fragment' );
+	assert.notStrictEqual( fragment, adjustedFragment, 'adjustLinearSelection produces a new fragment' );
 	assert.equalRange( fragment.getSelection().getRange(), new ve.Range( 20, 21 ), 'old fragment is not changed' );
 	assert.equalRange( adjustedFragment.getSelection().getRange(), new ve.Range( 1, 56 ), 'new range is used' );
 
@@ -156,12 +156,12 @@ QUnit.test( 'collapseToStart/End', function ( assert ) {
 		fragment = surface.getLinearFragment( new ve.Range( 20, 21 ) ),
 		collapsedFragment = fragment.collapseToStart();
 
-	assert.ok( fragment !== collapsedFragment, 'collapseToStart produces a new fragment' );
+	assert.notStrictEqual( fragment, collapsedFragment, 'collapseToStart produces a new fragment' );
 	assert.equalRange( fragment.getSelection().getRange(), new ve.Range( 20, 21 ), 'old fragment is not changed' );
 	assert.equalRange( collapsedFragment.getSelection().getRange(), new ve.Range( 20 ), 'new range is used' );
 
 	collapsedFragment = fragment.collapseToEnd();
-	assert.ok( fragment !== collapsedFragment, 'collapseToEnd produces a new fragment' );
+	assert.notStrictEqual( fragment, collapsedFragment, 'collapseToEnd produces a new fragment' );
 	assert.equalRange( fragment.getSelection().getRange(), new ve.Range( 20, 21 ), 'old fragment is not changed' );
 	assert.equalRange( collapsedFragment.getSelection().getRange(), new ve.Range( 21 ), 'range is at end when collapseToEnd is set' );
 } );
@@ -232,32 +232,31 @@ QUnit.test( 'expandLinearSelection (annotation)', function ( assert ) {
 
 QUnit.test( 'expandLinearSelection (closest)', function ( assert ) {
 	var i, fragment, surface,
-		doc = ve.dm.example.createExampleDocument(),
 		cases = [
 			{
 				msg: 've.dm.BranchNode selects surrounding paragraph',
 				range: new ve.Range( 1 ),
 				type: ve.dm.BranchNode,
-				expected: new ve.dm.LinearSelection( doc, new ve.Range( 0, 5 ) )
+				expected: new ve.dm.LinearSelection( new ve.Range( 0, 5 ) )
 			},
 			{
 				msg: 've.dm.BranchNode selects surrounding paragraph in empty paragraph',
 				doc: 'alienWithEmptyData',
 				range: new ve.Range( 1 ),
 				type: ve.dm.BranchNode,
-				expected: new ve.dm.LinearSelection( doc, new ve.Range( 0, 2 ) )
+				expected: new ve.dm.LinearSelection( new ve.Range( 0, 2 ) )
 			},
 			{
 				msg: 've.dm.BranchNode selects surrounding paragraph when entire paragrpah selected',
 				range: new ve.Range( 1, 4 ),
 				type: ve.dm.BranchNode,
-				expected: new ve.dm.LinearSelection( doc, new ve.Range( 0, 5 ) )
+				expected: new ve.dm.LinearSelection( new ve.Range( 0, 5 ) )
 			},
 			{
 				msg: 'invalid type results in null fragment',
 				range: new ve.Range( 20, 21 ),
 				type: function () {},
-				expected: new ve.dm.NullSelection( doc )
+				expected: new ve.dm.NullSelection()
 			}
 		];
 

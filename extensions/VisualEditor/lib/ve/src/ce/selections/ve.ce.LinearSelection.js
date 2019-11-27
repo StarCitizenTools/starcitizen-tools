@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Linear Selection class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -18,7 +18,7 @@ ve.ce.LinearSelection = function VeCeLinearSelection() {
 	// Properties
 	// The focused node in the view when this selection was created, if one exists
 	this.focusedNode = this.getSurface().getFocusedNode( this.getModel().getRange() );
-	this.direction = null;
+	this.directionality = null;
 };
 
 /* Inheritance */
@@ -145,19 +145,21 @@ ve.ce.LinearSelection.prototype.getSelectionBoundingRect = function () {
  * @return {Object|null} ClientRect-like object
  */
 ve.ce.LinearSelection.prototype.getNodeClientRectFromRange = function ( range ) {
-	var rect, side, x, adjacentNode, unicornRect, annotationNode, fixHeight, middle,
-		node = range.endContainer,
+	var rect, side, x, adjacentNode, unicornRect, annotationNode, fixHeight, middle, node,
+		containerNode = range.endContainer,
 		offset = range.endOffset;
 
-	if ( node.nodeType === Node.TEXT_NODE && ( offset === 0 || offset === node.length ) ) {
-		node = offset ? node.previousSibling : node.nextSibling;
-	} else if ( node.nodeType === Node.ELEMENT_NODE && ( offset === 0 || offset === node.childNodes.length ) ) {
-		node = offset ? node.lastChild : node.firstChild;
+	if ( containerNode.nodeType === Node.TEXT_NODE && ( offset === 0 || offset === containerNode.length ) ) {
+		node = offset ? containerNode.previousSibling : containerNode.nextSibling;
+	} else if ( containerNode.nodeType === Node.ELEMENT_NODE ) {
+		node = offset === containerNode.childNodes.length ? containerNode.lastChild : containerNode.childNodes[ offset ];
 		// Nail heights are 0, so use the annotation's height
-		if ( node.classList.contains( 've-ce-nail' ) ) {
+		if ( node && node.nodeType === Node.ELEMENT_NODE && node.classList.contains( 've-ce-nail' ) ) {
 			annotationNode = offset ? node.previousSibling : node.nextSibling;
 			fixHeight = annotationNode.getClientRects()[ 0 ].height;
 		}
+	} else {
+		node = containerNode;
 	}
 
 	while ( node && node.nodeType !== Node.ELEMENT_NODE ) {
@@ -179,7 +181,7 @@ ve.ce.LinearSelection.prototype.getNodeClientRectFromRange = function ( range ) 
 		return null;
 	}
 
-	side = this.getModel().getDocument().getDir() === 'rtl' ? 'right' : 'left';
+	side = $( node ).css( 'direction' ) === 'rtl' ? 'right' : 'left';
 	adjacentNode = range.endContainer.childNodes[ range.endOffset ];
 	if ( range.collapsed && adjacentNode && adjacentNode.classList && adjacentNode.classList.contains( 've-ce-unicorn' ) ) {
 		// We're next to a unicorn; use its left/right position
@@ -232,11 +234,11 @@ ve.ce.LinearSelection.prototype.isNativeCursor = function () {
 /**
  * @inheritdoc
  */
-ve.ce.LinearSelection.prototype.getDirection = function () {
-	if ( !this.direction ) {
-		this.direction = this.getSurface().getDocument().getDirectionFromRange( this.getModel().getRange() );
+ve.ce.LinearSelection.prototype.getDirectionality = function ( doc ) {
+	if ( !this.directionality ) {
+		this.directionality = doc.getDirectionalityFromRange( this.getModel().getRange() );
 	}
-	return this.direction;
+	return this.directionality;
 };
 
 /* Registration */

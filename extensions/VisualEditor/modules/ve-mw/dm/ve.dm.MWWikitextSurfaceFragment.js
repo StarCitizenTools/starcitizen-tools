@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWWikitextSurfaceFragment class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -172,13 +172,15 @@ ve.dm.MWWikitextSurfaceFragment.prototype.convertFromSource = function ( source 
 	}
 
 	// TODO: Show progress bar without breaking WindowAction
-	// ve.init.target.getSurface().createProgress(
-	// 	parsePromise, ve.msg( 'visualeditor-generating-wikitext-progress' )
-	// ).done( function ( progressBar, cancelPromise ) {
-	// 	cancelPromise.fail( function () {
-	// 		parsePromise.abort();
-	// 	} );
-	// } );
+	/*
+	ve.init.target.getSurface().createProgress(
+		parsePromise, ve.msg( 'visualeditor-generating-wikitext-progress' )
+	).done( function ( progressBar, cancelPromise ) {
+		cancelPromise.fail( function () {
+			parsePromise.abort();
+		} );
+	} );
+	*/
 
 	return parsePromise;
 };

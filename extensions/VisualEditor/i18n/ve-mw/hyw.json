@@ -1,10 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"ArmenBakkalian"
+			"ArmenBakkalian",
+			"Azniv Stepanian",
+			"Rajemian",
+			"Դավիթ Սարոյան"
 		]
 	},
-	"tooltip-ca-ve-edit": "Խմբագրէ՛ այս էջը",
-	"visualeditor-ca-editsource": "խմբագրել աղբիւրը",
-	"visualeditor-ca-editsource-section": "խմբագրել աղբիւրը"
+	"tooltip-ca-ve-edit": "Խմբագրել այս էջը",
+	"visualeditor-ca-createlocaldescriptionsource": "Աւելցնել տեղական նկարագրութեան աղբիւր",
+	"visualeditor-ca-createsource": "Ստեղծել աղբիւրը",
+	"visualeditor-ca-editsource": "Խմբագրել աղբիւրը",
+	"visualeditor-ca-editsource-section": "Խմբագրել աղբիւրը",
+	"visualeditor-descriptionpagelink": "Project:ՏեսողականԽմբագրիչ"
 }

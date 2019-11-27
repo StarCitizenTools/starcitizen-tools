@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Actions ContentAction tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ui.ContentAction' );
@@ -65,7 +65,7 @@ QUnit.test( 'insert/remove/select/selectAll', function ( assert ) {
 			{
 				rangeOrSelection: new ve.Range( 0 ),
 				method: 'select',
-				args: [ new ve.dm.LinearSelection( null, new ve.Range( 1, 4 ) ) ],
+				args: [ new ve.dm.LinearSelection( new ve.Range( 1, 4 ) ) ],
 				expectedRangeOrSelection: new ve.Range( 1, 4 ),
 				msg: 'select'
 			},

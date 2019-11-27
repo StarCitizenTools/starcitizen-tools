@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki-specific ContentEditable Surface tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -10,7 +10,8 @@ QUnit.module( 've.ce.Surface (MW)', ve.test.utils.mwEnvironment );
 /* Tests */
 
 QUnit.test( 'handleLinearDelete', function ( assert ) {
-	var i,
+	var done = assert.async(),
+		promise = Promise.resolve(),
 		blocklength = ve.dm.mwExample.MWBlockImage.data.length,
 		cases = [
 			// This asserts that getRelativeRange (via getRelativeOffset) doesn't try to
@@ -53,12 +54,15 @@ QUnit.test( 'handleLinearDelete', function ( assert ) {
 			}
 		];
 
-	for ( i = 0; i < cases.length; i++ ) {
-		ve.test.utils.runSurfaceHandleSpecialKeyTest(
-			assert, cases[ i ].htmlOrDoc, cases[ i ].rangeOrSelection, cases[ i ].keys,
-			cases[ i ].expectedData, cases[ i ].expectedRangeOrSelection, cases[ i ].msg
-		);
-	}
+	cases.forEach( function ( caseItem ) {
+		promise = promise.then( function () {
+			return ve.test.utils.runSurfaceHandleSpecialKeyTest( assert, caseItem );
+		} );
+	} );
+
+	promise.finally( function () {
+		done();
+	} );
 } );
 
 QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
@@ -72,6 +76,16 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 				expectedRangeOrSelection: new ve.Range( 5 ),
 				expectedHtml: '<p><span typeof="mw:Entity">-</span><span typeof="mw:Entity" id="mw-reference-cite">-</span></p>',
 				msg: 'RESTBase IDs stripped'
+			},
+			{
+				documentHtml: '<p></p>',
+				rangeOrSelection: new ve.Range( 1 ),
+				pasteHtml: '<span typeof="mw:Entity" id="mwAB">-</span><span typeof="mw:Entity" id="mw-reference-cite">-</span>',
+				pasteTargetHtml: '<span>-</span><span>-</span>',
+				fromVe: true,
+				expectedRangeOrSelection: new ve.Range( 5 ),
+				expectedHtml: '<p><span typeof="mw:Entity">-</span><span typeof="mw:Entity" id="mw-reference-cite">-</span></p>',
+				msg: 'RESTBase IDs still stripped if used when important attributes dropped'
 			}
 		];
 

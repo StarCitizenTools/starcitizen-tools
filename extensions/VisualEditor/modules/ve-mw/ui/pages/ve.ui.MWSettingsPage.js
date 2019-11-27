@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWSettingsPage class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -31,7 +31,7 @@ ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 
 	this.settingsFieldset = new OO.ui.FieldsetLayout( {
 		label: ve.msg( 'visualeditor-dialog-meta-settings-label' ),
-		icon: 'settings'
+		icon: 'pageSettings'
 	} );
 
 	// Initialization
@@ -78,7 +78,8 @@ ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 	);
 	this.redirectTargetInput = new mw.widgets.TitleInputWidget( {
 		placeholder: ve.msg( 'visualeditor-dialog-meta-settings-redirect-placeholder' ),
-		$overlay: config.$overlay
+		$overlay: config.$overlay,
+		api: ve.init.target.getContentApi()
 	} );
 	this.redirectTargetField = new OO.ui.FieldLayout(
 		this.redirectTargetInput,
@@ -130,18 +131,18 @@ ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 		this.tableOfContents
 	] );
 
-	$.each( this.metaItemCheckboxes, function () {
-		this.fieldLayout = new OO.ui.FieldLayout(
+	this.metaItemCheckboxes.forEach( function ( metaItemCheckbox ) {
+		metaItemCheckbox.fieldLayout = new OO.ui.FieldLayout(
 			new OO.ui.CheckboxInputWidget(),
 			{
 				$overlay: config.$overlay,
-				classes: this.classes,
+				classes: metaItemCheckbox.classes,
 				align: 'inline',
-				label: this.label,
-				help: this.help || ''
+				label: metaItemCheckbox.label,
+				help: metaItemCheckbox.help || ''
 			}
 		);
-		settingsPage.settingsFieldset.addItems( [ this.fieldLayout ] );
+		settingsPage.settingsFieldset.addItems( [ metaItemCheckbox.fieldLayout ] );
 	} );
 
 	this.$element.append( this.settingsFieldset.$element );
@@ -177,7 +178,7 @@ ve.ui.MWSettingsPage.prototype.setOutlineItem = function () {
 
 	if ( this.outlineItem ) {
 		this.outlineItem
-			.setIcon( 'settings' )
+			.setIcon( 'pageSettings' )
 			.setLabel( ve.msg( 'visualeditor-dialog-meta-settings-section' ) );
 	}
 };
@@ -225,6 +226,36 @@ ve.ui.MWSettingsPage.prototype.onEnableRedirectChange = function ( value ) {
 };
 
 /**
+ * @returns {boolean} Whether redirect link is valid.
+ */
+ve.ui.MWSettingsPage.prototype.checkValidRedirect = function () {
+	var title;
+	if ( this.enableRedirectInput.isSelected() ) {
+		title = this.redirectTargetInput.getValue();
+
+		if ( !mw.Title.newFromText( title ) ) {
+
+			/*
+			 * TODO more precise error message. Modify the Title.newFromText method in Title.js
+			 * my idea is to in the parse method instead of a boolean return a string with an error message (not an error code since the error string can have parameters),
+			 * then in Title.newFromText instead of returning null, return the error string. Use that string there in setErrors.
+			 * Problem: some methods might depend on it returning null.
+			 * Solution: either make it a new metohd (Title.newFromTextThrow), or add a an optional parameter to return the error message.
+			 */
+			this.redirectTargetField.setErrors( [ mw.msg( 'visualeditor-title-error' ) ] );
+			return false;
+
+		} else {
+			this.redirectTargetField.setErrors( [] );
+		}
+	} else {
+		this.redirectTargetField.setErrors( [] );
+	}
+
+	return true;
+};
+
+/**
  * Handle redirect target change events.
  */
 ve.ui.MWSettingsPage.prototype.onRedirectTargetChange = function () {
@@ -252,9 +283,12 @@ ve.ui.MWSettingsPage.prototype.getMetaItem = function ( name ) {
  * Setup settings page.
  *
  * @param {ve.dm.MetaList} metaList Meta list
- * @param {Object} [data] Dialog setup data
+ * @param {Object} [config] Configuration options
+ * @param {Object} [config.data] Dialog setup data
+ * @param {boolean} [config.isReadOnly] Dialog is in read-only mode
+ * @return {jQuery.Promise}
  */
-ve.ui.MWSettingsPage.prototype.setup = function ( metaList ) {
+ve.ui.MWSettingsPage.prototype.setup = function ( metaList, config ) {
 	var tableOfContentsMetaItem, tableOfContentsField, tableOfContentsMode,
 		redirectTargetItem, redirectTarget, redirectStatic,
 		settingsPage = this;
@@ -265,25 +299,36 @@ ve.ui.MWSettingsPage.prototype.setup = function ( metaList ) {
 	tableOfContentsField = this.tableOfContents.getField();
 	tableOfContentsMetaItem = this.getMetaItem( 'mwTOC' );
 	tableOfContentsMode = tableOfContentsMetaItem && tableOfContentsMetaItem.getAttribute( 'property' ) || 'default';
-	tableOfContentsField.selectItemByData( tableOfContentsMode );
+	tableOfContentsField
+		.selectItemByData( tableOfContentsMode )
+		.setDisabled( config.isReadOnly );
 	this.tableOfContentsTouched = false;
 
 	// Redirect items (disabled states set by change event)
 	redirectTargetItem = this.getMetaItem( 'mwRedirect' );
 	redirectTarget = redirectTargetItem && redirectTargetItem.getAttribute( 'title' ) || '';
 	redirectStatic = this.getMetaItem( 'mwStaticRedirect' );
-	this.enableRedirectInput.setSelected( !!redirectTargetItem );
-	this.redirectTargetInput.setValue( redirectTarget );
-	this.redirectTargetInput.setDisabled( !redirectTargetItem );
-	this.enableStaticRedirectInput.setSelected( !!redirectStatic );
-	this.enableStaticRedirectInput.setDisabled( !redirectTargetItem );
+	this.enableRedirectInput
+		.setSelected( !!redirectTargetItem )
+		.setDisabled( config.isReadOnly );
+	this.redirectTargetInput
+		.setValue( redirectTarget )
+		.setDisabled( !redirectTargetItem )
+		.setReadOnly( config.isReadOnly );
+	this.enableStaticRedirectInput
+		.setSelected( !!redirectStatic )
+		.setDisabled( !redirectTargetItem || config.isReadOnly );
 	this.redirectOptionsTouched = false;
 
 	// Simple checkbox items
-	$.each( this.metaItemCheckboxes, function () {
-		var isSelected = !!settingsPage.getMetaItem( this.metaName );
-		this.fieldLayout.getField().setSelected( isSelected );
+	this.metaItemCheckboxes.forEach( function ( metaItemCheckbox ) {
+		var isSelected = !!settingsPage.getMetaItem( metaItemCheckbox.metaName );
+		metaItemCheckbox.fieldLayout.getField()
+			.setSelected( isSelected )
+			.setDisabled( config.isReadOnly );
 	} );
+
+	return $.Deferred().resolve().promise();
 };
 
 /**
@@ -299,7 +344,7 @@ ve.ui.MWSettingsPage.prototype.teardown = function ( data ) {
 
 	// Data initialisation
 	data = data || {};
-	if ( data.action !== 'apply' ) {
+	if ( data.action !== 'done' ) {
 		return;
 	}
 
@@ -367,16 +412,22 @@ ve.ui.MWSettingsPage.prototype.teardown = function ( data ) {
 		}
 	}
 
-	$.each( this.metaItemCheckboxes, function () {
-		var currentItem = settingsPage.getMetaItem( this.metaName ),
-			isSelected = this.fieldLayout.getField().isSelected();
+	this.metaItemCheckboxes.forEach( function ( metaItemCheckbox ) {
+		var currentItem = settingsPage.getMetaItem( metaItemCheckbox.metaName ),
+			isSelected = metaItemCheckbox.fieldLayout.getField().isSelected();
 
 		if ( currentItem && !isSelected ) {
 			currentItem.remove();
 		} else if ( !currentItem && isSelected ) {
-			settingsPage.metaList.insertMeta( { type: this.metaName } );
+			settingsPage.metaList.insertMeta( { type: metaItemCheckbox.metaName } );
 		}
 	} );
 
 	this.metaList = null;
+};
+
+ve.ui.MWSettingsPage.prototype.getFieldsets = function () {
+	return [
+		this.settingsFieldset
+	];
 };

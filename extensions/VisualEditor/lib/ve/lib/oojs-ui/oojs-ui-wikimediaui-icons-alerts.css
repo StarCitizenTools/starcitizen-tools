@@ -1,20 +1,20 @@
 /*!
- * OOUI v0.26.3
+ * OOUI v0.31.1
  * https://www.mediawiki.org/wiki/OOUI
  *
- * Copyright 2011–2018 OOUI Team and other contributors.
+ * Copyright 2011–2019 OOUI Team and other contributors.
  * Released under the MIT license
  * http://oojs.mit-license.org
  *
- * Date: 2018-04-10T22:15:43Z
- */
-/**
- * WikimediaUI Base v0.10.0
- * Wikimedia Foundation user interface base variables
+ * Date: 2019-03-21T15:54:46Z
  */
 .oo-ui-icon-alert {
   background-image: url('themes/wikimediaui/images/icons/alert.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/alert.svg');
+}
+.oo-ui-image-error.oo-ui-icon-alert {
+  background-image: url('themes/wikimediaui/images/icons/alert-error.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/alert-error.svg');
 }
 .oo-ui-image-warning.oo-ui-icon-alert {
   background-image: url('themes/wikimediaui/images/icons/alert-warning.png');
@@ -39,18 +39,6 @@
 .oo-ui-image-progressive.oo-ui-icon-bell {
   background-image: url('themes/wikimediaui/images/icons/bell-progressive.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/bell-progressive.svg');
-}
-.oo-ui-icon-comment {
-  background-image: url('themes/wikimediaui/images/icons/speechBubble-ltr.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/speechBubble-ltr.svg');
-}
-.oo-ui-image-invert.oo-ui-icon-comment {
-  background-image: url('themes/wikimediaui/images/icons/speechBubble-ltr-invert.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/speechBubble-ltr-invert.svg');
-}
-.oo-ui-image-progressive.oo-ui-icon-comment {
-  background-image: url('themes/wikimediaui/images/icons/speechBubble-ltr-progressive.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/speechBubble-ltr-progressive.svg');
 }
 .oo-ui-icon-message {
   background-image: url('themes/wikimediaui/images/icons/message.png');

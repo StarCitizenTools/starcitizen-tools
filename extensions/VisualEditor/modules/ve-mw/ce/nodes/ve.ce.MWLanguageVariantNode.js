@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWLanguageVariantNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -30,7 +30,6 @@ ve.ce.MWLanguageVariantNode = function VeCeMWLanguageVariantNode( model, config 
 
 	// Events
 	this.model.connect( this, { update: 'onUpdate' } );
-	this.model.connect( this, { update: 'updateInvisibleIcon' } );
 
 	// Initialization
 	this.onUpdate();
@@ -45,8 +44,6 @@ OO.mixinClass( ve.ce.MWLanguageVariantNode, ve.ce.FocusableNode );
 /* Static Properties */
 
 ve.ce.MWLanguageVariantNode.static.iconWhenInvisible = 'language';
-
-ve.ce.MWLanguageVariantNode.static.maxPreviewLength = 20;
 
 /* Static Methods */
 
@@ -78,27 +75,6 @@ ve.ce.MWLanguageVariantNode.static.getDescription = function ( model ) {
 	return ve.msg( messageKey, languageString );
 };
 
-/**
- * Create a preview-safe version of some text
- *
- * The text preview is a trimmed down version of the actual rule. This
- * means that we strip whitespace and newlines, and truncate to a
- * fairly short length. The goal is to provide a fair representation of
- * typical short rules, and enough context for long rules that the
- * user can tell whether they want to see the full view by focusing the
- * node / hovering.
- *
- * @param  {string} text
- * @return {string|OO.ui.HtmlSnippet}
- */
-ve.ce.MWLanguageVariantNode.static.getTextPreview = function ( text ) {
-	text = text.trim().replace( /\s+/, ' ' );
-	if ( text.length > this.maxPreviewLength ) {
-		text = new OO.ui.HtmlSnippet( ve.escapeHtml( ve.graphemeSafeSubstring( text, 0, this.maxPreviewLength ) ) + '&hellip;' );
-	}
-	return text;
-};
-
 /* Methods */
 
 /**
@@ -107,9 +83,28 @@ ve.ce.MWLanguageVariantNode.static.getTextPreview = function ( text ) {
  * @method
  */
 ve.ce.MWLanguageVariantNode.prototype.onUpdate = function () {
-	var variantInfo = this.model.getVariantInfo(),
-		$element,
-		html;
+	if ( !this.model.isHidden() ) {
+		this.model.constructor.static.insertPreviewElements(
+			this.$holder[ 0 ], this.model.getVariantInfo()
+		);
+	}
+	this.updateInvisibleIconLabel();
+};
+
+/**
+ * @inheritdoc
+ *
+ * The text preview is a trimmed down version of the actual rule. This
+ * means that we strip whitespace and newlines, and truncate to a
+ * fairly short length. The goal is to provide a fair representation of
+ * typical short rules, and enough context for long rules that the
+ * user can tell whether they want to see the full view by focusing the
+ * node / hovering.
+ */
+ve.ce.MWLanguageVariantNode.prototype.getInvisibleIconLabel = function () {
+	var $element,
+		variantInfo = this.model.getVariantInfo();
+
 	if ( this.model.isHidden() ) {
 		$element = $( '<div>' );
 		this.model.constructor.static.insertPreviewElements(
@@ -117,19 +112,9 @@ ve.ce.MWLanguageVariantNode.prototype.onUpdate = function () {
 			// current variant output.
 			$element[ 0 ], variantInfo
 		);
-		// Create plain-text summary of this rule (ellipsize if necessary)
-		html = this.constructor.static.getTextPreview( $element.text() );
-		if ( this.icon ) {
-			this.icon.setLabel( html );
-		}
-	} else {
-		this.model.constructor.static.insertPreviewElements(
-			this.$holder[ 0 ], variantInfo
-		);
-		if ( this.icon ) {
-			this.icon.setLabel( null );
-		}
+		return $element.text().trim().replace( /\s+/, ' ' );
 	}
+	return null;
 };
 
 /**
@@ -150,105 +135,9 @@ ve.ce.MWLanguageVariantNode.prototype.appendHolder = function () {
 /**
  * @inheritdoc
  */
-ve.ce.MWLanguageVariantNode.prototype.createInvisibleIcon = function () {
-	// Unlike ancestor method, this adds a label to the (unframed) icon.
-	var icon = new OO.ui.ButtonWidget( {
-		classes: [ 've-ce-focusableNode-invisibleIcon' ],
-		framed: false,
-		icon: this.constructor.static.iconWhenInvisible
-	} );
-	this.icon = icon;
-	this.onUpdate(); // update label of icon
-	return icon.$element;
-};
-
-/**
- * @inheritdoc
- */
 ve.ce.MWLanguageVariantNode.prototype.hasRendering = function () {
 	// Efficiency improvement: the superclass implementation does a bunch
 	// of DOM measurement to determine if the node is empty.
 	// Instead consult the model for a definitive answer.
 	return !this.model.isHidden();
 };
-
-/**
- * ContentEditable MediaWiki language variant block node.
- *
- * @class
- * @extends ve.ce.MWLanguageVariantNode
- *
- * @constructor
- * @param {ve.dm.MWLanguageVariantBlockNode} model Model to observe
- * @param {Object} [config] Configuration options
- */
-ve.ce.MWLanguageVariantBlockNode = function VeCeMWLanguageVariantBlockNode() {
-	// Parent constructor
-	ve.ce.MWLanguageVariantBlockNode.super.apply( this, arguments );
-};
-
-/* Inheritance */
-
-OO.inheritClass( ve.ce.MWLanguageVariantBlockNode, ve.ce.MWLanguageVariantNode );
-
-ve.ce.MWLanguageVariantBlockNode.static.name = 'mwLanguageVariantBlock';
-
-ve.ce.MWLanguageVariantBlockNode.static.tagName = 'div';
-
-/**
- * ContentEditable MediaWiki language variant inline node.
- *
- * @class
- * @extends ve.ce.LeafNode
- * @mixins ve.ce.MWLanguageVariantNode
- *
- * @constructor
- * @param {ve.dm.MWLanguageVariantInlineNode} model Model to observe
- * @param {Object} [config] Configuration options
- */
-ve.ce.MWLanguageVariantInlineNode = function VeCeMWLanguageVariantInlineNode() {
-	// Parent constructor
-	ve.ce.MWLanguageVariantInlineNode.super.apply( this, arguments );
-};
-
-/* Inheritance */
-
-OO.inheritClass( ve.ce.MWLanguageVariantInlineNode, ve.ce.MWLanguageVariantNode );
-
-ve.ce.MWLanguageVariantInlineNode.static.name = 'mwLanguageVariantInline';
-
-ve.ce.MWLanguageVariantInlineNode.static.tagName = 'span';
-
-/**
- * ContentEditable MediaWiki language variant hidden node.
- *
- * @class
- * @extends ve.ce.MWLanguageVariantNode
- *
- * @constructor
- * @param {ve.dm.MWLanguageVariantHiddenNode} model Model to observe
- * @param {Object} [config] Configuration options
- */
-ve.ce.MWLanguageVariantHiddenNode = function VeCeMWLanguageVariantHiddenNode() {
-	// Parent constructor
-	ve.ce.MWLanguageVariantHiddenNode.super.apply( this, arguments );
-};
-
-/* Inheritance */
-
-OO.inheritClass( ve.ce.MWLanguageVariantHiddenNode, ve.ce.MWLanguageVariantNode );
-
-ve.ce.MWLanguageVariantHiddenNode.static.name = 'mwLanguageVariantHidden';
-
-ve.ce.MWLanguageVariantHiddenNode.static.tagName = 'span';
-
-ve.ce.MWLanguageVariantHiddenNode.prototype.appendHolder = function () {
-	// No holder for a hidden node.
-	return null;
-};
-
-/* Registration */
-
-ve.ce.nodeFactory.register( ve.ce.MWLanguageVariantBlockNode );
-ve.ce.nodeFactory.register( ve.ce.MWLanguageVariantInlineNode );
-ve.ce.nodeFactory.register( ve.ce.MWLanguageVariantHiddenNode );

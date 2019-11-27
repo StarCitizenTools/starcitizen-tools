@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable TableNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -156,16 +156,27 @@ ve.ce.TableNode.prototype.onTableMouseDown = function ( e ) {
 		return;
 	}
 	selection = this.surface.getModel().getSelection();
-	startCell = e.shiftKey && this.active ? { col: selection.fromCol, row: selection.fromRow } : endCell;
+
+	if ( e.shiftKey && this.active ) {
+		// Extend selection from the anchor cell
+		if ( selection instanceof ve.dm.TableSelection ) {
+			startCell = { col: selection.fromCol, row: selection.fromRow };
+		} else {
+			startCell = this.getModel().getMatrix().lookupCell( this.getActiveCellNode().getModel() );
+		}
+	} else {
+		// Select single cell
+		startCell = endCell;
+	}
+
 	newSelection = new ve.dm.TableSelection(
-		this.getModel().getDocument(),
 		this.getModel().getOuterRange(),
 		startCell.col,
 		startCell.row,
 		endCell.col,
-		endCell.row,
-		true
+		endCell.row
 	);
+	newSelection = newSelection.expand( this.getModel().getDocument() );
 	if ( this.editingFragment ) {
 		if ( newSelection.equals( this.editingFragment.getSelection() ) ) {
 			// Clicking on the editing cell, don't prevent default
@@ -262,11 +273,10 @@ ve.ce.TableNode.prototype.onTableMouseMove = function ( e ) {
 	}
 
 	selection = new ve.dm.TableSelection(
-		this.getModel().getDocument(),
 		this.getModel().getOuterRange(),
-		this.startCell.col, this.startCell.row, cell.col, cell.row,
-		true
+		this.startCell.col, this.startCell.row, cell.col, cell.row
 	);
+	selection = selection.expand( this.getModel().getDocument() );
 	this.surface.getModel().setSelection( selection );
 };
 
@@ -292,10 +302,11 @@ ve.ce.TableNode.prototype.onTableMouseUp = function () {
 ve.ce.TableNode.prototype.setEditing = function ( isEditing, noSelect ) {
 	var cell, offset, cellRange, profile, activeCellNode,
 		surfaceModel = this.surface.getModel(),
+		documentModel = surfaceModel.getDocument(),
 		selection = surfaceModel.getSelection();
 
 	if ( isEditing ) {
-		if ( !selection.isSingleCell() ) {
+		if ( !selection.isSingleCell( documentModel ) ) {
 			selection = selection.collapseToFrom();
 			this.surface.getModel().setSelection( selection );
 		}
@@ -348,7 +359,9 @@ ve.ce.TableNode.prototype.onSurfaceModelSelect = function ( selection ) {
 		(
 			this.editingFragment !== null &&
 			selection instanceof ve.dm.LinearSelection &&
-			this.editingFragment.getSelection().getRanges()[ 0 ].containsRange( selection.getRange() )
+			this.editingFragment.getSelection().getRanges(
+				this.editingFragment.getDocument()
+			)[ 0 ].containsRange( selection.getRange() )
 		) ||
 		(
 			selection instanceof ve.dm.TableSelection &&
@@ -402,16 +415,24 @@ ve.ce.TableNode.prototype.getActiveCellNode = function () {
  * @param {boolean} selectionChanged The update was triggered by a selection change
  */
 ve.ce.TableNode.prototype.updateOverlay = function ( selectionChanged ) {
-	var i, l, anchorNode, anchorOffset, selectionOffset, selection, selectionRect, tableOffset, surfaceOffset, cells,
+	var i, l, anchorNode, anchorOffset, selectionOffset, selection, documentModel,
+		selectionRect, tableOffset, surfaceOffset, cells,
 		editable = true;
 
-	if ( !this.active || !this.root ) {
+	if (
+		!this.active || !this.root ||
+		// Overlay isn't attached, e.g. in tests
+		!this.surface.surface.$blockers[ 0 ].parentNode
+	) {
 		return;
 	}
 
 	selection = this.editingFragment ?
 		this.editingFragment.getSelection() :
 		this.surface.getModel().getSelection();
+	documentModel = this.editingFragment ?
+		this.editingFragment.getDocument() :
+		this.surface.getModel().getDocument();
 	// getBoundingClientRect is more accurate but must be used consistently
 	// due to the iOS7 bug where it is relative to the document.
 	tableOffset = this.getFirstSectionNode().$element[ 0 ].getBoundingClientRect();
@@ -427,7 +448,7 @@ ve.ce.TableNode.prototype.updateOverlay = function ( selectionChanged ) {
 		return;
 	}
 
-	cells = selection.getMatrixCells();
+	cells = selection.getMatrixCells( documentModel );
 	anchorNode = this.getCellNodesFromSelection( selection.collapseToFrom() )[ 0 ];
 	anchorOffset = ve.translateRect( anchorNode.$element[ 0 ].getBoundingClientRect(), -tableOffset.left, -tableOffset.top );
 
@@ -472,10 +493,13 @@ ve.ce.TableNode.prototype.updateOverlay = function ( selectionChanged ) {
 		height: selectionOffset.height
 	} );
 
+	this.colContext.$element.toggleClass( 'oo-ui-element-hidden', this.surface.isReadOnly() );
+	this.rowContext.$element.toggleClass( 'oo-ui-element-hidden', this.surface.isReadOnly() );
+
 	// Classes
 	this.$selectionBox
-		.toggleClass( 've-ce-tableNodeOverlay-selection-box-fullRow', selection.isFullRow() )
-		.toggleClass( 've-ce-tableNodeOverlay-selection-box-fullCol', selection.isFullCol() )
+		.toggleClass( 've-ce-tableNodeOverlay-selection-box-fullRow', selection.isFullRow( documentModel ) )
+		.toggleClass( 've-ce-tableNodeOverlay-selection-box-fullCol', selection.isFullCol( documentModel ) )
 		.toggleClass( 've-ce-tableNodeOverlay-selection-box-notEditable', !editable );
 
 	if ( selectionChanged ) {
@@ -504,7 +528,7 @@ ve.ce.TableNode.prototype.getFirstSectionNode = function () {
  */
 ve.ce.TableNode.prototype.getCellNodesFromSelection = function ( selection ) {
 	var i, l, cellModel, cellView,
-		cells = selection.getMatrixCells(),
+		cells = selection.getMatrixCells( this.getModel().getDocument() ),
 		nodes = [];
 
 	for ( i = 0, l = cells.length; i < l; i++ ) {

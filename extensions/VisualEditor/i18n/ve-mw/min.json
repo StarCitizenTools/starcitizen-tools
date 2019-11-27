@@ -2,7 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Iwan Novirion",
-			"Jagwar"
+			"Jagwar",
+			"Muhraz",
+			"Matma Rex"
 		]
 	},
 	"tooltip-ca-createsource": "Buek kode sumber laman ko",
@@ -34,7 +36,6 @@
 	"visualeditor-dialog-media-size-choosecustom": "Atua ukuran",
 	"visualeditor-dialog-media-size-choosedefault": "Atua ka ukuran baku",
 	"visualeditor-dialog-media-size-choosefull": "Atua ka ukuran panuah",
-	"visualeditor-dialog-media-size-originalsize-error": "Ukuran gambar",
 	"visualeditor-dialog-media-size-section": "Ukuran gambar",
 	"visualeditor-dialog-media-title": "Pangaturan media",
 	"visualeditor-dialog-media-type-border": "Pinggia",
@@ -97,6 +98,5 @@
 	"visualeditor-serializeerror": "Kasalahan pamuatan data dari server: $1.",
 	"visualeditor-toolbar-savedialog": "Simpan laman",
 	"visualeditor-usernamespacepagelink": "Project:Ruangnamo pangguno",
-	"visualeditor-version-label": "Versi",
-	"visualeditor-viewpage-savewarning": "Apo Sanak yakin nio baliak ka mode baco sabalun manyimpan?"
+	"visualeditor-version-label": "Versi"
 }

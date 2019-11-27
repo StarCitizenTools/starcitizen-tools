@@ -1,10 +1,10 @@
 /*!
  * VisualEditor ContentEditable LanguageAnnotation styles.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
-.ve-ce-linkAnnotation-active {
+.ve-ce-linkAnnotation.ve-ce-annotation-active {
 	box-shadow: 0 0 0 1px #c6e0ff;
 	border-radius: 2px;
 	padding: 2px;
@@ -15,4 +15,12 @@
 .ve-ce-nail:not( .ve-ce-nail-debug ) {
 	width: 0;
 	height: 0;
+}
+
+.ve-ce-nail-debug {
+	vertical-align: middle;
+}
+
+.ve-init-target-ctrl-meta-down .ve-ce-linkAnnotation {
+	cursor: pointer;
 }

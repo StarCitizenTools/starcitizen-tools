@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Logger class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 /* global Set */
 
@@ -112,7 +112,7 @@ ve.Filibuster.prototype.observe = function ( action ) {
 		}
 
 		if ( this.states[ name ] !== newState ) {
-			if ( this.states.hasOwnProperty( name ) ) {
+			if ( Object.prototype.hasOwnProperty.call( this.states, name ) ) {
 				// State change: write observation
 				changes[ name ] = {
 					oldState: oldState,
@@ -298,7 +298,7 @@ ve.Filibuster.prototype.wrapNamespace = function ( ns, nsName, blacklist ) {
 		}
 		isConstructor = (
 			typeof prop === 'function' &&
-			!$.isEmptyObject( prop.prototype )
+			!ve.isEmptyObject( prop.prototype )
 		);
 		if ( isConstructor ) {
 			this.wrapClass( prop, blacklist );
@@ -478,7 +478,7 @@ ve.Filibuster.static.clonePlain = function ( val, seen ) {
 	}
 	if ( Array.isArray( val ) ) {
 		if ( seen.has( val ) ) {
-			return '...';
+			return '…';
 		}
 		seen.add( val );
 		return val.map( function ( x ) {
@@ -504,6 +504,7 @@ ve.Filibuster.static.clonePlain = function ( val, seen ) {
 		return { 've.dm.Selection': val.getDescription() };
 	} else if ( val.constructor === ve.dm.AnnotationSet ) {
 		return {
+			// eslint-disable-next-line no-restricted-syntax
 			've.dm.AnnotationSet': val.getStore()
 				.values( val.getHashes() )
 				.map( function ( annotation ) {
@@ -515,7 +516,7 @@ ve.Filibuster.static.clonePlain = function ( val, seen ) {
 		return '(' + ( val.constructor.name || 'unknown' ) + ')';
 	} else {
 		if ( seen.has( val ) ) {
-			return '...';
+			return '…';
 		}
 		seen.add( val );
 		plainVal = {};

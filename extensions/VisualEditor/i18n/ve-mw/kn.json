@@ -11,9 +11,6 @@
 			"Vikashegde"
 		]
 	},
-	"apihelp-visualeditor-description": "Parsoid ಸೇವೆಯಿಂದ ಪುಟವೊಂದಕ್ಕೆ HTML5 ಹಿಂದಿರುಗಿಸುತ್ತದೆ.",
-	"apihelp-visualeditor-param-paction": "ಕ್ರಿಯಾ ಪ್ರಯೋಗ",
-	"apihelp-visualeditoredit-param-summary": "ಸಂಪಾದನೆಯ ಸಾರಾಂಶ",
 	"tooltip-ca-createsource": "ಈ ಪುಟದ ಸೋರ್ಸ್ ಕೋಡ್ ಸೃಷ್ಟಿಸಿ",
 	"tooltip-ca-edit": "ಈ ಪುಟವನ್ನು ನೀವು ಸಂಪಾದಿಸಬಹುದು. ಉಳಿಸುವ ಮುನ್ನ ಮುನ್ನೋಟವನ್ನು ಉಪಯೋಗಿಸಿ.",
 	"tooltip-ca-editsource": "ಈ ಪುಟದ ಸೋರ್ಸ್ ಕೋಡ್ ಸಂಪಾದಿಸಿ",
@@ -64,7 +61,6 @@
 	"visualeditor-dialog-media-size-choosecustom": "ಅಗತ್ಯಕ್ಕನುಗುಣವಾಗಿ ಅಳತೆ ಇಡು",
 	"visualeditor-dialog-media-size-choosedefault": "ಪ್ರಥಮವಿದ ಅಳತೆ ಇಡು",
 	"visualeditor-dialog-media-size-choosefull": "ಚಿತ್ರವನ್ನು ಪೂರ್ಣ ಹಾಕು",
-	"visualeditor-dialog-media-size-originalsize-error": "ಮೂಲ ಕಡತದ ಗಾತ್ರ ಸಿಗಲಿಲ್ಲ",
 	"visualeditor-dialog-media-size-section": "ಚಿತ್ರದ ಗಾತ್ರ",
 	"visualeditor-dialog-media-title": "ಮಾಧ್ಯಮ ಸಿದ್ಧತೆಗಳು",
 	"visualeditor-dialog-media-type-border": "ಗಡಿ",
@@ -190,12 +186,8 @@
 	"visualeditor-saveerror": "ಪರಿಚಾರಕದಿಂದ ಡೇಟಾ ಉಳಿಸುವಾಗ ದೋಷವುಂಟಾಗಿದೆ: $1",
 	"visualeditor-serializeerror": "ಪರಿಚಾರಕದಿಂದ ಡೇಟಾ ಬರುವಾಗ ದೋಷವುಂಟಾಗಿದೆ: $1",
 	"visualeditor-settings-tool": "ಪುಟದ ಸಂಯೋಜನೆಗಳು",
-	"visualeditor-shortcuts-insert": "ಸೇರಿಸು",
 	"visualeditor-special-characters-group-other": "ಆಗಾಗ ಬಳಸಿದ",
 	"visualeditor-toolbar-savedialog": "ಪುಟವನ್ನು ಉಳಿಸಿ",
 	"visualeditor-toolbar-savedialog-short": "ಉಳಿಸಿ",
-	"visualeditor-version-label": "ಆವೃತ್ತಿ",
-	"visualeditor-viewpage-savewarning-discard": "ಸಂಪಾದನೆಗಳನ್ನು ತ್ಯಜಿಸು",
-	"visualeditor-viewpage-savewarning-keep": "ಸಂಪಾದನೆ ಮುಂದುವರಿಸಿ",
-	"visualeditor-viewpage-savewarning-title": "ನೀವು ಖ‍ಚಿತವಾಗಿದ್ದೀರಾ?"
+	"visualeditor-version-label": "ಆವೃತ್ತಿ"
 }

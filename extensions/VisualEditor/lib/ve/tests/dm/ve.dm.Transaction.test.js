@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Transaction tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.Transaction' );
@@ -19,9 +19,7 @@ QUnit.test( 'translateOffset', function ( assert ) {
 	txBuilder.pushReplacement( doc, 0, 0, [ 'a', 'b', 'c' ] );
 	txBuilder.pushRetain( 5 );
 	txBuilder.pushReplacement( doc, 5, 4, [] );
-	txBuilder.pushRetain( 2 );
-	txBuilder.pushStartAnnotating( 'set', { type: 'textStyle/bold' } );
-	txBuilder.pushRetain( 1 );
+	txBuilder.pushRetain( 3 );
 	txBuilder.pushReplacement( doc, 12, 1, [ 'i', 'j', 'k', 'l', 'm' ] );
 	txBuilder.pushRetain( 2 );
 	txBuilder.pushReplacement( doc, 15, 0, [ 'n', 'o', 'p' ] );
@@ -231,8 +229,6 @@ QUnit.test( 'Metadata transactions', function ( assert ) {
 			return item.element;
 		} );
 	}
-
-	assert.expect( 8 );
 
 	doc = new ve.dm.Document( [] );
 	surface = new ve.dm.Surface( doc );

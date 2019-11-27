@@ -1,7 +1,7 @@
 /*!
  * VisualEditor BranchNode tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.BranchNode' );
@@ -62,8 +62,6 @@ QUnit.test( 'setDocument', function ( assert ) {
 		] ),
 		attachEvents = [ '+para1', '+listItem1', '+para2', '+listItem2', '+list' ],
 		detachEvents = [ '-para1', '-listItem1', '-para2', '-listItem2', '-list' ];
-
-	assert.expect( 4 );
 
 	doc.connect( doc, {
 		nodeAttached: function ( node ) {

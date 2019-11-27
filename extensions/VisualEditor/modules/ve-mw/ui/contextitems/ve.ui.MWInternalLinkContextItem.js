@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWInternalLinkContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -122,7 +122,8 @@ ve.ui.MWInternalLinkContextItem.prototype.renderBody = function () {
 		this.model,
 		this.context.getSurface().getModel().getDocument().getHtmlDocument(),
 		this.context
-	) );
+	), this.$labelLayout );
+	this.updateLabelPreview();
 };
 
 /* Registration */

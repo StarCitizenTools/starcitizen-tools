@@ -2,7 +2,7 @@
 /**
  * Sets the VisualEditor autodisable preference on appropriate users.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license MIT
  * @author Alex Monk <amonk@wikimedia.org>
  * @file
@@ -70,5 +70,5 @@ class AutodisableVisualEditorPref extends Maintenance {
 	}
 }
 
-$maintClass = "AutodisableVisualEditorPref";
+$maintClass = AutodisableVisualEditorPref::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

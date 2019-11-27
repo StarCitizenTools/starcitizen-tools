@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable TableRowNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -106,7 +106,7 @@ ve.ce.TableRowNode.prototype.onMissingCellClick = function () {
 	row = matrix.getRowNodes().indexOf( this.model );
 	col = matrix.getColCount( row ) - 1;
 	surfaceModel.setSelection(
-		new ve.dm.TableSelection( documentModel, tableModel.getOuterRange(), col, row )
+		new ve.dm.TableSelection( tableModel.getOuterRange(), col, row )
 	);
 };
 

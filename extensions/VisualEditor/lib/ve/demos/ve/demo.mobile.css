@@ -1,14 +1,10 @@
 /*!
  * VisualEditor mobile demo
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /* Demo */
-
-body {
-	font: normal 0.875em/1.5 sans-serif;
-}
 
 .ve-demo-logo {
 	padding-right: 1.1em;
@@ -18,21 +14,10 @@ body {
 	padding-left: 1.5em;
 }
 
+.ve-demo-surfaceWrapper,
+.ve-init-sa-target-toolbar > .oo-ui-toolbar-bar,
 .ve-demo-read {
-	border-top: 1px solid #ccc;
-}
-
-/* Editor */
-
-.ve-ui-surface {
-	border-bottom: 1px solid #ccc;
-}
-
-.ve-init-sa-target-toolbar > .oo-ui-toolbar-bar {
-	border-top: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-}
-
-.ve-init-sa-target-toolbar.ve-ui-toolbar-floating > .oo-ui-toolbar-bar {
-	border-top: 0;
+	border-radius: 0;
+	border-left: 0;
+	border-right: 0;
 }

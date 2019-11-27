@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel ImageNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -31,6 +31,14 @@ OO.mixinClass( ve.dm.ImageNode, ve.dm.ResizableNode );
 /**
  * @inheritdoc ve.dm.Model
  */
+ve.dm.ImageNode.static.isDiffComparable = function ( element, other ) {
+	// Images with different src's shouldn't be diffed
+	return element.type === other.type && element.attributes.src === other.attributes.src;
+};
+
+/**
+ * @inheritdoc ve.dm.Model
+ */
 ve.dm.ImageNode.static.describeChanges = function ( attributeChanges, attributes ) {
 	var key, sizeFrom, sizeTo, change,
 		customKeys = [ 'width', 'height' ],
@@ -50,7 +58,7 @@ ve.dm.ImageNode.static.describeChanges = function ( attributeChanges, attributes
 			'height' in attributeChanges ? attributeChanges.height.to : attributes.height
 		);
 
-		descriptions.push( ve.msg( 'visualeditor-changedesc-image-size', sizeFrom, sizeTo ) );
+		descriptions.push( ve.htmlMsg( 'visualeditor-changedesc-image-size', this.wrapText( 'del', sizeFrom ), this.wrapText( 'ins', sizeTo ) ) );
 	}
 	for ( key in attributeChanges ) {
 		if ( customKeys.indexOf( key ) === -1 ) {
@@ -66,9 +74,11 @@ ve.dm.ImageNode.static.describeChanges = function ( attributeChanges, attributes
  */
 ve.dm.ImageNode.static.describeChange = function ( key, change ) {
 	if ( key === 'align' ) {
-		return ve.msg( 'visualeditor-changedesc-align',
-			ve.msg( 'visualeditor-align-widget-' + change.from ),
-			ve.msg( 'visualeditor-align-widget-' + change.to )
+		// Messages used:
+		// visualeditor-align-desc-left, visualeditor-align-desc-right, visualeditor-align-desc-center
+		return ve.htmlMsg( 'visualeditor-changedesc-align',
+			this.wrapText( 'del', ve.msg( 'visualeditor-align-desc-' + change.from ) ),
+			this.wrapText( 'ins', ve.msg( 'visualeditor-align-desc-' + change.to ) )
 		);
 	}
 	// Parent method

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface UrlStringTransferHandler tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ui.UrlStringTransferHandler (MW)' );
@@ -17,8 +17,7 @@ QUnit.test( 'paste', function ( assert ) {
 				pasteType: 'text/plain',
 				expectedData: function () {
 					// Explicitly create an internal link so we can assert this behaviour is working
-					// eslint-disable-next-line new-cap
-					var a = ve.dm.MWInternalLinkAnnotation.static.newFromTitle( new mw.Title.newFromText( 'Main Page' ) ).element;
+					var a = ve.dm.MWInternalLinkAnnotation.static.newFromTitle( mw.Title.newFromText( 'Main Page' ) ).element;
 					return [
 						[ 'M', [ a ] ],
 						[ 'a', [ a ] ],

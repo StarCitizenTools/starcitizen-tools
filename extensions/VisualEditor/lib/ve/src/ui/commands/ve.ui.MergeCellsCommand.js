@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MergeCellsCommand class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -32,7 +32,7 @@ OO.inheritClass( ve.ui.MergeCellsCommand, ve.ui.Command );
 ve.ui.MergeCellsCommand.prototype.isExecutable = function ( fragment ) {
 	// Parent method
 	return ve.ui.MergeCellsCommand.super.prototype.isExecutable.apply( this, arguments ) &&
-		fragment.getSelection().isMergeable();
+		fragment.getSelection().isMergeable( fragment.getDocument() );
 };
 
 /* Registration */

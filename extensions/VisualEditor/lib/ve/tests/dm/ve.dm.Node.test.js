@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Node tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.Node' );
@@ -20,6 +20,11 @@ ve.dm.NodeStub.static.name = 'stub';
 ve.dm.NodeStub.static.matchTagNames = [];
 
 ve.dm.nodeFactory.register( ve.dm.NodeStub );
+
+// FakeCommentNode is never instantiated, so create
+// one here to bypass code coverage warnings.
+// eslint-disable-next-line no-new
+new ve.dm.FakeCommentNode();
 
 /* Tests */
 

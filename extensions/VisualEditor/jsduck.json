@@ -7,7 +7,7 @@
 	"--processes": "0",
 	"--warnings-exit-nonzero": true,
 	"--builtin-classes": true,
-	"--external": "HTMLDocument,Window,Node,Text,Set,Range,Selection,ClientRect,File,Blob,DataTransfer,DataTransferItem,KeyboardEvent,MouseEvent",
+	"--external": "HTMLDocument,Window,Node,Text,Set,Range,Selection,ClientRect,File,Blob,DataTransfer,DataTransferItem,KeyboardEvent,MouseEvent,Promise",
 	"--warnings": ["-nodoc(class,public)", "-global"],
 	"--": [
 		".jsduck/external.js",
@@ -22,14 +22,7 @@
 		"lib/ve/lib/unicodejs/unicodejs.js",
 		"lib/ve/lib/treeDiffer/treeDiffer-dist.js",
 		"lib/ve/src",
-		"lib/ve/tests",
+		"lib/ve/rebaser/src/dm",
 		"modules/ve-mw"
-	],
-	"--exclude": [
-		"lib/ve/src/dm/ve.dm.RebaseServer.js",
-		"lib/ve/src/ve.utils-es6.js",
-		"lib/ve/tests/dm/ve.dm.RebaseServer.test.js",
-		"lib/ve/tests/dm/ve.dm.TestRebaseClient.js",
-		"lib/ve/tests/dm/ve.dm.TestRebaseServer.js"
 	]
 }

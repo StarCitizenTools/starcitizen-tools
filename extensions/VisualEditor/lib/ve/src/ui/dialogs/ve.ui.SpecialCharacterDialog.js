@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface SpecialCharacterDialog class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -52,11 +52,21 @@ ve.ui.SpecialCharacterDialog.prototype.initialize = function () {
  * @inheritdoc
  */
 ve.ui.SpecialCharacterDialog.prototype.getSetupProcess = function ( data ) {
+	data = data || {};
 	return ve.ui.SpecialCharacterDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
+			var inspector = this;
+
 			this.surface = data.surface;
-			this.surface.getView().focus();
 			this.surface.getModel().connect( this, { contextChange: 'onContextChange' } );
+
+			if ( !this.characters ) {
+				return ve.init.platform.fetchSpecialCharList()
+					.then( function ( specialChars ) {
+						inspector.characters = specialChars;
+						inspector.buildButtonList();
+					} );
+			}
 		}, this );
 };
 
@@ -76,20 +86,9 @@ ve.ui.SpecialCharacterDialog.prototype.getTeardownProcess = function ( data ) {
  * @inheritdoc
  */
 ve.ui.SpecialCharacterDialog.prototype.getReadyProcess = function ( data ) {
-	data = data || {};
 	return ve.ui.SpecialCharacterDialog.super.prototype.getReadyProcess.call( this, data )
 		.next( function () {
-			var inspector = this;
-
 			this.surface.getView().focus();
-
-			if ( !this.characters ) {
-				return ve.init.platform.fetchSpecialCharList()
-					.then( function ( specialChars ) {
-						inspector.characters = specialChars;
-						inspector.buildButtonList();
-					} );
-			}
 		}, this );
 };
 

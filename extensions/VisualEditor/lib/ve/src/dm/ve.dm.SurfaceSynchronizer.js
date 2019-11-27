@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel SurfaceSynchronizer class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 /* global io */
 
@@ -17,8 +17,11 @@
  * @param {string} documentId Document ID
  * @param {Object} [config] Configuration options
  * @cfg {string} [server] IO server
+ * @cfg {string} [defaultName] Default username
  */
 ve.dm.SurfaceSynchronizer = function VeDmSurfaceSynchronizer( surface, documentId, config ) {
+	var path, options, authorData;
+
 	config = config || {};
 
 	// Mixin constructors
@@ -29,26 +32,37 @@ ve.dm.SurfaceSynchronizer = function VeDmSurfaceSynchronizer( surface, documentI
 	this.surface = surface;
 	this.doc = surface.documentModel;
 	this.store = this.doc.getStore();
+	this.authors = {};
 	this.authorSelections = {};
-	this.authorNames = {};
-	this.authorColors = {};
 	this.documentId = documentId;
+	this.defaultName = config.defaultName;
 
 	// Whether the document has been initialized
 	this.initialized = false;
 	// Whether we are currently synchronizing the model
 	this.applying = false;
+	this.token = null;
+	this.serverId = null;
+	this.loadSessionKey();
 
 	// SocketIO events
-	this.socket = io( ( config.server || '' ) + '/' + this.documentId, { query: { docName: this.documentId } } );
+	path = ( config.server || '' );
+	options = { query: {
+		docName: this.documentId,
+		authorId: this.getAuthorId() || '',
+		token: this.token || ''
+	} };
+	this.socket = io( path, options );
 	this.socket.on( 'registered', this.onRegistered.bind( this ) );
 	this.socket.on( 'initDoc', this.onInitDoc.bind( this ) );
 	this.socket.on( 'newChange', this.onNewChange.bind( this ) );
-	this.socket.on( 'nameChange', this.onNameChange.bind( this ) );
-	this.socket.on( 'colorChange', this.onColorChange.bind( this ) );
+	this.socket.on( 'authorChange', this.onAuthorChange.bind( this ) );
 	this.socket.on( 'authorDisconnect', this.onAuthorDisconnect.bind( this ) );
-	// TODO: unbreak then re-enable usurp
-	// this.tryUsurp();
+
+	authorData = ve.init.platform.getSessionObject( 've-collab-author' );
+	if ( authorData ) {
+		this.changeAuthor( authorData );
+	}
 
 	// Events
 	this.doc.connect( this, {
@@ -75,11 +89,33 @@ OO.mixinClass( ve.dm.SurfaceSynchronizer, ve.dm.RebaseClient );
  */
 
 /**
- * @event authorNameChange
- * @param {number} authorId The author whose name has changed
+ * @event authorChange
+ * @param {number} authorId The author whose data has changed
+ */
+
+/**
+ * @event wrongDoc
+ */
+
+/**
+ * @event initDoc
+ */
+
+/**
+ * @event disconnect
  */
 
 /* Methods */
+
+/**
+ * Destroy the synchronizer
+ */
+ve.dm.SurfaceSynchronizer.prototype.destroy = function () {
+	this.socket.disconnect();
+	this.doc.disconnect( this );
+	this.surface.disconnect( this );
+	this.initialized = false;
+};
 
 /**
  * @inheritdoc
@@ -243,25 +279,30 @@ ve.dm.SurfaceSynchronizer.prototype.applyNewSelections = function ( newSelection
 	}
 };
 
-ve.dm.SurfaceSynchronizer.prototype.onNameChange = function ( data ) {
-	this.authorNames[ data.authorId ] = data.authorName;
-	this.emit( 'authorNameChange', data.authorId );
+/**
+ * Get author data object
+ * @param {number} authorId Author ID
+ * @return {Object} Author object, containing 'name' and 'color'
+ */
+ve.dm.SurfaceSynchronizer.prototype.getAuthorData = function ( authorId ) {
+	return this.authors[ authorId ];
 };
 
-ve.dm.SurfaceSynchronizer.prototype.onColorChange = function ( data ) {
-	this.authorColors[ data.authorId ] = data.authorColor;
-	this.emit( 'authorColorChange', data.authorId );
+ve.dm.SurfaceSynchronizer.prototype.onAuthorChange = function ( data ) {
+	this.authors[ data.authorId ] = data.authorData;
+	this.emit( 'authorChange', data.authorId );
+
+	if ( data.authorId === this.getAuthorId() ) {
+		ve.init.platform.setSessionObject( 've-collab-author', data.authorData );
+	}
 };
 
-ve.dm.SurfaceSynchronizer.prototype.changeName = function ( newName ) {
-	this.socket.emit( 'changeName', newName );
-};
-
-ve.dm.SurfaceSynchronizer.prototype.changeColor = function ( newColor ) {
-	this.socket.emit( 'changeColor', newColor );
+ve.dm.SurfaceSynchronizer.prototype.changeAuthor = function ( data ) {
+	this.socket.emit( 'changeAuthor', ve.extendObject( {}, this.getAuthorData( this.getAuthorId() ), data ) );
 };
 
 ve.dm.SurfaceSynchronizer.prototype.onAuthorDisconnect = function ( authorId ) {
+	delete this.authors[ authorId ];
 	delete this.authorSelections[ authorId ];
 	this.emit( 'authorDisconnect', authorId );
 };
@@ -271,27 +312,36 @@ ve.dm.SurfaceSynchronizer.prototype.onAuthorDisconnect = function ( authorId ) {
  *
  * @param {Object} data
  * @param {number} data.authorId The author ID allocated by the server
+ * @param {string} data.token
  */
 ve.dm.SurfaceSynchronizer.prototype.onRegistered = function ( data ) {
-	this.setAuthorId( data.authorId );
-	this.surface.setAuthorId( this.authorId );
-
-	if ( window.sessionStorage ) {
-		window.sessionStorage.setItem( 'visualeditor-author', JSON.stringify( data ) );
-	}
-};
-
-ve.dm.SurfaceSynchronizer.prototype.tryUsurp = function () {
-	var storedData = window.sessionStorage && window.sessionStorage.getItem( 'visualeditor-author' );
-	if ( !storedData ) {
+	if ( this.serverId && this.serverId !== data.serverId ) {
+		this.socket.disconnect();
+		this.emit( 'wrongDoc' );
 		return;
 	}
-	try {
-		storedData = JSON.parse( storedData );
-		this.socket.emit( 'usurp', storedData );
-	} catch ( e ) {
-		// eslint-disable-next-line no-console
-		console.warn( 'Failed to parse data in session storage', e );
+	this.serverId = data.serverId;
+	this.setAuthorId( data.authorId );
+	this.surface.setAuthorId( this.authorId );
+	this.token = data.token;
+	this.saveSessionKey();
+};
+
+ve.dm.SurfaceSynchronizer.prototype.saveSessionKey = function () {
+	ve.init.platform.setSessionObject( 'visualeditor-session-key', {
+		serverId: this.serverId,
+		docName: this.documentId,
+		authorId: this.getAuthorId(),
+		token: this.token
+	} );
+};
+
+ve.dm.SurfaceSynchronizer.prototype.loadSessionKey = function () {
+	var data = ve.init.platform.getSessionObject( 'visualeditor-session-key' );
+	if ( data && data.docName === this.documentId ) {
+		this.serverId = data.serverId;
+		this.setAuthorId( data.authorId );
+		this.token = data.token;
 	}
 };
 
@@ -300,7 +350,7 @@ ve.dm.SurfaceSynchronizer.prototype.tryUsurp = function () {
  *
  * @param {Object} data
  * @param {Object} data.history Serialized change representing the server's history
- * @param {Object} data.names Object mapping author IDs to names
+ * @param {Object} data.authors Object mapping author IDs to author data objects (name/color)
  */
 ve.dm.SurfaceSynchronizer.prototype.onInitDoc = function ( data ) {
 	var history, authorId;
@@ -308,11 +358,15 @@ ve.dm.SurfaceSynchronizer.prototype.onInitDoc = function ( data ) {
 		// Ignore attempt to initialize a second time
 		return;
 	}
-	for ( authorId in data.names ) {
-		this.onNameChange( { authorId: +authorId, authorName: data.names[ authorId ] } );
+	for ( authorId in data.authors ) {
+		this.onAuthorChange( {
+			authorId: +authorId,
+			authorData: data.authors[ authorId ]
+		} );
 	}
 	history = ve.dm.Change.static.deserialize( data.history, this.doc );
 	this.acceptChange( history );
+	this.emit( 'initDoc' );
 
 	// Mark ourselves as initialized and retry any prevented submissions
 	this.initialized = true;
@@ -345,4 +399,9 @@ ve.dm.SurfaceSynchronizer.prototype.onNewChange = function ( serializedChange ) 
 	}
 	// Schedule submission of unsent local changes, if any
 	this.submitChangeThrottled();
+};
+
+ve.dm.SurfaceSynchronizer.prototype.onDisconnect = function () {
+	this.initialized = false;
+	this.emit( 'disconnect' );
 };

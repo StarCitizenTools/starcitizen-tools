@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel TreeModifier tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 ve.dm.TreeModifier.prototype.dump = function () {
@@ -46,8 +46,6 @@ QUnit.module( 've.dm.TreeModifier' );
 
 QUnit.test( 'modify', function ( assert ) {
 	var origData, surface, doc, tx, expectedTreeDump, actualTreeDump;
-
-	assert.expect( 2 );
 
 	function dumpTree( doc ) {
 		// Build a tree modifier just for the .dump method (don't modify anything)
@@ -113,14 +111,17 @@ QUnit.test( 'modify', function ( assert ) {
 		expectedTreeDump,
 		'Modified tree matches rebuilt tree, reversed'
 	);
+	assert.notStrictEqual(
+		tx.operations[ 3 ].remove[ 1 ],
+		doc.data.data[ 6 ],
+		'Inserted transaction data is not referenced into the linear data'
+	);
 } );
 
 QUnit.test( 'setupBlockSlugs', function ( assert ) {
 	var doc = new ve.dm.Surface(
 		ve.dm.example.createExampleDocumentFromData( [] )
 	).documentModel;
-
-	assert.expect( 1 );
 
 	doc.commit( new ve.dm.Transaction( [ {
 		type: 'replace',

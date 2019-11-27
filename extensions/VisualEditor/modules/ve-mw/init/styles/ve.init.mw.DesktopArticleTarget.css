@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization DesktopArticleTarget styles.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -24,6 +24,11 @@
 .ve-init-mw-desktopArticleTarget-toolbar-open > .oo-ui-toolbar-bar {
 	transform: translateY( 0 );
 	opacity: 1;
+}
+
+.ve-init-mw-desktopArticleTarget-toolbar-opened > .oo-ui-toolbar-bar {
+	/* Turn off transforms when done to avoid Safari rendering bugs (T202935) */
+	transform: none;
 }
 
 .ve-tempSourceEditing .ve-init-mw-desktopArticleTarget-toolbar,
@@ -49,6 +54,7 @@
 	cursor: pointer;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .ve-init-mw-desktopArticleTarget .redirectMsg a:hover {
 	text-decoration: none;
 }

@@ -4,7 +4,7 @@
  *
  * @file
  * @ingroup Extensions
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
  * @license MIT
  */
 
@@ -78,13 +78,14 @@ class ApiVisualEditor extends ApiBase {
 	/**
 	 * Accessor function for all RESTbase requests
 	 *
+	 * @param Title $title The title of the page to use as the parsing context
 	 * @param string $method The HTTP method, either 'GET' or 'POST'
 	 * @param string $path The RESTbase api path
-	 * @param Array $params Request parameters
-	 * @param Array $reqheaders Request headers
+	 * @param array $params Request parameters
+	 * @param array $reqheaders Request headers
 	 * @return string Body of the RESTbase server's response
 	 */
-	protected function requestRestbase( $method, $path, $params, $reqheaders = [] ) {
+	protected function requestRestbase( Title $title, $method, $path, $params, $reqheaders = [] ) {
 		global $wgVersion;
 		$request = [
 			'method' => $method,
@@ -96,7 +97,9 @@ class ApiVisualEditor extends ApiBase {
 			$request['body'] = $params;
 		}
 		// Should be synchronised with modules/ve-mw/init/ve.init.mw.ArticleTargetLoader.js
-		$reqheaders['Accept'] = 'text/html; charset=utf-8; profile="mediawiki.org/specs/html/1.6.0"';
+		$reqheaders['Accept'] = 'text/html; charset=utf-8;' .
+			' profile="https://www.mediawiki.org/wiki/Specs/HTML/2.0.0"';
+		$reqheaders['Accept-Language'] = self::getPageLanguage( $title )->getCode();
 		$reqheaders['User-Agent'] = 'VisualEditor-MediaWiki/' . $wgVersion;
 		$reqheaders['Api-User-Agent'] = 'VisualEditor-MediaWiki/' . $wgVersion;
 		$request['headers'] = $reqheaders;
@@ -131,11 +134,11 @@ class ApiVisualEditor extends ApiBase {
 	/**
 	 * Run wikitext through the parser's Pre-Save-Transform
 	 *
-	 * @param string $title The title of the page to use as the parsing context
+	 * @param Title $title The title of the page to use as the parsing context
 	 * @param string $wikitext The wikitext to transform
 	 * @return string The transformed wikitext
 	 */
-	protected function pstWikitext( $title, $wikitext ) {
+	protected function pstWikitext( Title $title, $wikitext ) {
 		return ContentHandler::makeContent( $wikitext, $title, CONTENT_MODEL_WIKITEXT )
 			->preSaveTransform(
 				$title,
@@ -155,6 +158,7 @@ class ApiVisualEditor extends ApiBase {
 	 */
 	protected function parseWikitextFragment( Title $title, $wikitext, $bodyOnly ) {
 		return $this->requestRestbase(
+			$title,
 			'POST',
 			'transform/wikitext/to/html/' . urlencode( $title->getPrefixedDBkey() ),
 			[
@@ -169,11 +173,11 @@ class ApiVisualEditor extends ApiBase {
 	 *
 	 * @param string $preload The title of the page to use as the preload content
 	 * @param string[] $params The preloadTransform parameters to pass in, if any
-	 * @param string $contextTitle The contextual page title against which to parse the preload
+	 * @param Title $contextTitle The contextual page title against which to parse the preload
 	 * @param bool $parse Whether to parse the preload content
 	 * @return string The parsed content
 	 */
-	protected function getPreloadContent( $preload, $params, $contextTitle, $parse = false ) {
+	protected function getPreloadContent( $preload, $params, Title $contextTitle, $parse = false ) {
 		$content = '';
 		$preloadTitle = Title::newFromText( $preload );
 		// Check for existence to avoid getting MediaWiki:Noarticletext
@@ -205,47 +209,6 @@ class ApiVisualEditor extends ApiBase {
 	}
 
 	/**
-	 * Provide the current language links for a given page title
-	 *
-	 * @param Title $title The page title for which to get the current language links
-	 * @return string[] The language links
-	 */
-	protected function getLangLinks( Title $title ) {
-		$apiParams = [
-			'action' => 'query',
-			'prop' => 'langlinks',
-			'lllimit' => 500,
-			'titles' => $title->getPrefixedDBkey(),
-		];
-		$api = new ApiMain(
-			new DerivativeRequest(
-				$this->getRequest(),
-				$apiParams,
-				/* was posted? */ false
-			),
-			/* enable write? */ true
-		);
-
-		$api->execute();
-		$result = $api->getResult()->getResultData();
-		if ( !isset( $result['query']['pages'][$title->getArticleID()] ) ) {
-			return false;
-		}
-		$page = $result['query']['pages'][$title->getArticleID()];
-		if ( !isset( $page['langlinks'] ) ) {
-			return [];
-		}
-		$langlinks = $page['langlinks'];
-		$langnames = Language::fetchLanguageNames();
-		foreach ( $langlinks as $i => $lang ) {
-			if ( isset( $langnames[$lang['lang']] ) ) {
-				$langlinks[$i]['langname'] = $langnames[$lang['lang']];
-			}
-		}
-		return $langlinks;
-	}
-
-	/**
 	 * @inheritDoc
 	 */
 	public function execute() {
@@ -257,7 +220,7 @@ class ApiVisualEditor extends ApiBase {
 		$title = Title::newFromText( $params['page'] );
 		if ( $title && $title->isSpecial( 'CollabPad' ) ) {
 			// Convert Special:CollabPad/MyPage to MyPage so we can parsefragment properly
-			$title = Title::newFromText( preg_replace( '`^([^/]+/)`', '', $params['page'] ) );
+			$title = SpecialCollabPad::getSubPage( $title );
 		}
 		if ( !$title ) {
 			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['page'] ) ] );
@@ -305,6 +268,7 @@ class ApiVisualEditor extends ApiBase {
 					// If requested, request HTML from Parsoid/RESTBase
 					if ( $params['paction'] === 'parse' ) {
 						$content = $this->requestRestbase(
+							$title,
 							'GET',
 							'page/html/' . urlencode( $title->getPrefixedDBkey() ) . '/' . $oldid . '?redirect=false',
 							[]
@@ -320,7 +284,7 @@ class ApiVisualEditor extends ApiBase {
 							'rvprop' => 'content|ids'
 						];
 
-						$section = isset( $params['section'] ) ? $params['section'] : null;
+						$section = $params['section'] ?? null;
 
 						if ( $section === 'new' ) {
 							$content = '';
@@ -363,7 +327,7 @@ class ApiVisualEditor extends ApiBase {
 				} else {
 					$content = '';
 					Hooks::run( 'EditFormPreloadText', [ &$content, &$title ] );
-					if ( $content !== '' ) {
+					if ( $content !== '' && $params['paction'] !== 'wikitext' ) {
 						$content = $this->parseWikitextFragment( $title, $content, true );
 					}
 					if ( $content === '' && !empty( $params['preload'] ) ) {
@@ -426,6 +390,20 @@ class ApiVisualEditor extends ApiBase {
 					if ( $title->getRestrictions( 'create' ) ) {
 						$notices[] = $this->msg( 'titleprotectedwarning' )->parseAsBlock();
 					}
+					// From EditPage#showIntro, checking if the page has previously been deleted:
+					$dbr = wfGetDB( DB_REPLICA );
+					LogEventsList::showLogExtract( $out, [ 'delete', 'move' ], $title,
+						'',
+						[
+							'lim' => 10,
+							'conds' => [ 'log_action != ' . $dbr->addQuotes( 'revision' ) ],
+							'showIfEmpty' => false,
+							'msgKey' => [ 'recreate-moveddeleted-warn' ]
+						]
+					);
+					if ( $out ) {
+						$notices[] = $out;
+					}
 				}
 
 				// Look at protection status to set up notices + surface class(es)
@@ -484,6 +462,7 @@ class ApiVisualEditor extends ApiBase {
 						$targetUsername,
 						/* allow IP users*/ false
 					);
+					$block = $targetUser->getBlock();
 
 					if (
 						!( $targetUser && $targetUser->isLoggedIn() ) &&
@@ -493,8 +472,13 @@ class ApiVisualEditor extends ApiBase {
 						$notices[] = "<div class=\"mw-userpage-userdoesnotexist error\">\n" .
 							$this->msg( 'userpage-userdoesnotexist', wfEscapeWikiText( $targetUsername ) ) .
 							"\n</div>";
-					} elseif ( $targetUser->isBlocked() ) {
-						// Show log extract if the user is currently blocked
+					} elseif (
+						!is_null( $block ) &&
+						$block->getType() != Block::TYPE_AUTO &&
+						( $block->isSitewide() || $targetUser->isBlockedFrom( $title ) )
+					) {
+						// Show log extract if the user is sitewide blocked or is partially
+						// blocked and not allowed to edit their user page or user talk page
 						$notices[] = $this->msg(
 							'blocked-notice-logextract',
 							// Support GENDER in notice
@@ -504,22 +488,26 @@ class ApiVisualEditor extends ApiBase {
 				}
 
 				// Blocked user notice
-				if (
-					$user->isBlockedFrom( $title, true ) &&
-					$user->getBlock()->prevents( 'edit' ) !== false
-				) {
-					$notices[] = call_user_func_array(
-						[ $this, 'msg' ],
-						$user->getBlock()->getPermissionsError( $this->getContext() )
-					)->parseAsBlock();
-				}
+				if ( $user->isBlockedFrom( $title, true ) || $user->isBlockedGlobally() ) {
+					if ( $user->isBlockedFrom( $title, true ) ) {
+						$notices[] = [
+							'type' => 'block',
+							'message' => call_user_func_array(
+								[ $this, 'msg' ],
+								$user->getBlock()->getPermissionsError( $this->getContext() )
+							)->parseAsBlock(),
+						];
+					}
 
-				// Blocked user notice for global blocks
-				if ( $user->isBlockedGlobally() ) {
-					$notices[] = call_user_func_array(
-						[ $this, 'msg' ],
-						$user->getGlobalBlock()->getPermissionsError( $this->getContext() )
-					)->parseAsBlock();
+					if ( $user->isBlockedGlobally() ) {
+						$notices[] = [
+							'type' => 'block',
+							'message' => call_user_func_array(
+								[ $this, 'msg' ],
+								$user->getGlobalBlock()->getPermissionsError( $this->getContext() )
+							)->parseAsBlock(),
+						];
+					}
 				}
 
 				// HACK: Build a fake EditPage so we can get checkboxes from it
@@ -564,48 +552,6 @@ class ApiVisualEditor extends ApiBase {
 					$message = $this->msg( $messageSpecifier );
 					$checkboxesMessages[ $message->getKey() ] = $message->plain();
 				}
-				$templates = $editPage->makeTemplatesOnThisPageList( $editPage->getTemplates() );
-
-				// HACK: Find out which red links are on the page
-				// We do the lookup for the current version. This might not be entirely complete
-				// if we're loading an oldid, but it'll probably be close enough, and LinkCache
-				// will automatically request any additional data it needs.
-				// We only do this for visual edits, as the wikitext editor doesn't need to know
-				// about redlinks on the page. If the user switches to VE, they will do a fresh
-				// metadata request at that point.
-				$links = null;
-				if ( $params['paction'] !== 'wikitext' ) {
-					$wikipage = WikiPage::factory( $title );
-					$popts = $wikipage->makeParserOptions( 'canonical' );
-					$cached = MediaWikiServices::getInstance()->getParserCache()->get( $article, $popts, true );
-					$links = [
-						// Array of linked pages that are missing
-						'missing' => [],
-						// For current revisions: 1 (treat all non-missing pages as known)
-						// For old revisions: array of linked pages that are known
-						'known' => $restoring || !$cached ? [] : 1,
-					];
-					if ( $cached ) {
-						foreach ( $cached->getLinks() as $namespace => $cachedTitles ) {
-							foreach ( $cachedTitles as $cachedTitleText => $exists ) {
-								$cachedTitle = Title::makeTitle( $namespace, $cachedTitleText );
-								if ( !$cachedTitle->isKnown() ) {
-									$links['missing'][] = $cachedTitle->getPrefixedText();
-								} elseif ( $links['known'] !== 1 ) {
-									$links['known'][] = $cachedTitle->getPrefixedText();
-								}
-							}
-						}
-					}
-					// Add information about current page
-					if ( !$title->isKnown() ) {
-						$links['missing'][] = $title->getPrefixedText();
-					} elseif ( $links['known'] !== 1 ) {
-						$links['known'][] = $title->getPrefixedText();
-					}
-				}
-
-				// On parser cache miss, just don't bother populating red link data
 
 				foreach ( $checkboxesDef as &$value ) {
 					// Don't convert the boolean to empty string with formatversion=1
@@ -616,8 +562,6 @@ class ApiVisualEditor extends ApiBase {
 					'notices' => $notices,
 					'checkboxesDef' => $checkboxesDef,
 					'checkboxesMessages' => $checkboxesMessages,
-					'templates' => $templates,
-					'links' => $links,
 					'protectedClasses' => implode( ' ', $protectedClasses ),
 					'basetimestamp' => $baseTimestamp,
 					'starttimestamp' => wfTimestampNow(),
@@ -641,6 +585,14 @@ class ApiVisualEditor extends ApiBase {
 				}
 				break;
 
+			case 'templatesused':
+				// HACK: Build a fake EditPage so we can get checkboxes from it
+				// Deliberately omitting ,0 so oldid comes from request
+				$article = new Article( $title );
+				$editPage = new EditPage( $article );
+				$result = $editPage->makeTemplatesOnThisPageList( $editPage->getTemplates() );
+				break;
+
 			case 'parsedoc':
 			case 'parsefragment':
 				$wikitext = $params['wikitext'];
@@ -658,15 +610,6 @@ class ApiVisualEditor extends ApiBase {
 						'result' => 'success',
 						'content' => $content
 					];
-				}
-				break;
-
-			case 'getlanglinks':
-				$langlinks = $this->getLangLinks( $title );
-				if ( $langlinks === false ) {
-					$this->dieWithError( 'apierror-visualeditor-api-langlinks-error', 'api-langlinks-error' );
-				} else {
-					$result = [ 'result' => 'success', 'langlinks' => $langlinks ];
 				}
 				break;
 		}
@@ -722,30 +665,33 @@ class ApiVisualEditor extends ApiBase {
 	}
 
 	/**
+	 * Get the page language from a title, using the content language as fallback on special pages
+	 * @param Title $title Title
+	 * @return Language Content language
+	 */
+	public static function getPageLanguage( Title $title ) {
+		if ( $title->isSpecial( 'CollabPad' ) ) {
+			// Use the site language for CollabPad, as getPageLanguage just
+			// returns the interface language for special pages.
+			// TODO: Let the user change the document language on multi-lingual sites.
+			return MediaWikiServices::getInstance()->getContentLanguage();
+		} else {
+			return $title->getPageLanguage();
+		}
+	}
+
+	/**
 	 * Gets the relevant HTML for the latest log entry on a given title, including a full log link.
 	 *
-	 * @param $title Title
+	 * @param Title $title Title
 	 * @param $types array|string
 	 * @return string
 	 */
-	private function getLastLogEntry( $title, $types = '' ) {
-		$lp = new LogPager(
-			new LogEventsList( $this->getContext() ),
-			$types,
-			'',
-			$title->getPrefixedDbKey()
-		);
-		$lp->mLimit = 1;
-
-		return $lp->getBody() . MediaWikiServices::getInstance()->getLinkRenderer()->makeLink(
-			SpecialPage::getTitleFor( 'Log' ),
-			$this->msg( 'log-fulllog' )->text(),
-			[],
-			[
-				'page' => $title->getPrefixedDBkey(),
-				'type' => is_string( $types ) ? $types : null
-			]
-		);
+	private function getLastLogEntry( Title $title, $types = '' ) {
+		$outString = '';
+		LogEventsList::showLogExtract( $outString, $types, $title, '',
+			[ 'lim' => 1 ] );
+		return $outString;
 	}
 
 	/**
@@ -765,10 +711,10 @@ class ApiVisualEditor extends ApiBase {
 				ApiBase::PARAM_TYPE => [
 					'parse',
 					'metadata',
+					'templatesused',
 					'wikitext',
 					'parsefragment',
 					'parsedoc',
-					'getlanglinks',
 				],
 			],
 			'wikitext' => null,

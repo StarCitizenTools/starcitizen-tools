@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface AuthorItemWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -34,6 +34,7 @@ ve.ui.AuthorItemWidget = function VeUiAuthorItemWidget( synchronizer, $overlay, 
 	this.synchronizer = synchronizer;
 	this.editable = !!config.editable;
 	this.authorId = config.authorId;
+	this.name = null;
 	this.color = null;
 
 	this.$color = $( '<div>' ).addClass( 've-ui-authorItemWidget-color' );
@@ -41,8 +42,11 @@ ve.ui.AuthorItemWidget = function VeUiAuthorItemWidget( synchronizer, $overlay, 
 
 	if ( this.editable ) {
 		this.input = new OO.ui.TextInputWidget( {
-			classes: [ 've-ui-authorItemWidget-nameInput' ]
+			classes: [ 've-ui-authorItemWidget-nameInput' ],
+			placeholder: ve.msg( 'visualeditor-rebase-client-author-name' )
 		} );
+		// Re-emit change events
+		this.input.on( 'change', this.emit.bind( this, 'change' ) );
 
 		this.colorPicker = new CP( this.$color[ 0 ] );
 		this.colorPicker.on( 'change', function ( color ) {
@@ -51,7 +55,7 @@ ve.ui.AuthorItemWidget = function VeUiAuthorItemWidget( synchronizer, $overlay, 
 		} );
 		this.colorPicker.on( 'exit', function () {
 			if ( item.color !== null ) {
-				synchronizer.changeColor( item.color );
+				item.emit( 'changeColor', item.color );
 			}
 		} );
 
@@ -85,6 +89,28 @@ OO.mixinClass( ve.ui.AuthorItemWidget, OO.ui.mixin.LabelElement );
 /* Methods */
 
 /**
+ * Focus the widget, if possible
+ */
+ve.ui.AuthorItemWidget.prototype.focus = function () {
+	if ( this.editable ) {
+		this.input.focus();
+	}
+};
+
+/**
+ * Get the user's name
+ *
+ * @return {string} User's name
+ */
+ve.ui.AuthorItemWidget.prototype.getName = function () {
+	if ( this.editable ) {
+		return this.input.getValue();
+	} else {
+		return this.name;
+	}
+};
+
+/**
  * Set author ID
  *
  * @param {number} authorId Author ID
@@ -97,15 +123,16 @@ ve.ui.AuthorItemWidget.prototype.setAuthorId = function ( authorId ) {
  * Update name and color from synchronizer
  */
 ve.ui.AuthorItemWidget.prototype.update = function () {
-	var name = this.synchronizer.authorNames[ this.authorId ];
-
-	this.color = this.synchronizer.authorColors[ this.authorId ];
+	var authorData = this.synchronizer.getAuthorData( this.authorId );
+	this.name = authorData.name;
+	this.color = authorData.color;
 	this.$color.css( 'background-color', '#' + this.color );
 
 	if ( this.editable ) {
-		this.input.setValue( name );
+		this.input.setValue( this.name );
 		this.colorPicker.set( '#' + this.color );
 	} else {
-		this.setLabel( name );
+		// TODO: Handle empty names with a message
+		this.setLabel( this.name || '…' );
 	}
 };
