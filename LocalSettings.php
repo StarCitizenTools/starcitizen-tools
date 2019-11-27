@@ -340,6 +340,30 @@ $wgCookieWarningEnabled = true;
 #DynamicPageList
 $wgDplSettings['recursiveTagParse'] = true;
 
+#TemplateStyles
+$wgTemplateStylesAllowedUrls = [
+  "audio" => [
+    "<^https://starcitizen\\.tools/>",
+    "<^https://scwdev\\.czen\\.me/>"
+  ],
+  "image" => [
+    "<^https://starcitizen\\.tools/>",
+    "<^https://scwdev\\.czen\\.me/>"
+  ],
+  "svg" => [
+    "<^https://starcitizen\\.tools/[^?#]*\\.svg(?:[?#]|$)>",
+    "<^https://scwdev\\.czen\\.me/[^?#]*\\.svg(?:[?#]|$)>"
+  ],
+  "font" => [
+    "<^https://starcitizen\\.tools/>",
+    "<^https://scwdev\\.czen\\.me/>"
+  ],
+  "namespace" => [
+      "<.>"
+  ],
+  "css" => []
+];
+
 #=============================================== Namespaces ===============================================
 define("NS_COMMLINK", 3000);
 define("NS_COMMLINK_TALK", 3001);
