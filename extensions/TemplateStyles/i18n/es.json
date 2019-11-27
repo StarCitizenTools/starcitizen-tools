@@ -3,10 +3,10 @@
 		"authors": [
 			"Lemondoge",
 			"Ciencia Al Poder",
-			"Fitoschido"
+			"Fitoschido",
+			"MarcoAurelio"
 		]
 	},
-	"templatestyles": "TemplateStyles",
 	"templatestyles-desc": "Implementa hojas de estilo por plantilla",
 	"templatestyles-missing-src": "El atributo <code>src</code> de TemplateStyles no debe estar vacío.",
 	"templatestyles-invalid-src": "Se especificó un título no válido en el atributo <code>src</code> de TemplateStyles.",
@@ -16,6 +16,10 @@
 	"templatestyles-size-exceeded": "La hoja de estilos es más grande que el máximo permitido de $2.",
 	"templatestyles-end-tag-injection": "La hoja de estilos proporcionada contiene el código no permitido <code>&lt;/style</code>.",
 	"content-model-sanitized-css": "CSS expurgado",
+	"templatestyles-stylesheet-error-category": "Hojas de estilo de TemplateStyles con errores",
+	"templatestyles-stylesheet-error-category-desc": "La hoja de estilo de TemplateStyles tiene un error.",
+	"templatestyles-page-error-category": "Páginas con errores de TemplateStyles",
+	"templatestyles-page-error-category-desc": "Hubo un error procesando una etiqueta <code><nowiki><templatestyles/></nowiki></code> en la página.",
 	"templatestyles-error-at-rule-block-not-allowed": "Bloque no permitido para <code>@$3</code> en línea $1 carácter $2.",
 	"templatestyles-error-at-rule-block-required": "Bloque requerido para <code>@$3</code> en línea $1 carácter $2.",
 	"templatestyles-error-bad-character-in-url": "Carácter no válido en URL en línea $1 carácter $2.",

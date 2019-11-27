@@ -66,6 +66,11 @@ class TemplateStylesContentTest extends TextContentTest {
 				[ 'class' => false, 'minify' => false ],
 				Status::newGood( '.mw-parser-output .foo { margin-left: 10px ; }' )
 			],
+			'With an extra wrapper' => [
+				'.foo { margin-left: 10px }',
+				[ 'extraWrapper' => 'div.class' ],
+				Status::newGood( '.mw-parser-output div.class .foo{margin-left:10px}' )
+			],
 			'Escaping U+007F' => [
 				".foo\\\x7f { content: '\x7f'; }",
 				[],
@@ -91,28 +96,37 @@ class TemplateStylesContentTest extends TextContentTest {
 		];
 	}
 
+	/**
+	 * @expectedException InvalidArgumentException
+	 * @expectedExceptionMessage Invalid value for $extraWrapper: .foo>.bar
+	 */
+	public function testInvalidWrapper() {
+		$this->newContent( '.foo { margin-left: 10px }' )->sanitize( [
+			'extraWrapper' => '.foo>.bar',
+		] );
+	}
+
 	public function testCrazyBrokenSanitizer() {
-		global $wgHooks;
-
-		$this->stashMwGlobals( 'wgHooks' );
-
 		// Big hack: Make a Token that returns a bad string, and a Sanitizer
 		// that returns that bad Token, just so we can test a code path that
 		// handles such bad output.
-		$wgHooks['TemplateStylesStylesheetSanitizer'][] = function ( &$sanitizer ) {
-			$badToken = $this->getMockBuilder( Wikimedia\CSS\Objects\Token::class )
-				->disableOriginalConstructor()
-				->setMethods( [ '__toString' ] )
-				->getMock();
-			$badToken->method( '__toString' )->willReturn( '"</style>"' );
+		$this->setTemporaryHook(
+			'TemplateStylesStylesheetSanitizer',
+			function ( &$sanitizer ) {
+				$badToken = $this->getMockBuilder( Wikimedia\CSS\Objects\Token::class )
+					->disableOriginalConstructor()
+					->setMethods( [ '__toString' ] )
+					->getMock();
+				$badToken->method( '__toString' )->willReturn( '"</style>"' );
 
-			$sanitizer = $this->getMockBuilder( Wikimedia\CSS\Sanitizer\StylesheetSanitizer::class )
-				->disableOriginalConstructor()
-				->setMethods( [ 'sanitize' ] )
-				->getMock();
-			$sanitizer->method( 'sanitize' )->willReturn( $badToken );
-			return false;
-		};
+				$sanitizer = $this->getMockBuilder( Wikimedia\CSS\Sanitizer\StylesheetSanitizer::class )
+					->disableOriginalConstructor()
+					->setMethods( [ 'sanitize' ] )
+					->getMock();
+				$sanitizer->method( 'sanitize' )->willReturn( $badToken );
+				return false;
+			}
+		);
 
 		$this->assertEquals(
 			Status::newFatal( 'templatestyles-end-tag-injection' ),

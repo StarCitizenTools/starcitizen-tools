@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Elisardojm"
+			"Elisardojm",
+			"Banjo"
 		]
 	},
 	"templatestyles": "Estilos de modelos",
@@ -14,6 +15,10 @@
 	"templatestyles-size-exceeded": "A folla de estilo excede o tamaño máximo de $2.",
 	"templatestyles-end-tag-injection": "A folla de estilo indicada contén <code>&lt;/style</code>, que non está permitido.",
 	"content-model-sanitized-css": "CSS hixienizado",
+	"templatestyles-stylesheet-error-category": "Follas de estilo de TemplateStyles con erros",
+	"templatestyles-stylesheet-error-category-desc": "A folla de estilo TemplateStyles ten un erro.",
+	"templatestyles-page-error-category": "Páxinas con erros de TemplateStyles",
+	"templatestyles-page-error-category-desc": "Houbo un erro ó procesar unha etiqueta <code><nowiki><templatestyles/></nowiki></code> na páxina.",
 	"templatestyles-error-at-rule-block-not-allowed": "Bloque (parte entre {...}) non permitido para <code>@$3</code>, na liña $1, carácter $2.",
 	"templatestyles-error-at-rule-block-required": "Bloque (parte entre {...}) obrigatorio para <code>@$3</code>, na liña $1, carácter $2.",
 	"templatestyles-error-bad-character-in-url": "Carácter non válido no URL da liña $1, carácter $2.",
