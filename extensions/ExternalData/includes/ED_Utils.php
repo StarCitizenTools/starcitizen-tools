@@ -228,18 +228,10 @@ END;
 			$dbConnectionParams['dbDirectory'] = $db_directory;
 		}
 
-		// DatabaseBase::factory() was replaced by Database::factory()
-		// in MW 1.28.
-		if ( method_exists( 'Database', 'factory' ) ) {
-			$db = Database::factory( $db_type, $dbConnectionParams );
-		} else {
-			$db = DatabaseBase::factory( $db_type, $dbConnectionParams );
-		}
-
+		$db = Database::factory( $db_type, $dbConnectionParams );
 		if ( $db == null ) {
 			return wfMessage( "externaldata-db-unknown-type" )->text();
 		}
-
 		if ( ! $db->isOpen() ) {
 			return wfMessage( "externaldata-db-could-not-connect" )->text();
 		}
@@ -855,11 +847,17 @@ END;
 	}
 
 	static function fetchURL( $url, $post_vars = array(), $cacheExpireTime = 0, $get_fresh = false, $try_count = 1 ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		global $edgStringReplacements, $edgCacheTable, $edgAllowSSL;
 
 		if ( $post_vars ) {
-			return Http::post( $url, array( 'postData' => $post_vars ) );
+			$options = array( 'postData' => $post_vars );
+			Hooks::run( 'ExternalDataBeforeWebCall', [
+				'post',
+				&$url,
+				&$options
+			]);
+			return HttpWithHeaders::post( $url,  $options);
 		}
 
 		// do any special variable replacements in the URLs, for
@@ -870,10 +868,22 @@ END;
 
 		if ( !isset( $edgCacheTable ) || is_null( $edgCacheTable ) ) {
 			if ( $edgAllowSSL ) {
-				$contents = Http::get( $url, 'default', array( 'sslVerifyCert' => false, 'followRedirects' => false ) );
+				$options = array( 
+					'sslVerifyCert' => false, 
+					'followRedirects' => false ,
+					'timeout' => 'default',
+				);
 			} else {
-				$contents = Http::get( $url );
+				$options = array( 
+					'timeout' => 'default',
+				);
 			}
+			Hooks::run( 'ExternalDataBeforeWebCall', [
+				'get',
+				&$url,
+				&$options
+			]);
+			$contents = HttpWithHeaders::get( $url ,$options );
 			// Handle non-UTF-8 encodings.
 			// Copied from http://www.php.net/manual/en/function.file-get-contents.php#85008
 			// Unfortunately, 'mbstring' functions are not available
@@ -893,11 +903,18 @@ END;
 		}
 
 		if ( !$row || $get_fresh ) {
+			$options = [
+				'timeout' => 'default'
+			];
 			if ( $edgAllowSSL ) {
-				$page = Http::get( $url, 'default', array( CURLOPT_SSL_VERIFYPEER => false ) );
-			} else {
-				$page = Http::get( $url );
-			}
+				$options[CURLOPT_SSL_VERIFYPEER] = FALSE;
+			}	
+			Hooks::run( 'ExternalDataBeforeWebCall', [
+				'get',
+				&$url,
+				&$options
+			]);
+			$page = HttpWithHeaders::get( $url );
 			if ( $page === false ) {
 				sleep( 1 );
 				if ( $try_count >= self::$http_number_of_tries ) {
@@ -920,7 +937,7 @@ END;
 		}
 	}
 
-	static private function getDataFromText( $contents, $format, $mappings, $source, $prefixLength = 0 ) {
+	static private function getDataFromText( $contents, $format, $mappings, $source, $prefixLength = 0, $regex = null ) {
 		// For now, this is only done for the CSV formats.
 		if ( is_array( $format ) ) {
 			list( $format, $delimiter ) = $format;
@@ -940,6 +957,12 @@ END;
 			return self::getJSONData( $contents, $prefixLength );
 		} elseif ( $format == 'gff' ) {
 			return self::getGFFData( $contents );
+		} elseif ( $format == 'text' ) {
+			if ( $regex == null ) {
+				return array( 'text' => $contents );
+			} else {
+				return self::getRegexData( $contents, $regex );
+			}
 		} else {
 			return wfMessage( 'externaldata-web-invalid-format', $format )->text();
 		}
@@ -972,17 +995,16 @@ END;
 		}
 	}
 
-	static public function getDataFromURL( $url, $format, $mappings, $postData = null, $cacheExpireTime, $prefixLength ) {
+	static public function getDataFromURL( $url, $format, $mappings, $postData = null, $cacheExpireTime, $prefixLength, $regex ) {
 		$url_contents = self::fetchURL( $url, $postData, $cacheExpireTime );
 		// Show an error message if there's nothing there.
 		if ( empty( $url_contents ) ) {
 			return "Error: No contents found at URL $url.";
 		}
-
-		return self::getDataFromText( $url_contents, $format, $mappings, $url, $prefixLength );
+		return self::getDataFromText( $url_contents, $format, $mappings, $url, $prefixLength, $regex );
 	}
 
-	static private function getDataFromPath( $path, $format, $mappings ) {
+	static private function getDataFromPath( $path, $format, $mappings, $regex ) {
 		if ( !file_exists( $path ) ) {
 			return "Error: No file found.";
 		}
@@ -992,27 +1014,27 @@ END;
 			return "Error: Unable to get file contents.";
 		}
 
-		return self::getDataFromText( $file_contents, $format, $mappings, $path );
+		return self::getDataFromText( $file_contents, $format, $mappings, $path, $regex );
 	}
 
-	static public function getDataFromFile( $file, $format, $mappings ) {
+	static public function getDataFromFile( $file, $format, $mappings, $regex ) {
 		global $edgFilePath;
 
 		if ( array_key_exists( $file, $edgFilePath ) ) {
-			return self::getDataFromPath( $edgFilePath[$file], $format, $mappings );
+			return self::getDataFromPath( $edgFilePath[$file], $format, $mappings, $regex );
 		} else {
 			return "Error: No file is set for ID \"$file\".";
 		}
 	}
 
-	static public function getDataFromDirectory( $directory, $fileName, $format, $mappings ) {
+	static public function getDataFromDirectory( $directory, $fileName, $format, $mappings, $regex ) {
 		global $edgDirectoryPath;
 
 		if ( array_key_exists( $directory, $edgDirectoryPath ) ) {
 			$directoryPath = $edgDirectoryPath[$directory];
 			$path = realpath( $directoryPath . $fileName );
 			if ( $path !== false && strpos( $path, $directoryPath ) === 0 ) {
-				return self::getDataFromPath( $path, $format, $mappings );
+				return self::getDataFromPath( $path, $format, $mappings, $regex );
 			} else {
 				return "Error: File name \"$fileName\" is not allowed for directory ID \"$directory\".";
 			}
@@ -1066,6 +1088,12 @@ END;
 			$values[$fieldName] = self::getValuesForKeyInTree( $fieldName, $realResult );
 		}
 		return $values;
+	}
+
+	static public function getRegexData( $text, $regex ): array {
+		$matches = [];
+		@preg_match_all( $regex, $text, $matches, PREG_PATTERN_ORDER );
+		return $matches;
 	}
 
 }

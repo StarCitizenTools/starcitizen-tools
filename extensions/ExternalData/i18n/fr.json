@@ -6,12 +6,13 @@
 			"IAlex",
 			"McDutchie",
 			"PieRRoMaN",
-			"Shirayuki"
+			"Shirayuki",
+			"Thibaut120094"
 		]
 	},
 	"getdata": "Obtenir des données",
 	"externaldata-desc": "Permet de récupérer des données structurées à partir d'URL externes, de bases de données et d'autres sources",
-	"externaldata-no-param-specified": "Erreur : Aucun paramètre « $1 » spécifié.",
+	"externaldata-no-param-specified": "Erreur : Aucun paramètre « $1 » spécifié.",
 	"externaldata-web-invalid-format": "Format invalide: \"$1\"",
 	"externaldata-ldap-unable-to-connect": "Impossible de se connecter à $1",
 	"externaldata-xml-error": "Erreur XML : $1 à la ligne $2",

@@ -1,6 +1,6 @@
 External Data extension
 
-        Version 1.9.1
+        Version 2.0
         Yaron Koren and (many) others
 
 This is free software licensed under the GNU General Public License. Please
@@ -54,11 +54,11 @@ exports selected rows from a wiki page that holds CSV data, in a format
 that is readable by #get_web_data.
 
 For more information, see the extension homepage at:
-http://www.mediawiki.org/wiki/Extension:External_Data
+https://www.mediawiki.org/wiki/Extension:External_Data
 
 == Requirements ==
 
-This version of the External Data extension requires MediaWiki 1.23 or
+This version of the External Data extension requires MediaWiki 1.28 or
 higher.
 
 == Installation ==
@@ -67,7 +67,7 @@ To install the extension, place the entire 'ExternalData' directory
 within your MediaWiki 'extensions' directory, then add the following
 line to your 'LocalSettings.php' file:
 
-     require_once( "$IP/extensions/ExternalData/ExternalData.php" );
+     wfLoadExtension( 'ExternalData' );
 
 To cache the data from the URLs being accessed, you can call the contents
 of ExternalData.sql in your database, then add the following to

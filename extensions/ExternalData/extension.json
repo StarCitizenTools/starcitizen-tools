@@ -1,6 +1,6 @@
 {
 	"name": "External Data",
-	"version": "1.9.1",
+	"version": "2.0",
 	"author": [
 		"Yaron Koren",
 		"..."
@@ -24,6 +24,7 @@
 	"AutoloadClasses": {
 		"ExternalDataHooks": "ExternalData.hooks.php",
 		"EDUtils": "includes/ED_Utils.php",
+		"HttpWithHeaders": "includes/ED_HttpWithHeaders.php",
 		"EDParserFunctions": "includes/ED_ParserFunctions.php",
 		"EDGetData": "includes/ED_GetData.php"
 	},

@@ -100,14 +100,20 @@ class EDParserFunctions {
 		} elseif ( $format == 'csv' || $format == 'csv with header' ) {
 			if ( array_key_exists( 'delimiter', $args ) ) {
 				$delimiter = $args['delimiter'];
+				// Allow for tab delimiters, using \t.
+				$delimiter = str_replace( '\t', "\t", $delimiter );
 				// Hopefully this solution isn't "too clever".
-				$format = array( $format, $args['delimiter'] );
+				$format = array( $format, $delimiter );
 			}
 		}
 
+		$regex	= $format === 'text' && array_key_exists( 'regex', $args )
+			? html_entity_decode( $args['regex'] )
+			: null;
+
 		if ( array_key_exists( 'data', $args ) ) {
-			// parse the 'data' arg into mappings
-			if ( $format == 'xml with xpath' ) {
+			// Parse the 'data' arg into mappings.
+			if ( $format == 'xml with xpath' || $format === 'text' ) {
 				$mappings = EDUtils::paramToArray( $args['data'], false, false );
 			} else {
 				$mappings = EDUtils::paramToArray( $args['data'], false, true );
@@ -130,7 +136,7 @@ class EDParserFunctions {
 		}
 
 		$postData = array_key_exists( 'post data', $args ) ? $args['post data'] : '';
-		$external_values = EDUtils::getDataFromURL( $url, $format, $mappings, $postData, $cacheExpireTime, $prefixLength );
+		$external_values = EDUtils::getDataFromURL( $url, $format, $mappings, $postData, $cacheExpireTime, $prefixLength, $regex );
 		if ( is_string( $external_values ) ) {
 			// It's an error message - display it on the screen.
 			return EDUtils::formatErrorMessage( $external_values );
@@ -197,11 +203,15 @@ class EDParserFunctions {
 				// Hopefully this solution isn't "too clever".
 				$format = array( $format, $args['delimiter'] );
 			}
+		} elseif ( $format === 'text' ) {
+			if ( array_key_exists( 'regex', $args ) ) {
+				$regex = $args['regex'];
+			}
 		}
 
 		if ( array_key_exists( 'data', $args ) ) {
 			// parse the 'data' arg into mappings
-			if ( $format == 'xml with xpath' ) {
+			if ( $format == 'xml with xpath' || $format === 'text' ) {
 				$mappings = EDUtils::paramToArray( $args['data'], false, false );
 			} else {
 				$mappings = EDUtils::paramToArray( $args['data'], false, true );
@@ -218,9 +228,9 @@ class EDParserFunctions {
 		}
 
 		if ( isset( $file ) ) {
-			$external_values = EDUtils::getDataFromFile( $file, $format, $mappings );
+			$external_values = EDUtils::getDataFromFile( $file, $format, $mappings, $regex );
 		} else {
-			$external_values = EDUtils::getDataFromDirectory( $directory, $fileName, $format, $mappings );
+			$external_values = EDUtils::getDataFromDirectory( $directory, $fileName, $format, $mappings, $regex );
 		}
 
 		if ( is_string( $external_values ) ) {
