@@ -363,7 +363,7 @@ class ApiVisualEditor extends ApiBase {
 				} else {
 					$content = '';
 					Hooks::run( 'EditFormPreloadText', [ &$content, &$title ] );
-					if ( $content !== '' ) {
+					if ( $content !== '' && $params['paction'] !== 'wikitext' ) {
 						$content = $this->parseWikitextFragment( $title, $content, true );
 					}
 					if ( $content === '' && !empty( $params['preload'] ) ) {

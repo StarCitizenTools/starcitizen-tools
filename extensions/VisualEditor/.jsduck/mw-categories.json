@@ -12,7 +12,8 @@
 			{
 				"name": "Switching",
 				"classes": [
-					"mw.libs.ve.SwitchConfirmDialog"
+					"mw.libs.ve.SwitchConfirmDialog",
+					"mw.libs.ve.MWEditMode*Tool"
 				]
 			},
 			{
@@ -25,8 +26,33 @@
 			{
 				"name": "Data Model",
 				"classes": [
-					"ve.dm.MW*Provider",
-					"ve.dm.MW*Queue"
+					"ve.dm.MW*Surface",
+					"ve.dm.MW*SurfaceFragment"
+				]
+			},
+			{
+				"name": "ContentEditable",
+				"classes": [
+					"ve.ce.MW*Surface"
+				]
+			}
+		]
+	},
+	{
+		"name": "VisualEditor (core) unused parts",
+		"groups": [
+			{
+				"name": "Standalone",
+				"classes": [
+					"ve.init.sa*"
+				],
+				"name": "Visual Diffing",
+				"classes": [
+					"ve.DiffTreeNode",
+					"ve.DiffMatchPatch",
+					"ve.dm.VisualDiff",
+					"ve.ui.DiffDialog",
+					"ve.ui.DiffElement"
 				]
 			}
 		]
@@ -37,8 +63,9 @@
 			{
 				"name": "MediaWiki",
 				"classes": [
+					"mw.Api",
 					"mw.Title",
-					"mw.widgets.TitleInputWidget"
+					"mw.widgets.*Widget"
 				]
 			}
 		]
