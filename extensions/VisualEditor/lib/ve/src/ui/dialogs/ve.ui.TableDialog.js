@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface TableDialog class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -16,8 +16,6 @@
 ve.ui.TableDialog = function VeUiTableDialog( config ) {
 	// Parent constructor
 	ve.ui.TableDialog.super.call( this, config );
-
-	this.$element.addClass( 've-ui-tableDialog' );
 };
 
 /* Inheritance */
@@ -32,6 +30,18 @@ ve.ui.TableDialog.static.size = 'medium';
 
 ve.ui.TableDialog.static.title = OO.ui.deferMsg( 'visualeditor-dialog-table-title' );
 
+ve.ui.TableDialog.static.actions = [
+	{
+		action: 'done',
+		label: OO.ui.deferMsg( 'visualeditor-dialog-action-done' ),
+		flags: [ 'primary', 'progressive' ]
+	},
+	{
+		label: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' ),
+		flags: [ 'safe', 'back' ]
+	}
+];
+
 /* Methods */
 
 /**
@@ -45,8 +55,7 @@ ve.ui.TableDialog.prototype.initialize = function () {
 
 	this.panel = new OO.ui.PanelLayout( {
 		padded: true,
-		expanded: false,
-		classes: [ 've-ui-tableDialog-panel' ]
+		expanded: false
 	} );
 
 	this.captionToggle = new OO.ui.ToggleSwitchWidget();
@@ -88,13 +97,10 @@ ve.ui.TableDialog.prototype.getValues = function () {
 ve.ui.TableDialog.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.TableDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
-			var isReadOnly = this.isReadOnly();
 			this.initialValues = {
-				caption: !!this.getFragment().getSelection().getTableNode(
-					this.getFragment().getDocument()
-				).getCaptionNode()
+				caption: !!this.getFragment().getSelection().getTableNode().getCaptionNode()
 			};
-			this.captionToggle.setValue( this.initialValues.caption ).setDisabled( isReadOnly );
+			this.captionToggle.setValue( this.initialValues.caption );
 			this.closingFragment = null;
 			this.updateActions();
 		}, this );
@@ -111,9 +117,7 @@ ve.ui.TableDialog.prototype.getActionProcess = function ( action ) {
 			if ( action === 'done' ) {
 				surfaceModel = this.getFragment().getSurface();
 				selection = surfaceModel.getSelection();
-				captionNode = this.getFragment().getSelection().getTableNode(
-					this.getFragment().getDocument()
-				).getCaptionNode();
+				captionNode = this.getFragment().getSelection().getTableNode().getCaptionNode();
 				if ( this.captionToggle.getValue() !== this.initialValues.caption ) {
 					if ( this.initialValues.caption ) {
 						fragment = surfaceModel.getLinearFragment( captionNode.getOuterRange(), true );

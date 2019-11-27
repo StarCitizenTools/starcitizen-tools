@@ -1,8 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
-			"Jdforrester",
-			"Fitoschido"
+			"Jdforrester"
 		]
 	},
 	"ooui-toolbar-more": "Plus",
@@ -12,6 +11,5 @@
 	"ooui-dialog-message-reject": "Dimittere",
 	"ooui-dialog-process-dismiss": "Dimittere",
 	"ooui-dialog-process-retry": "Retemptare",
-	"ooui-dialog-process-continue": "Pergere",
-	"ooui-field-help": "Auxilium"
+	"ooui-dialog-process-continue": "Pergere"
 }

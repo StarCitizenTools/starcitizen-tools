@@ -6,9 +6,7 @@
 			"Shirayuki",
 			"Yekrats",
 			"Kvardek du",
-			"Psychoslave",
-			"Fitoschido",
-			"YvesNevelsteen"
+			"Psychoslave"
 		]
 	},
 	"ooui-outline-control-move-down": "Movi eron suben",
@@ -16,16 +14,15 @@
 	"ooui-outline-control-remove": "Forigi eron",
 	"ooui-toolbar-more": "Pli",
 	"ooui-toolgroup-expand": "Pli",
-	"ooui-toolgroup-collapse": "Malpli",
+	"ooui-toolgroup-collapse": "Mapli",
 	"ooui-dialog-message-accept": "Bone",
 	"ooui-dialog-message-reject": "Nuligi",
-	"ooui-dialog-process-error": "Io misfunkciis",
-	"ooui-dialog-process-dismiss": "Fermi",
+	"ooui-dialog-process-error": "Io rompiĝis",
+	"ooui-dialog-process-dismiss": "Elimini",
 	"ooui-dialog-process-retry": "Reprovi",
 	"ooui-dialog-process-continue": "Daŭrigi",
 	"ooui-selectfile-button-select": "Elekti dosieron",
-	"ooui-selectfile-not-supported": "Dosierelekto ne estas subtenata.",
-	"ooui-selectfile-placeholder": "Neniu dosiero elektita",
-	"ooui-selectfile-dragdrop-placeholder": "Demetu la dosieron ĉi tie",
-	"ooui-field-help": "Helpo"
+	"ooui-selectfile-not-supported": "Dosieroselekto ne estas subtenata.",
+	"ooui-selectfile-placeholder": "Vi ne selektis dosieron",
+	"ooui-selectfile-dragdrop-placeholder": "Ĵetu dosieron ĉi tie."
 }

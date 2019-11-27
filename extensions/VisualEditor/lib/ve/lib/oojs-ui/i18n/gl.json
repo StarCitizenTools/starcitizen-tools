@@ -5,8 +5,7 @@
 			"Kscanne",
 			"Toliño",
 			"Elisardojm",
-			"Banjo",
-			"Fitoschido"
+			"Banjo"
 		]
 	},
 	"ooui-outline-control-move-down": "Mover o elemento abaixo",
@@ -25,6 +24,5 @@
 	"ooui-selectfile-button-select": "Seleccionar un ficheiro",
 	"ooui-selectfile-not-supported": "Non está soportada a selección de ficheiros",
 	"ooui-selectfile-placeholder": "Non se seleccionou ningún ficheiro",
-	"ooui-selectfile-dragdrop-placeholder": "Solte un ficheiro aquí",
-	"ooui-field-help": "Axuda"
+	"ooui-selectfile-dragdrop-placeholder": "Solte un ficheiro aquí"
 }

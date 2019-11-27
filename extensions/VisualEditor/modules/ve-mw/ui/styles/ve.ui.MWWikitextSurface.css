@@ -1,11 +1,11 @@
 /*!
  * VisualEditor MediaWiki Initialization WikitextSurface styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
-.ve-ui-mwWikitextSurface .ve-ce-attachedRootNode {
+.ve-ui-mwWikitextSurface .ve-ce-documentNode {
 	/* Inherit mw-editfont setting instead of default source mode setting */
 	font-family: inherit;
 }

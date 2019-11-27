@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable linear enter key down handler
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,8 +13,8 @@
  * @constructor
  */
 ve.ce.LinearEnterKeyDownHandler = function VeCeLinearEnterKeyDownHandler() {
-	// Parent constructor - never called because class is fully static
-	// ve.ui.LinearEnterKeyDownHandler.super.apply( this, arguments );
+	// Parent constructor
+	ve.ui.LinearEnterKeyDownHandler.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -51,8 +51,9 @@ ve.ce.LinearEnterKeyDownHandler.static.execute = function ( surface, e ) {
 	e.preventDefault();
 
 	if ( e.ctrlKey || e.metaKey ) {
-		// CTRL+Enter triggers the submit command
-		return false;
+		// CTRL+Enter emits a 'submit' event from the surface
+		surface.getSurface().emit( 'submit' );
+		return true;
 	}
 
 	focusedNode = surface.getFocusedNode();
@@ -60,10 +61,6 @@ ve.ce.LinearEnterKeyDownHandler.static.execute = function ( surface, e ) {
 		if ( focusedNode.getModel().isEditable() ) {
 			focusedNode.executeCommand();
 		}
-		return true;
-	}
-
-	if ( surface.isReadOnly() ) {
 		return true;
 	}
 
@@ -78,7 +75,7 @@ ve.ce.LinearEnterKeyDownHandler.static.execute = function ( surface, e ) {
 		txRemove = ve.dm.TransactionBuilder.static.newFromRemoval( documentModel, range );
 		range = txRemove.translateRange( range );
 		// We do want this to propagate to the surface
-		surface.model.change( txRemove, new ve.dm.LinearSelection( range ) );
+		surface.model.change( txRemove, new ve.dm.LinearSelection( documentModel, range ) );
 		// Remove may have changed node at range.from
 		node = surface.getDocument().getBranchNodeFromOffset( range.from );
 	}
@@ -212,7 +209,7 @@ ve.ce.LinearEnterKeyDownHandler.static.execute = function ( surface, e ) {
 				txInsert = ve.dm.TransactionBuilder.static.newFromInsertion(
 					documentModel, listParent.getOuterRange().to, emptyListItem
 				);
-				// …and push forward to be within it
+				// ...and push forward to be within it
 				advanceCursor = true;
 			} else if ( list.getChildren().length !== 1 ) {
 				// Otherwise, if we just removed a list item, insert a paragraph

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Model class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -247,7 +247,7 @@ ve.dm.Model.static.getAllowedRdfaTypes = function () {
  * @param {Object} attributeChanges Attribute changes, keyed list containing objects with from and to properties
  * @param {Object} attributes New attributes
  * @param {Object} element New element
- * @return {Array} Descriptions, list of strings or Node arrays
+ * @return {Array} Descriptions, list of strings or jQuery objects
  */
 ve.dm.Model.static.describeChanges = function ( attributeChanges ) {
 	var key, change,
@@ -266,31 +266,18 @@ ve.dm.Model.static.describeChanges = function ( attributeChanges ) {
  *
  * @param {string} key Attribute key
  * @param {Object} change Change object with from and to properties
- * @return {string|Node[]|null} Description (string or Node array), or null if nothing to describe
+ * @return {string|jQuery|null} Description (string or jQuery object), or null if nothing to describe
  */
 ve.dm.Model.static.describeChange = function ( key, change ) {
 	if ( ( typeof change.from === 'object' && change.from !== null ) || ( typeof change.to === 'object' && change.to !== null ) ) {
-		return ve.htmlMsg( 'visualeditor-changedesc-unknown', key );
+		return ve.msg( 'visualeditor-changedesc-unknown', key );
 	} else if ( change.from === undefined ) {
-		return ve.htmlMsg( 'visualeditor-changedesc-set', key, this.wrapText( 'ins', change.to ) );
+		return ve.msg( 'visualeditor-changedesc-set', key, change.to );
 	} else if ( change.to === undefined ) {
-		return ve.htmlMsg( 'visualeditor-changedesc-unset', key, this.wrapText( 'del', change.from ) );
+		return ve.msg( 'visualeditor-changedesc-unset', key, change.from );
 	} else {
-		return ve.htmlMsg( 'visualeditor-changedesc-changed', key, this.wrapText( 'del', change.from ), this.wrapText( 'ins', change.to ) );
+		return ve.msg( 'visualeditor-changedesc-changed', key, change.from, change.to );
 	}
-};
-
-/**
- * Utility function for wrapping text in a tag, equivalent to `$( '<tag>' ).text( text )`
- *
- * @param {string} tag Wrapping element's tag
- * @param {string} text Text
- * @return {HTMLElement} Element wrapping text
- */
-ve.dm.Model.static.wrapText = function ( tag, text ) {
-	var wrapper = document.createElement( tag );
-	wrapper.appendChild( document.createTextNode( text ) );
-	return wrapper;
 };
 
 /**
@@ -299,8 +286,6 @@ ve.dm.Model.static.wrapText = function ( tag, text ) {
  * @static
  * @param {Object} element This element
  * @param {Object} other Another element
- * @param {ve.dm.HashValueStore} elementStore Store used by this element
- * @param {ve.dm.HashValueStore} otherStore Store used by other elements
  * @return {boolean} Elements are of a comparable type
  */
 ve.dm.Model.static.isDiffComparable = function ( element, other ) {
@@ -455,5 +440,5 @@ ve.dm.Model.prototype.getHashObject = function () {
  * @return {boolean} Elements are of a comparable type
  */
 ve.dm.Model.prototype.isDiffComparable = function ( other ) {
-	return this.constructor.static.isDiffComparable( this.element, other.element, this.getStore(), other.getStore() );
+	return this.constructor.static.isDiffComparable( this.element, other.element );
 };

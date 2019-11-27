@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWTocWidget class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -47,8 +47,6 @@ ve.ui.MWTocWidget = function VeUiMWTocWidget( surface, config ) {
 		insert: 'onMetaListInsert',
 		remove: 'onMetaListRemove'
 	} );
-
-	this.buildDebounced = ve.debounce( this.build.bind( this ) );
 
 	this.initFromMetaList();
 	this.build();
@@ -101,18 +99,15 @@ ve.ui.MWTocWidget.prototype.onMetaListRemove = function ( metaItem ) {
 ve.ui.MWTocWidget.prototype.initFromMetaList = function () {
 	var i = 0,
 		items = this.metaList.getItemsInGroup( 'mwTOC' ),
-		len = items.length,
-		property;
+		len = items.length;
 	if ( len > 0 ) {
 		for ( ; i < len; i++ ) {
-			if ( items[ i ] instanceof ve.dm.MWTOCMetaItem ) {
-				property = items[ i ].getAttribute( 'property' );
-				if ( property === 'mw:PageProp/forcetoc' ) {
-					this.mwTOCForce = true;
-				}
-				if ( property === 'mw:PageProp/notoc' ) {
-					this.mwTOCDisable = true;
-				}
+			if ( items[ i ] instanceof ve.dm.MWTOCForceMetaItem ) {
+				this.mwTOCForce = true;
+			}
+			// Needs testing
+			if ( items[ i ] instanceof ve.dm.MWTOCDisableMetaItem ) {
+				this.mwTOCDisable = true;
 			}
 		}
 		this.updateVisibility();
@@ -131,14 +126,14 @@ ve.ui.MWTocWidget.prototype.updateVisibility = function () {
 /**
  * Rebuild TOC on ve.ce.MWHeadingNode teardown or setup
  *
- * Rebuilds on both teardown and setup of a node, so build is debounced
+ * Rebuilds on both teardown and setup of a node, so rebuild is debounced
  */
-ve.ui.MWTocWidget.prototype.rebuild = function () {
+ve.ui.MWTocWidget.prototype.rebuild = ve.debounce( function () {
 	if ( this.initialized ) {
 		// Wait for transactions to process
-		this.buildDebounced();
+		this.build();
 	}
-};
+} );
 
 /**
  * Update the text content of a specific heading node
@@ -171,9 +166,9 @@ ve.ui.MWTocWidget.prototype.build = function () {
 		return $list.children( 'li' ).length + ( n === stack.length - 1 ? 1 : 0 );
 	}
 
-	function linkClickHandler( /* heading */ ) {
+	function linkClickHandler( heading ) {
 		surfaceView.focus();
-		// TODO: Impement heading scroll
+		ve.init.target.goToHeading( heading );
 		return false;
 	}
 

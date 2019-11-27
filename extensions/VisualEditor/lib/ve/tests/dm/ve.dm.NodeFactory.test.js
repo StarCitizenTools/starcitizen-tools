@@ -1,14 +1,17 @@
 /*!
  * VisualEditor DataModel NodeFactory tests.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.NodeFactory' );
 
 /* Stubs */
 
-ve.dm.NodeFactoryNodeStub = function VeDmNodeFactoryNodeStub() {};
+ve.dm.NodeFactoryNodeStub = function VeDmNodeFactoryNodeStub( a, b ) {
+	this.a = a;
+	this.b = b;
+};
 
 OO.inheritClass( ve.dm.NodeFactoryNodeStub, ve.dm.LeafNode );
 
@@ -49,7 +52,7 @@ QUnit.test( 'getParentNodeTypes', function ( assert ) {
 		'throws an exception when getting allowed parent nodes of a node of an unregistered type'
 	);
 	factory.register( ve.dm.NodeFactoryNodeStub );
-	assert.strictEqual(
+	assert.deepEqual(
 		factory.getParentNodeTypes( 'node-factory-node-stub' ),
 		null,
 		'gets parent type rules for registered nodes'

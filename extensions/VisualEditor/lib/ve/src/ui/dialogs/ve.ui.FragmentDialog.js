@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FragmentDialog class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -10,7 +10,6 @@
  * @class
  * @abstract
  * @extends OO.ui.ProcessDialog
- * @mixins ve.ui.FragmentWindow
  *
  * @constructor
  * @param {Object} [config] Configuration options
@@ -19,39 +18,13 @@ ve.ui.FragmentDialog = function VeUiFragmentDialog( config ) {
 	// Parent constructor
 	ve.ui.FragmentDialog.super.call( this, config );
 
-	// Mixin constructor
-	ve.ui.FragmentWindow.call( this, config );
+	// Properties
+	this.fragment = null;
 };
 
 /* Inheritance */
 
 OO.inheritClass( ve.ui.FragmentDialog, OO.ui.ProcessDialog );
-
-OO.mixinClass( ve.ui.FragmentDialog, ve.ui.FragmentWindow );
-
-/* Static Properties */
-
-ve.ui.FragmentDialog.static.actions = [
-	{
-		label: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' ),
-		flags: [ 'safe', 'back' ],
-		modes: [ 'readonly', 'edit', 'insert' ]
-	},
-	{
-		action: 'done',
-		label: OO.ui.deferMsg( 'visualeditor-dialog-action-apply' ),
-		flags: [ 'progressive', 'primary' ],
-		modes: 'edit'
-	},
-	{
-		action: 'done',
-		label: OO.ui.deferMsg( 'visualeditor-dialog-action-insert' ),
-		flags: [ 'progressive', 'primary' ],
-		modes: 'insert'
-	}
-];
-
-/* Methods */
 
 /**
  * @inheritdoc
@@ -67,23 +40,35 @@ ve.ui.FragmentDialog.prototype.initialize = function ( data ) {
 
 /**
  * @inheritdoc
+ * @throws {Error} If fragment was not provided through data parameter
  */
 ve.ui.FragmentDialog.prototype.getSetupProcess = function ( data ) {
-	// Parent method
-	var process = ve.ui.FragmentDialog.super.prototype.getSetupProcess.call( this, data );
-	// Mixin method
-	return ve.ui.FragmentWindow.prototype.getSetupProcess.call( this, data, process );
+	data = data || {};
+	return ve.ui.FragmentDialog.super.prototype.getSetupProcess.apply( this, data )
+		.next( function () {
+			if ( !( data.fragment instanceof ve.dm.SurfaceFragment ) ) {
+				throw new Error( 'Cannot open dialog: opening data must contain a fragment' );
+			}
+			this.fragment = data.fragment;
+		}, this );
 };
 
 /**
  * @inheritdoc
  */
 ve.ui.FragmentDialog.prototype.getTeardownProcess = function ( data ) {
-	// Parent method
-	var process = ve.ui.FragmentDialog.super.prototype.getTeardownProcess.call( this, data )
+	return ve.ui.FragmentDialog.super.prototype.getTeardownProcess.apply( this, data )
 		.first( function () {
 			this.fragment.select();
+			this.fragment = null;
 		}, this );
-	// Mixin method
-	return ve.ui.FragmentWindow.prototype.getTeardownProcess.call( this, data, process );
+};
+
+/**
+ * Get the surface fragment the dialog is for
+ *
+ * @return {ve.dm.SurfaceFragment|null} Surface fragment the dialog is for, null if the dialog is closed
+ */
+ve.ui.FragmentDialog.prototype.getFragment = function () {
+	return this.fragment;
 };

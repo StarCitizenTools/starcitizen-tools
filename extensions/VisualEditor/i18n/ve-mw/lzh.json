@@ -7,8 +7,7 @@
 			"飞舞回堂前",
 			"SolidBlock",
 			"Itsmine",
-			"Muhebbet",
-			"Davidzdh"
+			"Muhebbet"
 		]
 	},
 	"tooltip-ca-ve-edit": "纂是頁",
@@ -21,7 +20,7 @@
 	"visualeditor-dialog-media-info-moreinfo": "益訊",
 	"visualeditor-dialog-media-info-readmore": "閲甚",
 	"visualeditor-dialog-media-info-uploaded": "載：$1",
-	"visualeditor-dialog-media-noresults": "無所獲",
+	"visualeditor-dialog-media-noresults": "詢中無結",
 	"visualeditor-dialog-media-position-center": "中",
 	"visualeditor-dialog-media-position-left": "左",
 	"visualeditor-dialog-media-position-none": "無",

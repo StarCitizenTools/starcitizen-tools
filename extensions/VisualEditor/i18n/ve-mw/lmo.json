@@ -30,6 +30,7 @@
 	"visualeditor-dialog-media-position-none": "Nisü",
 	"visualeditor-dialog-media-position-right": "Dèstra",
 	"visualeditor-dialog-media-position-section": "Puzisiù",
+	"visualeditor-dialog-media-size-originalsize-error": "Se pöl mìa recüperà la dimensiù uriginàl del file.",
 	"visualeditor-dialog-media-size-section": "Dimensiù de la figüra",
 	"visualeditor-dialog-media-title": "Impostasiù dei archivi multimediài",
 	"visualeditor-dialog-media-type-border": "Bòrdo",
@@ -121,6 +122,7 @@
 	"visualeditor-toolbar-savedialog": "Sàlva la pàgina",
 	"visualeditor-usernamespacepagelink": "Project:Namespace ütènt",
 	"visualeditor-version-label": "Versiù",
+	"visualeditor-viewpage-savewarning": "Sét sigür che te ölet turnà 'ndré a la modalità de vizualizasiù sènsa salvà le mudìfiche prima?",
 	"visualeditor-wikitext-warning": "Te sét dré a doprà 'l VisualEditor - el [[{{MediaWiki:visualeditor-wikitext-warning-link}}|wikitest]] el funsiùna mìa ché. Schìsa sö \"{{MediaWiki:visualeditor-ca-editsource}}\" per mudificà la pàgina col wikitest (le mudìfiche mìa salvàde però le narà pèrde).",
 	"visualeditor-wikitext-warning-title": "Troàt wikitest"
 }

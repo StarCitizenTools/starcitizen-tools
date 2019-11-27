@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ContextItem class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -111,15 +111,6 @@ ve.ui.ContextItem.prototype.getFragment = function () {
 			surfaceModel.getFragment();
 	}
 	return this.fragment;
-};
-
-/**
- * Check if the context's surface is readOnly
- *
- * @return {boolean} Context's surface is readOnly
- */
-ve.ui.ContextItem.prototype.isReadOnly = function () {
-	return this.context.getSurface().isReadOnly();
 };
 
 /* eslint-disable valid-jsdoc */

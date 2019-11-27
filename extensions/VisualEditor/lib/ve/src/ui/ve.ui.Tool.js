@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Tool classes.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -96,14 +96,7 @@ ve.ui.Tool.static.getCommand = function ( surface ) {
 ve.ui.Tool.prototype.onUpdateState = function ( fragment ) {
 	var command = this.getCommand();
 	if ( command !== null ) {
-		this.setDisabled(
-			!command || !fragment || !command.isExecutable( fragment ) ||
-			// Show command as disabled if a selection is required and the surface
-			// is read-only. Don't do this in Command as some are actually allowed
-			// to run, e.g. selectAll
-			// TODO: Add an allowedInReadOnly flag to some commands
-			( command.supportedSelections && fragment.getSurface() && fragment.getSurface().isReadOnly() )
-		);
+		this.setDisabled( !command || !fragment || !command.isExecutable( fragment ) );
 	}
 };
 
@@ -120,7 +113,7 @@ ve.ui.Tool.prototype.onSelect = function () {
 		if ( surface.context.inspector ) {
 			contextClosePromise = surface.context.inspector.close().closed;
 		} else {
-			contextClosePromise = ve.createDeferred().resolve().promise();
+			contextClosePromise = $.Deferred().resolve().promise();
 		}
 	}
 	if ( this.constructor.static.deactivateOnSelect ) {

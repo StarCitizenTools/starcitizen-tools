@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWAdvancedSettingsPage class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -29,7 +29,7 @@ ve.ui.MWAdvancedSettingsPage = function VeUiMWAdvancedSettingsPage( name, config
 
 	this.advancedSettingsFieldset = new OO.ui.FieldsetLayout( {
 		label: ve.msg( 'visualeditor-dialog-meta-advancedsettings-label' ),
-		icon: 'settings'
+		icon: 'advanced'
 	} );
 
 	// Initialization
@@ -82,7 +82,6 @@ ve.ui.MWAdvancedSettingsPage = function VeUiMWAdvancedSettingsPage( name, config
 			$overlay: config.$overlay,
 			align: 'top',
 			label: ve.msg( 'visualeditor-dialog-meta-settings-newsectioneditlink-label' ),
-			// eslint-disable-next-line no-jquery/no-global-selector
 			help: ve.msg( 'visualeditor-dialog-meta-settings-newsectioneditlink-help', $( '#ca-edit' ).text() )
 		}
 	);
@@ -118,17 +117,17 @@ ve.ui.MWAdvancedSettingsPage = function VeUiMWAdvancedSettingsPage( name, config
 		);
 	}
 
-	this.metaItemCheckboxes.forEach( function ( metaItemCheckbox ) {
-		metaItemCheckbox.fieldLayout = new OO.ui.FieldLayout(
+	$.each( this.metaItemCheckboxes, function () {
+		this.fieldLayout = new OO.ui.FieldLayout(
 			new OO.ui.CheckboxInputWidget(),
 			{
 				$overlay: config.$overlay,
 				align: 'inline',
-				label: metaItemCheckbox.label,
-				help: metaItemCheckbox.help
+				label: this.label,
+				help: this.help
 			}
 		);
-		advancedSettingsPage.advancedSettingsFieldset.addItems( [ metaItemCheckbox.fieldLayout ] );
+		advancedSettingsPage.advancedSettingsFieldset.addItems( [ this.fieldLayout ] );
 	} );
 
 	this.$element.append( this.advancedSettingsFieldset.$element );
@@ -158,7 +157,7 @@ ve.ui.MWAdvancedSettingsPage.prototype.setOutlineItem = function () {
 
 	if ( this.outlineItem ) {
 		this.outlineItem
-			.setIcon( 'settings' )
+			.setIcon( 'advanced' )
 			.setLabel( ve.msg( 'visualeditor-dialog-meta-advancedsettings-section' ) );
 	}
 };
@@ -195,12 +194,9 @@ ve.ui.MWAdvancedSettingsPage.prototype.onNewSectionEditLinkOptionChange = functi
  * Setup settings page.
  *
  * @param {ve.dm.MetaList} metaList Meta list
- * @param {Object} [config] Configuration options
- * @param {Object} [config.data] Dialog setup data
- * @param {boolean} [config.isReadOnly] Dialog is in read-only mode
- * @return {jQuery.Promise}
+ * @param {Object} [data] Dialog setup data
  */
-ve.ui.MWAdvancedSettingsPage.prototype.setup = function ( metaList, config ) {
+ve.ui.MWAdvancedSettingsPage.prototype.setup = function ( metaList ) {
 	var indexingField, indexingOption, indexingType,
 		newSectionEditField, newSectionEditLinkOption, newSectionEditLinkType,
 		displayTitleItem, displayTitle,
@@ -212,40 +208,30 @@ ve.ui.MWAdvancedSettingsPage.prototype.setup = function ( metaList, config ) {
 	indexingField = this.indexing.getField();
 	indexingOption = this.getMetaItem( 'mwIndex' );
 	indexingType = indexingOption && indexingOption.getAttribute( 'property' ) || 'default';
-	indexingField
-		.selectItemByData( indexingType )
-		.setDisabled( config.isReadOnly );
+	indexingField.selectItemByData( indexingType );
 	this.indexingOptionTouched = false;
 
 	// New section edit link items
 	newSectionEditField = this.newEditSectionLink.getField();
 	newSectionEditLinkOption = this.getMetaItem( 'mwNewSectionEdit' );
 	newSectionEditLinkType = newSectionEditLinkOption && newSectionEditLinkOption.getAttribute( 'property' ) || 'default';
-	newSectionEditField
-		.selectItemByData( newSectionEditLinkType )
-		.setDisabled( config.isReadOnly );
+	newSectionEditField.selectItemByData( newSectionEditLinkType );
 	this.newSectionEditLinkOptionTouched = false;
 
 	// Display title items
 	displayTitleItem = this.getMetaItem( 'mwDisplayTitle' );
 	displayTitle = displayTitleItem && displayTitleItem.getAttribute( 'content' ) || '';
 	if ( !displayTitle ) {
-		displayTitle = mw.Title.newFromText( ve.init.target.getPageName() ).getPrefixedText();
+		displayTitle = mw.Title.newFromText( ve.init.target.pageName ).getPrefixedText();
 	}
-	this.displayTitleInput
-		.setValue( displayTitle )
-		.setReadOnly( config.isReadOnly );
+	this.displayTitleInput.setValue( displayTitle );
 	this.displayTitleTouched = false;
 
 	// Simple checkbox items
-	this.metaItemCheckboxes.forEach( function ( metaItemCheckbox ) {
-		var isSelected = !!advancedSettingsPage.getMetaItem( metaItemCheckbox.metaName );
-		metaItemCheckbox.fieldLayout.getField()
-			.setSelected( isSelected )
-			.setDisabled( config.isReadOnly );
+	$.each( this.metaItemCheckboxes, function () {
+		var isSelected = !!advancedSettingsPage.getMetaItem( this.metaName );
+		this.fieldLayout.getField().setSelected( isSelected );
 	} );
-
-	return $.Deferred().resolve().promise();
 };
 
 /**
@@ -261,7 +247,7 @@ ve.ui.MWAdvancedSettingsPage.prototype.teardown = function ( data ) {
 
 	// Data initialization
 	data = data || {};
-	if ( data.action !== 'done' ) {
+	if ( data.action !== 'apply' ) {
 		return;
 	}
 
@@ -314,7 +300,7 @@ ve.ui.MWAdvancedSettingsPage.prototype.teardown = function ( data ) {
 	// Display title items
 	currentDisplayTitleItem = this.getMetaItem( 'mwDisplayTitle' );
 	newDisplayTitle = this.displayTitleInput.getValue();
-	if ( newDisplayTitle === mw.Title.newFromText( ve.init.target.getPageName() ).getPrefixedText() ) {
+	if ( newDisplayTitle === mw.Title.newFromText( ve.init.target.pageName ).getPrefixedText() ) {
 		newDisplayTitle = '';
 	}
 	newDisplayTitleItem = { type: 'mwDisplayTitle', attributes: { content: newDisplayTitle } };
@@ -345,22 +331,16 @@ ve.ui.MWAdvancedSettingsPage.prototype.teardown = function ( data ) {
 		}
 	}
 
-	this.metaItemCheckboxes.forEach( function ( metaItemCheckbox ) {
-		var currentItem = advancedSettingsPage.getMetaItem( metaItemCheckbox.metaName ),
-			isSelected = metaItemCheckbox.fieldLayout.getField().isSelected();
+	$.each( this.metaItemCheckboxes, function () {
+		var currentItem = advancedSettingsPage.getMetaItem( this.metaName ),
+			isSelected = this.fieldLayout.getField().isSelected();
 
 		if ( currentItem && !isSelected ) {
 			currentItem.remove();
 		} else if ( !currentItem && isSelected ) {
-			advancedSettingsPage.metaList.insertMeta( { type: metaItemCheckbox.metaName } );
+			advancedSettingsPage.metaList.insertMeta( { type: this.metaName } );
 		}
 	} );
 
 	this.metaList = null;
-};
-
-ve.ui.MWAdvancedSettingsPage.prototype.getFieldsets = function () {
-	return [
-		this.advancedSettingsFieldset
-	];
 };

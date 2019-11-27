@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Null Selection class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -64,10 +64,11 @@ ve.ce.NullSelection.prototype.isNativeCursor = function () {
 /**
  * @inheritdoc
  *
- * Null selections don't exist in the view, so just return document directionality.
+ * Null selections don't exist in the view, so just return
+ * the model's directionality.
  */
-ve.ce.NullSelection.prototype.getDirectionality = function ( doc ) {
-	return doc.getDir();
+ve.ce.NullSelection.prototype.getDirection = function () {
+	return this.getModel().getDocument().getDir();
 };
 
 /* Registration */

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MetaList class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -108,9 +108,7 @@ ve.dm.MetaList.prototype.indexOf = function ( item, group ) {
  * @return {ve.dm.MetaItem[]} Array of items in the group (shallow copy)
  */
 ve.dm.MetaList.prototype.getItemsInGroup = function ( group ) {
-	return this.items.filter( function ( item ) {
-		return item.getGroup() === group;
-	} );
+	return this.items.filter( function ( item ) { return item.getGroup() === group; } );
 };
 
 /**

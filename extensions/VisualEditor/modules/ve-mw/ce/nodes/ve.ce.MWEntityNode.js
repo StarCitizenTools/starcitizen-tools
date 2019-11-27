@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWEntityNode class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -48,7 +48,7 @@ ve.ce.MWEntityNode.static.name = 'mwEntity';
 ve.ce.MWEntityNode.prototype.onUpdate = function () {
 	var
 		chr = this.model.getAttribute( 'character' ),
-		whitespaceHtmlChars = ve.visibleWhitespaceCharacters,
+		whitespaceHtmlChars = ve.ce.nodeFactory.lookup( 'text' ).static.whitespaceHtmlCharacters,
 		significantWhitespace = this.getModel().getParent().hasSignificantWhitespace();
 
 	if ( !significantWhitespace && Object.prototype.hasOwnProperty.call( whitespaceHtmlChars, chr ) ) {

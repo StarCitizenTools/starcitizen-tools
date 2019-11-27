@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWTemplatePlaceholderPage class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -32,8 +32,7 @@ ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeh
 
 	this.addTemplateInput = new ve.ui.MWTemplateTitleInputWidget( {
 		$overlay: config.$overlay,
-		showDescriptions: true,
-		api: ve.init.target.getContentApi()
+		showDescriptions: true
 	} )
 		.connect( this, {
 			change: 'onTemplateInputChange',
@@ -63,8 +62,7 @@ ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeh
 
 	addTemplateActionFieldLayout = new OO.ui.ActionFieldLayout(
 		this.addTemplateInput,
-		this.addTemplateButton,
-		{ align: 'top' }
+		this.addTemplateButton
 	);
 
 	this.addTemplateFieldset = new OO.ui.FieldsetLayout( {
@@ -101,15 +99,6 @@ ve.ui.MWTemplatePlaceholderPage.prototype.setOutlineItem = function () {
 			.setFlags( [ 'placeholder' ] )
 			.setLabel( ve.msg( 'visualeditor-dialog-transclusion-placeholder' ) );
 	}
-};
-
-ve.ui.MWTemplatePlaceholderPage.prototype.focus = function () {
-	// Parent method
-	ve.ui.MWTemplatePlaceholderPage.super.prototype.focus.apply( this, arguments );
-
-	// HACK: Set the width of the lookupMenu to the width of the input
-	// TODO: This should be handled upstream in OOUI
-	this.addTemplateInput.lookupMenu.width = this.addTemplateInput.$input[ 0 ].clientWidth;
 };
 
 ve.ui.MWTemplatePlaceholderPage.prototype.onAddTemplate = function () {

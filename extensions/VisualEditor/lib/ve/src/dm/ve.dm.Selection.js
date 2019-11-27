@@ -1,15 +1,17 @@
 /*!
  * VisualEditor Selection class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
  * @class
  * @abstract
  * @constructor
+ * @param {ve.dm.Document} doc Document
  */
-ve.dm.Selection = function VeDmSelection() {
+ve.dm.Selection = function VeDmSelection( doc ) {
+	this.documentModel = doc;
 };
 
 /* Inheritance */
@@ -25,23 +27,20 @@ ve.dm.Selection.static.type = null;
 /**
  * Create a new selection from a JSON serialization
  *
+ * @param {ve.dm.Document} doc Document to create the selection on
  * @param {string|Object} json JSON serialization or hash object
  * @return {ve.dm.Selection} New selection
  * @throws {Error} Unknown selection type
  */
-ve.dm.Selection.static.newFromJSON = function ( json ) {
-	var hash, constructor;
-	if ( ve.dm.Document && arguments[ 0 ] instanceof ve.dm.Document ) {
-		throw new Error( 'Got obsolete ve.dm.Document argument' );
-	}
-	hash = typeof json === 'string' ? JSON.parse( json ) : json;
-	constructor = ve.dm.selectionFactory.lookup( hash.type );
+ve.dm.Selection.static.newFromJSON = function ( doc, json ) {
+	var hash = typeof json === 'string' ? JSON.parse( json ) : json,
+		constructor = ve.dm.selectionFactory.lookup( hash.type );
 
 	if ( !constructor ) {
 		throw new Error( 'Unknown selection type ' + hash.name );
 	}
 
-	return constructor.static.newFromHash( hash );
+	return constructor.static.newFromHash( doc, hash );
 };
 
 /**
@@ -49,12 +48,18 @@ ve.dm.Selection.static.newFromJSON = function ( json ) {
  *
  * @abstract
  * @method
+ * @param {ve.dm.Document} doc Document to create the selection on
  * @param {Object} hash Hash object
  * @return {ve.dm.Selection} New selection
  */
 ve.dm.Selection.static.newFromHash = null;
 
 /* Methods */
+
+/**
+ * Test for selection equality
+ */
+ve.dm.Selection.prototype.equals = null;
 
 /**
  * Get a JSON serialization of this selection
@@ -73,6 +78,15 @@ ve.dm.Selection.prototype.toJSON = null;
  * @return {string} Textual description
  */
 ve.dm.Selection.prototype.getDescription = null;
+
+/**
+ * Create a copy of this selection
+ *
+ * @abstract
+ * @method
+ * @return {ve.dm.Selection} Cloned selection
+ */
+ve.dm.Selection.prototype.clone = null;
 
 /**
  * Get a new selection at the start point of this one
@@ -189,7 +203,6 @@ ve.dm.Selection.prototype.isNull = function () {
  *
  * @abstract
  * @method
- * @param {ve.dm.Document} doc The document to which this selection applies
  * @return {ve.Range[]} Ranges
  */
 ve.dm.Selection.prototype.getRanges = null;
@@ -202,6 +215,15 @@ ve.dm.Selection.prototype.getRanges = null;
  * @return {ve.Range|null} Covering range, if not null
  */
 ve.dm.Selection.prototype.getCoveringRange = null;
+
+/**
+ * Get the document model this selection applies to
+ *
+ * @return {ve.dm.Document} Document model
+ */
+ve.dm.Selection.prototype.getDocument = function () {
+	return this.documentModel;
+};
 
 /**
  * Get the name of the selection type

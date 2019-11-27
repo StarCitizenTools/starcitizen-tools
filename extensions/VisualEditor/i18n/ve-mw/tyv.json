@@ -41,5 +41,6 @@
 	"visualeditor-savedialog-label-error": "Алдаг",
 	"visualeditor-savedialog-label-warning": "Кичээңгей",
 	"visualeditor-savedialog-title-save": "Өскертилгеңер шыгжаар",
-	"visualeditor-toolbar-savedialog": "Арын шыгжаар"
+	"visualeditor-toolbar-savedialog": "Арын шыгжаар",
+	"visualeditor-viewpage-savewarning-title": "Бүзүрелдиг-дир бе?"
 }

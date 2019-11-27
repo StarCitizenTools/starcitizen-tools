@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Table Selection class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -14,7 +14,8 @@
 ve.ce.TableSelection = function VeCeTableSelection() {
 	// Parent constructor
 	ve.ce.TableSelection.super.apply( this, arguments );
-	this.directionality = null;
+
+	this.direction = null;
 };
 
 /* Inheritance */
@@ -118,11 +119,11 @@ ve.ce.TableSelection.prototype.isNativeCursor = function () {
 /**
  * @inheritdoc
  */
-ve.ce.TableSelection.prototype.getDirectionality = function ( doc ) {
-	if ( !this.directionality ) {
-		this.directionality = doc.getDirectionalityFromRange( this.getModel().tableRange );
+ve.ce.TableSelection.prototype.getDirection = function () {
+	if ( !this.direction ) {
+		this.direction = this.getSurface().getDocument().getDirectionFromRange( this.getModel().tableRange );
 	}
-	return this.directionality;
+	return this.direction;
 };
 
 /* Registration */

@@ -1,12 +1,12 @@
 /*!
- * OOUI v0.31.1
+ * OOUI v0.26.3
  * https://www.mediawiki.org/wiki/OOUI
  *
- * Copyright 2011–2019 OOUI Team and other contributors.
+ * Copyright 2011–2018 OOUI Team and other contributors.
  * Released under the MIT license
  * http://oojs.mit-license.org
  *
- * Date: 2019-03-21T15:54:37Z
+ * Date: 2018-04-10T22:15:39Z
  */
 ( function ( OO ) {
 
@@ -42,4 +42,4 @@ OO.ui.theme = new OO.ui.ApexTheme();
 
 }( OO ) );
 
-//# sourceMappingURL=oojs-ui-apex.js.map.json
+//# sourceMappingURL=oojs-ui-apex.js.map

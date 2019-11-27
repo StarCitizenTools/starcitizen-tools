@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Scalable tests.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.Scalable' );
@@ -38,7 +38,6 @@ QUnit.test( 'construction/clone/getters/setters/toggleDefault/clearers', functio
 		clone = scalable.clone();
 
 	assert.deepEqual( scalable, clone, 'Clone is deepEqual' );
-	assert.notStrictEqual( scalable, clone, 'Clone is not reference equal' );
 	assert.deepEqual( scalable.getCurrentDimensions(), currentDimensions, 'getCurrentDimensions' );
 	assert.deepEqual( scalable.getOriginalDimensions(), originalDimensions, 'getOriginalDimensions' );
 	assert.deepEqual( scalable.getDefaultDimensions(), defaultDimensions, 'getDefaultDimensions' );
@@ -56,9 +55,7 @@ QUnit.test( 'construction/clone/getters/setters/toggleDefault/clearers', functio
 	scalable.clearDefaultDimensions();
 	assert.strictEqual( scalable.getDefaultDimensions(), null, 'clearDefaultDimensions' );
 
-	scalable.on( 'defaultSizeChange', function () {
-		eventEmitted = true;
-	} );
+	scalable.on( 'defaultSizeChange', function () { eventEmitted = true; } );
 	eventEmitted = false;
 	scalable.clearDefaultDimensions();
 	scalable.off( 'defaultSizeChange' );
@@ -67,9 +64,7 @@ QUnit.test( 'construction/clone/getters/setters/toggleDefault/clearers', functio
 	scalable.clearOriginalDimensions();
 	assert.strictEqual( scalable.getOriginalDimensions(), null, 'clearOriginalDimensions' );
 
-	scalable.on( 'originalSizeChange', function () {
-		eventEmitted = true;
-	} );
+	scalable.on( 'originalSizeChange', function () { eventEmitted = true; } );
 	eventEmitted = false;
 	scalable.clearOriginalDimensions();
 	scalable.off( 'originalSizeChange' );
@@ -78,9 +73,7 @@ QUnit.test( 'construction/clone/getters/setters/toggleDefault/clearers', functio
 	scalable.clearMinDimensions();
 	assert.strictEqual( scalable.getMinDimensions(), null, 'clearMinDimensions' );
 
-	scalable.on( 'minSizeChange', function () {
-		eventEmitted = true;
-	} );
+	scalable.on( 'minSizeChange', function () { eventEmitted = true; } );
 	eventEmitted = false;
 	scalable.clearMinDimensions();
 	scalable.off( 'minSizeChange' );
@@ -89,9 +82,7 @@ QUnit.test( 'construction/clone/getters/setters/toggleDefault/clearers', functio
 	scalable.clearMaxDimensions();
 	assert.strictEqual( scalable.getMaxDimensions(), null, 'clearMaxDimensions' );
 
-	scalable.on( 'maxSizeChange', function () {
-		eventEmitted = true;
-	} );
+	scalable.on( 'maxSizeChange', function () { eventEmitted = true; } );
 	eventEmitted = false;
 	scalable.clearMaxDimensions();
 	scalable.off( 'maxSizeChange' );

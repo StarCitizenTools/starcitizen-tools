@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWMagicLinkNodeContextItem class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -52,15 +52,6 @@ ve.ui.MWMagicLinkNodeContextItem.prototype.getDescription = function () {
 	return this.model.getAttribute( 'content' );
 };
 
-/**
- * @inheritdoc
- */
-ve.ui.MWMagicLinkNodeContextItem.prototype.renderBody = function () {
-	// Parent method
-	ve.ui.MWMagicLinkNodeContextItem.super.prototype.renderBody.apply( this, arguments );
-
-	this.$labelLayout.remove();
-};
 /* Registration */
 
 ve.ui.contextItemFactory.register( ve.ui.MWMagicLinkNodeContextItem );

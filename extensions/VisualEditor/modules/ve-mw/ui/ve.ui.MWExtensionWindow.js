@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWExtensionWindow class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -108,7 +108,6 @@ ve.ui.MWExtensionWindow.prototype.getSetupProcess = function ( data, process ) {
 
 		dir = this.constructor.static.dir || data.dir;
 		this.input.setDir( dir );
-		this.input.setReadOnly( this.isReadOnly() );
 
 		this.actions.setAbilities( { done: false } );
 		this.input.connect( this, { change: 'onChangeHandler' } );
@@ -241,7 +240,7 @@ ve.ui.MWExtensionWindow.prototype.removeNode = function () {
 };
 
 /**
- * Update mwData object with the new values from the inspector or dialog
+ * Update mwData object with the new values from the inspector
  *
  * @param {Object} mwData MediaWiki data object
  */
@@ -251,11 +250,11 @@ ve.ui.MWExtensionWindow.prototype.updateMwData = function ( mwData ) {
 
 	// XML-like tags in wikitext are not actually XML and don't expect their contents to be escaped.
 	// This means that it is not possible for a tag '<foo>…</foo>' to contain the string '</foo>'.
-	// Prevent that by escaping the first angle bracket '<' to '&lt;'. (T59429)
+	// Prevent that by escaping the first angle bracket '<' to '&lt;'. (bug 57429)
 	value = value.replace( new RegExp( '<(/' + tagName + '\\s*>)', 'gi' ), '&lt;$1' );
 
 	if ( value.trim() === '' && this.constructor.static.selfCloseEmptyBody ) {
-		delete mwData.body;
+		mwData.body = null;
 	} else {
 		mwData.body = mwData.body || {};
 		mwData.body.extsrc = value;

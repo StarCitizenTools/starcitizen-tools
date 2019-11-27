@@ -1,9 +1,10 @@
 {
-	"root": true,
-	"extends": [
-		"wikimedia/client",
-		"wikimedia/jquery"
-	],
+	"extends": "wikimedia",
+	"env": {
+		"browser": true,
+		"jquery": true,
+		"qunit": true
+	},
 	"globals": {
 		"ve": true,
 		"VisualEditorSupportCheck": false,
@@ -13,16 +14,10 @@
 		"Papa": false
 	},
 	"rules": {
-		"no-jquery/no-extend": "error",
-		"no-jquery/no-hide": "error",
-		"no-jquery/no-show": "error",
-		"no-jquery/no-toggle": "error",
-		"max-statements-per-line": [ "error", { "max": 1 } ],
-		"max-len": "off"
+		"dot-notation": [ "error", { "allowKeywords": true } ]
 	},
 	"plugins": [ "html" ],
 	"settings": {
-		"html/indent": "+tab",
-		"html/report-bad-indent": "error"
+		"html/indent": "+tab"
 	}
 }

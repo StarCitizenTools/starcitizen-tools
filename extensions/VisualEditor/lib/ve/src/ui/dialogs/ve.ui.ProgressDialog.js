@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ProgressDialog class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -69,7 +69,7 @@ ve.ui.ProgressDialog.prototype.getSetupProcess = function ( data ) {
 			this.cancelDeferreds = [];
 
 			for ( i = 0, l = progresses.length; i < l; i++ ) {
-				cancelDeferred = ve.createDeferred();
+				cancelDeferred = $.Deferred();
 				$row = $( '<div>' ).addClass( 've-ui-progressDialog-row' );
 				progressBar = new OO.ui.ProgressBarWidget();
 				fieldLayout = new OO.ui.FieldLayout(
@@ -86,7 +86,7 @@ ve.ui.ProgressDialog.prototype.getSetupProcess = function ( data ) {
 					cancelButton = new OO.ui.ButtonWidget( {
 						framed: false,
 						icon: 'cancel',
-						title: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' )
+						iconTitle: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' )
 					} ).on( 'click', cancelDeferred.reject.bind( cancelDeferred ) );
 					$row.append( cancelButton.$element );
 					cancellable = true;

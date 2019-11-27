@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTemplateModel class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -265,7 +265,7 @@ ve.dm.MWTemplateModel.prototype.addParameter = function ( param ) {
 	var name = param.getName();
 	this.sequence = null;
 	this.params[ name ] = param;
-	this.spec.fillFromTemplate();
+	this.spec.fill();
 	param.connect( this, { change: [ 'emit', 'change' ] } );
 	this.emit( 'add', param );
 	this.emit( 'change' );
@@ -355,7 +355,7 @@ ve.dm.MWTemplateModel.prototype.serialize = function () {
 	}
 
 	// Performs a non-deep extend, so this won't reintroduce
-	// deleted parameters (T75134)
+	// deleted parameters (bug 73134)
 	template = ve.extendObject( {}, origData, template );
 	return { template: template };
 };

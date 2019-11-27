@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWPreviewElement class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -28,16 +28,6 @@ ve.ui.MWPreviewElement = function VeUiMwPreviewElement() {
 OO.inheritClass( ve.ui.MWPreviewElement, ve.ui.PreviewElement );
 
 /* Method */
-
-/**
- * @inheritdoc
- */
-ve.ui.MWPreviewElement.prototype.setModel = function ( model ) {
-	// Parent method
-	ve.ui.MWPreviewElement.super.prototype.setModel.call( this, model );
-
-	this.$element.addClass( 'mw-content-' + this.model.getDocument().getDir() );
-};
 
 /**
  * @inheritdoc

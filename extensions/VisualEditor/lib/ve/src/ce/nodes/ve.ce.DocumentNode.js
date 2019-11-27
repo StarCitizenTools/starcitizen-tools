@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable DocumentNode class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -29,8 +29,7 @@ ve.ce.DocumentNode = function VeCeDocumentNode( model, surface, config ) {
 	this.setRoot( this );
 
 	// DOM changes
-	// TODO: Remove ve-ce-rootNode class
-	this.$element.addClass( 've-ce-documentNode ve-ce-attachedRootNode ve-ce-rootNode' );
+	this.$element.addClass( 've-ce-documentNode' );
 	// Prevent Grammarly from polluting the DOM (T165746)
 	this.$element.attr( 'data-gramm', 'false' );
 };
@@ -68,6 +67,24 @@ ve.ce.DocumentNode.prototype.getOuterLength = function () {
  */
 ve.ce.DocumentNode.prototype.getSurface = function () {
 	return this.surface;
+};
+
+/**
+ * Disable editing.
+ *
+ * @method
+ */
+ve.ce.DocumentNode.prototype.disable = function () {
+	this.setContentEditable( false );
+};
+
+/**
+ * Enable editing.
+ *
+ * @method
+ */
+ve.ce.DocumentNode.prototype.enable = function () {
+	this.setContentEditable( true );
 };
 
 /* Registration */

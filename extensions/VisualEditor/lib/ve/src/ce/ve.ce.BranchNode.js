@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable BranchNode class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -174,7 +174,7 @@ ve.ce.BranchNode.prototype.onModelUpdate = function ( transaction ) {
  * @param {...ve.dm.BranchNode} [nodes] Variadic list of nodes to insert
  */
 ve.ce.BranchNode.prototype.onSplice = function ( index ) {
-	var i, length, removals, position, j, fragment,
+	var i, length, type, removals, position, j, fragment,
 		args = [];
 
 	for ( i = 0, length = arguments.length; i < length; i++ ) {
@@ -183,7 +183,13 @@ ve.ce.BranchNode.prototype.onSplice = function ( index ) {
 	// Convert models to views and attach them to this node
 	if ( args.length >= 3 ) {
 		for ( i = 2, length = args.length; i < length; i++ ) {
-			args[ i ] = ve.ce.nodeFactory.createFromModel( args[ i ] );
+			type = args[ i ].getType();
+			if ( ve.dm.nodeFactory.isMetaData( type ) ) {
+				// Metadata never has an explicit view representation, so a generic
+				// ve.ce.MetaItem should be fine
+				type = 'meta';
+			}
+			args[ i ] = ve.ce.nodeFactory.create( type, args[ i ] );
 			args[ i ].model.connect( this, { update: 'onModelUpdate' } );
 		}
 	}

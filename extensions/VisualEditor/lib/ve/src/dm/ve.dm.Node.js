@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Node class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -184,24 +184,6 @@ ve.dm.Node.static.isCellable = false;
  * @inheritable
  */
 ve.dm.Node.static.canContainContent = false;
-
-/**
- * Whether this node type behaves like a list when diffing.
- *
- * @static
- * @property {boolean}
- * @inheritable
- */
-ve.dm.Node.static.isDiffedAsList = false;
-
-/**
- * Whether this node type behaves like a leaf when diffing.
- *
- * @static
- * @property {boolean}
- * @inheritable
- */
-ve.dm.Node.static.isDiffedAsLeaf = false;
 
 /**
  * Whether this node type has significant whitespace. Only applies to content container nodes
@@ -456,13 +438,6 @@ ve.dm.Node.prototype.isInternal = function () {
 /**
  * @inheritdoc ve.Node
  */
-ve.dm.Node.prototype.isMetaData = function () {
-	return this.constructor.static.isMetaData;
-};
-
-/**
- * @inheritdoc ve.Node
- */
 ve.dm.Node.prototype.isWrapped = function () {
 	return this.constructor.static.isWrapped;
 };
@@ -517,20 +492,6 @@ ve.dm.Node.prototype.isCellEditable = function () {
 };
 
 /**
- * @inheritdoc ve.Node
- */
-ve.dm.Node.prototype.isDiffedAsList = function () {
-	return this.constructor.static.isDiffedAsList;
-};
-
-/**
- * @inheritdoc ve.Node
- */
-ve.dm.Node.prototype.isDiffedAsLeaf = function () {
-	return this.constructor.static.isDiffedAsLeaf;
-};
-
-/**
  * Check if the node can have a slug before it.
  *
  * @method
@@ -547,19 +508,6 @@ ve.dm.Node.prototype.canHaveSlugBefore = function () {
  * @return {boolean} Whether the node can have a slug after it
  */
 ve.dm.Node.prototype.canHaveSlugAfter = ve.dm.Node.prototype.canHaveSlugBefore;
-
-/**
- * A string identifier used to suppress slugs
- *
- * If sequential nodes have the same non-null suppressSlugType, then
- * no slug is shown, e.g. two floated images can return 'float' to
- * suppress the slug between them.
- *
- * @return {string|null} Type
- */
-ve.dm.Node.prototype.suppressSlugType = function () {
-	return null;
-};
 
 /**
  * @inheritdoc ve.Node
@@ -580,15 +528,6 @@ ve.dm.Node.prototype.handlesOwnChildren = function () {
  */
 ve.dm.Node.prototype.shouldIgnoreChildren = function () {
 	return this.constructor.static.ignoreChildren;
-};
-
-/**
- * Check if the node can be the root of a branch exposed in a ve.ce.Surface
- *
- * @return {boolean} Node can be the root of a surfaced branch
- */
-ve.dm.Node.prototype.isSurfaceable = function () {
-	return this.hasChildren() && !this.canContainContent() && !this.isMetaData() && !this.getChildNodeTypes();
 };
 
 /**

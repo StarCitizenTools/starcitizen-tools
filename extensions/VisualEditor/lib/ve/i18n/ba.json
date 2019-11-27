@@ -8,8 +8,7 @@
 			"Sagan",
 			"Рустам Нурыев",
 			"Азат Хәлилов",
-			"Lizalizaufa",
-			"Янмурза Баки"
+			"Lizalizaufa"
 		]
 	},
 	"visualeditor": "Күҙләгес мөхәррир",
@@ -31,6 +30,7 @@
 	"visualeditor-annotationbutton-superscript-tooltip": "Өҫкө индекс",
 	"visualeditor-annotationbutton-underline-tooltip": "Һыҙыу",
 	"visualeditor-changedesc-direction": "Яңынан ҡарау йүнәлеше $1-ҙән $2-гә тиклем үҙгәрҙе",
+	"visualeditor-changedesc-style": "Стиль $1- ҙан $2-гә тиклем үҙгәртелде",
 	"visualeditor-clearbutton-tooltip": "Форматлауҙы таҙартырға",
 	"visualeditor-clipboard-copy": "Күсермәһен алырға",
 	"visualeditor-clipboard-cut": "Киҫеү",
@@ -96,6 +96,8 @@
 	"visualeditor-linkinspector-title": "Һылтанма",
 	"visualeditor-listbutton-bullet-tooltip": "Тамғалы исемлек",
 	"visualeditor-listbutton-number-tooltip": "Һанлы исемлек",
+	"visualeditor-mediasizewidget-button-originaldimensions": "Тулыһынса күрһәтеү",
+	"visualeditor-mediasizewidget-label-custom": "Көйләнгән",
 	"visualeditor-mediasizewidget-label-defaulterror": "Ярамаған дәүмәлдәр",
 	"visualeditor-mediasizewidget-label-scale": "Масштаб",
 	"visualeditor-mediasizewidget-label-scale-percent": "Эскиз ҙурлығынан %",
@@ -105,7 +107,6 @@
 	"visualeditor-shortcuts-clipboard": "Алмашыу буферы",
 	"visualeditor-shortcuts-formatting": "Абзацты форматлау",
 	"visualeditor-shortcuts-history": "Тарих",
-	"visualeditor-shortcuts-insert": "Өҫтәргә",
 	"visualeditor-shortcuts-other": "Башҡалар",
 	"visualeditor-shortcuts-sequence-notice": "Төрө",
 	"visualeditor-shortcuts-text-style": "Текст стиле",

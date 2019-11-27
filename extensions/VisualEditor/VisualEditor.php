@@ -8,7 +8,7 @@
  *
  * @file
  * @ingroup Extensions
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license MIT
  */
 
@@ -22,11 +22,11 @@ if ( function_exists( 'wfLoadExtension' ) ) {
 		__DIR__ . '/i18n/ve-wmf'
 	];
 
-	wfWarn(
-		'Deprecated PHP entry point used for VisualEditor extension. Please use wfLoadExtension ' .
-		'instead, see https://www.mediawiki.org/wiki/Extension_registration for more details.'
-	);
+	/* wfWarn(
+	'Deprecated PHP entry point used for VisualEditor extension. Please use wfLoadExtension '.
+	'instead, see https://www.mediawiki.org/wiki/Extension_registration for more details.'
+	); */
 	return true;
 }
 
-die( 'This version of the VisualEditor extension requires MediaWiki 1.32+.' );
+die( 'This version of the VisualEditor extension requires MediaWiki 1.25+.' );

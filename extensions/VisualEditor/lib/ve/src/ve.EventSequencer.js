@@ -1,7 +1,7 @@
 /*!
  * VisualEditor EventSequencer class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -435,7 +435,7 @@ ve.EventSequencer.prototype.cancelPostponed = function ( timeoutId ) {
 	clearTimeout( timeoutId );
 };
 
-/**
+/*
  * Single method to perform all listener calls, for ease of debugging
  * @param {string} timing on|after|afterOne|onLoop|afterLoop|afterLoopOne
  * @param {string} eventName Name of the event

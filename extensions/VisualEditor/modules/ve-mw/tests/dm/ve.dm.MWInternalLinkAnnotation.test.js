@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWInternalLinkAnnotation tests.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.MWInternalLinkAnnotation' );
@@ -21,6 +21,7 @@ QUnit.test( 'toDataElement', function ( assert ) {
 				expected: {
 					type: 'link/mwInternal',
 					attributes: {
+						hrefPrefix: '',
 						lookupTitle: 'Foo',
 						normalizedTitle: 'Foo',
 						origTitle: 'Foo',
@@ -35,38 +36,11 @@ QUnit.test( 'toDataElement', function ( assert ) {
 				expected: {
 					type: 'link/mwInternal',
 					attributes: {
+						hrefPrefix: '',
 						lookupTitle: 'Foo?',
 						normalizedTitle: 'Foo?',
 						origTitle: 'Foo%3F',
 						title: 'Foo?'
-					}
-				}
-			},
-			{
-				// The fragment should make it into some parts of this, and not others
-				msg: 'Fragments',
-				element: internalLink( 'Foo#bar' ),
-				expected: {
-					type: 'link/mwInternal',
-					attributes: {
-						lookupTitle: 'Foo',
-						normalizedTitle: 'Foo#bar',
-						origTitle: 'Foo#bar',
-						title: 'Foo#bar'
-					}
-				}
-			},
-			{
-				// Question marks in the fragment shouldn't confuse this
-				msg: 'Question marks in fragments',
-				element: internalLink( 'Foo#bar?' ),
-				expected: {
-					type: 'link/mwInternal',
-					attributes: {
-						lookupTitle: 'Foo',
-						normalizedTitle: 'Foo#bar.3F',
-						origTitle: 'Foo#bar.3F',
-						title: 'Foo#bar.3F'
 					}
 				}
 			}
@@ -87,7 +61,7 @@ QUnit.test( 'toDataElement', function ( assert ) {
 } );
 
 QUnit.test( 'getFragment', function ( assert ) {
-	var i, l,
+	var	i, l,
 		cases = [
 			{
 				msg: 'No fragment returns null',
@@ -127,6 +101,6 @@ QUnit.test( 'getFragment', function ( assert ) {
 		];
 
 	for ( i = 0, l = cases.length; i < l; i++ ) {
-		assert.strictEqual( ve.dm.MWInternalLinkAnnotation.static.getFragment( cases[ i ].original ), cases[ i ].expected, cases[ i ].msg );
+		assert.deepEqual( ve.dm.MWInternalLinkAnnotation.static.getFragment( cases[ i ].original ), cases[ i ].expected, cases[ i ].msg );
 	}
 } );

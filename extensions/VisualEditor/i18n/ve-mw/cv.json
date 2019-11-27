@@ -2,11 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Chuvash2014",
-			"Chavash",
-			"Chuvash"
+			"Chavash"
 		]
 	},
-	"tooltip-ca-ve-edit": "Кăна тӳрлет",
+	"tooltip-ca-ve-edit": "Эле тӳрлет",
 	"visualeditor-ca-editsource": "Кодне тӳрлет",
 	"visualeditor-ca-editsource-section": "кодне тӳрлет",
 	"visualeditor-categories-tool": "Категорисем",
@@ -17,6 +16,5 @@
 	"visualeditor-dialog-meta-languages-section": "Чĕлхесем",
 	"visualeditor-dialog-meta-settings-hiddencat-label": "Пытарнă категори",
 	"visualeditor-languages-tool": "Чĕлхесем",
-	"visualeditor-savedialog-review-wikitext": "Викитексчĕ",
 	"visualeditor-toolbar-savedialog": "Страницине çырса хур"
 }

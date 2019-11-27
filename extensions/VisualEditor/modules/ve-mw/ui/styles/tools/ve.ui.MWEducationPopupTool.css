@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface education popup tool styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -20,10 +20,10 @@
 }
 
 .ve-ui-pulsatingDot {
-	width: 36px;
-	height: 36px;
-	margin-bottom: -18px;
-	margin-left: -18px;
+	width: 2.5em;
+	height: 2.5em;
+	margin-bottom: -1.25em;
+	margin-left: -1.25em;
 	opacity: 0;
 	-webkit-animation: pulse 3s ease-out;
 	-moz-animation: pulse 3s ease-out;
@@ -34,11 +34,10 @@
 }
 
 .ve-ui-stillDot {
-	/* Use whole pixel values to improve rendering (T214203) */
-	width: 12px;
-	height: 12px;
-	margin-bottom: -6px;
-	margin-left: -6px;
+	width: 0.8em;
+	height: 0.8em;
+	margin-bottom: -0.4em;
+	margin-left: -0.4em;
 }
 
 .ve-ui-educationPopup-shield {
@@ -80,22 +79,18 @@
 		transform: scale( 0 );
 		opacity: 0;
 	}
-
 	25% {
 		transform: scale( 0 );
 		opacity: 0.1;
 	}
-
 	50% {
 		transform: scale( 0.1 );
 		opacity: 0.3;
 	}
-
 	75% {
 		transform: scale( 0.5 );
 		opacity: 0.5;
 	}
-
 	100% {
 		transform: scale( 1 );
 		opacity: 0;
@@ -107,22 +102,18 @@
 		transform: scale( 0 );
 		opacity: 0;
 	}
-
 	25% {
 		transform: scale( 0 );
 		opacity: 0.1;
 	}
-
 	50% {
 		transform: scale( 0.1 );
 		opacity: 0.3;
 	}
-
 	75% {
 		transform: scale( 0.5 );
 		opacity: 0.5;
 	}
-
 	100% {
 		transform: scale( 1 );
 		opacity: 0;
@@ -134,22 +125,18 @@
 		transform: scale( 0 );
 		opacity: 0;
 	}
-
 	25% {
 		transform: scale( 0 );
 		opacity: 0.1;
 	}
-
 	50% {
 		transform: scale( 0.1 );
 		opacity: 0.3;
 	}
-
 	75% {
 		transform: scale( 0.5 );
 		opacity: 0.5;
 	}
-
 	100% {
 		transform: scale( 1 );
 		opacity: 0;

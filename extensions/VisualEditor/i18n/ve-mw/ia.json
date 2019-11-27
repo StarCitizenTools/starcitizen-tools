@@ -5,6 +5,12 @@
 			"Julian Mendez"
 		]
 	},
+	"apihelp-visualeditor-description": "Retorna HTML pro un pagina ab le servicio Parsoid.",
+	"apihelp-visualeditor-param-basetimestamp": "Quando tu salveguarda, insere hic le data e hora del version que ha essite modificate. Isto es pro deteger conflictos de modification.",
+	"apihelp-visualeditor-param-cachekey": "Pro serialisar o comparar le versiones, usar le resultato de un previe requesta \"serializeforcache\" con iste clave. Supplanta $1html.",
+	"apihelp-visualeditor-param-oldid": "Le numero del version a usar (predefinite le ultime version).",
+	"apihelp-visualeditor-param-paction": "Action a exequer.",
+	"apihelp-visualeditor-param-page": "Le pagina sur le qual exequer actiones.",
 	"tooltip-ca-createsource": "Crear le codice fonte de iste pagina",
 	"tooltip-ca-editsource": "Modificar le codice fonte de iste pagina",
 	"tooltip-ca-ve-edit": "Modificar iste pagina",
@@ -28,8 +34,8 @@
 	"visualeditor-dialog-media-content-section": "Legenda",
 	"visualeditor-dialog-media-goback": "Retornar",
 	"visualeditor-dialog-media-noresults": "Nulle resultato trovate.",
-	"visualeditor-dialog-media-page-advanced": "Avantiate",
-	"visualeditor-dialog-media-page-general": "General",
+	"visualeditor-dialog-media-page-advanced": "Configuration avantiate",
+	"visualeditor-dialog-media-page-general": "Configuration general",
 	"visualeditor-dialog-media-position-center": "Centro",
 	"visualeditor-dialog-media-position-checkbox": "Disponer le texto circum iste objecto",
 	"visualeditor-dialog-media-position-left": "Sinistra",
@@ -39,6 +45,7 @@
 	"visualeditor-dialog-media-size-choosecustom": "Definir un grandor personalisate",
 	"visualeditor-dialog-media-size-choosedefault": "Mitter al grandor predefinite",
 	"visualeditor-dialog-media-size-choosefull": "Mitter al grandor complete",
+	"visualeditor-dialog-media-size-originalsize-error": "Impossibile recuperar le dimension original del file.",
 	"visualeditor-dialog-media-size-section": "Dimension del imagine",
 	"visualeditor-dialog-media-title": "Configuration multimedial",
 	"visualeditor-dialog-media-type-border": "Bordo",
@@ -173,6 +180,9 @@
 	"visualeditor-toolbar-savedialog": "Salveguardar pagina",
 	"visualeditor-usernamespacepagelink": "Project:Spatio de nomines usator",
 	"visualeditor-version-label": "Version",
+	"visualeditor-viewpage-savewarning": "Es tu secur de voler quitar le modo de modification sin salveguardar primo?",
+	"visualeditor-viewpage-savewarning-discard": "Abandonar modificationes",
+	"visualeditor-viewpage-savewarning-keep": "Continuar a modificar",
 	"visualeditor-wikitext-warning": "Tu usa le editor visual; le [[{{MediaWiki:visualeditor-wikitext-warning-link}}|wikitexto]] non functiona hic. Pro cambiar al modification in modo de codice fonte a omne tempore sin perder tu modificationes, clicca sur le button de cambio.",
 	"visualeditor-wikitext-warning-title": "Marcation wikitexto detegite"
 }

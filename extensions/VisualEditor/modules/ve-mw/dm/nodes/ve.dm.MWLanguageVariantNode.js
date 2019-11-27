@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWLanguageVariantNode class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -146,7 +146,7 @@ ve.dm.MWLanguageVariantNode.static.toDomElements = function ( dataElement, doc, 
 
 	domElement.setAttribute( 'typeof', rdfaType );
 	domElement.setAttribute( 'data-mw-variant', dataMwvJSON );
-	if ( converter.doesModeNeedRendering() && tagName !== 'META' ) {
+	if ( converter.isForClipboard() && tagName !== 'META' ) {
 		// Fill in contents of span for diff/cut-and-paste/etc.
 		this.insertPreviewElements( domElement, variantInfo );
 	}
@@ -317,7 +317,7 @@ ve.dm.MWLanguageVariantNode.static.matchLanguage = function ( items ) {
 
 /* Methods */
 
-/**
+/*
  * Helper function to get the description object for this markup node.
  *
  * @method
@@ -359,20 +359,92 @@ ve.dm.MWLanguageVariantNode.prototype.getRuleType = function () {
  * @return {string}
  */
 ve.dm.MWLanguageVariantNode.static.getRuleType = function ( variantInfo ) {
-	if ( variantInfo.disabled ) {
-		return 'disabled';
-	}
-	if ( variantInfo.filter ) {
-		return 'filter';
-	}
-	if ( variantInfo.name ) {
-		return 'name';
-	}
-	if ( variantInfo.twoway ) {
-		return 'twoway';
-	}
-	if ( variantInfo.oneway ) {
-		return 'oneway';
-	}
+	if ( variantInfo.disabled ) { return 'disabled'; }
+	if ( variantInfo.filter ) { return 'filter'; }
+	if ( variantInfo.name ) { return 'name'; }
+	if ( variantInfo.twoway ) { return 'twoway'; }
+	if ( variantInfo.oneway ) { return 'oneway'; }
 	return 'unknown'; // should never happen
 };
+
+/* Concrete subclasses */
+
+/**
+ * DataModel MediaWiki language variant block node.
+ *
+ * @class
+ * @extends ve.dm.MWLanguageVariantNode
+ *
+ * @constructor
+ * @param {Object} [element] Reference to element in linear model
+ * @param {ve.dm.Node[]} [children]
+ */
+ve.dm.MWLanguageVariantBlockNode = function VeDmMWLanguageVariantBlockNode() {
+	// Parent constructor
+	ve.dm.MWLanguageVariantBlockNode.super.apply( this, arguments );
+};
+
+OO.inheritClass( ve.dm.MWLanguageVariantBlockNode, ve.dm.MWLanguageVariantNode );
+
+ve.dm.MWLanguageVariantBlockNode.static.matchTagNames = [ 'div' ];
+
+ve.dm.MWLanguageVariantBlockNode.static.name = 'mwLanguageVariantBlock';
+
+/**
+ * DataModel MediaWiki language variant inline node.
+ *
+ * @class
+ * @extends ve.dm.MWLanguageVariantNode
+ *
+ * @constructor
+ * @param {Object} [element] Reference to element in linear model
+ * @param {ve.dm.Node[]} [children]
+ */
+ve.dm.MWLanguageVariantInlineNode = function VeDmMWLanguageVariantInlineNode() {
+	// Parent constructor
+	ve.dm.MWLanguageVariantInlineNode.super.apply( this, arguments );
+};
+
+OO.inheritClass( ve.dm.MWLanguageVariantInlineNode, ve.dm.MWLanguageVariantNode );
+
+ve.dm.MWLanguageVariantInlineNode.static.matchTagNames = [ 'span' ];
+
+ve.dm.MWLanguageVariantInlineNode.static.name = 'mwLanguageVariantInline';
+
+ve.dm.MWLanguageVariantInlineNode.static.isContent = true;
+
+/**
+ * DataModel MediaWiki language variant hidden node.
+ *
+ * @class
+ * @extends ve.dm.MWLanguageVariantNode
+ *
+ * @constructor
+ * @param {Object} [element] Reference to element in linear model
+ * @param {ve.dm.Node[]} [children]
+ */
+ve.dm.MWLanguageVariantHiddenNode = function VeDmMWLanguageVariantHiddenNode() {
+	// Parent constructor
+	ve.dm.MWLanguageVariantHiddenNode.super.apply( this, arguments );
+};
+
+OO.inheritClass( ve.dm.MWLanguageVariantHiddenNode, ve.dm.MWLanguageVariantNode );
+
+ve.dm.MWLanguageVariantHiddenNode.static.matchTagNames = [ 'meta' ];
+
+ve.dm.MWLanguageVariantHiddenNode.static.name = 'mwLanguageVariantHidden';
+
+ve.dm.MWLanguageVariantHiddenNode.static.isContent = true;
+
+/**
+ * @inheritdoc
+ */
+ve.dm.MWLanguageVariantHiddenNode.prototype.isHidden = function () {
+	return true;
+};
+
+/* Registration */
+
+ve.dm.modelRegistry.register( ve.dm.MWLanguageVariantBlockNode );
+ve.dm.modelRegistry.register( ve.dm.MWLanguageVariantInlineNode );
+ve.dm.modelRegistry.register( ve.dm.MWLanguageVariantHiddenNode );

@@ -6,8 +6,7 @@
 			"Чаховіч Уладзіслаў",
 			"Zedlik",
 			"Red Winged Duck",
-			"Renessaince",
-			"Nerogaf"
+			"Renessaince"
 		]
 	},
 	"ooui-outline-control-move-down": "Перасунуць элемэнт ніжэй",
@@ -23,10 +22,8 @@
 	"ooui-dialog-process-dismiss": "Прапусьціць",
 	"ooui-dialog-process-retry": "Паспрабаваць зноў",
 	"ooui-dialog-process-continue": "Працягваць",
-	"ooui-combobox-button-label": "Выпадаючае вакенца для камбінаванага сьпісу",
 	"ooui-selectfile-button-select": "Абраць файл",
 	"ooui-selectfile-not-supported": "Выбар файлу не падтрымліваецца",
 	"ooui-selectfile-placeholder": "Ніводзін файл не абраны",
-	"ooui-selectfile-dragdrop-placeholder": "Перацягніце файл сюды",
-	"ooui-field-help": "Дапамога"
+	"ooui-selectfile-dragdrop-placeholder": "Перацягніце файл сюды"
 }

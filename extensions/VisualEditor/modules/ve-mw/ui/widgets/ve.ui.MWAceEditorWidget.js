@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWAceEditorWidget class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /* global ace */
@@ -203,23 +203,6 @@ ve.ui.MWAceEditorWidget.prototype.setMinRows = function ( minRows ) {
 	} );
 	// TODO: Implement minRows setter for OO.ui.TextInputWidget
 	// and call it here in loadingPromise.fail
-};
-
-/**
- * @inheritdoc
- */
-ve.ui.MWAceEditorWidget.prototype.setReadOnly = function ( readOnly ) {
-	var widget = this;
-
-	// Parent method
-	ve.ui.MWAceEditorWidget.super.prototype.setReadOnly.call( this, readOnly );
-
-	this.loadingPromise.done( function () {
-		widget.editor.setReadOnly( widget.isReadOnly() );
-	} );
-
-	this.$element.toggleClass( 've-ui-mwAceEditorWidget-readOnly', !!this.isReadOnly() );
-	return this;
 };
 
 /**

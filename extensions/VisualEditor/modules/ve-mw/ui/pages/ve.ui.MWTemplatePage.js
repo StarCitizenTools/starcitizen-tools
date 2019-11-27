@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWTemplatePage class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,7 +16,6 @@
  * @param {string} name Unique symbolic name of page
  * @param {Object} [config] Configuration options
  * @cfg {jQuery} [$overlay] Overlay to render dropdowns in
- * @cfg {boolean} [isReadOnly] Page is read-only
  */
 ve.ui.MWTemplatePage = function VeUiMWTemplatePage( template, name, config ) {
 	var linkData, messageKey,
@@ -69,8 +68,8 @@ ve.ui.MWTemplatePage = function VeUiMWTemplatePage( template, name, config ) {
 							'visualeditor-dialog-transclusion-more-template-description',
 							title.getRelativeText( mw.config.get( 'wgNamespaceIds' ).template )
 						).parseDom() )
-				);
-			ve.targetLinksToNewWindow( this.$description[ 0 ] );
+				)
+				.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' );
 		}
 	} else {
 		// The transcluded page may be dynamically generated or unspecified in the DOM
@@ -85,8 +84,8 @@ ve.ui.MWTemplatePage = function VeUiMWTemplatePage( template, name, config ) {
 
 			this.$description
 				.addClass( 've-ui-mwTemplatePage-description-missing' )
-				.append( mw.message( messageKey, title.getPrefixedText() ).parseDom() );
-			ve.targetLinksToNewWindow( this.$description[ 0 ] );
+				.append( mw.message( messageKey, title.getPrefixedText() ).parseDom() )
+				.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' );
 		}
 	}
 
@@ -96,10 +95,7 @@ ve.ui.MWTemplatePage = function VeUiMWTemplatePage( template, name, config ) {
 		.append( this.addButton.$element );
 	this.$element
 		.addClass( 've-ui-mwTemplatePage' )
-		.append( this.infoFieldset.$element );
-	if ( !config.isReadOnly ) {
-		this.$element.append( this.removeButton.$element, this.$more );
-	}
+		.append( this.infoFieldset.$element, this.removeButton.$element, this.$more );
 };
 
 /* Inheritance */

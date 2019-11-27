@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LinearContextItem styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-linearContextItem-head {
@@ -15,10 +15,10 @@
 }
 
 .ve-ui-linearContextItem-title > .oo-ui-labelWidget {
+	vertical-align: middle;
 	margin-left: 0.3em;
 }
 
-/* Only used in mobile contexts (hidden in ve.ui.DesktopContext) */
 .ve-ui-linearContextItem-info {
 	display: table-cell;
 	position: relative;
@@ -39,13 +39,11 @@
 }
 
 .ve-ui-linearContextItem-actions {
-	white-space: nowrap;
 	display: table-cell;
 	width: 1%;
 	padding: 0.5em;
 }
 
-/* Only used in desktop contexts (hidden in ve.ui.MobileContext) */
 .ve-ui-linearContextItem-body {
 	max-height: 15em;
 	overflow: auto;

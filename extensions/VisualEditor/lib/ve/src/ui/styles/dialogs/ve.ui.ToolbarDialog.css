@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ToolbarDialog styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-toolbarDialog-padded .oo-ui-window-body {
@@ -42,10 +42,14 @@
 	transition: width 250ms;
 }
 
-.ve-ui-surface-toolbarDialog-side {
+.ve-ui-surface {
+	min-height: 0;
 	-webkit-transition: margin 250ms, min-height 250ms;
 	-moz-transition: margin 250ms, min-height 250ms;
 	transition: margin 250ms, min-height 250ms;
+}
+
+.ve-ui-surface-toolbarDialog-side {
 	min-height: 40em;
 }
 

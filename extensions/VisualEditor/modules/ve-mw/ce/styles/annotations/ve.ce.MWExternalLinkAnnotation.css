@@ -1,11 +1,10 @@
 /*!
  * VisualEditor ContentEditable MWExternalLinkAnnotation styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
-/* stylelint-disable-next-line selector-class-pattern */
-.plainlinks a.ve-ce-linkAnnotation.ve-ce-annotation-active.external {
+.plainlinks a.ve-ce-linkAnnotation-active.external {
 	/*
 	 * plainlinks is a MW core class which tries to suppress the normal
 	 * external-link appearance; we don't want it to also suppress the
@@ -14,13 +13,4 @@
 	 */
 	background-color: #e6f1ff !important; /* stylelint-disable-line declaration-no-important */
 	padding: 2px !important; /* stylelint-disable-line declaration-no-important */
-}
-
-/*
- * .ve-ce-linkAnnotation.ve-ce-annotation-active has as higher specificity
- * than .external, so we need to re-override right padding
- */
-/* stylelint-disable-next-line selector-class-pattern */
-.ve-ce-linkAnnotation.ve-ce-annotation-active.external {
-	padding-right: 13px;
 }

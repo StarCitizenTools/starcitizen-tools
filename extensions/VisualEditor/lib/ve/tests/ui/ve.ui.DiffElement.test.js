@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DiffElement tests.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ui.DiffElement' );
@@ -11,7 +11,9 @@ QUnit.module( 've.ui.DiffElement' );
 QUnit.test( 'Diffing', function ( assert ) {
 	var i, len,
 		spacer = '<div class="ve-ui-diffElement-spacer">⋮</div>',
-		comment = ve.dm.example.commentNodePreview,
+		comment = function ( text ) {
+			return '<span rel="ve:Comment" data-ve-comment="' + text + '">&nbsp;</span>';
+		},
 		cases = [
 			{
 				msg: 'Simple text change',
@@ -156,39 +158,27 @@ QUnit.test( 'Diffing', function ( assert ) {
 			},
 			{
 				msg: 'Attributes added to ClassAttributeNodes',
-				oldDoc: '<figure><img src="http://example.org/foo.jpg" alt="foo"><figcaption>bar</figcaption></figure>',
-				newDoc: '<figure><img src="http://example.org/foo.jpg" alt="bar"><figcaption>bar</figcaption></figure>',
+				oldDoc: '<figure><img src="http://example.org/foo.jpg"><figcaption>bar</figcaption></figure>',
+				newDoc: '<figure><img src="http://example.org/boo.jpg"><figcaption>bar</figcaption></figure>',
 				expected:
 					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<figure data-diff-action="structural-change" data-diff-id="0"><img src="http://example.org/foo.jpg" alt="bar"><figcaption>bar</figcaption></figure>' +
+						'<figure data-diff-action="structural-change" data-diff-id="0"><img src="http://example.org/boo.jpg" width="0" height="0" alt="null"><figcaption>bar</figcaption></figure>' +
 					'</div>',
 				expectedDescriptions: [
-					'<div>visualeditor-changedesc-changed,alt,<del>foo</del>,<ins>bar</ins></div>'
+					'visualeditor-changedesc-changed,src,http://example.org/foo.jpg,http://example.org/boo.jpg'
 				]
 			},
 			{
 				msg: 'Attributes added to ClassAttributeNodes with classes',
-				oldDoc: '<figure class="ve-align-right"><img src="http://example.org/foo.jpg" alt="foo"><figcaption>bar</figcaption></figure>',
-				newDoc: '<figure class="ve-align-right"><img src="http://example.org/foo.jpg" alt="bar"><figcaption>bar</figcaption></figure>',
+				oldDoc: '<figure class="ve-align-right"><img src="http://example.org/foo.jpg"><figcaption>bar</figcaption></figure>',
+				newDoc: '<figure class="ve-align-right"><img src="http://example.org/boo.jpg"><figcaption>bar</figcaption></figure>',
 				expected:
 					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<figure class="ve-align-right" data-diff-action="structural-change" data-diff-id="0"><img src="http://example.org/foo.jpg" alt="bar"><figcaption>bar</figcaption></figure>' +
+						'<figure class="ve-align-right" data-diff-action="structural-change" data-diff-id="0"><img src="http://example.org/boo.jpg" width="0" height="0" alt="null"><figcaption>bar</figcaption></figure>' +
 					'</div>',
 				expectedDescriptions: [
-					'<div>visualeditor-changedesc-changed,alt,<del>foo</del>,<ins>bar</ins></div>'
+					'visualeditor-changedesc-changed,src,http://example.org/foo.jpg,http://example.org/boo.jpg'
 				]
-			},
-			{
-				msg: 'Changed src on an image is considered a delete + insert',
-				oldDoc: '<figure class="ve-align-right"><img src="http://example.org/foo.jpg"><figcaption>bar</figcaption></figure>',
-				newDoc: '<figure class="ve-align-right"><img src="http://example.org/bar.jpg"><figcaption>bar</figcaption></figure>',
-				expected:
-					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<figure class="ve-align-right" data-diff-action="remove"><img src="http://example.org/foo.jpg"><figcaption>bar</figcaption></figure>' +
-					'</div>' +
-					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<figure class="ve-align-right" data-diff-action="insert"><img src="http://example.org/bar.jpg"><figcaption>bar</figcaption></figure>' +
-					'</div>'
 			},
 			{
 				msg: 'Node inserted',
@@ -307,7 +297,7 @@ QUnit.test( 'Diffing', function ( assert ) {
 						'</p>' +
 					'</div>',
 				expectedDescriptions: [
-					'<div>visualeditor-changedesc-comment,<del>whee</del>,<ins>wibble</ins></div>'
+					'visualeditor-changedesc-comment,whee,wibble'
 				]
 			},
 			{
@@ -318,18 +308,7 @@ QUnit.test( 'Diffing', function ( assert ) {
 					'<p data-diff-action="none">foo</p>' +
 					'<div class="ve-ui-diffElement-doc-child-change">' +
 						'<div rel="ve:Alien" data-diff-action="remove">Alien old</div>' +
-					'</div>' +
-					'<div class="ve-ui-diffElement-doc-child-change">' +
 						'<div rel="ve:Alien" data-diff-action="insert">Alien new</div>' +
-					'</div>'
-			},
-			{
-				msg: '`about` attribute ignored inside alien nodes',
-				oldDoc: '<div rel="ve:Alien"><span about="old">Alien</span></div>',
-				newDoc: '<div rel="ve:Alien"><span about="new">Alien</span></div>',
-				expected:
-					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<div rel="ve:Alien"><span about="new">Alien</span></div>' +
 					'</div>'
 			},
 			{
@@ -366,8 +345,8 @@ QUnit.test( 'Diffing', function ( assert ) {
 				oldDoc: '<p>foo bar baz</p><p>quux whee</p>',
 				newDoc: '<p>quux whee!</p><p>foo bar baz!</p>',
 				expected:
-					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<p data-diff-move="up">quux whee<ins data-diff-action="insert">!</ins></p>' +
+					'<div class="ve-ui-diffElement-doc-child-change" data-diff-move="up">' +
+						'<p>quux whee<ins data-diff-action="insert">!</ins></p>' +
 					'</div>' +
 					'<div class="ve-ui-diffElement-doc-child-change">' +
 						'<p>foo bar baz<ins data-diff-action="insert">!</ins></p>' +
@@ -448,10 +427,10 @@ QUnit.test( 'Diffing', function ( assert ) {
 				newDoc: '<p>foo <a href="http://example.org/whee">bar</a> baz</p>',
 				expected:
 					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<p>foo <span data-diff-action="change-remove"><a href="http://example.org/quuz">bar</a></span><span data-diff-action="change-insert" data-diff-id="0"><a href="http://example.org/whee">bar</a></span> baz</p>' +
+						'<p>foo <span data-diff-action="change-remove"><a href="http://example.org/quuz" rel="noopener" target="_blank">bar</a></span><span data-diff-action="change-insert" data-diff-id="0"><a href="http://example.org/whee" rel="noopener" target="_blank">bar</a></span> baz</p>' +
 					'</div>',
 				expectedDescriptions: [
-					'<div>visualeditor-changedesc-link-href,<del>http://example.org/quuz</del>,<ins>http://example.org/whee</ins></div>'
+					'visualeditor-changedesc-link-href,http://example.org/quuz,http://example.org/whee'
 				]
 			},
 			{
@@ -460,7 +439,7 @@ QUnit.test( 'Diffing', function ( assert ) {
 				newDoc: '<p><a href="http://example.org/">foo <b>bar</b> baz</a></p>',
 				expected:
 					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<p><a href="http://example.org/">foo <del data-diff-action="remove">bar</del><ins data-diff-action="insert"><b>bar</b></ins> baz</a></p>' +
+						'<p><a href="http://example.org/" rel="noopener" target="_blank">foo <del data-diff-action="remove">bar</del><ins data-diff-action="insert"><b>bar</b></ins> baz</a></p>' +
 					'</div>'
 			},
 			{
@@ -489,7 +468,7 @@ QUnit.test( 'Diffing', function ( assert ) {
 					'<div class="ve-ui-diffElement-doc-child-change">' +
 						'<p>' +
 							'foo bar' +
-							'<ins data-diff-action="insert">' + comment( 'comment' ) + '</ins>' +
+							'<ins data-diff-action="insert"><span rel="ve:Comment" data-ve-comment="comment">&nbsp;</span></ins>' +
 							' baz' +
 						'</p>' +
 					'</div>'
@@ -502,7 +481,7 @@ QUnit.test( 'Diffing', function ( assert ) {
 					'<div class="ve-ui-diffElement-doc-child-change">' +
 						'<p>' +
 							'foo bar' +
-							'<del data-diff-action="remove">' + comment( 'comment' ) + '</del>' +
+							'<del data-diff-action="remove"><span rel="ve:Comment" data-ve-comment="comment">&nbsp;</span></del>' +
 							' baz' +
 						'</p>' +
 					'</div>'
@@ -514,9 +493,9 @@ QUnit.test( 'Diffing', function ( assert ) {
 				expected:
 					'<div class="ve-ui-diffElement-doc-child-change">' +
 						'<ul>' +
-							'<li><p data-diff-action="none">foo</p></li>' +
-							'<li><p data-diff-action="insert">bar</p></li>' +
-							'<li><p data-diff-action="none">baz</p></li>' +
+							'<li><p>foo</p></li>' +
+							'<li data-diff-action="structural-insert"><p data-diff-action="insert">bar</p></li>' +
+							'<li><p>baz</p></li>' +
 						'</ul>' +
 					'</div>'
 			},
@@ -527,130 +506,32 @@ QUnit.test( 'Diffing', function ( assert ) {
 				expected:
 					'<div class="ve-ui-diffElement-doc-child-change">' +
 						'<ul>' +
-							'<li><p data-diff-action="none">foo</p></li>' +
-							'<li><p data-diff-action="remove">bar</p></li>' +
-							'<li><p data-diff-action="none">baz</p></li>' +
-						'</ul>' +
-					'</div>'
-			},
-			{
-				msg: 'List item removal from both ends',
-				oldDoc: '<ul><li><p>foo</p></li><li><p>bar</p></li><li><p>baz</p></li></ul>',
-				newDoc: '<ul><li><p>bar</p></li></ul>',
-				expected:
-					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<ul>' +
-							'<li><p data-diff-action="remove">foo</p></li>' +
-							'<li><p data-diff-action="none">bar</p></li>' +
-							'<li><p data-diff-action="remove">baz</p></li>' +
-						'</ul>' +
-					'</div>'
-			},
-			{
-				msg: 'List item move up',
-				oldDoc: '<ul><li><p>foo</p></li><li><p>bar</p></li><li><p>baz</p></li><li><p>quux</p></li></ul>',
-				newDoc: '<ul><li><p>baz</p></li><li><p>foo</p></li><li><p>bar</p></li><li><p>quux</p></li></ul>',
-				expected:
-					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<ul>' +
-							'<li><p data-diff-action="none" data-diff-move="up">baz</p></li>' +
-							'<li><p data-diff-action="none">foo</p></li>' +
-							'<li><p data-diff-action="none">bar</p></li>' +
-							'<li><p data-diff-action="none">quux</p></li>' +
-						'</ul>' +
-					'</div>'
-			},
-			{
-				msg: 'List item move down',
-				oldDoc: '<ul><li><p>foo</p></li><li><p>bar</p></li><li><p>baz</p></li><li><p>quux</p></li></ul>',
-				newDoc: '<ul></li><li><p>foo</p></li><li><p>baz</p><li><p>quux</p></li><li><p>bar</p></li></ul>',
-				expected:
-					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<ul>' +
-							'<li><p data-diff-action="none">foo</p></li>' +
-							'<li><p data-diff-action="none">baz</p></li>' +
-							'<li><p data-diff-action="none">quux</p></li>' +
-							'<li><p data-diff-action="none" data-diff-move="down">bar</p></li>' +
-						'</ul>' +
-					'</div>'
-			},
-			{
-				msg: 'List item move and change',
-				oldDoc: '<ul><li><p>foo</p></li><li><p>bar</p></li><li><p>baz baz</p></li><li><p>quux</p></li></ul>',
-				newDoc: '<ul><li><p>baz bat</p></li><li><p>foo</p></li><li><p>bar</p></li><li><p>quux</p></li></ul>',
-				expected:
-					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<ul>' +
-							'<li><p data-diff-move="up">baz <del data-diff-action="remove">baz</del><ins data-diff-action="insert">bat</ins></p></li>' +
-							'<li><p data-diff-action="none">foo</p></li>' +
-							'<li><p data-diff-action="none">bar</p></li>' +
-							'<li><p data-diff-action="none">quux</p></li>' +
+							'<li><p>foo</p></li>' +
+							'<li data-diff-action="structural-remove"><p data-diff-action="remove">bar</p></li>' +
+							'<li><p>baz</p></li>' +
 						'</ul>' +
 					'</div>'
 			},
 			{
 				msg: 'List item indentation',
-				oldDoc: '<ul><li><p>foo</p></li><li><p>bar</p></li><li><p>baz</p></li></ul>',
-				newDoc: '<ul><li><p>foo</p><ul><li><p>bar</p></li></ul></li><li><p>baz</p></li></ul>',
+				oldDoc: '<ul><li><p>foo</p></li></ul>',
+				newDoc: '<ul><li><ul><li><p>foo</p></li></ul></li></ul>',
 				expected:
 					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<ul>' +
-							'<li>' +
-								'<p data-diff-action="none">foo</p>' +
-								'<ul>' +
-									'<li>' +
-										'<p data-diff-action="structural-change" data-diff-id="0">bar</p>' +
-									'</li>' +
-								'</ul>' +
-							'</li>' +
-							'<li>' +
-								'<p data-diff-action="none">baz</p>' +
-							'</li>' +
+						'<ul data-diff-action="structural-insert">' +
+							'<li data-diff-action="structural-insert"><ul><li><p>foo</p></li></ul></li>' +
 						'</ul>' +
-					'</div>',
-				expectedDescriptions: [
-					'<div>visualeditor-changedesc-changed,listItemDepth,<del>0</del>,<ins>1</ins></div>'
-				]
+					'</div>'
 			},
 			{
 				msg: 'List item deindentation',
-				oldDoc: '<ul><li><p>foo</p><ul><li><p>bar</p></li></ul></li><li><p>baz</p></li></ul>',
-				newDoc: '<ul><li><p>foo</p></li><li><p>bar</p></li><li><p>baz</p></li></ul>',
+				oldDoc: '<ul><li><ul><li><p>foo</p></li></ul></li></ul>',
+				newDoc: '<ul><li><p>foo</p></li></ul>',
 				expected:
 					'<div class="ve-ui-diffElement-doc-child-change">' +
 						'<ul>' +
-							'<li>' +
-								'<p data-diff-action="none">foo</p>' +
-							'</li>' +
-							'<li>' +
-								'<p data-diff-action="structural-change" data-diff-id="0">bar</p>' +
-							'</li>' +
-							'<li>' +
-								'<p data-diff-action="none">baz</p>' +
-							'</li>' +
-						'</ul>' +
-					'</div>',
-				expectedDescriptions: [
-					'<div>visualeditor-changedesc-changed,listItemDepth,<del>1</del>,<ins>0</ins></div>'
-				]
-			},
-			{
-				msg: 'Full list replacement',
-				oldDoc: '<ul><li><p>one</p></li><li><p>two</p></li><li><p>three</p></li></ul>',
-				newDoc: '<ul><li><p>four</p></li><li><p>five</p></li><li><p>six</p></li></ul>',
-				expected:
-					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<ul data-diff-action="remove">' +
-							'<li><p>one</p></li>' +
-							'<li><p>two</p></li>' +
-							'<li><p>three</p></li>' +
-						'</ul>' +
-					'</div>' +
-					'<div class="ve-ui-diffElement-doc-child-change">' +
-						'<ul data-diff-action="insert">' +
-							'<li><p>four</p></li>' +
-							'<li><p>five</p></li>' +
-							'<li><p>six</p></li>' +
+							// TODO: Add remove classes here
+							'<li><p>foo</p></li>' +
 						'</ul>' +
 					'</div>'
 			},
@@ -675,57 +556,10 @@ QUnit.test( 'Diffing', function ( assert ) {
 						'<p>foo ' +
 							'<ins data-diff-action="insert">quux </ins>' +
 							'bar ' +
-							comment( 'whee' ) +
-							'<del data-diff-action="remove">' + comment( 'wibble' ) + '</del>' +
+							'<span rel="ve:Comment" data-ve-comment="whee">&nbsp;</span>' +
+							'<del data-diff-action="remove"><span rel="ve:Comment" data-ve-comment="wibble">&nbsp;</span></del>' +
 						'</p>' +
 					'</div>'
-			},
-			{
-				msg: 'Similar item added to list and indented, introducing whitespace (T187632)',
-				oldDoc:
-					'<ul>' +
-						'<li>foo</li>' +
-						'<li>bar baz quux whee one</li>' +
-					'</ul>',
-				newDoc:
-					'<ul>' +
-						'<li>foo</li>' +
-						'<li>bar baz quux whee one\n' +
-							'<ul><li>bar baz quux whee won</li></ul>' +
-						'</li>' +
-					'</ul>',
-				expected: '<div class="ve-ui-diffElement-doc-child-change">' +
-					'<ul>' +
-						'<li><p data-diff-action="none">foo</p></li>' +
-						'<li><p data-diff-action="none">bar baz quux whee one</p>\n' +
-							'<ul><li><p data-diff-action="insert">bar baz quux whee won</p></li></ul>' +
-						'</li>' +
-					'</ul>' +
-				'</div>'
-			},
-			{
-				msg: 'Metadata change inside paragraph (no diff)',
-				oldDoc: '<p>foo bar baz<meta foo="a"></p>',
-				newDoc: '<p>foo bar baz<meta foo="b"></p>',
-				expected: '<div class="ve-ui-diffElement-no-changes">' + ve.msg( 'visualeditor-diff-no-changes' ) + '</div>'
-			},
-			{
-				msg: 'Metadata change between list items (no diff)',
-				oldDoc: '<ul><li><p>foo</p></li><meta foo="a"><li><p>baz</p></li></ul>',
-				newDoc: '<ul><li><p>foo</p></li><meta foo="b"><li><p>baz</p></li></ul>',
-				expected: '<div class="ve-ui-diffElement-no-changes">' + ve.msg( 'visualeditor-diff-no-changes' ) + '</div>'
-			},
-			{
-				msg: 'Insert metadata inside paragraph (no diff)',
-				oldDoc: '<p>foo bar baz</p>',
-				newDoc: '<p>foo bar baz<meta foo="a"></p>',
-				expected: '<div class="ve-ui-diffElement-no-changes">' + ve.msg( 'visualeditor-diff-no-changes' ) + '</div>'
-			},
-			{
-				msg: 'Remove metadata inside paragraph (no diff)',
-				oldDoc: '<p>foo bar baz<meta foo="a"></p>',
-				newDoc: '<p>foo bar baz</p>',
-				expected: '<div class="ve-ui-diffElement-no-changes">' + ve.msg( 'visualeditor-diff-no-changes' ) + '</div>'
 			}
 		];
 
@@ -757,70 +591,125 @@ QUnit.test( 'Diffing', function ( assert ) {
 	ve.dm.modelRegistry.unregister( InlineWidgetNode );
 } );
 
-QUnit.test( 'compareAttributes/describeChanges', function ( assert ) {
-	var i, l, attributeChanges, changes,
+QUnit.test( 'describeChange', function ( assert ) {
+	var i, l, key,
 		cases = [
 			{
 				msg: 'LinkAnnotation: Random attribute test (fallback)',
-				type: 'link',
-				before: {
-					href: 'https://www.example.org/foo'
-				},
-				after: {
-					href: 'https://www.example.org/foo',
-					foo: '!!'
-				},
-				expected: [ 'visualeditor-changedesc-set,foo,<ins>!!</ins>' ]
+				testedKey: 'foo',
+				before: new ve.dm.LinkAnnotation( {
+					type: 'link',
+					attributes: {
+						href: 'https://www.example.org/foo'
+					}
+				} ),
+				after: new ve.dm.LinkAnnotation( {
+					type: 'link',
+					attributes: {
+						href: 'https://www.example.org/foo',
+						foo: '!!'
+					}
+				} ),
+				expected: 'visualeditor-changedesc-set,foo,!!'
 			},
 			{
 				msg: 'LinkAnnotation: Href change',
-				type: 'link',
-				before: { href: 'https://www.example.org/foo' },
-				after: { href: 'https://www.example.org/bar' },
-				expected: [ 'visualeditor-changedesc-link-href,<del>https://www.example.org/foo</del>,<ins>https://www.example.org/bar</ins>' ]
+				testedKey: 'href',
+				before: new ve.dm.LinkAnnotation( {
+					type: 'link',
+					attributes: { href: 'https://www.example.org/foo' }
+				} ),
+				after: new ve.dm.LinkAnnotation( {
+					type: 'link',
+					attributes: { href: 'https://www.example.org/bar' }
+				} ),
+				expected: 'visualeditor-changedesc-link-href,https://www.example.org/foo,https://www.example.org/bar'
 			},
 			{
 				msg: 'LinkAnnotation: Href fragment change',
-				type: 'link',
-				before: { href: 'https://www.example.org/foo#bar' },
-				after: { href: 'https://www.example.org/foo#baz' },
-				expected: [ 'visualeditor-changedesc-link-href,<del>https://www.example.org/foo#bar</del>,<ins>https://www.example.org/foo#baz</ins>' ]
+				testedKey: 'href',
+				before: new ve.dm.LinkAnnotation( {
+					type: 'link',
+					attributes: { href: 'https://www.example.org/foo#bar' }
+				} ),
+				after: new ve.dm.LinkAnnotation( {
+					type: 'link',
+					attributes: { href: 'https://www.example.org/foo#baz' }
+				} ),
+				expected: 'visualeditor-changedesc-link-href,https://www.example.org/foo#bar,https://www.example.org/foo#baz'
 			},
 			{
 				msg: 'LanguageAnnotation: Lang change',
-				type: 'meta/language',
-				before: { lang: 'en', dir: 'ltr' },
-				after: { lang: 'fr', dir: 'ltr' },
-				expected: [ 'visualeditor-changedesc-language,<del>langname-en</del>,<ins>langname-fr</ins>' ]
+				testedKey: 'lang',
+				before: new ve.dm.LanguageAnnotation( {
+					type: 'meta/language',
+					attributes: { lang: 'en', dir: 'ltr' }
+				} ),
+				after: new ve.dm.LanguageAnnotation( {
+					type: 'meta/language',
+					attributes: { lang: 'fr', dir: 'ltr' }
+				} ),
+				expected: 'visualeditor-changedesc-language,langname-en,langname-fr'
 			},
 			{
 				msg: 'LanguageAnnotation: Dir change',
-				type: 'meta/language',
-				before: { lang: 'en', dir: 'ltr' },
-				after: { lang: 'en', dir: 'rtl' },
-				expected: [ 'visualeditor-changedesc-direction,<del>ltr</del>,<ins>rtl</ins>' ]
+				testedKey: 'dir',
+				before: new ve.dm.LanguageAnnotation( {
+					type: 'meta/language',
+					attributes: { lang: 'en', dir: 'ltr' }
+				} ),
+				after: new ve.dm.LanguageAnnotation( {
+					type: 'meta/language',
+					attributes: { lang: 'en', dir: 'rtl' }
+				} ),
+				expected: 'visualeditor-changedesc-direction,ltr,rtl'
 			},
 			{
-				msg: 'LanguageAnnotation: Other attribute change (fallback)',
-				type: 'meta/language',
-				before: { lang: 'en', dir: 'ltr', foo: 'bar' },
-				after: { lang: 'en', dir: 'ltr', foo: 'baz' },
-				expected: [ 'visualeditor-changedesc-changed,foo,<del>bar</del>,<ins>baz</ins>' ]
+				msg: 'LanguageAnnotation: Style change (fallback)',
+				testedKey: 'style',
+				before: new ve.dm.LanguageAnnotation( {
+					type: 'meta/language',
+					attributes: { lang: 'en', dir: 'ltr', style: 'font-weight:800' }
+				} ),
+				after: new ve.dm.LanguageAnnotation( {
+					type: 'meta/language',
+					attributes: { lang: 'en', dir: 'ltr', style: 'font-weight:700' }
+				} ),
+				expected: 'visualeditor-changedesc-changed,style,font-weight:800,font-weight:700'
+			},
+			{
+				msg: 'SpanAnnotation: Style change',
+				testedKey: 'style',
+				before: new ve.dm.SpanAnnotation( {
+					attributes: { style: 'font-weight:800' }
+				} ),
+				after: new ve.dm.SpanAnnotation( {
+					attributes: { style: 'font-weight:700' }
+				} ),
+				expected: 'visualeditor-changedesc-style,font-weight:800,font-weight:700'
+			},
+			{
+				msg: 'SpanAnnotation: Title change (fallback)',
+				testedKey: 'title',
+				before: new ve.dm.SpanAnnotation( {
+					attributes: { style: 'font-weight:800', title: 'Hello' }
+				} ),
+				after: new ve.dm.SpanAnnotation( {
+					attributes: { style: 'font-weight:800', title: 'Farewell' }
+				} ),
+				expected: 'visualeditor-changedesc-changed,title,Hello,Farewell'
 			}
 		];
 
 	for ( i = 0, l = cases.length; i < l; i++ ) {
-		attributeChanges = ve.ui.DiffElement.static.compareAttributes( cases[ i ].before, cases[ i ].after );
-		changes = ve.dm.modelRegistry.lookup( cases[ i ].type ).static.describeChanges(
-			attributeChanges, cases[ i ].after, { type: cases[ i ].type, attributes: cases[ i ].after }
+		key = cases[ i ].testedKey;
+		assert.deepEqual(
+			cases[ i ].before.constructor.static.describeChange(
+				key,
+				{ from: cases[ i ].before.getAttribute( key ), to: cases[ i ].after.getAttribute( key ) }
+			),
+			cases[ i ].expected,
+			cases[ i ].msg
 		);
-		// eslint-disable-next-line no-loop-func
-		changes.forEach( function ( change, j ) {
-			assert.deepEqualWithDomElements(
-				change,
-				$.parseHTML( cases[ i ].expected[ j ] ),
-				cases[ i ].msg + ', message ' + j
-			);
-		} );
 	}
 } );

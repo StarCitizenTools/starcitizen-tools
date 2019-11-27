@@ -14,8 +14,7 @@
 			"Skalman",
 			"Stryn",
 			"VezonThunder",
-			"Alluk.",
-			"Pyscowicz"
+			"Alluk."
 		]
 	},
 	"ooui-outline-control-move-down": "Siirrä kohdetta alaspäin",
@@ -34,6 +33,5 @@
 	"ooui-selectfile-button-select": "Valitse tiedosto",
 	"ooui-selectfile-not-supported": "Tiedoston valitsemista ei tueta",
 	"ooui-selectfile-placeholder": "Tiedostoa ei ole valittu",
-	"ooui-selectfile-dragdrop-placeholder": "Pudota tiedosto tähän",
-	"ooui-field-help": "Ohje"
+	"ooui-selectfile-dragdrop-placeholder": "Pudota tiedosto tähän"
 }

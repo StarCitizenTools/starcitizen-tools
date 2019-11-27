@@ -5,13 +5,12 @@
 			"Kscanne",
 			"Tem",
 			"Moilleadóir",
-			"Nmacu",
-			"Kwekubo"
+			"Nmacu"
 		]
 	},
-	"tooltip-ca-ve-edit": "Cuir an leathanach seo in eagar",
-	"visualeditor-ca-editsource": "Cuir foinse in eagar",
-	"visualeditor-ca-editsource-section": "athraigh foinse",
+	"tooltip-ca-ve-edit": "Athraigh an lch seo",
+	"visualeditor-ca-editsource": "Cuir vicithéacs in eagar",
+	"visualeditor-ca-editsource-section": "athraigh vicithéacs",
 	"visualeditor-ca-ve-create": "EagarthóirAmhairc",
 	"visualeditor-ca-ve-edit": "EagarthóirAmhairc",
 	"visualeditor-ca-ve-edit-section": "EagarthóirAmhairc",
@@ -27,5 +26,6 @@
 	"visualeditor-preference-core-label": "EagarthóirAmhairc",
 	"visualeditor-savedialog-label-publish-short": "Foilsigh",
 	"visualeditor-savedialog-label-warning": "Rabhadh",
+	"visualeditor-shortcuts-insert": "Ionsáigh",
 	"visualeditor-version-label": "Leagan"
 }

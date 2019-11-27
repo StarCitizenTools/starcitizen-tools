@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface CommandHelpDialog class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -45,34 +45,31 @@ ve.ui.CommandHelpDialog.static.commandGroups = {
 		demote: [ 'clear' ]
 	},
 	clipboard: {
-		title: OO.ui.deferMsg( 'visualeditor-shortcuts-clipboard' )
+		title: OO.ui.deferMsg( 'visualeditor-shortcuts-clipboard' ),
+		promote: [],
+		demote: []
 	},
 	formatting: {
 		title: OO.ui.deferMsg( 'visualeditor-shortcuts-formatting' ),
-		promote: [ 'paragraph', 'pre', 'blockquote' ]
+		promote: [ 'paragraph', 'pre', 'blockquote' ],
+		demote: []
 	},
 	history: {
 		title: OO.ui.deferMsg( 'visualeditor-shortcuts-history' ),
-		promote: [ 'undo', 'redo' ]
+		promote: [ 'undo', 'redo' ],
+		demote: []
 	},
 	dialog: {
-		title: OO.ui.deferMsg( 'visualeditor-shortcuts-dialog' )
+		title: OO.ui.deferMsg( 'visualeditor-shortcuts-dialog' ),
+		promote: [],
+		demote: []
 	},
 	other: {
 		title: OO.ui.deferMsg( 'visualeditor-shortcuts-other' ),
 		promote: [ 'findAndReplace', 'findNext', 'findPrevious' ],
 		demote: [ 'commandHelp' ]
-	},
-	insert: {
-		title: OO.ui.deferMsg( 'visualeditor-shortcuts-insert' )
 	}
 };
-
-ve.ui.CommandHelpDialog.static.commandGroupsOrder = [
-	'textStyle', 'clipboard',
-	'formatting', 'history',
-	'dialog', 'other', 'insert'
-];
 
 /* Methods */
 
@@ -87,8 +84,8 @@ ve.ui.CommandHelpDialog.prototype.getBodyHeight = function () {
  * @inheritdoc
  */
 ve.ui.CommandHelpDialog.prototype.initialize = function () {
-	var i, iLen, j, jLen, k, kLen, triggerList, commands, shortcut,
-		$list, $shortcut, groupName, commandGroup, commandGroups, commandGroupsOrder, sequence, hasCommand, hasShortcut,
+	var i, j, jLen, k, kLen, triggerList, commands, shortcut,
+		$list, $shortcut, commandGroups, sequence, hasCommand, hasShortcut,
 		surface = ve.init.target.getSurface(),
 		sequenceRegistry = surface.sequenceRegistry,
 		commandRegistry = surface.commandRegistry;
@@ -97,7 +94,6 @@ ve.ui.CommandHelpDialog.prototype.initialize = function () {
 	ve.ui.CommandHelpDialog.super.prototype.initialize.call( this );
 
 	commandGroups = this.constructor.static.commandGroups;
-	commandGroupsOrder = this.constructor.static.commandGroupsOrder;
 
 	this.contentLayout = new OO.ui.PanelLayout( {
 		scrollable: true,
@@ -106,15 +102,13 @@ ve.ui.CommandHelpDialog.prototype.initialize = function () {
 	} );
 	this.$container = $( '<div>' ).addClass( 've-ui-commandHelpDialog-container' );
 
-	for ( i = 0, iLen = commandGroupsOrder.length; i < iLen; i++ ) {
+	for ( i in commandGroups ) {
 		hasCommand = false;
-		groupName = commandGroupsOrder[ i ];
-		commandGroup = commandGroups[ groupName ];
-		commands = this.constructor.static.sortedCommandsFromGroup( groupName, commandGroup.promote, commandGroup.demote );
+		commands = this.constructor.static.sortedCommandsFromGroup( i, commandGroups[ i ].promote, commandGroups[ i ].demote );
 		$list = $( '<dl>' ).addClass( 've-ui-commandHelpDialog-list' );
 		for ( j = 0, jLen = commands.length; j < jLen; j++ ) {
 			if ( commands[ j ].trigger ) {
-				if ( !commands[ j ].ignoreCommand && !commandRegistry.lookup( commands[ j ].trigger ) ) {
+				if ( !commandRegistry.lookup( commands[ j ].trigger ) ) {
 					// Trigger is specified by unavailable command
 					continue;
 				}
@@ -167,7 +161,7 @@ ve.ui.CommandHelpDialog.prototype.initialize = function () {
 				$( '<div>' )
 					.addClass( 've-ui-commandHelpDialog-section' )
 					.append(
-						$( '<h3>' ).text( OO.ui.resolveMsg( commandGroup.title ) ),
+						$( '<h3>' ).text( OO.ui.resolveMsg( commandGroups[ i ].title ) ),
 						$list
 					)
 			);
@@ -204,8 +198,8 @@ ve.ui.CommandHelpDialog.static.buildKeyNode = function ( key ) {
  *
  * @static
  * @param {string} groupName The dialog-category in which to display this
- * @param {string[]} [promote] Commands which should be displayed first
- * @param {string[]} [demote] Commands which should be displayed last
+ * @param {string[]} promote Commands which should be displayed first
+ * @param {string[]} demote Commands which should be displayed last
  * @return {Object[]} List of commands in order
  */
 ve.ui.CommandHelpDialog.static.sortedCommandsFromGroup = function ( groupName, promote, demote ) {
@@ -217,23 +211,16 @@ ve.ui.CommandHelpDialog.static.sortedCommandsFromGroup = function ( groupName, p
 		promoted = [],
 		demoted = [];
 	keys.sort();
-	if ( promote ) {
-		for ( i = 0; i < promote.length; i++ ) {
-			if ( !commands[ promote[ i ] ] ) {
-				continue;
-			}
-			promoted.push( commands[ promote[ i ] ] );
-			used[ promote[ i ] ] = true;
-		}
+	for ( i = 0; i < promote.length; i++ ) {
+		promoted.push( commands[ promote[ i ] ] );
+		used[ promote[ i ] ] = true;
 	}
-	if ( demote ) {
-		for ( i = 0; i < demote.length; i++ ) {
-			if ( used[ demote[ i ] ] || !commands[ demote[ i ] ] ) {
-				continue;
-			}
-			demoted.push( commands[ demote[ i ] ] );
-			used[ demote[ i ] ] = true;
+	for ( i = 0; i < demote.length; i++ ) {
+		if ( used[ demote[ i ] ] ) {
+			continue;
 		}
+		demoted.push( commands[ demote[ i ] ] );
+		used[ demote[ i ] ] = true;
 	}
 	for ( i = 0; i < keys.length; i++ ) {
 		if ( used[ keys[ i ] ] ) {

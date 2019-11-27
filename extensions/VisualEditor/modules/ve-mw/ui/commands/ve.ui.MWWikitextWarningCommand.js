@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MediaWiki WikitextWarningCommand class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -30,17 +30,17 @@ OO.inheritClass( ve.ui.MWWikitextWarningCommand, ve.ui.Command );
  * @inheritdoc
  */
 ve.ui.MWWikitextWarningCommand.prototype.execute = function () {
-	var $message,
-		command = this;
+	var command = this;
 	if ( this.warning && this.warning.isOpen ) {
 		return false;
 	}
-	$message = $( '<div>' ).html( ve.init.platform.getParsedMessage( 'visualeditor-wikitext-warning' ) );
-	ve.targetLinksToNewWindow( $message[ 0 ] );
-	ve.init.platform.notify(
-		$message.contents(),
-		ve.msg( 'visualeditor-wikitext-warning-title' ),
-		{ tag: 'visualeditor-wikitext-warning' }
+	mw.notify(
+		$( $.parseHTML( ve.init.platform.getParsedMessage( 'visualeditor-wikitext-warning' ) ) )
+			.filter( 'a' ).attr( 'target', '_blank' ).end(),
+		{
+			title: ve.msg( 'visualeditor-wikitext-warning-title' ),
+			tag: 'visualeditor-wikitext-warning'
+		}
 	).then( function ( message ) {
 		command.warning = message;
 	} );

@@ -6,6 +6,7 @@
 			"Foxj"
 		]
 	},
+	"apihelp-visualeditor-param-basetimestamp": "Gin yer savin, mak this the timestamp o the revision chynged. It's uised tae airt oot ony fechts wi chynges.",
 	"tooltip-ca-createsource": "Cræft the soorce code o this page",
 	"tooltip-ca-edit": "Chynge this page uisin wikitext",
 	"tooltip-ca-editsource": "Eedit the soorce code o this page",
@@ -44,6 +45,7 @@
 	"visualeditor-dialog-media-info-readmore": "Read mair",
 	"visualeditor-dialog-media-info-uploaded": "Uplaidit: $1",
 	"visualeditor-dialog-media-noresults": "Nae results foond.",
+	"visualeditor-dialog-media-originaldimensions": "Oreeginal girsts",
 	"visualeditor-dialog-media-page-advanced": "Advanced settins",
 	"visualeditor-dialog-media-page-general": "General settins",
 	"visualeditor-dialog-media-position-center": "Center",
@@ -58,6 +60,7 @@
 	"visualeditor-dialog-media-size-choosecustom": "Set custym size",
 	"visualeditor-dialog-media-size-choosedefault": "Set til defaut size",
 	"visualeditor-dialog-media-size-choosefull": "Set til ful size",
+	"visualeditor-dialog-media-size-originalsize-error": "Coudna retreeve oreeginal file size.",
 	"visualeditor-dialog-media-size-section": "Eemage size",
 	"visualeditor-dialog-media-thumbdimensions": "Thumbnail girsts",
 	"visualeditor-dialog-media-title": "Media settins",
@@ -200,12 +203,17 @@
 	"visualeditor-savedialog-title-save": "Hain yer chynges",
 	"visualeditor-savedialog-warning-dirty": "Yer eedit micht hae been rotted - please luikower afore hainin.",
 	"visualeditor-saveerror": "Mistak hainin data til server: $1.",
+	"visualeditor-saveerror-titleblacklist": "Cannae save page: This page's title is blacklistit",
 	"visualeditor-serializeerror": "Mistak laidin data fae server: $1.",
 	"visualeditor-settings-tool": "Page settins",
 	"visualeditor-special-characters-group-other": "Aften uised",
 	"visualeditor-toolbar-savedialog": "Hain page",
 	"visualeditor-usernamespacepagelink": "Project:Uiser namespace",
 	"visualeditor-version-label": "Version",
+	"visualeditor-viewpage-savewarning": "Ar ye sair that ye want tae gang back til see mode wioot hainin first?",
+	"visualeditor-viewpage-savewarning-discard": "Get rid o chynges",
+	"visualeditor-viewpage-savewarning-keep": "Conteena eeditin",
+	"visualeditor-viewpage-savewarning-title": "Ye shuir?",
 	"visualeditor-wikitext-warning": "Ye'r uisin VeesualEediter - [[{{MediaWiki:visualeditor-wikitext-warning-link}}|wikitext]] disna wairk here. Tae switch tae soorce eeditin at onie time wioot tintin yer chynges, apen the drapdoun menu nex tae \"{{int:visualeditor-toolbar-savedialog}}\" n clap oan \"{{int:visualeditor-mweditmodesource-title}}\".",
 	"visualeditor-wikitext-warning-title": "Wikitex maurup detectit"
 }

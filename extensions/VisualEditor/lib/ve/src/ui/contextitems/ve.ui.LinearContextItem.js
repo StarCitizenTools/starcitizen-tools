@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LinearContextItem class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -37,9 +37,8 @@ ve.ui.LinearContextItem = function VeUiLinearContextItem( context, model, config
 	this.label = new OO.ui.LabelWidget( { label: config.label || this.constructor.static.label } );
 
 	if ( !this.context.isMobile() ) {
-		// Desktop
 		this.editButton = new OO.ui.ButtonWidget( {
-			label: ve.msg( this.isReadOnly() ? 'visualeditor-contextitemwidget-label-view' : 'visualeditor-contextitemwidget-label-secondary' ),
+			label: ve.msg( 'visualeditor-contextitemwidget-label-secondary' ),
 			flags: [ 'progressive' ]
 		} );
 		this.deleteButton = new OO.ui.ButtonWidget( {
@@ -47,10 +46,9 @@ ve.ui.LinearContextItem = function VeUiLinearContextItem( context, model, config
 			flags: [ 'destructive' ]
 		} );
 	} else {
-		// Mobile
 		this.editButton = new OO.ui.ButtonWidget( {
 			framed: false,
-			icon: this.isReadOnly() ? 'eye' : 'edit',
+			icon: 'edit',
 			flags: [ 'progressive' ]
 		} );
 		this.deleteButton = new OO.ui.ButtonWidget( {
@@ -158,7 +156,7 @@ ve.ui.LinearContextItem.prototype.isEditable = function () {
  * @return {boolean} Item is deletable
  */
 ve.ui.LinearContextItem.prototype.isDeletable = function () {
-	return this.constructor.static.deletable && this.isNode() && this.context.showDeleteButton() && this.isReadOnly();
+	return this.constructor.static.deletable && this.isNode() && this.context.showDeleteButton();
 };
 
 /**

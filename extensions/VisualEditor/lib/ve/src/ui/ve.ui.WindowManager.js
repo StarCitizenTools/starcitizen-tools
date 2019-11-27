@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface WindowManager class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -42,7 +42,7 @@ OO.inheritClass( ve.ui.WindowManager, OO.ui.WindowManager );
  * @return {string} UI directionality
  */
 ve.ui.WindowManager.prototype.getDir = function () {
-	return $( document.body ).css( 'direction' );
+	return $( 'body' ).css( 'direction' );
 };
 
 /**

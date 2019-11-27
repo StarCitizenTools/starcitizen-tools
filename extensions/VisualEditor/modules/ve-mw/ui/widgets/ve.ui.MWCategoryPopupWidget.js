@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWCategoryPopupWidget class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -27,7 +27,6 @@ ve.ui.MWCategoryPopupWidget = function VeUiMWCategoryPopupWidget( config ) {
 	this.removed = false;
 	this.$title = $( '<label>' );
 	this.$menu = $( '<div>' );
-	this.fallbackSortKey = mw.config.get( 'wgTitle' );
 	this.removeButton = new OO.ui.ButtonWidget( {
 		framed: false,
 		icon: 'trash',
@@ -135,11 +134,7 @@ ve.ui.MWCategoryPopupWidget.prototype.onToggle = function ( show ) {
 	}
 	newSortkey = this.sortKeyInput.$input.val();
 	if ( !this.removed && newSortkey !== ( this.origSortkey || '' ) ) {
-		if ( newSortkey === this.fallbackSortKey ) {
-			this.emit( 'updateSortkey', this.category, '' );
-		} else {
-			this.emit( 'updateSortkey', this.category, this.sortKeyInput.$input.val() );
-		}
+		this.emit( 'updateSortkey', this.category, this.sortKeyInput.$input.val() );
 	}
 };
 
@@ -150,7 +145,7 @@ ve.ui.MWCategoryPopupWidget.prototype.onToggle = function ( show ) {
  * @param {ve.ui.MWCategoryItemWidget} item Category item
  */
 ve.ui.MWCategoryPopupWidget.prototype.loadCategoryIntoPopup = function ( item ) {
-	this.origSortkey = item.sortKey || this.fallbackSortKey;
+	this.origSortkey = item.sortKey;
 	if ( item.isHidden ) {
 		this.$hiddenStatus.text( ve.msg( 'visualeditor-dialog-meta-categories-hidden' ) );
 	} else if ( item.isMissing ) {
@@ -158,7 +153,7 @@ ve.ui.MWCategoryPopupWidget.prototype.loadCategoryIntoPopup = function ( item ) 
 	} else {
 		this.$hiddenStatus.empty();
 	}
-	this.sortKeyInput.$input.val( this.origSortkey );
+	this.sortKeyInput.$input.val( item.sortKey );
 };
 
 /**
@@ -170,8 +165,6 @@ ve.ui.MWCategoryPopupWidget.prototype.closePopup = function () {
 	this.toggle( false );
 	this.popupOpen = false;
 	this.category = null;
-	this.origSortkey = null;
-	this.removed = false;
 };
 
 /**
@@ -181,7 +174,7 @@ ve.ui.MWCategoryPopupWidget.prototype.closePopup = function () {
  * @param {string} value Default sort key value
  */
 ve.ui.MWCategoryPopupWidget.prototype.setDefaultSortKey = function ( value ) {
-	this.fallbackSortKey = value;
+	this.sortKeyInput.$input.attr( 'placeholder', value );
 };
 
 /**

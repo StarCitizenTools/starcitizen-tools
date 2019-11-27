@@ -3,37 +3,21 @@
  *
  * Subscribes to ve.track() events and routes them to mw.track().
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 ( function () {
-	var timing, editingSessionId,
-		actionPrefixMap = {
-			saveIntent: 'save_intent',
-			saveAttempt: 'save_attempt',
-			saveSuccess: 'save_success',
-			saveFailure: 'save_failure'
-		},
-		trackdebug = !!mw.Uri().query.trackdebug;
+	var timing, editingSessionId;
+
+	if ( mw.loader.getState( 'schema.Edit' ) === null ) {
+		// Only route any events into the Edit schema if the module is actually available.
+		// It won't be if EventLogging is installed but WikimediaEvents is not.
+		return;
+	}
 
 	timing = {};
 	editingSessionId = mw.user.generateRandomSessionId();
-
-	function log() {
-		// mw.log is a no-op unless resource loader is in debug mode, so
-		// this allows trackdebug to work independently (T211698)
-		// eslint-disable-next-line no-console
-		console.log.apply( console, arguments );
-	}
-
-	function inSample() {
-		// Not using mw.eventLog.inSample() because we need to be able to pass our own editingSessionId
-		return mw.eventLog.randomTokenMatch(
-			1 / mw.config.get( 'wgWMESchemaEditAttemptStepSamplingRate' ),
-			editingSessionId
-		);
-	}
 
 	function computeDuration( action, event, timeStamp ) {
 		if ( event.timing !== undefined ) {
@@ -41,6 +25,13 @@
 		}
 
 		switch ( action ) {
+			case 'init':
+				// Account for second opening
+				return timeStamp - Math.max(
+					window.mediaWikiLoadStart,
+					timing.saveSuccess || 0,
+					timing.abort || 0
+				);
 			case 'ready':
 				return timeStamp - timing.init;
 			case 'loaded':
@@ -74,10 +65,8 @@
 		return -1;
 	}
 
-	function mwEditHandler( topic, data, timeStamp ) {
+	ve.trackSubscribe( 'mwedit.', function ( topic, data, timeStamp ) {
 		var action = topic.split( '.' )[ 1 ],
-			actionPrefix = actionPrefixMap[ action ] || action,
-			duration = 0,
 			event;
 
 		timeStamp = timeStamp || this.timeStamp; // I8e82acc12 back-compat
@@ -85,13 +74,7 @@
 		if ( action === 'init' ) {
 			// Regenerate editingSessionId
 			editingSessionId = mw.user.generateRandomSessionId();
-		}
-
-		if ( !inSample() && !mw.config.get( 'wgWMESchemaEditAttemptStepOversample' ) && !trackdebug ) {
-			return;
-		}
-
-		if (
+		} else if (
 			action === 'abort' &&
 			( data.type === 'unknown' || data.type === 'unknown-edited' )
 		) {
@@ -113,54 +96,36 @@
 			}
 		}
 
-		// Convert mode=source/visual to interface name
+		// Convert mode=source/visual to editor name
 		if ( data && data.mode ) {
-			// eslint-disable-next-line camelcase
-			data.editor_interface = data.mode === 'source' ? 'wikitext-2017' : 'visualeditor';
+			data.editor = data.mode === 'source' ? 'wikitext-2017' : 'visualeditor';
 			delete data.mode;
 		}
 
-		if ( !data.platform ) {
-			if ( ve.init && ve.init.target && ve.init.target.constructor.static.platformType ) {
-				data.platform = ve.init.target.constructor.static.platformType;
-			} else {
-				data.platform = 'other';
-				// TODO: outright abort in this case, once we think we've caught everything
-				mw.log.warn( 've.init.mw.trackSubscriber: no target available and no platform specified', action );
-			}
-		}
-
-		/* eslint-disable camelcase */
 		event = $.extend( {
 			version: 1,
 			action: action,
-			is_oversample: !inSample(),
-			editor_interface: 'visualeditor',
+			editor: 'visualeditor',
+			platform: ve.init && ve.init.target && ve.init.target.constructor.static.platformType || 'other',
 			integration: ve.init && ve.init.target && ve.init.target.constructor.static.integrationType || 'page',
-			page_id: mw.config.get( 'wgArticleId' ),
-			page_title: mw.config.get( 'wgPageName' ),
-			page_ns: mw.config.get( 'wgNamespaceNumber' ),
-			revision_id: mw.config.get( 'wgRevisionId' ),
-			editing_session_id: editingSessionId,
-			page_token: mw.user.getPageviewToken(),
-			session_token: mw.user.sessionId(),
-			user_id: mw.user.getId(),
-			user_editcount: mw.config.get( 'wgUserEditCount', 0 ),
-			mw_version: mw.config.get( 'wgVersion' )
+			'page.id': mw.config.get( 'wgArticleId' ),
+			'page.title': mw.config.get( 'wgPageName' ),
+			'page.ns': mw.config.get( 'wgNamespaceNumber' ),
+			'page.revid': mw.config.get( 'wgRevisionId' ),
+			editingSessionId: editingSessionId,
+			'user.id': mw.user.getId(),
+			'user.editCount': mw.config.get( 'wgUserEditCount', 0 ),
+			'mediawiki.version': mw.config.get( 'wgVersion' )
 		}, data );
 
 		if ( mw.user.isAnon() ) {
-			event.user_class = 'IP';
+			event[ 'user.class' ] = 'IP';
 		}
 
-		event[ actionPrefix + '_type' ] = event.type;
-		event[ actionPrefix + '_mechanism' ] = event.mechanism;
-		if ( action !== 'init' ) {
-			duration = Math.round( computeDuration( action, event, timeStamp ) );
-			event[ actionPrefix + '_timing' ] = duration;
-		}
-		event[ actionPrefix + '_message' ] = event.message;
-		/* eslint-enable camelcase */
+		event[ 'action.' + action + '.type' ] = event.type;
+		event[ 'action.' + action + '.mechanism' ] = event.mechanism;
+		event[ 'action.' + action + '.timing' ] = Math.round( computeDuration( action, event, timeStamp ) );
+		event[ 'action.' + action + '.message' ] = event.message;
 
 		// Remove renamed properties
 		delete event.type;
@@ -174,14 +139,14 @@
 			timing[ action ] = timeStamp;
 		}
 
-		if ( trackdebug ) {
-			log( topic, duration + 'ms', event );
-		} else {
-			mw.track( 'event.EditAttemptStep', event );
+		// Sample at 6.25%
+		if ( event.editingSessionId && event.editingSessionId[ 0 ] === '0' ) {
+			mw.track( 'event.Edit', event );
 		}
-	}
 
-	function mwTimingHandler( topic, data ) {
+	} );
+
+	ve.trackSubscribe( 'mwtiming.', function ( topic, data ) {
 		// Add type for save errors; not in the topic for stupid historical reasons
 		if ( topic === 'mwtiming.performance.user.saveError' ) {
 			topic = topic + '.' + data.type;
@@ -189,54 +154,7 @@
 
 		// Map mwtiming.foo --> timing.ve.foo.mobile
 		topic = topic.replace( /^mwtiming/, 'timing.ve.' + data.targetName );
-		if ( trackdebug ) {
-			log( topic, Math.round( data.duration ) + 'ms' );
-		} else {
-			mw.track( topic, data.duration );
-		}
-	}
-
-	function activityHandler( topic, data ) {
-		var feature = topic.split( '.' )[ 1 ],
-			event;
-
-		if ( !inSample() && !trackdebug ) {
-			return;
-		}
-
-		if ( ve.init.target.constructor.static.platformType === 'phone' ) {
-			// handled in MobileFrontend for session-identification reasons
-			return;
-		}
-
-		event = {
-			feature: feature,
-			action: data.action,
-			editingSessionId: editingSessionId
-		};
-
-		if ( trackdebug ) {
-			log( topic, event );
-		} else {
-			mw.track( 'event.VisualEditorFeatureUse', event );
-		}
-	}
-
-	if ( mw.loader.getState( 'schema.EditAttemptStep' ) !== null || trackdebug ) {
-		// Only route any events into the EditAttemptStep schema if the module is actually available.
-		// It won't be if EventLogging is installed but WikimediaEvents is not.
-		// Also load ext.eventLogging.subscriber to provide mw.eventLog.randomTokenMatch().
-		mw.loader.using( 'ext.eventLogging.subscriber' ).done( function () {
-			ve.trackSubscribe( 'mwedit.', mwEditHandler );
-			ve.trackSubscribe( 'mwtiming.', mwTimingHandler );
-		} );
-	}
-
-	if ( mw.loader.getState( 'schema.VisualEditorFeatureUse' ) !== null || trackdebug ) {
-		// Similarly for the VisualEditorFeatureUse schema
-		mw.loader.using( 'ext.eventLogging.subscriber' ).done( function () {
-			ve.trackSubscribe( 'activity.', activityHandler );
-		} );
-	}
+		mw.track( topic, data.duration );
+	} );
 
 }() );

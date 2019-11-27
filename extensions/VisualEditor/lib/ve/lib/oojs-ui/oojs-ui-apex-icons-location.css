@@ -1,17 +1,13 @@
 /*!
- * OOUI v0.31.1
+ * OOUI v0.26.3
  * https://www.mediawiki.org/wiki/OOUI
  *
- * Copyright 2011–2019 OOUI Team and other contributors.
+ * Copyright 2011–2018 OOUI Team and other contributors.
  * Released under the MIT license
  * http://oojs.mit-license.org
  *
- * Date: 2019-03-21T15:54:46Z
+ * Date: 2018-04-10T22:15:43Z
  */
-.oo-ui-icon-globe {
-  background-image: url('themes/wikimediaui/images/icons/globe.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/globe.svg');
-}
 .oo-ui-icon-map {
   background-image: url('themes/wikimediaui/images/icons/map-ltr.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/map-ltr.svg');

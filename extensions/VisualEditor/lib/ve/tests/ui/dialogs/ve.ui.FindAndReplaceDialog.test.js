@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FindAndReplaceDialog tests.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ui.FindAndReplaceDialog' );
@@ -78,7 +78,7 @@ QUnit.test( 'find fragments', function ( assert ) {
 		dialog.open( {
 			surface: surface,
 			fragment: surface.getModel().getFragment()
-		} ).opening.then( function () {
+		} ).then( function () {
 			var i, ranges;
 			for ( i = 0; i < cases.length; i++ ) {
 				dialog.matchCaseToggle.setValue( !!cases[ i ].matchCase );
@@ -125,7 +125,7 @@ QUnit.test( 'replace all', function ( assert ) {
 		dialog.open( {
 			surface: surface,
 			fragment: surface.getModel().getFragment()
-		} ).opening.then( function () {
+		} ).then( function () {
 			var i;
 			for ( i = 0; i < cases.length; i++ ) {
 				dialog.matchCaseToggle.setValue( !!cases[ i ].matchCase );

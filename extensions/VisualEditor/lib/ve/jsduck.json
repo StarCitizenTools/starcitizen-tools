@@ -8,7 +8,14 @@
 	"--builtin-classes": true,
 	"--processes": "0",
 	"--warnings-exit-nonzero": true,
-	"--external": "HTMLDocument,Window,Node,Text,Set,Range,Selection,ClientRect,File,Blob,DataTransfer,DataTransferItem,KeyboardEvent,MouseEvent,Promise",
+	"--external": "HTMLDocument,Window,Node,Text,Set,Range,Selection,ClientRect,File,Blob,DataTransfer,DataTransferItem,KeyboardEvent,MouseEvent",
+	"--exclude": [
+		"src/dm/ve.dm.RebaseServer.js",
+		"src/ve.utils-es6.js",
+		"tests/dm/ve.dm.RebaseServer.test.js",
+		"tests/dm/ve.dm.TestRebaseClient.js",
+		"tests/dm/ve.dm.TestRebaseServer.js"
+	],
 	"--": [
 		".jsduck/external.js",
 		"lib/oojs/oojs.jquery.js",
@@ -21,6 +28,6 @@
 		"lib/unicodejs/unicodejs.js",
 		"lib/treeDiffer/treeDiffer-dist.js",
 		"src",
-		"rebaser/src/dm"
+		"tests"
 	]
 }

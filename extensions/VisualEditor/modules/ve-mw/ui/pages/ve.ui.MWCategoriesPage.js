@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWCategoriesPage class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -34,7 +34,7 @@ ve.ui.MWCategoriesPage = function VeUiMWCategoriesPage( name, config ) {
 
 	this.categoryOptionsFieldset = new OO.ui.FieldsetLayout( {
 		label: ve.msg( 'visualeditor-dialog-meta-categories-options' ),
-		icon: 'settings'
+		icon: 'advanced'
 	} );
 
 	this.categoryWidget = new ve.ui.MWCategoryWidget( {
@@ -240,14 +240,10 @@ ve.ui.MWCategoriesPage.prototype.getCategoryItemForInsertion = function ( item, 
  * Setup categories page.
  *
  * @param {ve.dm.MetaList} metaList Meta list
- * @param {Object} [config] Configuration options
- * @param {Object} [config.data] Dialog setup data
- * @param {boolean} [config.isReadOnly] Dialog is in read-only mode
- * @return {jQuery.Promise}
+ * @param {Object} [data] Dialog setup data
  */
-ve.ui.MWCategoriesPage.prototype.setup = function ( metaList, config ) {
+ve.ui.MWCategoriesPage.prototype.setup = function ( metaList ) {
 	var defaultSortKeyItem,
-		promise,
 		page = this;
 
 	this.metaList = metaList;
@@ -258,21 +254,17 @@ ve.ui.MWCategoriesPage.prototype.setup = function ( metaList, config ) {
 
 	defaultSortKeyItem = this.getDefaultSortKeyItem();
 
-	promise = this.categoryWidget.addItems( this.getCategoryItems() ).then( function () {
-		page.categoryWidget.setDisabled( config.isReadOnly );
-	} );
+	this.categoryWidget.addItems( this.getCategoryItems() );
 
 	this.defaultSortInput.setValue(
-		defaultSortKeyItem ? defaultSortKeyItem.getAttribute( 'content' ) : this.fallbackDefaultSortKey
-	).setReadOnly( config.isReadOnly );
+		defaultSortKeyItem ? defaultSortKeyItem.getAttribute( 'content' ) : ''
+	);
 	this.defaultSortKeyTouched = false;
 
 	// Update input position after transition
 	setTimeout( function () {
 		page.categoryWidget.fitInput();
 	}, OO.ui.theme.getDialogTransitionDuration() );
-
-	return promise;
 };
 
 /**
@@ -295,10 +287,10 @@ ve.ui.MWCategoriesPage.prototype.teardown = function ( data ) {
 			attributes: { content: newDefaultSortKey }
 		};
 
-	if ( data && data.action === 'done' ) {
+	if ( data && data.action === 'apply' ) {
 		// Alter the default sort key iff it's been touched & is actually different
 		if ( this.defaultSortKeyTouched ) {
-			if ( newDefaultSortKey === '' || newDefaultSortKey === this.fallbackDefaultSortKey ) {
+			if ( newDefaultSortKey === '' ) {
 				if ( currentDefaultSortKeyItem ) {
 					currentDefaultSortKeyItem.remove();
 				}
@@ -320,11 +312,4 @@ ve.ui.MWCategoriesPage.prototype.teardown = function ( data ) {
 	this.categoryWidget.clearItems();
 	this.metaList.disconnect( this );
 	this.metaList = null;
-};
-
-ve.ui.MWCategoriesPage.prototype.getFieldsets = function () {
-	return [
-		this.categoriesFieldset,
-		this.categoryOptionsFieldset
-	];
 };

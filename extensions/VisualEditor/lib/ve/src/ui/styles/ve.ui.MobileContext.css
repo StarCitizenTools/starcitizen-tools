@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MobileContext styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-body {
@@ -19,19 +19,10 @@
 .ve-ui-mobileContext .ve-ui-linearContextItem-title {
 	padding: 0 1em 0 0.5em;
 	line-height: 3em;
-	max-width: 45vw;
-	text-overflow: ellipsis;
-	overflow: hidden;
-}
-
-.ve-ui-linearContextItem-title > .oo-ui-labelWidget {
-	display: inline;
 }
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-description {
 	line-height: 3em;
-	padding-right: 0.5em;
-	text-align: right;
 }
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-actions {
@@ -47,11 +38,6 @@
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonElement-button {
 	vertical-align: top;
-}
-
-.ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonElement-frameless.oo-ui-iconElement:first-child {
-	/* Reset negative margin */
-	margin-left: 0;
 }
 
 .ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonWidget.oo-ui-iconElement:not( .oo-ui-labelElement ) .oo-ui-buttonElement-button {

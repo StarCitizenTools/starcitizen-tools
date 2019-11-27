@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Surface class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -15,7 +15,8 @@
 ve.ce.SurfaceObserver = function VeCeSurfaceObserver( surface ) {
 	// Properties
 	this.surface = surface;
-	this.domDocument = surface.attachedRoot.getElementDocument();
+	this.documentView = surface.getDocument();
+	this.domDocument = this.documentView.getDocumentNode().getElementDocument();
 	this.polling = false;
 	this.disabled = false;
 	this.timeoutId = null;
@@ -45,6 +46,7 @@ ve.ce.SurfaceObserver.prototype.clear = function () {
  */
 ve.ce.SurfaceObserver.prototype.detach = function () {
 	this.surface = null;
+	this.documentView = null;
 	this.domDocument = null;
 	this.rangeState = null;
 };
@@ -157,7 +159,7 @@ ve.ce.SurfaceObserver.prototype.pollOnceInternal = function ( signalChanges, sel
 	oldState = this.rangeState;
 	newState = new ve.ce.RangeState(
 		oldState,
-		this.surface.attachedRoot,
+		this.documentView.getDocumentNode(),
 		selectionOnly
 	);
 	this.rangeState = newState;

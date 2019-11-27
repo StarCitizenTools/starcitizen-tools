@@ -55,6 +55,8 @@
 					"ve.dm.DataString",
 					"ve.dm.HashValueStore",
 					"ve.dm.Scalable",
+					"ve.dm.APIResultsProvider",
+					"ve.dm.APIResultsQueue",
 					"ve.dm.Surface",
 					"ve.dm.*SurfaceFragment",
 					"ve.dm.*Selection",
@@ -104,10 +106,6 @@
 					"ve.dm.Change",
 					"ve.dm.RebaseDocState",
 					"ve.dm.RebaseClient",
-					"ve.dm.RebaseServer",
-					"ve.dm.DocumentStore",
-					"ve.dm.ProtocolServer",
-					"ve.dm.TransportServer",
 					"ve.dm.SurfaceSynchronizer"
 				]
 			}
@@ -217,7 +215,7 @@
 				"name": "Windows",
 				"classes": [
 					"ve.ui.*WindowManager",
-					"ve.ui.*Window",
+					"ve.ui.NodeWindow",
 					"ve.ui.*Dialog",
 					"ve.ui.*Inspector"
 				]
@@ -236,6 +234,22 @@
 				"classes": [
 					"ve.DiffMatchPatch",
 					"ve.DiffTreeNode"
+				]
+			}
+		]
+	},
+	{
+		"name": "Tests",
+		"groups": [
+			{
+				"name": "QUnit",
+				"classes": ["ve.QUnit", "ve.QUnit.assert"]
+			},
+			{
+				"name": "IME",
+				"classes": [
+					"ve.ce.TestOffset",
+					"ve.ce.TestRunner"
 				]
 			}
 		]
@@ -333,7 +347,6 @@
 					"Number",
 					"Object",
 					"RegExp",
-					"Set",
 					"String"
 				]
 			}

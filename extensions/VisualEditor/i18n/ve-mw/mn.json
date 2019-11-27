@@ -14,5 +14,6 @@
 	"visualeditor-dialog-meta-categories-input-hiddencategorieslabel": "Нуугдсан категориуд",
 	"visualeditor-dialog-transclusion-multiple-mode": "Сонголтуудыг харуулах",
 	"visualeditor-dialog-transclusion-placeholder": "template нэмэх",
-	"visualeditor-dialog-transclusion-single-mode": "Сонголтуудыг нуух"
+	"visualeditor-dialog-transclusion-single-mode": "Сонголтуудыг нуух",
+	"visualeditor-viewpage-savewarning": "Чи хийсэн ажлаа хадгалалгүй засварлах хэсгийг орхих гэж байгаадаа итгэлтэй байна уу?"
 }

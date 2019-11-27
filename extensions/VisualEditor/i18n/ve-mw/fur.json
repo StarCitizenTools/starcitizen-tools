@@ -5,6 +5,7 @@
 			"Tocaibon"
 		]
 	},
+	"apihelp-visualeditoredit-param-summary": "Cambie il somari.",
 	"tooltip-ca-createsource": "Cree il codiç de pagjine",
 	"tooltip-ca-editsource": "Modifiche il codiç de pagjine",
 	"tooltip-ca-ve-edit": "Modifiche cheste pagjine.",
@@ -148,5 +149,8 @@
 	"visualeditor-serializeerror": "Erôr cjamant i dâts dal servidôr: $1.",
 	"visualeditor-settings-tool": "Impuestazions de pagjine",
 	"visualeditor-toolbar-savedialog": "Salve la pagjine",
-	"visualeditor-version-label": "Version"
+	"visualeditor-version-label": "Version",
+	"visualeditor-viewpage-savewarning-discard": "Abandone i cambiaments",
+	"visualeditor-viewpage-savewarning-keep": "Continue a fâ i cambiaments",
+	"visualeditor-viewpage-savewarning-title": "Sêstu sigûr?"
 }

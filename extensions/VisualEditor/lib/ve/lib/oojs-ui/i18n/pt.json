@@ -11,8 +11,7 @@
 			"Luckas",
 			"Vitorvicentevalente",
 			"SandroHc",
-			"Jkb8",
-			"Athena in Wonderland"
+			"Jkb8"
 		]
 	},
 	"ooui-outline-control-move-down": "Mover item para baixo",
@@ -28,10 +27,8 @@
 	"ooui-dialog-process-dismiss": "Ignorar",
 	"ooui-dialog-process-retry": "Tentar novamente",
 	"ooui-dialog-process-continue": "Continuar",
-	"ooui-combobox-button-label": "Expansor da caixa de combinação",
 	"ooui-selectfile-button-select": "Selecionar ficheiro",
 	"ooui-selectfile-not-supported": "A seleção de ficheiros não é suportada",
 	"ooui-selectfile-placeholder": "Nenhum ficheiro selecionado",
-	"ooui-selectfile-dragdrop-placeholder": "Soltar ficheiro aqui",
-	"ooui-field-help": "Ajuda"
+	"ooui-selectfile-dragdrop-placeholder": "Soltar ficheiro aqui"
 }

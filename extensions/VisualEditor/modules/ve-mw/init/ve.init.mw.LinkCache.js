@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization LinkCache class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -11,11 +11,9 @@
  * @class
  * @extends ve.init.mw.ApiResponseCache
  * @constructor
- * @param {mw.Api} [api]
  */
 ve.init.mw.LinkCache = function VeInitMwLinkCache() {
-	// Parent constructor
-	ve.init.mw.LinkCache.super.apply( this, arguments );
+	ve.init.mw.LinkCache.super.call( this );
 
 	// Keys are page names, values are link data objects
 	// This is kept for synchronous retrieval of cached values via #getCached
@@ -56,9 +54,8 @@ ve.init.mw.LinkCache.static.processPage = function ( page ) {
 		known: page.known !== undefined,
 		redirect: page.redirect !== undefined,
 		disambiguation: ve.getProp( page, 'pageprops', 'disambiguation' ) !== undefined,
-		hidden: ve.getProp( page, 'pageprops', 'hiddencat' ) !== undefined,
 		imageUrl: ve.getProp( page, 'thumbnail', 'source' ),
-		description: page.description
+		description: ve.getProp( page, 'terms', 'description' )
 	};
 };
 
@@ -104,21 +101,40 @@ ve.init.mw.LinkCache.prototype.styleElement = function ( title, $element, hasFra
 };
 
 /**
- * Given a chunk of Parsoid HTML, applies style transformations.
+ * Given a chunk of Parsoid HTML, requests information about each link's title, then adds classes
+ * to each such element as appropriate.
  *
- * Previously this was used for applying red-link styles, but that
- * has since been upstreamed to Parsoid.
- *
- * TODO: Evaluate if this method should be renamed/removed as it
- * now has nothing to do with the link cache.
+ * TODO: Most/all of this code should be done upstream, either by Parsoid itself or by an
+ * intermediary service – see T64803 and others.
  *
  * @param {jQuery} $element Elements to style
  * @param {HTMLDocument} doc Base document to use for normalisation
  */
-ve.init.mw.LinkCache.prototype.styleParsoidElements = function ( $elements ) {
+ve.init.mw.LinkCache.prototype.styleParsoidElements = function ( $elements, doc ) {
 	if ( ve.dm.MWLanguageVariantNode ) {
 		// Render the user's preferred variant in language converter markup
 		ve.dm.MWLanguageVariantNode.static.processVariants( $elements );
+	}
+
+	// TODO: Remove when fixed upstream in Parsoid (T58756)
+	$elements
+		.find( 'a[rel~="mw:ExtLink"]' ).addBack( 'a[rel~="mw:ExtLink"]' )
+		.addClass( 'external' );
+
+	// TODO: Remove when moved upstream into Parsoid or another service (T64803)
+	// If the element isn't attached, doc will be null, so we don't know how to normalise titles
+	if ( doc ) {
+		$elements
+			.find( 'a[rel~="mw:WikiLink"]' ).addBack( 'a[rel~="mw:WikiLink"]' )
+			.each( function () {
+				var title,
+					href = this.href || mw.config.get( 'wgArticlePath' );
+
+				title = ve.init.platform.linkCache.constructor.static.normalizeTitle(
+					ve.dm.MWInternalLinkAnnotation.static.getTargetDataFromHref( href, doc ).title
+				);
+				ve.init.platform.linkCache.styleElement( title, $( this ), href.indexOf( '#' ) !== -1 );
+			} );
 	}
 };
 
@@ -167,13 +183,14 @@ ve.init.mw.LinkCache.prototype.get = function ( title ) {
  * @inheritdoc
  */
 ve.init.mw.LinkCache.prototype.getRequestPromise = function ( subqueue ) {
-	return this.api.get( {
+	return new mw.Api().get( {
 		action: 'query',
-		prop: 'info|pageprops|pageimages|description',
+		prop: 'info|pageprops|pageimages|pageterms',
 		pithumbsize: 80,
 		pilimit: subqueue.length,
-		ppprop: 'disambiguation|hiddencat',
+		wbptterms: 'description',
+		ppprop: 'disambiguation',
 		titles: subqueue,
-		continue: ''
+		'continue': ''
 	} );
 };

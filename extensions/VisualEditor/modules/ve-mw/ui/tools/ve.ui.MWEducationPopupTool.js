@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MediaWiki EducationPopupTool class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -74,16 +74,14 @@ ve.ui.MWEducationPopupTool = function VeUiMwEducationPopupTool( config ) {
 			if ( ve.init.target.openEducationPopupTool ) {
 				ve.init.target.openEducationPopupTool.popup.toggle( false );
 				ve.init.target.openEducationPopupTool.setActive( false );
-				ve.init.target.openEducationPopupTool.$pulsatingDot.removeClass( 'oo-ui-element-hidden' );
-				ve.init.target.openEducationPopupTool.$stillDot.removeClass( 'oo-ui-element-hidden' );
+				ve.init.target.openEducationPopupTool.$pulsatingDot.show();
+				ve.init.target.openEducationPopupTool.$stillDot.show();
 			}
 			ve.init.target.openEducationPopupTool = tool;
-			tool.$pulsatingDot.addClass( 'oo-ui-element-hidden' );
-			tool.$stillDot.addClass( 'oo-ui-element-hidden' );
+			tool.$pulsatingDot.hide();
+			tool.$stillDot.hide();
 			tool.popup.toggle( true );
 			$shield.remove();
-
-			ve.track( 'activity.' + tool.constructor.static.name + 'EducationPopup', { action: 'show' } );
 		}
 	} );
 };
@@ -107,7 +105,7 @@ ve.ui.MWEducationPopupTool.prototype.onPopupCloseButtonClick = function () {
 	ve.init.target.openEducationPopupTool = undefined;
 
 	if ( prefSaysShow ) {
-		ve.init.target.getLocalApi().saveOption( 'visualeditor-hideusered', 1 );
+		new mw.Api().saveOption( 'visualeditor-hideusered', 1 );
 		mw.user.options.set( 'visualeditor-hideusered', 1 );
 	} else if ( !usePrefs ) {
 		if ( !mw.storage.set( 've-hideusered', 1 ) ) {

@@ -27,8 +27,7 @@
 	 */
 	$.uls.data.isRedirect = function ( language ) {
 		return ( $.uls.data.languages[ language ] !== undefined &&
-			$.uls.data.languages[ language ].length === 1 ) ?
-			$.uls.data.languages[ language ][ 0 ] : false;
+			$.uls.data.languages[ language ].length === 1 ) ? $.uls.data.languages[ language ][ 0 ] : false;
 	};
 
 	/**
@@ -78,8 +77,7 @@
 			return $.uls.data.getAutonym( target );
 		}
 
-		return ( $.uls.data.languages[ language ] &&
-			$.uls.data.languages[ language ][ 2 ] ) || language;
+		return ( $.uls.data.languages[ language ] && $.uls.data.languages[ language ][ 2 ] ) || language;
 	};
 
 	/**
@@ -139,7 +137,7 @@
 	 * Returns an associative array of languages in a region,
 	 * grouped by script group.
 	 * @param {string} region Region code
-	 * @return {Object}
+	 * @return {object}
 	 */
 	$.uls.data.getLanguagesByScriptGroupInRegion = function ( region ) {
 		return $.uls.data.getLanguagesByScriptGroupInRegions( [ region ] );
@@ -147,22 +145,25 @@
 
 	/**
 	 * Get the given list of languages grouped by script.
-	 * @param {string[]} languages Array of language codes to group
-	 * @return {string[]} Array of language codes
+	 * @param {string} languages Array of language codes
+	 * @return {Object} Array of languages indexed by script codes
 	 */
 	$.uls.data.getLanguagesByScriptGroup = function ( languages ) {
 		var languagesByScriptGroup = {},
-			language, languageIndex, resolvedRedirect, langScriptGroup;
+			language, resolvedRedirect, langScriptGroup;
 
-		for ( languageIndex = 0; languageIndex < languages.length; languageIndex++ ) {
-			language = languages[ languageIndex ];
+		for ( language in languages ) {
 			resolvedRedirect = $.uls.data.isRedirect( language ) || language;
+
 			langScriptGroup = $.uls.data.getScriptGroupOfLanguage( resolvedRedirect );
+
 			if ( !languagesByScriptGroup[ langScriptGroup ] ) {
 				languagesByScriptGroup[ langScriptGroup ] = [];
 			}
+
 			languagesByScriptGroup[ langScriptGroup ].push( language );
 		}
+
 		return languagesByScriptGroup;
 	};
 
@@ -223,25 +224,6 @@
 	 */
 	$.uls.data.getScriptGroupOfLanguage = function ( language ) {
 		return $.uls.data.getGroupOfScript( $.uls.data.getScript( language ) );
-	};
-
-	/**
-	 * Return the list of languages sorted by script groups.
-	 * @param {string[]} languages Array of language codes to sort
-	 * @return {string[]} Array of language codes
-	 */
-	$.uls.data.sortByScriptGroup = function ( languages ) {
-		var groupedLanguages, scriptGroups, i,
-			allLanguages = [];
-
-		groupedLanguages = $.uls.data.getLanguagesByScriptGroup( languages );
-		scriptGroups = Object.keys( groupedLanguages ).sort();
-
-		for ( i = 0; i < scriptGroups.length; i++ ) {
-			allLanguages = allLanguages.concat( groupedLanguages[ scriptGroups[ i ] ] );
-		}
-
-		return allLanguages;
 	};
 
 	/**

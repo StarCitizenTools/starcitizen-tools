@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Toolbar styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-toolbar {
@@ -25,7 +25,7 @@
 
 .ve-ui-toolbar.oo-ui-toolbar-position-bottom > .oo-ui-toolbar-bar {
 	/* For bottom toolbars though (e.g. Flow), we apparently want the toolbar to be below the surface
-	   overlay, but its dropdowns, popups etc. to be above it - this seems to work… (T169076) */
+	   overlay, but its dropdowns, popups etc. to be above it - this seems to work... (T169076) */
 	z-index: auto;
 }
 

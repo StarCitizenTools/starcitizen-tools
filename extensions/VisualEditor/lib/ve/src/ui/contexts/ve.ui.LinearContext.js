@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Linear Context class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -179,8 +179,8 @@ ve.ui.LinearContext.prototype.onInspectorOpening = function ( win, opening ) {
 			}
 			context.updateDimensionsDebounced();
 		} )
-		.then( function ( opened ) {
-			opened.then( function ( closed ) {
+		.always( function ( opened ) {
+			opened.always( function ( closed ) {
 				closed.always( function () {
 					// Don't try to close the inspector if a second
 					// opening has already been triggered

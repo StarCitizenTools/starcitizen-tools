@@ -1,7 +1,7 @@
-/*!
+/*
  * VisualEditor user interface MWTransclusionDialog class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -62,6 +62,16 @@ ve.ui.MWTransclusionDialog.static.bookletLayoutConfig = ve.extendObject(
 );
 
 /* Methods */
+
+/**
+ * @inheritdoc
+ */
+ve.ui.MWTransclusionDialog.prototype.getReadyProcess = function ( data ) {
+	return ve.ui.MWTransclusionDialog.super.prototype.getReadyProcess.call( this, data )
+		.next( function () {
+			this.setMode( 'auto' );
+		}, this );
+};
 
 /**
  * Handle outline controls move events.
@@ -142,8 +152,7 @@ ve.ui.MWTransclusionDialog.prototype.onAddParameterButtonClick = function () {
  */
 ve.ui.MWTransclusionDialog.prototype.onBookletLayoutSet = function ( page ) {
 	this.addParameterButton.setDisabled(
-		!( page instanceof ve.ui.MWTemplatePage || page instanceof ve.ui.MWParameterPage ) ||
-		this.isReadOnly()
+		!( page instanceof ve.ui.MWTemplatePage || page instanceof ve.ui.MWParameterPage )
 	);
 	this.bookletLayout.getOutlineControls().removeButton.toggle( !(
 		(
@@ -160,7 +169,7 @@ ve.ui.MWTransclusionDialog.prototype.onBookletLayoutSet = function ( page ) {
  * @inheritdoc
  */
 ve.ui.MWTransclusionDialog.prototype.onReplacePart = function ( removed, added ) {
-	var single;
+	var single, label;
 
 	ve.ui.MWTransclusionDialog.super.prototype.onReplacePart.call( this, removed, added );
 
@@ -170,7 +179,13 @@ ve.ui.MWTransclusionDialog.prototype.onReplacePart = function ( removed, added )
 	}
 
 	single = this.isSingleTemplateTransclusion();
-	this.actions.setAbilities( { mode: single } );
+	label = ve.msg( 'visualeditor-dialog-action-insert' );
+
+	this.actions
+		.setAbilities( { mode: single } )
+		.forEach( { actions: 'insert' }, function ( action ) {
+			action.setLabel( label );
+		} );
 };
 
 /**
@@ -193,7 +208,7 @@ ve.ui.MWTransclusionDialog.prototype.isSingleTemplateTransclusion = function () 
 ve.ui.MWTransclusionDialog.prototype.getPageFromPart = function ( part ) {
 	var page = ve.ui.MWTransclusionDialog.super.prototype.getPageFromPart.call( this, part );
 	if ( !page && part instanceof ve.dm.MWTransclusionContentModel ) {
-		return new ve.ui.MWTransclusionContentPage( part, part.getId(), { $overlay: this.$overlay, isReadOnly: this.isReadOnly() } );
+		return new ve.ui.MWTransclusionContentPage( part, part.getId(), { $overlay: this.$overlay } );
 	}
 	return page;
 };
@@ -233,7 +248,7 @@ ve.ui.MWTransclusionDialog.prototype.setMode = function ( mode ) {
 
 		// HACK blur any active input so that its dropdown will be hidden and won't end
 		// up being mispositioned
-		this.$content.find( 'input:focus' ).trigger( 'blur' );
+		this.$content.find( 'input:focus' ).blur();
 	}
 };
 
@@ -363,17 +378,8 @@ ve.ui.MWTransclusionDialog.prototype.initialize = function () {
 ve.ui.MWTransclusionDialog.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.MWTransclusionDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
-			var isReadOnly = this.isReadOnly();
-			this.addTemplateButton.setDisabled( isReadOnly );
-			this.addContentButton.setDisabled( isReadOnly );
-			this.addParameterButton.setDisabled( isReadOnly );
-			this.bookletLayout.getOutlineControls().setAbilities( {
-				move: !isReadOnly,
-				remove: !isReadOnly
-			} );
-
+			this.setMode( 'single' );
 			this.updateModeActionState();
-			this.setMode( 'auto' );
 		}, this );
 };
 

@@ -4,7 +4,7 @@
 	/*!
 	 * VisualEditor minimal demo
 	 *
-	 * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+	 * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
 	 */
 	-->
 	<head>
@@ -13,18 +13,17 @@
 		<title>VisualEditor Standalone Demo</title>
 
 		<!-- oojs-ui-apex -->
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-alerts.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-content.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-interactions.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-layout.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-moderation.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-movement.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-user.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-editing-core.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-editing-advanced.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-editing-styling.css" class="stylesheet-read">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-editing-list.css" class="stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex.css">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-alerts.css">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-interactions.css">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-layout.css">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-moderation.css">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-movement.css">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-user.css">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-editing-core.css">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-editing-advanced.css">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-editing-styling.css">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex-icons-editing-list.css">
 
 		<!-- visualEditor.dist.apex -->
 		<link rel=stylesheet href="../../dist/visualEditor-apex.css" class="stylesheet-ve">
@@ -71,10 +70,9 @@
 		<script src="../../dist/visualEditor.js"></script>
 
 		<script>
-			ve.messagePaths = [
-				'../../dist/i18n/',
-				'../../lib/oojs-ui/i18n/'
-			];
+			/* eslint-disable */
+			ve.messagePaths = ["../../dist/i18n/","../../lib/oojs-ui/i18n/"];
+			/* eslint-enable */
 		</script>
 
 		<!-- visualEditor.minimal.standalone.demo -->

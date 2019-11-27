@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Converter tests.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.Converter' );
@@ -29,16 +29,17 @@ QUnit.test( 'roundTripMetadata', function ( assert ) {
 		beforeHtml = '<!-- w --><meta foo="x"><p>ab<meta foo="y">cd</p><p>ef<meta foo="z">gh</p>',
 		afterHtml = '<!-- w --><meta foo="x"><p>abc</p><meta foo="y"><p>ef<meta foo="z">gh</p>';
 
+	assert.expect( 2 );
 	doc = ve.dm.converter.getModelFromDom( ve.createDocumentFromHtml( '<body>' + beforeHtml ) );
 	tx = ve.dm.TransactionBuilder.static.newFromRemoval( doc, new ve.Range( 10, 11 ) );
 	doc.commit( tx );
-	assert.strictEqual(
+	assert.equal(
 		ve.dm.converter.getDomFromModel( doc ).body.innerHTML,
 		afterHtml,
 		'Metadata in ContentBranchNode gets moved outside by change to ContentBranchNode'
 	);
 	doc.commit( tx.reversed() );
-	assert.strictEqual(
+	assert.equal(
 		ve.dm.converter.getDomFromModel( doc ).body.innerHTML,
 		beforeHtml,
 		'Undo restores metadata to inside ContentBranchNode'

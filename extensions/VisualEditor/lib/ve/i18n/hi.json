@@ -15,14 +15,12 @@
 			"Jayprakash12345",
 			"चक्रपाणी",
 			"Rishi.Singh",
-			"Smtchahal",
-			"Prong$31"
+			"Smtchahal"
 		]
 	},
 	"visualeditor": "यथादृश्य संपादिका",
 	"visualeditor-aliencontextitem-title": "वस्तु",
 	"visualeditor-aliennode-tooltip": "क्षमा करें, इस भाग को अभी केवल स्रोत सम्पादन में सम्पादित किया जा सकता है।",
-	"visualeditor-align-desc-center": "मध्य",
 	"visualeditor-align-widget-center": "मध्य",
 	"visualeditor-align-widget-default": "प्राथमिक",
 	"visualeditor-align-widget-left": "बाएँ ओर",
@@ -147,6 +145,8 @@
 	"visualeditor-linkinspector-title": "लिंक",
 	"visualeditor-listbutton-bullet-tooltip": "बुलेटेड सूची",
 	"visualeditor-listbutton-number-tooltip": "क्रमांकित सूची",
+	"visualeditor-mediasizewidget-button-originaldimensions": "पूर्ण आकार करें",
+	"visualeditor-mediasizewidget-label-custom": "कस्टम",
 	"visualeditor-mediasizewidget-label-defaulterror": "आकार मूल्य अमान्य है।",
 	"visualeditor-mediasizewidget-label-scale": "स्केल",
 	"visualeditor-mediasizewidget-label-scale-percent": "थंबनेल परिमाण का %",
@@ -160,7 +160,6 @@
 	"visualeditor-shortcuts-dialog": "डायलॉग विंडोज",
 	"visualeditor-shortcuts-formatting": "अनुच्छेद स्वरूपण",
 	"visualeditor-shortcuts-history": "इतिहास",
-	"visualeditor-shortcuts-insert": "जोड़ें",
 	"visualeditor-shortcuts-other": "अन्य",
 	"visualeditor-shortcuts-sequence-notice": "प्रकार",
 	"visualeditor-shortcuts-text-style": "पाठ्य स्वरूपण",

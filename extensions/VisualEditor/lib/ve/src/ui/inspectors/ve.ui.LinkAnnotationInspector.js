@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LinkAnnotationInspector class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -124,8 +124,9 @@ ve.ui.LinkAnnotationInspector.prototype.createAnnotationInput = function () {
 ve.ui.LinkAnnotationInspector.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.LinkAnnotationInspector.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
+			// Disable surface until animation is complete; will be reenabled in ready()
+			this.getFragment().getSurface().disable();
 			this.annotationInput.setAnnotation( this.initialAnnotation );
-			this.annotationInput.setReadOnly( this.isReadOnly() );
 			this.updateActions();
 		}, this );
 };
@@ -137,6 +138,7 @@ ve.ui.LinkAnnotationInspector.prototype.getReadyProcess = function ( data ) {
 	return ve.ui.LinkAnnotationInspector.super.prototype.getReadyProcess.call( this, data )
 		.next( function () {
 			this.annotationInput.getTextInputWidget().focus().select();
+			this.getFragment().getSurface().enable();
 
 			// Clear validation state, so that we don't get "invalid" state immediately on focus
 			this.annotationInput.getTextInputWidget().setValidityFlag( true );

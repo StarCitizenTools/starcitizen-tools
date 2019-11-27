@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWWelcomeDialog class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -20,7 +20,8 @@ mw.libs.ve.WelcomeDialog = function VeInitWelcomeDialog( config ) {
 	mw.libs.ve.WelcomeDialog.super.call( this, config );
 
 	this.$element
-		.addClass( 've-init-mw-welcomeDialog' );
+		.addClass( 've-init-mw-desktopArticleTarget-windowManager' )
+		.addClass( 've-init-mw-desktopArticleTarget-windowManager-welcome' );
 };
 
 /* Inheritance */
@@ -60,7 +61,7 @@ mw.libs.ve.WelcomeDialog.prototype.getSetupProcess = function ( data ) {
 	data = $.extend( {
 		title: mw.msg( 'visualeditor-welcomedialog-title', mw.user, mw.config.get( 'wgSiteName' ) ),
 		message: $( '<span>' )
-			.addClass( 've-init-mw-welcomeDialog-content' )
+			.addClass( 'visualeditor-welcomedialog-content' )
 			.append(
 				document.createTextNode( mw.msg( 'visualeditor-welcomedialog-content' ) ),
 				$( '<br>' ),
@@ -68,13 +69,19 @@ mw.libs.ve.WelcomeDialog.prototype.getSetupProcess = function ( data ) {
 			)
 	}, data );
 
-	return mw.libs.ve.WelcomeDialog.super.prototype.getSetupProcess.call( this, data )
-		.next( function () {
-			this.switchable = data.switchable;
-			this.editor = data.editor;
+	this.switchable = data.switchable;
+	this.editor = data.editor;
 
-			this.actions.setMode( this.switchable ? this.editor : 'noswitch' );
-		}, this );
+	return mw.libs.ve.WelcomeDialog.super.prototype.getSetupProcess.call( this, data );
+};
+
+/**
+ * @inheritdoc
+ */
+mw.libs.ve.WelcomeDialog.prototype.getReadyProcess = function () {
+	this.actions.setMode( this.switchable ? this.editor : 'noswitch' );
+
+	return mw.libs.ve.WelcomeDialog.super.prototype.getReadyProcess.apply( this, arguments );
 };
 
 /**

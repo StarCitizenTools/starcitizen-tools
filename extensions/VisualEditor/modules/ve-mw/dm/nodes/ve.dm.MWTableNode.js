@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTable class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -42,14 +42,7 @@ ve.dm.MWTableNode.static.classAttributes = {
 };
 
 // Tables in wikitext only work in some contexts, they're impossible e.g. in list items
-ve.dm.MWTableNode.static.suggestedParentNodeTypes = [
-	'document', 'div', 'tableCell', 'tableCaption', 'mwImageCaption', 'section',
-	// TODO: `paragraph` isn't really a suggested table parent. However,
-	// allowing it here interacts with our post-insertion cleanup for block
-	// nodes so that empty paragraphs get properly removed. We should find a
-	// cleaner way to do this. See: T201573.
-	'paragraph'
-];
+ve.dm.MWTableNode.static.suggestedParentNodeTypes = [ 'document', 'div', 'tableCell', 'tableCaption', 'mwImageCaption' ];
 
 // HACK: users of parentNodeTypes should be fixed to check for inherited classes.
 ve.dm.TableSectionNode.static.parentNodeTypes.push( 'mwTable' );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ListTool classes.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -46,14 +46,22 @@ ve.ui.ListTool.static.deactivateOnSelect = false;
  * @inheritdoc
  */
 ve.ui.ListTool.prototype.onUpdateState = function ( fragment ) {
-	var style, isMatching;
+	var i, len, nodes, style, all;
 
 	// Parent method
 	ve.ui.ListTool.super.prototype.onUpdateState.apply( this, arguments );
 
+	nodes = fragment ? fragment.getSelectedLeafNodes() : [];
 	style = this.constructor.static.style;
-	isMatching = fragment.hasMatchingAncestor( 'list', { style: style } );
-	this.setActive( isMatching );
+	all = !!nodes.length;
+
+	for ( i = 0, len = nodes.length; i < len; i++ ) {
+		if ( !nodes[ i ].hasMatchingAncestor( 'list', { style: style } ) ) {
+			all = false;
+			break;
+		}
+	}
+	this.setActive( all );
 };
 
 /**

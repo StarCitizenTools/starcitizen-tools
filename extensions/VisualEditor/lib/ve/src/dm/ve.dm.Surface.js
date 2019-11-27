@@ -1,49 +1,32 @@
 /*!
  * VisualEditor DataModel Surface class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
- * DataModel surface for a node within a document
- *
- * Methods do not check that ranges actually lie inside the surfaced node
+ * DataModel surface.
  *
  * @class
  * @mixins OO.EventEmitter
  *
  * @constructor
  * @param {ve.dm.Document} doc Document model to create surface for
- * @param {ve.dm.BranchNode} [attachedRoot] Node to surface; default is document node
  * @param {Object} [config] Configuration options
  * @cfg {boolean} [sourceMode] Source editing mode
  */
-ve.dm.Surface = function VeDmSurface( doc, attachedRoot, config ) {
-	// Support old (doc, config) argument order
-	// TODO: Remove this once all callers are updated
-	if ( !config && ve.isPlainObject( attachedRoot ) ) {
-		config = attachedRoot;
-		attachedRoot = undefined;
-	}
-
-	attachedRoot = attachedRoot || doc.getDocumentNode();
+ve.dm.Surface = function VeDmSurface( doc, config ) {
 	config = config || {};
-
-	if ( !( attachedRoot instanceof ve.dm.BranchNode ) ) {
-		throw new Error( 'Expected ve.dm.BranchNode for attachedRoot' );
-	}
 
 	// Mixin constructors
 	OO.EventEmitter.call( this );
 
 	// Properties
 	this.documentModel = doc;
-	this.attachedRoot = attachedRoot;
 	this.sourceMode = !!config.sourceMode;
 	this.metaList = new ve.dm.MetaList( this );
-	this.selection = new ve.dm.NullSelection();
-	// The selection before the most recent stack of changes was applied
-	this.selectionBefore = this.selection;
+	this.selection = new ve.dm.NullSelection( this.getDocument() );
+	this.selectionBefore = new ve.dm.NullSelection( this.getDocument() );
 	this.translatedSelection = null;
 	this.branchNodes = {};
 	this.selectedNode = null;
@@ -55,15 +38,13 @@ ve.dm.Surface = function VeDmSurface( doc, attachedRoot, config ) {
 	this.insertionAnnotations = new ve.dm.AnnotationSet( this.getDocument().getStore() );
 	this.selectedAnnotations = new ve.dm.AnnotationSet( this.getDocument().getStore() );
 	this.isCollapsed = null;
-	this.multiUser = false;
-	this.readOnly = false;
+	this.enabled = true;
 	this.transacting = false;
 	this.queueingContextChanges = false;
 	this.contextChangeQueued = false;
 	this.authorId = null;
-	this.lastStoredChange = doc.getCompleteHistoryLength();
+	this.lastStoredChange = 0;
 	this.autosaveFailed = false;
-	this.synchronizer = null;
 
 	// Events
 	this.getDocument().connect( this, {
@@ -133,29 +114,25 @@ OO.mixinClass( ve.dm.Surface, OO.EventEmitter );
 /* Methods */
 
 /**
- * Set the read-only state of the surface
+ * Disable changes.
  *
- * @param {boolean} readOnly Make surface read-only
+ * @fires history
  */
-ve.dm.Surface.prototype.setReadOnly = function ( readOnly ) {
-	if ( !!readOnly !== this.readOnly ) {
-		this.readOnly = !!readOnly;
-		if ( readOnly ) {
-			this.stopHistoryTracking();
-		} else {
-			this.startHistoryTracking();
-		}
-		this.emit( 'contextChange' );
-	}
+ve.dm.Surface.prototype.disable = function () {
+	this.stopHistoryTracking();
+	this.enabled = false;
+	this.emit( 'history' );
 };
 
 /**
- * Check if the surface is read-only
+ * Enable changes.
  *
- * @return {boolean}
+ * @fires history
  */
-ve.dm.Surface.prototype.isReadOnly = function () {
-	return this.readOnly;
+ve.dm.Surface.prototype.enable = function () {
+	this.enabled = true;
+	this.startHistoryTracking();
+	this.emit( 'history' );
 };
 
 /**
@@ -174,11 +151,12 @@ ve.dm.Surface.prototype.initialize = function () {
  * @return {HTMLDocument|string} HTML document (visual mode) or text (source mode)
  */
 ve.dm.Surface.prototype.getDom = function () {
+	// Optimized converter for source mode, which contains only
+	// plain text or paragraphs.
 	if ( this.sourceMode ) {
-		return ve.dm.sourceConverter.getSourceTextFromModel( this.getDocument() );
-	} else {
-		return ve.dm.converter.getDomFromModel( this.getDocument() );
+		return this.getDocument().data.getSourceText();
 	}
+	return ve.dm.converter.getDomFromModel( this.getDocument() );
 };
 
 /**
@@ -193,45 +171,10 @@ ve.dm.Surface.prototype.getHtml = function () {
 };
 
 /**
- * Set the surface multi-user mode
- *
- * @param {boolean} multiUser Multi-user mode
- */
-ve.dm.Surface.prototype.setMultiUser = function ( multiUser ) {
-	this.multiUser = multiUser;
-};
-
-/**
- * Check if the surface is in multi-user mode
- *
- * @return {boolean} Surface is in multi-user mode
- */
-ve.dm.Surface.prototype.isMultiUser = function () {
-	return this.multiUser;
-};
-
-/**
- * Create a surface synchronizer.
- *
- * @param {string} documentId Document ID
- * @param {Object} [config] Configuration options
- */
-ve.dm.Surface.prototype.createSynchronizer = function ( documentId, config ) {
-	if ( this.synchronizer ) {
-		throw new Error( 'Synchronizer already set' );
-	}
-
-	this.setNullSelection();
-	this.setMultiUser( true );
-
-	this.synchronizer = new ve.dm.SurfaceSynchronizer( this, documentId, config );
-};
-
-/**
  * Start tracking state changes in history.
  */
 ve.dm.Surface.prototype.startHistoryTracking = function () {
-	if ( this.readOnly ) {
+	if ( !this.enabled ) {
 		return;
 	}
 	if ( this.historyTrackingInterval === null ) {
@@ -243,7 +186,7 @@ ve.dm.Surface.prototype.startHistoryTracking = function () {
  * Stop tracking state changes in history.
  */
 ve.dm.Surface.prototype.stopHistoryTracking = function () {
-	if ( this.readOnly ) {
+	if ( !this.enabled ) {
 		return;
 	}
 	if ( this.historyTrackingInterval !== null ) {
@@ -331,9 +274,7 @@ ve.dm.Surface.prototype.pushStaging = function ( allowUndo ) {
 	}
 	this.stagingStack.push( {
 		transactions: [],
-		// Will get overridden after the first transaction, but while the
-		// stack is empty, should be equal to the previous selectionBefore.
-		selectionBefore: this.isStaging() ? this.getStaging().selectionBefore : this.selectionBefore,
+		selectionBefore: new ve.dm.NullSelection( this.getDocument() ),
 		allowUndo: !!allowUndo
 	} );
 };
@@ -448,7 +389,7 @@ ve.dm.Surface.prototype.getInsertionAnnotations = function () {
  * @fires contextChange
  */
 ve.dm.Surface.prototype.setInsertionAnnotations = function ( annotations ) {
-	if ( this.readOnly ) {
+	if ( !this.enabled ) {
 		return;
 	}
 	this.insertionAnnotations = annotations !== null ?
@@ -467,7 +408,7 @@ ve.dm.Surface.prototype.setInsertionAnnotations = function ( annotations ) {
  * @fires contextChange
  */
 ve.dm.Surface.prototype.addInsertionAnnotations = function ( annotations ) {
-	if ( this.readOnly ) {
+	if ( !this.enabled ) {
 		return;
 	}
 	if ( annotations instanceof ve.dm.Annotation ) {
@@ -490,7 +431,7 @@ ve.dm.Surface.prototype.addInsertionAnnotations = function ( annotations ) {
  * @fires contextChange
  */
 ve.dm.Surface.prototype.removeInsertionAnnotations = function ( annotations ) {
-	if ( this.readOnly ) {
+	if ( !this.enabled ) {
 		return;
 	}
 	if ( annotations instanceof ve.dm.Annotation ) {
@@ -511,7 +452,7 @@ ve.dm.Surface.prototype.removeInsertionAnnotations = function ( annotations ) {
  * @return {boolean} Redo is allowed
  */
 ve.dm.Surface.prototype.canRedo = function () {
-	return this.undoIndex > 0 && !this.readOnly;
+	return this.undoIndex > 0 && this.enabled;
 };
 
 /**
@@ -520,7 +461,7 @@ ve.dm.Surface.prototype.canRedo = function () {
  * @return {boolean} Undo is allowed
  */
 ve.dm.Surface.prototype.canUndo = function () {
-	return this.hasBeenModified() && !this.readOnly && ( !this.isStaging() || this.doesStagingAllowUndo() );
+	return this.hasBeenModified() && this.enabled && ( !this.isStaging() || this.doesStagingAllowUndo() );
 };
 
 /**
@@ -541,15 +482,6 @@ ve.dm.Surface.prototype.hasBeenModified = function () {
  */
 ve.dm.Surface.prototype.getDocument = function () {
 	return this.documentModel;
-};
-
-/**
- * Get the surfaced node
- *
- * @return {ve.dm.BranchNode} The surfaced node
- */
-ve.dm.Surface.prototype.getAttachedRoot = function () {
-	return this.attachedRoot;
 };
 
 /**
@@ -589,7 +521,7 @@ ve.dm.Surface.prototype.getTranslatedSelection = function () {
  */
 ve.dm.Surface.prototype.getFragment = function ( selection, noAutoSelect, excludeInsertions ) {
 	selection = selection || this.selection;
-	// TODO: Use a factory pattern to generate fragments
+	// TODO: Use a factory pattery to generate fragments
 	return this.sourceMode ?
 		new ve.dm.SourceSurfaceFragment( this, selection, noAutoSelect, excludeInsertions ) :
 		new ve.dm.SurfaceFragment( this, selection, noAutoSelect, excludeInsertions );
@@ -604,7 +536,7 @@ ve.dm.Surface.prototype.getFragment = function ( selection, noAutoSelect, exclud
  * @return {ve.dm.SurfaceFragment} Surface fragment
  */
 ve.dm.Surface.prototype.getLinearFragment = function ( range, noAutoSelect, excludeInsertions ) {
-	return this.getFragment( new ve.dm.LinearSelection( range ), noAutoSelect, excludeInsertions );
+	return this.getFragment( new ve.dm.LinearSelection( this.getDocument(), range ), noAutoSelect, excludeInsertions );
 };
 
 /**
@@ -681,14 +613,14 @@ ve.dm.Surface.prototype.stopQueueingContextChanges = function () {
  * @param {ve.Range} range Range to create linear selection at
  */
 ve.dm.Surface.prototype.setLinearSelection = function ( range ) {
-	this.setSelection( new ve.dm.LinearSelection( range ) );
+	this.setSelection( new ve.dm.LinearSelection( this.getDocument(), range ) );
 };
 
 /**
  * Set a null selection on the model
  */
 ve.dm.Surface.prototype.setNullSelection = function () {
-	this.setSelection( new ve.dm.NullSelection() );
+	this.setSelection( new ve.dm.NullSelection( this.getDocument() ) );
 };
 
 /**
@@ -758,6 +690,9 @@ ve.dm.Surface.prototype.setSelection = function ( selection ) {
 		contextChange = false,
 		linearData = this.getDocument().data;
 
+	if ( !this.enabled ) {
+		return;
+	}
 	this.translatedSelection = null;
 
 	if ( this.transacting ) {
@@ -821,7 +756,7 @@ ve.dm.Surface.prototype.setSelection = function ( selection ) {
 			}
 		}
 	} else if ( selection instanceof ve.dm.TableSelection ) {
-		selectedNode = selection.getMatrixCells( this.getDocument() )[ 0 ].node;
+		selectedNode = selection.getMatrixCells()[ 0 ].node;
 		contextChange = true;
 	} else if ( selection.isNull() ) {
 		contextChange = true;
@@ -848,7 +783,7 @@ ve.dm.Surface.prototype.setSelection = function ( selection ) {
 
 	// If selection changed emit a select
 	if ( selectionChange ) {
-		this.emit( 'select', this.selection );
+		this.emit( 'select', this.selection.clone() );
 		if ( oldSelection.isNull() ) {
 			this.emit( 'focus' );
 		}
@@ -867,10 +802,7 @@ ve.dm.Surface.prototype.setSelection = function ( selection ) {
  * Place the selection at the first content offset in the document.
  */
 ve.dm.Surface.prototype.selectFirstContentOffset = function () {
-	var firstOffset = this.getDocument().data.getNearestContentOffset(
-		this.getAttachedRoot().getOffset(),
-		1
-	);
+	var firstOffset = this.getDocument().data.getNearestContentOffset( 0, 1 );
 	if ( firstOffset !== -1 ) {
 		// Found a content offset
 		this.setLinearSelection( new ve.Range( firstOffset ) );
@@ -922,13 +854,17 @@ ve.dm.Surface.prototype.change = function ( transactions, selection ) {
  */
 ve.dm.Surface.prototype.changeInternal = function ( transactions, selection, skipUndoStack ) {
 	var i, len, selectionAfter, committed,
-		selectionBefore = this.selection,
+		selectionBefore = this.selection.clone(),
 		contextChange = false;
+
+	if ( !this.enabled ) {
+		return;
+	}
 
 	this.startQueueingContextChanges();
 
 	// Process transactions
-	if ( transactions && !this.readOnly ) {
+	if ( transactions ) {
 		if ( transactions instanceof ve.dm.Transaction ) {
 			transactions = [ transactions ];
 		}
@@ -984,7 +920,7 @@ ve.dm.Surface.prototype.changeInternal = function ( transactions, selection, ski
 		!selectionBefore.equals( selectionAfter ) &&
 		selectionAfter.equals( this.selection )
 	) {
-		this.emit( 'select', this.selection );
+		this.emit( 'select', this.selection.clone() );
 	}
 
 	if ( contextChange ) {
@@ -1001,24 +937,23 @@ ve.dm.Surface.prototype.changeInternal = function ( transactions, selection, ski
  * @fires undoStackChange
  */
 ve.dm.Surface.prototype.breakpoint = function () {
-	var breakpointSet = false;
-	if ( this.readOnly ) {
+	if ( !this.enabled ) {
 		return false;
 	}
 	this.resetHistoryTrackingInterval();
 	if ( this.newTransactions.length > 0 ) {
 		this.undoStack.push( {
 			transactions: this.newTransactions,
-			selection: this.selection,
-			selectionBefore: this.selectionBefore
+			selection: this.selection.clone(),
+			selectionBefore: this.selectionBefore.clone()
 		} );
 		this.newTransactions = [];
 		this.emit( 'undoStackChange' );
-		breakpointSet = true;
+		return true;
+	} else if ( this.selectionBefore.isNull() && !this.selection.isNull() ) {
+		this.selectionBefore = this.selection.clone();
 	}
-	// Update selectionBefore even if nothing has changed
-	this.selectionBefore = this.selection;
-	return breakpointSet;
+	return false;
 };
 
 /**
@@ -1095,7 +1030,7 @@ ve.dm.Surface.prototype.getSelectedNode = function () {
 /**
  * Get the selected node covering a specific selection, or null
  *
- * @param {ve.dm.Selection} [selection] Selection, defaults to the current selection
+ * @param {ve.dm.Selection} selection Selection
  * @return {ve.dm.Node|null} Selected node
  */
 ve.dm.Surface.prototype.getSelectedNodeFromSelection = function ( selection ) {
@@ -1159,20 +1094,16 @@ ve.dm.Surface.prototype.getModifiedRanges = function ( includeCollapsed, include
 		} );
 	} );
 
-	ranges
-		.sort( function ( a, b ) {
-			return a.start - b.start;
-		} )
-		.forEach( function ( range ) {
-			if ( includeCollapsed || !range.isCollapsed() ) {
-				if ( lastRange && lastRange.touchesRange( range ) ) {
-					compactRanges.pop();
-					range = lastRange.expand( range );
-				}
-				compactRanges.push( range );
-				lastRange = range;
+	ranges.sort( function ( a, b ) { return a.start - b.start; } ).forEach( function ( range ) {
+		if ( includeCollapsed || !range.isCollapsed() ) {
+			if ( lastRange && lastRange.touchesRange( range ) ) {
+				compactRanges.pop();
+				range = lastRange.expand( range );
 			}
-		} );
+			compactRanges.push( range );
+			lastRange = range;
+		}
+	} );
 
 	return compactRanges;
 };
@@ -1280,7 +1211,7 @@ ve.dm.Surface.prototype.storeChanges = function () {
 	if ( !change.isEmpty() ) {
 		if ( ve.init.platform.appendToSessionList( 've-changes', JSON.stringify( change.serialize() ) ) ) {
 			this.lastStoredChange = dmDoc.getCompleteHistoryLength();
-			ve.init.platform.setSessionObject( 've-selection', this.getSelection() );
+			ve.init.platform.setSession( 've-selection', JSON.stringify( this.getSelection() ) );
 		} else {
 			// Auto-save failed probably because of memory limits
 			// so flag it so we don't keep trying in vain.
@@ -1320,13 +1251,14 @@ ve.dm.Surface.prototype.restoreChanges = function () {
 		changes.forEach( function ( changeString ) {
 			var data = JSON.parse( changeString ),
 				change = ve.dm.Change.static.unsafeDeserialize( data, surface.getDocument() );
-			change.applyTo( surface, true );
+			change.applyTo( surface );
 			surface.breakpoint();
 		} );
 		restored = !!changes.length;
 		try {
 			selection = ve.dm.Selection.static.newFromJSON(
-				ve.init.platform.getSessionObject( 've-selection' )
+				this.getDocument(),
+				ve.init.platform.getSession( 've-selection' )
 			);
 		} catch ( e ) {
 			// Didn't restore the selection, not a big deal.
@@ -1361,7 +1293,7 @@ ve.dm.Surface.prototype.storeDocState = function ( state, html ) {
 	// Clear any changes that may have stored up to this point
 	this.removeDocStateAndChanges();
 	if ( state ) {
-		if ( !this.updateDocState( state ) ) {
+		if ( !ve.init.platform.setSession( 've-docstate', JSON.stringify( state ) ) ) {
 			this.stopStoringChanges();
 			return false;
 		}
@@ -1381,16 +1313,6 @@ ve.dm.Surface.prototype.storeDocState = function ( state, html ) {
 	}
 
 	return true;
-};
-
-/**
- * Update stored document state metadata, without changing the HTML
- *
- * @param {Object} state Document state
- * @return {boolean} Document metadata was successfully stored
- */
-ve.dm.Surface.prototype.updateDocState = function ( state ) {
-	return ve.init.platform.setSession( 've-docstate', JSON.stringify( state ) );
 };
 
 /**

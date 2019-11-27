@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface DiffDialog class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -63,7 +63,6 @@ ve.ui.DiffDialog.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.DiffDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
 			this.diffElement = new ve.ui.DiffElement( new ve.dm.VisualDiff( data.oldDoc, data.newDoc ) );
-			ve.targetLinksToNewWindow( this.diffElement.$document[ 0 ] );
 
 			this.content.$element.append(
 				this.diffElement.$element

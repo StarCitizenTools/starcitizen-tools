@@ -4,7 +4,7 @@
  *
  * @file
  * @ingroup Extensions
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license MIT
  */
 
@@ -12,6 +12,7 @@ class VisualEditorDataModule extends ResourceLoaderModule {
 
 	/* Protected Members */
 
+	protected $origin = self::ORIGIN_USER_SITEWIDE;
 	protected $targets = [ 'desktop', 'mobile' ];
 
 	/* Methods */
@@ -35,7 +36,7 @@ class VisualEditorDataModule extends ResourceLoaderModule {
 		return 've.init.platform.addParsedMessages(' . FormatJson::encode(
 				$parsedMessages,
 				ResourceLoader::inDebugMode()
-			) . ');' .
+			) . ');'.
 			've.init.platform.addMessages(' . FormatJson::encode(
 				$plainMessages,
 				ResourceLoader::inDebugMode()
@@ -45,7 +46,7 @@ class VisualEditorDataModule extends ResourceLoaderModule {
 	/**
 	 * @param ResourceLoaderContext $context Object containing information about the state of this
 	 *   specific loader request.
-	 * @return array[] Messages in various states of parsing
+	 * @return string[] Messages in various states of parsing
 	 */
 	protected function getMessageInfo( ResourceLoaderContext $context ) {
 		$editSubmitButtonLabelPublish = $context->getResourceLoader()->getConfig()

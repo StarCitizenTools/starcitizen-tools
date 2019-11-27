@@ -4,7 +4,7 @@
 	/*!
 	 * VisualEditor keyboard event logger page
 	 *
-	 * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+	 * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
 	 */
 	-->
 	<head>
@@ -47,7 +47,6 @@
 				overflow-y: auto;
 			}
 		</style>
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex.css" class="stylesheet-ltr stylesheet-read">
 	</head>
 	<body>
 		<form class="ve-demo-form">
@@ -67,13 +66,7 @@
 		<script src="../../src/ve.EventSequencer.js"></script>
 		<script>
 			( function () {
-				var startTime,
-					/* eslint-disable no-jquery/no-global-selector */
-					$form = $( '.ve-demo-form' ),
-					$content = $( '.ve-demo-content' ).addClass( 'oo-ui-element-hidden' ),
-					$log = $( '.ve-demo-log' ).val( '' ),
-					$imeIdentifier = $( '.ve-demo-identifier' ),
-					/* eslint-enable no-jquery/no-global-selector */
+				var $form, $content, $log, startTime,
 					oldHtml = '',
 					oldStartOffset = 0,
 					oldEndOffset = 0,
@@ -166,16 +159,16 @@
 					e.preventDefault();
 
 					comments = {
-						imeIdentifier: $imeIdentifier.val(),
+						imeIdentifier: $( '.ve-demo-identifier' ).val(),
 						userAgent: navigator.userAgent,
 						startDom: $content.html()
 					};
 
-					$form.addClass( 'oo-ui-element-hidden' );
-					$content.removeClass( 'oo-ui-element-hidden' ).trigger( 'focus' );
+					$form.hide();
+					$content.show().focus();
 				}
 
-				( function () {
+				function init() {
 					var i, len,
 						handlers = {},
 						eventNames = [
@@ -186,6 +179,10 @@
 							'keypress',
 							'input'
 						];
+
+					$form = $( '.ve-demo-form' );
+					$content = $( '.ve-demo-content' ).hide();
+					$log = $( '.ve-demo-log' ).val( '' );
 
 					for ( i = 0, len = eventNames.length; i < len; i++ ) {
 						handlers[ eventNames[ i ] ] =
@@ -207,8 +204,9 @@
 							this.select();
 						}
 					} );
-				}() );
+				}
 
+				init();
 			}() );
 		</script>
 	</body>

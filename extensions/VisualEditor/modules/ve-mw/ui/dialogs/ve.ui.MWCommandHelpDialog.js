@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWCommandHelpDialog class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -28,16 +28,10 @@ OO.inheritClass( ve.ui.MWCommandHelpDialog, ve.ui.CommandHelpDialog );
 ve.ui.MWCommandHelpDialog.static.commandGroups = ve.extendObject( {}, ve.ui.MWCommandHelpDialog.static.commandGroups, {
 	insert: {
 		title: OO.ui.deferMsg( 'visualeditor-shortcuts-insert' ),
-		promote: [ 'ref', 'template', 'table' ],
-		demote: [ 'horizontalRule' ]
+		promote: [],
+		demote: []
 	}
 } );
-
-ve.ui.MWCommandHelpDialog.static.commandGroupsOrder = [
-	'textStyle', 'clipboard', 'history', 'dialog',
-	'formatting', 'insert',
-	'other'
-];
 
 /* Registration */
 

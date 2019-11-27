@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable SectionNode styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /* Prevent margin collapse across sections */
@@ -20,6 +20,6 @@
 	transition: opacity 250ms ease;
 }
 
-.ve-ce-sectionNode:not( .ve-ce-activeNode-active ) {
+.ve-ce-surface-enabled .ve-ce-sectionNode:not( .ve-ce-activeNode-active ) {
 	opacity: 0.5;
 }

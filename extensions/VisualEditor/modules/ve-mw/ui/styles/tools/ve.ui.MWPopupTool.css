@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface popup tool styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -50,7 +50,7 @@
 /*
  * Bidi-isolate the version number,
  * so it won't mess up the date after it.
- * T70688
+ * Bug 68688
  */
 .ve-ui-mwHelpPopupTool-version-link {
 	unicode-bidi: embed;

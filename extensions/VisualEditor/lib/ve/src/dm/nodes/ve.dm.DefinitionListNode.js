@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel DefinitionListNode class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -30,8 +30,6 @@ ve.dm.DefinitionListNode.static.name = 'definitionList';
 ve.dm.DefinitionListNode.static.childNodeTypes = [ 'definitionListItem' ];
 
 ve.dm.DefinitionListNode.static.matchTagNames = [ 'dl' ];
-
-ve.dm.DefinitionListNode.static.isDiffedAsList = true;
 
 /* Registration */
 

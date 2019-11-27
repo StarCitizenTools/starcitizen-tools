@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable linear delete key down handler
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,8 +13,8 @@
  * @constructor
  */
 ve.ce.LinearDeleteKeyDownHandler = function VeCeLinearDeleteKeyDownHandler() {
-	// Parent constructor - never called because class is fully static
-	// ve.ui.LinearDeleteKeyDownHandler.super.apply( this, arguments );
+	// Parent constructor
+	ve.ui.LinearDeleteKeyDownHandler.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -51,15 +51,10 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 		documentModel = surface.getModel().getDocument(),
 		data = documentModel.data;
 
-	if ( surface.isReadOnly() ) {
-		e.preventDefault();
-		return true;
-	}
-
 	if ( direction === 1 && e.shiftKey && ve.getSystemPlatform() !== 'mac' ) {
 		// Shift+Del on non-Mac platforms performs 'cut', so
 		// don't handle it here.
-		return false;
+		return;
 	}
 
 	// Use native behaviour then poll if collapsed, unless we are adjacent to some hard tag
@@ -99,7 +94,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 			range.setStart( position.node, position.offset );
 			surface.nativeSelection.removeAllRanges();
 			surface.nativeSelection.addRange( range );
-			surface.updateActiveAnnotations();
+			surface.updateActiveLink();
 			e.preventDefault();
 			return true;
 		}
@@ -128,7 +123,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 			range = document.createRange();
 			// Set start to link's offset, minus 1 to allow for outer nail deletion
 			// (browsers actually tend to adjust range offsets automatically
-			// for previous sibling deletion, but just in case …)
+			// for previous sibling deletion, but just in case ...)
 			range.setStart( linkNode.parentNode, ve.parentIndex( linkNode ) - 1 );
 			// Remove the outer nails, then the link itself
 			linkNode.parentNode.removeChild( linkNode.previousSibling );
@@ -137,7 +132,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 
 			surface.nativeSelection.removeAllRanges();
 			surface.nativeSelection.addRange( range );
-			surface.updateActiveAnnotations();
+			surface.updateActiveLink();
 			e.preventDefault();
 			return true;
 		}
@@ -159,7 +154,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 			range.setStart( position.node, position.offset );
 			surface.nativeSelection.removeAllRanges();
 			surface.nativeSelection.addRange( range );
-			surface.updateActiveAnnotations();
+			surface.updateActiveLink();
 			e.preventDefault();
 			return true;
 		}
@@ -193,14 +188,14 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 			if ( node instanceof ve.dm.TableNode ) {
 				if ( rangeToRemove.containsOffset( nodeOuterRange.start ) ) {
 					surface.getModel().setSelection( new ve.dm.TableSelection(
-						nodeOuterRange, 0, 0
+						documentModel, nodeOuterRange, 0, 0
 					) );
 				} else {
 					matrix = node.getMatrix();
 					row = matrix.getRowCount() - 1;
 					col = matrix.getColCount( row ) - 1;
 					surface.getModel().setSelection( new ve.dm.TableSelection(
-						nodeOuterRange, col, row
+						documentModel, nodeOuterRange, col, row
 					) );
 				}
 				e.preventDefault();
@@ -237,7 +232,7 @@ ve.ce.LinearDeleteKeyDownHandler.static.execute = function ( surface, e ) {
 				!startNode.isUnwrappable() ||
 				// Content item at the start / end?
 				(
-					( startNode.canContainContent() || surface.attachedRoot === startNode ) &&
+					( startNode.canContainContent() || documentModel.getDocumentNode() === startNode ) &&
 					( nodeRange.start === 0 || nodeRange.end === docLength )
 				)
 			) {

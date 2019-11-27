@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface SequenceRegistry class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -105,7 +105,4 @@ ve.ui.sequenceRegistry.register(
 );
 ve.ui.sequenceRegistry.register(
 	new ve.ui.Sequence( 'numberDot', 'numberWrapOnce', [ { type: 'paragraph' }, '1', '.', ' ' ], 3 )
-);
-ve.ui.sequenceRegistry.register(
-	new ve.ui.Sequence( 'horizontalRule', 'insertHorizontalRule', [ { type: 'paragraph' }, '-', '-', '-', '-' ], 4 )
 );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface DSVFileTransferHandler tests.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ui.DSVFileTransferHandler' );
@@ -19,9 +19,9 @@ QUnit.test( 'getInsertableData', function ( assert ) {
 		},
 		mockSurface = {
 			createProgress: function () {
-				return ve.createDeferred().resolve(
+				return $.Deferred().resolve(
 					{ setProgress: fn },
-					ve.createDeferred().resolve().promise()
+					$.Deferred().resolve().promise()
 				).promise();
 			}
 		},

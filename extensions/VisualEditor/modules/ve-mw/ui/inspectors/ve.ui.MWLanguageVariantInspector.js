@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LanguageVariantInspector class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -190,7 +190,7 @@ ve.ui.MWLanguageVariantInspector.prototype.getHtmlForDoc = function ( doc ) {
 		// That's okay: ignore the error and use what we've got.
 	}
 	// XXX return a flag to indicate whether contents are now inline or block?
-	targetHtmlDoc = ve.dm.converter.getDomFromModel( doc );
+	targetHtmlDoc = ve.dm.converter.getDomFromModel( doc, false );
 	return ve.properInnerHtml( targetHtmlDoc.body );
 };
 
@@ -595,8 +595,7 @@ ve.ui.MWLanguageVariantTwoWayInspector.prototype.getDefaultVariantInfo = functio
 ve.ui.MWLanguageVariantTwoWayInspector.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.MWLanguageVariantTwoWayInspector.super.prototype.getSetupProcess.call( this, data ).next( function () {
 		var variantInfo = this.variantNode.getVariantInfo();
-		this.layout.clearItems();
-		this.items = [];
+		this.layout.clearItems(); this.items = [];
 		variantInfo.twoway.forEach( function ( tw, idx ) {
 			this.items[ idx ] = this.createItem( tw.l, tw.t );
 			this.layout.addItems( [ this.items[ idx ].layout ] );
@@ -624,7 +623,7 @@ ve.ui.MWLanguageVariantTwoWayInspector.prototype.createItem = function ( lang, c
 	) );
 	clearButton = new OO.ui.ButtonInputWidget( {
 		icon: 'clear',
-		title: OO.ui.deferMsg(
+		iconTitle: OO.ui.deferMsg(
 			'visualeditor-mwlanguagevariantinspector-twoway-clear-button'
 		),
 		framed: false
@@ -746,8 +745,7 @@ ve.ui.MWLanguageVariantOneWayInspector.prototype.getDefaultVariantInfo = functio
 ve.ui.MWLanguageVariantOneWayInspector.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.MWLanguageVariantOneWayInspector.super.prototype.getSetupProcess.call( this, data ).next( function () {
 		var variantInfo = this.variantNode.getVariantInfo();
-		this.layout.clearItems();
-		this.items = [];
+		this.layout.clearItems(); this.items = [];
 		variantInfo.oneway.forEach( function ( ow, idx ) {
 			this.items[ idx ] = this.createItem( ow.f, ow.l, ow.t );
 			this.layout.addItems( [ this.items[ idx ].layout ] );
@@ -779,7 +777,7 @@ ve.ui.MWLanguageVariantOneWayInspector.prototype.createItem = function ( from, l
 	) );
 	clearButton = new OO.ui.ButtonInputWidget( {
 		icon: 'clear',
-		title: OO.ui.deferMsg(
+		iconTitle: OO.ui.deferMsg(
 			'visualeditor-mwlanguagevariantinspector-oneway-clear-button'
 		),
 		framed: false

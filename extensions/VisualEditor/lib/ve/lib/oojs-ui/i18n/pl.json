@@ -17,8 +17,7 @@
 			"Matik7",
 			"Gloria sah",
 			"Andrzej aa",
-			"The Polish",
-			"Railfail536"
+			"The Polish"
 		]
 	},
 	"ooui-outline-control-move-down": "Przesuń w dół",
@@ -37,6 +36,5 @@
 	"ooui-selectfile-button-select": "Wybierz plik",
 	"ooui-selectfile-not-supported": "Wybór pliku nie jest obsługiwany",
 	"ooui-selectfile-placeholder": "Nie wybrano pliku",
-	"ooui-selectfile-dragdrop-placeholder": "Upuść plik tutaj",
-	"ooui-field-help": "Pomoc"
+	"ooui-selectfile-dragdrop-placeholder": "Upuść plik tutaj"
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWCategoryWidget class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -231,29 +231,6 @@ ve.ui.MWCategoryWidget.prototype.setDefaultSortKey = function ( value ) {
 };
 
 /**
- * @inheritdoc
- */
-ve.ui.MWCategoryWidget.prototype.setDisabled = function () {
-	var isDisabled;
-	// Parent method
-	ve.ui.MWCategoryWidget.super.prototype.setDisabled.apply( this, arguments );
-
-	isDisabled = this.isDisabled();
-
-	if ( this.input ) {
-		this.input.setDisabled( isDisabled );
-	}
-	if ( this.items ) {
-		this.items.forEach( function ( item ) {
-			item.setDisabled( isDisabled );
-		} );
-	}
-	if ( this.popup ) {
-		this.popup.closePopup();
-	}
-};
-
-/**
  * Get list of category names.
  *
  * @method
@@ -297,7 +274,7 @@ ve.ui.MWCategoryWidget.prototype.queryCategoryStatus = function ( categoryNames 
 
 	// Batch this up into groups of 50
 	while ( index < categoryNamesToQuery.length ) {
-		promises.push( ve.init.target.getContentApi().get( {
+		promises.push( new mw.Api().get( {
 			action: 'query',
 			prop: 'pageprops',
 			titles: categoryNamesToQuery.slice( index, index + batchSize ),
@@ -307,7 +284,6 @@ ve.ui.MWCategoryWidget.prototype.queryCategoryStatus = function ( categoryNames 
 			var linkCacheUpdate = {},
 				normalizedTitles = {};
 			if ( result && result.query && result.query.pages ) {
-				// eslint-disable-next-line no-jquery/no-each-util
 				$.each( result.query.pages, function ( index, pageInfo ) {
 					linkCacheUpdate[ pageInfo.title ] = {
 						missing: Object.prototype.hasOwnProperty.call( pageInfo, 'missing' ),
@@ -317,7 +293,6 @@ ve.ui.MWCategoryWidget.prototype.queryCategoryStatus = function ( categoryNames 
 				} );
 			}
 			if ( result && result.query && result.query.redirects ) {
-				// eslint-disable-next-line no-jquery/no-each-util
 				$.each( result.query.redirects, function ( index, redirectInfo ) {
 					widget.categoryRedirects[ redirectInfo.from ] = redirectInfo.to;
 				} );
@@ -325,7 +300,6 @@ ve.ui.MWCategoryWidget.prototype.queryCategoryStatus = function ( categoryNames 
 			ve.init.platform.linkCache.set( linkCacheUpdate );
 
 			if ( result.query && result.query.normalized ) {
-				// eslint-disable-next-line no-jquery/no-each-util
 				$.each( result.query.normalized, function ( index, normalisation ) {
 					normalizedTitles[ normalisation.from ] = normalisation.to;
 				} );
@@ -353,7 +327,6 @@ ve.ui.MWCategoryWidget.prototype.addItems = function ( items, index ) {
 	var i, len, item, categoryItem, hadFocus,
 		categoryItems = [],
 		existingCategoryItems = [],
-		// eslint-disable-next-line no-jquery/no-map-util
 		categoryNames = $.map( items, function ( item ) {
 			return item.name;
 		} ),
@@ -385,7 +358,6 @@ ve.ui.MWCategoryWidget.prototype.addItems = function ( items, index ) {
 			}
 			config.hidden = cachedData.hidden;
 			config.missing = cachedData.missing;
-			config.disabled = widget.disabled;
 
 			categoryItem = new ve.ui.MWCategoryItemWidget( config );
 			categoryItem.connect( widget, {
@@ -395,7 +367,7 @@ ve.ui.MWCategoryWidget.prototype.addItems = function ( items, index ) {
 			// Index item
 			widget.categories[ itemTitle.getMainText() ] = categoryItem;
 			// Copy sortKey from old item when "moving"
-			existingCategoryItems = widget.items.filter( checkValueMatches );
+			existingCategoryItems = $.grep( widget.items, checkValueMatches );
 			if ( existingCategoryItems.length ) {
 				// There should only be one element in existingCategoryItems
 				categoryItem.sortKey = existingCategoryItems[ 0 ].sortKey;

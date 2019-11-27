@@ -8,8 +8,7 @@
 			"Tacsipacsi",
 			"Csega",
 			"Kishajnalka",
-			"Rodrigo",
-			"Bencemac"
+			"Rodrigo"
 		]
 	},
 	"ooui-outline-control-move-down": "Elem mozgatása lefelé",
@@ -28,6 +27,5 @@
 	"ooui-selectfile-button-select": "Fájl kiválasztása",
 	"ooui-selectfile-not-supported": "A fájl kiválasztása nincs támogatva",
 	"ooui-selectfile-placeholder": "Nincs fájl kiválasztva",
-	"ooui-selectfile-dragdrop-placeholder": "Dobd ide a fájlt",
-	"ooui-field-help": "Súgó"
+	"ooui-selectfile-dragdrop-placeholder": "Dobd ide a fájlt"
 }

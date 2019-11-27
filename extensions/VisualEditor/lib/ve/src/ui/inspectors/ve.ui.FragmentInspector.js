@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FragmentInspector class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -9,7 +9,6 @@
  *
  * @class
  * @extends OO.ui.ProcessDialog
- * @mixins ve.ui.FragmentWindow
  *
  * @constructor
  * @param {Object} [config] Configuration options
@@ -22,10 +21,8 @@ ve.ui.FragmentInspector = function VeUiFragmentInspector( config ) {
 	// Parent constructor
 	ve.ui.FragmentInspector.super.call( this, config );
 
-	// Mixin constructor
-	ve.ui.FragmentWindow.call( this, config );
-
 	// Properties
+	this.fragment = null;
 	this.previousSelection = null;
 	this.padded = config.padded !== false;
 };
@@ -34,15 +31,13 @@ ve.ui.FragmentInspector = function VeUiFragmentInspector( config ) {
 
 OO.inheritClass( ve.ui.FragmentInspector, OO.ui.ProcessDialog );
 
-OO.mixinClass( ve.ui.FragmentInspector, ve.ui.FragmentWindow );
-
 /* Static Properties */
 
-ve.ui.FragmentInspector.static.actions = [
+ve.ui.FragmentInspector.static.actions = ve.ui.FragmentInspector.super.static.actions.concat( [
 	{
 		label: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' ),
 		flags: [ 'safe', 'back' ],
-		modes: [ 'readonly', 'edit', 'insert' ]
+		modes: [ 'edit', 'insert' ]
 	},
 	{
 		action: 'done',
@@ -56,7 +51,7 @@ ve.ui.FragmentInspector.static.actions = [
 		flags: [ 'progressive', 'primary' ],
 		modes: 'insert'
 	}
-];
+] );
 
 ve.ui.FragmentInspector.static.size = 'large';
 
@@ -74,6 +69,31 @@ ve.ui.FragmentInspector.prototype.onFormSubmit = function () {
 };
 
 /**
+ * Get the surface fragment the inspector is for.
+ *
+ * @return {ve.dm.SurfaceFragment|null} Surface fragment the inspector is for, null if the
+ *   inspector is closed
+ */
+ve.ui.FragmentInspector.prototype.getFragment = function () {
+	return this.fragment;
+};
+
+/**
+ * Get a symbolic mode name.
+ *
+ * @localdoc If the fragment being inspected selects at least one model the mode will be `edit`,
+ *   otherwise the mode will be `insert`
+ *
+ * @return {string} Symbolic mode name
+ */
+ve.ui.FragmentInspector.prototype.getMode = function () {
+	if ( this.fragment ) {
+		return this.fragment.getSelectedModels().length ? 'edit' : 'insert';
+	}
+	return '';
+};
+
+/**
  * @inheritdoc
  */
 ve.ui.FragmentInspector.prototype.initialize = function () {
@@ -84,7 +104,6 @@ ve.ui.FragmentInspector.prototype.initialize = function () {
 	this.container = new OO.ui.PanelLayout( {
 		classes: [ 've-ui-fragmentInspector-container' ],
 		scrollable: true,
-		expanded: false,
 		padded: this.padded
 	} );
 	this.form = new OO.ui.FormLayout( {
@@ -121,20 +140,29 @@ ve.ui.FragmentInspector.prototype.getActionProcess = function ( action ) {
  * @inheritdoc
  */
 ve.ui.FragmentInspector.prototype.getSetupProcess = function ( data ) {
-	// Parent method
-	var process = ve.ui.FragmentInspector.super.prototype.getSetupProcess.call( this, data );
-	// Mixin method
-	return ve.ui.FragmentWindow.prototype.getSetupProcess.call( this, data, process );
+	data = data || {};
+	return ve.ui.FragmentInspector.super.prototype.getSetupProcess.call( this, data )
+		.first( function () {
+			if ( !( data.fragment instanceof ve.dm.SurfaceFragment ) ) {
+				throw new Error( 'Cannot open inspector: opening data must contain a fragment' );
+			}
+			this.fragment = data.fragment;
+			this.previousSelection = this.fragment.getSelection();
+		}, this )
+		.next( function () {
+			this.actions.setMode( this.getMode() );
+		}, this );
 };
 
 /**
  * @inheritdoc
  */
 ve.ui.FragmentInspector.prototype.getTeardownProcess = function ( data ) {
-	// Parent method
-	var process = ve.ui.FragmentInspector.super.prototype.getTeardownProcess.call( this, data );
-	// Mixin method
-	return ve.ui.FragmentWindow.prototype.getTeardownProcess.call( this, data, process );
+	return ve.ui.FragmentDialog.super.prototype.getTeardownProcess.apply( this, data )
+		.next( function () {
+			this.fragment = null;
+			this.previousSelection = null;
+		}, this );
 };
 
 /**
@@ -142,7 +170,7 @@ ve.ui.FragmentInspector.prototype.getTeardownProcess = function ( data ) {
  */
 ve.ui.FragmentInspector.prototype.getReadyProcess = function ( data ) {
 	return ve.ui.FragmentInspector.super.prototype.getReadyProcess.call( this, data )
-		// Add a 0ms timeout before doing anything. Because… Internet Explorer :(
+		// Add a 0ms timeout before doing anything. Because... Internet Explorer :(
 		.first( 0 );
 };
 

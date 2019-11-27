@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface DimensionsWidget class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -195,19 +195,16 @@ ve.ui.DimensionsWidget.prototype.getDimensions = function () {
 /**
  * Disable or enable the inputs
  *
- * @param {boolean} disabled Set disabled or enabled
+ * @param {boolean} isDisabled Set disabled or enabled
  */
-ve.ui.DimensionsWidget.prototype.setDisabled = function ( disabled ) {
-	// Parent method
-	ve.ui.DimensionsWidget.super.prototype.setDisabled.call( this, disabled );
-
+ve.ui.DimensionsWidget.prototype.setDisabled = function ( isDisabled ) {
 	// The 'setDisabled' method runs in the constructor before the
 	// inputs are initialized
 	if ( this.widthInput ) {
-		this.widthInput.setDisabled( disabled );
+		this.widthInput.setDisabled( isDisabled );
 	}
 	if ( this.heightInput ) {
-		this.heightInput.setDisabled( disabled );
+		this.heightInput.setDisabled( isDisabled );
 	}
 };
 

@@ -6,8 +6,7 @@
 			"Xabier Armendaritz",
 			"Subi",
 			"Sator",
-			"Mikel Ibaiba",
-			"Fitoschido"
+			"Mikel Ibaiba"
 		]
 	},
 	"ooui-outline-control-move-down": "Mugitu itema beherantz",
@@ -26,6 +25,5 @@
 	"ooui-selectfile-button-select": "Fitxategi bat aukeratu",
 	"ooui-selectfile-not-supported": "Fitxategi aukeraketa ez da onartzen",
 	"ooui-selectfile-placeholder": "Ez da fitxategirik hautatu",
-	"ooui-selectfile-dragdrop-placeholder": "Fitxategia hemen utzi",
-	"ooui-field-help": "Laguntza"
+	"ooui-selectfile-dragdrop-placeholder": "Fitxategia hemen utzi"
 }

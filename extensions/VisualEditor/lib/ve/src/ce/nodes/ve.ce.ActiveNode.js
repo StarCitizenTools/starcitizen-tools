@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable ActiveNode class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -84,12 +84,7 @@ ve.ce.ActiveNode.prototype.onActiveNodeSurfaceModelSelect = function ( selection
 	if ( coveringRange && this.model.getRange().containsRange( new ve.Range( coveringRange.from ) ) ) {
 		// Only set this as the active node if active node is empty, or not a
 		// descendent of this node.
-		if (
-			!surface.getActiveNode() ||
-			!surface.getActiveNode().traverseUpstream( function ( node ) {
-				return node !== activeNode;
-			} )
-		) {
+		if ( !surface.getActiveNode() || !surface.getActiveNode().traverseUpstream( function ( node ) { return node !== activeNode; } ) ) {
 			surface.setActiveNode( this );
 		}
 		this.$element.addClass( 've-ce-activeNode-active' );

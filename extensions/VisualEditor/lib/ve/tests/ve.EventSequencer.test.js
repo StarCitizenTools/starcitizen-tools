@@ -1,7 +1,7 @@
 /*!
  * VisualEditor EventSequencer tests.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.EventSequencer' );
@@ -77,9 +77,7 @@ QUnit.test( 'EventSequencer', function ( assert ) {
 	);
 
 	calls.length = 0;
-	sequencer.afterLoopOne( function () {
-		calls.push( 'afterLoopOne' );
-	} );
+	sequencer.afterLoopOne( function () { calls.push( 'afterLoopOne' ); } );
 
 	sequencer.onEvent( 'event1' );
 	sequencer.onEvent( 'event2' );

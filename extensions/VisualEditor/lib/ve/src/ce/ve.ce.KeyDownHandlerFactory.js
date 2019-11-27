@@ -1,7 +1,7 @@
 /*!
  * VisualEditor KeyDownHandlerFactory class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -80,8 +80,7 @@ ve.ce.KeyDownHandlerFactory.prototype.lookupHandlersForKey = function ( key, sel
  * @return {boolean} Some handlers acted
  */
 ve.ce.KeyDownHandlerFactory.prototype.executeHandlersForKey = function ( key, selectionName, surface, e ) {
-	var i,
-		acted = false,
+	var i, acted,
 		handlers = this.lookupHandlersForKey( key, selectionName );
 
 	// Length is likely to be 1 or 0 so don't cache

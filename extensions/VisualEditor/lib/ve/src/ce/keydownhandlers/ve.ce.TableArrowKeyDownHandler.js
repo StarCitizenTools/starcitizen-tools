@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable table arrow key down handler
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,8 +13,8 @@
  * @constructor
  */
 ve.ce.TableArrowKeyDownHandler = function VeCeTableArrowKeyDownHandler() {
-	// Parent constructor - never called because class is fully static
-	// ve.ui.TableArrowKeyDownHandler.super.apply( this, arguments );
+	// Parent constructor
+	ve.ui.TableArrowKeyDownHandler.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -101,7 +101,7 @@ ve.ce.TableArrowKeyDownHandler.static.execute = function ( surface, e ) {
  * @param {boolean} wrap Wrap to the next/previous row at edges, insert new row at end
  */
 ve.ce.TableArrowKeyDownHandler.static.moveTableSelection = function ( surface, rowOffset, colOffset, checkDir, expand, wrap ) {
-	var tableNode, newSelection, documentModel, captionNode,
+	var tableNode, newSelection, documentModel,
 		selection = surface.getModel().getSelection();
 	if ( colOffset && checkDir ) {
 		tableNode = surface.documentView.getBranchNodeFromOffset( selection.tableRange.start + 1 );
@@ -109,13 +109,12 @@ ve.ce.TableArrowKeyDownHandler.static.moveTableSelection = function ( surface, r
 			colOffset *= -1;
 		}
 	}
-	if ( !expand && !selection.isSingleCell( surface.getModel().getDocument() ) ) {
+	if ( !expand && !selection.isSingleCell() ) {
 		selection = selection.collapseToFrom();
 	}
 
 	function adjust() {
 		newSelection = selection.newFromAdjustment(
-			surface.getModel().getDocument(),
 			expand ? 0 : colOffset,
 			expand ? 0 : rowOffset,
 			colOffset,
@@ -136,15 +135,9 @@ ve.ce.TableArrowKeyDownHandler.static.moveTableSelection = function ( surface, r
 
 	// If moving up/down didn't move, we must be at the start/end of the table,
 	// so move outside
-	if ( ( rowOffset !== 0 || ( rowOffset === 0 && colOffset === -1 && wrap ) ) && selection.equals( newSelection ) ) {
-		documentModel = surface.getModel().getDocument();
-		if ( ( rowOffset === -1 || ( colOffset === -1 && wrap ) ) && ( captionNode = selection.getTableNode( documentModel ).getCaptionNode() ) ) {
-			// If we're moving up/backwards, and there's a caption node, put the selection in it
-			newSelection = new ve.dm.LinearSelection( documentModel.getRelativeRange( new ve.Range( captionNode.getRange().start ), 1 ) );
-		} else {
-			// Otherwise, go outside the table
-			newSelection = new ve.dm.LinearSelection( documentModel.getRelativeRange( selection.tableRange, rowOffset || colOffset ) );
-		}
+	if ( rowOffset !== 0 && selection.equals( newSelection ) ) {
+		documentModel = selection.getDocument();
+		newSelection = new ve.dm.LinearSelection( documentModel, documentModel.getRelativeRange( selection.tableRange, rowOffset ) );
 	}
 
 	surface.getModel().setSelection( newSelection );

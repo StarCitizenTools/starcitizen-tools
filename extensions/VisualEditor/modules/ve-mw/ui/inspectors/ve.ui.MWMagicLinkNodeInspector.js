@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWMagicLinkNodeInspector class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -120,7 +120,7 @@ ve.ui.MWMagicLinkNodeInspector.prototype.getSetupProcess = function ( data ) {
 			// Initialization
 			this.targetInput.setValue(
 				this.selectedNode ? this.selectedNode.getAttribute( 'content' ) : ''
-			).setReadOnly( this.isReadOnly() );
+			);
 		}, this );
 };
 

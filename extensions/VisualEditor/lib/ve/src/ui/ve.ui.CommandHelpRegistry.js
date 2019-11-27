@@ -1,7 +1,7 @@
 /*!
  * VisualEditor CommandHelpRegistry class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -97,18 +97,24 @@ ve.ui.commandHelpRegistry.register( 'textStyle', 'clear', { trigger: 'clear', la
 
 // Clipboard
 ve.ui.commandHelpRegistry.register( 'clipboard', 'cut', {
-	trigger: 'cut',
-	ignoreCommand: true,
+	shortcuts: [ {
+		mac: 'cmd+x',
+		pc: 'ctrl+x'
+	} ],
 	label: OO.ui.deferMsg( 'visualeditor-clipboard-cut' )
 } );
 ve.ui.commandHelpRegistry.register( 'clipboard', 'copy', {
-	trigger: 'copy',
-	ignoreCommand: true,
+	shortcuts: [ {
+		mac: 'cmd+c',
+		pc: 'ctrl+c'
+	} ],
 	label: OO.ui.deferMsg( 'visualeditor-clipboard-copy' )
 } );
 ve.ui.commandHelpRegistry.register( 'clipboard', 'paste', {
-	trigger: 'paste',
-	ignoreCommand: true,
+	shortcuts: [ {
+		mac: 'cmd+v',
+		pc: 'ctrl+v'
+	} ],
 	label: OO.ui.deferMsg( 'visualeditor-clipboard-paste' )
 } );
 ve.ui.commandHelpRegistry.register( 'clipboard', 'pasteSpecial', { trigger: 'pasteSpecial', label: OO.ui.deferMsg( 'visualeditor-clipboard-paste-special' ) } );
@@ -147,6 +153,3 @@ ve.ui.commandHelpRegistry.register( 'other', 'findPrevious', { trigger: 'findPre
 ve.ui.commandHelpRegistry.register( 'other', 'selectAll', { trigger: 'selectAll', label: OO.ui.deferMsg( 'visualeditor-content-select-all' ) } );
 ve.ui.commandHelpRegistry.register( 'other', 'changeDirectionality', { trigger: 'changeDirectionality', label: OO.ui.deferMsg( 'visualeditor-changedir' ) } );
 ve.ui.commandHelpRegistry.register( 'other', 'commandHelp', { trigger: 'commandHelp', label: OO.ui.deferMsg( 'visualeditor-dialog-command-help-title' ) } );
-
-// Insert
-ve.ui.commandHelpRegistry.register( 'insert', 'horizontalRule', { sequences: [ 'horizontalRule' ], label: OO.ui.deferMsg( 'visualeditor-horizontalrule-tooltip' ) } );

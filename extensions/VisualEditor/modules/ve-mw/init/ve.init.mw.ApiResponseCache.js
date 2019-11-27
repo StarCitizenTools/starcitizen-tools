@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization ApiResponseCache class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -14,13 +14,10 @@
  * @class
  * @extends OO.EventEmitter
  * @constructor
- * @param {mw.Api} [api] API object to use. Defaults to new mw.Api()
  */
-ve.init.mw.ApiResponseCache = function VeInitMwApiResponseCache( api ) {
+ve.init.mw.ApiResponseCache = function VeInitMwApiResponseCache() {
 	// Mixin constructor
 	OO.EventEmitter.call( this );
-
-	this.api = api || new mw.Api();
 
 	// Keys are titles, values are deferreds
 	this.deferreds = {};
@@ -160,13 +157,9 @@ ve.init.mw.ApiResponseCache.prototype.processQueue = function () {
 	}
 
 	function processResult( data ) {
-		var i, pageid, page, processedPage, from, mappedTitles = [],
+		var pageid, page, processedPage,
 			pages = ( data.query && data.query.pages ) || data.pages,
 			processed = {};
-
-		[ 'redirects', 'normalized', 'converted' ].forEach( function ( map ) {
-			mappedTitles = mappedTitles.concat( ( data.query && data.query[ map ] ) || [] );
-		} );
 
 		if ( pages ) {
 			for ( pageid in pages ) {
@@ -174,16 +167,6 @@ ve.init.mw.ApiResponseCache.prototype.processQueue = function () {
 				processedPage = cache.constructor.static.processPage( page );
 				if ( processedPage !== undefined ) {
 					processed[ page.title ] = processedPage;
-				}
-			}
-			for ( i = 0; i < mappedTitles.length; i++ ) {
-				// Locate the title in mapped titles, if any.
-				if ( mappedTitles[ i ].to === page.title ) {
-					from = mappedTitles[ i ].fromencoded === '' ?
-						decodeURIComponent( mappedTitles[ i ].from ) :
-						mappedTitles[ i ].from;
-					processed[ from ] = processedPage;
-					break;
 				}
 			}
 			cache.set( processed );

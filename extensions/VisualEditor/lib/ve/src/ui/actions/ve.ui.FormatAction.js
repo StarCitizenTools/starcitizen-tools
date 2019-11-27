@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FormatAction class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -84,9 +84,6 @@ ve.ui.FormatAction.prototype.convert = function ( type, attributes ) {
 		surfaceModel.setSelection( fragmentSelection );
 	}
 	this.surface.getView().focus();
-
-	ve.track( 'activity.format', { action: type + ( attributes && attributes.level ? ( '-' + attributes.level ) : '' ) } );
-
 	return true;
 };
 

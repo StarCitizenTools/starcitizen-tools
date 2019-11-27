@@ -1,7 +1,7 @@
 /*!
  * VisualEditor AuthorInterface AuthorItemWidget styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-authorItemWidget {
@@ -22,7 +22,6 @@
 	margin-top: 3em;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
 .ve-ui-authorItemWidget-colorPicker .color-picker-control {
 	border-color: #ccc;
 	padding: 3px;
@@ -30,8 +29,8 @@
 }
 
 .ve-ui-authorItemWidget-editable .ve-ui-authorItemWidget-color {
+	top: 0.25em;
 	cursor: pointer;
 	outline: 1px solid #ccc;
 	outline-offset: 1px;
-	top: 2px; /* outline + outline-offset */
 }

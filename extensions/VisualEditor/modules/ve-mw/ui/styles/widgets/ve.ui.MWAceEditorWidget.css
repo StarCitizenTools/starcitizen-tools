@@ -1,11 +1,9 @@
 /*!
  * VisualEditor MediaWiki UserInterface MWAceEditorWidget styles.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
-
-/* stylelint-disable selector-class-pattern */
 
 .ve-ui-mwAceEditorWidget .ace_editor {
 	border: 1px solid #c8ccd1;

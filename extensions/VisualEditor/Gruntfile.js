@@ -4,6 +4,8 @@
  * @package VisualEditor
  */
 
+require( 'babel-polyfill' );
+
 /* eslint-env node, es6 */
 module.exports = function ( grunt ) {
 	var modules = grunt.file.readJSON( 'lib/ve/build/modules.json' ),
@@ -138,17 +140,12 @@ module.exports = function ( grunt ) {
 				'**/*.{js,json,less,css,txt}',
 				'!package-lock.json',
 				'!build/typos.json',
-				'!i18n/**',
 				'!lib/**',
 				'!{docs,node_modules,vendor}/**',
 				'!.git/**'
 			]
 		},
 		eslint: {
-			options: {
-				reportUnusedDisableDirectives: true,
-				cache: true
-			},
 			all: [
 				'*.js',
 				'{build,modules}/**/*.js'
@@ -168,7 +165,7 @@ module.exports = function ( grunt ) {
 		},
 		banana: {
 			all: [
-				'i18n/{ve-mw,ve-mw/api,ve-wmf}'
+				'i18n/{ve-mw,ve-wmf}'
 			]
 		},
 		jsonlint: {

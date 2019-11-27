@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MobileContext class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -17,6 +17,9 @@
 ve.ui.MobileContext = function VeUiMobileContext() {
 	// Parent constructor
 	ve.ui.MobileContext.super.apply( this, arguments );
+
+	// Properties
+	this.transitioning = null;
 
 	// Events
 	this.inspectors.connect( this, {

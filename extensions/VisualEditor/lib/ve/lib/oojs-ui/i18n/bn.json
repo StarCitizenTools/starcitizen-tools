@@ -9,9 +9,7 @@
 			"Sayak Sarkar",
 			"Aftabuzzaman",
 			"RYasmeen (WMF)",
-			"NahidSultan",
-			"আফতাবুজ্জামান",
-			"Titodutta"
+			"NahidSultan"
 		]
 	},
 	"ooui-outline-control-move-down": "আইটেম নিচে স্থানান্তর",
@@ -30,6 +28,5 @@
 	"ooui-selectfile-button-select": "একটি ফাইল নির্বাচন করুন",
 	"ooui-selectfile-not-supported": "চিত্র নির্বাচন সমর্থিত নয়",
 	"ooui-selectfile-placeholder": "কোন চিত্র নির্বাচিত হয়নি",
-	"ooui-selectfile-dragdrop-placeholder": "এখানে ফাইল ছাড়ুন",
-	"ooui-field-help": "সাহায্য"
+	"ooui-selectfile-dragdrop-placeholder": "এখানে ফাইল ছাড়ুন"
 }

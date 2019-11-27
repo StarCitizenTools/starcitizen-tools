@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWInternalLinkAnnotation class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -30,24 +30,18 @@ OO.inheritClass( ve.dm.MWInternalLinkAnnotation, ve.dm.LinkAnnotation );
 
 ve.dm.MWInternalLinkAnnotation.static.name = 'link/mwInternal';
 
-ve.dm.MWInternalLinkAnnotation.static.matchRdfaTypes = [ 'mw:WikiLink', 'mw:MediaLink' ];
+ve.dm.MWInternalLinkAnnotation.static.matchRdfaTypes = [ 'mw:WikiLink' ];
 
 ve.dm.MWInternalLinkAnnotation.static.toDataElement = function ( domElements, converter ) {
-	var targetData,
-		resource = domElements[ 0 ].getAttribute( 'resource' );
-
-	if ( resource ) {
-		targetData = ve.parseParsoidResourceName( resource );
-	} else {
-		targetData = this.getTargetDataFromHref(
-			domElements[ 0 ].getAttribute( 'href' ),
-			converter.getTargetHtmlDocument()
-		);
-	}
+	var targetData = this.getTargetDataFromHref(
+		domElements[ 0 ].getAttribute( 'href' ),
+		converter.getTargetHtmlDocument()
+	);
 
 	return {
 		type: this.name,
 		attributes: {
+			hrefPrefix: targetData.hrefPrefix,
 			title: targetData.title,
 			normalizedTitle: this.normalizeTitle( targetData.title ),
 			lookupTitle: this.getLookupTitle( targetData.title ),
@@ -57,13 +51,13 @@ ve.dm.MWInternalLinkAnnotation.static.toDataElement = function ( domElements, co
 };
 
 /**
- * Build element from a given mw.Title and raw title
+ * Build a ve.dm.MWInternalLinkAnnotation from a given mw.Title.
  *
  * @param {mw.Title} title The title to link to.
  * @param {string} [rawTitle] String from which the title was created
- * @return {Object} The element.
+ * @return {ve.dm.MWInternalLinkAnnotation} The annotation.
  */
-ve.dm.MWInternalLinkAnnotation.static.dataElementFromTitle = function ( title, rawTitle ) {
+ve.dm.MWInternalLinkAnnotation.static.newFromTitle = function ( title, rawTitle ) {
 	var element,
 		target = title.toText(),
 		namespaceIds = mw.config.get( 'wgNamespaceIds' );
@@ -79,31 +73,16 @@ ve.dm.MWInternalLinkAnnotation.static.dataElementFromTitle = function ( title, r
 	}
 
 	element = {
-		type: this.name,
+		type: 'link/mwInternal',
 		attributes: {
 			title: target,
-			normalizedTitle: this.normalizeTitle( title ),
-			lookupTitle: this.getLookupTitle( title )
+			normalizedTitle: ve.dm.MWInternalLinkAnnotation.static.normalizeTitle( title ),
+			lookupTitle: ve.dm.MWInternalLinkAnnotation.static.getLookupTitle( title )
 		}
 	};
-
 	if ( rawTitle ) {
 		element.attributes.origTitle = rawTitle;
 	}
-
-	return element;
-};
-
-/**
- * Build a ve.dm.MWInternalLinkAnnotation from a given mw.Title.
- *
- * @param {mw.Title} title The title to link to.
- * @param {string} [rawTitle] String from which the title was created
- * @return {ve.dm.MWInternalLinkAnnotation} The annotation.
- */
-ve.dm.MWInternalLinkAnnotation.static.newFromTitle = function ( title, rawTitle ) {
-	var element = this.dataElementFromTitle( title, rawTitle );
-
 	return new ve.dm.MWInternalLinkAnnotation( element );
 };
 
@@ -117,6 +96,8 @@ ve.dm.MWInternalLinkAnnotation.static.newFromTitle = function ( title, rawTitle 
  *    The title of the internal link, else the original href if href is external
  * @return {string} return.rawTitle
  *    The title without URL decoding and underscore normalization applied
+ * @return {string} return.hrefPrefix
+ *    Any ./ or ../ prefixes on a relative link
  * @return {boolean} return.isInternal
  *    True if the href pointed to the local wiki, false if href is external
  */
@@ -137,7 +118,7 @@ ve.dm.MWInternalLinkAnnotation.static.getTargetDataFromHref = function ( href, d
 	// Check if this matches the server's article path
 	matches = relativeHref.match( relativeBaseRegex );
 
-	if ( matches && matches[ 1 ].split( '#' )[ 0 ].indexOf( '?' ) === -1 ) {
+	if ( matches && matches[ 1 ].indexOf( '?' ) === -1 ) {
 		// Take the relative path
 		href = matches[ 1 ];
 		isInternal = true;
@@ -146,8 +127,13 @@ ve.dm.MWInternalLinkAnnotation.static.getTargetDataFromHref = function ( href, d
 	// This href doesn't necessarily come from Parsoid (and it might not have the "./" prefix), but
 	// this method will work fine.
 	data = ve.parseParsoidResourceName( href );
-	data.isInternal = isInternal;
-	return data;
+
+	return {
+		title: data.title,
+		rawTitle: data.rawTitle,
+		hrefPrefix: data.hrefPrefix,
+		isInternal: isInternal
+	};
 };
 
 ve.dm.MWInternalLinkAnnotation.static.toDomElements = function () {
@@ -157,15 +143,19 @@ ve.dm.MWInternalLinkAnnotation.static.toDomElements = function () {
 };
 
 ve.dm.MWInternalLinkAnnotation.static.getHref = function ( dataElement ) {
-	var encodedTitle,
+	var href,
 		title = dataElement.attributes.title,
 		origTitle = dataElement.attributes.origTitle;
 	if ( origTitle !== undefined && ve.decodeURIComponentIntoArticleTitle( origTitle ) === title ) {
 		// Restore href from origTitle
-		encodedTitle = origTitle;
+		href = origTitle;
+		// Only use hrefPrefix if restoring from origTitle
+		if ( dataElement.attributes.hrefPrefix ) {
+			href = dataElement.attributes.hrefPrefix + href;
+		}
 	} else {
 		// Don't escape slashes in the title; they represent subpages.
-		encodedTitle = title.split( /(\/|#)/ ).map( function ( part ) {
+		href = title.split( /(\/|#)/ ).map( function ( part ) {
 			if ( part === '/' || part === '#' ) {
 				return part;
 			} else {
@@ -173,7 +163,7 @@ ve.dm.MWInternalLinkAnnotation.static.getHref = function ( dataElement ) {
 			}
 		} ).join( '' );
 	}
-	return './' + encodedTitle;
+	return href;
 };
 
 /**
@@ -222,7 +212,7 @@ ve.dm.MWInternalLinkAnnotation.static.getFragment = function ( original ) {
 
 ve.dm.MWInternalLinkAnnotation.static.describeChange = function ( key, change ) {
 	if ( key === 'title' ) {
-		return ve.htmlMsg( 'visualeditor-changedesc-link-href', this.wrapText( 'del', change.from ), this.wrapText( 'ins', change.to ) );
+		return ve.msg( 'visualeditor-changedesc-link-href', change.from, change.to );
 	}
 	return null;
 };

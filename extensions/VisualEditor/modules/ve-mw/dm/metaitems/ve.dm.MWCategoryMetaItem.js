@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWCategoryMetaItem class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -40,6 +40,7 @@ ve.dm.MWCategoryMetaItem.static.toDataElement = function ( domElements ) {
 	return {
 		type: this.name,
 		attributes: {
+			hrefPrefix: data.hrefPrefix,
 			category: titleAndFragment[ 1 ],
 			origCategory: rawTitleAndFragment[ 1 ],
 			sortkey: titleAndFragment[ 2 ] || '',
@@ -49,8 +50,9 @@ ve.dm.MWCategoryMetaItem.static.toDataElement = function ( domElements ) {
 };
 
 ve.dm.MWCategoryMetaItem.static.toDomElements = function ( dataElement, doc ) {
-	var href, encodedCategory,
+	var href,
 		domElement = doc.createElement( 'link' ),
+		hrefPrefix = dataElement.attributes.hrefPrefix || '',
 		category = dataElement.attributes.category || '',
 		sortkey = dataElement.attributes.sortkey || '',
 		origCategory = dataElement.attributes.origCategory || '',
@@ -63,12 +65,12 @@ ve.dm.MWCategoryMetaItem.static.toDomElements = function ( dataElement, doc ) {
 		sortkey = encodeURIComponent( sortkey );
 	}
 	if ( normalizedOrigCategory === category ) {
-		encodedCategory = origCategory;
+		category = origCategory;
 	} else {
-		encodedCategory = encodeURIComponent( category );
+		category = encodeURIComponent( category );
 	}
 	domElement.setAttribute( 'rel', 'mw:PageProp/Category' );
-	href = './' + encodedCategory;
+	href = hrefPrefix + category;
 	if ( sortkey !== '' ) {
 		href += '#' + sortkey;
 	}

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Scalable class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -140,10 +140,10 @@ ve.dm.Scalable.static.getDimensionsFromValue = function ( dimensions, ratio ) {
 	}
 
 	// Calculate the opposite size if needed
-	if ( !dimensions.height && ratio !== null && +dimensions.width ) {
+	if ( !dimensions.height && ratio !== null && $.isNumeric( dimensions.width ) ) {
 		dimensions.height = Math.round( dimensions.width / ratio );
 	}
-	if ( !dimensions.width && ratio !== null && +dimensions.height ) {
+	if ( !dimensions.width && ratio !== null && $.isNumeric( dimensions.height ) ) {
 		dimensions.width = Math.round( dimensions.height * ratio );
 	}
 
@@ -160,7 +160,7 @@ ve.dm.Scalable.static.getDimensionsFromValue = function ( dimensions, ratio ) {
 ve.dm.Scalable.static.isDimensionsObjectValid = function ( dimensions ) {
 	if (
 		dimensions &&
-		!ve.isEmptyObject( dimensions ) &&
+		!$.isEmptyObject( dimensions ) &&
 		(
 			dimensions.width !== undefined ||
 			dimensions.height !== undefined
@@ -604,14 +604,13 @@ ve.dm.Scalable.prototype.getBoundedDimensions = function ( dimensions, grid ) {
  */
 ve.dm.Scalable.prototype.isCurrentDimensionsValid = function () {
 	var dimensions = this.getCurrentDimensions(),
-		minDimensions = this.isEnforcedMin() && !ve.isEmptyObject( this.getMinDimensions() ) && this.getMinDimensions(),
-		maxDimensions = this.isEnforcedMax() && !ve.isEmptyObject( this.getMaxDimensions() ) && this.getMaxDimensions();
+		minDimensions = this.isEnforcedMin() && !$.isEmptyObject( this.getMinDimensions() ) && this.getMinDimensions(),
+		maxDimensions = this.isEnforcedMax() && !$.isEmptyObject( this.getMaxDimensions() ) && this.getMaxDimensions();
 
 	this.valid = (
 		!!dimensions &&
-		// Dimensions must be non-zero
-		+dimensions.width &&
-		+dimensions.height &&
+		$.isNumeric( dimensions.width ) &&
+		$.isNumeric( dimensions.height ) &&
 		(
 			!minDimensions || (
 				dimensions.width >= minDimensions.width &&

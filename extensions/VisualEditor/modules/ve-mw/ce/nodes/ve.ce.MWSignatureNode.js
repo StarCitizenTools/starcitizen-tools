@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWSignatureNode class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -96,7 +96,7 @@ ve.ce.MWSignatureNode.prototype.onTeardown = function () {
  * @inheritdoc
  */
 ve.ce.MWSignatureNode.prototype.generateContents = function () {
-	var wikitext, signatureNode, deferred, xhr;
+	var wikitext, signatureNode, api, deferred, xhr;
 	// Parsoid doesn't support pre-save transforms. PHP parser doesn't support Parsoid's
 	// meta attributes (that may or may not be required).
 
@@ -107,8 +107,9 @@ ve.ce.MWSignatureNode.prototype.generateContents = function () {
 	wikitext = '<span>~~~~</span>';
 	signatureNode = this;
 
+	api = new mw.Api();
 	deferred = $.Deferred();
-	xhr = ve.init.target.getContentApi( this.getModel().getDocument() ).post( {
+	xhr = api.post( {
 		action: 'parse',
 		text: wikitext,
 		contentmodel: 'wikitext',
