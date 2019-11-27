@@ -5,12 +5,7 @@
  * @license GPL-2.0-or-later
  */
 
-use Wikimedia\CSS\Grammar\CheckedMatcher;
-use Wikimedia\CSS\Grammar\Match;
-use Wikimedia\CSS\Grammar\MatcherFactory;
-use Wikimedia\CSS\Objects\ComponentValueList;
 use Wikimedia\CSS\Objects\Token;
-use Wikimedia\CSS\Parser\Parser as CSSParser;
 use Wikimedia\CSS\Sanitizer\FontFeatureValuesAtRuleSanitizer;
 use Wikimedia\CSS\Sanitizer\KeyframesAtRuleSanitizer;
 use Wikimedia\CSS\Sanitizer\MediaAtRuleSanitizer;
@@ -30,14 +25,8 @@ class TemplateStylesHooks {
 	/** @var Config|null */
 	private static $config = null;
 
-	/** @var MatcherFactory|null */
-	private static $matcherFactory = null;
-
 	/** @var Sanitizer[] */
 	private static $sanitizers = [];
-
-	/** @var Token[] */
-	private static $wrappers = [];
 
 	/**
 	 * Get our Config
@@ -54,51 +43,16 @@ class TemplateStylesHooks {
 	}
 
 	/**
-	 * Get our MatcherFactory
-	 * @return MatcherFactory
-	 * @codeCoverageIgnore
-	 */
-	private static function getMatcherFactory() {
-		if ( !self::$matcherFactory ) {
-			$config = self::getConfig();
-			self::$matcherFactory = new TemplateStylesMatcherFactory(
-				$config->get( 'TemplateStylesAllowedUrls' )
-			);
-		}
-		return self::$matcherFactory;
-	}
-
-	/**
-	 * Validate an extra wrapper-selector
-	 * @param string $wrapper
-	 * @return Token[]|false Token representation of the selector, or null on failure
-	 */
-	private static function validateExtraWrapper( $wrapper ) {
-		if ( !isset( self::$wrappers[$wrapper] ) ) {
-			$cssParser = CSSParser::newFromString( $wrapper );
-			$components = $cssParser->parseComponentValueList();
-			if ( $cssParser->getParseErrors() ) {
-				$match = false;
-			} else {
-				$match = self::getMatcherFactory()->cssSimpleSelectorSeq()
-					->match( $components, [ 'mark-significance' => true ] );
-			}
-			self::$wrappers[$wrapper] = $match ? $components->toTokenArray() : false;
-		}
-		return self::$wrappers[$wrapper];
-	}
-
-	/**
 	 * Get our Sanitizer
 	 * @param string $class Class to limit selectors to
-	 * @param string|null $extraWrapper Extra selector to limit selectors to
 	 * @return Sanitizer
 	 */
-	public static function getSanitizer( $class, $extraWrapper = null ) {
-		$key = $extraWrapper !== null ? "$class $extraWrapper" : $class;
-		if ( !isset( self::$sanitizers[$key] ) ) {
+	public static function getSanitizer( $class ) {
+		if ( !isset( self::$sanitizers[$class] ) ) {
 			$config = self::getConfig();
-			$matcherFactory = self::getMatcherFactory();
+			$matcherFactory = new TemplateStylesMatcherFactory(
+				$config->get( 'TemplateStylesAllowedUrls' )
+			);
 
 			$propertySanitizer = new StylePropertySanitizer( $matcherFactory );
 			$propertySanitizer->setKnownProperties( array_diff_key(
@@ -107,44 +61,17 @@ class TemplateStylesHooks {
 			) );
 			Hooks::run( 'TemplateStylesPropertySanitizer', [ &$propertySanitizer, $matcherFactory ] );
 
-			$htmlOrBodySimpleSelectorSeqMatcher = new CheckedMatcher(
-				$matcherFactory->cssSimpleSelectorSeq(),
-				function ( ComponentValueList $values, Match $match, array $options ) {
-					foreach ( $match->getCapturedMatches() as $m ) {
-						if ( $m->getName() !== 'element' ) {
-							continue;
-						}
-						$str = (string)$m;
-						return $str === 'html' || $str === 'body';
-					}
-					return false;
-				}
-			);
-
-			$prependSelectors = [
-				new Token( Token::T_DELIM, '.' ),
-				new Token( Token::T_IDENT, $class ),
-			];
-			if ( $extraWrapper !== null ) {
-				$extraTokens = self::validateExtraWrapper( $extraWrapper );
-				if ( !$extraTokens ) {
-					throw new InvalidArgumentException( "Invalid value for \$extraWrapper: $extraWrapper" );
-				}
-				$prependSelectors = array_merge(
-					$prependSelectors,
-					[ new Token( Token::T_WHITESPACE, [ 'significant' => true ] ) ],
-					$extraTokens
-				);
-			}
-
 			$atRuleBlacklist = array_flip( $config->get( 'TemplateStylesAtRuleBlacklist' ) );
 			$ruleSanitizers = [
 				'styles' => new StyleRuleSanitizer(
 					$matcherFactory->cssSelectorList(),
 					$propertySanitizer,
 					[
-						'prependSelectors' => $prependSelectors,
-						'hoistableComponentMatcher' => $htmlOrBodySimpleSelectorSeqMatcher,
+						'prependSelectors' => [
+							new Token( Token::T_DELIM, '.' ),
+							new Token( Token::T_IDENT, $class ),
+							new Token( Token::T_WHITESPACE ),
+						],
 					]
 				),
 				'@font-face' => new TemplateStylesFontFaceAtRuleSanitizer( $matcherFactory ),
@@ -173,9 +100,9 @@ class TemplateStylesHooks {
 			Hooks::run( 'TemplateStylesStylesheetSanitizer',
 				[ &$sanitizer, $propertySanitizer, $matcherFactory ]
 			);
-			self::$sanitizers[$key] = $sanitizer;
+			self::$sanitizers[$class] = $sanitizer;
 		}
-		return self::$sanitizers[$key];
+		return self::$sanitizers[$class];
 	}
 
 	/**
@@ -227,15 +154,7 @@ class TemplateStylesHooks {
 	 * @return bool
 	 */
 	public static function onContentHandlerDefaultModelFor( $title, &$model ) {
-		// Allow overwriting attributes with config settings.
-		// Attributes can not use namespaces as keys, as processing them does not preserve
-		// integer keys.
-		$enabledNamespaces = self::getConfig()->get( 'TemplateStylesNamespaces' ) +
-			array_fill_keys(
-				ExtensionRegistry::getInstance()->getAttribute( 'TemplateStylesNamespaces' ),
-				true
-			);
-
+		$enabledNamespaces = self::getConfig()->get( 'TemplateStylesNamespaces' );
 		if ( !empty( $enabledNamespaces[$title->getNamespace()] ) &&
 			$title->isSubpage() && substr( $title->getText(), -4 ) === '.css'
 		) {
@@ -276,7 +195,6 @@ class TemplateStylesHooks {
 	 * @param Parser $parser
 	 * @param PPFrame $frame
 	 * @return string HTML
-	 * @suppress SecurityCheck-XSS
 	 */
 	public static function handleTag( $text, $params, $parser, $frame ) {
 		global $wgContLang;
@@ -286,15 +204,9 @@ class TemplateStylesHooks {
 		}
 
 		if ( !isset( $params['src'] ) || trim( $params['src'] ) === '' ) {
-			return self::formatTagError( $parser, [ 'templatestyles-missing-src' ] );
-		}
-
-		$extraWrapper = null;
-		if ( isset( $params['wrapper'] ) && trim( $params['wrapper'] ) !== '' ) {
-			$extraWrapper = trim( $params['wrapper'] );
-			if ( !self::validateExtraWrapper( $extraWrapper ) ) {
-				return self::formatTagError( $parser, [ 'templatestyles-invalid-wrapper' ] );
-			}
+			return '<strong class="error">' .
+				wfMessage( 'templatestyles-missing-src' )->inContentLanguage()->parse() .
+				'</strong>';
 		}
 
 		// Default to the Template namespace because that's the most likely
@@ -303,7 +215,9 @@ class TemplateStylesHooks {
 		// wind up wanting to make that relative to the wrong page.
 		$title = Title::newFromText( $params['src'], NS_TEMPLATE );
 		if ( !$title ) {
-			return self::formatTagError( $parser, [ 'templatestyles-invalid-src' ] );
+			return '<strong class="error">' .
+				wfMessage( 'templatestyles-invalid-src' )->inContentLanguage()->parse() .
+				'</strong>';
 		}
 
 		$rev = $parser->fetchCurrentRevisionOfTitle( $title );
@@ -314,21 +228,25 @@ class TemplateStylesHooks {
 
 		$content = $rev ? $rev->getContent() : null;
 		if ( !$content ) {
-			$titleText = $title->getPrefixedText();
-			return self::formatTagError( $parser, [
-				'templatestyles-bad-src-missing',
-				$titleText,
-				wfEscapeWikiText( $titleText )
-			] );
+			$title = $title->getPrefixedText();
+			return '<strong class="error">' .
+				wfMessage(
+					'templatestyles-bad-src-missing',
+					$title,
+					wfEscapeWikiText( $title )
+				)->inContentLanguage()->parse() .
+				'</strong>';
 		}
 		if ( !$content instanceof TemplateStylesContent ) {
-			$titleText = $title->getPrefixedText();
-			return self::formatTagError( $parser, [
-				'templatestyles-bad-src',
-				$titleText,
-				wfEscapeWikiText( $titleText ),
-				ContentHandler::getLocalizedName( $content->getModel() )
-			] );
+			$title = $title->getPrefixedText();
+			return '<strong class="error">' .
+				wfMessage(
+					'templatestyles-bad-src',
+					$title,
+					wfEscapeWikiText( $title ),
+					ContentHandler::getLocalizedName( $content->getModel() )
+				)->inContentLanguage()->parse() .
+				'</strong>';
 		}
 
 		// If the revision actually has an ID, cache based on that.
@@ -344,11 +262,8 @@ class TemplateStylesHooks {
 		if ( $wrapClass === false ) { // deprecated
 			$wrapClass = 'mw-parser-output';
 		}
-		if ( $wrapClass !== 'mw-parser-output' || $extraWrapper !== null ) {
+		if ( $wrapClass !== 'mw-parser-output' ) {
 			$cacheKey .= '/' . $wrapClass;
-			if ( $extraWrapper !== null ) {
-				$cacheKey .= '/' . $extraWrapper;
-			}
 		}
 
 		// Already cached?
@@ -360,7 +275,6 @@ class TemplateStylesHooks {
 			'flip' => $parser->getTargetLanguage()->getDir() !== $wgContLang->getDir(),
 			'minify' => !ResourceLoader::inDebugMode(),
 			'class' => $wrapClass,
-			'extraWrapper' => $extraWrapper,
 		] );
 		$style = $status->isOk() ? $status->getValue() : '/* Fatal error, no CSS will be output */';
 
@@ -394,19 +308,6 @@ class TemplateStylesHooks {
 		] );
 		$parser->extTemplateStylesCache->set( $cacheKey, $ret );
 		return $ret;
-	}
-
-	/**
-	 * Format an error in the `<templatestyles>` tag
-	 * @param Parser $parser
-	 * @param array $msg Arguments to wfMessage()
-	 * @return string HTML
-	 */
-	private static function formatTagError( Parser $parser, array $msg ) {
-		$parser->addTrackingCategory( 'templatestyles-page-error-category' );
-		return '<strong class="error">' .
-			call_user_func_array( 'wfMessage', $msg )->inContentLanguage()->parse() .
-			'</strong>';
 	}
 
 }

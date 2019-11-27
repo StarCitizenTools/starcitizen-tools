@@ -1,11 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Red Winged Duck",
-			"Renessaince"
+			"Red Winged Duck"
 		]
 	},
 	"templatestyles": "Стылі шаблёнаў",
-	"templatestyles-desc": "Рэалізуе старонкі стыляў для кожнага шаблёну",
-	"templatestyles-page-error-category": "Старонкі з памылкамі стыляў шаблёнаў"
+	"templatestyles-desc": "Рэалізуе старонкі стыляў для кожнага шаблёну"
 }

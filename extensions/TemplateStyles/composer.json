@@ -1,11 +1,11 @@
 {
 	"license": "GPL-2.0-or-later",
 	"require": {
-		"wikimedia/css-sanitizer": "~2.0.0"
+		"wikimedia/css-sanitizer": "~1.0.6"
 	},
 	"require-dev": {
 		"jakub-onderka/php-parallel-lint": "1.0.0",
-		"mediawiki/mediawiki-codesniffer": "24.0.0",
+		"mediawiki/mediawiki-codesniffer": "18.0.0",
 		"jakub-onderka/php-console-highlighter": "0.3.2",
 		"mediawiki/minus-x": "0.3.1"
 	},
@@ -19,8 +19,5 @@
 			"phpcs -p -s",
 			"minus-x check ."
 		]
-	},
-	"extra": {
-		"phan-taint-check-plugin": "1.5.0"
 	}
 }
