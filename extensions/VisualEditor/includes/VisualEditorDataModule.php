@@ -12,6 +12,7 @@ class VisualEditorDataModule extends ResourceLoaderModule {
 
 	/* Protected Members */
 
+	protected $origin = self::ORIGIN_USER_SITEWIDE;
 	protected $targets = [ 'desktop', 'mobile' ];
 
 	/* Methods */
@@ -35,7 +36,7 @@ class VisualEditorDataModule extends ResourceLoaderModule {
 		return 've.init.platform.addParsedMessages(' . FormatJson::encode(
 				$parsedMessages,
 				ResourceLoader::inDebugMode()
-			) . ');' .
+			) . ');'.
 			've.init.platform.addMessages(' . FormatJson::encode(
 				$plainMessages,
 				ResourceLoader::inDebugMode()

@@ -16,10 +16,14 @@ module.exports = function ( grunt ) {
 		coreBuildFilesWikimediaUI = moduleUtils.makeBuildList( modules, [ 'visualEditor.build.wikimediaui' ] ),
 		testFiles = moduleUtils.makeBuildList( modules, [ 'visualEditor.test' ] ).scripts,
 		demoPages = ( function () {
-			var pages = [],
+			var pages = {},
 				files = grunt.file.expand( 'demos/ve/pages/*.html' );
-			pages = files.map( function ( file ) {
-				return file.match( /^.*pages\/(.+).html$/ )[ 1 ];
+			files.forEach( function ( file ) {
+				var matches = file.match( /^.*(pages\/(.+).html)$/ ),
+					path = matches[ 1 ],
+					name = matches[ 2 ];
+
+				pages[ name ] = path;
 			} );
 			return pages;
 		}() );
@@ -142,10 +146,8 @@ module.exports = function ( grunt ) {
 		svgmin: {
 			options: {
 				js2svg: {
-					indent: '	',
 					pretty: true
 				},
-				multipass: true,
 				plugins: [ {
 					cleanupIDs: false
 				}, {
@@ -188,15 +190,15 @@ module.exports = function ( grunt ) {
 				indent: '\t\t',
 				dir: 'ltr'
 			},
-			desktopDemoApex: {
+			desktopDemo: {
 				targetFile: 'demos/ve/desktop.html',
 				template: 'demos/ve/demo.html.template',
 				modules: modules,
 				load: [
-					'visualEditor.desktop.standalone.apex',
+					'visualEditor.desktop.standalone',
 					'visualEditor.standalone.read'
 				],
-				run: [ 'visualEditor.desktop.standalone.apex.demo' ],
+				run: [ 'visualEditor.desktop.standalone.demo' ],
 				env: {
 					debug: true
 				},
@@ -205,46 +207,15 @@ module.exports = function ( grunt ) {
 				indent: '\t\t',
 				demoPages: demoPages
 			},
-			desktopDemoApexDist: {
+			desktopDemoDist: {
 				targetFile: 'demos/ve/desktop-dist.html',
 				template: 'demos/ve/demo.html.template',
 				modules: modules,
 				load: [
-					'visualEditor.desktop.standalone.apex.dist',
+					'visualEditor.desktop.standalone.dist',
 					'visualEditor.standalone.read'
 				],
-				run: [ 'visualEditor.desktop.standalone.apex.demo' ],
-				pathPrefix: '../../',
-				i18n: [ 'dist/i18n/', 'lib/oojs-ui/i18n/' ],
-				indent: '\t\t',
-				demoPages: demoPages
-			},
-			desktopDemoWikimediaUI: {
-				targetFile: 'demos/ve/desktop-wikimediaui.html',
-				template: 'demos/ve/demo.html.template',
-				modules: modules,
-				load: [
-					'visualEditor.desktop.standalone.wikimediaui',
-					'visualEditor.standalone.read'
-				],
-				run: [ 'visualEditor.desktop.standalone.wikimediaui.demo' ],
-				env: {
-					debug: true
-				},
-				pathPrefix: '../../',
-				i18n: [ 'i18n/', 'lib/oojs-ui/i18n/' ],
-				indent: '\t\t',
-				demoPages: demoPages
-			},
-			desktopDemoWikimediaUIDist: {
-				targetFile: 'demos/ve/desktop-wikimediaui-dist.html',
-				template: 'demos/ve/demo.html.template',
-				modules: modules,
-				load: [
-					'visualEditor.desktop.standalone.wikimediaui.dist',
-					'visualEditor.standalone.read'
-				],
-				run: [ 'visualEditor.desktop.standalone.wikimediaui.demo' ],
+				run: [ 'visualEditor.desktop.standalone.demo' ],
 				pathPrefix: '../../',
 				i18n: [ 'dist/i18n/', 'lib/oojs-ui/i18n/' ],
 				indent: '\t\t',
@@ -379,9 +350,8 @@ module.exports = function ( grunt ) {
 				autoWatch: false
 			},
 			main: {
-				browsers: [ 'Chrome' ], // T200347: Temporarily disabled `, 'Firefox'*/ ],`
+				browsers: [ 'Chrome', 'Firefox' ],
 				preprocessors: {
-					'rebaser/src/**/*.js': [ 'coverage' ],
 					'src/**/*.js': [ 'coverage' ]
 				},
 				reporters: [ 'mocha', 'coverage' ],
@@ -421,13 +391,11 @@ module.exports = function ( grunt ) {
 							statements: 20,
 							lines: 20,
 							excludes: [
-								'rebaser/src/dm/ve.dm.ProtocolServer.js',
-								'rebaser/src/dm/ve.dm.RebaseDocState.js',
-								'rebaser/src/dm/ve.dm.TransportServer.js',
 								'src/ve.track.js',
 								'src/init/**/*.js',
 								'src/ce/**/*.js',
 								'src/ui/**/*.js',
+								'src/dm/ve.dm.RebaseDocState.js',
 								'src/dm/ve.dm.SurfaceSynchronizer.js',
 								'src/dm/ve.dm.TableSlice.js',
 								'src/dm/annotations/ve.dm.BidiAnnotation.js',

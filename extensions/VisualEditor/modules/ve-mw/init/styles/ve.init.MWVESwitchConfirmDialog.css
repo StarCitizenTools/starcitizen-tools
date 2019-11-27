@@ -24,5 +24,8 @@
 
 .ve-init-mw-editSwitch .oo-ui-popupToolGroup.oo-ui-iconElement .oo-ui-popupToolGroup-handle {
 	padding-top: 32px;
-	height: 0;
+}
+
+.ve-init-mw-editSwitch .oo-ui-popupToolGroup .oo-ui-toolGroup-tools {
+	top: 32px;
 }

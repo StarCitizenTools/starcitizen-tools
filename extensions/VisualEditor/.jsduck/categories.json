@@ -109,6 +109,8 @@
 					"ve.dm.DataString",
 					"ve.dm.HashValueStore",
 					"ve.dm.Scalable",
+					"ve.dm.APIResultsProvider",
+					"ve.dm.APIResultsQueue",
 					"ve.dm.Surface",
 					"ve.dm.*SurfaceFragment",
 					"ve.dm.*Selection",
@@ -134,9 +136,6 @@
 					"ve.dm.Change",
 					"ve.dm.RebaseDocState",
 					"ve.dm.RebaseClient",
-					"ve.dm.RebaseServer",
-					"ve.dm.ProtocolServer",
-					"ve.dm.TransportServer",
 					"ve.dm.SurfaceSynchronizer"
 				]
 			},
@@ -196,9 +195,7 @@
 					"ve.QUnit",
 					"ve.QUnit.assert",
 					"ve.ce.TestOffset",
-					"ve.ce.TestRunner",
-					"ve.dm.TestRebaseClient",
-					"ve.dm.TestRebaseServer"
+					"ve.ce.TestRunner"
 				]
 			}
 		]

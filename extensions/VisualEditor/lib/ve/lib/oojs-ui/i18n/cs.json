@@ -32,6 +32,5 @@
 	"ooui-selectfile-button-select": "Vybrat soubor",
 	"ooui-selectfile-not-supported": "Výběr souboru není podporován",
 	"ooui-selectfile-placeholder": "Nebyl vybrán žádný soubor",
-	"ooui-selectfile-dragdrop-placeholder": "Umístěte soubor sem",
-	"ooui-field-help": "Pomoc"
+	"ooui-selectfile-dragdrop-placeholder": "Umístěte soubor sem"
 }

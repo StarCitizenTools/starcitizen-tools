@@ -39,7 +39,7 @@ ve.demo.SurfaceContainer = function VeDemoSurfaceContainer( target, page, lang, 
 	} );
 	this.autosaveToggle = new OO.ui.ToggleButtonWidget( {
 		label: 'Auto-save',
-		value: !!ve.init.platform.getSessionObject( 've-docstate' )
+		value: !!ve.init.platform.getSession( 've-docstate' )
 	} );
 	saveButton = new OO.ui.ButtonWidget( {
 		label: 'Save HTML'
@@ -64,18 +64,10 @@ ve.demo.SurfaceContainer = function VeDemoSurfaceContainer( target, page, lang, 
 	this.page = '';
 	this.lang = lang;
 	this.dir = dir;
-	this.surfaceWrapper = new OO.ui.PanelLayout( {
-		classes: [ 've-demo-surfaceWrapper' ],
-		expanded: false,
-		framed: true
-	} );
+	this.$surfaceWrapper = $( '<div>' ).addClass( 've-demo-surfaceWrapper' );
 	this.mode = null;
 	this.pageMenu = pageDropdown.getMenu();
-	this.readView = new OO.ui.PanelLayout( {
-		classes: [ 've-demo-read' ],
-		expanded: false,
-		framed: true
-	} );
+	this.$readView = $( '<div>' ).addClass( 've-demo-read' ).hide();
 
 	// Events
 	this.pageMenu.on( 'select', function ( item ) {
@@ -115,8 +107,8 @@ ve.demo.SurfaceContainer = function VeDemoSurfaceContainer( target, page, lang, 
 		$( '<div>' ).addClass( 've-demo-toolbar-commands ve-demo-surfaceToolbar-read' ).append(
 			$exitReadButton
 		),
-		this.surfaceWrapper.$element,
-		this.readView.$element.hide()
+		this.$surfaceWrapper,
+		this.$readView
 	);
 
 	this.pageMenu.selectItem(
@@ -139,12 +131,15 @@ OO.mixinClass( ve.demo.SurfaceContainer, OO.EventEmitter );
  * @return {OO.ui.MenuOptionWidget[]} Menu items
  */
 ve.demo.SurfaceContainer.prototype.getPageMenuItems = function () {
-	var items = ve.demoPages.map( function ( name ) {
-		return new OO.ui.MenuOptionWidget( {
-			data: name,
-			label: name
-		} );
-	} );
+	var name, items = [];
+	for ( name in ve.demoPages ) {
+		items.push(
+			new OO.ui.MenuOptionWidget( {
+				data: ve.demoPages[ name ],
+				label: name
+			} )
+		);
+	}
 	items.push(
 		new OO.ui.MenuOptionWidget( {
 			data: 'localStorage/ve-demo-saved-markup',
@@ -182,9 +177,9 @@ ve.demo.SurfaceContainer.prototype.change = function ( mode, page ) {
 			break;
 
 		case 'read':
-			closePromise = this.readView.$element.slideUp().promise();
+			closePromise = this.$readView.slideUp().promise();
 			if ( !page ) {
-				html = ve.properInnerHtml( this.readView.$element[ 0 ] );
+				html = ve.properInnerHtml( this.$readView[ 0 ] );
 			}
 			break;
 
@@ -211,7 +206,7 @@ ve.demo.SurfaceContainer.prototype.change = function ( mode, page ) {
 		switch ( mode ) {
 			case 'visual':
 			case 'source':
-				container.surfaceWrapper.toggle( true );
+				container.$surfaceWrapper.show();
 				if ( page ) {
 					container.loadPage( page, mode );
 				} else if ( html !== undefined ) {
@@ -220,8 +215,8 @@ ve.demo.SurfaceContainer.prototype.change = function ( mode, page ) {
 				break;
 
 			case 'read':
-				container.surfaceWrapper.toggle( false );
-				container.readView.$element.html( html ).css( 'direction', currentDir ).slideDown();
+				container.$surfaceWrapper.hide();
+				container.$readView.html( html ).css( 'direction', currentDir ).slideDown();
 				break;
 		}
 		container.mode = mode;
@@ -231,31 +226,31 @@ ve.demo.SurfaceContainer.prototype.change = function ( mode, page ) {
 /**
  * Load a page into the editor
  *
- * @param {string} page Page to load
+ * @param {string} src Path of html to load
  * @param {string} mode Edit mode
  */
-ve.demo.SurfaceContainer.prototype.loadPage = function ( page, mode ) {
+ve.demo.SurfaceContainer.prototype.loadPage = function ( src, mode ) {
 	var container = this;
 
-	this.page = page;
+	this.page = src;
 
 	container.emit( 'changePage' );
 
 	ve.init.platform.getInitializedPromise().done( function () {
 		( container.surface ? container.surface.$element.slideUp().promise() : $.Deferred().resolve().promise() ).done( function () {
-			var localMatch = page.match( /^localStorage\/(.+)$/ );
+			var localMatch = src.match( /^localStorage\/(.+)$/ );
 			if ( localMatch ) {
 				container.loadHtml( localStorage.getItem( localMatch[ 1 ] ), mode );
 				return;
 			}
 			$.ajax( {
-				url: 'pages/' + page + '.html',
+				url: src,
 				dataType: 'text'
 			} ).always( function ( result, status ) {
 				var pageHtml;
 
 				if ( status === 'error' ) {
-					pageHtml = '<p><i>Failed loading page ' + $( '<span>' ).text( page ).html() + '</i></p>';
+					pageHtml = '<p><i>Failed loading page ' + $( '<span>' ).text( src ).html() + '</i></p>';
 				} else {
 					pageHtml = result;
 				}
@@ -273,7 +268,7 @@ ve.demo.SurfaceContainer.prototype.loadPage = function ( page, mode ) {
  * @param {string} mode Edit mode
  */
 ve.demo.SurfaceContainer.prototype.loadHtml = function ( pageHtml, mode ) {
-	var surfaceModel, state,
+	var surfaceModel, state, page,
 		restored = false,
 		container = this;
 
@@ -282,18 +277,19 @@ ve.demo.SurfaceContainer.prototype.loadHtml = function ( pageHtml, mode ) {
 	}
 
 	if ( this.autosaveToggle.getValue() ) {
-		state = ve.init.platform.getSessionObject( 've-docstate' );
-
-		if ( state && state.page === this.page ) {
+		state = ve.init.platform.getSession( 've-docstate' );
+		try {
+			page = JSON.parse( state ).page;
+		} catch ( e ) {}
+		if ( page === this.page ) {
 			pageHtml = ve.init.platform.getSession( 've-dochtml' );
 			restored = true;
 		}
 	}
 
 	this.surface = this.target.addSurface(
-		this.target.constructor.static.createModelFromDom(
+		ve.dm.converter.getModelFromDom(
 			this.target.constructor.static.parseDocument( pageHtml, mode ),
-			mode,
 			{ lang: this.lang, dir: this.dir }
 		),
 		{ placeholder: 'Start your document', mode: mode }
@@ -323,7 +319,7 @@ ve.demo.SurfaceContainer.prototype.loadHtml = function ( pageHtml, mode ) {
 		}
 	} );
 
-	this.surfaceWrapper.$element.empty().append( this.surface.$element.parent() );
+	this.$surfaceWrapper.empty().append( this.surface.$element.parent() );
 	this.surface.$element.hide().slideDown().promise().done( function () {
 		// Check surface still exists
 		if ( container.surface ) {
@@ -376,7 +372,7 @@ ve.demo.SurfaceContainer.prototype.save = function () {
 			html = this.surface.getHtml();
 			break;
 		case 'read':
-			html = ve.properInnerHtml( this.readView.$element[ 0 ] );
+			html = ve.properInnerHtml( this.$readView[ 0 ] );
 			break;
 		default:
 			return;

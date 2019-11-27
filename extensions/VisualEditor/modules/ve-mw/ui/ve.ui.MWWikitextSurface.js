@@ -64,7 +64,7 @@ ve.ui.MWWikitextSurface = function VeUiMWWikitextSurface() {
 		getCaretPosition: function ( options ) {
 			var range = surface.getModel().getSelection().getCoveringRange(),
 				surfaceModel = surface.getModel(),
-				caretPos = range ? surfaceModel.getSourceOffsetFromOffset( range.start ) : 0;
+				caretPos = surfaceModel.getSourceOffsetFromOffset( range.start );
 
 			return options.startAndEnd ?
 				[ caretPos, surfaceModel.getSourceOffsetFromOffset( range.end ) ] :
@@ -84,7 +84,7 @@ ve.ui.MWWikitextSurface = function VeUiMWWikitextSurface() {
 
 /* Inheritance */
 
-OO.inheritClass( ve.ui.MWWikitextSurface, ve.ui.MWSurface );
+OO.inheritClass( ve.ui.MWWikitextSurface, ve.ui.Surface );
 
 /* Methods */
 

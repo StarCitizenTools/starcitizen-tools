@@ -48,8 +48,6 @@ ve.ui.MWTocWidget = function VeUiMWTocWidget( surface, config ) {
 		remove: 'onMetaListRemove'
 	} );
 
-	this.buildDebounced = ve.debounce( this.build.bind( this ) );
-
 	this.initFromMetaList();
 	this.build();
 };
@@ -128,14 +126,14 @@ ve.ui.MWTocWidget.prototype.updateVisibility = function () {
 /**
  * Rebuild TOC on ve.ce.MWHeadingNode teardown or setup
  *
- * Rebuilds on both teardown and setup of a node, so build is debounced
+ * Rebuilds on both teardown and setup of a node, so rebuild is debounced
  */
-ve.ui.MWTocWidget.prototype.rebuild = function () {
+ve.ui.MWTocWidget.prototype.rebuild = ve.debounce( function () {
 	if ( this.initialized ) {
 		// Wait for transactions to process
-		this.buildDebounced();
+		this.build();
 	}
-};
+} );
 
 /**
  * Update the text content of a specific heading node

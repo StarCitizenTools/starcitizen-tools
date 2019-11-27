@@ -56,7 +56,7 @@ ve.ui.PositionedTargetToolbar.prototype.setup = function ( groups, surface ) {
 		opening: 'onToolbarDialogsOpeningOrClosing',
 		closing: 'onToolbarDialogsOpeningOrClosing'
 	} );
-	ve.addPassiveEventListener( this.$window[ 0 ], 'scroll', this.onWindowScrollThrottled );
+	this.$window.on( 'scroll', this.onWindowScrollThrottled );
 };
 
 /**
@@ -70,7 +70,7 @@ ve.ui.PositionedTargetToolbar.prototype.detach = function () {
 		this.getSurface().getToolbarDialogs().disconnect( this );
 		this.getSurface().getToolbarDialogs().clearWindows();
 	}
-	ve.removePassiveEventListener( this.$window[ 0 ], 'scroll', this.onWindowScrollThrottled );
+	this.$window.off( 'scroll', this.onWindowScrollThrottled );
 
 	// Parent method
 	ve.ui.PositionedTargetToolbar.super.prototype.detach.apply( this, arguments );
@@ -204,6 +204,7 @@ ve.ui.PositionedTargetToolbar.prototype.onToolbarDialogsOpeningOrClosing = funct
 
 	openingOrClosing.then( function () {
 		var originalMargin;
+		toolbar.updateToolState();
 		if ( win.constructor.static.position === 'side' ) {
 			// win.isOpened after promise means we are opening
 			if ( win.isOpened() ) {

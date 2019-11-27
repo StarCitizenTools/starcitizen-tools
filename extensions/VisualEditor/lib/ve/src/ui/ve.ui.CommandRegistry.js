@@ -266,26 +266,6 @@ ve.ui.commandRegistry.register(
 );
 ve.ui.commandRegistry.register(
 	new ve.ui.Command(
-		'insertHorizontalRule', 'content', 'insert', {
-			args: [
-				[
-					{ type: 'horizontalRule' },
-					{ type: '/horizontalRule' },
-					{ type: 'paragraph' }
-					// omit /p to leave the cursor in the correct place,
-					// fixupInsertion will balance the insertion
-				],
-				// annotate
-				false,
-				// collapseToEnd
-				true
-			],
-			supportedSelections: [ 'linear' ]
-		}
-	)
-);
-ve.ui.commandRegistry.register(
-	new ve.ui.Command(
 		'insertTable', 'table', 'create',
 		{
 			args: [ {

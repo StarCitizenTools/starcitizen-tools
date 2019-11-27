@@ -13,8 +13,7 @@
 			"Davidpar",
 			"Maceleiro",
 			"Kippelboy",
-			"Macofe",
-			"Fitoschido"
+			"Macofe"
 		]
 	},
 	"ooui-outline-control-move-down": "Baixa l'element",
@@ -23,7 +22,6 @@
 	"ooui-toolbar-more": "Més",
 	"ooui-toolgroup-expand": "Més",
 	"ooui-toolgroup-collapse": "Menys",
-	"ooui-item-remove": "Suprimeix",
 	"ooui-dialog-message-accept": "D'acord",
 	"ooui-dialog-message-reject": "Cancel·la",
 	"ooui-dialog-process-error": "Alguna cosa no ha funcionat",
@@ -33,6 +31,5 @@
 	"ooui-selectfile-button-select": "Seleccioneu un fitxer",
 	"ooui-selectfile-not-supported": "El tipus de fitxer no és compatible",
 	"ooui-selectfile-placeholder": "No s'ha seleccionat cap fitxer",
-	"ooui-selectfile-dragdrop-placeholder": "Deseu els arxius aquí",
-	"ooui-field-help": "Ajuda"
+	"ooui-selectfile-dragdrop-placeholder": "Deseu els arxius aquí"
 }

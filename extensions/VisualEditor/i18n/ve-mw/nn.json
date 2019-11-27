@@ -7,6 +7,7 @@
 			"Jon Harald Søby"
 		]
 	},
+	"apihelp-visualeditoredit-param-summary": "Endringssamandrag.",
 	"tooltip-ca-createsource": "Opprett kjeldekoden til sida",
 	"tooltip-ca-editsource": "Endre kjeldekoden til sida",
 	"tooltip-ca-ve-edit": "Endre sida",
@@ -213,6 +214,7 @@
 	"visualeditor-section-title-placeholder": "Emne",
 	"visualeditor-serializeerror": "Det oppstod ein feil under datalasting frå tenaren: $1",
 	"visualeditor-settings-tool": "Sideinnstillingar",
+	"visualeditor-shortcuts-insert": "Set inn",
 	"visualeditor-special-characters-group-other": "Utval",
 	"visualeditor-templatesused-tool": "Malar brukt",
 	"visualeditor-toolbar-savedialog": "Lagra sida",

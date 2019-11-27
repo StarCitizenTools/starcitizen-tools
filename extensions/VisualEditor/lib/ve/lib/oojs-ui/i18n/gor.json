@@ -1,8 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
-			"Marwan Mohamad",
-			"Fitoschido"
+			"Marwan Mohamad"
 		]
 	},
 	"ooui-outline-control-move-down": "Heyiya botu ode tibawa",
@@ -20,6 +19,5 @@
 	"ooui-selectfile-button-select": "Tulawota berkas tuwawu",
 	"ooui-selectfile-not-supported": "Berkas tilulawoto ja motuhatawa",
 	"ooui-selectfile-placeholder": "Diya'a berkas u letulawoto",
-	"ooui-selectfile-dragdrop-placeholder": "Dutuwa berkas teeya",
-	"ooui-field-help": "Wubodu"
+	"ooui-selectfile-dragdrop-placeholder": "Dutuwa berkas teeya"
 }

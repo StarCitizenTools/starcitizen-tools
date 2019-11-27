@@ -29,16 +29,13 @@
 	margin: 0.5em 0;
 }
 
-.mw-body .external.ve-ce-linkAnnotation.ve-ce-annotation-active {
+.mw-body .external.ve-ce-linkAnnotation-active {
 	/* Reset -2px from VE-core */
 	margin-right: 0;
 }
 
 .ve-ui-surface .ve-ui-surface-placeholder {
 	opacity: 1;
-}
-
-.ve-ui-surface .ve-ui-surface-placeholder > * {
 	color: #72777d;
 }
 

@@ -81,10 +81,6 @@ ve.ce.MWTableNode.prototype.updateSortableHeaders = function () {
 		return;
 	}
 
-	if ( this.model.getAttribute( 'collapsible' ) ) {
-		mw.loader.load( 'jquery.makeCollapsible.styles' );
-	}
-
 	this.$element.toggleClass( 'jquery-tablesorter', this.model.getAttribute( 'sortable' ) );
 
 	this.$sortableHeaders.removeClass( 'headerSort' );
@@ -130,10 +126,10 @@ ve.ce.MWTableNode.prototype.getTablesorterHeaderCells = function () {
 	for ( i = 0, l = matrix.getRowCount(); i < l; i++ ) {
 		matrixCells = matrix.getRow( i );
 		cellModels = OO.unique( matrixCells.map( function ( matrixCell ) {
-			return matrixCell && matrixCell.getOwner().node;
+			return matrixCell.getOwner().node;
 		} ) );
 		isAllHeaders = cellModels.every( function ( cellModel ) {
-			return cellModel && cellModel.getAttribute( 'style' ) === 'header';
+			return cellModel.getAttribute( 'style' ) === 'header';
 		} );
 		if ( !isAllHeaders ) {
 			// This is the end of table head (thead), stop looking further

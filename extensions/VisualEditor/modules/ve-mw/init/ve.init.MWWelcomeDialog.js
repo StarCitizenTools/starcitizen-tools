@@ -69,13 +69,19 @@ mw.libs.ve.WelcomeDialog.prototype.getSetupProcess = function ( data ) {
 			)
 	}, data );
 
-	return mw.libs.ve.WelcomeDialog.super.prototype.getSetupProcess.call( this, data )
-		.next( function () {
-			this.switchable = data.switchable;
-			this.editor = data.editor;
+	this.switchable = data.switchable;
+	this.editor = data.editor;
 
-			this.actions.setMode( this.switchable ? this.editor : 'noswitch' );
-		}, this );
+	return mw.libs.ve.WelcomeDialog.super.prototype.getSetupProcess.call( this, data );
+};
+
+/**
+ * @inheritdoc
+ */
+mw.libs.ve.WelcomeDialog.prototype.getReadyProcess = function () {
+	this.actions.setMode( this.switchable ? this.editor : 'noswitch' );
+
+	return mw.libs.ve.WelcomeDialog.super.prototype.getReadyProcess.apply( this, arguments );
 };
 
 /**

@@ -57,6 +57,11 @@ ve.dm.Selection.static.newFromHash = null;
 /* Methods */
 
 /**
+ * Test for selection equality
+ */
+ve.dm.Selection.prototype.equals = null;
+
+/**
  * Get a JSON serialization of this selection
  *
  * @abstract
@@ -73,6 +78,15 @@ ve.dm.Selection.prototype.toJSON = null;
  * @return {string} Textual description
  */
 ve.dm.Selection.prototype.getDescription = null;
+
+/**
+ * Create a copy of this selection
+ *
+ * @abstract
+ * @method
+ * @return {ve.dm.Selection} Cloned selection
+ */
+ve.dm.Selection.prototype.clone = null;
 
 /**
  * Get a new selection at the start point of this one

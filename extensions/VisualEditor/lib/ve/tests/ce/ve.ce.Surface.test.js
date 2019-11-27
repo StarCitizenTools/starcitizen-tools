@@ -5,11 +5,8 @@
  */
 
 QUnit.module( 've.ce.Surface', {
-	// See https://github.com/platinumazure/eslint-plugin-qunit/issues/68
-	// eslint-disable-next-line qunit/resolve-async
-	beforeEach: function ( assert ) {
-		var done = assert.async();
-		return ve.init.platform.getInitializedPromise().then( done );
+	beforeEach: function () {
+		return ve.init.platform.getInitializedPromise();
 	}
 } );
 
@@ -96,7 +93,7 @@ ve.test.utils.runSurfacePasteTest = function ( assert, htmlOrView, pasteData, in
 	// Paste sequence
 	if ( internalSourceRangeOrSelection ) {
 		model.setSelection( ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), internalSourceRangeOrSelection ) );
-		testEvent = new ve.test.utils.TestEvent( 'copy' );
+		testEvent = new ve.test.utils.TestEvent();
 		if ( noClipboardData ) {
 			isClipboardDataFormatsSupported = ve.isClipboardDataFormatsSupported;
 			ve.isClipboardDataFormatsSupported = function () { return false; };
@@ -106,14 +103,14 @@ ve.test.utils.runSurfacePasteTest = function ( assert, htmlOrView, pasteData, in
 			ve.isClipboardDataFormatsSupported = isClipboardDataFormatsSupported;
 		}
 		// A fresh event with the copied data, because of defaultPrevented:
-		testEvent = new ve.test.utils.TestEvent( 'paste', testEvent.testData );
+		testEvent = new ve.test.utils.TestEvent( testEvent.testData );
 	} else {
 		if ( useClipboardData ) {
 			e[ 'text/xcustom' ] = 'useClipboardData-0';
 		} else if ( fromVe ) {
 			e[ 'text/xcustom' ] = '0.123-0';
 		}
-		testEvent = new ve.test.utils.TestEvent( 'paste', e );
+		testEvent = new ve.test.utils.TestEvent( e );
 	}
 	model.setSelection( ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), rangeOrSelection ) );
 	view.pasteSpecial = pasteSpecial;
@@ -175,11 +172,10 @@ ve.test.utils.runSurfacePasteTest = function ( assert, htmlOrView, pasteData, in
 	} );
 };
 
-ve.test.utils.TestEvent = function TestEvent( type, data ) {
+ve.test.utils.TestEvent = function TestEvent( data ) {
 	var defaultPrevented, key,
 		internalData = {};
 	this.testData = internalData;
-	this.type = type;
 	this.originalEvent = {
 		clipboardData: {
 			getData: function ( prop ) {
@@ -690,44 +686,8 @@ QUnit.test( 'special key down: table cells', function ( assert ) {
 				htmlOrDoc: complexTableDoc,
 				rangeOrSelection: new ve.Range( 3 ),
 				keys: [ 'TAB' ],
-				expectedRangeOrSelection: {
-					type: 'table',
-					tableRange: new ve.Range( 0, 51 ),
-					fromCol: 0,
-					fromRow: 0
-				},
-				msg: 'Tab inside a table caption moves to first row of table'
-			},
-			{
-				htmlOrDoc: complexTableDoc,
-				rangeOrSelection: new ve.Range( 3 ),
-				keys: [ 'SHIFT+TAB' ],
-				expectedRangeOrSelection: new ve.Range( 0 ),
-				msg: 'Shift+tab inside a table caption moves out of table'
-			},
-			{
-				htmlOrDoc: complexTableDoc,
-				rangeOrSelection: {
-					type: 'table',
-					tableRange: new ve.Range( 0, 51 ),
-					fromCol: 0,
-					fromRow: 0
-				},
-				keys: [ 'SHIFT+TAB' ],
 				expectedRangeOrSelection: new ve.Range( 3 ),
-				msg: 'Shift+tab inside the first cell of a table moves into the caption'
-			},
-			{
-				htmlOrDoc: complexTableDoc,
-				rangeOrSelection: {
-					type: 'table',
-					tableRange: new ve.Range( 0, 51 ),
-					fromCol: 0,
-					fromRow: 0
-				},
-				keys: [ 'UP' ],
-				expectedRangeOrSelection: new ve.Range( 3 ),
-				msg: 'Up in first row of table moves into caption if present'
+				msg: 'Tab inside a table caption does nothing'
 			}
 		];
 
@@ -1381,7 +1341,7 @@ QUnit.test( 'handleObservedChanges (content changes)', function ( assert ) {
 		}
 		assert.deepEqual( ops, expectedOps, msg + ': keys' );
 		assert.equalRange( model.getSelection().getRange(), expectedRangeOrSelection, msg + ': range' );
-		assert.strictEqual( initialBreakpoints !== model.undoStack.length, !!expectsBreakpoint, msg + ': breakpoint' );
+		assert.equal( initialBreakpoints !== model.undoStack.length, !!expectsBreakpoint, msg + ': breakpoint' );
 
 		view.destroy();
 	}
@@ -1517,7 +1477,7 @@ QUnit.test( 'onCopy', function ( assert ) {
 
 	function testRunner( doc, rangeOrSelection, expectedData, expectedOriginalRange, expectedBalancedRange, expectedHtml, expectedText, noClipboardData, msg ) {
 		var slice, isClipboardDataFormatsSupported, $expected, clipboardKey,
-			testEvent = new ve.test.utils.TestEvent( 'copy' ),
+			testEvent = new ve.test.utils.TestEvent(),
 			clipboardData = testEvent.originalEvent.clipboardData,
 			view = ve.test.utils.createSurfaceViewFromDocument( doc || ve.dm.example.createExampleDocument() ),
 			model = view.getModel();
@@ -1926,72 +1886,20 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 			},
 			{
 				rangeOrSelection: new ve.Range( 4 ),
-				pasteHtml: '☀foo☂',
+				pasteHtml: '☂foo☀',
 				expectedRangeOrSelection: new ve.Range( 9 ),
 				expectedOps: [
 					[
 						{ type: 'retain', length: 4 },
 						{
 							type: 'replace',
-							insert: [ '☀', 'f', 'o', 'o', '☂' ],
+							insert: [ '☂', 'f', 'o', 'o', '☀' ],
 							remove: []
 						},
 						{ type: 'retain', length: docLen - 4 }
 					]
 				],
-				msg: 'Left/right placeholder characters not accidentally removed'
-			},
-			{
-				rangeOrSelection: new ve.Range( 4 ),
-				pasteHtml: '☀foo☂',
-				expectedRangeOrSelection: new ve.Range( 9 ),
-				expectedOps: [
-					[
-						{ type: 'retain', length: 4 },
-						{
-							type: 'replace',
-							insert: [ '☀', 'f', 'o', 'o', '☂' ],
-							remove: []
-						},
-						{ type: 'retain', length: docLen - 4 }
-					]
-				],
-				msg: 'Pasted left/right placeholder characters kept'
-			},
-			{
-				rangeOrSelection: new ve.Range( 4 ),
-				pasteTargetHtml: '☀foo☂',
-				expectedRangeOrSelection: new ve.Range( 7 ),
-				expectedOps: [
-					[
-						{ type: 'retain', length: 4 },
-						{
-							type: 'replace',
-							insert: [ 'f', 'o', 'o' ],
-							remove: []
-						},
-						{ type: 'retain', length: docLen - 4 }
-					]
-				],
-				msg: 'Left/right placeholder characters removed'
-			},
-			{
-				rangeOrSelection: new ve.Range( 4 ),
-				pasteHtml: 'foo',
-				pasteTargetHtml: '☀☂foo',
-				expectedRangeOrSelection: new ve.Range( 7 ),
-				expectedOps: [
-					[
-						{ type: 'retain', length: 4 },
-						{
-							type: 'replace',
-							insert: [ 'f', 'o', 'o' ],
-							remove: []
-						},
-						{ type: 'retain', length: docLen - 4 }
-					]
-				],
-				msg: 'Corrupted paste target ignored'
+				msg: 'Left/right placeholder characters'
 			},
 			{
 				rangeOrSelection: new ve.Range( 6 ),
@@ -2076,16 +1984,6 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 					]
 				],
 				msg: 'RDFa attributes restored/overwritten from data-ve-attributes'
-			},
-			{
-				rangeOrSelection: new ve.Range( 1 ),
-				documentHtml: '<p></p>',
-				pasteHtml: '<span data-ve-attributes="{{invalid">foo</span>' +
-					'<span data-ve-attributes="{&quot;about&quot;:&quot;quux&quot;}">bar</span>',
-				fromVe: true,
-				expectedHtml: '<p><span>foo</span><span about="quux">bar</span></p>',
-				expectedRangeOrSelection: new ve.Range( 7 ),
-				msg: 'Span cleanups: data-ve-attributes always stripped'
 			},
 			{
 				rangeOrSelection: new ve.Range( 1 ),
@@ -2269,7 +2167,6 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 			{
 				rangeOrSelection: new ve.Range( 1 ),
 				pasteHtml: '<span data-ve-clipboard-key="0.13811087369534492-4">&nbsp;</span><s rel="ve:Alien">Alien</s>',
-				pasteTargetHtml: '<span data-ve-clipboard-key="0.13811087369534492-4">&nbsp;</span><s>Alien</s>',
 				fromVe: true,
 				expectedOps: [
 					[
@@ -2944,39 +2841,6 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 				msg: 'Paste paragraphs and a table into table cell'
 			},
 			{
-				rangeOrSelection: new ve.Range( 2 ),
-				documentHtml: '<p>A</p><ul><li>B</li><li>C</li></ul>',
-				internalSourceRangeOrSelection: new ve.Range( 6, 12 ),
-				expectedRangeOrSelection: new ve.Range( 14 ),
-				expectedOps: [
-					[
-						{ type: 'retain', length: 3 },
-						{
-							type: 'replace',
-							insert: [
-								{ type: 'list', attributes: { style: 'bullet' } },
-								{ type: 'listItem' },
-								{ type: 'paragraph' },
-								'B',
-								{ type: '/paragraph' },
-								{ type: '/listItem' },
-								{ type: 'listItem' },
-								{ type: 'paragraph', internal: { generated: 'wrapper' } },
-								'C',
-								{ type: '/paragraph' },
-								{ type: '/listItem' },
-								{ type: '/list' }
-							],
-							remove: [],
-							insertedDataLength: 10,
-							insertedDataOffset: 1
-						},
-						{ type: 'retain', length: 14 }
-					]
-				],
-				msg: 'Unbalanced data can\'t be fixed by fixupInsertion'
-			},
-			{
 				rangeOrSelection: new ve.Range( 0 ),
 				// Firefox doesn't like using execCommand for this test for some reason
 				pasteTargetHtml: '<ul><li>A</li><ul><li>B</li></ul></ul>',
@@ -3173,7 +3037,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 						{ type: 'retain', length: docLen - 1 }
 					]
 				],
-				expectedDefaultPrevented: false,
+				expectedDefaultPrevented: true,
 				msg: 'Plain text paste into empty paragraph'
 			},
 			{
@@ -3193,7 +3057,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 						{ type: 'retain', length: docLen - 1 }
 					]
 				],
-				expectedDefaultPrevented: false,
+				expectedDefaultPrevented: true,
 				msg: 'Plain text paste doesn\'t become HTML'
 			}
 		];
@@ -3381,10 +3245,7 @@ QUnit.test( 'onDocumentDragStart/onDocumentDrop', function ( assert ) {
 				msg: 'Simple drag and drop',
 				rangeOrSelection: new ve.Range( 1, 4 ),
 				targetOffset: 10,
-				expectedTransfer: {
-					'text/html': 'a<b>b</b><i>c</i>',
-					'text/plain': 'abc'
-				},
+				expectedTransfer: { 'application-x/VisualEditor': JSON.stringify( selection ) },
 				expectedData: function ( data ) {
 					var removed = data.splice( 1, 3 );
 					data.splice.apply( data, [ 7, 0 ].concat( removed ) );
@@ -3396,7 +3257,7 @@ QUnit.test( 'onDocumentDragStart/onDocumentDrop', function ( assert ) {
 				rangeOrSelection: new ve.Range( 1, 4 ),
 				targetOffset: 10,
 				isIE: true,
-				expectedTransfer: {},
+				expectedTransfer: { text: '__ve__' + JSON.stringify( selection ) },
 				expectedData: function ( data ) {
 					var removed = data.splice( 1, 3 );
 					data.splice.apply( data, [ 7, 0 ].concat( removed ) );
@@ -3407,10 +3268,7 @@ QUnit.test( 'onDocumentDragStart/onDocumentDrop', function ( assert ) {
 				msg: 'Invalid target offset',
 				rangeOrSelection: new ve.Range( 1, 4 ),
 				targetOffset: -1,
-				expectedTransfer: {
-					'text/html': 'a<b>b</b><i>c</i>',
-					'text/plain': 'abc'
-				},
+				expectedTransfer: { 'application-x/VisualEditor': JSON.stringify( selection ) },
 				expectedData: function () {},
 				expectedSelection: selection
 			}
@@ -3511,47 +3369,11 @@ QUnit.test( 'getSelectionState', function ( assert ) {
 				]
 			},
 			{
-				msg: 'No cursorable offset (no native selection)',
-				html: '<article><section rel="ve:SectionPlaceholder"></section></article>',
-				expected: [
-					false,
-					false,
-					false,
-					false
-				]
-			},
-			{
 				msg: 'Simple example doc',
 				html: ve.dm.example.html,
 				expected: ve.dm.example.offsetPaths
 			}
 		];
-
-	function TestDmSectionPlaceholderNode() {
-		TestDmSectionPlaceholderNode.super.apply( this, arguments );
-	}
-	OO.inheritClass( TestDmSectionPlaceholderNode, ve.dm.LeafNode );
-	TestDmSectionPlaceholderNode.static.name = 'sectionPlaceholder';
-	TestDmSectionPlaceholderNode.static.matchTagNames = [ 'section' ];
-	TestDmSectionPlaceholderNode.static.matchRdfaTypes = [ 've:SectionPlaceholder' ];
-	TestDmSectionPlaceholderNode.prototype.canHaveSlugBefore = function () {
-		return false;
-	};
-	TestDmSectionPlaceholderNode.prototype.canHaveSlugAfter = function () {
-		return false;
-	};
-	ve.dm.modelRegistry.register( TestDmSectionPlaceholderNode );
-
-	function TestCeSectionPlaceholderNode() {
-		TestCeSectionPlaceholderNode.super.apply( this, arguments );
-		this.$element
-			.addClass( 'test-ce-sectionPlaceholderNode' )
-			.append( $( '<hr>' ) );
-	}
-	OO.inheritClass( TestCeSectionPlaceholderNode, ve.ce.LeafNode );
-	TestCeSectionPlaceholderNode.static.tagName = 'section';
-	TestCeSectionPlaceholderNode.static.name = 'sectionPlaceholder';
-	ve.ce.nodeFactory.register( TestCeSectionPlaceholderNode );
 
 	for ( i = 0; i < cases.length; i++ ) {
 		view = ve.test.utils.createSurfaceViewFromHtml( cases[ i ].html );
@@ -3559,28 +3381,20 @@ QUnit.test( 'getSelectionState', function ( assert ) {
 		rootElement = view.getDocument().getDocumentNode().$element[ 0 ];
 		for ( j = 0, l = internalListNode.getOuterRange().start; j < l; j++ ) {
 			node = view.getDocument().getDocumentNode().getNodeFromOffset( j );
-			if ( cases[ i ].expected[ j ] === null ) {
-				assert.strictEqual( node.isFocusable(), true, 'Focusable node at ' + j );
+			if ( node.isFocusable() ) {
+				assert.strictEqual( null, cases[ i ].expected[ j ], 'Focusable node at ' + j );
 			} else {
 				selection = view.getSelectionState( new ve.Range( j ) );
-				if ( cases[ i ].expected[ j ] === false ) {
-					assert.strictEqual( selection.anchorNode, null, 'No selection at ' + j );
-				} else {
-					assert.deepEqual(
-						ve.getOffsetPath( rootElement, selection.anchorNode, selection.anchorOffset ),
-						cases[ i ].expected[ j ],
-						'Path at ' + j + ' in ' + cases[ i ].msg
-					);
-				}
-				// Check that this doesn't throw exceptions
-				view.showSelectionState( selection );
+				assert.deepEqual(
+					ve.getOffsetPath( rootElement, selection.anchorNode, selection.anchorOffset ),
+					cases[ i ].expected[ j ],
+					'Path at ' + j + ' in ' + cases[ i ].msg
+				);
 			}
 		}
 		view.destroy();
 	}
 
-	ve.dm.modelRegistry.unregister( TestDmSectionPlaceholderNode );
-	ve.ce.nodeFactory.unregister( TestCeSectionPlaceholderNode );
 } );
 
 /* Methods with return values */
@@ -3618,6 +3432,8 @@ QUnit.test( 'getSelectionState', function ( assert ) {
 // TODO: ve.ce.Surface#onSurfaceObserverSelectionChange
 // TODO: ve.ce.Surface#onLock
 // TODO: ve.ce.Surface#onUnlock
+// TODO: ve.ce.Surface#startRelocation
+// TODO: ve.ce.Surface#endRelocation
 // TODO: ve.ce.Surface#handleInsertion
 // TODO: ve.ce.Surface#showModelSelection
 // TODO: ve.ce.Surface#appendHighlights

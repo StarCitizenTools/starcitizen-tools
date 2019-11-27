@@ -1,4 +1,4 @@
-/*!
+/*
  * VisualEditor user interface MWTemplateDialog class.
  *
  * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
@@ -80,6 +80,11 @@ ve.ui.MWTemplateDialog.static.bookletLayoutConfig = {
 ve.ui.MWTemplateDialog.prototype.getReadyProcess = function ( data ) {
 	return ve.ui.MWTemplateDialog.super.prototype.getReadyProcess.call( this, data )
 		.next( function () {
+			// Add missing required and suggested parameters to each transclusion.
+			this.transclusionModel.addPromptedParameters();
+			this.loaded = true;
+			this.$element.addClass( 've-ui-mwTemplateDialog-ready' );
+			this.$body.append( this.bookletLayout.$element );
 			this.bookletLayout.focus( 1 );
 		}, this );
 };
@@ -230,15 +235,12 @@ ve.ui.MWTemplateDialog.prototype.onRemoveParameter = function ( param ) {
 	var page = this.bookletLayout.getPage( param.getId() ),
 		reselect = this.bookletLayout.findClosestPage( page );
 
-	// Select the desired page first. Otherwise, if the page we are removing is selected,
-	// OOUI will try to select the first page after it is removed, and scroll to the top.
-	if ( this.loaded && !this.preventReselection ) {
-		this.setPageByName( reselect.getName() );
-	}
-
 	this.bookletLayout.removePages( [ page ] );
-
 	if ( this.loaded ) {
+		if ( !this.preventReselection ) {
+			this.setPageByName( reselect.getName() );
+		}
+
 		this.altered = true;
 		this.setApplicableStatus();
 	}
@@ -355,7 +357,7 @@ ve.ui.MWTemplateDialog.prototype.initialize = function () {
 
 	// Initialization
 	this.$content.addClass( 've-ui-mwTemplateDialog' );
-	// bookletLayout is appended after the form has been built in getSetupProcess for performance
+	// bookletLayout is appended after the form has been built in getReadyProcess for performance
 };
 
 /**
@@ -448,13 +450,12 @@ ve.ui.MWTemplateDialog.prototype.getSetupProcess = function ( data ) {
 	data = data || {};
 	return ve.ui.MWTemplateDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
-			var template, promise,
-				bookletLayout = this.bookletLayout;
+			var template, promise;
 
 			// Properties
 			this.loaded = false;
 			this.altered = false;
-			this.transclusionModel = new ve.dm.MWTransclusionModel( this.getFragment().getDocument() );
+			this.transclusionModel = new ve.dm.MWTransclusionModel();
 
 			// Events
 			this.transclusionModel.connect( this, {
@@ -463,10 +464,7 @@ ve.ui.MWTemplateDialog.prototype.getSetupProcess = function ( data ) {
 			} );
 
 			// Detach the form while building for performance
-			bookletLayout.$element.detach();
-			// HACK: Prevent any setPage() calls (from #onReplacePart) from focussing stuff, it messes
-			// with OOUI logic for marking fields as invalid (T199838). We set it back to true below.
-			bookletLayout.autoFocus = false;
+			this.bookletLayout.$element.detach();
 
 			// Initialization
 			if ( !this.selectedNode ) {
@@ -493,17 +491,7 @@ ve.ui.MWTemplateDialog.prototype.getSetupProcess = function ( data ) {
 					.then( this.initializeTemplateParameters.bind( this ) );
 			}
 			this.actions.setAbilities( { apply: false, insert: false } );
-
-			// Add missing required and suggested parameters to each transclusion.
-			this.transclusionModel.addPromptedParameters();
-
-			this.loaded = true;
-			this.$element.addClass( 've-ui-mwTemplateDialog-ready' );
-			this.$body.append( bookletLayout.$element );
-
-			return promise.then( function () {
-				bookletLayout.autoFocus = true;
-			} );
+			return promise;
 		}, this );
 };
 

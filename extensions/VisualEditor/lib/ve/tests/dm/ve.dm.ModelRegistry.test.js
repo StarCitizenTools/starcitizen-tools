@@ -131,11 +131,11 @@ ve.dm.example.StubRegExpNode.static.matchRdfaTypes = [
 
 /* Tests */
 
-QUnit.test( 'register/unregister/matchElement', function ( assert ) {
+QUnit.test( 'matchElement', function ( assert ) {
 	var registry = new ve.dm.ModelRegistry(),
 		element = document.createElement( 'a' );
 
-	assert.strictEqual( registry.matchElement( element ), null, 'matchElement() returns null if registry empty' );
+	assert.deepEqual( registry.matchElement( element ), null, 'matchElement() returns null if registry empty' );
 
 	registry.register( ve.dm.example.StubNothingSetAnnotation );
 	registry.register( ve.dm.example.StubSingleTagAnnotation );
@@ -152,75 +152,36 @@ QUnit.test( 'register/unregister/matchElement', function ( assert ) {
 	registry.register( ve.dm.example.StubRegExpNode );
 
 	element = document.createElement( 'b' );
-	assert.strictEqual( registry.matchElement( element ), 'stubnothingset', 'nothingset matches anything' );
+	assert.deepEqual( registry.matchElement( element ), 'stubnothingset', 'nothingset matches anything' );
 	element.setAttribute( 'rel', 'ext:foo' );
-	assert.strictEqual( registry.matchElement( element ), 'stubsingletype', 'type-only match' );
-	element.setAttribute( 'rel', ' ext:foo ' );
-	assert.strictEqual( registry.matchElement( element ), 'stubsingletype', 'type-only match (extra spaces)' );
+	assert.deepEqual( registry.matchElement( element ), 'stubsingletype', 'type-only match' );
 	element.setAttribute( 'rel', 'ext:foo bar' );
-	assert.strictEqual( registry.matchElement( element ), 'stubsingletypewithallowed', 'type-only match with extra allowed type' );
-	element.setAttribute( 'rel', 'ext:foo  bar' );
-	assert.strictEqual( registry.matchElement( element ), 'stubsingletypewithallowed', 'type-only match with extra allowed type (extra spaces)' );
+	assert.deepEqual( registry.matchElement( element ), 'stubsingletypewithallowed', 'type-only match with extra allowed type' );
 	element.setAttribute( 'rel', 'ext:foo bar baz quux whee' );
-	assert.strictEqual( registry.matchElement( element ), 'stubsingletypewithanyallowed', 'type-only match with many extra types' );
+	assert.deepEqual( registry.matchElement( element ), 'stubsingletypewithanyallowed', 'type-only match with many extra types' );
 	element = document.createElement( 'a' );
-	assert.strictEqual( registry.matchElement( element ), 'stubsingletag', 'tag-only match' );
+	assert.deepEqual( registry.matchElement( element ), 'stubsingletag', 'tag-only match' );
 	element.setAttribute( 'rel', 'ext:foo' );
-	assert.strictEqual( registry.matchElement( element ), 'stubsingletagandtype', 'tag and type match' );
+	assert.deepEqual( registry.matchElement( element ), 'stubsingletagandtype', 'tag and type match' );
 	element.setAttribute( 'pickme', 'true' );
-	assert.strictEqual( registry.matchElement( element ), 'stubsingletagandtypeandfunc', 'tag, type and func match' );
+	assert.deepEqual( registry.matchElement( element ), 'stubsingletagandtypeandfunc', 'tag, type and func match' );
 	element.setAttribute( 'rel', 'ext:bar' );
-	assert.strictEqual( registry.matchElement( element ), 'stubsingletagandfunc', 'tag and func match' );
+	assert.deepEqual( registry.matchElement( element ), 'stubsingletagandfunc', 'tag and func match' );
 	element = document.createElement( 'b' );
 	element.setAttribute( 'pickme', 'true' );
-	assert.strictEqual( registry.matchElement( element ), 'stubfunc', 'func-only match' );
+	assert.deepEqual( registry.matchElement( element ), 'stubfunc', 'func-only match' );
 	element.setAttribute( 'rel', 'ext:foo' );
-	assert.strictEqual( registry.matchElement( element ), 'stubsingletypeandfunc', 'type and func match' );
+	assert.deepEqual( registry.matchElement( element ), 'stubsingletypeandfunc', 'type and func match' );
 	element = document.createElement( 'abbr' );
 	element.setAttribute( 'rel', 'ext:baz' );
-	assert.strictEqual( registry.matchElement( element ), 'stub-regexp', 'RegExp type match' );
+	assert.deepEqual( registry.matchElement( element ), 'stub-regexp', 'RegExp type match' );
 	element.setAttribute( 'rel', 'ext:abbr' );
-	assert.strictEqual( registry.matchElement( element ), 'stub-abbr', 'String match overrides RegExp match' );
-
-	assert.strictEqual(
-		registry.registrationOrder[ ve.dm.example.StubNothingSetAnnotation.static.name ],
-		0,
-		'Model given a registration order'
-	);
-	registry.register( ve.dm.example.StubNothingSetAnnotation );
-	assert.strictEqual(
-		registry.registrationOrder[ ve.dm.example.StubNothingSetAnnotation.static.name ],
-		0,
-		'Double registration is a no-op (doesn\'t affect registration order)'
-	);
+	assert.deepEqual( registry.matchElement( element ), 'stub-abbr', 'String match overrides RegExp match' );
 
 	registry.unregister( ve.dm.example.StubAbbrNode );
 	element.removeAttribute( 'typeof' );
 	element.setAttribute( 'rel', 'ext:abbr' );
-	assert.strictEqual( registry.matchElement( element ), 'stub-regexp', 'RegExp type match after string match is unregistered' );
-
-	assert.deepEqual(
-		registry.modelsByTag[ 1 ].a,
-		[ 'stubsingletagandtypeandfunc', 'stubsingletagandfunc' ],
-		'tag and func creates entries in modelsByTag[ 1 ]'
-	);
-	assert.deepEqual(
-		registry.modelsByTypeAndTag[ 1 ][ 'ext:foo' ].a,
-		[ 'stubsingletagandtypeandfunc' ],
-		'tag and func creates entries in modelsByTypeAndTag[ 1 ]'
-	);
-	registry.unregister( ve.dm.example.StubSingleTagAndFuncAnnotation );
-	registry.unregister( ve.dm.example.StubSingleTagAndTypeAndFuncAnnotation );
-	assert.deepEqual(
-		registry.modelsByTag[ 1 ][ ve.dm.example.StubSingleTagAndFuncAnnotation.static.matchTagNames[ 0 ] ],
-		[],
-		'unregister removes entries in modelsByTag[ 1 ]'
-	);
-	assert.deepEqual(
-		registry.modelsByTypeAndTag[ 1 ][ 'ext:foo' ].a,
-		[],
-		'unregister removes entries in modelsByTypeAndTag[ 1 ]'
-	);
+	assert.deepEqual( registry.matchElement( element ), 'stub-regexp', 'RegExp type match after string match is unregistered' );
 
 } );
 
@@ -231,7 +192,7 @@ QUnit.test( 'isAnnotation', function ( assert ) {
 
 	for ( i = 0, len = allAnnotationTags.length; i < len; i++ ) {
 		node = document.createElement( allAnnotationTags[ i ] );
-		assert.strictEqual(
+		assert.deepEqual(
 			ve.dm.modelRegistry.isAnnotation( node ),
 			true,
 			allAnnotationTags[ i ] + ' annotation'
@@ -240,7 +201,7 @@ QUnit.test( 'isAnnotation', function ( assert ) {
 
 	for ( i = 0, len = nonAnnotationTags.length; i < len; i++ ) {
 		node = document.createElement( nonAnnotationTags[ i ] );
-		assert.strictEqual(
+		assert.deepEqual(
 			ve.dm.modelRegistry.isAnnotation( node ),
 			false,
 			allAnnotationTags[ i ] + ' non-annotation'
@@ -249,7 +210,7 @@ QUnit.test( 'isAnnotation', function ( assert ) {
 
 	node = document.createElement( 'span' );
 	node.setAttribute( 'rel', 've:Alien' );
-	assert.strictEqual( ve.dm.modelRegistry.isAnnotation( node ), false, 'alien span' );
+	assert.deepEqual( ve.dm.modelRegistry.isAnnotation( node ), false, 'alien span' );
 	node.setAttribute( 'rel', 've:Dummy' );
-	assert.strictEqual( ve.dm.modelRegistry.isAnnotation( node ), true, 'non-alien rel span' );
+	assert.deepEqual( ve.dm.modelRegistry.isAnnotation( node ), true, 'non-alien rel span' );
 } );

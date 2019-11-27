@@ -438,7 +438,7 @@ ve.dm.MWImageModel.prototype.updateImageNode = function ( node, surfaceModel ) {
  * @throws {Error} Unknown image node type
  */
 ve.dm.MWImageModel.prototype.insertImageNode = function ( fragment ) {
-	var offset, contentToInsert, selectedNode,
+	var captionDoc, offset, contentToInsert, selectedNode,
 		nodeType = this.getImageNodeType(),
 		surfaceModel = fragment.getSurface();
 
@@ -479,14 +479,18 @@ ve.dm.MWImageModel.prototype.insertImageNode = function ( fragment ) {
 				fragment = fragment.clone( new ve.dm.LinearSelection( fragment.getDocument(), new ve.Range( offset ) ) );
 			}
 			fragment.insertContent( contentToInsert );
-			// Add contents of new caption
-			surfaceModel.change(
-				ve.dm.TransactionBuilder.static.newFromDocumentInsertion(
-					surfaceModel.getDocument(),
-					fragment.getSelection().getRange().start + 2,
-					this.getCaptionDocument()
-				)
-			);
+			// Check if there is caption document and insert it
+			captionDoc = this.getCaptionDocument();
+			if ( captionDoc.data.hasContent() ) {
+				// Add contents of new caption
+				surfaceModel.change(
+					ve.dm.TransactionBuilder.static.newFromDocumentInsertion(
+						surfaceModel.getDocument(),
+						fragment.getSelection().getRange().start + 2,
+						this.getCaptionDocument()
+					)
+				);
+			}
 			return fragment;
 
 		default:
@@ -568,6 +572,11 @@ ve.dm.MWImageModel.prototype.getUpdatedAttributes = function () {
 	attrs.href = this.getImageHref();
 	attrs.resource = this.getImageResourceName();
 
+	// If converting from block to inline, set isLinked=true to avoid |link=
+	if ( origAttrs.isLinked === undefined && this.getImageNodeType() === 'mwInlineImage' ) {
+		attrs.isLinked = true;
+	}
+
 	return attrs;
 };
 
@@ -643,8 +652,7 @@ ve.dm.MWImageModel.prototype.setMediaType = function ( type ) {
  * @return {boolean} Default size flag on or off
  */
 ve.dm.MWImageModel.prototype.isDefaultSize = function () {
-	// An image with 'frame' always ignores the size specification
-	return this.scalable.isDefault() || this.getType() === 'frame';
+	return this.scalable.isDefault();
 };
 
 /**
@@ -986,7 +994,7 @@ ve.dm.MWImageModel.prototype.setType = function ( type ) {
 ve.dm.MWImageModel.prototype.resetDefaultDimensions = function () {
 	var originalDimensions = this.scalable.getOriginalDimensions();
 
-	if ( !ve.isEmptyObject( originalDimensions ) ) {
+	if ( !$.isEmptyObject( originalDimensions ) ) {
 		if ( this.getType() === 'thumb' || this.getType() === 'frameless' ) {
 			// Default is thumb size
 			if ( originalDimensions.width <= this.defaultThumbSize ) {
@@ -1154,7 +1162,7 @@ ve.dm.MWImageModel.prototype.attachScalable = function ( scalable ) {
 			// We have to adjust the details in the initial hash if the original
 			// image was 'default' since we didn't have default until now and the
 			// default dimensions that were 'recorded' were wrong
-			if ( !ve.isEmptyObject( imageModel.initialHash ) && imageModel.initialHash.scalable.isDefault ) {
+			if ( !$.isEmptyObject( imageModel.initialHash ) && imageModel.initialHash.scalable.isDefault ) {
 				imageModel.initialHash.scalable.currentDimensions = imageModel.scalable.getDefaultDimensions();
 			}
 

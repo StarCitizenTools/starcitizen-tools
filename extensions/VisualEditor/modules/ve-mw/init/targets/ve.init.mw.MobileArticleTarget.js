@@ -38,12 +38,9 @@ OO.inheritClass( ve.init.mw.MobileArticleTarget, ve.init.mw.ArticleTarget );
 
 ve.init.mw.MobileArticleTarget.static.toolbarGroups = [
 	// History
-	{
-		name: 'history',
-		include: [ 'undo' ] },
+	{ include: [ 'undo' ] },
 	// Style
 	{
-		name: 'style',
 		classes: [ 've-test-toolbar-style' ],
 		type: 'list',
 		icon: 'textStyle',
@@ -54,16 +51,9 @@ ve.init.mw.MobileArticleTarget.static.toolbarGroups = [
 		demote: [ 'strikethrough', 'code', 'underline', 'language', 'clear' ]
 	},
 	// Link
-	{
-		name: 'link',
-		include: [ 'link' ]
-	},
-	// Placeholder for reference tools (e.g. Cite and/or Citoid)
-	{
-		name: 'reference'
-	}
-	// "Done" tool is added in setupToolbar as it not part of the
-	// standard config (i.e. shouldn't be inhertied by TargetWidget)
+	{ include: [ 'link' ] },
+	// Done with editing toolbar
+	{ include: [ 'done' ] }
 ];
 
 ve.init.mw.MobileArticleTarget.static.trackingName = 'mobile';
@@ -100,7 +90,8 @@ ve.init.mw.MobileArticleTarget.prototype.surfaceReady = function () {
  * Handle surface blur events
  */
 ve.init.mw.MobileArticleTarget.prototype.onSurfaceBlur = function () {
-	this.getToolbar().$group.addClass( 've-init-mw-mobileArticleTarget-editTools-hidden' );
+	var toolbar = this.getToolbar();
+	toolbar.$group.addClass( 've-init-mw-mobileArticleTarget-editTools-hidden' );
 	this.pageToolbar.$element.removeClass( 've-init-mw-mobileArticleTarget-pageToolbar-hidden' );
 };
 
@@ -108,7 +99,8 @@ ve.init.mw.MobileArticleTarget.prototype.onSurfaceBlur = function () {
  * Handle surface focus events
  */
 ve.init.mw.MobileArticleTarget.prototype.onSurfaceFocus = function () {
-	this.getToolbar().$group.removeClass( 've-init-mw-mobileArticleTarget-editTools-hidden' );
+	var toolbar = this.getToolbar();
+	toolbar.$group.removeClass( 've-init-mw-mobileArticleTarget-editTools-hidden' );
 	this.pageToolbar.$element.addClass( 've-init-mw-mobileArticleTarget-pageToolbar-hidden' );
 };
 
@@ -151,17 +143,6 @@ ve.init.mw.MobileArticleTarget.prototype.setupToolbar = function ( surface ) {
 	// Parent method
 	ve.init.mw.MobileArticleTarget.super.prototype.setupToolbar.call( this, surface );
 
-	this.getToolbar().setup(
-		this.constructor.static.toolbarGroups.concat( [
-			// Done with editing toolbar
-			{
-				name: 'done',
-				include: [ 'done' ]
-			}
-		] ),
-		surface
-	);
-
 	this.toolbar.$element.addClass( 've-init-mw-mobileArticleTarget-toolbar' );
 	// Append the context to the toolbar
 	this.toolbar.$bar.append( surface.getContext().$element );
@@ -188,16 +169,12 @@ ve.init.mw.MobileArticleTarget.prototype.attachToolbarSaveButton = function () {
 
 	this.pageToolbar.setup( [
 		// Back
+		{ include: [ 'back' ] },
 		{
-			name: 'back',
-			include: [ 'back' ]
-		},
-		{
-			name: 'editMode',
 			type: 'list',
 			icon: 'edit',
 			title: ve.msg( 'visualeditor-mweditmode-tooltip' ),
-			include: [ 'editModeVisual', 'editModeSource' ]
+			include: [ surface.getMode() === 'visual' ? 'editModeSource' : 'editModeVisual' ]
 		}
 	], surface );
 
@@ -206,7 +183,7 @@ ve.init.mw.MobileArticleTarget.prototype.attachToolbarSaveButton = function () {
 	if ( !this.$title ) {
 		this.$title = $( '<div>' ).addClass( 've-init-mw-mobileArticleTarget-title-container' ).append(
 			$( '<div>' ).addClass( 've-init-mw-mobileArticleTarget-title' ).text(
-				new mw.Title( ve.init.target.getPageName() ).getMainText()
+				new mw.Title( ve.init.target.pageName ).getMainText()
 			)
 		);
 	}
@@ -224,9 +201,6 @@ ve.init.mw.MobileArticleTarget.prototype.attachToolbarSaveButton = function () {
 
 	this.pageToolbar.$group.addClass( 've-init-mw-mobileArticleTarget-pageTools' );
 	this.toolbar.$group.addClass( 've-init-mw-mobileArticleTarget-editTools' );
-
-	// Don't wait for the first surface focus/blur event to hide one of the toolbars
-	this.onSurfaceBlur();
 };
 
 /**
@@ -313,7 +287,6 @@ ve.ui.MWDoneTool = function VeUiMWDoneTool() {
 OO.inheritClass( ve.ui.MWDoneTool, ve.ui.Tool );
 ve.ui.MWDoneTool.static.name = 'done';
 ve.ui.MWDoneTool.static.group = 'navigation';
-ve.ui.MWDoneTool.static.group.autoAddToCatchall = false;
 ve.ui.MWDoneTool.static.icon = 'check';
 ve.ui.MWDoneTool.static.title =
 	OO.ui.deferMsg( 'visualeditor-donebutton-tooltip' );

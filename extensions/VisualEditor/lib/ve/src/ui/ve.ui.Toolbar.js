@@ -19,8 +19,6 @@ ve.ui.Toolbar = function VeUiToolbar( config ) {
 	// Parent constructor
 	ve.ui.Toolbar.super.call( this, ve.ui.toolFactory, ve.ui.toolGroupFactory, config );
 
-	this.updateToolStateDebounced = ve.debounce( this.updateToolState.bind( this ) );
-
 	this.groups = null;
 	// Default directions
 	this.contextDirection = { inline: 'ltr', block: 'ltr' };
@@ -83,16 +81,6 @@ ve.ui.Toolbar.prototype.setup = function ( groups, surface ) {
 	// do this if they have changed
 	if ( groups !== this.groups ) {
 		// Parent method
-		groups = groups.map( function ( group ) {
-			if ( group.name ) {
-				group.classes = group.classes || [];
-				// ve-test-toolbar- prefix is deprecated, use ve-ui-toolbar-group- instead
-				group.classes.push( 've-test-toolbar-' + group.name, 've-ui-toolbar-group-' + group.name );
-			} else {
-				OO.ui.warnDeprecation( 'No name: ' + JSON.stringify( group ) );
-			}
-			return group;
-		} );
 		ve.ui.Toolbar.super.prototype.setup.call( this, groups );
 	}
 
@@ -106,10 +94,6 @@ ve.ui.Toolbar.prototype.setup = function ( groups, surface ) {
 	// Events
 	this.getSurface().getModel().connect( this, { contextChange: 'onContextChange' } );
 	this.getSurface().getDialogs().connect( this, {
-		opening: 'onInspectorOrDialogOpeningOrClosing',
-		closing: 'onInspectorOrDialogOpeningOrClosing'
-	} );
-	this.getSurface().getToolbarDialogs().connect( this, {
 		opening: 'onInspectorOrDialogOpeningOrClosing',
 		closing: 'onInspectorOrDialogOpeningOrClosing'
 	} );
@@ -148,7 +132,7 @@ ve.ui.Toolbar.prototype.isToolAvailable = function ( name ) {
 ve.ui.Toolbar.prototype.onInspectorOrDialogOpeningOrClosing = function ( win, openingOrClosing ) {
 	var toolbar = this;
 	openingOrClosing.then( function () {
-		toolbar.updateToolStateDebounced();
+		toolbar.updateToolState();
 	} );
 };
 
@@ -158,7 +142,7 @@ ve.ui.Toolbar.prototype.onInspectorOrDialogOpeningOrClosing = function ( win, op
  * @fires updateState
  */
 ve.ui.Toolbar.prototype.onContextChange = function () {
-	this.updateToolStateDebounced();
+	this.updateToolState();
 };
 
 /**

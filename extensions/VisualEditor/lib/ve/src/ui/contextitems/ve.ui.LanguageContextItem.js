@@ -40,8 +40,6 @@ ve.ui.LanguageContextItem.static.embeddable = false;
 
 ve.ui.LanguageContextItem.static.commandName = 'language';
 
-ve.ui.LanguageContextItem.static.clearMsg = OO.ui.deferMsg( 'visualeditor-languagecontext-remove' );
-
 /* Methods */
 
 /**

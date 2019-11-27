@@ -48,11 +48,6 @@ ve.init.mw.Platform.prototype.getUnanchoredExternalLinkUrlProtocolsRegExp = func
 	return this.unanchoredExternalLinkUrlProtocolsRegExp;
 };
 
-/** @inheritdoc */
-ve.init.mw.Platform.prototype.notify = function ( message, title, options ) {
-	return mw.notify( message, ve.extendObject( { title: title }, options ) );
-};
-
 /**
  * Regular expression matching RESTBase IDs
  *
@@ -74,13 +69,6 @@ ve.init.mw.Platform.prototype.addMessages = function ( messages ) {
  * @inheritdoc
  */
 ve.init.mw.Platform.prototype.getMessage = mw.msg.bind( mw );
-
-/**
- * @inheritdoc
- */
-ve.init.mw.Platform.prototype.getHtmlMessage = function () {
-	return mw.message.apply( mw.message, arguments ).parseDom();
-};
 
 /**
  * @method
@@ -132,7 +120,7 @@ ve.init.mw.Platform.prototype.setUserConfig = function ( keyOrValueMap, value ) 
 		Object.keys( keyOrValueMap ).forEach( function ( key ) {
 			jsonValues[ key ] = JSON.stringify( keyOrValueMap[ key ] );
 		} );
-		ve.init.target.getLocalApi().saveOptions( jsonValues );
+		new mw.Api().saveOptions( jsonValues );
 		return mw.user.options.set( jsonValues );
 	} else {
 		if ( value === this.getUserConfig( keyOrValueMap ) ) {
@@ -140,7 +128,7 @@ ve.init.mw.Platform.prototype.setUserConfig = function ( keyOrValueMap, value ) 
 		}
 		// JSON encode the value for API storage
 		jsonValue = JSON.stringify( value );
-		ve.init.target.getLocalApi().saveOption( keyOrValueMap, jsonValue );
+		new mw.Api().saveOption( keyOrValueMap, jsonValue );
 		return mw.user.options.set( keyOrValueMap, jsonValue );
 	}
 };

@@ -4,6 +4,8 @@
 			"JinJian"
 		]
 	},
+	"apihelp-visualeditor-param-etag": "ETag para maipadangat.",
+	"apihelp-visualeditor-param-paction": "Gios nga pagbubuhaton.",
 	"tooltip-ca-ve-edit": "Igliwat ini nga pakli",
 	"visualeditor-backbutton-tooltip": "Balik",
 	"visualeditor-beta-label": "beta",
@@ -31,6 +33,7 @@
 	"visualeditor-dialog-media-info-readmore": "Dugang nga barasahon",
 	"visualeditor-dialog-media-info-uploaded": "Gin-upload: $1",
 	"visualeditor-dialog-media-noresults": "Waray resulta nga nabilngan.",
+	"visualeditor-dialog-media-originaldimensions": "Mga orihinal nga dimension",
 	"visualeditor-dialog-media-page-advanced": "Mga abansado nga setting",
 	"visualeditor-dialog-media-page-general": "Mga kasahiran nga setting",
 	"visualeditor-dialog-media-position-center": "Butnga",
@@ -44,6 +47,7 @@
 	"visualeditor-dialog-media-search-tab-upload": "Upload",
 	"visualeditor-dialog-media-searchselect": "Pili",
 	"visualeditor-dialog-media-size-choosefull": "Ig-set ha pinakadako",
+	"visualeditor-dialog-media-size-originalsize-error": "Diri nakaka-retrieve ha orihinal nga kadako han file.",
 	"visualeditor-dialog-media-size-section": "Kadako han imahe",
 	"visualeditor-dialog-media-upload": "Upload",
 	"visualeditor-dialog-meta-categories-category": "Kaarangay",

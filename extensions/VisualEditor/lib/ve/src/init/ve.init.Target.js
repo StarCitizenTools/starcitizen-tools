@@ -41,8 +41,6 @@ ve.init.Target = function VeInitTarget( config ) {
 	this.toolbarConfig = config.toolbarConfig || {};
 	this.$scrollContainer = this.getScrollContainer();
 	this.toolbarScrollOffset = 0;
-	this.activeToolbars = 0;
-	this.wasSurfaceActive = null;
 
 	this.modes = config.modes || this.constructor.static.modes;
 	this.setDefaultMode( config.defaultMode );
@@ -89,12 +87,10 @@ OO.mixinClass( ve.init.Target, OO.EventEmitter );
 ve.init.Target.static.modes = [ 'visual' ];
 
 ve.init.Target.static.toolbarGroups = [
+	// History
+	{ include: [ 'undo', 'redo' ] },
+	// Format
 	{
-		name: 'history',
-		include: [ 'undo', 'redo' ]
-	},
-	{
-		name: 'format',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-paragraph-format' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-format-tooltip' ),
 		type: 'menu',
@@ -102,18 +98,16 @@ ve.init.Target.static.toolbarGroups = [
 		promote: [ 'paragraph' ],
 		demote: [ 'preformatted', 'blockquote' ]
 	},
+	// Text style
 	{
-		name: 'style',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-text-style' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-style-tooltip' ),
 		include: [ 'bold', 'italic', 'moreTextStyle' ]
 	},
+	// Link
+	{ include: [ 'link' ] },
+	// Structure
 	{
-		name: 'link',
-		include: [ 'link' ]
-	},
-	{
-		name: 'structure',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
 		type: 'list',
@@ -121,8 +115,8 @@ ve.init.Target.static.toolbarGroups = [
 		include: [ { group: 'structure' } ],
 		demote: [ 'outdent', 'indent' ]
 	},
+	// Insert
 	{
-		name: 'insert',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
 		type: 'list',
@@ -130,10 +124,8 @@ ve.init.Target.static.toolbarGroups = [
 		label: '',
 		include: '*'
 	},
-	{
-		name: 'specialCharacter',
-		include: [ 'specialCharacter' ]
-	}
+	// Special character toolbar
+	{ include: [ 'specialCharacter' ] }
 ];
 
 ve.init.Target.static.actionGroups = [];
@@ -199,34 +191,28 @@ ve.init.Target.static.importRules = {
 /* Static methods */
 
 /**
- * Create a document model from an HTML document.
- *
- * @param {HTMLDocument|string} doc HTML document or source text
- * @param {string} mode Editing mode
- * @param {Object} options Conversion options
- * @return {ve.dm.Document} Document model
- */
-ve.init.Target.static.createModelFromDom = function ( doc, mode, options ) {
-	if ( mode === 'source' ) {
-		return ve.dm.sourceConverter.getModelFromSourceText( doc, options );
-	} else {
-		return ve.dm.converter.getModelFromDom( doc, options );
-	}
-};
-
-/**
  * Parse document string into an HTML document
  *
  * @param {string} documentString Document. Note that this must really be a whole document
  *   with a single root tag.
  * @param {string} mode Editing mode
- * @return {HTMLDocument|string} HTML document, or document string (source mode)
+ * @return {HTMLDocument} HTML document
  */
 ve.init.Target.static.parseDocument = function ( documentString, mode ) {
+	var doc;
 	if ( mode === 'source' ) {
-		return documentString;
+		// Parse as plain text in source mode
+		doc = ve.createDocumentFromHtml( '' );
+
+		documentString.split( '\n' ).forEach( function ( line ) {
+			var p = doc.createElement( 'p' );
+			p.appendChild( doc.createTextNode( line ) );
+			doc.body.appendChild( p );
+		} );
+	} else {
+		doc = ve.createDocumentFromHtml( documentString );
 	}
-	return ve.createDocumentFromHtml( documentString );
+	return doc;
 };
 
 // Deprecated alias
@@ -289,7 +275,7 @@ ve.init.Target.prototype.isModeAvailable = function ( mode ) {
 ve.init.Target.prototype.bindHandlers = function () {
 	$( this.getElementDocument() ).on( 'keydown', this.onDocumentKeyDownHandler );
 	this.$element.on( 'keydown', this.onTargetKeyDownHandler );
-	ve.addPassiveEventListener( this.$scrollContainer[ 0 ], 'scroll', this.onContainerScrollHandler );
+	this.$scrollContainer.on( 'scroll', this.onContainerScrollHandler );
 };
 
 /**
@@ -298,7 +284,7 @@ ve.init.Target.prototype.bindHandlers = function () {
 ve.init.Target.prototype.unbindHandlers = function () {
 	$( this.getElementDocument() ).off( 'keydown', this.onDocumentKeyDownHandler );
 	this.$element.off( 'keydown', this.onTargetKeyDownHandler );
-	ve.removePassiveEventListener( this.$scrollContainer[ 0 ], 'scroll', this.onContainerScrollHandler );
+	this.$scrollContainer.off( 'scroll', this.onContainerScrollHandler );
 };
 
 /**
@@ -346,27 +332,16 @@ ve.init.Target.prototype.getScrollContainer = function () {
  * Handle scroll container scroll events
  */
 ve.init.Target.prototype.onContainerScroll = function () {
-	var scrollTop, wasFloating,
+	var scrollTop,
 		toolbar = this.getToolbar();
 
 	if ( toolbar.isFloatable() ) {
-		wasFloating = toolbar.isFloating();
 		scrollTop = this.$scrollContainer.scrollTop();
 
 		if ( scrollTop + this.toolbarScrollOffset > toolbar.getElementOffset().top ) {
 			toolbar.float();
 		} else {
 			toolbar.unfloat();
-		}
-
-		if ( toolbar.isFloating() !== wasFloating ) {
-			// HACK: Re-position any active toolgroup popups. We can't rely on normal event handler order
-			// because we're mixing jQuery and non-jQuery events. T205924#4657203
-			toolbar.getItems().forEach( function ( toolgroup ) {
-				if ( toolgroup instanceof OO.ui.PopupToolGroup && toolgroup.isActive() ) {
-					toolgroup.position();
-				}
-			} );
 		}
 	}
 };
@@ -425,12 +400,12 @@ ve.init.Target.prototype.createTargetWidget = function ( config ) {
  * Create a surface.
  *
  * @method
- * @param {ve.dm.Document|ve.dm.Surface} dmDocOrSurface Document model or surface model
+ * @param {ve.dm.Document} dmDoc Document model
  * @param {Object} [config] Configuration options
  * @return {ve.ui.Surface}
  */
-ve.init.Target.prototype.createSurface = function ( dmDocOrSurface, config ) {
-	return new ve.ui.Surface( dmDocOrSurface, this.getSurfaceConfig( config ) );
+ve.init.Target.prototype.createSurface = function ( dmDoc, config ) {
+	return new ve.ui.Surface( dmDoc, this.getSurfaceConfig( config ) );
 };
 
 /**
@@ -458,12 +433,12 @@ ve.init.Target.prototype.getSurfaceConfig = function ( config ) {
 /**
  * Add a surface to the target
  *
- * @param {ve.dm.Document|ve.dm.Surface} dmDocOrSurface Document model or surface model
+ * @param {ve.dm.Document} dmDoc Document model
  * @param {Object} [config] Configuration options
  * @return {ve.ui.Surface}
  */
-ve.init.Target.prototype.addSurface = function ( dmDocOrSurface, config ) {
-	var surface = this.createSurface( dmDocOrSurface, ve.extendObject( { mode: this.getDefaultMode() }, config ) );
+ve.init.Target.prototype.addSurface = function ( dmDoc, config ) {
+	var surface = this.createSurface( dmDoc, ve.extendObject( { mode: this.getDefaultMode() }, config ) );
 	this.surfaces.push( surface );
 	surface.getView().connect( this, {
 		focus: this.onSurfaceViewFocus.bind( this, surface )
@@ -535,10 +510,7 @@ ve.init.Target.prototype.getToolbar = function () {
  */
 ve.init.Target.prototype.getActions = function () {
 	if ( !this.actionsToolbar ) {
-		this.actionsToolbar = new ve.ui.TargetToolbar( this, {
-			position: this.toolbarConfig.position,
-			$overlay: this.toolbarConfig.$overlay
-		} );
+		this.actionsToolbar = new ve.ui.TargetToolbar( this, { position: this.toolbarConfig.position } );
 	}
 	return this.actionsToolbar;
 };
@@ -553,43 +525,13 @@ ve.init.Target.prototype.setupToolbar = function ( surface ) {
 		actions = this.getActions(),
 		rAF = window.requestAnimationFrame || setTimeout;
 
-	toolbar.connect( this, {
-		resize: 'onToolbarResize',
-		active: 'onToolbarActive'
-	} );
-	actions.connect( this, { active: 'onToolbarActive' } );
+	toolbar.connect( this, { resize: 'onToolbarResize' } );
 
 	toolbar.setup( this.constructor.static.toolbarGroups, surface );
 	actions.setup( this.constructor.static.actionGroups, surface );
 	this.attachToolbar();
 	toolbar.$actions.append( actions.$element );
 	rAF( this.onContainerScrollHandler );
-};
-
-/**
- * Handle active events from the toolbar
- *
- * @param {boolean} active The toolbar is active
- */
-ve.init.Target.prototype.onToolbarActive = function ( active ) {
-	var view = this.getSurface().getView();
-	// Deactivate the surface when the toolbar is active (T109529, T201329)
-	if ( active ) {
-		this.activeToolbars++;
-		if ( this.activeToolbars === 1 ) {
-			// Surface may already be deactived (e.g. link inspector is open)
-			this.wasSurfaceActive = !view.deactivated;
-			if ( this.wasSurfaceActive ) {
-				this.getSurface().getView().deactivate();
-			}
-		}
-	} else {
-		this.activeToolbars--;
-		// Re-active surface if it was active when the toolbar first became active
-		if ( !this.activeToolbars && this.wasSurfaceActive ) {
-			this.getSurface().getView().activate();
-		}
-	}
 };
 
 /**

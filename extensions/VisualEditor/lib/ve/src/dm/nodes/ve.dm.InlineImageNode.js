@@ -37,18 +37,18 @@ ve.dm.InlineImageNode.static.isContent = true;
 ve.dm.InlineImageNode.static.matchTagNames = [ 'img' ];
 
 ve.dm.InlineImageNode.static.toDataElement = function ( domElements ) {
-	var domElement = domElements[ 0 ],
-		alt = domElement.getAttribute( 'alt' ),
-		width = domElement.getAttribute( 'width' ),
-		height = domElement.getAttribute( 'height' );
+	var $node = $( domElements[ 0 ] ),
+		alt = $node.attr( 'alt' ),
+		width = $node.attr( 'width' ),
+		height = $node.attr( 'height' );
 
 	return {
 		type: this.name,
 		attributes: {
-			src: domElement.getAttribute( 'src' ),
-			alt: alt,
-			width: width !== null && width !== '' ? +width : null,
-			height: height !== null && height !== '' ? +height : null
+			src: $node.attr( 'src' ),
+			alt: alt !== undefined ? alt : null,
+			width: width !== undefined && width !== '' ? Number( width ) : null,
+			height: height !== undefined && height !== '' ? Number( height ) : null
 		}
 	};
 };

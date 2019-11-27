@@ -42,7 +42,7 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 	// data: the expected DM content
 	// positions: the node+offset corresponding to each DM offset, shown by marking pipe
 	// characters on a modified HTML representation in which text nodes are wrapped in
-	// <#text>…</#text> tags (and most attributes are omitted)
+	// <#text>...</#text> tags (and most attributes are omitted)
 	// dies (optional): a list of DM offsets where getNodeAndOffset is expected to die
 	/* eslint-disable quotes */
 	tests = [
@@ -56,7 +56,7 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 			title: 'Bold',
 			html: '<p>x<b>y</b>z</p>',
 			data: [ '<paragraph>', 'x', 'y', 'z', '</paragraph>' ],
-			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'><#text>|x|</#text><b class='ve-ce-annotation ve-ce-textStyleAnnotation ve-ce-boldAnnotation'><#text>y|</#text></b><#text>z|</#text></p></div>"
+			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'><#text>|x|</#text><b class='ve-ce-textStyleAnnotation ve-ce-boldAnnotation'><#text>y|</#text></b><#text>z|</#text></p></div>"
 		},
 		{
 			title: 'Nested block nodes',
@@ -90,13 +90,13 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 			title: 'Paragraph with links',
 			html: '<p><a href="A">A</a><a href="B">B</a></p>',
 			data: [ '<paragraph>', 'A', 'B', '</paragraph>' ],
-			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'>|<img class='ve-ce-nail ve-ce-nail-pre-open'></img><a class='ve-ce-annotation ve-ce-nailedAnnotation ve-ce-linkAnnotation'><img class='ve-ce-nail ve-ce-nail-post-open'></img><#text>A</#text><img class='ve-ce-nail ve-ce-nail-pre-close'></img></a><img class='ve-ce-nail ve-ce-nail-post-close'></img>|<img class='ve-ce-nail ve-ce-nail-pre-open'></img><a class='ve-ce-annotation ve-ce-nailedAnnotation ve-ce-linkAnnotation'><img class='ve-ce-nail ve-ce-nail-post-open'></img><#text>B</#text><img class='ve-ce-nail ve-ce-nail-pre-close'></img></a><img class='ve-ce-nail ve-ce-nail-post-close'></img>|</p></div>"
+			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'>|<img class='ve-ce-nail ve-ce-nail-pre-open'></img><a class='ve-ce-linkAnnotation'><img class='ve-ce-nail ve-ce-nail-post-open'></img><#text>A</#text><img class='ve-ce-nail ve-ce-nail-pre-close'></img></a><img class='ve-ce-nail ve-ce-nail-post-close'></img>|<img class='ve-ce-nail ve-ce-nail-pre-open'></img><a class='ve-ce-linkAnnotation'><img class='ve-ce-nail ve-ce-nail-post-open'></img><#text>B</#text><img class='ve-ce-nail ve-ce-nail-pre-close'></img></a><img class='ve-ce-nail ve-ce-nail-post-close'></img>|</p></div>"
 		},
 		{
 			title: 'Paragraph with links, non-text nodes',
 			html: '<p><a href="A"><b>A<img></b></a></p>',
 			data: [ '<paragraph>', 'A', '<inlineImage>', '</inlineImage>', '</paragraph>' ],
-			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'>|<img class='ve-ce-nail ve-ce-nail-pre-open'></img><a class='ve-ce-annotation ve-ce-nailedAnnotation ve-ce-linkAnnotation'><img class='ve-ce-nail ve-ce-nail-post-open'></img><b class='ve-ce-annotation ve-ce-textStyleAnnotation ve-ce-boldAnnotation'><#text>A|</#text><img class='ve-ce-leafNode ve-ce-focusableNode ve-ce-imageNode ve-ce-inlineImageNode'></img></b><img class='ve-ce-nail ve-ce-nail-pre-close'></img></a><img class='ve-ce-nail ve-ce-nail-post-close'></img>||<span class='ve-ce-branchNode-slug ve-ce-branchNode-inlineSlug'></span></p></div>"
+			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'>|<img class='ve-ce-nail ve-ce-nail-pre-open'></img><a class='ve-ce-linkAnnotation'><img class='ve-ce-nail ve-ce-nail-post-open'></img><b class='ve-ce-textStyleAnnotation ve-ce-boldAnnotation'><#text>A|</#text><img class='ve-ce-leafNode ve-ce-focusableNode ve-ce-imageNode ve-ce-inlineImageNode'></img></b><img class='ve-ce-nail ve-ce-nail-pre-close'></img></a><img class='ve-ce-nail ve-ce-nail-post-close'></img>||<span class='ve-ce-branchNode-slug ve-ce-branchNode-inlineSlug'></span></p></div>"
 		},
 		{
 			title: 'About grouped aliens',
@@ -117,10 +117,10 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'>|<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'><#text>|X|</#text></p>|||<p class='ve-ce-branchNode ve-ce-contentBranchNode ve-ce-paragraphNode'><#text>|Y|</#text></p></div>"
 		},
 		{
-			title: 'Meta does not cause double block slug',
+			title: 'Meta causing double block slug',
 			html: "<p rel='ve:Alien'>X</p><!---->",
 			data: [ '<alienBlock>', '</alienBlock>', '<commentMeta>', '</commentMeta>' ],
-			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div>|<p class='ve-ce-focusableNode ve-ce-leafNode'>|<#text>X</#text></p><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div>||</div>"
+			positions: "<div class='ve-ce-branchNode ve-ce-documentNode'><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div>|<p class='ve-ce-focusableNode ve-ce-leafNode'>|<#text>X</#text></p><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div><div class='ve-ce-branchNode-slug ve-ce-branchNode-blockSlug'></div>||</div>"
 		}
 	];
 	/* eslint-enable quotes */
@@ -183,7 +183,7 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 			assert.strictEqual(
 				ve.test.utils.serializePosition(
 					rootNode,
-					ceDoc.getNodeAndOffset( offset ),
+					ceDoc.getNodeAndOffset( offset, test.outsideNails ),
 					{ ignore: '.ve-ce-branchNode-slug>*' }
 				),
 				[].concat(
@@ -198,11 +198,11 @@ QUnit.test( 'getNodeAndOffset', function ( assert ) {
 			offset = test.dies[ j ];
 			ex = null;
 			try {
-				ceDoc.getNodeAndOffset( offset );
+				ceDoc.getNodeAndOffset( offset, test.outsideNails );
 			} catch ( e ) {
 				ex = e;
 			}
-			assert.notStrictEqual( ex, null, test.title + ' (' + offset + ') dies' );
+			assert.ok( ex !== null, test.title + ' (' + offset + ') dies' );
 		}
 		view.destroy();
 	}

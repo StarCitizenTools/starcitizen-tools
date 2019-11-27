@@ -34,8 +34,6 @@ OO.mixinClass( ve.dm.LeafNode, ve.LeafNode );
 
 ve.dm.LeafNode.static.childNodeTypes = [];
 
-ve.dm.LeafNode.static.isDiffedAsLeaf = true;
-
 /* Methods */
 
 /**

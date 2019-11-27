@@ -10,6 +10,12 @@
 ( function () {
 	var timing, editingSessionId;
 
+	if ( mw.loader.getState( 'schema.Edit' ) === null ) {
+		// Only route any events into the Edit schema if the module is actually available.
+		// It won't be if EventLogging is installed but WikimediaEvents is not.
+		return;
+	}
+
 	timing = {};
 	editingSessionId = mw.user.generateRandomSessionId();
 
@@ -19,6 +25,13 @@
 		}
 
 		switch ( action ) {
+			case 'init':
+				// Account for second opening
+				return timeStamp - Math.max(
+					window.mediaWikiLoadStart,
+					timing.saveSuccess || 0,
+					timing.abort || 0
+				);
 			case 'ready':
 				return timeStamp - timing.init;
 			case 'loaded':
@@ -52,7 +65,7 @@
 		return -1;
 	}
 
-	function mwEditHandler( topic, data, timeStamp ) {
+	ve.trackSubscribe( 'mwedit.', function ( topic, data, timeStamp ) {
 		var action = topic.split( '.' )[ 1 ],
 			event;
 
@@ -61,14 +74,7 @@
 		if ( action === 'init' ) {
 			// Regenerate editingSessionId
 			editingSessionId = mw.user.generateRandomSessionId();
-		}
-
-		// Sample at 6.25% (via hex digit)
-		if ( editingSessionId.charAt( 0 ) > '0' ) {
-			return;
-		}
-
-		if (
+		} else if (
 			action === 'abort' &&
 			( data.type === 'unknown' || data.type === 'unknown-edited' )
 		) {
@@ -96,20 +102,11 @@
 			delete data.mode;
 		}
 
-		if ( !data.platform ) {
-			if ( ve.init && ve.init.target && ve.init.target.constructor.static.platformType ) {
-				data.platform = ve.init.target.constructor.static.platformType;
-			} else {
-				data.platform = 'other';
-				// TODO: outright abort in this case, once we think we've caught everything
-				mw.log.warn( 've.init.mw.trackSubscriber: no target available and no platform specified', action );
-			}
-		}
-
 		event = $.extend( {
 			version: 1,
 			action: action,
 			editor: 'visualeditor',
+			platform: ve.init && ve.init.target && ve.init.target.constructor.static.platformType || 'other',
 			integration: ve.init && ve.init.target && ve.init.target.constructor.static.integrationType || 'page',
 			'page.id': mw.config.get( 'wgArticleId' ),
 			'page.title': mw.config.get( 'wgPageName' ),
@@ -127,9 +124,7 @@
 
 		event[ 'action.' + action + '.type' ] = event.type;
 		event[ 'action.' + action + '.mechanism' ] = event.mechanism;
-		if ( action !== 'init' ) {
-			event[ 'action.' + action + '.timing' ] = Math.round( computeDuration( action, event, timeStamp ) );
-		}
+		event[ 'action.' + action + '.timing' ] = Math.round( computeDuration( action, event, timeStamp ) );
 		event[ 'action.' + action + '.message' ] = event.message;
 
 		// Remove renamed properties
@@ -144,10 +139,14 @@
 			timing[ action ] = timeStamp;
 		}
 
-		mw.track( 'event.Edit', event );
-	}
+		// Sample at 6.25%
+		if ( event.editingSessionId && event.editingSessionId[ 0 ] === '0' ) {
+			mw.track( 'event.Edit', event );
+		}
 
-	function mwTimingHandler( topic, data ) {
+	} );
+
+	ve.trackSubscribe( 'mwtiming.', function ( topic, data ) {
 		// Add type for save errors; not in the topic for stupid historical reasons
 		if ( topic === 'mwtiming.performance.user.saveError' ) {
 			topic = topic + '.' + data.type;
@@ -156,36 +155,6 @@
 		// Map mwtiming.foo --> timing.ve.foo.mobile
 		topic = topic.replace( /^mwtiming/, 'timing.ve.' + data.targetName );
 		mw.track( topic, data.duration );
-	}
-
-	function activityHandler( topic, data ) {
-		var feature = topic.split( '.' )[ 1 ],
-			event;
-
-		// Sample at 6.25% (via hex digit)
-		if ( editingSessionId.charAt( 0 ) > '0' ) {
-			return;
-		}
-
-		event = {
-			feature: feature,
-			action: data.action,
-			editingSessionId: editingSessionId
-		};
-
-		mw.track( 'event.VisualEditorFeatureUse', event );
-	}
-
-	if ( mw.loader.getState( 'schema.Edit' ) !== null ) {
-		// Only route any events into the Edit schema if the module is actually available.
-		// It won't be if EventLogging is installed but WikimediaEvents is not.
-		ve.trackSubscribe( 'mwedit.', mwEditHandler );
-		ve.trackSubscribe( 'mwtiming.', mwTimingHandler );
-	}
-
-	if ( mw.loader.getState( 'schema.VisualEditorFeatureUse' ) !== null ) {
-		// Similarly for the VisualEditorFeatureUse schema
-		ve.trackSubscribe( 'activity.', activityHandler );
-	}
+	} );
 
 }() );

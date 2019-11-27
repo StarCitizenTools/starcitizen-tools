@@ -26,8 +26,7 @@ ve.dm.Surface = function VeDmSurface( doc, config ) {
 	this.sourceMode = !!config.sourceMode;
 	this.metaList = new ve.dm.MetaList( this );
 	this.selection = new ve.dm.NullSelection( this.getDocument() );
-	// The selection before the most recent stack of changes was applied
-	this.selectionBefore = this.selection;
+	this.selectionBefore = new ve.dm.NullSelection( this.getDocument() );
 	this.translatedSelection = null;
 	this.branchNodes = {};
 	this.selectedNode = null;
@@ -39,15 +38,13 @@ ve.dm.Surface = function VeDmSurface( doc, config ) {
 	this.insertionAnnotations = new ve.dm.AnnotationSet( this.getDocument().getStore() );
 	this.selectedAnnotations = new ve.dm.AnnotationSet( this.getDocument().getStore() );
 	this.isCollapsed = null;
-	this.multiUser = false;
 	this.enabled = true;
 	this.transacting = false;
 	this.queueingContextChanges = false;
 	this.contextChangeQueued = false;
 	this.authorId = null;
-	this.lastStoredChange = doc.getCompleteHistoryLength();
+	this.lastStoredChange = 0;
 	this.autosaveFailed = false;
-	this.synchronizer = null;
 
 	// Events
 	this.getDocument().connect( this, {
@@ -154,11 +151,12 @@ ve.dm.Surface.prototype.initialize = function () {
  * @return {HTMLDocument|string} HTML document (visual mode) or text (source mode)
  */
 ve.dm.Surface.prototype.getDom = function () {
+	// Optimized converter for source mode, which contains only
+	// plain text or paragraphs.
 	if ( this.sourceMode ) {
-		return ve.dm.sourceConverter.getSourceTextFromModel( this.getDocument() );
-	} else {
-		return ve.dm.converter.getDomFromModel( this.getDocument() );
+		return this.getDocument().data.getSourceText();
 	}
+	return ve.dm.converter.getDomFromModel( this.getDocument() );
 };
 
 /**
@@ -170,41 +168,6 @@ ve.dm.Surface.prototype.getHtml = function () {
 	return this.sourceMode ?
 		this.getDom() :
 		ve.properInnerHtml( this.getDom().body );
-};
-
-/**
- * Set the surface multi-user mode
- *
- * @param {boolean} multiUser Multi-user mode
- */
-ve.dm.Surface.prototype.setMultiUser = function ( multiUser ) {
-	this.multiUser = multiUser;
-};
-
-/**
- * Check if the surface is in multi-user mode
- *
- * @return {boolean} Surface is in multi-user mode
- */
-ve.dm.Surface.prototype.isMultiUser = function () {
-	return this.multiUser;
-};
-
-/**
- * Create a surface synchronizer.
- *
- * @param {string} documentId Document ID
- * @param {Object} [config] Configuration options
- */
-ve.dm.Surface.prototype.createSynchronizer = function ( documentId, config ) {
-	if ( this.synchronizer ) {
-		throw new Error( 'Synchronizer already set' );
-	}
-
-	this.setNullSelection();
-	this.setMultiUser( true );
-
-	this.synchronizer = new ve.dm.SurfaceSynchronizer( this, documentId, config );
 };
 
 /**
@@ -311,9 +274,7 @@ ve.dm.Surface.prototype.pushStaging = function ( allowUndo ) {
 	}
 	this.stagingStack.push( {
 		transactions: [],
-		// Will get overridden after the first transaction, but while the
-		// stack is empty, should be equal to the previous selectionBefore.
-		selectionBefore: this.isStaging() ? this.getStaging().selectionBefore : this.selectionBefore,
+		selectionBefore: new ve.dm.NullSelection( this.getDocument() ),
 		allowUndo: !!allowUndo
 	} );
 };
@@ -822,7 +783,7 @@ ve.dm.Surface.prototype.setSelection = function ( selection ) {
 
 	// If selection changed emit a select
 	if ( selectionChange ) {
-		this.emit( 'select', this.selection );
+		this.emit( 'select', this.selection.clone() );
 		if ( oldSelection.isNull() ) {
 			this.emit( 'focus' );
 		}
@@ -893,7 +854,7 @@ ve.dm.Surface.prototype.change = function ( transactions, selection ) {
  */
 ve.dm.Surface.prototype.changeInternal = function ( transactions, selection, skipUndoStack ) {
 	var i, len, selectionAfter, committed,
-		selectionBefore = this.selection,
+		selectionBefore = this.selection.clone(),
 		contextChange = false;
 
 	if ( !this.enabled ) {
@@ -959,7 +920,7 @@ ve.dm.Surface.prototype.changeInternal = function ( transactions, selection, ski
 		!selectionBefore.equals( selectionAfter ) &&
 		selectionAfter.equals( this.selection )
 	) {
-		this.emit( 'select', this.selection );
+		this.emit( 'select', this.selection.clone() );
 	}
 
 	if ( contextChange ) {
@@ -976,7 +937,6 @@ ve.dm.Surface.prototype.changeInternal = function ( transactions, selection, ski
  * @fires undoStackChange
  */
 ve.dm.Surface.prototype.breakpoint = function () {
-	var breakpointSet = false;
 	if ( !this.enabled ) {
 		return false;
 	}
@@ -984,16 +944,16 @@ ve.dm.Surface.prototype.breakpoint = function () {
 	if ( this.newTransactions.length > 0 ) {
 		this.undoStack.push( {
 			transactions: this.newTransactions,
-			selection: this.selection,
-			selectionBefore: this.selectionBefore
+			selection: this.selection.clone(),
+			selectionBefore: this.selectionBefore.clone()
 		} );
 		this.newTransactions = [];
 		this.emit( 'undoStackChange' );
-		breakpointSet = true;
+		return true;
+	} else if ( this.selectionBefore.isNull() && !this.selection.isNull() ) {
+		this.selectionBefore = this.selection.clone();
 	}
-	// Update selectionBefore even if nothing has changed
-	this.selectionBefore = this.selection;
-	return breakpointSet;
+	return false;
 };
 
 /**
@@ -1070,7 +1030,7 @@ ve.dm.Surface.prototype.getSelectedNode = function () {
 /**
  * Get the selected node covering a specific selection, or null
  *
- * @param {ve.dm.Selection} [selection] Selection, defaults to the current selection
+ * @param {ve.dm.Selection} selection Selection
  * @return {ve.dm.Node|null} Selected node
  */
 ve.dm.Surface.prototype.getSelectedNodeFromSelection = function ( selection ) {
@@ -1251,7 +1211,7 @@ ve.dm.Surface.prototype.storeChanges = function () {
 	if ( !change.isEmpty() ) {
 		if ( ve.init.platform.appendToSessionList( 've-changes', JSON.stringify( change.serialize() ) ) ) {
 			this.lastStoredChange = dmDoc.getCompleteHistoryLength();
-			ve.init.platform.setSessionObject( 've-selection', this.getSelection() );
+			ve.init.platform.setSession( 've-selection', JSON.stringify( this.getSelection() ) );
 		} else {
 			// Auto-save failed probably because of memory limits
 			// so flag it so we don't keep trying in vain.
@@ -1291,14 +1251,14 @@ ve.dm.Surface.prototype.restoreChanges = function () {
 		changes.forEach( function ( changeString ) {
 			var data = JSON.parse( changeString ),
 				change = ve.dm.Change.static.unsafeDeserialize( data, surface.getDocument() );
-			change.applyTo( surface, true );
+			change.applyTo( surface );
 			surface.breakpoint();
 		} );
 		restored = !!changes.length;
 		try {
 			selection = ve.dm.Selection.static.newFromJSON(
 				this.getDocument(),
-				ve.init.platform.getSessionObject( 've-selection' )
+				ve.init.platform.getSession( 've-selection' )
 			);
 		} catch ( e ) {
 			// Didn't restore the selection, not a big deal.

@@ -83,25 +83,18 @@ ve.ui.MWWikitextLinkAnnotationInspector.prototype.getTeardownProcess = function 
 	// Call grand-parent
 	return ve.ui.FragmentInspector.prototype.getTeardownProcess.call( this, data )
 		.first( function () {
-			var insertion, insert,
+			var insertion,
 				annotation = this.getAnnotation(),
 				fragment = this.getFragment(),
 				surfaceModel = fragment.getSurface();
 
 			if ( data && data.action === 'done' && annotation ) {
-				insert = this.initialSelection.isCollapsed() && ( insertion = this.getInsertionData() ).length;
-				if ( insert ) {
+				if ( this.initialSelection.isCollapsed() && ( insertion = this.getInsertionData() ).length ) {
 					fragment.insertContent( insertion );
 				}
+				// Action is async, so we use auto select to ensure the content is selected
+				fragment.setAutoSelect( true );
 				fragment.annotateContent( 'set', annotation );
-				// Fix selection after annotating is complete
-				fragment.getPending().then( function () {
-					if ( insert ) {
-						fragment.collapseToEnd().select();
-					} else {
-						fragment.select();
-					}
-				} );
 			} else if ( !data.action ) {
 				// Restore selection to what it was before we expanded it
 				surfaceModel.setSelection( this.previousSelection );

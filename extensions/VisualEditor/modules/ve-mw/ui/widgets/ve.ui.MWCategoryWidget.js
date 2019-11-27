@@ -274,7 +274,7 @@ ve.ui.MWCategoryWidget.prototype.queryCategoryStatus = function ( categoryNames 
 
 	// Batch this up into groups of 50
 	while ( index < categoryNamesToQuery.length ) {
-		promises.push( ve.init.target.getContentApi().get( {
+		promises.push( new mw.Api().get( {
 			action: 'query',
 			prop: 'pageprops',
 			titles: categoryNamesToQuery.slice( index, index + batchSize ),
@@ -367,7 +367,7 @@ ve.ui.MWCategoryWidget.prototype.addItems = function ( items, index ) {
 			// Index item
 			widget.categories[ itemTitle.getMainText() ] = categoryItem;
 			// Copy sortKey from old item when "moving"
-			existingCategoryItems = widget.items.filter( checkValueMatches );
+			existingCategoryItems = $.grep( widget.items, checkValueMatches );
 			if ( existingCategoryItems.length ) {
 				// There should only be one element in existingCategoryItems
 				categoryItem.sortKey = existingCategoryItems[ 0 ].sortKey;

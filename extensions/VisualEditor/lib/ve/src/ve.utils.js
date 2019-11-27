@@ -87,6 +87,12 @@ ve.debounce = OO.ui.debounce;
 ve.throttle = OO.ui.throttle;
 
 /**
+ * @method
+ * @inheritdoc OO.ui.Element#scrollIntoView
+ */
+ve.scrollIntoView = OO.ui.Element.static.scrollIntoView.bind( OO.ui.Element.static );
+
+/**
  * Copy an array of DOM elements, optionally into a different document.
  *
  * @param {HTMLElement[]} domElements DOM elements to copy
@@ -226,7 +232,7 @@ ve.supportsSplice = ( function () {
 /**
  * Splice one array into another.
  *
- * This is the equivalent of arr.splice( offset, remove, d1, d2, d3, … ) except that arguments are
+ * This is the equivalent of arr.splice( offset, remove, d1, d2, d3, ... ) except that arguments are
  * specified as an array rather than separate parameters.
  *
  * This method has been proven to be faster than using slice and concat to create a new array, but
@@ -258,7 +264,7 @@ ve.batchSplice = function ( arr, offset, remove, data ) {
 			splice = Array.prototype.splice;
 		} else {
 			// Standard Array.prototype.splice() function implemented using .slice() and .push().
-			splice = function ( offset, remove /* , data… */ ) {
+			splice = function ( offset, remove /* , data... */ ) {
 				var data, begin, removed, end;
 
 				data = Array.prototype.slice.call( arguments, 2 );
@@ -284,7 +290,7 @@ ve.batchSplice = function ( arr, offset, remove, data ) {
 	}
 
 	while ( index < data.length ) {
-		// Call arr.splice( offset, remove, i0, i1, i2, …, i1023 );
+		// Call arr.splice( offset, remove, i0, i1, i2, ..., i1023 );
 		// Only set remove on the first call, and set it to zero on subsequent calls
 		spliced = splice.apply(
 			arr, [ index + offset, toRemove ].concat( data.slice( index, index + batchSize ) )
@@ -365,7 +371,7 @@ ve.insertIntoArray = function ( arr, offset, src ) {
 /**
  * Push one array into another.
  *
- * This is the equivalent of arr.push( d1, d2, d3, … ) except that arguments are
+ * This is the equivalent of arr.push( d1, d2, d3, ... ) except that arguments are
  * specified as an array rather than separate parameters.
  *
  * @param {Array|ve.dm.BranchNode} arr Object supporting .push() to insert at the end of the array. Will be modified
@@ -383,7 +389,7 @@ ve.batchPush = function ( arr, data ) {
 		return arr.push.apply( arr, data );
 	}
 	while ( index < data.length ) {
-		// Call arr.push( i0, i1, i2, …, i1023 );
+		// Call arr.push( i0, i1, i2, ..., i1023 );
 		length = arr.push.apply(
 			arr, data.slice( index, index + batchSize )
 		);
@@ -426,6 +432,21 @@ ve.dir = ve.dir || function () {
 };
 
 /**
+ * Select the contents of an element
+ *
+ * @param {HTMLElement} element Element
+ */
+ve.selectElement = function ( element ) {
+	var win = OO.ui.Element.static.getWindow( element ),
+		nativeRange = win.document.createRange(),
+		nativeSelection = win.getSelection();
+	nativeRange.setStart( element, 0 );
+	nativeRange.setEnd( element, element.childNodes.length );
+	nativeSelection.removeAllRanges();
+	nativeSelection.addRange( nativeRange );
+};
+
+/**
  * Get a localized message.
  *
  * @param {string} key Message key
@@ -436,19 +457,6 @@ ve.msg = function () {
 	// Avoid using bind because ve.init.platform doesn't exist yet.
 	// TODO: Fix dependency issues between ve.js and ve.init.platform
 	return ve.init.platform.getMessage.apply( ve.init.platform, arguments );
-};
-
-/**
- * Get an HTML localized message with HTML or DOM arguments.
- *
- * @param {string} key Message key
- * @param {...Mixed} [params] Message parameters
- * @return {jQuery} Localized message
- */
-ve.htmlMsg = function () {
-	// Avoid using bind because ve.init.platform doesn't exist yet.
-	// TODO: Fix dependency issues between ve.js and ve.init.platform
-	return ve.init.platform.getHtmlMessage.apply( ve.init.platform, arguments );
 };
 
 /**
@@ -479,6 +487,16 @@ ve.userConfig = function ( key ) {
 		// set( key, value )
 		return ve.init.platform.setUserConfig.apply( ve.init.platform, arguments );
 	}
+};
+
+/**
+ * Determine if the text consists of only unattached combining marks.
+ *
+ * @param {string} text Text to test
+ * @return {boolean} The text is unattached combining marks
+ */
+ve.isUnattachedCombiningMark = function ( text ) {
+	return ( /^[\u0300-\u036F]+$/ ).test( text );
 };
 
 /**
@@ -682,11 +700,6 @@ ve.convertDomElements = function ( value ) {
 	return value;
 };
 
-ve.visibleWhitespaceCharacters = {
-	'\n': '\u21b5', // ↵
-	'\t': '\u279e' // ➞
-};
-
 /**
  * Check whether a given DOM element has a block element type.
  *
@@ -836,6 +849,7 @@ ve.createDocumentFromHtmlUsingIframe = function ( html ) {
 	//     return newDocument;
 	//
 	// Sadly, it's impossible:
+	// * On IE 9, calling open()/write() on such a document throws an "Unspecified error" (sic).
 	// * On Firefox 20, calling open()/write() doesn't actually do anything, including writing.
 	//   This is reported as Firefox bug 867102.
 	// * On Opera 12, calling open()/write() behaves as if called on window.document, replacing the
@@ -850,7 +864,7 @@ ve.createDocumentFromHtmlUsingIframe = function ( html ) {
 	// There is one more way - create an <iframe>, append it to current document, and access its
 	// contentDocument. The only browser having issues with that is Opera (sometimes the accessible
 	// value is not actually a Document, but something which behaves just like an empty regular
-	// object…), so we're detecting that and using the innerHTML hack described above.
+	// object...), so we're detecting that and using the innerHTML hack described above.
 
 	// Support: Firefox 20
 	// Support: Opera 12
@@ -991,7 +1005,7 @@ ve.resolveAttributes = function ( elementsOrJQuery, doc, attrs ) {
  * Take a target document with a possibly relative base URL, and modify it to be absolute.
  * The base URL of the target document is resolved using the base URL of the source document.
  *
- * Note that the fallbackBase parameter will be used if there is no <base> tag, even if
+ * Note that the the fallbackBase parameter will be used if there is no <base> tag, even if
  * the document does have a valid base URL: this is to work around Firefox's behavior of having
  * documents created by DOMParser inherit the base URL of the main document.
  *
@@ -1019,7 +1033,6 @@ ve.fixBase = function ( targetDoc, sourceDoc, fallbackBase ) {
 		// Chrome just entirely ignores <base> tags with a protocol-relative href attribute.
 		// Code below is *not a no-op*; reading the href property and setting it back
 		// will expand the href *attribute* to use an absolute URL if it was relative.
-		// eslint-disable-next-line no-self-assign
 		baseNode.href = baseNode.href;
 	} else if ( fallbackBase ) {
 		// Support: Firefox
@@ -1148,7 +1161,7 @@ ve.fixupPreBug = function ( element ) {
 		return element;
 	}
 
-	// Workaround for T44469: if a `<pre>` starts with a newline, that means .innerHTML will
+	// Workaround for bug 42469: if a `<pre>` starts with a newline, that means .innerHTML will
 	// screw up and stringify it with one fewer newline. Work around this by adding a newline.
 	// If we don't see a leading newline, we still don't know if the original HTML was
 	// `<pre>Foo</pre>` or `<pre>\nFoo</pre>`, but that's a syntactic difference, not a
@@ -1363,6 +1376,76 @@ ve.normalizeNode = function ( node ) {
 };
 
 /**
+ * Translate rect by some fixed vector and return a new offset object
+ *
+ * @param {Object} rect Offset object containing all or any of top, left, bottom, right, width & height
+ * @param {number} x Horizontal translation
+ * @param {number} y Vertical translation
+ * @return {Object} Translated rect
+ */
+ve.translateRect = function ( rect, x, y ) {
+	var translatedRect = {};
+	if ( rect.top !== undefined ) {
+		translatedRect.top = rect.top + y;
+	}
+	if ( rect.bottom !== undefined ) {
+		translatedRect.bottom = rect.bottom + y;
+	}
+	if ( rect.left !== undefined ) {
+		translatedRect.left = rect.left + x;
+	}
+	if ( rect.right !== undefined ) {
+		translatedRect.right = rect.right + x;
+	}
+	if ( rect.width !== undefined ) {
+		translatedRect.width = rect.width;
+	}
+	if ( rect.height !== undefined ) {
+		translatedRect.height = rect.height;
+	}
+	return translatedRect;
+};
+
+/**
+ * Get the start and end rectangles (in a text flow sense) from a list of rectangles
+ *
+ * The start rectangle is the top-most, and the end rectangle is the bottom-most.
+ *
+ * @param {Array} rects Full list of rectangles
+ * @return {Object|null} Object containing two rectangles: start and end, or null if there are no rectangles
+ */
+ve.getStartAndEndRects = function ( rects ) {
+	var i, l, startRect, endRect;
+	if ( !rects || !rects.length ) {
+		return null;
+	}
+	for ( i = 0, l = rects.length; i < l; i++ ) {
+		if ( !startRect || rects[ i ].top < startRect.top ) {
+			// Use ve.extendObject as ve.copy copies non-plain objects by reference
+			startRect = ve.extendObject( {}, rects[ i ] );
+		} else if ( rects[ i ].top === startRect.top ) {
+			// Merge rects with the same top coordinate
+			startRect.left = Math.min( startRect.left, rects[ i ].left );
+			startRect.right = Math.max( startRect.right, rects[ i ].right );
+			startRect.width = startRect.right - startRect.left;
+		}
+		if ( !endRect || rects[ i ].bottom > endRect.bottom ) {
+			// Use ve.extendObject as ve.copy copies non-plain objects by reference
+			endRect = ve.extendObject( {}, rects[ i ] );
+		} else if ( rects[ i ].bottom === endRect.bottom ) {
+			// Merge rects with the same bottom coordinate
+			endRect.left = Math.min( endRect.left, rects[ i ].left );
+			endRect.right = Math.max( endRect.right, rects[ i ].right );
+			endRect.width = startRect.right - startRect.left;
+		}
+	}
+	return {
+		start: startRect,
+		end: endRect
+	};
+};
+
+/**
  * Find the length of the common start sequence of one or more sequences
  *
  * Items are tested for sameness using === .
@@ -1534,6 +1617,21 @@ ve.compareDocumentOrder = function ( node1, offset1, node2, offset2 ) {
 		ve.getOffsetPath( commonAncestor, node1, offset1 ),
 		ve.getOffsetPath( commonAncestor, node2, offset2 )
 	);
+};
+
+/**
+ * Get the client platform string from the browser.
+ *
+ * FIXME T126036: This is a wrapper for calling getSystemPlatform() on the current
+ * platform except that if the platform hasn't been constructed yet, it falls back
+ * to using the base class implementation in {ve.init.Platform}. A proper solution
+ * would be not to need this information before the platform is constructed.
+ *
+ * @see ve.init.Platform#getSystemPlatform
+ * @return {string} Client platform string
+ */
+ve.getSystemPlatform = function () {
+	return ( ve.init.platform && ve.init.platform.constructor || ve.init.Platform ).static.getSystemPlatform();
 };
 
 /**
@@ -1754,4 +1852,46 @@ ve.countEdgeMatches = function ( before, after, equals ) {
  */
 ve.repeatString = function ( str, n ) {
 	return new Array( n + 1 ).join( str );
+};
+
+/**
+ * Check whether a jQuery event represents a plain left click, without any modifiers
+ *
+ * @param {jQuery.Event} e The jQuery event object
+ * @return {boolean} Whether it was an unmodified left click
+ */
+ve.isUnmodifiedLeftClick = function ( e ) {
+	return e && e.which && e.which === OO.ui.MouseButtons.LEFT && !( e.shiftKey || e.altKey || e.ctrlKey || e.metaKey );
+};
+
+/**
+ * Are multiple formats for clipboardData items supported?
+ *
+ * If you want to use unknown formats, an additional check for whether we're
+ * on MS Edge needs to be made, as that only supports standard plain text / HTML.
+ *
+ * @param {jQuery.Event} e A jQuery event object for a copy/paste event
+ * @param {boolean} [customTypes] Check whether non-standard formats are supported
+ * @return {boolean} Whether multiple clipboardData item formats are supported
+ */
+ve.isClipboardDataFormatsSupported = function ( e, customTypes ) {
+	var profile, clipboardData,
+		cacheKey = customTypes ? 'cachedCustom' : 'cached';
+
+	if ( ve.isClipboardDataFormatsSupported[ cacheKey ] === undefined ) {
+		profile = $.client.profile();
+		clipboardData = e.originalEvent.clipboardData;
+		ve.isClipboardDataFormatsSupported[ cacheKey ] = !!(
+			clipboardData &&
+			( !customTypes || profile.name !== 'edge' ) && (
+				// Support: Chrome
+				clipboardData.items ||
+				// Support: Firefox >= 48
+				// (but not Firefox Android, which has name='android' and doesn't support this feature)
+				( profile.name === 'firefox' && profile.versionNumber >= 48 )
+			)
+		);
+	}
+
+	return ve.isClipboardDataFormatsSupported[ cacheKey ];
 };

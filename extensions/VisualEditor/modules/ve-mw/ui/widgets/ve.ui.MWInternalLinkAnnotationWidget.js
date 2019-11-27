@@ -60,7 +60,6 @@ ve.ui.MWInternalLinkAnnotationWidget.prototype.createInputWidget = function ( co
 		excludeCurrentPage: true,
 		showImages: mw.config.get( 'wgVisualEditor' ).usePageImages,
 		showDescriptions: mw.config.get( 'wgVisualEditor' ).usePageDescriptions,
-		api: ve.init.target.getContentApi(),
 		cache: ve.init.platform.linkCache
 	}, config ) );
 
@@ -78,10 +77,13 @@ ve.ui.MWInternalLinkAnnotationWidget.prototype.getTextInputWidget = function () 
 	return this.input.query;
 };
 
-// #getHref returns the link title, not a fully resolved URL, however the only
-// use case of widget.getHref is for link insertion text, which expects a title.
-//
-// Callers needing the full resolved URL should use ve.resolveUrl
+/**
+ * @inheritdoc
+ */
+ve.ui.MWInternalLinkAnnotationWidget.prototype.getHref = function () {
+	var title = ve.ui.MWInternalLinkAnnotationWidget.super.prototype.getHref.call( this );
+	return mw.util.getUrl( title );
+};
 
 /**
  * @inheritdoc

@@ -47,13 +47,6 @@ ve.dm.MWRedirectMetaItem.static.toDomElements = function ( dataElement, doc ) {
 	return [ meta ];
 };
 
-ve.dm.MWRedirectMetaItem.static.describeChange = function ( key, change ) {
-	if ( key === 'title' ) {
-		return ve.htmlMsg( 'visualeditor-changedesc-mwredirect', this.wrapText( 'del', change.from ), this.wrapText( 'ins', change.to ) );
-	}
-	return null;
-};
-
 /* Registration */
 
 ve.dm.modelRegistry.register( ve.dm.MWRedirectMetaItem );

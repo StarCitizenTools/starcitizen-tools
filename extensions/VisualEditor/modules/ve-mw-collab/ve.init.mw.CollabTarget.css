@@ -5,10 +5,10 @@
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
-.ve-init-mw-collabTarget-loading.oo-ui-progressBarWidget,
-.ve-init-mw-collabTarget-form {
+.ve-init-mw-collabTarget-loading,
+.ve-init-mw-collabTarget-nameField {
 	margin: 0 auto;
-	max-width: 40em;
+	width: 40em;
 	margin-top: 2em !important; /* stylelint-disable-line declaration-no-important */
 }
 
@@ -17,14 +17,7 @@
 	left: 0;
 }
 
-/* stylelint-disable-next-line selector-max-id */
-#ca-pad > span > a {
-	max-width: 15em;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-/* Mobile */
-.mw-body .heading-holder {
-	display: none;
+/* Hack for T165794 */
+.ve-init-mw-collabTarget .ve-ui-authorListWidget-editName > .oo-ui-fieldLayout-body > .oo-ui-fieldLayout-header > .oo-ui-labelElement-label {
+	padding-top: 0.6em !important; /* stylelint-disable-line declaration-no-important */
 }

@@ -4,8 +4,7 @@ $( function () {
 				placeholder: OO.ui.msg( 'visualeditor-rebase-client-document-name' )
 			} ),
 			submitButton = new OO.ui.ButtonWidget( {
-				label: OO.ui.msg( 'visualeditor-rebase-client-document-create-edit' ),
-				flags: [ 'primary', 'progressive' ]
+				label: OO.ui.msg( 'visualeditor-rebase-client-document-create-edit' )
 			} ),
 			documentNameField = new OO.ui.ActionFieldLayout( documentNameInput, submitButton, {
 				align: 'top'

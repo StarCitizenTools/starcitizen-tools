@@ -112,16 +112,14 @@
 		 * @return {jQuery.Promise} Abortable promise resolved with a JSON object
 		 */
 		requestPageData: function ( mode, pageName, options ) {
-			var sessionState, request, dataPromise, apiRequest;
-
-			options = options || {};
-			apiRequest = mode === 'source' ?
-				this.requestWikitext.bind( this, pageName, options ) :
-				this.requestParsoidData.bind( this, pageName, options );
+			var sessionState, request, dataPromise,
+				apiRequest = mode === 'source' ?
+					this.requestWikitext.bind( this, pageName, options ) :
+					this.requestParsoidData.bind( this, pageName, options );
 
 			if ( options.sessionStore ) {
 				try {
-					// ve.init.platform.getSessionObject is not available yet
+					// ve.init.platform.getSession is not available yet
 					sessionState = JSON.parse( mw.storage.session.get( 've-docstate' ) );
 				} catch ( e ) {}
 
@@ -187,20 +185,20 @@
 		 * @return {jQuery.Promise} Abortable promise resolved with a JSON object
 		 */
 		requestParsoidData: function ( pageName, options ) {
-			var start, apiXhr, restbaseXhr, apiPromise, restbasePromise, dataPromise, pageHtmlUrl, headers, data,
+			var start, apiXhr, restbaseXhr, apiPromise, restbasePromise, dataPromise, pageHtmlUrl, headers,
 				switched = false,
-				fromEditedState = false;
+				fromEditedState = false,
+				data = {
+					action: 'visualeditor',
+					paction: ( conf.fullRestbaseUrl || conf.restbaseUrl ) ? 'metadata' : 'parse',
+					page: pageName,
+					uselang: mw.config.get( 'wgUserLanguage' ),
+					editintro: uri.query.editintro,
+					preload: options.preload,
+					preloadparams: options.preloadparams
+				};
 
 			options = options || {};
-			data = {
-				action: 'visualeditor',
-				paction: ( conf.fullRestbaseUrl || conf.restbaseUrl ) ? 'metadata' : 'parse',
-				page: pageName,
-				uselang: mw.config.get( 'wgUserLanguage' ),
-				editintro: uri.query.editintro,
-				preload: options.preload,
-				preloadparams: options.preloadparams
-			};
 
 			// Only request the API to explicitly load the currently visible revision if we're restoring
 			// from oldid. Otherwise we should load the latest version. This prevents us from editing an
@@ -236,10 +234,9 @@
 			if ( conf.fullRestbaseUrl || conf.restbaseUrl ) {
 				ve.track( 'trace.restbaseLoad.enter', { mode: 'visual' } );
 
+				// Should be synchronised with ApiVisualEditor.php
 				headers = {
-					// Should be synchronised with ApiVisualEditor.php
-					Accept: 'text/html; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/HTML/2.0.0"',
-					'Accept-Language': mw.config.get( 'wgVisualEditor' ).pageLanguageCode,
+					Accept: 'text/html; charset=utf-8; profile="mediawiki.org/specs/html/1.6.0"',
 					'Api-User-Agent': 'VisualEditor-MediaWiki/' + mw.config.get( 'wgVersion' )
 				};
 
@@ -343,10 +340,7 @@
 		 * @return {jQuery.Promise} Abortable promise resolved with a JSON object
 		 */
 		requestWikitext: function ( pageName, options ) {
-			var data;
-
-			options = options || {};
-			data = {
+			var data = {
 				action: 'visualeditor',
 				paction: 'wikitext',
 				page: pageName,

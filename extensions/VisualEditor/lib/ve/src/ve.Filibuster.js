@@ -112,7 +112,7 @@ ve.Filibuster.prototype.observe = function ( action ) {
 		}
 
 		if ( this.states[ name ] !== newState ) {
-			if ( Object.prototype.hasOwnProperty.call( this.states, name ) ) {
+			if ( this.states.hasOwnProperty( name ) ) {
 				// State change: write observation
 				changes[ name ] = {
 					oldState: oldState,
@@ -298,7 +298,7 @@ ve.Filibuster.prototype.wrapNamespace = function ( ns, nsName, blacklist ) {
 		}
 		isConstructor = (
 			typeof prop === 'function' &&
-			!ve.isEmptyObject( prop.prototype )
+			!$.isEmptyObject( prop.prototype )
 		);
 		if ( isConstructor ) {
 			this.wrapClass( prop, blacklist );
@@ -478,7 +478,7 @@ ve.Filibuster.static.clonePlain = function ( val, seen ) {
 	}
 	if ( Array.isArray( val ) ) {
 		if ( seen.has( val ) ) {
-			return '…';
+			return '...';
 		}
 		seen.add( val );
 		return val.map( function ( x ) {
@@ -515,7 +515,7 @@ ve.Filibuster.static.clonePlain = function ( val, seen ) {
 		return '(' + ( val.constructor.name || 'unknown' ) + ')';
 	} else {
 		if ( seen.has( val ) ) {
-			return '…';
+			return '...';
 		}
 		seen.add( val );
 		plainVal = {};

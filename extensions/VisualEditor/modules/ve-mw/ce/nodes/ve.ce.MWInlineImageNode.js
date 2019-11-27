@@ -25,7 +25,7 @@ ve.ce.MWInlineImageNode = function VeCeMWInlineImageNode( model, config ) {
 			.text( model.getFilename() );
 		$image = $( [] );
 	} else {
-		if ( model.getAttribute( 'href' ) ) {
+		if ( model.getAttribute( 'isLinked' ) ) {
 			this.$element = $( '<a>' ).addClass( 'image' );
 			$image = $( '<img>' ).appendTo( this.$element );
 		} else {

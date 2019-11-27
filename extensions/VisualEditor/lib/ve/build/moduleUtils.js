@@ -123,12 +123,12 @@ var self = module.exports = {
 		for ( i = 0; i < load.length; i++ ) {
 			module = load[ i ];
 
-			if ( !Object.prototype.hasOwnProperty.call( modules, module ) ) {
+			if ( !modules.hasOwnProperty( module ) ) {
 				throw new Error( 'Dependency ' + module + ' not found' );
 			}
 
 			// Add in any dependencies
-			if ( modules[ module ].dependencies ) {
+			if ( modules[ module ].hasOwnProperty( 'dependencies' ) ) {
 				self.buildDependencyList( modules, modules[ module ].dependencies, list );
 			}
 

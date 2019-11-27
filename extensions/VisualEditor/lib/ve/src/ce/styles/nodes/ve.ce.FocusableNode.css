@@ -28,6 +28,21 @@
 	background: #d33;
 }
 
+.ve-ce-focusableNode-highlight-relocatable-marker {
+	width: 100%;
+	height: 100%;
+}
+
+.ve-ce-focusableNode-highlights-relocating .ve-ce-focusableNode-highlight-relocatable-marker {
+	background: #000;
+	background: rgba( 0, 0, 0, 1 );
+}
+
+/* Prevent 'copy image' appearing in context menu */
+.ve-ce-focusableNode-highlights-contextOpen .ve-ce-focusableNode-highlight-relocatable-marker {
+	display: none;
+}
+
 .ve-ce-focusableNode-highlight-selectable {
 	position: absolute;
 	top: -1000px;
@@ -36,35 +51,24 @@
 .ve-ce-focusableNode-invisible {
 	display: inline-block;
 	vertical-align: middle;
-	/* Negative margins ensure button height doesn't exceed line height */
-	margin: -0.7em 0 -0.6em 0;
-	width: auto;
+	/* Negative margins ensure icon height doesn't exceed line height in paragraphs */
+	margin: -6px 0 -2px 0;
+	width: 24px;
+	height: 24px;
 }
 
-.ve-ce-focusableNode-invisibleIcon {
+/* Selector for comment node, which isn't an iconWidget */
+.ve-ce-focusableNode-invisibleIcon.oo-ui-iconElement,
+.ve-ce-focusableNode-invisibleIcon.oo-ui-iconWidget.oo-ui-iconElement {
+	display: block;
+	/* Don't scale icon in headings etc. */
+	width: 24px;
+	height: 24px;
+	background-size: 24px 24px;
+	/* Make native selection match fake selection */
+	font-size: 24px;
+	line-height: 1em;
 	opacity: 0.5;
-}
-
-.ve-ce-focusableNode-invisibleIcon > .oo-ui-buttonElement-button {
-	/* Button can sometimes be exposed (T198912), but it shouldn't interact like one */
-	cursor: default;
-}
-
-.ve-ce-focusableNode-invisibleIcon.oo-ui-labelElement {
-	width: auto;
-}
-
-.ve-ce-focusableNode-invisibleIcon.oo-ui-labelElement .oo-ui-labelElement-label {
-	max-width: 15em;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	display: inline-block;
-}
-
-/* Requires high specificity to override OOUI */
-.ve-ce-focusableNode-invisibleIcon.oo-ui-iconElement.oo-ui-buttonElement-frameless.oo-ui-iconElement:first-child {
-	margin-left: 0;
 }
 
 /* Highlights group opacity */

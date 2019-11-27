@@ -350,17 +350,14 @@ ve.ce.getOffset = function ( domNode, domOffset ) {
  * @throws {Error}
  */
 ve.ce.getOffsetOfSlug = function ( element ) {
-	var model, $prev, $element = $( element );
+	var model, $element = $( element );
 	if ( $element.index() === 0 ) {
 		model = $element.parent().data( 'view' ).getModel();
 		return model.getOffset() + ( model.isWrapped() ? 1 : 0 );
+	} else if ( $element.prev().length ) {
+		model = $element.prev().data( 'view' ).getModel();
+		return model.getOffset() + model.getOuterLength();
 	} else {
-		// Don't pick up DOM nodes not from the view tree e.g. cursorHolders (T202103)
-		$prev = $element.prevAll( '.ve-ce-leafNode,.ve-ce-branchNode' ).first();
-		if ( $prev.length ) {
-			model = $prev.data( 'view' ).getModel();
-			return model.getOffset() + model.getOuterLength();
-		}
 		throw new Error( 'Incorrect slug location' );
 	}
 };
@@ -443,16 +440,16 @@ ve.ce.veRangeFromSelection = function ( selection ) {
 };
 
 /**
- * Find the closest nailed annotation in which a node lies
+ * Find the link in which a node lies
  *
  * @param {Node|null} node The node to test
- * @return {Node|null} The closest nailed annotation within which the node lies (possibly the node itself)
+ * @return {Node|null} The link within which the node lies (possibly the node itself)
  */
-ve.ce.nailedAnnotationAt = function ( node ) {
+ve.ce.linkAt = function ( node ) {
 	if ( node && node.nodeType === Node.TEXT_NODE ) {
 		node = node.parentNode;
 	}
-	return $( node ).closest( '.ve-ce-nailedAnnotation' )[ 0 ];
+	return $( node ).closest( '.ve-ce-linkAnnotation' )[ 0 ];
 };
 
 /**

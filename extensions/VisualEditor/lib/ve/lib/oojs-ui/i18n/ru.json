@@ -18,8 +18,7 @@
 			"Умар",
 			"Камалист",
 			"Meshkov.a",
-			"Mailman",
-			"Stjn"
+			"Mailman"
 		]
 	},
 	"ooui-outline-control-move-down": "Переместить элемент вниз",
@@ -38,6 +37,5 @@
 	"ooui-selectfile-button-select": "Выберите файл",
 	"ooui-selectfile-not-supported": "Выбор файла не поддерживается",
 	"ooui-selectfile-placeholder": "Не выбран файл",
-	"ooui-selectfile-dragdrop-placeholder": "Перетащите файл сюда",
-	"ooui-field-help": "Справка"
+	"ooui-selectfile-dragdrop-placeholder": "Перетащите файл сюда"
 }

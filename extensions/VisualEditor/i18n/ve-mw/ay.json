@@ -6,6 +6,11 @@
 			"Macofe"
 		]
 	},
+	"apihelp-visualeditor-description": "HTML5 ukar kutt'añataki ma pajinataki parsoid servicio ukataki.",
+	"apihelp-visualeditor-param-basetimestamp": "Imataki ukhat pach askichat imatak uka uñjañataki. Edicion ukan jan walt'awip uñjañataki apanqasi.",
+	"apihelp-visualeditor-param-html": "HTML Parsoid ukar apayañataki uk wikitexto ukar tukuyañataki.",
+	"apihelp-visualeditor-param-paction": "Acción a realizar.",
+	"apihelp-visualeditor-param-page": "La página para realizar acciones.",
 	"tooltip-ca-createsource": "Aka pajinan chimpu fuente-p uñstayama",
 	"tooltip-ca-editsource": "Aka pajinan chimpu fuente-p askichaña",
 	"tooltip-ca-ve-edit": "Editor Visual ukamp aka pajin askichaña",
@@ -33,6 +38,7 @@
 	"visualeditor-dialog-media-position-right": "Kupi",
 	"visualeditor-dialog-media-position-section": "Kawkhankañapasa",
 	"visualeditor-dialog-media-size-choosefull": "Ukch'apachar chiqachaña",
+	"visualeditor-dialog-media-size-originalsize-error": "Janiw ukch'pach aski imatax jikxatañjamakiti",
 	"visualeditor-dialog-media-size-section": "Jamuqax qawqch'asa",
 	"visualeditor-dialog-media-title": "Multimedia imat mayjt'ayaña",
 	"visualeditor-dialog-media-type-border": "Marjina",

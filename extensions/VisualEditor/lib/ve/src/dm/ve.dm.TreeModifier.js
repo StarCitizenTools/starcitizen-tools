@@ -460,12 +460,12 @@ ve.dm.TreeModifier.prototype.processInsert = function ( itemOrData ) {
 			// content in either processRemove or processRetain).
 			inserter.stepOut();
 		}
-		data = [ ve.copy( item ), { type: '/' + item.type } ];
+		data = [ item, { type: '/' + item.type } ];
 		// Put undefined at the close tag offset, for the time being
 		this.create( data );
 		inserter.stepIn();
 	} else if ( type === 'crosstext' ) {
-		data = ve.copy( data );
+		data = data.slice();
 		this.insertText( data );
 	} else if ( type === 'close' ) {
 		// Step past the next close tag, even if that skips past some content (in which

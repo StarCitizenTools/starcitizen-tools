@@ -34,11 +34,13 @@ ve.ui.MWWikitextWarningCommand.prototype.execute = function () {
 	if ( this.warning && this.warning.isOpen ) {
 		return false;
 	}
-	ve.init.platform.notify(
+	mw.notify(
 		$( $.parseHTML( ve.init.platform.getParsedMessage( 'visualeditor-wikitext-warning' ) ) )
 			.filter( 'a' ).attr( 'target', '_blank' ).end(),
-		ve.msg( 'visualeditor-wikitext-warning-title' ),
-		{ tag: 'visualeditor-wikitext-warning' }
+		{
+			title: ve.msg( 'visualeditor-wikitext-warning-title' ),
+			tag: 'visualeditor-wikitext-warning'
+		}
 	).then( function ( message ) {
 		command.warning = message;
 	} );

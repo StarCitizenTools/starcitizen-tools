@@ -15,7 +15,7 @@
  * @constructor
  * @param {ve.ui.MWCategoryWidget} categoryWidget
  * @param {Object} [config] Configuration options
- * @cfg {mw.Api} [api] API object to use, uses Target#getContentApi if not specified
+ * @cfg {mw.Api} [api] API object to use, creates a default mw.Api instance if not specified
  */
 ve.ui.MWCategoryInputWidget = function VeUiMWCategoryInputWidget( categoryWidget, config ) {
 	// Config initialization
@@ -31,7 +31,7 @@ ve.ui.MWCategoryInputWidget = function VeUiMWCategoryInputWidget( categoryWidget
 
 	// Properties
 	this.categoryWidget = categoryWidget;
-	this.api = config.api || ve.init.target.getContentApi();
+	this.api = config.api || new mw.Api();
 
 	// Initialization
 	this.$element.addClass( 've-ui-mwCategoryInputWidget' );
@@ -85,16 +85,13 @@ ve.ui.MWCategoryInputWidget.prototype.getLookupCacheDataFromResponse = function 
 	$.each( query.pages || [], function ( pageId, categoryPage ) {
 		result.push( mw.Title.newFromText( categoryPage.title ).getMainText() );
 		linkCacheUpdate[ categoryPage.title ] = {
-			missing: Object.prototype.hasOwnProperty.call( categoryPage, 'missing' ),
-			hidden: (
-				categoryPage.categoryinfo &&
-				Object.prototype.hasOwnProperty.call( categoryPage.categoryinfo, 'missing' )
-			)
+			missing: categoryPage.hasOwnProperty( 'missing' ),
+			hidden: categoryPage.categoryinfo && categoryPage.categoryinfo.hasOwnProperty( 'hidden' )
 		};
 	} );
 
 	$.each( query.redirects || [], function ( index, redirect ) {
-		if ( !Object.prototype.hasOwnProperty.call( linkCacheUpdate, redirect.to ) ) {
+		if ( !linkCacheUpdate.hasOwnProperty( redirect.to ) ) {
 			linkCacheUpdate[ redirect.to ] = ve.init.platform.linkCache.getCached( redirect.to ) ||
 				{ missing: false, redirectFrom: [ redirect.from ] };
 		}

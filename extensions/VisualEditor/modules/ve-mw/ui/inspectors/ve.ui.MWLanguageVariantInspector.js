@@ -190,7 +190,7 @@ ve.ui.MWLanguageVariantInspector.prototype.getHtmlForDoc = function ( doc ) {
 		// That's okay: ignore the error and use what we've got.
 	}
 	// XXX return a flag to indicate whether contents are now inline or block?
-	targetHtmlDoc = ve.dm.converter.getDomFromModel( doc );
+	targetHtmlDoc = ve.dm.converter.getDomFromModel( doc, false );
 	return ve.properInnerHtml( targetHtmlDoc.body );
 };
 
@@ -623,7 +623,7 @@ ve.ui.MWLanguageVariantTwoWayInspector.prototype.createItem = function ( lang, c
 	) );
 	clearButton = new OO.ui.ButtonInputWidget( {
 		icon: 'clear',
-		title: OO.ui.deferMsg(
+		iconTitle: OO.ui.deferMsg(
 			'visualeditor-mwlanguagevariantinspector-twoway-clear-button'
 		),
 		framed: false
@@ -777,7 +777,7 @@ ve.ui.MWLanguageVariantOneWayInspector.prototype.createItem = function ( from, l
 	) );
 	clearButton = new OO.ui.ButtonInputWidget( {
 		icon: 'clear',
-		title: OO.ui.deferMsg(
+		iconTitle: OO.ui.deferMsg(
 			'visualeditor-mwlanguagevariantinspector-oneway-clear-button'
 		),
 		framed: false

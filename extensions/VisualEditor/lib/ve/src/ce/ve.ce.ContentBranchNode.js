@@ -414,8 +414,8 @@ ve.ce.ContentBranchNode.prototype.renderContents = function () {
 	if ( this.rendered ) {
 		oldWrapper = this.$element[ 0 ].cloneNode( true );
 		$( oldWrapper )
-			.find( '.ve-ce-annotation-active' )
-			.removeClass( 've-ce-annotation-active' );
+			.find( '.ve-ce-linkAnnotation-active' )
+			.removeClass( 've-ce-linkAnnotation-active' );
 		$( oldWrapper )
 			.find( '.ve-ce-branchNode-inlineSlug' )
 			.children()
@@ -481,7 +481,7 @@ ve.ce.ContentBranchNode.prototype.detach = function () {
 	if ( this.getRoot() ) {
 		// This should be true, as the root is removed in the parent detach
 		// method which hasn't run yet. However, just in case a node gets
-		// double-detached…
+		// double-detached...
 		this.getRoot().getSurface().setNotUnicorning( this );
 	}
 

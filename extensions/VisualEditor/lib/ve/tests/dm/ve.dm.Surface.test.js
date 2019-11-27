@@ -119,7 +119,7 @@ QUnit.test( 'contextChange events', function ( assert ) {
 		surface.setLinearSelection( tests[ i ].initialSelection || new ve.Range( 1 ) );
 		contextChanges = 0;
 		surface.setLinearSelection( tests[ i ].selection );
-		assert.strictEqual( contextChanges, tests[ i ].expected, tests[ i ].title );
+		assert.equal( contextChanges, tests[ i ].expected, tests[ i ].title );
 	}
 } );
 
@@ -201,18 +201,19 @@ QUnit.test( 'change rollback', function ( assert ) {
 		'Transaction throws an exception'
 	);
 
-	assert.strictEqual( surface.canUndo(), false, 'No history to undo after failed change' );
+	assert.deepEqual( surface.canUndo(), false, 'No history to undo after failed change' );
 } );
 
 QUnit.test( 'range translation', function ( assert ) {
-	var selection,
+	var sel, range,
 		surface = new ve.dm.SurfaceStub( null, new ve.Range( 3 ) ),
 		doc = surface.getDocument(),
 		tx = ve.dm.TransactionBuilder.static.newFromInsertion( doc, 3, [ 'x' ] );
 	surface.change( tx );
-	selection = surface.getSelection();
-	assert.ok( selection instanceof ve.dm.LinearSelection, 'Selection is linear' );
-	assert.equalRange( selection.getRange(), new ve.Range( 3 ), 'Cursor is unmoved' );
+	sel = surface.getSelection();
+	assert.ok( sel instanceof ve.dm.LinearSelection, 'Selection is linear' );
+	range = sel.getRange();
+	assert.deepEqual( { from: range.from, to: range.to }, { from: 3, to: 3 }, 'Cursor is unmoved' );
 } );
 
 QUnit.test( 'staging', function ( assert ) {
@@ -379,15 +380,15 @@ QUnit.test( 'autosave', function ( assert ) {
 			id: 1
 		};
 
-	assert.strictEqual( surface.restoreChanges(), false, 'restoreChanges returns false when nothing to restore' );
-	assert.strictEqual( surface.storeDocState( state, '<p>foo</p>' ), true, 'storeDocState returns true' );
-	assert.deepEqual( ve.init.platform.getSessionObject( 've-docstate' ), state, 'storeDocState writes doc state to session storage' );
-	assert.strictEqual( ve.init.platform.getSession( 've-dochtml' ), '<p>foo</p>', 'storeDocState writes custom HTML to session storage' );
+	assert.deepEqual( surface.restoreChanges(), false, 'restoreChanges returns false when nothing to restore' );
+	assert.deepEqual( surface.storeDocState( state, '<p>foo</p>' ), true, 'storeDocState returns true' );
+	assert.deepEqual( ve.init.platform.getSession( 've-docstate' ), JSON.stringify( state ), 'storeDocState writes doc state to session storage' );
+	assert.deepEqual( ve.init.platform.getSession( 've-dochtml' ), '<p>foo</p>', 'storeDocState writes custom HTML to session storage' );
 	surface.storeDocState( state, '' );
-	assert.strictEqual( ve.init.platform.getSession( 've-dochtml' ), '', 'storeDocState can set HTML to empty string' );
+	assert.deepEqual( ve.init.platform.getSession( 've-dochtml' ), '', 'storeDocState can set HTML to empty string' );
 	surface.storeDocState();
-	assert.strictEqual( ve.init.platform.getSession( 've-dochtml' ), '<p>hi</p>', 'storeDocState writes current HTML to session storage' );
-	assert.strictEqual( ve.init.platform.getSessionObject( 've-docstate' ), null, 'docstate is empty if not provided' );
+	assert.deepEqual( ve.init.platform.getSession( 've-dochtml' ), '<p>hi</p>', 'storeDocState writes current HTML to session storage' );
+	assert.deepEqual( ve.init.platform.getSession( 've-docstate' ), null, 'docstate is empty if not provided' );
 
 	fragment.insertContent( ' bar' );
 	surface.breakpoint();
@@ -409,9 +410,10 @@ QUnit.test( 'autosave', function ( assert ) {
 	);
 
 	surface.storeChanges();
-	assert.strictEqual( ve.init.platform.getSessionList( 've-changes' ).length, 1, 'No extra change stored if no changes since last store' );
+	assert.deepEqual( ve.init.platform.getSessionList( 've-changes' ).length, 1, 'No extra change stored if no changes since last store' );
 
 	fragment.convertNodes( 'heading', { level: 1 } );
+	surface.setLinearSelection( new ve.Range( 5 ) );
 	surface.breakpoint();
 	assert.deepEqual(
 		ve.init.platform.getSessionList( 've-changes' ).map( JSON.parse )[ 1 ],
@@ -425,92 +427,83 @@ QUnit.test( 'autosave', function ( assert ) {
 		},
 		'Second change stored'
 	);
-	fragment.collapseToEnd().insertContent( ' baz' );
-	surface.setLinearSelection( new ve.Range( 5 ) );
-	surface.breakpoint();
-	assert.strictEqual(
-		ve.init.platform.getSessionList( 've-changes' ).length, 3, 'Fourth change stored'
-	);
 	assert.deepEqual(
-		ve.init.platform.getSessionObject( 've-selection' ),
-		{ type: 'linear', range: { type: 'range', from: 5, to: 5 } },
+		ve.init.platform.getSession( 've-selection' ),
+		JSON.stringify( { type: 'linear', range: { type: 'range', from: 5, to: 5 } } ),
 		'Selection state stored'
 	);
 
 	surface.stopStoringChanges();
 	fragment.collapseToEnd().insertContent( ' quux' );
 	surface.breakpoint();
-	assert.strictEqual(
-		ve.init.platform.getSessionList( 've-changes' ).length, 3, 'Change not stored after stopStoringChanges'
+	assert.deepEqual(
+		ve.init.platform.getSessionList( 've-changes' ).length, 2, 'Change not stored after stopStoringChanges'
 	);
 
 	assert.throws(
 		function () {
-			surface.documentModel.completeHistory = new ve.dm.Change( 0, [], [], {} );
 			surface.restoreChanges();
 		},
 		/Failed to restore/,
-		'Calling restoreChanges on the wrong document state throws "Failed to restore…" error'
+		'Calling restoreChanges on the wrong document state throws "Failed to restore..." error'
 	);
 
 	surface = new ve.dm.SurfaceStub();
 	fragment = null;
-	assert.strictEqual( surface.getHtml(), '<p>hi</p>', 'Document HTML before restoreChanges' );
-	assert.strictEqual( surface.restoreChanges(), true, 'restoreChanges returns true on success' );
-	assert.strictEqual( surface.getHtml(), '<h1>hi bar baz</h1>', 'Document HTML restored' );
-	assert.strictEqual( surface.getDocument().getCompleteHistoryLength(), 3, 'Document history restored' );
+	assert.deepEqual( surface.getHtml(), '<p>hi</p>', 'Document HTML before restoreChanges' );
+	assert.deepEqual( surface.restoreChanges(), true, 'restoreChanges returns true on success' );
+	assert.deepEqual( surface.getHtml(), '<h1>hi bar</h1>', 'Document HTML restored' );
+	assert.deepEqual( surface.getDocument().getCompleteHistoryLength(), 2, 'Document history restored' );
 	setTimeout( function ( surface ) {
 		assert.equalHash( surface.getSelection(), { type: 'linear', range: { type: 'range', from: 5, to: 5 } }, 'Document selection restored (async)' );
-		surface.undo();
-		assert.equalHash( surface.getSelection(), { type: 'linear', range: { type: 'range', from: 7, to: 7 } }, 'Document selection guessed after undo' );
 		done();
 	}.bind( this, surface ) );
 
 	ve.init.platform.sessionDisabled = true;
-	assert.strictEqual( surface.restoreChanges(), false, 'restoreChanges returns false if session storage disabled' );
+	assert.deepEqual( surface.restoreChanges(), false, 'restoreChanges returns false if session storage disabled' );
 	ve.init.platform.sessionDisabled = false;
 
 	surface.removeDocStateAndChanges();
-	assert.strictEqual( ve.init.platform.getSession( 've-html' ), null, 'HTML empty after removeDocStateAndChanges' );
-	assert.strictEqual( ve.init.platform.getSessionObject( 've-docstate' ), null, 'Doc state empty after removeDocStateAndChanges' );
+	assert.deepEqual( ve.init.platform.getSession( 've-html' ), null, 'HTML empty after removeDocStateAndChanges' );
+	assert.deepEqual( ve.init.platform.getSession( 've-docstate' ), null, 'Doc state empty after removeDocStateAndChanges' );
 	assert.deepEqual( ve.init.platform.getSessionList( 've-changes' ), [], 'Changes empty after removeDocStateAndChanges' );
 
 	surface = new ve.dm.SurfaceStub();
 	fragment = surface.getLinearFragment( new ve.Range( 3 ) );
 	surface.startStoringChanges();
 	// Pass magic string to only fail when writing HTML
-	assert.strictEqual( surface.storeDocState( state, '__FAIL__' ), false, 'storeDocState returns false when HTML can\'t be stored' );
-	assert.strictEqual( ve.init.platform.getSessionObject( 've-docstate' ), null, 'docstate is wiped if HTML storage failed' );
+	assert.deepEqual( surface.storeDocState( state, '__FAIL__' ), false, 'storeDocState returns false when HTML can\'t be stored' );
+	assert.deepEqual( ve.init.platform.getSession( 've-docstate' ), null, 'docstate is wiped if HTML storage failed' );
 
 	ve.init.platform.sessionDisabled = true;
 	surface = new ve.dm.SurfaceStub();
 	fragment = surface.getLinearFragment( new ve.Range( 3 ) );
 	surface.startStoringChanges();
-	assert.strictEqual( surface.storeDocState( state ), false, 'storeDocState returns false when sessionStorage disabled' );
+	assert.deepEqual( surface.storeDocState( state ), false, 'storeDocState returns false when sessionStorage disabled' );
 	fragment.insertContent( ' bar' );
 	surface.breakpoint();
-	assert.strictEqual( ve.init.platform.getSessionList( 've-changes' ).length, 0, 'No changes recorded after storeDocState failure' );
+	assert.deepEqual( ve.init.platform.getSessionList( 've-changes' ).length, 0, 'No changes recorded after storeDocState failure' );
 	ve.init.platform.sessionDisabled = false;
 
 	surface.on( 'autosaveFailed', function () { autosaveFailed++; } );
 	surface.startStoringChanges();
 	surface.storeDocState( state );
 	ve.init.platform.sessionDisabled = true;
-	assert.strictEqual( autosaveFailed, 0, 'Autosave hasn\'t failed before first change' );
+	assert.deepEqual( autosaveFailed, 0, 'Autosave hasn\'t failed before first change' );
 	fragment.insertContent( ' bar' );
 	surface.breakpoint();
-	assert.strictEqual( autosaveFailed, 1, 'Autosave fails after first change' );
+	assert.deepEqual( autosaveFailed, 1, 'Autosave fails after first change' );
 	fragment.insertContent( ' baz' );
 	surface.breakpoint();
-	assert.strictEqual( autosaveFailed, 1, 'Subsequent failures don\'t fire autosaveFailed again' );
-	assert.strictEqual( ve.init.platform.getSessionList( 've-changes' ).length, 0, 'No changes recorded after storeChanges failure' );
+	assert.deepEqual( autosaveFailed, 1, 'Subsequent failures don\'t fire autosaveFailed again' );
+	assert.deepEqual( ve.init.platform.getSessionList( 've-changes' ).length, 0, 'No changes recorded after storeChanges failure' );
 	ve.init.platform.sessionDisabled = false;
 
 	surface.storeDocState( state, '<p>foo</p>' );
 	// This allows callers to call storeDocState after startStoringChanges, e.g. after the first transaction
-	assert.strictEqual( surface.lastStoredChange, 1, 'storeDocState with custom HTML doesn\'t advance the lastStoredChange pointer' );
+	assert.deepEqual( surface.lastStoredChange, 1, 'storeDocState with custom HTML doesn\'t advance the lastStoredChange pointer' );
 	surface.storeDocState( state );
-	assert.strictEqual( surface.lastStoredChange, 5, 'storeDocState without custom HTML advances the lastStoredChange pointer' );
+	assert.deepEqual( surface.lastStoredChange, 5, 'storeDocState without custom HTML advances the lastStoredChange pointer' );
 
 } );
 

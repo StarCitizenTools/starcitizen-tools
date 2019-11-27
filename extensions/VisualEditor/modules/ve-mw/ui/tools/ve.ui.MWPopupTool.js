@@ -193,12 +193,11 @@ ve.ui.MWHelpPopupTool.static.autoAddToGroup = false;
  * Handle clicks on the feedback button.
  */
 ve.ui.MWHelpPopupTool.prototype.onFeedbackClick = function () {
-	var tool = this;
 	this.popup.toggle( false );
 	if ( !this.feedbackPromise ) {
 		this.feedbackPromise = mw.loader.using( 'mediawiki.feedback' ).then( function () {
 			var feedbackConfig, veConfig,
-				mode = tool.toolbar.getSurface().getMode();
+				mode = this.toolbar.getSurface().getMode();
 
 			// This can't be constructed until the editor has loaded as it uses special messages
 			feedbackConfig = {
@@ -253,7 +252,7 @@ ve.ui.MWHelpPopupTool.prototype.onSelect = function () {
 	if ( !this.versionPromise && this.popup.isVisible() ) {
 		$version = $( '<div>' ).addClass( 've-ui-mwHelpPopupTool-item oo-ui-pendingElement-pending' ).text( '\u00a0' );
 		this.$items.append( $version );
-		this.versionPromise = ve.init.target.getLocalApi().get( {
+		this.versionPromise = new mw.Api().get( {
 			action: 'query',
 			meta: 'siteinfo',
 			format: 'json',

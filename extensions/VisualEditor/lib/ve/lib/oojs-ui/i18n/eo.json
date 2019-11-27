@@ -6,8 +6,7 @@
 			"Shirayuki",
 			"Yekrats",
 			"Kvardek du",
-			"Psychoslave",
-			"Fitoschido"
+			"Psychoslave"
 		]
 	},
 	"ooui-outline-control-move-down": "Movi eron suben",
@@ -25,6 +24,5 @@
 	"ooui-selectfile-button-select": "Elekti dosieron",
 	"ooui-selectfile-not-supported": "Dosieroselekto ne estas subtenata.",
 	"ooui-selectfile-placeholder": "Vi ne selektis dosieron",
-	"ooui-selectfile-dragdrop-placeholder": "Ĵetu dosieron ĉi tie.",
-	"ooui-field-help": "Helpo"
+	"ooui-selectfile-dragdrop-placeholder": "Ĵetu dosieron ĉi tie."
 }

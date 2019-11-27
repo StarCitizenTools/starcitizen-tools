@@ -12,11 +12,10 @@
  * @extends OO.ui.Widget
  *
  * @constructor
- * @param {HTMLDocument|Array|ve.dm.ElementLinearData|ve.dm.Document|ve.dm.Surface} dataOrDocOrSurface Document data, document model, or surface model to edit
+ * @param {HTMLDocument|Array|ve.dm.ElementLinearData|ve.dm.Document} dataOrDoc Document data to edit
  * @param {Object} [config] Configuration options
  * @cfg {string} [mode] Editing mode
  * @cfg {jQuery} [$scrollContainer] The scroll container of the surface
- * @cfg {jQuery} [$overlayContainer] Clipping container for local overlays, defaults to surface view
  * @cfg {ve.ui.CommandRegistry} [commandRegistry] Command registry to use
  * @cfg {ve.ui.SequenceRegistry} [sequenceRegistry] Sequence registry to use
  * @cfg {ve.ui.DataTransferHandlerFactory} [dataTransferHandlerFactory] Data transfer handler factory to use
@@ -27,7 +26,7 @@
  * @cfg {string} [placeholder] Placeholder text to display when the surface is empty
  * @cfg {string} [inDialog] The name of the dialog this surface is in
  */
-ve.ui.Surface = function VeUiSurface( dataOrDocOrSurface, config ) {
+ve.ui.Surface = function VeUiSurface( dataOrDoc, config ) {
 	var documentModel;
 
 	config = config || {};
@@ -57,26 +56,22 @@ ve.ui.Surface = function VeUiSurface( dataOrDocOrSurface, config ) {
 		config.includeCommands || this.commandRegistry.getNames(), config.excludeCommands || []
 	);
 	this.triggerListener = new ve.TriggerListener( this.commands, this.commandRegistry );
-	if ( dataOrDocOrSurface instanceof ve.dm.Surface ) {
-		this.model = dataOrDocOrSurface;
+	if ( dataOrDoc instanceof ve.dm.Document ) {
+		// ve.dm.Document
+		documentModel = dataOrDoc;
+	} else if ( dataOrDoc instanceof ve.dm.ElementLinearData || Array.isArray( dataOrDoc ) ) {
+		// LinearData or raw linear data
+		documentModel = new ve.dm.Document( dataOrDoc );
 	} else {
-		if ( dataOrDocOrSurface instanceof ve.dm.Document ) {
-			// ve.dm.Document
-			documentModel = dataOrDocOrSurface;
-		} else if ( dataOrDocOrSurface instanceof ve.dm.ElementLinearData || Array.isArray( dataOrDocOrSurface ) ) {
-			// LinearData or raw linear data
-			documentModel = new ve.dm.Document( dataOrDocOrSurface );
-		} else {
-			// HTMLDocument
-			documentModel = ve.dm.converter.getModelFromDom( dataOrDocOrSurface );
-		}
-		this.model = this.createModel( documentModel );
+		// HTMLDocument
+		documentModel = ve.dm.converter.getModelFromDom( dataOrDoc );
 	}
+	this.model = this.createModel( documentModel );
 	this.view = this.createView( this.model );
 	this.dialogs = this.createDialogWindowManager();
 	this.importRules = config.importRules || {};
 	this.multiline = config.multiline !== false;
-	this.context = this.createContext( { $popupContainer: config.$overlayContainer } );
+	this.context = this.createContext();
 	this.progresses = [];
 	this.showProgressDebounced = ve.debounce( this.showProgress.bind( this ) );
 	this.filibuster = null;
@@ -85,7 +80,6 @@ ve.ui.Surface = function VeUiSurface( dataOrDocOrSurface, config ) {
 	this.placeholderVisible = false;
 	this.setPlaceholder( config.placeholder );
 	this.scrollPosition = null;
-	this.windowStackDepth = 0;
 
 	this.toolbarHeight = 0;
 	this.toolbarDialogs = new ve.ui.ToolbarDialogWindowManager( this, {
@@ -137,6 +131,17 @@ OO.inheritClass( ve.ui.Surface, OO.ui.Widget );
  * @event submit
  */
 
+/* Static Properties */
+
+/**
+ * The surface is for use on mobile devices
+ *
+ * @static
+ * @inheritable
+ * @property {boolean}
+ */
+ve.ui.Surface.static.isMobile = false;
+
 /* Methods */
 
 /* eslint-disable valid-jsdoc */
@@ -149,8 +154,8 @@ OO.inheritClass( ve.ui.Surface, OO.ui.Widget );
  * @fires destroy
  */
 ve.ui.Surface.prototype.destroy = function () {
-	// Disable the surface to avoid issues during teardown (e.g. T193103)
-	this.setDisabled( true );
+	// Stop periodic history tracking in model
+	this.model.stopHistoryTracking();
 
 	// Destroy the ce.Surface, the ui.Context and window managers
 	this.context.destroy();
@@ -233,11 +238,10 @@ ve.ui.Surface.prototype.getMode = function () {
  * Create a context.
  *
  * @method
- * @param {Object} config Configuration options
  * @return {ve.ui.Context} Context
  */
-ve.ui.Surface.prototype.createContext = function ( config ) {
-	return OO.ui.isMobile() ? new ve.ui.MobileContext( this, config ) : new ve.ui.DesktopContext( this, config );
+ve.ui.Surface.prototype.createContext = function () {
+	return OO.ui.isMobile() ? new ve.ui.MobileContext( this ) : new ve.ui.DesktopContext( this );
 };
 
 /**
@@ -273,6 +277,15 @@ ve.ui.Surface.prototype.createModel = function ( doc ) {
  */
 ve.ui.Surface.prototype.createView = function ( model ) {
 	return new ve.ce.Surface( model, this );
+};
+
+/**
+ * Check if the surface is for use on mobile devices
+ *
+ * @return {boolean} The surface is for use on mobile devices
+ */
+ve.ui.Surface.prototype.isMobile = function () {
+	return this.constructor.static.isMobile;
 };
 
 /**
@@ -545,19 +558,13 @@ ve.ui.Surface.prototype.onWindowOpening = function ( win, opening ) {
 		opening
 			.progress( function ( data ) {
 				if ( data.state === 'setup' ) {
-					surface.windowStackDepth++;
-					if ( surface.windowStackDepth === 1 ) {
-						surface.toggleMobileGlobalOverlay( true );
-					}
+					surface.toggleMobileGlobalOverlay( true );
 				}
 			} )
 			.always( function ( opened ) {
 				opened.always( function ( closed ) {
 					closed.always( function () {
-						surface.windowStackDepth--;
-						if ( surface.windowStackDepth === 0 ) {
-							surface.toggleMobileGlobalOverlay( false );
-						}
+						surface.toggleMobileGlobalOverlay( false );
 					} );
 				} );
 			} );
@@ -570,18 +577,15 @@ ve.ui.Surface.prototype.onWindowOpening = function ( win, opening ) {
  * @param {boolean} show Show the global overlay.
  */
 ve.ui.Surface.prototype.toggleMobileGlobalOverlay = function ( show ) {
-	var $scrollContainer;
+	var $body = $( 'body' );
 
 	if ( !OO.ui.isMobile() ) {
 		return;
 	}
 
-	// TODO: Avoid accessing ve.init.target from the surface?
-	$scrollContainer = ve.init.target.getScrollContainer();
-
 	// Store current position before we set overflow: hidden on body
 	if ( show ) {
-		this.scrollPosition = $scrollContainer.scrollTop();
+		this.scrollPosition = $body.scrollTop();
 	}
 
 	$( 'html, body' ).toggleClass( 've-ui-overlay-global-mobile-enabled', show );
@@ -589,7 +593,7 @@ ve.ui.Surface.prototype.toggleMobileGlobalOverlay = function ( show ) {
 
 	// Restore previous position after we remove overflow: hidden on body
 	if ( !show ) {
-		$scrollContainer.scrollTop( this.scrollPosition );
+		$body.scrollTop( this.scrollPosition );
 	}
 };
 

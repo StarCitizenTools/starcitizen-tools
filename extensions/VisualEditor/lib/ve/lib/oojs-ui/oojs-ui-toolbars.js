@@ -1,12 +1,12 @@
 /*!
- * OOUI v0.29.2
+ * OOUI v0.26.3
  * https://www.mediawiki.org/wiki/OOUI
  *
  * Copyright 2011–2018 OOUI Team and other contributors.
  * Released under the MIT license
  * http://oojs.mit-license.org
  *
- * Date: 2018-10-08T22:42:55Z
+ * Date: 2018-04-10T22:15:39Z
  */
 ( function ( OO ) {
 
@@ -293,8 +293,6 @@
  *  in the toolbar, but are not configured as tools. By default, actions are displayed on the right side of
  *  the toolbar.
  * @cfg {string} [position='top'] Whether the toolbar is positioned above ('top') or below ('bottom') content.
- * @cfg {jQuery} [$overlay] An overlay for the popup.
- *  See <https://www.mediawiki.org/wiki/OOUI/Concepts#Overlays>.
  */
 OO.ui.Toolbar = function OoUiToolbar( toolFactory, toolGroupFactory, config ) {
 	// Allow passing positional parameters inside the config object
@@ -317,17 +315,14 @@ OO.ui.Toolbar = function OoUiToolbar( toolFactory, toolGroupFactory, config ) {
 	// Properties
 	this.toolFactory = toolFactory;
 	this.toolGroupFactory = toolGroupFactory;
-	this.groupsByName = {};
-	this.activeToolGroups = 0;
+	this.groups = [];
 	this.tools = {};
 	this.position = config.position || 'top';
 	this.$bar = $( '<div>' );
 	this.$actions = $( '<div>' );
-	this.$popups = $( '<div>' );
 	this.initialized = false;
 	this.narrowThreshold = null;
 	this.onWindowResizeHandler = this.onWindowResize.bind( this );
-	this.$overlay = ( config.$overlay === true ? OO.ui.getDefaultOverlay() : config.$overlay ) || this.$element;
 
 	// Events
 	this.$element
@@ -339,13 +334,11 @@ OO.ui.Toolbar = function OoUiToolbar( toolFactory, toolGroupFactory, config ) {
 	if ( config.actions ) {
 		this.$bar.append( this.$actions.addClass( 'oo-ui-toolbar-actions' ) );
 	}
-	this.$popups.addClass( 'oo-ui-toolbar-popups' );
 	this.$bar
 		.addClass( 'oo-ui-toolbar-bar' )
 		.append( this.$group, '<div style="clear:both"></div>' );
 	// Possible classes: oo-ui-toolbar-position-top, oo-ui-toolbar-position-bottom
 	this.$element.addClass( 'oo-ui-toolbar oo-ui-toolbar-position-' + this.position ).append( this.$bar );
-	this.$overlay.append( this.$popups );
 };
 
 /* Setup */
@@ -364,15 +357,6 @@ OO.mixinClass( OO.ui.Toolbar, OO.ui.mixin.GroupElement );
  * tools is required.
  *
  * @param {...Mixed} data Application-defined parameters
- */
-
-/**
- * @event active
- *
- * An 'active' event is emitted when the number of active toolgroups increases from 0, or
- * returns to 0.
- *
- * @param {boolean} There are active toolgroups in this toolbar
  */
 
 /* Methods */
@@ -416,7 +400,7 @@ OO.ui.Toolbar.prototype.onPointerDown = function ( e ) {
  * @param {jQuery.Event} e Window resize event
  */
 OO.ui.Toolbar.prototype.onWindowResize = function () {
-	this.$element.add( this.$popups ).toggleClass(
+	this.$element.toggleClass(
 		'oo-ui-toolbar-narrow',
 		this.$bar[ 0 ].clientWidth <= this.getNarrowThreshold()
 	);
@@ -457,15 +441,13 @@ OO.ui.Toolbar.prototype.initialize = function () {
  * see {@link OO.ui.ToolGroup toolgroups} for more information about including tools in toolgroups.
  *
  * @param {Object.<string,Array>} groups List of toolgroup configurations
- * @param {string} [groups.name] Symbolic name for this toolgroup
- * @param {string} [groups.type] Toolgroup type, should exist in the toolgroup factory
  * @param {Array|string} [groups.include] Tools to include in the toolgroup
  * @param {Array|string} [groups.exclude] Tools to exclude from the toolgroup
  * @param {Array|string} [groups.promote] Tools to promote to the beginning of the toolgroup
  * @param {Array|string} [groups.demote] Tools to demote to the end of the toolgroup
  */
 OO.ui.Toolbar.prototype.setup = function ( groups ) {
-	var i, len, type, toolGroup, groupConfig,
+	var i, len, type, group,
 		items = [],
 		defaultType = 'bar';
 
@@ -474,59 +456,23 @@ OO.ui.Toolbar.prototype.setup = function ( groups ) {
 
 	// Build out new groups
 	for ( i = 0, len = groups.length; i < len; i++ ) {
-		groupConfig = groups[ i ];
-		if ( groupConfig.include === '*' ) {
+		group = groups[ i ];
+		if ( group.include === '*' ) {
 			// Apply defaults to catch-all groups
-			if ( groupConfig.type === undefined ) {
-				groupConfig.type = 'list';
+			if ( group.type === undefined ) {
+				group.type = 'list';
 			}
-			if ( groupConfig.label === undefined ) {
-				groupConfig.label = OO.ui.msg( 'ooui-toolbar-more' );
+			if ( group.label === undefined ) {
+				group.label = OO.ui.msg( 'ooui-toolbar-more' );
 			}
 		}
 		// Check type has been registered
-		type = this.getToolGroupFactory().lookup( groupConfig.type ) ? groupConfig.type : defaultType;
-		toolGroup = this.getToolGroupFactory().create( type, this, groupConfig );
-		items.push( toolGroup );
-		if ( groupConfig.name ) {
-			this.groupsByName[ groupConfig.name ] = toolGroup;
-		} else {
-			// Groups without name are deprecated
-			OO.ui.warnDeprecation( 'Toolgroups must have a \'name\' property' );
-		}
-		toolGroup.connect( this, { active: 'onToolGroupActive' } );
+		type = this.getToolGroupFactory().lookup( group.type ) ? group.type : defaultType;
+		items.push(
+			this.getToolGroupFactory().create( type, this, group )
+		);
 	}
 	this.addItems( items );
-};
-
-/**
- * Handle active events from tool groups
- *
- * @param {boolean} active Tool group has become active, inactive if false
- * @fires active
- */
-OO.ui.Toolbar.prototype.onToolGroupActive = function ( active ) {
-	if ( active ) {
-		this.activeToolGroups++;
-		if ( this.activeToolGroups === 1 ) {
-			this.emit( 'active', true );
-		}
-	} else {
-		this.activeToolGroups--;
-		if ( this.activeToolGroups === 0 ) {
-			this.emit( 'active', false );
-		}
-	}
-};
-
-/**
- * Get a toolgroup by name
- *
- * @param {string} name Group name
- * @return {OO.ui.ToolGroup|null} Tool group, or null if none found by that name
- */
-OO.ui.Toolbar.prototype.getToolGroupByName = function ( name ) {
-	return this.groupsByName[ name ] || null;
 };
 
 /**
@@ -535,7 +481,7 @@ OO.ui.Toolbar.prototype.getToolGroupByName = function ( name ) {
 OO.ui.Toolbar.prototype.reset = function () {
 	var i, len;
 
-	this.groupsByName = {};
+	this.groups = [];
 	this.tools = {};
 	for ( i = 0, len = this.items.length; i < len; i++ ) {
 		this.items[ i ].destroy();
@@ -973,10 +919,10 @@ OO.ui.ToolGroup = function OoUiToolGroup( toolbar, config ) {
 	this.exclude = config.exclude || [];
 	this.promote = config.promote || [];
 	this.demote = config.demote || [];
-	this.onDocumentMouseKeyUpHandler = this.onDocumentMouseKeyUp.bind( this );
+	this.onCapturedMouseKeyUpHandler = this.onCapturedMouseKeyUp.bind( this );
 
 	// Events
-	this.$group.on( {
+	this.$element.on( {
 		mousedown: this.onMouseKeyDown.bind( this ),
 		mouseup: this.onMouseKeyUp.bind( this ),
 		keydown: this.onMouseKeyDown.bind( this ),
@@ -988,17 +934,13 @@ OO.ui.ToolGroup = function OoUiToolGroup( toolbar, config ) {
 	} );
 	this.toolbar.getToolFactory().connect( this, { register: 'onToolFactoryRegister' } );
 	this.aggregate( { disable: 'itemDisable' } );
-	this.connect( this, {
-		itemDisable: 'updateDisabled',
-		disable: 'onDisable'
-	} );
+	this.connect( this, { itemDisable: 'updateDisabled' } );
 
 	// Initialization
 	this.$group.addClass( 'oo-ui-toolGroup-tools' );
 	this.$element
 		.addClass( 'oo-ui-toolGroup' )
 		.append( this.$group );
-	this.onDisable( this.isDisabled() );
 	this.populate();
 };
 
@@ -1011,14 +953,6 @@ OO.mixinClass( OO.ui.ToolGroup, OO.ui.mixin.GroupElement );
 
 /**
  * @event update
- */
-
-/**
- * @event active
- *
- * An 'active' event is emitted when any popup is shown/hidden.
- *
- * @param {boolean} The popup is visible
  */
 
 /* Static Properties */
@@ -1092,17 +1026,6 @@ OO.ui.ToolGroup.prototype.updateDisabled = function () {
 };
 
 /**
- * Handle disable events.
- *
- * @protected
- * @param {boolean} isDisabled
- */
-OO.ui.ToolGroup.prototype.onDisable = function ( isDisabled ) {
-	this.$group.toggleClass( 'oo-ui-toolGroup-disabled-tools', isDisabled );
-	this.$group.toggleClass( 'oo-ui-toolGroup-enabled-tools', !isDisabled );
-};
-
-/**
  * Handle mouse down and key down events.
  *
  * @protected
@@ -1116,31 +1039,25 @@ OO.ui.ToolGroup.prototype.onMouseKeyDown = function ( e ) {
 		this.pressed = this.findTargetTool( e );
 		if ( this.pressed ) {
 			this.pressed.setActive( true );
-			this.getElementDocument().addEventListener( 'mouseup', this.onDocumentMouseKeyUpHandler, true );
-			this.getElementDocument().addEventListener( 'keyup', this.onDocumentMouseKeyUpHandler, true );
+			this.getElementDocument().addEventListener( 'mouseup', this.onCapturedMouseKeyUpHandler, true );
+			this.getElementDocument().addEventListener( 'keyup', this.onCapturedMouseKeyUpHandler, true );
 			return false;
 		}
 	}
 };
 
 /**
- * Handle document mouse up and key up events.
+ * Handle captured mouse up and key up events.
  *
  * @protected
  * @param {MouseEvent|KeyboardEvent} e Mouse up or key up event
  */
-OO.ui.ToolGroup.prototype.onDocumentMouseKeyUp = function ( e ) {
-	this.getElementDocument().removeEventListener( 'mouseup', this.onDocumentMouseKeyUpHandler, true );
-	this.getElementDocument().removeEventListener( 'keyup', this.onDocumentMouseKeyUpHandler, true );
+OO.ui.ToolGroup.prototype.onCapturedMouseKeyUp = function ( e ) {
+	this.getElementDocument().removeEventListener( 'mouseup', this.onCapturedMouseKeyUpHandler, true );
+	this.getElementDocument().removeEventListener( 'keyup', this.onCapturedMouseKeyUpHandler, true );
 	// onMouseKeyUp may be called a second time, depending on where the mouse is when the button is
 	// released, but since `this.pressed` will no longer be true, the second call will be ignored.
 	this.onMouseKeyUp( e );
-};
-
-// Deprecated alias since 0.28.3
-OO.ui.ToolGroup.prototype.onCapturedMouseKeyUp = function () {
-	OO.ui.warnDeprecation( 'onCapturedMouseKeyUp is deprecated, use onDocumentMouseKeyUp instead' );
-	this.onDocumentMouseKeyUp.apply( this, arguments );
 };
 
 /**
@@ -1549,14 +1466,11 @@ OO.ui.PopupTool = function OoUiPopupTool( toolGroup, config ) {
 	// Mixin constructors
 	OO.ui.mixin.PopupElement.call( this, config );
 
-	// Events
-	this.popup.connect( this, { toggle: 'onPopupToggle' } );
-
 	// Initialization
 	this.popup.setPosition( toolGroup.getToolbar().position === 'bottom' ? 'above' : 'below' );
-	this.$element.addClass( 'oo-ui-popupTool' );
-	this.popup.$element.addClass( 'oo-ui-popupTool-popup' );
-	this.toolbar.$popups.append( this.popup.$element );
+	this.$element
+		.addClass( 'oo-ui-popupTool' )
+		.append( this.popup.$element );
 };
 
 /* Setup */
@@ -1575,6 +1489,7 @@ OO.ui.PopupTool.prototype.onSelect = function () {
 	if ( !this.isDisabled() ) {
 		this.popup.toggle();
 	}
+	this.setActive( false );
 	return false;
 };
 
@@ -1584,16 +1499,7 @@ OO.ui.PopupTool.prototype.onSelect = function () {
  * @inheritdoc
  */
 OO.ui.PopupTool.prototype.onUpdateState = function () {
-};
-
-/**
- * Handle popup visibility being toggled.
- *
- * @param {boolean} isVisible
- */
-OO.ui.PopupTool.prototype.onPopupToggle = function ( isVisible ) {
-	this.setActive( isVisible );
-	this.toolGroup.emit( 'active', isVisible );
+	this.setActive( false );
 };
 
 /**
@@ -1647,11 +1553,7 @@ OO.ui.ToolGroupTool = function OoUiToolGroupTool( toolGroup, config ) {
 	this.innerToolGroup = this.createGroup( this.constructor.static.groupConfig );
 
 	// Events
-	this.innerToolGroup.connect( this, {
-		disable: 'onToolGroupDisable',
-		// Re-emit active events from the innerToolGroup on the parent toolGroup
-		active: this.toolGroup.emit.bind( this.toolGroup, 'active' )
-	} );
+	this.innerToolGroup.connect( this, { disable: 'onToolGroupDisable' } );
 
 	// Initialization
 	this.$link.remove();
@@ -1836,7 +1738,6 @@ OO.ui.BarToolGroup = function OoUiBarToolGroup( toolbar, config ) {
 
 	// Initialization
 	this.$element.addClass( 'oo-ui-barToolGroup' );
-	this.$group.addClass( 'oo-ui-barToolGroup-tools' );
 };
 
 /* Setup */
@@ -1877,7 +1778,6 @@ OO.ui.BarToolGroup.static.name = 'bar';
  * @mixins OO.ui.mixin.TitledElement
  * @mixins OO.ui.mixin.FlaggedElement
  * @mixins OO.ui.mixin.ClippableElement
- * @mixins OO.ui.mixin.FloatableElement
  * @mixins OO.ui.mixin.TabIndexedElement
  *
  * @constructor
@@ -1903,8 +1803,7 @@ OO.ui.PopupToolGroup = function OoUiPopupToolGroup( toolbar, config ) {
 	// Properties
 	this.active = false;
 	this.dragging = false;
-	// Don't conflict with parent method of the same name
-	this.onPopupDocumentMouseKeyUpHandler = this.onPopupDocumentMouseKeyUp.bind( this );
+	this.onBlurHandler = this.onBlur.bind( this );
 	this.$handle = $( '<span>' );
 
 	// Mixin constructors
@@ -1914,12 +1813,6 @@ OO.ui.PopupToolGroup = function OoUiPopupToolGroup( toolbar, config ) {
 	OO.ui.mixin.TitledElement.call( this, config );
 	OO.ui.mixin.FlaggedElement.call( this, config );
 	OO.ui.mixin.ClippableElement.call( this, $.extend( {}, config, { $clippable: this.$group } ) );
-	OO.ui.mixin.FloatableElement.call( this, $.extend( {}, config, {
-		$floatable: this.$group,
-		$floatableContainer: this.$handle,
-		hideWhenOutOfView: false,
-		verticalPosition: this.toolbar.position === 'bottom' ? 'above' : 'below'
-	} ) );
 	OO.ui.mixin.TabIndexedElement.call( this, $.extend( {}, config, { $tabIndexed: this.$handle } ) );
 
 	// Events
@@ -1948,8 +1841,6 @@ OO.ui.PopupToolGroup = function OoUiPopupToolGroup( toolbar, config ) {
 	this.$element
 		.addClass( 'oo-ui-popupToolGroup' )
 		.prepend( this.$handle );
-	this.$group.addClass( 'oo-ui-popupToolGroup-tools' );
-	this.toolbar.$popups.append( this.$group );
 };
 
 /* Setup */
@@ -1961,10 +1852,36 @@ OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.LabelElement );
 OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.TitledElement );
 OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.FlaggedElement );
 OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.ClippableElement );
-OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.FloatableElement );
 OO.mixinClass( OO.ui.PopupToolGroup, OO.ui.mixin.TabIndexedElement );
 
 /* Methods */
+
+/**
+ * @inheritdoc OO.ui.mixin.ClippableElement
+ */
+OO.ui.PopupToolGroup.prototype.getHorizontalAnchorEdge = function () {
+	var out;
+	if ( this.$element.hasClass( 'oo-ui-popupToolGroup-right' ) ) {
+		out = 'right';
+	} else {
+		out = 'left';
+	}
+	// Flip for RTL
+	if ( this.$element.css( 'direction' ) === 'rtl' ) {
+		out = ( out === 'left' ) ? 'right' : 'left';
+	}
+	return out;
+};
+
+/**
+ * @inheritdoc OO.ui.mixin.ClippableElement
+ */
+OO.ui.PopupToolGroup.prototype.getVerticalAnchorEdge = function () {
+	if ( this.toolbar.position === 'bottom' ) {
+		return 'bottom';
+	}
+	return 'top';
+};
 
 /**
  * @inheritdoc
@@ -1979,27 +1896,18 @@ OO.ui.PopupToolGroup.prototype.setDisabled = function () {
 };
 
 /**
- * Handle document mouse up and key up events.
+ * Handle focus being lost.
+ *
+ * The event is actually generated from a mouseup/keyup, so it is not a normal blur event object.
  *
  * @protected
  * @param {MouseEvent|KeyboardEvent} e Mouse up or key up event
  */
-OO.ui.PopupToolGroup.prototype.onPopupDocumentMouseKeyUp = function ( e ) {
-	var $target = $( e.target );
+OO.ui.PopupToolGroup.prototype.onBlur = function ( e ) {
 	// Only deactivate when clicking outside the dropdown element
-	if ( $target.closest( '.oo-ui-popupToolGroup' )[ 0 ] === this.$element[ 0 ] ) {
-		return;
+	if ( $( e.target ).closest( '.oo-ui-popupToolGroup' )[ 0 ] !== this.$element[ 0 ] ) {
+		this.setActive( false );
 	}
-	if ( $target.closest( '.oo-ui-popupToolGroup-tools' )[ 0 ] === this.$group[ 0 ] ) {
-		return;
-	}
-	this.setActive( false );
-};
-
-// Deprecated alias since 0.28.3
-OO.ui.PopupToolGroup.prototype.onBlur = function () {
-	OO.ui.warnDeprecation( 'onBlur is deprecated, use onPopupDocumentMouseKeyUp instead' );
-	this.onPopupDocumentMouseKeyUp.apply( this, arguments );
 };
 
 /**
@@ -2014,34 +1922,6 @@ OO.ui.PopupToolGroup.prototype.onMouseKeyUp = function ( e ) {
 		this.setActive( false );
 	}
 	return OO.ui.PopupToolGroup.parent.prototype.onMouseKeyUp.call( this, e );
-};
-
-/**
- * @inheritdoc
- */
-OO.ui.PopupToolGroup.prototype.onMouseKeyDown = function ( e ) {
-	var $focused, $firstFocusable, $lastFocusable;
-	// Shift-Tab on the first tool in the group jumps to the handle.
-	// Tab on the last tool in the group jumps to the next group.
-	if ( !this.isDisabled() && e.which === OO.ui.Keys.TAB ) {
-		// (We can't use this.items because ListToolGroup inserts the extra fake expand/collapse tool.)
-		$focused = $( document.activeElement );
-		$firstFocusable = OO.ui.findFocusable( this.$group );
-		if ( $focused[ 0 ] === $firstFocusable[ 0 ] && e.shiftKey ) {
-			this.$handle.focus();
-			return false;
-		}
-		$lastFocusable = OO.ui.findFocusable( this.$group, true );
-		if ( $focused[ 0 ] === $lastFocusable[ 0 ] && !e.shiftKey ) {
-			// Focus this group's handle and let the browser's tab handling happen (no 'return false').
-			// This way we don't have to fiddle with other ToolGroups' business, or worry what to do
-			// if the next group is not a PopupToolGroup or doesn't exist at all.
-			this.$handle.focus();
-			// Close the popup so that we don't move back inside it (if this is the last group).
-			this.setActive( false );
-		}
-	}
-	return OO.ui.PopupToolGroup.parent.prototype.onMouseKeyDown.call( this, e );
 };
 
 /**
@@ -2066,20 +1946,12 @@ OO.ui.PopupToolGroup.prototype.onHandleMouseKeyUp = function ( e ) {
  * @param {jQuery.Event} e Mouse down or key down event
  */
 OO.ui.PopupToolGroup.prototype.onHandleMouseKeyDown = function ( e ) {
-	var $focusable;
-	if ( !this.isDisabled() ) {
-		// Tab on the handle jumps to the first tool in the group (if the popup is open).
-		if ( e.which === OO.ui.Keys.TAB && !e.shiftKey ) {
-			$focusable = OO.ui.findFocusable( this.$group );
-			if ( $focusable.length ) {
-				$focusable.focus();
-				return false;
-			}
-		}
-		if ( e.which === OO.ui.MouseButtons.LEFT || e.which === OO.ui.Keys.SPACE || e.which === OO.ui.Keys.ENTER ) {
-			this.setActive( !this.active );
-			return false;
-		}
+	if (
+		!this.isDisabled() &&
+		( e.which === OO.ui.MouseButtons.LEFT || e.which === OO.ui.Keys.SPACE || e.which === OO.ui.Keys.ENTER )
+	) {
+		this.setActive( !this.active );
+		return false;
 	}
 };
 
@@ -2099,7 +1971,6 @@ OO.ui.PopupToolGroup.prototype.isActive = function () {
  * deactivation.
  *
  * @param {boolean} value The active state to set
- * @fires active
  */
 OO.ui.PopupToolGroup.prototype.setActive = function ( value ) {
 	var containerWidth, containerLeft;
@@ -2107,23 +1978,22 @@ OO.ui.PopupToolGroup.prototype.setActive = function ( value ) {
 	if ( this.active !== value ) {
 		this.active = value;
 		if ( value ) {
-			this.getElementDocument().addEventListener( 'mouseup', this.onPopupDocumentMouseKeyUpHandler, true );
-			this.getElementDocument().addEventListener( 'keyup', this.onPopupDocumentMouseKeyUpHandler, true );
+			this.getElementDocument().addEventListener( 'mouseup', this.onBlurHandler, true );
+			this.getElementDocument().addEventListener( 'keyup', this.onBlurHandler, true );
 
 			this.$clippable.css( 'left', '' );
-			this.$element.addClass( 'oo-ui-popupToolGroup-active' );
-			this.$group.addClass( 'oo-ui-popupToolGroup-active-tools' );
-			this.togglePositioning( true );
-			this.toggleClipping( true );
-
 			// Try anchoring the popup to the left first
-			this.setHorizontalPosition( 'start' );
-
-			if ( this.isClippedHorizontally() || this.isFloatableOutOfView() ) {
+			this.$element.addClass( 'oo-ui-popupToolGroup-active oo-ui-popupToolGroup-left' );
+			this.toggleClipping( true );
+			if ( this.isClippedHorizontally() ) {
 				// Anchoring to the left caused the popup to clip, so anchor it to the right instead
-				this.setHorizontalPosition( 'end' );
+				this.toggleClipping( false );
+				this.$element
+					.removeClass( 'oo-ui-popupToolGroup-left' )
+					.addClass( 'oo-ui-popupToolGroup-right' );
+				this.toggleClipping( true );
 			}
-			if ( this.isClippedHorizontally() || this.isFloatableOutOfView() ) {
+			if ( this.isClippedHorizontally() ) {
 				// Anchoring to the right also caused the popup to clip, so just make it fill the container
 				containerWidth = this.$clippableScrollableContainer.width();
 				containerLeft = this.$clippableScrollableContainer[ 0 ] === document.documentElement ?
@@ -2131,22 +2001,21 @@ OO.ui.PopupToolGroup.prototype.setActive = function ( value ) {
 					this.$clippableScrollableContainer.offset().left;
 
 				this.toggleClipping( false );
-				this.setHorizontalPosition( 'start' );
+				this.$element.removeClass( 'oo-ui-popupToolGroup-right' );
 
 				this.$clippable.css( {
-					'margin-left': -( this.$element.offset().left - containerLeft ),
+					left: -( this.$element.offset().left - containerLeft ),
 					width: containerWidth
 				} );
 			}
 		} else {
-			this.getElementDocument().removeEventListener( 'mouseup', this.onPopupDocumentMouseKeyUpHandler, true );
-			this.getElementDocument().removeEventListener( 'keyup', this.onPopupDocumentMouseKeyUpHandler, true );
-			this.$element.removeClass( 'oo-ui-popupToolGroup-active' );
-			this.$group.removeClass( 'oo-ui-popupToolGroup-active-tools' );
-			this.togglePositioning( false );
+			this.getElementDocument().removeEventListener( 'mouseup', this.onBlurHandler, true );
+			this.getElementDocument().removeEventListener( 'keyup', this.onBlurHandler, true );
+			this.$element.removeClass(
+				'oo-ui-popupToolGroup-active oo-ui-popupToolGroup-left oo-ui-popupToolGroup-right'
+			);
 			this.toggleClipping( false );
 		}
-		this.emit( 'active', this.active );
 		this.updateThemeClasses();
 	}
 };
@@ -2265,7 +2134,6 @@ OO.ui.ListToolGroup = function OoUiListToolGroup( toolbar, config ) {
 
 	// Initialization
 	this.$element.addClass( 'oo-ui-listToolGroup' );
-	this.$group.addClass( 'oo-ui-listToolGroup-tools' );
 };
 
 /* Setup */
@@ -2500,7 +2368,6 @@ OO.ui.MenuToolGroup = function OoUiMenuToolGroup( toolbar, config ) {
 
 	// Initialization
 	this.$element.addClass( 'oo-ui-menuToolGroup' );
-	this.$group.addClass( 'oo-ui-menuToolGroup-tools' );
 };
 
 /* Setup */
@@ -2540,4 +2407,4 @@ OO.ui.MenuToolGroup.prototype.onUpdateState = function () {
 
 }( OO ) );
 
-//# sourceMappingURL=oojs-ui-toolbars.js.map.json
+//# sourceMappingURL=oojs-ui-toolbars.js.map

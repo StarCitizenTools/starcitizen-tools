@@ -11,6 +11,7 @@
 			"Abdulq"
 		]
 	},
+	"apihelp-visualeditoredit-param-summary": "خلاصہ ترمیم۔",
 	"collabpad-doctitle": "مشترکہ پیڈ: $1",
 	"collabpad": "مشترکہ پیڈ",
 	"tooltip-ca-createsource": "اس صفحے کا سورس کوڈ بنائیں",
@@ -52,6 +53,7 @@
 	"visualeditor-dialog-media-info-readmore": "مزید پڑھیں",
 	"visualeditor-dialog-media-info-uploaded": "اپلوڈ بتاریخ: $1",
 	"visualeditor-dialog-media-noresults": "کوئی نتیجہ برآمد نہیں ہوا۔",
+	"visualeditor-dialog-media-originaldimensions": "حقیقی ابعاد",
 	"visualeditor-dialog-media-page-advanced": "پیشرفتہ ترتیبات",
 	"visualeditor-dialog-media-page-general": "عمومی ترتیبات",
 	"visualeditor-dialog-media-position-center": "وسط",
@@ -176,6 +178,7 @@
 	"visualeditor-section-title-placeholder": "موضوع",
 	"visualeditor-serializeerror": "نقص ہے ڈیٹا اثقال کرنے میں :  $1 ۔",
 	"visualeditor-settings-tool": "صفحہ کی ترتیبات",
+	"visualeditor-shortcuts-insert": "درج کریں",
 	"visualeditor-templatesused-tool": "مستعمل سانچے",
 	"visualeditor-toload": "خانہ ترمیم لوڈ ہو رہا ہے۔ اگر کچھ سیکنڈ تک یہی پیغام دکھائی دے تو براہ کرم [$1 صفحہ دوبارہ لوڈ کریں]۔",
 	"visualeditor-toolbar-savedialog": "صفحہ محفوظ کریں",

@@ -35,17 +35,6 @@ ve.dm.ListNode.static.defaultAttributes = {
 
 ve.dm.ListNode.static.matchTagNames = [ 'ul', 'ol' ];
 
-ve.dm.ListNode.static.isDiffedAsList = true;
-
-/**
- * Creates a list item element
- *
- * @return {Object} Element data
- */
-ve.dm.ListNode.static.createItem = function () {
-	return { type: 'listItem' };
-};
-
 ve.dm.ListNode.static.toDataElement = function ( domElements ) {
 	var style = domElements[ 0 ].nodeName.toLowerCase() === 'ol' ? 'number' : 'bullet';
 	return { type: this.name, attributes: { style: style } };
@@ -58,10 +47,10 @@ ve.dm.ListNode.static.toDomElements = function ( dataElement, doc ) {
 
 ve.dm.ListNode.static.describeChange = function ( key, change ) {
 	if ( key === 'style' ) {
-		return ve.htmlMsg( 'visualeditor-changedesc-no-key',
+		return ve.msg( 'visualeditor-changedesc-no-key',
 			// Either visualeditor-listbutton-bullet-tooltip or visualeditor-listbutton-number-tooltip
-			this.wrapText( 'del', ve.msg( 'visualeditor-listbutton-' + change.from + '-tooltip' ) ),
-			this.wrapText( 'ins', ve.msg( 'visualeditor-listbutton-' + change.to + '-tooltip' ) )
+			ve.msg( 'visualeditor-listbutton-' + change.from + '-tooltip' ),
+			ve.msg( 'visualeditor-listbutton-' + change.to + '-tooltip' )
 		);
 	}
 	// Parent method

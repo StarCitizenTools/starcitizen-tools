@@ -32,6 +32,5 @@
 	"ooui-selectfile-button-select": "Select a file",
 	"ooui-selectfile-not-supported": "File selection is not supported",
 	"ooui-selectfile-placeholder": "No file is selected",
-	"ooui-selectfile-dragdrop-placeholder": "Drop file here",
-	"ooui-field-help": "Help"
+	"ooui-selectfile-dragdrop-placeholder": "Drop file here"
 }

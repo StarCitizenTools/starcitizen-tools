@@ -105,7 +105,7 @@ ve.DiffMatchPatch.prototype.getCleanDiff = function ( oldData, newData, options 
 	}
 
 	/**
-	 * Get the index of the first or last wordbreak in a data array
+	 * Get the index of the the first or last wordbreak in a data array
 	 *
 	 * @param {Array} data Linear data
 	 * @param {boolean} reversed Get the index of the last wordbreak
@@ -129,7 +129,7 @@ ve.DiffMatchPatch.prototype.getCleanDiff = function ( oldData, newData, options 
 		}
 	}
 
-	/**
+	/*
 	 * Determine whether there is a wordbreak at an offset
 	 *
 	 * @param {Array} data Linear data
@@ -176,7 +176,7 @@ ve.DiffMatchPatch.prototype.getCleanDiff = function ( oldData, newData, options 
 				return false;
 			}
 			if ( ve.dm.LinearData.static.isOpenElementData( element ) ) {
-				return ve.dm.modelRegistry.lookup( element.type ).static.isDiffComparable( element, other[ index ], store, store );
+				return ve.dm.modelRegistry.lookup( element.type ).static.isDiffComparable( element, other[ index ] );
 			} else {
 				// Ignore close elements
 				return true;

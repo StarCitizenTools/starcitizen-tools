@@ -32,6 +32,5 @@
 	"ooui-selectfile-button-select": "Selecionar um arquivo",
 	"ooui-selectfile-not-supported": "O selecionamento de arquivos não é suportado",
 	"ooui-selectfile-placeholder": "Nenhum arquivo selecionado",
-	"ooui-selectfile-dragdrop-placeholder": "Arraste o arquivo para cá",
-	"ooui-field-help": "Ajuda"
+	"ooui-selectfile-dragdrop-placeholder": "Arraste o arquivo para cá"
 }

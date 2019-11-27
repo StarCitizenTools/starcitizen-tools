@@ -44,8 +44,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 			e.keyCode === OO.ui.Keys.PAGEUP || e.keyCode === OO.ui.Keys.PAGEDOWN ||
 			e.keyCode === OO.ui.Keys.HOME || e.keyCode === OO.ui.Keys.END,
 		keyBlockDirection = e.keyCode === OO.ui.Keys.DOWN || e.keyCode === OO.ui.Keys.PAGEDOWN || e.keyCode === OO.ui.Keys.END ? 1 : -1,
-		range = surface.model.getSelection().getRange(),
-		activeNode = surface.getActiveNode();
+		range = surface.model.getSelection().getRange();
 
 	// TODO: onDocumentKeyDown did this already
 	surface.surfaceObserver.stopTimerLoop();
@@ -72,7 +71,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 			direction,
 			'character',
 			e.shiftKey,
-			activeNode && ( e.shiftKey || activeNode.trapsCursor() ) ? activeNode.getRange() : null
+			surface.getActiveNode() ? surface.getActiveNode().getRange() : null
 		);
 		surface.model.setLinearSelection( range );
 		e.preventDefault();
@@ -101,7 +100,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 				direction,
 				'character',
 				e.shiftKey,
-				activeNode && ( e.shiftKey || activeNode.trapsCursor() ) ? activeNode.getRange() : null
+				surface.getActiveNode() ? surface.getActiveNode().getRange() : null
 			);
 			surface.model.setLinearSelection( range );
 			e.preventDefault();
@@ -163,7 +162,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 		var viewNode, newRange, afterDirection;
 
 		// Support: Chrome
-		// Chrome bug lets you cursor into a multi-line contentEditable=false with up/down…
+		// Chrome bug lets you cursor into a multi-line contentEditable=false with up/down...
 		viewNode = $( surface.nativeSelection.focusNode ).closest( '.ve-ce-leafNode,.ve-ce-branchNode' ).data( 'view' );
 		if ( !viewNode ) {
 			// Irrelevant selection (or none)
@@ -201,7 +200,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 			newRange = new ve.Range( range.from, newRange.to );
 			surface.getModel().setLinearSelection( newRange );
 		}
-		surface.updateActiveAnnotations();
+		surface.updateActiveLink();
 		surface.surfaceObserver.pollOnce();
 	} } );
 

@@ -355,7 +355,7 @@ ve.dm.MWTemplateModel.prototype.serialize = function () {
 	}
 
 	// Performs a non-deep extend, so this won't reintroduce
-	// deleted parameters (T75134)
+	// deleted parameters (bug 73134)
 	template = ve.extendObject( {}, origData, template );
 	return { template: template };
 };

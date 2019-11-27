@@ -25,6 +25,5 @@
 	"ooui-selectfile-button-select": "Абраць файл",
 	"ooui-selectfile-not-supported": "Выбар файлу не падтрымліваецца",
 	"ooui-selectfile-placeholder": "Ніводзін файл не абраны",
-	"ooui-selectfile-dragdrop-placeholder": "Перацягніце файл сюды",
-	"ooui-field-help": "Дапамога"
+	"ooui-selectfile-dragdrop-placeholder": "Перацягніце файл сюды"
 }

@@ -85,26 +85,6 @@ ve.dm.MWImageNode.static.getRdfa = function ( mediaClass, frameType ) {
 };
 
 /**
- * Map media types to tag names
- * @type {Object}
- */
-ve.dm.MWImageNode.static.typesToTags = {
-	Image: 'img',
-	Audio: 'audio',
-	Video: 'video'
-};
-
-/**
- * Map media types to source attributes
- * @type {Object}
- */
-ve.dm.MWImageNode.static.typesToSrcAttrs = {
-	Image: 'src',
-	Audio: null,
-	Video: 'poster'
-};
-
-/**
  * @inheritdoc ve.dm.GeneratedContentNode
  */
 ve.dm.MWImageNode.static.getHashObjectForRendering = function ( dataElement ) {
@@ -123,11 +103,6 @@ ve.dm.MWImageNode.static.getMatchRdfaTypes = function () {
 };
 
 ve.dm.MWImageNode.static.allowedRdfaTypes = [ 'mw:Error' ];
-
-ve.dm.MWImageNode.static.isDiffComparable = function ( element, other ) {
-	// Images with different src's shouldn't be diffed
-	return element.type === other.type && element.attributes.resource === other.attributes.resource;
-};
 
 ve.dm.MWImageNode.static.describeChanges = function ( attributeChanges, attributes ) {
 	var key, sizeFrom, sizeTo, change,
@@ -156,9 +131,7 @@ ve.dm.MWImageNode.static.describeChanges = function ( attributeChanges, attribut
 			);
 		}
 
-		descriptions.push(
-			ve.htmlMsg( 'visualeditor-changedesc-image-size', this.wrapText( 'del', sizeFrom ), this.wrapText( 'ins', sizeTo ) )
-		);
+		descriptions.push( ve.msg( 'visualeditor-changedesc-image-size', sizeFrom, sizeTo ) );
 	}
 	for ( key in attributeChanges ) {
 		if ( customKeys.indexOf( key ) === -1 ) {
@@ -174,20 +147,14 @@ ve.dm.MWImageNode.static.describeChanges = function ( attributeChanges, attribut
 };
 
 ve.dm.MWImageNode.static.describeChange = function ( key, change ) {
-	switch ( key ) {
-		case 'align':
-			return ve.htmlMsg( 'visualeditor-changedesc-align',
-				// Messages used:
-				// visualeditor-align-desc-left, visualeditor-align-desc-right,
-				// visualeditor-align-desc-center, visualeditor-align-desc-default,
-				// visualeditor-align-desc-none
-				this.wrapText( 'del', ve.msg( 'visualeditor-align-desc-' + change.from ) ),
-				this.wrapText( 'ins', ve.msg( 'visualeditor-align-desc-' + change.to ) )
-			);
-		case 'originalClasses':
-		case 'unrecognizedClasses':
-			return;
-		// TODO: Handle valign
+	if ( key === 'align' ) {
+		return ve.msg( 'visualeditor-changedesc-align',
+			// Messages used:
+			// visualeditor-align-widget-left, visualeditor-align-widget-right,
+			// visualeditor-align-widget-center, visualeditor-align-widget-default
+			ve.msg( 'visualeditor-align-widget-' + change.from ),
+			ve.msg( 'visualeditor-align-widget-' + change.to )
+		);
 	}
 	// Parent method
 	return ve.dm.Node.static.describeChange.apply( this, arguments );

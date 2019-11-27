@@ -86,8 +86,8 @@ class VisualEditorHooks {
 	 * Handler for the DiffViewHeader hook, to add visual diffs code as configured
 	 *
 	 * @param DifferenceEngine $diff The difference engine
-	 * @param Revision|null $oldRev The old revision
-	 * @param Revision|null $newRev The new revision
+	 * @param Revision $oldRev The old revision
+	 * @param Revision $newRev The new revision
 	 * @return bool Always true
 	 */
 	public static function onDiffViewHeader(
@@ -869,8 +869,7 @@ class VisualEditorHooks {
 	 * @return bool Always true
 	 */
 	public static function onMakeGlobalVariablesScript( array &$vars, OutputPage $out ) {
-		$pageLanguage = ApiVisualEditor::getPageLanguage( $out->getTitle() );
-
+		$pageLanguage = $out->getTitle()->getPageLanguage();
 		$fallbacks = $pageLanguage->getConverter()->getVariantFallbacks(
 			$pageLanguage->getPreferredVariant()
 		);
@@ -879,7 +878,7 @@ class VisualEditorHooks {
 			'pageLanguageCode' => $pageLanguage->getHtmlCode(),
 			'pageLanguageDir' => $pageLanguage->getDir(),
 			'pageVariantFallbacks' => $fallbacks,
-			'usePageImages' => ExtensionRegistry::getInstance()->isLoaded( 'PageImages' ),
+			'usePageImages' => defined( 'PAGE_IMAGES_INSTALLED' ),
 			'usePageDescriptions' => defined( 'WBC_VERSION' ),
 		];
 
@@ -1045,7 +1044,6 @@ class VisualEditorHooks {
 				'lib/ve/tests/dm/ve.dm.NodeFactory.test.js',
 				'lib/ve/tests/dm/ve.dm.Node.test.js',
 				'lib/ve/tests/dm/ve.dm.Converter.test.js',
-				'lib/ve/tests/dm/ve.dm.SourceConverter.test.js',
 				'lib/ve/tests/dm/ve.dm.BranchNode.test.js',
 				'lib/ve/tests/dm/ve.dm.LeafNode.test.js',
 				'lib/ve/tests/dm/nodes/ve.dm.TextNode.test.js',
@@ -1060,6 +1058,7 @@ class VisualEditorHooks {
 				'lib/ve/tests/dm/ve.dm.Change.test.js',
 				'lib/ve/tests/dm/ve.dm.TreeModifier.test.js',
 				'lib/ve/tests/dm/ve.dm.TransactionProcessor.test.js',
+				'lib/ve/tests/dm/ve.dm.APIResultsQueue.test.js',
 				'lib/ve/tests/dm/ve.dm.Surface.test.js',
 				'lib/ve/tests/dm/ve.dm.SurfaceFragment.test.js',
 				'modules/ve-mw/tests/dm/ve.dm.SurfaceFragment.test.js',
@@ -1094,10 +1093,7 @@ class VisualEditorHooks {
 				'lib/ve/tests/ce/nodes/ve.ce.TableNode.test.js',
 				// VisualEditor UI Tests
 				'lib/ve/tests/ui/ve.ui.Trigger.test.js',
-				'lib/ve/tests/ui/ve.ui.Sequence.test.js',
 				'lib/ve/tests/ui/ve.ui.DiffElement.test.js',
-				'lib/ve/tests/ui/ve.ui.PreviewElement.test.js',
-				'modules/ve-mw/tests/ui/ve.ui.DiffElement.test.js',
 				// VisualEditor Actions Tests
 				'lib/ve/tests/ui/actions/ve.ui.AnnotationAction.test.js',
 				'lib/ve/tests/ui/actions/ve.ui.ContentAction.test.js',
@@ -1154,10 +1150,6 @@ class VisualEditorHooks {
 				'lib/ve/tests/ce/imetests/leftarrow-chromium-ubuntu-none.js',
 				'lib/ve/tests/ce/imetests/leftarrow-firefox-ubuntu-none.js',
 				'lib/ve/tests/ce/imetests/leftarrow-ie9-win7-none.js',
-				// Rebaser infrastructure
-				'lib/ve/rebaser/src/dm/ve.dm.RebaseServer.js',
-				'lib/ve/tests/dm/ve.dm.TestRebaseClient.js',
-				'lib/ve/tests/dm/ve.dm.TestRebaseServer.js',
 			],
 			'dependencies' => [
 				'unicodejs',

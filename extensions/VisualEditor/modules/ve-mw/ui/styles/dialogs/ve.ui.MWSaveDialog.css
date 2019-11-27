@@ -41,10 +41,6 @@
 	margin: 0 1.5em 0 0;
 }
 
-.ve-ui-mwSaveDialog-checkboxes .oo-ui-fieldLayout:last-child {
-	margin-right: 0;
-}
-
 .ve-ui-mwSaveDialog-editSummary-count {
 	position: absolute;
 	right: 0;
@@ -54,9 +50,6 @@
 	line-height: 3em;
 	padding: 0 1em;
 	color: #54595d;
-}
-.ve-ui-mwSaveDialog-editSummary-count:empty {
-	visibility: hidden;
 }
 
 .ve-ui-mwSaveDialog-license {

@@ -36,14 +36,14 @@ QUnit.test( 'commit', function ( assert ) {
 					[ 'pushStartAnnotating', 'set', store.hash( bold ) ],
 					[ 'pushStartAnnotating', 'set', store.hash( underline ) ],
 					[ 'pushRetain', 1 ],
-					[ 'pushStopAnnotating', 'set', store.hash( bold ) ],
 					[ 'pushStopAnnotating', 'clear', store.hash( italic ) ],
+					[ 'pushStopAnnotating', 'set', store.hash( bold ) ],
 					[ 'pushStopAnnotating', 'set', store.hash( underline ) ]
 				],
 				expected: function ( data ) {
 					data[ 1 ] = [ 'a', store.hashAll( [ bold ] ) ];
 					data[ 2 ] = [ 'b', store.hashAll( [ bold ] ) ];
-					data[ 3 ] = [ 'c', store.hashAll( [ underline, bold ] ) ];
+					data[ 3 ] = [ 'c', store.hashAll( [ bold, underline ] ) ];
 				},
 				events: [
 					[ 'annotation', 0, 0 ],
@@ -447,9 +447,9 @@ QUnit.test( 'commit', function ( assert ) {
 			'applying a link across an existing annotation boundary': {
 				data: [
 					{ type: 'paragraph' },
-					[ 'f', store.hashAll( [ italic, bold ] ) ],
-					[ 'o', store.hashAll( [ italic, bold ] ) ],
-					[ 'o', store.hashAll( [ italic, bold ] ) ],
+					[ 'f', store.hashAll( [ bold, italic ] ) ],
+					[ 'o', store.hashAll( [ bold, italic ] ) ],
+					[ 'o', store.hashAll( [ bold, italic ] ) ],
 					[ 'b', store.hashAll( [ bold ] ) ],
 					[ 'a', store.hashAll( [ bold ] ) ],
 					[ 'r', store.hashAll( [ bold ] ) ],
@@ -466,7 +466,7 @@ QUnit.test( 'commit', function ( assert ) {
 					var i, annotations;
 					for ( i = 1; i <= 6; i++ ) {
 						annotations = data[ i ][ 1 ];
-						annotations.splice( 0, 0, store.hash( link ) );
+						annotations.splice( 1, 0, store.hash( link ) );
 					}
 				}
 			},
@@ -723,7 +723,7 @@ QUnit.test( 'commit', function ( assert ) {
 			);
 			if ( 'events' in cases[ msg ] ) {
 				for ( i = 0; i < cases[ msg ].events.length; i++ ) {
-					assert.strictEqual(
+					assert.equal(
 						cases[ msg ].events[ i ].fired,
 						1,
 						'event ' + cases[ msg ].events[ i ][ 0 ] + ' on ' +
@@ -756,26 +756,4 @@ QUnit.test( 'commit', function ( assert ) {
 			);
 		}
 	}
-} );
-
-// TODO: Fix the code so undoing unbold roundtrips properly, then fix this test to reflect that
-QUnit.test( 'undo clear annotation', function ( assert ) {
-	var doc, tx,
-		origData = [
-			{ type: 'paragraph' },
-			[ 'x', [ ve.dm.example.boldHash, ve.dm.example.italicHash ] ],
-			{ type: '/paragraph' }
-		];
-	doc = ve.dm.example.createExampleDocumentFromData( origData );
-	doc.store.hash( ve.dm.example.italic );
-	doc.store.hash( ve.dm.example.bold );
-	tx = ve.dm.TransactionBuilder.static.newFromAnnotation(
-		doc,
-		new ve.Range( 1, 2 ),
-		'clear',
-		ve.dm.example.bold
-	);
-	doc.commit( tx );
-	doc.commit( tx.reversed() );
-	assert.deepEqual( doc.data.data, origData, 'Roundtrip difference undoing unbold under italic' );
 } );

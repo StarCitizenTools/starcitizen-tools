@@ -34,7 +34,7 @@ ve.ui.TableLineContext = function VeUiTableLineContext( tableNode, itemGroup, co
 		$container: this.surface.$element,
 		$floatableContainer: this.icon.$element,
 		position: itemGroup === 'col' ? 'below' : 'after',
-		width: null
+		width: 180
 	} );
 
 	// Events
@@ -128,12 +128,12 @@ ve.ui.TableLineContext.prototype.onModelSelect = function () {
  */
 ve.ui.TableLineContext.prototype.toggleMenu = function ( show ) {
 	var dir, surfaceModel, surfaceView;
-	show = show === undefined ? !this.popup.isVisible() : !!show;
 
 	surfaceModel = this.surface.getModel();
 	surfaceView = this.surface.getView();
 
-	if ( show ) {
+	this.popup.toggle( show );
+	if ( this.popup.isVisible() ) {
 		this.tableNode.setEditing( false );
 		surfaceModel.connect( this, { select: 'onModelSelect' } );
 		surfaceView.$document.on( 'mousedown', this.onDocumentMouseDownHandler );
@@ -149,7 +149,6 @@ ve.ui.TableLineContext.prototype.toggleMenu = function ( show ) {
 	// Parent method - call after selection has been possibly modified above
 	ve.ui.TableLineContext.super.prototype.toggleMenu.call( this, show );
 
-	// Display the popup with correct positioning after the parent method fills in its contents
-	// (or hide it).
-	this.popup.toggle( show );
+	// Update popup positioning after the parent method fills in its contents
+	this.popup.position();
 };

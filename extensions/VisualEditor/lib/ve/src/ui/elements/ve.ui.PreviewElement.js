@@ -15,18 +15,13 @@
  * @constructor
  * @param {ve.dm.Node} [model] Model from which to create a preview
  * @param {Object} [config] Configuration options
- * @cfg {boolean} [useView] Use the view HTML, and don't bother generating model HTML, which is a bit slower
  */
 ve.ui.PreviewElement = function VeUiPreviewElement( model, config ) {
-	config = config || {};
-
 	// Parent constructor
 	ve.ui.PreviewElement.super.call( this, config );
 
 	// Mixin constructor
 	OO.EventEmitter.call( this );
-
-	this.useView = !!config.useView;
 
 	if ( model ) {
 		this.setModel( model );
@@ -66,9 +61,15 @@ ve.ui.PreviewElement.prototype.setModel = function ( model ) {
  * Replace the content of the body with the model DOM
  *
  * Doesn't use jQuery to avoid document switching performance bug
+ *
+ * @fires render
  */
 ve.ui.PreviewElement.prototype.replaceWithModelDom = function () {
-	var htmlDocument = ve.dm.converter.getDomFromNode( this.model, ve.dm.Converter.static.PREVIEW_MODE ),
+	var
+		// FIXME: The 'true' means 'for clipboard'. This is not really true, but changing it to 'false'
+		// breaks the rendering of pretty much everything that checks for 'converter.isForClipboard()',
+		// e.g. nodes in MW like MWTransclusionNode and MWNumberedExternalLinkNode.
+		htmlDocument = ve.dm.converter.getDomFromNode( this.model, true ),
 		body = htmlDocument.body,
 		element = this.$element[ 0 ];
 
@@ -89,7 +90,12 @@ ve.ui.PreviewElement.prototype.replaceWithModelDom = function () {
 		);
 	}
 
-	this.afterRender();
+	// Cleanup
+	this.view.destroy();
+	this.view = null;
+
+	// Event
+	this.emit( 'render' );
 };
 
 /**
@@ -99,38 +105,17 @@ ve.ui.PreviewElement.prototype.updatePreview = function () {
 	var element = this;
 
 	// Initial CE node
-	this.view = ve.ce.nodeFactory.createFromModel( this.model );
+	this.view = ve.ce.nodeFactory.create( this.model.getType(), this.model );
 	this.$element.append( this.view.$element );
-	this.view.setLive( true );
 
+	// When all children are rerendered, replace with dm DOM
 	ve.ce.GeneratedContentNode.static.awaitGeneratedContent( this.view )
 		.then( function () {
-			// When all children are rerendered, replace with DM DOM for a better preview.
-			// Conversion should be pretty fast, but avoid this (by setting useView to true)
-			// if you generating a lot of previews, e.g. in a list
-			if ( !element.useView ) {
-				// Verify that the PreviewElement hasn't been destroyed.
-				if ( element.view ) {
-					element.replaceWithModelDom();
-				}
-			} else {
-				element.afterRender();
+			// Verify that the element and/or the ce node weren't destroyed
+			if ( element.view ) {
+				element.replaceWithModelDom();
 			}
 		} );
-};
-
-/**
- * Cleanup and emit events after render
- *
- * @fires render
- */
-ve.ui.PreviewElement.prototype.afterRender = function () {
-	// Cleanup
-	this.view.destroy();
-	this.view = null;
-
-	// Event
-	this.emit( 'render' );
 };
 
 /**

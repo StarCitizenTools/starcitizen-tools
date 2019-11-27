@@ -78,14 +78,13 @@ class ApiVisualEditor extends ApiBase {
 	/**
 	 * Accessor function for all RESTbase requests
 	 *
-	 * @param Title $title The title of the page to use as the parsing context
 	 * @param string $method The HTTP method, either 'GET' or 'POST'
 	 * @param string $path The RESTbase api path
 	 * @param Array $params Request parameters
 	 * @param Array $reqheaders Request headers
 	 * @return string Body of the RESTbase server's response
 	 */
-	protected function requestRestbase( Title $title, $method, $path, $params, $reqheaders = [] ) {
+	protected function requestRestbase( $method, $path, $params, $reqheaders = [] ) {
 		global $wgVersion;
 		$request = [
 			'method' => $method,
@@ -97,9 +96,7 @@ class ApiVisualEditor extends ApiBase {
 			$request['body'] = $params;
 		}
 		// Should be synchronised with modules/ve-mw/init/ve.init.mw.ArticleTargetLoader.js
-		$reqheaders['Accept'] = 'text/html; charset=utf-8;' .
-			' profile="https://www.mediawiki.org/wiki/Specs/HTML/2.0.0"';
-		$reqheaders['Accept-Language'] = self::getPageLanguage( $title )->getCode();
+		$reqheaders['Accept'] = 'text/html; charset=utf-8; profile="mediawiki.org/specs/html/1.6.0"';
 		$reqheaders['User-Agent'] = 'VisualEditor-MediaWiki/' . $wgVersion;
 		$reqheaders['Api-User-Agent'] = 'VisualEditor-MediaWiki/' . $wgVersion;
 		$request['headers'] = $reqheaders;
@@ -134,11 +131,11 @@ class ApiVisualEditor extends ApiBase {
 	/**
 	 * Run wikitext through the parser's Pre-Save-Transform
 	 *
-	 * @param Title $title The title of the page to use as the parsing context
+	 * @param string $title The title of the page to use as the parsing context
 	 * @param string $wikitext The wikitext to transform
 	 * @return string The transformed wikitext
 	 */
-	protected function pstWikitext( Title $title, $wikitext ) {
+	protected function pstWikitext( $title, $wikitext ) {
 		return ContentHandler::makeContent( $wikitext, $title, CONTENT_MODEL_WIKITEXT )
 			->preSaveTransform(
 				$title,
@@ -158,7 +155,6 @@ class ApiVisualEditor extends ApiBase {
 	 */
 	protected function parseWikitextFragment( Title $title, $wikitext, $bodyOnly ) {
 		return $this->requestRestbase(
-			$title,
 			'POST',
 			'transform/wikitext/to/html/' . urlencode( $title->getPrefixedDBkey() ),
 			[
@@ -173,11 +169,11 @@ class ApiVisualEditor extends ApiBase {
 	 *
 	 * @param string $preload The title of the page to use as the preload content
 	 * @param string[] $params The preloadTransform parameters to pass in, if any
-	 * @param Title $contextTitle The contextual page title against which to parse the preload
+	 * @param string $contextTitle The contextual page title against which to parse the preload
 	 * @param bool $parse Whether to parse the preload content
 	 * @return string The parsed content
 	 */
-	protected function getPreloadContent( $preload, $params, Title $contextTitle, $parse = false ) {
+	protected function getPreloadContent( $preload, $params, $contextTitle, $parse = false ) {
 		$content = '';
 		$preloadTitle = Title::newFromText( $preload );
 		// Check for existence to avoid getting MediaWiki:Noarticletext
@@ -261,7 +257,7 @@ class ApiVisualEditor extends ApiBase {
 		$title = Title::newFromText( $params['page'] );
 		if ( $title && $title->isSpecial( 'CollabPad' ) ) {
 			// Convert Special:CollabPad/MyPage to MyPage so we can parsefragment properly
-			$title = SpecialCollabPad::getSubPage( $title );
+			$title = Title::newFromText( preg_replace( '`^([^/]+/)`', '', $params['page'] ) );
 		}
 		if ( !$title ) {
 			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['page'] ) ] );
@@ -309,7 +305,6 @@ class ApiVisualEditor extends ApiBase {
 					// If requested, request HTML from Parsoid/RESTBase
 					if ( $params['paction'] === 'parse' ) {
 						$content = $this->requestRestbase(
-							$title,
 							'GET',
 							'page/html/' . urlencode( $title->getPrefixedDBkey() ) . '/' . $oldid . '?redirect=false',
 							[]
@@ -430,20 +425,6 @@ class ApiVisualEditor extends ApiBase {
 					// Page protected from creation
 					if ( $title->getRestrictions( 'create' ) ) {
 						$notices[] = $this->msg( 'titleprotectedwarning' )->parseAsBlock();
-					}
-					// From EditPage#showIntro, checking if the page has previously been deleted:
-					$dbr = wfGetDB( DB_REPLICA );
-					LogEventsList::showLogExtract( $out, [ 'delete', 'move' ], $title,
-						'',
-						[
-							'lim' => 10,
-							'conds' => [ 'log_action != ' . $dbr->addQuotes( 'revision' ) ],
-							'showIfEmpty' => false,
-							'msgKey' => [ 'recreate-moveddeleted-warn' ]
-						]
-					);
-					if ( $out ) {
-						$notices[] = $out;
 					}
 				}
 
@@ -741,29 +722,13 @@ class ApiVisualEditor extends ApiBase {
 	}
 
 	/**
-	 * Get the page language from a title, using the content language as fallback on special pages
-	 * @param Title $title Title
-	 * @return Language Content language
-	 */
-	public static function getPageLanguage( Title $title ) {
-		if ( $title->isSpecial( 'CollabPad' ) ) {
-			// Use the site language for CollabPad, as getPageLanguage just
-			// returns the interface language for special pages.
-			// TODO: Let the user change the document language on multi-lingual sites.
-			return MediaWikiServices::getInstance()->getContentLanguage();
-		} else {
-			return $title->getPageLanguage();
-		}
-	}
-
-	/**
 	 * Gets the relevant HTML for the latest log entry on a given title, including a full log link.
 	 *
-	 * @param Title $title Title
+	 * @param $title Title
 	 * @param $types array|string
 	 * @return string
 	 */
-	private function getLastLogEntry( Title $title, $types = '' ) {
+	private function getLastLogEntry( $title, $types = '' ) {
 		$lp = new LogPager(
 			new LogEventsList( $this->getContext() ),
 			$types,

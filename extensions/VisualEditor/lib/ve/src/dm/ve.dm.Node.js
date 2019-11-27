@@ -186,24 +186,6 @@ ve.dm.Node.static.isCellable = false;
 ve.dm.Node.static.canContainContent = false;
 
 /**
- * Whether this node type behaves like a list when diffing.
- *
- * @static
- * @property {boolean}
- * @inheritable
- */
-ve.dm.Node.static.isDiffedAsList = false;
-
-/**
- * Whether this node type behaves like a leaf when diffing.
- *
- * @static
- * @property {boolean}
- * @inheritable
- */
-ve.dm.Node.static.isDiffedAsLeaf = false;
-
-/**
  * Whether this node type has significant whitespace. Only applies to content container nodes
  * (i.e. can only be true if canContainContent is also true).
  *
@@ -456,13 +438,6 @@ ve.dm.Node.prototype.isInternal = function () {
 /**
  * @inheritdoc ve.Node
  */
-ve.dm.Node.prototype.isMetaData = function () {
-	return this.constructor.static.isMetaData;
-};
-
-/**
- * @inheritdoc ve.Node
- */
 ve.dm.Node.prototype.isWrapped = function () {
 	return this.constructor.static.isWrapped;
 };
@@ -514,20 +489,6 @@ ve.dm.Node.prototype.isCellable = function () {
  */
 ve.dm.Node.prototype.isCellEditable = function () {
 	return this.constructor.static.isCellEditable;
-};
-
-/**
- * @inheritdoc ve.Node
- */
-ve.dm.Node.prototype.isDiffedAsList = function () {
-	return this.constructor.static.isDiffedAsList;
-};
-
-/**
- * @inheritdoc ve.Node
- */
-ve.dm.Node.prototype.isDiffedAsLeaf = function () {
-	return this.constructor.static.isDiffedAsLeaf;
 };
 
 /**

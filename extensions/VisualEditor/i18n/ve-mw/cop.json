@@ -1,11 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"ⲁϩⲙⲉⲧ",
-			"Ⲁϩⲙⲉⲧ"
+			"ⲁϩⲙⲉⲧ"
 		]
 	},
 	"tooltip-ca-ve-edit": "ⲫⲱⲛϩ `ⲛⲧⲁⲓⲥⲉⲗⲓⲥ",
-	"visualeditor-ca-editsource": "ⲫⲱⲛϩ `ⲛϯⲡⲏⲅⲏ",
 	"visualeditor-ca-editsource-section": "ⲫⲱⲛϩ `ⲛϯⲡⲏⲅⲏ"
 }

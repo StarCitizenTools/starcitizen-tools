@@ -154,10 +154,7 @@ ve.dm.RebaseClient.prototype.acceptChange = function ( change ) {
 	}
 
 	unsent = this.getChangeSince( this.sentLength, false );
-	if (
-		authorId !== this.getAuthorId() ||
-		change.start + change.getLength() > this.sentLength
-	) {
+	if ( authorId !== this.getAuthorId() ) {
 		uncommitted = this.getChangeSince( this.commitLength, false );
 		result = ve.dm.Change.static.rebaseUncommittedChange( change, uncommitted );
 		if ( result.rejected ) {

@@ -28,16 +28,10 @@ OO.inheritClass( ve.ui.MWCommandHelpDialog, ve.ui.CommandHelpDialog );
 ve.ui.MWCommandHelpDialog.static.commandGroups = ve.extendObject( {}, ve.ui.MWCommandHelpDialog.static.commandGroups, {
 	insert: {
 		title: OO.ui.deferMsg( 'visualeditor-shortcuts-insert' ),
-		promote: [ 'ref', 'template', 'table' ],
-		demote: [ 'horizontalRule' ]
+		promote: [],
+		demote: []
 	}
 } );
-
-ve.ui.MWCommandHelpDialog.static.commandGroupsOrder = [
-	'textStyle', 'clipboard', 'history', 'dialog',
-	'formatting', 'insert',
-	'other'
-];
 
 /* Registration */
 

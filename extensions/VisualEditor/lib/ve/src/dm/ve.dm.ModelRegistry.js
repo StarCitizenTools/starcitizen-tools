@@ -27,7 +27,7 @@
 		// [ [modelNamesWithoutFunc], [modelNamesWithFunc] ]
 		this.modelsWithTypeRegExps = [ [], [] ];
 		// Map tracking registration order
-		// { nameA: 0, nameB: 1, … }
+		// { nameA: 0, nameB: 1, ... }
 		this.registrationOrder = {};
 		this.nextNumber = 0;
 		this.extSpecificTypes = [];
@@ -114,11 +114,6 @@
 		}
 		if ( !( constructor.prototype instanceof ve.dm.Model ) ) {
 			throw new Error( 'Models must be subclasses of ve.dm.Model' );
-		}
-		if ( this.lookup( name ) === constructor ) {
-			// Don't allow double registration as it would create duplicate
-			// entries in various caches.
-			return;
 		}
 
 		// Register the model with the right factory
@@ -403,13 +398,13 @@
 		types = [];
 		if ( node.getAttribute ) {
 			if ( node.getAttribute( 'rel' ) ) {
-				types = types.concat( node.getAttribute( 'rel' ).trim().split( /\s+/ ) );
+				types = types.concat( node.getAttribute( 'rel' ).split( ' ' ) );
 			}
 			if ( node.getAttribute( 'typeof' ) ) {
-				types = types.concat( node.getAttribute( 'typeof' ).trim().split( /\s+/ ) );
+				types = types.concat( node.getAttribute( 'typeof' ).split( ' ' ) );
 			}
 			if ( node.getAttribute( 'property' ) ) {
-				types = types.concat( node.getAttribute( 'property' ).trim().split( /\s+/ ) );
+				types = types.concat( node.getAttribute( 'property' ).split( ' ' ) );
 			}
 		}
 

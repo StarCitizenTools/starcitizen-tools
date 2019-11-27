@@ -137,7 +137,7 @@ ve.ce.GeneratedContentNode.prototype.getRenderedDomElements = function ( domElem
 	var rendering,
 		doc = this.getElementDocument();
 
-	rendering = this.filterRenderedDomElements(
+	rendering = ve.filterMetaElements(
 		// Clone the elements into the target document
 		ve.copyDomElements( domElements, doc )
 	);
@@ -165,16 +165,6 @@ ve.ce.GeneratedContentNode.prototype.getRenderedDomElements = function ( domElem
 	);
 
 	return rendering;
-};
-
-/**
- * Filter out elemements from the rendered content which we don't want to display in the CE.
- *
- * @param {Node[]} domElements Clones of the DOM elements from the store, already copied into the document
- * @return {Node[]} DOM elements to keep
- */
-ve.ce.GeneratedContentNode.prototype.filterRenderedDomElements = function ( domElements ) {
-	return ve.filterMetaElements( domElements );
 };
 
 /**

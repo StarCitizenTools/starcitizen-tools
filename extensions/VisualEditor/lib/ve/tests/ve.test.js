@@ -186,7 +186,7 @@ QUnit.test( 'setDomAttributes', function ( assert ) {
 
 	target = sample.cloneNode();
 	ve.setDomAttributes( target, { onclick: 'alert(1);', foo: 'update', add: 'whee' }, [ 'foo', 'add' ] );
-	assert.strictEqual( target.hasAttribute( 'onclick' ), false, 'whitelist affects creating attributes' );
+	assert.ok( !target.hasAttribute( 'onclick' ), 'whitelist affects creating attributes' );
 	assert.deepEqual(
 		ve.getDomAttributes( target ),
 		{ foo: 'update', bar: 'two', baz: 'three', add: 'whee' },
@@ -218,7 +218,7 @@ QUnit.test( 'sparseSplice', function ( assert ) {
 		var j, jLen,
 			strings = [];
 		for ( j = 0, jLen = flatArray.length; j < jLen; j++ ) {
-			strings.push( Object.prototype.hasOwnProperty.call( flatArray, j ) ? String( flatArray[ j ] ) : '' );
+			strings.push( flatArray.hasOwnProperty( j ) ? String( flatArray[ j ] ) : '' );
 		}
 		return strings;
 	}
@@ -330,12 +330,12 @@ QUnit.test( 'batchPush', function ( assert ) {
 
 	actual = [];
 	actualRet = ve.batchPush( actual, [ 1, 2, 3 ] );
-	assert.strictEqual( actualRet, 3, 'Adding to an empty array: return' );
+	assert.deepEqual( actualRet, 3, 'Adding to an empty array: return' );
 	assert.deepEqual( actual, [ 1, 2, 3 ], 'Adding to an empty array: value' );
 
 	actual = [ 1 ];
 	actualRet = ve.batchPush( actual, [ 1, 2, 3 ] );
-	assert.strictEqual( actualRet, 4, 'Adding to a non-empty array: return' );
+	assert.deepEqual( actualRet, 4, 'Adding to a non-empty array: return' );
 	assert.deepEqual( actual, [ 1, 1, 2, 3 ], 'Adding to a non-empty array: value' );
 
 	// batchPush takes a separate codepath for really long arrays, make sure it's behaving similarly:
@@ -346,9 +346,9 @@ QUnit.test( 'batchPush', function ( assert ) {
 
 	actual = [ 'a' ];
 	actualRet = ve.batchPush( actual, bigArr );
-	assert.strictEqual( actualRet, 2101, 'Adding a huge array: return' );
-	assert.strictEqual( actual[ 0 ], 'a', 'Adding a huge array: first value' );
-	assert.strictEqual( actual[ actual.length - 1 ], 2099, 'Adding a huge array: last value' );
+	assert.deepEqual( actualRet, 2101, 'Adding a huge array: return' );
+	assert.deepEqual( actual[ 0 ], 'a', 'Adding a huge array: first value' );
+	assert.deepEqual( actual[ actual.length - 1 ], 2099, 'Adding a huge array: last value' );
 } );
 
 QUnit.test( 'insertIntoArray', function ( assert ) {
@@ -595,6 +595,19 @@ QUnit.test( 'isBlockElement/isVoidElement', function ( assert ) {
 	assert.strictEqual( ve.isVoidElement( 'span' ), false, '"span" is not a void element' );
 	assert.strictEqual( ve.isVoidElement( document.createElement( 'img' ) ), true, '<img> is a void element' );
 	assert.strictEqual( ve.isVoidElement( document.createElement( 'div' ) ), false, '<div> is not a void element' );
+} );
+
+QUnit.test( 'isUnattachedCombiningMark', function ( assert ) {
+	assert.strictEqual( ve.isUnattachedCombiningMark( 'Ú' ), false, '"Ú" is not an unattached combining mark' );
+	assert.strictEqual( ve.isUnattachedCombiningMark( 'é' ), false, '"é" is not an unattached combining mark' );
+	assert.strictEqual( ve.isUnattachedCombiningMark( '\u02FF' ), false, '"\u02FF" is not an unattached combining mark' );
+	assert.strictEqual( ve.isUnattachedCombiningMark( '\u0300' ), true, '"\u0300" is an unattached combining mark' );
+	assert.strictEqual( ve.isUnattachedCombiningMark( '̀' ), true, '" ̀" is an unattached combining mark' );
+	assert.strictEqual( ve.isUnattachedCombiningMark( '́' ), true, '" ́" is an unattached combining mark' );
+	assert.strictEqual( ve.isUnattachedCombiningMark( '\u036F' ), true, '"\u036F" is an unattached combining mark' );
+	assert.strictEqual( ve.isUnattachedCombiningMark( 'ͯ' ), true, '" ͯ" is an unattached combining mark' );
+	assert.strictEqual( ve.isUnattachedCombiningMark( '̀ͯ' ), true, '"̀ͯ" is an unattached combining mark (even though it is two attached to each other)' );
+	assert.strictEqual( ve.isUnattachedCombiningMark( '\u0370' ), false, '"\u0370" is not an unattached combining mark' );
 } );
 
 // TODO: ve.getByteOffset
@@ -917,7 +930,7 @@ QUnit.test( 'getCommonAncestor', function ( assert ) {
 		test = tests[ i ];
 		testNodes = test.nodes.split( /\s+/ ).map( getNode );
 		ancestorNode = nodes[ test.ancestor ];
-		assert.strictEqual(
+		assert.equal(
 			ve.getCommonAncestor.apply( null, testNodes ),
 			ancestorNode,
 			test.nodes + ' -> ' + test.ancestor
@@ -925,7 +938,7 @@ QUnit.test( 'getCommonAncestor', function ( assert ) {
 	}
 
 	// Test no-argument case
-	assert.strictEqual( ve.getCommonAncestor(), null, 'No nodes' );
+	assert.equal( ve.getCommonAncestor(), null, 'No nodes' );
 } );
 
 QUnit.test( 'getCommonStartSequenceLength', function ( assert ) {

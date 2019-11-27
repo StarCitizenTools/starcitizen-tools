@@ -17,12 +17,6 @@ $specialPageAliases['en'] = [
 	'CollabPad' => [ 'CollabPad', 'Collab Pad' ],
 ];
 
-/** Arabic
- */
-$specialPageAliases['ar'] = [
-	'CollabPad' => 'كولاب باد',
-];
-
 /** Cyrmu
  * @author "James D. Forrester"
  */
@@ -30,26 +24,8 @@ $specialPageAliases['cy'] = [
 	'CollabPad' => [ 'PadCydweithredu', 'Pad Cydweithredu' ],
 ];
 
-/** Hebrew
- */
-$specialPageAliases['he'] = [
-	'CollabPad' => [ 'פנקס שיתופי' ],
-];
-
-/** Macedonian
- */
-$specialPageAliases['mk'] = [
-	'CollabPad' => [ 'Соработна тетратка' ],
-];
-
-/** Marathi
- */
-$specialPageAliases['mr'] = [
-	'CollabPad' => [ 'सहसंपादनपत्र' ],
-];
-
 /** Urdu
  */
 $specialPageAliases['ur'] = [
-	'CollabPad' => [ 'مشترکہ پیڈ' ],
+	'CollabPad' => [ 'مشترکہ_پیڈ' ],
 ];

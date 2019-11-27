@@ -18,11 +18,10 @@
 			"Siebrand",
 			"Trevor Parscal",
 			"Liuxinyu970226",
-			"Robby",
-			"BadDog"
+			"Robby"
 		]
 	},
-	"ooui-outline-control-move-down": "Tooltip for a button that moves items in a list down one place",
+	"ooui-outline-control-move-down": "Tool tip for a button that moves items in a list down one place",
 	"ooui-outline-control-move-up": "Tool tip for a button that moves items in a list up one place",
 	"ooui-outline-control-remove": "Tool tip for a button that removes items from a list.\n{{Identical|Remove item}}",
 	"ooui-toolbar-more": "Label for the toolbar group that contains a list of all other available tools.\n{{Identical|More}}",
@@ -38,6 +37,5 @@
 	"ooui-selectfile-button-select": "Label for the file selection widget's select file button",
 	"ooui-selectfile-not-supported": "Label for the file selection widget if file selection is not supported",
 	"ooui-selectfile-placeholder": "Label for the file selection widget when no file is currently selected",
-	"ooui-selectfile-dragdrop-placeholder": "Label for the file selection widget's drop target",
-	"ooui-field-help": "Label for the help icon attached to a form field\n{{Identical|Help}}"
+	"ooui-selectfile-dragdrop-placeholder": "Label for the file selection widget's drop target"
 }

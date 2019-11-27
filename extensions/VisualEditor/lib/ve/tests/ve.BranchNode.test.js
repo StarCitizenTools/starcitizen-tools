@@ -63,6 +63,8 @@ QUnit.test( 'setDocument', function ( assert ) {
 		attachEvents = [ '+para1', '+listItem1', '+para2', '+listItem2', '+list' ],
 		detachEvents = [ '-para1', '-listItem1', '-para2', '-listItem2', '-list' ];
 
+	assert.expect( 4 );
+
 	doc.connect( doc, {
 		nodeAttached: function ( node ) {
 			log.push( '+' + node.label );

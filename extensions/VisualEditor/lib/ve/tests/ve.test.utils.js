@@ -22,18 +22,6 @@
 	OO.inheritClass( DummyPlatform, ve.init.Platform );
 	DummyPlatform.prototype.getUserLanguages = function () { return [ 'en' ]; };
 	DummyPlatform.prototype.getMessage = function () { return Array.prototype.join.call( arguments, ',' ); };
-	DummyPlatform.prototype.getHtmlMessage = function () {
-		var $wrapper = $( '<div>' );
-		Array.prototype.forEach.call( arguments, function ( arg, i, args ) {
-			$wrapper.append( arg );
-			if ( i < args.length - 1 ) {
-				$wrapper.append( ',' );
-			}
-		} );
-		// Merge text nodes
-		$wrapper[ 0 ].normalize();
-		return $wrapper.contents();
-	};
 	DummyPlatform.prototype.getLanguageName = function ( lang ) { return 'langname-' + lang; };
 	DummyPlatform.prototype.getLanguageDirection = function () { return 'ltr'; };
 	DummyPlatform.prototype.getExternalLinkUrlProtocolsRegExp = function () { return /^https?:\/\//i; };
@@ -42,9 +30,7 @@
 	DummyPlatform.prototype.setUserConfig = function () {};
 	DummyPlatform.prototype.getSession = function ( key ) {
 		if ( this.sessionDisabled ) { return false; }
-		return Object.prototype.hasOwnProperty.call( this.sessionStorage, key ) ?
-			this.sessionStorage[ key ] :
-			null;
+		return this.sessionStorage.hasOwnProperty( key ) ? this.sessionStorage[ key ] : null;
 	};
 	DummyPlatform.prototype.setSession = function ( key, value ) {
 		if ( this.sessionDisabled || value === '__FAIL__' ) { return false; }
@@ -64,7 +50,6 @@
 	DummyTarget.prototype.addSurface = function () {
 		// Parent method
 		var surface = DummyTarget.super.prototype.addSurface.apply( this, arguments );
-		this.$element.append( surface.$element );
 		if ( !this.getSurface() ) {
 			this.setSurface( surface );
 		}
@@ -76,14 +61,14 @@
 
 	/* eslint-disable no-new */
 	new ve.test.utils.DummyPlatform();
-	new ve.test.utils.DummyTarget(); // Target gets appended to qunit-fixture in ve.qunit.local.js
+	new ve.test.utils.DummyTarget();
 	/* eslint-enable no-new */
 
 	// Disable scroll animatinos
 	ve.scrollIntoView = function () {};
 
 	function getSerializableData( model ) {
-		return model.getFullData( undefined, 'roundTrip' );
+		return model.getFullData( undefined, true );
 	}
 
 	ve.test.utils.runIsolateTest = function ( assert, type, range, expected, label ) {
@@ -231,34 +216,23 @@
 	};
 
 	ve.test.utils.runGetDomFromModelTest = function ( assert, caseItem, msg ) {
-		var originalData, model, html, fromDataBody, clipboardHtml, previewHtml;
+		var originalData, model, html, fromDataBody, clipboardHtml;
 
 		model = ve.test.utils.getModelFromTestCase( caseItem );
 		originalData = ve.copy( getSerializableData( model ) );
 		fromDataBody = caseItem.fromDataBody || caseItem.normalizedBody || caseItem.body;
 		html = '<body>' + fromDataBody + '</body>';
 		clipboardHtml = '<body>' + ( caseItem.clipboardBody || fromDataBody ) + '</body>';
-		previewHtml = '<body>' + ( caseItem.previewBody || fromDataBody ) + '</body>';
 		assert.equalDomElement(
 			ve.dm.converter.getDomFromModel( model ),
 			ve.createDocumentFromHtml( html ),
 			msg
 		);
 		assert.equalDomElement(
-			ve.dm.converter.getDomFromModel( model, ve.dm.Converter.static.CLIPBOARD_MODE ),
+			ve.dm.converter.getDomFromModel( model, true ),
 			ve.createDocumentFromHtml( clipboardHtml ),
 			msg + ' (clipboard mode)'
 		);
-		// Make this conditional on previewBody being present until downstream test-suites have been fixed.
-		// This should be changed to:
-		// if ( caseItem.previewBody !== false ) {
-		if ( caseItem.previewBody ) {
-			assert.equalDomElement(
-				ve.dm.converter.getDomFromModel( model, ve.dm.Converter.static.PREVIEW_MODE ),
-				ve.createDocumentFromHtml( previewHtml ),
-				msg + ' (preview mode)'
-			);
-		}
 		assert.deepEqualWithDomElements( getSerializableData( model ), originalData, msg + ' (data hasn\'t changed)' );
 	};
 
@@ -275,13 +249,13 @@
 		assert.strictEqual( diffElement.$element.hasClass( 've-ui-diffElement-hasMoves' ), !!caseItem.hasMoves, caseItem.msg + ': hasMoves' );
 		assert.strictEqual( diffElement.$element.hasClass( 've-ui-diffElement-hasDescriptions' ), !!caseItem.expectedDescriptions, caseItem.msg + ': hasDescriptions' );
 		if ( caseItem.expectedDescriptions !== undefined ) {
-			assert.deepEqualWithDomElements(
-				diffElement.descriptions.items.map( function ( item ) { return item.$label.contents().toArray(); } ),
-				caseItem.expectedDescriptions.map( function ( expected ) { return $.parseHTML( expected ); } ),
+			assert.deepEqual(
+				diffElement.descriptions.items.map( function ( item ) { return item.$label.text(); } ),
+				caseItem.expectedDescriptions,
 				caseItem.msg + ': sidebar'
 			);
 		}
-		assert.strictEqual(
+		assert.deepEqual(
 			diffElement.$messages.children().length, caseItem.forceTimeout ? 1 : 0,
 			'Timeout message ' + ( caseItem.forceTimeout ? 'shown' : 'not shown' )
 		);
@@ -311,7 +285,10 @@
 	 * @return {ve.ui.Surface} UI surface
 	 */
 	ve.test.utils.createSurfaceFromDocument = function ( doc ) {
-		return ve.init.target.addSurface( doc );
+		var target = new ve.init.sa.Target();
+		$( '#qunit-fixture' ).append( target.$element );
+		target.addSurface( doc );
+		return target.surface;
 	};
 
 	/**
@@ -356,13 +333,6 @@
 				getView: function () {
 					return view;
 				},
-				getCommands: function () {
-					return ve.ui.commandRegistry.getNames();
-				},
-				isDisabled: function () {
-					return false;
-				},
-				execute: ve.ui.Surface.prototype.execute,
 				commandRegistry: ve.ui.commandRegistry,
 				sequenceRegistry: ve.ui.sequenceRegistry,
 				dataTransferHandlerFactory: ve.ui.dataTransferHandlerFactory

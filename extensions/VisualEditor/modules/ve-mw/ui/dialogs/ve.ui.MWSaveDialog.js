@@ -189,11 +189,10 @@ ve.ui.MWSaveDialog.prototype.setDiffAndReview = function ( wikitextDiffPromise, 
  * @param {HTMLDocument} [baseDoc] Base document against which to normalise links, if document provided
  */
 ve.ui.MWSaveDialog.prototype.showPreview = function ( docOrMsg, baseDoc ) {
-	var body, contents, $heading, redirectMeta, deferred,
+	var body, contents, $heading, redirectMeta,
 		$redirect = $(),
 		categories = [],
-		modules = [],
-		dialog = this;
+		modules = [];
 
 	if ( docOrMsg instanceof HTMLDocument ) {
 		// Extract required modules for stylesheet tags (avoids re-loading styles)
@@ -211,7 +210,7 @@ ve.ui.MWSaveDialog.prototype.showPreview = function ( docOrMsg, baseDoc ) {
 		body = docOrMsg.body;
 		// Take a snapshot of all categories
 		Array.prototype.forEach.call( body.querySelectorAll( 'link[rel~="mw:PageProp/Category"]' ), function ( element ) {
-			categories.push( ve.dm.nodeFactory.createFromElement( ve.dm.MWCategoryMetaItem.static.toDataElement( [ element ] ) ) );
+			categories.push( ve.dm.MWCategoryMetaItem.static.toDataElement( [ element ] ).attributes.category );
 		} );
 		// Import body to current document, then resolve attributes against original document (parseDocument called #fixBase)
 		document.adoptNode( body );
@@ -227,9 +226,9 @@ ve.ui.MWSaveDialog.prototype.showPreview = function ( docOrMsg, baseDoc ) {
 		// Document title will only be set if wikitext contains {{DISPLAYTITLE}}
 		if ( docOrMsg.title ) {
 			// HACK: Parse title as it can contain basic wikitext (T122976)
-			ve.init.target.getContentApi().post( {
+			new mw.Api().post( {
 				action: 'parse',
-				title: ve.init.target.getPageName(),
+				title: ve.init.target.pageName,
 				prop: 'displaytitle',
 				text: '{{DISPLAYTITLE:' + docOrMsg.title + '}}\n'
 			} ).then( function ( response ) {
@@ -252,34 +251,32 @@ ve.ui.MWSaveDialog.prototype.showPreview = function ( docOrMsg, baseDoc ) {
 
 		this.$previewViewer.empty().append(
 			// TODO: This won't work with formatted titles (T122976)
-			$heading.text( docOrMsg.title || mw.Title.newFromText( ve.init.target.getPageName() ).getPrefixedText() ),
+			$heading.text( docOrMsg.title || mw.Title.newFromText( ve.init.target.pageName ).getPrefixedText() ),
 			$redirect,
 			$( '<div>' ).addClass( 'mw-content-' + mw.config.get( 'wgVisualEditor' ).pageLanguageDir ).append(
 				contents
 			)
 		);
 
+		if ( categories.length ) {
+			// Simple category list rendering
+			this.$previewViewer.append(
+				$( '<div>' ).addClass( 'catlinks' ).append(
+					document.createTextNode( ve.msg( 'pagecategories', categories.length ) + ve.msg( 'colon-separator' ) ),
+					$( '<ul>' ).append( categories.map( function ( category ) {
+						var title = mw.Title.newFromText( category );
+						return $( '<li>' ).append( $( '<a>' ).attr( 'rel', 'mw:WikiLink' ).attr( 'href', title.getUrl() ).text( title.getMainText() ) );
+					} ) )
+				)
+			);
+		}
+
 		ve.targetLinksToNewWindow( this.$previewViewer[ 0 ] );
 		// Add styles so links render with their appropriate classes
 		ve.init.platform.linkCache.styleParsoidElements( this.$previewViewer, baseDoc );
 
-		if ( categories.length ) {
-			// If there are categories, we need to render them. This involves
-			// a delay, since they might be hidden categories.
-			deferred = ve.init.target.renderCategories( categories ).done( function ( $categories ) {
-				dialog.$previewViewer.append( $categories );
-
-				ve.targetLinksToNewWindow( $categories[ 0 ] );
-				// Add styles so links render with their appropriate classes
-				ve.init.platform.linkCache.styleParsoidElements( $categories, baseDoc );
-			} );
-		} else {
-			deferred = $.Deferred().resolve();
-		}
-		deferred.done( function () {
-			// Run hooks so other things can alter the document
-			mw.hook( 'wikipage.content' ).fire( dialog.$previewViewer );
-		} );
+		// Run hooks so other things can alter the document
+		mw.hook( 'wikipage.content' ).fire( this.$previewViewer );
 	} else {
 		this.$previewViewer.empty().append(
 			$( '<em>' ).text( docOrMsg )
@@ -390,7 +387,7 @@ ve.ui.MWSaveDialog.prototype.swapPanel = function ( panel, noFocus ) {
 					this.$reviewEditSummary.parent()
 						.removeClass( 'oo-ui-element-hidden' )
 						.addClass( 'mw-ajax-loader' );
-					this.editSummaryXhr = ve.init.target.getContentApi().post( {
+					this.editSummaryXhr = new mw.Api().post( {
 						action: 'parse',
 						summary: currentEditSummaryWikitext
 					} ).done( function ( result ) {
@@ -564,7 +561,7 @@ ve.ui.MWSaveDialog.prototype.initialize = function () {
 	// Byte counter in edit summary
 	this.editSummaryCountLabel = new OO.ui.LabelWidget( {
 		classes: [ 've-ui-mwSaveDialog-editSummary-count' ],
-		label: '',
+		label: String( this.editSummaryCodePointLimit || this.editSummaryByteLimit ),
 		title: ve.msg( this.editSummaryCodePointLimit ?
 			'visualeditor-editsummary-characters-remaining' : 'visualeditor-editsummary-bytes-remaining' )
 	} );
@@ -599,27 +596,26 @@ ve.ui.MWSaveDialog.prototype.initialize = function () {
 	// Limit length, and display the remaining bytes/characters
 	if ( this.editSummaryCodePointLimit ) {
 		this.editSummaryInput.$input.codePointLimit( this.editSummaryCodePointLimit );
+		this.editSummaryInput.on( 'change', function () {
+			dialog.changedEditSummary = true;
+			dialog.editSummaryCountLabel.setLabel(
+				String( dialog.editSummaryCodePointLimit -
+					mwString.codePointLength( dialog.editSummaryInput.getValue() ) )
+			);
+		} );
 	} else {
 		this.editSummaryInput.$input.byteLimit( this.editSummaryByteLimit );
+		this.editSummaryInput.on( 'change', function () {
+			// TODO: This looks a bit weird, there is no unit in the UI, just numbers
+			// Users likely assume characters but then it seems to count down quicker
+			// than expected. Facing users with the word "byte" is bad? (bug 40035)
+			dialog.changedEditSummary = true;
+			dialog.editSummaryCountLabel.setLabel(
+				String( dialog.editSummaryByteLimit -
+					mwString.byteLength( dialog.editSummaryInput.getValue() ) )
+			);
+		} );
 	}
-	this.editSummaryInput.on( 'change', function () {
-		var remaining;
-		if ( dialog.editSummaryCodePointLimit ) {
-			remaining = dialog.editSummaryCodePointLimit - mwString.codePointLength( dialog.editSummaryInput.getValue() );
-		} else {
-			remaining = dialog.editSummaryByteLimit - mwString.byteLength( dialog.editSummaryInput.getValue() );
-		}
-		// TODO: This looks a bit weird, there is no unit in the UI, just
-		// numbers. Users likely assume characters but then it seems to count
-		// down quicker than expected if it's byteLimit. Facing users with the
-		// word "byte" is bad? (T42035)
-		dialog.changedEditSummary = true;
-		if ( remaining > 99 ) {
-			dialog.editSummaryCountLabel.setLabel( '' );
-		} else {
-			dialog.editSummaryCountLabel.setLabel( mw.language.convertNumber( remaining ) );
-		}
-	} );
 
 	this.$saveCheckboxes = $( '<div>' ).addClass( 've-ui-mwSaveDialog-checkboxes' );
 	this.$saveOptions = $( '<div>' ).addClass( 've-ui-mwSaveDialog-options' ).append(
@@ -888,7 +884,7 @@ ve.ui.MWSaveDialog.prototype.getActionProcess = function ( action ) {
 	}
 	if ( action === 'report' ) {
 		return new OO.ui.Process( function () {
-			window.open( this.constructor.static.feedbackUrl );
+			window.open( this.constructor.static.feedbackUrl, '_new' );
 		}, this );
 	}
 

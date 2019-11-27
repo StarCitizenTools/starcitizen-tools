@@ -55,6 +55,8 @@
 					"ve.dm.DataString",
 					"ve.dm.HashValueStore",
 					"ve.dm.Scalable",
+					"ve.dm.APIResultsProvider",
+					"ve.dm.APIResultsQueue",
 					"ve.dm.Surface",
 					"ve.dm.*SurfaceFragment",
 					"ve.dm.*Selection",
@@ -104,9 +106,6 @@
 					"ve.dm.Change",
 					"ve.dm.RebaseDocState",
 					"ve.dm.RebaseClient",
-					"ve.dm.RebaseServer",
-					"ve.dm.ProtocolServer",
-					"ve.dm.TransportServer",
 					"ve.dm.SurfaceSynchronizer"
 				]
 			}
@@ -251,13 +250,6 @@
 				"classes": [
 					"ve.ce.TestOffset",
 					"ve.ce.TestRunner"
-				]
-			},
-			{
-				"name": "Rebasing",
-				"classes": [
-					"ve.dm.TestRebaseClient",
-					"ve.dm.TestRebaseServer"
 				]
 			}
 		]

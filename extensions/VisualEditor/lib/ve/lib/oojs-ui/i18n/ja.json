@@ -10,8 +10,7 @@
 			"Sujiniku",
 			"Translatealcd",
 			"Otokoume",
-			"Rxy",
-			"S2KTS"
+			"Rxy"
 		]
 	},
 	"ooui-outline-control-move-down": "項目を下に移動させる",
@@ -30,6 +29,5 @@
 	"ooui-selectfile-button-select": "ファイルを選択",
 	"ooui-selectfile-not-supported": "ファイルの選択はサポートされていません",
 	"ooui-selectfile-placeholder": "ファイルが選択されていません",
-	"ooui-selectfile-dragdrop-placeholder": "ファイルをここにドロップ",
-	"ooui-field-help": "ヘルプ"
+	"ooui-selectfile-dragdrop-placeholder": "ファイルをここにドロップ"
 }
