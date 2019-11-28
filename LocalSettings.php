@@ -562,12 +562,12 @@ $wgFooterIcons = [
             "alt" => "Powered by MediaWiki",
         ]
     ],
-  "monitoredby" => [
-        "wikiapiary" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
-            "url" => "https://wikiapiary.com/wiki/The_Star_Citizen_Wiki",
-            "alt" => "Monitored By Wikiapiary",
-        ]
+    "monitoredby" => [
+          "wikiapiary" => [
+              "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+              "url" => "https://wikiapiary.com/wiki/The_Star_Citizen_Wiki",
+              "alt" => "Monitored By Wikiapiary",
+          ]
     ],
 /*
   "gdprcompliance" => [
@@ -578,11 +578,18 @@ $wgFooterIcons = [
         ]
     ],
 */
-  "madeby" => [
-        "thecommunity" => [
+    "madeby" => [
+          "thecommunity" => [
+              "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+              "url" => "https://robertsspaceindustries.com",
+              "alt" => "Made by the community",
+          ]
+    ],
+    "partof" => [
+        "starcitizentools" => [
             "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
-            "url" => "https://robertsspaceindustries.com",
-            "alt" => "Made by the community",
+            "url" => "https://starcitizen.tools",
+            "alt" => "Part of Star Citizen Tools",
         ]
     ]
 ];
