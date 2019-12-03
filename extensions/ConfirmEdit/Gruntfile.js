@@ -7,10 +7,6 @@ module.exports = function ( grunt ) {
 
 	grunt.initConfig( {
 		eslint: {
-			options: {
-				reportUnusedDisableDirectives: true,
-				cache: true
-			},
 			all: [
 				'**/*.js',
 				'!node_modules/**',
@@ -20,7 +16,6 @@ module.exports = function ( grunt ) {
 		stylelint: {
 			all: [
 				'**/*.css',
-				'**/*.less',
 				'!node_modules/**',
 				'!vendor/**'
 			]

@@ -17,17 +17,13 @@
 		]
 	},
 	"AutoloadClasses": {
-		"FancyCaptcha": "includes/FancyCaptcha.php",
-		"HTMLFancyCaptchaField": "includes/HTMLFancyCaptchaField.php",
-		"ApiFancyCaptchaReload": "includes/ApiFancyCaptchaReload.php"
+		"FancyCaptcha": "FancyCaptcha.class.php",
+		"HTMLFancyCaptchaField": "HTMLFancyCaptchaField.php",
+		"ApiFancyCaptchaReload": "ApiFancyCaptchaReload.php"
 	},
 	"ResourceModules": {
 		"ext.confirmEdit.fancyCaptcha.styles": {
-			"styles": "ext.confirmEdit.fancyCaptcha.less",
-			"targets": [
-				"mobile",
-				"desktop"
-			]
+			"styles": "ext.confirmEdit.fancyCaptcha.css"
 		},
 		"ext.confirmEdit.fancyCaptcha": {
 			"scripts": "ext.confirmEdit.fancyCaptcha.js",

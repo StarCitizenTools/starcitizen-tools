@@ -1,7 +1,7 @@
 {
 	"@doc": "Please read README.md",
 	"name": "ConfirmEdit",
-	"version": "1.6.0",
+	"version": "1.5.1",
 	"author": [
 		"Brion Vibber",
 		"Florian Schmidt",
@@ -13,7 +13,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "antispam",
 	"requires": {
-		"MediaWiki": ">= 1.31.0"
+		"MediaWiki": ">= 1.28"
 	},
 	"GroupPermissions": {
 		"*": {
@@ -39,7 +39,7 @@
 		"ConfirmEditHooks::confirmEditSetup"
 	],
 	"SpecialPages": {
-		"Captcha": "SpecialCaptcha"
+		"Captcha": "CaptchaSpecialPage"
 	},
 	"MessagesDirs": {
 		"ConfirmEdit": [
@@ -51,37 +51,21 @@
 	},
 	"AutoloadClasses": {
 		"ConfirmEditHooks": "includes/ConfirmEditHooks.php",
-		"HTMLFancyCaptchaField": "FancyCaptcha/includes/HTMLFancyCaptchaField.php",
-		"HTMLReCaptchaField": "ReCaptcha/includes/HTMLReCaptchaField.php",
-		"HTMLReCaptchaNoCaptchaField": "ReCaptchaNoCaptcha/includes/HTMLReCaptchaNoCaptchaField.php",
-		"HTMLSubmittedValueField": "ReCaptcha/includes/HTMLSubmittedValueField.php",
-		"SimpleCaptcha": "SimpleCaptcha/SimpleCaptcha.php",
+		"SimpleCaptcha": "SimpleCaptcha/Captcha.php",
 		"CaptchaStore": "includes/store/CaptchaStore.php",
 		"CaptchaSessionStore": "includes/store/CaptchaSessionStore.php",
 		"CaptchaCacheStore": "includes/store/CaptchaCacheStore.php",
 		"CaptchaHashStore": "includes/store/CaptchaHashStore.php",
 		"CaptchaTriggers": "includes/CaptchaTriggers.php",
-		"SpecialCaptcha": "includes/specials/SpecialCaptcha.php",
+		"CaptchaSpecialPage": "includes/specials/SpecialCaptcha.php",
 		"CaptchaPreAuthenticationProvider": "includes/auth/CaptchaPreAuthenticationProvider.php",
-		"CaptchaAuthenticationRequest": "includes/auth/CaptchaAuthenticationRequest.php",
-		"ReCaptchaAuthenticationRequest": "ReCaptcha/includes/ReCaptchaAuthenticationRequest.php",
-		"ReCaptchaNoCaptchaAuthenticationRequest": "ReCaptchaNoCaptcha/includes/ReCaptchaNoCaptchaAuthenticationRequest.php"
+		"CaptchaAuthenticationRequest": "includes/auth/CaptchaAuthenticationRequest.php"
 	},
 	"ResourceModules": {
 		"ext.confirmEdit.editPreview.ipwhitelist.styles": {
 			"styles": "ext.confirmEdit.editPreview.ipwhitelist.styles.css"
-		},
-		"ext.confirmEdit.visualEditor": {
-			"scripts": "ve-confirmedit/ve.init.mw.CaptchaSaveErrorHandler.js",
-			"targets": [ "desktop", "mobile" ]
-		},
-		"ext.confirmEdit.simpleCaptcha": {
-			"styles": "../SimpleCaptcha/resources/ext.confirmEdit.simpleCaptcha.css"
 		}
 	},
-	"VisualEditorPluginModules": [
-		"ext.confirmEdit.visualEditor"
-	],
 	"ResourceFileModulePaths": {
 		"localBasePath": "resources",
 		"remoteExtPath": "ConfirmEdit/resources"
@@ -93,7 +77,7 @@
 		"PageContentSaveComplete": "ConfirmEditHooks::onPageContentSaveComplete",
 		"EditPage::showEditForm:fields": "ConfirmEditHooks::showEditFormFields",
 		"EditFilterMergedContent": "ConfirmEditHooks::confirmEditMerged",
-		"APIGetAllowedParams": "ConfirmEditHooks::onAPIGetAllowedParams",
+		"APIGetAllowedParams": "ConfirmEditHooks::APIGetAllowedParams",
 		"TitleReadWhitelist": "ConfirmEditHooks::onTitleReadWhitelist",
 		"AlternateEditPreview": "ConfirmEditHooks::onAlternateEditPreview",
 		"AuthChangeFormFields": "ConfirmEditHooks::onAuthChangeFormFields"
