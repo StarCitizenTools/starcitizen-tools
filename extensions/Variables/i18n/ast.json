@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu"
+		]
+	},
+	"variables-desc": "Funciones analítiques que permiten trabayar con variables dinámiques nun contestu d'artículu",
+	"variables-config-disabledfunctions": "Permite definir un rangu de funciones que nun tendríen de tar disponibles na wiki. Nun escribas nengún # al añadir funciones."
+}
