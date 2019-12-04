@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 
 	// FIXME: Move into separate file as this module becomes larger.
 	mw.relatedPages = {};
@@ -7,20 +7,23 @@
 	 * @class RelatedPagesGateway
 	 * @param {mw.Api} api
 	 * @param {string} currentPage the page that the editorCuratedPages relate to
-	 * @param {Array} editorCuratedPages a list of pages curated by editors for the current page
+	 * @param {Array|null} editorCuratedPages a list of pages curated by editors for the current page
 	 * @param {boolean} useCirrusSearch whether to hit the API when no editor-curated pages are available
 	 * @param {boolean} [onlyUseCirrusSearch=false] whether to ignore the list of editor-curated pages
+	 * @param {boolean|string} [descriptionSource=false] source to get the page description from
 	 */
 	function RelatedPagesGateway(
 		api,
 		currentPage,
 		editorCuratedPages,
 		useCirrusSearch,
-		onlyUseCirrusSearch
+		onlyUseCirrusSearch,
+		descriptionSource
 	) {
 		this.api = api;
 		this.currentPage = currentPage;
 		this.useCirrusSearch = useCirrusSearch;
+		this.descriptionSource = descriptionSource;
 
 		if ( onlyUseCirrusSearch ) {
 			editorCuratedPages = [];
@@ -56,7 +59,7 @@
 	 *
 	 * * The ID of the page corresponding to the title
 	 * * The thumbnail, if any
-	 * * The Wikidata description, if any
+	 * * The page description, if any
 	 *
 	 * @method
 	 * @param {number} limit of pages to get. Should be between 1-20.
@@ -66,12 +69,28 @@
 		var parameters = {
 				action: 'query',
 				formatversion: 2,
-				prop: 'pageimages|description',
+				prop: 'pageimages',
 				piprop: 'thumbnail',
 				pithumbsize: 160 // FIXME: Revert to 80 once pithumbmode is implemented
 			},
 			// Enforce limit
 			relatedPages = this.editorCuratedPages.slice( 0, limit );
+
+		switch ( this.descriptionSource ) {
+			case 'wikidata':
+				parameters.prop += '|description';
+				break;
+			case 'textextracts':
+				parameters.prop += '|extracts';
+				parameters.exsentences = '1';
+				parameters.exintro = '1';
+				parameters.explaintext = '1';
+				break;
+			case 'pagedescription':
+				parameters.prop += '|pageprops';
+				parameters.ppprop = 'description';
+				break;
+		}
 
 		if ( relatedPages.length ) {
 			parameters.pilimit = relatedPages.length;
@@ -111,4 +130,4 @@
 	};
 
 	mw.relatedPages.RelatedPagesGateway = RelatedPagesGateway;
-}( jQuery, mediaWiki ) );
+}() );

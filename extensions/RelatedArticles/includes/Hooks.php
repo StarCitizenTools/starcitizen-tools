@@ -6,7 +6,6 @@ use Parser;
 use OutputPage;
 use ParserOutput;
 use MediaWiki\MediaWikiServices;
-use ResourceLoader;
 use Skin;
 use User;
 use DisambiguatorHooks;
@@ -22,18 +21,12 @@ class Hooks {
 	 *
 	 * @param array &$vars variables to be added into the output of OutputPage::headElement.
 	 * @param OutputPage $out OutputPage instance calling the hook
-	 * @return bool Always <code>true</code>
 	 */
 	public static function onMakeGlobalVariablesScript( &$vars, OutputPage $out ) {
-		$config = MediaWikiServices::getInstance()->getConfigFactory()
-			->makeConfig( 'RelatedArticles' );
-
-		$vars['wgRelatedArticles'] = $out->getProperty( 'RelatedArticles' );
-		$vars['wgRelatedArticlesUseCirrusSearch'] = $config->get( 'RelatedArticlesUseCirrusSearch' );
-		$vars['wgRelatedArticlesOnlyUseCirrusSearch'] =
-			$config->get( 'RelatedArticlesOnlyUseCirrusSearch' );
-
-		return true;
+		$editorCuratedPages = $out->getProperty( 'RelatedArticles' );
+		if ( $editorCuratedPages ) {
+			$vars['wgRelatedArticles'] = $editorCuratedPages;
+		}
 	}
 
 	/**
@@ -68,8 +61,9 @@ class Hooks {
 	/**
 	 * Is ReadMore allowed on skin?
 	 *
-	 * The feature is allowed on all skins as long as they are whitelisted
-	 * in the configuration variable `RelatedArticlesFooterWhitelistedSkins`.
+	 * Some wikis may want to only enable the feature on some skins, so we'll only
+	 * show it if the whitelist (`RelatedArticlesFooterWhitelistedSkins`
+	 * configuration variable) is empty or the skin is listed.
 	 *
 	 * @param User $user
 	 * @param Skin $skin
@@ -80,7 +74,7 @@ class Hooks {
 			->makeConfig( 'RelatedArticles' );
 		$skins = $config->get( 'RelatedArticlesFooterWhitelistedSkins' );
 		$skinName = $skin->getSkinName();
-		return in_array( $skinName, $skins );
+		return empty( $skins ) || in_array( $skinName, $skins );
 	}
 
 	/**
@@ -124,26 +118,6 @@ class Hooks {
 	}
 
 	/**
-	 * EventLoggingRegisterSchemas hook handler.
-	 *
-	 * Registers our EventLogging schemas so that they can be converted to
-	 * ResourceLoaderSchemaModules by the EventLogging extension.
-	 *
-	 * If the module has already been registered in
-	 * onResourceLoaderRegisterModules, then it is overwritten.
-	 *
-	 * @param array &$schemas The schemas currently registered with the EventLogging
-	 *  extension
-	 * @return bool Always true
-	 */
-	public static function onEventLoggingRegisterSchemas( &$schemas ) {
-		// @see https://meta.wikimedia.org/wiki/Schema:RelatedArticles
-		$schemas['RelatedArticles'] = 16352530;
-
-		return true;
-	}
-
-	/**
 	 * ResourceLoaderGetConfigVars hook handler for setting a config variable
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ResourceLoaderGetConfigVars
 	 *
@@ -153,10 +127,6 @@ class Hooks {
 	public static function onResourceLoaderGetConfigVars( &$vars ) {
 		$config = MediaWikiServices::getInstance()->getConfigFactory()
 			->makeConfig( 'RelatedArticles' );
-		$vars['wgRelatedArticlesLoggingBucketSize'] =
-			$config->get( 'RelatedArticlesLoggingBucketSize' );
-		$vars['wgRelatedArticlesEnabledBucketSize']
-			= $config->get( 'RelatedArticlesEnabledBucketSize' );
 
 		$limit = $config->get( 'RelatedArticlesCardLimit' );
 		$vars['wgRelatedArticlesCardLimit'] = $limit;
@@ -165,44 +135,6 @@ class Hooks {
 				'The value of wgRelatedArticlesCardLimit is not valid. It should be between 1 and 20.'
 			);
 		}
-		return true;
-	}
-
-	/**
-	 * Register the "ext.relatedArticles.readMore.eventLogging" module.
-	 * Optionally update the dependencies and scripts if EventLogging is installed.
-	 *
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ResourceLoaderRegisterModules
-	 *
-	 * @param ResourceLoader &$resourceLoader The ResourceLoader object
-	 * @return bool
-	 */
-	public static function onResourceLoaderRegisterModules( ResourceLoader &$resourceLoader ) {
-		$dependencies = [];
-		$scripts = [];
-
-		if ( class_exists( 'EventLogging' ) ) {
-			$dependencies[] = "mediawiki.user";
-			$dependencies[] = "mediawiki.viewport";
-			$dependencies[] = "ext.eventLogging.Schema";
-			$dependencies[] = "mediawiki.experiments";
-			$scripts[] = "resources/ext.relatedArticles.readMore.eventLogging/index.js";
-		}
-
-		$resourceLoader->register(
-			"ext.relatedArticles.readMore.eventLogging",
-			[
-				"dependencies" => $dependencies,
-				"scripts" => $scripts,
-				"targets" => [
-					"desktop",
-					"mobile"
-				],
-				"localBasePath" => __DIR__ . "/..",
-				"remoteExtPath" => "RelatedArticles"
-			]
-		);
-
 		return true;
 	}
 
@@ -231,17 +163,16 @@ class Hooks {
 	 *
 	 * @todo Test for uniqueness
 	 * @param Parser $parser Parser object
+	 * @param string ...$args
 	 *
 	 * @return string Always <code>''</code>
 	 */
-	public static function onFuncRelated( Parser $parser ) {
+	public static function onFuncRelated( Parser $parser, ...$args ) {
 		$parserOutput = $parser->getOutput();
 		$relatedPages = $parserOutput->getExtensionData( 'RelatedArticles' );
 		if ( !$relatedPages ) {
 			$relatedPages = [];
 		}
-		$args = func_get_args();
-		array_shift( $args );
 
 		// Add all the related pages passed by the parser function
 		// {{#related:Test with read more|Foo|Bar}}
@@ -294,19 +225,29 @@ class Hooks {
 				'ext.relatedArticles.cards'
 			],
 			'scripts' => [
-				'ext.relatedArticles.cards/CardModel.js',
-				'ext.relatedArticles.cards/CardView.js',
+				'ext.relatedArticles.cards/CardModel.test.js',
+				'ext.relatedArticles.cards/CardView.test.js',
 			]
 		];
 
 		$modules['qunit']['ext.relatedArticles.readMore.gateway.tests'] = $boilerplate + [
 			'scripts' => [
-				'ext.relatedArticles.readMore.gateway/test_RelatedPagesGateway.js',
+				'ext.relatedArticles.readMore.gateway/RelatedPagesGateway.test.js',
 			],
 			'dependencies' => [
 				'ext.relatedArticles.readMore.gateway',
 			],
 		];
 		return true;
+	}
+
+	/**
+	 * Create container for ReadMore cards so that they're correctly placed in all skins.
+	 *
+	 * @param string &$data
+	 * @param Skin $skin
+	 */
+	public static function onSkinAfterContent( &$data, Skin $skin ) {
+		$data .= \Html::element( 'div', [ 'class' => 'read-more-container' ] );
 	}
 }

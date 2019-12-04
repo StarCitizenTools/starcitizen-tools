@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require( 'assert' ),
-	EditPage = require( '../../../../../tests/selenium/pageobjects/edit.page' ),
+	Api = require( 'wdio-mediawiki/Api' ),
 	ReadMorePage = require( '../pageobjects/readmore.page' );
 
 describe( 'ReadMore', function () {
@@ -12,7 +12,7 @@ describe( 'ReadMore', function () {
 		// Create page needed for the tests
 		browser.call( function () {
 			let content = '{{#related:related_articles_2}}';
-			return EditPage.apiEdit( name, content );
+			return Api.edit( name, content );
 		} );
 	} );
 

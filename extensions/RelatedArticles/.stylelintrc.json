@@ -1,6 +1,3 @@
 {
-	"extends": "stylelint-config-wikimedia",
-	"rules": {
-		"no-descending-specificity": null
-	}
+	"extends": "stylelint-config-wikimedia"
 }

@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	'use strict';
 
 	/**
@@ -53,4 +53,4 @@
 	};
 
 	mw.cards.CardModel = CardModel;
-}( mediaWiki ) );
+}() );

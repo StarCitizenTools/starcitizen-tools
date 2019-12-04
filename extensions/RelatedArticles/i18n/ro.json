@@ -2,9 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Firilacroco",
-			"Strainu"
+			"Strainu",
+			"Andrei Stroe"
 		]
 	},
-	"relatedarticles-desc": "Adaugă o legătură către site-uri similare în bara laterală",
+	"relatedarticles-desc": "Adaugă o legătură către pagini similare în subsol",
 	"relatedarticles-read-more-heading": "Pagini similare"
 }

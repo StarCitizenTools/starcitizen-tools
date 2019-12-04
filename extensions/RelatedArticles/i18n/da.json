@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Christian List"
+			"Christian List",
+			"Saederup92"
 		]
 	},
-	"relatedarticles-desc": "Tilføjer et link til relaterede sider i venstre side"
+	"relatedarticles-desc": "Tilføjer et link til beslægtede sider i bunden af siden",
+	"relatedarticles-read-more-heading": "Beslægtede sider"
 }

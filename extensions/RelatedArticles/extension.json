@@ -1,7 +1,8 @@
 {
 	"name": "RelatedArticles",
-	"version": "3.0.0",
+	"version": "3.1.0",
 	"author": [
+		"[https://www.mediawiki.org/wiki/Reading/Web/Team Readers Web Team]",
 		"Roland Unger",
 		"Hans Musil",
 		"Matthias Mullie",
@@ -11,9 +12,11 @@
 	"descriptionmsg": "relatedarticles-desc",
 	"license-name": "GPL-2.0-only",
 	"type": "betafeatures",
-	"AutoloadClasses": {
-		"RelatedArticles\\ResourceLoaderMuHoganModule": "includes/ResourceLoaderMuHoganModule.php",
-		"RelatedArticles\\Hooks": "includes/Hooks.php"
+	"requires": {
+		"MediaWiki": ">= 1.31.0"
+	},
+	"AutoloadNamespaces": {
+		"RelatedArticles\\": "includes/"
 	},
 	"ExtensionMessagesFiles": {
 		"RelatedArticlesMagic": "RelatedArticles.i18n.magic.php"
@@ -36,14 +39,11 @@
 		"BeforePageDisplay": [
 			"RelatedArticles\\Hooks::onBeforePageDisplay"
 		],
-		"EventLoggingRegisterSchemas": [
-			"RelatedArticles\\Hooks::onEventLoggingRegisterSchemas"
-		],
 		"ResourceLoaderGetConfigVars": [
 			"RelatedArticles\\Hooks::onResourceLoaderGetConfigVars"
 		],
-		"ResourceLoaderRegisterModules": [
-			"RelatedArticles\\Hooks::onResourceLoaderRegisterModules"
+		"SkinAfterContent": [
+			"RelatedArticles\\Hooks::onSkinAfterContent"
 		]
 	},
 	"MessagesDirs": {
@@ -53,16 +53,6 @@
 	},
 	"manifest_version": 1,
 	"ResourceModules": {
-		"mediawiki.template.muhogan": {
-			"class": "RelatedArticles\\ResourceLoaderMuHoganModule",
-			"scripts": [
-				"resources/mediawiki.template.muhogan/muhogan.js"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
-			]
-		},
 		"ext.relatedArticles.cards": {
 			"targets": [
 				"desktop",
@@ -81,11 +71,7 @@
 			],
 			"styles": [
 				"resources/ext.relatedArticles.cards/styles.less"
-			],
-			"templates": {
-				"card.muhogan": "resources/ext.relatedArticles.cards/card.muhogan",
-				"cards.muhogan": "resources/ext.relatedArticles.cards/cards.muhogan"
-			}
+			]
 		},
 		"ext.relatedArticles.lib": {
 			"targets": [
@@ -109,8 +95,15 @@
 			]
 		},
 		"ext.relatedArticles.readMore.bootstrap": {
-			"scripts": [
-				"resources/ext.relatedArticles.readMore.bootstrap/index.js"
+			"localBasePath": "resources/ext.relatedArticles.readMore.bootstrap",
+			"remoteExtPath": "RelatedArticles/resources/ext.relatedArticles.readMore.bootstrap",
+			"packageFiles": [
+				"index.js",
+				{ "name": "data.json", "config": {
+					"useCirrusSearch": "RelatedArticlesUseCirrusSearch",
+					"onlyUseCirrusSearch": "RelatedArticlesOnlyUseCirrusSearch",
+					"descriptionSource": "RelatedArticlesDescriptionSource"
+				} }
 			],
 			"dependencies": [
 				"mediawiki.experiments",
@@ -119,7 +112,6 @@
 				"mediawiki.Uri",
 				"mediawiki.viewport",
 				"ext.relatedArticles.readMore.gateway",
-				"ext.relatedArticles.readMore.eventLogging",
 				"jquery.throttle-debounce"
 			],
 			"targets": [
@@ -129,8 +121,7 @@
 		},
 		"ext.relatedArticles.readMore": {
 			"dependencies": [
-				"mediawiki.util",
-				"ext.relatedArticles.readMore.eventLogging"
+				"mediawiki.util"
 			],
 			"scripts": [
 				"resources/ext.relatedArticles.readMore/index.js"
@@ -140,10 +131,6 @@
 			],
 			"skinStyles": {
 				"default": "resources/ext.relatedArticles.readMore/readMore.default.less",
-				"monobook": [
-					"resources/ext.relatedArticles.readMore/readMore.default.less",
-					"resources/ext.relatedArticles.readMore/readMore.monobook.less"
-				],
 				"minerva": ""
 			},
 			"messages": [
@@ -160,10 +147,10 @@
 		"RelatedArticlesCardLimit": 3,
 		"RelatedArticlesUseCirrusSearch": false,
 		"RelatedArticlesOnlyUseCirrusSearch": false,
-		"RelatedArticlesLoggingBucketSize": 0.01,
-		"RelatedArticlesEnabledBucketSize": 1,
+		"@RelatedArticlesDescriptionSource": "Source to get the page description from (string, or false to not fetch the description). Possible values: wikidata, textextracts, pagedescription.",
+		"RelatedArticlesDescriptionSource": false,
 		"@RelatedArticlesFooterWhitelistedSkins": "List of skin names (e.g. 'minerva') where related articles will be shown in the footer.",
-		"RelatedArticlesFooterWhitelistedSkins": [ "minerva" ]
+		"RelatedArticlesFooterWhitelistedSkins": []
 	},
 	"ConfigRegistry": {
 		"RelatedArticles": "GlobalVarConfig::newInstance"
