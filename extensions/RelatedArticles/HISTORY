@@ -1,0 +1,51 @@
+==RelatedArticles 2.1.0==
+9932fee Add browser tests for ReadMore
+8a73239 Update packages
+9623c1c RelatedArticles load after half window scroll
+ed338bb Disable RelatedArticles when editor enabled
+a3d9b22 Fix loading related articles on small screens
+==RelatedArticles 2.0.0==
+fbc6961 Fix RelatedPagesGateway unit test failures
+18990e6 Correctly show related articles on desktop
+9157e30 [Hygiene] Reorganise hooks to reflect placements
+040314c [Breaking] Configure footer and sidebar placements
+==RelatedArticles 1.2.0==
+e86fc3b Fall back to CirrusSearch's morelike: feature
+5b5a0b2 Put Read More behind a feature flag
+7ebe784 Run JSHint and JSCS against tests
+3995b7a Add event logging to read more
+2397059 Remove CustomData extension dependency
+529b798 build: Simplify Grunt configuration
+0fed50e Optionally disable Read More using extension data
+f87807e Limit the number of pages to 3
+d08962d [Hygiene] Rename internal uses of "article" to "page"
+8cf9b60 Make RelatedArticles soft-depend on Cards
+5522727 Add simple README
+95ea0b0 Make RelatedArticles available as a beta feature
+==RelatedArticles 1.1.0==
+761ddf1 Add .gitreview and .gitignore
+2c93d90 Initial commit
+bb5e4ff Reformat code. Remove ?>
+58b1178 Some consistency tweaks:
+046bc1c maintenance
+4c61d5d Fixup documentation
+37fae79 (bug 44761) Fix sanitization for alt text
+f9bae4a RelatedArticles: Heading level in sidebar: h5 to h3
+91603a4 (bug 51870) fix html in toolbox for related articles
+09f973f Migrate to JSON i18n
+6b455b5 Update i18n shim
+ebdbab7 Use public instead of var in classes
+3f33253 MWException -> Exception
+426422b build: Configure banana-checker and jsonlint
+cd055fd Add extension boilerplate
+7995ce4 Use extension registration
+8782824 Remove CustomData dependency
+1ab33e4 build: Updating development dependencies
+397146e Update indentation to use tabs
+4578791 Hygiene: Fix PHPCS errors
+aa30f47 Clear extension data in ParserClearState handler
+81fcc48 build: Updating development dependencies
+7c23636 Add Related Articles section to Minerva
+e4685f0 mw.config.get doesn't work that way.
+816003c Tweak readMore.minerva to reflect upstream changes
+bead2ee Switch default branch to dev

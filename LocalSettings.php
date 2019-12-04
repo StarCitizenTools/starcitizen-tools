@@ -193,6 +193,7 @@ wfLoadExtension( 'Tabber' );
 wfLoadExtension( 'RSS' );
 wfLoadExtension( 'TemplateData' );
 wfLoadExtension( 'PageImages' );
+wfLoadExtension( 'RelatedArticles' );
 wfLoadExtension( 'VisualEditor' );
 wfLoadExtension( 'Scribunto' );
 wfLoadExtension( 'Renameuser' );
@@ -296,6 +297,13 @@ $wgVisualEditorEnableWikitext = true;
 $wgVisualEditorEnableDiffPage = true;
 $wgVisualEditorUseSingleEditTab = true;
 $wgVisualEditorEnableVisualSectionEditing = true;
+
+#RelatedArticles 
+$wgRelatedArticlesFooterWhitelistedSkins = [ 'citizen', 'vector', 'timeless' ];
+$wgRelatedArticlesDescriptionSource = 'textextracts';
+# Enable when CirrusSearch is installed
+$wgRelatedArticlesUseCirrusSearch = false;
+$wgRelatedArticlesOnlyUseCirrusSearch = false;
 
 #Eventlogging
 $wgEventLoggingBaseUri = 'https://starcitizen.tools:8080/event.gif';

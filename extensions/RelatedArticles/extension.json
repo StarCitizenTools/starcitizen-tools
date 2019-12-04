@@ -1,0 +1,175 @@
+{
+	"name": "RelatedArticles",
+	"version": "3.0.0",
+	"author": [
+		"Roland Unger",
+		"Hans Musil",
+		"Matthias Mullie",
+		"Sam Smith"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:RelatedArticles",
+	"descriptionmsg": "relatedarticles-desc",
+	"license-name": "GPL-2.0-only",
+	"type": "betafeatures",
+	"AutoloadClasses": {
+		"RelatedArticles\\ResourceLoaderMuHoganModule": "includes/ResourceLoaderMuHoganModule.php",
+		"RelatedArticles\\Hooks": "includes/Hooks.php"
+	},
+	"ExtensionMessagesFiles": {
+		"RelatedArticlesMagic": "RelatedArticles.i18n.magic.php"
+	},
+	"Hooks": {
+		"ResourceLoaderTestModules": [
+			"RelatedArticles\\Hooks::onResourceLoaderTestModules"
+		],
+
+		"ParserFirstCallInit": [
+			"RelatedArticles\\Hooks::onParserFirstCallInit"
+		],
+		"OutputPageParserOutput": [
+			"RelatedArticles\\Hooks::onOutputPageParserOutput"
+		],
+
+		"MakeGlobalVariablesScript": [
+			"RelatedArticles\\Hooks::onMakeGlobalVariablesScript"
+		],
+		"BeforePageDisplay": [
+			"RelatedArticles\\Hooks::onBeforePageDisplay"
+		],
+		"EventLoggingRegisterSchemas": [
+			"RelatedArticles\\Hooks::onEventLoggingRegisterSchemas"
+		],
+		"ResourceLoaderGetConfigVars": [
+			"RelatedArticles\\Hooks::onResourceLoaderGetConfigVars"
+		],
+		"ResourceLoaderRegisterModules": [
+			"RelatedArticles\\Hooks::onResourceLoaderRegisterModules"
+		]
+	},
+	"MessagesDirs": {
+		"RelatedArticles": [
+			"i18n"
+		]
+	},
+	"manifest_version": 1,
+	"ResourceModules": {
+		"mediawiki.template.muhogan": {
+			"class": "RelatedArticles\\ResourceLoaderMuHoganModule",
+			"scripts": [
+				"resources/mediawiki.template.muhogan/muhogan.js"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.relatedArticles.cards": {
+			"targets": [
+				"desktop",
+				"mobile"
+			],
+			"dependencies": [
+				"oojs",
+				"mediawiki.util",
+				"ext.relatedArticles.lib"
+			],
+			"scripts": [
+				"resources/ext.relatedArticles.cards/init.js",
+				"resources/ext.relatedArticles.cards/CardModel.js",
+				"resources/ext.relatedArticles.cards/CardView.js",
+				"resources/ext.relatedArticles.cards/CardListView.js"
+			],
+			"styles": [
+				"resources/ext.relatedArticles.cards/styles.less"
+			],
+			"templates": {
+				"card.muhogan": "resources/ext.relatedArticles.cards/card.muhogan",
+				"cards.muhogan": "resources/ext.relatedArticles.cards/cards.muhogan"
+			}
+		},
+		"ext.relatedArticles.lib": {
+			"targets": [
+				"desktop",
+				"mobile"
+			],
+			"scripts": [
+				"resources/ext.relatedArticles.lib/CSS.escape/css.escape.js"
+			]
+		},
+		"ext.relatedArticles.readMore.gateway": {
+			"scripts": [
+				"resources/ext.relatedArticles.readMore.gateway/RelatedPagesGateway.js"
+			],
+			"dependencies": [
+				"oojs"
+			],
+			"targets": [
+				"mobile",
+				"desktop"
+			]
+		},
+		"ext.relatedArticles.readMore.bootstrap": {
+			"scripts": [
+				"resources/ext.relatedArticles.readMore.bootstrap/index.js"
+			],
+			"dependencies": [
+				"mediawiki.experiments",
+				"mediawiki.user",
+				"mediawiki.api",
+				"mediawiki.Uri",
+				"mediawiki.viewport",
+				"ext.relatedArticles.readMore.gateway",
+				"ext.relatedArticles.readMore.eventLogging",
+				"jquery.throttle-debounce"
+			],
+			"targets": [
+				"mobile",
+				"desktop"
+			]
+		},
+		"ext.relatedArticles.readMore": {
+			"dependencies": [
+				"mediawiki.util",
+				"ext.relatedArticles.readMore.eventLogging"
+			],
+			"scripts": [
+				"resources/ext.relatedArticles.readMore/index.js"
+			],
+			"styles": [
+				"resources/ext.relatedArticles.readMore/readMore.less"
+			],
+			"skinStyles": {
+				"default": "resources/ext.relatedArticles.readMore/readMore.default.less",
+				"monobook": [
+					"resources/ext.relatedArticles.readMore/readMore.default.less",
+					"resources/ext.relatedArticles.readMore/readMore.monobook.less"
+				],
+				"minerva": ""
+			},
+			"messages": [
+				"relatedarticles-read-more-heading"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		}
+	},
+	"config": {
+		"@RelatedArticlesCardLimit": "Maximum number of articles that should be shown in RelatedArticles widget. This limit is derived from limits in TextExtracts and PageImages extensions. Number should be between 1 and 20.",
+		"RelatedArticlesCardLimit": 3,
+		"RelatedArticlesUseCirrusSearch": false,
+		"RelatedArticlesOnlyUseCirrusSearch": false,
+		"RelatedArticlesLoggingBucketSize": 0.01,
+		"RelatedArticlesEnabledBucketSize": 1,
+		"@RelatedArticlesFooterWhitelistedSkins": "List of skin names (e.g. 'minerva') where related articles will be shown in the footer.",
+		"RelatedArticlesFooterWhitelistedSkins": [ "minerva" ]
+	},
+	"ConfigRegistry": {
+		"RelatedArticles": "GlobalVarConfig::newInstance"
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "RelatedArticles"
+	}
+}

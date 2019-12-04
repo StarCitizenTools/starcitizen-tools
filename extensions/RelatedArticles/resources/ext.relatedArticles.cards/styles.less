@@ -1,0 +1,157 @@
+@import 'mediawiki.mixins';
+@import 'mediawiki.ui/variables';
+
+@baseFontSize: 1em;
+@thumbWidth: 80px;
+@cardBorder: 1px solid rgba( 0, 0, 0, 0.2 );
+@borderRadius: 2px;
+
+.ext-related-articles-card-list {
+	.flex-display();
+	flex-flow: row wrap;
+	font-size: @baseFontSize;
+	list-style: none;
+	overflow: hidden;
+	position: relative;
+
+	// flex-item
+	.ext-related-articles-card {
+		background-color: #fff;
+		box-sizing: border-box;
+		margin: 0;
+		height: @thumbWidth;
+		position: relative;
+		width: 100%;
+		border: @cardBorder;
+		& + .ext-related-articles-card {
+			border-top: 0;
+		}
+		// Apply radius to top & bottom cards when stacked
+		&:first-child {
+			border-radius: @borderRadius @borderRadius 0 0;
+		}
+		&:last-child {
+			border-radius: 0 0 @borderRadius @borderRadius;
+		}
+	}
+
+	.ext-related-articles-card > a {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		z-index: 1;
+
+		&:hover {
+			box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.1 );
+		}
+	}
+
+	h3 {
+		@fontSize: 1em;
+		@lineHeight: 1.3;
+		@lineHeightEm: @lineHeight * @fontSize;
+
+		font-family: inherit;
+		font-size: @fontSize;
+		// max 2 lines
+		max-height: 2 * @lineHeightEm;
+		line-height: @lineHeight;
+		margin: 0;
+		overflow: hidden;
+		padding: 0;
+		position: relative;
+		font-weight: 500;
+
+		a {
+			color: #000;
+		}
+
+		&:after {
+			content: ' ';
+			position: absolute;
+			right: 0;
+			bottom: 0;
+			width: 25%;
+			height: @lineHeightEm;
+			background-color: transparent;
+			background-image: -webkit-linear-gradient( right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+			background-image: -moz-linear-gradient( right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+			background-image: -o-linear-gradient( right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+			background-image: linear-gradient( to right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+		}
+	}
+
+	.ext-related-articles-card-detail {
+		// Vertically center the element using the technique described at
+		// http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css/.
+		//
+		// This technique is ideal because:
+		// * it's easy to reason about,
+		// * `position: relative` means that the element is laid out as if it weren't
+		//   positioned, allowing for `text-overflow: ellipsis` to work (see below)
+		// * it supports more browsers than flexbox does, and
+		// * we don't deliver RelatedArticles/Cards assets to those browsers that don't
+		//   support CSS 2D transforms
+		position: relative;
+		top: 50%;
+		-webkit-transform: translateY( -50% ); // iOS 8.1, Android Browser 4.3-4.4.4
+		-ms-transform: translateY( -50% ); // IE9
+		transform: translateY( -50% );
+	}
+
+	.ext-related-articles-card-extract {
+		color: @colorGray7;
+		font-size: 0.8em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		margin-top: 2px;
+	}
+
+	.ext-related-articles-card-thumb {
+		background-color: @colorGray14;
+		.background-image-svg( 'noimage.svg', 'noimage.png' );
+		background-repeat: no-repeat;
+		background-position: top center;
+		.background-size( 100%, 100% );
+		background-size: cover;
+		float: left;
+		height: 100%;
+		width: @thumbWidth;
+		margin-right: 10px;
+	}
+}
+
+@media all and ( min-width: @deviceWidthTablet ) {
+	.ext-related-articles-card-list {
+		border-top: 0;
+		.ext-related-articles-card {
+			border: @cardBorder;
+			@rightMargin: 1%;
+			margin-right: @rightMargin;
+			margin-bottom: 10px;
+			// max space is 100-2/3
+			width: ( 100 - ( 2 * @rightMargin ) ) / 3;
+
+			// Individual border-radius when cards side by side (not stacked)
+			&,
+			&:first-child,
+			&:last-child {
+				border-radius: @borderRadius;
+			}
+
+			&:last-child {
+				margin-right: 0;
+			}
+			& + .ext-related-articles-card {
+				border: @cardBorder;
+			}
+			// every 3rd child drop the right margin
+			&:nth-child( 3n+3 ) {
+				margin-right: 0;
+			}
+		}
+	}
+}
