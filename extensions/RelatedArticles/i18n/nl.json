@@ -3,10 +3,9 @@
 		"authors": [
 			"Siebrand",
 			"Sjoerddebruin",
-			"Dinosaur918",
-			"Mainframe98"
+			"Dinosaur918"
 		]
 	},
-	"relatedarticles-desc": "Voegt koppelingen toe naar gerelateerde pagina's in de voettekst",
+	"relatedarticles-desc": "Voegt een koppeling toe naar gerelateerde pagina's in de navigatiekolom",
 	"relatedarticles-read-more-heading": "Gerelateerde pagina's"
 }

@@ -1,4 +1,4 @@
-( function () {
+( function ( mw ) {
 	'use strict';
 
 	/**
@@ -9,4 +9,4 @@
 		models: {},
 		views: {}
 	};
-}() );
+}( mediaWiki ) );

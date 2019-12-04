@@ -1,4 +1,4 @@
-( function () {
+( function ( $, mw ) {
 	// Make sure 'ext.relatedArticles.cards' is loaded. It may not be because of the race
 	// condition in the bootstrap file.
 	mw.loader.using( 'ext.relatedArticles.cards' ).done( function () {
@@ -13,13 +13,12 @@
 		 * @return {mw.cards.CardView[]}
 		 */
 		function getCards( pages ) {
-			return pages.map( function ( page ) {
+			return $.map( pages, function ( page ) {
 				var result = {
 					title: page.title,
 					url: mw.util.getUrl( page.title ),
 					hasThumbnail: false,
-					extract: ( page.description || page.extract ||
-						( page.pageprops ? page.pageprops.description : '' ) )
+					extract: page.description
 				};
 
 				if ( page.thumbnail ) {
@@ -38,13 +37,15 @@
 
 			cards = new CardListView( getCards( pages ) );
 
-			$readMore = $( '<aside>' ).addClass( 'ra-read-more noprint' )
+			$readMore = $( '<aside class="ra-read-more noprint"></aside>' )
 				.append( $( '<h2></h2>' ).text( mw.msg( 'relatedarticles-read-more-heading' ) ) )
 				.append( cards.$el );
 
-			// eslint-disable-next-line no-jquery/no-global-selector
 			$( '.read-more-container' ).append( $readMore );
+
+			// the ReadMore code is ready
+			mw.track( 'ext.relatedArticles.logReady', { $readMore: $readMore } );
 		} );
 	} );
 
-}() );
+}( jQuery, mediaWiki ) );

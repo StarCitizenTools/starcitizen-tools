@@ -1,4 +1,4 @@
-( function () {
+( function ( M, $ ) {
 	var RelatedPagesGateway = mw.relatedPages.RelatedPagesGateway,
 		lotsaRelatedPages = [ 'A', 'B', 'C', 'D', 'E', 'F' ],
 		relatedPages = {
@@ -22,7 +22,7 @@
 		};
 
 	QUnit.module( 'ext.relatedArticles.gateway', {
-		beforeEach: function () {
+		setup: function () {
 			this.api = new mw.Api();
 		}
 	} );
@@ -32,7 +32,7 @@
 		this.sandbox.stub( this.api, 'get' ).returns( $.Deferred().resolve( relatedPages ) );
 
 		return gateway.getForCurrentPage( 1 ).then( function ( results ) {
-			assert.ok( Array.isArray( results ), 'Results must be an array' );
+			assert.ok( $.isArray( results ), 'Results must be an array' );
 			assert.strictEqual( results[ 0 ].title, 'Oh noes' );
 		} );
 	} );
@@ -42,7 +42,7 @@
 		this.sandbox.stub( this.api, 'get' ).returns( $.Deferred().resolve( emptyRelatedPages ) );
 
 		return gateway.getForCurrentPage( 1 ).then( function ( results ) {
-			assert.ok( Array.isArray( results ), 'Results must be an array' );
+			assert.ok( $.isArray( results ), 'Results must be an array' );
 			assert.strictEqual( results.length, 0 );
 		} );
 	} );
@@ -52,8 +52,8 @@
 			spy = this.sandbox.stub( this.api, 'get' ).returns( $.Deferred().resolve( relatedPages ) );
 
 		return gateway.getForCurrentPage( 1 ).then( function ( results ) {
-			assert.ok( Array.isArray( results ), 'Results must be an array' );
-			assert.notOk( spy.called, 'API is not invoked' );
+			assert.ok( $.isArray( results ), 'Results must be an array' );
+			assert.ok( !spy.called, 'API is not invoked' );
 			assert.strictEqual( results.length, 0 );
 		} );
 	} );
@@ -97,7 +97,7 @@
 			.returns( $.Deferred().resolve( relatedPages ) );
 
 		return gateway.getForCurrentPage( 1 ).then( function ( results ) {
-			assert.ok( Array.isArray( results ), 'Results must be an array' );
+			assert.ok( $.isArray( results ), 'Results must be an array' );
 			assert.strictEqual( results.length, 1, 'API is invoked to source articles.' );
 		} );
 	} );
@@ -125,4 +125,4 @@
 		} );
 	} );
 
-}() );
+}( mw.mobileFrontend, jQuery ) );

@@ -1,4 +1,4 @@
-( function () {
+( function ( $, mw ) {
 	'use strict';
 
 	/**
@@ -18,15 +18,20 @@
 		/**
 		 * @property {jQuery}
 		 */
-		this.$el = $( '<ul>' ).attr( { class: 'ext-related-articles-card-list' } );
+		this.$el = $( this.template.render() );
 
 		// We don't want to use template partials because we want to
 		// preserve event handlers of each card view.
-		this.cardViews.forEach( function ( cardView ) {
+		$.each( this.cardViews, function ( i, cardView ) {
 			self.$el.append( cardView.$el );
 		} );
 	}
 	OO.initClass( CardListView );
 
+	/**
+	 * @property {Object} compiled template
+	 */
+	CardListView.prototype.template = mw.template.get( 'ext.relatedArticles.cards', 'cards.muhogan' );
+
 	mw.cards.CardListView = CardListView;
-}() );
+}( jQuery, mediaWiki ) );

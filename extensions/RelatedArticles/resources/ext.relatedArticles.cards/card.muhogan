@@ -1,0 +1,8 @@
+<li title="{{ title }}" class="ext-related-articles-card">
+	<div class="ext-related-articles-card-thumb" {{# hasThumbnail }}style="background-image: url( '{{ thumbnailUrl }}' );"{{/ hasThumbnail }}></div>
+	<a href="{{ url }}" aria-hidden="true" tabindex="-1"></a>
+	<div class="ext-related-articles-card-detail">
+		<h3><a href="{{ url }}">{{ title }}</a></h3>
+		{{# extract }}<p class="ext-related-articles-card-extract">{{ extract }}</p>{{/ extract }}
+	</div>
+</li>

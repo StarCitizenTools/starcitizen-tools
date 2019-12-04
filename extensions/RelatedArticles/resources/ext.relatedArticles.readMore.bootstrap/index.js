@@ -1,21 +1,44 @@
-/* eslint-disable no-jquery/no-global-selector */
-( function () {
+( function ( $, mw ) {
 
-	var data = require( './data.json' ),
-		relatedPages = new mw.relatedPages.RelatedPagesGateway(
+	var relatedPages = new mw.relatedPages.RelatedPagesGateway(
 			new mw.Api(),
 			mw.config.get( 'wgPageName' ),
 			mw.config.get( 'wgRelatedArticles' ),
-			data.useCirrusSearch,
-			data.onlyUseCirrusSearch,
-			data.descriptionSource
+			mw.config.get( 'wgRelatedArticlesUseCirrusSearch' ),
+			mw.config.get( 'wgRelatedArticlesOnlyUseCirrusSearch' )
 		),
 		// Make sure this is never undefined as I'm paranoid
 		LIMIT = mw.config.get( 'wgRelatedArticlesCardLimit', 3 ),
 		debouncedLoad = $.debounce( 100, function () {
-			loadRelatedArticles(); // eslint-disable-line no-use-before-define
+			loadRelatedArticles(); // eslint-disable-line
 		} ),
-		$window = $( window );
+		$window = $( window ),
+		shouldShowReadMore;
+
+	/**
+	 * Gets whether the feature is enabled for the user.
+	 *
+	 * The user's session ID is used to determine the eligibility for
+	 * RelatedArticles functionality, based on the value of
+	 * `$wgRelatedArticlesEnabledBucketSize`. The result of the function will be
+	 * the same for the duration of their session.
+	 *
+	 * @return {boolean}
+	 */
+	function isEnabledForCurrentUser() {
+		var bucket,
+			bucketSize = mw.config.get( 'wgRelatedArticlesEnabledBucketSize', 1 );
+
+		bucket = mw.experiments.getBucket( {
+			name: 'ext.relatedArticles.visibility',
+			enabled: true,
+			buckets: {
+				control: 1 - bucketSize,
+				A: bucketSize
+			}
+		}, mw.user.sessionId() );
+		return bucket === 'A';
+	}
 
 	/**
 	 * Load related articles when the user scrolls past half of the window height.
@@ -36,11 +59,11 @@
 					'ext.relatedArticles.readMore'
 				] ),
 				relatedPages.getForCurrentPage( LIMIT )
-			).then( function ( _, pages ) {
+			).done( function ( _, pages ) {
 				if ( pages.length ) {
 					mw.track( 'ext.relatedArticles.init', pages );
 				} else {
-					$( readMore ).remove();
+					readMore.remove();
 				}
 			} );
 			// detach handler to stop subsequent loads on scroll
@@ -48,12 +71,26 @@
 		}
 	}
 
+	shouldShowReadMore = isEnabledForCurrentUser();
+
 	function showReadMore() {
+		// Add container to DOM for checking distance on scroll
+		// If a skin has marked up a footer content area prepend it there
+		if ( $( '.footer-content' ).length ) {
+			$( '<div class="read-more-container" />' ).prependTo( '.footer-content' );
+		} else {
+			$( '<div class="read-more-container post-content" />' )
+				.insertAfter( '#content' );
+		}
+
 		// try related articles load on scroll
 		$window.on( 'scroll', debouncedLoad );
 		// try an initial load, in case of no scroll
 		loadRelatedArticles();
 	}
 
-	$( showReadMore );
-}() );
+	if ( shouldShowReadMore ) {
+		$( showReadMore );
+	}
+	mw.track( 'ext.relatedArticles.logEnabled', { isEnabled: shouldShowReadMore } );
+}( jQuery, mediaWiki ) );

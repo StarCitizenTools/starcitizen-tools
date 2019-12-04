@@ -1,13 +1,11 @@
 {
-	"root": true,
-	"extends": [
-		"wikimedia/server"
-	],
+	"extends": "../../.eslintrc.json",
 	"env": {
-		"mocha": true
+		"es6": true,
+		"mocha": true,
+		"node": true
 	},
 	"globals": {
-		"mw": false,
 		"browser": false
 	}
 }

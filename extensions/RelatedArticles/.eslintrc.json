@@ -1,17 +1,16 @@
 {
-	"root": true,
-	"extends": [
-		"wikimedia/client",
-		"wikimedia/jquery"
-	],
+	"extends": "wikimedia",
 	"env": {
-		"commonjs": true
+		"browser": true,
+		"jquery": true,
+		"qunit": true
 	},
 	"globals": {
 		"mw": false,
-		"OO": false
+		"OO": false,
+		"mediaWiki": false
 	},
 	"rules": {
-		"max-len": "off"
+		"no-use-before-define": 1
 	}
 }

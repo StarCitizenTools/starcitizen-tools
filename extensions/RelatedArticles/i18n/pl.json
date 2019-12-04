@@ -2,11 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Matma Rex",
-			"Chrumps",
-			"Railfail536",
-			"Rail"
+			"Chrumps"
 		]
 	},
-	"relatedarticles-desc": "Dodaje w stopce linki do powiązanych stron",
+	"relatedarticles-desc": "Dodaje w stopce linki do powiązanych stron.",
 	"relatedarticles-read-more-heading": "Powiązane strony"
 }

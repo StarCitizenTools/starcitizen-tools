@@ -1,3 +1,5 @@
+/* jshint unused:false */
+
 ( function () {
 	'use strict';
 
@@ -21,9 +23,9 @@
 			.eq( 0 )
 			.attr( 'style' );
 
-		assert.strictEqual(
+		assert.equal(
 			style,
-			"background-image: url(\"http://foo.bar/');display:none;\\\"//baz.jpg\");"
+			'background-image: url( \'http\\:\\/\\/foo\\.bar\\/\\\'\\)\\;display\\:none\\;\\"\\/\\/baz\\.jpg\' );'
 		);
 	} );
 }() );

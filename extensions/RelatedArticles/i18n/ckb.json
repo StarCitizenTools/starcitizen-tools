@@ -1,10 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sarchia",
-			"ئارام بکر"
+			"Sarchia"
 		]
 	},
-	"relatedarticles-desc": "بەستەرەکان بۆ پەڕە پەیوەندیدارەکان لە پێپەڕەکەدا زیاد دەکات",
-	"relatedarticles-read-more-heading": "پەڕە پەیوەندیدارەکان"
+	"relatedarticles-title": "پەڕە ھاوپەیوەندەکان",
+	"relatedarticles-read-more-beta-feature-title": "پەڕە ھاوپەیوەندەکان"
 }
