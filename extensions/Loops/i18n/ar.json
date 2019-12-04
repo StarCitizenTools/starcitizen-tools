@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"ديفيد"
+		]
+	},
+	"loops-desc": "وظائف محلل لإجراء الحلقات",
+	"loops_max": "تم تنفيذ الحد الأقصى لعدد الحلقات",
+	"loops-limitreport-count-limited": "عد ExtLoops",
+	"loops-limitreport-count-unlimited": "عد ExtLoops",
+	"loops-config-countlimit": "متغير التكوين يحدد الحد الأقصى المسموح به لعدد الحلقات ('-1' => بلا حدود)، \"# forargs\" و\"#fornumargs\" ليست محدودة بهذا.",
+	"loops-config-enabledfunctions": "يسمح بتحديد الوظائف التي توفرها \"الحلقات\" التي يجب تمكينها في الويكي، إذا لم يتم تثبيت الإضافة \"المتغيرات\"، فسيتم تلقائيًا تعطيل \"#loop\" و\"# forargs\" و\"#fornumargs\"."
+}

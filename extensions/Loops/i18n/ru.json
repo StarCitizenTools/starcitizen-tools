@@ -1,9 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Okras"
+			"Okras",
+			"Facenapalm"
 		]
 	},
 	"loops-desc": "Функции анализатора для выполнения циклов",
-	"loops_max": "Максимальное количество циклов для выполнения"
+	"loops_max": "Превышено максимальное количество выполняемых циклов",
+	"loops-limitreport-count-limited": "Количество ExtLoops",
+	"loops-limitreport-count-unlimited": "Количество ExtLoops"
 }

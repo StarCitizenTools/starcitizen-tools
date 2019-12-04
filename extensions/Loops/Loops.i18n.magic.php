@@ -1,5 +1,5 @@
 <?php
-#coding: utf-8
+# coding: utf-8
 
 /**
  * Internationalization file for magic words of the 'Loops' extension.
@@ -11,12 +11,12 @@
  * @author Daniel Werner < danweetz@web.de >
  */
 
-$magicWords = array();
+$magicWords = [];
 
-$magicWords['en'] = array(
-	'while'      => array( 0, 'while' ),
-	'dowhile'    => array( 0, 'dowhile' ),
-	'loop'       => array( 0, 'loop' ),
-	'forargs'    => array( 0, 'forargs' ),
-	'fornumargs' => array( 0, 'fornumargs' ),
-);
+$magicWords['en'] = [
+	'while'      => [ 0, 'while' ],
+	'dowhile'    => [ 0, 'dowhile' ],
+	'loop'       => [ 0, 'loop' ],
+	'forargs'    => [ 0, 'forargs' ],
+	'fornumargs' => [ 0, 'fornumargs' ],
+];

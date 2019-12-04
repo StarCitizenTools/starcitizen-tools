@@ -30,7 +30,7 @@
  The following pre-svn changelog was composed after the extension has been moved into mediawiki.org
  svn. All changes can still be retrace at:
 
- http://www.mediawiki.org/w/index.php?title=Extension:Loops&action=history 
+ https://www.mediawiki.org/w/index.php?title=Extension:Loops&action=history 
 
  * Version 0.3.0 by David M. Sledge
    - '#loop' and '#fornumargs' parser functions were introduced.
