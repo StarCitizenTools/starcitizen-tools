@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lokal Profil"
+		]
+	},
+	"loops-desc": "Tolkningsfunktioner för att hantera loopar",
+	"loops_max": "Maximalt antal loopar har utförts"
+}

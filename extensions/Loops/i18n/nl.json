@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Siebrand"
+		]
+	},
+	"loops-desc": "Parserfuncties voor het uitvoeren van herhalingen",
+	"loops_max": "Het maximum aantal herhalingen is uitgevoerd"
+}

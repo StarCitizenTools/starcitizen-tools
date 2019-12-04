@@ -198,6 +198,7 @@ wfLoadExtension( 'Scribunto' );
 wfLoadExtension( 'Renameuser' );
 wfLoadExtension( 'ExternalData' );
 wfLoadExtension( 'TemplateStyles' );
+wfLoadExtension( 'Loops' );
 require_once "$IP/extensions/Translate/Translate.php";
 require_once "$IP/extensions/googleAnalytics/googleAnalytics.php";
 require_once "$IP/extensions/EventLogging/EventLogging.php";

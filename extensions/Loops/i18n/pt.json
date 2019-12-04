@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cainamarques"
+		]
+	},
+	"loops-desc": "Funções sintáticas para executar ciclos",
+	"loops_max": "O número máximo de ciclos foi atingido"
+}

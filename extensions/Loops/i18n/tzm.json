@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tifinaghes"
+		]
+	},
+	"loops-desc": "Parser functions for performing loops",
+	"loops_max": "Maximum number of loops have been performed"
+}

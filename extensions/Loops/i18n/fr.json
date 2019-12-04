@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"DavidL"
+		]
+	},
+	"loops-desc": "Fonctions de l'interpréteur pour effectuer des boucles",
+	"loops_max": "Le nombre maximal de boucles a été effectué"
+}

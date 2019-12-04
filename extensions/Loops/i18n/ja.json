@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fryed-peach"
+		]
+	},
+	"loops-desc": "ループを実行するためのパーサー関数",
+	"loops_max": "ループの最大実行回数に達しました"
+}

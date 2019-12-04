@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kly"
+		]
+	},
+	"loops-desc": "執行循環的解析函式",
+	"loops_max": "已執行到最大循環數目"
+}
