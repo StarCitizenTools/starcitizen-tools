@@ -56,7 +56,7 @@
 	 *
 	 * * The ID of the page corresponding to the title
 	 * * The thumbnail, if any
-	 * * The Wikidata description, if any
+	 * * The page description, if any
 	 *
 	 * @method
 	 * @param {number} limit of pages to get. Should be between 1-20.
@@ -66,12 +66,18 @@
 		var parameters = {
 				action: 'query',
 				formatversion: 2,
-				prop: 'pageimages|description',
+				prop: 'pageimages',
 				piprop: 'thumbnail',
 				pithumbsize: 160 // FIXME: Revert to 80 once pithumbmode is implemented
 			},
 			// Enforce limit
 			relatedPages = this.editorCuratedPages.slice( 0, limit );
+
+			// TextExtracts
+			parameters.prop += '|extracts';
+			parameters.exsentences = '1';
+			parameters.exintro = '1';
+			parameters.explaintext = '1';
 
 		if ( relatedPages.length ) {
 			parameters.pilimit = relatedPages.length;

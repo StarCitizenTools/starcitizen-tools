@@ -18,7 +18,7 @@
 					title: page.title,
 					url: mw.util.getUrl( page.title ),
 					hasThumbnail: false,
-					extract: page.description
+					extract: page.extract
 				};
 
 				if ( page.thumbnail ) {
