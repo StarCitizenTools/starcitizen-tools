@@ -300,10 +300,11 @@ $wgVisualEditorEnableVisualSectionEditing = true;
 
 #RelatedArticles 
 $wgRelatedArticlesFooterWhitelistedSkins = [ 'citizen', 'vector', 'timeless' ];
-$wgRelatedArticlesDescriptionSource = 'textextracts';
+# Enable when moved to 1.3.4
+# $wgRelatedArticlesDescriptionSource = 'textextracts';
 # Enable when CirrusSearch is installed
-$wgRelatedArticlesUseCirrusSearch = false;
-$wgRelatedArticlesOnlyUseCirrusSearch = false;
+# $wgRelatedArticlesUseCirrusSearch = true;
+# $wgRelatedArticlesOnlyUseCirrusSearch = true;
 
 #Eventlogging
 $wgEventLoggingBaseUri = 'https://starcitizen.tools:8080/event.gif';
