@@ -114,7 +114,7 @@ wfLoadSkin( 'Vector' );
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
 
 #SVG Support
-$wgFileExtensions[] = 'svg';
+#$wgFileExtensions[] = 'svg';
 $wgAllowTitlesInSVG = true;
 $wgSVGConverter = 'ImageMagick';
 
