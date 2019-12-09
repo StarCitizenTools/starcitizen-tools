@@ -193,7 +193,7 @@ wfLoadExtension( 'Tabber' );
 wfLoadExtension( 'RSS' );
 wfLoadExtension( 'TemplateData' );
 wfLoadExtension( 'PageImages' );
-wfLoadExtension( 'RelatedArticles' );
+#wfLoadExtension( 'RelatedArticles' );
 wfLoadExtension( 'VisualEditor' );
 wfLoadExtension( 'Scribunto' );
 wfLoadExtension( 'Renameuser' );
@@ -284,7 +284,7 @@ $wgGoogleAnalyticsAccount = 'UA-48789297-5';
 
 #ExternalData
 # $edgCacheTable = 'ed_url_cache'; Need to run ExternalData.sql first
-$wgHTTPTimeout = 60;
+# $wgHTTPTimeout = 60; Set HTTP request timeout to 60s
 $edgCacheExpireTime = 3 * 24 * 60 * 60;
 $edgAllowExternalDataFrom = array('https://starcitizen.tools','http://starcitizendb.com/', 'https://scwdev.czen.me');
 $edgExternalValueVerbose = false;
@@ -300,7 +300,7 @@ $wgVisualEditorUseSingleEditTab = true;
 $wgVisualEditorEnableVisualSectionEditing = true;
 
 #RelatedArticles 
-$wgRelatedArticlesFooterWhitelistedSkins = [ 'citizen', 'vector', 'timeless' ];
+# $wgRelatedArticlesFooterWhitelistedSkins = [ 'citizen', 'vector', 'timeless' ];
 # Enable when moved to 1.3.4
 # $wgRelatedArticlesDescriptionSource = 'textextracts';
 # Enable when CirrusSearch is installed
