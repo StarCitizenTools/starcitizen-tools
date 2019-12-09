@@ -304,6 +304,7 @@ $wgDefaultUserOptions['usecodemirror'] = 0;
 
 #CookieWarning
 $wgCookieWarningEnabled = true;
+$wgCookieWarningGeoIPLookup = none;
 
 #=============================================== Namespaces ===============================================
 define("NS_COMMLINK", 3000);
