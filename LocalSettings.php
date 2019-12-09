@@ -606,6 +606,13 @@ $wgFooterIcons = [
     ]
 ];
 
+# Add cookie statement to footer
+$wgHooks['SkinTemplateOutputPageBeforeExec'][] = function( $sk, &$tpl ) {
+  $tpl->set( 'cookiestatement', $sk->footerLink( 'cookiestatement', 'cookiestatementpage' ) );
+  $tpl->data['footerlinks']['places'][] = 'cookie';
+  return true;
+};
+
 #============================== Final External Includes ===============================================
 
 require_once("/home/www-data/external_includes/misc_server_settings.php");
