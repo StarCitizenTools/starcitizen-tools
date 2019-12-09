@@ -609,7 +609,9 @@ $wgFooterIcons = [
 # Add cookie statement to footer
 $wgHooks['SkinTemplateOutputPageBeforeExec'][] = function( $sk, &$tpl ) {
   $tpl->set( 'cookiestatement', $sk->footerLink( 'cookiestatement', 'cookiestatementpage' ) );
-  $tpl->data['footerlinks']['places'][] = 'cookie';
+  // or to add non-link text:
+  $tpl->set( 'footertext', 'Text to show in footer' );
+  $tpl->data['footerlinks']['places'][] = 'cookiestatement';
   return true;
 };
 
