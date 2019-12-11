@@ -69,7 +69,7 @@ $wgMemCachedServers = array();
 ## is writable, then set this to true:
 $wgEnableUploads = true;
 $wgGenerateThumbnailOnParse = false;
-$wgLocalFileRepo['transformVia404'] = true;
+#$wgLocalFileRepo['transformVia404'] = true;
 $wgUseImageMagick = true;
 $wgThumbnailEpoch = "20190815000000";
 #$wgThumbnailScriptPath = "{$wgScriptPath}/thumb.php";
