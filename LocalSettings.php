@@ -145,8 +145,8 @@ $wgDefaultSkin = 'citizen';
 # Enabled skins.
 # The following skins were automatically enabled:
 wfLoadSkin( 'Citizen' );
-wfLoadSkin( 'Vector' );
-wfLoadSkin( 'Timeless' );
+#wfLoadSkin( 'Vector' );
+#wfLoadSkin( 'Timeless' );
 
 #Maintenance
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
@@ -165,11 +165,11 @@ require_once("/home/www-data/external_includes/secret_keys.php");
 
 wfLoadExtension( 'ParserFunctions' );
 wfLoadExtension( 'EmbedVideo' );
-wfLoadExtension( 'MsUpload' );
+#wfLoadExtension( 'MsUpload' ); - No longer used
 wfLoadExtension( 'InputBox' );
 wfLoadExtension( 'WikiSEO' );
 wfLoadExtension( 'Cite' );
-wfLoadExtension("DynamicPageList");
+wfLoadExtension( 'DynamicPageList' );
 wfLoadExtension( 'Nuke' );
 wfLoadExtension( 'CommonsMetadata' );
 wfLoadExtension( 'ReplaceText' );
@@ -239,8 +239,8 @@ $wgExtractsRemoveClasses[] = 'dablink';
 $wgExtractsRemoveClasses[] = 'translate';
 
 #MsUpload
-$wgMSU_useDragDrop = true;
-$wgMSU_showAutoCat = true;
+#$wgMSU_useDragDrop = true;
+#$wgMSU_showAutoCat = true;
 
 #MultimediaViewer
 $wgMediaViewerEnableByDefault = true;
@@ -252,9 +252,9 @@ $wgCaptchaTriggers['edit']          = true;
 $wgCaptchaTriggers['create']        = true;
 
 #CleanChanges
-$wgCCTrailerFilter = true;
-$wgCCUserFilter = false;
-$wgDefaultUserOptions['usenewrc'] = 1;
+#$wgCCTrailerFilter = true;
+#$wgCCUserFilter = false;
+#$wgDefaultUserOptions['usenewrc'] = 1;
 
 #Translate
 $wgLocalisationUpdateDirectory = "$IP/cache";
@@ -562,7 +562,7 @@ $wgGroupPermissions['sysop']['renameuser'] = true;
 $wgFooterIcons = [
     "copyright" => [
         "copyright" => [
-      "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default,
+        "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default,
             "url" => $wgRightsUrl,
             "alt" => $wgRightsText,
     	]
