@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"LNDDYL"
+		]
+	},
+	"description2-desc": "將 description 中繼標籤新增至 MediaWiki 頁面到使用其他擴展為 ParserOutput"
+}

@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Peter17"
+		]
+	},
+	"description2-desc": "Ajoute une méta-étiquette de description aux pages de MediaWiki et à ParserOutput pour les autres extensions à utiliser"
+}

@@ -207,6 +207,7 @@ wfLoadExtension( 'ExternalData' );
 wfLoadExtension( 'TemplateStyles' );
 wfLoadExtension( 'Variables' );
 wfLoadExtension( 'Loops' );
+wfLoadExtension( 'Description2' );
 require_once "$IP/extensions/Translate/Translate.php";
 require_once "$IP/extensions/googleAnalytics/googleAnalytics.php";
 require_once "$IP/extensions/EventLogging/EventLogging.php";
