@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Daniel Friesen"
-		]
-	},
-	"description2-desc": "Adds a description meta-tag to MediaWiki pages and into the ParserOutput for other extensions to use"
-}

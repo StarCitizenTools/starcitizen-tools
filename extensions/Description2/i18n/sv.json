@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Ainali"
-		]
-	},
-	"description2-desc": "Lägger till en beskrivningsmetatagg till MediaWikisidor och till ParserOutput som andra tillägg kan använda"
-}
