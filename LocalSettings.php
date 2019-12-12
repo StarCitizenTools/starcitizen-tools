@@ -151,8 +151,8 @@ wfLoadSkin( 'Citizen' );
 
 # Citizen skin config
 # Enable Preconnect for the defined domain
-$wgCitizenEnablePreconnect = true;
-$wgCitizenPreconnectOrigin = 'https://www.google-analytics.com';
+#$wgCitizenEnablePreconnect = true;
+#$wgCitizenPreconnectOrigin = 'https://www.google-analytics.com';
 
 #Maintenance
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
