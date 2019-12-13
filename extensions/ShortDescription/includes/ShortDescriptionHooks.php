@@ -26,7 +26,7 @@ class ShortDescriptionHooks {
 		$shortdescription = $parserOutput->getProperty( 'shortdesc' );
 
 		if ( $shortdescription !== false ) {
-			$output = $shortdescription
+			$output = $shortdescription;
 		}
 
 		return $output;
