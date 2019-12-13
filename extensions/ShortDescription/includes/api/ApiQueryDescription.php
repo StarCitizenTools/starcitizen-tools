@@ -2,6 +2,7 @@
 
 /**
  * Extracted from WikiBase
+ * See T184000 for related info
  */
 
 use ApiQuery;

@@ -18,7 +18,7 @@ class ShortDescriptionHooks {
 	}
 
 	// Render the output of {{GETSHORTDESC}}.
-	public static function rendershortdesc( Parser $parser, $param1 = '', $param2 = '', $param3 = '' ) {
+	public static function rendershortdesc( Parser $parser ) {
 
 		$output = '';
 
@@ -34,6 +34,10 @@ class ShortDescriptionHooks {
 
    /**
      * Extracted from WikiBase
+     * See T184000 for related info
+	 */
+   
+   /**
 	 * Parser function callback
 	 *
 	 * @param Parser $parser
