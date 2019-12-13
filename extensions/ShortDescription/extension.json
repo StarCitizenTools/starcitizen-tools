@@ -12,7 +12,7 @@
 		"MediaWiki": ">= 1.31.0"
 	},
 	"AutoloadClasses": {
-		"ShortDescriptionHooks": "includes/ShortDescription.php"
+		"ShortDescriptionHooks": "includes/ShortDescriptionHooks.php"
 	},
 	"ExtensionMessagesFiles": {
 		"ShortDescriptionMagic": "ShortDescription.i18n.magic.php"

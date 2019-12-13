@@ -1,5 +1,9 @@
 <?php
 
+namespace MediaWiki\Extension\ShortDescription;
+
+use Parser;
+
 class ShortDescriptionHooks {
 	// Register any render callbacks with the parser
 	public static function onParserFirstCallInit( Parser $parser ) {
@@ -8,12 +12,12 @@ class ShortDescriptionHooks {
 		$parser->setFunctionHook( 'shortdesc', [ self::class, 'rendershortdesc' ] );
 	}
 
-	// Render the output of {{SHORTDESC:}}.
+	// Render the output of {{#SHORTDESC}}.
 	public static function rendershortdesc( Parser $parser, $param1 = '', $param2 = '', $param3 = '' ) {
 
 	// The input parameters are wikitext with templates expanded.
 	// The output should be wikitext too.
-	$output = "test response";
+	$output = "this should be where the description is";
 
 	return $output;
    }
