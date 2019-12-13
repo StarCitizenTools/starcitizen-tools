@@ -2,18 +2,16 @@
 
 class ShortDescriptionHooks {
 
-	// Extracted from WikiBase
-	// Register the "shortdesc" magic word
-	private function registerShortDescHandler( Parser $parser ) {
+	// Register any render callbacks with the parser
+	public static function onParserFirstCallInit( Parser $parser ) {
+
+		// Extracted from WikiBase
+		// Register the "shortdesc" magic word
 		$parser->setFunctionHook(
 			'shortdesc',
 			[ ShortDescHandler::class, 'handle' ],
 			Parser::SFH_NO_HASH
 		);
-	}
-
-	// Register any render callbacks with the parser
-	public static function onParserFirstCallInit( Parser $parser ) {
 
 		// Create a function hook associating the "getshortdesc" magic word with rendershortdesc()
 		$parser->setFunctionHook( 'getshortdesc', [ self::class, 'rendershortdesc' ] );
