@@ -14,5 +14,5 @@ if ( function_exists( 'wfLoadExtension' ) ) {
 	);
 	return;
 } else {
-	die( 'This version of the Short Description extension requires MediaWiki 1.31+' );
+	die( 'This version of the ShortDescription extension requires MediaWiki 1.31+' );
 }
