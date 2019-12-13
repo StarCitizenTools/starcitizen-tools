@@ -4,7 +4,7 @@
 	"author": [
 		"alistair3149"
 	],
-	"url": "https://starcitizen.tools",
+	"url": "https://www.mediawiki.org/wiki/Extension:ShortDescription",
 	"descriptionmsg": "shortdescription-desc",
 	"license-name": "GPL-3.0",
 	"type": "api",
