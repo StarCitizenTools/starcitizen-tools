@@ -4,5 +4,7 @@
 			"alistair3149"
 		]
 	},
-	"shortdescription-desc": "{{desc|name=Short Description|url=https://starcitizen.tools}}"
+	"shortdescription-desc": "{{desc|name=Short Description|url=https://starcitizen.tools}}",
+	"apihelp-query+description-summary": "{{doc-apihelp-summary|query+description}}",
+	"apihelp-query+description-example": "{{doc-apihelp-example|query+description}}"
 }

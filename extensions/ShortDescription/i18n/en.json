@@ -4,5 +4,7 @@
 			"alistair3149"
 		]
 	},
-	"shortdescription-desc": "Adds the required magic word and API to mimic the short description on Wikimedia projects."
+	"shortdescription-desc": "Adds the required magic word and API to mimic the short description on Wikimedia projects.",
+	"apihelp-query+description-summary": "Get a short description a.k.a. subtitle explaining what the target page is about.",
+	"apihelp-query+description-example": "Get the description for the page 'London'."
 }
