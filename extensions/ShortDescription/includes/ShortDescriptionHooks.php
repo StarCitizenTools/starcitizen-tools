@@ -20,7 +20,7 @@ class ShortDescriptionHooks {
 	// Render the output of {{GETSHORTDESC}}.
 	public static function rendershortdesc( Parser $parser, $param1 = '', $param2 = '', $param3 = '' ) {
 
-		$output = 'No shortdesc found on the page';
+		$output = '';
 
 		// Check if shortdesc exists, render if exist
 		$shortdescription = $parser->getOutput()->getProperty( 'shortdesc' );

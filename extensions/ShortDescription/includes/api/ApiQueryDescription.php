@@ -33,33 +33,17 @@ class Description extends ApiQueryBase {
 	private $contentLanguage;
 
 	/**
-	 * @var EntityIdLookup
-	 */
-	private $idLookup;
-
-	/**
-	 * @var TermIndex
-	 */
-	private $termIndex;
-
-	/**
 	 * @param ApiQuery $query
 	 * @param string $moduleName
 	 * @param Language $contentLanguage
-	 * @param EntityIdLookup $idLookup
-	 * @param TermIndex $termIndex
 	 */
 	public function __construct(
 		ApiQuery $query,
 		$moduleName,
 		Language $contentLanguage,
-		EntityIdLookup $idLookup,
-		TermIndex $termIndex
 	) {
 		parent::__construct( $query, $moduleName, 'desc' );
 		$this->contentLanguage = $contentLanguage;
-		$this->idLookup = $idLookup;
-		$this->termIndex = $termIndex;
 	}
 
 	/**
