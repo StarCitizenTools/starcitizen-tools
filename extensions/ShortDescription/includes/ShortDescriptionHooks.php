@@ -22,6 +22,7 @@ class ShortDescriptionHooks {
 
 		$output = '';
 
+		// Check if shortdesc exists, render if exist
 		$shortdescription = $parser->getOutput()->getProperty( 'shortdesc' );
 
 		if ( $shortdescription !== false ) {
