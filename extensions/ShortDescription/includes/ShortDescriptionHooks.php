@@ -5,8 +5,6 @@ class ShortDescriptionHooks {
 	// Register any render callbacks with the parser
 	public static function onParserFirstCallInit( Parser $parser ) {
 
-		// Extracted from WikiBase
-		// Register the "shortdesc" magic word
 		$parser->setFunctionHook(
 			'shortdesc',
 			[ self::class, 'handle' ],
@@ -22,14 +20,20 @@ class ShortDescriptionHooks {
 	// Render the output of {{#GETSHORTDESC}}.
 	public static function rendershortdesc( Parser $parser, $param1 = '', $param2 = '', $param3 = '' ) {
 
-	// The input parameters are wikitext with templates expanded.
-	// The output should be wikitext too.
-	$output = "this should be where the description is";
+		$output = 'No shortdesc found on the page';
 
-	return $output;
-   }
+		// Check if shortdesc exists, render if exist
+		$shortdescription = $parserOutput->getProperty( 'shortdesc' );
+
+		if ( $shortdescription !== false ) {
+			$output = $shortdescription
+		}
+
+		return $output;
+	}
 
    /**
+     * Extracted from WikiBase
 	 * Parser function callback
 	 *
 	 * @param Parser $parser
