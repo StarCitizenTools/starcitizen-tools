@@ -4,32 +4,37 @@ class ShortDescriptionHooks {
 
 	// Register any render callbacks with the parser
 	public static function onParserFirstCallInit( Parser $parser ) {
-
 		$parser->setFunctionHook(
 			'shortdesc',
 			[ self::class, 'handle' ],
 			Parser::SFH_NO_HASH
 		);
 
-		// Create a function hook associating the "getshortdesc" magic word with rendershortdesc()
-		$parser->setFunctionHook( 'getshortdesc', [ self::class, 'rendershortdesc' ], Parser::SFH_NO_HASH );
-
 		return true;
 	}
 
 	// Render the output of {{GETSHORTDESC}}.
-	public static function rendershortdesc( Parser $parser ) {
+	public static function onParserGetVariableValueSwitch( $parser, &$variableCache, &$magicWordId, &$ret, $frame ) {
+		$ret = '';
 
-		$output = '';
-
-		// Check if shortdesc exists, render if exist
-		$shortdescription = $parser->getOutput()->getProperty( 'shortdesc' );
-
-		if ( $shortdescription !== false ) {
-			$output = $shortdescription;
+		if ( $magicWordId == 'getshortdesc' ) {
+			$shortdescription = $parser->getOutput()->getProperty( 'shortdesc' );
+			if ( $shortdescription !== false ) {
+				$ret = $shortdescription;
+			}
 		}
 
-		return $output;
+		return true;
+	}
+
+	public static function onMagicWordwgVariableIDs( &$aCustomVariableIds ) {
+		// $customVariableIds is where MediaWiki wants to store its list of custom
+		// variable IDs. We oblige by adding ours:
+		$customVariableIds[] = 'getshortdesc';
+
+		// must do this or you will silence every MagicWordwgVariableIds hook
+		// registered after this!
+		return true;
 	}
 
    /**
