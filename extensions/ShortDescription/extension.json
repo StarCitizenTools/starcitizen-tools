@@ -23,7 +23,7 @@
 		]
 	},
 	"Hooks": {
-		"ParserFirstCallInit": "ShortDescriptionHooks::onParserFirstCallInit",
+		"ParserFirstCallInit": "ShortDescriptionHooks::onParserFirstCallInit"
 	},
 	"manifest_version": 2
 }
