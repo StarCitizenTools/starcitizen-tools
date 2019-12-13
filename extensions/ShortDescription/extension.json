@@ -12,7 +12,6 @@
 		"MediaWiki": ">= 1.31.0"
 	},
 	"AutoloadClasses": {
-		"ShortDescHandler": "includes/ShortDescHandler.php",
 		"ShortDescriptionHooks": "includes/ShortDescriptionHooks.php"
 	},
 	"ExtensionMessagesFiles": {
