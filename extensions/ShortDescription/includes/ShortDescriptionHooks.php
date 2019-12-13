@@ -1,5 +1,8 @@
 <?php
 
+use Parser;
+use ParserOutput;
+
 class ShortDescriptionHooks {
 
 	// Register any render callbacks with the parser
@@ -12,7 +15,7 @@ class ShortDescriptionHooks {
 		);
 
 		// Create a function hook associating the "getshortdesc" magic word with rendershortdesc()
-		$parser->setFunctionHook( 'getshortdesc', [ self::class, 'rendershortdesc' ] );
+		$parser->setFunctionHook( 'getshortdesc', [ self::class, 'rendershortdesc' ], Parser::SFH_NO_HASH );
 
 		return true;
 	}
@@ -21,9 +24,9 @@ class ShortDescriptionHooks {
 	public static function rendershortdesc( Parser $parser ) {
 
 		$output = '';
-
-		// Check if shortdesc exists, render if exist
-		$shortdescription = $parser->getOutput()->getProperty( 'shortdesc' );
+		$parserOutput = $parser->getOutput();
+		
+		$shortdescription = $parserOutput->getProperty( 'shortdesc' );
 
 		if ( $shortdescription !== false ) {
 			$output = $shortdescription;

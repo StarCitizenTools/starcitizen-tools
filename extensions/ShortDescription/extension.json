@@ -27,6 +27,7 @@
 		]
 	},
 	"Hooks": {
+		"OutputPageParserOutput": "ShortDescriptionHooks::onOutputPageParserOutput",
 		"ParserFirstCallInit": "ShortDescriptionHooks::onParserFirstCallInit"
 	},
 	"manifest_version": 2
