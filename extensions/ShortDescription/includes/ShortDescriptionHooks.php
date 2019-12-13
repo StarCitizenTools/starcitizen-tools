@@ -22,7 +22,7 @@ class ShortDescriptionHooks {
 
 	// The input parameters are wikitext with templates expanded.
 	// The output should be wikitext too.
-	$output = "this should be where the description is";
+	$output = $parserOutput->getProperty( 'shortdesc' );
 
 	return $output;
    }
