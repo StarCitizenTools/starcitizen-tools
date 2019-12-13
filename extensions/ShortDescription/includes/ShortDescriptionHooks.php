@@ -1,8 +1,5 @@
 <?php
 
-use Parser;
-use ParserOutput;
-
 class ShortDescriptionHooks {
 
 	// Register any render callbacks with the parser
@@ -24,9 +21,8 @@ class ShortDescriptionHooks {
 	public static function rendershortdesc( Parser $parser ) {
 
 		$output = '';
-		$parserOutput = $parser->getOutput();
-		
-		$shortdescription = $parserOutput->getProperty( 'shortdesc' );
+
+		$shortdescription = $parser->getOutput()->getProperty( 'shortdesc' );
 
 		if ( $shortdescription !== false ) {
 			$output = $shortdescription;
