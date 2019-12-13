@@ -6,7 +6,6 @@
 
 use ApiQuery;
 use ApiQueryBase;
-use Language;
 use PageProps;
 use Title;
 
@@ -23,22 +22,14 @@ use Title;
 class Description extends ApiQueryBase {
 
 	/**
-	 * @var Language
-	 */
-	private $contentLanguage;
-
-	/**
 	 * @param ApiQuery $query
 	 * @param string $moduleName
-	 * @param Language $contentLanguage
 	 */
 	public function __construct(
 		ApiQuery $query,
-		$moduleName,
-		Language $contentLanguage,
+		$moduleName
 	) {
 		parent::__construct( $query, $moduleName, 'desc' );
-		$this->contentLanguage = $contentLanguage;
 	}
 
 	/**
@@ -77,7 +68,7 @@ class Description extends ApiQueryBase {
 	/**
 	 * @param int[] $pageIds Page IDs, in the same order as returned by the ApiPageSet.
 	 * @param string[] $localDescriptionsByPageId Descriptions from local wikitext, as an
-	 *   associative array of page ID => description in the content language.
+	 *   associative array of page ID
 	 * @param int $continue The API request is being continued from this position.
 	 */
 	private function addDataToResponse(
