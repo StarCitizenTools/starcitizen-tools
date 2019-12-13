@@ -15,7 +15,7 @@
 		"description": "ApiQueryDescription"
 	},
 	"AutoloadClasses": {
-		"ApiQueryDescription": "includes/Api/ApiQueryDescription.php",
+		"ApiQueryDescription": "includes/api/ApiQueryDescription.php",
 		"ShortDescriptionHooks": "includes/ShortDescriptionHooks.php"
 	},
 	"ExtensionMessagesFiles": {
