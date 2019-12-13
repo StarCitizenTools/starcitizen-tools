@@ -7,6 +7,8 @@ class ShortDescriptionHooks {
 
 		// Extracted from WikiBase
 		// Register the "shortdesc" magic word
+		$this->registerShortDescHandler( $parser );
+		
 		$parser->setFunctionHook(
 			'shortdesc',
 			[ ShortDescHandler::class, 'handle' ],
