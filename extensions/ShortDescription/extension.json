@@ -27,9 +27,7 @@
 		]
 	},
 	"Hooks": {
-		"MagicWordwgVariableIDs": "ShortDescriptionHooks::onMagicWordwgVariableIDs",
-		"ParserFirstCallInit": "ShortDescriptionHooks::onParserFirstCallInit",
-		"ParserGetVariableValueSwitch": "ShortDescriptionHooks::onParserGetVariableValueSwitch"
+		"ParserFirstCallInit": "ShortDescriptionHooks::onParserFirstCallInit"
 	},
 	"manifest_version": 2
 }
