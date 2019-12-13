@@ -2,13 +2,11 @@
 
 namespace MediaWiki\Extension\ShortDescription;
 
-use Parser;
-
 class ShortDescriptionHooks {
 	// Register any render callbacks with the parser
 	public static function onParserFirstCallInit( Parser $parser ) {
 
-		// Create a function hook associating the "example" magic word with rendershortdesc()
+		// Create a function hook associating the "shortdesc" magic word with rendershortdesc()
 		$parser->setFunctionHook( 'shortdesc', [ self::class, 'rendershortdesc' ] );
 	}
 
