@@ -12,18 +12,18 @@ class ShortDescriptionHooks {
 		);
 
 		// Create a function hook associating the "getshortdesc" magic word with rendershortdesc()
-		$parser->setFunctionHook( 'getshortdesc', [ self::class, 'rendershortdesc' ] );
+		$parser->setFunctionHook( 'getshortdesc', [ self::class, 'rendershortdesc' ], Parser::SFH_NO_HASH );
 
 		return true;
 	}
 
-	// Render the output of {{#GETSHORTDESC}}.
+	// Render the output of {{GETSHORTDESC}}.
 	public static function rendershortdesc( Parser $parser, $param1 = '', $param2 = '', $param3 = '' ) {
 
 		$output = 'No shortdesc found on the page';
 
 		// Check if shortdesc exists, render if exist
-		$shortdescription = $parserOutput->getProperty( 'shortdesc' );
+		$shortdescription = $parser->getOutput()->getProperty( 'shortdesc' );
 
 		if ( $shortdescription !== false ) {
 			$output = $shortdescription;
