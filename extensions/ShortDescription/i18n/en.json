@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"alistair3149"
+		]
+	},
+	"shortdescription-desc": "Adds the required magic word and API to mimic the short description on Wikimedia projects."
+}

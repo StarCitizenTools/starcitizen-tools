@@ -1,0 +1,31 @@
+{
+	"name": "Short Description",
+	"version": "0.0.1",
+	"author": [
+		"alistair3149"
+	],
+	"url": "https://starcitizen.tools",
+	"descriptionmsg": "shortdescription-desc",
+	"license-name": "GPL-3.0",
+	"type": "api",
+	"requires": {
+		"MediaWiki": ">= 1.31.0"
+	},
+	"AutoloadClasses": {
+		"MediaWiki\\Extension\\ShortDescription\\ShortDescription": "includes/ShortDescription.php"
+	},
+	"ExtensionMessagesFiles": {
+		"ShortDescriptionMagic": "ShortDescription.i18n.magic.php"
+	},
+	"MessagesDirs": {
+		"ShortDescription": [
+			"i18n"
+		]
+	},
+	"Hooks": {
+		"OutputPageParserOutput": "MediaWiki\\Extension\\ShortDescription\\ShortDescription::onOutputPageParserOutput",
+		"ParserAfterTidy": "MediaWiki\\Extension\\ShortDescription\\ShortDescription::onParserAfterTidy",
+		"ParserFirstCallInit": "MediaWiki\\Extension\\ShortDescription\\ShortDescription::onParserFirstCallInit"
+	},
+	"manifest_version": 2
+}
