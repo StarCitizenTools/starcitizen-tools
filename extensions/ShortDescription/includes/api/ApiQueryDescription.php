@@ -23,11 +23,6 @@ use Title;
 class Description extends ApiQueryBase {
 
 	/**
-	 * Local description, in the form of a {{SHORTDESC:...}} parser function.
-	 */
-	const SOURCE_LOCAL = 'local';
-
-	/**
 	 * @var Language
 	 */
 	private $contentLanguage;
@@ -96,8 +91,7 @@ class Description extends ApiQueryBase {
 		foreach ( $pageIds as $pageId ) {
 			$path = [ 'query', 'pages', $pageId ];
 			if ( array_key_exists( $pageId, $localDescriptionsByPageId ) ) {
-				$fit = $result->addValue( $path, 'description', $localDescriptionsByPageId[$pageId] )
-					&& $result->addValue( $path, 'descriptionsource', 'local' );
+				$fit = $result->addValue( $path, 'description', $localDescriptionsByPageId[$pageId] );
 			}
 			if ( !$fit ) {
 				$this->setContinueEnumParameter( 'continue', $continue + $i );
