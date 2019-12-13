@@ -1,6 +1,6 @@
 {
 	"name": "Short Description",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"author": [
 		"alistair3149"
 	],
@@ -11,7 +11,11 @@
 	"requires": {
 		"MediaWiki": ">= 1.31.0"
 	},
+	"APIPropModules": {
+		"description": "ApiQueryDescription"
+	},
 	"AutoloadClasses": {
+		"ApiQueryDescription": "includes/Api/ApiQueryDescription.php",
 		"ShortDescriptionHooks": "includes/ShortDescriptionHooks.php"
 	},
 	"ExtensionMessagesFiles": {
