@@ -15,7 +15,6 @@ class ShortDescriptionHooks {
 
 	// Render the output of {{GETSHORTDESC}}.
 	public static function onParserGetVariableValueSwitch( $parser, &$variableCache, &$magicWordId, &$ret, $frame ) {
-		$ret = '';
 
 		if ( $magicWordId == 'getshortdesc' ) {
 			$shortdescription = $parser->getOutput()->getProperty( 'shortdesc' );
