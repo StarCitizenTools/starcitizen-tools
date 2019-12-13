@@ -23,9 +23,6 @@
 		]
 	},
 	"Hooks": {
-		"OutputPageParserOutput": "MediaWiki\\Extension\\ShortDescription\\ShortDescription::onOutputPageParserOutput",
-		"ParserAfterTidy": "MediaWiki\\Extension\\ShortDescription\\ShortDescription::onParserAfterTidy",
-		"ParserFirstCallInit": "MediaWiki\\Extension\\ShortDescription\\ShortDescription::onParserFirstCallInit"
 	},
 	"manifest_version": 2
 }
