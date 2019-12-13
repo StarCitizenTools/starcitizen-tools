@@ -1,16 +1,25 @@
 <?php
 
-namespace MediaWiki\Extension\ShortDescription;
-
 class ShortDescriptionHooks {
+
+	// Extracted from WikiBase
+	// Register the "shortdesc" magic word
+	private function registerShortDescHandler( Parser $parser ) {
+		$parser->setFunctionHook(
+			'shortdesc',
+			[ ShortDescHandler::class, 'handle' ],
+			Parser::SFH_NO_HASH
+		);
+	}
+
 	// Register any render callbacks with the parser
 	public static function onParserFirstCallInit( Parser $parser ) {
 
-		// Create a function hook associating the "shortdesc" magic word with rendershortdesc()
-		$parser->setFunctionHook( 'shortdesc', [ self::class, 'rendershortdesc' ] );
+		// Create a function hook associating the "getshortdesc" magic word with rendershortdesc()
+		$parser->setFunctionHook( 'getshortdesc', [ self::class, 'rendershortdesc' ] );
 	}
 
-	// Render the output of {{#SHORTDESC}}.
+	// Render the output of {{#GETSHORTDESC}}.
 	public static function rendershortdesc( Parser $parser, $param1 = '', $param2 = '', $param3 = '' ) {
 
 	// The input parameters are wikitext with templates expanded.

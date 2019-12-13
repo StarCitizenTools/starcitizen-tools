@@ -1,7 +1,5 @@
 <?php
 
-namespace MediaWiki\Extension\ShortDescription;
-
 use Parser;
 
 /**
@@ -10,6 +8,7 @@ use Parser;
  *
  * @license GPL-2.0+
  */
+
 class ShortDescHandler {
 
 	/**
