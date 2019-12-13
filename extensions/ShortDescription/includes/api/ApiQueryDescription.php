@@ -10,7 +10,7 @@ use PageProps;
 use Title;
 
 /**
- * Provides a short description of the page in the content language.
+ * Provides a short description of the page.
  * The description may be taken from an upstream Wikibase instance, or from a parser function in
  * the article wikitext.
  *
@@ -19,7 +19,7 @@ use Title;
  *
  * @license GPL-2.0+
  */
-class Description extends ApiQueryBase {
+class ApiQueryDescription extends ApiQueryBase {
 
 	/**
 	 * @param ApiQuery $query
