@@ -1,4 +1,7 @@
 <?php
+
+namespace MediaWiki\Extension\NativeSvgHandler;
+
 /*
     Copyright 2012 Povilas Kanapickas <povilas@radix.lt>
 

@@ -12,6 +12,9 @@
 	"requires": {
 		"MediaWiki": ">= 1.31.0"
 	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extensions\\NativeSvgHandler\\": "includes/"
+	},
 	"AutoloadClasses": {
 		"NativeSvgHandler": "MediaWiki\\Extensions\\NativeSvgHandler\\NativeSvgHandler.php",
 		"SvgImage": "MediaWiki\\Extensions\\NativeSvgHandler\\NativeSvgHandler.php"
@@ -23,9 +26,6 @@
 	},
 	"MediaHandlers": {
 		"image/svg+xml": "MediaWiki\\Extensions\\NativeSvgHandler\\NativeSvgHandler"
-	},
-	"AutoloadNamespaces": {
-		"MediaWiki\\Extensions\\NativeSvgHandler\\": "includes/"
 	},
 	"manifest_version": 2
 }
