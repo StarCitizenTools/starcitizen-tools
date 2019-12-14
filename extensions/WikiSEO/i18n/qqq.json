@@ -1,5 +1,10 @@
 {
-	"@metadata": [],
+	"@metadata": {
+		"authors": [
+			"Zoranzoki21"
+		]
+	},
+	"wiki-seo-desc": "Extension that allows the user to add metadata tags for SEO improvements",
 	"wiki-seo-empty-attr-tag": "Error message if the parser tag is called without content",
 	"wiki-seo-empty-attr-parser": "Error message if the parser hook is called without content",
 	"wiki-seo-invalid-generator": "Error message if a generator name ($1) is not valid.",

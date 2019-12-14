@@ -5,7 +5,7 @@
 			"Fitoschido"
 		]
 	},
-	"wiki-se-desc": "Permite meta-ajustes por página, como palabras clave y descripción, cambio de título y varios tags de verificación de sitio.",
+	"wiki-seo-desc": "Permite meta-ajustes por página, como palabras clave y descripción, cambio de título y varios tags de verificación de sitio.",
 	"wiki-seo-empty-attr-tag": "Error: &It;seo&gt; tag debe contener al menos un atributo no vacío.",
 	"wiki-seo-empty-attr-parser": "Error: <nowiki>{{#seo:}}</nowiki> deber contener al menos un atributo no vacío.",
 	"wiki-seo-invalid-generator": "Error: $1 no es un generador de metadatos valído.",

@@ -101,8 +101,10 @@ class SchemaOrg implements GeneratorInterface {
 
 		$meta = [
 			'@context' => 'http://schema.org',
+			'@type'     => $this->getTypeMetadata(),
 			'name'     => $this->outputPage->getHTMLTitle(),
 			'headline' => $this->outputPage->getHTMLTitle(),
+			'mainEntityOfPage' => $this->outputPage->getPageTitle(),
 		];
 
 		if ( $this->outputPage->getTitle() !== null ) {
@@ -116,7 +118,6 @@ class SchemaOrg implements GeneratorInterface {
 
 		foreach ( $this->tags as $tag ) {
 			if ( array_key_exists( $tag, $this->metadata ) ) {
-
 				$convertedTag = $this->conversions[$tag] ?? $tag;
 
 				$meta[$convertedTag] = $this->metadata[$tag];
@@ -132,7 +133,16 @@ class SchemaOrg implements GeneratorInterface {
 	}
 
 	/**
-	 * Generate jsonld metadata from the wiki logo or supplied file name
+	* Generate proper schema.org type in order to pass validation
+	*
+	* @return string
+	*/
+	private function getTypeMetadata() {
+		return $this->metadata['type'] ?? 'article';
+	}
+
+	/**
+	 * Generate jsonld metadata from the supplied file name, configured default image or wiki logo
 	 *
 	 * @return array
 	 */
@@ -140,6 +150,20 @@ class SchemaOrg implements GeneratorInterface {
 		$data = [
 			'@type' => 'ImageObject',
 		];
+
+		if ( !isset( $this->metadata['image'] ) ) {
+			try {
+				$defaultImage =
+					MediaWikiServices::getInstance()->getMainConfig()->get( 'WikiSeoDefaultImage' );
+
+				if ( $defaultImage !== null ) {
+					$this->metadata['image'] = $defaultImage;
+				}
+
+			} catch ( ConfigException $e ) {
+				// Fallthrough
+			}
+		}
 
 		if ( isset( $this->metadata['image'] ) ) {
 			$image = $this->metadata['image'];
@@ -153,17 +177,8 @@ class SchemaOrg implements GeneratorInterface {
 			}
 		}
 
-		try {
-			$logo = MediaWikiServices::getInstance()->getMainConfig()->get( 'Logo' );
-			$logo = wfExpandUrl( $logo );
-			$data['url'] = $logo;
-		} catch ( Exception $e ) {
-			// Uh oh either there was a ConfigException or there was an error expanding the URL.
-			// We'll bail out.
-			$data = [];
-		}
-
-		return $data;
+		// Logo as Fallback
+		return $this->getLogoMetadata();
 	}
 
 	/**
@@ -179,10 +194,47 @@ class SchemaOrg implements GeneratorInterface {
 			$sitename = '';
 		}
 
+		try {
+			$server = MediaWikiServices::getInstance()->getMainConfig()->get( 'Server' );
+		} catch ( Exception $e ) {
+			$server = '';
+		}
+
+		$logo = $this->getLogoMetadata();
+
+		if ( !empty( $logo ) ) {
+			$logo['caption'] = $sitename;
+		}
+
 		return [
 			'@type' => 'Organization',
 			'name' => $sitename,
+			'url' => $server,
+			'logo' => $logo,
 		];
+	}
+
+	/**
+	 * Tries to get the main logo form config as an expanded url
+	 *
+	 * @return array
+	 */
+	private function getLogoMetadata() {
+		$data = [
+			'@type' => 'ImageObject',
+		];
+
+		try {
+			$logo = MediaWikiServices::getInstance()->getMainConfig()->get( 'Logo' );
+			$logo = wfExpandUrl( $logo );
+			$data['url'] = $logo;
+		} catch ( Exception $e ) {
+			// Uh oh either there was a ConfigException or there was an error expanding the URL.
+			// We'll bail out.
+			$data = [];
+		}
+
+		return $data;
 	}
 
 	/**
@@ -197,7 +249,7 @@ class SchemaOrg implements GeneratorInterface {
 		if ( $searchPage !== null ) {
 			$search =
 				$searchPage->getFullURL( [ 'search' => 'search_term' ], false,
-					$this->outputPage->getRequest()->getProtocol() );
+					sprintf( '%s://', $this->outputPage->getRequest()->getProtocol() ) );
 			$search = str_replace( 'search_term', '{search_term}', $search );
 
 			return [

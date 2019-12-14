@@ -1,6 +1,6 @@
 {
 	"name": "WikiSEO",
-	"version": "2.2.1",
+	"version": "2.3.1",
 	"author": [
 		"Octfx"
 	],
@@ -44,13 +44,17 @@
 			"description": "Twitter Site handle to add globally",
 			"value": null
 		},
-		"MetadataGenerators":  {
+		"MetadataGenerators": {
 			"description": "Array with metadata generators",
 			"value": [
 				"OpenGraph",
 				"Twitter",
 				"SchemaOrg"
 			]
+		},
+		"WikiSeoDefaultImage": {
+			"description": "Default image. Local image, if not set $wgLogo will be used.",
+			"value": null
 		}
 	},
 	"MessagesDirs": {

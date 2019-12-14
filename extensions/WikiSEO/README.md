@@ -18,6 +18,10 @@ wfLoadExtension( 'WikiSEO' );
 ## Configuration
 The following variables are in use by this extension.
 
+### $wgWikiSeoDefaultImage
+Set a default image to use if no image is set on the site. If this variable is not set the sites logo will be used.  
+Usage: $wgWikiSeoDefaultImage = 'File:Localfile.jpg';.
+
 ### $wgGoogleSiteVerificationKey
 Setting this variable will add a ``<meta name="google-site-verification" content="CODE">`` tag to every page.  
 Usage: $wgGoogleSiteVerificationKey = 'CODE';.
@@ -78,7 +82,7 @@ The extension can be used via the ``{{#seo}}`` parser function. It accepts the f
 * type
   * The type of your object, e.g., "video.movie". Depending on the type you specify, other properties may also be required.
 * image
-  * An image URL which should represent your object within the graph. The extension will automatically add the right image url, width and height if an image name is set as the parameter. Example ``image = Local_file_to_use.png``. Alternatively a full url to an image can be used, image_width and image_height will then have to be set manually. If no parameter is set, the extension will use ``$wgLogo`` as a fallback.
+  * An image URL which should represent your object within the graph. The extension will automatically add the right image url, width and height if an image name is set as the parameter. Example ``image = Local_file_to_use.png``. Alternatively a full url to an image can be used, image_width and image_height will then have to be set manually. If no parameter is set, the extension will use ``$wgLogo`` as a fallback or the local file set through ``$wgWikiSeoDefaultImage``.
 * image_width
   * The image width in px. (Automatically set if an image name is set in image)
 * image_height
