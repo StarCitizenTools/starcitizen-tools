@@ -154,7 +154,7 @@ wfLoadSkin( 'Citizen' );
 $wgCitizenEnablePreconnect = true;
 $wgCitizenPreconnectOrigin = 'https://www.google-analytics.com';
 # Number of search results in suggestion
-$wgCitizenMaxSearchResults = 10;
+$wgCitizenMaxSearchResults = 6;
 
 #Maintenance
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
