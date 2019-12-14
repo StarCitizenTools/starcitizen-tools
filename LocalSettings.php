@@ -212,7 +212,6 @@ wfLoadExtension( 'NativeSvgHandler' );
 require_once "$IP/extensions/Translate/Translate.php";
 require_once "$IP/extensions/googleAnalytics/googleAnalytics.php";
 require_once "$IP/extensions/EventLogging/EventLogging.php";
-#require_once "$IP/extensions/NativeSvgHandler/NativeSvgHandler.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================

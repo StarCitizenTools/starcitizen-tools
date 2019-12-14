@@ -14,7 +14,7 @@
 	},
 	"AutoloadClasses": {
 		"NativeSvgHandler": "includes/NativeSvgHandler.php",
-		"SvgImage": "includes/NativeSvgHandler.php"
+		"SvgImage": "includes/SvgImage.php"
 	},
 	"MessagesDirs": {
 		"NativeSvgHandler": [
