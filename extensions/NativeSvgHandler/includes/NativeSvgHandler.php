@@ -41,12 +41,11 @@ class NativeSvgHandler extends SvgHandler {
             return new TransformParameterError( $params );
         }
 
-        /*
         if( $this->getConfig()->get('NativeSvgHandlerEnableLinks') == true ) {
             return new ThumbnailImage($image, $image->getURL(), $params['width'],
                                       $params['height'], $image->getPath() );
         }
-        */
+        
         return new SvgImage($image, $image->getURL(), $params['width'],
                             $params['height'], $image->getPath() );
     }
