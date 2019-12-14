@@ -22,7 +22,7 @@
 		]
 	},
 	"MediaHandlers": {
-		"image/svg+xml": "NativeSvgHandler::NativeSvgHandler"
+		"image/svg+xml": "NativeSvgHandler"
 	},
 	"manifest_version": 2
 }
