@@ -5,5 +5,6 @@
 			"Ilaï Deutel"
 		]
 	},
+	"nativesvghandler-extensionname": "{{name}}",
 	"nativesvghandler-desc": "{{desc|name=NativeSvgHandler|url=https://www.mediawiki.org/wiki/Extension:NativeSvgHandler}}"
 }

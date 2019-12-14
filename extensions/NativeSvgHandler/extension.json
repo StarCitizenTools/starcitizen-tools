@@ -6,11 +6,24 @@
 		"Ilaï Deutel"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:NativeSvgHandler",
+	"namemsg": "nativesvghandler-extensionname",
 	"descriptionmsg": "nativesvghandler-desc",
 	"license-name": "GPL-3.0",
 	"type": "media",
 	"requires": {
 		"MediaWiki": ">= 1.31.0"
+	},
+	"config_prefix": "wgNativeSvgHandler",
+	"config": {
+		"EnableLinks": {
+			"value": false,
+			"description": "Enable or disable links over SVG images",
+			"descriptionmsg": "nativesvghandler-config-enablelinks",
+			"public": true
+		},
+	},
+	"ConfigRegistry": {
+		"NativeSvgHandler": "GlobalVarConfig::newInstance"
 	},
 	"AutoloadClasses": {
 		"NativeSvgHandler": "includes/NativeSvgHandler.php",

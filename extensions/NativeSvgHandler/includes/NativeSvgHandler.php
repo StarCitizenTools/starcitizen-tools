@@ -41,8 +41,7 @@ class NativeSvgHandler extends SvgHandler {
             return new TransformParameterError( $params );
         }
 
-        global $wgNativeSvgHandlerEnableLinks;
-        if(!isset($wgNativeSvgHandlerEnableLinks) || $wgNativeSvgHandlerEnableLinks) {
+        if( $this->getConfig()->get('NativeSvgHandlerEnableLinks') == true ) {
             return new ThumbnailImage($image, $image->getURL(), $params['width'],
                                       $params['height'], $image->getPath() );
         }
