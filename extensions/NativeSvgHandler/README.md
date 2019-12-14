@@ -1,26 +1,19 @@
-Information
-===========
+# NativeSvgHandler for Mediawiki
+Extension:NativeSvgHandler allows SVG files to by served directly to clients for client-side rendering.
 
-This is a MediaWiki extension which allows SVG files to by served directly to
-clients for client-side rendering. No configuration is required, just add the
-following lines to your LocalSettings.php once the source of the extension is
-copied to the extensions/ directory:
+## Requirements
+* [MediaWiki](https://www.mediawiki.org) 1.31 or later
 
-require_once "$IP/extensions/NativeSvgHandler/NativeSvgHandler.php";
-$wgNativeSvgHandlerEnableLinks = true; //Set to false to disable links over SVG images
+## Installation
+You can get the extension via Git (specifying ShortDescription as the destination directory):
 
-License
-=======
+    git clone https://github.com/StarCitizenTools/mediawiki-extensions-NativeSvgHandler.git NativeSvgHandler
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
+Or [download it as zip archive](https://github.com/StarCitizenTools/mediawiki-extensions-NativeSvgHandler/archive/master.zip).
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+In either case, the "NativeSvgHandler" extension should end up in the "extensions" directory 
+of your MediaWiki installation. If you got the zip archive, you will need to put it 
+into a directory called ShortDescription.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## Usage
+Please refer to the [extensions documentation page](https://www.mediawiki.org/wiki/Extension:NativeSvgHandler). Note that the documentation is for the older version, but it is still compatitible.
