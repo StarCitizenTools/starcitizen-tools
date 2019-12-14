@@ -13,6 +13,18 @@
 	"requires": {
 		"MediaWiki": ">= 1.31.0"
 	},
+	"config_prefix": "wgNativeSvgHandler",
+	"config": {
+		"EnableLinks": {
+			"value": false,
+			"description": "Enable or disable links over SVG images",
+			"descriptionmsg": "nativesvghandler-config-enablelinks",
+			"public": true
+		}
+	},
+	"ConfigRegistry": {
+		"NativeSvgHandler": "GlobalVarConfig::newInstance"
+	},
 	"AutoloadClasses": {
 		"NativeSvgHandler": "includes/NativeSvgHandler.php",
 		"SvgImage": "includes/SvgImage.php"
