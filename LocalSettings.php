@@ -569,13 +569,6 @@ $wgGroupPermissions['sysop']['renameuser'] = true;
 #=============================================== Misc ===============================================
 
 $wgFooterIcons = [
-    "copyright" => [
-        "copyright" => [
-        "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default,
-            "url" => $wgRightsUrl,
-            "alt" => $wgRightsText,
-    	]
-    ],
     "poweredby" => [
         "mediawiki" => [
             "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
@@ -599,6 +592,13 @@ $wgFooterIcons = [
         ]
     ],
 */
+    "copyright" => [
+        "copyright" => [
+        "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default,
+            "url" => $wgRightsUrl,
+            "alt" => $wgRightsText,
+      ]
+    ],
     "madeby" => [
           "thecommunity" => [
               "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
