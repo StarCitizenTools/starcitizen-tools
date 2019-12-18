@@ -433,6 +433,12 @@ $wgExtraNamespaces[NS_CSN_TALK] = "CSN_talk";
 $wgNamespacesWithSubpages[NS_CSN] = true;
 $wgNamespacesToBeSearchedDefault[NS_CSN] = true;
 
+define("NS_TRANSCRIPT", 3014);
+define("NS_TRANSCRIPT_TALK", 3015);
+$wgExtraNamespaces[NS_TRANSCRIPT] = "Transcript";
+$wgExtraNamespaces[NS_TRANSCRIPT_TALK] = "Transcript_talk";
+$wgNamespacesWithSubpages[NS_TRANSCRIPT] = true;
+
 $wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
 $wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
 
