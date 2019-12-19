@@ -1,0 +1,37 @@
+{
+	"name": "mediawiki/native-svg-handler",
+	"type": "mediawiki-extension",
+	"description": "Serves SVG images directly to clients",
+	"keywords": [
+		"MediaWiki",
+		"NativeSvgHandler",
+		"SVG",
+		"extension"
+	],
+	"homepage": "https://www.mediawiki.org/wiki/Extension:NativeSvgHandler",
+	"readme": "README.md",
+	"license": "GPL-3.0",
+	"authors": [
+		{
+			"name": "alistair3149",
+			"email": "alistair31494322@gmail.com",
+			"role": "Maintainer"
+		},
+		{
+			"name": "Povilas Kanapickas",
+			"role": "Developer"
+		},
+		{
+			"name": "Ilaï Deutel",
+			"role": "Developer"
+		}
+	],
+	"support": {
+		"forum": "https://www.mediawiki.org/wiki/Extension_talk:NativeSvgHandler",
+		"wiki": "https://www.mediawiki.org/wiki/Extension:NativeSvgHandler"
+	},
+	"require": {
+		"composer/installers": ">=1.0.1",
+		"mediawiki/mediawiki": ">=1.31.0"
+	},
+}

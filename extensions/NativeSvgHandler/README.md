@@ -16,4 +16,4 @@ of your MediaWiki installation. If you got the zip archive, you will need to put
 into a directory called ShortDescription.
 
 ## Usage
-Please refer to the [extensions documentation page](https://www.mediawiki.org/wiki/Extension:NativeSvgHandler). Note that the documentation is for the older version, but it is still compatitible.
+Please refer to the [extensions documentation page](https://www.mediawiki.org/wiki/Extension:NativeSvgHandler).
