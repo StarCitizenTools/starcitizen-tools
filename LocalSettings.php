@@ -9,8 +9,8 @@ $wgShowExceptionDetails = true;
 
 $wgTidyConfig = null;
 #General Settings
-$wgSitename = "Star Citizen Wiki";
-$wgMetaNamespace = "Star_Citizen";
+$wgSitename = 'Star Citizen Wiki';
+$wgMetaNamespace = 'Star_Citizen';
 $wgAllowSiteCSSOnRestrictedPages = true;
 
 ## The URL base path to the directory containing the wiki;
@@ -18,7 +18,7 @@ $wgAllowSiteCSSOnRestrictedPages = true;
 ## For more information on customizing the URLs
 ## (like /w/index.php/Page_title to /wiki/Page_title) please see:
 ## https://www.mediawiki.org/wiki/Manual:Short_URL
-$wgScriptPath = "";
+$wgScriptPath = '';
 $wgScriptExtension = "$wgScriptPath/index.php";
 $wgRedirectScript   = "$wgScriptPath/redirect.php";
 $wgArticlePath = "/$1";
@@ -28,7 +28,7 @@ $wgDebugDumpSql = false;
 $wgDebugComments = false;
 
 ## The protocol and server name to use in fully-qualified URLs
-$wgServer = "https://scwdev.czen.me";
+$wgServer = 'https://scwdev.czen.me';
 
 ## The URL path to static resources (images, scripts, etc.)
 $wgResourceBasePath = $wgScriptPath;
@@ -37,8 +37,8 @@ $wgResourceBasePath = $wgScriptPath;
 ## or else you'll overwrite your logo when you upgrade!
 $wgLogo = "$wgResourceBasePath/resources/assets/sitelogo.png";
 $wgLogoHD = [
-  "1.5x" => "$wgResourceBasePath/resources/assets/sitelogo-1.5x.png",
-  "2x" => "$wgResourceBasePath/resources/assets/sitelogo-2x.png"
+  '1.5x' => "$wgResourceBasePath/resources/assets/sitelogo-1.5x.png",
+  '2x' => "$wgResourceBasePath/resources/assets/sitelogo-2x.png"
 ];
 $wgFavicon = "$wgResourceBasePath/resources/assets/favicon.ico";
 $wgAppleTouchIcon = "$wgResourceBasePath/resources/assets/apple-touch-icon.png";
@@ -47,15 +47,15 @@ $wgAppleTouchIcon = "$wgResourceBasePath/resources/assets/apple-touch-icon.png";
 $wgEnableEmail = true;
 $wgEnableUserEmail = true; # UPO
 
-$wgEmergencyContact = "webmaster@starcitizen.tools";
-$wgPasswordSender = "do-not-reply@starcitizen.tools";
+$wgEmergencyContact = 'webmaster@starcitizen.tools';
+$wgPasswordSender = 'do-not-reply@starcitizen.tools';
 
 $wgEnotifUserTalk = false; # UPO
 $wgEnotifWatchlist = false; # UPO
 $wgEmailAuthentication = true;
 
 # MySQL table options to use during installation or update
-$wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=utf8";
+$wgDBTableOptions = 'ENGINE=InnoDB, DEFAULT CHARSET=utf8';
 
 # Experimental charset support for MySQL 5.0.
 $wgDBmysql5 = false;
@@ -71,7 +71,7 @@ $wgEnableUploads = true;
 $wgGenerateThumbnailOnParse = true;
 #$wgLocalFileRepo['transformVia404'] = true;
 $wgUseImageMagick = true;
-$wgThumbnailEpoch = "20190815000000";
+$wgThumbnailEpoch = '20190815000000';
 #$wgThumbnailScriptPath = "{$wgScriptPath}/thumb.php";
 
 $wgDefaultUserOptions['imagesize'] = 4; // image size 1280, 1024
@@ -109,7 +109,7 @@ $wgUseInstantCommons = true;
 ## If you use ImageMagick (or any other shell command) on a
 ## Linux server, this will need to be set to the name of an
 ## available UTF-8 locale
-$wgShellLocale = "en_US.utf8";
+$wgShellLocale = 'en_US.utf8';
 
 ## If you want to use image uploads under safe mode,
 ## create the directories images/archive, images/thumb and
@@ -123,18 +123,18 @@ $wgShellLocale = "en_US.utf8";
 $wgCacheDirectory = "$IP/cache";
 
 # Site language code, should be one of the list in ./languages/Names.php
-$wgLanguageCode = "en";
+$wgLanguageCode = 'en';
 
 ## For attaching licensing metadata to pages, and displaying an
 ## appropriate copyright notice / icon. GNU Free Documentation
 ## License and Creative Commons licenses are supported so far.
-$wgRightsPage = ""; # Set to the title of a wiki page that describes your license/copyright
-$wgRightsUrl = "https://creativecommons.org/licenses/by-sa/4.0/";
-$wgRightsText = "Creative Commons Attribution-ShareAlike";
+$wgRightsPage = ''; # Set to the title of a wiki page that describes your license/copyright
+$wgRightsUrl = 'https://creativecommons.org/licenses/by-sa/4.0/';
+$wgRightsText = 'Creative Commons Attribution-ShareAlike';
 $wgRightsIcon = "$wgResourceBasePath/resources/assets/licenses/cc-by-sa.png";
 
 # Path to the GNU diff3 utility. Used for conflict resolution.
-$wgDiff3 = "/usr/bin/diff3";
+$wgDiff3 = '/usr/bin/diff3';
 
 # The following permissions were set based on your choice in the installer
 $wgAllowUserCss = true;
@@ -150,6 +150,10 @@ wfLoadSkin( 'Citizen' );
 #wfLoadSkin( 'Timeless' );
 
 # Citizen skin config
+# Contact FAB
+$wgCitizenButtonLink = 'https://discord.gg/3kjftWK';
+$wgCitizenButtonLabel = 'Discord';
+$wgCitizenButtonTitle = 'Contact Us on Discord';
 # Enable Preconnect for the defined domain
 $wgCitizenEnablePreconnect = true;
 $wgCitizenPreconnectOrigin = 'https://www.google-analytics.com';
@@ -166,8 +170,8 @@ $wgSVGConverter = 'ImageMagick';
 
 #=============================================== External Includes ===============================================
 
-require_once("/home/www-data/external_includes/mysql_pw.php");
-require_once("/home/www-data/external_includes/secret_keys.php");
+require_once('/home/www-data/external_includes/mysql_pw.php');
+require_once('/home/www-data/external_includes/secret_keys.php');
 
 #=============================================== Extension Load ===============================================
 
@@ -300,7 +304,7 @@ $edgExternalValueVerbose = false;
 
 #Visual Editor
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
-$wgDefaultUserOptions['visualeditor-editor'] = "visualeditor";
+$wgDefaultUserOptions['visualeditor-editor'] = 'visualeditor';
 $wgDefaultUserOptions['visualeditor-newwikitext'] = 1;
 $wgHiddenPrefs[] = 'visualeditor-enable';
 $wgVisualEditorEnableWikitext = true;
@@ -363,80 +367,80 @@ $wgDplSettings['recursiveTagParse'] = true;
 
 #TemplateStyles
 $wgTemplateStylesAllowedUrls = [
-  "audio" => [
+  'audio' => [
     "<^https://starcitizen\\.tools/>",
     "<^https://scwdev\\.czen\\.me/>"
   ],
-  "image" => [
+  'image' => [
     "<^https://starcitizen\\.tools/>",
     "<^https://scwdev\\.czen\\.me/>"
   ],
-  "svg" => [
+  'svg' => [
     "<^https://starcitizen\\.tools/[^?#]*\\.svg(?:[?#]|$)>",
     "<^https://scwdev\\.czen\\.me/[^?#]*\\.svg(?:[?#]|$)>"
   ],
-  "font" => [
+  'font' => [
     "<^https://starcitizen\\.tools/>",
     "<^https://scwdev\\.czen\\.me/>"
   ],
-  "namespace" => [
+  'namespace' => [
       "<.>"
   ],
-  "css" => []
+  'css' => []
 ];
 
 #=============================================== Namespaces ===============================================
-define("NS_COMMLINK", 3000);
-define("NS_COMMLINK_TALK", 3001);
-$wgExtraNamespaces[NS_COMMLINK] = "Comm-Link";
-$wgExtraNamespaces[NS_COMMLINK_TALK] = "Comm-Link_talk";
+define('NS_COMMLINK', 3000);
+define('NS_COMMLINK_TALK', 3001);
+$wgExtraNamespaces[NS_COMMLINK] = 'Comm-Link';
+$wgExtraNamespaces[NS_COMMLINK_TALK] = 'Comm-Link_talk';
 $wgNamespacesWithSubpages[NS_COMMLINK] = true;
 $wgNamespacesToBeSearchedDefault[NS_COMMLINK] = true;
 
-define("NS_PROJMGMT", 3002);
-define("NS_PROJMGMT_TALK", 3003);
-$wgExtraNamespaces[NS_PROJMGMT] = "ProjMGMT";
-$wgExtraNamespaces[NS_PROJMGMT_TALK] = "ProjMGMT_talk";
+define('NS_PROJMGMT', 3002);
+define('NS_PROJMGMT_TALK', 3003);
+$wgExtraNamespaces[NS_PROJMGMT] = 'ProjMGMT';
+$wgExtraNamespaces[NS_PROJMGMT_TALK] = 'ProjMGMT_talk';
 $wgNamespacesWithSubpages[NS_PROJMGMT] = true;
 
-define("NS_ISSUE", 3004);
-define("NS_ISSUE_TALK", 3005);
-$wgExtraNamespaces[NS_ISSUE] = "Issue";
-$wgExtraNamespaces[NS_ISSUE_TALK] = "Issue_talk";
+define('NS_ISSUE', 3004);
+define('NS_ISSUE_TALK', 3005);
+$wgExtraNamespaces[NS_ISSUE] = 'Issue';
+$wgExtraNamespaces[NS_ISSUE_TALK] = 'Issue_talk';
 $wgNamespacesWithSubpages[NS_ISSUE] = true;
 
-define("NS_GUIDE", 3006);
-define("NS_GUIDE_TALK", 3007);
-$wgExtraNamespaces[NS_GUIDE] = "Guide";
-$wgExtraNamespaces[NS_GUIDE_TALK] = "Guide_talk";
+define('NS_GUIDE', 3006);
+define('NS_GUIDE_TALK', 3007);
+$wgExtraNamespaces[NS_GUIDE] = 'Guide';
+$wgExtraNamespaces[NS_GUIDE_TALK] = 'Guide_talk';
 $wgNamespacesWithSubpages[NS_GUIDE] = true;
 $wgNamespacesToBeSearchedDefault[NS_GUIDE] = true;
 
 
-define("NS_ORG", 3008);
-define("NS_ORG_TALK", 3009);
-$wgExtraNamespaces[NS_ORG] = "ORG";
-$wgExtraNamespaces[NS_ORG_TALK] = "ORG_talk";
+define('NS_ORG', 3008);
+define('NS_ORG_TALK', 3009);
+$wgExtraNamespaces[NS_ORG] = 'ORG';
+$wgExtraNamespaces[NS_ORG_TALK] = 'ORG_talk';
 $wgNamespacesWithSubpages[NS_ORG] = true;
 
-define("NS_EVENT", 3010);
-define("NS_EVENT_TALK", 3011);
-$wgExtraNamespaces[NS_EVENT] = "EVENT";
-$wgExtraNamespaces[NS_EVENT_TALK] = "EVENT_talk";
+define('NS_EVENT', 3010);
+define('NS_EVENT_TALK', 3011);
+$wgExtraNamespaces[NS_EVENT] = 'EVENT';
+$wgExtraNamespaces[NS_EVENT_TALK] = 'EVENT_talk';
 $wgNamespacesWithSubpages[NS_EVENT] = true;
 
 # Citizen Star News Archive project
-define("NS_CSN", 3012);
-define("NS_CSN_TALK", 3013);
-$wgExtraNamespaces[NS_CSN] = "CSN";
-$wgExtraNamespaces[NS_CSN_TALK] = "CSN_talk";
+define('NS_CSN', 3012);
+define('NS_CSN_TALK', 3013);
+$wgExtraNamespaces[NS_CSN] = 'CSN';
+$wgExtraNamespaces[NS_CSN_TALK] = 'CSN_talk';
 $wgNamespacesWithSubpages[NS_CSN] = true;
 $wgNamespacesToBeSearchedDefault[NS_CSN] = true;
 
-define("NS_TRANSCRIPT", 3014);
-define("NS_TRANSCRIPT_TALK", 3015);
-$wgExtraNamespaces[NS_TRANSCRIPT] = "Transcript";
-$wgExtraNamespaces[NS_TRANSCRIPT_TALK] = "Transcript_talk";
+define('NS_TRANSCRIPT', 3014);
+define('NS_TRANSCRIPT_TALK', 3015);
+$wgExtraNamespaces[NS_TRANSCRIPT] = 'Transcript';
+$wgExtraNamespaces[NS_TRANSCRIPT_TALK] = 'Transcript_talk';
 $wgNamespacesWithSubpages[NS_TRANSCRIPT] = true;
 
 $wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
@@ -466,14 +470,14 @@ $wgVisualEditorAvailableNamespaces = array(
 
 #=============================================== Permissions ===============================================
 $wgAutopromote = array(
-	"autoconfirmed" => array( "&",
+	'autoconfirmed' => array( "&",
 		array( APCOND_EDITCOUNT, &$wgAutoConfirmCount ),
 		array( APCOND_AGE, &$wgAutoConfirmAge ),
     APCOND_EMAILCONFIRMED,
 	),
-  "Trusted" => array( "&",
+  'Trusted' => array( "&",
     array( APCOND_EDITCOUNT, 300),
-    array( APCOND_INGROUPS, "Verified"),
+    array( APCOND_INGROUPS, 'Verified'),
   ),
 );
 
@@ -575,48 +579,48 @@ $wgGroupPermissions['sysop']['renameuser'] = true;
 #=============================================== Misc ===============================================
 
 $wgFooterIcons = [
-    "poweredby" => [
-        "mediawiki" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
-            "url" => "https://www.mediawiki.org",
-            "alt" => "Powered by MediaWiki",
+    'poweredby' => [
+        'mediawiki' => [
+            'src' => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+            'url' => 'https://www.mediawiki.org',
+            'alt' => 'Powered by MediaWiki',
         ]
     ],
-    "monitoredby" => [
-          "wikiapiary" => [
-              "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
-              "url" => "https://wikiapiary.com/wiki/The_Star_Citizen_Wiki",
-              "alt" => "Monitored By Wikiapiary",
+    'monitoredby' => [
+          'wikiapiary' => [
+              'src' => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+              'url' => 'https://wikiapiary.com/wiki/The_Star_Citizen_Wiki',
+              'alt' => 'Monitored By Wikiapiary',
           ]
     ],
 /*
-  "gdprcompliance" => [
-        "gdpr" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
-            "url" => "https://gdpr.eu",
-            "alt" => "GDPR compliant",
+  'gdprcompliance' => [
+        'gdpr' => [
+            'src' => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+            'url' => 'https://gdpr.eu',
+            'alt' => 'GDPR compliant',
         ]
     ],
 */
-    "copyright" => [
-        "copyright" => [
-        "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default,
-            "url" => $wgRightsUrl,
-            "alt" => $wgRightsText,
+    'copyright' => [
+        'copyright' => [
+        'src' => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default,
+            'url' => $wgRightsUrl,
+            'alt' => $wgRightsText,
       ]
     ],
-    "madeby" => [
-          "thecommunity" => [
-              "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
-              "url" => "https://robertsspaceindustries.com",
-              "alt" => "Made by the community",
+    'madeby' => [
+          'thecommunity' => [
+              'src' => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+              'url' => 'https://robertsspaceindustries.com',
+              'alt' => 'Made by the community',
           ]
     ],
-    "partof" => [
-        "starcitizentools" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
-            "url" => "https://starcitizen.tools",
-            "alt" => "Part of Star Citizen Tools",
+    'partof' => [
+        'starcitizentools' => [
+            'src' => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+            'url' => 'https://starcitizen.tools',
+            'alt' => 'Part of Star Citizen Tools',
         ]
     ]
 ];
@@ -632,4 +636,4 @@ $wgHooks['SkinTemplateOutputPageBeforeExec'][] = function( $sk, &$tpl ) {
 
 #============================== Final External Includes ===============================================
 
-require_once("/home/www-data/external_includes/misc_server_settings.php");
+require_once('/home/www-data/external_includes/misc_server_settings.php');
