@@ -150,10 +150,6 @@ wfLoadSkin( 'Citizen' );
 #wfLoadSkin( 'Timeless' );
 
 # Citizen skin config
-# Contact FAB
-$wgCitizenButtonLink = 'https://discord.gg/3kjftWK';
-$wgCitizenButtonLabel = 'Discord';
-$wgCitizenButtonTitle = 'Contact Us on Discord';
 # Enable Preconnect for the defined domain
 $wgCitizenEnablePreconnect = true;
 $wgCitizenPreconnectOrigin = 'https://www.google-analytics.com';
