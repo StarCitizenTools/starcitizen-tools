@@ -459,17 +459,18 @@ $wgNamespaceProtection[NS_ORG] = array( 'org-edit' );
 $wgNamespaceProtection[NS_EVENT] = array( 'event-edit' );
 
 $wgVisualEditorAvailableNamespaces = array(
-  NS_MAIN     => true,
-  NS_USER     => true,
-  NS_HELP     => true,
-  NS_PROJECT  => true,
-  NS_COMMLINK => true,
-  NS_PROJMGMT => true,
-  NS_ISSUE    => true,
-  NS_GUIDE    => true,
-  NS_ORG      => true,
-  NS_EVENT    => true,
-  NS_CSN    => true
+  NS_MAIN     	=> true,
+  NS_USER     	=> true,
+  NS_HELP     	=> true,
+  NS_PROJECT 	=> true,
+  NS_COMMLINK 	=> true,
+  NS_PROJMGMT 	=> true,
+  NS_ISSUE    	=> true,
+  NS_GUIDE    	=> true,
+  NS_ORG      	=> true,
+  NS_EVENT    	=> true,
+  NS_CSN    	=> true,
+  NS_TRANSCRIPT => true
 );
 
 #=============================================== Permissions ===============================================
@@ -580,7 +581,7 @@ $wgGroupPermissions['sysop']['editinterface'] = true;
 $wgGroupPermissions['sysop']['delete'] = true;
 $wgGroupPermissions['sysop']['renameuser'] = true;
 
-#=============================================== Misc ===============================================
+#=============================================== Footer ===============================================
 
 $wgFooterIcons = [
     "poweredby" => [
