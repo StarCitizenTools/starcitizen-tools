@@ -294,6 +294,10 @@ $wgULSGeoService = false;
 
 #Google Analytics
 $wgGoogleAnalyticsAccount = 'UA-48789297-5';
+# Array with special pages where web analytics code should NOT be included.
+$wgGoogleAnalyticsIgnoreSpecials = array( 'Userlogin', 'CreateAccount', 'Userlogout', 'Preferences', 'ChangePassword', 'OATH');
+# No bot group analytics.
+$wgGroupPermissions['bot']['noanalytics'] = true;
 
 #ExternalData
 # $edgCacheTable = 'ed_url_cache'; Need to run ExternalData.sql first
