@@ -30,6 +30,9 @@ $wgDebugComments = false;
 ## The protocol and server name to use in fully-qualified URLs
 $wgServer = "https://scwdev.czen.me";
 
+## Output a canonical meta tag on every page
+$wgEnableCanonicalServerLink = true;
+
 ## The URL path to static resources (images, scripts, etc.)
 $wgResourceBasePath = $wgScriptPath;
 
