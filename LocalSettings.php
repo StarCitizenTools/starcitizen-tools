@@ -7,7 +7,10 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 /* DEBUG ONLY */
 $wgShowExceptionDetails = true;
 
-$wgTidyConfig = null;
+#Tidy HTML output
+$wgUseTidy = true;
+$wgTidyConfig = [ 'driver' => 'RemexHtml' ];
+
 #General Settings
 $wgSitename = "Star Citizen Wiki";
 $wgMetaNamespace = "Star_Citizen";
