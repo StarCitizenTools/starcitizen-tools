@@ -40,8 +40,7 @@ $wgResourceBasePath = $wgScriptPath;
 ## or else you'll overwrite your logo when you upgrade!
 $wgLogo = "$wgResourceBasePath/resources/assets/sitelogo.png";
 $wgLogoHD = [
-  "1.5x" => "$wgResourceBasePath/resources/assets/sitelogo-1.5x.png",
-  "2x" => "$wgResourceBasePath/resources/assets/sitelogo-2x.png"
+  "svg" => "$wgResourceBasePath/resources/assets/sitelogo.svg"
 ];
 $wgFavicon = "$wgResourceBasePath/resources/assets/favicon.ico";
 $wgAppleTouchIcon = "$wgResourceBasePath/resources/assets/apple-touch-icon.png";
