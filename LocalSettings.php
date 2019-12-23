@@ -82,7 +82,6 @@ $wgThumbnailEpoch = "20190815000000";
 $wgDefaultUserOptions['imagesize'] = 4; // image size 1280, 1024
 
 $wgThumbLimits = array(
-   10, // placeholder thumbnail for lazyload, thumb size 0
   120, // thumb size 1
   150, // thumb size 2
   180, // thumb size 3
@@ -91,7 +90,7 @@ $wgThumbLimits = array(
   300 // thumb size 6
 );
 
-$wgDefaultUserOptions['thumbsize'] = 6; // thumb size 300
+$wgDefaultUserOptions['thumbsize'] = 5; // thumb size 300
 
 
 $wgMaxImageArea = 6.4e7;
