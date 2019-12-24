@@ -157,7 +157,7 @@ $wgCitizenEnablePreconnect = true;
 $wgCitizenPreconnectURL = 'https://www.google-analytics.com';
 # CSP
 $wgCitizenEnableCSP = true;
-$wgCitizenCSPDirective = 'default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://commons.wikimedia.org https://www.mediawiki.org https://ajax.cloudflare.com/ https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://commons.wikimedia.org https://www.mediawiki.org; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-src https://www.youtube.com; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; base-uri 'self'';
+$wgCitizenCSPDirective = 'default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://commons.wikimedia.org https://www.mediawiki.org https://ajax.cloudflare.com/ https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.google-analytics.com; style-src \'self\' \'unsafe-inline\' https://commons.wikimedia.org https://www.mediawiki.org; img-src \'self\' data: https:; font-src \'self\'; connect-src \'self\'; frame-src https://www.youtube.com; frame-ancestors \'none\'; form-action \'self\'; upgrade-insecure-requests; base-uri \'self\'';
 # HSTS
 $wgCitizenEnableHSTS = true;
 $wgCitizenHSTSMaxAge = 31536000; # 1 year
