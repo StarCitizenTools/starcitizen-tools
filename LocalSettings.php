@@ -157,6 +157,8 @@ wfLoadSkin( 'Citizen' );
 # Enable Preconnect for the defined domain
 $wgCitizenEnablePreconnect = true;
 $wgCitizenPreconnectOrigin = 'https://www.google-analytics.com';
+# Enable strict-origin-when-cross-origin referrer policy
+$wgCitizenEnableReferrerPolicy = true;
 # Number of search results in suggestion
 $wgCitizenMaxSearchResults = 6;
 
