@@ -150,8 +150,6 @@ $wgDefaultSkin = 'citizen';
 # Enabled skins.
 # The following skins were automatically enabled:
 wfLoadSkin( 'Citizen' );
-#wfLoadSkin( 'Vector' );
-#wfLoadSkin( 'Timeless' );
 
 # Citizen skin config
 # Enable Preconnect for the defined domain
@@ -159,8 +157,9 @@ $wgCitizenEnablePreconnect = true;
 $wgCitizenPreconnectURL = 'https://www.google-analytics.com';
 # HSTS
 $wgCitizenEnableHSTS = true;
-$wgCitizenHSTSMaxAge = 31536000;
+$wgCitizenHSTSMaxAge = 31536000; # 1 year
 $wgCitizenHSTSIncludeSubdomains = true;
+#$wgCitizenHSTSPreload = true;
 # Enable the deny X-Frame-Options header
 $wgCitizenEnableDenyXFrameOptions = true;
 # Enable strict-origin-when-cross-origin referrer policy
