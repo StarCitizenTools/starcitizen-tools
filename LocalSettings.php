@@ -8,8 +8,8 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 $wgShowExceptionDetails = true;
 
 #Tidy HTML output
-#$wgUseTidy = true;
-#$wgTidyConfig = [ 'driver' => 'RemexHtml' ];
+$wgUseTidy = true;
+$wgTidyConfig = [ 'driver' => 'RemexHtml' ];
 
 #General Settings
 $wgSitename = "Star Citizen Wiki";
