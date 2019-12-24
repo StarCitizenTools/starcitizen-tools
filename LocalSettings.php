@@ -157,6 +157,10 @@ wfLoadSkin( 'Citizen' );
 # Enable Preconnect for the defined domain
 $wgCitizenEnablePreconnect = true;
 $wgCitizenPreconnectURL = 'https://www.google-analytics.com';
+# HSTS
+$wgCitizenEnableHSTS = true;
+$wgCitizenHSTSMaxAge = 300;
+#$wgCitizenHSTSIncludeSubdomains = true;
 # Enable the deny X-Frame-Options header
 $wgCitizenEnableDenyXFrameOptions = true;
 # Enable strict-origin-when-cross-origin referrer policy
