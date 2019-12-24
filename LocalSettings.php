@@ -167,6 +167,9 @@ $wgCitizenHSTSIncludeSubdomains = true;
 $wgCitizenEnableDenyXFrameOptions = true;
 # Enable strict-origin-when-cross-origin referrer policy
 $wgCitizenEnableStrictReferrerPolicy = true;
+# Feature policy
+$wgCitizenEnableFeaturePolicy = true;
+$wgCitizenFeaturePolicyDirective = 'autoplay \'none\'';
 # Number of search results in suggestion
 $wgCitizenMaxSearchResults = 6;
 
