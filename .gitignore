@@ -37,6 +37,7 @@ cscope.out
 # Building & testing
 node_modules/
 /tests/phpunit/phpunit.phar
+/tests/phpunit/includes/Services/
 
 # Composer
 /composer.lock
