@@ -176,7 +176,7 @@ $wgCitizenButtonLink = 'https://discord.gg/3kjftWK';
 $wgCitizenButtonTitle = 'Contact us on Discord';
 $wgCitizenButtonText = 'Discord';
 # Page tools
-#$wgCitizenShowPageTools = 'permission-edit';
+$wgCitizenShowPageTools = 'login'; #Only show page tools if logged in
 # Number of search results in suggestion
 $wgCitizenMaxSearchResults = 6;
 
