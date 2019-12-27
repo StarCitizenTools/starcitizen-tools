@@ -7,7 +7,7 @@
 			"Umherirrender"
 		]
 	},
-	"googleanalytics-desc": "{{desc|name=google Analytics|url=https://www.mediawiki.org/wiki/Extension:Google_Analytics_Integration}}",
+	"googleanalytics-desc": "{{desc|name=GoogleAnalytics|url=https://github.com/StarCitizenTools/mediawiki-extensions-GoogleAnalytics}}",
 	"action-noanalytics": "{{doc-action|noanalytics}}",
 	"right-noanalytics": "{{doc-right|noanalytics}}"
 }
