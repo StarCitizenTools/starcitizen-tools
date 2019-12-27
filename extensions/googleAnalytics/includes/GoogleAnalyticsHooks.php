@@ -7,6 +7,7 @@ class GoogleAnalyticsHooks {
 	 * @return bool
 	 */
 	public static function onSkinAfterBottomScripts( Skin $skin, &$text = '' ) {
+	/*
 		global $wgGoogleAnalyticsAccount, $wgGoogleAnalyticsAnonymizeIP, $wgGoogleAnalyticsOtherCode,
 			   $wgGoogleAnalyticsIgnoreNsIDs, $wgGoogleAnalyticsIgnorePages, $wgGoogleAnalyticsIgnoreSpecials;
 
@@ -58,6 +59,7 @@ EOD;
 		if ( !$appended ) {
 			$text .= "<!-- No web analytics configured. -->\r\n";
 		}
+		*/
 
 		return true;
 	}
