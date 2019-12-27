@@ -1,9 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"John Reid"
-		]
-	},
-	"googleanalytics-desc": "Inserts Google Analytics screept (ga.js) intil MediaWiki pages fer trackin",
-	"right-noanalytics": "Exemptit fae Google Analytics trackin"
-}
