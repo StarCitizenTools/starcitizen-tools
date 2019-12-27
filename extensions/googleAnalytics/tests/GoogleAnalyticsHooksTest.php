@@ -4,10 +4,11 @@
  * @covers GoogleAnalyticsHooks
  */
 class GoogleAnalyticsHooksTest extends MediaWikiLangTestCase {
-	public function setUp() {
+	public function setUp() : void {
 		parent::setUp();
 		$this->setMwGlobals( 'wgGoogleAnalyticsAccount', '' );
 	}
+
 	/**
 	 * @param $allowed
 	 * @return Skin
@@ -15,11 +16,11 @@ class GoogleAnalyticsHooksTest extends MediaWikiLangTestCase {
 	private function mockSkin( $allowed, $title = 'Main Page' ) {
 		$skin = $this->getMockBuilder( 'SkinFallback' )
 			->disableOriginalConstructor()
-			->setMethods( array( 'getUser', 'getTitle' ) )
+			->setMethods( [ 'getUser', 'getTitle' ] )
 			->getMock();
 		$user = $this->getMockBuilder( 'User' )
 			->disableOriginalConstructor()
-			->setMethods( array( 'isAllowed' ) )
+			->setMethods( [ 'isAllowed' ] )
 			->getMock();
 
 		$user->expects( $this->any() )
@@ -47,10 +48,10 @@ class GoogleAnalyticsHooksTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideUserPermissions() {
-		return array(
-			array( false, 'No web analytics configured' ),
-			array( true, 'Web analytics code inclusion is disabled for this user' ),
-		);
+		return [
+			[ false, 'No web analytics configured' ],
+			[ true, 'Web analytics code inclusion is disabled for this user' ],
+		];
 	}
 
 	public function testAccountIdSet() {
@@ -82,7 +83,7 @@ class GoogleAnalyticsHooksTest extends MediaWikiLangTestCase {
 	 * @dataProvider provideExcludedPages
 	 */
 	public function testExcludedPages( $type, $conf, $title, $include ) {
-		$this->setMwGlobals( $type, array( $conf ) );
+		$this->setMwGlobals( $type, [ $conf ] );
 		$text = '';
 		GoogleAnalyticsHooks::onSkinAfterBottomScripts( $this->mockSkin( false, $title ), $text );
 		if ( $include ) {
@@ -93,13 +94,13 @@ class GoogleAnalyticsHooksTest extends MediaWikiLangTestCase {
 	}
 
 	public static function provideExcludedPages() {
-		return array(
-			array( 'wgGoogleAnalyticsIgnoreSpecials', 'Preferences', 'Special:Preferences', false ),
-			array( 'wgGoogleAnalyticsIgnoreSpecials', 'Userlogout', 'Special:Preferences', true ),
-			array( 'wgGoogleAnalyticsIgnoreNsIDs', NS_HELP, 'Help:FooBar', false ),
-			array( 'wgGoogleAnalyticsIgnoreNsIDs', NS_MAIN, 'Help:FooBar', true ),
-			array( 'wgGoogleAnalyticsIgnorePages', 'Help:FooBar', 'Help:FooBar', false ),
-			array( 'wgGoogleAnalyticsIgnorePages', 'Help:FooBar', 'Help:FooBarBaz', true ),
-		);
+		return [
+			[ 'wgGoogleAnalyticsIgnoreSpecials', 'Preferences', 'Special:Preferences', false ],
+			[ 'wgGoogleAnalyticsIgnoreSpecials', 'Userlogout', 'Special:Preferences', true ],
+			[ 'wgGoogleAnalyticsIgnoreNsIDs', NS_HELP, 'Help:FooBar', false ],
+			[ 'wgGoogleAnalyticsIgnoreNsIDs', NS_MAIN, 'Help:FooBar', true ],
+			[ 'wgGoogleAnalyticsIgnorePages', 'Help:FooBar', 'Help:FooBar', false ],
+			[ 'wgGoogleAnalyticsIgnorePages', 'Help:FooBar', 'Help:FooBarBaz', true ],
+		];
 	}
 }

@@ -207,6 +207,7 @@ wfLoadExtension( 'CommonsMetadata' );
 wfLoadExtension( 'ReplaceText' );
 wfLoadExtension( 'TextExtracts' );
 wfLoadExtension( 'Popups' );
+wfLoadExtension( 'GoogleAnalytics' );
 wfLoadExtension( 'RevisionSlider' );
 wfLoadExtension( 'CheckUser' );
 wfLoadExtension( 'Babel' );
@@ -236,7 +237,6 @@ wfLoadExtension( 'Loops' );
 wfLoadExtension( 'ShortDescription' );
 wfLoadExtension( 'NativeSvgHandler' );
 require_once "$IP/extensions/Translate/Translate.php";
-require_once "$IP/extensions/googleAnalytics/googleAnalytics.php";
 require_once "$IP/extensions/EventLogging/EventLogging.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
@@ -314,8 +314,6 @@ $wgULSGeoService = false;
 
 #Google Analytics
 $wgGoogleAnalyticsAccount = 'UA-48789297-5';
-# Array with special pages where web analytics code should NOT be included.
-$wgGoogleAnalyticsIgnoreSpecials = array( 'Userlogin', 'CreateAccount', 'Userlogout', 'Preferences', 'ChangePassword', 'OATH');
 # No bot group analytics.
 $wgGroupPermissions['bot']['noanalytics'] = true;
 

@@ -1,9 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Joseph"
+			"Joseph",
+			"BaRaN6161 TURK"
 		]
 	},
-	"googleanalytics-desc": "MedyaViki sayfalarını izlemek için Google Analytics scriptini (ga.js) ekler",
-	"right-noanalytics": "Google Analytics izlemesinden muafiyet"
+	"googleanalytics-desc": "İzleme için MediaWiki sayfalarına Google Universal Analytics (ve/veya diğer web analytics) betiklerini ekler",
+	"action-noanalytics": "web analitiği izlemesinden muaf",
+	"right-noanalytics": "Web analitiği izlemesinden muaf"
 }

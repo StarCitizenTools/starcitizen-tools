@@ -1,0 +1,77 @@
+{
+	"name": "GoogleAnalytics",
+	"version": "4.0.0",
+	"author": [
+		"Tim Laqua",
+		"[https://www.mediawiki.org/wiki/User:DavisNT Davis Mosenkovs]"
+	],
+	"url": "https://github.com/StarCitizenTools/mediawiki-extensions-GoogleAnalytics",
+	"descriptionmsg": "googleanalytics-desc",
+	"license-name": "GPL-3.0",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.31.0"
+	},
+	"config_prefix": "wgGoogleAnalytics",
+	"config": {
+		"Account": {
+			"value": "",
+			"description": "Google Universal Analytics account id (e.g. UA-12345678-1)",
+			"descriptionmsg": "googleanalytics-config-account",
+			"public": true
+		},
+		"AnonymizeIP": {
+			"value": true,
+			"description": "Don't store last octet (or last 80 bits of IPv6 address) in Google Universal Analytics",
+			"descriptionmsg": "googleanalytics-config-anonymizeip",
+			"public": true
+		},
+		"OtherCode": {
+			"value": "",
+			"description": "HTML code for other web analytics (can be used along with Google Universal Analytics)",
+			"descriptionmsg": "googleanalytics-config-othercode",
+			"public": true
+		},
+		"IgnoreNsIDs": {
+			"value": [],
+			"description": "Array with NUMERIC namespace IDs where web analytics code should NOT be included.",
+			"descriptionmsg": "googleanalytics-config-ignorensids",
+			"public": true
+		},
+		"IgnorePages": {
+			"value": [],
+			"description": "Array with page names (see magic word {{FULLPAGENAME}}) where web analytics code should NOT be included.",
+			"descriptionmsg": "googleanalytics-config-ignorepages",
+			"public": true
+		},
+		"IgnoreSpecials": {
+			"value": [
+				"Userlogin",
+				"CreateAccount",
+				"OATH",
+				"Userlogout",
+				"Preferences",
+				"ChangePassword"
+			],
+			"description": "Array with special pages where web analytics code should NOT be included.",
+			"descriptionmsg": "googleanalytics-config-ignorespecials",
+			"public": true
+		}
+	},
+	"ConfigRegistry": {
+		"GoogleAnalytics": "GlobalVarConfig::newInstance"
+	},
+	"AutoloadClasses": {
+		"GoogleAnalyticsHooks": "includes/GoogleAnalyticsHooks.php"
+	},
+	"MessagesDirs": {
+		"GoogleAnalytics": [
+			"i18n"
+		]
+	},
+	"Hooks": {
+		"SkinAfterBottomScripts": "GoogleAnalyticsHooks::onSkinAfterBottomScripts",
+		"UnitTestsList": "GoogleAnalyticsHooksonUnitTestsList"
+	},
+	"manifest_version": 2
+}

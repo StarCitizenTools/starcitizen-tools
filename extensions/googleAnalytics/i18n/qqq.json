@@ -8,5 +8,6 @@
 		]
 	},
 	"googleanalytics-desc": "{{desc|name=google Analytics|url=https://www.mediawiki.org/wiki/Extension:Google_Analytics_Integration}}",
+	"action-noanalytics": "{{doc-action|noanalytics}}",
 	"right-noanalytics": "{{doc-right|noanalytics}}"
 }

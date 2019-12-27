@@ -6,5 +6,6 @@
 		]
 	},
 	"googleanalytics-desc": "Inserts Google Universal Analytics (and/or other web analytics) scripts into MediaWiki pages for tracking",
+	"action-noanalytics": "exempted from web analytics tracking",
 	"right-noanalytics": "Exempted from web analytics tracking"
 }

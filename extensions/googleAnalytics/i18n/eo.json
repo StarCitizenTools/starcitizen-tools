@@ -1,8 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Yekrats"
+			"Yekrats",
+			"Mirin"
 		]
 	},
-	"googleanalytics-desc": "Enmetas skripton de Google Analytics (ga.js) en paĝoj de MediaWiki por patrolado"
+	"googleanalytics-desc": "Enmeti la programeton Google Universal Analytics (kaj/aŭ aliajn retanalizilojn) en MediaVikiajn paĝojn por spurado",
+	"action-noanalytics": "sendevigita de retanaliza spurado",
+	"right-noanalytics": "Sendevigita de retanaliza spurado"
 }
