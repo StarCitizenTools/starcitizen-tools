@@ -1,40 +1,33 @@
 <?php
 
 class GoogleAnalyticsHooks {
-
 	/**
 	 * @param Skin $skin
 	 * @param string $text
 	 * @return bool
 	 */
 	public static function onSkinAfterBottomScripts( Skin $skin, &$text = '' ) {
-		$config = ConfigFactory::getDefaultInstance()->makeConfig( 'googleanalytics' );
-
-		$account = $config->get( 'GoogleAnalyticsAccount' );
-		$anonymizeIP = $config->get( 'GoogleAnalyticsAnonymizeIP' );
-		$otherCode = $config->get( 'GoogleAnalyticsOtherCode' );
-		$ignoreNsIDs = $config->get( 'GoogleAnalyticsIgnoreNsIDs' );
-		$ignorePages = $config->get( 'GoogleAnalyticsIgnorePages' );
-		$ignoreSpecials = $config->get( 'GoogleAnalyticsIgnoreSpecials' );
+		global $wgGoogleAnalyticsAccount, $wgGoogleAnalyticsAnonymizeIP, $wgGoogleAnalyticsOtherCode,
+			   $wgGoogleAnalyticsIgnoreNsIDs, $wgGoogleAnalyticsIgnorePages, $wgGoogleAnalyticsIgnoreSpecials;
 
 		if ( $skin->getUser()->isAllowed( 'noanalytics' ) ) {
 			$text .= "<!-- Web analytics code inclusion is disabled for this user. -->\r\n";
 			return true;
 		}
 
-		$ignoreSpecialss = array_filter( $ignoreSpecials, function ( $v ) use ( $skin ) {
+		$ignoreSpecials = array_filter( $wgGoogleAnalyticsIgnoreSpecials, function ( $v ) use ( $skin ) {
 			return $skin->getTitle()->isSpecial( $v );
 		} );
-		if ( count( $ignoreSpecialss ) > 0
-			|| in_array( $skin->getTitle()->getNamespace(), $ignoreNsIDs, true )
-			|| in_array( $skin->getTitle()->getPrefixedText(), $ignorePages, true ) ) {
+		if ( count( $ignoreSpecials ) > 0
+			|| in_array( $skin->getTitle()->getNamespace(), $wgGoogleAnalyticsIgnoreNsIDs, true )
+			|| in_array( $skin->getTitle()->getPrefixedText(), $wgGoogleAnalyticsIgnorePages, true ) ) {
 			$text .= "<!-- Web analytics code inclusion is disabled for this page. -->\r\n";
 			return true;
 		}
 
 		$appended = false;
 
-		if ( $account !== '' ) {
+		if ( $wgGoogleAnalyticsAccount !== '' ) {
 			$text .= <<<EOD
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -44,11 +37,11 @@ class GoogleAnalyticsHooks {
 
   ga('create', '
 EOD
-. $account . <<<EOD
+. $wgGoogleAnalyticsAccount . <<<EOD
 ', 'auto');
 
 EOD
-. ( $anonymizeIP ? "  ga('set', 'anonymizeIp', true);\r\n" : "" ) . <<<EOD
+. ( $wgGoogleAnalyticsAnonymizeIP ? "  ga('set', 'anonymizeIp', true);\r\n" : "" ) . <<<EOD
   ga('send', 'pageview');
 
 </script>
@@ -57,8 +50,8 @@ EOD;
 			$appended = true;
 		}
 
-		if ( $otherCode !== '' ) {
-			$text .= $otherCode . "\r\n";
+		if ( $wgGoogleAnalyticsOtherCode !== '' ) {
+			$text .= $wgGoogleAnalyticsOtherCode . "\r\n";
 			$appended = true;
 		}
 
