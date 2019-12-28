@@ -70,8 +70,7 @@
 		]
 	},
 	"Hooks": {
-		"SkinAfterBottomScripts": "GoogleAnalyticsHooks::onSkinAfterBottomScripts",
-		"UnitTestsList": "GoogleAnalyticsHooks::onUnitTestsList"
+		"SkinAfterBottomScripts": "GoogleAnalyticsHooks::onSkinAfterBottomScripts"
 	},
 	"manifest_version": 2
 }
