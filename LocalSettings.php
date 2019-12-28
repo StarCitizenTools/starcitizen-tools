@@ -207,7 +207,7 @@ wfLoadExtension( 'CommonsMetadata' );
 wfLoadExtension( 'ReplaceText' );
 wfLoadExtension( 'TextExtracts' );
 wfLoadExtension( 'Popups' );
-#wfLoadExtension( 'GoogleAnalytics' );
+wfLoadExtension( 'GoogleAnalytics' );
 wfLoadExtension( 'RevisionSlider' );
 wfLoadExtension( 'CheckUser' );
 wfLoadExtension( 'Babel' );
