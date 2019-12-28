@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rex"
+		]
+	},
+	"googleanalytics-desc": "Menambahkan skrip Google Analytics (ga.js) ke halaman-halaman MediaWiki untuk tujuan penjejakan"
+}

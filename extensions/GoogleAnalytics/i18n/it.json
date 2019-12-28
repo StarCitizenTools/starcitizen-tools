@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gianfranco",
+			"Pietrodn",
+			"Beta16"
+		]
+	},
+	"googleanalytics-desc": "Inserisce lo script di Google Analytics (e/o altri strumenti di analisi web) nelle pagine MediaWiki per il monitoraggio",
+	"right-noanalytics": "Immune dal tracciamento dell'analisi web"
+}

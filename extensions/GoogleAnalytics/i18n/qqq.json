@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha",
+			"Shirayuki",
+			"The Evil IP address",
+			"Umherirrender"
+		]
+	},
+	"googleanalytics-desc": "{{desc|name=GoogleAnalytics|url=https://github.com/StarCitizenTools/mediawiki-extensions-GoogleAnalytics}}",
+	"action-noanalytics": "{{doc-action|noanalytics}}",
+	"right-noanalytics": "{{doc-right|noanalytics}}"
+}

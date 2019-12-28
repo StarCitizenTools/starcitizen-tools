@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fryed-peach",
+			"Shirayuki",
+			"Sujiniku"
+		]
+	},
+	"googleanalytics-desc": "利用者追跡のために Google Universal Analytics (または他のウェブ解析) を MediaWiki のページに挿入する",
+	"right-noanalytics": "ウェブ解析による追跡から免除"
+}

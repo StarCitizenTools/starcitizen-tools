@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cainamarques",
+			"Malafaya",
+			"Hamilton Abreu"
+		]
+	},
+	"googleanalytics-desc": "Insere <i>scripts</i> Google Universal Analytics (e outras ferramentas analíticas da Internet) em páginas MediaWiki para efeitos de rastreio",
+	"action-noanalytics": "isento do rastreio por ferramentas analíticas da Internet",
+	"right-noanalytics": "Isento do rastreio por ferramentas analíticas da Internet"
+}

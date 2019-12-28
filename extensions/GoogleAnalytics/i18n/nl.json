@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"SPQRobin",
+			"Siebrand",
+			"Esketti",
+			"Mainframe98"
+		]
+	},
+	"googleanalytics-desc": "Voegt Google Universal Analytics (en/of andere web analytics) scripts in de MediaWiki-pagina ' s voor het bijhouden van",
+	"action-noanalytics": "vrijgesteld te zijn van web analytics-tracking",
+	"right-noanalytics": "Vrijgesteld zijn van web analytics-tracking"
+}

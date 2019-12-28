@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rotemliss",
+			"YaronSh",
+			"Yona b",
+			"Guycn2"
+		]
+	},
+	"googleanalytics-desc": "הוספת סקריפט של Google Analytics (בשם ga.js) לעמודי מדיה־ויקי לצורכי מעקב.",
+	"right-noanalytics": "חסינות ממעקב של web analytics"
+}

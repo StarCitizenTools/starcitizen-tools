@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Harald Khan",
+			"Njardarlogar"
+		]
+	},
+	"googleanalytics-desc": "Set inn eit skript frå Google Analytics (ga.js) på MediaWiki-sider for å spora brukarar."
+}
