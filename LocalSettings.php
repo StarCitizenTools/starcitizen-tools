@@ -229,6 +229,7 @@ wfLoadExtension( 'PageImages' );
 #wfLoadExtension( 'RelatedArticles' );
 wfLoadExtension( 'VisualEditor' );
 wfLoadExtension( 'Scribunto' );
+wfLoadExtension( 'EventLogging' );
 wfLoadExtension( 'Renameuser' );
 wfLoadExtension( 'ExternalData' );
 wfLoadExtension( 'TemplateStyles' );
@@ -237,7 +238,6 @@ wfLoadExtension( 'Loops' );
 wfLoadExtension( 'ShortDescription' );
 wfLoadExtension( 'NativeSvgHandler' );
 require_once "$IP/extensions/Translate/Translate.php";
-require_once "$IP/extensions/EventLogging/EventLogging.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================
