@@ -184,7 +184,7 @@ $wgCitizenMaxSearchResults = 6;
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
 
 #SVG Support
-$wgFileExtensions[] = 'svg';
+#$wgFileExtensions[] = 'svg';
 $wgAllowTitlesInSVG = true;
 $wgSVGConverter = 'ImageMagick';
 
@@ -383,6 +383,7 @@ $wgDefaultUserOptions['usecodemirror'] = 0;
 
 #CookieWarning
 $wgCookieWarningEnabled = true;
+$wgCookieWarningGeoIPLookup = none;
 
 #DynamicPageList
 $wgDplSettings['recursiveTagParse'] = true;
@@ -598,6 +599,7 @@ $wgGroupPermissions['sysop']['nuke'] = true;
 $wgGroupPermissions['sysop']['editinterface'] = true;
 $wgGroupPermissions['sysop']['delete'] = true;
 $wgGroupPermissions['sysop']['renameuser'] = true;
+$wgGroupPermissions['sysop']['import'] = true;
 
 #=============================================== Footer ===============================================
 
