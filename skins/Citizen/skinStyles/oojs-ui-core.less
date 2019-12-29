@@ -64,8 +64,17 @@
 }
 
 @media ( prefers-color-scheme: dark ) {
-	.oo-ui-pendingElement-pending {
+	.oo-ui-iconElement-icon,
+	.oo-ui-indicator-down {
 		filter: invert( 1 ) hue-rotate( 180deg );
+	}
+
+	.oo-ui-pendingElement-pending {
+		/* Find a better way to replace the progress bar */
+		background-color: @dark-bg-20 !important;
+		background-image: -webkit-linear-gradient( 135deg, @dark-bg-0 25%, transparent 25%, transparent 50%, @dark-bg-0 50%, @dark-bg-0 75%, transparent 75%, transparent ) !important;
+		background-image: -moz-linear-gradient( 135deg, @dark-bg-0 25%, transparent 25%, transparent 50%, @dark-bg-0 50%, @dark-bg-0 75%, transparent 75%, transparent ) !important;
+		background-image: linear-gradient( 135deg, @dark-bg-0 25%, transparent 25%, transparent 50%, @dark-bg-0 50%, @dark-bg-0 75%, transparent 75%, transparent ) !important;
 	}
 
 	.oo-ui-buttonElement-frameless {
@@ -269,9 +278,9 @@
 
 	.oo-ui-textInputWidget {
 		.oo-ui-inputWidget-input {
-			background-color: @dark-bg-0;
-			color: @dark-text-100;
-			border-color: @dark-bg-50;
+			background-color: @dark-bg-0 !important;
+			color: @dark-text-100 !important;
+			border-color: @dark-bg-50 !important;
 		}
 
 		.oo-ui-pendingElement-pending {
