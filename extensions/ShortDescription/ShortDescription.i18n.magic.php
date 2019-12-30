@@ -10,6 +10,6 @@ $magicWords = [];
 
 /* English */
 $magicWords['en'] = [
-	'getshortdesc' => [ 1, 'GETSHORTDESC'],
+	'getshortdesc' => [ 1, 'GETSHORTDESC' ],
 	'shortdesc' => [ 1, 'SHORTDESC' ]
 ];

@@ -2,27 +2,39 @@
 
 class ShortDescriptionHooks {
 
-	// Register any render callbacks with the parser
+	/**
+	 * Register any render callbacks with the parser
+	 *
+	 * @param Parser $parser
+	 * @return true
+	 */
 	public static function onParserFirstCallInit( Parser $parser ) {
-
 		$parser->setFunctionHook(
 			'shortdesc',
 			[ self::class, 'handle' ],
 			Parser::SFH_NO_HASH
 		);
 
-		// Create a function hook associating the "getshortdesc" magic word with rendershortdesc()
+		/*
+		 * Create a function hook associating the "getshortdesc" magic word with rendershortdesc()
+		 */
 		$parser->setFunctionHook( 'getshortdesc', [ self::class, 'rendershortdesc' ], Parser::SFH_NO_HASH );
 
 		return true;
 	}
 
-	// Render the output of {{GETSHORTDESC}}.
+	/**
+	 * Render the output of {{GETSHORTDESC}}.
+	 *
+	 * @param Parser $parser
+	 * @return $output
+	 */
 	public static function rendershortdesc( Parser $parser ) {
-
 		$output = '';
 
-		// Check if shortdesc exists, render if exist
+		/*
+		 * Check if shortdesc exists, render if exist
+		 */
 		$shortdescription = $parser->getOutput()->getProperty( 'shortdesc' );
 
 		if ( $shortdescription !== false ) {
@@ -32,12 +44,12 @@ class ShortDescriptionHooks {
 		return $output;
 	}
 
-   /**
-     * Extracted from WikiBase
-     * See T184000 for related info
+	/**
+	 * Extracted from WikiBase
+	 * See T184000 for related info
 	 */
-   
-   /**
+
+	/**
 	 * Parser function callback
 	 *
 	 * @param Parser $parser
