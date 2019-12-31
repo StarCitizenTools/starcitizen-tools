@@ -22,7 +22,13 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
     
-    - name: Composer test
+    # Bypass the phpcbf non-standard exit code  
+    - name: Run composer fix
+      run: |
+        sh ./bin/phpcbf.sh
+        composer fix
+
+    - name: Run Composer test
       run: composer test
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
