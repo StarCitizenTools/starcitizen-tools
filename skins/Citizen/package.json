@@ -1,0 +1,25 @@
+{
+	"private": true,
+	"scripts": {
+		"test": "grunt test",
+		"doc": "jsdoc resources/main.js -c jsdoc.json -r",
+		"fix": "stylelint '**/*.less' '**/*.css' --fix"
+	},
+	"devDependencies": {
+		"eslint-config-wikimedia": "0.15.0",
+		"grunt": "1.0.4",
+		"grunt-banana-checker": "0.8.1",
+		"grunt-eslint": "22.0.0",
+		"grunt-stylelint": "0.13.0",
+		"stylelint-config-wikimedia": "0.8.0",
+		"jsdoc": "3.6.3"
+	},
+	"eslintIgnore": [
+		"vendor/**",
+		"node_modules/**",
+		"out/**"
+	],
+	"jshintConfig": {
+		"esversion": 6
+	}
+}
