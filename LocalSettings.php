@@ -168,6 +168,8 @@ $wgCitizenHSTSIncludeSubdomains = true;
 #$wgCitizenHSTSPreload = true;
 # Enable the deny X-Frame-Options header
 $wgCitizenEnableDenyXFrameOptions = true;
+# Enable X-XSS-Protection header
+$wgCitizenEnableXXSSProtection = true;
 # Feature policy
 $wgCitizenEnableFeaturePolicy = true;
 $wgCitizenFeaturePolicyDirective = 'autoplay \'none\'; camera \'none\'; fullscreen \'self\'; geolocation \'none\'; microphone \'none\'; midi \'none\'; payment \'none\'' ;
