@@ -33,6 +33,9 @@ $wgDebugComments = false;
 ## The protocol and server name to use in fully-qualified URLs
 $wgServer = "https://scwdev.czen.me";
 
+## Enable strict referrer policy
+$wgReferrerPolicy = array('strict-origin-when-cross-origin', 'strict-origin');
+
 ## Output a canonical meta tag on every page
 $wgEnableCanonicalServerLink = true;
 
@@ -165,8 +168,6 @@ $wgCitizenHSTSIncludeSubdomains = true;
 #$wgCitizenHSTSPreload = true;
 # Enable the deny X-Frame-Options header
 $wgCitizenEnableDenyXFrameOptions = true;
-# Enable strict-origin-when-cross-origin referrer policy
-$wgCitizenEnableStrictReferrerPolicy = true;
 # Feature policy
 $wgCitizenEnableFeaturePolicy = true;
 $wgCitizenFeaturePolicyDirective = 'autoplay \'none\'; camera \'none\'; fullscreen \'self\'; geolocation \'none\'; microphone \'none\'; midi \'none\'; payment \'none\'' ;
