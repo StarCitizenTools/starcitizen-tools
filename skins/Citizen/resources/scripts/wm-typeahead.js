@@ -104,6 +104,8 @@ window.WMTypeAhead = function ( appendTo, searchInput ) {
 		appendEl.appendChild( typeAheadEl );
 	}
 
+	console.log('1st descriptionSource is ' + descriptionSource);
+
 	/**
 	 * Keeps track of the search query callbacks. Consists of an array of
 	 * callback functions and an index that keeps track of the order of requests.
