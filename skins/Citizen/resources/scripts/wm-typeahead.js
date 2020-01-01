@@ -295,6 +295,7 @@ window.WMTypeAhead = function ( appendTo, searchInput ) {
 		switch (descriptionSource) {
 			case 'wikidata':
 				searchQuery.prop += '|description';
+				console.log('wikidata prop set');
 				break;
 			case 'textextracts':
 				searchQuery.prop += '|extracts';
@@ -302,10 +303,12 @@ window.WMTypeAhead = function ( appendTo, searchInput ) {
 				searchQuery.exintro = '1';
 				searchQuery.exlimit = maxSearchResults;
 				searchQuery.explaintext = '1';
+				console.log('textextracts prop set');
 				break;
 			case 'pagedescription':
 				searchQuery.prop += '|pageprops';
-				searchQuery.ppprop = 'description';
+				searchQuery.ppprop += 'description';
+				console.log('pageprops prop set');
 				break;
 		}
 
@@ -380,12 +383,15 @@ window.WMTypeAhead = function ( appendTo, searchInput ) {
 			switch (descriptionSource) {
 				case 'wikidata':
 					pageDescription = page.description || '';
+					console.log('wikidata desc set');
 					break;
 				case 'textextracts':
 					pageDescription = page.extract || '';
+					console.log('textextracts desc set');
 					break;
 				case 'pagedescription':
 					pageDescription = page.pageprops.description || '';
+					console.log('pagedesc desc set');
 					break;
 			}
 
