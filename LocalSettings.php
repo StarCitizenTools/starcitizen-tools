@@ -180,6 +180,8 @@ $wgCitizenButtonTitle = 'Contact us on Discord';
 $wgCitizenButtonText = 'Discord';
 # Page tools
 $wgCitizenShowPageTools = 'login'; #Only show page tools if logged in
+# Search description source
+$wgCitizenSearchDescriptionSource = 'Wikidata';
 # Number of search results in suggestion
 $wgCitizenMaxSearchResults = 6;
 
