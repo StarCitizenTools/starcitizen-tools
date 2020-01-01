@@ -292,6 +292,8 @@ window.WMTypeAhead = function ( appendTo, searchInput ) {
 			gpslimit: maxSearchResults
 		};
 
+		console.log('descriptionSource is ' + descriptionSource);
+
 		switch (descriptionSource) {
 			case 'wikidata':
 				searchQuery.prop += '|description';
@@ -394,6 +396,8 @@ window.WMTypeAhead = function ( appendTo, searchInput ) {
 					console.log('pagedesc desc set');
 					break;
 			}
+
+			console.log('pageDescription is ' + pageDescription);
 
 			// Ensure that the value from the previous iteration isn't used
 			sanitizedThumbURL = false;
