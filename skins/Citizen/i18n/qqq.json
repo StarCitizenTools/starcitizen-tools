@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [ 
+			"[https://www.mediawiki.org/wiki/User:Alistair3149 Alistair3149]",
+			"[https://www.mediawiki.org/wiki/User:Octfx Octfx]"
+		]
+	},
+	"skinname-citizen": "{{name}}",
+	"citizen-desc": "{{desc|what=skin|name=Citizen|url=https://github.com/StarCitizenTools/mediawiki-skins-Citizen}}",
+
+	"citizen-search-no-results-title": "Title of the message displayed if no results could be found",
+	"citizen-search-no-results-desc": "Description of the message displayed if no results could be found"
+}
