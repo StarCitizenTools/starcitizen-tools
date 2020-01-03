@@ -605,6 +605,7 @@ $wgGroupPermissions['sysop']['editinterface'] = true;
 $wgGroupPermissions['sysop']['delete'] = true;
 $wgGroupPermissions['sysop']['renameuser'] = true;
 $wgGroupPermissions['sysop']['import'] = true;
+$wgGroupPermissions['sysop']['importupload'] = true;
 
 #=============================================== Footer ===============================================
 
