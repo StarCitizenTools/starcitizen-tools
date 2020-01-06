@@ -31,7 +31,7 @@ $wgDebugDumpSql = false;
 $wgDebugComments = false;
 
 ## The protocol and server name to use in fully-qualified URLs
-$wgServer = "https://scwdev.czen.me";
+#$wgServer = ""; NOW PLACED IN EXTERNAL INCLUDES FOLDER
 
 ## Enable strict referrer policy
 $wgReferrerPolicy = array('strict-origin-when-cross-origin', 'strict-origin');
