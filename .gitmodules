@@ -1,7 +1,3 @@
-[submodule "skins/mediawiki-skins-Citizen"]
-	path = skins/mediawiki-skins-Citizen
-	url = https://github.com/StarCitizenTools/mediawiki-skins-Citizen
-	branch = master
 [submodule "skins/Citizen"]
 	path = skins/Citizen
 	url = https://github.com/StarCitizenTools/mediawiki-skins-Citizen
