@@ -1,4 +1,4 @@
 [submodule "skins/Citizen"]
 	path = skins/Citizen
 	url = https://github.com/StarCitizenTools/mediawiki-skins-Citizen
-	branch = master
+	branch = dev
