@@ -17,24 +17,31 @@
  * @licence MIT License
  */
 
-/* eslint-disable no-use-before-define */
-
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var DEFAULT_LIST_SIZE = 9;
 
 	/**
-	 * Concatenate two arrays, remove duplicates
-	 *
-	 * @param {Array} a First array
-	 * @param {Array} b Second array
-	 * @return {Array} Resulting array
+	 * @param {Array} target
+	 * @param {Array} source
+	 * @param {string|string[]|undefined} items Language code, or list of language codes
 	 */
-	function concatWithoutDuplicates( a, b ) {
-		return a.concat( b.filter( function ( item ) {
-			return a.indexOf( item ) < 0;
-		} ) );
+	function addMatchWithoutDuplicate( target, source, items ) {
+		var i;
+		if ( items === undefined ) {
+			return;
+		}
+		items = !Array.isArray( items ) ? [ items ] : items;
+		for ( i = 0; i < items.length; i++ ) {
+			if (
+				// Only add if unique and matches source
+				target.indexOf( items[ i ] ) === -1 &&
+				source.indexOf( items[ i ] ) !== -1
+			) {
+				target.push( items[ i ] );
+			}
+		}
 	}
 
 	/**
@@ -52,16 +59,109 @@
 	}
 
 	/**
+	 * Get user-defined assistant languages on wikis with Translate extension.
+	 *
+	 * Where available, they're languages deemed useful by the user.
+	 *
+	 * @return {string[]|undefined} Language codes
+	 */
+	function getAssistantLanguages() {
+		var assistantLanguages = mw.user.options.get( 'translate-editlangs' );
+		if ( !assistantLanguages || assistantLanguages === 'default' ) {
+			return;
+		}
+
+		return assistantLanguages.split( /,\s*/ );
+	}
+
+	/**
+	 * Get previously selected languages.
+	 *
+	 * Previous languages are a good suggestion because the user has
+	 * explicitly chosen them in the past.
+	 *
+	 * @return {string[]} Language codes
+	 */
+	function getPreviousLanguages() {
+		return mw.uls.getPreviousLanguages();
+	}
+
+	/**
+	 * Get languages from the Babel box on the user's user page.
+	 *
+	 * @return {string[]|undefined} Language codes
+	 */
+	function getBabelLanguages() {
+		return mw.config.get( 'wgULSBabelLanguages' );
+	}
+
+	/**
+	 * Get site-specific highlighted languags. Mostly used on Wikimedia sites.
+	 *
+	 * @return {string[]|undefined} Language codes
+	 */
+	function getSitePicks() {
+		return mw.config.get( 'wgULSCompactLinksPrepend' );
+	}
+
+	/**
+	 * Get probable languages predicted by ULS.
+	 *
+	 * @return {string[]} Language codes
+	 */
+	function getCommonLanguages() {
+		return mw.uls.getFrequentLanguageList();
+	}
+
+	/**
+	 * Get globally common languages.
+	 *
+	 * These are not user-specific. This helps to avoid biasing the compact list
+	 * to language codes that sort to the beginning of the alphabet in the
+	 * final stage.
+	 *
+	 * @return {string[]} Language codes
+	 */
+	function getExtraCommonLanguages() {
+		return [
+			'zh', 'en', 'hi', 'ur', 'es', 'ar', 'ru', 'id', 'ms', 'pt',
+			'fr', 'de', 'bn', 'ja', 'pnb', 'pa', 'jv', 'te', 'ta', 'ko', 'mr', 'tr', 'vi',
+			'it', 'fa', 'sv', 'nl', 'pl'
+		];
+	}
+
+	/**
+	 * The final strategy is the original interlanguage list.
+	 *
+	 * @param {string[]} languages Language codes
+	 * @return {string[]} Language codes
+	 */
+	function getFinalFallback( languages ) {
+		return languages;
+	}
+
+	/**
 	 * @class
 	 * @constructor
-	 * @param {string|jQuery} interlanguageList Selector for interlanguage list
+	 * @param {HTMLElement} listElement Interlanguage list element
 	 * @param {Object} options
 	 */
-	function CompactInterlanguageList( interlanguageList, options ) {
-		this.$interlanguageList = $( interlanguageList );
+	function CompactInterlanguageList( listElement, options ) {
+		this.listElement = listElement;
 		this.options = options || {};
-		this.interlanguageList = {};
-		this.compactList = {};
+
+		/**
+		 * @private
+		 * @property {Object} interlanguageList
+		 */
+		this.interlanguageList = null;
+
+		/**
+		 * @private
+		 * @property {Object} interlanguageList
+		 */
+		this.compactList = null;
+
 		this.commonInterlanguageList = null;
 		this.$trigger = null;
 		this.compactSize = 0;
@@ -72,8 +172,7 @@
 	 * Initialize the plugin
 	 */
 	CompactInterlanguageList.prototype.init = function () {
-		var self = this,
-			max = this.options.max || DEFAULT_LIST_SIZE;
+		var max = this.options.max || DEFAULT_LIST_SIZE;
 
 		this.interlanguageList = this.getInterlanguageList();
 		this.listSize = Object.keys( this.interlanguageList ).length;
@@ -81,17 +180,16 @@
 		if ( this.listSize <= max ) {
 			// Not enough languages to compact the list
 			mw.hook( 'mw.uls.compactlinks.initialized' ).fire( false );
-
 			return;
 		}
 
 		// If we're only a bit beyond max, limit to 7 instead of 9.
 		// FIXME: This assumes the max is 9.
-		self.compactSize = ( self.listSize <= 12 ) ? 7 : max;
-		self.compactList = self.getCompactList();
-		self.hideOriginal();
-		self.render();
-		self.listen();
+		this.compactSize = ( this.listSize <= 12 ) ? 7 : max;
+		this.compactList = this.getCompactList();
+		this.hideOriginal();
+		this.render();
+		this.listen();
 	};
 
 	/**
@@ -101,7 +199,7 @@
 		var language;
 
 		for ( language in this.compactList ) {
-			this.compactList[ language ].element.parentNode.style.display = '';
+			this.compactList[ language ].parentNode.style.display = '';
 		}
 
 		this.addTrigger();
@@ -115,15 +213,14 @@
 	 * @param {jQuery} $trigger Element to use as trigger.
 	 */
 	CompactInterlanguageList.prototype.createSelector = function ( $trigger ) {
-		var languages,
+		var languageCode,
+			languages = Object.keys( this.interlanguageList ),
 			self = this,
 			ulsLanguageList = {};
 
-		languages = $.map( this.interlanguageList, function ( language, languageCode ) {
-			ulsLanguageList[ languageCode ] = language.autonym;
-
-			return languageCode;
-		} );
+		for ( languageCode in this.interlanguageList ) {
+			ulsLanguageList[ languageCode ] = this.interlanguageList[ languageCode ].textContent;
+		}
 
 		// Attach ULS to the trigger
 		$trigger.uls( {
@@ -177,20 +274,20 @@
 				$trigger.addClass( 'selector-open' );
 			},
 			languageDecorator: function ( $languageLink, language ) {
-				var data = self.interlanguageList[ language ];
+				var element = self.interlanguageList[ language ];
 				// Set href, text, and tooltip exactly same as what was in
 				// interlanguage link. The ULS autonym might be different in some
 				// cases like sr. In ULS it is "српски", while in interlanguage links
 				// it is "српски / srpski"
 				$languageLink
 					.prop( {
-						href: data.href,
-						title: data.element.title
+						href: element.href,
+						title: element.title
 					} )
-					.text( data.autonym );
+					.text( element.textContent );
 
 				// This code is to support badges used in Wikimedia
-				$languageLink.parent().addClass( data.element.parentNode.className );
+				$languageLink.parent().addClass( element.parentNode.className );
 			},
 			onCancel: function () {
 				$trigger.removeClass( 'selector-open' );
@@ -200,7 +297,7 @@
 			// Show common languages
 			quickList: self.getCommonLanguages( languages ),
 			noResultsTemplate: function () {
-				var $defaultTemplate = $.proxy( $.fn.lcd.defaults.noResultsTemplate, this )();
+				var $defaultTemplate = $.fn.lcd.defaults.noResultsTemplate.call( this );
 				// Customize the message
 				$defaultTemplate
 					.find( '.uls-no-results-found-title' )
@@ -218,9 +315,9 @@
 
 		this.$trigger.one( 'click', function () {
 			// Load the ULS now.
-			mw.loader.using( 'ext.uls.mediawiki' ).done( function () {
+			mw.loader.using( 'ext.uls.mediawiki' ).then( function () {
 				self.createSelector( self.$trigger );
-				self.$trigger.click();
+				self.$trigger.trigger( 'click' );
 			} );
 		} );
 	};
@@ -231,13 +328,10 @@
 	 * @return {Object}
 	 */
 	CompactInterlanguageList.prototype.getCompactList = function () {
-		var language, languages, compactLanguages, i,
-			compactedList = {};
+		var language, languages, compactLanguages, i, compactedList;
 
-		languages = $.map( this.interlanguageList, function ( item, languageCode ) {
-			return languageCode;
-		} );
-
+		compactedList = {};
+		languages = Object.keys( this.interlanguageList );
 		compactLanguages = this.compact( languages );
 
 		for ( i = 0; i < compactLanguages.length; i++ ) {
@@ -250,36 +344,29 @@
 
 	/**
 	 * Get compacting strategies.
+	 *
 	 * The items will be executed in the given order till the required
-	 * compact size is achieved. Each item should be an array and should
-	 * take the whole language list as argument.
+	 * compact size is achieved. Each strategy is given two arrays: `candidates`
+	 * and `languages`. The candidates array is a list the callback should add to.
+	 * The languages list contains language codes actually available for the current
+	 * page, the callback may use this to optimise their search for candidates,
+	 * although compact() will filter out irrelevant candidates so strategies should
+	 * only use this if it helps narrow their search for candidates, avoid needless
+	 * filtering that compact() will do already.
 	 *
 	 * @return {Function[]} Array of compacting functions
 	 */
 	CompactInterlanguageList.prototype.getCompactStrategies = function () {
 		return [
-			// Add user-defined assistant languages on wikis with Translate extension.
-			filterByAssistantLanguages,
-			// Add previously selected languages.
-			// Previous languages are always the better suggestion
-			// because the user has explicitly chosen them.
-			filterByPreviousLanguages,
-			// User's languages in the Babel box on the user page
-			filterByBabelLanguages,
-			// Site specific highlights, mostly used on Wikimedia sites
-			filterBySitePicks,
-			// Add all common languages to the beginning of array.
-			// These are the most probable languages predicted by ULS.
-			this.getCommonLanguages,
-			// Add languages that are present in the article content.
-			this.filterByLangsInText,
-			// Add languages in which there are featured articles.
-			this.filterByBadges,
-			// Some global fallbacks to avoid showing languages in the beginning of the alphabet
+			getAssistantLanguages,
+			getPreviousLanguages,
+			getBabelLanguages,
+			getSitePicks,
+			getCommonLanguages,
+			this.getLangsInText,
+			this.getLangsWithBadges,
 			getExtraCommonLanguages,
-			// Finally add the whole languages array too.
-			// We will remove duplicates and cut down to required size.
-			this.finalFallback
+			getFinalFallback
 		];
 	};
 
@@ -290,14 +377,15 @@
 	 * @return {Array} Compacted array
 	 */
 	CompactInterlanguageList.prototype.compact = function ( languages ) {
-		var i, strategies,
+		var i, strategies, found,
 			compactLanguages = [];
 
 		strategies = this.getCompactStrategies();
 		for ( i = 0; i < strategies.length; i++ ) {
-			compactLanguages = concatWithoutDuplicates(
-				compactLanguages, strategies[ i ].call( this, languages )
-			);
+			found = strategies[ i ]( languages );
+			// Add language codes from 'found' that are also in 'languages'
+			// to 'compactLanguages' (if not already in there).
+			addMatchWithoutDuplicate( compactLanguages, languages, found );
 			if ( compactLanguages.length >= this.compactSize ) {
 				// We have more than enough items. Stop here.
 				compactLanguages = compactLanguages.slice( 0, this.compactSize );
@@ -309,120 +397,21 @@
 	};
 
 	/**
-	 * Filter the language list by previous languages.
-	 * Not all previous languages will be present in interlanguage links,
-	 * so we are filtering them.
+	 * Get language codes that are used in the page's text content.
 	 *
-	 * @param {string[]} languages Language codes
-	 * @return {string[]} List of language codes supported by the article
-	 */
-	function filterByPreviousLanguages( languages ) {
-		var previousLanguages = mw.uls.getPreviousLanguages();
-
-		return $.grep( previousLanguages, function ( language ) {
-			return $.inArray( language, languages ) >= 0;
-		} );
-	}
-
-	/**
-	 * Filter by languages that appear in the Babel box on the user page.
-	 *
-	 * @param {string[]} languages Language codes
-	 * @return {string[]} List of language codes supported by the article
-	 */
-	function filterByBabelLanguages( languages ) {
-		var babelLanguages = mw.config.get( 'wgULSBabelLanguages', [] );
-
-		return $.grep( babelLanguages, function ( language ) {
-			return $.inArray( language, languages ) >= 0;
-		} );
-	}
-
-	/**
-	 * Filter the language list by site picks.
-	 *
-	 * @param {string[]} languages Language codes
-	 * @return {string[]} List of language codes supported by the article
-	 */
-	function filterBySitePicks( languages ) {
-		var picks = mw.config.get( 'wgULSCompactLinksPrepend', [] );
-
-		return $.grep( picks, function ( language ) {
-			return $.inArray( language, languages ) >= 0;
-		} );
-	}
-
-	/**
-	 * Filter the language list by common languages.
-	 * Common languages are the most probable languages predicted by ULS.
-	 *
-	 * @param {string[]} languages Language codes
-	 * @return {string[]} List of language codes supported by the article
-	 */
-	function filterByCommonLanguages( languages ) {
-		var commonLanguages = mw.uls.getFrequentLanguageList();
-
-		return $.grep( commonLanguages, function ( language ) {
-			return $.inArray( language, languages ) >= 0;
-		} );
-	}
-
-	/**
-	 * Filter the language list by globally common languages, i.e.
-	 * this list is not user specific.
-	 *
-	 * @param {string[]} languages Language codes
-	 * @return {string[]} List of language codes supported by the article
-	 */
-	function getExtraCommonLanguages( languages ) {
-		var commonLanguages = [
-			'zh', 'en', 'hi', 'ur', 'es', 'ar', 'ru', 'id', 'ms', 'pt',
-			'fr', 'de', 'bn', 'ja', 'pnb', 'pa', 'jv', 'te', 'ta', 'ko', 'mr', 'tr', 'vi',
-			'it', 'fa', 'sv', 'nl', 'pl'
-		];
-
-		return $.grep( commonLanguages, function ( language ) {
-			return $.inArray( language, languages ) >= 0;
-		} );
-	}
-
-	/**
-	 * Filter the language list by Translate's assistant languages.
-	 * Where available, they're languages deemed useful by the user.
-	 *
-	 * @param {string[]} languages Language codes
-	 * @return {string[]} List of language codes supported by the article
-	 */
-	function filterByAssistantLanguages( languages ) {
-		var assistantLanguages = mw.user.options.get( 'translate-editlangs' );
-
-		if ( assistantLanguages && assistantLanguages !== 'default' ) {
-			return $.grep( assistantLanguages.split( /,\s*/ ), function ( language ) {
-				return $.inArray( language, languages ) >= 0;
-			} );
-		}
-
-		return [];
-	}
-
-	/**
-	 * Filter the language list by languages that appear in
-	 * the page's text. This is done by looking for HTML elements with
-	 * a "lang" attribute—they are likely to appear in a foreign name,
-	 * for example.
+	 * This is done by looking for HTML elements with a "lang" attribute—they
+	 * are likely to appear in a foreign name, for example.
 	 *
 	 * The reader doesn't necessarily know this language, but it
 	 * appears relevant to the page.
 	 *
-	 * @param {string[]} languages Language codes
-	 * @return {string[]} List of language codes supported by the article
+	 * @return {string[]} Language codes
 	 */
-	CompactInterlanguageList.prototype.filterByLangsInText = function ( languages ) {
+	CompactInterlanguageList.prototype.getLangsInText = function () {
 		var languagesInText = [];
-
-		$( '#mw-content-text [lang]' ).each( function ( i, el ) {
-			var lang = convertMediaWikiLanguageCodeToULS( $( el ).attr( 'lang' ) );
-			if ( $.inArray( lang, languagesInText ) === -1 && $.inArray( lang, languages ) >= 0 ) {
+		Array.prototype.forEach.call( document.querySelectorAll( '#mw-content-text [lang]' ), function ( el ) {
+			var lang = convertMediaWikiLanguageCodeToULS( el.lang );
+			if ( languagesInText.indexOf( lang ) === -1 ) {
 				languagesInText.push( lang );
 			}
 		} );
@@ -431,53 +420,33 @@
 	};
 
 	/**
-	 * Filter the language list by languages the page in which
-	 * has any kind of a badge, such as "featured article".
-	 * The "badge-*" classes are added by Wikibase.
+	 * Get languages in which a related page has any kind of a badge,
+	 * such as "featured article". The "badge-*" classes are added by Wikibase.
 	 *
-	 * The reader doesn't necessarily know this language, but it
-	 * appears relevant to the page.
-	 *
-	 * @return {Array} List of language codes in which there are articles with badges
+	 * @return {string[]} Language codes
 	 */
-	CompactInterlanguageList.prototype.filterByBadges = function () {
-		// Can be removed when backwards compatibility before
-		// MediaWiki 1.28 is no longer needed
-		var targetSelector = parseFloat( mw.config.get( 'wgVersion' ) ) >= 1.28 ?
-			'.interlanguage-link-target' :
-			'a';
-
-		return $( '#p-lang' ).find( '[class*="badge"]' ).map( function ( i, el ) {
-			return convertMediaWikiLanguageCodeToULS(
-				$( el ).find( targetSelector ).attr( 'lang' )
-			);
-		} ).toArray();
+	CompactInterlanguageList.prototype.getLangsWithBadges = function () {
+		return Array.prototype.map.call(
+			document.querySelectorAll( '#p-lang [class*="badge"]' ),
+			function ( el ) {
+				return convertMediaWikiLanguageCodeToULS(
+					el.querySelector( '.interlanguage-link-target' ).lang
+				);
+			}
+		);
 	};
 
 	/**
-	 * Find out the existing languages supported
-	 * by the article and fetch their href.
+	 * Get the list of languages links.
 	 *
-	 * @return {Object} List of existing language codes and their hrefs
+	 * @return {Object} Map of language codes to elements.
 	 */
 	CompactInterlanguageList.prototype.getInterlanguageList = function () {
-		var targetSelector,
-			interlanguageList = {};
+		var interlanguageList = {};
 
-		// Can be removed when backwards compatibility before
-		// MediaWiki 1.28 is no longer needed
-		targetSelector = parseFloat( mw.config.get( 'wgVersion' ) ) >= 1.28 ?
-			'.interlanguage-link-target' :
-			'li.interlanguage-link > a';
-
-		this.$interlanguageList.find( targetSelector ).each( function () {
-			var langCode = convertMediaWikiLanguageCodeToULS( this.getAttribute( 'lang' ) );
-
-			interlanguageList[ langCode ] = {
-				href: this.getAttribute( 'href' ),
-				autonym: $( this ).text(),
-				element: this
-			};
+		Array.prototype.forEach.call( this.listElement.querySelectorAll( '.interlanguage-link-target' ), function ( el ) {
+			var langCode = convertMediaWikiLanguageCodeToULS( el.lang );
+			interlanguageList[ langCode ] = el;
 		} );
 
 		return interlanguageList;
@@ -491,43 +460,70 @@
 	 */
 	CompactInterlanguageList.prototype.getCommonLanguages = function ( languages ) {
 		if ( this.commonInterlanguageList === null ) {
-			this.commonInterlanguageList = filterByCommonLanguages( languages );
+			this.commonInterlanguageList = mw.uls.getFrequentLanguageList()
+				.filter( function ( language ) {
+					return languages.indexOf( language ) >= 0;
+				} );
 		}
 
 		return this.commonInterlanguageList;
 	};
 
-	CompactInterlanguageList.prototype.finalFallback = function ( languages ) {
-		return languages;
-	};
-
 	/**
-	 * Hide the original interlanguage list
+	 * Hide languages in the interlanguage list.
+	 *
+	 * The most relevant ones are unhidden in #render.
 	 */
 	CompactInterlanguageList.prototype.hideOriginal = function () {
-		this.$interlanguageList.find( '.interlanguage-link' ).css( 'display', 'none' );
+		var links = this.listElement.querySelectorAll( '.interlanguage-link' ),
+			i = links.length;
+		while ( i-- ) {
+			links[ i ].style.display = 'none';
+		}
 	};
 
 	/**
 	 * Add the trigger at the bottom of the language list
 	 */
 	CompactInterlanguageList.prototype.addTrigger = function () {
-		var $trigger;
+		var trigger = document.createElement( 'button' );
+		trigger.className = 'mw-interlanguage-selector mw-ui-button';
+		trigger.title = mw.message( 'ext-uls-compact-link-info' ).plain();
+		// Use text() because the message needs {{PLURAL:}}
+		trigger.textContent = mw.message(
+			'ext-uls-compact-link-count',
+			mw.language.convertNumber( this.listSize - this.compactSize )
+		).text();
 
-		$trigger = $( '<button>' )
-			.addClass( 'mw-interlanguage-selector mw-ui-button' )
-			.prop( 'title', mw.msg( 'ext-uls-compact-link-info' ) )
-			.text( mw.msg(
-				'ext-uls-compact-link-count',
-				mw.language.convertNumber( this.listSize - this.compactSize )
-			) );
-
-		this.$interlanguageList.append( $trigger );
-		this.$trigger = $trigger;
+		this.listElement.appendChild( trigger );
+		this.$trigger = $( trigger );
 	};
 
+	/**
+	 * Performance cost of calling createCompactList(), as of 2018-09-10.
+	 *
+	 * Summary:
+	 * - DOM Queries: 5 + 1N
+	 *   * createCompactList (1 querySelector)
+	 *   * getLangsWithBadges (1N querySelector, 1 querySelectorAll)
+	 *   * getInterlanguageList (1 querySelectorAll)
+	 *   * getLangsInText (1 querySelectorAll)
+	 *   * hideOriginal (1 querySelectorAll)
+	 * - DOM Writes: 1 + 2N
+	 *   * addTrigger (1 appendChild)
+	 *   * hideOriginal (1N Element.style)
+	 *   * render (1N Element.style)
+	 * - Misc: 1
+	 *   * addTrigger (1 mw.Message#parser)
+	 */
 	function createCompactList() {
-		var compactList = new CompactInterlanguageList( $( '#p-lang ul' ), {
+		var listElement, compactList;
+		listElement = document.querySelector( '#p-lang ul' );
+		if ( !listElement ) {
+			// Not all namespaces/pages/actions have #p-lang.
+			return;
+		}
+		compactList = new CompactInterlanguageList( listElement, {
 			// Compact the list to this size
 			max: 9
 		} );
@@ -542,4 +538,4 @@
 		$( createCompactList );
 	}
 
-}( jQuery, mediaWiki ) );
+}() );

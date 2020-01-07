@@ -17,7 +17,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var mwImeRulesPath, inputSelector, inputPreferences, ulsIMEPreferences, customHelpLink;
@@ -36,7 +36,8 @@
 			availableLanguages = {};
 
 		for ( language in $.ime.languages ) {
-			availableLanguages[ language ] = ulsLanguages[ language ];
+			availableLanguages[ language ] = ulsLanguages[ language ] ||
+				$.uls.data.getAutonym( language );
 		}
 
 		return availableLanguages;
@@ -50,9 +51,9 @@
 		previousIMELanguages = $.ime.preferences.getPreviousLanguages() || [];
 		imeLanguageList = previousIMELanguages.concat( mw.uls.getFrequentLanguageList() );
 
-		$.each( imeLanguageList, function ( i, v ) {
-			if ( $.inArray( v, unique ) === -1 ) {
-				unique.push( v );
+		imeLanguageList.forEach( function ( lang ) {
+			if ( unique.indexOf( lang ) === -1 ) {
+				unique.push( lang );
 			}
 		} );
 
@@ -149,7 +150,7 @@
 				defaultModule: 'input',
 				onClose: function () {
 					// on close of input settings, keep focus in input area.
-					imeselector.$element.focus();
+					imeselector.$element.trigger( 'focus' );
 				},
 				top: imeselector.$element.offset().top
 			} );
@@ -290,7 +291,7 @@
 				$ulsTrigger.uls( {
 					onSelect: function ( language ) {
 						$input.data( 'imeselector' ).selectLanguage( language );
-						$input.focus();
+						$input.trigger( 'focus' );
 					},
 					languages: mw.ime.getLanguagesWithIME(),
 					ulsPurpose: 'ime-selector',
@@ -307,7 +308,7 @@
 						title: $.i18n( 'ext-uls-ime-help' )
 					} )
 					.addClass( 'ime-perime-help' )
-					.click( function ( event ) {
+					.on( 'click', function ( event ) {
 						event.stopPropagation();
 					} );
 			}
@@ -322,4 +323,5 @@
 			} );
 		}
 	};
-}( jQuery, mediaWiki ) );
+
+}() );

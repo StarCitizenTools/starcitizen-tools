@@ -251,7 +251,7 @@ class CommandlineExport extends Maintenance {
 			$whitelist = $group->getTranslatableLanguages();
 
 			foreach ( $langs as $lang ) {
-				// Do not export languges that are blacklisted (or not whitelisted).
+				// Do not export languages that are blacklisted (or not whitelisted).
 				// Also check that whitelist is not null, which means that all
 				// languages are allowed for translation and export.
 				if ( is_array( $whitelist ) && !isset( $whitelist[$lang] ) ) {
@@ -297,5 +297,5 @@ class CommandlineExport extends Maintenance {
 	}
 }
 
-$maintClass = 'CommandlineExport';
+$maintClass = CommandlineExport::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

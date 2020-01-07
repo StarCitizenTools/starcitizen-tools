@@ -1,7 +1,5 @@
 <?php
 /**
- * Tests for SolrTTMServer
- *
  * @file
  * @author Niklas Laxström
  * @license GPL-2.0-or-later
@@ -30,7 +28,7 @@ class SolrTTMServerTest extends MediaWikiTestCase {
 		$wgHooks['TranslatePostInitGroups'] = [ [ $this, 'addGroups' ] ];
 
 		$mg = MessageGroups::singleton();
-		$mg->setCache( wfGetCache( 'hash' ) );
+		$mg->setCache( new WANObjectCache( [ 'cache' => wfGetCache( 'hash' ) ] ) );
 		$mg->recache();
 
 		MessageIndex::setInstance( new HashMessageIndex() );

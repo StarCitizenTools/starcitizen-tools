@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 	/**
 	 * Page mode plugin
@@ -10,9 +10,9 @@
 	 * Example usage:
 	 *
 	 * $( 'div.pagemode' ).pagemode( {
-	 *	message: messageObject, // Mandatory message object
-	 *	sourcelangcode: 'en', // Mandatory source language code
-	 *	targetlangcode: 'hi' // Mandatory target language code
+	 *     message: messageObject, // Mandatory message object
+	 *     sourcelangcode: 'en', // Mandatory source language code
+	 *     targetlangcode: 'hi' // Mandatory target language code
 	 * } );
 	 *
 	 * @param {Element} element
@@ -36,6 +36,8 @@
 		 */
 		init: function () {
 			var pagemode = this;
+
+			this.message.proofreadable = false;
 
 			this.render();
 
@@ -131,4 +133,4 @@
 	};
 
 	$.fn.pagemode.Constructor = PageMode;
-}( jQuery, mediaWiki ) );
+}() );

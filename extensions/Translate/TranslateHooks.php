@@ -12,6 +12,17 @@
  */
 class TranslateHooks {
 	/**
+	 * Any user of this list should make sure that the tables
+	 * actually exist, since they may be optional
+	 *
+	 * @var array
+	 */
+	private static $userMergeTables = [
+		'translate_stash' => 'ts_user',
+		'translate_reviews' => 'trr_user',
+	];
+
+	/**
 	 * Hook: ResourceLoaderTestModules
 	 * @param array &$modules
 	 */
@@ -32,27 +43,21 @@ class TranslateHooks {
 	}
 
 	/**
-	 * Hook: CanonicalNamespaces
-	 *
-	 * @param array &$list
-	 */
-	public static function setupNamespaces( array &$list ) {
-		global $wgPageTranslationNamespace, $wgNamespaceRobotPolicies;
-		if ( !defined( 'NS_TRANSLATIONS' ) ) {
-			define( 'NS_TRANSLATIONS', $wgPageTranslationNamespace );
-			define( 'NS_TRANSLATIONS_TALK', $wgPageTranslationNamespace + 1 );
-		}
-		$list[NS_TRANSLATIONS] = 'Translations';
-		$list[NS_TRANSLATIONS_TALK] = 'Translations_talk';
-		$wgNamespaceRobotPolicies[NS_TRANSLATIONS] = 'noindex';
-	}
-
-	/**
 	 * Initialises the extension.
 	 * Does late-initialization that is not possible at file level,
 	 * because it depends on user configuration.
 	 */
 	public static function setupTranslate() {
+		global $wgPageTranslationNamespace;
+		if ( isset( $wgPageTranslationNamespace ) &&
+		$wgPageTranslationNamespace !== NS_TRANSLATIONS ) {
+			throw new MWException(
+				'$wgPageTranslationNamespace is no longer supported. Instead, define ' .
+				'NS_TRANSLATIONS and NS_TRANSLATIONS_TALK in LocalSettings.php before loading ' .
+				'Translate.'
+			);
+		}
+
 		global $wgTranslatePHPlot, $wgAutoloadClasses, $wgHooks;
 
 		if ( $wgTranslatePHPlot ) {
@@ -119,15 +124,8 @@ class TranslateHooks {
 			$wgJobClasses['TranslationsUpdateJob'] = 'TranslationsUpdateJob';
 
 			// Namespaces
-			global $wgPageTranslationNamespace;
 			global $wgNamespacesWithSubpages, $wgNamespaceProtection;
 			global $wgTranslateMessageNamespaces;
-
-			// Define constants for more readable core
-			if ( !defined( 'NS_TRANSLATIONS' ) ) {
-				define( 'NS_TRANSLATIONS', $wgPageTranslationNamespace );
-				define( 'NS_TRANSLATIONS_TALK', $wgPageTranslationNamespace + 1 );
-			}
 
 			$wgNamespacesWithSubpages[NS_TRANSLATIONS] = true;
 			$wgNamespacesWithSubpages[NS_TRANSLATIONS_TALK] = true;
@@ -151,8 +149,10 @@ class TranslateHooks {
 			$wgHooks['RevisionInsertComplete'][] =
 				'PageTranslationHooks::updateTranstagOnNullRevisions';
 
-			// Register \<languages/>
+			// Register different ways to show language links
 			$wgHooks['ParserFirstCallInit'][] = 'TranslateHooks::setupParserHooks';
+			$wgHooks['LanguageLinks'][] = 'PageTranslationHooks::addLanguageLinks';
+			$wgHooks['SkinTemplateGetLanguageLink'][] = 'PageTranslationHooks::formatLanguageLink';
 
 			// Strip \<translate> tags etc. from source pages when rendering
 			$wgHooks['ParserBeforeStrip'][] = 'PageTranslationHooks::renderTagPage';
@@ -227,7 +227,21 @@ class TranslateHooks {
 
 			global $wgJobClasses;
 			$wgJobClasses['TranslateSandboxEmailJob'] = 'TranslateSandboxEmailJob';
+
+			global $wgAPIModules;
+			$wgAPIModules['translationstash'] = 'ApiTranslationStash';
+			$wgAPIModules['translatesandbox'] = 'ApiTranslateSandbox';
 		}
+
+		// Back compatibility for MediaWiki <= 1.31
+		global $wgVersion, $wgResourceModules;
+		if ( version_compare( $wgVersion, '1.32', '<' ) ) {
+			$wgResourceModules['ext.translate.editor']['dependencies'][] = 'mediawiki.api.parse';
+			$wgResourceModules['ext.translate.special.translate']['dependencies'][] = 'mediawiki.api.parse';
+		}
+
+		global $wgNamespaceRobotPolicies;
+		$wgNamespaceRobotPolicies[NS_TRANSLATIONS] = 'noindex';
 	}
 
 	/**
@@ -295,7 +309,7 @@ class TranslateHooks {
 	 * Register AbuseFilter variables provided by Translate.
 	 * @param array &$builderValues
 	 */
-	public static function onAbuseFilterBuilder( &$builderValues ) {
+	public static function onAbuseFilterBuilder( array &$builderValues ) {
 		// Uses: 'abusefilter-edit-builder-vars-translate-source-text'
 		$builderValues['vars']['translate_source_text'] = 'translate-source-text';
 	}
@@ -424,6 +438,17 @@ class TranslateHooks {
 			"$dir/translate_stash.sql",
 			true
 		] );
+
+		// This also adds a PRIMARY KEY
+		$updater->addExtensionUpdate( [
+			'renameIndex',
+			'translate_reviews',
+			'trr_user_page_revision',
+			'PRIMARY',
+			false,
+			"$dir/translate_reviews-patch-01-primary-key.sql",
+			true
+		] );
 	}
 
 	/**
@@ -442,7 +467,7 @@ class TranslateHooks {
 	 * Set the correct page content language for translation units.
 	 *
 	 * @param Title $title
-	 * @param Language &$pageLang
+	 * @param Language|StubUserLang|string &$pageLang
 	 */
 	public static function onPageContentLanguage( Title $title, &$pageLang ) {
 		$handle = new MessageHandle( $title );
@@ -513,9 +538,9 @@ class TranslateHooks {
 	 */
 	public static function searchProfileForm(
 		SpecialSearch $search,
-		/*string*/&$form,
-		/*string*/$profile,
-		/*string*/$term,
+		&$form,
+		$profile,
+		$term,
 		array $opts
 	) {
 		if ( $profile !== 'translation' ) {
@@ -580,7 +605,7 @@ class TranslateHooks {
 	 */
 	public static function searchProfileSetupEngine(
 		SpecialSearch $search,
-		/*string*/$profile,
+		$profile,
 		SearchEngine $engine
 	) {
 		if ( $profile !== 'translation' ) {
@@ -647,7 +672,7 @@ class TranslateHooks {
 	public static function addConfig( array &$vars, OutputPage $out ) {
 		$request = $out->getRequest();
 		$title = $out->getTitle();
-		list( $alias, ) = SpecialPageFactory::resolveAlias( $title->getText() );
+		list( $alias, ) = TranslateUtils::resolveSpecialPageAlias( $title->getText() );
 
 		if ( $title->isSpecialPage()
 			&& ( $alias === 'Translate'
@@ -679,17 +704,6 @@ class TranslateHooks {
 			$row->addItem( ALItem::newFromSpecialPage( 'TranslateSandbox' ) );
 		}
 	}
-
-	/**
-	 * Any user of this list should make sure that the tables
-	 * actually exist, since they may be optional
-	 *
-	 * @var array
-	 */
-	private static $userMergeTables = [
-		'translate_stash' => 'ts_user',
-		'translate_reviews' => 'trr_user',
-	];
 
 	/**
 	 * Hook: MergeAccountFromTo
@@ -751,7 +765,7 @@ class TranslateHooks {
 		Title $title,
 		RecentChange $rc
 	) {
-		if ( $rc->mAttribs['rc_log_type'] === 'translationreview' ) {
+		if ( $rc->getAttribute( 'rc_log_type' ) === 'translationreview' ) {
 			return false;
 		}
 	}
@@ -770,7 +784,7 @@ class TranslateHooks {
 			return true;
 		}
 
-		list( $name, $subpage ) = SpecialPageFactory::resolveAlias( $target->getDBkey() );
+		list( $name, $subpage ) = TranslateUtils::resolveSpecialPageAlias( $target->getDBkey() );
 		if ( $name !== 'MyLanguage' ) {
 			return true;
 		}
@@ -797,6 +811,10 @@ class TranslateHooks {
 		$parser->setFunctionHook( 'translation', 'TranslateHooks::translateRenderParserFunction' );
 	}
 
+	/**
+	 * @param Parser $parser
+	 * @return string
+	 */
 	public static function translateRenderParserFunction( Parser $parser ) {
 		$pageTitle = $parser->getTitle();
 
@@ -808,6 +826,9 @@ class TranslateHooks {
 		return '';
 	}
 
+	/**
+	 * @param ResourceLoader $resourceLoader
+	 */
 	public static function onResourceLoaderRegisterModules( ResourceLoader $resourceLoader ) {
 		$modules = [];
 		$modules['ext.translate.recentgroups'] = [

@@ -8,7 +8,6 @@ $languageNames = [
 	'az' => 'Isi-Azerbaijani',
 	'be' => 'Isi-Belarusian',
 	'bg' => 'Isi-Bulgaria',
-	'bh' => 'Isi-Bihari',
 	'bn' => 'Isi-Bengali',
 	'br' => 'Breton',
 	'bs' => 'Isi-Bosnia',
@@ -106,4 +105,16 @@ $languageNames = [
 	'xh' => 'isiXhosa',
 	'yi' => 'Yiddish',
 	'zu' => 'isiZulu',
+];
+
+$currencyNames = [
+	'ZAR' => 'iRandi yaseMzanzi Afrika',
+];
+
+$currencySymbols = [
+	'ZAR' => 'R',
+];
+
+$countryNames = [
+	'ZA' => 'eMzantsi Afrika',
 ];

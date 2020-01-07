@@ -101,36 +101,13 @@ class ElasticSearchTTMServer
 		$fuzzyQuery->addFields( [ 'content' ] );
 
 		$boostQuery = new \Elastica\Query\FunctionScore();
-		if ( $this->useWikimediaExtraPlugin() ) {
-			$boostQuery->addFunction(
-				'levenshtein_distance_score',
-				[
-					'text' => $text,
-					'field' => 'content'
-				]
-			);
-		} else {
-			// TODO: should we remove this code block the extra
-			// plugin is now mandatory and we will never use the
-			// groovy script.
-			if ( $this->isElastica5() ) {
-				$scriptClass = \Elastica\Script\Script::class;
-			} else {
-				$scriptClass = \Elastica\Script::class;
-			}
-
-			$groovyScript =
-<<<GROOVY
-import org.apache.lucene.search.spell.*
-new LevensteinDistance().getDistance(srctxt, _source['content'])
-GROOVY;
-			$script = new $scriptClass(
-				$groovyScript,
-				[ 'srctxt' => $text ],
-				$scriptClass::LANG_GROOVY
-			);
-			$boostQuery->addScriptScoreFunction( $script );
-		}
+		$boostQuery->addFunction(
+			'levenshtein_distance_score',
+			[
+				'text' => $text,
+				'field' => 'content'
+			]
+		);
 		$boostQuery->setBoostMode( \Elastica\Query\FunctionScore::BOOST_MODE_REPLACE );
 
 		// Wrap the fuzzy query so it can be used as a filter.
@@ -161,7 +138,7 @@ GROOVY;
 		$query->setFrom( 0 );
 		$query->setSize( $sizeFirst );
 		$query->setParam( '_source', [ 'content' ] );
-		$cutoff = isset( $this->config['cutoff'] ) ? $this->config['cutoff'] : 0.65;
+		$cutoff = $this->config['cutoff'] ?? 0.65;
 		$query->setParam( 'min_score', $cutoff );
 		$query->setSort( [ '_score', '_uid' ] );
 
@@ -241,7 +218,7 @@ GROOVY;
 				];
 			}
 
-			// Ensure reults are in quality order
+			// Ensure results are in quality order
 			uasort( $suggestions, function ( $a, $b ) {
 				if ( $a['quality'] === $b['quality'] ) {
 					return 0;
@@ -258,6 +235,14 @@ GROOVY;
 
 	/* Write functions */
 
+	/**
+	 * Add / update translations.
+	 *
+	 * @param MessageHandle $handle
+	 * @param ?string $targetText
+	 * @throws \RuntimeException
+	 * @return bool
+	 */
 	public function update( MessageHandle $handle, $targetText ) {
 		if ( !$handle->isValid() || $handle->getCode() === '' ) {
 			return false;
@@ -278,14 +263,11 @@ GROOVY;
 		// Do not delete definitions, because the translations are attached to that
 		if ( $handle->getCode() !== $sourceLanguage ) {
 			$localid = $handle->getTitleForBase()->getPrefixedText();
-
-			$boolQuery = new \Elastica\Query\BoolQuery();
-			$boolQuery->addFilter( new Elastica\Query\Term( [ 'wiki' => wfWikiID() ] ) );
-			$boolQuery->addFilter( new Elastica\Query\Term( [ 'language' => $handle->getCode() ] ) );
-			$boolQuery->addFilter( new Elastica\Query\Term( [ 'localid' => $localid ] ) );
-
-			$query = new \Elastica\Query( $boolQuery );
-			$this->deleteByQuery( $this->getType(), $query );
+			$this->deleteByQuery( $this->getType(), Elastica\Query::create(
+				( new \Elastica\Query\BoolQuery() )
+				->addFilter( new Elastica\Query\Term( [ 'wiki' => wfWikiID() ] ) )
+				->addFilter( new Elastica\Query\Term( [ 'language' => $handle->getCode() ] ) )
+				->addFilter( new Elastica\Query\Term( [ 'localid' => $localid ] ) ) ) );
 		}
 
 		// If translation was made fuzzy, we do not need to add anything
@@ -295,15 +277,16 @@ GROOVY;
 
 		$revId = $handle->getTitleForLanguage( $sourceLanguage )->getLatestRevID();
 		$doc = $this->createDocument( $handle, $targetText, $revId );
+		$fname = __METHOD__;
 
 		MWElasticUtils::withRetry( self::BULK_INDEX_RETRY_ATTEMPTS,
 			function () use ( $doc ) {
 				$this->getType()->addDocument( $doc );
 			},
-			function ( $e, $errors ) {
+			function ( $e, $errors ) use ( $fname ) {
 				$c = get_class( $e );
 				$msg = $e->getMessage();
-				error_log( __METHOD__ . ": update failed ($c: $msg); retrying." );
+				error_log( $fname . ": update failed ($c: $msg); retrying." );
 				sleep( 10 );
 			}
 		);
@@ -341,36 +324,45 @@ GROOVY;
 	 * @param bool $rebuild Deletes index first if already exists
 	 */
 	public function createIndex( $rebuild ) {
-		$type = $this->getType();
-		$type->getIndex()->create(
-			[
-				'number_of_shards' => $this->getShardCount(),
-				'number_of_replicas' => $this->getReplicaCount(),
-				'analysis' => [
-					'filter' => [
-						'prefix_filter' => [
-							'type' => 'edge_ngram',
-							'min_gram' => 2,
-							'max_gram' => 20
-						]
+		$indexSettings = [
+			'number_of_shards' => $this->getShardCount(),
+			'analysis' => [
+				'filter' => [
+					'prefix_filter' => [
+						'type' => 'edge_ngram',
+						'min_gram' => 2,
+						'max_gram' => 20
+					]
+				],
+				'analyzer' => [
+					'prefix' => [
+						'type' => 'custom',
+						'tokenizer' => 'standard',
+						'filter' => [ 'standard', 'lowercase', 'prefix_filter' ]
 					],
-					'analyzer' => [
-						'prefix' => [
-							'type' => 'custom',
-							'tokenizer' => 'standard',
-							'filter' => [ 'standard', 'lowercase', 'prefix_filter' ]
-						],
-						'casesensitive' => [
-							'tokenizer' => 'standard',
-							'filter' => [ 'standard' ]
-						]
+					'casesensitive' => [
+						'tokenizer' => 'standard',
+						'filter' => [ 'standard' ]
 					]
 				]
-			],
-			$rebuild
-		);
+			]
+		];
+		$replicas = $this->getReplicaCount();
+		if ( strpos( $replicas, '-' ) === false ) {
+			$indexSettings['number_of_replicas'] = $replicas;
+		} else {
+			$indexSettings['auto_expand_replicas'] = $replicas;
+		}
+
+		$type = $this->getType();
+		$type->getIndex()->create( $indexSettings, $rebuild );
 	}
 
+	/**
+	 * Begin the bootstrap process.
+	 *
+	 * @throws \RuntimeException
+	 */
 	public function beginBootstrap() {
 		$type = $this->getType();
 		if ( $this->updateMapping ) {
@@ -383,43 +375,32 @@ GROOVY;
 		$settings = $type->getIndex()->getSettings();
 		$settings->setRefreshInterval( '-1' );
 
-		$term = new Elastica\Query\Term();
-		$term->setTerm( 'wiki', wfWikiID() );
-		$query = new \Elastica\Query( $term );
-		$this->deleteByQuery( $type, $query );
+		$this->deleteByQuery( $this->getType(), \Elastica\Query::create(
+			( new Elastica\Query\Term() )->setTerm( 'wiki', wfWikiID() ) ) );
 
 		$mapping = new \Elastica\Type\Mapping();
 		$mapping->setType( $type );
-
-		$keywordType = [ 'type' => 'string', 'index' => 'not_analyzed' ];
-		$textType = 'string';
-		if ( $this->isElastica5() ) {
-			$keywordType = [ 'type' => 'keyword' ];
-			$textType = 'text';
-		}
 		$mapping->setProperties( [
-			'wiki'     => $keywordType,
-			'localid'  => $keywordType,
-			'uri'      => $keywordType,
-			'language' => $keywordType,
-			'group'    => $keywordType,
+			'wiki'     => [ 'type' => 'keyword' ],
+			'localid'  => [ 'type' => 'keyword' ],
+			'uri'      => [ 'type' => 'keyword' ],
+			'language' => [ 'type' => 'keyword' ],
+			'group'    => [ 'type' => 'keyword' ],
 			'content'  => [
-				'type' => $textType,
+				'type' => 'text',
 				'fields' => [
 					'content' => [
-						'type' => $textType,
-						'index' => 'analyzed',
+						'type' => 'text',
 						'term_vector' => 'yes'
 					],
 					'prefix_complete' => [
-						'type' => $textType,
+						'type' => 'text',
 						'analyzer' => 'prefix',
 						'search_analyzer' => 'standard',
 						'term_vector' => 'yes'
 					],
 					'case_sensitive' => [
-						'type' => $textType,
-						'index' => 'analyzed',
+						'type' => 'text',
 						'analyzer' => 'casesensitive',
 						'term_vector' => 'yes'
 					]
@@ -473,11 +454,7 @@ GROOVY;
 	public function endBootstrap() {
 		$index = $this->getType()->getIndex();
 		$index->refresh();
-		if ( $this->isElastica5() ) {
-			$index->forcemerge();
-		} else {
-			$index->optimize();
-		}
+		$index->forcemerge();
 		$index->getSettings()->setRefreshInterval( '5s' );
 	}
 
@@ -517,15 +494,17 @@ GROOVY;
 	}
 
 	protected function getShardCount() {
-		return isset( $this->config['shards'] ) ? $this->config['shards'] : 5;
+		return $this->config['shards'] ?? 1;
 	}
 
 	protected function getReplicaCount() {
-		return isset( $this->config['replicas'] ) ? $this->config['replicas'] : 0;
+		return $this->config['replicas'] ?? '0-2';
 	}
 
 	/**
 	 * Get index health
+	 * TODO: Remove this code in the future as we drop support for
+	 * older versions of the Elastica extension.
 	 *
 	 * @param string $indexName
 	 * @return array the index health status
@@ -534,7 +513,7 @@ GROOVY;
 		$path = "_cluster/health/$indexName";
 		$response = $this->getClient()->request( $path );
 		if ( $response->hasError() ) {
-			throw new \Exception( "Error while fetching index health status: ". $response->getError() );
+			throw new \Exception( "Error while fetching index health status: " . $response->getError() );
 		}
 		return $response->getData();
 	}
@@ -546,6 +525,8 @@ GROOVY;
 	 * CirrusSearch/includes/Maintenance/ConfigUtils.php.  Ideally we'd
 	 * like to make these utility methods available in the Elastica
 	 * extension, but this one requires some refactoring in cirrus first.
+	 * TODO: Remove this code in the future as we drop support for
+	 * older versions of the Elastica extension.
 	 *
 	 * @param string $indexName
 	 * @param int $timeout
@@ -571,6 +552,25 @@ GROOVY;
 	}
 
 	protected function waitUntilReady() {
+		if ( method_exists( 'MWElasticUtils', 'waitForGreen' ) ) {
+			$statuses = MWElasticUtils::waitForGreen(
+				$this->getClient(),
+				$this->getIndexName(),
+				self::WAIT_UNTIL_READY_TIMEOUT );
+			$this->logOutput( "Waiting for the index to go green..." );
+			foreach ( $statuses as $message ) {
+				$this->logOutput( $message );
+			}
+
+			if ( !$statuses->getReturn() ) {
+				die( "Timeout! Please check server logs for {$this->getIndexName()}." );
+			}
+
+			return;
+		}
+
+		// TODO: This code can be removed in the future as we drop support for
+		// older versions of the Elastica extension.
 		$indexName = $this->getType()->getIndex()->getName();
 		$this->logOutput( "Waiting for the index to go green..." );
 		if ( !$this->waitForGreen( $indexName, self::WAIT_UNTIL_READY_TIMEOUT ) ) {
@@ -673,9 +673,9 @@ GROOVY;
 	 * @param string $queryString
 	 * @param array $opts
 	 * @param array $highlight
-	 * @return array
+	 * @return \Elastica\Search
 	 */
-	public function search( $queryString, $opts, $highlight ) {
+	public function createSearch( $queryString, $opts, $highlight ) {
 		$query = new \Elastica\Query();
 
 		list( $searchQuery, $highlights ) = $this->parseQueryString( $queryString, $opts );
@@ -718,6 +718,9 @@ GROOVY;
 
 		// Check that we have at least one filter to avoid invalid query errors.
 		if ( $language !== '' || $group !== '' ) {
+			// TODO: This seems wrong, but perhaps for aggregation purposes?
+			// should make $search a must clause and use the bool query
+			// as main.
 			$query->setPostFilter( $filters );
 		}
 
@@ -729,8 +732,22 @@ GROOVY;
 			'fields' => $highlights,
 		] );
 
+		return $this->getType()->getIndex()->createSearch( $query );
+	}
+
+	/**
+	 * Search interface
+	 * @param string $queryString
+	 * @param array $opts
+	 * @param array $highlight
+	 * @throws TTMServerException
+	 * @return \Elastica\ResultSet
+	 */
+	public function search( $queryString, $opts, $highlight ) {
+		$search = $this->createSearch( $queryString, $opts, $highlight );
+
 		try {
-			return $this->getType()->getIndex()->search( $query );
+			return $search->search();
 		} catch ( \Elastica\Exception\ExceptionInterface $e ) {
 			throw new TTMServerException( $e->getMessage() );
 		}
@@ -777,13 +794,30 @@ GROOVY;
 
 	/**
 	 * Delete docs by query by using the scroll API.
+	 * TODO: Elastica\Index::deleteByQuery() ? was removed
+	 *  in 2.x and returned in 5.x.
 	 *
 	 * @param \Elastica\Type $type the source index
 	 * @param \Elastica\Query $query the query
+	 * @throws \RuntimeException
 	 */
 	private function deleteByQuery( \Elastica\Type $type, \Elastica\Query $query ) {
-		$retryAttempts = self::BULK_INDEX_RETRY_ATTEMPTS;
+		if ( method_exists( 'MWElasticUtils', 'deleteByQuery' ) ) {
+			try {
+				MWElasticUtils::deleteByQuery( $type->getIndex(), $query, /* $allowConflicts = */ true );
+			} catch ( \Exception $e ) {
+				LoggerFactory::getInstance( 'ElasticSearchTTMServer' )->error(
+					'Problem encountered during deletion.',
+					[ 'exception' => $e ]
+				);
 
+				throw new \RuntimeException( "Problem encountered during deletion.\n" . $e );
+			}
+			return;
+		}
+		// TODO: This code can be removed in the future as we drop support for
+		// older versions of the Elastica extension.
+		$retryAttempts = self::BULK_INDEX_RETRY_ATTEMPTS;
 		$search = new \Elastica\Search( $this->getClient() );
 		$search->setQuery( $query );
 		$search->addType( $type );
@@ -812,12 +846,27 @@ GROOVY;
 	 * @return bool
 	 */
 	public function isFrozen() {
+		if ( method_exists( 'MWElasticUtils', 'isFrozen' ) ) {
+			try {
+				return MWElasticUtils::isFrozen( $this->getClient() );
+			} catch ( \Exception $e ) {
+				LoggerFactory::getInstance( 'ElasticSearchTTMServer' )->warning(
+					'Problem encountered while checking the frozen index.',
+					[ 'exception' => $e ]
+				);
+				return false;
+			}
+		}
+
+		// TODO: This code can be removed in the future as we drop support for
+		// older versions of the Elastica extension.
 		if ( !isset( $this->config['frozen_index'] ) ) {
 			return false;
 		}
 		$frozenIndex = $this->config['frozen_index'];
 		$indices = [ static::ALL_INDEXES_FROZEN_NAME, $this->getIndexName() ];
-		$ids = new \Elastica\Query\Ids( null, $indices );
+		$ids = ( new \Elastica\Query\Ids() )
+			->setIds( $indices );
 
 		try {
 			$resp = $this->getClient()
@@ -830,22 +879,12 @@ GROOVY;
 			} else {
 				return true;
 			}
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			LoggerFactory::getInstance( 'ElasticSearchTTMServer' )->warning(
 				'Problem encountered while checking the frozen index.',
 				[ 'exception' => $e ]
 			);
 			return false;
 		}
-	}
-
-	/**
-	 * @return bool true if running with Elastica 5+
-	 */
-	private function isElastica5() {
-		// Sadly Elastica does not seem to expose its version so we
-		// check the inexistence of a class that was removed in the
-		// version 5
-		return !class_exists( \Elastica\Script::class );
 	}
 }

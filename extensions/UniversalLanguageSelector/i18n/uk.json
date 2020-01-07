@@ -14,6 +14,7 @@
 	"uls-plang-title-languages": "Мови",
 	"ext-uls-select-language-settings-icon-tooltip": "Налаштування мови",
 	"ext-uls-undo-language-tooltip-text": "Мову змінено з $1",
+	"ext-uls-undo-language-tooltip-text-local": "Мову змінено для цієї вікі. Перегляньте свої [[Special:GlobalPreferences|глобальні налаштування]], щоб змінити мову для всіх вікі.",
 	"ext-uls-language-settings-preferences-link": "Додаткові налаштування мови",
 	"uls-betafeature-label": "Компактні мовні посилання",
 	"uls-betafeature-desc": "Переглянути скорочену версію списку мов лише з тими мовами, які найпридатніші для вас.",
@@ -63,5 +64,6 @@
 	"ext-uls-compact-link-count": "Ще {{PLURAL:$1|одна|$1}}",
 	"ext-uls-compact-link-info": "Усі мови (початковий вибір з поширених виборів Вами та іншими)",
 	"prefs-languages": "Мови",
-	"ext-uls-compact-language-links-preference": "Використовувати [[$1|компактний список мов]], з мовами, що є релевантними для Вас."
+	"ext-uls-compact-language-links-preference": "Використовувати [[$1|компактний список мов]], з мовами, що є релевантними для Вас.",
+	"ext-uls-compact-no-results": "Ця сторінка недоступна тією мовою, якою Ви проводили пошук."
 }

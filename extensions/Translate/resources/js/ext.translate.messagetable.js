@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var itemsClass = {
@@ -21,7 +21,8 @@
 				mclimit: limit,
 				mcfilter: filter,
 				mcprop: 'definition|translation|tags|properties',
-				rawcontinue: 1
+				rawcontinue: 1,
+				errorformat: 'html'
 			} );
 		}
 	} );
@@ -41,6 +42,7 @@
 		this.$loaderIcon = this.$loader.find( '.tux-loading-indicator' );
 		this.$loaderInfo = this.$loader.find( '.tux-messagetable-loader-info' );
 		this.$actionBar = this.$container.siblings( '.tux-action-bar' );
+		this.$statsBar = this.$actionBar.find( '.tux-message-list-statsbar' );
 		this.$proofreadOwnTranslations = this.$actionBar.find( '.tux-proofread-own-translations-button' );
 		this.messages = [];
 		this.loading = false;
@@ -122,7 +124,7 @@
 		 */
 		add: function ( message ) {
 			// Prepare the message for display
-			mw.translateHooks.run( 'formatMessageBeforeTable', message );
+			mw.hook( 'mw.translate.messagetable.formatMessageBeforeTable' ).fire( message );
 
 			if ( this.mode === 'translate' ) {
 				this.addTranslate( message );
@@ -149,8 +151,10 @@
 				$messageWrapper = $( '<div>' ).addClass( 'row tux-message' ),
 				statusMsg = '';
 
+			message.proofreadable = false;
+
 			if ( message.tags.length &&
-				$.inArray( 'optional', message.tags ) >= 0 &&
+				message.tags.indexOf( 'optional' ) >= 0 &&
 				status === 'untranslated'
 			) {
 				status = 'optional';
@@ -241,7 +245,8 @@
 		addProofread: function ( message ) {
 			var $message, $icon;
 
-			$message = $( '<div>' ).addClass( 'row tux-message-proofread' );
+			$message = $( '<div>' )
+				.addClass( 'row tux-message tux-message-proofread' );
 
 			this.$container.append( $message );
 			$message.proofread( {
@@ -394,8 +399,6 @@
 		 * @param {Object} changes
 		 */
 		changeSettings: function ( changes ) {
-			var $statsbar = $( '.tux-message-list-statsbar' );
-
 			// Clear current messages
 			this.clear();
 			this.settings = $.extend( this.settings, changes );
@@ -410,7 +413,7 @@
 			);
 
 			// Reset the statsbar
-			$statsbar
+			this.$statsBar
 				.empty()
 				.removeData()
 				.languagestatsbar( {
@@ -428,6 +431,9 @@
 			if ( changes.offset ) {
 				this.$loader.data( 'offset', changes.offset );
 			}
+
+			this.$header.removeClass( 'hide' );
+			this.$actionBar.removeClass( 'hide' );
 
 			// Start loading messages
 			this.load( changes.limit );
@@ -464,10 +470,20 @@
 				this.settings.filter
 			).done( function ( result ) {
 				var messages = result.query.messagecollection,
-					state;
+					state, i;
 
 				if ( !self.loading ) {
 					// reject. This was cancelled.
+					return;
+				}
+
+				if ( result.warnings ) {
+					for ( i = 0; i !== result.warnings.length; i++ ) {
+						if ( result.warnings[ i ].code === 'translate-language-disabled-source' ) {
+							self.handleLoadErrors( [ result.warnings[ i ] ] );
+							break;
+						}
+					}
 					return;
 				}
 
@@ -493,7 +509,7 @@
 					self.settings.group,
 					self.settings.language,
 					state
-				);
+				).removeClass( 'hide' );
 
 				// Dynamically loaded messages should pass the search filter if present.
 				query = $( '.tux-message-filter-box' ).val();
@@ -526,12 +542,7 @@
 				self.updateHideOwnInProofreadingToggleVisibility();
 				self.updateLastMessage();
 			} ).fail( function ( errorCode, response ) {
-				if ( response.error && response.error.code === 'mctranslate-language-disabled' ) {
-					$( '.tux-editor-header .group-warning' )
-						.text( mw.msg( 'translate-language-disabled' ) )
-						.show();
-				}
-				self.$loader.data( 'offset', -1 ).addClass( 'hide' );
+				self.handleLoadErrors( response.errors, errorCode );
 			} ).always( function () {
 				self.$loaderIcon.addClass( 'tux-loading-indicator--stopped' );
 				self.loading = false;
@@ -816,6 +827,30 @@
 			} else if ( isActionBarFloating && needsActionBarFloat ) {
 				this.$actionBar.width( messageListWidth );
 			}
+		},
+
+		/**
+		 * Handles errors encountered during the loading state.
+		 * Displays the errors and updates the state of the table.
+		 *
+		 * @param {Array} errors
+		 * @param {string} errorCode
+		 */
+		handleLoadErrors: function ( errors, errorCode ) {
+			var $warningContainer = $( '.tux-editor-header .group-warning' );
+
+			if ( errors ) {
+				$.map( errors, function ( error ) {
+					$warningContainer.append( error[ '*' ] );
+				} );
+			} else {
+				$warningContainer.text( mw.msg( 'api-error-unknownerror', errorCode ) );
+			}
+
+			$( '.tux-workflow' ).addClass( 'hide' );
+			this.$loader.data( 'offset', -1 ).addClass( 'hide' );
+			this.$actionBar.addClass( 'hide' );
+			this.$header.addClass( 'hide' );
 		}
 	};
 
@@ -867,4 +902,4 @@
 		return elementTop - viewportBottom < 200;
 	}
 
-}( jQuery, mediaWiki ) );
+}() );

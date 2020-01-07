@@ -1,22 +1,36 @@
 {
 	"@metadata": {
 		"authors": [
-			"Jawadywn"
+			"Jawadywn",
+			"Masjawad99"
 		]
 	},
-	"babel-0": "Wong ini [[$1|lum pacak]]  bebaso [[$2|$3]] (pun pacak jugo cuman sepintil).",
-	"babel-1": "Wong ini [[$1|terti]] bebaso [[$2|$3]].",
-	"babel-2": "Wong ini [[$1|lumayan]] pacak bebaso [[$2|$3]].",
-	"babel-3": "Wong ini la [[$1|pacak]] bebaso [[$2|$3]].",
-	"babel-4": "Wong ini la [[$1|hibat]] bebaso [[$2|$3]].",
-	"babel-5": "Wong ini la [[$1|dewo]] bebaso [[$2|$3]].",
-	"babel-N": "Wong ini [[$1|aslinyo]] bebaso [[$2|$3]].",
-	"babel-0-n": "Wong ini [[$1|lum pacak]] bebaso [[$2|Musi]] (pun pacak cuman sepintil).",
-	"babel-1-n": "Wong ini la [[$1|terti]] dikit bebaso [[$2|Musi]].",
-	"babel-2-n": "Wong ini [[$1|lumayan]] pacak bebaso [[$2|Musi]].",
-	"babel-3-n": "Wong ini la [[$1|pacak]] bebaso [[$2|Musi]].",
-	"babel-4-n": "Wong ini la [[$1|hibat]] bebaso [[$2|Musi]].",
-	"babel-5-n": "Wong ini la dewo [[$1|professional]] bebaso [[$2|Musi]].",
-	"babel-N-n": "Wong ini [[$1|aslinyo]] bebaso [[$2|Musi]].",
-	"babel-footer": "Jingok wong dari basonyo"
+	"babel": "Informasi pemakék Babel",
+	"babel-desc": "Menambahkan fungsi parser <code>#babel</code> untuk menampilkan kolom kotak pengguna babel secara otomatis dengan kemampuan menggunakan templat yang dikustomisasi",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Pemakék dari basonyo",
+	"babel-autocreate-reason": "Muat kaco bangso [[$1|Babel]] secaro otomatis.",
+	"babel-autocreate-text-levels": "Pemakék di bangso ini pacak bebaso $2 tingkat $1.",
+	"babel-autocreate-text-main": "Pemakék di bangso ini pacak bebaso $1.",
+	"babel-autocreate-user": "Babel AutoCreate",
+	"babel-0": "Pemakék ini [[$1|lum pacak]] bebaso [[$2|$3]].",
+	"babel-1": "Pemakék ini pacak bebaso [[$2|$3]] tingkat [[$1|awal]].",
+	"babel-2": "Pemakék ini pacak bebaso [[$2|$3]] tingkat [[$1|jadilah]].",
+	"babel-3": "Pemakék ini pacak bebaso [[$2|$3]] tingkat [[$1|maju]].",
+	"babel-4": "Pemakék ini pacak bebaso [[$2|$3]] tingkat [[$1|déwo]].",
+	"babel-5": "Pemakék ini pacak bebaso [[$2|$3]] tingkat [[$1|tinggi]] .",
+	"babel-N": "Pemakék ini [[$1|aslinyo]] bebaso [[$2|$3]].",
+	"babel-0-n": "Pemakék ini [[$1|lum pacak]] bebaso [[$2|Pelémbang]].",
+	"babel-1-n": "Pemakék ini pacak bebaso [[$2|Pelémbang]] tingkat [[$1|awal]].",
+	"babel-2-n": "Pemakék ini pacak bebaso [[$2|Pelémbang]] tingkat [[$1|jadilah]].",
+	"babel-3-n": "Pemakék ini pacak bebaso [[$2|Pelémbang]] tingkat [[$1|maju]].",
+	"babel-4-n": "Pemakék ini pacak bebaso [[$2|Pelémbang]] tingkat [[$1|déwo]].",
+	"babel-5-n": "Pemakék ini pacak bebaso [[$2|Pelémbang]] tingkat [[$1|tinggi]] .",
+	"babel-N-n": "Pemakék ini [[$1|aslinyo]] bebaso [[$2|Pelémbang]].",
+	"babel-template": "Pemakék $1",
+	"babel-footer": "Jingok pemakék dari basonyo",
+	"apihelp-query+babel-description": "Gari baso apo yang pacak dipakék pemakék ini",
+	"apihelp-query+babel-summary": "Gari baso apo yang pacak dipakék pemakék ini",
+	"apihelp-query+babel-param-user": "Pemakék yang informasinyo nak dijingok",
+	"apihelp-query+babel-example-1": "Jingok informasi Babel dari pemakék <kbd>Contoh</kbd>"
 }

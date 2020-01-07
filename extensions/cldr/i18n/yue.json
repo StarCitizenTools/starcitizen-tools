@@ -2,8 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Shinjiman",
-			"Ktchankt"
+			"Ktchankt",
+			"Hello903hello"
 		]
 	},
-	"cldr-desc": "跟[http://cldr.unicode.org/index/downloads CLDR 資料]提供本地化名嘅擴展"
+	"cldr-desc": "跟[http://cldr.unicode.org/index/downloads CLDR 資料]提供本地化名嘅擴充功能"
 }

@@ -10,6 +10,7 @@
 	"uls-plang-title-languages": "Мовы",
 	"ext-uls-select-language-settings-icon-tooltip": "Моўныя налады",
 	"ext-uls-undo-language-tooltip-text": "Папярэдняя мова — $1",
+	"ext-uls-undo-language-tooltip-text-local": "Мова зьмененая для гэтай вікі. Глядзіце вашыя [[Special:GlobalPreferences|глябальныя налады]], каб зьмяніць мову для ўсіх вікі.",
 	"ext-uls-language-settings-preferences-link": "Больш моўных наладаў",
 	"uls-betafeature-label": "Кампактныя моўныя спасылкі",
 	"uls-betafeature-desc": "Паказвае скарочаную вэрсію сьпісу моўных спасылак, якія зьяўляюцца больш адпаведнымі для вас.",
@@ -57,5 +58,8 @@
 	"ext-uls-input-disable-notification-info-interlanguage": "Вы можаце ўключыць прылады для ўводу зноў у моўных наладах побач са сьпісам моваў.",
 	"ext-uls-language-settings-applying": "Дастасоўваем…",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Яшчэ $1}}",
-	"ext-uls-compact-link-info": "Усе мовы (пачатковая выбарка паводле частых Вашых і іншых запытаў)"
+	"ext-uls-compact-link-info": "Усе мовы (пачатковая выбарка паводле частых Вашых і іншых запытаў)",
+	"prefs-languages": "Мовы",
+	"ext-uls-compact-language-links-preference": "Ужываць [[$1|кампактны сьпіс моваў]] з прыдатнымі для вас мовамі.",
+	"ext-uls-compact-no-results": "Гэтая старонка не даступная на мове, якой вы шукалі."
 }

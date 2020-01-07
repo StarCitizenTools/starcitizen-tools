@@ -15,11 +15,12 @@
  * @file
  * @ingroup Extensions
  * @license GPL-2.0-or-later
- * @license MIT License
+ * @license MIT
  */
 
 /**
- * @covers LanguageNameSearch
+ * @covers \LanguageNameSearch
+ * @covers \LanguageNameSearchData
  */
 class LanguageSearchTest extends PHPUnit\Framework\TestCase {
 	/**
@@ -66,7 +67,7 @@ class LanguageSearchTest extends PHPUnit\Framework\TestCase {
 			]
 			],
 			[ 'punja', [
-				'pa' => class_exists( 'LanguageNames' ) ? 'punjabi' : 'punjaabi sennii',
+				'pa' => class_exists( LanguageNames::class ) ? 'punjabi' : 'punjaabi sennii',
 				'pnb' => 'punjabi western',
 			]
 			],

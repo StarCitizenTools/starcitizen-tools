@@ -20,9 +20,9 @@ class TranslateDeleteJob extends Job {
 	 * @param string $full
 	 * @param User $performer
 	 * @param string $reason
-	 * @return TranslateDeleteJob
+	 * @return self
 	 */
-	public static function newJob( Title $target, $base, $full, /*User*/$performer, $reason ) {
+	public static function newJob( Title $target, $base, $full, /*User*/ $performer, $reason ) {
 		$job = new self( $target );
 		$job->setUser( FuzzyBot::getUser() );
 		$job->setFull( $full );
@@ -58,7 +58,8 @@ class TranslateDeleteJob extends Job {
 
 		$error = '';
 		$wikipage = new WikiPage( $title );
-		$status = $wikipage->doDeleteArticleReal( "{$summary}: $reason", false, 0, true, $error, $user );
+		$status = $wikipage->doDeleteArticleReal( "{$summary}: $reason", false, 0, true, $error,
+			$user, [], 'delete', true );
 		if ( !$status->isGood() ) {
 			$params = [
 				'target' => $base,

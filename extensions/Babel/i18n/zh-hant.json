@@ -12,10 +12,11 @@
 			"LNDDYL",
 			"Zhxy 519",
 			"Liuxinyu970226",
-			"Kly"
+			"Kly",
+			"A2093064"
 		]
 	},
-	"babel": "Babel 使用者資訊",
+	"babel": "巴別使用者資訊",
 	"babel-desc": "提供 <code>#babel</code> 分析函數可自動產生一個能夠使用自訂模板的使用者語言資訊欄",
 	"babel-url": "Project:Babel",
 	"babel-footer-url": ":Category:Babel - 使用者 (依語言)",

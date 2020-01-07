@@ -4,7 +4,8 @@
 			"Mordecool",
 			"Dianakc",
 			"Felipe L. Ewald",
-			"Eduardo Addad de Oliveira"
+			"Eduardo Addad de Oliveira",
+			"TheEduGobi"
 		]
 	},
 	"apihelp-aggregategroups-description": "Gerencie grupos de mensagens agregadas.\n\nVocê pode adicionar e remover grupos de mensagens agregadas e associar ou dissociar grupos de mensagens deles (um de cada vez).",
@@ -91,8 +92,8 @@
 	"apihelp-ttmserver-param-targetlanguage": "O código de idioma da sugestão.",
 	"apihelp-ttmserver-param-text": "O texto para o qual encontrar sugestões.",
 	"apihelp-ttmserver-example-1": "Obtenha sugestões para traduzir \"Help\" do inglês para o finlandês",
-	"apihelp-searchtranslations-description": "Pesquisa traduções.",
-	"apihelp-searchtranslations-summary": "Pesquisa traduções.",
+	"apihelp-searchtranslations-description": "Pesquisar traduções.",
+	"apihelp-searchtranslations-summary": "Pesquisar traduções.",
 	"apihelp-searchtranslations-param-service": "Qual dos serviços de tradução disponíveis para usar.",
 	"apihelp-searchtranslations-param-query": "A string pela qual procurar.",
 	"apihelp-searchtranslations-param-sourcelanguage": "O código de idioma do texto original.",
@@ -118,7 +119,8 @@
 	"apierror-translate-invalidstate": "O estado solicitado é inválido.",
 	"apierror-translate-invalidlanguage": "O idioma solicitado é inválido.",
 	"apierror-translate-invalidupdate": "Atualização inválida",
-	"apierror-translate-language-disabled": "A tradução para este idioma está desativada",
+	"apierror-translate-language-disabled": "A tradução para $1 foi impossibilitada.",
+	"apierror-translate-language-disabled-reason": "A tradução para $1 foi impossibilitada: $2",
 	"apierror-translate-nodynamicgroups": "Os grupos de mensagens dinâmicas não são suportados aqui",
 	"apierror-translate-nomessagefortitle": "O título não corresponde a uma mensagem traduzível",
 	"apierror-translate-notranslationservices": "Não foram configurados serviços públicos de tradução. O administrador da wiki precisa de definir <var>$wgTranslateTranslationServices</var> devidamente para esta funcionalidade poder ser usada.",
@@ -126,5 +128,6 @@
 	"apierror-translate-sandboxdisabled": "O recurso sandbox não está em uso",
 	"apierror-translate-sandbox-invalidppassword": "Senha inválida",
 	"apierror-translate-unknownmessage": "Mensagem desconhecida",
-	"apiwarn-translate-alreadyreviewedbyyou": "Já marcado como revisado por você"
+	"apiwarn-translate-alreadyreviewedbyyou": "Já marcado como revisado por você",
+	"apiwarn-translate-language-disabled-source": "O idioma de origem deste grupo é $1. Selecione outro idioma, para a qual irá traduzir, por favor."
 }

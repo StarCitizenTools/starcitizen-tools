@@ -63,8 +63,6 @@ class TranslatablePage {
 		$this->title = $title;
 	}
 
-	// Public constructors //
-
 	/**
 	 * Constructs a translatable page from given text.
 	 * Some functions will fail unless you set revision
@@ -73,7 +71,7 @@ class TranslatablePage {
 	 * @param Title $title
 	 * @param string $text
 	 *
-	 * @return TranslatablePage
+	 * @return self
 	 */
 	public static function newFromText( Title $title, $text ) {
 		$obj = new self( $title );
@@ -91,7 +89,7 @@ class TranslatablePage {
 	 * @param Title $title
 	 * @param int $revision Revision number
 	 * @throws MWException
-	 * @return TranslatablePage
+	 * @return self
 	 */
 	public static function newFromRevision( Title $title, $revision ) {
 		$rev = Revision::newFromTitle( $title, $revision );
@@ -111,7 +109,7 @@ class TranslatablePage {
 	 * The text of last marked revision is loaded when neded.
 	 *
 	 * @param Title $title
-	 * @return TranslatablePage
+	 * @return self
 	 */
 	public static function newFromTitle( Title $title ) {
 		$obj = new self( $title );
@@ -119,8 +117,6 @@ class TranslatablePage {
 
 		return $obj;
 	}
-
-	// Getters //
 
 	/**
 	 * Returns the title for this translatable page.
@@ -176,8 +172,6 @@ class TranslatablePage {
 		$this->source = 'revision';
 		$this->init = false;
 	}
-
-	// Public functions //
 
 	/**
 	 * Returns the source language of this translatable page. In other words
@@ -377,8 +371,6 @@ class TranslatablePage {
 		return $text;
 	}
 
-	// Inner functionality //
-
 	/**
 	 * @param array &$holders
 	 * @param string $text
@@ -505,8 +497,6 @@ class TranslatablePage {
 		return $section;
 	}
 
-	// Tag methods //
-
 	protected static $tagCache = [];
 
 	/**
@@ -531,7 +521,7 @@ class TranslatablePage {
 	/**
 	 * @param string $tag Tag name
 	 * @param int $revision Revision ID to add tag for
-	 * @param mixed $value Optional. Value to be stored as serialized with | as separator
+	 * @param mixed|null $value Optional. Value to be stored as serialized with | as separator
 	 * @throws MWException
 	 */
 	protected function addTag( $tag, $revision, $value = null ) {
@@ -822,7 +812,7 @@ class TranslatablePage {
 
 	/**
 	 * @param Title $title
-	 * @return bool|TranslatablePage
+	 * @return bool|self
 	 */
 	public static function isTranslationPage( Title $title ) {
 		$handle = new MessageHandle( $title );
@@ -866,8 +856,7 @@ class TranslatablePage {
 	 */
 	public static function isSourcePage( Title $title ) {
 		$cache = ObjectCache::getMainWANInstance();
-		// BC for MediaWiki 1.27
-		$pcTTL = defined( 'WANObjectCache::TTL_PROC_LONG' ) ? $cache::TTL_PROC_LONG : 30;
+		$pcTTL = $cache::TTL_PROC_LONG;
 
 		$translatablePageIds = $cache->getWithSetCallback(
 			$cache->makeKey( 'pagetranslation', 'sourcepages' ),
@@ -876,7 +865,7 @@ class TranslatablePage {
 				$dbr = wfGetDB( DB_REPLICA );
 				$setOpts += Database::getCacheSetOptions( $dbr );
 
-				return TranslatablePage::getTranslatablePages();
+				return self::getTranslatablePages();
 			},
 			[ 'pcTTL' => $pcTTL, 'pcGroup' => __CLASS__ . ':30' ]
 		);

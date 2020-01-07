@@ -25,7 +25,7 @@ class TranslateHooksTest extends MediaWikiLangTestCase {
 		$wgHooks['TranslatePostInitGroups'] = [ [ $this, 'getTestGroups' ] ];
 
 		$mg = MessageGroups::singleton();
-		$mg->setCache( wfGetCache( 'hash' ) );
+		$mg->setCache( new WANObjectCache( [ 'cache' => wfGetCache( 'hash' ) ] ) );
 		$mg->recache();
 
 		MessageIndex::setInstance( new HashMessageIndex() );
@@ -44,7 +44,7 @@ class TranslateHooksTest extends MediaWikiLangTestCase {
 	}
 
 	public function testPreventCategorization() {
-		$user = new MockSuperUser();
+		$user = $this->getTestSysop()->getUser();
 		$title = Title::makeTitle( NS_MEDIAWIKI, 'ugakey1/fi' );
 		$wikipage = WikiPage::factory( $title );
 		$content = ContentHandler::makeContent( '[[Category:Shouldnotbe]]', $title );

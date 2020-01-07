@@ -3,6 +3,7 @@
 $languageNames = [
 	'ace' => 'Aceh-Sprache',
 	'ach' => 'Acholi-Sprache',
+	'ars' => 'Nadschd-Arabisch',
 	'bas' => 'Basaa-Sprache',
 	'be' => 'Weissrussisch',
 	'bik' => 'Bikol-Sprache',
@@ -19,7 +20,9 @@ $languageNames = [
 $currencyNames = [
 	'BYN' => 'Weissrussischer Rubel',
 	'BYR' => 'Weissrussischer Rubel (2000–2016)',
-	'PEN' => 'Peruanischer Neuer Sol',
+	'STN' => 'São-toméischer Dobra (2018)',
+	'VEF' => 'Venezolanischer Bolívar',
+	'VES' => 'VES',
 ];
 
 $countryNames = [

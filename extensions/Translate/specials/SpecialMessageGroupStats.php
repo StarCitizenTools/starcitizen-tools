@@ -15,8 +15,6 @@
  * @ingroup SpecialPage TranslateSpecialPage Stats
  */
 class SpecialMessageGroupStats extends SpecialLanguageStats {
-	use CompatibleLinkRenderer;
-
 	/// Overwritten from SpecialLanguageStats
 	protected $targetValueName = [ 'group' ];
 	/// Overwritten from SpecialLanguageStats
@@ -38,8 +36,14 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 		return $this->msg( 'translate-mgs-pagename' )->text();
 	}
 
-	protected function getGroupName() {
-		return 'wiki';
+	/// Overwritten from SpecialLanguageStats
+	protected function loadStatistics( $target, $flags = 0 ) {
+		return MessageGroupStats::forGroup( $target, $flags );
+	}
+
+	/// Overwritten from SpecialLanguageStats
+	protected function getCacheRebuildJobParameters( $target ) {
+		return [ 'groupid' => $target ];
 	}
 
 	/// Overwritten from SpecialLanguageStats
@@ -71,106 +75,76 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 
 	/// Overwritten from SpecialLanguageStats
 	protected function outputIntroduction() {
-		$group = $this->getRequest()->getVal( 'group' );
-		$priorityLangs = TranslateMetadata::get( $group, 'prioritylangs' );
+		$priorityLangs = TranslateMetadata::get( $this->target, 'prioritylangs' );
 		if ( $priorityLangs ) {
 			$this->getOutput()->addWikiMsg( 'tpt-priority-languages', $priorityLangs );
 		}
 	}
 
 	/// Overwriten from SpecialLanguageStats
-	protected function getform() {
-		global $wgScript;
+	protected function addForm() {
+		$formDescriptor = [
+			'select' => [
+				'type' => 'select',
+				'name' => 'group',
+				'id' => 'group',
+				'label' => $this->msg( 'translate-mgs-group' )->text(),
+				'options' => $this->getGroupOptions(),
+				'default' => $this->target
+			],
+			'nocomplete-check' => [
+				'type' => 'check',
+				'name' => 'suppresscomplete',
+				'id' => 'suppresscomplete',
+				'label' => $this->msg( 'translate-mgs-nocomplete' )->text(),
+				'default' => $this->noComplete,
+			],
+			'noempty-check' => [
+				'type' => 'check',
+				'name' => 'suppressempty',
+				'id' => 'suppressempty',
+				'label' => $this->msg( 'translate-mgs-noempty' )->text(),
+				'default' => $this->noEmpty,
+			]
+		];
 
-		$out = Html::openElement( 'div' );
-		$out .= Html::openElement( 'form', [ 'method' => 'get', 'action' => $wgScript ] );
-		$out .= Html::hidden( 'title', $this->getPageTitle()->getPrefixedText() );
-		$out .= Html::hidden( 'x', 'D' ); // To detect submission
-		$out .= Html::openElement( 'fieldset' );
-		$out .= Html::element( 'legend', [], $this->msg( 'translate-mgs-fieldset' )->text() );
-		$out .= Html::openElement( 'table' );
+		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() );
 
-		$out .= Html::openElement( 'tr' );
-		$out .= Html::openElement( 'td', [ 'class' => 'mw-label' ] );
-		$out .= Xml::label( $this->msg( 'translate-mgs-group' )->text(), 'group' );
-		$out .= Html::closeElement( 'td' );
-		$out .= Html::openElement( 'td', [ 'class' => 'mw-input' ] );
-		$out .= $this->getGroupSelector( $this->target )->getHTML();
-		$out .= Html::closeElement( 'td' );
-		$out .= Html::closeElement( 'tr' );
-
-		$out .= Html::openElement( 'tr' );
-		$out .= Html::openElement( 'td', [ 'colspan' => 2 ] );
-		$out .= Xml::checkLabel(
-			$this->msg( 'translate-mgs-nocomplete' )->text(),
-			'suppresscomplete',
-			'suppresscomplete',
-			$this->noComplete
-		);
-		$out .= Html::closeElement( 'td' );
-		$out .= Html::closeElement( 'tr' );
-
-		$out .= Html::openElement( 'tr' );
-		$out .= Html::openElement( 'td', [ 'colspan' => 2 ] );
-		$out .= Xml::checkLabel(
-			$this->msg( 'translate-mgs-noempty' )->text(),
-			'suppressempty',
-			'suppressempty',
-			$this->noEmpty
-		);
-		$out .= Html::closeElement( 'td' );
-		$out .= Html::closeElement( 'tr' );
-
-		$out .= Html::openElement( 'tr' );
-		$out .= Html::openElement( 'td', [ 'class' => 'mw-input', 'colspan' => 2 ] );
-		$out .= Xml::submitButton( $this->msg( 'translate-mgs-submit' )->text() );
-		$out .= Html::closeElement( 'td' );
-		$out .= Html::closeElement( 'tr' );
-
-		$out .= Html::closeElement( 'table' );
-		$out .= Html::closeElement( 'fieldset' );
 		/* Since these pages are in the tabgroup with Special:Translate,
 		 * it makes sense to retain the selected group/language parameter
 		 * on post requests even when not relevant to the current page. */
 		$val = $this->getRequest()->getVal( 'language' );
 		if ( $val !== null ) {
-			$out .= Html::hidden( 'language', $val );
+			$htmlForm->addHiddenField( 'language', $val );
 		}
-		$out .= Html::closeElement( 'form' );
-		$out .= Html::closeElement( 'div' );
 
-		return $out;
+		$htmlForm
+			->addHiddenField( 'x', 'D' ) // To detect submission
+			->setMethod( 'get' )
+			->setSubmitTextMsg( 'translate-mgs-submit' )
+			->setWrapperLegendMsg( 'translate-mgs-fieldset' )
+			->prepareForm()
+			->displayForm( false );
 	}
 
-	/**
-	 * Overwritten from SpecialLanguageStats
-	 *
-	 * @return string
-	 */
-	protected function getTable() {
+	/// Overwritten from SpecialLanguageStats
+	protected function getTable( $stats ) {
 		$table = $this->table;
 
 		$this->addWorkflowStatesColumn();
 		$out = '';
-
-		if ( $this->purge ) {
-			MessageGroupStats::clearGroup( $this->target );
-		}
-
-		MessageGroupStats::setTimeLimit( $this->timelimit );
-		$cache = MessageGroupStats::forGroup( $this->target );
 
 		$this->numberOfShownLanguages = 0;
 		$languages = array_keys(
 			TranslateUtils::getLanguageNames( $this->getLanguage()->getCode() )
 		);
 		sort( $languages );
-		$this->filterPriorityLangs( $languages, $this->target, $cache );
+		$this->filterPriorityLangs( $languages, $this->target, $stats );
 		foreach ( $languages as $code ) {
 			if ( $table->isBlacklisted( $this->target, $code ) !== null ) {
 				continue;
 			}
-			$out .= $this->makeRow( $code, $cache );
+			$out .= $this->makeRow( $code, $stats );
 		}
 
 		if ( $out ) {
@@ -287,17 +261,20 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 		];
 
 		if ( isset( $this->names[$code] ) ) {
-			$text = htmlspecialchars( "$code: {$this->names[$code]}" );
+			$text = "$code: {$this->names[$code]}";
 		} else {
-			$text = htmlspecialchars( $code );
+			$text = $code;
 		}
-		$link = $this->makeKnownLink( $this->translate, $text, [], $queryParameters );
+		$link = $this->getLinkRenderer()->makeKnownLink(
+			$this->translate,
+			$text,
+			[],
+			$queryParameters
+		);
 
 		return Html::rawElement( 'td', [], $link );
 	}
 
-	// @codingStandardsIgnoreStart PHP CodeSniffer warns "Useless method overriding
-	// detected", but that's not the case.
 	/**
 	 * @param string $field
 	 * @param string $filter
@@ -305,24 +282,23 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 	 */
 	protected function getWorkflowStates( $field = 'tgr_lang', $filter = 'tgr_group' ) {
 		return parent::getWorkflowStates( $field, $filter );
-	} // @codingStandardsIgnoreEnd
+	}
 
 	/**
-	 * Creates a simple message group selector.
+	 * Creates a simple message group options.
 	 *
-	 * @param string|bool $default Group id of the group chosen by default. Optional.
-	 * @return XmlSelect
+	 * @return array $options
 	 */
-	protected function getGroupSelector( $default = false ) {
+	protected function getGroupOptions() {
+		$options = [];
 		$groups = MessageGroups::getAllGroups();
-		$selector = new XmlSelect( 'group', 'group', $default );
 
 		foreach ( $groups as $id => $class ) {
 			if ( MessageGroups::getGroup( $id )->exists() ) {
-				$selector->addOption( $class->getLabel(), $id );
+				$options[$class->getLabel()] = $id;
 			}
 		}
 
-		return $selector;
+		return $options;
 	}
 }

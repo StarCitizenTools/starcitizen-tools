@@ -8,6 +8,7 @@
 	"uls-plang-title-languages": "Lènghe",
 	"ext-uls-select-language-settings-icon-tooltip": "'Mbostaziune de lènghe",
 	"ext-uls-undo-language-tooltip-text": "Lènghe cangiate da $1",
+	"ext-uls-undo-language-tooltip-text-local": "Lènghe cangiate pe sta uicchi. Condrolle le [[Special:GlobalPreferences|preferenze globbale]] tune pe cangià 'a lènghe pe tutte le uicchi.",
 	"ext-uls-language-settings-preferences-link": "Otre 'mbostaziune d'a lènghe",
 	"uls-betafeature-label": "Collegaminde inderuicchi a fiche",
 	"uls-betafeature-desc": "Fà 'ndrucà ìna versione cchiù corte de l'elenghe de le inderuicchi, ca sò le collegaminde a le otre lènghe addò 'a pàgene jè disponibbile, limitate a chidde cchiù 'mbortande pe te.",
@@ -57,5 +58,6 @@
 	"ext-uls-compact-link-count": "{{PLURAL:$1|'N'otre|otre $1}}",
 	"ext-uls-compact-link-info": "Tutte le lènghe ('u scacchiamende iniziale avène 'mbrà le scacchiaminde comune tue e de l'otre)",
 	"prefs-languages": "Lènghe",
-	"ext-uls-compact-language-links-preference": "Ause 'n'[[$1|elenghe ridotte de lènghe]], cu le lènghe ca so 'mbortande pe te."
+	"ext-uls-compact-language-links-preference": "Ause 'n'[[$1|elenghe ridotte de lènghe]], cu le lènghe ca so 'mbortande pe te.",
+	"ext-uls-compact-no-results": "Sta pàgene non g'è disponibbile jndr'à lènghe ca ste cirche."
 }

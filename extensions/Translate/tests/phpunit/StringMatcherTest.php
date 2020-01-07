@@ -42,6 +42,7 @@ class StringMatcherTest extends MediaWikiTestCase {
 				'[kissa]', '=5Bkissa=5D', 'p-', [ '[k.s*' ],
 				'Message key with special chars'
 			],
+			[ 'keyblah/i', 'p-keyblah/i', 'p-', [ 'key*/i' ], 'Slash in pattern does not trigger modifier' ],
 		];
 
 		return $keys;
@@ -80,8 +81,11 @@ class StringMatcherTest extends MediaWikiTestCase {
 			[ 'key%AB', 'string with invalid url encoding' ],
 			[ 'key&amp;', 'string with html entity' ],
 			[ 'key=2A', 'string with fake escaping' ],
-			[ 'abcdefgh', 'string with fake escaping' ],
 			[ 'общегосударственные', 'Unicode string' ],
+			[ ' la la land_', 'string starting or ending with spaces or underscores' ],
+			[ 'one  two__three _four', 'multiple spaces consisting of spaces or underscores' ],
+			[ 'Signed by ~~~', 'Magic tilde expansion' ],
+			[ ':iam', 'string starting with a colon' ],
 		];
 
 		// Add tests for ranges of exotic ASCII characters

@@ -31,5 +31,7 @@
 	"babel-N-n": "Erabiltzaile hau [[$1|euskaldun zaharra]] da ([[$2|euskara]] du ama hizkuntza).",
 	"babel-footer": "Lankideak hizkuntzaren arabera",
 	"apihelp-query+babel-description": "Eskuratu lakideak dakizkien hizkuntzen inguruko informazioa",
-	"apihelp-query+babel-param-user": "Zein lankideren informazioa lortu"
+	"apihelp-query+babel-summary": "Lankideak dakizkien hizkuntzen inguruko informazioa jaso",
+	"apihelp-query+babel-param-user": "Zein lankideren informazioa lortu",
+	"apihelp-query+babel-example-1": "<kbd>Adibide</kbd> lankidearen Babel informazioa lortu"
 }

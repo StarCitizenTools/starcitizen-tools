@@ -52,7 +52,7 @@ class SpecialMagic extends SpecialPage {
 	 *
 	 * @return string
 	 */
-	function getDescription() {
+	public function getDescription() {
 		return $this->msg( 'translate-magic-pagename' )->text();
 	}
 
@@ -116,7 +116,7 @@ class SpecialMagic extends SpecialPage {
 			/* str  */'module'   => '',
 			/* str  */'language' => $this->getUser()->getOption( 'language' ),
 			/* bool */'export'   => false,
-			/* bool */'savetodb' => false,
+			/* bool */'savetodb' => false
 		];
 
 		/**

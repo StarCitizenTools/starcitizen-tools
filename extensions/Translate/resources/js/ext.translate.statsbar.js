@@ -9,13 +9,13 @@
 
 /*
  * Usage:
- *	$( '<div>' ).languagestatsbar( {
- *		language: 'fi',
- *		group: 'core'
- *	} );
+ *     $( '<div>' ).languagestatsbar( {
+ *         language: 'fi',
+ *         group: 'core'
+ *     } );
  * The status bar will be rendered to the newly created div. Or use any container.
  */
-( function ( mw, $ ) {
+( function () {
 	'use strict';
 
 	var LanguageStatsBar = function ( container, options ) {
@@ -33,7 +33,7 @@
 				this.render();
 			} else {
 				mw.translate.loadLanguageStats( this.language )
-					.done( $.proxy( this.render, this ) );
+					.done( this.render.bind( this ) );
 			}
 		},
 
@@ -184,4 +184,4 @@
 
 	mw.translate = mw.translate || {};
 
-}( mediaWiki, jQuery ) );
+}() );

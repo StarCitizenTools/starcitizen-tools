@@ -4,18 +4,19 @@
  * @package Babel
  */
 
-/*jshint node:true */
+/* eslint-env node */
 module.exports = function ( grunt ) {
+	var conf = grunt.file.readJSON( 'extension.json' );
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
 	grunt.loadNpmTasks( 'grunt-jsonlint' );
+	grunt.loadNpmTasks( 'grunt-eslint' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 
 	grunt.initConfig( {
-		banana: {
-			all: ['i18n/']
-		},
+		banana: conf.MessagesDirs,
 		jsonlint: {
 			all: [
+				'*.json',
 				'**/*.json',
 				'!node_modules/**',
 				'!vendor/**'
@@ -24,12 +25,21 @@ module.exports = function ( grunt ) {
 		stylelint: {
 			all: [
 				'**/*.css',
+				'**/*.less',
+				'!node_modules/**',
+				'!vendor/**'
+			]
+		},
+		eslint: {
+			all: [
+				'*.js',
+				'modules/**/*.js',
 				'!node_modules/**',
 				'!vendor/**'
 			]
 		}
 	} );
 
-	grunt.registerTask( 'test', [ 'jsonlint', 'banana', 'stylelint' ] );
+	grunt.registerTask( 'test', [ 'jsonlint', 'banana', 'eslint', 'stylelint' ] );
 	grunt.registerTask( 'default', 'test' );
 };

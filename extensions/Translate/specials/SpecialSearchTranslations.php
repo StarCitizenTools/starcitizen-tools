@@ -68,6 +68,7 @@ class SpecialSearchTranslations extends SpecialPage {
 		$out->addModules( 'ext.translate.special.searchtranslations' );
 		$out->addModules( 'ext.translate.special.searchtranslations.operatorsuggest' );
 		$out->addHelpLink( 'Help:Extension:Translate#searching' );
+		$out->addJsConfigVars( 'wgTranslateLanguages', TranslateUtils::getLanguageNames( null ) );
 
 		$this->opts = $opts = new FormOptions();
 		$opts->add( 'query', '' );
@@ -87,9 +88,10 @@ class SpecialSearchTranslations extends SpecialPage {
 
 		if ( $queryString === '' ) {
 			$this->showEmptySearch();
-
 			return;
 		}
+
+		$search = $this->getSearchInput( $queryString );
 
 		$options = $params = $opts->getAllValues();
 		$filter = $opts->getValue( 'filter' );
@@ -99,6 +101,11 @@ class SpecialSearchTranslations extends SpecialPage {
 			}
 			$translationSearch = new CrossLanguageTranslationSearchQuery( $options, $server );
 			if ( in_array( $filter, $translationSearch->getAvailableFilters() ) ) {
+				if ( $options['language'] === $options['sourcelanguage'] ) {
+					$this->showSearchError( $search, $this->msg( 'tux-sst-error-language' ) );
+					return;
+				}
+
 				$opts->setValue( 'language', $options['language'] );
 				$documents = $translationSearch->getDocuments();
 				$total = $translationSearch->getTotalHits();
@@ -109,6 +116,14 @@ class SpecialSearchTranslations extends SpecialPage {
 				$total = $server->getTotalHits( $resultset );
 			}
 		} catch ( TTMServerException $e ) {
+			$message = $e->getMessage();
+			// Known exceptions
+			if ( preg_match( '/^Result window is too large/', $message ) ) {
+				$this->showSearchError( $search, $this->msg( 'tux-sst-error-offset' ) );
+				return;
+			}
+
+			// Other exceptions
 			error_log( 'Translation search server unavailable: ' . $e->getMessage() );
 			throw new ErrorPageError( 'tux-sst-solr-offline-title', 'tux-sst-solr-offline-body' );
 		}
@@ -117,7 +132,7 @@ class SpecialSearchTranslations extends SpecialPage {
 		$facets = $server->getFacets( $resultset );
 		$facetHtml = '';
 
-		if ( count( $facets['language'] ) > 0 ) {
+		if ( $facets['language'] !== [] ) {
 			if ( $filter !== '' ) {
 				$facets['language'] = array_merge(
 					$facets['language'],
@@ -129,16 +144,16 @@ class SpecialSearchTranslations extends SpecialPage {
 					'data-facets' => FormatJson::encode( $this->getLanguages( $facets['language'] ) ),
 					'data-language' => $opts->getValue( 'language' ),
 				],
-				$this->msg( 'tux-sst-facet-language' )
+				$this->msg( 'tux-sst-facet-language' )->text()
 			);
 		}
 
-		if ( count( $facets['group'] ) > 0 ) {
+		if ( $facets['group'] !== [] ) {
 			$facetHtml .= Html::element( 'div',
 				[ 'class' => 'row facet groups',
 					'data-facets' => FormatJson::encode( $this->getGroups( $facets['group'] ) ),
 					'data-group' => $opts->getValue( 'group' ) ],
-				$this->msg( 'tux-sst-facet-group' )
+				$this->msg( 'tux-sst-facet-group' )->text()
 			);
 		}
 
@@ -260,7 +275,6 @@ class SpecialSearchTranslations extends SpecialPage {
 			"$prev $next"
 		);
 
-		$search = $this->getSearchInput( $queryString );
 		$count = $this->msg( 'tux-sst-count' )->numParams( $total );
 
 		$this->showSearch( $search, $count, $facetHtml, $resultsHtml, $total );
@@ -333,7 +347,7 @@ class SpecialSearchTranslations extends SpecialPage {
 				$nondefaults['grouppath'] = $pathString . $id;
 			}
 
-			$value = isset( $counts[$id] ) ? $counts[$id] : 0;
+			$value = $counts[$id] ?? 0;
 
 			$output[$id] = [
 				'id' => $id,
@@ -403,6 +417,24 @@ HTML
 <div class="grid tux-searchpage">
 	<div class="row searchinput">
 		<div class="nine columns offset-by-three">$search</div>
+	</div>
+</div>
+HTML
+		);
+	}
+
+	protected function showSearchError( $search, Message $message ) {
+		$messageSelector = $this->messageSelector();
+		$this->getOutput()->addHTML( <<<HTML
+<div class="grid tux-searchpage">
+	<div class="row tux-searchboxform">
+		<div class="tux-search-tabs offset-by-three">$messageSelector</div>
+		<div class="row tux-search-options">
+			<div class="offset-by-three nine columns tux-search-inputs">
+				<div class="row searchinput">$search</div>
+				<div class="row errorbox">{$message->escaped()}</div>
+			</div>
+		</div>
 	</div>
 </div>
 HTML

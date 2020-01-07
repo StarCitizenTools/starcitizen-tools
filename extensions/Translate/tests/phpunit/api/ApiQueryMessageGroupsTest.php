@@ -1,7 +1,5 @@
 <?php
 /**
- * Unit tests for api module.
- *
  * @file
  * @author Harry Burt
  * @copyright Copyright © 2012-2013, Harry Burt
@@ -24,7 +22,7 @@ class ApiQueryMessageGroupsTest extends ApiTestCase {
 		$wgHooks['TranslatePostInitGroups'] = [ [ $this, 'getTestGroups' ] ];
 
 		$mg = MessageGroups::singleton();
-		$mg->setCache( wfGetCache( 'hash' ) );
+		$mg->setCache( new WANObjectCache( [ 'cache' => wfGetCache( 'hash' ) ] ) );
 		$mg->recache();
 	}
 

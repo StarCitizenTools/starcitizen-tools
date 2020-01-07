@@ -6,20 +6,22 @@
 			"Mirzali",
 			"Kumkumuk",
 			"1917 Ekim Devrimi",
-			"Gırd"
+			"Gırd",
+			"Orbot707"
 		]
 	},
 	"uls-desc": "Karberi rê seba weçinıtışê zıwani û vurnayışê eyarê zıwani ra weçinıkan peyda keno",
 	"uls-plang-title-languages": "Zıwani",
 	"ext-uls-select-language-settings-icon-tooltip": "Eyarê zıwani",
 	"ext-uls-undo-language-tooltip-text": "Zıwan $1 ra açarniya",
-	"ext-uls-language-settings-preferences-link": "Dahana véşi zıwani",
+	"ext-uls-undo-language-tooltip-text-local": "Seba na wiki zıwan vuriyê . Zıwanê wikiya pêroyi in vurnayışi rê [[Special:GlobalPreferences|tercihanê globali]] kontrol bıkerê .",
+	"ext-uls-language-settings-preferences-link": "Zeder eyarê zıwani",
 	"uls-betafeature-label": "Gıreyê zıwaniyê tengkerdeyi",
 	"uls-betafeature-desc": " Ebe zıwananê ke şıma rê muhimê, yew verziyonê lista zıwaniyo kılmi mocneno.",
 	"ext-uls-display-settings-title": "Eyarê ekrani",
 	"ext-uls-display-settings-language-tab": "Zıwan",
 	"ext-uls-display-settings-fonts-tab": "Fonti",
-	"ext-uls-display-settings-title-short": "Asen",
+	"ext-uls-display-settings-title-short": "Ekran",
 	"ext-uls-display-settings-desc": "Semedê menuyan û babetê nuşteyan ra zıwan weçine.",
 	"ext-uls-language-settings-title": "Eyarê zıwani",
 	"ext-uls-language-settings-apply": "Eyaran tetbiq ke",
@@ -55,12 +57,13 @@
 	"ext-uls-input-disable-info": "Hacetê cıkewtışi dewre ra veciyayi.",
 	"ext-uls-input-settings-noime": "Semedê nê zıwani ra metodê cıkewtışi çıniyê.",
 	"ext-uls-input-disable-notification": "Hacetê cıkewtışi dewre ra veti",
-	"ext-uls-input-disable-notification-undo": "Peyser biya",
+	"ext-uls-input-disable-notification-undo": "Peyser bıgê",
 	"ext-uls-input-disable-notification-info-personal": "Eyaranê zıwani şıma çı wext ke wazenê, şıma şenê hacetanê cıkewtışi ra feal kerê.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Eyaranê zıwani şıma şenê, hacetanê ke leweyê lista zıwani derê, feal kerê.",
 	"ext-uls-language-settings-applying": "Dezgeyeno...",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|vêşêr|$1 vêşêr}}",
 	"ext-uls-compact-link-info": "Zıwani pêro (hetê to û ê binan ra ke kamcin yeno hesab wa ey weçine)",
 	"prefs-languages": "Zıwani",
-	"ext-uls-compact-language-links-preference": "Yew lista serkerdiye be zıwananê eleqedaran ra bıgurene."
+	"ext-uls-compact-language-links-preference": "Teyna zıwanê ke to aleqedar kenê  [[$1|a lista zıwani]] bıkarne.",
+	"ext-uls-compact-no-results": "Na pel zıwano ke şıma cıgeyrenê a zıwan de mewcud niya"
 }

@@ -24,7 +24,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	protected $label = 'none';
 
 	/**
-	 * @param IContextSource $context
+	 * @param IContextSource|null $context
 	 * @return string
 	 */
 	public function getLabel( IContextSource $context = null ) {
@@ -220,7 +220,7 @@ abstract class MessageGroupOld implements MessageGroup {
 		}
 		$key = strtolower( str_replace( ' ', '_', $key ) );
 
-		return isset( $this->messages[$code][$key] ) ? $this->messages[$code][$key] : null;
+		return $this->messages[$code][$key] ?? null;
 	}
 
 	public static function normaliseKeys( $array ) {
@@ -278,8 +278,8 @@ abstract class MessageGroupOld implements MessageGroup {
 	/**
 	 * Creates a new MessageCollection for this group.
 	 *
-	 * @param \string $code Language code for this collection.
-	 * @param \bool $unique Whether to build collection for messages unique to this
+	 * @param string $code Language code for this collection.
+	 * @param bool $unique Whether to build collection for messages unique to this
 	 *                group only.
 	 * @return MessageCollection
 	 */
@@ -325,7 +325,7 @@ abstract class MessageGroupOld implements MessageGroup {
 			return $tags;
 		}
 
-		return isset( $tags[$type] ) ? $tags[$type] : [];
+		return $tags[$type] ?? [];
 	}
 
 	/**
@@ -372,6 +372,8 @@ abstract class MessageGroupOld implements MessageGroup {
 	public function getMessageGroupStates() {
 		// @todo Replace deprecated call.
 		$conf = $this->getWorkflowConfiguration();
+
+		Hooks::run( 'Translate:modifyMessageGroupStates', [ $this->getId(), &$conf ] );
 
 		return new MessageGroupStates( $conf );
 	}

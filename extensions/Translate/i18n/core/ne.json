@@ -8,7 +8,8 @@
 			"Krish Dulal",
 			"बिप्लब आनन्द",
 			"NehalDaveND",
-			"राम प्रसाद जोशी"
+			"राम प्रसाद जोशी",
+			"पर्वत सुबेदी"
 		]
 	},
 	"translate": "अनुवाद गर्ने",
@@ -34,7 +35,6 @@
 	"translate-prev": "अघिल्लो पृष्ठ",
 	"translate-page-description-legend": "समूह बारेको जानकारी",
 	"translate-page-edit": "सम्पादन गर्ने",
-	"translate-ext-url": "<hr />वेवसाइट: $1",
 	"translate-optional": "(वैकल्पिक)",
 	"translate-ignored": "(अनदेखा गरिएको)",
 	"translate-edit-title": "\"$1\" सम्पादन गर्ने",
@@ -53,7 +53,7 @@
 	"translate-magic-cm-current": "वर्तमान",
 	"translate-magic-cm-original": "मूल",
 	"translate-magic-cm-comment": "टिप्पणी:",
-	"translate-magic-cm-save": "संग्रह गर्ने",
+	"translate-magic-cm-save": "सङ्ग्रह गर्ने",
 	"translate-magic-cm-savefailed": "संग्रह विफल भयो",
 	"translate-magic-words": "जादुई शब्दहरू",
 	"translate-magic-notsaved": "तपाईंको सम्पादन संग्रह गरिएको थिएन!",
@@ -104,6 +104,7 @@
 	"translate-untranslated": "अनुवाद नगरिएका",
 	"translate-percentage-complete": "सकिएका",
 	"translate-percentage-fuzzy": "पुराना (काम नलाग्ने)",
+	"translate-percentage-proofread": "समीक्षा गरियो",
 	"translate-ls-column-group": "सन्देश समूह",
 	"translate-mgs-group": "सन्देश समूहः",
 	"translate-mgs-column-language": "भाषा",
@@ -111,7 +112,7 @@
 	"translate-manage-action-import": "आयात गर्नु",
 	"translate-manage-action-ignore": "उपेक्षा",
 	"translate-js-summary": "सारांश :",
-	"translate-js-save": "संग्रह गर्ने",
+	"translate-js-save": "सङ्ग्रह गर्ने",
 	"translate-gs-code": "कोड",
 	"translate-gs-speakers": "वक्ताहरु",
 	"translate-documentation-language": "सन्देश दस्तावेज",

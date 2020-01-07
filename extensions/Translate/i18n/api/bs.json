@@ -117,5 +117,6 @@
 	"apierror-translate-sandboxdisabled": "Funkcija pijeska nije u upotrebi",
 	"apierror-translate-sandbox-invalidppassword": "Neispravna lozinka",
 	"apierror-translate-unknownmessage": "Nepoznata poruka",
-	"apiwarn-translate-alreadyreviewedbyyou": "Već ste je označili pregledanom"
+	"apiwarn-translate-alreadyreviewedbyyou": "Već ste je označili pregledanom",
+	"apiwarn-translate-language-disabled-source": "Izvorni jezik ove grupe je $1. Izaberite jezik na koji želite prevoditi."
 }

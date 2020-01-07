@@ -3,10 +3,12 @@
 		"authors": [
 			"Chhorran",
 			"Lovekhmer",
-			"Thearith"
+			"Thearith",
+			"គីមស៊្រុន"
 		]
 	},
 	"cleanchanges-changerightslink": "ផ្លាស់ប្តូរក្រុម",
+	"cleanchanges-desc": "[[Special:RecentChanges|បញ្ជីបន្លាស់ប្ដូរថ្មីៗ]]ខ្នាតខ្លី",
 	"cleanchanges-language": "ភាសា៖",
 	"cleanchanges-language-na": "ទាំងអស់",
 	"cleanchanges-users": "អ្នកប្រើប្រាស់​(ខណ្ឌដោយ |)៖",

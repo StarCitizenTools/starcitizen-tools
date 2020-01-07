@@ -62,6 +62,9 @@ $wgEnotifUserTalk = false; # UPO
 $wgEnotifWatchlist = false; # UPO
 $wgEmailAuthentication = true;
 
+# Disable the real name field
+$wgHiddenPrefs[] = 'realname';
+
 # MySQL table options to use during installation or update
 $wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=utf8";
 
@@ -94,7 +97,6 @@ $wgThumbLimits = array(
 );
 
 $wgDefaultUserOptions['thumbsize'] = 5; // thumb size 300
-
 
 $wgMaxImageArea = 6.4e7;
 
@@ -160,7 +162,7 @@ $wgCitizenEnablePreconnect = true;
 $wgCitizenPreconnectURL = 'https://www.google-analytics.com';
 # CSP
 $wgCitizenEnableCSP = true;
-$wgCitizenCSPDirective = 'default-src \'none\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://commons.wikimedia.org https://www.mediawiki.org https://ajax.cloudflare.com/ https://www.google.com/recaptcha/ https://*.starcitizen.tools https://www.gstatic.com/recaptcha/ https://www.google-analytics.com; style-src \'self\' \'unsafe-inline\' https://*.starcitizen.tools https://commons.wikimedia.org https://www.mediawiki.org; img-src \'self\' data: https:; font-src \'self\'; connect-src \'self\' https://*.starcitizen.tools; manifest-src \'self\'; frame-src https://www.youtube.com; frame-ancestors \'none\'; form-action \'self\'; upgrade-insecure-requests; base-uri \'self\'';
+$wgCitizenCSPDirective = 'default-src \'none\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://commons.wikimedia.org https://www.mediawiki.org https://ajax.cloudflare.com/ https://www.google.com/recaptcha/ https://*.starcitizen.tools https://www.gstatic.com/recaptcha/ https://www.google-analytics.com; style-src \'self\' \'unsafe-inline\' https://*.starcitizen.tools https://commons.wikimedia.org https://www.mediawiki.org; img-src \'self\' data: https:; font-src \'self\'; connect-src \'self\' https://*.starcitizen.tools; manifest-src \'self\'; frame-src https://www.google.com/recaptcha/ https://www.youtube.com; frame-ancestors \'none\'; form-action \'self\'; upgrade-insecure-requests; base-uri \'self\'';
 # HSTS
 $wgCitizenEnableHSTS = true;
 $wgCitizenHSTSMaxAge = 63072000; # 2 year
@@ -333,7 +335,7 @@ $edgExternalValueVerbose = false;
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
 $wgDefaultUserOptions['visualeditor-editor'] = "visualeditor";
 $wgDefaultUserOptions['visualeditor-newwikitext'] = 1;
-$wgHiddenPrefs[] = 'visualeditor-enable';
+$wgPrefs[] = 'visualeditor-enable';
 $wgVisualEditorEnableWikitext = true;
 $wgVisualEditorEnableDiffPage = true;
 $wgVisualEditorUseSingleEditTab = true;

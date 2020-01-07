@@ -51,13 +51,14 @@ class LanguageBabelBox implements BabelBox {
 	 *
 	 * @param Title $title
 	 * @param string $code Language code to use.
+	 *   This is a mediawiki-internal code (not necessarily a valid BCP-47 code)
 	 * @param string $level Level of ability to use.
 	 * @param bool $createCategories If true, creates non existing categories;
 	 *  otherwise, doesn't create them.
 	 */
 	public function __construct( Title $title, $code, $level, $createCategories = true ) {
 		$this->title = $title;
-		$this->code = wfBCP47( $code );
+		$this->code = BabelLanguageCodes::getCode( $code ) ?? $code;
 		$this->level = $level;
 		$this->createCategories = $createCategories;
 	}
@@ -69,17 +70,18 @@ class LanguageBabelBox implements BabelBox {
 	 */
 	public function render() {
 		$code = $this->code;
+		$catCode = BabelLanguageCodes::getCategoryCode( $code );
+		$bcp47 = BabelLanguageCodes::bcp47( $code );
 
-		$portal = wfMessage( 'babel-portal', $code )->inContentLanguage()->text();
+		$portal = wfMessage( 'babel-portal', $catCode )->inContentLanguage()->text();
 		if ( $portal !== '' ) {
-			$portal = "[[$portal|$code]]";
+			$portal = "[[$portal|$catCode]]";
 		} else {
-			$portal = $code;
+			$portal = $catCode;
 		}
 		$header = "$portal<span class=\"mw-babel-box-level-{$this->level}\">-{$this->level}</span>";
 
 		$name = BabelLanguageCodes::getName( $code );
-		$code = BabelLanguageCodes::getCode( $code );
 		$text = self::getText( $this->title, $name, $code, $this->level );
 
 		$dir_current = Language::factory( $code )->getDir();
@@ -90,7 +92,7 @@ class LanguageBabelBox implements BabelBox {
 <div class="mw-babel-box mw-babel-box-{$this->level}" dir="$dir_head">
 {|
 ! dir="$dir_head" | $header
-| dir="$dir_current" lang="$code" | $text
+| dir="$dir_current" lang="$bcp47" | $text
 |}
 </div>
 EOT;
@@ -104,46 +106,44 @@ EOT;
 	 *
 	 * @param Title $title
 	 * @param string $name
-	 * @param string $language Language code of language to use.
+	 * @param string $code Mediawiki-internal language code of language to use.
 	 * @param string $level Level to use.
 	 * @return string Text for display, in wikitext format.
 	 */
-	private static function getText( Title $title, $name, $language, $level ) {
+	private static function getText( Title $title, $name, $code, $level ) {
 		global $wgBabelMainCategory, $wgBabelCategoryNames;
 
 		if ( $wgBabelCategoryNames[$level] === false ) {
 			$categoryLevel = ':' . $title->getFullText();
 		} else {
 			$categoryLevel = ':Category:' .
-				self::getCategoryName( $wgBabelCategoryNames[$level], $language );
+				self::getCategoryName( $wgBabelCategoryNames[$level], $code );
 		}
 
 		if ( $wgBabelMainCategory === false ) {
 			$categoryMain = ':' . $title->getFullText();
 		} else {
 			$categoryMain = ':Category:' .
-				self::getCategoryName( $wgBabelMainCategory, $language );
+				self::getCategoryName( $wgBabelMainCategory, $code );
 		}
-
-		$languageForMw = strtolower( $language );
 
 		// Give grep a chance to find the usages:
 		// babel-0-n, babel-1-n, babel-2-n, babel-3-n, babel-4-n, babel-5-n, babel-N-n
 		$text = wfMessage( "babel-$level-n",
 			$categoryLevel, $categoryMain, '', $title->getDBkey()
-		)->inLanguage( $languageForMw )->text();
+		)->inLanguage( $code )->text();
 
-		$fallbackLanguage = Language::getFallbackFor( $languageForMw );
+		$fallbackLanguage = Language::getFallbackFor( $code );
 		$fallback = wfMessage( "babel-$level-n",
 			$categoryLevel, $categoryMain, '', $title->getDBkey()
-		)->inLanguage( $fallbackLanguage ? $fallbackLanguage : $languageForMw )->text();
+		)->inLanguage( $fallbackLanguage ?: $code )->text();
 
 		// Give grep a chance to find the usages:
 		// babel-0, babel-1, babel-2, babel-3, babel-4, babel-5, babel-N
 		if ( $text == $fallback ) {
 			$text = wfMessage( "babel-$level",
 				$categoryLevel, $categoryMain, $name, $title->getDBkey()
-			)->inLanguage( $languageForMw )->text();
+			)->inLanguage( $code )->text();
 		}
 
 		return $text;
@@ -194,13 +194,13 @@ EOT;
 	 *
 	 * @throws MWException if the category name is not a valid title
 	 * @param string $category Category name (containing variables).
-	 * @param string $code Language code of category.
+	 * @param string $code Mediawiki-internal language code of category.
 	 * @return string Category name with variables replaced.
 	 */
 	private static function getCategoryName( $category, $code ) {
 		global $wgLanguageCode;
 		$category = strtr( $category, [
-			'%code%' => $code,
+			'%code%' => BabelLanguageCodes::getCategoryCode( $code ),
 			'%wikiname%' => BabelLanguageCodes::getName( $code, $wgLanguageCode ),
 			'%nativename%' => BabelLanguageCodes::getName( $code )
 		] );

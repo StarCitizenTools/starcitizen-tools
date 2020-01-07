@@ -17,7 +17,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	/**
@@ -79,7 +79,7 @@
 				};
 			}
 			$.extend( displaySettingsOptions, uls.position() );
-			$displaySettings.languagesettings( displaySettingsOptions ).click();
+			$displaySettings.languagesettings( displaySettingsOptions ).trigger( 'click' );
 		} );
 	}
 
@@ -104,7 +104,7 @@
 				},
 				top: position.top,
 				left: position.left
-			} ).click();
+			} ).trigger( 'click' );
 
 		} );
 	}
@@ -133,16 +133,7 @@
 		}
 
 		function showTipsy( timeout ) {
-			var offset, tipsyTimer = 0;
-
-			// BC for MW 1.27
-			if ( ulsPopup.setFloatableContainer === undefined ) {
-				offset = $ulsTrigger.offset();
-				ulsPopup.$element.css( {
-					top: offset.top + 24,
-					left: offset.left + $ulsTrigger.outerWidth() / 2
-				} );
-			}
+			var tipsyTimer = 0;
 
 			ulsPopup.toggle( true );
 			ulsPopup.toggleClipping( false );
@@ -157,24 +148,6 @@
 			// hide the tooltip when clicked on it
 			$( '.uls-tipsy' ).on( 'click', hideTipsy );
 
-			// Event handler for links in the tooltip.
-			// It looks like the tipsy is always created from scratch so that
-			// there wont be multiple event handlers bound to same click.
-			$( 'a.uls-prevlang-link' ).on( 'click.ulstipsy', function ( event ) {
-				var deferred = $.Deferred();
-
-				event.preventDefault();
-				deferred.done( function () {
-					mw.uls.changeLanguage( event.target.lang );
-				} );
-
-				mw.hook( 'mw.uls.language.revert' ).fire( deferred );
-
-				// Delay is zero if event logging is not enabled
-				window.setTimeout( function () {
-					deferred.resolve();
-				}, mw.config.get( 'wgULSEventLogging' ) * 500 );
-			} );
 			tipsyTimer = window.setTimeout( hideTipsy, timeout );
 		}
 
@@ -203,26 +176,43 @@
 			$floatableContainer: $ulsTrigger,
 			position: ulsPopupPosition,
 			$content: ( function () {
-				var link = $( '<a>' ).text( previousAutonym )
-					.attr( {
-						href: '#',
-						'class': 'uls-prevlang-link',
+				var messageKey, $link;
+
+				$link = $( '<a>' )
+					.text( previousAutonym )
+					.prop( {
+						href: '',
+						class: 'uls-prevlang-link',
 						lang: previousLang,
 						// We could get dir from uls.data,
 						// but we are trying to avoid loading it
 						// and 'auto' is safe enough in this context.
 						// T130390: must use attr
 						dir: 'auto'
+					} )
+					.on( 'click', function ( event ) {
+						var deferred = $.Deferred();
+
+						event.preventDefault();
+						deferred.done( function () {
+							mw.uls.changeLanguage( event.target.lang );
+						} );
+
+						mw.hook( 'mw.uls.language.revert' ).fire( deferred );
+
+						// Delay is zero if event logging is not enabled
+						window.setTimeout( function () {
+							deferred.resolve();
+						}, mw.config.get( 'wgULSEventLogging' ) * 500 );
 					} );
 
-				// Get the html of the link by wrapping it in div first
-				link = $( '<div>' ).html( link ).html();
+				if ( mw.storage.get( 'uls-gp' ) === '1' ) {
+					messageKey = 'ext-uls-undo-language-tooltip-text-local';
+				} else {
+					messageKey = 'ext-uls-undo-language-tooltip-text';
+				}
 
-				return $( '<p>' )
-					.html(
-						mw.message( 'ext-uls-undo-language-tooltip-text', '$1' )
-							.escaped().replace( '$1', link )
-					);
+				return $( '<p>' ).append( mw.message( messageKey, $link ).parseDom() );
 			}() )
 		} );
 
@@ -282,47 +272,49 @@
 					if ( !languagesettings.shown ) {
 						mw.hook( 'mw.uls.settings.open' ).fire( eventParams && eventParams.source || 'interlanguage' );
 					}
-				} else {
-					// Initialize the Language settings window
-					languageSettingsOptions = {
-						defaultModule: 'display',
-						onVisible: function () {
-							var caretRadius,
-								ulsTriggerHeight = this.$element.height(),
-								ulsTriggerWidth = this.$element[ 0 ].offsetWidth,
-								ulsTriggerOffset = this.$element.offset();
 
-							this.$window.addClass( 'callout' );
-
-							// Same as border width in mixins.less, or near enough
-							caretRadius = 12;
-
-							if ( ulsTriggerOffset.left > $( window ).width() / 2 ) {
-								this.left = ulsTriggerOffset.left - this.$window.width() - caretRadius;
-								this.$window.removeClass( 'selector-left' ).addClass( 'selector-right' );
-
-							} else {
-								this.left = ulsTriggerOffset.left + ulsTriggerWidth + caretRadius;
-								this.$window.removeClass( 'selector-right' ).addClass( 'selector-left' );
-							}
-
-							// The top of the dialog is aligned in relation to
-							// the middle of the trigger, so that middle of the
-							// caret aligns with it. 16 is trigger icon height in pixels
-							this.top = ulsTriggerOffset.top +
-								( ulsTriggerHeight / 2 ) -
-								( caretRadius + 16 );
-
-							this.position();
-						}
-					};
-
-					mw.loader.using( mw.uls.languageSettingsModules, function () {
-						$ulsTrigger.languagesettings( languageSettingsOptions ).click();
-					} );
-
-					e.stopPropagation();
+					return;
 				}
+
+				// Initialize the Language settings window
+				languageSettingsOptions = {
+					defaultModule: 'display',
+					onVisible: function () {
+						var caretRadius,
+							ulsTriggerHeight = this.$element.height(),
+							ulsTriggerWidth = this.$element[ 0 ].offsetWidth,
+							ulsTriggerOffset = this.$element.offset();
+
+						this.$window.addClass( 'callout' );
+
+						// Same as border width in mixins.less, or near enough
+						caretRadius = 12;
+
+						if ( ulsTriggerOffset.left > $( window ).width() / 2 ) {
+							this.left = ulsTriggerOffset.left - this.$window.width() - caretRadius;
+							this.$window.removeClass( 'selector-left' ).addClass( 'selector-right' );
+
+						} else {
+							this.left = ulsTriggerOffset.left + ulsTriggerWidth + caretRadius;
+							this.$window.removeClass( 'selector-right' ).addClass( 'selector-left' );
+						}
+
+						// The top of the dialog is aligned in relation to
+						// the middle of the trigger, so that middle of the
+						// caret aligns with it. 16 is trigger icon height in pixels
+						this.top = ulsTriggerOffset.top +
+							( ulsTriggerHeight / 2 ) -
+							( caretRadius + 16 );
+
+						this.position();
+					}
+				};
+
+				mw.loader.using( mw.uls.languageSettingsModules, function () {
+					$ulsTrigger.languagesettings( languageSettingsOptions ).trigger( 'click' );
+				} );
+
+				e.stopPropagation();
 			};
 		} else if ( anonMode ) {
 			clickHandler = function ( e, eventParams ) {
@@ -392,11 +384,15 @@
 
 		// Bind language settings to preferences page link
 		$( '#uls-preferences-link' )
-			.text( mw.msg( 'ext-uls-language-settings-preferences-link' ) )
-			.click( function () {
-				$ulsTrigger.trigger( 'click', {
-					source: 'preferences'
-				} );
+			.on( 'click keypress', function ( e ) {
+				if (
+					e.type === 'click' ||
+					e.type === 'keypress' && e.which === 13
+				) {
+					$ulsTrigger.trigger( 'click', {
+						source: 'preferences'
+					} );
+				}
 
 				return false;
 			} );
@@ -458,4 +454,5 @@
 	} else {
 		$( init );
 	}
-}( jQuery, mediaWiki ) );
+
+}() );

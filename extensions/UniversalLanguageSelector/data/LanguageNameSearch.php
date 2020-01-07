@@ -15,7 +15,7 @@
  * @file
  * @ingroup Extensions
  * @license GPL-2.0-or-later
- * @license MIT License
+ * @license MIT
  */
 class LanguageNameSearch {
 	/**
@@ -34,7 +34,7 @@ class LanguageNameSearch {
 	 *
 	 * @param string $searchKey
 	 * @param int $typos
-	 * @param string $userLanguage Language tag.
+	 * @param string|null $userLanguage Language tag.
 	 * @return array
 	 */
 	public static function search( $searchKey, $typos = 0, $userLanguage = null ) {
@@ -135,7 +135,7 @@ class LanguageNameSearch {
 				break;
 			} else {
 				// Codepoints larger than 127 are represented by multi-byte sequences
-				if ( count( $values ) === 0 ) {
+				if ( $values === [] ) {
 					// 224 is the lowest non-overlong-encoded codepoint.
 					$lookingFor = ( $thisValue < 224 ) ? 2 : 3;
 				}

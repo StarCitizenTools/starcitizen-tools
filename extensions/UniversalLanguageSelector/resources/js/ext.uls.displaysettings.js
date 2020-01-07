@@ -17,7 +17,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var template = '<div class="uls-display-settings">' +
@@ -185,7 +185,7 @@
 						var deferred = new $.Deferred();
 
 						$loginCta.html( parsedCta ); // The parsed CTA is HTML
-						$loginCta.find( 'a' ).click( function ( event ) {
+						$loginCta.find( 'a' ).on( 'click', function ( event ) {
 							event.preventDefault();
 							// Because browsers navigate away when clicking a link,
 							// we are overriding the normal click behavior to allow
@@ -232,7 +232,7 @@
 
 			for ( lang in suggestedLanguages ) {
 				// Skip already found languages
-				if ( $.inArray( suggestedLanguages[ lang ], languagesForButtons ) > -1 ) {
+				if ( languagesForButtons.indexOf( suggestedLanguages[ lang ] ) > -1 ) {
 					continue;
 				}
 
@@ -301,7 +301,7 @@
 						$back = $( '<div>' )
 							.addClass( 'uls-icon-back' );
 
-					$back.click( function () {
+					$back.on( 'click', function () {
 						uls.hide();
 						displaySettings.$parent.show();
 					} );
@@ -339,7 +339,7 @@
 					if ( parseInt( $parent.css( 'top' ), 10 ) ) {
 						this.$menu.css( 'top', $parent.css( 'top' ) );
 					}
-					// If the ULS is shown in the the sidebar,
+					// If the ULS is shown in the sidebar,
 					// add a caret pointing to the icon
 					if ( displaySettings.$parent.$window.hasClass( 'callout' ) ) {
 						this.$menu.addClass( 'callout callout--languageselection' );
@@ -456,7 +456,7 @@
 
 			// Get the saved font using the fontSelector defined in mw.webfonts.setup
 			savedFont = this.$webfonts.getFont( language );
-			$.each( fonts, function ( key, font ) {
+			fonts.forEach( function ( font ) {
 				var $fontOption;
 
 				if ( font !== 'system' ) {
@@ -655,19 +655,17 @@
 		 * modules.
 		 */
 		apply: function () {
-			var displaySettings = this;
-
-			if ( !displaySettings.dirty ) {
+			if ( !this.dirty ) {
 				// No changes to save in this module.
 				return;
 			}
 
-			displaySettings.$parent.setBusy( true );
+			this.$parent.setBusy( true );
 			// Save the preferences
 			mw.webfonts.preferences.save( function ( result ) {
 				var newWebfontsEnable, oldWebfontsEnable, webfontsEvent,
 					newRegistry = mw.webfonts.preferences.registry,
-					oldRegistry = displaySettings.savedRegistry.registry,
+					oldRegistry = this.savedRegistry.registry,
 					newFonts = newRegistry.fonts || {},
 					oldFonts = oldRegistry.fonts || {};
 
@@ -684,25 +682,25 @@
 					mw.hook( webfontsEvent ).fire( 'displaysettings' );
 				}
 
-				if ( newFonts[ displaySettings.uiLanguage ] !== oldFonts[ displaySettings.uiLanguage ] ) {
+				if ( newFonts[ this.uiLanguage ] !== oldFonts[ this.uiLanguage ] ) {
 					mw.hook( 'mw.uls.font.change' ).fire(
-						'interface', displaySettings.uiLanguage, newFonts[ displaySettings.uiLanguage ]
+						'interface', this.uiLanguage, newFonts[ this.uiLanguage ]
 					);
 				}
 
-				if ( newFonts[ displaySettings.contentLanguage ] !== oldFonts[ displaySettings.contentLanguage ] ) {
+				if ( newFonts[ this.contentLanguage ] !== oldFonts[ this.contentLanguage ] ) {
 					mw.hook( 'mw.uls.font.change' ).fire(
-						'content', displaySettings.contentLanguage, newFonts[ displaySettings.contentLanguage ]
+						'content', this.contentLanguage, newFonts[ this.contentLanguage ]
 					);
 				}
 
 				// closure for not losing the scope
-				displaySettings.onSave( result );
-				displaySettings.dirty = false;
+				this.onSave( result );
+				this.dirty = false;
 				// Update the back-up preferences for the case of canceling
-				displaySettings.savedRegistry = $.extend( true, {}, mw.webfonts.preferences );
-				displaySettings.$parent.setBusy( false );
-			} );
+				this.savedRegistry = $.extend( true, {}, mw.webfonts.preferences );
+				this.$parent.setBusy( false );
+			}.bind( this ) );
 		},
 
 		/**
@@ -733,4 +731,4 @@
 	$.fn.languagesettings.modules = $.extend( $.fn.languagesettings.modules, {
 		display: DisplaySettings
 	} );
-}( jQuery, mediaWiki ) );
+}() );

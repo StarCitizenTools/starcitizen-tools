@@ -17,7 +17,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var ulsPreferences;
@@ -91,7 +91,7 @@
 
 				defaultFont = repository.defaultFont( language );
 
-				if ( classes && $.inArray( 'autonym', classes ) >= 0 ) {
+				if ( classes && classes.indexOf( 'autonym' ) >= 0 ) {
 					// Do not load font for showing autonym.
 					return null;
 				}
@@ -138,4 +138,5 @@
 			mw.loader.using( 'ext.uls.webfonts.fonts', mw.webfonts.setup );
 		}
 	} );
-}( jQuery, mediaWiki ) );
+
+}() );

@@ -35,7 +35,8 @@
 	"babel-N-n": "Questo utente può contribuire con un livello [[$1|madrelingua]] in [[$2|italiano]].",
 	"babel-template": "Template:Utente $1",
 	"babel-footer": "Utenti per lingua",
-	"apihelp-query+babel-description": "Ottenere informazioni su quali lingue l'utente conosce",
+	"apihelp-query+babel-description": "Ottieni informazioni su quali lingue l'utente conosce",
+	"apihelp-query+babel-summary": "Ottieni informazioni su quali lingue l'utente conosce",
 	"apihelp-query+babel-param-user": "Utente sul quale ottenere informazioni",
 	"apihelp-query+babel-example-1": "Ottieni informazioni Babel per l'utente <kbd>Example</kbd>"
 }

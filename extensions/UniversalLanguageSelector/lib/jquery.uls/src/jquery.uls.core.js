@@ -220,7 +220,7 @@
 				columns: columnsOptions[ this.menuWidth ],
 
 				quickList: languagesCount > 12 ? this.options.quickList : [],
-				clickhandler: $.proxy( this.select, this ),
+				clickhandler: this.select.bind( this ),
 				showRegions: this.options.showRegions,
 				languageDecorator: this.options.languageDecorator,
 				noResultsTemplate: this.options.noResultsTemplate,
@@ -233,10 +233,10 @@
 				languages: this.languages,
 				ulsPurpose: this.options.ulsPurpose,
 				searchAPI: this.options.searchAPI,
-				onSelect: $.proxy( this.select, this )
+				onSelect: this.select.bind( this )
 			} );
 
-			this.$languageFilter.on( 'noresults.uls', $.proxy( lcd.noResults, lcd ) );
+			this.$languageFilter.on( 'noresults.uls', lcd.noResults.bind( lcd ) );
 		},
 
 		recreateLanguageFilter: function () {
@@ -253,7 +253,7 @@
 		 */
 		listen: function () {
 			// Register all event listeners to the ULS here.
-			this.$element.on( 'click', $.proxy( this.click, this ) );
+			this.$element.on( 'click', this.click.bind( this ) );
 
 			// Don't do anything if pressing on empty space in the ULS
 			this.$menu.on( 'click', function ( e ) {
@@ -261,13 +261,13 @@
 			} );
 
 			// Handle key press events on the menu
-			this.$menu.on( 'keydown', $.proxy( this.keypress, this ) );
+			this.$menu.on( 'keydown', this.keypress.bind( this ) );
 
 			this.createLanguageFilter();
 
-			this.$languageFilter.on( 'resultsfound.uls', $.proxy( this.success, this ) );
+			this.$languageFilter.on( 'resultsfound.uls', this.success.bind( this ) );
 
-			$( 'html' ).click( $.proxy( this.cancel, this ) );
+			$( 'html' ).click( this.cancel.bind( this ) );
 			$( window ).resize( $.fn.uls.debounce( this.resize.bind( this ), 250 ) );
 		},
 
@@ -302,7 +302,8 @@
 		 * @param {Event} e
 		 */
 		cancel: function ( e ) {
-			if ( e && ( this.$element.is( e.target ) || $.contains( this.$element[ 0 ], e.target ) ) ) {
+			if ( e && ( this.$element.is( e.target ) ||
+				$.contains( this.$element[ 0 ], e.target ) ) ) {
 				return;
 			}
 
@@ -427,7 +428,7 @@
 	 * since the last time it was invoked.
 	 *
 	 * @param {Function} fn Function to be debounced.
-	 * @param {Number} wait Wait interval in milliseconds.
+	 * @param {number} wait Wait interval in milliseconds.
 	 * @param {boolean} [immediate] Trigger the function on the leading edge of the wait interval,
 	 * instead of the trailing edge.
 	 * @return {Function} Debounced function.

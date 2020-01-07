@@ -10,40 +10,17 @@ if ( !defined( 'MEDIAWIKI' ) ) {
  *
  * @author Niklas Laxström
  * @author Siebrand Mazeland
- * @copyright Copyright © 2006-2018, Niklas Laxström, Siebrand Mazeland
+ * @copyright Copyright © 2006-2019, Niklas Laxström, Siebrand Mazeland
  * @license GPL-2.0-or-later
  */
 
 /**
  * Version number used in extension credits and in other places where needed.
  */
-define( 'TRANSLATE_VERSION', '2018-04-10' );
+define( 'TRANSLATE_VERSION', '2019-04-24' );
 
-/**
- * Extension credits properties.
- */
-$wgExtensionCredits['specialpage'][] = [
-	'path' => __FILE__,
-	'name' => 'Translate',
-	'namemsg' => 'translate-extensionname',
-	'version' => TRANSLATE_VERSION,
-	'author' => [
-		'Niklas Laxström',
-		'Santhosh Thottingal',
-		'Siebrand Mazeland'
-	],
-	'descriptionmsg' => 'translate-desc',
-	'url' => 'https://www.mediawiki.org/wiki/Extension:Translate',
-	'license-name' => 'GPL-2.0-or-later',
-];
-
-/**
- * @cond file_level_code
- * Setup class autoloading.
- */
-$dir = __DIR__;
-require_once "$dir/Autoload.php";
-/** @endcond */
+// Load stuff already converted to extension registration.
+wfLoadExtension( 'Translate', __DIR__ . '/extension-wip.json' );
 
 /**
  * Registering various resources
@@ -55,159 +32,8 @@ $wgMessagesDirs['Translate'] = __DIR__ . '/i18n/core';
 $wgMessagesDirs['TranslateSearch'] = __DIR__ . '/i18n/search';
 $wgMessagesDirs['TranslateSandbox'] = __DIR__ . '/i18n/sandbox';
 $wgMessagesDirs['TranslateApi'] = __DIR__ . '/i18n/api';
-$wgExtensionMessagesFiles['TranslateAlias'] = "$dir/Translate.alias.php";
-$wgExtensionMessagesFiles['TranslateMagic'] = "$dir/Translate.i18n.magic.php";
-
-// Register initialization code
-$wgExtensionFunctions[] = 'TranslateHooks::setupTranslate';
-$wgHooks['CanonicalNamespaces'][] = 'TranslateHooks::setupNamespaces';
-$wgHooks['ResourceLoaderTestModules'][] = 'TranslateHooks::onResourceLoaderTestModules';
-$wgHooks['UnitTestsList'][] = 'TranslateHooks::setupUnitTests';
-$wgHooks['LoadExtensionSchemaUpdates'][] = 'TranslateHooks::schemaUpdates';
-$wgHooks['ParserTestTables'][] = 'TranslateHooks::parserTestTables';
-$wgHooks['PageContentLanguage'][] = 'TranslateHooks::onPageContentLanguage';
-$wgHooks['ResourceLoaderRegisterModules'][] = 'TranslateHooks::onResourceLoaderRegisterModules';
-
-// Register special pages into MediaWiki
-$wgSpecialPages['Translate'] = 'SpecialTranslate';
-$wgSpecialPages['Translations'] = 'SpecialTranslations';
-// Disabled by default
-// $wgSpecialPages['Magic'] = 'SpecialMagic';
-$wgSpecialPages['TranslationStats'] = 'SpecialTranslationStats';
-$wgSpecialPages['LanguageStats'] = 'SpecialLanguageStats';
-$wgSpecialPages['MessageGroupStats'] = 'SpecialMessageGroupStats';
-$wgSpecialPages['ImportTranslations'] = 'SpecialImportTranslations';
-$wgSpecialPages['ExportTranslations'] = 'SpecialExportTranslations';
-$wgSpecialPages['ManageMessageGroups'] = 'SpecialManageGroups';
-$wgSpecialPages['SupportedLanguages'] = 'SpecialSupportedLanguages';
-$wgSpecialPages['AggregateGroups'] = 'SpecialAggregateGroups';
-$wgSpecialPages['SearchTranslations'] = 'SpecialSearchTranslations';
-
-// API
-$wgAPIListModules['messagecollection'] = 'ApiQueryMessageCollection';
-$wgAPIMetaModules['languagestats'] = 'ApiQueryLanguageStats';
-$wgAPIMetaModules['messagegroups'] = 'ApiQueryMessageGroups';
-$wgAPIMetaModules['messagegroupstats'] = 'ApiQueryMessageGroupStats';
-$wgAPIMetaModules['messagetranslations'] = 'ApiQueryMessageTranslations';
-$wgAPIModules['aggregategroups'] = 'ApiAggregateGroups';
-$wgAPIModules['groupreview'] = 'ApiGroupReview';
-$wgAPIModules['translatesandbox'] = 'ApiTranslateSandbox';
-$wgAPIModules['translationaids'] = 'ApiTranslationAids';
-$wgAPIModules['translationreview'] = 'ApiTranslationReview';
-$wgAPIModules['translationstash'] = 'ApiTranslationStash';
-$wgAPIModules['translationcheck'] = 'ApiTranslationCheck';
-$wgAPIModules['ttmserver'] = 'ApiTTMServer';
-$wgAPIModules['searchtranslations'] = 'ApiSearchTranslations';
-
-// Register hooks.
-$wgHooks['EditPage::showEditForm:initial'][] = 'TranslateEditAddons::addTools';
-$wgHooks['AlternateEdit'][] = 'TranslateEditAddons::suppressIntro';
-$wgHooks['getUserPermissionsErrorsExpensive'][] = 'TranslateEditAddons::disallowLangTranslations';
-$wgHooks['EditPageBeforeEditButtons'][] = 'TranslateEditAddons::buttonHack';
-$wgHooks['LanguageGetTranslatedLanguageNames'][] =
-	'TranslateHooks::translateMessageDocumentationLanguage';
-$wgHooks['TranslateSupportedLanguages'][] =
-	'TranslateHooks::translateMessageDocumentationLanguage';
-$wgHooks['ArticlePrepareTextForEdit'][] = 'TranslateEditAddons::disablePreSaveTransform';
-$wgHooks['ParserFirstCallInit'][] = 'TranslateHooks::setupTranslateParserFunction';
-$wgHooks['UserGetReservedNames'][] = 'TranslateHooks::onUserGetReservedNames';
-
-// Prevent translations creating bogus categories
-$wgHooks['LinksUpdate'][] = 'TranslateHooks::preventCategorization';
-// Fuzzy tags for speed.
-$wgHooks['PageContentSaveComplete'][] = 'TranslateEditAddons::onSave';
-
-$wgHooks['Translate:newTranslation'][] = 'TranslateEditAddons::updateTransverTag';
-
-$wgHooks['SkinTemplateNavigation::SpecialPage'][] = 'SpecialTranslate::tabify';
-$wgHooks['SkinTemplateNavigation::SpecialPage'][] = 'SpecialManageGroups::tabify';
-
-// Custom preferences
-$wgDefaultUserOptions['translate'] = 0;
-$wgDefaultUserOptions['translate-editlangs'] = 'default';
-$wgDefaultUserOptions['translate-recent-groups'] = '';
-$wgHooks['GetPreferences'][] = 'TranslatePreferences::onGetPreferences';
-$wgHooks['GetPreferences'][] = 'TranslatePreferences::translationAssistLanguages';
-
-// Recent changes filters
-$wgHooks['ChangesListSpecialPageQuery'][] = 'TranslateRcFilter::translationFilter';
-$wgHooks['SpecialRecentChangesPanel'][] = 'TranslateRcFilter::translationFilterForm';
-$wgHooks['ChangesListSpecialPageStructuredFilters'][] =
-	'TranslateRcFilter::onChangesListSpecialPageStructuredFilters';
-$wgHooks['BaseTemplateToolbox'][] = 'TranslateToolbox::toolboxAllTranslations';
-$wgHooks['AbortEmailNotification'][] = 'TranslateHooks::onAbortEmailNotificationReview';
-
-// Translation memory related
-$wgHooks['ArticleDeleteComplete'][] = 'TTMServer::onDelete';
-$wgHooks['TranslateEventMessageMembershipChange'][] = 'TTMServer::onGroupChange';
-
-// Translation display related
-$wgHooks['ArticleContentOnDiff'][] = 'TranslateEditAddons::displayOnDiff';
-
-// Search profile
-$wgHooks['SpecialSearchProfiles'][] = 'TranslateHooks::searchProfile';
-$wgHooks['SpecialSearchProfileForm'][] = 'TranslateHooks::searchProfileForm';
-$wgHooks['SpecialSearchSetupEngine'][] = 'TranslateHooks::searchProfileSetupEngine';
-
-$wgHooks['TitleIsAlwaysKnown'][] = 'TranslateHooks::onTitleIsAlwaysKnown';
-
-// Stats table manipulation
-$wgHooks['Translate:MessageGroupStats:isIncluded'][] =
-	'TranslateHooks::hideDiscouragedFromStats';
-$wgHooks['Translate:MessageGroupStats:isIncluded'][] =
-	'TranslateHooks::hideRestrictedFromStats';
-
-$wgHooks['MakeGlobalVariablesScript'][] = 'TranslateHooks::addConfig';
-
-// Internal event listeners
-$wgHooks['TranslateEventTranslationReview'][] = 'MessageGroupStats::clear';
-$wgHooks['TranslateEventTranslationReview'][] = 'MessageGroupStatesUpdaterJob::onChange';
-
-// Internal groups registers
-$wgHooks['TranslatePostInitGroups'][] = 'MessageGroups::getCCGroups';
-$wgHooks['TranslatePostInitGroups'][] = 'MessageGroups::getTranslatablePages';
-$wgHooks['TranslatePostInitGroups'][] = 'MessageGroups::getConfiguredGroups';
-$wgHooks['TranslatePostInitGroups'][] = 'MessageGroups::getWorkflowGroups';
-$wgHooks['TranslatePostInitGroups'][] = 'MessageGroups::getAggregateGroups';
-
-// Other extensions
-$wgHooks['AdminLinks'][] = 'TranslateHooks::onAdminLinks';
-$wgHooks['MergeAccountFromTo'][] = 'TranslateHooks::onMergeAccountFromTo';
-$wgHooks['DeleteAccount'][] = 'TranslateHooks::onDeleteAccount';
-$wgHooks['AbuseFilter-filterAction'][] = 'TranslateHooks::onAbuseFilterFilterAction';
-$wgHooks['AbuseFilter-computeVariable'][] = 'TranslateHooks::onAbuseFilterComputeVariable';
-$wgHooks['AbuseFilter-builder'][] = 'TranslateHooks::onAbuseFilterBuilder';
-
-// New rights
-// right-translate
-$wgAvailableRights[] = 'translate';
-// right-translate-import action-translate-import
-$wgAvailableRights[] = 'translate-import';
-// right-translate-manage action-translate-manage
-$wgAvailableRights[] = 'translate-manage';
-// right-translate-messagereview
-$wgAvailableRights[] = 'translate-messagereview';
-// right-translate-groupreview
-$wgAvailableRights[] = 'translate-groupreview';
-
-$wgGrantPermissions['editpage']['translate'] = true;
-
-// Logs. More logs are defined in TranslateHooks::setupTranslate
-// log-name-translationreview log-descriptionmsg-translationreview
-$wgLogTypes[] = 'translationreview';
-// logentry-translationreview-message logentry-translationreview-group
-$wgLogActionsHandlers['translationreview/message'] = 'TranslateLogFormatter';
-$wgLogActionsHandlers['translationreview/group'] = 'TranslateLogFormatter';
-
-// New jobs
-$wgJobClasses['MessageIndexRebuildJob'] = 'MessageIndexRebuildJob';
-$wgJobClasses['MessageUpdateJob'] = 'MessageUpdateJob';
-$wgJobClasses['MessageGroupStatesUpdaterJob'] = 'MessageGroupStatesUpdaterJob';
-$wgJobClasses['TTMServerMessageUpdateJob'] = 'TTMServerMessageUpdateJob';
-
-$wgParserTestFiles[] = "$dir/tests/parser/translateParserTests.txt";
-
-require "$dir/Resources.php";
+$wgExtensionMessagesFiles['TranslateAlias'] = __DIR__ . '/Translate.alias.php';
+$wgExtensionMessagesFiles['TranslateMagic'] = __DIR__ . '/Translate.i18n.magic.php';
 
 /** @endcond */
 
@@ -281,14 +107,14 @@ $wgTranslateTranslationServices['TTMServer'] = [
 	'public' => false,
 ];
 $wgTranslateTranslationServices['Microsoft'] = [
-	'url' => 'http://api.microsofttranslator.com/V2/Http.svc/Translate',
+	'url' => 'https://api.cognitive.microsofttranslator.com',
 	'key' => null,
 	'timeout' => 3,
 	'type' => 'microsoft',
 ];
 $wgTranslateTranslationServices['Apertium'] = [
-	'url' => 'http://api.apertium.org/json/translate',
-	'pairs' => 'http://api.apertium.org/json/listPairs',
+	'url' => 'http://apy.projectjj.com/translate',
+	'pairs' => 'http://apy.projectjj.com/listPairs',
 	'key' => null,
 	'timeout' => 3,
 	'type' => 'apertium',
@@ -351,12 +177,6 @@ $wgTranslateSecondaryPermissionUrl = 'Project:Translator';
 $wgEnablePageTranslation = true;
 
 /**
- * Number for the Translations namespace. Change this if it conflicts with
- * other namespace in your wiki.
- */
-$wgPageTranslationNamespace = 1198;
-
-/**
  * If set to true, when a user selects an interface language via ULS (Universal
  * Language Selector), if the current page is a translatable page or a translation
  * page then the user is also redirected to the corresponding translation page
@@ -379,6 +199,19 @@ $wgTranslatePageTranslationULS = false;
  * @since 2016.12
  */
 $wgTranslateKeepOutdatedTranslations = true;
+
+/**
+ * How language list for translatable pages is shown. Allowed values:
+ * tag-only: Only display languages with the \<languages /> tag.
+ * sidebar-only: Display languages as interlanguage links only and ignore the
+ *  tag even if present on the page.
+ * sidebar-fallback: Display languages as interlanguage links if no tag is on
+ *  the page.
+ * sidebar-always: Display languages as interlanguage links and also in tag if
+ *  it is present on the page.
+ * @since 2018.07
+ */
+$wgPageTranslationLanguageList = 'tag-only';
 
 # </source>
 # === Message group configuration ===
@@ -636,9 +469,9 @@ $wgTranslateTestUsers = [];
  *
  * It defines constants for the namespace (and talk namespace) and sets up
  * restrictions and some other configuration.
- * @param \int $id Namespace number
- * @param \string $name Name of the namespace
- * @param \string $constant (optional) name of namespace constant, defaults to
+ * @param int $id Namespace number
+ * @param string $name Name of the namespace
+ * @param string|null $constant (optional) name of namespace constant, defaults to
  *   NS_ followed by upper case version of $name, e.g., NS_MEDIAWIKI
  */
 function wfAddNamespace( $id, $name, $constant = null ) {
@@ -667,7 +500,3 @@ function wfAddNamespace( $id, $name, $constant = null ) {
 }
 
 /** @defgroup TranslateSpecialPage Special pages of Translate extension */
-
-if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-	require_once __DIR__ . '/vendor/autoload.php';
-}

@@ -21,7 +21,7 @@ class TranslatablePageMoveJob extends Job {
 	 * @param array $moves should include base-source and base-target
 	 * @param string $summary
 	 * @param User $performer
-	 * @return TranslateMoveJob
+	 * @return TranslatablePageMoveJob
 	 */
 	public static function newJob(
 		Title $source, Title $target, array $moves, $summary, User $performer
@@ -43,18 +43,19 @@ class TranslatablePageMoveJob extends Job {
 
 	public function __construct( $title, $params = [] ) {
 		parent::__construct( __CLASS__, $title, $params );
-		$this->params = $params;
 	}
 
 	public function run() {
 		$sourceTitle = Title::newFromText( $this->params['source'] );
 		$targetTitle = Title::newFromText( $this->params['target'] );
+		$sourcePage = TranslatablePage::newFromTitle( $sourceTitle );
+		$targetPage = TranslatablePage::newFromTitle( $targetTitle );
 
 		$this->doMoves();
 
 		$this->moveMetadata(
-			TranslatablePage::newFromTitle( $sourceTitle )->getMessageGroupId(),
-			TranslatablePage::newFromTitle( $targetTitle )->getMessageGroupId()
+			$sourcePage->getMessageGroupId(),
+			$targetPage->getMessageGroupId()
 		);
 
 		$entry = new ManualLogEntry( 'pagetranslation', 'moveok' );
@@ -66,8 +67,11 @@ class TranslatablePageMoveJob extends Job {
 
 		// Re-render the pages to get everything in sync
 		MessageGroups::singleton()->recache();
+		// Update message index now so that, when after this job the MoveTranslationUnits hook
+		// runs in deferred updates, it will not run MessageIndexRebuildJob (T175834).
+		MessageIndex::singleton()->rebuild();
 
-		$job = new TranslationsUpdateJob( $targetTitle, [ 'sections' => [] ] );
+		$job = TranslationsUpdateJob::newFromPage( $targetPage );
 		JobQueueGroup::singleton()->push( $job );
 
 		return true;
@@ -78,7 +82,6 @@ class TranslatablePageMoveJob extends Job {
 		$performer = User::newFromName( $this->params['performer'] );
 
 		PageTranslationHooks::$allowTargetEdit = true;
-		PageTranslationHooks::$jobQueueRunning = true;
 
 		foreach ( $this->params['moves'] as $source => $target ) {
 			$sourceTitle = Title::newFromText( $source );
@@ -108,12 +111,12 @@ class TranslatablePageMoveJob extends Job {
 		}
 
 		PageTranslationHooks::$allowTargetEdit = false;
-		PageTranslationHooks::$jobQueueRunning = false;
 	}
 
 	protected function moveMetadata( $oldGroupId, $newGroupId ) {
 		$types = [ 'prioritylangs', 'priorityforce', 'priorityreason' ];
 
+		TranslateMetadata::preloadGroups( [ $oldGroupId, $newGroupId ] );
 		foreach ( $types as $type ) {
 			$value = TranslateMetadata::get( $oldGroupId, $type );
 			if ( $value !== false ) {
@@ -123,13 +126,11 @@ class TranslatablePageMoveJob extends Job {
 		}
 
 		// Make the changes in aggregate groups metadata, if present in any of them.
-		$groups = MessageGroups::getAllGroups();
-		foreach ( $groups as $group ) {
-			if ( !$group instanceof AggregateMessageGroup ) {
-				continue;
-			}
+		$aggregateGroups = MessageGroups::getGroupsByType( AggregateMessageGroup::class );
+		TranslateMetadata::preloadGroups( array_keys( $aggregateGroups ) );
 
-			$subgroups = TranslateMetadata::get( $group->getId(), 'subgroups' );
+		foreach ( $aggregateGroups as $id => $group ) {
+			$subgroups = TranslateMetadata::get( $id, 'subgroups' );
 			if ( $subgroups === false ) {
 				continue;
 			}

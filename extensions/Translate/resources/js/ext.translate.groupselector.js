@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var groupsLoader, delay;
@@ -131,7 +131,7 @@
 			// Start loading the groups, but assess the situation again after
 			// they are loaded, in case user has made further interactions.
 			if ( this.firstShow ) {
-				this.loadGroups().done( $.proxy( this.showList, this ) );
+				this.loadGroups().done( this.showList.bind( this ) );
 				this.firstShow = false;
 			}
 		},
@@ -169,7 +169,7 @@
 				groupSelector = this;
 
 			// Hide the selector panel when clicking outside of it
-			$( 'html' ).on( 'click', $.proxy( this.hide, this ) );
+			$( 'html' ).on( 'click', this.hide.bind( this ) );
 
 			groupSelector.$trigger.on( 'click', function () {
 				groupSelector.toggle();
@@ -235,12 +235,12 @@
 				groupSelector.showList();
 			} );
 
-			this.$search.on( 'click', $.proxy( this.show, this ) )
-				.on( 'keypress', $.proxy( this.keyup, this ) )
-				.on( 'keyup', $.proxy( this.keyup, this ) );
+			this.$search.on( 'click', this.show.bind( this ) )
+				.on( 'keypress', this.keyup.bind( this ) )
+				.on( 'keyup', this.keyup.bind( this ) );
 
 			if ( this.eventSupported( 'keydown' ) ) {
-				this.$search.on( 'keydown', $.proxy( this.keyup, this ) );
+				this.$search.on( 'keydown', this.keyup.bind( this ) );
 			}
 		},
 
@@ -248,7 +248,7 @@
 		 * Handle the keypress/keyup events in the message group search box.
 		 */
 		keyup: function () {
-			delay( $.proxy( this.showList, this ), 300 );
+			delay( this.showList.bind( this ), 300 );
 		},
 
 		/**
@@ -265,7 +265,7 @@
 		 * Shows suitable list for current view, taking possible filter into account
 		 */
 		showList: function () {
-			var query = $.trim( this.$search.val() ).toLowerCase();
+			var query = this.$search.val().trim().toLowerCase();
 
 			if ( query ) {
 				this.filter( query );
@@ -471,7 +471,7 @@
 				if ( group.priority === 'discouraged' ||
 					( group.priorityforce &&
 						group.prioritylangs &&
-						$.inArray( targetLanguage, group.prioritylangs ) === -1 )
+						group.prioritylangs.indexOf( targetLanguage ) === -1 )
 				) {
 					return;
 				}
@@ -630,4 +630,4 @@
 			timer = setTimeout( callback, milliseconds );
 		};
 	}() );
-}( jQuery, mediaWiki ) );
+}() );

@@ -2,13 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Lucyin",
-			"Srtxg"
+			"Srtxg",
+			"Reptilien.19831209BE1"
 		]
 	},
-	"babel": "Racsegnes Babel so l' uzeu",
+	"babel": "Racsegnes Babel so l' {{GENDER:$1|uzeu|uzeuse|uzeu}}",
 	"babel-desc": "Radjoute ene fonccion d' analijhe sintacsike <code>#babel</code> ki permete li fjhaedje otomatike di boesses ''Babel'' po-z indiker les lingaedjes k' èn uzeu cnoxhe; avou l' possibilité di radjouter locålmint des modeles",
 	"babel-url": "Project:Babel",
-	"babel-footer-url": ":Category:Babel - Uzeus pa lingaedje",
+	"babel-footer-url": ":Categoreye:Babel - Uzeus pa lingaedje",
 	"babel-autocreate-reason": "Askepiaedje otomatike del categoreye [[$1|Babel]].",
 	"babel-autocreate-text-levels": "Les uzeus d' cisse categoreye ci ont-st ene kinoxhance di livea $1 do lingaedje $2.",
 	"babel-autocreate-text-main": "Les uzeus d' cisse categoreye ci ont-st ene kinoxhance do lingaedje $1.",
@@ -26,5 +27,10 @@
 	"babel-4-n": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci kinoxhe [[$1|foirt bén]] li [[$2|walon]].",
 	"babel-5-n": "{{GENDER:$4|Cist uzeu|Ciste uzeuse}} ci kinoxhe li [[$2|walon]] [[$1|come ene djin d' mestî]]",
 	"babel-N-n": "{{GENDER:$4|Cist uzeu est on [[$1|cåzant natif]]|Ciste uzeuse est ene [[$1|cåzante native]]}} do [[$2|walon]].",
-	"babel-footer": "Uzeus pa lingaedje"
+	"babel-template": "Modele:Uzeu $1",
+	"babel-footer": "Uzeus pa lingaedje",
+	"apihelp-query+babel-description": "Obtini ds infôrmåcions so les cnoxhous lingaedjes di ci uzeu ci",
+	"apihelp-query+babel-summary": "Obtini ds infôrmåcions so les cnoxhous lingaedjes pa ci uzeu ci",
+	"apihelp-query+babel-param-user": "Uzeu la ki fåt-st obtini ds infôrmåcions",
+	"apihelp-query+babel-example-1": "Obtini ls infôrmåcions di Babel po l' uzeu <kbd>Example</kbd>"
 }

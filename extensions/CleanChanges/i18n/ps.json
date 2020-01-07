@@ -1,7 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ahmed-Najib-Biabani-Ibrahimkhel"
+			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"Baloch Khan",
+			"Amjad Khan"
 		]
 	},
 	"cleanchanges-changerightslink": "ډلې بدلول",
@@ -9,5 +11,6 @@
 	"cleanchanges-language": "ژبه:",
 	"cleanchanges-language-na": "ټول",
 	"cleanchanges-users": "کارن (بېلول: |):",
-	"cleanchanges-showuserlinks": "د کارن تړنې ښکاره کول"
+	"cleanchanges-showuserlinks": "د کارن تړنې ښکاره کول",
+	"cleanchanges-rcinfo-3": "($1؛ $2؛ $3)"
 }

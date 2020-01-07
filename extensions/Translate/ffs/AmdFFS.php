@@ -17,7 +17,7 @@
  *   "key2": "anothervalue"
  * });
  *
- * It also supports the the top-level bundle with a root construction and language indicators.
+ * It also supports the top-level bundle with a root construction and language indicators.
  * The following example will give the same messages as above:
  * define({
  *   "root": {
@@ -159,11 +159,11 @@ EOT;
 	}
 
 	/**
-	 * @param array $authors
+	 * @param string[] $authors
 	 * @return string
 	 */
 	private function authorsList( array $authors ) {
-		if ( count( $authors ) === 0 ) {
+		if ( $authors === [] ) {
 			return '';
 		}
 

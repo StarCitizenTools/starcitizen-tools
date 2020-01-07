@@ -15,13 +15,22 @@
  * @ingroup TTMServer
  */
 class TTMServer {
+	/** @var array */
 	protected $config;
 
-	protected function __construct( $config ) {
+	/**
+	 * @param array $config
+	 */
+	protected function __construct( array $config ) {
 		$this->config = $config;
 	}
 
-	public static function factory( $config ) {
+	/**
+	 * @param array $config
+	 * @return TTMServer|null
+	 * @throws MWException
+	 */
+	public static function factory( array $config ) {
 		if ( isset( $config['class'] ) ) {
 			$class = $config['class'];
 
@@ -38,7 +47,7 @@ class TTMServer {
 			}
 		}
 
-		throw new MWEXception( 'TTMServer with no type' );
+		throw new MWException( 'TTMServer with no type' );
 	}
 
 	/**
@@ -60,12 +69,21 @@ class TTMServer {
 		return new FakeTTMServer();
 	}
 
+	/**
+	 * @param array[] $suggestions
+	 * @return array[]
+	 */
 	public static function sortSuggestions( array $suggestions ) {
 		usort( $suggestions, [ __CLASS__, 'qualitySort' ] );
 
 		return $suggestions;
 	}
 
+	/**
+	 * @param array $a
+	 * @param array $b
+	 * @return int
+	 */
 	protected static function qualitySort( $a, $b ) {
 		list( $c, $d ) = [ $a['quality'], $b['quality'] ];
 		if ( $c === $d ) {
@@ -137,15 +155,17 @@ class TTMServer {
 	/**
 	 * Called from TranslateEditAddons::onSave
 	 * @param MessageHandle $handle
-	 * @param string $text
-	 * @param bool $fuzzy
 	 */
-	public static function onChange( MessageHandle $handle, $text, $fuzzy ) {
+	public static function onChange( MessageHandle $handle ) {
 		$job = TTMServerMessageUpdateJob::newJob( $handle, 'refresh' );
 		JobQueueGroup::singleton()->push( $job );
 	}
 
-	public static function onGroupChange( MessageHandle $handle, $old, $new ) {
+	/**
+	 * @param MessageHandle $handle
+	 * @param array $old
+	 */
+	public static function onGroupChange( MessageHandle $handle, $old ) {
 		if ( $old === [] ) {
 			// Don't bother for newly added messages
 			return;

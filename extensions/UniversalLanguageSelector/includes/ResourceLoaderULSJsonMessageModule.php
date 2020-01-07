@@ -14,7 +14,7 @@ class ResourceLoaderULSJsonMessageModule extends ResourceLoaderModule {
 	/**
 	 * Part of the ResourceLoader module interface.
 	 * Declares the core ext.uls.i18n module as a dependency.
-	 * @param ResourceLoaderContext $context
+	 * @param ResourceLoaderContext|null $context
 	 * @return string[] Module names.
 	 */
 	public function getDependencies( ResourceLoaderContext $context = null ) {
@@ -35,9 +35,6 @@ class ResourceLoaderULSJsonMessageModule extends ResourceLoaderModule {
 	 */
 	public function getDefinitionSummary( ResourceLoaderContext $context ) {
 		$code = $context->getLanguage();
-		if ( !Language::isValidCode( $code ) ) {
-			$code = 'en';
-		}
 		$fileHashes = array_map(
 			[ __CLASS__, 'safeFileHash' ],
 			ULSJsonMessageLoader::getFilenames( $code )
@@ -58,10 +55,6 @@ class ResourceLoaderULSJsonMessageModule extends ResourceLoaderModule {
 	 */
 	public function getScript( ResourceLoaderContext $context ) {
 		$code = $context->getLanguage();
-		if ( !Language::isValidCode( $code ) ) {
-			$code = 'en';
-		}
-
 		$params = [ $code, ULSJsonMessageLoader::getMessages( $code ) ];
 
 		return Xml::encodeJsCall( 'mw.uls.loadLocalization', $params );

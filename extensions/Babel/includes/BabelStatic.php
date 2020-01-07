@@ -7,6 +7,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Static functions for Babel extension.
  */
@@ -15,13 +17,9 @@ class BabelStatic {
 	 * Registers the parser function hook.
 	 *
 	 * @param Parser $parser
-	 *
-	 * @return bool True.
 	 */
-	public static function onParserFirstCallInit( $parser ) {
+	public static function onParserFirstCallInit( Parser $parser ) {
 		$parser->setFunctionHook( 'babel', [ 'Babel', 'Render' ] );
-
-		return true;
 	}
 
 	/**
@@ -53,7 +51,7 @@ class BabelStatic {
 		$data = $linksUpdate->getParserOutput()->getExtensionData( 'babel' ) ?: [];
 		$changed = $babelDB->setForUser( $user->getId(), $data );
 		if ( $changed ) {
-			$cache = ObjectCache::getMainWANInstance();
+			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 			$cache->touchCheckKey( $cache->makeKey( 'babel', 'userLanguages', $user->getId() ) );
 			if ( $wgBabelCentralDb === wfWikiID() ) {
 				// If this is the central wiki, invalidate all of the local caches

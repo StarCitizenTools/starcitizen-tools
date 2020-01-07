@@ -69,6 +69,6 @@ class CurrencyNames extends CldrNames {
 			}
 		}
 
-		return isset( self::$cache[$code] ) ? self::$cache[$code] : [];
+		return self::$cache[$code] ?? [];
 	}
 }

@@ -92,14 +92,33 @@ class RecentMessageGroup extends WikiMessageGroup {
 		}
 
 		$db = wfGetDB( DB_REPLICA );
-		$tables = 'recentchanges';
+
+		if ( is_callable( RecentChange::class, 'getQueryInfo' ) ) {
+			$rcQuery = RecentChange::getQueryInfo();
+			$tables = $rcQuery['tables'];
+			$joins = $rcQuery['joins'];
+		} else {
+			$tables = 'recentchanges';
+			$joins = [];
+		}
+
 		$fields = [ 'rc_namespace', 'rc_title' ];
 		$conds = $this->getQueryConditions();
 		$options = [
 			'ORDER BY' => 'rc_id DESC',
 			'LIMIT' => 5000
 		];
-		$res = $db->select( $tables, $fields, $conds, __METHOD__, $options );
+		$res = $db->select( $tables, $fields, $conds, __METHOD__, $options, $joins );
+
+		$groupIdsPreload = [];
+		foreach ( $res as $row ) {
+			$title = Title::makeTitle( $row->rc_namespace, $row->rc_title );
+			$handle = new MessageHandle( $title );
+			if ( $handle->isValid() ) {
+				$groupIdsPreload[] = $handle->getGroup()->getId();
+			}
+		}
+		TranslateMetadata::preloadGroups( $groupIdsPreload );
 
 		$defs = [];
 		foreach ( $res as $row ) {

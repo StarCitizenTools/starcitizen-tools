@@ -444,6 +444,13 @@ module.exports=( function ( $ ) {
             ],
             "বাংলা"
         ],
+        "bnn": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Bunun"
+        ],
         "bo": [
             "Tibt",
             [
@@ -486,7 +493,7 @@ module.exports=( function ( $ ) {
             [
                 "AS"
             ],
-            "बड़ो"
+            "बर'"
         ],
         "bs": [
             "Latn",
@@ -494,6 +501,13 @@ module.exports=( function ( $ ) {
                 "EU"
             ],
             "bosanski"
+        ],
+        "btm": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Mandailing"
         ],
         "bto": [
             "Latn",
@@ -529,6 +543,13 @@ module.exports=( function ( $ ) {
                 "EU"
             ],
             "català"
+        ],
+        "cak": [
+            "Latn",
+            [
+                "AM"
+            ],
+            "Kaqchikel"
         ],
         "cbk-zam": [
             "Latn",
@@ -633,6 +654,23 @@ module.exports=( function ( $ ) {
                 "AS"
             ],
             "Lai holh"
+        ],
+        "cnr": [
+            "cnr-latn"
+        ],
+        "cnr-cyrl": [
+            "Cyrl",
+            [
+                "EU"
+            ],
+            "црногорски"
+        ],
+        "cnr-latn": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "crnogorski"
         ],
         "co": [
             "Latn",
@@ -893,7 +931,7 @@ module.exports=( function ( $ ) {
             [
                 "AM"
             ],
-            "español de America Latina"
+            "español de América Latina"
         ],
         "es-formal": [
             "Latn",
@@ -966,6 +1004,13 @@ module.exports=( function ( $ ) {
             ],
             "فارسی"
         ],
+        "fan": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Faŋ"
+        ],
         "fax": [
             "Latn",
             [
@@ -1020,6 +1065,13 @@ module.exports=( function ( $ ) {
                 "EU"
             ],
             "føroyskt"
+        ],
+        "fon": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "fɔ̀ngbè"
         ],
         "fr": [
             "Latn",
@@ -1117,6 +1169,13 @@ module.exports=( function ( $ ) {
             ],
             "贛語"
         ],
+        "gbm": [
+            "Deva",
+            [
+                "AS"
+            ],
+            "गढ़वळि"
+        ],
         "gbz": [
             "Latn",
             [
@@ -1190,6 +1249,13 @@ module.exports=( function ( $ ) {
                 "AS"
             ],
             "Gõychi Konknni"
+        ],
+        "gor": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Bahasa Hulontalo"
         ],
         "got": [
             "Goth",
@@ -1415,7 +1481,7 @@ module.exports=( function ( $ ) {
                 "EU",
                 "ME"
             ],
-            "Հայերեն"
+            "հայերեն"
         ],
         "hyw": [
             "Armn",
@@ -1692,6 +1758,13 @@ module.exports=( function ( $ ) {
                 "AS"
             ],
             "хакас"
+        ],
+        "kjp": [
+            "Mymr",
+            [
+                "AS"
+            ],
+            "ဖၠုံလိက်"
         ],
         "kk": [
             "kk-cyrl"
@@ -2973,11 +3046,11 @@ module.exports=( function ( $ ) {
             "саха тыла"
         ],
         "sat": [
-            "Latn",
+            "Olck",
             [
                 "AS"
             ],
-            "Santali"
+            "ᱥᱟᱱᱛᱟᱲᱤ"
         ],
         "saz": [
             "Saur",
@@ -3989,6 +4062,7 @@ module.exports=( function ( $ ) {
             "Guru",
             "Knda",
             "Mlym",
+            "Olck",
             "Orya",
             "Saur",
             "Sinh",
@@ -4163,7 +4237,8 @@ module.exports=( function ( $ ) {
             "wa"
         ],
         "BF": [
-            "fr"
+            "fr",
+            "ff"
         ],
         "BG": [
             "bg",
@@ -4184,6 +4259,7 @@ module.exports=( function ( $ ) {
         ],
         "BJ": [
             "fr",
+            "fon",
             "yo"
         ],
         "BL": [
@@ -4564,7 +4640,8 @@ module.exports=( function ( $ ) {
             "ee",
             "gur",
             "gaa",
-            "ha-latn"
+            "ha-latn",
+            "ff"
         ],
         "GI": [
             "en",
@@ -4575,7 +4652,8 @@ module.exports=( function ( $ ) {
             "da"
         ],
         "GM": [
-            "en"
+            "en",
+            "ff"
         ],
         "GN": [
             "fr",
@@ -4587,6 +4665,7 @@ module.exports=( function ( $ ) {
         ],
         "GQ": [
             "es",
+            "fan",
             "fr",
             "pt"
         ],
@@ -4611,7 +4690,8 @@ module.exports=( function ( $ ) {
             "ch"
         ],
         "GW": [
-            "pt"
+            "pt",
+            "ff"
         ],
         "GY": [
             "en"
@@ -4662,6 +4742,7 @@ module.exports=( function ( $ ) {
             "bbc-latn",
             "zh-hant",
             "zh",
+            "gor",
             "sly",
             "mwv"
         ],
@@ -4709,6 +4790,7 @@ module.exports=( function ( $ ) {
             "sat",
             "ks-arab",
             "gom-deva",
+            "gbm",
             "sd",
             "doi",
             "tcy",
@@ -4872,7 +4954,8 @@ module.exports=( function ( $ ) {
             "en"
         ],
         "LR": [
-            "en"
+            "en",
+            "ff"
         ],
         "LS": [
             "st",
@@ -5053,7 +5136,8 @@ module.exports=( function ( $ ) {
         "NE": [
             "ha-latn",
             "fr",
-            "ar"
+            "ar",
+            "ff"
         ],
         "NF": [
             "en"
@@ -5064,7 +5148,8 @@ module.exports=( function ( $ ) {
             "ig",
             "yo",
             "ha-arab",
-            "ar"
+            "ar",
+            "ff"
         ],
         "NI": [
             "es"
@@ -5344,7 +5429,8 @@ module.exports=( function ( $ ) {
         ],
         "SL": [
             "kri",
-            "en"
+            "en",
+            "ff"
         ],
         "SM": [
             "it",

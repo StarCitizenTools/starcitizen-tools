@@ -16,7 +16,7 @@ class TranslateRenderJob extends Job {
 
 	/**
 	 * @param Title $target
-	 * @return TranslateRenderJob
+	 * @return self
 	 */
 	public static function newJob( Title $target ) {
 		$job = new self( $target );
@@ -33,7 +33,6 @@ class TranslateRenderJob extends Job {
 	 */
 	public function __construct( $title, $params = [] ) {
 		parent::__construct( __CLASS__, $title, $params );
-		$this->params = $params;
 		$this->removeDuplicates = true;
 	}
 

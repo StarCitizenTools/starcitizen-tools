@@ -5,7 +5,8 @@
 			"Fitoschido",
 			"Csbotero",
 			"Lemondoge",
-			"Dgstranz"
+			"Dgstranz",
+			"Tiberius1701"
 		]
 	},
 	"apihelp-aggregategroups-description": "Administrar grupos de mensajes agregados.\n\nPuedes agregar y quitar grupos de mensajes agregados, y asociar o disociar a ellos grupos de mensajes (uno a la vez).",
@@ -21,6 +22,7 @@
 	"apihelp-groupreview-param-state": "El estado nuevo para el grupo.",
 	"apihelp-groupreview-example-1": "Marcar como leído el estado de la traducción al alemán del grupo de mensajes \"group-Example\"",
 	"apihelp-query+languagestats-description": "Consultar estadísticas de idioma.",
+	"apihelp-query+languagestats-summary": "Consultar las estadísticas del idioma.",
 	"apihelp-query+languagestats-param-language": "Código de idioma.",
 	"apihelp-query+languagestats-example-1": "Lista de estadísticas de traducciones completadas en finés.",
 	"apihelp-query+messagecollection-description": "Consultar a MessageCollection acerca de las traducciones.",
@@ -36,9 +38,11 @@
 	"apihelp-query+messagegroups-param-root": "Cuando se utiliza el formato de árbol, en lugar de partir de nivel superior empezar desde el mensaje del grupo, que debe ser un agregado de mensaje de grupo. Cuando se utiliza plano formato de sólo el grupo especificado se devuelve.",
 	"apihelp-query+messagegroups-example-1": "Mostrar grupos de mensajes",
 	"apihelp-query+messagegroupstats-description": "Consultar estadísticas del grupo de mensajes.",
+	"apihelp-query+messagegroupstats-summary": "Consultar las estadísticas del grupo de mensajes.",
 	"apihelp-query+messagegroupstats-param-group": "Identificador del grupo de mensajes.",
 	"apihelp-query+messagegroupstats-example-1": "Lista de estadísticas de finalización de traducciones para el grupo \"page-Example\"",
 	"apihelp-query+messagetranslations-description": "Consultar todas las traducciones para un único mensaje.",
+	"apihelp-query+messagetranslations-summary": "Consulta todas las traducciones de un solo mensaje.",
 	"apihelp-query+messagetranslations-param-title": "Título completo de un mensaje conocido.",
 	"apihelp-query+messagetranslations-example-1": "Lista de traducciones en el wiki de \"MediaWiki:January\"",
 	"apihelp-translatesandbox-description": "Registrar y gestionar usuarios aislados (en \"sandbox\").",
@@ -48,6 +52,7 @@
 	"apihelp-translatesandbox-param-password": "Contraseña al crear el usuario.",
 	"apihelp-translatesandbox-param-email": "Correo electrónico al crear el usuario.",
 	"apihelp-translationaids-description": "Consultar todas las asistencias de traducciones.",
+	"apihelp-translationaids-summary": "Consultar todas las ayudas de traducción.",
 	"apihelp-translationaids-param-title": "Título completo de un mensaje conocido.",
 	"apihelp-translationaids-param-group": "Grupo de mensajes al que pertenece el mensaje. Si está vacío se usa el grupo primario.",
 	"apihelp-translationaids-param-prop": "Cuáles asistentes de traducción incluir.",
@@ -94,12 +99,14 @@
 	"apierror-translate-invalidstate": "El estado solicitado no es válido.",
 	"apierror-translate-invalidlanguage": "El idioma solicitado no es válido.",
 	"apierror-translate-invalidupdate": "Actualización no válida",
-	"apierror-translate-language-disabled": "Se ha desactivado la traducción a este idioma",
+	"apierror-translate-language-disabled": "Se ha desactivado la traducción al $1.",
+	"apierror-translate-language-disabled-reason": "Se ha desactivado la traducción al $1: $2",
 	"apierror-translate-nodynamicgroups": "No se admiten aquí los grupos de mensajes dinámicos",
 	"apierror-translate-nomessagefortitle": "El título no se corresponde con un mensaje traducible",
 	"apierror-translate-notranslationservices": "No se ha configurado ningún servicio público de traducciones. Los administradores del wiki deben configurar <var>$wgTranslateTranslationServices</var> adecuadamente para poder utilizar esta función.",
 	"apierror-translate-owntranslation": "No se pueden revisar las traducciones propias",
 	"apierror-translate-sandbox-invalidppassword": "La contraseña no es válida",
 	"apierror-translate-unknownmessage": "Mensaje desconocido",
-	"apiwarn-translate-alreadyreviewedbyyou": "Ya la marcaste como revisada"
+	"apiwarn-translate-alreadyreviewedbyyou": "Ya la marcaste como revisada",
+	"apiwarn-translate-language-disabled-source": "El idioma original de este grupo es el $1. Selecciona otro idioma al cual traducir."
 }
