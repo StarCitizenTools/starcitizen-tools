@@ -7,7 +7,7 @@
  * @license GPL-2.0-or-later
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var delay;
@@ -99,7 +99,7 @@
 								.text( mw.msg( 'tsb-reminder-sending' ) );
 
 							doApiAction( {
-								'do': 'remind',
+								do: 'remind',
 								userid: request.userid
 							} ).done( function () {
 								$reminderStatus.text( mw.msg( 'tsb-reminder-sent-new' ) );
@@ -126,7 +126,7 @@
 
 							doApiAction( {
 								userid: request.userid,
-								'do': 'promote'
+								do: 'promote'
 							} ).done( function () {
 								removeSelectedRequests();
 
@@ -143,7 +143,7 @@
 
 							doApiAction( {
 								userid: request.userid,
-								'do': 'delete'
+								do: 'delete'
 							} ).done( function () {
 								removeSelectedRequests();
 
@@ -288,7 +288,7 @@
 
 							doApiAction( {
 								userid: selectedUserIDs,
-								'do': 'promote'
+								do: 'promote'
 							} ).done( function () {
 								removeSelectedRequests();
 
@@ -305,7 +305,7 @@
 
 							doApiAction( {
 								userid: selectedUserIDs,
-								'do': 'delete'
+								do: 'delete'
 							} ).done( function () {
 								removeSelectedRequests();
 
@@ -651,7 +651,7 @@
 	}
 
 	TranslatorSearch.prototype.init = function () {
-		this.$search.on( 'search keyup', $.proxy( this.keyup, this ) );
+		this.$search.on( 'search keyup', this.keyup.bind( this ) );
 	};
 
 	TranslatorSearch.prototype.keyup = function () {
@@ -660,7 +660,7 @@
 
 		// Respond to the keypress events after a small timeout to avoid freeze when typed fast
 		delay( function () {
-			query = $.trim( translatorSearch.$search.val() ).toLowerCase().trim();
+			query = translatorSearch.$search.val().trim().toLowerCase();
 			translatorSearch.filter( query );
 		}, 300 );
 	};
@@ -752,4 +752,4 @@
 
 		updateRequestCount();
 	} );
-}( jQuery, mediaWiki ) );
+}() );

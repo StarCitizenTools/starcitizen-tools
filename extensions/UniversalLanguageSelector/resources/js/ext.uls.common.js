@@ -17,7 +17,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	/*
@@ -50,23 +50,49 @@
 		}
 
 		deferred.done( function () {
-			var api;
+			var api = new mw.Api();
 
 			if ( mw.user.isAnon() ) {
 				changeLanguageAnon();
 				return;
 			}
 
-			api = new mw.Api();
-			api.saveOption( 'language', language )
-				.done( function () {
-					location.reload();
-				} )
-				.fail( function () {
-					// Set options failed. Maybe the user has logged off.
-					// Continue like anonymous user and set cookie.
-					changeLanguageAnon();
+			// TODO We can avoid doing this query if we know global preferences are not enabled
+			api.get( {
+				action: 'query',
+				meta: 'globalpreferences',
+				gprprop: 'preferences'
+			} ).then( function ( res ) {
+				// Check whether global preferences are in use. If they are not, `res.query` is
+				// an empty object. `res` will also contain warnings about unknown parameters.
+				try {
+					return !!res.query.globalpreferences.preferences.language;
+				} catch ( e ) {
+					return false;
+				}
+			} ).then( function ( hasGlobalPreference ) {
+				var apiModule;
+
+				if ( hasGlobalPreference ) {
+					apiModule = 'globalpreferenceoverrides';
+					mw.storage.set( 'uls-gp', '1' );
+				} else {
+					apiModule = 'options';
+					mw.storage.remove( 'uls-gp' );
+				}
+
+				return api.postWithToken( 'csrf', {
+					action: apiModule,
+					optionname: 'language',
+					optionvalue: language
 				} );
+			} ).done( function () {
+				location.reload();
+			} ).fail( function () {
+				// Setting the option failed. Maybe the user has logged off.
+				// Continue like anonymous user and set cookie.
+				changeLanguageAnon();
+			} );
 		} );
 
 		mw.hook( 'mw.uls.interface.language.change' ).fire( language, deferred );
@@ -107,13 +133,15 @@
 	 * @since 2016.05
 	 */
 	mw.uls.addPreviousLanguage = function ( language ) {
-		var languages = mw.uls.getPreviousLanguages();
+		var languages = mw.uls.getPreviousLanguages(),
+			index = languages.indexOf( language );
 
 		// Avoid duplicates
-		languages = $.map( languages, function ( element ) {
-			return element === language ? undefined : element;
-		} );
+		if ( index !== -1 ) {
+			languages.splice( index, 1 );
+		}
 		languages.unshift( language );
+
 		mw.uls.setPreviousLanguages( languages );
 	};
 
@@ -152,39 +180,34 @@
 	 * @return {Array} List of language codes without duplicates.
 	 */
 	mw.uls.getFrequentLanguageList = function ( countryCode ) {
-		var unique = [],
-			list = [
-				mw.config.get( 'wgUserLanguage' ),
-				mw.config.get( 'wgContentLanguage' ),
-				mw.uls.getBrowserLanguage()
-			]
-				.concat( mw.uls.getPreviousLanguages() )
-				.concat( mw.uls.getAcceptLanguageList() );
+		var i, j, lang,
+			ret = [],
+			lists = [
+				[
+					mw.config.get( 'wgUserLanguage' ),
+					mw.config.get( 'wgContentLanguage' ),
+					mw.uls.getBrowserLanguage()
+				],
+				mw.uls.getPreviousLanguages(),
+				mw.uls.getAcceptLanguageList()
+			];
 
 		countryCode = countryCode || mw.uls.getCountryCode();
-
 		if ( countryCode ) {
-			list = list.concat( $.uls.data.getLanguagesInTerritory( countryCode ) );
+			lists.push( $.uls.data.getLanguagesInTerritory( countryCode ) );
 		}
 
-		$.each( list, function ( i, v ) {
-			if ( $.inArray( v, unique ) === -1 ) {
-				unique.push( v );
+		for ( i = 0; i < lists.length; i++ ) {
+			for ( j = 0; j < lists[ i ].length; j++ ) {
+				lang = lists[ i ][ j ];
+				// Make flat, make unique, and ignore unknown/unsupported languages
+				if ( ret.indexOf( lang ) === -1 && $.uls.data.getAutonym( lang ) !== lang ) {
+					ret.push( lang );
+				}
 			}
-		} );
+		}
 
-		// Filter out unknown and unsupported languages
-		unique = $.grep( unique, function ( langCode ) {
-			// If the language is already known and defined, just use it.
-			// $.uls.data.getAutonym will resolve redirects if any.
-			if ( $.uls.data.getAutonym( langCode ) !== langCode ) {
-				return true;
-			}
-
-			return false;
-		} );
-
-		return unique;
+		return ret;
 	};
 
-}( jQuery, mediaWiki ) );
+}() );

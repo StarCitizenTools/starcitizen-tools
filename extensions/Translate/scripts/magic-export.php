@@ -121,13 +121,13 @@ class MagicExport extends Maintenance {
 						$varName = '$specialPageAliases';
 					} else {
 						$this->error( "File '$inFile' does not contain an aliases array." );
-						continue;
+						continue 2;
 					}
 					break;
 				case 'magic':
 					if ( !isset( $magicWords ) ) {
 						$this->error( "File '$inFile' does not contain a magic words array." );
-						continue;
+						continue 2;
 					}
 					$this->messagesOld[$group->getId()] = $magicWords;
 					unset( $magicWords );
@@ -169,7 +169,7 @@ class MagicExport extends Maintenance {
 
 		// preserve the long array syntax, if varName is written with it
 		$preserveLongArraySyntax = preg_match(
-			'/' . preg_quote( $varName ) . '\s*=\s*array\s*\(\s*\)\s*;/',
+			'/' . preg_quote( $varName, '/' ) . '\s*=\s*array\s*\(\s*\)\s*;/',
 			$data
 		);
 
@@ -291,7 +291,7 @@ PHP
 				}
 
 				// If there are messages to write, write them.
-				if ( count( $messagesOut ) > 0 ) {
+				if ( $messagesOut !== [] ) {
 					$out = '';
 					switch ( $this->type ) {
 						case 'special':
@@ -359,5 +359,5 @@ PHP
 	}
 }
 
-$maintClass = 'MagicExport';
+$maintClass = MagicExport::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

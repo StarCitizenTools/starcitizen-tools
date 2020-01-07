@@ -15,12 +15,12 @@
  * @file
  * @ingroup Extensions
  * @license GPL-2.0-or-later
- * @license MIT License
+ * @license MIT
  */
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
-	$IP = __DIR__  . '/../../..';
+	$IP = __DIR__ . '/../../..';
 }
 require_once "$IP/maintenance/Maintenance.php";
 
@@ -156,5 +156,5 @@ PHP;
 	}
 }
 
-$maintClass = 'LanguageNameIndexer';
+$maintClass = LanguageNameIndexer::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

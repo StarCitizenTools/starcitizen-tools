@@ -8,6 +8,8 @@
  * @license GPL-2.0-or-later
  */
 
+use Wikimedia\Rdbms\IResultWrapper;
+
 /**
  * Core message collection class.
  *
@@ -51,23 +53,25 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 	// Database resources
 
-	/// \type{Database Result Resource} Stored message existence and fuzzy state.
+	/** @var IResultWrapper Stored message existence and fuzzy state. */
 	protected $dbInfo;
 
-	/// \type{Database Result Resource} Stored translations in database.
+	/** @var IResultWrapper Stored translations in database. */
 	protected $dbData;
 
-	/// \type{Database Result Resource} Stored reviews in database.
+	/** @var IResultWrapper Stored reviews in database. */
 	protected $dbReviewData = [];
 
 	/**
 	 * Tags, copied to thin messages
 	 * tagtype => keys
+	 * @var array[]
 	 */
 	protected $tags = [];
 
 	/**
 	 * Properties, copied to thin messages
+	 * @var array[]
 	 */
 	protected $properties = [];
 
@@ -88,7 +92,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 * Construct a new message collection from definitions.
 	 * @param MessageDefinitions $definitions
 	 * @param string $code Language code.
-	 * @return MessageCollection
+	 * @return self
 	 */
 	public static function newFromDefinitions( MessageDefinitions $definitions, $code ) {
 		$collection = new self( $code );
@@ -101,7 +105,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	/**
 	 * Constructs a new empty message collection. Suitable for example for testing.
 	 * @param string $code Language code.
-	 * @return MessageCollection
+	 * @return self
 	 */
 	public static function newEmpty( $code ) {
 	}
@@ -118,8 +122,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	/**
 	 * Set translation from file, as opposed to translation which only exists
 	 * in the wiki because they are not exported and committed yet.
-	 * @param array $messages \arrayof{String,String} Array of translations indexed
-	 * by display key.
+	 * @param string[] $messages Array of translations indexed by display key.
 	 */
 	public function setInFile( array $messages ) {
 		$this->infile = $messages;
@@ -166,7 +169,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 * @return string[] List of keys with given tag.
 	 */
 	public function getTags( $type ) {
-		return isset( $this->tags[$type] ) ? $this->tags[$type] : [];
+		return $this->tags[$type] ?? [];
 	}
 
 	/**
@@ -201,13 +204,14 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 		# arsort( $authors, SORT_NUMERIC );
 		ksort( $authors );
 		$fuzzyBot = FuzzyBot::getName();
+		$filteredAuthors = [];
 		foreach ( $authors as $author => $edits ) {
 			if ( $author !== $fuzzyBot ) {
 				$filteredAuthors[] = $author;
 			}
 		}
 
-		return isset( $filteredAuthors ) ? $filteredAuthors : [];
+		return $filteredAuthors;
 	}
 
 	/**
@@ -342,7 +346,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 *    (INFILE, TRANSLATIONS)
 	 * @param bool $condition Whether to return messages which do not satisfy
 	 * the given filter condition (true), or only which do (false).
-	 * @param mixed $value Value for properties filtering.
+	 * @param mixed|null $value Value for properties filtering.
 	 * @throws MWException If given invalid filter name.
 	 */
 	public function filter( $type, $condition = true, $value = null ) {
@@ -691,23 +695,32 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 		$dbr = TranslateUtils::getSafeReadDB();
 
-		$tables = [ 'page', 'revision', 'text' ];
-		$fields = [
-			'page_namespace',
-			'page_title',
-			'page_latest',
-			'rev_user',
-			'rev_user_text',
-			'old_flags',
-			'old_text'
-		];
-		$conds = [
-			'page_latest = rev_id',
-			'old_id = rev_text_id',
-		];
+		if ( is_callable( Revision::class, 'getQueryInfo' ) ) {
+			$revQuery = Revision::getQueryInfo( [ 'page', 'text' ] );
+		} else {
+			$revQuery = [
+				'tables' => [ 'page', 'revision', 'text' ],
+				'fields' => [
+					'page_namespace',
+					'page_title',
+					'page_latest',
+					'rev_user',
+					'rev_user_text',
+					'old_flags',
+					'old_text'
+				],
+				'joins' => [
+					'revision' => [ 'JOIN', 'page_latest = rev_id' ],
+					'text' => [ 'JOIN', 'old_id = rev_text_id' ],
+				],
+			];
+		}
+		$conds = [ 'page_latest = rev_id' ];
 		$conds[] = $this->getTitleConds( $dbr );
 
-		$res = $dbr->select( $tables, $fields, $conds, __METHOD__ );
+		$res = $dbr->select(
+			$revQuery['tables'], $revQuery['fields'], $conds, __METHOD__, [], $revQuery['joins']
+		);
 
 		$this->dbData = $res;
 	}

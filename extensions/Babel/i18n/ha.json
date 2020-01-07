@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ammarpad"
+		]
+	},
+	"babel": "Harsunan edita",
+	"babel-0": "Wannan edita [[$1|baya jin]] [[$2|$3]] (ko kuma zai iya fahimta da ƙyar).",
+	"babel-5": "Wannan edita [[$1|ya karanci]] [[$2|$3]] sosai.",
+	"babel-N": "Wannan edita [[$1|cikakken]] [[$2|Bahaushe]] ne.",
+	"babel-N-n": "Wannan edita [[$1|cikakken]] [[$2|Bahaushe]] ne.",
+	"babel-footer": "Editoci da yarensu"
+}

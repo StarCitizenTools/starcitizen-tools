@@ -18,7 +18,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var ULSPreferences;
@@ -126,7 +126,7 @@
 		save: function ( callback ) {
 			var ulsPreferences = this;
 
-			callback = callback || $.noop;
+			callback = callback || function () {};
 			if ( this.isAnon ) {
 				// Anonymous user. Save preferences in local storage
 				preferenceStore().set( this.preferenceName, this.preferences );
@@ -155,4 +155,4 @@
 		return data;
 	};
 
-}( jQuery, mediaWiki ) );
+}() );

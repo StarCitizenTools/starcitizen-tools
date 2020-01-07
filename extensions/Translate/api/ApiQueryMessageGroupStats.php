@@ -19,24 +19,21 @@ class ApiQueryMessageGroupStats extends ApiStatsQuery {
 		parent::__construct( $query, $moduleName, 'mgs' );
 	}
 
-	protected function getData() {
-		$params = $this->extractRequestParams();
+	/// Overwritten from ApiStatsQuery
+	protected function validateTargetParamater( array $params ) {
 		$group = MessageGroups::getGroup( $params['group'] );
 		if ( !$group ) {
-			if ( method_exists( $this, 'dieWithError' ) ) {
-				$this->dieWithError( [ 'apierror-missingparam', 'mgsgroup' ] );
-			} else {
-				$this->dieUsageMsg( [ 'missingparam', 'mgsgroup' ] );
-			}
+			$this->dieWithError( [ 'apierror-missingparam', 'mgsgroup' ] );
 		} elseif ( MessageGroups::isDynamic( $group ) ) {
-			if ( method_exists( $this, 'dieWithError' ) ) {
-				$this->dieWithError( 'apierror-translate-nodynamicgroups', 'invalidparam' );
-			} else {
-				$this->dieUsage( 'Dynamic message groups are not supported here', 'invalidparam' );
-			}
+			$this->dieWithError( 'apierror-translate-nodynamicgroups', 'invalidparam' );
 		}
 
-		return MessageGroupStats::forGroup( $group->getId() );
+		return $group->getId();
+	}
+
+	/// Overwritten from ApiStatsQuery
+	protected function loadStatistics( $target, $flags = 0 ) {
+		return MessageGroupStats::forGroup( $target, $flags );
 	}
 
 	protected function makeItem( $item, $stats ) {

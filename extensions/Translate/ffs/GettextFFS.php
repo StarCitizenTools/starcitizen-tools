@@ -308,7 +308,13 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 
 		if ( $algorithm === 'simple' ) {
 			$hash = substr( $hash, 0, 6 );
-			$snippet = $lang->truncate( $item['id'], 30, '' );
+			if ( !is_callable( [ $lang, 'truncateForDatabase' ] ) ) {
+				// Backwards compatibility code; remove once MW 1.30 is
+				// no longer supported (aka once MW 1.33 is released)
+				$snippet = $lang->truncate( $item['id'], 30, '' );
+			} else {
+				$snippet = $lang->truncateForDatabase( $item['id'], 30, '' );
+			}
 			$snippet = str_replace( ' ', '_', trim( $snippet ) );
 		} else { // legacy
 			global $wgLegalTitleChars;
@@ -316,7 +322,13 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 			$snippet = preg_replace( "/[^$wgLegalTitleChars]/", ' ', $snippet );
 			$snippet = preg_replace( "/[:&%\/_]/", ' ', $snippet );
 			$snippet = preg_replace( '/ {2,}/', ' ', $snippet );
-			$snippet = $lang->truncate( $snippet, 30, '' );
+			if ( !is_callable( [ $lang, 'truncateForDatabase' ] ) ) {
+				// Backwards compatibility code; remove once MW 1.30 is
+				// no longer supported (aka once MW 1.33 is released)
+				$snippet = $lang->truncate( $snippet, 30, '' );
+			} else {
+				$snippet = $lang->truncateForDatabase( $snippet, 30, '' );
+			}
 			$snippet = str_replace( ' ', '_', trim( $snippet ) );
 		}
 
@@ -373,10 +385,8 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 
 		/** @var TMessage $m */
 		foreach ( $collection as $key => $m ) {
-			$transTemplate = isset( $template['TEMPLATE'][$key] ) ?
-				$template['TEMPLATE'][$key] : [];
-			$potTemplate = isset( $pot['TEMPLATE'][$key] ) ?
-				$pot['TEMPLATE'][$key] : [];
+			$transTemplate = $template['TEMPLATE'][$key] ?? [];
+			$potTemplate = $pot['TEMPLATE'][$key] ?? [];
 
 			$output .= $this->formatMessageBlock( $key, $m, $transTemplate, $potTemplate, $pluralCount );
 		}
@@ -407,7 +417,7 @@ PHP;
 		// Make sure there is no empty line before msgid
 		$output = trim( $output ) . "\n";
 
-		$specs = isset( $template['HEADERS'] ) ? $template['HEADERS'] : [];
+		$specs = $template['HEADERS'] ?? [];
 
 		$timestamp = wfTimestampNow();
 		$specs['PO-Revision-Date'] = self::formatTime( $timestamp );
@@ -418,7 +428,7 @@ PHP;
 		}
 		$specs['Content-Type'] = 'text/plain; charset=UTF-8';
 		$specs['Content-Transfer-Encoding'] = '8bit';
-		$specs['Language'] = wfBCP47( $this->group->mapCode( $code ) );
+		$specs['Language'] = LanguageCode::bcp47( $this->group->mapCode( $code ) );
 		Hooks::run( 'Translate:GettextFFS:headerFields', [ &$specs, $this->group, $code ] );
 		$specs['X-Generator'] = $this->getGenerator();
 
@@ -528,7 +538,7 @@ PHP;
 			$header .= '#, ' . implode( ', ', array_unique( $flags ) ) . "\n";
 		}
 
-		$output = $header ? $header : "#\n";
+		$output = $header ?: "#\n";
 		$output .= $content . "\n";
 
 		return $output;
@@ -606,8 +616,8 @@ PHP;
 
 	/**
 	 * Returns plural rule for Gettext.
-	 * @param \string $code Language code.
-	 * @return \string
+	 * @param string $code Language code.
+	 * @return string
 	 */
 	public static function getPluralRule( $code ) {
 		$rulefile = __DIR__ . '/../data/plural-gettext.txt';

@@ -25,7 +25,7 @@ class PageTranslationHooksTest extends MediaWikiTestCase {
 		$wgHooks['TranslatePostInitGroups'] = [ 'MessageGroups::getTranslatablePages' ];
 
 		$mg = MessageGroups::singleton();
-		$mg->setCache( wfGetCache( 'hash' ) );
+		$mg->setCache( new WANObjectCache( [ 'cache' => wfGetCache( 'hash' ) ] ) );
 		$mg->recache();
 
 		MessageIndex::setInstance( new HashMessageIndex() );
@@ -36,7 +36,7 @@ class PageTranslationHooksTest extends MediaWikiTestCase {
 		global $wgParser;
 
 		// Setup objects
-		$superUser = new MockSuperUser();
+		$superUser = $this->getTestSysop()->getUser();
 		$translatablePageTitle = Title::newFromText( 'Vuosaari' );
 		$page = WikiPage::factory( $translatablePageTitle );
 		$text = '<translate>pupu</translate>';

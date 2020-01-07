@@ -1,15 +1,17 @@
 {
-	"extends": "wikimedia",
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/jquery"
+	],
 	"env": {
-		"browser": true,
-		"jquery": true,
-		"qunit": true
+		"commonjs": true
 	},
 	"globals": {
-		"mediaWiki": false,
+		"mw": false,
 		"OO": false
 	},
 	"rules": {
-		"dot-notation": [ "error", { "allowKeywords": true } ]
+		"no-jquery/no-global-selector": "off"
 	}
 }

@@ -7,6 +7,8 @@
  * @license GPL-2.0-or-later
  */
 
+use Wikimedia\ScopedCallback;
+
 /**
  * Hooks for page translation.
  *
@@ -21,6 +23,9 @@ class PageTranslationHooks {
 
 	// Check if we are just rendering tags or such
 	public static $renderingContext = false;
+
+	// Used to communicate data between LanguageLinks and SkinTemplateGetLanguageLink hooks.
+	private static $languageLinkData = [];
 
 	/**
 	 * Hook: ParserBeforeStrip
@@ -100,7 +105,7 @@ class PageTranslationHooks {
 	 * Hook: PageContentLanguage
 	 *
 	 * @param Title $title
-	 * @param Language &$pageLang
+	 * @param Language|StubUserLang|string &$pageLang
 	 * @return true
 	 */
 	public static function onPageContentLanguage( Title $title, &$pageLang ) {
@@ -136,7 +141,7 @@ class PageTranslationHooks {
 	 * @param string $text
 	 * @return true
 	 */
-	public static function injectCss( OutputPage $out, /*string*/$text ) {
+	public static function injectCss( OutputPage $out, /*string*/ $text ) {
 		global $wgTranslatePageTranslationULS;
 
 		$title = $out->getTitle();
@@ -231,51 +236,30 @@ class PageTranslationHooks {
 	 * @return string
 	 */
 	public static function languages( $data, $params, $parser ) {
+		global $wgPageTranslationLanguageList;
+
+		if ( $wgPageTranslationLanguageList === 'sidebar-only' ) {
+			return '';
+		}
+
 		self::$renderingContext = true;
 		$context = new ScopedCallback( function () {
 			self::$renderingContext = false;
 		} );
 
+		// Add a dummy language link that is removed in self::addLanguageLinks.
+		if ( $wgPageTranslationLanguageList === 'sidebar-fallback' ) {
+			$parser->getOutput()->addLanguageLink( 'x-pagetranslation-tag' );
+		}
+
 		$currentTitle = $parser->getTitle();
-
-		// Check if this is a source page or a translation page
-		$page = TranslatablePage::newFromTitle( $currentTitle );
-		if ( $page->getMarkedTag() === false ) {
-			$page = TranslatablePage::isTranslationPage( $currentTitle );
-		}
-
-		if ( $page === false || $page->getMarkedTag() === false ) {
+		$pageStatus = self::getTranslatablePageStatus( $currentTitle );
+		if ( !$pageStatus ) {
 			return '';
 		}
 
-		$status = $page->getTranslationPercentages();
-		if ( !$status ) {
-			return '';
-		}
-
-		// If priority languages have been set always show those languages
-		$priorityLangs = TranslateMetadata::get( $page->getMessageGroupId(), 'prioritylangs' );
-		$priorityForce = TranslateMetadata::get( $page->getMessageGroupId(), 'priorityforce' );
-		$filter = null;
-		if ( strlen( $priorityLangs ) > 0 ) {
-			$filter = array_flip( explode( ',', $priorityLangs ) );
-		}
-		if ( $filter !== null ) {
-			// If translation is restricted to some languages, only show them
-			if ( $priorityForce === 'on' ) {
-				// Do not filter the source language link
-				$filter[$page->getMessageGroup()->getSourceLanguage()] = true;
-				$status = array_intersect_key( $status, $filter );
-			}
-			foreach ( $filter as $langCode => $value ) {
-				if ( !isset( $status[$langCode] ) ) {
-					// We need to show all priority languages even if no translation started
-					$status[$langCode] = 0;
-				}
-			}
-		}
-
-		// Fix title
+		$page = $pageStatus[ 'page' ];
+		$status = $pageStatus[ 'languages' ];
 		$pageTitle = $page->getTitle();
 
 		// Sort by language code, which seems to be the only sane method
@@ -308,9 +292,9 @@ class PageTranslationHooks {
 			if ( $currentTitle->equals( $subpage ) ) {
 				$classes[] = 'mw-pt-languages-selected';
 				$classes = array_merge( $classes, self::tpProgressIcon( $percent ) );
-				$name = Html::rawElement(
+				$element = Html::rawElement(
 					'span',
-					[ 'class' => $classes , 'lang' => wfBCP47( $code ) ],
+					[ 'class' => $classes , 'lang' => LanguageCode::bcp47( $code ) ],
 					$name
 				);
 			} elseif ( $subpage->isKnown() ) {
@@ -329,10 +313,10 @@ class PageTranslationHooks {
 				$attribs = [
 					'title' => $title,
 					'class' => $classes,
-					'lang' => wfBCP47( $code ),
+					'lang' => LanguageCode::bcp47( $code ),
 				];
 
-				$name = Linker::linkKnown( $subpage, $name, $attribs );
+				$element = Linker::linkKnown( $subpage, $name, $attribs );
 			} else {
 				/* When language is included because it is a priority language,
 				 * but translation does not yet exists, link directly to the
@@ -349,11 +333,15 @@ class PageTranslationHooks {
 					'title' => wfMessage( 'tpt-languages-zero' )->inLanguage( $userLang )->text(),
 					'class' => $classes,
 				];
-				$name = Linker::linkKnown( $specialTranslateTitle, $name, $attribs, $params );
+				$element = Linker::linkKnown( $specialTranslateTitle, $name, $attribs, $params );
 			}
 
-			$languages[] = $name;
+			$languages[ $name ] = $element;
 		}
+
+		// Sort languages by autonym
+		ksort( $languages );
+		$languages = array_values( $languages );
 
 		// dirmark (rlm/lrm) is added, because languages with RTL names can
 		// mess the display
@@ -402,6 +390,174 @@ class PageTranslationHooks {
 			$classes[] = 'mw-pt-progress--complete';
 		}
 		return $classes;
+	}
+
+	/**
+	 * Returns translatable page and language stats for given title.
+	 * @param Title $title
+	 * @return array|null Returns null if not a translatable page.
+	 */
+	private static function getTranslatablePageStatus( Title $title ) {
+		// Check if this is a source page or a translation page
+		$page = TranslatablePage::newFromTitle( $title );
+		if ( $page->getMarkedTag() === false ) {
+			$page = TranslatablePage::isTranslationPage( $title );
+		}
+
+		if ( $page === false || $page->getMarkedTag() === false ) {
+			return null;
+		}
+
+		$status = $page->getTranslationPercentages();
+		if ( !$status ) {
+			return null;
+		}
+
+		// If priority languages have been set always show those languages
+		$priorityLangs = TranslateMetadata::get( $page->getMessageGroupId(), 'prioritylangs' );
+		$priorityForce = TranslateMetadata::get( $page->getMessageGroupId(), 'priorityforce' );
+		$filter = null;
+		if ( strlen( $priorityLangs ) > 0 ) {
+			$filter = array_flip( explode( ',', $priorityLangs ) );
+		}
+		if ( $filter !== null ) {
+			// If translation is restricted to some languages, only show them
+			if ( $priorityForce === 'on' ) {
+				// Do not filter the source language link
+				$filter[$page->getMessageGroup()->getSourceLanguage()] = true;
+				$status = array_intersect_key( $status, $filter );
+			}
+			foreach ( $filter as $langCode => $value ) {
+				if ( !isset( $status[$langCode] ) ) {
+					// We need to show all priority languages even if no translation started
+					$status[$langCode] = 0;
+				}
+			}
+		}
+
+		return [
+			'page' => $page,
+			'languages' => $status
+		];
+	}
+
+	/**
+	 * Hooks: LanguageLinks
+	 * @param Title $title Title of the page for which links are needed.
+	 * @param array &$languageLinks List of language links to modify.
+	 */
+	public static function addLanguageLinks( Title $title, array &$languageLinks ) {
+		global $wgPageTranslationLanguageList;
+
+		$hasLanguagesTag = false;
+		foreach ( $languageLinks as $index => $name ) {
+			if ( $name === 'x-pagetranslation-tag' ) {
+				$hasLanguagesTag = true;
+				unset( $languageLinks[ $index ] );
+			}
+		}
+
+		if ( $wgPageTranslationLanguageList === 'tag-only' ) {
+			return;
+		}
+
+		if ( $wgPageTranslationLanguageList === 'sidebar-fallback' && $hasLanguagesTag ) {
+			return;
+		}
+
+		// $wgPageTranslationLanguageList === 'sidebar-always' OR 'sidebar-only'
+
+		$status = self::getTranslatablePageStatus( $title );
+		if ( !$status ) {
+			return;
+		}
+
+		self::$renderingContext = true;
+		$context = new ScopedCallback( function () {
+			self::$renderingContext = false;
+		} );
+
+		$page = $status[ 'page' ];
+		$languages = $status[ 'languages' ];
+		$en = Language::factory( 'en' );
+
+		$newLanguageLinks = [];
+
+		// Batch the Title::exists queries used below
+		$lb = new LinkBatch();
+		foreach ( array_keys( $languages ) as $code ) {
+			$title = $page->getTitle()->getSubpage( $code );
+			$lb->addObj( $title );
+		}
+		$lb->execute();
+
+		foreach ( $languages as $code => $percentage ) {
+			$title = $page->getTitle()->getSubpage( $code );
+			$key = "x-pagetranslation:{$title->getPrefixedText()}";
+			$translatedName = $page->getPageDisplayTitle( $code ) ?: $title->getPrefixedText();
+
+			if ( $title->exists() ) {
+				$href = $title->getLocalURL();
+				$classes = self::tpProgressIcon( $percentage );
+				$title = wfMessage( 'tpt-languages-nonzero' )
+					->params( $translatedName )
+					->numParams( 100 * $percentage );
+			} else {
+				$href = SpecialPage::getTitleFor( 'Translate' )->getLocalURL( [
+					'group' => $page->getMessageGroupId(),
+					'language' => $code,
+				] );
+				$classes = [ 'mw-pt-progress--none' ];
+				$title = wfMessage( 'tpt-languages-zero' );
+			}
+
+			self::$languageLinkData[ $key ] = [
+				'href' => $href,
+				'language' => $code,
+				'percentage' => $percentage,
+				'classes' => $classes,
+				'autonym' => $en->ucfirst( Language::fetchLanguageName( $code ) ),
+				'title' => $title,
+			];
+
+			$newLanguageLinks[ $key ] = self::$languageLinkData[ $key ][ 'autonym' ];
+		}
+
+		asort( $newLanguageLinks );
+		$languageLinks = array_merge( array_keys( $newLanguageLinks ), $languageLinks );
+	}
+
+	/**
+	 * Hooks: SkinTemplateGetLanguageLink
+	 * @param array &$link
+	 * @param Title $linkTitle
+	 * @param Title $pageTitle
+	 * @param OutputPage $out
+	 */
+	public static function formatLanguageLink(
+		array &$link,
+		Title $linkTitle,
+		Title $pageTitle,
+		OutputPage $out
+	) {
+		if ( substr( $link[ 'text' ], 0, 18 ) !== 'x-pagetranslation:' ) {
+			return;
+		}
+
+		if ( !isset( self::$languageLinkData[ $link[ 'text' ] ] ) ) {
+			return;
+		}
+
+		$data = self::$languageLinkData[ $link[ 'text' ] ];
+
+		$link[ 'class' ] .= ' ' . implode( ' ', $data[ 'classes' ] );
+		$link[ 'href' ] = $data[ 'href' ];
+		$link[ 'text' ] = $data[ 'autonym' ];
+		$link[ 'title' ] = $data[ 'title' ]->inLanguage( $out->getLanguage()->getCode() )->text();
+		$link[ 'lang'] = LanguageCode::bcp47( $data[ 'language' ] );
+		$link[ 'hreflang'] = LanguageCode::bcp47( $data[ 'language' ] );
+
+		$out->addModuleStyles( 'ext.translate.tag.languages' );
 	}
 
 	/**
@@ -740,7 +896,10 @@ class PageTranslationHooks {
 	 */
 	public static function disableDelete( $article, $out, &$reason ) {
 		$title = $article->getTitle();
-		if ( TranslatablePage::isSourcePage( $title ) ||
+		$translatablePage = TranslatablePage::newFromTitle( $title );
+
+		if (
+			$translatablePage->getMarkedTag() !== false ||
 			TranslatablePage::isTranslationPage( $title )
 		) {
 			$new = SpecialPage::getTitleFor(
@@ -948,7 +1107,7 @@ class PageTranslationHooks {
 	 * @param OutputPage $out
 	 * @return bool
 	 */
-	public static function replaceSubtitle( &$subpages, $skin = null, OutputPage $out ) {
+	public static function replaceSubtitle( &$subpages, Skin $skin = null, OutputPage $out ) {
 		$isTranslationPage = TranslatablePage::isTranslationPage( $out->getTitle() );
 		if ( !$isTranslationPage
 			&& !TranslatablePage::isSourcePage( $out->getTitle() )
@@ -1049,8 +1208,11 @@ class PageTranslationHooks {
 	public static function onMoveTranslationUnits( Title $ot, Title $nt, User $user,
 		$oldid, $newid, $reason
 	) {
-		// Do the update only once. In case running by job queue, the update is not done here
-		if ( self::$jobQueueRunning ) {
+		// TranslatablePageMoveJob takes care of handling updates because it performs
+		// a lot of moves at once. As a performance optimization, skip this hook if
+		// we detect moves from that job. As there isn't a good way to pass information
+		// to this hook what originated the move, we use some heuristics.
+		if ( defined( 'MEDIAWIKI_JOB_RUNNER' ) && $user->equals( FuzzyBot::getUser() ) ) {
 			return;
 		}
 
@@ -1132,17 +1294,21 @@ class PageTranslationHooks {
 
 		if ( !isset( $queuedPages[ $targetPage ] ) ) {
 			$queuedPages[ $targetPage ] = true;
+			$fname = __METHOD__;
 
 			$dbw = wfGetDB( DB_MASTER );
 			$dbw->onTransactionIdle( function () use ( $dbw, $queuedPages, $targetPage,
-				$target, $handle, $langCode, $user, $reason
+				$target, $handle, $langCode, $user, $reason, $fname
 			) {
-				$dbw->startAtomic( __METHOD__ );
+				$dbw->startAtomic( $fname );
 
 				$page = TranslatablePage::newFromTitle( $target );
 
-				MessageGroupStats::clear( $handle );
-				MessageGroupStats::forItem( $page->getMessageGroupId(), $langCode );
+				MessageGroupStats::forItem(
+					$page->getMessageGroupId(),
+					$langCode,
+					MessageGroupStats::FLAG_NO_CACHE
+				);
 
 				if ( !$handle->isDoc() ) {
 					// Assume that $user and $reason for the first deletion is the same for all
@@ -1154,7 +1320,7 @@ class PageTranslationHooks {
 				// edit here with the latest changes.
 				unset( $queuedPages[ $targetPage ] );
 
-				$dbw->endAtomic( __METHOD__ );
+				$dbw->endAtomic( $fname );
 			} );
 		}
 	}

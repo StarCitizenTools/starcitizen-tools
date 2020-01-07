@@ -25,6 +25,7 @@
 	"ext-uls-display-settings-ui-language": "Attēlošanas valoda",
 	"ext-uls-display-settings-anon-label": "Attēlošanas valoda:",
 	"ext-uls-display-settings-anon-same-as-content": "$1 (tāda pati kā saturam)",
+	"ext-uls-display-settings-anon-log-in-cta": "[[Special:UserLogin|Pieslēdzies]], lai izvēlētos atšķirīgu valodu izvēlnēm.",
 	"ext-uls-webfonts-settings-title": "Lejupielādēt fontus pēc nepieciešamības",
 	"ext-uls-webfonts-settings-info-link": "Vairāk informācijas",
 	"ext-uls-webfonts-select-for-ui-info": "Saskarnei izmantotais fonts",
@@ -35,11 +36,13 @@
 	"ext-uls-input-settings-title-short": "Ievade",
 	"ext-uls-input-settings-desc": "Raksti citā valodā?",
 	"ext-uls-input-settings-ui-language": "Rakstīšanai izmantotā valoda",
+	"ext-uls-back-to-input-settings": "Atpakaļ uz ievades iestatījumiem",
 	"ext-uls-ime-help": "Kā lietot",
 	"ext-uls-input-settings-more-languages-tooltip": "Vairāk valodu",
 	"jquery-ime-other-languages": "Citas valodas",
 	"jquery-ime-help": "Palīdzība",
 	"ext-uls-input-disable": "Atspējot ievades rīkus",
+	"ext-uls-input-enable": "Iespējot ievades rīkus",
 	"ext-uls-input-disable-info": "Ievades rīki ir atspējoti.",
 	"ext-uls-input-settings-noime": "Šai valodai nav pieejama neviena ievades metode.",
 	"ext-uls-input-disable-notification": "Ievades rīki ir tikuši atspējoti",
@@ -47,5 +50,6 @@
 	"ext-uls-language-settings-applying": "Pielieto...",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Vēl $1}}",
 	"prefs-languages": "Valodas",
-	"ext-uls-compact-language-links-preference": "Izmantot [[$1|kompakto valodu sarakstu]] ar tev atbilstošajām valodām."
+	"ext-uls-compact-language-links-preference": "Izmantot [[$1|kompakto valodu sarakstu]] ar tev atbilstošajām valodām.",
+	"ext-uls-compact-no-results": "Šī lapa nav pieejama tevis atrastajā valodā."
 }

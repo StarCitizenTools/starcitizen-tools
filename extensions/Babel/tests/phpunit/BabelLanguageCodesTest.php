@@ -22,7 +22,7 @@ class BabelLanguageCodesTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function getCodeProvider() {
-		return [
+		$testData = [
 			[ 'invalidLanguageCode', false ],
 			[ 'en', 'en' ],
 			[ 'eng', 'en' ],
@@ -30,6 +30,17 @@ class BabelLanguageCodesTest extends \PHPUnit\Framework\TestCase {
 			[ 'de', 'de' ],
 			[ 'be-x-old', 'be-tarask' ],
 		];
+		// True BCP 47 normalization was added in MW 1.32
+		if ( BabelLanguageCodes::bcp47( 'simple' ) === 'en-simple' ) {
+			// ensure BCP 47-compliant codes are mapped to MediaWiki's
+			// nonstandard internal codes
+			$testData = array_merge( $testData, [
+				[ 'en-simple', 'simple' ],
+				[ 'cbk', 'cbk-zam' ],
+				[ 'nrf', 'nrm' ],
+			] );
+		}
+		return $testData;
 	}
 
 	/**
@@ -47,6 +58,22 @@ class BabelLanguageCodesTest extends \PHPUnit\Framework\TestCase {
 			[ 'eng', null, 'English' ],
 			[ 'en-gb', null, 'British English' ],
 			[ 'de', null, 'Deutsch' ],
+		];
+	}
+
+	/**
+	 * @dataProvider getCategoryCodeProvider
+	 */
+	public function testGetCategoryCode( $code, $expected ) {
+		$this->assertSame( $expected, BabelLanguageCodes::getCategoryCode( $code ) );
+	}
+
+	public function getCategoryCodeProvider() {
+		return [
+			[ 'en', 'en' ],
+			[ 'de', 'de' ],
+			[ 'simple', 'simple' ],
+			[ 'zh-hant', 'zh-Hant' ],
 		];
 	}
 

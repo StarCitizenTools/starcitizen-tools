@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Nike",
-			"Pyscowicz"
+			"Pyscowicz",
+			"Valtlait"
 		]
 	},
 	"apihelp-aggregategroups-param-group": "Viestiryhmän tunnus.",
@@ -13,7 +14,7 @@
 	"apihelp-groupreview-param-group": "Viestiryhmä.",
 	"apihelp-groupreview-param-language": "Kielikoodi.",
 	"apihelp-groupreview-param-state": "Viestiryhmän uusi tila.",
-	"apihelp-groupreview-example-1": "Merkitsee saksankielisen käännöksen viestiryhmälle \"group-Example\" valmiiksi",
+	"apihelp-groupreview-example-1": "Merkitsee saksankielisen käännöksen viestiryhmälle ”group-Example” valmiiksi",
 	"apihelp-query+languagestats-description": "Hakee kielitilastoja.",
 	"apihelp-query+languagestats-param-language": "Kielikoodi.",
 	"apihelp-query+languagestats-example-1": "Luettelo käännösten kattavuustilastoista suomeksi",
@@ -42,11 +43,13 @@
 	"apierror-translate-invalidgroup": "Ryhmä ei ole olemassa tai se on virheellinen",
 	"apierror-translate-invalidlanguage": "Pyydetty kieli ei kelpaa.",
 	"apierror-translate-invalidupdate": "Virheellinen päivitys",
-	"apierror-translate-language-disabled": "Kääntäminen tälle kielelle ei ole mahdollista.",
+	"apierror-translate-language-disabled": "Kääntäminen kielelle $1 ei ole mahdollista.",
+	"apierror-translate-language-disabled-reason": "Kääntäminen kielelle $1 ei ole mahdollista: $2",
 	"apierror-translate-nodynamicgroups": "Dynaamisiä viestiryhmiä ei tueta täällä",
 	"apierror-translate-nomessagefortitle": "Otsikko ei vastaa käännettävää viesti",
 	"apierror-translate-owntranslation": "Ei voida tarkistaa omia käännöksiä",
 	"apierror-translate-sandboxdisabled": "Hiekkalaatikko-ominaisuus ei ole käytössä",
 	"apierror-translate-sandbox-invalidppassword": "Virheellinen salasana",
-	"apierror-translate-unknownmessage": "Tuntematon viesti"
+	"apierror-translate-unknownmessage": "Tuntematon viesti",
+	"apiwarn-translate-language-disabled-source": "Tämän ryhmän lähdekieli on $1. Valitse toinen kieli käännöksille."
 }

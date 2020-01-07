@@ -9,12 +9,13 @@
 			"Shizhao",
 			"Xiaomingyan",
 			"Yfdyh000",
-			"Liuxinyu970226"
+			"Liuxinyu970226",
+			"大小李子"
 		]
 	},
-	"babel": "用户巴别信息",
+	"babel": "用户语文水平",
 	"babel-desc": "增加一个<code>#babel</code>处理功能以支持自动产生一个巴别用户框栏及包含可自定化的模版",
-	"babel-url": "Project:巴别",
+	"babel-url": "Project:语文",
 	"babel-footer-url": ":Category:巴别-用户（按语言）",
 	"babel-autocreate-reason": "自动建立[[$1|巴别]]分类页。",
 	"babel-autocreate-text-levels": "在此分类中的用户具有$2的$1级能力。",

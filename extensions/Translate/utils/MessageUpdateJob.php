@@ -30,7 +30,6 @@ class MessageUpdateJob extends Job {
 	 */
 	public function __construct( $title, $params = [] ) {
 		parent::__construct( __CLASS__, $title, $params );
-		$this->params = $params;
 	}
 
 	public function run() {
@@ -66,7 +65,7 @@ class MessageUpdateJob extends Job {
 				$pages[$otherTitle->getDBkey()] = true;
 			}
 			unset( $pages[$title->getDBkey()] );
-			if ( count( $pages ) === 0 ) {
+			if ( $pages === [] ) {
 				return true;
 			}
 

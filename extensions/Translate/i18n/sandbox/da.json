@@ -1,8 +1,24 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sarrus"
+			"Sarrus",
+			"Saederup92"
 		]
 	},
-	"tsb-all-languages-button-label": "Alle sprog"
+	"tsb-reminder-sending": "Sender påmindelsen...",
+	"tsb-reminder-sent-new": "Sendte en påmindelse",
+	"tsb-all-languages-button-label": "Alle sprog",
+	"tsb-accept-button-label": "Accepter",
+	"tsb-reject-button-label": "Afvis",
+	"tsb-accept-all-button-label": "Accepter alle",
+	"tsb-reject-all-button-label": "Afvis alle",
+	"tsb-user-posted-a-comment": "Ikke en oversætter",
+	"tsb-translations-source": "Kilde",
+	"tsb-translations-current": "Eksisterende oversættelser",
+	"tsb-reject-confirmation": "Afviste {{PLURAL:$1|bruger|brugere}}",
+	"tsb-accept-confirmation": "{{PLURAL:$1|Accepteret bruger|Accepterede brugere}}",
+	"translationstash": "Velkommen",
+	"translate-translationstash-welcome": "Velkommen {{GENDER:$1|$1}}, du er nu en ny oversætter",
+	"translate-translationstash-skip-button-label": "Prøv en anden",
+	"tsb-limit-reached-title": "Tak for dine oversættelser"
 }

@@ -1,20 +1,25 @@
 {
 	"@metadata": {
 		"authors": [
-			"Chrumps"
+			"Chrumps",
+			"CiaPan"
 		]
 	},
 	"managetranslatorsandbox": "Zarządzanie brudnopisem tłumacza",
 	"tsb-filter-pending": "Oczekujące wnioski",
 	"tsb-reminder-sending": "Wysyłanie przypomnienia...",
+	"tsb-reminder-sent": "{{PLURAL:$1|Wysłane $1 przypomnienie. Czas: $2.|Wysłane $1 przypomnienia. Czas ostatniego: $2|Wysłane $1 przypomnień. Czas ostatniego: $2}}",
 	"tsb-reminder-sent-new": "Wyślij przypomnienie",
 	"tsb-reminder-failed": "Wysłanie przypomnienia nie powiodło się",
 	"tsb-email-promoted-subject": "Teraz jesteś tłumaczem w serwisie {{SITENAME}}",
-	"tsb-email-rejected-subject": "Twój wniosek o uzyskanie uprawnień tłumacza witryny {{SITENAME}} została odrzucony",
+	"tsb-email-promoted-body": "Witaj {{GENDER:$1|$1}},\n\nGratulacje! {{GENDER:$3|Sprawdziłem|Sprawdziłam}} Twoje testowe tłumaczenia wykonane w {{SITENAME}} i {{GENDER:$3|przyznałem|przyznałam}} Ci pełne prawa tłumacza.\n\nPrzyjdź do {{SITENAME}}, aby kontynuować tłumaczenie:\n$2\n\nWitamy i dziękujemy za Twój wkład!\n\n{{GENDER:$3|$3}},\nZespół {{SITENAME}}",
+	"tsb-email-rejected-subject": "Twój wniosek o uzyskanie uprawnień tłumacza witryny {{SITENAME}} został odrzucony",
+	"tsb-email-rejected-body": "Witaj {{GENDER:$1|$1}},\n\nDziękujemy za zgłoszenie się jako tłumacz w {{SITENAME}}. Z przykrością informuję, że {{GENDER:$3|odrzuciłem|odrzuciłam}} Twój wniosek, ponieważ jakość twoich tłumaczeń nie spełniała wymagań.\n\nJeśli uważasz, że Twoje zgłoszenie zostało odrzucone przez pomyłkę, spróbuj ponownie złożyć wniosek jako tłumacz w {{SITENAME}}. Możesz zarejestrować się tutaj:\n$2\n\n{{GENDER:$3|$3}},\nZespół {{SITENAME}}",
 	"tsb-request-count": "$1 {{PLURAL:$1|wniosek|wnioski|wniosków}}",
 	"tsb-all-languages-button-label": "Wszystkie języki",
 	"tsb-accept-button-label": "Akceptuj",
 	"tsb-reject-button-label": "Odrzuć",
+	"tsb-selected-count": "{{PLURAL:$1|$1 wybrany użytkownik|$1 wybranych użytkowników}}",
 	"tsb-older-requests": "$1 {{PLURAL:$1|starszy wniosek|starsze wnioski|starszych wniosków}}",
 	"tsb-accept-all-button-label": "Akceptuje wszystkie",
 	"tsb-reject-all-button-label": "Odrzuć wszystkie",
@@ -26,12 +31,13 @@
 	"tsb-accept-confirmation": "{{PLURAL:$1|Użytkownik zaakceptowany|Użytkownicy zaakceptowani}}",
 	"translationstash": "Powitanie",
 	"translate-translationstash-welcome": "Witaj $1, jesteś {{GENDER:$1|nowym tłumaczem|nową tłumaczką}}",
+	"translate-translationstash-welcome-note": "Zapoznaj się z narzędziami tłumacza. Przetłumacz część komunikatów i zostań pełnoprawnym tłumaczem aby uczestniczyć w wybranych projektach.",
 	"translate-translationstash-initialtranslation": "Twoje pierwotne tłumaczenie",
 	"translate-translationstash-translations": "$1 {{PLURAL:$1|ukończone tłumaczenie|ukończone tłumaczenia|ukończonych tłumaczeń}}",
 	"translate-translationstash-skip-button-label": "Spróbuj innego",
 	"tsb-limit-reached-title": "Dziękuję za Twoje tłumaczenia",
 	"tsb-no-requests-from-new-users": "Brak wniosków od nowych użytkowników",
-	"tsb-create-user-page": "Utwórz prostą stronę użytkownika",
+	"tsb-create-user-page": "Utworzono prostą stronę użytkownika",
 	"log-name-translatorsandbox": "Rejestr brudnopisu tłumaczeń",
 	"log-description-translatorsandbox": "To jest rejestr działań użytkowników brudnopisu tłumaczeń",
 	"logentry-translatorsandbox-promoted": "$1 {{GENDER:$2|awansował|awansowała}} $3 na {{GENDER:$4|tłumacza|tłumaczkę}}",

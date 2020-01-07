@@ -12,22 +12,22 @@
  * All matching strings are prefixed with the same prefix.
  */
 class StringMatcher implements StringMangler, MetaYamlSchemaExtender {
-	/// Prefix for mangled message keys
+	/** @var string Prefix for mangled message keys */
 	protected $sPrefix = '';
-	/// Exact message keys
+	/** @var string[] Exact message keys */
 	protected $aExact = [];
-	/// Patterns of type foo*
+	/** @var string[] Patterns of type foo* */
 	protected $aPrefix = [];
-	/// Patterns that contain wildcard anywhere else than in the end
+	/** @var string[] Patterns that contain wildcard anywhere else than in the end */
 	protected $aRegex = [];
 
 	/**
 	 * Alias for making NO-OP string mangler.
 	 *
-	 * @return StringMatcher
+	 * @return self
 	 */
 	public static function EmptyMatcher() {
-		return new StringMatcher();
+		return new self();
 	}
 
 	/**
@@ -75,7 +75,7 @@ class StringMatcher implements StringMangler, MetaYamlSchemaExtender {
 				$prefix = substr( $string, 0, -1 );
 				$this->aPrefix[$prefix] = strlen( $prefix );
 			} else {
-				$string = str_replace( '\\*', '.+', preg_quote( $string ) );
+				$string = str_replace( '\\*', '.+', preg_quote( $string, '/' ) );
 				$this->aRegex[] = "/^$string$/";
 			}
 		}
@@ -153,16 +153,23 @@ class StringMatcher implements StringMangler, MetaYamlSchemaExtender {
 			$string = $this->sPrefix . $string;
 		}
 
+		$escaper = function ( $match ) {
+			$esc = '';
+			foreach ( str_split( $match[ 0 ] ) as $c ) {
+				$esc .= '=' . sprintf( '%02X', ord( $c ) );
+			}
+			return $esc;
+		};
+
 		// Apply a "quoted-printable"-like escaping
 		$valid = self::getValidKeyChars();
-		$escapedString = preg_replace_callback( "/[^$valid]/",
-			function ( $match ) {
-				return '=' . sprintf( '%02X', ord( $match[0] ) );
-			},
-			$string
-		);
+		$string = preg_replace_callback( "/[^$valid]/", $escaper, $string );
+		// Additional limitations in MediaWiki, see MediaWikiTitleCodec::splitTitleString
+		$string = preg_replace_callback( '/(~~~|^[ _]|[ _]$|[ _]{2,}|^:)/', $escaper, $string );
+		// TODO: length check + truncation
+		// TODO: forbid path travels
 
-		return $escapedString;
+		return $string;
 	}
 
 	/**

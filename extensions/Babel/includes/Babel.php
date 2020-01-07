@@ -16,6 +16,7 @@
 use MediaWiki\Babel\BabelBox\LanguageBabelBox;
 use MediaWiki\Babel\BabelBox\NotBabelBox;
 use MediaWiki\Babel\BabelBox\NullBabelBox;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Logger\LoggerFactory;
 
 /**
@@ -31,13 +32,11 @@ class Babel {
 	 * Render the Babel tower.
 	 *
 	 * @param Parser $parser
-	 * @param string $parameter,...
+	 * @param string ...$parameters
 	 * @return string Babel tower.
 	 */
-	public static function Render( Parser $parser ) {
+	public static function Render( Parser $parser, ...$parameters ) {
 		global $wgBabelUseUserLanguage;
-		$parameters = func_get_args();
-		array_shift( $parameters );
 		self::$title = $parser->getTitle();
 
 		self::mTemplateLinkBatch( $parameters );
@@ -114,7 +113,7 @@ EOT;
 
 	private static function setExtensionData( ParserOutput $parserOutput, $code, $level ) {
 		$data = $parserOutput->getExtensionData( 'babel' ) ?: [];
-		$data[wfBCP47( $code )] = $level;
+		$data[ BabelLanguageCodes::getCategoryCode( $code ) ] = $level;
 		$parserOutput->setExtensionData( 'babel', $data );
 	}
 
@@ -312,7 +311,7 @@ EOT;
 	 * @since Version 1.10.0
 	 */
 	public static function getCachedUserLanguageInfo( User $user ) {
-		$cache = ObjectCache::getMainWANInstance();
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$userId = $user->getId();
 		$key = $cache->makeKey( 'babel', 'userLanguages', $userId );
 		$checkKeys = [ $key ];
@@ -377,7 +376,7 @@ EOT;
 	 * Gets the cached list of languages a user has set up with Babel.
 	 *
 	 * @param User $user
-	 * @param string $level Minimal level as given in $wgBabelCategoryNames
+	 * @param string|null $level Minimal level as given in $wgBabelCategoryNames
 	 * @return string[] List of language codes
 	 *
 	 * @since Version 1.10.0
@@ -391,7 +390,7 @@ EOT;
 	 * For performance it is recommended to use getCachedUserLanguages.
 	 *
 	 * @param User $user
-	 * @param string $level Minimal level as given in $wgBabelCategoryNames
+	 * @param string|null $level Minimal level as given in $wgBabelCategoryNames
 	 * @return string[] List of language codes
 	 *
 	 * @since Version 1.9.0
@@ -405,7 +404,7 @@ EOT;
 
 		$babelDB = new MediaWiki\Babel\Database();
 		$result = $babelDB->getForUser( $user->getId() );
-		// If local data or no central source, return
+		/** If local data or no central source, return */
 		if ( $result || !$wgBabelCentralApi || !$wgBabelCentralDb ) {
 			return $result;
 		}
@@ -432,7 +431,7 @@ EOT;
 		] );
 		$logger->debug( 'Making request to {url}', [ 'url' => $url ] );
 		$req = MWHttpRequest::factory( $url, [ 'timeout' => 10 ], __METHOD__ );
-		$status = $req->execute();
+		$status = Status::wrap( $req->execute() );
 		if ( !$status->isOK() ) {
 			$logger->error( 'Request to {url} failed: {error}',
 				[ 'url' => $url, 'error' => $status->getWikiText( false, false, 'en' ) ]
@@ -484,7 +483,8 @@ EOT;
 				// lowercase the first char, but stay away from the others in case of region codes
 				$code = BabelLanguageCodes::getCode( lcfirst( $match[1] ) );
 				if ( $code !== false ) {
-					$result[$code] = isset( $match[3] ) ? $match[3] : 'N';
+					$catCode = BabelLanguageCodes::getCategoryCode( $code );
+					$result[$catCode] = $match[3] ?? 'N';
 				}
 			}
 		}

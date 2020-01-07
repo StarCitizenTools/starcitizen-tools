@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mynor Archila"
+		]
+	},
+	"babel-footer-url": ":Kiwäch:Babel - Okisanela’ pa ruch’ab’äl",
+	"babel-autocreate-text-main": "Okinasela’ chi k’o re molaj ruetamab’al pa ri[[$2|Kaqchikel]].",
+	"babel-1": "Re okinasel k’o [[$1|ruxe’]] etamab’al pa ri [[$2|$3]].",
+	"babel-2": "Re okinasel k’o [[$1|nik’aj]] etamab’al pa ri [[$2|$3]].",
+	"babel-3": "Re okinasel k’o [[$1|ik’owinem]] etamab’al pa ri [[$2|$3]].",
+	"babel-4": "Re okinasel k’o [[$1|chunaqaj alaxik]] etamab’al pa ri [[$2|$3]].",
+	"babel-5": "Re okinasel k’o [[$1|tijtijonem]] etamab’al pa ri [[$2|$3]].",
+	"babel-N": "Re okinasel k’o [[$1|alaxik]] etamab’al pa ri [[$2|$3]].",
+	"babel-0-n": "Re okinasel [[$1|man]] k’o etamab’al pa ri [[$2|Kaqchikel]].",
+	"babel-1-n": "Re okinasel k’o [[$1|ruxe’]] etamab’al pa ri [[$2|Kaqchikel]].",
+	"babel-2-n": "Re okinasel k’o [[$1|nik’aj]] etamab’al pa ri [[$2|Kaqchikel]].",
+	"babel-3-n": "Re okinasel k’o [[$1|ik’owinem]] etamab’al pa ri [[$2|Kaqchikel]].",
+	"babel-4-n": "Re okinasel k’o [[$1|chunaqaj alaxik]] etamab’al pa ri [[$2|Kaqchikel]].",
+	"babel-5-n": "Re okinasel k’o [[$1|tijtijonem]] etamab’al pa ri [[$2|Kaqchikel]].",
+	"babel-N-n": "Re okinasel k’o [[$1|alaxik]] etamab’al pa ri [[$2|Kaqchikel]].",
+	"babel-footer": "Okisanela’ pa ruch’ab’äl"
+}

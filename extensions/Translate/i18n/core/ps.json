@@ -3,7 +3,8 @@
 		"authors": [
 			"Ahmed-Najib-Biabani-Ibrahimkhel",
 			"Waldir",
-			"Baloch Khan"
+			"Baloch Khan",
+			"Amjad Khan"
 		]
 	},
 	"translate": "ژباړل",
@@ -32,7 +33,6 @@
 	"translate-page-description-legend": "د ډلې په اړه مالومات",
 	"translate-page-description-hasoptional-open": "اختياري پيغامونه ښکاره کول.",
 	"translate-page-edit": "سمول",
-	"translate-ext-url": "<hr />وېبځی: $1",
 	"translate-optional": "(اختياري)",
 	"translate-ignored": "(بابېزه گڼل شوی)",
 	"translate-edit-title": "\"$1\" سمول",
@@ -135,6 +135,7 @@
 	"abusefilter-edit-builder-vars-translate-source-text": "د ژباړې يوون د سرچينې متن",
 	"translate-save": "خوندي کول ($1)",
 	"translate-jssti-add": "لړليک کې گډول",
+	"managemessagegroups": "د پیغام ګروپ مدیریت",
 	"translate-manage-import-new": "نوی پيغام $1",
 	"translate-manage-import-deleted": "ړنگ شوی پيغام $1",
 	"translate-manage-action-import": "رالېږدول",

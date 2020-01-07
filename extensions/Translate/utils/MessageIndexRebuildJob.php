@@ -16,7 +16,7 @@
 class MessageIndexRebuildJob extends Job {
 
 	/**
-	 * @return MessageIndexRebuildJob
+	 * @return self
 	 */
 	public static function newJob() {
 		$job = new self( Title::newMainPage() );
@@ -52,12 +52,4 @@ class MessageIndexRebuildJob extends Job {
 			$this->run();
 		}
 	}
-
-	/**
-	 * @deprecated since 2017-11-03 alias for insertIntoJobQueue()
-	 */
-	public function insert() {
-		$this->insertIntoJobQueue();
-	}
-
 }

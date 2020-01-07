@@ -18,7 +18,8 @@
 			"Alirezaaa",
 			"Hosseinblue",
 			"Calak",
-			"Ommmmid"
+			"Ommmmid",
+			"Ladsgroup"
 		]
 	},
 	"translate": "ترجمه",
@@ -35,7 +36,6 @@
 	"translate-page-no-such-language": "زبان مشخص‌شده نامعتبر است.",
 	"translate-page-no-such-group": "گروه مشخص‌شده نامعتبر است.",
 	"translate-page-disabled": "ترجمه این زبان در این گروه غیرفعال است.\nدلیل:\n\n<em>$1</em>",
-	"translate-page-disabled-source": "$1 زبان مبدأ این صفحه است.",
 	"translate-language-disabled": "ترجمه به این زبان غیرفعال شده‌است.",
 	"translate-page-settings-legend": "تنظیمات",
 	"translate-page-group": "گروه",
@@ -53,7 +53,6 @@
 	"translate-page-description-hasoptional": "این گروه پیغام‌ها شامل پیغام‌های اختیاری است.\nپیغام‌های اختیاری باید تنها زمانی ترجمه شوند که زبان شما شرایط ویژه‌ای نظیر استفاده نکردن از فاصله یا نویسه‌گردانی اسامی خاص داشته باشد. $1",
 	"translate-page-description-hasoptional-open": "نمایش پیغام‌های اختیاری.",
 	"translate-page-edit": "ویرایش",
-	"translate-ext-url": "<hr />وبگاه: $1",
 	"translate-optional": "(اختیاری)",
 	"translate-ignored": "(نادیده گرفته شده)",
 	"translate-edit-title": "ویرایش «$1»",
@@ -124,7 +123,10 @@
 	"action-translate-groupreview": "تغییر وضعیت جریان کار گروه پیغام‌ها",
 	"translate-rcfilters-translations": "ترجمه‌ها",
 	"translate-rcfilters-translations-only-label": "ترجمه‌ها",
+	"translate-rcfilters-translations-only-desc": "تغییرات به صفحه‌های ترجمه شده.",
+	"translate-rcfilters-translations-filter-label": "بدون ترجمه",
 	"translate-rcfilters-translations-filter-desc": "تغییراتی که ترجمه نیستند",
+	"translate-rcfilters-translations-site-label": "پیامی‌های سایت.",
 	"translate-rc-translation-filter": "پالایش ترجمه‌ها:",
 	"translate-rc-translation-filter-no": "کاری نکن",
 	"translate-rc-translation-filter-only": "تنها ترجمه‌ها را نمایش بده",
@@ -197,12 +199,13 @@
 	"translate-mgs-noempty": "زبان‌هایی که هیچ ترجمه‌ای ندارند نمایش نده",
 	"translate-mgs-submit": "نمایش آمار",
 	"translate-mgs-column-language": "زبان",
-	"translate-mgs-totals": "همهٔ زبان‌ها با هم",
+	"translate-mgs-totals": "همهٔ {{PLURAL:$1|زبان|زبان‌ها}} با هم",
 	"translate-mgs-invalid-group": "گروه مشخص‌شدهٔ $1 وجود ندارد.",
 	"translate-mgs-nothing": "دربارهٔ آمار درخواست‌شده چیزی برای نمایش وجود ندارد.",
 	"supportedlanguages": "زبان‌های پشتیبانی‌شده",
 	"supportedlanguages-summary": "این صفحه فهرستی از تمام زبان‌های پشتیبانی‌شده توسط {{SITENAME}} را به همراه نام مترجمان در حال کار در آن زبان نمایش میدهد.\nهرچه یک مترجم با ویرایش‌های بیشتری مشارکت کرده باشد، نامش بزرگتر دیده می‌شود.\nرنگ زیرخط نشان‌دهندهٔ تازگی فعالیت مترجم در اینجا است.",
 	"supportedlanguages-colorlegend": "توضیح برای رنگ: آخرین ترجمه در $1 روز پیش.",
+	"supportedlanguages-sqlite-error": "از SQLite پشتیبانی نمی‌شود",
 	"supportedlanguages-translators": "{{PLURAL:$2|{{GENDER:$3|مترجم}}|مترجمان}}: $1",
 	"supportedlanguages-recenttranslations": "ترجمه‌های اخیر",
 	"supportedlanguages-count": "در مجموع $1 {{PLURAL:$1|زبان|زبان}}.",
@@ -376,6 +379,7 @@
 	"tux-editor-message-tools-history": "تاریخچه",
 	"tux-editor-message-tools-delete": "حذف",
 	"tux-editor-message-tools-translations": "همهٔ ترجمه‌ها",
+	"tux-editor-message-tools-linktothis": "پیوند به این پیام",
 	"tux-editor-loading": "در حال بارگیری...",
 	"translate-search-more-languages-info": "$1 {{PLURAL:$1|زبان}} بیشتر",
 	"translate-statsbar-tooltip": "$1٪ ترجمه‌شده، ٪$2 بازبینی‌شده",
@@ -384,5 +388,5 @@
 	"translate-ulsdep-title": "خطای تنظیمات",
 	"translate-ulsdep-body": "افزونهٔ ترجمه به [https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:UniversalLanguageSelector افزونهٔ انتخاب زبان جهانی] وابستگی دارد.",
 	"tux-session-expired": "شما دیگر داخل سامانه نیستید. لطفاً در یک زبانهٔ دیگر به سامانه وارد شوید. یا این که یک نسخه از ترجمه‌های ذخیره‌نشده تهیه کنید، به سامانه وارد شوید، به این صفحه بازگردید و ترجمه‌های خود را دوباره وارد کنید.",
-	"tux-nojs": "این صفحه به جاوااسکریپت نیاز دارد."
+	"tux-nojs": "این ابزار بدون جاوااسکریپت کار نمی‌کند. جاوااسکریپت غیرفعال است، از کار افتاده است، یا توسط این مرورگر پشتیبانی نمی‌شود."
 }

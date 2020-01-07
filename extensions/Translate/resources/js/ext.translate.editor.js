@@ -1,6 +1,6 @@
 /* global autosize */
 
-( function ( $, mw, autosize ) {
+( function () {
 	'use strict';
 
 	/**
@@ -182,7 +182,7 @@
 			var translation, editSummary,
 				translateEditor = this;
 
-			mw.translateHooks.run( 'beforeSubmit', translateEditor.$editor );
+			mw.hook( 'mw.translate.editor.beforeSubmit' ).fire( translateEditor.$editor );
 			translation = translateEditor.$editor.find( '.editcolumn textarea' ).val();
 			editSummary = translateEditor.$editor.find( '.tux-input-editsummary' ).val() || '';
 
@@ -274,7 +274,7 @@
 			}
 
 			mw.translate.dirty = false;
-			mw.translateHooks.run( 'afterSubmit', this.$editor );
+			mw.hook( 'mw.translate.editor.afterSubmit' ).fire( this.$editor );
 
 			if ( mw.track ) {
 				mw.track( 'ext.translate.event.translation', this.message );
@@ -622,7 +622,9 @@
 					e.stopPropagation();
 					translateEditor.$editor.find( '.shortcut-activated:visible' ).eq( index ).trigger( 'click' );
 					// Update numbers and locations after trigger should be completed
-					window.setTimeout( function () { translateEditor.showShortcuts(); }, 100 );
+					window.setTimeout( function () {
+						translateEditor.showShortcuts();
+					}, 100 );
 				}
 
 				if ( e.which === 18 && e.type === 'keyup' ) {
@@ -658,7 +660,7 @@
 
 				// When there is content in the editor enable the button.
 				// But do not enable when some saving is not finished yet.
-				if ( $.trim( current ) && !translateEditor.saving ) {
+				if ( current.trim() && !translateEditor.saving ) {
 					$pasteSourceButton.addClass( 'hide' );
 					$saveButton.prop( 'disabled', false );
 				} else {
@@ -717,6 +719,16 @@
 					if ( $textarea.val().trim() === '' ) {
 						$editSummary.prop( 'disabled', true );
 					}
+				} ).on( 'keydown', function ( e ) {
+					if ( !e.ctrlKey || e.keyCode !== 13 ) {
+						return;
+					}
+
+					if ( !$saveButton.is( ':disabled' ) ) {
+						$saveButton.click();
+						return;
+					}
+					$skipButton.click();
 				} );
 
 				if ( originalTranslation !== null ) {
@@ -851,7 +863,7 @@
 					.addClass( 'row shortcutinfo' )
 					.text( mw.msg(
 						'tux-editor-shortcut-info',
-						( prefix + 's' ).toUpperCase(),
+						'CTRL-ENTER',
 						( prefix + 'd' ).toUpperCase(),
 						'ALT',
 						( prefix + 'b' ).toUpperCase()
@@ -1070,7 +1082,7 @@
 									target: '_blank'
 								} )
 								.addClass( 'message-desc-edit' )
-								.on( 'click', $.proxy( this.showDocumentationEditor, this ) )
+								.on( 'click', this.showDocumentationEditor.bind( this ) )
 							)
 					);
 
@@ -1158,7 +1170,7 @@
 				$next.data( 'translateeditor' ).init();
 			}
 
-			mw.translateHooks.run( 'afterEditorShown', this.$editor );
+			mw.hook( 'mw.translate.editor.afterEditorShown' ).fire( this.$editor );
 
 			return false;
 		},
@@ -1309,4 +1321,4 @@
 			};
 		}() );
 	}
-}( jQuery, mediaWiki, autosize ) );
+}() );

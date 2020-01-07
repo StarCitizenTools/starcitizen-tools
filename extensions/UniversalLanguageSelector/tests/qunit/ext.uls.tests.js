@@ -17,7 +17,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	QUnit.module( 'ext.uls', QUnit.newMwEnvironment() );
@@ -63,7 +63,9 @@
 			assert.ok( successSave, 'Options saving API did not produce an error.' );
 			// Delete old options
 			prefs.set( prefName, undefined );
-			prefs.save( done );
+			prefs.save( function () {
+				done();
+			} );
 		} );
 	} );
 
@@ -88,4 +90,4 @@
 			'Tagalog is one of the languages presented to users in the Philippines.'
 		);
 	} );
-}( jQuery, mediaWiki ) );
+}() );

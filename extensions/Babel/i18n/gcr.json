@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"LeGuyanaisPure"
+		]
+	},
+	"babel": "Lenfòrmasyon Babel asou {{GENDER:$1|itilizatò}}-a",
+	"babel-desc": "Ajouté fongsyon-an di annanlizò sentagsik-a <code>#babel</code> ki ka pèrmèt kréyasyon otonmatik-a di roun kolonn di bwèt itilizatò Babel ké posibilité-a di enkli dé modèl lokal",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Katégori:Babel - Itilizatò pa lanng",
+	"babel-autocreate-reason": "Kréyasyon otonmatik di paj-a dé katégori [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Itilizatò-ya ki annan sa katégori endiké ki yé gen nivo-a $1 pou lanng-an $2.",
+	"babel-autocreate-text-main": "Itilizatò-ya ki annan sa katégori endiké yé konnésans di lanng-an $1.",
+	"babel-0": "{{GENDER:$4|Sa itilizatò}} pa gen [[$1|pyès]] konnésans an [[$2|$3]] (oben ka konprann li ké rounlo difikilté).",
+	"babel-1": "{{GENDER:$4|Sa itilizatò}} pouvé kontribiyé ké roun nivo ki [[$1|élémantèr]] an [[$2|$3]].",
+	"babel-2": "{{GENDER:$4|Sa itilizatò}} gen roun konnésans ki [[$1|mwayen]] an [[$2|$3]].",
+	"babel-3": "{{GENDER:$4|Sa itilizatò}} ka dispozé di roun konnésans ki [[$1|avansé]] an [[$2|$3]].",
+	"babel-4": "{{GENDER:$4|Sa itilizatò}} gen roun konnésans ki pròch di [[$1|lanng matèrnèl-a]] an [[$2|$3]].",
+	"babel-5": "{{GENDER:$4|Sa itilizatò-a}} gen roun nivo di konnésans ki [[$1|profésyonnèl]] an [[$2|$3]].",
+	"babel-N": "{{GENDER:$4|Sa itilizatò}} ka palé an [[$2|$3]] kou [[$1|lanng matèrnèl]].",
+	"babel-0-n": "{{GENDER:$4|Sa itilizatò}} gen [[$1|pyès]] konnésans an [[$2|Kriyòl Gwiyannen]] (oben ka konprann li ké rounlo difikilté).",
+	"babel-1-n": "{{GENDER:$4|Sa itilizatò}} ka dispozé di konnésans ki [[$1|bazik]] an [[$2|Kriyòl Gwiyannen]].",
+	"babel-2-n": "{{GENDER:$4|Sa itilizatò}} ka dispozé di roun [[$1|nivo entèrmédjèr]] di konnésans an [[$2|Kriyòl Gwiyannen]].",
+	"babel-3-n": "{{GENDER:$4|Sa itilizatò}} ka dispozé di konnésans ki [[$1|avansé]] an [[$2|Kriyòl Gwiyannen]].",
+	"babel-4-n": "{{GENDER:$4|Sa itilizatò}} ka dispozé di konnésans ki pròch di [[$1|lanng matèrnèl-a]] an [[$2|Kriyòl Gwiyannen]].",
+	"babel-5-n": "{{GENDER:$4|Sa itilizatò}} ka dispozé di roun nivo di konnésans ki [[$1|profésyonnèl]] di [[$2|Kriyòl Gwiyannen]].",
+	"babel-N-n": "{{GENDER:$4|Sa itilizatò}} gen pou [[$1|lanng matèrnèl]] [[$2|Kriyòl Gwiyannen]]-an.",
+	"babel-footer": "Itilizatò pa lanng",
+	"apihelp-query+babel-description": "Òbténi dé lenfòrmasyon asou lanng-yan ki konnèt pa itilizatò-a",
+	"apihelp-query+babel-summary": "Òbténi dé lenfòrmasyon asou lanng-yan ki itilizatò-a ka konnèt",
+	"apihelp-query+babel-param-user": "Itilizatò apropo dikèl òbténi dé lenfòrmasyon",
+	"apihelp-query+babel-example-1": "Òbténi lenfòrmasyon-yan di Babel pou itilizatò-a <kbd>Example</kbd>"
+}

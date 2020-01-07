@@ -11,7 +11,8 @@
 			"Rodrigo codignoli",
 			"He7d3r",
 			"Fasouzafreitas",
-			"Felipe L. Ewald"
+			"Felipe L. Ewald",
+			"Eduardo Addad de Oliveira"
 		]
 	},
 	"pagetranslation": "Tradução de páginas",
@@ -32,6 +33,7 @@
 	"tpt-oldrevision": "$2 não é a versão atual da página [[:$1]].\nApenas as versões atuais pode ser marcadas para tradução.",
 	"tpt-notsuitable": "A página $1 não está adequada para tradução.\nTenha certeza que ela tenha marcas <nowiki><translate></nowiki> e sintaxe válida.",
 	"tpt-saveok": "A página [[:$1]] foi marcada para tradução com $2 {{PLURAL:$2|unidade|unidades}} de tradução.\nA página já pode ser <span class=\"plainlinks\">[$3 traduzida]</span>.",
+	"tpt-saveok-first": "Você pode [[Special:PageMigration|importar tradução pré-existente]] para esta página (se houver).",
 	"tpt-offer-notify": "Você pode <span class=\"plainlinks\">[$1 notificar tradutores]</span> sobre esta página.",
 	"tpt-showpage-intro": "A seguir estão listadas as unidades de tradução novas, existentes e removidas.\nAntes de marcar esta versão para tradução, verifique se as mudanças nas unidades de tradução foram minimizadas, para que seja evitado trabalho desnecessário aos tradutores.",
 	"tpt-mark-summary": "Marcou esta versão para tradução",
@@ -107,7 +109,7 @@
 	"log-description-pagetranslation": "Registro para operações relacionadas com o sistema de tradução de páginas",
 	"log-name-pagetranslation": "Registro de tradução de páginas",
 	"logentry-pagetranslation-mark": "$1 {{GENDER:$2|marcou}} $3 para tradução",
-	"logentry-pagetranslation-unmark": "$1 {{GENDER:$2|removeu}} $3 das páginas para tradução",
+	"logentry-pagetranslation-unmark": "$1 {{GENDER:$2|removeu}} $3 do sistema de tradução",
 	"logentry-pagetranslation-moveok": "$1 {{GENDER:$2|completou}} a renomeação da página traduzível $3 para $4",
 	"logentry-pagetranslation-movenok": "$1 {{GENDER:$2|encontrou}} um problema ao mover a página $3 para $4",
 	"logentry-pagetranslation-deletefok": "$1 {{GENDER:$2|completou}} a eliminação da página traduzível $3",
@@ -143,6 +145,8 @@
 	"pt-movepage-list-pages": "Lista de páginas para serem movidas",
 	"pt-movepage-list-translation": "{{PLURAL:$1|Página|Páginas}} de tradução",
 	"pt-movepage-list-section": "{{PLURAL:$1|Página de unidade|Páginas de unidades}} de tradução",
+	"pt-movepage-list-translatable": "{{PLURAL:$1|Subpágina marcada|Subpáginas marcadas}} para tradução",
+	"pt-movepage-list-translatable-note": "Essas páginas devem ser movidas separadamente.",
 	"pt-movepage-list-other": "{{PLURAL:$1|Outra subpágina|Outras subpáginas}}",
 	"pt-movepage-list-count": "Há, no total, $1 {{PLURAL:$1|página para ser movida|páginas para serem movidas}}.",
 	"pt-movepage-legend": "Mover página traduzível",

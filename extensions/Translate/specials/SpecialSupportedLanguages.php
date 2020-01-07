@@ -19,8 +19,6 @@
  * @ingroup SpecialPage TranslateSpecialPage Stats
  */
 class SpecialSupportedLanguages extends SpecialPage {
-	use CompatibleLinkRenderer;
-
 	/// Whether to skip and regenerate caches
 	protected $purge = false;
 
@@ -35,7 +33,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 		return 'wiki';
 	}
 
-	function getDescription() {
+	public function getDescription() {
 		return $this->msg( 'supportedlanguages' )->text();
 	}
 
@@ -48,6 +46,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 
 		$this->setHeaders();
 		$out->addModules( 'ext.translate.special.supportedlanguages' );
+		$out->addModuleStyles( 'ext.translate.special.supportedlanguages' );
 
 		$out->addHelpLink(
 			'Help:Extension:Translate/Statistics_and_reporting#List_of_languages_and_translators'
@@ -56,8 +55,10 @@ class SpecialSupportedLanguages extends SpecialPage {
 		$this->outputHeader( 'supportedlanguages-summary' );
 		$dbr = wfGetDB( DB_REPLICA );
 		if ( $dbr->getType() === 'sqlite' ) {
-			$out->addWikiText( '<div class=errorbox>SQLite is not supported.</div>' );
-
+			$out->wrapWikiMsg(
+				'<div class="errorbox">$1</div>',
+				'supportedlanguages-sqlite-error'
+			);
 			return;
 		}
 
@@ -100,9 +101,9 @@ class SpecialSupportedLanguages extends SpecialPage {
 		// Information to be used inside the foreach loop.
 		$linkInfo = [];
 		$linkInfo['rc']['title'] = SpecialPage::getTitleFor( 'Recentchanges' );
-		$linkInfo['rc']['msg'] = $this->msg( 'supportedlanguages-recenttranslations' )->escaped();
+		$linkInfo['rc']['msg'] = $this->msg( 'supportedlanguages-recenttranslations' )->text();
 		$linkInfo['stats']['title'] = SpecialPage::getTitleFor( 'LanguageStats' );
-		$linkInfo['stats']['msg'] = $this->msg( 'languagestats' )->escaped();
+		$linkInfo['stats']['msg'] = $this->msg( 'languagestats' )->text();
 
 		$local = Language::fetchLanguageName( $code, $lang->getCode(), 'all' );
 		$native = Language::fetchLanguageName( $code, null, 'all' );
@@ -120,7 +121,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 
 		// Add useful links for language stats and recent changes for the language.
 		$links = [];
-		$links[] = $this->makeKnownLink(
+		$links[] = $this->getLinkRenderer()->makeKnownLink(
 			$linkInfo['stats']['title'],
 			$linkInfo['stats']['msg'],
 			[],
@@ -129,7 +130,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 				'suppresscomplete' => '1'
 			]
 		);
-		$links[] = $this->makeKnownLink(
+		$links[] = $this->getLinkRenderer()->makeKnownLink(
 			$linkInfo['rc']['title'],
 			$linkInfo['rc']['msg'],
 			[],
@@ -239,19 +240,32 @@ class SpecialSupportedLanguages extends SpecialPage {
 		global $wgTranslateMessageNamespaces;
 
 		$dbr = wfGetDB( DB_REPLICA, 'vslow' );
-		$tables = [ 'page', 'revision' ];
+
+		if ( class_exists( ActorMigration::class ) ) {
+			$actorQuery = ActorMigration::newMigration()->getJoin( 'rev_user' );
+		} else {
+			$actorQuery = [
+				'tables' => [],
+				'fields' => [ 'rev_user_text' => 'rev_user_text' ],
+				'joins' => [],
+			];
+		}
+
+		$tables = [ 'page', 'revision' ] + $actorQuery['tables'];
 		$fields = [
-			'rev_user_text',
+			'rev_user_text' => $actorQuery['fields']['rev_user_text'],
 			'count(page_id) as count'
 		];
 		$conds = [
 			'page_title' . $dbr->buildLike( $dbr->anyString(), '/', $code ),
 			'page_namespace' => $wgTranslateMessageNamespaces,
-			'page_id=rev_page',
 		];
-		$options = [ 'GROUP BY' => 'rev_user_text', 'ORDER BY' => 'NULL' ];
+		$options = [ 'GROUP BY' => $actorQuery['fields']['rev_user_text'], 'ORDER BY' => 'NULL' ];
+		$joins = [
+			'revision' => [ 'JOIN', 'page_id=rev_page' ],
+		] + $actorQuery['joins'];
 
-		$res = $dbr->select( $tables, $fields, $conds, __METHOD__, $options );
+		$res = $dbr->select( $tables, $fields, $conds, __METHOD__, $options, $joins );
 
 		$data = [];
 		foreach ( $res as $row ) {
@@ -320,6 +334,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 		$links = [];
 		$statsTable = new StatsTable();
 
+		arsort( $users );
 		foreach ( $users as $username => $count ) {
 			$title = Title::makeTitleSafe( NS_USER, $username );
 			$enc = htmlspecialchars( $username );
@@ -339,7 +354,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 					->numParams( $count, $last )->text();
 				$last = max( 1, min( $period, $last ) );
 				$styles['border-bottom'] = '3px solid #' .
-					$statsTable->getBackgroundColor( $period - $last, $period );
+					$statsTable->getBackgroundColor( ( $period - $last ) / $period );
 			} else {
 				$enc = "<del>$enc</del>";
 			}
@@ -349,7 +364,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 				$attribs['style'] = $stylestr;
 			}
 
-			$links[] = $this->makeLink( $title, $enc, $attribs );
+			$links[] = $this->getLinkRenderer()->makeLink( $title, new HtmlArmor( $enc ), $attribs );
 		}
 
 		// for GENDER support
@@ -390,14 +405,23 @@ class SpecialSupportedLanguages extends SpecialPage {
 				continue;
 			}
 
-			$tables = [ 'user', 'revision' ];
+			if ( class_exists( ActorMigration::class ) ) {
+				$actorQuery = ActorMigration::newMigration()->getJoin( 'rev_user' );
+				$tables = [ 'user', 'r' => [ 'revision' ] + $actorQuery['tables'] ];
+				$joins = [
+					'r' => [ 'JOIN', 'user_id = rev_user' ],
+				] + $actorQuery['joins'];
+			} else {
+				$tables = [ 'user', 'revision' ];
+				$joins = [ 'revision' => [ 'JOIN', 'user_id = rev_user' ] ];
+			}
+
 			$fields = [ 'user_name', 'user_editcount', 'MAX(rev_timestamp) as lastedit' ];
 			$conds = [
 				'user_name' => $username,
-				'user_id = rev_user',
 			];
 
-			$res = $dbr->selectRow( $tables, $fields, $conds, __METHOD__ );
+			$res = $dbr->selectRow( $tables, $fields, $conds, __METHOD__, [], $joins );
 			$data[$username] = [ $res->user_editcount, $res->lastedit ];
 
 			$cache->set( $cachekey, $data[$username], 3600 );
@@ -433,7 +457,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 		for ( $i = 0; $i <= $period; $i += 30 ) {
 			$iFormatted = htmlspecialchars( $this->getLanguage()->formatNum( $i ) );
 			$legend .= '<span style="background-color:#' .
-				$statsTable->getBackgroundColor( $period - $i, $period ) .
+				$statsTable->getBackgroundColor( ( $period - $i ) / $period ) .
 				"\"> $iFormatted</span>";
 		}
 

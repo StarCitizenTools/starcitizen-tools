@@ -1,5 +1,6 @@
-== cldr 2016.08 ==
-Released at 2016-08-25.
+== cldr 2019.04 ==
+Released at 2019-04-25.
 
 === Noteworthy changes ===
-* Thiemo Mättig changed "Multiple Languages" and "Unknown Language" to "multiple languages" and "unknown languages" in English.
+* PHP entry point has been removed. Warning will be displayed for deprecated PHP entry point. (T140007)
+* Maintenance and localization updates.

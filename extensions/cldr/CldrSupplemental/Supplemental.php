@@ -14,8 +14,10 @@ $currencyFractions = [
 		'rounding' => '0',
 	],
 	'AMD' => [
-		'digits' => '0',
+		'digits' => '2',
 		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'BHD' => [
 		'digits' => '3',
@@ -52,8 +54,10 @@ $currencyFractions = [
 		'rounding' => '0',
 	],
 	'COP' => [
-		'digits' => '0',
+		'digits' => '2',
 		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'CRC' => [
 		'digits' => '2',
@@ -89,8 +93,10 @@ $currencyFractions = [
 		'rounding' => '0',
 	],
 	'GYD' => [
-		'digits' => '0',
+		'digits' => '2',
 		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'HUF' => [
 		'digits' => '2',
@@ -99,8 +105,10 @@ $currencyFractions = [
 		'cashRounding' => '0',
 	],
 	'IDR' => [
-		'digits' => '0',
+		'digits' => '2',
 		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'IQD' => [
 		'digits' => '0',
@@ -171,16 +179,20 @@ $currencyFractions = [
 		'rounding' => '0',
 	],
 	'MNT' => [
-		'digits' => '0',
+		'digits' => '2',
 		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'MRO' => [
 		'digits' => '0',
 		'rounding' => '0',
 	],
 	'MUR' => [
-		'digits' => '0',
+		'digits' => '2',
 		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'NOK' => [
 		'digits' => '2',
@@ -193,8 +205,10 @@ $currencyFractions = [
 		'rounding' => '0',
 	],
 	'PKR' => [
-		'digits' => '0',
+		'digits' => '2',
 		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'PYG' => [
 		'digits' => '0',
@@ -243,8 +257,10 @@ $currencyFractions = [
 		'rounding' => '0',
 	],
 	'TZS' => [
-		'digits' => '0',
+		'digits' => '2',
 		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'TWD' => [
 		'digits' => '2',
@@ -257,12 +273,24 @@ $currencyFractions = [
 		'rounding' => '0',
 	],
 	'UZS' => [
-		'digits' => '0',
+		'digits' => '2',
 		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'UYI' => [
 		'digits' => '0',
 		'rounding' => '0',
+	],
+	'UYW' => [
+		'digits' => '4',
+		'rounding' => '0',
+	],
+	'VEF' => [
+		'digits' => '2',
+		'rounding' => '0',
+		'cashDigits' => '0',
+		'cashRounding' => '0',
 	],
 	'VND' => [
 		'digits' => '0',
@@ -766,7 +794,7 @@ $localeCurrencies = [
 		'EUR',
 	],
 	'MR' => [
-		'MRO',
+		'MRU',
 	],
 	'MS' => [
 		'XCD',
@@ -1033,7 +1061,7 @@ $localeCurrencies = [
 		'XCD',
 	],
 	'VE' => [
-		'VEF',
+		'VES',
 	],
 	'VG' => [
 		'USD',

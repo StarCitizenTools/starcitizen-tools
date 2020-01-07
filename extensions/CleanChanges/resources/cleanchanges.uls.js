@@ -1,9 +1,9 @@
-/*!
+/*
  *
  * @author Niklas Laxström
  * @license GPL-2.0-or-later
  */
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	function useULS( $trigger ) {
@@ -46,6 +46,7 @@
 				$trigger.val( '/' + language );
 				update( language );
 			},
+			ulsPurpose: 'clean-changes',
 			quickList: mw.uls.getFrequentLanguageList
 		} );
 	}
@@ -59,4 +60,4 @@
 			} );
 		}
 	} );
-}( jQuery, mediaWiki ) );
+}() );

@@ -20,10 +20,10 @@ class TranslateMoveJob extends Job {
 	 * @param Title $target
 	 * @param array $params should include base-source and base-target
 	 * @param User $performer
-	 * @return TranslateMoveJob
+	 * @return self
 	 */
 	public static function newJob( Title $source, Title $target, array $params,
-		/*User*/$performer
+		/*User*/ $performer
 	) {
 		$job = new self( $source );
 		$job->setUser( FuzzyBot::getUser() );
@@ -136,6 +136,9 @@ class TranslateMoveJob extends Job {
 		return $this->params['performer'];
 	}
 
+	/**
+	 * @param Title|string $target
+	 */
 	public function setTarget( $target ) {
 		if ( $target instanceof Title ) {
 			$this->params['target'] = $target->getPrefixedText();
@@ -206,9 +209,7 @@ class TranslateMoveJob extends Job {
 			}
 		} else {
 			if ( !$suppressCount ) {
-				$originalLevel = isset( $wgGroupPermissions['*']['suppressredirect'] ) ?
-					$wgGroupPermissions['*']['suppressredirect'] :
-					null;
+				$originalLevel = $wgGroupPermissions['*']['suppressredirect'] ?? null;
 				$wgGroupPermissions['*']['suppressredirect'] = true;
 			}
 			++$suppressCount;

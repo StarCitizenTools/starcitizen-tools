@@ -11,8 +11,6 @@
  */
 
 class SpecialAggregateGroups extends SpecialPage {
-	use CompatibleLinkRenderer;
-
 	protected $hasPermission = false;
 
 	public function __construct() {
@@ -33,6 +31,12 @@ class SpecialAggregateGroups extends SpecialPage {
 		if ( $this->getUser()->isAllowed( 'translate-manage' ) ) {
 			$this->hasPermission = true;
 		}
+
+		$groupsPreload = array_merge(
+			MessageGroups::getGroupsByType( WikiPageMessageGroup::class ),
+			MessageGroups::getGroupsByType( AggregateMessageGroup::class )
+		);
+		TranslateMetadata::preloadGroups( array_keys( $groupsPreload ) );
 
 		$groups = MessageGroups::getAllGroups();
 		uasort( $groups, [ 'MessageGroups', 'groupLabelSort' ] );
@@ -56,15 +60,14 @@ class SpecialAggregateGroups extends SpecialPage {
 			return;
 		}
 
-		$this->showAggregateGroups( $aggregates, $pages );
+		$this->showAggregateGroups( $aggregates );
 	}
 
 	/**
 	 * @param AggregateMessageGroup $group
-	 * @param array $pages
 	 * @return string
 	 */
-	protected function showAggregateGroup( $group, array $pages ) {
+	protected function showAggregateGroup( $group ) {
 		$out = '';
 		$id = $group->getId();
 		$label = $group->getLabel();
@@ -166,9 +169,8 @@ class SpecialAggregateGroups extends SpecialPage {
 
 	/**
 	 * @param array $aggregates
-	 * @param array $pages
 	 */
-	protected function showAggregateGroups( array $aggregates, array $pages ) {
+	protected function showAggregateGroups( array $aggregates ) {
 		$out = $this->getOutput();
 		$out->addModules( 'ext.translate.special.aggregategroups' );
 
@@ -181,10 +183,10 @@ class SpecialAggregateGroups extends SpecialPage {
 		$out->addHTML( $nojs );
 
 		/**
-		 * @var $group AggregateMessageGroup
+		 * @var AggregateMessageGroup $group
 		 */
 		foreach ( $aggregates as $group ) {
-			$out->addHTML( $this->showAggregateGroup( $group, $pages ) );
+			$out->addHTML( $this->showAggregateGroup( $group ) );
 		}
 
 		// Add new group if user has permissions
@@ -232,6 +234,14 @@ class SpecialAggregateGroups extends SpecialPage {
 		$subgroups = MessageGroups::getGroupsById( $subgroupIds );
 		uasort( $subgroups, [ 'MessageGroups', 'groupLabelSort' ] );
 
+		// Avoid potentially thousands of separate database queries
+		$lb = new LinkBatch();
+		foreach ( $subgroups as $group ) {
+			$lb->addObj( $group->getTitle() );
+		}
+		$lb->setCaller( __METHOD__ );
+		$lb->execute();
+
 		// Add missing invalid group ids back, not returned by getGroupsById
 		foreach ( $subgroupIds as $id ) {
 			if ( !isset( $subgroups[$id] ) ) {
@@ -251,7 +261,7 @@ class SpecialAggregateGroups extends SpecialPage {
 			}
 
 			if ( $group ) {
-				$text = $this->makeKnownLink( $group->getTitle() );
+				$text = $this->getLinkRenderer()->makeKnownLink( $group->getTitle() );
 				$note = MessageGroups::getPriority( $id );
 			} else {
 				$text = htmlspecialchars( $id );

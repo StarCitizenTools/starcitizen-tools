@@ -72,6 +72,7 @@ class SpecialTranslationStats extends SpecialPage {
 		$opts->add( 'group', '' );
 		$opts->add( 'uselang', '' );
 		$opts->add( 'start', '' );
+		$opts->add( 'imagescale', 1.0 );
 		$opts->fetchValuesFromRequest( $this->getRequest() );
 
 		$pars = explode( ';', $par );
@@ -90,6 +91,7 @@ class SpecialTranslationStats extends SpecialPage {
 		$opts->validateIntBounds( 'days', 1, 10000 );
 		$opts->validateIntBounds( 'width', 200, 1000 );
 		$opts->validateIntBounds( 'height', 200, 1000 );
+		$opts->validateBounds( 'imagescale', 1.0, 4.0 );
 
 		if ( $opts['start'] !== '' ) {
 			$opts['start'] = rtrim( wfTimestamp( TS_ISO_8601, $opts['start'] ), 'Z' );
@@ -122,7 +124,7 @@ class SpecialTranslationStats extends SpecialPage {
 		if ( $this->including() ) {
 			$this->getOutput()->addHTML( $this->image( $opts ) );
 		} elseif ( $opts['graphit'] ) {
-			if ( !class_exists( 'PHPlot' ) ) {
+			if ( !class_exists( PHPlot::class ) ) {
 				header( 'HTTP/1.0 500 Multi fail' );
 				echo 'PHPlot not found';
 			}
@@ -142,6 +144,7 @@ class SpecialTranslationStats extends SpecialPage {
 	/**
 	 * Constructs the form which can be used to generate custom graphs.
 	 * @param FormOptions $opts
+	 * @suppress SecurityCheck-DoubleEscaped Intentionally outputting what user should type
 	 */
 	protected function form( FormOptions $opts ) {
 		global $wgScript;
@@ -341,7 +344,7 @@ class SpecialTranslationStats extends SpecialPage {
 	protected function groupSelector() {
 		$groups = MessageGroups::singleton()->getGroups();
 		/**
-		 * @var $group MessageGroup
+		 * @var MessageGroup $group
 		 */
 		foreach ( $groups as $key => $group ) {
 			if ( !$group->exists() ) {
@@ -372,12 +375,21 @@ class SpecialTranslationStats extends SpecialPage {
 	 */
 	protected function image( FormOptions $opts ) {
 		$title = $this->getPageTitle();
-		$cgiparams = wfArrayToCgi( [ 'graphit' => true ], $opts->getAllValues() );
-		$href = $title->getLocalURL( $cgiparams );
+
+		$params = $opts->getChangedValues();
+		$params[ 'graphit' ] = true;
+		$src = $title->getLocalURL( $params );
+
+		$srcsets = [];
+		foreach ( [ 1.5, 2, 3 ] as $scale ) {
+			$params[ 'imagescale' ] = $scale;
+			$srcsets[] = "{$title->getLocalURL( $params )} {$scale}x";
+		}
 
 		return Xml::element( 'img',
 			[
-				'src' => $href,
+				'src' => $src,
+				'srcset' => implode( ', ', $srcsets ),
 				'width' => $opts['width'],
 				'height' => $opts['height'],
 			]
@@ -420,9 +432,10 @@ class SpecialTranslationStats extends SpecialPage {
 		$conds = [];
 		$type = __METHOD__;
 		$options = [];
+		$joins = [];
 
-		$so->preQuery( $tables, $fields, $conds, $type, $options, $start, $end );
-		$res = $dbr->select( $tables, $fields, $conds, $type, $options );
+		$so->preQuery( $tables, $fields, $conds, $type, $options, $joins, $start, $end );
+		$res = $dbr->select( $tables, $fields, $conds, $type, $options, $joins );
 		wfDebug( __METHOD__ . "-queryend\n" );
 
 		// Start processing the data
@@ -557,10 +570,11 @@ class SpecialTranslationStats extends SpecialPage {
 	public function draw( FormOptions $opts ) {
 		global $wgTranslatePHPlotFont;
 
+		$imageScale = $opts->getValue( 'imagescale' );
 		$width = $opts->getValue( 'width' );
 		$height = $opts->getValue( 'height' );
 		// Define the object
-		$plot = new PHPlot( $width, $height );
+		$plot = new PHPlot( $width * $imageScale, $height * $imageScale );
 
 		list( $legend, $resData ) = $this->getData( $opts );
 		$count = count( $resData );
@@ -585,22 +599,24 @@ class SpecialTranslationStats extends SpecialPage {
 		}
 
 		$font = FCFontFinder::findFile( $this->getLanguage()->getCode() );
-
-		if ( $font ) {
-			$plot->SetDefaultTTFont( $font );
-		} else {
-			$plot->SetDefaultTTFont( $wgTranslatePHPlotFont );
+		if ( !$font ) {
+			$font = $wgTranslatePHPlotFont;
 		}
+		$numberFont = FCFontFinder::findFile( 'en' );
+		$plot->SetDefaultTTFont( $font );
+		$plot->SetFontTTF( 'generic', $font, 12 * $imageScale );
+		$plot->SetFontTTF( 'legend', $font, 12 * $imageScale );
+		$plot->SetFontTTF( 'x_title', $font, 10 * $imageScale );
+		$plot->SetFontTTF( 'y_title', $font, 10 * $imageScale );
+		$plot->SetFontTTF( 'x_label', $numberFont, 8 * $imageScale );
+		$plot->SetFontTTF( 'y_label', $numberFont, 8 * $imageScale );
+
 		$plot->SetDataValues( $data );
 
 		if ( $legend !== null ) {
 			$plot->SetLegend( $legend );
 		}
 
-		$numberFont = FCFontFinder::findFile( 'en' );
-
-		$plot->setFont( 'x_label', $numberFont, 8 );
-		$plot->setFont( 'y_label', $numberFont, 8 );
 		// Give grep a chance to find the usages:
 		// translate-stats-edits, translate-stats-users, translate-stats-registrations,
 		// translate-stats-reviews, translate-stats-reviewers
@@ -698,10 +714,11 @@ interface TranslationStatsInterface {
 	 * @param array &$conds Empty array. Append select conditions.
 	 * @param string &$type Append graph type (used to identify queries).
 	 * @param array &$options Empty array. Append extra query options.
+	 * @param array &$joins Empty array. Append extra join conditions.
 	 * @param string $start Precalculated start cutoff timestamp
 	 * @param string $end Precalculated end cutoff timestamp
 	 */
-	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, $start, $end );
+	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, &$joins, $start, $end );
 
 	/**
 	 * Return the indexes which this result contributes to.
@@ -721,7 +738,7 @@ interface TranslationStatsInterface {
 	/**
 	 * Return the timestamp associated with this result row.
 	 * @param array $row Database Result Row
-	 * @return \string Timestamp.
+	 * @return string Timestamp.
 	 */
 	public function getTimestamp( $row );
 
@@ -806,7 +823,7 @@ abstract class TranslationStatsBase implements TranslationStatsInterface {
  * @ingroup Stats
  */
 class TranslatePerLanguageStats extends TranslationStatsBase {
-	/// array ( string => bool ) Cache used to count active users only once per day.
+	/** @var bool[] array( string => bool ) Cache used to count active users only once per day. */
 	protected $usercache;
 
 	protected $codes, $groups;
@@ -817,13 +834,14 @@ class TranslatePerLanguageStats extends TranslationStatsBase {
 		$opts->validateIntBounds( 'days', 1, 200 );
 	}
 
-	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, $start, $end ) {
+	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, &$joins, $start, $end ) {
 		global $wgTranslateMessageNamespaces;
 
 		$db = wfGetDB( DB_REPLICA );
 
 		$tables = [ 'recentchanges' ];
 		$fields = [ 'rc_timestamp' ];
+		$joins = [];
 
 		$conds = [
 			'rc_namespace' => $wgTranslateMessageNamespaces,
@@ -860,7 +878,14 @@ class TranslatePerLanguageStats extends TranslationStatsBase {
 		}
 
 		if ( $this->opts['count'] === 'users' ) {
-			$fields[] = 'rc_user_text';
+			if ( class_exists( ActorMigration::class ) ) {
+				$actorQuery = ActorMigration::newMigration()->getJoin( 'rc_user' );
+				$tables += $actorQuery['tables'];
+				$fields['rc_user_text'] = $actorQuery['fields']['rc_user_text'];
+				$joins += $actorQuery['joins'];
+			} else {
+				$fields[] = 'rc_user_text';
+			}
 		}
 
 		$type .= '-perlang';
@@ -991,12 +1016,13 @@ class TranslatePerLanguageStats extends TranslationStatsBase {
  * @ingroup Stats
  */
 class TranslateRegistrationStats extends TranslationStatsBase {
-	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, $start, $end ) {
+	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, &$joins, $start, $end ) {
 		$tables = 'user';
 		$fields = 'user_registration';
 		$conds = self::makeTimeCondition( 'user_registration', $start, $end );
 		$type .= '-registration';
 		$options = [];
+		$joins = [];
 	}
 
 	public function getTimestamp( $row ) {
@@ -1010,13 +1036,14 @@ class TranslateRegistrationStats extends TranslationStatsBase {
  * @ingroup Stats
  */
 class ReviewPerLanguageStats extends TranslatePerLanguageStats {
-	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, $start, $end ) {
+	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, &$joins, $start, $end ) {
 		global $wgTranslateMessageNamespaces;
 
 		$db = wfGetDB( DB_REPLICA );
 
 		$tables = [ 'logging' ];
 		$fields = [ 'log_timestamp' ];
+		$joins = [];
 
 		$conds = [
 			'log_namespace' => $wgTranslateMessageNamespaces,
@@ -1051,7 +1078,14 @@ class ReviewPerLanguageStats extends TranslatePerLanguageStats {
 		}
 
 		if ( $this->opts['count'] === 'reviewers' ) {
-			$fields[] = 'log_user_text';
+			if ( class_exists( ActorMigration::class ) ) {
+				$actorQuery = ActorMigration::newMigration()->getJoin( 'log_user' );
+				$tables += $actorQuery['tables'];
+				$fields['log_user_text'] = $actorQuery['fields']['log_user_text'];
+				$joins += $actorQuery['joins'];
+			} else {
+				$fields[] = 'log_user_text';
+			}
 		}
 
 		$type .= '-reviews';

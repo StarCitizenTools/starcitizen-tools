@@ -1,14 +1,11 @@
 <?php
 /**
- * Unit tests.
- *
  * @file
  * @author Niklas Laxström
  * @license GPL-2.0-or-later
  */
 
 /**
- * Unit tests for MessageIndexRebuildJob class.
  * @group Database
  * @group medium
  */
@@ -27,7 +24,7 @@ class MessageIndexRebuildJobTest extends MediaWikiTestCase {
 		$wgHooks['TranslatePostInitGroups'] = [];
 
 		$mg = MessageGroups::singleton();
-		$mg->setCache( wfGetCache( 'hash' ) );
+		$mg->setCache( new WANObjectCache( [ 'cache' => wfGetCache( 'hash' ) ] ) );
 		$mg->recache();
 
 		MessageIndex::setInstance( new HashMessageIndex() );
@@ -54,6 +51,6 @@ class MessageIndexRebuildJobTest extends MediaWikiTestCase {
 			$job,
 			'There is a job in the JobQueue'
 		);
-		$this->assertTrue( $job->run(), 'Job is executed succesfully' );
+		$this->assertTrue( $job->run(), 'Job is executed successfully' );
 	}
 }

@@ -97,7 +97,7 @@ class GroupStatistics extends Maintenance {
 	 * Definitions in this variable can be used to report weighted meta localisation
 	 * scores for the 50 most spoken languages.
 	 *
-	 * @todo Allow weighted reporting for all available languges.
+	 * @todo Allow weighted reporting for all available languages.
 	 */
 	public $localisedWeights = [
 		'wikimedia' => [
@@ -359,7 +359,7 @@ class GroupStatistics extends Maintenance {
 		}
 
 		// List of all languages.
-		$languages = Language::fetchLanguageNames( false );
+		$languages = TranslateUtils::getLanguageNames( null );
 		// Default sorting order by language code, users can sort wiki output.
 		ksort( $languages );
 
@@ -512,7 +512,7 @@ class GroupStatistics extends Maintenance {
 				continue;
 			}
 
-			// Output the the row
+			// Output the row
 			if ( !$wmfscore ) {
 				$out->blockstart();
 			}
@@ -677,5 +677,5 @@ class GroupStatistics extends Maintenance {
 	}
 }
 
-$maintClass = 'GroupStatistics';
+$maintClass = GroupStatistics::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

@@ -80,7 +80,7 @@ class Fuzzy extends Maintenance {
 	 * Public alternative for protected Maintenance::output() as we need to get
 	 * messages from the ChangeSyncer class to the commandline.
 	 * @param string $text The text to show to the user
-	 * @param string $channel Unique identifier for the channel.
+	 * @param string|null $channel Unique identifier for the channel.
 	 * @param bool $error Whether this is an error message
 	 */
 	public function myOutput( $text, $channel = null, $error = false ) {
@@ -207,10 +207,18 @@ class FuzzyScript {
 		global $wgTranslateMessageNamespaces;
 		$dbr = wfGetDB( DB_REPLICA );
 
+		if ( class_exists( ActorMigration::class ) ) {
+			$revWhere = ActorMigration::newMigration()->getWhere( $dbr, 'rev_user', $user );
+		} else {
+			$revWhere = [
+				'tables' => [],
+				'conds' => 'rev_user = ' . (int)$user->getId(),
+				'joins' => [],
+			];
+		}
+
 		$conds = [
-			'page_latest=rev_id',
-			'rev_text_id=old_id',
-			'rev_user' => $user->getId(),
+			$revWhere['conds'],
 			'page_namespace' => $wgTranslateMessageNamespaces,
 			'page_title' . $dbr->buildLike( $dbr->anyString(), '/', $dbr->anyString() ),
 		];
@@ -221,10 +229,15 @@ class FuzzyScript {
 		}
 
 		$rows = $dbr->select(
-			[ 'page', 'revision', 'text' ],
+			[ 'page', 'revision', 'text' ] + $revWhere['tables'],
 			[ 'page_title', 'page_namespace', 'old_text', 'old_flags' ],
 			$conds,
-			__METHOD__
+			__METHOD__,
+			[],
+			[
+				'revision' => [ 'JOIN', 'page_latest=rev_id' ],
+				'text' => [ 'JOIN', 'rev_text_id=old_id' ],
+			] + $revWhere['joins']
 		);
 
 		$messagesContents = [];
@@ -272,7 +285,7 @@ class FuzzyScript {
 		$content = ContentHandler::makeContent( $text, $title );
 		$status = $wikipage->doEditContent(
 			$content,
-			$comment ? $comment : 'Marking as fuzzy',
+			$comment ?: 'Marking as fuzzy',
 			EDIT_FORCE_BOT | EDIT_UPDATE,
 			false, /*base revision id*/
 			FuzzyBot::getUser()
@@ -283,5 +296,5 @@ class FuzzyScript {
 	}
 }
 
-$maintClass = 'Fuzzy';
+$maintClass = Fuzzy::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

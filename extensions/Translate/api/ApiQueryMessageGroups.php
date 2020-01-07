@@ -29,11 +29,12 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 		// Parameter root as all for all pages subgroups
 		if ( $params['root'] === 'all' ) {
 			$allGroups = MessageGroups::getAllGroups();
-			foreach ( $allGroups as $group ) {
+			foreach ( $allGroups as $id => $group ) {
 				if ( $group instanceof WikiPageMessageGroup ) {
-					$groups[] = $group;
+					$groups[$id] = $group;
 				}
 			}
+			TranslateMetadata::preloadGroups( array_keys( $groups ) );
 		} elseif ( $params['format'] === 'flat' ) {
 			if ( $params['root'] !== '' ) {
 				$group = MessageGroups::getGroup( $params['root'] );
@@ -42,29 +43,35 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 				}
 			} else {
 				$groups = MessageGroups::getAllGroups();
-				foreach ( MessageGroups::getDynamicGroups() as $id => $unused ) {
-					$groups[$id] = MessageGroups::getGroup( $id );
-				}
+				// Not sorted by default, so do it now
+				// Work around php bug: https://bugs.php.net/bug.php?id=50688
+				Wikimedia\suppressWarnings();
+				usort( $groups, [ 'MessageGroups', 'groupLabelSort' ] );
+				Wikimedia\restoreWarnings();
 			}
-
-			// Not sorted by default, so do it now
-			// Work around php bug: https://bugs.php.net/bug.php?id=50688
-			MediaWiki\suppressWarnings();
-			usort( $groups, [ 'MessageGroups', 'groupLabelSort' ] );
-			MediaWiki\restoreWarnings();
+			TranslateMetadata::preloadGroups( array_keys( $groups ) );
 		} elseif ( $params['root'] !== '' ) {
 			// format=tree from now on, as it is the only other valid option
 			$group = MessageGroups::getGroup( $params['root'] );
 			if ( $group instanceof AggregateMessageGroup ) {
-				$groups = MessageGroups::subGroups( $group );
+				$childIds = [];
+				$groups = MessageGroups::subGroups( $group, $childIds );
 				// The parent group is the first, ignore it
 				array_shift( $groups );
+				TranslateMetadata::preloadGroups( $childIds );
 			}
 		} else {
 			$groups = MessageGroups::getGroupStructure();
-			foreach ( MessageGroups::getDynamicGroups() as $id => $unused ) {
-				$groups[$id] = MessageGroups::getGroup( $id );
+			TranslateMetadata::preloadGroups( array_keys( MessageGroups::getAllGroups() ) );
+		}
+
+		if ( $params['root'] === '' ) {
+			$dynamicGroups = [];
+			foreach ( array_keys( MessageGroups::getDynamicGroups() ) as $id ) {
+				$dynamicGroups[$id] = MessageGroups::getGroup( $id );
 			}
+			// Have dynamic groups appear first in the list
+			$groups = $dynamicGroups + $groups;
 		}
 
 		// Do not list the sandbox group. The code that knows it

@@ -100,7 +100,7 @@ class NCL extends EnhancedChangesList {
 	}
 
 	/**
-	 * @param RCCacheEntry $rc
+	 * @param RCCacheEntry|null $rc
 	 * @return int
 	 */
 	protected function isLog( RCCacheEntry $rc = null ) {
@@ -127,7 +127,7 @@ class NCL extends EnhancedChangesList {
 	 * Format a line for enhanced recentchange (aka with JavaScript and block of lines).
 	 * @param RecentChange &$baseRC
 	 * @param bool $watched
-	 * @param int $linenumber
+	 * @param int|null $linenumber
 	 * @return string
 	 */
 	public function recentChangesLine( &$baseRC, $watched = false, $linenumber = null ) {
@@ -271,8 +271,8 @@ class NCL extends EnhancedChangesList {
 		$overrides = [ 'minor' => false, 'bot' => false ];
 		$oldid = 0;
 		foreach ( $block as $rcObj ) {
-			$oldid = $rcObj->mAttribs['rc_last_oldid'];
-			if ( $rcObj->mAttribs['rc_new'] ) {
+			$oldid = $rcObj->getAttribute( 'rc_last_oldid' );
+			if ( $rcObj->getAttribute( 'rc_new' ) ) {
 				$isnew = $overrides['new'] = true;
 			}
 			$u = $rcObj->_user;
@@ -328,8 +328,8 @@ class NCL extends EnhancedChangesList {
 					$nchanges[$n],
 					[],
 					[
-						'curid' => $block[0]->mAttribs['rc_cur_id'],
-						'diff' => $block[0]->mAttribs['rc_this_oldid'],
+						'curid' => $block[0]->getAttribute( 'rc_cur_id' ),
+						'diff' => $block[0]->getAttribute( 'rc_this_oldid' ),
 						'oldid' => $oldid
 					]
 				);
@@ -650,7 +650,7 @@ class NCL extends EnhancedChangesList {
 
 	/**
 	 * @param RCCacheEntry $rc
-	 * @param array $overrides
+	 * @param array|null $overrides
 	 * @return string
 	 */
 	protected function getFlags( $rc, array $overrides = null ) {
@@ -667,7 +667,7 @@ class NCL extends EnhancedChangesList {
 		$items = [];
 		foreach ( $map as $item => $data ) {
 			list( $field, $flag ) = $data;
-			$bool = isset( $overrides[$item] ) ? $overrides[$item] : $rc->getAttribute( $field );
+			$bool = $overrides[$item] ?? $rc->getAttribute( $field );
 			$items[] = $bool ? $flag : $nothing;
 		}
 

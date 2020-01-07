@@ -143,14 +143,38 @@ class MessageGroupBaseTest extends MediaWikiTestCase {
 		);
 	}
 
-	/**
-	 * @expectedException MWException
-	 * @expectedExceptionMessage No valid namespace defined
-	 */
 	public function testGetNamespaceInvalid() {
 		$conf = $this->groupConfiguration;
 		$conf['BASIC']['namespace'] = 'ergweofijwef';
+		$this->setExpectedException( MWException::class, 'No valid namespace defined' );
 		MessageGroupBase::factory( $conf );
+	}
+
+	public function testModifyMessageGroupStates() {
+		// Create a basic workflow.
+		$this->setMwGlobals( [
+			'wgTranslateWorkflowStates' => [
+				'progress' => [ 'color' => 'd33' ],
+				'proofreading' => [ 'color' => 'fc3' ],
+			],
+		] );
+		// Install a special permission when the group ID is matched.
+		$this->setTemporaryHook(
+			'Translate:modifyMessageGroupStates',
+			function ( $groupId, &$conf ) {
+				if ( $groupId === 'test-id' ) {
+					// No users have this.
+					$conf['proofreading']['right'] = 'inobtanium';
+				}
+			}
+		);
+
+		$expectedStates = [
+			'progress' => [ 'color' => 'd33' ],
+			'proofreading' => [ 'color' => 'fc3', 'right' => 'inobtanium' ],
+		];
+		$states = $this->group->getMessageGroupStates()->getStates();
+		$this->assertEquals( $expectedStates, $states );
 	}
 }
 

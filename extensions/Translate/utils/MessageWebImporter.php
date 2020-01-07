@@ -42,6 +42,11 @@ class MessageWebImporter {
 	 */
 	protected $processingTime = 43;
 
+	/**
+	 * @param Title|null $title
+	 * @param MessageGroup|string|null $group
+	 * @param string $code
+	 */
 	public function __construct( Title $title = null, $group = null, $code = 'en' ) {
 		$this->setTitle( $title );
 		$this->setGroup( $group );
@@ -57,6 +62,9 @@ class MessageWebImporter {
 		return $this->title;
 	}
 
+	/**
+	 * @param Title $title
+	 */
 	public function setTitle( Title $title ) {
 		$this->title = $title;
 	}
@@ -65,9 +73,12 @@ class MessageWebImporter {
 	 * @return User
 	 */
 	public function getUser() {
-		return $this->user ? $this->user : RequestContext::getMain()->getUser();
+		return $this->user ?: RequestContext::getMain()->getUser();
 	}
 
+	/**
+	 * @param User $user
+	 */
 	public function setUser( User $user ) {
 		$this->user = $user;
 	}
@@ -91,10 +102,16 @@ class MessageWebImporter {
 		}
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getCode() {
 		return $this->code;
 	}
 
+	/**
+	 * @param string $code
+	 */
 	public function setCode( $code = 'en' ) {
 		$this->code = $code;
 	}
@@ -135,14 +152,9 @@ class MessageWebImporter {
 	protected function allowProcess() {
 		$request = RequestContext::getMain()->getRequest();
 
-		if ( $request->wasPosted() &&
-			$request->getBool( 'process', false ) &&
-			$this->getUser()->matchEditToken( $request->getVal( 'token' ) )
-		) {
-			return true;
-		}
-
-		return false;
+		return $request->wasPosted()
+			&& $request->getBool( 'process', false )
+			&& $this->getUser()->matchEditToken( $request->getVal( 'token' ) );
 	}
 
 	/**
@@ -151,9 +163,9 @@ class MessageWebImporter {
 	protected function getActions() {
 		if ( $this->code === 'en' ) {
 			return [ 'import', 'fuzzy', 'ignore' ];
-		} else {
-			return [ 'import', 'conflict', 'ignore' ];
 		}
+
+		return [ 'import', 'conflict', 'ignore' ];
 	}
 
 	/**
@@ -213,7 +225,7 @@ class MessageWebImporter {
 				// We found a new translation for this message of the
 				// current group: import it.
 				$action = 'import';
-				$message = self::doAction(
+				self::doAction(
 					$action,
 					$group,
 					$key,
@@ -242,7 +254,7 @@ class MessageWebImporter {
 					->getVal( self::escapeNameForPHP( "action-$type-$key" ) );
 
 				if ( $process ) {
-					if ( !count( $changed ) ) {
+					if ( $changed === [] ) {
 						// Initialise the HTML list showing the changes performed
 						$changed[] = '<ul>';
 					}
@@ -266,7 +278,7 @@ class MessageWebImporter {
 
 						// We have all the necessary information on this changed
 						// translation: actually process the message
-						$message = self::doAction(
+						$messageKeyAndParams = self::doAction(
 							$action,
 							$group,
 							$key,
@@ -275,9 +287,9 @@ class MessageWebImporter {
 						);
 
 						// Show what we just did, adding to the list of changes
-						$key = array_shift( $message );
-						$params = $message;
-						$message = $context->msg( $key, $params )->parse();
+						$msgKey = array_shift( $messageKeyAndParams );
+						$params = $messageKeyAndParams;
+						$message = $context->msg( $msgKey, $params )->parse();
 						$changed[] = "<li>$message</li>";
 
 						// Stop processing further messages if too much time
@@ -336,12 +348,12 @@ class MessageWebImporter {
 			}
 		}
 
-		if ( $process || ( !count( $changed ) && $code !== 'en' ) ) {
-			if ( !count( $changed ) ) {
+		if ( $process || ( $changed === [] && $code !== 'en' ) ) {
+			if ( $changed === [] ) {
 				$this->out->addWikiMsg( 'translate-manage-nochanges-other' );
 			}
 
-			if ( !count( $changed ) || strpos( $changed[count( $changed ) - 1], '<li>' ) !== 0 ) {
+			if ( $changed === [] || strpos( end( $changed ), '<li>' ) !== 0 ) {
 				$changed[] = '<ul>';
 			}
 
@@ -350,7 +362,7 @@ class MessageWebImporter {
 			$this->out->addHTML( implode( "\n", $changed ) );
 		} else {
 			// END
-			if ( count( $changed ) ) {
+			if ( $changed !== [] ) {
 				if ( $code === 'en' ) {
 					$this->out->addWikiMsg( 'translate-manage-intro-en' );
 				} else {
@@ -382,7 +394,7 @@ class MessageWebImporter {
 	 * @param string $code Language code
 	 * @param string $message Contents for the $key/code combination
 	 * @param string $comment Edit summary (default: empty) - see Article::doEdit
-	 * @param User $user User that will make the edit (default: null - RequestContext user).
+	 * @param User|null $user User that will make the edit (default: null - RequestContext user).
 	 *        See Article::doEdit.
 	 * @param int $editFlags Integer bitfield: see Article::doEdit
 	 * @throws MWException
@@ -428,7 +440,7 @@ class MessageWebImporter {
 	 * @param Title $title
 	 * @param string $message
 	 * @param string $summary
-	 * @param User $user
+	 * @param User|null $user
 	 * @param int $editFlags
 	 * @return array
 	 */
@@ -442,11 +454,11 @@ class MessageWebImporter {
 			return [ 'translate-manage-import-ok',
 				wfEscapeWikiText( $title->getPrefixedText() )
 			];
-		} else {
-			$text = "Failed to import new version of page {$title->getPrefixedText()}\n";
-			$text .= "{$status->getWikiText()}";
-			throw new MWException( $text );
 		}
+
+		$text = "Failed to import new version of page {$title->getPrefixedText()}\n";
+		$text .= "{$status->getWikiText()}";
+		throw new MWException( $text );
 	}
 
 	/**
@@ -548,7 +560,7 @@ class MessageWebImporter {
 	 * @param string $legend Legend as raw html.
 	 * @param string $type Contents of type class.
 	 * @param string $content Contents as raw html.
-	 * @param Language $lang The language in which the text is written.
+	 * @param Language|null $lang The language in which the text is written.
 	 * @return string Section element as html.
 	 */
 	public static function makeSectionElement( $legend, $type, $content, $lang = null ) {

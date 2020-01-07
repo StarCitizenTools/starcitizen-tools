@@ -17,11 +17,12 @@
 			"Purodha",
 			"Александр Сигачёв",
 			"Mailman",
-			"Movses"
+			"Movses",
+			"Vlad5250"
 		]
 	},
 	"pagetranslation": "Перевод страниц",
-	"right-pagetranslation": "отметка версий страниц для перевода",
+	"right-pagetranslation": "Отметка версий страниц для перевода",
 	"action-pagetranslation": "управлять переводимыми страницами",
 	"tpt-section": "Блок перевода $1",
 	"tpt-section-new": "Новый блок перевода. Название: $1",
@@ -112,7 +113,7 @@
 	"log-description-pagetranslation": "Журнал для действий, связанных с системой перевода страниц",
 	"log-name-pagetranslation": "Журнал перевода страниц",
 	"logentry-pagetranslation-mark": "$1 {{GENDER:$2|пометил|пометила}} страницу «$3» как доступную для перевода",
-	"logentry-pagetranslation-unmark": "$1 {{GENDER:$2|удалил|удалила}} страницу «$3» из списка доступных для перевода",
+	"logentry-pagetranslation-unmark": "$1 {{GENDER:$2|удалил|удалила}} «$3» из системы перевода",
 	"logentry-pagetranslation-moveok": "$1 {{GENDER:$2|переименовал|переименовала}} доступную для перевода страницу «$3» в «$4»",
 	"logentry-pagetranslation-movenok": "$1 {{GENDER:$2|столкнулся|столкнулась}} с проблемой при переименовании страницы «$3» в «$4»",
 	"logentry-pagetranslation-deletefok": "$1 {{GENDER:$2|удалил|удалила}} доступную для перевода страницу «$3»",
@@ -148,6 +149,8 @@
 	"pt-movepage-list-pages": "Список страниц для переименования",
 	"pt-movepage-list-translation": "{{PLURAL:$1|1=Страница|Страницы}} перевода",
 	"pt-movepage-list-section": "Разделы {{PLURAL:$1|1=переводимой страницы|переводимых страниц}}",
+	"pt-movepage-list-translatable": "{{PLURAL:$1|Подстраница|Подстраницы}}, отмеченные для перевода",
+	"pt-movepage-list-translatable-note": "Эти страницы должны быть переименованы отдельно.",
 	"pt-movepage-list-other": "{{PLURAL:$1|1=Другая подстраница|Другие подстраницы}}",
 	"pt-movepage-list-count": "Всего переименовать $1 {{PLURAL:$1|страницу|страницы|страниц}}.",
 	"pt-movepage-legend": "Переименование переводимых страниц",

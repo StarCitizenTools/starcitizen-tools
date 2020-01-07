@@ -1,7 +1,7 @@
 /*!
  * Translate editor additional helper functionality
  */
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var translateEditorHelpers = {
@@ -136,6 +136,8 @@
 					.attr( langAttr )
 					.addClass( 'mw-content-' + documentationDir )
 					.html( documentation.html );
+
+				$messageDoc.find( 'a[href]' ).prop( 'target', '_blank' );
 
 				this.$editor.find( '.tux-textarea-documentation' )
 					.attr( langAttr )
@@ -388,7 +390,7 @@
 
 		/**
 		 * Makes the $source element clickable and clicking it will replace the
-		 * transltion textarea with the given suggestion.
+		 * translation textarea with the given suggestion.
 		 *
 		 * @param {jQuery} $source
 		 * @param {string} suggestion Text to add
@@ -508,7 +510,7 @@
 					translateEditor.validateTranslation();
 				}
 
-				mw.translateHooks.run( 'showTranslationHelpers', result.helpers, translateEditor.$editor );
+				mw.hook( 'mw.translate.editor.showTranslationHelpers' ).fire( result.helpers, translateEditor.$editor );
 
 			} ).fail( function ( errorCode, results ) {
 				mw.log( 'Error loading translation aids', errorCode, results );
@@ -537,4 +539,4 @@
 	mw.translate.editor = mw.translate.editor || {};
 	$.extend( mw.translate.editor, translateEditorHelpers );
 
-}( jQuery, mediaWiki ) );
+}() );

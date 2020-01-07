@@ -20,6 +20,7 @@
 
 namespace MediaWiki\Babel;
 
+use MediaWiki\MediaWikiServices;
 use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\LoadBalancer;
 
@@ -31,7 +32,7 @@ class Database {
 	private $loadBalancer;
 
 	public function __construct() {
-		$this->loadBalancer = wfGetLB();
+		$this->loadBalancer = MediaWikiServices::getInstance()->getDBLoadBalancer();
 	}
 
 	/**

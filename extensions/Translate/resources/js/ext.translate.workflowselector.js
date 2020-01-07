@@ -1,12 +1,12 @@
 /*!
  * A jQuery plugin which handles the display and change of message group
- * workflow sates.
+ * workflow states.
  *
  * @author Niklas Laxström
  * @license GPL-2.0-or-later
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	function WorkflowSelector( container ) {
@@ -164,4 +164,4 @@
 	};
 	$.fn.workflowselector.Constructor = WorkflowSelector;
 
-}( jQuery, mediaWiki ) );
+}() );

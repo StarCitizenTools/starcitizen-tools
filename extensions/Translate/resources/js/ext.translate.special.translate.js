@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var state = {
@@ -34,6 +34,7 @@
 
 			mw.translate.changeUrl( changes );
 			mw.translate.updateTabLinks( changes );
+			$( '.tux-editor-header .group-warning' ).empty();
 			state.messageList.changeSettings( changes );
 			updateGroupInformation( state );
 		},
@@ -44,9 +45,14 @@
 				showMessage: null
 			};
 
-			// Force a URL change (no AJAX) until client-side language changing
-			// is stable enough. This doesn't do checks for some restrictions atm.
-			mw.translate.changeUrl( changes, true );
+			state.language = language;
+
+			mw.translate.changeUrl( changes );
+			mw.translate.updateTabLinks( changes );
+			$( '.tux-editor-header .group-warning' ).empty();
+			state.messageList.changeSettings( changes );
+			updateGroupInformation( state );
+
 		},
 
 		changeFilter: function ( filter ) {
@@ -165,7 +171,7 @@
 		api.parse( group.description ).done( function ( parsedDescription ) {
 			// The parsed text is returned in a <p> tag,
 			// so it's removed here.
-			$description.html( $( parsedDescription ).html() );
+			$description.html( parsedDescription );
 		} ).fail( function () {
 			$description.empty();
 			mw.log( 'Error parsing description for group ' + group.id );
@@ -176,15 +182,7 @@
 		var preferredLanguages, headerMessage, languagesMessage,
 			$groupWarning = $( '.tux-editor-header .group-warning' );
 
-		$groupWarning.empty();
-
-		// Check whether the group has priority languages
-		if ( !group.prioritylangs ) {
-			return;
-		}
-
-		// And if the current language is among them, we can return early
-		if ( $.inArray( language, group.prioritylangs ) !== -1 ) {
+		if ( isPriorityLanguage( language, group.prioritylangs ) ) {
 			return;
 		}
 
@@ -215,12 +213,31 @@
 		);
 	}
 
-	function setupLanguageSelector( $element ) {
-		var docLanguageCode, docLanguageAutonym, ulsOptions;
+	function isPriorityLanguage( language, priorityLanguages ) {
+		// Don't show priority notice if the language is message documentation.
+		if ( language === mw.config.get( 'wgTranslateDocumentationLanguageCode' ) ) {
+			return true;
+		}
 
-		ulsOptions = {
+		// If no priority language is set, return early.
+		if ( !priorityLanguages ) {
+			return true;
+		}
+
+		if ( priorityLanguages.indexOf( language ) !== -1 ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	function setupLanguageSelector( $element ) {
+		var ulsOptions = {
+			languages: mw.config.get( 'wgTranslateLanguages' ),
+			showRegions: [ 'SP' ].concat( $.fn.lcd.defaults.showRegions ),
 			onSelect: function ( language ) {
 				mw.translate.changeLanguage( language );
+				$element.text( $.uls.data.getAutonym( language ) );
 			},
 			ulsPurpose: 'translate-special-translate',
 			quickList: function () {
@@ -228,17 +245,7 @@
 			}
 		};
 
-		// If a documentation pseudo-language is defined,
-		// add it to the language selector
-		docLanguageCode = mw.config.get( 'wgTranslateDocumentationLanguageCode' );
-		if ( docLanguageCode ) {
-			docLanguageAutonym = mw.msg( 'translate-documentation-language' );
-			ulsOptions.languages = mw.config.get( 'wgULSLanguages' );
-			ulsOptions.languages[ docLanguageCode ] = docLanguageAutonym;
-			mw.translate.addDocumentationLanguage();
-			ulsOptions.showRegions = [ 'WW', 'SP', 'AM', 'EU', 'ME', 'AF', 'AS', 'PA' ];
-		}
-
+		mw.translate.addExtraLanguagesToLanguageData( ulsOptions.languages, [ 'SP' ] );
 		$element.uls( ulsOptions );
 	}
 
@@ -389,4 +396,4 @@
 		} );
 	} );
 
-}( jQuery, mediaWiki ) );
+}() );

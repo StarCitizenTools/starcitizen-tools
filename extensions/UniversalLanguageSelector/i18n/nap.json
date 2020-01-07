@@ -4,7 +4,8 @@
 			"Chelin",
 			"C.R.",
 			"Nemo bis",
-			"Candalua"
+			"Candalua",
+			"Ruthven"
 		]
 	},
 	"uls-desc": "Permettesse l'utente divierze mode 'e scegliere na lengua e cagnà mpustaziune 'e sta lengua",
@@ -21,7 +22,7 @@
 	"ext-uls-display-settings-desc": "Sceglie lengua ausata pe' menu e fonte.",
 	"ext-uls-language-settings-title": "Mpustaziune 'e lengua",
 	"ext-uls-language-settings-apply": "Appreca mpustaziune",
-	"ext-uls-language-settings-cancel": "Canciella",
+	"ext-uls-language-settings-cancel": "Scancella",
 	"ext-uls-language-buttons-help": "Cagna 'a lengua d' 'e menu. 'A lengua 'e cuntenute nun sarrà cagnata.",
 	"ext-uls-display-settings-font-settings": "Mpustaziune 'e carattere",
 	"ext-uls-display-settings-ui-language": "Lengua 'e visualizzazione",
@@ -53,7 +54,7 @@
 	"ext-uls-input-disable-info": "'E strumiente 'e scrittura-ngresso so' state stutate",
 	"ext-uls-input-settings-noime": "Nun ce stanno metode d'ingresso pe' sta lengua.",
 	"ext-uls-input-disable-notification": "'E strumiente 'e scrittura so' state stutate",
-	"ext-uls-input-disable-notification-undo": "Annulla",
+	"ext-uls-input-disable-notification-undo": "Sfàjere",
 	"ext-uls-input-disable-notification-info-personal": "Vuje putite appiccià 'e strumiente 'e scrittura 'a ll'impostaziune 'e llengua.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Vuje putite appiccià 'e tool dint'a qualsiasi mumento d' 'e preferenze 'e llengua aropp'a l'elenco 'e llengue",
 	"ext-uls-language-settings-applying": "Apprecanno...",

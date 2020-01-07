@@ -7,6 +7,10 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Logger\LoggerFactory;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
+
 /**
  * Multipurpose class:
  *  - 1) Interface for web services.
@@ -16,7 +20,7 @@
  * @since 2013-01-01
  * @defgroup TranslationWebService Translation Web Services
  */
-abstract class TranslationWebService {
+abstract class TranslationWebService implements LoggerAwareInterface {
 	/* Public api */
 
 	/**
@@ -59,7 +63,9 @@ abstract class TranslationWebService {
 		if ( isset( $handlers[$config['type']] ) ) {
 			$class = $handlers[$config['type']];
 
-			return new $class( $name, $config );
+			$obj = new $class( $name, $config );
+			$obj->setLogger( LoggerFactory::getInstance( 'translationservices' ) );
+			return $obj;
 		}
 
 		return null;
@@ -87,6 +93,9 @@ abstract class TranslationWebService {
 	 * @throws TranslationWebServiceConfigurationException
 	 */
 	public function getQueries( $text, $from, $to ) {
+		$from = $this->mapCode( $from );
+		$to = $this->mapCode( $to );
+
 		try {
 			return [ $this->getQuery( $text, $from, $to ) ];
 		} catch ( TranslationWebServiceException $e ) {
@@ -107,7 +116,10 @@ abstract class TranslationWebService {
 	 */
 	public function getResultData( TranslationQueryResponse $response ) {
 		if ( $response->getStatusCode() !== 200 ) {
-			$this->reportTranslationServiceFailure( $response->getStatusMessage() );
+			$this->reportTranslationServiceFailure(
+				'STATUS: ' . $response->getStatusMessage() . "\n" .
+				'BODY: ' . $response->getBody()
+			);
 			return null;
 		}
 
@@ -185,7 +197,6 @@ abstract class TranslationWebService {
 	protected $config;
 
 	/**
-	 * TranslationWebService constructor.
 	 * @param string $service Name of the webservice
 	 * @param array $config
 	 */
@@ -205,6 +216,9 @@ abstract class TranslationWebService {
 	 */
 	public function isSupportedLanguagePair( $from, $to ) {
 		$pairs = $this->getSupportedLanguagePairs();
+		$from = $this->mapCode( $from );
+		$to = $this->mapCode( $to );
+
 		return isset( $pairs[$from][$to] );
 	}
 
@@ -257,6 +271,10 @@ abstract class TranslationWebService {
 
 	/* Failure handling and suspending */
 
+	public function setLogger( LoggerInterface $logger ) {
+		$this->logger = $logger;
+	}
+
 	/**
 	 * @var int How many failures during failure period need to happen to
 	 * consider the service being temporarily off-line.
@@ -284,7 +302,7 @@ abstract class TranslationWebService {
 
 		if ( $failed + ( 2 * $this->serviceFailurePeriod ) < wfTimestamp() ) {
 			if ( $count >= $this->serviceFailureCount ) {
-				wfDebugLog( 'translationservices', "Translation service $service (was) restored" );
+				$this->logger->warning( "Translation service $service (was) restored" );
 			}
 			wfGetCache( CACHE_ANYTHING )->delete( $key );
 
@@ -307,7 +325,7 @@ abstract class TranslationWebService {
 	 */
 	protected function reportTranslationServiceFailure( $msg ) {
 		$service = $this->service;
-		wfDebugLog( 'translationservices', "Translation service $service problem: $msg" );
+		$this->logger->warning( "Translation service $service problem: $msg" );
 
 		$key = wfMemcKey( "translate-service-$service" );
 		$value = wfGetCache( CACHE_ANYTHING )->get( $key );
@@ -326,9 +344,9 @@ abstract class TranslationWebService {
 		);
 
 		if ( $count === $this->serviceFailureCount ) {
-			wfDebugLog( 'translationservices', "Translation service $service suspended" );
+			$this->logger->error( "Translation service $service suspended" );
 		} elseif ( $count > $this->serviceFailureCount ) {
-			wfDebugLog( 'translationservices', "Translation service $service still suspended" );
+			$this->logger->warning( "Translation service $service still suspended" );
 		}
 	}
 }

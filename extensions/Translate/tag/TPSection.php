@@ -19,9 +19,9 @@ class TPSection {
 	public $id;
 
 	/**
-	 * @var string New name of the section, that will be saved to database.
+	 * @var string|null New name of the section, that will be saved to database.
 	 */
-	public $name;
+	public $name = null;
 
 	/**
 	 * @var string Section text.
@@ -34,15 +34,25 @@ class TPSection {
 	public $type;
 
 	/**
-	 * @var string Text of previous version of this section.
+	 * @var string|null Text of previous version of this section.
 	 */
-	public $oldText;
+	public $oldText = null;
 
 	/**
 	 * @var bool Whether this section is inline section.
 	 * E.g. "Something <translate>foo</translate> bar".
 	 */
 	protected $inline = false;
+
+	/**
+	 * @var int Version number for the serialization.
+	 */
+	private $version = 1;
+
+	/**
+	 * @var string[] List of properties to serialize.
+	 */
+	private static $properties = [ 'version', 'id', 'name', 'text', 'type', 'oldText', 'inline' ];
 
 	public function setIsInline( $value ) {
 		$this->inline = (bool)$value;
@@ -87,7 +97,7 @@ class TPSection {
 	 * @return string Wikitext.
 	 */
 	public function getMarkedText() {
-		$id = isset( $this->name ) ? $this->name : $this->id;
+		$id = $this->name !== null ? $this->name : $this->id;
 		$header = "<!--T:{$id}-->";
 		$re = '~^(=+.*?=+\s*?$)~m';
 		$rep = "\\1 $header";
@@ -111,7 +121,7 @@ class TPSection {
 	 * @return string Wikitext.
 	 */
 	public function getOldText() {
-		return isset( $this->oldText ) ? $this->oldText : $this->text;
+		return $this->oldText !== null ? $this->oldText : $this->text;
 	}
 
 	/**
@@ -130,5 +140,36 @@ class TPSection {
 		}
 
 		return $vars;
+	}
+
+	/**
+	 * Serialize this object to a PHP array.
+	 * @return array
+	 * @since 2018.07
+	 */
+	public function serializeToArray() {
+		$data = [];
+		foreach ( self::$properties as $index => $property ) {
+			// Because this is used for the JobQueue, use a list
+			// instead of an array to save space.
+			$data[ $index ] = $this->$property;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Construct an object from previously serialized array.
+	 * @param array $data
+	 * @return self
+	 * @since 2018.07
+	 */
+	public static function unserializeFromArray( $data ) {
+		$section = new self;
+		foreach ( self::$properties as $index => $property ) {
+			$section->$property = $data[ $index ];
+		}
+
+		return $section;
 	}
 }

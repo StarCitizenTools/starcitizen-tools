@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	'use strict';
 
 	window.toggleVisibilityE = function ( levelId, otherId, linkId, type ) {
@@ -59,4 +59,4 @@
 		} );
 
 	} );
-}( mediaWiki, jQuery ) );
+}() );

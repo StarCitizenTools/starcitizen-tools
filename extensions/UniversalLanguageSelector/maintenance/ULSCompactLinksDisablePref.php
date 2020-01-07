@@ -33,34 +33,53 @@ class ULSCompactLinksDisablePref extends Maintenance {
 	public function execute() {
 		$dbr = wfGetDB( DB_REPLICA, 'vslow' );
 
-		$this->really = $this->hasOption( 'really' );
+		$really = $this->hasOption( 'really' );
 
 		$lastUserId = $this->getOption( 'continue', 0 );
 
+		if ( class_exists( ActorMigration::class ) ) {
+			$actorQuery = ActorMigration::newMigration()->getJoin( 'rev_user' );
+			$revUser = $actorQuery['fields']['rev_user'];
+		} else {
+			$actorQuery = [
+				'tables' => [],
+				'joins' => [],
+			];
+			$revUser = 'rev_user';
+		}
+
 		do {
-			$tables = [ 'revision', 'user_properties', 'user_groups' ];
-			$fields = [ 'rev_user', 'isbot' => 'ug_group', 'hasbeta' => 'up_value' ];
+			$tables = array_merge(
+				[ 'revision' ],
+				$actorQuery['tables'],
+				[ 'user_properties', 'user_groups' ]
+			);
+			$fields = [
+				'user' => $revUser,
+				'isbot' => 'ug_group',
+				'hasbeta' => 'up_value'
+			];
 			$conds = [
 				'rev_timestamp > ' . $dbr->timestamp( 20170101000000 ),
-				"rev_user > $lastUserId"
+				"$revUser > $lastUserId"
 			];
 			$options = [
-				'GROUP BY' => 'rev_user',
-				'ORDER BY' => 'rev_user',
+				'GROUP BY' => $revUser,
+				'ORDER BY' => 'user',
 				'LIMIT' => $this->mBatchSize,
 			];
 			$joins = [
 				'user_properties' => [
 					'LEFT OUTER JOIN',
-					"rev_user = up_user AND up_property = 'uls-compact-links' AND up_value = 1"
+					"$revUser = up_user AND up_property = 'uls-compact-links' AND up_value = 1"
 				],
 				'user_groups' => [
 					'LEFT OUTER JOIN',
-					"rev_user = ug_user AND ug_group = 'bot'"
+					"$revUser = ug_user AND ug_group = 'bot'"
 				]
-			];
+			] + $actorQuery['joins'];
 
-			if ( !$this->really ) {
+			if ( !$really ) {
 				echo "\n\n" .
 					$dbr->selectSqlText( $tables, $fields, $conds, __METHOD__, $options, $joins ) .
 					"\n";
@@ -71,7 +90,7 @@ class ULSCompactLinksDisablePref extends Maintenance {
 			$disabled = 0;
 
 			foreach ( $results as $row ) {
-				$lastUserId = $row->rev_user;
+				$lastUserId = $row->user;
 				if ( $row->isbot === 'bot' || $row->hasbeta !== null ) {
 					continue;
 				}
@@ -79,7 +98,7 @@ class ULSCompactLinksDisablePref extends Maintenance {
 				$user = User::newFromId( $lastUserId );
 				$user->load( User::READ_LATEST );
 
-				if ( $this->really ) {
+				if ( $really ) {
 					$user->setOption( 'compact-language-links', 0 );
 
 					$user->saveSettings();
@@ -87,7 +106,7 @@ class ULSCompactLinksDisablePref extends Maintenance {
 
 				$disabled++;
 				// If we ever need to revert, print the affected user ids
-				$this->output( $row->rev_user . " ", 'userids' );
+				$this->output( $row->user . " ", 'userids' );
 			}
 
 			$this->output( "Disabled compact-language-links for $disabled users.\n" );
@@ -98,5 +117,5 @@ class ULSCompactLinksDisablePref extends Maintenance {
 	}
 }
 
-$maintClass = "ULSCompactLinksDisablePref";
+$maintClass = ULSCompactLinksDisablePref::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

@@ -58,7 +58,7 @@ class CldrCurrency {
 	 *
 	 * @param string $currency_code ISO 4217 3-character currency code.
 	 * @param string $language_code ISO 639 2-character language code.
-	 * @param string $country_code ISO 3166-1 Alpha-2 country code (optional)
+	 * @param string|null $country_code ISO 3166-1 Alpha-2 country code (optional)
 	 * @return string The symbol for the specified currency, language, and country
 	 */
 	public static function getSymbol( $currency_code, $language_code, $country_code = null ) {

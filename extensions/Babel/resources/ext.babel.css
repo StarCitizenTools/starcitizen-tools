@@ -11,65 +11,92 @@
 /* Babel wrapper layout. */
 /* @noflip */
 .mw-babel-wrapper {
-	width: 238px;
-	float: right;
-	clear: right;
-	margin: 1px;
-	padding: 0;
 	background-color: #fff;
 	border: 1px solid #99b3ff;
 	border-spacing: 0;
+	box-sizing: border-box;
+	padding: 0;
+	margin: 1px;
+	width: 100%;
 }
 
-/* @noflip */
-.mw-content-ltr .mw-babel-wrapper {
-	float: right;
-	clear: right;
+/* header and footer */
+.mw-babel-header {
+	font-weight: bold;
+	text-align: center;
 }
 
-/* @noflip */
-.mw-content-rtl .mw-babel-wrapper {
-	float: left;
-	clear: left;
+.mw-babel-footer {
+	font-size: 85%;
+	font-weight: normal;
+	text-align: center;
 }
 
 /* Babel box layout */
-/* @noflip */
 .mw-babel-box {
-	float: left;
-	clear: left;
 	margin: 1px;
 }
 
-/* @noflip */
-.mw-content-ltr .mw-babel-box {
-	float: left;
-	clear: left;
-}
-
-/* @noflip */
-.mw-content-rtl .mw-babel-box {
-	float: right;
-	clear: right;
-}
-
 .mw-babel-box table {
-	width: 238px;
-	padding: 0;
 	border-spacing: 0;
+	width: 100%;
+	margin: 0 !important; /* stylelint-disable-line declaration-no-important */
 }
 
-.mw-babel-box table th {
-	width: 45px;
-	height: 45px;
-	text-align: center;
+.mw-babel-box th {
 	font-size: 14pt;
+	height: 45px;
+	min-width: 45px;
+	text-align: center;
+	width: 45px;
 }
 
-.mw-babel-box table td {
+.mw-babel-box td {
+	line-height: 1.25em;
 	font-size: 8pt;
 	padding: 4pt;
-	line-height: 1.25em;
+	width: 100%;
+}
+
+@media all and ( min-width: 480px ) {
+
+	/* @noflip */
+	.mw-babel-wrapper {
+		float: right;
+		clear: right;
+		width: 238px;
+	}
+
+	/* @noflip */
+	.mw-content-ltr .mw-babel-wrapper {
+		float: right;
+		clear: right;
+	}
+
+	/* @noflip */
+	.mw-content-rtl .mw-babel-wrapper {
+		float: left;
+		clear: left;
+	}
+
+	/* @noflip */
+	.mw-babel-box {
+		float: right;
+		clear: right;
+		width: 238px;
+	}
+
+	/* @noflip */
+	.mw-content-ltr .mw-babel-box {
+		float: right;
+		clear: right;
+	}
+
+	/* @noflip */
+	.mw-content-rtl .mw-babel-box {
+		float: left;
+		clear: left;
+	}
 }
 
 /* Babel box colours. */
@@ -155,16 +182,4 @@
 
 .mw-babel-box-N table {
 	background-color: #c5fcdc;
-}
-
-/* header and footer */
-.mw-babel-header {
-	text-align: center;
-	font-weight: bold;
-}
-
-.mw-babel-footer {
-	text-align: center;
-	font-weight: normal;
-	font-size: 85%;
 }

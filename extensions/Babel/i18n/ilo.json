@@ -28,6 +28,7 @@
 	"babel-N-n": "Daytoy nga agar-aramat ket [[$1|patneng]] ti pannakaawatna iti [[$2|Ilokano]].",
 	"babel-footer": "Dagiti agar-aramat babaen ti pagsasao",
 	"apihelp-query+babel-description": "Agala ti pakaammo a maipanggep no ania dagiti pagsasao nga ammo ti agar-aramat",
+	"apihelp-query+babel-summary": "Agala iti pakaammo a maipanggep kadagiti pagsasao nga ammo ti agar-aramat",
 	"apihelp-query+babel-param-user": "Ti agar-aramat a pagalaan iti pakaammo",
 	"apihelp-query+babel-example-1": "Alaen ti pakaammo ti Babel para kenni agar-aramat <kbd>Pagarigan</kbd>"
 }
