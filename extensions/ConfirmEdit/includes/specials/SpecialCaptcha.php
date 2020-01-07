@@ -1,10 +1,11 @@
 <?php
-class CaptchaSpecialPage extends UnlistedSpecialPage {
+
+class SpecialCaptcha extends UnlistedSpecialPage {
 	public function __construct() {
 		parent::__construct( 'Captcha' );
 	}
 
-	function execute( $par ) {
+	public function execute( $par ) {
 		$this->setHeaders();
 
 		$instance = ConfirmEditHooks::getInstance();
@@ -12,6 +13,8 @@ class CaptchaSpecialPage extends UnlistedSpecialPage {
 		switch ( $par ) {
 			case "image":
 				if ( method_exists( $instance, 'showImage' ) ) {
+					// @todo: Do this in a more OOP way
+					/** @phan-suppress-next-line PhanUndeclaredMethod */
 					return $instance->showImage();
 				}
 			case "help":
