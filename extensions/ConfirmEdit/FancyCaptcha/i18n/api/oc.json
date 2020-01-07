@@ -1,9 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Cedric31"
-		]
-	},
-	"apihelp-fancycaptchareload-description": "Obténer un novèl FancyCaptcha.",
-	"apihelp-fancycaptchareload-example-1": "Obténer un novèl FancyCaptcha."
-}

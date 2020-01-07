@@ -1,22 +1,9 @@
 <?php
 
-use Wikimedia\ScopedCallback;
-use Wikimedia\TestingAccessWrapper;
-
 /**
  * @covers SimpleCaptcha
  */
 class CaptchaTest extends MediaWikiTestCase {
-
-	/** @var ScopedCallback[] */
-	private $hold = [];
-
-	public function tearDown() {
-		// Destroy any ScopedCallbacks being held
-		$this->hold = [];
-		parent::tearDown();
-	}
-
 	/**
 	 * @dataProvider provideSimpleTriggersCaptcha
 	 */
@@ -68,18 +55,6 @@ class CaptchaTest extends MediaWikiTestCase {
 	}
 
 	private function setCaptchaTriggersAttribute( $trigger, $value ) {
-		// XXX This is really hacky, but is needed to stop extensions from
-		// being clobbered in subsequent tests. This should be fixed properly
-		// by making extension registration happen in services instead of
-		// globals.
-		$keys =
-			TestingAccessWrapper::newFromClass( ExtensionProcessor::class )->globalSettings;
-		$globalsToStash = [];
-		foreach ( $keys as $key ) {
-			$globalsToStash["wg$key"] = $GLOBALS["wg$key"];
-		}
-		$this->setMwGlobals( $globalsToStash );
-
 		$info = [
 			'globals' => [],
 			'callbacks' => [],
@@ -92,9 +67,14 @@ class CaptchaTest extends MediaWikiTestCase {
 			],
 			'autoloaderPaths' => []
 		];
-		$this->hold[] = ExtensionRegistry::getInstance()->setAttributeForTest(
-			'CaptchaTriggers', [ $trigger => $value ]
-		);
+		$registry = new ExtensionRegistry();
+		$class = new ReflectionClass( 'ExtensionRegistry' );
+		$instanceProperty = $class->getProperty( 'instance' );
+		$instanceProperty->setAccessible( true );
+		$instanceProperty->setValue( $registry );
+		$method = $class->getMethod( 'exportExtractedData' );
+		$method->setAccessible( true );
+		$method->invokeArgs( $registry, [ $info ] );
 	}
 
 	/**
@@ -132,85 +112,5 @@ class CaptchaTest extends MediaWikiTestCase {
 			[ 'edit', true ],
 			[ 'edit', false ],
 		];
-	}
-
-	/**
-	 * @dataProvider provideCanSkipCaptchaUserright
-	 */
-	public function testCanSkipCaptchaUserright( $userIsAllowed, $expected ) {
-		$testObject = new SimpleCaptcha();
-		$user = $this->getMock( User::class );
-		$user->method( 'isAllowed' )->willReturn( $userIsAllowed );
-
-		$actual = $testObject->canSkipCaptcha( $user, RequestContext::getMain()->getConfig() );
-
-		$this->assertEquals( $expected, $actual );
-	}
-
-	public function provideCanSkipCaptchaUserright() {
-		return [
-			[ true, true ],
-			[ false, false ]
-		];
-	}
-
-	/**
-	 * @param $allowUserConfirmEmail
-	 * @param $userIsMailConfirmed
-	 * @param $expected
-	 * @throws ConfigException
-	 * @dataProvider provideCanSkipCaptchaMailconfirmed
-	 */
-	public function testCanSkipCaptchaMailconfirmed( $allowUserConfirmEmail,
-		$userIsMailConfirmed, $expected ) {
-		$testObject = new SimpleCaptcha();
-		$user = $this->getMock( User::class );
-		$user->method( 'isEmailConfirmed' )->willReturn( $userIsMailConfirmed );
-		$config = $this->getMock( Config::class );
-		$config->method( 'get' )->willReturn( $allowUserConfirmEmail );
-
-		$actual = $testObject->canSkipCaptcha( $user, $config );
-
-		$this->assertEquals( $expected, $actual );
-	}
-
-	public function provideCanSkipCaptchaMailconfirmed() {
-		return [
-			[ false, false, false ],
-			[ false, true, false ],
-			[ true, false, false ],
-			[ true, true, true ],
-		];
-	}
-
-	/**
-	 * @param $requestIP
-	 * @param $IPWhitelist
-	 * @param $expected
-	 * @throws ConfigException
-	 * @dataProvider provideCanSkipCaptchaIPWhitelisted
-	 */
-	public function testCanSkipCaptchaIPWhitelisted( $requestIP, $IPWhitelist, $expected ) {
-		$testObject = new SimpleCaptcha();
-		$config = $this->getMock( Config::class );
-		$request = $this->getMock( WebRequest::class );
-		$request->method( 'getIP' )->willReturn( $requestIP );
-
-		$this->setMwGlobals( [
-			'wgRequest' => $request,
-			'wgCaptchaWhitelistIP' => $IPWhitelist
-		] );
-
-		$actual = $testObject->canSkipCaptcha( RequestContext::getMain()->getUser(), $config );
-
-		$this->assertEquals( $expected, $actual );
-	}
-
-	public function provideCanSkipCaptchaIPWhitelisted() {
-		return ( [
-			[ '127.0.0.1', [ '127.0.0.1', '127.0.0.2' ], true ],
-			[ '127.0.0.1', [], false ]
-		]
-		);
 	}
 }

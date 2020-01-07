@@ -6,5 +6,8 @@
 	},
 	"fancycaptcha-captcha": "حفاظتی تدبیر",
 	"fancycaptcha-imgcaptcha-ph": "فوٹو وچ نظرݨ آلی لکھت درج کرو",
-	"fancycaptcha-reload-text": "سجرا، تازہ کرو"
+	"fancycaptcha-reload-text": "سجرا، تازہ کرو",
+	"apihelp-fancycaptchareload-description": "نواں سوہݨاکیپچا گھنو",
+	"apihelp-fancycaptchareload-summary": "نواں سوہݨاکیپچا گھنو",
+	"apihelp-fancycaptchareload-example-1": "نواں سوہݨاکیپچا گھنو"
 }

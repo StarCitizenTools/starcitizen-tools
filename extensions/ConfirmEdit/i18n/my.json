@@ -1,10 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ninjastrikers",
-			"Dr Lotus Black"
+			"Ninjastrikers"
 		]
 	},
-	"captcha-label": "CAPTCHA",
-	"confirmedit-preview-invalid": "မဆီလျော်ပါ"
+	"captcha-label": "CAPTCHA"
 }

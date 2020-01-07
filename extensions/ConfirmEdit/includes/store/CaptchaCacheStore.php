@@ -1,31 +1,18 @@
 <?php
 
-use MediaWiki\MediaWikiServices;
-
 class CaptchaCacheStore extends CaptchaStore {
-	/** @var BagOStuff */
-	private $cache;
-
-	public function __construct() {
-		parent::__construct();
-
-		$this->cache = MediaWikiServices::getInstance()->getMainObjectStash();
-	}
-
-	public function store( $index, $info ) {
+	function store( $index, $info ) {
 		global $wgCaptchaSessionExpiration;
 
-		$cache = $this->cache;
-		$cache->set(
-			$cache->makeKey( 'captcha', $index ),
+		ObjectCache::getMainStashInstance()->set(
+			wfMemcKey( 'captcha', $index ),
 			$info,
 			$wgCaptchaSessionExpiration
 		);
 	}
 
-	public function retrieve( $index ) {
-		$cache = $this->cache;
-		$info = $cache->get( $cache->makeKey( 'captcha', $index ) );
+	function retrieve( $index ) {
+		$info = ObjectCache::getMainStashInstance()->get( wfMemcKey( 'captcha', $index ) );
 		if ( $info ) {
 			return $info;
 		} else {
@@ -33,12 +20,11 @@ class CaptchaCacheStore extends CaptchaStore {
 		}
 	}
 
-	public function clear( $index ) {
-		$cache = $this->cache;
-		$cache->delete( $cache->makeKey( 'captcha', $index ) );
+	function clear( $index ) {
+		ObjectCache::getMainStashInstance()->delete( wfMemcKey( 'captcha', $index ) );
 	}
 
-	public function cookiesNeeded() {
+	function cookiesNeeded() {
 		return false;
 	}
 }

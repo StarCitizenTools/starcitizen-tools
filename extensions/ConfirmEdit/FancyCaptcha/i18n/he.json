@@ -15,5 +15,8 @@
 	"fancycaptcha-edit": "כדי לערוך את הדף, נא להקליד את המילים המופיעות בתיבה שלהלן ([[Special:Captcha/help|מידע נוסף]]):",
 	"fancycaptcha-imgcaptcha-ph": "נא להקליד את הטקסט שמופיע בתמונה",
 	"fancycaptcha-sendemail": "כהגנה מפני ספאם אוטומטי, נא להקליד את המילים המופיעות בתיבה שלהלן ([[Special:Captcha/help|מידע נוסף]]):",
-	"fancycaptcha-reload-text": "החלפה"
+	"fancycaptcha-reload-text": "החלפה",
+	"apihelp-fancycaptchareload-description": "קבלת FancyCaptcha חדשה.",
+	"apihelp-fancycaptchareload-summary": "קבלת FancyCaptcha חדשה.",
+	"apihelp-fancycaptchareload-example-1": "קבלת FancyCaptcha חדשה"
 }
