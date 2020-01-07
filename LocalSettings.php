@@ -62,6 +62,9 @@ $wgEnotifUserTalk = false; # UPO
 $wgEnotifWatchlist = false; # UPO
 $wgEmailAuthentication = true;
 
+# Disable the real name field
+$wgHiddenPrefs[] = 'realname';
+
 # MySQL table options to use during installation or update
 $wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=utf8";
 
@@ -94,7 +97,6 @@ $wgThumbLimits = array(
 );
 
 $wgDefaultUserOptions['thumbsize'] = 5; // thumb size 300
-
 
 $wgMaxImageArea = 6.4e7;
 
@@ -333,7 +335,7 @@ $edgExternalValueVerbose = false;
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
 $wgDefaultUserOptions['visualeditor-editor'] = "visualeditor";
 $wgDefaultUserOptions['visualeditor-newwikitext'] = 1;
-$wgHiddenPrefs[] = 'visualeditor-enable';
+$wgPrefs[] = 'visualeditor-enable';
 $wgVisualEditorEnableWikitext = true;
 $wgVisualEditorEnableDiffPage = true;
 $wgVisualEditorUseSingleEditTab = true;
