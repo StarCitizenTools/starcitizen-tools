@@ -172,6 +172,8 @@ $wgCitizenHSTSIncludeSubdomains = true;
 $wgCitizenEnableDenyXFrameOptions = true;
 # Enable X-XSS-Protection header
 $wgCitizenEnableXXSSProtection = true;
+# Enable strict-origin-when-cross-origin referrer policy	
+$wgCitizenEnableStrictReferrerPolicy = true;
 # Feature policy
 $wgCitizenEnableFeaturePolicy = true;
 $wgCitizenFeaturePolicyDirective = 'autoplay \'none\'; camera \'none\'; fullscreen \'self\'; geolocation \'none\'; microphone \'none\'; midi \'none\'; payment \'none\'' ;
