@@ -188,6 +188,8 @@ $wgCitizenShowPageTools = 'login'; #Only show page tools if logged in
 $wgCitizenSearchDescriptionSource = 'wikidata';
 # Number of search results in suggestion
 $wgCitizenMaxSearchResults = 6;
+# Lazyload thumbnail size
+$wgCitizenThumbnailSize = 120;
 
 #Maintenance
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
