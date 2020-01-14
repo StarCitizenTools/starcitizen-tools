@@ -371,7 +371,7 @@ class MWEchoNotifUser {
 				$categoryMap = $attributeManager->getEventsByCategory();
 				$usertalkTypes = $categoryMap['edit-user-talk'];
 				$unreadEditUserTalk = $this->notifMapper->fetchUnreadByUser( $this->mUser, 1, null, $usertalkTypes, null, DB_MASTER );
-				if ( count( $unreadEditUserTalk ) === 0 ) {
+				if ( $unreadEditUserTalk === [] ) {
 					$this->mUser->setNewtalk( false );
 				}
 			}
@@ -404,7 +404,7 @@ class MWEchoNotifUser {
 				$categoryMap = $attributeManager->getEventsByCategory();
 				$usertalkTypes = $categoryMap['edit-user-talk'];
 				$unreadEditUserTalk = $this->notifMapper->fetchUnreadByUser( $this->mUser, 1, null, $usertalkTypes, null, DB_MASTER );
-				if ( count( $unreadEditUserTalk ) > 0 ) {
+				if ( $unreadEditUserTalk !== [] ) {
 					$this->mUser->setNewtalk( true );
 				}
 			}

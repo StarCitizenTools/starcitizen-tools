@@ -19,7 +19,7 @@ class ApiEchoMarkRead extends ApiBase {
 
 		// There is no need to trigger markRead if all notifications are read
 		if ( $notifUser->getLocalNotificationCount() > 0 ) {
-			if ( count( $params['list'] ) ) {
+			if ( $params['list'] ) {
 				// Make sure there is a limit to the update
 				$notifUser->markRead( array_slice( $params['list'], 0, ApiBase::LIMIT_SML2 ) );
 				// Mark all as read
@@ -32,7 +32,7 @@ class ApiEchoMarkRead extends ApiBase {
 		}
 
 		// Mark as unread
-		if ( count( $params['unreadlist'] ) > 0 ) {
+		if ( $params['unreadlist'] !== null && $params['unreadlist'] !== [] ) {
 			// Make sure there is a limit to the update
 			$notifUser->markUnRead( array_slice( $params['unreadlist'], 0, ApiBase::LIMIT_SML2 ) );
 		}

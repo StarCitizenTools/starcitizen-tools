@@ -530,7 +530,7 @@ abstract class EchoDiscussionParser {
 				$signedUsers = array_keys( self::extractSignatures( $content, $title ) );
 
 				if (
-					count( $signedUsers ) == 1 &&
+					count( $signedUsers ) === 1 &&
 					in_array( $username, $signedUsers )
 				) {
 					if ( $sectionCount === 0 ) {
@@ -573,7 +573,7 @@ abstract class EchoDiscussionParser {
 							}
 						}
 					}
-				} elseif ( count( $signedUsers ) >= 1 ) {
+				} elseif ( $signedUsers !== [] ) {
 					$actions[] = [
 						'type' => 'unknown-multi-signed-addition',
 						'content' => $content,
