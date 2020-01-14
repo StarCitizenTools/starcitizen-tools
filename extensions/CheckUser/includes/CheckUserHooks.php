@@ -353,7 +353,7 @@ class CheckUserHooks {
 	 *
 	 * @param string $xff XFF header value
 	 * @return array (string|null, bool)
-	 * @TODO: move this to a utility class
+	 * @todo move this to a utility class
 	 */
 	public static function getClientIPfromXFF( $xff ) {
 		global $wgUsePrivateIPs;
@@ -366,12 +366,7 @@ class CheckUserHooks {
 		$ipchain = array_map( 'trim', explode( ',', $xff ) );
 		$ipchain = array_reverse( $ipchain );
 
-		if ( class_exists( ProxyLookup::class ) ) { // MW 1.28+
-			$proxyLookup = MediaWikiServices::getInstance()->getProxyLookup();
-		} else {
-			// This is kind of sketch, but is good enough for back-compat
-			$proxyLookup = new IP();
-		}
+		$proxyLookup = MediaWikiServices::getInstance()->getProxyLookup();
 
 		$client = null; // best guess of the client IP
 		$isSquidOnly = false; // all proxy servers where site Squid/Varnish servers?

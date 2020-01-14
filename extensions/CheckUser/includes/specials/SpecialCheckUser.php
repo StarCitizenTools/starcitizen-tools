@@ -1494,7 +1494,46 @@ class SpecialCheckUser extends SpecialPage {
 			$line .= ' ' . Linker::formatComment( $row->cuc_actiontext ) . ' ';
 		}
 		// Comment
-		$line .= Linker::commentBlock( $row->cuc_comment );
+		if ( $row->cuc_type == RC_EDIT || $row->cuc_type == RC_NEW ) {
+			$rev = Revision::newFromId( $row->cuc_this_oldid );
+			if ( !$rev ) {
+				// Assume revision is deleted
+				$dbr = wfGetDB( DB_REPLICA );
+				$queryInfo = Revision::getArchiveQueryInfo();
+				$tmp = $dbr->selectRow(
+					$queryInfo['tables'],
+					$queryInfo['fields'],
+					[ 'ar_rev_id' => $row->cuc_this_oldid ],
+					__METHOD__,
+					[],
+					$queryInfo['joins']
+				);
+				if ( $tmp ) {
+					$rev = Revision::newFromArchiveRow( $tmp );
+				}
+
+				if ( !$rev ) {
+					// This shouldn't happen, CheckUser points to a revision
+					// that isn't in revision nor archive table?
+					throw new Exception(
+						"Couldn't fetch revision cu_changes table links to (cuc_this_oldid {$row->cuc_this_oldid})"
+					);
+				}
+			}
+			if ( $rev->userCan( Revision::DELETED_COMMENT ) ) {
+				$line .= Linker::commentBlock( $row->cuc_comment );
+			} else {
+				$line .= Linker::commentBlock(
+					$this->msg( 'rev-deleted-comment' )->text(),
+					null,
+					false,
+					null,
+					false
+				);
+			}
+		} else {
+			$line .= Linker::commentBlock( $row->cuc_comment );
+		}
 		$line .= '<br />&#160; &#160; &#160; &#160; <small>';
 		// IP
 		$line .= ' <strong>IP</strong>: ';

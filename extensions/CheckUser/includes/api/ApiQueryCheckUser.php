@@ -102,7 +102,7 @@ class ApiQueryCheckUser extends ApiQueryBase {
 				}
 
 				$this->addFields( [
-					'cuc_namespace', 'cuc_title', 'cuc_user_text', 'cuc_actiontext',
+					'cuc_namespace', 'cuc_title', 'cuc_user_text', 'cuc_actiontext', 'cuc_this_oldid',
 					'cuc_comment', 'cuc_minor', 'cuc_timestamp', 'cuc_ip', 'cuc_xff', 'cuc_agent'
 				] );
 
@@ -122,7 +122,34 @@ class ApiQueryCheckUser extends ApiQueryBase {
 					if ( $row->cuc_actiontext ) {
 						$edit['summary'] = $row->cuc_actiontext;
 					} elseif ( $row->cuc_comment ) {
-						$edit['summary'] = $row->cuc_comment;
+						$rev = Revision::newFromId( $row->cuc_this_oldid );
+						if ( !$rev ) {
+							$dbr = wfGetDB( DB_REPLICA );
+							$queryInfo = Revision::getArchiveQueryInfo();
+							$tmp = $dbr->selectRow(
+								$queryInfo['tables'],
+								$queryInfo['fields'],
+								[ 'ar_rev_id' => $row->cuc_this_oldid ],
+								__METHOD__,
+								[],
+								$queryInfo['joins']
+							);
+							if ( $tmp ) {
+								$rev = Revision::newFromArchiveRow( $tmp );
+							}
+						}
+						if ( !$rev ) {
+							// This shouldn't happen, CheckUser points to a revision
+							// that isn't in revision nor archive table?
+							throw new Exception(
+								"Couldn't fetch revision cu_changes table links to (cuc_this_oldid {$row->cuc_this_oldid})"
+							);
+						}
+						if ( $rev->userCan( Revision::DELETED_COMMENT ) ) {
+							$edit['summary'] = $row->cuc_comment;
+						} else {
+							$edit['summary'] = $this->msg( 'rev-deleted-comment' )->text();
+						}
 					}
 					if ( $row->cuc_minor ) {
 						$edit['minor'] = 'm';
