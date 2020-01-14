@@ -24,9 +24,15 @@ use File;
 use InvalidArgumentException;
 use MediaWiki\Extension\WikiSEO\WikiSEO;
 use MediaWiki\MediaWikiServices;
+use OutputPage;
 use RepoGroup;
 use Title;
 
+/**
+ * File Metadata methods used in generators
+ *
+ * @property OutputPage outputPage
+ */
 trait FileMetadataTrait {
 	/**
 	 * Returns a file object by name, throws InvalidArgument if not found.

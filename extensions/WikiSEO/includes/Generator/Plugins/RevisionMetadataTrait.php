@@ -20,7 +20,11 @@
 namespace MediaWiki\Extension\WikiSEO\Generator\Plugins;
 
 use MediaWiki\MediaWikiServices;
+use OutputPage;
 
+/**
+ * @property OutputPage outputPage
+ */
 trait RevisionMetadataTrait {
 	/**
 	 * Tries to load the current revision timestamp for the page or current timestamp if nothing

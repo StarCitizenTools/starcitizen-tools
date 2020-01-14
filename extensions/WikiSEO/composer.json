@@ -1,10 +1,27 @@
 {
+	"name": "mediawiki/wiki-seo",
+	"type": "mediawiki-extension",
+	"description": "Allows per page meta settings like keywords and description, changing the title and various site verification tags.",
+	"homepage": "http://www.mediawiki.org/wiki/Extension:WikiSEO",
+	"license": "GPL-2.0+",
+	"authors": [
+		{
+			"name": "Hannes Kruse",
+			"homepage": "https://octofox.de/",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=7.1",
+		"ext-json": "*",
+		"composer/installers": ">=1.0.1"
+	},
 	"require-dev": {
 		"jakub-onderka/php-parallel-lint": "1.0.0",
 		"mediawiki/mediawiki-codesniffer": "28.0.0",
 		"jakub-onderka/php-console-highlighter": "0.4.0",
 		"mediawiki/minus-x": "0.3.2",
-		"mediawiki/mediawiki-phan-config": "0.8.0"
+		"mediawiki/mediawiki-phan-config": "0.9.0"
 	},
 	"scripts": {
 		"test": [
@@ -16,5 +33,8 @@
 			"minus-x fix .",
 			"phpcbf"
 		]
+	},
+	"extra": {
+		"installer-name": "WikiSEO"
 	}
 }

@@ -136,4 +136,50 @@ class MetaTagTest extends GeneratorTest {
 		$this->assertEquals( '<meta property="fb:app_id" content="0011223344"/>',
 			$out->getHeadItemsArray()['fb:app_id'] );
 	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::addHrefLangs
+	 * @throws \MWException
+	 */
+	public function testAddDefaultLanguageLink() {
+		$this->setMwGlobals( 'wgWikiSeoDefaultLanguage', 'de-de' );
+
+		$out = $this->newInstance();
+
+		$generator = new MetaTag();
+		$generator->init( [], $out );
+		$generator->addMetadata();
+
+		$this->assertArrayHasKey( 'de-de', $out->getHeadItemsArray() );
+		$this->assertContains( 'hreflang="de-de"', $out->getHeadItemsArray()['de-de'] );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\MetaTag::addHrefLangs
+	 * @throws \MWException
+	 */
+	public function testAddLanguageLinks() {
+		$this->setMwGlobals( 'wgWikiSeoDefaultLanguage', 'de-de' );
+
+		$out = $this->newInstance();
+
+		$generator = new MetaTag();
+		$generator->init( [
+			'hreflang_de-de' => 'https://example.de',
+			'hreflang_nl-nl' => 'https://example.nl',
+			'hreflang_en-us' => 'https://example.com',
+		], $out );
+		$generator->addMetadata();
+
+		$this->assertArrayHasKey( 'hreflang_de-de', $out->getHeadItemsArray() );
+		$this->assertArrayHasKey( 'hreflang_nl-nl', $out->getHeadItemsArray() );
+		$this->assertArrayHasKey( 'hreflang_en-us', $out->getHeadItemsArray() );
+
+		$this->assertContains( 'https://example.de"',
+			$out->getHeadItemsArray()['hreflang_de-de'] );
+		$this->assertContains( 'https://example.nl"',
+			$out->getHeadItemsArray()['hreflang_nl-nl'] );
+		$this->assertContains( 'https://example.com"', $out->getHeadItemsArray()
+		['hreflang_en-us'] );
+	}
 }

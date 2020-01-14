@@ -2,8 +2,8 @@
 
 namespace MediaWiki\Extension\WikiSEO\Tests;
 
-use MediaWikiTestCase;
 use MediaWiki\Extension\WikiSEO\Validator;
+use MediaWikiTestCase;
 
 class ValidatorTest extends MediaWikiTestCase {
 	/**
@@ -78,6 +78,27 @@ class ValidatorTest extends MediaWikiTestCase {
 		$validatedArray = $this->validator->validateParams( $params );
 
 		$this->assertCount( 4, $validatedArray );
+		$this->assertArrayEquals( $valid, $validatedArray );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Validator::validateParams
+	 */
+	public function testLanguages() {
+		$langs = [
+			'hreflang_de-de' => '',
+			'hreflang_nl-nl' => '',
+			'hreflang_invalid' => '',
+		];
+
+		$valid = [
+			'hreflang_de-de' => '',
+			'hreflang_nl-nl' => '',
+		];
+
+		$validatedArray = $this->validator->validateParams( $langs );
+
+		$this->assertCount( 2, $validatedArray );
 		$this->assertArrayEquals( $valid, $validatedArray );
 	}
 }

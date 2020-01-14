@@ -123,6 +123,8 @@ class OpenGraph implements GeneratorInterface {
 				}
 
 			} catch ( ConfigException $e ) {
+				wfLogWarning( sprintf( 'Could not gef config for "$wgWikiSeoDefaultImage". %s',
+					$e->getMessage() ) );
 				// Fallthrough
 			}
 		}
@@ -188,6 +190,8 @@ class OpenGraph implements GeneratorInterface {
 		try {
 			$sitename = MediaWikiServices::getInstance()->getMainConfig()->get( 'Sitename' );
 		} catch ( ConfigException $e ) {
+			wfLogWarning( sprintf( 'Could not gef config for "$wgSitename". %s', $e->getMessage() ) );
+
 			$sitename = null;
 		}
 

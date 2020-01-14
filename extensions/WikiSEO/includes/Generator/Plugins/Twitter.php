@@ -19,7 +19,9 @@
 
 namespace MediaWiki\Extension\WikiSEO\Generator\Plugins;
 
+use ConfigException;
 use Html;
+use MediaWiki\MediaWikiServices;
 
 /**
  * Twitter metadata generator
@@ -27,7 +29,6 @@ use Html;
  * @package MediaWiki\Extension\WikiSEO\Generator\Plugins
  */
 class Twitter extends OpenGraph {
-
 	/**
 	 * Page title property name
 	 *
@@ -60,9 +61,18 @@ class Twitter extends OpenGraph {
 
 		parent::addMetadata();
 
+		try {
+			$twitterCardType =
+				MediaWikiServices::getInstance()->getMainConfig()->get( 'TwitterCardType' );
+		} catch ( ConfigException $e ) {
+			wfLogWarning( 'Could not get config $TwitterCardType. Defaulting to "summary_large_image".' );
+
+			$twitterCardType = 'summary_large_image';
+		}
+
 		$this->outputPage->addHeadItem( 'twitter:card', Html::element( 'meta', [
 			self::$htmlElementPropertyKey => 'twitter:card',
-			self::$htmlElementContentKey => 'summary',
+			self::$htmlElementContentKey => $twitterCardType,
 		] ) );
 	}
 
@@ -71,15 +81,22 @@ class Twitter extends OpenGraph {
 	 * If $wgTwitterSiteHandle is not null setting the handle via tag or hook is ignored
 	 */
 	private function addTwitterSiteHandleTag() {
-		global $wgTwitterSiteHandle;
+		try {
+			$twitterSiteHandle =
+				MediaWikiServices::getInstance()->getMainConfig()->get( 'TwitterSiteHandle' );
+		} catch ( ConfigException $e ) {
+			wfLogWarning( 'Could not get config $wgTwitterSiteHandle.' );
 
-		if ( $wgTwitterSiteHandle !== null ) {
+			return;
+		}
+
+		if ( $twitterSiteHandle !== null ) {
 			unset( $this->metadata['twitter_site'] );
 			unset( $this->tags['twitter_site'], $this->conversions['twitter_site'] );
 
 			$this->outputPage->addHeadItem( 'twitter:site', Html::element( 'meta', [
 				self::$htmlElementPropertyKey => 'twitter:site',
-				self::$htmlElementContentKey => $wgTwitterSiteHandle,
+				self::$htmlElementContentKey => $twitterSiteHandle,
 			] ) );
 		}
 	}
