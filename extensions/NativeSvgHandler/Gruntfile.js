@@ -8,7 +8,6 @@ module.exports = function ( grunt ) {
 	grunt.initConfig( {
 		eslint: {
 			options: {
-				reportUnusedDisableDirectives: true,
 				extensions: [ '.json' ],
 				cache: true,
 				fix: true,
