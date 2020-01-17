@@ -40,8 +40,11 @@ class NativeSvgHandler extends SvgHandler {
 			return new TransformParameterError( $params );
 		}
 
-		return new SvgImage( $image, $image->getURL(), $params['width'],
-							$params['height'], $image->getPath() );
+		// @phan-suppress-next-line PhanTypeMismatchReturn
+		return new SvgImage(
+			// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
+			$image, $image->getURL(), $params['width'], $params['height'], $image->getPath()
+		);
 	}
 
 	public function getThumbType( $ext, $mime, $params = null ) {
