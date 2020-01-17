@@ -1,6 +1,7 @@
 <?php
 /**
- * ShortDescription – Adds the required magic word and API to mimic the short description on Wikimedia projects
+ * ShortDescription – Adds the required magic word and API to mimic the
+ * short description on Wikimedia projects
  */
 
 if ( function_exists( 'wfLoadExtension' ) ) {

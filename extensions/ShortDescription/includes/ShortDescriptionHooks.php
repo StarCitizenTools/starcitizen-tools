@@ -18,7 +18,11 @@ class ShortDescriptionHooks {
 		/*
 		 * Create a function hook associating the "getshortdesc" magic word with rendershortdesc()
 		 */
-		$parser->setFunctionHook( 'getshortdesc', [ self::class, 'rendershortdesc' ], Parser::SFH_NO_HASH );
+		$parser->setFunctionHook(
+			'getshortdesc',
+			[ self::class, 'rendershortdesc' ],
+			Parser::SFH_NO_HASH
+		);
 
 		return true;
 	}
