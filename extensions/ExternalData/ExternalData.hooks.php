@@ -9,7 +9,7 @@
  */
 class ExternalDataHooks {
 
-	public static function registerParser( &$parser ) {
+	public static function registerParser( Parser $parser ) {
 		$parser->setFunctionHook( 'get_web_data', array( 'EDParserFunctions', 'doGetWebData' ) );
 		$parser->setFunctionHook( 'get_file_data', array( 'EDParserFunctions', 'doGetFileData' ) );
 		$parser->setFunctionHook( 'get_soap_data', array( 'EDParserFunctions', 'doGetSOAPData' ) );
