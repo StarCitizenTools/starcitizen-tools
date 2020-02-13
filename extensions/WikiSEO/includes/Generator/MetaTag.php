@@ -19,7 +19,11 @@
 
 namespace MediaWiki\Extension\WikiSEO\Generator;
 
+use ConfigException;
 use Html;
+use MediaWiki\Extension\WikiSEO\Validator;
+use MediaWiki\Extension\WikiSEO\WikiSEO;
+use MediaWiki\MediaWikiServices;
 use OutputPage;
 
 /**
@@ -67,6 +71,7 @@ class MetaTag implements GeneratorInterface {
 		$this->addPinterestSiteVerification();
 		$this->addNortonSiteVerification();
 		$this->addFacebookAppId();
+		$this->addHrefLangs();
 
 		foreach ( self::$tags as $tag ) {
 			if ( array_key_exists( $tag, $this->metadata ) ) {
@@ -79,10 +84,10 @@ class MetaTag implements GeneratorInterface {
 	 * Add $wgGoogleSiteVerificationKey from LocalSettings
 	 */
 	private function addGoogleSiteVerification() {
-		global $wgGoogleSiteVerificationKey;
+		$googleSiteVerificationKey = $this->getConfig( 'GoogleSiteVerificationKey' );
 
-		if ( $wgGoogleSiteVerificationKey !== null ) {
-			$this->outputPage->addMeta( 'google-site-verification', $wgGoogleSiteVerificationKey );
+		if ( $googleSiteVerificationKey !== null ) {
+			$this->outputPage->addMeta( 'google-site-verification', $googleSiteVerificationKey );
 		}
 	}
 
@@ -90,10 +95,10 @@ class MetaTag implements GeneratorInterface {
 	 * Add $wgBingSiteVerificationKey from LocalSettings
 	 */
 	private function addBingSiteVerification() {
-		global $wgBingSiteVerificationKey;
+		$bingSiteVerificationKey = $this->getConfig( 'BingSiteVerificationKey' );
 
-		if ( $wgBingSiteVerificationKey !== null ) {
-			$this->outputPage->addMeta( 'msvalidate.01', $wgBingSiteVerificationKey );
+		if ( $bingSiteVerificationKey !== null ) {
+			$this->outputPage->addMeta( 'msvalidate.01', $bingSiteVerificationKey );
 		}
 	}
 
@@ -101,10 +106,10 @@ class MetaTag implements GeneratorInterface {
 	 * Add $wgYandexSiteVerificationKey from LocalSettings
 	 */
 	private function addYandexSiteVerification() {
-		global $wgYandexSiteVerificationKey;
+		$yandexSiteVerificationKey = $this->getConfig( 'YandexSiteVerificationKey' );
 
-		if ( $wgYandexSiteVerificationKey !== null ) {
-			$this->outputPage->addMeta( 'yandex-verification', $wgYandexSiteVerificationKey );
+		if ( $yandexSiteVerificationKey !== null ) {
+			$this->outputPage->addMeta( 'yandex-verification', $yandexSiteVerificationKey );
 		}
 	}
 
@@ -112,10 +117,10 @@ class MetaTag implements GeneratorInterface {
 	 * Add $wgAlexaSiteVerificationKey from LocalSettings
 	 */
 	private function addAlexaSiteVerification() {
-		global $wgAlexaSiteVerificationKey;
+		$alexaSiteVerificationKey = $this->getConfig( 'AlexaSiteVerificationKey' );
 
-		if ( $wgAlexaSiteVerificationKey !== null ) {
-			$this->outputPage->addMeta( 'alexaVerifyID', $wgAlexaSiteVerificationKey );
+		if ( $alexaSiteVerificationKey !== null ) {
+			$this->outputPage->addMeta( 'alexaVerifyID', $alexaSiteVerificationKey );
 		}
 	}
 
@@ -123,10 +128,10 @@ class MetaTag implements GeneratorInterface {
 	 * Add $wgPinterestSiteVerificationKey from LocalSettings
 	 */
 	private function addPinterestSiteVerification() {
-		global $wgPinterestSiteVerificationKey;
+		$pinterestSiteVerificationKey = $this->getConfig( 'PinterestSiteVerificationKey' );
 
-		if ( $wgPinterestSiteVerificationKey !== null ) {
-			$this->outputPage->addMeta( 'p:domain_verify', $wgPinterestSiteVerificationKey );
+		if ( $pinterestSiteVerificationKey !== null ) {
+			$this->outputPage->addMeta( 'p:domain_verify', $pinterestSiteVerificationKey );
 		}
 	}
 
@@ -134,10 +139,11 @@ class MetaTag implements GeneratorInterface {
 	 * Add $wgNortonSiteVerificationKey from LocalSettings
 	 */
 	private function addNortonSiteVerification() {
-		global $wgNortonSiteVerificationKey;
+		$nortonSiteVerificationKey = $this->getConfig( 'NortonSiteVerificationKey' );
 
-		if ( $wgNortonSiteVerificationKey !== null ) {
-			$this->outputPage->addMeta( 'norton-safeweb-site-verification', $wgNortonSiteVerificationKey );
+		if ( $nortonSiteVerificationKey !== null ) {
+			$this->outputPage->addMeta( 'norton-safeweb-site-verification',
+				$nortonSiteVerificationKey );
 		}
 	}
 
@@ -145,13 +151,61 @@ class MetaTag implements GeneratorInterface {
 	 * Add $wgFacebookAppId from LocalSettings
 	 */
 	private function addFacebookAppId() {
-		global $wgFacebookAppId;
+		$facebookAppId = $this->getConfig( 'FacebookAppId' );
 
-		if ( $wgFacebookAppId !== null ) {
+		if ( $facebookAppId !== null ) {
 			$this->outputPage->addHeadItem( 'fb:app_id', Html::element( 'meta', [
 				'property' => 'fb:app_id',
-				'content'  => $wgFacebookAppId
+				'content' => $facebookAppId,
 			] ) );
 		}
+	}
+
+	/**
+	 * Sets <link rel="alternate" href="url" hreflang="language-area"> elements
+	 * Will add a link element for the current page if $wgWikiSeoDefaultLanguage is set
+	 */
+	private function addHrefLangs() {
+		$language = $this->getConfig( 'WikiSeoDefaultLanguage' );
+
+		if ( $language !== null && in_array( $language, Validator::$isoLanguageCodes, true ) ) {
+			$this->outputPage->addHeadItem( $language, Html::element( 'link', [
+				'rel' => 'alternate',
+				'href' => WikiSEO::protocolizeUrl( $this->outputPage->getTitle()->getFullURL(),
+					$this->outputPage->getRequest() ),
+				'hreflang' => $language,
+			] ) );
+		}
+
+		foreach ( $this->metadata as $metaKey => $url ) {
+			if ( strpos( $metaKey, 'hreflang' ) === false ) {
+				continue;
+			}
+
+			$this->outputPage->addHeadItem( $metaKey, Html::element( 'link', [
+				'rel' => 'alternate',
+				'href' => $url,
+				'hreflang' => substr( $metaKey, 9 ),
+			] ) );
+		}
+	}
+
+	/**
+	 * Wrapper function for getMainConfig()
+	 * Logs errors
+	 *
+	 * @param string $key
+	 * @return mixed|null
+	 */
+	private function getConfig( $key ) {
+		try {
+			$value = MediaWikiServices::getInstance()->getMainConfig()->get( $key );
+		} catch ( ConfigException $e ) {
+			wfLogWarning( sprintf( 'Could not get config for "$wg%s". %s', $key,
+				$e->getMessage() ) );
+			$value = null;
+		}
+
+		return $value;
 	}
 }

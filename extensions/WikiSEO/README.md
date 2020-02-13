@@ -60,6 +60,18 @@ Array containing the metadata generator names to load.
 Default: ["OpenGraph", "Twitter", "SchemaOrg"].  
 If you only want to change the page title and add 'description', 'keywords', 'robots' tags set $wgMetadataGenerators = [];
 
+### $wgWikiSeoDefaultImage
+Default image. Local image, if not set $wgLogo will be used.
+
+### $wgTwitterCardType
+Defaults to `summary_large_image` for the twitter card type.  
+Usage: $wgTwitterCardType = 'summary';
+
+### $wgWikiSeoDefaultLanguage
+A default language code with area to generate a `<link rel="alternate" href="current Url" hreflang="xx-xx">` for.  
+Usage: $wgWikiSeoDefaultLanguage = 'de-de';  
+
+
 ## Usage
 The extension can be used via the ``{{#seo}}`` parser function. It accepts the following named parameters in any order.
 
@@ -77,6 +89,8 @@ The extension can be used via the ``{{#seo}}`` parser function. It accepts the f
   * Controls the behavior of search engine crawling and indexing
 * googlebot
   * Controls the behavior of the google crawler
+* hreflang_xx-xx[]
+  * Adds `<link rel="alternate" href="url" hreflang="xx-xx">` elements 
 
 **Tags related to the Open Graph protocol**  
 * type
@@ -132,6 +146,22 @@ If you need to include variables or templates you should use the parser function
  |published_time={{REVISIONYEAR}}-{{REVISIONMONTH}}-{{REVISIONDAY2}}
 }}
 ```
+
+#### Hreflang Attributes
+```
+{{#seo:
+ |hreflang_de-de=https://example.de/page
+ |hreflang_nl-nl=https://example.nl/page-nl
+ |hreflang_en-us=https://website.com/
+}}
+```
+Will generate the following `<link>` elements:
+```html
+<link rel="alternate" href="https://example.de/page" hreflang="de-de">
+<link rel="alternate" href="https://example.nl/page-nl" hreflang="nl-nl">
+<link rel="alternate" href="https://website.com/" hreflang="en-us">
+```
+
 
 ## Migrating to v2
 ### Removed tags

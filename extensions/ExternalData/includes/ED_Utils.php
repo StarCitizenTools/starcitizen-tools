@@ -133,6 +133,11 @@ END;
 	}
 
 	static function connectLDAP( $server, $username, $password ) {
+		// Check that a PHP LDAP library is installed.
+		if ( ! function_exists( 'ldap_connect' ) ) {
+			echo ( "Error: you must have a PHP LDAP library installed in order to call #get_ldap_data." );
+		}
+
 		$ds = ldap_connect( $server );
 		if ( $ds ) {
 			// these options for Active Directory only?
@@ -908,7 +913,7 @@ END;
 			];
 			if ( $edgAllowSSL ) {
 				$options[CURLOPT_SSL_VERIFYPEER] = FALSE;
-			}	
+			}
 			Hooks::run( 'ExternalDataBeforeWebCall', [
 				'get',
 				&$url,
@@ -918,7 +923,7 @@ END;
 			if ( $page === false ) {
 				sleep( 1 );
 				if ( $try_count >= self::$http_number_of_tries ) {
-					echo wfMessage( 'externaldata-db-could-not-get-url', self::$http_number_of_tries )->text();
+					wfDebug( wfMessage( 'externaldata-db-could-not-get-url', self::$http_number_of_tries )->text() );
 					return '';
 				}
 				$try_count++;

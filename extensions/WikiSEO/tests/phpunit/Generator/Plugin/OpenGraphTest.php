@@ -68,6 +68,9 @@ class OpenGraphTest extends GeneratorTest {
 	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\OpenGraph::preprocessFileMetadata
 	 */
 	public function testContainsImage() {
+		// Unset default image if set
+		$this->setMwGlobals( 'wgWikiSeoDefaultImage', null );
+
 		$out = $this->newInstance();
 
 		$generator = new OpenGraph();

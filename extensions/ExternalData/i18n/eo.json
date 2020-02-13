@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Yekrats"
+			"Yekrats",
+			"Robin van der Vliet"
 		]
 	},
-	"externaldata-db-invalid-query": "Malvalida serĉomendo."
+	"externaldata-db-invalid-query": "Nevalida serĉomendo."
 }

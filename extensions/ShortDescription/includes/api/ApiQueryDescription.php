@@ -5,11 +5,6 @@
  * See T184000 for related info
  */
 
-use ApiQuery;
-use ApiQueryBase;
-use PageProps;
-use Title;
-
 /**
  * Provides a short description of the page.
  * The description may be taken from an upstream Wikibase instance, or from a parser function in

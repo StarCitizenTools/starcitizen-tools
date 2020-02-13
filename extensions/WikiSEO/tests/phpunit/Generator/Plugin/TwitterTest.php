@@ -66,9 +66,11 @@ class TwitterTest extends GeneratorTest {
 
 	/**
 	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\Twitter::init
-	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\Twitter::preprocessFileMetadata
 	 */
 	public function testContainsImage() {
+		// Unset default image if set
+		$this->setMwGlobals( 'wgWikiSeoDefaultImage', null );
+
 		$out = $this->newInstance();
 
 		$generator = new Twitter();
@@ -77,5 +79,38 @@ class TwitterTest extends GeneratorTest {
 
 		$this->assertArrayHasKey( 'twitter:image', $out->getHeadItemsArray() );
 		$this->assertContains( 'wiki.png', $out->getHeadItemsArray()['twitter:image'] );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\Twitter::addMetadata
+	 */
+	public function testDefaultSummaryType() {
+		$out = $this->newInstance();
+
+		$generator = new Twitter();
+		$generator->init( [], $out );
+		$generator->addMetadata();
+
+		$this->assertArrayHasKey( 'twitter:card', $out->getHeadItemsArray() );
+		$this->assertEquals( '<meta property="twitter:card" content="summary_large_image"/>',
+			$out->getHeadItemsArray()['twitter:card'] );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\Twitter::addMetadata
+	 */
+	public function testSummaryType() {
+		// Unset default image if set
+		$this->setMwGlobals( 'wgTwitterCardType', 'summary' );
+
+		$out = $this->newInstance();
+
+		$generator = new Twitter();
+		$generator->init( [], $out );
+		$generator->addMetadata();
+
+		$this->assertArrayHasKey( 'twitter:card', $out->getHeadItemsArray() );
+		$this->assertEquals( '<meta property="twitter:card" content="summary"/>',
+			$out->getHeadItemsArray()['twitter:card'] );
 	}
 }
