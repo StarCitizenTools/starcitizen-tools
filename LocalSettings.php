@@ -673,6 +673,3 @@ $wgHooks['SkinTemplateOutputPageBeforeExec'][] = function( $sk, &$tpl ) {
 #============================== Final External Includes ===============================================
 
 require_once("/home/www-data/external_includes/misc_server_settings.php");
-
-# Generate thumbnails from 404
-$wgLocalFileRepo['transformVia404'] = true;
