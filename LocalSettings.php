@@ -79,12 +79,14 @@ $wgMemCachedServers = array();
 ## To enable image uploads, make sure the 'images' directory
 ## is writable, then set this to true:
 $wgEnableUploads = true;
+# Use 404 handler to generate images on client request
 $wgGenerateThumbnailOnParse = false;
+$wgLocalFileRepo['transformVia404'] = true;
+#$wgThumbnailScriptPath = "{$wgScriptPath}/thumb.php";
 $wgUseImageMagick = true;
 $wgThumbnailEpoch = "20190815000000";
 $wgThumbnailScriptPath = false;
 $wgIgnoreImageErrors = true;
-$wgThumbnailScriptPath = "{$wgScriptPath}/thumb.php";
 
 $wgDefaultUserOptions['imagesize'] = 4; // image size 1280, 1024
 
