@@ -332,7 +332,7 @@ $wgGroupPermissions['bot']['noanalytics'] = true;
 # $edgCacheTable = 'ed_url_cache'; Need to run ExternalData.sql first
 # $wgHTTPTimeout = 60; Set HTTP request timeout to 60s
 $edgCacheExpireTime = 3 * 24 * 60 * 60;
-$edgAllowExternalDataFrom = array('https://*.starcitizen.tools','http://starcitizendb.com/', 'https://scwdev.czen.me');
+$edgAllowExternalDataFrom = array('https://starcitizen.tools','http://starcitizendb.com/', 'https://*.czen.me', 'https://*.starcitizen.tools/');
 $edgExternalValueVerbose = false;
 
 #Visual Editor
