@@ -167,7 +167,7 @@ $wgCitizenCSPDirective = 'default-src \'none\'; script-src \'self\' \'unsafe-inl
 $wgCitizenEnableHSTS = true;
 $wgCitizenHSTSMaxAge = 63072000; # 2 year
 $wgCitizenHSTSIncludeSubdomains = true;
-#$wgCitizenHSTSPreload = true;
+$wgCitizenHSTSPreload = true;
 # Enable the deny X-Frame-Options header
 $wgCitizenEnableDenyXFrameOptions = true;
 # Enable X-XSS-Protection header
