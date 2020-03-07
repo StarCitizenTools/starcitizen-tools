@@ -660,6 +660,13 @@ $wgFooterIcons = [
     ]
 ];
 
+# Use domain root as the canonical URL 
+$wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
+	if ( $title->isExternal() && $query != '' && $title->isMainPage() ) {
+		$url = '/';
+	}
+};
+
 # Add cookie statement to footer
 $wgHooks['SkinTemplateOutputPageBeforeExec'][] = function( $sk, &$tpl ) {
   $tpl->set( 'cookiestatement', $sk->footerLink( 'cookiestatement', 'cookiestatementpage' ) );
