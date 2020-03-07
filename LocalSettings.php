@@ -392,7 +392,7 @@ $wgDefaultUserOptions['usecodemirror'] = 0;
 
 #CookieWarning
 $wgCookieWarningEnabled = true;
-$wgCookieWarningGeoIPLookup = none;
+$wgCookieWarningGeoIPLookup = 'none';
 
 #DynamicPageList
 $wgDplSettings['recursiveTagParse'] = true;
