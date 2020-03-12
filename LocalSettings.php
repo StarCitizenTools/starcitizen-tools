@@ -210,6 +210,7 @@ wfLoadExtension( 'EmbedVideo' );
 wfLoadExtension( 'InputBox' );
 wfLoadExtension( 'WikiSEO' );
 wfLoadExtension( 'Cite' );
+wfLoadExtension( 'CiteThisPage' );
 wfLoadExtension( 'DynamicPageList' );
 wfLoadExtension( 'Nuke' );
 wfLoadExtension( 'CommonsMetadata' );
