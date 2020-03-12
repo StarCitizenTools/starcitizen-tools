@@ -488,7 +488,7 @@ $wgNamespaceProtection[NS_ORG] = array( 'org-edit' );
 $wgNamespaceProtection[NS_EVENT] = array( 'event-edit' );
 
 $wgNamespaceAliases['SC'] = NS_PROJECT;
-$wgNamespaceAliases['SC_talk'] = NS_PROJECT_TALK;
+$wgNamespaceAliases['ST'] = NS_PROJECT_TALK;
 
 $wgVisualEditorAvailableNamespaces = array(
   NS_MAIN     	=> true,
