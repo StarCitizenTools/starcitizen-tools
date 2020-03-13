@@ -684,12 +684,7 @@ $wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
 	}
 };
 
-# Override canonical URL setting for main page
-$wgHooks['BeforePageDisplay'][] = function ( OutputPage $out, Skin $skin ) {
-	if ( $out->getPageTitle() == 'Star_Citizen_Wiki'  ) {
-		$out->addLink( [
-			'rel' => 'canonical',
-			'href' => $wgServer,
-		] );
-	}
+# Tell MediaWiki that "/" should not be redirected
+$wgHooks['TestCanonicalRedirect'][] = function ( $request ) {
+	return $request->getRequestURL() !== '/';
 };
