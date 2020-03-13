@@ -694,4 +694,5 @@ $wgHooks['BeforePageDisplay'][] = function ( OutputPage $out, Skin $skin ) {
 	if ( $out->getPageTitle() == 'Star_Citizen_Wiki'  ) {
 		$out->setCanonicalUrl( $wgServer );
 	}
+	return true;
 };
