@@ -664,13 +664,6 @@ $wgFooterIcons = [
     ]
 ];
 
-# Use domain root as the canonical URL 
-$wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
-	if ( $title->isExternal() && $query != '' && $title->isMainPage() ) {
-		$url = '/';
-	}
-};
-
 # Add cookie statement to footer
 $wgHooks['SkinTemplateOutputPageBeforeExec'][] = function( $sk, &$tpl ) {
   $tpl->set( 'cookiestatement', $sk->footerLink( 'cookiestatement', 'cookiestatementpage' ) );
@@ -683,3 +676,20 @@ $wgHooks['SkinTemplateOutputPageBeforeExec'][] = function( $sk, &$tpl ) {
 #============================== Final External Includes ===============================================
 
 require_once("/home/www-data/external_includes/misc_server_settings.php");
+
+# Use domain root as the canonical URL 
+$wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
+	if ( $title->isExternal() && $query != '' && $title->isMainPage() ) {
+		$url = '/';
+	}
+};
+
+# Override canonical URL setting for main page
+$wgHooks['BeforePageDisplay'][] = function ( OutputPage $out, Skin $skin ) {
+	if ( $out->getPageTitle()->isMainPage() ) {
+		$out->addLink( [
+			'rel' => 'canonical',
+			'href' => $wgServer,
+		] );
+	}
+};
