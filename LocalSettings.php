@@ -685,11 +685,11 @@ $wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
 };
 
 # Override canonical URL setting for main page
-$wgHooks['BeforePageDisplay'][] = function ( OutputPage $out, Skin $skin ) {
-	if ( $out->getPageTitle()->isMainPage() ) {
-		$out->addLink( [
-			'rel' => 'canonical',
-			'href' => $wgServer,
-		] );
-	}
-};
+#$wgHooks['BeforePageDisplay'][] = function ( OutputPage $out, Skin $skin ) {
+#	if ( $out->getPageTitle()->isMainPage() ) {
+#		$out->addLink( [
+#			'rel' => 'canonical',
+#			'href' => $wgServer,
+#		] );
+#	}
+#};
