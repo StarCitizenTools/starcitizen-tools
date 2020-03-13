@@ -690,8 +690,3 @@ $wgHooks['TestCanonicalRedirect'][] = function ( $request ) {
 };
 
 # Override canonical URL setting for main page
-$wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
-	if ( !$title->isExternal() && $query == '' && $title->isMainPage() ) {
-		$url = '/';
-	}
-};
