@@ -688,3 +688,10 @@ $wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
 $wgHooks['TestCanonicalRedirect'][] = function ( $request ) {
 	return $request->getRequestURL() !== '/';
 };
+
+# Override canonical URL setting for main page
+$wgHooks['BeforePageDisplay'][] = function ( OutputPage $out, Skin $skin ) {
+	if ( $out->getPageTitle() == 'Star_Citizen_Wiki'  ) {
+		$out->setCanonicalUrl( $wgServer );
+	}
+};
