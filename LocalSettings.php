@@ -691,7 +691,8 @@ $wgHooks['TestCanonicalRedirect'][] = function ( $request ) {
 
 # Override canonical URL setting for main page
 $wgHooks['BeforePageDisplay'][] = function ( OutputPage $out, Skin $skin ) {
-	if ( $out->getPageTitle() == 'Star_Citizen_Wiki'  ) {
+	$page_title = $out->getPageTitle();
+	if ( $page_title == 'Star_Citizen_Wiki'  ) {
 		$out->setCanonicalUrl( $wgServer );
 	}
 	return true;
