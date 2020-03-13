@@ -679,7 +679,7 @@ require_once("/home/www-data/external_includes/misc_server_settings.php");
 
 # Use domain root as the canonical URL 
 $wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
-	if ( $title->isExternal() && $query != '' && $title->isMainPage() ) {
+	if ( !$title->isExternal() && $query == '' && $title->isMainPage() ) {
 		$url = '/';
 	}
 };
