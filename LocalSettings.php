@@ -487,8 +487,13 @@ $wgNamespaceProtection[NS_GUIDE] = array( 'guide-edit' );
 $wgNamespaceProtection[NS_ORG] = array( 'org-edit' );
 $wgNamespaceProtection[NS_EVENT] = array( 'event-edit' );
 
+# Namespace alias
 $wgNamespaceAliases['SC'] = NS_PROJECT;
 $wgNamespaceAliases['ST'] = NS_PROJECT_TALK;
+$wgNamespaceAliases['H'] = NS_HELP;
+$wgNamespaceAliases['T'] = NS_TEMPLATE;
+$wgNamespaceAliases['CAT'] = NS_CATEGORY;
+$wgNamespaceAliases['CL'] = NS_COMMLINK;
 
 $wgVisualEditorAvailableNamespaces = array(
   NS_MAIN     	=> true,
