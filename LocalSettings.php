@@ -237,6 +237,7 @@ wfLoadExtension( 'RSS' );
 wfLoadExtension( 'TemplateData' );
 wfLoadExtension( 'PageImages' );
 #wfLoadExtension( 'RelatedArticles' );
+wfLoadExtension( 'WikiEditor' );
 wfLoadExtension( 'VisualEditor' );
 wfLoadExtension( 'Scribunto' );
 wfLoadExtension( 'EventLogging' );
