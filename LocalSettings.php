@@ -694,5 +694,3 @@ $wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
 $wgHooks['TestCanonicalRedirect'][] = function ( $request ) {
 	return $request->getRequestURL() !== '/';
 };
-
-# Override canonical URL setting for main page
