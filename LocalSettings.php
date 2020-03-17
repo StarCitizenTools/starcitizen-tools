@@ -266,6 +266,7 @@ $wgUploadWizardConfig = array(
   'debug' => false,
   'altUploadForm' => 'Special:Upload',
   'fallbackToAltUploadForm' => false,
+  'alternativeUploadToolsPage' => false,
   'enableFormData' => true,
   'enableMultipleFiles' => true,
   'enableMultiFileSelect' => false,
