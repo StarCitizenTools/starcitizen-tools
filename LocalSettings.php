@@ -80,12 +80,10 @@ $wgMemCachedServers = array();
 ## is writable, then set this to true:
 $wgEnableUploads = true;
 $wgGenerateThumbnailOnParse = false;
-#$['transformVia404'] = true;
+#$wgThumbnailScriptPath = "{$wgScriptPath}/thumb.php";
 $wgUseImageMagick = true;
 $wgThumbnailEpoch = "20190815000000";
-$wgThumbnailScriptPath = false;
 $wgIgnoreImageErrors = true;
-#$wgThumbnailScriptPath = "{$wgScriptPath}/thumb.php";
 
 $wgDefaultUserOptions['imagesize'] = 4; // image size 1280, 1024
 
@@ -169,7 +167,7 @@ $wgCitizenCSPDirective = 'default-src \'none\'; script-src \'self\' \'unsafe-inl
 $wgCitizenEnableHSTS = true;
 $wgCitizenHSTSMaxAge = 63072000; # 2 year
 $wgCitizenHSTSIncludeSubdomains = true;
-#$wgCitizenHSTSPreload = true;
+$wgCitizenHSTSPreload = true;
 # Enable the deny X-Frame-Options header
 $wgCitizenEnableDenyXFrameOptions = true;
 # Enable X-XSS-Protection header
@@ -195,7 +193,7 @@ $wgCitizenMaxSearchResults = 6;
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
 
 #SVG Support
-#$wgFileExtensions[] = 'svg';
+$wgFileExtensions[] = 'svg';
 $wgAllowTitlesInSVG = true;
 $wgSVGConverter = 'ImageMagick';
 
@@ -212,6 +210,7 @@ wfLoadExtension( 'EmbedVideo' );
 wfLoadExtension( 'InputBox' );
 wfLoadExtension( 'WikiSEO' );
 wfLoadExtension( 'Cite' );
+wfLoadExtension( 'CiteThisPage' );
 wfLoadExtension( 'DynamicPageList' );
 wfLoadExtension( 'Nuke' );
 wfLoadExtension( 'CommonsMetadata' );
@@ -238,6 +237,7 @@ wfLoadExtension( 'RSS' );
 wfLoadExtension( 'TemplateData' );
 wfLoadExtension( 'PageImages' );
 #wfLoadExtension( 'RelatedArticles' );
+wfLoadExtension( 'WikiEditor' );
 wfLoadExtension( 'VisualEditor' );
 wfLoadExtension( 'Scribunto' );
 wfLoadExtension( 'EventLogging' );
@@ -266,6 +266,7 @@ $wgUploadWizardConfig = array(
   'debug' => false,
   'altUploadForm' => 'Special:Upload',
   'fallbackToAltUploadForm' => false,
+  'alternativeUploadToolsPage' => false,
   'enableFormData' => true,
   'enableMultipleFiles' => true,
   'enableMultiFileSelect' => false,
@@ -394,7 +395,7 @@ $wgDefaultUserOptions['usecodemirror'] = 0;
 
 #CookieWarning
 $wgCookieWarningEnabled = true;
-$wgCookieWarningGeoIPLookup = none;
+$wgCookieWarningGeoIPLookup = 'none';
 
 #DynamicPageList
 $wgDplSettings['recursiveTagParse'] = true;
@@ -487,6 +488,14 @@ $wgNamespaceProtection[NS_ISSUE] = array( 'issue-edit' );
 $wgNamespaceProtection[NS_GUIDE] = array( 'guide-edit' );
 $wgNamespaceProtection[NS_ORG] = array( 'org-edit' );
 $wgNamespaceProtection[NS_EVENT] = array( 'event-edit' );
+
+# Namespace alias
+$wgNamespaceAliases['SC'] = NS_PROJECT;
+$wgNamespaceAliases['ST'] = NS_PROJECT_TALK;
+$wgNamespaceAliases['H'] = NS_HELP;
+$wgNamespaceAliases['T'] = NS_TEMPLATE;
+$wgNamespaceAliases['CAT'] = NS_CATEGORY;
+$wgNamespaceAliases['CL'] = NS_COMMLINK;
 
 $wgVisualEditorAvailableNamespaces = array(
   NS_MAIN     	=> true,
@@ -674,3 +683,15 @@ $wgHooks['SkinTemplateOutputPageBeforeExec'][] = function( $sk, &$tpl ) {
 #============================== Final External Includes ===============================================
 
 require_once("/home/www-data/external_includes/misc_server_settings.php");
+
+# Use domain root as the canonical URL 
+$wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
+	if ( !$title->isExternal() && $query == '' && $title->isMainPage() ) {
+		$url = '/';
+	}
+};
+
+# Tell MediaWiki that "/" should not be redirected
+$wgHooks['TestCanonicalRedirect'][] = function ( $request ) {
+	return $request->getRequestURL() !== '/';
+};
