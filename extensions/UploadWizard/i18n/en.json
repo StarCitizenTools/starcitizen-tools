@@ -279,7 +279,7 @@
 	"mwe-upwiz-license-cc-by-sa-2.5": "Creative Commons Attribution ShareAlike 2.5 ([$2 legal code])",
 	"mwe-upwiz-license-cc-by-2.5": "Creative Commons Attribution 2.5 ([$2 legal code])",
 	"mwe-upwiz-license-cc-by-sa-2.0": "Creative Commons Attribution ShareAlike 2.0 ([$2 legal code])",
-	"mwe-upwiz-license-cc-by-2.0": "Creative Commons Attribution 2.0 ([$2 legal code])",
+	"mwe-upwiz-license-cc-by-2.0": "Creative Commons Attribution ShareAlike 2.0 ([$2 legal code])",
 	"mwe-upwiz-license-cc-zero": "Creative Commons CC0 Waiver (release all rights, like public domain: [$2 legal code])",
 	"mwe-upwiz-license-custom": "The license is described by the following wikitext (must contain a valid [$2 copyright tag]):",
 	"mwe-upwiz-license-custom-url": "//commons.wikimedia.org/wiki/Commons:Copyright_tags",
@@ -368,5 +368,9 @@
 	"apihelp-query+allcampaigns-summary": "Enumerate all UploadWizard campaigns.",
 	"apihelp-query+allcampaigns-param-enabledonly": "Only list campaigns that are enabled.",
 	"apihelp-query+allcampaigns-param-limit": "Number of campaigns to return.",
-	"apihelp-query+allcampaigns-example-1": "Enumerate enabled campaigns"
+	"apihelp-query+allcampaigns-example-1": "Enumerate enabled campaigns",
+	"mwe-upwiz-license-sc-head": "Cloud Imperium published this work as public media",
+	"mwe-upwiz-license-rsi": "Roberts Space Industries grant of public media for use on fan sites.",
+	"mwe-upwiz-license-cc-by-nc-sa-2.0": "Creative Commons Attribution NonCommercial 2.0 ([$2 legal code])",
+	"mwe-upwiz-license-cc-by-nc-2.0": "Creative Commons Attribution NonCommercial 2.0 ([$2 legal code])"
 }
