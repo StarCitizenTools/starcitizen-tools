@@ -442,35 +442,7 @@ return [
 			'templates' => [ 'subst:Custom license marker added by UW' ],
 			'url' => wfMessage( 'mwe-upwiz-license-custom-url' )->parse()
 		],
-		'rsilicense' => [
-			'msg' => 'mwe-upwiz-license-rsi',
-			'templates' => ['RSIlicense']
-		],
-		'thedamnshameslicense' => [
-			'msg' => 'mwe-upwiz-license-thedamnshames',
-			'templates' => ['TheDamnShamesLicense']
-		],
-		'hasgahalicense' => [
-			'msg' => 'mwe-upwiz-license-hasgaha',
-			'templates' => ['HasgahaLicense']
-		],
-		'aelannateslalicense' => [
-			'msg' => 'mwe-upwiz-license-aelannatesla',
-			'templates' => ['AelannaTeslaLicense']
-		],
-		'cc-by-nc-sa-2.0' => [
-			'msg' => 'mwe-upwiz-license-cc-by-nc-sa-2.0',
-			'templates' => ['cc-by-nc-sa-2.0'],
-//			'icons' => array('cc-by','cc-nc','cc-sa'),
-			'url' => '//creativecommons.org/licenses/by-nc-sa/2.0/'
-		],
-        'cc-by-nc-2.0' => [
-            'msg' => 'mwe-upwiz-license-cc-by-nc-2.0',
-            'templates' => ['cc-by-nc-2.0'],
- //         'icons' => array('cc-by','cc-nc'),
-            'url' => '//creativecommons.org/licenses/by-nc/2.0/'
-		],
-    	'generic' => [
+		'generic' => [
 			'msg' => 'mwe-upwiz-license-generic',
 			'templates' => [ 'Generic' ]
 		]
@@ -502,14 +474,8 @@ return [
 		// checkbox selection of all licenses
 		'thirdParty' => [
 			'type' => 'or',
-			'defaults' => 'rsilicense',
+			'defaults' => 'cc-by-sa-4.0',
 			'licenseGroups' => [
-				[
-					'head' => 'mwe-upwiz-license-sc-head',
-					'licenses' => [
-						'rsilicense'
-					]
-				],
 				[
 					// This should be a list of all CC licenses we can reasonably expect to find around the web
 					'head' => 'mwe-upwiz-license-cc-head',
@@ -532,9 +498,24 @@ return [
 					'prependTemplates' => [ 'flickrreview' ],
 					'licenses' => [
 						'cc-by-sa-2.0',
-						'cc-by-nc-2.0',
-						'cc-by-nc-sa-2.0',
-						'cc-by-2.0'
+						'cc-by-2.0',
+						'pd-usgov',
+					]
+				],
+				[
+					'head' => 'mwe-upwiz-license-public-domain-usa-head',
+					'subhead' => 'mwe-upwiz-license-public-domain-usa-subhead',
+					'licenses' => [
+						'pd-us',
+						'pd-art',
+					]
+				],
+				[
+					// omitted navy because it is believed only MultiChil uses it heavily. Could add it back
+					'head' => 'mwe-upwiz-license-usgov-head',
+					'licenses' => [
+						'pd-usgov',
+						'pd-usgov-nasa'
 					]
 				],
 				[
