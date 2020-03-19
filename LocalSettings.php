@@ -281,20 +281,21 @@ $wgUploadWizardConfig = array(
     'rsilicense' => array(
       'msg' => 'mwe-upwiz-license-rsi',
       'templates' => array('RSIlicense')
-    ),
+      ),
     # CC-BY-NC-SA-2.0 required by Flickr
     'cc-by-nc-sa-2.0' => array(
       'msg' => 'mwe-upwiz-license-cc-by-nc-sa-2.0',
       'templates' => array('cc-by-nc-sa-2.0'),
       'icons' => array('cc-by','cc-nc','cc-sa'),
       'url' => '//creativecommons.org/licenses/by-nc-sa/2.0/'
-    ),
+      ),
     # CC-BY-NC-2.0 required by Flickr
     'cc-by-nc-2.0' => array(
       'msg' => 'mwe-upwiz-license-cc-by-nc-2.0',
       'templates' => array('cc-by-nc-2.0'),
       'icons' => array('cc-by','cc-nc'),
       'url' => '//creativecommons.org/licenses/by-nc/2.0/'
+      ),
     ),
   );
 
