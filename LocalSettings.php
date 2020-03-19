@@ -310,7 +310,41 @@ $wgUploadWizardConfig = array(
           'licenses' => array(
             'rsilicense'
           )
-        )
+        ),
+        array(
+          // This should be a list of all CC licenses we can reasonably expect to find around the web
+          'head' => 'mwe-upwiz-license-cc-head',
+          'subhead' => 'mwe-upwiz-license-cc-subhead',
+          'licenses' => array(
+            'cc-by-sa-4.0',
+            'cc-by-sa-3.0',
+            'cc-by-sa-2.5',
+            'cc-by-4.0',
+            'cc-by-3.0',
+            'cc-by-2.5',
+            'cc-zero'
+          )
+        ),
+        array(
+          // Flickr still uses CC 2.0
+          'head' => 'mwe-upwiz-license-flickr-head',
+          'subhead'=> 'mwe-upwiz-license-flickr-subhead',
+          'licenses'=> array(
+            'cc-by-sa-2.0',
+            'cc-by-nc-2.0',
+            'cc-by-nc-sa-2.0',
+            'cc-by-2.0'
+          )
+        ),
+        array(
+          'head' => 'mwe-upwiz-license-custom-head',
+          'special' => 'custom',
+          'licenses' => array( 'custom' ),
+        ),
+        array(
+          'head' => 'mwe-upwiz-license-none-head',
+          'licenses' => array( 'none' )
+        ),
       )
     )
   );
