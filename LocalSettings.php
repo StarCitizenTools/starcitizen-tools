@@ -283,18 +283,20 @@ $wgUploadWizardConfig = array(
       'templates' => array('RSIlicense')
     ),
     # CC-BY-NC-SA-2.0 required by Flickr
+    # Note that this need to be added to mw.FlickrChecker.js every time it is updated
     'cc-by-nc-sa-2.0' => array(
       'msg' => 'mwe-upwiz-license-cc-by-nc-sa-2.0',
       'templates' => array('cc-by-nc-sa-2.0'),
-      'icons' => array('cc-by','cc-nc','cc-sa'),
+      #'icons' => array('cc-by','cc-nc','cc-sa'), NC icon is missing
       'url' => '//creativecommons.org/licenses/by-nc-sa/2.0/',
       'languageCodePrefix' => 'deed.'
     ),
     # CC-BY-NC-2.0 required by Flickr
+    # Note that this need to be added to mw.FlickrChecker.js every time it is updated
     'cc-by-nc-2.0' => array(
       'msg' => 'mwe-upwiz-license-cc-by-nc-2.0',
       'templates' => array('cc-by-nc-2.0'),
-      'icons' => array('cc-by','cc-nc'),
+      #'icons' => array('cc-by','cc-nc'), NC icon is missing
       'url' => '//creativecommons.org/licenses/by-nc/2.0/',
       'languageCodePrefix' => 'deed.'
     ),
