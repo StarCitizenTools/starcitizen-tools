@@ -312,7 +312,7 @@ $wgUploadWizardConfig = array(
           )
         ),
         array(
-          // This should be a list of all CC licenses we can reasonably expect to find around the web
+          # This should be a list of all CC licenses we can reasonably expect to find around the web
           'head' => 'mwe-upwiz-license-cc-head',
           'subhead' => 'mwe-upwiz-license-cc-subhead',
           'licenses' => array(
@@ -326,13 +326,13 @@ $wgUploadWizardConfig = array(
           )
         ),
         array(
-          // Flickr still uses CC 2.0
+          # Flickr still uses CC 2.0
           'head' => 'mwe-upwiz-license-flickr-head',
           'subhead'=> 'mwe-upwiz-license-flickr-subhead',
           'licenses'=> array(
-            'cc-by-sa-2.0',
-            'cc-by-nc-2.0',
             'cc-by-nc-sa-2.0',
+            'cc-by-nc-2.0',
+            'cc-by-sa-2.0',
             'cc-by-2.0'
           )
         ),
@@ -342,12 +342,14 @@ $wgUploadWizardConfig = array(
           'licenses' => array( 'custom' ),
         ),
         array(
+
           'head' => 'mwe-upwiz-license-none-head',
           'licenses' => array( 'none' )
         ),
       )
     )
-  );
+  )
+);
 
 #TextExtracts
 $wgExtractsRemoveClasses[] = 'dd';
