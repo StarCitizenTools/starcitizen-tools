@@ -272,7 +272,7 @@ $wgUploadWizardConfig = array(
   'enableMultiFileSelect' => false,
   'tutorial' => array(
     'skip' => true
-    ),
+  ),
   'maxUploads' => 15,
   'fileExtensions' => $wgFileExtensions,
   'flickrApiUrl' => 'https://secure.flickr.com/services/rest/?',
@@ -287,14 +287,16 @@ $wgUploadWizardConfig = array(
       'msg' => 'mwe-upwiz-license-cc-by-nc-sa-2.0',
       'templates' => array('cc-by-nc-sa-2.0'),
       'icons' => array('cc-by','cc-nc','cc-sa'),
-      'url' => '//creativecommons.org/licenses/by-nc-sa/2.0/'
+      'url' => '//creativecommons.org/licenses/by-nc-sa/2.0/',
+      'languageCodePrefix' => 'deed.'
     ),
     # CC-BY-NC-2.0 required by Flickr
     'cc-by-nc-2.0' => array(
       'msg' => 'mwe-upwiz-license-cc-by-nc-2.0',
       'templates' => array('cc-by-nc-2.0'),
       'icons' => array('cc-by','cc-nc'),
-      'url' => '//creativecommons.org/licenses/by-nc/2.0/'
+      'url' => '//creativecommons.org/licenses/by-nc/2.0/',
+      'languageCodePrefix' => 'deed.'
     ),
   ),
   # License selection page
@@ -307,10 +309,10 @@ $wgUploadWizardConfig = array(
           'head' => 'mwe-upwiz-license-sc-head',
           'licenses' => array(
             'rsilicense'
-          ),
-        ),
-      ),
-    ),
+          )
+        )
+      )
+    )
   );
 
 #TextExtracts
