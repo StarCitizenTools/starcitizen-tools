@@ -342,7 +342,6 @@ $wgUploadWizardConfig = array(
           'licenses' => array( 'custom' ),
         ),
         array(
-
           'head' => 'mwe-upwiz-license-none-head',
           'licenses' => array( 'none' )
         ),
