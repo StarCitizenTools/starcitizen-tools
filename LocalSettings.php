@@ -197,6 +197,9 @@ $wgFileExtensions[] = 'svg';
 $wgAllowTitlesInSVG = true;
 $wgSVGConverter = 'ImageMagick';
 
+#Open external link in new tab/window
+$wgExternalLinkTarget = '_blank';
+
 #=============================================== External Includes ===============================================
 
 require_once("/home/www-data/external_includes/mysql_pw.php");
