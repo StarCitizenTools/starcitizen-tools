@@ -2636,8 +2636,3 @@ ve.init.mw.saveErrorHandlerRegistry.register( 'confirmEditCaptchas', function ( 
 
 	return true;
 } );
-
-/* Registration */
-
-// Used in tryTeardown
-ve.ui.windowFactory.register( mw.widgets.AbandonEditDialog );
