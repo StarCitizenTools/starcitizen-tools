@@ -1,7 +1,7 @@
 <?php
 
 class CaptchaCacheStore extends CaptchaStore {
-	public function store( $index, $info ) {
+	function store( $index, $info ) {
 		global $wgCaptchaSessionExpiration;
 
 		ObjectCache::getMainStashInstance()->set(
@@ -11,7 +11,7 @@ class CaptchaCacheStore extends CaptchaStore {
 		);
 	}
 
-	public function retrieve( $index ) {
+	function retrieve( $index ) {
 		$info = ObjectCache::getMainStashInstance()->get( wfMemcKey( 'captcha', $index ) );
 		if ( $info ) {
 			return $info;
@@ -20,11 +20,11 @@ class CaptchaCacheStore extends CaptchaStore {
 		}
 	}
 
-	public function clear( $index ) {
+	function clear( $index ) {
 		ObjectCache::getMainStashInstance()->delete( wfMemcKey( 'captcha', $index ) );
 	}
 
-	public function cookiesNeeded() {
+	function cookiesNeeded() {
 		return false;
 	}
 }

@@ -45,8 +45,7 @@ class HTMLFancyCaptchaField extends HTMLFormField {
 			'id'   => $this->mID,
 			'name' => $this->mName,
 			'class' => 'mw-ui-input',
-			// max_length in captcha.py plus fudge factor
-			'size' => '12',
+			'size' => '12',  // max_length in captcha.py plus fudge factor
 			'dir' => $this->mDir,
 			'autocomplete' => 'off',
 			'autocorrect' => 'off',

@@ -36,15 +36,10 @@ class CaptchaAuthenticationRequest extends AuthenticationRequest {
 		return $success;
 	}
 
-	/**
-	 * @inheritDoc
-	 * @suppress SecurityCheck-DoubleEscaped T202112
-	 */
 	public function getFieldInfo() {
 		$captcha = ConfirmEditHooks::getInstance();
 
-		// doesn't actually exist but *Captcha::getMessage will handle that
-		$action = 'generic';
+		$action = 'generic'; // doesn't actually exist but *Captcha::getMessage will handle that
 		switch ( $this->action ) {
 			case AuthManager::ACTION_LOGIN:
 				$action = 'badlogin';

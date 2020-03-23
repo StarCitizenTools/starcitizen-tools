@@ -13,7 +13,7 @@ class ReCaptchaNoCaptcha extends SimpleCaptcha {
 	 * @param int $tabIndex
 	 * @return array
 	 */
-	public function getFormInformation( $tabIndex = 1 ) {
+	function getFormInformation( $tabIndex = 1 ) {
 		global $wgReCaptchaSiteKey, $wgLang;
 		$lang = htmlspecialchars( urlencode( $wgLang->getCode() ) );
 
@@ -80,14 +80,9 @@ HTML;
 	 * @return array
 	 */
 	protected function getCaptchaParamsFromRequest( WebRequest $request ) {
-		// ReCaptchaNoCaptcha combines captcha ID + solution into a single value
+		$index = 'not used'; // ReCaptchaNoCaptcha combines captcha ID + solution into a single value
 		// API is hardwired to return captchaWord, so use that if the standard isempty
-		// "captchaWord" is sent as "captchaword" by visual editor
-		$index = 'not used';
-		$response = $request->getVal( 'g-recaptcha-response',
-						$request->getVal( 'captchaWord',
-							$request->getVal( 'captchaword' )
-						) );
+		$response = $request->getVal( 'g-recaptcha-response', $request->getVal( 'captchaWord' ) );
 		return [ $index, $response ];
 	}
 
@@ -101,7 +96,7 @@ HTML;
 	 * @param string $word captcha solution
 	 * @return bool
 	 */
-	protected function passCaptcha( $_, $word ) {
+	function passCaptcha( $_, $word ) {
 		global $wgRequest, $wgReCaptchaSecretKey, $wgReCaptchaSendRemoteIP;
 
 		$url = 'https://www.google.com/recaptcha/api/siteverify';
@@ -139,7 +134,7 @@ HTML;
 	/**
 	 * @param array &$resultArr
 	 */
-	protected function addCaptchaAPI( &$resultArr ) {
+	function addCaptchaAPI( &$resultArr ) {
 		$resultArr['captcha'] = $this->describeCaptchaType();
 		$resultArr['captcha']['error'] = $this->error;
 	}
@@ -177,7 +172,7 @@ HTML;
 	 * @param int $flags
 	 * @return bool
 	 */
-	public function apiGetAllowedParams( &$module, &$params, $flags ) {
+	public function APIGetAllowedParams( &$module, &$params, $flags ) {
 		if ( $flags && $this->isAPICaptchaModule( $module ) ) {
 			$params['g-recaptcha-response'] = [
 				ApiBase::PARAM_HELP_MSG => 'renocaptcha-apihelp-param-g-recaptcha-response',

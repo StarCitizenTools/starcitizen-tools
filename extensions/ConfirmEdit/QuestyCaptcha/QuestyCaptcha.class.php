@@ -21,7 +21,7 @@ class QuestyCaptcha extends SimpleCaptcha {
 	 * @param array $info
 	 * @return bool
 	 */
-	protected function keyMatch( $answer, $info ) {
+	function keyMatch( $answer, $info ) {
 		if ( is_array( $info['answer'] ) ) {
 			return in_array( strtolower( $answer ), array_map( 'strtolower', $info['answer'] ) );
 		} else {
@@ -32,7 +32,7 @@ class QuestyCaptcha extends SimpleCaptcha {
 	/**
 	 * @param array &$resultArr
 	 */
-	protected function addCaptchaAPI( &$resultArr ) {
+	function addCaptchaAPI( &$resultArr ) {
 		$captcha = $this->getCaptcha();
 		$index = $this->storeCaptcha( $captcha );
 		$resultArr['captcha'] = $this->describeCaptchaType();
@@ -53,7 +53,7 @@ class QuestyCaptcha extends SimpleCaptcha {
 	/**
 	 * @return array
 	 */
-	public function getCaptcha() {
+	function getCaptcha() {
 		global $wgCaptchaQuestions;
 
 		// Backwards compatibility
@@ -70,7 +70,7 @@ class QuestyCaptcha extends SimpleCaptcha {
 	 * @param int $tabIndex
 	 * @return array
 	 */
-	public function getFormInformation( $tabIndex = 1 ) {
+	function getFormInformation( $tabIndex = 1 ) {
 		$captcha = $this->getCaptcha();
 		if ( !$captcha ) {
 			die(
@@ -86,8 +86,7 @@ class QuestyCaptcha extends SimpleCaptcha {
 					'class' => 'mw-ui-input',
 					'required',
 					'autocomplete' => 'off',
-					// tab in before the edit textarea
-					'tabindex' => $tabIndex ] ) .
+					'tabindex' => $tabIndex ] ) . // tab in before the edit textarea
 				"</p>\n" .
 				Xml::element( 'input', [
 					'type'  => 'hidden',
@@ -97,7 +96,7 @@ class QuestyCaptcha extends SimpleCaptcha {
 		];
 	}
 
-	public function showHelp() {
+	function showHelp() {
 		global $wgOut;
 		$wgOut->setPageTitle( wfMessage( 'captchahelp-title' )->text() );
 		$wgOut->addWikiMsg( 'questycaptchahelp-text' );

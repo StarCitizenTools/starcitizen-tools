@@ -175,7 +175,7 @@ class GenerateFancyCaptchas extends Maintenance {
 
 		$storeTime += microtime( true );
 
-		$storeSucceeded = true;
+		$storeSuceeded = true;
 		if ( $ret->isOK() ) {
 			$this->output( " Done.\n" );
 			$this->output(
@@ -193,11 +193,11 @@ class GenerateFancyCaptchas extends Maintenance {
 				);
 			}
 			if ( $ret->failCount ) {
-				$storeSucceeded = false;
+				$storeSuceeded = false;
 				$this->error( sprintf( "\nFailed to copy %d captchas\n", $ret->failCount ) );
 			}
 			if ( $ret->successCount + $ret->failCount !== $captchasGenerated ) {
-				$storeSucceeded = false;
+				$storeSuceeded = false;
 				$this->error(
 					sprintf( "Internal error: captchasGenerated: %d, successCount: %d, failCount: %d\n",
 						$captchasGenerated, $ret->successCount, $ret->failCount
@@ -205,7 +205,7 @@ class GenerateFancyCaptchas extends Maintenance {
 				);
 			}
 		} else {
-			$storeSucceeded = false;
+			$storeSuceeded = false;
 			$this->output( "Errored.\n" );
 			$this->error(
 				Status::wrap( $ret )->getWikiText( null, null, 'en' ) .
@@ -213,7 +213,7 @@ class GenerateFancyCaptchas extends Maintenance {
 			);
 		}
 
-		if ( $storeSucceeded && $deleteOldCaptchas ) {
+		if ( $storeSuceeded && $deleteOldCaptchas ) {
 			$numOriginalFiles = count( $filesToDelete );
 			$this->output( "Deleting {$numOriginalFiles} old captchas...\n" );
 			$deleteTime = -microtime( true );

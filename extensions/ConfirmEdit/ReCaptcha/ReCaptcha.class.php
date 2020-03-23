@@ -16,7 +16,7 @@ class ReCaptcha extends SimpleCaptcha {
 	 * @param int $tabIndex
 	 * @return array
 	 */
-	public function getFormInformation( $tabIndex = 1 ) {
+	function getFormInformation( $tabIndex = 1 ) {
 		global $wgReCaptchaPublicKey, $wgReCaptchaTheme;
 
 		wfDeprecated( 'ConfirmEdit module ReCaptcha', '1.28' );
@@ -50,7 +50,7 @@ class ReCaptcha extends SimpleCaptcha {
 	 * @param string $response Response value
 	 * @return bool
 	 */
-	protected function passCaptcha( $challenge, $response ) {
+	function passCaptcha( $challenge, $response ) {
 		global $wgReCaptchaPrivateKey, $wgRequest;
 
 		if ( $response === null ) {
@@ -76,7 +76,7 @@ class ReCaptcha extends SimpleCaptcha {
 	/**
 	 * @param array &$resultArr
 	 */
-	protected function addCaptchaAPI( &$resultArr ) {
+	function addCaptchaAPI( &$resultArr ) {
 		$resultArr['captcha'] = $this->describeCaptchaType();
 		$resultArr['captcha']['error'] = $this->recaptcha_error;
 	}
@@ -99,7 +99,7 @@ class ReCaptcha extends SimpleCaptcha {
 	 * @param int $flags
 	 * @return bool
 	 */
-	public function apiGetAllowedParams( &$module, &$params, $flags ) {
+	public function APIGetAllowedParams( &$module, &$params, $flags ) {
 		if ( $flags && $this->isAPICaptchaModule( $module ) ) {
 			$params['recaptcha_challenge_field'] = [
 				ApiBase::PARAM_HELP_MSG => 'recaptcha-apihelp-param-recaptcha_challenge_field',

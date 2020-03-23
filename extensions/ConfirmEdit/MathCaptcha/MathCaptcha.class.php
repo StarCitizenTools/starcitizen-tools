@@ -10,14 +10,14 @@ class MathCaptcha extends SimpleCaptcha {
 	 * @param array $info
 	 * @return bool
 	 */
-	protected function keyMatch( $answer, $info ) {
+	function keyMatch( $answer, $info ) {
 		return (int)$answer == (int)$info['answer'];
 	}
 
 	/**
 	 * @param array &$resultArr
 	 */
-	protected function addCaptchaAPI( &$resultArr ) {
+	function addCaptchaAPI( &$resultArr ) {
 		list( $sum, $answer ) = $this->pickSum();
 		$html = $this->fetchMath( $sum );
 		$index = $this->storeCaptcha( [ 'answer' => $answer ] );
@@ -40,7 +40,7 @@ class MathCaptcha extends SimpleCaptcha {
 	 * @param int $tabIndex
 	 * @return array
 	 */
-	public function getFormInformation( $tabIndex = 1 ) {
+	function getFormInformation( $tabIndex = 1 ) {
 		list( $sum, $answer ) = $this->pickSum();
 		$index = $this->storeCaptcha( [ 'answer' => $answer ] );
 
@@ -58,7 +58,7 @@ class MathCaptcha extends SimpleCaptcha {
 	 * Pick a random sum
 	 * @return array
 	 */
-	private function pickSum() {
+	function pickSum() {
 		$a = mt_rand( 0, 100 );
 		$b = mt_rand( 0, 10 );
 		$op = mt_rand( 0, 1 ) ? '+' : '-';
@@ -72,7 +72,7 @@ class MathCaptcha extends SimpleCaptcha {
 	 * @param int $sum
 	 * @return string
 	 */
-	private function fetchMath( $sum ) {
+	function fetchMath( $sum ) {
 		if ( class_exists( 'MathRenderer' ) ) {
 			$math = MathRenderer::getRenderer( $sum, [], 'png' );
 		} else {
