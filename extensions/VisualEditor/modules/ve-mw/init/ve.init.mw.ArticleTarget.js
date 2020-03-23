@@ -30,7 +30,7 @@ ve.init.mw.ArticleTarget = function VeInitMwArticleTarget( config ) {
 	// Properties
 	this.saveDialog = null;
 	this.saveDeferred = null;
-	this.saveFields = {};
+	this.captcha = null;
 	this.docToSave = null;
 	this.originalDmDocPromise = null;
 	this.originalHtml = null;
@@ -692,8 +692,7 @@ ve.init.mw.ArticleTarget.prototype.saveComplete = function () {
  * @param {Object|null} data API response data
  */
 ve.init.mw.ArticleTarget.prototype.saveFail = function ( doc, saveData, wasRetry, jqXHR, status, data ) {
-	var editApi, name, handler,
-		saveErrorHandlerRegistry = ve.init.mw.saveErrorHandlerRegistry,
+	var editApi,
 		target = this;
 
 	this.saving = false;
@@ -705,13 +704,7 @@ ve.init.mw.ArticleTarget.prototype.saveFail = function ( doc, saveData, wasRetry
 		return;
 	}
 
-	editApi = ve.getProp( data, 'visualeditoredit', 'edit' ) || {};
-
-	// Handle spam blacklist error (either from core or from Extension:SpamBlacklist)
-	if ( editApi.spamblacklist ) {
-		this.saveErrorSpamBlacklist( editApi );
-		return;
-	}
+	editApi = data && data.visualeditoredit && data.visualeditoredit.edit;
 
 	// Handle spam blacklist error (either from core or from Extension:SpamBlacklist)
 	if ( editApi && editApi.spamblacklist ) {
@@ -762,19 +755,22 @@ ve.init.mw.ArticleTarget.prototype.saveFail = function ( doc, saveData, wasRetry
 		return;
 	}
 
-	// Handle warnings/errors from Extension:AbuseFilter
-	// TODO: Move this to a plugin
-	if ( editApi.abusefilter ) {
-		this.saveErrorAbuseFilter( editApi );
+	// Handle captcha
+	// Captcha "errors" usually aren't errors. We simply don't know about them ahead of time,
+	// so we save once, then (if required) we get an error with a captcha back and try again after
+	// the user solved the captcha.
+	// TODO: ConfirmEdit API is horrible, there is no reliable way to know whether it is a "math",
+	// "question" or "fancy" type of captcha. They all expose differently named properties in the
+	// API for different things in the UI. At this point we only support the SimpleCaptcha and FancyCaptcha
+	// which we very intuitively detect by the presence of a "url" property.
+	if ( editApi && editApi.captcha && (
+		editApi.captcha.url ||
+		editApi.captcha.type === 'simple' ||
+		editApi.captcha.type === 'math' ||
+		editApi.captcha.type === 'question'
+	) ) {
+		this.saveErrorCaptcha( editApi );
 		return;
-	}
-
-	for ( name in saveErrorHandlerRegistry.registry ) {
-		handler = saveErrorHandlerRegistry.lookup( name );
-		if ( handler( editApi, this ) ) {
-			// Error was handled
-			return;
-		}
 	}
 
 	// Handle (other) unknown and/or unrecoverable errors
@@ -908,6 +904,96 @@ ve.init.mw.ArticleTarget.prototype.saveErrorUnknown = function ( editApi, data )
 		false // prevents reapply
 	);
 	this.emit( 'saveErrorUnknown', errorCode || errorMsg || unknown );
+};
+
+/**
+ * Handle captcha error
+ *
+ * @method
+ * @param {Object} editApi
+ * @fires saveErrorCaptcha
+ */
+ve.init.mw.ArticleTarget.prototype.saveErrorCaptcha = function ( editApi ) {
+	var $captchaImg, msg, question,
+		captchaData = editApi.captcha,
+		captchaInput = new OO.ui.TextInputWidget( { classes: [ 've-ui-saveDialog-captchaInput' ] } ),
+		$captchaDiv = $( '<div>' ),
+		$captchaParagraph = $( '<p>' ),
+		target = this;
+
+	function onCaptchaLoad() {
+		target.saveDialog.updateSize();
+		captchaInput.focus();
+		captchaInput.scrollElementIntoView();
+	}
+
+	// Save when pressing 'Enter' in captcha field as it is single line.
+	captchaInput.on( 'enter', function () {
+		target.saveDialog.executeAction( 'save' );
+	} );
+
+	this.captcha = {
+		input: captchaInput,
+		id: captchaData.id
+	};
+	$captchaDiv.append( $captchaParagraph );
+	$captchaParagraph.append(
+		$( '<strong>' ).text( mw.msg( 'captcha-label' ) ),
+		document.createTextNode( mw.msg( 'colon-separator' ) )
+	);
+
+	if ( captchaData.url ) {
+		// FancyCaptcha
+		// Based on FancyCaptcha::getFormInformation() (https://git.io/v6mml) and
+		// ext.confirmEdit.fancyCaptcha.js in the ConfirmEdit extension.
+		mw.loader.load( 'ext.confirmEdit.fancyCaptcha' );
+		$captchaDiv.addClass( 'fancycaptcha-captcha-container' );
+		$captchaParagraph.append(
+			$( $.parseHTML( mw.message( 'fancycaptcha-edit' ).parse() ) )
+				.filter( 'a' ).attr( 'target', '_blank' ).end()
+		);
+		$captchaImg = $( '<img>' )
+			.attr( 'src', captchaData.url )
+			.addClass( 'fancycaptcha-image' )
+			.on( 'load', onCaptchaLoad );
+		$captchaDiv.append(
+			$captchaImg,
+			' ',
+			$( '<a>' ).addClass( 'fancycaptcha-reload' ).text( mw.msg( 'fancycaptcha-reload-text' ) )
+		);
+	} else {
+		if ( captchaData.type === 'simple' || captchaData.type === 'math' ) {
+			// SimpleCaptcha and MathCaptcha
+			msg = 'captcha-edit';
+		} else if ( captchaData.type === 'question' ) {
+			// QuestyCaptcha
+			msg = 'questycaptcha-edit';
+		}
+
+		if ( msg ) {
+			switch ( captchaData.mime ) {
+				case 'text/html':
+					question = $.parseHTML( captchaData.question );
+					// TODO: Search for images and wait for them to load
+					setTimeout( onCaptchaLoad );
+					break;
+				case 'text/plain':
+					question = document.createTextNode( captchaData.question );
+					setTimeout( onCaptchaLoad );
+					break;
+			}
+			$captchaParagraph.append( mw.message( msg ).parse(), '<br>', question );
+		}
+	}
+
+	$captchaDiv.append( captchaInput.$element );
+
+	// ProcessDialog's error system isn't great for this yet.
+	this.saveDialog.clearMessage( 'api-save-error' );
+	this.saveDialog.showMessage( 'api-save-error', $captchaDiv );
+	this.saveDialog.popPending();
+
+	this.emit( 'saveErrorCaptcha' );
 };
 
 /**
