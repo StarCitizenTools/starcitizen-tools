@@ -64,8 +64,14 @@
 	"ResourceModules": {
 		"ext.confirmEdit.editPreview.ipwhitelist.styles": {
 			"styles": "ext.confirmEdit.editPreview.ipwhitelist.styles.css"
+		},
+		"ext.confirmEdit.visualEditor": {
+			"scripts": "ve-confirmedit/ve.init.ConfirmEdit.init.js"
 		}
 	},
+	"VisualEditorPluginModules": [
+		"ext.confirmEdit.visualEditor"
+	],
 	"ResourceFileModulePaths": {
 		"localBasePath": "resources",
 		"remoteExtPath": "ConfirmEdit/resources"
