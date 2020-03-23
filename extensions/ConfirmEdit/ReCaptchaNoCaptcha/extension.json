@@ -6,10 +6,10 @@
 		]
 	},
 	"AutoloadClasses": {
-		"ReCaptchaNoCaptcha": "ReCaptchaNoCaptcha.class.php",
+		"ReCaptchaNoCaptcha": "includes/ReCaptchaNoCaptcha.php",
 		"ReCaptchaNoCaptchaHooks": "includes/ReCaptchaNoCaptchaHooks.php",
-		"HTMLReCaptchaNoCaptchaField": "HTMLReCaptchaNoCaptchaField.php",
-		"ReCaptchaNoCaptchaAuthenticationRequest": "ReCaptchaNoCaptchaAuthenticationRequest.php"
+		"HTMLReCaptchaNoCaptchaField": "includes/HTMLReCaptchaNoCaptchaField.php",
+		"ReCaptchaNoCaptchaAuthenticationRequest": "includes/ReCaptchaNoCaptchaAuthenticationRequest.php"
 	},
 	"config": {
 		"CaptchaClass": "ReCaptchaNoCaptcha",
