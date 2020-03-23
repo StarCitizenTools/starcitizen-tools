@@ -50,7 +50,7 @@ class SimpleCaptcha {
 	 * Since MW 1.27 all subclasses must implement this method.
 	 * @return array
 	 */
-	function getCaptcha() {
+	public function getCaptcha() {
 		$a = mt_rand( 0, 100 );
 		$b = mt_rand( 0, 10 );
 
@@ -68,7 +68,7 @@ class SimpleCaptcha {
 	/**
 	 * @param array &$resultArr
 	 */
-	function addCaptchaAPI( &$resultArr ) {
+	protected function addCaptchaAPI( &$resultArr ) {
 		$captcha = $this->getCaptcha();
 		$index = $this->storeCaptcha( $captcha );
 		$resultArr['captcha'] = $this->describeCaptchaType();
@@ -129,7 +129,8 @@ class SimpleCaptcha {
 					'id'   => 'wpCaptchaWord',
 					'size'  => 5,
 					'autocomplete' => 'off',
-					'tabindex' => $tabIndex ] ) . // tab in before the edit textarea
+					// tab in before the edit textarea
+					'tabindex' => $tabIndex ] ) .
 				"</p>\n" .
 				Xml::element( 'input', [
 					'type'  => 'hidden',
@@ -189,7 +190,7 @@ class SimpleCaptcha {
 	 * @param EditPage &$editPage
 	 * @param OutputPage &$out
 	 */
-	function showEditFormFields( &$editPage, &$out ) {
+	public function showEditFormFields( &$editPage, &$out ) {
 		$page = $editPage->getArticle()->getPage();
 		if ( !isset( $page->ConfirmEdit_ActivateCaptcha ) ) {
 			return;
@@ -197,7 +198,7 @@ class SimpleCaptcha {
 
 		if ( $this->action !== 'edit' ) {
 			unset( $page->ConfirmEdit_ActivateCaptcha );
-			$out->addWikiText( $this->getMessage( $this->action )->text() );
+			$out->addWikiMsg( $this->getMessage( $this->action )->getKey() );
 			$this->addFormToOutput( $out );
 		}
 	}
@@ -206,14 +207,14 @@ class SimpleCaptcha {
 	 * Insert the captcha prompt into an edit form.
 	 * @param EditPage $editPage
 	 */
-	function editShowCaptcha( $editPage ) {
+	public function editShowCaptcha( $editPage ) {
 		$context = $editPage->getArticle()->getContext();
 		$page = $editPage->getArticle()->getPage();
 		$out = $context->getOutput();
 		if ( isset( $page->ConfirmEdit_ActivateCaptcha ) ||
 			$this->shouldCheck( $page, '', '', $context )
 		) {
-			$out->addWikiText( $this->getMessage( $this->action )->text() );
+			$out->addWikiMsg( $this->getMessage( $this->action )->getKey() );
 			$this->addFormToOutput( $out );
 		}
 		unset( $page->ConfirmEdit_ActivateCaptcha );
@@ -242,13 +243,12 @@ class SimpleCaptcha {
 	 * @param HTMLForm &$form
 	 * @return bool true to keep running callbacks
 	 */
-	function injectEmailUser( &$form ) {
+	public function injectEmailUser( &$form ) {
 		$out = $form->getOutput();
 		$user = $form->getUser();
 		if ( $this->triggersCaptcha( CaptchaTriggers::SENDEMAIL ) ) {
 			$this->action = 'sendemail';
-			if ( $user->isAllowed( 'skipcaptcha' ) ) {
-				wfDebug( "ConfirmEdit: user group allows skipping captcha on email sending\n" );
+			if ( $this->canSkipCaptcha( $user, $form->getConfig() ) ) {
 				return true;
 			}
 			$formInformation = $this->getFormInformation();
@@ -257,7 +257,7 @@ class SimpleCaptcha {
 			$this->addFormInformationToOutput( $out, $formMetainfo );
 			$form->addFooterText(
 				"<div class='captcha'>" .
-				$out->parse( $this->getMessage( 'sendemail' )->text() ) .
+				$this->getMessage( 'sendemail' )->parseAsBlock() .
 				$formInformation['html'] .
 				"</div>\n" );
 		}
@@ -347,7 +347,7 @@ class SimpleCaptcha {
 	 *
 	 * @return bool true if whitelisted, false if not
 	 */
-	function isIPWhitelisted() {
+	private function isIPWhitelisted() {
 		global $wgCaptchaWhitelistIP, $wgRequest;
 		$ip = $wgRequest->getIP();
 
@@ -454,7 +454,7 @@ class SimpleCaptcha {
 	 * @param array $info
 	 * @return bool
 	 */
-	function keyMatch( $answer, $info ) {
+	protected function keyMatch( $answer, $info ) {
 		return $answer == $info['answer'];
 	}
 
@@ -510,13 +510,11 @@ class SimpleCaptcha {
 	 * @param Content|string $content
 	 * @param string $section
 	 * @param IContextSource $context
-	 * @param string $oldtext The content of the revision prior to $content When
+	 * @param string|null $oldtext The content of the revision prior to $content When
 	 *  null this will be loaded from the database.
 	 * @return bool true if the captcha should run
 	 */
-	function shouldCheck( WikiPage $page, $content, $section, $context, $oldtext = null ) {
-		global $wgAllowConfirmedEmail;
-
+	public function shouldCheck( WikiPage $page, $content, $section, $context, $oldtext = null ) {
 		if ( !$context instanceof IContextSource ) {
 			$context = RequestContext::getMain();
 		}
@@ -524,15 +522,7 @@ class SimpleCaptcha {
 		$request = $context->getRequest();
 		$user = $context->getUser();
 
-		// captcha check exceptions, which will return always false
-		if ( $user->isAllowed( 'skipcaptcha' ) ) {
-			wfDebug( "ConfirmEdit: user group allows skipping captcha\n" );
-			return false;
-		} elseif ( $this->isIPWhitelisted() ) {
-			wfDebug( "ConfirmEdit: user IP is whitelisted" );
-			return false;
-		} elseif ( $wgAllowConfirmedEmail && $user->isEmailConfirmed() ) {
-			wfDebug( "ConfirmEdit: user has confirmed mail, skipping captcha\n" );
+		if ( $this->canSkipCaptcha( $user, $context->getConfig() ) ) {
 			return false;
 		}
 
@@ -654,9 +644,8 @@ class SimpleCaptcha {
 	 * Filter callback function for URL whitelisting
 	 * @param string $url string to check
 	 * @return bool true if unknown, false if whitelisted
-	 * @access private
 	 */
-	function filterLink( $url ) {
+	private function filterLink( $url ) {
 		global $wgCaptchaWhitelist;
 		static $regexes = null;
 
@@ -687,7 +676,7 @@ class SimpleCaptcha {
 	 * @return array Regexes
 	 * @access private
 	 */
-	function buildRegexes( $lines ) {
+	private function buildRegexes( $lines ) {
 		# Code duplicated from the SpamBlacklist extension (r19197)
 		# and later modified.
 
@@ -760,9 +749,10 @@ class SimpleCaptcha {
 	 * @param Title $title
 	 * @return array
 	 */
-	function getLinksFromTracker( $title ) {
+	private function getLinksFromTracker( $title ) {
 		$dbr = wfGetDB( DB_REPLICA );
-		$id = $title->getArticleID(); // should be zero queries
+		// should be zero queries
+		$id = $title->getArticleID();
 		$res = $dbr->select( 'externallinks', [ 'el_to' ],
 			[ 'el_from' => $id ], __METHOD__ );
 		$links = [];
@@ -812,7 +802,7 @@ class SimpleCaptcha {
 	 * @param bool $minorEdit
 	 * @return bool
 	 */
-	function confirmEditMerged( $context, $content, $status, $summary, $user, $minorEdit ) {
+	public function confirmEditMerged( $context, $content, $status, $summary, $user, $minorEdit ) {
 		if ( !$context->canUseWikiPage() ) {
 			// we check WikiPage only
 			// try to get an appropriate title for this page
@@ -858,7 +848,7 @@ class SimpleCaptcha {
 	 * Logic to check if we need to pass a captcha for the current user
 	 * to create a new account, or not
 	 *
-	 * @param User $creatingUser
+	 * @param User|null $creatingUser
 	 * @return bool true to show captcha, false to skip captcha
 	 */
 	public function needCreateAccountCaptcha( User $creatingUser = null ) {
@@ -866,11 +856,8 @@ class SimpleCaptcha {
 		$creatingUser = $creatingUser ?: $wgUser;
 
 		if ( $this->triggersCaptcha( CaptchaTriggers::CREATE_ACCOUNT ) ) {
-			if ( $creatingUser->isAllowed( 'skipcaptcha' ) ) {
-				wfDebug( "ConfirmEdit: user group allows skipping captcha on account creation\n" );
-				return false;
-			}
-			if ( $this->isIPWhitelisted() ) {
+			if ( $this->canSkipCaptcha( $creatingUser,
+				\MediaWiki\MediaWikiServices::getInstance()->getMainConfig() ) ) {
 				return false;
 			}
 			return true;
@@ -887,15 +874,12 @@ class SimpleCaptcha {
 	 * @param string &$error
 	 * @return bool true to continue saving, false to abort and show a captcha form
 	 */
-	function confirmEmailUser( $from, $to, $subject, $text, &$error ) {
+	public function confirmEmailUser( $from, $to, $subject, $text, &$error ) {
 		global $wgUser, $wgRequest;
 
 		if ( $this->triggersCaptcha( CaptchaTriggers::SENDEMAIL ) ) {
-			if ( $wgUser->isAllowed( 'skipcaptcha' ) ) {
-				wfDebug( "ConfirmEdit: user group allows skipping captcha on email sending\n" );
-				return true;
-			}
-			if ( $this->isIPWhitelisted() ) {
+			if ( $this->canSkipCaptcha( $wgUser,
+				\MediaWiki\MediaWikiServices::getInstance()->getMainConfig() ) ) {
 				return true;
 			}
 
@@ -928,7 +912,7 @@ class SimpleCaptcha {
 	 * @param int $flags
 	 * @return bool
 	 */
-	public function APIGetAllowedParams( &$module, &$params, $flags ) {
+	public function apiGetAllowedParams( &$module, &$params, $flags ) {
 		if ( $this->isAPICaptchaModule( $module ) ) {
 			$params['captchaword'] = [
 				ApiBase::PARAM_HELP_MSG => 'captcha-apihelp-param-captchaword',
@@ -1040,8 +1024,8 @@ class SimpleCaptcha {
 	 * Log the status and any triggering info for debugging or statistics
 	 * @param string $message
 	 */
-	function log( $message ) {
-		wfDebugLog( 'captcha', 'ConfirmEdit: ' . $message . '; ' .  $this->trigger );
+	protected function log( $message ) {
+		wfDebugLog( 'captcha', 'ConfirmEdit: ' . $message . '; ' . $this->trigger );
 	}
 
 	/**
@@ -1090,7 +1074,7 @@ class SimpleCaptcha {
 	 * @return string
 	 * @access private
 	 */
-	function loadText( $title, $section, $flags = Revision::READ_LATEST ) {
+	private function loadText( $title, $section, $flags = Revision::READ_LATEST ) {
 		global $wgParser;
 
 		$rev = Revision::newFromTitle( $title, false, $flags );
@@ -1113,7 +1097,7 @@ class SimpleCaptcha {
 	 * @param string $text
 	 * @return array of strings
 	 */
-	function findLinks( $title, $text ) {
+	private function findLinks( $title, $text ) {
 		global $wgParser, $wgUser;
 
 		$options = new ParserOptions();
@@ -1126,7 +1110,7 @@ class SimpleCaptcha {
 	/**
 	 * Show a page explaining what this wacky thing is.
 	 */
-	function showHelp() {
+	public function showHelp() {
 		global $wgOut;
 		$wgOut->setPageTitle( wfMessage( 'captchahelp-title' )->text() );
 		$wgOut->addWikiMsg( 'captchahelp-text' );
@@ -1145,7 +1129,7 @@ class SimpleCaptcha {
 	}
 
 	/**
-	 * Modify the apprearance of the captcha field
+	 * Modify the appearance of the captcha field
 	 * @param AuthenticationRequest[] $requests
 	 * @param array $fieldInfo Field description as given by AuthenticationRequest::mergeFieldInfo
 	 * @param array &$formDescriptor A form descriptor suitable for the HTMLForm constructor
@@ -1166,5 +1150,33 @@ class SimpleCaptcha {
 			'persistent' => false,
 			'required' => true,
 		] + $formDescriptor['captchaWord'];
+	}
+
+	/**
+	 * Check whether the user provided / IP making the request is allowed to skip captchas
+	 * @param User $user
+	 * @param Config $config
+	 * @return bool
+	 * @throws ConfigException
+	 */
+	public function canSkipCaptcha( $user, Config $config ) {
+		$allowConfirmEmail = $config->get( 'AllowConfirmedEmail' );
+
+		if ( $user->isAllowed( 'skipcaptcha' ) ) {
+			wfDebug( "ConfirmEdit: user group allows skipping captcha\n" );
+			return true;
+		}
+
+		if ( $this->isIPWhitelisted() ) {
+			wfDebug( "ConfirmEdit: user IP is whitelisted" );
+			return true;
+		}
+
+		if ( $allowConfirmEmail && $user->isEmailConfirmed() ) {
+			wfDebug( "ConfirmEdit: user has confirmed mail, skipping captcha\n" );
+			return true;
+		}
+
+		return false;
 	}
 }

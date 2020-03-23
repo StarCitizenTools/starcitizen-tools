@@ -65,7 +65,7 @@ class FancyCaptcha extends SimpleCaptcha {
 	 * @param array $info
 	 * @return bool
 	 */
-	function keyMatch( $answer, $info ) {
+	protected function keyMatch( $answer, $info ) {
 		global $wgCaptchaSecret;
 
 		$digest = $wgCaptchaSecret . $info['salt'] . $answer . $wgCaptchaSecret . $info['salt'];
@@ -83,7 +83,7 @@ class FancyCaptcha extends SimpleCaptcha {
 	/**
 	 * @param array &$resultArr
 	 */
-	function addCaptchaAPI( &$resultArr ) {
+	protected function addCaptchaAPI( &$resultArr ) {
 		$info = $this->pickImage();
 		if ( !$info ) {
 			$resultArr['captcha']['error'] = 'Out of images';
@@ -110,7 +110,7 @@ class FancyCaptcha extends SimpleCaptcha {
 	 * @param int $tabIndex
 	 * @return array
 	 */
-	function getFormInformation( $tabIndex = 1 ) {
+	public function getFormInformation( $tabIndex = 1 ) {
 		$modules = [];
 
 		$title = SpecialPage::getTitleFor( 'Captcha', 'image' );
@@ -148,35 +148,37 @@ class FancyCaptcha extends SimpleCaptcha {
 					'class' => 'mw-ui-input',
 					'id'   => 'wpCaptchaWord',
 					'type' => 'text',
-					'size' => '12',  // max_length in captcha.py plus fudge factor
+					// max_length in captcha.py plus fudge factor
+					'size' => '12',
 					'autocomplete' => 'off',
 					'autocorrect' => 'off',
 					'autocapitalize' => 'off',
 					'required' => 'required',
+					// tab in before the edit textarea
 					'tabindex' => $tabIndex,
-					'placeholder' => wfMessage( 'fancycaptcha-imgcaptcha-ph' )
+					'placeholder' => wfMessage( 'fancycaptcha-imgcaptcha-ph' )->text()
 				]
-			); // tab in before the edit textarea
-			if ( $this->action == 'createaccount' ) {
-				// use raw element, because the message can contain links or some other html
-				$form .= Html::rawElement( 'small', [
-						'class' => 'mw-createacct-captcha-assisted'
-					], wfMessage( 'createacct-imgcaptcha-help' )->parse()
-				);
-			}
-			$form .= Html::element( 'input', [
-					'type'  => 'hidden',
-					'name'  => 'wpCaptchaId',
-					'id'    => 'wpCaptchaId',
-					'value' => $index
-				]
-			) . Html::closeElement( 'div' ) . Html::closeElement( 'div' ) . "\n";
+			);
+		if ( $this->action == 'createaccount' ) {
+			// use raw element, because the message can contain links or some other html
+			$form .= Html::rawElement( 'small', [
+					'class' => 'mw-createacct-captcha-assisted'
+				], wfMessage( 'createacct-imgcaptcha-help' )->parse()
+			);
+		}
+		$form .= Html::element( 'input', [
+				'type'  => 'hidden',
+				'name'  => 'wpCaptchaId',
+				'id'    => 'wpCaptchaId',
+				'value' => $index
+			]
+		) . Html::closeElement( 'div' ) . Html::closeElement( 'div' ) . "\n";
 
 		return [
 			'html' => $form,
 			'modules' => $modules,
 			// Uses addModuleStyles so it is loaded when JS is disabled.
-			'modulestyles' => [ 'ext.confirmEdit.fancyCaptcha.styles' ],
+			'modulestyles' => [ 'mediawiki.ui.input', 'ext.confirmEdit.fancyCaptcha.styles' ],
 		];
 	}
 
@@ -187,7 +189,8 @@ class FancyCaptcha extends SimpleCaptcha {
 	protected function pickImage() {
 		global $wgCaptchaDirectoryLevels;
 
-		$lockouts = 0; // number of times another process claimed a file before this one
+		// number of times another process claimed a file before this one
+		$lockouts = 0;
 		$baseDir = $this->getBackend()->getRootStoragePath() . '/captcha-render';
 		return $this->pickImageDir( $baseDir, $wgCaptchaDirectoryLevels, $lockouts );
 	}
@@ -201,16 +204,20 @@ class FancyCaptcha extends SimpleCaptcha {
 	protected function pickImageDir( $directory, $levels, &$lockouts ) {
 		global $wgMemc;
 
-		if ( $levels <= 0 ) { // $directory has regular files
+		if ( $levels <= 0 ) {
+			// $directory has regular files
 			return $this->pickImageFromDir( $directory, $lockouts );
 		}
 
 		$backend = $this->getBackend();
 
-		$key  = "fancycaptcha:dirlist:{$backend->getWikiId()}:" . sha1( $directory );
-		$dirs = $wgMemc->get( $key ); // check cache
-		if ( !is_array( $dirs ) || !count( $dirs ) ) { // cache miss
-			$dirs = []; // subdirs actually present...
+		$key = "fancycaptcha:dirlist:{$backend->getWikiId()}:" . sha1( $directory );
+		// check cache
+		$dirs = $wgMemc->get( $key );
+		if ( !is_array( $dirs ) || !count( $dirs ) ) {
+			// cache miss
+			$dirs = [];
+			// subdirs actually present...
 			foreach ( $backend->getTopDirectoryList( [ 'dir' => $directory ] ) as $entry ) {
 				if ( ctype_xdigit( $entry ) && strlen( $entry ) == 1 ) {
 					$dirs[] = $entry;
@@ -225,24 +232,29 @@ class FancyCaptcha extends SimpleCaptcha {
 		if ( !count( $dirs ) ) {
 			// Remove this directory if empty so callers don't keep looking here
 			$backend->clean( [ 'dir' => $directory ] );
-			return false; // none found
+			// none found
+			return false;
 		}
 
-		$place = mt_rand( 0, count( $dirs ) - 1 ); // pick a random subdir
+		// pick a random subdir
+		$place = mt_rand( 0, count( $dirs ) - 1 );
 		// In case all dirs are not filled, cycle through next digits...
 		$fancyCount = count( $dirs );
 		for ( $j = 0; $j < $fancyCount; $j++ ) {
 			$char = $dirs[( $place + $j ) % count( $dirs )];
 			$info = $this->pickImageDir( "$directory/$char", $levels - 1, $lockouts );
 			if ( $info ) {
-				return $info; // found a captcha
+				// found a captcha
+				return $info;
 			} else {
 				wfDebug( "Could not find captcha in $directory.\n" );
-				$wgMemc->delete( $key ); // files changed on disk?
+				// files changed on disk?
+				$wgMemc->delete( $key );
 			}
 		}
 
-		return false; // didn't find any images in this directory... empty?
+		// didn't find any images in this directory... empty?
+		return false;
 	}
 
 	/**
@@ -255,13 +267,16 @@ class FancyCaptcha extends SimpleCaptcha {
 
 		$backend = $this->getBackend();
 
-		$key   = "fancycaptcha:filelist:{$backend->getWikiId()}:" . sha1( $directory );
-		$files = $wgMemc->get( $key ); // check cache
-		if ( !is_array( $files ) || !count( $files ) ) { // cache miss
-			$files = []; // captcha files
+		$key = "fancycaptcha:filelist:{$backend->getWikiId()}:" . sha1( $directory );
+		// check cache
+		$files = $wgMemc->get( $key );
+		if ( !is_array( $files ) || !count( $files ) ) {
+			// cache miss
+			$files = [];
 			foreach ( $backend->getTopFileList( [ 'dir' => $directory ] ) as $entry ) {
 				$files[] = $entry;
-				if ( count( $files ) >= 500 ) { // sanity
+				if ( count( $files ) >= 500 ) {
+					// sanity
 					wfDebug( 'Skipping some captchas; $wgCaptchaDirectoryLevels set too low?.' );
 					break;
 				}
@@ -281,7 +296,8 @@ class FancyCaptcha extends SimpleCaptcha {
 		$info = $this->pickImageFromList( $directory, $files, $lockouts );
 		if ( !$info ) {
 			wfDebug( "Could not find captcha in $directory.\n" );
-			$wgMemc->delete( $key ); // files changed on disk?
+			// files changed on disk?
+			$wgMemc->delete( $key );
 		}
 
 		return $info;
@@ -297,28 +313,36 @@ class FancyCaptcha extends SimpleCaptcha {
 		global $wgMemc, $wgCaptchaDeleteOnSolve;
 
 		if ( !count( $files ) ) {
-			return false; // none found
+			// none found
+			return false;
 		}
 
-		$backend  = $this->getBackend();
-		$place    = mt_rand( 0, count( $files ) - 1 ); // pick a random file
-		$misses   = 0; // number of files in listing that don't actually exist
+		$backend = $this->getBackend();
+		// pick a random file
+		$place = mt_rand( 0, count( $files ) - 1 );
+		// number of files in listing that don't actually exist
+		$misses = 0;
 		$fancyImageCount = count( $files );
 		for ( $j = 0; $j < $fancyImageCount; $j++ ) {
 			$entry = $files[( $place + $j ) % count( $files )];
 			if ( preg_match( '/^image_([0-9a-f]+)_([0-9a-f]+)\\.png$/', $entry, $matches ) ) {
-				if ( $wgCaptchaDeleteOnSolve ) { // captcha will be deleted when solved
+				if ( $wgCaptchaDeleteOnSolve ) {
+					// captcha will be deleted when solved
 					$key = "fancycaptcha:filelock:{$backend->getWikiId()}:" . sha1( $entry );
 					// Try to claim this captcha for 10 minutes (for the user to solve)...
 					if ( ++$lockouts <= 10 && !$wgMemc->add( $key, '1', 600 ) ) {
-						continue; // could not acquire (skip it to avoid race conditions)
+						// could not acquire (skip it to avoid race conditions)
+						continue;
 					}
 				}
 				if ( !$backend->fileExists( [ 'src' => "$directory/$entry" ] ) ) {
-					if ( ++$misses >= 5 ) { // too many files in the listing don't exist
-						break; // listing cache too stale? break out so it will be cleared
+					if ( ++$misses >= 5 ) {
+						// too many files in the listing don't exist
+						// listing cache too stale? break out so it will be cleared
+						break;
 					}
-					continue; // try next file
+					// try next file
+					continue;
 				}
 				return [
 					'salt'   => $matches[1],
@@ -328,13 +352,14 @@ class FancyCaptcha extends SimpleCaptcha {
 			}
 		}
 
-		return false; // none found
+		// none found
+		return false;
 	}
 
 	/**
 	 * @return bool|StatusValue
 	 */
-	function showImage() {
+	public function showImage() {
 		global $wgOut, $wgRequest;
 
 		$wgOut->disable();
@@ -396,7 +421,8 @@ class FancyCaptcha extends SimpleCaptcha {
 	protected function passCaptcha( $index, $word ) {
 		global $wgCaptchaDeleteOnSolve;
 
-		$info = $this->retrieveCaptcha( $index ); // get the captcha info before it gets deleted
+		// get the captcha info before it gets deleted
+		$info = $this->retrieveCaptcha( $index );
 		$pass = parent::passCaptcha( $index, $word );
 
 		if ( $pass && $wgCaptchaDeleteOnSolve ) {

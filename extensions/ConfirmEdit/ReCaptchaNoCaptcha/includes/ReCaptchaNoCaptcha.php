@@ -1,9 +1,12 @@
 <?php
+
 use MediaWiki\Auth\AuthenticationRequest;
+
 class ReCaptchaNoCaptcha extends SimpleCaptcha {
 	// used for renocaptcha-edit, renocaptcha-addurl, renocaptcha-badlogin, renocaptcha-createaccount,
 	// renocaptcha-create, renocaptcha-sendemail via getMessage()
 	protected static $messagePrefix = 'renocaptcha-';
+
 	private $error = null;
 	/**
 	 * Get the captcha form.
@@ -13,6 +16,7 @@ class ReCaptchaNoCaptcha extends SimpleCaptcha {
 	public function getFormInformation( $tabIndex = 1 ) {
 		global $wgReCaptchaSiteKey, $wgLang;
 		$lang = htmlspecialchars( urlencode( $wgLang->getCode() ) );
+
 		$output = Html::element( 'div', [
 			'class' => [
 				'g-recaptcha',
@@ -54,6 +58,7 @@ HTML;
 			]
 		];
 	}
+
 	/**
 	 * @param Status|array|string $info
 	 */
@@ -66,8 +71,10 @@ HTML;
 		} else {
 			$error = $info;
 		}
+
 		wfDebugLog( 'captcha', 'Unable to validate response: ' . $error );
 	}
+
 	/**
 	 * @param WebRequest $request
 	 * @return array
@@ -83,6 +90,7 @@ HTML;
 						) );
 		return [ $index, $response ];
 	}
+
 	/**
 	 * Check, if the user solved the captcha.
 	 *
@@ -95,6 +103,7 @@ HTML;
 	 */
 	protected function passCaptcha( $_, $word ) {
 		global $wgRequest, $wgReCaptchaSecretKey, $wgReCaptchaSendRemoteIP;
+
 		$url = 'https://www.google.com/recaptcha/api/siteverify';
 		// Build data to append to request
 		$data = [
@@ -123,8 +132,10 @@ HTML;
 			$this->logCheckError( $response['error-codes'] );
 			return false;
 		}
+
 		return $response['success'];
 	}
+
 	/**
 	 * @param array &$resultArr
 	 */
@@ -132,6 +143,7 @@ HTML;
 		$resultArr['captcha'] = $this->describeCaptchaType();
 		$resultArr['captcha']['error'] = $this->error;
 	}
+
 	/**
 	 * @return array
 	 */
@@ -143,6 +155,7 @@ HTML;
 			'key' => $wgReCaptchaSiteKey,
 		];
 	}
+
 	/**
 	 * Show a message asking the user to enter a captcha on edit
 	 * The result will be treated as wiki text
@@ -157,6 +170,7 @@ HTML;
 		}
 		return $msg;
 	}
+
 	/**
 	 * @param ApiBase &$module
 	 * @param array &$params
@@ -169,24 +183,30 @@ HTML;
 				ApiBase::PARAM_HELP_MSG => 'renocaptcha-apihelp-param-g-recaptcha-response',
 			];
 		}
+
 		return true;
 	}
+
 	public function getError() {
 		return $this->error;
 	}
+
 	public function storeCaptcha( $info ) {
 		// ReCaptcha is stored by Google; the ID will be generated at that time as well, and
 		// the one returned here won't be used. Just pretend this worked.
 		return 'not used';
 	}
+
 	public function retrieveCaptcha( $index ) {
 		// just pretend it worked
 		return [ 'index' => $index ];
 	}
+
 	public function getCaptcha() {
 		// ReCaptcha is handled by frontend code + an external provider; nothing to do here.
 		return [];
 	}
+
 	/**
 	 * @param array $captchaData
 	 * @param string $id
@@ -195,12 +215,14 @@ HTML;
 	public function getCaptchaInfo( $captchaData, $id ) {
 		return wfMessage( 'renocaptcha-info' );
 	}
+
 	/**
 	 * @return ReCaptchaNoCaptchaAuthenticationRequest
 	 */
 	public function createAuthenticationRequest() {
 		return new ReCaptchaNoCaptchaAuthenticationRequest();
 	}
+
 	/**
 	 * @param array $requests
 	 * @param array $fieldInfo
@@ -211,13 +233,16 @@ HTML;
 		array $requests, array $fieldInfo, array &$formDescriptor, $action
 	) {
 		global $wgReCaptchaSiteKey;
+
 		$req = AuthenticationRequest::getRequestByClass( $requests,
 			CaptchaAuthenticationRequest::class, true );
 		if ( !$req ) {
 			return;
 		}
+
 		// ugly way to retrieve error information
 		$captcha = ConfirmEditHooks::getInstance();
+
 		$formDescriptor['captchaWord'] = [
 			'class' => HTMLReCaptchaNoCaptchaField::class,
 			'key' => $wgReCaptchaSiteKey,
