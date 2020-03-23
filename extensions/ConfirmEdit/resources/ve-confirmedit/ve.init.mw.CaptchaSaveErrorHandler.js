@@ -7,21 +7,28 @@
 // API for different things in the UI. At this point we only support the SimpleCaptcha and FancyCaptcha
 // which we very intuitively detect by the presence of a "url" property.
 mw.libs.ve.targetLoader.addPlugin( function () {
-	ve.init.mw.saveErrorHandlerRegistry.register( 'confirmEditCaptchas', function ( editApi, target ) {
+
+	ve.init.mw.CaptchaSaveErrorHandler = function () {};
+
+	OO.inheritClass( ve.init.mw.CaptchaSaveErrorHandler, ve.init.mw.SaveErrorHandler );
+
+	ve.init.mw.CaptchaSaveErrorHandler.static.name = 'confirmEditCaptchas';
+
+	ve.init.mw.CaptchaSaveErrorHandler.static.matchFunction = function ( editApi ) {
+		var captchaData = editApi.captcha;
+
+		return !!( captchaData && (
+			captchaData.url ||
+			captchaData.type === 'simple' ||
+			captchaData.type === 'math' ||
+			captchaData.type === 'question'
+		) );
+	};
+
+	ve.init.mw.CaptchaSaveErrorHandler.static.process = function ( editApi, target ) {
 		var $captchaImg, msg, question,
 			captchaInput, $captchaDiv, $captchaParagraph,
 			captchaData = editApi.captcha;
-
-		if ( !(
-			captchaData && (
-				captchaData.url ||
-				captchaData.type === 'simple' ||
-				captchaData.type === 'math' ||
-				captchaData.type === 'question'
-			)
-		) ) {
-			return false;
-		}
 
 		captchaInput = new OO.ui.TextInputWidget( { classes: [ 've-ui-saveDialog-captchaInput' ] } );
 
@@ -109,7 +116,8 @@ mw.libs.ve.targetLoader.addPlugin( function () {
 
 		// Emit event for tracking. TODO: This is a bad design
 		target.emit( 'saveErrorCaptcha' );
+	};
+	
+	ve.init.mw.saveErrorHandlerFactory.register( ve.init.mw.CaptchaSaveErrorHandler );
 
-		return true;
-	} );
 } );
