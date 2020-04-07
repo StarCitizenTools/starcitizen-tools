@@ -397,5 +397,9 @@
 	"apihelp-query+allcampaigns-summary": "{{doc-apihelp-summary|query+allcampaigns}}",
 	"apihelp-query+allcampaigns-param-enabledonly": "{{doc-apihelp-param|query+allcampaigns|enabledonly}}",
 	"apihelp-query+allcampaigns-param-limit": "{{doc-apihelp-param|query+allcampaigns|limit}}",
-	"apihelp-query+allcampaigns-example-1": "{{doc-apihelp-example|query+allcampaigns}}"
+	"apihelp-query+allcampaigns-example-1": "{{doc-apihelp-example|query+allcampaigns}}",
+	"mwe-upwiz-license-sc-head": "Used as expand/collapse action link text.\n\nThe word \"right\" seems to refer to \"the right one\" in the sense of one that matches or is suitable.",
+	"mwe-upwiz-license-rsi": "License choice for public media from Roberts Space Industries to use on fan sites.",
+	"mwe-upwiz-license-cc-by-nc-sa-2.0": "Parameters:\n* $1 - (Unused) empty string\n* $2 - the URL \"//creativecommons.org/licenses/by-nc-sa/2.0/deed.en\" or one of its localized versions\nFor more information, see https://www.mediawiki.org/wiki/UploadWizard\n{{Related|Mwe-upwiz-license-cc}}",
+	"mwe-upwiz-license-cc-by-nc-2.0": "Parameters:\n* $1 - (Unused) empty string\n* $2 - the URL \"//creativecommons.org/licenses/by-nc/2.0/deed.en\" or one of its localized versions\nFor more information, see https://www.mediawiki.org/wiki/UploadWizard\n{{Related|Mwe-upwiz-license-cc}}"
 }

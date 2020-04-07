@@ -498,7 +498,11 @@
 				"mwe-upwiz-dialog-yes",
 				"mwe-upwiz-dialog-no",
 				"mwe-upwiz-dialog-title",
-				"colon-separator"
+				"colon-separator",
+				"mwe-upwiz-license-sc-head",
+				"mwe-upwiz-license-rsi",
+				"mwe-upwiz-license-cc-by-nc-sa-2.0",
+				"mwe-upwiz-license-cc-by-nc-2.0"
 			],
 			"targets": [ "desktop", "mobile" ],
 			"group": "ext.uploadWizard"

@@ -9,7 +9,7 @@
 
 			tabContent.each(function() {
 				$(this).attr('data-hash', mw.util.escapeIdForAttribute(this.title));
-				var anchor = $('<a>').text(this.title).attr('title',this.title).attr('data-hash', $(this).attr('data-hash')).attr('href', '#');
+				var anchor = $('<a>').text(this.title).attr('title',this.title).attr('data-hash', $(this).attr('data-hash'));
 				$('<li>').append(anchor).appendTo(nav);
 
 				// Append a manual word break point after each tab

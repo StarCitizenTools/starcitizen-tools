@@ -162,7 +162,7 @@ $wgCitizenEnablePreconnect = true;
 $wgCitizenPreconnectURL = 'https://www.google-analytics.com';
 # CSP
 $wgCitizenEnableCSP = true;
-$wgCitizenCSPDirective = 'default-src \'none\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://commons.wikimedia.org https://www.mediawiki.org https://ajax.cloudflare.com/ https://*.starcitizen.tools https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.google-analytics.com https://ssl.google-analytics.com; style-src \'self\' \'unsafe-inline\' https://*.starcitizen.tools https://commons.wikimedia.org https://www.mediawiki.org; img-src \'self\' data: https://www.google-analytics.com; font-src \'self\'; connect-src \'self\' https://*.starcitizen.tools https://www.google-analytics.com; manifest-src \'self\'; frame-src https://www.google.com/recaptcha/ https://www.youtube.com; frame-ancestors \'none\'; form-action \'self\'; upgrade-insecure-requests; base-uri \'self\'';
+$wgCitizenCSPDirective = 'default-src \'none\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://commons.wikimedia.org https://www.mediawiki.org https://ajax.cloudflare.com/ https://*.starcitizen.tools https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.google-analytics.com https://ssl.google-analytics.com; style-src \'self\' \'unsafe-inline\' https://*.starcitizen.tools https://commons.wikimedia.org https://www.mediawiki.org; img-src \'self\' data: https://www.google-analytics.com https://upload.wikimedia.org; font-src \'self\'; connect-src \'self\' https://*.starcitizen.tools https://www.google-analytics.com https://secure.flickr.com; manifest-src \'self\'; frame-src https://www.google.com/recaptcha/ https://www.youtube.com; frame-ancestors \'none\'; form-action \'self\'; upgrade-insecure-requests; base-uri \'self\'';
 # HSTS
 $wgCitizenEnableHSTS = true;
 $wgCitizenHSTSMaxAge = 63072000; # 2 year
@@ -196,6 +196,9 @@ $wgCitizenMaxSearchResults = 6;
 $wgFileExtensions[] = 'svg';
 $wgAllowTitlesInSVG = true;
 $wgSVGConverter = 'ImageMagick';
+
+#Open external link in new tab/window
+$wgExternalLinkTarget = '_blank';
 
 #=============================================== External Includes ===============================================
 
@@ -272,11 +275,85 @@ $wgUploadWizardConfig = array(
   'enableMultiFileSelect' => false,
   'tutorial' => array(
     'skip' => true
-    ),
+  ),
   'maxUploads' => 15,
   'fileExtensions' => $wgFileExtensions,
   'flickrApiUrl' => 'https://secure.flickr.com/services/rest/?',
-  );
+  'licenses' => array(
+    # Cloud Imperium license
+    'rsilicense' => array(
+      'msg' => 'mwe-upwiz-license-rsi',
+      'templates' => array('RSIlicense')
+    ),
+    # CC-BY-NC-SA-2.0 required by Flickr
+    # Note that this need to be added to mw.FlickrChecker.js every time it is updated
+    'cc-by-nc-sa-2.0' => array(
+      'msg' => 'mwe-upwiz-license-cc-by-nc-sa-2.0',
+      'templates' => array('cc-by-nc-sa-2.0'),
+      #'icons' => array('cc-by','cc-nc','cc-sa'), NC icon is missing
+      'url' => '//creativecommons.org/licenses/by-nc-sa/2.0/',
+      'languageCodePrefix' => 'deed.'
+    ),
+    # CC-BY-NC-2.0 required by Flickr
+    # Note that this need to be added to mw.FlickrChecker.js every time it is updated
+    'cc-by-nc-2.0' => array(
+      'msg' => 'mwe-upwiz-license-cc-by-nc-2.0',
+      'templates' => array('cc-by-nc-2.0'),
+      #'icons' => array('cc-by','cc-nc'), NC icon is missing
+      'url' => '//creativecommons.org/licenses/by-nc/2.0/',
+      'languageCodePrefix' => 'deed.'
+    ),
+  ),
+  # License selection page
+  'licensing' => array(
+    'thirdParty' => array(
+      'type' => 'or',
+      'defaults' => 'rsilicense',
+      'licenseGroups' => array(
+        array(
+          'head' => 'mwe-upwiz-license-sc-head',
+          'licenses' => array(
+            'rsilicense'
+          )
+        ),
+        array(
+          # This should be a list of all CC licenses we can reasonably expect to find around the web
+          'head' => 'mwe-upwiz-license-cc-head',
+          'subhead' => 'mwe-upwiz-license-cc-subhead',
+          'licenses' => array(
+            'cc-by-sa-4.0',
+            'cc-by-sa-3.0',
+            'cc-by-sa-2.5',
+            'cc-by-4.0',
+            'cc-by-3.0',
+            'cc-by-2.5',
+            'cc-zero'
+          )
+        ),
+        array(
+          # Flickr still uses CC 2.0
+          'head' => 'mwe-upwiz-license-flickr-head',
+          'subhead'=> 'mwe-upwiz-license-flickr-subhead',
+          'licenses'=> array(
+            'cc-by-nc-sa-2.0',
+            'cc-by-nc-2.0',
+            'cc-by-sa-2.0',
+            'cc-by-2.0'
+          )
+        ),
+        array(
+          'head' => 'mwe-upwiz-license-custom-head',
+          'special' => 'custom',
+          'licenses' => array( 'custom' ),
+        ),
+        array(
+          'head' => 'mwe-upwiz-license-none-head',
+          'licenses' => array( 'none' )
+        ),
+      )
+    )
+  )
+);
 
 #TextExtracts
 $wgExtractsRemoveClasses[] = 'dd';
