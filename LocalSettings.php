@@ -198,7 +198,8 @@ $wgAllowTitlesInSVG = true;
 $wgSVGConverter = 'ImageMagick';
 
 #Open external link in new tab/window
-$wgExternalLinkTarget = '_blank';
+#Disabled due to security issue (Links to cross-origin destinations are unsafe)
+#$wgExternalLinkTarget = '_blank';
 
 #=============================================== External Includes ===============================================
 
