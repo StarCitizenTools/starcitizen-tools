@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"DCLXVI",
+			"Termininja",
+			"Spiritia",
+			"Borislav",
+			"StanProg",
+			"Vodnokon4e",
+			"V111P",
+			"ShockD"
+		]
+	},
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|благодарност}}}}",
+	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|изказана благодарност}}}}",
+	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Благодарност}}}}",
+	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|Изказана благодарност}}}}",
+	"thanks-thank-tooltip": "С препратката „благодарност“ можете да {{GENDER:$1|изкажете}} на {{GENDER:$2|този потребител|тази потребителка|този потребител}} благодарност за редакцията.",
+	"thanks-confirmation2": "Всички благодарности са публични. {{GENDER:$1|Ще изпратите ли }} благодарност?",
+	"thanks-thanked-notice": "{{GENDER:$3|Вие}} благодарихте на {{GENDER:$2|$1}}.",
+	"thanks": "Изпращане на благодарност",
+	"thanks-submit": "Изпратете благодарност",
+	"echo-pref-subscription-edit-thank": "Благодари за моята редакция",
+	"echo-pref-tooltip-edit-thank": "Известяване, когато някой изкаже благодарност за моя редакция.",
+	"echo-category-title-edit-thank": "Благодарност",
+	"notification-thanks-diff-link": "вашата редакция",
+	"notification-header-rev-thank": "$1 {{GENDER:$4|ви}} {{GENDER:$2|благодари}} за вашата редакция на <strong>$3</strong>.",
+	"notification-header-log-thank": "$1 {{GENDER:$2|ви благодари}} за вашето действие в <strong>$3</strong>.",
+	"notification-bundle-header-log-thank": "{{PLURAL:$1|Един човек ви благодари|$1 души ви благодарят|100=над 99 души ви благодарят}} за действието ви в <strong>$2</strong>.",
+	"log-name-thanks": "Дневник на благодарностите",
+	"log-description-thanks": "По-долу е показан списък с потребители, получили благодарност от други потребители.",
+	"logentry-thanks-thank": "$1 {{GENDER:$2|изпрати благодарност на}} {{GENDER:$4|$3}}",
+	"log-show-hide-thanks": "$1 на дневника на благодарностите",
+	"notification-link-text-view-post": "Виж коментар",
+	"flow-thanks-confirmation-special": "Искате ли публично да благодарите за този коментар?",
+	"notification-header-flow-thank": "$1 {{GENDER:$5|ви}} {{GENDER:$2|благодари}} за коментара в „<strong>$3</strong>“.",
+	"notification-compact-header-flow-thank": "$1 {{GENDER:$3|Ви}} {{GENDER:$2|благодари}}."
+}

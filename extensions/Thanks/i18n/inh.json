@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Adam-Yourist"
+		]
+	},
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|баркал}}}}",
+	"thanks-thank-tooltip": "{{GENDER:$1|ДIадахьийта}} {{GENDER:$2|укх доакъашхочун}} баркал алар"
+}

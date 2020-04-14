@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dbc334",
+			"Eleassar",
+			"Matej1234",
+			"Yerpo",
+			"Janezdrilc"
+		]
+	},
+	"thanks-desc": "Doda povezave za zahvalo uporabnikom za urejanja, pripombe itn.",
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|zahvala}}}}",
+	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|zahvala je objavljena}}}}",
+	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Zahvala}}}}",
+	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|Zahvala je objavljena}}}}",
+	"thanks-error-undefined": "Dejanje zahvale je spodletelo (koda napake: $1). Prosimo, poskusite znova.",
+	"thanks-error-invalidrevision": "ID-številka redakcije ni veljavna.",
+	"thanks-error-ratelimited": "{{GENDER:$1|Presegli}} ste omejitev hitrosti. Prosimo, počakajte nekaj časa in nato poskusite znova.",
+	"thanks-thank-tooltip": "{{GENDER:$1|Pošljite}} {{GENDER:$2|temu uporabniku|tej uporabnici}} zahvalo",
+	"thanks-confirmation2": "Vse zahvale so javne. Se {{GENDER:$1|želiš}} zahvaliti?",
+	"thanks-thanked-notice": "{{GENDER:$3|Zahvalili}} ste se {{GENDER:$2|$1}}.",
+	"thanks": "Pošljite zahvalo",
+	"echo-pref-subscription-edit-thank": "Se mi zahvali za urejanje",
+	"echo-pref-tooltip-edit-thank": "Obvesti me, kadar se mi kdo zahvali za katero od mojih urejanj.",
+	"echo-category-title-edit-thank": "Zahvala",
+	"notification-thanks-diff-link": "tvoje urejanje",
+	"notification-header-rev-thank": "$1 {{GENDER:$2|se}} {{GENDER:$4|ti}} zahvaljuje za urejanje <strong>$3</strong>.",
+	"log-name-thanks": "Dnevnik zahval",
+	"log-description-thanks": "Prikazan je dnevnik uporabnikov, ki se jim je kdo zahvalil.",
+	"logentry-thanks-thank": "$1 se je {{GENDER:$2|zahvalil|zahvalila}} {{GENDER:$4|uporabniku|uporabnici}} {{GENDER:$4|$3}}",
+	"log-show-hide-thanks": "$1 dnevnik zahval",
+	"thanks-error-no-id-specified": "Določiti morate ID redakcije ali dnevnika, da se lahko zahvalite.",
+	"notification-link-text-view-post": "Ogled pripombe",
+	"thanks-error-invalidpostid": "ID objave ni veljaven.",
+	"flow-thanks-confirmation-special": "Se želite javno zahvaliti za to pripombo?",
+	"flow-thanks-thanked-notice": "{{GENDER:$3|Zahvalili}} ste se $1 za {{GENDER:$2|njegovo|njeno}} pripombo.",
+	"notification-flow-thanks-post-link": "tvojo pripombo"
+}

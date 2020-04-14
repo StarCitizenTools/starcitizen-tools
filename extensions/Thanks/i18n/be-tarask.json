@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Renessaince",
+			"Zedlik",
+			"Red Winged Duck",
+			"Macofe"
+		]
+	},
+	"thanks-desc": "Дадае спасылкі для падзякаў удзельнікам за праўкі, камэнтары і г. д.",
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|дзякуй}}}}",
+	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|падзякаваў}}|{{GENDER:$2|падзякавала}}}}",
+	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Дзякуй}}}}",
+	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|Падзякаваў}}|{{GENDER:$2|Падзякавала}}}}",
+	"thanks-error-undefined": "Не атрымалася падзякаваць (код памылкі: $1). Калі ласка, паспрабуйце яшчэ раз.",
+	"thanks-error-invalidrevision": "Няслушны ідэнтыфікатар вэрсіі",
+	"thanks-error-ratelimited": "{{GENDER:$1|Вы}} перавысілі абмежаваньне хуткасьці выкананьня. Калі ласка, пачакайце крыху і паўтарыце спробу.",
+	"thanks-thank-tooltip": "{{GENDER:$1|Адаслаць}} {{GENDER:$2|гэтаму карыстальніку|гэтай карыстальніцы}} падзяку",
+	"thanks-confirmation2": "Усе падзякі зьяўляюцца публічнымі. {{GENDER:$1|Даслаць}} падзяку?",
+	"thanks-thanked-notice": "{{GENDER:$3|Вы}} падзякавалі {{GENDER:$2|$1}}.",
+	"thanks": "Даслаць падзяку",
+	"echo-pref-subscription-edit-thank": "Дзякуе мне за маю праўку",
+	"echo-pref-tooltip-edit-thank": "Паведаміць мне, калі нехта дзякуе за мае праўкі.",
+	"echo-category-title-edit-thank": "Дзякуй",
+	"notification-thanks-diff-link": "вашае рэдагаваньне",
+	"notification-header-rev-thank": "$1 {{GENDER:$2|падзякаваў|падзякавала}} {{GENDER:$4|вам}} за вашую праўку на старонцы <strong>$3</strong>.",
+	"log-name-thanks": "Журнал падзякаў",
+	"log-description-thanks": "Ніжэй знаходзіцца сьпіс удзельнікаў, якія атрымалі падзякі.",
+	"logentry-thanks-thank": "$1 {{GENDER:$2|падзякаваў|падзякавала}} {{GENDER:$4|удзельніку|удзельніцы}} $3",
+	"log-show-hide-thanks": "Журнал падзякаў $1"
+}
