@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"disambig-desc": "Brängk dä Befähl <code><nowiki>__DISAMBIG__</nowiki></code> en et Wiki, öm [[Special:DisambiguationPages|„Watt eß dat?“ Sigge]] ze beschtemme.",
+	"disambiguationpages": "„Watt eß dat?“ Sigge",
+	"disambiguationpages-summary": "Heh küdd en Leß met alle „Watt eß dat?“ Sigge {{GRAMMAR:em Dativ|{{ucfirst:{{SITENAME}}}}}}, dat sin Sigge, woh <code><nowiki>__DISAMBIG__</nowiki></code> dren schteiht, udder jät zom sällve Efäk.",
+	"disambiguationpagelinks": "Sigge, di op „Watt eß dat?“ Sigge verlengke donn",
+	"disambiguationpagelinks-summary": "Di Sigge en heh dä Leß han alle winneschsdens eine Lenk ob_en „Watt eß dat?“ Sigg.\nEt künnt sin, dat se bäßer ob_en Sigg lenke dähte, di mih zopaß kütt.\n\nEn Sigg med_enem <code><nowiki>__DISAMBIG__</nowiki></code> Befähl dren, udder jät, wad_et sellve bedügg udder enföösch, zällt als en  „Watt eß dat?“ Sigg.",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Dat heh es en „Wat eß dat?“-Sigg"
+}

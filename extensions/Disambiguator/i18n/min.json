@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iwan Novirion"
+		]
+	},
+	"disambig-desc": "Tambahkan tag <code><nowiki>__DISAMBIG__</nowiki></code> untuak manandoi sabagai [[Special:DisambiguationPages|laman disambiguasi]]",
+	"disambiguationpages": "Laman disambiguasi",
+	"disambiguationpages-summary": "Barikuik ko adolah dafta sado '''laman disambiguasi''' pado {{SITENAME}}.<br />\nSuatu laman dianggap sabagai laman disambiguasi bilo laman tasabuik barisi tag <code><nowiki>__DISAMBIG__</nowiki></code> (atau namo lain nan sasuai).",
+	"disambiguationpagelinks": "Laman nan tahubuang ka laman disambiguasi",
+	"disambiguationpagelinks-summary": "Laman-laman barikuik ado pautan ka suatu '''laman disambiguasi'''.\nLaman-laman tasabuik saharuihnyo tapauik ka topik-topik nan sesuai.<br />\nSuatu laman dianggap sabagai laman disambiguasi bilo laman tasabuik barisi tag <code><nowiki>__DISAMBIG__</nowiki></code> (atau namo lain nan sasuai)."
+}

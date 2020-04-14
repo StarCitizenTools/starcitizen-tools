@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"disambig-desc": "Ја става ознаката <code><nowiki>__DISAMBIG__</nowiki></code> со која ги означува [[Special:DisambiguationPages|појаснителните страници]].",
+	"disambiguationpages": "Појаснителни страници",
+	"disambiguationpages-summary": "Ова е список на појаснителни страници на {{SITENAME}}.<br />\nЕдна страница се смета за појаснителна ако ја содржи ознаката <code><nowiki>__DISAMBIG__</nowiki></code> (или нејзин истозначник).",
+	"disambiguationpagelinks": "Страници што водат до појаснителни страници",
+	"disambiguationpagelinks-summary": "Следниве страници содржат барем по една врска до појаснителна страница.\nВеројатно ќе треба да ставите врска до посоодветна (поконкретна) страница.<br />\nЕдна страница се смета за појаснителна доколку ја содржи ознаката <code><nowiki>__DISAMBIG__</nowiki></code> (или нејзин истозначник).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Ова е појаснителна страница"
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tacsipacsi"
+		]
+	},
+	"disambig-desc": "Bevezeti a <code><nowiki>__DISAMBIG__</nowiki></code> varázsszót az [[Special:DisambiguationPages|egyértelműsítő lapok]] megjelöléséhez",
+	"disambiguationpages": "Egyértelműsítő lapok",
+	"disambiguationpages-summary": "Alább láthatod a(z) {{SITENAME}} wikin található egyértelműsítő lapok listáját.<br />\nEgy lap akkor számít egyértelműsítőnek, ha tartalmazza a <code><nowiki>__DISAMBIG__</nowiki></code> varázsszót (vagy egy megfelelőjét).",
+	"disambiguationpagelinks": "Egyértelműsítő lapokra linkelő lapok",
+	"disambiguationpagelinks-summary": "Az alábbi lapok legalább egy egyértelműsítő lapra tartalmaznak hivatkozásokat.\nLehet, hogy inkább egy pontosabb linkre lenne szükségük.<br />\nEgy lap akkor számít egyértelműsítőnek, ha tartalmazza a <code><nowiki>__DISAMBIG__</nowiki></code> varázsszót (vagy egy megfelelőjét).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Ez egy egyértelműsítő lap"
+}

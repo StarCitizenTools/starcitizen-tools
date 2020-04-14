@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iwan Novirion",
+			"William Surya Permana"
+		]
+	},
+	"disambig-desc": "Tambahkan tag <code><nowiki>__DISAMBIG__</nowiki></code> untuk menandai sebagai [[Special:DisambiguationPages|halaman disambiguasi]]",
+	"disambiguationpages": "Halaman disambiguasi",
+	"disambiguationpages-summary": "Berikut ini adalah daftar semua '''halaman disambiguasi''' pada {{SITENAME}}.<br />\nSuatu halaman dianggap sebagai halaman disambiguasi apabila halaman tersebut berisi tag <code><nowiki>__DISAMBIG__</nowiki></code> (atau nama lain yang sesuai).",
+	"disambiguationpagelinks": "Halaman yang terhubung ke halaman disambiguasi",
+	"disambiguationpagelinks-summary": "Halaman-halaman berikut memiliki pranala ke suatu '''halaman disambiguasi'''.\nHalaman-halaman tersebut seharusnya terpaut ke topik-topik yang sesuai.<br />\nSuatu halaman dianggap sebagai halaman disambiguasi apabila halaman tersebut berisi tag <code><nowiki>__DISAMBIG__</nowiki></code> (atau nama lain yang sesuai).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Ini adalah halaman disambiguasi"
+}

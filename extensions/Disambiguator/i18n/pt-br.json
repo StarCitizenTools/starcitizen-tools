@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cainamarques",
+			"555",
+			"Dianakc"
+		]
+	},
+	"disambig-desc": "Adiciona a tag <code><nowiki>__DISAMBIG__</nowiki></code> para marcar [[Special:DisambiguationPages|páginas de desambiguação]]",
+	"disambiguationpages": "Páginas de desambiguação",
+	"disambiguationpages-summary": "Segue abaixo listagem de todas as páginas de desambiguação em {{SITENAME}}.<br />\nA página é tratada como desambiguação se contêm a tag <code><nowiki>__DISAMBIG__</nowiki></code> (ou um equivalente).",
+	"disambiguationpagelinks": "Páginas com links para páginas de desambiguação",
+	"disambiguationpagelinks-summary": "As páginas a seguir contêm ao menos um link a uma página de desambiguação. \nTalvez elas devam direcionar a uma página mais específica.<br />\nA página é tratada como desambiguação se contêm a tag <code><nowiki>__DISAMBIG__</nowiki></code> (ou um equivalente).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Esta é uma página de desambiguação"
+}
