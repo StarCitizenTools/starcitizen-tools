@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Matma Rex",
+			"Tacsipacsi"
+		]
+	},
+	"sandboxlink-desc": "Hozzáad egy linket a felhasználó próbalapjára a lap teteji személyes menübe",
+	"sandboxlink-subpage-name": "próbalap",
+	"sandboxlink-portlet-label": "Próbalap",
+	"tooltip-pt-sandbox": "A próbalapom megnyitása"
+}

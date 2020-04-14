@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Freked",
+			"Lokal Profil",
+			"Platinawolf"
+		]
+	},
+	"sandboxlink-desc": "Lägger till en länk till användarens personliga sandlåda i den personliga verktygsraden.",
+	"sandboxlink-subpage-name": "sandlåda",
+	"sandboxlink-portlet-label": "Sandlåda",
+	"tooltip-pt-sandbox": "Din sandlåda"
+}

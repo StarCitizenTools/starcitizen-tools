@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Banjo"
+		]
+	},
+	"sandboxlink-desc": "Engade unha ligazón á zona de probas persoal do usuario no menú de ferramentas",
+	"sandboxlink-subpage-name": "zona de probas",
+	"sandboxlink-portlet-label": "Zona de probas",
+	"tooltip-pt-sandbox": "A súa zona de probas"
+}
