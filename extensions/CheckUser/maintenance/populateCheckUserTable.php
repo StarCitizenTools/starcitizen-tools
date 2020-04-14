@@ -92,7 +92,7 @@ class PopulateCheckUserTable extends LoggedUpdateMaintenance {
 			foreach ( $res as $row ) {
 				$batch[] = [
 					'cuc_timestamp' => $row->rc_timestamp,
-					'cuc_user' => $row->rc_user,
+					'cuc_user' => $row->rc_user ?? 0,
 					'cuc_user_text' => $row->rc_user_text,
 					'cuc_namespace' => $row->rc_namespace,
 					'cuc_title' => $row->rc_title,
