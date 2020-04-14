@@ -209,7 +209,7 @@ require_once("/home/www-data/external_includes/secret_keys.php");
 #=============================================== Extension Load ===============================================
 
 wfLoadExtension( 'ParserFunctions' );
-wfLoadExtension( 'OATHAuth' );
+#wfLoadExtension( 'OATHAuth' ); - Abandoned for now, require update script
 wfLoadExtension( 'EmbedVideo' );
 #wfLoadExtension( 'MsUpload' ); - No longer used
 wfLoadExtension( 'InputBox' );
