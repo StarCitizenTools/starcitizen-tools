@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eduardo.mps",
+			"Jesielt",
+			"555",
+			"Felipe L. Ewald"
+		]
+	},
+	"sitenotice_close": "ignorar",
+	"sitenotice_close-brackets": "[$1]",
+	"sitenotice-desc": "Permite que os usuários ocultem o banner de avisos"
+}

@@ -257,6 +257,7 @@ wfLoadExtension( 'NativeSvgHandler' );
 wfLoadExtension( 'Disambiguator' );
 wfLoadExtension( 'SandboxLink' );
 wfLoadExtension( 'Thanks' );
+wfLoadExtension( 'DismissableSiteNotice' );
 require_once "$IP/extensions/Translate/Translate.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
@@ -509,6 +510,9 @@ $wgTemplateStylesAllowedUrls = [
   ],
   "css" => []
 ];
+
+#DismissableSiteNotice
+$wgDismissableSiteNoticeForAnons = true; // Allow anon to dismiss site notice
 
 #=============================================== Namespaces ===============================================
 define("NS_COMMLINK", 3000);
