@@ -242,6 +242,7 @@ wfLoadExtension( 'RSS' );
 wfLoadExtension( 'TemplateData' );
 wfLoadExtension( 'PageImages' );
 #wfLoadExtension( 'RelatedArticles' );
+wfLoadExtension( 'CodeEditor' );
 wfLoadExtension( 'WikiEditor' );
 wfLoadExtension( 'VisualEditor' );
 wfLoadExtension( 'Scribunto' );
@@ -415,7 +416,10 @@ $edgCacheExpireTime = 3 * 24 * 60 * 60;
 $edgAllowExternalDataFrom = array('https://starcitizen.tools','http://starcitizendb.com/', 'https://scwdev.czen.me');
 $edgExternalValueVerbose = false;
 
-#Visual Editor
+#CodeEditor
+$wgDefaultUserOptions['usebetatoolbar'] = 1; // user option provided by WikiEditor extension
+
+#VisualEditor
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
 $wgDefaultUserOptions['visualeditor-editor'] = "visualeditor";
 $wgDefaultUserOptions['visualeditor-newwikitext'] = 1;
