@@ -7,7 +7,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 /* DEBUG ONLY */
 $wgShowExceptionDetails = true;
 # Enable debug toolbar
-$wgDebugToolbar = true;
+#$wgDebugToolbar = true;
 
 #Tidy HTML output
 $wgUseTidy = true;
