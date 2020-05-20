@@ -476,7 +476,7 @@ $wgCookieWarningGeoIPLookup = 'none';
 
 #DynamicPageList
 $wgDplSettings['recursiveTagParse'] = true;
-
+$wgDplSettings['allowUnlimitedResults'] = true;
 #TemplateStyles
 $wgTemplateStylesAllowedUrls = [
   "audio" => [
