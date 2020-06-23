@@ -719,7 +719,7 @@ $wgFooterIcons = [
 /*
   "gdprcompliance" => [
         "gdpr" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+            "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons/shared/image.svg", // placeholder to bypass default
             "url" => "https://gdpr.eu",
             "alt" => "GDPR compliant",
         ]
@@ -727,21 +727,21 @@ $wgFooterIcons = [
 */
     "copyright" => [
         "copyright" => [
-        "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default,
+        "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons/shared/image.svg", // placeholder to bypass default,
             "url" => $wgRightsUrl,
             "alt" => $wgRightsText,
       ]
     ],
     "madeby" => [
           "thecommunity" => [
-              "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+              "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons/shared/image.svg", // placeholder to bypass default
               "url" => "https://robertsspaceindustries.com",
               "alt" => "Made by the community",
           ]
     ],
     "partof" => [
         "starcitizentools" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+            "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons/shared/image.svg", // placeholder to bypass default
             "url" => "https://starcitizen.tools",
             "alt" => "Part of Star Citizen Tools",
         ]
