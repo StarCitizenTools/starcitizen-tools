@@ -704,14 +704,14 @@ $wgGroupPermissions['sysop']['importupload'] = true;
 $wgFooterIcons = [
     "poweredby" => [
         "mediawiki" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons.badges/MediaWiki.svg",
+            "src" => "$wgResourceBasePath/resources/assets/badge-mediawiki.svg",
             "url" => "https://www.mediawiki.org",
             "alt" => "Powered by MediaWiki",
         ]
     ],
     "monitoredby" => [
           "wikiapiary" => [
-              "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons.badges/WikiApiary.svg",
+              "src" => "$wgResourceBasePath/resources/assets/badge-wikiapiary.svg",
               "url" => "https://wikiapiary.com/wiki/The_Star_Citizen_Wiki",
               "alt" => "Monitored By Wikiapiary",
           ]
@@ -719,7 +719,7 @@ $wgFooterIcons = [
 /*
   "gdprcompliance" => [
         "gdpr" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons/shared/image.svg", // placeholder to bypass default
+            "src" => "$wgResourceBasePath/resources/assets/badge-gdpr.svg",
             "url" => "https://gdpr.eu",
             "alt" => "GDPR compliant",
         ]
@@ -727,21 +727,21 @@ $wgFooterIcons = [
 */
     "copyright" => [
         "copyright" => [
-        "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons.badges/CCBYSA.svg",
+        "src" => "$wgResourceBasePath/resources/assets/badge-ccbysa.svg",
             "url" => $wgRightsUrl,
             "alt" => $wgRightsText,
       ]
     ],
     "madeby" => [
           "thecommunity" => [
-              "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons.badges/StarCitizenCommunity.svg",
+              "src" => "$wgResourceBasePath/resources/assets/badge-starcitizencommunity.svg",
               "url" => "https://robertsspaceindustries.com",
               "alt" => "Made by the community",
           ]
     ],
     "partof" => [
         "starcitizentools" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons.badges/StarCitizenTools.svg",
+            "src" => "$wgResourceBasePath/resources/assets/badge-starcitizentools.svg",
             "url" => "https://starcitizen.tools",
             "alt" => "Part of Star Citizen Tools",
         ]
