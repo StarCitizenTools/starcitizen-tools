@@ -704,14 +704,14 @@ $wgGroupPermissions['sysop']['importupload'] = true;
 $wgFooterIcons = [
     "poweredby" => [
         "mediawiki" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+            "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons.badges/MediaWiki.svg",
             "url" => "https://www.mediawiki.org",
             "alt" => "Powered by MediaWiki",
         ]
     ],
     "monitoredby" => [
           "wikiapiary" => [
-              "src" => "$wgResourceBasePath/skins/Citizen/resources/images/icons/image.svg", // placeholder to bypass default
+              "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons.badges/WikiApiary.svg",
               "url" => "https://wikiapiary.com/wiki/The_Star_Citizen_Wiki",
               "alt" => "Monitored By Wikiapiary",
           ]
@@ -727,21 +727,21 @@ $wgFooterIcons = [
 */
     "copyright" => [
         "copyright" => [
-        "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons/shared/image.svg", // placeholder to bypass default,
+        "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons.badges/CCBYSA.svg",
             "url" => $wgRightsUrl,
             "alt" => $wgRightsText,
       ]
     ],
     "madeby" => [
           "thecommunity" => [
-              "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons/shared/image.svg", // placeholder to bypass default
+              "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons.badges/StarCitizenCommunity.svg",
               "url" => "https://robertsspaceindustries.com",
               "alt" => "Made by the community",
           ]
     ],
     "partof" => [
         "starcitizentools" => [
-            "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons/shared/image.svg", // placeholder to bypass default
+            "src" => "$wgResourceBasePath/skins/Citizen/resources/skins.citizen.icons.badges/StarCitizenTools.svg",
             "url" => "https://starcitizen.tools",
             "alt" => "Part of Star Citizen Tools",
         ]
