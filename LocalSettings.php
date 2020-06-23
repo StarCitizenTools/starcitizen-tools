@@ -711,6 +711,7 @@ $wgFooterIcons = [
             "width" => "95",
         ]
     ],
+/*
     "monitoredby" => [
           "wikiapiary" => [
               "src" => "$wgResourceBasePath/resources/assets/badge-wikiapiary.svg",
@@ -720,6 +721,7 @@ $wgFooterIcons = [
               "width" => "95",
           ]
     ],
+*/
 /*
   "gdprcompliance" => [
         "gdpr" => [
