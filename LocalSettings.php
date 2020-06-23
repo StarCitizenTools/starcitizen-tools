@@ -707,6 +707,8 @@ $wgFooterIcons = [
             "src" => "$wgResourceBasePath/resources/assets/badge-mediawiki.svg",
             "url" => "https://www.mediawiki.org",
             "alt" => "Powered by MediaWiki",
+            "height" => "50",
+            "width" => "95",
         ]
     ],
     "monitoredby" => [
@@ -714,6 +716,8 @@ $wgFooterIcons = [
               "src" => "$wgResourceBasePath/resources/assets/badge-wikiapiary.svg",
               "url" => "https://wikiapiary.com/wiki/The_Star_Citizen_Wiki",
               "alt" => "Monitored By Wikiapiary",
+              "height" => "54",
+              "width" => "95",
           ]
     ],
 /*
@@ -722,14 +726,18 @@ $wgFooterIcons = [
             "src" => "$wgResourceBasePath/resources/assets/badge-gdpr.svg",
             "url" => "https://gdpr.eu",
             "alt" => "GDPR compliant",
+	    "height" => "50",
+            "width" => "50",
         ]
     ],
 */
     "copyright" => [
         "copyright" => [
         "src" => "$wgResourceBasePath/resources/assets/badge-ccbysa.svg",
-            "url" => $wgRightsUrl,
-            "alt" => $wgRightsText,
+        "url" => $wgRightsUrl,
+        "alt" => $wgRightsText,
+	"height" => "50",
+        "width" => "110",
       ]
     ],
     "madeby" => [
@@ -737,6 +745,8 @@ $wgFooterIcons = [
               "src" => "$wgResourceBasePath/resources/assets/badge-starcitizencommunity.svg",
               "url" => "https://robertsspaceindustries.com",
               "alt" => "Made by the community",
+	      "height" => "50",
+              "width" => "50",
           ]
     ],
     "partof" => [
@@ -744,6 +754,8 @@ $wgFooterIcons = [
             "src" => "$wgResourceBasePath/resources/assets/badge-starcitizentools.svg",
             "url" => "https://starcitizen.tools",
             "alt" => "Part of Star Citizen Tools",
+	    "height" => "50",
+            "width" => "50",
         ]
     ]
 ];
