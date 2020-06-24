@@ -177,13 +177,6 @@ $wgCitizenEnableStrictReferrerPolicy = true;
 # Feature policy
 $wgCitizenEnableFeaturePolicy = true;
 $wgCitizenFeaturePolicyDirective = 'autoplay \'none\'; camera \'none\'; fullscreen \'self\'; geolocation \'none\'; microphone \'none\'; midi \'none\'; payment \'none\'' ;
-# FAB
-$wgCitizenEnableButton = true;
-$wgCitizenButtonLink = 'https://discord.gg/3kjftWK';
-$wgCitizenButtonTitle = 'Contact us on Discord';
-$wgCitizenButtonText = 'Discord';
-# Page tools
-$wgCitizenShowPageTools = 'login'; #Only show page tools if logged in
 # Search description source
 $wgCitizenSearchDescriptionSource = 'wikidata';
 # Number of search results in suggestion
