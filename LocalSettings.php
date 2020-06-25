@@ -768,6 +768,23 @@ $wgHooks['SkinTemplateOutputPageBeforeExec'][] = function( $sk, &$tpl ) {
 
 require_once("/home/www-data/external_includes/misc_server_settings.php");
 
+# Override multilingual interface messages
+$wgHooks['MessageCache::get'][] = function ( &$key ) {
+    $keys = [
+            'badaccess-groups',
+            'citizen-footer-desc',
+            'citizen-footer-tagline',
+            'copyright',
+            'noarticletext',
+            'noarticletext-nopermission',
+            'tagline',
+    ];
+
+    if ( in_array( $key, $keys, true ) ) {
+            $key = "i18n-$key";
+    }
+};
+
 # Use domain root as the canonical URL 
 $wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
 	if ( !$title->isExternal() && $query == '' && $title->isMainPage() ) {
