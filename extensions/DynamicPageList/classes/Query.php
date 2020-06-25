@@ -148,7 +148,7 @@ class Query {
 	 * Main Constructor
 	 *
 	 * @access	public
-	 * @param	object	Parameters
+	 * @param	\DPL\Parameters	$parameters
 	 * @return	void
 	 */
 	public function __construct(Parameters $parameters) {
@@ -181,7 +181,6 @@ class Query {
 			}
 			if ($success === false) {
 				throw new \MWException(__METHOD__ . ": SQL Build Error returned from {$function} for " . serialize($option) . ".");
-				return;
 			}
 			$this->parametersProcessed[$parameter] = true;
 		}
@@ -362,6 +361,8 @@ class Query {
 			'revision',
 			'templatelinks'
 		];
+
+		$tableNames = [];
 		foreach ($tables as $table) {
 			$tableNames[$table] = $DB->tableName($table);
 		}
@@ -725,10 +726,18 @@ class Query {
 	 */
 	private function _addcontribution($option) {
 		$this->addTable('recentchanges', 'rc');
+
+		$field = 'rc.rc_user_text';
+		// This is the wrong check since the ActorMigration may be in progress
+		// https://www.mediawiki.org/wiki/Actor_migration
+		if ( class_exists( 'ActorMigration' ) ) {
+			$field = 'rc.rc_actor';
+		}
+
 		$this->addSelect(
 			[
 				'contribution'	=> 'SUM(ABS(rc.rc_new_len - rc.rc_old_len))',
-				'contributor'	=> 'rc.rc_user_text'
+				'contributor'	=> $field
 			]
 		);
 		$this->addWhere(
@@ -1451,7 +1460,8 @@ class Query {
 	 */
 	private function _minoredits($option) {
 		if (isset($option) && $option == 'exclude') {
-			$this->addWhere("rev_minor_edit = 0");
+			$this->addTable('revision', 'rev');
+			$this->addWhere('rev.rev_minor_edit = 0');
 		}
 	}
 
@@ -1664,7 +1674,6 @@ class Query {
 						$_clTableAlias = 'cl_head';
 					}
 					$this->addTable($_clTableName, $_clTableAlias);
-					$this->addTable('revision', 'rev');
 					$this->addJoin(
 						$_clTableAlias,
 						[
@@ -1796,7 +1805,7 @@ class Query {
 					} else {
 						$this->addSelect(
 							[
-								'sortkey' => $replaceConcat . $collation
+								'sortkey' => $replaceConcat . $this->getCollateSQL()
 							]
 						);
 					}
@@ -1966,7 +1975,6 @@ class Query {
 		}
 		$where = '(' . implode(' OR ', $ors) . ')';
 		$this->addWhere($where);
-		$this->revisionAuxWhereAdded = true;
 	}
 
 	/**
