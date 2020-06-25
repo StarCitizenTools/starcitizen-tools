@@ -1,6 +1,6 @@
 {
 	"name": "External Data",
-	"version": "2.0.1",
+	"version": "2.1",
 	"author": [
 		"Yaron Koren",
 		"..."
@@ -9,9 +9,9 @@
 	"descriptionmsg": "externaldata-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
-        "requires": {
-                "MediaWiki": ">= 1.28.0"
-        },
+	"requires": {
+		"MediaWiki": ">= 1.28.0"
+	},
 	"SpecialPages": {
 		"GetData": "EDGetData"
 	},
@@ -25,16 +25,16 @@
 		"ExternalDataAlias": "ExternalData.i18n.alias.php"
 	},
 	"AutoloadClasses": {
-		"ExternalDataHooks": "ExternalData.hooks.php",
-		"EDUtils": "includes/ED_Utils.php",
-		"HttpWithHeaders": "includes/ED_HttpWithHeaders.php",
-		"EDParserFunctions": "includes/ED_ParserFunctions.php",
-		"EDGetData": "includes/ED_GetData.php"
+		"ExternalDataHooks": "includes/ExternalDataHooks.php",
+		"EDUtils": "includes/EDUtils.php",
+		"EDHttpWithHeaders": "includes/EDHttpWithHeaders.php",
+		"EDParserFunctions": "includes/EDParserFunctions.php",
+		"EDGetData": "includes/EDGetData.php",
+		"EDJsonObject": "includes/EDJsonObject.php",
+		"EDArraySlice": "includes/EDArraySlice.php"
 	},
 	"Hooks": {
-		"ParserFirstCallInit": [
-			"ExternalDataHooks::registerParser"
-		]
+		"ParserFirstCallInit": "ExternalDataHooks::registerParser"
 	},
 	"config": {
 		"_prefix": "edg",
@@ -53,7 +53,10 @@
 		"DBFlags": [],
 		"DBTablePrefix": [],
 		"DirectoryPath": [],
-		"FilePath": []
+		"FilePath": [],
+		"HTTPOptions": {
+			"timeout": "default"
+		}
 	},
 	"manifest_version": 1
 }

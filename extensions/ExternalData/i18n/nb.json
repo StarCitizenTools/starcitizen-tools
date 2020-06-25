@@ -1,11 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Harald Khan",
-			"Nghtwlkr",
-			"Njardarlogar",
 			"Danmichaelo",
-			"Jon Harald Søby"
+			"Harald Khan",
+			"Jon Harald Søby",
+			"Nghtwlkr",
+			"Njardarlogar"
 		]
 	},
 	"getdata": "Hent data",

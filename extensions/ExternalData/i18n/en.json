@@ -11,11 +11,13 @@
 	"externaldata-ldap-unable-to-connect": "Unable to connect to $1.",
 	"externaldata-xml-error": "XML error: $1 at line $2.",
 	"externaldata-invalid-json": "Error: Invalid JSON.",
+	"externaldata-jsonpath-error": "Error: Invalid JSONPath notation.",
 	"externaldata-db-incomplete-information": "Error: Incomplete information for this database ID.",
 	"externaldata-db-could-not-get-url": "Could not get URL after $1 {{PLURAL:$1|try|tries}}.",
 	"externaldata-db-unknown-type": "Error: Unknown database type.",
 	"externaldata-db-could-not-connect": "Error: Could not connect to database.",
 	"externaldata-db-unknown-collection": "Error: Unknown MongoDB collection.",
 	"externaldata-db-no-return-values": "Error: No return values specified.",
-	"externaldata-db-invalid-query": "Invalid query."
+	"externaldata-db-invalid-query": "Invalid query.",
+	"externaldata-no-css-selector": "The library $1, required to use the '$2' format without the '$3' option, is missing."
 }
