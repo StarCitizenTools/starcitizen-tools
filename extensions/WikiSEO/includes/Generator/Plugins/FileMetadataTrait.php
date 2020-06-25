@@ -31,7 +31,8 @@ use Title;
 /**
  * File Metadata methods used in generators
  *
- * @property OutputPage outputPage
+ * @property OutputPage $outputPage
+ * @property array $metadata
  */
 trait FileMetadataTrait {
 	/**
@@ -50,7 +51,13 @@ trait FileMetadataTrait {
 
 		$title = Title::newFromText( sprintf( 'File:%s', $name ) );
 
-		$file = RepoGroup::singleton()->getLocalRepo()->findFile( $title );
+		if ( method_exists( MediaWikiServices::class, 'getRepoGroup' ) ) {
+			// MediaWiki 1.34+
+			$file = MediaWikiServices::getInstance()->getRepoGroup()->getLocalRepo()
+				->findFile( $title );
+		} else {
+			$file = RepoGroup::singleton()->getLocalRepo()->findFile( $title );
+		}
 
 		if ( $file === false ) {
 			throw new InvalidArgumentException( sprintf( 'File %s not found.', $name ) );
