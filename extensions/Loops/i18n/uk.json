@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Base",
-			"Piramidion",
-			"Movses"
+			"Movses",
+			"Piramidion"
 		]
 	},
 	"loops-desc": "Функції парсеру для створення циклів",

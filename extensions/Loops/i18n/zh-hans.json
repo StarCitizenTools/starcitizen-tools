@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Yfdyh000",
 			"D41D8CD98F",
-			"Looong"
+			"Looong",
+			"Yfdyh000"
 		]
 	},
 	"loops-desc": "执行循环的解析器函数",
