@@ -1,13 +1,15 @@
 {
 	"private": true,
 	"scripts": {
-		"test": "grunt test"
+		"test": "grunt test",
+		"doc": "jsdoc resources/main.js -c jsdoc.json -r"
 	},
 	"devDependencies": {
 		"eslint-config-wikimedia": "0.15.0",
 		"grunt": "1.0.4",
 		"grunt-banana-checker": "0.8.1",
-		"grunt-eslint": "22.0.0"
+		"grunt-eslint": "22.0.0",
+		"jsdoc": "3.6.3"
 	},
 	"eslintIgnore": [
 		"vendor/**",

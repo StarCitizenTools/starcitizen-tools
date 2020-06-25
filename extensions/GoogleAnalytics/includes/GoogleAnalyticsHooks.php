@@ -3,7 +3,7 @@
 class GoogleAnalyticsHooks {
 	/**
 	 * @param Skin $skin
-	 * @param string $text
+	 * @param string &$text
 	 * @return bool
 	 */
 	public static function onSkinAfterBottomScripts( Skin $skin, &$text = '' ) {
@@ -62,6 +62,10 @@ EOD;
 		return true;
 	}
 
+	/**
+	 * @param array &$files
+	 * @return true
+	 */
 	public static function onUnitTestsList( array &$files ) {
 		// @codeCoverageIgnoreStart
 		$directoryIterator = new RecursiveDirectoryIterator( __DIR__ . '/tests/' );
