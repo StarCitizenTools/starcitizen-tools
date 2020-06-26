@@ -187,7 +187,7 @@ class ExtLoops {
 
 		if ( count( $args ) > 3 ) {
 			/**
-			 *compatbility to pre 0.4 but consistency with other Loop functions.
+			 * compatbility to pre 0.4 but consistency with other Loop functions.
 			 * this way the first argument can be ommitted like '#fornumargs: |varKey |varVal |code'
 			 */
 			array_shift( $args );

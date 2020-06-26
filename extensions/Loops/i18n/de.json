@@ -3,8 +3,8 @@
 		"authors": [
 			"Daniel Werner",
 			"Kghbln",
-			"Metalhead64",
-			"MGChecker"
+			"MGChecker",
+			"Metalhead64"
 		]
 	},
 	"loops-desc": "Ergänzt den Parser um Funktionen zur Ausführung von Schleifen",

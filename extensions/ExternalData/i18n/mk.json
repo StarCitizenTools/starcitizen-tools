@@ -11,11 +11,13 @@
 	"externaldata-ldap-unable-to-connect": "Не можам да се поврзам со  $1",
 	"externaldata-xml-error": "XML грешка: $1 во ред $2",
 	"externaldata-invalid-json": "Грешка: Неважечки JSON",
+	"externaldata-jsonpath-error": "Грешка: Неважечки JSONPath-запис.",
 	"externaldata-db-incomplete-information": "Грешка: Нецелосни информации за овој опслужувачки ид. бр.",
 	"externaldata-db-could-not-get-url": "Не можев да ја добијам URL адресата по $1 {{PLURAL:$1|обид|обиди}}.",
 	"externaldata-db-unknown-type": "Грешка: Непознат тип на база на податоци.",
 	"externaldata-db-could-not-connect": "Грешка: Не можев да се поврзам со базата на податоци.",
 	"externaldata-db-unknown-collection": "Грешка: Непозната збирка од MongoDB.",
 	"externaldata-db-no-return-values": "Грешка: Нема назначено повратни вредности.",
-	"externaldata-db-invalid-query": "Грешно барање."
+	"externaldata-db-invalid-query": "Грешно барање.",
+	"externaldata-no-css-selector": "Недостасува библиотеката $1, потребна за употреба на форматот „$2“ без можноста „$3“."
 }

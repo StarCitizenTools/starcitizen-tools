@@ -4,7 +4,8 @@
 			"BeginaFelicysym",
 			"Chrumps",
 			"Leinad",
-			"Sp5uhe"
+			"Sp5uhe",
+			"WaldiSt"
 		]
 	},
 	"getdata": "Pobierz dane",
@@ -20,5 +21,6 @@
 	"externaldata-db-could-not-connect": "Błąd: Nie można połączyć się z bazą danych.",
 	"externaldata-db-unknown-collection": "Błąd: Nieznany zbiór MongoDB.",
 	"externaldata-db-no-return-values": "Błąd – nie określono zwracanej wartości.",
-	"externaldata-db-invalid-query": "Nieprawidłowe zapytanie."
+	"externaldata-db-invalid-query": "Nieprawidłowe zapytanie.",
+	"externaldata-no-css-selector": "Brakuje biblioteki $1 wymaganej do użycia formatu '$2' bez opcji '$3'."
 }

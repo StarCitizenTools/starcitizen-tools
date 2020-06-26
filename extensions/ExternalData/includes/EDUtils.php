@@ -18,11 +18,14 @@ class EDUtils {
 		return '<span class="error">' . $msg . '</span>';
 	}
 
-	// XML-handling functions based on code found at
-	// http://us.php.net/xml_set_element_handler
+	/**
+	 * This method and endElement() below it are both based on code found at
+	 * http://us.php.net/xml_set_element_handler
+	 */
 	static function startElement( $parser, $name, $attrs ) {
 		global $edgCurrentXMLTag, $edgCurrentValue, $edgXMLValues;
-		// set to all lowercase to avoid casing issues
+
+		// Set to all lowercase to avoid casing issues.
 		$edgCurrentXMLTag = strtolower( $name );
 		$edgCurrentValue = '';
 		foreach ( $attrs as $attr => $value ) {
@@ -31,7 +34,7 @@ class EDUtils {
 			if ( array_key_exists( $attr, $edgXMLValues ) ) {
 				$edgXMLValues[$attr][] = $value;
 			} else {
-				$edgXMLValues[$attr] = array( $value );
+				$edgXMLValues[$attr] = [ $value ];
 			}
 		}
 	}
@@ -42,7 +45,7 @@ class EDUtils {
 		if ( array_key_exists( $edgCurrentXMLTag, $edgXMLValues ) ) {
 			$edgXMLValues[$edgCurrentXMLTag][] = $edgCurrentValue;
 		} else {
-			$edgXMLValues[$edgCurrentXMLTag] = array( $edgCurrentValue );
+			$edgXMLValues[$edgCurrentXMLTag] = [ $edgCurrentValue ];
 		}
 		// Clear the value both here and in startElement(), in case this
 		// is an embedded tag.
@@ -68,9 +71,9 @@ class EDUtils {
 	}
 
 	static function parseParams( $params ) {
-		$args = array();
+		$args = [];
 		foreach ( $params as $param ) {
-			$param = preg_replace ( "/\s\s+/", ' ', $param ); // whitespace
+			$param = preg_replace( "/\s\s+/", ' ', $param ); // whitespace
 			$param_parts = explode( "=", $param, 2 );
 			if ( count( $param_parts ) < 2 ) {
 				$args[$param_parts[0]] = null;
@@ -86,7 +89,7 @@ class EDUtils {
 	 * Parses an argument of the form "a=b,c=d,..." into an array
 	 */
 	static function paramToArray( $arg, $lowercaseKeys = false, $lowercaseValues = false ) {
-		$arg = preg_replace ( "/\s\s+/", ' ', $arg ); // whitespace
+		$arg = preg_replace( "/\s\s+/", ' ', $arg ); // whitespace
 
 		// Split text on commas, except for commas found within quotes
 		// and parentheses. Regular expression based on:
@@ -103,7 +106,7 @@ END;
 		// " - fix for color highlighting in vi :)
 		$keyValuePairs = preg_split( $pattern, $arg );
 
-		$returnArray = array();
+		$returnArray = [];
 		foreach ( $keyValuePairs as $keyValuePair ) {
 			$keyAndValue = explode( '=', $keyValuePair, 2 );
 			if ( count( $keyAndValue ) == 2 ) {
@@ -133,8 +136,8 @@ END;
 	}
 
 	static function connectLDAP( $server, $username, $password ) {
-		// Check that a PHP LDAP library is installed.
-		if ( ! function_exists( 'ldap_connect' ) ) {
+		// Check that the PHP LDAP library is installed.
+		if ( !function_exists( 'ldap_connect' ) ) {
 			echo ( "Error: you must have a PHP LDAP library installed in order to call #get_ldap_data." );
 		}
 
@@ -221,14 +224,14 @@ END;
 			$db_flags = DBO_DEFAULT;
 		}
 
-		$dbConnectionParams = array(
+		$dbConnectionParams = [
 			'host' => $db_server,
 			'user' => $db_username,
 			'password' => $db_password,
 			'dbname' => $db_name,
 			'flags' => $db_flags,
 			'tablePrefix' => $db_tableprefix,
-		);
+		];
 		if ( $db_type == 'sqlite' ) {
 			$dbConnectionParams['dbDirectory'] = $db_directory;
 		}
@@ -237,7 +240,7 @@ END;
 		if ( $db == null ) {
 			return wfMessage( "externaldata-db-unknown-type" )->text();
 		}
-		if ( ! $db->isOpen() ) {
+		if ( !$db->isOpen() ) {
 			return wfMessage( "externaldata-db-could-not-connect" )->text();
 		}
 
@@ -253,7 +256,7 @@ END;
 			return $rows;
 		}
 
-		$values = array();
+		$values = [];
 		foreach ( $rows as $row ) {
 			foreach ( $columns as $column ) {
 				$values[$column][] = $row[$column];
@@ -285,12 +288,12 @@ END;
 		global $wgMainCacheType, $wgMemc, $edgMemCachedMongoDBSeconds;
 
 		// Use MEMCACHED if configured to cache mongodb queries.
-		if ($wgMainCacheType === CACHE_MEMCACHED && $edgMemCachedMongoDBSeconds > 0) {
+		if ( $wgMainCacheType === CACHE_MEMCACHED && $edgMemCachedMongoDBSeconds > 0 ) {
 			// Check if cache entry exists.
-			$mckey = wfMemcKey( 'mongodb', $from, md5(json_encode($otherParams) . json_encode($columns) . $where . json_encode($sqlOptions) . $db_name . $db_server));
+			$mckey = wfMemcKey( 'mongodb', $from, md5( json_encode( $otherParams ) . json_encode( $columns ) . $where . json_encode( $sqlOptions ) . $db_name . $db_server ) );
 			$values = $wgMemc->get( $mckey );
 
-			if ($values !== false) {
+			if ( $values !== false ) {
 				return $values;
 			}
 		}
@@ -303,7 +306,7 @@ END;
 		if ( $db_username != '' ) {
 			$connect_string .= $db_username . ':' . $db_password . '@';
 		}
-		if ( $db_server != '') {
+		if ( $db_server != '' ) {
 			$connect_string .= $db_server;
 		} else {
 			$connect_string .= 'localhost:27017';
@@ -321,27 +324,27 @@ END;
 		$db = $m->selectDB( $db_name );
 
 		// Check if collection exists
-		if ( $db->system->namespaces->findOne( array( 'name'=>$db_name . "." . $from ) ) === null ){
-			return wfMessage( "externaldata-db-unknown-collection:")->text() . $db_name . "." . $from;
+		if ( $db->system->namespaces->findOne( [ 'name' => $db_name . "." . $from ] ) === null ) {
+			return wfMessage( "externaldata-db-unknown-collection:" )->text() . $db_name . "." . $from;
 		}
 
 		$collection = new MongoCollection( $db, $from );
 
-		$findArray = array();
-		$aggregateArray = array();
+		$findArray = [];
+		$aggregateArray = [];
 		// Was an aggregation pipeline command issued?
-		if ( array_key_exists('aggregate', $otherParams ) ) {
+		if ( array_key_exists( 'aggregate', $otherParams ) ) {
 			// The 'aggregate' parameter should be an array of
 			// aggregation JSON pipeline commands.
 			// Note to users: be sure to use spaces between curly
 			// brackets in the 'aggregate' JSON so as not to trip up the
 			// MW parser.
-			$aggregateArray = json_decode ($otherParams['aggregate'], true);
+			$aggregateArray = json_decode( $otherParams['aggregate'], true );
 		} elseif ( array_key_exists( 'find query', $otherParams ) ) {
 			// Otherwise, was a direct MongoDB "find" query JSON string provided?
 			// If so, use that. As with 'aggregate' JSON, use spaces
 			// between curly brackets
-			$findArray = json_decode ($otherParams['find query'], true);
+			$findArray = json_decode( $otherParams['find query'], true );
 		} elseif ( $where != '' ) {
 			// If not, turn the SQL of the "where=" parameter into
 			// a "find" array for MongoDB. Note that this approach
@@ -354,16 +357,16 @@ END;
 			foreach ( $whereElements as $whereElement ) {
 				if ( strpos( $whereElement, '>=' ) ) {
 					list( $fieldName, $value ) = explode( '>=', $whereElement );
-					$findArray[trim( $fieldName )] = array( '$gte' => trim( $value ) );
+					$findArray[trim( $fieldName )] = [ '$gte' => trim( $value ) ];
 				} elseif ( strpos( $whereElement, '>' ) ) {
 					list( $fieldName, $value ) = explode( '>', $whereElement );
-					$findArray[trim( $fieldName )] = array( '$gt' => trim( $value ) );
+					$findArray[trim( $fieldName )] = [ '$gt' => trim( $value ) ];
 				} elseif ( strpos( $whereElement, '<=' ) ) {
 					list( $fieldName, $value ) = explode( '<=', $whereElement );
-					$findArray[trim( $fieldName )] = array( '$lte' => trim( $value ) );
+					$findArray[trim( $fieldName )] = [ '$lte' => trim( $value ) ];
 				} elseif ( strpos( $whereElement, '<' ) ) {
 					list( $fieldName, $value ) = explode( '<', $whereElement );
-					$findArray[trim( $fieldName )] = array( '$lt' => trim( $value ) );
+					$findArray[trim( $fieldName )] = [ '$lt' => trim( $value ) ];
 				} elseif ( strpos( $whereElement, ' LIKE ' ) ) {
 					list( $fieldName, $value ) = explode( ' LIKE ', $whereElement );
 					$value = trim( $value );
@@ -377,7 +380,7 @@ END;
 		}
 
 		// Do the same for the "order=" parameter as the "where=" parameter
-		$sortArray = array();
+		$sortArray = [];
 		if ( $sqlOptions['ORDER BY'] != '' ) {
 			$sortElements = explode( ',', $sqlOptions['ORDER BY'] );
 			foreach ( $sortElements as $sortElement ) {
@@ -395,11 +398,11 @@ END;
 
 		// Get the data!
 		if ( array_key_exists( 'aggregate', $otherParams ) ) {
-			if ( $sqlOptions['ORDER BY'] != '') {
-				$aggregateArray[] = array( '$sort' => $sortArray );
+			if ( $sqlOptions['ORDER BY'] != '' ) {
+				$aggregateArray[] = [ '$sort' => $sortArray ];
 			}
 			if ( $sqlOptions['LIMIT'] != '' ) {
-				$aggregateArray[] = array( '$limit' => intval( $sqlOptions['LIMIT'] ) );
+				$aggregateArray[] = [ '$limit' => intval( $sqlOptions['LIMIT'] ) ];
 			}
 			$aggregateResult = $collection->aggregate( $aggregateArray );
 			$resultsCursor = $aggregateResult['result'];
@@ -407,10 +410,10 @@ END;
 			$resultsCursor = $collection->find( $findArray, $columns )->sort( $sortArray )->limit( $sqlOptions['LIMIT'] );
 		}
 
-		$values = array();
+		$values = [];
 		foreach ( $resultsCursor as $doc ) {
 			foreach ( $columns as $column ) {
-				if ( strstr($column, ".") ) {
+				if ( strstr( $column, "." ) ) {
 					// If the exact path of the value was
 					// specified using dots (e.g., "a.b.c"),
 					// get the value that way.
@@ -425,7 +428,7 @@ END;
 						// If so, return it in a format that
 						// the Maps extension can understand.
 						$coordinates = $doc['geometry']['coordinates'][0];
-						$coordinateStrings = array();
+						$coordinateStrings = [];
 						foreach ( $coordinates as $coordinate ) {
 							$coordinateStrings[] = $coordinate[1] . ',' . $coordinate[0];
 						}
@@ -437,12 +440,12 @@ END;
 					}
 				} else {
 					// It's a simple literal.
-					$values[$column][] = (isset( $doc[$column] ) ? $doc[$column] : null);
+					$values[$column][] = ( isset( $doc[$column] ) ? $doc[$column] : null );
 				}
 			}
 		}
 
-		if ($wgMainCacheType === CACHE_MEMCACHED && $edgMemCachedMongoDBSeconds > 0 ) {
+		if ( $wgMainCacheType === CACHE_MEMCACHED && $edgMemCachedMongoDBSeconds > 0 ) {
 			$wgMemc->set( $mckey, $values, $edgMemCachedMongoDBSeconds );
 		}
 
@@ -452,7 +455,7 @@ END;
 	static function searchDB( $db, $from, $vars, $conds, $sqlOptions, $joinOn ) {
 		// The format of $from can be just "TableName", or the more
 		// complex "Table1=Alias1,Table2=Alias2,...".
-		$tables = array();
+		$tables = [];
 		$tableStrings = explode( ',', $from );
 		foreach ( $tableStrings as $tableString ) {
 			if ( strpos( $tableString, '=' ) !== false ) {
@@ -460,11 +463,11 @@ END;
 				$tableName = trim( $tableStringParts[0] );
 				$alias = trim( $tableStringParts[1] );
 			} else {
-				$tableName = $alias = trim( $tableString);
+				$tableName = $alias = trim( $tableString );
 			}
 			$tables[$alias] = $tableName;
 		}
-		$joinConds = array();
+		$joinConds = [];
 		$joinStrings = explode( ',', $joinOn );
 		foreach ( $joinStrings as $i => $joinString ) {
 			if ( $joinString == '' ) {
@@ -478,26 +481,26 @@ END;
 			}
 			$aliases = array_keys( $tables );
 			$alias = $aliases[$i + 1];
-			$joinConds[$alias] = array( 'JOIN', $joinString );
+			$joinConds[$alias] = [ 'JOIN', $joinString ];
 		}
 		$result = $db->select( $tables, $vars, $conds, 'EDUtils::searchDB', $sqlOptions, $joinConds );
 		if ( !$result ) {
 			return wfMessage( "externaldata-db-invalid-query" )->text();
 		}
 
-		$rows = array();
+		$rows = [];
 		while ( $row = $db->fetchRow( $result ) ) {
 			// Create a new row object that uses the passed-in
 			// column names as keys, so that there's always an
 			// exact match between what's in the query and what's
 			// in the return value (so that "a.b", for instance,
 			// doesn't get chopped off to just "b").
-			$new_row = array();
+			$new_row = [];
 			foreach ( $vars as $i => $column_name ) {
 				$dbField = $row[$i];
 				// This can happen with MSSQL.
 				if ( $dbField instanceof DateTime ) {
-					$dbField = $dbField->format('Y-m-d H:i:s');
+					$dbField = $dbField->format( 'Y-m-d H:i:s' );
 				}
 				// Convert the encoding to UTF-8
 				// if necessary - based on code at
@@ -516,7 +519,7 @@ END;
 
 	static function getXMLData( $xml ) {
 		global $edgXMLValues;
-		$edgXMLValues = array();
+		$edgXMLValues = [];
 
 		// Remove comments from XML - for some reason, xml_parse()
 		// can't handle them.
@@ -527,8 +530,8 @@ END;
 		$xml = str_replace( '&amp;', self::$ampersandReplacement, $xml );
 
 		$xml_parser = xml_parser_create();
-		xml_set_element_handler( $xml_parser, array( 'EDUtils', 'startElement' ), array( 'EDUtils', 'endElement' ) );
-		xml_set_character_data_handler( $xml_parser, array( 'EDUtils', 'getContent' ) );
+		xml_set_element_handler( $xml_parser, [ 'EDUtils', 'startElement' ], [ 'EDUtils', 'endElement' ] );
+		xml_set_character_data_handler( $xml_parser, [ 'EDUtils', 'getContent' ] );
 		if ( !xml_parse( $xml_parser, $xml, true ) ) {
 			return wfMessage( 'externaldata-xml-error',
 			xml_error_string( xml_get_error_code( $xml_parser ) ),
@@ -539,15 +542,17 @@ END;
 	}
 
 	static function isNodeNotEmpty( $node ) {
-		return trim( $node[0] ) != '';
+		return trim( $node[0] ) !== '';
 	}
 
 	static function filterEmptyNodes( $nodes ) {
-		if ( !is_array( $nodes ) ) return $nodes;
-		return array_filter( $nodes, array( 'EDUtils', 'isNodeNotEmpty' ) );
+		if ( !is_array( $nodes ) ) {
+			return $nodes;
+		}
+		return array_filter( $nodes, [ 'EDUtils', 'isNodeNotEmpty' ] );
 	}
 
-	static function getXPathData( $xml, $mappings, $ns ) {
+	static function getXMLXPathData( $xml, $mappings, $ns ) {
 		global $edgXMLValues;
 
 		try {
@@ -555,12 +560,12 @@ END;
 		} catch ( Exception $e ) {
 			return "Caught exception parsing XML: " . $e->getMessage();
 		}
-		$edgXMLValues = array();
+		$edgXMLValues = [];
 
 		foreach ( $mappings as $local_var => $xpath ) {
 			// First, register any necessary XML namespaces, to
 			// avoid "Undefined namespace prefix" errors.
-			$matches = array();
+			$matches = [];
 			preg_match_all( '/[\/\@]([a-zA-Z0-9]*):/', $xpath, $matches );
 			foreach ( $matches[1] as $namespace ) {
 				$sxml->registerXPathNamespace( $namespace, $ns );
@@ -574,7 +579,7 @@ END;
 			}
 
 			// Convert from SimpleXMLElement to string.
-			$nodesArray = array();
+			$nodesArray = [];
 			foreach ( $nodes as $xmlNode ) {
 				$nodesArray[] = (string)$xmlNode;
 			}
@@ -591,10 +596,65 @@ END;
 		return $edgXMLValues;
 	}
 
+	static function getHTMLData( $html, array $mappings, $css ) {
+		global $edgHTMLValues;
+		$doc = new DOMDocument;
+		// Remove whitespaces:
+		$doc->preserveWhiteSpace = false;
+
+		// Otherwise, the encoding will be broken:
+		if ( !preg_match( '/^<\?xml[^>]+encoding/', $html )
+			&& preg_match( '%<meta[^>]+charset\s*=\s*(["\'])(.+?)\1[^>]*/?>%i', $html, $matches ) ) {
+			// <? - another fix for color highlighting in vi
+			$encoding = '<?xml encoding="' . $matches [2] . '" ?>';
+		} else {
+			$encoding = '';
+		}
+
+		try {
+			$doc->loadHTML( $encoding . $html );
+		} catch ( Exception $e ) {
+			return "Caught exception parsing HTML: " . $e->getMessage();
+		}
+		$edgHTMLValues = [];
+
+		$domxpath = new DOMXPath( $doc );
+		if ( $css ) {
+			$converter = new Symfony\Component\CssSelector\CssSelectorConverter();
+		}
+		foreach ( $mappings as $local_var => $query ) {
+			if ( $css ) {
+				preg_match( '/(?<selector>.+?)(\.\s*attr\s*\(\s*(?<quote>["\']?)(?<attr>.+?)\k<quote>\s*\))?$/i', $query, $matches );
+				$xpath = '/' . strtr( $converter->toXPath( $matches ['selector'] ), [
+					'descendant-or-self::*' => '',
+					'descendant-or-self::' => '/'
+				] );
+				$attr = $matches ['attr'];
+			} else {
+				$xpath = $query;
+			}
+			$entries = $domxpath->query( $xpath );
+			$nodesArray = [];
+			foreach ( $entries as $entry ) {
+				$values = $attr ? $entry->attributes[$attr]->nodeValue : $entry->textContent;
+				$nodesArray[] = self::filterEmptyNodes( $values );
+			}
+			if ( array_key_exists( $xpath, $edgHTMLValues ) ) {
+				// At the moment, this code will never get
+				// called, because duplicate values in
+				// $mappings will have been removed already.
+				$edgHTMLValues[$query] = array_merge( $edgHTMLValues[$xpath], $nodesArray );
+			} else {
+				$edgHTMLValues[$query] = $nodesArray;
+			}
+		}
+		return $edgHTMLValues;
+	}
+
 	static function getValuesFromCSVLine( $csv_line ) {
 		// regular expression copied from http://us.php.net/fgetcsv
 		$vals = preg_split( '/,(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))/', $csv_line );
-		$vals2 = array();
+		$vals2 = [];
 		foreach ( $vals as $val ) {
 			$vals2[] = trim( $val, '"' );
 		}
@@ -616,18 +676,18 @@ END;
 			$fp = fopen( "php://temp/maxmemory:$fiveMBs", 'r+' );
 			fputs( $fp, $csv );
 			rewind( $fp );
-			$table = array();
+			$table = [];
 			while ( $line = fgetcsv( $fp, 0, $delimiter ) ) {
 				array_push( $table, $line );
 			}
 			fclose( $fp );
-		//}
+		// }
 
 		// Get rid of blank characters - these sometimes show up
 		// for certain encodings.
-		foreach( $table as $i => $row ) {
+		foreach ( $table as $i => $row ) {
 			foreach ( $row as $j => $cell ) {
-				$table[$i][$j] = str_replace( chr(0), '', $cell );
+				$table[$i][$j] = str_replace( chr( 0 ), '', $cell );
 			}
 		}
 
@@ -635,7 +695,7 @@ END;
 		// be one of a variety of options, depending on the encoding.
 		// Code copied in part from:
 		// http://artur.ejsmont.org/blog/content/annoying-utf-byte-order-marks
-		$sets = array(
+		$sets = [
 			"\xFE",
 			"\xFF",
 			"\xFE\xFF",
@@ -647,7 +707,7 @@ END;
 			"\xFB\xEE\x28",
 			"\x00\x00\xFE\xFF",
 			"\xDD\x73\x66\x73",
-		);
+		];
 		$decodedFirstCell = utf8_decode( $table[0][0] );
 		foreach ( $sets as $set ) {
 			if ( 0 == strncmp( $decodedFirstCell, $set, strlen( $set ) ) ) {
@@ -691,7 +751,7 @@ END;
 
 		// Now "flip" the data, turning it into a column-by-column
 		// array, instead of row-by-row.
-		$values = array();
+		$values = [];
 		foreach ( $table as $line ) {
 			for ( $i = 0; $i < $num_columns; $i++ ) {
 				// This check is needed in case it's an
@@ -710,7 +770,7 @@ END;
 				if ( array_key_exists( $column, $values ) ) {
 					$values[$column][] = $row_val;
 				} else {
-					$values[$column] = array( $row_val );
+					$values[$column] = [ $row_val ];
 				}
 			}
 		}
@@ -730,7 +790,7 @@ END;
 		$fp = fopen( "php://temp/maxmemory:$fiveMBs", 'r+' );
 		fputs( $fp, $gff );
 		rewind( $fp );
-		$table = array();
+		$table = [];
 		while ( $line = fgetcsv( $fp, null, "\t" ) ) {
 			// ignore comment lines
 			if ( strpos( $line[0], '##' ) !== 0 ) {
@@ -751,7 +811,7 @@ END;
 		}
 		fclose( $fp );
 
-		$values = array();
+		$values = [];
 		foreach ( $table as $line ) {
 			foreach ( $line as $i => $row_val ) {
 				// each of the columns in GFF have a
@@ -782,7 +842,7 @@ END;
 				if ( array_key_exists( $column, $values ) ) {
 					$values[$column][] = $row_val;
 				} else {
-					$values[$column] = array( $row_val );
+					$values[$column] = [ $row_val ];
 				}
 			}
 		}
@@ -796,7 +856,7 @@ END;
 	 */
 	static function holdsSimpleList( $arr ) {
 		$expectedKey = 0;
-		foreach( $arr as $key => $val ) {
+		foreach ( $arr as $key => $val ) {
 			if ( is_array( $val ) || $key != $expectedKey++ ) {
 				return false;
 			}
@@ -813,8 +873,9 @@ END;
 			if ( is_array( $val ) && self::holdsSimpleList( $val ) ) {
 				// If it just holds a simple list, turn the
 				// array into a comma-separated list, then
-				// pass it back in in order to do the final					// processing.
-				$val = array( $key => implode( ', ', $val ) );
+				// pass it back in in order to do the final
+				// processing.
+				$val = [ $key => implode( ', ', $val ) ];
 				self::parseTree( $val, $retrieved_values );
 			} elseif ( is_array( $val ) && count( $val ) > 1 ) {
 				self::parseTree( $val, $retrieved_values );
@@ -831,7 +892,7 @@ END;
 				if ( array_key_exists( $key, $retrieved_values ) ) {
 					$retrieved_values[$key][] = $val;
 				} else {
-					$retrieved_values[$key] = array( $val );
+					$retrieved_values[$key] = [ $val ];
 				}
 			}
 		}
@@ -840,55 +901,61 @@ END;
 	static function getJSONData( $json, $prefixLength ) {
 		$json = substr( $json, $prefixLength );
 		$json_tree = FormatJson::decode( $json, true );
-		if ( is_null( $json_tree ) ) {
+		if ( $json_tree === null ) {
 			// It's probably invalid JSON.
 			return wfMessage( 'externaldata-invalid-json' )->text();
 		}
-		$values = array();
+		$values = [];
 		if ( is_array( $json_tree ) ) {
 			self::parseTree( $json_tree, $values );
 		}
 		return $values;
 	}
 
-	static function fetchURL( $url, $post_vars = array(), $cacheExpireTime = 0, $get_fresh = false, $try_count = 1 ) {
-		$dbr = wfGetDB( DB_REPLICA );
-		global $edgStringReplacements, $edgCacheTable, $edgAllowSSL;
+	static function getJSONPathData( $json, $mappings ) {
+		global $edgJSONValues;
 
+		$jsonObject = new EDJsonObject( $json );
+		foreach ( $mappings as $jsonpath ) {
+			$edgJSONValues[$jsonpath] = $jsonObject->get( $jsonpath );
+		}
+		return $edgJSONValues;
+	}
+
+	static function fetchURL( $url, $post_vars = [], $cacheExpireTime = 0, $get_fresh = false, $try_count = 1 ) {
+		$dbr = wfGetDB( DB_REPLICA );
+		global $edgStringReplacements, $edgCacheTable, $edgAllowSSL, $edgHTTPOptions;
+
+		$options = $edgHTTPOptions;
 		if ( $post_vars ) {
-			$options = array( 'postData' => $post_vars );
+			$post_options = array_merge( isset( $options['postData'] ) ? $options['postData'] : [], $post_vars );
 			Hooks::run( 'ExternalDataBeforeWebCall', [
 				'post',
 				&$url,
-				&$options
-			]);
-			return HttpWithHeaders::post( $url,  $options);
+				$post_options
+			] );
+			return EDHttpWithHeaders::post( $url,  $post_options );
 		}
 
-		// do any special variable replacements in the URLs, for
-		// secret API keys and the like
+		// Do any special variable replacements in the URLs, for
+		// secret API keys and the like.
 		foreach ( $edgStringReplacements as $key => $value ) {
 			$url = str_replace( $key, $value, $url );
 		}
 
-		if ( !isset( $edgCacheTable ) || is_null( $edgCacheTable ) ) {
-			if ( $edgAllowSSL ) {
-				$options = array( 
-					'sslVerifyCert' => false, 
-					'followRedirects' => false ,
-					'timeout' => 'default',
-				);
-			} else {
-				$options = array( 
-					'timeout' => 'default',
-				);
-			}
-			Hooks::run( 'ExternalDataBeforeWebCall', [
-				'get',
-				&$url,
-				&$options
-			]);
-			$contents = HttpWithHeaders::get( $url ,$options );
+		if ( $edgAllowSSL ) {
+			$options['sslVerifyCert'] = isset( $options['sslVerifyCert'] ) ? $options['sslVerifyCert'] : false;
+			$options['followRedirects'] = isset( $options['followRedirects'] ) ? $options['followRedirects'] : false;
+		}
+
+		Hooks::run( 'ExternalDataBeforeWebCall', [
+			'get',
+			&$url,
+			&$options
+		] );
+
+		if ( !isset( $edgCacheTable ) || $edgCacheTable === null ) {
+			$contents = EDHttpWithHeaders::get( $url, $options, __METHOD__ );
 			// Handle non-UTF-8 encodings.
 			// Copied from http://www.php.net/manual/en/function.file-get-contents.php#85008
 			// Unfortunately, 'mbstring' functions are not available
@@ -901,25 +968,14 @@ END;
 		}
 
 		// check the cache (only the first 254 chars of the url)
-		$row = $dbr->selectRow( $edgCacheTable, '*', array( 'url' => substr( $url, 0, 254 ) ), 'EDUtils::fetchURL' );
+		$row = $dbr->selectRow( $edgCacheTable, '*', [ 'url' => substr( $url, 0, 254 ) ], __METHOD__ );
 
 		if ( $row && ( ( time() - $row->req_time ) > $cacheExpireTime ) ) {
 			$get_fresh = true;
 		}
 
 		if ( !$row || $get_fresh ) {
-			$options = [
-				'timeout' => 'default'
-			];
-			if ( $edgAllowSSL ) {
-				$options[CURLOPT_SSL_VERIFYPEER] = FALSE;
-			}
-			Hooks::run( 'ExternalDataBeforeWebCall', [
-				'get',
-				&$url,
-				&$options
-			]);
-			$page = HttpWithHeaders::get( $url );
+			$page = EDHttpWithHeaders::get( $url, $options, __METHOD__ );
 			if ( $page === false ) {
 				sleep( 1 );
 				if ( $try_count >= self::$http_number_of_tries ) {
@@ -932,9 +988,9 @@ END;
 			if ( $page != '' ) {
 				$dbw = wfGetDB( DB_MASTER );
 				// Delete the old entry, if one exists.
-				$dbw->delete( $edgCacheTable, array( 'url' => substr( $url, 0, 254 )));
+				$dbw->delete( $edgCacheTable, [ 'url' => substr( $url, 0, 254 ) ] );
 				// Insert contents into the cache table.
-				$dbw->insert( $edgCacheTable, array( 'url' => substr( $url, 0, 254 ), 'result' => $page, 'req_time' => time() ) );
+				$dbw->insert( $edgCacheTable, [ 'url' => substr( $url, 0, 254 ), 'result' => $page, 'req_time' => time() ] );
 				return $page;
 			}
 		} else {
@@ -942,34 +998,36 @@ END;
 		}
 	}
 
-	static private function getDataFromText( $contents, $format, $mappings, $source, $prefixLength = 0, $regex = null ) {
+	private static function getDataFromText( $contents, $format, $mappings, $source, $prefixLength = 0, $regex = null ) {
 		// For now, this is only done for the CSV formats.
 		if ( is_array( $format ) ) {
 			list( $format, $delimiter ) = $format;
 		} else {
 			$delimiter = ',';
 		}
-
-		if ( $format == 'xml' ) {
-			return self::getXMLData( $contents );
-		} elseif ( $format == 'xml with xpath' ) {
-			return self::getXPathData( $contents, $mappings, $source );
-		} elseif ( $format == 'csv' ) {
-			return self::getCSVData( $contents, false, $delimiter );
-		} elseif ( $format == 'csv with header' ) {
-			return self::getCSVData( $contents, true, $delimiter );
-		} elseif ( $format == 'json' ) {
-			return self::getJSONData( $contents, $prefixLength );
-		} elseif ( $format == 'gff' ) {
-			return self::getGFFData( $contents );
-		} elseif ( $format == 'text' ) {
-			if ( $regex == null ) {
-				return array( 'text' => $contents );
-			} else {
-				return self::getRegexData( $contents, $regex );
-			}
-		} else {
-			return wfMessage( 'externaldata-web-invalid-format', $format )->text();
+		switch ( $format ) {
+			case 'xml':
+				return self::getXMLData( $contents );
+			case 'xml with xpath':
+				return self::getXMLXPathData( $contents, $mappings, $source );
+			case 'html':
+				return self::getHTMLData( $contents, $mappings, true );
+			case 'html with xpath':
+				return self::getHTMLData( $contents, $mappings, false );
+			case 'csv':
+				return self::getCSVData( $contents, false, $delimiter );
+			case 'csv with header':
+				return self::getCSVData( $contents, true, $delimiter );
+			case 'json':
+				return self::getJSONData( $contents, $prefixLength );
+			case 'json with jsonpath':
+				return self::getJSONPathData( $contents, $mappings );
+			case 'gff':
+				return self::getGFFData( $contents );
+			case 'text':
+				return $regex === null ? [ 'text' => $contents ] : self::getRegexData( $contents, $regex );
+			default:
+				return wfMessage( 'externaldata-web-invalid-format', $format )->text();
 		}
 	}
 
@@ -977,7 +1035,7 @@ END;
 	 * Checks whether this URL is allowed, based on the
 	 * $edgAllowExternalDataFrom whitelist
 	 */
-	static public function isURLAllowed( $url ) {
+	public static function isURLAllowed( $url ) {
 		// this code is based on Parser::maybeMakeExternalImage()
 		global $edgAllowExternalDataFrom;
 		$data_from = $edgAllowExternalDataFrom;
@@ -1000,7 +1058,7 @@ END;
 		}
 	}
 
-	static public function getDataFromURL( $url, $format, $mappings, $postData = null, $cacheExpireTime, $prefixLength, $regex ) {
+	public static function getDataFromURL( $url, $format, $mappings, $postData = null, $cacheExpireTime, $prefixLength, $regex ) {
 		$url_contents = self::fetchURL( $url, $postData, $cacheExpireTime );
 		// Show an error message if there's nothing there.
 		if ( empty( $url_contents ) ) {
@@ -1009,7 +1067,7 @@ END;
 		return self::getDataFromText( $url_contents, $format, $mappings, $url, $prefixLength, $regex );
 	}
 
-	static private function getDataFromPath( $path, $format, $mappings, $regex ) {
+	private static function getDataFromPath( $path, $format, $mappings, $regex ) {
 		if ( !file_exists( $path ) ) {
 			return "Error: No file found.";
 		}
@@ -1019,10 +1077,10 @@ END;
 			return "Error: Unable to get file contents.";
 		}
 
-		return self::getDataFromText( $file_contents, $format, $mappings, $path, $regex );
+		return self::getDataFromText( $file_contents, $format, $mappings, $path, 0, $regex );
 	}
 
-	static public function getDataFromFile( $file, $format, $mappings, $regex ) {
+	public static function getDataFromFile( $file, $format, $mappings, $regex ) {
 		global $edgFilePath;
 
 		if ( array_key_exists( $file, $edgFilePath ) ) {
@@ -1032,7 +1090,7 @@ END;
 		}
 	}
 
-	static public function getDataFromDirectory( $directory, $fileName, $format, $mappings, $regex ) {
+	public static function getDataFromDirectory( $directory, $fileName, $format, $mappings, $regex ) {
 		global $edgDirectoryPath;
 
 		if ( array_key_exists( $directory, $edgDirectoryPath ) ) {
@@ -1051,13 +1109,13 @@ END;
 	/**
 	 * Recursive function, used by getSOAPData().
 	 */
-	static public function getValuesForKeyInTree( $key, $tree ) {
+	public static function getValuesForKeyInTree( $key, $tree ) {
 		// The passed-in tree can be either an array or a stdObject -
 		// we need it to be an array.
 		if ( is_object( $tree ) ) {
 			$tree = get_object_vars( $tree );
 		}
-		$values = array();
+		$values = [];
 		foreach ( $tree as $curKey => $curValue ) {
 			if ( is_object( $curValue ) || is_array( $curValue ) ) {
 				$additionalValues = self::getValuesForKeyInTree( $key, $curValue );
@@ -1069,7 +1127,7 @@ END;
 		return $values;
 	}
 
-	static public function getSOAPData( $url, $requestName, $requestData, $responseName, $mappings) {
+	public static function getSOAPData( $url, $requestName, $requestData, $responseName, $mappings ) {
 		$client = new SoapClient( $url );
 		try {
 			$result = $client->$requestName( $requestData );
@@ -1088,16 +1146,30 @@ END;
 			return 'Error: ' . $realResult->$errorKey;
 		}
 
-		$values = array();
+		$values = [];
 		foreach ( $mappings as $fieldName ) {
 			$values[$fieldName] = self::getValuesForKeyInTree( $fieldName, $realResult );
 		}
 		return $values;
 	}
 
-	static public function getRegexData( $text, $regex ): array {
+	public static function getRegexData( $text, $regex ): array {
 		$matches = [];
-		@preg_match_all( $regex, $text, $matches, PREG_PATTERN_ORDER );
+
+		if ( method_exists( AtEase::class, 'suppressWarnings' ) ) {
+			// MW >= 1.33
+			AtEase::suppressWarnings();
+		} else {
+			\MediaWiki\suppressWarnings();
+		}
+		preg_match_all( $regex, $text, $matches, PREG_PATTERN_ORDER );
+		if ( method_exists( AtEase::class, 'restoreWarnings' ) ) {
+			// MW >= 1.33
+			AtEase::restoreWarnings();
+		} else {
+			\MediaWiki\restoreWarnings();
+		}
+
 		return $matches;
 	}
 

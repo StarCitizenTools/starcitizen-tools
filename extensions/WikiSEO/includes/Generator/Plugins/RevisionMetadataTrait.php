@@ -23,7 +23,7 @@ use MediaWiki\MediaWikiServices;
 use OutputPage;
 
 /**
- * @property OutputPage outputPage
+ * @property OutputPage $outputPage
  */
 trait RevisionMetadataTrait {
 	/**

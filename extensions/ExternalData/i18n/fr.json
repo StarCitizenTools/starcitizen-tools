@@ -5,9 +5,11 @@
 			"Gomoko",
 			"IAlex",
 			"McDutchie",
+			"Pamputt",
 			"PieRRoMaN",
 			"Shirayuki",
-			"Thibaut120094"
+			"Thibaut120094",
+			"Wladek92"
 		]
 	},
 	"getdata": "Obtenir des données",
@@ -17,11 +19,13 @@
 	"externaldata-ldap-unable-to-connect": "Impossible de se connecter à $1",
 	"externaldata-xml-error": "Erreur XML : $1 à la ligne $2",
 	"externaldata-invalid-json": "Erreur : JSON non valide",
+	"externaldata-jsonpath-error": "Erreur : notation JSONPath non valide.",
 	"externaldata-db-incomplete-information": "Erreur : Informations incomplètes pour cet identifiant de serveur.",
 	"externaldata-db-could-not-get-url": "Impossible d'obtenir l'URL après $1 {{PLURAL:$1|essais}}.",
 	"externaldata-db-unknown-type": "ERREUR: Type de base de données inconnu.",
 	"externaldata-db-could-not-connect": "Erreur : Impossible de se connecter à la base de données.",
 	"externaldata-db-unknown-collection": "Erreur: Collection MongoDB inconnue.",
 	"externaldata-db-no-return-values": "Erreur : Aucune valeur de retour n'a été spécifiée.",
-	"externaldata-db-invalid-query": "Requête invalide."
+	"externaldata-db-invalid-query": "Requête invalide.",
+	"externaldata-no-css-selector": "La bibliothèque $1, nécessaire pour utiliser le format '$2' sans l’option '$3', est absente."
 }

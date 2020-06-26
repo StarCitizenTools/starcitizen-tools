@@ -1,3 +1,5 @@
+!! Version 2
+
 !! test
 Tag only title
 !! wikitext

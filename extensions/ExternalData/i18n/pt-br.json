@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Eduardo Addad de Oliveira",
 			"Eduardo.mps",
 			"Giro720",
 			"Jaideraf"
@@ -13,11 +14,13 @@
 	"externaldata-ldap-unable-to-connect": "Não foi possível conectar-se a $1",
 	"externaldata-xml-error": "Erro no XML: $1 na linha $2",
 	"externaldata-invalid-json": "Erro: JSON inválido.",
+	"externaldata-jsonpath-error": "Erro: notação JSONPath inválida.",
 	"externaldata-db-incomplete-information": "Erro: informação incompleta para o ID deste servidor</P>",
 	"externaldata-db-could-not-get-url": "Não foi possível obter o URL após $1 {{PLURAL:$1|tentativa|tentativas}}.",
 	"externaldata-db-unknown-type": "Erro: tipo de base de dados desconhecido.",
 	"externaldata-db-could-not-connect": "Erro: não foi possível conectar-se a base de dados.",
 	"externaldata-db-unknown-collection": "Erro: coleção do MongoDB desconhecida.",
 	"externaldata-db-no-return-values": "Erro: nenhum valor de retorno especificado.",
-	"externaldata-db-invalid-query": "Consulta inválida."
+	"externaldata-db-invalid-query": "Consulta inválida.",
+	"externaldata-no-css-selector": "A biblioteca $1, necessária para usar o formato '$2' sem a opção '$3', está ausente."
 }

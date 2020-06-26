@@ -168,7 +168,7 @@ class WikiSEO {
 	 * Tries to load the page props from OutputPage with keys from Validator::$validParams
 	 *
 	 * @param OutputPage $page
-	 * @return array
+	 * @return array|null
 	 * @see Validator::$validParams
 	 */
 	private function loadPagePropsFromOutputPage( OutputPage $page ) {

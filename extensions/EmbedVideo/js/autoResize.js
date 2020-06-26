@@ -1,4 +1,4 @@
-(function(mw, $) {
+(function(mw, $, window) {
 	$(function() {
         autoResizer(); // run first thing, because we dont need a resize to be broken.
 
@@ -40,6 +40,29 @@
                 var self = $(this);
                 var iframe = self.find('iframe');
                 var wrap = self.find('.embedvideowrap');
+                
+                if(parent.width() <= 0) {
+                    return;
+                }
+
+                if(self.hasClass("thumb")) {
+                    
+                    var originalWidth = iframe.attr("data-orig-width");
+                    if(originalWidth == undefined) {
+                        originalWidth = iframe.width();
+                    }
+
+                    if(parent.width() < iframe.width()) {
+                        self.width(parent.width());
+                    }
+                    else if(parent.width() > originalWidth) {
+                        self.width(originalWidth).css('width', originalWidth).attr('width', originalWidth);
+                    }
+                    else{ 
+                        resizeHandler(self, iframe, parent, wrap);
+                    }
+                    return;
+                }
 
                 if (iframe.width() > parent.width()) {
                     resizeHandler(self, iframe, parent, wrap);
@@ -53,12 +76,14 @@
                     wrap.height(originalHeight).css('height', originalHeight).attr('height', originalHeight);
                 }
 
-                if (!self.hasClass('autoResized') && iframe.width() > parent.width()) {
+                if (!self.hasClass('autoResized') && iframe.width() >= parent.width()) {
                     resizeHandler(self, iframe, parent, wrap);
                 }
             });
         }
 
+        window.autoResizer = autoResizer;
+        
         function resizeHandler(self, iframe, parent, wrap) {
             self.addClass('autoResized');
 
@@ -80,4 +105,4 @@
 
     });
 
-}(mediaWiki, jQuery));
+}(mediaWiki, jQuery, window));

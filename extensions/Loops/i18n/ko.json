@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"아라",
-			"Ykhwong"
+			"Ykhwong",
+			"아라"
 		]
 	},
 	"loops-desc": "루프를 수행하는 것에 대한 파서 함수",

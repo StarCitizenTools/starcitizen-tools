@@ -5,7 +5,7 @@
 |type        = parser function
 |author      = Alexia E. Smith ([[User:Alexia E. Smith|Alexia E. Smith]]), Andrew Whitworth ([[User:Whiteknight|Whiteknight]]), Jim R. Wilson ([[User:Jimbojw|Jimbojw]]), and Mohammad Derakhshani ([[User:Mderakhs|Mderakhs]])
 |version     = 2.8.0
-|update      = 2018-07-16
+|update      = 2019-04-16
 |mediawiki   = 1.29+
 |php         = 7.0+
 |download    = {{TNT|GitlabDownload|HydraWiki/extensions|embedvideo}}
@@ -30,7 +30,7 @@ The '''EmbedVideo''' extension adds a parser function called <code>#ev</code> fo
 
 {{TNT|ExtensionInstall
  |registration=required
- |download-link=[https://gitlab.com/hydrawiki/extensions/EmbedVideo/archive/v2.8.0.zip Download]
+ |download-link=[https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/archive/v2.8.0/EmbedVideo-v2.8.0.zip Download]
  |custom-steps=* [[#Configuration|Configure as required]]
 }}
 
@@ -312,12 +312,6 @@ As of version 2.x, EmbedVideo supports embedding video content from the followin
 | <code>bambuser_channel</code>
 | Channels
 |-
-! [https://beam.pro/ Beam]
-| <code>beam</code>
-| RocketBear
-| <nowiki>https://beam.pro/RocketBear</nowiki>
-| Streams
-|-
 ! [http://www.bing.com/videos/ Bing]
 | <code>bing</code>
 | 31ncp9r7l
@@ -372,6 +366,12 @@ As of version 2.x, EmbedVideo supports embedding video content from the followin
 | <nowiki>http://www.funnyordie.com/videos/c61fb67ac9/to-catch-a-predator-elastic-heart-edition</nowiki>
 | 
 |-
+! [http://www.facebook.com/ Facebook]
+| <code>facebook</code>
+| 
+| <nowiki>https://www.facebook.com/Warcraft/videos/10155717024919034/</nowiki>
+| 
+|-
 ! [http://gfycat.com/ Gfycat]
 | <code>gfycat</code>
 | BruisedSilentAntarcticfurseal
@@ -402,6 +402,19 @@ As of version 2.x, EmbedVideo supports embedding video content from the followin
 | <nowiki>http://www.metacafe.com/watch/11404579/lan_party_far_cry_4/</nowiki>
 | 
 |-
+| [https://www.microsoftstream.com Microsoft Stream]
+| <code>microsoftstream</code>
+| 3aaec3c4-01b7-46e1-b2fb-1a9b1ee444f5
+| <nowiki>https://web.microsoftstream.com/video/3aaec3c4-01b7-46e1-b2fb-1a9b1ee444f5</nowiki>
+| Videos require authentication to Office 365 services to view
+|-
+! [http://www.mixer.com/ Mixer]
+| <code>mixer</code>
+| RocketBear
+| <nowiki>https://mixer.com/RocketBear</nowiki>
+| Beam and Mixer Streams
+| 
+|-
 ! [http://www.nicovideo.jp/ Nico Nico Video]
 | <code>nico</code>
 | sm24394325
@@ -419,6 +432,24 @@ As of version 2.x, EmbedVideo supports embedding video content from the followin
 | 
 | <nowiki>https://soundcloud.com/skrillex/skrillex-rick-ross-purple-lamborghini</nowiki>
 | SoundCloud requires the full URL.
+|-
+! [http://spotify.com/ Spotify]
+| <code>spotifyalbum</code>
+| 1EoDsNmgTLtmwe1BDAVxV5
+| <nowiki>https://open.spotify.com/album/1EoDsNmgTLtmwe1BDAVxV5</nowiki>
+| 
+|-
+! [http://spotify.com/ Spotify]
+| <code>spotifyartist</code>
+| 06HL4z0CvFAxyc27GXpf02
+| <nowiki>https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02</nowiki>
+| 
+|-
+! [http://spotify.com/ Spotify]
+| <code>spotifytrack</code>
+| 1EoDsNmgTLtmwe1BDAVxV5
+| <nowiki>https://open.spotify.com/track/72jCZdH0Lhg93z6Z4hBjgj</nowiki>
+| 
 |-
 ! [http://teachertube.com TeacherTube]
 | <code>teachertube</code>

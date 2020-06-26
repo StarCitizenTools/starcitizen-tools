@@ -2,11 +2,11 @@
 
 use MediaWiki\Logger\LoggerFactory;
 
-class HttpWithHeaders extends Http {
+class EDHttpWithHeaders extends Http {
 	/**
-	* @see Http::request()
-	* Only diffrence - $options variable an also have value 'headers', and would append to request before sending
-	**/
+	 * @see Http::request()
+	 * Only diffrence - $options variable an also have value 'headers', and would append to request before sending
+	 */
 	public static function request( $method, $url, $options = [], $caller = __METHOD__ ) {
 		wfDebug( "HTTP: $method: $url\n" );
 
@@ -20,9 +20,9 @@ class HttpWithHeaders extends Http {
 		}
 
 		$req = MWHttpRequest::factory( $url, $options, $caller );
-		if( isset( $options['headers'] ) ){
-			foreach ($options['headers'] as $headerName => $headerValue) {
-				$req->setHeader( $headerName, $headerValue);
+		if ( isset( $options['headers'] ) ) {
+			foreach ( $options['headers'] as $headerName => $headerValue ) {
+				$req->setHeader( $headerName, $headerValue );
 			}
 		}
 		$status = $req->execute();
@@ -37,6 +37,7 @@ class HttpWithHeaders extends Http {
 			return false;
 		}
 	}
+
 	/**
 	 * Simple wrapper for Http::request( 'POST' )
 	 * this is copy of Http::post, the only reason to redeclare it is becouse Http calls Http::request instead of self::request
@@ -50,7 +51,8 @@ class HttpWithHeaders extends Http {
 	public static function post( $url, $options = [], $caller = __METHOD__ ) {
 		return self::request( 'POST', $url, $options, $caller );
 	}
-		/**
+
+	/**
 	 * Simple wrapper for Http::request( 'GET' )
 	 * this is copy of Http::get, the only reason to redeclare it is becouse Http calls Http::request instead of self::request
 	 * @see Http::request()

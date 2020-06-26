@@ -133,10 +133,10 @@ class SchemaOrg implements GeneratorInterface {
 	}
 
 	/**
-	* Generate proper schema.org type in order to pass validation
-	*
-	* @return string
-	*/
+	 * Generate proper schema.org type in order to pass validation
+	 *
+	 * @return string
+	 */
 	private function getTypeMetadata() {
 		return $this->metadata['type'] ?? 'article';
 	}

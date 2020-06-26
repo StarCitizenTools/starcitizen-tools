@@ -11,6 +11,7 @@
 	"externaldata-ldap-unable-to-connect": "Indisponibbile a collegarse a $1",
 	"externaldata-xml-error": "Errore XML: $1 sus a linèe $2",
 	"externaldata-invalid-json": "Errore: JSON invalide.",
+	"externaldata-jsonpath-error": "Errore: Notazione JSONPath non valide.",
 	"externaldata-db-incomplete-information": "Errore: 'Mbormazione ingomblete pe stu ID d'u database.",
 	"externaldata-db-could-not-get-url": "Non ge pozze pigghià 'a URL apprisse $1 {{PLURAL:$1|prove}}.",
 	"externaldata-db-unknown-type": "Errore: Tipe de database scanusciute.",
