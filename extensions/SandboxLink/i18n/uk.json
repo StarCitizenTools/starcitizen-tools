@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Olion",
+			"Piramidion"
+		]
+	},
+	"sandboxlink-desc": "Додає посилання на особисту чернетку користувача в меню особистих інструментів",
+	"sandboxlink-subpage-name": "Чернетка",
+	"sandboxlink-portlet-label": "Чернетка",
+	"tooltip-pt-sandbox": "Ваша чернетка"
+}

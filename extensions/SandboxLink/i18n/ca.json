@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Matma Rex",
+			"Vriullop"
+		]
+	},
+	"sandboxlink-desc": "Afegeix un enllaç a la pàgina de proves de l'usuari en el menú d'eines personals",
+	"sandboxlink-subpage-name": "proves",
+	"sandboxlink-portlet-label": "Proves",
+	"tooltip-pt-sandbox": "La vostra pàgina de proves"
+}

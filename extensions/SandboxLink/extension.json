@@ -1,0 +1,30 @@
+{
+	"name": "SandboxLink",
+	"author": [
+		"Bartosz Dziewoński"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:SandboxLink",
+	"descriptionmsg": "sandboxlink-desc",
+	"license-name": "MIT",
+	"type": "other",
+	"MessagesDirs": {
+		"SandboxLink": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"SandboxLinkHooks": "SandboxLinkHooks.php"
+	},
+	"Hooks": {
+		"SkinPreloadExistence": [
+			"SandboxLinkHooks::onSkinPreloadExistence"
+		],
+		"PersonalUrls": [
+			"SandboxLinkHooks::onPersonalUrls"
+		]
+	},
+	"config": {
+		"SandboxLinkDisableAnon": true
+	},
+	"manifest_version": 1
+}

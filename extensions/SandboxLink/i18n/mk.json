@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"sandboxlink-desc": "Додава врска во личниот песочник на корисник до мени со лични алатки.",
+	"sandboxlink-subpage-name": "песочник",
+	"sandboxlink-portlet-label": "Песочник",
+	"tooltip-pt-sandbox": "Ваш песочник"
+}

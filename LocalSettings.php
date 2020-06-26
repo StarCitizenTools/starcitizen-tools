@@ -247,6 +247,7 @@ wfLoadExtension( 'NativeSvgHandler' );
 wfLoadExtension( 'CategoryTree' );
 wfLoadExtension( 'Disambiguator' );
 wfLoadExtension( 'DismissableSiteNotice' );
+wfLoadExtension( 'SandboxLink' );
 require_once "$IP/extensions/Translate/Translate.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 

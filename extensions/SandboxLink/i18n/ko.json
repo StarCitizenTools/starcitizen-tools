@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Matma Rex",
+			"IRTC1015",
+			"Bluemersen"
+		]
+	},
+	"sandboxlink-desc": "개인 도구 메뉴에 사용자의 개인 연습장 링크를 추가합니다",
+	"sandboxlink-subpage-name": "연습장",
+	"sandboxlink-portlet-label": "연습장",
+	"tooltip-pt-sandbox": "내 연습장"
+}

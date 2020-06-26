@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Matma Rex",
+			"Geraki"
+		]
+	},
+	"sandboxlink-desc": "Προσθέτει ένα σύνδεσμο προς το προσωπικό πρόχειρο του χρήστη, στο μενού προσωπικών εργαλείων",
+	"sandboxlink-subpage-name": "πρόχειρο",
+	"sandboxlink-portlet-label": "Το πρόχειρό μου",
+	"tooltip-pt-sandbox": "Το πρόχειρό σας"
+}

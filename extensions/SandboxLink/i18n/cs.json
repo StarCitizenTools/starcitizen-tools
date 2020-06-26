@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mormegil",
+			"Vojtěch Dostál"
+		]
+	},
+	"sandboxlink-desc": "Přidá odkaz na uživatelovo osobní pískoviště do nabídky osobních nástrojů",
+	"sandboxlink-subpage-name": "Pískoviště",
+	"sandboxlink-portlet-label": "Pískoviště",
+	"tooltip-pt-sandbox": "Vaše pískoviště"
+}

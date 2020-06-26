@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226",
+			"LNDDYL"
+		]
+	},
+	"sandboxlink-desc": "將連入使用者本人沙盒的連結加入到使用者工具列",
+	"sandboxlink-subpage-name": "沙盒",
+	"sandboxlink-portlet-label": "沙盒",
+	"tooltip-pt-sandbox": "您的沙盒"
+}
