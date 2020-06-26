@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pikne"
+		]
+	},
+	"disambig-desc": "Lisab [[Special:DisambiguationPages|täpsustuslehekülgede]] märgistamiseks sildi <code><nowiki>__DISAMBIG__</nowiki></code>.",
+	"disambiguationpages": "Täpsustusleheküljed",
+	"disambiguationpages-summary": "See on {{GRAMMAR:genitive|{{SITENAME}}}} täpsustuslehekülgede loend.<br />\nLehekülg arvatakse täpsustusleheküljeks, kui see sisaldab märgist <code><nowiki>__DISAMBIG__</nowiki></code> või vastavat rööpkuju.",
+	"disambiguationpagelinks": "Täpsustuslehekülgedele linkivad leheküljed",
+	"disambiguationpagelinks-summary": "Järgmised leheküljed sisaldavad vähemalt üht linki, mis viitab täpsustusleheküljele.\nVõimalik, et nad peaks viitama sobivamale lehekülje.<br />\nLehekülg arvatakse täpsustusleheküljeks, kui see sisaldab märgist <code><nowiki>__DISAMBIG__</nowiki></code> või vastavat rööpkuju.",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "See on täpsustuslehekülg"
+}

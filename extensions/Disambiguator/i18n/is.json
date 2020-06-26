@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Snævar"
+		]
+	},
+	"disambiguationpages": "Aðgreiningarsíður",
+	"disambiguationpages-summary": "Eftirfarandi er listi yfir allar aðgreiningarsíður á {{SITENAME}}.<br />\nSíða er meðhöndluð sem aðgreiningarsíða ef hún inniheldur tagið <code><nowiki>__DISAMBIG__</nowiki></code> (eða svipað samnefni).",
+	"disambiguationpagelinks": "Síður sem tengja á aðgreiningarsíður",
+	"disambiguationpagelinks-summary": "Eftirfarandi síður innihalda að minnsta kosti einn tengil á aðgreiningarsíðu.\nÞað gæti þurft að breyta tenglinum svo hann beini á rétta síðu. Síða er meðhöndluð sem aðgreiningarsíða ef tagið <code><nowiki>__DISAMBIG__</nowiki></code> (eða sambærilegt samheiti) er á síðunni.",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Þetta er aðgreiningarsíða"
+}

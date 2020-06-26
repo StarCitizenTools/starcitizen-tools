@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Les Meloures",
+			"Robby",
+			"Soued031"
+		]
+	},
+	"disambig-desc": "Setzt den Tag <code><nowiki>__DISAMBIG__</nowiki></code> dobäi fir [[Special:DisambiguationPages|Homonymie-Säiten]] ze markéieren",
+	"disambiguationpages": "Homonymie-Säiten",
+	"disambiguationpages-summary": "Hei ass d'Lëscht vun allen Homonymiesäiten op {{SITENAME}}.<br />\nEng Säit gëtt als Homonymiesäit betruecht wann op der Säit den Tag<code><nowiki>__DISAMBIG__</nowiki></code> (oder en equivalenten Alias) drop steet.",
+	"disambiguationpagelinks": "Säiten déi op Homonymiesäite linken",
+	"disambiguationpagelinks-summary": "Op dëse Säiten ass mindestens ee Link op eng Homonymie Säit.\nDéi sollten op eng Säit déi besser passt verlinkt ginn.<br />\nEng Säit gëtt als Homonynie-Säit behandelt wann den Tag <code><nowiki>__DISAMBIG__</nowiki></code> (oder en equivalenten Alias) dran ass.",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Dëst ass eng Homonymie-Säit"
+}

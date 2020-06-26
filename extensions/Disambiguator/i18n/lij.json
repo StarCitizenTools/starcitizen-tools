@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Giromin Cangiaxo"
+		]
+	},
+	"disambig-desc": "O l'azonze o tag <code><nowiki>__DISAMBIG__</nowiki></code> pe marcâ e [[Special:DisambiguationPages|pagine de disambiguaçion]].",
+	"disambiguationpages": "Paggine de disambiguaçion",
+	"disambiguationpages-summary": "Chì aproeuvo l'è riportou un elenco de tutte e paggine de disambiguaçion insce {{SITENAME}}.<br />\nUna paggina a l'è consciderâ comme 'na paggina de disambiguaçion s'a conten o tag <code><nowiki>__DISAMBIG__</nowiki></code> (ò un alias equivalente).",
+	"disambiguationpagelinks": "Paggine inganciæ a de paggine de disambiguaçion",
+	"disambiguationpagelinks-summary": "E paggine riportæ chì aprœuvo contegnan a-o manco un ingancio a 'na paggina de disambiguaçion.\nTi poriesci inganciâle a 'na paggina ciu apropiâ.<br />\nUna paggina a l'è consciderâ de disambiguaçion s'a conten o tag <code><nowiki>__DISAMBIG__</nowiki></code> (ò un alias equivalente).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Questa a l'è una paggina d'omonimia"
+}

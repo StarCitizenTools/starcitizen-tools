@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minisarm"
+		]
+	},
+	"disambig-desc": "Adaugă eticheta <code><nowiki>__DISAMBIG__</nowiki></code> pentru a marca [[Special:DisambiguationPages|paginile de dezambiguizare]]",
+	"disambiguationpages": "Pagini de dezambiguizare",
+	"disambiguationpages-summary": "Următoarea este o listă a tuturor paginilor de dezambiguizare de la {{SITENAME}}.<br />\nO pagină este socotită drept pagină de dezambiguizare dacă conține eticheta <code><nowiki>__DISAMBIG__</nowiki></code> (sau un alias echivalent).",
+	"disambiguationpagelinks": "Pagini care trimit către pagini de dezambiguizare",
+	"disambiguationpagelinks-summary": "Următoarele pagini conțin cel puțin o legătură către o pagină de dezambiguizare.\nAr putea fi necesar ca, în schimb, acestea să conțină legături către pagini mai potrivite.<br />\nO pagină este socotită drept pagină de dezambiguizare dacă conține eticheta <code><nowiki>__DISAMBIG__</nowiki></code> (sau un alias echivalent).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Aceasta este o pagină de dezambiguizare"
+}

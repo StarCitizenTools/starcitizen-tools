@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Njardarlogar"
+		]
+	},
+	"disambig-desc": "Introduserer merket <code><nowiki>__DISAMBIG__</nowiki></code> som merkjer [[Special:DisambiguationPages|fleirtydingssider]] .",
+	"disambiguationpages": "Fleirtydingssider",
+	"disambiguationpages-summary": "Dette er ei liste over alle fleirtydingssidene på {{SITENAME}}.<br />\nEi side vert rekna som ei fleirtydingsside om ho inneheld merket <code><nowiki>__DISAMBIG__</nowiki></code> (eller eit liketydande merke)",
+	"disambiguationpagelinks": "Sider som lenkjar til fleirtydingssider",
+	"disambiguationpagelinks-summary": "Desse sidene inneheld minst éi lenkje til ei fleirtydingsside. Det kan vera at dei bør lenkja til ei meir passande side i staden.<br />\nEi side vert rekna som ei fleirtydingsside om ho inneheld merket <code><nowiki>__DISAMBIG__</nowiki></code> (eller eit liketydande merke)",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Dette er ei fleirtydingsside"
+}

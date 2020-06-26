@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Toliño",
+			"Vivaelcelta"
+		]
+	},
+	"disambig-desc": "Engade a etiqueta <code><nowiki>__DISAMBIG__</nowiki></code> para marcar as [[Special:DisambiguationPages|páxinas de homónimos]].",
+	"disambiguationpages": "Páxinas de homónimos",
+	"disambiguationpages-summary": "A seguinte é unha lista de todas as páxinas de homónimos de {{SITENAME}}.<br />\nUnha páxina considérase de homónimos se contén a etiqueta <code><nowiki>__DISAMBIG__</nowiki></code> (ou un pseudónimo equivalente).",
+	"disambiguationpagelinks": "Páxinas que ligan con páxinas de homónimos",
+	"disambiguationpagelinks-summary": "As seguintes páxinas conteñen, polo menos, unha ligazón a unha páxina de homónimos.\nSe cadra, deberían ligar cunha páxina máis axeitada.<br />\nUnha páxina considérase de homónimos se contén a etiqueta <code><nowiki>__DISAMBIG__</nowiki></code> (ou un pseudónimo equivalente).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Esta é unha páxina de homónimos"
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu"
+		]
+	},
+	"disambig-desc": "Amiesta la etiqueta <code><nowiki>__DISAMBIG__</nowiki></code> pa marcar les [[Special:DisambiguationPages|páxines de dixebra]].",
+	"disambiguationpages": "Páxines de dixebra",
+	"disambiguationpages-summary": "La siguiente ye una llista de toles páxines de dixebra de {{SITENAME}}.<br />\nUna páxina tratase como páxina de dixebra si contien la etiqueta <code><nowiki>__DISAMBIG__</nowiki></code> (o un alcuñu equivaliente).",
+	"disambiguationpagelinks": "Páxines qu'enllacen con páxines de dixebra",
+	"disambiguationpagelinks-summary": "Les siguientes páxines contienen, polo menos, un enllaz a una páxina de dixebra.\nSeique, necesiten enllazar con una páxina más axeitada.<br />\nUna páxina tratase como de dixebra si contien la etiqueta <code><nowiki>__DISAMBIG__</nowiki></code> (o un alcuñu equivaliente).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Esta ye una páxina de dixebra"
+}

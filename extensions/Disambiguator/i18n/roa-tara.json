@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"disambig-desc": "Aggiugne 'u tag <code><nowiki>__DISAMBIG__</nowiki></code> pe signà le [[Special:DisambiguationPages|pàggende de disambbiguazione]].",
+	"disambiguationpages": "Pàggene de disambbiguazione",
+	"disambiguationpages-summary": "'u seguende jè 'n'elenghe de tutte le pàggene de disambbiguazione de {{SITENAME}}.<br />\n'Na pàgene jè trattate cumme 'na pàgene de disambbiguazione ce 'a pàgene tène 'u tag <code><nowiki>__DISAMBIG__</nowiki></code> (o une equivalende).",
+	"disambiguationpagelinks": "Pàggene collegate a le pàggene de disambbiguazione",
+	"disambiguationpagelinks-summary": "Le pàggene seguende tènene almene 'na pàgene de disambbiguazione.\nLore ponne avè abbesogne de collegarse a cchiù pàggene appropriate.<br />\n'Na pàgene jè trattate cumme a 'na pàgene de disambbiguazione ce 'a pàgene tène 'u tag <code><nowiki>__DISAMBIG__</nowiki></code> (o 'nu nome equivalende).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Queste jè 'na pàgene de disambiguazzione"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80",
+			"Guycn2",
+			"ערן"
+		]
+	},
+	"disambig-desc": "הוספת התג <code><nowiki>__DISAMBIG__</nowiki></code> כדי לסמן [[Special:DisambiguationPages|דפי פירושונים]]",
+	"disambiguationpages": "דפי פירושונים",
+	"disambiguationpages-summary": "זוהי רשימה של כל דפי הפירושונים ב{{grammar:תחילית|{{SITENAME}}}}.<br />\nדף מוגדר כדף פירושונים אם הוא מכיל את התג <code><nowiki>__DISAMBIG__</nowiki></code>.",
+	"disambiguationpagelinks": "דפים המקשרים לדפי פירושונים",
+	"disambiguationpagelinks-summary": "הדפים הבאים מכילים לפחות קישור אחד לדף פירושונים.\nלרוב רצוי לתקן את הקישור לדף עם הפירוש המתאים.<br />\nדף מוגדר כדף פירושונים הם הוא מכיל את התג <code><nowiki>__DISAMBIG__</nowiki></code>.",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "זהו דף פירושונים"
+}

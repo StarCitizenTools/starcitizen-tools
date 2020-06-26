@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Christian List",
+			"Thomsen"
+		]
+	},
+	"disambig-desc": "Tilføjer tagget <code><nowiki>__DISAMBIG__</nowiki></code> til at markere [[Special:DisambiguationPages|flertydige sider]]",
+	"disambiguationpages": "Flertydige sider",
+	"disambiguationpages-summary": "Følgende er en liste over alle flertydige sider på {{SITENAME}}.<br />\nEn side behandles som en flertydig side, hvis den indeholder tagget <code><nowiki>__DISAMBIG__</nowiki></code> (eller et tilsvarende alias).",
+	"disambiguationpagelinks": "Sider, der henviser til flertydige titler",
+	"disambiguationpagelinks-summary": "De følgende sider indeholder mindst ét link til en flertydig side.\nDe muligvis er nødt til at linke til en mere passende side i stedet for.<br />\nEn side behandles som en flertydig side, hvis den indeholder tagget <code><nowiki>__DISAMBIG__</nowiki></code> (eller et tilsvarende alias).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Dette er en flertydig side"
+}

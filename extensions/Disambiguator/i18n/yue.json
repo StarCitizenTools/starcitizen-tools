@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ktchankt"
+		]
+	},
+	"disambig-desc": "加 <code><nowiki>__DISAMBIG__</nowiki></code> 標籤去標示[[Special:DisambiguationPages|搞清楚版]]",
+	"disambiguationpages": "搞清楚版",
+	"disambiguationpages-summary": "以面係 {{SITENAME}} 入面所有搞清楚版嘅一覽。<br />\n逢親版面有 <code><nowiki>__DISAMBIG__</nowiki></code> (或者類似) 嘅標籤都算係搞清楚版。",
+	"disambiguationpagelinks": "連去搞清楚版嘅版面",
+	"disambiguationpagelinks-summary": "下面嘅版面起碼有一個連去搞清楚版嘅連結。\n呢啲連結可能需要連到更合適嘅版面。<br />\n逢親版面有 <code><nowiki>__DISAMBIG__</nowiki></code> (或者類似) 嘅標籤都算係搞清楚版。",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "呢個係搞清楚版"
+}

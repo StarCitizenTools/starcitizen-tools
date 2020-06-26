@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Justincheng12345",
+			"Simon Shek",
+			"LNDDYL",
+			"Cwlin0416",
+			"Wwycheuk"
+		]
+	},
+	"disambig-desc": "加入 <code><nowiki>__DISAMBIG__</nowiki></code> 標籤以用來標示[[Special:DisambiguationPages|消歧義頁面]]",
+	"disambiguationpages": "消歧義頁面",
+	"disambiguationpages-summary": "以下為 {{SITENAME}} 中所有的消歧義頁面清單。<br />\n頁面內容含有 <code><nowiki>__DISAMBIG__</nowiki></code> (或別名) 標籤會被作為消歧義頁面。",
+	"disambiguationpagelinks": "連結到消歧義頁的頁面",
+	"disambiguationpagelinks-summary": "下列頁面含有一個以上的連結到消歧義頁面。\n這些頁面可能需要連結到更適合的頁面。<br />\n頁面內容含有 <code><nowiki>__DISAMBIG__</nowiki></code> (或別名) 標籤會被作為消歧義頁面。",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "這是消歧義頁面"
+}

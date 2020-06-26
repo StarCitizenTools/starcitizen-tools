@@ -1,0 +1,23 @@
+!! article
+Disambig
+!! text
+This is a disambig page.
+__DISAMBIG__
+!! endarticle
+
+!! article
+Normal
+!! text
+This is a normal page.
+!! endarticle
+
+!! test
+Link to disambig and non-disambig page
+!! options
+disabled
+!! input
+I am linking to [[Disambig]] and [[Normal]].
+!! result
+<p>I am linking to <a href="/wiki/Disambig" class="mw-disambig" title="Disambig">Disambig</a> and <a href="/wiki/Normal" title="Normal">Normal</a>.
+</p>
+!! end
