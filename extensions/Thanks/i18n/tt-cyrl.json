@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ilnur efende",
+			"Derslek",
+			"Ильнар"
+		]
+	},
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|рәхмәт әйтү}}}}",
+	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|рәхмәт әйтелде}}}}",
+	"thanks-thank-tooltip": "{{GENDER:$2|Кулланучыга}} рәхмәт хаты {{GENDER:$1|җибәрү}}",
+	"thanks-confirmation2": "Әлеге төзәтмә өчен рәхмәт {{GENDER:$1|әйтергәме}}?",
+	"thanks": "Рәхмәт әйтү",
+	"echo-category-title-edit-thank": "Рәхмәтләр",
+	"notification-header-rev-thank": "$1 {{GENDER:$4|сезгә}} <strong>$3</strong> битендә ясаган кертемегез өчен {{GENDER:$2|рәхмәт әйтте}}."
+}

@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bishnu Saikia",
+			"Gitartha.bordoloi",
+			"Dibya Dutta"
+		]
+	},
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|ধন্যবাদ}}}}",
+	"thanks-thank-tooltip": "এই {{GENDER:$2|সদস্যলৈ}} এটা ধন্যবাদ বাৰ্তা {{GENDER:$1|পঠিয়াওক}}",
+	"thanks-confirmation2": "এই সম্পাদনাৰ বাবে ৰাজহুৱাকৈ ধন্যবাদ {{GENDER:$1|জনাব}}?",
+	"notification-link-text-view-post": "মন্তব্য দেখুৱাওক",
+	"notification-flow-thanks-post-link": "আপোনাৰ মন্তব্য"
+}

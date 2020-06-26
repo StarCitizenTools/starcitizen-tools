@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Giromin Cangiaxo"
+		]
+	},
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|ringrassia}}}}",
+	"thanks-thank-tooltip": "{{GENDER:$1|Invia}} una notiffica de ringraçiamento a {{GENDER:$2|questo|questa}} utente"
+}

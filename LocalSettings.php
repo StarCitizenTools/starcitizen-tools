@@ -248,6 +248,7 @@ wfLoadExtension( 'CategoryTree' );
 wfLoadExtension( 'Disambiguator' );
 wfLoadExtension( 'DismissableSiteNotice' );
 wfLoadExtension( 'SandboxLink' );
+wfLoadExtension( 'Thanks' );
 require_once "$IP/extensions/Translate/Translate.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
