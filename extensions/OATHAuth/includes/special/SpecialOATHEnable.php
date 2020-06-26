@@ -86,6 +86,14 @@ class SpecialOATHEnable extends FormSpecialPage {
 	}
 
 	/**
+	 * @param string $par
+	 */
+	public function execute( $par ) {
+		$this->getOutput()->disallowUserJs();
+		parent::execute( $par );
+	}
+
+	/**
 	 * @return array[]
 	 */
 	protected function getFormFields() {

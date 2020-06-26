@@ -230,6 +230,16 @@ class SpecialContributions extends IncludableSpecialPage {
 			} elseif ( !$pager->getNumRows() ) {
 				$out->addWikiMsg( 'nocontribs', $target );
 			} else {
+				// @todo We just want a wiki ID here, not a "DB domain", but
+				// current status of MediaWiki conflates the two. See T235955.
+				$poolKey = WikiMap::getCurrentWikiDbDomain() . ':SpecialContributions:';
+				if ( $this->getUser()->isAnon() ) {
+					$poolKey .= 'a:' . $this->getUser()->getName();
+				} else {
+					$poolKey .= 'u:' . $this->getUser()->getId();
+				}
+				$work = new PoolCounterWorkViaCallback( 'SpecialContributions', $poolKey, [
+					'doWork' => function () use ( $pager, $out ) {
 				# Show a message about replica DB lag, if applicable
 				$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 				$lag = $lb->safeGetLag( $pager->getDatabase() );
@@ -244,6 +254,15 @@ class SpecialContributions extends IncludableSpecialPage {
 						'<p>' . $pager->getNavigationBar() . '</p>';
 				}
 				$out->addHTML( $output );
+					},
+					'error' => function () use ( $out ) {
+						$msg = $this->getUser()->isAnon()
+							? 'sp-contributions-concurrency-ip'
+							: 'sp-contributions-concurrency-user';
+						$out->wrapWikiMsg( "<div class='errorbox'>\n$1\n</div>", $msg );
+					}
+				] );
+				$work->execute();
 			}
 
 			$out->preventClickjacking( $pager->getPreventClickjacking() );
