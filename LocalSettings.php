@@ -142,6 +142,11 @@ $wgRightsUrl = "https://creativecommons.org/licenses/by-sa/4.0/";
 $wgRightsText = "Creative Commons Attribution-ShareAlike";
 $wgRightsIcon = "$wgResourceBasePath/resources/assets/licenses/cc-by-sa.png";
 
+# Enable new filters for RC
+# Depreciate in > MW 1.32
+$wgStructuredChangeFiltersShowPreference = true;
+$wgStructuredChangeFiltersOnWatchlist = true;
+
 # Path to the GNU diff3 utility. Used for conflict resolution.
 $wgDiff3 = "/usr/bin/diff3";
 
