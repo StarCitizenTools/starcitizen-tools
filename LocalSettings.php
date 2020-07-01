@@ -239,6 +239,7 @@ wfLoadExtension( 'TemplateData' );
 wfLoadExtension( 'PageImages' );
 #wfLoadExtension( 'RelatedArticles' );
 wfLoadExtension( 'WikiEditor' );
+wfLoadExtension( 'CodeEditor' );
 wfLoadExtension( 'VisualEditor' );
 wfLoadExtension( 'Scribunto' );
 wfLoadExtension( 'EventLogging' );
@@ -425,6 +426,9 @@ $wgVisualEditorEnableWikitext = true;
 $wgVisualEditorEnableDiffPage = true;
 $wgVisualEditorUseSingleEditTab = true;
 $wgVisualEditorEnableVisualSectionEditing = true;
+
+#Code Editor
+$wgDefaultUserOptions['usebetatoolbar'] = 1; // user option provided by WikiEditor extension
 
 #RelatedArticles 
 # $wgRelatedArticlesFooterWhitelistedSkins = [ 'citizen', 'vector', 'timeless' ];
