@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"GunChleoc"
+		]
+	},
+	"disambig-desc": "Cuiridh seo an taga <code><nowiki>__DISAMBIG__</nowiki></code> ris gus [[Special:DisambiguationPages|duilleagan na ioma-fhillteachd]] a chomharradh",
+	"disambiguationpages": "Duilleagan na ioma-fhillteachd",
+	"disambiguationpages-summary": "Seo liosta shlàn dhe na duilleagan na ioma-fhillteachd air {{SITENAME}}.<br />\nThèid dèiligeadh ri duilleag 'na duilleag na ioma-fhillteachd ma tha an taga <code><nowiki>__DISAMBIG__</nowiki></code> (no ainm-brèige co-ionnann) na 'broinn.",
+	"disambiguationpagelinks": "Duilleagan a nì ceangal ri duilleag na ioma-fhillteachd",
+	"disambiguationpagelinks-summary": "Tha ceangal no dhà gu duilleag na ioma-fhillteachd sna duilleagan a leanas.\n'S dòcha gum bu chòir iad ceangal gu duilleag as iomchaidh 'na àite.<br />\nThèid dèiligeadh ri duilleag 'na duilleag na ioma-fhillteachd ma tha an taga <code><nowiki>__DISAMBIG__</nowiki></code> (no ainm-brèige co-ionnann) na 'broinn.",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Seo duilleag na ioma-fhillteachd"
+}

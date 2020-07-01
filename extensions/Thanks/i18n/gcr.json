@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"LeGuyanaisPure"
+		]
+	},
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|grémésyé}}}}",
+	"thanks-thank-tooltip": "{{GENDER:$1|Voyé}} roun notifikasyon di grémésiman à {{GENDER:$2|sa itilizatò|sa itilizatris}}"
+}

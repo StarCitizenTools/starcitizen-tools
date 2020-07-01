@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"NehalDaveND"
+		]
+	},
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|कृतज्ञता पाठ्यताम्}}}}",
+	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|कृतज्ञता पाठिता}}}}",
+	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|कृतज्ञता पाठिता}}}}",
+	"thanks-thank-tooltip": "एतस्मै {{GENDER:$2|सदस्याय}} कृतज्ञतां {{GENDER:$1|पाठ्यताम्}}।",
+	"thanks-confirmation2": "एतस्मै योजकाय कृतज्ञतां {{GENDER:$1|पाठयितुम्}} इच्छति ?",
+	"thanks": "कृतज्ञता पाठ्यताम्",
+	"echo-category-title-edit-thank": "कृतज्ञता",
+	"notification-thanks-diff-link": "भवतः/भवत्याः सम्पादनम्",
+	"log-name-thanks": "कृतज्ञतायाः संरक्षितावलिः",
+	"logentry-thanks-thank": "$1 इत्यनेन {{GENDER:$4|$3}} इत्यस्य कृते {{GENDER:$2|कृतज्ञता पाठिता ।}}",
+	"log-show-hide-thanks": "$1 इत्यस्य कृतज्ञतायाः संरक्षितावलिः",
+	"notification-link-text-view-post": "टिप्पणी दृश्यताम्",
+	"notification-flow-thanks-post-link": "भवतः/भवत्याः टिप्पणी"
+}

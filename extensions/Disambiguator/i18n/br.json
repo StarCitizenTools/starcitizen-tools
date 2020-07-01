@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Y-M D",
+			"Fulup"
+		]
+	},
+	"disambig-desc": "Ouzhpennañ a ra an dikedenn <code><nowiki>__DISAMBIG__</nowiki></code> evit merkañ [[Special:DisambiguationPages|ar pajennoù diforc'hañ]].",
+	"disambiguationpages": "Pajennoù disheñvelout",
+	"disambiguationpages-summary": "Da heul ez eus ur roll eus an holl bajennoù diforc'hañ war {{SITENAME}}.<br />\nUr statud pajenn diforc'hañ zo gant ar pajennoù enno an dikedenn <code><nowiki>__DISAMBIG__</nowiki></code> (pe un alias kevatal).",
+	"disambiguationpagelinks": "Pajennoù enno liammoù war-zu pajennoù disheñvelout",
+	"disambiguationpagelinks-summary": "Ar pajennoù da-heul zo enno da nebeutañ ul liamm war-zu ur bajenn diforc'hañ. Marteze o defe ezhomm da vezañ liammet ouzh ur bajenn all a zere gwelloc'h.<br />\nSellet a reer ouzh ur bajenn evel ur bajenn diforc'hañ m'emañ enni an dikedenn <code><nowiki>__DISAMBIG__</nowiki></code> (pe un alias kevatal)."
+}

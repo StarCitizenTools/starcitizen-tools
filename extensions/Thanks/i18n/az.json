@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Interfase",
+			"Khan27",
+			"Dağlı95",
+			"Wertuose",
+			"Serkanland",
+			"Archaeodontosaurus"
+		]
+	},
+	"thanks-desc": "İstifadəçilərin redaktələrinə, şərhlərinə və s. görə minnətdarlıq üçün keçidləri əlavə edir",
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|təşəkkür}}}}",
+	"thanks-thanked": "{{GENDER:$1|təşəkkür edildi}}",
+	"thanks-button-thank": "{{GENDER:$1|Təşəkkür}}",
+	"thanks-button-thanked": "{{GENDER:$1|Təşəkkür edildi}}",
+	"thanks-error-undefined": "Təşəkkür bildirişinin göndərilməsi alınmadı. Xahiş edirik, yenidən cəhd edin.",
+	"thanks-thank-tooltip": "Bu {{GENDER:$2|istifadəçiyə}} təşəkkür bildirişi {{GENDER:$1|göndər}}.",
+	"thanks-confirmation2": "Bu dəyişiklik üçün təşəkkür göndərilsin?",
+	"thanks-thanked-notice": "$1 etdiyi dəyişikliyə görə sizin təşəkkürünüzü aldı.",
+	"thanks": "Təşəkkür et",
+	"notification-thanks-diff-link": "redaktəniz",
+	"notification-header-rev-thank": "$1 '''$3''' səhifəsindəki redaktənizə görə {{GENDER:$4|sizə}} {{GENDER:$2|təşəkkür etdi}}.",
+	"logentry-thanks-thank": "$1 {{GENDER:$2}}, {{GENDER:$4|$3}} istifadəçisinə təşəkkür etdi."
+}

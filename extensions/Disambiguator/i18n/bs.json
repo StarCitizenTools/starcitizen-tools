@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Srdjan m"
+		]
+	},
+	"disambiguationpages": "Čvor-stranice",
+	"disambiguationpages-summary": "Sljedeći spisak sadrži sve čvorove na {{GRAMMAR:dativ|{{SITENAME}}}}.<br />\nStranica će se označiti kao čvor ako sadrži oznaku <code><nowiki>__DISAMBIG__</nowiki></code> (ili sličan pseudonim).",
+	"disambiguationpagelinks": "Stranice koje sadrže link do čvorova",
+	"disambiguationpagelinks-summary": "Sljedeći spisak sadrži stranice koje u sebi sadrži bar jedan link na čvor.\nMožda bi trebale upućivati na tačnu stranicu.<br />\nStranica će se označiti kao čvor ako sadrži oznaku <code><nowiki>__DISAMBIG__</nowiki></code> (ili sličan pseudonim).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Ovo je čvor-stranica"
+}

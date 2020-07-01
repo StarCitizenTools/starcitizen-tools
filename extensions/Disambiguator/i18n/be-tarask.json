@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wizardist",
+			"Red Winged Duck"
+		]
+	},
+	"disambig-desc": "Дадае тэг <code><nowiki>__DISAMBIG__</nowiki></code>, каб пазначыць [[Special:DisambiguationPages|старонкі-неадназначнасьці]]",
+	"disambiguationpages": "Старонкі-неадназначнасьці",
+	"disambiguationpages-summary": "Ніжэй пададзены сьпіс усіх старонак-неадназначнасьцяў у {{GRAMMAR:месны|{{SITENAME}}}}.<br />\nСтаронка лічыцца неадназначнай, калі яна ўтрымлівае тэг <code><nowiki>__DISAMBIG__</nowiki></code> (або адпаведны сынонім).",
+	"disambiguationpagelinks": "Старонкі, якія спасылаюцца на старонкі-неадназначнасьці",
+	"disambiguationpagelinks-summary": "Наступныя старонкі ўтрымліваюць прынамсі адну спасылку на старонку-неадназначнасьць.\nМагчыма, патрабуецца ўдакладненьне спасылак.<br />\nСтаронка лічыцца неадназначнай, калі яна ўтрымлівае тэг <code><nowiki>__DISAMBIG__</nowiki></code> (або адпаведны сынонім).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Гэта старонка разьвязаньня неадназначнасьцяў"
+}

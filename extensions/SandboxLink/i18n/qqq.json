@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby",
+			"Shirayuki",
+			"TTO"
+		]
+	},
+	"sandboxlink-desc": "{{desc|name=SandboxLink|url=https://www.mediawiki.org/wiki/Extension:SandboxLink}}",
+	"sandboxlink-subpage-name": "Name of the subpage where user's sandbox will be created. For example, 'sandbox' means that the link in personal tools menu will point to \"User:Example/sandbox\".\n\n'''Changing this message in established languages will break links!'''\n\n{{Identical|Sandbox}}",
+	"sandboxlink-portlet-label": "Label of the link in personal tools menu.\n\nThe tooltip for the link is {{msg-mw|Tooltip-pt-sandbox}}.\n{{Identical|Sandbox}}",
+	"tooltip-pt-sandbox": "Tooltip of the link in personal tools menu.",
+	"sandboxlink-editintro-pagename": "{{ignore}}\nTitle of the page that will be used as the 'editintro' parameter in the link in personal tools menu. '-' means the parameter won't be added.",
+	"sandboxlink-preload-pagename": "{{ignore}}\nTitle of the page that will be used as the 'preload' parameter in the link in personal tools menu. '-' means the parameter won't be added."
+}

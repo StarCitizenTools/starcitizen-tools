@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Азат Хәлилов",
+			"Янмурза Баки",
+			"Sagan"
+		]
+	},
+	"disambig-desc": "[[Special:DisambiguationPages|Мәғлүмәтһеҙлектәргә рөхсәт биреү битен]] билдәләү өсөн <code><nowiki>__DISAMBIG__</nowiki></code> тег өҫтәй",
+	"disambiguationpages": "Мәғәнәләре тура килмәғәндәрҙе рөхсәт итеү бите",
+	"disambiguationpages-summary": "{{SITENAME}}.<br />-гә аҫта, мәғәнәләре тура килмәгәндәрҙе рөхсәт итеү бите исемлектәре күрһәтелгән. \n<code><nowiki>__DISAMBIG__</nowiki></code> тегы булһа, бит мәғәнәләре тура килмәгәндәрҙе рөхсәт итеү бите тип ҡарала (йәки оҡшаш ҡушаматтар).",
+	"disambiguationpagelinks": "Мәғәнәләре тура килмәгәндәрҙе рөхсәт итеү битенә һылтанған биттәр",
+	"disambiguationpagelinks-summary": "Киләһе биттә күп мәғәнәлеккә һылтанма бар. Башҡа яраҡлы биткә һылтанма һоралыуы мөмкин<br />\n<code><nowiki>__DISAMBIG__</nowiki></code>  коды булһа, бит күп төрлөлөкте рөхсәт итеү бите итеп ҡарала (йәки эквивалент псевдоним).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Был бит мәғәнәһе тура килмәгәндәрҙе рөхсәт итеү бите"
+}

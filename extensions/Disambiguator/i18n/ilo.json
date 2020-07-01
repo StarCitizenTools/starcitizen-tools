@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lam-ang"
+		]
+	},
+	"disambig-desc": "Agnayon ti etiketa ti <code><nowiki>__DISAMBIG__</nowiki></code> tapno mamarkaan [[Special:DisambiguationPages|dagiti panangilawlawag a panid]]",
+	"disambiguationpages": "Panangilawlawag a pampanid",
+	"disambiguationpages-summary": "Ti sumaganad ket listaan iti amin a panangilawlawag a pampanid iti {{SITENAME}}.<br />\nTi panid ket matrato a kas panangilawlawag a panid no aglaon ti etiketa ti <code><nowiki>__DISAMBIG__</nowiki></code> (wenno maysa a kapadpada a parbo a nagan).",
+	"disambiguationpagelinks": "Dagiti panid a nakasilpo kadagiti panangilawlawag a panid",
+	"disambiguationpagelinks-summary": "Dagiti sumaganad a panid ket aglaon ti saan a basbassit ngem maysa a silpo iti panangilawlawag a panid.\nMabalin a dagitoy ket imbes a nasken a maisilpo iti nasaysayaat a panid.<br />\nTi panid ket matrato a kas panangilawlawag a panid no aglaon ti etiketa ti <code><nowiki>__DISAMBIG__</nowiki></code> (wenno maysa a kapadpada a parbo a nagan).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Daytoy ket panangilawlawag a panid"
+}

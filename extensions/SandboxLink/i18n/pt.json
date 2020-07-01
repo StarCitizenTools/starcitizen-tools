@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Vitorvicentevalente",
+			"Hamilton Abreu"
+		]
+	},
+	"sandboxlink-desc": "Adiciona uma hiperligação para a página pessoal de testes do utilizador ao menu de ferramentas",
+	"sandboxlink-subpage-name": "Testes",
+	"sandboxlink-portlet-label": "Testes",
+	"tooltip-pt-sandbox": "A sua página de testes"
+}

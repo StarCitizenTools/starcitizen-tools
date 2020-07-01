@@ -1,0 +1,212 @@
+{
+	"name": "Thanks",
+	"version": "1.2.0",
+	"author": [
+		"Ryan Kaldari",
+		"Benjamin Chen",
+		"Wctaiwan"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:Thanks",
+	"descriptionmsg": "thanks-desc",
+	"license-name": "MIT",
+	"type": "other",
+	"requires": {
+		"extensions": {
+			"Echo": "*"
+		}
+	},
+	"DefaultUserOptions": {
+		"echo-subscriptions-web-edit-thank": true,
+		"echo-subscriptions-email-edit-thank": false
+	},
+	"RateLimits": {
+		"thanks-notification": {
+			"user": [
+				10,
+				60
+			]
+		}
+	},
+	"SpecialPages": {
+		"Thanks": "SpecialThanks"
+	},
+	"LogTypes": [
+		"thanks"
+	],
+	"FilterLogTypes": {
+		"thanks": true
+	},
+	"LogActionsHandlers": {
+		"thanks/*": "ThanksLogFormatter"
+	},
+	"APIModules": {
+		"thank": "ApiCoreThank"
+	},
+	"MessagesDirs": {
+		"Thanks": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"ThanksAlias": "Thanks.alias.php"
+	},
+	"AutoloadClasses": {
+		"ThanksHooks": "includes/ThanksHooks.php",
+		"EchoCoreThanksPresentationModel": "includes/EchoCoreThanksPresentationModel.php",
+		"EchoFlowThanksPresentationModel": "includes/EchoFlowThanksPresentationModel.php",
+		"ApiThank": "includes/ApiThank.php",
+		"ApiCoreThank": "includes/ApiCoreThank.php",
+		"ApiFlowThank": "includes/ApiFlowThank.php",
+		"ThanksLogFormatter": "includes/ThanksLogFormatter.php",
+		"SpecialThanks": "includes/SpecialThanks.php"
+	},
+	"ResourceModules": {
+		"ext.thanks": {
+			"scripts": [
+				"ext.thanks.thank.js"
+			],
+			"dependencies": [
+				"jquery.cookie",
+				"mediawiki.api"
+			]
+		},
+		"ext.thanks.corethank": {
+			"scripts": [
+				"ext.thanks.corethank.js"
+			],
+			"messages": [
+				"thanks-thanked",
+				"thanks-error-undefined",
+				"thanks-error-invalidrevision",
+				"thanks-error-ratelimited",
+				"thanks-error-revdeleted",
+				"thanks-confirmation2",
+				"thanks-thank-tooltip-no",
+				"thanks-thank-tooltip-yes",
+				"thanks-button-thank",
+				"cancel"
+			],
+			"dependencies": [
+				"oojs-ui-core",
+				"oojs-ui-windows",
+				"mediawiki.jqueryMsg",
+				"mediawiki.api",
+				"jquery.confirmable",
+				"jquery.cookie",
+				"ext.thanks"
+			]
+		},
+		"ext.thanks.mobilediff": {
+			"scripts": [
+				"ext.thanks.mobilediff.js"
+			],
+			"messages": [
+				"thanks-button-thank",
+				"thanks-button-thanked",
+				"thanks-error-invalidrevision",
+				"thanks-error-ratelimited",
+				"thanks-error-undefined",
+				"thanks-thanked-notice"
+			],
+			"dependencies": [
+				"mediawiki.api",
+				"mediawiki.jqueryMsg",
+				"mediawiki.notify"
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.thanks.jquery.findWithParent": {
+			"scripts": [
+				"jquery.findWithParent.js"
+			]
+		},
+		"ext.thanks.flowthank": {
+			"scripts": [
+				"ext.thanks.flowthank.js"
+			],
+			"messages": [
+				"thanks-button-thanked",
+				"thanks-error-undefined",
+				"thanks-error-ratelimited"
+			],
+			"dependencies": [
+				"oojs-ui-core",
+				"oojs-ui-windows",
+				"mediawiki.jqueryMsg",
+				"mediawiki.api",
+				"ext.thanks.jquery.findWithParent",
+				"ext.thanks"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "Thanks/modules"
+	},
+	"Hooks": {
+		"HistoryRevisionTools": [
+			"ThanksHooks::insertThankLink"
+		],
+		"DiffRevisionTools": [
+			"ThanksHooks::insertThankLink"
+		],
+		"PageHistoryBeforeList": [
+			"ThanksHooks::onPageHistoryBeforeList"
+		],
+		"DiffViewHeader": [
+			"ThanksHooks::onDiffViewHeader"
+		],
+		"BeforeCreateEchoEvent": [
+			"ThanksHooks::onBeforeCreateEchoEvent"
+		],
+		"EchoGetDefaultNotifiedUsers": [
+			"ThanksHooks::onEchoGetDefaultNotifiedUsers"
+		],
+		"LocalUserCreated": [
+			"ThanksHooks::onAccountCreated"
+		],
+		"BeforeSpecialMobileDiffDisplay": [
+			"ThanksHooks::onBeforeSpecialMobileDiffDisplay"
+		],
+		"GetLogTypesOnUser": [
+			"ThanksHooks::onGetLogTypesOnUser"
+		],
+		"BeforePageDisplay": [
+			"ThanksHooks::onBeforePageDisplay"
+		],
+		"ResourceLoaderTestModules": [
+			"ThanksHooks::onResourceLoaderTestModules"
+		],
+		"ApiMain::moduleManager": [
+			"ThanksHooks::onApiMainModuleManager"
+		],
+		"EchoGetBundleRules": [
+			"ThanksHooks::onEchoGetBundleRules"
+		],
+		"LogEventsListLineEnding": [
+			"ThanksHooks::onLogEventsListLineEnding"
+		]
+	},
+	"config": {
+		"ThanksSendToBots": false,
+		"ThanksLogging": true,
+		"ThanksConfirmationRequired": true,
+		"ThanksLogTypeWhitelist": [
+			"contentmodel",
+			"delete",
+			"import",
+			"merge",
+			"move",
+			"patrol",
+			"protect",
+			"tag",
+			"managetags",
+			"rights",
+			"lock"
+		]
+	},
+	"manifest_version": 1
+}

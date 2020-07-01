@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bartosz Dziewoński"
+		]
+	},
+	"sandboxlink-desc": "Adds a link to user's personal sandbox to personal tools menu",
+	"sandboxlink-subpage-name": "sandbox",
+	"sandboxlink-portlet-label": "Sandbox",
+	"tooltip-pt-sandbox": "Your sandbox",
+	"sandboxlink-editintro-pagename": "-",
+	"sandboxlink-preload-pagename": "-"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko",
+			"Linedwell",
+			"Zebulon84"
+		]
+	},
+	"disambig-desc": "Ajoute la balise <code><nowiki>__DISAMBIG__</nowiki></code> pour marquer [[Special:DisambiguationPages|les pages d’ambiguïté]].",
+	"disambiguationpages": "Pages d’homonymie",
+	"disambiguationpages-summary": "Ce qui suit est une liste de toutes les pages d’ambiguïté de {{SITENAME}}.<br />Une page est traitée comme page d’ambiguïté si la page contient la balise <code><nowiki>__DISAMBIG__</nowiki></code> (ou un alias équivalent).",
+	"disambiguationpagelinks": "Pages de liens vers des pages d'homonymie",
+	"disambiguationpagelinks-summary": "Les pages suivantes contiennent au moins un lien vers une page d’ambiguïté. Elles peuvent devoir plutôt être liées à une page plus appropriée.<br />Une page est traitée comme page d’ambiguïté si la page contient la balise <code><nowiki>__DISAMBIG__</nowiki></code> (ou un alias équivalent).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Ceci est une page d’homonymie"
+}

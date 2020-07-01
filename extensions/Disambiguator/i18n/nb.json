@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Danmichaelo"
+		]
+	},
+	"disambig-desc": "Legger til merket <code><nowiki>__DISAMBIG__</nowiki></code> for å markere [[Special:DisambiguationPages|pekersider]]",
+	"disambiguationpages": "Pekersider",
+	"disambiguationpages-summary": "Dette er en liste over alle pekersider på {{SITENAME}}.<br />\nEn side regnes som en pekerside hvis den inneholder merket <code><nowiki>__DISAMBIG__</nowiki></code> (eller et tilsvarende alias).",
+	"disambiguationpagelinks": "Sider som lenker til pekersider",
+	"disambiguationpagelinks-summary": "Dette er en liste over alle sider som har minst en lenke til en pekerside.\nDet kan være behov for å endre slike lenker til å peke direkte mot vanlige sider i stedet.<br />\nEn side regnes som en pekerside hvis den inneholder merket <code><nowiki>__DISAMBIG__</nowiki></code> (eller et tilsvarende alias).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Dette er en pekerside"
+}

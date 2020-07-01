@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Abshirdheere",
+			"Macofe"
+		]
+	},
+	"notification-header-rev-thank": "$1 {{GENDER:$2|waan}} {{GENDER:$4|kaaga}} mahad celinayaa bedelka aad ku samaysay '''$3'''."
+}

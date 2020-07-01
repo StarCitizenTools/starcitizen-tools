@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Servien"
+		]
+	},
+	"disambig-desc": "Voegt t etiket <code><nowiki>__DISAMBIG__</nowiki></code> toe um [[Special:DisambiguationPages|deurverwiesziejen]] te markeren",
+	"disambiguationpages": "Deurverwiesziejen",
+	"disambiguationpages-summary": "Hier volgt n lieste mit alle deurverwiesziejen op de webstee van {{SITENAME}}.<br />\nn Zied wörden ezien as deurverwieszied as t etiket <code><nowiki>__DISAMBIG__</nowiki></code> derop steet (of n soortgelieke alias).",
+	"disambiguationpagelinks": "Ziejen die verwiezen naor deurverwiesziejen",
+	"disambiguationpagelinks-summary": "In de volgende ziejen steet tenminsten één verwiezing naor n deurverwieszied.\nt Kan ween dat ze mutten verwiezen naor n passendere zied.<br />\nn Zied wörden ezien as deurverwieszied as t etiket <code><nowiki>__DISAMBIG__</nowiki></code> derop steet (of n soortgelieke alias).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Dit is n deurverwieszied"
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Shirayuki",
+			"Omotecho",
+			"ネイ"
+		]
+	},
+	"sandboxlink-desc": "利用者の個人ツールメニューに個人サンドボックスへのリンクを追加する",
+	"sandboxlink-subpage-name": "sandbox",
+	"sandboxlink-portlet-label": "サンドボックス",
+	"tooltip-pt-sandbox": "自分のサンドボックス"
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chase me ladies, I'm the Cavalry"
+		]
+	},
+	"disambig-desc": "Adds the tag <code><nowiki>__DISAMBIG__</nowiki></code> to mark [[Special:DisambiguationPages|disambiguation pages]]",
+	"disambiguationpages": "Disambiguation pages",
+	"disambiguationpages-summary": "The following is a list of all disambiguation pages on {{SITENAME}}.<br />\nA page is treated as a disambiguation page if it contains the tag <code><nowiki>__DISAMBIG__</nowiki></code> (or an equivalent alias).",
+	"disambiguationpagelinks": "Pages linking to disambiguation pages",
+	"disambiguationpagelinks-summary": "The following pages contain at least one link to a disambiguation page.\nThey may need to link to a more appropriate page instead.<br />\nA page is treated as a disambiguation page if it contains the tag <code><nowiki>__DISAMBIG__</nowiki></code> (or an equivalent alias).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "This is a disambiguation page"
+}

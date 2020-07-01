@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sjoerddebruin",
+			"Mathonius",
+			"Mainframe98"
+		]
+	},
+	"sandboxlink-desc": "Voegt een koppeling naar het persoonlijke kladblok van de gebruiker toe aan het persoonlijke hulpmiddelen menu.",
+	"sandboxlink-subpage-name": "kladblok",
+	"sandboxlink-portlet-label": "Kladblok",
+	"tooltip-pt-sandbox": "Uw kladblok"
+}

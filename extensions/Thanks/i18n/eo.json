@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"KuboF",
+			"Robin van der Vliet",
+			"Gamliel Fishkin",
+			"Happy5214"
+		]
+	},
+	"thanks-desc": "Aldoni ligilon por danki al uzantoj pro ties redaktoj, komentoj ks.",
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|danki}}}}",
+	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|dankita}}}}",
+	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Danki}}}}",
+	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|dankita}}}}",
+	"thanks-error-undefined": "Danko malsukcesis. Reprovu poste.",
+	"thanks-error-invalidrevision": "Identigilo de revizio estas nevalida.",
+	"thanks-error-invalidrecipient-self": "Vi ne povas danki sin",
+	"thanks-error-ratelimited": "{{GENDER:$1|Vi}} superis vian laŭtempan limon. Atendu kelkan tempon kaj reprovu.",
+	"thanks-thank-tooltip": "{{GENDER:$1|Danki}} al ĉi tiu {{GENDER:$2|uzanto}}",
+	"thanks-confirmation2": "{{GENDER:$1|Ĉu sendi}} publikan dankon pro tiu ĉi redakto?",
+	"thanks-thanked-notice": "$1 ricevis vian dankon pro {{GENDER:$2|sia}} redakto.",
+	"thanks": "Sendi dankon",
+	"thanks-submit": "Danki",
+	"echo-pref-subscription-edit-thank": "Danki al mi pro miaj redaktoj",
+	"echo-pref-tooltip-edit-thank": "Sciigu min kiam iu dankas al mi pro mia redakto.",
+	"echo-category-title-edit-thank": "Dankoj",
+	"notification-thanks-diff-link": "via redakto",
+	"notification-header-rev-thank": "$1 {{GENDER:$2|dankis}} {{GENDER:$4|vin}} pro via redakto en <strong>$3</strong>.",
+	"log-name-thanks": "Protokolo de dankoj",
+	"log-description-thanks": "Sube estas listo de uzantoj al kiuj aliaj uzantoj dankis.",
+	"logentry-thanks-thank": "$1 {{GENDER:$2|dankis}} al {{GENDER:$4|$3}}",
+	"log-show-hide-thanks": "$1 protokolon de dankoj",
+	"notification-link-text-view-post": "Montri komenton",
+	"flow-thanks-confirmation-special": "Ĉu vi volas publike sendi dankon pro tiu ĉi komento?",
+	"flow-thanks-thanked-notice": "$1 ricevis vian dankon pro {{GENDER:$2|sia}} komento.",
+	"notification-flow-thanks-post-link": "via komento",
+	"notification-header-flow-thank": "$1 {{GENDER:$2|dankis}} {{GENDER:$5|vin}} pro via komento en «<strong>$3</strong>»."
+}

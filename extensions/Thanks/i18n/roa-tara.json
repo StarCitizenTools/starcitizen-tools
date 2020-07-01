@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"thanks-desc": "Aggiunge le collegaminde de rengraziamende a l'utinde pe le cangiaminde, le commende, etc.",
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|grazie}}}}",
+	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|ringraziate}}}}",
+	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Grazie}}}}",
+	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|Ringraziate}}}}",
+	"thanks-error-undefined": "Azione de ringraziamende fallite (codece de errore: $1). Pe piacere pruéve arrete.",
+	"thanks-error-invalidrevision": "ID d'a revisione non g'è valide.",
+	"thanks-error-ratelimited": "{{GENDER:$1|Tu}} è sbunnate le limite de valutazione tune. Pe piacere aspitte 'nu picche e pruève arrete.",
+	"thanks-thank-tooltip": "{{GENDER:$1|Manne}} 'na notifiche de rengraziamende a stu {{GENDER:$2|utende}}",
+	"thanks-confirmation2": "Tutte le rengraziaminde so pubbleche. {{GENDER:$1|Manne}} le rengraziaminde?",
+	"thanks-thanked-notice": "{{GENDER:$3|E'}} ditte grazie a $1 pu cangiamende {{GENDER:$2|sue|sue|lore}}.",
+	"thanks": "Manne le rengraziaminde",
+	"echo-pref-subscription-edit-thank": "Ringraziame pu cangiamende mije",
+	"echo-pref-tooltip-edit-thank": "Notificame quanne quacchedune me ringrazie pe 'nu cangiamende ca agghie fatte.",
+	"echo-category-title-edit-thank": "Grazie!",
+	"notification-thanks-diff-link": "le cangiaminde tune",
+	"log-name-thanks": "Archivije de le rengraziaminde",
+	"log-description-thanks": "Sotte stè 'n'elenghe de utinde ca onne rengraziate otre utinde.",
+	"logentry-thanks-thank": "$1 {{GENDER:$2|ave ringraziate}} {{GENDER:$4|$3}}",
+	"log-show-hide-thanks": "$1 archivije de le rengraziaminde",
+	"notification-link-text-view-post": "'Ndruche 'u commende",
+	"thanks-error-invalidpostid": "ID d'u messàgge jè invalide.",
+	"flow-thanks-confirmation-special": "Vuè ccu manne 'nu grazie pubblecamende pe stu commende?",
+	"notification-flow-thanks-post-link": "'u commende tune"
+}

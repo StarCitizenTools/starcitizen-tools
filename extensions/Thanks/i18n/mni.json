@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Laishram Lokendro"
+		]
+	},
+	"thanks-confirmation2": "{{GENDER:$1|Send}} public thanks for this edit?",
+	"flow-thanks-confirmation-special": "nahak waphamsigidamak mayamda thagat-waheising piningbra?",
+	"apihelp-flowthank-description": "Flow comment-gidamak mayamda thagat-wahei khanghanwa thao"
+}
