@@ -363,6 +363,10 @@ $wgExtractsRemoveClasses[] = 'dd';
 $wgExtractsRemoveClasses[] = 'dablink';
 $wgExtractsRemoveClasses[] = 'translate';
 
+#WikiSEO
+#Disable wgLogo as fallback image
+$wgWikiSeoDisableLogoFallbackImage = true;
+
 #MsUpload
 #$wgMSU_useDragDrop = true;
 #$wgMSU_showAutoCat = true;
