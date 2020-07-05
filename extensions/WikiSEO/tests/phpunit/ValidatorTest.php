@@ -26,10 +26,10 @@ class ValidatorTest extends MediaWikiTestCase {
 	 */
 	public function testValidateParamsAllValid() {
 		$params = [
-			'title'       => '',
-			'keywords'    => '',
-			'description' => '',
-			'locale'      => '',
+		'title'       => '',
+		'keywords'    => '',
+		'description' => '',
+		'locale'      => '',
 		];
 
 		$validatedArray = $this->validator->validateParams( $params );
@@ -43,10 +43,10 @@ class ValidatorTest extends MediaWikiTestCase {
 	 */
 	public function testValidateParamsAllInvalid() {
 		$params = [
-			'no'      => '',
-			'valid'   => '',
-			'params'  => '',
-			'in_here' => '',
+		'no'      => '',
+		'valid'   => '',
+		'params'  => '',
+		'in_here' => '',
 		];
 
 		$validatedArray = $this->validator->validateParams( $params );
@@ -60,17 +60,17 @@ class ValidatorTest extends MediaWikiTestCase {
 	 */
 	public function testMixedParams() {
 		$valid = [
-			'title'       => '',
-			'keywords'    => '',
-			'description' => '',
-			'locale'      => '',
+		'title'       => '',
+		'keywords'    => '',
+		'description' => '',
+		'locale'      => '',
 		];
 
 		$invalid = [
-			'no'      => '',
-			'valid'   => '',
-			'params'  => '',
-			'in_here' => '',
+		'no'      => '',
+		'valid'   => '',
+		'params'  => '',
+		'in_here' => '',
 		];
 
 		$params = array_merge( $valid, $invalid );
@@ -86,14 +86,14 @@ class ValidatorTest extends MediaWikiTestCase {
 	 */
 	public function testLanguages() {
 		$langs = [
-			'hreflang_de-de' => '',
-			'hreflang_nl-nl' => '',
-			'hreflang_invalid' => '',
+		'hreflang_de-de' => '',
+		'hreflang_nl-nl' => '',
+		'hreflang_invalid' => '',
 		];
 
 		$valid = [
-			'hreflang_de-de' => '',
-			'hreflang_nl-nl' => '',
+		'hreflang_de-de' => '',
+		'hreflang_nl-nl' => '',
 		];
 
 		$validatedArray = $this->validator->validateParams( $langs );

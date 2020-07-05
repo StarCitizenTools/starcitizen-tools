@@ -13,13 +13,16 @@ use WebRequest;
 class GeneratorTest extends MediaWikiTestCase {
 	/**
 	 * @return OutputPage
-	 * @see \OutputPageTest::newInstance()
+	 * @see    \OutputPageTest::newInstance()
 	 */
 	protected function newInstance( $config = [], WebRequest $request = null, $options = [] ) {
 		$context = new RequestContext();
 
-		$context->setConfig( new MultiConfig( [
-			new HashConfig( $config + [
+		$context->setConfig(
+			new MultiConfig(
+				[
+				new HashConfig(
+					$config + [
 					'AppleTouchIcon'            => false,
 					'DisableLangConversion'     => true,
 					'EnableCanonicalServerLink' => false,
@@ -30,9 +33,12 @@ class GeneratorTest extends MediaWikiTestCase {
 					'RightsPage'                => false,
 					'RightsUrl'                 => false,
 					'UniversalEditButton'       => false,
-				] ),
-			$context->getConfig()
-		] ) );
+					]
+				),
+				$context->getConfig()
+				]
+			)
+		);
 
 		if ( !in_array( 'notitle', (array)$options ) ) {
 			$context->setTitle( Title::newFromText( 'My test page' ) );

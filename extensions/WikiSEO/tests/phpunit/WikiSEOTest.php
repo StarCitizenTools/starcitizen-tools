@@ -11,8 +11,9 @@ use RequestContext;
 
 /**
  * Class WikiSEOTest
+ *
  * @package MediaWiki\Extension\WikiSEO\Tests
- * @group Database
+ * @group   Database
  */
 class WikiSEOTest extends GeneratorTest {
 	private $replacementTitle = 'Replaced Title';
@@ -25,10 +26,12 @@ class WikiSEOTest extends GeneratorTest {
 		$seo = new WikiSEO();
 		$out = $this->newInstance();
 
-		$this->setProperties( [
+		$this->setProperties(
+			[
 			'title' => $this->replacementTitle,
 			'title_mode' => 'replace',
-		], $out );
+			], $out
+		);
 
 		$seo->setMetadataFromPageProps( $out );
 		$seo->addMetadataToPage( $out );
@@ -45,16 +48,20 @@ class WikiSEOTest extends GeneratorTest {
 		$out = $this->newInstance();
 		$origTitle = $out->getHTMLTitle();
 
-		$this->setProperties( [
+		$this->setProperties(
+			[
 			'title' => $this->replacementTitle,
 			'title_mode' => 'append',
-		], $out );
+			], $out
+		);
 
 		$seo->setMetadataFromPageProps( $out );
 		$seo->addMetadataToPage( $out );
 
-		$this->assertEquals( sprintf( '%s - %s', $origTitle, $this->replacementTitle ),
-			$out->getHTMLTitle() );
+		$this->assertEquals(
+			sprintf( '%s - %s', $origTitle, $this->replacementTitle ),
+			$out->getHTMLTitle()
+		);
 	}
 
 	/**
@@ -66,16 +73,20 @@ class WikiSEOTest extends GeneratorTest {
 		$out = $this->newInstance();
 		$origTitle = $out->getHTMLTitle();
 
-		$this->setProperties( [
+		$this->setProperties(
+			[
 			'title' => $this->replacementTitle,
 			'title_mode' => 'prepend',
-		], $out );
+			], $out
+		);
 
 		$seo->setMetadataFromPageProps( $out );
 		$seo->addMetadataToPage( $out );
 
-		$this->assertEquals( sprintf( '%s - %s', $this->replacementTitle, $origTitle ),
-			$out->getHTMLTitle() );
+		$this->assertEquals(
+			sprintf( '%s - %s', $this->replacementTitle, $origTitle ),
+			$out->getHTMLTitle()
+		);
 	}
 
 	/**
@@ -87,17 +98,21 @@ class WikiSEOTest extends GeneratorTest {
 		$out = $this->newInstance();
 		$origTitle = $out->getHTMLTitle();
 
-		$this->setProperties( [
+		$this->setProperties(
+			[
 			'title' => $this->replacementTitle,
 			'title_mode' => 'append',
 			'title_separator' => 'SEP__SEP',
-		], $out );
+			], $out
+		);
 
 		$seo->setMetadataFromPageProps( $out );
 		$seo->addMetadataToPage( $out );
 
-		$this->assertEquals( sprintf( '%sSEP__SEP%s', $origTitle, $this->replacementTitle ),
-			$out->getHTMLTitle() );
+		$this->assertEquals(
+			sprintf( '%sSEP__SEP%s', $origTitle, $this->replacementTitle ),
+			$out->getHTMLTitle()
+		);
 	}
 
 	/**
@@ -108,11 +123,13 @@ class WikiSEOTest extends GeneratorTest {
 		$seo = new WikiSEO();
 		$out = $this->newInstance();
 
-		$this->setProperties( [
+		$this->setProperties(
+			[
 			'title' => $this->replacementTitle,
 			'title_mode' => 'append',
 			'title_separator' => '&nbsp;&nbsp;--&nbsp;&nbsp;',
-		], $out );
+			], $out
+		);
 
 		$seo->setMetadataFromPageProps( $out );
 		$seo->addMetadataToPage( $out );
@@ -150,10 +167,14 @@ class WikiSEOTest extends GeneratorTest {
 	 */
 	public function testPropsParse() {
 		$page =
-			$this->insertPage( 'PagePropParse', '{{#seo:|title=Test Title|title_mode=prepend}}',
-				NS_MAIN );
+		$this->insertPage(
+			'PagePropParse', '{{#seo:|title=Test Title|title_mode=prepend}}',
+			NS_MAIN
+		);
 
-		/** @var \Title $title */
+		/**
+		 * @var \Title $title
+		 */
 		$title = $page['title'];
 
 		$page = $this->getExistingTestPage( $title );
@@ -165,13 +186,81 @@ class WikiSEOTest extends GeneratorTest {
 	}
 
 	/**
+	 * Tests the parsing from Tag
+	 *
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::__construct
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::instantiateMetadataPlugins
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::setMetadataFromPageProps
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::addMetadataToPage
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::fromTag
+	 * @covers \MediaWiki\Extension\WikiSEO\TagParser::expandWikiTextTagArray
+	 * @throws \MWException
+	 */
+	public function testTagParse() {
+		$pageTitle = 'Tag Parse Test2';
+
+		$page =
+			$this->insertPage(
+				$pageTitle,
+				'<seo title="Test Title :: {{FULLPAGENAME}}"></seo>', NS_MAIN
+			);
+
+		$context = new RequestContext();
+		$context->setTitle( $page['title'] );
+		$out = new OutputPage( $context );
+
+		$seo = new WikiSEO();
+		$seo->setMetadataFromPageProps( $out );
+		$seo->addMetadataToPage( $out );
+
+		// HACK
+		$this->assertEquals( 'Test Title&nbsp;:: ' . $pageTitle, htmlentities( $out->getHTMLTitle() ) );
+	}
+
+	/**
+	 * Tests the parsing from Tag Body
+	 *
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::__construct
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::instantiateMetadataPlugins
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::setMetadataFromPageProps
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::addMetadataToPage
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::fromTag
+	 * @covers \MediaWiki\Extension\WikiSEO\TagParser::expandWikiTextTagArray
+	 * @throws \MWException
+	 */
+	public function testTagParseBody() {
+		$pageTitle = 'Tag Parse Test Body';
+
+		$page =
+			$this->insertPage(
+				$pageTitle,
+				'<seo>title=Test Title :: {{FULLPAGENAME}}</seo>', NS_MAIN
+			);
+
+		$context = new RequestContext();
+		$context->setTitle( $page['title'] );
+		$out = new OutputPage( $context );
+
+		$seo = new WikiSEO();
+		$seo->setMetadataFromPageProps( $out );
+		$seo->addMetadataToPage( $out );
+
+		// HACK
+		$this->assertEquals( 'Test Title&nbsp;:: ' . $pageTitle, htmlentities( $out->getHTMLTitle() ) );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::__construct
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::instantiateMetadataPlugins
 	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::modifyPageTitle
 	 * @throws \MWException
 	 */
 	public function testNoHtmlEntitiesInTitleAmpersand() {
 		$page =
-			$this->insertPage( 'Title with &',
-				'{{#seo:|title={{FULLPAGENAME}}|title_mode=replace}}', NS_MAIN );
+		$this->insertPage(
+			'Title with &',
+			'{{#seo:|title={{FULLPAGENAME}}|title_mode=replace}}', NS_MAIN
+		);
 
 		$context = new RequestContext();
 		$context->setTitle( $page['title'] );
@@ -203,38 +292,61 @@ class WikiSEOTest extends GeneratorTest {
 	}
 
 	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::__construct
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::instantiateMetadataPlugins
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::setMetadataFromPageProps
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::addMetadataToPage
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::modifyPageTitle
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::finalize
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::makeErrorHtml
+	 * @throws \MWException
+	 */
+	public function testNoArgs() {
+		$page = $this->insertPage( 'No Args Title', '{{#seo:}}', NS_MAIN );
+
+		$context = new RequestContext();
+		$context->setTitle( $page['title'] );
+		$out = new OutputPage( $context );
+
+		$errorMessage = wfMessage( 'wiki-seo-empty-attr-parser' )->parse();
+
+		$this->assertContains( $errorMessage, $out->parseAsContent( "{{#seo:}}" ) );
+	}
+
+	/**
 	 * Sets props on outputpage
 	 *
-	 * @param array $props
+	 * @param array      $props
 	 * @param OutputPage $out
 	 */
 	private function setProperties( array $props, OutputPage $out ) {
 		foreach ( $props as $key => $value ) {
-			$out->setProperty( $key, serialize( $value ) );
+			$out->setProperty( $key, $value );
 		}
 	}
 
 	/**
 	 * Loads the page props for a given page id.
 	 *
-	 * @param int $id
+	 * @param  int $id
 	 * @return array
 	 */
 	private function loadPropForPageId( int $id ) {
 		$dbl = MediaWikiServices::getInstance()->getDBLoadBalancer();
 		$db = $dbl->getConnection( DB_REPLICA );
 
-		$propValue = $db->select( 'page_props', [ 'pp_propname', 'pp_value' ], [
+		$propValue = $db->select(
+			'page_props', [ 'pp_propname', 'pp_value' ], [
 			'pp_page' => $id,
 			'pp_propname' => Validator::$validParams,
-		], __METHOD__ );
+			], __METHOD__
+		);
 
 		$result = [];
 
 		if ( $propValue !== false ) {
 			foreach ( $propValue as $row ) {
-				// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-				$result[$row->pp_propname] = @unserialize( $row->pp_value, [ false ] );
+				$result[$row->pp_propname] = $row->pp_value;
 			}
 		}
 
@@ -243,7 +355,7 @@ class WikiSEOTest extends GeneratorTest {
 
 	/**
 	 * @inheritDoc
-	 * @return bool
+	 * @return     bool
 	 */
 	public function needsDB() {
 		return true;

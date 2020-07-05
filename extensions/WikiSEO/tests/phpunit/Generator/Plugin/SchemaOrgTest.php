@@ -9,11 +9,12 @@ class SchemaOrgTest extends GeneratorTest {
 	/**
 	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::init
 	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::addMetadata
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::getRevisionTimestamp
 	 */
 	public function testAddMetadata() {
 		$metadata = [
-			'description' => 'Example Description',
-			'type'        => 'website',
+		'description' => 'Example Description',
+		'type'        => 'website',
 		];
 
 		$out = $this->newInstance();
@@ -29,6 +30,8 @@ class SchemaOrgTest extends GeneratorTest {
 
 	/**
 	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::getAuthorMetadata
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::getConfigValue
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::getLogoMetadata
 	 */
 	public function testContainsOrganization() {
 		$out = $this->newInstance();
@@ -55,6 +58,8 @@ class SchemaOrgTest extends GeneratorTest {
 
 	/**
 	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::getAuthorMetadata
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::getConfigValue
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::getLogoMetadata
 	 */
 	public function testContainsAuthorAndPublisher() {
 		$out = $this->newInstance();
@@ -90,9 +95,11 @@ class SchemaOrgTest extends GeneratorTest {
 		$out = $this->newInstance();
 
 		$generator = new SchemaOrg();
-		$generator->init( [
+		$generator->init(
+			[
 			'published_time' => '2012-01-01',
-		], $out );
+			], $out
+		);
 		$generator->addMetadata();
 
 		$this->assertContains( '2012-01-01', $out->getHeadItemsArray()['jsonld-metadata'] );
@@ -102,6 +109,8 @@ class SchemaOrgTest extends GeneratorTest {
 	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::getImageMetadata
 	 */
 	public function testContainsImageObject() {
+		$this->setMwGlobals( 'wgWikiSeoDisableLogoFallbackImage', false );
+
 		$out = $this->newInstance();
 
 		$generator = new SchemaOrg();
@@ -109,5 +118,23 @@ class SchemaOrgTest extends GeneratorTest {
 		$generator->addMetadata();
 
 		$this->assertContains( 'wiki.png', $out->getHeadItemsArray()['jsonld-metadata'] );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::init
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\SchemaOrg::getTypeMetadata
+	 */
+	public function testTypeMetadata() {
+		$out = $this->newInstance();
+
+		$generator = new SchemaOrg();
+		$generator->init(
+			[
+			'type' => 'test-type',
+			 ], $out
+		);
+		$generator->addMetadata();
+
+		$this->assertContains( 'test-type', $out->getHeadItemsArray()['jsonld-metadata'] );
 	}
 }

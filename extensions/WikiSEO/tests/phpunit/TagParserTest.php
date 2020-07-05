@@ -26,11 +26,11 @@ class TagParserTest extends MediaWikiTestCase {
 	 */
 	public function testParseArgs() {
 		$args = [
-			'title=Test Title',
-			'=',
-			'keywords=a,b ,  c , d',
-			'=emptyKey',
-			'emptyContent='
+		'title=Test Title',
+		'=',
+		'keywords=a,b ,  c , d',
+		'=emptyKey',
+		'emptyContent='
 		];
 
 		$parsedArgs = $this->tagParser->parseArgs( $args );
@@ -45,17 +45,19 @@ class TagParserTest extends MediaWikiTestCase {
 	 */
 	public function testParseArgsMultipleEquals() {
 		$args = [
-			'description=First Equal separates = Second Equal is included',
-			'====',
-			'==emptyKey',
+		'description=First Equal separates = Second Equal is included',
+		'====',
+		'==emptyKey',
 		];
 
 		$parsedArgs = $this->tagParser->parseArgs( $args );
 
 		$this->assertCount( 1, $parsedArgs );
 		$this->assertArrayHasKey( 'description', $parsedArgs );
-		$this->assertEquals( 'First Equal separates = Second Equal is included',
-			$parsedArgs['description'] );
+		$this->assertEquals(
+			'First Equal separates = Second Equal is included',
+			$parsedArgs['description']
+		);
 	}
 
 	/**

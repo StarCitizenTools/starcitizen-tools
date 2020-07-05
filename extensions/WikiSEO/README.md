@@ -34,6 +34,10 @@ Usage: $wgBingSiteVerificationKey= 'CODE';.
 Setting this variable will add a ``<meta property="fb:app_id" content="ID">`` tag to every page.  
 Usage: $wgFacebookAppID= 'App_ID';.
 
+### $wgFacebookAdmins
+Setting this variable will add a ``<meta property="fb:admins" content="ID1,ID2,...">`` tag to every page.  
+Usage: $wgFacebookAdmins= 'ID1,ID2,...';.
+
 ### $wgYandexSiteVerificationKey
 Setting this variable will add a ``<meta name="yandex-verification" content="CODE">`` tag to every page.  
 Usage: $wgYandexSiteVerificationKey= 'CODE';.
@@ -62,6 +66,9 @@ If you only want to change the page title and add 'description', 'keywords', 'ro
 
 ### $wgWikiSeoDefaultImage
 Default image. Local image, if not set $wgLogo will be used.
+
+### $wgWikiSeoDisableLogoFallbackImage
+Disables setting `$wgLogo` as the fallback image if no image was set.
 
 ### $wgTwitterCardType
 Defaults to `summary_large_image` for the twitter card type.  

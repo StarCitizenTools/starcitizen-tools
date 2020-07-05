@@ -9,11 +9,16 @@ class OpenGraphTest extends GeneratorTest {
 	/**
 	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\OpenGraph::init
 	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\OpenGraph::addMetadata
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\OpenGraph::addTitleMeta
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\OpenGraph::addSiteName
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\AbstractBaseGenerator::getConfigValue
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\AbstractBaseGenerator::getRevisionTimestamp
+	 * @covers \MediaWiki\Extension\WikiSEO\WikiSEO::protocolizeUrl
 	 */
 	public function testAddMetadata() {
 		$metadata = [
-			'description' => 'Example Description',
-			'keywords'    => 'Keyword 1, Keyword 2',
+		'description' => 'Example Description',
+		'keywords'    => 'Keyword 1, Keyword 2',
 		];
 
 		$out = $this->newInstance();
@@ -52,14 +57,18 @@ class OpenGraphTest extends GeneratorTest {
 		$out = $this->newInstance();
 
 		$generator = new OpenGraph();
-		$generator->init( [
+		$generator->init(
+			[
 			'published_time' => '2012-01-01',
-		], $out );
+			], $out
+		);
 		$generator->addMetadata();
 
 		$this->assertArrayHasKey( 'article:published_time', $out->getHeadItemsArray() );
-		$this->assertContains( '2012-01-01',
-			$out->getHeadItemsArray()['article:published_time'] );
+		$this->assertContains(
+			'2012-01-01',
+			$out->getHeadItemsArray()['article:published_time']
+		);
 		$this->assertArrayHasKey( 'article:modified_time', $out->getHeadItemsArray() );
 	}
 
@@ -70,6 +79,25 @@ class OpenGraphTest extends GeneratorTest {
 	public function testContainsImage() {
 		// Unset default image if set
 		$this->setMwGlobals( 'wgWikiSeoDefaultImage', null );
+		$this->setMwGlobals( 'wgWikiSeoDisableLogoFallbackImage', false );
+
+		$out = $this->newInstance();
+
+		$generator = new OpenGraph();
+		$generator->init( [], $out );
+		$generator->addMetadata();
+
+		$this->assertArrayHasKey( 'og:image', $out->getHeadItemsArray() );
+		$this->assertContains( 'wiki.png', $out->getHeadItemsArray()['og:image'] );
+	}
+
+	/**
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\OpenGraph::init
+	 * @covers \MediaWiki\Extension\WikiSEO\Generator\Plugins\OpenGraph::preprocessFileMetadata
+	 */
+	public function testDefaultImage() {
+		$this->setMwGlobals( 'wgWikiSeoDefaultImage', 'wiki.png' );
+		$this->setMwGlobals( 'wgWikiSeoDisableLogoFallbackImage', true );
 
 		$out = $this->newInstance();
 

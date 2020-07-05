@@ -1,6 +1,6 @@
 {
 	"name": "WikiSEO",
-	"version": "2.4.1",
+	"version": "2.5.0",
 	"author": [
 		"Octfx"
 	],
@@ -22,6 +22,10 @@
 		},
 		"FacebookAppId":  {
 			"description": "App Id for Facebook Insights",
+			"value": null
+		},
+		"FacebookAdmins":  {
+			"description": "Admin id for Facebook Insights. Multiple ids can be separated by ','",
 			"value": null
 		},
 		"YandexSiteVerificationKey": {
@@ -63,7 +67,11 @@
 		"WikiSeoDefaultLanguage": {
 			"description": "Language code and area which will set a <link rel='alternate'> for the current page.",
 			"value": null
-		}
+		},
+        "WikiSeoDisableLogoFallbackImage": {
+            "description": "Disable setting the sites logo as the default SEO image if no image was provided.",
+            "value": false
+        }
 	},
 	"MessagesDirs": {
 		"WikiSEO": [

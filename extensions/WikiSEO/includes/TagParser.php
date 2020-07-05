@@ -48,9 +48,11 @@ class TagParser {
 			}
 		}
 
-		return array_filter( $results, static function ( $value, $key ) {
-			return mb_strlen( $value ) > 0 && mb_strlen( $key ) > 0;
-		}, ARRAY_FILTER_USE_BOTH );
+		return array_filter(
+			$results, static function ( $value, $key ) {
+				return mb_strlen( $value ) > 0 && mb_strlen( $key ) > 0;
+			}, ARRAY_FILTER_USE_BOTH
+		);
 	}
 
 	/**

@@ -19,21 +19,16 @@
 
 namespace MediaWiki\Extension\WikiSEO\Generator\Plugins;
 
-use ConfigException;
 use Exception;
 use InvalidArgumentException;
+use MediaWiki\Extension\WikiSEO\Generator\AbstractBaseGenerator;
 use MediaWiki\Extension\WikiSEO\Generator\GeneratorInterface;
-use MediaWiki\Extension\WikiSEO\Generator\Plugins\FileMetadataTrait as FileMetadata;
-use MediaWiki\Extension\WikiSEO\Generator\Plugins\RevisionMetadataTrait as RevisionMetadata;
 use MediaWiki\Extension\WikiSEO\WikiSEO;
 use MediaWiki\MediaWikiServices;
 use OutputPage;
 use Title;
 
-class SchemaOrg implements GeneratorInterface {
-	use FileMetadata;
-	use RevisionMetadata;
-
+class SchemaOrg extends AbstractBaseGenerator implements GeneratorInterface {
 	/**
 	 * Valid Tags for this generator
 	 *
@@ -80,16 +75,6 @@ class SchemaOrg implements GeneratorInterface {
 			$this->metadata['published_time'] = $this->metadata['modified_time'];
 		}
 	}
-
-	/**
-	 * @var array
-	 */
-	protected $metadata;
-
-	/**
-	 * @var OutputPage
-	 */
-	protected $outputPage;
 
 	/**
 	 * Add the metadata to the OutputPage
@@ -152,18 +137,10 @@ class SchemaOrg implements GeneratorInterface {
 		];
 
 		if ( !isset( $this->metadata['image'] ) ) {
-			try {
-				$defaultImage =
-					MediaWikiServices::getInstance()->getMainConfig()->get( 'WikiSeoDefaultImage' );
+			$defaultImage = $this->getConfigValue( 'WikiSeoDefaultImage' );
 
-				if ( $defaultImage !== null ) {
-					$this->metadata['image'] = $defaultImage;
-				}
-
-			} catch ( ConfigException $e ) {
-				wfLogWarning( sprintf( 'Could not gef config for "$wgWikiSeoDefaultImage". %s',
-					$e->getMessage() ) );
-				// Fallthrough
+			if ( $defaultImage !== null ) {
+				$this->metadata['image'] = $defaultImage;
 			}
 		}
 
@@ -189,21 +166,8 @@ class SchemaOrg implements GeneratorInterface {
 	 * @return array
 	 */
 	private function getAuthorMetadata() {
-		try {
-			$sitename = MediaWikiServices::getInstance()->getMainConfig()->get( 'Sitename' );
-		} catch ( ConfigException $e ) {
-			wfLogWarning( sprintf( 'Could not gef config for "$wgSitename". %s', $e->getMessage() ) );
-			// Empty tags will be ignored
-			$sitename = '';
-		}
-
-		try {
-			$server = MediaWikiServices::getInstance()->getMainConfig()->get( 'Server' );
-		} catch ( ConfigException $e ) {
-			wfLogWarning( sprintf( 'Could not gef config for "$wgServer". %s', $e->getMessage() ) );
-
-			$server = '';
-		}
+		$sitename = $this->getConfigValue( 'Sitename' ) ?? '';
+		$server = $this->getConfigValue( 'Server' ) ?? '';
 
 		$logo = $this->getLogoMetadata();
 
@@ -228,6 +192,10 @@ class SchemaOrg implements GeneratorInterface {
 		$data = [
 			'@type' => 'ImageObject',
 		];
+
+		if ( $this->getConfigValue( 'WikiSeoDisableLogoFallbackImage' ) === true ) {
+			return $data;
+		}
 
 		try {
 			$logo = MediaWikiServices::getInstance()->getMainConfig()->get( 'Logo' );

@@ -19,13 +19,10 @@
 
 namespace MediaWiki\Extension\WikiSEO\Generator\Plugins;
 
-use ConfigException;
 use Html;
+use MediaWiki\Extension\WikiSEO\Generator\AbstractBaseGenerator;
 use MediaWiki\Extension\WikiSEO\Generator\GeneratorInterface;
-use MediaWiki\Extension\WikiSEO\Generator\Plugins\FileMetadataTrait as FileMetadata;
-use MediaWiki\Extension\WikiSEO\Generator\Plugins\RevisionMetadataTrait as RevisionMetadata;
 use MediaWiki\Extension\WikiSEO\WikiSEO;
-use MediaWiki\MediaWikiServices;
 use OutputPage;
 
 /**
@@ -33,10 +30,7 @@ use OutputPage;
  *
  * @package MediaWiki\Extension\WikiSEO\Generator\Plugins
  */
-class OpenGraph implements GeneratorInterface {
-	use FileMetadata;
-	use RevisionMetadata;
-
+class OpenGraph extends AbstractBaseGenerator implements GeneratorInterface {
 	protected static $htmlElementPropertyKey = 'property';
 	protected static $htmlElementContentKey = 'content';
 
@@ -46,19 +40,19 @@ class OpenGraph implements GeneratorInterface {
 	 * @var array
 	 */
 	protected $tags = [
-		'author',
-		'description',
-		'image',
-		'image_width',
-		'image_height',
-		'image_alt',
-		'keywords',
-		'locale',
-		'modified_time',
-		'published_time',
-		'section',
-		'site_name',
-		'type',
+	'author',
+	'description',
+	'image',
+	'image_width',
+	'image_height',
+	'image_alt',
+	'keywords',
+	'locale',
+	'modified_time',
+	'published_time',
+	'section',
+	'site_name',
+	'type',
 	];
 
 	/**
@@ -67,21 +61,21 @@ class OpenGraph implements GeneratorInterface {
 	 * @var array
 	 */
 	protected $conversions = [
-		'image'        => 'og:image',
-		'image_width'  => 'og:image:width',
-		'image_height' => 'og:image:height',
-		'image_alt'    => 'og:image:alt',
+	'image'        => 'og:image',
+	'image_width'  => 'og:image:width',
+	'image_height' => 'og:image:height',
+	'image_alt'    => 'og:image:alt',
 
-		'locale'      => 'og:locale',
-		'type'        => 'og:type',
-		'site_name'   => 'og:site_name',
-		'description' => 'og:description',
+	'locale'      => 'og:locale',
+	'type'        => 'og:type',
+	'site_name'   => 'og:site_name',
+	'description' => 'og:description',
 
-		'author'         => 'article:author',
-		'modified_time'  => 'article:modified_time',
-		'published_time' => 'article:published_time',
-		'section'        => 'article:section',
-		'keywords'       => 'article:tag',
+	'author'         => 'article:author',
+	'modified_time'  => 'article:modified_time',
+	'published_time' => 'article:published_time',
+	'section'        => 'article:section',
+	'keywords'       => 'article:tag',
 	];
 
 	/**
@@ -114,18 +108,10 @@ class OpenGraph implements GeneratorInterface {
 		$this->outputPage = $out;
 
 		if ( !isset( $this->metadata['image'] ) ) {
-			try {
-				$defaultImage =
-					MediaWikiServices::getInstance()->getMainConfig()->get( 'WikiSeoDefaultImage' );
+			$defaultImage = $this->getConfigValue( 'WikiSeoDefaultImage' );
 
-				if ( $defaultImage !== null ) {
-					$this->metadata['image'] = $defaultImage;
-				}
-
-			} catch ( ConfigException $e ) {
-				wfLogWarning( sprintf( 'Could not gef config for "$wgWikiSeoDefaultImage". %s',
-					$e->getMessage() ) );
-				// Fallthrough
+			if ( $defaultImage !== null ) {
+				$this->metadata['image'] = $defaultImage;
 			}
 		}
 
@@ -151,20 +137,28 @@ class OpenGraph implements GeneratorInterface {
 
 			$url = WikiSEO::protocolizeUrl( $url, $this->outputPage->getRequest() );
 
-			$this->outputPage->addHeadItem( 'og:url', Html::element( 'meta', [
-				self::$htmlElementPropertyKey => 'og:url',
-				self::$htmlElementContentKey  => $url,
-			] ) );
+			$this->outputPage->addHeadItem(
+				'og:url', Html::element(
+					'meta', [
+					self::$htmlElementPropertyKey => 'og:url',
+					self::$htmlElementContentKey  => $url,
+					]
+				)
+			);
 		}
 
 		foreach ( $this->tags as $tag ) {
 			if ( array_key_exists( $tag, $this->metadata ) ) {
 				$convertedTag = $this->conversions[$tag];
 
-				$this->outputPage->addHeadItem( $convertedTag, Html::element( 'meta', [
-					self::$htmlElementPropertyKey => $convertedTag,
-					self::$htmlElementContentKey  => $this->metadata[$tag]
-				] ) );
+				$this->outputPage->addHeadItem(
+					$convertedTag, Html::element(
+						'meta', [
+						self::$htmlElementPropertyKey => $convertedTag,
+						self::$htmlElementContentKey  => $this->metadata[$tag]
+						]
+					)
+				);
 			}
 		}
 	}
@@ -175,10 +169,14 @@ class OpenGraph implements GeneratorInterface {
 	 * @return void
 	 */
 	protected function addTitleMeta() {
-		$this->outputPage->addHeadItem( $this->titlePropertyName, Html::element( 'meta', [
-			self::$htmlElementPropertyKey => $this->titlePropertyName,
-			self::$htmlElementContentKey => $this->outputPage->getHTMLTitle(),
-		] ) );
+		$this->outputPage->addHeadItem(
+			$this->titlePropertyName, Html::element(
+				'meta', [
+				self::$htmlElementPropertyKey => $this->titlePropertyName,
+				self::$htmlElementContentKey => $this->outputPage->getHTMLTitle(),
+				]
+			)
+		);
 	}
 
 	/**
@@ -187,19 +185,17 @@ class OpenGraph implements GeneratorInterface {
 	 * @return void
 	 */
 	private function addSiteName() {
-		try {
-			$sitename = MediaWikiServices::getInstance()->getMainConfig()->get( 'Sitename' );
-		} catch ( ConfigException $e ) {
-			wfLogWarning( sprintf( 'Could not gef config for "$wgSitename". %s', $e->getMessage() ) );
-
-			$sitename = null;
-		}
+		$sitename = $this->getConfigValue( 'Sitename' );
 
 		if ( !isset( $this->metadata['site_name'] ) && $sitename !== null ) {
-			$this->outputPage->addHeadItem( 'og:site_name', Html::element( 'meta', [
-				self::$htmlElementPropertyKey => 'og:site_name',
-				self::$htmlElementContentKey => $sitename,
-			] ) );
+			$this->outputPage->addHeadItem(
+				'og:site_name', Html::element(
+					'meta', [
+					self::$htmlElementPropertyKey => 'og:site_name',
+					self::$htmlElementContentKey => $sitename,
+					]
+				)
+			);
 		}
 	}
 }
