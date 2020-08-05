@@ -19,6 +19,7 @@
  *
  * @file
  */
+use Wikimedia\Rdbms\LikeMatch;
 
 /**
  * Some functions to help implement an external link filter for spam control.
@@ -49,7 +50,7 @@ class LinkFilter {
 
 		$text = $content->getNativeData();
 
-		$regex = LinkFilter::makeRegex( $filterEntry );
+		$regex = self::makeRegex( $filterEntry );
 		return preg_match( $regex, $text );
 	}
 
@@ -89,10 +90,10 @@ class LinkFilter {
 	 *
 	 * @param string $filterEntry Domainparts
 	 * @param string $protocol Protocol (default http://)
-	 * @return array Array to be passed to Database::buildLike() or false on error
+	 * @return array|bool Array to be passed to Database::buildLike() or false on error
 	 */
 	public static function makeLikeArray( $filterEntry, $protocol = 'http://' ) {
-		$db = wfGetDB( DB_SLAVE );
+		$db = wfGetDB( DB_REPLICA );
 
 		$target = $protocol . $filterEntry;
 		$bits = wfParseUrl( $target );

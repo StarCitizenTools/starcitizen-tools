@@ -4,34 +4,63 @@
  * @license WTFPL 2.0
  * @author Max Semenik
  * @author Brad Jorsch
- * @author Thiemo Mättig
+ * @author Thiemo Kreuz
  */
 class PageImages {
 
 	/**
-	 * Page property used to store the page image information
+	 * Page property used to store the best page image information.
+	 * If the best image is the same as the best image with free license,
+	 * then nothing is stored under this property.
+	 * Note changing this value is not advised as it will invalidate all
+	 * existing page property names on a production instance
+	 * and cause them to be regenerated.
+	 * @see PageImages::PROP_NAME_FREE
 	 */
 	const PROP_NAME = 'page_image';
 
 	/**
+	 * Page property used to store the best free page image information
+	 * Note changing this value is not advised as it will invalidate all
+	 * existing page property names on a production instance
+	 * and cause them to be regenerated.
+	 */
+	const PROP_NAME_FREE = 'page_image_free';
+
+	/**
+	 * Get property name used in page_props table. When a page image
+	 * is stored it will be stored under this property name on the corresponding
+	 * article.
+	 *
+	 * @param bool $isFree Whether the image is a free-license image
+	 * @return string
+	 */
+	public static function getPropName( $isFree ) {
+		return $isFree ? self::PROP_NAME_FREE : self::PROP_NAME;
+	}
+
+	/**
 	 * Returns page image for a given title
 	 *
-	 * @param Title $title: Title to get page image for
+	 * @param Title $title Title to get page image for
 	 *
 	 * @return File|bool
 	 */
 	public static function getPageImage( Title $title ) {
-		$dbr = wfGetDB( DB_SLAVE );
-		$name = $dbr->selectField( 'page_props',
-			'pp_value',
-			array( 'pp_page' => $title->getArticleID(), 'pp_propname' => self::PROP_NAME ),
-			__METHOD__
+		$dbr = wfGetDB( DB_REPLICA );
+		$fileName = $dbr->selectField( 'page_props',
+			[ 'pp_value' ],
+			[
+				'pp_page' => $title->getArticleID(),
+				'pp_propname' => [ self::PROP_NAME, self::PROP_NAME_FREE ]
+			],
+			__METHOD__,
+			[ 'ORDER BY' => 'pp_propname' ]
 		);
 
 		$file = false;
-
-		if ( $name ) {
-			$file = wfFindFile( $name );
+		if ( $fileName ) {
+			$file = wfFindFile( $fileName );
 		}
 
 		return $file;
@@ -42,8 +71,8 @@ class PageImages {
 	 *
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/InfoAction
 	 *
-	 * @param IContextSource $context
-	 * @param array[] &$pageInfo
+	 * @param IContextSource $context Context, used to extract the title of the page
+	 * @param array[] &$pageInfo Auxillary information about the page.
 	 */
 	public static function onInfoAction( IContextSource $context, &$pageInfo ) {
 		global $wgThumbLimits;
@@ -57,27 +86,27 @@ class PageImages {
 		$thumbSetting = $context->getUser()->getOption( 'thumbsize' );
 		$thumbSize = $wgThumbLimits[$thumbSetting];
 
-		$thumb = $imageFile->transform( array( 'width' => $thumbSize ) );
+		$thumb = $imageFile->transform( [ 'width' => $thumbSize ] );
 		if ( !$thumb ) {
 			return;
 		}
 		$imageHtml = $thumb->toHtml(
-			array(
+			[
 				'alt' => $imageFile->getTitle()->getText(),
 				'desc-link' => true,
-			)
+			]
 		);
 
-		$pageInfo['header-basic'][] = array(
+		$pageInfo['header-basic'][] = [
 			$context->msg( 'pageimages-info-label' ),
 			$imageHtml
-		);
+		];
 	}
 
 	/**
 	 * ApiOpenSearchSuggest hook handler, enhances ApiOpenSearch results with this extension's data
 	 *
-	 * @param array[] &$results
+	 * @param array[] &$results Array of results to add page images too
 	 */
 	public static function onApiOpenSearchSuggest( array &$results ) {
 		global $wgPageImagesExpandOpenSearchXml;
@@ -100,14 +129,14 @@ class PageImages {
 	/**
 	 * SpecialMobileEditWatchlist::images hook handler, adds images to mobile watchlist A-Z view
 	 *
-	 * @param IContextSource $context
-	 * @param array[] $watchlist
-	 * @param array[] &$images
+	 * @param IContextSource $context Context object. Ignored
+	 * @param array[] $watchlist Array of relevant pages on the watchlist, sorted by namespace
+	 * @param array[] &$images Array of images to populate
 	 */
-	public static function onSpecialMobileEditWatchlist_images( IContextSource $context, array $watchlist,
-		array &$images
+	public static function onSpecialMobileEditWatchlistImages(
+		IContextSource $context, array $watchlist, array &$images
 	) {
-		$ids = array();
+		$ids = [];
 		foreach ( $watchlist as $ns => $pages ) {
 			foreach ( array_keys( $pages ) as $dbKey ) {
 				$title = Title::makeTitle( $ns, $dbKey );
@@ -137,32 +166,62 @@ class PageImages {
 	 * @return array[]
 	 */
 	private static function getImages( array $pageIds, $size = 0 ) {
-		$request = array(
-			'action' => 'query',
-			'prop' => 'pageimages',
-			'piprop' => 'name',
-			'pageids' => implode( '|', $pageIds ),
-			'pilimit' => 'max',
-		);
+		$ret = [];
+		foreach ( array_chunk( $pageIds, ApiBase::LIMIT_SML1 ) as $chunk ) {
+			$request = [
+				'action' => 'query',
+				'prop' => 'pageimages',
+				'piprop' => 'name',
+				'pageids' => implode( '|', $chunk ),
+				'pilimit' => 'max',
+			];
 
-		if ( $size ) {
-			$request['piprop'] = 'thumbnail';
-			$request['pithumbsize'] = $size;
-		}
-
-		$api = new ApiMain( new FauxRequest( $request ) );
-		$api->execute();
-
-		if ( defined( 'ApiResult::META_CONTENT' ) ) {
-			return (array)$api->getResult()->getResultData( array( 'query', 'pages' ),
-				array( 'Strip' => 'base' ) );
-		} else {
-			$data = $api->getResultData();
-			if ( isset( $data['query']['pages'] ) ) {
-				return $data['query']['pages'];
+			if ( $size ) {
+				$request['piprop'] = 'thumbnail';
+				$request['pithumbsize'] = $size;
 			}
-			return array();
+
+			$api = new ApiMain( new FauxRequest( $request ) );
+			$api->execute();
+
+			if ( defined( 'ApiResult::META_CONTENT' ) ) {
+				$ret += (array)$api->getResult()->getResultData( [ 'query', 'pages' ],
+					[ 'Strip' => 'base' ] );
+			} else {
+				$data = $api->getResultData();
+				if ( isset( $data['query']['pages'] ) ) {
+					$ret += $data['query']['pages'];
+				}
+			}
 		}
+		return $ret;
+	}
+
+	/**
+	 * Hook function called after the extension is loaded to define PAGE_IMAGES_INSTALLED
+	 * @return null
+	 */
+	public static function onRegistration() {
+		define( 'PAGE_IMAGES_INSTALLED', true );
+	}
+
+	/**
+	 * @param OutputPage &$out The page being output.
+	 * @param Skin &$skin Skin object used to generate the page. Ignored
+	 */
+	public static function onBeforePageDisplay( OutputPage &$out, Skin &$skin ) {
+		$imageFile = self::getPageImage( $out->getContext()->getTitle() );
+		if ( !$imageFile ) {
+			return;
+		}
+
+		// See https://developers.facebook.com/docs/sharing/best-practices?locale=en_US#tags
+		$thumb = $imageFile->transform( [ 'width' => 1200 ] );
+		if ( !$thumb ) {
+			return;
+		}
+
+		$out->addMeta( 'og:image', wfExpandUrl( $thumb->getUrl(), PROTO_CANONICAL ) );
 	}
 
 }

@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gion-andri"
+		]
+	},
+	"api-error-noimageinfo": "La datoteca è vegnida transferida cun success, ma il server n'ha returnà naginas infurmaziuns davart la datoteca."
+}

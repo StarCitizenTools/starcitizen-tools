@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Base",
+			"Movses",
+			"Piramidion"
+		]
+	},
+	"loops-desc": "Функції парсеру для створення циклів",
+	"loops_max": "Максимальне число циклів, що може бути створено",
+	"loops-limitreport-count-limited": "Підрахунок ExtLoops",
+	"loops-limitreport-count-unlimited": "Підрахунок ExtLoops",
+	"loops-config-countlimit": "Змінна конфігурації, що визначає максимальну дозволену кількість циклів ('-1' означає, що межі немає). \nЦя змінна не накладає обмеження на '#forargs' та '#fornumargs'.",
+	"loops-config-enabledfunctions": "Дозволяє визначити яка функціональність від 'Loops' має бути увімкненою для вікі. Якщо розширення 'Variables' не встановлено, то '#loop', '#forargs' та '#fornumargs' будуть автоматично вимкнені."
+}

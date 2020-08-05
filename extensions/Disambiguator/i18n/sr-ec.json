@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Милан Јелисавчић",
+			"Milicevic01"
+		]
+	},
+	"disambig-desc": "Додаје ознаку <code><nowiki>__DISAMBIG__</nowiki></code> за обележавање [[Special:DisambiguationPages|вишезначних одредница]]",
+	"disambiguationpages": "Вишезначне одреднице",
+	"disambiguationpages-summary": "Ово је списак вишезначних одредница на {{SITENAME}}.<br />\nСтраница се сматра вишезначном одредницом ако има ознаку <code><nowiki>__DISAMBIG__</nowiki></code> (или неки други еквивалент).",
+	"disambiguationpagelinks": "Странице до вишезначних одредница",
+	"disambiguationpagelinks-summary": "Ово је списак страница које имају бар једну везу до неке вишезначне одреднице.\nУ принципу странице не би требале да имају везе до вишезначних одредница.<br />\nСтраница се сматра вишезначном одредницом ако има ознаку <code><nowiki>__DISAMBIG__</nowiki></code> (или неки други еквивалент).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Ово је вишезначна страница"
+}

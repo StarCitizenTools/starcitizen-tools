@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable table enter key down handler
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -39,6 +39,13 @@ ve.ce.TableEnterKeyDownHandler.static.execute = function ( surface, e ) {
 		tableNode = surface.documentView.getBranchNodeFromOffset( selection.tableRange.start + 1 );
 
 	e.preventDefault();
+
+	if ( e.ctrlKey || e.metaKey ) {
+		// CTRL+Enter emits a 'submit' event from the surface
+		surface.getSurface().emit( 'submit' );
+		return true;
+	}
+
 	tableNode.setEditing( true );
 	return true;
 };

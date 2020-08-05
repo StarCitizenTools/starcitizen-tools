@@ -1,47 +1,60 @@
 .tux-message-editor {
 	position: relative;
 	border: 1px solid #777;
-	background-color: #FFFFFF;
+	background-color: #fff;
 	cursor: default;
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 2px 6px rgba( 0, 0, 0, 0.3 );
 }
 
-/* Temporary fix for T111685 */
 .grid .tux-message-editor .close {
-	background: url('../images/close.png') no-repeat scroll center center transparent;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/close.svg);
+	background: no-repeat center center;
 	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/close.svg);
-	padding: 15px;
+	background-image: linear-gradient( transparent, transparent ), url( ../images/close.svg );
+	padding: 16px;
 	cursor: pointer;
 	float: right;
+	opacity: 0.87;
 }
 
-/* Temporary fix for T111685 */
 .grid .tux-message-editor .editor-info-toggle {
-	padding: 15px;
+	padding: 16px;
 	cursor: pointer;
 	float: right;
 }
 
 .tux-message-editor .editor-contract {
-	background: url('../images/contract-ltr.png') no-repeat scroll center center transparent;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/contract-ltr.svg);
+	background: no-repeat center center;
 	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/contract-ltr.svg);
+	background-image: linear-gradient( transparent, transparent ), url( ../images/contract-ltr.svg );
 }
 
 .tux-message-editor .editor-expand {
-	background: url('../images/expand-ltr.png') no-repeat scroll center center transparent;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/expand-ltr.svg);
+	background: no-repeat center center;
 	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/expand-ltr.svg);
+	background-image: linear-gradient( transparent, transparent ), url( ../images/expand-ltr.svg );
 }
 
 .tux-message-editor .editcolumn {
-	border-right: 1px solid #AAA;
-	-webkit-transition: width 0.5s;
+	border-right: 1px solid #aaa;
 	transition: width 0.5s;
+	background-color: #fff;
+	z-index: 1;
+	/* Padding to have space for the arrow indicating split section */
+	padding-right: 40px;
+}
+
+.grid .tux-message-editor--expanded .editcolumn {
+	width: 100%;
+	padding-right: 5px;
+}
+
+.grid .tux-message-editor .tux-editor-titletools {
+	/* Ignore the padding added for the arrow */
+	margin-right: -40px;
+}
+
+.grid .tux-message-editor--expanded .tux-editor-titletools {
+	margin-right: -5px;
 }
 
 .tux-message-editor textarea {
@@ -49,6 +62,8 @@
 	font-size: 16px;
 	/* The (30px + 5px paddings) 40px for bottom is for the insertables */
 	padding: 5px 5px 40px 5px;
+	/* Normalize margin across skins (esp. Timeless) */
+	margin: 0;
 	height: 100px;
 	min-height: 150px;
 	overflow-y: auto;
@@ -56,10 +71,14 @@
 	z-index: 100;
 	/* We have automatic resizing for height, and horizontal makes no sense */
 	resize: none;
+	/* Avoid weird extra space appearing at the bottom of enclosing div when
+	 * the default value inline-block is used in Chrome.
+	 * https://stackoverflow.com/questions/5196424/inconsistent-textarea-handling-in-browsers */
+	display: block;
 }
 
 .tux-editor-editsummary-block input {
-	border: 1px solid #C0C0C0;
+	border: 1px solid #c0c0c0;
 	font-size: 14px;
 	width: 100%;
 	height: 30px;
@@ -68,7 +87,7 @@
 }
 
 .tux-editor-editsummary-block input:disabled {
-	background-color: #F8F8F8;
+	background-color: #f8f8f8;
 }
 
 .tux-message-editor .editarea {
@@ -77,7 +96,7 @@
 
 /* Temporary fix for T111685 */
 .grid .tux-message-editor .messagekey {
-	color: #252525;
+	color: #222;
 	font-size: 13px;
 	font-weight: bold;
 	padding: 5px 0 5px 10px;
@@ -85,7 +104,7 @@
 }
 
 .tux-message-editor .messagekey .caret {
-	border-top: 4px solid #252525;
+	border-top: 4px solid #222;
 	border-left: 4px solid transparent;
 	border-right: 4px solid transparent;
 	display: inline-block;
@@ -110,9 +129,16 @@
 }
 
 .tux-message-editor .shortcutinfo {
+	color: #54595d;
 	font-size: 13px;
-	color: #555;
 	padding: 0 5px 5px 10px;
+	display: none;
+}
+
+@media screen and ( min-width: 980px ) {
+	.tux-message-editor .shortcutinfo {
+		display: block;
+	}
 }
 
 .tux-message-editor .infocolumn-block .infocolumn {
@@ -128,36 +154,38 @@
 /* Temporary fix for T111685 */
 .grid .tux-message-editor .infocolumn-block {
 	font-size: 12pt;
-	background: #FCFCFC;
+	background: #fcfcfc;
 	position: absolute;
 	top: 0;
 	right: 0;
 	bottom: 0;
 	padding: 0;
-	-webkit-transition: width 0.5s;
 	transition: width 0.5s;
 }
 
-.tux-message-editor .infocolumn-block .caret:before {
+.tux-message-editor__caret:before,
+.tux-message-editor__caret:after {
 	border-top: 20px solid transparent;
-	border-right: 20px solid #AAA;
+	border-right: 20px solid #aaa;
 	border-bottom: 20px solid transparent;
-	content: "";
+	content: '';
 	display: inline-block;
 	left: -21px;
 	position: absolute;
 	bottom: 50%;
+	z-index: 2;
+	transition: visibility 0s 0.5s;
 }
 
-.tux-message-editor .infocolumn-block .caret:after {
-	border-top: 20px solid transparent;
-	border-right: 20px solid #FCFCFC;
-	border-bottom: 20px solid transparent;
-	content: "";
-	display: inline-block;
+.tux-message-editor__caret:after {
+	border-right: 20px solid #fcfcfc;
 	left: -20px;
-	position: absolute;
-	bottom: 50%;
+}
+
+.tux-message-editor--expanded .tux-message-editor__caret:before,
+.tux-message-editor--expanded .tux-message-editor__caret:after {
+	visibility: hidden;
+	transition: visibility 0s 0s;
 }
 
 .infocolumn-block .infocolumn .message-desc-editor {
@@ -178,7 +206,7 @@
 
 .infocolumn-block .infocolumn .message-desc.long {
 	font-size: 14px;
-	border-bottom: 1px solid #DDD;
+	border-bottom: 1px solid #ddd;
 }
 
 .infocolumn-block .infocolumn .message-desc.compact {
@@ -194,16 +222,14 @@
 
 .message-desc-control .read-more {
 	font-size: 14px;
-	color: #3366BB;
+	color: #36c;
 	cursor: pointer;
 	margin-right: 5px;
 }
 
 .message-desc-edit {
-	background: transparent url(../images/action-edit.png) left center no-repeat;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/action-edit.svg);
-	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/action-edit.svg);
+	background: left center no-repeat;
+	background-image: /* @embed */ linear-gradient( transparent, transparent ), url( ../images/action-edit.svg );
 	background-size: 18px 18px;
 	padding-left: 19px;
 }
@@ -219,7 +245,7 @@
 .in-other-language {
 	font-size: 14px;
 	border: 1px solid #ddd;
-	border-left: 2px solid #3366BB;
+	border-left: 2px solid #36c;
 	padding: 5px 5px 5px 10px;
 	background-color: #f5f5f5;
 }
@@ -232,11 +258,11 @@
 .tm-suggestion:hover,
 .in-other-language:hover {
 	cursor: pointer;
-	box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 0 3px rgba( 0, 0, 0, 0.2 );
 }
 
 .in-other-language .language {
-	color: #565656;
+	color: #54595d;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
@@ -256,11 +282,11 @@
 }
 
 .tux-warning {
-	background-color: #FFFFCC;
+	background-color: #ffc;
 }
 
 .tux-highlight {
-	background-color: #C9C9C9;
+	background-color: #c9c9c9;
 }
 
 .tux-warning-message {
@@ -279,7 +305,7 @@
 }
 
 .editarea .tux-more-warnings {
-	background-color: #FBF6AD;
+	background-color: #fbf6ad;
 	position: absolute;
 	right: 0;
 	padding: 2px 5px;
@@ -289,31 +315,25 @@
 }
 
 .tux-warning-message.validation {
-	background-image: url(../images/label-flag.png);
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/label-flag.svg);
-	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/label-flag.svg);
+	background-image: /* @embed */ linear-gradient( transparent, transparent ), url( ../images/label-flag.svg );
 }
 
 .tux-warning-message.diff {
-	background-image: url(../images/label-clock.png);
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/label-clock.svg);
-	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/label-clock.svg);
+	background-image: /* @embed */ linear-gradient( transparent, transparent ), url( ../images/label-clock.svg );
 }
 
 .tux-warning-message .show-diff-link {
-	color: #3366BB;
+	color: #36c;
 	cursor: pointer;
 	padding-left: 5px;
 }
 
 .editarea .tux-more-warnings:before {
-	content: "";
-	border-bottom: 1em solid #FBF6AD;
+	content: '';
+	border-bottom: 1em solid #fbf6ad;
 	border-top: 1em solid transparent;
 	border-left: 1em solid transparent;
-	border-right: 1em solid #FBF6AD;
+	border-right: 1em solid #fbf6ad;
 	display: inline-block;
 	position: absolute;
 	right: 100%;
@@ -323,7 +343,7 @@
 .tux-editor-request-right {
 	font-size: 13px;
 	padding: 0 5px;
-	color: #555;
+	color: #54595d;
 }
 
 .tux-editor-ask-permission {
@@ -352,19 +372,22 @@
 }
 
 .tux-editor-insert-buttons button {
-	padding: 4px;
-	border: 1px solid #DDD;
-	background: #FBFBFB;
-	color: #252525;
+	padding: 0 5px;
+	min-width: 30px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	border: 1px solid #ddd;
+	background: #fbfbfb;
+	color: #222;
 	font-size: 13px;
+	line-height: 30px;
 	height: 30px;
 }
 
 .tux-editor-insert-buttons .tux-editor-paste-original-button {
-	background: #FBFBFB url(../images/paste.png) left center no-repeat;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/paste.svg);
+	background: #fbfbfb left center no-repeat;
 	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/paste.svg);
+	background-image: linear-gradient( transparent, transparent ), url( ../images/paste.svg );
 	background-size: 16px 16px;
 	padding-left: 18px;
 }
@@ -380,13 +403,13 @@
 }
 
 .infocolumn .loading {
+	color: #54595d;
 	padding: 10px;
 	font-size: 14px;
-	color: #565656;
 }
 
 .tux-message-tools-menu li a {
-	color: #555555;
+	color: #54595d;
 	display: block;
 	font-size: 14px;
 	padding: 0 2px;
@@ -396,15 +419,14 @@
 .tux-message-tools-menu li a:hover {
 	cursor: pointer;
 	background-color: #f0f0f0;
-	color: #252525;
+	color: #222;
 }
 
 .tux-message-tools-menu li.selected {
-	background: url(../images/label-tick.png) right no-repeat;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/label-tick.svg);
+	background: right no-repeat;
 	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/label-tick.svg);
-	color: #252525;
+	background-image: linear-gradient( transparent, transparent ), url( ../images/label-tick.svg );
+	color: #222;
 }
 
 /*
@@ -424,19 +446,15 @@
 }
 
 .shortcut-popup {
-	/* Firefox likes to add "relative" inline for elements with offset */
-	position: absolute !important;
-	width: 17px;
-	height: 17px;
-	line-height: 17px;
+	width: 18px;
+	height: 18px;
+	line-height: 18px;
 	overflow: hidden;
 	font-size: 13px;
 	text-align: center;
-	border: 1px dashed gray;
+	border: 1px dashed #808080;
 	border-radius: 100%;
 	z-index: 110;
-	background-color: white;
-	margin-top: -10px;
-	/* @noflip */
-	margin-left: -10px;
+	background-color: #fff;
+	padding: 3px;
 }

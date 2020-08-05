@@ -25,15 +25,14 @@ namespace MediaWiki\Logger;
  *
  * Usage:
  * @code
- * $wgMWLoggerDefaultSpi = array(
- *   'class' => '\\MediaWiki\\Logger\\LegacySpi',
- * );
+ * $wgMWLoggerDefaultSpi = [
+ *   'class' => \MediaWiki\Logger\LegacySpi::class,
+ * ];
  * @endcode
  *
  * @see \MediaWiki\Logger\LoggerFactory
  * @since 1.25
- * @author Bryan Davis <bd808@wikimedia.org>
- * @copyright © 2014 Bryan Davis and Wikimedia Foundation.
+ * @copyright © 2014 Wikimedia Foundation and contributors
  */
 class LegacySpi implements Spi {
 

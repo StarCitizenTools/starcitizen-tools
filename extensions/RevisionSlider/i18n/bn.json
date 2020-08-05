@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aftabuzzaman",
+			"Macofe"
+		]
+	},
+	"revisionslider": "সংশোধনস্লাইডার",
+	"revisionslider-preference-disable": "সংশোধন স্লাইডার প্রদর্শন করবেন না",
+	"revisionslider-desc": "একটি স্লাইডার দেখায় যা পার্থক্য পাতায় সংশোধন নির্বাচন করতে ও তুলনা করতে অনুমতি দেয়।",
+	"revisionslider-toggle-label": "ইতিহাস ব্রাউজ করুন",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|বাইট}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|বাইট}}",
+	"revisionslider-label-date": "তারিখ",
+	"revisionslider-label-page-size": "পাতার আকার",
+	"revisionslider-label-change-size": "পরিবর্তনের আকার",
+	"revisionslider-label-comment": "মন্তব্য",
+	"revisionslider-label-username": "{{GENDER:$1|ব্যবহারকারী নাম}}",
+	"revisionslider-minoredit": "এটি একটি অনুল্লেখিত সম্পাদনা",
+	"revisionslider-loading-failed": "সংশোধন স্লাইডার লোড হতে ব্যর্থ।",
+	"revisionslider-toggle-title-expand": "সংশোধন স্লাইডার খুলুন",
+	"revisionslider-toggle-title-collapse": "সংশোধন স্লাইডার সংকোচন করুন",
+	"revisionslider-turn-on-auto-expand-title": "সবসময় সংশোধন স্লাইডার সম্প্রসারণ করুন",
+	"revisionslider-turn-off-auto-expand-title": "স্বয়ংক্রিয়ভাবে সংশোধন স্লাইডার সম্প্রসারণ করবেন না",
+	"revisionslider-arrow-tooltip-newer": "নতুন সংস্করণ দেখুন",
+	"revisionslider-arrow-tooltip-older": "পুরনো সংস্করণ দেখুন",
+	"revisionslider-show-help-tooltip": "সাহায্য পাঠ্য দেখান",
+	"revisionslider-help-dialog-slide1": "পার্থক্য পাতায় সংশোধন তুলনা করতে ও পরিভ্রমণ করতে সংশোধন স্লাইডার আপনাকে সাহায্য করবে। এটি জার্মান ভাষী সম্প্রদায়ের প্রযুক্তিগত ইচ্ছাতালিকা থেকে [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider সম্প্রদায়ের ইচ্ছার] উপর ভিত্তি করে করা। [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider এখানে] প্রতিক্রিয়া জানান।",
+	"revisionslider-help-dialog-slide2": "প্রতিটি দণ্ড একটি সংশোধনকে প্রতিনিধিত্ব করে। উপরের দণ্ড পাতার আকারের বৃদ্ধি দেখায়, নিচের দণ্ড হ্রাস দেখায়। চিত্রে, সংশোধন ১ বিষয়বস্তু যোগ করাকে উপস্থাপন করছে, যেখানে সংশোধন ২ বিষয়বস্তু সরানো উপস্থাপন করছে।",
+	"revisionslider-help-dialog-slide3a": "<p>নির্দিষ্ট সংশোধন তুলনা করার জন্য, হলুদ এবং নীল গাঁট ব্যবহার করে সংশোধন নির্বাচন করুন।</p><p>নীল গাঁট অপেক্ষাকৃত নতুন সংস্করণ নিয়ন্ত্রণ করে, হলুদ গাঁট পুরোনো সংস্করণে মানচিত্রায়ন করে।</p><p>টেনে এনে ছাড়ার দ্বারা গাঁট সরান বা স্লাইডার লাইনে ক্লিক করুন।</p>",
+	"revisionslider-help-dialog-slide4": "পুরনো ও নতুন দেখতে এবং সংশোধন ইতিহাসের মাধ্যমে এগিয়ে যেতে সামনে ও পিছনের তীরগুলি ব্যবহার করুন।",
+	"revisionslider-tutorial": "সংশোধন স্লাইডার নির্দেশিকা",
+	"revisionslider-previous-dialog": "পূর্ববর্তী",
+	"revisionslider-next-dialog": "পরবর্তী",
+	"revisionslider-close-dialog": "বন্ধ"
+}

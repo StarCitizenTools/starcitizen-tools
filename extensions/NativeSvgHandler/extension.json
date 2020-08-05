@@ -1,0 +1,29 @@
+{
+	"name": "NativeSvgHandler",
+	"version": "1.3.2",
+	"author": [
+		"Povilas Kanapickas",
+		"Ilaï Deutel"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:NativeSvgHandler",
+	"namemsg": "nativesvghandler-extensionname",
+	"descriptionmsg": "nativesvghandler-desc",
+	"license-name": "GPL-3.0",
+	"type": "media",
+	"requires": {
+		"MediaWiki": ">= 1.31.0"
+	},
+	"AutoloadClasses": {
+		"NativeSvgHandler": "includes/NativeSvgHandler.php",
+		"SvgImage": "includes/SvgImage.php"
+	},
+	"MessagesDirs": {
+		"NativeSvgHandler": [
+			"i18n"
+		]
+	},
+	"MediaHandlers": {
+		"image/svg+xml": "NativeSvgHandler"
+	},
+	"manifest_version": 2
+}

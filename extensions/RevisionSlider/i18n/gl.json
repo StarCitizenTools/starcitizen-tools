@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elisardojm",
+			"Macofe",
+			"Banjo",
+			"Toliño"
+		]
+	},
+	"revisionslider": "Cronograma de revisións",
+	"revisionslider-preference-disable": "Non amosar o Cronograma de revisións",
+	"revisionslider-desc": "Mostra un control deslizante que permite a selección e comparación das revisións nunha páxina de diferenzas",
+	"revisionslider-toggle-label": "Explorar o historial",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte|bytes}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte|bytes}}",
+	"revisionslider-label-date": "Data",
+	"revisionslider-label-page-size": "Tamaño da páxina",
+	"revisionslider-label-change-size": "Tamaño da modificación",
+	"revisionslider-label-comment": "Comentario",
+	"revisionslider-label-username": "Nome de {{GENDER:$1|usuario|usuaria}}",
+	"revisionslider-minoredit": "Esta é unha edición pequena",
+	"revisionslider-loading-failed": "Non se puido cargar o cronograma de revisións.",
+	"revisionslider-toggle-title-expand": "Abrir o cronograma de revisións",
+	"revisionslider-toggle-title-collapse": "Pechar o cronograma de revisións",
+	"revisionslider-turn-on-auto-expand-title": "Expandir sempre o cronograma de revisións",
+	"revisionslider-turn-off-auto-expand-title": "Non expandir automaticamente o cronograma de revisións",
+	"revisionslider-arrow-tooltip-newer": "Ver as revisións máis recentes",
+	"revisionslider-arrow-tooltip-older": "Ver as revisións máis vellas",
+	"revisionslider-show-help-tooltip": "Mostrar o texto de axuda",
+	"revisionslider-help-dialog-slide1": "O cronograma de revisións axuda a navegar e comparar as revisións na páxina de diferenzas. Está baseado nunha [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlidersolicitude comunitaria] da lista de solicitudes técnicas da comunidade xermanoparlante. Os comentarios son benvidos [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider aquí].",
+	"revisionslider-help-dialog-slide2": "Cada barra representa unha revisión da páxina. As barras superiores mostran un crecemento no tamaño da páxina e as barras inferiores mostran unha redución. Na imaxe, a revisión 1 representa o contido engadido, mentres que a revisión 2 representa a eliminación de contido.",
+	"revisionslider-help-dialog-slide3a": "<p>Para comparar certas revisións, seleccióneas utilizando o punteiro amarelo e azul.</p><p>O punteiro azul controla a revisión máis recente e o amarelo a máis antiga.</p><p>Mova os punteiros arrastrando ou soltando, ou prema na liña da barra.</p>",
+	"revisionslider-help-dialog-slide4": "Use as frechas de avanzar e retroceder para moverse a través do historial de revisións e mostrar as revisións máis novas e máis antigas.",
+	"revisionslider-tutorial": "Guía para o cronograma de revisións",
+	"revisionslider-previous-dialog": "Anterior",
+	"revisionslider-next-dialog": "Seguinte",
+	"revisionslider-close-dialog": "Pechar"
+}

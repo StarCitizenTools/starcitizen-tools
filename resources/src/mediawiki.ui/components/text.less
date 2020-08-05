@@ -1,6 +1,6 @@
-@import "mediawiki.mixins";
-@import "mediawiki.ui/variables";
-@import "mediawiki.ui/mixins";
+@import 'mediawiki.mixins';
+@import 'mediawiki.ui/variables';
+@import 'mediawiki.ui/mixins';
 
 /*
 Text & Anchors
@@ -19,7 +19,6 @@ example, mw-ui-anchor with A, or mw-ui-button with buttons.
 
 Markup:
 <span class="mw-ui-text mw-ui-progressive">Progressive</span>
-<span class="mw-ui-text mw-ui-constructive">Constructive</span>
 <span class="mw-ui-text mw-ui-destructive">Destructive</span>
 
 Styleguide 6.1.
@@ -28,13 +27,10 @@ Styleguide 6.1.
 .mw-ui-text {
 	// The selector order is like this on purpose; IE 6 ignores the second selector,
 	// so we don't want to accidentally apply this color on all mw-ui-CONTEXT classes
-	.mw-ui-progressive& {
+	&.mw-ui-progressive {
 		color: @colorProgressive;
 	}
-	.mw-ui-constructive& {
-		color: @colorConstructive;
-	}
-	.mw-ui-destructive& {
+	&.mw-ui-destructive {
 		color: @colorDestructive;
 	}
 }

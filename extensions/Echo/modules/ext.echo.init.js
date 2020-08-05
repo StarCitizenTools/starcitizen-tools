@@ -9,30 +9,38 @@
 	}
 
 	mw.echo = mw.echo || {};
+	mw.echo.config = mw.echo.config || {};
+	// Set default max prioritized action links per item
+	mw.echo.config.maxPrioritizedActions = 2;
 
 	// Activate ooui
-	$( document ).ready( function () {
+	$( function () {
 		var myWidget, echoApi,
 			$existingAlertLink = $( '#pt-notifications-alert a' ),
-			$existingMessageLink = $( '#pt-notifications-message a' ),
-			numAlerts = $existingAlertLink.text(),
-			numMessages = $existingMessageLink.text(),
+			$existingMessageLink = $( '#pt-notifications-notice a' ),
+			numAlerts = $existingAlertLink.attr( 'data-counter-num' ),
+			numMessages = $existingMessageLink.attr( 'data-counter-num' ),
+			badgeLabelAlerts = $existingAlertLink.attr( 'data-counter-text' ),
+			badgeLabelMessages = $existingMessageLink.attr( 'data-counter-text' ),
 			hasUnseenAlerts = $existingAlertLink.hasClass( 'mw-echo-unseen-notifications' ),
 			hasUnseenMessages = $existingMessageLink.hasClass( 'mw-echo-unseen-notifications' ),
 			// Store links
 			links = {
-				notifications: $( '#pt-notifications-alert a' ).attr( 'href' ),
-				preferences: $( '#pt-preferences a' ).attr( 'href' ) + '#mw-prefsection-echo'
+				notifications: $( '#pt-notifications-alert a' ).attr( 'href' ) || mw.util.getUrl( 'Special:Notifications' ),
+				preferences: ( $( '#pt-preferences a' ).attr( 'href' ) || mw.util.getUrl( 'Special:Preferences' ) ) +
+					'#mw-prefsection-echo'
 			};
 
 		// Respond to click on the notification button and load the UI on demand
 		$( '.mw-echo-notification-badge-nojs' ).click( function ( e ) {
-			var myType = $( this ).parent().prop( 'id' ) === 'pt-notifications-alert' ? 'alert' : 'message',
-				time = mw.now();
+			var time = mw.now(),
+				myType = $( this ).parent().prop( 'id' ) === 'pt-notifications-alert' ? 'alert' : 'message';
 
-			if ( e.which !== 1 ) {
-				return;
+			if ( e.which !== 1 || $( this ).data( 'clicked' ) ) {
+				return false;
 			}
+
+			$( this ).data( 'clicked', true );
 
 			// Dim the button while we load
 			$( this ).addClass( 'mw-echo-notifications-badge-dimmed' );
@@ -47,69 +55,63 @@
 
 			// Load the ui
 			mw.loader.using( 'ext.echo.ui.desktop', function () {
-				var messageNotificationsModel,
-					alertNotificationsModel,
+				var messageController,
+					alertController,
+					messageModelManager,
+					alertModelManager,
 					unreadMessageCounter,
 					unreadAlertCounter,
 					maxNotificationCount = mw.config.get( 'wgEchoMaxNotificationCount' );
 
 				// Overlay
 				$( 'body' ).append( mw.echo.ui.$overlay );
-
 				// Load message button and popup if messages exist
 				if ( $existingMessageLink.length ) {
 					unreadMessageCounter = new mw.echo.dm.UnreadNotificationCounter( echoApi, 'message', maxNotificationCount );
-					messageNotificationsModel = new mw.echo.dm.NotificationsModel(
-						echoApi,
-						unreadMessageCounter,
+					messageModelManager = new mw.echo.dm.ModelManager( unreadMessageCounter, { type: 'message' } );
+					messageController = new mw.echo.Controller( echoApi, messageModelManager );
+
+					mw.echo.ui.messageWidget = new mw.echo.ui.NotificationBadgeWidget(
+						messageController,
+						messageModelManager,
 						{
-							type: 'message'
+							$overlay: mw.echo.ui.$overlay,
+							numItems: Number( numMessages ),
+							hasUnseen: hasUnseenMessages,
+							badgeIcon: 'tray',
+							convertedNumber: badgeLabelMessages,
+							links: links,
+							href: $existingMessageLink.attr( 'href' )
 						}
 					);
-					mw.echo.ui.messageWidget = new mw.echo.ui.NotificationBadgeWidget( messageNotificationsModel, unreadMessageCounter, {
-						markReadWhenSeen: false,
-						$overlay: mw.echo.ui.$overlay,
-						numItems: numMessages,
-						hasUnseen: hasUnseenMessages,
-						badgeIcon: 'speechBubbles',
-						links: links,
-						href: $existingMessageLink.attr( 'href' )
-					} );
-					// HACK: avoid late debouncedUpdateThemeClasses
-					mw.echo.ui.messageWidget.badgeButton.debouncedUpdateThemeClasses();
 					// Replace the link button with the ooui button
 					$existingMessageLink.parent().replaceWith( mw.echo.ui.messageWidget.$element );
-
-					mw.echo.ui.messageWidget.getModel().on( 'allTalkRead', function () {
-						// If there was a talk page notification, get rid of it
-						$( '#pt-mytalk a' )
-							.removeClass( 'mw-echo-alert' )
-							.text( mw.msg( 'mytalk' ) );
-					} );
 				}
-				// Load alerts popup and button
 				unreadAlertCounter = new mw.echo.dm.UnreadNotificationCounter( echoApi, 'alert', maxNotificationCount );
-				alertNotificationsModel = new mw.echo.dm.NotificationsModel(
-					echoApi,
-					unreadAlertCounter,
+				alertModelManager = new mw.echo.dm.ModelManager( unreadAlertCounter, { type: 'alert' } );
+				alertController = new mw.echo.Controller( echoApi, alertModelManager );
+
+				mw.echo.ui.alertWidget = new mw.echo.ui.NotificationBadgeWidget(
+					alertController,
+					alertModelManager,
 					{
-						type: 'alert'
+						numItems: Number( numAlerts ),
+						convertedNumber: badgeLabelAlerts,
+						hasUnseen: hasUnseenAlerts,
+						badgeIcon: 'bell',
+						links: links,
+						$overlay: mw.echo.ui.$overlay,
+						href: $existingAlertLink.attr( 'href' )
 					}
 				);
-				mw.echo.ui.alertWidget = new mw.echo.ui.NotificationBadgeWidget( alertNotificationsModel, unreadAlertCounter, {
-					markReadWhenSeen: true,
-					numItems: numAlerts,
-					hasUnseen: hasUnseenAlerts,
-					badgeIcon: {
-						seen: 'bell',
-						unseen: 'bellOn'
-					},
-					links: links,
-					$overlay: mw.echo.ui.$overlay,
-					href: $existingAlertLink.attr( 'href' )
+
+				alertModelManager.on( 'allTalkRead', function () {
+					// If there was a talk page notification, get rid of it
+					$( '#pt-mytalk a' )
+						.removeClass( 'mw-echo-alert' )
+						.text( mw.msg( 'mytalk' ) );
 				} );
-				// HACK: avoid late debouncedUpdateThemeClasses
-				mw.echo.ui.alertWidget.badgeButton.debouncedUpdateThemeClasses();
+
 				// Replace the link button with the ooui button
 				$existingAlertLink.parent().replaceWith( mw.echo.ui.alertWidget.$element );
 
@@ -133,4 +135,4 @@
 		} );
 	} );
 
-} )( mediaWiki, jQuery );
+}( mediaWiki, jQuery ) );

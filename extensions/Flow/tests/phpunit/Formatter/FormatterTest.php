@@ -2,6 +2,7 @@
 
 namespace Flow\Tests\Formatter;
 
+use ExtensionRegistry;
 use Flow\Container;
 use Flow\Formatter\FormatterRow;
 use Flow\Formatter\RevisionFormatter;
@@ -15,32 +16,32 @@ use Title;
  */
 class FormatterTest extends FlowTestCase {
 
-	static public function checkUserProvider() {
+	public static function checkUserProvider() {
 		$topicId = UUID::create();
 		$revId = UUID::create();
 		$postId = UUID::create();
 
-		return array(
-			array(
+		return [
+			[
 				'With only a topicId reply should not fail',
 				// result must contain
-				function( $test, $message, $result ) {
+				function ( $test, $message, $result ) {
 					$test->assertNotNull( $result );
 					$test->assertArrayHasKey( 'links', $result, $message );
 				},
 				// cuc_comment parameters
 				'reply', $topicId, $revId, null
-			),
+			],
 
-			array(
+			[
 				'With topicId and postId should not fail',
-				function( $test, $message, $result ) {
+				function ( $test, $message, $result ) {
 					$test->assertNotNull( $result );
 					$test->assertArrayHasKey( 'links', $result, $message );
 				},
 				'reply', $topicId, $revId, $postId,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -49,7 +50,7 @@ class FormatterTest extends FlowTestCase {
 	public function testCheckUserFormatter( $message, $test, $action, UUID $workflowId, UUID $revId, UUID $postId = null ) {
 		global $wgLang;
 
-		if ( !class_exists( 'CheckUser' ) ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'CheckUser' ) ) {
 			$this->markTestSkipped( 'CheckUser is not available' );
 			return;
 		}
@@ -70,9 +71,9 @@ class FormatterTest extends FlowTestCase {
 
 		// Code uses wfWarn as a louder wfDebugLog in error conditions.
 		// but phpunit considers a warning a fail.
-		wfSuppressWarnings();
+		\Wikimedia\suppressWarnings();
 		$links = $this->createFormatter( 'Flow\Formatter\CheckUserFormatter' )->format( $row, $ctx );
-		wfRestoreWarnings();
+		\Wikimedia\restoreWarnings();
 		$test( $this, $message, $links );
 	}
 

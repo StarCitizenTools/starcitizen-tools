@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Leinad"
-		]
-	},
-	"css-desc": "Funkcja parsera pozwalająca dołączać arkusze stylów CSS do wskazanych stron"
-}

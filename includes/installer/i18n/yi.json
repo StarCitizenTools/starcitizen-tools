@@ -39,9 +39,8 @@
 	"config-env-bad": "מ'האט קאנטראלירט די סביבה.\nאיר קענט נישט אינסטאלירן מעדיעוויקי.",
 	"config-env-php": "PHP $1 איז אינצטאלירט.",
 	"config-env-hhvm": "HHVM $1 איז אינסטאלירט.",
-	"config-xcache": "[http://xcache.lighttpd.net/ XCache] איז אינסטאלירט",
 	"config-apc": "[http://www.php.net/apc APC] איז אינסטאלירט",
-	"config-wincache": "[http://www.iis.net/download/WinCacheForPhp WinCache] איז אינסטאלירט",
+	"config-wincache": "[https://www.iis.net/download/WinCacheForPhp WinCache] איז אינסטאלירט",
 	"config-diff3-bad": "GNU diff3 נישט געטראפן.",
 	"config-using-server": "באניצן סארווער־נאמען \"<nowiki>$1</nowiki>\".",
 	"config-using-uri": "באניצן סארווער־אדרעס \"<nowiki>$1$2</nowiki>\".",
@@ -50,6 +49,7 @@
 	"config-db-host-oracle": "דאטנבאזע־TNS:",
 	"config-db-wiki-settings": "אידענטיפיצירן די דאזיקע וויקי",
 	"config-db-name": "דאטנבאזע נאָמען:",
+	"config-db-name-oracle": "דאטנבאזע סכעמע:",
 	"config-db-install-account": "באניצער־קאנטע פאר אינסטאלאציע",
 	"config-db-username": "דאטנבאזע באניצער־נאָמען:",
 	"config-db-password": "דאטנבאזע־פאסווארט:",
@@ -65,10 +65,11 @@
 	"config-admin-email": "בליצפּאָסט אַדרעס:",
 	"config-install-tables": "שאפן טאבעלעס",
 	"config-install-tables-exist": "'''ווארענונג''': זעט אויס אז די מעדיעוויקי טאבעלעס עקזיסטירן שוין.\nאיבערהיפן שאפֿן.",
+	"config-install-stats": "סטאַטיסטיק ווערן איניציאַליזירט",
 	"config-install-mainpage-failed": "מ'האט נישט געקענט אריינגעבן הויפטבלאט: $1",
 	"config-download-localsettings": "אראפלאדן <code>LocalSettings.php</code>",
 	"config-help": "הילף",
 	"config-nofile": "מ'האט נישט געקענט טרעפן די טעקע \"$1\". צי האט מען זי אויסגעמעקט?",
 	"mainpagetext": "<strong> מעדיעוויקי אינסטאלירט.</strong>",
-	"mainpagedocfooter": "גיט זיך אן עצה מיט [//meta.wikimedia.org/wiki/Help:Contents באניצער'ס וועגווײַזער] פֿאר אינפֿארמאציע וויאזוי זיך באנוצן מיט וויקי ווייכוואַרג.\n\n== נוצליכע וועבלינקען פֿאַר אנהייבערס ==\n* [//www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings רשימה פון קאנפֿיגוראציעס]\n* [//www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ אפֿט געפֿרעגטע שאלות]\n* [https://lists.wikimedia.org/mailman/listinfo/mediawiki-announce מעדיעוויקי באפֿרײַאונג פאסטליסטע]* [//www.mediawiki.org/wiki/Special:MyLanguage/Localisation#Translation_resources איבערזעצן מעדיעוויקי אין אײַער שפראך]\n* [//www.mediawiki.org/wiki/Special:MyLanguage/Manual:Combating_spam לערנט וויאזוי צו באקעמפן בפעם אויף אייער וויקי]"
+	"mainpagedocfooter": "גיט זיך אן עצה מיט [https://meta.wikimedia.org/wiki/Help:Contents באניצער'ס וועגווײַזער] פֿאר אינפֿארמאציע וויאזוי זיך באנוצן מיט וויקי ווייכוואַרג.\n\n== נוצליכע וועבלינקען פֿאַר אנהייבערס ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings רשימה פון קאנפֿיגוראציעס]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ אפֿט געפֿרעגטע שאלות]\n* [https://lists.wikimedia.org/mailman/listinfo/mediawiki-announce מעדיעוויקי באפֿרײַאונג פאסטליסטע]* [https://www.mediawiki.org/wiki/Special:MyLanguage/Localisation#Translation_resources איבערזעצן מעדיעוויקי אין אײַער שפראך]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Combating_spam לערנט וויאזוי צו באקעמפן בפעם אויף אייער וויקי]"
 }

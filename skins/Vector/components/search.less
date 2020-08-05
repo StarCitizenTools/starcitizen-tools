@@ -1,22 +1,28 @@
+@import 'mediawiki.mixins';
+@import 'mediawiki.ui/variables';
+
 /* Search */
 #p-search {
-	/* @noflip */
 	float: left;
 	margin-right: 0.5em;
 	margin-left: 0.5em;
 
 	h3 {
-		display: none;
+		.mixin-screen-reader-text;
 	}
 
 	form,
 	input {
-		margin: 0;
-		margin-top: 0.4em;
+		margin: 0.4em 0 0;
 	}
 }
 
-div#simpleSearch {
+#simpleSearch {
+	background-color: #fff;
+	.background-image( 'images/search-fade.png' );
+	background-position: top left;
+	background-repeat: repeat-x;
+	color: #000;
 	display: block;
 	width: 12.6em;
 	width: 20vw; /* responsive width */
@@ -27,20 +33,21 @@ div#simpleSearch {
 	margin-top: 0.65em;
 	position: relative;
 	min-height: 1px; /* Gotta trigger hasLayout for IE7 */
-	border: solid 1px #aaa;
-	color: black;
-	background-color: white;
-	.background-image('images/search-fade.png');
-	background-position: top left;
-	background-repeat: repeat-x;
+	border: 1px solid @colorGray10;
+	border-radius: @borderRadius;
+	.transition( border-color 250ms );
+
+	&:hover {
+		border-color: @colorGray7;
+	}
 
 	// Styles for both the search input and the button
 	input {
+		background-color: transparent;
+		color: #000;
 		margin: 0;
 		padding: 0;
 		border: 0;
-		background-color: transparent;
-		color: black;
 	}
 
 	// The search input
@@ -51,26 +58,15 @@ div#simpleSearch {
 		direction: ltr;
 
 		&:focus {
-			outline: none;
+			outline: 0;
 		}
 
-		// These rules MAY NOT be merged because of how CSS requires browsers
-		// to parse unrecognized selectors!
-		// Note these rules ensure that placeholder text can be distinguished from
-		// standard text. In browsers which make this distinction clear these rules
-		// are not necessary.
-		// For inputs that use jquery.placeholder.js e.g. IE9-
-		&.placeholder {
-			color: #999;
-		}
-		// Distinguish placeholder text in IE10+
-		&:-ms-input-placeholder {
-			color: #999;
-		}
-		// Distinguish placeholder text in Firefox 18-
-		&:-moz-placeholder {
-			color: #999;
-		}
+		/* stylelint-disable indentation */
+		.mixin-placeholder( {
+			color: @colorGray7;
+			opacity: 1;
+		} );
+		/* stylelint-enable indentation */
 
 		// Undo the styles Webkit browsers apply to type=search fields,
 		// we provide our own
@@ -103,7 +99,10 @@ div#simpleSearch {
 		direction: ltr;
 		white-space: nowrap;
 		overflow: hidden;
-		.background-image-svg('images/search-ltr.svg', 'images/search-ltr.png');
+	}
+
+	#searchButton {
+		.background-image-svg( 'images/search-ltr.svg', 'images/search-ltr.png' );
 		background-position: center center;
 		background-repeat: no-repeat;
 	}

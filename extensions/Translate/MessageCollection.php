@@ -5,8 +5,10 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2007-2011, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
+
+use Wikimedia\Rdbms\IResultWrapper;
 
 /**
  * Core message collection class.
@@ -24,25 +26,25 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 	/**
 	 * @var MessageDefinitions
-	 * */
+	 */
 	protected $definitions = null;
 
 	/**
 	 * @var array array( %Message key => translation, ... )
 	 */
-	protected $infile = array();
+	protected $infile = [];
 
 	// Keys and messages.
 
 	/**
 	 * @var array array( %Message display key => database key, ... )
 	 */
-	protected $keys = array();
+	protected $keys = [];
 
 	/**
 	 * @var array array( %Message String => TMessage, ... )
 	 */
-	protected $messages = array();
+	protected $messages = [];
 
 	/**
 	 * @var array
@@ -51,30 +53,32 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 	// Database resources
 
-	/// \type{Database Result Resource} Stored message existence and fuzzy state.
+	/** @var IResultWrapper Stored message existence and fuzzy state. */
 	protected $dbInfo;
 
-	/// \type{Database Result Resource} Stored translations in database.
+	/** @var IResultWrapper Stored translations in database. */
 	protected $dbData;
 
-	/// \type{Database Result Resource} Stored reviews in database.
-	protected $dbReviewData = array();
+	/** @var IResultWrapper Stored reviews in database. */
+	protected $dbReviewData = [];
 
 	/**
 	 * Tags, copied to thin messages
 	 * tagtype => keys
+	 * @var array[]
 	 */
-	protected $tags = array();
+	protected $tags = [];
 
 	/**
 	 * Properties, copied to thin messages
+	 * @var array[]
 	 */
-	protected $properties = array();
+	protected $properties = [];
 
 	/**
 	 * @var string[] Authors.
 	 */
-	protected $authors = array();
+	protected $authors = [];
 
 	/**
 	 * Constructors. Use newFromDefinitions() instead.
@@ -88,7 +92,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 * Construct a new message collection from definitions.
 	 * @param MessageDefinitions $definitions
 	 * @param string $code Language code.
-	 * @return MessageCollection
+	 * @return self
 	 */
 	public static function newFromDefinitions( MessageDefinitions $definitions, $code ) {
 		$collection = new self( $code );
@@ -101,7 +105,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	/**
 	 * Constructs a new empty message collection. Suitable for example for testing.
 	 * @param string $code Language code.
-	 * @return MessageCollection
+	 * @return self
 	 */
 	public static function newEmpty( $code ) {
 	}
@@ -118,8 +122,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	/**
 	 * Set translation from file, as opposed to translation which only exists
 	 * in the wiki because they are not exported and committed yet.
-	 * @param array $messages \arrayof{String,String} Array of translations indexed
-	 * by display key.
+	 * @param string[] $messages Array of translations indexed by display key.
 	 */
 	public function setInFile( array $messages ) {
 		$this->infile = $messages;
@@ -166,7 +169,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 * @return string[] List of keys with given tag.
 	 */
 	public function getTags( $type ) {
-		return isset( $this->tags[$type] ) ? $this->tags[$type] : array();
+		return $this->tags[$type] ?? [];
 	}
 
 	/**
@@ -201,13 +204,14 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 		# arsort( $authors, SORT_NUMERIC );
 		ksort( $authors );
 		$fuzzyBot = FuzzyBot::getName();
+		$filteredAuthors = [];
 		foreach ( $authors as $author => $edits ) {
 			if ( $author !== $fuzzyBot ) {
 				$filteredAuthors[] = $author;
 			}
 		}
 
-		return isset( $filteredAuthors ) ? $filteredAuthors : array();
+		return $filteredAuthors;
 	}
 
 	/**
@@ -253,10 +257,10 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 		$this->keys = $this->fixKeys();
 		$this->dbInfo = null;
 		$this->dbData = null;
-		$this->dbReviewData = array();
+		$this->dbReviewData = [];
 		$this->messages = null;
-		$this->infile = array();
-		$this->authors = array();
+		$this->infile = [];
+		$this->authors = [];
 
 		unset( $this->tags['fuzzy'] );
 		$this->reverseMap = null;
@@ -319,7 +323,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 		$this->keys = array_slice( $this->keys, $offset, $limit, true );
 
-		return array( $backwardsOffset, $forwardsOffset, $offset );
+		return [ $backwardsOffset, $forwardsOffset, $offset ];
 	}
 
 	/**
@@ -342,7 +346,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 *    (INFILE, TRANSLATIONS)
 	 * @param bool $condition Whether to return messages which do not satisfy
 	 * the given filter condition (true), or only which do (false).
-	 * @param mixed $value Value for properties filtering.
+	 * @param mixed|null $value Value for properties filtering.
 	 * @throws MWException If given invalid filter name.
 	 */
 	public function filter( $type, $condition = true, $value = null ) {
@@ -356,7 +360,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 * @return array
 	 */
 	public static function getAvailableFilters() {
-		return array(
+		return [
 			'fuzzy',
 			'optional',
 			'ignored',
@@ -365,7 +369,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 			'translated',
 			'reviewer',
 			'last-translator',
-		);
+		];
 	}
 
 	/**
@@ -400,7 +404,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 				if ( $filter !== 'optional' && $filter !== 'ignored' ) {
 					throw new MWException( "No tagged messages for custom filter $filter" );
 				}
-				$keys = $this->filterOnCondition( $keys, array(), $condition );
+				$keys = $this->filterOnCondition( $keys, [], $condition );
 			} else {
 				$taggedKeys = array_flip( $this->tags[$filter] );
 				$keys = $this->filterOnCondition( $keys, $taggedKeys, $condition );
@@ -453,7 +457,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	protected function filterFuzzy( array $keys, $condition ) {
 		$this->loadInfo( $keys );
 
-		$origKeys = array();
+		$origKeys = [];
 		if ( $condition === false ) {
 			$origKeys = $keys;
 		}
@@ -481,7 +485,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	protected function filterHastranslation( array $keys, $condition ) {
 		$this->loadInfo( $keys );
 
-		$origKeys = array();
+		$origKeys = [];
 		if ( $condition === false ) {
 			$origKeys = $keys;
 		}
@@ -514,7 +518,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	protected function filterChanged( array $keys, $condition ) {
 		$this->loadData( $keys );
 
-		$origKeys = array();
+		$origKeys = [];
 		if ( $condition === false ) {
 			$origKeys = $keys;
 		}
@@ -598,13 +602,13 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 * @return array ( string => string ) Array of keys in database format indexed by display format.
 	 */
 	protected function fixKeys() {
-		$newkeys = array();
+		$newkeys = [];
 		// array( namespace, pagename )
 		$pages = $this->definitions->getPages();
 		$code = $this->code;
 
 		foreach ( $pages as $key => $page ) {
-			list ( $namespace, $pagename ) = $page;
+			list( $namespace, $pagename ) = $page;
 			$title = Title::makeTitleSafe( $namespace, "$pagename/$code" );
 			if ( !$title ) {
 				wfWarn( "Invalid title $namespace:$pagename/$code" );
@@ -625,24 +629,24 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 			return;
 		}
 
-		$this->dbInfo = array();
+		$this->dbInfo = [];
 
 		if ( !count( $keys ) ) {
 			return;
 		}
 
 		$dbr = TranslateUtils::getSafeReadDB();
-		$tables = array( 'page', 'revtag' );
-		$fields = array( 'page_namespace', 'page_title', 'rt_type' );
+		$tables = [ 'page', 'revtag' ];
+		$fields = [ 'page_namespace', 'page_title', 'rt_type' ];
 		$conds = $this->getTitleConds( $dbr );
-		$joins = array( 'revtag' =>
-		array(
+		$joins = [ 'revtag' =>
+		[
 			'LEFT JOIN',
-			array( 'page_id=rt_page', 'page_latest=rt_revision', 'rt_type' => RevTag::getType( 'fuzzy' ) )
-		)
-		);
+			[ 'page_id=rt_page', 'page_latest=rt_revision', 'rt_type' => RevTag::getType( 'fuzzy' ) ]
+		]
+		];
 
-		$this->dbInfo = $dbr->select( $tables, $fields, $conds, __METHOD__, array(), $joins );
+		$this->dbInfo = $dbr->select( $tables, $fields, $conds, __METHOD__, [], $joins );
 	}
 
 	/**
@@ -650,28 +654,28 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 * @param string[] $keys List of keys in database format.
 	 */
 	protected function loadReviewInfo( array $keys ) {
-		if ( $this->dbReviewData !== array() ) {
+		if ( $this->dbReviewData !== [] ) {
 			return;
 		}
 
-		$this->dbReviewData = array();
+		$this->dbReviewData = [];
 
 		if ( !count( $keys ) ) {
 			return;
 		}
 
 		$dbr = TranslateUtils::getSafeReadDB();
-		$tables = array( 'page', 'translate_reviews' );
-		$fields = array( 'page_namespace', 'page_title', 'trr_user' );
+		$tables = [ 'page', 'translate_reviews' ];
+		$fields = [ 'page_namespace', 'page_title', 'trr_user' ];
 		$conds = $this->getTitleConds( $dbr );
-		$joins = array( 'translate_reviews' =>
-			array(
+		$joins = [ 'translate_reviews' =>
+			[
 				'JOIN',
-				array( 'page_id=trr_page', 'page_latest=trr_revision' )
-			)
-		);
+				[ 'page_id=trr_page', 'page_latest=trr_revision' ]
+			]
+		];
 
-		$this->dbReviewData = $dbr->select( $tables, $fields, $conds, __METHOD__, array(), $joins );
+		$this->dbReviewData = $dbr->select( $tables, $fields, $conds, __METHOD__, [], $joins );
 	}
 
 	/**
@@ -683,7 +687,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 			return;
 		}
 
-		$this->dbData = array();
+		$this->dbData = [];
 
 		if ( !count( $keys ) ) {
 			return;
@@ -691,23 +695,32 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 		$dbr = TranslateUtils::getSafeReadDB();
 
-		$tables = array( 'page', 'revision', 'text' );
-		$fields = array(
-			'page_namespace',
-			'page_title',
-			'page_latest',
-			'rev_user',
-			'rev_user_text',
-			'old_flags',
-			'old_text'
-		);
-		$conds = array(
-			'page_latest = rev_id',
-			'old_id = rev_text_id',
-		);
+		if ( is_callable( Revision::class, 'getQueryInfo' ) ) {
+			$revQuery = Revision::getQueryInfo( [ 'page', 'text' ] );
+		} else {
+			$revQuery = [
+				'tables' => [ 'page', 'revision', 'text' ],
+				'fields' => [
+					'page_namespace',
+					'page_title',
+					'page_latest',
+					'rev_user',
+					'rev_user_text',
+					'old_flags',
+					'old_text'
+				],
+				'joins' => [
+					'revision' => [ 'JOIN', 'page_latest = rev_id' ],
+					'text' => [ 'JOIN', 'old_id = rev_text_id' ],
+				],
+			];
+		}
+		$conds = [ 'page_latest = rev_id' ];
 		$conds[] = $this->getTitleConds( $dbr );
 
-		$res = $dbr->select( $tables, $fields, $conds, __METHOD__ );
+		$res = $dbr->select(
+			$revQuery['tables'], $revQuery['fields'], $conds, __METHOD__, [], $revQuery['joins']
+		);
 
 		$this->dbData = $res;
 	}
@@ -715,24 +728,24 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	/**
 	 * Of the current set of keys, construct database query conditions.
 	 * @since 2011-12-28
-	 * @param DatabaseBase $db
+	 * @param \Wikimedia\Rdbms\IDatabase $db
 	 * @return string
 	 */
 	protected function getTitleConds( $db ) {
 		// Array of array( namespace, pagename )
-		$byNamespace = array();
+		$byNamespace = [];
 		foreach ( $this->getTitles() as $title ) {
 			$namespace = $title->getNamespace();
 			$pagename = $title->getDBkey();
 			$byNamespace[$namespace][] = $pagename;
 		}
 
-		$conds = array();
+		$conds = [];
 		foreach ( $byNamespace as $namespaces => $pagenames ) {
-			$cond = array(
+			$cond = [
 				'page_namespace' => $namespaces,
 				'page_title' => $pagenames,
-			);
+			];
 
 			$conds[] = $db->makeList( $cond, LIST_AND );
 		}
@@ -745,6 +758,8 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 * database fields page_namespace and page_title as keys and returns
 	 * the value for those indexes.
 	 * @since 2011-12-23
+	 * @param stdClass $row
+	 * @return string|null
 	 */
 	protected function rowToKey( $row ) {
 		$map = $this->getReverseMap();
@@ -760,13 +775,14 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	/**
 	 * Creates a two-dimensional map of namespace and pagenames.
 	 * @since 2011-12-23
+	 * @return array
 	 */
 	public function getReverseMap() {
 		if ( isset( $this->reverseMap ) ) {
 			return $this->reverseMap;
 		}
 
-		$map = array();
+		$map = [];
 		/**
 		 * @var Title $title
 		 */
@@ -774,7 +790,8 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 			$map[$title->getNamespace()][$title->getDBkey()] = $mkey;
 		}
 
-		return $this->reverseMap = $map;
+		$this->reverseMap = $map;
+		return $this->reverseMap;
 	}
 
 	/**
@@ -786,7 +803,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 			return;
 		}
 
-		$messages = array();
+		$messages = [];
 		$definitions = $this->definitions->getDefinitions();
 		foreach ( array_keys( $this->keys ) as $mkey ) {
 			$messages[$mkey] = new ThinMessage( $mkey, $definitions[$mkey] );
@@ -805,7 +822,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 		}
 
 		if ( $this->dbInfo !== null ) {
-			$fuzzy = array();
+			$fuzzy = [];
 			foreach ( $this->dbInfo as $row ) {
 				if ( $row->rt_type !== null ) {
 					$fuzzy[] = $this->rowToKey( $row );
@@ -883,7 +900,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 	/**
 	 * @param mixed $offset
-	 * @param $value
+	 * @param mixed $value
 	 */
 	public function offsetSet( $offset, $value ) {
 		$this->messages[$offset] = $value;
@@ -969,13 +986,13 @@ class MessageDefinitions {
 	 */
 	public function getPages() {
 		$namespace = $this->namespace;
-		$pages = array();
+		$pages = [];
 		foreach ( array_keys( $this->messages ) as $key ) {
 			if ( $namespace === false ) {
 				// pages are in format ex. "8:jan"
 				$pages[$key] = explode( ':', $key, 2 );
 			} else {
-				$pages[$key] = array( $namespace, $key );
+				$pages[$key] = [ $namespace, $key ];
 			}
 		}
 

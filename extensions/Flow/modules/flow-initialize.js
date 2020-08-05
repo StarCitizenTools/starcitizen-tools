@@ -7,7 +7,7 @@
 	 * Now do stuff
 	 * @todo not like this
 	 */
-	$( document ).ready( function () {
+	$( function () {
 		var flowBoard,
 			$component = $( '.flow-component' ),
 			$board = $( '.flow-board' ),
@@ -71,5 +71,8 @@
 
 		// Show the board
 		initializer.finishLoading();
+
+		// Preload VisualEditor
+		mw.flow.ui.EditorWidget.static.preload();
 	} );
 }( jQuery ) );

@@ -1,0 +1,6 @@
+{
+	"--title": "RevisionSlider - Documentation",
+	"--external": "jQuery,OO.ui.PanelLayout,OO.ui.Process",
+	"--output": "docs",
+	"--": "modules"
+}

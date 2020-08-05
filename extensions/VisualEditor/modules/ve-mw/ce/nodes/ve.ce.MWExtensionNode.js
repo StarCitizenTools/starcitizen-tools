@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWExtensionNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -46,14 +46,18 @@ OO.mixinClass( ve.ce.MWExtensionNode, ve.ce.GeneratedContentNode );
  */
 ve.ce.MWExtensionNode.static.rendersEmpty = false;
 
+ve.ce.MWExtensionNode.static.iconWhenInvisible = 'markup';
+
 /* Methods */
 
-/** */
+/**
+ * @inheritdoc ve.ce.GeneratedContentNode
+ */
 ve.ce.MWExtensionNode.prototype.generateContents = function ( config ) {
 	var xhr, attr, wikitext,
 		deferred = $.Deferred(),
 		mwData = ve.copy( this.getModel().getAttribute( 'mw' ) ),
-		extsrc = config && config.extsrc !== undefined ? config.extsrc : mwData.body.extsrc,
+		extsrc = config && config.extsrc !== undefined ? config.extsrc : ( ve.getProp( mwData, 'body', 'extsrc' ) || '' ),
 		attrs = config && config.attrs || mwData.attrs,
 		tagName = this.getModel().getExtensionName();
 
@@ -68,12 +72,7 @@ ve.ce.MWExtensionNode.prototype.generateContents = function ( config ) {
 	wikitext = mw.html.element( tagName, attrs, new mw.html.Raw( extsrc ) );
 
 	if ( this.constructor.static.rendersEmpty || extsrc.trim() !== '' ) {
-		xhr = new mw.Api().post( {
-			action: 'visualeditor',
-			paction: 'parsefragment',
-			page: mw.config.get( 'wgRelevantPageName' ),
-			wikitext: wikitext
-		} )
+		xhr = ve.init.target.parseWikitextFragment( wikitext, false, this.getModel().getDocument() )
 			.done( this.onParseSuccess.bind( this, deferred ) )
 			.fail( this.onParseError.bind( this, deferred ) );
 		return deferred.promise( { abort: xhr.abort } );
@@ -81,6 +80,22 @@ ve.ce.MWExtensionNode.prototype.generateContents = function ( config ) {
 		deferred.resolve( $( '<span>&nbsp;</span>' ).get() );
 		return deferred.promise();
 	}
+};
+
+/**
+ * @inheritdoc
+ */
+ve.ce.MWExtensionNode.prototype.getRenderedDomElements = function () {
+	// Parent method
+	var elements = ve.ce.GeneratedContentNode.prototype.getRenderedDomElements.apply( this, arguments );
+
+	if ( this.getModelHtmlDocument() ) {
+		ve.init.platform.linkCache.styleParsoidElements(
+			$( elements ),
+			this.getModelHtmlDocument()
+		);
+	}
+	return elements;
 };
 
 /**

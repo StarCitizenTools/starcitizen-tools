@@ -6,9 +6,9 @@
 		]
 	},
 	"checkuser-reason": "કારણ:",
-	"checkuser-search": "શોધો",
 	"checkuser-nolog": "કોઇ લૉગ ફાઇલ મળી નહી.",
 	"checkuser-locked": "તાળું મારેલ",
+	"checkuser-search": "શોધો",
 	"checkuser-search-submit": "શોધો",
 	"checkuser-search-target": "લક્ષ્ય"
 }

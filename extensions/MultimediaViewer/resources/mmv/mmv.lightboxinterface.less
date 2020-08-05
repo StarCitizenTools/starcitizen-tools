@@ -1,12 +1,10 @@
-@import "mmv.globals";
-@import "mmv.mixins";
-
-@metadata-background: rgb(248, 248, 248);
+@import 'mmv.globals';
+@import 'mmv.mixins';
 
 .mw-mmv-wrapper {
-	top: 0px;
-	left: 0px;
-	right: 0px;
+	top: 0;
+	left: 0;
+	right: 0;
 	z-index: 1001;
 	position: absolute;
 	bottom: auto;
@@ -22,16 +20,16 @@
 	position: relative;
 
 	.jq-fullscreened {
-		background-color: black;
+		background-color: #000;
 	}
 }
 
 .mw-mmv-image-wrapper {
 	position: fixed;
-	top: 0px;
+	top: 0;
 	bottom: @metadatabar-above-fold-height;
-	left: 0px;
-	right: 0px;
+	left: 0;
+	right: 0;
 	overflow-y: hidden;
 }
 
@@ -43,7 +41,7 @@
 
 .mw-mmv-pre-image {
 	position: absolute;
-	top: 0px;
+	top: 0;
 	height: 32px;
 	width: 100%;
 	z-index: 1;
@@ -54,9 +52,9 @@
 	width: 100%;
 	bottom: auto;
 	height: auto;
-	color: #333333;
+	color: #222;
 	background-color: @panel-above-fold-background-color;
-	min-height: (@metadatabar-above-fold-inner-height + 1);
+	min-height: ( @metadatabar-above-fold-inner-height + 1 );
 	z-index: 1005;
 }
 
@@ -66,11 +64,11 @@
 	height: @metadatabar-above-fold-inner-height;
 	// min-height is used when the height is changed to auto to display long texts, to make sure the layout
 	// is not messed up wheen the text is short and does not fill the available place. It is also used by
-	// Javascript to get the "default" height.
+	// JavaScript to get the "default" height.
 	min-height: @metadatabar-above-fold-inner-height;
 	position: relative;
 	// make sure there is no content in the part which is overlapped by the revealed part of the below-fold content
-	// also used in Javascript for the height calculations
+	// also used in JavaScript for the height calculations
 	padding-bottom: @metadatabar-below-fold-pushup-height;
 
 	.mw-mmv-untruncated & {
@@ -85,23 +83,23 @@
 }
 
 .mw-mmv-main.jq-fullscreened {
-	background-color: black;
+	background-color: #000;
 }
 
 .jq-fullscreened {
 	.mw-mmv-image-wrapper, // make the image occupy the whole screen
-	.mw-mmv-post-image {  // make sure the panel fits in the screen and does not cause scrollbars to appear
-		bottom: 0px;
+	.mw-mmv-post-image { // make sure the panel fits in the screen and does not cause scrollbars to appear
+		bottom: 0;
 	}
 
 	.mw-mmv-post-image {
 		position: fixed;
 		min-height: 0;
-		.opacity(0);
+		.opacity( 0 );
 		transition: opacity 0.25s;
 
 		&:hover {
-			.opacity(1);
+			.opacity( 1 );
 		}
 	}
 }

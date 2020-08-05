@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Dbc334"
+			"Dbc334",
+			"Janezdrilc"
 		]
 	},
 	"checkuser-summary": "Orodje pregleda zadnje spremembe, da pridobi IP-naslove, ki jih uporablja uporabnik, ali prikaže podatke urejanja/uporabniške podatke IP-naslova.\nUporabniki in urejanja odjemalčevega IP-naslova se lahko pridobijo preko glav XFF tako, da se IP-naslovu pripne »/xff«. Podprta sta IPv4 (CIDR $1-32) in IPv6 (CIDR $2-128).\nZaradi zmogljivostnih razlogov se ne prikaže več kot 5.000 urejanj.\nOrodje uporabljajte v skladu s pravilnikom.",
@@ -11,8 +12,8 @@
 	"checkuserlog": "Dnevnik CheckUser",
 	"checkuser-contribs": "preveri uporabnikove IP-naslove",
 	"checkuser-contribs-log": "nedavna preverjanja uporabnikov",
-	"group-checkuser": "Preveri uporabnike",
-	"group-checkuser-member": "{{GENDER:$1|preverjalec|preverjalka}} uporabnikov",
+	"group-checkuser": "Preverjevalci uporabnikov",
+	"group-checkuser-member": "{{GENDER:$1|preverjevalec|preverjevalka}} uporabnikov",
 	"right-checkuser": "Preverjanje uporabnikovih IP-naslovov in drugih informacij",
 	"right-checkuser-log": "Ogled dnevnika preverjanja uporabnikov",
 	"action-checkuser": "preverjanje uporabnikovih IP-naslovov in drugih informacij",

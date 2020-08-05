@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWStaticRedirectMetaItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -13,9 +13,9 @@
  * @constructor
  * @param {Object} element Reference to element in meta-linmod
  */
-ve.dm.MWStaticRedirectMetaItem = function VeDmMWStaticRedirectMetaItem( element ) {
+ve.dm.MWStaticRedirectMetaItem = function VeDmMWStaticRedirectMetaItem() {
 	// Parent constructor
-	ve.dm.MetaItem.call( this, element );
+	ve.dm.MWStaticRedirectMetaItem.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -32,7 +32,7 @@ ve.dm.MWStaticRedirectMetaItem.static.matchTagNames = [ 'meta' ];
 
 ve.dm.MWStaticRedirectMetaItem.static.matchRdfaTypes = [ 'mw:PageProp/staticredirect' ];
 
-ve.dm.MWStaticRedirectMetaItem.static.toDataElement = function ( ) {
+ve.dm.MWStaticRedirectMetaItem.static.toDataElement = function () {
 	return { type: this.name };
 };
 

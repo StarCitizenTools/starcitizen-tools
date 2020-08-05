@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel InternalItemNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -34,6 +34,24 @@ ve.dm.InternalItemNode.static.ignoreChildren = true;
 ve.dm.InternalItemNode.static.isInternal = true;
 
 ve.dm.InternalItemNode.static.isDeletable = false;
+
+ve.dm.InternalItemNode.static.parentNodeTypes = [ 'internalList' ];
+
+/* Methods */
+
+/**
+ * @inheritdoc
+ */
+ve.dm.InternalItemNode.static.describeChanges = function () {
+	return [];
+};
+
+/**
+ * @inheritdoc
+ */
+ve.dm.InternalItemNode.static.getHashObject = function ( dataElement ) {
+	return { type: dataElement.type };
+};
 
 /* Registration */
 

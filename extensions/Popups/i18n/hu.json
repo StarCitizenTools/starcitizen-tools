@@ -3,14 +3,29 @@
 		"authors": [
 			"Teemeah",
 			"Csega",
-			"Dorgan"
+			"Dorgan",
+			"Tacsipacsi",
+			"Tgr",
+			"Bencemac"
 		]
 	},
-	"popups-message": "Lapleíró kártya",
-	"popups-desc": "Amikor a felhasználó egy belső hivatkozás fölé viszi az egérmutatót, kis felugró ablakban megjelenik az oldal összefoglalója.",
-	"popups-last-edited": "Utolsó szerkesztés: $1",
-	"popups-redirects": "Átirányítás a(z) <h3>$1</h3> oldalra",
-	"popups-settings-option-simple": "Egyszerű",
+	"popups-message": "Lapelőnézetek",
+	"popups-desc": "Amikor a felhasználó egy belső hivatkozás fölé viszi az egérmutatót, megjelenik az előnézete.",
+	"popups-settings-title": "Lapok előnézete",
+	"popups-settings-option-simple": "Engedélyezés",
+	"popups-settings-option-simple-description": "Gyors előnézetek megjelenítése, miközben olvasod az oldalt.",
+	"popups-settings-option-advanced": "Haladó",
+	"popups-settings-option-advanced-description": "Linkek előnézetének megjelenítése és hozzáférés szerkesztési funkciók menüihez. Ezt sok szerkesztő használja.",
+	"popups-settings-option-off": "Letiltás",
 	"popups-settings-save": "Mentés",
-	"popups-settings-cancel": "Mégse"
+	"popups-settings-help-ok": "Kész",
+	"popups-settings-cancel": "Mégse",
+	"popups-settings-help": "Az előnézetet a lap alján található link segítségével kapcsolhatod vissza.",
+	"popups-settings-enable": "Előnézetek engedélyezése",
+	"popups-preview-no-preview": "Úgy tűnik, nincs előnézet a laphoz",
+	"popups-preview-footer-read": "Olvasás",
+	"prefs-reading": "Olvasási preferenciák",
+	"popups-prefs-optin-title": "Lapelőnézet\n\n<em>Az egeret egy belső hivatkozás fölött tartva gyors összefoglalót kapsz a cikkről anélkül, hogy elnavigálnál az oldalról.</em>",
+	"popups-prefs-optin-enabled-label": "Engedélyezés",
+	"popups-prefs-optin-disabled-label": "Letiltás"
 }

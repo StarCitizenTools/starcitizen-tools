@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mehtab ahmed",
+			"Indus Asia"
+		]
+	},
+	"group-checkuser": "واپرائيندڙ چڪاسڪار",
+	"checkuser-edits": "ترميمون وٺو",
+	"checkuser-all": "سڀ",
+	"checkuser-check-this-user": "هن واپرائيندڙ جي جانچ ڪيو (Check this user)",
+	"checkuser-blocktag-talk": "بحث صفحن کي سان مٽايو:",
+	"apihelp-query+checkuser-example-2": "192.0.2.0/24 پاران ترميمون چڪاسيو"
+}

@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -14,8 +14,8 @@
  * @since 2015.02
  */
 class QueryAggregator {
-	protected $queries = array();
-	protected $responses = array();
+	protected $queries = [];
+	protected $responses = [];
 	protected $timeout = 0;
 	protected $hasRun = false;
 
@@ -42,17 +42,25 @@ class QueryAggregator {
 			throw new RuntimeException( 'Tried to get response before queries ran' );
 		}
 
-		return TranslationQueryResponse::newFromMultiHttp( $this->responses[$id] );
+		return TranslationQueryResponse::newFromMultiHttp(
+			$this->responses[$id],
+			$this->queries[$id]
+		);
 	}
 
 	/**
 	 * Runs all the queries.
 	 */
 	public function run() {
-		$http = new MultiHttpClient( array(
+		global $wgSitename;
+
+		$version = TRANSLATE_VERSION;
+
+		$http = new MultiHttpClient( [
 			'reqTimeout' => $this->timeout,
-			'connTimeout' => 3
-		) );
+			'connTimeout' => 3,
+			'userAgent' => "MediaWiki Translate extension $version for $wgSitename"
+		] );
 		$responses = $http->runMulti( $this->getMultiHttpQueries( $this->queries ) );
 		foreach ( $responses as $index => $response ) {
 			$this->responses[$index] = $response;
@@ -66,13 +74,14 @@ class QueryAggregator {
 	 * @return array[]
 	 */
 	protected function getMultiHttpQueries( $queries ) {
-		$converter = function( TranslationQuery $q ) {
-			return array(
+		$converter = function ( TranslationQuery $q ) {
+			return [
 				'url' => $q->getUrl(),
 				'method' => $q->getMethod(),
 				'query' => $q->getQueryParameters(),
 				'body' => $q->getBody(),
-			);
+				'headers' => $q->getHeaders(),
+			];
 		};
 
 		return array_map( $converter, $queries );

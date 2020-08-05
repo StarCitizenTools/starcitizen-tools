@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Сербијана",
+			"Obsuser"
+		]
+	},
+	"revisionslider-preference-disable": "Ne prikazuj klizač za izmene",
+	"revisionslider-toggle-label": "Pretraga istorije",
+	"revisionslider-label-date": "Datum",
+	"revisionslider-label-page-size": "Veličina stranice",
+	"revisionslider-label-change-size": "Promena veličine",
+	"revisionslider-label-comment": "Komentar",
+	"revisionslider-label-username": "{{GENDER:$1|Korisničko ime}}",
+	"revisionslider-minoredit": "Ovo je manja izmena",
+	"revisionslider-toggle-title-expand": "Otvori klizač za izmene",
+	"revisionslider-toggle-title-collapse": "Zatvori klizač za izmene",
+	"revisionslider-turn-on-auto-expand-title": "Uvek otvori klizač za izmene",
+	"revisionslider-turn-off-auto-expand-title": "Isključivanje automatskog otvaranja klizača za izmene",
+	"revisionslider-show-help-tooltip": "Prikaži vodič",
+	"revisionslider-help-dialog-slide1": "Klizač za izmene Vam pomaže da pretražujete i upoređujete razlike izmena stranice. Nastao je [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider željom zajednice Vikimedije Nemačke]. Povratne informacije su dobrodošle, [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider ovde].",
+	"revisionslider-help-dialog-slide2": "Svaka uspravna traka predstavlja jednu izmenu stranice. Gornje trake označavaju povećanje stranice (dodavanje sadržaja), a donje smanjenje stranice (uklanjanje sadržaja). Na datoj slici, u izmeni 1 je povećan broj bajtova a u izmeni 2 smanjen.",
+	"revisionslider-help-dialog-slide3a": "<p>Da biste uporedili određene izmene, selektujte ih koristeći žute i plave kružiće.</p><p>Plavi kružić kontroliše noviju izmenu, a žuti vodi do starije.</p><p>Pomerajte kružiće prevlačenjem ili samo kliknite na liniju klizača.</p>",
+	"revisionslider-help-dialog-slide4": "Koristite strelice (<) nazad i napred (>) za kretanje kroz istoriju izmena odnosno prikaz starijih i novijih izmena.",
+	"revisionslider-tutorial": "Vodič za upotrebu",
+	"revisionslider-previous-dialog": "Prethodno",
+	"revisionslider-next-dialog": "Sledeće",
+	"revisionslider-close-dialog": "Zatvori"
+}

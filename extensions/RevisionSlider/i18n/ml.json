@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Praveenp"
+		]
+	},
+	"revisionslider": "നാൾപ്പതിപ്പ് മാറ്റിക്കാണൽ",
+	"revisionslider-preference-disable": "നാൾപ്പതിപ്പ് മാറ്റിക്കാണൽ പ്രദർശിപ്പിക്കരുത്",
+	"revisionslider-desc": "വ്യത്യാസമുള്ള താളിന്റെ നാൾപ്പതിപ്പുകൾ തിരഞ്ഞെടുക്കാനും താരതമ്യപ്പെടുത്താനുമുള്ള മാറ്റിക്കാണൽ സൗകര്യം പ്രദർശിപ്പിക്കുന്നു",
+	"revisionslider-toggle-label": "നാൾപ്പതിപ്പുകൾ കാണുക",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|ബൈറ്റ്|ബൈറ്റുകൾ}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|ബൈറ്റ്|ബൈറ്റുകൾ}}",
+	"revisionslider-label-date": "തീയതി",
+	"revisionslider-label-page-size": "താളിന്റെ വലിപ്പം",
+	"revisionslider-label-change-size": "വലിപ്പത്തിലുണ്ടായ മാറ്റം",
+	"revisionslider-label-comment": "കുറിപ്പ്",
+	"revisionslider-label-username": "{{GENDER:$1|ഉപയോക്തൃനാമം}}",
+	"revisionslider-minoredit": "ഇതൊരു ചെറിയ തിരുത്താണ്",
+	"revisionslider-loading-failed": "നാൾപ്പതിപ്പ് മാറ്റിക്കാണൽ സൗകര്യം എടുക്കൽ പരാജയപ്പെട്ടു.",
+	"revisionslider-toggle-title-expand": "നാൾപ്പതിപ്പ് മാറ്റിക്കാണൽ സൗകര്യം തുറക്കുക",
+	"revisionslider-toggle-title-collapse": "നാൾപ്പതിപ്പ് മാറ്റിക്കാണൽ സൗകര്യം ചുരുക്കുക",
+	"revisionslider-turn-on-auto-expand-title": "നാൾപ്പതിപ്പ് മാറ്റിക്കാണൽ സൗകര്യം എപ്പോഴും വികസിപ്പിക്കുക",
+	"revisionslider-turn-off-auto-expand-title": "നാൾപ്പതിപ്പ് മാറ്റിക്കാണൽ സൗകര്യം സ്വതേ വികസിപ്പിക്കേണ്ടതില്ല",
+	"revisionslider-arrow-tooltip-newer": "പുതിയ നാൾപ്പതിപ്പുകൾ കാണുക",
+	"revisionslider-arrow-tooltip-older": "പഴയ നാൾപ്പതിപ്പുകൾ കാണുക",
+	"revisionslider-show-help-tooltip": "സഹായ എഴുത്തുകൾ പ്രദർശിപ്പിക്കുക",
+	"revisionslider-help-dialog-slide1": "വ്യത്യാസമുള്ള താളിന്റെ നാൾപ്പതിപ്പുകൾ തിരഞ്ഞെടുക്കാനും താരതമ്യപ്പെടുത്താനും മാറ്റിക്കാണൽ സൗകര്യം സഹായിക്കുന്നു. ജെർമൻ ഉപയോഗിക്കുന്ന വിക്കിസമൂഹത്തിന്റെ സാങ്കേതിക നിർദ്ദേശങ്ങളുടെ പട്ടികയിൽ ഉൾപ്പെട്ടിരുന്ന ഒരു [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider  സമൂഹ ആവശ്യമായിരുന്നു] ഇത്. വിലയേറിയ അഭിപ്രായങ്ങൾ [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider ഇവിടെ] അറിയിക്കുക",
+	"revisionslider-help-dialog-slide2": "ഓരോ പട്ടയും ഓരോ നാൾപ്പതിപ്പിനെ പ്രതിനിധീകരിക്കുന്നു. മുകളിലുള്ള പട്ടകൾ താളിന്റെ വളർച്ചയെ കാണിക്കുന്നു, താഴെയുള്ള പട്ടകൾ വലിപ്പത്തിലുണ്ടായ കുറവിനെയും കാണിക്കുന്നു. ചിത്രത്തിൽ നാൾപ്പതിപ്പ് 1 ഉള്ളടക്കം കൂട്ടിച്ചേർത്തതിനേയും, നാൾപ്പതിപ്പ് 2 ഉള്ളടക്കം നീക്കംചെയ്തതിനേയും പ്രതിനിധീകരിക്കുന്നു.",
+	"revisionslider-help-dialog-slide3a": "<p>വേണ്ട നാൾപ്പതിപ്പുകൾ താരതമ്യം ചെയ്യാൻ, മഞ്ഞയും നീലയും പിടികൾ ഉപയോഗിച്ച് നാൾപ്പതിപ്പുകൾ തിരഞ്ഞെടുക്കുക.</p><p>നീലപ്പിടി പുതിയ നാൾപ്പതിപ്പിനെ നിയന്ത്രിക്കുന്നു, മഞ്ഞപ്പിടി പഴയ നാൾപ്പതിപ്പിനെ അടയാളപ്പെടുത്തുന്നു.</p><p>വലിച്ചിട്ടോ, വലിച്ചിടാവുന്ന വരിയിൽ ഞെക്കിയോ പിടികൾ നീക്കാവുന്നതാണ്.</p>",
+	"revisionslider-help-dialog-slide4": "മുന്നോട്ടും പിന്നോട്ടുമുള്ള ആരോ ഉപയോഗിച്ച് നാൾപ്പതിപ്പുകളിൽ പുതിയവയും പഴയവയും പ്രദർശിപ്പിക്കാവുന്നതാണ്.",
+	"revisionslider-tutorial": "നാൾപ്പതിപ്പ് മാറ്റിക്കാണൽ സഹായി",
+	"revisionslider-previous-dialog": "മുൻപത്തേത്",
+	"revisionslider-next-dialog": "അടുത്തത്",
+	"revisionslider-close-dialog": "അടയ്ക്കുക"
+}

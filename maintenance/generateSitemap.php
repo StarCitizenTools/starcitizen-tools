@@ -113,7 +113,7 @@ class GenerateSitemap extends Maintenance {
 	public $timestamp;
 
 	/**
-	 * A database slave object
+	 * A database replica DB object
 	 *
 	 * @var object
 	 */
@@ -140,9 +140,6 @@ class GenerateSitemap extends Maintenance {
 	 */
 	private $identifier;
 
-	/**
-	 * Constructor
-	 */
 	public function __construct() {
 		parent::__construct();
 		$this->addDescription( 'Creates a sitemap for the site' );
@@ -185,7 +182,7 @@ class GenerateSitemap extends Maintenance {
 		# Create directory if needed
 		$fspath = $this->getOption( 'fspath', getcwd() );
 		if ( !wfMkdirParents( $fspath, null, __METHOD__ ) ) {
-			$this->error( "Can not create directory $fspath.", 1 );
+			$this->fatalError( "Can not create directory $fspath." );
 		}
 
 		$this->fspath = realpath( $fspath ) . DIRECTORY_SEPARATOR;
@@ -195,8 +192,8 @@ class GenerateSitemap extends Maintenance {
 		}
 		$this->identifier = $this->getOption( 'identifier', wfWikiID() );
 		$this->compress = $this->getOption( 'compress', 'yes' ) !== 'no';
-		$this->skipRedirects = $this->getOption( 'skip-redirects', false ) !== false;
-		$this->dbr = $this->getDB( DB_SLAVE );
+		$this->skipRedirects = $this->hasOption( 'skip-redirects' );
+		$this->dbr = $this->getDB( DB_REPLICA );
 		$this->generateNamespaces();
 		$this->timestamp = wfTimestamp( TS_ISO_8601, wfTimestampNow() );
 		$this->findex = fopen( "{$this->fspath}sitemap-index-{$this->identifier}.xml", 'wb' );
@@ -413,7 +410,7 @@ class GenerateSitemap extends Maintenance {
 	/**
 	 * gzwrite() / fwrite() wrapper
 	 *
-	 * @param resource $handle
+	 * @param resource &$handle
 	 * @param string $str
 	 */
 	function write( &$handle, $str ) {
@@ -430,7 +427,7 @@ class GenerateSitemap extends Maintenance {
 	/**
 	 * gzclose() / fclose() wrapper
 	 *
-	 * @param resource $handle
+	 * @param resource &$handle
 	 */
 	function close( &$handle ) {
 		if ( $this->compress ) {
@@ -443,8 +440,8 @@ class GenerateSitemap extends Maintenance {
 	/**
 	 * Get a sitemap filename
 	 *
-	 * @param int $namespace The namespace
-	 * @param int $count The count
+	 * @param int $namespace
+	 * @param int $count
 	 * @return string
 	 */
 	function sitemapFilename( $namespace, $count ) {
@@ -487,8 +484,7 @@ class GenerateSitemap extends Maintenance {
 	 * @return string
 	 */
 	function indexEntry( $filename ) {
-		return
-			"\t<sitemap>\n" .
+		return "\t<sitemap>\n" .
 			"\t\t<loc>{$this->urlpath}$filename</loc>\n" .
 			"\t\t<lastmod>{$this->timestamp}</lastmod>\n" .
 			"\t</sitemap>\n";
@@ -521,9 +517,8 @@ class GenerateSitemap extends Maintenance {
 	 * @return string
 	 */
 	function fileEntry( $url, $date, $priority ) {
-		return
-			"\t<url>\n" .
-			// bug 34666: $url may contain bad characters such as ampersands.
+		return "\t<url>\n" .
+			// T36666: $url may contain bad characters such as ampersands.
 			"\t\t<loc>" . htmlspecialchars( $url ) . "</loc>\n" .
 			"\t\t<lastmod>$date</lastmod>\n" .
 			"\t\t<priority>$priority</priority>\n" .
@@ -545,7 +540,7 @@ class GenerateSitemap extends Maintenance {
 	 * @param int $namespace
 	 */
 	function generateLimit( $namespace ) {
-		// bug 17961: make a title with the longest possible URL in this namespace
+		// T19961: make a title with the longest possible URL in this namespace
 		$title = Title::makeTitle( $namespace, str_repeat( "\xf0\xa8\xae\x81", 63 ) . "\xe5\x96\x83" );
 
 		$this->limit = [
@@ -560,5 +555,5 @@ class GenerateSitemap extends Maintenance {
 	}
 }
 
-$maintClass = "GenerateSitemap";
+$maintClass = GenerateSitemap::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

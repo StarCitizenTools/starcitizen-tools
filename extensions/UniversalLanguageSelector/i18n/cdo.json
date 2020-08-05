@@ -1,8 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"唐吉訶德的侍從"
+			"唐吉訶德的侍從",
+			"Xð",
+			"GnuDoyng"
 		]
 	},
-	"ext-uls-compact-link-count": "{{PLURAL:$1|Gì-tă siŏh ciáh|Gì-tă $1 ciáh}}"
+	"uls-plang-title-languages": "Ngṳ̄-ngiòng",
+	"ext-uls-compact-link-count": "Gì-tă $1 ciáh"
 }

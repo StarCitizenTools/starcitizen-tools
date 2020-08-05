@@ -37,13 +37,16 @@ class UnusedCategoriesPage extends QueryPage {
 		return $this->msg( 'unusedcategoriestext' )->parseAsBlock();
 	}
 
+	function getOrderFields() {
+		return [ 'title' ];
+	}
+
 	public function getQueryInfo() {
 		return [
 			'tables' => [ 'page', 'categorylinks' ],
 			'fields' => [
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
-				'value' => 'page_title'
 			],
 			'conds' => [
 				'cl_from IS NULL',
@@ -55,7 +58,7 @@ class UnusedCategoriesPage extends QueryPage {
 	}
 
 	/**
-	 * A should come before Z (bug 30907)
+	 * A should come before Z (T32907)
 	 * @return bool
 	 */
 	function sortDescending() {
@@ -70,10 +73,14 @@ class UnusedCategoriesPage extends QueryPage {
 	function formatResult( $skin, $result ) {
 		$title = Title::makeTitle( NS_CATEGORY, $result->title );
 
-		return Linker::link( $title, htmlspecialchars( $title->getText() ) );
+		return $this->getLinkRenderer()->makeLink( $title, $title->getText() );
 	}
 
 	protected function getGroupName() {
 		return 'maintenance';
+	}
+
+	public function preprocessResults( $db, $res ) {
+		$this->executeLBFromResultWrapper( $res );
 	}
 }

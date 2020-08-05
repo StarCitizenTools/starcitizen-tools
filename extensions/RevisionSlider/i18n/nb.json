@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Danmichaelo",
+			"Jon Harald Søby"
+		]
+	},
+	"revisionslider": "Revisjonsskyvelinje",
+	"revisionslider-preference-disable": "Ikke vis revisjonsskyvelinja",
+	"revisionslider-desc": "Viser en skyvelinje for å velge revisjoner å sammenligne på revisjonssammenligningssidene (diff-sidene)",
+	"revisionslider-toggle-label": "Bla gjennom historikken",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte}}",
+	"revisionslider-label-date": "Dato",
+	"revisionslider-label-page-size": "Sidestørrelse",
+	"revisionslider-label-change-size": "Endringsstørrelse",
+	"revisionslider-label-comment": "Kommentar",
+	"revisionslider-label-username": "{{GENDER:$1|Brukernavn}}",
+	"revisionslider-minoredit": "Dette er en mindre redigering",
+	"revisionslider-loading-failed": "Klarte ikke å laste revisjonsskyvelinja.",
+	"revisionslider-toggle-title-expand": "Åpne revisjonsskyvelinja",
+	"revisionslider-toggle-title-collapse": "Lukke revisjonsskyvelinja",
+	"revisionslider-turn-on-auto-expand-title": "Vis revisjonsskyvelinja som standard",
+	"revisionslider-turn-off-auto-expand-title": "Ikke vis revisjonsskyvelinja som standard",
+	"revisionslider-arrow-tooltip-newer": "Vis nyere revisjoner",
+	"revisionslider-arrow-tooltip-older": "Vis eldre revisjoner",
+	"revisionslider-show-help-tooltip": "Vis hjelpetekst",
+	"revisionslider-help-dialog-slide1": "Revisjonsskyvelinja lar deg navigere og sammenligne revisjoner av en artikkel. Den baserer seg på et [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider ønske] fra den tekniske ønskelisten til tyskspråklige brukersamfunnet. Vi tar gjerne imot tilbakemeldinger [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider her].",
+	"revisionslider-help-dialog-slide2": "Hver stabel viser til en siderevisjon. Stabler som peker oppover viser at artikkelstørrelsen har økt, mens stabler som peker nedover viser at den har sunket. I eksempelet over har det blitt lagt til innhold i revisjon 1, mens det har blitt fjernet innhold i revisjon 2.",
+	"revisionslider-help-dialog-slide3a": "<p>For å sammenligne bestemte revisjoner, velg revisjonene ved hjelp av den gule og den blå markøren.</p><p>Den blå markøren kontrollerer den nyeste revisjonen, mens den gule kontrollerer den eldste.</p><p>Flytt markørene ved å dra og slippe dem eller ved å klikke på skyvelinjen.</p>",
+	"revisionslider-help-dialog-slide4": "Bruk frem- og tilbakepilene for å bla gjennom revisjonhistorikken og vise eldre og nyere revisjoner.",
+	"revisionslider-tutorial": "Veiviser for revisjonsskyvelinja",
+	"revisionslider-previous-dialog": "Forrige",
+	"revisionslider-next-dialog": "Neste",
+	"revisionslider-close-dialog": "Lukk"
+}

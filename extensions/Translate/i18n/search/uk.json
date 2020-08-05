@@ -3,7 +3,8 @@
 		"authors": [
 			"Base",
 			"Ата",
-			"Dars"
+			"Dars",
+			"Vlad5250"
 		]
 	},
 	"searchtranslations": "Пошук перекладів",
@@ -14,7 +15,6 @@
 	"tux-sst-count": "{{PLURAL:$1|Знайдено один результат|Знайдено $1 результати|Знайдено $1 результатів}}",
 	"tux-sst-facet-language": "Мови",
 	"tux-sst-facet-group": "Групи повідомлень",
-	"tux-sst-facet-orphan": "(сирота)",
 	"tux-sst-nosolr-title": "Пошук недоступний",
 	"tux-sst-nosolr-body": "У цій вікі немає служби пошуку перекладів.",
 	"tux-sst-solr-offline-title": "Пошук не доступний",
@@ -29,5 +29,6 @@
 	"tux-sst-ellipsis-outdated": "Застарілі переклади",
 	"tux-sst-link-all-match": "Потребуються всі слова пошуку.",
 	"tux-sst-match-message": "Показані переклади, в яких збігається хоча б одне із пошукових слів. $1",
-	"tux-sst-case-sensitive": "Чутливий до регістру"
+	"tux-sst-case-sensitive": "Чутливий до регістру",
+	"tux-sst-error-offset": "Неможливо показати більше результатів пошуку. Будь ласка, уточніть Ваш пошук."
 }

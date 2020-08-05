@@ -20,16 +20,15 @@
 
 	/**
 	 * Tracks how long users are viewing images for
+	 *
 	 * @class mw.mmv.logging.ViewLogger
 	 * @extends mw.Api
 	 * @constructor
-	 * @param {mw.Map} mwConfig mw.config
-	 * @param {Object} window Browser window object
+	 * @param {mw.mmv.Config} config mw.mmv.Config object
+	 * @param {Object} windowObject Browser window object
 	 * @param {mw.mmv.logging.ActionLogger} actionLogger ActionLogger object
 	 */
-	function ViewLogger( mwConfig, windowObject, actionLogger ) {
-		var config = mwConfig && mwConfig.get ? mwConfig.get( 'wgMultimediaViewer' ) : false;
-
+	function ViewLogger( config, windowObject, actionLogger ) {
 		/**
 		 * Was the last image view logged or was logging skipped?
 		 * @property {boolean}
@@ -58,7 +57,7 @@
 		 * If set, URI to send the beacon request to in order to record the virtual view
 		 * @property {string}
 		 */
-		this.recordVirtualViewBeaconURI = config ? config.recordVirtualViewBeaconURI : false;
+		this.recordVirtualViewBeaconURI = config.recordVirtualViewBeaconURI();
 
 		/**
 		 * Browser window
@@ -136,6 +135,7 @@
 
 	/**
 	 * Sets up the view tracking for the current image
+	 *
 	 * @param {string} url URL of the image to record a virtual view for
 	 */
 	VL.attach = function ( url ) {
@@ -167,6 +167,7 @@
 
 	/**
 	 * Tracks whether or not the image view event was logged or not (i.e. was it in the logging sample)
+	 *
 	 * @param {boolean} wasEventLogged Whether the image view event was logged
 	 */
 	VL.setLastViewLogged = function ( wasEventLogged ) {

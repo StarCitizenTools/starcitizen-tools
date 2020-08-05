@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWParameterSearchWidget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -24,7 +24,7 @@ ve.ui.MWParameterSearchWidget = function VeUiMWParameterSearchWidget( template, 
 	}, config );
 
 	// Parent constructor
-	OO.ui.SearchWidget.call( this, config );
+	ve.ui.MWParameterSearchWidget.super.call( this, config );
 
 	// Properties
 	this.template = template;
@@ -62,7 +62,7 @@ OO.inheritClass( ve.ui.MWParameterSearchWidget, OO.ui.SearchWidget );
  */
 ve.ui.MWParameterSearchWidget.prototype.onQueryChange = function () {
 	// Parent method
-	OO.ui.SearchWidget.prototype.onQueryChange.call( this );
+	ve.ui.MWParameterSearchWidget.super.prototype.onQueryChange.call( this );
 
 	// Populate
 	this.addResults();
@@ -132,7 +132,7 @@ ve.ui.MWParameterSearchWidget.prototype.buildIndex = function () {
 ve.ui.MWParameterSearchWidget.prototype.addResults = function () {
 	var i, len, item, textMatch, nameMatch, remainder,
 		exactMatch = false,
-		value = this.query.getValue().trim().replace( /[\|\{\}]/g, '' ),
+		value = this.query.getValue().trim().replace( /[|{}]/g, '' ),
 		query = value.toLowerCase(),
 		hasQuery = !!query.length,
 		items = [];
@@ -181,6 +181,6 @@ ve.ui.MWParameterSearchWidget.prototype.addResults = function () {
 
 	this.results.addItems( items );
 	if ( hasQuery ) {
-		this.results.highlightItem( this.results.getFirstSelectableItem() );
+		this.results.highlightItem( this.results.findFirstSelectableItem() );
 	}
 };

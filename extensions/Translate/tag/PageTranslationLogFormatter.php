@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -22,7 +22,7 @@ class PageTranslationLogFormatter extends LogFormatter {
 
 				$targetPage = $this->makePageLink(
 					$this->entry->getTarget(),
-					array( 'oldid' => $revision )
+					[ 'oldid' => $revision ]
 				);
 
 				$params[2] = Message::rawParam( $targetPage );

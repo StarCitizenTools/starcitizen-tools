@@ -4,7 +4,8 @@
 			"Siebrand",
 			"Robin0van0der0vliet",
 			"Robin van der Vliet",
-			"Sjoerddebruin"
+			"Sjoerddebruin",
+			"Mainframe98"
 		]
 	},
 	"searchtranslations": "Vertalingen zoeken",
@@ -22,7 +23,11 @@
 	"tux-sst-next": "Volgende ›",
 	"tux-sst-prev": "‹ Vorige",
 	"tux-sst-default": "Vertalingen",
+	"tux-sst-translated": "Vertaling voor $1",
+	"tux-sst-untranslated": "Geen vertalingen voor $1",
+	"tux-sst-outdated": "Verouderde vertalingen voor $1",
 	"tux-sst-ellipsis-untranslated": "Geen vertaling",
 	"tux-sst-ellipsis-outdated": "Verouderde vertalingen",
-	"tux-sst-case-sensitive": "Hoofdlettergevoelig"
+	"tux-sst-case-sensitive": "Hoofdlettergevoelig",
+	"tux-sst-error-language": "Deze taal kan niet worden gebruikt met dit type zoekopdracht."
 }

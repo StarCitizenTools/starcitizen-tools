@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ce' );
@@ -40,8 +40,6 @@ QUnit.test( 'getDomHash/getDomText (with ve.dm.Converter)', function ( assert ) 
 			}
 		];
 
-	QUnit.expect( cases.length * 2 );
-
 	for ( i = 0; i < cases.length; i++ ) {
 		view = ve.test.utils.createSurfaceViewFromHtml( cases[ i ].html );
 		documentView = view.getDocument();
@@ -68,7 +66,6 @@ QUnit.test( 'getDomHash/getDomText (without ve.dm.Converter)', function ( assert
 			}
 		];
 
-	QUnit.expect( cases.length * 2 );
 	view = ve.test.utils.createSurfaceViewFromHtml( '' );
 	element = view.getDocument().getDocumentNode().$element[ 0 ];
 
@@ -82,8 +79,7 @@ QUnit.test( 'getDomHash/getDomText (without ve.dm.Converter)', function ( assert
 } );
 
 QUnit.test( 'getOffset', function ( assert ) {
-	var i, view, documentModel, documentView,
-		expected = 0,
+	var i, view, documentView,
 		testCases = [
 			{
 				msg: 'Empty paragraph',
@@ -222,12 +218,6 @@ QUnit.test( 'getOffset', function ( assert ) {
 			}
 		];
 
-	for ( i = 0; i < testCases.length; i++ ) {
-		expected += testCases[ i ].expected.length;
-	}
-
-	QUnit.expect( expected );
-
 	function testOffsets( parent, testCase, expectedIndex ) {
 		var i;
 		switch ( parent.nodeType ) {
@@ -260,7 +250,6 @@ QUnit.test( 'getOffset', function ( assert ) {
 
 	for ( i = 0; i < testCases.length; i++ ) {
 		view = ve.test.utils.createSurfaceViewFromHtml( testCases[ i ].html );
-		documentModel = view.getModel().getDocument();
 		documentView = view.getDocument();
 
 		testOffsets( documentView.getDocumentNode().$element[ 0 ], testCases[ i ], -1 );
@@ -270,7 +259,7 @@ QUnit.test( 'getOffset', function ( assert ) {
 
 // TODO: ve.ce.getOffsetOfSlug
 
-QUnit.test( 'isShortcutKey', 3, function ( assert ) {
+QUnit.test( 'isShortcutKey', function ( assert ) {
 	assert.strictEqual( ve.ce.isShortcutKey( { ctrlKey: true } ), true, 'ctrlKey' );
 	assert.strictEqual( ve.ce.isShortcutKey( { metaKey: true } ), true, 'metaKey' );
 	assert.strictEqual( ve.ce.isShortcutKey( {} ), false, 'Not set' );
@@ -280,7 +269,7 @@ QUnit.test( 'nextCursorOffset', function ( assert ) {
 	var i, len, tests, elt, test, img, nextOffset;
 
 	function dumpnode( node ) {
-		if ( node.nodeType === 3 ) {
+		if ( node.nodeType === Node.TEXT_NODE ) {
 			return '#' + node.data;
 		} else {
 			return node.nodeName.toLowerCase();
@@ -296,7 +285,7 @@ QUnit.test( 'nextCursorOffset', function ( assert ) {
 		{ html: '<p><img><b>foo</b></p>', expected: [ 'p', 1 ] },
 		{ html: '<p><b>foo</b><img><b>bar</b></p>', expected: [ 'p', 2 ] }
 	];
-	QUnit.expect( tests.length );
+
 	elt = ve.createDocumentFromHtml( '' ).createElement( 'div' );
 	for ( i = 0, len = tests.length; i < len; i++ ) {
 		test = tests[ i ];
@@ -312,7 +301,7 @@ QUnit.test( 'nextCursorOffset', function ( assert ) {
 } );
 
 QUnit.test( 'resolveTestOffset', function ( assert ) {
-	var i, ilen, j, jlen, tests, test, testOffset, elt, pre, post, count, dom;
+	var i, ilen, j, jlen, tests, test, testOffset, elt, pre, post, dom;
 	tests = [
 		[ 'o', 'k' ],
 		// TODO: doesn't handle tags correctly yet!
@@ -320,11 +309,7 @@ QUnit.test( 'resolveTestOffset', function ( assert ) {
 		// ['q', '<b>', 'r', '<b>', 's', 't', '</b>', 'u', '</b>', 'v']
 		[ 'h', 'e', 'l', 'l', 'o' ]
 	];
-	count = 0;
-	for ( i = 0, ilen = tests.length; i < ilen; i++ ) {
-		count += tests[ i ].length + 1;
-	}
-	QUnit.expect( 2 * count );
+
 	dom = ve.createDocumentFromHtml( '' );
 	elt = dom.createElement( 'div' );
 	for ( i = 0, ilen = tests.length; i < ilen; i++ ) {
@@ -351,7 +336,7 @@ QUnit.test( 'resolveTestOffset', function ( assert ) {
 
 QUnit.test( 'fakeImes', function ( assert ) {
 	var i, ilen, j, jlen, view, testRunner, testName, testActions, seq, testInfo,
-		action, args, count, foundEndLoop, testsFailAt, failAt, died, fakePreventDefault;
+		action, args, foundEndLoop, testsFailAt, failAt, died, fakePreventDefault;
 
 	if ( Function.prototype.bind === undefined ) {
 		// Assume we are in PhantomJS (which breaks different tests than a real browser)
@@ -359,23 +344,6 @@ QUnit.test( 'fakeImes', function ( assert ) {
 	} else {
 		testsFailAt = ve.ce.imetestsFailAt;
 	}
-
-	// count tests
-	count = 0;
-	for ( i = 0, ilen = ve.ce.imetests.length; i < ilen; i++ ) {
-		testName = ve.ce.imetests[ i ][ 0 ];
-		testActions = ve.ce.imetests[ i ][ 1 ];
-		// For the test that there is at least one endLoop
-		count++;
-		for ( j = 1, jlen = testActions.length; j < jlen; j++ ) {
-			action = testActions[ j ].action;
-			if ( action === 'endLoop' ) {
-				// For the test that the model and CE surface are in sync
-				count++;
-			}
-		}
-	}
-	QUnit.expect( count );
 
 	// TODO: make this function actually affect the events triggered
 	fakePreventDefault = function () {};
@@ -390,7 +358,7 @@ QUnit.test( 'fakeImes', function ( assert ) {
 		view = ve.test.utils.createSurfaceViewFromHtml( testInfo.startDom || '' );
 		view.getModel().setLinearSelection( new ve.Range( 1 ) );
 		testRunner = new ve.ce.TestRunner( view );
-		// start at 1 to omit the testInfo
+		// Start at 1 to omit the testInfo
 		died = false;
 		for ( j = 1, jlen = testActions.length; j < jlen; j++ ) {
 			action = testActions[ j ].action;
@@ -479,8 +447,6 @@ QUnit.test( 'isAfterAnnotationBoundary', function ( assert ) {
 		{ path: [ 4 ], offset: 1, expected: false },
 		{ path: [], offset: 5, expected: true }
 	];
-
-	QUnit.expect( tests.length );
 
 	for ( i = 0, iLen = tests.length; i < iLen; i++ ) {
 		test = tests[ i ];

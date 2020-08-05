@@ -1,24 +1,11 @@
-/**
- * Create a group of radio buttons for licenses. N.b. the licenses are named after the templates they invoke.
- * Note that this is very anti-MVC. The values are held only in the actual form elements themselves.
- *
- * @param {string|jQuery} selector to place license input
- * @param {Array|undefined} license key name(s) to activate by default
- * @param {Object} configuration of licenseInput. Must have following properties
- *				'type' = ("and"|"or") -- whether inclusive or exclusive license allowed
- *				'licenses' => array of template string names (matching keys in mw.UploadWizard.config.licenses)
- *				optional: 'licenseGroups' => groups of licenses, with more explanation
- *				optional: 'special' => String -- indicates, don't put licenses here, instead use a special widget
- * @param {number} count of the things we are licensing (it matters to some texts)
- * @param {mw.Api} api object; useful for previews
- */
-
 ( function ( mw, uw, $, OO ) {
 	function LicensePreviewDialog( config ) {
 		LicensePreviewDialog.parent.call( this, config );
 	}
 
 	OO.inheritClass( LicensePreviewDialog, OO.ui.Dialog );
+
+	LicensePreviewDialog.static.name = 'licensePreviewDialog';
 
 	LicensePreviewDialog.prototype.initialize = function () {
 		var dialog = this;
@@ -28,7 +15,7 @@
 		this.content = new OO.ui.PanelLayout( { padded: true, expanded: false } );
 		this.$body.append( this.content.$element );
 		this.$spinner = $.createSpinner( { size: 'large', type: 'block' } )
-			.css( { width: 200, padding: 20, float: 'none', margin: '0 auto' } );
+			.css( { width: 200, padding: 20, 'float': 'none', margin: '0 auto' } );
 
 		$( 'body' ).on( 'click', function ( e ) {
 			if ( !$.contains( dialog.$body.get( 0 ), e.target ) ) {
@@ -72,7 +59,18 @@
 	};
 
 	/**
+	 * Create a group of radio buttons for licenses. N.B. the licenses are named after the templates they invoke.
+	 * Note that this is very anti-MVC. The values are held only in the actual form elements themselves.
+	 *
 	 * @extends OO.ui.Widget
+	 * @param {Array|undefined} values License key name(s) to activate by default
+	 * @param {Object} config Configuration. Must have following properties:
+	 * @param {string} config.type Whether inclusive or exclusive license allowed ("and"|"or")
+	 * @param {string[]} config.licenses Template string names (matching keys in mw.UploadWizard.config.licenses)
+	 * @param {string[]} [config.licenseGroups] Groups of licenses, with more explanation
+	 * @param {string} [config.special] Indicates, don't put licenses here, instead use a special widget
+	 * @param {Number} count Number of the things we are licensing (it matters to some texts)
+	 * @param {mw.Api} api API object, used for wikitext previews
 	 */
 	mw.UploadWizardLicenseInput = function ( values, config, count, api ) {
 		mw.UploadWizardLicenseInput.parent.call( this );
@@ -122,6 +120,10 @@
 		$( 'body' ).append( this.windowManager.$element );
 		this.previewDialog = new LicensePreviewDialog();
 		this.windowManager.addWindows( [ this.previewDialog ] );
+
+		// [wikitext => list of templates used in wikitext] map, used in
+		// getUsedTemplates to reduce amount of API calls
+		this.templateCache = {};
 	};
 	OO.inheritClass( mw.UploadWizardLicenseInput, OO.ui.Widget );
 
@@ -138,7 +140,7 @@
 			var input = this;
 			$.each( configGroups, function ( i, group ) {
 				var $body, $head, $licensesDiv,
-					$group = $( '<div></div>' ).addClass( 'mwe-upwiz-deed-license-group' );
+					$group = $( '<div>' ).addClass( 'mwe-upwiz-deed-license-group' );
 				if ( group.head === undefined ) {
 					// if there is no header, just append licenses to the group div.
 					$body = $group;
@@ -147,13 +149,13 @@
 					$head = $( '<a>' )
 						.addClass( 'mwe-upwiz-deed-license-group-head mw-collapsible-toggle mw-collapsible-arrow' )
 						.msg( group.head, input.count );
-					$body = $( '<div></div>' ).addClass( 'mwe-upwiz-deed-license-group-body mw-collapsible-content' );
+					$body = $( '<div>' ).addClass( 'mwe-upwiz-deed-license-group-body mw-collapsible-content' );
 					$group.append( $head, $body ).makeCollapsible( { collapsed: true } );
 				}
 				if ( group.subhead !== undefined ) {
-					$body.append( $( '<div></div>' ).addClass( 'mwe-upwiz-deed-license-group-subhead' ).msg( group.subhead, input.count ) );
+					$body.append( $( '<div>' ).addClass( 'mwe-upwiz-deed-license-group-subhead' ).msg( group.subhead, input.count ) );
 				}
-				$licensesDiv = $( '<div></div>' ).addClass( 'mwe-upwiz-deed-license' );
+				$licensesDiv = $( '<div>' ).addClass( 'mwe-upwiz-deed-license' );
 				input.createInputs( $licensesDiv, group );
 				$body.append( $licensesDiv );
 				input.$selector.append( $group );
@@ -248,7 +250,7 @@
 			var input = this,
 
 				attrs = {
-					id:  this.name + '_' + this.inputs.length, // unique id
+					id: this.name + '_' + this.inputs.length, // unique id
 					name: this.name, // name of input, shared among all checkboxes or radio buttons.
 					type: this.type, // kind of input
 					value: this.createInputValueFromTemplateConfig( templates, config )
@@ -274,19 +276,20 @@
 				languageCode = mw.config.get( 'wgUserLanguage' ),
 
 				// The URL is optional, but if the message includes it as $2, we surface the fact
-				// that it's misisng.
+				// that it's missing.
 				licenseURL = license.props.url === undefined ? '#missing license URL' : license.props.url,
 
-				licenseLink = $( '<a>' ).attr( { target: '_blank', href: licenseURL } ),
+				licenseLink,
 
-				$icons = $( '<span></span>' );
+				$icons = $( '<span>' );
 
 			if ( license.props.languageCodePrefix !== undefined ) {
 				licenseURL += license.props.languageCodePrefix + languageCode;
 			}
+			licenseLink = $( '<a>' ).attr( { target: '_blank', href: licenseURL } );
 			if ( license.props.icons !== undefined ) {
 				$.each( license.props.icons, function ( i, icon ) {
-					$icons.append( $( '<span></span>' ).addClass( 'mwe-upwiz-license-icon mwe-upwiz-' + icon + '-icon' ) );
+					$icons.append( $( '<span>' ).addClass( 'mwe-upwiz-license-icon mwe-upwiz-' + icon + '-icon' ) );
 				} );
 			}
 			return $( '<label />' )
@@ -304,31 +307,22 @@
 		 * @return {jQuery} Wrapped textarea
 		 */
 		createCustomWikiTextInterface: function ( $input, customDefault ) {
-			var keydownTimeout,
+			var
 				input = this,
 				nameId = $input.attr( 'id' ) + '_custom',
 				textarea, button;
 
-			textarea = new OO.ui.TextInputWidget( {
+			textarea = new OO.ui.MultilineTextInputWidget( {
 				value: customDefault,
 				name: nameId,
-				multiline: true,
 				autosize: true
 			} );
 			textarea.$input.attr( 'id', nameId );
 
-			textarea.$input
-				.focus( function () { input.setInput( $input, true ); } )
-				.keydown( function () {
-					window.clearTimeout( keydownTimeout );
-					keydownTimeout = window.setTimeout(
-						function () { input.emit( 'change' ); },
-						2000
-					);
-				} )
-				.css( {
-					'font-family': 'monospace'
-				} );
+			// Select this radio when the user clicks on the text field
+			textarea.$input.focus( function () { input.setInput( $input, true ); } );
+			// Update displayed errors as the user is typing
+			textarea.on( 'change', OO.ui.debounce( this.emit.bind( this, 'change' ), 500 ) );
 
 			button = new OO.ui.ButtonWidget( {
 				label: mw.message( 'mwe-upwiz-license-custom-preview' ).text(),
@@ -337,10 +331,9 @@
 				input.showPreview( textarea.getValue() );
 			} );
 
-			return $( '<div></div>' ).css( { width: '100%' } ).append(
-				$( '<div></div>' ).css( { float: 'right', width: '9em', 'padding-left': '1em' } ).append( button.$element ),
-				$( '<div></div>' ).css( { 'margin-right': '10em' } ).append( textarea.$element ),
-				$( '<div></div>' ).css( { clear: 'both' } )
+			return $( '<div>' ).addClass( 'mwe-upwiz-license-custom' ).append(
+				button.$element,
+				textarea.$element
 			);
 		},
 
@@ -374,8 +367,16 @@
 		setInputsIndividually: function ( values ) {
 			var input = this;
 			$.each( this.inputs, function ( i, $input ) {
-				var licenseName = $input.data( 'licenseName' );
-				input.setInput( $input, values[ licenseName ] );
+				var licenseName = $input.data( 'licenseName' ),
+					value = licenseName in values && values[ licenseName ] !== false;
+
+				input.setInput( $input, value );
+
+				// if value was a string, it doesn't just mean that we should
+				// select the checkbox, but also fill out the textarea it comes with
+				if ( value && typeof values[ licenseName ] === 'string' ) {
+					$input.data( 'textarea' ).val( values[ licenseName ] );
+				}
 			} );
 		},
 
@@ -436,6 +437,23 @@
 		},
 
 		/**
+		 * Gets the selected license(s). The returned value will be a license
+		 * key => license props map, as defined in UploadWizard.config.php.
+		 *
+		 * @return {Object}
+		 */
+		getLicenses: function () {
+			var licenses = {};
+
+			this.getSelectedInputs().each( function () {
+				var licenseName = this.data( 'licenseName' );
+				licenses[ licenseName ] = mw.UploadWizard.config.licenses[ licenseName ] || {};
+			} );
+
+			return licenses;
+		},
+
+		/**
 		 * Gets the wikitext associated with all selected inputs. Some inputs also have associated textareas so we append their contents too.
 		 *
 		 * @return {string} of wikitext (empty string if no inputs set)
@@ -447,12 +465,16 @@
 						return input.getInputWikiText( this );
 					}
 				);
+
 			// need to use makeArray because a jQuery-returned set of things won't have .join
-			return $.makeArray( wikiTexts ).join( '' );
+			return $.makeArray( wikiTexts ).join( '' ).trim();
 		},
 
 		/**
 		 * Get the value of a particular input
+		 *
+		 * @param {jQuery} $input
+		 * @return {string}
 		 */
 		getInputWikiText: function ( $input ) {
 			return $input.val() + '\n' + this.getInputTextAreaVal( $input );
@@ -461,6 +483,7 @@
 		/**
 		 * Get the value of the associated textarea, if any
 		 *
+		 * @param {jQuery} $input
 		 * @return {string}
 		 */
 		getInputTextAreaVal: function ( $input ) {
@@ -482,45 +505,110 @@
 		},
 
 		/**
+		 * Returns a list of templates used & transcluded in given wikitext
+		 *
+		 * @param {string} wikitext
+		 * @return {$.Promise} Promise that resolves with an array of template names
+		 */
+		getUsedTemplates: function ( wikitext ) {
+			var input = this;
+
+			if ( wikitext in this.templateCache ) {
+				return $.Deferred().resolve( this.templateCache[ wikitext ] ).promise();
+			}
+
+			return this.api.get( {
+				action: 'parse',
+				pst: true,
+				prop: 'templates',
+				title: 'File:UploadWizard license verification.png',
+				text: wikitext
+			} ).then( function ( result ) {
+				var templates = [],
+					template, title, i;
+
+				for ( i = 0; i < result.parse.templates.length; i++ ) {
+					template = result.parse.templates[ i ];
+
+					// normalize templates to mw.Title.getPrefixedDb() format
+					title = new mw.Title( template.title, template.ns );
+					templates.push( title.getPrefixedDb() );
+				}
+
+				// cache result so we won't have to fire another API request
+				// for the same content
+				input.templateCache[ wikitext ] = templates;
+
+				return templates;
+			} );
+		},
+
+		/**
 		 * See uw.DetailsWidget
+		 *
+		 * @return {jQuery.Promise}
 		 */
 		getErrors: function () {
 			var input = this,
-				errors = [],
+				errors = $.Deferred().resolve( [] ).promise(),
+				addError = function ( message ) {
+					errors = errors.then( function ( errors ) {
+						errors.push( mw.message( message ) );
+						return errors;
+					} );
+				},
 				selectedInputs = this.getSelectedInputs();
 
 			if ( selectedInputs.length === 0 ) {
-				errors.push( mw.message( 'mwe-upwiz-deeds-need-license' ) );
-
+				addError( 'mwe-upwiz-deeds-need-license' );
 			} else {
 				// It's pretty hard to screw up a radio button, so if even one of them is selected it's okay.
 				// But also check that associated textareas are filled for if the input is selected, and that
 				// they are the appropriate size.
 				$.each( selectedInputs, function ( i, $input ) {
-					var textAreaName, text;
+					var wikitext;
 
 					if ( !$input.data( 'textarea' ) ) {
 						return;
 					}
 
-					textAreaName = $input.data( 'textarea' ).attr( 'name' );
-					text = input.getInputTextAreaVal( $input );
+					wikitext = input.getInputTextAreaVal( $input );
 
-					if ( text === '' ) {
-						errors.push( mw.message( 'mwe-upwiz-error-license-wikitext-missing' ) );
-					} else if ( text.length < mw.UploadWizard.config.minCustomLicenseLength ) {
-						errors.push( mw.message( 'mwe-upwiz-error-license-wikitext-too-short' ) );
-					} else if ( text.length > mw.UploadWizard.config.maxCustomLicenseLength ) {
-						errors.push( mw.message( 'mwe-upwiz-error-license-wikitext-too-long' ) );
+					if ( wikitext === '' ) {
+						addError( 'mwe-upwiz-error-license-wikitext-missing' );
+					} else if ( wikitext.length < mw.UploadWizard.config.minCustomLicenseLength ) {
+						addError( 'mwe-upwiz-error-license-wikitext-too-short' );
+					} else if ( wikitext.length > mw.UploadWizard.config.maxCustomLicenseLength ) {
+						addError( 'mwe-upwiz-error-license-wikitext-too-long' );
+					} else if ( wikitext.match( /\{\{(.+?)\}\}/g ) === null ) {
+						// if text doesn't contain a template, we don't even
+						// need to validate it any further...
+						addError( 'mwe-upwiz-error-license-wikitext-missing-template' );
+					} else if ( mw.UploadWizard.config.customLicenseTemplate !== false ) {
+						// now do a thorough test to see if the text actually
+						// includes a license template
+						errors = $.when(
+							errors, // array of existing errors
+							input.getUsedTemplates( wikitext )
+						).then( function ( errors, usedTemplates ) {
+							if ( usedTemplates.indexOf( mw.UploadWizard.config.customLicenseTemplate ) < 0 ) {
+								// no license template found, add another error
+								errors.push( mw.message( 'mwe-upwiz-error-license-wikitext-missing-template' ) );
+							}
+
+							return errors;
+						} );
 					}
 				} );
 			}
 
-			return $.Deferred().resolve( errors ).promise();
+			return errors;
 		},
 
 		/**
 		 * See uw.DetailsWidget
+		 *
+		 * @return {jQuery.Promise}
 		 */
 		getWarnings: function () {
 			return $.Deferred().resolve( [] ).promise();
@@ -545,18 +633,40 @@
 			}
 
 			function error( code, result ) {
-				var message = result.textStatus || result.error && result.error.info || undefined;
+				var message = result.errors[ 0 ].html;
 
 				uw.eventFlowLogger.logError( 'license', { code: code, message: message } );
-				show( $( '<div></div>' ).append(
-					$( '<h3></h3>' ).append( code ),
-					$( '<p></p>' ).append( message )
+				show( $( '<div>' ).append(
+					$( '<h3>' ).append( code ),
+					$( '<p>' ).append( message )
 				) );
 			}
 
-			this.api.parse( wikiText ).done( show ).fail( error );
+			this.api.parse( wikiText, { pst: true } ).done( show ).fail( error );
+		},
+
+		/**
+		 * @return {Object}
+		 */
+		getSerialized: function () {
+			var i,
+				values = {},
+				$inputs = this.getSelectedInputs();
+
+			for ( i = 0; i < $inputs.length; i++ ) {
+				values[ $inputs[ i ].data( 'licenseName' ) ] = this.getInputTextAreaVal( $inputs[ i ] ) || true;
+			}
+
+			return values;
+		},
+
+		/**
+		 * @param {Object} serialized
+		 */
+		setSerialized: function ( serialized ) {
+			this.setValues( serialized );
 		}
 
 	} );
 
-} )( mediaWiki, mediaWiki.uploadWizard, jQuery, OO );
+}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );

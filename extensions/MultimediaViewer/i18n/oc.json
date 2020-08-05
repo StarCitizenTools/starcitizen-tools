@@ -14,7 +14,7 @@
 	"multimediaviewer-license-cc-pd": "Domeni public",
 	"multimediaviewer-license-pd": "Domeni public",
 	"multimediaviewer-license-default": "Afichar la licéncia",
-	"multimediaviewer-permission-title": "Detalhs dels dreches",
+	"multimediaviewer-permission-title": "Detalhs dels dreits",
 	"multimediaviewer-permission-link": "afichar las condicions",
 	"multimediaviewer-permission-viewmore": "Veire mai",
 	"multimediaviewer-about-mmv": "A prepaus",
@@ -29,6 +29,7 @@
 	"multimediaviewer-download-small-button-name": "Telecargar en pichona talha",
 	"multimediaviewer-download-medium-button-name": "Telecargar en talha mejana",
 	"multimediaviewer-download-large-button-name": "Telecargar en granda talha",
+	"multimediaviewer-default-embed-dimensions": "Talha de vinheta per defaut",
 	"multimediaviewer-original-embed-dimensions": "Fichièr d’origina $1",
 	"multimediaviewer-large-embed-dimensions": "Grand $1",
 	"multimediaviewer-medium-embed-dimensions": "Mejan $1",
@@ -36,5 +37,6 @@
 	"multimediaviewer-description-page-button-text": "Mai de detalhs sus aqueste fichièr",
 	"multimediaviewer-description-page-popup-text": "Mai de detalhs sus aqueste fichièr en $1",
 	"multimediaviewer-commons-subtitle": "L'entrepaus de mèdia liure",
-	"multimediaviewer-view-expanded": "Dobrir dins lo Visualizador de mèdias"
+	"multimediaviewer-view-expanded": "Dobrir dins lo Visualizador de mèdias",
+	"multimediaviewer-close-popup-text": "Tampar aquesta aisina (Esc)"
 }

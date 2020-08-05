@@ -1,25 +1,39 @@
 /*!
  * VisualEditor MediaWiki Initialization DesktopArticleTarget styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 /* Toolbar */
 
-.ve-activating .ve-init-mw-desktopArticleTarget-toolbar,
-.ve-deactivating .ve-init-mw-desktopArticleTarget-toolbar {
+.ve-init-mw-desktopArticleTarget-toolbar {
 	overflow: hidden;
-	transition: height 0.4s ease;
+	transition: height 250ms ease;
 }
 
-.ve-ui-toolbar-floating .oo-ui-toolbar-bar {
+.ve-init-mw-desktopArticleTarget-toolbar > .oo-ui-toolbar-bar {
 	transform: translateY( -100% );
-	transition: transform 0.4s ease;
+	transition: transform 250ms ease;
 }
 
-.ve-active .ve-ui-toolbar-floating .oo-ui-toolbar-bar {
+.ve-init-mw-desktopArticleTarget-toolbar-opened {
+	overflow: visible;
+}
+
+.ve-init-mw-desktopArticleTarget-toolbar-open > .oo-ui-toolbar-bar {
 	transform: translateY( 0 );
+	opacity: 1;
+}
+
+.ve-tempSourceEditing .ve-init-mw-desktopArticleTarget-toolbar,
+.ve-tempSourceEditing .ve-init-mw-desktopArticleTarget-toolbar > .oo-ui-toolbar-bar {
+	transition: none;
+}
+
+.ve-tempSourceEditing .ve-init-mw-desktopArticleTarget-toolbar {
+	margin-bottom: -3.125em;
+	transition: opacity 2s ease;
 }
 
 /*!
@@ -38,3 +52,25 @@
 .ve-init-mw-desktopArticleTarget .redirectMsg a:hover {
 	text-decoration: none;
 }
+
+/*!
+ * Increase z-index of surface container so it appears above the debug bar
+ */
+.ve-init-mw-desktopArticleTarget #bodyContent { /* stylelint-disable-line selector-max-id */
+	z-index: 1;
+}
+
+.ve-ui-init-desktopArticleTarget-sectionTitle {
+	max-width: none;
+	margin: 1em 0 0.5em 0;
+}
+
+/* stylelint-disable declaration-no-important */
+.ve-ui-init-desktopArticleTarget-sectionTitle .oo-ui-inputWidget-input {
+	padding: 0 !important;
+	border: 0 !important;
+	outline: 0 !important;
+	box-shadow: none !important;
+	line-height: inherit;
+}
+/* stylelint-enable declaration-no-important */

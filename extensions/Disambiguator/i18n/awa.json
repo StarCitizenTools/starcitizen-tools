@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"1AnuraagPandey"
+		]
+	},
+	"disambig-desc": "[[Special:DisambiguationPages|बहुविकल्पी पन्ना]] चिन्हय खत्तीर <code><nowiki>__DISAMBIG__</nowiki></code> टैग जोड़त है",
+	"disambiguationpages": "बहुविकल्पी पन्ना",
+	"disambiguationpages-summary": "{{SITENAME}} पे कुल बहुविकल्पी पन्नन कय सूची निचे है।<br />\nकवनो पन्ना कय बहुविकल्पी पन्ना तब मानि जात है यदि ओहमा <code><nowiki>__DISAMBIG__</nowiki></code> टैग (या ओकरे जैसन कोड) कय प्रयोग होत है।",
+	"disambiguationpagelinks": "बहुविकल्पी पन्ना से जोड़ाय वाले पन्ना",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "इ एक्ठु बहुविकल्पी पन्ना होय"
+}

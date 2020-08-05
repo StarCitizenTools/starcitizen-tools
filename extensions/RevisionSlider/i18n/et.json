@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cumbril",
+			"Pikne"
+		]
+	},
+	"revisionslider": "Redaktsiooniliugur",
+	"revisionslider-preference-disable": "Ära näita redaktsiooniliugurit",
+	"revisionslider-desc": "Näitab liugurit, mis võimaldab erinevuste leheküljel redaktsioone valida ja võrrelda.",
+	"revisionslider-toggle-label": "Sirvi ajalugu",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|bait|baiti}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bait|baiti}}",
+	"revisionslider-label-date": "Kuupäev",
+	"revisionslider-label-page-size": "Lehekülje suurus",
+	"revisionslider-label-change-size": "Suuruse muutus",
+	"revisionslider-label-comment": "Resümee",
+	"revisionslider-label-username": "{{GENDER:$1|Kasutajanimi}}",
+	"revisionslider-minoredit": "See on pisimuudatus.",
+	"revisionslider-loading-failed": "Redaktsiooniliugurit ei õnnestunud laadida.",
+	"revisionslider-toggle-title-expand": "Näita redaktsiooniliugurit",
+	"revisionslider-toggle-title-collapse": "Sule redaktsiooniliugur",
+	"revisionslider-turn-on-auto-expand-title": "Hoia redaktsiooniliugur alati avatud",
+	"revisionslider-turn-off-auto-expand-title": "Ära hoia redaktsiooniliugurit vaikimisi avatud",
+	"revisionslider-arrow-tooltip-newer": "Näita uuemaid redaktsioone",
+	"revisionslider-arrow-tooltip-older": "Näita vanemaid redaktsioone",
+	"revisionslider-show-help-tooltip": "Näita abiteksti",
+	"revisionslider-help-dialog-slide1": "Redaktsiooniliugur aitab erinevuste leheküljel redaktsioonide vahel liikuda ja neid võrrelda. Vahendi väljaarendamiseks [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider avaldas soovi saksa kaastööliskond]. Oleme tänulikud, kui annad [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider siin] tagasisidet.",
+	"revisionslider-help-dialog-slide2": "Iga tulp kujutab üht redaktsiooni. Ülemised tulbad näitavad, et lehekülje suurus kasvas ja alumised tulbad vähenemist. Pildil on esimesele redaktsioonile sisu lisatud ja teiselt redaktsioonilt sisu eemaldatud.",
+	"revisionslider-help-dialog-slide3a": "<p>Et teatud redaktsioone võrrelda, kasuta redaktsioonide valimiseks kollast ja sinist pidet.</p><p>Sinine pide näitab uuemat redaktsiooni ja kollane pide vanemat redaktsiooni.</p><p>Pidemete liigutamiseks lohista neid või klõpsa liugurijoonel.</p>",
+	"revisionslider-help-dialog-slide4": "Kasuta edasi- ja tagasinoolt, et liikuda mööda redaktsioonilugu ning näidata uuemaid ja vanemaid redaktsioone.",
+	"revisionslider-tutorial": "Redaktsiooniliuguri õppekäik",
+	"revisionslider-previous-dialog": "Tagasi",
+	"revisionslider-next-dialog": "Edasi",
+	"revisionslider-close-dialog": "Sule"
+}

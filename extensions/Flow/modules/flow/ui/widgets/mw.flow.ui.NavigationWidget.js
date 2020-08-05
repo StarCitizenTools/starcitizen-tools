@@ -34,8 +34,7 @@
 		this.$element
 			.append(
 				this.tocWidget.$element,
-				this.reorderTopicsWidget.$element,
-				$( '<div>' ).addClass( 'flow-ui-navigationWidget-clear' )
+				this.reorderTopicsWidget.$element
 			)
 			.addClass( 'flow-ui-navigationWidget' );
 	};
@@ -119,7 +118,7 @@
 
 		if ( isScrolledDown ) {
 			// TODO use binary search
-			$( '.flow-topic' ).each( function ( index, element ) {
+			$( '.flow-topic' ).each( function () {
 				if ( isElementInView( $( this ) ) ) {
 					topicId = $( this ).data( 'flowId' );
 					return false;

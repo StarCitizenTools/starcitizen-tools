@@ -14,6 +14,7 @@
 	"jsonschema-invalid-missingfield": "JSON Schema validation error, shown when a required field is missing.\n\nParameters:\n* $1 - schema key",
 	"jsonschema-invalid-notinenum": "JSON Schema validation error, shown when a value is not in the set of permitted values for a field.\n\nParameters:\n* $1 - value\n* $2 - property",
 	"apihelp-jsonschema-description": "{{doc-apihelp-description|jsonschema}}",
+	"apihelp-jsonschema-summary": "{{doc-apihelp-summary|jsonschema}}",
 	"apihelp-jsonschema-param-revid": "{{doc-apihelp-param|jsonschema|revid}}",
 	"apihelp-jsonschema-param-title": "{{doc-apihelp-param|jsonschema|title}}",
 	"apihelp-jsonschema-example-1": "{{doc-apihelp-example|jsonschema}}"

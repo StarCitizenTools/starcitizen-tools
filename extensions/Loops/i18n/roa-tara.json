@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"loops-desc": "Funziune analizzatrice pe fà le cicle",
+	"loops_max": "Massime numere de cicle onne state fatte",
+	"loops-limitreport-count-limited": "Condegge de ExtLoops",
+	"loops-limitreport-count-unlimited": "Condegge de ExtLoops",
+	"loops-config-countlimit": "'A variabbele de configurazione definisce 'u masseme numere permesse de cicle ('-1' => nisciune limite).\n'#forargs' e '#fornumargs' no so limitate da quiste.",
+	"loops-config-enabledfunctions": "Permette de definì quale funziune avènene date pe 'Loops' ca avessera essere abbiltiate pa uicchi. Ce l'estenzione 'Variables' non g'è installate, '#loop', '#forargs' e '#fornumargs' avènene disabbilitate automatecamende."
+}

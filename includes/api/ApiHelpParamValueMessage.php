@@ -1,10 +1,6 @@
 <?php
 /**
- *
- *
- * Created on Dec 22, 2014
- *
- * Copyright © 2014 Brad Jorsch <bjorsch@wikimedia.org>
+ * Copyright © 2014 Wikimedia Foundation and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +32,7 @@
 class ApiHelpParamValueMessage extends Message {
 
 	protected $paramValue;
+	protected $deprecated;
 
 	/**
 	 * @see Message::__construct
@@ -43,11 +40,14 @@ class ApiHelpParamValueMessage extends Message {
 	 * @param string $paramValue Parameter value being documented
 	 * @param string $text Message to use.
 	 * @param array $params Parameters for the message.
+	 * @param bool $deprecated Whether the value is deprecated
 	 * @throws InvalidArgumentException
+	 * @since 1.30 Added the `$deprecated` parameter
 	 */
-	public function __construct( $paramValue, $text, $params = [] ) {
+	public function __construct( $paramValue, $text, $params = [], $deprecated = false ) {
 		parent::__construct( $text, $params );
 		$this->paramValue = $paramValue;
+		$this->deprecated = (bool)$deprecated;
 	}
 
 	/**
@@ -59,12 +59,31 @@ class ApiHelpParamValueMessage extends Message {
 	}
 
 	/**
+	 * Fetch the 'deprecated' flag
+	 * @since 1.30
+	 * @return bool
+	 */
+	public function isDeprecated() {
+		return $this->deprecated;
+	}
+
+	/**
 	 * Fetch the message.
 	 * @return string
 	 */
 	public function fetchMessage() {
 		if ( $this->message === null ) {
-			$this->message = ";{$this->paramValue}:" . parent::fetchMessage();
+			$dep = '';
+			if ( $this->isDeprecated() ) {
+				$msg = new Message( 'api-help-param-deprecated' );
+				$msg->interface = $this->interface;
+				$msg->language = $this->language;
+				$msg->useDatabase = $this->useDatabase;
+				$msg->title = $this->title;
+				$dep = '<span class="apihelp-deprecated">' . $msg->fetchMessage() . '</span> ';
+			}
+			$this->message = ";<span dir=\"ltr\" lang=\"en\">{$this->paramValue}</span>:"
+				. $dep . parent::fetchMessage();
 		}
 		return $this->message;
 	}

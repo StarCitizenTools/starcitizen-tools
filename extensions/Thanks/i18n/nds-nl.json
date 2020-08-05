@@ -1,0 +1,42 @@
+{
+	"@metadata": {
+		"authors": [
+			"Servien",
+			"Macofe"
+		]
+	},
+	"thanks-desc": "Voegt verwiezingen toe um gebrukers te bedanken veur bewarkingen, kommentaar, enz.",
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|bedanken}}}}",
+	"thanks-thanked": "{{GENDER:$1|is bedankt}}",
+	"thanks-button-thank": "{{GENDER:$1|Bedanken}}",
+	"thanks-button-thanked": "{{GENDER:$1|Is bedankt}}",
+	"thanks-error-undefined": "Bedanken is mislokt. Probeer t weer.",
+	"thanks-error-invalidrevision": "t Versienummer is niet geldig.",
+	"thanks-error-ratelimited": "{{GENDER:$1|Je}} hebben joew limiet veur bedankjes overschrejen. Wacht effen veurda'j verdan gaon.",
+	"thanks-thank-tooltip": "{{GENDER:$1|Stuur}} n melding mit n bedankjen naor disse {{GENDER:$2|gebruker}}",
+	"thanks-confirmation2": "n Bedankjen veur disse bewarking {{GENDER:$1|sturen}}?",
+	"thanks-thanked-notice": "$1 hef joew bedankjen ontvangen veur {{GENDER:$2|zien|heur|zien}} bewarking.",
+	"thanks": "Bedanken",
+	"echo-pref-subscription-edit-thank": "Bedank m'n veur mien bewarking",
+	"echo-pref-tooltip-edit-thank": "Stuur m'n n melding as der ene mien bedankt veur n bewarking die'k an-ebröcht hebbe.",
+	"echo-category-title-edit-thank": "Bedankt",
+	"notification-thanks-diff-link": "joew bewarking",
+	"notification-header-rev-thank": "$1 {{GENDER:$2|hef}} {{GENDER:$4|joe}} bedankt veur joew bewarking op '''$3'''.",
+	"log-name-thanks": "Bedankjeslogboek",
+	"log-description-thanks": "Hieronder zie'j n lieste mit gebrukers die deur aandere gebrukers bedankt bin.",
+	"logentry-thanks-thank": "$1 {{GENDER:$2|hef}} {{GENDER:$4|$3}} bedankt",
+	"log-show-hide-thanks": "bedankjeslogboek $1",
+	"thanks-error-no-id-specified": "Je mutten n versienummer opgeven um n bedankjen te sturen.",
+	"notification-link-text-view-post": "Reaksie bekieken",
+	"thanks-error-invalidpostid": "Berichtnummer is niet geldig.",
+	"flow-thanks-confirmation-special": "Wi'j n bedankjen sturen veur disse reaksie?",
+	"flow-thanks-thanked-notice": "$1 hef joew bedankjen ontvangen veur {{GENDER:$2|zien|heur|zien}} reaksie.",
+	"notification-flow-thanks-post-link": "joew reaksie",
+	"apihelp-flowthank-description": "Stuur n bedankjen veur n Flow-reaksie.",
+	"apihelp-flowthank-param-postid": "De UUID van t bericht um veur te bedanken.",
+	"apihelp-flowthank-example-1": "Stuur n bedankjen veur de reaksie mit <kbd>UUID xyz789</kbd>",
+	"apihelp-thank-description": "Stuur n bedankjen naor n bewarker.",
+	"apihelp-thank-param-rev": "Versienummer um ene veur te bedanken.",
+	"apihelp-thank-param-source": "n Korte tekste waormee je de bron veur t verzeuk beschrieven, bieveurbeeld <kbd>diff</kbd> of <kbd>history</kbd>.",
+	"apihelp-thank-example-1": "Stuur n bedankjen veur versienummer 456, mit n 'wiezig'-zied as bron"
+}

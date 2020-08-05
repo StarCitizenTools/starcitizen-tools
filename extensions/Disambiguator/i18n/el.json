@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Αντιγόνη",
+			"Nikosgranturismogt"
+		]
+	},
+	"disambig-desc": "Προσθέτει την πινακίδα <code><nowiki>__DISAMBIG__</nowiki></code> για να επισημάνει [[Special:DisambiguationPages|σελίδες αποσαφήνισης]]",
+	"disambiguationpages": "Σελίδες αποσαφήνισης",
+	"disambiguationpages-summary": "Αυτός είναι ο κατάλογος με όλες οι σελίδες αποσαφήνισης του {{SITENAME}}.<br />\nΜια σελίδα αντιμετωπίζεται ως σελίδα αποσαφήνισης εάν περιέχει την πινακίδα <code><nowiki>__DISAMBIG__</nowiki></code> (ή μια ισοδύναμη αντίστοιχη).",
+	"disambiguationpagelinks": "Σελίδες που συνδέουν σε σελίδες αποσαφήνισης",
+	"disambiguationpagelinks-summary": "Οι παρακάτω σελίδες περιέχουν τουλάχιστον έναν σύνδεσμο προς κάποια σελίδα αποσαφήνισης. Ίσως όμως είναι δυνατό να οδηγούν προς μια πιο κατάλληλη σελίδα.<br />\nΜια σελίδα αντιμετωπίζεται ως σελίδα αποσαφήνισης εάν περιέχει την πινακίδα <code><nowiki>__DISAMBIG__</nowiki></code> (ή μια ισοδύναμη αντίστοιχη).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Αυτή είναι μια σελίδα αποσαφήνισης"
+}

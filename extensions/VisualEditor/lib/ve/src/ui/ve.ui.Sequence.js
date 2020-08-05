@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Sequence class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -12,18 +12,27 @@
  * @constructor
  * @param {string} name Symbolic name
  * @param {string} commandName Command name this sequence executes
- * @param {string|Array|RegExp} data Data to match
+ * @param {string|Array|RegExp} data Data to match. String, linear data array, or regular expression.
+ *         When using a RegularExpression always match the end of the sequence with a '$' so that
+ *         only sequences next to the user's cursor match.
  * @param {number} [strip=0] Number of data elements to strip after execution
  *        (from the right)
  * @param {boolean} [setSelection=false] Whether to set the selection to the
  *        range matching the sequence before executing the command.
+ * @param {boolean} [delayed=false] Whether to wait for the user to stop typing matching content
+ *     before executing the command. When the sequence matches typed text, it will not be executed
+ *     immediately, but only after more non-matching text is added afterwards or the selection is
+ *     changed. This is useful for variable-length sequences (defined with RegExps).
+ * @param {boolean} [checkOnPaste=false] Whether the sequence should also be matched after paste.
  */
-ve.ui.Sequence = function VeUiSequence( name, commandName, data, strip, setSelection ) {
+ve.ui.Sequence = function VeUiSequence( name, commandName, data, strip, setSelection, delayed, checkOnPaste ) {
 	this.name = name;
 	this.commandName = commandName;
 	this.data = data;
 	this.strip = strip;
 	this.setSelection = setSelection;
+	this.delayed = delayed;
+	this.checkOnPaste = checkOnPaste;
 };
 
 /* Inheritance */
@@ -37,6 +46,7 @@ OO.initClass( ve.ui.Sequence );
  *
  * @param {ve.dm.ElementLinearData} data String or linear data
  * @param {number} offset Offset
+ * @param {string} plaintext Plain text of data
  * @return {ve.Range|null} Range corresponding to the match, or else null
  */
 ve.ui.Sequence.prototype.match = function ( data, offset, plaintext ) {
@@ -63,10 +73,11 @@ ve.ui.Sequence.prototype.match = function ( data, offset, plaintext ) {
  * Execute the command associated with the sequence
  *
  * @param {ve.ui.Surface} surface surface
+ * @param {ve.Range} range Range to set
  * @return {boolean} The command executed
  */
 ve.ui.Sequence.prototype.execute = function ( surface, range ) {
-	var command, stripRange, executed, stripFragment, selection,
+	var command, stripRange, executed, stripFragment, originalSelectionFragment, args,
 		surfaceModel = surface.getModel();
 
 	if ( surface.getCommands().indexOf( this.getCommandName() ) === -1 ) {
@@ -89,19 +100,34 @@ ve.ui.Sequence.prototype.execute = function ( surface, range ) {
 
 	surfaceModel.breakpoint();
 
+	// Use SurfaceFragment rather than Selection to automatically adjust the selection for any changes
+	// (additions, removals) caused by executing the command
+	originalSelectionFragment = surfaceModel.getFragment();
 	if ( this.setSelection ) {
-		selection = surfaceModel.getSelection();
 		surfaceModel.setLinearSelection( range );
 	}
 
-	executed = command.execute( surface );
+	// For sequences that trigger dialogs, pass an extra flag so the window knows
+	// to un-strip the sequence if it is closed without action. See ve.ui.WindowAction.
+	if ( command.getAction() === 'window' && command.getMethod() === 'open' ) {
+		args = ve.copy( command.args );
+		args[ 1 ] = args[ 1 ] || {};
+		args[ 1 ].strippedSequence = !!this.strip;
+	}
+
+	executed = command.execute( surface, args );
 
 	if ( executed && stripFragment ) {
+		// Strip the typed text. This will be undone if the action triggered was
+		// window/open and the window is dismissed
 		stripFragment.removeContent();
 	}
 
-	if ( !executed && selection ) {
-		surfaceModel.setSelection( selection );
+	// Restore user's selection if:
+	// * This sequence was not executed after all
+	// * This sequence is delayed, so it only executes after the user changed the selection
+	if ( !executed || this.delayed ) {
+		originalSelectionFragment.select();
 	}
 
 	return executed;

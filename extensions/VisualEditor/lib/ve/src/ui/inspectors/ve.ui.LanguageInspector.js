@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LanguageInspector class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,9 +13,9 @@
  * @constructor
  * @param {Object} [config] Configuration options
  */
-ve.ui.LanguageInspector = function VeUiLanguageInspector( config ) {
+ve.ui.LanguageInspector = function VeUiLanguageInspector() {
 	// Parent constructor
-	ve.ui.AnnotationInspector.call( this, config );
+	ve.ui.LanguageInspector.super.apply( this, arguments );
 };
 
 /* Inheritance */

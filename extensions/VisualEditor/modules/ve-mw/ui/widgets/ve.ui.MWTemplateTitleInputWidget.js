@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWTemplateTitleInputWidget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,7 +16,7 @@
  * @cfg {number} [namespace] Namespace to prepend to queries. Defaults to template namespace.
  */
 ve.ui.MWTemplateTitleInputWidget = function VeUiMWTemplateTitleInputWidget( config ) {
-	config = ve.extendObject( {},  {
+	config = ve.extendObject( {}, {
 		namespace: mw.config.get( 'wgNamespaceIds' ).template
 	}, config );
 
@@ -37,6 +37,7 @@ ve.ui.MWTemplateTitleInputWidget = function VeUiMWTemplateTitleInputWidget( conf
 
 /* Inheritance */
 
+// FIXME: This should extend mw.widgets.TitleSearchWidget instead
 OO.inheritClass( ve.ui.MWTemplateTitleInputWidget, mw.widgets.TitleInputWidget );
 
 /* Methods */
@@ -52,7 +53,7 @@ ve.ui.MWTemplateTitleInputWidget.prototype.getLookupRequest = function () {
 	if ( this.showTemplateDescriptions ) {
 		return promise
 			.then( function ( response ) {
-				var xhr, pageId, index, params, indexFound, redirIndex,
+				var xhr, pageId, index, redirIndex,
 					redirects = ( response.query && response.query.redirects ) || {},
 					origPages = ( response.query && response.query.pages ) || {},
 					newPages = [],
@@ -62,17 +63,14 @@ ve.ui.MWTemplateTitleInputWidget.prototype.getLookupRequest = function () {
 				// the order defined by the page's index key, instead of whatever random order the
 				// browser would let you iterate over the old object in.
 				for ( pageId in origPages ) {
-					indexFound = false;
 					if ( 'index' in origPages[ pageId ] ) {
 						newPages[ origPages[ pageId ].index - 1 ] = origPages[ pageId ];
-						indexFound = true;
 					} else {
 						// Watch out for cases where the index is specified on the redirect object
 						// rather than the page object.
 						for ( redirIndex in redirects ) {
 							if ( redirects[ redirIndex ].to === origPages[ pageId ].title ) {
 								newPages[ redirects[ redirIndex ].index - 1 ] = origPages[ pageId ];
-								indexFound = true;
 								break;
 							}
 						}
@@ -87,29 +85,41 @@ ve.ui.MWTemplateTitleInputWidget.prototype.getLookupRequest = function () {
 				originalResponse = response; // lie!
 
 				// Also get descriptions
+				// FIXME: This should go through MWTransclusionModel rather than duplicate.
 				if ( titles.length > 0 ) {
-					params = {
+					xhr = widget.getApi().get( {
 						action: 'templatedata',
-						titles: titles.join( '|' ),
+						format: 'json',
+						formatversion: '2',
+						titles: titles,
+						redirects: !!widget.showRedirects,
+						doNotIgnoreMissingTitles: '1',
 						lang: mw.config.get( 'wgUserLanguage' )
-					};
-					if ( widget.showRedirects ) {
-						params.redirects = '1';
-					}
-					xhr = new mw.Api().get( params );
+					} );
 					return xhr.promise( { abort: xhr.abort } );
 				}
 			} )
 			.then( function ( templateDataResponse ) {
-				var index, page,
+				var index, page, missingTitle,
 					pages = ( templateDataResponse && templateDataResponse.pages ) || {};
 				// Look for descriptions and cache them
 				for ( index in pages ) {
 					page = pages[ index ];
-					// Cache descriptions
-					widget.descriptions[ page.title ] = page.description;
+					if ( page.missing ) {
+						// Remmeber templates that don't exist in the link cache
+						// { title: { missing: true|false }
+						missingTitle = {};
+						missingTitle[ page.title ] = { missing: true };
+						ve.init.platform.linkCache.setMissing( missingTitle );
+					} else if ( !page.notemplatedata ) {
+						// Cache descriptions
+						widget.descriptions[ page.title ] = page.description;
+					}
 				}
 				// Return the original response
+				return originalResponse;
+			}, function () {
+				// API request failed; most likely, we're on a wiki which doesn't have TemplateData.
 				return originalResponse;
 			} )
 			.promise( { abort: function () {} } );
@@ -121,6 +131,9 @@ ve.ui.MWTemplateTitleInputWidget.prototype.getLookupRequest = function () {
 
 /**
  * See the parent documentation at <https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.widgets.TitleInputWidget>
+ *
+ * @param {string} title
+ * @return {Object}
  */
 ve.ui.MWTemplateTitleInputWidget.prototype.getOptionWidgetData = function ( title ) {
 	return ve.extendObject(

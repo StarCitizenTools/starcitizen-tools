@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel CommentMetaItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -9,7 +9,7 @@
  * @extends ve.dm.MetaItem
  *
  * @constructor
- * @param {Object} element Reference to element in meta-linmod
+ * @param {Object} element Reference to element in linmod
  */
 ve.dm.CommentMetaItem = function VeDmCommentMetaItem() {
 	// Parent constructor

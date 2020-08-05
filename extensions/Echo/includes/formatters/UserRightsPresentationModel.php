@@ -12,14 +12,25 @@ class EchoUserRightsPresentationModel extends EchoEventPresentationModel {
 	public function getHeaderMessage() {
 		list( $formattedName, $genderName ) = $this->getAgentForOutput();
 		$add = array_map(
-			array( $this->language, 'embedBidi' ),
-			$this->getLocalizedGroupNames( array_values( $this->event->getExtraParam( 'add', array() ) ) )
+			[ $this->language, 'embedBidi' ],
+			$this->getLocalizedGroupNames( array_values( $this->event->getExtraParam( 'add', [] ) ) )
 		);
 		$remove = array_map(
-			array( $this->language, 'embedBidi' ),
-			$this->getLocalizedGroupNames( array_values( $this->event->getExtraParam( 'remove', array() ) ) )
+			[ $this->language, 'embedBidi' ],
+			$this->getLocalizedGroupNames( array_values( $this->event->getExtraParam( 'remove', [] ) ) )
 		);
-		if ( $add && !$remove ) {
+		$expiryChanged = array_map(
+			[ $this->language, 'embedBidi' ],
+			$this->getLocalizedGroupNames( array_values( $this->event->getExtraParam( 'expiry-changed', [] ) ) )
+		);
+		if ( $expiryChanged ) {
+			$msg = $this->msg( 'notification-header-user-rights-expiry-change' );
+			$msg->params( $genderName );
+			$msg->params( $this->language->commaList( $expiryChanged ) );
+			$msg->params( count( $expiryChanged ) );
+			$msg->params( $this->getViewingUserForGender() );
+			return $msg;
+		} elseif ( $add && !$remove ) {
 			$msg = $this->msg( 'notification-header-user-rights-add-only' );
 			$msg->params( $genderName );
 			$msg->params( $this->language->commaList( $add ) );
@@ -47,40 +58,57 @@ class EchoUserRightsPresentationModel extends EchoEventPresentationModel {
 
 	public function getBodyMessage() {
 		$reason = $this->event->getExtraParam( 'reason' );
-		return $reason ? $this->msg( 'notification-body-user-rights' )->params( $reason ) : false;
+		if ( $reason ) {
+			$text = EchoDiscussionParser::getTextSnippet( $reason, $this->language );
+			return new RawMessage( "$1", [ $text ] );
+		}
+		return false;
 	}
 
 	private function getLocalizedGroupNames( $names ) {
-		return array_map( function( $name ) {
+		return array_map( function ( $name ) {
 			$msg = $this->msg( 'group-' . $name );
 			return $msg->isBlank() ? $name : $msg->text();
 		}, $names );
 	}
 
 	public function getPrimaryLink() {
-		return array(
-			'url' => SpecialPage::getTitleFor( 'Listgrouprights' )->getLocalURL(),
+		$addedGroups = array_values( $this->event->getExtraParam( 'add', [] ) );
+		$removedGroups = array_values( $this->event->getExtraParam( 'remove', [] ) );
+		if ( $addedGroups !== [] && $removedGroups === [] ) {
+			$fragment = $addedGroups[0];
+		} elseif ( $addedGroups === [] && $removedGroups !== [] ) {
+			$fragment = $removedGroups[0];
+		} else {
+			$fragment = '';
+		}
+		return [
+			'url' => SpecialPage::getTitleFor( 'Listgrouprights', false, $fragment )->getFullURL(),
 			'label' => $this->msg( 'echo-learn-more' )->text()
-		);
+		];
 	}
 
 	public function getSecondaryLinks() {
-		return array( $this->getAgentLink(), $this->getLogLink() );
+		return [ $this->getAgentLink(), $this->getLogLink() ];
 	}
 
 	private function getLogLink() {
 		$affectedUserPage = User::newFromId( $this->event->getExtraParam( 'user' ) )->getUserPage();
-		$query = array(
+		$query = [
 			'type' => 'rights',
 			'page' => $affectedUserPage->getPrefixedText(),
 			'user' => $this->event->getAgent()->getName(),
-		);
-		return array(
+		];
+		return [
 			'label' => $this->msg( 'echo-log' )->text(),
 			'url' => SpecialPage::getTitleFor( 'Log' )->getFullURL( $query ),
 			'description' => '',
 			'icon' => false,
 			'prioritized' => true,
-		);
+		];
+	}
+
+	protected function getSubjectMessageKey() {
+		return 'notification-user-rights-email-subject';
 	}
 }

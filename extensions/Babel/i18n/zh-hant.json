@@ -11,16 +11,18 @@
 			"Cwek",
 			"LNDDYL",
 			"Zhxy 519",
-			"Liuxinyu970226"
+			"Liuxinyu970226",
+			"Kly",
+			"A2093064"
 		]
 	},
-	"babel": "Babel 使用者資訊",
+	"babel": "巴別使用者資訊",
 	"babel-desc": "提供 <code>#babel</code> 分析函數可自動產生一個能夠使用自訂模板的使用者語言資訊欄",
 	"babel-url": "Project:Babel",
 	"babel-footer-url": ":Category:Babel - 使用者 (依語言)",
 	"babel-autocreate-reason": "自動建立 [[$1|Babel]] 分類頁面。",
 	"babel-autocreate-text-levels": "在此分類中的使用者代表其擁有等級 $1 的 $2 語言能力。",
-	"babel-autocreate-text-main": "在此分類中的使用者代表其瞭解語言 $1。",
+	"babel-autocreate-text-main": "在此分類中的使用者代表其對語言 $1 的瞭解程度。",
 	"babel-0": "此使用者[[$1|不]]瞭解或很難理解 [[$2|$3]] (或者有一定程度難以理解)。",
 	"babel-1": "這位使用者會[[$1|基本]]水準的 [[$2|$3]]。",
 	"babel-2": "這位使用者會[[$1|中等]]水準的 [[$2|$3]]。",
@@ -35,5 +37,9 @@
 	"babel-4-n": "這位使用者會[[$1|接近母語]]水準的 [[$2|繁體中文]]。",
 	"babel-5-n": "這位使用者會[[$1|專業]]水準的 [[$2|繁體中文]]。",
 	"babel-N-n": "這位使用者會[[$1|母語]]水準的 [[$2|繁體中文]]。",
-	"babel-footer": "使用者 (依語言)"
+	"babel-footer": "使用者 (依語言)",
+	"apihelp-query+babel-description": "取得有關使用者瞭解何種語言的資訊",
+	"apihelp-query+babel-summary": "獲得關於使用者所能理解語言的資訊",
+	"apihelp-query+babel-param-user": "要取得相關資訊的使用者",
+	"apihelp-query+babel-example-1": "取得使用者 <kbd>Example</kbd> 的 Babel 資訊"
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel SmallAnnotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -28,6 +28,8 @@ OO.inheritClass( ve.dm.SmallAnnotation, ve.dm.TextStyleAnnotation );
 ve.dm.SmallAnnotation.static.name = 'textStyle/small';
 
 ve.dm.SmallAnnotation.static.matchTagNames = [ 'small' ];
+
+ve.dm.SmallAnnotation.static.removes = [ 'textStyle/big' ];
 
 /* Registration */
 

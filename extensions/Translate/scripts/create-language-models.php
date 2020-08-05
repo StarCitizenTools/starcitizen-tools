@@ -6,7 +6,7 @@
  * @author Niklas Laxström
  *
  * @copyright Copyright © 2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -20,7 +20,7 @@ if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 require_once "$IP/maintenance/Maintenance.php";
 
 class LanguageModelCreator extends Maintenance {
-	protected $changes = array();
+	protected $changes = [];
 
 	public function __construct() {
 		parent::__construct();
@@ -47,15 +47,15 @@ TXT;
 
 		$pages = $cache->get( $key );
 		if ( !is_array( $pages ) ) {
-			$dbr = wfGetDB( DB_SLAVE );
-			$conds = array();
+			$dbr = wfGetDB( DB_REPLICA );
+			$conds = [];
 			$conds[] = 'page_title' . $dbr->buildLike( $dbr->anyString(), '/', $dbr->anyString() );
 			$conds['page_namespace'] = $wgTranslateMessageNamespaces;
 
 			echo "Before query\n";
 			$res = $dbr->select(
-				array( 'page' ),
-				array( 'page_title, page_id' ),
+				[ 'page' ],
+				[ 'page_title, page_id' ],
 				$conds,
 				__METHOD__
 			);
@@ -93,7 +93,7 @@ TXT;
 
 			echo "After sort map\n";
 
-			$cache->set( $key, $pages, 3600*24 );
+			$cache->set( $key, $pages, 3600 * 24 );
 			echo "After set map\n";
 		}
 
@@ -102,14 +102,14 @@ TXT;
 		unset( $pages['nl-informal'] );
 		unset( $pages['en-gb'] );
 
-		$pids = array();
+		$pids = [];
 		$threads = 2;
 		foreach ( $pages as $code => $pageids ) {
 			$pid = ( $threads > 1 ) ? pcntl_fork() : -1;
 
 			if ( $pid === 0 ) {
 				// Child, reseed because there is no bug in PHP:
-				// http://bugs.php.net/bug.php?id=42465
+				// https://bugs.php.net/bug.php?id=42465
 				mt_srand( getmypid() );
 				$this->analyzeLanguage( $code, $pageids );
 				exit();
@@ -136,7 +136,7 @@ TXT;
 
 		$this->output( "Combining languages\n" );
 
-		$huge = array();
+		$huge = [];
 		foreach ( glob( 'temp-*.json' ) as $file ) {
 			$contents = file_get_contents( $file );
 			$json = FormatJson::decode( $contents, true );
@@ -164,7 +164,7 @@ TXT;
 		$config->useMb( true );
 		$c = new LanguageDetector\Learn( $config );
 		$c->addSample( $code, $text );
-		$c->addStepCallback( function( $lang, $status ) {
+		$c->addStepCallback( function ( $lang, $status ) {
 				echo "Learning {$lang}: $status\n";
 		} );
 
@@ -177,8 +177,7 @@ TXT;
 		$key = wfMemcKey( __CLASS__, 'cc', $code );
 		$text = $cache->get( $key );
 		if ( !is_string( $text ) ) {
-
-			$snippets = array();
+			$snippets = [];
 
 			$ids = explode( '|', $ids );
 
@@ -194,19 +193,19 @@ TXT;
 			$time = microtime( true );
 
 			foreach ( $ids as $id ) {
-				$params = new FauxRequest( array(
+				$params = new FauxRequest( [
 					'pageid' => $id,
 					'action' => 'parse',
 					'prop' => 'text',
 					'disablepp' => 'true',
-				) );
+				] );
 
 				$api = new ApiMain( $params );
 				$api->execute();
 
 				$result = $api->getResult()->getResultData(
 					null,
-					array( 'BC' => array() )
+					[ 'BC' => [] ]
 				);
 
 				$text = $result['parse']['text']['*'];
@@ -219,7 +218,7 @@ TXT;
 			}
 
 			$text = implode( '   ', $snippets );
-			$cache->set( $key, $text, 3600*24 );
+			$cache->set( $key, $text, 3600 * 24 );
 
 			$delta = microtime( true ) - $time;
 			$this->output( "$code TOOK $delta\n" );
@@ -231,5 +230,5 @@ TXT;
 	}
 }
 
-$maintClass = 'LanguageModelCreator';
+$maintClass = LanguageModelCreator::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

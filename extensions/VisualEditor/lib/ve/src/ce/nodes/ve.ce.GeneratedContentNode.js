@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable GeneratedContentNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -47,6 +47,41 @@ OO.initClass( ve.ce.GeneratedContentNode );
 
 // We handle rendering ourselves, no need to render attributes from originalDomElements
 ve.ce.GeneratedContentNode.static.renderHtmlAttributes = false;
+
+/* Static methods */
+
+/**
+ * Wait for all content-generation within a given node to finish
+ *
+ * If no GeneratedContentNodes are within the node, a resolved promise will be
+ * returned.
+ *
+ * @param  {ve.ce.View} view Any view node
+ * @return {jQuery.Promise} Promise, resolved when content is generated
+ */
+ve.ce.GeneratedContentNode.static.awaitGeneratedContent = function ( view ) {
+	var promises = [];
+
+	function queueNode( node ) {
+		var promise;
+		if ( typeof node.generateContents === 'function' ) {
+			if ( node.isGenerating() ) {
+				promise = $.Deferred();
+				node.once( 'rerender', promise.resolve );
+				promises.push( promise );
+			}
+		}
+	}
+
+	// Traverse children to see when they are all rerendered
+	if ( view instanceof ve.ce.BranchNode ) {
+		view.traverse( queueNode );
+	} else {
+		queueNode( view );
+	}
+
+	return $.when.apply( $, promises );
+};
 
 /* Abstract methods */
 
@@ -95,42 +130,41 @@ ve.ce.GeneratedContentNode.prototype.onGeneratedContentNodeUpdate = function ( s
  * implementation, otherwise you should call the parent implementation first and modify its
  * return value.
  *
- * @param {HTMLElement[]} domElements Clones of the DOM elements from the store
+ * @param {Node[]} domElements Clones of the DOM elements from the store
  * @return {HTMLElement[]} Clones of the DOM elements in the right document, with modifications
  */
 ve.ce.GeneratedContentNode.prototype.getRenderedDomElements = function ( domElements ) {
-	var i, len, $rendering,
+	var rendering,
 		doc = this.getElementDocument();
 
-	// Clone the elements into the target document
-	$rendering = $( ve.copyDomElements( domElements, doc ) );
+	rendering = ve.filterMetaElements(
+		// Clone the elements into the target document
+		ve.copyDomElements( domElements, doc )
+	);
 
-	// Filter out link and style tags for bug 50043
-	// Previously filtered out meta tags, but restore these as they
-	// can be made visible.
-	$rendering = $rendering.not( 'link, style' );
-	// Also remove link and style tags nested inside other tags
-	$rendering.find( 'link, style' ).remove();
-
-	if ( $rendering.length ) {
+	if ( rendering.length ) {
 		// Span wrap root text nodes so they can be measured
-		for ( i = 0, len = $rendering.length; i < len; i++ ) {
-			if ( $rendering[ i ].nodeType === Node.TEXT_NODE ) {
-				$rendering[ i ] = $( '<span>' ).append( $rendering[ i ] )[ 0 ];
+		rendering = rendering.map( function ( node ) {
+			var span;
+			if ( node.nodeType === Node.TEXT_NODE ) {
+				span = document.createElement( 'span' );
+				span.appendChild( node );
+				return span;
 			}
-		}
+			return node;
+		} );
 	} else {
-		$rendering = $( '<span>' );
+		rendering = [ document.createElement( 'span' ) ];
 	}
 
 	// Render the computed values of some attributes
 	ve.resolveAttributes(
-		$rendering,
+		rendering,
 		domElements[ 0 ].ownerDocument,
 		ve.dm.Converter.static.computedAttributes
 	);
 
-	return $rendering.toArray();
+	return rendering;
 };
 
 /**
@@ -164,13 +198,16 @@ ve.ce.GeneratedContentNode.prototype.render = function ( generatedContents, stag
 	}
 
 	// Update focusable and resizable elements if necessary
+	// TODO: Move these method definitions to their respective mixins.
 	if ( this.$focusable ) {
 		this.$focusable = this.getFocusableElement();
+		this.$bounding = this.getBoundingElement();
 	}
 	if ( this.$resizable ) {
 		this.$resizable = this.getResizableElement();
 	}
 
+	this.initialize();
 	if ( this.live ) {
 		this.emit( 'setup' );
 	}
@@ -210,9 +247,9 @@ ve.ce.GeneratedContentNode.prototype.validateGeneratedContents = function () {
  */
 ve.ce.GeneratedContentNode.prototype.update = function ( config, staged ) {
 	var store = this.model.doc.getStore(),
-		index = store.indexOfHash( OO.getHash( [ this.model.getHashObjectForRendering(), config ] ) );
-	if ( index !== null ) {
-		this.render( store.value( index ), staged );
+		contents = store.value( store.hashOfValue( null, OO.getHash( [ this.model.getHashObjectForRendering(), config ] ) ) );
+	if ( contents ) {
+		this.render( contents, staged );
 	} else {
 		this.forceUpdate( config, staged );
 	}
@@ -299,7 +336,7 @@ ve.ce.GeneratedContentNode.prototype.doneGenerating = function ( generatedConten
 	if ( this.model && this.model.doc ) {
 		store = this.model.doc.getStore();
 		hash = OO.getHash( [ this.model.getHashObjectForRendering(), config ] );
-		store.index( generatedContents, hash );
+		store.hash( generatedContents, hash );
 	}
 
 	this.$element.removeClass( 've-ce-generatedContentNode-generating' );
@@ -332,6 +369,15 @@ ve.ce.GeneratedContentNode.prototype.isGenerating = function () {
  * @return {jQuery} Focusable element
  */
 ve.ce.GeneratedContentNode.prototype.getFocusableElement = function () {
+	return this.$element;
+};
+
+/**
+ * Get the bounding element
+ *
+ * @return {jQuery} Bounding element
+ */
+ve.ce.GeneratedContentNode.prototype.getBoundingElement = function () {
 	return this.$element;
 };
 

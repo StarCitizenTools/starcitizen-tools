@@ -5,7 +5,7 @@
  * @author Robert Leverington <robert@rhl.me.uk>
  *
  * @copyright Copyright © 2010 Robert Leverington
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -24,8 +24,9 @@ class MagicExport extends Maintenance {
 	protected $type;
 	protected $target;
 
-	protected $handles = array();
-	protected $messagesOld = array();
+	protected $handles = [];
+	protected $messagesOld = [];
+	protected $extraInformation = [];
 
 	public function __construct() {
 		parent::__construct();
@@ -99,7 +100,13 @@ class MagicExport extends Maintenance {
 			}
 
 			$inFile = $group->replaceVariables( $inFile, 'en' );
-			$outFile =  $this->target . '/' . $outFile;
+			$outFile = $this->target . '/' . $outFile;
+			$varName = null;
+
+			if ( !is_readable( $inFile ) ) {
+				$this->error( "File '$inFile' not readable." );
+				continue;
+			}
 
 			include $inFile;
 			switch ( $this->type ) {
@@ -107,66 +114,100 @@ class MagicExport extends Maintenance {
 					if ( isset( $aliases ) ) {
 						$this->messagesOld[$group->getId()] = $aliases;
 						unset( $aliases );
+						$varName = '$aliases';
 					} elseif ( isset( $specialPageAliases ) ) {
 						$this->messagesOld[$group->getId()] = $specialPageAliases;
 						unset( $specialPageAliases );
+						$varName = '$specialPageAliases';
 					} else {
 						$this->error( "File '$inFile' does not contain an aliases array." );
-						continue;
+						continue 2;
 					}
 					break;
 				case 'magic':
 					if ( !isset( $magicWords ) ) {
 						$this->error( "File '$inFile' does not contain a magic words array." );
-						continue;
+						continue 2;
 					}
 					$this->messagesOld[$group->getId()] = $magicWords;
 					unset( $magicWords );
+					$varName = '$magicWords';
 					break;
 			}
 
 			wfMkdirParents( dirname( $outFile ), null, __METHOD__ );
 			$this->handles[$group->getId()] = fopen( $outFile, 'w' );
-			fwrite( $this->handles[$group->getId()], $this->readHeader( $inFile ) );
+			$headerInformation = $this->readHeader( $inFile, $varName );
+			fwrite( $this->handles[$group->getId()], $headerInformation['fileBegin'] );
+			$this->extraInformation[$group->getId()] = $headerInformation;
 
 			$this->output( "\t{$group->getId()}\n" );
 		}
 	}
 
-	protected function readHeader( $file ) {
+	protected function readHeader( $file, $varName ) {
 		$data = file_get_contents( $file );
 
 		// Seek first '*/'.
-		$end = strpos( $data, '*/' ) + 2;
+		$end = strpos( $data, '*/' );
 
-		if ( $end === false ) {
-			return "<?php\n";
+		// But not when it is the english comment
+		$varPos = strpos( $data, $varName );
+		if ( $varPos && $end && $varPos <= $end ) {
+			$end = false;
 		}
 
-		// Grab header.
-		return substr( $data, 0, $end );
+		if ( $end === false ) {
+			$fileBegin = "<?php\n";
+		} else {
+			// Grab header.
+			$fileBegin = substr( $data, 0, $end + 2 );
+		}
+
+		// preserve the phpcs codingStandardsIgnoreFile, if exists
+		$preserveIgnoreTag = strpos( $data, '@codingStandardsIgnoreFile' ) !== false;
+
+		// preserve the long array syntax, if varName is written with it
+		$preserveLongArraySyntax = preg_match(
+			'/' . preg_quote( $varName, '/' ) . '\s*=\s*array\s*\(\s*\)\s*;/',
+			$data
+		);
+
+		// avoid difference by the last character
+		$preserveNewlineAtEnd = substr( $data, -1 ) === "\n";
+
+		return [
+			'fileBegin' => $fileBegin,
+			'preserveIgnoreTag' => $preserveIgnoreTag,
+			'preserveLongArraySyntax' => $preserveLongArraySyntax,
+			'preserveNewlineAtEnd' => $preserveNewlineAtEnd,
+		];
 	}
 
 	/**
 	 * Write the opening of the files for each output file handle.
 	 */
 	protected function writeHeaders() {
-		foreach ( $this->handles as $handle ) {
+		foreach ( $this->handles as $group => $handle ) {
+			$arraySyntax = $this->extraInformation[$group]['preserveLongArraySyntax']
+				? 'array()'
+				: '[]';
 			switch ( $this->type ) {
 				case 'special':
+					$ignoreTag = $this->extraInformation[$group]['preserveIgnoreTag']
+						? "\n// @codingStandardsIgnoreFile"
+						: '';
 					fwrite( $handle, <<<PHP
+$ignoreTag
 
-// @codingStandardsIgnoreFile
-
-\$specialPageAliases = array();
+\$specialPageAliases = $arraySyntax;
 PHP
 					);
 					break;
 				case 'magic':
 					fwrite( $handle, <<<PHP
 
-
-\$magicWords = array();
+\$magicWords = $arraySyntax;
 PHP
 					);
 					break;
@@ -182,7 +223,7 @@ PHP
 	protected function writeFiles() {
 		$langs = TranslateUtils::parseLanguageCodes( '*' );
 		unset( $langs[array_search( 'en', $langs )] );
-		$langs = array_merge( array( 'en' ), $langs );
+		$langs = array_merge( [ 'en' ], $langs );
 		foreach ( $langs as $l ) {
 			// Load message page.
 			switch ( $this->type ) {
@@ -200,7 +241,7 @@ PHP
 			if ( !$title || !$title->exists() ) {
 				$this->output( "Skiping $l...\n" );
 
-				$messagesNew = array();
+				$messagesNew = [];
 			} else {
 				$this->output( "Processing $l...\n" );
 
@@ -214,7 +255,7 @@ PHP
 				array_shift( $segments );
 				unset( $segments[count( $segments ) - 1] );
 				unset( $segments[count( $segments ) - 1] );
-				$messagesNew = array();
+				$messagesNew = [];
 				foreach ( $segments as $segment ) {
 					$parts = explode( ' = ', $segment );
 					$key = array_shift( $parts );
@@ -229,7 +270,7 @@ PHP
 
 			foreach ( $this->handles as $group => $handle ) {
 				// Find messages to write to this handle.
-				$messagesOut = array();
+				$messagesOut = [];
 				if ( !isset( $this->messagesOld[$group] ) ) {
 					continue;
 				}
@@ -241,42 +282,53 @@ PHP
 						$messagesOut[$key] = $this->messagesOld[$group][$l][$key];
 					}
 				}
+				if ( $this->extraInformation[$group]['preserveLongArraySyntax'] ) {
+					$arrayStart = 'array(';
+					$arrayEnd = ')';
+				} else {
+					$arrayStart = '[';
+					$arrayEnd = ']';
+				}
 
 				// If there are messages to write, write them.
-				if ( count( $messagesOut ) > 0 ) {
+				if ( $messagesOut !== [] ) {
 					$out = '';
 					switch ( $this->type ) {
 						case 'special':
 							$out .= "\n\n/** {$namesEn[$l]} ({$namesNative[$l]}) " .
-								"*/\n\$specialPageAliases['{$l}'] = array(\n";
+								"*/\n\$specialPageAliases['{$l}'] = {$arrayStart}\n";
 							break;
 						case 'magic':
 							$out .= "\n\n/** {$namesEn[$l]} ({$namesNative[$l]}) *" .
-								"/\n\$magicWords['{$l}'] = array(\n";
+								"/\n\$magicWords['{$l}'] = {$arrayStart}\n";
 							break;
 					}
 					foreach ( $messagesOut as $key => $translations ) {
+						if ( !is_array( $translations ) ) {
+							$this->error( "$l in $group has not an array..." );
+							continue;
+						}
 						foreach ( $translations as $id => $translation ) {
 							$translations[$id] = addslashes( $translation );
-							if ( $this->type === 'magic' && $translation == 0 ) {
+							if ( $this->type === 'magic' && $translation === 0 ) {
 								unset( $translations[$id] );
 							}
 						}
 						$translations = implode( "', '", $translations );
 						switch ( $this->type ) {
 							case 'special':
-								$out .= "\t'$key' => array( '$translations' ),\n";
+								$out .= "\t'$key' => $arrayStart '$translations' $arrayEnd,\n";
 								break;
 							case 'magic':
 								if ( $this->messagesOld[$group]['en'][$key][0] === 0 ) {
-									$out .= "\t'$key' => array( 0, '$translations' ),\n";
+									$out .= "\t'$key' => $arrayStart 0, '$translations' $arrayEnd,\n";
 								} else {
-									$out .= "\t'$key' => array( '$translations' ),\n";
+									$out .= "\t'$key' => $arrayStart '$translations' $arrayEnd,\n";
 								}
 								break;
 						}
 					}
-					$out .= ');';
+					$out .= "$arrayEnd;";
 					fwrite( $handle, $out );
 				}
 			}
@@ -288,6 +340,12 @@ PHP
 	 */
 	protected function writeFooters() {
 		$this->output( "Writing file footers...\n" );
+		foreach ( $this->handles as $group => $handle ) {
+			if ( $this->extraInformation[$group]['preserveNewlineAtEnd'] ) {
+				// php files should end with a newline
+				fwrite( $handle, "\n" );
+			}
+		}
 	}
 
 	/**
@@ -301,5 +359,5 @@ PHP
 	}
 }
 
-$maintClass = 'MagicExport';
-require_once DO_MAINTENANCE;
+$maintClass = MagicExport::class;
+require_once RUN_MAINTENANCE_IF_MAIN;

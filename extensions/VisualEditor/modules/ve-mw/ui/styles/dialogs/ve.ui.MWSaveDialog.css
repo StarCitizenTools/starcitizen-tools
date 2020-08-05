@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface MWSaveDialog styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -11,14 +11,12 @@
 
 .ve-ui-mwSaveDialog-summary {
 	width: 100%;
+	max-width: none;
 	background-color: #fff;
 }
 
 .ve-ui-mwSaveDialog-summary textarea {
-	display: block;
-	resize: none;
 	height: 4em;
-	background-color: transparent;
 }
 
 .ve-ui-mwSaveDialog-foot {
@@ -27,9 +25,9 @@
 
 .ve-ui-mwSaveDialog-options {
 	position: relative;
-	background-color: #f7f7f7;
-	border: solid 1px #ccc;
-	border-top: none;
+	background-color: #f8f9fa;
+	border: 1px solid #c8ccd1;
+	border-top: 0;
 	min-height: 3em;
 }
 
@@ -48,10 +46,10 @@
 	right: 0;
 	top: 0;
 	bottom: 0;
-	border-left: solid 1px #eee;
+	border-left: 1px solid #eaecf0;
 	line-height: 3em;
 	padding: 0 1em;
-	color: #aaa;
+	color: #54595d;
 }
 
 .ve-ui-mwSaveDialog-license {
@@ -59,5 +57,43 @@
 	line-height: 1.4em;
 	padding: 0;
 	margin: 0;
-	color: #555;
+	color: #54595d;
+}
+
+.ve-ui-mwSaveDialog-messages {
+	/* Make a top border that spans the whole width of the dialog */
+	margin: 0 -1.25em;
+	padding: 0 1.25em;
+	border-top: 1px solid rgba( 0, 0, 0, 0.2 );
+	/* Ew */
+	margin-top: 1em;
+	padding-top: 0.5em;
+	margin-bottom: -0.5em;
+}
+
+.ve-ui-mwSaveDialog-messages:empty {
+	display: none;
+}
+
+.ve-ui-mwSaveDialog-reviewMode {
+	float: right;
+	margin: 0 0 0 1em;
+}
+
+.ve-ui-mwSaveDialog-viewer {
+	margin-top: 1em;
+	clear: both;
+}
+
+.ve-ui-mwSaveDialog-no-changes {
+	color: #72777d;
+	font-style: italic;
+}
+
+.ve-ui-saveDialog-captchaInput {
+	margin-top: 0.5em;
+}
+
+.ve-ui-mwSaveDialog-visualDiffFeedback {
+	float: right;
 }

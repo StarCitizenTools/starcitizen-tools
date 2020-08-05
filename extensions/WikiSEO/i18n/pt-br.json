@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eduardo Addad de Oliveira"
+		]
+	},
+	"wiki-seo-desc": "Permite meta-configurações por página, como palavras-chave e descrição, alterando o título e várias tags de verificação do site.",
+	"wiki-seo-empty-attr-tag": "Eror: &lt;seo&gt; A etiqueta deve conter pelo menos um atributo não vazio.",
+	"wiki-seo-empty-attr-parser": "Errr: <nowiki>{{#seo:}}</nowiki> deve conter pelo menos um atributo não vazio.",
+	"wiki-seo-invalid-generator": "Erro: $1 não é um gerador de metadados válido.",
+	"wiki-seo-missing-page-title": "Erro: o título da página fornecido é inválido."
+}

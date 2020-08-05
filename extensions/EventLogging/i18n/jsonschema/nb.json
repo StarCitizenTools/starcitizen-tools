@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jon Harald Søby"
+		]
+	},
+	"jsonschema-badidref": "Dårlig idref: «$1»",
+	"jsonschema-idconvert": "Kan ikke konverte var til id: <code>$1</code>",
+	"jsonschema-invalidkey": "Ugyldig nøkkel «$1» i «$2»",
+	"jsonschema-invalidempty": "Tom datastruktur er ikke gyldig med dette skjemaet",
+	"jsonschema-invalidnode": "Ugyldig node: forventet «$1», fikk «$2». Sti: «$3»",
+	"jsonschema-invalid-missingfield": "Manglende påkrevd felt «$1»",
+	"jsonschema-invalid-notinenum": "Verdien <code>$1</code> ikke i enum for egenskapen $2",
+	"apihelp-jsonschema-description": "Hent en JSON-skjemaside.",
+	"apihelp-jsonschema-summary": "Hent ei JSON Schema-side.",
+	"apihelp-jsonschema-param-revid": "Skjemaets revisjons-ID.",
+	"apihelp-jsonschema-param-title": "Skjemanavn.",
+	"apihelp-jsonschema-example-1": "Hent skjema for revisjon 1234"
+}

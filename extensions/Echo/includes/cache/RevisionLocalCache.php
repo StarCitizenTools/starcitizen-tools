@@ -23,33 +23,26 @@ class EchoRevisionLocalCache extends EchoLocalCache {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	protected function resolve() {
 		if ( $this->lookups ) {
 			// @Todo Add newFromIds() to Revision
-			$dbr = wfGetDB( DB_SLAVE );
-			$fields = array_merge(
-				Revision::selectFields(),
-				Revision::selectPageFields(),
-				Revision::selectUserFields()
-			);
+			$dbr = wfGetDB( DB_REPLICA );
+			$revQuery = Revision::getQueryInfo( [ 'page', 'user' ] );
 			$res = $dbr->select(
-				array( 'revision', 'page', 'user' ),
-				$fields,
-				array( 'rev_id' => $this->lookups ),
+				$revQuery['tables'],
+				$revQuery['fields'],
+				[ 'rev_id' => $this->lookups ],
 				__METHOD__,
-				array(),
-				array(
-					'page' => Revision::pageJoinCond(),
-					'user' => Revision::userJoinCond()
-				)
+				[],
+				$revQuery['joins']
 			);
 			if ( $res ) {
 				foreach ( $res as $row ) {
 					$this->targets->set( $row->rev_id, new Revision( $row ) );
 				}
-				$this->lookups = array();
+				$this->lookups = [];
 			}
 		}
 	}

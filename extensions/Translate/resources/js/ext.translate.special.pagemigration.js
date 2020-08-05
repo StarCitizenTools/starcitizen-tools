@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 	var noOfSourceUnits, noOfTranslationUnits,
 		pageName = '',
@@ -10,6 +10,8 @@
 	 * and identifiers from left hand side blocks. Create pages only if
 	 * content is not empty.
 	 *
+	 * @param {number} i Array index to sourceUnits.
+	 * @param {string} content
 	 * @return {Function} Returns a function which returns a jQuery.Promise
 	 */
 	function createTranslationPage( i, content ) {
@@ -22,10 +24,8 @@
 			title = 'Translations:' + pageName + '/' + identifier + '/' + langCode;
 			summary = $( '#pm-summary' ).val();
 
-			// Change to csrf when support for MW 1.25 is dropped
-			return api.postWithToken( 'edit', {
+			return api.postWithToken( 'csrf', {
 				action: 'edit',
-				format: 'json',
 				watchlist: 'nochange',
 				title: title,
 				text: content,
@@ -49,7 +49,6 @@
 		return api.get( {
 			action: 'query',
 			prop: 'revisions',
-			format: 'json',
 			rvprop: 'content',
 			rvstart: fuzzyTimestamp,
 			titles: pageTitle
@@ -90,7 +89,6 @@
 		return api.get( {
 			action: 'query',
 			prop: 'revisions',
-			format: 'json',
 			rvprop: 'timestamp',
 			rvuser: 'FuzzyBot',
 			rvdir: 'newer',
@@ -137,7 +135,6 @@
 		return api.get( {
 			action: 'query',
 			list: 'messagecollection',
-			format: 'json',
 			mcgroup: 'page-' + pageName,
 			mclanguage: 'en',
 			mcprop: 'definition'
@@ -214,14 +211,16 @@
 		sourceUnit = $( '<textarea>' ).addClass( 'mw-tpm-sp-unit__source five columns' )
 			.prop( 'readonly', true ).attr( 'tabindex', '-1' ).val( sourceText );
 		targetUnit = $( '<textarea>' ).addClass( 'mw-tpm-sp-unit__target five columns' )
-			.val( targetText );
+			.val( targetText ).prop( 'dir', $.uls.data.getDir( langCode ) );
 		actionUnit = $( '<div>' ).addClass( 'mw-tpm-sp-unit__actions two columns' );
-		actionUnit.append( $( '<span>' ).addClass( 'mw-tpm-sp-action mw-tpm-sp-action--add' )
+		actionUnit.append(
+			$( '<span>' ).addClass( 'mw-tpm-sp-action mw-tpm-sp-action--add' )
 				.attr( 'title', mw.msg( 'pm-add-icon-hover-text' ) ),
 			$( '<span>' ).addClass( 'mw-tpm-sp-action mw-tpm-sp-action--swap' )
 				.attr( 'title', mw.msg( 'pm-swap-icon-hover-text' ) ),
 			$( '<span>' ).addClass( 'mw-tpm-sp-action mw-tpm-sp-action--delete' )
-				.attr( 'title', mw.msg( 'pm-delete-icon-hover-text' ) ) );
+				.attr( 'title', mw.msg( 'pm-delete-icon-hover-text' ) )
+		);
 		newUnit.append( sourceUnit, targetUnit, actionUnit );
 		return newUnit;
 	}
@@ -258,11 +257,11 @@
 	 * Split headers from remaining text in each translation unit if present.
 	 *
 	 * @param {Array} translations Array of initial units obtained on splitting
-	 * @return {string[]} translationUnits Array having the headers split into new unit
+	 * @return {string[]} Array having the headers split into new unit
 	 */
 	function splitHeaders( translations ) {
 		return $.map( translations, function ( elem ) {
-			// Check http://regex101.com/r/oT7fZ2 for details
+			// Check https://regex101.com/r/oT7fZ2 for details
 			return elem.match( /(^==.+$|(?:(?!^==).+\n?)+)/gm );
 		} );
 	}
@@ -271,7 +270,8 @@
 	 * Get the index of next translation unit containing h2 header.
 	 *
 	 * @param {number} startIndex Index to start the scan from
-	 * @return {number} i Index of the next unit found, -1 if not
+	 * @param {string[]} translationUnits Segmented units.
+	 * @return {number} Index of the next unit found, -1 if not.
 	 */
 	function getHeaderUnit( startIndex, translationUnits ) {
 		var i, regex;
@@ -288,6 +288,10 @@
 	 * Align h2 headers in the order they appear.
 	 * Assumption: The source headers and translation headers appear in
 	 * the same order.
+	 *
+	 * @param {Object[]} sourceUnits
+	 * @param {string[]} translationUnits
+	 * @return {string[]}
 	 */
 	function alignHeaders( sourceUnits, translationUnits ) {
 		var i, regex, tIndex = 0,
@@ -348,7 +352,7 @@
 			$( '.mw-tpm-sp-instructions' ).hide( 'fast' );
 			for ( i = 0; i < noOfSourceUnits; i++ ) {
 				content = $( '.mw-tpm-sp-unit__target' ).eq( i ).val();
-				content = $.trim( content );
+				content = content.trim();
 				if ( content !== '' ) {
 					list.push( createTranslationPage( i, content ) );
 				}
@@ -358,6 +362,9 @@
 				$( '#action-import' ).removeClass( 'hide' );
 				$( 'input' ).prop( 'disabled', false );
 				$( '.mw-tpm-sp-instructions' ).text( mw.msg( 'pm-on-save-message-text' ) ).show( 'fast' );
+			} ).fail( function ( errmsg ) {
+				$( 'input' ).prop( 'disabled', false );
+				$( '.mw-tpm-sp-error__message' ).text( mw.msg( errmsg ) ).show( 'fast' );
 			} );
 		}
 	}
@@ -376,6 +383,8 @@
 	/**
 	 * Handler for add new unit icon ('+') click event. Adds a translation unit
 	 * below the current unit.
+	 *
+	 * @param {jQuery.Event} event
 	 */
 	function addHandler( event ) {
 		var nextRow, text, newUnit, targetUnit;
@@ -396,6 +405,8 @@
 	/**
 	 * Handler for delete icon ('-') click event. Deletes the unit and shifts
 	 * the units up by one.
+	 *
+	 * @param {jQuery.Event} event
 	 */
 	function deleteHandler( event ) {
 		var sourceText, rowUnit;
@@ -413,6 +424,8 @@
 	/**
 	 * Handler for swap icon click event. Swaps the text in the current unit
 	 * with the text in the unit below.
+	 *
+	 * @param {jQuery.Event} event
 	 */
 	function swapHandler( event ) {
 		var rowUnit, tempText, nextVal;
@@ -427,7 +440,7 @@
 	 * Handler for 'Import' button click event. Imports source and translation
 	 * units and displays them.
 	 *
-	 * @param {jQuery.event} e
+	 * @param {jQuery.Event} e
 	 */
 	function importHandler( e ) {
 		var pageTitle, slashPos, titleObj,
@@ -436,7 +449,7 @@
 
 		e.preventDefault();
 
-		pageTitle = $.trim( $( '#title' ).val() );
+		pageTitle = $( '#title' ).val().trim();
 		if ( pageTitle === '' ) {
 			errorBox.text( mw.msg( 'pm-pagetitle-missing' ) ).show( 'fast' );
 			return;
@@ -469,17 +482,17 @@
 
 		$.when( getSourceUnits( pageName ), getFuzzyTimestamp( pageTitle ) )
 			.then( function ( sourceUnits, fuzzyTimestamp ) {
-			noOfSourceUnits = sourceUnits.length;
-			splitTranslationPage( fuzzyTimestamp, pageTitle ).done( function ( translations ) {
-				var translationUnits = splitHeaders( translations );
-				translationUnits = alignHeaders( sourceUnits, translationUnits );
-				noOfTranslationUnits = translationUnits.length;
-				displayUnits( sourceUnits, translationUnits );
-				$( '#action-save, #action-cancel' ).removeClass( 'hide' );
-				$( '#action-import' ).addClass( 'hide' );
-				messageBox.text( mw.msg( 'pm-on-import-message-text' ) ).show( 'fast' );
+				noOfSourceUnits = sourceUnits.length;
+				splitTranslationPage( fuzzyTimestamp, pageTitle ).done( function ( translations ) {
+					var translationUnits = splitHeaders( translations );
+					translationUnits = alignHeaders( sourceUnits, translationUnits );
+					noOfTranslationUnits = translationUnits.length;
+					displayUnits( sourceUnits, translationUnits );
+					$( '#action-save, #action-cancel' ).removeClass( 'hide' );
+					$( '#action-import' ).addClass( 'hide' );
+					messageBox.text( mw.msg( 'pm-on-import-message-text' ) ).show( 'fast' );
+				} );
 			} );
-		} );
 	}
 
 	/**
@@ -497,7 +510,7 @@
 		$listing.on( 'click', '.mw-tpm-sp-action--add', addHandler );
 	}
 
-	$( document ).ready( listen );
+	$( listen );
 
 	mw.translate = mw.translate || {};
 	mw.translate = $.extend( mw.translate, {
@@ -507,4 +520,4 @@
 		alignHeaders: alignHeaders
 	} );
 
-}( jQuery, mediaWiki ) );
+}() );

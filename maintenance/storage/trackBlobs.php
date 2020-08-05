@@ -22,6 +22,9 @@
  * @see wfWaitForSlaves()
  */
 
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Rdbms\DBConnectionError;
+
 require __DIR__ . '/../commandLine.inc';
 
 if ( count( $args ) < 1 ) {
@@ -67,9 +70,9 @@ class TrackBlobs {
 
 	function checkIntegrity() {
 		echo "Doing integrity check...\n";
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
-		// Scan for HistoryBlobStub objects in the text table (bug 20757)
+		// Scan for HistoryBlobStub objects in the text table (T22757)
 
 		$exists = $dbr->selectField( 'text', 1,
 			'old_flags LIKE \'%object%\' AND old_flags NOT LIKE \'%external%\' ' .
@@ -81,25 +84,6 @@ class TrackBlobs {
 			echo "Integrity check failed: found HistoryBlobStub objects in your text table.\n" .
 				"This script could destroy these objects if it continued. Run resolveStubs.php\n" .
 				"to fix this.\n";
-			exit( 1 );
-		}
-
-		// Scan the archive table for HistoryBlobStub objects or external flags (bug 22624)
-		$flags = $dbr->selectField( 'archive', 'ar_flags',
-			'ar_flags LIKE \'%external%\' OR (' .
-			'ar_flags LIKE \'%object%\' ' .
-			'AND LOWER(CONVERT(LEFT(ar_text,22) USING latin1)) = \'o:15:"historyblobstub"\' )',
-			__METHOD__
-		);
-
-		if ( strpos( $flags, 'external' ) !== false ) {
-			echo "Integrity check failed: found external storage pointers in your archive table.\n" .
-				"Run normaliseArchiveTable.php to fix this.\n";
-			exit( 1 );
-		} elseif ( $flags ) {
-			echo "Integrity check failed: found HistoryBlobStub objects in your archive table.\n" .
-				"These objects are probably already broken, continuing would make them\n" .
-				"unrecoverable. Run \"normaliseArchiveTable.php --fix-cgz-bug\" to fix this.\n";
 			exit( 1 );
 		}
 
@@ -117,7 +101,7 @@ class TrackBlobs {
 
 	function getTextClause() {
 		if ( !$this->textClause ) {
-			$dbr = wfGetDB( DB_SLAVE );
+			$dbr = wfGetDB( DB_REPLICA );
 			$this->textClause = '';
 			foreach ( $this->clusters as $cluster ) {
 				if ( $this->textClause != '' ) {
@@ -147,11 +131,11 @@ class TrackBlobs {
 	 */
 	function trackRevisions() {
 		$dbw = wfGetDB( DB_MASTER );
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		$textClause = $this->getTextClause();
 		$startId = 0;
-		$endId = $dbr->selectField( 'revision', 'MAX(rev_id)', false, __METHOD__ );
+		$endId = $dbr->selectField( 'revision', 'MAX(rev_id)', '', __METHOD__ );
 		$batchesDone = 0;
 		$rowsInserted = 0;
 
@@ -219,15 +203,15 @@ class TrackBlobs {
 	 * archive table counts as orphan for our purposes.
 	 */
 	function trackOrphanText() {
-		# Wait until the blob_tracking table is available in the slave
+		# Wait until the blob_tracking table is available in the replica DB
 		$dbw = wfGetDB( DB_MASTER );
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$pos = $dbw->getMasterPos();
 		$dbr->masterPosWait( $pos, 100000 );
 
 		$textClause = $this->getTextClause( $this->clusters );
 		$startId = 0;
-		$endId = $dbr->selectField( 'text', 'MAX(old_id)', false, __METHOD__ );
+		$endId = $dbr->selectField( 'text', 'MAX(old_id)', '', __METHOD__ );
 		$rowsInserted = 0;
 		$batchesDone = 0;
 
@@ -315,9 +299,10 @@ class TrackBlobs {
 
 		foreach ( $this->clusters as $cluster ) {
 			echo "Searching for orphan blobs in $cluster...\n";
-			$lb = wfGetLBFactory()->getExternalLB( $cluster );
+			$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+			$lb = $lbFactory->getExternalLB( $cluster );
 			try {
-				$extDB = $lb->getConnection( DB_SLAVE );
+				$extDB = $lb->getConnection( DB_REPLICA );
 			} catch ( DBConnectionError $e ) {
 				if ( strpos( $e->error, 'Unknown database' ) !== false ) {
 					echo "No database on $cluster\n";
@@ -337,7 +322,7 @@ class TrackBlobs {
 			$startId = 0;
 			$batchesDone = 0;
 			$actualBlobs = gmp_init( 0 );
-			$endId = $extDB->selectField( $table, 'MAX(blob_id)', false, __METHOD__ );
+			$endId = $extDB->selectField( $table, 'MAX(blob_id)', '', __METHOD__ );
 
 			// Build a bitmap of actual blob rows
 			while ( true ) {

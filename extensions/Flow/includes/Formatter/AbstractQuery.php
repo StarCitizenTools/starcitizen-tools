@@ -11,7 +11,7 @@ use Flow\Model\PostSummary;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
 use Flow\Repository\TreeRepository;
-use ResultWrapper;
+use Wikimedia\Rdbms\ResultWrapper;
 
 /**
  * Base class that collects the data necessary to utilize AbstractFormatter
@@ -35,31 +35,31 @@ abstract class AbstractQuery {
 	/**
 	 * @var UUID[] Associative array of post ID to root post's UUID object.
 	 */
-	protected $rootPostIdCache = array();
+	protected $rootPostIdCache = [];
 
 	/**
 	 * @var PostRevision[] Associative array of post ID to PostRevision object.
 	 */
-	protected $postCache = array();
+	protected $postCache = [];
 
 	/**
 	 * @var AbstractRevision[] Associative array of revision ID to AbstractRevision object
 	 */
-	protected $revisionCache = array();
+	protected $revisionCache = [];
 
 	/**
 	 * @var Workflow[] Associative array of workflow ID to Workflow object.
 	 */
-	protected $workflowCache = array();
+	protected $workflowCache = [];
 
 	/**
 	 * Array of collection ids mapping to their most recent revision ids.
 	 *
 	 * @var UUID[]
 	 */
-	protected $currentRevisionsCache = array();
+	protected $currentRevisionsCache = [];
 
-	protected $identityMap = array();
+	protected $identityMap = [];
 
 	/**
 	 * @param ManagerGroup $storage
@@ -78,12 +78,12 @@ abstract class AbstractQuery {
 	 */
 	protected function loadMetadataBatch( $results ) {
 		// Batch load data related to a list of revisions
-		$postIds = array();
-		$workflowIds = array();
-		$revisions = array();
-		$previousRevisionIds = array();
-		$collectionIds = array();
-		foreach( $results as $result ) {
+		$postIds = [];
+		$workflowIds = [];
+		$revisions = [];
+		$previousRevisionIds = [];
+		$collectionIds = [];
+		foreach ( $results as $result ) {
 			if ( $result instanceof PostRevision ) {
 				// If top-level, then just get the workflow.
 				// Otherwise we need to find the root post.
@@ -114,13 +114,12 @@ abstract class AbstractQuery {
 
 		// map from post Id to the related root post id
 		$rootPostIds = array_filter( $this->treeRepository->findRoots( $postIds ) );
-		$rootPostRequests = array();
-		foreach( $rootPostIds as $postId ) {
-			$rootPostRequests[] = array( 'rev_type_id' => $postId );
+		$rootPostRequests = [];
+		foreach ( $rootPostIds as $postId ) {
+			$rootPostRequests[] = [ 'rev_type_id' => $postId ];
 		}
 
 		// these tree identity maps are required for determining where a reply goes when
-		//
 		// replying to a specific post.
 		$identityMap = $this->treeRepository->fetchSubtreeIdentityMap(
 			array_unique( $rootPostIds, SORT_REGULAR )
@@ -129,14 +128,14 @@ abstract class AbstractQuery {
 		$rootPostResult = $this->storage->findMulti(
 			'PostRevision',
 			$rootPostRequests,
-			array(
+			[
 				'SORT' => 'rev_id',
 				'ORDER' => 'DESC',
 				'LIMIT' => 1,
-			)
+			]
 		);
 
-		$rootPosts = array();
+		$rootPosts = [];
 		if ( count( $rootPostResult ) > 0 ) {
 			foreach ( $rootPostResult as $found ) {
 				$root = reset( $found );
@@ -149,7 +148,7 @@ abstract class AbstractQuery {
 		// So any post IDs that *are* root posts + found root post IDs + header workflow IDs
 		// should cover the lot.
 		$workflows = $this->storage->getMulti( 'Workflow', array_merge( $rootPostIds, $workflowIds ) );
-		$workflows = $workflows ?: array();
+		$workflows = $workflows ?: [];
 
 		// preload all requested previous revisions
 		foreach ( $previousRevisionIds as $revisionType => $ids ) {
@@ -164,14 +163,14 @@ abstract class AbstractQuery {
 
 		// preload all current versions
 		foreach ( $collectionIds as $revisionType => $ids ) {
-			$queries = array();
+			$queries = [];
 			foreach ( $ids as $uuid ) {
-				$queries[] = array( 'rev_type_id' => $uuid );
+				$queries[] = [ 'rev_type_id' => $uuid ];
 			}
 
 			$found = $this->storage->findMulti( $revisionType,
 				$queries,
-				array( 'sort' => 'rev_id', 'order' => 'DESC', 'limit' => 1 )
+				[ 'sort' => 'rev_id', 'order' => 'DESC', 'limit' => 1 ]
 			);
 
 			/** @var AbstractRevision[] $result */
@@ -293,7 +292,7 @@ abstract class AbstractQuery {
 	/**
 	 * Decides if the given abstract revision needs its prior revision for formatting
 	 * @param AbstractRevision $revision
-	 * @return boolean true when the previous revision to this should be loaded
+	 * @return bool true when the previous revision to this should be loaded
 	 */
 	protected function needsPreviousRevision( AbstractRevision $revision ) {
 		// crappy special case needs the previous object so it can show the title
@@ -304,8 +303,8 @@ abstract class AbstractQuery {
 
 	/**
 	 * Retrieves the previous revision for a given AbstractRevision
-	 * @param  AbstractRevision $revision The revision to retrieve the previous revision for.
-	 * @return AbstractRevision|null      AbstractRevision of the previous revision or null if no previous revision.
+	 * @param AbstractRevision $revision The revision to retrieve the previous revision for.
+	 * @return AbstractRevision|null AbstractRevision of the previous revision or null if no previous revision.
 	 */
 	protected function getPreviousRevision( AbstractRevision $revision ) {
 		$previousRevisionId = $revision->getPrevRevisionId();
@@ -325,8 +324,8 @@ abstract class AbstractQuery {
 
 	/**
 	 * Retrieves the current revision for a given AbstractRevision
-	 * @param  AbstractRevision $revision The revision to retrieve the current revision for.
-	 * @return AbstractRevision|null      AbstractRevision of the current revision.
+	 * @param AbstractRevision $revision The revision to retrieve the current revision for.
+	 * @return AbstractRevision|null AbstractRevision of the current revision.
 	 */
 	protected function getCurrentRevision( AbstractRevision $revision ) {
 		$cacheKey = $this->getCurrentRevisionCacheKey( $revision );
@@ -343,8 +342,8 @@ abstract class AbstractQuery {
 
 	/**
 	 * Retrieves the root post for a given PostRevision
-	 * @param  PostRevision $revision The revision to retrieve the root post for.
-	 * @return PostRevision           PostRevision of the root post.
+	 * @param PostRevision $revision The revision to retrieve the root post for.
+	 * @return PostRevision PostRevision of the root post.
 	 * @throws \MWException
 	 */
 	protected function getRootPost( PostRevision $revision ) {
@@ -370,8 +369,8 @@ abstract class AbstractQuery {
 
 	/**
 	 * Gets the root post ID for a given PostRevision
-	 * @param  PostRevision $revision The revision to get the root post ID for.
-	 * @return UUID                   The UUID for the root post.
+	 * @param PostRevision $revision The revision to get the root post ID for.
+	 * @return UUID The UUID for the root post.
 	 * @throws \MWException
 	 */
 	protected function getRootPostId( PostRevision $revision ) {
@@ -387,15 +386,16 @@ abstract class AbstractQuery {
 
 	/**
 	 * Gets a Workflow object given its ID
-	 * @param  UUID   $workflowId The Workflow ID to retrieve.
-	 * @return Workflow           The Workflow.
+	 * @param UUID $workflowId The Workflow ID to retrieve.
+	 * @return Workflow The Workflow.
 	 */
 	protected function getWorkflowById( UUID $workflowId ) {
 		$alpha = $workflowId->getAlphadecimal();
 		if ( isset( $this->workflowCache[$alpha] ) ) {
 			return $this->workflowCache[$alpha];
 		} else {
-			return $this->workflowCache[$alpha] = $this->storage->get( 'Workflow', $workflowId );
+			$this->workflowCache[$alpha] = $this->storage->get( 'Workflow', $workflowId );
+			return $this->workflowCache[$alpha];
 		}
 	}
 
@@ -441,4 +441,3 @@ class FormatterRow {
 		throw new \MWException( "Accessing non-existent parameter: $attribute" );
 	}
 }
-

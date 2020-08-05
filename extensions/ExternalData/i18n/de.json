@@ -17,6 +17,7 @@
 	"externaldata-ldap-unable-to-connect": "Es konnte keine Verbindung zu $1 hergestellt werden",
 	"externaldata-xml-error": "XML-Fehler: $1 in Zeile $2",
 	"externaldata-invalid-json": "Fehler: Ungültiges JSON",
+	"externaldata-jsonpath-error": "Fehler: Ungültige JSONPath-Notation.",
 	"externaldata-db-incomplete-information": "Fehler: Es liegen nur unvollständige Informationen für diese Serverkennung vor.",
 	"externaldata-db-could-not-get-url": "Die URL konnte mit {{PLURAL:$1|einem Versuch|$1 Versuchen}} nicht abgerufen werden.",
 	"externaldata-db-unknown-type": "Fehler: Es handelt sich um einen unbekannten Datenbanktyp.",

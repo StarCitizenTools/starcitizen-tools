@@ -28,9 +28,12 @@
  * @ingroup FileAbstraction
  */
 class ForeignAPIFile extends File {
+	/** @var bool */
 	private $mExists;
+	/** @var array */
+	private $mInfo = [];
 
-	protected $repoClass = 'ForeignApiRepo';
+	protected $repoClass = ForeignApiRepo::class;
 
 	/**
 	 * @param Title|string|bool $title
@@ -189,8 +192,8 @@ class ForeignAPIFile extends File {
 	}
 
 	/**
-	 * @param array $metadata
-	 * @return array
+	 * @param mixed $metadata
+	 * @return mixed
 	 */
 	public static function parseMetadata( $metadata ) {
 		if ( !is_array( $metadata ) ) {
@@ -244,14 +247,14 @@ class ForeignAPIFile extends File {
 	public function getUser( $type = 'text' ) {
 		if ( $type == 'text' ) {
 			return isset( $this->mInfo['user'] ) ? strval( $this->mInfo['user'] ) : null;
-		} elseif ( $type == 'id' ) {
+		} else {
 			return 0; // What makes sense here, for a remote user?
 		}
 	}
 
 	/**
 	 * @param int $audience
-	 * @param User $user
+	 * @param User|null $user
 	 * @return null|string
 	 */
 	public function getDescription( $audience = self::FOR_PUBLIC, User $user = null ) {
@@ -283,7 +286,7 @@ class ForeignAPIFile extends File {
 	 */
 	function getMimeType() {
 		if ( !isset( $this->mInfo['mime'] ) ) {
-			$magic = MimeMagic::singleton();
+			$magic = MediaWiki\MediaWikiServices::getInstance()->getMimeAnalyzer();
 			$this->mInfo['mime'] = $magic->guessTypesForExtension( $this->getExtension() );
 		}
 
@@ -297,7 +300,7 @@ class ForeignAPIFile extends File {
 		if ( isset( $this->mInfo['mediatype'] ) ) {
 			return $this->mInfo['mediatype'];
 		}
-		$magic = MimeMagic::singleton();
+		$magic = MediaWiki\MediaWikiServices::getInstance()->getMimeAnalyzer();
 
 		return $magic->getMediaType( null, $this->getMimeType() );
 	}
@@ -330,23 +333,22 @@ class ForeignAPIFile extends File {
 	}
 
 	/**
-	 * @return array
+	 * @return string[]
 	 */
 	function getThumbnails() {
 		$dir = $this->getThumbPath( $this->getName() );
 		$iter = $this->repo->getBackend()->getFileList( [ 'dir' => $dir ] );
 
 		$files = [];
-		foreach ( $iter as $file ) {
-			$files[] = $file;
+		if ( $iter ) {
+			foreach ( $iter as $file ) {
+				$files[] = $file;
+			}
 		}
 
 		return $files;
 	}
 
-	/**
-	 * @see File::purgeCache()
-	 */
 	function purgeCache( $options = [] ) {
 		$this->purgeThumbnails( $options );
 		$this->purgeDescriptionPage();

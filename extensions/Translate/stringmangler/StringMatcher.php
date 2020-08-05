@@ -3,7 +3,7 @@
  * Default StringMangler implementation.
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -12,22 +12,22 @@
  * All matching strings are prefixed with the same prefix.
  */
 class StringMatcher implements StringMangler, MetaYamlSchemaExtender {
-	/// Prefix for mangled message keys
+	/** @var string Prefix for mangled message keys */
 	protected $sPrefix = '';
-	/// Exact message keys
-	protected $aExact = array();
-	/// Patterns of type foo*
-	protected $aPrefix = array();
-	/// Patterns that contain wildcard anywhere else than in the end
-	protected $aRegex = array();
+	/** @var string[] Exact message keys */
+	protected $aExact = [];
+	/** @var string[] Patterns of type foo* */
+	protected $aPrefix = [];
+	/** @var string[] Patterns that contain wildcard anywhere else than in the end */
+	protected $aRegex = [];
 
 	/**
 	 * Alias for making NO-OP string mangler.
 	 *
-	 * @return StringMatcher
+	 * @return self
 	 */
 	public static function EmptyMatcher() {
-		return new StringMatcher();
+		return new self();
 	}
 
 	/**
@@ -36,7 +36,7 @@ class StringMatcher implements StringMangler, MetaYamlSchemaExtender {
 	 * @param string $prefix
 	 * @param array $patterns
 	 */
-	public function __construct( $prefix = '', array $patterns = array() ) {
+	public function __construct( $prefix = '', array $patterns = [] ) {
 		$this->sPrefix = $prefix;
 		$this->init( $patterns );
 	}
@@ -45,11 +45,11 @@ class StringMatcher implements StringMangler, MetaYamlSchemaExtender {
 		static $valid = null;
 		if ( $valid === null ) {
 			global $wgLegalTitleChars;
-			$valid = strtr( $wgLegalTitleChars, array(
+			$valid = strtr( $wgLegalTitleChars, [
 				'=' => '', // equals sign, which is itself usef for escaping
 				'&' => '', // ampersand, for entities
 				'%' => '', // percent sign, which is used in URL encoding
-			) );
+			] );
 		}
 
 		return $valid;
@@ -75,7 +75,7 @@ class StringMatcher implements StringMangler, MetaYamlSchemaExtender {
 				$prefix = substr( $string, 0, -1 );
 				$this->aPrefix[$prefix] = strlen( $prefix );
 			} else {
-				$string = str_replace( '\\*', '.+', preg_quote( $string ) );
+				$string = str_replace( '\\*', '.+', preg_quote( $string, '/' ) );
 				$this->aRegex[] = "/^$string$/";
 			}
 		}
@@ -153,16 +153,23 @@ class StringMatcher implements StringMangler, MetaYamlSchemaExtender {
 			$string = $this->sPrefix . $string;
 		}
 
+		$escaper = function ( $match ) {
+			$esc = '';
+			foreach ( str_split( $match[ 0 ] ) as $c ) {
+				$esc .= '=' . sprintf( '%02X', ord( $c ) );
+			}
+			return $esc;
+		};
+
 		// Apply a "quoted-printable"-like escaping
 		$valid = self::getValidKeyChars();
-		$escapedString = preg_replace_callback( "/[^$valid]/",
-			function ( $match ) {
-				return '=' . sprintf( '%02X', ord( $match[0] ) );
-			},
-			$string
-		);
+		$string = preg_replace_callback( "/[^$valid]/", $escaper, $string );
+		// Additional limitations in MediaWiki, see MediaWikiTitleCodec::splitTitleString
+		$string = preg_replace_callback( '/(~~~|^[ _]|[ _]$|[ _]{2,}|^:)/', $escaper, $string );
+		// TODO: length check + truncation
+		// TODO: forbid path travels
 
-		return $escapedString;
+		return $string;
 	}
 
 	/**
@@ -196,7 +203,7 @@ class StringMatcher implements StringMangler, MetaYamlSchemaExtender {
 	 * @return string[]|array (Un)mangled strings.
 	 */
 	protected function mangleArray( array $array, $reverse = false ) {
-		$temp = array();
+		$temp = [];
 
 		if ( !$this->isAssoc( $array ) ) {
 			foreach ( $array as $key => &$value ) {
@@ -224,28 +231,28 @@ class StringMatcher implements StringMangler, MetaYamlSchemaExtender {
 	}
 
 	public static function getExtraSchema() {
-		$schema = array(
-			'root' => array(
+		$schema = [
+			'root' => [
 				'_type' => 'array',
-				'_children' => array(
-					'MANGLER' => array(
+				'_children' => [
+					'MANGLER' => [
 						'_type' => 'array',
-						'_children' => array(
-							'prefix' => array(
+						'_children' => [
+							'prefix' => [
 								'_type' => 'text',
 								'_not_empty' => true
-							),
-							'patterns' => array(
+							],
+							'patterns' => [
 								'_type' => 'array',
 								'_required' => true,
 								'_ignore_extra_keys' => true,
-								'_children' => array(),
-							),
-						)
-					)
-				)
-			)
-		);
+								'_children' => [],
+							],
+						]
+					]
+				]
+			]
+		];
 
 		return $schema;
 	}

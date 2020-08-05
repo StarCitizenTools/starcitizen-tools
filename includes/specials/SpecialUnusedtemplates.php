@@ -46,13 +46,16 @@ class UnusedtemplatesPage extends QueryPage {
 		return false;
 	}
 
+	function getOrderFields() {
+		return [ 'title' ];
+	}
+
 	public function getQueryInfo() {
 		return [
 			'tables' => [ 'page', 'templatelinks' ],
 			'fields' => [
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
-				'value' => 'page_title'
 			],
 			'conds' => [
 				'page_namespace' => NS_TEMPLATE,
@@ -71,16 +74,17 @@ class UnusedtemplatesPage extends QueryPage {
 	 * @return string
 	 */
 	function formatResult( $skin, $result ) {
+		$linkRenderer = $this->getLinkRenderer();
 		$title = Title::makeTitle( NS_TEMPLATE, $result->title );
-		$pageLink = Linker::linkKnown(
+		$pageLink = $linkRenderer->makeKnownLink(
 			$title,
 			null,
 			[],
 			[ 'redirect' => 'no' ]
 		);
-		$wlhLink = Linker::linkKnown(
+		$wlhLink = $linkRenderer->makeKnownLink(
 			SpecialPage::getTitleFor( 'Whatlinkshere', $title->getPrefixedText() ),
-			$this->msg( 'unusedtemplateswlh' )->escaped()
+			$this->msg( 'unusedtemplateswlh' )->text()
 		);
 
 		return $this->getLanguage()->specialList( $pageLink, $wlhLink );

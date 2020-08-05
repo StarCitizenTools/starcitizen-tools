@@ -1,0 +1,40 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lebiega",
+			"Pyscowicz",
+			"Stryn",
+			"Pxos",
+			"SMAUG",
+			"Alluk."
+		]
+	},
+	"revisionslider": "Sivuvertailun vaakajana",
+	"revisionslider-preference-disable": "Älä näytä sivuvertailun vaakajanaa",
+	"revisionslider-desc": "Näyttää vaakajanan, joka mahdollistaa sivun eri versioiden valitsemisen ja vertailemisen sivun muutoshistoriassa",
+	"revisionslider-toggle-label": "Selaa historiaa",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|merkki|merkkiä}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|merkki|merkkiä}}",
+	"revisionslider-label-date": "Päiväys",
+	"revisionslider-label-page-size": "Sivun koko",
+	"revisionslider-label-change-size": "Muutoksen koko",
+	"revisionslider-label-comment": "Yhteenveto",
+	"revisionslider-label-username": "{{GENDER:$1|Käyttäjätunnus}}",
+	"revisionslider-minoredit": "Tämä on pieni muutos",
+	"revisionslider-loading-failed": "Sivuvertailun vaakajanan lataaminen epäonnistui.",
+	"revisionslider-toggle-title-expand": "Avaa sivuvertailun vaakajana",
+	"revisionslider-toggle-title-collapse": "Pienennä sivuvertailun vaakajana",
+	"revisionslider-turn-on-auto-expand-title": "Laajenna sivuvertailun vaakajana automaattisesti",
+	"revisionslider-turn-off-auto-expand-title": "Älä laajenna sivuvertailun vaakajanaa automaattisesti",
+	"revisionslider-arrow-tooltip-newer": "Näe uudemmat korjaukset",
+	"revisionslider-arrow-tooltip-older": "Näe vanhemmat korjaukset",
+	"revisionslider-show-help-tooltip": "Näytä ohjeteksti",
+	"revisionslider-help-dialog-slide1": "Sivuvertailun vaakajana auttaa vertailemaan muutoksia sivulla, joka näyttää erot eri versioiden välillä. Se perustuu saksankielisen muokkaajayhteisön tech-toivelistalla esittämään [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider pyyntöön]. Palautetta otetaan vastaan [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider täällä].",
+	"revisionslider-help-dialog-slide2": "Jokainen palkki kuvaa sivulle tehtyä muokkausta. Ylhäällä olevat palkit kuvaavat sivun koon kasvua ja alhaalla olevat palkit sivun koon vähenemistä. Kuvassa muokkaus 1 on lisännyt sisältöä sivulle, kun taas muokkaus 2 vähentänyt sitä.",
+	"revisionslider-help-dialog-slide3a": "<p>Vertaillaksesi haluamiasi muokkauksia valitse muokkaukset keltaista ja sinistä osoitinta siirtämällä.</p><p>Sininen osoitin säätelee uusinta näytettävää muokkausta, keltainen puolestaan vanhinta.</p><p>Siirrä osoittimia raahaamalla ja pudottamalla tai klikkaa suoraan haluamaasi palkkia.</p>",
+	"revisionslider-help-dialog-slide4": "Vasemmalle ja oikealle osoittavilla nuolilla voit liikkua muutoshistoriassa ja katsella vanhempia sekä uudempia muokkauksia.",
+	"revisionslider-tutorial": "Opastus sivuvertailun vaakajanan käyttöön",
+	"revisionslider-previous-dialog": "Edellinen",
+	"revisionslider-next-dialog": "Seuraava",
+	"revisionslider-close-dialog": "Sulje"
+}

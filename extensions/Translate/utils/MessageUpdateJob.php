@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2008-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -15,10 +15,10 @@
  */
 class MessageUpdateJob extends Job {
 	public static function newJob( Title $target, $content, $fuzzy = false ) {
-		$params = array(
+		$params = [
 			'content' => $content,
 			'fuzzy' => $fuzzy,
-		);
+		];
 		$job = new self( $target, $params );
 
 		return $job;
@@ -27,11 +27,9 @@ class MessageUpdateJob extends Job {
 	/**
 	 * @param Title $title
 	 * @param array $params
-	 * @param int $id
 	 */
-	public function __construct( $title, $params = array(), $id = 0 ) {
-		parent::__construct( __CLASS__, $title, $params, $id );
-		$this->params = $params;
+	public function __construct( $title, $params = [] ) {
+		parent::__construct( __CLASS__, $title, $params );
 	}
 
 	public function run() {
@@ -58,38 +56,38 @@ class MessageUpdateJob extends Job {
 			$languages = array_keys( $languages );
 
 			$dbw = wfGetDB( DB_MASTER );
-			$fields = array( 'page_id', 'page_latest' );
-			$conds = array( 'page_namespace' => $title->getNamespace() );
+			$fields = [ 'page_id', 'page_latest' ];
+			$conds = [ 'page_namespace' => $title->getNamespace() ];
 
-			$pages = array();
+			$pages = [];
 			foreach ( $languages as $code ) {
 				$otherTitle = Title::makeTitleSafe( $title->getNamespace(), "$key/$code" );
 				$pages[$otherTitle->getDBkey()] = true;
 			}
 			unset( $pages[$title->getDBkey()] );
-			if ( count( $pages ) === 0 ) {
+			if ( $pages === [] ) {
 				return true;
 			}
 
 			$conds['page_title'] = array_keys( $pages );
 
 			$res = $dbw->select( 'page', $fields, $conds, __METHOD__ );
-			$inserts = array();
+			$inserts = [];
 			foreach ( $res as $row ) {
-				$inserts[] = array(
+				$inserts[] = [
 					'rt_type' => RevTag::getType( 'fuzzy' ),
 					'rt_page' => $row->page_id,
 					'rt_revision' => $row->page_latest,
-				);
+				];
 			}
 
-			if ( $inserts === array() ) {
+			if ( $inserts === [] ) {
 				return true;
 			}
 
 			$dbw->replace(
 				'revtag',
-				array( array( 'rt_type', 'rt_page', 'rt_revision' ) ),
+				[ [ 'rt_type', 'rt_page', 'rt_revision' ] ],
 				$inserts,
 				__METHOD__
 			);

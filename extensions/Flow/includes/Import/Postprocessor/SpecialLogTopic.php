@@ -8,7 +8,6 @@ use Flow\Import\IImportTopic;
 use Flow\Import\PageImportState;
 use Flow\Import\TopicImportState;
 use Flow\Model\PostRevision;
-use Flow\Model\UUID;
 use ManualLogEntry;
 use User;
 
@@ -45,9 +44,9 @@ class SpecialLogTopic implements PostProcessor {
 		$logEntry = new ManualLogEntry( 'import', $topic->getLogType() );
 		$logEntry->setTarget( $state->topicWorkflow->getOwnerTitle() );
 		$logEntry->setPerformer( $this->user );
-		$logEntry->setParameters( array(
+		$logEntry->setParameters( [
 			'topic' => $state->topicWorkflow->getArticleTitle()->getPrefixedText(),
-		) + $topic->getLogParameters() );
+		] + $topic->getLogParameters() );
 		$logEntry->insert();
 
 		$this->newPosts = false;

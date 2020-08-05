@@ -1,9 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sahran"
+			"Sahran",
+			"Uzdil"
 		]
 	},
+	"api-error-noimageinfo": "مۇۋەپپەقىيەتلىك يۈكلەندى ئەمما مۇلازىمېتىر ھۆججەتكە مۇناسىۋەتلىك ئۇچۇر بەرمىدى.",
 	"mwe-upwiz-step-file": "يۈكلە",
 	"mwe-upwiz-step-thanks": "ئىشلەت",
 	"mwe-upwiz-add-flickr-or": "ياكى",

@@ -1,9 +1,8 @@
 /*!
  * Translate editor shortcuts
  */
-( function ( $, mw ) {
+( function () {
 	'use strict';
-
 	var translateEditorShortcuts = {
 		showShortcuts: function () {
 			var editorOffset, minTop, maxTop, maxLeft, middle, rtl;
@@ -15,34 +14,27 @@
 			minTop = editorOffset.top;
 			maxTop = minTop + this.$editor.outerHeight();
 			middle = minTop + ( maxTop - minTop ) / 2;
-
-			maxLeft = editorOffset.left;
-			if ( !rtl ) {
-				maxLeft += this.$editor.outerWidth();
-			}
+			maxLeft = rtl ? editorOffset.left : editorOffset.left + this.$editor.outerWidth();
 
 			this.hideShortcuts();
 
 			// For scrolling up and down
 			$( '<div>' )
 				.text( '↑' )
-				.offset( { top: middle - 10, left: maxLeft } )
 				.addClass( 'shortcut-popup' )
-				.appendTo( 'body' );
+				.appendTo( 'body' )
+				.offset( { top: middle - 15, left: maxLeft } )
+				.css( 'transform', 'translate( -50%, 0 )' );
 
 			$( '<div>' )
 				.text( '↓' )
-				.offset( { top: middle + 10, left: maxLeft } )
 				.addClass( 'shortcut-popup' )
-				.appendTo( 'body' );
+				.appendTo( 'body' )
+				.offset( { top: middle + 15, left: maxLeft } )
+				.css( 'transform', 'translate( -50%, 0 )' );
 
 			this.$editor.find( '.shortcut-activated:visible' ).each( function ( index ) {
-				var $this = $( this ),
-					offset = $this.offset();
-
-				if ( rtl ) {
-					offset.left += $this.outerWidth();
-				}
+				var offset = getStartCornerOffsetOf( $( this ), rtl );
 
 				// Let's not have numbers appear outside the editor over other content
 				if ( offset.top > maxTop || offset.top < minTop ) {
@@ -51,9 +43,10 @@
 
 				$( '<div>' )
 					.text( index + 1 )
-					.offset( offset )
 					.addClass( 'shortcut-popup' )
-					.appendTo( 'body' );
+					.appendTo( 'body' )
+					.offset( offset )
+					.css( 'transform', 'translate( -50%, -50% )' );
 			} );
 		},
 
@@ -62,7 +55,17 @@
 		}
 	};
 
+	function getStartCornerOffsetOf( $element, rtl ) {
+		var offset = $element.offset();
+
+		if ( rtl ) {
+			offset.left += $element.outerWidth();
+		}
+
+		return offset;
+	}
+
 	mw.translate.editor = mw.translate.editor || {};
 	$.extend( mw.translate.editor, translateEditorShortcuts );
 
-}( jQuery, mediaWiki ) );
+}() );

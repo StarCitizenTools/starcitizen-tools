@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Overlay class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -14,9 +14,9 @@
  * @constructor
  * @param {Object} [config] Configuration options
  */
-ve.ui.Overlay = function VeUiOverlay( config ) {
+ve.ui.Overlay = function VeUiOverlay() {
 	// Parent constructor
-	OO.ui.Element.call( this, config );
+	ve.ui.Overlay.super.apply( this, arguments );
 
 	// Initialization
 	this.$element.addClass( 've-ui-overlay' );

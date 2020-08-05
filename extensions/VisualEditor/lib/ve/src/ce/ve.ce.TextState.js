@@ -1,7 +1,7 @@
 /*!
  * VisualEditor annotated text content state class
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -32,7 +32,7 @@ OO.initClass( ve.ce.TextState );
  * @return {ve.ce.TextStateChunk[]} chunks
  */
 ve.ce.TextState.static.getChunks = function ( element ) {
-	var viewNode,
+	var view,
 		node = element,
 		// Stack of element-lists in force; each element list is equal to its predecessor extended
 		// by one element. This means two chunks have object-equal element lists if they have the
@@ -69,7 +69,6 @@ ve.ce.TextState.static.getChunks = function ( element ) {
 		// If appropriate, step into first child and loop
 		// If no next sibling, step out until there is (breaking if we leave element)
 		// Step to next sibling and loop
-		// jscs:disable disallowEmptyBlocks
 		if ( node.nodeType === Node.TEXT_NODE ) {
 			add( node.data.replace( /\u00A0/g, ' ' ) );
 		} else if (
@@ -80,21 +79,20 @@ ve.ce.TextState.static.getChunks = function ( element ) {
 			node.classList.contains( 've-ce-cursorHolder' )
 		) {
 			// Do nothing
-		} else if ( node.classList.contains( 've-ce-leafNode' ) ) {
+		} else if ( ( view = $( node ).data( 'view' ) ) && view instanceof ve.ce.LeafNode ) {
 			// Don't return the content, but return placeholder characters so the
 			// offsets match up.
-			viewNode = $( node ).data( 'view' );
 			// Only return placeholders for the first element in a sibling group;
 			// otherwise we'll double count this node
-			if ( viewNode && node === viewNode.$element[ 0 ] ) {
+			if ( node === view.$element[ 0 ] ) {
 				// \u2603 is the snowman character: ☃
-				add( ve.repeatString( '\u2603', viewNode.getOuterLength() ) );
+				add( ve.repeatString( '\u2603', view.getOuterLength() ) );
 			}
 		} else if ( node.classList.contains( 've-ce-unicorn' ) ) {
 			add( '', 'unicorn' );
 		} else if ( node.firstChild ) {
 			if ( ve.ce.isAnnotationElement( node ) ) {
-				// push a new element stack state
+				// Push a new element stack state
 				elementListStack.push( elementListStack[ stackTop ].concat( node ) );
 				annotationStack.push( node );
 				stackTop++;
@@ -102,8 +100,7 @@ ve.ce.TextState.static.getChunks = function ( element ) {
 			node = node.firstChild;
 			continue;
 		}
-		// Else no child nodes; do nothing
-		// jscs:enable disallowEmptyBlocks
+		// else no child nodes; do nothing
 
 		// Step out of this node, then keep stepping outwards until there is a next sibling
 		while ( true ) {
@@ -213,7 +210,11 @@ ve.ce.TextState.prototype.getChangeTransaction = function ( prev, modelDoc, mode
 	// During typical typing, there is a single changed chunk with matching start/end chars.
 	textStart = 0;
 	textEnd = 0;
-	if ( change.start < Math.min( oldChunks.length, newChunks.length ) ) {
+	if ( change.start + change.end < Math.min( oldChunks.length, newChunks.length ) ) {
+		// Both oldChunks and newChunks include a changed chunk. Therefore the first changed
+		// chunk of oldChunks and newChunks is respectively oldChunks[ change.start ] and
+		// newChunks[ change.start ] . If they have matching annotations, then matching
+		// characters at their start are also part of the unchanged start region.
 		if ( oldChunks[ change.start ].hasEqualElements( newChunks[ change.start ] ) ) {
 			oldChunk = oldChunks[ change.start ];
 			newChunk = newChunks[ change.start ];
@@ -226,19 +227,22 @@ ve.ce.TextState.prototype.getChangeTransaction = function ( prev, modelDoc, mode
 			textStart = i;
 		}
 
-		if (
-			change.end < Math.min( oldChunks.length, newChunks.length ) &&
-			oldChunks[ oldChunks.length - 1 - change.end ].hasEqualElements(
-				newChunks[ newChunks.length - 1 - change.end ]
-			)
-		) {
+		// Likewise, the last changed chunk of oldChunks and newChunks is respectively
+		// oldChunks[ oldChunks.length - 1 - change.end ] and
+		// newChunks[ newChunks.length - 1 - change.end ] , and if they have matching
+		// annotations, then matching characters at their end potentially form part of
+		// the unchanged end region.
+		if ( oldChunks[ oldChunks.length - 1 - change.end ].hasEqualElements(
+			newChunks[ newChunks.length - 1 - change.end ]
+		) ) {
 			oldChunk = oldChunks[ oldChunks.length - 1 - change.end ];
 			newChunk = newChunks[ newChunks.length - 1 - change.end ];
-			// For oldChunks/newChunks/both, it's possible that only one chunk
-			// changed, in which case textStart has already eaten into that chunk;
-			// so take care not to overlap it. (For example, for 'ana'->'anna',
-			// textStart will be 2 so we want to limit textEnd to 1, else the 'n'
-			// of 'ana' will be counted twice).
+			// However, if only one chunk has changed in oldChunks/newChunks, then
+			// oldChunk/newChunk is also the *first* changed chunk, in which case
+			// textStart has already eaten into that chunk; so take care not to
+			// overlap it. (For example, for 'ana'->'anna', textStart will be 2 so
+			// we want to limit textEnd to 1, else the 'n' of 'ana' will be counted
+			// twice).
 			iLen = Math.min(
 				oldChunk.text.length -
 				( change.start + change.end === oldChunks.length - 1 ? textStart : 0 ),
@@ -391,13 +395,13 @@ ve.ce.TextState.prototype.getChangeTransaction = function ( prev, modelDoc, mode
 					modelClass = ve.dm.modelRegistry.lookup(
 						ve.dm.modelRegistry.matchElement( element )
 					);
-					ann = ve.dm.annotationFactory.createFromElement(
-						ve.dm.converter.createDataElements( modelClass, [ element ] )[ 0 ]
-					);
-					if ( !( ann instanceof ve.dm.Annotation ) ) {
+					if ( !( modelClass && modelClass.prototype instanceof ve.dm.Annotation ) ) {
 						// Erroneous element; nothing we can do with it
 						continue;
 					}
+					ann = ve.dm.annotationFactory.createFromElement(
+						modelClass.static.toDataElement( [ element ], ve.dm.converter )
+					);
 					oldAnn = oldAnnotations.getComparable( ann );
 					if ( oldAnn ) {
 						ann = oldAnn;
@@ -413,5 +417,5 @@ ve.ce.TextState.prototype.getChangeTransaction = function ( prev, modelDoc, mode
 		ve.batchPush( newData, data );
 	}
 
-	return ve.dm.Transaction.newFromReplacement( modelDoc, removeRange, newData );
+	return ve.dm.TransactionBuilder.static.newFromReplacement( modelDoc, removeRange, newData );
 };

@@ -1,8 +1,8 @@
 /*
  * VisualEditor user interface MWCitationDialog class.
  *
- * @copyright 2011-2016 Cite VisualEditor Team and others; see AUTHORS.txt
- * @license The MIT License (MIT); see LICENSE.txt
+ * @copyright 2011-2018 VisualEditor Team's Cite sub-team and others; see AUTHORS.txt
+ * @license MIT
  */
 
 /**
@@ -202,7 +202,8 @@ ve.ui.MWCitationDialog.prototype.getActionProcess = function ( action ) {
 							// first (and empty) child
 							dialog.getFragment().clone(
 								new ve.dm.LinearSelection( doc, item.getChildren()[ 0 ].getRange() )
-							)
+							),
+							'inline'
 						);
 					}
 				}

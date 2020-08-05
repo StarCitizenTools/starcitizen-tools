@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ebraminio",
+			"Reza1615",
+			"Rtemis"
+		]
+	},
+	"disambig-desc": "افزودن برچسب <code><nowiki>__DISAMBIG__</nowiki></code> برای مشخص‌کردن [[Special:DisambiguationPages|صفحات ابهام‌زدایی]]",
+	"disambiguationpages": "صفحه‌های ابهام‌زدایی",
+	"disambiguationpages-summary": "در زیر فهرستی از همه صفحات ابهام‌زدایی {{SITENAME}} موجود است.<br />\nاگر صفحه حاوی برچسب <code><nowiki>__DISAMBIG__</nowiki></code> (یا نام مستعار معادل) باشد به عنوان صفحهٔ ابهام‌زدایی در نظر گرفته می‌شود.",
+	"disambiguationpagelinks": "صفحه‌های دارای پیوند به صفحه‌های ابهام‌زدایی",
+	"disambiguationpagelinks-summary": "صفحه های زیر شامل حداقل یک پیوند به یک صفحه ابهام زدایی است.\nبهتر است آنها به پیوندهای دقیق‌تری پیوند داشته باشند.<br />\nاگر صفحه حاوی برچسب <code><nowiki>__DISAMBIG__</nowiki></code> (یا نام مستعار معادل) باشد به عنوان صفحهٔ ابهام‌زدایی در نظر گرفته می‌شود.",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "این یک صفحه ابهام‌زدایی است"
+}

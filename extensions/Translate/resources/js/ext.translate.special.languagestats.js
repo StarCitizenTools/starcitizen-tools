@@ -2,19 +2,28 @@
  * Collapsing script for Special:LanguageStats in MediaWiki Extension:Translate
  * @author Krinkle <krinklemail (at) gmail (dot) com>
  * @author Niklas Laxström
- * @license GPL-2.0+, CC-BY-SA-3.0
+ * @license GPL-2.0-or-later, CC-BY-SA-3.0
  */
 
-( function ( mw, $ ) {
+( function () {
 	'use strict';
 
-	$( document ).ready( function () {
+	/**
+	 * Add css class to every other visible row.
+	 * It's not possible to do zebra colors with CSS only if there are hidden rows.
+	 */
+	function doZebra() {
+		$( '.statstable tr:visible:odd' ).toggleClass( 'tux-statstable-even', false );
+		$( '.statstable tr:visible:even' ).toggleClass( 'tux-statstable-even', true );
+	}
+
+	$( function () {
 		var $allChildRows, $allTogglesCache, $toggleAllButton,
-			$translateTable = $( '.mw-sp-translate-table' ),
+			$translateTable = $( '.statstable' ),
 			$metaRows = $( 'tr.AggregateMessageGroup', $translateTable );
 
 		// Quick return
-		if ( !$metaRows.size() ) {
+		if ( !$metaRows.length ) {
 			return;
 		}
 
@@ -25,7 +34,7 @@
 				$children = $( 'tr[data-parentgroup="' + thisGroupId + '"]', $translateTable );
 
 			// Only do the collapse stuff if this Meta-group actually has children on this page
-			if ( !$children.size() ) {
+			if ( !$children.length ) {
 				return;
 			}
 
@@ -38,11 +47,11 @@
 					var $el = $( this );
 					// Switch the state and toggle the rows
 					if ( $el.hasClass( 'collapsed' ) ) {
-						$children.fadeIn().trigger( 'show' );
+						$children.fadeIn( { start: doZebra } ).trigger( 'show' );
 						$el.removeClass( 'collapsed' ).addClass( 'expanded' );
 						$el.find( '> a' ).text( mw.msg( 'translate-langstats-collapse' ) );
 					} else {
-						$children.fadeOut().trigger( 'hide' );
+						$children.fadeOut( { done: doZebra } ).trigger( 'hide' );
 						$el.addClass( 'collapsed' ).removeClass( 'expanded' );
 						$el.find( '> a' ).text( mw.msg( 'translate-langstats-expand' ) );
 					}
@@ -72,7 +81,7 @@
 			.append( ']' )
 			.click( function ( e ) {
 				var $el = $( this ),
-					$allToggles = !!$allTogglesCache ? $allTogglesCache : $( '.groupexpander', $translateTable );
+					$allToggles = $allTogglesCache || $( '.groupexpander', $translateTable );
 
 				// Switch the state and toggle the rows
 				// and update the local toggles too
@@ -88,47 +97,19 @@
 					$allToggles.find( '> a' ).text( mw.msg( 'translate-langstats-expand' ) );
 				}
 
+				doZebra();
 				e.preventDefault();
 			} );
 
 		// Initially hide them
 		$allChildRows.hide();
+		doZebra();
 
 		// Add the toggle-all button above the table
 		$( '<p class="groupexpander-all"></p>' ).append( $toggleAllButton ).insertBefore( $translateTable );
 	} );
 
-	// When hovering a row, adjust brightness of the last two custom-colored cells as well
-	// See also translate.langstats.css for the highlighting for the other normal rows
-	mw.loader.using( 'jquery.colorUtil', function () {
-		$( document ).ready( function () {
-			// It is possible that the first event we get is hover-out, in
-			// which case the colors will get stuck wrong. Ignore it.
-			var seenHoverIn = false;
-
-			$( '.mw-sp-translate-table.wikitable tr' ).hover( function () {
-				seenHoverIn = true;
-				$( '> td.hover-color', this )
-					// 30% more brightness
-					.css( 'background-color', function ( i, val ) {
-						// @codingStandardsIgnoreStart Bug in CodeSniffer?
-						return $.colorUtil.getColorBrightness( val, +0.3 );
-						// codingStandardsIgnoreEnd
-					} );
-			}, function () {
-				if ( !seenHoverIn ) {
-					return;
-				}
-				$( '> td.hover-color', this )
-					// 30% less brightness
-					.css( 'background-color', function ( i, val ) {
-						return $.colorUtil.getColorBrightness( val, -0.3 );
-					} );
-			} );
-		} );
-	} );
-
-	$( document ).ready( function () {
+	$( function () {
 		var index,
 			sort = {},
 			re = /#sortable:(\d+)=(asc|desc)/,
@@ -145,9 +126,11 @@
 			var $table = $( this );
 			$table.find( '.headerSortDown, .headerSortUp' ).each( function () {
 				var index = $table.find( 'th' ).index( $( this ) ),
-					dir = $( this ).hasClass( 'headerSortUp' ) ? 'desc' : 'asc';
+					dir = $( this ).hasClass( 'headerSortUp' ) ? 'asc' : 'desc';
 				window.location.hash = 'sortable:' + index + '=' + dir;
+
+				doZebra();
 			} );
 		} );
 	} );
-}( mediaWiki, jQuery ) );
+}() );

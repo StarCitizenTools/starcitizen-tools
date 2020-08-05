@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWParameterResultWidget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -19,7 +19,7 @@ ve.ui.MWParameterResultWidget = function VeUiMWParameterResultWidget( config ) {
 	config = ve.extendObject( { icon: 'parameter' }, config );
 
 	// Parent constructor
-	OO.ui.DecoratedOptionWidget.call( this, config );
+	ve.ui.MWParameterResultWidget.super.call( this, config );
 
 	// Initialization
 	this.$element.addClass( 've-ui-mwParameterResultWidget' );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface SpecialCharacterDialog styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-specialCharacterDialog .oo-ui-outlineOptionWidget {
@@ -26,8 +26,8 @@
 }
 
 .ve-ui-specialCharacterPage h3 {
+	color: #54595d;
 	margin: 0 0 0.5em 0;
-	color: #888;
 	font-weight: normal;
 	font-size: 1em;
 }
@@ -44,14 +44,23 @@
 	height: 1.8em;
 	text-align: center;
 	display: inline-block;
+	vertical-align: top;
 	margin: 0 3px 3px 0;
-	border: 1px solid #e6e6e6;
+	border: 1px solid #eaecf0;
 	-webkit-transition: border-color 200ms;
 	-moz-transition: border-color 200ms;
-	-o-transition: border-color 200ms;
 	transition: border-color 200ms;
 }
 
 .ve-ui-specialCharacterPage-character:hover {
-	border-color: #ccc;
+	border-color: #c8ccd1;
+}
+
+.ve-ui-specialCharacterPage-character-source {
+	/* Specify a valid second value to fix size in Chrome/FF */
+	font-family: monospace, 'Courier';
+	font-size: 1em;
+	line-height: 2.7em;
+	height: 2.7em;
+	padding: 0 0.2em;
 }

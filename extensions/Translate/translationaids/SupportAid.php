@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -16,15 +16,15 @@
  */
 class SupportAid extends TranslationAid {
 	public function getData() {
-		return array(
-			'url' => SupportAid::getSupportUrl( $this->handle->getTitle() ),
-		);
+		return [
+			'url' => self::getSupportUrl( $this->handle->getTitle() ),
+		];
 	}
 
 	/**
 	 * Target URL for a link provided by a support button/aid.
 	 *
-	 * @param $title Title Title object for the translation message.
+	 * @param Title $title Title object for the translation message.
 	 * @since 2015.09
 	 * @return string
 	 * @throws TranslationHelperException
@@ -43,7 +43,7 @@ class SupportAid extends TranslationAid {
 		}
 
 		// Preprocess params
-		$params = array();
+		$params = [];
 		if ( isset( $config['params'] ) ) {
 			foreach ( $config['params'] as $key => $value ) {
 				$params[$key] = str_replace( '%MESSAGE%', $title->getPrefixedText(), $value );

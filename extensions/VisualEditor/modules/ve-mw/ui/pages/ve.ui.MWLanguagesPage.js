@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWLanguagesPage class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -14,10 +14,11 @@
  * @constructor
  * @param {string} name Unique symbolic name of page
  * @param {Object} [config] Configuration options
+ * @cfg {jQuery} [$overlay] Overlay to render dropdowns in
  */
-ve.ui.MWLanguagesPage = function VeUiMWLanguagesPage( name, config ) {
+ve.ui.MWLanguagesPage = function VeUiMWLanguagesPage() {
 	// Parent constructor
-	OO.ui.PageLayout.call( this, name, config );
+	ve.ui.MWLanguagesPage.super.apply( this, arguments );
 
 	// Properties
 	this.languagesFieldset = new OO.ui.FieldsetLayout( {
@@ -44,9 +45,9 @@ OO.inheritClass( ve.ui.MWLanguagesPage, OO.ui.PageLayout );
 /**
  * @inheritdoc
  */
-ve.ui.MWLanguagesPage.prototype.setOutlineItem = function ( outlineItem ) {
+ve.ui.MWLanguagesPage.prototype.setOutlineItem = function () {
 	// Parent method
-	OO.ui.PageLayout.prototype.setOutlineItem.call( this, outlineItem );
+	ve.ui.MWLanguagesPage.super.prototype.setOutlineItem.apply( this, arguments );
 
 	if ( this.outlineItem ) {
 		this.outlineItem
@@ -86,15 +87,16 @@ ve.ui.MWLanguagesPage.prototype.onLoadLanguageData = function ( languages ) {
 			languages[ i ].safelang = $.uls.data.isRedirect( languages[ i ].lang ) || languages[ i ].lang;
 			languages[ i ].dir = ve.init.platform.getLanguageDirection( languages[ i ].safelang );
 		}
-		$languagesTable
-			.append( $( '<tr>' )
-				.append( $( '<td>' ).text( languages[ i ].lang ) )
-				.append( $( '<td>' ).text( languages[ i ].langname ).add(
-						$( '<td>' ).text( languages[ i ].title )
-					)
-					.attr( 'lang', languages[ i ].safelang )
-					.attr( 'dir', languages[ i ].dir ) )
-			);
+		$languagesTable.append(
+			$( '<tr>' ).append(
+				$( '<td>' ).text( languages[ i ].lang ),
+				$( '<td>' ).text( languages[ i ].langname ).add( $( '<td>' ).text( languages[ i ].title ) )
+					.attr( {
+						lang: languages[ i ].safelang,
+						dir: languages[ i ].dir
+					} )
+			)
+		);
 	}
 
 	this.languagesFieldset.$element.append( $languagesTable );
@@ -102,6 +104,9 @@ ve.ui.MWLanguagesPage.prototype.onLoadLanguageData = function ( languages ) {
 
 /**
  * Handle language items being loaded.
+ *
+ * @param {jQuery.Deferred} deferred Deferred to resolve with language data
+ * @param {Object} response API response
  */
 ve.ui.MWLanguagesPage.prototype.onAllLanguageItemsSuccess = function ( deferred, response ) {
 	var i, iLen, languages = [],
@@ -165,7 +170,7 @@ ve.ui.MWLanguagesPage.prototype.getAllLanguageItems = function () {
 	new mw.Api().get( {
 		action: 'visualeditor',
 		paction: 'getlanglinks',
-		page: mw.config.get( 'wgPageName' )
+		page: ve.init.target.pageName
 	} )
 		.done( this.onAllLanguageItemsSuccess.bind( this, deferred ) )
 		.fail( this.onAllLanguageItemsError.bind( this, deferred ) );

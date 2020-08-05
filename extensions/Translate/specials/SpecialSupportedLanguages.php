@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @author Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -33,7 +33,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 		return 'wiki';
 	}
 
-	function getDescription() {
+	public function getDescription() {
 		return $this->msg( 'supportedlanguages' )->text();
 	}
 
@@ -46,16 +46,19 @@ class SpecialSupportedLanguages extends SpecialPage {
 
 		$this->setHeaders();
 		$out->addModules( 'ext.translate.special.supportedlanguages' );
+		$out->addModuleStyles( 'ext.translate.special.supportedlanguages' );
 
 		$out->addHelpLink(
 			'Help:Extension:Translate/Statistics_and_reporting#List_of_languages_and_translators'
 		);
 
 		$this->outputHeader( 'supportedlanguages-summary' );
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		if ( $dbr->getType() === 'sqlite' ) {
-			$out->addWikiText( '<div class=errorbox>SQLite is not supported.</div>' );
-
+			$out->wrapWikiMsg(
+				'<div class="errorbox">$1</div>',
+				'supportedlanguages-sqlite-error'
+			);
 			return;
 		}
 
@@ -96,11 +99,11 @@ class SpecialSupportedLanguages extends SpecialPage {
 		$userStats = $this->getUserStats( $usernames );
 
 		// Information to be used inside the foreach loop.
-		$linkInfo = array();
+		$linkInfo = [];
 		$linkInfo['rc']['title'] = SpecialPage::getTitleFor( 'Recentchanges' );
-		$linkInfo['rc']['msg'] = $this->msg( 'supportedlanguages-recenttranslations' )->escaped();
+		$linkInfo['rc']['msg'] = $this->msg( 'supportedlanguages-recenttranslations' )->text();
 		$linkInfo['stats']['title'] = SpecialPage::getTitleFor( 'LanguageStats' );
-		$linkInfo['stats']['msg'] = $this->msg( 'languagestats' )->escaped();
+		$linkInfo['stats']['msg'] = $this->msg( 'languagestats' )->text();
 
 		$local = Language::fetchLanguageName( $code, $lang->getCode(), 'all' );
 		$native = Language::fetchLanguageName( $code, null, 'all' );
@@ -114,29 +117,27 @@ class SpecialSupportedLanguages extends SpecialPage {
 				->params( $code, $native )->escaped();
 		}
 
-		$out->addHTML( Html::rawElement( 'h2', array( 'id' => $code ), $headerText ) );
+		$out->addHTML( Html::rawElement( 'h2', [ 'id' => $code ], $headerText ) );
 
 		// Add useful links for language stats and recent changes for the language.
-		$links = array();
-		$links[] = Linker::link(
+		$links = [];
+		$links[] = $this->getLinkRenderer()->makeKnownLink(
 			$linkInfo['stats']['title'],
 			$linkInfo['stats']['msg'],
-			array(),
-			array(
+			[],
+			[
 				'code' => $code,
 				'suppresscomplete' => '1'
-			),
-			array( 'known', 'noclasses' )
+			]
 		);
-		$links[] = Linker::link(
+		$links[] = $this->getLinkRenderer()->makeKnownLink(
 			$linkInfo['rc']['title'],
 			$linkInfo['rc']['msg'],
-			array(),
-			array(
+			[],
+			[
 				'translations' => 'only',
 				'trailer' => '/' . $code
-			),
-			array( 'known', 'noclasses' )
+			]
 		);
 		$linkList = $lang->listToText( $links );
 
@@ -158,21 +159,21 @@ class SpecialSupportedLanguages extends SpecialPage {
 			}
 		}
 
-		$dbr = wfGetDB( DB_SLAVE );
-		$tables = array( 'recentchanges' );
-		$fields = array( 'substring_index(rc_title, \'/\', -1) as lang', 'count(*) as count' );
+		$dbr = wfGetDB( DB_REPLICA );
+		$tables = [ 'recentchanges' ];
+		$fields = [ 'substring_index(rc_title, \'/\', -1) as lang', 'count(*) as count' ];
 		$timestamp = $dbr->timestamp( wfTimestamp( TS_UNIX ) - 60 * 60 * 24 * $this->period );
-		$conds = array(
+		$conds = [
 			# Without the quotes the rc_timestamp index isn't used and this query is much slower
 			"rc_timestamp > '$timestamp'",
 			'rc_namespace' => $wgTranslateMessageNamespaces,
 			'rc_title' . $dbr->buildLike( $dbr->anyString(), '/', $dbr->anyString() ),
-		);
-		$options = array( 'GROUP BY' => 'lang', 'HAVING' => 'count > 20', 'ORDER BY' => 'NULL' );
+		];
+		$options = [ 'GROUP BY' => 'lang', 'HAVING' => 'count > 20', 'ORDER BY' => 'NULL' ];
 
 		$res = $dbr->select( $tables, $fields, $conds, __METHOD__, $options );
 
-		$data = array();
+		$data = [];
 		foreach ( $res as $row ) {
 			$data[$row->lang] = $row->count;
 		}
@@ -207,10 +208,10 @@ class SpecialSupportedLanguages extends SpecialPage {
 		$work = new PoolCounterWorkViaCallback(
 			'TranslateFetchTranslators',
 			"TranslateFetchTranslators-$code",
-			array(
+			[
 				'doWork' => function () use ( $that, $code, $cache, $cachekey ) {
 					$users = $that->loadTranslators( $code );
-					$newData = array( 'users' => $users, 'asOfTime' => time() );
+					$newData = [ 'users' => $users, 'asOfTime' => time() ];
 					$cache->set( $cachekey, $newData, 86400 );
 					return $users;
 				},
@@ -223,7 +224,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 					// Use stale cache if possible
 					return is_array( $data ) ? $data['users'] : false;
 				}
-			)
+			]
 		);
 
 		return $work->execute();
@@ -238,22 +239,35 @@ class SpecialSupportedLanguages extends SpecialPage {
 	public function loadTranslators( $code ) {
 		global $wgTranslateMessageNamespaces;
 
-		$dbr = wfGetDB( DB_SLAVE, 'vslow' );
-		$tables = array( 'page', 'revision' );
-		$fields = array(
-			'rev_user_text',
+		$dbr = wfGetDB( DB_REPLICA, 'vslow' );
+
+		if ( class_exists( ActorMigration::class ) ) {
+			$actorQuery = ActorMigration::newMigration()->getJoin( 'rev_user' );
+		} else {
+			$actorQuery = [
+				'tables' => [],
+				'fields' => [ 'rev_user_text' => 'rev_user_text' ],
+				'joins' => [],
+			];
+		}
+
+		$tables = [ 'page', 'revision' ] + $actorQuery['tables'];
+		$fields = [
+			'rev_user_text' => $actorQuery['fields']['rev_user_text'],
 			'count(page_id) as count'
-		);
-		$conds = array(
+		];
+		$conds = [
 			'page_title' . $dbr->buildLike( $dbr->anyString(), '/', $code ),
 			'page_namespace' => $wgTranslateMessageNamespaces,
-			'page_id=rev_page',
-		);
-		$options = array( 'GROUP BY' => 'rev_user_text', 'ORDER BY' => 'NULL' );
+		];
+		$options = [ 'GROUP BY' => $actorQuery['fields']['rev_user_text'], 'ORDER BY' => 'NULL' ];
+		$joins = [
+			'revision' => [ 'JOIN', 'page_id=rev_page' ],
+		] + $actorQuery['joins'];
 
-		$res = $dbr->select( $tables, $fields, $conds, __METHOD__, $options );
+		$res = $dbr->select( $tables, $fields, $conds, __METHOD__, $options, $joins );
 
-		$data = array();
+		$data = [];
 		foreach ( $res as $row ) {
 			$data[$row->rev_user_text] = $row->count;
 		}
@@ -297,12 +311,12 @@ class SpecialSupportedLanguages extends SpecialPage {
 			$name = $names[$k];
 			$size = round( log( $v ) * 20 ) + 10;
 
-			$params = array(
+			$params = [
 				'href' => $this->getPageTitle( $k )->getLocalURL(),
 				'class' => 'tag',
 				'style' => "font-size:$size%",
 				'lang' => $k,
-			);
+			];
 
 			$tag = Html::element( 'a', $params, $name );
 			$out->addHTML( $tag . "\n" );
@@ -317,15 +331,16 @@ class SpecialSupportedLanguages extends SpecialPage {
 		// longer than this is just inactive
 		$period = $this->period;
 
-		$links = array();
+		$links = [];
 		$statsTable = new StatsTable();
 
+		arsort( $users );
 		foreach ( $users as $username => $count ) {
 			$title = Title::makeTitleSafe( NS_USER, $username );
 			$enc = htmlspecialchars( $username );
 
-			$attribs = array();
-			$styles = array();
+			$attribs = [];
+			$styles = [];
 			if ( isset( $stats[$username][0] ) ) {
 				if ( $count === -1 ) {
 					$count = $stats[$username][0];
@@ -339,7 +354,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 					->numParams( $count, $last )->text();
 				$last = max( 1, min( $period, $last ) );
 				$styles['border-bottom'] = '3px solid #' .
-					$statsTable->getBackgroundColor( $period - $last, $period );
+					$statsTable->getBackgroundColor( ( $period - $last ) / $period );
 			} else {
 				$enc = "<del>$enc</del>";
 			}
@@ -349,7 +364,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 				$attribs['style'] = $stylestr;
 			}
 
-			$links[] = Linker::link( $title, $enc, $attribs );
+			$links[] = $this->getLinkRenderer()->makeLink( $title, new HtmlArmor( $enc ), $attribs );
 		}
 
 		// for GENDER support
@@ -372,15 +387,15 @@ class SpecialSupportedLanguages extends SpecialPage {
 
 	protected function getUserStats( $users ) {
 		$cache = wfGetCache( CACHE_ANYTHING );
-		$dbr = wfGetDB( DB_SLAVE );
-		$keys = array();
+		$dbr = wfGetDB( DB_REPLICA );
+		$keys = [];
 
 		foreach ( $users as $username ) {
 			$keys[] = wfMemcKey( 'translate', 'sl-usertats', $username );
 		}
 
 		$cached = $cache->getMulti( $keys );
-		$data = array();
+		$data = [];
 
 		foreach ( $users as $index => $username ) {
 			$cachekey = $keys[$index];
@@ -390,15 +405,24 @@ class SpecialSupportedLanguages extends SpecialPage {
 				continue;
 			}
 
-			$tables = array( 'user', 'revision' );
-			$fields = array( 'user_name', 'user_editcount', 'MAX(rev_timestamp) as lastedit' );
-			$conds = array(
-				'user_name' => $username,
-				'user_id = rev_user',
-			);
+			if ( class_exists( ActorMigration::class ) ) {
+				$actorQuery = ActorMigration::newMigration()->getJoin( 'rev_user' );
+				$tables = [ 'user', 'r' => [ 'revision' ] + $actorQuery['tables'] ];
+				$joins = [
+					'r' => [ 'JOIN', 'user_id = rev_user' ],
+				] + $actorQuery['joins'];
+			} else {
+				$tables = [ 'user', 'revision' ];
+				$joins = [ 'revision' => [ 'JOIN', 'user_id = rev_user' ] ];
+			}
 
-			$res = $dbr->selectRow( $tables, $fields, $conds, __METHOD__ );
-			$data[$username] = array( $res->user_editcount, $res->lastedit );
+			$fields = [ 'user_name', 'user_editcount', 'MAX(rev_timestamp) as lastedit' ];
+			$conds = [
+				'user_name' => $username,
+			];
+
+			$res = $dbr->selectRow( $tables, $fields, $conds, __METHOD__, [], $joins );
+			$data[$username] = [ $res->user_editcount, $res->lastedit ];
 
 			$cache->set( $cachekey, $data[$username], 3600 );
 		}
@@ -433,7 +457,7 @@ class SpecialSupportedLanguages extends SpecialPage {
 		for ( $i = 0; $i <= $period; $i += 30 ) {
 			$iFormatted = htmlspecialchars( $this->getLanguage()->formatNum( $i ) );
 			$legend .= '<span style="background-color:#' .
-				$statsTable->getBackgroundColor( $period - $i, $period ) .
+				$statsTable->getBackgroundColor( ( $period - $i ) / $period ) .
 				"\"> $iFormatted</span>";
 		}
 

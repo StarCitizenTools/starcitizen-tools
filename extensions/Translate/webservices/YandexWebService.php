@@ -4,12 +4,12 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
  * Implements support for Yandex translation api v1.
- * @see http://api.yandex.com/translate/
+ * @see https://tech.yandex.com/translate/
  * @ingroup TranslationWebService
  * @since 2013-01-01
  */
@@ -27,19 +27,19 @@ class YandexWebService extends TranslationWebService {
 
 	protected function doPairs() {
 		if ( !isset( $this->config['key'] ) ) {
-			throw new TranslationWebServiceException( 'API key is not set' );
+			throw new TranslationWebServiceConfigurationException( 'API key is not set' );
 		}
 
-		$pairs = array();
+		$pairs = [];
 
-		$params = array(
+		$params = [
 			'key' => $this->config['key'],
-		);
+		];
 
 		$url = $this->config['pairs'] . '?' . wfArrayToCgi( $params );
 		$json = Http::get(
 			$url,
-			array( 'timeout' => $this->config['timeout'] ),
+			[ 'timeout' => $this->config['timeout'] ],
 			__METHOD__
 		);
 		$response = FormatJson::decode( $json );
@@ -59,12 +59,12 @@ class YandexWebService extends TranslationWebService {
 
 	protected function getQuery( $text, $from, $to ) {
 		if ( !isset( $this->config['key'] ) ) {
-			throw new TranslationWebServiceException( 'API key is not set' );
+			throw new TranslationWebServiceConfigurationException( 'API key is not set' );
 		}
 
-		# http://api.yandex.com/translate/doc/dg/reference/translate.xml
+		# https://tech.yandex.com/translate/doc/dg/reference/translate-docpage/
 		if ( strlen( $text ) > 10000 ) {
-			throw new TranslationWebServiceException( 'Source text too long' );
+			throw new TranslationWebServiceInvalidInputException( 'Source text too long' );
 		}
 
 		$text = trim( $text );
@@ -73,12 +73,12 @@ class YandexWebService extends TranslationWebService {
 		return TranslationQuery::factory( $this->config['url'] )
 			->timeout( $this->config['timeout'] )
 			->postWithData(
-				array(
+				[
 					'key' => $this->config['key'],
 					'text' => $text,
 					'lang' => "$from-$to",
 					'format' => 'html',
-				)
+				]
 			);
 	}
 

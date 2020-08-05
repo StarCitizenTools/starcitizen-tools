@@ -12,7 +12,7 @@ mw.flow.ui.enhance = {};
 	* This will make unhovered and unfocused sibling buttons become faded and blurred
 	* Usage: Buttons must be in a form, or in a parent with mw-ui-button-container, or they must be siblings
 	*/
-	$( document ).ready( function () {
+	$( function () {
 		function onMwUiButtonFocus( event ) {
 			var $el, $form, $siblings;
 
@@ -43,14 +43,14 @@ mw.flow.ui.enhance = {};
 		}
 
 		function onMwUiButtonBlur( event ) {
+			var $el, $form, $siblings, $focused;
+
 			if ( event.target.className.indexOf( 'mw-ui-button' ) === -1 ) {
 				// Not a button event
 				return;
 			}
 
-			var $el       = $( event.target ),
-				$form, $siblings, $focused;
-
+			$el = $( event.target );
 			$form = $el.closest( 'form, .mw-ui-button-container' );
 			if ( $form.length ) {
 				// If this button is in a form, apply this to all the form's buttons.
@@ -100,12 +100,7 @@ mw.flow.ui.enhance = {};
 			ready = true;
 
 		$fields.each( function () {
-			var $this = $( this );
-			if ( mw.flow.editor.exists( $this ) ) {
-				if ( mw.flow.editor.getEditor( $this ).isEmpty() ) {
-					ready = false;
-				}
-			} else if ( this.value === '' ) {
+			if ( this.value === '' ) {
 				ready = false;
 			}
 		} );
@@ -122,7 +117,7 @@ mw.flow.ui.enhance = {};
 	 * Disable / enable submit buttons without/with text in field.
 	 * Usage: field needs required attribute
 	 */
-	$( document ).ready( function () {
+	$( function () {
 		// We should probably not use this change detection method for VE
 		//
 		// Also, consider using the input event (which I think can replace all of these
@@ -147,7 +142,7 @@ mw.flow.ui.enhance = {};
 	 * mw-ui-tooltip
 	 * Renders tooltips on over, and also via mw.tooltip.
 	 */
-	$( document ).ready( function () {
+	$( function () {
 		var _$tooltip = $(
 				'<span class="flow-ui-tooltip flow-ui-tooltip-left">' +
 					'<span class="flow-ui-tooltip-content"></span>' +
@@ -162,7 +157,7 @@ mw.flow.ui.enhance = {};
 		 * Renders a tooltip at target.
 		 * Options (either given as param, or fetched from target as data-tooltip-x params):
 		 *  tooltipSize=String (small,large,block)
-		 *  tooltipContext=String (constructive,destructive,progressive,regressive)
+		 *  tooltipContext=String (progressive,destructive)
 		 *  tooltipPointing=String (up,down,left,right)
 		 *  tooltipClosable=Boolean
 		 *  tooltipContentCallback=Function
@@ -171,6 +166,7 @@ mw.flow.ui.enhance = {};
 		 * @param {jQuery|HTMLElement|string} [content] A jQuery set, an element, or a string of
 		 *  HTML.  If omitted, first tries tooltipContentCallback, then target.title
 		 * @param {Object} [options]
+		 * @return {jQuery}
 		 */
 		function mwUiTooltipShow( target, content, options ) {
 			var $target = $( target ),
@@ -252,8 +248,6 @@ mw.flow.ui.enhance = {};
 			if ( !optionsUnreferenced.tooltipContext ) {
 				if ( $target.hasClass( 'mw-ui-progressive' ) ) {
 					optionsUnreferenced.tooltipContext = 'progressive';
-				} else if ( $target.hasClass( 'mw-ui-constructive' ) ) {
-					optionsUnreferenced.tooltipContext = 'constructive';
 				} else if ( $target.hasClass( 'mw-ui-destructive' ) ) {
 					optionsUnreferenced.tooltipContext = 'destructive';
 				}
@@ -262,9 +256,8 @@ mw.flow.ui.enhance = {};
 			$tooltip
 				// Add the content to it
 				.find( '.flow-ui-tooltip-content' )
-					.empty()
-					[ insertFn ]( content )
-					.end()
+				.empty()[ insertFn ]( content );
+			$tooltip
 				// Move this off-page before rendering it, so that we can calculate its real dimensions
 				// @todo use .parent() loop to check for z-index and + that to this if needed
 				.css( { position: 'absolute', zIndex: 1000, top: 0, left: '-999em' } )
@@ -274,7 +267,7 @@ mw.flow.ui.enhance = {};
 
 			// Tooltip style context
 			if ( optionsUnreferenced.tooltipContext ) {
-				$tooltip.removeClass( 'mw-ui-progressive mw-ui-constructive mw-ui-destructive' );
+				$tooltip.removeClass( 'mw-ui-progressive mw-ui-destructive' );
 				$tooltip.addClass( 'mw-ui-' + optionsUnreferenced.tooltipContext );
 			}
 
@@ -425,17 +418,17 @@ mw.flow.ui.enhance = {};
 
 		/**
 		 * Event handler for mouse entering on a .flow-ui-tooltip-target
-		 * @param {Event} event
+		 * @param {jQuery.Event} event
 		 */
-		function onMwUiTooltipFocus( event ) {
+		function onMwUiTooltipFocus() {
 			mw.tooltip.show( this );
 		}
 
 		/**
 		 * Event handler for mouse leaving a .flow-ui-tooltip-target
-		 * @param {Event} event
+		 * @param {jQuery.Event} event
 		 */
-		function onMwUiTooltipBlur( event ) {
+		function onMwUiTooltipBlur() {
 			mw.tooltip.hide( this );
 		}
 

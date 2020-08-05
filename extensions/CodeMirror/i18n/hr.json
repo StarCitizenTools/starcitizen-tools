@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bugoslav",
+			"MaGa"
+		]
+	},
+	"codemirror-desc": "Omogućava isticanje sintakse u uređivaču wikiteksta",
+	"codemirror-toggle-label": "Isticanje sintakse",
+	"codemirror-beta-title": "Isticatelj wikitekstualne sintakse",
+	"codemirror-beta-desc": "Isticanje sintakse olakšava uređivanje uz pomoć boja i nijansi za vizualno razlikovanje kôdova za poveznice, referencije i predloške od teksta na stranicama.",
+	"codemirror-popup-desc": "Isticanje sintakse pomoći će Vam da s lakoćom razlikujete različite dijelove teksta koji uređujete, dodavajući im boje.",
+	"codemirror-popup-btn-yes": "Isprobat ću",
+	"codemirror-popup-btn-no": "Ne, hvala"
+}

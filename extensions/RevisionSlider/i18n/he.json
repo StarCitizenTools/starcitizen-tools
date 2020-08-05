@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Guycn2",
+			"IKhitron",
+			"Amire80",
+			"Macofe"
+		]
+	},
+	"revisionslider": "סרגל הגרסאות",
+	"revisionslider-preference-disable": "לא להציג את סרגל הגרסאות",
+	"revisionslider-desc": "הצגת סרגל המאפשר לבחור ולהשוות גרסאות ישירות בתוך דף השוואת הגרסאות",
+	"revisionslider-toggle-label": "עיון בהיסטוריה",
+	"revisionslider-page-size": "{{PLURAL:$2|בית אחד|$1 בתים}}",
+	"revisionslider-change-size": "{{PLURAL:$3|בית אחד|$1 בתים}}",
+	"revisionslider-label-date": "תאריך",
+	"revisionslider-label-page-size": "גודל הדף",
+	"revisionslider-label-change-size": "השינוי בגודל הדף",
+	"revisionslider-label-comment": "תקציר העריכה",
+	"revisionslider-label-username": "{{GENDER:$1|משתמש|משתמשת}}",
+	"revisionslider-minoredit": "זוהי עריכה משנית",
+	"revisionslider-loading-failed": "לא ניתן היה לטעון את סרגל הגרסאות.",
+	"revisionslider-toggle-title-expand": "פתיחת סרגל הגרסאות",
+	"revisionslider-toggle-title-collapse": "סגירת סרגל הגרסאות",
+	"revisionslider-turn-on-auto-expand-title": "תמיד לפתוח את סרגל הגרסאות",
+	"revisionslider-turn-off-auto-expand-title": "לא לפתוח את סרגל הגרסאות באופן אוטומטי",
+	"revisionslider-arrow-tooltip-newer": "הצגת גרסאות חדשות יותר",
+	"revisionslider-arrow-tooltip-older": "הצגת גרסאות ישנות יותר",
+	"revisionslider-show-help-tooltip": "הצגת עזרה",
+	"revisionslider-help-dialog-slide1": "סרגל הגרסאות עוזר {{GENDER:|לך|לך|לכם}} לנווט ולהשוות גרסאות בדפי \"השוואה בין גרסאות\". <span style=\"display: none;\">הוא מבוסס על [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider בקשה קהילתית] מרשימת המשאלות של קהילת השפה הגרמנית.</span> נודה {{GENDER:|לך|לך|לכם}} אם [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider {{GENDER:|תשלח|תשלחי|תשלחו}} משוב על התכונה הזאת].",
+	"revisionslider-help-dialog-slide2": "כל סרגל מציין גרסה של דף. הסרגלים שלמעלה מציגים את העלייה בגודל הדף, והסרגלים שלמטה מציגים את הירידה בגודל. בתמונה זו, גרסה 1 מציינת תוכן שנוסף לדף, וגרסה 2 מציינת הסרה של תוכן.",
+	"revisionslider-help-dialog-slide3a": "<p>כדי להשוות גרסאות מסוימות, בחרו את הגרסאות באמצעות הכפתורים הצהובים והכחולים</p><p>הכפתור הכחול שולט בגרסה החדשה, והכפתור הצהוב ממפה לגרסה הישנה.</p><p>הזיזו את כפתור באמצעות גרירה ושחרור בקו הגולש.</p>",
+	"revisionslider-help-dialog-slide4": "{{GENDER:|השתמש|השתמשי|השתמשו}} בחִצֵי הניווט כדי לנווט בהיסטוריית הגרסאות ולצפות בגרסאות ישנות או חדשות יותר.",
+	"revisionslider-tutorial": "מדריך על סרגל הגרסאות",
+	"revisionslider-previous-dialog": "הקודם",
+	"revisionslider-next-dialog": "הבא",
+	"revisionslider-close-dialog": "סגירה"
+}

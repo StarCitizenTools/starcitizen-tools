@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @covers EchoTitleLocalCache
+ */
 class EchoTitleLocalCacheTest extends MediaWikiTestCase {
 
 	public function testCreate() {
@@ -23,8 +26,8 @@ class EchoTitleLocalCacheTest extends MediaWikiTestCase {
 	 * @depends testCreate
 	 */
 	public function testGet( $cache ) {
-		$map = new HashBagOStuff( array( 'maxKeys' => EchoLocalCache::TARGET_MAX_NUM ) );
-		$titleIds = array();
+		$map = new HashBagOStuff( [ 'maxKeys' => EchoLocalCache::TARGET_MAX_NUM ] );
+		$titleIds = [];
 
 		// First title included in cache
 		$res = $this->insertPage( 'EchoTitleLocalCacheTest_testGet' );
@@ -64,7 +67,7 @@ class EchoTitleLocalCacheTest extends MediaWikiTestCase {
 	 * @depends testCreate
 	 */
 	public function testClearAll( $cache ) {
-		$map = new HashBagOStuff( array( 'maxKeys' => EchoLocalCache::TARGET_MAX_NUM ) );
+		$map = new HashBagOStuff( [ 'maxKeys' => EchoLocalCache::TARGET_MAX_NUM ] );
 		$map->set( 1, $this->mockTitle() );
 		$object = new \ReflectionObject( $cache );
 		$targets = $object->getProperty( 'targets' );
@@ -72,10 +75,10 @@ class EchoTitleLocalCacheTest extends MediaWikiTestCase {
 		$targets->setValue( $cache, $map );
 		$lookups = $object->getProperty( 'lookups' );
 		$lookups->setAccessible( true );
-		$lookups->setValue( $cache, array( '1' => '1', '2' => '2' ) );
+		$lookups->setValue( $cache, [ '1' => '1', '2' => '2' ] );
 
 		$cache->clearAll();
-		$this->assertTrue( count( $cache->getLookups() ) == 0 );
+		$this->assertEmpty( $cache->getLookups() );
 		$this->assertEquals( false, $cache->getTargets()->get( 1 ) );
 		$this->assertEquals( false, $cache->getTargets()->get( '1' ) );
 	}

@@ -1,12 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ahmed-Najib-Biabani-Ibrahimkhel"
+			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"Baloch Khan"
 		]
 	},
 	"checkuser": "کره کتونکی کارن",
 	"group-checkuser": "کره کتونکي کارنان",
 	"group-checkuser-member": "{{GENDER:$1|کره کتونکی کارن}}",
+	"grouppage-checkuser": "{{ns:project}}:کره کتونکي کارنان",
 	"checkuser-reason": "سبب:",
 	"checkuser-showlog": "يادښت کتل",
 	"checkuser-target": "کارن يا IP پته:",

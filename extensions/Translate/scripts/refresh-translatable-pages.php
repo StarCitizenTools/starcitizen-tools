@@ -3,7 +3,7 @@
  * Script to ensure all translation pages are up to date.
  *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -25,11 +25,13 @@ class RefreshTranslatablePages extends Maintenance {
 		parent::__construct();
 		$this->mDescription = 'Ensure all translation pages are up to date.';
 		$this->setBatchSize( 300 );
+		$this->addOption( 'jobqueue', 'Use JobQueue (asynchronous)' );
 	}
 
 	public function execute() {
 		$groups = MessageGroups::singleton()->getGroups();
 		$counter = 0;
+		$useJobQueue = $this->hasOption( 'jobqueue' );
 
 		/** @var MessageGroup $group */
 		foreach ( $groups as $group ) {
@@ -44,14 +46,22 @@ class RefreshTranslatablePages extends Maintenance {
 
 			$page = TranslatablePage::newFromTitle( $group->getTitle() );
 			$jobs = TranslationsUpdateJob::getRenderJobs( $page );
-			foreach ( $jobs as $job ) {
-				$job->run();
+			if ( $useJobQueue ) {
+				JobQueueGroup::singleton()->push( $jobs );
+			} else {
+				foreach ( $jobs as $job ) {
+					$job->run();
+				}
 			}
 		}
 
-		$this->output( "Refreshed $counter translatable pages.\n" );
+		if ( $useJobQueue ) {
+			$this->output( "Queued refresh for $counter translatable pages.\n" );
+		} else {
+			$this->output( "Refreshed $counter translatable pages.\n" );
+		}
 	}
 }
 
-$maintClass = 'RefreshTranslatablePages';
+$maintClass = RefreshTranslatablePages::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

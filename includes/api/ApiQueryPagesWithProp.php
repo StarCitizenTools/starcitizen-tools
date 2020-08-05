@@ -1,8 +1,6 @@
 <?php
 /**
- * Created on December 31, 2012
- *
- * Copyright © 2012 Brad Jorsch <bjorsch@wikimedia.org>
+ * Copyright © 2012 Wikimedia Foundation and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +19,6 @@
  *
  * @file
  * @since 1.21
- * @author Brad Jorsch
  */
 
 /**
@@ -173,6 +170,6 @@ class ApiQueryPagesWithProp extends ApiQueryGeneratorBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Pageswithprop';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Pageswithprop';
 	}
 }

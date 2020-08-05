@@ -88,7 +88,7 @@ $defaultDateFormat = 'km';
 $dateFormats = [
 	'km time' => 'ម៉ោងH:i',
 	'km date' => 'l ទីd F ឆ្នាំY',
-	'km both' =>  'ម៉ោងH:i l ទីd F ឆ្នាំY',
+	'km both' => 'ម៉ោងH:i l ទីd F ឆ្នាំY',
 ];
 
 $specialPageAliases = [
@@ -256,4 +256,3 @@ $magicWords = [
 	'noindex'                   => [ '1', '__មិនមានលិបិក្រម__', '__NOINDEX__' ],
 	'staticredirect'            => [ '1', '__ស្ថិតិទំព័របញ្ជូនបន្ត__', '__STATICREDIRECT__' ],
 ];
-

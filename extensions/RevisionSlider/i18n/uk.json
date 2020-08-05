@@ -1,0 +1,40 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ата",
+			"Green Zero",
+			"Macofe",
+			"Base",
+			"Piramidion",
+			"Avatar6"
+		]
+	},
+	"revisionslider": "RevisionSlider",
+	"revisionslider-preference-disable": "Не показувати Слайдер версій",
+	"revisionslider-desc": "Показує слайдер для вибору і порівняння версій на сторінці порівняння версій",
+	"revisionslider-toggle-label": "Перегляд історії",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|байт|байти|байтів}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|байт|байти|байтів}}",
+	"revisionslider-label-date": "Дата",
+	"revisionslider-label-page-size": "Розмір сторінки",
+	"revisionslider-label-change-size": "Розмір зміни",
+	"revisionslider-label-comment": "Коментар",
+	"revisionslider-label-username": "{{GENDER:$1|Ім'я користувача}}",
+	"revisionslider-minoredit": "Це незначна зміна",
+	"revisionslider-loading-failed": "Не вдалося завантажити слайдер версій.",
+	"revisionslider-toggle-title-expand": "Відкрити Слайдер версій",
+	"revisionslider-toggle-title-collapse": "Згорнути Слайдер версій",
+	"revisionslider-turn-on-auto-expand-title": "Завжди розкривати слайдер версій",
+	"revisionslider-turn-off-auto-expand-title": "Не розкривати слайдер версій автоматично",
+	"revisionslider-arrow-tooltip-newer": "Дивитися новіші версії",
+	"revisionslider-arrow-tooltip-older": "Дивитися старіші версії",
+	"revisionslider-show-help-tooltip": "Показати текст довідки",
+	"revisionslider-help-dialog-slide1": "Слайдер версій допомагає в навігації і порівнянні версій. Він базується на [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider побажанні спільноти] зі списку технічних побажань німецькомовної спільноти. Будемо вдячні за відгуки [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider тут].",
+	"revisionslider-help-dialog-slide2": "Кожен стовпець є версією сторінки. Стовпці угорі показують збільшення розміру сторінки, стовпці внизу — зменшення. На зображенні версія 1 показує додавання вмісту, тоді як версія 2 показує вилучення вмісту.",
+	"revisionslider-help-dialog-slide3a": "<p>Для порівняння певних версій, оберіть версії, використовуючи жовтий та блакитний вказівники.</p><p>Блакитний вказівник контролює новішу версію, тоді як жовтий вказівник вказує положення старішої версії.</p><p>Пересувайте вказівники, перетягуючи їх, або натискаючи на відповідний стовпець.</p>",
+	"revisionslider-help-dialog-slide4": "Використовуйте стрілки назад та вперед для пересування по історії та показу старіших та новіших версій.",
+	"revisionslider-tutorial": "Інструкція з використання Слайдера версій",
+	"revisionslider-previous-dialog": "Попередня",
+	"revisionslider-next-dialog": "Наступна",
+	"revisionslider-close-dialog": "Закрити"
+}

@@ -2,19 +2,21 @@
 	"@metadata": {
 		"authors": [
 			"Vitas Povilaitis",
-			"Zygimantus"
+			"Zygimantus",
+			"Manvydasz"
 		]
 	},
 	"msu-desc": "Leidžia lengviau pakrauti vieną arba keletą failų vienu metu. Yra galimybė naudoti drag&drop.",
 	"msu-button-title": "Pasirinkti failus",
 	"msu-insert-link": "Įterpti nuorodas",
 	"msu-insert-gallery": "Įterpti vaizdų galeriją",
+	"msu-insert-image": "Įterpti kaip paveikslėlį",
+	"msu-insert-video": "Įterpti vaizdo įrašą",
 	"msu-cancel-upload": "Nutraukti pakrovimą",
 	"msu-clean-all": "Išvalyti sąrašą",
-	"msu-upload-possible": "Pasirinktas failas (-ai) gali būti įkeltas",
-	"msu-ext-not-allowed": "Leidžiami tik sekantys failų tipai:",
-	"msu-upload-this": "Paspausk, kad pakrauti šį failą",
-	"msu-upload-all": "Paspausk, kad pakrauti visus failus",
+	"msu-ext-not-allowed": "Leidžiami tik {{PLURAL:$1|sekantis failų tipas|sekantys failų tipai}}:",
+	"msu-upload-this": "Įkelti šią rinkmeną",
+	"msu-upload-all": "Įkelti visus failus",
 	"msu-dropzone": "Čia užtemk failus",
 	"msu-comment": "MsUpload"
 }

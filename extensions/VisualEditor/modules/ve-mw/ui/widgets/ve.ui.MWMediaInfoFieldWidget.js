@@ -1,11 +1,11 @@
 /*!
  * VisualEditor user interface MWMediaDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
-/*global moment */
+/* global moment */
 
 /**
  * MWMediaInfoFieldWidget widget for displaying media information from the API.
@@ -62,8 +62,8 @@ ve.ui.MWMediaInfoFieldWidget = function VeUiMWMediaInfoFieldWidget( content, con
 						// without http(s) prefix, we will add that prefix
 						// ourselves
 						!config.href.match( /^(https?:)?\/\// ) ?
-								'//' + config.href :
-								config.href
+							'//' + config.href :
+							config.href
 					)
 					.append( content )
 			);

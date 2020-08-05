@@ -18,7 +18,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var ULSPreferences;
@@ -26,6 +26,8 @@
 	/**
 	 * Wrapper for localStorage, falls back to cookie
 	 * when localStorage not supported by browser.
+	 *
+	 * @return {Object}
 	 */
 	function preferenceStore() {
 
@@ -110,6 +112,7 @@
 		 * Get a preference value for the given preference name
 		 *
 		 * @param {string} key
+		 * @return {Mixed}
 		 */
 		get: function ( key ) {
 			return this.preferences[ key ];
@@ -123,7 +126,7 @@
 		save: function ( callback ) {
 			var ulsPreferences = this;
 
-			callback = callback || $.noop;
+			callback = callback || function () {};
 			if ( this.isAnon ) {
 				// Anonymous user. Save preferences in local storage
 				preferenceStore().set( this.preferenceName, this.preferences );
@@ -152,4 +155,4 @@
 		return data;
 	};
 
-}( jQuery, mediaWiki ) );
+}() );

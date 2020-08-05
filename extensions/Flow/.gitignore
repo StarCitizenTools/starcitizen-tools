@@ -4,12 +4,7 @@
 scripts/hhvm-wrapper.phar
 scripts/remotes
 node_modules/
-tests/browser/.gem
-tests/browser/screenshots
-vendor/bin/
-vendor/composer/
-vendor/jakub-onderka/
-vendor/symfony/
-vendor/autoload.php
+vendor/
 \#*#
 /composer.lock
+/docs

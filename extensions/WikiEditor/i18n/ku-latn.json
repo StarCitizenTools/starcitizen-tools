@@ -9,15 +9,6 @@
 		]
 	},
 	"wikieditor-loading": "Bar dibe",
-	"wikieditor-preview-tab": "Pêşdîtin",
-	"wikieditor-preview-changes-tab": "Guhartin",
-	"wikieditor-preview-loading": "Bar dibe…",
-	"wikieditor-publish-button-publish": "Weşandin",
-	"wikieditor-publish-button-cancel": "Betal bike",
-	"wikieditor-publish-dialog-minor": "Guhertina biçûk",
-	"wikieditor-publish-dialog-watch": "Vê rûpelê bişopîne",
-	"wikieditor-publish-dialog-publish": "Weşandin",
-	"wikieditor-publish-dialog-goback": "Vegere",
 	"wikieditor-toolbar-loading": "Bar dibe…",
 	"wikieditor-toolbar-tool-bold": "Stûr",
 	"wikieditor-toolbar-tool-bold-example": "Nivîsa stûr",
@@ -72,7 +63,7 @@
 	"wikieditor-toolbar-tool-table-preview": "Pêşdîtin",
 	"wikieditor-toolbar-tool-table-insert": "Tevlî bike",
 	"wikieditor-toolbar-tool-table-cancel": "Betal bike",
-	"wikieditor-toolbar-tool-replace-close": "Girtin",
+	"wikieditor-toolbar-tool-replace-close": "Bigre",
 	"wikieditor-toolbar-section-characters": "Karakterên taybet",
 	"wikieditor-toolbar-section-help": "Alîkarî",
 	"wikieditor-toolbar-help-heading-description": "Danasîn",
@@ -97,6 +88,6 @@
 	"wikieditor-toolbar-help-content-xlink-description": "Girêdana derve",
 	"wikieditor-toolbar-help-content-file-syntax": "[[$1:Mînak.png|$2|$3]]",
 	"wikieditor-toolbar-help-content-file-caption": "Nivîsa sernavê",
-	"wikieditor-toolbar-help-content-reference-description": "Referans",
+	"wikieditor-toolbar-help-content-reference-description": "Çavkanî",
 	"wikieditor-toolbar-help-content-signature-description": "Îmze"
 }

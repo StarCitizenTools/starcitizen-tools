@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow Board
 	 *
@@ -16,11 +16,11 @@
 		OO.EventEmitter.call( this, config );
 
 		// Mixin constructor
-		mw.flow.dm.List.call( this, config );
+		mw.flow.dm.List.call( this );
 	};
 
 	/* Initialization */
 
 	OO.mixinClass( mw.flow.dm.Categories, OO.EventEmitter );
 	OO.mixinClass( mw.flow.dm.Categories, mw.flow.dm.List );
-}( jQuery ) );
+}() );

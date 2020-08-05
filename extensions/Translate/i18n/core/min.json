@@ -2,10 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Iwan Novirion",
-			"Naval Scene"
+			"Naval Scene",
+			"Muhraz"
 		]
 	},
-	"translate-edit-tmsugs": "Saran dari memori tajamahan",
 	"translate-statsf-start": "Tanggal mulai:",
 	"translate-statsf-scale": "Granularitas:",
 	"translate-statsf-scale-months": "Bulan",
@@ -18,5 +18,6 @@
 	"translate-statsf-count-registrations": "Pangguno baru",
 	"translate-sidebar-alltrans": "Dalam bahaso lain",
 	"translate-js-support": "Batanyo",
+	"translate-documentation-language": "Pambakehan pasan",
 	"translate-searchprofile-tooltip": "Cari dari sado tajamahan"
 }

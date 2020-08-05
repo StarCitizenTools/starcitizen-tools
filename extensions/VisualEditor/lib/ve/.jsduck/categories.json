@@ -50,19 +50,20 @@
 					"ve.dm.ModelRegistry",
 					"ve.dm.ModelFactory",
 					"ve.dm.AnnotationFactory",
-					"ve.dm.MetaItemFactory",
 					"ve.dm.NodeFactory",
 					"ve.dm.Converter",
 					"ve.dm.DataString",
-					"ve.dm.DocumentSynchronizer",
-					"ve.dm.IndexValueStore",
+					"ve.dm.HashValueStore",
 					"ve.dm.Scalable",
 					"ve.dm.APIResultsProvider",
 					"ve.dm.APIResultsQueue",
 					"ve.dm.Surface",
-					"ve.dm.SurfaceFragment",
+					"ve.dm.*SurfaceFragment",
 					"ve.dm.*Selection",
 					"ve.dm.Transaction",
+					"ve.dm.TransactionBuilder",
+					"ve.dm.TreeCursor",
+					"ve.dm.TreeModifier",
 					"ve.dm.TransactionProcessor",
 					"ve.dm.TransactionProcessor.*"
 				]
@@ -98,6 +99,15 @@
 					"ve.dm.TableMatrixCell",
 					"ve.dm.TableNodeCellIterator"
 				]
+			},
+			{
+				"name": "Rebasing",
+				"classes": [
+					"ve.dm.Change",
+					"ve.dm.RebaseDocState",
+					"ve.dm.RebaseClient",
+					"ve.dm.SurfaceSynchronizer"
+				]
 			}
 		]
 	},
@@ -122,6 +132,10 @@
 			{
 				"name": "Annotations",
 				"classes": ["ve.ce.*Annotation"]
+			},
+			{
+				"name": "Meta items",
+				"classes": ["ve.ce.MetaItem"]
 			},
 			{
 				"name": "Factories",
@@ -149,7 +163,8 @@
 					"ve.ui.Overlay",
 					"ve.ui.*Toolbar",
 					"ve.ui.DebugBar",
-					"ve.ui.Trigger"
+					"ve.ui.Trigger",
+					"ve.ui.TabIndexScope"
 				]
 			},
 			{
@@ -208,6 +223,22 @@
 		]
 	},
 	{
+		"name": "Diffing",
+		"groups": [
+			{
+				"name": "Data Model",
+				"classes": ["ve.dm.VisualDiff"]
+			},
+			{
+				"name": "Core",
+				"classes": [
+					"ve.DiffMatchPatch",
+					"ve.DiffTreeNode"
+				]
+			}
+		]
+	},
+	{
 		"name": "Tests",
 		"groups": [
 			{
@@ -220,73 +251,6 @@
 					"ve.ce.TestOffset",
 					"ve.ce.TestRunner"
 				]
-			}
-		]
-	},
-	{
-		"name": "UnicodeJS",
-		"groups": [
-			{
-				"name": "UnicodeJS",
-				"classes": [
-					"unicodeJS",
-					"unicodeJS.TextString",
-					"unicodeJS.wordbreak",
-					"unicodeJS.graphemebreak",
-					"unicodeJS.characterclass"
-				]
-			}
-		]
-	},
-	{
-		"name": "OOjs UI",
-		"groups": [
-			{
-				"name": "General",
-				"classes": [
-					"OO.ui",
-					"OO.ui.Element",
-					"OO.ui.HtmlSnippet",
-					"OO.ui.Toolbar",
-					"OO.ui.Window",
-					"OO.ui.Dialog",
-					"OO.ui.WindowManager",
-					"OO.ui.Process",
-					"OO.ui.Error",
-					"OO.ui.ActionSet"
-				]
-			},
-			{
-				"name": "Factories",
-				"classes": ["OO.ui.*Factory"]
-			},
-			{
-				"name": "Tools",
-				"classes": ["OO.ui.*Tool"]
-			},
-			{
-				"name": "Mixins",
-				"classes": ["OO.ui.mixin", "OO.ui.mixin.*"]
-			},
-			{
-				"name": "Layouts",
-				"classes": ["OO.ui.*Layout"]
-			},
-			{
-				"name": "Tool groups",
-				"classes": ["OO.ui.*ToolGroup"]
-			},
-			{
-				"name": "Widgets",
-				"classes": ["OO.ui.*Widget"]
-			},
-			{
-				"name": "Dialogs",
-				"classes": ["OO.ui.*Dialog"]
-			},
-			{
-				"name": "Themes",
-				"classes": ["OO.ui.*Theme"]
 			}
 		]
 	},
@@ -305,8 +269,72 @@
 				]
 			},
 			{
+				"name": "UnicodeJS",
+				"classes": [
+					"unicodeJS",
+					"unicodeJS.TextString",
+					"unicodeJS.wordbreak",
+					"unicodeJS.graphemebreak",
+					"unicodeJS.characterclass"
+				]
+			},
+			{
+				"name": "OOjs UI General",
+				"classes": [
+					"OO.ui",
+					"OO.ui.Element",
+					"OO.ui.HtmlSnippet",
+					"OO.ui.Toolbar",
+					"OO.ui.Window*",
+					"OO.ui.Dialog",
+					"OO.ui.Process",
+					"OO.ui.Error",
+					"OO.ui.ActionSet"
+				]
+			},
+			{
+				"name": "OOjs UI Mixins",
+				"classes": ["OO.ui.mixin", "OO.ui.mixin.*"]
+			},
+			{
+				"name": "OOjs UI Factories",
+				"classes": ["OO.ui.*Factory"]
+			},
+			{
+				"name": "OOjs UI Layouts",
+				"classes": ["OO.ui.*Layout"]
+			},
+			{
+				"name": "OOjs UI Tool groups",
+				"classes": ["OO.ui.*ToolGroup"]
+			},
+			{
+				"name": "OOjs UI Tools",
+				"classes": ["OO.ui.*Tool"]
+			},
+			{
+				"name": "OOjs UI Widgets",
+				"classes": ["OO.ui.*Widget"]
+			},
+			{
+				"name": "OOjs UI Dialogs",
+				"classes": ["OO.ui.*Dialog"]
+			},
+			{
+				"name": "OOjs UI Themes",
+				"classes": ["OO.ui.*Theme"]
+			},
+			{
 				"name": "jQuery",
 				"classes": ["jQuery", "jQuery.Event", "jQuery.Promise", "jQuery.Deferred", "jQuery.jqXHR", "QUnit"]
+			},
+			{
+				"name": "treeDiffer",
+				"classes": ["treeDiffer.Differ", "treeDiffer.Tree", "treeDiffer.TreeNode"]
+			},
+			{
+				"name": "DiffMatchPatch",
+				"classes": ["diff_match_patch"]
 			},
 			{
 				"name": "JavaScript",
@@ -315,6 +343,7 @@
 					"Boolean",
 					"Date",
 					"Function",
+					"Map",
 					"Number",
 					"Object",
 					"RegExp",

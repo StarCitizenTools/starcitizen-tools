@@ -1,25 +1,28 @@
 <?php
 
+/**
+ * @covers EchoEventMapper
+ */
 class EchoEventMapperTest extends MediaWikiTestCase {
 
 	public function provideDataTestInsert() {
-		return array(
-			array(
+		return [
+			[
 				'successful insert with next sequence = 1',
-				array( 'nextSequenceValue' => 1, 'insert' => true, 'insertId' => 2 ),
+				[ 'insert' => true, 'insertId' => 1 ],
 				1
-			),
-			array(
+			],
+			[
 				'successful insert with insert id = 2',
-				array( 'nextSequenceValue' => null, 'insert' => true, 'insertId' => 2 ),
+				[ 'insert' => true, 'insertId' => 2 ],
 				2
-			),
-			array(
+			],
+			[
 				'unsuccessful insert',
-				array( 'nextSequenceValue' => null, 'insert' => false, 'insertId' => 2 ),
+				[ 'insert' => false, 'insertId' => 2 ],
 				false
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -37,17 +40,18 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 	public function testSuccessfulFetchById() {
 		$eventMapper = new EchoEventMapper(
 			$this->mockMWEchoDbFactory(
-				array(
-					'selectRow' => (object)array(
+				[
+					'selectRow' => (object)[
 						'event_id' => 1,
 						'event_type' => 'test',
 						'event_variant' => '',
 						'event_extra' => '',
 						'event_page_id' => '',
 						'event_agent_id' => '',
-						'event_agent_ip' => ''
-					)
-				)
+						'event_agent_ip' => '',
+						'event_deleted' => 0,
+					]
+				]
 			)
 		);
 		$res = $eventMapper->fetchById( 1 );
@@ -60,43 +64,13 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 	public function testUnsuccessfulFetchById() {
 		$eventMapper = new EchoEventMapper(
 			$this->mockMWEchoDbFactory(
-				array(
+				[
 					'selectRow' => false
-				)
+				]
 			)
 		);
 		$res = $eventMapper->fetchById( 1 );
 		$this->assertInstanceOf( 'EchoEvent', $res );
-	}
-
-	public function testFetchByUserBundleHash() {
-		// Successful select
-		$dbResult = array(
-			(object)array(
-				'event_id' => 1,
-				'event_type' => 'test',
-				'event_variant' => '',
-				'event_extra' => '',
-				'event_page_id' => '',
-				'event_agent_id' => '',
-				'event_agent_ip' => ''
-			),
-			(object)array(
-				'event_id' => 2,
-				'event_type' => 'test2',
-				'event_variant' => '',
-				'event_extra' => '',
-				'event_page_id' => '',
-				'event_agent_id' => '',
-				'event_agent_ip' => ''
-			)
-		);
-		$eventMapper = new EchoEventMapper( $this->mockMWEchoDbFactory( array( 'select' => $dbResult ) ) );
-		$res = $eventMapper->fetchByUserBundleHash( User::newFromId( 1 ), 'testhash', 'web', 'DESC', 250 );
-		$this->assertTrue( is_array( $res ) );
-		foreach ( $res as $row ) {
-			$this->assertInstanceOf( 'EchoEvent', $row );
-		}
 	}
 
 	/**
@@ -108,7 +82,7 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 			->getMock();
 		$event->expects( $this->any() )
 			->method( 'toDbArray' )
-			->will( $this->returnValue( array() ) );
+			->will( $this->returnValue( [] ) );
 
 		return $event;
 	}
@@ -128,22 +102,19 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 	}
 
 	/**
-	 * Mock object of DatabaseMysql ( DatabaseBase )
+	 * Returns a mock database object
+	 * @return \Wikimedia\Rdbms\IDatabase
 	 */
 	protected function mockDb( array $dbResult ) {
-		$dbResult += array(
-			'nextSequenceValue' => '',
+		$dbResult += [
 			'insert' => '',
 			'insertId' => '',
 			'select' => '',
 			'selectRow' => ''
-		);
-		$db = $this->getMockBuilder( 'DatabaseMysql' )
+		];
+		$db = $this->getMockBuilder( 'DatabaseMysqli' )
 			->disableOriginalConstructor()
 			->getMock();
-		$db->expects( $this->any() )
-			->method( 'nextSequenceValue' )
-			->will( $this->returnValue( $dbResult['nextSequenceValue'] ) );
 		$db->expects( $this->any() )
 			->method( 'insert' )
 			->will( $this->returnValue( $dbResult['insert'] ) );

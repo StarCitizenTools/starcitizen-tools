@@ -129,6 +129,11 @@ final class Session implements \Countable, \Iterator, \ArrayAccess {
 
 	/**
 	 * Make this session not be persisted across requests
+	 *
+	 * This will remove persistence information (e.g. delete cookies)
+	 * from the associated WebRequest(s), and delete session data in the
+	 * backend. The session data will still be available via get() until
+	 * the end of the request.
 	 */
 	public function unpersist() {
 		$this->backend->unpersist();
@@ -387,7 +392,7 @@ final class Session implements \Countable, \Iterator, \ArrayAccess {
 	 * @return string[] Encryption key, HMAC key
 	 */
 	private function getSecretKeys() {
-		global $wgSessionSecret, $wgSecretKey;
+		global $wgSessionSecret, $wgSecretKey, $wgSessionPbkdf2Iterations;
 
 		$wikiSecret = $wgSessionSecret ?: $wgSecretKey;
 		$userSecret = $this->get( 'wsSessionSecret', null );
@@ -395,8 +400,13 @@ final class Session implements \Countable, \Iterator, \ArrayAccess {
 			$userSecret = \MWCryptRand::generateHex( 32 );
 			$this->set( 'wsSessionSecret', $userSecret );
 		}
+		$iterations = $this->get( 'wsSessionPbkdf2Iterations', null );
+		if ( $iterations === null ) {
+			$iterations = $wgSessionPbkdf2Iterations;
+			$this->set( 'wsSessionPbkdf2Iterations', $iterations );
+		}
 
-		$keymats = hash_pbkdf2( 'sha256', $wikiSecret, $userSecret, 10001, 64, true );
+		$keymats = hash_pbkdf2( 'sha256', $wikiSecret, $userSecret, $iterations, 64, true );
 		return [
 			substr( $keymats, 0, 32 ),
 			substr( $keymats, 32, 32 ),
@@ -590,7 +600,7 @@ final class Session implements \Countable, \Iterator, \ArrayAccess {
 	 *
 	 * Calls to save() or clear() will not be delayed.
 	 *
-	 * @return \ScopedCallback When this goes out of scope, a save will be triggered
+	 * @return \Wikimedia\ScopedCallback When this goes out of scope, a save will be triggered
 	 */
 	public function delaySave() {
 		return $this->backend->delaySave();
@@ -598,6 +608,9 @@ final class Session implements \Countable, \Iterator, \ArrayAccess {
 
 	/**
 	 * Save the session
+	 *
+	 * This will update the backend data and might re-persist the session
+	 * if needed.
 	 */
 	public function save() {
 		$this->backend->save();
@@ -608,31 +621,37 @@ final class Session implements \Countable, \Iterator, \ArrayAccess {
 	 * @{
 	 */
 
+	/** @inheritDoc */
 	public function count() {
 		$data = &$this->backend->getData();
 		return count( $data );
 	}
 
+	/** @inheritDoc */
 	public function current() {
 		$data = &$this->backend->getData();
 		return current( $data );
 	}
 
+	/** @inheritDoc */
 	public function key() {
 		$data = &$this->backend->getData();
 		return key( $data );
 	}
 
+	/** @inheritDoc */
 	public function next() {
 		$data = &$this->backend->getData();
 		next( $data );
 	}
 
+	/** @inheritDoc */
 	public function rewind() {
 		$data = &$this->backend->getData();
 		reset( $data );
 	}
 
+	/** @inheritDoc */
 	public function valid() {
 		$data = &$this->backend->getData();
 		return key( $data ) !== null;
@@ -641,6 +660,7 @@ final class Session implements \Countable, \Iterator, \ArrayAccess {
 	/**
 	 * @note Despite the name, this seems to be intended to implement isset()
 	 *  rather than array_key_exists(). So do that.
+	 * @inheritDoc
 	 */
 	public function offsetExists( $offset ) {
 		$data = &$this->backend->getData();
@@ -653,6 +673,7 @@ final class Session implements \Countable, \Iterator, \ArrayAccess {
 	 *  data to detect such changes.
 	 * @note Accessing a nonexistent key via this mechanism causes that key to
 	 *  be created with a null value, and does not raise a PHP warning.
+	 * @inheritDoc
 	 */
 	public function &offsetGet( $offset ) {
 		$data = &$this->backend->getData();
@@ -663,10 +684,12 @@ final class Session implements \Countable, \Iterator, \ArrayAccess {
 		return $data[$offset];
 	}
 
+	/** @inheritDoc */
 	public function offsetSet( $offset, $value ) {
 		$this->set( $offset, $value );
 	}
 
+	/** @inheritDoc */
 	public function offsetUnset( $offset ) {
 		$this->remove( $offset );
 	}

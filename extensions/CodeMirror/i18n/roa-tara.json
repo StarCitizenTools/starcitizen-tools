@@ -4,5 +4,12 @@
 			"Joetaras"
 		]
 	},
-	"codemirror-desc": "Dèje l'evidenziazzione d'a sindasse jndr'à 'u cangiatore de uicchiteste"
+	"codemirror-desc": "Dèje l'evidenziazzione d'a sindasse jndr'à 'u cangiatore de uicchiteste",
+	"codemirror-toggle-label": "Evidenziatore de sindasse",
+	"codemirror-beta-title": "Evidenziazzione d'a sindasse jndr'à 'u uicchiteste",
+	"codemirror-beta-desc": "L'evidenziatore de sindasse face fa le cangiaminde facile facile ausanne le culure e le ombre pe separà a video 'u teste d'a pàgene da 'u codece pe le collegaminde, le refereminde e le template.",
+	"codemirror-popup-label": "Evidenziatore de sindasse",
+	"codemirror-popup-desc": "L'evidenziatore de sindasse te dèje 'na màne accussì capisce facile facile le vanne ca cangiane d'u cangiamende tune ausanne 'u culore pe codificarle.",
+	"codemirror-popup-btn-yes": "Pruéve",
+	"codemirror-popup-btn-no": "No, grazie"
 }

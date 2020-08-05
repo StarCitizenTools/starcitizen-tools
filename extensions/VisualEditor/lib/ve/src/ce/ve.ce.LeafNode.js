@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable LeafNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -17,17 +17,12 @@
  * @param {ve.dm.LeafNode} model
  * @param {Object} [config]
  */
-ve.ce.LeafNode = function VeCeLeafNode( model ) {
+ve.ce.LeafNode = function VeCeLeafNode() {
 	// Mixin constructor
 	ve.LeafNode.call( this );
 
 	// Parent constructor
-	ve.ce.Node.apply( this, arguments );
-
-	// DOM changes (keep in sync with #onSetup)
-	if ( model.isWrapped() ) {
-		this.$element.addClass( 've-ce-leafNode' );
-	}
+	ve.ce.LeafNode.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -45,11 +40,10 @@ ve.ce.LeafNode.static.tagName = 'span';
 /**
  * @inheritdoc
  */
-ve.ce.LeafNode.prototype.onSetup = function () {
+ve.ce.LeafNode.prototype.initialize = function () {
 	// Parent method
-	ve.ce.Node.prototype.onSetup.call( this );
+	ve.ce.LeafNode.super.prototype.initialize.call( this );
 
-	// DOM changes (duplicated from constructor in case this.$element is replaced)
 	if ( this.model.isWrapped() ) {
 		this.$element.addClass( 've-ce-leafNode' );
 	}

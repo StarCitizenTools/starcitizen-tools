@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Algentem",
+			"Joao Xavier"
+		]
+	},
+	"prefs-echo": "Avizi",
+	"prefs-emailsettings": "Selekti pri e-posto (e-mail)",
+	"prefs-echocrosswiki": "Notifiki 'Cross-wiki'",
+	"echo-pref-web": "Per reto",
+	"echo-pref-email": "Per e-posto",
+	"echo-pref-cross-wiki-notifications": "Montrez notifiki de altra Wiki",
+	"echo-pref-new-message-indicator": "Montrez indikilo pri mesaji de altra Wiki en mea menuo di utensili",
+	"echo-new-messages": "Vu havas nova mesaji",
+	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Mesajo|Mesaji}} en la diskuto-pagino",
+	"tooltip-pt-notifications-alert": "{{GENDER:|Vua}} informi",
+	"tooltip-pt-notifications-notice": "{{GENDER:|Vua}} informi",
+	"echo-specialpage-pagefilters-title": "Recenta agadi",
+	"notification-link-text-view-page": "Montrez pagino",
+	"notification-header-mention-success": "{{GENDER:$2|Vua}} menciono pri <strong>$3</strong> sendesis.",
+	"notification-header-welcome": "{{GENDER:$2|Bonveno}} a {{SITENAME}}, $1! Ni prizas havar {{GENDER:$2|vu}} hike!",
+	"notification-header-thank-you-1-edit": "{{GENDER:$2|Vu}} jus facis {{GENDER:$2|vua}} unesma redakto; ni dankas {{GENDER:$2|vu}}, e bonveno!",
+	"notification-header-thank-you-10-edit": "{{GENDER:$2|Vu}} jus facis {{GENDER:$2|vua}} dekesma redakto; ni dankas {{GENDER:$2|vu}}, e voluntez durar!",
+	"notification-header-thank-you-100-edit": "{{GENDER:$2|Vu}} jus facis {{GENDER:$2|vua}} centesma redakto; ni dankas {{GENDER:$2|vu}} tre multe!",
+	"notification-header-thank-you-1000-edit": "{{GENDER:$2|Vu}} jus facis {{GENDER:$2|vua}} milesma redakto; ni dankas {{GENDER:$2|vu}} por esar bonega kontributero!",
+	"notification-header-thank-you-10000-edit": "{{GENDER:$2|Vu}} jus facis {{GENDER:$2|vua}} dekamilesma redakto; ni dankas {{GENDER:$2|vu}} tre multe!",
+	"notification-header-thank-you-100000-edit": "{{GENDER:$2|Vu}} jus facis {{GENDER:$2|vua}} centamilesma redakto; ni dankas {{GENDER:$2|vu}} por astoniva kontributo!",
+	"notification-header-thank-you-1000000-edit": "{{GENDER:$2|Vu}} jus facis {{GENDER:$2|vua}} milionesma redakto; ni dankas {{GENDER:$2|vu}} por astoniva kontributo!",
+	"notification-link-text-view-edit": "Montrez redakturo",
+	"notification-header-reverted": "Vua {{PLURAL:$4|redakto en <strong>$3</strong>|redakti en <strong>$3</strong>}} {{GENDER:$2|desfacesis}}.",
+	"notification-reverted-email-subject2": "Vua {{PLURAL:$3|redakto|redakti}} {{GENDER:$1|desfacesis}} en {{SITENAME}}",
+	"notification-timestamp-ago-days": "{{PLURAL:$1|$1d}}",
+	"echo-notification-alert": "{{PLURAL:$1|($1) avizo|($1) avizi|100=(99+) avizi}}"
+}

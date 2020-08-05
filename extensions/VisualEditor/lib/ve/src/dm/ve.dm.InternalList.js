@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel InternalList class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -107,7 +107,7 @@ ve.dm.InternalList.prototype.getDocument = function () {
  */
 ve.dm.InternalList.prototype.getListNode = function () {
 	var i, nodes;
-	// find listNode if not set, or unattached
+	// Find listNode if not set, or unattached
 	if ( !this.listNode || !this.listNode.doc ) {
 		nodes = this.getDocument().getDocumentNode().children;
 		for ( i = nodes.length; i >= 0; i-- ) {
@@ -260,8 +260,8 @@ ve.dm.InternalList.prototype.getItemInsertion = function ( groupName, key, data 
 		index = this.getItemNodeCount();
 		this.keyIndexes[ groupName + '/' + key ] = index;
 
-		itemData = [ { type: 'internalItem' } ].concat( data,  [ { type: '/internalItem' } ] );
-		tx = ve.dm.Transaction.newFromInsertion(
+		itemData = [ { type: 'internalItem' } ].concat( data, [ { type: '/internalItem' } ] );
+		tx = ve.dm.TransactionBuilder.static.newFromInsertion(
 			this.getDocument(),
 			this.getListNode().getRange().end,
 			itemData

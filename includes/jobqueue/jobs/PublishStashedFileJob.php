@@ -21,6 +21,7 @@
  * @ingroup Upload
  * @ingroup JobQueue
  */
+use Wikimedia\ScopedCallback;
 
 /**
  * Upload a file from the upload stash into the local file repo.
@@ -35,7 +36,6 @@ class PublishStashedFileJob extends Job {
 	}
 
 	public function run() {
-		/** @noinspection PhpUnusedLocalVariableInspection */
 		$scope = RequestContext::importScopedSession( $this->params['session'] );
 		$this->addTeardownCallback( function () use ( &$scope ) {
 			ScopedCallback::consume( $scope ); // T126450
@@ -128,7 +128,7 @@ class PublishStashedFileJob extends Job {
 			);
 			$this->setLastError( get_class( $e ) . ": " . $e->getMessage() );
 			// To prevent potential database referential integrity issues.
-			// See bug 32551.
+			// See T34551.
 			MWExceptionHandler::rollbackMasterChangesAndLog( $e );
 
 			return false;

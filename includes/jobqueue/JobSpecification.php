@@ -18,7 +18,6 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup JobQueue
  */
 
 /**
@@ -128,7 +127,7 @@ class JobSpecification implements IJobSpecification {
 
 		$this->type = $type;
 		$this->params = $params;
-		$this->title = $title ?: Title::makeTitle( NS_SPECIAL, 'Badtitle/' . get_class( $this ) );
+		$this->title = $title ?: Title::makeTitle( NS_SPECIAL, 'Badtitle/' . static::class );
 		$this->opts = $opts;
 	}
 

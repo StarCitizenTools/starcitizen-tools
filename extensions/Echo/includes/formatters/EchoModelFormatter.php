@@ -11,7 +11,7 @@ class EchoModelFormatter extends EchoEventFormatter {
 	 */
 	protected function formatModel( EchoEventPresentationModel $model ) {
 		$data = $model->jsonSerialize();
-		$data['iconUrl'] = EchoNotificationFormatter::getIconUrl( $model->getIconType(), $this->language->getDir() );
+		$data['iconUrl'] = EchoIcon::getUrl( $model->getIconType(), $this->language->getDir() );
 
 		if ( isset( $data['links']['primary']['url'] ) ) {
 			$data['links']['primary']['url'] = wfExpandUrl( $data['links']['primary']['url'] );
@@ -19,6 +19,11 @@ class EchoModelFormatter extends EchoEventFormatter {
 
 		foreach ( $data['links']['secondary'] as &$link ) {
 			$link['url'] = wfExpandUrl( $link['url'] );
+		}
+
+		$bundledIds = $model->getBundledIds();
+		if ( $bundledIds ) {
+			$data[ 'bundledIds' ] = $bundledIds;
 		}
 
 		return $data;

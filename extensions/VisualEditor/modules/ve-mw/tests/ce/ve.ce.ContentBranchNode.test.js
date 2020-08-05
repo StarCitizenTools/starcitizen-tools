@@ -1,7 +1,7 @@
 /*!
- * VisualEditor ContentEditable MediaWiki-specific ContentBranchNode tests.
+ * VisualEditor MediaWiki-specific ContentEditable ContentBranchNode tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -36,10 +36,10 @@ QUnit.test( 'getRenderedContents', function ( assert ) {
 			html:
 				'a<b>b' +
 					'<span class="ve-ce-leafNode ve-ce-mwEntityNode" contenteditable="false">c</span>' +
-					'd<span rel="ve:Alien" class="ve-ce-focusableNode" contenteditable="false">e</span>' +
+					'd<span rel="ve:Alien" class="ve-ce-focusableNode ve-ce-leafNode" contenteditable="false">e</span>' +
 				'</b>'
 		} ];
-	QUnit.expect( cases.length );
+
 	for ( i = 0, len = cases.length; i < len; i++ ) {
 		doc = new ve.dm.Document( ve.dm.example.preprocessAnnotations( cases[ i ].data ) );
 		$wrapper = $( new ve.ce.ParagraphNode( doc.getDocumentNode().getChildren()[ 0 ] ).getRenderedContents() );

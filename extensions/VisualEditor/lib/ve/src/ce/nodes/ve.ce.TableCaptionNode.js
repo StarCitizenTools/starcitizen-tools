@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable TableCaptionNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -9,6 +9,7 @@
  *
  * @class
  * @extends ve.ce.BranchNode
+ * @mixins ve.ce.ActiveNode
  * @constructor
  * @param {ve.dm.TableCaptionNode} model Model to observe
  * @param {Object} [config] Configuration options
@@ -17,15 +18,18 @@ ve.ce.TableCaptionNode = function VeCeTableCaptionNode() {
 	// Parent constructor
 	ve.ce.TableCaptionNode.super.apply( this, arguments );
 
+	// Mixin constructor
+	ve.ce.ActiveNode.call( this );
+
 	// DOM changes
-	this.$element
-		.addClass( 've-ce-tableCaptionNode' )
-		.prop( 'contentEditable', 'true' );
+	this.$element.addClass( 've-ce-tableCaptionNode' );
 };
 
 /* Inheritance */
 
 OO.inheritClass( ve.ce.TableCaptionNode, ve.ce.BranchNode );
+
+OO.mixinClass( ve.ce.TableCaptionNode, ve.ce.ActiveNode );
 
 /* Static Properties */
 

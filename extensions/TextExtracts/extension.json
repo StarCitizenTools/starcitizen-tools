@@ -3,9 +3,12 @@
 	"author": [
 		"Max Semenik"
 	],
+	"requires": {
+		"MediaWiki": ">= 1.29.0"
+	},
 	"url": "https://www.mediawiki.org/wiki/Extension:TextExtracts",
 	"descriptionmsg": "textextracts-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"ConfigRegistry": {
 		"textextracts": "GlobalVarConfig::newInstance"
@@ -32,15 +35,15 @@
 		],
 		"ApiOpenSearchSuggest": [
 			"TextExtracts\\Hooks::onApiOpenSearchSuggest"
-		],
-		"UnitTestsList": [
-			"TextExtracts\\Hooks::onUnitTestsList"
 		]
 	},
 	"config": {
 		"ExtractsRemoveClasses": [
 			"table",
 			"div",
+			"script",
+			"input",
+			"style",
 			"ul.gallery",
 			".mw-editsection",
 			"sup.reference",
@@ -48,7 +51,8 @@
 			".error",
 			".nomobile",
 			".noprint",
-			".noexcerpt"
+			".noexcerpt",
+			".sortkey"
 		],
 		"ExtractsExtendOpenSearchXml": false
 	},

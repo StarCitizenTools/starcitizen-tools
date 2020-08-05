@@ -13,6 +13,7 @@
 	"jsonschema-invalid-missingfield": "Es fehlt das erforderliche Feld „$1“.",
 	"jsonschema-invalid-notinenum": "Der Wert <code>$1</code> ist nicht in der Aufzählung für die Eigenschaft $2",
 	"apihelp-jsonschema-description": "Ruft eine JSON-Schemaseite ab.",
+	"apihelp-jsonschema-summary": "Ruft eine JSON-Schemaseite ab.",
 	"apihelp-jsonschema-param-revid": "Versionskennung des Schemas.",
 	"apihelp-jsonschema-param-title": "Name des Schemas.",
 	"apihelp-jsonschema-example-1": "Ruft das Schema für die Version 1234 ab"

@@ -1,50 +1,50 @@
+@import 'mediawiki.mixins';
+
 .flow-ui-newTopicWidget {
 	clear: both;
-	margin-top: 1.5em;
 
 	&-title.oo-ui-textInputWidget {
 		// OO.ui.TextInputWidget has a max-width: 50 by default
 		max-width: none;
 
 		input {
-			// Reproduce mw-input-large
-			font-size: 1.75em;
+			.flow-ui-newTopicWidget-expanded & {
+				border-bottom-left-radius: 0;
+				border-bottom-right-radius: 0;
+			}
+
+			// Match heading styles
+			font-size: 1.5em;
 			font-weight: bold;
 			line-height: 1.25em;
 
 			// Reproduce mw-input
 			-webkit-appearance: none;
-			border: 1px solid #CCC;
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
+			.box-sizing( border-box );
 			width: 100%;
-			padding: .3em .3em .3em .6em;
+			padding: 0.429em 0.381em 0.381em;
 			display: block;
 			vertical-align: middle;
-			border-radius: 2px;
 			font-family: inherit;
-			-webkit-transition: border 0.2s cubic-bezier(0.39, 0.575, 0.565, 1), box-shadow 0.2s cubic-bezier(0.39, 0.575, 0.565, 1);
-			-moz-transition: border 0.2s cubic-bezier(0.39, 0.575, 0.565, 1), box-shadow 0.2s cubic-bezier(0.39, 0.575, 0.565, 1);
-			-o-transition: border 0.2s cubic-bezier(0.39, 0.575, 0.565, 1), box-shadow 0.2s cubic-bezier(0.39, 0.575, 0.565, 1);
-			transition: border 0.2s cubic-bezier(0.39, 0.575, 0.565, 1), box-shadow 0.2s cubic-bezier(0.39, 0.575, 0.565, 1);
+			.transition( ~'border 200ms cubic-bezier( 0.39, 0.575, 0.565, 1 ), box-shadow 200ms cubic-bezier( 0.39, 0.575, 0.565, 1 )' );
 
-			&::-webkit-input-placeholder {
-				font-style: italic;
+			/* stylelint-disable indentation */
+			.mixin-placeholder( {
 				font-weight: normal;
-			}
-			&::-moz-placeholder {
-				font-style: italic;
-				font-weight: normal;
-			}
-			&:-moz-placeholder {
-				font-style: italic;
-				font-weight: normal;
-			}
-			&:-ms-input-placeholder {
-				font-style: italic;
-				font-weight: normal;
-			}
+			} );
+			/* stylelint-enable indentation */
+		}
+	}
+
+	&-editor {
+		.flow-ui-editorWidget-editor {
+			margin-top: -1px;
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
+		}
+		.flow-ui-editorWidget-focused .flow-ui-editorWidget-editor {
+			/* Force above the title widget so border isn't cropped */
+			position: relative;
 		}
 	}
 }

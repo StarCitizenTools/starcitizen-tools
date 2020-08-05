@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWAceEditorWidget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /* global ace */
@@ -27,14 +27,17 @@
  * @cfg {string} [autocomplete='none'] Symbolic name of autocomplete
  * mode: 'none', 'basic' (requires the user to press Ctrl-Space) or
  * 'live' (shows a list of suggestions as the user types)
+ * @cfg {Array} [autocompleteWordList=null] List of words to
+ * autocomplete to
  */
 ve.ui.MWAceEditorWidget = function VeUiMWAceEditorWidget( config ) {
 	// Configuration
 	config = config || {};
 
 	this.autocomplete = config.autocomplete || 'none';
+	this.autocompleteWordList = config.autocompleteWordList || null;
 
-	this.$ace = $( '<div dir="ltr">' );
+	this.$ace = $( '<div>' ).attr( 'dir', 'ltr' );
 	this.editor = null;
 	// Initialise to a rejected promise for the setValue call in the parent constructor
 	this.loadingPromise = $.Deferred().reject().promise();
@@ -70,8 +73,8 @@ OO.inheritClass( ve.ui.MWAceEditorWidget, ve.ui.WhitespacePreservingTextInputWid
  */
 ve.ui.MWAceEditorWidget.prototype.setup = function () {
 	if ( !this.loadingPromise ) {
-		this.loadingPromise = mw.loader.getState( 'ext.codeEditor.ace.modes' ) ?
-			mw.loader.using( 'ext.codeEditor.ace.modes' ) :
+		this.loadingPromise = mw.loader.getState( 'ext.codeEditor.ace' ) ?
+			mw.loader.using( 'ext.codeEditor.ace' ) :
 			$.Deferred().reject().promise();
 		// Resolved promises will run synchronously, so ensure #setupEditor
 		// runs after this.loadingPromise is stored.
@@ -99,13 +102,40 @@ ve.ui.MWAceEditorWidget.prototype.teardown = function () {
  * @fires resize
  */
 ve.ui.MWAceEditorWidget.prototype.setupEditor = function () {
+	var completer, widget = this,
+		basePath = mw.config.get( 'wgExtensionAssetsPath', '' );
+
+	if ( basePath.slice( 0, 2 ) === '//' ) {
+		// ACE uses web workers, which have importScripts, which don't like relative links.
+		basePath = window.location.protocol + basePath;
+	}
+	ace.config.set( 'basePath', basePath + '/CodeEditor/modules/ace' );
+
 	this.$input.addClass( 'oo-ui-element-hidden' );
 	this.editor = ace.edit( this.$ace[ 0 ] );
 	this.setMinRows( this.minRows );
+
+	// Autocompletion
 	this.editor.setOptions( {
-		enableBasicAutocompletion: this.autocomplete !== 'none' ? true : false,
-		enableLiveAutocompletion: this.autocomplete === 'live' ? true : false
+		enableBasicAutocompletion: this.autocomplete !== 'none',
+		enableLiveAutocompletion: this.autocomplete === 'live'
 	} );
+	if ( this.autocompleteWordList ) {
+		completer = {
+			getCompletions: function ( editor, session, pos, prefix, callback ) {
+				var wordList = widget.autocompleteWordList;
+				callback( null, wordList.map( function ( word ) {
+					return {
+						caption: word,
+						value: word,
+						meta: 'static'
+					};
+				} ) );
+			}
+		};
+		ace.require( 'ace/ext/language_tools' ).addCompleter( completer );
+	}
+
 	this.editor.getSession().on( 'change', this.onEditorChange.bind( this ) );
 	this.editor.renderer.on( 'resize', this.onEditorResize.bind( this ) );
 	this.setEditorValue( this.getValue() );
@@ -117,17 +147,17 @@ ve.ui.MWAceEditorWidget.prototype.setupEditor = function () {
  *
  * @param {string} mode Symbolic name of autocomplete mode
  */
- ve.ui.MWAceEditorWidget.prototype.setAutocomplete = function ( mode ) {
+ve.ui.MWAceEditorWidget.prototype.setAutocomplete = function ( mode ) {
 	var widget = this;
 	this.autocomplete = mode;
 	this.loadingPromise.done( function () {
 		widget.editor.renderer.setOptions( {
-			enableBasicAutocompletion: widget.autocomplete !== 'none' ? true : false,
-			enableLiveAutocompletion: widget.autocomplete === 'live' ? true : false
+			enableBasicAutocompletion: widget.autocomplete !== 'none',
+			enableLiveAutocompletion: widget.autocomplete === 'live'
 		} );
 	} );
 	return this;
- };
+};
 
 /**
  * @inheritdoc
@@ -320,9 +350,12 @@ ve.ui.MWAceEditorWidget.prototype.togglePrintMargin = function ( visible ) {
 ve.ui.MWAceEditorWidget.prototype.setLanguage = function ( lang ) {
 	var widget = this;
 	this.loadingPromise.done( function () {
-		// TODO: Just use ace.require once T127643 is resolved
-		var require = ace.require || require;
-		widget.editor.getSession().setMode( 'ace/mode/' + ( require( 'ace/mode/' + lang ) ? lang : 'text' ) );
+		ace.config.loadModule( 'ace/ext/modelist', function ( modelist ) {
+			if ( !modelist || !modelist.modesByName[ lang ] ) {
+				lang = 'text';
+			}
+			widget.editor.getSession().setMode( 'ace/mode/' + lang );
+		} );
 	} );
 	return this;
 };

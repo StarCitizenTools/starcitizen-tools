@@ -14,7 +14,7 @@ use FormatJson;
  * update events.
  */
 class ObjectLocator {
-	/*
+	/**
 	 * @var ObjectMapper
 	 */
 	protected $mapper;
@@ -48,7 +48,7 @@ class ObjectLocator {
 	 * @param Index[] $indexes
 	 * @param LifecycleHandler[] $lifecycleHandlers
 	 */
-	public function __construct( ObjectMapper $mapper, ObjectStorage $storage, DbFactory $dbFactory, array $indexes = array(), array $lifecycleHandlers = array() ) {
+	public function __construct( ObjectMapper $mapper, ObjectStorage $storage, DbFactory $dbFactory, array $indexes = [], array $lifecycleHandlers = [] ) {
 		$this->mapper = $mapper;
 		$this->storage = $storage;
 		$this->indexes = $indexes;
@@ -60,9 +60,9 @@ class ObjectLocator {
 		return $this->mapper;
 	}
 
-	public function find( array $attributes, array $options = array() ) {
-		$result = $this->findMulti( array( $attributes ), $options );
-		return $result ? reset( $result ) : array();
+	public function find( array $attributes, array $options = [] ) {
+		$result = $this->findMulti( [ $attributes ], $options );
+		return $result ? reset( $result ) : [];
 	}
 
 	/**
@@ -74,9 +74,9 @@ class ObjectLocator {
 	 * @param array $options
 	 * @return array[]
 	 */
-	public function findMulti( array $queries, array $options = array() ) {
+	public function findMulti( array $queries, array $options = [] ) {
 		if ( !$queries ) {
-			return array();
+			return [];
 		}
 
 		$keys = array_keys( reset( $queries ) );
@@ -103,8 +103,8 @@ class ObjectLocator {
 			$res = $this->storage->findMulti( $this->convertToDbQueries( $queries, $options ), $this->convertToDbOptions( $options ) );
 		}
 
-		$output = array();
-		foreach( $res as $index => $queryOutput ) {
+		$output = [];
+		foreach ( $res as $index => $queryOutput ) {
 			foreach ( $queryOutput as $k => $v ) {
 				if ( $v ) {
 					$output[$index][$k] = $this->load( $v );
@@ -126,8 +126,8 @@ class ObjectLocator {
 	 * @param array[optional] $options Options to find()
 	 * @return bool
 	 */
-	public function found( array $attributes, array $options = array() ) {
-		return $this->foundMulti( array( $attributes ), $options );
+	public function found( array $attributes, array $options = [] ) {
+		return $this->foundMulti( [ $attributes ], $options );
 	}
 
 	/**
@@ -141,7 +141,7 @@ class ObjectLocator {
 	 * @param array[optional] $options Options to findMulti()
 	 * @return bool
 	 */
-	public function foundMulti( array $queries, array $options = array() ) {
+	public function foundMulti( array $queries, array $options = [] ) {
 		if ( !$queries ) {
 			return true;
 		}
@@ -151,7 +151,7 @@ class ObjectLocator {
 			$options['sort'] = ObjectManager::makeArray( $options['sort'] );
 		}
 
-		foreach( $queries as $key => $value ) {
+		foreach ( $queries as $key => $value ) {
 			$queries[$key] = UUID::convertUUIDs( $value, 'alphadecimal' );
 		}
 
@@ -171,20 +171,23 @@ class ObjectLocator {
 	}
 
 	public function get( $id ) {
-		$result = $this->getMulti( array( $id ) );
+		$result = $this->getMulti( [ $id ] );
 		return $result ? reset( $result ) : null;
 	}
 
-	// Just a helper to find by primary key
-	//
-	// Be careful with regards to order on composite primary keys,
-	// must be in same order as provided to the storage implementation.
+	/**
+	 * Just a helper to find by primary key
+	 * Be careful with regards to order on composite primary keys,
+	 * must be in same order as provided to the storage implementation.
+	 * @param array $objectIds
+	 * @return array
+	 */
 	public function getMulti( array $objectIds ) {
 		if ( !$objectIds ) {
-			return array();
+			return [];
 		}
 		$primaryKey = $this->storage->getPrimaryKeyColumns();
-		$queries = array();
+		$queries = [];
 		$retval = null;
 		foreach ( $objectIds as $id ) {
 			// check internal cache
@@ -217,11 +220,11 @@ class ObjectLocator {
 	 * Determining if a find() has not yet been resolved may be useful so that
 	 * additional data may be loaded at once.
 	 *
-	 * @param string|integer $id Id to get()
+	 * @param string|int $id Id to get()
 	 * @return bool
 	 */
 	public function got( $id ) {
-		return $this->gotMulti( array( $id ) );
+		return $this->gotMulti( [ $id ] );
 	}
 
 	/**
@@ -240,7 +243,7 @@ class ObjectLocator {
 		}
 
 		$primaryKey = $this->storage->getPrimaryKeyColumns();
-		$queries = array();
+		$queries = [];
 		foreach ( $objectIds as $id ) {
 			$query = array_combine( $primaryKey, ObjectManager::makeArray( $id ) );
 			$query = UUID::convertUUIDs( $query, 'alphadecimal' );
@@ -266,7 +269,7 @@ class ObjectLocator {
 	 * @return Index
 	 * @throws NoIndexException
 	 */
-	public function getIndexFor( array $keys, array $options = array() ) {
+	public function getIndexFor( array $keys, array $options = [] ) {
 		sort( $keys );
 		/** @var Index|null $current */
 		$current = null;
@@ -281,7 +284,7 @@ class ObjectLocator {
 				$current = $index;
 
 			// Find the smallest matching index
-			} else if ( isset( $options['limit'] ) ) {
+			} elseif ( isset( $options['limit'] ) ) {
 				$current = $index->getLimit() < $current->getLimit() ? $index : $current;
 
 			// if no limit specified, find biggest matching index
@@ -309,9 +312,11 @@ class ObjectLocator {
 
 	/**
 	 * Convert index options to db equivalent options
+	 * @param array $options
+	 * @return array
 	 */
 	protected function convertToDbOptions( $options ) {
-		$dbOptions = $orderBy = array();
+		$dbOptions = $orderBy = [];
 		$order = '';
 
 		if ( isset( $options['limit'] ) ) {
@@ -351,7 +356,6 @@ class ObjectLocator {
 				}
 
 				if ( $options['order'] === 'ASC' ) {
-
 					$operator = '>';
 				} else {
 					$operator = '<';
@@ -361,10 +365,10 @@ class ObjectLocator {
 					$operator .= '=';
 				}
 
-				$dbr = $this->dbFactory->getDB( DB_SLAVE );
+				$dbr = $this->dbFactory->getDB( DB_REPLICA );
 				$condition = new RawSql( $options['sort'][0] . ' ' . $operator . ' ' . $dbr->addQuotes( $options['offset-id']->getBinary() ) );
 
-				foreach( $queries as &$query ) {
+				foreach ( $queries as &$query ) {
 					$query[] = $condition;
 				}
 		}

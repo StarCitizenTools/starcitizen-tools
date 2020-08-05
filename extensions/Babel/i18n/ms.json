@@ -4,7 +4,8 @@
 			"Anakmalaysia",
 			"Aviator",
 			"Iwan Novirion",
-			"Kurniasan"
+			"Kurniasan",
+			"Jeluang Terluang"
 		]
 	},
 	"babel": "Maklumat bahasa pengguna",
@@ -21,14 +22,14 @@
 	"babel-3": "Pengguna ini memiliki kemahiran [[$1|tinggi]] dalam [[$2|$3]].",
 	"babel-4": "Pengguna ini memiliki kemahiran [[$1|hampir sempurna]] dalam [[$2|$3]].",
 	"babel-5": "Pengguna ini memiliki kemahiran [[$1|profesional]] dalam [[$2|$3]].",
-	"babel-N": "Pengguna ini adalah penutur [[$1|asli]] [[$2|$3]].",
+	"babel-N": "Pengguna ini ialah penutur [[$1|asli]] [[$2|$3]].",
 	"babel-0-n": "Pengguna ini [[$1|tidak mampu]] bertutur dalam (atau sukar memahami) [[$2|bahasa Melayu]].",
 	"babel-1-n": "Pengguna ini memiliki kemahiran [[$1|asas]] dalam [[$2|bahasa Melayu]].",
 	"babel-2-n": "Pengguna ini memiliki kemahiran [[$1|sederhana]] dalam [[$2|bahasa Melayu]].",
 	"babel-3-n": "Pengguna ini memiliki kemahiran [[$1|tinggi]] dalam [[$2|bahasa Melayu]].",
 	"babel-4-n": "Pengguna ini memiliki kemahiran [[$1|hampir sempurna]] dalam [[$2|bahasa Melayu]].",
 	"babel-5-n": "Pengguna ini memiliki kemahiran [[$1|profesional]] dalam [[$2|bahasa Melayu]].",
-	"babel-N-n": "Pengguna ini adalah penutur [[$1|asli]] [[$2|bahasa Melayu]].",
+	"babel-N-n": "Pengguna ini ialah penutur [[$1|asli]] [[$2|bahasa Melayu]].",
 	"babel-template": "Template:Pengguna $1",
 	"babel-footer": "Pengguna mengikut bahasa"
 }

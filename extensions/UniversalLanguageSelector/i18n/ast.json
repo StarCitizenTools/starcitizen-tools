@@ -2,13 +2,15 @@
 	"@metadata": {
 		"authors": [
 			"Esbardu",
-			"Xuacu"
+			"Xuacu",
+			"Macofe"
 		]
 	},
 	"uls-desc": "Ufre al usuariu delles maneres pa seleicionar una llingua y axustar la configuración de llingua",
 	"uls-plang-title-languages": "Llingües",
 	"ext-uls-select-language-settings-icon-tooltip": "Preferencies de llingua",
 	"ext-uls-undo-language-tooltip-text": "La llingua camudó dende $1",
+	"ext-uls-undo-language-tooltip-text-local": "Cambióse d'idioma pa esta wiki. Comprueba les [[Special:GlobalPreferences|preferencies globales]] pa cambiar l'idioma pa toles wikis.",
 	"ext-uls-language-settings-preferences-link": "Más preferencies de llingua",
 	"uls-betafeature-label": "Enllaces de llingües compactos",
 	"uls-betafeature-desc": "Amuesa una versión más curtia de la llista de llingües, sólo coles más relevantes pa vusté.",
@@ -25,7 +27,7 @@
 	"ext-uls-display-settings-ui-language": "Llingua de la interfaz",
 	"ext-uls-display-settings-anon-label": "Llingua de la interfaz:",
 	"ext-uls-display-settings-anon-same-as-content": "$1 (igual que'l conteníu)",
-	"ext-uls-display-settings-anon-log-in-cta": "[[Special:UserLogin|Anicie sesión]] pa seleicionar una llingua diferente pa los menús.",
+	"ext-uls-display-settings-anon-log-in-cta": "[[Special:UserLogin|Anicia sesión]] pa seleicionar una llingua distinta pa los menús.",
 	"ext-uls-webfonts-settings-title": "Descargar tipografía cuando seya necesario",
 	"ext-uls-webfonts-settings-info": "Descargar la tipografía que falta y permitir seleicionar la tipografía preferida.",
 	"ext-uls-webfonts-settings-info-link": "Más información",
@@ -57,16 +59,7 @@
 	"ext-uls-language-settings-applying": "Aplicando...",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Una más|$1 más}}",
 	"ext-uls-compact-link-info": "Tolos idiomes (esbilla inicial d'opciones comunes de to y d'otros)",
-	"apihelp-languagesearch-description": "Buscar nomes de llingua en cualquier alfabetu.",
-	"apihelp-languagesearch-param-search": "Buscar cadena.",
-	"apihelp-languagesearch-param-typos": "Númberu d'errores ortográficos permitíos na cadena de gueta.",
-	"apihelp-languagesearch-example-1": "Buscar \"Te\"",
-	"apihelp-languagesearch-example-2": "Buscar \"ഫി\"",
-	"apihelp-languagesearch-example-3": "Buscar \"ഫി\", permitiendo un fallu d'ortografía",
-	"apihelp-ulslocalization-description": "Obtener la llocalización de ULS na llingua dada.",
-	"apihelp-ulslocalization-param-language": "Códigu de llingua.",
-	"apihelp-ulslocalization-example-1": "Obtener la llocalización en tamil",
-	"apihelp-ulslocalization-example-2": "Obtener la llocalización en hindi",
 	"prefs-languages": "Llingües",
-	"ext-uls-compact-language-links-preference": "Usar una llista de llingües compacta coles más afayadices pa ti."
+	"ext-uls-compact-language-links-preference": "Usar una [[$1|llista de llingües compacta]] coles más afayadices pa ti.",
+	"ext-uls-compact-no-results": "Esta páxina nun ta disponible na llingua que buscasti."
 }

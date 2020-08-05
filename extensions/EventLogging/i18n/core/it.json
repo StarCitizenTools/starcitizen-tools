@@ -1,13 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Beta16"
+			"Beta16",
+			"Selven"
 		]
 	},
 	"eventlogging-desc": "Framework per la registrazione degli eventi lato client",
 	"eventlogging-invalid-json": "JSON non valido",
 	"eventlogging-revision-id": "Versione $1",
 	"eventlogging-code-sample-logging-on-server-side": "Registrazione PHP",
-	"eventlogging-code-sample-module-setup": "Installazione PHP per la registrazione JavaScript",
-	"eventlogging-code-sample-logging-on-client-side": "Registrazione JavaScript"
+	"eventlogging-code-sample-module-setup-json": "installazione estensione.json per la registrazione JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Registrazione JavaScript",
+	"eventlogging-error-move-source": "Lo schema di pagine non può essere rinominato",
+	"eventlogging-error-move-destination": "Le pagine non possono essere rinominati allo Schema di pagine"
 }

@@ -19,7 +19,6 @@
 	"checkuser-users": "Gebrukers naokieken",
 	"checkuser-edits": "Bewarkingen opvragen",
 	"checkuser-ips": "IP-adressen naokieken",
-	"checkuser-search": "Zeuken",
 	"checkuser-empty": "Der steet gien informasie in t logboek.",
 	"checkuser-nomatch": "Gien overeenkomsten evunnen.",
 	"checkuser-check": "Naokieken",
@@ -28,7 +27,7 @@
 	"checkuser-blocked": "Eblokkeerd",
 	"checkuser-too-many": "Te veule resultaoten (volgens de schatting). Maakt de IP-reeks kleinder:\nHieronder staon de gebruken IP-aderssen (maximaal 5.000, op IP-adres ekontroleerd):",
 	"checkuser-user-nonexistent": "De op-egeven gebruker besteet niet.",
-	"checkuser-search-form": "Logboekregels zeuken waor de $1 $2 is",
+	"checkuser-search": "Zeuken",
 	"checkuser-search-submit": "Zeuken",
 	"checkuser-search-initiator": "anvrager",
 	"checkuser-search-target": "onderwarp"

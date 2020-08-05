@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Thibaut120094",
+			"Verdy p"
+		]
+	},
+	"wiki-seo-desc": "Permet des méta-paramétrages par page, tels que les mots-clés et la description, la modification du titre et diverses balises de vérification du site.",
+	"wiki-seo-empty-attr-tag": "Erreur : la balise &lt;seo&gt; doit contenir au moins un attribut non-vide.",
+	"wiki-seo-empty-attr-parser": "Erreur : <nowiki>{{#seo:}}</nowiki> doit contenir au moins un attribut non-vide.",
+	"wiki-seo-invalid-generator": "Erreur : $1 n’est pas un générateur valide de métadonnées.",
+	"wiki-seo-missing-page-title": "Erreur : le titre de page indiqué n’est pas valide."
+}

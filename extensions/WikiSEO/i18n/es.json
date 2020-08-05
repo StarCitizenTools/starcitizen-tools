@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Canaan9801",
+			"Fitoschido"
+		]
+	},
+	"wiki-seo-desc": "Permite meta-ajustes por página, como palabras clave y descripción, cambio de título y varios tags de verificación de sitio.",
+	"wiki-seo-empty-attr-tag": "Error: &It;seo&gt; tag debe contener al menos un atributo no vacío.",
+	"wiki-seo-empty-attr-parser": "Error: <nowiki>{{#seo:}}</nowiki> deber contener al menos un atributo no vacío.",
+	"wiki-seo-invalid-generator": "Error: $1 no es un generador de metadatos valído.",
+	"wiki-seo-missing-page-title": "Error: el título de página indicado no es válido."
+}

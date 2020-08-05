@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"TomášPolonec"
+		]
+	},
+	"codemirror-desc": "Poskytuje zvýraznenie syntaxe v textovom editore",
+	"codemirror-toggle-label": "Zvýraznenie syntaxe",
+	"codemirror-beta-title": "Zvýraznenie syntaxe wikitextu",
+	"codemirror-beta-desc": "Zvýraznenie syntaxe zjednodušuje editovanie použitím farieb a odtieňov na vizuálne oddelenie textu stránky od kódu odkazov, referencií a šablón.",
+	"codemirror-popup-label": "Zvýraznenie syntaxe",
+	"codemirror-popup-desc": "Zvýraznenie syntaxe vám pomôže jednoducho rozoznať rôzne časti úpravy pomocou ich farebného označenia.",
+	"codemirror-popup-btn-yes": "Vyskúšať",
+	"codemirror-popup-btn-no": "Nie, ďakujem"
+}

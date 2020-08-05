@@ -1,7 +1,6 @@
 <?php
 /**
- * Populates the rev_len and ar_len fields for old revisions created
- * before MW 1.10.
+ * Populates the rev_len and ar_len fields when they are NULL.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +21,14 @@
  * @ingroup Maintenance
  */
 
+use Wikimedia\Rdbms\IDatabase;
+
 require_once __DIR__ . '/Maintenance.php';
 
 /**
- * Maintenance script that populates the rev_len and ar_len fields
- * for old revisions created before MW 1.10.
+ * Maintenance script that populates the rev_len and ar_len fields when they are NULL.
+ * This is the case for all revisions created before MW 1.10, as well as those affected
+ * by T18748 (MW 1.10-1.13) and those affected by T135414 (MW 1.21-1.24).
  *
  * @ingroup Maintenance
  */
@@ -42,22 +44,22 @@ class PopulateRevisionLength extends LoggedUpdateMaintenance {
 	}
 
 	public function doDBUpdates() {
-		$db = $this->getDB( DB_MASTER );
-		if ( !$db->tableExists( 'revision' ) ) {
-			$this->error( "revision table does not exist", true );
-		} elseif ( !$db->tableExists( 'archive' ) ) {
-			$this->error( "archive table does not exist", true );
-		} elseif ( !$db->fieldExists( 'revision', 'rev_len', __METHOD__ ) ) {
+		$dbw = $this->getDB( DB_MASTER );
+		if ( !$dbw->tableExists( 'revision' ) ) {
+			$this->fatalError( "revision table does not exist" );
+		} elseif ( !$dbw->tableExists( 'archive' ) ) {
+			$this->fatalError( "archive table does not exist" );
+		} elseif ( !$dbw->fieldExists( 'revision', 'rev_len', __METHOD__ ) ) {
 			$this->output( "rev_len column does not exist\n\n", true );
 
 			return false;
 		}
 
 		$this->output( "Populating rev_len column\n" );
-		$rev = $this->doLenUpdates( 'revision', 'rev_id', 'rev', Revision::selectFields() );
+		$rev = $this->doLenUpdates( 'revision', 'rev_id', 'rev', Revision::getQueryInfo() );
 
 		$this->output( "Populating ar_len column\n" );
-		$ar = $this->doLenUpdates( 'archive', 'ar_id', 'ar', Revision::selectArchiveFields() );
+		$ar = $this->doLenUpdates( 'archive', 'ar_id', 'ar', Revision::getArchiveQueryInfo() );
 
 		$this->output( "rev_len and ar_len population complete "
 			. "[$rev revision rows, $ar archive rows].\n" );
@@ -69,13 +71,15 @@ class PopulateRevisionLength extends LoggedUpdateMaintenance {
 	 * @param string $table
 	 * @param string $idCol
 	 * @param string $prefix
-	 * @param array $fields
+	 * @param array $queryInfo
 	 * @return int
 	 */
-	protected function doLenUpdates( $table, $idCol, $prefix, $fields ) {
-		$db = $this->getDB( DB_MASTER );
-		$start = $db->selectField( $table, "MIN($idCol)", false, __METHOD__ );
-		$end = $db->selectField( $table, "MAX($idCol)", false, __METHOD__ );
+	protected function doLenUpdates( $table, $idCol, $prefix, $queryInfo ) {
+		$dbr = $this->getDB( DB_REPLICA );
+		$dbw = $this->getDB( DB_MASTER );
+		$batchSize = $this->getBatchSize();
+		$start = $dbw->selectField( $table, "MIN($idCol)", '', __METHOD__ );
+		$end = $dbw->selectField( $table, "MAX($idCol)", '', __METHOD__ );
 		if ( !$start || !$end ) {
 			$this->output( "...$table table seems to be empty.\n" );
 
@@ -84,34 +88,43 @@ class PopulateRevisionLength extends LoggedUpdateMaintenance {
 
 		# Do remaining chunks
 		$blockStart = intval( $start );
-		$blockEnd = intval( $start ) + $this->mBatchSize - 1;
+		$blockEnd = intval( $start ) + $batchSize - 1;
 		$count = 0;
 
 		while ( $blockStart <= $end ) {
 			$this->output( "...doing $idCol from $blockStart to $blockEnd\n" );
-			$res = $db->select(
-				$table,
-				$fields,
+			$res = $dbr->select(
+				$queryInfo['tables'],
+				$queryInfo['fields'],
 				[
 					"$idCol >= $blockStart",
 					"$idCol <= $blockEnd",
-					"{$prefix}_len IS NULL"
+					$dbr->makeList( [
+						"{$prefix}_len IS NULL",
+						$dbr->makeList( [
+							"{$prefix}_len = 0",
+							"{$prefix}_sha1 != " . $dbr->addQuotes( 'phoiac9h4m842xq45sp7s6u21eteeq1' ), // sha1( "" )
+						], IDatabase::LIST_AND )
+					], IDatabase::LIST_OR )
 				],
-				__METHOD__
+				__METHOD__,
+				[],
+				$queryInfo['joins']
 			);
 
-			$this->beginTransaction( $db, __METHOD__ );
-			# Go through and update rev_len from these rows.
-			foreach ( $res as $row ) {
-				if ( $this->upgradeRow( $row, $table, $idCol, $prefix ) ) {
-					$count++;
+			if ( $res->numRows() > 0 ) {
+				$this->beginTransaction( $dbw, __METHOD__ );
+				# Go through and update rev_len from these rows.
+				foreach ( $res as $row ) {
+					if ( $this->upgradeRow( $row, $table, $idCol, $prefix ) ) {
+						$count++;
+					}
 				}
+				$this->commitTransaction( $dbw, __METHOD__ );
 			}
-			$this->commitTransaction( $db, __METHOD__ );
 
-			$blockStart += $this->mBatchSize;
-			$blockEnd += $this->mBatchSize;
-			wfWaitForSlaves();
+			$blockStart += $batchSize;
+			$blockEnd += $batchSize;
 		}
 
 		return $count;
@@ -125,15 +138,15 @@ class PopulateRevisionLength extends LoggedUpdateMaintenance {
 	 * @return bool
 	 */
 	protected function upgradeRow( $row, $table, $idCol, $prefix ) {
-		$db = $this->getDB( DB_MASTER );
+		$dbw = $this->getDB( DB_MASTER );
 
 		$rev = ( $table === 'archive' )
 			? Revision::newFromArchiveRow( $row )
 			: new Revision( $row );
 
-		$content = $rev->getContent();
+		$content = $rev->getContent( Revision::RAW );
 		if ( !$content ) {
-			# This should not happen, but sometimes does (bug 20757)
+			# This should not happen, but sometimes does (T22757)
 			$id = $row->$idCol;
 			$this->output( "Content of $table $id unavailable!\n" );
 
@@ -141,7 +154,7 @@ class PopulateRevisionLength extends LoggedUpdateMaintenance {
 		}
 
 		# Update the row...
-		$db->update( $table,
+		$dbw->update( $table,
 			[ "{$prefix}_len" => $content->getSize() ],
 			[ $idCol => $row->$idCol ],
 			__METHOD__
@@ -151,5 +164,5 @@ class PopulateRevisionLength extends LoggedUpdateMaintenance {
 	}
 }
 
-$maintClass = "PopulateRevisionLength";
+$maintClass = PopulateRevisionLength::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

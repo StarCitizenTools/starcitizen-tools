@@ -9,6 +9,7 @@ use Flow\Exception\PermissionException;
 use Flow\Conversion\Utils;
 use ContentHandler;
 use Hooks;
+use Sanitizer;
 use Title;
 use User;
 use RecentChange;
@@ -25,14 +26,14 @@ abstract class AbstractRevision {
 	 * List of available permission levels.
 	 *
 	 * @var string[]
-	 **/
-	static public $perms = array(
+	 */
+	static public $perms = [
 		self::MODERATED_NONE,
 		self::MODERATED_HIDDEN,
 		self::MODERATED_DELETED,
 		self::MODERATED_SUPPRESSED,
 		self::MODERATED_LOCKED,
-	);
+	];
 
 	/**
 	 * List of moderation change types
@@ -57,7 +58,7 @@ abstract class AbstractRevision {
 	 *
 	 * @var string[]
 	 */
-	protected $flags = array();
+	protected $flags = [];
 
 	/**
 	 * Name of the action performed that generated this revision.
@@ -90,14 +91,14 @@ abstract class AbstractRevision {
 	/**
 	 * @var string[] Converted (wikitext|html) content, based off of $this->decompressedContent
 	 */
-	protected $convertedContent = array();
+	protected $convertedContent = [];
 
 	/**
 	 * html content has been allowed by the xss check.  When we find the next xss
 	 * in the parser this hook allows preventing any display of hostile html. True
 	 * means the content is allowed. False means not allowed. Null means unchecked
 	 *
-	 * @var boolean
+	 * @var bool
 	 */
 	protected $xssCheck;
 
@@ -137,12 +138,12 @@ abstract class AbstractRevision {
 	protected $lastEditUser;
 
 	/**
-	 * @var integer Size of previous revision wikitext
+	 * @var int Size of previous revision wikitext
 	 */
 	protected $previousContentLength = 0;
 
 	/**
-	 * @var integer Size of current revision wikitext
+	 * @var int Size of current revision wikitext
 	 */
 	protected $contentLength = 0;
 
@@ -159,7 +160,7 @@ abstract class AbstractRevision {
 	 * @return AbstractRevision
 	 * @throws DataModelException
 	 */
-	static public function fromStorageRow( array $row, $obj = null ) {
+	public static function fromStorageRow( array $row, $obj = null ) {
 		if ( $obj === null ) {
 			/** @var AbstractRevision $obj */
 			$obj = new static;
@@ -173,7 +174,7 @@ abstract class AbstractRevision {
 		}
 		$obj->prevRevision = $row['rev_parent_id'] ? UUID::create( $row['rev_parent_id'] ) : null;
 		$obj->changeType = $row['rev_change_type'];
-	 	$obj->flags = array_filter( explode( ',', $row['rev_flags'] ) );
+		$obj->flags = array_filter( explode( ',', $row['rev_flags'] ) );
 		$obj->content = $row['rev_content'];
 		// null if external store is not being used
 		$obj->contentUrl = isset( $row['rev_content_url'] ) ? $row['rev_content_url'] : null;
@@ -185,10 +186,10 @@ abstract class AbstractRevision {
 		$obj->moderatedReason = isset( $row['rev_mod_reason'] ) && $row['rev_mod_reason'] ? $row['rev_mod_reason'] : null;
 
 		// BC: 'suppress' used to be called 'censor' & 'lock' was 'close'
-		$bc = array(
-			'censor' => AbstractRevision::MODERATED_SUPPRESSED,
-			'close' => AbstractRevision::MODERATED_LOCKED,
-		);
+		$bc = [
+			'censor' => self::MODERATED_SUPPRESSED,
+			'close' => self::MODERATED_LOCKED,
+		];
 		$obj->moderationState = str_replace( array_keys( $bc ), array_values( $bc ), $obj->moderationState );
 
 		// isset required because there is a possible db migration, cached data will not have it
@@ -205,8 +206,8 @@ abstract class AbstractRevision {
 	 * @param AbstractRevision $obj
 	 * @return string[]
 	 */
-	static public function toStorageRow( $obj ) {
-		return array(
+	public static function toStorageRow( $obj ) {
+		return [
 			'rev_id' => $obj->revId->getAlphadecimal(),
 			'rev_user_id' => $obj->user->id,
 			'rev_user_ip' => $obj->user->ip,
@@ -234,7 +235,7 @@ abstract class AbstractRevision {
 
 			'rev_content_length' => $obj->contentLength,
 			'rev_previous_content_length' => $obj->previousContentLength,
-		);
+		];
 	}
 
 	/**
@@ -286,7 +287,7 @@ abstract class AbstractRevision {
 	 * @return AbstractRevision
 	 */
 	public function moderate( User $user, $state, $changeType, $reason ) {
-		if ( ! $this->isValidModerationState( $state ) ) {
+		if ( !$this->isValidModerationState( $state ) ) {
 			wfWarn( __METHOD__ . ': Provided moderation state does not exist : ' . $state );
 			return null;
 		}
@@ -321,7 +322,7 @@ abstract class AbstractRevision {
 
 	/**
 	 * @param string $state
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isValidModerationState( $state ) {
 		return in_array( $state, self::$perms );
@@ -335,7 +336,7 @@ abstract class AbstractRevision {
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function hasHiddenContent() {
 		return $this->moderationState === self::MODERATED_HIDDEN;
@@ -353,6 +354,20 @@ abstract class AbstractRevision {
 	}
 
 	/**
+	 * Checks whether the content is retrievable.
+	 *
+	 * False is an error state, used when the content is unretrievable, e.g. due to data loss (T95580)
+	 * or a temporary database error.
+	 *
+	 * This is unrelated to whether the content is loaded on-demand.
+	 *
+	 * @return bool
+	 */
+	public function isContentCurrentlyRetrievable() {
+		return $this->content !== false;
+	}
+
+	/**
 	 * DO NOT USE THIS METHOD to output the content; use
 	 * Templating::getContent, which will do additional (permissions-based)
 	 * checks to make sure it outputs something the user can see.
@@ -362,9 +377,17 @@ abstract class AbstractRevision {
 	 * @throws InvalidDataException
 	 */
 	public function getContent( $format = 'html' ) {
-		if ( $this->content === false ) {
-			throw new InvalidDataException( 'Failed to load the content' );
+		if ( !$this->isContentCurrentlyRetrievable() ) {
+			wfDebugLog( 'Flow', __METHOD__ . ': Failed to load the content of revision with rev_id ' . $this->revId->getAlphadecimal() );
+
+			$stubContent = wfMessage( 'flow-stub-post-content' )->parse();
+			if ( !in_array( $format, [ 'html', 'fixed-html' ] ) ) {
+				$stubContent = Sanitizer::stripAllTags( $stubContent );
+			}
+
+			return $stubContent;
 		}
+
 		if ( $this->xssCheck === false ) {
 			return '';
 		}
@@ -372,7 +395,7 @@ abstract class AbstractRevision {
 		$sourceFormat = $this->getContentFormat();
 		if ( $this->xssCheck === null && $sourceFormat === 'html' ) {
 			// returns true if no handler aborted the hook
-			$this->xssCheck = Hooks::run( 'FlowCheckHtmlContentXss', array( $raw ) );
+			$this->xssCheck = Hooks::run( 'FlowCheckHtmlContentXss', [ $raw ] );
 			if ( !$this->xssCheck ) {
 				wfDebugLog( 'Flow', __METHOD__ . ': XSS check prevented display of revision ' . $this->revId->getAlphadecimal() );
 				return '';
@@ -449,7 +472,7 @@ abstract class AbstractRevision {
 	}
 
 	/**
-	 * @return integer
+	 * @return int
 	 */
 	public function getUserId() {
 		return $this->user->id;
@@ -504,7 +527,7 @@ abstract class AbstractRevision {
 
 		// never trust incoming html - roundtrip to wikitext first
 		if ( $format === 'html' ) {
-			$content = Utils::convert( $format, 'wikitext', $content, $title  );
+			$content = Utils::convert( $format, 'wikitext', $content, $title );
 			$format = 'wikitext';
 		}
 
@@ -521,7 +544,7 @@ abstract class AbstractRevision {
 
 		// Keep consistent with normal edit page, trim only trailing whitespaces
 		$content = rtrim( $content );
-		$this->convertedContent = array( $format => $content );
+		$this->convertedContent = [ $format => $content ];
 
 		// convert content to desired storage format
 		$storageFormat = $this->getStorageFormat();
@@ -610,35 +633,35 @@ abstract class AbstractRevision {
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isModerated() {
 		return $this->moderationState !== self::MODERATED_NONE;
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isHidden() {
 		return $this->moderationState === self::MODERATED_HIDDEN;
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isDeleted() {
 		return $this->moderationState === self::MODERATED_DELETED;
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isSuppressed() {
 		return $this->moderationState === self::MODERATED_SUPPRESSED;
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isLocked() {
 		return $this->moderationState === self::MODERATED_LOCKED;
@@ -653,10 +676,10 @@ abstract class AbstractRevision {
 
 	/**
 	 * @param string|array $flags
-	 * @return boolean True when at least one flag in $flags is set
+	 * @return bool True when at least one flag in $flags is set
 	 */
 	public function isFlaggedAny( $flags ) {
-		foreach ( (array) $flags as $flag ) {
+		foreach ( (array)$flags as $flag ) {
 			if ( false !== array_search( $flag, $this->flags ) ) {
 				return true;
 			}
@@ -666,10 +689,10 @@ abstract class AbstractRevision {
 
 	/**
 	 * @param string|array $flags
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isFlaggedAll( $flags ) {
-		foreach ( (array) $flags as $flag ) {
+		foreach ( (array)$flags as $flag ) {
 			if ( false === array_search( $flag, $this->flags ) ) {
 				return false;
 			}
@@ -678,14 +701,14 @@ abstract class AbstractRevision {
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isFirstRevision() {
 		return $this->prevRevision === null;
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isOriginalContent() {
 		return $this->lastEditId === null;
@@ -706,7 +729,7 @@ abstract class AbstractRevision {
 	}
 
 	/**
-	 * @return integer
+	 * @return int
 	 */
 	public function getLastContentEditUserId() {
 		return $this->lastEditUser ? $this->lastEditUser->id : null;
@@ -734,7 +757,7 @@ abstract class AbstractRevision {
 	}
 
 	/**
-	 * @return integer|null
+	 * @return int|null
 	 */
 	public function getModeratedByUserId() {
 		return $this->moderatedBy ? $this->moderatedBy->id : null;
@@ -756,8 +779,8 @@ abstract class AbstractRevision {
 
 	public static function getModerationChangeTypes() {
 		if ( self::$moderationChangeTypes === null ) {
-			self::$moderationChangeTypes = array();
-			foreach( self::$perms as $perm ) {
+			self::$moderationChangeTypes = [];
+			foreach ( self::$perms as $perm ) {
 				if ( $perm != '' ) {
 					self::$moderationChangeTypes[] = "{$perm}-topic";
 					self::$moderationChangeTypes[] = "{$perm}-post";
@@ -772,11 +795,11 @@ abstract class AbstractRevision {
 	}
 
 	public function isModerationChange() {
-		 return in_array( $this->getChangeType(), self::getModerationChangeTypes() );
+		return in_array( $this->getChangeType(), self::getModerationChangeTypes() );
 	}
 
 	/**
-	 * @return integer
+	 * @return int
 	 */
 	public function getContentLength() {
 		return $this->contentLength;
@@ -786,14 +809,14 @@ abstract class AbstractRevision {
 	/**
 	 * Determines the content length by measuring the actual content.
 	 *
-	 * @return integer
+	 * @return int
 	 */
 	public function calculateContentLength() {
 		return mb_strlen( $this->getContentInWikitext() );
 	}
 
 	/**
-	 * @return integer
+	 * @return int
 	 */
 	public function getPreviousContentLength() {
 		return $this->previousContentLength;
@@ -819,15 +842,23 @@ abstract class AbstractRevision {
 		}
 		$namespace = $title->getNamespace();
 
-		$conditions = array(
+		$conditions = [
 			'rc_title' => $title->getDBkey(),
 			'rc_timestamp' => $timestamp,
 			'rc_namespace' => $namespace
-		);
-		$options = array( 'USE INDEX' => 'rc_timestamp' );
+		];
+		$options = [ 'USE INDEX' => [ 'recentchanges' => 'rc_timestamp' ] ];
 
-		$dbr = wfGetDB( DB_SLAVE );
-		$rows = $dbr->select( 'recentchanges', RecentChange::selectFields(), $conditions, __METHOD__, $options );
+		$dbr = wfGetDB( DB_REPLICA );
+		$rcQuery = RecentChange::getQueryInfo();
+		$rows = $dbr->select(
+			$rcQuery['tables'],
+			$rcQuery['fields'],
+			$conditions,
+			__METHOD__,
+			$options,
+			$rcQuery['joins']
+		);
 
 		if ( $rows === false ) {
 			return null;
@@ -840,7 +871,9 @@ abstract class AbstractRevision {
 		// it is possible that more than 1 changes on the same page have the same timestamp
 		// the revision id is hidden in rc_params['flow-workflow-change']['revision']
 		$revId = $this->revId->getAlphadecimal();
+		// @codingStandardsIgnoreStart
 		while ( $row = $rows->next() ) {
+		// @codingStandardsIgnoreEnd
 			$rc = RecentChange::newFromRow( $row );
 			$params = $rc->parseParams();
 			if ( $params && $params['flow-workflow-change']['revision'] === $revId ) {
@@ -869,7 +902,7 @@ abstract class AbstractRevision {
 	/**
 	 * Get the user ID of the user who created this summary.
 	 *
-	 * @return integer The user ID
+	 * @return int The user ID
 	 */
 	public function getCreatorId() {
 		return $this->getCreatorTuple()->id;

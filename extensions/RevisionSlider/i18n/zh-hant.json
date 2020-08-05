@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226",
+			"Cwlin0416",
+			"一個正常人",
+			"Bowleerin",
+			"Kly"
+		]
+	},
+	"revisionslider": "修訂時間軸",
+	"revisionslider-preference-disable": "不要顯示修訂時間軸",
+	"revisionslider-desc": "在修訂版本差異頁面上顯示時間軸，同時可供選擇並比較修訂版本間的差異",
+	"revisionslider-toggle-label": "檢視歷史",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|位元組|位元組}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|位元組|位元組}}",
+	"revisionslider-label-date": "日期",
+	"revisionslider-label-page-size": "頁面大小",
+	"revisionslider-label-change-size": "變更大小",
+	"revisionslider-label-comment": "注釋",
+	"revisionslider-label-username": "{{GENDER:$1|使用者名稱}}",
+	"revisionslider-minoredit": "這是一個小修改",
+	"revisionslider-loading-failed": "修訂時間軸載入失敗。",
+	"revisionslider-toggle-title-expand": "開啟修訂時間軸",
+	"revisionslider-toggle-title-collapse": "隱藏修訂時間軸",
+	"revisionslider-turn-on-auto-expand-title": "每次都展開修訂時間軸",
+	"revisionslider-turn-off-auto-expand-title": "不要自動顯示修訂時間軸",
+	"revisionslider-arrow-tooltip-newer": "檢視較新的修訂版本",
+	"revisionslider-arrow-tooltip-older": "檢視先前的修訂版本",
+	"revisionslider-show-help-tooltip": "顯示說明文字",
+	"revisionslider-help-dialog-slide1": "修訂時間軸可以在您於差異頁面比較修訂版本時，協助並引導您。此功能是根據德語維基社群技術願望清單的[//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider 社群願望]為基礎。歡迎您踴躍[//www.mediawiki.org/wiki/Extension_talk:RevisionSlider 於此處提供回饋]。",
+	"revisionslider-help-dialog-slide2": "每個縱條代表一個頁面修訂版本。在時間軸之上的縱條顯示頁面增加的大小，時間軸下方的縱條代表減少的大小。在圖片中，修訂版本1代表內容增加，而修訂版本2代表內容減少。",
+	"revisionslider-help-dialog-slide3a": "<p>若要比較特定修訂版本，請使用黃色及藍色旋鈕選擇修訂版本。</p><p>藍色旋鈕控制較新的編輯，黃色旋鈕表示較舊的編輯。</p><p>您可以透過拖曳或點擊縱條來移動旋鈕。</p>",
+	"revisionslider-help-dialog-slide4": "使用向後及向前箭頭在修訂歷史之間移動，以顯示較舊或較新的修訂版本。",
+	"revisionslider-tutorial": "修訂時間軸教學",
+	"revisionslider-previous-dialog": "上一步",
+	"revisionslider-next-dialog": "下一步",
+	"revisionslider-close-dialog": "關閉"
+}

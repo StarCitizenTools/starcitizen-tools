@@ -14,14 +14,17 @@
  *
  * @file
  * @ingroup Extensions
- * @licence GNU General Public Licence 2.0 or later
- * @licence MIT License
+ * @license GPL-2.0-or-later
+ * @license MIT License
  */
 
 class UniversalLanguageSelectorHooks {
-	// Used when extension registration in use which skips the main php file
+
+	/**
+	 * Used when extension registration in use which skips the main php file
+	 */
 	public static function setVersionConstant() {
-		define( 'ULS_VERSION', '2015-06-08' );
+		define( 'ULS_VERSION', '2017-07-25' );
 	}
 
 	/**
@@ -88,6 +91,8 @@ class UniversalLanguageSelectorHooks {
 	 * user account is new.
 	 *
 	 * To be removed once no longer needed.
+	 * @param User $user
+	 * @param bool $autoCreate
 	 */
 	public static function onLocalUserCreated( User $user, $autoCreate ) {
 		if ( RequestContext::getMain()->getConfig()->get( 'ULSCompactLinksForNewAccounts' ) ) {
@@ -105,9 +110,6 @@ class UniversalLanguageSelectorHooks {
 	public static function addModules( $out, $skin ) {
 		global $wgULSPosition, $wgULSGeoService, $wgULSEventLogging;
 
-		// Load the style for users without JS, to hide the useless links
-		$out->addModuleStyles( 'ext.uls.nojs' );
-
 		// If EventLogging integration is enabled, load the schema module
 		// and the event logging functions module
 		if ( $wgULSEventLogging ) {
@@ -117,7 +119,10 @@ class UniversalLanguageSelectorHooks {
 		// If the extension is enabled, basic features (API, language data) available.
 		$out->addModules( 'ext.uls.init' );
 
-		if ( self::isCompactLinksEnabled( $out->getUser() ) ) {
+		// Soft dependency to Wikibase client. Don't enable CLL if links are managed manually.
+		$excludedLinks = $out->getProperty( 'noexternallanglinks' );
+		$override = is_array( $excludedLinks ) && in_array( '*', $excludedLinks );
+		if ( !$override && self::isCompactLinksEnabled( $out->getUser() ) ) {
 			$out->addModules( 'ext.uls.compactlinks' );
 		}
 
@@ -131,20 +136,20 @@ class UniversalLanguageSelectorHooks {
 		}
 
 		if ( $wgULSPosition === 'personal' ) {
-			$out->addModules( 'ext.uls.pt' );
+			$out->addModuleStyles( 'ext.uls.pt' );
 		} else {
-			$out->addModules( 'ext.uls.interlanguage' );
+			$out->addModuleStyles( 'ext.uls.interlanguage' );
 		}
 
 		return true;
 	}
 
 	public static function onEventLoggingRegisterSchemas( array &$schemas ) {
-		$schemas['UniversalLanguageSelector'] = 7327441;
+		$schemas['UniversalLanguageSelector'] = 17799034;
 	}
 
 	/**
-	 * @param $testModules array of javascript testing modules. 'qunit' is fed
+	 * @param array &$testModules array of javascript testing modules. 'qunit' is fed
 	 * using tests/qunit/QUnitTestResources.php.
 	 * @param ResourceLoader $resourceLoader
 	 * @return bool
@@ -164,6 +169,9 @@ class UniversalLanguageSelectorHooks {
 	/**
 	 * Add some tabs for navigation for users who do not use Ajax interface.
 	 * Hook: PersonalUrls
+	 * @param array &$personal_urls
+	 * @param string &$title
+	 * @return true
 	 */
 	public static function addPersonalBarTrigger( array &$personal_urls, &$title ) {
 		global $wgULSPosition;
@@ -183,7 +191,7 @@ class UniversalLanguageSelectorHooks {
 			'uls' => [
 				'text' => Language::fetchLanguageName( $langCode ),
 				'href' => '#',
-				'class' => 'uls-trigger autonym',
+				'class' => 'uls-trigger',
 				'active' => true
 			]
 		] + $personal_urls;
@@ -222,7 +230,7 @@ class UniversalLanguageSelectorHooks {
 	/**
 	 * Hook to UserGetLanguageObject
 	 * @param User $user
-	 * @param string $code
+	 * @param string &$code
 	 * @param IContextSource $context
 	 * @return bool
 	 */
@@ -250,7 +258,7 @@ class UniversalLanguageSelectorHooks {
 				$user->setOption( 'language', $languageToSave );
 				$code = $languageToSave;
 				// Promise to sync the DB on post-send
-				DeferredUpdates::addCallableUpdate( function() use ( $user ) {
+				DeferredUpdates::addCallableUpdate( function () use ( $user ) {
 					$user->saveSettings();
 				} );
 			}
@@ -295,7 +303,7 @@ class UniversalLanguageSelectorHooks {
 
 	/**
 	 * Hook: ResourceLoaderGetConfigVars
-	 * @param array $vars
+	 * @param array &$vars
 	 * @return bool
 	 */
 	public static function addConfig( &$vars ) {
@@ -307,7 +315,8 @@ class UniversalLanguageSelectorHooks {
 			$wgULSImeSelectors, $wgULSNoImeSelectors,
 			$wgULSFontRepositoryBasePath,
 			$wgExtensionAssetsPath,
-			$wgWBClientSettings;
+			$wgWBClientSettings,
+			$wgInterwikiSortingSortPrepend;
 
 		// Place constant stuff here (not depending on request context)
 
@@ -334,10 +343,8 @@ class UniversalLanguageSelectorHooks {
 				'/UniversalLanguageSelector/data/fontrepo/fonts/';
 		}
 
-		// Cannot check where whether CLL is enabled for a particular user. The overhead
-		// of including this data is small.
-		if ( isset( $wgWBClientSettings['sortPrepend'] ) ) {
-			$vars['wgULSCompactLinksPrepend'] = $wgWBClientSettings['sortPrepend'];
+		if ( isset( $wgInterwikiSortingSortPrepend ) && $wgInterwikiSortingSortPrepend !== [] ) {
+			$vars['wgULSCompactLinksPrepend'] = $wgInterwikiSortingSortPrepend;
 		}
 
 		return true;
@@ -345,7 +352,7 @@ class UniversalLanguageSelectorHooks {
 
 	/**
 	 * Hook: MakeGlobalVariablesScript
-	 * @param array $vars
+	 * @param array &$vars
 	 * @param OutputPage $out
 	 * @return bool
 	 */
@@ -354,9 +361,23 @@ class UniversalLanguageSelectorHooks {
 
 		// Place request context dependent stuff here
 
+		$user = $out->getUser();
+		$loggedIn = $user->isLoggedIn();
+
 		// Do not output accept languages if there is risk it will get cached accross requests
-		if ( $wgULSAnonCanChangeLanguage || $out->getUser()->isLoggedIn() ) {
+		if ( $wgULSAnonCanChangeLanguage || $loggedIn ) {
 			$vars['wgULSAcceptLanguageList'] = array_keys( $out->getRequest()->getAcceptLang() );
+		}
+
+		if ( $loggedIn && class_exists( Babel::class ) ) {
+			$userLanguageInfo = Babel::getCachedUserLanguageInfo( $user );
+
+			// This relies on the fact that Babel levels are 'N' and
+			// the digits 0 to 5 as strings, and that in reverse
+			// ASCII order they will be 'N', '5', '4', '3', '2', '1', '0'.
+			arsort( $userLanguageInfo );
+
+			$vars['wgULSBabelLanguages'] = array_keys( $userLanguageInfo );
 		}
 
 		// An optimization to avoid loading all of uls.data just to get the autonym
@@ -387,7 +408,10 @@ class UniversalLanguageSelectorHooks {
 			$preferences['compact-language-links'] = [
 				'type' => 'check',
 				'section' => 'rendering/languages',
-				'label-message' => 'ext-uls-compact-language-links-preference'
+				'label-message' => [
+					'ext-uls-compact-language-links-preference',
+					'mediawikiwiki:Special:MyLanguage/Universal_Language_Selector/Compact_Language_Links'
+				]
 			];
 		}
 
@@ -407,11 +431,12 @@ class UniversalLanguageSelectorHooks {
 				'label-message' => 'uls-betafeature-label',
 				'desc-message' => 'uls-betafeature-desc',
 				'screenshot' => [
-					'ltr' => "$imagesDir/compact-links-ltr.png",
-					'rtl' => "$imagesDir/compact-links-rtl.png",
+					'ltr' => "$imagesDir/compact-links-ltr.svg",
+					'rtl' => "$imagesDir/compact-links-rtl.svg",
 				],
 				'info-link' =>
-					'https://www.mediawiki.org/wiki/Universal_Language_Selector/Compact_Language_Links',
+					'https://www.mediawiki.org/wiki/Special:MyLanguage/' .
+					'Universal_Language_Selector/Compact_Language_Links',
 				'discussion-link' =>
 					'https://www.mediawiki.org/wiki/Talk:Universal_Language_Selector/Compact_Language_Links',
 			];
@@ -437,12 +462,10 @@ class UniversalLanguageSelectorHooks {
 			return true;
 		}
 
-		// A dummy link, just to make sure that the section appears
-		$template->data['language_urls'][] = [
-			'href' => '#',
-			'text' => '',
-			'class' => 'uls-p-lang-dummy',
-		];
+		// Set to an empty array, just to make sure that the section appears
+		if ( $template->get( 'language_urls' ) === false ) {
+			$template->set( 'language_urls', [] );
+		}
 
 		return true;
 	}
@@ -465,74 +488,49 @@ class UniversalLanguageSelectorHooks {
 	}
 
 	/**
-	 * Conditionally register jquery.18n (backwards copatbility for those on pre-MediaWiki 1.26).
+	 * Conditionally register module ext.uls.eventlogger.
 	 *
 	 * @param ResourceLoader $resourceLoader
-	 * @return boolean true
+	 * @return bool true
 	 */
 	public static function onResourceLoaderRegisterModules( ResourceLoader $resourceLoader ) {
-		global $wgResourceModules, $wgULSEventLogging;
+		global $wgULSEventLogging, $wgVersion;
 
-		if (
-			(
-				(
-					is_callable( [ $resourceLoader, 'isModuleRegistered' ] ) &&
-					!$resourceLoader->isModuleRegistered( 'jquery.i18n' )
-				)
-				||
-				$resourceLoader->getModule( 'jquery.i18n' ) === null
-			)
-			&&
-			!isset( $wgResourceModules[ 'jquery.i18n' ] )
-		) {
-			$resourceLoader->register( [
-				'jquery.i18n' => [
-					'scripts' => [
-						'lib/jquery.i18n/jquery.i18n.js',
-						'lib/jquery.i18n/jquery.i18n.messagestore.js',
-						'lib/jquery.i18n/jquery.i18n.parser.js',
-						'lib/jquery.i18n/jquery.i18n.emitter.js',
-						'lib/jquery.i18n/jquery.i18n.emitter.bidi.js',
-						'lib/jquery.i18n/jquery.i18n.language.js',
-					],
-					'dependencies' => 'mediawiki.libs.pluralruleparser',
-					'languageScripts' => [
-						'bs' => 'lib/jquery.i18n/languages/bs.js',
-						'dsb' => 'lib/jquery.i18n/languages/dsb.js',
-						'fi' => 'lib/jquery.i18n/languages/fi.js',
-						'ga' => 'lib/jquery.i18n/languages/ga.js',
-						'he' => 'lib/jquery.i18n/languages/he.js',
-						'hsb' => 'lib/jquery.i18n/languages/hsb.js',
-						'hu' => 'lib/jquery.i18n/languages/hu.js',
-						'hy' => 'lib/jquery.i18n/languages/hy.js',
-						'la' => 'lib/jquery.i18n/languages/la.js',
-						'ml' => 'lib/jquery.i18n/languages/ml.js',
-						'os' => 'lib/jquery.i18n/languages/os.js',
-						'ru' => 'lib/jquery.i18n/languages/ru.js',
-						'sl' => 'lib/jquery.i18n/languages/sl.js',
-						'uk' => 'lib/jquery.i18n/languages/uk.js',
-					],
-					'targets' => [ 'desktop', 'mobile' ],
-					'localBasePath' => __DIR__,
-					'remoteExtPath' => 'UniversalLanguageSelector',
-				]
-			] );
+		$modules = [];
+		$modules['ext.uls.compactlinks'] = [
+			'scripts' => 'js/ext.uls.compactlinks.js',
+			'styles' => 'css/ext.uls.compactlinks.less',
+			'dependencies' => [
+				'mediawiki.jqueryMsg',
+				'mediawiki.language',
+				'mediawiki.ui.button',
+				'ext.uls.init'
+			],
+			'messages' => [
+				'ext-uls-compact-link-count',
+				'ext-uls-compact-link-info',
+				'ext-uls-compact-no-results'
+			],
+			'localBasePath' => __DIR__ . '/resources',
+			'remoteExtPath' => 'UniversalLanguageSelector/resources'
+		];
+		if ( version_compare( $wgVersion, '1.29', '<' ) ) {
+			// Support: MediaWiki 1.28 and earlier (T162590)
+			$modules['ext.uls.compactlinks']['dependencies'][] = 'es5-shim';
 		}
 
 		if ( $wgULSEventLogging ) {
-			$resourceLoader->register( [
-				'ext.uls.eventlogger' => [
-					'scripts' => 'js/ext.uls.eventlogger.js',
-					'dependencies' => [
-						'mediawiki.user',
-						'schema.UniversalLanguageSelector',
-					],
-					'localBasePath' => __DIR__ . '/resources',
-					'remoteExtPath' => 'UniversalLanguageSelector/resources',
+			$modules['ext.uls.eventlogger'] = [
+				'scripts' => 'js/ext.uls.eventlogger.js',
+				'dependencies' => [
+					'mediawiki.user',
+					'schema.UniversalLanguageSelector',
 				],
-			] );
+				'localBasePath' => __DIR__ . '/resources',
+				'remoteExtPath' => 'UniversalLanguageSelector/resources',
+			];
 		}
 
-		return true;
+		$resourceLoader->register( $modules );
 	}
 }

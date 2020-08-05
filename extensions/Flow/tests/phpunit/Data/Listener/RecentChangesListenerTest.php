@@ -15,16 +15,16 @@ use User;
 class RecentChangesListenerTest extends \MediaWikiTestCase {
 
 	public function somethingProvider() {
-		return array(
-			array(
+		return [
+			[
 				'Reply recent change goes to the topic',
 				NS_TOPIC,
-				function( $workflow, $user ) {
+				function ( $workflow, $user ) {
 					$first = PostRevision::createTopicPost( $workflow, $user, 'blah blah' );
 					return $first->reply( $workflow, $user, 'fofofo', 'wikitext' );
 				},
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -46,7 +46,7 @@ class RecentChangesListenerTest extends \MediaWikiTestCase {
 		$change = $this->getMock( 'RecentChange' );
 		$rcFactory->expects( $this->once() )
 			->method( 'newFromRow' )
-			->will( $this->returnCallback( function( $obj ) use ( &$ref, $change ) {
+			->will( $this->returnCallback( function ( $obj ) use ( &$ref, $change ) {
 				$ref = $obj;
 				return $change;
 			} ) );
@@ -59,8 +59,8 @@ class RecentChangesListenerTest extends \MediaWikiTestCase {
 
 		$rc->onAfterInsert(
 			$revision,
-			array( 'rev_user_id' => 0, 'rev_user_ip' => '127.0.0.1' ),
-			array( 'workflow' => $workflow )
+			[ 'rev_user_id' => 0, 'rev_user_ip' => '127.0.0.1' ],
+			[ 'workflow' => $workflow ]
 		);
 		$this->assertNotNull( $ref );
 		$this->assertEquals( $expect, $ref->rc_namespace, $message );

@@ -2,10 +2,13 @@
 
 namespace Flow;
 
+use Article;
 use ContextSource;
 use Flow\Block\AbstractBlock;
+use Flow\Block\TopicBlock;
 use Flow\Exception\InvalidActionException;
 use Flow\Model\Anchor;
+use Flow\Model\HtmlRenderingInformation;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
 use Html;
@@ -14,7 +17,6 @@ use IContextSource;
 use Message;
 use OutputPage;
 use Title;
-use WebRequest;
 
 class View extends ContextSource {
 	/**
@@ -75,52 +77,75 @@ class View extends ContextSource {
 			$block->setPageTitle( $output );
 		}
 
+		$robotPolicy = $this->getRobotPolicy( $action, $loader->getWorkflow(), $blocks );
+		$this->renderApiResponse( $apiResponse, $robotPolicy );
+	}
 
-		$this->renderApiResponse( $apiResponse );
+	private function getRobotPolicy( $action, $workflow, $blocks ) {
+		if ( $action !== 'view' ) {
+			// consistent with 'edit' and other action pages in Core
+			return [
+				'index' => 'noindex',
+				'follow' => 'nofollow',
+			];
+		}
+
+		if ( $workflow->getType() === 'topic' ) {
+			/** @var TopicBlock $topic */
+			$topic = $blocks[ 'topic' ];
+			$topicRev = $topic->loadTopicTitle();
+			if ( !$topicRev || $topicRev->isHidden() ) {
+				return [
+					'index' => 'noindex',
+					'follow' => 'nofollow',
+				];
+			}
+		}
+
+		$boardTitle = $workflow->getOwnerTitle();
+		$article = Article::newFromTitle( $boardTitle, $this->getContext() );
+		return $article->getRobotPolicy( /* unused $action parameter */ null );
 	}
 
 	protected function addModules( OutputPage $out, $action ) {
 		if ( $this->actions->hasValue( $action, 'modules' ) ) {
 			$out->addModules( $this->actions->getValue( $action, 'modules' ) );
 		} else {
-			$out->addModules( array( 'ext.flow' ) );
+			$out->addModules( [ 'ext.flow' ] );
 		}
 
 		if ( $this->actions->hasValue( $action, 'moduleStyles' ) ) {
 			$out->addModuleStyles( $this->actions->getValue( $action, 'moduleStyles' ) );
 		} else {
-			$out->addModuleStyles( array(
+			$out->addModuleStyles( [
 				'mediawiki.ui',
 				'mediawiki.ui.anchor',
 				'mediawiki.ui.button',
 				'mediawiki.ui.input',
 				'mediawiki.ui.icon',
 				'mediawiki.ui.text',
+				'mediawiki.special.changeslist',
+				'mediawiki.editfont.styles',
 				'ext.flow.styles.base' ,
 				'ext.flow.mediawiki.ui.form',
 				'ext.flow.mediawiki.ui.text',
-				'oojs-ui.styles.icons',
-				'oojs-ui.styles.icons-layout',
-				'oojs-ui.styles.icons-interactions',
 				'ext.flow.board.styles',
 				'ext.flow.board.topic.styles',
-				'oojs-ui.styles.icons',
 				'oojs-ui.styles.icons-alerts',
 				'oojs-ui.styles.icons-content',
 				'oojs-ui.styles.icons-layout',
 				'oojs-ui.styles.icons-movement',
 				'oojs-ui.styles.icons-indicators',
+				'oojs-ui.styles.icons-interactions',
 				'oojs-ui.styles.icons-editing-core',
 				'oojs-ui.styles.icons-moderation',
-				// Needed for pending texture while switching editors
-				'oojs-ui.styles.textures'
-			) );
+			] );
 		}
 
 		// Add Parsoid modules if necessary
 		Conversion\Utils::onFlowAddModules( $out );
 		// Allow other extensions to add modules
-		Hooks::run( 'FlowAddModules', array( $out ) );
+		Hooks::run( 'FlowAddModules', [ $out ] );
 	}
 
 	protected function handleSubmit( WorkflowLoader $loader, $action, array $parameters ) {
@@ -148,21 +173,21 @@ class View extends ContextSource {
 		$title = $workflow->getArticleTitle();
 		$user = $this->getUser();
 		$categories = array_keys( $title->getParentCategories() );
-		$categoryObject = array();
-		$linkedCategories = array();
+		$categoryObject = [];
+		$linkedCategories = [];
 
 		// Transform the raw category names into links
 		foreach ( $categories as $value ) {
 			$categoryTitle = Title::newFromText( $value );
-			$categoryObject[ $value ] = array(
+			$categoryObject[ $value ] = [
 				'name' => $value,
 				'exists' => $categoryTitle->exists()
-			);
+			];
 			$linkedCategories[] = \Linker::link( $categoryTitle, htmlspecialchars( $categoryTitle->getText() ) );
 		}
 
 		// @todo This and API should use same code
-		$apiResponse = array(
+		$apiResponse = [
 			'title' => $title->getPrefixedText(),
 			'categories' => $categoryObject,
 			// We need to store the link to the Special:Categories page from the
@@ -170,30 +195,32 @@ class View extends ContextSource {
 			// get the localized link of a special page
 			'specialCategoryLink' => \SpecialPage::getTitleFor( 'Categories' )->getLocalURL(),
 			'workflow' => $workflow->isNew() ? '' : $workflow->getId()->getAlphadecimal(),
-			'blocks' => array(),
+			'blocks' => [],
 			'isWatched' => $user->isWatched( $title ),
 			'watchable' => !$user->isAnon(),
-			'links' => array(
-				'watch-board' => array(
+			'links' => [
+				'watch-board' => [
 					'url' => $title->getLocalUrl( 'action=watch' ),
-				),
-				'unwatch-board' => array(
+				],
+				'unwatch-board' => [
 					'url' => $title->getLocalUrl( 'action=unwatch' ),
-				),
-			)
-		);
+				],
+			]
+		];
 
 		$editToken = $user->getEditToken();
+		$editFont = $user->getOption( 'editfont' );
 		$wasPosted = $this->getRequest()->wasPosted();
 		$topicListBlock = null;
 		foreach ( $blocks as $block ) {
 			if ( $wasPosted ? $block->canSubmit( $action ) : $block->canRender( $action ) ) {
 				$apiResponse['blocks'][$block->getName()] = $block->renderApi( $parameters[$block->getName()] )
-								+ array(
+								+ [
 									'title' => $apiResponse['title'],
 									'block-action-template' => $block->getTemplate( $action ),
 									'editToken' => $editToken,
-								);
+									'editFont' => $editFont,
+								];
 				if ( $block->getName() == 'topiclist' ) {
 					$topicListBlock = $block;
 				}
@@ -202,13 +229,13 @@ class View extends ContextSource {
 
 		// Add category items to the header if they exist
 		if ( count( $linkedCategories ) > 0 && isset( $apiResponse['blocks']['header'] ) ) {
-			$apiResponse['blocks']['header']['categories'] = array(
+			$apiResponse['blocks']['header']['categories'] = [
 				'link' => \Linker::link(
 						\SpecialPage::getTitleFor( 'Categories' ),
 						wfMessage( 'pagecategories' )->params( count( $linkedCategories ) )->text()
 					) . wfMessage( 'colon-separator' )->text(),
 				'items' => $linkedCategories
-			);
+			];
 		}
 
 		if ( isset( $topicListBlock ) && isset( $parameters['topiclist'] ) ) {
@@ -222,7 +249,7 @@ class View extends ContextSource {
 			throw new InvalidActionException( "No blocks accepted action: $action", 'invalid-action' );
 		}
 
-		array_walk_recursive( $apiResponse, function( &$value ) {
+		array_walk_recursive( $apiResponse, function ( &$value ) {
 			if ( $value instanceof Anchor ) {
 				$anchor = $value;
 				$value = $value->toArray();
@@ -243,10 +270,10 @@ class View extends ContextSource {
 		return $apiResponse;
 	}
 
-	protected function renderApiResponse( array $apiResponse ) {
+	protected function renderApiResponse( array $apiResponse, array $robotPolicy ) {
 		// Render the flow-component wrapper
 		if ( empty( $apiResponse['blocks'] ) ) {
-			return array();
+			return [];
 		}
 
 		$out = $this->getOutput();
@@ -263,7 +290,7 @@ class View extends ContextSource {
 		// Add JSON blob for OOUI widgets
 		$out->addJsConfigVars( 'wgFlowData', $jsonBlobResponse );
 
-		$renderedBlocks = array();
+		$renderedBlocks = [];
 		foreach ( $apiResponse['blocks'] as $block ) {
 			// @todo find a better way to do this; potentially make all blocks their own components
 			switch ( $block['type'] ) {
@@ -285,6 +312,20 @@ class View extends ContextSource {
 					$page = 'board';
 			}
 
+			if ( isset( $block['errors'] ) ) {
+				foreach ( $block['errors'] as $error ) {
+					if ( isset( $error['extra']['details'] ) &&
+						$error['extra']['details'] instanceof HtmlRenderingInformation
+					) {
+						$renderingInfo = $error['extra']['details'];
+
+						$out->addHeadItems( $renderingInfo->getHeadItems() );
+						$out->addModuleStyles( $renderingInfo->getModuleStyles() );
+						$out->addModules( $renderingInfo->getModules() );
+					}
+				}
+			}
+
 			// Don't re-render a block type twice in one page
 			if ( isset( $renderedBlocks[$flowComponent] ) ) {
 				continue;
@@ -294,22 +335,28 @@ class View extends ContextSource {
 			// Get the block loop template
 			$template = $this->lightncandy->getTemplate( 'flow_block_loop' );
 
-			$classes = array( 'flow-component', "flow-$page-page" );
+			$classes = [ 'flow-component', "flow-$page-page" ];
 
 			// Always add mw-content-{ltr,rtl} class
 			$title = Title::newFromText( $apiResponse['title'] );
 			$classes[] = 'mw-content-' . $title->getPageViewLanguage()->getDir();
 
+			$action = $this->getRequest()->getVal( 'action', 'view' );
+			$classes[] = "flow-action-$action";
+
 			// Output the component, with the rendered blocks inside it
 			$out->addHTML( Html::rawElement(
 				'div',
-				array(
+				[
 					'class'               => implode( ' ', $classes ),
 					'data-flow-component' => $flowComponent,
 					'data-flow-id'        => $apiResponse['workflow'],
-				),
+				],
 				$template( $apiResponse )
 			) );
+
+			$out->setIndexPolicy( $robotPolicy[ 'index' ] );
+			$out->setFollowPolicy( $robotPolicy[ 'follow' ] );
 		}
 	}
 
@@ -325,23 +372,22 @@ class View extends ContextSource {
 	 * Helper function extracts parameters from a WebRequest.
 	 *
 	 * @param string $action
-	 * @param WebRequest $request
 	 * @param AbstractBlock[] $blocks
 	 * @return array
 	 */
 	public function extractBlockParameters( $action, array $blocks ) {
 		$request = $this->getRequest();
-		$result = array();
+		$result = [];
 		// BC for old parameters enclosed in square brackets
 		foreach ( $blocks as $block ) {
 			$name = $block->getName();
-			$result[$name] = $request->getArray( $name, array() );
+			$result[$name] = $request->getArray( $name, [] );
 		}
 		// BC for topic_list renamed to topiclist
 		if ( isset( $result['topiclist'] ) && !$result['topiclist'] ) {
-			$result['topiclist'] = $request->getArray( 'topic_list', array() );
+			$result['topiclist'] = $request->getArray( 'topic_list', [] );
 		}
-		$globalData = array( 'action' => $action );
+		$globalData = [ 'action' => $action ];
 		foreach ( $request->getValues() as $name => $value ) {
 			// between urls only allowing [-_.] as unencoded special chars and
 			// php mangling all of those into '_', we have to split on '_'

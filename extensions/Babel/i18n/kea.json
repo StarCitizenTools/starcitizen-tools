@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Waldir"
+			"Waldir",
+			"Quintino Lopes Castro Tavares"
 		]
 	},
 	"babel": "Informason di línguas di utilizador",
@@ -18,12 +19,12 @@
 	"babel-4": "Kel utilizador li ta papia [[$2|$3]] [[$1|kuazi sima un falanti nativu]].",
 	"babel-5": "Kel utilizador li ta papia [[$2|$3]] ku un nível [[$1|prifisiunal]].",
 	"babel-N": "Kel utilizador li se língua [[$1|maternu]] e [[$2|$3]].",
-	"babel-0-n": "Kel utilizador li [[$1|ka ta entende]] [[$2|kriolu]] (o e' ta entendê-l ku txeu difikuldadi).",
+	"babel-0-n": "Kel utilizador li [[$1|ka ta entende]] [[$2|kriolu]] (o e ta entendê-l ku txeu difikuldadi).",
 	"babel-1-n": "Kel utilizador li ta papia [[$2|kriolu]] ku un nível [[$1|báziku]].",
 	"babel-2-n": "Kel utilizador li ta papia [[$2|kriolu]] ku un nível [[$1|médiu]].",
 	"babel-3-n": "Kel utilizador li ta papia [[$2|kriolu]] ku un nível [[$1|avansadu]].",
 	"babel-4-n": "Kel utilizador li ta papia [[$2|kriolu]] [[$1|kuazi sima un falanti nativu]].",
-	"babel-5-n": "Kel utilizador li ta papia [[$2|kriolu]] ku un nível [[$1|prufisiunal]].",
+	"babel-5-n": "Kel utilizador li ta papia [[$2|kriolu]] na un nível [[$1|prufisiunal]].",
 	"babel-N-n": "Kel utilizador li se língua [[$1|maternu]] e [[$2|kriolu]].",
 	"babel-footer": "Utilizadoris pur língua"
 }

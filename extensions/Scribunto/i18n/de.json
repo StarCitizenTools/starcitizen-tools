@@ -4,7 +4,8 @@
 			"Kghbln",
 			"Metalhead64",
 			"Hoo",
-			"PerfektesChaos"
+			"PerfektesChaos",
+			"Umherirrender"
 		]
 	},
 	"scribunto-desc": "Ermöglicht eine Umgebung zum Einbetten von Skriptsprachen in Wikiseiten",
@@ -16,7 +17,7 @@
 	"scribunto-doc-page-name": "Module:$1/Doku",
 	"scribunto-doc-page-does-not-exist": "''Die Dokumentation für dieses Modul kann unter [[$1]] erstellt werden''",
 	"scribunto-doc-page-header": "'''Dies ist die Dokumentationsseite für [[$1]]'''",
-	"scribunto-console-intro": "* Modulexporte sind über die Variable „p“ verfügbar. Sie enthalten auch nicht gespeicherte Änderungen.\n* Einer Zeile „=“ voranstellen, um sie als Ausdruck auszuwerten oder print() nutzen.\n* Innerhalb des Modulcodes mw.log() nutzen, um Nachrichten zu dieser Konsole zu senden.",
+	"scribunto-console-intro": "* Modulexporte sind über die Variable „p“ verfügbar. Sie enthalten auch nicht gespeicherte Änderungen.\n* Einer Zeile „=“ voranstellen, um sie als Ausdruck auszuwerten oder print() nutzen. mw.logObject() für Tabellen verwenden.\n* Innerhalb des Modulcodes mw.log() und mw.logObject() nutzen, um Nachrichten zu dieser Konsole zu senden.",
 	"scribunto-console-title": "Fehlerbereinigungskonsole",
 	"scribunto-console-too-large": "Diese Konsolensitzung ist zu umfangreich. Bitte deaktiviere die Konsolenprotokollierung oder verringere die Größe des Moduls.",
 	"scribunto-console-current-src": "Konsoleneingabe",
@@ -35,14 +36,13 @@
 	"scribunto-common-no-details": "Es sind keine weiteren Einzelheiten verfügbar.",
 	"scribunto-lua-in-function": "in der Funktion „$1“",
 	"scribunto-lua-in-main": "im Hauptsegment",
-	"scribunto-lua-in-function-at": "in der Funktion bei  $1:$2",
-	"scribunto-lua-error-location": "Lua-Fehler  $1: $2",
+	"scribunto-lua-in-function-at": "in der Funktion bei $1:$2",
+	"scribunto-lua-error-location": "Lua-Fehler $1: $2",
 	"scribunto-lua-error": "Lua-Fehler: $2",
 	"scribunto-lua-notarrayreturn": "Skriptfehler: Das Modul gab einen $2-Wert zurück. Es wird angenommen, dass eine Tabelle zum Export zurückgegeben wird.",
 	"scribunto-luastandalone-proc-error": "Lua-Fehler: Der Vorgang kann nicht erstellt werden.",
 	"scribunto-luastandalone-proc-error-msg": "Lua-Fehler: Der Prozess konnte nicht erstellt werden: $2",
 	"scribunto-luastandalone-proc-error-proc-open": "Lua-Fehler: Der Prozess konnte nicht erstellt werden: proc_open ist nicht verfügbar. „disable_functions“ der PHP-Konfigurationsanweisung überprüfen.",
-	"scribunto-luastandalone-proc-error-safe-mode": "Lua-Fehler: Der Prozess konnte nicht erstellt werden. Die veraltete PHP-Konfigurationsanweisung „safe_mode“ ist aktiviert.",
 	"scribunto-luastandalone-decode-error": "Interner Lua-Fehler: Die Nachricht konnte nicht dekodiert werden.",
 	"scribunto-luastandalone-write-error": "Interner Lua-Fehler: Es trat ein Fehler beim Schreiben auf.",
 	"scribunto-luastandalone-read-error": "Interner Lua-Fehler: Es trat ein Fehler beim Lesen auf.",
@@ -63,5 +63,7 @@
 	"apihelp-scribunto-console-param-content": "Der neue Inhalt des Moduls.",
 	"apihelp-scribunto-console-param-session": "Sitzungs-Token.",
 	"apihelp-scribunto-console-param-question": "Die nächste Zeile, die als Skript evaluiert werden soll.",
-	"apihelp-scribunto-console-param-clear": "Setzt den aktuellen Sitzungsstatus fest oder löscht ihn."
+	"apihelp-scribunto-console-param-clear": "Setzt den aktuellen Sitzungsstatus fest oder löscht ihn.",
+	"nstab-module": "Modul",
+	"tooltip-ca-nstab-module": "Die Modulseite ansehen"
 }

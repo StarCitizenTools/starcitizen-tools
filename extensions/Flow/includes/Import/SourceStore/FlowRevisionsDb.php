@@ -2,7 +2,7 @@
 
 namespace Flow\Import\SourceStore;
 
-use DatabaseBase;
+use Wikimedia\Rdbms\IDatabase;
 use IP;
 use Flow\Import\IImportHeader;
 use Flow\Import\IImportObject;
@@ -15,6 +15,7 @@ use Flow\Model\UserTuple;
 use Flow\Model\UUID;
 use MWTimestamp;
 use User;
+use Wikimedia\Timestamp\TimestampException;
 
 /**
  * Unlike other source stores, this doesn't really "store" anything. This just
@@ -23,19 +24,19 @@ use User;
  *
  * This is less versatile than other source stores (you can't just throw
  * anything at it, it's tied to a specific schema and throwing new objects at it
- * will prompt changes in here) but it's more reliable (if the source store it
+ * will prompt changes in here) but it's more reliable (if the source store is
  * lost, it can use the "result" of a previous import)
  */
 class FlowRevisionsDb implements SourceStoreInterface {
 	/**
-	 * @var DatabaseBase
+	 * @var IDatabase
 	 */
 	protected $dbr;
 
 	/**
-	 * @param DatabaseBase $dbr
+	 * @param IDatabase $dbr
 	 */
-	public function __construct( DatabaseBase $dbr ) {
+	public function __construct( IDatabase $dbr ) {
 		$this->dbr = $dbr;
 	}
 
@@ -45,13 +46,13 @@ class FlowRevisionsDb implements SourceStoreInterface {
 
 	public function getImportedId( IImportObject $object ) {
 		if ( $object instanceof IImportHeader ) {
-			$conds = array( 'rev_type' => 'header' );
+			$conds = [ 'rev_type' => 'header' ];
 		} elseif ( $object instanceof IImportSummary ) {
-			$conds = array( 'rev_type' => 'post-summary' );
+			$conds = [ 'rev_type' => 'post-summary' ];
 		} elseif ( $object instanceof IImportTopic ) {
-			$conds = array( 'rev_type' => 'post', 'rev_parent_id' => null );
+			$conds = [ 'rev_type' => 'post', 'tree_parent_id' => null ];
 		} elseif ( $object instanceof IImportPost ) {
-			$conds = array( 'rev_type' => 'post', 'rev_parent_id IS NOT NULL' );
+			$conds = [ 'rev_type' => 'post', 'tree_parent_id IS NOT NULL' ];
 		} else {
 			throw new Exception( 'Import object of type ' . get_class( $object ) . ' not supported.' );
 		}
@@ -72,25 +73,43 @@ class FlowRevisionsDb implements SourceStoreInterface {
 	 * @param array $conds
 	 * @return bool|UUID
 	 * @throws Exception
-	 * @throws \DBUnexpectedError
+	 * @throws \Wikimedia\Rdbms\DBUnexpectedError
 	 * @throws \Flow\Exception\FlowException
 	 * @throws \Flow\Exception\InvalidInputException
 	 */
-	protected function getCollectionId( $timestamp, $author, array $conds = array() ) {
+	protected function getCollectionId( $timestamp, $author, array $conds = [] ) {
 		$range = $this->getUUIDRange( new MWTimestamp( $timestamp ) );
 		$tuple = $this->getUserTuple( $author );
 
-		$field = $this->dbr->selectField(
-			array( 'flow_revision' ),
-			array( 'rev_type_id' ),
-			array(
-				'rev_type_id >= ' . $this->dbr->addQuotes( $range[0]->getBinary() ),
-				'rev_type_id < ' . $this->dbr->addQuotes( $range[1]->getBinary() ),
-			) + $tuple->toArray( 'rev_user_' ) + $conds,
-			__METHOD__
+		// flow_revision will LEFT JOIN against flow_tree_revision, meaning that
+		// we'll also have info about the parent; or it can just be ignored if
+		// there is no parent
+		$rows = $this->dbr->select(
+			[ 'flow_revision', 'flow_tree_revision' ],
+			[ 'rev_type_id' ],
+			array_merge(
+				[
+					'rev_type_id >= ' . $this->dbr->addQuotes( $range[0]->getBinary() ),
+					'rev_type_id < ' . $this->dbr->addQuotes( $range[1]->getBinary() ),
+				],
+				$tuple->toArray( 'rev_user_' ),
+				$conds
+			),
+			__METHOD__,
+			[ 'LIMIT' => 1 ],
+			[
+				'flow_tree_revision' => [
+					'LEFT OUTER JOIN',
+					[ 'tree_rev_descendant_id = rev_type_id' ]
+				],
+			]
 		);
 
-		return $field !== false ? UUID::create( $field ) : false;
+		if ( $rows->numRows() === 0 ) {
+			return false;
+		}
+
+		return UUID::create( $rows->fetchObject()->rev_type_id );
 	}
 
 	/**
@@ -134,12 +153,12 @@ class FlowRevisionsDb implements SourceStoreInterface {
 	 *
 	 * @param MWTimestamp $timestamp
 	 * @return UUID[] [min, max]
-	 * @throws \TimestampException
+	 * @throws TimestampException
 	 */
 	protected function getUUIDRange( MWTimestamp $timestamp ) {
-		return array(
-			UUID::getComparisonUUID( (int) $timestamp->getTimestamp( TS_UNIX ) ),
-			UUID::getComparisonUUID( (int) $timestamp->getTimestamp( TS_UNIX ) + 1 ),
-		);
+		return [
+			UUID::getComparisonUUID( (int)$timestamp->getTimestamp( TS_UNIX ) ),
+			UUID::getComparisonUUID( (int)$timestamp->getTimestamp( TS_UNIX ) + 1 ),
+		];
 	}
 }

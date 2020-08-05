@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki WikitextTransferRegistry and registrations.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -21,18 +21,17 @@ ve.ui.mwWikitextTransferRegistry.register(
 
 ve.ui.mwWikitextTransferRegistry.register(
 	'internalLink',
-	// [[...]] on a single line of max 80 characters
-	/\[\[.{1,80}\]\]/m
+	'[['
 );
 
 ve.init.platform.getInitializedPromise().done( function () {
 	ve.ui.mwWikitextTransferRegistry.register(
 		'externalLink',
-			// [url label]
-			new RegExp(
-				'\\[' + ve.init.platform.getUnanchoredExternalLinkUrlProtocolsRegExp().source + '\\S+ [^\\]]+\\]',
-				'i'
-			)
+		// [url label]
+		new RegExp(
+			'\\[' + ve.init.platform.getUnanchoredExternalLinkUrlProtocolsRegExp().source + '\\S+ [^\\]]+\\]',
+			'i'
+		)
 	);
 } );
 

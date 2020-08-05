@@ -31,9 +31,9 @@ class PostRevisionTopicHistoryStorage implements ObjectStorage {
 		$this->treeRepository = $treeRepo;
 	}
 
-	public function find( array $attributes, array $options = array() ) {
-		$multi = $this->findMulti( array( $attributes ), $options );
-		return $multi ? reset( $multi ) : array();
+	public function find( array $attributes, array $options = [] ) {
+		$multi = $this->findMulti( [ $attributes ], $options );
+		return $multi ? reset( $multi ) : [];
 	}
 
 	/**
@@ -44,7 +44,7 @@ class PostRevisionTopicHistoryStorage implements ObjectStorage {
 	 * @param array $options
 	 * @return array
 	 */
-	public function findMulti( array $queries, array $options = array() ) {
+	public function findMulti( array $queries, array $options = [] ) {
 		foreach ( $queries as $idx => $query ) {
 			if ( isset( $query['topic_root_id'] ) ) {
 				$descendantQuery = $this->findDescendantQuery( $query );
@@ -65,28 +65,28 @@ class PostRevisionTopicHistoryStorage implements ObjectStorage {
 	 * This isn't a hot path (should be pre-populated into index) but we still don't want
 	 * horrible performance
 	 *
-	 * @param array $queries
+	 * @param array $query
 	 * @return array
 	 * @throws \Flow\Exception\InvalidInputException
 	 */
 	protected function findDescendantQuery( array $query ) {
-		$roots = array( UUID::create( $query['topic_root_id'] ) );
+		$roots = [ UUID::create( $query['topic_root_id'] ) ];
 		$nodeList = $this->treeRepository->fetchSubtreeNodeList( $roots );
 		if ( $nodeList === false ) {
 			// We can't return the existing $retval, that false data would be cached.
-			return array();
+			return [];
 		}
 
 		/** @var UUID $topicRootId */
 		$topicRootId = UUID::create( $query['topic_root_id'] );
 		$nodes = $nodeList[$topicRootId->getAlphadecimal()];
-		return array(
+		return [
 			'rev_type_id' => UUID::convertUUIDs( $nodes ),
-		);
+		];
 	}
 
 	public function getPrimaryKeyColumns() {
-		return array( 'topic_root_id' );
+		return [ 'topic_root_id' ];
 	}
 
 	public function insert( array $row ) {

@@ -19,8 +19,8 @@
  *
  * @file
  * @ingroup Profiler
- * @author Aaron Schulz
  */
+use Wikimedia\ScopedCallback;
 
 /**
  * Custom PHP profiler for parser/DB type section names that xhprof/xdebug can't handle
@@ -46,8 +46,6 @@ class SectionProfiler {
 	protected $collateOnly = true;
 	/** @var array Cache of a standard broken collation entry */
 	protected $errorEntry;
-	/** @var callable Cache of a profile out callback */
-	protected $profileOutCallback;
 
 	/**
 	 * @param array $params
@@ -55,14 +53,11 @@ class SectionProfiler {
 	public function __construct( array $params = [] ) {
 		$this->errorEntry = $this->getErrorEntry();
 		$this->collateOnly = empty( $params['trace'] );
-		$this->profileOutCallback = function ( $profiler, $section ) {
-			$profiler->profileOutInternal( $section );
-		};
 	}
 
 	/**
 	 * @param string $section
-	 * @return ScopedCallback
+	 * @return SectionProfileCallback
 	 */
 	public function scopedProfileIn( $section ) {
 		$this->profileInInternal( $section );
@@ -71,7 +66,7 @@ class SectionProfiler {
 	}
 
 	/**
-	 * @param ScopedCallback $section
+	 * @param ScopedCallback &$section
 	 */
 	public function scopedProfileOut( ScopedCallback &$section ) {
 		$section = null;
@@ -303,7 +298,7 @@ class SectionProfiler {
 			/* Find all items under this entry */
 			$level = $stack[$max][1];
 			$working = [];
-			for ( $i = $max -1; $i >= 0; $i-- ) {
+			for ( $i = $max - 1; $i >= 0; $i-- ) {
 				if ( $stack[$i][1] > $level ) {
 					$working[] = $stack[$i];
 				} else {
@@ -444,7 +439,7 @@ class SectionProfiler {
 	protected function calltreeCount( $stack, $start ) {
 		$level = $stack[$start][1];
 		$count = 0;
-		for ( $i = $start -1; $i >= 0 && $stack[$i][1] > $level; $i-- ) {
+		for ( $i = $start - 1; $i >= 0 && $stack[$i][1] > $level; $i-- ) {
 			$count ++;
 		}
 		return $count;

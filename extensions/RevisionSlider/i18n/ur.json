@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hindustanilanguage",
+			"امین اکبر",
+			"Macofe",
+			"Muhammad Shuaib"
+		]
+	},
+	"revisionslider": "نسخہ جاتی موازنہ کنندہ",
+	"revisionslider-preference-disable": "نسخہ جاتی موازنہ کنندہ نہ دکھائیں",
+	"revisionslider-desc": "صفحات کے نسخوں کو منتخب کرنے اور ان میں موازنہ کرنے کی سہولت بہم پہنچاتا ہے",
+	"revisionslider-toggle-label": "تاریخچہ دیکھیں",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|بائٹ}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|بائٹ}}",
+	"revisionslider-label-date": "تاریخ",
+	"revisionslider-label-page-size": "صفحے کا حجم",
+	"revisionslider-label-change-size": "تبدیلی کا حجم",
+	"revisionslider-label-comment": "تبصرہ",
+	"revisionslider-label-username": "{{GENDER:$1|صارف نام}}",
+	"revisionslider-minoredit": "یہ ایک معمولی ترمیم ہے",
+	"revisionslider-loading-failed": "نسخوں کا موازنہ لوڈ نہیں ہو سکا۔",
+	"revisionslider-toggle-title-expand": "نسخوں کا موازنہ کریں",
+	"revisionslider-toggle-title-collapse": "نسخوں کا موازنہ بند کریں",
+	"revisionslider-turn-on-auto-expand-title": "نسخوں کا موازنہ ہمیشہ دکھائیں",
+	"revisionslider-turn-off-auto-expand-title": "خودکار طور پر نسخوں کا موازنہ نہ دکھائیں",
+	"revisionslider-arrow-tooltip-newer": "نئے نسخے دیکھیں",
+	"revisionslider-arrow-tooltip-older": "پرانے نسخے دیکھیں",
+	"revisionslider-show-help-tooltip": "متنِ معاونت دکھائیں",
+	"revisionslider-help-dialog-slide1": "نسخوں کے موازنہ کے ذریعہ کسی صفحے کے مختلف نسخوں کو دیکھنا اور ان میں موازنہ کرنا سہل ہو جاتا ہے۔ ([//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider درخواست])",
+	"revisionslider-tutorial": "نسخوں کے موازنہ کا مکمل طریقہ کار",
+	"revisionslider-previous-dialog": "پچھلا",
+	"revisionslider-next-dialog": "اگلا",
+	"revisionslider-close-dialog": "بند کریں"
+}

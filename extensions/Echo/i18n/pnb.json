@@ -1,7 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Khalid Mahmood"
+			"Khalid Mahmood",
+			"Saanvel",
+			"Abbas dhothar",
+			"BukhariSaeed"
 		]
-	}
+	},
+	"notifications": "اطلاعات",
+	"tooltip-pt-notifications-alert": "{{GENDER:|Your}} الرٹس"
 }

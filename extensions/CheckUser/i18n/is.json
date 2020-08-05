@@ -4,7 +4,8 @@
 			"S.Örvarr.S",
 			"Snævar",
 			"Spacebirdy",
-			"පසිඳු කාවින්ද"
+			"පසිඳු කාවින්ද",
+			"Sveinn í Felli"
 		]
 	},
 	"checkuser-desc": "Veitir notendum réttindi til að athuga vistföng notenda og aðrar notendaupplýsingar.",
@@ -13,13 +14,16 @@
 	"group-checkuser-member": "{{GENDER:$1|notenda athugandi}}",
 	"grouppage-checkuser": "{{ns:project}}:Notenda athugandi",
 	"checkuser-reason": "Ástæða:",
-	"checkuser-showlog": "Sýna skrá",
+	"checkuser-reason-api": "API-forritsviðmót: $1",
+	"checkuser-showlog": "Skipta yfir í CheckUser-aðgerðaskrá",
 	"checkuser-query": "Sækja nýlegar breytingar",
 	"checkuser-target": "Notandi eða vistfang:",
 	"checkuser-users": "Sækja notendur",
 	"checkuser-edits": "Sækja breytingar",
 	"checkuser-ips": "Sækja vistföng",
-	"checkuser-search": "Leita",
+	"checkuser-period": "Tímalengd:",
+	"checkuser-week-1": "í síðustu viku",
+	"checkuser-month": "síðustu 30 daga",
 	"checkuser-all": "allt",
 	"checkuser-nomatch": "Engin samsvörun fannst.",
 	"checkuser-check": "Athuga",
@@ -27,5 +31,9 @@
 	"checkuser-blocked": "Bannaður",
 	"checkuser-locked": "Læstur",
 	"checkuser-accounts": "$1 {{PLURAL:$1|nýr aðgangur|nýir aðgangar}}",
-	"checkuser-search-submit": "Leita"
+	"checkuser-search": "Leita",
+	"checkuser-search-submit": "Leita",
+	"checkuser-search-target": "markmið",
+	"checkuser-log-search-target": "Markmið:",
+	"checkuser-reset-action": "endurstilla lykilorð fyrir notandann \"$1\""
 }

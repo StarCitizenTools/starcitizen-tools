@@ -1,7 +1,6 @@
 <?php
 namespace MediaWiki\Tidy;
 
-use ReplacementArray;
 use ParserOutput;
 use Parser;
 
@@ -20,41 +19,46 @@ use Parser;
 class RaggettWrapper {
 
 	/**
-	 * @var ReplacementArray
+	 * @var array
 	 */
 	protected $mTokens;
 
+	/**
+	 * @var int
+	 */
 	protected $mMarkerIndex;
-
-	public function __construct() {
-		$this->mTokens = null;
-	}
 
 	/**
 	 * @param string $text
 	 * @return string
 	 */
 	public function getWrapped( $text ) {
-		$this->mTokens = new ReplacementArray;
+		$this->mTokens = [];
 		$this->mMarkerIndex = 0;
 
 		// Replace <mw:editsection> elements with placeholders
 		$wrappedtext = preg_replace_callback( ParserOutput::EDITSECTION_REGEX,
-			[ &$this, 'replaceCallback' ], $text );
+			[ $this, 'replaceCallback' ], $text );
 		// ...and <mw:toc> markers
 		$wrappedtext = preg_replace_callback( '/\<\\/?mw:toc\>/',
-			[ &$this, 'replaceCallback' ], $wrappedtext );
+			[ $this, 'replaceCallback' ], $wrappedtext );
 		// ... and <math> tags
 		$wrappedtext = preg_replace_callback( '/\<math(.*?)\<\\/math\>/s',
-			[ &$this, 'replaceCallback' ], $wrappedtext );
+			[ $this, 'replaceCallback' ], $wrappedtext );
 		// Modify inline Microdata <link> and <meta> elements so they say <html-link> and <html-meta> so
 		// we can trick Tidy into not stripping them out by including them in tidy's new-empty-tags config
 		$wrappedtext = preg_replace( '!<(link|meta)([^>]*?)(/{0,1}>)!', '<html-$1$2$3', $wrappedtext );
+		// Similar for inline <style> tags, but those aren't empty.
+		$wrappedtext = preg_replace_callback( '!<style([^>]*)>(.*?)</style>!s', function ( $m ) {
+			return '<html-style' . $m[1] . '>'
+				. $this->replaceCallback( [ $m[2] ] )
+				. '</html-style>';
+		}, $wrappedtext );
 
 		// Preserve empty li elements (T49673) by abusing Tidy's datafld hack
 		// The whitespace class is as in TY_(InitMap)
 		$wrappedtext = preg_replace( "!<li>([ \r\n\t\f]*)</li>!",
-			'<li datafld="" class="mw-empty-li">\1</li>', $wrappedtext );
+			'<li datafld="" class="mw-empty-elt">\1</li>', $wrappedtext );
 
 		// Wrap the whole thing in a doctype and body for Tidy.
 		$wrappedtext = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"' .
@@ -66,13 +70,12 @@ class RaggettWrapper {
 
 	/**
 	 * @param array $m
-	 *
 	 * @return string
 	 */
-	public function replaceCallback( $m ) {
+	private function replaceCallback( array $m ) {
 		$marker = Parser::MARKER_PREFIX . "-item-{$this->mMarkerIndex}" . Parser::MARKER_SUFFIX;
 		$this->mMarkerIndex++;
-		$this->mTokens->setPair( $marker, $m[0] );
+		$this->mTokens[$marker] = $m[0];
 		return $marker;
 	}
 
@@ -81,14 +84,15 @@ class RaggettWrapper {
 	 * @return string
 	 */
 	public function postprocess( $text ) {
-		// Revert <html-{link,meta}> back to <{link,meta}>
+		// Revert <html-{link,meta,style}> back to <{link,meta,style}>
 		$text = preg_replace( '!<html-(link|meta)([^>]*?)(/{0,1}>)!', '<$1$2$3', $text );
+		$text = preg_replace( '!<(/?)html-(style)([^>]*)>!', '<$1$2$3>', $text );
 
 		// Remove datafld
 		$text = str_replace( '<li datafld=""', '<li', $text );
 
 		// Restore the contents of placeholder tokens
-		$text = $this->mTokens->replace( $text );
+		$text = strtr( $text, $this->mTokens );
 
 		return $text;
 	}

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Selection class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -95,7 +95,7 @@ ve.ce.Selection.prototype.isFocusedNode = null;
  * Check if the selection is a native cursor selection
  *
  * @abstract
- * @return {boolean} The selection covers a focused node
+ * @return {boolean} The selection is represented by a native cursor
  */
 ve.ce.Selection.prototype.isNativeCursor = null;
 

@@ -43,10 +43,9 @@ class SpecialImport extends SpecialPage {
 	private $includeTemplates = false;
 	private $pageLinkDepth;
 	private $importSources;
+	private $assignKnownUsers;
+	private $usernamePrefix;
 
-	/**
-	 * Constructor
-	 */
 	public function __construct() {
 		parent::__construct( 'Import', 'import' );
 	}
@@ -113,6 +112,7 @@ class SpecialImport extends SpecialPage {
 		$isUpload = false;
 		$request = $this->getRequest();
 		$this->sourceName = $request->getVal( "source" );
+		$this->assignKnownUsers = $request->getCheck( 'assignKnownUsers' );
 
 		$this->logcomment = $request->getText( 'log-comment' );
 		$this->pageLinkDepth = $this->getConfig()->get( 'ExportMaxLinkDepth' ) == 0
@@ -133,6 +133,7 @@ class SpecialImport extends SpecialPage {
 			$source = Status::newFatal( 'import-token-mismatch' );
 		} elseif ( $this->sourceName === 'upload' ) {
 			$isUpload = true;
+			$this->usernamePrefix = $this->fullInterwikiPrefix = $request->getVal( 'usernamePrefix' );
 			if ( $user->isAllowed( 'importupload' ) ) {
 				$source = ImportStreamSource::newFromUpload( "xmlimport" );
 			} else {
@@ -172,12 +173,14 @@ class SpecialImport extends SpecialPage {
 			$source = Status::newFatal( "importunknownsource" );
 		}
 
+		if ( (string)$this->fullInterwikiPrefix === '' ) {
+			$source->fatal( 'importnoprefix' );
+		}
+
 		$out = $this->getOutput();
 		if ( !$source->isGood() ) {
-			$out->wrapWikiMsg(
-				"<p class=\"error\">\n$1\n</p>",
-				[ 'importfailed', $source->getWikiText() ]
-			);
+			$out->addWikiText( "<p class=\"error\">\n" .
+				$this->msg( 'importfailed', $source->getWikiText() )->parse() . "\n</p>" );
 		} else {
 			$importer = new WikiImporter( $source->value, $this->getConfig() );
 			if ( !is_null( $this->namespace ) ) {
@@ -197,6 +200,7 @@ class SpecialImport extends SpecialPage {
 					return;
 				}
 			}
+			$importer->setUsernamePrefix( $this->fullInterwikiPrefix, $this->assignKnownUsers );
 
 			$out->addWikiMsg( "importstart" );
 
@@ -339,6 +343,28 @@ class SpecialImport extends SpecialPage {
 					"</td>
 					<td class='mw-input'>" .
 					Html::input( 'xmlimport', '', 'file', [ 'id' => 'xmlimport' ] ) . ' ' .
+					"</td>
+				</tr>
+				<tr>
+					<td class='mw-label'>" .
+					Xml::label( $this->msg( 'import-upload-username-prefix' )->text(),
+						'mw-import-usernamePrefix' ) .
+					"</td>
+					<td class='mw-input'>" .
+					Xml::input( 'usernamePrefix', 50,
+						$this->usernamePrefix,
+						[ 'id' => 'usernamePrefix', 'type' => 'text' ] ) . ' ' .
+					"</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td class='mw-input'>" .
+					Xml::checkLabel(
+						$this->msg( 'import-assign-known-users' )->text(),
+						'assignKnownUsers',
+						'assignKnownUsers',
+						$this->assignKnownUsers
+					) .
 					"</td>
 				</tr>
 				<tr>
@@ -494,6 +520,17 @@ class SpecialImport extends SpecialPage {
 					) .
 					"</td>
 				</tr>
+				<tr>
+					<td></td>
+					<td class='mw-input'>" .
+					Xml::checkLabel(
+						$this->msg( 'import-assign-known-users' )->text(),
+						'assignKnownUsers',
+						'assignKnownUsers',
+						$this->assignKnownUsers
+					) .
+					"</td>
+				</tr>
 				$importDepth
 				<tr>
 					<td class='mw-label'>" .
@@ -525,150 +562,5 @@ class SpecialImport extends SpecialPage {
 
 	protected function getGroupName() {
 		return 'pagetools';
-	}
-}
-
-/**
- * Reporting callback
- * @ingroup SpecialPage
- */
-class ImportReporter extends ContextSource {
-	private $reason = false;
-	private $mOriginalLogCallback = null;
-	private $mOriginalPageOutCallback = null;
-	private $mLogItemCount = 0;
-
-	/**
-	 * @param WikiImporter $importer
-	 * @param bool $upload
-	 * @param string $interwiki
-	 * @param string|bool $reason
-	 */
-	function __construct( $importer, $upload, $interwiki, $reason = false ) {
-		$this->mOriginalPageOutCallback =
-			$importer->setPageOutCallback( [ $this, 'reportPage' ] );
-		$this->mOriginalLogCallback =
-			$importer->setLogItemCallback( [ $this, 'reportLogItem' ] );
-		$importer->setNoticeCallback( [ $this, 'reportNotice' ] );
-		$this->mPageCount = 0;
-		$this->mIsUpload = $upload;
-		$this->mInterwiki = $interwiki;
-		$this->reason = $reason;
-	}
-
-	function open() {
-		$this->getOutput()->addHTML( "<ul>\n" );
-	}
-
-	function reportNotice( $msg, array $params ) {
-		$this->getOutput()->addHTML(
-			Html::element( 'li', [], $this->msg( $msg, $params )->text() )
-		);
-	}
-
-	function reportLogItem( /* ... */ ) {
-		$this->mLogItemCount++;
-		if ( is_callable( $this->mOriginalLogCallback ) ) {
-			call_user_func_array( $this->mOriginalLogCallback, func_get_args() );
-		}
-	}
-
-	/**
-	 * @param Title $title
-	 * @param ForeignTitle $foreignTitle
-	 * @param int $revisionCount
-	 * @param int $successCount
-	 * @param array $pageInfo
-	 * @return void
-	 */
-	public function reportPage( $title, $foreignTitle, $revisionCount,
-			$successCount, $pageInfo ) {
-		$args = func_get_args();
-		call_user_func_array( $this->mOriginalPageOutCallback, $args );
-
-		if ( $title === null ) {
-			# Invalid or non-importable title; a notice is already displayed
-			return;
-		}
-
-		$this->mPageCount++;
-
-		if ( $successCount > 0 ) {
-			$this->getOutput()->addHTML(
-				"<li>" . Linker::linkKnown( $title ) . " " .
-					$this->msg( 'import-revision-count' )->numParams( $successCount )->escaped() .
-					"</li>\n"
-			);
-
-			$logParams = [ '4:number:count' => $successCount ];
-			if ( $this->mIsUpload ) {
-				$detail = $this->msg( 'import-logentry-upload-detail' )->numParams(
-					$successCount )->inContentLanguage()->text();
-				$action = 'upload';
-			} else {
-				$pageTitle = $foreignTitle->getFullText();
-				$fullInterwikiPrefix = $this->mInterwiki;
-				Hooks::run( 'ImportLogInterwikiLink', [ &$fullInterwikiPrefix, &$pageTitle ] );
-
-				$interwikiTitleStr = $fullInterwikiPrefix . ':' . $pageTitle;
-				$interwiki = '[[:' . $interwikiTitleStr . ']]';
-				$detail = $this->msg( 'import-logentry-interwiki-detail' )->numParams(
-					$successCount )->params( $interwiki )->inContentLanguage()->text();
-				$action = 'interwiki';
-				$logParams['5:title-link:interwiki'] = $interwikiTitleStr;
-			}
-			if ( $this->reason ) {
-				$detail .= $this->msg( 'colon-separator' )->inContentLanguage()->text()
-					. $this->reason;
-			}
-
-			$logEntry = new ManualLogEntry( 'import', $action );
-			$logEntry->setTarget( $title );
-			$logEntry->setComment( $this->reason );
-			$logEntry->setPerformer( $this->getUser() );
-			$logEntry->setParameters( $logParams );
-			$logid = $logEntry->insert();
-			$logEntry->publish( $logid );
-
-			$comment = $detail; // quick
-			$dbw = wfGetDB( DB_MASTER );
-			$latest = $title->getLatestRevID();
-			$nullRevision = Revision::newNullRevision(
-				$dbw,
-				$title->getArticleID(),
-				$comment,
-				true,
-				$this->getUser()
-			);
-
-			if ( !is_null( $nullRevision ) ) {
-				$nullRevision->insertOn( $dbw );
-				$page = WikiPage::factory( $title );
-				# Update page record
-				$page->updateRevisionOn( $dbw, $nullRevision );
-				Hooks::run(
-					'NewRevisionFromEditComplete',
-					[ $page, $nullRevision, $latest, $this->getUser() ]
-				);
-			}
-		} else {
-			$this->getOutput()->addHTML( "<li>" . Linker::linkKnown( $title ) . " " .
-				$this->msg( 'import-nonewrevisions' )->escaped() . "</li>\n" );
-		}
-	}
-
-	function close() {
-		$out = $this->getOutput();
-		if ( $this->mLogItemCount > 0 ) {
-			$msg = $this->msg( 'imported-log-entries' )->numParams( $this->mLogItemCount )->parse();
-			$out->addHTML( Xml::tags( 'li', null, $msg ) );
-		} elseif ( $this->mPageCount == 0 && $this->mLogItemCount == 0 ) {
-			$out->addHTML( "</ul>\n" );
-
-			return Status::newFatal( 'importnopages' );
-		}
-		$out->addHTML( "</ul>\n" );
-
-		return Status::newGood( $this->mPageCount );
 	}
 }

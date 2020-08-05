@@ -1,40 +1,19 @@
-OO.ui.Demo.static.pages.icons = function ( demo ) {
-	var i, len, iconSet, iconsFieldset, iconButton, selector,
+Demo.static.pages.icons = function ( demo ) {
+	var i, len, iconSet, iconsFieldset, iconWidget, selector,
 		icons = {
-			core: [
-				'add',
-				'advanced',
-				'alert',
-				'cancel',
-				'check',
-				'circle',
-				'close',
-				'collapse',
-				'comment',
-				'ellipsis',
-				'expand',
-				'help',
-				'history',
-				'info',
-				'menu',
-				'next',
-				'notice',
-				'previous',
-				'search',
-				'settings',
-				'tag',
-				'window'
-			],
 			movement: [
-				'arrowLast',
+				'arrowPrevious',
 				'arrowNext',
 				'downTriangle',
 				'upTriangle',
-				'caretLast',
-				'caretNext',
-				'caretDown',
-				'caretUp',
-				'move'
+				'first',
+				'previous',
+				'next',
+				'last',
+				'expand',
+				'collapse',
+				'move',
+				'draggable'
 			],
 			content: [
 				'article',
@@ -44,54 +23,70 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 				'articleRedirect',
 				'citeArticle',
 				'book',
+				'history',
+				'info',
 				'journal',
 				'newspaper',
 				'folderPlaceholder',
 				'die',
 				'download',
-				'upload'
+				'tag',
+				'upload',
+				'window'
 			],
 			alerts: [
+				'alert',
 				'bell',
-				'bellOn',
-				'eye',
-				'eyeClosed',
+				'comment',
 				'message',
-				'signature',
+				'notice',
 				'speechBubble',
 				'speechBubbleAdd',
-				'speechBubbles'
+				'speechBubbles',
+				'tray'
 			],
 			interactions: [
-				'beta',
-				'betaLaunch',
-				'bookmark',
+				'add',
+				'advanced',
 				'browser',
+				'cancel',
+				'check',
+				'checkAll',
 				'clear',
 				'clock',
+				'close',
+				'ellipsis',
+				'feedback',
 				'funnel',
 				'heart',
+				'help',
 				'key',
 				'keyboard',
+				'lightbulb',
 				'logOut',
 				'newWindow',
 				'printer',
-				'ribbonPrize',
-				'sun',
-				'watchlist'
+				'reload',
+				'search',
+				'settings',
+				'subtract'
 			],
 			moderation: [
+				'bookmarkOutline',
+				'bookmark',
 				'block',
-				'blockUndo',
+				'unBlock',
 				'flag',
-				'flagUndo',
+				'unFlag',
 				'lock',
-				'ongoingConversation',
+				'unLock',
 				'star',
-				'trash',
-				'trashUndo',
+				'halfStar',
 				'unStar',
-				'unLock'
+				'trash',
+				'unTrash',
+				'pushPin',
+				'ongoingConversation'
 			],
 			'editing-core': [
 				'edit',
@@ -109,6 +104,7 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 				'subscript',
 				'superscript',
 				'bold',
+				'highlight',
 				'italic',
 				'strikethrough',
 				'underline',
@@ -123,7 +119,7 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 				'outdent'
 			],
 			'editing-advanced': [
-				'alignCentre',
+				'alignCenter',
 				'alignLeft',
 				'alignRight',
 				'attachment',
@@ -138,9 +134,10 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 				'outline',
 				'puzzle',
 				'quotes',
-				'quotesAdd',
 				'searchCaseSensitive',
+				'searchDiacritics',
 				'searchRegularExpression',
+				'signature',
 				'specialCharacter',
 				'table',
 				'tableAddColumnAfter',
@@ -149,34 +146,39 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 				'tableAddRowBefore',
 				'tableCaption',
 				'tableMergeCells',
+				'tableMoveColumnAfter',
+				'tableMoveColumnBefore',
+				'tableMoveRowAfter',
+				'tableMoveRowBefore',
 				'templateAdd',
 				'wikiText'
 			],
 			media: [
 				'fullScreen',
+				'exitFullscreen',
 				'image',
 				'imageAdd',
 				'imageLock',
 				'imageGallery',
-				'photoGallery',
+				'imageBroken',
 				'play',
+				'pause',
 				'stop'
 			],
 			location: [
 				'map',
 				'mapPin',
 				'mapPinAdd',
-				'wikitrail'
+				'mapTrail'
 			],
 			user: [
-				'userActive',
+				'userAnonymous',
 				'userAvatar',
-				'userInactive',
 				'userTalk'
 			],
 			layout: [
+				'menu',
 				'stripeFlow',
-				'stripeSideMenu',
 				'stripeSummary',
 				'stripeToC',
 				'viewCompact',
@@ -186,6 +188,8 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 				'bright',
 				'halfBright',
 				'notBright',
+				'eye',
+				'eyeClosed',
 				'moon',
 				'largerText',
 				'smallerText',
@@ -194,32 +198,32 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 			wikimedia: [
 				'logoCC',
 				'logoWikimediaCommons',
+				'logoWikimediaDiscovery',
 				'logoWikipedia'
 			]
 		},
 		indicators = [
-			'alert',
 			'clear',
 			'down',
-			'next',
-			'previous',
 			'required',
 			'search',
 			'up'
 		],
 		iconsFieldsets = [],
-		iconsButtons = [],
+		iconsWidgets = [],
 		indicatorsFieldset = new OO.ui.FieldsetLayout( { label: 'Indicators' } );
 
 	for ( i = 0, len = indicators.length; i < len; i++ ) {
 		indicatorsFieldset.addItems( [
 			new OO.ui.FieldLayout(
-				new OO.ui.ButtonWidget( {
+				new OO.ui.IndicatorWidget( {
 					indicator: indicators[ i ],
-					framed: false,
-					label: indicators[ i ]
+					title: indicators[ i ]
 				} ),
-				{ align: 'top' }
+				{
+					align: 'inline',
+					label: indicators[ i ]
+				}
 			)
 		] );
 	}
@@ -228,17 +232,16 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 		iconsFieldsets.push( iconsFieldset );
 
 		for ( i = 0, len = icons[ iconSet ].length; i < len; i++ ) {
-			iconButton = new OO.ui.ButtonWidget( {
+			iconWidget = new OO.ui.IconWidget( {
 				icon: icons[ iconSet ][ i ],
-				framed: false,
-				label: icons[ iconSet ][ i ]
+				title: icons[ iconSet ][ i ]
 			} );
-			iconsButtons.push( iconButton );
+			iconsWidgets.push( iconWidget );
 			iconsFieldset.addItems( [
-				new OO.ui.FieldLayout(
-					iconButton,
-					{ align: 'top' }
-				)
+				new OO.ui.FieldLayout( iconWidget, {
+					label: icons[ iconSet ][ i ],
+					align: 'inline'
+				} )
 			] );
 		}
 	}
@@ -250,7 +253,6 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 				flags: [],
 				data: {
 					progressive: false,
-					constructive: false,
 					destructive: false
 				}
 			} ),
@@ -259,16 +261,6 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 				flags: [ 'progressive' ],
 				data: {
 					progressive: true,
-					constructive: false,
-					destructive: false
-				}
-			} ),
-			new OO.ui.ButtonOptionWidget( {
-				label: 'Constructive',
-				flags: [ 'constructive' ],
-				data: {
-					progressive: false,
-					constructive: true,
 					destructive: false
 				}
 			} ),
@@ -277,20 +269,20 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 				flags: [ 'destructive' ],
 				data: {
 					progressive: false,
-					constructive: false,
 					destructive: true
 				}
 			} )
 		]
-	} )
+	} );
+
+	selector
 		.on( 'select', function ( selected ) {
-			iconsButtons.forEach( function ( iconButton ) {
-				iconButton.setFlags( selected.getData() );
+			iconsWidgets.forEach( function ( iconWidget ) {
+				iconWidget.setFlags( selected.getData() );
 			} );
 		} )
 		.selectItemByData( {
 			progressive: false,
-			constructive: false,
 			destructive: false
 		} );
 
@@ -299,10 +291,12 @@ OO.ui.Demo.static.pages.icons = function ( demo ) {
 			expanded: false,
 			framed: true
 		} ).$element
-			.addClass( 'oo-ui-demo-container oo-ui-demo-icons' )
+			.addClass( 'demo-container demo-icons' )
+			.attr( 'role', 'main' )
 			.append(
 				selector.$element,
 				indicatorsFieldset.$element,
 				iconsFieldsets.map( function ( item ) { return item.$element[ 0 ]; } )
-			) );
+			)
+	);
 };

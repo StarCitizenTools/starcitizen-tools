@@ -1,12 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ahmed-Najib-Biabani-Ibrahimkhel"
+			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"Baloch Khan",
+			"Amjad Khan"
 		]
 	},
 	"pagetranslation": "د مخ ژباړه",
-	"tpt-template": "د مخ کينډۍ",
-	"tpt-templatediff": "د مخ کينډۍ بدلون موندلی.",
 	"tpt-diff-old": "پخوانی متن",
 	"tpt-diff-new": "نوی متن",
 	"tpt-sections-template": "د ژباړې د مخ کينډۍ",
@@ -18,6 +18,8 @@
 	"tpt-rev-encourage": "بيازېرمل",
 	"translate-tag-translate-link-desc": "همدا مخ ژباړل",
 	"translate-tag-markthis": "همدا مخ د ژباړې لپاره په نښه کول",
+	"tpt-translation-intro": "دا پاڼه د  [[$2]] مخ <span class=\"plainlinks\">[$1 ژباړل شوي بڼه] ده </span> او ددي ژباړه تر ٪$3 پوري بشپړه شوي ده.",
+	"tpt-translation-intro-fuzzy": "تر تاریخ وتلې ژباړي په دي ډول مارک شوي دي.",
 	"tpt-languages-legend": "نورې ژبې:",
 	"tpt-languages-nonzero": "$1 ($2% وژباړل شو)",
 	"tpt-tab-translate": "ژباړل",
@@ -57,8 +59,6 @@
 	"pt-deletepage-list-other": "نور واړه مخونه",
 	"pm-savepages-button-label": "خوندي کول",
 	"pm-cancel-button-label": "ناگارل",
-	"pm-pagename-placeholder": "د مخ نوم ورکړئ",
-	"pm-langcode-placeholder": "د ژبې کوډ",
 	"pm-page-does-not-exist": "$1 نشته.",
 	"tpt-translate-title": "د مخ سرليک د ژباړې پرېښه",
 	"pp-pagename-placeholder": "د مخ نوم ورکړئ",

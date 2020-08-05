@@ -1,8 +1,5 @@
 <?php
 /**
- *
- * Created on January 3rd, 2013
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -24,30 +21,6 @@
 class ApiImageRotate extends ApiBase {
 	private $mPageSet = null;
 
-	/**
-	 * Add all items from $values into the result
-	 * @param array $result Output
-	 * @param array $values Values to add
-	 * @param string $flag The name of the boolean flag to mark this element
-	 * @param string $name If given, name of the value
-	 */
-	private static function addValues( array &$result, $values, $flag = null, $name = null ) {
-		foreach ( $values as $val ) {
-			if ( $val instanceof Title ) {
-				$v = [];
-				ApiQueryBase::addTitleInfo( $v, $val );
-			} elseif ( $name !== null ) {
-				$v = [ $name => $val ];
-			} else {
-				$v = $val;
-			}
-			if ( $flag !== null ) {
-				$v[$flag] = true;
-			}
-			$result[] = $v;
-		}
-	}
-
 	public function execute() {
 		$this->useTransactionalTimeLimit();
 
@@ -62,11 +35,17 @@ class ApiImageRotate extends ApiBase {
 
 		$result = [];
 
-		self::addValues( $result, $pageSet->getInvalidTitlesAndReasons(), 'invalid' );
-		self::addValues( $result, $pageSet->getSpecialTitles(), 'special', 'title' );
-		self::addValues( $result, $pageSet->getMissingPageIDs(), 'missing', 'pageid' );
-		self::addValues( $result, $pageSet->getMissingRevisionIDs(), 'missing', 'revid' );
-		self::addValues( $result, $pageSet->getInterwikiTitlesAsResult() );
+		$result = $pageSet->getInvalidTitlesAndRevisions( [
+			'invalidTitles', 'special', 'missingIds', 'missingRevIds', 'interwikiTitles',
+		] );
+
+		// Check if user can add tags
+		if ( $params['tags'] ) {
+			$ableToTag = ChangeTags::canAddTagsAccompanyingChange( $params['tags'], $this->getUser() );
+			if ( !$ableToTag->isOK() ) {
+				$this->dieStatus( $ableToTag );
+			}
+		}
 
 		foreach ( $pageSet->getTitles() as $title ) {
 			$r = [];
@@ -74,28 +53,37 @@ class ApiImageRotate extends ApiBase {
 			ApiQueryBase::addTitleInfo( $r, $title );
 			if ( !$title->exists() ) {
 				$r['missing'] = true;
+				if ( $title->isKnown() ) {
+					$r['known'] = true;
+				}
 			}
 
 			$file = wfFindFile( $title, [ 'latest' => true ] );
 			if ( !$file ) {
 				$r['result'] = 'Failure';
-				$r['errormessage'] = 'File does not exist';
+				$r['errors'] = $this->getErrorFormatter()->arrayFromStatus(
+					Status::newFatal( 'apierror-filedoesnotexist' )
+				);
 				$result[] = $r;
 				continue;
 			}
 			$handler = $file->getHandler();
 			if ( !$handler || !$handler->canRotate() ) {
 				$r['result'] = 'Failure';
-				$r['errormessage'] = 'File type cannot be rotated';
+				$r['errors'] = $this->getErrorFormatter()->arrayFromStatus(
+					Status::newFatal( 'apierror-filetypecannotberotated' )
+				);
 				$result[] = $r;
 				continue;
 			}
 
 			// Check whether we're allowed to rotate this file
-			$permError = $this->checkPermissions( $this->getUser(), $file->getTitle() );
-			if ( $permError !== null ) {
+			$permError = $this->checkTitleUserPermissions( $file->getTitle(), [ 'edit', 'upload' ] );
+			if ( $permError ) {
 				$r['result'] = 'Failure';
-				$r['errormessage'] = $permError;
+				$r['errors'] = $this->getErrorFormatter()->arrayFromStatus(
+					$this->errorArrayToStatus( $permError )
+				);
 				$result[] = $r;
 				continue;
 			}
@@ -103,12 +91,14 @@ class ApiImageRotate extends ApiBase {
 			$srcPath = $file->getLocalRefPath();
 			if ( $srcPath === false ) {
 				$r['result'] = 'Failure';
-				$r['errormessage'] = 'Cannot get local file path';
+				$r['errors'] = $this->getErrorFormatter()->arrayFromStatus(
+					Status::newFatal( 'apierror-filenopath' )
+				);
 				$result[] = $r;
 				continue;
 			}
 			$ext = strtolower( pathinfo( "$srcPath", PATHINFO_EXTENSION ) );
-			$tmpFile = TempFSFile::factory( 'rotate_', $ext );
+			$tmpFile = TempFSFile::factory( 'rotate_', $ext, wfTempDir() );
 			$dstPath = $tmpFile->getPath();
 			$err = $handler->rotate( $file, [
 				'srcPath' => $srcPath,
@@ -119,17 +109,27 @@ class ApiImageRotate extends ApiBase {
 				$comment = wfMessage(
 					'rotate-comment'
 				)->numParams( $rotation )->inContentLanguage()->text();
-				$status = $file->upload( $dstPath,
-					$comment, $comment, 0, false, false, $this->getUser() );
+				$status = $file->upload(
+					$dstPath,
+					$comment,
+					$comment,
+					0,
+					false,
+					false,
+					$this->getUser(),
+					$params['tags'] ?: []
+				);
 				if ( $status->isGood() ) {
 					$r['result'] = 'Success';
 				} else {
 					$r['result'] = 'Failure';
-					$r['errormessage'] = $this->getErrorFormatter()->arrayFromStatus( $status );
+					$r['errors'] = $this->getErrorFormatter()->arrayFromStatus( $status );
 				}
 			} else {
 				$r['result'] = 'Failure';
-				$r['errormessage'] = $err->toText();
+				$r['errors'] = $this->getErrorFormatter()->arrayFromStatus(
+					Status::newFatal( ApiMessage::create( $err->getMsg() ) )
+				);
 			}
 			$result[] = $r;
 		}
@@ -153,28 +153,6 @@ class ApiImageRotate extends ApiBase {
 		return $this->mPageSet;
 	}
 
-	/**
-	 * Checks that the user has permissions to perform rotations.
-	 * @param User $user The user to check
-	 * @param Title $title
-	 * @return string|null Permission error message, or null if there is no error
-	 */
-	protected function checkPermissions( $user, $title ) {
-		$permissionErrors = array_merge(
-			$title->getUserPermissionsErrors( 'edit', $user ),
-			$title->getUserPermissionsErrors( 'upload', $user )
-		);
-
-		if ( $permissionErrors ) {
-			// Just return the first error
-			$msg = $this->parseMsg( $permissionErrors[0] );
-
-			return $msg['info'];
-		}
-
-		return null;
-	}
-
 	public function mustBePosted() {
 		return true;
 	}
@@ -191,6 +169,10 @@ class ApiImageRotate extends ApiBase {
 			],
 			'continue' => [
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
+			],
+			'tags' => [
+				ApiBase::PARAM_TYPE => 'tags',
+				ApiBase::PARAM_ISMULTI => true,
 			],
 		];
 		if ( $flags ) {

@@ -6,9 +6,12 @@
 			"Nirjal stha",
 			"बिप्लब आनन्द",
 			"NehalDaveND",
-			"राम प्रसाद जोशी"
+			"राम प्रसाद जोशी",
+			"Nirajan pant"
 		]
 	},
+	"notification-dynamic-actions-flow-topic-unwatch": "एइ विषय हेर्न बन्द गर",
+	"notification-dynamic-actions-flow-topic-unwatch-confirmation-description": "तपाईं [$2 this topic] जहिले पनि हेर्न सक्नुहुन्छ।",
 	"flow-board-header": "छलफलको बारेमा",
 	"flow-board-collapse-description": "वर्णन लुकाउने",
 	"flow-board-expand-description": "वर्णन देखाउने",
@@ -21,13 +24,14 @@
 	"flow-history-action-delete-post": "मेटिएको",
 	"flow-history-action-hide-post": "लुकाउनुहोस्",
 	"flow-history-action-restore-post": "पूर्वावस्थामा ल्याउनुहोस्",
-	"flow-history-action-lock-topic": "रोक्ने",
-	"flow-history-action-unlock-topic": "रोक फुकुवा गर्ने",
+	"flow-history-action-lock-topic": "समाधान",
+	"flow-history-action-unlock-topic": "रोक फुकुवा",
 	"flow-post-action-post-history": "इतिहास",
 	"flow-post-action-suppress-post": "दबाउने",
 	"flow-post-action-delete-post": "हटाउने",
 	"flow-post-action-hide-post": "लुकाउनुहोस्",
 	"flow-post-action-edit-post": "सम्पादन",
+	"flow-post-action-edit-post-submit": "परिवर्तन सङ्ग्रह गर्नुहोस्",
 	"flow-post-action-restore-post": "पूर्वावस्थामा ल्याउनुहोस्",
 	"flow-topic-action-history": "इतिहास",
 	"flow-topic-action-undo-moderation": "पूर्ववत गर्ने",
@@ -47,7 +51,7 @@
 	"flow-special-uuid": "UUID",
 	"flow-special-enableflow-invalid-title": "अबैध पृष्ठ शिर्षक राखिएको थियो",
 	"flow-undo": "पूर्ववत गर्ने",
-	"flow-undo-your-text": "तपाईँको पाठ",
+	"flow-undo-your-text": "तपाईंको पाठ",
 	"flow-ve-mention-inspector-remove-label": "हटाउने",
 	"flow-ve-mention-placeholder": "प्रयोगकर्ता नाम"
 }

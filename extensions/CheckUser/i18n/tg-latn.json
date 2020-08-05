@@ -19,7 +19,6 @@
 	"checkuser-users": "Fehrist kardani korbaron",
 	"checkuser-edits": "Namoişi viroişhoi marbut ba in nişonai IP",
 	"checkuser-ips": "Fehrist kardani nişonahoi IP",
-	"checkuser-search": "Çustuçū",
 	"checkuser-period": "Tūl:",
 	"checkuser-week-1": "hafta guzaşta",
 	"checkuser-week-2": "du haftai guzaşta",
@@ -40,11 +39,11 @@
 	"checkuser-blocktag-talk": "Çojguzin kardani sahifahoi bahs bo:",
 	"checkuser-block-limit": "Te'dodi beş az şumorai korbaron intixob şudaand.",
 	"checkuser-user-nonexistent": "Korbari mavridi nazar vuçud nadorad.",
-	"checkuser-search-form": "Pajdo kardani mavorid dar guzorişho, ki $1 dar on $2 ast",
+	"checkuser-search": "Çustuçū",
 	"checkuser-search-submit": "Çustuçū",
 	"checkuser-search-initiator": "oƣozgar",
 	"checkuser-search-target": "hadaf",
-	"checkuser-log-return": "Bozgaşt ba formi asliji bozrasiji korbar",
+	"checkuser-showmain": "Bozgaşt ba formi asliji bozrasiji korbar",
 	"checkuser-autocreate-action": "ba tavri xudkor eçod şuda bud",
 	"checkuser-email-action": "poctai elektronī ba korbar \"$1\" firistoda şud"
 }

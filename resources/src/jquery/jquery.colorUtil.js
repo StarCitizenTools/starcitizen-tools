@@ -23,15 +23,18 @@
 		 * @return {Array}
 		 */
 		getRGB: function ( color ) {
-			/*jshint boss:true */
 			var result;
 
 			// Check if we're already dealing with an array of colors
-			if ( color && $.isArray( color ) && color.length === 3 ) {
+			if ( color && Array.isArray( color ) && color.length === 3 ) {
 				return color;
+			}
+			if ( typeof color !== 'string' ) {
+				return undefined;
 			}
 
 			// Look for rgb(num,num,num)
+			// eslint-disable-next-line no-cond-assign
 			if ( result = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec( color ) ) {
 				return [
 					parseInt( result[ 1 ], 10 ),
@@ -41,7 +44,8 @@
 			}
 
 			// Look for rgb(num%,num%,num%)
-			if ( result = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec( color ) ) {
+			// eslint-disable-next-line no-cond-assign
+			if ( result = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)%\s*,\s*([0-9]+(?:\.[0-9]+)?)%\s*,\s*([0-9]+(?:\.[0-9]+)?)%\s*\)/.exec( color ) ) {
 				return [
 					parseFloat( result[ 1 ] ) * 2.55,
 					parseFloat( result[ 2 ] ) * 2.55,
@@ -50,6 +54,7 @@
 			}
 
 			// Look for #a0b1c2
+			// eslint-disable-next-line no-cond-assign
 			if ( result = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec( color ) ) {
 				return [
 					parseInt( result[ 1 ], 16 ),
@@ -59,6 +64,7 @@
 			}
 
 			// Look for #fff
+			// eslint-disable-next-line no-cond-assign
 			if ( result = /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec( color ) ) {
 				return [
 					parseInt( result[ 1 ] + result[ 1 ], 16 ),
@@ -68,12 +74,13 @@
 			}
 
 			// Look for rgba(0, 0, 0, 0) == transparent in Safari 3
+			// eslint-disable-next-line no-cond-assign
 			if ( result = /rgba\(0, 0, 0, 0\)/.exec( color ) ) {
 				return $.colorUtil.colors.transparent;
 			}
 
 			// Otherwise, we're most likely dealing with a named color
-			return $.colorUtil.colors[ $.trim( color ).toLowerCase() ];
+			return $.colorUtil.colors[ color.trim().toLowerCase() ];
 		},
 
 		/**
@@ -148,16 +155,15 @@
 		 * @return {number[]} The HSL representation
 		 */
 		rgbToHsl: function ( r, g, b ) {
+			var d, h, s, l, min, max;
+
 			r = r / 255;
 			g = g / 255;
 			b = b / 255;
 
-			var d,
-				max = Math.max( r, g, b ),
-				min = Math.min( r, g, b ),
-				h,
-				s,
-				l = ( max + min ) / 2;
+			max = Math.max( r, g, b );
+			min = Math.min( r, g, b );
+			l = ( max + min ) / 2;
 
 			if ( max === min ) {
 				// achromatic

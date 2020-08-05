@@ -16,17 +16,17 @@ class ReferenceClarifier {
 	function __construct( ManagerGroup $storage, UrlGenerator $urlGenerator ) {
 		$this->storage = $storage;
 		$this->urlGenerator = $urlGenerator;
-		$this->referenceCache = array();
+		$this->referenceCache = [];
 	}
 
 	public function getWhatLinksHereProps( $row, Title $from, Title $to ) {
-		$ids = array();
-		$props = array();
+		$ids = [];
+		$props = [];
 		$references = $this->getWikiReferences( $from, $to );
 
 		// Collect referenced workflow ids and load them so we can generate
 		// links to their pages
-		foreach( $references as $reference ) {
+		foreach ( $references as $reference ) {
 			$id = $reference->getWorkflowId();
 			// utilize array key to de-duplicate
 			$ids[$id->getAlphadecimal()] = $id;
@@ -41,7 +41,7 @@ class ReferenceClarifier {
 		// * flow-whatlinkshere-post
 		// * flow-whatlinkshere-post-summary
 		// Topic is plain text and do not have links.
-		foreach( $references as $reference ) {
+		foreach ( $references as $reference ) {
 			if ( $reference->getType() === WikiReference::TYPE_CATEGORY ) {
 				// While it might make sense to have backlinks from categories to
 				// a page in what links here, thats not what mediawiki currently does.
@@ -67,7 +67,7 @@ class ReferenceClarifier {
 	 * @return WikiReference[]
 	 */
 	public function getWikiReferences( Title $from, Title $to ) {
-		if ( ! isset( $this->referenceCache[$from->getPrefixedDBkey()] ) ) {
+		if ( !isset( $this->referenceCache[$from->getPrefixedDBkey()] ) ) {
 			$this->loadReferencesForPage( $from );
 		}
 
@@ -76,7 +76,7 @@ class ReferenceClarifier {
 
 		return isset( $this->referenceCache[$fromT][$toT] )
 			? $this->referenceCache[$fromT][$toT]
-			: array();
+			: [];
 	}
 
 	/**
@@ -100,17 +100,17 @@ class ReferenceClarifier {
 
 	protected function loadReferencesForPage( Title $from ) {
 		/** @var Reference[] $allReferences */
-		$allReferences = array();
+		$allReferences = [];
 
-		foreach( array( 'WikiReference', 'URLReference' ) as $refType ) {
+		foreach ( [ 'WikiReference', 'URLReference' ] as $refType ) {
 			// find() returns null for error or empty result
 			$res = $this->storage->find(
 				$refType,
-				array(
-					'ref_src_wiki' => wfWikiId(),
+				[
+					'ref_src_wiki' => wfWikiID(),
 					'ref_src_namespace' => $from->getNamespace(),
 					'ref_src_title' => $from->getDBkey(),
-				)
+				]
 			);
 
 			if ( $res ) {
@@ -128,10 +128,10 @@ class ReferenceClarifier {
 			}
 		}
 
-		$cache = array();
-		foreach( $allReferences as $reference ) {
+		$cache = [];
+		foreach ( $allReferences as $reference ) {
 			if ( !isset( $cache[$reference->getTargetIdentifier()] ) ) {
-				$cache[$reference->getTargetIdentifier()] = array();
+				$cache[$reference->getTargetIdentifier()] = [];
 			}
 
 			$cache[$reference->getTargetIdentifier()][] = $reference;

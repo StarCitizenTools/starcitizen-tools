@@ -14,7 +14,6 @@
 	"checkuser-users": "قاتىسۋشىلاردى كەلتىرۋ",
 	"checkuser-edits": "IP جايدان جاسالعان تۇزەتۋلەردى كەلتىرۋ",
 	"checkuser-ips": "IP جايلاردى كەلتىرۋ",
-	"checkuser-search": "ىزدەۋ",
 	"checkuser-empty": "جۋرنالدا ەش جازبا جوق.",
 	"checkuser-nomatch": "سايكەس تابىلمادى.",
 	"checkuser-check": "سىناۋ",
@@ -23,9 +22,9 @@
 	"checkuser-blocked": "بۇعاتتالعان",
 	"checkuser-too-many": "تىم كوپ ناتىيجە كەلتىرىلدى, CIDR دەگەندى تارىلتىپ كورىڭىز. مىندا پايدالانىلعان IP جايلار كورسەتىلگەن (بارىنشا 5000, جايىمەن سۇرىپتالعان):",
 	"checkuser-user-nonexistent": "ەنگىزىلگەن قاتىسۋشى جوق.",
-	"checkuser-search-form": "جۋرنالداعى وقىيعالاردى تابۋ ($1 دەگەن $2 ەكەن جايىنداعى)",
+	"checkuser-search": "ىزدەۋ",
 	"checkuser-search-submit": "ىزدەۋ",
 	"checkuser-search-initiator": "باستاماشى",
 	"checkuser-search-target": "نىسانا",
-	"checkuser-log-return": "CheckUser باسقى پىشىنىنە  ورالۋ"
+	"checkuser-showmain": "CheckUser باسقى پىشىنىنە  ورالۋ"
 }

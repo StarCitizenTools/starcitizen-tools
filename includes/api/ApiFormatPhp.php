@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on Oct 22, 2006
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -55,23 +51,20 @@ class ApiFormatPhp extends ApiFormatBase {
 				break;
 
 			default:
-				$this->dieUsage( __METHOD__ . ': Unknown value for \'formatversion\'', 'unknownformatversion' );
+				// Should have been caught during parameter validation
+				$this->dieDebug( __METHOD__, 'Unknown value for \'formatversion\'' );
 		}
 		$text = serialize( $this->getResult()->getResultData( null, $transforms ) );
 
-		// Bug 66776: wfMangleFlashPolicy() is needed to avoid a nasty bug in
+		// T68776: OutputHandler::mangleFlashPolicy() avoids a nasty bug in
 		// Flash, but what it does isn't friendly for the API. There's nothing
 		// we can do here that isn't actively broken in some manner, so let's
 		// just be broken in a useful manner.
 		if ( $this->getConfig()->get( 'MangleFlashPolicy' ) &&
-			in_array( 'wfOutputHandler', ob_list_handlers(), true ) &&
+			in_array( 'MediaWiki\\OutputHandler::handle', ob_list_handlers(), true ) &&
 			preg_match( '/\<\s*cross-domain-policy(?=\s|\>)/i', $text )
 		) {
-			$this->dieUsage(
-				'This response cannot be represented using format=php. ' .
-				'See https://phabricator.wikimedia.org/T68776',
-				'internalerror'
-			);
+			$this->dieWithError( 'apierror-formatphp', 'internalerror' );
 		}
 
 		$this->printText( $text );
@@ -80,8 +73,8 @@ class ApiFormatPhp extends ApiFormatBase {
 	public function getAllowedParams() {
 		$ret = parent::getAllowedParams() + [
 			'formatversion' => [
-				ApiBase::PARAM_TYPE => [ 1, 2, 'latest' ],
-				ApiBase::PARAM_DFLT => 1,
+				ApiBase::PARAM_TYPE => [ '1', '2', 'latest' ],
+				ApiBase::PARAM_DFLT => '1',
 				ApiBase::PARAM_HELP_MSG => 'apihelp-php-param-formatversion',
 			],
 		];

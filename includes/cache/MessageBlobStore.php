@@ -26,6 +26,7 @@
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Wikimedia\Rdbms\Database;
 
 /**
  * This class generates message blobs for use by ResourceLoader modules.
@@ -110,9 +111,6 @@ class MessageBlobStore implements LoggerAwareInterface {
 		foreach ( $modules as $name => $module ) {
 			$key = $cacheKeys[$name];
 			if ( !isset( $result[$key] ) || $curTTLs[$key] === null || $curTTLs[$key] < 0 ) {
-				$this->logger->info( 'Message blob cache-miss for {module}',
-					[ 'module' => $name, 'cacheKey' => $key ]
-				);
 				$blobs[$name] = $this->recacheMessageBlob( $key, $module, $lang );
 			} else {
 				// Use unexpired cache
@@ -128,14 +126,6 @@ class MessageBlobStore implements LoggerAwareInterface {
 	 */
 	public function get( ResourceLoader $resourceLoader, $modules, $lang ) {
 		return $this->getBlobs( $modules, $lang );
-	}
-
-	/**
-	 * @deprecated since 1.27 Obsolete. Used to populate a cache table in the database.
-	 * @return bool
-	 */
-	public function insertMessageBlob( $name, ResourceLoaderModule $module, $lang ) {
-		return false;
 	}
 
 	/**
@@ -165,7 +155,7 @@ class MessageBlobStore implements LoggerAwareInterface {
 		$cache->set( $cacheKey, $blob,
 			// Add part of a day to TTL to avoid all modules expiring at once
 			$cache::TTL_WEEK + mt_rand( 0, $cache::TTL_DAY ),
-			Database::getCacheSetOptions( wfGetDB( DB_SLAVE ) )
+			Database::getCacheSetOptions( wfGetDB( DB_REPLICA ) )
 		);
 		return $blob;
 	}
@@ -179,7 +169,7 @@ class MessageBlobStore implements LoggerAwareInterface {
 	public function updateMessage( $key ) {
 		$moduleNames = $this->getResourceLoader()->getModulesByMessage( $key );
 		foreach ( $moduleNames as $moduleName ) {
-			// Uses a holdoff to account for database slave lag (for MessageCache)
+			// Uses a holdoff to account for database replica DB lag (for MessageCache)
 			$this->wanCache->touchCheckKey( $this->wanCache->makeKey( __CLASS__, $moduleName ) );
 		}
 	}
@@ -241,6 +231,7 @@ class MessageBlobStore implements LoggerAwareInterface {
 		}
 
 		$json = FormatJson::encode( (object)$messages );
+		// @codeCoverageIgnoreStart
 		if ( $json === false ) {
 			$this->logger->warning( 'Failed to encode message blob for {module} ({lang})', [
 				'module' => $module->getName(),
@@ -248,6 +239,7 @@ class MessageBlobStore implements LoggerAwareInterface {
 			] );
 			$json = '{}';
 		}
+		// codeCoverageIgnoreEnd
 		return $json;
 	}
 }

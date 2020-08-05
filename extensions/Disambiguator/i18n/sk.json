@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Teslaton"
+		]
+	},
+	"disambiguationpages": "Rozlišovacie stránky",
+	"disambiguationpages-summary": "Toto je zoznam všetkých rozlišovacích stránok na {{grammar:6sg|{{SITENAME}}}}.<br />Stránka je považovaná za rozlišovaciu ak obsahuje značku <code><nowiki>__DISAMBIG__</nowiki></code> (prípadne jej synonymum).",
+	"disambiguationpagelinks": "Stránky odkazujúce na rozlišovacie stránky",
+	"disambiguationpagelinks-summary": "Následujúce stránky obsahujú aspoň jeden odkaz na rozlišovaciu stránku. Odkazy by možno mali smerovať na konkrétnejšiu stránku.<br />Stránka je považovaná za rozlišovaciu ak obsahuje značku <code><nowiki>__DISAMBIG__</nowiki></code> (prípadne jej synonymum).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Toto je rozlišovacia stránka"
+}

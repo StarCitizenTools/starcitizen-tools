@@ -50,7 +50,7 @@ class EchoMentionPresentationModel extends EchoEventPresentationModel {
 		}
 
 		if ( $this->hasSection() ) {
-			$msg->plaintextParams( $this->getTruncatedSectionTitle( $this->getSection() ) );
+			$msg->plaintextParams( $this->getTruncatedSectionTitle() );
 		}
 
 		return $msg;
@@ -63,7 +63,9 @@ class EchoMentionPresentationModel extends EchoEventPresentationModel {
 			$msg->plaintextParams(
 				EchoDiscussionParser::getTextSnippet(
 					$content,
-					$this->language
+					$this->language,
+					150,
+					$this->event->getTitle()
 				)
 			);
 			return $msg;
@@ -73,29 +75,29 @@ class EchoMentionPresentationModel extends EchoEventPresentationModel {
 	}
 
 	public function getPrimaryLink() {
-		return array(
+		return [
 			// Need FullURL so the section is included
 			'url' => $this->getTitleWithSection()->getFullURL(),
 			'label' => $this->msg( 'notification-link-text-view-mention' )->text()
-		);
+		];
 	}
 
 	public function getSecondaryLinks() {
 		$title = $this->event->getTitle();
 
-		$url = $title->getLocalURL( array(
+		$url = $title->getLocalURL( [
 			'oldid' => 'prev',
 			'diff' => $this->event->getExtraParam( 'revid' )
-		) );
-		$viewChangesLink = array(
+		] );
+		$viewChangesLink = [
 			'url' => $url,
 			'label' => $this->msg( 'notification-link-text-view-changes', $this->getViewingUserForGender() )->text(),
 			'description' => '',
 			'icon' => 'changes',
 			'prioritized' => true,
-		);
+		];
 
-		return array( $this->getAgentLink(), $viewChangesLink );
+		return [ $this->getAgentLink(), $viewChangesLink ];
 	}
 
 	private function onArticleTalkpage() {
@@ -119,5 +121,9 @@ class EchoMentionPresentationModel extends EchoEventPresentationModel {
 	private function isArticle() {
 		$ns = $this->event->getTitle()->getNamespace();
 		return $ns === NS_MAIN || $ns === NS_TALK;
+	}
+
+	protected function getSubjectMessageKey() {
+		return 'notification-mention-email-subject';
 	}
 }

@@ -1,0 +1,24 @@
+.mwe-upwiz-singleLanguageInputWidget {
+	.mwe-upwiz-singleLanguageInputWidget-language {
+		width: 11.5em;
+	}
+
+	.mwe-upwiz-singleLanguageInputWidget-text {
+		width: 30.5em;
+	}
+
+	.mwe-upwiz-singleLanguageInputWidget-removeItem {
+		// HACK Until T97631 is fixed, otherwise the icons look awful
+		&.oo-ui-iconElement > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
+			width: 24px;
+		}
+	}
+
+	.mwe-upwiz-singleLanguageInputWidget-language,
+	.mwe-upwiz-singleLanguageInputWidget-text,
+	.mwe-upwiz-singleLanguageInputWidget-removeItem {
+		display: inline-block;
+		// 'top' because the description text input is autosized
+		vertical-align: top;
+	}
+}

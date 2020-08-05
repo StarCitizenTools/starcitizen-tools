@@ -1,7 +1,16 @@
-/*global moment*/
+/* global moment */
 ( function ( mw, $, moment ) {
 	/**
-	 * this is a progress bar for monitoring multiple objects, giving summary view
+	 * This is a progress bar for monitoring multiple objects, giving summary view
+	 *
+	 * @class mw.GroupProgressbar
+	 * @constructor
+	 * @param {string} selector
+	 * @param {mw.UploadWizardUpload[]} uploads
+	 * @param {string[]} successStates
+	 * @param {string[]} errorStates
+	 * @param {string} progressProperty
+	 * @param {string} weightProperty
 	 */
 	mw.GroupProgressBar = function ( selector, uploads, successStates, errorStates, progressProperty, weightProperty ) {
 		this.$selector = $( selector );
@@ -58,15 +67,11 @@
 					hasData = false;
 
 				$.each( bar.uploads, function ( i, upload ) {
-					if ( upload === undefined ) {
-						return;
-					}
-
 					totalWeight += upload[ bar.weightProperty ];
 				} );
 
 				$.each( bar.uploads, function ( i, upload ) {
-					if ( upload === undefined || upload.state === 'aborted' ) {
+					if ( upload.state === 'aborted' ) {
 						return;
 					}
 					if ( $.inArray( upload.state, bar.successStates ) !== -1 ) {
@@ -94,7 +99,7 @@
 				}
 				bar.showCount( successStateCount );
 
-				if ( successStateCount + errorStateCount < bar.uploads.length - bar.countEmpties() ) {
+				if ( successStateCount + errorStateCount < bar.uploads.length - bar.countRemoved() ) {
 					setTimeout( displayer, 200 );
 				} else {
 					bar.showProgress( 1.0 );
@@ -119,7 +124,7 @@
 		 * @param {number} [time] The time this bar is presumed to have started (epoch milliseconds)
 		 */
 		setBeginTime: function ( time ) {
-			this.beginTime = time ? time : ( new Date() ).getTime();
+			this.beginTime = time || ( new Date() ).getTime();
 		},
 
 		/**
@@ -171,15 +176,18 @@
 		/**
 		 * Show the overall count as we upload
 		 *
-		 * @param {number} count The number of items that have done whatever has been done e.g. in "uploaded 2 of 5", this is the 2
+		 * @param {number} completed The number of items that have done whatever has been done e.g. in "uploaded 2 of 5", this is the 2
 		 */
-		showCount: function ( count ) {
+		showCount: function ( completed ) {
+			var total = this.uploads.length - this.countRemoved();
 			this.$selector
 				.find( '.mwe-upwiz-count' )
-				.html( mw.message( 'mwe-upwiz-upload-count', count, this.uploads.length - this.countEmpties() ).escaped() );
+				// Hide if there are no uploads, show otherwise
+				.toggle( total !== 0 )
+				.html( mw.message( 'mwe-upwiz-upload-count', completed, total ).escaped() );
 		},
 
-		countEmpties: function () {
+		countRemoved: function () {
 			var count = 0;
 			$.each( this.uploads, function ( i, upload ) {
 				if ( !upload || upload.state === 'aborted' ) {

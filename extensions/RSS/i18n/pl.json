@@ -3,11 +3,13 @@
 		"authors": [
 			"BeginaFelicysym",
 			"Sp5uhe",
-			"Chrumps"
+			"Chrumps",
+			"Woytecr"
 		]
 	},
 	"rss-desc": "Wyświetla kanał RSS na stronie wiki",
 	"rss-tracking-category": "Strony z kanałami informacyjnymi RSS",
+	"rss-tracking-category-desc": "Ta strona zawiera kanał RSS.",
 	"rss-error": "Nie udało się odczytać kanału $1: $2",
 	"rss-empty": "Nie udało się odczytać kanału $1!",
 	"rss-fetch-nourl": "Wywołano pobieranie bez adresu URL!",

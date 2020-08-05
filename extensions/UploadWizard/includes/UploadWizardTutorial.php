@@ -51,12 +51,12 @@ class UploadWizardTutorial {
 			// XXX TODO if the client can handle SVG, we could also just send it the unscaled thumb,
 			// client-scaled into a DIV or something.
 			// if ( client can handle SVG ) {
-			//   $tutorialThumbnailImage->getUnscaledThumb();
+			// $tutorialThumbnailImage->getUnscaledThumb();
 			// }
 			// put it into a div of appropriate dimensions.
 
 			// n.b. File::transform() returns false if failed, MediaTransformOutput otherwise
-			$thumbnailImage = $tutorialFile->transform( array( 'width' => $tutorial['width'] ) );
+			$thumbnailImage = $tutorialFile->transform( [ 'width' => $tutorial['width'] ] );
 
 			if ( $thumbnailImage ) {
 				$tutorialHtml = self::getImageHtml( $thumbnailImage, $tutorial );
@@ -76,19 +76,18 @@ class UploadWizardTutorial {
 				$errorMsg->params( Language::fetchLanguageName( $langCode, $wgLang->getCode() ) );
 			}
 			$errorHtml = Html::element(
-				'p', array( 'class' => 'errorbox', 'style' => 'float: none;' ), $errorMsg->text()
+				'p', [ 'class' => 'errorbox', 'style' => 'float: none;' ], $errorMsg->text()
 			);
 		}
 
 		return $errorHtml . $tutorialHtml;
-
 	}
 
 	/**
 	 * Get tutorial file for a particular language, or false if not available.
 	 *
-	 * @param String $langCode: language Code
-	 * @param String|null $campaign Upload Wizard campaign for which the tutorial should be displayed.
+	 * @param String $langCode language Code
+	 * @param String|null $tutorial Upload Wizard campaign for which the tutorial should be displayed.
 	 *
 	 * @return File|false
 	 */
@@ -102,7 +101,7 @@ class UploadWizardTutorial {
 	 * including an imagemap for the clickable "Help desk" button.
 	 *
 	 * @param MediaTransformOutput $thumb
-	 * @param String|null $campaign Upload Wizard campaign for which the tutorial should be displayed.
+	 * @param String|null $tutorial Upload Wizard campaign for which the tutorial should be displayed.
 	 *
 	 * @return String HTML representing the image, with clickable helpdesk button
 	 */
@@ -127,11 +126,11 @@ class UploadWizardTutorial {
 		$buttonCoords = $tutorial['helpdeskCoords'];
 		$useMap = $buttonCoords !== false && trim( $buttonCoords ) != '';
 
-		$imgAttributes = array(
+		$imgAttributes = [
 			'src' => $thumb->getUrl(),
 			'width' => $thumb->getWidth(),
 			'height' => $thumb->getHeight(),
-		);
+		];
 
 		if ( $useMap ) {
 			$imgAttributes['usemap'] = '#' . self::IMAGEMAP_ID;
@@ -145,18 +144,18 @@ class UploadWizardTutorial {
 		if ( $useMap ) {
 			$areaAltText = wfMessage( 'mwe-upwiz-help-desk' )->text();
 
-			$area = Html::element( 'area', array(
+			$area = Html::element( 'area', [
 				'shape' => 'rect',
 				'coords' => $buttonCoords,
 				'href' => $helpDeskHref,
 				'alt' => $areaAltText,
 				'title' => $areaAltText,
 				'id' => 'mwe-upwiz-tutorial-helpdesk',
-			) );
+			] );
 
 			$imgHtml = Html::rawElement(
 				'map',
-				array( 'id' => self::IMAGEMAP_ID, 'name' => self::IMAGEMAP_ID ),
+				[ 'id' => self::IMAGEMAP_ID, 'name' => self::IMAGEMAP_ID ],
 				$area
 			) . $imgHtml;
 		}

@@ -13,5 +13,7 @@
 	"commonsmetadata-trackingcategory-no-author": "Archivos sin autor de lectura mecánica",
 	"commonsmetadata-trackingcategory-no-author-desc": "El archivo no tiene ninguna plantilla de información de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecánica], o el campo de autor está vacío.",
 	"commonsmetadata-trackingcategory-no-source": "Archivos sin fuente de lectura mecánica",
-	"commonsmetadata-trackingcategory-no-source-desc": "El archivo no tiene ninguna plantilla de información de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecánica], o el campo de origen está vacío."
+	"commonsmetadata-trackingcategory-no-source-desc": "El archivo no tiene ninguna plantilla de información de [{{MediaWiki:Commonsmetadata-doc-url}} lectura mecánica], o el campo de origen está vacío.",
+	"commonsmetadata-trackingcategory-no-patent": "Archivos sin patente legible mecánicamente",
+	"commonsmetadata-trackingcategory-no-patent-desc": "El archivo no incluye una plantilla de patente [{{MediaWiki:Commonsmetadata-doc-url}} legible mecánicamente]."
 }

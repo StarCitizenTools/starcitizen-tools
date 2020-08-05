@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Arystanbek"
+		]
+	},
+	"revisionslider": "Нұсқа слайдері",
+	"revisionslider-desc": "Беттің айырмашылығын беттегі таңдалған және салыстырылған нұсқалар айырмашылығын слайт түрінде көрсетеді",
+	"revisionslider-toggle-label": "Тарихын шолу",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|байт|байт}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|байт|байт}}",
+	"revisionslider-label-date": "Күн-айы",
+	"revisionslider-label-page-size": "Бет мөлшері",
+	"revisionslider-label-change-size": "Өзгерту мөлшері",
+	"revisionslider-label-comment": "Өңдеме түйіндемесі",
+	"revisionslider-label-username": "{{GENDER:$1|Қатысушы}}",
+	"revisionslider-minoredit": "Бұл шағын өңдеме",
+	"revisionslider-loading-failed": "Нұсқа жүгірткісі жүктелмеді.",
+	"revisionslider-toggle-title-expand": "Нұсқа жүгірткісін ашу",
+	"revisionslider-toggle-title-collapse": "Нұсқа жүгірткісін жабу",
+	"revisionslider-turn-on-auto-expand-title": "Әрқашан нұсқа слайдерін кеңейту",
+	"revisionslider-turn-off-auto-expand-title": "Нұсқа слайдерін өздігінен кеңейтпеу",
+	"revisionslider-arrow-tooltip-newer": "Жаңалау нұсқаларын көру",
+	"revisionslider-arrow-tooltip-older": "Ескілеу нұсқаларын көру",
+	"revisionslider-show-help-tooltip": "Анықтама мәтінін көрсету",
+	"revisionslider-tutorial": "Нұсқа жүгірткісі нұсқаулығы",
+	"revisionslider-previous-dialog": "Алдыңғы",
+	"revisionslider-next-dialog": "Келесі",
+	"revisionslider-close-dialog": "Жабу"
+}

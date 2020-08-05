@@ -1,14 +1,11 @@
 <?php
 /**
- * Unit tests for class TPParse
- *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
 /**
- * Unit tests for class TPParse
  * @ingroup PageTranslation
  */
 class TPParseTest extends MediaWikiTestCase {
@@ -21,7 +18,7 @@ class TPParseTest extends MediaWikiTestCase {
 		$prefix = $title->getPrefixedDBkey() . '/';
 		$parse = $page->getParse();
 
-		$collection = array();
+		$collection = [];
 		$expected = 'Hello peter!';
 
 		$actual = $parse->getTranslationPageText( $collection );

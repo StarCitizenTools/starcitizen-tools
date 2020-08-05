@@ -12,13 +12,13 @@ use Flow\Tests\FlowTestCase;
 class UUIDTest extends FlowTestCase {
 
 	public function testFixesCapitalizedDataWhenUnserializing() {
-		$uuid = UUID::create();
+		$uuid = UUID::create( 'u9pdp74asmm1qa81' );
 		$serialized = serialize( $uuid );
 		// We are targeting this portion of the serialized string:
-		//   s:16:"s3xyjucl93jtq2ci"
+		// s:16:"s3xyjucl93jtq2ci"
 		$broken = preg_replace_callback(
 			'/(s:16:")([a-z0-9])/',
-			function( $matches ) {
+			function ( $matches ) {
 				return $matches[1] . strtoupper( $matches[2] );
 			},
 			$serialized
@@ -30,14 +30,14 @@ class UUIDTest extends FlowTestCase {
 	}
 
 	public function invalidInputProvider() {
-		$valid = UUID::create()->getAlphadecimal();
+		$valid = 'u9pdkbdvsgz206kh';
 
-		return array(
-			array( '' ),
-			array( strtoupper( $valid ) ),
-			array( strtoupper( UUID::alnum2hex( $valid ) ) ),
-			array( ucfirst( $valid ) ),
-		);
+		return [
+			[ '' ],
+			[ strtoupper( $valid ) ],
+			[ strtoupper( UUID::alnum2hex( $valid ) ) ],
+			[ ucfirst( $valid ) ],
+		];
 	}
 
 	/**
@@ -48,7 +48,7 @@ class UUIDTest extends FlowTestCase {
 		UUID::create( $invalidInput );
 	}
 
-	static public function uuidConversionProvider() {
+	public static function uuidConversionProvider() {
 		// sample uuid from UIDGenerator::newTimestampedUID128()
 		$numeric_128 = '6709199728898751234959525538795913762';
 		$hex_128 = \Wikimedia\base_convert( $numeric_128, 10, 16, 32 );
@@ -61,8 +61,8 @@ class UUIDTest extends FlowTestCase {
 		$bin_88 = new UUIDBlob( pack( 'H*', $hex_88 ) );
 		$pretty_88 = \Wikimedia\base_convert( $numeric_88, 10, 36 );
 
-		return array(
-			array(
+		return [
+			[
 				'128 bit hex input must be truncated to 88bit output',
 				// input
 				$hex_128,
@@ -72,9 +72,9 @@ class UUIDTest extends FlowTestCase {
 				$hex_88,
 				// base36 output
 				$pretty_88,
-			),
+			],
 
-			array(
+			[
 				'88 bit binary input',
 				// input
 				$bin_88,
@@ -84,9 +84,9 @@ class UUIDTest extends FlowTestCase {
 				$hex_88,
 				// pretty
 				$pretty_88,
-			),
+			],
 
-			array(
+			[
 				'88 bit numeric input',
 				// input
 				$numeric_88,
@@ -96,9 +96,9 @@ class UUIDTest extends FlowTestCase {
 				$hex_88,
 				// pretty
 				$pretty_88,
-			),
+			],
 
-			array(
+			[
 				'88 bit hex input',
 				// input
 				$hex_88,
@@ -108,9 +108,9 @@ class UUIDTest extends FlowTestCase {
 				$hex_88,
 				// pretty
 				$pretty_88,
-			),
+			],
 
-			array(
+			[
 				'88 bit pretty input',
 				// input
 				$pretty_88,
@@ -120,9 +120,9 @@ class UUIDTest extends FlowTestCase {
 				$hex_88,
 				// pretty
 				$pretty_88,
-			),
+			],
 
-		);
+		];
 	}
 
 	/**
@@ -132,17 +132,17 @@ class UUIDTest extends FlowTestCase {
 		$uuid = UUID::create( $input );
 
 		$this->assertEquals( $binary, $uuid->getBinary(), "Compare binary: $msg" );
-		//$this->assertEquals( $hex, $uuid->getHex(), "Compare hex: $msg" );
+		// $this->assertEquals( $hex, $uuid->getHex(), "Compare hex: $msg" );
 		$this->assertEquals( $pretty, $uuid->getAlphadecimal(), "Compare pretty: $msg" );
 	}
 
-	static public function prettyProvider() {
-		return array(
+	public static function prettyProvider() {
+		return [
 			// maximal base 36 value ( 2^88 )
-			array( '12vwzoefjlykjgcnwf' ),
+			[ '12vwzoefjlykjgcnwf' ],
 			// current unpadded values from uidgenerator
-			array( 'rlnn1941hqtdtn8a' ),
-		);
+			[ 'rlnn1941hqtdtn8a' ],
+		];
 	}
 
 	/**
@@ -160,20 +160,18 @@ class UUIDTest extends FlowTestCase {
 		$this->assertEquals( UUID::create( 10 )->getAlphadecimal(), '000000000000000a' );
 	}
 
-	public static function uuidProvider()
-	{
-		return array(
-			array( UUID::create() ),
-			array( UUID::getComparisonUUID( 1 ) ),
-		);
+	public static function uuidProvider() {
+		return [
+			[ UUID::create() ],
+			[ UUID::getComparisonUUID( 1 ) ],
+		];
 	}
 
 	/**
 	 * @dataProvider uuidProvider
 	 * @param UUID $uuid
 	 */
-	public function testAlphadecimalRoundtrip( UUID $uuid )
-	{
+	public function testAlphadecimalRoundtrip( UUID $uuid ) {
 		$expect = $uuid->getAlphadecimal();
 		$new = UUID::create( $expect );
 
@@ -184,8 +182,7 @@ class UUIDTest extends FlowTestCase {
 	 * @dataProvider uuidProvider
 	 * @param UUID $uuid
 	 */
-	public function testHexRoundtrip( UUID $uuid )
-	{
+	public function testHexRoundtrip( UUID $uuid ) {
 		$expect = $uuid->getHex();
 		$new = UUID::create( $expect );
 
@@ -196,8 +193,7 @@ class UUIDTest extends FlowTestCase {
 	 * @dataProvider uuidProvider
 	 * @param UUID $uuid
 	 */
-	public function testBinaryRoundtrip( UUID $uuid )
-	{
+	public function testBinaryRoundtrip( UUID $uuid ) {
 		$expect = $uuid->getBinary();
 		$new = UUID::create( $expect );
 

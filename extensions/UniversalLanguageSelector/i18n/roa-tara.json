@@ -8,7 +8,10 @@
 	"uls-plang-title-languages": "Lènghe",
 	"ext-uls-select-language-settings-icon-tooltip": "'Mbostaziune de lènghe",
 	"ext-uls-undo-language-tooltip-text": "Lènghe cangiate da $1",
+	"ext-uls-undo-language-tooltip-text-local": "Lènghe cangiate pe sta uicchi. Condrolle le [[Special:GlobalPreferences|preferenze globbale]] tune pe cangià 'a lènghe pe tutte le uicchi.",
 	"ext-uls-language-settings-preferences-link": "Otre 'mbostaziune d'a lènghe",
+	"uls-betafeature-label": "Collegaminde inderuicchi a fiche",
+	"uls-betafeature-desc": "Fà 'ndrucà ìna versione cchiù corte de l'elenghe de le inderuicchi, ca sò le collegaminde a le otre lènghe addò 'a pàgene jè disponibbile, limitate a chidde cchiù 'mbortande pe te.",
 	"ext-uls-display-settings-title": "Fà vedè le 'mbostaziune",
 	"ext-uls-display-settings-language-tab": "Lènghe",
 	"ext-uls-display-settings-fonts-tab": "Carattere",
@@ -24,6 +27,7 @@
 	"ext-uls-display-settings-anon-same-as-content": "$1 ('u stesse cumme condenute)",
 	"ext-uls-display-settings-anon-log-in-cta": "[[Special:UserLogin|Tràse]] pe scacchià 'na lènghe diverse pe le menu.",
 	"ext-uls-webfonts-settings-title": "Scareche le carattere quanne abbesògne",
+	"ext-uls-webfonts-settings-info": "Scareche automaticamende le font ca mangane e face scacchià le tipe de carattere preferite.",
 	"ext-uls-webfonts-settings-info-link": "Cchiù 'mbormaziune",
 	"ext-uls-webfonts-select-for": "Scacchie 'u carattere pe $1",
 	"ext-uls-webfonts-select-for-ui-info": "Carattere ausate pe l'inderfacce utende",
@@ -50,5 +54,10 @@
 	"ext-uls-input-disable-notification-undo": "Annulle",
 	"ext-uls-input-disable-notification-info-personal": "Tu puè abbilità le struminde de ingresse ogne vote da le 'mbostaziune d'a lènghe.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Tu puè abbilità le struminde de ingresse ogne vote da le 'mbostaziune d'a lènghe successive a l'elenghe de le lènghe.",
-	"ext-uls-language-settings-applying": "Stoche a appleche..."
+	"ext-uls-language-settings-applying": "Stoche a appleche...",
+	"ext-uls-compact-link-count": "{{PLURAL:$1|'N'otre|otre $1}}",
+	"ext-uls-compact-link-info": "Tutte le lènghe ('u scacchiamende iniziale avène 'mbrà le scacchiaminde comune tue e de l'otre)",
+	"prefs-languages": "Lènghe",
+	"ext-uls-compact-language-links-preference": "Ause 'n'[[$1|elenghe ridotte de lènghe]], cu le lènghe ca so 'mbortande pe te.",
+	"ext-uls-compact-no-results": "Sta pàgene non g'è disponibbile jndr'à lènghe ca ste cirche."
 }

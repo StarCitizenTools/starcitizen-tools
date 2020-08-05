@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface MWParameterResultWidget styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -35,12 +35,12 @@
 }
 
 .ve-ui-mwParameterResultWidget-name {
-	border-radius: 0.3em;
 	padding: 0.125em 0.25em;
 	margin-left: 0.5em;
-	color: #999;
-	background-color: #eee;
-	border: solid 1px #ddd;
+	color: #54595d;
+	background-color: #eaecf0;
+	border: 1px solid #c8ccd1;
+	border-radius: 2px;
 }
 
 .ve-ui-mwParameterResultWidget-name:first-child {
@@ -49,5 +49,5 @@
 
 .ve-ui-mwParameterResultWidget-description {
 	clear: both;
-	color: #555;
+	color: #54595d;
 }

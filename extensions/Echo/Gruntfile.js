@@ -1,50 +1,89 @@
-/*jshint node:true */
+/* eslint-env node */
 module.exports = function ( grunt ) {
-	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
-	grunt.loadNpmTasks( 'grunt-contrib-watch' );
-	grunt.loadNpmTasks( 'grunt-jsonlint' );
+	var conf = grunt.file.readJSON( 'extension.json' );
+
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
-	grunt.loadNpmTasks( 'grunt-jscs' );
+	grunt.loadNpmTasks( 'grunt-contrib-watch' );
+	grunt.loadNpmTasks( 'grunt-eslint' );
+	grunt.loadNpmTasks( 'grunt-jsonlint' );
+	grunt.loadNpmTasks( 'grunt-stylelint' );
+	grunt.loadNpmTasks( 'grunt-svgmin' );
 
 	grunt.initConfig( {
-		jshint: {
+		eslint: {
+			src: [
+				'**/*.js',
+				'!node_modules/**',
+				'!vendor/**',
+				'!tests/externals/**',
+				'!docs/**'
+			]
+		},
+		// Lint – Styling
+		stylelint: {
 			options: {
-				jshintrc: true,
-				ignores: [
-					'tests/externals/**'
-				]
+				syntax: 'less'
 			},
 			all: [
-				'**/*.js',
-				'!node_modules/**'
+				'modules/**/*.css',
+				'modules/**/*.less'
 			]
 		},
-		jscs: {
-			src: [
-				'<%= jshint.all %>',
-				'!tests/externals/**'
-			]
+		// SVG Optimization
+		svgmin: {
+			options: {
+				js2svg: {
+					indent: '	',
+					pretty: true
+				},
+				plugins: [ {
+					cleanupIDs: false
+				}, {
+					removeDesc: false
+				}, {
+					removeRasterImages: true
+				}, {
+					removeTitle: false
+				}, {
+					removeViewBox: false
+				}, {
+					removeXMLProcInst: false
+				}, {
+					sortAttrs: true
+				} ]
+			},
+			all: {
+				files: [ {
+					expand: true,
+					cwd: 'modules/icons',
+					src: [
+						'**/*.svg'
+					],
+					dest: 'modules/icons/',
+					ext: '.svg'
+				} ]
+			}
 		},
-		banana: {
-			all: 'i18n/'
-		},
+		banana: conf.MessagesDirs,
 		watch: {
 			files: [
-				'.{csslintrc,jscsrc,jshintignore,jshintrc}',
-				'<%= jshint.all %>',
-				'<%= csslint.all %>'
+				'.{stylelintrc,eslintrc}.json',
+				'<%= eslint.all %>',
+				'<%= stylelint.all %>'
 			],
 			tasks: 'test'
 		},
 		jsonlint: {
 			all: [
 				'**/*.json',
-				'!node_modules/**'
+				'!node_modules/**',
+				'!vendor/**',
+				'!docs/**'
 			]
 		}
 	} );
 
-	grunt.registerTask( 'lint', [ 'jshint', 'jscs', 'jsonlint', 'banana' ] );
-	grunt.registerTask( 'test', 'lint' );
+	grunt.registerTask( 'lint', [ 'eslint', 'stylelint', 'jsonlint', 'banana' ] );
+	grunt.registerTask( 'test', 'lint', 'svgmin' );
 	grunt.registerTask( 'default', 'test' );
 };

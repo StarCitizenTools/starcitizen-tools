@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel CommentNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -67,6 +67,13 @@ ve.dm.CommentNode.static.toDomElements = function ( dataElement, doc, converter 
 				'&#' + m.charCodeAt( m.length - 1 ) + ';';
 		} );
 		return [ doc.createComment( data ) ];
+	}
+};
+
+ve.dm.CommentNode.static.describeChange = function ( key, change ) {
+	if ( key === 'text' ) {
+		// TODO: Run comment changes through a linear differ.
+		return ve.msg( 'visualeditor-changedesc-comment', change.from, change.to );
 	}
 };
 

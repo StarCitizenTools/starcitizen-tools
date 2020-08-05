@@ -10,22 +10,48 @@
  * @since 2016.03
  */
 class TranslationsUpdateJob extends Job {
+	/**
+	 * @inheritDoc
+	 */
+	public function __construct( Title $title, $params = [] ) {
+		parent::__construct( __CLASS__, $title, $params );
+	}
 
 	/**
-	 * @param Title $title
-	 * @param array $params
-	 * @param int $id
+	 * Create a job that updates a translation page.
+	 *
+	 * If a list of sections is provided, then the job will also update translation
+	 * unit pages.
+	 *
+	 * @param TranslatablePage $page
+	 * @param TPSection[] $sections
+	 * @return TranslationsUpdateJob
+	 * @since 2018.07
 	 */
-	public function __construct( Title $title, array $params, $id = 0 ) {
-		parent::__construct( __CLASS__, $title, $params, $id );
+	public static function newFromPage( TranslatablePage $page, array $sections = [] ) {
+		$params = [];
+		$params[ 'sections' ] = [];
+		foreach ( $sections as $section ) {
+			$params[ 'sections' ][] = $section->serializeToArray();
+		}
 
-		$this->page = TranslatablePage::newFromTitle( $title );
-		$this->sections = $params['sections'];
+		return new self( $page->getTitle(), $params );
 	}
 
 	public function run() {
+		$page = TranslatablePage::newFromTitle( $this->title );
+		$sections = $this->params[ 'sections' ];
+		foreach ( $sections as $index => $section ) {
+			// Old jobs stored sections as objects because they were serialized and
+			// unserialized transparently. That is no longer supported, so we
+			// convert manually to primitive types first (to an PHP array).
+			if ( is_array( $section ) ) {
+				$sections[ $index ] = TPSection::unserializeFromArray( $section );
+			}
+		}
+
 		// Units should be updated before the render jobs are run
-		$unitJobs = self::getTranslationUnitJobs( $this->page, $this->sections );
+		$unitJobs = self::getTranslationUnitJobs( $page, $sections );
 		foreach ( $unitJobs as $job ) {
 			$job->run();
 		}
@@ -36,19 +62,18 @@ class TranslationsUpdateJob extends Job {
 		// returns null. There is no need to regenerate the global cache.
 		MessageGroups::singleton()->clearProcessCache();
 		// Ensure fresh definitions for MessageIndex and stats
-		$this->page->getMessageGroup()->clearCaches();
+		$page->getMessageGroup()->clearCaches();
 
 		MessageIndex::singleton()->rebuild();
 
 		// Refresh translations statistics
-		$id = $this->page->getMessageGroupId();
-		MessageGroupStats::clearGroup( $id );
-		MessageGroupStats::forGroup( $id );
+		$id = $page->getMessageGroupId();
+		MessageGroupStats::forGroup( $id, MessageGroupStats::FLAG_NO_CACHE );
 
-		$wikiPage = WikiPage::factory( $this->page->getTitle() );
+		$wikiPage = WikiPage::factory( $page->getTitle() );
 		$wikiPage->doPurge();
 
-		$renderJobs = self::getRenderJobs( $this->page );
+		$renderJobs = self::getRenderJobs( $page );
 		JobQueueGroup::singleton()->push( $renderJobs );
 		return true;
 	}
@@ -61,7 +86,7 @@ class TranslationsUpdateJob extends Job {
 	 * @since 2013-01-28
 	 */
 	public static function getTranslationUnitJobs( TranslatablePage $page, array $sections ) {
-		$jobs = array();
+		$jobs = [];
 
 		$code = $page->getSourceLanguageCode();
 		$prefix = $page->getTitle()->getPrefixedText();
@@ -84,7 +109,7 @@ class TranslationsUpdateJob extends Job {
 	 * @since 2013-01-28
 	 */
 	public static function getRenderJobs( TranslatablePage $page ) {
-		$jobs = array();
+		$jobs = [];
 
 		$jobTitles = $page->getTranslationPages();
 		// $jobTitles may have the source language title already but duplicate TranslateRenderJobs

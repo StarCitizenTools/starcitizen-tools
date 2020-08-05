@@ -11,7 +11,7 @@
 	"babel-footer-url": ":Category:Babel - Utilizaires per lenga",
 	"babel-autocreate-reason": "Creacion automatica de la categoria [[$1|Babel]].",
 	"babel-autocreate-text-levels": "Los utilizaires dins aquesta categoria an indicat qu'an lo nivèl $1 per la lenga $2.",
-	"babel-autocreate-text-main": "Los utilizaires dins aquesta categoria an indicat qu'an una coneissença en $1.",
+	"babel-autocreate-text-main": "Los utilizaires dins aquesta categoria an indicat qu'an una coneissença en lenga $1.",
 	"babel-0": "Aqueste utilizaire a [[$1|pas cap]] de coneissença en [[$2|$3]] (o comprend amb de dificultats grandas).",
 	"babel-1": "Aqueste utilizaire pòt contribuir amb un nivèl [[$1|elementari]] en [[$2|$3]].",
 	"babel-2": "Aqueste utilizaire a una coneissença [[$1|mejana]] en [[$2|$3]].",

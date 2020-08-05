@@ -13,7 +13,7 @@
 	"nuke-defaultreason": "Scangellazzione de masse de le pàggene aggiunde da [[Special:Contributions/$1|{{GENDER:$1|$1}}]]",
 	"nuke-multiplepeople": "Scangellazione massive de le pàggene aggiunde de recende",
 	"nuke-tools": "Stu strumende permette le scangellazziune de masse de le pàggene aggiunde de recende da 'nu certe utende o IP.<br />\nMitte 'u nome de l'utende o l'indirizze IP pe avè 'n'elenghe de le pàggene de scangellà, o lasse vianghe pe tutte l'utinde.",
-	"nuke-submit-user": "Veje",
+	"nuke-submit-user": "Elenghe de le pàggene",
 	"nuke-toggleinvert": "'Nverte",
 	"nuke-submit-delete": "Scangelle 'a selezione",
 	"right-nuke": "Scangellazione de masse de le pàggene",
@@ -25,9 +25,10 @@
 	"nuke-not-deleted": "Pàgene [[:$1]] '''non ge pò''' essere scangellate.",
 	"nuke-delete-more": "[[Special:Nuke|Scangille cchiù pàggene]]",
 	"nuke-pattern": "Segnaposte pu nomed'a pàgene:",
-	"nuke-nopages-global": "Non ge stonne pàggene nove jndr'à le [[Special:RecentChanges|cangiaminde recende]].",
+	"nuke-nopages-global": "Non ge stonne titole de pàggene ca s'accocchiane cu 'a recerca toje.",
 	"nuke-viewchanges": "vide le cangiaminde",
 	"nuke-namespace": "Limite a namespace:",
 	"nuke-linkoncontribs": "scangellazione de masse",
-	"nuke-linkoncontribs-text": "Pàggene da scangellà massive addò stu utende jè 'u sole autore"
+	"nuke-linkoncontribs-text": "Pàggene da scangellazzione massive addò {{GENDER:$1|stu utende}} jè 'u sole autore",
+	"nuke-confirm": "Ste pe scangellà {{PLURAL:$1|'na pàgene|$1 pàggene}}. Sì secure ca vue ccu scangille?"
 }

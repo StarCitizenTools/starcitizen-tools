@@ -21,6 +21,8 @@
  * @ingroup Maintenance
  */
 
+use MediaWiki\MediaWikiServices;
+
 require_once __DIR__ . '/Maintenance.php';
 
 /**
@@ -56,14 +58,23 @@ class ImportTextFiles extends Maintenance {
 		$prefix = $this->getOption( 'prefix', '' );
 
 		// Get all the arguments. A loop is required since Maintenance doesn't
-		// suppport an arbitrary number of arguments.
+		// support an arbitrary number of arguments.
 		$files = [];
 		$i = 0;
 		while ( $arg = $this->getArg( $i++ ) ) {
 			if ( file_exists( $arg ) ) {
 				$files[$arg] = file_get_contents( $arg );
 			} else {
-				$this->error( "Fatal error: The file '$arg' does not exist!", 1 );
+				// use glob to support the Windows shell, which doesn't automatically
+				// expand wildcards
+				$found = false;
+				foreach ( glob( $arg ) as $filename ) {
+					$found = true;
+					$files[$filename] = file_get_contents( $filename );
+				}
+				if ( !$found ) {
+					$this->fatalError( "Fatal error: The file '$arg' does not exist!" );
+				}
 			}
 		};
 
@@ -77,7 +88,7 @@ class ImportTextFiles extends Maintenance {
 		}
 
 		if ( !$user ) {
-			$this->error( "Invalid username\n", true );
+			$this->fatalError( "Invalid username\n" );
 		}
 		if ( $user->isAnon() ) {
 			$user->addToDatabase();
@@ -94,16 +105,16 @@ class ImportTextFiles extends Maintenance {
 			$timestamp = $useTimestamp ? wfTimestamp( TS_UNIX, filemtime( $file ) ) : wfTimestampNow();
 
 			$title = Title::newFromText( $pageName );
-			$exists = $title->exists();
-			$oldRevID = $title->getLatestRevID();
-			$oldRev = $oldRevID ? Revision::newFromId( $oldRevID ) : null;
-
-			if ( !$title ) {
+			// Have to check for # manually, since it gets interpreted as a fragment
+			if ( !$title || $title->hasFragment() ) {
 				$this->error( "Invalid title $pageName. Skipping.\n" );
 				$skipCount++;
 				continue;
 			}
 
+			$exists = $title->exists();
+			$oldRevID = $title->getLatestRevID();
+			$oldRev = $oldRevID ? Revision::newFromId( $oldRevID ) : null;
 			$actualTitle = $title->getPrefixedText();
 
 			if ( $exists ) {
@@ -120,7 +131,7 @@ class ImportTextFiles extends Maintenance {
 				}
 			}
 
-			$rev = new WikiRevision( ConfigFactory::getDefaultInstance()->makeConfig( 'main' ) );
+			$rev = new WikiRevision( MediaWikiServices::getInstance()->getMainConfig() );
 			$rev->setText( rtrim( $text ) );
 			$rev->setTitle( $title );
 			$rev->setUserObj( $user );
@@ -188,10 +199,10 @@ class ImportTextFiles extends Maintenance {
 
 		$this->output( "Done! $successCount succeeded, $skipCount skipped.\n" );
 		if ( $exit ) {
-			$this->error( "Import failed with $failCount failed pages.\n", $exit );
+			$this->fatalError( "Import failed with $failCount failed pages.\n", $exit );
 		}
 	}
 }
 
-$maintClass = "ImportTextFiles";
+$maintClass = ImportTextFiles::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

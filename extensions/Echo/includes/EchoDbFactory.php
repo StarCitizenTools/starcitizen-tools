@@ -1,4 +1,6 @@
 <?php
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Rdbms\LoadBalancer;
 
 /**
  * Database factory class, this will determine whether to use the main database
@@ -41,15 +43,22 @@ class MWEchoDbFactory {
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function isReadOnly() {
+		return ( $this->getLB()->getReadOnlyReason() !== false );
+	}
+
+	/**
 	 * Get the database load balancer
 	 * @return LoadBalancer
 	 */
 	protected function getLB() {
 		// Use the external db defined for Echo
 		if ( $this->cluster ) {
-			$lb = wfGetLBFactory()->getExternalLB( $this->cluster );
+			$lb = MediaWikiServices::getInstance()->getDBLoadBalancerFactory()->getExternalLB( $this->cluster );
 		} else {
-			$lb = wfGetLB();
+			$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 		}
 
 		return $lb;
@@ -60,9 +69,9 @@ class MWEchoDbFactory {
 	 */
 	protected function getSharedLB() {
 		if ( $this->sharedCluster ) {
-			$lb = wfGetLBFactory()->getExternalLB( $this->sharedCluster );
+			$lb = MediaWikiServices::getInstance()->getDBLoadBalancerFactory()->getExternalLB( $this->sharedCluster );
 		} else {
-			$lb = wfGetLB();
+			$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 		}
 
 		return $lb;
@@ -70,28 +79,26 @@ class MWEchoDbFactory {
 
 	/**
 	 * Get the database connection for Echo
-	 * @param $db int Index of the connection to get
-	 * @param $groups mixed Query groups.
-	 * @return DatabaseBase
+	 * @param int $db Index of the connection to get
+	 * @param mixed $groups Query groups.
+	 * @return \Wikimedia\Rdbms\IDatabase
 	 */
-	public function getEchoDb( $db, $groups = array() ) {
+	public function getEchoDb( $db, $groups = [] ) {
 		return $this->getLB()->getConnection( $db, $groups );
 	}
 
 	/**
-	 * @param $db int Index of the connection to get
+	 * @param int $db Index of the connection to get
 	 * @param array $groups Query groups
-	 * @return bool|DatabaseBase false if no shared db is configured
+	 * @return bool|\Wikimedia\Rdbms\IDatabase false if no shared db is configured
 	 */
-	public function getSharedDb( $db, $groups = array() ) {
+	public function getSharedDb( $db, $groups = [] ) {
 		if ( !$this->shared ) {
 			return false;
 		}
 
 		return $this->getSharedLB()->getConnection( $db, $groups, $this->shared );
 	}
-
-
 
 	/**
 	 * Wrapper function for wfGetDB, some extensions like MobileFrontend is
@@ -100,19 +107,25 @@ class MWEchoDbFactory {
 	 * objects
 	 *
 	 * @deprecated Use newFromDefault() instead to create a db factory
-	 * @param $db int Index of the connection to get
-	 * @param $groups mixed Query groups.
-	 * @param $wiki string|bool The wiki ID, or false for the current wiki
-	 * @return DatabaseBase
+	 * @param int $db Index of the connection to get
+	 * @param mixed $groups Query groups.
+	 * @param string|bool $wiki The wiki ID, or false for the current wiki
+	 * @return \Wikimedia\Rdbms\IDatabase
 	 */
-	public static function getDB( $db, $groups = array(), $wiki = false ) {
+	public static function getDB( $db, $groups = [], $wiki = false ) {
 		global $wgEchoCluster;
+
+		$services = MediaWikiServices::getInstance();
 
 		// Use the external db defined for Echo
 		if ( $wgEchoCluster ) {
-			$lb = wfGetLBFactory()->getExternalLB( $wgEchoCluster, $wiki );
+			$lb = $services->getDBLoadBalancerFactory()->getExternalLB( $wgEchoCluster );
 		} else {
-			$lb = wfGetLB( $wiki );
+			if ( $wiki === false ) {
+				$lb = $services->getDBLoadBalancer();
+			} else {
+				$lb = $services->getDBLoadBalancerFactory()->getMainLB( $wiki );
+			}
 		}
 
 		return $lb->getConnection( $db, $groups, $wiki );
@@ -132,11 +145,11 @@ class MWEchoDbFactory {
 	 * @return array
 	 */
 	public function getMasterPosition() {
-		$position = array(
+		$position = [
 			'wikiDb' => false,
 			'echoDb' => false,
-		);
-		$lb = wfGetLB();
+		];
+		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 		if ( $lb->getServerCount() > 1 ) {
 			$position['wikiDb'] = $lb->getMasterPos();
 		};
@@ -152,7 +165,7 @@ class MWEchoDbFactory {
 	}
 
 	/**
-	 * Recieves the output of self::getMasterPosition. Waits
+	 * Receives the output of self::getMasterPosition. Waits
 	 * for slaves to catch up to the master position at that
 	 * point.
 	 *
@@ -160,10 +173,18 @@ class MWEchoDbFactory {
 	 */
 	public function waitFor( array $position ) {
 		if ( $position['wikiDb'] ) {
-			wfGetLB()->waitFor( $position['wikiDb'] );
+			MediaWikiServices::getInstance()->getDBLoadBalancer()->waitFor( $position['wikiDb'] );
 		}
 		if ( $position['echoDb'] ) {
 			$this->getLB()->waitFor( $position['echoDb'] );
 		}
+	}
+
+	/**
+	 * Check whether it makes sense to retry a failed lookup on the master.
+	 * @return bool True if there are multiple servers and changes were made in this request; false otherwise
+	 */
+	public function canRetryMaster() {
+		return $this->getLB()->getServerCount() > 1 && $this->getLB()->hasOrMadeRecentMasterChanges();
 	}
 }

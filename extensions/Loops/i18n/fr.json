@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"DavidL",
+			"Gomoko"
+		]
+	},
+	"loops-desc": "Fonctions de l'interpréteur pour effectuer des boucles",
+	"loops_max": "Le nombre maximal de boucles a été effectué",
+	"loops-limitreport-count-limited": "Compteur ExtLoops",
+	"loops-limitreport-count-unlimited": "Compteur ExtLoops",
+	"loops-config-countlimit": "Variable de configuration définissant le nombre maximum autorisé de boucles ('-1' => pas de limite). '#forargs' et '#fornumargs' ne sont pas limités par cela.",
+	"loops-config-enabledfunctions": "Permet de définir quelles fonctionnalités fournies par 'Loops' doivent être activées pour le wiki. Si l’extension 'Variables' n’est pas installée, '#loop', '#forargs' et '#fornumargs' seront automatiquement désactivés."
+}

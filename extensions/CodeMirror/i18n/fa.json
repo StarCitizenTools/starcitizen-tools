@@ -1,8 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Alirezaaa"
+			"Alirezaaa",
+			"Ladsgroup"
 		]
 	},
-	"codemirror-desc": "ویرایش نحو برجسته برای صفحات ویکی با استفاده از [http://codemirror.net/ CodeMirror]"
+	"codemirror-desc": "ویرایش نحو برجسته برای صفحات ویکی",
+	"codemirror-toggle-label": "پررنگ کردن ترکیب",
+	"codemirror-beta-title": "پررنگ کردن ترکیب ویکی‌نویسی",
+	"codemirror-popup-label": "پررنگ کردن ترکیب",
+	"codemirror-popup-btn-yes": "امتحانش کن",
+	"codemirror-popup-btn-no": "نه، ممنون"
 }

@@ -54,8 +54,8 @@ class ResourceLoaderImage {
 		$this->variants = $variants;
 
 		// Expand shorthands:
-		// array( "en,de,fr" => "foo.svg" )
-		// → array( "en" => "foo.svg", "de" => "foo.svg", "fr" => "foo.svg" )
+		// [ "en,de,fr" => "foo.svg" ]
+		// → [ "en" => "foo.svg", "de" => "foo.svg", "fr" => "foo.svg" ]
 		if ( is_array( $this->descriptor ) && isset( $this->descriptor['lang'] ) ) {
 			foreach ( array_keys( $this->descriptor['lang'] ) as $langList ) {
 				if ( strpos( $langList, ',' ) !== false ) {
@@ -67,23 +67,27 @@ class ResourceLoaderImage {
 				}
 			}
 		}
+		// Remove 'deprecated' key
+		if ( is_array( $this->descriptor ) ) {
+			unset( $this->descriptor[ 'deprecated' ] );
+		}
 
 		// Ensure that all files have common extension.
 		$extensions = [];
-		$descriptor = (array)$descriptor;
+		$descriptor = (array)$this->descriptor;
 		array_walk_recursive( $descriptor, function ( $path ) use ( &$extensions ) {
 			$extensions[] = pathinfo( $path, PATHINFO_EXTENSION );
 		} );
 		$extensions = array_unique( $extensions );
 		if ( count( $extensions ) !== 1 ) {
 			throw new InvalidArgumentException(
-				"File type for different image files of '$name' not the same"
+				"File type for different image files of '$name' not the same in module '$module'"
 			);
 		}
 		$ext = $extensions[0];
 		if ( !isset( self::$fileTypes[$ext] ) ) {
 			throw new InvalidArgumentException(
-				"Invalid file type for image files of '$name' (valid: svg, png, gif, jpg)"
+				"Invalid file type for image files of '$name' (valid: svg, png, gif, jpg) in module '$module'"
 			);
 		}
 		$this->extension = $ext;
@@ -126,13 +130,27 @@ class ResourceLoaderImage {
 		$desc = $this->descriptor;
 		if ( is_string( $desc ) ) {
 			return $this->basePath . '/' . $desc;
-		} elseif ( isset( $desc['lang'][$context->getLanguage()] ) ) {
-			return $this->basePath . '/' . $desc['lang'][$context->getLanguage()];
-		} elseif ( isset( $desc[$context->getDirection()] ) ) {
-			return $this->basePath . '/' . $desc[$context->getDirection()];
-		} else {
-			return $this->basePath . '/' . $desc['default'];
 		}
+		if ( isset( $desc['lang'] ) ) {
+			$contextLang = $context->getLanguage();
+			if ( isset( $desc['lang'][$contextLang] ) ) {
+				return $this->basePath . '/' . $desc['lang'][$contextLang];
+			}
+			$fallbacks = Language::getFallbacksFor( $contextLang );
+			foreach ( $fallbacks as $lang ) {
+				// Images will fallback to 'default' instead of 'en', except for 'en-*' variants
+				if (
+					( $lang !== 'en' || substr( $contextLang, 0, 3 ) === 'en-' ) &&
+					isset( $desc['lang'][$lang] )
+				) {
+					return $this->basePath . '/' . $desc['lang'][$lang];
+				}
+			}
+		}
+		if ( isset( $desc[$context->getDirection()] ) ) {
+			return $this->basePath . '/' . $desc[$context->getDirection()];
+		}
+		return $this->basePath . '/' . $desc['default'];
 	}
 
 	/**
@@ -144,9 +162,8 @@ class ResourceLoaderImage {
 	public function getExtension( $format = 'original' ) {
 		if ( $format === 'rasterized' && $this->extension === 'svg' ) {
 			return 'png';
-		} else {
-			return $this->extension;
 		}
+		return $this->extension;
 	}
 
 	/**
@@ -176,6 +193,7 @@ class ResourceLoaderImage {
 			'variant' => $variant,
 			'format' => $format,
 			'lang' => $context->getLanguage(),
+			'skin' => $context->getSkin(),
 			'version' => $context->getVersion(),
 		];
 

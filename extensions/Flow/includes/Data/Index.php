@@ -14,7 +14,7 @@ interface Index extends LifecycleHandler {
 	 * @return array Cached subset of data model rows matching the
 	 *     equality conditions provided in $keys.
 	 */
-	function find( array $keys, array $options = array() );
+	function find( array $keys, array $options = [] );
 
 	/**
 	 * Batch together multiple calls to self::find with minimal network round trips.
@@ -23,7 +23,7 @@ interface Index extends LifecycleHandler {
 	 * @param array[optional] $options Options to use
 	 * @return array[] Array of arrays in same order as $queries representing batched result set.
 	 */
-	function findMulti( array $queries, array $options = array() );
+	function findMulti( array $queries, array $options = [] );
 
 	/**
 	 * Returns a boolean true/false if the find()-operation for the given
@@ -36,7 +36,7 @@ interface Index extends LifecycleHandler {
 	 * @param array[optional] $options Options to find()
 	 * @return bool
 	 */
-	public function found( array $attributes, array $options = array() );
+	public function found( array $attributes, array $options = [] );
 
 	/**
 	 * Returns a boolean true/false if the findMulti()-operation for the given
@@ -49,10 +49,10 @@ interface Index extends LifecycleHandler {
 	 * @param array[optional] $options Options to find()
 	 * @return bool
 	 */
-	public function foundMulti( array $attributes, array $options = array() );
+	public function foundMulti( array $attributes, array $options = [] );
 
 	/**
-	 * @return integer Maximum number of items in a single index value
+	 * @return int Maximum number of items in a single index value
 	 */
 	function getLimit();
 
@@ -73,7 +73,7 @@ interface Index extends LifecycleHandler {
 	 *
 	 * @param array $keys
 	 * @param array $options
-	 * @return boolean Can the index locate a result for this keys and options pair
+	 * @return bool Can the index locate a result for this keys and options pair
 	 */
 	function canAnswer( array $keys, array $options );
 

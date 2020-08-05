@@ -160,6 +160,7 @@ class BitmapMetadataHandler {
 		$meta = new self();
 
 		$seg = JpegMetadataExtractor::segmentSplitter( $filename );
+
 		if ( isset( $seg['COM'] ) && isset( $seg['COM'][0] ) ) {
 			$meta->addMetadata( [ 'JPEGFileComment' => $seg['COM'] ], 'native' );
 		}
@@ -169,7 +170,7 @@ class BitmapMetadataHandler {
 			}
 		}
 		if ( isset( $seg['XMP'] ) && $showXMP ) {
-			$xmp = new XMPReader( LoggerFactory::getInstance( 'XMP' ) );
+			$xmp = new XMPReader( LoggerFactory::getInstance( 'XMP' ), $filename );
 			$xmp->parse( $seg['XMP'] );
 			foreach ( $seg['XMP_ext'] as $xmpExt ) {
 				/* Support for extended xmp in jpeg files
@@ -182,9 +183,8 @@ class BitmapMetadataHandler {
 				$meta->addMetadata( $array, $type );
 			}
 		}
-		if ( isset( $seg['byteOrder'] ) ) {
-			$meta->getExif( $filename, $seg['byteOrder'] );
-		}
+
+		$meta->getExif( $filename, isset( $seg['byteOrder'] ) ? $seg['byteOrder'] : 'BE' );
 
 		return $meta->getMetadataArray();
 	}
@@ -205,7 +205,7 @@ class BitmapMetadataHandler {
 		if ( isset( $array['text']['xmp']['x-default'] )
 			&& $array['text']['xmp']['x-default'] !== '' && $showXMP
 		) {
-			$xmp = new XMPReader( LoggerFactory::getInstance( 'XMP' ) );
+			$xmp = new XMPReader( LoggerFactory::getInstance( 'XMP' ), $filename );
 			$xmp->parse( $array['text']['xmp']['x-default'] );
 			$xmpRes = $xmp->getResults();
 			foreach ( $xmpRes as $type => $xmpSection ) {
@@ -230,7 +230,6 @@ class BitmapMetadataHandler {
 	 * @return array Metadata array
 	 */
 	public static function GIF( $filename ) {
-
 		$meta = new self();
 		$baseArray = GIFMetadataExtractor::getMetadata( $filename );
 
@@ -239,7 +238,7 @@ class BitmapMetadataHandler {
 		}
 
 		if ( $baseArray['xmp'] !== '' && XMPReader::isSupported() ) {
-			$xmp = new XMPReader( LoggerFactory::getInstance( 'XMP' ) );
+			$xmp = new XMPReader( LoggerFactory::getInstance( 'XMP' ), $filename );
 			$xmp->parse( $baseArray['xmp'] );
 			$xmpRes = $xmp->getResults();
 			foreach ( $xmpRes as $type => $xmpSection ) {
@@ -293,7 +292,7 @@ class BitmapMetadataHandler {
 	 * Read the first 2 bytes of a tiff file to figure out
 	 * Little Endian or Big Endian. Needed for exif stuff.
 	 *
-	 * @param string $filename The filename
+	 * @param string $filename
 	 * @return string 'BE' or 'LE' or false
 	 */
 	static function getTiffByteOrder( $filename ) {

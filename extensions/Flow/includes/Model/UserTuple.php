@@ -18,7 +18,7 @@ class UserTuple {
 	public $wiki;
 
 	/**
-	 * @var integer The id of the user, or 0 for anonymous
+	 * @var int The id of the user, or 0 for anonymous
 	 */
 	public $id;
 
@@ -29,13 +29,13 @@ class UserTuple {
 
 	/**
 	 * @param string $wiki The wiki the user belongs to
-	 * @param integer|string $id The id of the user, or 0 for anonymous
+	 * @param int|string $id The id of the user, or 0 for anonymous
 	 * @param string|null $ip The ip of the user, blank string for no ip.
 	 *  null special case pass-through to be removed.
 	 * @throws InvalidDataException
 	 */
 	public function __construct( $wiki, $id, $ip ) {
-		if ( !is_integer( $id ) ) {
+		if ( !is_int( $id ) ) {
 			if ( ctype_digit( $id ) ) {
 				$id = (int)$id;
 			} else {
@@ -64,7 +64,7 @@ class UserTuple {
 
 	public static function newFromUser( User $user ) {
 		return new self(
-			wfWikiId(),
+			wfWikiID(),
 			$user->getId(),
 			$user->isAnon() ? $user->getName() : null
 		);
@@ -88,15 +88,15 @@ class UserTuple {
 	}
 
 	public function toArray( $prefix = '' ) {
-		return array(
+		return [
 			"{$prefix}wiki" => $this->wiki,
 			"{$prefix}id" => $this->id,
 			"{$prefix}ip" => $this->ip
-		);
+		];
 	}
 
 	public function createUser() {
-		if ( $this->wiki !== wfWikiId() ) {
+		if ( $this->wiki !== wfWikiID() ) {
 			throw new CrossWikiException( 'Can only retrieve same-wiki users' );
 		}
 		if ( $this->id ) {

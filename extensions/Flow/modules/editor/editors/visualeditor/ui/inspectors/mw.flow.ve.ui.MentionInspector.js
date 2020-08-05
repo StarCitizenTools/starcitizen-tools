@@ -152,7 +152,7 @@
 	 * Initialize UI of inspector
 	 */
 	mw.flow.ve.ui.MentionInspector.prototype.initialize = function () {
-		var flowBoard, overlay, indicatorWidget;
+		var flowBoard, overlay, iconWidget;
 
 		mw.flow.ve.ui.MentionInspector.parent.prototype.initialize.call( this );
 
@@ -170,10 +170,10 @@
 			$overlay: overlay ? overlay.$element : this.$frame,
 			topicPosters: flowBoard.getTopicPosters( this.$element )
 		} );
-		indicatorWidget = new OO.ui.IndicatorWidget( {
-			indicator: 'alert'
+		iconWidget = new OO.ui.IconWidget( {
+			icon: 'notice'
 		} );
-		this.errorWidget = new OO.ui.FieldLayout( indicatorWidget, {
+		this.errorWidget = new OO.ui.FieldLayout( iconWidget, {
 			align: 'inline'
 		} );
 		this.errorFieldsetLayout = new OO.ui.FieldsetLayout( {
@@ -214,7 +214,7 @@
 						if ( !inspector.selectedAt ) {
 							inspector.fragment = inspector.getFragment().collapseToEnd();
 						}
-						inspector.transclusionModel.insertTransclusionNode( inspector.getFragment() );
+						inspector.transclusionModel.insertTransclusionNode( inspector.getFragment(), 'inline' );
 						// After insertion move cursor to end of template
 						inspector.fragment.collapseToEnd().select();
 					}
@@ -229,14 +229,7 @@
 			return new OO.ui.Process( deferred.promise() );
 		} else if ( action === 'remove' ) {
 			return new OO.ui.Process( function () {
-				var doc, nodeRange;
-
-				doc = surfaceModel.getDocument();
-				nodeRange = this.selectedNode.getOuterRange();
-
-				surfaceModel.change(
-					ve.dm.Transaction.newFromRemoval( doc, nodeRange )
-				);
+				this.getFragment().removeContent();
 
 				this.close( { action: action } );
 			}, this );
@@ -276,6 +269,7 @@
 	 *
 	 * @param {Object} [data] Inspector initial data
 	 * @param {boolean} [data.selectAt] Select the '@' symbol to the left of the fragment
+	 * @return {OO.ui.Process}
 	 */
 	mw.flow.ve.ui.MentionInspector.prototype.getSetupProcess = function ( data ) {
 		return mw.flow.ve.ui.MentionInspector.parent.prototype.getSetupProcess.call( this, data )

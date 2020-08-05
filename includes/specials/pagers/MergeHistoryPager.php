@@ -36,7 +36,7 @@ class MergeHistoryPager extends ReverseChronologicalPager {
 		$this->title = $source;
 		$this->articleID = $source->getArticleID();
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$maxtimestamp = $dbr->selectField(
 			'revision',
 			'MIN(rev_timestamp)',
@@ -54,15 +54,17 @@ class MergeHistoryPager extends ReverseChronologicalPager {
 		$batch = new LinkBatch();
 		# Give some pointers to make (last) links
 		$this->mForm->prevId = [];
+		$rev_id = null;
 		foreach ( $this->mResult as $row ) {
 			$batch->addObj( Title::makeTitleSafe( NS_USER, $row->user_name ) );
 			$batch->addObj( Title::makeTitleSafe( NS_USER_TALK, $row->user_name ) );
 
-			$rev_id = isset( $rev_id ) ? $rev_id : $row->rev_id;
-			if ( $rev_id > $row->rev_id ) {
-				$this->mForm->prevId[$rev_id] = $row->rev_id;
-			} elseif ( $rev_id < $row->rev_id ) {
-				$this->mForm->prevId[$row->rev_id] = $rev_id;
+			if ( isset( $rev_id ) ) {
+				if ( $rev_id > $row->rev_id ) {
+					$this->mForm->prevId[$rev_id] = $row->rev_id;
+				} elseif ( $rev_id < $row->rev_id ) {
+					$this->mForm->prevId[$row->rev_id] = $rev_id;
+				}
 			}
 
 			$rev_id = $row->rev_id;
@@ -83,13 +85,12 @@ class MergeHistoryPager extends ReverseChronologicalPager {
 		$conds['rev_page'] = $this->articleID;
 		$conds[] = "rev_timestamp < " . $this->mDb->addQuotes( $this->maxTimestamp );
 
+		$revQuery = Revision::getQueryInfo( [ 'page', 'user' ] );
 		return [
-			'tables' => [ 'revision', 'page', 'user' ],
-			'fields' => array_merge( Revision::selectFields(), Revision::selectUserFields() ),
+			'tables' => $revQuery['tables'],
+			'fields' => $revQuery['fields'],
 			'conds' => $conds,
-			'join_conds' => [
-				'page' => Revision::pageJoinCond(),
-				'user' => Revision::userJoinCond() ]
+			'join_conds' => $revQuery['joins']
 		];
 	}
 

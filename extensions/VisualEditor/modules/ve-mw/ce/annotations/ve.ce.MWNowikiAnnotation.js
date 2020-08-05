@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWNowikiAnnotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -14,9 +14,9 @@
  * @param {ve.dm.MWNowikiAnnotation} model Model to observe
  * @param {Object} [config] Configuration options
  */
-ve.ce.MWNowikiAnnotation = function VeCeMWNowikiAnnotation( model, config ) {
+ve.ce.MWNowikiAnnotation = function VeCeMWNowikiAnnotation() {
 	// Parent constructor
-	ve.ce.Annotation.call( this, model, config );
+	ve.ce.MWNowikiAnnotation.super.apply( this, arguments );
 
 	// DOM changes
 	this.$element.addClass( 've-ce-mwNowikiAnnotation' );

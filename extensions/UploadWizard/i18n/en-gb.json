@@ -4,7 +4,10 @@
 			"Reedy",
 			"Shirayuki",
 			"Caliburn",
-			"Sator"
+			"Sator",
+			"Usandaru555",
+			"Codynguyen1116",
+			"Andibing"
 		]
 	},
 	"uploadwizard": "Upload Wizard",
@@ -15,7 +18,6 @@
 	"mwe-upwiz-help-desk": "Help desk",
 	"mwe-upwiz-add-flickr-or": "Or",
 	"mwe-upwiz-transport-started": "Starting...",
-	"mwe-upwiz-encoding": "Encoding...",
 	"mwe-upwiz-uploading": "Uploading...",
 	"mwe-upwiz-upload": "Upload",
 	"mwe-upwiz-skip-tutorial-future": "Skip this step in future",
@@ -49,6 +51,9 @@
 	"mwe-upwiz-source-ownwork-assert-note": "I, copyright holder of {{PLURAL:$2|this work|these works}}, publish {{PLURAL:$2|this work|these works}} under the $1 licence.",
 	"mwe-upwiz-source-thirdparty-accept": "OK",
 	"mwe-upwiz-copy-metadata-button": "Copy",
+	"mwe-upwiz-copy-metadata-button-undo": "Undo",
+	"mwe-upwiz-copied-metadata": "Copied!",
+	"mwe-upwiz-undid-metadata": "Copy undone.",
 	"mwe-upwiz-title": "Title",
 	"mwe-upwiz-location": "Location",
 	"mwe-upwiz-ok": "OK",
@@ -59,7 +64,7 @@
 	"mwe-upwiz-tooltip-more-info": "Learn more.",
 	"mwe-upwiz-deeds-need-license": "Aukeratu mesedez lizentzia bat.",
 	"mwe-upwiz-license-show-all": "Use a different licence",
-	"mwe-upwiz-license-show-recommended": "Use the recommended licence",
+	"mwe-upwiz-license-show-recommended": "Use the site's recommended licence",
 	"mwe-upwiz-error-license-wikitext-too-short": "The wikitext here is too short to be a licence",
 	"mwe-upwiz-dialog-yes": "Yes",
 	"mwe-upwiz-dialog-no": "No",

@@ -3,11 +3,12 @@
 		"authors": [
 			"Wladek92",
 			"Gomoko",
-			"Urhixidur"
+			"Urhixidur",
+			"Envlh"
 		]
 	},
-	"cookiewarning-info": "Les témoins (cookies) nous aident à fournir nos services. En utilisant nos services, vous acceptez notre utilisation des témoins.",
-	"cookiewarning-desc": "Fournit une note en haut de la page, concernant les témoins (cookies).",
+	"cookiewarning-info": "Les cookies nous aident à fournir nos services. En utilisant nos services, vous acceptez notre utilisation des cookies.",
+	"cookiewarning-desc": "Fournit une note à propos des cookies en haut de la page",
 	"cookiewarning-moreinfo-label": "Plus d’informations",
 	"cookiewarning-ok-label": "OK"
 }

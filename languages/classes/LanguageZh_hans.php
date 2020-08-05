@@ -26,9 +26,8 @@
  *
  * @ingroup Language
  */
-// @codingStandardsIgnoreStart Ignore class name is not in camel caps format error
+// phpcs:ignore Squiz.Classes.ValidClassName.NotCamelCaps
 class LanguageZh_hans extends Language {
-	// @codingStandardsIgnoreEnd
 	/**
 	 * @return bool
 	 */
@@ -56,7 +55,6 @@ class LanguageZh_hans extends Language {
 	 * @return string
 	 */
 	function normalizeForSearch( $s ) {
-
 		// Double-width roman characters
 		$s = parent::normalizeForSearch( $s );
 		$s = trim( $s );

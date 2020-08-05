@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"NoiX180"
+		]
+	},
+	"revisionslider": "Panyalindra Owahan",
+	"revisionslider-preference-disable": "Aja tuduhaké Panyalindra Owahan",
+	"revisionslider-desc": "Nuduhaké panyalindra minangka sarana milih lan mbandhingaké owah-owahaning sawiji kaca",
+	"revisionslider-toggle-label": "Luru sajarah",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|bèt}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bèt}}",
+	"revisionslider-label-date": "Tanggal",
+	"revisionslider-label-page-size": "Gedhéné kaca",
+	"revisionslider-label-change-size": "Gedhéné owahan",
+	"revisionslider-label-comment": "Tanggepan",
+	"revisionslider-label-username": "{{GENDER:$1|Panganggo}}",
+	"revisionslider-minoredit": "Iki besutan cikil",
+	"revisionslider-loading-failed": "Panyalindra owahan wurung kamot.",
+	"revisionslider-toggle-title-expand": "Bukak panyalindra owahan",
+	"revisionslider-toggle-title-collapse": "Tutup panyalindra owahan",
+	"revisionslider-turn-on-auto-expand-title": "Panggah jembaraké panyalindra owahan",
+	"revisionslider-turn-off-auto-expand-title": "Aja otomatis njembaraké panyalindra owahan",
+	"revisionslider-arrow-tooltip-newer": "Deleng owah-owahan anyar",
+	"revisionslider-arrow-tooltip-older": "Deleng owah-owahan lawas",
+	"revisionslider-show-help-tooltip": "Tuduhaké tulisan pambiyantu",
+	"revisionslider-help-dialog-slide1": "Panyalindra owahan mbiyantu sampéyan saperlu ngluru lan mbandhingaké owah-owahan sawijining kaca. Piranti iki adhedhasar [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider pangajab paguyuban] sing kapacak ing pratélan pangajab tèhnis darbéné paguyuban abasa Jerman. Sakèhing saran banget diajèni [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider ing kéné].",
+	"revisionslider-help-dialog-slide4": "Anggoa tandha panah maju lan mundhur saperlu njlajahi sajarah owahan lan nuduhaké owahan anyar lan lawas.",
+	"revisionslider-tutorial": "Tutorial panyalindra owahan",
+	"revisionslider-previous-dialog": "Sadurungé",
+	"revisionslider-next-dialog": "Sabanjuré",
+	"revisionslider-close-dialog": "Tutup"
+}

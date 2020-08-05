@@ -13,7 +13,8 @@
 			"Sp5uhe",
 			"WTM",
 			"Woytecr",
-			"Peter Bowman"
+			"Peter Bowman",
+			"Railfail536"
 		]
 	},
 	"nuke": "Masowe usuwanie",
@@ -25,7 +26,7 @@
 	"nuke-defaultreason": "Masowe usunięcie stron stworzonych przez [[Special:Contributions/$1|{{GENDER:$1|$1}}]]",
 	"nuke-multiplepeople": "Masowe usuwanie ostatnio utworzonych stron",
 	"nuke-tools": "Narzędzie pozwala na masowe usuwanie stron ostatnio dodanych przez zarejestrowanego lub anonimowego użytkownika.<br />\nWpisz nazwę użytkownika lub adres IP, by otrzymać listę stron do usunięcia. Możesz także nic nie wpisywać, wtedy będzie można masowo usunąć wkład wszystkich użytkowników.",
-	"nuke-submit-user": "Dalej",
+	"nuke-submit-user": "Lista stron",
 	"nuke-toggleinvert": "Odwróć",
 	"nuke-submit-delete": "Usuń zaznaczone",
 	"right-nuke": "Masowe usuwanie stron",
@@ -37,9 +38,10 @@
 	"nuke-not-deleted": "Strony [[:$1]] '''nie można''' usunąć.",
 	"nuke-delete-more": "[[Special:Nuke|Usuń więcej stron]]",
 	"nuke-pattern": "Wzór nazwy strony:",
-	"nuke-nopages-global": "Brak nowych stron w [[Special:RecentChanges|ostatnich zmianach]].",
+	"nuke-nopages-global": "Nie odnaleziono stron pasujących do Twojego wyszukiwania.",
 	"nuke-viewchanges": "widok zmian",
 	"nuke-namespace": "Tylko w przestrzeni nazw:",
 	"nuke-linkoncontribs": "masowe usuwanie",
-	"nuke-linkoncontribs-text": "Masowe usuwanie stron, których jedynym autorem jest ten użytkownik"
+	"nuke-linkoncontribs-text": "Masowe usuwanie stron, których {{GENDER:$1|jedynym autorem jest ten użytkownik|jedyną autorką jest ta użytkowniczka}}",
+	"nuke-confirm": "Zamierzasz usunąć {{PLURAL:$1|jedną stronę|$1 strony|$1 stron}}. Czy na pewno chcesz to zrobić?"
 }

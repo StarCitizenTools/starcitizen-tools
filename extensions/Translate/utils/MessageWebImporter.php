@@ -7,7 +7,7 @@
  * @author Niklas Laxström
  * @author Siebrand Mazeland
  * @copyright Copyright © 2009-2013, Niklas Laxström, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -42,6 +42,11 @@ class MessageWebImporter {
 	 */
 	protected $processingTime = 43;
 
+	/**
+	 * @param Title|null $title
+	 * @param MessageGroup|string|null $group
+	 * @param string $code
+	 */
 	public function __construct( Title $title = null, $group = null, $code = 'en' ) {
 		$this->setTitle( $title );
 		$this->setGroup( $group );
@@ -57,6 +62,9 @@ class MessageWebImporter {
 		return $this->title;
 	}
 
+	/**
+	 * @param Title $title
+	 */
 	public function setTitle( Title $title ) {
 		$this->title = $title;
 	}
@@ -65,9 +73,12 @@ class MessageWebImporter {
 	 * @return User
 	 */
 	public function getUser() {
-		return $this->user ? $this->user : RequestContext::getMain()->getUser();
+		return $this->user ?: RequestContext::getMain()->getUser();
 	}
 
+	/**
+	 * @param User $user
+	 */
 	public function setUser( User $user ) {
 		$this->user = $user;
 	}
@@ -91,10 +102,16 @@ class MessageWebImporter {
 		}
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getCode() {
 		return $this->code;
 	}
 
+	/**
+	 * @param string $code
+	 */
 	public function setCode( $code = 'en' ) {
 		$this->code = $code;
 	}
@@ -110,14 +127,13 @@ class MessageWebImporter {
 	 * @return string
 	 */
 	protected function doHeader() {
-		$formParams = array(
+		$formParams = [
 			'method' => 'post',
 			'action' => $this->getAction(),
 			'class' => 'mw-translate-manage'
-		);
+		];
 
-		return
-			Xml::openElement( 'form', $formParams ) .
+		return Xml::openElement( 'form', $formParams ) .
 			Html::hidden( 'title', $this->getTitle()->getPrefixedText() ) .
 			Html::hidden( 'token', $this->getUser()->getEditToken() ) .
 			Html::hidden( 'process', 1 );
@@ -136,15 +152,9 @@ class MessageWebImporter {
 	protected function allowProcess() {
 		$request = RequestContext::getMain()->getRequest();
 
-		if ( $request->wasPosted() &&
-			$request->getBool( 'process', false ) &&
-			$this->getUser()->matchEditToken( $request->getVal( 'token' ) )
-		) {
-
-			return true;
-		}
-
-		return false;
+		return $request->wasPosted()
+			&& $request->getBool( 'process', false )
+			&& $this->getUser()->matchEditToken( $request->getVal( 'token' ) );
 	}
 
 	/**
@@ -152,10 +162,10 @@ class MessageWebImporter {
 	 */
 	protected function getActions() {
 		if ( $this->code === 'en' ) {
-			return array( 'import', 'fuzzy', 'ignore' );
-		} else {
-			return array( 'import', 'conflict', 'ignore' );
+			return [ 'import', 'fuzzy', 'ignore' ];
 		}
+
+		return [ 'import', 'conflict', 'ignore' ];
 	}
 
 	/**
@@ -191,15 +201,18 @@ class MessageWebImporter {
 
 		$this->out->addHTML( $this->doHeader() );
 
-		// Determine changes
+		// Initialise variable to keep track whether all changes were imported
+		// or not. If we're allowed to process, initially assume they were.
 		$alldone = $process;
-		$changed = array();
+
+		// Determine changes for each message.
+		$changed = [];
 
 		foreach ( $messages as $key => $value ) {
 			$fuzzy = $old = null;
 
 			if ( isset( $collection[$key] ) ) {
-				// This returns null for if no existing translation
+				// This returns null if no existing translation is found
 				$old = $collection[$key]->translation();
 			}
 
@@ -209,6 +222,18 @@ class MessageWebImporter {
 			}
 
 			if ( $old === null ) {
+				// We found a new translation for this message of the
+				// current group: import it.
+				$action = 'import';
+				self::doAction(
+					$action,
+					$group,
+					$key,
+					$code,
+					$value
+				);
+
+				// Show the user that we imported the new translation
 				$para = '<code class="mw-tmi-new">' . htmlspecialchars( $key ) . '</code>';
 				$name = $context->msg( 'translate-manage-import-new' )->rawParams( $para )
 					->escaped();
@@ -217,26 +242,33 @@ class MessageWebImporter {
 			} else {
 				$oldContent = ContentHandler::makeContent( $old, $diff->getTitle() );
 				$newContent = ContentHandler::makeContent( $value, $diff->getTitle() );
-
 				$diff->setContent( $oldContent, $newContent );
-
 				$text = $diff->getDiff( '', '' );
+
+				// This is a changed translation. Note it for the next steps.
 				$type = 'changed';
 
+				// Get the user instructions for the current message,
+				// submitted together with the form
 				$action = $context->getRequest()
 					->getVal( self::escapeNameForPHP( "action-$type-$key" ) );
 
 				if ( $process ) {
-					if ( !count( $changed ) ) {
+					if ( $changed === [] ) {
+						// Initialise the HTML list showing the changes performed
 						$changed[] = '<ul>';
 					}
 
 					if ( $action === null ) {
+						// We have been told to process the messages, but not
+						// what to do with this one. Tell the user.
 						$message = $context->msg(
 							'translate-manage-inconsistent',
 							wfEscapeWikiText( "action-$type-$key" )
 						)->parse();
 						$changed[] = "<li>$message</li></ul>";
+
+						// Also stop any further processing for the other messages.
 						$process = false;
 					} else {
 						// Check processing time
@@ -244,7 +276,9 @@ class MessageWebImporter {
 							$this->time = wfTimestamp();
 						}
 
-						$message = self::doAction(
+						// We have all the necessary information on this changed
+						// translation: actually process the message
+						$messageKeyAndParams = self::doAction(
 							$action,
 							$group,
 							$key,
@@ -252,27 +286,34 @@ class MessageWebImporter {
 							$value
 						);
 
-						$key = array_shift( $message );
-						$params = $message;
-						$message = $context->msg( $key, $params )->parse();
+						// Show what we just did, adding to the list of changes
+						$msgKey = array_shift( $messageKeyAndParams );
+						$params = $messageKeyAndParams;
+						$message = $context->msg( $msgKey, $params )->parse();
 						$changed[] = "<li>$message</li>";
 
+						// Stop processing further messages if too much time
+						// has been spent.
 						if ( $this->checkProcessTime() ) {
 							$process = false;
 							$message = $context->msg( 'translate-manage-toolong' )
 								->numParams( $this->processingTime )->parse();
 							$changed[] = "<li>$message</li></ul>";
 						}
+
 						continue;
 					}
 				}
 
+				// We are not processing messages, or no longer, or this was an
+				// unactionable translation. We will eventually return false
 				$alldone = false;
 
+				// Prepare to ask the user what to do with this message
 				$actions = $this->getActions();
 				$defaction = $this->getDefaultAction( $fuzzy, $action );
 
-				$act = array();
+				$act = [];
 
 				// Give grep a chance to find the usages:
 				// translate-manage-action-import, translate-manage-action-conflict,
@@ -285,9 +326,9 @@ class MessageWebImporter {
 				}
 
 				$param = '<code class="mw-tmi-diff">' . htmlspecialchars( $key ) . '</code>';
-				$name = $context->msg( 'translate-manage-import-diff', $param,
-					implode( ' ', $act )
-				)->text();
+				$name = $context->msg( 'translate-manage-import-diff' )
+					->rawParams( $param, implode( ' ', $act ) )
+					->escaped();
 
 				$changed[] = self::makeSectionElement( $name, $type, $text );
 			}
@@ -307,12 +348,12 @@ class MessageWebImporter {
 			}
 		}
 
-		if ( $process || ( !count( $changed ) && $code !== 'en' ) ) {
-			if ( !count( $changed ) ) {
+		if ( $process || ( $changed === [] && $code !== 'en' ) ) {
+			if ( $changed === [] ) {
 				$this->out->addWikiMsg( 'translate-manage-nochanges-other' );
 			}
 
-			if ( !count( $changed ) || strpos( $changed[count( $changed ) - 1], '<li>' ) !== 0 ) {
+			if ( $changed === [] || strpos( end( $changed ), '<li>' ) !== 0 ) {
 				$changed[] = '<ul>';
 			}
 
@@ -321,7 +362,7 @@ class MessageWebImporter {
 			$this->out->addHTML( implode( "\n", $changed ) );
 		} else {
 			// END
-			if ( count( $changed ) ) {
+			if ( $changed !== [] ) {
 				if ( $code === 'en' ) {
 					$this->out->addWikiMsg( 'translate-manage-intro-en' );
 				} else {
@@ -353,7 +394,7 @@ class MessageWebImporter {
 	 * @param string $code Language code
 	 * @param string $message Contents for the $key/code combination
 	 * @param string $comment Edit summary (default: empty) - see Article::doEdit
-	 * @param User $user User that will make the edit (default: null - RequestContext user).
+	 * @param User|null $user User that will make the edit (default: null - RequestContext user).
 	 *        See Article::doEdit.
 	 * @param int $editFlags Integer bitfield: see Article::doEdit
 	 * @throws MWException
@@ -376,7 +417,7 @@ class MessageWebImporter {
 
 			return self::doImport( $title, $message, $comment, $user, $editFlags );
 		} elseif ( $action === 'ignore' ) {
-			return array( 'translate-manage-import-ignore', $key );
+			return [ 'translate-manage-import-ignore', $key ];
 		} elseif ( $action === 'fuzzy' && $code !== 'en' &&
 			$code !== $wgTranslateDocumentationLanguageCode
 		) {
@@ -397,10 +438,10 @@ class MessageWebImporter {
 	/**
 	 * @throws MWException
 	 * @param Title $title
-	 * @param $message
-	 * @param $summary
-	 * @param User $user
-	 * @param $editFlags
+	 * @param string $message
+	 * @param string $summary
+	 * @param User|null $user
+	 * @param int $editFlags
 	 * @return array
 	 */
 	public static function doImport( $title, $message, $summary, $user = null, $editFlags = 0 ) {
@@ -410,21 +451,21 @@ class MessageWebImporter {
 		$success = $status->isOK();
 
 		if ( $success ) {
-			return array( 'translate-manage-import-ok',
+			return [ 'translate-manage-import-ok',
 				wfEscapeWikiText( $title->getPrefixedText() )
-			);
-		} else {
-			$text = "Failed to import new version of page {$title->getPrefixedText()}\n";
-			$text .= "{$status->getWikiText()}";
-			throw new MWException( $text );
+			];
 		}
+
+		$text = "Failed to import new version of page {$title->getPrefixedText()}\n";
+		$text .= "{$status->getWikiText()}";
+		throw new MWException( $text );
 	}
 
 	/**
 	 * @param Title $title
-	 * @param $message
-	 * @param $comment
-	 * @param $user
+	 * @param string $message
+	 * @param string $comment
+	 * @param User $user
 	 * @param int $editFlags
 	 * @return array|String
 	 */
@@ -441,16 +482,16 @@ class MessageWebImporter {
 		$handle = new MessageHandle( $title );
 		$titleText = $handle->getKey();
 
-		$conds = array(
+		$conds = [
 			'page_namespace' => $title->getNamespace(),
 			'page_latest=rev_id',
 			'rev_text_id=old_id',
 			'page_title' . $dbw->buildLike( "$titleText/", $dbw->anyString() ),
-		);
+		];
 
 		$rows = $dbw->select(
-			array( 'page', 'revision', 'text' ),
-			array( 'page_title', 'page_namespace', 'old_text', 'old_flags' ),
+			[ 'page', 'revision', 'text' ],
+			[ 'page_title', 'page_namespace', 'old_text', 'old_flags' ],
 			$conds,
 			__METHOD__
 		);
@@ -461,7 +502,7 @@ class MessageWebImporter {
 		}
 
 		// Process all rows.
-		$changed = array();
+		$changed = [];
 		foreach ( $rows as $row ) {
 			global $wgTranslateDocumentationLanguageCode;
 
@@ -495,7 +536,7 @@ class MessageWebImporter {
 			$text .= '* ' . $context->msg( $key, $c )->plain() . "\n";
 		}
 
-		return array( 'translate-manage-import-fuzzy', "\n" . $text );
+		return [ 'translate-manage-import-fuzzy', "\n" . $text ];
 	}
 
 	/**
@@ -519,13 +560,13 @@ class MessageWebImporter {
 	 * @param string $legend Legend as raw html.
 	 * @param string $type Contents of type class.
 	 * @param string $content Contents as raw html.
-	 * @param Language $lang The language in which the text is written.
+	 * @param Language|null $lang The language in which the text is written.
 	 * @return string Section element as html.
 	 */
 	public static function makeSectionElement( $legend, $type, $content, $lang = null ) {
-		$containerParams = array( 'class' => "mw-tpt-sp-section mw-tpt-sp-section-type-{$type}" );
-		$legendParams = array( 'class' => 'mw-tpt-sp-legend' );
-		$contentParams = array( 'class' => 'mw-tpt-sp-content' );
+		$containerParams = [ 'class' => "mw-tpt-sp-section mw-tpt-sp-section-type-{$type}" ];
+		$legendParams = [ 'class' => 'mw-tpt-sp-legend' ];
+		$contentParams = [ 'class' => 'mw-tpt-sp-content' ];
 		if ( $lang ) {
 			$contentParams['dir'] = $lang->getDir();
 			$contentParams['lang'] = $lang->getCode();
@@ -559,7 +600,7 @@ class MessageWebImporter {
 	 * @return string
 	 */
 	public static function escapeNameForPHP( $name ) {
-		$replacements = array(
+		$replacements = [
 			'(' => '(OP)',
 			' ' => '(SP)',
 			"\t" => '(TAB)',
@@ -568,7 +609,7 @@ class MessageWebImporter {
 			"\"" => '(DQ)',
 			'%' => '(PC)',
 			'&' => '(AMP)',
-		);
+		];
 
 		/* How nice of you PHP. No way to split array into keys and values in one
 		 * function or have str_replace which takes one array? */

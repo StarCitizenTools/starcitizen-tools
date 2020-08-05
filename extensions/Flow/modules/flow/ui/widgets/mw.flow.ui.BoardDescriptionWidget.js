@@ -11,6 +11,7 @@
 	 * @cfg {jQuery} [$existing] A jQuery object of the existing contents of the board description
 	 * @cfg {string} [specialPageCategoryLink] Link to the localized Special:Categories page
 	 * @cfg {jQuery} [$categories] A jQuery object of the existing board categories
+	 * @cfg {Object} [editor] Config options to pass to mw.flow.ui.EditorWidget
 	 */
 	mw.flow.ui.BoardDescriptionWidget = function mwFlowUiBoardDescriptionWidget( boardModel, config ) {
 		var $content = $();
@@ -33,7 +34,7 @@
 		}
 
 		this.$content = $( '<div>' )
-			.addClass( 'flow-ui-boardDescriptionWidget-content' )
+			.addClass( 'flow-ui-boardDescriptionWidget-content mw-parser-output' )
 			.append( $content );
 
 		this.api = new mw.flow.dm.APIHandler(
@@ -43,10 +44,10 @@
 			}
 		);
 
-		this.editor = new mw.flow.ui.EditorWidget( {
+		this.editor = new mw.flow.ui.EditorWidget( $.extend( {
 			saveMsgKey: mw.user.isAnon() ? 'flow-edit-header-submit-anonymously' : 'flow-edit-header-submit',
 			classes: [ 'flow-ui-boardDescriptionWidget-editor' ]
-		} );
+		}, config.editor ) );
 		this.editor.toggle( false );
 
 		this.anonWarning = new mw.flow.ui.AnonWarningWidget();
@@ -99,14 +100,19 @@
 		// as necessary.
 		this.model.connect( this, { editableChange: 'onModelEditableChange' } );
 
+		this.$messages = $( '<div>' ).addClass( 'flow-ui-editorContainerWidget-messages' );
+
 		// Initialize
 		this.$element
 			.append(
-				this.error.$element,
-				this.captchaWidget.$element,
-				this.anonWarning.$element,
-				this.button.$element,
-				this.$content,
+				this.$messages.append(
+					this.error.$element,
+					this.captchaWidget.$element,
+					this.anonWarning.$element,
+					// Ensure inline button is on its own line, and is :first-child, T175683
+					$( '<div>' ).append( this.button.$element ),
+					this.$content
+				),
 				this.editor.$element,
 				this.categoriesWidget.$element
 			)
@@ -145,7 +151,7 @@
 	 */
 	mw.flow.ui.BoardDescriptionWidget.prototype.onEditButtonClick = function () {
 		var widget = this,
-			contentFormat = this.editor.getInitialFormat() || 'wikitext';
+			contentFormat = this.editor.getPreferredFormat();
 
 		// Hide the edit button, any errors, and the content
 		this.button.toggle( false );
@@ -154,26 +160,27 @@
 		this.$content.addClass( 'oo-ui-element-hidden' );
 
 		this.editor.toggle( true );
-
-		// Load the editor
 		this.editor.pushPending();
 		this.anonWarning.toggle( true );
-		this.editor.activate();
+		this.editor.load();
 
 		// Get the description from the API
 		this.api.getDescription( contentFormat )
 			.then(
 				function ( desc ) {
-					var content = OO.getProp( desc, 'content', 'content' ),
+					var contentToLoad,
+						content = OO.getProp( desc, 'content', 'content' ),
 						format = OO.getProp( desc, 'content', 'format' );
 
 					if ( content !== undefined && format !== undefined ) {
-						// Give it to the editor
-						widget.editor.setContent( content, format );
-
 						// Update revisionId in the API
 						widget.api.setCurrentRevision( widget.model.getRevisionId() );
+
+						contentToLoad = { content: content, format: format };
 					}
+
+					// Load the editor
+					return widget.editor.activate( contentToLoad );
 				},
 				// Error fetching description
 				function ( error ) {
@@ -207,7 +214,7 @@
 	 * Respond to editor save event. Save the content and display the new description.
 	 *
 	 * @param {string} content Content to save
-	 * @param {string} contentFormat Format of content
+	 * @param {string} format Format of content
 	 * @fires saveContent
 	 */
 	mw.flow.ui.BoardDescriptionWidget.prototype.onEditorSaveContent = function ( content, format ) {
@@ -239,15 +246,16 @@
 			.then( function ( desc ) {
 				// Change the actual content
 				widget.$content.empty().append( $.parseHTML( desc.content.content ) );
-				widget.showContent( true );
 				widget.emit( 'saveContent' );
 			} )
-			.then( null, function ( errorCode, errorObj ) {
+			.catch( function ( errorCode, errorObj ) {
 				widget.captcha.update( errorCode, errorObj );
 				if ( !widget.captcha.isRequired() ) {
 					widget.error.setLabel( new OO.ui.HtmlSnippet( errorObj.error && errorObj.error.info || errorObj.exception ) );
 					widget.error.toggle( true );
 				}
+				// Prevent the promise from becoming resolved after this step
+				return $.Deferred().reject().promise();
 			} )
 			// Get the new categories
 			.then( this.api.getCategories.bind( this.api ) )

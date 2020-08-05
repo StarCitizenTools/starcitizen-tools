@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -17,6 +17,11 @@ class ApiTTMServer extends ApiBase {
 
 	public function execute() {
 		global $wgTranslateTranslationServices;
+
+		if ( !$this->getAvailableTranslationServices() ) {
+			$this->dieWithError( 'apierror-translate-notranslationservices' );
+		}
+
 		$params = $this->extractRequestParams();
 
 		$config = $wgTranslateTranslationServices[$params['service']];
@@ -41,7 +46,7 @@ class ApiTTMServer extends ApiBase {
 	protected function getAvailableTranslationServices() {
 		global $wgTranslateTranslationServices;
 
-		$good = array();
+		$good = [];
 		foreach ( $wgTranslateTranslationServices as $id => $config ) {
 			if ( isset( $config['public'] ) && $config['public'] === true ) {
 				$good[] = $id;
@@ -52,32 +57,40 @@ class ApiTTMServer extends ApiBase {
 	}
 
 	public function getAllowedParams() {
+		global $wgTranslateTranslationDefaultService;
 		$available = $this->getAvailableTranslationServices();
 
-		return array(
-			'service' => array(
+		$ret = [
+			'service' => [
 				ApiBase::PARAM_TYPE => $available,
-				ApiBase::PARAM_DFLT => 'TTMServer',
-			),
-			'sourcelanguage' => array(
+			],
+			'sourcelanguage' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'targetlanguage' => array(
+			],
+			'targetlanguage' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'text' => array(
+			],
+			'text' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-		);
+			],
+		];
+
+		if ( $available ) {
+			// Don't add this if no services are available, it makes
+			// ApiStructureTest unhappy
+			$ret['service'][ApiBase::PARAM_DFLT] = $wgTranslateTranslationDefaultService;
+		}
+
+		return $ret;
 	}
 
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=ttmserver&sourcelanguage=en&targetlanguage=fi&text=Help'
 				=> 'apihelp-ttmserver-example-1',
-		);
+		];
 	}
 }

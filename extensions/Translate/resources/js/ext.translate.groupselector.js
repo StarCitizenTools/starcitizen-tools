@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var groupsLoader, delay;
@@ -6,11 +6,20 @@
 	/**
 	 * options
 	 *  - position: accepts same values as jquery.ui.position
-	 *  - onSelect: callback with message group id when selected
-	 *  - language: language for statistics.
+	 *  - onSelect:
+	 *  - language:
 	 *  - preventSelector: boolean to load but not show the group selector.
 	 *  - recent: list of recent group ids
 	 * groups: list of message group ids
+	 *
+	 * @param {Element} element
+	 * @param {Object} options
+	 * @param {Object} [options.position] Accepts same values as jquery.ui.position.
+	 * @param {Function} [options.onSelect] Callback with message group id when selected.
+	 * @param {string} options.language Language code for statistics.
+	 * @param {boolean} [options.preventSelector] Whether not to show the group selector.
+	 * @param {string[]} [options.recent] List of recent message group ids.
+	 * @param {string[]} [groups] List of message group ids to show.
 	 */
 	function TranslateMessageGroupSelector( element, options, groups ) {
 		this.$trigger = $( element );
@@ -47,8 +56,7 @@
 		 * Prepare the selector menu rendering
 		 */
 		prepareSelectorMenu: function () {
-			var $groupTitle,
-				$listFilters,
+			var $listFilters,
 				$listFiltersGroup,
 				$search,
 				$searchIcon,
@@ -57,15 +65,6 @@
 			this.$menu = $( '<div>' )
 				.addClass( 'tux-groupselector' )
 				.addClass( 'grid' );
-
-			$groupTitle = $( '<div>' )
-				.addClass( 'row' )
-				.append(
-					$( '<h3>' )
-						.addClass( 'tux-groupselector__title' )
-						.addClass( 'ten columns' )
-						.text( mw.msg( 'translate-msggroupselector-projects' ) )
-				);
 
 			$searchIcon = $( '<div>' )
 				.addClass( 'two columns tux-groupselector__filter__search__icon' );
@@ -116,7 +115,7 @@
 			this.$loader = $( '<div>' )
 				.addClass( 'tux-loading-indicator tux-loading-indicator--centered' );
 
-			this.$menu.append( $groupTitle, $listFiltersGroup, this.$loader, this.$list );
+			this.$menu.append( $listFiltersGroup, this.$loader, this.$list );
 
 			$( 'body' ).append( this.$menu );
 		},
@@ -132,13 +131,15 @@
 			// Start loading the groups, but assess the situation again after
 			// they are loaded, in case user has made further interactions.
 			if ( this.firstShow ) {
-				this.loadGroups().done( $.proxy( this.showList, this ) );
+				this.loadGroups().done( this.showList.bind( this ) );
 				this.firstShow = false;
 			}
 		},
 
 		/**
 		 * Hide the selector
+		 *
+		 * @param {jQuery.Event} e
 		 */
 		hide: function ( e ) {
 			// Do not hide if the trigger is clicked
@@ -168,7 +169,7 @@
 				groupSelector = this;
 
 			// Hide the selector panel when clicking outside of it
-			$( 'html' ).on( 'click', $.proxy( this.hide, this ) );
+			$( 'html' ).on( 'click', this.hide.bind( this ) );
 
 			groupSelector.$trigger.on( 'click', function () {
 				groupSelector.toggle();
@@ -234,12 +235,12 @@
 				groupSelector.showList();
 			} );
 
-			this.$search.on( 'click', $.proxy( this.show, this ) )
-				.on( 'keypress', $.proxy( this.keyup, this ) )
-				.on( 'keyup', $.proxy( this.keyup, this ) );
+			this.$search.on( 'click', this.show.bind( this ) )
+				.on( 'keypress', this.keyup.bind( this ) )
+				.on( 'keyup', this.keyup.bind( this ) );
 
 			if ( this.eventSupported( 'keydown' ) ) {
-				this.$search.on( 'keydown', $.proxy( this.keyup, this ) );
+				this.$search.on( 'keydown', this.keyup.bind( this ) );
 			}
 		},
 
@@ -247,7 +248,7 @@
 		 * Handle the keypress/keyup events in the message group search box.
 		 */
 		keyup: function () {
-			delay( $.proxy( this.showList, this ), 300 );
+			delay( this.showList.bind( this ), 300 );
 		},
 
 		/**
@@ -264,7 +265,7 @@
 		 * Shows suitable list for current view, taking possible filter into account
 		 */
 		showList: function () {
-			var query = $.trim( this.$search.val() ).toLowerCase();
+			var query = this.$search.val().trim().toLowerCase();
 
 			if ( query ) {
 				this.filter( query );
@@ -431,7 +432,6 @@
 
 			params = {
 				action: 'query',
-				format: 'json',
 				meta: 'messagegroups',
 				mgformat: 'tree',
 				mgprop: 'id|label|icon|priority|prioritylangs|priorityforce',
@@ -471,7 +471,7 @@
 				if ( group.priority === 'discouraged' ||
 					( group.priorityforce &&
 						group.prioritylangs &&
-						$.inArray( targetLanguage, group.prioritylangs ) === -1 )
+						group.prioritylangs.indexOf( targetLanguage ) === -1 )
 				) {
 					return;
 				}
@@ -537,9 +537,7 @@
 			}
 
 			if ( messagegroup.icon && messagegroup.icon.vector ) {
-				style +=
-					'background-image: -webkit-linear-gradient(transparent, transparent), url(--);' +
-					'background-image: linear-gradient(transparent, transparent), url(--);';
+				style += 'background-image: linear-gradient(transparent, transparent), url(--);';
 				style = style.replace( /--/g, messagegroup.icon.vector );
 			}
 
@@ -621,7 +619,7 @@
 	 * @return {string} Escaped string that is safe to use for a search.
 	 */
 	function escapeRegex( value ) {
-		return value.replace( /[\-\[\]{}()*+?.,\\\^$\|#\s]/g, '\\$&' );
+		return value.replace( /[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&' );
 	}
 
 	delay = ( function () {
@@ -632,4 +630,4 @@
 			timer = setTimeout( callback, milliseconds );
 		};
 	}() );
-}( jQuery, mediaWiki ) );
+}() );

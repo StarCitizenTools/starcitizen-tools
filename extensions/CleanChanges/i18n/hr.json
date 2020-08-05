@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ex13"
+			"Ex13",
+			"Bugoslav"
 		]
 	},
-	"cleanchanges-changerightslink": "promijeni grupe",
+	"cleanchanges-changerightslink": "promijeni skupine",
 	"cleanchanges-desc": "Kompaktniji prikaz [[Special:RecentChanges|nedavnih promjena]]",
 	"cleanchanges-language": "Jezik:",
 	"cleanchanges-language-na": "Svi",
-	"cleanchanges-users": "Suradnici (Raz: |):",
+	"cleanchanges-users": "Suradnici (razdjeljivač: |):",
 	"cleanchanges-showuserlinks": "Prikaži poveznice suradnika"
 }

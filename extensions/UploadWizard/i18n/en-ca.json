@@ -4,7 +4,8 @@
 			"Dantman",
 			"Shirayuki",
 			"Nemo bis",
-			"Paladox"
+			"Paladox",
+			"Zachyoung6969"
 		]
 	},
 	"mwe-upwiz-source-ownwork-assert-custom": "I, $2, the copyright holder of {{PLURAL:$1|this work|these works}}, hereby publish {{PLURAL:$1|this work|these works}} under the following licence:",
@@ -14,7 +15,6 @@
 	"mwe-upwiz-license-show-recommended": "Use the recommended licence",
 	"mwe-upwiz-license-fal": "Free Art Licence",
 	"mwe-upwiz-license-own-pd": "Public domain (all rights waived with Creative Commons Zero licence)",
-	"mwe-upwiz-license-pd-art": "Reproduction of a painting that is in public domain because of its age",
 	"mwe-upwiz-license-gfdl": "GNU Free Documentation Licence",
 	"mwe-upwiz-license-cc-head": "The copyright holder published {{PLURAL:$1|this work|these works}} with the right Creative Commons licence",
 	"mwe-upwiz-license-cc-subhead": "Not all Creative Commons licences are good for this site. Make sure the copyright holder used one of these licences.",

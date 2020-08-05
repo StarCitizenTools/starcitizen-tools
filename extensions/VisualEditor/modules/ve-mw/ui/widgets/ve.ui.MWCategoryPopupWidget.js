@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWCategoryPopupWidget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -19,7 +19,7 @@ ve.ui.MWCategoryPopupWidget = function VeUiMWCategoryPopupWidget( config ) {
 	config = ve.extendObject( { autoClose: true }, config );
 
 	// Parent constructor
-	OO.ui.PopupWidget.call( this, config );
+	ve.ui.MWCategoryPopupWidget.super.call( this, config );
 
 	// Properties
 	this.category = null;
@@ -29,7 +29,7 @@ ve.ui.MWCategoryPopupWidget = function VeUiMWCategoryPopupWidget( config ) {
 	this.$menu = $( '<div>' );
 	this.removeButton = new OO.ui.ButtonWidget( {
 		framed: false,
-		icon: 'remove',
+		icon: 'trash',
 		title: ve.msg( 'visualeditor-inspector-remove-tooltip' )
 	} );
 	this.sortKeyInput = new OO.ui.TextInputWidget();
@@ -164,6 +164,7 @@ ve.ui.MWCategoryPopupWidget.prototype.loadCategoryIntoPopup = function ( item ) 
 ve.ui.MWCategoryPopupWidget.prototype.closePopup = function () {
 	this.toggle( false );
 	this.popupOpen = false;
+	this.category = null;
 };
 
 /**
@@ -183,13 +184,6 @@ ve.ui.MWCategoryPopupWidget.prototype.setDefaultSortKey = function ( value ) {
  * @param {ve.ui.MWCategoryItemWidget} item Category item
  */
 ve.ui.MWCategoryPopupWidget.prototype.setPopup = function ( item ) {
-	var pos = OO.ui.Element.static.getRelativePosition( item.$indicator, this.$element.offsetParent() );
-
-	// Align to the middle of the indicator
-	pos.left += item.$indicator.width() / 2;
-	// Position below the indicator
-	pos.top += item.$indicator.height();
-
-	this.$element.css( pos );
+	this.setFloatableContainer( item.$element );
 	this.updateDimensions();
 };

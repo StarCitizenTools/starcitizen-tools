@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Pahles"
+			"Pahles",
+			"Ooswesthoesbes"
 		]
 	},
-	"cldr-desc": "Oetbreiding die euverzatte name van tale beejt"
+	"cldr-desc": "Oetbreiding die euverzatte name van tale beejt gebaseerd op [http://cldr.unicode.org/index/downloads CLDR-gegaeves]"
 }

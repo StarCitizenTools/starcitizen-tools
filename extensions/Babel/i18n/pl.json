@@ -3,7 +3,9 @@
 		"authors": [
 			"Karol007",
 			"Sp5uhe",
-			"Ymar"
+			"Ymar",
+			"Woytecr",
+			"InternerowyGołąb"
 		]
 	},
 	"babel": "Wieża Babel użytkownika",
@@ -27,5 +29,9 @@
 	"babel-4-n": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem polskim]] prawie tak samo biegle, jak [[$1|językiem ojczystym]].",
 	"babel-5-n": "{{GENDER:$4|Ten użytkownik|Ta użytkowniczka}} posługuje się [[$2|językiem polskim]] na równi z [[$1|językiem ojczystym]].",
 	"babel-N-n": "[[$2|Polski]] jest [[$1|językiem ojczystym]] {{GENDER:$4|tego użytkownika|tej użytkowniczki}}.",
-	"babel-footer": "Użytkownicy według języka"
+	"babel-footer": "Użytkownicy według języka",
+	"apihelp-query+babel-description": "Pobiera informacje o tym, jakie użytkownik zna języki",
+	"apihelp-query+babel-summary": "Uzyskaj informacje o językach, które zna użytkownik",
+	"apihelp-query+babel-param-user": "Użytkownik, o którym pobrać informacje",
+	"apihelp-query+babel-example-1": "Pobranie informacji Babel dla użytkownika <kbd>Example</kbd>"
 }

@@ -1,12 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Mogoeilor"
+			"Mogoeilor",
+			"Beyronvan"
 		]
 	},
 	"translate": "والرن",
-	"translate-taskui-view": "همه پيغومل نشون بيه",
-	"translate-taskui-untranslated": "پيغوما نلرسه نه نشون بيه",
 	"translate-taction-translate": "والرن",
 	"translate-taction-proofread": "دواره دیئن",
 	"translate-taction-lstats": "آماريا زون",
@@ -74,7 +73,7 @@
 	"translate-gs-speakers": "گپ زننه",
 	"translate-gs-score": "امتياز",
 	"translate-gs-total": "همه",
-	"translate-documentation-language": "سندسازی سی پیغوم",
+	"translate-documentation-language": "سٱنٱدسازی سی پاٛغوم",
 	"tux-edit": "ڤیرایئشت",
 	"tux-proofread-edit-label": "ڤیرایئشت",
 	"tux-editor-message-tools-history": "ڤیرگار"

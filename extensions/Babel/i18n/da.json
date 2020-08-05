@@ -6,7 +6,8 @@
 			"Froztbyte",
 			"Jan Friberg",
 			"Peter Alberti",
-			"Sarrus"
+			"Sarrus",
+			"Saederup92"
 		]
 	},
 	"babel": "Babel brugeroplysninger",
@@ -15,7 +16,7 @@
 	"babel-footer-url": ":Category:Babel - Brugere efter sprog",
 	"babel-autocreate-reason": "Opretter automatisk [[$1|Babel]] kategoriside.",
 	"babel-autocreate-text-levels": "Brugere i denne kategori angiver, at deres kendskab til $2 er på niveau $1",
-	"babel-autocreate-text-main": "Brugere i denne kategori angiver, at de har kendskab til $1.",
+	"babel-autocreate-text-main": "Brugere i denne kategori angiver, at de har kendskab til sproget $1.",
 	"babel-0": "Denne bruger har [[$1|ingen]] kendskab til [[$2|$3]] (eller har meget svært ved at forstå det).",
 	"babel-1": "Denne bruger har [[$1|grundlæggende]] kendskab til [[$2|$3]].",
 	"babel-2": "Denne bruger har et [[$1|godt]] kendskab til [[$2|$3]].",
@@ -31,5 +32,8 @@
 	"babel-5-n": "Denne bruger har [[$1|professionelt]] kendskab til [[$2|dansk]].",
 	"babel-N-n": "Denne bruger har [[$2|dansk]] som [[$1|modersmål]].",
 	"babel-template": "Template:Bruger $1",
-	"babel-footer": "Brugere efter sprog"
+	"babel-footer": "Brugere efter sprog",
+	"apihelp-query+babel-description": "Hent oplysninger om hvilke sprog brugeren kender",
+	"apihelp-query+babel-summary": "Hent oplysninger om hvilke sprog brugeren kender",
+	"apihelp-query+babel-param-user": "Bruger der skal hentes information om"
 }

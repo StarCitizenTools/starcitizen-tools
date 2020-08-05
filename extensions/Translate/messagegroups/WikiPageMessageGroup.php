@@ -5,18 +5,23 @@
  * @file
  * @author Niklas Laxström
  * @author Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
  * Wraps the translatable page sections into a message group.
  * @ingroup PageTranslation MessageGroup
  */
-class WikiPageMessageGroup extends WikiMessageGroup {
+class WikiPageMessageGroup extends WikiMessageGroup implements IDBAccessObject, \Serializable {
 	/**
 	 * @var Title|string
 	 */
 	protected $title;
+
+	/**
+	 * @var int
+	 */
+	protected $namespace = NS_TRANSLATIONS;
 
 	/**
 	 * @param string $id
@@ -25,7 +30,6 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 	public function __construct( $id, $source ) {
 		$this->id = $id;
 		$this->title = $source;
-		$this->namespace = NS_TRANSLATIONS;
 	}
 
 	public function getSourceLanguage() {
@@ -59,12 +63,12 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 
 		$dbr = TranslateUtils::getSafeReadDB();
 		$tables = 'translate_sections';
-		$vars = array( 'trs_key', 'trs_text' );
-		$conds = array( 'trs_page' => $this->getTitle()->getArticleID() );
-		$options = array( 'ORDER BY' => 'trs_order' );
+		$vars = [ 'trs_key', 'trs_text' ];
+		$conds = [ 'trs_page' => $this->getTitle()->getArticleID() ];
+		$options = [ 'ORDER BY' => 'trs_order' ];
 		$res = $dbr->select( $tables, $vars, $conds, __METHOD__, $options );
 
-		$defs = array();
+		$defs = [];
 		$prefix = $this->getTitle()->getPrefixedDBkey() . '/';
 
 		foreach ( $res as $r ) {
@@ -73,13 +77,25 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 			$defs[$r->trs_key] = $section->getTextWithVariables();
 		}
 
-		$new_defs = array();
+		$new_defs = [];
 		foreach ( $defs as $k => $v ) {
 			$k = str_replace( ' ', '_', $k );
 			$new_defs[$prefix . $k] = $v;
 		}
 
-		return $this->definitions = $new_defs;
+		$this->definitions = $new_defs;
+		return $this->definitions;
+	}
+
+	/**
+	 * Overriding the getLabel method and deriving the label from the title.
+	 * Mainly to reduce the amount of data stored in the cache.
+	 *
+	 * @param IContextSource|null $context
+	 * @return string
+	 */
+	public function getLabel( IContextSource $context = null ) {
+		return $this->getTitle()->getPrefixedText();
 	}
 
 	/**
@@ -99,7 +115,7 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 			return $this->getDefinitions();
 		}
 
-		return array();
+		return [];
 	}
 
 	/**
@@ -108,9 +124,10 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 	 *
 	 * @param string $key Message key
 	 * @param string $code Language code
+	 * @param int $flags READ_* class constant bitfield
 	 * @return string|null Stored translation or null.
 	 */
-	public function getMessage( $key, $code ) {
+	public function getMessage( $key, $code, $flags = self::READ_LATEST ) {
 		if ( $this->isSourceLanguage( $code ) ) {
 			$stuff = $this->load( $code );
 
@@ -119,14 +136,18 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 				$key = $title->getPrefixedDBkey();
 			}
 
-			return isset( $stuff[$key] ) ? $stuff[$key] : null;
+			return $stuff[$key] ?? null;
 		}
 
 		$title = Title::makeTitleSafe( $this->getNamespace(), "$key/$code" );
-		$flags = RequestContext::getMain()->getRequest()->wasPosted()
-			? Revision::READ_LATEST
-			: 0; // bug T95753
-		$rev = Revision::newFromTitle( $title, false, $flags );
+		if ( PageTranslationHooks::$renderingContext ) {
+			$revFlags = Revision::READ_NORMAL; // bug T95753
+		} else {
+			$revFlags = ( $flags & self::READ_LATEST ) == self::READ_LATEST
+				? Revision::READ_LATEST
+				: Revision::READ_NORMAL;
+		}
+		$rev = Revision::newFromTitle( $title, false, $revFlags );
 
 		if ( !$rev ) {
 			return null;
@@ -140,13 +161,11 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 	 */
 	public function getChecker() {
 		$checker = new MediaWikiMessageChecker( $this );
-		$checker->setChecks( array(
-			array( $checker, 'pluralCheck' ),
-			array( $checker, 'XhtmlCheck' ),
-			array( $checker, 'braceBalanceCheck' ),
-			array( $checker, 'pagenameMessagesCheck' ),
-			array( $checker, 'miscMWChecks' )
-		) );
+		$checker->setChecks( [
+			[ $checker, 'pluralCheck' ],
+			[ $checker, 'braceBalanceCheck' ],
+			[ $checker, 'miscMWChecks' ]
+		] );
 
 		return $checker;
 	}
@@ -175,5 +194,55 @@ class WikiPageMessageGroup extends WikiMessageGroup {
 		self::addContext( $msg, $context );
 
 		return $msg->plain() . $customText;
+	}
+
+	public function serialize() {
+		$toSerialize = [
+			'title' => $this->getTitle()->getPrefixedText(),
+			'id' => $this->id,
+			'_v' => 1 // version - to track incompatible changes
+		];
+
+		// NOTE: get_class_vars returns properties before the constructor has run so if any default
+		// values have to be set for properties, do them while declaring the properties themselves.
+		// Also any properties that are object will automatically be serialized because `===`
+		// does not actually compare object properties to see that they are same.
+
+		// Using array_diff_key to unset the properties already set earlier.
+		$defaultProps = array_diff_key( get_class_vars( self::class ),  $toSerialize );
+
+		foreach ( $defaultProps as $prop => $defaultVal ) {
+			if ( $this->{$prop} === $defaultVal ) {
+				continue;
+			}
+
+			$toSerialize[$prop] = $this->{$prop};
+		}
+
+		return FormatJson::encode( $toSerialize, false, FormatJson::ALL_OK );
+	}
+
+	public function unserialize( $serialized ) {
+		$deserialized = FormatJson::decode( $serialized );
+		if ( $deserialized === false ) {
+			// Unrecoverable. This should not happen but still.
+			throw new \UnexpectedValueException(
+				'Error while deserializing to WikiPageMessageGroup object - FormatJson::decode failed. ' .
+				"Serialize string - $serialized."
+			);
+		}
+
+		// Use as needed in the future to track incompatible changes.
+		// $version = $deserialized->_v;
+		// unset($deserialized->_v);
+
+		// Only set the properties that are present in the class and the deserialized object.
+		$classProps = array_keys( get_class_vars( self::class ) );
+
+		foreach ( $classProps as $prop ) {
+			if ( property_exists( $deserialized, $prop ) ) {
+				$this->{$prop} = $deserialized->{$prop};
+			}
+		}
 	}
 }

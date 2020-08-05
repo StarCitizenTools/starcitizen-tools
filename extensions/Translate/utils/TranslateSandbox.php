@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 use MediaWiki\Auth\AuthManager;
@@ -34,13 +34,13 @@ class TranslateSandbox {
 			throw new MWException( 'Invalid user name' );
 		}
 
-		$data = array(
+		$data = [
 			'username' => $user->getName(),
 			'password' => $password,
 			'retype' => $password,
 			'email' => $email,
 			'realname' => '',
-		);
+		];
 
 		self::$userToCreate = $user;
 		$reqs = AuthManager::singleton()->getAuthenticationRequests( AuthManager::ACTION_CREATE );
@@ -74,7 +74,6 @@ class TranslateSandbox {
 
 		// group-translate-sandboxed group-translate-sandboxed-member
 		$user->addGroup( 'translate-sandboxed' );
-		$user->sendConfirmationMail();
 
 		return $user;
 	}
@@ -88,6 +87,7 @@ class TranslateSandbox {
 	 */
 	public static function deleteUser( User $user, $force = '' ) {
 		$uid = $user->getId();
+		$username = $user->getName();
 
 		if ( $force !== 'force' && !self::isSandboxed( $user ) ) {
 			throw new MWException( 'Not a sandboxed user' );
@@ -95,10 +95,24 @@ class TranslateSandbox {
 
 		// Delete from database
 		$dbw = wfGetDB( DB_MASTER );
-		$dbw->delete( 'user', array( 'user_id' => $uid ), __METHOD__ );
-		$dbw->delete( 'user_groups', array( 'ug_user' => $uid ), __METHOD__ );
-		$dbw->delete( 'user_properties', array( 'up_user' => $uid ), __METHOD__ );
-		$dbw->delete( 'logging', array( 'log_user' => $uid ), __METHOD__ );
+		$dbw->delete( 'user', [ 'user_id' => $uid ], __METHOD__ );
+		$dbw->delete( 'user_groups', [ 'ug_user' => $uid ], __METHOD__ );
+		$dbw->delete( 'user_properties', [ 'up_user' => $uid ], __METHOD__ );
+
+		if ( class_exists( ActorMigration::class ) ) {
+			$m = ActorMigration::newMigration();
+
+			// Assume no joins are needed for logging or recentchanges
+			$dbw->delete( 'logging', $m->getWhere( $dbw, 'log_user', $user )['conds'], __METHOD__ );
+			$dbw->delete( 'recentchanges', $m->getWhere( $dbw, 'rc_user', $user )['conds'], __METHOD__ );
+		} else {
+			$dbw->delete( 'logging', [ 'log_user' => $uid ], __METHOD__ );
+			$dbw->delete(
+				'recentchanges',
+				[ 'rc_user' => $uid, 'rc_user_text' => $username ],
+				__METHOD__
+			);
+		}
 
 		// If someone tries to access still object still, they will get anon user
 		// data.
@@ -125,14 +139,25 @@ class TranslateSandbox {
 	 */
 	public static function getUsers() {
 		$dbw = TranslateUtils::getSafeReadDB();
-		$tables = array( 'user', 'user_groups' );
-		$fields = User::selectFields();
-		$conds = array(
+		if ( is_callable( [ User::class, 'getQueryInfo' ] ) ) {
+			$userQuery = User::getQueryInfo();
+		} else {
+			$userQuery = [
+				'tables' => [ 'user' ],
+				'fields' => User::selectFields(),
+				'joins' => [],
+			];
+		}
+		$tables = array_merge( $userQuery['tables'], [ 'user_groups' ] );
+		$fields = $userQuery['fields'];
+		$conds = [
 			'ug_group' => 'translate-sandboxed',
-			'ug_user = user_id',
-		);
+		];
+		$joins = [
+			'user_groups' => [ 'JOIN', 'ug_user = user_id' ],
+		] + $userQuery['joins'];
 
-		$res = $dbw->select( $tables, $fields, $conds, __METHOD__ );
+		$res = $dbw->select( $tables, $fields, $conds, __METHOD__, [], $joins );
 
 		return UserArray::newFromResult( $res );
 	}
@@ -206,15 +231,15 @@ class TranslateSandbox {
 			$sender->getName()
 		)->inLanguage( $targetLang )->text();
 
-		$params = array(
+		$params = [
 			'user' => $target->getId(),
-			'to' => new MailAddress( $target ),
-			'from' => new MailAddress( $sender ),
+			'to' => MailAddress::newFromUser( $target ),
+			'from' => MailAddress::newFromUser( $sender ),
 			'replyto' => new MailAddress( $wgNoReplyAddress ),
 			'subj' => $subject,
 			'body' => $body,
 			'emailType' => $type,
-		);
+		];
 
 		JobQueueGroup::singleton()->push( TranslateSandboxEmailJob::newJob( $params ) );
 	}
@@ -233,7 +258,12 @@ class TranslateSandbox {
 		return false;
 	}
 
-	/// Hook: UserGetRights
+	/**
+	 * Hook: UserGetRights
+	 * @param User $user
+	 * @param array &$rights
+	 * @return true
+	 */
 	public static function enforcePermissions( User $user, array &$rights ) {
 		global $wgTranslateUseSandbox;
 
@@ -246,7 +276,7 @@ class TranslateSandbox {
 		}
 
 		// right-translate-sandboxaction action-translate-sandboxaction
-		$rights = array(
+		$rights = [
 			'editmyoptions',
 			'editmyprivateinfo',
 			'read',
@@ -254,7 +284,7 @@ class TranslateSandbox {
 			'translate-sandboxaction',
 			'viewmyprivateinfo',
 			'writeapi',
-		);
+		];
 
 		// Do not let other hooks add more actions
 		return false;
@@ -270,7 +300,7 @@ class TranslateSandbox {
 	/// Hook: onGetPreferences
 	public static function onGetPreferences( $user, &$preferences ) {
 		$preferences['translate-sandbox'] = $preferences['translate-sandbox-reminders'] =
-			array( 'type' => 'api' );
+			[ 'type' => 'api' ];
 
 		return true;
 	}
@@ -278,19 +308,27 @@ class TranslateSandbox {
 	/**
 	 * Whitelisting for certain API modules. See also enforcePermissions.
 	 * Hook: ApiCheckCanExecute
+	 * @param ApiBase $module
+	 * @param User $user
+	 * @param string &$message
+	 * @return bool
 	 */
 	public static function onApiCheckCanExecute( ApiBase $module, User $user, &$message ) {
-		$whitelist = array(
+		$whitelist = [
 			// Obviously this is needed to get out of the sandbox
 			'ApiTranslationStash',
 			// Used by UniversalLanguageSelector for example
 			'ApiOptions'
-		);
+		];
 
-		if ( TranslateSandbox::isSandboxed( $user ) ) {
+		if ( self::isSandboxed( $user ) ) {
 			$class = get_class( $module );
 			if ( $module->isWriteMode() && !in_array( $class, $whitelist, true ) ) {
-				$message = 'writerequired';
+				$message = ApiMessage::create( 'apierror-writeapidenied' );
+				if ( $message->getApiCode() === 'apierror-writeapidenied' ) {
+					// Backwards compatibility for pre-1.29 MediaWiki
+					$message = 'writerequired';
+				}
 				return false;
 			}
 		}

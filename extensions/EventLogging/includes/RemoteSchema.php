@@ -2,9 +2,8 @@
 /**
  * Represents a schema revision on a remote wiki.
  * Handles retrieval (via HTTP) and local caching.
- * @note When we switch to PHP 5.4, add 'implements JsonSerializable'
  */
-class RemoteSchema {
+class RemoteSchema implements JsonSerializable {
 
 	const LOCK_TIMEOUT = 20;
 
@@ -18,23 +17,27 @@ class RemoteSchema {
 	/**
 	 * Constructor.
 	 * @param string $title
-	 * @param integer $revision
-	 * @param ObjectCache $cache (optional) cache client.
+	 * @param int $revision
+	 * @param BagOStuff $cache (optional) cache client.
 	 * @param Http $http (optional) HTTP client.
 	 */
 	public function __construct( $title, $revision, $cache = null, $http = null ) {
-		global $wgEventLoggingDBname;
+		global $wgEventLoggingSchemaApiUri;
 
 		$this->title = $title;
 		$this->revision = $revision;
 		$this->cache = $cache ?: wfGetCache( CACHE_ANYTHING );
 		$this->http = $http ?: new Http();
-		$this->key = "schema:{$wgEventLoggingDBname}:{$title}:{$revision}";
+		$this->key = $this->cache->makeGlobalKey(
+			'eventlogging-schema',
+			$wgEventLoggingSchemaApiUri,
+			$revision
+		);
 	}
 
 	/**
 	 * Retrieves schema content.
-	 * @return array|bool: Schema or false if irretrievable.
+	 * @return array|bool Schema or false if irretrievable.
 	 */
 	public function get() {
 		if ( $this->content ) {
@@ -56,18 +59,18 @@ class RemoteSchema {
 
 	/**
 	 * Returns an object containing serializable properties.
-	 * @implements JsonSerializable
+	 * @return array
 	 */
 	public function jsonSerialize() {
 		return [
-			'schema'   => $this->get() ?: new StdClass(),
+			'schema'   => $this->get() ?: new stdClass(),
 			'revision' => $this->revision
 		];
 	}
 
 	/**
 	 * Retrieves content from memcached.
-	 * @return array:bool Schema or false if not in cache.
+	 * @return array|bool Schema or false if not in cache.
 	 */
 	protected function memcGet() {
 		return $this->cache->get( $this->key );
@@ -75,6 +78,7 @@ class RemoteSchema {
 
 	/**
 	 * Store content in memcached.
+	 * @return bool
 	 */
 	protected function memcSet() {
 		return $this->cache->set( $this->key, $this->content );

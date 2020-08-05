@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2010-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -24,7 +24,7 @@ class AggregateMessageGroup extends MessageGroupBase {
 	}
 
 	public function load( $code ) {
-		$messages = array();
+		$messages = [];
 
 		/**
 		 * @var $group MessageGroup
@@ -46,7 +46,7 @@ class AggregateMessageGroup extends MessageGroupBase {
 
 	public function getGroups() {
 		if ( !isset( $this->groups ) ) {
-			$groups = array();
+			$groups = [];
 			$ids = (array)$this->conf['GROUPS'];
 			$ids = MessageGroups::expandWildcards( $ids );
 
@@ -76,14 +76,14 @@ class AggregateMessageGroup extends MessageGroupBase {
 	}
 
 	protected function loadMessagesFromCache( $groups ) {
-		$messages = array();
+		$messages = [];
 		foreach ( $groups as $group ) {
 			if ( $group instanceof MessageGroupOld ) {
 				$messages += $group->getDefinitions();
 				continue;
 			}
 
-			if ( $group instanceof AggregateMessageGroup ) {
+			if ( $group instanceof self ) {
 				$messages += $this->loadMessagesFromCache( $group->getGroups() );
 				continue;
 			}
@@ -143,7 +143,7 @@ class AggregateMessageGroup extends MessageGroupBase {
 	}
 
 	public function getTags( $type = null ) {
-		$tags = array();
+		$tags = [];
 
 		/**
 		 * @var $group MessageGroup
@@ -156,23 +156,25 @@ class AggregateMessageGroup extends MessageGroupBase {
 	}
 
 	public function getKeys() {
-		$keys = array();
+		$keys = [];
 		/**
 		 * @var $group MessageGroup
 		 */
 		foreach ( $this->getGroups() as $group ) {
 			// @todo Not all oldstyle groups have getKeys yet
 			if ( method_exists( $group, 'getKeys' ) ) {
-				$keys = array_merge( $keys, $group->getKeys() );
+				$moreKeys = $group->getKeys();
 			} else {
-				$keys = array_keys( $group->getDefinitions() );
+				$moreKeys = array_keys( $group->getDefinitions() );
+			}
+
+			// Array merge is *really* slow (tested in PHP 7.1), so avoiding it. A loop
+			// followed by array_unique (which we need anyway) is magnitudes faster.
+			foreach ( $moreKeys as $key ) {
+				$keys[] = $key;
 			}
 		}
 
-		/* In case some groups are included directly and indirectly
-		 * via other subgroup, we might get the same keys multiple
-		 * times. Since this is a list we need to remove duplicates
-		 * manually */
-		return array_unique( $keys );
+		return array_values( array_unique( $keys ) );
 	}
 }

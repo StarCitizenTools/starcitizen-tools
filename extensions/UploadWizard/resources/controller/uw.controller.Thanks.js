@@ -15,20 +15,20 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( uw, $, OO ) {
+( function ( mw, uw, $, OO ) {
 	/**
 	 * The thanks step.
 	 *
 	 * @class
-	 * @constructor
+	 * @extends uw.controller.Step
+	 * @param {mw.Api} api
+	 * @param {Object} config UploadWizard config object.
 	 */
-	uw.controller.Thanks = function UWControllerThanks( config ) {
+	uw.controller.Thanks = function UWControllerThanks( api, config ) {
 		uw.controller.Step.call(
 			this,
-			new uw.ui.Thanks( config )
-				.connect( this, {
-					'reset-wizard': [ 'emit', 'reset-wizard' ]
-				} ),
+			new uw.ui.Thanks( config ),
+			api,
 			config
 		);
 
@@ -37,20 +37,33 @@
 
 	OO.inheritClass( uw.controller.Thanks, uw.controller.Step );
 
-	uw.controller.Thanks.prototype.moveTo = function ( uploads ) {
+	uw.controller.Thanks.prototype.load = function ( uploads ) {
 		var thanks = this;
 
-		uw.controller.Step.prototype.moveTo.call( this );
+		uw.controller.Step.prototype.load.call( this, uploads );
+
+		if ( uploads.length === 0 ) {
+			// We got here after the user removed all uploads; just restart from "Upload" step
+			uw.eventFlowLogger.logSkippedStep( this.stepName );
+			this.moveNext();
+			return;
+		}
 
 		$.each( uploads, function ( i, upload ) {
 			thanks.ui.addUpload( upload );
 		} );
-
-		this.uploads = undefined;
 	};
 
-	uw.controller.Thanks.prototype.isComplete = function () {
-		return true;
+	uw.controller.Thanks.prototype.moveNext = function () {
+		// remove all existing uploads before moving on
+		mw.UploadWizardUpload.prototype.count = 0;
+		this.removeUploads( this.uploads );
+
+		uw.controller.Step.prototype.moveNext.call( this );
 	};
 
-}( mediaWiki.uploadWizard, jQuery, OO ) );
+	uw.controller.Thanks.prototype.hasData = function () {
+		return false;
+	};
+
+}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );

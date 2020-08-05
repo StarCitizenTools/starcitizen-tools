@@ -12,5 +12,7 @@
 	"commonsmetadata-trackingcategory-no-author": "Ficheros ensin autor de llectura automática",
 	"commonsmetadata-trackingcategory-no-author-desc": "El ficheru nun tien nenguna plantía d'informacion [{{MediaWiki:Commonsmetadata-doc-url}} lleíble automáticamente], o'l campu d'autor nun se rellenó.",
 	"commonsmetadata-trackingcategory-no-source": "Ficheros ensin orixe de llectura automática",
-	"commonsmetadata-trackingcategory-no-source-desc": "El ficheru nun tien nenguna plantía d'informacion [{{MediaWiki:Commonsmetadata-doc-url}} lleíble automáticamente], o'l campu d'orixe nun se rellenó."
+	"commonsmetadata-trackingcategory-no-source-desc": "El ficheru nun tien nenguna plantía d'informacion [{{MediaWiki:Commonsmetadata-doc-url}} lleíble automáticamente], o'l campu d'orixe nun se rellenó.",
+	"commonsmetadata-trackingcategory-no-patent": "Ficheros ensin patente de llectura automática",
+	"commonsmetadata-trackingcategory-no-patent-desc": "El ficheru nun tien nenguna plantía de patente [{{MediaWiki:Commonsmetadata-doc-url}} lleíble automáticamente]."
 }

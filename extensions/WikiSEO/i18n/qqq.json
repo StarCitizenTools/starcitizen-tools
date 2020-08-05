@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Umherirrender",
+			"Zoranzoki21"
+		]
+	},
+	"wiki-seo-desc": "{{desc|name=WikiSEO|url=https://www.mediawiki.org/wiki/Extension:WikiSEO}}",
+	"wiki-seo-empty-attr-tag": "Error message if the parser tag is called without content",
+	"wiki-seo-empty-attr-parser": "Error message if the parser hook is called without content",
+	"wiki-seo-invalid-generator": "Error message if a generator name ($1) is not valid.",
+	"wiki-seo-missing-page-title": "Error message if the page title in output page is null (should not happen)."
+}

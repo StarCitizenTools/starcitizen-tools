@@ -1,7 +1,7 @@
 /*
  * VisualEditor user interface MWRequiredParamBlankConfirmDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -26,8 +26,6 @@ OO.inheritClass( ve.ui.MWRequiredParamBlankConfirmDialog, OO.ui.MessageDialog );
 /* Static Properties */
 
 ve.ui.MWRequiredParamBlankConfirmDialog.static.name = 'requiredparamblankconfirm';
-
-ve.ui.MWRequiredParamBlankConfirmDialog.static.verbose = true;
 
 ve.ui.MWRequiredParamBlankConfirmDialog.static.size = 'medium';
 

@@ -25,15 +25,11 @@
 
 	// If the user disabled MediaViewer in his preferences, we do not set up click handling.
 	// This is loaded before user JS so we cannot check wgMediaViewer.
-	try {
-		if (
-			mw.config.get( 'wgMediaViewerOnClick' ) !== true
-			|| mw.user.isAnon() && window.localStorage && localStorage.getItem( 'wgMediaViewerOnClick' ) === false
-		) {
-			return;
-		}
-	} catch ( e ) { // localStorage.getItem can throw exceptions
-		mw.log( 'Could not check value of wgMediaViewerOnClick in localStorage' );
+	if (
+		mw.config.get( 'wgMediaViewerOnClick' ) !== true ||
+		mw.user.isAnon() && mw.storage.get( 'wgMediaViewerOnClick', '1' ) !== '1'
+	) {
+		return;
 	}
 
 	$document.on( 'click.mmv-head', 'a.image', function ( e ) {
@@ -47,13 +43,13 @@
 
 		// We wait for document readiness because mw.loader.using writes to the DOM
 		// which can cause a blank page if it happens before DOM readiness
-		$document.ready( function () {
+		$( function () {
 			mw.loader.using( [ 'mmv.bootstrap.autostart' ], function () {
 				mw.mmv.bootstrap.whenThumbsReady().then( function () {
 					mw.mmv.durationLogger.stop( 'early-click-to-replay-click', start ).record( 'early-click-to-replay-click' );
 
 					// We have to copy the properties, passing e doesn't work. Probably because of preventDefault()
-					$( e.target ).trigger( { type : 'click', which: 1, replayed: true } );
+					$( e.target ).trigger( { type: 'click', which: 1, replayed: true } );
 				} );
 			} );
 		} );

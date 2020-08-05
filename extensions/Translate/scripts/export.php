@@ -5,7 +5,7 @@
  * @author Niklas Laxström
  * @author Siebrand Mazeland
  * @copyright Copyright © 2008-2013, Niklas Laxström, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -107,7 +107,7 @@ class CommandlineExport extends Maintenance {
 			$noLocation = '--no-location ';
 		};
 
-		$skip = array();
+		$skip = [];
 		if ( $this->hasOption( 'skip' ) ) {
 			$skip = array_map( 'trim', explode( ',', $this->getOption( 'skip' ) ) );
 		}
@@ -147,7 +147,7 @@ class CommandlineExport extends Maintenance {
 		$changeFilter = false;
 		$hours = $this->getOption( 'hours' );
 		if ( $hours ) {
-			$namespaces = array();
+			$namespaces = [];
 
 			/** @var FileBasedMessageGroup $group */
 			foreach ( $groups as $group ) {
@@ -157,7 +157,7 @@ class CommandlineExport extends Maintenance {
 			$namespaces = array_keys( $namespaces );
 			$bots = true;
 
-			$changeFilter = array();
+			$changeFilter = [];
 			$rows = TranslateUtils::translationChanges( $hours, $bots, $namespaces );
 			foreach ( $rows as $row ) {
 				$title = Title::makeTitle( $row->rc_namespace, $row->rc_title );
@@ -173,7 +173,7 @@ class CommandlineExport extends Maintenance {
 			}
 		}
 
-		$skipGroups = array();
+		$skipGroups = [];
 		if ( $this->hasOption( 'skipgroup' ) ) {
 			$skipGroups = array_map( 'trim', explode( ',', $this->getOption( 'skipgroup' ) ) );
 		}
@@ -251,7 +251,7 @@ class CommandlineExport extends Maintenance {
 			$whitelist = $group->getTranslatableLanguages();
 
 			foreach ( $langs as $lang ) {
-				// Do not export languges that are blacklisted (or not whitelisted).
+				// Do not export languages that are blacklisted (or not whitelisted).
 				// Also check that whitelist is not null, which means that all
 				// languages are allowed for translation and export.
 				if ( is_array( $whitelist ) && !isset( $whitelist[$lang] ) ) {
@@ -297,5 +297,5 @@ class CommandlineExport extends Maintenance {
 	}
 }
 
-$maintClass = 'CommandlineExport';
+$maintClass = CommandlineExport::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

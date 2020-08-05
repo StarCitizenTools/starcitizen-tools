@@ -3,16 +3,12 @@
 		"authors": [
 			"Amire80",
 			"Bert Jickty",
-			"HalanTul"
+			"HalanTul",
+			"Туллук"
 		]
 	},
 	"translate": "Тылбаас",
 	"translate-desc": "MediaWiki движогу уонна атын бырагырааммалары тылбаастыырга [[Special:Translate|аналлаах сирэй]]",
-	"translate-taskui-view": "Этиилэри барыларын көрдөр",
-	"translate-taskui-untranslated": "Тылбаастамматаҕы көрдөр",
-	"translate-taskui-optional": "Эбии этиилэри көрдөр",
-	"translate-taskui-acceptqueue": "Мин бигэргэтэрбин кэтэһэри эрэ",
-	"translate-taskui-reviewall": "Бары тылбаастары көр",
 	"translate-taskui-export-to-file": "Бэйэтин формаатынан экспортаа",
 	"translate-taskui-export-as-po": "Ситимнэммэккэ тылбаастыырга анаан экспортааһын",
 	"translate-taction-translate": "Тылбаас",
@@ -41,7 +37,6 @@
 	"translate-page-description-hasoptional": "Бу эбии этиилэр бөлөхтөрө.\nЭбии этиилэр тылбаастамматтар. Арай тылыҥ улахан уратылаах буоллаҕына тылбаастаныан сөп, холобур, тыллар ыккардыларыгар арыт суох буоллаҕына эбэтэр ааттары транслитерациялыырга. $1",
 	"translate-page-description-hasoptional-open": "Эбии этиилэри көрдөр.",
 	"translate-page-edit": "Уларыт",
-	"translate-ext-url": "<hr />Ситим-сир: $1",
 	"translate-optional": "(булгуччута суох)",
 	"translate-ignored": "(ааххайыллыбат)",
 	"translate-edit-title": "\"$1\" уларытыы",
@@ -51,9 +46,7 @@
 	"translate-edit-no-information": "''Бу этии туһунан туох да суох. Ханна, хаһан бу этии туттулларын билэр буоллаххына, атын тылбаасчыттарга көмөлөһөн, ол туһунан суруйуоххун сөп.''",
 	"translate-edit-information": "Бу туһунан ($1)",
 	"translate-edit-in-other-languages": "Атын тылынан",
-	"translate-edit-committed": "Билигин баар тылбаас",
 	"translate-edit-warnings": "Ситэтэ суох тылбаас туһунан сэрэтии",
-	"translate-edit-tmsugs": "Урукку тылбаастартан",
 	"translate-edit-tmmatch-source": "Тылбаастаныахтаах этии: $1",
 	"translate-edit-tmmatch": "$1% сөп түбэһэр",
 	"translate-use-suggestion": "Баар тиэкиһи бу этэн биэриинэн солбуй.",
@@ -133,7 +126,6 @@
 	"translate-statsf-language": "Соппутуойунан арахсыбыт тыллар куодтарын тиһигэ:",
 	"translate-statsf-group": "Соппутуойунан арахсыбыт бөлөхтөр куодтарын тиһигэ:",
 	"translate-statsf-submit": "Бигэргэтиэх иннинэ көрүү",
-	"translate-tag-category": "Тылбаастанар сирэйдэр",
 	"translate-tag-page-desc": "Биики-сирэй тылбааһа [[$2|$1]].",
 	"translate-sidebar-alltrans": "Атын тылларынан",
 	"translations": "Бары тылбаастар",
@@ -156,8 +148,8 @@
 	"translate-langstats-collapseall": "барытын суулаа",
 	"translate-language-code": "Тыл куода",
 	"translate-language-code-field-name": "Тыл куода:",
-	"translate-suppress-complete": "Толору тылбаастаммыт этиилэрдээх бөлөхтөрү көрдөрүмэ",
-	"translate-ls-noempty": "Толору тылбаастаммыт этиилэрдээх бөлөхтөрү көрдөрүмэ",
+	"translate-suppress-complete": "Толору тылбаастаммыт этиилээх бөлөҕү көрдөрүмэ",
+	"translate-ls-noempty": "Толору тылбаастамматах этиилээх бөлөҕү көрдөрүмэ",
 	"translate-language": "Ханнык тылынан:",
 	"translate-total": "Этии",
 	"translate-untranslated": "Тылбаастамматах биирдэмнэр ахсааннара",
@@ -177,7 +169,7 @@
 	"translate-mgs-invalid-group": "$1 диэн ааттаах бөлөх суох эбит.",
 	"translate-mgs-nothing": "Көрдөрүллэр дааннай суох.",
 	"supportedlanguages": "Өйүүр тыллара",
-	"supportedlanguages-summary": "Манна{{SITENAME}} өйүүр тыллара уонна тылбаасчыттар ааттара көстөр. Тылбаасчыт төһөнөн элбэхтик үлэлээбит да, оччонон аата бөдөҥ бичигинэн суруллар. Алларанан тардыытын өҥө тылбаасчыт бүтэһигин хаһан үлэлээбитин көрдөрөр.",
+	"supportedlanguages-summary": "Манна {{SITENAME}} өйүүр тыллара уонна тылбаасчыттар ааттара көстөр. Тылбаасчыт төһөнөн элбэхтик үлэлээбит да, оччонон аата бөдөҥ бичигинэн суруллар. Алларанан тардыытын өҥө тылбаасчыт бүтэһигин хаһан үлэлээбитин көрдөрөр.",
 	"supportedlanguages-colorlegend": "Өҥүн суолтата: Тиһэх көннөрүүнү $1 күн ынараа өттүгэр оҥорбут.",
 	"supportedlanguages-translators": "{{PLURAL:$2|Тылбаасчыт|Тылбаасчыттар}}: $1",
 	"supportedlanguages-recenttranslations": "соторутааҥы тылбаастар",
@@ -199,5 +191,6 @@
 	"translate-gs-avgscore": "Ортотунан",
 	"translate-documentation-language": "Биллэрии документацията",
 	"tux-editor-proofreading-hide-own-translations": "Бэйэ тылбааһын көрдөрүмэ",
-	"tux-empty-nothing-new-to-proofread": "Тургутуллуохтаах саҥа тылбаас суох"
+	"tux-empty-nothing-new-to-proofread": "Тургутуллуохтаах саҥа тылбаас суох",
+	"tux-editor-message-tools-show-editor": "Вики редакторын көр"
 }

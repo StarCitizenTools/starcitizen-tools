@@ -23,7 +23,6 @@ namespace MediaWiki\Logger\Monolog;
 use AvroIODatumWriter;
 use AvroIOBinaryEncoder;
 use AvroIOTypeException;
-use AvroNamedSchemata;
 use AvroSchema;
 use AvroStringIO;
 use AvroValidator;
@@ -62,7 +61,7 @@ class AvroFormatter implements FormatterInterface {
 	protected $writer;
 
 	/**
-	 * @var array $schemas Map from Monolog channel to Avro schema.
+	 * @param array $schemas Map from Monolog channel to Avro schema.
 	 *  Each schema can be either the JSON string or decoded into PHP
 	 *  arrays.
 	 */
@@ -121,7 +120,7 @@ class AvroFormatter implements FormatterInterface {
 	/**
 	 * Get the writer for the named channel
 	 *
-	 * @var string $channel Name of the schema to fetch
+	 * @param string $channel Name of the schema to fetch
 	 * @return \AvroSchema|null
 	 */
 	protected function getSchema( $channel ) {
@@ -138,9 +137,7 @@ class AvroFormatter implements FormatterInterface {
 				$this->schemas[$channel]['schema'] = AvroSchema::parse( $schema );
 			} else {
 				$this->schemas[$channel]['schema'] = AvroSchema::real_parse(
-					$schema,
-					null,
-					new AvroNamedSchemata()
+					$schema
 				);
 			}
 		}
@@ -150,12 +147,12 @@ class AvroFormatter implements FormatterInterface {
 	/**
 	 * Get the writer for the named channel
 	 *
-	 * @var string $channel Name of the schema
+	 * @param string $channel Name of the schema
 	 * @return int|null
 	 */
 	public function getSchemaRevisionId( $channel ) {
 		if ( isset( $this->schemas[$channel]['revision'] ) ) {
-			return (int) $this->schemas[$channel]['revision'];
+			return (int)$this->schemas[$channel]['revision'];
 		}
 		return null;
 	}

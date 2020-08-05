@@ -1,12 +1,12 @@
 /*!
  * VisualEditor user interface SpecialCharacterPage class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 /**
- * MediaWiki meta dialog Languages page.
+ * Special character toolbar dialog.
  *
  * @class
  * @extends OO.ui.PageLayout
@@ -16,10 +16,11 @@
  * @param {Object} [config] Configuration options
  */
 ve.ui.SpecialCharacterPage = function VeUiSpecialCharacterPage( name, config ) {
-	var character, characterNode, characters, $characters, charactersNode;
+	var character, characterNode, characters, $characters, charactersNode,
+		source = config.source;
 
 	// Parent constructor
-	OO.ui.PageLayout.call( this, name, config );
+	ve.ui.SpecialCharacterPage.super.apply( this, arguments );
 
 	this.label = config.label;
 	this.icon = config.icon;
@@ -31,14 +32,28 @@ ve.ui.SpecialCharacterPage = function VeUiSpecialCharacterPage( name, config ) {
 	// The body of this loop is executed a few thousand times when opening
 	// ve.ui.SpecialCharacterDialog, avoid jQuery wrappers.
 	for ( character in characters ) {
+		if ( !source && characters[ character ].source ) {
+			continue;
+		}
+		if ( character === 'attributes' ) {
+			continue;
+		}
 		characterNode = document.createElement( 'div' );
 		characterNode.className = 've-ui-specialCharacterPage-character';
 		if ( characters[ character ].titleMsg ) {
 			characterNode.setAttribute( 'title', ve.msg( characters[ character ].titleMsg ) );
 		}
+		if ( characters[ character ].source ) {
+			characterNode.classList.add( 've-ui-specialCharacterPage-character-source' );
+		}
 		characterNode.textContent = character;
 		$.data( characterNode, 'character', characters[ character ] );
 		charactersNode.appendChild( characterNode );
+	}
+
+	if ( characters.attributes ) {
+		$characters.attr( 'lang', characters.attributes.lang );
+		$characters.attr( 'dir', characters.attributes.dir );
 	}
 
 	this.$element
@@ -55,7 +70,9 @@ OO.inheritClass( ve.ui.SpecialCharacterPage, OO.ui.PageLayout );
 /**
  * @inheritdoc
  */
-ve.ui.SpecialCharacterPage.prototype.setupOutlineItem = function ( outlineItem ) {
-	ve.ui.SpecialCharacterPage.super.prototype.setupOutlineItem.call( this, outlineItem );
+ve.ui.SpecialCharacterPage.prototype.setupOutlineItem = function () {
+	// Parent method
+	ve.ui.SpecialCharacterPage.super.prototype.setupOutlineItem.apply( this, arguments );
+
 	this.outlineItem.setLabel( this.label );
 };

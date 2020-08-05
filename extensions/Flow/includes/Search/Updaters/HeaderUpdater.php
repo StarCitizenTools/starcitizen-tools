@@ -9,14 +9,14 @@ use Sanitizer;
 
 class HeaderUpdater extends AbstractUpdater {
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getTypeName() {
 		return Connection::HEADER_TYPE_NAME;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function buildDocument( AbstractRevision /* Header */ $revision ) {
 		/** @var Header $revision */
@@ -29,9 +29,9 @@ class HeaderUpdater extends AbstractUpdater {
 		$creationTimestamp = $revision->getCollectionId()->getTimestampObj();
 		$updateTimestamp = $revision->getRevisionId()->getTimestampObj();
 
-		$revisions = array();
+		$revisions = [];
 		if ( $this->permissions->isAllowed( $revision, 'view' ) ) {
-			$revisions[] = array(
+			$revisions[] = [
 				'id' => $revision->getCollectionId()->getAlphadecimal(),
 				'text' => trim( Sanitizer::stripAllTags( $revision->getContent( $format ) ) ),
 				'source_text' => $revision->getContent( 'wikitext' ), // for insource: searches
@@ -39,7 +39,7 @@ class HeaderUpdater extends AbstractUpdater {
 				'timestamp' => $creationTimestamp->getTimestamp( TS_ISO_8601 ),
 				'update_timestamp' => $updateTimestamp->getTimestamp( TS_ISO_8601 ),
 				'type' => $revision->getRevisionType(),
-			);
+			];
 		}
 
 		// for consistency with topics, headers will also get "revisions",
@@ -47,7 +47,7 @@ class HeaderUpdater extends AbstractUpdater {
 		// which may have multiple sub-posts)
 		return new \Elastica\Document(
 			$revision->getCollectionId()->getAlphadecimal(),
-			array(
+			[
 				'namespace' => $title->getNamespace(),
 				'namespace_text' => $title->getPageLanguage()->getFormattedNsText( $title->getNamespace() ),
 				'pageid' => $title->getArticleID(),
@@ -55,7 +55,7 @@ class HeaderUpdater extends AbstractUpdater {
 				'timestamp' => $creationTimestamp->getTimestamp( TS_ISO_8601 ),
 				'update_timestamp' => $updateTimestamp->getTimestamp( TS_ISO_8601 ),
 				'revisions' => $revisions,
-			)
+			]
 		);
 	}
 }

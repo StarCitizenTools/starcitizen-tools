@@ -1,11 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"WTM"
+			"WTM",
+			"Woytecr"
 		]
 	},
+	"commonsmetadata-desc": "Rozszerza właściwość \"extmetadata\" modułu API informacji o zdjęciu o informacje zawarte na stronach opisu zdjęć, które wykorzystują szablony powszechnie wykorzystywane na Wikimedia Commons",
 	"commonsmetadata-trackingcategory-no-license": "Pliki bez licencji czytelnej dla maszyny",
+	"commonsmetadata-trackingcategory-no-license-desc": "Ten plik nie zawiera żadnego szablonu licencji [{{MediaWiki:Commonsmetadata-doc-url}} czytelnego dla maszyn].",
 	"commonsmetadata-trackingcategory-no-description": "Pliki bez opisu czytelnego dla maszyny",
+	"commonsmetadata-trackingcategory-no-description-desc": "Ten plik nie zawiera żadnego szablonu informacyjnego [{{MediaWiki:Commonsmetadata-doc-url}} czytelnego dla maszyn] lub jego pole opisu nie zostało wypełnione.",
 	"commonsmetadata-trackingcategory-no-author": "Pliki bez autora czytelnego dla maszyny",
-	"commonsmetadata-trackingcategory-no-source": "Pliki bez źródła czytelnego dla maszyny"
+	"commonsmetadata-trackingcategory-no-author-desc": "Ten plik nie zawiera żadnego szablonu informacyjnego [{{MediaWiki:Commonsmetadata-doc-url}} czytelnego dla maszyn] lub jego pole z autorem nie zostało wypełnione.",
+	"commonsmetadata-trackingcategory-no-source": "Pliki bez źródła czytelnego dla maszyny",
+	"commonsmetadata-trackingcategory-no-source-desc": "Ten plik nie zawiera żadnego szablonu informacyjnego [{{MediaWiki:Commonsmetadata-doc-url}} czytelnego dla maszyn] lub jego pole ze źródłem nie zostało wypełnione."
 }

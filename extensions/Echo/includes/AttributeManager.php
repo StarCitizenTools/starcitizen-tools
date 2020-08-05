@@ -49,10 +49,10 @@ class EchoAttributeManager {
 	 * Notifications are broken down to two sections, default is alert
 	 * @var array
 	 */
-	public static $sections = array(
+	public static $sections = [
 		self::ALERT,
 		self::MESSAGE
-	);
+	];
 
 	/**
 	 * Names for keys in $wgEchoNotifications notification config
@@ -62,7 +62,7 @@ class EchoAttributeManager {
 
 	/**
 	 * An EchoAttributeManager instance created from global variables
-	 * @param EchoAttributeManager
+	 * @var self
 	 */
 	protected static $globalVarInstance = null;
 
@@ -126,22 +126,22 @@ class EchoAttributeManager {
 		if ( isset( $this->notifications[$type][$locator] ) ) {
 			return (array)$this->notifications[$type][$locator];
 		} else {
-			return array();
+			return [];
 		}
 	}
 
 	/**
 	 * Get the enabled events for a user, which excludes user-dismissed events
 	 * from the general enabled events
-	 * @param User
-	 * @param string web/email
+	 * @param User $user
+	 * @param string $notifyType Either "web" or "email".
 	 * @return string[]
 	 */
 	public function getUserEnabledEvents( User $user, $notifyType ) {
 		$eventTypesToLoad = $this->notifications;
 		foreach ( $eventTypesToLoad as $eventType => $eventData ) {
 			$category = $this->getNotificationCategory( $eventType );
-			// Make sure the user is eligible to recieve this type of notification
+			// Make sure the user is eligible to receive this type of notification
 			if ( !$this->getCategoryEligibility( $user, $category ) ) {
 				unset( $eventTypesToLoad[$eventType] );
 			}
@@ -155,14 +155,14 @@ class EchoAttributeManager {
 	}
 
 	/**
-	 * Get the uesr enabled events for the specified sections
-	 * @param User
-	 * @param string
-	 * @param string[]
+	 * Get the user enabled events for the specified sections
+	 * @param User $user
+	 * @param string $notifyType Either "web" or "email".
+	 * @param string[] $sections
 	 * @return string[]
 	 */
 	public function getUserEnabledEventsbySections( User $user, $notifyType, array $sections ) {
-		$events = array();
+		$events = [];
 		foreach ( $sections as $section ) {
 			$events = array_merge(
 				$events,
@@ -184,7 +184,7 @@ class EchoAttributeManager {
 	 * @return array Array of notification types in this section
 	 */
 	public function getEventsForSection( $section ) {
-		$events = array();
+		$events = [];
 
 		$isDefault = ( $section === self::$DEFAULT_SECTION );
 
@@ -215,19 +215,19 @@ class EchoAttributeManager {
 	/**
 	 * Gets array of internal category names
 	 *
-	 * @return All internal names
+	 * @return array All internal names
 	 */
 	public function getInternalCategoryNames() {
 		return array_keys( $this->categories );
 	}
 
 	/**
-	 * See if a user is eligible to recieve a certain type of notification
+	 * See if a user is eligible to receive a certain type of notification
 	 * (based on user groups, not user preferences)
 	 *
-	 * @param User
-	 * @param string A notification category defined in $wgEchoNotificationCategories
-	 * @return boolean
+	 * @param User $user
+	 * @param string $category A notification category defined in $wgEchoNotificationCategories
+	 * @return bool
 	 */
 	public function getCategoryEligibility( $user, $category ) {
 		$usersGroups = $user->getGroups();
@@ -244,8 +244,8 @@ class EchoAttributeManager {
 	/**
 	 * Get the priority for a specific notification type
 	 *
-	 * @param string A notification type defined in $wgEchoNotifications
-	 * @return integer From 1 to 10 (10 is default)
+	 * @param string $notificationType A notification type defined in $wgEchoNotifications
+	 * @return int From 1 to 10 (10 is default)
 	 */
 	public function getNotificationPriority( $notificationType ) {
 		$category = $this->getNotificationCategory( $notificationType );
@@ -256,8 +256,8 @@ class EchoAttributeManager {
 	/**
 	 * Get the priority for a notification category
 	 *
-	 * @param string A notification category defined in $wgEchoNotificationCategories
-	 * @return integer From 1 to 10 (10 is default)
+	 * @param string $category A notification category defined in $wgEchoNotificationCategories
+	 * @return int From 1 to 10 (10 is default)
 	 */
 	public function getCategoryPriority( $category ) {
 		if ( isset( $this->categories[$category]['priority'] ) ) {
@@ -273,7 +273,7 @@ class EchoAttributeManager {
 	/**
 	 * Get the notification category for a notification type
 	 *
-	 * @param string A notification type defined in $wgEchoNotifications
+	 * @param string $notificationType A notification type defined in $wgEchoNotifications
 	 * @return string The name of the notification category or 'other' if no
 	 *     category is explicitly assigned.
 	 */
@@ -295,10 +295,10 @@ class EchoAttributeManager {
 	 * @return array Associative array with category as key
 	 */
 	public function getEventsByCategory() {
-		$eventsByCategory = array();
+		$eventsByCategory = [];
 
 		foreach ( $this->categories as $category => $categoryDetails ) {
-			$eventsByCategory[$category] = array();
+			$eventsByCategory[$category] = [];
 		}
 
 		foreach ( $this->notifications as $notificationType => $notificationDetails ) {
@@ -322,6 +322,7 @@ class EchoAttributeManager {
 	 *
 	 * @param string $category Category name
 	 * @param string $notifyType notify type, e.g. email/web.
+	 * @return bool
 	 */
 	public function isNotifyTypeAvailableForCategory( $category, $notifyType ) {
 		if ( isset( $this->notifyTypeAvailabilityByCategory[$category][$notifyType] ) ) {
@@ -335,6 +336,7 @@ class EchoAttributeManager {
 	 * Checks whether category is displayed in preferences
 	 *
 	 * @param string $category Category name
+	 * @return bool
 	 */
 	public function isCategoryDisplayedInPreferences( $category ) {
 		return !(
@@ -352,6 +354,7 @@ class EchoAttributeManager {
 	 *
 	 * @param string $category Name of category
 	 * @param string $notifyType notify type, e.g. email/web.
+	 * @return bool
 	 */
 	public function isNotifyTypeDismissableForCategory( $category, $notifyType ) {
 		return !(

@@ -1,4 +1,6 @@
-( function ( $, mw, autosize ) {
+/* global autosize */
+
+( function () {
 	'use strict';
 
 	/**
@@ -180,7 +182,7 @@
 			var translation, editSummary,
 				translateEditor = this;
 
-			mw.translateHooks.run( 'beforeSubmit', translateEditor.$editor );
+			mw.hook( 'mw.translate.editor.beforeSubmit' ).fire( translateEditor.$editor );
 			translation = translateEditor.$editor.find( '.editcolumn textarea' ).val();
 			editSummary = translateEditor.$editor.find( '.tux-input-editsummary' ).val() || '';
 
@@ -233,7 +235,8 @@
 					response.error && response.error.info || mw.msg( 'tux-save-unknown-error' )
 				);
 				if ( errorCode === 'assertuserfailed' ) {
-					window.alert( mw.msg( 'tux-session-expired' ) );
+					// eslint-disable-next-line no-alert
+					alert( mw.msg( 'tux-session-expired' ) );
 				}
 			} );
 		},
@@ -271,7 +274,7 @@
 			}
 
 			mw.translate.dirty = false;
-			mw.translateHooks.run( 'afterSubmit', this.$editor );
+			mw.hook( 'mw.translate.editor.afterSubmit' ).fire( this.$editor );
 
 			if ( mw.track ) {
 				mw.track( 'ext.translate.event.translation', this.message );
@@ -309,7 +312,9 @@
 			// Skip if the message is hidden. For example in a filter result.
 			if ( $next.length && $next.hasClass( 'hide' ) ) {
 				this.$editTrigger = $next;
-				return this.next();
+				this.next();
+
+				return;
 			}
 
 			// If this is the last message, just hide it
@@ -363,7 +368,20 @@
 		 * @return {jQuery} The new message tools menu element
 		 */
 		createMessageTools: function () {
-			var $historyItem, $deleteItem, $translationsItem;
+			var $editItem, $historyItem, $deleteItem, $translationsItem, $linkToThisItem;
+
+			$editItem = this.createMessageToolsItem(
+				'message-tools-edit',
+				{
+					title: this.message.title,
+					action: 'edit'
+				},
+				'tux-editor-message-tools-show-editor'
+			);
+
+			if ( !mw.translate.canTranslate() ) {
+				$editItem.addClass( 'hide' );
+			}
 
 			$historyItem = this.createMessageToolsItem(
 				'message-tools-history',
@@ -403,9 +421,19 @@
 				'tux-editor-message-tools-translations'
 			);
 
+			$linkToThisItem = this.createMessageToolsItem(
+				'message-tools-linktothis',
+				{
+					title: 'Special:Translate',
+					showMessage: this.message.key,
+					group: this.message.primaryGroup
+				},
+				'tux-editor-message-tools-linktothis'
+			);
+
 			return $( '<ul>' )
 				.addClass( 'tux-dropdown-menu tux-message-tools-menu hide' )
-				.append( $historyItem, $deleteItem, $translationsItem );
+				.append( $editItem, $historyItem, $deleteItem, $translationsItem, $linkToThisItem );
 		},
 
 		prepareEditorColumn: function () {
@@ -434,7 +462,7 @@
 				$layoutActions,
 				$infoToggleIcon,
 				$messageList,
-				targetLangAttrib, targetLangDir, targetLangCode,
+				targetLangAttrib, targetLangDir, targetLangCode, prefix,
 				$messageTools = translateEditor.createMessageTools(),
 				canTranslate = mw.translate.canTranslate();
 
@@ -476,7 +504,7 @@
 				.append( $closeIcon, $infoToggleIcon );
 
 			$editorColumn.append( $( '<div>' )
-				.addClass( 'row' )
+				.addClass( 'row tux-editor-titletools' )
 				.append( $messageKeyLabel, $layoutActions )
 			);
 
@@ -484,7 +512,7 @@
 			originalTranslation = this.message.translation;
 			sourceString = this.message.definition;
 			$sourceString = $( '<span>' )
-				.addClass( 'eleven column sourcemessage' )
+				.addClass( 'twelve columns sourcemessage' )
 				.attr( {
 					lang: $messageList.data( 'sourcelangcode' ),
 					dir: $messageList.data( 'sourcelangdir' )
@@ -594,7 +622,9 @@
 					e.stopPropagation();
 					translateEditor.$editor.find( '.shortcut-activated:visible' ).eq( index ).trigger( 'click' );
 					// Update numbers and locations after trigger should be completed
-					window.setTimeout( function () { translateEditor.showShortcuts(); }, 100 );
+					window.setTimeout( function () {
+						translateEditor.showShortcuts();
+					}, 100 );
 				}
 
 				if ( e.which === 18 && e.type === 'keyup' ) {
@@ -630,7 +660,7 @@
 
 				// When there is content in the editor enable the button.
 				// But do not enable when some saving is not finished yet.
-				if ( $.trim( current ) && !translateEditor.saving ) {
+				if ( current.trim() && !translateEditor.saving ) {
 					$pasteSourceButton.addClass( 'hide' );
 					$saveButton.prop( 'disabled', false );
 				} else {
@@ -652,7 +682,7 @@
 			$editAreaBlock = $( '<div>' )
 				.addClass( 'row tux-editor-editarea-block' )
 				.append( $( '<div>' )
-					.addClass( 'editarea eleven columns' )
+					.addClass( 'editarea twelve columns' )
 					.append( $warningsBlock, $textarea )
 				);
 
@@ -689,6 +719,16 @@
 					if ( $textarea.val().trim() === '' ) {
 						$editSummary.prop( 'disabled', true );
 					}
+				} ).on( 'keydown', function ( e ) {
+					if ( !e.ctrlKey || e.keyCode !== 13 ) {
+						return;
+					}
+
+					if ( !$saveButton.is( ':disabled' ) ) {
+						$saveButton.click();
+						return;
+					}
+					$skipButton.click();
 				} );
 
 				if ( originalTranslation !== null ) {
@@ -720,7 +760,7 @@
 				}
 
 				$editingButtonBlock = $( '<div>' )
-					.addClass( 'ten columns tux-editor-insert-buttons' )
+					.addClass( 'twelve columns tux-editor-insert-buttons' )
 					.append(
 						$pasteOriginalButton,
 						$discardChangesButton
@@ -730,7 +770,7 @@
 					.addClass( 'row tux-editor-editsummary-block' )
 					.append(
 						$( '<div>' )
-							.addClass( 'eleven columns' )
+							.addClass( 'twelve columns' )
 							.append( $editSummary )
 					);
 
@@ -738,7 +778,7 @@
 
 				$saveButton = $( '<button>' )
 					.prop( 'disabled', true )
-					.addClass( 'tux-editor-save-button mw-ui-button mw-ui-progressive mw-ui-big' )
+					.addClass( 'tux-editor-save-button mw-ui-button mw-ui-progressive' )
 					.text( mw.msg( 'tux-editor-save-button-label' ) )
 					.on( 'click', function ( e ) {
 						translateEditor.save();
@@ -753,19 +793,22 @@
 
 				$requestRight = $( '<span>' )
 					.addClass( 'tux-editor-request-right' )
-					.text( mw.msg( 'translate-edit-nopermission' ) )
-					.append( $( '<a>' )
-						.text( mw.msg( 'translate-edit-askpermission' ) )
-						.addClass( 'tux-editor-ask-permission' )
-						.attr( {
-							href: mw.util.getUrl(
-								mw.config.get( 'wgTranslateUseSandbox' ) ?
-								'Special:TranslationStash' :
-								mw.config.get( 'wgTranslatePermissionUrl' )
-							)
-						} )
-					);
-
+					.text( mw.msg( 'translate-edit-nopermission' ) );
+				// Make sure wgTranslatePermissionUrl setting is not 'false'
+				if ( mw.config.get( 'wgTranslatePermissionUrl' ) !== false ) {
+					$requestRight
+						.append( $( '<a>' )
+							.text( mw.msg( 'translate-edit-askpermission' ) )
+							.addClass( 'tux-editor-ask-permission' )
+							.attr( {
+								href: mw.util.getUrl(
+									mw.config.get( 'wgTranslateUseSandbox' ) ?
+										'Special:TranslationStash' :
+										mw.config.get( 'wgTranslatePermissionUrl' )
+								)
+							} )
+						);
+				}
 				// Disable the text area if user has no translation rights.
 				// Use readonly to allow copy-pasting (except for placeholders)
 				$textarea.prop( 'readonly', true );
@@ -774,7 +817,7 @@
 			}
 
 			$skipButton = $( '<button>' )
-				.addClass( 'tux-editor-skip-button mw-ui-button mw-ui-quiet mw-ui-big' )
+				.addClass( 'tux-editor-skip-button mw-ui-button mw-ui-quiet' )
 				.text( mw.msg( 'tux-editor-skip-button-label' ) )
 				.on( 'click', function ( e ) {
 					translateEditor.skip();
@@ -789,7 +832,7 @@
 
 			// This appears instead of "Skip" on the last message on the page
 			$cancelButton = $( '<button>' )
-				.addClass( 'tux-editor-cancel-button mw-ui-button mw-ui-quiet mw-ui-big' )
+				.addClass( 'tux-editor-cancel-button mw-ui-button mw-ui-quiet' )
 				.text( mw.msg( 'tux-editor-cancel-button-label' ) )
 				.on( 'click', function ( e ) {
 					translateEditor.skip();
@@ -815,28 +858,17 @@
 			);
 
 			if ( canTranslate ) {
-				// BC for MW <= 1.26
-
-				( function () {
-					if ( mw.loader.getState( 'jquery.accessKeyLabel' ) ) {
-						return mw.loader.using( 'jquery.accessKeyLabel' ).then( function () {
-							return $.fn.updateTooltipAccessKeys.getAccessKeyPrefix();
-						} );
-					}
-
-					return $.Deferred().resolve( mw.util.tooltipAccessKeyPrefix );
-				}() ).done( function ( prefix ) {
-					$editorColumn.append( $( '<div>' )
-						.addClass( 'row shortcutinfo' )
-						.text( mw.msg(
-							'tux-editor-shortcut-info',
-							( prefix + 's' ).toUpperCase(),
-							( prefix + 'd' ).toUpperCase(),
-							'ALT',
-							( prefix + 'b' ).toUpperCase()
-						) )
-					);
-				} );
+				prefix = $.fn.updateTooltipAccessKeys.getAccessKeyPrefix();
+				$editorColumn.append( $( '<div>' )
+					.addClass( 'row shortcutinfo' )
+					.text( mw.msg(
+						'tux-editor-shortcut-info',
+						'CTRL-ENTER',
+						( prefix + 'd' ).toUpperCase(),
+						'ALT',
+						( prefix + 'b' ).toUpperCase()
+					) )
+				);
 			}
 
 			return $editorColumn;
@@ -895,21 +927,18 @@
 		 */
 		validateTranslation: function () {
 			var translateEditor = this,
-				url,
+				api,
 				$textarea = translateEditor.$editor.find( '.tux-textarea-translation' );
 
-			// TODO: We need a better API for this
-			url = mw.util.getUrl( 'Special:Translate/editpage', {
-				suggestions: 'checks',
-				page: translateEditor.message.title,
-				loadgroup: translateEditor.message.group
-			} );
+			api = new mw.Api();
 
-			$.post( url, {
+			api.post( {
+				action: 'translationcheck',
+				title: this.message.title,
 				translation: $textarea.val()
-			}, function ( data ) {
+			} ).done( function ( data ) {
 				var warningIndex,
-					warnings = JSON.parse( data );
+					warnings = data.warnings;
 
 				translateEditor.removeWarning( 'validation' );
 				if ( !warnings || !warnings.length ) {
@@ -1048,12 +1077,12 @@
 							.append( $( '<a>' )
 								.attr( {
 									href: mw.translate.getDocumentationEditURL(
-										this.message.title.replace( /\/[a-z\-]+$/, '' )
+										this.message.title.replace( /\/[a-z-]+$/, '' )
 									),
 									target: '_blank'
 								} )
 								.addClass( 'message-desc-edit' )
-								.on( 'click', $.proxy( this.showDocumentationEditor, this ) )
+								.on( 'click', this.showDocumentationEditor.bind( this ) )
 							)
 					);
 
@@ -1099,7 +1128,7 @@
 			return $( '<div>' )
 				.addClass( 'five columns infocolumn-block' )
 				.append(
-					$( '<span>' ).addClass( 'caret' ),
+					$( '<span>' ).addClass( 'tux-message-editor__caret' ),
 					$infoColumn
 				);
 		},
@@ -1141,7 +1170,7 @@
 				$next.data( 'translateeditor' ).init();
 			}
 
-			mw.translateHooks.run( 'afterEditorShown', this.$editor );
+			mw.hook( 'mw.translate.editor.afterEditorShown' ).fire( this.$editor );
 
 			return false;
 		},
@@ -1184,12 +1213,7 @@
 				.addClass( 'editor-expand' )
 				.attr( 'title', mw.msg( 'tux-editor-expand-tooltip' ) );
 
-			this.$editor.find( '.infocolumn-block' )
-				.removeClass( 'hide' );
-			this.$editor.find( '.editcolumn' )
-				.removeClass( 'twelve' )
-				.addClass( 'seven' );
-
+			this.$editor.removeClass( 'tux-message-editor--expanded' );
 			this.expanded = false;
 		},
 
@@ -1200,12 +1224,7 @@
 				.addClass( 'editor-contract' )
 				.attr( 'title', mw.msg( 'tux-editor-collapse-tooltip' ) );
 
-			this.$editor.find( '.infocolumn-block' )
-				.addClass( 'hide' );
-			this.$editor.find( '.editcolumn' )
-				.removeClass( 'seven' )
-				.addClass( 'twelve' );
-
+			this.$editor.addClass( 'tux-message-editor--expanded' );
 			this.expanded = true;
 		},
 
@@ -1223,7 +1242,7 @@
 			}
 
 			// Load the diff styles
-			mw.loader.load( 'mediawiki.action.history.diff', undefined, true );
+			mw.loader.load( 'mediawiki.diff.styles' );
 
 			$trigger = $( '<span>' )
 				.addClass( 'show-diff-link' )
@@ -1254,14 +1273,16 @@
 
 		/**
 		 * Makes the textare large enough for insertables and positions the insertables.
+		 *
+		 * @param {jQuery} $textarea Text area.
 		 */
 		resizeInsertables: function ( $textarea ) {
 			var $buttonArea, buttonAreaHeight;
 
 			$buttonArea = this.$editor.find( '.tux-editor-insert-buttons' );
 			buttonAreaHeight = $buttonArea.height();
-			$textarea.css( 'padding-bottom', buttonAreaHeight + 10 );
-			$buttonArea.css( 'top', -buttonAreaHeight - 5 );
+			$textarea.css( 'padding-bottom', buttonAreaHeight + 5 );
+			$buttonArea.css( 'top', -buttonAreaHeight );
 			autosize.update( $textarea );
 		}
 	};
@@ -1300,4 +1321,4 @@
 			};
 		}() );
 	}
-}( jQuery, mediaWiki, autosize ) );
+}() );

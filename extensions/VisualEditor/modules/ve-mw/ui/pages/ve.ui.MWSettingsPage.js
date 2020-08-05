@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWSettingsPage class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -14,13 +14,13 @@
  * @constructor
  * @param {string} name Unique symbolic name of page
  * @param {Object} [config] Configuration options
- * @param {jQuery} [$overlay] Overlay to render dropdowns in
+ * @cfg {jQuery} [$overlay] Overlay to render dropdowns in
  */
 ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 	var settingsPage = this;
 
 	// Parent constructor
-	OO.ui.PageLayout.call( this, name, config );
+	ve.ui.MWSettingsPage.super.apply( this, arguments );
 
 	// Properties
 	this.metaList = null;
@@ -43,7 +43,7 @@ ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 		} )
 			.addItems( [
 				new OO.ui.ButtonOptionWidget( {
-					data: 'mwTOCForce',
+					data: 'mw:PageProp/forcetoc',
 					label: ve.msg( 'visualeditor-dialog-meta-settings-toc-force' )
 				} ),
 				new OO.ui.ButtonOptionWidget( {
@@ -51,12 +51,13 @@ ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 					label: ve.msg( 'visualeditor-dialog-meta-settings-toc-default' )
 				} ),
 				new OO.ui.ButtonOptionWidget( {
-					data: 'mwTOCDisable',
+					data: 'mw:PageProp/notoc',
 					label: ve.msg( 'visualeditor-dialog-meta-settings-toc-disable' )
 				} )
 			] )
 			.connect( this, { select: 'onTableOfContentsFieldChange' } ),
 		{
+			$overlay: config.$overlay,
 			align: 'top',
 			label: ve.msg( 'visualeditor-dialog-meta-settings-toc-label' ),
 			help: ve.msg( 'visualeditor-dialog-meta-settings-toc-help' )
@@ -68,6 +69,7 @@ ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 	this.enableRedirectField = new OO.ui.FieldLayout(
 		this.enableRedirectInput,
 		{
+			$overlay: config.$overlay,
 			classes: [ 've-test-page-settings-enable-redirect' ],
 			align: 'inline',
 			label: ve.msg( 'visualeditor-dialog-meta-settings-redirect-label' ),
@@ -86,6 +88,7 @@ ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 	this.enableStaticRedirectField = new OO.ui.FieldLayout(
 		this.enableStaticRedirectInput,
 		{
+			$overlay: config.$overlay,
 			classes: [ 've-test-page-settings-prevent-redirect' ],
 			align: 'inline',
 			label: ve.msg( 'visualeditor-dialog-meta-settings-redirect-staticlabel' ),
@@ -131,6 +134,7 @@ ve.ui.MWSettingsPage = function VeUiMWSettingsPage( name, config ) {
 		this.fieldLayout = new OO.ui.FieldLayout(
 			new OO.ui.CheckboxInputWidget(),
 			{
+				$overlay: config.$overlay,
 				classes: this.classes,
 				align: 'inline',
 				label: this.label,
@@ -167,9 +171,9 @@ ve.ui.MWSettingsPage.static.addMetaCheckbox = function ( metaName, label ) {
 /**
  * @inheritdoc
  */
-ve.ui.MWSettingsPage.prototype.setOutlineItem = function ( outlineItem ) {
+ve.ui.MWSettingsPage.prototype.setOutlineItem = function () {
 	// Parent method
-	OO.ui.PageLayout.prototype.setOutlineItem.call( this, outlineItem );
+	ve.ui.MWSettingsPage.super.prototype.setOutlineItem.apply( this, arguments );
 
 	if ( this.outlineItem ) {
 		this.outlineItem
@@ -195,10 +199,24 @@ ve.ui.MWSettingsPage.prototype.onTableOfContentsFieldChange = function () {
  * @param {boolean} value Whether a redirect is to be set for this page
  */
 ve.ui.MWSettingsPage.prototype.onEnableRedirectChange = function ( value ) {
+	var page = this;
 	this.redirectTargetInput.setDisabled( !value );
 	this.enableStaticRedirectInput.setDisabled( !value );
 	if ( value ) {
-		this.redirectTargetInput.focus();
+		/*
+		 * HACK: When editing a page which has a redirect, the meta dialog
+		 * automatically opens with the settings page's redirect field focused.
+		 * When this happens, we don't want the lookup dropdown to appear until
+		 * the user actually does something.
+		 * Using setTimeout because we need to defer this until after the
+		 * dialog has opened - otherwise its internal lookupDisabled logic will
+		 * fail to have any effect during the actual focusing and calling of
+		 * OO.ui.LookupElement#onLookupInputFocus/OO.ui.LookupElement#populateLookupMenu.
+		 * https://phabricator.wikimedia.org/T137309
+		 */
+		setTimeout( function () {
+			page.redirectTargetInput.focus();
+		} );
 	} else {
 		this.redirectTargetInput.setValue( '' );
 		this.enableStaticRedirectInput.setSelected( false );
@@ -244,10 +262,9 @@ ve.ui.MWSettingsPage.prototype.setup = function ( metaList ) {
 	this.metaList = metaList;
 
 	// Table of Contents items
-	tableOfContentsMetaItem = this.getMetaItem( 'mwTOC' );
 	tableOfContentsField = this.tableOfContents.getField();
-	tableOfContentsMode = tableOfContentsMetaItem &&
-		tableOfContentsMetaItem.getType() || 'default';
+	tableOfContentsMetaItem = this.getMetaItem( 'mwTOC' );
+	tableOfContentsMode = tableOfContentsMetaItem && tableOfContentsMetaItem.getAttribute( 'property' ) || 'default';
 	tableOfContentsField.selectItemByData( tableOfContentsMode );
 	this.tableOfContentsTouched = false;
 
@@ -275,7 +292,7 @@ ve.ui.MWSettingsPage.prototype.setup = function ( metaList ) {
  * @param {Object} [data] Dialog tear down data
  */
 ve.ui.MWSettingsPage.prototype.teardown = function ( data ) {
-	var tableOfContentsMetaItem, tableOfContentsSelectedItem, tableOfContentsValue,
+	var currentTableOfContents, newTableOfContentsData, newTableOfContentsItem,
 		currentRedirectTargetItem, newRedirectData, newRedirectItemData,
 		currentStaticRedirectItem, newStaticRedirectState,
 		settingsPage = this;
@@ -287,9 +304,8 @@ ve.ui.MWSettingsPage.prototype.teardown = function ( data ) {
 	}
 
 	// Table of Contents items
-	tableOfContentsMetaItem = this.getMetaItem( 'mwTOC' );
-	tableOfContentsSelectedItem = this.tableOfContents.getField().getSelectedItem();
-	tableOfContentsValue = tableOfContentsSelectedItem && tableOfContentsSelectedItem.getData();
+	currentTableOfContents = this.getMetaItem( 'mwTOC' );
+	newTableOfContentsData = this.tableOfContents.getField().findSelectedItem();
 
 	// Redirect items
 	currentRedirectTargetItem = this.getMetaItem( 'mwRedirect' );
@@ -301,19 +317,18 @@ ve.ui.MWSettingsPage.prototype.teardown = function ( data ) {
 
 	// Alter the TOC option flag iff it's been touched & is actually different
 	if ( this.tableOfContentsTouched ) {
-		if ( tableOfContentsValue === 'default' ) {
-			if ( tableOfContentsMetaItem ) {
-				tableOfContentsMetaItem.remove();
+		if ( newTableOfContentsData.data === 'default' ) {
+			if ( currentTableOfContents ) {
+				currentTableOfContents.remove();
 			}
 		} else {
-			if ( !tableOfContentsMetaItem ) {
-				this.metaList.insertMeta( { type: tableOfContentsValue } );
-			} else if ( tableOfContentsMetaItem.getType() !== tableOfContentsValue ) {
-				tableOfContentsMetaItem.replaceWith(
-					ve.extendObject( true, {},
-						tableOfContentsMetaItem.getElement(),
-						{ type: tableOfContentsValue }
-					)
+			newTableOfContentsItem = { type: 'mwTOC', attributes: { property: newTableOfContentsData.data } };
+
+			if ( !currentTableOfContents ) {
+				this.metaList.insertMeta( newTableOfContentsItem );
+			} else if ( currentTableOfContents.getAttribute( 'property' ) !== newTableOfContentsData.data ) {
+				currentTableOfContents.replaceWith(
+					ve.extendObject( true, {}, currentTableOfContents.getElement(), newTableOfContentsItem )
 				);
 			}
 		}
@@ -329,7 +344,8 @@ ve.ui.MWSettingsPage.prototype.teardown = function ( data ) {
 						ve.extendObject( true, {},
 							currentRedirectTargetItem.getElement(),
 							newRedirectItemData
-					) );
+						)
+					);
 				}
 			} else {
 				// There was a redirect and is no new one, so remove
@@ -338,8 +354,8 @@ ve.ui.MWSettingsPage.prototype.teardown = function ( data ) {
 		} else {
 			if ( newRedirectData ) {
 				// There's no existing redirect but there is a new one, so create
-				// HACK: Putting this at index 0, offset 0 so that it works – bug 61862
-				this.metaList.insertMeta( newRedirectItemData, 0, 0 );
+				// HACK: Putting this at position 0 so that it works – T63862
+				this.metaList.insertMeta( newRedirectItemData, 0 );
 			}
 		}
 

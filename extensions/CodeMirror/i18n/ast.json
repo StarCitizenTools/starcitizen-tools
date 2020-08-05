@@ -5,6 +5,11 @@
 		]
 	},
 	"codemirror-desc": "Ufre sintaxis resaltada nel editor de testu wiki",
-	"codemirror-enable-label": "Activar CodeMirror (resaltáu de sintaxis)",
-	"codemirror-disable-label": "Desactivar CodeMirror (resaltáu de sintaxis)"
+	"codemirror-toggle-label": "Resaltador de sintaxis",
+	"codemirror-beta-title": "Resaltador de sintaxis de testu wiki",
+	"codemirror-beta-desc": "El resaltador de sintaxis facilita la edición usando color y solombra pa estremar de mou visual el testu de la páxina del códigu pa enllaces, referencies y plantíes.",
+	"codemirror-popup-label": "Resaltáu de sintaxis",
+	"codemirror-popup-desc": "El resaltáu de sintaxis ayudaráte a estremar con facilidá distintes partes de la edición codificándoles con colores.",
+	"codemirror-popup-btn-yes": "Probalo",
+	"codemirror-popup-btn-no": "Non, gracies"
 }

@@ -21,14 +21,18 @@
  * @ingroup SpecialPage
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Implements Special:DeletedContributions to display archived revisions
  * @ingroup SpecialPage
  */
 class DeletedContributionsPage extends SpecialPage {
+	/** @var FormOptions */
+	protected $mOpts;
+
 	function __construct() {
-		parent::__construct( 'DeletedContributions', 'deletedhistory',
-			/*listed*/true, /*function*/false, /*file*/false );
+		parent::__construct( 'DeletedContributions', 'deletedhistory' );
 	}
 
 	/**
@@ -40,40 +44,43 @@ class DeletedContributionsPage extends SpecialPage {
 	function execute( $par ) {
 		$this->setHeaders();
 		$this->outputHeader();
+		$this->checkPermissions();
 
 		$user = $this->getUser();
 
-		if ( !$this->userCanExecute( $user ) ) {
-			$this->displayRestrictionError();
-
-			return;
-		}
-
-		$request = $this->getRequest();
 		$out = $this->getOutput();
 		$out->setPageTitle( $this->msg( 'deletedcontributions-title' ) );
 
-		$options = [];
+		$opts = new FormOptions();
+
+		$opts->add( 'target', '' );
+		$opts->add( 'namespace', '' );
+		$opts->add( 'limit', 20 );
+
+		$opts->fetchValuesFromRequest( $this->getRequest() );
+		$opts->validateIntBounds( 'limit', 0, $this->getConfig()->get( 'QueryPageDefaultLimit' ) );
 
 		if ( $par !== null ) {
-			$target = $par;
-		} else {
-			$target = $request->getVal( 'target' );
+			$opts->setValue( 'target', $par );
 		}
 
+		$ns = $opts->getValue( 'namespace' );
+		if ( $ns !== null && $ns !== '' ) {
+			$opts->setValue( 'namespace', intval( $ns ) );
+		}
+
+		$this->mOpts = $opts;
+
+		$target = $opts->getValue( 'target' );
 		if ( !strlen( $target ) ) {
-			$out->addHTML( $this->getForm( '' ) );
+			$this->getForm();
 
 			return;
 		}
 
-		$options['limit'] = $request->getInt( 'limit',
-			$this->getConfig()->get( 'QueryPageDefaultLimit' ) );
-		$options['target'] = $target;
-
 		$userObj = User::newFromName( $target, false );
 		if ( !$userObj ) {
-			$out->addHTML( $this->getForm( '' ) );
+			$this->getForm();
 
 			return;
 		}
@@ -82,24 +89,18 @@ class DeletedContributionsPage extends SpecialPage {
 		$target = $userObj->getName();
 		$out->addSubtitle( $this->getSubTitle( $userObj ) );
 
-		$ns = $request->getVal( 'namespace', null );
-		if ( $ns !== null && $ns !== '' ) {
-			$options['namespace'] = intval( $ns );
-		} else {
-			$options['namespace'] = '';
-		}
+		$this->getForm();
 
-		$out->addHTML( $this->getForm( $options ) );
-
-		$pager = new DeletedContribsPager( $this->getContext(), $target, $options['namespace'] );
+		$pager = new DeletedContribsPager( $this->getContext(), $target, $opts->getValue( 'namespace' ) );
 		if ( !$pager->getNumRows() ) {
 			$out->addWikiMsg( 'nocontribs' );
 
 			return;
 		}
 
-		# Show a message about slave lag, if applicable
-		$lag = wfGetLB()->safeGetLag( $pager->getDatabase() );
+		# Show a message about replica DB lag, if applicable
+		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
+		$lag = $lb->safeGetLag( $pager->getDatabase() );
 		if ( $lag > 0 ) {
 			$out->showLagWarning( $lag );
 		}
@@ -129,97 +130,29 @@ class DeletedContributionsPage extends SpecialPage {
 	 * Generates the subheading with links
 	 * @param User $userObj User object for the target
 	 * @return string Appropriately-escaped HTML to be output literally
-	 * @todo FIXME: Almost the same as contributionsSub in SpecialContributions.php. Could be combined.
 	 */
 	function getSubTitle( $userObj ) {
+		$linkRenderer = $this->getLinkRenderer();
 		if ( $userObj->isAnon() ) {
 			$user = htmlspecialchars( $userObj->getName() );
 		} else {
-			$user = Linker::link( $userObj->getUserPage(), htmlspecialchars( $userObj->getName() ) );
+			$user = $linkRenderer->makeLink( $userObj->getUserPage(), $userObj->getName() );
 		}
 		$links = '';
 		$nt = $userObj->getUserPage();
-		$id = $userObj->getId();
 		$talk = $nt->getTalkPage();
 		if ( $talk ) {
-			# Talk page link
-			$tools[] = Linker::link( $talk, $this->msg( 'sp-contributions-talk' )->escaped() );
-			if ( ( $id !== null ) || ( $id === null && IP::isIPAddress( $nt->getText() ) ) ) {
-				# Block / Change block / Unblock links
-				if ( $this->getUser()->isAllowed( 'block' ) ) {
-					if ( $userObj->isBlocked() && $userObj->getBlock()->getType() !== Block::TYPE_AUTO ) {
-						$tools[] = Linker::linkKnown( # Change block link
-							SpecialPage::getTitleFor( 'Block', $nt->getDBkey() ),
-							$this->msg( 'change-blocklink' )->escaped()
-						);
-						$tools[] = Linker::linkKnown( # Unblock link
-							SpecialPage::getTitleFor( 'BlockList' ),
-							$this->msg( 'unblocklink' )->escaped(),
-							[],
-							[
-								'action' => 'unblock',
-								'ip' => $nt->getDBkey()
-							]
-						);
-					} else {
-						# User is not blocked
-						$tools[] = Linker::linkKnown( # Block link
-							SpecialPage::getTitleFor( 'Block', $nt->getDBkey() ),
-							$this->msg( 'blocklink' )->escaped()
-						);
-					}
-				}
-				# Block log link
-				$tools[] = Linker::linkKnown(
-					SpecialPage::getTitleFor( 'Log' ),
-					$this->msg( 'sp-contributions-blocklog' )->escaped(),
-					[],
-					[
-						'type' => 'block',
-						'page' => $nt->getPrefixedText()
-					]
-				);
-				# Suppression log link (bug 59120)
-				if ( $this->getUser()->isAllowed( 'suppressionlog' ) ) {
-					$tools[] = Linker::linkKnown(
-						SpecialPage::getTitleFor( 'Log', 'suppress' ),
-						$this->msg( 'sp-contributions-suppresslog' )->escaped(),
-						[],
-						[ 'offender' => $userObj->getName() ]
-					);
-				}
-			}
+			$tools = SpecialContributions::getUserLinks( $this, $userObj );
 
-			# Uploads
-			$tools[] = Linker::linkKnown(
-				SpecialPage::getTitleFor( 'Listfiles', $userObj->getName() ),
-				$this->msg( 'sp-contributions-uploads' )->escaped()
-			);
-
-			# Other logs link
-			$tools[] = Linker::linkKnown(
-				SpecialPage::getTitleFor( 'Log' ),
-				$this->msg( 'sp-contributions-logs' )->escaped(),
-				[],
-				[ 'user' => $nt->getText() ]
-			);
 			# Link to contributions
-			$tools[] = Linker::linkKnown(
+			$insert['contribs'] = $linkRenderer->makeKnownLink(
 				SpecialPage::getTitleFor( 'Contributions', $nt->getDBkey() ),
-				$this->msg( 'sp-deletedcontributions-contribs' )->escaped()
+				$this->msg( 'sp-deletedcontributions-contribs' )->text()
 			);
 
-			# Add a link to change user rights for privileged users
-			$userrightsPage = new UserrightsPage();
-			$userrightsPage->setContext( $this->getContext() );
-			if ( $userrightsPage->userCanChangeRights( $userObj ) ) {
-				$tools[] = Linker::linkKnown(
-					SpecialPage::getTitleFor( 'Userrights', $nt->getDBkey() ),
-					$this->msg( 'sp-contributions-userrights' )->escaped()
-				);
-			}
-
-			Hooks::run( 'ContributionsToolLinks', [ $id, $nt, &$tools ] );
+			// Swap out the deletedcontribs link for our contribs one
+			$tools = wfArrayInsertAfter( $tools, $insert, 'deletedcontribs' );
+			unset( $tools['deletedcontribs'] );
 
 			$links = $this->getLanguage()->pipeList( $tools );
 
@@ -255,76 +188,35 @@ class DeletedContributionsPage extends SpecialPage {
 
 	/**
 	 * Generates the namespace selector form with hidden attributes.
-	 * @param array $options The options to be included.
-	 * @return string
 	 */
-	function getForm( $options ) {
-		$options['title'] = $this->getPageTitle()->getPrefixedText();
-		if ( !isset( $options['target'] ) ) {
-			$options['target'] = '';
-		} else {
-			$options['target'] = str_replace( '_', ' ', $options['target'] );
-		}
+	function getForm() {
+		$opts = $this->mOpts;
 
-		if ( !isset( $options['namespace'] ) ) {
-			$options['namespace'] = '';
-		}
-
-		if ( !isset( $options['contribs'] ) ) {
-			$options['contribs'] = 'user';
-		}
-
-		if ( $options['contribs'] == 'newbie' ) {
-			$options['target'] = '';
-		}
-
-		$f = Xml::openElement( 'form', [ 'method' => 'get', 'action' => wfScript() ] );
-
-		foreach ( $options as $name => $value ) {
-			if ( in_array( $name, [ 'namespace', 'target', 'contribs' ] ) ) {
-				continue;
-			}
-			$f .= "\t" . Html::hidden( $name, $value ) . "\n";
-		}
-
-		$this->getOutput()->addModules( 'mediawiki.userSuggest' );
-
-		$f .= Xml::openElement( 'fieldset' );
-		$f .= Xml::element( 'legend', [], $this->msg( 'sp-contributions-search' )->text() );
-		$f .= Xml::tags(
-			'label',
-			[ 'for' => 'target' ],
-			$this->msg( 'sp-contributions-username' )->parse()
-		) . ' ';
-		$f .= Html::input(
-			'target',
-			$options['target'],
-			'text',
-			[
-				'size' => '20',
-				'required' => '',
-				'class' => [
-					'mw-autocomplete-user', // used by mediawiki.userSuggest
-				],
-			] + ( $options['target'] ? [] : [ 'autofocus' ] )
-		) . ' ';
-		$f .= Html::namespaceSelector(
-			[
-				'selected' => $options['namespace'],
-				'all' => '',
-				'label' => $this->msg( 'namespace' )->text()
+		$formDescriptor = [
+			'target' => [
+				'type' => 'user',
+				'name' => 'target',
+				'label-message' => 'sp-contributions-username',
+				'default' => $opts->getValue( 'target' ),
+				'ipallowed' => true,
 			],
-			[
-				'name' => 'namespace',
-				'id' => 'namespace',
-				'class' => 'namespaceselector',
-			]
-		) . ' ';
-		$f .= Xml::submitButton( $this->msg( 'sp-contributions-submit' )->text() );
-		$f .= Xml::closeElement( 'fieldset' );
-		$f .= Xml::closeElement( 'form' );
 
-		return $f;
+			'namespace' => [
+				'type' => 'namespaceselect',
+				'name' => 'namespace',
+				'label-message' => 'namespace',
+				'all' => '',
+			],
+		];
+
+		HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
+			->setWrapperLegendMsg( 'sp-contributions-search' )
+			->setSubmitTextMsg( 'sp-contributions-submit' )
+			// prevent setting subpage and 'target' parameter at the same time
+			->setAction( $this->getPageTitle()->getLocalURL() )
+			->setMethod( 'get' )
+			->prepareForm()
+			->displayForm( false );
 	}
 
 	/**

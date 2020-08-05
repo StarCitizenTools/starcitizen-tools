@@ -14,7 +14,7 @@
 	"msu-insert-image": "插入为图片",
 	"msu-insert-video": "插入视频",
 	"msu-cancel-upload": "取消上传",
-	"msu-replace-file": "替代文件？",
+	"msu-continue": "仍要继续么？",
 	"msu-clean-all": "清空列表",
 	"msu-ext-not-allowed": "只允许以下文件{{PLURAL:$1|类型}}：",
 	"msu-upload-this": "上传此文件",

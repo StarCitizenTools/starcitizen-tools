@@ -72,6 +72,7 @@ class ObjectManager extends ObjectLocator {
 	/**
 	 * @param ObjectMapper $mapper Convert to/from database rows/domain objects.
 	 * @param ObjectStorage $storage Implements persistence(typically sql)
+	 * @param DbFactory $dbFactory
 	 * @param Index[] $indexes Specialized listeners that cache rows and can respond
 	 *  to queries
 	 * @param LifecycleHandler[] $lifecycleHandlers Listeners for insert, update,
@@ -81,8 +82,8 @@ class ObjectManager extends ObjectLocator {
 		ObjectMapper $mapper,
 		ObjectStorage $storage,
 		DbFactory $dbFactory,
-		array $indexes = array(),
-		array $lifecycleHandlers = array()
+		array $indexes = [],
+		array $lifecycleHandlers = []
 	) {
 		parent::__construct( $mapper, $storage, $dbFactory, $indexes, $lifecycleHandlers );
 
@@ -111,7 +112,7 @@ class ObjectManager extends ObjectLocator {
 	 * Merge an object loaded from outside the object manager for update.
 	 * Without merge using self::put will trigger an insert operation.
 	 *
-	 * @var object $object
+	 * @param object $object
 	 */
 	public function merge( $object ) {
 		if ( !isset( $this->loaded[$object] ) ) {
@@ -137,26 +138,26 @@ class ObjectManager extends ObjectLocator {
 	/**
 	 * Persist a single object to storage.
 	 *
-	 * @var object $object
-	 * @var array $metadata Additional information about the object for
+	 * @param object $object
+	 * @param array $metadata Additional information about the object for
 	 *  listeners to operate on.
 	 */
-	public function put( $object, array $metadata = array() ) {
-		$this->multiPut( array( $object ), $metadata );
+	public function put( $object, array $metadata = [] ) {
+		$this->multiPut( [ $object ], $metadata );
 	}
 
 	/**
 	 * Persist multiple objects to storage.
 	 *
-	 * @var object[] $objects
-	 * @var array $metadata Additional information about the object for
+	 * @param object[] $objects
+	 * @param array $metadata Additional information about the object for
 	 *  listeners to operate on.
 	 */
-	public function multiPut( array $objects, array $metadata = array() ) {
-		$updateObjects = array();
-		$insertObjects = array();
+	public function multiPut( array $objects, array $metadata = [] ) {
+		$updateObjects = [];
+		$insertObjects = [];
 
-		foreach( $objects as $object ) {
+		foreach ( $objects as $object ) {
 			if ( isset( $this->loaded[$object] ) ) {
 				$updateObjects[] = $object;
 			} else {
@@ -176,11 +177,11 @@ class ObjectManager extends ObjectLocator {
 	/**
 	 * Remove an object from persistent storage.
 	 *
-	 * @var object $object
-	 * @var array $metadata Additional information about the object for
+	 * @param object $object
+	 * @param array $metadata Additional information about the object for
 	 *  listeners to operate on.
 	 */
-	public function remove( $object, array $metadata = array() ) {
+	public function remove( $object, array $metadata = [] ) {
 		if ( !isset( $this->loaded[$object] ) ) {
 			throw new FlowException( 'Object was not loaded through this object manager, use ObjectManager::merge if necessary' );
 		}
@@ -196,8 +197,8 @@ class ObjectManager extends ObjectLocator {
 	/**
 	 * Remove multiple objects from persistent storage.
 	 *
-	 * @var object[] $objects
-	 * @var array $metadata
+	 * @param object[] $objects
+	 * @param array $metadata
 	 */
 	public function multiRemove( $objects, array $metadata ) {
 		foreach ( $objects as $obj ) {
@@ -214,11 +215,11 @@ class ObjectManager extends ObjectLocator {
 	 * @return string
 	 */
 	public function serializeOffset( $object, array $sortFields ) {
-		$offsetFields = array();
+		$offsetFields = [];
 		// @todo $row = $this->loaded[$object] ?
 		$row = $this->mapper->toStorageRow( $object );
 		// @todo Why not self::splitFromRow?
-		foreach( $sortFields as $field ) {
+		foreach ( $sortFields as $field ) {
 			$value = $row[$field];
 
 			if ( is_string( $value )
@@ -243,14 +244,14 @@ class ObjectManager extends ObjectLocator {
 	 * @param array $metadata
 	 */
 	protected function insert( array $objects, array $metadata ) {
-		$rows = array_map( array( $this->mapper, 'toStorageRow' ), $objects );
+		$rows = array_map( [ $this->mapper, 'toStorageRow' ], $objects );
 		$storedRows = $this->storage->insert( $rows );
 		if ( !$storedRows ) {
 			throw new DataModelException( 'failed insert', 'process-data' );
 		}
 
 		$numObjects = count( $objects );
-		for( $i = 0; $i < $numObjects; ++$i ) {
+		for ( $i = 0; $i < $numObjects; ++$i ) {
 			$object = $objects[$i];
 			$stored = $storedRows[$i];
 
@@ -274,7 +275,7 @@ class ObjectManager extends ObjectLocator {
 	 * @param array $metadata
 	 */
 	protected function update( array $objects, array $metadata ) {
-		foreach( $objects as $object ) {
+		foreach ( $objects as $object ) {
 			$this->updateSingle( $object, $metadata );
 		}
 	}
@@ -300,7 +301,7 @@ class ObjectManager extends ObjectLocator {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	protected function load( $row ) {
 		$object = parent::load( $row );
@@ -316,9 +317,9 @@ class ObjectManager extends ObjectLocator {
 	 * @param array $new
 	 * @return bool
 	 */
-	static public function arrayEquals( array $old, array $new ) {
-		return array_diff_assoc( $old, $new ) === array()
-			&& array_diff_assoc( $new, $old ) === array();
+	public static function arrayEquals( array $old, array $new ) {
+		return array_diff_assoc( $old, $new ) === []
+			&& array_diff_assoc( $new, $old ) === [];
 	}
 
 	/**
@@ -330,11 +331,11 @@ class ObjectManager extends ObjectLocator {
 	 *
 	 * @return array
 	 */
-	static public function makeArray( $input ) {
+	public static function makeArray( $input ) {
 		if ( is_array( $input ) ) {
 			return $input;
 		} else {
-			return array( $input );
+			return [ $input ];
 		}
 	}
 
@@ -349,8 +350,8 @@ class ObjectManager extends ObjectLocator {
 	 * @param array $new
 	 * @return array
 	 */
-	static public function calcUpdatesWithoutValidation( array $old, array $new ) {
-		$updates = array();
+	public static function calcUpdatesWithoutValidation( array $old, array $new ) {
+		$updates = [];
 		foreach ( array_keys( $new ) as $key ) {
 			/*
 			 * $old[$key] and $new[$key] could both be the same value going into the same
@@ -360,7 +361,7 @@ class ObjectManager extends ObjectLocator {
 			 * (different between them doesn't matter here, both are for the same database
 			 * column), so I'm casting them to string before performing comparison.
 			 */
-			if ( !array_key_exists( $key, $old ) || (string) $old[$key] !== (string) $new[$key] ) {
+			if ( !array_key_exists( $key, $old ) || (string)$old[$key] !== (string)$new[$key] ) {
 				$updates[$key] = $new[$key];
 			}
 			unset( $old[$key] );
@@ -372,7 +373,6 @@ class ObjectManager extends ObjectLocator {
 		return $updates;
 	}
 
-
 	/**
 	 * Separate a set of keys from an array. Returns null if not
 	 * all keys are set.
@@ -381,8 +381,8 @@ class ObjectManager extends ObjectLocator {
 	 * @param array $keys
 	 * @return array|null
 	 */
-	static public function splitFromRow( array $row, array $keys ) {
-		$split = array();
+	public static function splitFromRow( array $row, array $keys ) {
+		$split = [];
 		foreach ( $keys as $key ) {
 			if ( !isset( $row[$key] ) ) {
 				return null;

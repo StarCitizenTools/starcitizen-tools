@@ -1,14 +1,14 @@
 /*!
  * VisualEditor DataModel TextNode tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.TextNode' );
 
 /* Tests */
 
-QUnit.test( 'getOuterLength', 2, function ( assert ) {
+QUnit.test( 'getOuterLength', function ( assert ) {
 	var node1 = new ve.dm.TextNode(),
 		node2 = new ve.dm.TextNode();
 

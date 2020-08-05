@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Spiritia",
+			"V111P",
+			"Termininja"
+		]
+	},
+	"disambiguationpages": "Пояснителни страници",
+	"disambiguationpages-summary": "По-долу е даден списък на всички пояснителни страници в {{SITENAME}}.<br />\nЕдна страница се третира като пояснителна, ако съдържа маркер <code><nowiki>__DISAMBIG__</nowiki></code> (или еквивалентен псевдоним).",
+	"disambiguationpagelinks": "Страници с препратки към пояснителни страници"
+}

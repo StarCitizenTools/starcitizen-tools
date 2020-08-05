@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Brad Jorsch <bjorsch@wikimedia.org>
+ * Copyright © 2016 Wikimedia Foundation and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ use MediaWiki\Auth\AuthManager;
 use MediaWiki\Auth\AuthenticationRequest;
 use MediaWiki\Auth\AuthenticationResponse;
 use MediaWiki\Auth\CreateFromLoginAuthenticationRequest;
+use MediaWiki\Logger\LoggerFactory;
 
 /**
  * Helper class for AuthManager-using API modules. Intended for use via
@@ -84,6 +85,7 @@ class ApiAuthManagerHelper {
 					'key' => $message->getKey(),
 					'params' => $message->getParams(),
 				];
+				ApiResult::setIndexedTagName( $res[$key]['params'], 'param' );
 				break;
 		}
 	}
@@ -91,7 +93,7 @@ class ApiAuthManagerHelper {
 	/**
 	 * Call $manager->securitySensitiveOperationStatus()
 	 * @param string $operation Operation being checked.
-	 * @throws UsageException
+	 * @throws ApiUsageException
 	 */
 	public function securitySensitiveOperation( $operation ) {
 		$status = AuthManager::singleton()->securitySensitiveOperationStatus( $operation );
@@ -100,14 +102,10 @@ class ApiAuthManagerHelper {
 				return;
 
 			case AuthManager::SEC_REAUTH:
-				$this->module->dieUsage(
-					'You have not authenticated recently in this session, please reauthenticate.', 'reauthenticate'
-				);
+				$this->module->dieWithError( 'apierror-reauthenticate' );
 
 			case AuthManager::SEC_FAIL:
-				$this->module->dieUsage(
-					'This action is not available as your identify cannot be verified.', 'cannotreauthenticate'
-				);
+				$this->module->dieWithError( 'apierror-cannotreauthenticate' );
 
 			default:
 				throw new UnexpectedValueException( "Unknown status \"$status\"" );
@@ -172,13 +170,7 @@ class ApiAuthManagerHelper {
 
 		if ( $sensitive ) {
 			$this->module->getMain()->markParamsSensitive( array_keys( $sensitive ) );
-			try {
-				$this->module->requirePostedParameters( array_keys( $sensitive ), 'noprefix' );
-			} catch ( UsageException $ex ) {
-				// Make this a warning for now, upgrade to an error in 1.29.
-				$this->module->setWarning( $ex->getMessage() );
-				$this->module->logFeatureUsage( $this->module->getModuleName() . '-params-in-query-string' );
-			}
+			$this->module->requirePostedParameters( array_keys( $sensitive ), 'noprefix' );
 		}
 
 		return AuthenticationRequest::loadRequestsFromSubmission( $reqs, $data );
@@ -190,8 +182,6 @@ class ApiAuthManagerHelper {
 	 * @return array
 	 */
 	public function formatAuthenticationResponse( AuthenticationResponse $res ) {
-		$params = $this->module->extractRequestParams();
-
 		$ret = [
 			'status' => $res->status,
 		];
@@ -219,6 +209,7 @@ class ApiAuthManagerHelper {
 			$res->status === AuthenticationResponse::RESTART
 		) {
 			$this->formatMessage( $ret, 'message', $res->message );
+			$ret['messagecode'] = ApiMessage::create( $res->message )->getApiCode();
 		}
 
 		if ( $res->status === AuthenticationResponse::FAIL ||
@@ -234,6 +225,30 @@ class ApiAuthManagerHelper {
 		}
 
 		return $ret;
+	}
+
+	/**
+	 * Logs successful or failed authentication.
+	 * @param string $event Event type (e.g. 'accountcreation')
+	 * @param string|AuthenticationResponse $result Response or error message
+	 */
+	public function logAuthenticationResult( $event, $result ) {
+		if ( is_string( $result ) ) {
+			$status = Status::newFatal( $result );
+		} elseif ( $result->status === AuthenticationResponse::PASS ) {
+			$status = Status::newGood();
+		} elseif ( $result->status === AuthenticationResponse::FAIL ) {
+			$status = Status::newFatal( $result->message );
+		} else {
+			return;
+		}
+
+		$module = $this->module->getModuleName();
+		LoggerFactory::getInstance( 'authevents' )->info( "$module API attempt", [
+			'event' => $event,
+			'status' => $status,
+			'module' => $module,
+		] );
 	}
 
 	/**
@@ -317,6 +332,7 @@ class ApiAuthManagerHelper {
 			$this->formatMessage( $ret, 'label', $field['label'] );
 			$this->formatMessage( $ret, 'help', $field['help'] );
 			$ret['optional'] = !empty( $field['optional'] );
+			$ret['sensitive'] = !empty( $field['sensitive'] );
 
 			$retFields[$name] = $ret;
 		}
@@ -329,7 +345,7 @@ class ApiAuthManagerHelper {
 	/**
 	 * Fetch the standard parameters this helper recognizes
 	 * @param string $action AuthManager action
-	 * @param string $param... Parameters to use
+	 * @param string $param,... Parameters to use
 	 * @return array
 	 */
 	public static function getStandardParams( $action, $param /* ... */ ) {

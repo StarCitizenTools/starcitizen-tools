@@ -19,14 +19,14 @@
 	/**
 	 * Represents a step in the wizard.
 	 *
-	 * @class mw.uw.controller.Step
+	 * @class
 	 * @mixins OO.EventEmitter
 	 * @abstract
-	 * @constructor
-	 * @param {mw.uw.ui.Step} ui The UI object that controls this step.
-	 * @param {Object} config The UW config object, or relevant subset.
+	 * @param {uw.ui.Step} ui The UI object that controls this step.
+	 * @param {mw.Api} api
+	 * @param {Object} config UploadWizard config object.
 	 */
-	uw.controller.Step = function UWControllerStep( ui, config ) {
+	uw.controller.Step = function UWControllerStep( ui, api, config ) {
 		var step = this;
 
 		OO.EventEmitter.call( this );
@@ -35,123 +35,163 @@
 		 * @property {Object} config
 		 */
 		this.config = config;
+		/**
+		 * @property {mw.Api} api
+		 */
+		this.api = api;
 
 		this.ui = ui;
 
+		this.uploads = [];
+
+		/**
+		 * Upload object event handlers to be bound on load & unbound on unload.
+		 * This is an object literal where the keys are callback names, and
+		 * values all callback. These callbacks will be called with the
+		 * controller as content (`this`), and the upload as first argument.
+		 * This'll effectively be:
+		 * `upload.on( <key>, <value>.bind( this, upload ) );`
+		 *
+		 * @property {Object}
+		 *
+		 */
+		this.uploadHandlers = {
+			'remove-upload': this.removeUpload
+		};
+
 		this.ui.on( 'next-step', function () {
-			step.moveFrom();
+			step.moveNext();
+		} );
+
+		this.ui.on( 'previous-step', function () {
+			step.movePrevious();
 		} );
 
 		/**
-		 * @property {mw.uw.controller.Step} nextStep
+		 * @property {uw.controller.Step} nextStep
 		 * The next step in the process.
 		 */
 		this.nextStep = null;
+
+		/**
+		 * @property {uw.controller.Step} previousStep
+		 * The previous step in the process.
+		 */
+		this.previousStep = null;
 	};
 
 	OO.mixinClass( uw.controller.Step, OO.EventEmitter );
 
 	/**
-	 * Empty the step of all data.
-	 */
-	uw.controller.Step.prototype.empty = function () {
-		this.ui.empty();
-	};
-
-	/**
 	 * Set the next step in the process.
 	 *
-	 * @param {mw.uw.controller.Step} step
+	 * @param {uw.controller.Step} step
 	 */
 	uw.controller.Step.prototype.setNextStep = function ( step ) {
 		this.nextStep = step;
+		this.ui.enableNextButton();
 	};
 
 	/**
-	 * Move to this step.
+	 * Set the previous step in the process.
+	 *
+	 * @param {uw.controller.Step} step
+	 */
+	uw.controller.Step.prototype.setPreviousStep = function ( step ) {
+		this.previousStep = step;
+		this.ui.enablePreviousButton();
+	};
+
+	/**
+	 * Initialize this step.
 	 *
 	 * @param {mw.UploadWizardUpload[]} uploads List of uploads being carried forward.
 	 */
-	uw.controller.Step.prototype.moveTo = function ( uploads ) {
+	uw.controller.Step.prototype.load = function ( uploads ) {
 		var step = this;
 
-		this.movedFrom = false;
-
-		// Through some very convoluted route, this reached code in mw.UploadWizard that can
-		// remove items from the `uploads` array here.
 		this.emit( 'load' );
 
 		this.uploads = uploads || [];
 
-		$.each( this.uploads, function ( i, upload ) {
-			if ( upload !== undefined ) {
-				upload.state = step.stepName;
-			}
+		// prevent the window from being closed as long as we have data
+		this.allowCloseWindow = mw.confirmCloseWindow( {
+			message: mw.message( 'mwe-upwiz-prevent-close' ).text(),
+			test: step.hasData.bind( this )
 		} );
 
-		this.ui.moveTo( uploads );
-		( new mw.UploadWizardTutorialEvent( 'load' ) ).dispatch();
-		uw.eventFlowLogger.logStep( this.stepName );
+		$.each( this.uploads, function ( i, upload ) {
+			upload.state = step.stepName;
 
-		this.updateFileCounts( this.uploads );
+			step.bindUploadHandlers( upload );
+		} );
+
+		this.ui.load( uploads );
+		uw.eventFlowLogger.logStep( this.stepName );
 	};
 
 	/**
-	 * Move out of this step.
+	 * Cleanup this step.
 	 */
-	uw.controller.Step.prototype.moveFrom = function () {
-		this.ui.moveFrom( this.uploads );
+	uw.controller.Step.prototype.unload = function () {
+		var step = this;
 
-		this.movedFrom = true;
+		$.each( this.uploads, function ( i, upload ) {
+			step.unbindUploadHandlers( upload );
+		} );
+
+		this.allowCloseWindow.release();
+		this.ui.unload();
+
+		this.emit( 'unload' );
+	};
+
+	/**
+	 * Move to the next step.
+	 */
+	uw.controller.Step.prototype.moveNext = function () {
+		this.unload();
 
 		if ( this.nextStep ) {
-			this.nextStep.moveTo( this.uploads );
+			this.nextStep.load( this.uploads );
 		}
 	};
 
 	/**
-	 * Skip this step.
+	 * Move to the previous step.
 	 */
-	uw.controller.Step.prototype.skip = function () {
-		uw.eventFlowLogger.logSkippedStep( this.stepName );
-		this.moveFrom();
+	uw.controller.Step.prototype.movePrevious = function () {
+		this.unload();
+
+		if ( this.previousStep ) {
+			this.previousStep.load( this.uploads );
+		}
 	};
 
 	/**
-	 * Count the number of empty (undefined) uploads in our list.
-	 */
-	uw.controller.Step.prototype.countEmpties = function () {
-		var count = 0;
-
-		$.each( this.uploads, function ( i, upload ) {
-			if ( !upload ) {
-				count += 1;
-			}
-		} );
-
-		return count;
-	};
-
-	/**
-	 * Update file counts for the step.
+	 * Attaches controller-specific upload event handlers.
 	 *
-	 * @param {mw.UploadWizardUpload[]} uploads
-	 * @return {boolean} Whether there are uploads present in the list
+	 * @param {mw.UploadWizardUpload} upload
 	 */
-	uw.controller.Step.prototype.updateFileCounts = function ( uploads ) {
-		if ( uploads ) {
-			this.uploads = uploads;
-		} else {
-			this.uploads = [];
-		}
+	uw.controller.Step.prototype.bindUploadHandlers = function ( upload ) {
+		var controller = this;
 
-		if ( uploads.length - this.countEmpties() <= 0 ) {
-			this.uploads = [];
-			this.emit( 'no-uploads' );
-			return false;
-		}
+		$.each( this.uploadHandlers, function ( event, callback ) {
+			upload.on( event, callback, [ upload ], controller );
+		} );
+	};
 
-		return true;
+	/**
+	 * Removes controller-specific upload event handlers.
+	 *
+	 * @param {mw.UploadWizardUpload} upload
+	 */
+	uw.controller.Step.prototype.unbindUploadHandlers = function ( upload ) {
+		var controller = this;
+
+		$.each( this.uploadHandlers, function ( event, callback ) {
+			upload.off( event, callback, controller );
+		} );
 	};
 
 	/**
@@ -179,30 +219,13 @@
 	 * @return {boolean} Whether all of the uploads are in a successful state.
 	 */
 	uw.controller.Step.prototype.showNext = function () {
-		var errorCount = 0,
-			okCount = 0,
-			stillGoing = 0,
-			allOk = false,
-			desiredState = this.finishState,
+		var okCount = this.getUploadStatesCount( this.finishState ),
 			$buttons;
 
 		// abort if all uploads have been removed
 		if ( this.uploads.length === 0 ) {
 			return false;
 		}
-
-		$.each( this.uploads, function ( i, upload ) {
-			if ( upload === undefined ) {
-				return;
-			}
-			if ( upload.state === 'error' ) {
-				errorCount++;
-			} else if ( upload.state === desiredState ) {
-				okCount++;
-			} else if ( upload.state === 'transporting' ) {
-				stillGoing += 1;
-			}
-		} );
 
 		this.updateProgressBarCount( okCount );
 
@@ -213,18 +236,37 @@
 		$buttons.find( '.mwe-upwiz-file-next-some-failed' ).hide();
 		$buttons.find( '.mwe-upwiz-file-next-all-failed' ).hide();
 
-		if ( okCount === ( this.uploads.length - this.countEmpties() ) ) {
-			allOk = true;
+		if ( okCount === this.uploads.length ) {
 			$buttons.find( '.mwe-upwiz-file-next-all-ok' ).show();
-		} else if ( errorCount === ( this.uploads.length - this.countEmpties() ) ) {
+			return true;
+		}
+
+		if ( this.getUploadStatesCount( [ 'error', 'recoverable-error' ] ) === this.uploads.length ) {
 			$buttons.find( '.mwe-upwiz-file-next-all-failed' ).show();
-		} else if ( stillGoing !== 0 ) {
-			return false;
-		} else {
+		} else if ( this.getUploadStatesCount( 'transporting' ) === 0 ) {
 			$buttons.find( '.mwe-upwiz-file-next-some-failed' ).show();
 		}
 
-		return allOk;
+		return false;
+	};
+
+	/**
+	 * @param {string|string[]} states List of upload states we want the count for
+	 * @return {number}
+	 */
+	uw.controller.Step.prototype.getUploadStatesCount = function ( states ) {
+		var count = 0;
+
+		// normalize to array of states, even though input can be 1 string
+		states = Array.isArray( states ) ? states : [ states ];
+
+		$.each( this.uploads, function ( i, upload ) {
+			if ( states.indexOf( upload.state ) > -1 ) {
+				count++;
+			}
+		} );
+
+		return count;
 	};
 
 	/**
@@ -234,14 +276,71 @@
 	uw.controller.Step.prototype.updateProgressBarCount = function () {};
 
 	/**
-	 * Check whether this step has been completed, or is in progress.
-	 * The default check is for the three middle steps - tutorial and
-	 * thanks have their own.
+	 * Check if this step has data, to test if the window can be close (i.e. if
+	 * content is going to be lost)
 	 *
 	 * @return {boolean}
 	 */
-	uw.controller.Step.prototype.isComplete = function () {
-		return this.uploads === undefined || this.uploads.length === 0 || this.movedFrom;
+	uw.controller.Step.prototype.hasData = function () {
+		return this.uploads.length !== 0;
+	};
+
+	/**
+	 * Add an upload.
+	 *
+	 * @param {mw.UploadWizardUpload} upload
+	 */
+	uw.controller.Step.prototype.addUpload = function ( upload ) {
+		this.uploads.push( upload );
+	};
+
+	/**
+	 * Remove an upload.
+	 *
+	 * @param {mw.UploadWizardUpload} upload
+	 */
+	uw.controller.Step.prototype.removeUpload = function ( upload ) {
+		// remove the upload from the uploads array
+		var index = this.uploads.indexOf( upload );
+		if ( index !== -1 ) {
+			this.uploads.splice( index, 1 );
+		}
+
+		// let the upload object cleanup itself!
+		upload.remove();
+	};
+
+	/**
+	 * Remove multiple uploads.
+	 *
+	 * @param {mw.UploadWizardUpload[]} uploads
+	 */
+	uw.controller.Step.prototype.removeUploads = function ( uploads ) {
+		var i,
+			// clone the array of uploads, just to be sure it's not a reference
+			// to this.uploads, which will be modified (and we can't have that
+			// while we're looping it)
+			copy = uploads.slice();
+
+		for ( i = 0; i < copy.length; i++ ) {
+			this.removeUpload( copy[ i ] );
+		}
+	};
+
+	/**
+	 * Clear out uploads that are in error mode, perhaps before proceeding to the next step
+	 */
+	uw.controller.Step.prototype.removeErrorUploads = function () {
+		// We must not remove items from an array while iterating over it with $.each (it causes the
+		// next item to be skipped). Find and queue them first, then remove them.
+		var toRemove = [];
+		$.each( this.uploads, function ( i, upload ) {
+			if ( upload.state === 'error' || upload.state === 'recoverable-error' ) {
+				toRemove.push( upload );
+			}
+		} );
+
+		this.removeUploads( toRemove );
 	};
 
 }( mediaWiki, mediaWiki.uploadWizard, OO, jQuery ) );

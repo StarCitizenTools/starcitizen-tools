@@ -20,7 +20,6 @@
 	"checkuser-users": "بەکارھێنەرەکان پێرست بکە",
 	"checkuser-edits": "دەستکارییەکان پێرست بکە",
 	"checkuser-ips": "ناونیشانەکان ئایپی پێرست بکە",
-	"checkuser-search": "گەڕان",
 	"checkuser-period": "ماوە:",
 	"checkuser-week-1": "حەوتەیەک لەمە پێش",
 	"checkuser-week-2": "دوو حەوتە لەمە پێش",
@@ -45,6 +44,7 @@
 	"checkuser-accounts": "$1 {{PLURAL:$1|ھەژمار}}ی نوێ",
 	"checkuser-too-many": "ژمارەی ئاکامەکان یەکجار زۆرە (بە پێی بەراوردی پرسەکە)، تکایە CIDR بەرتەسک بکەوە.\nئەمانە ئایپییە بەکارھێنراوەکانن (ئەو پەڕی ٥٠٠٠، ڕیزکراو بە ناونیشان):",
 	"checkuser-user-nonexistent": "بەکارھێنەری دەستنیشان کراوە بوونی نییە.",
+	"checkuser-search": "گەڕان",
 	"checkuser-search-submit": "گەڕان",
 	"checkuser-search-target": "مەبەست"
 }

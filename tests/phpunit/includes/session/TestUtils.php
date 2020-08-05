@@ -3,6 +3,7 @@
 namespace MediaWiki\Session;
 
 use Psr\Log\LoggerInterface;
+use Wikimedia\TestingAccessWrapper;
 
 /**
  * Utility functions for Session unit tests
@@ -12,7 +13,7 @@ class TestUtils {
 	/**
 	 * Override the singleton for unit testing
 	 * @param SessionManager|null $manager
-	 * @return \\ScopedCallback|null
+	 * @return \\Wikimedia\ScopedCallback|null
 	 */
 	public static function setSessionManagerSingleton( SessionManager $manager = null ) {
 		session_write_close();
@@ -45,7 +46,7 @@ class TestUtils {
 			PHPSessionHandler::install( $manager );
 		}
 
-		return new \ScopedCallback( function () use ( &$reset, $oldInstance ) {
+		return new \Wikimedia\ScopedCallback( function () use ( &$reset, $oldInstance ) {
 			foreach ( $reset as &$arr ) {
 				$arr[0]->setValue( $arr[1] );
 			}
@@ -70,7 +71,7 @@ class TestUtils {
 		}
 
 		$ret = $rc->newInstanceWithoutConstructor();
-		\TestingAccessWrapper::newFromObject( $ret )->logger = new \TestLogger;
+		TestingAccessWrapper::newFromObject( $ret )->logger = new \TestLogger;
 		return $ret;
 	}
 
@@ -78,7 +79,7 @@ class TestUtils {
 	 * If you need a Session for testing but don't want to create a backend to
 	 * construct one, use this.
 	 * @param object $backend Object to serve as the SessionBackend
-	 * @param int $index Index
+	 * @param int $index
 	 * @param LoggerInterface $logger
 	 * @return Session
 	 */
@@ -95,7 +96,7 @@ class TestUtils {
 		}
 
 		$session = $rc->newInstanceWithoutConstructor();
-		$priv = \TestingAccessWrapper::newFromObject( $session );
+		$priv = TestingAccessWrapper::newFromObject( $session );
 		$priv->backend = $backend;
 		$priv->index = $index;
 		$priv->logger = $logger ?: new \TestLogger;

@@ -45,7 +45,7 @@ class EchoUnreadWikis {
 
 	/**
 	 * @param int $index DB_* constant
-	 * @return bool|DatabaseBase
+	 * @return bool|\Wikimedia\Rdbms\IDatabase
 	 */
 	private function getDB( $index ) {
 		return $this->dbFactory->getSharedDb( $index );
@@ -55,63 +55,65 @@ class EchoUnreadWikis {
 	 * @return array
 	 */
 	public function getUnreadCounts() {
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = $this->getDB( DB_REPLICA );
 		if ( $dbr === false ) {
-			return array();
+			return [];
 		}
 
 		$rows = $dbr->select(
 			'echo_unread_wikis',
-			array(
+			[
 				'euw_wiki',
 				'euw_alerts', 'euw_alerts_ts',
 				'euw_messages', 'euw_messages_ts',
-			),
-			array( 'euw_user' => $this->id ),
+			],
+			[ 'euw_user' => $this->id ],
 			__METHOD__
 		);
 
-		$wikis = array();
+		$wikis = [];
 		foreach ( $rows as $row ) {
 			if ( !$row->euw_alerts && !$row->euw_messages ) {
 				// This shouldn't happen, but lets be safe...
 				continue;
 			}
-			$wikis[$row->euw_wiki] = array(
-				EchoAttributeManager::ALERT => array(
+			$wikis[$row->euw_wiki] = [
+				EchoAttributeManager::ALERT => [
 					'count' => $row->euw_alerts,
 					'ts' => $row->euw_alerts_ts,
-				),
-				EchoAttributeManager::MESSAGE => array(
+				],
+				EchoAttributeManager::MESSAGE => [
 					'count' => $row->euw_messages,
 					'ts' => $row->euw_messages_ts,
-				),
-			);
+				],
+			];
 		}
 
 		return $wikis;
 	}
 
 	/**
-	 * @param string $wiki
-	 * @param int $alertCount
-	 * @param MWTimestamp|bool $alertTime
-	 * @param int $msgCount
-	 * @param MWTimestamp|bool $msgTime
+	 * @param string $wiki Wiki code
+	 * @param int $alertCount Number of alerts
+	 * @param MWTimestamp|bool $alertTime Timestamp of most recent unread alert, or
+	 *   false meaning no timestamp because there are no unread alerts.
+	 * @param int $msgCount Number of messages
+	 * @param MWTimestamp|bool $msgTime Timestamp of most recent message, or
+	 *   false meaning no timestamp because there are no unread messages.
 	 */
 	public function updateCount( $wiki, $alertCount, $alertTime, $msgCount, $msgTime ) {
 		$dbw = $this->getDB( DB_MASTER );
-		if ( $dbw === false ) {
+		if ( $dbw === false || $dbw->isReadOnly() ) {
 			return;
 		}
 
-		$conditions = array(
+		$conditions = [
 			'euw_user' => $this->id,
 			'euw_wiki' => $wiki,
-		);
+		];
 
 		if ( $alertCount || $msgCount ) {
-			$values = array(
+			$values = [
 				'euw_alerts' => $alertCount,
 				'euw_alerts_ts' => $alertCount
 					? $alertTime->getTimestamp( TS_MW )
@@ -120,13 +122,13 @@ class EchoUnreadWikis {
 				'euw_messages_ts' => $msgCount
 					? $msgTime->getTimestamp( TS_MW )
 					: static::DEFAULT_TS,
-			);
+			];
 
 			// when there is unread alert(s) and/or message(s), upsert the row
 			$dbw->upsert(
 				'echo_unread_wikis',
 				$conditions + $values,
-				array( 'euw_user', 'euw_wiki' ),
+				[ 'euw_user', 'euw_wiki' ],
 				$values,
 				__METHOD__
 			);

@@ -3,7 +3,7 @@
 	 * Notification API handler
 	 *
 	 * @class
-	 * @extends mw.echo.dm.APIHandler
+	 * @extends mw.echo.api.APIHandler
 	 *
 	 * @constructor
 	 * @param {Object} [config] Configuration object
@@ -12,9 +12,10 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.api.LocalAPIHandler.parent.call( this, config );
-
-		this.api = new mw.Api( { ajax: { cache: false } } );
+		mw.echo.api.LocalAPIHandler.parent.call( this,
+			new mw.Api( { ajax: { cache: false } } ),
+			config
+		);
 	};
 
 	/* Setup */
@@ -24,22 +25,27 @@
 	/**
 	 * @inheritdoc
 	 */
-	mw.echo.api.LocalAPIHandler.prototype.fetchNotifications = function ( type, isForced ) {
-		if ( isForced || this.isFetchingErrorState( type ) ) {
+	mw.echo.api.LocalAPIHandler.prototype.fetchNotifications = function ( type, source, isForced, overrideParams ) {
+		if ( overrideParams ) {
+			return this.createNewFetchNotificationPromise( type, source, overrideParams );
+		} else if ( isForced || this.isFetchingErrorState( type, source ) ) {
 			// Force new promise
-			this.createNewFetchNotificationPromise( type );
+			return this.createNewFetchNotificationPromise( type, source, overrideParams );
 		}
 
-		return this.getFetchNotificationPromise( type );
+		return this.getFetchNotificationPromise( type, source, overrideParams );
 	};
 
 	/**
 	 * @inheritdoc
 	 */
 	mw.echo.api.LocalAPIHandler.prototype.updateSeenTime = function ( type ) {
-		return this.api.postWithToken( 'edit', {
+		type = Array.isArray( type ) ? type : [ type ];
+
+		return this.api.postWithToken( 'csrf', {
 			action: 'echomarkseen',
-			type: this.normalizedType[ type ]
+			type: type.length === 1 ? type[ 0 ] : 'all',
+			timestampFormat: 'ISO_8601'
 		} )
 			.then( function ( data ) {
 				return data.query.echomarkseen.timestamp;
@@ -50,12 +56,12 @@
 	 * @inheritdoc
 	 */
 	mw.echo.api.LocalAPIHandler.prototype.markAllRead = function ( type ) {
-		var data = {
-				action: 'echomarkread',
-				sections: this.normalizedType[ type ]
-			};
+		type = Array.isArray( type ) ? type : [ type ];
 
-		return this.api.postWithToken( 'edit', data )
+		return this.api.postWithToken( 'csrf', {
+			action: 'echomarkread',
+			sections: type.join( '|' )
+		} )
 			.then( function ( result ) {
 				return OO.getProp( result.query, 'echomarkread', type, 'rawcount' ) || 0;
 			} );
@@ -66,8 +72,8 @@
 	 */
 	mw.echo.api.LocalAPIHandler.prototype.markItemsRead = function ( itemIdArray, isRead ) {
 		var data = {
-				action: 'echomarkread'
-			};
+			action: 'echomarkread'
+		};
 
 		if ( isRead ) {
 			data.list = itemIdArray.join( '|' );
@@ -75,13 +81,18 @@
 			data.unreadlist = itemIdArray.join( '|' );
 		}
 
-		return this.api.postWithToken( 'edit', data );
+		return this.api.postWithToken( 'csrf', data );
 	};
 
 	/**
-	 * @inheritdoc
+	 * Fetch the number of unread notifications.
+	 *
+	 * @param {string} type Notification type, 'alert', 'message' or 'all'
+	 * @param {boolean} [ignoreCrossWiki] Ignore cross-wiki notifications when fetching the count.
+	 *  If set to false (by default) it counts notifications across all wikis.
+	 * @return {jQuery.Promise} Promise which resolves with the unread count
 	 */
-	mw.echo.api.LocalAPIHandler.prototype.fetchUnreadCount = function ( type ) {
+	mw.echo.api.LocalAPIHandler.prototype.fetchUnreadCount = function ( type, ignoreCrossWiki ) {
 		var normalizedType = this.normalizedType[ type ],
 			apiData = {
 				action: 'query',
@@ -91,9 +102,12 @@
 				notmessageunreadfirst: 1,
 				notlimit: this.limit,
 				notprop: 'count',
-				notcrosswikisummary: 1,
 				uselang: this.userLang
 			};
+
+		if ( !ignoreCrossWiki ) {
+			apiData.notcrosswikisummary = 1;
+		}
 
 		return this.api.get( apiData )
 			.then( function ( result ) {
@@ -113,4 +127,4 @@
 			notcrosswikisummary: 1
 		} );
 	};
-} )( mediaWiki, jQuery );
+}( mediaWiki, jQuery ) );

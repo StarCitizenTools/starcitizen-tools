@@ -7,6 +7,7 @@ namespace Flow\Repository\UserName;
 
 use Flow\DbFactory;
 use Flow\Exception\FlowException;
+use Wikimedia\Rdbms\ResultWrapper;
 
 /**
  * Helper query for UserNameBatch fetches requested userIds
@@ -34,7 +35,7 @@ class TwoStepUserNameQuery implements UserNameQuery {
 	 *
 	 * @param string $wiki
 	 * @param array $userIds
-	 * @return \ResultWrapper|bool
+	 * @return ResultWrapper|bool
 	 * @throws FlowException
 	 */
 	public function execute( $wiki, array $userIds ) {
@@ -42,20 +43,20 @@ class TwoStepUserNameQuery implements UserNameQuery {
 			throw new FlowException( 'No wiki provided with user ids' );
 		}
 
-		$dbr = $this->dbFactory->getWikiDB( DB_SLAVE, array(), $wiki );
+		$dbr = $this->dbFactory->getWikiDB( DB_REPLICA, $wiki );
 		$res = $dbr->select(
 			'ipblocks',
 			'ipb_user',
-			array(
+			[
 				'ipb_user' => $userIds,
 				'ipb_deleted' => 1,
-			),
+			],
 			__METHOD__
 		);
 		if ( !$res ) {
 			return $res;
 		}
-		$blocked = array();
+		$blocked = [];
 		foreach ( $res as $row ) {
 			$blocked[] = $row->ipb_user;
 		}
@@ -66,8 +67,8 @@ class TwoStepUserNameQuery implements UserNameQuery {
 		}
 		return $dbr->select(
 			'user',
-			array( 'user_id', 'user_name' ),
-			array( 'user_id' => $allowed ),
+			[ 'user_id', 'user_name' ],
+			[ 'user_id' => $allowed ],
 			__METHOD__
 		);
 	}

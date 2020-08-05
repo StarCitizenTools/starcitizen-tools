@@ -5,7 +5,7 @@ namespace Flow;
 class NewTopicPresentationModel extends FlowPresentationModel {
 
 	public function getIconType() {
-		return $this->isUserTalkPage() ? 'flowusertalk-new-topic' : 'flow-new-topic';
+		return $this->getType();
 	}
 
 	public function canRender() {
@@ -23,12 +23,15 @@ class NewTopicPresentationModel extends FlowPresentationModel {
 
 	public function getSecondaryLinks() {
 		if ( $this->isBundled() ) {
-			return array();
+			return [
+				$this->getFlowUnwatchDynamicActionLink()
+			];
 		} else {
-			return array(
+			return [
 				$this->getAgentLink(),
 				$this->getBoardByNewestLink(),
-			);
+				$this->getFlowUnwatchDynamicActionLink()
+			];
 		}
 	}
 
@@ -41,7 +44,7 @@ class NewTopicPresentationModel extends FlowPresentationModel {
 			$msg = $this->msg( "notification-body-flow-new-topic-v2" );
 		}
 
-		$msg->params( $this->getContentSnippet() );
+		$msg->plaintextParams( $this->getContentSnippet() );
 		return $msg;
 	}
 
@@ -68,13 +71,19 @@ class NewTopicPresentationModel extends FlowPresentationModel {
 			$count = $this->getNotificationCountForOutput();
 			// Repeat is B/C until unused parameter is removed from translations
 			$msg->numParams( $count, $count );
-			$msg->params( $this->getTruncatedTitleText( $this->event->getTitle(), true) );
+			$msg->params( $this->getTruncatedTitleText( $this->event->getTitle(), true ) );
 		} else {
 			$msg->params( $this->getAgentForOutput() );
-			$msg->params( $this->getTruncatedTitleText( $this->event->getTitle(), true) );
+			$msg->params( $this->getTruncatedTitleText( $this->event->getTitle(), true ) );
 			$msg->plaintextParams( $this->getTopicTitle() );
 		}
 
+		return $msg;
+	}
+
+	public function getCompactHeaderMessage() {
+		$msg = $this->msg( 'notification-compact-header-flow-new-topic' );
+		$msg->plaintextParams( $this->getTopicTitle() );
 		return $msg;
 	}
 }

@@ -15,7 +15,7 @@
 	"msu-insert-image": "Вставить как изображение",
 	"msu-insert-video": "Вставить видео",
 	"msu-cancel-upload": "Отменить загрузку",
-	"msu-replace-file": "Заменить файл?",
+	"msu-continue": "Всё равно продолжить?",
 	"msu-clean-all": "Clear list",
 	"msu-ext-not-allowed": "Разрешен{{PLURAL:$1||ы}} только {{PLURAL:$1|следующий тип|следующие типы}} файлов:",
 	"msu-upload-this": "Загрузить этот файл",

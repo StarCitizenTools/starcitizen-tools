@@ -3,7 +3,7 @@
  * Script to bootstrap TTMServer translation memory
  *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -58,10 +58,10 @@ class TTMServerBootstrap extends Maintenance {
 	}
 
 	public function execute() {
-		global $wgTranslateTranslationServices;
+		global $wgTranslateTranslationServices,
+			$wgTranslateTranslationDefaultService;
 
-		// TTMServer is the id of the enabled-by-default instance
-		$configKey = $this->getOption( 'ttmserver', 'TTMServer' );
+		$configKey = $this->getOption( 'ttmserver', $wgTranslateTranslationDefaultService );
 		if ( !isset( $wgTranslateTranslationServices[$configKey] ) ) {
 			$this->error( 'Translation memory is not configured properly', 1 );
 		}
@@ -84,10 +84,14 @@ class TTMServerBootstrap extends Maintenance {
 			$this->statusLine( "Forked thread $pid to handle bootstrapping\n" );
 			$status = 0;
 			pcntl_waitpid( $pid, $status );
+			// beginBootStrap probably failed, give up.
+			if ( $status !== 0 ) {
+				$this->error( 'Boostrap failed.', 1 );
+			}
 		}
 
 		$threads = $this->getOption( 'threads', 1 );
-		$pids = array();
+		$pids = [];
 
 		$groups = MessageGroups::singleton()->getGroups();
 		foreach ( $groups as $id => $group ) {
@@ -131,9 +135,12 @@ class TTMServerBootstrap extends Maintenance {
 	}
 
 	protected function beginBootStrap( $config ) {
-		$this->statusLine( "Cleaning up old entries...\n" );
 		$server = TTMServer::factory( $config );
 		$server->setLogger( $this );
+		if ( $server->isFrozen() ) {
+			$this->error( "The service is frozen, giving up.", 1 );
+		}
+		$this->statusLine( "Cleaning up old entries...\n" );
 		if ( $this->reindex ) {
 			$server->doMappingUpdate();
 		}
@@ -162,18 +169,18 @@ class TTMServerBootstrap extends Maintenance {
 
 		$server->beginBatch();
 
-		$inserts = array();
+		$inserts = [];
 		foreach ( $collection->keys() as $mkey => $title ) {
 			$handle = new MessageHandle( $title );
-			$inserts[] = array( $handle, $sourceLanguage, $collection[$mkey]->definition() );
+			$inserts[] = [ $handle, $sourceLanguage, $collection[$mkey]->definition() ];
 		}
 
-		while ( $inserts !== array() ) {
+		while ( $inserts !== [] ) {
 			$batch = array_splice( $inserts, 0, $this->mBatchSize );
 			$server->batchInsertDefinitions( $batch );
 		}
 
-		$inserts = array();
+		$inserts = [];
 		foreach ( $stats as $targetLanguage => $numbers ) {
 			if ( $targetLanguage === $sourceLanguage ) {
 				continue;
@@ -189,7 +196,7 @@ class TTMServerBootstrap extends Maintenance {
 
 			foreach ( $collection->keys() as $mkey => $title ) {
 				$handle = new MessageHandle( $title );
-				$inserts[] = array( $handle, $sourceLanguage, $collection[$mkey]->translation() );
+				$inserts[] = [ $handle, $sourceLanguage, $collection[$mkey]->translation() ];
 			}
 
 			while ( count( $inserts ) >= $this->mBatchSize ) {
@@ -198,7 +205,7 @@ class TTMServerBootstrap extends Maintenance {
 			}
 		}
 
-		while ( $inserts !== array() ) {
+		while ( $inserts !== [] ) {
 			$batch = array_splice( $inserts, 0, $this->mBatchSize );
 			$server->batchInsertTranslations( $batch );
 		}
@@ -209,18 +216,9 @@ class TTMServerBootstrap extends Maintenance {
 	protected function resetStateForFork() {
 		// Make sure all existing connections are dead,
 		// we can't use them in forked children.
-		if ( method_exists( 'MediaWiki\MediaWikiServices', 'resetChildProcessServices' ) ) {
-			MediaWiki\MediaWikiServices::resetChildProcessServices();
-		} else {
-			// BC for MediaWiki <= 1.27
-			LBFactory::destroyInstance();
-
-			// Child, reseed because there is no bug in PHP:
-			// http://bugs.php.net/bug.php?id=42465
-			mt_srand( getmypid() );
-		}
+		MediaWiki\MediaWikiServices::resetChildProcessServices();
 	}
 }
 
-$maintClass = 'TTMServerBootstrap';
+$maintClass = TTMServerBootstrap::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

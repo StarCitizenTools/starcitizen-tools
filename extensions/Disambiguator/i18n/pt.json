@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cainamarques",
+			"Malafaya",
+			"Vitorvicentevalente",
+			"Hamilton Abreu"
+		]
+	},
+	"disambig-desc": "Adiciona o elemento <code><nowiki>__DISAMBIG__</nowiki></code> para marcar [[Special:DisambiguationPages|páginas de desambiguação]]",
+	"disambiguationpages": "Páginas de desambiguação",
+	"disambiguationpages-summary": "O que se segue é uma lista de todas as páginas de desambiguação na wiki {{SITENAME}}.<br />\nUma página é considerada de desambiguação se contém o elemento <code><nowiki>__DISAMBIG__</nowiki></code> (ou um nome alternativo equivalente).",
+	"disambiguationpagelinks": "Páginas com hiperligações para páginas de desambiguação",
+	"disambiguationpagelinks-summary": "As seguintes páginas contêm pelo menos uma hiperligação para uma página de desambiguação. É provável que essa hiperligação devesse ser feita para uma página mais específica.<br />\nUma página é considerada de desambiguação se contém o elemento <code><nowiki>__DISAMBIG__</nowiki></code> (ou um nome alternativo equivalente).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Esta é uma página de desambiguação"
+}

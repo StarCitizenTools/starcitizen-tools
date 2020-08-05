@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nikosgranturismogt"
+		]
+	},
+	"cookiewarning-info": "Τα cookies μας βοηθούν να παρέχουμε τις υπηρεσίες μας. Χρησιμοποιώντας τις υπηρεσίες μας, συμφωνείτε στην χρήση των cookies από εμάς.",
+	"cookiewarning-desc": "Παρέχει μια σημείωση στη κορυφή της σελίδας σχετικά με τα cookies",
+	"cookiewarning-moreinfo-label": "Περισσότερες πληροφορίες",
+	"cookiewarning-ok-label": "Εντάξει"
+}

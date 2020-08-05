@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hamilton Abreu",
+			"Athena in Wonderland"
+		]
+	},
+	"variables-desc": "Funções do analisador sintático que permitem trabalhar com variáveis dinâmicas num contexto limitado ao âmbito de uma página",
+	"variables-config-disabledfunctions": "Permite definir uma matriz de funções que não devem estar disponíveis na wiki. Omita qualquer # quando adicionar funções."
+}

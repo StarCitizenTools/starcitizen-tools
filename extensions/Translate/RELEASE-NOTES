@@ -1,20 +1,15 @@
-== Translate 2016.08 ==
-Released at 2016-08-25.
+== Translate 2019.04 ==
+Released at 2019-04-25.
 
 === Noteworthy changes ===
-* Kunal Grover's patch to update translation pages upon deletion of translation units was merged with the help of Glaisher.
-* David Causse made translation memory and translation search work with new ElasticSearch version.
-* Pratik Lahoti's improvements to the user interface of Special:PageMigration was merged with help of Federico Leva.
-* Glaisher fulfilled a long requested feature to have summary field on Special:Translate.
-* Glaisher fixed bugs and improved stability of the page translation feature.
-* Glaisher added a log subtype selector for the page translation log on Special:Log.
-* Glaisher fixed false warnings about bad translation in Special:Translate when the source text contained discouraged html or had smileys.
-* Glaisher moved export functionality from Special:Translate to Special:ExportTranslations.
-* Niklas Laxström improved message group selector on Special:Translate.
-* Niklas Laxström improved display of Special:Translate for small screens.
-* Niklas Laxström fixed flash of unstyled content on many of Translate's special pages.
-* Niklas Laxström changed JSON file format handler to always output a metadata section. T118205
-* Niklas Laxström fixed multiple issues related to statsbar updates on Special:Translate. T62949
-* Niklas Laxström improved the refresh-translatable-pages.php maintenance script so that it creates missing source language pages.
-* Niklas Laxström updated Translate's sandbox feature to use AuthManager. T111486
-* Federico Leva made characterEditStats.php to able to scan history further than the recent changes table. T64833
+* Fixed fatal error on PageContentLanguage hook subscriber (T214358)
+* Replaced usage of mw.translateHooks with mw.hook. Deprecation warning will be shown while using functions under mw.translateHooks (T72031)
+* Added support for newer versions of the Elastica extension while maintaining backward compatibility for older version REL 1.31 (T218100)
+* Fixed page suggestion control on Special:PageMigration (T217726)
+* Fixed broken Special:PageMigration (T217727)
+* Add link to Special:PageMigration when page is marked for translation (T178642)
+* Removed display of the message group state for the source language (T160511)
+* Fixed invalid display of priority language notice (T217046)
+* Added better error handling in Special:SearchTranslations (T159221)
+* Display proper notice when translations to non-priority languages are blocked (T218777)
+* Fixed "proofreading" status appearing for source language on the MessageGroup and Language stats page (T160511)

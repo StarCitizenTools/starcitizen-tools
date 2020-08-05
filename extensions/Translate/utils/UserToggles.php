@@ -6,7 +6,7 @@
  * @author Siebrand Mazeland
  * @author Niklas Laxström
  * @copyright Copyright © 2008-2010 Siebrand Mazeland, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -17,6 +17,9 @@ class TranslatePreferences {
 	 * Add 'translate-pref-nonewsletter' preference.
 	 * This is most probably specific to translatewiki.net. Can be enabled
 	 * with $wgTranslateNewsletterPreference.
+	 * @param User $user
+	 * @param array &$preferences
+	 * @return bool
 	 */
 	public static function onGetPreferences( User $user, array &$preferences ) {
 		global $wgTranslateNewsletterPreference;
@@ -31,11 +34,11 @@ class TranslatePreferences {
 		if ( $wgEnableEmail && $user->isEmailConfirmed() ) {
 			// 'translate-pref-nonewsletter' is used as opt-out for
 			// users with a confirmed email address
-			$preferences['translate-nonewsletter'] = array(
+			$preferences['translate-nonewsletter'] = [
 				'type' => 'toggle',
 				'section' => 'personal/email',
 				'label-message' => 'translate-pref-nonewsletter'
-			);
+			];
 
 		}
 	}
@@ -45,7 +48,7 @@ class TranslatePreferences {
 	 * These are the languages also shown when translating.
 	 *
 	 * @param User $user
-	 * @param array $preferences
+	 * @param array &$preferences
 	 * @return bool true
 	 */
 	public static function translationAssistLanguages( User $user, &$preferences ) {
@@ -56,7 +59,7 @@ class TranslatePreferences {
 		// Get available languages.
 		$languages = Language::fetchLanguageNames();
 
-		$preferences['translate-editlangs'] = array(
+		$preferences['translate-editlangs'] = [
 			'class' => 'HTMLJsSelectToInputField',
 			// prefs-translate
 			'section' => 'editing/translate',
@@ -65,7 +68,7 @@ class TranslatePreferences {
 			'select' => $select,
 			'valid-values' => array_keys( $languages ),
 			'name' => 'translate-editlangs',
-		);
+		];
 
 		return true;
 	}
@@ -75,7 +78,7 @@ class TranslatePreferences {
 	 * @return JsSelectToInput
 	 */
 	protected static function languageSelector() {
-		if ( is_callable( array( 'LanguageNames', 'getNames' ) ) ) {
+		if ( is_callable( [ 'LanguageNames', 'getNames' ] ) ) {
 			$lang = RequestContext::getMain()->getLanguage();
 			$languages = LanguageNames::getNames( $lang->getCode(),
 				LanguageNames::FALLBACK_NORMAL

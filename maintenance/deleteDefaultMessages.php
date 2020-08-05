@@ -35,39 +35,55 @@ class DeleteDefaultMessages extends Maintenance {
 		parent::__construct();
 		$this->addDescription( 'Deletes all pages in the MediaWiki namespace' .
 			' which were last edited by "MediaWiki default"' );
+		$this->addOption( 'dry-run', 'Perform a dry run, delete nothing' );
 	}
 
 	public function execute() {
 		global $wgUser;
 
 		$this->output( "Checking existence of old default messages..." );
-		$dbr = $this->getDB( DB_SLAVE );
-		$res = $dbr->select( [ 'page', 'revision' ],
+		$dbr = $this->getDB( DB_REPLICA );
+
+		$actorQuery = ActorMigration::newMigration()
+			->getWhere( $dbr, 'rev_user', User::newFromName( 'MediaWiki default' ) );
+		$res = $dbr->select(
+			[ 'page', 'revision' ] + $actorQuery['tables'],
 			[ 'page_namespace', 'page_title' ],
 			[
 				'page_namespace' => NS_MEDIAWIKI,
-				'page_latest=rev_id',
-				'rev_user_text' => 'MediaWiki default',
-			]
+				$actorQuery['conds'],
+			],
+			__METHOD__,
+			[],
+			[ 'revision' => [ 'JOIN', 'page_latest=rev_id' ] ] + $actorQuery['joins']
 		);
 
 		if ( $dbr->numRows( $res ) == 0 ) {
-			# No more messages left
+			// No more messages left
 			$this->output( "done.\n" );
-
 			return;
 		}
 
-		# Deletions will be made by $user temporarly added to the bot group
-		# in order to hide it in RecentChanges.
+		$dryrun = $this->hasOption( 'dry-run' );
+		if ( $dryrun ) {
+			foreach ( $res as $row ) {
+				$title = Title::makeTitle( $row->page_namespace, $row->page_title );
+				$this->output( "\n* [[$title]]" );
+			}
+			$this->output( "\n\nRun again without --dry-run to delete these pages.\n" );
+			return;
+		}
+
+		// Deletions will be made by $user temporarly added to the bot group
+		// in order to hide it in RecentChanges.
 		$user = User::newFromName( 'MediaWiki default' );
 		if ( !$user ) {
-			$this->error( "Invalid username", true );
+			$this->fatalError( "Invalid username" );
 		}
 		$user->addGroup( 'bot' );
 		$wgUser = $user;
 
-		# Handle deletion
+		// Handle deletion
 		$this->output( "\n...deleting old default messages (this may take a long time!)...", 'msg' );
 		$dbw = $this->getDB( DB_MASTER );
 
@@ -85,5 +101,5 @@ class DeleteDefaultMessages extends Maintenance {
 	}
 }
 
-$maintClass = "DeleteDefaultMessages";
+$maintClass = DeleteDefaultMessages::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

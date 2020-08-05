@@ -1,7 +1,6 @@
 @import 'mediawiki.mixins';
-@import 'flow.variables';
-@import 'flow.colors';
-@import 'flow.helpers';
+@import '../flow.variables';
+@import '../flow.colors';
 
 // @todo document flow-menu
 .flow-menu {
@@ -13,17 +12,18 @@
 	ul {
 		font-size: 0.75em;
 	}
+
 	li {
 		display: inline;
-		text-align: left;
 
 		a {
 			font-weight: inherit;
+			text-align: left;
 		}
 	}
 
 	a:focus {
-		outline: none;
+		outline: 0;
 	}
 
 	// Hide the menu trigger completely in no-js mode
@@ -59,7 +59,7 @@ div.flow-menu-inverted {
 div > .flow-menu {
 	bottom: auto;
 	display: block;
-	border: none;
+	border: 0;
 
 	&.flow-menu-inverted {
 		right: auto;
@@ -69,7 +69,6 @@ div > .flow-menu {
 			text-align: left;
 		}
 	}
-
 
 	// the toc needs to retain display:block for purposes
 	// of triggering autoload eagerly behind the scenes.
@@ -81,8 +80,6 @@ div > .flow-menu {
 			display: block;
 		}
 	}
-
-
 
 	&.flow-menu-hoverable:hover,
 	&.focus {
@@ -97,10 +94,9 @@ div > .flow-menu {
 		}
 
 		.flow-menu-js-drop a {
-			outline: none;
 			border-color: transparent;
 			background: transparent;
-			background: rgba(0,0,0,0.05);
+			background: rgba( 0, 0, 0, 0.05 );
 
 			.caret {
 				border-top-color: #000;
@@ -113,18 +109,24 @@ div > .flow-menu {
 		// itself is hidden
 		display: none;
 		font-size: 1em;
-		box-shadow: 0 1px 2px @colorGrayLight;
 		background: #fff;
-		border-radius: 2px;
+		border: 1px solid @colorGray10;
+		border-radius: @borderRadius;
+		box-shadow: 0 2px 2px 0 rgba( 0, 0, 0, 0.25 );
 
-		> section:not(:first-of-type) > li:first-of-type,
-		li.flow-menu-section:not(:first-of-type) {
-			border-top: 1px solid @colorGrayLighter;
+		> section:not( :first-of-type ) > li:first-of-type,
+		li.flow-menu-section:not( :first-of-type ) {
+			border-top: 1px solid @colorGray12;
 		}
+	}
 
-		li {
+	li {
+		display: block;
+		margin: 0;
+
+		a {
 			display: block;
-			cursor: default;
+			text-align: left;
 		}
 	}
 
@@ -136,9 +138,8 @@ div > .flow-menu {
 
 		a {
 			display: inline-block;
-			padding: 0 .5em;
-			border: 1px solid @colorGrayLight;
-			border-radius: 3px;
+			padding: 0 0.5em;
+			border-radius: @borderRadius;
 			border-width: 0;
 			color: @colorTextLight;
 		}
@@ -167,13 +168,12 @@ div > .flow-menu {
 div.flow-post > .flow-menu {
 	.flow-menu-js-drop {
 		a {
-			border-color: @colorGrayLightest;
 			border-width: 0;
 		}
 	}
 }
 
-@media all and (min-width: @small) {
+@media all and ( min-width: @small ) {
 	// On desktop, the flow-menu is no longer inline
 	.flow-menu {
 		position: absolute;

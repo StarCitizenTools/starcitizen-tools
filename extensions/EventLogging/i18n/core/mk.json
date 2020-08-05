@@ -8,7 +8,7 @@
 	"eventlogging-invalid-json": "Неважечки JSON",
 	"eventlogging-revision-id": "Преработка $1",
 	"eventlogging-code-sample-logging-on-server-side": "PHP-заведување",
-	"eventlogging-code-sample-module-setup": "PHP-поставки за JavaScript-заведување",
+	"eventlogging-code-sample-module-setup-json": "поставка на extension.json за дневничко запишување со JavaScript",
 	"eventlogging-code-sample-logging-on-client-side": "JavaScript-заведување",
 	"eventlogging-error-move-source": "Страниците именскиот простор „Шема“ не можат да се преименуваат",
 	"eventlogging-error-move-destination": "Страниците не може да се преименуваат во страници од именскиот простор „Шема“"

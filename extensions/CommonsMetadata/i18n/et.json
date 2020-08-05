@@ -12,5 +12,7 @@
 	"commonsmetadata-trackingcategory-no-author": "Masinloetava autorita failid",
 	"commonsmetadata-trackingcategory-no-author-desc": "Failil pole [{{MediaWiki:Commonsmetadata-doc-url}} masinloetavat] teabemalli või autori väli on mallis täitmata.",
 	"commonsmetadata-trackingcategory-no-source": "Masinloetava allikata failid",
-	"commonsmetadata-trackingcategory-no-source-desc": "Failil pole [{{MediaWiki:Commonsmetadata-doc-url}} masinloetavat] teabemalli või allika väli on mallis täitmata."
+	"commonsmetadata-trackingcategory-no-source-desc": "Failil pole [{{MediaWiki:Commonsmetadata-doc-url}} masinloetavat] teabemalli või allika väli on mallis täitmata.",
+	"commonsmetadata-trackingcategory-no-patent": "Masinloetava patendita failid",
+	"commonsmetadata-trackingcategory-no-patent-desc": "Failil pole [{{MediaWiki:Commonsmetadata-doc-url}} masinloetavat] patendimalli."
 }

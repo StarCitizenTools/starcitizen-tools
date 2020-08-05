@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel TableSlice class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -10,15 +10,16 @@
  * @class
  * @extends ve.dm.Document
  * @constructor
- * @param {HTMLDocument|Array|ve.dm.ElementLinearData|ve.dm.FlatLinearData} data
+ * @param {HTMLDocument|Array|ve.dm.ElementLinearData} data
  * @param {HTMLDocument} [htmlDocument]
  * @param {ve.dm.Document} [parentDocument]
  * @param {ve.dm.InternalList} [internalList]
  * @param {ve.Range} [tableRange] Table range
+ * @param {ve.dm.Document} [originalDocument]
  */
-ve.dm.TableSlice = function VeDmTableSlice( data, htmlDocument, parentDocument, internalList, tableRange ) {
+ve.dm.TableSlice = function VeDmTableSlice( data, htmlDocument, parentDocument, internalList, tableRange, originalDocument ) {
 	// Parent constructor
-	ve.dm.TableSlice.super.call( this, data, htmlDocument, parentDocument, internalList, tableRange, tableRange );
+	ve.dm.TableSlice.super.call( this, data, htmlDocument, parentDocument, internalList, tableRange, tableRange, originalDocument );
 };
 
 /* Inheritance */

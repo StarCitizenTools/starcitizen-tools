@@ -17,7 +17,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var mediawikiFontRepository;
@@ -28,7 +28,7 @@
 	mediawikiFontRepository.base = mw.config.get( 'wgExtensionAssetsPath' ) +
 		'/UniversalLanguageSelector/data/fontrepo/fonts/';
 
-	$( document ).ready( function () {
+	$( function () {
 		// MediaWiki specific overrides for jquery.webfonts
 		$.extend( $.fn.webfonts.defaults, {
 			repository: mediawikiFontRepository,
@@ -47,4 +47,5 @@
 
 		$( 'body' ).webfonts();
 	} );
-}( jQuery, mediaWiki ) );
+
+}() );

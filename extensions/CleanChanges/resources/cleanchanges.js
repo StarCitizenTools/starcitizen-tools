@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	'use strict';
 
 	window.toggleVisibilityE = function ( levelId, otherId, linkId, type ) {
@@ -29,9 +29,13 @@
 			id = $this.data( 'mw-userinfo-id' );
 			target = $this.data( 'mw-userinfo-target' );
 			if ( id !== undefined ) {
-				$this.click( function ( e ) {
-					e.preventDefault();
-					window.showUserInfo( 'wgUserInfo' + id, target );
+				$this.on( 'click keypress', function ( e ) {
+					if (
+						e.type === 'click' ||
+						e.type === 'keypress' && e.which === 13
+					) {
+						window.showUserInfo( 'wgUserInfo' + id, target );
+					}
 				} );
 			}
 		} );
@@ -43,12 +47,16 @@
 			other = $this.data( 'mw-cleanchanges-other' );
 			link = $this.data( 'mw-cleanchanges-link' );
 			if ( level !== undefined ) {
-				$this.click( function ( e ) {
-					e.preventDefault();
-					window.toggleVisibilityE( level, other, link, 'block' );
+				$this.on( 'click keypress', function ( e ) {
+					if (
+						e.type === 'click' ||
+						e.type === 'keypress' && e.which === 13
+					) {
+						window.toggleVisibilityE( level, other, link, 'block' );
+					}
 				} );
 			}
 		} );
 
 	} );
-}( mediaWiki, jQuery ) );
+}() );

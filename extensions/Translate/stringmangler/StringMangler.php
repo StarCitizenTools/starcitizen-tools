@@ -3,7 +3,7 @@
  * StringMangler interface.
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -14,7 +14,6 @@
  *
  * The operations have to be reversible so that
  * x equals unmangle( mangle( x ) ).
- *
  */
 interface StringMangler {
 	/// @todo Does this really need to be in the interface???
@@ -30,7 +29,7 @@ interface StringMangler {
 	 * Match strings against a pattern.
 	 * If string matches, mangle() should mangle the key.
 	 * @param string $string Message key.
-	 * @return \bool
+	 * @return bool
 	 */
 	public function match( $string );
 

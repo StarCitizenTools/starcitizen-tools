@@ -21,7 +21,7 @@ class Workflow {
 	/**
 	 * @var string[]
 	 */
-	static private $allowedTypes = array( 'discussion', 'topic' );
+	static private $allowedTypes = [ 'discussion', 'topic' ];
 
 	/**
 	 * @var UUID
@@ -39,12 +39,12 @@ class Workflow {
 	protected $wiki;
 
 	/**
-	 * @var integer
+	 * @var int
 	 */
 	protected $pageId = 0;
 
 	/**
-	 * @var integer
+	 * @var int
 	 */
 	protected $namespace;
 
@@ -79,7 +79,7 @@ class Workflow {
 	 * @return Workflow
 	 * @throws DataModelException
 	 */
-	static public function fromStorageRow( array $row, $obj = null ) {
+	public static function fromStorageRow( array $row, $obj = null ) {
 		if ( $obj === null ) {
 			$obj = new self;
 		} elseif ( !$obj instanceof self ) {
@@ -88,8 +88,8 @@ class Workflow {
 		$obj->id = UUID::create( $row['workflow_id'] );
 		$obj->type = $row['workflow_type'];
 		$obj->wiki = $row['workflow_wiki'];
-		$obj->pageId = (int) $row['workflow_page_id'];
-		$obj->namespace = (int) $row['workflow_namespace'];
+		$obj->pageId = (int)$row['workflow_page_id'];
+		$obj->namespace = (int)$row['workflow_namespace'];
 		$obj->titleText = $row['workflow_title_text'];
 		$obj->lastUpdated = $row['workflow_last_update_timestamp'];
 
@@ -101,7 +101,7 @@ class Workflow {
 	 * @return array
 	 * @throws FailCommitException
 	 */
-	static public function toStorageRow( Workflow $obj ) {
+	public static function toStorageRow( Workflow $obj ) {
 		if ( $obj->pageId === 0 ) {
 			/*
 			 * We try to defer creating a new page as long as possible, which
@@ -122,7 +122,7 @@ class Workflow {
 			}
 		}
 
-		return array(
+		return [
 			'workflow_id' => $obj->id->getAlphadecimal(),
 			'workflow_type' => $obj->type,
 			'workflow_wiki' => $obj->wiki,
@@ -133,7 +133,7 @@ class Workflow {
 			'workflow_last_update_timestamp' => $obj->lastUpdated,
 			// not used, but set it to empty string so it doesn't fail in strict mode
 			'workflow_name' => '',
-		);
+		];
 	}
 
 	/**
@@ -142,13 +142,13 @@ class Workflow {
 	 * @return Workflow
 	 * @throws DataModelException
 	 */
-	static public function create( $type, Title $title ) {
+	public static function create( $type, Title $title ) {
 		// temporary limitation until we implement something more concrete
 		if ( !in_array( $type, self::$allowedTypes ) ) {
 			throw new DataModelException( 'Invalid workflow type provided: ' . $type, 'process-data' );
 		}
 		if ( $title->isLocal() ) {
-			$wiki = wfWikiId();
+			$wiki = wfWikiID();
 		} else {
 			$wiki = $title->getTransWikiID();
 		}
@@ -167,8 +167,8 @@ class Workflow {
 		// we just created a new workflow; wipe out any cached data for the
 		// associated title
 		if ( self::$titleCache !== null ) {
-			$key = implode( '|', array( $obj->wiki, $obj->namespace, $obj->titleText ) );
-			self::$titleCache->clear( array( $key ) );
+			$key = implode( '|', [ $obj->wiki, $obj->namespace, $obj->titleText ] );
+			self::$titleCache->clear( [ $key ] );
 		}
 
 		return $obj;
@@ -210,7 +210,8 @@ class Workflow {
 			$namespace = $this->namespace;
 			$titleText = $this->titleText;
 		}
-		return $this->title = self::getFromTitleCache( $this->wiki, $namespace, $titleText );
+		$this->title = self::getFromTitleCache( $this->wiki, $namespace, $titleText );
+		return $this->title;
 	}
 
 	/**
@@ -223,7 +224,8 @@ class Workflow {
 		if ( $this->ownerTitle ) {
 			return $this->ownerTitle;
 		}
-		return $this->ownerTitle = self::getFromTitleCache( $this->wiki, $this->namespace, $this->titleText );
+		$this->ownerTitle = self::getFromTitleCache( $this->wiki, $this->namespace, $this->titleText );
+		return $this->ownerTitle;
 	}
 
 	/**
@@ -241,7 +243,7 @@ class Workflow {
 			self::$titleCache = new MapCacheLRU( 50 );
 		}
 
-		$key = implode( '|', array( $wiki, $namespace, $titleText ) );
+		$key = implode( '|', [ $wiki, $namespace, $titleText ] );
 		$title = self::$titleCache->get( $key );
 		if ( $title === null ) {
 			$title = Title::makeTitleSafe( $namespace, $titleText );
@@ -258,19 +260,25 @@ class Workflow {
 	/**
 	 * @return UUID
 	 */
-	public function getId() { return $this->id; }
+	public function getId() {
+		return $this->id;
+	}
 
 	/**
 	 * @return string
 	 */
-	public function getType() { return $this->type; }
+	public function getType() {
+		return $this->type;
+	}
 
 	/**
 	 * Get the wiki ID, e.g. eswiki
 	 *
 	 * @return string
 	 */
-	public function getWiki() { return $this->wiki; }
+	public function getWiki() {
+		return $this->wiki;
+	}
 
 	/**
 	 * @return bool
@@ -288,7 +296,7 @@ class Workflow {
 	/**
 	 * Returns true if the workflow is new as of this request.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isNew() {
 		return $this->pageId === 0;
@@ -297,12 +305,16 @@ class Workflow {
 	/**
 	 * @return string
 	 */
-	public function getLastUpdated() { return $this->lastUpdated; }
+	public function getLastUpdated() {
+		return $this->lastUpdated;
+	}
 
 	/**
 	 * @return \MWTimestamp
 	 */
-	public function getLastUpdatedObj() { return new MWTimestamp( $this->lastUpdated ); }
+	public function getLastUpdatedObj() {
+		return new MWTimestamp( $this->lastUpdated );
+	}
 
 	public function updateLastUpdated( UUID $latestRevisionId ) {
 		$this->lastUpdated = $latestRevisionId->getTimestamp();
@@ -334,7 +346,7 @@ class Workflow {
 	 * it should return false later on to allow wider use.
 	 *
 	 * @param Title $title
-	 * @return boolean
+	 * @return bool
 	 * @throws InvalidInputException
 	 * @throws InvalidInputException
 	 */
@@ -343,35 +355,60 @@ class Workflow {
 	}
 
 	/**
-	 * @param string $permission
+	 * Convenience wrapper for checking user permissions as boolean.
+	 * getPermissionErrors 'quick' + blocked check only for logged in users
+	 *
+	 * @param string $permission Permission to check; for 'edit', 'create' will also be
+	 *  checked if the title does not exist
 	 * @param User $user
-	 * @return bool
+	 * @return bool Whether the user can take the action, based on a quick check
 	 */
 	public function userCan( $permission, $user ) {
-		$title = $this->getArticleTitle();
-		$allowed = $title->userCan( $permission, $user );
-		if ( $allowed && $this->type === 'topic' ) {
-			$allowed = $this->getOwnerTitle()->userCan( $permission, $user );
-		}
+		return !count( $this->getPermissionErrors( $permission, $user, 'quick' ) ) &&
 
-		return $allowed;
+		// We only check the blocked status of actual users and not anons, because
+		// the anonymous version can be cached and served to many different IP
+		// addresses which will not all be blocked.
+		// See T61928
+		!( $user->isLoggedIn() && $user->isBlockedFrom( $this->getOwnerTitle(), true ) );
 	}
 
 	/**
 	 * Pass-through to Title::getUserPermissionsErrors
 	 * with title, and owning title if needed.
-	 * @param string $permission
-	 * @param User $user
+	 *
+	 * @param string $permission Permission to check; for 'edit', 'create' will also be
+	 *  checked if the title does not exist
+	 * @param User $user User to check permissions for
+	 * @param string $rigor Rigor of check; see Title->getUserPermissionsErrors
 	 * @return array Array of arrays of the arguments to wfMessage to explain permissions problems.
 	 */
-	public function getPermissionErrors( $permission, $user ) {
+	public function getPermissionErrors( $permission, $user, $rigor ) {
 		$title = $this->type === 'topic' ? $this->getOwnerTitle() : $this->getArticleTitle();
 
-		$errors = $title->getUserPermissionsErrors( $permission, $user );
+		$editErrors = $title->getUserPermissionsErrors( $permission, $user, $rigor );
+
+		$errors = $editErrors;
+
+		$titleExistsFlags = ( $rigor === 'secure' ) ? Title::GAID_FOR_UPDATE : 0;
+
+		if ( $permission === 'edit' && !$title->exists( $titleExistsFlags ) ) {
+			// If it's 'edit', but the title doesn't exist, check 'create' as
+			// well.
+
+			$editErrorKeys = array_map( function ( $val ) {
+				return reset( $val );
+			}, $editErrors );
+
+			// Pass in the edit errors to avoid duplicates
+			$createErrors = $title->getUserPermissionsErrors( 'create', $user, $rigor, $editErrorKeys );
+			$errors = array_merge( $errors, $createErrors );
+		}
+
 		if ( count( $errors ) ) {
 			return $errors;
 		}
 
-		return array();
+		return [];
 	}
 }

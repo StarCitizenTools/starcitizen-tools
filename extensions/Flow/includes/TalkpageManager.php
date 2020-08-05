@@ -8,6 +8,7 @@ use Flow\Model\Workflow;
 use Article;
 use CentralAuthUser;
 use ContentHandler;
+use ExtensionRegistry;
 use Status;
 use Title;
 use User;
@@ -79,7 +80,7 @@ class TalkpageManager implements OccupationController {
 	/**
 	 * @var string[]
 	 */
-	protected $allowedPageNames = array();
+	protected $allowedPageNames = [];
 
 	/**
 	 * Cached talk page manager user
@@ -119,10 +120,10 @@ class TalkpageManager implements OccupationController {
 			$content = $revision->getContent();
 			if ( $content instanceof BoardContent && $content->getWorkflowId() ) {
 				// Revision is already a valid BoardContent
-				return Status::newGood( array(
+				return Status::newGood( [
 					'revision' => $revision,
 					'already-existed' => true,
-				) );
+				] );
 			}
 		}
 
@@ -141,9 +142,9 @@ class TalkpageManager implements OccupationController {
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * @inheritDoc
 	 */
-	public function checkIfCreationIsPossible( Title $title, $mustNotExist = true) {
+	public function checkIfCreationIsPossible( Title $title, $mustNotExist = true, $forWrite = true ) {
 		global $wgContentHandlerUseDB;
 
 		// Arbitrary pages can only be enabled when content handler
@@ -154,7 +155,7 @@ class TalkpageManager implements OccupationController {
 
 		// Only allow converting a non-existent page to Flow
 		if ( $mustNotExist ) {
-			if ( $title->exists( Title::GAID_FOR_UPDATE ) ) {
+			if ( $title->exists( $forWrite ? Title::GAID_FOR_UPDATE : 0 ) ) {
 				return Status::newFatal( 'flow-error-allowcreation-already-exists' );
 			}
 		}
@@ -163,7 +164,7 @@ class TalkpageManager implements OccupationController {
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * @inheritDoc
 	 */
 	public function checkIfUserHasPermission( Title $title, User $user ) {
 		if (
@@ -173,22 +174,21 @@ class TalkpageManager implements OccupationController {
 			// Gate this on the flow-create-board right, essentially giving
 			// wiki communities control over if Flow board creation is allowed
 			// to everyone or just a select few.
-			$user->isAllowedAll( 'flow-create-board' )
+			$title->userCan( 'flow-create-board', $user )
 		) {
 			return Status::newGood();
 		} else {
 			return Status::newFatal( 'flow-error-allowcreation-flow-create-board' );
 		}
-
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * @inheritDoc
 	 */
-	public function safeAllowCreation( Title $title, User $user, $mustNotExist = true ) {
+	public function safeAllowCreation( Title $title, User $user, $mustNotExist = true, $forWrite = true ) {
 		$status = Status::newGood();
 
-		$technicallyAllowedStatus = $this->checkIfCreationIsPossible( $title, $mustNotExist );
+		$technicallyAllowedStatus = $this->checkIfCreationIsPossible( $title, $mustNotExist, $forWrite );
 
 		$permissionStatus = $this->checkIfUserHasPermission( $title, $user );
 
@@ -203,7 +203,7 @@ class TalkpageManager implements OccupationController {
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * @inheritDoc
 	 */
 	public function forceAllowCreation( Title $title ) {
 		/*
@@ -224,8 +224,13 @@ class TalkpageManager implements OccupationController {
 	 * @return bool
 	 */
 	public function canBeUsedOn( Title $title ) {
-		return
-			// default content model already
+		global $wgUser;
+
+		// If the user has rights, mark the page as allowed
+		// For MovePage
+		$this->safeAllowCreation( $title, $wgUser, /* $mustNotExist = */ true );
+
+		return // default content model already
 			ContentHandler::getDefaultModelFor( $title ) === CONTENT_MODEL_FLOW_BOARD ||
 			// explicitly allowed via safeAllowCreation()
 			in_array( $title->getPrefixedDBkey(), $this->allowedPageNames );
@@ -241,24 +246,19 @@ class TalkpageManager implements OccupationController {
 			return $this->talkPageManagerUser;
 		}
 
-		$user = User::newFromName( FLOW_TALK_PAGE_MANAGER_USER );
+		$user = User::newSystemUser( FLOW_TALK_PAGE_MANAGER_USER, [ 'steal' => true ] );
 
-		if ( $user->getId() === 0 ) {
-			// Does not exist, lets create it
-			$user->loadDefaults( FLOW_TALK_PAGE_MANAGER_USER );
-			$user->addToDatabase();
-			if ( class_exists( 'CentralAuthUser' ) ) {
-				// Attach to CentralAuth if a global account already
-				// exists
-				$ca = CentralAuthUser::getInstance( $user );
-				if ( $ca->exists() ) {
-					$ca->attach( wfWikiID(), 'admin' );
-				}
+		if ( ExtensionRegistry::getInstance()->isLoaded( 'CentralAuth' ) ) {
+			// Attach to CentralAuth if a global account already
+			// exists
+			$ca = CentralAuthUser::getMasterInstance( $user );
+			if ( $ca->exists() && !$ca->isAttached() ) {
+				$ca->attach( wfWikiID(), 'admin' );
 			}
 		}
 
 		$groups = $user->getGroups();
-		foreach ( array( 'bot', 'flow-bot' ) as $group ) {
+		foreach ( [ 'bot', 'flow-bot' ] as $group ) {
 			if ( !in_array( $group, $groups ) ) {
 				$user->addGroup( $group );
 			}

@@ -3,9 +3,12 @@
 use MediaWiki\Auth\AuthenticationRequest;
 use MediaWiki\Auth\AuthManager;
 
+/**
+ * FancyCaptcha for displaying captchas precomputed by captcha.py
+ */
 class FancyCaptcha extends SimpleCaptcha {
 	// used for fancycaptcha-edit, fancycaptcha-addurl, fancycaptcha-badlogin,
-	// fancycaptcha-createaccount, fancycaptcha-create, fancycaptcha-sendemail via getMessage()
+	// fancycaptcha-accountcreate, fancycaptcha-create, fancycaptcha-sendemail via getMessage()
 	protected static $messagePrefix = 'fancycaptcha-';
 
 	/**
@@ -21,10 +24,12 @@ class FancyCaptcha extends SimpleCaptcha {
 			if ( !$backend ) {
 				$backend = new FSFileBackend( [
 					'name'           => 'captcha-backend',
-					'wikiId'         => wfWikiId(),
+					'wikiId'         => wfWikiID(),
 					'lockManager'    => new NullLockManager( [] ),
 					'containerPaths' => [ 'captcha-render' => $wgCaptchaDirectory ],
-					'fileMode'       => 777
+					'fileMode'       => 777,
+					'obResetFunc'    => 'wfResetOutputBuffers',
+					'streamMimeFunc' => [ 'StreamFile', 'contentTypeFromPath' ]
 				] );
 			}
 			return $backend;
@@ -32,28 +37,24 @@ class FancyCaptcha extends SimpleCaptcha {
 	}
 
 	/**
-	 * @return integer Estimate of the number of captchas files
+	 * @deprecated Use getCaptchaCount instead for an accurate figure
+	 * @return int Number of captcha files
 	 */
 	public function estimateCaptchaCount() {
-		global $wgCaptchaDirectoryLevels;
+		wfDeprecated( __METHOD__ );
+		return $this->getCaptchaCount();
+	}
 
-		$factor = 1;
-		$sampleDir = $this->getBackend()->getRootStoragePath() . '/captcha-render';
-		if ( $wgCaptchaDirectoryLevels >= 1 ) { // 1/16 sample if 16 shards
-			$sampleDir .= '/' . dechex( mt_rand( 0, 15 ) );
-			$factor = 16;
-		}
-		if ( $wgCaptchaDirectoryLevels >= 3 ) { // 1/256 sample if 4096 shards
-			$sampleDir .= '/' . dechex( mt_rand( 0, 15 ) );
-			$factor = 256;
-		}
+	/**
+	 * @return int Number of captcha files
+	 */
+	public function getCaptchaCount() {
+		$backend = $this->getBackend();
+		$files = $backend->getFileList(
+			[ 'dir' => $backend->getRootStoragePath() . '/captcha-render' ]
+		);
 
-		$count = 0;
-		foreach ( $this->getBackend()->getFileList( [ 'dir' => $sampleDir ] ) as $file ) {
-			++$count;
-		}
-
-		return ( $count * $factor );
+		return iterator_count( $files );
 	}
 
 	/**
@@ -79,6 +80,9 @@ class FancyCaptcha extends SimpleCaptcha {
 		}
 	}
 
+	/**
+	 * @param array &$resultArr
+	 */
 	function addCaptchaAPI( &$resultArr ) {
 		$info = $this->pickImage();
 		if ( !$info ) {
@@ -89,9 +93,12 @@ class FancyCaptcha extends SimpleCaptcha {
 		$title = SpecialPage::getTitleFor( 'Captcha', 'image' );
 		$resultArr['captcha'] = $this->describeCaptchaType();
 		$resultArr['captcha']['id'] = $index;
-		$resultArr['captcha']['url'] = $title->getLocalUrl( 'wpCaptchaId=' . urlencode( $index ) );
+		$resultArr['captcha']['url'] = $title->getLocalURL( 'wpCaptchaId=' . urlencode( $index ) );
 	}
 
+	/**
+	 * @return array
+	 */
 	public function describeCaptchaType() {
 		return [
 			'type' => 'image',
@@ -100,33 +107,26 @@ class FancyCaptcha extends SimpleCaptcha {
 	}
 
 	/**
-	 * Insert the captcha prompt into the edit form.
-	 * @param OutputPage $out
+	 * @param int $tabIndex
+	 * @return array
 	 */
-	function getForm( OutputPage $out, $tabIndex = 1 ) {
-		global $wgEnableAPI;
-
-		// Uses addModuleStyles so it is loaded when JS is disabled.
-		$out->addModuleStyles( 'ext.confirmEdit.fancyCaptcha.styles' );
+	function getFormInformation( $tabIndex = 1 ) {
+		$modules = [];
 
 		$title = SpecialPage::getTitleFor( 'Captcha', 'image' );
 		$info = $this->getCaptcha();
 		$index = $this->storeCaptcha( $info );
 
-		if ( $wgEnableAPI ) {
-			// Loaded only if JS is enabled
-			$out->addModules( 'ext.confirmEdit.fancyCaptcha' );
+		// Loaded only for clients with JS enabled
+		$modules[] = 'ext.confirmEdit.fancyCaptcha';
 
-			$captchaReload = Html::element(
-				'small',
-				[
-					'class' => 'confirmedit-captcha-reload fancycaptcha-reload'
-				],
-				wfMessage( 'fancycaptcha-reload-text' )->text()
-			);
-		} else {
-			$captchaReload = '';
-		}
+		$captchaReload = Html::element(
+			'small',
+			[
+				'class' => 'confirmedit-captcha-reload fancycaptcha-reload'
+			],
+			wfMessage( 'fancycaptcha-reload-text' )->text()
+		);
 
 		$form = Html::openElement( 'div' ) .
 			Html::element( 'label', [
@@ -139,7 +139,7 @@ class FancyCaptcha extends SimpleCaptcha {
 			Html::openElement( 'div', [ 'class' => 'fancycaptcha-image-container' ] ) .
 			Html::element( 'img', [
 					'class'  => 'fancycaptcha-image',
-					'src'    => $title->getLocalUrl( 'wpCaptchaId=' . urlencode( $index ) ),
+					'src'    => $title->getLocalURL( 'wpCaptchaId=' . urlencode( $index ) ),
 					'alt'    => ''
 				]
 			) . $captchaReload . Html::closeElement( 'div' ) . Html::closeElement( 'div' ) . "\n" .
@@ -172,7 +172,12 @@ class FancyCaptcha extends SimpleCaptcha {
 				]
 			) . Html::closeElement( 'div' ) . Html::closeElement( 'div' ) . "\n";
 
-			return $form;
+		return [
+			'html' => $form,
+			'modules' => $modules,
+			// Uses addModuleStyles so it is loaded when JS is disabled.
+			'modulestyles' => [ 'ext.confirmEdit.fancyCaptcha.styles' ],
+		];
 	}
 
 	/**
@@ -188,10 +193,10 @@ class FancyCaptcha extends SimpleCaptcha {
 	}
 
 	/**
-	 * @param $directory string
-	 * @param $levels integer
-	 * @param $lockouts integer
-	 * @return Array|bool
+	 * @param string $directory
+	 * @param int $levels
+	 * @param int &$lockouts
+	 * @return array|bool
 	 */
 	protected function pickImageDir( $directory, $levels, &$lockouts ) {
 		global $wgMemc;
@@ -241,9 +246,9 @@ class FancyCaptcha extends SimpleCaptcha {
 	}
 
 	/**
-	 * @param $directory string
-	 * @param $lockouts integer
-	 * @return Array|bool
+	 * @param string $directory
+	 * @param int &$lockouts
+	 * @return array|bool
 	 */
 	protected function pickImageFromDir( $directory, &$lockouts ) {
 		global $wgMemc;
@@ -283,10 +288,10 @@ class FancyCaptcha extends SimpleCaptcha {
 	}
 
 	/**
-	 * @param $directory string
-	 * @param $files array
-	 * @param $lockouts integer
-	 * @return boolean
+	 * @param string $directory
+	 * @param array $files
+	 * @param int &$lockouts
+	 * @return array|bool
 	 */
 	protected function pickImageFromList( $directory, array $files, &$lockouts ) {
 		global $wgMemc, $wgCaptchaDeleteOnSolve;
@@ -326,6 +331,9 @@ class FancyCaptcha extends SimpleCaptcha {
 		return false; // none found
 	}
 
+	/**
+	 * @return bool|StatusValue
+	 */
 	function showImage() {
 		global $wgOut, $wgRequest;
 
@@ -352,8 +360,8 @@ class FancyCaptcha extends SimpleCaptcha {
 	}
 
 	/**
-	 * @param $salt string
-	 * @param $hash string
+	 * @param string $salt
+	 * @param string $hash
 	 * @return string
 	 */
 	public function imagePath( $salt, $hash ) {
@@ -369,8 +377,8 @@ class FancyCaptcha extends SimpleCaptcha {
 	}
 
 	/**
-	 * @param $basename string
-	 * @return Array (salt, hash)
+	 * @param string $basename
+	 * @return array (salt, hash)
 	 * @throws Exception
 	 */
 	public function hashFromImageName( $basename ) {
@@ -383,7 +391,7 @@ class FancyCaptcha extends SimpleCaptcha {
 
 	/**
 	 * Delete a solved captcha image, if $wgCaptchaDeleteOnSolve is true.
-	 * @inheritdoc
+	 * @inheritDoc
 	 */
 	protected function passCaptcha( $index, $word ) {
 		global $wgCaptchaDeleteOnSolve;
@@ -414,11 +422,22 @@ class FancyCaptcha extends SimpleCaptcha {
 		return $info;
 	}
 
+	/**
+	 * @param array $captchaData
+	 * @param string $id
+	 * @return string
+	 */
 	public function getCaptchaInfo( $captchaData, $id ) {
 		$title = SpecialPage::getTitleFor( 'Captcha', 'image' );
 		return $title->getLocalURL( 'wpCaptchaId=' . urlencode( $id ) );
 	}
 
+	/**
+	 * @param array $requests
+	 * @param array $fieldInfo
+	 * @param array &$formDescriptor
+	 * @param string $action
+	 */
 	public function onAuthChangeFormFields(
 		array $requests, array $fieldInfo, array &$formDescriptor, $action
 	) {

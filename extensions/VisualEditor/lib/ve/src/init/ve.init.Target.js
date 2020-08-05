@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Initialization Target class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -15,11 +15,13 @@
  * @constructor
  * @param {Object} [config] Configuration options
  * @cfg {Object} [toolbarConfig] Configuration options for the toolbar
- * @cfg {ve.ui.CommandRegistry} [commandRegistry] Command registry to use
- * @cfg {ve.ui.SequenceRegistry} [sequenceRegistry] Sequence registry to use
- * @cfg {ve.ui.DataTransferHandlerFactory} [dataTransferHandlerFactory] Data transfer handler factory to use
+ * @cfg {Object} [modes] Available editing modes. Defaults to static.modes
+ * @cfg {Object} [defaultMode] Default mode for new surfaces. Must be in this.modes and defaults to first item.
  */
 ve.init.Target = function VeInitTarget( config ) {
+	var isIe = ve.init.platform.constructor.static.isInternetExplorer(),
+		isEdge = ve.init.platform.constructor.static.isEdge();
+
 	config = config || {};
 
 	// Parent constructor
@@ -36,20 +38,26 @@ ve.init.Target = function VeInitTarget( config ) {
 	this.surface = null;
 	this.toolbar = null;
 	this.actionsToolbar = null;
-	this.toolbarConfig = config.toolbarConfig;
-	this.commandRegistry = config.commandRegistry || ve.ui.commandRegistry;
-	this.sequenceRegistry = config.sequenceRegistry || ve.ui.sequenceRegistry;
-	this.dataTransferHandlerFactory = config.dataTransferHandlerFactory || ve.ui.dataTransferHandlerFactory;
-	this.documentTriggerListener = new ve.TriggerListener( this.constructor.static.documentCommands, this.commandRegistry );
-	this.targetTriggerListener = new ve.TriggerListener( this.constructor.static.targetCommands, this.commandRegistry );
+	this.toolbarConfig = config.toolbarConfig || {};
 	this.$scrollContainer = this.getScrollContainer();
 	this.toolbarScrollOffset = 0;
+
+	this.modes = config.modes || this.constructor.static.modes;
+	this.setDefaultMode( config.defaultMode );
+
+	this.setupTriggerListeners();
 
 	// Initialization
 	this.$element.addClass( 've-init-target' );
 
-	if ( ve.init.platform.constructor.static.isInternetExplorer() ) {
+	if ( isIe ) {
 		this.$element.addClass( 've-init-target-ie' );
+	}
+
+	// We don't have any Edge CSS bugs that aren't present in IE, so
+	// use a combined class to simplify selectors.
+	if ( isIe || isEdge ) {
+		this.$element.addClass( 've-init-target-ie-or-edge' );
 	}
 
 	// Events
@@ -67,18 +75,25 @@ OO.mixinClass( ve.init.Target, OO.EventEmitter );
 
 /* Static Properties */
 
+/**
+ * Editing modes available in the target.
+ *
+ * Must contain at least one mode. Overridden if the #modes config option is used.
+ *
+ * @static
+ * @property {string[]}
+ * @inheritable
+ */
+ve.init.Target.static.modes = [ 'visual' ];
+
 ve.init.Target.static.toolbarGroups = [
 	// History
-	{
-		header: OO.ui.deferMsg( 'visualeditor-toolbar-history' ),
-		include: [ 'undo', 'redo' ]
-	},
+	{ include: [ 'undo', 'redo' ] },
 	// Format
 	{
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-paragraph-format' ),
-		type: 'menu',
-		indicator: 'down',
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-format-tooltip' ),
+		type: 'menu',
 		include: [ { group: 'format' } ],
 		promote: [ 'paragraph' ],
 		demote: [ 'preformatted', 'blockquote' ]
@@ -90,35 +105,27 @@ ve.init.Target.static.toolbarGroups = [
 		include: [ 'bold', 'italic', 'moreTextStyle' ]
 	},
 	// Link
-	{
-		header: OO.ui.deferMsg( 'visualeditor-linkinspector-title' ),
-		include: [ 'link' ]
-	},
+	{ include: [ 'link' ] },
 	// Structure
 	{
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
+		title: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
 		type: 'list',
 		icon: 'listBullet',
-		title: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
-		indicator: 'down',
 		include: [ { group: 'structure' } ],
 		demote: [ 'outdent', 'indent' ]
 	},
 	// Insert
 	{
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
+		title: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
 		type: 'list',
 		icon: 'add',
 		label: '',
-		title: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
-		indicator: 'down',
 		include: '*'
 	},
 	// Special character toolbar
-	{
-		header: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
-		include: [ 'specialCharacter' ]
-	}
+	{ include: [ 'specialCharacter' ] }
 ];
 
 ve.init.Target.static.actionGroups = [];
@@ -158,24 +165,109 @@ ve.init.Target.static.excludeCommands = [];
  *
  * One set for external (non-VE) paste sources and one for all paste sources.
  *
- * @see ve.dm.ElementLinearData#sanitize
+ * Most rules are handled in ve.dm.ElementLinearData#sanitize, but htmlBlacklist
+ * is handled in ve.ce.Surface#afterPaste.
+ *
  * @type {Object}
  */
 ve.init.Target.static.importRules = {
 	external: {
 		blacklist: [
 			// Annotations
-			// TODO: allow spans
 			'textStyle/span', 'textStyle/font',
 			// Nodes
-			'alienInline', 'alienBlock', 'comment'
+			'alienInline', 'alienBlock', 'alienTableCell', 'comment', 'div'
 		],
+		// Selectors to filter. Runs before model type blacklist above.
+		htmlBlacklist: {
+			// remove: [ 'selectorToRemove' ]
+			unwrap: [ 'fieldset', 'legend' ]
+		},
 		nodeSanitization: true
 	},
 	all: null
 };
 
+/* Static methods */
+
+/**
+ * Parse document string into an HTML document
+ *
+ * @param {string} documentString Document. Note that this must really be a whole document
+ *   with a single root tag.
+ * @param {string} mode Editing mode
+ * @return {HTMLDocument} HTML document
+ */
+ve.init.Target.static.parseDocument = function ( documentString, mode ) {
+	var doc;
+	if ( mode === 'source' ) {
+		// Parse as plain text in source mode
+		doc = ve.createDocumentFromHtml( '' );
+
+		documentString.split( '\n' ).forEach( function ( line ) {
+			var p = doc.createElement( 'p' );
+			p.appendChild( doc.createTextNode( line ) );
+			doc.body.appendChild( p );
+		} );
+	} else {
+		doc = ve.createDocumentFromHtml( documentString );
+	}
+	return doc;
+};
+
+// Deprecated alias
+ve.init.Target.prototype.parseDocument = function () {
+	return this.constructor.static.parseDocument.apply( this.constructor.static, arguments );
+};
+
 /* Methods */
+
+/**
+ * Set default editing mode for new surfaces
+ *
+ * @param {string} defaultMode Editing mode, see static.modes
+ */
+ve.init.Target.prototype.setDefaultMode = function ( defaultMode ) {
+	// Mode is not available
+	if ( !this.isModeAvailable( defaultMode ) ) {
+		if ( !this.defaultMode ) {
+			// Use default mode if nothing has been set
+			defaultMode = this.modes[ 0 ];
+		} else {
+			// Fail if we already have a valid mode
+			return;
+		}
+	}
+	if ( defaultMode !== this.defaultMode ) {
+		// The follow classes are used here:
+		// * ve-init-target-visual
+		// * ve-init-target-[modename]
+		if ( this.defaultMode ) {
+			this.$element.removeClass( 've-init-target-' + this.defaultMode );
+		}
+		this.$element.addClass( 've-init-target-' + defaultMode );
+		this.defaultMode = defaultMode;
+	}
+};
+
+/**
+ * Get default editing mode for new surfaces
+ *
+ * @return {string} Editing mode
+ */
+ve.init.Target.prototype.getDefaultMode = function () {
+	return this.defaultMode;
+};
+
+/**
+ * Check if a specific editing mode is available
+ *
+ * @param {string} mode Editing mode
+ * @return {boolean} Editing mode is available
+ */
+ve.init.Target.prototype.isModeAvailable = function ( mode ) {
+	return this.modes.indexOf( mode ) !== -1;
+};
 
 /**
  * Bind event handlers to target and document
@@ -196,21 +288,35 @@ ve.init.Target.prototype.unbindHandlers = function () {
 };
 
 /**
+ * Teardown the target, removing all surfaces, toolbars and handlers
+ *
+ * @return {jQuery.Promise} Promise which resolves when the target has been torn down
+ */
+ve.init.Target.prototype.teardown = function () {
+	this.unbindHandlers();
+	// Wait for the toolbar to teardown before clearing surfaces,
+	// as it may want to transition away
+	return this.teardownToolbar().then( this.clearSurfaces.bind( this ) );
+};
+
+/**
  * Destroy the target
  */
 ve.init.Target.prototype.destroy = function () {
-	this.clearSurfaces();
-	if ( this.toolbar ) {
-		this.toolbar.destroy();
-		this.toolbar = null;
-	}
-	if ( this.actionsToolbar ) {
-		this.actionsToolbar.destroy();
-		this.actionsToolbar = null;
-	}
-	this.$element.remove();
-	this.unbindHandlers();
-	ve.init.target = null;
+	var target = this;
+	this.teardown().then( function () {
+		target.$element.remove();
+		ve.init.target = null;
+	} );
+};
+
+/**
+ * Set up trigger listeners
+ */
+ve.init.Target.prototype.setupTriggerListeners = function () {
+	var surfaceOrSurfaceConfig = this.getSurface() || this.getSurfaceConfig();
+	this.documentTriggerListener = new ve.TriggerListener( this.constructor.static.documentCommands, surfaceOrSurfaceConfig.commandRegistry );
+	this.targetTriggerListener = new ve.TriggerListener( this.constructor.static.targetCommands, surfaceOrSurfaceConfig.commandRegistry );
 };
 
 /**
@@ -246,10 +352,11 @@ ve.init.Target.prototype.onContainerScroll = function () {
  * @param {jQuery.Event} e Key down event
  */
 ve.init.Target.prototype.onDocumentKeyDown = function ( e ) {
-	var command, trigger = new ve.ui.Trigger( e );
+	var command, surface, trigger = new ve.ui.Trigger( e );
 	if ( trigger.isComplete() ) {
 		command = this.documentTriggerListener.getCommandByTrigger( trigger.toString() );
-		if ( command && command.execute( this.getSurface() ) ) {
+		surface = this.getSurface();
+		if ( surface && command && command.execute( surface ) ) {
 			e.preventDefault();
 		}
 	}
@@ -261,10 +368,11 @@ ve.init.Target.prototype.onDocumentKeyDown = function ( e ) {
  * @param {jQuery.Event} e Key down event
  */
 ve.init.Target.prototype.onTargetKeyDown = function ( e ) {
-	var command, trigger = new ve.ui.Trigger( e );
+	var command, surface, trigger = new ve.ui.Trigger( e );
 	if ( trigger.isComplete() ) {
 		command = this.targetTriggerListener.getCommandByTrigger( trigger.toString() );
-		if ( command && command.execute( this.getSurface() ) ) {
+		surface = this.getSurface();
+		if ( surface && command && command.execute( surface ) ) {
 			e.preventDefault();
 		}
 	}
@@ -281,12 +389,11 @@ ve.init.Target.prototype.onToolbarResize = function () {
  * Create a target widget.
  *
  * @method
- * @param {ve.dm.Document} dmDoc Document model
  * @param {Object} [config] Configuration options
  * @return {ve.ui.TargetWidget}
  */
-ve.init.Target.prototype.createTargetWidget = function ( dmDoc, config ) {
-	return new ve.ui.TargetWidget( dmDoc, config );
+ve.init.Target.prototype.createTargetWidget = function ( config ) {
+	return new ve.ui.TargetWidget( config );
 };
 
 /**
@@ -295,10 +402,10 @@ ve.init.Target.prototype.createTargetWidget = function ( dmDoc, config ) {
  * @method
  * @param {ve.dm.Document} dmDoc Document model
  * @param {Object} [config] Configuration options
- * @return {ve.ui.DesktopSurface}
+ * @return {ve.ui.Surface}
  */
 ve.init.Target.prototype.createSurface = function ( dmDoc, config ) {
-	return new ve.ui.DesktopSurface( dmDoc, this.getSurfaceConfig( config ) );
+	return new ve.ui.Surface( dmDoc, this.getSurfaceConfig( config ) );
 };
 
 /**
@@ -310,8 +417,9 @@ ve.init.Target.prototype.createSurface = function ( dmDoc, config ) {
 ve.init.Target.prototype.getSurfaceConfig = function ( config ) {
 	return ve.extendObject( {
 		$scrollContainer: this.$scrollContainer,
-		commandRegistry: this.commandRegistry,
-		sequenceRegistry: this.sequenceRegistry,
+		commandRegistry: ve.ui.commandRegistry,
+		sequenceRegistry: ve.ui.sequenceRegistry,
+		dataTransferHandlerFactory: ve.ui.dataTransferHandlerFactory,
 		includeCommands: this.constructor.static.includeCommands,
 		excludeCommands: OO.simpleArrayUnion(
 			this.constructor.static.excludeCommands,
@@ -327,10 +435,10 @@ ve.init.Target.prototype.getSurfaceConfig = function ( config ) {
  *
  * @param {ve.dm.Document} dmDoc Document model
  * @param {Object} [config] Configuration options
- * @return {ve.ui.DesktopSurface}
+ * @return {ve.ui.Surface}
  */
 ve.init.Target.prototype.addSurface = function ( dmDoc, config ) {
-	var surface = this.createSurface( dmDoc, config );
+	var surface = this.createSurface( dmDoc, ve.extendObject( { mode: this.getDefaultMode() }, config ) );
 	this.surfaces.push( surface );
 	surface.getView().connect( this, {
 		focus: this.onSurfaceViewFocus.bind( this, surface )
@@ -342,6 +450,9 @@ ve.init.Target.prototype.addSurface = function ( dmDoc, config ) {
  * Destroy and remove all surfaces from the target
  */
 ve.init.Target.prototype.clearSurfaces = function () {
+	// We're about to destroy this.surface, so unset it for sanity
+	// Otherwise, getSurface() could return a destroyed surface
+	this.surface = null;
 	while ( this.surfaces.length ) {
 		this.surfaces.pop().destroy();
 	}
@@ -362,6 +473,9 @@ ve.init.Target.prototype.onSurfaceViewFocus = function ( surface ) {
  * @param {ve.ui.Surface} surface Surface
  */
 ve.init.Target.prototype.setSurface = function ( surface ) {
+	if ( this.surfaces.indexOf( surface ) === -1 ) {
+		throw new Error( 'Active surface must have been added first' );
+	}
 	if ( surface !== this.surface ) {
 		this.surface = surface;
 		this.setupToolbar( surface );
@@ -396,7 +510,7 @@ ve.init.Target.prototype.getToolbar = function () {
  */
 ve.init.Target.prototype.getActions = function () {
 	if ( !this.actionsToolbar ) {
-		this.actionsToolbar = new ve.ui.TargetToolbar( this );
+		this.actionsToolbar = new ve.ui.TargetToolbar( this, { position: this.toolbarConfig.position } );
 	}
 	return this.actionsToolbar;
 };
@@ -408,24 +522,41 @@ ve.init.Target.prototype.getActions = function () {
  */
 ve.init.Target.prototype.setupToolbar = function ( surface ) {
 	var toolbar = this.getToolbar(),
-		actions = this.getActions();
+		actions = this.getActions(),
+		rAF = window.requestAnimationFrame || setTimeout;
 
 	toolbar.connect( this, { resize: 'onToolbarResize' } );
 
 	toolbar.setup( this.constructor.static.toolbarGroups, surface );
 	actions.setup( this.constructor.static.actionGroups, surface );
-	this.attachToolbar( surface );
-	toolbar.$bar.append( surface.getToolbarDialogs().$element );
+	this.attachToolbar();
 	toolbar.$actions.append( actions.$element );
-	this.onContainerScroll();
+	rAF( this.onContainerScrollHandler );
+};
 
+/**
+ * Teardown the toolbar
+ *
+ * @return {jQuery.Promise} Promise which resolves when the toolbar has been torn down
+ */
+ve.init.Target.prototype.teardownToolbar = function () {
+	if ( this.toolbar ) {
+		this.toolbar.destroy();
+		this.toolbar = null;
+	}
+	if ( this.actionsToolbar ) {
+		this.actionsToolbar.destroy();
+		this.actionsToolbar = null;
+	}
+	return $.Deferred().resolve().promise();
 };
 
 /**
  * Attach the toolbar to the DOM
  */
 ve.init.Target.prototype.attachToolbar = function () {
-	this.getToolbar().$element.insertBefore( this.getToolbar().getSurface().$element );
-	this.getToolbar().initialize();
+	var toolbar = this.getToolbar();
+	toolbar.$element.insertBefore( toolbar.getSurface().$element );
+	toolbar.initialize();
 	this.getActions().initialize();
 };

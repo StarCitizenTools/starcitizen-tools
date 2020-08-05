@@ -18,8 +18,8 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @author Aaron Schulz
  */
+use Psr\Log\LoggerInterface;
 
 /**
  * Class to handle job queues stored in Redis
@@ -66,11 +66,15 @@
 class JobQueueRedis extends JobQueue {
 	/** @var RedisConnectionPool */
 	protected $redisPool;
+	/** @var LoggerInterface */
+	protected $logger;
 
 	/** @var string Server address */
 	protected $server;
 	/** @var string Compression method to use */
 	protected $compression;
+
+	const MAX_PUSH_SIZE = 25; // avoid tying up the server
 
 	/**
 	 * @param array $params Possible keys:
@@ -96,6 +100,7 @@ class JobQueueRedis extends JobQueue {
 				"Non-daemonized mode is no longer supported. Please install the " .
 				"mediawiki/services/jobrunner service and update \$wgJobTypeConf as needed." );
 		}
+		$this->logger = \MediaWiki\Logger\LoggerFactory::getInstance( 'redis' );
 	}
 
 	protected function supportedOrders() {
@@ -127,7 +132,7 @@ class JobQueueRedis extends JobQueue {
 	protected function doGetSize() {
 		$conn = $this->getConnection();
 		try {
-			return $conn->lSize( $this->getQueueKey( 'l-unclaimed' ) );
+			return $conn->lLen( $this->getQueueKey( 'l-unclaimed' ) );
 		} catch ( RedisException $e ) {
 			$this->throwRedisException( $conn, $e );
 		}
@@ -208,7 +213,7 @@ class JobQueueRedis extends JobQueue {
 			if ( $flags & self::QOS_ATOMIC ) {
 				$batches = [ $items ]; // all or nothing
 			} else {
-				$batches = array_chunk( $items, 100 ); // avoid tying up the server
+				$batches = array_chunk( $items, self::MAX_PUSH_SIZE );
 			}
 			$failed = 0;
 			$pushed = 0;
@@ -250,6 +255,7 @@ class JobQueueRedis extends JobQueue {
 			$args[] = (string)$this->serialize( $item );
 		}
 		static $script =
+		/** @lang Lua */
 <<<LUA
 		local kUnclaimed, kSha1ById, kIdBySha1, kDelayed, kData, kQwJobs = unpack(KEYS)
 		-- First argument is the queue ID
@@ -339,6 +345,7 @@ LUA;
 	 */
 	protected function popAndAcquireBlob( RedisConnRef $conn ) {
 		static $script =
+		/** @lang Lua */
 <<<LUA
 		local kUnclaimed, kSha1ById, kIdBySha1, kClaimed, kAttempts, kData = unpack(KEYS)
 		local rTime = unpack(ARGV)
@@ -386,6 +393,7 @@ LUA;
 		$conn = $this->getConnection();
 		try {
 			static $script =
+			/** @lang Lua */
 <<<LUA
 			local kClaimed, kAttempts, kData = unpack(KEYS)
 			local id = unpack(ARGV)
@@ -494,7 +502,7 @@ LUA;
 				$keys[] = $this->getQueueKey( $prop );
 			}
 
-			$ok = ( $conn->delete( $keys ) !== false );
+			$ok = ( $conn->del( $keys ) !== false );
 			$conn->sRem( $this->getGlobalKey( 's-queuesWithJobs' ), $this->encodeQueueName() );
 
 			return $ok;
@@ -599,7 +607,7 @@ LUA;
 		try {
 			$conn->multi( Redis::PIPELINE );
 			foreach ( $types as $type ) {
-				$conn->lSize( $this->getQueueKey( 'l-unclaimed', $type ) );
+				$conn->lLen( $this->getQueueKey( 'l-unclaimed', $type ) );
 			}
 			$res = $conn->exec();
 			if ( is_array( $res ) ) {
@@ -745,7 +753,7 @@ LUA;
 	 * @throws JobQueueConnectionError
 	 */
 	protected function getConnection() {
-		$conn = $this->redisPool->getConnection( $this->server );
+		$conn = $this->redisPool->getConnection( $this->server, $this->logger );
 		if ( !$conn ) {
 			throw new JobQueueConnectionError(
 				"Unable to connect to redis server {$this->server}." );
@@ -786,9 +794,9 @@ LUA;
 	private function getGlobalKey( $name ) {
 		$parts = [ 'global', 'jobqueue', $name ];
 		foreach ( $parts as $part ) {
-		    if ( !preg_match( '/[a-zA-Z0-9_-]+/', $part ) ) {
-		        throw new InvalidArgumentException( "Key part characters are out of range." );
-		    }
+			if ( !preg_match( '/[a-zA-Z0-9_-]+/', $part ) ) {
+				throw new InvalidArgumentException( "Key part characters are out of range." );
+			}
 		}
 
 		return implode( ':', $parts );

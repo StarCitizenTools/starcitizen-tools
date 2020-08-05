@@ -1,6 +1,7 @@
 div.tcenter.embedvideo,
 div.embedvideo.ev_center  {
-	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 div.embedvideo.ev_center > .embedvideowrap {
@@ -8,11 +9,17 @@ div.embedvideo.ev_center > .embedvideowrap {
 	margin-right: auto;
 }
 
+div.embedvideo.ev_center .thumbcaption {
+	text-align: center;
+}
+
+/* @noflip */
 div.embedvideo.ev_left {
 	clear: left;
 	float: left;
 }
 
+/* @noflip */
 div.embedvideo.ev_right {
 	clear: right;
 	float: right;
@@ -22,6 +29,33 @@ div.embedvideo.ev_inline {
 	display: inline-block;
 }
 
+div.embedvideo.ev_top {
+	vertical-align: top;
+}
+
+div.embedvideo.ev_middle {
+	vertical-align: middle;
+}
+
+div.embedvideo.ev_bottom {
+	vertical-align: bottom;
+}
+
+div.embedvideo.ev_baseline {
+	vertical-align: baseline;
+}
+
 video.thumbborder, audio.thumbborder {
 	border: 1pt solid #ddd;
+}
+
+a.vplink {
+	padding-left: 18px;
+	background-image: url(../img/play.png);
+	background-repeat: no-repeat;
+	background-position: left center;
+}
+
+a.vplink:hover {
+	background-image: url(../img/play-hover.png);
 }

@@ -95,12 +95,10 @@
 	};
 
 	/**
-	 * Set up the window overlay
+	 * Set up the window manager
 	 */
-	mw.flow.Initializer.prototype.setupWindowOverlay = function () {
-		// Set up window overlay
-		$( 'body' ).append( mw.flow.ui.windowOverlay.$element );
-		mw.flow.ui.windowOverlay.$element.append( mw.flow.ui.windowManager.$element );
+	mw.flow.Initializer.prototype.setupWindowManager = function () {
+		$( 'body' ).append( mw.flow.ui.windowManager.$element );
 	};
 
 	/**
@@ -135,8 +133,8 @@
 	 * Initialize the UI widgets
 	 */
 	mw.flow.Initializer.prototype.initializeWidgets = function () {
-		// Set up window overlay
-		this.setupWindowOverlay();
+		// Set up window manager
+		this.setupWindowManager();
 
 		// Set up sidebar widget if it needs to be there
 		this.setupSidebarWidget();
@@ -344,7 +342,11 @@
 	mw.flow.Initializer.prototype.setupNewTopicWidget = function ( $form ) {
 		var self = this;
 
-		this.newTopicWidget = new mw.flow.ui.NewTopicWidget( this.pageTitle.getPrefixedDb() );
+		this.newTopicWidget = new mw.flow.ui.NewTopicWidget( this.pageTitle.getPrefixedDb(), {
+			editor: {
+				confirmLeave: !!mw.user.options.get( 'useeditwarning' )
+			}
+		} );
 
 		// Events
 		this.newTopicWidget.connect( this, {
@@ -372,7 +374,10 @@
 
 		descriptionWidget = new mw.flow.ui.BoardDescriptionWidget( this.board, {
 			$existing: $( '.flow-ui-boardDescriptionWidget-content' ).contents(),
-			$categories: $( '.flow-board-header-category-view-nojs' ).contents()
+			$categories: $( '.flow-board-header-category-view-nojs' ).contents(),
+			editor: {
+				confirmLeave: !!mw.user.options.get( 'useeditwarning' )
+			}
 		} ).once( 'saveContent', this.reloadOnCreate ); // Reload page if board is new so we get page actions at top
 
 		// The category widget is inside the board description widget.
@@ -411,7 +416,10 @@
 				placeholder = mw.msg( 'flow-reply-topic-title-placeholder', $topic.find( '.flow-topic-title' ).text().trim() ),
 				replyTo = $( this ).find( 'input[name="topic_replyTo"]' ).val(),
 				replyWidget = new mw.flow.ui.ReplyWidget( $topic.data( 'flowId' ), replyTo, {
-					placeholder: placeholder
+					placeholder: placeholder,
+					editor: {
+						confirmLeave: !!mw.user.options.get( 'useeditwarning' )
+					}
 				} );
 
 			replyWidget.on( 'saveContent', function ( workflow ) {
@@ -446,7 +454,11 @@
 				$board = $( '.flow-board' ),
 				flowBoard = mw.flow.getPrototypeMethod( 'component', 'getInstanceByElement' )( $board );
 
-			editPostWidget = new mw.flow.ui.EditPostWidget( topicId, postId );
+			editPostWidget = new mw.flow.ui.EditPostWidget( topicId, postId, {
+				editor: {
+					confirmLeave: !!mw.user.options.get( 'useeditwarning' )
+				}
+			} );
 			editPostWidget
 				.on( 'saveContent', function ( workflow ) {
 					editPostWidget.destroy();
@@ -544,7 +556,11 @@
 					return false;
 				}
 
-				widget = new mw.flow.ui.TopicTitleWidget( topicId );
+				widget = new mw.flow.ui.TopicTitleWidget( topicId, {
+					editor: {
+						confirmLeave: !!mw.user.options.get( 'useeditwarning' )
+					}
+				} );
 				widget
 					.on( 'saveContent', function ( workflow ) {
 						widget.$element.remove();
@@ -581,12 +597,12 @@
 				uri = new mw.Uri( href ),
 				replyTo = uri.query.topic_postId,
 				$topic = $( this ).closest( '.flow-topic' ),
-					placeholder = mw.msg( 'flow-reply-topic-title-placeholder', $topic.find( '.flow-topic-title' ).text().trim() ),
-					// replyTo can refer to a post ID or a topic ID
-					// For posts, the ReplyWidget should go in .flow-replies
-					// For topics, it's directly inside the topic
-					$targetContainer = $( '#flow-post-' + replyTo + ' > .flow-replies, #flow-topic-' + replyTo ),
-					$existingWidget = $targetContainer.children( '.flow-ui-replyWidget' );
+				placeholder = mw.msg( 'flow-reply-topic-title-placeholder', $topic.find( '.flow-topic-title' ).text().trim() ),
+				// replyTo can refer to a post ID or a topic ID
+				// For posts, the ReplyWidget should go in .flow-replies
+				// For topics, it's directly inside the topic
+				$targetContainer = $( '#flow-post-' + replyTo + ' > .flow-replies, #flow-topic-' + replyTo ),
+				$existingWidget = $targetContainer.children( '.flow-ui-replyWidget' );
 
 			// Check that there's not already a reply widget existing in the same place
 			if ( $existingWidget.length > 0 ) {
@@ -598,7 +614,10 @@
 
 			replyWidget = new mw.flow.ui.ReplyWidget( $topic.data( 'flowId' ), replyTo, {
 				placeholder: placeholder,
-				expandable: false
+				expandable: false,
+				editor: {
+					confirmLeave: !!mw.user.options.get( 'useeditwarning' )
+				}
 			} );
 			// Create a reference so we can call it from the DOM above
 			replyWidget.$element.data( 'self', replyWidget );
@@ -635,13 +654,15 @@
 	 * @param {string} [action] Lock action 'lock' or 'unlock'. If not given, the action
 	 *  is assumed as summary only.
 	 */
-	mw.flow.Initializer.prototype.startEditTopicSummary = function ( isFullBoard, topicId, action  ) {
+	mw.flow.Initializer.prototype.startEditTopicSummary = function ( isFullBoard, topicId, action ) {
 		var editTopicSummaryWidget,
 			self = this,
 			$topic = $( '#flow-topic-' + topicId ),
 			$summaryContainer = $topic.find( '.flow-topic-summary-container' ),
 			$topicSummary = $summaryContainer.find( '.flow-topic-summary' ),
-			options = {},
+			editorOptions = {
+				confirmLeave: !!mw.user.options.get( 'useeditwarning' )
+			},
 			pageName = mw.config.get( 'wgPageName' ),
 			title = mw.Title.newFromText( pageName );
 
@@ -649,14 +670,17 @@
 			return;
 		}
 
-		// TODO: This should be managed by the EditTopicSummary widget
-		if ( action === 'lock' || action === 'unlock' ) {
-			options = {
-				cancelMsgKey: 'flow-skip-summary'
-			};
+		// Don't launch a summary editor when there is one already
+		if ( $summaryContainer.find( '.flow-ui-editTopicSummaryWidget' ).length ) {
+			return;
 		}
 
-		editTopicSummaryWidget = new mw.flow.ui.EditTopicSummaryWidget( topicId, options );
+		// TODO: This should be managed by the EditTopicSummary widget
+		if ( action === 'lock' || action === 'unlock' ) {
+			editorOptions.cancelMsgKey = 'flow-skip-summary';
+		}
+
+		editTopicSummaryWidget = new mw.flow.ui.EditTopicSummaryWidget( topicId, { editor: editorOptions } );
 		editTopicSummaryWidget
 			.on( 'saveContent', function ( workflow ) {
 				editTopicSummaryWidget.destroy();
@@ -715,7 +739,11 @@
 			return;
 		}
 
-		editPostWidget = new mw.flow.ui.EditPostWidget( $topic.data( 'flowId' ), $post.data( 'flowId' ) );
+		editPostWidget = new mw.flow.ui.EditPostWidget( $topic.data( 'flowId' ), $post.data( 'flowId' ), {
+			editor: {
+				confirmLeave: !!mw.user.options.get( 'useeditwarning' )
+			}
+		} );
 
 		editPostWidget
 			.on( 'saveContent', saveOrCancelHandler )
@@ -737,30 +765,54 @@
 	 * @param {jQuery} $domToReplace The element, usually a form, that the new editor replaces
 	 * @param {string} [content] The content of the editing area
 	 * @param {string} [saveMsgKey] The message key for the editor save button
+	 * @return {mw.flow.ui.EditorWidget}
 	 */
 	mw.flow.Initializer.prototype.createEditorWidget = function ( $domToReplace, content, saveMsgKey ) {
 		var $wrapper,
-			anonWarning = new mw.flow.ui.AnonWarningWidget(),
+			$messages = $( '<div>' ).addClass( 'flow-ui-editorContainerWidget-messages' ),
+			isProbablyEditable = mw.config.get( 'wgIsProbablyEditable' ),
+			anonWarning = new mw.flow.ui.AnonWarningWidget( {
+				isProbablyEditable: isProbablyEditable
+			} ),
+			canNotEdit = new mw.flow.ui.CanNotEditWidget( new mw.flow.dm.APIHandler(), {
+				userGroups: mw.config.get( 'wgUserGroups' ),
+				restrictionEdit: mw.config.get( 'wgRestrictionEdit' ),
+				isProbablyEditable: isProbablyEditable
+			} ),
+			captcha = new mw.flow.dm.Captcha(),
+			captchaWidget = new mw.flow.ui.CaptchaWidget( captcha ),
 			error = new OO.ui.LabelWidget( {
 				classes: [ 'flow-ui-boardDescriptionWidget-error flow-errors errorbox' ]
 			} ),
 			editor = new mw.flow.ui.EditorWidget( {
-				saveMsgKey: saveMsgKey
+				saveMsgKey: saveMsgKey,
+				confirmLeave: !!mw.user.options.get( 'useeditwarning' )
 			} );
+
+		function handleFailure( errorCode, errorObj ) {
+			captchaWidget.model.update( errorCode, errorObj );
+
+			if ( !captchaWidget.model.isRequired() ) {
+				error.setLabel( new OO.ui.HtmlSnippet( errorObj.error && errorObj.error.info || errorObj.exception ) );
+				error.toggle( true );
+			}
+
+			editor.popPending();
+		}
 
 		error.toggle( false );
 		editor.toggle( true );
 		anonWarning.toggle( mw.user.isAnon() );
-
-		// HACK: We still need a reference to the error widget, for
-		// the api responses in the intialized widgets that use this
-		// function, so make a forced connection
-		editor.error = error;
+		canNotEdit.toggle( !isProbablyEditable );
 
 		$wrapper = $( '<div>' )
 			.append(
-				error.$element,
-				anonWarning.$element,
+				$messages.append(
+					error.$element,
+					captchaWidget.$element,
+					anonWarning.$element,
+					canNotEdit.$element
+				),
 				editor.$element
 			);
 
@@ -768,33 +820,26 @@
 
 		// Prepare the editor
 		editor.pushPending();
-		editor.activate();
-
-		editor.setContent( content, 'wikitext' )
+		editor.activate( { content: content || '', format: 'wikitext' } )
 			.then( function () {
 				editor.popPending();
 			} );
 
 		editor
 			.on( 'saveContent', function ( content, contentFormat ) {
-				var $captchaField, captcha;
+				var captchaResponse;
 
 				editor.pushPending();
 
-				$captchaField = error.$label.find( '[name="wpCaptchaWord"]' );
-				if ( $captchaField.length > 0 ) {
-					captcha = {
-						id: this.error.$label.find( '[name="wpCaptchaId"]' ).val(),
-						answer: $captchaField.val()
-					};
-				}
+				captchaResponse = captchaWidget.getResponse();
+
 				error.setLabel( '' );
 				error.toggle( false );
 
 				// HACK: This is a cheat so that we can have a single function
-				// that creates the editor, but multiple uses, especially for the
-				// APIhandler in different cases
-				editor.emit( 'afterSaveContent', content, contentFormat, captcha );
+				// that creates the editor and a single error-handler, but multiple
+				// uses, especially for the APIhandler in different cases
+				editor.emit( 'afterSaveContent', content, contentFormat, captchaResponse, handleFailure );
 			} )
 			.on( 'cancel', function () {
 				editor.pushPending();
@@ -811,143 +856,68 @@
 	 * @return {boolean} The page is an in-progress undo form
 	 */
 	mw.flow.Initializer.prototype.isUndoForm = function () {
-		return !!( $( 'form[data-module="topic"]' ).length ||
-			$( 'form[data-module="header"]' ).length );
+		return !!$( 'form[data-module="topic"], form[data-module="header"], form[data-module="topicsummary"]' ).length;
 	};
 
-	/**
-	 * Set up editors in undo pages
-	 */
 	mw.flow.Initializer.prototype.setupUndoPage = function () {
-		if ( $( 'form[data-module="topic"]' ).length ) {
-			this.replaceEditorInUndoEditPost( $( 'form[data-module="topic"]' ) );
-		} else if ( $( 'form[data-module="header"]' ).length ) {
-			this.replaceEditorInUndoHeaderPost( $( 'form[data-module="header"]' ) );
-		}
-	};
-
-	/**
-	 * Replace the editor in undo edit post pages
-	 *
-	 * @param {jQuery} $form The form where the no-js editor exists to be replaced
-	 */
-	mw.flow.Initializer.prototype.replaceEditorInUndoEditPost = function ( $form ) {
-		var apiHandler, content, postId, editor, prevRevId,
+		var $undoForm = $( 'form[data-module="topic"], form[data-module="header"], form[data-module="topicsummary"]' ),
+			undoType = $undoForm.attr( 'data-module' ),
 			pageName = mw.config.get( 'wgPageName' ),
 			title = mw.Title.newFromText( pageName ),
 			topicId = title.getNameText(),
+			postId = $undoForm.find( 'input[name="topic_postId"]' ).val(),
+			prevRevId = $undoForm.find( 'input[name="' + undoType + '_prev_revision"]' ).val(),
+			content = $undoForm.find( 'textarea' ).val(),
 			returnToTitle = function () {
-				// HACK: redirect to topic view
-				window.location.href = title.getUrl();
-			};
+				var url;
+				if ( undoType === 'topic' ) {
+					// If we're undoing a post edit, redirect to the topic page with the right parameter
+					// and fragment to highlight the post
+					url = title.getUrl( { topic_showPostId: postId } ) + '#flow-post-' + postId;
+				} else {
+					// When undoing a topic summary edit, redirect to the topic;
+					// when undoing a board description edit, redirect to the board
+					url = title.getUrl();
+				}
+				window.location.href = url;
+			},
+			apiHandler = new mw.flow.dm.APIHandler(
+				title.getPrefixedDb(),
+				{ currentRevision: prevRevId }
+			),
+			save = ( {
+				topic: apiHandler.savePost.bind( apiHandler, topicId, postId ),
+				header: apiHandler.saveDescription.bind( apiHandler ),
+				topicsummary: apiHandler.saveTopicSummary.bind( apiHandler, topicId )
+			} )[ undoType ],
+			saveMsgKey = ( {
+				topic: [
+					'flow-post-action-edit-post-submit-anonymously',
+					'flow-post-action-edit-post-submit'
+				],
+				header: [
+					'flow-edit-header-submit-anonymously',
+					'flow-edit-header-submit'
+				],
+				topicsummary: [
+					'flow-topic-action-update-topic-summary',
+					'flow-topic-action-update-topic-summary'
+				]
+			} )[ undoType ][ mw.user.isAnon() ? 0 : 1 ],
+			editor = this.createEditorWidget( $undoForm, content, saveMsgKey );
 
-		if ( !$form.length ) {
-			return;
-		}
-
-		postId = $form.find( 'input[name="topic_postId"]' ).val();
-		prevRevId = $form.find( 'input[name="topic_prev_revision"]' ).val();
-		content = $form.find( 'textarea' ).val();
-
-		apiHandler = new mw.flow.dm.APIHandler(
-			'Topic:' + topicId,
-			{
-				currentRevision: prevRevId
-			}
-		);
-
-		// Create the editor
-		editor = this.createEditorWidget(
-			$form,
-			content,
-			mw.user.isAnon() ? 'flow-post-action-edit-post-submit-anonymously' : 'flow-post-action-edit-post-submit'
-		);
-
-		// Events
 		editor
-			.on( 'afterSaveContent', function ( content, contentFormat, captcha ) {
-				apiHandler.savePost( topicId, postId, content, contentFormat, captcha )
+			.on( 'afterSaveContent', function ( content, contentFormat, captcha, handleFailure ) {
+				save( content, contentFormat, captcha )
 					.then(
 						// Success
 						returnToTitle,
-						// Failure
-						function ( errorCode, errorObj ) {
-							if ( /spamfilter$/.test( errorCode ) && errorObj.error.spamfilter === 'flow-spam-confirmedit-form' ) {
-								editor.error.setLabel(
-									// CAPTCHA form
-									new OO.ui.HtmlSnippet( errorObj.error.info )
-								);
-							} else {
-								editor.error.setLabel( new OO.ui.HtmlSnippet( errorObj.error && errorObj.error.info || errorObj.exception ) );
-							}
 
-							editor.error.toggle( true );
-							editor.popPending();
-						}
+						// Failure
+						handleFailure
 					);
 			} )
 			.on( 'afterCancel', returnToTitle );
-	};
-
-	/**
-	 * Replace the editor in undo edit header pages
-	 *
-	 * @param {jQuery} $form The form where the no-js editor exists to be replaced
-	 */
-	mw.flow.Initializer.prototype.replaceEditorInUndoHeaderPost = function ( $form ) {
-		var prevRevId, editor, content,
-			error, apiHandler,
-			pageName = mw.config.get( 'wgPageName' ),
-			title = mw.Title.newFromText( pageName ),
-			returnToBoard = function () {
-				window.location.href = title.getUrl();
-			};
-
-		if ( !$form.length ) {
-			return;
-		}
-
-		prevRevId = $form.find( 'input[name="header_prev_revision"]' ).val();
-		content = $form.find( 'textarea[name="header_content"]' ).val();
-
-		apiHandler = new mw.flow.dm.APIHandler(
-			title.getPrefixedDb(),
-			{
-				currentRevision: prevRevId
-			}
-		);
-
-		// Create the editor
-		editor = this.createEditorWidget(
-			$form,
-			content,
-			mw.user.isAnon() ? 'flow-edit-header-submit-anonymously' : 'flow-edit-header-submit'
-		);
-
-		// Events
-		editor
-			.on( 'afterSaveContent', function ( content, contentFormat, captcha ) {
-				apiHandler.saveDescription( content, contentFormat, captcha )
-					.then(
-						// Success
-						returnToBoard,
-						// Failure
-						function ( errorCode, errorObj ) {
-							if ( /spamfilter$/.test( errorCode ) && errorObj.error.spamfilter === 'flow-spam-confirmedit-form' ) {
-								error.setLabel(
-									// CAPTCHA form
-									new OO.ui.HtmlSnippet( errorObj.error.info )
-								);
-							} else {
-								error.setLabel( new OO.ui.HtmlSnippet( errorObj.error && errorObj.error.info || errorObj.exception ) );
-							}
-							editor.popPending();
-						}
-					);
-			} )
-			.on( 'afterCancel', function () {
-				returnToBoard();
-			} );
 	};
 
 	/**

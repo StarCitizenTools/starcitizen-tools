@@ -1,27 +1,10 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var resultGroups;
 
-	$( document ).ready( function () {
-		var $messages = $( '.tux-message' );
-
+	$( function () {
 		resultGroups = $( '.facet.groups' ).data( 'facets' );
-
-		$messages.each( function () {
-			var $this = $( this );
-
-			$this.translateeditor( {
-				message: {
-					title: $this.data( 'title' ),
-					definition: $this.data( 'definition' ),
-					translation: $this.data( 'translation' ),
-					group: $this.data( 'group' )
-				}
-			} );
-		} );
-
-		$messages.last().addClass( 'last-message' );
 
 		$( '.tux-searchpage .button' ).click( function () {
 			var query = $( '.tux-searchpage .searchinputbox' ).val(),
@@ -29,8 +12,7 @@
 				$form = $( '.tux-searchpage form[name=searchform]' );
 
 			$.each( result, function ( index, value ) {
-				var $input = $( '<input>' )
-					.prop( 'type', 'hidden' ),
+				var $input = $( '<input>' ).prop( 'type', 'hidden' ),
 					$elem = $form.find( 'input[name=' + index + ']' );
 
 				if ( $elem.length ) {
@@ -82,11 +64,9 @@
 			result,
 			i,
 			selectedClasss = '',
-			docLanguageCode,
 			languageCode,
 			quickLanguageList = [],
 			unique = [],
-			regions,
 			$ulsTrigger,
 			uri;
 
@@ -104,30 +84,20 @@
 		}
 
 		resultCount = Object.keys( languages ).length;
-
-		// If a documentation pseudo-language is defined,
-		// add it to the language selector
-		docLanguageCode = mw.config.get( 'wgTranslateDocumentationLanguageCode' );
-		if ( languages[ docLanguageCode ] ) {
-			mw.translate.addDocumentationLanguage();
-			mw.config.get( 'wgULSLanguages' )[ docLanguageCode ] = mw.msg( 'translate-documentation-language' );
-			regions = [ 'WW', 'SP', 'AM', 'EU', 'ME', 'AF', 'AS', 'PA' ];
-		}
-
 		quickLanguageList = quickLanguageList.concat( mw.uls.getFrequentLanguageList() )
 			.concat( Object.keys( languages ) );
 
 		// Remove duplicates from the language list
-		$.each( quickLanguageList, function ( i, v ) {
-			result = languages[ v ];
-			if ( result && $.inArray( v, unique ) === -1 ) {
-				unique.push( v );
+		quickLanguageList.forEach( function ( lang ) {
+			result = languages[ lang ];
+			if ( result && unique.indexOf( lang ) === -1 ) {
+				unique.push( lang );
 			}
 		} );
 
-		if ( currentLanguage && $.inArray( currentLanguage, quickLanguageList ) >= 0 ) {
+		if ( currentLanguage && quickLanguageList.indexOf( currentLanguage ) >= 0 ) {
 			quickLanguageList = unique.splice( 0, 5 );
-			if ( $.inArray( currentLanguage, quickLanguageList ) === -1 ) {
+			if ( quickLanguageList.indexOf( currentLanguage ) === -1 ) {
 				quickLanguageList = quickLanguageList.concat( currentLanguage );
 			}
 		} else {
@@ -151,12 +121,13 @@
 
 			$languages.append( $( '<div>' )
 				.addClass( 'row facet-item' )
-				.append( $( '<span>' )
-					.addClass( 'facet-name ' + selectedClasss )
-					.append( $( '<a>' )
-						.attr( 'href', result.url )
-						.text( getLanguageLabel( languageCode ) )
-					),
+				.append(
+					$( '<span>' )
+						.addClass( 'facet-name ' + selectedClasss )
+						.append( $( '<a>' )
+							.attr( 'href', result.url )
+							.text( getLanguageLabel( languageCode ) )
+						),
 					$( '<span>' )
 						.addClass( 'facet-count' )
 						.text( result.count )
@@ -165,8 +136,10 @@
 		}
 
 		$.each( Object.keys( languages ), function ( index, languageCode ) {
-			ulslanguages[ languageCode ] = mw.config.get( 'wgULSLanguages' )[ languageCode ];
+			ulslanguages[ languageCode ] = mw.config.get( 'wgTranslateLanguages' )[ languageCode ];
 		} );
+
+		mw.translate.addExtraLanguagesToLanguageData( ulslanguages, [ 'SP' ] );
 
 		if ( resultCount > 6 ) {
 			$ulsTrigger = $( '<a>' )
@@ -183,8 +156,9 @@
 				},
 				compact: true,
 				languages: ulslanguages,
+				ulsPurpose: 'translate-special-searchtranslations',
 				top: $languages.offset().top,
-				showRegions: regions
+				showRegions: [ 'SP' ].concat( $.fn.lcd.defaults.showRegions )
 			} );
 		}
 	}
@@ -228,7 +202,7 @@
 		}
 		grouppath = getParameterByName( 'grouppath' ).split( '|' )[ 0 ];
 		if ( currentGroup && resultGroups[ grouppath ] &&
-			$.inArray( grouppath, groupList ) < 0 &&
+			groupList.indexOf( grouppath ) < 0 &&
 			level === 0
 		) {
 			// Make sure current selected group is displayed always.
@@ -246,7 +220,7 @@
 			if ( parentGrouppath !== undefined ) {
 				grouppath = parentGrouppath + '|' + groupId;
 			} else {
-				grouppath =  groupId;
+				grouppath = groupId;
 			}
 			uri.extend( { group: groupId, grouppath: grouppath } );
 
@@ -260,13 +234,14 @@
 			}
 
 			$groupRow = $( '<div>' )
-				.addClass( 'row facet-item ' + ' facet-level-' + level )
-				.append( $( '<span>' )
-					.addClass( 'facet-name ' + selectedClass )
-					.append( $( '<a>' )
-						.attr( 'href', uri.toString() )
-						.text( group.label )
-					),
+				.addClass( 'row facet-item facet-level-' + level )
+				.append(
+					$( '<span>' )
+						.addClass( 'facet-name ' + selectedClass )
+						.append( $( '<a>' )
+							.attr( 'href', uri.toString() )
+							.text( group.label )
+						),
 					$( '<span>' )
 						.addClass( 'facet-count' )
 						.text( mw.language.convertNumber( group.count ) )
@@ -280,9 +255,10 @@
 		if ( resultCount > maxListSize && resultCount - groupList.length > 0 && level === 0 ) {
 			$grouSelectorTrigger = $( '<div>' )
 				.addClass( 'rowfacet-item ' )
-				.append( $( '<a>' )
-					.text( '...' )
-					.addClass( 'translate-search-more-groups' ),
+				.append(
+					$( '<a>' )
+						.text( '...' )
+						.addClass( 'translate-search-more-groups' ),
 					$( '<span>' )
 						.addClass( 'translate-search-more-groups-info' )
 						.text( mw.msg( 'translate-search-more-groups-info',
@@ -405,16 +381,17 @@
 	function addToSelectedBox( label, url ) {
 		$( '.tux-searchpage .tux-selectedbox' ).append( $( '<div>' )
 			.addClass( 'row facet-item' )
-			.append( $( '<span>' )
-				.addClass( 'facet-name selected' )
-				.append( $( '<a>' )
-					.attr( 'href', url )
-					.text( label )
-				),
+			.append(
+				$( '<span>' )
+					.addClass( 'facet-name selected' )
+					.append( $( '<a>' )
+						.attr( 'href', url )
+						.text( label )
+					),
 				$( '<span>' )
 					.addClass( 'facet-count' )
 					.text( 'X' )
 			)
 		);
 	}
-}( jQuery, mediaWiki ) );
+}() );

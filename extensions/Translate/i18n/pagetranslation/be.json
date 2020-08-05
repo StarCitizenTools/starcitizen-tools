@@ -5,16 +5,16 @@
 			"Mikalai Udodau",
 			"Unomano",
 			"Artificial123",
-			"Чаховіч Уладзіслаў"
+			"Чаховіч Уладзіслаў",
+			"Artsiom91"
 		]
 	},
+	"tpt-languages-legend": "Іншыя мовы:",
 	"tpt-languages-nonzero": "$1 ($2% перакладзена)",
 	"pt-movepage-reason": "Прычына:",
 	"pm-import-button-label": "Імпартаваць",
 	"pm-savepages-button-label": "Запісаць",
 	"pm-cancel-button-label": "Адмяніць",
-	"pm-pagename-placeholder": "Увядзіце назву старонкі",
-	"pm-langcode-placeholder": "Код мовы",
 	"pm-add-icon-hover-text": "Дадаць блок ніжэй",
 	"pm-swap-icon-hover-text": "Замяніць блокам ніжэй",
 	"pm-delete-icon-hover-text": "Выдаліць блок"

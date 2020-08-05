@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fwolff"
+		]
+	},
+	"revisionslider": "Weergawebalk",
+	"revisionslider-preference-disable": "Moenie die Weergawebalk wys nie",
+	"revisionslider-desc": "Wys 'n glybalk waarmee mens verskillende weergawes kan kies en vergelyk op 'n vergelykingsbladsy",
+	"revisionslider-toggle-label": "Blaai deur geskiedenis",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|greep|grepe}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|greep|grepe}}",
+	"revisionslider-label-date": "Datum",
+	"revisionslider-label-page-size": "Bladgrootte",
+	"revisionslider-label-change-size": "Grootteverandering",
+	"revisionslider-label-comment": "Opmerking",
+	"revisionslider-label-username": "{{GENDER:$1|Gebruikersnaam}}",
+	"revisionslider-minoredit": "Hierdie is 'n klein wysiging",
+	"revisionslider-loading-failed": "Kon nie die weergawebalk laai nie.",
+	"revisionslider-toggle-title-expand": "Open weergawebalk",
+	"revisionslider-toggle-title-collapse": "Vou weergawebalk toe",
+	"revisionslider-turn-on-auto-expand-title": "Vou altyd die weergawebalk oop",
+	"revisionslider-turn-off-auto-expand-title": "Moenie die weergawebalk outomaties oopvou nie",
+	"revisionslider-arrow-tooltip-newer": "Wys nuwer weergawes",
+	"revisionslider-arrow-tooltip-older": "Wys ouer weergawes",
+	"revisionslider-show-help-tooltip": "Wys hulpteks",
+	"revisionslider-help-dialog-slide1": "Die weergawebalk help om deur weergawes te navigeer en te vergelyk op die vergelykingsblad. Dit is gebaseer op 'n [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider gemeenskapsversoek] uit die Duitssprekende gemeenskap se tegniese wenslys. Terugvoer word waardeer en kan gerus [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider hier] gegee word.",
+	"revisionslider-help-dialog-slide2": "Elke vertikale balk verteenwoordig 'n bladsyweergawe. Balke aan die bokant dui op groei in die artikelgrootte, balke aan die onderkant dui op 'n verkleining. In die prentjie dui weergawe 1 op inhoud wat bygevoeg is, en weergawe 2 wys dat inhoud verwyder is.",
+	"revisionslider-help-dialog-slide3a": "<p>Om sekere weergawes te vergelyk, kies die weergawes met die geel en blou punte.</p><p>Die blou punt bepaal die jonger weergawe, die geel punt bepaal die ouer weergawe.</p><p>Skuif die punte deur hul te sleep of klik op 'n balk.</p>",
+	"revisionslider-help-dialog-slide4": "Gebruik die terug- en vorentoe-pyltjies om ouer en jonger weergawes te wys deur te blaai deur die weergawegeskiedenis.",
+	"revisionslider-tutorial": "Inleiding tot die weergawebalk",
+	"revisionslider-previous-dialog": "Vorige",
+	"revisionslider-next-dialog": "Volgende",
+	"revisionslider-close-dialog": "Sluit"
+}

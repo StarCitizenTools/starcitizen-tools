@@ -1,0 +1,17 @@
+{
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/jquery"
+	],
+	"env": {
+		"commonjs": true
+	},
+	"globals": {
+		"mw": false,
+		"OO": false
+	},
+	"rules": {
+		"no-jquery/no-global-selector": "off"
+	}
+}

@@ -41,17 +41,19 @@ require_once "$IP/maintenance/Maintenance.php";
 class MigrateCampaigns extends Maintenance {
 
 	/**
-	 * @var DatabaseBase
+	 * @var \Wikimedia\Rdbms\IDatabase
 	 */
 	private $dbr = null;
 
 	public function __construct() {
 		parent::__construct();
+
+		$this->requireExtension( 'Upload Wizard' );
 		$this->mDescription = "Migrate UploadCampaigns from database storage to pages";
 		$this->addOption( 'user', 'The user to perform the migration as', false, true, 'u' );
 	}
 
-	private $oldKeyDefaults = array(
+	private $oldKeyDefaults = [
 		'headerLabelPage' => '',
 		'thanksLabelPage' => '',
 
@@ -85,28 +87,28 @@ class MigrateCampaigns extends Maintenance {
 		'idField2LabelPage' => '',
 		'idField2MaxLength' => 25,
 		'idField2InitialValue' => ''
-	);
+	];
 
-	private $oldNumberConfigs = array(
+	private $oldNumberConfigs = [
 		'idFieldMaxLength',
 		'idField2MaxLength',
 		'tutorialWidth',
 		'defaultLat',
 		'defaultLon',
 		'defaultAlt'
-	);
+	];
 
 	/**
-	 * @param $id int|string
+	 * @param int|string $id
 	 * @return array
 	 */
 	private function getConfigFromDB( $id ) {
-		$config = array();
+		$config = [];
 
 		$confProps = $this->dbr->select(
 			'uw_campaign_conf',
-			array( 'cc_property', 'cc_value' ),
-			array( 'cc_campaign_id' => $id ),
+			[ 'cc_property', 'cc_value' ],
+			[ 'cc_campaign_id' => $id ],
 			__METHOD__
 		);
 
@@ -118,7 +120,7 @@ class MigrateCampaigns extends Maintenance {
 			}
 		}
 
-		$mergedConfig = array();
+		$mergedConfig = [];
 
 		foreach ( $this->oldKeyDefaults as $key => $default ) {
 			if ( array_key_exists( $key, $config ) && $config[$key] !== $default ) {
@@ -132,12 +134,12 @@ class MigrateCampaigns extends Maintenance {
 	}
 
 	/**
-	 * @param $string string
+	 * @param string $string
 	 * @return array
 	 */
 	private function explodeStringToArray( $string ) {
 		$parts = explode( '|', $string );
-		$array = array();
+		$array = [];
 
 		foreach ( $parts as $part ) {
 			$part = trim( $part );
@@ -150,15 +152,15 @@ class MigrateCampaigns extends Maintenance {
 	}
 
 	/**
-	 * @param $array array
+	 * @param array $array
 	 * @return array
 	 */
 	private function trimArray( $array ) {
-		$newArray = array();
+		$newArray = [];
 		foreach ( $array as $key => $value ) {
 			if ( gettype( $value ) === 'array' ) {
 				$trimmedValue = $this->trimArray( $value );
-				if ( $trimmedValue !== array() ) {
+				if ( $trimmedValue !== [] ) {
 					$newArray[$key] = $trimmedValue;
 				}
 			} else {
@@ -173,8 +175,8 @@ class MigrateCampaigns extends Maintenance {
 	/**
 	 * Ensure that the default license, if set, is the first
 	 *
-	 * @param $licenses array
-	 * @param $default string
+	 * @param array $licenses
+	 * @param string $default
 	 * @return array
 	 */
 	private function ensureDefaultLicense( $licenses, $default ) {
@@ -189,39 +191,39 @@ class MigrateCampaigns extends Maintenance {
 	}
 
 	/**
-	 * @param $campaign
-	 * @param $oldConfig array
+	 * @param object $campaign
+	 * @param array $oldConfig
 	 * @return array
 	 */
 	private function getConfigForJSON( $campaign, $oldConfig ) {
-		$config = array(
+		$config = [
 			'enabled' => $campaign->campaign_enabled === '1',
-			'display' => array(
+			'display' => [
 				'headerLabelPage' => $oldConfig['headerLabelPage'],
 				'thanksLabelPage' => $oldConfig['thanksLabelPage']
-			),
-			'defaults' => array(
+			],
+			'defaults' => [
 				'description' => $oldConfig['defaultDescription'],
 				'lat' => $oldConfig['defaultLat'],
 				'lon' => $oldConfig['defaultLon'],
 				'categories' => $this->explodeStringToArray( $oldConfig['defaultCategories'] )
-			),
-			'autoAdd' => array(
+			],
+			'autoAdd' => [
 				'wikitext' => $oldConfig['autoWikiText'],
 				'categories' => $this->explodeStringToArray( $oldConfig['autoCategories'] )
-			),
-			"licensing" => array(
+			],
+			"licensing" => [
 				'defaultType' => $oldConfig['defaultLicenseType'],
 				'ownWorkDefault' => $oldConfig['ownWorkOption'],
-				'ownWork' => array(
+				'ownWork' => [
 					'licenses' => $this->ensureDefaultLicense(
 						$this->explodeStringToArray( $oldConfig['licensesOwnWork'] ),
 						$oldConfig['defaultOwnWorkLicense']
 					)
-				)
-			),
-			'fields' => array(
-				array(
+				]
+			],
+			'fields' => [
+				[
 					'wikitext' => $oldConfig['idField'],
 					'label' => $oldConfig['idFieldLabel'],
 					# Migrated even though this is a nop.
@@ -229,22 +231,22 @@ class MigrateCampaigns extends Maintenance {
 					'labelPage' => $oldConfig['idFieldLabelPage'],
 					'maxLength' => $oldConfig['idFieldMaxLength'],
 					'initialValue' => $oldConfig['idFieldInitialValue']
-				),
-				array(
+				],
+				[
 					'wikitext' => $oldConfig['idField2'],
 					'label' => $oldConfig['idField2Label'],
 					'labelPage' => $oldConfig['idField2LabelPage'],
 					'maxLength' => $oldConfig['idField2MaxLength'],
 					'initialValue' => $oldConfig['idField2InitialValue']
-				)
-			),
-			'tutorial' => array(
+				]
+			],
+			'tutorial' => [
 				'skip' => (bool)$oldConfig['skipTutorial'],
 				'template' => $oldConfig['tutorialTemplate'],
 				'helpdeskCoords' => $oldConfig['tutorialHelpdeskCoords'],
 				'width' => $oldConfig['tutorialWidth']
-			)
-		);
+			]
+		];
 
 		return $this->trimArray( $config );
 	}

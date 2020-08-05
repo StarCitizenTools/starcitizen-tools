@@ -1,10 +1,11 @@
 <?php
 
 use Flow\Data\Listener\RecentChangesListener;
+use Wikimedia\Rdbms\IDatabase;
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: dirname( __FILE__ ) . '/../../../maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
  * Updates recentchanges entries to contain information to build the
@@ -27,6 +28,12 @@ class FlowUpdateRecentChanges extends LoggedUpdateMaintenance {
 	 */
 	protected $batchSize = 300;
 
+	public function __construct() {
+		parent::__construct();
+
+		$this->requireExtension( 'Flow' );
+	}
+
 	protected function doDBUpdates() {
 		$dbw = wfGetDB( DB_MASTER );
 
@@ -43,17 +50,17 @@ class FlowUpdateRecentChanges extends LoggedUpdateMaintenance {
 	/**
 	 * Refreshes a batch of recentchanges entries
 	 *
-	 * @param DatabaseBase $dbw
+	 * @param IDatabase $dbw
 	 * @param int[optional] $continue The next batch starting at rc_id
 	 * @return int Start id for the next batch
 	 */
-	public function refreshBatch( DatabaseBase $dbw, $continue = null ) {
+	public function refreshBatch( IDatabase $dbw, $continue = null ) {
 		$rows = $dbw->select(
 			/* table */'recentchanges',
-			/* select */array( 'rc_id', 'rc_params' ),
-			/* conds */array( "rc_id > $continue", 'rc_source' => RecentChangesListener::SRC_FLOW ),
+			/* select */[ 'rc_id', 'rc_params' ],
+			/* conds */[ "rc_id > $continue", 'rc_source' => RecentChangesListener::SRC_FLOW ],
 			__METHOD__,
-			/* options */array( 'LIMIT' => $this->mBatchSize, 'ORDER BY' => 'rc_id' )
+			/* options */[ 'LIMIT' => $this->mBatchSize, 'ORDER BY' => 'rc_id' ]
 		);
 
 		$continue = null;
@@ -62,11 +69,11 @@ class FlowUpdateRecentChanges extends LoggedUpdateMaintenance {
 			$continue = $row->rc_id;
 
 			// build params
-			wfSuppressWarnings();
+			Wikimedia\suppressWarnings();
 			$params = unserialize( $row->rc_params );
-			wfRestoreWarnings();
+			Wikimedia\restoreWarnings();
 			if ( !$params ) {
-				$params = array();
+				$params = [];
 			}
 
 			// Don't fix entries that have been dealt with already
@@ -153,8 +160,8 @@ class FlowUpdateRecentChanges extends LoggedUpdateMaintenance {
 			// update log entry
 			$dbw->update(
 				'recentchanges',
-				array( 'rc_params' => serialize( $params ) ),
-				array( 'rc_id' => $row->rc_id )
+				[ 'rc_params' => serialize( $params ) ],
+				[ 'rc_id' => $row->rc_id ]
 			);
 
 			$this->completeCount++;
@@ -174,4 +181,4 @@ class FlowUpdateRecentChanges extends LoggedUpdateMaintenance {
 }
 
 $maintClass = 'FlowUpdateRecentChanges'; // Tells it to run the class
-require_once( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

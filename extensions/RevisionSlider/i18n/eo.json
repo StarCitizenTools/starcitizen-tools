@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robin van der Vliet",
+			"Macofe",
+			"Orikrin1998"
+		]
+	},
+	"revisionslider-page-size": "$1 {{PLURAL:$2|bitoko|bitokoj}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bitoko|bitokoj}}",
+	"revisionslider-label-date": "Dato",
+	"revisionslider-label-comment": "Komento",
+	"revisionslider-label-username": "{{GENDER:$1|Uzantnomo}}",
+	"revisionslider-minoredit": "Ĉi tiu ŝanĝo estas redakteto",
+	"revisionslider-arrow-tooltip-newer": "Vidi pli novajn reviziojn",
+	"revisionslider-arrow-tooltip-older": "Vidi pli malnovajn reviziojn"
+}

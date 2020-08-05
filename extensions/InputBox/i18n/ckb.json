@@ -1,8 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Calak"
+			"Calak",
+			"Lost Whispers",
+			"Épine"
 		]
 	},
+	"inputbox-tryexact": "لێکچوونی تەواوەتی تاقی بکەرەوە",
 	"inputbox-ns-main": "سەرەکی"
 }

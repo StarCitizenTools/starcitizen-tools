@@ -2,7 +2,7 @@
 
 namespace Flow\Data\Storage;
 
-use DatabaseBase;
+use Wikimedia\Rdbms\IDatabase;
 use ExternalStore;
 use Flow\Data\Utils\Merger;
 use Flow\Data\Utils\ResultDuplicator;
@@ -17,30 +17,30 @@ use MWException;
  */
 abstract class RevisionStorage extends DbStorage {
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
-	protected $allowedUpdateColumns = array(
+	protected $allowedUpdateColumns = [
 		'rev_mod_state',
 		'rev_mod_user_id',
 		'rev_mod_user_ip',
 		'rev_mod_user_wiki',
 		'rev_mod_timestamp',
 		'rev_mod_reason',
-	);
+	];
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 *
 	 * @Todo - This may not be necessary anymore since we don't update historical
 	 * revisions ( flow_revision ) during moderation
 	 */
-	protected $obsoleteUpdateColumns = array (
+	protected $obsoleteUpdateColumns = [
 		'tree_orig_user_text',
 		'rev_user_text',
 		'rev_edit_user_text',
 		'rev_mod_user_text',
 		'rev_type_id',
-	);
+	];
 
 	protected $externalStore;
 
@@ -104,11 +104,16 @@ abstract class RevisionStorage extends DbStorage {
 		$this->externalStore = $externalStore;
 	}
 
-	// Find one by specific attributes
-	// @todo: this method can probably be generalized in parent class?
-	public function find( array $attributes, array $options = array() ) {
-		$multi = $this->findMulti( array( $attributes ), $options );
-		return $multi ? reset( $multi ) : array();
+	/**
+	 * Find one by specific attributes
+	 * @todo: this method can probably be generalized in parent class?
+	 * @param array $attributes
+	 * @param array $options
+	 * @return mixed
+	 */
+	public function find( array $attributes, array $options = [] ) {
+		$multi = $this->findMulti( [ $attributes ], $options );
+		return $multi ? reset( $multi ) : [];
 	}
 
 	/**
@@ -118,8 +123,8 @@ abstract class RevisionStorage extends DbStorage {
 	 * @throws DataModelException
 	 * @throws MWException
 	 */
-	protected function findInternal( array $attributes, array $options = array() ) {
-		$dbr = $this->dbFactory->getDB( DB_SLAVE );
+	protected function findInternal( array $attributes, array $options = [] ) {
+		$dbr = $this->dbFactory->getDB( DB_REPLICA );
 
 		if ( !$this->validateOptions( $options ) ) {
 			throw new MWException( "Validation error in database options" );
@@ -128,11 +133,11 @@ abstract class RevisionStorage extends DbStorage {
 		// Add rev_type if rev_type_id exists in query condition
 		$attributes = $this->addRevTypeToQuery( $attributes );
 
-		$tables = array( 'rev' => 'flow_revision' );
-		$joins = array();
+		$tables = [ 'rev' => 'flow_revision' ];
+		$joins = [];
 		if ( $this->joinTable() ) {
 			$tables[] = $this->joinTable();
-			$joins = array( 'rev' => array( 'JOIN', $this->joinField() . ' = rev_id' ) );
+			$joins = [ 'rev' => [ 'JOIN', $this->joinField() . ' = rev_id' ] ];
 		}
 
 		$res = $dbr->select(
@@ -142,9 +147,9 @@ abstract class RevisionStorage extends DbStorage {
 			throw new DataModelException( __METHOD__ . ': Query failed: ' . $dbr->lastError(), 'process-data' );
 		}
 
-		$retval = array();
+		$retval = [];
 		foreach ( $res as $row ) {
-			$row = UUID::convertUUIDs( (array) $row, 'alphadecimal' );
+			$row = UUID::convertUUIDs( (array)$row, 'alphadecimal' );
 			$retval[$row['rev_id']] = $row;
 		}
 		return $retval;
@@ -157,7 +162,7 @@ abstract class RevisionStorage extends DbStorage {
 		return $query;
 	}
 
-	public function findMulti( array $queries, array $options = array() ) {
+	public function findMulti( array $queries, array $options = [] ) {
 		if ( count( $queries ) < 3 ) {
 			$res = $this->fallbackFindMulti( $queries, $options );
 		} else {
@@ -168,30 +173,30 @@ abstract class RevisionStorage extends DbStorage {
 	}
 
 	protected function fallbackFindMulti( array $queries, array $options ) {
-		$result = array();
+		$result = [];
 		foreach ( $queries as $key => $attributes ) {
 			$result[$key] = $this->findInternal( $attributes, $options );
 		}
 		return $result;
 	}
 
-	protected function findMultiInternal( array $queries, array $options = array() ) {
+	protected function findMultiInternal( array $queries, array $options = [] ) {
 		$queriedKeys = array_keys( reset( $queries ) );
 		// The findMulti doesn't map well to SQL, basically we are asking to answer a bunch
 		// of queries. We can optimize those into a single query in a few select instances:
 		if ( isset( $options['LIMIT'] ) && $options['LIMIT'] == 1 ) {
 			// Find by primary key
-			if ( $options == array( 'LIMIT' => 1 ) &&
-				$queriedKeys === array( 'rev_id' )
+			if ( $options == [ 'LIMIT' => 1 ] &&
+				$queriedKeys === [ 'rev_id' ]
 			) {
 				return $this->findRevId( $queries );
 			}
 
 			// Find most recent revision of a number of posts
 			if ( !isset( $options['OFFSET'] ) &&
-				$queriedKeys == array( 'rev_type_id' ) &&
+				$queriedKeys == [ 'rev_type_id' ] &&
 				isset( $options['ORDER BY'] ) &&
-				$options['ORDER BY'] === array( 'rev_id DESC' )
+				$options['ORDER BY'] === [ 'rev_id DESC' ]
 			) {
 				return $this->findMostRecent( $queries );
 			}
@@ -203,7 +208,7 @@ abstract class RevisionStorage extends DbStorage {
 		// but would still have the need to run a bunch of queries serially.
 		if ( count( $options ) === 2 &&
 			isset( $options['LIMIT'], $options['ORDER BY'] ) &&
-			$options['ORDER BY'] === array( 'rev_id DESC' )
+			$options['ORDER BY'] === [ 'rev_id DESC' ]
 		) {
 			return $this->fallbackFindMulti( $queries, $options );
 		// unoptimizable query
@@ -219,10 +224,10 @@ abstract class RevisionStorage extends DbStorage {
 	}
 
 	protected function findRevId( array $queries ) {
-		$duplicator = new ResultDuplicator( array( 'rev_id' ), 1 );
-		$pks = array();
+		$duplicator = new ResultDuplicator( [ 'rev_id' ], 1 );
+		$pks = [];
 		foreach ( $queries as $idx => $query ) {
-			$query = UUID::convertUUIDs( (array) $query, 'alphadecimal' );
+			$query = UUID::convertUUIDs( (array)$query, 'alphadecimal' );
 			$duplicator->add( $query, $idx );
 			$id = $query['rev_id'];
 			$pks[$id] = UUID::create( $id )->getBinary();
@@ -236,25 +241,25 @@ abstract class RevisionStorage extends DbStorage {
 		// FROM flow_tree_revision
 		// WHERE rev_type= 'post' AND rev_type_id IN (...)
 		// GROUP BY rev_type_id
-		$duplicator = new ResultDuplicator( array( 'rev_type_id' ), 1 );
+		$duplicator = new ResultDuplicator( [ 'rev_type_id' ], 1 );
 		foreach ( $queries as $idx => $query ) {
-			$query = UUID::convertUUIDs( (array) $query, 'alphadecimal' );
+			$query = UUID::convertUUIDs( (array)$query, 'alphadecimal' );
 			$duplicator->add( $query, $idx );
 		}
 
-		$dbr = $this->dbFactory->getDB( DB_SLAVE );
+		$dbr = $this->dbFactory->getDB( DB_REPLICA );
 		$res = $dbr->select(
-			array( 'flow_revision' ),
-			array( 'rev_id' => "MAX( 'rev_id' )" ),
-			array( 'rev_type' => $this->getRevType() ) + $this->preprocessSqlArray( $this->buildCompositeInCondition( $dbr, $duplicator->getUniqueQueries() ) ),
+			[ 'flow_revision' ],
+			[ 'rev_id' => "MAX( 'rev_id' )" ],
+			[ 'rev_type' => $this->getRevType() ] + $this->preprocessSqlArray( $this->buildCompositeInCondition( $dbr, $duplicator->getUniqueQueries() ) ),
 			__METHOD__,
-			array( 'GROUP BY' => 'rev_type_id' )
+			[ 'GROUP BY' => 'rev_type_id' ]
 		);
 		if ( $res === false ) {
 			throw new DataModelException( __METHOD__ . ': Query failed: ' . $dbr->lastError(), 'process-data' );
 		}
 
-		$revisionIds = array();
+		$revisionIds = [];
 		foreach ( $res as $row ) {
 			$revisionIds[] = $row->rev_id;
 		}
@@ -273,24 +278,24 @@ abstract class RevisionStorage extends DbStorage {
 	 */
 	protected function findRevIdReal( ResultDuplicator $duplicator, array $revisionIds ) {
 		if ( $revisionIds ) {
-			//  SELECT * from flow_revision
-			//	  JOIN flow_tree_revision ON tree_rev_id = rev_id
-			//   WHERE rev_id IN (...)
-			$dbr = $this->dbFactory->getDB( DB_SLAVE );
+			// SELECT * from flow_revision
+			// JOIN flow_tree_revision ON tree_rev_id = rev_id
+			// WHERE rev_id IN (...)
+			$dbr = $this->dbFactory->getDB( DB_REPLICA );
 
-			$tables = array( 'flow_revision' );
-			$joins  = array();
+			$tables = [ 'flow_revision' ];
+			$joins  = [];
 			if ( $this->joinTable() ) {
 				$tables['rev'] = $this->joinTable();
-				$joins = array( 'rev' => array( 'JOIN', "rev_id = " . $this->joinField() ) );
+				$joins = [ 'rev' => [ 'JOIN', "rev_id = " . $this->joinField() ] ];
 			}
 
 			$res = $dbr->select(
 				$tables,
 				'*',
-				array( 'rev_id' => $revisionIds ),
+				[ 'rev_id' => $revisionIds ],
 				__METHOD__,
-				array(),
+				[],
 				$joins
 			);
 			if ( $res === false ) {
@@ -299,7 +304,7 @@ abstract class RevisionStorage extends DbStorage {
 
 			foreach ( $res as $row ) {
 				$row = UUID::convertUUIDs( (array)$row, 'alphadecimal' );
-				$duplicator->merge( $row, array( $row ) );
+				$duplicator->merge( $row, [ $row ] );
 			}
 		}
 
@@ -335,15 +340,15 @@ abstract class RevisionStorage extends DbStorage {
 		return Merger::mergeMulti(
 			$cacheResult,
 			/* fromKey = */ 'rev_content_url',
-			/* callable = */ array( 'ExternalStore', 'batchFetchFromURLs' ),
+			/* callable = */ [ 'ExternalStore', 'batchFetchFromURLs' ],
 			/* name = */ 'rev_content',
 			/* default = */ ''
 		);
 	}
 
-	protected function buildCompositeInCondition( DatabaseBase $dbr, array $queries ) {
+	protected function buildCompositeInCondition( IDatabase $dbr, array $queries ) {
 		$keys = array_keys( reset( $queries ) );
-		$conditions = array();
+		$conditions = [];
 		if ( count( $keys ) === 1 ) {
 			// standard in condition: tree_rev_descendant_id IN (1,2...)
 			$key = reset( $keys );
@@ -363,14 +368,14 @@ abstract class RevisionStorage extends DbStorage {
 	}
 
 	public function insert( array $rows ) {
-		if ( ! is_array( reset( $rows ) ) ) {
-			$rows = array( $rows );
+		if ( !is_array( reset( $rows ) ) ) {
+			$rows = [ $rows ];
 		}
 
 		// Holds the subset of the row to go into the revision table
-		$revisions = array();
+		$revisions = [];
 
-		foreach( $rows as $key => $row ) {
+		foreach ( $rows as $key => $row ) {
 			$row = $this->processExternalStore( $row );
 			$revisions[$key] = $this->splitUpdate( $row, 'rev' );
 		}
@@ -401,12 +406,12 @@ abstract class RevisionStorage extends DbStorage {
 	 */
 	public function isUpdatingExistingRevisionContentAllowed() {
 		// All of these are required to do a consistent mechanical update.
-		$requiredColumnNames = array(
-			 'rev_content',
-			 'rev_content_length',
-			 'rev_flags',
-			 'rev_previous_content_length',
-		);
+		$requiredColumnNames = [
+			'rev_content',
+			'rev_content_length',
+			'rev_flags',
+			'rev_previous_content_length',
+		];
 
 		// compare required column names against allowedUpdateColumns
 		$diff = array_diff( $requiredColumnNames, $this->allowedUpdateColumns );
@@ -425,8 +430,12 @@ abstract class RevisionStorage extends DbStorage {
 		return false;
 	}
 
-	// If this is a new row (new rows should always have content) or part of an update
-	// involving a content change, inserts into external store.
+	/**
+	 * If this is a new row (new rows should always have content) or part of an update
+	 * involving a content change, inserts into external store.
+	 * @param array $row
+	 * @return array
+	 */
 	protected function processExternalStore( array $row ) {
 		// Check if we need to insert new content
 		if (
@@ -488,18 +497,22 @@ abstract class RevisionStorage extends DbStorage {
 
 		// The parent calcUpdates does the validation that we're not changing a non-allowed
 		// field, regardless of whether explicitly passed in, or done by processExternalStore.
-		$validatedChangeset = parent::calcUpdates( array(), $unvalidatedChangeset );
+		$validatedChangeset = parent::calcUpdates( [], $unvalidatedChangeset );
 		return $validatedChangeset;
 	}
 
-	// This is to *UPDATE* a revision.  It should hardly ever be used.
-	// For the most part should insert a new revision.  This should only be called
-	// by maintenance scripts and (future) suppression features.
-	//
-	// It supports updating content, which is only intended for required mechanical
-	// transformations, such as XSS fixes.  However, since this is only intended for
-	// maintenance scripts, these columns must first be temporarily added to
-	// allowedUpdateColumns.
+	/**
+	 * This is to *UPDATE* a revision.  It should hardly ever be used.
+	 * For the most part should insert a new revision.  This should only be called
+	 * by maintenance scripts and (future) suppression features.
+	 * It supports updating content, which is only intended for required mechanical
+	 * transformations, such as XSS fixes.  However, since this is only intended for
+	 * maintenance scripts, these columns must first be temporarily added to
+	 * allowedUpdateColumns.
+	 * @param array $old
+	 * @param array $new
+	 * @return bool
+	 */
 	public function update( array $old, array $new ) {
 		$changeSet = $this->calcUpdates( $old, $new );
 
@@ -510,26 +523,29 @@ abstract class RevisionStorage extends DbStorage {
 			$res = $dbw->update(
 				'flow_revision',
 				$this->preprocessSqlArray( $rev ),
-				$this->preprocessSqlArray( array( 'rev_id' => $old['rev_id'] ) ),
+				$this->preprocessSqlArray( [ 'rev_id' => $old['rev_id'] ] ),
 				__METHOD__
 			);
 			if ( !( $res && $dbw->affectedRows() ) ) {
 				return false;
 			}
 		}
-		return (bool) $this->updateRelated( $changeSet, $old );
+		return (bool)$this->updateRelated( $changeSet, $old );
 	}
 
-
-	// Revisions can only be removed for LIMITED circumstances,  in almost all cases
-	// the offending revision should be updated with appropriate suppression.
-	// Also note this doesnt delete the whole post, it just deletes the revision.
-	// The post will *always* exist in the tree structure, it will just show up as
-	// [deleted] or something
+	/**
+	 * Revisions can only be removed for LIMITED circumstances,  in almost all cases
+	 * the offending revision should be updated with appropriate suppression.
+	 * Also note this doesnt delete the whole post, it just deletes the revision.
+	 * The post will *always* exist in the tree structure, it will just show up as
+	 * [deleted] or something
+	 * @param array $row
+	 * @return bool
+	 */
 	public function remove( array $row ) {
 		$res = $this->dbFactory->getDB( DB_MASTER )->delete(
 			'flow_revision',
-			$this->preprocessSqlArray( array( 'rev_id' => $row['rev_id'] ) ),
+			$this->preprocessSqlArray( [ 'rev_id' => $row['rev_id'] ] ),
 			__METHOD__
 		);
 		if ( !$res ) {
@@ -540,9 +556,10 @@ abstract class RevisionStorage extends DbStorage {
 
 	/**
 	 * Used to locate the index for a query by ObjectLocator::get()
+	 * @return string[]
 	 */
 	public function getPrimaryKeyColumns() {
-		return array( 'rev_id' );
+		return [ 'rev_id' ];
 	}
 
 	/**
@@ -550,7 +567,7 @@ abstract class RevisionStorage extends DbStorage {
 	 * called to fetch the content. This could fail, resulting in the content
 	 * being a 'false' value.
 	 *
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function validate( array $row ) {
 		return !isset( $row['rev_content'] ) || $row['rev_content'] !== false;
@@ -565,7 +582,7 @@ abstract class RevisionStorage extends DbStorage {
 	 * @return array Remaining rows
 	 */
 	protected function splitUpdate( array $row, $prefix = 'rev' ) {
-		$rev = array();
+		$rev = [];
 		foreach ( $row as $key => $value ) {
 			$keyPrefix = strstr( $key, '_', true );
 			if ( $keyPrefix === $prefix ) {

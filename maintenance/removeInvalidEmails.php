@@ -23,7 +23,7 @@ class RemoveInvalidEmails extends Maintenance {
 	}
 	public function execute() {
 		$this->commit = $this->hasOption( 'commit' );
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = $this->getDB( DB_REPLICA );
 		$dbw = $this->getDB( DB_MASTER );
 		$lastId = 0;
 		do {
@@ -36,7 +36,7 @@ class RemoveInvalidEmails extends Maintenance {
 					'user_email_authenticated IS NULL'
 				],
 				__METHOD__,
-				[ 'LIMIT' => $this->mBatchSize ]
+				[ 'LIMIT' => $this->getBatchSize() ]
 			);
 			$count = $rows->numRows();
 			$badIds = [];
@@ -74,5 +74,5 @@ class RemoveInvalidEmails extends Maintenance {
 	}
 }
 
-$maintClass = 'RemoveInvalidEmails';
+$maintClass = RemoveInvalidEmails::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

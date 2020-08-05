@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Red Winged Duck",
+			"Wizardist"
+		]
+	},
+	"loops-desc": "Функцыі парсэра для стварэньня цыклаў",
+	"loops_max": "Максымальная колькасьць цыклаў",
+	"loops-limitreport-count-limited": "Колькасьць ExtLoops",
+	"loops-limitreport-count-unlimited": "Колькасьць ExtLoops"
+}

@@ -3,7 +3,8 @@
 		"authors": [
 			"Amire80",
 			"Rotemliss",
-			"YaronSh"
+			"YaronSh",
+			"Guycn2"
 		]
 	},
 	"replacetext": "החלפת טקסט",
@@ -39,5 +40,5 @@
 	"replacetext_continue": "המשך",
 	"replacetext_editsummary": "החלפת טקסט – \"$1\" ב־\"$2\"",
 	"right-replacetext": "ביצוע החלפת מחרוזות באתר הוויקי כולו",
-	"action-replacetext": "החלפת מחרוזות בכל הוויקי"
+	"action-replacetext": "לבצע החלפת מחרוזות באתר הוויקי כולו"
 }

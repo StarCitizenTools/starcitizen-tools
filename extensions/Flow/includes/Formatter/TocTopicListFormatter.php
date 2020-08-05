@@ -2,7 +2,6 @@
 
 namespace Flow\Formatter;
 
-use Flow\Conversion\Utils;
 use Flow\Data\Pager\PagerPage;
 use Flow\Model\Workflow;
 use Flow\Templating;
@@ -38,7 +37,7 @@ class TocTopicListFormatter extends BaseTopicListFormatter {
 		foreach ( $topicRootRevisionsByWorkflowId as $topicId => $postRevision ) {
 			$result['roots'][] = $topicId;
 			$revisionId = $postRevision->getRevisionId()->getAlphadecimal();
-			$result['posts'][$topicId] = array( $revisionId );
+			$result['posts'][$topicId] = [ $revisionId ];
 
 			$contentFormat = 'topic-title-wikitext';
 
@@ -46,20 +45,20 @@ class TocTopicListFormatter extends BaseTopicListFormatter {
 
 			$moderatedRevision = $this->templating->getModeratedRevision( $postRevision );
 			$moderationData = $moderatedRevision->isModerated() ?
-				array(
+				[
 					'isModerated' => true,
 					'moderateState' => $moderatedRevision->getModerationState(),
-				) :
-				array(
+				] :
+				[
 					'isModerated' => false
-				);
-			$result['revisions'][$revisionId] = array(
+				];
+			$result['revisions'][$revisionId] = [
 				// Keep this as a minimal subset of
 				// RevisionFormatter->formatApi, and keep the same content
 				// format for topic titles as specified in that class for
 				// topic titles.
 
-				'content' => array(
+				'content' => [
 					// no need to check permissions before fetching content; that should've
 					// been done by whatever caller supplies $topicRootRevisionsByWorkflowId,
 					'content' => $this->templating->getContent(
@@ -68,9 +67,9 @@ class TocTopicListFormatter extends BaseTopicListFormatter {
 					),
 					'format' => $contentFormat,
 					'plaintext' => $this->templating->getContent( $postRevision, 'topic-title-plaintext' )
-				),
+				],
 				'last_updated' => $workflow->getLastUpdatedObj()->getTimestamp() * 1000,
-			) + $moderationData;
+			] + $moderationData;
 		}
 
 		$pagingOption = $page->getPagingLinksOptions();

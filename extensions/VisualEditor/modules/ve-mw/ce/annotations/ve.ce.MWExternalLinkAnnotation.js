@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWExternalLinkAnnotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -20,6 +20,7 @@ ve.ce.MWExternalLinkAnnotation = function VeCeMWExternalLinkAnnotation() {
 	ve.ce.MWExternalLinkAnnotation.super.apply( this, arguments );
 
 	// DOM changes
+	// TODO: Remove when fixed upstream in Parsoid (T58756)
 	this.$anchor.addClass( 'external' );
 };
 

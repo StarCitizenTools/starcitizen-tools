@@ -1,300 +1,297 @@
 <?php
-return array(
+return [
 	"type" => "object",
 	"id" => "#campaignnode",
 	"required" => true,
-	"properties" => array(
-		"title" => array(
+	"properties" => [
+		"title" => [
 			"type" => "string"
-		),
-		"description" => array(
+		],
+		"description" => [
 			"type" => "string"
-		),
-		"enabled" => array(
+		],
+		"enabled" => [
 			"type" => "boolean",
 			"required" => true,
-		),
-		"start" => array(
+		],
+		"start" => [
 			"type" => "string",
-		),
-		"end" => array(
+		],
+		"end" => [
 			"type" => "string",
-		),
-		"autoAdd" => array(
+		],
+		"autoAdd" => [
 			"type" => "object",
-			"properties" => array(
-				"categories" => array(
+			"properties" => [
+				"categories" => [
 					"type" => "array",
-					"items" => array(
-						array(
+					"items" => [
+						[
 							"type" => "string"
-						)
-					)
-				),
-				"wikitext" => array(
+						]
+					]
+				],
+				"wikitext" => [
 					"type" => "string"
-				)
-			)
-		),
-		"fields" => array(
+				]
+			]
+		],
+		"fields" => [
 			"type" => "array",
-			"items" => array(
-				array(
+			"items" => [
+				[
 					"type" => "object",
-					"properties" => array(
-						"wikitext" => array(
+					"properties" => [
+						"wikitext" => [
 							"type" => "string"
-						),
-						"label" => array(
+						],
+						"label" => [
 							"type" => "string"
-						),
-						"maxLength" => array(
+						],
+						"maxLength" => [
 							"type" => "integer"
-						),
-						"initialValue" => array(
+						],
+						"initialValue" => [
 							"type" => "string"
-						),
-						"required" => array(
+						],
+						"required" => [
 							"type" => "boolean"
-						),
-						"type" => array(
+						],
+						"type" => [
 							"type" => "string"
-						),
-						"options" => array(
+						],
+						"options" => [
 							"type" => "object",
-							"properties" => array(),
+							"properties" => [],
 							"additionalProperties" => true
-						)
-					)
-				)
-			)
-		),
-		"defaults" => array(
+						]
+					]
+				]
+			]
+		],
+		"defaults" => [
 			"type" => "object",
-			"properties" =>array(
-				"alt" => array(
+			"properties" => [
+				"alt" => [
 					"type" => "number"
-				),
-				"categories" => array(
+				],
+				"categories" => [
 					"type" => "array",
-					"items" => array(
-						array(
+					"items" => [
+						[
 							"type" => "string"
-						)
-					)
-				),
-				"description" => array(
+						]
+					]
+				],
+				"description" => [
 					"type" => "string"
-				),
-				"lat" => array(
+				],
+				"lat" => [
 					"type" => "number"
-				),
-				"lon" => array(
+				],
+				"lon" => [
 					"type" => "number"
-				)
-			)
-		),
-		"display" => array(
+				]
+			]
+		],
+		"display" => [
 			"type" => "object",
-			"properties" =>array(
-				"headerLabel" => array(
+			"properties" => [
+				"headerLabel" => [
 					"type" => "string"
-				),
-				"thanksLabel" => array(
+				],
+				"thanksLabel" => [
 					"type" => "string"
-				),
-				"homeButton" => array(
+				],
+				"homeButton" => [
 					"type" => "object",
-					"properties" => array(
-						"label" => array(
+					"properties" => [
+						"label" => [
 							"type" => "string"
-						),
-						"target" => array(
+						],
+						"target" => [
 							"type" => "string"
-						)
-					)
-				),
-				"beginButton" => array(
+						]
+					]
+				],
+				"beginButton" => [
 					"type" => "object",
-					"properties" => array(
-						"label" => array(
+					"properties" => [
+						"label" => [
 							"type" => "string"
-						),
-						"target" => array(
+						],
+						"target" => [
 							"type" => "string"
-						)
-					)
-				),
-				"labelPickImage" => array(
+						]
+					]
+				],
+				"labelPickImage" => [
 					"type" => "string"
-				),
-				"noticeExistingImage" => array(
+				],
+				"noticeExistingImage" => [
 					"type" => "string"
-				),
-				"noticeUpdateDelay" => array(
+				],
+				"noticeUpdateDelay" => [
 					"type" => "string"
-				)
-			)
-		),
-		"licensing" => array(
+				]
+			]
+		],
+		"licensing" => [
 			"type" => "object",
-			"properties" =>array(
-				"defaultType" => array(
+			"properties" => [
+				"defaultType" => [
 					"type" => "string"
-				),
-				"ownWorkDefault" => array(
+				],
+				"ownWorkDefault" => [
 					"type" => "string"
-				),
-				"ownWork" => array(
+				],
+				"ownWork" => [
 					"type" => "object",
-					"properties" =>array(
-						"default" => array(
+					"properties" => [
+						"default" => [
 							"type" => "string",
 							"enum" => array_keys( UploadWizardConfig::getSetting( 'licenses' ) )
-						),
-						"licenses" => array(
+						],
+						"licenses" => [
 							"type" => "array",
-							"items" =>array(
-								array(
+							"items" => [
+								[
 									"type" => "string",
 									"enum" => array_keys( UploadWizardConfig::getSetting( 'licenses' ) )
-								)
-							)
+								]
+							]
 
-
-						),
-						"template" => array(
+						],
+						"template" => [
 							"type" => "string"
-						),
-						"type" => array(
+						],
+						"type" => [
 							"type" => "string"
-						)
-					)
-				),
-				"thirdParty" => array(
+						]
+					]
+				],
+				"thirdParty" => [
 					"type" => "object",
-					"properties" =>array(
-						"defaults" => array(
+					"properties" => [
+						"defaults" => [
 							"type" => "string",
 							"enum" => array_keys( UploadWizardConfig::getSetting( 'licenses' ) )
-						),
-						"licenseGroups" => array(
+						],
+						"licenseGroups" => [
 							"type" => "array",
-							"items" =>array(
-								array(
+							"items" => [
+								[
 									"type" => "object",
-									"properties" =>array(
-										"head" => array(
+									"properties" => [
+										"head" => [
 											"type" => "string"
-										),
-										"licenses" => array(
+										],
+										"licenses" => [
 											"type" => "array",
-											"items" =>array(
-												array(
+											"items" => [
+												[
 													"type" => "string",
 													"enum" => array_keys( UploadWizardConfig::getSetting( 'licenses' ) )
-												)
-											)
+												]
+											]
 
-
-										),
-										"subhead" => array(
+										],
+										"subhead" => [
 											"type" => "string"
-										)
-									)
-								)
-							)
+										]
+									]
+								]
+							]
 
-
-						),
-						"type" => array(
+						],
+						"type" => [
 							"type" => "string"
-						)
-					)
-				)
-			)
-		),
-		"tutorial" => array(
+						]
+					]
+				]
+			]
+		],
+		"tutorial" => [
 			"type" => "object",
-			"properties" =>array(
-				"skip" => array(
+			"properties" => [
+				"skip" => [
 					"type" => "boolean"
-				),
-				"helpdeskCoords" => array(
+				],
+				"helpdeskCoords" => [
 					"type" => "string"
-				),
-				"template" => array(
+				],
+				"template" => [
 					"type" => "string"
-				),
-				"width" => array(
+				],
+				"width" => [
 					"type" => "number"
-				)
-			)
-		),
-		"whileActive" => array(
+				]
+			]
+		],
+		"whileActive" => [
 			"type" => "object",
-			"properties" => array(
-				"display" => array(
+			"properties" => [
+				"display" => [
 					"type" => "object",
-					"properties" =>array(
-						"headerLabel" => array(
+					"properties" => [
+						"headerLabel" => [
 							"type" => "string"
-						),
-						"thanksLabel" => array(
+						],
+						"thanksLabel" => [
 							"type" => "string"
-						),
-					),
-				),
+						],
+					],
+				],
 
-				"autoAdd" => array(
+				"autoAdd" => [
 					"type" => "object",
-					"properties" => array(
-						"categories" => array(
+					"properties" => [
+						"categories" => [
 							"type" => "array",
-							"items" => array(
-								array(
+							"items" => [
+								[
 									"type" => "string"
-								),
-							),
-						),
-						"wikitext" => array(
+								],
+							],
+						],
+						"wikitext" => [
 							"type" => "string"
-						),
-					),
-				),
-			),
-		),
-		"beforeActive" => array(
+						],
+					],
+				],
+			],
+		],
+		"beforeActive" => [
 			"type" => "object",
-			"properties" => array(
-				"display" => array(
+			"properties" => [
+				"display" => [
 					"type" => "object",
-					"properties" =>array(
-						"headerLabel" => array(
+					"properties" => [
+						"headerLabel" => [
 							"type" => "string"
-						),
-						"thanksLabel" => array(
+						],
+						"thanksLabel" => [
 							"type" => "string"
-						),
-					),
-				),
-			),
-		),
-		"afterActive" => array(
+						],
+					],
+				],
+			],
+		],
+		"afterActive" => [
 			"type" => "object",
-			"properties" => array(
-				"display" => array(
+			"properties" => [
+				"display" => [
 					"type" => "object",
-					"properties" =>array(
-						"headerLabel" => array(
+					"properties" => [
+						"headerLabel" => [
 							"type" => "string"
-						),
-						"thanksLabel" => array(
+						],
+						"thanksLabel" => [
 							"type" => "string"
-						),
-					),
-				),
-			),
-		),
-	)
-);
+						],
+					],
+				],
+			],
+		],
+	]
+];

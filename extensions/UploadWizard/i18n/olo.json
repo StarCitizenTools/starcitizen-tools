@@ -5,7 +5,6 @@
 			"Ilja.mos"
 		]
 	},
-	"mwe-upwiz-code-unknown": "Tundematoi kieli",
 	"mwe-upwiz-step-tutorial": "Opastu",
 	"mwe-upwiz-step-thanks": "Käytä",
 	"mwe-upwiz-add-flickr-or": "Libo",
@@ -27,8 +26,6 @@
 	"mwe-upwiz-license-custom-preview": "Ezikačo",
 	"mwe-upwiz-license-none-head": "Lövvin sen netaspäi engo ole varmu",
 	"mwe-upwiz-categories": "Kategouriet",
-	"mwe-upwiz-feedback-blacklist-report-prompt": "[$1 Kirjuta omii mielii]",
-	"mwe-upwiz-feedback-blacklist-info-prompt": "[$1 Ližätieduo]",
 	"mwe-upwiz-calendar-date": "Valliče päivy kalenduaraspäi",
 	"mwe-upload-campaigns-pagination-next": "Tulii sivu"
 }

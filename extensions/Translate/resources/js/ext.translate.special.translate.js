@@ -1,9 +1,10 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var state = {
 		group: null,
-		language: null
+		language: null,
+		messageList: null
 	};
 
 	mw.translate = mw.translate || {};
@@ -26,88 +27,62 @@
 			state.group = group.id;
 
 			changes = {
-				group: group.id
+				group: group.id,
+				showMessage: null
+
 			};
 
 			mw.translate.changeUrl( changes );
 			mw.translate.updateTabLinks( changes );
-			mw.translate.loadMessages( changes );
+			$( '.tux-editor-header .group-warning' ).empty();
+			state.messageList.changeSettings( changes );
 			updateGroupInformation( state );
 		},
 
 		changeLanguage: function ( language ) {
-			var changes, targetDir, targetLangAttrib,
-				userLanguageCode = mw.config.get( 'wgUserLanguage' );
-
-			if ( !checkDirty() ) {
-				return;
-			}
+			var changes = {
+				language: language,
+				showMessage: null
+			};
 
 			state.language = language;
 
-			changes = {
-				language: language
-			};
-
-			if ( language === mw.config.get( 'wgTranslateDocumentationLanguageCode' ) ) {
-				targetLangAttrib = userLanguageCode;
-				targetDir = $.uls.data.getDir( userLanguageCode );
-			} else {
-				targetLangAttrib = language;
-				targetDir = $.uls.data.getDir( language );
-			}
-
-			// Changes to attributes must also be reflected
-			// when the element is created on the server side
-			$( '.ext-translate-language-selector > .uls' )
-				.text( $.uls.data.getAutonym( language ) )
-				.attr( {
-					lang: targetLangAttrib,
-					dir: targetDir
-				} );
-			$( '.tux-messagelist' ).data( {
-				targetlangcode: language,
-				targetlangdir: targetDir
-			} );
-
 			mw.translate.changeUrl( changes );
 			mw.translate.updateTabLinks( changes );
-			mw.translate.loadMessages();
+			$( '.tux-editor-header .group-warning' ).empty();
+			state.messageList.changeSettings( changes );
 			updateGroupInformation( state );
+
 		},
 
 		changeFilter: function ( filter ) {
-			var realFilters, uri;
-
 			if ( !checkDirty() ) {
 				return;
 			}
 
-			realFilters = [ '!ignored' ];
-			uri = new mw.Uri( window.location.href );
-			if ( uri.query.optional !== '1' ) {
-				realFilters.push( '!optional' );
-			}
-			if ( filter ) {
-				realFilters.push( filter );
-			}
-
-			mw.translate.changeUrl( { filter: filter } );
-			mw.translate.loadMessages( { filter: realFilters.join( '|' ) } );
+			mw.translate.changeUrl( { filter: filter, showMessage: null } );
+			state.messageList.changeSettings( { filter: getActualFilter( filter ) } );
 		},
 
-		changeUrl: function ( params ) {
+		changeUrl: function ( params, forceChange ) {
 			var uri = new mw.Uri( window.location.href );
 
 			uri.extend( params );
+
+			// Support removing keys from the query
+			$.each( params, function ( key, val ) {
+				if ( val === null ) {
+					delete uri.query[ key ];
+				}
+			} );
 
 			if ( uri.toString() === window.location.href ) {
 				return;
 			}
 
-			// Change the URL with this URI, but don't leave the page.
-			if ( history.pushState && $( '.tux-messagelist' ).length ) {
-				// IE<10 does not support pushState. Never mind.
+			// If supported by the browser and requested, change the URL with
+			// this URI but try not to leave the page.
+			if ( !forceChange && history.pushState && $( '.tux-messagelist' ).length ) {
 				history.pushState( uri, null, uri.toString() );
 			} else {
 				// For old browsers, just reload
@@ -133,9 +108,25 @@
 		}
 	} );
 
+	function getActualFilter( filter ) {
+		var realFilters, uri;
+
+		realFilters = [ '!ignored' ];
+		uri = new mw.Uri( window.location.href );
+		if ( uri.query.optional !== '1' ) {
+			realFilters.push( '!optional' );
+		}
+		if ( filter ) {
+			realFilters.push( filter );
+		}
+
+		return realFilters.join( '|' );
+	}
+
 	function checkDirty() {
 		if ( mw.translate.isDirty() ) {
-			return window.confirm( mw.msg( 'translate-js-support-unsaved-warning' ) );
+			// eslint-disable-next-line no-alert
+			return confirm( mw.msg( 'translate-js-support-unsaved-warning' ) );
 		}
 		return true;
 	}
@@ -151,6 +142,10 @@
 
 	/**
 	 * Updates all group specific stuff on the page.
+	 *
+	 * @param {Object} state Information about current group and language.
+	 * @param {string} state.group Message group id.
+	 * @param {string} state.language Language.
 	 */
 	function updateGroupInformation( state ) {
 		var props = 'id|priority|prioritylangs|priorityforce|description';
@@ -176,7 +171,7 @@
 		api.parse( group.description ).done( function ( parsedDescription ) {
 			// The parsed text is returned in a <p> tag,
 			// so it's removed here.
-			$description.html( $( parsedDescription ).html() );
+			$description.html( parsedDescription );
 		} ).fail( function () {
 			$description.empty();
 			mw.log( 'Error parsing description for group ' + group.id );
@@ -187,15 +182,7 @@
 		var preferredLanguages, headerMessage, languagesMessage,
 			$groupWarning = $( '.tux-editor-header .group-warning' );
 
-		$groupWarning.empty();
-
-		// Check whether the group has priority languages
-		if ( !group.prioritylangs ) {
-			return;
-		}
-
-		// And if the current language is among them, we can return early
-		if ( $.inArray( language, group.prioritylangs ) !== -1 ) {
+		if ( isPriorityLanguage( language, group.prioritylangs ) ) {
 			return;
 		}
 
@@ -205,15 +192,17 @@
 			return '<bdi>' + $.uls.data.getAutonym( lang ) + '</bdi>';
 		} ).join( ', ' );
 
-		headerMessage = mw.message( group.priorityforce ?
-			'tpt-discouraged-language-force-header' :
-			'tpt-discouraged-language-header',
+		headerMessage = mw.message(
+			group.priorityforce ?
+				'tpt-discouraged-language-force-header' :
+				'tpt-discouraged-language-header',
 			$.uls.data.getAutonym( language )
 		).parse();
 
-		languagesMessage = mw.message( group.priorityforce ?
-			'tpt-discouraged-language-force-content' :
-			'tpt-discouraged-language-content',
+		languagesMessage = mw.message(
+			group.priorityforce ?
+				'tpt-discouraged-language-force-content' :
+				'tpt-discouraged-language-content',
 			preferredLanguages
 		).parse();
 
@@ -224,46 +213,67 @@
 		);
 	}
 
-	function setupLanguageSelector( $element ) {
-		var docLanguageCode, docLanguageAutonym, ulsOptions;
+	function isPriorityLanguage( language, priorityLanguages ) {
+		// Don't show priority notice if the language is message documentation.
+		if ( language === mw.config.get( 'wgTranslateDocumentationLanguageCode' ) ) {
+			return true;
+		}
 
-		ulsOptions = {
+		// If no priority language is set, return early.
+		if ( !priorityLanguages ) {
+			return true;
+		}
+
+		if ( priorityLanguages.indexOf( language ) !== -1 ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	function setupLanguageSelector( $element ) {
+		var ulsOptions = {
+			languages: mw.config.get( 'wgTranslateLanguages' ),
+			showRegions: [ 'SP' ].concat( $.fn.lcd.defaults.showRegions ),
 			onSelect: function ( language ) {
 				mw.translate.changeLanguage( language );
+				$element.text( $.uls.data.getAutonym( language ) );
 			},
+			ulsPurpose: 'translate-special-translate',
 			quickList: function () {
 				return mw.uls.getFrequentLanguageList();
 			}
 		};
 
-		// If a documentation pseudo-language is defined,
-		// add it to the language selector
-		docLanguageCode = mw.config.get( 'wgTranslateDocumentationLanguageCode' );
-		if ( docLanguageCode ) {
-			docLanguageAutonym = mw.msg( 'translate-documentation-language' );
-			ulsOptions.languages = mw.config.get( 'wgULSLanguages' );
-			ulsOptions.languages[ docLanguageCode ] = docLanguageAutonym;
-			mw.translate.addDocumentationLanguage();
-			ulsOptions.showRegions = [ 'WW', 'SP', 'AM', 'EU', 'ME', 'AF', 'AS', 'PA' ];
-		}
-
+		mw.translate.addExtraLanguagesToLanguageData( ulsOptions.languages, [ 'SP' ] );
 		$element.uls( ulsOptions );
 	}
 
-	$( document ).ready( function () {
-		var $translateContainer, $hideTranslatedButton, $controlOwnButton, $messageList,
-			filter, uri, position;
+	$( function () {
+		var $translateContainer, $hideTranslatedButton, $messageList,
+			filter, uri, position, offset, limit;
 
 		$messageList = $( '.tux-messagelist' );
+		state.group = $( '.tux-messagetable-loader' ).data( 'messagegroup' );
+		state.language = $messageList.data( 'targetlangcode' );
+
 		if ( $messageList.length ) {
+			$messageList.messagetable();
+			state.messageList = $messageList.data( 'messagetable' );
+
 			uri = new mw.Uri( window.location.href );
 			filter = uri.query.filter;
+			offset = uri.query.showMessage;
+			if ( offset ) {
+				limit = uri.query.limit || 1;
+				// Default to no filters
+				filter = filter || '';
+			}
 
 			if ( filter === undefined ) {
 				filter = '!translated';
 			}
 
-			mw.translate.changeFilter( filter );
 			$( '.tux-message-selector li' ).each( function () {
 				var $this = $( this );
 
@@ -271,11 +281,24 @@
 					$this.addClass( 'selected' );
 				}
 			} );
-		}
 
-		state.group = $( '.tux-messagetable-loader' ).data( 'messagegroup' );
-		state.language = $messageList.data( 'targetlangcode' ) || // for tux=1
-			mw.config.get( 'wgUserLanguage' ); // for tux=0
+			mw.translate.changeUrl( {
+				group: state.group,
+				language: state.language,
+				filter: filter,
+				showMessage: offset,
+				optional: offset ? 1 : undefined
+			} );
+
+			// Start loading messages
+			state.messageList.changeSettings( {
+				group: state.group,
+				language: state.language,
+				offset: offset,
+				limit: limit,
+				filter: getActualFilter( filter )
+			} );
+		}
 
 		if ( $( 'body' ).hasClass( 'rtl' ) ) {
 			position = {
@@ -291,8 +314,6 @@
 		} );
 
 		updateGroupInformation( state );
-
-		$messageList.messagetable();
 
 		$( '.ext-translate-language-selector .uls' ).one( 'click', function () {
 			var $target = $( this );
@@ -320,22 +341,6 @@
 				getTranslatedMessages( $translateContainer ).remove();
 				$( this ).prop( 'disabled', true );
 			} );
-
-		$controlOwnButton = $translateContainer.find( '.tux-proofread-own-translations-button' );
-		$controlOwnButton.click( function () {
-			var $this = $( this ),
-				ownTranslatedMessages = $translateContainer.find( '.own-translation' ),
-				hideMessage = mw.msg( 'tux-editor-proofreading-hide-own-translations' ),
-				showMessage = mw.msg( 'tux-editor-proofreading-show-own-translations' );
-
-			if ( $this.hasClass( 'down' ) ) {
-				ownTranslatedMessages.removeClass( 'hide' );
-				$this.removeClass( 'down' ).text( hideMessage );
-			} else {
-				ownTranslatedMessages.addClass( 'hide' );
-				$this.addClass( 'down' ).text( showMessage );
-			}
-		} );
 
 		// Message filter click handler
 		$translateContainer.find( '.row.tux-message-selector > li' ).on( 'click', function () {
@@ -391,4 +396,4 @@
 		} );
 	} );
 
-}( jQuery, mediaWiki ) );
+}() );

@@ -1,9 +1,9 @@
 /*!
  * VisualEditor Logger class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
-/*global Set*/
+/* global Set */
 
 /**
  * A scrupulous event logger that logs state at every function call, and
@@ -69,6 +69,7 @@ ve.Filibuster.prototype.clearLogs = function () {
 	this.callPath.length = 0;
 };
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Attaches an observer callback. The callback returns a value representing the current state,
  * which must be a string (this ensures state values are immutable, comparable with strict
@@ -248,6 +249,7 @@ ve.Filibuster.prototype.wrapFunction = function ( container, klassName, fnName )
 	return this;
 };
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Wrap the functions in a class with wrappers that perform logging.
  *
@@ -276,6 +278,7 @@ ve.Filibuster.prototype.wrapClass = function ( klass, blacklist ) {
 	return this;
 };
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Recursively wrap the functions in a namespace with wrappers that perform logging.
  *
@@ -302,7 +305,7 @@ ve.Filibuster.prototype.wrapNamespace = function ( ns, nsName, blacklist ) {
 		} else if ( typeof prop === 'function' ) {
 			this.wrapFunction( ns, nsName, propName );
 		} else if ( $.isPlainObject( prop ) ) {
-			// might be a namespace; recurse
+			// Might be a namespace; recurse
 			this.wrapNamespace( prop, nsName + '.' + propName, blacklist );
 		}
 	}
@@ -376,7 +379,7 @@ ve.Filibuster.prototype.getObservationsHtml = function ( branchPath ) {
 		return (
 			'<b>exit ' + ve.escapeHtml( frame.funcName ) + '</b>' +
 			'--->' +
-			( frame.thrown ?  'thrown' : showVal( frame.returned ) )
+			( frame.thrown ? 'thrown' : showVal( frame.returned ) )
 		);
 	}
 
@@ -500,8 +503,9 @@ ve.Filibuster.static.clonePlain = function ( val, seen ) {
 	} else if ( val instanceof ve.dm.Selection ) {
 		return { 've.dm.Selection': val.getDescription() };
 	} else if ( val.constructor === ve.dm.AnnotationSet ) {
-		return { 've.dm.AnnotationSet':
-				val.getStore().values( val.getIndexes() )
+		return {
+			've.dm.AnnotationSet': val.getStore()
+				.values( val.getHashes() )
 				.map( function ( annotation ) {
 					return annotation.name;
 				} )

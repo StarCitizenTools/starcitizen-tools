@@ -39,6 +39,14 @@
 	}
 
 	/**
+	 * @private
+	 * @ignore
+	 */
+	function init() {
+		mw.trackSubscribe( 'event.', handleTrackedEvent );
+	}
+
+	/**
 	 * This a light-weight interface intended to have no dependencies and be
 	 * loaded by initialisation code from consumers without loading the rest
 	 * of EventLogging that deals with validation and logging to the server.
@@ -87,8 +95,17 @@
 
 	};
 
-	$( window ).on( 'load', function () {
-		mw.trackSubscribe( 'event.', handleTrackedEvent );
-	} );
+	// It's possible for this code to run after the "load" event has already fired.
+	if ( document.readyState === 'complete' ) {
+		mw.requestIdleCallback( init );
+	} else {
+		// Avoid the logging of duplicate events (T170018).
+		//
+		// The load event must only fire once. However, Firefox 51 introduced a
+		// bug that causes the event to fire again when returning from the
+		// "Back-Forward cache" (BFCache) under certain circumstances (see
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=1379762).
+		$( window ).one( 'load', init );
+	}
 
 }( mediaWiki, jQuery ) );

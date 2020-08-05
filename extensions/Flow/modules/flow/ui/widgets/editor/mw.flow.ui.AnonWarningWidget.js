@@ -7,19 +7,36 @@
 	 *
 	 * @constructor
 	 * @param {Object} [config] Configuration options
+	 * @cfg {boolean} [isProbablyEditable=true] Whether the content seems to be editable
 	 */
-	mw.flow.ui.AnonWarningWidget = function mwFlowUiEditorControlsWidget( config ) {
-		var returnTo, labelHtml,
-			isAnon = mw.user.isAnon();
+	mw.flow.ui.AnonWarningWidget = function mwFlowUiAnonWarningWidget( config ) {
+		var returnTo, labelHtml, isProbablyEditable,
+			widget = this,
+			shouldDisplay;
 
 		config = config || {};
+
+		if ( config.isProbablyEditable !== undefined ) {
+			isProbablyEditable = config.isProbablyEditable;
+		} else {
+			isProbablyEditable = true;
+		}
+
+		// If it's not editable, we'll display CanNotEditWidget instead
+		shouldDisplay = isProbablyEditable && mw.user.isAnon();
 
 		// Parent constructor
 		mw.flow.ui.AnonWarningWidget.parent.call( this, config );
 
+		this.icon = new OO.ui.IconWidget( { icon: 'userAnonymous' } );
 		this.label = new OO.ui.LabelWidget();
 
-		if ( isAnon ) {
+		// HACK: Theme styles get recalculated after timeout
+		setTimeout( ( function () {
+			widget.icon.$element.addClass( 'oo-ui-image-invert' );
+		} ) );
+
+		if ( shouldDisplay ) {
 			returnTo = {
 				returntoquery: encodeURIComponent( window.location.search ),
 				returnto: mw.config.get( 'wgPageName' )
@@ -36,10 +53,11 @@
 		// Initialize
 		this.$element
 			.append(
+				this.icon.$element,
 				this.label.$element
 			)
 			.addClass( 'flow-ui-anonWarningWidget' )
-			.toggleClass( 'flow-ui-anonWarningWidget-active', isAnon );
+			.toggleClass( 'flow-ui-anonWarningWidget-active', shouldDisplay );
 	};
 
 	/* Initialization */

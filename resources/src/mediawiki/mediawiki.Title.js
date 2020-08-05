@@ -1,19 +1,15 @@
 /*!
  * @author Neil Kandalgaonkar, 2010
- * @author Timo Tijhof, 2011-2013
+ * @author Timo Tijhof
  * @since 1.18
  */
-( function ( mw, $ ) {
-	/*jshint latedef:false */
 
+( function ( mw, $ ) {
 	/**
 	 * Parse titles into an object structure. Note that when using the constructor
 	 * directly, passing invalid titles will result in an exception. Use #newFromText to use the
 	 * logic directly and get null for invalid titles which is easier to work with.
 	 *
-	 * @class mw.Title
-	 */
-	/**
 	 * Note that in the constructor and #newFromText method, `namespace` is the **default** namespace
 	 * only, and can be overridden by a namespace prefix in `title`. If you do not want this behavior,
 	 * use #makeTitle. Compare:
@@ -30,6 +26,408 @@
 	 *     mw.Title.newFromText( 'Template:Foo', NS_TEMPLATE ).getPrefixedText(); // => 'Template:Foo'
 	 *     mw.Title.makeTitle( NS_TEMPLATE, 'Template:Foo' ).getPrefixedText();   // => 'Template:Template:Foo'
 	 *
+	 * @class mw.Title
+	 */
+
+	/* Private members */
+
+	var
+		mwString = require( 'mediawiki.String' ),
+
+		namespaceIds = mw.config.get( 'wgNamespaceIds' ),
+
+		/**
+		 * @private
+		 * @static
+		 * @property NS_MAIN
+		 */
+		NS_MAIN = namespaceIds[ '' ],
+
+		/**
+		 * @private
+		 * @static
+		 * @property NS_TALK
+		 */
+		NS_TALK = namespaceIds.talk,
+
+		/**
+		 * @private
+		 * @static
+		 * @property NS_SPECIAL
+		 */
+		NS_SPECIAL = namespaceIds.special,
+
+		/**
+		 * @private
+		 * @static
+		 * @property NS_MEDIA
+		 */
+		NS_MEDIA = namespaceIds.media,
+
+		/**
+		 * @private
+		 * @static
+		 * @property NS_FILE
+		 */
+		NS_FILE = namespaceIds.file,
+
+		/**
+		 * @private
+		 * @static
+		 * @property FILENAME_MAX_BYTES
+		 */
+		FILENAME_MAX_BYTES = 240,
+
+		/**
+		 * @private
+		 * @static
+		 * @property TITLE_MAX_BYTES
+		 */
+		TITLE_MAX_BYTES = 255,
+
+		/**
+		 * Get the namespace id from a namespace name (either from the localized, canonical or alias
+		 * name).
+		 *
+		 * Example: On a German wiki this would return 6 for any of 'File', 'Datei', 'Image' or
+		 * even 'Bild'.
+		 *
+		 * @private
+		 * @static
+		 * @method getNsIdByName
+		 * @param {string} ns Namespace name (case insensitive, leading/trailing space ignored)
+		 * @return {number|boolean} Namespace id or boolean false
+		 */
+		getNsIdByName = function ( ns ) {
+			var id;
+
+			// Don't cast non-strings to strings, because null or undefined should not result in
+			// returning the id of a potential namespace called "Null:" (e.g. on null.example.org/wiki)
+			// Also, toLowerCase throws exception on null/undefined, because it is a String method.
+			if ( typeof ns !== 'string' ) {
+				return false;
+			}
+			// TODO: Should just use local var namespaceIds here but it
+			// breaks test which modify the config
+			id = mw.config.get( 'wgNamespaceIds' )[ ns.toLowerCase() ];
+			if ( id === undefined ) {
+				return false;
+			}
+			return id;
+		},
+
+		/**
+		 * @private
+		 * @method getNamespacePrefix_
+		 * @param {number} namespace
+		 * @return {string}
+		 */
+		getNamespacePrefix = function ( namespace ) {
+			return namespace === NS_MAIN ?
+				'' :
+				( mw.config.get( 'wgFormattedNamespaces' )[ namespace ].replace( / /g, '_' ) + ':' );
+		},
+
+		rUnderscoreTrim = /^_+|_+$/g,
+
+		rSplit = /^(.+?)_*:_*(.*)$/,
+
+		// See MediaWikiTitleCodec.php#getTitleInvalidRegex
+		rInvalid = new RegExp(
+			'[^' + mw.config.get( 'wgLegalTitleChars' ) + ']' +
+			// URL percent encoding sequences interfere with the ability
+			// to round-trip titles -- you can't link to them consistently.
+			'|%[0-9A-Fa-f]{2}' +
+			// XML/HTML character references produce similar issues.
+			'|&[A-Za-z0-9\u0080-\uFFFF]+;' +
+			'|&#[0-9]+;' +
+			'|&#x[0-9A-Fa-f]+;'
+		),
+
+		// From MediaWikiTitleCodec::splitTitleString() in PHP
+		// Note that this is not equivalent to /\s/, e.g. underscore is included, tab is not included.
+		rWhitespace = /[ _\u00A0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]+/g,
+
+		// From MediaWikiTitleCodec::splitTitleString() in PHP
+		rUnicodeBidi = /[\u200E\u200F\u202A-\u202E]/g,
+
+		/**
+		 * Slightly modified from Flinfo. Credit goes to Lupo and Flominator.
+		 * @private
+		 * @static
+		 * @property sanitationRules
+		 */
+		sanitationRules = [
+			// "signature"
+			{
+				pattern: /~{3}/g,
+				replace: '',
+				generalRule: true
+			},
+			// control characters
+			{
+				// eslint-disable-next-line no-control-regex
+				pattern: /[\x00-\x1f\x7f]/g,
+				replace: '',
+				generalRule: true
+			},
+			// URL encoding (possibly)
+			{
+				pattern: /%([0-9A-Fa-f]{2})/g,
+				replace: '% $1',
+				generalRule: true
+			},
+			// HTML-character-entities
+			{
+				pattern: /&(([A-Za-z0-9\x80-\xff]+|#[0-9]+|#x[0-9A-Fa-f]+);)/g,
+				replace: '& $1',
+				generalRule: true
+			},
+			// slash, colon (not supported by file systems like NTFS/Windows, Mac OS 9 [:], ext4 [/])
+			{
+				pattern: new RegExp( '[' + mw.config.get( 'wgIllegalFileChars', '' ) + ']', 'g' ),
+				replace: '-',
+				fileRule: true
+			},
+			// brackets, greater than
+			{
+				pattern: /[}\]>]/g,
+				replace: ')',
+				generalRule: true
+			},
+			// brackets, lower than
+			{
+				pattern: /[{[<]/g,
+				replace: '(',
+				generalRule: true
+			},
+			// everything that wasn't covered yet
+			{
+				pattern: new RegExp( rInvalid.source, 'g' ),
+				replace: '-',
+				generalRule: true
+			},
+			// directory structures
+			{
+				pattern: /^(\.|\.\.|\.\/.*|\.\.\/.*|.*\/\.\/.*|.*\/\.\.\/.*|.*\/\.|.*\/\.\.)$/g,
+				replace: '',
+				generalRule: true
+			}
+		],
+
+		/**
+		 * Internal helper for #constructor and #newFromText.
+		 *
+		 * Based on Title.php#secureAndSplit
+		 *
+		 * @private
+		 * @static
+		 * @method parse
+		 * @param {string} title
+		 * @param {number} [defaultNamespace=NS_MAIN]
+		 * @return {Object|boolean}
+		 */
+		parse = function ( title, defaultNamespace ) {
+			var namespace, m, id, i, fragment, ext;
+
+			namespace = defaultNamespace === undefined ? NS_MAIN : defaultNamespace;
+
+			title = title
+				// Strip Unicode bidi override characters
+				.replace( rUnicodeBidi, '' )
+				// Normalise whitespace to underscores and remove duplicates
+				.replace( rWhitespace, '_' )
+				// Trim underscores
+				.replace( rUnderscoreTrim, '' );
+
+			// Process initial colon
+			if ( title !== '' && title[ 0 ] === ':' ) {
+				// Initial colon means main namespace instead of specified default
+				namespace = NS_MAIN;
+				title = title
+					// Strip colon
+					.slice( 1 )
+					// Trim underscores
+					.replace( rUnderscoreTrim, '' );
+			}
+
+			if ( title === '' ) {
+				return false;
+			}
+
+			// Process namespace prefix (if any)
+			m = title.match( rSplit );
+			if ( m ) {
+				id = getNsIdByName( m[ 1 ] );
+				if ( id !== false ) {
+					// Ordinary namespace
+					namespace = id;
+					title = m[ 2 ];
+
+					// For Talk:X pages, make sure X has no "namespace" prefix
+					if ( namespace === NS_TALK && ( m = title.match( rSplit ) ) ) {
+						// Disallow titles like Talk:File:x (subject should roundtrip: talk:file:x -> file:x -> file_talk:x)
+						if ( getNsIdByName( m[ 1 ] ) !== false ) {
+							return false;
+						}
+					}
+				}
+			}
+
+			// Process fragment
+			i = title.indexOf( '#' );
+			if ( i === -1 ) {
+				fragment = null;
+			} else {
+				fragment = title
+					// Get segment starting after the hash
+					.slice( i + 1 )
+					// Convert to text
+					// NB: Must not be trimmed ("Example#_foo" is not the same as "Example#foo")
+					.replace( /_/g, ' ' );
+
+				title = title
+					// Strip hash
+					.slice( 0, i )
+					// Trim underscores, again (strips "_" from "bar" in "Foo_bar_#quux")
+					.replace( rUnderscoreTrim, '' );
+			}
+
+			// Reject illegal characters
+			if ( title.match( rInvalid ) ) {
+				return false;
+			}
+
+			// Disallow titles that browsers or servers might resolve as directory navigation
+			if (
+				title.indexOf( '.' ) !== -1 && (
+					title === '.' || title === '..' ||
+					title.indexOf( './' ) === 0 ||
+					title.indexOf( '../' ) === 0 ||
+					title.indexOf( '/./' ) !== -1 ||
+					title.indexOf( '/../' ) !== -1 ||
+					title.slice( -2 ) === '/.' ||
+					title.slice( -3 ) === '/..'
+				)
+			) {
+				return false;
+			}
+
+			// Disallow magic tilde sequence
+			if ( title.indexOf( '~~~' ) !== -1 ) {
+				return false;
+			}
+
+			// Disallow titles exceeding the TITLE_MAX_BYTES byte size limit (size of underlying database field)
+			// Except for special pages, e.g. [[Special:Block/Long name]]
+			// Note: The PHP implementation also asserts that even in NS_SPECIAL, the title should
+			// be less than 512 bytes.
+			if ( namespace !== NS_SPECIAL && mwString.byteLength( title ) > TITLE_MAX_BYTES ) {
+				return false;
+			}
+
+			// Can't make a link to a namespace alone.
+			if ( title === '' && namespace !== NS_MAIN ) {
+				return false;
+			}
+
+			// Any remaining initial :s are illegal.
+			if ( title[ 0 ] === ':' ) {
+				return false;
+			}
+
+			// For backwards-compatibility with old mw.Title, we separate the extension from the
+			// rest of the title.
+			i = title.lastIndexOf( '.' );
+			if ( i === -1 || title.length <= i + 1 ) {
+				// Extensions are the non-empty segment after the last dot
+				ext = null;
+			} else {
+				ext = title.slice( i + 1 );
+				title = title.slice( 0, i );
+			}
+
+			return {
+				namespace: namespace,
+				title: title,
+				ext: ext,
+				fragment: fragment
+			};
+		},
+
+		/**
+		 * Convert db-key to readable text.
+		 *
+		 * @private
+		 * @static
+		 * @method text
+		 * @param {string} s
+		 * @return {string}
+		 */
+		text = function ( s ) {
+			if ( s !== null && s !== undefined ) {
+				return s.replace( /_/g, ' ' );
+			} else {
+				return '';
+			}
+		},
+
+		/**
+		 * Sanitizes a string based on a rule set and a filter
+		 *
+		 * @private
+		 * @static
+		 * @method sanitize
+		 * @param {string} s
+		 * @param {Array} filter
+		 * @return {string}
+		 */
+		sanitize = function ( s, filter ) {
+			var i, ruleLength, rule, m, filterLength,
+				rules = sanitationRules;
+
+			for ( i = 0, ruleLength = rules.length; i < ruleLength; ++i ) {
+				rule = rules[ i ];
+				for ( m = 0, filterLength = filter.length; m < filterLength; ++m ) {
+					if ( rule[ filter[ m ] ] ) {
+						s = s.replace( rule.pattern, rule.replace );
+					}
+				}
+			}
+			return s;
+		},
+
+		/**
+		 * Cuts a string to a specific byte length, assuming UTF-8
+		 * or less, if the last character is a multi-byte one
+		 *
+		 * @private
+		 * @static
+		 * @method trimToByteLength
+		 * @param {string} s
+		 * @param {number} length
+		 * @return {string}
+		 */
+		trimToByteLength = function ( s, length ) {
+			return mwString.trimByteLength( '', s, length ).newVal;
+		},
+
+		/**
+		 * Cuts a file name to a specific byte length
+		 *
+		 * @private
+		 * @static
+		 * @method trimFileNameToByteLength
+		 * @param {string} name without extension
+		 * @param {string} extension file extension
+		 * @return {string} The full name, including extension
+		 */
+		trimFileNameToByteLength = function ( name, extension ) {
+			// There is a special byte limit for file names and ... remember the dot
+			return trimToByteLength( name, FILENAME_MAX_BYTES - extension.length - 1 ) + '.' + extension;
+		};
+
+	/**
 	 * @method constructor
 	 * @param {string} title Title of the page. If no second argument given,
 	 *  this will be searched for a namespace
@@ -46,438 +444,7 @@
 		this.title = parsed.title;
 		this.ext = parsed.ext;
 		this.fragment = parsed.fragment;
-
-		return this;
 	}
-
-	/* Private members */
-
-	var
-
-	namespaceIds = mw.config.get( 'wgNamespaceIds' ),
-
-	/**
-	 * @private
-	 * @static
-	 * @property NS_MAIN
-	 */
-	NS_MAIN = namespaceIds[ '' ],
-
-	/**
-	 * @private
-	 * @static
-	 * @property NS_TALK
-	 */
-	NS_TALK = namespaceIds.talk,
-
-	/**
-	 * @private
-	 * @static
-	 * @property NS_SPECIAL
-	 */
-	NS_SPECIAL = namespaceIds.special,
-
-	/**
-	 * @private
-	 * @static
-	 * @property NS_MEDIA
-	 */
-	NS_MEDIA = namespaceIds.media,
-
-	/**
-	 * @private
-	 * @static
-	 * @property NS_FILE
-	 */
-	NS_FILE = namespaceIds.file,
-
-	/**
-	 * @private
-	 * @static
-	 * @property FILENAME_MAX_BYTES
-	 */
-	FILENAME_MAX_BYTES = 240,
-
-	/**
-	 * @private
-	 * @static
-	 * @property TITLE_MAX_BYTES
-	 */
-	TITLE_MAX_BYTES = 255,
-
-	/**
-	 * Get the namespace id from a namespace name (either from the localized, canonical or alias
-	 * name).
-	 *
-	 * Example: On a German wiki this would return 6 for any of 'File', 'Datei', 'Image' or
-	 * even 'Bild'.
-	 *
-	 * @private
-	 * @static
-	 * @method getNsIdByName
-	 * @param {string} ns Namespace name (case insensitive, leading/trailing space ignored)
-	 * @return {number|boolean} Namespace id or boolean false
-	 */
-	getNsIdByName = function ( ns ) {
-		var id;
-
-		// Don't cast non-strings to strings, because null or undefined should not result in
-		// returning the id of a potential namespace called "Null:" (e.g. on null.example.org/wiki)
-		// Also, toLowerCase throws exception on null/undefined, because it is a String method.
-		if ( typeof ns !== 'string' ) {
-			return false;
-		}
-		// TODO: Should just use local var namespaceIds here but it
-		// breaks test which modify the config
-		id = mw.config.get( 'wgNamespaceIds' )[ ns.toLowerCase() ];
-		if ( id === undefined ) {
-			return false;
-		}
-		return id;
-	},
-
-	/**
-	 * @private
-	 * @method getNamespacePrefix_
-	 * @param {number} namespace
-	 * @return {string}
-	 */
-	getNamespacePrefix = function ( namespace ) {
-		return namespace === NS_MAIN ?
-			'' :
-			( mw.config.get( 'wgFormattedNamespaces' )[ namespace ].replace( / /g, '_' ) + ':' );
-	},
-
-	rUnderscoreTrim = /^_+|_+$/g,
-
-	rSplit = /^(.+?)_*:_*(.*)$/,
-
-	// See MediaWikiTitleCodec.php#getTitleInvalidRegex
-	rInvalid = new RegExp(
-		'[^' + mw.config.get( 'wgLegalTitleChars' ) + ']' +
-		// URL percent encoding sequences interfere with the ability
-		// to round-trip titles -- you can't link to them consistently.
-		'|%[0-9A-Fa-f]{2}' +
-		// XML/HTML character references produce similar issues.
-		'|&[A-Za-z0-9\u0080-\uFFFF]+;' +
-		'|&#[0-9]+;' +
-		'|&#x[0-9A-Fa-f]+;'
-	),
-
-	// From MediaWikiTitleCodec.php#L225 @26fcab1f18c568a41
-	// "Clean up whitespace" in function MediaWikiTitleCodec::splitTitleString()
-	rWhitespace = /[ _\u0009\u00A0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\s]+/g,
-
-	/**
-	 * Slightly modified from Flinfo. Credit goes to Lupo and Flominator.
-	 * @private
-	 * @static
-	 * @property sanitationRules
-	 */
-	sanitationRules = [
-		// "signature"
-		{
-			pattern: /~{3}/g,
-			replace: '',
-			generalRule: true
-		},
-		// Space, underscore, tab, NBSP and other unusual spaces
-		{
-			pattern: rWhitespace,
-			replace: ' ',
-			generalRule: true
-		},
-		// unicode bidi override characters: Implicit, Embeds, Overrides
-		{
-			pattern: /[\u200E\u200F\u202A-\u202E]/g,
-			replace: '',
-			generalRule: true
-		},
-		// control characters
-		{
-			pattern: /[\x00-\x1f\x7f]/g,
-			replace: '',
-			generalRule: true
-		},
-		// URL encoding (possibly)
-		{
-			pattern: /%([0-9A-Fa-f]{2})/g,
-			replace: '% $1',
-			generalRule: true
-		},
-		// HTML-character-entities
-		{
-			pattern: /&(([A-Za-z0-9\x80-\xff]+|#[0-9]+|#x[0-9A-Fa-f]+);)/g,
-			replace: '& $1',
-			generalRule: true
-		},
-		// slash, colon (not supported by file systems like NTFS/Windows, Mac OS 9 [:], ext4 [/])
-		{
-			pattern: /[:\/#]/g,
-			replace: '-',
-			fileRule: true
-		},
-		// brackets, greater than
-		{
-			pattern: /[\]\}>]/g,
-			replace: ')',
-			generalRule: true
-		},
-		// brackets, lower than
-		{
-			pattern: /[\[\{<]/g,
-			replace: '(',
-			generalRule: true
-		},
-		// everything that wasn't covered yet
-		{
-			pattern: new RegExp( rInvalid.source, 'g' ),
-			replace: '-',
-			generalRule: true
-		},
-		// directory structures
-		{
-			pattern: /^(\.|\.\.|\.\/.*|\.\.\/.*|.*\/\.\/.*|.*\/\.\.\/.*|.*\/\.|.*\/\.\.)$/g,
-			replace: '',
-			generalRule: true
-		}
-	],
-
-	/**
-	 * Internal helper for #constructor and #newFromText.
-	 *
-	 * Based on Title.php#secureAndSplit
-	 *
-	 * @private
-	 * @static
-	 * @method parse
-	 * @param {string} title
-	 * @param {number} [defaultNamespace=NS_MAIN]
-	 * @return {Object|boolean}
-	 */
-	parse = function ( title, defaultNamespace ) {
-		var namespace, m, id, i, fragment, ext;
-
-		namespace = defaultNamespace === undefined ? NS_MAIN : defaultNamespace;
-
-		title = title
-			// Normalise whitespace to underscores and remove duplicates
-			.replace( /[ _\s]+/g, '_' )
-			// Trim underscores
-			.replace( rUnderscoreTrim, '' );
-
-		// Process initial colon
-		if ( title !== '' && title[ 0 ] === ':' ) {
-			// Initial colon means main namespace instead of specified default
-			namespace = NS_MAIN;
-			title = title
-				// Strip colon
-				.slice( 1 )
-				// Trim underscores
-				.replace( rUnderscoreTrim, '' );
-		}
-
-		if ( title === '' ) {
-			return false;
-		}
-
-		// Process namespace prefix (if any)
-		m = title.match( rSplit );
-		if ( m ) {
-			id = getNsIdByName( m[ 1 ] );
-			if ( id !== false ) {
-				// Ordinary namespace
-				namespace = id;
-				title = m[ 2 ];
-
-				// For Talk:X pages, make sure X has no "namespace" prefix
-				if ( namespace === NS_TALK && ( m = title.match( rSplit ) ) ) {
-					// Disallow titles like Talk:File:x (subject should roundtrip: talk:file:x -> file:x -> file_talk:x)
-					if ( getNsIdByName( m[ 1 ] ) !== false ) {
-						return false;
-					}
-				}
-			}
-		}
-
-		// Process fragment
-		i = title.indexOf( '#' );
-		if ( i === -1 ) {
-			fragment = null;
-		} else {
-			fragment = title
-				// Get segment starting after the hash
-				.slice( i + 1 )
-				// Convert to text
-				// NB: Must not be trimmed ("Example#_foo" is not the same as "Example#foo")
-				.replace( /_/g, ' ' );
-
-			title = title
-				// Strip hash
-				.slice( 0, i )
-				// Trim underscores, again (strips "_" from "bar" in "Foo_bar_#quux")
-				.replace( rUnderscoreTrim, '' );
-		}
-
-		// Reject illegal characters
-		if ( title.match( rInvalid ) ) {
-			return false;
-		}
-
-		// Disallow titles that browsers or servers might resolve as directory navigation
-		if (
-			title.indexOf( '.' ) !== -1 && (
-				title === '.' || title === '..' ||
-				title.indexOf( './' ) === 0 ||
-				title.indexOf( '../' ) === 0 ||
-				title.indexOf( '/./' ) !== -1 ||
-				title.indexOf( '/../' ) !== -1 ||
-				title.slice( -2 ) === '/.' ||
-				title.slice( -3 ) === '/..'
-			)
-		) {
-			return false;
-		}
-
-		// Disallow magic tilde sequence
-		if ( title.indexOf( '~~~' ) !== -1 ) {
-			return false;
-		}
-
-		// Disallow titles exceeding the TITLE_MAX_BYTES byte size limit (size of underlying database field)
-		// Except for special pages, e.g. [[Special:Block/Long name]]
-		// Note: The PHP implementation also asserts that even in NS_SPECIAL, the title should
-		// be less than 512 bytes.
-		if ( namespace !== NS_SPECIAL && $.byteLength( title ) > TITLE_MAX_BYTES ) {
-			return false;
-		}
-
-		// Can't make a link to a namespace alone.
-		if ( title === '' && namespace !== NS_MAIN ) {
-			return false;
-		}
-
-		// Any remaining initial :s are illegal.
-		if ( title[ 0 ] === ':' ) {
-			return false;
-		}
-
-		// For backwards-compatibility with old mw.Title, we separate the extension from the
-		// rest of the title.
-		i = title.lastIndexOf( '.' );
-		if ( i === -1 || title.length <= i + 1 ) {
-			// Extensions are the non-empty segment after the last dot
-			ext = null;
-		} else {
-			ext = title.slice( i + 1 );
-			title = title.slice( 0, i );
-		}
-
-		return {
-			namespace: namespace,
-			title: title,
-			ext: ext,
-			fragment: fragment
-		};
-	},
-
-	/**
-	 * Convert db-key to readable text.
-	 *
-	 * @private
-	 * @static
-	 * @method text
-	 * @param {string} s
-	 * @return {string}
-	 */
-	text = function ( s ) {
-		if ( s !== null && s !== undefined ) {
-			return s.replace( /_/g, ' ' );
-		} else {
-			return '';
-		}
-	},
-
-	/**
-	 * Sanitizes a string based on a rule set and a filter
-	 *
-	 * @private
-	 * @static
-	 * @method sanitize
-	 * @param {string} s
-	 * @param {Array} filter
-	 * @return {string}
-	 */
-	sanitize = function ( s, filter ) {
-		var i, ruleLength, rule, m, filterLength,
-			rules = sanitationRules;
-
-		for ( i = 0, ruleLength = rules.length; i < ruleLength; ++i ) {
-			rule = rules[ i ];
-			for ( m = 0, filterLength = filter.length; m < filterLength; ++m ) {
-				if ( rule[ filter[ m ] ] ) {
-					s = s.replace( rule.pattern, rule.replace );
-				}
-			}
-		}
-		return s;
-	},
-
-	/**
-	 * Cuts a string to a specific byte length, assuming UTF-8
-	 * or less, if the last character is a multi-byte one
-	 *
-	 * @private
-	 * @static
-	 * @method trimToByteLength
-	 * @param {string} s
-	 * @param {number} length
-	 * @return {string}
-	 */
-	trimToByteLength = function ( s, length ) {
-		var byteLength, chopOffChars, chopOffBytes;
-
-		// bytelength is always greater or equal to the length in characters
-		s = s.substr( 0, length );
-		while ( ( byteLength = $.byteLength( s ) ) > length ) {
-			// Calculate how many characters can be safely removed
-			// First, we need to know how many bytes the string exceeds the threshold
-			chopOffBytes = byteLength - length;
-			// A character in UTF-8 is at most 4 bytes
-			// One character must be removed in any case because the
-			// string is too long
-			chopOffChars = Math.max( 1, Math.floor( chopOffBytes / 4 ) );
-			s = s.substr( 0, s.length - chopOffChars );
-		}
-		return s;
-	},
-
-	/**
-	 * Cuts a file name to a specific byte length
-	 *
-	 * @private
-	 * @static
-	 * @method trimFileNameToByteLength
-	 * @param {string} name without extension
-	 * @param {string} extension file extension
-	 * @return {string} The full name, including extension
-	 */
-	trimFileNameToByteLength = function ( name, extension ) {
-		// There is a special byte limit for file names and ... remember the dot
-		return trimToByteLength( name, FILENAME_MAX_BYTES - extension.length - 1 ) + '.' + extension;
-	},
-
-	// Polyfill for ES5 Object.create
-	createObject = Object.create || ( function () {
-		return function ( o ) {
-			function Title() {}
-			if ( o !== Object( o ) ) {
-				throw new Error( 'Cannot inherit from a non-object' );
-			}
-			Title.prototype = o;
-			return new Title();
-		};
-	}() );
 
 	/* Static members */
 
@@ -499,7 +466,7 @@
 			return null;
 		}
 
-		t = createObject( Title.prototype );
+		t = Object.create( Title.prototype );
 		t.namespace = parsed.namespace;
 		t.title = parsed.title;
 		t.ext = parsed.ext;
@@ -557,8 +524,8 @@
 
 		namespace = defaultNamespace === undefined ? NS_MAIN : defaultNamespace;
 
-		// Normalise whitespace and remove duplicates
-		title = $.trim( title.replace( rWhitespace, ' ' ) );
+		// Normalise additional whitespace
+		title = title.replace( /\s/g, ' ' ).trim();
 
 		// Process initial colon
 		if ( title !== '' && title[ 0 ] === ':' ) {
@@ -582,8 +549,9 @@
 			}
 		}
 
-		if ( namespace === NS_MEDIA
-			|| ( options.forUploading && ( namespace === NS_FILE ) )
+		if (
+			namespace === NS_MEDIA ||
+			( options.forUploading && ( namespace === NS_FILE ) )
 		) {
 
 			title = sanitize( title, [ 'generalRule', 'fileRule' ] );
@@ -599,7 +567,7 @@
 				ext = parts.pop();
 
 				// Remove whitespace of the name part (that W/O extension)
-				title = $.trim( parts.join( '.' ) );
+				title = parts.join( '.' ).trim();
 
 				// Cut, if too long and append file extension
 				title = trimFileNameToByteLength( title, ext );
@@ -607,7 +575,7 @@
 			} else {
 
 				// Missing file extension
-				title = $.trim( parts.join( '.' ) );
+				title = parts.join( '.' ).trim();
 
 				// Name has no file extension and a fallback wasn't provided either
 				return null;
@@ -624,7 +592,7 @@
 		}
 
 		// Any remaining initial :s are illegal.
-		title = title.replace( /^\:+/, '' );
+		title = title.replace( /^:+/, '' );
 
 		return Title.newFromText( title, namespace );
 	};
@@ -662,16 +630,16 @@
 			thumbPhpRegex = /thumb\.php/,
 			regexes = [
 				// Thumbnails
-				/\/[a-f0-9]\/[a-f0-9]{2}\/([^\s\/]+)\/[^\s\/]+-[^\s\/]*$/,
-
-				// Thumbnails in non-hashed upload directories
-				/\/([^\s\/]+)\/[^\s\/]+-(?:\1|thumbnail)[^\s\/]*$/,
+				/\/[a-f0-9]\/[a-f0-9]{2}\/([^\s/]+)\/[^\s/]+-[^\s/]*$/,
 
 				// Full size images
-				/\/[a-f0-9]\/[a-f0-9]{2}\/([^\s\/]+)$/,
+				/\/[a-f0-9]\/[a-f0-9]{2}\/([^\s/]+)$/,
+
+				// Thumbnails in non-hashed upload directories
+				/\/([^\s/]+)\/[^\s/]+-(?:\1|thumbnail)[^\s/]*$/,
 
 				// Full-size images in non-hashed upload directories
-				/\/([^\s\/]+)$/
+				/\/([^\s/]+)$/
 			],
 
 			recount = regexes.length;
@@ -707,22 +675,21 @@
 	 */
 	Title.exists = function ( title ) {
 		var match,
-			type = $.type( title ),
 			obj = Title.exist.pages;
 
-		if ( type === 'string' ) {
+		if ( typeof title === 'string' ) {
 			match = obj[ title ];
-		} else if ( type === 'object' && title instanceof Title ) {
+		} else if ( title instanceof Title ) {
 			match = obj[ title.toString() ];
 		} else {
 			throw new Error( 'mw.Title.exists: title must be a string or an instance of Title' );
 		}
 
-		if ( typeof match === 'boolean' ) {
-			return match;
+		if ( typeof match !== 'boolean' ) {
+			return null;
 		}
 
-		return null;
+		return match;
 	};
 
 	/**
@@ -750,13 +717,13 @@
 		pages: {},
 
 		set: function ( titles, state ) {
-			titles = $.isArray( titles ) ? titles : [ titles ];
-			state = state === undefined ? true : !!state;
-			var i,
-				pages = this.pages,
-				len = titles.length;
+			var i, len,
+				pages = this.pages;
 
-			for ( i = 0; i < len; i++ ) {
+			titles = Array.isArray( titles ) ? titles : [ titles ];
+			state = state === undefined ? true : !!state;
+
+			for ( i = 0, len = titles.length; i < len; i++ ) {
 				pages[ titles[ i ] ] = state;
 			}
 			return true;
@@ -834,7 +801,9 @@
 			) {
 				return this.title;
 			}
-			return this.title[ 0 ].toUpperCase() + this.title.slice( 1 );
+			// PHP's strtoupper differs from String.toUpperCase in a number of cases
+			// Bug: T147646
+			return mw.Title.phpCharToUpper( this.title[ 0 ] ) + this.title.slice( 1 );
 		},
 
 		/**

@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -16,7 +16,6 @@
  */
 class GettextDocumentationAid extends TranslationAid {
 	public function getData() {
-
 		// We need to get the primary group to get the correct file
 		// So $group can be different from $this->group
 		$group = $this->handle->getGroup();
@@ -60,11 +59,11 @@ class GettextDocumentationAid extends TranslationAid {
 			}
 		}
 
-		return array(
+		return [
 			'language' => $wgContLang->getCode(),
 			// @todo Provide raw data when possible
 			// 'value' => $help,
 			'html' => $this->context->getOutput()->parse( $out ),
-		);
+		];
 	}
 }

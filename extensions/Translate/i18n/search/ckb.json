@@ -1,8 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sarchia"
+			"Sarchia",
+			"Lost Whispers",
+			"Épine"
 		]
 	},
-	"tux-sst-search": "گەڕان"
+	"tux-sst-search": "گەڕان",
+	"tux-sst-translated": "وەرگێڕانەکان لە $1ەوە",
+	"tux-sst-match-message": "ھەموو ئەو وەرگێڕانانە پیشان دەدرێت کە لەگەڵ وشەکانی بەکارھێندراون بۆ گەڕان دەگونجێت. $1"
 }

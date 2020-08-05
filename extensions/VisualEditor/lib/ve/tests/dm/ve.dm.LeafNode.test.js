@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel LeafNode tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.LeafNode' );
@@ -10,7 +10,7 @@ QUnit.module( 've.dm.LeafNode' );
 
 ve.dm.LeafNodeStub = function VeDmLeafNodeStub() {
 	// Parent constructor
-	ve.dm.LeafNode.apply( this, arguments );
+	ve.dm.LeafNodeStub.super.apply( this, arguments );
 };
 
 OO.inheritClass( ve.dm.LeafNodeStub, ve.dm.LeafNode );
@@ -23,17 +23,17 @@ ve.dm.nodeFactory.register( ve.dm.LeafNodeStub );
 
 /* Tests */
 
-QUnit.test( 'canHaveChildren', 1, function ( assert ) {
+QUnit.test( 'canHaveChildren', function ( assert ) {
 	var node = new ve.dm.LeafNodeStub();
 	assert.strictEqual( node.canHaveChildren(), false );
 } );
 
-QUnit.test( 'canHaveChildrenNotContent', 1, function ( assert ) {
+QUnit.test( 'canHaveChildrenNotContent', function ( assert ) {
 	var node = new ve.dm.LeafNodeStub();
 	assert.strictEqual( node.canHaveChildrenNotContent(), false );
 } );
 
-QUnit.test( 'getAnnotations', 3, function ( assert ) {
+QUnit.test( 'getAnnotations', function ( assert ) {
 	var element = { type: 'leaf-stub' },
 		node = new ve.dm.LeafNodeStub( element );
 	assert.deepEqual( node.getAnnotations(), [], 'undefined .annotations returns empty set' );

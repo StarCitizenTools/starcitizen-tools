@@ -2,13 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Alchimista",
-			"Vitorvicentevalente"
+			"Vitorvicentevalente",
+			"Hamilton Abreu"
 		]
 	},
-	"eventlogging-desc": "Estrutura para registo de eventos no código Client Side",
+	"eventlogging-desc": "Estrutura para registar eventos vindos do código do lado do cliente",
 	"eventlogging-invalid-json": "JSON inválido",
-	"eventlogging-revision-id": "Revisão: $1",
+	"eventlogging-revision-id": "Revisão $1",
 	"eventlogging-code-sample-logging-on-server-side": "Registo de PHP",
-	"eventlogging-code-sample-module-setup": "Instalação PHP para registo de Javascript",
-	"eventlogging-code-sample-logging-on-client-side": "Registo JavaScript"
+	"eventlogging-code-sample-module-setup-json": "Configuração de extension.json para registo de JavaScript",
+	"eventlogging-code-sample-logging-on-client-side": "Registo de JavaScript",
+	"eventlogging-error-move-source": "Não é possível alterar o nome de páginas do modelo de dados (<i>schema</i>)",
+	"eventlogging-error-move-destination": "Não é possível alterar o nome de páginas para torná-las em páginas do modelo de dados (<i>schema</i>)"
 }

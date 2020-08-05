@@ -54,7 +54,7 @@ class PatrolLogFormatter extends LogFormatter {
 				'oldid' => $oldid,
 				'diff' => 'prev'
 			];
-			$revlink = Linker::link( $target, htmlspecialchars( $revision ), [], $query );
+			$revlink = $this->getLinkRenderer()->makeLink( $target, $revision, [], $query );
 		} else {
 			$revlink = htmlspecialchars( $revision );
 		}

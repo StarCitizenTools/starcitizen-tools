@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -16,12 +16,12 @@
  */
 class InOtherLanguagesAid extends TranslationAid {
 	public function getData() {
-		$suggestions = array(
+		$suggestions = [
 			'**' => 'suggestion',
-		);
+		];
 
 		// Fuzzy translations are not included in these
-		$translations = $this->getTranslations();
+		$translations = $this->dataProvider->getGoodTranslations();
 		$code = $this->handle->getCode();
 
 		$sourceLanguage = $this->handle->getGroup()->getSourceLanguage();
@@ -35,10 +35,10 @@ class InOtherLanguagesAid extends TranslationAid {
 				continue;
 			}
 
-			$suggestions[] = array(
+			$suggestions[] = [
 				'language' => $fbcode,
 				'value' => $translations[$fbcode],
-			);
+			];
 		}
 
 		return $suggestions;
@@ -67,7 +67,7 @@ class InOtherLanguagesAid extends TranslationAid {
 		}
 
 		// Global configuration settings
-		$fallbacks = array();
+		$fallbacks = [];
 		if ( isset( $wgTranslateLanguageFallbacks[$code] ) ) {
 			$fallbacks = (array)$wgTranslateLanguageFallbacks[$code];
 		}

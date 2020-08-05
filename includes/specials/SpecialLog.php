@@ -2,8 +2,6 @@
 /**
  * Implements Special:Log
  *
- * Copyright © 2008 Aaron Schulz
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -34,9 +32,12 @@ class SpecialLog extends SpecialPage {
 	}
 
 	public function execute( $par ) {
+		global $wgActorTableSchemaMigrationStage;
+
 		$this->setHeaders();
 		$this->outputHeader();
 		$this->getOutput()->addModules( 'mediawiki.userSuggest' );
+		$this->addHelpLink( 'Help:Log' );
 
 		$opts = new FormOptions;
 		$opts->add( 'type', '' );
@@ -50,6 +51,7 @@ class SpecialLog extends SpecialPage {
 		$opts->add( 'dir', '' );
 		$opts->add( 'offender', '' );
 		$opts->add( 'subtype', '' );
+		$opts->add( 'logid', '' );
 
 		// Set values
 		$opts->fetchValuesFromRequest( $this->getRequest() );
@@ -79,11 +81,34 @@ class SpecialLog extends SpecialPage {
 		# Handle type-specific inputs
 		$qc = [];
 		if ( $opts->getValue( 'type' ) == 'suppress' ) {
-			$offender = User::newFromName( $opts->getValue( 'offender' ), false );
-			if ( $offender && $offender->getId() > 0 ) {
-				$qc = [ 'ls_field' => 'target_author_id', 'ls_value' => $offender->getId() ];
-			} elseif ( $offender && IP::isIPAddress( $offender->getName() ) ) {
-				$qc = [ 'ls_field' => 'target_author_ip', 'ls_value' => $offender->getName() ];
+			$offenderName = $opts->getValue( 'offender' );
+			$offender = empty( $offenderName ) ? null : User::newFromName( $offenderName, false );
+			if ( $offender ) {
+				if ( $wgActorTableSchemaMigrationStage === MIGRATION_NEW ) {
+					$qc = [ 'ls_field' => 'target_author_actor', 'ls_value' => $offender->getActorId() ];
+				} else {
+					if ( $offender->getId() > 0 ) {
+						$field = 'target_author_id';
+						$value = $offender->getId();
+					} else {
+						$field = 'target_author_ip';
+						$value = $offender->getName();
+					}
+					if ( !$offender->getActorId() ) {
+						$qc = [ 'ls_field' => $field, 'ls_value' => $value ];
+					} else {
+						$db = wfGetDB( DB_REPLICA );
+						$qc = [
+							'ls_field' => [ 'target_author_actor', $field ], // So LogPager::getQueryInfo() works right
+							$db->makeList( [
+								$db->makeList(
+									[ 'ls_field' => 'target_author_actor', 'ls_value' => $offender->getActorId() ], LIST_AND
+								),
+								$db->makeList( [ 'ls_field' => $field, 'ls_value' => $value ], LIST_AND ),
+							], LIST_OR ),
+						];
+					}
+				}
 			}
 		} else {
 			// Allow extensions to add relations to their search types
@@ -95,7 +120,7 @@ class SpecialLog extends SpecialPage {
 
 		# Some log types are only for a 'User:' title but we might have been given
 		# only the username instead of the full title 'User:username'. This part try
-		# to lookup for a user by that name and eventually fix user input. See bug 1697.
+		# to lookup for a user by that name and eventually fix user input. See T3697.
 		if ( in_array( $opts->getValue( 'type' ), self::getLogTypesOnUser() ) ) {
 			# ok we have a type of log which expect a user title.
 			$target = Title::newFromText( $opts->getValue( 'page' ) );
@@ -145,6 +170,16 @@ class SpecialLog extends SpecialPage {
 		return $subpages;
 	}
 
+	/**
+	 * Set options based on the subpage title parts:
+	 * - One part that is a valid log type: Special:Log/logtype
+	 * - Two parts: Special:Log/logtype/username
+	 * - Otherwise, assume the whole subpage is a username.
+	 *
+	 * @param FormOptions $opts
+	 * @param $par
+	 * @throws ConfigException
+	 */
 	private function parseParams( FormOptions $opts, $par ) {
 		# Get parameters
 		$par = $par !== null ? $par : '';
@@ -166,7 +201,7 @@ class SpecialLog extends SpecialPage {
 		# Create a LogPager item to get the results and a LogEventsList item to format them...
 		$loglist = new LogEventsList(
 			$this->getContext(),
-			null,
+			$this->getLinkRenderer(),
 			LogEventsList::USE_CHECKBOXES
 		);
 
@@ -180,7 +215,8 @@ class SpecialLog extends SpecialPage {
 			$opts->getValue( 'year' ),
 			$opts->getValue( 'month' ),
 			$opts->getValue( 'tagfilter' ),
-			$opts->getValue( 'subtype' )
+			$opts->getValue( 'subtype' ),
+			$opts->getValue( 'logid' )
 		);
 
 		$this->addHeader( $opts->getValue( 'type' ) );

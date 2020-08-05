@@ -20,15 +20,13 @@
 
 	/**
 	 * Represents the main interface of the lightbox
+	 *
 	 * @class mw.mmv.LightboxInterface
 	 * @extends mw.mmv.ui.Element
 	 * @constructor
 	 */
 	function LightboxInterface() {
-		this.localStorage = false;
-		try {
-			this.localStorage = window.localStorage || false;
-		} catch ( e ) {}
+		this.localStorage = mw.storage;
 
 		/** @property {mw.mmv.Config} config - */
 		this.config = new mw.mmv.Config(
@@ -53,6 +51,7 @@
 
 	/**
 	 * The currently selected LightboxImage.
+	 *
 	 * @type {mw.mmv.LightboxImage}
 	 * @protected
 	 */
@@ -112,6 +111,7 @@
 
 	/**
 	 * Sets up the file reuse data in the DOM
+	 *
 	 * @param {mw.mmv.model.Image} image
 	 * @param {mw.mmv.model.Repo} repo
 	 * @param {string} caption
@@ -146,6 +146,7 @@
 
 	/**
 	 * Attaches the interface to the DOM.
+	 *
 	 * @param {string} [parentId] parent id where we want to attach the UI. Defaults to document
 	 *  element, override is mainly used for testing.
 	 */
@@ -158,7 +159,7 @@
 		// If the lightbox is already attached, it means we're doing prev/next, and
 		// we should avoid scrolling the panel
 		if ( !this.attached ) {
-			$.scrollTo( 0, 0 );
+			$( window ).scrollTop( 0 );
 		}
 
 		// Make sure that the metadata is going to be at the bottom when it appears
@@ -194,8 +195,8 @@
 		this.handleEvent( 'mmv-fade-stopped', function ( e ) { ui.fadeStopped( e ); } );
 
 		this.buttons.connect( this, {
-			'next': [ 'emit', 'next' ],
-			'prev': [ 'emit', 'prev' ]
+			next: [ 'emit', 'next' ],
+			prev: [ 'emit', 'prev' ]
 		} );
 
 		$parent = $( parentId || document.body );
@@ -277,8 +278,8 @@
 		this.clearEvents();
 
 		this.buttons.disconnect( this, {
-			'next': [ 'emit', 'next' ],
-			'prev': [ 'emit', 'prev' ]
+			next: [ 'emit', 'next' ],
+			prev: [ 'emit', 'prev' ]
 		} );
 
 		// We trigger this event on the document because unattach() can run
@@ -311,7 +312,7 @@
 		var ui = this,
 			tooltipDelay = mw.config.get( 'wgMultimediaViewer' ).tooltipDelay;
 
-		this.$closeButton = $( '<div>' )
+		this.$closeButton = $( '<button>' )
 			.text( ' ' )
 			.addClass( 'mw-mmv-close' )
 			.prop( 'title', mw.message( 'multimediaviewer-close-popup-text' ).text() )
@@ -326,7 +327,7 @@
 				ui.unattach();
 			} );
 
-		this.$fullscreenButton = $( '<div>' )
+		this.$fullscreenButton = $( '<button>' )
 			.text( ' ' )
 			.addClass( 'mw-mmv-fullscreen' )
 			.prop( 'title', mw.message( 'multimediaviewer-fullscreen-popup-text' ).text() )
@@ -334,9 +335,18 @@
 				delayIn: tooltipDelay,
 				gravity: this.correctEW( 'ne' )
 			} )
-			.click( function () {
+			.click( function ( e ) {
 				if ( ui.isFullscreen ) {
 					ui.exitFullscreen();
+
+					// mousemove is throttled and the mouse coordinates only
+					// register every 250ms, so there is a chance that we moved
+					// our mouse over one of the buttons but it didn't register,
+					// and a fadeOut is triggered; when we're coming back from
+					// fullscreen, we'll want to make sure the mouse data is
+					// current so that the fadeOut behavior will not trigger
+					ui.mousePosition = { x: e.pageX, y: e.pageY };
+					ui.buttons.revealAndFade( ui.mousePosition );
 				} else {
 					ui.enterFullscreen();
 				}
@@ -352,6 +362,7 @@
 
 	/**
 	 * Handle a fullscreen change event.
+	 *
 	 * @param {jQuery.Event} e The fullscreen change event.
 	 */
 	LIP.fullscreenChange = function ( e ) {
@@ -361,12 +372,14 @@
 			mw.mmv.actionLogger.log( 'fullscreen' );
 
 			this.$fullscreenButton
-				.prop( 'title', mw.message( 'multimediaviewer-defullscreen-popup-text' ).text() );
+				.prop( 'title', mw.message( 'multimediaviewer-defullscreen-popup-text' ).text() )
+				.attr( 'alt', mw.message( 'multimediaviewer-defullscreen-popup-text' ).text() );
 		} else {
 			mw.mmv.actionLogger.log( 'defullscreen' );
 
 			this.$fullscreenButton
-				.prop( 'title', mw.message( 'multimediaviewer-fullscreen-popup-text' ).text() );
+				.prop( 'title', mw.message( 'multimediaviewer-fullscreen-popup-text' ).text() )
+				.attr( 'alt', mw.message( 'multimediaviewer-fullscreen-popup-text' ).text() );
 		}
 
 		if ( !this.fullscreenButtonJustPressed && !e.fullscreen ) {
@@ -400,6 +413,7 @@
 
 	/**
 	 * Handles keydown events on the document
+	 *
 	 * @param {jQuery.Event} e The jQuery keypress event object
 	 */
 	LIP.keydown = function ( e ) {
@@ -432,15 +446,16 @@
 
 	/**
 	 * Handles mousemove events on the document
+	 *
 	 * @param {jQuery.Event} e The mousemove event object
 	 */
 	LIP.mousemove = function ( e ) {
 		// T77869 ignore fake mousemove events triggered by Chrome
 		if (
-			e
-			&& e.originalEvent
-			&& e.originalEvent.movementX === 0
-			&& e.originalEvent.movementY === 0
+			e &&
+			e.originalEvent &&
+			e.originalEvent.movementX === 0 &&
+			e.originalEvent.movementY === 0
 		) {
 			return;
 		}
@@ -473,6 +488,7 @@
 
 	/**
 	 * Updates the next and prev buttons
+	 *
 	 * @param {boolean} showPrevButton Whether the prev button should be revealed or not
 	 * @param {boolean} showNextButton Whether the next button should be revealed or not
 	 */

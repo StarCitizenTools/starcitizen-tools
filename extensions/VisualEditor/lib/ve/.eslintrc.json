@@ -1,0 +1,23 @@
+{
+	"extends": "wikimedia",
+	"env": {
+		"browser": true,
+		"jquery": true,
+		"qunit": true
+	},
+	"globals": {
+		"ve": true,
+		"VisualEditorSupportCheck": false,
+		"OO": false,
+		"unicodeJS": false,
+		"RangeFix": false,
+		"Papa": false
+	},
+	"rules": {
+		"dot-notation": [ "error", { "allowKeywords": true } ]
+	},
+	"plugins": [ "html" ],
+	"settings": {
+		"html/indent": "+tab"
+	}
+}

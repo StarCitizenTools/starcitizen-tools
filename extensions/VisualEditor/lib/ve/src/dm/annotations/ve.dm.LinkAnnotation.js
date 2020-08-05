@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel LinkAnnotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -30,6 +30,9 @@ ve.dm.LinkAnnotation.static.name = 'link';
 ve.dm.LinkAnnotation.static.matchTagNames = [ 'a' ];
 
 ve.dm.LinkAnnotation.static.toDataElement = function ( domElements ) {
+	if ( !domElements[ 0 ].hasAttribute( 'href' ) ) {
+		return ve.dm.SpanAnnotation.static.toDataElement.apply( ve.dm.SpanAnnotation.static, arguments );
+	}
 	return {
 		type: this.name,
 		attributes: {
@@ -42,6 +45,14 @@ ve.dm.LinkAnnotation.static.toDomElements = function ( dataElement, doc ) {
 	var domElement = doc.createElement( 'a' );
 	domElement.setAttribute( 'href', this.getHref( dataElement ) );
 	return [ domElement ];
+};
+
+ve.dm.LinkAnnotation.static.describeChange = function ( key, change ) {
+	if ( key === 'href' ) {
+		return ve.msg( 'visualeditor-changedesc-link-href', change.from, change.to );
+	}
+	// Parent method
+	return ve.dm.LinkAnnotation.parent.static.describeChange.apply( this, arguments );
 };
 
 /**
@@ -80,6 +91,20 @@ ve.dm.LinkAnnotation.prototype.getHref = function () {
  */
 ve.dm.LinkAnnotation.prototype.getDisplayTitle = function () {
 	return this.getHref();
+};
+
+/**
+ * Get the fragment / hash for the current href
+ *
+ * @return {string|null} The fragment, or null if none is present
+ */
+ve.dm.LinkAnnotation.prototype.getFragment = function () {
+	var href = this.getHref(),
+		hash = href.indexOf( '#' );
+	if ( hash === -1 ) {
+		return null;
+	}
+	return href.slice( hash + 1 );
 };
 
 /**

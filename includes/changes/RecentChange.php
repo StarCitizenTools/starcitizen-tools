@@ -34,6 +34,7 @@
  *  rc_cur_id       page_id of associated page entry
  *  rc_user         user id who made the entry
  *  rc_user_text    user name who made the entry
+ *  rc_actor        actor id who made the entry
  *  rc_comment      edit summary
  *  rc_this_oldid   rev_id associated with this entry (or zero)
  *  rc_last_oldid   rev_id associated with the entry before this one (or zero)
@@ -59,6 +60,10 @@
  * temporary:       not stored in the database
  *      notificationtimestamp
  *      numberofWatchingusers
+ *
+ * @todo Deprecate access to mAttribs (direct or via getAttributes). Right now
+ *  we're having to include both rc_comment and rc_comment_text/rc_comment_data
+ *  so random crap works right.
  */
 class RecentChange {
 	// Constants for the rc_source field.  Extensions may also have
@@ -68,6 +73,10 @@ class RecentChange {
 	const SRC_LOG = 'mw.log';
 	const SRC_EXTERNAL = 'mw.external'; // obsolete
 	const SRC_CATEGORIZE = 'mw.categorize';
+
+	const PRC_UNPATROLLED = 0;
+	const PRC_PATROLLED = 1;
+	const PRC_AUTOPATROLLED = 2;
 
 	public $mAttribs = [];
 	public $mExtra = [];
@@ -89,6 +98,11 @@ class RecentChange {
 	 * @var int Line number of recent change. Default -1.
 	 */
 	public $counter = -1;
+
+	/**
+	 * @var array List of tags to apply
+	 */
+	private $tags = [];
 
 	/**
 	 * @var array Array of change types
@@ -125,7 +139,7 @@ class RecentChange {
 		if ( is_array( $type ) ) {
 			$retval = [];
 			foreach ( $type as $t ) {
-				$retval[] = RecentChange::parseToRCType( $t );
+				$retval[] = self::parseToRCType( $t );
 			}
 
 			return $retval;
@@ -180,10 +194,13 @@ class RecentChange {
 	public static function newFromConds(
 		$conds,
 		$fname = __METHOD__,
-		$dbType = DB_SLAVE
+		$dbType = DB_REPLICA
 	) {
 		$db = wfGetDB( $dbType );
-		$row = $db->selectRow( 'recentchanges', self::selectFields(), $conds, $fname );
+		$rcQuery = self::getQueryInfo();
+		$row = $db->selectRow(
+			$rcQuery['tables'], $rcQuery['fields'], $conds, $fname, [], $rcQuery['joins']
+		);
 		if ( $row !== false ) {
 			return self::newFromRow( $row );
 		} else {
@@ -194,17 +211,31 @@ class RecentChange {
 	/**
 	 * Return the list of recentchanges fields that should be selected to create
 	 * a new recentchanges object.
+	 * @deprecated since 1.31, use self::getQueryInfo() instead.
 	 * @return array
 	 */
 	public static function selectFields() {
+		global $wgActorTableSchemaMigrationStage;
+
+		wfDeprecated( __METHOD__, '1.31' );
+		if ( $wgActorTableSchemaMigrationStage > MIGRATION_WRITE_BOTH ) {
+			// If code is using this instead of self::getQueryInfo(), there's a
+			// decent chance it's going to try to directly access
+			// $row->rc_user or $row->rc_user_text and we can't give it
+			// useful values here once those aren't being written anymore.
+			throw new BadMethodCallException(
+				'Cannot use ' . __METHOD__ . ' when $wgActorTableSchemaMigrationStage > MIGRATION_WRITE_BOTH'
+			);
+		}
+
 		return [
 			'rc_id',
 			'rc_timestamp',
 			'rc_user',
 			'rc_user_text',
+			'rc_actor' => 'NULL',
 			'rc_namespace',
 			'rc_title',
-			'rc_comment',
 			'rc_minor',
 			'rc_bot',
 			'rc_new',
@@ -222,6 +253,47 @@ class RecentChange {
 			'rc_log_type',
 			'rc_log_action',
 			'rc_params',
+		] + CommentStore::getStore()->getFields( 'rc_comment' );
+	}
+
+	/**
+	 * Return the tables, fields, and join conditions to be selected to create
+	 * a new recentchanges object.
+	 * @since 1.31
+	 * @return array With three keys:
+	 *   - tables: (string[]) to include in the `$table` to `IDatabase->select()`
+	 *   - fields: (string[]) to include in the `$vars` to `IDatabase->select()`
+	 *   - joins: (array) to include in the `$join_conds` to `IDatabase->select()`
+	 */
+	public static function getQueryInfo() {
+		$commentQuery = CommentStore::getStore()->getJoin( 'rc_comment' );
+		$actorQuery = ActorMigration::newMigration()->getJoin( 'rc_user' );
+		return [
+			'tables' => [ 'recentchanges' ] + $commentQuery['tables'] + $actorQuery['tables'],
+			'fields' => [
+				'rc_id',
+				'rc_timestamp',
+				'rc_namespace',
+				'rc_title',
+				'rc_minor',
+				'rc_bot',
+				'rc_new',
+				'rc_cur_id',
+				'rc_this_oldid',
+				'rc_last_oldid',
+				'rc_type',
+				'rc_source',
+				'rc_patrolled',
+				'rc_ip',
+				'rc_old_len',
+				'rc_new_len',
+				'rc_deleted',
+				'rc_logid',
+				'rc_log_type',
+				'rc_log_action',
+				'rc_params',
+			] + $commentQuery['fields'] + $actorQuery['fields'],
+			'joins' => $commentQuery['joins'] + $actorQuery['joins'],
 		];
 	}
 
@@ -259,10 +331,14 @@ class RecentChange {
 	 */
 	public function getPerformer() {
 		if ( $this->mPerformer === false ) {
-			if ( $this->mAttribs['rc_user'] ) {
+			if ( !empty( $this->mAttribs['rc_actor'] ) ) {
+				$this->mPerformer = User::newFromActorId( $this->mAttribs['rc_actor'] );
+			} elseif ( !empty( $this->mAttribs['rc_user'] ) ) {
 				$this->mPerformer = User::newFromId( $this->mAttribs['rc_user'] );
-			} else {
+			} elseif ( !empty( $this->mAttribs['rc_user_text'] ) ) {
 				$this->mPerformer = User::newFromName( $this->mAttribs['rc_user_text'], false );
+			} else {
+				throw new MWException( 'RecentChange object lacks rc_actor, rc_user, and rc_user_text' );
 			}
 		}
 
@@ -274,7 +350,7 @@ class RecentChange {
 	 * @param bool $noudp
 	 */
 	public function save( $noudp = false ) {
-		global $wgPutIPinRC, $wgUseEnotif, $wgShowUpdatedMarker, $wgContLang;
+		global $wgPutIPinRC, $wgUseEnotif, $wgShowUpdatedMarker;
 
 		$dbw = wfGetDB( DB_MASTER );
 		if ( !is_array( $this->mExtra ) ) {
@@ -285,34 +361,69 @@ class RecentChange {
 			$this->mAttribs['rc_ip'] = '';
 		}
 
+		# Strict mode fixups (not-NULL fields)
+		foreach ( [ 'minor', 'bot', 'new', 'patrolled', 'deleted' ] as $field ) {
+			$this->mAttribs["rc_$field"] = (int)$this->mAttribs["rc_$field"];
+		}
+		# ...more fixups (NULL fields)
+		foreach ( [ 'old_len', 'new_len' ] as $field ) {
+			$this->mAttribs["rc_$field"] = isset( $this->mAttribs["rc_$field"] )
+				? (int)$this->mAttribs["rc_$field"]
+				: null;
+		}
+
 		# If our database is strict about IP addresses, use NULL instead of an empty string
-		if ( $dbw->strictIPs() && $this->mAttribs['rc_ip'] == '' ) {
+		$strictIPs = in_array( $dbw->getType(), [ 'oracle', 'postgres' ] ); // legacy
+		if ( $strictIPs && $this->mAttribs['rc_ip'] == '' ) {
 			unset( $this->mAttribs['rc_ip'] );
 		}
 
 		# Trim spaces on user supplied text
 		$this->mAttribs['rc_comment'] = trim( $this->mAttribs['rc_comment'] );
 
-		# Make sure summary is truncated (whole multibyte characters)
-		$this->mAttribs['rc_comment'] = $wgContLang->truncate( $this->mAttribs['rc_comment'], 255 );
-
 		# Fixup database timestamps
 		$this->mAttribs['rc_timestamp'] = $dbw->timestamp( $this->mAttribs['rc_timestamp'] );
-		$this->mAttribs['rc_id'] = $dbw->nextSequenceValue( 'recentchanges_rc_id_seq' );
 
 		# # If we are using foreign keys, an entry of 0 for the page_id will fail, so use NULL
-		if ( $dbw->cascadingDeletes() && $this->mAttribs['rc_cur_id'] == 0 ) {
+		if ( $this->mAttribs['rc_cur_id'] == 0 ) {
 			unset( $this->mAttribs['rc_cur_id'] );
 		}
 
+		$row = $this->mAttribs;
+
+		# Convert mAttribs['rc_comment'] for CommentStore
+		$comment = $row['rc_comment'];
+		unset( $row['rc_comment'], $row['rc_comment_text'], $row['rc_comment_data'] );
+		$row += CommentStore::getStore()->insert( $dbw, 'rc_comment', $comment );
+
+		# Convert mAttribs['rc_user'] etc for ActorMigration
+		$user = User::newFromAnyId(
+			isset( $row['rc_user'] ) ? $row['rc_user'] : null,
+			isset( $row['rc_user_text'] ) ? $row['rc_user_text'] : null,
+			isset( $row['rc_actor'] ) ? $row['rc_actor'] : null
+		);
+		unset( $row['rc_user'], $row['rc_user_text'], $row['rc_actor'] );
+		$row += ActorMigration::newMigration()->getInsertValues( $dbw, 'rc_user', $user );
+
+		# Don't reuse an existing rc_id for the new row, if one happens to be
+		# set for some reason.
+		unset( $row['rc_id'] );
+
 		# Insert new row
-		$dbw->insert( 'recentchanges', $this->mAttribs, __METHOD__ );
+		$dbw->insert( 'recentchanges', $row, __METHOD__ );
 
 		# Set the ID
 		$this->mAttribs['rc_id'] = $dbw->insertId();
 
 		# Notify extensions
-		Hooks::run( 'RecentChange_save', [ &$this ] );
+		// Avoid PHP 7.1 warning from passing $this by reference
+		$rc = $this;
+		Hooks::run( 'RecentChange_save', [ &$rc ] );
+
+		if ( count( $this->tags ) ) {
+			ChangeTags::addTags( $this->tags, $this->mAttribs['rc_id'],
+				$this->mAttribs['rc_this_oldid'], $this->mAttribs['rc_logid'], null, $this );
+		}
 
 		# Notify external application via UDP
 		if ( !$noudp ) {
@@ -325,20 +436,27 @@ class RecentChange {
 			$title = $this->getTitle();
 
 			// Never send an RC notification email about categorization changes
-			if ( $this->mAttribs['rc_type'] != RC_CATEGORIZE ) {
-				if ( Hooks::run( 'AbortEmailNotification', [ $editor, $title, $this ] ) ) {
-					# @todo FIXME: This would be better as an extension hook
-					$enotif = new EmailNotification();
-					$enotif->notifyOnPageChange(
-						$editor,
-						$title,
-						$this->mAttribs['rc_timestamp'],
-						$this->mAttribs['rc_comment'],
-						$this->mAttribs['rc_minor'],
-						$this->mAttribs['rc_last_oldid'],
-						$this->mExtra['pageStatus']
-					);
-				}
+			if (
+				Hooks::run( 'AbortEmailNotification', [ $editor, $title, $this ] ) &&
+				$this->mAttribs['rc_type'] != RC_CATEGORIZE
+			) {
+				// @FIXME: This would be better as an extension hook
+				// Send emails or email jobs once this row is safely committed
+				$dbw->onTransactionIdle(
+					function () use ( $editor, $title ) {
+						$enotif = new EmailNotification();
+						$enotif->notifyOnPageChange(
+							$editor,
+							$title,
+							$this->mAttribs['rc_timestamp'],
+							$this->mAttribs['rc_comment'],
+							$this->mAttribs['rc_minor'],
+							$this->mAttribs['rc_last_oldid'],
+							$this->mExtra['pageStatus']
+						);
+					},
+					__METHOD__
+				);
 			}
 		}
 
@@ -360,8 +478,8 @@ class RecentChange {
 
 		$performer = $this->getPerformer();
 
-		foreach ( $feeds as $feed ) {
-			$feed += [
+		foreach ( $feeds as $params ) {
+			$params += [
 				'omit_bots' => false,
 				'omit_anon' => false,
 				'omit_user' => false,
@@ -370,17 +488,15 @@ class RecentChange {
 			];
 
 			if (
-				( $feed['omit_bots'] && $this->mAttribs['rc_bot'] ) ||
-				( $feed['omit_anon'] && $performer->isAnon() ) ||
-				( $feed['omit_user'] && !$performer->isAnon() ) ||
-				( $feed['omit_minor'] && $this->mAttribs['rc_minor'] ) ||
-				( $feed['omit_patrolled'] && $this->mAttribs['rc_patrolled'] ) ||
+				( $params['omit_bots'] && $this->mAttribs['rc_bot'] ) ||
+				( $params['omit_anon'] && $performer->isAnon() ) ||
+				( $params['omit_user'] && !$performer->isAnon() ) ||
+				( $params['omit_minor'] && $this->mAttribs['rc_minor'] ) ||
+				( $params['omit_patrolled'] && $this->mAttribs['rc_patrolled'] ) ||
 				$this->mAttribs['rc_type'] == RC_EXTERNAL
 			) {
 				continue;
 			}
-
-			$engine = self::getEngine( $feed['uri'] );
 
 			if ( isset( $this->mExtra['actionCommentIRC'] ) ) {
 				$actionComment = $this->mExtra['actionCommentIRC'];
@@ -388,41 +504,33 @@ class RecentChange {
 				$actionComment = null;
 			}
 
-			/** @var $formatter RCFeedFormatter */
-			$formatter = is_object( $feed['formatter'] ) ? $feed['formatter'] : new $feed['formatter']();
-			$line = $formatter->getLine( $feed, $this, $actionComment );
-			if ( !$line ) {
-				// T109544
-				// If a feed formatter returns null, this will otherwise cause an
-				// error in at least RedisPubSubFeedEngine.
-				// Not sure where/how this should best be handled.
-				continue;
-			}
-
-			$engine->send( $feed, $line );
+			$feed = RCFeed::factory( $params );
+			$feed->notify( $this, $actionComment );
 		}
 	}
 
 	/**
-	 * Gets the stream engine object for a given URI from $wgRCEngines
-	 *
+	 * @since 1.22
+	 * @deprecated since 1.29 Use RCFeed::factory() instead
 	 * @param string $uri URI to get the engine object for
-	 * @throws MWException
+	 * @param array $params
 	 * @return RCFeedEngine The engine object
+	 * @throws MWException
 	 */
-	public static function getEngine( $uri ) {
+	public static function getEngine( $uri, $params = [] ) {
+		// TODO: Merge into RCFeed::factory().
 		global $wgRCEngines;
-
 		$scheme = parse_url( $uri, PHP_URL_SCHEME );
 		if ( !$scheme ) {
-			throw new MWException( __FUNCTION__ . ": Invalid stream logger URI: '$uri'" );
+			throw new MWException( "Invalid RCFeed uri: '$uri'" );
 		}
-
 		if ( !isset( $wgRCEngines[$scheme] ) ) {
-			throw new MWException( __FUNCTION__ . ": Unknown stream logger URI scheme: $scheme" );
+			throw new MWException( "Unknown RCFeedEngine scheme: '$scheme'" );
 		}
-
-		return new $wgRCEngines[$scheme];
+		if ( defined( 'MW_PHPUNIT_TEST' ) && is_object( $wgRCEngines[$scheme] ) ) {
+			return $wgRCEngines[$scheme];
+		}
+		return new $wgRCEngines[$scheme]( $params );
 	}
 
 	/**
@@ -439,7 +547,7 @@ class RecentChange {
 
 		$change = $change instanceof RecentChange
 			? $change
-			: RecentChange::newFromId( $change );
+			: self::newFromId( $change );
 
 		if ( !$change instanceof RecentChange ) {
 			return null;
@@ -514,7 +622,7 @@ class RecentChange {
 		$dbw->update(
 			'recentchanges',
 			[
-				'rc_patrolled' => 1
+				'rc_patrolled' => self::PRC_PATROLLED
 			],
 			[
 				'rc_id' => $this->getAttribute( 'rc_id' )
@@ -532,9 +640,9 @@ class RecentChange {
 	 * Makes an entry in the database corresponding to an edit
 	 *
 	 * @param string $timestamp
-	 * @param Title $title
+	 * @param Title &$title
 	 * @param bool $minor
-	 * @param User $user
+	 * @param User &$user
 	 * @param string $comment
 	 * @param int $oldId
 	 * @param string $lastTimestamp
@@ -565,7 +673,10 @@ class RecentChange {
 			'rc_cur_id' => $title->getArticleID(),
 			'rc_user' => $user->getId(),
 			'rc_user_text' => $user->getName(),
-			'rc_comment' => $comment,
+			'rc_actor' => $user->getActorId(),
+			'rc_comment' => &$comment,
+			'rc_comment_text' => &$comment,
+			'rc_comment_data' => null,
 			'rc_this_oldid' => $newId,
 			'rc_last_oldid' => $oldId,
 			'rc_bot' => $bot ? 1 : 0,
@@ -589,16 +700,14 @@ class RecentChange {
 			'pageStatus' => 'changed'
 		];
 
-		DeferredUpdates::addCallableUpdate( function() use ( $rc, $tags ) {
-			$rc->save();
-			if ( $rc->mAttribs['rc_patrolled'] ) {
-				PatrolLog::record( $rc, true, $rc->getPerformer() );
-			}
-			if ( count( $tags ) ) {
-				ChangeTags::addTags( $tags, $rc->mAttribs['rc_id'],
-					$rc->mAttribs['rc_this_oldid'], null, null );
-			}
-		} );
+		DeferredUpdates::addCallableUpdate(
+			function () use ( $rc, $tags ) {
+				$rc->addTags( $tags );
+				$rc->save();
+			},
+			DeferredUpdates::POSTSEND,
+			wfGetDB( DB_MASTER )
+		);
 
 		return $rc;
 	}
@@ -608,9 +717,9 @@ class RecentChange {
 	 * Note: the title object must be loaded with the new id using resetArticleID()
 	 *
 	 * @param string $timestamp
-	 * @param Title $title
+	 * @param Title &$title
 	 * @param bool $minor
-	 * @param User $user
+	 * @param User &$user
 	 * @param string $comment
 	 * @param bool $bot
 	 * @param string $ip
@@ -637,7 +746,10 @@ class RecentChange {
 			'rc_cur_id' => $title->getArticleID(),
 			'rc_user' => $user->getId(),
 			'rc_user_text' => $user->getName(),
-			'rc_comment' => $comment,
+			'rc_actor' => $user->getActorId(),
+			'rc_comment' => &$comment,
+			'rc_comment_text' => &$comment,
+			'rc_comment_data' => null,
 			'rc_this_oldid' => $newId,
 			'rc_last_oldid' => 0,
 			'rc_bot' => $bot ? 1 : 0,
@@ -661,24 +773,22 @@ class RecentChange {
 			'pageStatus' => 'created'
 		];
 
-		DeferredUpdates::addCallableUpdate( function() use ( $rc, $tags ) {
-			$rc->save();
-			if ( $rc->mAttribs['rc_patrolled'] ) {
-				PatrolLog::record( $rc, true, $rc->getPerformer() );
-			}
-			if ( count( $tags ) ) {
-				ChangeTags::addTags( $tags, $rc->mAttribs['rc_id'],
-					$rc->mAttribs['rc_this_oldid'], null, null );
-			}
-		} );
+		DeferredUpdates::addCallableUpdate(
+			function () use ( $rc, $tags ) {
+				$rc->addTags( $tags );
+				$rc->save();
+			},
+			DeferredUpdates::POSTSEND,
+			wfGetDB( DB_MASTER )
+		);
 
 		return $rc;
 	}
 
 	/**
 	 * @param string $timestamp
-	 * @param Title $title
-	 * @param User $user
+	 * @param Title &$title
+	 * @param User &$user
 	 * @param string $actionComment
 	 * @param string $ip
 	 * @param string $type
@@ -708,8 +818,8 @@ class RecentChange {
 
 	/**
 	 * @param string $timestamp
-	 * @param Title $title
-	 * @param User $user
+	 * @param Title &$title
+	 * @param User &$user
 	 * @param string $actionComment
 	 * @param string $ip
 	 * @param string $type
@@ -731,6 +841,7 @@ class RecentChange {
 		# # Get pageStatus for email notification
 		switch ( $type . '-' . $action ) {
 			case 'delete-delete':
+			case 'delete-delete_redir':
 				$pageStatus = 'deleted';
 				break;
 			case 'move-move':
@@ -765,12 +876,15 @@ class RecentChange {
 			'rc_cur_id' => $target->getArticleID(),
 			'rc_user' => $user->getId(),
 			'rc_user_text' => $user->getName(),
-			'rc_comment' => $logComment,
+			'rc_actor' => $user->getActorId(),
+			'rc_comment' => &$logComment,
+			'rc_comment_text' => &$logComment,
+			'rc_comment_data' => null,
 			'rc_this_oldid' => $revId,
 			'rc_last_oldid' => 0,
-			'rc_bot' => $user->isAllowed( 'bot' ) ? $wgRequest->getBool( 'bot', true ) : 0,
+			'rc_bot' => $user->isAllowed( 'bot' ) ? (int)$wgRequest->getBool( 'bot', true ) : 0,
 			'rc_ip' => self::checkIPAddress( $ip ),
-			'rc_patrolled' => $markPatrolled ? 1 : 0,
+			'rc_patrolled' => $markPatrolled ? self::PRC_PATROLLED : self::PRC_UNPATROLLED,
 			'rc_new' => 0, # obsolete
 			'rc_old_len' => null,
 			'rc_new_len' => null,
@@ -809,6 +923,7 @@ class RecentChange {
 	 * @param bool $bot true, if the change was made by a bot
 	 * @param string $ip IP address of the user, if the change was made anonymously
 	 * @param int $deleted Indicates whether the change has been deleted
+	 * @param bool $added true, if the category was added, false for removed
 	 *
 	 * @return RecentChange
 	 */
@@ -823,8 +938,17 @@ class RecentChange {
 		$lastTimestamp,
 		$bot,
 		$ip = '',
-		$deleted = 0
+		$deleted = 0,
+		$added = null
 	) {
+		// Done in a backwards compatible way.
+		$params = [
+			'hidden-cat' => WikiCategoryPage::factory( $categoryTitle )->isHidden()
+		];
+		if ( $added !== null ) {
+			$params['added'] = $added;
+		}
+
 		$rc = new RecentChange;
 		$rc->mTitle = $categoryTitle;
 		$rc->mPerformer = $user;
@@ -838,12 +962,15 @@ class RecentChange {
 			'rc_cur_id' => $pageTitle->getArticleID(),
 			'rc_user' => $user ? $user->getId() : 0,
 			'rc_user_text' => $user ? $user->getName() : '',
-			'rc_comment' => $comment,
+			'rc_actor' => $user ? $user->getActorId() : null,
+			'rc_comment' => &$comment,
+			'rc_comment_text' => &$comment,
+			'rc_comment_data' => null,
 			'rc_this_oldid' => $newRevId,
 			'rc_last_oldid' => $oldRevId,
 			'rc_bot' => $bot ? 1 : 0,
 			'rc_ip' => self::checkIPAddress( $ip ),
-			'rc_patrolled' => 1, // Always patrolled, just like log entries
+			'rc_patrolled' => self::PRC_PATROLLED, // Always patrolled, just like log entries
 			'rc_new' => 0, # obsolete
 			'rc_old_len' => null,
 			'rc_new_len' => null,
@@ -851,9 +978,7 @@ class RecentChange {
 			'rc_logid' => 0,
 			'rc_log_type' => null,
 			'rc_log_action' => '',
-			'rc_params' =>  serialize( [
-				'hidden-cat' => WikiCategoryPage::factory( $categoryTitle )->isHidden()
-			] )
+			'rc_params' => serialize( $params )
 		];
 
 		$rc->mExtra = [
@@ -888,7 +1013,33 @@ class RecentChange {
 	public function loadFromRow( $row ) {
 		$this->mAttribs = get_object_vars( $row );
 		$this->mAttribs['rc_timestamp'] = wfTimestamp( TS_MW, $this->mAttribs['rc_timestamp'] );
-		$this->mAttribs['rc_deleted'] = $row->rc_deleted; // MUST be set
+		// rc_deleted MUST be set
+		$this->mAttribs['rc_deleted'] = $row->rc_deleted;
+
+		if ( isset( $this->mAttribs['rc_ip'] ) ) {
+			// Clean up CIDRs for Postgres per T164898. ("127.0.0.1" casts to "127.0.0.1/32")
+			$n = strpos( $this->mAttribs['rc_ip'], '/' );
+			if ( $n !== false ) {
+				$this->mAttribs['rc_ip'] = substr( $this->mAttribs['rc_ip'], 0, $n );
+			}
+		}
+
+		$comment = CommentStore::getStore()
+			// Legacy because $row may have come from self::selectFields()
+			->getCommentLegacy( wfGetDB( DB_REPLICA ), 'rc_comment', $row, true )
+			->text;
+		$this->mAttribs['rc_comment'] = &$comment;
+		$this->mAttribs['rc_comment_text'] = &$comment;
+		$this->mAttribs['rc_comment_data'] = null;
+
+		$user = User::newFromAnyId(
+			isset( $this->mAttribs['rc_user'] ) ? $this->mAttribs['rc_user'] : null,
+			isset( $this->mAttribs['rc_user_text'] ) ? $this->mAttribs['rc_user_text'] : null,
+			isset( $this->mAttribs['rc_actor'] ) ? $this->mAttribs['rc_actor'] : null
+		);
+		$this->mAttribs['rc_user'] = $user->getId();
+		$this->mAttribs['rc_user_text'] = $user->getName();
+		$this->mAttribs['rc_actor'] = $user->getActorId();
 	}
 
 	/**
@@ -898,6 +1049,28 @@ class RecentChange {
 	 * @return mixed
 	 */
 	public function getAttribute( $name ) {
+		if ( $name === 'rc_comment' ) {
+			return CommentStore::getStore()
+				->getComment( 'rc_comment', $this->mAttribs, true )->text;
+		}
+
+		if ( $name === 'rc_user' || $name === 'rc_user_text' || $name === 'rc_actor' ) {
+			$user = User::newFromAnyId(
+				isset( $this->mAttribs['rc_user'] ) ? $this->mAttribs['rc_user'] : null,
+				isset( $this->mAttribs['rc_user_text'] ) ? $this->mAttribs['rc_user_text'] : null,
+				isset( $this->mAttribs['rc_actor'] ) ? $this->mAttribs['rc_actor'] : null
+			);
+			if ( $name === 'rc_user' ) {
+				return $user->getId();
+			}
+			if ( $name === 'rc_user_text' ) {
+				return $user->getName();
+			}
+			if ( $name === 'rc_actor' ) {
+				return $user->getActorId();
+			}
+		}
+
 		return isset( $this->mAttribs[$name] ) ? $this->mAttribs[$name] : null;
 	}
 
@@ -993,10 +1166,26 @@ class RecentChange {
 	public function parseParams() {
 		$rcParams = $this->getAttribute( 'rc_params' );
 
-		MediaWiki\suppressWarnings();
+		Wikimedia\suppressWarnings();
 		$unserializedParams = unserialize( $rcParams );
-		MediaWiki\restoreWarnings();
+		Wikimedia\restoreWarnings();
 
 		return $unserializedParams;
+	}
+
+	/**
+	 * Tags to append to the recent change,
+	 * and associated revision/log
+	 *
+	 * @since 1.28
+	 *
+	 * @param string|array $tags
+	 */
+	public function addTags( $tags ) {
+		if ( is_string( $tags ) ) {
+			$this->tags[] = $tags;
+		} else {
+			$this->tags = array_merge( $tags, $this->tags );
+		}
 	}
 }

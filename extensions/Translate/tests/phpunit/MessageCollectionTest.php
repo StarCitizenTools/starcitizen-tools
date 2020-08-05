@@ -1,13 +1,11 @@
 <?php
 /**
- * Tests for MessageCollection.
  * @author Niklas Laxström
  * @file
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
- * Tests for MessageCollection.
  * @group Database
  * @group medium
  */
@@ -16,14 +14,14 @@ class MessageCollectionTest extends MediaWikiTestCase {
 		parent::setUp();
 
 		global $wgHooks;
-		$this->setMwGlobals( array(
+		$this->setMwGlobals( [
 			'wgHooks' => $wgHooks,
-			'wgTranslateTranslationServices' => array(),
-		) );
-		$wgHooks['TranslatePostInitGroups'] = array( array( $this, 'getTestGroups' ) );
+			'wgTranslateTranslationServices' => [],
+		] );
+		$wgHooks['TranslatePostInitGroups'] = [ [ $this, 'getTestGroups' ] ];
 
 		$mg = MessageGroups::singleton();
-		$mg->setCache( wfGetCache( 'hash' ) );
+		$mg->setCache( new WANObjectCache( [ 'cache' => wfGetCache( 'hash' ) ] ) );
 		$mg->recache();
 
 		MessageIndex::setInstance( new HashMessageIndex() );
@@ -31,18 +29,17 @@ class MessageCollectionTest extends MediaWikiTestCase {
 	}
 
 	public function getTestGroups( &$list ) {
-		$messages = array(
+		$messages = [
 			'translated' => 'bunny',
 			'untranslated' => 'fanny',
-		);
+		];
 		$list['test-group'] = new MockWikiMessageGroup( 'test-group', $messages );
 
 		return false;
 	}
 
 	public function testMessage() {
-		$user = new MockSuperUser();
-		$user->setId( 123 );
+		$user = $this->getTestSysop()->getUser();
 		$title = Title::newFromText( 'MediaWiki:translated/fi' );
 		$page = WikiPage::factory( $title );
 		$content = ContentHandler::makeContent( 'pupuliini', $title );
@@ -63,8 +60,8 @@ class MessageCollectionTest extends MediaWikiTestCase {
 		$this->assertEquals( 'translated', $translated->key() );
 		$this->assertEquals( 'bunny', $translated->definition() );
 		$this->assertEquals( 'pupuliini', $translated->translation() );
-		$this->assertEquals( 'SuperUser', $translated->getProperty( 'last-translator-text' ) );
-		$this->assertEquals( 123, $translated->getProperty( 'last-translator-id' ) );
+		$this->assertEquals( $user->getName(), $translated->getProperty( 'last-translator-text' ) );
+		$this->assertEquals( $user->getId(), $translated->getProperty( 'last-translator-id' ) );
 		$this->assertEquals(
 			'translated',
 			$translated->getProperty( 'status' ),

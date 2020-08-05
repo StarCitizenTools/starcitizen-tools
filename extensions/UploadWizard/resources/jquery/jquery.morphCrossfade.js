@@ -21,9 +21,9 @@
  * one parent, e.g.
  *
  *  <div id="container">
- *	<div id="panel1"/>
- *	<div id="panel2"/>
- *	<div id="panel3"/>
+ *    <div id="panel1"/>
+ *    <div id="panel2"/>
+ *    <div id="panel3"/>
  *  </div>
  *
  * Initialize the crossfader:
@@ -42,6 +42,9 @@
 ( function ( $ ) {
 	/**
 	 * Initialize crossfading of the children of an element
+	 *
+	 * @return {jQuery}
+	 * @chainable
 	 */
 	$.fn.morphCrossfader = function () {
 		// the elements that are immediate children are the crossfadables
@@ -69,8 +72,11 @@
 
 	/**
 	 * Initialize crossfading of the children of an element
-	 * @param selector of new thing to show; should be an immediate child of the crossfader element
-	 * @param speed (optional) how fast to crossfade, in milliseconds
+	 *
+	 * @param {string} newPanelSelector Selector of new thing to show; should be an immediate child of the crossfader element
+	 * @param {number} [speed] How fast to crossfade, in milliseconds
+	 * @return {jQuery}
+	 * @chainable
 	 */
 	$.fn.morphCrossfade = function ( newPanelSelector, speed ) {
 		if ( typeof speed === 'undefined' ) {
@@ -79,24 +85,21 @@
 
 		$.each( this, function ( i, container ) {
 			var $container = $( container ),
-				oldOverflow = $container.css( 'overflow' ),
 				$oldPanel = $( $container.data( 'crossfadeDisplay' ) ),
 				$newPanel = ( typeof newPanelSelector === 'string' ) ?
 					$container.find( newPanelSelector ) : $( newPanelSelector );
 
-			if ( $oldPanel.get(0) !== $newPanel.get(0) ) {
+			if ( $oldPanel.get( 0 ) !== $newPanel.get( 0 ) ) {
 				if ( $oldPanel.length ) {
 					// remove auto setting of height from container, and
 					// make doubly sure that the container height is equal to oldPanel,
 					// and prevent now-oversized panels from sticking out
 					$container.css( { height: $oldPanel.outerHeight() } );
-					$container.css( { overflow: 'hidden' } );
 					// take it out of the flow
 					$oldPanel.css( { position: 'absolute' } );
 					// fade WITHOUT hiding when opacity = 0
 					$oldPanel.stop().animate( { opacity: 0 }, speed, 'linear', function () {
 						$oldPanel.css( { visibility: 'hidden' } );
-						$container.css( { overflow: oldOverflow } );
 					} );
 				}
 				$container.data( 'crossfadeDisplay', $newPanel );
@@ -115,4 +118,4 @@
 		return this;
 	};
 
-} )( jQuery );
+}( jQuery ) );

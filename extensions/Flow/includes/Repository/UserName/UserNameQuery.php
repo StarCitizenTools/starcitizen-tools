@@ -5,15 +5,17 @@
  */
 namespace Flow\Repository\UserName;
 
+use Wikimedia\Rdbms\ResultWrapper;
+
 /**
  * Classes implementing the interface can lookup
  * user names based on wiki + id
  */
-Interface UserNameQuery {
+interface UserNameQuery {
 	/**
 	 * @param string $wiki wiki id
 	 * @param array $userIds List of user ids to lookup
-	 * @return \ResultWrapper|bool Containing objects with user_id and
+	 * @return ResultWrapper|bool Containing objects with user_id and
 	 *   user_name properies.
 	 */
 	function execute( $wiki, array $userIds );

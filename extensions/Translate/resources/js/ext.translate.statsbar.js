@@ -3,19 +3,19 @@
  *
  * @author Niklas Laxström
  * @author Santhosh Thottingal
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @since 2012-11-30
  */
 
 /*
  * Usage:
- *	$( '<div>' ).languagestatsbar( {
- *		language: 'fi',
- *		group: 'core'
- *	} );
+ *     $( '<div>' ).languagestatsbar( {
+ *         language: 'fi',
+ *         group: 'core'
+ *     } );
  * The status bar will be rendered to the newly created div. Or use any container.
  */
-( function ( mw, $ ) {
+( function () {
 	'use strict';
 
 	var LanguageStatsBar = function ( container, options ) {
@@ -33,7 +33,7 @@
 				this.render();
 			} else {
 				mw.translate.loadLanguageStats( this.language )
-					.done( $.proxy( this.render, this ) );
+					.done( this.render.bind( this ) );
 			}
 		},
 
@@ -77,10 +77,13 @@
 				statsbar.update();
 			} );
 
-			statsbar.$container.hover( function () {
-				statsbar.elements.$info.removeClass( 'hide' );
-			}, function () {
-				statsbar.elements.$info.addClass( 'hide' );
+			statsbar.$container.on( {
+				mouseenter: function () {
+					statsbar.elements.$info.removeClass( 'hide' );
+				},
+				mouseleave: function () {
+					statsbar.elements.$info.addClass( 'hide' );
+				}
 			} );
 		},
 
@@ -181,4 +184,4 @@
 
 	mw.translate = mw.translate || {};
 
-}( mediaWiki, jQuery ) );
+}() );

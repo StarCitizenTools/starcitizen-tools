@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWPreformattedNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -14,9 +14,9 @@
  * @param {ve.dm.MWPreformattedNode} model Model to observe
  * @param {Object} [config] Configuration options
  */
-ve.ce.MWPreformattedNode = function VeCeMWPreformattedNode( model, config ) {
+ve.ce.MWPreformattedNode = function VeCeMWPreformattedNode() {
 	// Parent constructor
-	ve.ce.PreformattedNode.call( this, model, config );
+	ve.ce.MWPreformattedNode.super.apply( this, arguments );
 };
 
 /* Inheritance */

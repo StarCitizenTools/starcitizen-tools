@@ -9,14 +9,14 @@ use Flow\Model\UUID;
 use Flow\Model\Workflow;
 use Flow\NotificationController;
 use EchoNotificationController;
+use ExtensionRegistry;
 use User;
-use WatchedItem;
 
 /**
  * @group Flow
  */
 class NotifiedUsersTest extends PostRevisionTestCase {
-	protected $tablesUsed = array(
+	protected $tablesUsed = [
 		'echo_event',
 		'echo_notification',
 		'flow_revision',
@@ -26,13 +26,14 @@ class NotifiedUsersTest extends PostRevisionTestCase {
 		'flow_workflow',
 		'page',
 		'revision',
+		'ip_changes',
 		'text',
-	);
+	];
 
 	protected function setUp() {
 		parent::setUp();
 
-		if ( !class_exists( 'EchoEvent' ) ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
 			$this->markTestSkipped();
 			return;
 		}
@@ -45,19 +46,21 @@ class NotifiedUsersTest extends PostRevisionTestCase {
 			return;
 		}
 
-		WatchedItem::fromUserTitle( $data['user'], $data['topicWorkflow']->getArticleTitle() )->addWatch();
+		/** @var User $user */
+		$user = $data['user'];
+		$user->addWatch( $data['topicWorkflow']->getArticleTitle() );
 
 		$events = $data['notificationController']->notifyPostChange( 'flow-post-reply',
-			array(
+			[
 				'topic-workflow' => $data['topicWorkflow'],
 				'title' => $data['boardWorkflow']->getOwnerTitle(),
 				'user' => $data['agent'],
 				'reply-to' => $data['topic'],
 				'topic-title' => $data['topic'],
 				'revision' => $data['post-2'],
-			) );
+			] );
 
-		$this->assertNotifiedUser( $events, $data['user'], $data['agent'] );
+		$this->assertNotifiedUser( $events, $user, $data['agent'] );
 	}
 
 	public function testWatchingBoard() {
@@ -67,30 +70,37 @@ class NotifiedUsersTest extends PostRevisionTestCase {
 			return;
 		}
 
-		WatchedItem::fromUserTitle( $data['user'], $data['boardWorkflow']->getArticleTitle() )->addWatch();
+		/** @var User $user */
+		$user = $data['user'];
+		$user->addWatch( $data['boardWorkflow']->getArticleTitle() );
 
-		$events = $data['notificationController']->notifyNewTopic( array(
+		$events = $data['notificationController']->notifyNewTopic( [
 			'board-workflow' => $data['boardWorkflow'],
 			'topic-workflow' => $data['topicWorkflow'],
 			'topic-title' => $data['topic'],
 			'first-post' => $data['post'],
 			'user' => $data['agent'],
-		) );
+		] );
 
-		$this->assertNotifiedUser( $events, $data['user'], $data['agent'] );
+		$this->assertNotifiedUser( $events, $user, $data['agent'] );
 	}
 
 	protected function assertNotifiedUser( array $events, User $notifiedUser, User $notNotifiedUser ) {
-		$users = array();
-		foreach( $events as $event ) {
+		$users = [];
+		foreach ( $events as $event ) {
 			$iterator = EchoNotificationController::getUsersToNotifyForEvent( $event );
-			foreach( $iterator as $user ) {
+			foreach ( $iterator as $user ) {
 				$users[] = $user;
 			}
 		}
 
 		// convert user objects back into user ids to simplify assertion
-		$users = array_map( function( $user ) { return $user->getId(); }, $users );
+		$users = array_map(
+			function ( $user ) {
+				return $user->getId();
+			},
+			$users
+		);
 
 		$this->assertContains( $notifiedUser->getId(), $users );
 		$this->assertNotContains( $notNotifiedUser->getId(), $users );
@@ -117,14 +127,14 @@ class NotifiedUsersTest extends PostRevisionTestCase {
 		$agent->addToDatabase();
 
 		$tuple = UserTuple::newFromUser( $agent );
-		$topicTitle = $this->generateObject( array(
+		$topicTitle = $this->generateObject( [
 			'rev_user_wiki' => $tuple->wiki,
 			'rev_user_id' => $tuple->id,
 			'rev_user_ip' => $tuple->ip,
 
 			'rev_flags' => 'wikitext',
 			'rev_content' => 'some content',
-		) );
+		] );
 
 		/*
 		 * We don't really *have* to store everything for this test. We could
@@ -151,13 +161,13 @@ class NotifiedUsersTest extends PostRevisionTestCase {
 		 * in the future) in there.
 		 */
 		$secondPost = $topicTitle->reply( $topicWorkflow, $agent, 'lorem ipsum', 'wikitext' );
-		$newId = UUID::getComparisonUUID( (int) $secondPost->getPostId()->getTimestamp( TS_UNIX ) + 2 );
+		$newId = UUID::getComparisonUUID( (int)$secondPost->getPostId()->getTimestamp( TS_UNIX ) + 2 );
 		$reflection = new \ReflectionProperty( $secondPost, 'postId' );
 		$reflection->setAccessible( true );
 		$reflection->setValue( $secondPost, $newId );
 		$this->store( $secondPost );
 
-		return array(
+		return [
 			'boardWorkflow' => $boardWorkflow,
 			'topicWorkflow' => $topicWorkflow,
 			'post' => $firstPost,
@@ -166,6 +176,6 @@ class NotifiedUsersTest extends PostRevisionTestCase {
 			'user' => $user,
 			'agent' => $agent,
 			'notificationController' => Container::get( 'controller.notification' ),
-		);
+		];
 	}
 }

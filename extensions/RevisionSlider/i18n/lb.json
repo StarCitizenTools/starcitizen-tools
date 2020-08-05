@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby",
+			"Macofe"
+		]
+	},
+	"revisionslider-preference-disable": "De Versiounsbliederer (RevisionSlider) net weisen",
+	"revisionslider-toggle-label": "An de Versioune sichen",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|Byte|Byten}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|Byte|Byten}}",
+	"revisionslider-label-date": "Datum",
+	"revisionslider-label-page-size": "Gréisst vun der Säit",
+	"revisionslider-label-change-size": "Gréisst vun der Ännerung",
+	"revisionslider-label-comment": "Bemierkung",
+	"revisionslider-label-username": "{{GENDER:$1|Benotzernumm}}",
+	"revisionslider-minoredit": "Dëst ass eng kleng Ännerung",
+	"revisionslider-loading-failed": "De RevisionSlider konnt net geluede ginn.",
+	"revisionslider-toggle-title-expand": "RevisionSlider opmaachen",
+	"revisionslider-toggle-title-collapse": "RevisionSlider zesummeklappen",
+	"revisionslider-turn-off-auto-expand-title": "De RevisionSlider net automatesch expandéieren",
+	"revisionslider-arrow-tooltip-newer": "Méi nei Versioune weisen",
+	"revisionslider-arrow-tooltip-older": "Méi al Versioune weisen",
+	"revisionslider-show-help-tooltip": "Hëllefstext weisen",
+	"revisionslider-tutorial": "Guide vum RevisionSlider",
+	"revisionslider-previous-dialog": "Vireg",
+	"revisionslider-next-dialog": "Nächst",
+	"revisionslider-close-dialog": "Zoumaachen"
+}

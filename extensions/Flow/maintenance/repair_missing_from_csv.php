@@ -2,7 +2,7 @@
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
-	$IP = dirname( __FILE__ ) . '/../../..';
+	$IP = __DIR__ . '/../../..';
 }
 
 require_once "$IP/maintenance/commandLine.inc";
@@ -15,10 +15,9 @@ if ( !is_file( $argv[1] ) ) {
 	die( 'Provided CSV file does not exist' );
 }
 $csv = fopen( $argv[1], "r" );
-if ( fgetcsv( $csv ) !== array( 'uuid', 'esurl', 'flags' ) ) {
+if ( fgetcsv( $csv ) !== [ 'uuid', 'esurl', 'flags' ] ) {
 	die( 'Provided CSV file does not have the expected header' );
 }
-
 
 $fixed = 0;
 $dbw = Flow\Container::get( 'db.factory' )->getDB( DB_MASTER );
@@ -35,16 +34,15 @@ while ( $row = fgetcsv( $csv ) ) {
 	$uuid = Flow\Model\UUID::create( $uuid );
 	$dbw->update(
 		/* table */'flow_revision',
-		/* set */ array(
+		/* set */ [
 			'rev_content' => $esUrl,
 			'rev_flags' => $flags,
-		),
-		/* where */ array(
+		],
+		/* where */ [
 			'rev_id' => $uuid->getBinary()
-		)
+		]
 	);
 	++$fixed;
 }
 
 echo "Updated $fixed revisions\n\n";
-

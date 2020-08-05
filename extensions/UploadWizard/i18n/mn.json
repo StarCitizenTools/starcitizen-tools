@@ -2,9 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Chinneeb",
-			"Munkhzaya.E"
+			"Munkhzaya.E",
+			"Wisdom"
 		]
 	},
+	"api-error-noimageinfo": "upload хийгдсэн боловч файлын талаар ямарч мэдээлэл сервер өгсөнгүй.",
 	"mwe-upwiz-select-date": "Огноо сонгоно уу",
 	"mwe-upwiz-categories": "Ангиллууд",
 	"mwe-upwiz-prefs-def-license-custom": "Хэрэглэгчийн тодорхойлсон стандард лиценз",

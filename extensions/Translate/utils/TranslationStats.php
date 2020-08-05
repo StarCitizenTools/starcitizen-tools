@@ -6,7 +6,7 @@
  * @author Niklas Laxström
  * @author Siebrand Mazeland
  * @copyright Copyright © 2010-2013, Niklas Laxström, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -19,19 +19,19 @@ class TranslationStats {
 	 * Returns translated percentage for message group in given
 	 * languages
 	 *
-	 * @param $group \string Unique key identifying the group
-	 * @param $languages \array List of language codes
-	 * @param bool|int $threshold \int Minimum required percentage translated to
+	 * @param string $group Unique key identifying the group
+	 * @param string[] $languages List of language codes
+	 * @param bool|int $threshold Minimum required percentage translated to
 	 * return. Other given language codes will not be returned.
-	 * @param $simple \bool Return only codes or code/pecentage pairs
+	 * @param bool $simple Return only codes or code/pecentage pairs
 	 *
-	 * @return \array Array of key value pairs code (string)/percentage
+	 * @return (float|string)[] Array of key value pairs code (string)/percentage
 	 * (float) or array of codes, depending on $simple
 	 */
 	public static function getPercentageTranslated( $group, $languages, $threshold = false,
 		$simple = false
 	) {
-		$stats = array();
+		$stats = [];
 
 		$g = MessageGroups::singleton()->getGroup( $group );
 

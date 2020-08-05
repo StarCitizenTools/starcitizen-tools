@@ -2,11 +2,12 @@
 
 namespace Flow\Tests\Import\LiquidThreadsApi;
 
-use DatabaseBase;
+use Wikimedia\Rdbms\IDatabase;
 use DateTime;
 use DateTimeZone;
+use ExtensionRegistry;
 use Flow\Import\SourceStore\SourceStoreInterface as ImportSourceStore;
-use Flow\Import\SourceStore\Null as NullImportSourceStore;
+use Flow\Import\SourceStore\NullImportSourceStore;
 use Flow\Import\LiquidThreadsApi\ConversionStrategy;
 use Flow\Import\LiquidThreadsApi\ApiBackend;
 use Title;
@@ -81,23 +82,23 @@ class ConversionStrategyTest extends \MediaWikiTestCase {
 		$now = new DateTime( "now", new DateTimeZone( "GMT" ) );
 		$date = $now->format( 'Y-m-d' );
 
-		return array(
-			array(
+		return [
+			[
 				'Blank input page',
 				// expect
 				"{{Archive for converted LQT page|from=Talk:Blue birds|date=$date}}\n\n{{#useliquidthreads:0}}\n\n",
 				// input content
 				'',
-			),
-			array(
+			],
+			[
 				'Page containing lqt magic word',
 				// expect
 				"{{Archive for converted LQT page|from=Talk:Blue birds|date=$date}}\n\n{{#useliquidthreads:0}}\n\n",
 				// input content
 				'{{#useliquidthreads:1}}',
-			),
+			],
 
-			array(
+			[
 				'Page containing some stuff and the lqt magic word',
 				// expect
 				<<<EOD
@@ -120,8 +121,8 @@ dedicated to the proposition that all men are created equal.
 	1
 }}
 EOD
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -129,7 +130,7 @@ EOD
 	 * @param string $content
 	 */
 	public function testCreateArchiveCleanupRevisionContent( $message, $expect, $content ) {
-		if( !class_exists( 'LqtDispatch' ) ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Liquid Threads' ) ) {
 			$this->markTestSkipped( 'LiquidThreads not enabled' );
 		}
 
@@ -150,14 +151,13 @@ EOD
 		);
 	}
 
-
 	protected function createStrategy(
-		DatabaseBase $dbr = null,
+		IDatabase $dbr = null,
 		ImportSourceStore $sourceStore = null,
 		ApiBackend $api = null
 	) {
 		return new ConversionStrategy(
-			$dbr ?: wfGetDB( DB_SLAVE ),
+			$dbr ?: wfGetDB( DB_REPLICA ),
 			$sourceStore ?: new NullImportSourceStore,
 			$api ?: $this->getMockBuilder( 'Flow\Import\LiquidThreadsApi\ApiBackend' )
 				->disableOriginalConstructor()

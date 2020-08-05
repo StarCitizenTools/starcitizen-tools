@@ -2,10 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Banjo",
-			"Toliño"
+			"Toliño",
+			"Elisardojm"
 		]
 	},
 	"codemirror-desc": "Proporciona un resalte da sintaxe no editor de texto wiki",
-	"codemirror-enable-label": "Activar CodeMirror (resalte da sintaxe)",
-	"codemirror-disable-label": "Desactivar CodeMirror (resalte da sintaxe)"
+	"codemirror-toggle-label": "Resaltado de sintaxe",
+	"codemirror-beta-title": "Resaltado do texto coa sintaxe Wiki",
+	"codemirror-beta-desc": "O destaque sintáctico facilita a edición utilizando cores e sombreados para separar visualmente o texto da páxina do código de ligazóns, referencias e modelos.",
+	"codemirror-popup-label": "Resaltado de sintaxe",
+	"codemirror-popup-desc": "O realce sintáctico axuda a distinguir as diferentes partes da súa edición poñéndolles diferentes cores.",
+	"codemirror-popup-btn-yes": "Probar",
+	"codemirror-popup-btn-no": "Non, grazas"
 }

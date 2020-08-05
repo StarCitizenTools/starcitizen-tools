@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FragmentInspector class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -12,14 +12,19 @@
  *
  * @constructor
  * @param {Object} [config] Configuration options
+ * @cfg {boolean} [padded=true] Inspector form area has padding,
+ *      set to false for edge-to-edge layouts, e.g. IndexLayout
  */
 ve.ui.FragmentInspector = function VeUiFragmentInspector( config ) {
+	config = config || {};
+
 	// Parent constructor
 	ve.ui.FragmentInspector.super.call( this, config );
 
 	// Properties
 	this.fragment = null;
 	this.previousSelection = null;
+	this.padded = config.padded !== false;
 };
 
 /* Inheritance */
@@ -43,7 +48,7 @@ ve.ui.FragmentInspector.static.actions = ve.ui.FragmentInspector.super.static.ac
 	{
 		action: 'done',
 		label: OO.ui.deferMsg( 'visualeditor-dialog-action-insert' ),
-		flags: [ 'constructive', 'primary' ],
+		flags: [ 'progressive', 'primary' ],
 		modes: 'insert'
 	}
 ] );
@@ -97,7 +102,9 @@ ve.ui.FragmentInspector.prototype.initialize = function () {
 
 	// Properties
 	this.container = new OO.ui.PanelLayout( {
-		scrollable: true, classes: [ 've-ui-fragmentInspector-container' ]
+		classes: [ 've-ui-fragmentInspector-container' ],
+		scrollable: true,
+		padded: this.padded
 	} );
 	this.form = new OO.ui.FormLayout( {
 		classes: [ 've-ui-fragmentInspector-form' ]
@@ -111,6 +118,10 @@ ve.ui.FragmentInspector.prototype.initialize = function () {
 	this.$content.addClass( 've-ui-fragmentInspector-content' );
 	this.container.$element.append( this.form.$element, this.$otherActions );
 	this.$body.append( this.container.$element );
+
+	this.tabIndexScope = new ve.ui.TabIndexScope( {
+		root: this.$content
+	} );
 };
 
 /**

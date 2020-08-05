@@ -15,13 +15,13 @@ class JavaFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 	}
 
 	public function getFileExtensions() {
-		return array( '.properties' );
+		return [ '.properties' ];
 	}
 
 	protected $keySeparator = '=';
 
 	/**
-	 * @param $group FileBasedMessageGroup
+	 * @param FileBasedMessageGroup $group
 	 */
 	public function __construct( FileBasedMessageGroup $group ) {
 		parent::__construct( $group );
@@ -31,17 +31,15 @@ class JavaFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 		}
 	}
 
-	// READ
-
 	/**
-	 * @param $data array
+	 * @param string $data
 	 * @return array Parsed data.
 	 * @throws MWException
 	 */
 	public function readFromVariable( $data ) {
 		$data = self::fixNewLines( $data );
 		$lines = array_map( 'ltrim', explode( "\n", $data ) );
-		$authors = $messages = array();
+		$authors = $messages = [];
 		$linecontinuation = false;
 
 		$key = '';
@@ -58,7 +56,7 @@ class JavaFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 				}
 
 				if ( $line[0] === '#' || $line[0] === '!' ) {
-					$match = array();
+					$match = [];
 					$ok = preg_match( '/#\s*Author:\s*(.*)/', $line, $match );
 
 					if ( $ok ) {
@@ -89,16 +87,14 @@ class JavaFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 
 		$messages = $this->group->getMangler()->mangle( $messages );
 
-		return array(
+		return [
 			'AUTHORS' => $authors,
 			'MESSAGES' => $messages,
-		);
+		];
 	}
 
-	// Write
-
 	/**
-	 * @param $collection MessageCollection
+	 * @param MessageCollection $collection
 	 * @return string
 	 */
 	protected function writeReal( MessageCollection $collection ) {
@@ -159,7 +155,7 @@ class JavaFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 	 * Parses non-empty properties file row to key and value.
 	 * @param string $line
 	 * @param string $sep
-	 * @return string
+	 * @return string[]
 	 * @since 2012-03-28
 	 */
 	public static function readRow( $line, $sep ) {
@@ -212,11 +208,11 @@ class JavaFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 		$value = ltrim( $value );
 		$value = str_replace( '\n', "\n", $value );
 
-		return array( $key, $value );
+		return [ $key, $value ];
 	}
 
 	/**
-	 * @param $collection MessageCollection
+	 * @param MessageCollection $collection
 	 * @return string
 	 */
 	protected function doHeader( MessageCollection $collection ) {
@@ -236,7 +232,7 @@ class JavaFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 	}
 
 	/**
-	 * @param $collection MessageCollection
+	 * @param MessageCollection $collection
 	 * @return string
 	 */
 	protected function doAuthors( MessageCollection $collection ) {
@@ -252,24 +248,24 @@ class JavaFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 	}
 
 	public static function getExtraSchema() {
-		$schema = array(
-			'root' => array(
+		$schema = [
+			'root' => [
 				'_type' => 'array',
-				'_children' => array(
-					'FILES' => array(
+				'_children' => [
+					'FILES' => [
 						'_type' => 'array',
-						'_children' => array(
-							'header' => array(
+						'_children' => [
+							'header' => [
 								'_type' => 'text',
-							),
-							'keySeparator' => array(
+							],
+							'keySeparator' => [
 								'_type' => 'text',
-							),
-						)
-					)
-				)
-			)
-		);
+							],
+						]
+					]
+				]
+			]
+		];
 
 		return $schema;
 	}

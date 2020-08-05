@@ -21,6 +21,7 @@
 
 	/**
 	 * Represents the file reuse dialog and the link to open it.
+	 *
 	 * @class mw.mmv.ui.reuse.Dialog
 	 * @extends mw.mmv.ui.Element
 	 * @param {jQuery} $container the element to which the dialog will be appended
@@ -36,7 +37,7 @@
 		this.tabs = null;
 
 		/**
-		 * @property {Object.<string, OO.ui.MenuOptionWidget>} ooTabs List of tab OOJS UI objects.
+		 * @property {Object.<string, OO.ui.MenuOptionWidget>} ooTabs List of tab OOUI objects.
 		 */
 		this.ooTabs = null;
 
@@ -91,7 +92,7 @@
 			this.selectedTab = 'share';
 		}
 
-		this.reuseTabs.selectItem( this.ooTabs[this.selectedTab] );
+		this.reuseTabs.selectItem( this.ooTabs[ this.selectedTab ] );
 
 		if ( this.dependenciesNeedToBeAttached ) {
 			this.attachDependencies();
@@ -101,6 +102,7 @@
 			// This is a delayed set() for the elements we've just created on demand
 			this.tabs.share.set.apply( this.tabs.share, this.tabsSetValues.share );
 			this.tabs.embed.set.apply( this.tabs.embed, this.tabsSetValues.embed );
+			this.showImageWarnings( this.tabsSetValues.share[ 0 ] );
 			this.tabsSetValues = undefined;
 		}
 	};
@@ -115,6 +117,8 @@
 
 	/**
 	 * Handles tab selection.
+	 *
+	 * @param {OO.ui.MenuOptionWidget} option
 	 */
 	DP.handleTabSelection = function ( option ) {
 		var tab;
@@ -123,9 +127,9 @@
 
 		for ( tab in this.tabs ) {
 			if ( tab === this.selectedTab ) {
-				this.tabs[tab].show();
+				this.tabs[ tab ].show();
 			} else {
-				this.tabs[tab].hide();
+				this.tabs[ tab ].hide();
 			}
 		}
 
@@ -133,7 +137,7 @@
 	};
 
 	/**
-	 *
+	 * @return {string} Last used tab
 	 */
 	DP.getLastUsedTab = function () {
 		return this.config.getFromLocalStorage( 'mmv-lastUsedTab' );
@@ -162,7 +166,7 @@
 			this.reuseTabs.on( 'select', $.proxy( dialog.handleTabSelection, dialog ) );
 
 			for ( tab in this.tabs ) {
-				this.tabs[tab].attach();
+				this.tabs[ tab ].attach();
 			}
 
 			this.dependenciesNeedToBeAttached = false;
@@ -185,14 +189,14 @@
 
 		if ( this.tabs ) {
 			for ( tab in this.tabs ) {
-				this.tabs[tab].unattach();
+				this.tabs[ tab ].unattach();
 			}
 		}
 	};
 
-
 	/**
 	 * Sets data needed by contaned tabs and makes dialog launch link visible.
+	 *
 	 * @param {mw.mmv.model.Image} image
 	 * @param {mw.mmv.model.Repo} repo
 	 * @param {string} caption
@@ -202,10 +206,12 @@
 		if ( this.tabs !== null ) {
 			this.tabs.share.set( image );
 			this.tabs.embed.set( image, repo, caption, alt );
+			this.tabs.embed.set( image, repo, caption );
+			this.showImageWarnings( image );
 		} else {
 			this.tabsSetValues = {
-				share : [ image ],
-				embed : [ image, repo, caption, alt ]
+				share: [ image ],
+				embed: [ image, repo, caption, alt ]
 			};
 		}
 	};
@@ -214,10 +220,12 @@
 	 * @inheritdoc
 	 */
 	DP.empty = function () {
+		var tab;
+
 		mw.mmv.ui.Dialog.prototype.empty.call( this );
 
-		for ( var tab in this.tabs ) {
-			this.tabs[tab].empty();
+		for ( tab in this.tabs ) {
+			this.tabs[ tab ].empty();
 		}
 	};
 
@@ -231,7 +239,10 @@
 	DP.openDialog = function () {
 		mw.mmv.ui.Dialog.prototype.openDialog.call( this );
 
-		this.tabs[this.selectedTab].show();
+		// move warnings after the tabs
+		this.$warning.insertAfter( this.reuseTabs.$element );
+
+		this.tabs[ this.selectedTab ].show();
 
 		$( document ).trigger( 'mmv-reuse-opened' );
 	};

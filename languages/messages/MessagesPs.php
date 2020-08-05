@@ -8,14 +8,31 @@
  *
  * @author Ahmed-Najib-Biabani-Ibrahimkhel
  * @author Kaganer
- * @author Umherirrender
  */
 
 $rtl = true;
 
+$digitTransformTable = [
+	'0' => '۰', # &#x1776;
+	'1' => '۱', # &#x1777;
+	'2' => '۲', # &#x1778;
+	'3' => '۳', # &#x1779;
+	'4' => '۴', # &#x1780;
+	'5' => '۵', # &#x1781;
+	'6' => '۶', # &#x1782;
+	'7' => '۷', # &#x1783;
+	'8' => '۸', # &#x1784;
+	'9' => '۹', # &#x1785;
+];
+
+$separatorTransformTable = [
+	'.' => '٫', # &#x066b;
+	',' => '٬', # &#x066c;
+];
+
 $namespaceNames = [
 	NS_MEDIA            => 'رسنۍ',
-	NS_SPECIAL          => 'ځانګړی',
+	NS_SPECIAL          => 'ځانگړی',
 	NS_TALK             => 'خبرې_اترې',
 	NS_USER             => 'کارن',
 	NS_USER_TALK        => 'د_کارن_خبرې_اترې',
@@ -33,6 +50,7 @@ $namespaceNames = [
 ];
 
 $namespaceAliases = [
+	'ځﺎﻧګړی' => NS_SPECIAL,
 	'کارونکی' => NS_USER,
 	'د_کارونکي_خبرې_اترې' => NS_USER_TALK,
 	'انځور' => NS_FILE,
@@ -154,4 +172,3 @@ $magicWords = [
 	'noindex'                   => [ '1', '__بې_ليکلړ__', '__NOINDEX__' ],
 	'protectionlevel'           => [ '1', 'ژغورکچه', 'PROTECTIONLEVEL' ],
 ];
-

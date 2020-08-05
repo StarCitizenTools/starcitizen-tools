@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2011-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -16,7 +16,7 @@
 class MessageIndexRebuildJob extends Job {
 
 	/**
-	 * @return MessageIndexRebuildJob
+	 * @return self
 	 */
 	public static function newJob() {
 		$job = new self( Title::newMainPage() );
@@ -27,10 +27,9 @@ class MessageIndexRebuildJob extends Job {
 	/**
 	 * @param Title $title
 	 * @param array $params
-	 * @param int $id
 	 */
-	public function __construct( $title, $params = array(), $id = 0 ) {
-		parent::__construct( __CLASS__, $title, $params, $id );
+	public function __construct( $title, $params = [] ) {
+		parent::__construct( __CLASS__, $title, $params );
 	}
 
 	public function run() {
@@ -45,7 +44,7 @@ class MessageIndexRebuildJob extends Job {
 	 * in installations with errant job queue processing.
 	 * @override
 	 */
-	public function insert() {
+	public function insertIntoJobQueue() {
 		global $wgTranslateDelayedMessageIndexRebuild;
 		if ( $wgTranslateDelayedMessageIndexRebuild ) {
 			JobQueueGroup::singleton()->push( $this );

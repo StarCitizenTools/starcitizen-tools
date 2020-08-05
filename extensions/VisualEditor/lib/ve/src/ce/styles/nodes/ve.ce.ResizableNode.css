@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable ResizableNode styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ce-resizableNode-handles {
@@ -21,13 +21,6 @@
 	width: 11px;
 	height: 11px;
 	background-repeat: no-repeat;
-}
-
-.ve-ce-resizableNode-hide-nw .ve-ce-resizableNode-nwHandle,
-.ve-ce-resizableNode-hide-ne .ve-ce-resizableNode-neHandle,
-.ve-ce-resizableNode-hide-sw .ve-ce-resizableNode-swHandle,
-.ve-ce-resizableNode-hide-se .ve-ce-resizableNode-seHandle {
-	display: none;
 }
 
 .ve-ce-resizableNode-nwHandle {
@@ -66,6 +59,12 @@
 	background-image: url( ../../../ui/styles/images/resize-ne-sw.svg );
 }
 
+.ve-ce-resizableNode-hide-nw .ve-ce-resizableNode-nwHandle,
+.ve-ce-resizableNode-hide-ne .ve-ce-resizableNode-neHandle,
+.ve-ce-resizableNode-hide-sw .ve-ce-resizableNode-swHandle,
+.ve-ce-resizableNode-hide-se .ve-ce-resizableNode-seHandle {
+	display: none;
+}
 
 .ve-ce-resizableNode-sizeLabel {
 	position: absolute;
@@ -73,7 +72,6 @@
 	opacity: 0;
 	-webkit-transition: opacity 200ms;
 	-moz-transition: opacity 200ms;
-	-o-transition: opacity 200ms;
 	transition: opacity 200ms;
 }
 
@@ -83,16 +81,16 @@
 
 .ve-ce-resizableNode-sizeText {
 	padding: 0.25em 0.5em;
-	border: 1px solid #ccc;
-	background-color: white;
-	border-radius: 0.3em;
+	border: 1px solid #c8ccd1;
+	background-color: #fff;
+	border-radius: 2px;
 	white-space: nowrap;
 }
 
 .ve-ce-resizableNode-sizeText span:not( :first-child ) {
 	margin-left: 0.4em;
 	padding-left: 0.4em;
-	border-left: 1px solid #ccc;
+	border-left: 1px solid #c8ccd1;
 }
 
 .ve-ce-resizableNode-sizeText-warning {

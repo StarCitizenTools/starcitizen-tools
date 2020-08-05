@@ -27,10 +27,23 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 		return [
 			'noTemplateModule' => [],
 
+			'deprecatedModule' => $base + [
+				'deprecated' => true,
+			],
+			'deprecatedTomorrow' => $base + [
+				'deprecated' => 'Will be removed tomorrow.'
+			],
+
 			'htmlTemplateModule' => $base + [
 				'templates' => [
 					'templates/template.html',
 					'templates/template2.html',
+				]
+			],
+
+			'htmlTemplateUnknown' => $base + [
+				'templates' => [
+					'templates/notfound.html',
 				]
 			],
 
@@ -93,7 +106,56 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 	 */
 	public function testTemplateDependencies( $module, $expected ) {
 		$rl = new ResourceLoaderFileModule( $module );
+		$rl->setName( 'testing' );
 		$this->assertEquals( $rl->getDependencies(), $expected );
+	}
+
+	public static function providerDeprecatedModules() {
+		return [
+			[
+				'deprecatedModule',
+				'mw.log.warn("This page is using the deprecated ResourceLoader module \"deprecatedModule\".");',
+			],
+			[
+				'deprecatedTomorrow',
+				'mw.log.warn(' .
+					'"This page is using the deprecated ResourceLoader module \"deprecatedTomorrow\".\\n' .
+					"Will be removed tomorrow." .
+					'");'
+			]
+		];
+	}
+
+	/**
+	 * @dataProvider providerDeprecatedModules
+	 * @covers ResourceLoaderFileModule::getScript
+	 */
+	public function testDeprecatedModules( $name, $expected ) {
+		$modules = self::getModules();
+		$module = new ResourceLoaderFileModule( $modules[$name] );
+		$module->setName( $name );
+		$ctx = $this->getResourceLoaderContext();
+		$this->assertEquals( $module->getScript( $ctx ), $expected );
+	}
+
+	/**
+	 * @covers ResourceLoaderFileModule::getScript
+	 */
+	public function testGetScript() {
+		$module = new ResourceLoaderFileModule( [
+			'localBasePath' => __DIR__ . '/../../data/resourceloader',
+			'scripts' => [ 'script-nosemi.js', 'script-comment.js' ],
+		] );
+		$module->setName( 'testing' );
+		$ctx = $this->getResourceLoaderContext();
+		$this->assertEquals(
+			"/* eslint-disable */\nmw.foo()\n" .
+			"\n" .
+			"/* eslint-disable */\nmw.foo()\n// mw.bar();\n" .
+			"\n",
+			$module->getScript( $ctx ),
+			'scripts are concatenated with a new-line'
+		);
 	}
 
 	/**
@@ -127,6 +189,7 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 		];
 
 		$module = new ResourceLoaderFileModule( $baseParams );
+		$module->setName( 'testing' );
 
 		$this->assertEquals(
 			[
@@ -164,13 +227,21 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 			'localBasePath' => $basePath,
 			'styles' => [ 'test.css' ],
 		] );
+		$testModule->setName( 'testing' );
 		$expectedModule = new ResourceLoaderFileModule( [
 			'localBasePath' => $basePath,
 			'styles' => [ 'expected.css' ],
 		] );
+		$expectedModule->setName( 'testing' );
 
-		$contextLtr = $this->getResourceLoaderContext( 'en', 'ltr' );
-		$contextRtl = $this->getResourceLoaderContext( 'he', 'rtl' );
+		$contextLtr = $this->getResourceLoaderContext( [
+			'lang' => 'en',
+			'dir' => 'ltr',
+		] );
+		$contextRtl = $this->getResourceLoaderContext( [
+			'lang' => 'he',
+			'dir' => 'rtl',
+		] );
 
 		// Since we want to compare the effect of @noflip+@embed against the effect of just @embed, and
 		// the @noflip annotations are always preserved, we need to strip them first.
@@ -214,6 +285,10 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 					'bar.html' => "<div>goodbye</div>\n",
 				],
 			],
+			[
+				$modules['htmlTemplateUnknown'],
+				false,
+			],
 		];
 	}
 
@@ -223,27 +298,56 @@ class ResourceLoaderFileModuleTest extends ResourceLoaderTestCase {
 	 */
 	public function testGetTemplates( $module, $expected ) {
 		$rl = new ResourceLoaderFileModule( $module );
+		$rl->setName( 'testing' );
 
-		$this->assertEquals( $rl->getTemplates(), $expected );
+		if ( $expected === false ) {
+			$this->setExpectedException( MWException::class );
+			$rl->getTemplates();
+		} else {
+			$this->assertEquals( $rl->getTemplates(), $expected );
+		}
 	}
 
+	/**
+	 * @covers ResourceLoaderFileModule::stripBom
+	 */
 	public function testBomConcatenation() {
 		$basePath = __DIR__ . '/../../data/css';
 		$testModule = new ResourceLoaderFileModule( [
 			'localBasePath' => $basePath,
 			'styles' => [ 'bom.css' ],
 			] );
+		$testModule->setName( 'testing' );
 		$this->assertEquals(
 			substr( file_get_contents( "$basePath/bom.css" ), 0, 10 ),
 			"\xef\xbb\xbf.efbbbf",
 			'File has leading BOM'
 		);
 
-		$contextLtr = $this->getResourceLoaderContext( 'en', 'ltr' );
+		$context = $this->getResourceLoaderContext();
 		$this->assertEquals(
-			$testModule->getStyles( $contextLtr ),
+			$testModule->getStyles( $context ),
 			[ 'all' => ".efbbbf_bom_char_at_start_of_file {}\n" ],
 			'Leading BOM removed when concatenating files'
+		);
+	}
+
+	/**
+	 * @covers ResourceLoaderFileModule::getDefinitionSummary
+	 */
+	public function testGetVersionHash() {
+		$context = $this->getResourceLoaderContext();
+
+		// Less variables
+		$module = new ResourceLoaderFileTestModule();
+		$version = $module->getVersionHash( $context );
+		$module = new ResourceLoaderFileTestModule( [], [
+			'lessVars' => [ 'key' => 'value' ],
+		] );
+		$this->assertNotEquals(
+			$version,
+			$module->getVersionHash( $context ),
+			'Using less variables is significant'
 		);
 	}
 }

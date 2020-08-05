@@ -28,14 +28,13 @@ use Psr\Log\NullLogger;
  *
  * Usage:
  *
- *     $wgMWLoggerDefaultSpi = array(
- *         'class' => '\\MediaWiki\\Logger\\NullSpi',
- *     );
+ *     $wgMWLoggerDefaultSpi = [
+ *         'class' => \MediaWiki\Logger\NullSpi::class,
+ *     ];
  *
  * @see \MediaWiki\Logger\LoggerFactory
  * @since 1.25
- * @author Bryan Davis <bd808@wikimedia.org>
- * @copyright © 2014 Bryan Davis and Wikimedia Foundation.
+ * @copyright © 2014 Wikimedia Foundation and contributors
  */
 class NullSpi implements Spi {
 

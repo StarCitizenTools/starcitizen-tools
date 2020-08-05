@@ -1,10 +1,13 @@
 /**
  * Introduces a toggle icon than can be used to hide navigation menu in vector
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 .tux-navitoggle {
+	background: no-repeat scroll right center transparent;
+	/* @embed */
+	background-image: linear-gradient( transparent, transparent ), url( ../images/expand-rtl.svg );
 	height: 40px;
 	width: 20px;
 	position: absolute;
@@ -13,18 +16,11 @@
 	cursor: pointer;
 }
 
-.tux-navitoggle {
-	background: url('../images/expand-rtl.png') no-repeat scroll right center transparent;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/expand-rtl.svg);
-	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/expand-rtl.svg);
-}
-
 .tux-navi-collapsed .tux-navitoggle {
-	background: url('../images/expand-ltr.png') no-repeat scroll right center transparent;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/expand-ltr.svg);
+	background: no-repeat scroll right center transparent;
 	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/expand-ltr.svg);
+	background-image: linear-gradient( transparent, transparent ), url( ../images/expand-ltr.svg );
+	left: 40px !important;
 }
 
 .tux-navi-collapsed #mw-panel {
@@ -37,10 +33,6 @@
 
 .tux-navi-collapsed #left-navigation {
 	left: 0;
-}
-
-.tux-navi-collapsed .tux-navitoggle {
-	left: 40px !important;
 }
 
 .tux-navi-minilogo {

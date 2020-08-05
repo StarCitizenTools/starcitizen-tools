@@ -1,14 +1,14 @@
 /*!
  * VisualEditor MediaWiki UserInterface expandable error element styles.
  *
- * @copyright 2015 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 .ve-ui-mwExpandableErrorElement-label {
 	display: block;
 	margin-right: 2.5em;
-	color: #c00;
+	color: #d33;
 }
 
 .ve-ui-mwExpandableErrorElement-label-collapsed {

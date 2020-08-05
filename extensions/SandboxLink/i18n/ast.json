@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu"
+		]
+	},
+	"sandboxlink-desc": "Amiesta un enllaz a la zona de pruebes del usuariu nel menú de ferramientes personales",
+	"sandboxlink-subpage-name": "zona de pruebes",
+	"sandboxlink-portlet-label": "Zona de pruebes",
+	"tooltip-pt-sandbox": "La to zona de pruebes"
+}

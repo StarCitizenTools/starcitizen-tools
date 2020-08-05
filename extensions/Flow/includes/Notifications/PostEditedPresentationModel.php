@@ -17,38 +17,47 @@ class PostEditedPresentationModel extends FlowPresentationModel {
 	}
 
 	public function getPrimaryLink() {
-		return array(
+		return [
 			'url' => $this->getPostLinkUrl(),
 			'label' => $this->msg( 'flow-notification-link-text-view-post' )->text()
-		);
+		];
 	}
 
 	public function getSecondaryLinks() {
 		if ( $this->isBundled() ) {
-			return array( $this->getBoardLink() );
+			$links = [ $this->getBoardLink() ];
 		} else {
-			$links = array( $this->getAgentLink() );
 			if ( $this->isUserTalkPage() ) {
-				$links[] = $this->getDiffLink();
+				$links = [
+					$this->getAgentLink(),
+					$this->getDiffLink(),
+				];
 			} else {
-				$links[] = $this->getBoardLink();
+				$links = [
+					$this->getAgentLink(),
+					$this->getBoardLink(),
+					$this->getDiffLink( false ),
+				];
 			}
-			return $links;
 		}
+
+		$links[] = $this->getFlowUnwatchDynamicActionLink( true );
+
+		return $links;
 	}
 
 	protected function getHeaderMessageKey() {
 		if ( $this->isBundled() ) {
 			if ( $this->isUserTalkPage() ) {
-				return "notification-bundle-header-{$this->type}-user-talk";
+				return "notification-bundle-header-flow-post-edited-user-talk";
 			} else {
-				return "notification-bundle-header-{$this->type}-v2";
+				return "notification-bundle-header-flow-post-edited-v2";
 			}
 		} else {
 			if ( $this->isUserTalkPage() ) {
-				return parent::getHeaderMessageKey() . '-user-talk';
+				return 'notification-header-flow-post-edited-user-talk';
 			} else {
-				return parent::getHeaderMessageKey() . '-v2';
+				return 'notification-header-flow-post-edited-v2';
 			}
 		}
 	}
@@ -62,16 +71,16 @@ class PostEditedPresentationModel extends FlowPresentationModel {
 
 	public function getBodyMessage() {
 		if ( $this->isUserTalkPage() ) {
-			$msg = $this->msg( "notification-body-{$this->type}-user-talk" );
+			$msg = $this->msg( 'notification-body-flow-post-edited-user-talk' );
 		} else {
-			$msg = $this->msg( "notification-body-{$this->type}-v2" );
+			$msg = $this->msg( 'notification-body-flow-post-edited-v2' );
 		}
 
-		$msg->params( $this->getContentSnippet() );
+		$msg->plaintextParams( $this->getContentSnippet() );
 		return $msg;
 	}
 
-	protected function getDiffLink() {
+	protected function getDiffLink( $prioritized = true ) {
 		/** @var UrlGenerator $urlGenerator */
 		$urlGenerator = Container::get( 'url_generator' );
 		$anchor = $urlGenerator->diffPostLink(
@@ -80,12 +89,12 @@ class PostEditedPresentationModel extends FlowPresentationModel {
 			$this->event->getExtraParam( 'revision-id' )
 		);
 
-		return array(
+		return [
 			'url' => $anchor->getFullURL(),
 			'label' => $this->msg( 'notification-link-text-view-changes' )->params( $this->getViewingUserForGender() )->text(),
 			'description' => '',
 			'icon' => 'changes',
-			'prioritized' => true,
-		);
+			'prioritized' => $prioritized,
+		];
 	}
 }

@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -18,10 +18,21 @@ class ApiQueryLanguageStats extends ApiStatsQuery {
 		parent::__construct( $query, $moduleName, 'ls' );
 	}
 
-	protected function getData() {
-		$params = $this->extractRequestParams();
+	/// Overwritten from ApiStatsQuery
+	protected function validateTargetParamater( array $params ) {
+		$all = TranslateUtils::getLanguageNames( null );
+		$requested = $params[ 'language' ];
 
-		return MessageGroupStats::forLanguage( $params['language'] );
+		if ( !isset( $all[ $requested ] ) ) {
+			$this->dieWithError( [ 'apierror-translate-invalidlanguage' ] );
+		}
+
+		return $requested;
+	}
+
+	/// Overwritten from ApiStatsQuery
+	protected function loadStatistics( $target, $flags = 0 ) {
+		return MessageGroupStats::forLanguage( $target, $flags );
 	}
 
 	protected function makeItem( $item, $stats ) {
@@ -33,18 +44,18 @@ class ApiQueryLanguageStats extends ApiStatsQuery {
 
 	public function getAllowedParams() {
 		$params = parent::getAllowedParams();
-		$params['language'] = array(
+		$params['language'] = [
 			ApiBase::PARAM_TYPE => 'string',
 			ApiBase::PARAM_REQUIRED => true,
-		);
+		];
 
 		return $params;
 	}
 
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=query&meta=languagestats&lslanguage=fi'
 				=> 'apihelp-query+languagestats-example-1',
-		);
+		];
 	}
 }

@@ -1,13 +1,13 @@
 /*!
  * @author Santhosh Thottingal
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
-	$( document ).ready( function () {
+	$( function () {
 		$( '#wpUserLanguage' ).multiselectautocomplete( { inputbox: '#tpt-prioritylangs' } );
 
 		$( '#mw-content-text' ).on( 'click', '.mw-translate-jspost', function ( e ) {
@@ -23,4 +23,4 @@
 			e.preventDefault();
 		} );
 	} );
-}( jQuery, mediaWiki ) );
+}() );

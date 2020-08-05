@@ -3,7 +3,7 @@
  * API module for switching workflow states for message groups
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -22,47 +22,44 @@ class ApiGroupReview extends ApiBase {
 		$code = $requestParams['language'];
 
 		if ( !$group || MessageGroups::isDynamic( $group ) ) {
-			$this->dieUsageMsg( array( 'missingparam', 'group' ) );
+			$this->dieWithError( [ 'apierror-missingparam', 'group' ] );
 		}
 		$stateConfig = $group->getMessageGroupStates()->getStates();
 		if ( !$stateConfig ) {
-			$this->dieUsage( 'Message group review not in use', 'disabled' );
+			$this->dieWithError( 'apierror-translate-groupreviewdisabled', 'disabled' );
 		}
 
-		if ( !$user->isAllowed( self::$right ) ) {
-			$this->dieUsage( 'Permission denied', 'permissiondenied' );
-		}
+		$this->checkUserRightsAny( self::$right );
 
 		if ( $user->isBlocked() ) {
-			$this->dieUsage( 'You have been blocked', 'blocked' );
+			$this->dieBlocked( $user->getBlock() );
 		}
 
 		$requestParams = $this->extractRequestParams();
 
 		$languages = Language::fetchLanguageNames();
 		if ( !isset( $languages[$code] ) ) {
-			$this->dieUsageMsg( array( 'missingparam', 'language' ) );
+			$this->dieWithError( [ 'apierror-missingparam', 'language' ] );
 		}
 
 		$targetState = $requestParams['state'];
 		if ( !isset( $stateConfig[$targetState] ) ) {
-			$this->dieUsage( 'The requested state is invalid', 'invalidstate' );
+			$this->dieWithError( 'apierror-translate-invalidstate', 'invalidstate' );
 		}
 
 		if ( is_array( $stateConfig[$targetState] )
 			&& isset( $stateConfig[$targetState]['right'] )
-			&& !$user->isAllowed( $stateConfig[$targetState]['right'] )
 		) {
-			$this->dieUsage( 'Permission denied', 'permissiondenied' );
+			$this->checkUserRightsAny( $stateConfig[$targetState]['right'] );
 		}
 
 		self::changeState( $group, $code, $targetState, $user );
 
-		$output = array( 'review' => array(
+		$output = [ 'review' => [
 			'group' => $group->getId(),
 			'language' => $code,
 			'state' => $targetState,
-		) );
+		] ];
 
 		$this->getResult()->addValue( null, $this->getModuleName(), $output );
 	}
@@ -72,10 +69,10 @@ class ApiGroupReview extends ApiBase {
 		$table = 'translate_groupreviews';
 
 		$field = 'tgr_state';
-		$conds = array(
+		$conds = [
 			'tgr_group' => $group->getId(),
 			'tgr_lang' => $code
-		);
+		];
 
 		return $dbw->selectField( $table, $field, $conds, __METHOD__ );
 	}
@@ -87,33 +84,33 @@ class ApiGroupReview extends ApiBase {
 		}
 
 		$table = 'translate_groupreviews';
-		$index = array( 'tgr_group', 'tgr_language' );
-		$row = array(
+		$index = [ 'tgr_group', 'tgr_language' ];
+		$row = [
 			'tgr_group' => $group->getId(),
 			'tgr_lang' => $code,
 			'tgr_state' => $newState,
-		);
+		];
 
 		$dbw = wfGetDB( DB_MASTER );
-		$dbw->replace( $table, array( $index ), $row, __METHOD__ );
+		$dbw->replace( $table, [ $index ], $row, __METHOD__ );
 
 		$entry = new ManualLogEntry( 'translationreview', 'group' );
 		$entry->setPerformer( $user );
 		$entry->setTarget( SpecialPage::getTitleFor( 'Translate', $group->getId() ) );
 		// @todo
 		// $entry->setComment( $comment );
-		$entry->setParameters( array(
+		$entry->setParameters( [
 			'4::language' => $code,
 			'5::group-label' => $group->getLabel(),
 			'6::old-state' => $currentState,
 			'7::new-state' => $newState,
-		) );
+		] );
 
 		$logid = $entry->insert();
 		$entry->publish( $logid );
 
 		Hooks::run( 'TranslateEventMessageGroupStateChange',
-			array( $group, $code, $currentState, $newState ) );
+			[ $group, $code, $currentState, $newState ] );
 
 		return true;
 	}
@@ -127,30 +124,30 @@ class ApiGroupReview extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return array(
-			'group' => array(
+		return [
+			'group' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'language' => array(
+			],
+			'language' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DFLT => 'en',
-			),
-			'state' => array(
+			],
+			'state' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'token' => array(
+			],
+			'token' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-		);
+			],
+		];
 	}
 
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=groupreview&group=page-Example&language=de&state=ready&token=foo'
 				=> 'apihelp-groupreview-example-1',
-		);
+		];
 	}
 }

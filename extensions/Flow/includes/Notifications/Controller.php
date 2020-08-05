@@ -2,7 +2,8 @@
 
 namespace Flow;
 
-use Flow\Data\ManagerGroup;
+use EchoEventMapper;
+use EchoModerationController;
 use Flow\Exception\FlowException;
 use Flow\Model\AbstractRevision;
 use Flow\Model\Header;
@@ -13,6 +14,7 @@ use Flow\Model\Workflow;
 use Flow\Conversion\Utils;
 use Flow\Repository\TreeRepository;
 use EchoEvent;
+use ExtensionRegistry;
 use Language;
 use Title;
 use User;
@@ -30,6 +32,7 @@ class NotificationController {
 
 	/**
 	 * @param Language $language
+	 * @param TreeRepository $treeRepository
 	 */
 	public function __construct( Language $language, TreeRepository $treeRepository ) {
 		$this->language = $language;
@@ -38,34 +41,33 @@ class NotificationController {
 
 	public static function onBeforeCreateEchoEvent( &$notifs, &$categories, &$icons ) {
 		$notifs += require __DIR__ . "/Notifications.php";
-		$categories['flow-discussion'] = array(
+		$categories['flow-discussion'] = [
 			'priority' => 3,
 			'tooltip' => 'echo-pref-tooltip-flow-discussion',
-		);
-		$icons['flow-new-topic'] = array(
+		];
+		$icons['flow-new-topic'] = [
 			'path' => 'Flow/modules/notification/icon/flow-new-topic.svg',
-		);
-		$icons['flow-post-edited'] = array(
-			'path' => 'Flow/modules/notification/icon/flow-post-edited.svg',
-		);
-		$icons['flow-topic-renamed'] = array(
-			'path' => 'Flow/modules/notification/icon/flow-topic-renamed.svg',
-		);
-		$icons['flowusertalk-new-topic'] = array(
+		];
+		$icons['flowusertalk-new-topic'] = [
 			'path' => 'Flow/modules/notification/icon/flowusertalk-new-topic.svg',
-		);
-		$icons['flow-topic-resolved'] = array(
+		];
+		$icons['flow-post-edited'] = $icons['flowusertalk-post-edited'] = [
+			'path' => 'Flow/modules/notification/icon/flow-post-edited.svg',
+		];
+		$icons['flow-topic-renamed'] = $icons['flowusertalk-topic-renamed'] = [
+			'path' => 'Flow/modules/notification/icon/flow-topic-renamed.svg',
+		];
+		$icons['flow-topic-resolved'] = $icons['flowusertalk-topic-resolved'] = [
 			'path' => 'Flow/modules/notification/icon/flow-topic-resolved.svg',
-		);
-		$icons['flow-topic-reopened'] = array(
+		];
+		$icons['flow-topic-reopened'] = $icons['flowusertalk-topic-reopened'] = [
 			'path' => 'Flow/modules/notification/icon/flow-topic-reopened.svg',
-		);
+		];
 	}
 
 	/**
 	 * Causes notifications to be fired for a Header-related event.
-	 * @param  String $eventName The event that occurred.
-	 * @param  array  $data Associative array of parameters.
+	 * @param array $data Associative array of parameters. * revision: The PostRevision created by the action. Always required. * board-workflow: The Workflow object for the board. Always required. * timestamp: Original event timestamp, for imports. Optional. * extra-data: Additional data to pass along to Event extra.
 	 * * revision: The PostRevision created by the action. Always required.
 	 * * board-workflow: The Workflow object for the board. Always required.
 	 * * timestamp: Original event timestamp, for imports. Optional.
@@ -73,15 +75,15 @@ class NotificationController {
 	 * @return array Array of created EchoEvent objects.
 	 * @throws FlowException When $data contains unexpected types/values
 	 */
-	public function notifyHeaderChange( $eventName, $data = array() ) {
-		if ( !class_exists( 'EchoEvent' ) ) {
-			return array();
+	public function notifyHeaderChange( $data = [] ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
+			return [];
 		}
 
 		if ( isset( $data['extra-data'] ) ) {
 			$extraData = $data['extra-data'];
 		} else {
-			$extraData = array();
+			$extraData = [];
 		}
 
 		$revision = $data['revision'];
@@ -94,7 +96,7 @@ class NotificationController {
 		}
 
 		$user = $revision->getUser();
-		$mentionedUsers = $this->getMentionedUsers( $revision );
+		list( $mentionedUsers, $mentionsSkipped ) = $this->getMentionedUsersAndSkipState( $revision );
 
 		$extraData['content'] = Utils::htmlToPlaintext( $revision->getContent(), 200, $this->language );
 		$extraData['revision-id'] = $revision->getRevisionId();
@@ -102,22 +104,33 @@ class NotificationController {
 		$extraData['target-page'] = $boardWorkflow->getArticleTitle()->getArticleID();
 		// pass along mentioned users to other notification, so it knows who to ignore
 		$extraData['mentioned-users'] = $mentionedUsers;
+		$title = $boardWorkflow->getOwnerTitle();
 
-		$info = array(
-			'type' => $eventName,
+		$info = [
 			'agent' => $user,
-			'title' => $boardWorkflow->getOwnerTitle(),
+			'title' => $title,
 			'extra' => $extraData,
-		);
+		];
 
 		// Allow a specific timestamp to be set - useful when importing existing data
-		if ( isset( $data['timestamp'] ) ){
+		if ( isset( $data['timestamp'] ) ) {
 			$info['timestamp'] = $data['timestamp'];
 		}
 
-		$events = array( EchoEvent::create( $info ) );
+		$events = [ EchoEvent::create( [ 'type' => 'flow-description-edited' ] + $info ) ];
+		if ( $title->getNamespace() === NS_USER_TALK ) {
+			$events[] = EchoEvent::create( [ 'type' => 'flowusertalk-description-edited' ] + $info );
+		}
 		if ( $mentionedUsers ) {
-			$events[] = $this->generateMentionEvent( $revision, null, $boardWorkflow, $user, $mentionedUsers );
+			$mentionEvents = $this->generateMentionEvents(
+				$revision,
+				null,
+				$boardWorkflow,
+				$user,
+				$mentionedUsers,
+				$mentionsSkipped
+			);
+			$events = array_merge( $events, $mentionEvents );
 		}
 
 		return $events;
@@ -125,11 +138,11 @@ class NotificationController {
 
 	/**
 	 * Causes notifications to be fired for a Flow event.
-	 * @param  String $eventName The event that occurred. Choice of:
+	 * @param String $eventName The event that occurred. Choice of:
 	 * * flow-post-reply
 	 * * flow-topic-renamed
 	 * * flow-post-edited
-	 * @param  array  $data Associative array of parameters.
+	 * @param array $data Associative array of parameters. * user: The user who made the change. Always required. * revision: The PostRevision created by the action. Always required. * title: The Title on which this Topic sits. Always required. * topic-workflow: The Workflow object for the topic. Always required. * topic-title: The Title of the Topic that the post belongs to. Required except for topic renames. * old-subject: The old subject of a Topic. Required for topic renames. * new-subject: The new subject of a Topic. Required for topic renames.
 	 * * user: The user who made the change. Always required.
 	 * * revision: The PostRevision created by the action. Always required.
 	 * * title: The Title on which this Topic sits. Always required.
@@ -140,15 +153,15 @@ class NotificationController {
 	 * @return array Array of created EchoEvent objects.
 	 * @throws FlowException When $data contains unexpected types/values
 	 */
-	public function notifyPostChange( $eventName, $data = array() ) {
-		if ( !class_exists( 'EchoEvent' ) ) {
-			return array();
+	public function notifyPostChange( $eventName, $data = [] ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
+			return [];
 		}
 
 		if ( isset( $data['extra-data'] ) ) {
 			$extraData = $data['extra-data'];
 		} else {
-			$extraData = array();
+			$extraData = [];
 		}
 
 		$revision = $data['revision'];
@@ -165,7 +178,8 @@ class NotificationController {
 		}
 
 		$user = $revision->getUser();
-		$mentionedUsers = $this->getMentionedUsers( $revision );
+		list( $mentionedUsers, $mentionsSkipped ) = $this->getMentionedUsersAndSkipState( $revision );
+		$title = $topicWorkflow->getOwnerTitle();
 
 		$extraData['revision-id'] = $revision->getRevisionId();
 		$extraData['post-id'] = $revision->getPostId();
@@ -174,13 +188,13 @@ class NotificationController {
 		// pass along mentioned users to other notification, so it knows who to ignore
 		$extraData['mentioned-users'] = $mentionedUsers;
 
-		switch( $eventName ) {
+		switch ( $eventName ) {
 			case 'flow-post-reply':
-				$extraData += array(
+				$extraData += [
 					'reply-to' => $revision->getReplyToId(),
 					'content' => Utils::htmlToPlaintext( $revision->getContent(), 200, $this->language ),
 					'topic-title' => $this->language->truncate( $topicRevision->getContent( 'topic-title-plaintext' ), 200 ),
-				);
+				];
 
 				// if we're looking at the initial post (submitted along with the topic
 				// title), we don't want to send the flow-post-reply notification,
@@ -190,45 +204,65 @@ class NotificationController {
 					// that they weren't also mentioned in the topic title (in
 					// which case they would get 2 notifications...)
 					if ( $mentionedUsers ) {
-						$mentionedInTitle = $this->getMentionedUsers( $topicRevision );
+						list( $mentionedInTitle, $mentionsSkippedInTitle ) =
+							$this->getMentionedUsersAndSkipState( $topicRevision );
 						$mentionedUsers = array_diff_key( $mentionedUsers, $mentionedInTitle );
+						$mentionsSkipped = $mentionsSkipped || $mentionsSkippedInTitle;
 						$extraData['mentioned-users'] = $mentionedUsers;
 					}
 
-					return $this->generateMentionEvent( $revision, $topicRevision, $topicWorkflow, $user, $mentionedUsers );
+					return $this->generateMentionEvents(
+						$revision,
+						$topicRevision,
+						$topicWorkflow,
+						$user,
+						$mentionedUsers,
+						$mentionsSkipped
+					);
 				}
 
 			break;
 			case 'flow-topic-renamed':
 				$previousRevision = $revision->getCollection()->getPrevRevision( $revision );
-				$extraData += array(
+				$extraData += [
 					'old-subject' => $this->language->truncate( $previousRevision->getContent( 'topic-title-plaintext' ), 200 ),
 					'new-subject' => $this->language->truncate( $revision->getContent( 'topic-title-plaintext' ), 200 ),
-				);
+				];
 			break;
 			case 'flow-post-edited':
-				$extraData += array(
+				$extraData += [
 					'content' => Utils::htmlToPlaintext( $revision->getContent(), 200, $this->language ),
 					'topic-title' => $this->language->truncate( $topicRevision->getContent( 'topic-title-plaintext' ), 200 ),
-				);
+				];
 			break;
 		}
 
-		$info = array(
-			'type' => $eventName,
+		$info = [
 			'agent' => $user,
-			'title' => $topicWorkflow->getOwnerTitle(),
+			'title' => $title,
 			'extra' => $extraData,
-		);
+		];
 
 		// Allow a specific timestamp to be set - useful when importing existing data
-		if ( isset( $data['timestamp'] ) ){
+		if ( isset( $data['timestamp'] ) ) {
 			$info['timestamp'] = $data['timestamp'];
 		}
 
-		$events = array( EchoEvent::create( $info ) );
+		$events = [ EchoEvent::create( [ 'type' => $eventName ] + $info ) ];
+		if ( $title->getNamespace() === NS_USER_TALK ) {
+			$usertalkEvent = str_replace( 'flow-', 'flowusertalk-', $eventName );
+			$events[] = EchoEvent::create( [ 'type' => $usertalkEvent ] + $info );
+		}
 		if ( $mentionedUsers ) {
-			$events[] = $this->generateMentionEvent( $revision, $topicRevision, $topicWorkflow, $user, $mentionedUsers );
+			$mentionEvents = $this->generateMentionEvents(
+				$revision,
+				$topicRevision,
+				$topicWorkflow,
+				$user,
+				$mentionedUsers,
+				$mentionsSkipped
+			);
+			$events = array_merge( $events, $mentionEvents );
 		}
 
 		return $events;
@@ -236,8 +270,7 @@ class NotificationController {
 
 	/**
 	 * Causes notifications to be fired for a Summary-related event.
-	 * @param  String $eventName The event that occurred.
-	 * @param  array  $data Associative array of parameters.
+	 * @param array $data Associative array of parameters. * revision: The PostRevision created by the action. Always required. * topic-title: The PostRevision object for the topic title. Always required. * topic-workflow: The Workflow object for the board. Always required. * extra-data: Additional data to pass along to Event extra.
 	 * * revision: The PostRevision created by the action. Always required.
 	 * * topic-title: The PostRevision object for the topic title. Always required.
 	 * * topic-workflow: The Workflow object for the board. Always required.
@@ -245,9 +278,9 @@ class NotificationController {
 	 * @return array Array of created EchoEvent objects.
 	 * @throws FlowException When $data contains unexpected types/values
 	 */
-	public function notifySummaryChange( $eventName, $data = array() ) {
-		if ( !class_exists( 'EchoEvent' ) ) {
-			return array();
+	public function notifySummaryChange( $data = [] ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
+			return [];
 		}
 
 		$revision = $data['revision'];
@@ -264,7 +297,7 @@ class NotificationController {
 		}
 
 		$user = $revision->getUser();
-		$mentionedUsers = $this->getMentionedUsers( $revision );
+		list( $mentionedUsers, $mentionsSkipped ) = $this->getMentionedUsersAndSkipState( $revision );
 
 		$extraData['content'] = Utils::htmlToPlaintext( $revision->getContent(), 200, $this->language );
 		$extraData['revision-id'] = $revision->getRevisionId();
@@ -274,22 +307,33 @@ class NotificationController {
 		$extraData['target-page'] = $topicWorkflow->getArticleTitle()->getArticleID();
 		// pass along mentioned users to other notification, so it knows who to ignore
 		$extraData['mentioned-users'] = $mentionedUsers;
+		$title = $topicWorkflow->getOwnerTitle();
 
-		$info = array(
-			'type' => $eventName,
+		$info = [
 			'agent' => $user,
-			'title' => $topicWorkflow->getOwnerTitle(),
+			'title' => $title,
 			'extra' => $extraData,
-		);
+		];
 
 		// Allow a specific timestamp to be set - useful when importing existing data
-		if ( isset( $data['timestamp'] ) ){
+		if ( isset( $data['timestamp'] ) ) {
 			$info['timestamp'] = $data['timestamp'];
 		}
 
-		$events = array( EchoEvent::create( $info ) );
+		$events = [ EchoEvent::create( [ 'type' => 'flow-summary-edited' ] + $info ) ];
+		if ( $title->getNamespace() === NS_USER_TALK ) {
+			$events[] = EchoEvent::create( [ 'type' => 'flowusertalk-summary-edited' ] + $info );
+		}
 		if ( $mentionedUsers ) {
-			$events[] = $this->generateMentionEvent( $revision, $topicRevision, $topicWorkflow, $user, $mentionedUsers );
+			$mentionEvents = $this->generateMentionEvents(
+				$revision,
+				$topicRevision,
+				$topicWorkflow,
+				$user,
+				$mentionedUsers,
+				$mentionsSkipped
+			);
+			$events = array_merge( $events, $mentionEvents );
 		}
 
 		return $events;
@@ -297,7 +341,7 @@ class NotificationController {
 
 	/**
 	 * Triggers notifications for a new topic.
-	 * @param  array $params Associative array of parameters, all required:
+	 * @param array $params Associative array of parameters, all required:
 	 * * board-workflow: Workflow object for the Flow board.
 	 * * topic-workflow: Workflow object for the new Topic.
 	 * * topic-title: PostRevision object for the "topic post", containing the
@@ -308,9 +352,9 @@ class NotificationController {
 	 * @throws FlowException When $params contains unexpected types/values
 	 */
 	public function notifyNewTopic( $params ) {
-		if ( !class_exists( 'EchoEvent' ) ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
 			// Nothing to do here.
-			return array();
+			return [];
 		}
 
 		$topicWorkflow = $params['topic-workflow'];
@@ -331,14 +375,14 @@ class NotificationController {
 			throw new FlowException( 'Expected Workflow but received ' . get_class( $boardWorkflow ) );
 		}
 
-		$mentionedUsers = $this->getMentionedUsers( $topicTitle );
+		list( $mentionedUsers, $mentionsSkipped ) = $this->getMentionedUsersAndSkipState( $topicTitle );
 
-		$events = array();
-		$events[] = EchoEvent::create( array(
-			'type' => 'flow-new-topic',
+		$title = $boardWorkflow->getArticleTitle();
+		$events = [];
+		$eventData = [
 			'agent' => $user,
-			'title' => $boardWorkflow->getArticleTitle(),
-			'extra' => array(
+			'title' => $title,
+			'extra' => [
 				'board-workflow' => $boardWorkflow->getId(),
 				'topic-workflow' => $topicWorkflow->getId(),
 				'post-id' => $firstPost ? $firstPost->getRevisionId() : null,
@@ -347,20 +391,32 @@ class NotificationController {
 					? Utils::htmlToPlaintext( $firstPost->getContent(), 200, $this->language )
 					: null,
 				// Force a read from master database since this could be a new page
-				'target-page' => array(
+				'target-page' => [
 					$topicWorkflow->getOwnerTitle()->getArticleID( Title::GAID_FOR_UPDATE ),
 					$topicWorkflow->getArticleTitle()->getArticleID( Title::GAID_FOR_UPDATE ),
-				),
+				],
 				// pass along mentioned users to other notification, so it knows who to ignore
 				// also look at users mentioned in first post: if there are any, this
 				// (flow-new-topic) notification shouldn't go through (because they'll
 				// already receive the mention notification)
-				'mentioned-users' => $mentionedUsers + $this->getMentionedUsers( $firstPost ),
-			)
-		) );
+				'mentioned-users' => $mentionedUsers,
+			]
+		];
+		$events[] = EchoEvent::create( [ 'type' => 'flow-new-topic' ] + $eventData );
+		if ( $title->getNamespace() === NS_USER_TALK ) {
+			$events[] = EchoEvent::create( [ 'type' => 'flowusertalk-new-topic' ] + $eventData );
+		}
 
 		if ( $mentionedUsers ) {
-			$events[] = $this->generateMentionEvent( $topicTitle, $topicTitle, $topicWorkflow, $user, $mentionedUsers );
+			$mentionEvents = $this->generateMentionEvents(
+				$topicTitle,
+				$topicTitle,
+				$topicWorkflow,
+				$user,
+				$mentionedUsers,
+				$mentionsSkipped
+			);
+			$events = array_merge( $events, $mentionEvents );
 		}
 
 		return $events;
@@ -376,9 +432,9 @@ class NotificationController {
 	 * @throws FlowException
 	 * @throws \MWException
 	 */
-	public function notifyTopicLocked( $type, $data = array() ) {
-		if ( !class_exists( 'EchoEvent' ) ) {
-			return array();
+	public function notifyTopicLocked( $type, $data = [] ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
+			return [];
 		}
 
 		$revision = $data['revision'];
@@ -396,37 +452,41 @@ class NotificationController {
 		// I'll treat resolve & reopen as the same notification type, but pass the
 		// different type so presentation models can differentiate
 		$extraData['type'] = $type;
+		$title = $topicWorkflow->getOwnerTitle();
 
-		$info = array(
-			'type' => 'flow-topic-resolved',
+		$info = [
 			'agent' => $revision->getUser(),
-			'title' => $topicWorkflow->getOwnerTitle(),
+			'title' => $title,
 			'extra' => $extraData,
-		);
+		];
 
 		// Allow a specific timestamp to be set - useful when importing existing data
-		if ( isset( $data['timestamp'] ) ){
+		if ( isset( $data['timestamp'] ) ) {
 			$info['timestamp'] = $data['timestamp'];
 		}
 
-		return array( EchoEvent::create( $info ) );
+		$events = [ EchoEvent::create( [ 'type' => 'flow-topic-resolved' ] + $info ) ];
+		if ( $title->getNamespace() === NS_USER_TALK ) {
+			$events[] = EchoEvent::create( [ 'type' => 'flowusertalk-topic-resolved' ] + $info );
+		}
+		return $events;
 	}
 
 	public function notifyFlowEnabledOnTalkpage( User $user ) {
-		if ( !class_exists( 'EchoEvent' ) ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
 			// Nothing to do here.
-			return array();
+			return [];
 		}
 
-		$events = array();
-		$events[] = EchoEvent::create( array(
+		$events = [];
+		$events[] = EchoEvent::create( [
 			'type' => 'flow-enabled-on-talkpage',
 			'agent' => $user,
 			'title' => $user->getTalkPage(),
-			'extra' => array(
+			'extra' => [
 				'notifyAgent' => true,
-			),
-		) );
+			],
+		] );
 
 		return $events;
 	}
@@ -434,19 +494,29 @@ class NotificationController {
 	/**
 	 * @param AbstractRevision $content The (post|topic|header) revision that contains the content of the mention
 	 * @param PostRevision|null $topic Topic PostRevision object, if relevant (e.g. not for Header)
-	 * @param Workflow $workflow Workflow object
+	 * @param Workflow $workflow
 	 * @param User $user User who created the new post
 	 * @param array $mentionedUsers
-	 * @return bool|EchoEvent
+	 * @param bool $mentionsSkipped Were mentions skipped due to too many mentions being attempted?
+	 * @return bool|EchoEvent[]
 	 * @throws Exception\InvalidDataException
 	 * @throws \MWException
 	 */
-	protected function generateMentionEvent( AbstractRevision $content, PostRevision $topic = null, Workflow $workflow, User $user, array $mentionedUsers ) {
+	protected function generateMentionEvents(
+		AbstractRevision $content,
+		PostRevision $topic = null,
+		Workflow $workflow,
+		User $user,
+		array $mentionedUsers,
+		$mentionsSkipped
+	) {
+		global $wgEchoMentionStatusNotifications, $wgFlowMaxMentionCount;
+
 		if ( count( $mentionedUsers ) === 0 ) {
 			return false;
 		}
 
-		$extraData = array();
+		$extraData = [];
 		$extraData['mentioned-users'] = $mentionedUsers;
 		$extraData['target-page'] = $workflow->getArticleTitle()->getArticleID();
 		// don't include topic content again if the notification IS in the title
@@ -464,24 +534,46 @@ class NotificationController {
 			$extraData['topic-title'] = $this->language->truncate( $topic->getContent( 'topic-title-plaintext' ), 200 );
 		}
 
-		return EchoEvent::create( array(
+		$events = [];
+		$events[] = EchoEvent::create( [
 			'type' => 'flow-mention',
 			'title' => $workflow->getOwnerTitle(),
 			'extra' => $extraData,
 			'agent' => $user,
-		) );
+		] );
+		if ( $wgEchoMentionStatusNotifications && $mentionsSkipped ) {
+			$extra = [
+				'topic-workflow' => $workflow->getId(),
+				'max-mentions' => $wgFlowMaxMentionCount,
+				'section-title' => $extraData['topic-title'],
+				'failure-type' => 'too-many',
+				'notifyAgent' => true
+			];
+			if ( $content->getRevisionType() === 'post' ) {
+				$extra['post-id'] = $content->getCollection()->getId();
+			}
+			$events[] = EchoEvent::create( [
+				'type' => 'flow-mention-failure-too-many',
+				'title' => $workflow->getOwnerTitle(),
+				'extra' => $extra,
+				'agent' => $user,
+			] );
+		}
+		return $events;
 	}
 
 	/**
 	 * Analyses a PostRevision to determine which users are mentioned.
 	 *
 	 * @param AbstractRevision $revision The Post to analyse.
-	 * @return int[] Array of user ids.
+	 * @return array
+	 *          0 => int[] Array of user IDs
+	 *          1 => bool Were some mentions ignored due to $wgFlowMaxMentionCount?
 	 */
-	protected function getMentionedUsers( AbstractRevision $revision ) {
+	protected function getMentionedUsersAndSkipState( AbstractRevision $revision ) {
 		// At the moment, it is not possible to get a list of mentioned users from HTML
-		//  unless that HTML comes from Parsoid. But VisualEditor (what is currently used
-		//  to convert wikitext to HTML) does not currently use Parsoid.
+		// unless that HTML comes from Parsoid. But VisualEditor (what is currently used
+		// to convert wikitext to HTML) does not currently use Parsoid.
 		$wikitext = $revision->getContentInWikitext();
 		$mentions = $this->getMentionedUsersFromWikitext( $wikitext );
 
@@ -495,9 +587,7 @@ class NotificationController {
 			$mentions = array_diff( $mentions, $previousMentions );
 		}
 
-		$notifyUsers = $this->filterMentionedUsers( $mentions, $revision );
-
-		return $notifyUsers;
+		return $this->filterMentionedUsers( $mentions, $revision );
 	}
 
 	/**
@@ -506,15 +596,19 @@ class NotificationController {
 	 *
 	 * Removes duplicates, anonymous users, self-mentions, and mentions of the
 	 * owner of the talk page
-	 * @param  User[] $mentions Array of User objects
-	 * @param  AbstractRevision $revision The Post that is being examined.
-	 * @return int[] Array of user IDs
+	 * @param User[] $mentions Array of User objects
+	 * @param AbstractRevision $revision The Post that is being examined.
+	 * @return array
+	 *          0 => int[] Array of user IDs
+	 *          1 => bool Were some mentions ignored due to $wgFlowMaxMentionCount?
 	 */
 	protected function filterMentionedUsers( $mentions, AbstractRevision $revision ) {
-		$outputMentions = array();
 		global $wgFlowMaxMentionCount;
 
-		foreach( $mentions as $mentionedUser ) {
+		$outputMentions = [];
+		$mentionsSkipped = false;
+
+		foreach ( $mentions as $mentionedUser ) {
 			// Don't notify anonymous users
 			if ( $mentionedUser->isAnon() ) {
 				continue;
@@ -525,19 +619,20 @@ class NotificationController {
 				continue;
 			}
 
-			if ( count( $outputMentions ) > $wgFlowMaxMentionCount ) {
+			if ( count( $outputMentions ) >= $wgFlowMaxMentionCount ) {
+				$mentionsSkipped = true;
 				break;
 			}
 
 			$outputMentions[$mentionedUser->getId()] = $mentionedUser->getId();
 		}
 
-		return $outputMentions;
+		return [ $outputMentions, $mentionsSkipped ];
 	}
 
 	/**
 	 * Examines a wikitext string and finds users that were mentioned
-	 * @param  string $wikitext
+	 * @param string $wikitext
 	 * @return User[] Array of User objects
 	 */
 	protected function getMentionedUsersFromWikitext( $wikitext ) {
@@ -547,18 +642,17 @@ class NotificationController {
 
 		$options = new \ParserOptions;
 		$options->setTidy( true );
-		$options->setEditSection( false );
 
 		$output = $wgParser->parse( $wikitext, $title, $options );
 
 		$links = $output->getLinks();
 
-		if ( ! isset( $links[NS_USER] ) || ! is_array( $links[NS_USER] ) ) {
+		if ( !isset( $links[NS_USER] ) || !is_array( $links[NS_USER] ) ) {
 			// Nothing
-			return array();
+			return [];
 		}
 
-		$users = array();
+		$users = [];
 		foreach ( $links[NS_USER] as $dbk => $page_id ) {
 			$user = User::newFromName( $dbk );
 			if ( !$user || $user->isAnon() ) {
@@ -566,11 +660,6 @@ class NotificationController {
 			}
 
 			$users[$user->getId()] = $user;
-			// If more than 20 users are being notified this is probably a spam/attack vector.
-			// Don't send any mention notifications
-			if ( count( $users ) > 20 ) {
-				return array();
-			}
 		}
 
 		return $users;
@@ -579,13 +668,14 @@ class NotificationController {
 	/**
 	 * Handler for EchoGetBundleRule hook, which defines the bundle rules for each notification
 	 *
-	 * @param $event EchoEvent
-	 * @param $bundleString string Determines how the notification should be bundled
-	 * @return boolean True for success
+	 * @param EchoEvent $event
+	 * @param string &$bundleString Determines how the notification should be bundled
+	 * @return bool True for success
 	 */
 	public static function onEchoGetBundleRules( $event, &$bundleString ) {
 		switch ( $event->getType() ) {
 			case 'flow-new-topic':
+			case 'flowusertalk-new-topic':
 				$board = $event->getExtraParam( 'board-workflow' );
 				if ( $board instanceof UUID ) {
 					$bundleString = $event->getType() . '-' . $board->getAlphadecimal();
@@ -593,8 +683,11 @@ class NotificationController {
 				break;
 
 			case 'flow-post-reply':
+			case 'flowusertalk-post-reply':
 			case 'flow-post-edited':
+			case 'flowusertalk-post-edited':
 			case 'flow-summary-edited':
+			case 'flowusertalk-summary-edited':
 				$topic = $event->getExtraParam( 'topic-workflow' );
 				if ( $topic instanceof UUID ) {
 					$bundleString = $event->getType() . '-' . $topic->getAlphadecimal();
@@ -602,6 +695,7 @@ class NotificationController {
 				break;
 
 			case 'flow-description-edited':
+			case 'flowusertalk-description-edited':
 				$headerId = $event->getExtraParam( 'collection-id' );
 				if ( $headerId instanceof UUID ) {
 					$bundleString = $event->getType() . '-' . $headerId->getAlphadecimal();
@@ -618,7 +712,7 @@ class NotificationController {
 	 * @return array Map from userid to User object
 	 */
 	protected static function getTalkPageOwner( $topicId ) {
-		$talkUser = array();
+		$talkUser = [];
 		// Owner of talk page should always get a reply notification
 		/** @var Workflow|null $workflow */
 		$workflow = Container::get( 'storage' )
@@ -671,11 +765,11 @@ class NotificationController {
 	 * This is the lowest-number post, numbering them using a pre-order depth-first
 	 *  search
 	 *
-	 * @param array Array of EchoEvents
+	 * @param array $bundledEvents Array of EchoEvents
 	 * @return UUID|null Post ID, or null on failure
 	 */
 	public function getTopmostPostId( array $bundledEvents ) {
-		$postIds = array();
+		$postIds = [];
 		foreach ( $bundledEvents as $event ) {
 			$postId = $event->getExtraParam( 'post-id' );
 			if ( $postId instanceof UUID ) {
@@ -704,7 +798,7 @@ class NotificationController {
 	 * @param array $tree Tree structure
 	 * @return UUID First post ID found, or null on failure
 	 */
-	protected function getFirstPreorderDepthFirst( array $relevantPostIds, UUID $root, array $tree  ) {
+	protected function getFirstPreorderDepthFirst( array $relevantPostIds, UUID $root, array $tree ) {
 		$rootAlpha = $root->getAlphadecimal();
 
 		if ( isset( $relevantPostIds[$rootAlpha] ) ) {
@@ -714,11 +808,11 @@ class NotificationController {
 		if ( isset( $tree[$rootAlpha]['children'] ) ) {
 			$children = array_keys( $tree[$rootAlpha]['children'] );
 		} else {
-			$children = array();
+			$children = [];
 		}
 
 		foreach ( $children as $child ) {
-			$relevantPostId = $this->getFirstPreorderDepthFirst( $relevantPostIds, UUID::create( $child ), $tree  );
+			$relevantPostId = $this->getFirstPreorderDepthFirst( $relevantPostIds, UUID::create( $child ), $tree );
 			if ( $relevantPostId !== null ) {
 				return $relevantPostId;
 			}
@@ -746,7 +840,7 @@ class NotificationController {
 		$firstPath = reset( $rootPaths );
 		$pathLength = count( $firstPath );
 
-		for( $i = 0; $i < $pathLength; $i++ ) {
+		for ( $i = 0; $i < $pathLength; $i++ ) {
 			$possibleDeepestRoot = $firstPath[$i];
 
 			foreach ( $rootPaths as $path ) {
@@ -760,5 +854,64 @@ class NotificationController {
 		}
 
 		return $deepestRoot;
+	}
+
+	/**
+	 * Moderate or unmoderate Flow notifications associated with a topic.
+	 *
+	 * @param UUID $topicId
+	 * @param bool $moderated Whether the events need to be moderated or unmoderated
+	 * @throws FlowException
+	 */
+	public function moderateTopicNotifications( UUID $topicId, $moderated ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
+			// Nothing to do here.
+			return;
+		}
+
+		$title = Title::makeTitle( NS_TOPIC, ucfirst( $topicId->getAlphadecimal() ) );
+		$pageId = $title->getArticleID();
+		\DeferredUpdates::addCallableUpdate( function () use ( $pageId, $moderated ) {
+			$eventMapper = new EchoEventMapper();
+			$eventIds = $eventMapper->fetchIdsByPage( $pageId );
+
+			EchoModerationController::moderate( $eventIds, $moderated );
+		} );
+	}
+
+	/**
+	 * Moderate or unmoderate Flow notifications associated with a post within a topic.
+	 *
+	 * @param UUID $topicId
+	 * @param UUID $postId
+	 * @param bool $moderated Whether the events need to be moderated or unmoderated
+	 * @throws FlowException
+	 */
+	public function moderatePostNotifications( UUID $topicId, UUID $postId, $moderated ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
+			// Nothing to do here.
+			return;
+		}
+
+		$title = Title::makeTitle( NS_TOPIC, ucfirst( $topicId->getAlphadecimal() ) );
+		$pageId = $title->getArticleID();
+		\DeferredUpdates::addCallableUpdate( function () use ( $pageId, $postId, $moderated ) {
+			$eventMapper = new \EchoEventMapper();
+			$moderatedPostIdAlpha = $postId->getAlphadecimal();
+			$eventIds = [];
+
+			$events = $eventMapper->fetchByPage( $pageId );
+
+			foreach ( $events as $event ) {
+				/** @var UUID|string $eventPostId */
+				$eventPostId = $event->getExtraParam( 'post-id' );
+				$eventPostIdAlpha = $eventPostId instanceof UUID ? $eventPostId->getAlphadecimal() : $eventPostId;
+				if ( $eventPostIdAlpha === $moderatedPostIdAlpha ) {
+					$eventIds[] = $event->getId();
+				}
+			}
+
+			EchoModerationController::moderate( $eventIds, $moderated );
+		} );
 	}
 }

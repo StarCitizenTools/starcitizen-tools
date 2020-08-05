@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable LinkAnnotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -57,12 +57,18 @@ ve.ce.LinkAnnotation.static.getDescription = function ( model ) {
  */
 ve.ce.LinkAnnotation.static.makeNail = function ( type ) {
 	var nail = document.createElement( 'img' );
-	nail.src = ve.inputDebug ? ve.ce.nailImgDataUri : ve.ce.minImgDataUri;
+	// Support: Firefox
+	// Firefox <=37 misbehaves if we don't set an src: https://bugzilla.mozilla.org/show_bug.cgi?id=989012
+	// Firefox misbehaves if we don't set an src and there is no sizing at node creation time: https://bugzilla.mozilla.org/show_bug.cgi?id=1267906
+	// Setting an src in Chrome is slow, so only set it in affected versions of Firefox
+	if ( $.client.profile().layout === 'gecko' ) {
+		nail.src = ve.inputDebug ? ve.ce.nailImgDataUri : ve.ce.minImgDataUri;
+	}
 	// The following classes can be used here:
-	// ve-ce-nail-pre-open
-	// ve-ce-nail-pre-close
-	// ve-ce-nail-post-open
-	// ve-ce-nail-post-close
+	// * ve-ce-nail-pre-open
+	// * ve-ce-nail-pre-close
+	// * ve-ce-nail-post-open
+	// * ve-ce-nail-post-close
 	nail.className = 've-ce-nail ve-ce-nail-' + type + ( ve.inputDebug ? ' ve-ce-nail-debug' : '' );
 	return nail;
 };

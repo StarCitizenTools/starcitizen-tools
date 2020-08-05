@@ -2,14 +2,19 @@
 
 /**
  * @group large
+ * @covers Pbkdf2Password
+ * @covers Password
+ * @covers ParameterizedPassword
+ * @requires function hash_pbkdf2
  */
 class Pbkdf2PasswordTest extends PasswordTestCase {
 	protected function getTypeConfigs() {
 		return [ 'pbkdf2' => [
-			'class' => 'Pbkdf2Password',
+			'class' => Pbkdf2Password::class,
 			'algo' => 'sha256',
 			'cost' => '10000',
 			'length' => '128',
+			'use-hash-extension' => true,
 		] ];
 	}
 

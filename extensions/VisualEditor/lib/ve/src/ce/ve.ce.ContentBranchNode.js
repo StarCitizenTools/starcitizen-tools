@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable ContentBranchNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -15,7 +15,7 @@
  * @param {ve.dm.BranchNode} model Model to observe
  * @param {Object} [config] Configuration options
  */
-ve.ce.ContentBranchNode = function VeCeContentBranchNode( model, config ) {
+ve.ce.ContentBranchNode = function VeCeContentBranchNode() {
 	// Properties
 	this.lastTransaction = null;
 	// Parent constructor calls renderContents, so this must be set first
@@ -24,7 +24,7 @@ ve.ce.ContentBranchNode = function VeCeContentBranchNode( model, config ) {
 	this.unicorns = null;
 
 	// Parent constructor
-	ve.ce.BranchNode.call( this, model, config );
+	ve.ce.ContentBranchNode.super.apply( this, arguments );
 
 	this.onClickHandler = this.onClick.bind( this );
 
@@ -33,6 +33,7 @@ ve.ce.ContentBranchNode = function VeCeContentBranchNode( model, config ) {
 
 	// Events
 	this.connect( this, { childUpdate: 'onChildUpdate' } );
+	this.model.connect( this, { detach: 'onModelDetach' } );
 	// Some browsers allow clicking links inside contenteditable, such as in iOS Safari when the
 	// keyboard is closed
 	this.$element.on( 'click', this.onClickHandler );
@@ -123,6 +124,7 @@ ve.ce.ContentBranchNode.prototype.onClick = function ( e ) {
  * This is used to automatically render contents.
  *
  * @method
+ * @param {ve.dm.Transaction} transaction Transaction
  */
 ve.ce.ContentBranchNode.prototype.onChildUpdate = function ( transaction ) {
 	if ( transaction === null || transaction === this.lastTransaction ) {
@@ -137,7 +139,7 @@ ve.ce.ContentBranchNode.prototype.onChildUpdate = function ( transaction ) {
  */
 ve.ce.ContentBranchNode.prototype.onSplice = function ( index, howmany ) {
 	// Parent method
-	ve.ce.BranchNode.prototype.onSplice.apply( this, arguments );
+	ve.ce.ContentBranchNode.super.prototype.onSplice.apply( this, arguments );
 
 	// FIXME T126025: adjust slugNodes indexes if isRenderingLocked. This should be
 	// sufficient to keep this.slugNodes valid - only text changes can occur, which
@@ -159,13 +161,31 @@ ve.ce.ContentBranchNode.prototype.onSplice = function ( index, howmany ) {
  */
 ve.ce.ContentBranchNode.prototype.setupBlockSlugs = function () {
 	// Respect render lock
+	// TODO: Can this check be moved into the parent method?
 	if (
 		this.root instanceof ve.ce.DocumentNode &&
 		this.root.getSurface().isRenderingLocked()
 	) {
 		return;
 	}
-	ve.ce.BranchNode.prototype.setupBlockSlugs.apply( this, arguments );
+	// Parent method
+	ve.ce.ContentBranchNode.super.prototype.setupBlockSlugs.apply( this, arguments );
+};
+
+/**
+ * @inheritdoc
+ */
+ve.ce.ContentBranchNode.prototype.setupInlineSlugs = function () {
+	// Respect render lock
+	// TODO: Can this check be moved into the parent method?
+	if (
+		this.root instanceof ve.ce.DocumentNode &&
+		this.root.getSurface().isRenderingLocked()
+	) {
+		return;
+	}
+	// Parent method
+	ve.ce.ContentBranchNode.super.prototype.setupInlineSlugs.apply( this, arguments );
 };
 
 /**
@@ -190,7 +210,11 @@ ve.ce.ContentBranchNode.prototype.getRenderedContents = function () {
 		current = wrapper,
 		annotationStack = [],
 		nodeStack = [],
-		unicornInfo = {},
+		unicornInfo = {
+			hasCursor: false,
+			annotations: null,
+			unicorns: null
+		},
 		buffer = '',
 		node = this;
 
@@ -206,6 +230,7 @@ ve.ce.ContentBranchNode.prototype.getRenderedContents = function () {
 			buffer = '';
 		}
 		// Create a new DOM node and descend into it
+		annotation.store = store;
 		ann = ve.ce.annotationFactory.create( annotation.getType(), annotation, node );
 		ann.appendTo( current );
 		annotationStack.push( ann );
@@ -243,7 +268,7 @@ ve.ce.ContentBranchNode.prototype.getRenderedContents = function () {
 		dmSurface = ceSurface.getModel();
 		dmSelection = dmSurface.getTranslatedSelection();
 		if ( dmSelection instanceof ve.dm.LinearSelection && dmSelection.isCollapsed() ) {
-			// subtract 1 for CBN opening tag
+			// Subtract 1 for CBN opening tag
 			relCursor = dmSelection.getRange().start - this.getOffset() - 1;
 		}
 	}
@@ -260,8 +285,8 @@ ve.ce.ContentBranchNode.prototype.getRenderedContents = function () {
 			childLength = ( typeof htmlItem === 'string' ) ? 1 : 2;
 			if ( offset <= relCursor && relCursor < offset + childLength ) {
 				unicorn = [
-					{}, // unique object, for testing object equality later
-					dmSurface.getInsertionAnnotations().storeIndexes
+					{}, // Unique object, for testing object equality later
+					dmSurface.getInsertionAnnotations().storeHashes
 				];
 				annotatedHtml.splice( i, 0, unicorn );
 				break;
@@ -271,8 +296,8 @@ ve.ce.ContentBranchNode.prototype.getRenderedContents = function () {
 		// Special case for final position
 		if ( i === ilen && offset === relCursor ) {
 			unicorn = [
-				{}, // unique object, for testing object equality later
-				dmSurface.getInsertionAnnotations().storeIndexes
+				{}, // Unique object, for testing object equality later
+				dmSurface.getInsertionAnnotations().storeHashes
 			];
 			annotatedHtml.push( unicorn );
 		}
@@ -323,7 +348,7 @@ ve.ce.ContentBranchNode.prototype.getRenderedContents = function () {
 				unicornInfo.annotations = dmSurface.getInsertionAnnotations();
 				unicornInfo.unicorns = [ preUnicorn, postUnicorn ];
 			} else {
-				unicornInfo.unicornAnnotations = null;
+				unicornInfo.annotations = null;
 				unicornInfo.unicorns = null;
 			}
 		} else {
@@ -352,6 +377,12 @@ ve.ce.ContentBranchNode.prototype.getRenderedContents = function () {
 	return wrapper;
 };
 
+ve.ce.ContentBranchNode.prototype.onModelDetach = function () {
+	if ( this.root instanceof ve.ce.DocumentNode ) {
+		this.root.getSurface().setContentBranchNodeChanged();
+	}
+};
+
 /**
  * Render contents.
  *
@@ -374,7 +405,6 @@ ve.ce.ContentBranchNode.prototype.renderContents = function () {
 
 	rendered = this.getRenderedContents();
 	unicornInfo = rendered.unicornInfo;
-	delete rendered.unicornInfo;
 
 	// Return if unchanged. Test by building the new version and checking DOM-equality.
 	// However we have to normalize to cope with consecutive text nodes. We can't normalize
@@ -429,34 +459,34 @@ ve.ce.ContentBranchNode.prototype.renderContents = function () {
 			this.getRoot().getSurface().setNotUnicorningAll( this );
 		}
 	}
-	this.hasCursor = null;
 
 	// Add slugs
 	this.setupInlineSlugs();
 
 	// Highlight the node in debug mode
-	if ( ve.debug && !ve.test ) {
+	if ( ve.inputDebug ) {
 		this.$element.css( 'backgroundColor', '#eee' );
 		setTimeout( function () {
 			node.$element.css( 'backgroundColor', '' );
-		}, 500 );
+		}, 300 );
 	}
 
 	return true;
 };
 
 /**
- * Handle teardown event.
- *
- * @method
+ * @inheritdoc
  */
-ve.ce.ContentBranchNode.prototype.onTeardown = function () {
-	var ceSurface = this.getRoot().getSurface();
+ve.ce.ContentBranchNode.prototype.detach = function () {
+	if ( this.getRoot() ) {
+		// This should be true, as the root is removed in the parent detach
+		// method which hasn't run yet. However, just in case a node gets
+		// double-detached...
+		this.getRoot().getSurface().setNotUnicorning( this );
+	}
 
 	// Parent method
-	ve.ce.BranchNode.prototype.onTeardown.call( this );
-
-	ceSurface.setNotUnicorning( this );
+	ve.ce.ContentBranchNode.super.prototype.detach.call( this );
 };
 
 /**
@@ -464,4 +494,7 @@ ve.ce.ContentBranchNode.prototype.onTeardown = function () {
  */
 ve.ce.ContentBranchNode.prototype.destroy = function () {
 	this.$element.off( 'click', this.onClickHandler );
+
+	// Parent method
+	ve.ce.ContentBranchNode.super.prototype.destroy.call( this );
 };

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jon Harald Søby"
+		]
+	},
+	"loops-desc": "Parserfunksjoner for å utføre sløyfer",
+	"loops_max": "Maksimalt antall sløyfer har blitt utført",
+	"loops-limitreport-count-limited": "ExtLoops-antall",
+	"loops-limitreport-count-unlimited": "ExtLoops-antall",
+	"loops-config-countlimit": "Konfigurasjonsvariabel som definerer maksimalt antall tillatte løkker («-1» => ingen grense). «#forargs» og «#fornumargs» begrenses ikke av dette.",
+	"loops-config-enabledfunctions": "Gjør det mulig å definere hvilken funksjonalitet som gis av «Loops» som skal slås på for wikien. Hvis utvidelsen «Variables» ikke er installert vil «#loop», «#forargs» og «#fornumargs» slås av automatisk."
+}

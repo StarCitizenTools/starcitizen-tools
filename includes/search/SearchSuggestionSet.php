@@ -17,7 +17,6 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
- *
  */
 
 /**
@@ -107,6 +106,7 @@ class SearchSuggestionSet {
 
 	/**
 	 * Move the suggestion at index $key to the first position
+	 * @param string $key
 	 */
 	public function rescore( $key ) {
 		$removed = array_splice( $this->suggestions, $key, 1 );
@@ -181,7 +181,7 @@ class SearchSuggestionSet {
 	 */
 	public static function fromTitles( array $titles ) {
 		$score = count( $titles );
-		$suggestions = array_map( function( $title ) use ( &$score ) {
+		$suggestions = array_map( function ( $title ) use ( &$score ) {
 			return SearchSuggestion::fromTitle( $score--, $title );
 		}, $titles );
 		return new SearchSuggestionSet( $suggestions );
@@ -197,7 +197,7 @@ class SearchSuggestionSet {
 	 */
 	public static function fromStrings( array $titles ) {
 		$score = count( $titles );
-		$suggestions = array_map( function( $title ) use ( &$score ) {
+		$suggestions = array_map( function ( $title ) use ( &$score ) {
 			return SearchSuggestion::fromText( $score--, $title );
 		}, $titles );
 		return new SearchSuggestionSet( $suggestions );

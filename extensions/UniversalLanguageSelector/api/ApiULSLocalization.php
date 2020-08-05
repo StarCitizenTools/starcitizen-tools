@@ -14,8 +14,8 @@
  *
  * @file
  * @ingroup Extensions
- * @licence GNU General Public Licence 2.0 or later
- * @licence MIT License
+ * @license GPL-2.0-or-later
+ * @license MIT License
  */
 
 /**
@@ -30,7 +30,7 @@ class ApiULSLocalization extends ApiBase {
 		$params = $this->extractRequestParams();
 		$language = $params['language'];
 		if ( !Language::isValidCode( $language ) ) {
-			$this->dieUsage( 'Invalid language', 'invalidlanguage' );
+			$this->dieWithError( [ 'apierror-invalidlang', 'language' ], 'invalidlanguage' );
 		}
 		$contents = ULSJsonMessageLoader::getMessages( $language );
 		// Output the file's contents raw
@@ -55,7 +55,7 @@ class ApiULSLocalization extends ApiBase {
 	}
 
 	/**
-	 * @see ApiBase::getExamplesMessages()
+	 * @inheritDoc
 	 */
 	protected function getExamplesMessages() {
 		return [
@@ -66,8 +66,8 @@ class ApiULSLocalization extends ApiBase {
 		];
 	}
 
-	// Try to scare people away from using this externally
 	public function isInternal() {
+		// Try to scare people away from using this externally
 		return true;
 	}
 }

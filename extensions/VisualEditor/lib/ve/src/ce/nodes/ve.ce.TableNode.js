@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable TableNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -139,8 +139,8 @@ ve.ce.TableNode.prototype.onTableMouseDown = function ( e ) {
 		return;
 	}
 
-	// Right-click
-	if ( e.which === 3 ) {
+	// Right-click on a cell which isn't being edited
+	if ( e.which === OO.ui.MouseButtons.RIGHT && !this.getActiveCellNode() ) {
 		// Select the cell to the browser renders the correct context menu
 		ve.selectElement( cellNode.$element[ 0 ] );
 		setTimeout( function () {
@@ -192,7 +192,7 @@ ve.ce.TableNode.prototype.onTableMouseDown = function ( e ) {
  * @return {ve.ce.TableCellNode|null} Table cell node
  */
 ve.ce.TableNode.prototype.getCellNodeFromEvent = function ( e ) {
-	var touch, cellNode;
+	var touch;
 
 	// 'touchmove' doesn't give a correct e.target, so calculate it from coordinates
 	if ( e.type === 'touchstart' && e.originalEvent.touches.length > 1 ) {
@@ -205,14 +205,6 @@ ve.ce.TableNode.prototype.getCellNodeFromEvent = function ( e ) {
 		}
 		touch = e.originalEvent.touches[ 0 ];
 		return this.getCellNodeFromPoint( touch.clientX, touch.clientY );
-	} else if ( OO.ui.contains( this.$overlay[ 0 ], e.target, true ) ) {
-		// Support: IE<=10
-		// Browsers which don't support pointer-events:none will still fire events
-		// on the overlay. Hide the overlay and get the target from the event coords.
-		this.$overlay.addClass( 'oo-ui-element-hidden' );
-		cellNode = this.getCellNodeFromPoint( e.clientX, e.clientY );
-		this.$overlay.removeClass( 'oo-ui-element-hidden' );
-		return cellNode;
 	} else {
 		return this.getNearestCellNode( e.target );
 	}
@@ -320,10 +312,12 @@ ve.ce.TableNode.prototype.setEditing = function ( isEditing, noSelect ) {
 				surfaceModel.setLinearSelection( new ve.Range( offset ) );
 			}
 		}
-	} else if ( ( activeCellNode = this.getActiveCellNode() ) ) {
-		activeCellNode.setEditing( false );
-		if ( !noSelect ) {
-			surfaceModel.setSelection( this.editingFragment.getSelection() );
+	} else {
+		if ( ( activeCellNode = this.getActiveCellNode() ) ) {
+			activeCellNode.setEditing( false );
+			if ( !noSelect ) {
+				surfaceModel.setSelection( this.editingFragment.getSelection() );
+			}
 		}
 		this.editingFragment = null;
 	}
@@ -340,12 +334,6 @@ ve.ce.TableNode.prototype.setEditing = function ( isEditing, noSelect ) {
 		this.$element.prop( 'contentEditable', isEditing.toString() );
 	}
 	this.$overlay.toggleClass( 've-ce-tableNodeOverlay-editing', isEditing );
-	// Support: IE<=10
-	// If the browser doesn't support pointer-events:none, hide the selection boxes.
-	if ( !this.surface.supportsPointerEvents() ) {
-		this.$selectionBox.toggleClass( 'oo-ui-element-hidden', isEditing );
-		this.$selectionBoxAnchor.toggleClass( 'oo-ui-element-hidden', isEditing );
-	}
 };
 
 /**
@@ -356,7 +344,8 @@ ve.ce.TableNode.prototype.setEditing = function ( isEditing, noSelect ) {
 ve.ce.TableNode.prototype.onSurfaceModelSelect = function ( selection ) {
 	// The table is active if there is a linear selection inside a cell being edited
 	// or a table selection matching this table.
-	var active = (
+	var active =
+		(
 			this.editingFragment !== null &&
 			selection instanceof ve.dm.LinearSelection &&
 			this.editingFragment.getSelection().getRanges()[ 0 ].containsRange( selection.getRange() )
@@ -375,7 +364,10 @@ ve.ce.TableNode.prototype.onSurfaceModelSelect = function ( selection ) {
 		}
 		// Ignore update the overlay if the table selection changed, i.e. not an in-cell selection change
 		if ( selection instanceof ve.dm.TableSelection ) {
-			this.updateOverlayDebounced( true  );
+			if ( this.editingFragment ) {
+				this.setEditing( false, true );
+			}
+			this.updateOverlayDebounced( true );
 		}
 	} else if ( !active && this.active ) {
 		this.$overlay.addClass( 'oo-ui-element-hidden' );
@@ -471,23 +463,13 @@ ve.ce.TableNode.prototype.updateOverlay = function ( selectionChanged ) {
 		left: tableOffset.left - surfaceOffset.left,
 		width: tableOffset.width
 	} );
-	this.colContext.$element.css( {
-		left: selectionOffset.left
-	} );
-	this.colContext.indicator.$element.css( {
+	this.colContext.icon.$element.css( {
+		left: selectionOffset.left,
 		width: selectionOffset.width
 	} );
-	this.colContext.popup.$element.css( {
-		'margin-left': selectionOffset.width / 2
-	} );
-	this.rowContext.$element.css( {
-		top: selectionOffset.top
-	} );
-	this.rowContext.indicator.$element.css( {
+	this.rowContext.icon.$element.css( {
+		top: selectionOffset.top,
 		height: selectionOffset.height
-	} );
-	this.rowContext.popup.$element.css( {
-		'margin-top': selectionOffset.height / 2
 	} );
 
 	// Classes

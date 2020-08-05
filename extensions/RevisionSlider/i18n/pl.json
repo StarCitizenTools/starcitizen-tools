@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps",
+			"Leszek Manicki (WMDE)",
+			"Macofe",
+			"Tar Lócesilion",
+			"Doctore",
+			"Sethakill",
+			"Lebiega",
+			"Woytecr"
+		]
+	},
+	"revisionslider": "Suwak wersji",
+	"revisionslider-preference-disable": "Nie pokazuj Suwaka Wersji",
+	"revisionslider-desc": "Pokazuje suwak, pozwalający wybierać i porównywać wersje zmian na stronie",
+	"revisionslider-toggle-label": "Przeglądaj historię",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|bajt|bajty|bajtów}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bajt|bajty|bajtów}}",
+	"revisionslider-label-date": "Data",
+	"revisionslider-label-page-size": "Rozmiar strony",
+	"revisionslider-label-change-size": "Wielkość zmiany",
+	"revisionslider-label-comment": "Komentarz",
+	"revisionslider-label-username": "Nazwa {{GENDER:$1|użytkownika|użytkowniczki}}",
+	"revisionslider-minoredit": "To jest drobna zmiana",
+	"revisionslider-loading-failed": "Nie udało się uruchomić suwaka wersji.",
+	"revisionslider-toggle-title-expand": "Otwórz suwak wersji",
+	"revisionslider-toggle-title-collapse": "Zwiń suwak wersji",
+	"revisionslider-turn-on-auto-expand-title": "Zawsze rozwijaj suwak wersji",
+	"revisionslider-turn-off-auto-expand-title": "Nie rozwijaj suwaka wersji automatycznie",
+	"revisionslider-arrow-tooltip-newer": "Zobacz nowsze wersje",
+	"revisionslider-arrow-tooltip-older": "Zobacz starsze wersje",
+	"revisionslider-show-help-tooltip": "Pokaż tekst pomocy",
+	"revisionslider-help-dialog-slide1": "Suwak wersji pomaga nawigować i porównywać zmiany wykonane na stronie. Został opracowany [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider na prośbę] niemieckojęzycznej społeczności. Będziemy wdzięczni za opinie na [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider stronie dyskusji].",
+	"revisionslider-help-dialog-slide2": "Każdy słupek odpowiada wersji strony. Słupki na górze pokazują wzrost rozmiaru strony, słupki na dole pokazują wartości malejące. Na ilustracji wersja 1 oznacza dodaną zawartość, wersja 2 - usuniętą.",
+	"revisionslider-help-dialog-slide4": "Użyj strzałek do przodu i do tyłu, aby poruszać się po historii zmian wersji i wyświetlać nowsze i starsze zmiany.",
+	"revisionslider-tutorial": "Instrukcja obsługi suwaka wersji",
+	"revisionslider-previous-dialog": "Poprzedni",
+	"revisionslider-next-dialog": "Następny",
+	"revisionslider-close-dialog": "Zamknij"
+}

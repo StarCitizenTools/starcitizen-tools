@@ -7,7 +7,8 @@
 			"Banjo",
 			"Fisterraeomar",
 			"Elisardojm",
-			"Macofe"
+			"Macofe",
+			"McDutchie"
 		]
 	},
 	"checkuser-summary": "Esta ferramenta analiza os cambios para recuperar os enderezos IP utilizados por un usuario ou mostrar as edicións ou os datos de usuario dun enderezo IP.\nOs usuarios e as edicións dun cliente IP poden recuperarse a través de cabeceiras XFF, engadindo o sufixo \"/xff\" ao enderezo IP. IPv4 (CIDR $1-32) e IPv6 (CIDR $2-128) están soportados.\nNon se devolverán máis de 5.000 edicións por motivos de rendemento.\nUse isto de acordo coas políticas.",
@@ -43,6 +44,8 @@
 	"checkuser-nomatch": "Non se atoparon coincidencias.",
 	"checkuser-nomatch-edits": "Non se atoparon coincidencias.\nA última edición foi feita o $1 ás $2.",
 	"checkuser-check": "Comprobar",
+	"checkuser-check-this-user": "Verificar este usuario",
+	"checkuser-recent-checks": "Verificacións recentes para este usuario",
 	"checkuser-log-fail": "Non é posible engadir unha entrada no rexistro",
 	"checkuser-nolog": "Non se atopou ningún ficheiro de rexistro.",
 	"checkuser-blocked": "Bloqueado",
@@ -61,6 +64,7 @@
 	"checkuser-block-failure": "'''Non hai ningún usuario bloqueado.'''",
 	"checkuser-block-limit": "Hai seleccionados demasiados usuarios.",
 	"checkuser-block-noreason": "Debe dar unha razón para os bloqueos.",
+	"checkuser-centralauth-multilock": "Bloquear contas múltiples seleccionadas",
 	"checkuser-noreason": "Debe dar unha razón para esta pescuda.",
 	"checkuser-accounts": "{{PLURAL:$1|Unha nova conta|$1 novas contas}}",
 	"checkuser-too-many": "Hai demasiados resultados (segundo a estimación da pescuda), restrinxa o CIDR.\nAquí están os enderezos IP usados (máximo de 5.000, ordenados por enderezo):",
@@ -88,6 +92,7 @@
 	"group-checkuser.css": "/* O CSS que se coloque aquí afectará soamente aos verificadores de usuarios */",
 	"group-checkuser.js": "/* O JS que se coloque aquí afectará soamente aos verificadores de usuarios */",
 	"apihelp-query+checkuser-description": "Comprobar que enderezos IP son empregados por un usuario concreto ou que nomes de usuario son empregados por un IP específico.",
+	"apihelp-query+checkuser-summary": "Comprobar que enderezos IP son empregados por un usuario concreto ou que nomes de usuario son empregados por un IP específico.",
 	"apihelp-query+checkuser-param-request": "Tipo da petición CheckUser:\n;userips: Retornar o enderezo IP do usuario obxetivo.\n;edits: Retornar os cambios do enderezo IP ou rango obxetivo.\n;ipusers: Retornar os usuarios do enderezo IP ou rango obxetivo.",
 	"apihelp-query+checkuser-param-target": "Nome de usuario, dirección IP, ou rango CIDR a comprobar.",
 	"apihelp-query+checkuser-param-reason": "Motivo para a comprobación.",
@@ -97,11 +102,15 @@
 	"apihelp-query+checkuser-example-1": "Comprobar enderezos IP para [[User:Example]]",
 	"apihelp-query+checkuser-example-2": "Comprobar as edicións de 192.0.2.0/24",
 	"apihelp-query+checkuserlog-description": "Retornar entradas do rexistro de CheckUser",
+	"apihelp-query+checkuserlog-summary": "Retornar entradas do rexistro de CheckUser",
 	"apihelp-query+checkuserlog-param-user": "Nome de usuario do CheckUser.",
 	"apihelp-query+checkuserlog-param-target": "Usuario comprobado, enderezo IP, ou rango CIDR.",
 	"apihelp-query+checkuserlog-param-limit": "Límite de filas.",
 	"apihelp-query+checkuserlog-param-from": "Selo de tempo no que comezar a enumeración.",
 	"apihelp-query+checkuserlog-param-to": "Selo de tempo para rematar a enumeración.",
 	"apihelp-query+checkuserlog-example-1": "Amosar as comprobacións de [[User:Example]]",
-	"apihelp-query+checkuserlog-example-2": "Amosar as comprobacións de 192.0.2.0/24 despois de 2011-10-15T23:00:00Z"
+	"apihelp-query+checkuserlog-example-2": "Amosar as comprobacións de 192.0.2.0/24 despois de 2011-10-15T23:00:00Z",
+	"apierror-checkuser-missingsummary": "Debes definir un motivo para comprobar.",
+	"apierror-checkuser-timelimit": "Debe usar un límite de tempo correcto (como \"-2 weeks\" ou \"2 weeks ago\").",
+	"apierror-checkuser-invalidmode": "Modo de petición non válido"
 }

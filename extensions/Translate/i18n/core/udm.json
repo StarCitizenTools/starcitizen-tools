@@ -1,10 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Kaganer"
+			"Kaganer",
+			"Irus",
+			"Wadorgurt"
 		]
 	},
 	"translate-statsf-submit": "Эскерон",
 	"translate-sidebar-alltrans": "Мукет кылъёсын",
+	"languagestats": "Кыл статистика",
+	"translate-documentation-language": "Ивортонлэн документациез",
+	"translate-msggroupselector-search-all": "Ваньзэ",
+	"tux-tab-all": "Ваньзэ",
 	"tux-editor-in-other-languages": "Мукет кылъёсын"
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface IndentationAction class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,9 +13,9 @@
  * @constructor
  * @param {ve.ui.Surface} surface Surface to act on
  */
-ve.ui.IndentationAction = function VeUiIndentationAction( surface ) {
+ve.ui.IndentationAction = function VeUiIndentationAction() {
 	// Parent constructor
-	ve.ui.Action.call( this, surface );
+	ve.ui.IndentationAction.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -38,8 +38,6 @@ ve.ui.IndentationAction.static.methods = [ 'increase', 'decrease' ];
 
 /**
  * Indent content.
- *
- * TODO: Refactor functionality into {ve.dm.SurfaceFragment}.
  *
  * @method
  * @return {boolean} Indentation increase occurred
@@ -81,8 +79,6 @@ ve.ui.IndentationAction.prototype.increase = function () {
 
 /**
  * Unindent content.
- *
- * TODO: Refactor functionality into {ve.dm.SurfaceFragment}.
  *
  * @method
  * @return {boolean} Indentation decrease occurred
@@ -130,23 +126,16 @@ ve.ui.IndentationAction.prototype.decrease = function () {
 /**
  * Indent a list item.
  *
- * TODO: Refactor functionality into {ve.dm.SurfaceFragment}.
- *
  * @method
  * @param {ve.dm.ListItemNode} listItem List item to indent
  * @throws {Error} listItem must be a ve.dm.ListItemNode
  */
 ve.ui.IndentationAction.prototype.indentListItem = function ( listItem ) {
-	var tx, range,
+	var listType, listItemRange,
+		mergeStart, mergeEnd,
 		surfaceModel = this.surface.getModel(),
 		documentModel = surfaceModel.getDocument(),
-		selection = surfaceModel.getSelection(),
-		listType,
-		listItemRange,
-		innerListItemRange,
-		outerListItemRange,
-		mergeStart,
-		mergeEnd;
+		fragment = surfaceModel.getFragment();
 
 	if ( !( listItem instanceof ve.dm.ListItemNode ) ) {
 		throw new Error( 'listItem must be a ve.dm.ListItemNode' );
@@ -160,13 +149,12 @@ ve.ui.IndentationAction.prototype.indentListItem = function ( listItem ) {
 	 * 3. If this results in the wrapped list being preceded by another list,
 	 *    merge those lists.
 	 */
-	if ( !( selection instanceof ve.dm.LinearSelection ) ) {
+	if ( !( fragment.getSelection() instanceof ve.dm.LinearSelection ) ) {
 		return;
 	}
 
 	listType = listItem.getParent().getAttribute( 'style' );
 	listItemRange = listItem.getOuterRange();
-	range = selection.getRange();
 
 	// CAREFUL: after initializing the variables above, we cannot use the model tree!
 	// The first transaction will cause rebuilds so the nodes we have references to now
@@ -174,18 +162,8 @@ ve.ui.IndentationAction.prototype.indentListItem = function ( listItem ) {
 	// documentModel.data to find out things about the current structure.
 
 	// (1) Wrap the listItem in a list and a listItem
-	tx = ve.dm.Transaction.newFromWrap( documentModel,
-		listItemRange,
-		[],
-		[ { type: 'listItem' }, { type: 'list', attributes: { style: listType } } ],
-		[],
-		[]
-	);
-	surfaceModel.change( tx );
-	range = tx.translateRange( range );
-	// tx.translateRange( innerListItemRange ) doesn't do what we want
-	innerListItemRange = listItemRange.translate( 2 );
-	outerListItemRange = new ve.Range( listItemRange.start, listItemRange.end + 2 );
+	surfaceModel.getLinearFragment( listItemRange, true )
+		.wrapNodes( [ { type: 'listItem' }, { type: 'list', attributes: { style: listType } } ] );
 
 	// (2) Merge the listItem into the previous listItem (if there is one)
 	if (
@@ -202,16 +180,12 @@ ve.ui.IndentationAction.prototype.indentListItem = function ( listItem ) {
 			mergeStart--;
 			mergeEnd++;
 		}
-		tx = ve.dm.Transaction.newFromRemoval( documentModel, new ve.Range( mergeStart, mergeEnd ) );
-		surfaceModel.change( tx );
-		range = tx.translateRange( range );
-		innerListItemRange = tx.translateRange( innerListItemRange );
-		outerListItemRange = tx.translateRange( outerListItemRange );
+		surfaceModel.getLinearFragment( new ve.Range( mergeStart, mergeEnd ), true ).removeContent();
 	}
 
 	// TODO If this listItem has a child list, split&unwrap it
 
-	surfaceModel.setLinearSelection( range );
+	fragment.select();
 };
 
 /**
@@ -259,7 +233,7 @@ ve.ui.IndentationAction.prototype.unindentListItem = function ( listItem ) {
 	// (1) Split the listItem into a separate list
 	if ( documentModel.data.getData( listItemRange.start - 1 ).type !== 'list' ) {
 		// (1a) listItem is not the first child, split the list before listItem
-		tx = ve.dm.Transaction.newFromInsertion( documentModel, listItemRange.start,
+		tx = ve.dm.TransactionBuilder.static.newFromInsertion( documentModel, listItemRange.start,
 			[ { type: '/list' }, listElement ]
 		);
 		surfaceModel.change( tx );
@@ -268,7 +242,7 @@ ve.ui.IndentationAction.prototype.unindentListItem = function ( listItem ) {
 	}
 	if ( documentModel.data.getData( listItemRange.end ).type !== '/list' ) {
 		// (1b) listItem is not the last child, split the list after listItem
-		tx = ve.dm.Transaction.newFromInsertion( documentModel, listItemRange.end,
+		tx = ve.dm.TransactionBuilder.static.newFromInsertion( documentModel, listItemRange.end,
 			[ { type: '/list' }, listElement ]
 		);
 		surfaceModel.change( tx );
@@ -280,29 +254,16 @@ ve.ui.IndentationAction.prototype.unindentListItem = function ( listItem ) {
 		// The user is trying to unindent a list item that's not nested
 		// (2) Unwrap both the list and the listItem, dumping the listItem's contents
 		// into the list's parent
-		tx = ve.dm.Transaction.newFromWrap( documentModel,
-			new ve.Range( listItemRange.start + 1, listItemRange.end - 1 ),
-			[ { type: 'list' }, { type: 'listItem' } ],
-			[],
-			[],
-			[]
-		);
-		surfaceModel.change( tx );
+		surfaceModel.getLinearFragment( new ve.Range( listItemRange.start + 1, listItemRange.end - 1 ), true )
+			.unwrapNodes( 2 );
 
-		// ensure paragraphs are not wrapper paragraphs now
+		// Ensure paragraphs are not generated paragraphs now
 		// that they are not in a list
 		children = fragment.getSiblingNodes();
 		for ( i = 0, length = children.length; i < length; i++ ) {
 			child = children[ i ].node;
-			if (
-				child.type === 'paragraph' &&
-				child.element.internal &&
-				child.element.internal.generated === 'wrapper'
-			) {
-				delete child.element.internal.generated;
-				if ( ve.isEmptyObject( child.element.internal ) ) {
-					delete child.element.internal;
-				}
+			if ( child.type === 'paragraph' ) {
+				ve.deleteProp( child.element, 'internal', 'generated' );
 			}
 		}
 	} else {
@@ -310,7 +271,7 @@ ve.ui.IndentationAction.prototype.unindentListItem = function ( listItem ) {
 		// TODO factor common split logic somehow?
 		if ( documentModel.data.getData( splitListRange.start - 1 ).type !== 'listItem' ) {
 			// (3a) Split parentListItem before list
-			tx = ve.dm.Transaction.newFromInsertion( documentModel, splitListRange.start,
+			tx = ve.dm.TransactionBuilder.static.newFromInsertion( documentModel, splitListRange.start,
 				[ { type: '/listItem' }, { type: 'listItem' } ]
 			);
 			surfaceModel.change( tx );
@@ -319,7 +280,7 @@ ve.ui.IndentationAction.prototype.unindentListItem = function ( listItem ) {
 		}
 		if ( documentModel.data.getData( splitListRange.end ).type !== '/listItem' ) {
 			// (3b) Split parentListItem after list
-			tx = ve.dm.Transaction.newFromInsertion( documentModel, splitListRange.end,
+			tx = ve.dm.TransactionBuilder.static.newFromInsertion( documentModel, splitListRange.end,
 				[ { type: '/listItem' }, { type: 'listItem' } ]
 			);
 			surfaceModel.change( tx );
@@ -327,14 +288,8 @@ ve.ui.IndentationAction.prototype.unindentListItem = function ( listItem ) {
 		}
 
 		// (4) Unwrap the list and its containing listItem
-		tx = ve.dm.Transaction.newFromWrap( documentModel,
-			new ve.Range( splitListRange.start + 1, splitListRange.end - 1 ),
-			[ { type: 'listItem' }, { type: 'list' } ],
-			[],
-			[],
-			[]
-		);
-		surfaceModel.change( tx );
+		surfaceModel.getLinearFragment( new ve.Range( splitListRange.start + 1, splitListRange.end - 1 ), true )
+			.unwrapNodes( 2 );
 	}
 };
 

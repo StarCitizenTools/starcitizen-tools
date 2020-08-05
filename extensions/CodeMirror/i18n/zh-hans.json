@@ -5,6 +5,11 @@
 		]
 	},
 	"codemirror-desc": "在wiki文本编辑器中提供语法高亮显示",
-	"codemirror-enable-label": "启用CodeMirror（Syntaxhighlight）",
-	"codemirror-disable-label": "禁用CodeMirror（Syntaxhighlight）"
+	"codemirror-toggle-label": "语法高亮",
+	"codemirror-beta-title": "Wiki文本语法高亮",
+	"codemirror-beta-desc": "语法高亮通过使用颜色和阴影形象化地从链接、参考资料和模板的代码中分离页面文本，使编辑更容易。",
+	"codemirror-popup-label": "语法高亮",
+	"codemirror-popup-desc": "语法高亮通过在编辑的不同部分上色，帮助您更容易的区别它们。",
+	"codemirror-popup-btn-yes": "试一试",
+	"codemirror-popup-btn-no": "不用了，谢谢"
 }

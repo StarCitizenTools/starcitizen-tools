@@ -31,6 +31,21 @@
  */
 class MailAddress {
 	/**
+	 * @var string
+	 */
+	public $name;
+
+	/**
+	 * @var string
+	 */
+	public $realName;
+
+	/**
+	 * @var string
+	 */
+	public $address;
+
+	/**
 	 * @param string $address String with an email address, or a User object
 	 * @param string $name Human-readable name if a string address is given
 	 * @param string $realName Human-readable real name if a string address is given
@@ -73,8 +88,9 @@ class MailAddress {
 				global $wgEnotifUseRealName;
 				$name = ( $wgEnotifUseRealName && $this->realName !== '' ) ? $this->realName : $this->name;
 				$quoted = UserMailer::quotedPrintable( $name );
-				if ( strpos( $quoted, '.' ) !== false || strpos( $quoted, ',' ) !== false ) {
-					$quoted = '"' . $quoted . '"';
+				// Must only be quoted if string does not use =? encoding (T191931)
+				if ( $quoted === $name ) {
+					$quoted = '"' . addslashes( $quoted ) . '"';
 				}
 				return "$quoted <{$this->address}>";
 			} else {

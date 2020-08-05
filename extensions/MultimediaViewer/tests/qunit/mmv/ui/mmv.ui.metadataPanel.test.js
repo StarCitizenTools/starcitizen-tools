@@ -15,25 +15,27 @@
 
 	QUnit.module( 'mmv.ui.metadataPanel', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'The panel is emptied properly when necessary', thingsShouldBeEmptied.length + thingsShouldHaveEmptyClass.length, function ( assert ) {
+	QUnit.test( 'The panel is emptied properly when necessary', function ( assert ) {
 		var i,
 			$qf = $( '#qunit-fixture' ),
-			panel = new mw.mmv.ui.MetadataPanel( $qf, $( '<div>' ).appendTo( $qf ), window.localStorage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), window.localStorage ) );
+			panel = new mw.mmv.ui.MetadataPanel( $qf, $( '<div>' ).appendTo( $qf ), mw.storage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), mw.storage ) );
 
 		panel.empty();
 
+		assert.expect( thingsShouldBeEmptied.length + thingsShouldHaveEmptyClass.length );
+
 		for ( i = 0; i < thingsShouldBeEmptied.length; i++ ) {
-			assert.strictEqual( panel[thingsShouldBeEmptied[i]].text(), '', 'We successfully emptied the ' + thingsShouldBeEmptied[i] + ' element' );
+			assert.strictEqual( panel[ thingsShouldBeEmptied[ i ] ].text(), '', 'We successfully emptied the ' + thingsShouldBeEmptied[ i ] + ' element' );
 		}
 
 		for ( i = 0; i < thingsShouldHaveEmptyClass.length; i++ ) {
-			assert.strictEqual( panel[thingsShouldHaveEmptyClass[i]].hasClass( 'empty' ), true, 'We successfully applied the empty class to the ' + thingsShouldHaveEmptyClass[i] + ' element' );
+			assert.strictEqual( panel[ thingsShouldHaveEmptyClass[ i ] ].hasClass( 'empty' ), true, 'We successfully applied the empty class to the ' + thingsShouldHaveEmptyClass[ i ] + ' element' );
 		}
 	} );
 
-	QUnit.test( 'Setting location information works as expected', 6, function ( assert ) {
+	QUnit.test( 'Setting location information works as expected', function ( assert ) {
 		var $qf = $( '#qunit-fixture' ),
-			panel = new mw.mmv.ui.MetadataPanel( $qf, $( '<div>' ).appendTo( $qf ), window.localStorage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), window.localStorage ) ),
+			panel = new mw.mmv.ui.MetadataPanel( $qf, $( '<div>' ).appendTo( $qf ), mw.storage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), mw.storage ) ),
 			fileName = 'Foobar.jpg',
 			latitude = 12.3456789,
 			longitude = 98.7654321,
@@ -72,7 +74,7 @@
 
 		assert.strictEqual(
 			panel.$location.prop( 'href' ),
-			'http://tools.wmflabs.org/geohack/geohack.php?pagename=File:' + fileName + '&params=' + ( - latitude ) + '_S_' + ( - longitude ) + '_W_&language=en',
+			'http://tools.wmflabs.org/geohack/geohack.php?pagename=File:' + fileName + '&params=' + ( -latitude ) + '_S_' + ( -longitude ) + '_W_&language=en',
 			'Location URL is set as expected'
 		);
 
@@ -95,10 +97,10 @@
 		);
 	} );
 
-	QUnit.test( 'Setting image information works as expected', 17, function ( assert ) {
+	QUnit.test( 'Setting image information works as expected', function ( assert ) {
 		var creditPopupText,
 			$qf = $( '#qunit-fixture' ),
-			panel = new mw.mmv.ui.MetadataPanel( $qf, $( '<div>' ).appendTo( $qf ), window.localStorage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), window.localStorage ) ),
+			panel = new mw.mmv.ui.MetadataPanel( $qf, $( '<div>' ).appendTo( $qf ), mw.storage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), mw.storage ) ),
 			title = 'Foo bar',
 			image = {
 				filePageTitle: mw.Title.newFromText( 'File:' + title + '.jpg' )
@@ -113,9 +115,11 @@
 				getArticlePath: function () { return 'Foo'; },
 				isCommons: function () { return false; }
 			},
-			oldMoment = window.moment;
+			oldMoment = window.moment,
+			// custom clock will give MPP.formatDate some time to load moment.js
+			clock = this.sandbox.useFakeTimers();
 
-		/*window.moment = function ( date ) {
+		/* window.moment = function ( date ) {
 			// This has no effect for now, since writing this test revealed that our moment.js
 			// doesn't have any language configuration
 			return oldMoment( date ).lang( 'fr' );
@@ -142,6 +146,7 @@
 
 		panel.setImageInfo( image, imageData, repoData );
 		creditPopupText = panel.creditField.$element.attr( 'original-title' );
+		clock.tick( 10 );
 
 		assert.strictEqual( panel.$title.text(), title, 'Title is correctly set' );
 		assert.ok( !panel.$credit.hasClass( 'empty' ), 'Credit is not empty' );
@@ -157,43 +162,42 @@
 
 		imageData.creationDateTime = undefined;
 		panel.setImageInfo( image, imageData, repoData );
+		clock.tick( 10 );
 
 		assert.ok( panel.$datetime.text().indexOf( '25 August 2013' ) > 0, 'Correct date is displayed' );
 
 		window.moment = oldMoment;
+		clock.restore();
 	} );
 
-	QUnit.test( 'Setting permission information works as expected', 1, function ( assert ) {
+	QUnit.test( 'Setting permission information works as expected', function ( assert ) {
 		var $qf = $( '#qunit-fixture' ),
-			panel = new mw.mmv.ui.MetadataPanel( $qf, $( '<div>' ).appendTo( $qf ), window.localStorage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), window.localStorage ) );
+			panel = new mw.mmv.ui.MetadataPanel( $qf, $( '<div>' ).appendTo( $qf ), mw.storage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), mw.storage ) );
 
 		panel.setLicense( null, 'http://example.com' ); // make sure license is visible as it contains the permission
 		panel.setPermission( 'Look at me, I am a permission!' );
 		assert.ok( panel.$permissionLink.is( ':visible' ) );
 	} );
 
-	QUnit.test( 'Date formatting', 1, function ( assert ) {
+	QUnit.test( 'Date formatting', function ( assert ) {
 		var $qf = $( '#qunit-fixture' ),
-			panel = new mw.mmv.ui.MetadataPanel( $qf, $( '<div>' ).appendTo( $qf ), window.localStorage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), window.localStorage ) ),
+			panel = new mw.mmv.ui.MetadataPanel( $qf, $( '<div>' ).appendTo( $qf ), mw.storage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), mw.storage ) ),
 			date1 = 'Garbage',
 			promise = panel.formatDate( date1 );
 
-		QUnit.stop();
-
-		promise.then( function ( result ) {
+		return promise.then( function ( result ) {
 			assert.strictEqual( result, date1, 'Invalid date is correctly ignored' );
-			QUnit.start();
 		} );
 	} );
 
-	QUnit.test( 'About links', 3, function ( assert ) {
-		var panel,
-			$qf = $( '#qunit-fixture' ),
+	QUnit.test( 'About links', function ( assert ) {
+		var $qf = $( '#qunit-fixture' ),
 			oldWgMediaViewerIsInBeta = mw.config.get( 'wgMediaViewerIsInBeta' );
 
 		this.sandbox.stub( mw.user, 'isAnon' );
 		mw.config.set( 'wgMediaViewerIsInBeta', false );
-		panel = new mw.mmv.ui.MetadataPanel( $qf.empty(), $( '<div>' ).appendTo( $qf ), window.localStorage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), window.localStorage ) );
+		// eslint-disable-next-line no-new
+		new mw.mmv.ui.MetadataPanel( $qf.empty(), $( '<div>' ).appendTo( $qf ), mw.storage, new mw.mmv.Config( {}, mw.config, mw.user, new mw.Api(), mw.storage ) );
 
 		assert.strictEqual( $qf.find( '.mw-mmv-about-link' ).length, 1, 'About link is created.' );
 		assert.strictEqual( $qf.find( '.mw-mmv-discuss-link' ).length, 1, 'Discuss link is created.' );

@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2009-2013 Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -15,14 +15,14 @@
  * @ingroup PageTranslation
  */
 class TPParse {
-	/// \type{Title} Title of the page.
+	/** @var Title Title of the page. */
 	protected $title;
 
-	/** \arrayof{String,TPSection} Parsed sections indexed with placeholder.
+	/** @var TPSection[] Parsed sections indexed with placeholder.
 	 * @todo Encapsulate
 	 */
-	public $sections = array();
-	/** \string Page source with content replaced with placeholders.
+	public $sections = [];
+	/** @var string Page source with content replaced with placeholders.
 	 * @todo Encapsulate
 	 */
 	public $template = null;
@@ -38,7 +38,7 @@ class TPParse {
 
 	/**
 	 * Returns the number of sections in this page.
-	 * @return \int
+	 * @return int
 	 */
 	public function countSections() {
 		return count( $this->sections );
@@ -47,7 +47,7 @@ class TPParse {
 	/**
 	 * Returns the page template where translatable content is replaced with
 	 * placeholders.
-	 * @return \string
+	 * @return string
 	 */
 	public function getTemplate() {
 		return $this->template;
@@ -57,7 +57,7 @@ class TPParse {
 	 * Returns the page template where the ugly placeholders are replaced with
 	 * section markers. Sections which previously had no number will get one
 	 * assigned now.
-	 * @return \string
+	 * @return string
 	 */
 	public function getTemplatePretty() {
 		$text = $this->template;
@@ -72,7 +72,7 @@ class TPParse {
 	/**
 	 * Gets the sections and assigns section id for new sections
 	 * @param int $highest The largest used integer id (Since 2012-08-02)
-	 * @return array array( string => TPSection, ... )
+	 * @return TPSection[] array( string => TPSection, ... )
 	 */
 	public function getSectionsForSave( $highest = 0 ) {
 		$this->loadFromDatabase();
@@ -108,7 +108,7 @@ class TPParse {
 
 	/**
 	 * Returns list of deleted sections.
-	 * @return array List of sections indexed by id. array( string => TPsection, ... )
+	 * @return TPSection[] List of sections indexed by id. array( string => TPsection, ... )
 	 */
 	public function getDeletedSections() {
 		$sections = $this->getSectionsForSave();
@@ -131,12 +131,12 @@ class TPParse {
 			return;
 		}
 
-		$this->dbSections = array();
+		$this->dbSections = [];
 
 		$db = TranslateUtils::getSafeReadDB();
 		$tables = 'translate_sections';
-		$vars = array( 'trs_key', 'trs_text' );
-		$conds = array( 'trs_page' => $this->title->getArticleID() );
+		$vars = [ 'trs_key', 'trs_text' ];
+		$conds = [ 'trs_page' => $this->title->getArticleID() ];
 
 		$res = $db->select( $tables, $vars, $conds, __METHOD__ );
 		foreach ( $res as $r ) {
@@ -164,13 +164,15 @@ class TPParse {
 	}
 
 	/**
-	 * Returns translation page with all possible translations replaced in
-	 * and ugly translation tags removed.
+	 * Returns translation page with all possible translations replaced in, ugly
+	 * translation tags removed and outdated translation marked with a class
+	 * mw-translate-fuzzy.
 	 *
 	 * @param MessageCollection $collection Collection that holds translated messages.
+	 * @param bool $showOutdated Whether to show outdated sections, wrapped in a HTML class.
 	 * @return string Whole page as wikitext.
 	 */
-	public function getTranslationPageText( $collection ) {
+	public function getTranslationPageText( $collection, $showOutdated = false ) {
 		$text = $this->template; // The source
 
 		// For finding the messages
@@ -178,18 +180,35 @@ class TPParse {
 
 		if ( $collection instanceof MessageCollection ) {
 			$collection->loadTranslations();
-			$collection->filter( 'translated', false );
+			if ( $showOutdated ) {
+				$collection->filter( 'hastranslation', false );
+			} else {
+				$collection->filter( 'translated', false );
+			}
 		}
 
 		foreach ( $this->sections as $ph => $s ) {
 			$sectiontext = null;
 
 			if ( isset( $collection[$prefix . $s->id] ) ) {
-				/**
-				 * @var TMessage $msg
-				 */
+				/** @var TMessage $msg */
 				$msg = $collection[$prefix . $s->id];
+				/** @var string|null */
 				$sectiontext = $msg->translation();
+
+				// If translation is fuzzy, $sectiontext must be a string
+				if ( $msg->hasTag( 'fuzzy' ) ) {
+					// We do not ever want to show explicit fuzzy marks in the rendered pages
+					$sectiontext = str_replace( TRANSLATE_FUZZY, '', $sectiontext );
+
+					if ( $s->isInline() ) {
+						$sectiontext = "<span class=\"mw-translate-fuzzy\">$sectiontext</span>";
+					} else {
+						// We add new lines around the text to avoid disturbing any mark-up that
+						// has special handling on line start, such as lists.
+						$sectiontext = "<div class=\"mw-translate-fuzzy\">\n$sectiontext\n</div>";
+					}
+				}
 			}
 
 			// Use the original text if no translation is available.
@@ -208,11 +227,11 @@ class TPParse {
 			$text = str_replace( $ph, $sectiontext, $text );
 		}
 
-		$nph = array();
+		$nph = [];
 		$text = TranslatablePage::armourNowiki( $nph, $text );
 
 		// Remove translation markup from the template to produce final text
-		$cb = array( __CLASS__, 'replaceTagCb' );
+		$cb = [ __CLASS__, 'replaceTagCb' ];
 		$text = preg_replace_callback( '~(<translate>)(.*)(</translate>)~sU', $cb, $text );
 		$text = TranslatablePage::unArmourNowiki( $nph, $text );
 
@@ -222,7 +241,7 @@ class TPParse {
 	/**
 	 * Chops of trailing or preceeding whitespace intelligently to avoid
 	 * build up of unintented whitespace.
-	 * @param array $matches
+	 * @param string[] $matches
 	 * @return string
 	 */
 	protected static function replaceTagCb( $matches ) {

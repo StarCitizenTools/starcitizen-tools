@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2010-2013 Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -28,13 +28,13 @@ class RemoteTTMServerWebService extends TranslationWebService {
 	}
 
 	protected function getQuery( $text, $from, $to ) {
-		$params = array(
+		$params = [
 			'format' => 'json',
 			'action' => 'ttmserver',
 			'sourcelanguage' => $from,
 			'targetlanguage' => $to,
 			'text' => $text
-		);
+		];
 
 		if ( isset( $this->config['service'] ) ) {
 			$params['service'] = $this->config['service'];
@@ -42,7 +42,7 @@ class RemoteTTMServerWebService extends TranslationWebService {
 
 		return TranslationQuery::factory( $this->config['url'] )
 			->timeout( $this->config['timeout'] )
-			->queryParamaters( $params );
+			->queryParameters( $params );
 	}
 
 	protected function parseResponse( TranslationQueryResponse $reply ) {

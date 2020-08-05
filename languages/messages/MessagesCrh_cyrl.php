@@ -1,5 +1,5 @@
 <?php
-/** Crimean Turkish (Cyrillic script) (къырымтатарджа (Кирилл)‎)
+/** Crimean Tatar (Cyrillic script) (къырымтатарджа (Кирилл)‎)
  *
  * To improve a translation please visit https://translatewiki.net
  *
@@ -99,4 +99,3 @@ $dateFormats = [
 $separatorTransformTable = [ ','  => '.', '.' => ',' ];
 $linkTrail = '/^([a-zâçğıñöşüа-яё“»]+)(.*)$/sDu';
 $linkPrefixCharset = 'a-zâçğıñöşüA-ZÂÇĞİÑÖŞÜa-яёА-ЯЁ«„';
-

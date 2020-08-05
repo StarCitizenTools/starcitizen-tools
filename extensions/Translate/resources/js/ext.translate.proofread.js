@@ -1,5 +1,4 @@
-/*global alert: false*/
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	/**
@@ -11,10 +10,16 @@
 	 * Example usage:
 	 *
 	 * $( 'div.proofread' ).proofread( {
-	 *	message: messageObject, // Mandatory message object
-	 *	sourcelangcode: 'en', // Mandatory source language code
-	 *	targetlangcode: 'hi' // Mandatory target language code
+	 *     message: messageObject, // Mandatory message object
+	 *     sourcelangcode: 'en', // Mandatory source language code
+	 *     targetlangcode: 'hi' // Mandatory target language code
 	 * } );
+	 *
+	 * @param {Element} element
+	 * @param {Object} options
+	 * @param {Object} options.message
+	 * @param {string} options.sourcelangcode Language code.
+	 * @param {string} options.targetlangcode Language code.
 	 */
 	function Proofread( element, options ) {
 		this.$message = $( element );
@@ -71,15 +76,17 @@
 				translatedBySelf, proofreadBySelf;
 
 			// List of all reviewers
-			reviewers = $( this.message.properties.reviewers );
+			reviewers = this.message.properties.reviewers || [];
 			// The id of the current user, converted to string as the are in reviewers
 			userId = String( mw.config.get( 'wgUserId' ) );
 			// List of all reviewers excluding the current user.
-			otherReviewers = reviewers.not( [ userId ] );
+			otherReviewers = reviewers.filter( function ( element ) {
+				return element !== userId;
+			} );
 			/* Whether the current user if the last translator of this message.
 			 * Accepting own translations is prohibited. */
 			translatedBySelf = ( this.message.properties[ 'last-translator-text' ] === mw.user.getName() );
-			proofreadBySelf = $.inArray( userId, reviewers ) > -1;
+			proofreadBySelf = reviewers.indexOf( userId ) > -1;
 
 			sourceLangCode = this.options.sourcelangcode;
 			sourceLangDir = $.uls.data.getDir( sourceLangCode );
@@ -90,8 +97,7 @@
 				.attr( 'title', mw.msg( 'tux-proofread-action-tooltip' ) )
 				.addClass(
 					'tux-proofread-action ' + this.message.properties.status + ' ' + ( proofreadBySelf ? 'accepted' : '' )
-				)
-				.tipsy( { gravity: 's', delayIn: 1000, className: 'translate-tipsy' } );
+				);
 
 			$proofreadEdit = $( '<div>' )
 				.addClass( 'tux-proofread-edit' )
@@ -146,8 +152,7 @@
 								$proofreadEdit
 							)
 					)
-			)
-			.addClass( this.message.properties.status );
+			).addClass( this.message.properties.status );
 
 			if ( !translatedBySelf && !proofreadBySelf ) {
 				// This will get removed later if any of various other reasons prevent it
@@ -184,7 +189,6 @@
 					.append( $( '<div>' )
 						.addClass( 'translated-by-self' )
 						.attr( 'title', mw.msg( 'tux-proofread-translated-by-self' ) )
-						.tipsy( { gravity: 'e', className: 'translate-tipsy' } )
 					);
 			}
 		},
@@ -206,8 +210,7 @@
 				params.assert = 'user';
 			}
 
-			// Change to csrf when support for MW 1.25 is dropped
-			api.postWithToken( 'edit', params ).done( function () {
+			api.postWithToken( 'csrf', params ).done( function () {
 				$message.find( '.tux-proofread-action' )
 					.removeClass( 'tux-warning' ) // in case, it failed previously
 					.addClass( 'accepted' );
@@ -229,8 +232,8 @@
 				}
 			} ).fail( function ( errorCode ) {
 				$message.find( '.tux-proofread-action' ).addClass( 'tux-warning' );
-				// In MW 1.24 postWithToken returns token-missing instead of assertuserfailed
-				if ( errorCode === 'assertuserfailed' || errorCode === 'token-missing'  ) {
+				if ( errorCode === 'assertuserfailed' ) {
+					// eslint-disable-next-line no-alert
 					alert( mw.msg( 'tux-session-expired' ) );
 				}
 			} );
@@ -248,8 +251,8 @@
 			} );
 
 			this.$message.find( '.tux-proofread-edit' ).on( 'click', function () {
-				// Make sure that the tipsy is hidden when going to the editor
-				$( '.translate-tipsy' ).remove();
+				// Make sure that the tooltip is hidden when going to the editor
+				$( '.translate-tooltip' ).remove();
 				proofread.$message.data( 'translateeditor' ).show();
 
 				return false;
@@ -276,4 +279,4 @@
 
 	$.fn.proofread.Constructor = Proofread;
 
-}( jQuery, mediaWiki ) );
+}() );

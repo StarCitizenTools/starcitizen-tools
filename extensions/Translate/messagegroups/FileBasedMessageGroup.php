@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2010-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -22,22 +22,22 @@ class FileBasedMessageGroup extends MessageGroupBase implements MetaYamlSchemaEx
 	/**
 	 * Constructs a FileBasedMessageGroup from any normal message group.
 	 * Useful for doing special Gettext exports from any group.
-	 * @param $group MessageGroup
-	 * @return FileBasedMessageGroup
+	 * @param MessageGroup $group
+	 * @return self
 	 */
 	public static function newFromMessageGroup( $group ) {
-		$conf = array(
-			'BASIC' => array(
-				'class' => 'FileBasedMessageGroup',
+		$conf = [
+			'BASIC' => [
+				'class' => self::class,
 				'id' => $group->getId(),
 				'label' => $group->getLabel(),
 				'namespace' => $group->getNamespace(),
-			),
-			'FILES' => array(
+			],
+			'FILES' => [
 				'sourcePattern' => '',
 				'targetPattern' => '',
-			),
-		);
+			],
+		];
 
 		return MessageGroupBase::factory( $conf );
 	}
@@ -51,7 +51,7 @@ class FileBasedMessageGroup extends MessageGroupBase implements MetaYamlSchemaEx
 		$ffs = $this->getFFS();
 		$data = $ffs->read( $code );
 
-		return $data ? $data['MESSAGES'] : array();
+		return $data ? $data['MESSAGES'] : [];
 	}
 
 	/**
@@ -110,17 +110,15 @@ class FileBasedMessageGroup extends MessageGroupBase implements MetaYamlSchemaEx
 	 * @since 2014.02 Made public
 	 */
 	public function replaceVariables( $pattern, $code ) {
-		// @codingStandardsIgnoreStart Ignore MediaWiki.NamingConventions.ValidGlobalName.wgPrefix
 		global $IP, $wgTranslateGroupRoot;
-		// @codingStandardsIgnoreEnd
 
-		$variables = array(
+		$variables = [
 			'%CODE%' => $this->mapCode( $code ),
 			'%MWROOT%' => $IP,
 			'%GROUPROOT%' => $wgTranslateGroupRoot,
-		);
+		];
 
-		Hooks::run( 'TranslateMessageGroupPathVariables', array( $this, &$variables ) );
+		Hooks::run( 'TranslateMessageGroupPathVariables', [ $this, &$variables ] );
 
 		return str_replace( array_keys( $variables ), array_values( $variables ), $pattern );
 	}
@@ -150,37 +148,37 @@ class FileBasedMessageGroup extends MessageGroupBase implements MetaYamlSchemaEx
 	}
 
 	public static function getExtraSchema() {
-		$schema = array(
-			'root' => array(
+		$schema = [
+			'root' => [
 				'_type' => 'array',
-				'_children' => array(
-					'FILES' => array(
+				'_children' => [
+					'FILES' => [
 						'_type' => 'array',
-						'_children' => array(
-							'class' => array(
+						'_children' => [
+							'class' => [
 								'_type' => 'text',
 								'_not_empty' => true,
-							),
-							'codeMap' => array(
+							],
+							'codeMap' => [
 								'_type' => 'array',
 								'_ignore_extra_keys' => true,
-								'_children' => array(),
-							),
-							'definitionFile' => array(
+								'_children' => [],
+							],
+							'definitionFile' => [
 								'_type' => 'text',
-							),
-							'sourcePattern' => array(
+							],
+							'sourcePattern' => [
 								'_type' => 'text',
 								'_not_empty' => true,
-							),
-							'targetPattern' => array(
+							],
+							'targetPattern' => [
 								'_type' => 'text',
-							),
-						)
-					)
-				)
-			)
-		);
+							],
+						]
+					]
+				]
+			]
+		];
 
 		return $schema;
 	}

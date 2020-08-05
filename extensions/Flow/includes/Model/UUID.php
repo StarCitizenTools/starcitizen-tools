@@ -3,14 +3,15 @@
 namespace Flow\Model;
 
 use ApiSerializable;
-use Blob;
 use Flow\Data\ObjectManager;
 use Flow\Exception\FlowException;
+use Flow\Exception\InvalidParameterException;
 use Flow\Exception\InvalidInputException;
 use Language;
 use MWTimestamp;
-use TimestampException;
 use User;
+use Wikimedia\Rdbms\Blob;
+use Wikimedia\Timestamp\TimestampException;
 
 /**
  * Immutable class modeling timestamped UUID's from
@@ -83,11 +84,13 @@ class UUID implements ApiSerializable {
 	 * @param string $value UUID value
 	 * @param string $format UUID format (static::INPUT_BIN, static::input_HEX
 	 *  or static::input_ALNUM)
+	 * @throws InvalidParameterException On logic error, or for an invalid UUID string
+	 *  in a format not used directly by end-users
 	 * @throws InvalidInputException
 	 */
 	protected function __construct( $value, $format ) {
-		if ( !in_array( $format, array( static::INPUT_BIN, static::INPUT_HEX, static::INPUT_ALNUM ) ) ) {
-			throw new InvalidInputException( 'Invalid UUID input format: ' . $format, 'invalid-input' );
+		if ( !in_array( $format, [ static::INPUT_BIN, static::INPUT_HEX, static::INPUT_ALNUM ] ) ) {
+			throw new InvalidParameterException( 'Invalid UUID input format: ' . $format );
 		}
 
 		// doublecheck validity of inputs, based on pre-determined lengths
@@ -117,7 +120,7 @@ class UUID implements ApiSerializable {
 	public function __sleep() {
 		// ensure alphadecimal is populated
 		$this->getAlphadecimal();
-		return array( 'alphadecimalValue' );
+		return [ 'alphadecimalValue' ];
 	}
 
 	public function __wakeup() {
@@ -146,7 +149,7 @@ class UUID implements ApiSerializable {
 	 * @return UUID|null
 	 * @throws InvalidInputException
 	 */
-	static public function create( $input = false ) {
+	public static function create( $input = false ) {
 		// Most calls to UUID::create are binary strings, check string first
 		if ( is_string( $input ) || is_int( $input ) || $input === false ) {
 			if ( $input === false ) {
@@ -184,18 +187,21 @@ class UUID implements ApiSerializable {
 					return new static( $value, $type );
 				}
 			}
-		} else if ( is_object( $input ) ) {
+		} elseif ( is_array( $input ) ) {
+			// array syntax in the url (?foo[]=bar) will make $input an array
+			throw new InvalidInputException( 'Invalid input to UUID class', 'invalid-input' );
+		} elseif ( is_object( $input ) ) {
 			if ( $input instanceof UUID ) {
 				return $input;
 			} elseif ( $input instanceof Blob ) {
 				return self::create( $input->fetch() );
 			} else {
-				throw new InvalidInputException( 'Unknown input of type ' . get_class( $input ), 'invalid-input' );
+				throw new InvalidParameterException( 'Unknown input of type ' . get_class( $input ) );
 			}
 		} elseif ( $input === null ) {
 			return null;
 		} else {
-			throw new InvalidInputException( 'Unknown input type to UUID class: ' . gettype( $input ), 'invalid-input' );
+			throw new InvalidParameterException( 'Unknown input type to UUID class: ' . gettype( $input ) );
 		}
 	}
 
@@ -317,7 +323,7 @@ class UUID implements ApiSerializable {
 	 * @param User|null $user
 	 * @param Language|null $lang
 	 * @return string|false
-	 * @throws InvalidInputException
+	 * @throws InvalidParameterException
 	 */
 	public function getHumanTimestamp( $relativeTo = null, User $user = null, Language $lang = null ) {
 		if ( $relativeTo instanceof UUID ) {
@@ -325,7 +331,7 @@ class UUID implements ApiSerializable {
 		} elseif ( $relativeTo instanceof MWTimestamp ) {
 			$rel = $relativeTo;
 		} else {
-			throw new InvalidInputException( 'Expected MWTimestamp or UUID, got ' . get_class( $relativeTo ), 'invalid-input' );
+			throw new InvalidParameterException( 'Expected MWTimestamp or UUID, got ' . get_class( $relativeTo ) );
 		}
 		$ts = $this->getTimestampObj();
 		return $ts ? $ts->getHumanTimestamp( $rel, $user, $lang ) : false;
@@ -342,11 +348,11 @@ class UUID implements ApiSerializable {
 	 */
 	public static function convertUUIDs( $array, $format = 'binary' ) {
 		$array = ObjectManager::makeArray( $array );
-		foreach( $array as $key => $value ) {
+		foreach ( $array as $key => $value ) {
 			if ( $value instanceof UUIDBlob ) {
 				// database encoded binary value
 				if ( $format === 'alphadecimal' ) {
-					$array[$key] = UUID::create( $value->fetch() )->getAlphadecimal();
+					$array[$key] = self::create( $value->fetch() )->getAlphadecimal();
 				}
 			} elseif ( $value instanceof UUID ) {
 				if ( $format === 'binary' ) {
@@ -358,13 +364,13 @@ class UUID implements ApiSerializable {
 				// things that look like uuids
 				$len = strlen( $value );
 				if ( $format === 'alphadecimal' && $len === self::BIN_LEN ) {
-					$array[$key] = UUID::create( $value )->getAlphadecimal();
+					$array[$key] = self::create( $value )->getAlphadecimal();
 				} elseif ( $format === 'binary' && (
 					( $len >= self::MIN_ALNUM_LEN && $len <= self::ALNUM_LEN )
 					||
 					$len === self::HEX_LEN
 				) ) {
-					$array[$key] = UUID::create( $value )->getBinary();
+					$array[$key] = self::create( $value )->getBinary();
 				}
 			}
 		}
@@ -374,7 +380,7 @@ class UUID implements ApiSerializable {
 
 	/**
 	 * @param UUID|null $other
-	 * @return boolean
+	 * @return bool
 	 */
 	public function equals( UUID $other = null ) {
 		return $other && $other->getAlphadecimal() === $this->getAlphadecimal();
@@ -383,7 +389,7 @@ class UUID implements ApiSerializable {
 	/**
 	 * Generates a fake UUID for a given timestamp that will have comparison
 	 * results equivalent to a real UUID generated at that time
-	 * @param  mixed $ts Something accepted by wfTimestamp()
+	 * @param mixed $ts Something accepted by wfTimestamp()
 	 * @return UUID object.
 	 */
 	public static function getComparisonUUID( $ts ) {
@@ -446,7 +452,7 @@ class UUID implements ApiSerializable {
 	 * been generated with \UIDGenerator::newTimestampedUID88.
 	 *
 	 * @param string $hex
-	 * @return integer Number of seconds since epoch
+	 * @return int Number of seconds since epoch
 	 */
 	public static function hex2timestamp( $hex ) {
 		$msTimestamp = hexdec( substr( $hex, 0, 12 ) ) >> 2;
@@ -457,7 +463,7 @@ class UUID implements ApiSerializable {
 /**
  * Extend Blob so we can identify UUID specific blobs
  */
-class UUIDBlob extends \Blob {
+class UUIDBlob extends Blob {
 	/**
 	 * We'll want to be able to compare the (string) value of 2 blobs.
 	 *

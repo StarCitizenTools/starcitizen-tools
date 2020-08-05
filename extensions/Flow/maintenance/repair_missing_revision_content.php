@@ -2,13 +2,13 @@
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
-	$IP = dirname( __FILE__ ) . '/../../..';
+	$IP = __DIR__ . '/../../..';
 }
 
 require_once "$IP/maintenance/commandLine.inc";
 require_once "$IP/extensions/Flow/FlowActions.php";
 
-$moderationChangeTypes = array(
+$moderationChangeTypes = [
 	'hide-post',
 	'hide-topic',
 	'delete-post',
@@ -18,29 +18,29 @@ $moderationChangeTypes = array(
 	'lock-topic',
 	'restore-post',
 	'restore-topic',
-);
+];
 
-$plaintextChangeTypes = array(
+$plaintextChangeTypes = [
 	'edit-title',
 	'new-topic',
-);
+];
 
-$csvOutput = fopen( 'repair_results_' . wfWikiId() . '.csv', 'w' );
+$csvOutput = fopen( 'repair_results_' . wfWikiID() . '.csv', 'w' );
 if ( !$csvOutput ) {
 	die( "Could not open results file\n" );
 }
-fputcsv( $csvOutput, array( "uuid", "esurl", "flags" ) );
+fputcsv( $csvOutput, [ "uuid", "esurl", "flags" ] );
 
 $it = new BatchRowIterator(
-	Flow\Container::get( 'db.factory' )->getDB( DB_SLAVE ),
+	Flow\Container::get( 'db.factory' )->getDB( DB_REPLICA ),
 	'flow_revision',
-	array( 'rev_id' ),
+	[ 'rev_id' ],
 	10
 );
-$it->addConditions( array( 'rev_user_wiki' => wfWikiId() ) );
-$it->setFetchColumns( array( 'rev_content', 'rev_content_length', 'rev_change_type', 'rev_parent_id' ) );
+$it->addConditions( [ 'rev_user_wiki' => wfWikiID() ] );
+$it->setFetchColumns( [ 'rev_content', 'rev_content_length', 'rev_change_type', 'rev_parent_id' ] );
 
-$dbr = wfGetDB( DB_SLAVE );
+$dbr = wfGetDB( DB_REPLICA );
 $totalMissingConsidered = 0;
 $totalCompleteMatch = 0;
 $totalMultipleMatches = 0;
@@ -62,7 +62,7 @@ foreach ( $it as $batch ) {
 		$tsEscaped = $dbr->addQuotes( $uuid->getTimestamp( TS_MW ) );
 
 		$changeType = $rev->rev_change_type;
-		while( is_string( $wgFlowActions[$changeType] ) ) {
+		while ( is_string( $wgFlowActions[$changeType] ) ) {
 			$changeType = $wgFlowActions[$changeType];
 		}
 		if ( in_array( $changeType, $moderationChangeTypes ) ) {
@@ -78,8 +78,8 @@ foreach ( $it as $batch ) {
 		$last = end( $after );
 		echo "Considering core revisions from " . $first->rev_timestamp . " to " . $last->rev_timestamp . "\n";
 
-		$esIdsForCluster = array();
-		foreach ( array( $before, $after ) as $results ) {
+		$esIdsForCluster = [];
+		foreach ( [ $before, $after ] as $results ) {
 			foreach ( $results as $row ) {
 				$parts = explode( '/', $row->old_text );
 				if ( isset( $parts[4] ) ) {
@@ -94,7 +94,7 @@ foreach ( $it as $batch ) {
 		}
 
 		// find any gaps in ES within this area
-		$matches = $lengths = array();
+		$matches = $lengths = [];
 		$invalid = false;
 
 		$flags = 'utf-8,gzip,external';
@@ -107,7 +107,6 @@ foreach ( $it as $batch ) {
 		foreach ( array_keys( $esIdsForCluster ) as $cluster ) {
 			sort( $esIdsForCluster[$cluster] );
 			$lastId = reset( $esIdsForCluster[$cluster] );
-
 
 			foreach ( $esIdsForCluster[$cluster] as $id ) {
 				if ( $id === $lastId || $id === $lastId + 1 ) {
@@ -125,11 +124,16 @@ foreach ( $it as $batch ) {
 				foreach ( $range as $possible ) {
 					$url = "DB://$cluster/$possible";
 					$content = gzinflate( ExternalStore::fetchFromURL( $url ) );
-					if ( false !== @unserialize( $content ) ) {
+					Wikimedia\suppressWarnings();
+					$unserializedContent = unserialize( $content );
+					Wikimedia\restoreWarnings();
+					if ( false !== $unserializedContent ) {
 						// if it unserializes, its not our content
 						continue;
 					}
-					$json = @json_decode( $content, true );
+					Wikimedia\suppressWarnings();
+					$json = json_decode( $content, true );
+					Wikimedia\restoreWarnings();
 					if ( $json && count( $json ) === 1 && isset( $json['flow-workflow'] ) ) {
 						// while technically possible to be a topic title, i'm almost
 						// certain this is a core revisions inserted by flow in the form
@@ -152,7 +156,7 @@ foreach ( $it as $batch ) {
 							}
 						}
 						if ( $doAppend ) {
-							$matches[] = array( $url, $content, $flags );
+							$matches[] = [ $url, $content, $flags ];
 						}
 					} else {
 						$lengths[] = $len;
@@ -173,7 +177,7 @@ foreach ( $it as $batch ) {
 			list( $url, $content, $flags ) = reset( $matches );
 			echo "SINGLE DIRECT MATCH: $url : " . truncate( $content, 1024 ) . "\n";
 			++$totalCompleteMatch;
-			fputcsv( $csvOutput, array( $uuid->getAlphadecimal(), $url, $flags ) );
+			fputcsv( $csvOutput, [ $uuid->getAlphadecimal(), $url, $flags ] );
 		} else {
 			echo "MULTIPLE POTENTIAL MATCHES:\n";
 			++$totalMultipleMatches;
@@ -193,9 +197,9 @@ if ( $multipleMatches ) {
 		// Grab the first key/value pair from $multipleMatches as our
 		// first matching group
 		$current = reset( $multipleMatches );
-		$group = array(
+		$group = [
 			key( $multipleMatches ) => $current,
-		);
+		];
 		array_shift( $multipleMatches );
 		// Look for other revisions in $multipleMatches that matched at least
 		// one of the same pieces of ExternalStore data.
@@ -245,7 +249,7 @@ if ( $multipleMatches ) {
 			foreach ( array_keys( $group ) as $uuid ) {
 				$match = array_shift( $expectedMatches );
 				list( $url, $content, $flags ) = $match;
-				fputcsv( $csvOutput, array( $uuid, $url, $flags ) );
+				fputcsv( $csvOutput, [ $uuid, $url, $flags ] );
 				--$totalMultipleMatches;
 				++$totalResolvedMultipleMatches;
 			}
@@ -265,38 +269,36 @@ echo "Found a match but invalid due to size of es gaps for $totalMatchButInvalid
 echo "Resolved $totalResolvedMultipleMatches multiple matches (" . number_format( 100 * $totalResolvedMultipleMatches / $totalMissingConsidered ) . "%)\n";
 
 function query_revisions( $dbr, $op, $tsEscaped ) {
-
 	$direction = $op[0] === '>' ? 'ASC' : 'DESC';
-	$sql =
-   "SELECT revision.rev_timestamp, text.old_text
-      FROM revision
-      JOIN text ON revision.rev_text_id = old_id
- LEFT JOIN revision parent ON parent.rev_id = revision.rev_parent_id
-     WHERE revision.rev_timestamp $op $tsEscaped
-       AND revision.rev_text_id <> parent.rev_text_id
-     ORDER BY revision.rev_timestamp $direction
-     LIMIT 10";
+	$sql = "SELECT revision.rev_timestamp, text.old_text " .
+		"     FROM revision " .
+		"     JOIN text ON revision.rev_text_id = old_id " .
+		"LEFT JOIN revision parent ON parent.rev_id = revision.rev_parent_id " .
+		"    WHERE revision.rev_timestamp $op $tsEscaped " .
+		"      AND revision.rev_text_id <> parent.rev_text_id " .
+		"    ORDER BY revision.rev_timestamp $direction " .
+		"    LIMIT 10";
 
 	$res = $dbr->query( $sql, __METHOD__ );
-return iterator_to_array( $res );
+	return iterator_to_array( $res );
 }
 
-
 function parsoid_to_wikitext( $content, $retry = 3 ) {
-	static $cache = array();
+	static $cache = [];
 	$hash = md5( $content );
 	if ( isset( $cache[$hash] ) ) {
 		return $cache[$hash];
 	}
 	try {
 		$wikitext = Flow\Conversion\Utils::convert( 'html', 'wt', $content, Title::newMainPage() );
-		return $cache[$hash] = $wikitext;
+		$cache[$hash] = $wikitext;
+		return $cache[$hash];
 	} catch ( Flow\Exception\NoParserException $e ) {
 		echo "failed to convert to wikitext: " . truncate( $content, 1024 ) . "\n";
-		return $cache[$hash] = $content;
+		$cache[$hash] = $content;
+		return $cache[$hash];
 	}
 }
-
 
 function truncate( $string, $length ) {
 	if ( strlen( $string ) > $length ) {

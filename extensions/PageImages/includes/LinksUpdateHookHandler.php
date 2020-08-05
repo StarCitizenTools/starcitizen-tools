@@ -16,7 +16,7 @@ use Title;
  *
  * @license WTFPL 2.0
  * @author Max Semenik
- * @author Thiemo Mättig
+ * @author Thiemo Kreuz
  */
 class LinksUpdateHookHandler {
 
@@ -25,7 +25,7 @@ class LinksUpdateHookHandler {
 	 *
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/LinksUpdate
 	 *
-	 * @param LinksUpdate $linksUpdate
+	 * @param LinksUpdate $linksUpdate the LinksUpdate object that this hook is parsing
 	 */
 	public static function onLinksUpdate( LinksUpdate $linksUpdate ) {
 		$handler = new self();
@@ -33,16 +33,47 @@ class LinksUpdateHookHandler {
 	}
 
 	/**
-	 * @param LinksUpdate $linksUpdate
+	 * Returns a list of page image candidates for consideration
+	 * for scoring algorithm.
+	 * @param LinksUpdate $linksUpdate LinksUpdate object used to determine what page
+	 * to get page images for
+	 * @return array $image Associative array describing an image
+	 */
+	public function getPageImageCandidates( LinksUpdate $linksUpdate ) {
+		global $wgPageImagesLeadSectionOnly;
+		$po = false;
+
+		if ( $wgPageImagesLeadSectionOnly ) {
+			$rev = $linksUpdate->getRevision();
+			if ( $rev ) {
+				$content = $rev->getContent();
+				if ( $content ) {
+					$section = $content->getSection( 0 );
+
+					// Certain content types e.g. AbstractContent return null if sections do not apply
+					if ( $section ) {
+						$po = $section->getParserOutput( $linksUpdate->getTitle() );
+					}
+				}
+			}
+		} else {
+			$po = $linksUpdate->getParserOutput();
+		}
+
+		return $po ? $po->getExtensionData( 'pageImages' ) : [];
+	}
+
+	/**
+	 * @param LinksUpdate $linksUpdate the LinksUpdate object that was passed to the handler
 	 */
 	public function doLinksUpdate( LinksUpdate $linksUpdate ) {
-		$images = $linksUpdate->getParserOutput()->getExtensionData( 'pageImages' );
+		$images = $this->getPageImageCandidates( $linksUpdate );
 
 		if ( $images === null ) {
 			return;
 		}
 
-		$scores = array();
+		$scores = [];
 		$counter = 0;
 
 		foreach ( $images as $image ) {
@@ -56,15 +87,26 @@ class LinksUpdateHookHandler {
 		}
 
 		$image = false;
+		$free_image = false;
 
 		foreach ( $scores as $name => $score ) {
-			if ( $score > 0 && ( !$image || $score > $scores[$image] ) ) {
-				$image = $name;
+			if ( $score > 0 ) {
+				if ( !$image || $score > $scores[$image] ) {
+					$image = $name;
+				}
+				if ( ( !$free_image || $score > $scores[$free_image] ) && $this->isImageFree( $name ) ) {
+					$free_image = $name;
+				}
 			}
 		}
 
-		if ( $image ) {
-			$linksUpdate->mProperties[PageImages::PROP_NAME] = $image;
+		if ( $free_image ) {
+			$linksUpdate->mProperties[PageImages::getPropName( true )] = $free_image;
+		}
+
+		// Only store the image if it's not free. Free image (if any) has already been stored above.
+		if ( $image && $image !== $free_image ) {
+			$linksUpdate->mProperties[PageImages::getPropName( false )] = $image;
 		}
 	}
 
@@ -77,13 +119,8 @@ class LinksUpdateHookHandler {
 	 *
 	 * @return int
 	 */
-	private function getScore( array $image, $position ) {
+	protected function getScore( array $image, $position ) {
 		global $wgPageImagesScores;
-
-		$file = wfFindFile( $image['filename'] );
-		if ( $file ) {
-			$image += $this->getMetadata( $file );
-		}
 
 		if ( isset( $image['handler'] ) ) {
 			// Standalone image
@@ -100,10 +137,6 @@ class LinksUpdateHookHandler {
 		$ratio = intval( $this->getRatio( $image ) * 10 );
 		$score += $this->scoreFromTable( $ratio, $wgPageImagesScores['ratio'] );
 
-		if ( isset( $image['rights'] ) && isset( $wgPageImagesScores['rights'][$image['rights']] ) ) {
-			$score += $wgPageImagesScores['rights'][$image['rights']];
-		}
-
 		$blacklist = $this->getBlacklist();
 		if ( isset( $blacklist[$image['filename']] ) ) {
 			$score = -1000;
@@ -115,12 +148,13 @@ class LinksUpdateHookHandler {
 	/**
 	 * Returns score based on table of ranges
 	 *
-	 * @param int $value
-	 * @param int[] $scores
+	 * @param int $value The number that the various bounds are compared against
+	 * to calculate the score
+	 * @param int[] $scores Table of scores for different ranges of $value
 	 *
 	 * @return int
 	 */
-	private function scoreFromTable( $value, array $scores ) {
+	protected function scoreFromTable( $value, array $scores ) {
 		$lastScore = 0;
 
 		foreach ( $scores as $boundary => $score ) {
@@ -135,37 +169,46 @@ class LinksUpdateHookHandler {
 	}
 
 	/**
-	 * Return some file metadata (only what's relevant to page image scores).
+	 * Check whether image's copyright allows it to be used freely.
 	 *
-	 * @param File $file
-	 *
-	 * @return string[]
+	 * @param string $fileName Name of the image file
+	 * @return bool
 	 */
-	private function getMetadata( File $file ) {
+	protected function isImageFree( $fileName ) {
+		$file = wfFindFile( $fileName );
+		if ( $file ) {
+			// Process copyright metadata from CommonsMetadata, if present.
+			// Image is considered free if the value is '0' or unset.
+			return empty( $this->fetchFileMetadata( $file )['NonFree']['value'] );
+		}
+		return true;
+	}
+
+	/**
+	 * Fetch file metadata
+	 *
+	 * @param File $file File to fetch metadata from
+	 * @return array
+	 */
+	protected function fetchFileMetadata( $file ) {
 		$format = new FormatMetadata;
 		$context = new DerivativeContext( $format->getContext() );
-		$format->setSingleLanguage( true ); // we don't care and it's slightly faster
-		$context->setLanguage( 'en' ); // we don't care so avoid splitting the cache
+		// we don't care about the language, and specifying singleLanguage is slightly faster
+		$format->setSingleLanguage( true );
+		// we don't care about the language, so avoid splitting the cache by selecting English
+		$context->setLanguage( 'en' );
 		$format->setContext( $context );
-		$extmetadata = $format->fetchExtendedMetadata( $file );
-		$processedMetadata = array();
-
-		// process copyright metadata from CommonsMetadata, if present
-		if ( !empty( $extmetadata['NonFree']['value'] ) ) { // not '0' or unset
-			$processedMetadata['rights'] = 'nonfree';
-		}
-
-		return $processedMetadata;
+		return $format->fetchExtendedMetadata( $file );
 	}
 
 	/**
 	 * Returns width/height ratio of an image as displayed or 0 is not available
 	 *
-	 * @param array $image
+	 * @param array $image Array representing the image to get the aspect ratio from
 	 *
 	 * @return float|int
 	 */
-	private function getRatio( array $image ) {
+	protected function getRatio( array $image ) {
 		$width = $image['fullwidth'];
 		$height = $image['fullheight'];
 
@@ -182,7 +225,7 @@ class LinksUpdateHookHandler {
 	 * @throws Exception
 	 * @return int[] Flipped associative array in format "image BDB key" => int
 	 */
-	private function getBlacklist() {
+	protected function getBlacklist() {
 		global $wgPageImagesBlacklist, $wgPageImagesBlacklistExpiry, $wgMemc;
 		static $list = false;
 
@@ -197,7 +240,7 @@ class LinksUpdateHookHandler {
 		}
 
 		wfDebug( __METHOD__ . "(): cache miss\n" );
-		$list = array();
+		$list = [];
 
 		foreach ( $wgPageImagesBlacklist as $source ) {
 			switch ( $source['type'] ) {
@@ -208,7 +251,8 @@ class LinksUpdateHookHandler {
 					$list = array_merge( $list, $this->getUrlBlacklist( $source['url'] ) );
 					break;
 				default:
-					throw new Exception( __METHOD__ . "(): unrecognized image blacklist type '{$source['type']}'" );
+					throw new Exception(
+						__METHOD__ . "(): unrecognized image blacklist type '{$source['type']}'" );
 			}
 		}
 
@@ -226,21 +270,21 @@ class LinksUpdateHookHandler {
 	 * @return string[]
 	 */
 	private function getDbBlacklist( $dbName, $page ) {
-		$dbr = wfGetDB( DB_SLAVE, array(), $dbName );
+		$dbr = wfGetDB( DB_REPLICA, [], $dbName );
 		$title = Title::newFromText( $page );
-		$list = array();
+		$list = [];
 
 		$id = $dbr->selectField(
 			'page',
 			'page_id',
-			array( 'page_namespace' => $title->getNamespace(), 'page_title' => $title->getDBkey() ),
+			[ 'page_namespace' => $title->getNamespace(), 'page_title' => $title->getDBkey() ],
 			__METHOD__
 		);
 
 		if ( $id ) {
 			$res = $dbr->select( 'pagelinks',
 				'pl_title',
-				array( 'pl_from' => $id, 'pl_namespace' => NS_FILE ),
+				[ 'pl_from' => $id, 'pl_namespace' => NS_FILE ],
 				__METHOD__
 			);
 			foreach ( $res as $row ) {
@@ -263,8 +307,8 @@ class LinksUpdateHookHandler {
 	private function getUrlBlacklist( $url ) {
 		global $wgFileExtensions;
 
-		$list = array();
-		$text = Http::get( $url, 3 );
+		$list = [];
+		$text = Http::get( $url, [ 'timeout' => 3 ], __METHOD__ );
 		$regex = '/\[\[:([^|\#]*?\.(?:' . implode( '|', $wgFileExtensions ) . '))/i';
 
 		if ( $text && preg_match_all( $regex, $text, $matches ) ) {

@@ -3,14 +3,17 @@
 		"authors": [
 			"Praveen Illa",
 			"Veeven",
-			"Ravichandra"
+			"Ravichandra",
+			"Chaduvari"
 		]
 	},
+	"api-error-noimageinfo": "ఎక్కింపు జయప్రదమైంది. కానీ సర్వరు, ఆ ఫైలు గురించిన సమాచారమేమీ ఇవ్వలేదు.",
 	"mwe-upwiz-step-tutorial": "నేర్చుకోండి",
 	"mwe-upwiz-step-file": "ఎక్కింపు",
 	"mwe-upwiz-step-deeds": "విడుదల హక్కులు",
 	"mwe-upwiz-step-details": "వివరించండి",
 	"mwe-upwiz-step-thanks": "ఉపయోగించండి",
+	"mwe-upwiz-api-warning-was-deleted": "\"$1\" పేరుతో ఒక ఫైలుండేది. కానీ దాన్ని తొలగించారు. దాన్ని మళ్ళీ ఎక్కించ జాలరు. మీ ఫైలు భిన్నమైనదైతే, దాని పేరు మార్చి చూడండి.",
 	"mwe-upwiz-help-desk": "సహాయ కేంద్రం",
 	"mwe-upwiz-help-desk-url": "{{ns:project}}:సహాయ కేంద్రం",
 	"mwe-upwiz-add-file-n": "మరిన్ని దస్త్రాలను చేర్చండి",
@@ -40,8 +43,6 @@
 	"mwe-upwiz-source-thirdparty-accept": "సరే",
 	"mwe-upwiz-more-options": "వర్గాలను మరియు మరింత సమాచారాన్ని చేర్చండి...",
 	"mwe-upwiz-desc": "వివరణ",
-	"mwe-upwiz-desc-add-n": "వేరే భాషలో ఒక వివరణని చేర్చు",
-	"mwe-upwiz-desc-add-0": "ఒక వివరణని చేర్చు",
 	"mwe-upwiz-title": "శీర్షిక",
 	"mwe-upwiz-date-created": "సృష్టించిన తేదీ",
 	"mwe-upwiz-location": "ప్రాంతం",
@@ -78,7 +79,6 @@
 	"mwe-upwiz-error-signature-too-long": "మీ సంతకం చాలా పొడవుగా ఉంది.\nదాన్ని $1 {{PLURAL:$1|అక్షరం|అక్షరాల}} లోపుకి తగ్గించండి.",
 	"mwe-upwiz-error-signature-too-short": "మీ సంతకం చాలా చిన్నగా ఉంది.\nదాన్ని {{PLURAL:$1|ఒక అక్షరానికి|$1 అక్షరాల వరకూ}} పొడగించండి.",
 	"mwe-upwiz-error-blank": "ఈ ఖాళీని తప్పనిసరిగా పూరించాలి.",
-	"mwe-upwiz-error-nologin": "దస్త్రాలను ఎక్కించడానికి మీరు తప్పనిసరిగా <span class=\"plainlinks\">[{{fullurl:{{#Special:UserLogin}}|returnto=$1}} ప్రవేశించి]</span> ఉండాలి.",
 	"mwe-upwiz-error-too-long": "ఈ పద్దు చాలా పెద్దగా ఉంది.\nదీన్ని {{PLURAL:$1|ఒక అక్షరానికి|$1 అక్షరాల కంటే తక్కువకు}} కుదించండి.",
 	"mwe-upwiz-error-title-senselessimagename": "ఈ శీర్షికని మరింత అర్థవంతంగా ఉండేట్టు పెట్టండి.",
 	"mwe-upwiz-too-many-files": "చాలా దస్త్రాలు.",

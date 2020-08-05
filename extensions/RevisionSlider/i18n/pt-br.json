@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"LucyDiniz",
+			"TheEduGobi",
+			"Macofe",
+			"Diego Queiroz",
+			"Felipe L. Ewald"
+		]
+	},
+	"revisionslider": "Deslizador de Revisões",
+	"revisionslider-preference-disable": "Não exibir o Deslizador de Revisões",
+	"revisionslider-desc": "Exibe um deslizador, permitindo a seleção e comparação de revisões numa página de dif",
+	"revisionslider-toggle-label": "Navegar pelo histórico",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte|bytes}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte|bytes}}",
+	"revisionslider-label-date": "Data",
+	"revisionslider-label-page-size": "Tamanho da página",
+	"revisionslider-label-change-size": "Tamanho da mudança",
+	"revisionslider-label-comment": "Comentário",
+	"revisionslider-label-username": "{{GENDER:$1|Usuário|Usuária|Usuário(a)}}",
+	"revisionslider-minoredit": "Esta é uma edição menor",
+	"revisionslider-loading-failed": "O deslizador de revisões não pôde ser carregado.",
+	"revisionslider-toggle-title-expand": "Abrir o deslizador de revisões",
+	"revisionslider-toggle-title-collapse": "Ocultar o deslizador de revisões",
+	"revisionslider-turn-on-auto-expand-title": "Sempre expandir o deslizador de revisões",
+	"revisionslider-turn-off-auto-expand-title": "Não expandir o deslizador de revisões automaticamente",
+	"revisionslider-arrow-tooltip-newer": "Ver revisões posteriores",
+	"revisionslider-arrow-tooltip-older": "Ver revisões anteriores",
+	"revisionslider-show-help-tooltip": "Mostrar texto de ajuda",
+	"revisionslider-help-dialog-slide1": "O deslizador de revisões ajuda você a navegar e comparar revisões na página de dif. Baseia-se num [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider desejo] vindo da lista de desejos da comunidade técnica alemã. Comentários são muito bem-vindos [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider aqui].",
+	"revisionslider-help-dialog-slide2": "Cada barra representa uma revisão da página. As barras na parte de cima mostram o crescimento do tamanho da página, as de baixo, a redução. Na imagem, a revisão 1 representa o conteúdo adicionado, enquanto a revisão 2 representa o conteúdo removido.",
+	"revisionslider-help-dialog-slide3a": "<p>Para comparar certas revisões, selecione as revisões usando os botões amarelo e azul.</p><p> O botão azul controla a revisão mais recente, o botão amarelo mapeia para a revisão mais antiga.</p><p>Mova os botões arrastando e soltando ou clicando na linha do controle deslizante.</p>",
+	"revisionslider-help-dialog-slide4": "Use as setas de voltar e avançar para mover-se pelo histórico de revisões, mostrando revisões novas e antigas.",
+	"revisionslider-tutorial": "Tutorial do deslizador de revisões",
+	"revisionslider-previous-dialog": "Anterior",
+	"revisionslider-next-dialog": "Próximo",
+	"revisionslider-close-dialog": "Fechar"
+}

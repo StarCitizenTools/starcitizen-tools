@@ -1,0 +1,15 @@
+{
+	"variants": {
+		"invert": {
+			"color": "#FFFFFF"
+		}
+	},
+	"images": {
+		"bell": {
+			"file": "icons/bell.svg"
+		},
+		"tray": {
+			"file": "icons/tray.svg"
+		}
+	}
+}

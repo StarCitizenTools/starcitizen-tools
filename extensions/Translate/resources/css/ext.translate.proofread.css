@@ -2,7 +2,7 @@
 	min-height: 50px;
 	margin: 0 auto;
 	vertical-align: middle;
-	background: #F8F8F8;
+	background: #f8f8f8;
 }
 
 .ext-translate-container .tux-messagelist .tux-message-proofread .tux-message-item-compact {
@@ -12,26 +12,26 @@
 	margin-left: auto;
 	vertical-align: middle;
 	border-bottom: 1px solid #f0f0f0;
-	border-left: 1px solid #DDDDDD;
-	border-right: 1px solid #DDDDDD;
-	background: #FFFFFF;
+	border-left: 1px solid #ddd;
+	border-right: 1px solid #ddd;
+	background: #fff;
 	max-width: 900px;
 }
 
 .ext-translate-container .tux-messagelist .tux-message-proofread .tux-message-item-compact:hover {
-	background: #FCFCFC;
+	background: #fcfcfc;
 }
 
 .ext-translate-container .tux-messagelist .tux-message-proofread:first-child .tux-message-item-compact {
 	margin-top: 10px;
 	padding-top: 60px;
-	border-top: 1px solid #DDDDDD;
+	border-top: 1px solid #ddd;
 }
 
 .ext-translate-container .tux-messagelist .tux-message-proofread:last-child .tux-message-item-compact {
 	margin-bottom: 10px;
 	padding-bottom: 60px;
-	border-bottom: 1px solid #DDDDDD;
+	border-bottom: 1px solid #ddd;
 }
 
 .tux-proofread-source,
@@ -48,7 +48,7 @@
 }
 
 .tux-messagelist .tux-message-proofread .tux-proofread-source {
-	color: #555;
+	color: #54595d;
 	font-size: 16px;
 	line-height: 1.5em;
 	padding-right: 25px;
@@ -56,7 +56,7 @@
 }
 
 .tux-messagelist .tux-message-proofread .tux-proofread-translation {
-	color: #252525;
+	color: #222;
 	font-size: 16px;
 	line-height: 1.5em;
 	padding-left: 20px;
@@ -69,21 +69,24 @@
 
 .ext-translate-container .tux-messagelist .tux-message-proofread.own-translation,
 .ext-translate-container .tux-messagelist .tux-message-proofread.own-translation:hover {
-	background: #FBFBFB;
+	background: #fbfbfb;
+}
+
+.tux-messagelist.tux-hide-own .tux-message-proofread.own-translation {
+	display: none;
 }
 
 .translated-by-self {
-	color: #777;
+	color: #72777d;
 	text-align: right;
 	font-size: 12px;
 	margin-right: 5px;
 	margin-left: auto;
 	width: 18px;
 	height: 18px; /* Icon height + 3px */
-	background: url(../images/user-small.png) top right no-repeat;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/user-small.svg);
+	background: top right no-repeat;
 	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/user-small.svg);
+	background-image: linear-gradient( transparent, transparent ), url( ../images/user-small.svg );
 }
 
 .tux-proofread-status {
@@ -91,28 +94,23 @@
 }
 
 .tux-proofread-status.fuzzy {
-	background: url(../images/outdated-ltr.png) left center no-repeat;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/outdated-ltr.svg);
+	background: left center no-repeat;
 	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/outdated-ltr.svg);
+	background-image: linear-gradient( transparent, transparent ), url( ../images/outdated-ltr.svg );
 	height: 40px;
 }
 
 .tux-proofread-status.untranslated {
-	background: url(../images/translate-ltr.png) left center no-repeat;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/translate-ltr.svg);
+	background: left center no-repeat;
 	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/translate-ltr.svg);
+	background-image: linear-gradient( transparent, transparent ), url( ../images/translate-ltr.svg );
 	height: 40px;
 }
 
 .tux-proofread-action {
 	background-position: right top;
 	background-repeat: no-repeat;
-	background-image: url(../images/check-sprite-ltr.png);
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/check-sprite-ltr.svg);
-	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/check-sprite-ltr.svg);
+	background-image: /* @embed */ linear-gradient( transparent, transparent ), url( ../images/check-sprite-ltr.svg );
 	/* There is 1px white row between each icon */
 	height: 30px;
 	cursor: pointer;
@@ -141,10 +139,7 @@
 }
 
 .tux-proofread-edit {
-	background-image: url(../images/edit-mark.png);
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/edit-mark.svg);
-	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/edit-mark.svg);
+	background-image: /* @embed */ linear-gradient( transparent, transparent ), url( ../images/edit-mark.svg );
 	background-repeat: no-repeat;
 	background-position: right center;
 	height: 50px;
@@ -158,8 +153,8 @@
 }
 
 .tux-proofread-edit-label {
+	color: #72777d;
 	position: relative;
-	color: #777777;
 	display: inline-block;
 	font-size: 13px;
 	padding-top: 30px;
@@ -167,7 +162,7 @@
 }
 
 .tux-proofread-count {
-	color: #777;
+	color: #72777d;
 	font-size: 15px;
 	padding-right: 5px;
 	text-align: right;
@@ -176,10 +171,9 @@
 .tux-proofread-count:before {
 	content: '';
 	display: inline-block;
-	background: url(../images/check-small.png) left bottom no-repeat;
-	background-image: -webkit-linear-gradient(transparent, transparent), url(../images/check-small.svg);
+	background: left bottom no-repeat;
 	/* @embed */
-	background-image: linear-gradient(transparent, transparent), url(../images/check-small.svg);
+	background-image: linear-gradient( transparent, transparent ), url( ../images/check-small.svg );
 	height: 12px;
 	width: 14px;
 }

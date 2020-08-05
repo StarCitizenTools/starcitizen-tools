@@ -6,13 +6,17 @@
 			"Meelo",
 			"Rapsar",
 			"Sayginer",
-			"McAang"
+			"McAang",
+			"Katpatuka",
+			"Hedda",
+			"By erdo can"
 		]
 	},
 	"uls-desc": "Kullanıcının bir dil seçmesi ve dil ayarlarını değiştirmesi için seçenekler sağlar.",
 	"uls-plang-title-languages": "Diller",
 	"ext-uls-select-language-settings-icon-tooltip": "Dil ayarları",
 	"ext-uls-undo-language-tooltip-text": "Dil, $1 dilinden değiştirildi.",
+	"ext-uls-undo-language-tooltip-text-local": "Bu viki için dil değişti. Tüm vikilerin dilini değiştirmek için  [[Special:GlobalPreferences|küresel tercihlerinizi]] kontrol edin.",
 	"ext-uls-language-settings-preferences-link": "Daha fazla dil ayarları",
 	"uls-betafeature-label": "Daraltılmış dil bağlantıları",
 	"uls-betafeature-desc": "Yalnızca sizinle daha alakalı olan dillerin yer aldığı, daha kısa bir dil listesi görüntüler.",
@@ -60,7 +64,8 @@
 	"ext-uls-input-disable-notification-info-interlanguage": "Dil ayarlarını dil listesinin yanında bulunan giriş araçlarından etkinleştirebilirsiniz.",
 	"ext-uls-language-settings-applying": "Uygulanıyor...",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Bir tane daha|$1 tane daha}}",
-	"apihelp-ulslocalization-param-language": "Dil kodu.",
+	"ext-uls-compact-link-info": "Tüm diller (sizin ve başkalarının ortak tercihlerinden ilk seçim)",
 	"prefs-languages": "Diller",
-	"ext-uls-compact-language-links-preference": "Yalnızca sizinle ilgisi bulunan dilleri listeleyen sıkıştırılmış diller listesi kullanın."
+	"ext-uls-compact-language-links-preference": "Sadece seni ilgilendiren [[$1|dil listesi]] kullan.",
+	"ext-uls-compact-no-results": "Bu sayfa, aradığınız dilde mevcut değil."
 }

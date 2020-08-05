@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable ResizableNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -109,7 +109,11 @@ ve.ce.ResizableNode.prototype.getResizableOffset = function () {
 	return this.resizableOffset;
 };
 
-/** */
+/**
+ * Set the original dimensions of the scalable object
+ *
+ * @param {Object} dimensions Dimensions
+ */
 ve.ce.ResizableNode.prototype.setOriginalDimensions = function ( dimensions ) {
 	var scalable;
 
@@ -245,16 +249,16 @@ ve.ce.ResizableNode.prototype.onResizableFocus = function () {
 
 	this.$resizeHandles
 		.find( '.ve-ce-resizableNode-neHandle' )
-			.css( { marginRight: -this.$resizable.width() } )
-			.end()
+		.css( { marginRight: -this.$resizable.width() } );
+	this.$resizeHandles
 		.find( '.ve-ce-resizableNode-swHandle' )
-			.css( { marginBottom: -this.$resizable.height() } )
-			.end()
+		.css( { marginBottom: -this.$resizable.height() } );
+	this.$resizeHandles
 		.find( '.ve-ce-resizableNode-seHandle' )
-			.css( {
-				marginRight: -this.$resizable.width(),
-				marginBottom: -this.$resizable.height()
-			} );
+		.css( {
+			marginRight: -this.$resizable.width(),
+			marginBottom: -this.$resizable.height()
+		} );
 
 	this.$resizeHandles.children()
 		.off( '.ve-ce-resizableNode' )
@@ -417,7 +421,7 @@ ve.ce.ResizableNode.prototype.onResizeHandlesCornerMouseDown = function ( e ) {
 	} );
 	this.emit( 'resizeStart' );
 
-	return false;
+	e.preventDefault();
 };
 
 /**
@@ -445,16 +449,16 @@ ve.ce.ResizableNode.prototype.setResizableHandlesSizeAndPosition = function () {
 			height: 0
 		} )
 		.find( '.ve-ce-resizableNode-neHandle' )
-			.css( { marginRight: -width } )
-			.end()
+		.css( { marginRight: -width } );
+	this.$resizeHandles
 		.find( '.ve-ce-resizableNode-swHandle' )
-			.css( { marginBottom: -height } )
-			.end()
+		.css( { marginBottom: -height } );
+	this.$resizeHandles
 		.find( '.ve-ce-resizableNode-seHandle' )
-			.css( {
-				marginRight: -width,
-				marginBottom: -height
-			} );
+		.css( {
+			marginRight: -width,
+			marginBottom: -height
+		} );
 };
 
 /**
@@ -553,12 +557,8 @@ ve.ce.ResizableNode.prototype.onDocumentMouseMove = function ( e ) {
  */
 ve.ce.ResizableNode.prototype.onDocumentMouseUp = function () {
 	var attrChanges,
-		offset = this.model.getOffset(),
 		width = this.$resizeHandles.outerWidth(),
-		height = this.$resizeHandles.outerHeight(),
-		surfaceModel = this.resizableSurface.getModel(),
-		documentModel = surfaceModel.getDocument(),
-		selection = surfaceModel.getSelection();
+		height = this.$resizeHandles.outerHeight();
 
 	this.$resizeHandles.removeClass( 've-ce-resizableNode-handles-resizing' );
 	$( this.getElementDocument() ).off( '.ve-ce-resizableNode' );
@@ -569,10 +569,7 @@ ve.ce.ResizableNode.prototype.onDocumentMouseUp = function () {
 	// Apply changes to the model
 	attrChanges = this.getAttributeChanges( width, height );
 	if ( !ve.isEmptyObject( attrChanges ) ) {
-		surfaceModel.change(
-			ve.dm.Transaction.newFromAttributeChanges( documentModel, offset, attrChanges ),
-			selection
-		);
+		this.resizableSurface.getModel().getFragment().changeAttributes( attrChanges );
 	}
 
 	// Update the context menu. This usually happens with the redraw, but not if the

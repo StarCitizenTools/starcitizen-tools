@@ -7,7 +7,7 @@
  * @author Siebrand Mazeland
  * @copyright Copyright © 2007-2013, Niklas Laxström
  * @copyright Copyright © 2009-2013, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -130,7 +130,7 @@ class SyncGroup extends Maintenance {
 				}
 
 				$cs = new ChangeSyncer( $group, $this );
-				$cs->setProgressCallback( array( $this, 'myOutput' ) );
+				$cs->setProgressCallback( [ $this, 'myOutput' ] );
 				$cs->interactive = !$this->hasOption( 'noask' );
 				$cs->nocolor = $this->hasOption( 'nocolor' );
 				$cs->norc = $this->hasOption( 'norc' );
@@ -161,7 +161,7 @@ class SyncGroup extends Maintenance {
 	 * Public alternative for protected Maintenance::output() as we need to get
 	 * messages from the ChangeSyncer class to the commandline.
 	 * @param string $text The text to show to the user
-	 * @param string $channel Unique identifier for the channel.
+	 * @param string|null $channel Unique identifier for the channel.
 	 * @param bool $error Whether this is an error message
 	 */
 	public function myOutput( $text, $channel = null, $error = false ) {
@@ -227,7 +227,7 @@ class ChangeSyncer {
 			return false;
 		}
 
-		$matches = array();
+		$matches = [];
 		// PHP doesn't allow foo || return false;
 		// Thank
 		// you
@@ -481,5 +481,5 @@ class ChangeSyncer {
 	}
 }
 
-$maintClass = 'SyncGroup';
+$maintClass = SyncGroup::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

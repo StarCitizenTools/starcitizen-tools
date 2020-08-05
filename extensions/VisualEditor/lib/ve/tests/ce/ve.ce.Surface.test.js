@@ -1,31 +1,30 @@
 /*!
  * VisualEditor ContentEditable Surface tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
-QUnit.module( 've.ce.Surface' );
+QUnit.module( 've.ce.Surface', {
+	beforeEach: function () {
+		return ve.init.platform.getInitializedPromise();
+	}
+} );
 
 /* Tests */
 
 ve.test.utils.runSurfaceHandleSpecialKeyTest = function ( assert, htmlOrDoc, rangeOrSelection, keys, expectedData, expectedRangeOrSelection, msg, forceSelection, fullEvents ) {
-	var i, e, selection, expectedSelection, key,
+	var i, e, expectedSelection, key,
 		view = typeof htmlOrDoc === 'string' ?
 			ve.test.utils.createSurfaceViewFromHtml( htmlOrDoc ) :
-			ve.test.utils.createSurfaceViewFromDocument( htmlOrDoc || ve.dm.example.createExampleDocument() ),
+			( htmlOrDoc instanceof ve.ce.Surface ? htmlOrDoc : ve.test.utils.createSurfaceViewFromDocument( htmlOrDoc || ve.dm.example.createExampleDocument() ) ),
 		model = view.getModel(),
 		data = ve.copy( model.getDocument().getFullData() );
 
-	// TODO: model.getSelection() should be consistent after it has been
-	// changed but appears to behave differently depending on the browser.
-	// The selection from the select event is still consistent.
-	selection = ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), rangeOrSelection );
+	ve.test.utils.hijackEventSequencerTimeouts( view.eventSequencer );
 
-	model.on( 'select', function ( s ) {
-		selection = s;
-	} );
-
-	model.setSelection( selection );
+	model.setSelection(
+		ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), rangeOrSelection )
+	);
 	for ( i = 0; i < keys.length; i++ ) {
 		key = keys[ i ].split( '+' );
 		e = {
@@ -41,32 +40,172 @@ ve.test.utils.runSurfaceHandleSpecialKeyTest = function ( assert, htmlOrDoc, ran
 			// TODO: Could probably switch to using this for every test, but it
 			// would need the faked testing surface to be improved.
 			view.eventSequencer.onEvent( 'keydown', $.Event( 'keydown', e ) );
-			if ( forceSelection ) {
-				view.showSelectionState( view.getSelectionState( forceSelection ) );
-			}
-			view.eventSequencer.runPendingCalls( 'keydown' );
 			view.eventSequencer.onEvent( 'keypress', $.Event( 'keypress', e ) );
-			view.eventSequencer.runPendingCalls( 'keypress' );
+			if ( forceSelection instanceof ve.Range ) {
+				view.showSelectionState( view.getSelectionState( forceSelection ) );
+			} else if ( forceSelection && forceSelection.focusNode ) {
+				view.showSelectionState( new ve.SelectionState( {
+					anchorNode: view.$element.find( forceSelection.anchorNode )[ 0 ],
+					anchorOffset: forceSelection.anchorOffset,
+					focusNode: view.$element.find( forceSelection.focusNode )[ 0 ],
+					focusOffset: forceSelection.focusOffset
+				} ) );
+			}
 			view.eventSequencer.onEvent( 'keyup', $.Event( 'keyup', e ) );
-			view.eventSequencer.runPendingCalls( 'keyup' );
+			view.eventSequencer.endLoop();
 		} else {
 			if ( forceSelection ) {
 				view.showSelectionState( view.getSelectionState( forceSelection ) );
 			}
 			ve.ce.keyDownHandlerFactory.executeHandlersForKey(
-				e.keyCode, selection.getName(), view, e
+				e.keyCode, model.getSelection().getName(), view, e
 			);
 		}
 	}
-	expectedData( data );
+	if ( expectedData ) {
+		expectedData( data );
+		assert.equalLinearData( model.getDocument().getFullData(), data, msg + ': data' );
+	}
 
-	expectedSelection = expectedRangeOrSelection instanceof ve.Range ?
+	expectedSelection = ve.dm.Selection.static.newFromJSON( model.getDocument(), expectedRangeOrSelection instanceof ve.Range ?
 		{ type: 'linear', range: expectedRangeOrSelection } :
-		expectedRangeOrSelection;
-
-	assert.equalLinearData( model.getDocument().getFullData(), data, msg + ': data' );
-	assert.deepEqual( selection.toJSON(), expectedSelection, msg + ': selection' );
+		expectedRangeOrSelection
+	);
+	assert.equalHash( model.getSelection(), expectedSelection, msg + ': selection' );
 	view.destroy();
+};
+
+ve.test.utils.runSurfacePasteTest = function ( assert, htmlOrView, pasteData, internalSourceRangeOrSelection, noClipboardData, fromVe, useClipboardData, pasteTargetHtml, rangeOrSelection, pasteSpecial, expectedOps, expectedRangeOrSelection, expectedHtml, expectedDefaultPrevented, store, msg ) {
+	var i, j, txs, ops, txops, htmlDoc, expectedSelection, testEvent, isClipboardDataFormatsSupported,
+		afterPastePromise = $.Deferred().resolve().promise(),
+		e = ve.extendObject( {}, pasteData ),
+		view = typeof htmlOrView === 'string' ?
+			ve.test.utils.createSurfaceViewFromHtml( htmlOrView ) :
+			htmlOrView,
+		model = view.getModel(),
+		doc = model.getDocument(),
+		done = assert.async();
+
+	function summary( el ) {
+		return ve.getDomElementSummary( el, true );
+	}
+
+	// Paste sequence
+	if ( internalSourceRangeOrSelection ) {
+		model.setSelection( ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), internalSourceRangeOrSelection ) );
+		testEvent = new ve.test.utils.TestEvent();
+		if ( noClipboardData ) {
+			isClipboardDataFormatsSupported = ve.isClipboardDataFormatsSupported;
+			ve.isClipboardDataFormatsSupported = function () { return false; };
+		}
+		view.onCopy( testEvent );
+		if ( noClipboardData ) {
+			ve.isClipboardDataFormatsSupported = isClipboardDataFormatsSupported;
+		}
+		// A fresh event with the copied data, because of defaultPrevented:
+		testEvent = new ve.test.utils.TestEvent( testEvent.testData );
+	} else {
+		if ( useClipboardData ) {
+			e[ 'text/xcustom' ] = 'useClipboardData-0';
+		} else if ( fromVe ) {
+			e[ 'text/xcustom' ] = '0.123-0';
+		}
+		testEvent = new ve.test.utils.TestEvent( e );
+	}
+	model.setSelection( ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), rangeOrSelection ) );
+	view.pasteSpecial = pasteSpecial;
+
+	// Replicate the sequencing of ce.Surface.onPaste, without any setTimeouts:
+	view.beforePaste( testEvent );
+	if ( !testEvent.defaultPrevented() ) {
+		if ( pasteTargetHtml ) {
+			view.$pasteTarget.html( pasteTargetHtml );
+		} else if ( e[ 'text/html' ] ) {
+			document.execCommand( 'insertHTML', false, e[ 'text/html' ] );
+		} else if ( e[ 'text/plain' ] ) {
+			document.execCommand( 'insertText', false, e[ 'text/plain' ] );
+		}
+		afterPastePromise = view.afterPaste( testEvent );
+	}
+
+	// Use #done to run immediately after paste promise
+	// TODO: Ideally these tests would run in series use 'await' to
+	// avoid selection issues with running parallel surface tests.
+	afterPastePromise.done( function () {
+		if ( expectedOps ) {
+			ops = [];
+			if ( model.getHistory().length ) {
+				txs = model.getHistory()[ 0 ].transactions;
+				for ( i = 0; i < txs.length; i++ ) {
+					txops = ve.copy( txs[ i ].getOperations() );
+					for ( j = 0; j < txops.length; j++ ) {
+						if ( txops[ j ].remove ) {
+							ve.dm.example.postprocessAnnotations( txops[ j ].remove, doc.getStore() );
+							ve.dm.example.removeOriginalDomElements( txops[ j ].remove );
+						}
+						if ( txops[ j ].insert ) {
+							ve.dm.example.postprocessAnnotations( txops[ j ].insert, doc.getStore() );
+							ve.dm.example.removeOriginalDomElements( txops[ j ].insert );
+						}
+					}
+					ops.push( txops );
+				}
+			}
+			assert.equalLinearData( ops, expectedOps, msg + ': data' );
+			if ( store ) {
+				for ( i in store ) {
+					assert.deepEqual( doc.getStore().value( i ).map( summary ), store[ i ].map( summary ), ': store value ' + i );
+				}
+			}
+		}
+		if ( expectedRangeOrSelection ) {
+			expectedSelection = ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), expectedRangeOrSelection );
+			assert.equalHash( model.getSelection(), expectedSelection, msg + ': selection' );
+		}
+		if ( expectedHtml ) {
+			htmlDoc = ve.dm.converter.getDomFromModel( doc );
+			assert.strictEqual( htmlDoc.body.innerHTML, expectedHtml, msg + ': HTML' );
+		}
+		assert.strictEqual( testEvent.defaultPrevented(), !!expectedDefaultPrevented, msg + ': default action ' + ( expectedDefaultPrevented ? '' : 'not ' ) + 'prevented' );
+		view.destroy();
+		done();
+	} );
+};
+
+ve.test.utils.TestEvent = function TestEvent( data ) {
+	var defaultPrevented, key,
+		internalData = {};
+	this.testData = internalData;
+	this.originalEvent = {
+		clipboardData: {
+			getData: function ( prop ) {
+				return internalData[ prop ];
+			},
+			setData: function ( prop, val ) {
+				if ( internalData[ prop ] === undefined ) {
+					this.items.push( {
+						kind: 'string',
+						type: prop
+					} );
+				}
+				internalData[ prop ] = val;
+				return true;
+			},
+			items: []
+		}
+	};
+	this.preventDefault = this.stopPropagation = function () {
+		defaultPrevented = true;
+	};
+	this.defaultPrevented = function () {
+		return !!defaultPrevented;
+	};
+	if ( data ) {
+		for ( key in data ) {
+			// Don't directly use the data, so we get items set up
+			this.originalEvent.clipboardData.setData( key, data[ key ] );
+		}
+	}
 };
 
 QUnit.test( 'special key down: backspace/delete', function ( assert ) {
@@ -150,9 +289,7 @@ QUnit.test( 'special key down: backspace/delete', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 5, 37 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
 				msg: 'Table cell selected but not deleted by backspace'
 			},
@@ -164,9 +301,7 @@ QUnit.test( 'special key down: backspace/delete', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 5, 37 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
 				msg: 'Table cell selected but not deleted by delete'
 			},
@@ -224,10 +359,12 @@ QUnit.test( 'special key down: backspace/delete', function ( assert ) {
 				rangeOrSelection: new ve.Range( 0, 63 ),
 				keys: [ 'BACKSPACE' ],
 				expectedData: function ( data ) {
-					data.splice( 0, 61,
-							{ type: 'paragraph' },
-							{ type: '/paragraph' }
-						);
+					data.splice(
+						0,
+						61,
+						{ type: 'paragraph' },
+						{ type: '/paragraph' }
+					);
 				},
 				expectedRangeOrSelection: new ve.Range( 1 ),
 				msg: 'Backspace after select all spanning entire document creates empty paragraph'
@@ -271,8 +408,8 @@ QUnit.test( 'special key down: backspace/delete', function ( assert ) {
 				keys: [ 'DELETE' ],
 				expectedData: function ( data ) {
 					var paragraph = data.splice( 14, 5 );
-					data.splice( 13, 2 ); // remove the empty listItem
-					data.splice.apply( data, [ 14, 0 ].concat( paragraph, { type: 'list', attributes: { style: 'bullet' } }, { type: '/list' } ) );
+					data.splice( 13, 2 ); // Remove the empty listItem
+					data.splice.apply( data, [ 14, 0 ].concat( paragraph ) );
 				},
 				expectedRangeOrSelection: new ve.Range( 15 ),
 				msg: 'Non-empty multi-item list at end of document unwrapped by delete'
@@ -422,8 +559,6 @@ QUnit.test( 'special key down: backspace/delete', function ( assert ) {
 			}
 		];
 
-	QUnit.expect( cases.length * 2 );
-
 	for ( i = 0; i < cases.length; i++ ) {
 		ve.test.utils.runSurfaceHandleSpecialKeyTest(
 			assert, cases[ i ].htmlOrDoc, cases[ i ].rangeOrSelection, cases[ i ].keys,
@@ -435,6 +570,7 @@ QUnit.test( 'special key down: backspace/delete', function ( assert ) {
 QUnit.test( 'special key down: table cells', function ( assert ) {
 	var i,
 		mergedCellsDoc = ve.dm.example.createExampleDocument( 'mergedCells' ),
+		complexTableDoc = ve.dm.example.createExampleDocument( 'complexTable' ),
 		cases = [
 			{
 				htmlOrDoc: mergedCellsDoc,
@@ -442,12 +578,9 @@ QUnit.test( 'special key down: table cells', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 0, 171 ),
 					fromCol: 1,
-					fromRow: 0,
-					toCol: 1,
-					toRow: 0
+					fromRow: 0
 				},
 				keys: [ 'ENTER' ],
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 11 ),
 				msg: 'Enter to edit a table cell'
 			},
@@ -457,19 +590,14 @@ QUnit.test( 'special key down: table cells', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 0, 171 ),
 					fromCol: 1,
-					fromRow: 0,
-					toCol: 1,
-					toRow: 0
+					fromRow: 0
 				},
 				keys: [ 'ENTER', 'ESCAPE' ],
-				expectedData: function () {},
 				expectedRangeOrSelection: {
 					type: 'table',
 					tableRange: new ve.Range( 0, 171 ),
 					fromCol: 1,
-					fromRow: 0,
-					toCol: 1,
-					toRow: 0
+					fromRow: 0
 				},
 				msg: 'Escape to leave a table cell'
 			},
@@ -479,21 +607,14 @@ QUnit.test( 'special key down: table cells', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 0, 171 ),
 					fromCol: 1,
-					fromRow: 0,
-					toCol: 1,
-					toRow: 0
+					fromRow: 0
 				},
 				keys: [ 'ENTER', 'TAB' ],
-				expectedData: function () {},
 				expectedRangeOrSelection: {
-					type: 'table',
-					tableRange: new ve.Range( 0, 171 ),
-					fromCol: 2,
-					fromRow: 0,
-					toCol: 2,
-					toRow: 0
+					type: 'linear',
+					range: new ve.Range( 16 )
 				},
-				msg: 'Tab while in a table cell moves to the next cell'
+				msg: 'Tab while in a table cell moves inside the next cell'
 			},
 			{
 				htmlOrDoc: mergedCellsDoc,
@@ -501,25 +622,74 @@ QUnit.test( 'special key down: table cells', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 0, 171 ),
 					fromCol: 1,
-					fromRow: 0,
-					toCol: 1,
-					toRow: 0
+					fromRow: 0
 				},
 				keys: [ 'ENTER', 'SHIFT+TAB' ],
-				expectedData: function () {},
 				expectedRangeOrSelection: {
+					type: 'linear',
+					range: new ve.Range( 6 )
+				},
+				msg: 'Shift+tab while in a table cell moves inside the previous cell'
+			},
+			{
+				// Create a full surface and return the view, as the UI surface is required for the insert action
+				htmlOrDoc: ve.test.utils.createSurfaceFromDocument( ve.dm.example.createExampleDocument( 'mergedCells' ) ).view,
+				rangeOrSelection: {
 					type: 'table',
 					tableRange: new ve.Range( 0, 171 ),
-					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromCol: 5,
+					fromRow: 6
 				},
-				msg: 'Shift+tab while in a table cell moves to the previous cell'
+				keys: [ 'TAB' ],
+				expectedData: function ( data ) {
+					var tableCell = [
+						{ type: 'tableCell', attributes: { style: 'data', colspan: 1, rowspan: 1 } },
+						{ type: 'paragraph', internal: { generated: 'wrapper' } },
+						{ type: '/paragraph' },
+						{ type: '/tableCell' }
+					];
+					data.splice.apply( data, [ 169, 0 ].concat( { type: 'tableRow' }, tableCell, tableCell, tableCell, tableCell, tableCell, tableCell, { type: '/tableRow' } ) );
+				},
+				expectedRangeOrSelection: {
+					type: 'table',
+					tableRange: new ve.Range( 0, 197 ),
+					fromCol: 0,
+					fromRow: 7
+				},
+				msg: 'Tab at end of table inserts new row'
+			},
+			{
+				htmlOrDoc: mergedCellsDoc,
+				rangeOrSelection: {
+					type: 'table',
+					tableRange: new ve.Range( 0, 171 ),
+					fromCol: 2,
+					fromRow: 0
+				},
+				keys: [ 'UP' ],
+				expectedRangeOrSelection: new ve.Range( 0 ),
+				msg: 'Up in first row of table moves out of table'
+			},
+			{
+				htmlOrDoc: mergedCellsDoc,
+				rangeOrSelection: {
+					type: 'table',
+					tableRange: new ve.Range( 0, 171 ),
+					fromCol: 2,
+					fromRow: 6
+				},
+				keys: [ 'DOWN' ],
+				expectedRangeOrSelection: new ve.Range( 171 ),
+				msg: 'Down in last row of table moves out of table'
+			},
+			{
+				htmlOrDoc: complexTableDoc,
+				rangeOrSelection: new ve.Range( 3 ),
+				keys: [ 'TAB' ],
+				expectedRangeOrSelection: new ve.Range( 3 ),
+				msg: 'Tab inside a table caption does nothing'
 			}
 		];
-
-	QUnit.expect( cases.length * 2 );
 
 	for ( i = 0; i < cases.length; i++ ) {
 		ve.test.utils.runSurfaceHandleSpecialKeyTest(
@@ -527,6 +697,12 @@ QUnit.test( 'special key down: table cells', function ( assert ) {
 			cases[ i ].expectedData, cases[ i ].expectedRangeOrSelection, cases[ i ].msg
 		);
 	}
+
+	// Allow the real surface created with createSurfaceFromDocument for the
+	// 'Tab at end of table inserts new row' case to get properly initialized
+	// before we end the test and kill it.
+	// FIXME Oh no eww gross
+	setTimeout( assert.async(), 0 );
 } );
 
 QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
@@ -548,7 +724,6 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				rangeOrSelection: new ve.Range( 2 ),
 				keys: [ 'LEFT' ],
 				forceSelection: new ve.Range( 1 ),
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 1 ),
 				msg: 'Cursor left in text'
 			},
@@ -557,7 +732,6 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				rangeOrSelection: new ve.Range( 2 ),
 				keys: [ 'RIGHT' ],
 				forceSelection: new ve.Range( 3 ),
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 3 ),
 				msg: 'Cursor right in text'
 			},
@@ -566,7 +740,6 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				rangeOrSelection: new ve.Range( 4 ),
 				keys: [ 'UP' ],
 				forceSelection: new ve.Range( 1 ),
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 1 ),
 				msg: 'Cursor up in text'
 			},
@@ -575,7 +748,6 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				rangeOrSelection: new ve.Range( 20 ),
 				keys: [ 'DOWN' ],
 				forceSelection: new ve.Range( 22 ),
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 22 ),
 				msg: 'Cursor down in text'
 			},
@@ -585,7 +757,6 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				rangeOrSelection: new ve.Range( 2 ),
 				keys: [ 'SHIFT+LEFT' ],
 				forceSelection: new ve.Range( 1 ),
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 2, 1 ),
 				msg: 'Cursor left in text with shift'
 			},
@@ -594,7 +765,6 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				rangeOrSelection: new ve.Range( 2 ),
 				keys: [ 'SHIFT+RIGHT' ],
 				forceSelection: new ve.Range( 3 ),
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 2, 3 ),
 				msg: 'Cursor right in text with shift'
 			},
@@ -603,7 +773,6 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				rangeOrSelection: new ve.Range( 4 ),
 				keys: [ 'SHIFT+UP' ],
 				forceSelection: new ve.Range( 1 ),
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 4, 1 ),
 				msg: 'Cursor up in text with shift'
 			},
@@ -612,7 +781,6 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				rangeOrSelection: new ve.Range( 20 ),
 				keys: [ 'SHIFT+DOWN' ],
 				forceSelection: new ve.Range( 22 ),
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 20, 22 ),
 				msg: 'Cursor down in text with shift'
 			},
@@ -621,33 +789,57 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				htmlOrDoc: blockImageDoc,
 				rangeOrSelection: new ve.Range( 5, 18 ),
 				keys: [ 'LEFT' ],
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 4 ),
 				msg: 'Cursor left off a block node'
 			},
 			{
 				htmlOrDoc: blockImageDoc,
 				rangeOrSelection: new ve.Range( 5, 18 ),
+				keys: [ 'HOME' ],
+				expectedRangeOrSelection: new ve.Range( 4 ),
+				msg: 'Cursor home off a block node'
+			},
+			{
+				htmlOrDoc: blockImageDoc,
+				rangeOrSelection: new ve.Range( 5, 18 ),
 				keys: [ 'UP' ],
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 4 ),
 				msg: 'Cursor up off a block node'
 			},
 			{
 				htmlOrDoc: blockImageDoc,
 				rangeOrSelection: new ve.Range( 5, 18 ),
+				keys: [ 'PAGEUP' ],
+				expectedRangeOrSelection: new ve.Range( 4 ),
+				msg: 'Cursor page up off a block node'
+			},
+			{
+				htmlOrDoc: blockImageDoc,
+				rangeOrSelection: new ve.Range( 5, 18 ),
 				keys: [ 'RIGHT' ],
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 19 ),
 				msg: 'Cursor right off a block node'
 			},
 			{
 				htmlOrDoc: blockImageDoc,
 				rangeOrSelection: new ve.Range( 5, 18 ),
+				keys: [ 'END' ],
+				expectedRangeOrSelection: new ve.Range( 19 ),
+				msg: 'Cursor end off a block node'
+			},
+			{
+				htmlOrDoc: blockImageDoc,
+				rangeOrSelection: new ve.Range( 5, 18 ),
 				keys: [ 'DOWN' ],
-				expectedData: function () {},
 				expectedRangeOrSelection: new ve.Range( 19 ),
 				msg: 'Cursor down off a block node'
+			},
+			{
+				htmlOrDoc: blockImageDoc,
+				rangeOrSelection: new ve.Range( 5, 18 ),
+				keys: [ 'PAGEDOWN' ],
+				expectedRangeOrSelection: new ve.Range( 19 ),
+				msg: 'Cursor page down off a block node'
 			},
 			// Cursoring onto a block node, which should focus it
 			// Again, these are forcibly moving the cursor, so it's not a perfect
@@ -656,8 +848,14 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				htmlOrDoc: blockImageDoc,
 				rangeOrSelection: new ve.Range( 4 ),
 				keys: [ 'RIGHT' ],
-				forceSelection: new ve.Range( 8 ), // cursor moves into the caption
-				expectedData: function () {},
+				// Force cursor into the cursor holder before the block image
+				forceSelection: {
+					anchorNode: '.ve-ce-cursorHolder-before',
+					// Emulating Chromium 50, right arrow lands at offset 0
+					anchorOffset: 0,
+					focusNode: '.ve-ce-cursorHolder-before',
+					focusOffset: 0
+				},
 				expectedRangeOrSelection: new ve.Range( 5, 18 ),
 				msg: 'Cursor right onto a block node'
 			},
@@ -665,8 +863,14 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				htmlOrDoc: blockImageDoc,
 				rangeOrSelection: new ve.Range( 19 ),
 				keys: [ 'LEFT' ],
-				forceSelection: new ve.Range( 17 ),
-				expectedData: function () {},
+				// Force cursor into the cursor holder after the block image
+				forceSelection: {
+					anchorNode: '.ve-ce-cursorHolder-after',
+					// Emulating Chromium 50, left arrow lands at offset 1
+					anchorOffset: 1,
+					focusNode: '.ve-ce-cursorHolder-after',
+					focusOffset: 1
+				},
 				expectedRangeOrSelection: new ve.Range( 18, 5 ),
 				msg: 'Cursor left onto a block node'
 			},
@@ -674,8 +878,14 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				htmlOrDoc: blockImageDoc,
 				rangeOrSelection: new ve.Range( 4 ),
 				keys: [ 'DOWN' ],
-				forceSelection: new ve.Range( 14 ), // cursor moves into the caption
-				expectedData: function () {},
+				// Force cursor into the cursor holder before the block image
+				forceSelection: {
+					anchorNode: '.ve-ce-cursorHolder-before',
+					// Emulating Chromium 50, down arrow lands at offset 0
+					anchorOffset: 0,
+					focusNode: '.ve-ce-cursorHolder-before',
+					focusOffset: 0
+				},
 				expectedRangeOrSelection: new ve.Range( 5, 18 ),
 				msg: 'Cursor down onto a block node'
 			},
@@ -683,14 +893,18 @@ QUnit.test( 'special key down: linear arrow keys', function ( assert ) {
 				htmlOrDoc: blockImageDoc,
 				rangeOrSelection: new ve.Range( 20 ),
 				keys: [ 'UP' ],
-				forceSelection: new ve.Range( 14 ), // cursor moves into the caption
-				expectedData: function () {},
+				// Force cursor into the cursor holder after the block image
+				forceSelection: {
+					anchorNode: '.ve-ce-cursorHolder-after',
+					// Emulating Chromium 50, up arrow lands at offset 0
+					anchorOffset: 0,
+					focusNode: '.ve-ce-cursorHolder-after',
+					focusOffset: 0
+				},
 				expectedRangeOrSelection: new ve.Range( 18, 5 ),
 				msg: 'Cursor up onto a block node'
 			}
 		];
-
-	QUnit.expect( cases.length * 2 );
 
 	for ( i = 0; i < cases.length; i++ ) {
 		ve.test.utils.runSurfaceHandleSpecialKeyTest(
@@ -717,6 +931,18 @@ QUnit.test( 'special key down: linear enter', function ( assert ) {
 				},
 				expectedRangeOrSelection: new ve.Range( 59 ),
 				msg: 'End of paragraph split by enter'
+			},
+			{
+				rangeOrSelection: new ve.Range( 57 ),
+				keys: [ 'ENTER' ],
+				htmlOrDoc: ( function () {
+					var view = ve.test.utils.createSurfaceViewFromDocument( ve.dm.example.createExampleDocument() );
+					view.surface.isMultiline = function () { return false; };
+					return view;
+				}() ),
+				expectedData: function () {},
+				expectedRangeOrSelection: new ve.Range( 57 ),
+				msg: 'Enter does nothing in single line mode'
 			},
 			{
 				rangeOrSelection: new ve.Range( 57 ),
@@ -825,17 +1051,32 @@ QUnit.test( 'special key down: linear enter', function ( assert ) {
 				msg: 'List item not split by shift+enter'
 			},
 			{
+				rangeOrSelection: new ve.Range( 30 ),
+				keys: [ 'ENTER', 'ENTER' ],
+				expectedData: function ( data ) {
+					data.splice(
+						33, 0,
+						{ type: 'paragraph' },
+						{ type: '/paragraph' }
+					);
+				},
+				expectedRangeOrSelection: new ve.Range( 34 ),
+				msg: 'Two enters breaks out of a list and starts a new paragraph'
+			},
+			{
 				rangeOrSelection: new ve.Range( 21 ),
 				keys: [ 'ENTER', 'ENTER' ],
 				expectedData: function ( data ) {
 					data.splice(
 						24, 0,
+						{ type: '/listItem' },
+						{ type: 'listItem' },
 						{ type: 'paragraph' },
 						{ type: '/paragraph' }
 					);
 				},
-				expectedRangeOrSelection: new ve.Range( 25 ),
-				msg: 'Two enters breaks out of a list and starts a new paragraph'
+				expectedRangeOrSelection: new ve.Range( 27 ),
+				msg: 'Two enters in nested list breaks out of inner list and starts a new list item'
 			},
 			{
 				htmlOrDoc: '<p>foo</p>' + emptyList + '<p>bar</p>',
@@ -880,10 +1121,21 @@ QUnit.test( 'special key down: linear enter', function ( assert ) {
 				},
 				expectedRangeOrSelection: new ve.Range( 1 ),
 				msg: 'Enter in an empty list with no adjacent content destroys it and creates a paragraph'
+			},
+			{
+				htmlOrDoc: '<p>foo</p><ul><li>bar' + emptyList + '</li></ul><p>baz</p>',
+				rangeOrSelection: new ve.Range( 15 ),
+				keys: [ 'ENTER' ],
+				expectedData: function ( data ) {
+					data.splice(
+						12, 6,
+						{ type: '/listItem' }, { type: 'listItem' }, { type: 'paragraph' }, { type: '/paragraph' }
+					);
+				},
+				expectedRangeOrSelection: new ve.Range( 15 ),
+				msg: 'Enter in a completely empty nested list destroys it and adds a new list item to the parent'
 			}
 		];
-
-	QUnit.expect( cases.length * 2 );
 
 	for ( i = 0; i < cases.length; i++ ) {
 		ve.test.utils.runSurfaceHandleSpecialKeyTest(
@@ -895,6 +1147,7 @@ QUnit.test( 'special key down: linear enter', function ( assert ) {
 
 QUnit.test( 'handleObservedChanges (content changes)', function ( assert ) {
 	var i,
+		linkHash = 'hdee7b89d544aa584',
 		cases = [
 			{
 				prevHtml: '<p></p>',
@@ -907,9 +1160,7 @@ QUnit.test( 'handleObservedChanges (content changes)', function ( assert ) {
 						{
 							type: 'replace',
 							insert: [ 'A' ],
-							remove: [],
-							insertedDataOffset: 0,
-							insertedDataLength: 1
+							remove: []
 						},
 						{ type: 'retain', length: 3 }
 					]
@@ -927,9 +1178,7 @@ QUnit.test( 'handleObservedChanges (content changes)', function ( assert ) {
 						{
 							type: 'replace',
 							insert: [ 'B' ],
-							remove: [ 'A' ],
-							insertedDataLength: 1,
-							insertedDataOffset: 0
+							remove: [ 'A' ]
 						},
 						{ type: 'retain', length: 3 }
 					]
@@ -946,10 +1195,8 @@ QUnit.test( 'handleObservedChanges (content changes)', function ( assert ) {
 						{ type: 'retain', length: 5 },
 						{
 							type: 'replace',
-							insert: [ [ 'B', [ 1 ] ] ],
-							remove: [ [ 'X', [ 1 ] ] ],
-							insertedDataLength: 1,
-							insertedDataOffset: 0
+							insert: [ [ 'B', [ linkHash ] ] ],
+							remove: [ [ 'X', [ linkHash ] ] ]
 						},
 						{ type: 'retain', length: 4 }
 					]
@@ -966,10 +1213,8 @@ QUnit.test( 'handleObservedChanges (content changes)', function ( assert ) {
 						{ type: 'retain', length: 2 },
 						{
 							type: 'replace',
-							insert: [ [ 'Y', [ 0 ] ] ],
-							remove: [],
-							insertedDataOffset: 0,
-							insertedDataLength: 1
+							insert: [ [ 'Y', [ 'h96560f31226e3199' ] ] ],
+							remove: []
 						},
 						{ type: 'retain', length: 3 }
 					]
@@ -988,21 +1233,75 @@ QUnit.test( 'handleObservedChanges (content changes)', function ( assert ) {
 						{
 							type: 'replace',
 							insert: [ 'Y' ],
-							remove: [],
-							insertedDataOffset: 0,
-							insertedDataLength: 1
+							remove: []
 						},
 						{ type: 'retain', length: 3 }
 					]
 				],
 				msg: 'Append after bold'
+			},
+			{
+				prevHtml: '<p>Foo</p>',
+				prevRange: new ve.Range( 4 ),
+				nextHtml: '<p>Foo </p>',
+				nextRange: new ve.Range( 5 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 4 },
+						{
+							type: 'replace',
+							insert: [ ' ' ],
+							remove: []
+						},
+						{ type: 'retain', length: 3 }
+					]
+				],
+				expectsBreakpoint: true, // Adding a word break triggers a breakpoint
+				msg: 'Inserting a word break'
+			},
+			{
+				prevHtml: '<p>Foo</p>',
+				prevRange: new ve.Range( 4 ),
+				nextHtml: '<p>Fo</p>',
+				nextRange: new ve.Range( 3 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 3 },
+						{
+							type: 'replace',
+							insert: [],
+							remove: [ 'o' ]
+						},
+						{ type: 'retain', length: 3 }
+					]
+				],
+				expectsBreakpoint: true, // Any delete triggers a breakpoint
+				msg: 'Deleting text'
+			},
+			{
+				prevHtml: '<p>Foo</p>',
+				prevRange: new ve.Range( 4 ),
+				nextHtml: '<p>Foo</p>',
+				nextRange: new ve.Range( 1 ),
+				expectedOps: [],
+				expectsBreakpoint: false,
+				msg: 'Just moving the selection'
+			},
+			{
+				prevHtml: '<p>Foo</p><p>Bar</p>',
+				prevRange: new ve.Range( 4 ),
+				nextHtml: '<p>Foo</p><p>Bar</p>',
+				nextRange: new ve.Range( 5 ),
+				expectedOps: [],
+				expectsBreakpoint: false,
+				expectedRangeOrSelection: new ve.Range( 6 ),
+				msg: 'Moving the selection to a non-cursorable location'
 			}
 		];
 
-	QUnit.expect( cases.length * 2 );
-
-	function testRunner( prevHtml, prevRange, prevFocusIsAfterAnnotationBoundary, nextHtml, nextRange, expectedOps, expectedRangeOrSelection, msg ) {
+	function testRunner( prevHtml, prevRange, prevFocusIsAfterAnnotationBoundary, nextHtml, nextRange, expectedOps, expectedRangeOrSelection, expectsBreakpoint, msg ) {
 		var txs, i, ops,
+			delayed = [],
 			view = ve.test.utils.createSurfaceViewFromHtml( prevHtml ),
 			model = view.getModel(),
 			node = view.getDocument().getDocumentNode().children[ 0 ],
@@ -1022,18 +1321,27 @@ QUnit.test( 'handleObservedChanges (content changes)', function ( assert ) {
 				veRange: nextRange,
 				selectionChanged: !nextRange.equals( prevRange ),
 				contentChanged: true
-			};
+			},
+			initialBreakpoints = model.undoStack.length;
+
+		view.afterRenderLock = function ( callback ) {
+			delayed.push( callback );
+		};
 
 		// Set model linear selection, so that insertion annotations are primed correctly
 		model.setLinearSelection( prevRange );
 		view.handleObservedChanges( prev, next );
-		txs = model.getHistory()[ 0 ].transactions;
+		for ( i = 0; i < delayed.length; i++ ) {
+			delayed[ i ]();
+		}
+		txs = ( model.getHistory()[ 0 ] || {} ).transactions || [];
 		ops = [];
 		for ( i = 0; i < txs.length; i++ ) {
 			ops.push( txs[ i ].getOperations() );
 		}
 		assert.deepEqual( ops, expectedOps, msg + ': keys' );
 		assert.equalRange( model.getSelection().getRange(), expectedRangeOrSelection, msg + ': range' );
+		assert.equal( initialBreakpoints !== model.undoStack.length, !!expectsBreakpoint, msg + ': breakpoint' );
 
 		view.destroy();
 	}
@@ -1042,20 +1350,25 @@ QUnit.test( 'handleObservedChanges (content changes)', function ( assert ) {
 		testRunner(
 			cases[ i ].prevHtml, cases[ i ].prevRange, cases[ i ].prevFocusIsAfterAnnotationBoundary || false,
 			cases[ i ].nextHtml, cases[ i ].nextRange,
-			cases[ i ].expectedOps, cases[ i ].expectedRangeOrSelection || cases[ i ].nextRange, cases[ i ].msg
+			cases[ i ].expectedOps, cases[ i ].expectedRangeOrSelection || cases[ i ].nextRange, cases[ i ].expectsBreakpoint, cases[ i ].msg
 		);
 	}
 
 } );
 
-QUnit.test( 'handleDataTransfer/handleDataTransferItems', function ( assert )  {
+QUnit.test( 'handleDataTransfer/handleDataTransferItems', function ( assert ) {
 	var i,
-		view = ve.test.utils.createSurfaceViewFromHtml( '' ),
-		model = view.getModel(),
+		surface = ve.test.utils.createViewOnlySurfaceFromHtml( '' ),
+		view = surface.getView(),
+		model = surface.getModel(),
+		linkAction = ve.ui.actionFactory.create( 'link', surface ),
+		link = linkAction.getLinkAnnotation( 'http://foo.com' ),
+		// Don't hard-code link index as it may depend on the LinkAction used
+		linkHash = model.getDocument().getStore().hashOfValue( link ),
 		fragment = model.getLinearFragment( new ve.Range( 1 ) ),
 		cases = [
 			{
-				msg: 'Url',
+				msg: 'URL',
 				dataTransfer: {
 					items: [
 						{
@@ -1069,25 +1382,23 @@ QUnit.test( 'handleDataTransfer/handleDataTransferItems', function ( assert )  {
 				},
 				isPaste: true,
 				expectedData: [
-					[ 'h', [ 0 ] ],
-					[ 't', [ 0 ] ],
-					[ 't', [ 0 ] ],
-					[ 'p', [ 0 ] ],
-					[ ':', [ 0 ] ],
-					[ '/', [ 0 ] ],
-					[ '/', [ 0 ] ],
-					[ 'f', [ 0 ] ],
-					[ 'o', [ 0 ] ],
-					[ 'o', [ 0 ] ],
-					[ '.', [ 0 ] ],
-					[ 'c', [ 0 ] ],
-					[ 'o', [ 0 ] ],
-					[ 'm', [ 0 ] ]
+					[ 'h', [ linkHash ] ],
+					[ 't', [ linkHash ] ],
+					[ 't', [ linkHash ] ],
+					[ 'p', [ linkHash ] ],
+					[ ':', [ linkHash ] ],
+					[ '/', [ linkHash ] ],
+					[ '/', [ linkHash ] ],
+					[ 'f', [ linkHash ] ],
+					[ 'o', [ linkHash ] ],
+					[ 'o', [ linkHash ] ],
+					[ '.', [ linkHash ] ],
+					[ 'c', [ linkHash ] ],
+					[ 'o', [ linkHash ] ],
+					[ 'm', [ linkHash ] ]
 				]
 			}
 		];
-
-	QUnit.expect( cases.length );
 
 	for ( i = 0; i < cases.length; i++ ) {
 		fragment.select();
@@ -1097,7 +1408,7 @@ QUnit.test( 'handleDataTransfer/handleDataTransferItems', function ( assert )  {
 	}
 } );
 
-QUnit.test( 'getClipboardHash', 1, function ( assert ) {
+QUnit.test( 'getClipboardHash', function ( assert ) {
 	assert.strictEqual(
 		ve.ce.Surface.static.getClipboardHash(
 			$( '  <p class="foo"> B<b>a</b>r </p>\n\t<span class="baz"></span> Quux <h1><span></span>Whee</h1>' )
@@ -1108,20 +1419,7 @@ QUnit.test( 'getClipboardHash', 1, function ( assert ) {
 } );
 
 QUnit.test( 'onCopy', function ( assert ) {
-	var i, testClipboardData,
-		testEvent = {
-			originalEvent: {
-				clipboardData: {
-					items: [],
-					setData: function ( prop, val ) {
-						testClipboardData[ prop ] = val;
-						return true;
-					}
-				}
-			},
-			preventDefault: function () {},
-			stopPropagation: function () {}
-		},
+	var i,
 		cases = [
 			{
 				rangeOrSelection: new ve.Range( 27, 32 ),
@@ -1139,6 +1437,7 @@ QUnit.test( 'onCopy', function ( assert ) {
 				expectedOriginalRange: new ve.Range( 1, 6 ),
 				expectedBalancedRange: new ve.Range( 1, 6 ),
 				expectedHtml: '<ol><li><p>g</p></li></ol>',
+				expectedText: 'g\n\n',
 				msg: 'Copy list item'
 			},
 			{
@@ -1148,42 +1447,81 @@ QUnit.test( 'onCopy', function ( assert ) {
 				expectedOriginalRange: new ve.Range( 0, 5 ),
 				expectedBalancedRange: new ve.Range( 0, 5 ),
 				expectedHtml:
-					'<p about="a" content="b" datatype="c" property="d" rel="e" resource="f" rev="g" typeof="h" class="i" ' +
+					'<p content="b" datatype="c" property="d" rel="e" resource="f" rev="g" typeof="h" class="i" ' +
 						'data-ve-attributes="{&quot;typeof&quot;:&quot;h&quot;,&quot;rev&quot;:&quot;g&quot;,' +
 						'&quot;resource&quot;:&quot;f&quot;,&quot;rel&quot;:&quot;e&quot;,&quot;property&quot;:&quot;d&quot;,' +
-						'&quot;datatype&quot;:&quot;c&quot;,&quot;content&quot;:&quot;b&quot;,&quot;about&quot;:&quot;a&quot;}">' +
+						'&quot;datatype&quot;:&quot;c&quot;,&quot;content&quot;:&quot;b&quot;}">' +
 						'Foo' +
 					'</p>',
+				expectedText: 'Foo\n\n',
 				msg: 'RDFa attributes encoded into data-ve-attributes'
+			},
+			{
+				rangeOrSelection: new ve.Range( 1, 4 ),
+				expectedHtml: '<span data-ve-clipboard-key="">&nbsp;</span>a<b>b</b><i>c</i>',
+				noClipboardData: true,
+				msg: 'Clipboard span'
 			}
+			/*
+			// Our CI environment uses either Chrome 57 (mediawiki/extensions/VisualEditor)
+			// or Chrome 63 (VisualEditor/VisualEditor), but they produce different results,
+			// so this test will always fail in at least one of them.
+			{
+				rangeOrSelection: new ve.Range( 0, 61 ),
+				expectedText: 'abc\n\nd\n\ne\n\nf\n\ng\n\nhi\nj\n\nk\n\nl\n\nm\n\n', // Chrome 57
+				expectedText: 'abc\nd\n\ne\n\nf\n\ng\n\nhi\nj\n\nk\n\nl\n\nm\n\n',   // Chrome 63
+				msg: 'Plain text of entire document'
+			}
+			*/
 		];
 
-	QUnit.expect( cases.length * 5 );
-
-	function testRunner( doc, rangeOrSelection, expectedData, expectedOriginalRange, expectedBalancedRange, expectedHtml, msg ) {
-		var clipboardKey, slice,
+	function testRunner( doc, rangeOrSelection, expectedData, expectedOriginalRange, expectedBalancedRange, expectedHtml, expectedText, noClipboardData, msg ) {
+		var slice, isClipboardDataFormatsSupported, $expected, clipboardKey,
+			testEvent = new ve.test.utils.TestEvent(),
+			clipboardData = testEvent.originalEvent.clipboardData,
 			view = ve.test.utils.createSurfaceViewFromDocument( doc || ve.dm.example.createExampleDocument() ),
 			model = view.getModel();
 
+		if ( noClipboardData ) {
+			isClipboardDataFormatsSupported = ve.isClipboardDataFormatsSupported;
+			ve.isClipboardDataFormatsSupported = function () { return false; };
+		}
+
 		// Paste sequence
 		model.setSelection( ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), rangeOrSelection ) );
-		testClipboardData = {};
 		view.onCopy( testEvent );
 
-		clipboardKey = testClipboardData[ 'text/xcustom' ];
-
-		assert.strictEqual( clipboardKey, view.clipboardId + '-' + view.clipboardIndex, msg + ': clipboardId set' );
+		if ( noClipboardData ) {
+			ve.isClipboardDataFormatsSupported = isClipboardDataFormatsSupported;
+		}
 
 		slice = view.clipboard.slice;
+		clipboardKey = view.clipboardId + '-' + view.clipboardIndex;
 
-		assert.equalLinearData( slice.data.data, expectedData, msg + ': data' );
-		assert.equalRange( slice.originalRange, expectedOriginalRange, msg + ': originalRange' );
-		assert.equalRange( slice.balancedRange, expectedBalancedRange, msg + ': balancedRange' );
-		assert.equalDomElement(
-			$( '<div>' ).html( view.$pasteTarget.html() )[ 0 ],
-			$( '<div>' ).html( expectedHtml )[ 0 ],
-			msg + ': html'
-		);
+		assert.equalRange( slice.originalRange, expectedOriginalRange || rangeOrSelection, msg + ': originalRange' );
+		assert.equalRange( slice.balancedRange, expectedBalancedRange || rangeOrSelection, msg + ': balancedRange' );
+		if ( expectedData ) {
+			assert.equalLinearData( slice.data.data, expectedData, msg + ': data' );
+		}
+		if ( expectedHtml ) {
+			$expected = $( '<div>' ).html( expectedHtml );
+			// Clipboard key is random, so update it
+			$expected.find( '[data-ve-clipboard-key]' ).attr( 'data-ve-clipboard-key', clipboardKey );
+			assert.equalDomElement(
+				$( '<div>' ).html( clipboardData.getData( 'text/html' ) )[ 0 ],
+				$expected[ 0 ],
+				msg + ': html'
+			);
+		}
+		if ( expectedText ) {
+			if ( $.client.profile().layout === 'gecko' ) {
+				expectedText = expectedText.trim();
+			}
+			assert.strictEqual( clipboardData.getData( 'text/plain' ), expectedText, msg + ': text' );
+		}
+		if ( !noClipboardData ) {
+			assert.strictEqual( clipboardData.getData( 'text/xcustom' ), clipboardKey, msg + ': clipboardId set' );
+		}
 
 		view.destroy();
 	}
@@ -1192,7 +1530,7 @@ QUnit.test( 'onCopy', function ( assert ) {
 		testRunner(
 			cases[ i ].doc, cases[ i ].rangeOrSelection, cases[ i ].expectedData,
 			cases[ i ].expectedOriginalRange, cases[ i ].expectedBalancedRange,
-			cases[ i ].expectedHtml, cases[ i ].msg
+			cases[ i ].expectedHtml, cases[ i ].expectedText, cases[ i ].noClipboardData, cases[ i ].msg
 		);
 	}
 
@@ -1200,22 +1538,10 @@ QUnit.test( 'onCopy', function ( assert ) {
 
 QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 	var i,
-		layout = $.client.profile().layout,
-		expected = 0,
-		exampleDoc = '<p id="foo"></p><p>Foo</p><h2> Baz </h2><table><tbody><tr><td></td></tbody></table>',
-		exampleSurface = ve.test.utils.createSurfaceViewFromHtml( exampleDoc ),
-		docLen = 24,
-		TestEvent = function ( data ) {
-			this.originalEvent = {
-				clipboardData: {
-					getData: function ( prop ) {
-						return data[ prop ];
-					}
-				}
-			};
-			this.preventDefault = function () {};
-			this.stopPropagation = function () {};
-		},
+		exampleDoc = '<p id="foo"></p><p>Foo</p><h2> Baz </h2><table><tbody><tr><td></td></tbody></table><p><b>Quux</b></p>',
+		docLen = 30,
+		bold = ve.dm.example.bold,
+		italic = ve.dm.example.italic,
 		cases = [
 			{
 				rangeOrSelection: new ve.Range( 1 ),
@@ -1252,6 +1578,152 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 					]
 				],
 				msg: 'Text into paragraph'
+			},
+			{
+				rangeOrSelection: new ve.Range( 4, 5 ),
+				pasteHtml: 'Bar',
+				expectedRangeOrSelection: new ve.Range( 7 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 4 },
+						{
+							type: 'replace',
+							insert: [],
+							remove: [ 'o' ]
+						},
+						{ type: 'retain', length: docLen - 5 }
+					],
+					[
+						{ type: 'retain', length: 4 },
+						{
+							type: 'replace',
+							insert: [ 'B', 'a', 'r' ],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 5 }
+					]
+				],
+				msg: 'Text into selection'
+			},
+			{
+				rangeOrSelection: new ve.Range( 25 ),
+				internalSourceRangeOrSelection: new ve.Range( 3, 6 ),
+				expectedRangeOrSelection: new ve.Range( 28 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 25 },
+						{
+							type: 'replace',
+							insert: [
+								[ 'F', [ bold ] ],
+								[ 'o', [ bold ] ],
+								[ 'o', [ bold ] ]
+							],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 25 }
+					]
+				],
+				msg: 'Internal text into annotated content'
+			},
+			{
+				rangeOrSelection: new ve.Range( 25 ),
+				internalSourceRangeOrSelection: new ve.Range( 3, 6 ),
+				noClipboardData: true,
+				expectedRangeOrSelection: new ve.Range( 28 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 25 },
+						{
+							type: 'replace',
+							insert: [
+								[ 'F', [ bold ] ],
+								[ 'o', [ bold ] ],
+								[ 'o', [ bold ] ]
+							],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 25 }
+					]
+				],
+				msg: 'Internal text into annotated content (noClipboardData)'
+			},
+			{
+				rangeOrSelection: new ve.Range( 25 ),
+				pasteHtml: 'Foo',
+				expectedRangeOrSelection: new ve.Range( 28 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 25 },
+						{
+							type: 'replace',
+							insert: [
+								[ 'F', [ bold ] ],
+								[ 'o', [ bold ] ],
+								[ 'o', [ bold ] ]
+							],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 25 }
+					]
+				],
+				msg: 'External text into annotated content'
+			},
+			{
+				rangeOrSelection: new ve.Range( 25 ),
+				pasteHtml: '<i>Foo</i>',
+				expectedRangeOrSelection: new ve.Range( 28 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 25 },
+						{
+							type: 'replace',
+							insert: [
+								[ 'F', [ bold, italic ] ],
+								[ 'o', [ bold, italic ] ],
+								[ 'o', [ bold, italic ] ]
+							],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 25 }
+					]
+				],
+				msg: 'Formatted text into annotated content'
+			},
+			{
+				rangeOrSelection: new ve.Range( 23, 27 ),
+				pasteHtml: 'Foo',
+				expectedRangeOrSelection: new ve.Range( 26 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 23 },
+						{
+							type: 'replace',
+							insert: [],
+							remove: [
+								[ 'Q', [ bold ] ],
+								[ 'u', [ bold ] ],
+								[ 'u', [ bold ] ],
+								[ 'x', [ bold ] ]
+							]
+						},
+						{ type: 'retain', length: docLen - 27 }
+					],
+					[
+						{ type: 'retain', length: 23 },
+						{
+							type: 'replace',
+							insert: [
+								[ 'F', [ bold ] ],
+								[ 'o', [ bold ] ],
+								[ 'o', [ bold ] ]
+							],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 27 }
+					]
+				],
+				msg: 'External text over annotated content'
 			},
 			{
 				rangeOrSelection: new ve.Range( 4 ),
@@ -1330,151 +1802,69 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 			{
 				rangeOrSelection: new ve.Range( 4 ),
 				pasteHtml: '<p>Bar</p>',
-				expectedRangeOrSelection: {
-					gecko: new ve.Range( 11 ),
-					default: new ve.Range( 7 )
-				},
-				expectedOps: {
-					gecko: [
-						[
-							{ type: 'retain', length: 4 },
-							{
-								type: 'replace',
-								insert: [
-									{ type: '/paragraph' },
-									{ type: 'paragraph' },
-									'B', 'a', 'r',
-									{ type: '/paragraph' },
-									{ type: 'paragraph' }
-								],
-								remove: []
-							},
-							{ type: 'retain', length: docLen - 4 }
-						]
-					],
-					default: [
-						[
-							{ type: 'retain', length: 4 },
-							{
-								type: 'replace',
-								insert: [ 'B', 'a', 'r' ],
-								remove: []
-							},
-							{ type: 'retain', length: docLen - 4 }
-						]
+				expectedRangeOrSelection: new ve.Range( 7 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 4 },
+						{
+							type: 'replace',
+							insert: [ 'B', 'a', 'r' ],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 4 }
 					]
-				},
+				],
 				msg: 'Paragraph into paragraph'
 			},
 			{
 				rangeOrSelection: new ve.Range( 6 ),
 				pasteHtml: '<p>Bar</p>',
-				expectedRangeOrSelection: {
-					gecko: new ve.Range( 6 ),
-					default: new ve.Range( 9 )
-				},
-				expectedOps: {
-					gecko: [
-						[
-							{ type: 'retain', length: 7 },
-							{
-								type: 'replace',
-								insert: [
-									{ type: 'paragraph' },
-									'B', 'a', 'r',
-									{ type: '/paragraph' }
-								],
-								remove: []
-							},
-							{ type: 'retain', length: docLen - 7 }
-						]
-					],
-					default: [
-						[
-							{ type: 'retain', length: 6 },
-							{
-								type: 'replace',
-								insert: [ 'B', 'a', 'r' ],
-								remove: []
-							},
-							{ type: 'retain', length: docLen - 6 }
-						]
+				expectedRangeOrSelection: new ve.Range( 9 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 6 },
+						{
+							type: 'replace',
+							insert: [ 'B', 'a', 'r' ],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 6 }
 					]
-				},
+				],
 				msg: 'Paragraph at end of paragraph'
 			},
 			{
 				rangeOrSelection: new ve.Range( 3 ),
 				pasteHtml: '<p>Bar</p>',
-				expectedRangeOrSelection: {
-					gecko: new ve.Range( 8 ),
-					default: new ve.Range( 6 )
-				},
-				expectedOps: {
-					gecko: [
-						[
-							{ type: 'retain', length: 3 },
-							{
-								type: 'replace',
-								insert: [
-									'B', 'a', 'r',
-									{ type: '/paragraph' },
-									{ type: 'paragraph' }
-								],
-								remove: []
-							},
-							{ type: 'retain', length: docLen - 3 }
-						]
-					],
-					default: [
-						[
-							{ type: 'retain', length: 3 },
-							{
-								type: 'replace',
-								insert: [ 'B', 'a', 'r' ],
-								remove: []
-							},
-							{ type: 'retain', length: docLen - 3 }
-						]
+				expectedRangeOrSelection: new ve.Range( 6 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 3 },
+						{
+							type: 'replace',
+							insert: [ 'B', 'a', 'r' ],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 3 }
 					]
-				},
+				],
 				msg: 'Paragraph at start of paragraph'
 			},
 			{
 				rangeOrSelection: new ve.Range( 11 ),
 				pasteHtml: '<h2>Quux</h2>',
-				expectedRangeOrSelection: {
-					gecko: new ve.Range( 11 ),
-					default: new ve.Range( 15 )
-				},
-				expectedOps: {
-					gecko: [
-						[
-							{ type: 'retain', length: 12 },
-							{
-								type: 'replace',
-								insert: [
-									{ type: 'heading', attributes: { level: 2 } },
-									'Q', 'u', 'u', 'x',
-									{ type: '/heading' }
-								],
-								remove: []
-							},
-							{ type: 'retain', length: docLen - 12 }
-						]
-					],
-					default: [
-						[
-							{ type: 'retain', length: 11 },
-							{
-								type: 'replace',
-								insert: [ 'Q', 'u', 'u', 'x' ],
-								remove: []
-							},
-							{ type: 'retain', length: docLen - 11 }
-						]
+				expectedRangeOrSelection: new ve.Range( 15 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 11 },
+						{
+							type: 'replace',
+							insert: [ 'Q', 'u', 'u', 'x' ],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 11 }
 					]
-				},
+				],
 				msg: 'Heading into heading with whitespace'
 			},
 			{
@@ -1514,7 +1904,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 			{
 				rangeOrSelection: new ve.Range( 6 ),
 				pasteHtml: '<ul><li>Foo</li></ul>',
-				expectedRangeOrSelection: new ve.Range( 6 ),
+				expectedRangeOrSelection: new ve.Range( 16 ),
 				expectedOps: [
 					[
 						{ type: 'retain', length: 7 },
@@ -1628,6 +2018,76 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 				msg: 'Span cleanups: only meaningful attributes kept'
 			},
 			{
+				rangeOrSelection: new ve.Range( 1 ),
+				pasteHtml: '<span data-ve-clipboard-key="0.13811087369534492-4">&nbsp;</span><s>Foo</s>',
+				fromVe: true,
+				expectedOps: [
+					[
+						{ type: 'retain', length: 1 },
+						{
+							type: 'replace',
+							insert: [
+								[ 'F', [ { type: 'textStyle/strikethrough', attributes: { nodeName: 's' } } ] ],
+								[ 'o', [ { type: 'textStyle/strikethrough', attributes: { nodeName: 's' } } ] ],
+								[ 'o', [ { type: 'textStyle/strikethrough', attributes: { nodeName: 's' } } ] ]
+							],
+							remove: []
+						},
+						{ type: 'retain', length: 29 }
+					]
+				],
+				expectedRangeOrSelection: new ve.Range( 4 ),
+				msg: 'Span cleanups: clipboard key stripped'
+			},
+			{
+				rangeOrSelection: new ve.Range( 1 ),
+				pasteHtml: '<span data-ve-clipboard-key="0.13811087369534492-4">&nbsp;</span><s>Foo</s>',
+				expectedOps: [
+					[
+						{ type: 'retain', length: 1 },
+						{
+							type: 'replace',
+							insert: [
+								[ 'F', [ { type: 'textStyle/strikethrough', attributes: { nodeName: 's' } } ] ],
+								[ 'o', [ { type: 'textStyle/strikethrough', attributes: { nodeName: 's' } } ] ],
+								[ 'o', [ { type: 'textStyle/strikethrough', attributes: { nodeName: 's' } } ] ]
+							],
+							remove: []
+						},
+						{ type: 'retain', length: 29 }
+					]
+				],
+				expectedRangeOrSelection: new ve.Range( 4 ),
+				msg: 'Span cleanups: clipboard key stripped (external)'
+			},
+			{
+				rangeOrSelection: new ve.Range( 1 ),
+				pasteHtml: '<span style="font-weight:700;">A</span><span style="font-style:italic;">B</span><span style="text-decoration:underline">C</span><span style="text-decoration:line-through;">D</span><span style="vertical-align:super;">E</span><span style="vertical-align:sub;">F</span><span style="font-weight:700; font-style:italic;">G</span><span style="color:red;">H</span>',
+				fromVe: true,
+				expectedOps: [
+					[
+						{ type: 'retain', length: 1 },
+						{
+							type: 'replace',
+							insert: [
+								[ 'A', [ { type: 'textStyle/bold', attributes: { nodeName: 'b' } } ] ],
+								[ 'B', [ { type: 'textStyle/italic', attributes: { nodeName: 'i' } } ] ],
+								[ 'C', [ { type: 'textStyle/underline', attributes: { nodeName: 'u' } } ] ],
+								[ 'D', [ { type: 'textStyle/strikethrough', attributes: { nodeName: 's' } } ] ],
+								[ 'E', [ { type: 'textStyle/superscript', attributes: { nodeName: 'sup' } } ] ],
+								[ 'F', [ { type: 'textStyle/subscript', attributes: { nodeName: 'sub' } } ] ],
+								[ 'G', [ { type: 'textStyle/bold', attributes: { nodeName: 'b' } }, { type: 'textStyle/italic', attributes: { nodeName: 'i' } } ] ],
+								'H'
+							],
+							remove: []
+						},
+						{ type: 'retain', length: 29 }
+					]
+				],
+				expectedRangeOrSelection: new ve.Range( 9 ),
+				msg: 'Span cleanups: style converted into markup'
+			},
+			{
 				rangeOrSelection: new ve.Range( 0 ),
 				pasteHtml: 'foo\n<!-- StartFragment --><p>Bar</p><!--EndFragment-->baz',
 				useClipboardData: true,
@@ -1679,35 +2139,58 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 			},
 			{
 				rangeOrSelection: new ve.Range( 1 ),
-				pasteHtml: '<span rel="ve:Alien">Alien</span>',
-				pasteTargetHtml: '<p><span>Alien</span></p>',
+				pasteHtml: '<span rel="ve:Alien">Alien</span><span rel="ve:Alien">Alien2</span>',
+				pasteTargetHtml: '<p><span>Alien</span><span rel="ve:Alien">Alien2</span></p>',
 				fromVe: true,
 				expectedOps: [
 					[
 						{
+							type: 'retain',
+							length: 1
+						},
+						{
 							type: 'replace',
 							insert: [
-								{ type: 'paragraph', internal: { generated: 'wrapper' } },
 								{ type: 'alienInline' },
 								{ type: '/alienInline' },
-								{ type: '/paragraph' }
+								{ type: 'alienInline' },
+								{ type: '/alienInline' }
 							],
 							remove: []
 						},
-						{ type: 'retain', length: docLen }
+						{ type: 'retain', length: docLen - 1 }
 					]
 				],
 				expectedRangeOrSelection: new ve.Range( 5 ),
 				msg: 'Paste API HTML used if important attributes dropped'
 			},
 			{
+				rangeOrSelection: new ve.Range( 1 ),
+				pasteHtml: '<span data-ve-clipboard-key="0.13811087369534492-4">&nbsp;</span><s rel="ve:Alien">Alien</s>',
+				fromVe: true,
+				expectedOps: [
+					[
+						{ type: 'retain', length: 1 },
+						{
+							type: 'replace',
+							insert: [
+								{ type: 'alienInline' },
+								{ type: '/alienInline' }
+							],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 1 }
+					]
+				],
+				expectedRangeOrSelection: new ve.Range( 3 ),
+				msg: 'Paste API HTML still cleaned up if used when important attributes dropped'
+			},
+			{
 				rangeOrSelection: {
 					type: 'table',
 					tableRange: new ve.Range( 12, 22 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
 				pasteHtml: '<p>A</p>',
 				fromVe: true,
@@ -1715,9 +2198,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 12, 23 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
 				expectedOps: [
 					[
@@ -1753,19 +2234,15 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 12, 22 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
-				pasteHtml: '<table><tbody><tr><td>X</td></tr></table>',
+				pasteHtml: '<table><tbody><tr><td>X</td></tr></tbody></table>',
 				fromVe: true,
 				expectedRangeOrSelection: {
 					type: 'table',
 					tableRange: new ve.Range( 12, 23 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
 				expectedOps: [
 					[
@@ -1801,19 +2278,15 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 12, 22 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
-				pasteHtml: '<table><tbody><tr><th>X</th></tr></table>',
+				pasteHtml: '<table><tbody><tr><th>X</th></tr></tbody></table>',
 				fromVe: true,
 				expectedRangeOrSelection: {
 					type: 'table',
 					tableRange: new ve.Range( 12, 23 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
 				expectedOps: [
 					[
@@ -1831,7 +2304,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 					[
 						{ type: 'retain', length: 15 },
 						{ type: 'attribute', key: 'style', from: 'data', to: 'header' },
-						{ type: 'retain', length: 7 }
+						{ type: 'retain', length: docLen - 17 }
 					],
 					[
 						{ type: 'retain', length: 16 },
@@ -1854,11 +2327,85 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 12, 22 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
-				pasteHtml: '<table><tbody><tr><td>X</td><td>Y</td><td>Z</td></tr></table>',
+				pasteHtml: '<table><tbody><tr><td rel="ve:Alien">X</td></tr></tbody></table>',
+				fromVe: true,
+				expectedRangeOrSelection: {
+					type: 'table',
+					tableRange: new ve.Range( 12, 20 ),
+					fromCol: 0,
+					fromRow: 0
+				},
+				expectedOps: [
+					[
+						{ type: 'retain', length: 15 },
+						{
+							type: 'replace',
+							insert: [
+								{ type: 'alienTableCell', attributes: { style: 'data' } },
+								{ type: '/alienTableCell' }
+							],
+							remove: [
+								{ type: 'tableCell', attributes: { style: 'data' } },
+								{ type: 'paragraph', internal: { generated: 'empty' } },
+								{ type: '/paragraph' },
+								{ type: '/tableCell' }
+							]
+						},
+						{ type: 'retain', length: docLen - 19 }
+					]
+				],
+				msg: 'Paste alien cell onto table cell'
+			},
+
+			{
+				rangeOrSelection: {
+					type: 'table',
+					tableRange: new ve.Range( 0, 8 ),
+					fromCol: 0,
+					fromRow: 0
+				},
+				documentHtml: '<table><tbody><tr><td rel="ve:Alien">X</td></tr></tbody></table>',
+				pasteHtml: '<table><tbody><tr><td>Y</td></tr></tbody></table>',
+				fromVe: true,
+				expectedRangeOrSelection: {
+					type: 'table',
+					tableRange: new ve.Range( 0, 11 ),
+					fromCol: 0,
+					fromRow: 0
+				},
+				expectedOps: [
+					[
+						{ type: 'retain', length: 3 },
+						{
+							type: 'replace',
+							remove: [
+								{ type: 'alienTableCell', attributes: { style: 'data' } },
+								{ type: '/alienTableCell' }
+							],
+							insert: [
+								{ type: 'tableCell', attributes: { style: 'data' } },
+								{ type: 'paragraph', internal: { generated: 'wrapper' } },
+								'Y',
+								{ type: '/paragraph' },
+								{ type: '/tableCell' }
+							]
+						},
+						{ type: 'retain', length: 5 }
+					]
+				],
+				msg: 'Paste table cell onto alien cell'
+			},
+			{
+				rangeOrSelection: {
+					type: 'table',
+					tableRange: new ve.Range( 12, 22 ),
+					fromCol: 0,
+					fromRow: 0
+				},
+				// Firefox doesn't like using execCommand for this test for some reason
+				pasteTargetHtml: '<table><tbody><tr><td>X</td><td>Y</td><td>Z</td></tr></tbody></table>',
 				fromVe: true,
 				expectedRangeOrSelection: {
 					type: 'table',
@@ -1892,12 +2439,10 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 									type: '/tableCell'
 								}
 							],
-							insertedDataLength: 4,
-							insertedDataOffset: 0,
 							remove: [],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 5 }
+						{ type: 'retain', length: docLen - 19 }
 					],
 					[
 						{ type: 'retain', length: 23 },
@@ -1923,11 +2468,9 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 									type: '/tableCell'
 								}
 							],
-							insertedDataLength: 4,
-							insertedDataOffset: 0,
 							remove: []
 						},
-						{ type: 'retain', length: 5 }
+						{ type: 'retain', length: docLen - 19 }
 					],
 					[
 						{ type: 'retain', length: 24 },
@@ -1944,7 +2487,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 6 }
+						{ type: 'retain', length: docLen - 18 }
 					],
 					[
 						{ type: 'retain', length: 24 },
@@ -1962,7 +2505,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							remove: [],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 6 }
+						{ type: 'retain', length: docLen - 18 }
 					],
 					[
 						{ type: 'retain', length: 20 },
@@ -1979,7 +2522,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 11 }
+						{ type: 'retain', length: docLen - 13 }
 					],
 					[
 						{ type: 'retain', length: 20 },
@@ -1997,7 +2540,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							remove: [],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 11 }
+						{ type: 'retain', length: docLen - 13 }
 					],
 					[
 						{ type: 'retain', length: 16 },
@@ -2014,7 +2557,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 16 }
+						{ type: 'retain', length: docLen - 8 }
 					],
 					[
 						{ type: 'retain', length: 16 },
@@ -2032,7 +2575,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							remove: [],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 16 }
+						{ type: 'retain', length: docLen - 8 }
 					]
 				],
 				msg: 'Paste row of table cells onto table cell'
@@ -2042,11 +2585,9 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 12, 22 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
-				pasteHtml: '<table><tbody><tr><td>X</td></tr><tr><td>Y</td></tr><tr><td>Z</td></tr></table>',
+				pasteHtml: '<table><tbody><tr><td>X</td></tr><tr><td>Y</td></tr><tr><td>Z</td></tr></tbody></table>',
 				fromVe: true,
 				expectedRangeOrSelection: {
 					type: 'table',
@@ -2080,12 +2621,10 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 								{ type: '/tableCell' },
 								{ type: '/tableRow' }
 							],
-							insertedDataLength: 6,
-							insertedDataOffset: 0,
 							remove: [],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 4 }
+						{ type: 'retain', length: docLen - 20 }
 					],
 					[
 						{ type: 'retain', length: 26 },
@@ -2111,11 +2650,9 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 								{ type: '/tableCell' },
 								{ type: '/tableRow' }
 							],
-							insertedDataLength: 6,
-							insertedDataOffset: 0,
 							remove: []
 						},
-						{ type: 'retain', length: 4 }
+						{ type: 'retain', length: docLen - 20 }
 					],
 					[
 						{ type: 'retain', length: 28 },
@@ -2132,7 +2669,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 6 }
+						{ type: 'retain', length: docLen - 18 }
 					],
 					[
 						{ type: 'retain', length: 28 },
@@ -2150,7 +2687,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							remove: [],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 6 }
+						{ type: 'retain', length: docLen - 18 }
 					],
 					[
 						{ type: 'retain', length: 22 },
@@ -2167,7 +2704,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 13 }
+						{ type: 'retain', length: docLen - 11 }
 					],
 					[
 						{ type: 'retain', length: 22 },
@@ -2185,7 +2722,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							remove: [],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 13 }
+						{ type: 'retain', length: docLen - 11 }
 					],
 					[
 						{ type: 'retain', length: 16 },
@@ -2202,7 +2739,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 20 }
+						{ type: 'retain', length: docLen - 4 }
 					],
 					[
 						{ type: 'retain', length: 16 },
@@ -2220,7 +2757,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							remove: [],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 20 }
+						{ type: 'retain', length: docLen - 4 }
 					]
 				],
 				msg: 'Paste column of table cells onto table cell'
@@ -2230,19 +2767,15 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 					type: 'table',
 					tableRange: new ve.Range( 12, 22 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
-				pasteHtml: '<p>Foo</p><table><tbody><tr><td>X</td></tr></table><p>Bar</p>',
+				pasteHtml: '<p>Foo</p><table><tbody><tr><td>X</td></tr></tbody></table><p>Bar</p>',
 				fromVe: true,
 				expectedRangeOrSelection: {
 					type: 'table',
 					tableRange: new ve.Range( 12, 41 ),
 					fromCol: 0,
-					fromRow: 0,
-					toCol: 0,
-					toRow: 0
+					fromRow: 0
 				},
 				expectedOps: [
 					[
@@ -2260,7 +2793,7 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							],
 							type: 'replace'
 						},
-						{ type: 'retain', length: 6 }
+						{ type: 'retain', length: docLen - 18 }
 					],
 					[
 						{ type: 'retain', length: 16 },
@@ -2302,38 +2835,15 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 							],
 							remove: []
 						},
-						{ type: 'retain', length: 6 }
+						{ type: 'retain', length: docLen - 18 }
 					]
 				],
 				msg: 'Paste paragraphs and a table into table cell'
 			},
 			{
-				rangeOrSelection: new ve.Range( 1 ),
-				pasteHtml: '<span rel="ve:Alien" id="useful">Foo</span><span rel="ve:Alien" id="mwAB">Bar</span>',
-				fromVe: true,
-				originalDomElements: true,
-				expectedRangeOrSelection: new ve.Range( 5 ),
-				expectedOps: [
-					[
-						{ type: 'retain', length: 1 },
-						{
-							type: 'replace',
-							insert: [
-								{ type: 'alienInline', originalDomElements: $( '<span rel="ve:Alien" id="useful">Foo</span>' ).toArray() },
-								{ type: '/alienInline' },
-								{ type: 'alienInline', originalDomElements: $( '<span rel="ve:Alien">Bar</span>' ).toArray() },
-								{ type: '/alienInline' }
-							],
-							remove: []
-						},
-						{ type: 'retain', length: docLen - 1 }
-					]
-				],
-				msg: 'Parsoid IDs stripped'
-			},
-			{
 				rangeOrSelection: new ve.Range( 0 ),
-				pasteHtml: '<ul><li>A</li><ul><li>B</li></ul></ul>',
+				// Firefox doesn't like using execCommand for this test for some reason
+				pasteTargetHtml: '<ul><li>A</li><ul><li>B</li></ul></ul>',
 				expectedRangeOrSelection: new ve.Range( 14 ),
 				expectedOps: [
 					[
@@ -2396,113 +2906,179 @@ QUnit.test( 'beforePaste/afterPaste', function ( assert ) {
 					]
 				],
 				msg: 'Double indented lists (Google Docs style)'
+			},
+			{
+				rangeOrSelection: new ve.Range( 0 ),
+				pasteTargetHtml: '<p>A</p><p></p><p>B</p>',
+				expectedOps: [
+					[
+						{
+							type: 'replace',
+							insert: [
+								{ type: 'paragraph' },
+								'A',
+								{ type: '/paragraph' },
+								{ type: 'paragraph' },
+								'B',
+								{ type: '/paragraph' }
+							],
+							remove: []
+						},
+						{ type: 'retain', length: docLen }
+					]
+				],
+				msg: 'Empty paragraph stripped from external paste'
+			},
+			{
+				rangeOrSelection: new ve.Range( 8 ),
+				documentHtml: '<p>A</p><p></p><p>B</p>',
+				internalSourceRangeOrSelection: new ve.Range( 0, 8 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 8 },
+						{
+							type: 'replace',
+							insert: [
+								{ type: 'paragraph' },
+								'A',
+								{ type: '/paragraph' },
+								{ type: 'paragraph' },
+								{ type: '/paragraph' },
+								{ type: 'paragraph' },
+								'B',
+								{ type: '/paragraph' }
+							],
+							remove: []
+						},
+						{ type: 'retain', length: 2 }
+					]
+				],
+				msg: 'Empty paragraph kept in internal paste'
+			},
+			{
+				rangeOrSelection: new ve.Range( 0 ),
+				pasteTargetHtml: '<h3>A</h3>',
+				expectedOps: [
+					[
+						{
+							type: 'replace',
+							insert: [
+								{ type: 'paragraph' },
+								'A',
+								{ type: '/paragraph' }
+							],
+							remove: []
+						},
+						{ type: 'retain', length: docLen }
+					]
+				],
+				msg: 'Non-paragraph content branch node converted to paragraph'
+			},
+			{
+				rangeOrSelection: new ve.Range( 5 ),
+				pasteHtml: '<h3>A</h3>',
+				expectedOps: [
+					[
+						{
+							type: 'retain',
+							length: 5
+						},
+						{
+							type: 'replace',
+							insert: [ 'A' ],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 5 }
+					]
+				],
+				msg: 'Non-paragraph content branch node converted to paragraph when in paragraph'
+			},
+			{
+				rangeOrSelection: new ve.Range( 6 ),
+				pasteHtml: '<h3>A</h3>',
+				expectedOps: [
+					[
+						{
+							type: 'retain',
+							length: 6
+						},
+						{
+							type: 'replace',
+							insert: [ 'A' ],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 6 }
+					]
+				],
+				msg: 'Non-paragraph content branch node converted to paragraph at end of paragraph'
+			},
+			{
+				rangeOrSelection: { type: 'null' },
+				pasteHtml: 'Foo',
+				expectedRangeOrSelection: { type: 'null' },
+				expectedOps: [],
+				expectedDefaultPrevented: true,
+				msg: 'Pasting without a selection does nothing'
+			},
+			{
+				rangeOrSelection: new ve.Range( 1 ),
+				pasteText: 'Foo',
+				expectedRangeOrSelection: new ve.Range( 4 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 1 },
+						{
+							type: 'replace',
+							insert: [
+								'F', 'o', 'o'
+							],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 1 }
+					]
+				],
+				expectedDefaultPrevented: true,
+				msg: 'Plain text paste into empty paragraph'
+			},
+			{
+				rangeOrSelection: new ve.Range( 1 ),
+				pasteText: '<b>Foo</b>',
+				expectedRangeOrSelection: new ve.Range( 11 ),
+				expectedOps: [
+					[
+						{ type: 'retain', length: 1 },
+						{
+							type: 'replace',
+							insert: [
+								'<', 'b', '>', 'F', 'o', 'o', '<', '/', 'b', '>'
+							],
+							remove: []
+						},
+						{ type: 'retain', length: docLen - 1 }
+					]
+				],
+				expectedDefaultPrevented: true,
+				msg: 'Plain text paste doesn\'t become HTML'
 			}
 		];
 
 	for ( i = 0; i < cases.length; i++ ) {
-		if ( cases[ i ].expectedOps ) {
-			expected++;
-		}
-		if ( cases[ i ].expectedRangeOrSelection ) {
-			expected++;
-		}
-		if ( cases[ i ].expectedHtml ) {
-			expected++;
-		}
-	}
-	QUnit.expect( expected );
-
-	function testRunner( documentHtml, pasteHtml, fromVe, useClipboardData, pasteTargetHtml, rangeOrSelection, pasteSpecial, expectedOps, expectedRangeOrSelection, expectedHtml, originalDomElements, msg ) {
-		var i, j, txs, ops, txops, htmlDoc, expectedSelection,
-			e = {},
-			view = documentHtml ? ve.test.utils.createSurfaceViewFromHtml( documentHtml ) : exampleSurface,
-			model = view.getModel(),
-			doc = model.getDocument();
-
-		function getLayoutSpecific( expected ) {
-			if ( $.isPlainObject( expected ) && !expected.type ) {
-				return expected[ layout ] || expected.default;
-			}
-			return expected;
-		}
-
-		// Paste sequence
-		model.setSelection( ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), rangeOrSelection ) );
-		view.pasteSpecial = pasteSpecial;
-		if ( useClipboardData ) {
-			e[ 'text/html' ] = pasteHtml;
-			e[ 'text/xcustom' ] = 'useClipboardData-0';
-		} else if ( fromVe ) {
-			e[ 'text/html' ] = pasteHtml;
-			e[ 'text/xcustom' ] = '0.123-0';
-		}
-		view.beforePaste( new TestEvent( e ) );
-		if ( pasteTargetHtml ) {
-			view.$pasteTarget.html( pasteTargetHtml );
-		} else {
-			document.execCommand( 'insertHTML', false, pasteHtml );
-		}
-		view.afterPaste( new TestEvent( e ) );
-
-		if ( expectedOps ) {
-			expectedOps = getLayoutSpecific( expectedOps );
-			ops = [];
-			if ( model.getHistory().length ) {
-				txs = model.getHistory()[ 0 ].transactions;
-				for ( i = 0; i < txs.length; i++ ) {
-					txops = txs[ i ].getOperations();
-					for ( j = 0; j < txops.length; j++ ) {
-						if ( txops[ j ].remove ) {
-							ve.dm.example.postprocessAnnotations( txops[ j ].remove, doc.getStore(), originalDomElements );
-							if ( !originalDomElements ) {
-								ve.dm.example.removeOriginalDomElements( txops[ j ].remove );
-							}
-						}
-						if ( txops[ j ].insert ) {
-							ve.dm.example.postprocessAnnotations( txops[ j ].insert, doc.getStore(), originalDomElements );
-							if ( !originalDomElements ) {
-								ve.dm.example.removeOriginalDomElements( txops[ j ].insert );
-							}
-						}
-					}
-					ops.push( txops );
-				}
-			}
-			assert.equalLinearData( ops, expectedOps, msg + ': keys' );
-		}
-		if ( expectedRangeOrSelection ) {
-			expectedSelection = ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), getLayoutSpecific( expectedRangeOrSelection ) );
-			assert.equalHash( model.getSelection(), expectedSelection, msg +  ': selection' );
-		}
-		if ( expectedHtml ) {
-			htmlDoc = ve.dm.converter.getDomFromModel( doc );
-			assert.strictEqual( htmlDoc.body.innerHTML, expectedHtml, msg + ': HTML' );
-		}
-		if ( view === exampleSurface ) {
-			while ( model.hasBeenModified() ) {
-				model.undo();
-			}
-			model.truncateUndoStack();
-		} else {
-			view.destroy();
-		}
-	}
-
-	for ( i = 0; i < cases.length; i++ ) {
-		testRunner(
-			cases[ i ].documentHtml, cases[ i ].pasteHtml, cases[ i ].fromVe, cases[ i ].useClipboardData,
+		ve.test.utils.runSurfacePasteTest(
+			assert, cases[ i ].documentHtml || ve.test.utils.createSurfaceViewFromHtml( exampleDoc ),
+			{
+				'text/html': cases[ i ].pasteHtml,
+				'text/plain': cases[ i ].pasteText
+			},
+			cases[ i ].internalSourceRangeOrSelection, cases[ i ].noClipboardData, cases[ i ].fromVe, cases[ i ].useClipboardData,
 			cases[ i ].pasteTargetHtml, cases[ i ].rangeOrSelection, cases[ i ].pasteSpecial,
-			cases[ i ].expectedOps, cases[ i ].expectedRangeOrSelection, cases[ i ].expectedHtml, cases[ i ].originalDomElements,
-			cases[ i ].msg
+			cases[ i ].expectedOps, cases[ i ].expectedRangeOrSelection, cases[ i ].expectedHtml,
+			cases[ i ].expectedDefaultPrevented, cases[ i ].store, cases[ i ].msg
 		);
 	}
-
-	exampleSurface.destroy();
-
 } );
 
 QUnit.test( 'special key down: table arrow keys', function ( assert ) {
-	var i, offsets, selection, table, view, model,
+	var i, offsets, expectedSelectionOffsets, selection, table, view, model,
 		fn = function () {},
 		tables = {
 			mergedCells: {
@@ -2526,79 +3102,81 @@ QUnit.test( 'special key down: table arrow keys', function ( assert ) {
 				msg: 'Simple move right',
 				key: 'RIGHT',
 				selectionOffsets: [ 0, 0 ],
-				expectedSelectionOffsets: [ 1, 0, 1, 0 ]
+				expectedSelectionOffsets: [ 1, 0 ]
 			},
 			{
 				msg: 'Simple move right with tab',
 				key: 'TAB',
 				selectionOffsets: [ 0, 0 ],
-				expectedSelectionOffsets: [ 1, 0, 1, 0 ]
-			},			{
+				expectedSelectionOffsets: [ 1, 0 ]
+			},
+			{
+				msg: 'Move right with tab at end wraps to next line',
+				key: 'TAB',
+				selectionOffsets: [ 5, 0 ],
+				expectedSelectionOffsets: [ 0, 1 ]
+			},
+			{
 				msg: 'Simple move end',
 				key: 'END',
 				selectionOffsets: [ 0, 0 ],
-				expectedSelectionOffsets: [ 5, 0, 5, 0 ]
+				expectedSelectionOffsets: [ 5, 0 ]
 			},
 			{
 				msg: 'Simple move down',
 				key: 'DOWN',
 				selectionOffsets: [ 0, 0 ],
-				expectedSelectionOffsets: [ 0, 1, 0, 1 ]
+				expectedSelectionOffsets: [ 0, 1 ]
 			},
 			{
 				msg: 'Simple move page down',
 				key: 'PAGEDOWN',
 				selectionOffsets: [ 0, 0 ],
-				expectedSelectionOffsets: [ 0, 6, 0, 6 ]
+				expectedSelectionOffsets: [ 0, 6 ]
 			},
 			{
 				msg: 'Simple move left',
 				key: 'LEFT',
 				selectionOffsets: [ 5, 6 ],
-				expectedSelectionOffsets: [ 4, 6, 4, 6 ]
+				expectedSelectionOffsets: [ 4, 6 ]
 			},
 			{
-				msg: 'Simple move left with shift-tab',
+				msg: 'Simple move left with shift+tab',
 				key: 'TAB',
 				shiftKey: true,
 				selectionOffsets: [ 5, 6 ],
-				expectedSelectionOffsets: [ 4, 6, 4, 6 ]
+				expectedSelectionOffsets: [ 4, 6 ]
+			},
+			{
+				msg: 'Move left with shift+tab at start wraps to previous line',
+				key: 'TAB',
+				shiftKey: true,
+				selectionOffsets: [ 0, 1 ],
+				expectedSelectionOffsets: [ 5, 0 ]
 			},
 			{
 				msg: 'Simple move home',
 				key: 'HOME',
 				selectionOffsets: [ 5, 6 ],
-				expectedSelectionOffsets: [ 0, 6, 0, 6 ]
+				expectedSelectionOffsets: [ 0, 6 ]
 			},
 			{
 				msg: 'Simple move page up',
 				key: 'PAGEUP',
 				selectionOffsets: [ 5, 6 ],
-				expectedSelectionOffsets: [ 5, 0, 5, 0 ]
+				expectedSelectionOffsets: [ 5, 0 ]
 			},
 			{
 				msg: 'Move left at start',
 				key: 'LEFT',
 				selectionOffsets: [ 0, 0 ],
-				expectedSelectionOffsets: [ 0, 0, 0, 0 ]
-			},
-			{
-				msg: 'Move up at start',
-				key: 'UP',
-				selectionOffsets: [ 0, 0 ],
-				expectedSelectionOffsets: [ 0, 0, 0, 0 ]
+				expectedSelectionOffsets: [ 0, 0 ]
 			},
 			{
 				msg: 'Move right at end',
 				key: 'RIGHT',
 				selectionOffsets: [ 5, 6 ],
-				expectedSelectionOffsets: [ 5, 6, 5, 6 ]
-			},
-			{
-				msg: 'Move down at end',
-				key: 'DOWN',
-				selectionOffsets: [ 5, 6 ],
-				expectedSelectionOffsets: [ 5, 6, 5, 6 ]
+				expectedSelectionOffsets: [ 5, 6 ]
 			},
 			{
 				msg: 'Move from merged cell to merged cell',
@@ -2617,18 +3195,16 @@ QUnit.test( 'special key down: table arrow keys', function ( assert ) {
 				msg: 'Expanded selection collapses',
 				key: 'DOWN',
 				selectionOffsets: [ 0, 0, 2, 0 ],
-				expectedSelectionOffsets: [ 0, 1, 0, 1 ]
+				expectedSelectionOffsets: [ 0, 1 ]
 			},
 			{
 				msg: 'Left in RTL table increments column',
 				table: 'rtl',
 				key: 'LEFT',
 				selectionOffsets: [ 0, 0 ],
-				expectedSelectionOffsets: [ 1, 0, 1, 0 ]
+				expectedSelectionOffsets: [ 1, 0 ]
 			}
 		];
-
-	QUnit.expect( cases.length );
 
 	for ( i = 0; i < cases.length; i++ ) {
 		offsets = cases[ i ].selectionOffsets;
@@ -2648,9 +3224,12 @@ QUnit.test( 'special key down: table arrow keys', function ( assert ) {
 			}
 		);
 		selection = model.getSelection();
+		expectedSelectionOffsets = cases[ i ].expectedSelectionOffsets.length > 2 ?
+			cases[ i ].expectedSelectionOffsets :
+			cases[ i ].expectedSelectionOffsets.concat( cases[ i ].expectedSelectionOffsets );
 		assert.deepEqual(
 			[ selection.fromCol, selection.fromRow, selection.toCol, selection.toRow ],
-			cases[ i ].expectedSelectionOffsets,
+			expectedSelectionOffsets,
 			cases[ i ].msg
 		);
 	}
@@ -2694,8 +3273,6 @@ QUnit.test( 'onDocumentDragStart/onDocumentDrop', function ( assert ) {
 				expectedSelection: selection
 			}
 		];
-
-	QUnit.expect( cases.length * 3 );
 
 	function testRunner( rangeOrSelection, targetOffset, expectedTransfer, expectedData, expectedSelection, isIE, msg ) {
 		var view = ve.test.utils.createSurfaceViewFromDocument( ve.dm.example.createExampleDocument() ),
@@ -2757,7 +3334,6 @@ QUnit.test( 'onDocumentDragStart/onDocumentDrop', function ( assert ) {
 
 QUnit.test( 'getSelectionState', function ( assert ) {
 	var i, j, l, view, selection, internalListNode, node, rootElement,
-		expect = 0,
 		cases = [
 			{
 				msg: 'Grouped aliens',
@@ -2798,12 +3374,6 @@ QUnit.test( 'getSelectionState', function ( assert ) {
 				expected: ve.dm.example.offsetPaths
 			}
 		];
-
-	for ( i = 0; i < cases.length; i++ ) {
-		expect += cases[ i ].expected.length;
-	}
-
-	QUnit.expect( expect );
 
 	for ( i = 0; i < cases.length; i++ ) {
 		view = ve.test.utils.createSurfaceViewFromHtml( cases[ i ].html );

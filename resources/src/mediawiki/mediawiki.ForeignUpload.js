@@ -1,8 +1,5 @@
 ( function ( mw, OO, $ ) {
 	/**
-	 * @class mw.ForeignUpload
-	 * @extends mw.Upload
-	 *
 	 * Used to represent an upload in progress on the frontend.
 	 *
 	 * Subclassed to upload to a foreign API, with no other goodies. Use
@@ -11,6 +8,9 @@
 	 * Note you can provide the {@link #target target} or not - if the first argument is
 	 * an object, we assume you want the default, and treat it as apiconfig
 	 * instead.
+	 *
+	 * @class mw.ForeignUpload
+	 * @extends mw.Upload
 	 *
 	 * @constructor
 	 * @param {string} [target] Used to set up the target
@@ -43,7 +43,9 @@
 		// However, if the target is a remote wiki, we must check the API
 		// to confirm that the target is one that this site is configured to
 		// support.
-		if ( this.target === 'local' ) {
+		if ( validTargets.length === 0 ) {
+			this.apiPromise = $.Deferred().reject( 'upload-dialog-disabled' );
+		} else if ( this.target === 'local' ) {
 			// If local uploads were requested, but they are disabled, fail.
 			if ( !mw.config.get( 'wgEnableUploads' ) ) {
 				this.apiPromise = $.Deferred().reject( 'uploaddisabledtext' );
@@ -113,6 +115,8 @@
 
 	/**
 	 * Override from mw.Upload to make sure the API info is found and allowed
+	 *
+	 * @inheritdoc
 	 */
 	ForeignUpload.prototype.upload = function () {
 		var upload = this;
@@ -124,6 +128,8 @@
 
 	/**
 	 * Override from mw.Upload to make sure the API info is found and allowed
+	 *
+	 * @inheritdoc
 	 */
 	ForeignUpload.prototype.uploadToStash = function () {
 		var upload = this;

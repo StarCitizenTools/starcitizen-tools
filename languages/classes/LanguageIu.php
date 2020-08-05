@@ -28,7 +28,7 @@
  *
  *
  * Based on:
- *   - http://commons.wikimedia.org/wiki/Image:Inuktitut.png
+ *   - https://commons.wikimedia.org/wiki/Image:Inuktitut.png
  *   - LanguageSr.php
  *
  * @ingroup Language
@@ -94,44 +94,6 @@ class IuConverter extends LanguageConverter {
 			'ike-latn' => new ReplacementArray( $this->mToLatin ),
 			'iu' => new ReplacementArray()
 		];
-	}
-
-	/**
-	 * rules should be defined as -{Syllabic | Latin-} -or-
-	 * -{code:text | code:text | ...}-
-	 * update: delete all rule parsing because it's not used
-	 * currently, and just produces a couple of bugs
-	 *
-	 * @param string $rule
-	 * @param array $flags
-	 * @return array
-	 */
-	function parseManualRule( $rule, $flags = [] ) {
-		if ( in_array( 'T', $flags ) ) {
-			return parent::parseManualRule( $rule, $flags );
-		}
-
-		$carray = [];
-		// otherwise ignore all formatting
-		foreach ( $this->mVariants as $v ) {
-			$carray[$v] = $rule;
-		}
-
-		return $carray;
-	}
-
-	/**
-	 * Do not convert content on talk pages
-	 *
-	 * @param string $text
-	 * @param Parser $parser
-	 * @return string
-	 */
-	function parserConvert( $text, &$parser ) {
-		$this->mDoContentConvert = !( is_object( $parser->getTitle() )
-			&& $parser->getTitle()->isTalkPage() );
-
-		return parent::parserConvert( $text, $parser );
 	}
 
 	/**

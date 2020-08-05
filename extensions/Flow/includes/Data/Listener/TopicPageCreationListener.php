@@ -16,7 +16,7 @@ class TopicPageCreationListener extends AbstractListener {
 
 	/**
 	 * @param OccupationController $occupationController The OccupationController to create the page with.
-	 * @param SplQueue             $deferredQueue        Queue of callbacks to run only if commit succeeds
+	 * @param SplQueue $deferredQueue Queue of callbacks to run only if commit succeeds
 	 */
 	public function __construct(
 		OccupationController $occupationController,
@@ -37,7 +37,7 @@ class TopicPageCreationListener extends AbstractListener {
 
 		// make sure this Topic:xyz page exists
 		$controller = $this->occupationController;
-		$this->deferredQueue->push( function() use ( $controller, $object ) {
+		$this->deferredQueue->push( function () use ( $controller, $object ) {
 			$controller->ensureFlowRevision(
 				new Article( $object->getArticleTitle() ),
 				$object

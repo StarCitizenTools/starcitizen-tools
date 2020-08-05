@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Beta16"
+			"Beta16",
+			"Selven"
 		]
 	},
 	"jsonschema-badidref": "IDref malformato: \"$1\"",
@@ -10,5 +11,10 @@
 	"jsonschema-invalidempty": "Struttura dati vuota non valida con questo schema",
 	"jsonschema-invalidnode": "Nodo non valido: si aspettava \"$1\", ma ricevuto \"$2\". Percorso: \"$3\"",
 	"jsonschema-invalid-missingfield": "Campo obbligatorio mancante \"$1\"",
-	"jsonschema-invalid-notinenum": "Il valore <code>$1</code> non è fra i valori consentiti per la proprietà $2"
+	"jsonschema-invalid-notinenum": "Il valore <code>$1</code> non è fra i valori consentiti per la proprietà $2",
+	"apihelp-jsonschema-description": "Recupera una pagina di Schema JSON.",
+	"apihelp-jsonschema-summary": "Recupera una pagina di Schema JSON.",
+	"apihelp-jsonschema-param-revid": "ID versione schema.",
+	"apihelp-jsonschema-param-title": "Nome dello schema.",
+	"apihelp-jsonschema-example-1": "Recupera schema per la versione 1234"
 }

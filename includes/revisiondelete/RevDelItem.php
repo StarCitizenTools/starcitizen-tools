@@ -37,7 +37,7 @@ abstract class RevDelItem extends RevisionItemBase {
 	/**
 	 * Get the current deletion bitfield value
 	 *
-	 * @return integer
+	 * @return int
 	 */
 	abstract public function getBits();
 
@@ -57,8 +57,26 @@ abstract class RevDelItem extends RevisionItemBase {
 	/**
 	 * Get the return information about the revision for the API
 	 * @since 1.23
-	 * @param ApiResult $result API result object
+	 * @param ApiResult $result
 	 * @return array Data for the API result
 	 */
 	abstract public function getApiData( ApiResult $result );
+
+	/**
+	 * Lock the item against changes outside of the DB
+	 * @return Status
+	 * @since 1.28
+	 */
+	public function lock() {
+		return Status::newGood();
+	}
+
+	/**
+	 * Unlock the item against changes outside of the DB
+	 * @return Status
+	 * @since 1.28
+	 */
+	public function unlock() {
+		return Status::newGood();
+	}
 }

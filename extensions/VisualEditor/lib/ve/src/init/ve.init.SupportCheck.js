@@ -1,10 +1,8 @@
 /*!
  * VisualEditor initialization support checker.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
-
-// jshint esversion: 3
 
 ( function () {
 	/**
@@ -20,33 +18,25 @@
 	window.VisualEditorSupportCheck = function () {
 		return (
 			/* ES5 */
-			!!(
-				// It would be much easier to do a quick inline function that asserts "use strict"
-				// works, but since IE9 doesn't support strict mode (and we don't use strict mode)
-				// we have to instead list all the ES5 features individually.
-				Array.isArray &&
-				Array.prototype.filter &&
-				Array.prototype.indexOf &&
-				Array.prototype.map &&
-				Date.now &&
-				Date.prototype.toJSON &&
-				Object.create &&
-				Object.keys &&
-				String.prototype.trim &&
-				window.JSON &&
-				JSON.parse &&
-				JSON.stringify &&
-				Function.prototype.bind
-			) &&
+			( function () {
+				'use strict';
+				return !this && !!Function.prototype.bind && !!window.JSON;
+			}() ) &&
 
 			/* contentEditable */
 			!!( 'contentEditable' in document.createElement( 'div' ) ) &&
 
-			/* SVG */
+			/* createElementNS */
+			!!document.createElementNS &&
+
+			/* classList */
 			!!(
-				document.createElementNS &&
-				document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' ).createSVGRect
-			)
+				( 'classList' in document.createElement( '_' ) ) ||
+				( 'classList' in document.createElementNS( 'http://www.w3.org/2000/svg ', 'g' ) )
+			) &&
+
+			/* SVG */
+			!!( 'createSVGRect' in document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' ) )
 		);
 	};
 }() );

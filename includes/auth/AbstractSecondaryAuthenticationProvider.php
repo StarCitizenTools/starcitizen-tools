@@ -43,7 +43,7 @@ abstract class AbstractSecondaryAuthenticationProvider extends AbstractAuthentic
 	}
 
 	/**
-	 * @inheritdoc
+	 * @inheritDoc
 	 * @note Reimplement this if self::getAuthenticationRequests( AuthManager::ACTION_REMOVE )
 	 *  doesn't return requests that will revoke all access for the user.
 	 */
@@ -77,7 +77,7 @@ abstract class AbstractSecondaryAuthenticationProvider extends AbstractAuthentic
 	public function postAccountCreation( $user, $creator, AuthenticationResponse $response ) {
 	}
 
-	public function testUserForCreation( $user, $autocreate ) {
+	public function testUserForCreation( $user, $autocreate, array $options = [] ) {
 		return \StatusValue::newGood();
 	}
 

@@ -17,7 +17,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var template = '<div class="uls-input-settings">' +
@@ -54,7 +54,7 @@
 		'<div class="row">' +
 		'<div class="twelve columns uls-input-settings-disable-info"></div>' +
 		'<div class="ten columns uls-input-settings-toggle">' +
-		'<button class="active mw-ui-constructive mw-ui-button uls-input-toggle-button"></button>' +
+		'<button class="mw-ui-button mw-ui-progressive active uls-input-toggle-button"></button>' +
 		'</div>' +
 		'</div>';
 
@@ -173,12 +173,13 @@
 
 			$imeLabel = $( '<label>' ).attr( 'for', imeId );
 
-			$inputMethodItem = $( '<input type="radio">' ).attr( {
+			$inputMethodItem = $( '<input>' ).attr( {
+				type: 'radio',
 				name: 'ime',
 				id: imeId,
 				value: imeId
 			} )
-			.prop( 'checked', selected );
+				.prop( 'checked', selected );
 
 			if ( imeId === 'system' ) {
 				name = $.i18n( 'ext-uls-disable-input-method' );
@@ -189,7 +190,7 @@
 				$helplink = $( '<a>' )
 					.addClass( 'uls-ime-help' )
 					.text( $.i18n( 'ext-uls-ime-help' ) )
-					.attr( 'href', mw.msg( 'uls-ime-helppage' ).replace( '$1', imeId ) )
+					.attr( 'href', mw.msg( 'uls-ime-helppage', imeId ) )
 					.attr( 'target', '_blank' );
 				if ( !inputmethod ) {
 					// The input method definition(rules) not loaded.
@@ -203,8 +204,12 @@
 			}
 
 			$imeLabel.append(
-				$( '<strong>' ).text( name ),
-				$( '<span>' ).text( description ),
+				$( '<strong>' )
+					.addClass( 'uls-input-settings-name' )
+					.text( name + ' ' ),
+				$( '<span>' )
+					.addClass( 'uls-input-settings-description' )
+					.text( description ),
 				$helplink
 			);
 
@@ -238,23 +243,23 @@
 			// after selecting a different language
 			$languages.empty();
 
-			// Selected IME language may be different, and it must
-			// be present, too
+			// Selected IME language may be different, and it must be present, too
 			if ( $.uls.data.languages[ selectedImeLanguage ] &&
-				$.inArray( selectedImeLanguage, languagesForButtons ) === -1 ) {
+				languagesForButtons.indexOf( selectedImeLanguage ) === -1
+			) {
 				languagesForButtons.push( selectedImeLanguage );
 			}
 
 			// UI language must always be present
 			if ( this.uiLanguage !== this.contentLanguage &&
 				$.uls.data.languages[ this.uiLanguage ] &&
-				$.inArray( this.uiLanguage, languagesForButtons ) === -1 ) {
+				languagesForButtons.indexOf( this.uiLanguage ) === -1 ) {
 				languagesForButtons.push( this.uiLanguage );
 			}
 
 			for ( lang in suggestedLanguages ) {
 				// Skip already found languages
-				if ( $.inArray( suggestedLanguages[ lang ], languagesForButtons ) > -1 ) {
+				if ( languagesForButtons.indexOf( suggestedLanguages[ lang ] ) > -1 ) {
 					continue;
 				}
 
@@ -302,7 +307,7 @@
 				$button.on( 'click', buttonHandler( $button ) );
 
 				if ( language === selectedImeLanguage ) {
-					$button.click();
+					$button.trigger( 'click' );
 				}
 			}
 
@@ -335,7 +340,7 @@
 							.i18n()
 							.text( ' ' );
 
-					$back.click( function () {
+					$back.on( 'click', function () {
 						uls.hide();
 						inputSettings.$parent.show();
 					} );
@@ -346,10 +351,11 @@
 					uls.$menu.find( '.uls-search-wrapper' ).wrap( $wrap );
 					uls.$menu.find( '.uls-search-wrapper-wrapper' ).prepend( $back );
 
-					uls.$menu.prepend(
-						$( '<span>' ).addClass( 'caret-before' ),
-						$( '<span>' ).addClass( 'caret-after' )
-					);
+					if ( $( '.uls-settings-trigger' ).offset().left > $( window ).width() / 2 ) {
+						uls.$menu.removeClass( 'selector-left' ).addClass( 'selector-right' );
+					} else {
+						uls.$menu.removeClass( 'selector-right' ).addClass( 'selector-left' );
+					}
 				},
 				onVisible: function () {
 					var $parent;
@@ -385,7 +391,8 @@
 					inputSettings.prepareLanguages();
 					inputSettings.markDirty();
 				},
-				languages: mw.ime.getLanguagesWithIME()
+				languages: mw.ime.getLanguagesWithIME(),
+				ulsPurpose: 'input-settings'
 			} );
 
 			$moreLanguagesButton.on( 'click', function () {
@@ -498,6 +505,8 @@
 
 		/**
 		 * Callback for save preferences
+		 *
+		 * @param {boolean} success
 		 */
 		onSave: function ( success ) {
 			if ( success ) {
@@ -583,4 +592,4 @@
 		input: InputSettings
 	} );
 
-}( jQuery, mediaWiki ) );
+}() );

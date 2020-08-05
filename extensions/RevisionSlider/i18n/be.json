@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Artsiom91"
+		]
+	},
+	"revisionslider-preference-disable": "Не паказваць RevisionSlider",
+	"revisionslider-label-username": "{{GENDER:$1|Удзельнік|Удзельніца}}"
+}

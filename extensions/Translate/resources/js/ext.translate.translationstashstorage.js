@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	/**
@@ -22,8 +22,7 @@
 		save: function ( title, translation ) {
 			var api = new mw.Api();
 
-			// Change to csrf when support for MW 1.25 is dropped
-			return api.postWithToken( 'edit', {
+			return api.postWithToken( 'csrf', {
 				action: 'translationstash',
 				subaction: 'add',
 				title: title,
@@ -37,13 +36,13 @@
 		/**
 		 * Get the current users translations.
 		 *
+		 * @param {string} user User name
 		 * @return {jQuery.Promise}
 		 */
 		getUserTranslations: function ( user ) {
 			var api = new mw.Api();
 
-			// Change to csrf when support for MW 1.25 is dropped
-			return api.postWithToken( 'edit', {
+			return api.postWithToken( 'csrf', {
 				action: 'translationstash',
 				subaction: 'query',
 				username: user
@@ -55,4 +54,4 @@
 	mw.translate = mw.translate || {};
 	mw.translate.TranslationStashStorage = TranslationStashStorage;
 
-}( jQuery, mediaWiki ) );
+}() );

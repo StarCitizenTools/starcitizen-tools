@@ -2,26 +2,26 @@
 
 namespace Flow\Search\Iterators;
 
-use DatabaseBase;
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\ResultWrapper;
 use Flow\Container;
 use Flow\Data\ManagerGroup;
 use Flow\DbFactory;
 use Flow\Model\AbstractRevision;
 use Flow\Model\UUID;
 use Iterator;
-use ResultWrapper;
 use stdClass;
 
 abstract class AbstractIterator implements Iterator {
 	/**
-	 * @var DatabaseBase
+	 * @var IDatabase
 	 */
 	protected $dbr;
 
 	/**
 	 * @var array
 	 */
-	protected $conditions = array();
+	protected $conditions = [];
 
 	/**
 	 * @var ResultWrapper|null
@@ -49,8 +49,8 @@ abstract class AbstractIterator implements Iterator {
 	 * @param DbFactory $dbFactory
 	 */
 	public function __construct( DbFactory $dbFactory ) {
-		$this->dbr = $dbFactory->getDB( DB_SLAVE );
-		$this->conditions = array( 'workflow_wiki' => wfWikiId() );
+		$this->dbr = $dbFactory->getDB( DB_REPLICA );
+		$this->conditions = [ 'workflow_wiki' => wfWikiID() ];
 	}
 
 	/**
@@ -118,7 +118,7 @@ abstract class AbstractIterator implements Iterator {
 	}
 
 	/**
-	 * @return integer 0-indexed count of the page number fetched
+	 * @return int 0-indexed count of the page number fetched
 	 */
 	public function key() {
 		return $this->key;
@@ -138,7 +138,7 @@ abstract class AbstractIterator implements Iterator {
 	 * @return bool True when the iterator is in a valid state
 	 */
 	public function valid() {
-		return (bool) $this->current;
+		return (bool)$this->current;
 	}
 
 	/**

@@ -15,13 +15,13 @@
  * along with DeedWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( uw, $ ) {
-	QUnit.module( 'mw.uw.controller.Step', QUnit.newMwEnvironment() );
+( function ( $, mw, uw ) {
+	QUnit.module( 'uw.controller.Step', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Constructor sanity test', 2, function ( assert ) {
-		var step = new uw.controller.Step( { on: $.noop }, {} );
+	QUnit.test( 'Constructor sanity test', function ( assert ) {
+		var step = new uw.controller.Step( { on: $.noop }, new mw.Api(), {} );
 		assert.ok( step );
 		assert.ok( step.ui );
 	} );
 
-}( mediaWiki.uploadWizard, jQuery ) );
+}( jQuery, mediaWiki, mediaWiki.uploadWizard ) );

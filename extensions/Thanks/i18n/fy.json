@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robin0van0der0vliet",
+			"Robin van der Vliet"
+		]
+	},
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|betankje}}}}"
+}

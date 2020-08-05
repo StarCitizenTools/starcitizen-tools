@@ -26,6 +26,7 @@
  */
 class OOUIHTMLForm extends HTMLForm {
 	private $oouiErrors;
+	private $oouiWarnings;
 
 	public function __construct( $descriptor, $context = null, $messagePrefix = '' ) {
 		parent::__construct( $descriptor, $context, $messagePrefix );
@@ -47,7 +48,7 @@ class OOUIHTMLForm extends HTMLForm {
 		return $field;
 	}
 
-	function getButtons() {
+	public function getButtons() {
 		$buttons = '';
 
 		// IE<8 has bugs with <button>, so we'll need to avoid them.
@@ -65,7 +66,10 @@ class OOUIHTMLForm extends HTMLForm {
 			}
 
 			if ( isset( $this->mSubmitTooltip ) ) {
-				$attribs += Linker::tooltipAndAccesskeyAttribs( $this->mSubmitTooltip );
+				$attribs += [
+					'title' => Linker::titleAttrib( $this->mSubmitTooltip ),
+					'accessKey' => Linker::accesskey( $this->mSubmitTooltip ),
+				];
 			}
 
 			$attribs['classes'] = [ 'mw-htmlform-submit' ];
@@ -83,6 +87,17 @@ class OOUIHTMLForm extends HTMLForm {
 				'type' => 'reset',
 				'label' => $this->msg( 'htmlform-reset' )->text(),
 				'useInputTag' => $isBadIE,
+			] );
+		}
+
+		if ( $this->mShowCancel ) {
+			$target = $this->mCancelTarget ?: Title::newMainPage();
+			if ( $target instanceof Title ) {
+				$target = $target->getLocalURL();
+			}
+			$buttons .= new OOUI\ButtonWidget( [
+				'label' => $this->msg( 'cancel' )->text(),
+				'href' => $target,
 			] );
 		}
 
@@ -117,6 +132,7 @@ class OOUIHTMLForm extends HTMLForm {
 				'value' => $button['value'],
 				'label' => $label,
 				'flags' => $button['flags'],
+				'framed' => $button['framed'],
 				'useInputTag' => $isBadIE,
 			] + $attrs );
 		}
@@ -160,40 +176,52 @@ class OOUIHTMLForm extends HTMLForm {
 	 * @return string HTML
 	 */
 	protected function formatSection( array $fieldsHtml, $sectionName, $anyFieldHasLabel ) {
-		$config = [
-			'items' => $fieldsHtml,
-		];
+		if ( !$fieldsHtml ) {
+			// Do not generate any wrappers for empty sections. Sections may be empty if they only have
+			// subsections, but no fields. A legend will still be added in wrapFieldSetSection().
+			return '';
+		}
+
+		$html = implode( '', $fieldsHtml );
+
 		if ( $sectionName ) {
-			$config['id'] = Sanitizer::escapeId( $sectionName );
+			$html = Html::rawElement(
+				'div',
+				[ 'id' => Sanitizer::escapeIdForAttribute( $sectionName ) ],
+				$html
+			);
 		}
-		if ( is_string( $this->mWrapperLegend ) ) {
-			$config['label'] = $this->mWrapperLegend;
-		}
-		return new OOUI\FieldsetLayout( $config );
+		return $html;
 	}
 
 	/**
-	 * @param string|array|Status $err
+	 * @param string|array|Status $elements
+	 * @param string $elementsType
 	 * @return string
 	 */
-	function getErrors( $err ) {
-		if ( !$err ) {
-			$errors = [];
-		} elseif ( $err instanceof Status ) {
-			if ( $err->isOK() ) {
-				$errors = [];
-			} else {
-				$errors = $err->getErrorsByType( 'error' );
+	public function getErrorsOrWarnings( $elements, $elementsType ) {
+		if ( $elements === '' ) {
+			return '';
+		}
+
+		if ( !in_array( $elementsType, [ 'error', 'warning' ], true ) ) {
+			throw new DomainException( $elementsType . ' is not a valid type.' );
+		}
+		$errors = [];
+		if ( $elements instanceof Status ) {
+			if ( !$elements->isGood() ) {
+				$errors = $elements->getErrorsByType( $elementsType );
 				foreach ( $errors as &$error ) {
-					// Input:  array( 'message' => 'foo', 'errors' => array( 'a', 'b', 'c' ) )
-					// Output: array( 'foo', 'a', 'b', 'c' )
+					// Input:  [ 'message' => 'foo', 'errors' => [ 'a', 'b', 'c' ] ]
+					// Output: [ 'foo', 'a', 'b', 'c' ]
 					$error = array_merge( [ $error['message'] ], $error['params'] );
 				}
 			}
-		} else {
-			$errors = $err;
-			if ( !is_array( $errors ) ) {
-				$errors = [ $errors ];
+		} elseif ( $elementsType === 'error' ) {
+			if ( is_array( $elements ) ) {
+				$errors = $elements;
+			} elseif ( is_string( $elements ) ) {
+				$errors = [ $elements ];
 			}
 		}
 
@@ -203,11 +231,15 @@ class OOUIHTMLForm extends HTMLForm {
 		}
 
 		// Used in getBody()
-		$this->oouiErrors = $errors;
+		if ( $elementsType === 'error' ) {
+			$this->oouiErrors = $errors;
+		} else {
+			$this->oouiWarnings = $errors;
+		}
 		return '';
 	}
 
-	function getHeaderText( $section = null ) {
+	public function getHeaderText( $section = null ) {
 		if ( is_null( $section ) ) {
 			// We handle $this->mHeader elsewhere, in getBody()
 			return '';
@@ -216,35 +248,52 @@ class OOUIHTMLForm extends HTMLForm {
 		}
 	}
 
-	function getBody() {
-		$fieldset = parent::getBody();
-		// FIXME This only works for forms with no subsections
-		if ( $fieldset instanceof OOUI\FieldsetLayout ) {
+	public function getBody() {
+		$html = parent::getBody();
+		if ( $this->mHeader || $this->oouiErrors || $this->oouiWarnings ) {
 			$classes = [ 'mw-htmlform-ooui-header' ];
-			if ( !$this->mHeader ) {
-				$classes[] = 'mw-htmlform-ooui-header-empty';
-			}
 			if ( $this->oouiErrors ) {
 				$classes[] = 'mw-htmlform-ooui-header-errors';
 			}
-			$fieldset->addItems( [
-				new OOUI\FieldLayout(
-					new OOUI\LabelWidget( [ 'label' => new OOUI\HtmlSnippet( $this->mHeader ) ] ),
-					[
-						'align' => 'top',
-						'errors' => $this->oouiErrors,
-						'classes' => $classes,
-					]
-				)
-			], 0 );
+			if ( $this->oouiWarnings ) {
+				$classes[] = 'mw-htmlform-ooui-header-warnings';
+			}
+			// if there's no header, don't create an (empty) LabelWidget, simply use a placeholder
+			if ( $this->mHeader ) {
+				$element = new OOUI\LabelWidget( [ 'label' => new OOUI\HtmlSnippet( $this->mHeader ) ] );
+			} else {
+				$element = new OOUI\Widget( [] );
+			}
+			$html = new OOUI\FieldLayout(
+				$element,
+				[
+					'align' => 'top',
+					'errors' => $this->oouiErrors,
+					'notices' => $this->oouiWarnings,
+					'classes' => $classes,
+				]
+			) . $html;
 		}
-		return $fieldset;
+		return $html;
 	}
 
-	function wrapForm( $html ) {
+	public function wrapForm( $html ) {
+		if ( is_string( $this->mWrapperLegend ) ) {
+			$content = new OOUI\FieldsetLayout( [
+				'label' => $this->mWrapperLegend,
+				'items' => [
+					new OOUI\Widget( [
+						'content' => new OOUI\HtmlSnippet( $html )
+					] ),
+				],
+			] );
+		} else {
+			$content = new OOUI\HtmlSnippet( $html );
+		}
+
 		$form = new OOUI\FormLayout( $this->getFormAttributes() + [
-			'classes' => [ 'mw-htmlform-ooui' ],
-			'content' => new OOUI\HtmlSnippet( $html ),
+			'classes' => [ 'mw-htmlform', 'mw-htmlform-ooui' ],
+			'content' => $content,
 		] );
 
 		// Include a wrapper for style, if requested.

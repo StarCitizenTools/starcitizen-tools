@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -12,11 +12,24 @@
  * @since 2013.06
  */
 class StashedTranslation {
+	/** @var User */
 	protected $user;
+
+	/** @var Title */
 	protected $title;
+
+	/** @var string */
 	protected $value;
+
+	/** @var array|null */
 	protected $metadata;
 
+	/**
+	 * @param User $user
+	 * @param Title $title
+	 * @param string $value
+	 * @param array|null $metadata
+	 */
 	public function __construct( User $user, Title $title, $value, array $metadata = null ) {
 		$this->user = $user;
 		$this->title = $title;
@@ -24,22 +37,30 @@ class StashedTranslation {
 		$this->metadata = $metadata;
 	}
 
-	/// @return User
+	/**
+	 * @return User
+	 */
 	public function getUser() {
 		return $this->user;
 	}
 
-	/// @return Title
+	/**
+	 * @return Title
+	 */
 	public function getTitle() {
 		return $this->title;
 	}
 
-	/// @return string
+	/**
+	 * @return string
+	 */
 	public function getValue() {
 		return $this->value;
 	}
 
-	/// @return array
+	/**
+	 * @return array|null
+	 */
 	public function getMetadata() {
 		return $this->metadata;
 	}

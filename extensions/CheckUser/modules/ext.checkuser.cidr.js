@@ -1,6 +1,4 @@
 /* -- (c) Aaron Schulz 2009 */
-/*global mediaWiki*/
-
 ( function ( mw, $ ) {
 var showResults = function ( size, cidr ) {
 	$( '#mw-checkuser-cidr-res' ).val( cidr );
@@ -30,6 +28,8 @@ var updateCIDRresult = function () {
 		ips = text.split( '\t' );
 	} else if ( text.indexOf( ',' ) !== -1 ) {
 		ips = text.split( ',' );
+	} else if ( text.indexOf( ' - ' ) !== -1 ) {
+		ips = text.split( ' - ' );
 	} else if ( text.indexOf( '-' ) !== -1 ) {
 		ips = text.split( '-' );
 	} else if ( text.indexOf( ' ' ) !== -1 ) {
@@ -252,7 +252,7 @@ var hex2int = function ( hex ) {
 
 $( function () {
 	updateCIDRresult();
-	$( '#mw-checkuser-iplist' ).bind( 'keyup click', function () {
+	$( '#mw-checkuser-iplist' ).on( 'keyup click', function () {
 		updateCIDRresult();
 	} );
 } );

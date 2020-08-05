@@ -3,10 +3,11 @@
 use Flow\Container;
 use Flow\FlowActions;
 use Flow\Model\UUID;
+use Wikimedia\Rdbms\IDatabase;
 
-require_once ( getenv( 'MW_INSTALL_PATH' ) !== false
+require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
-	: dirname( __FILE__ ) . '/../../../maintenance/Maintenance.php' );
+	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
  * Adjusts edit counts for all existing Flow data.
@@ -19,7 +20,7 @@ class FlowFixEditCount extends LoggedUpdateMaintenance {
 	 *
 	 * @var array
 	 */
-	protected $updates = array();
+	protected $updates = [];
 
 	public function __construct() {
 		parent::__construct();
@@ -30,6 +31,8 @@ class FlowFixEditCount extends LoggedUpdateMaintenance {
 		$this->addOption( 'stop', 'Timestamp to stop counting revisions at', false, true );
 
 		$this->setBatchSize( 300 );
+
+		$this->requireExtension( 'Flow' );
 	}
 
 	protected function getUpdateKey() {
@@ -37,8 +40,8 @@ class FlowFixEditCount extends LoggedUpdateMaintenance {
 	}
 
 	protected function doDBUpdates() {
-		/** @var DatabaseBase $dbr */
-		$dbr = Container::get( 'db.factory' )->getDB( DB_SLAVE );
+		/** @var IDatabase $dbr */
+		$dbr = Container::get( 'db.factory' )->getDB( DB_REPLICA );
 		$countableActions = $this->getCountableActions();
 
 		// defaults = date of first Flow commit up until now
@@ -60,22 +63,22 @@ class FlowFixEditCount extends LoggedUpdateMaintenance {
 		return true;
 	}
 
-	public function refreshBatch( DatabaseBase $dbr, UUID $continue, $countableActions, UUID $stop ) {
+	public function refreshBatch( IDatabase $dbr, UUID $continue, $countableActions, UUID $stop ) {
 		$rows = $dbr->select(
 			'flow_revision',
-			array( 'rev_id', 'rev_user_id' ),
-			array(
+			[ 'rev_id', 'rev_user_id' ],
+			[
 				'rev_id > ' . $dbr->addQuotes( $continue->getBinary() ),
 				'rev_id <= ' . $dbr->addQuotes( $stop->getBinary() ),
 				'rev_user_id > 0',
 				'rev_user_wiki' => wfWikiID(),
 				'rev_change_type' => $countableActions,
-			),
+			],
 			__METHOD__,
-			array(
+			[
 				'ORDER BY' => 'rev_id ASC',
 				'LIMIT' => $this->mBatchSize,
-			)
+			]
 		);
 
 		// end of data
@@ -111,7 +114,7 @@ class FlowFixEditCount extends LoggedUpdateMaintenance {
 	 * @return array
 	 */
 	protected function getCountableActions() {
-		$allowedActions = array();
+		$allowedActions = [];
 
 		/** @var FlowActions $actions */
 		$actions = \Flow\Container::get( 'flow_actions' );
@@ -126,4 +129,4 @@ class FlowFixEditCount extends LoggedUpdateMaintenance {
 }
 
 $maintClass = 'FlowFixEditCount';
-require_once( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

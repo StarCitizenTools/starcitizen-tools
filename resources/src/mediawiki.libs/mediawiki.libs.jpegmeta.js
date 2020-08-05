@@ -7,10 +7,11 @@
  * Changes:
  * - Add closure.
  * - Add this.JpegMeta assignment to expose it as global.
+ * - Add export as module.
  * - Add mw.libs.jpegmeta wrapper.
  */
 
-( function () {
+( function ( mw ) {
 	/*
 	Copyright (c) 2009 Ben Leslie
 	
@@ -729,9 +730,13 @@
 	    }
 	};
 
-	// MediaWiki: Add mw.libs wrapper
-	mw.libs.jpegmeta = function( fileReaderResult, fileName ) {
+	// MediaWiki: Export as module
+	module.exports = function( fileReaderResult, fileName ) {
 		return new JpegMeta.JpegFile( fileReaderResult, fileName );
 	};
 
-}() );
+	// MediaWiki: Add mw.libs wrapper
+	// @deprecated since 1.31
+	mw.log.deprecate( mw.libs, 'jpegmeta', module.exports );
+
+}( mediaWiki ) );

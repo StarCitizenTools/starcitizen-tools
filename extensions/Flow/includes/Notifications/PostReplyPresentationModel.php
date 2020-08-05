@@ -2,8 +2,6 @@
 
 namespace Flow;
 
-use Flow\Model\UUID;
-
 class PostReplyPresentationModel extends FlowPresentationModel {
 
 	public function getIconType() {
@@ -26,7 +24,7 @@ class PostReplyPresentationModel extends FlowPresentationModel {
 			$notificationController = Container::get( 'controller.notification' );
 			$firstChronologicallyEvent = end( $bundledEvents );
 			$firstChronologicallyPostId = $firstChronologicallyEvent->getExtraParam( 'post-id' );
-			$bundledEventsIncludingThis = array_merge( array( $this->event ), $bundledEvents );
+			$bundledEventsIncludingThis = array_merge( [ $this->event ], $bundledEvents );
 			$topmostPostID = $notificationController->getTopmostPostId( $bundledEventsIncludingThis ) ?:
 				$firstChronologicallyPostId;
 
@@ -34,32 +32,36 @@ class PostReplyPresentationModel extends FlowPresentationModel {
 			$event = $this->event;
 			$firstChronologicallyPostId = $event->getExtraParam( 'post-id' );
 		}
-		return array(
+		return [
 			'url' => $this->getPostLinkUrl( $firstChronologicallyPostId, $topmostPostID ),
 			'label' => $this->msg( 'flow-notification-link-text-view-post' )->text(),
-		);
+		];
 	}
 
 	public function getSecondaryLinks() {
 		if ( $this->isBundled() ) {
-			return array( $this->getBoardLink() );
+			$links = [ $this->getBoardLink() ];
 		} else {
-			return array( $this->getAgentLink(), $this->getBoardLink() );
+			$links = [ $this->getAgentLink(), $this->getBoardLink() ];
 		}
+
+		$links[] = $this->getFlowUnwatchDynamicActionLink( true );
+
+		return $links;
 	}
 
 	protected function getHeaderMessageKey() {
 		if ( $this->isBundled() ) {
 			if ( $this->isUserTalkPage() ) {
-				return "notification-bundle-header-{$this->type}-user-talk";
+				return 'notification-bundle-header-flow-post-reply-user-talk';
 			} else {
-				return "notification-bundle-header-{$this->type}-v2";
+				return 'notification-bundle-header-flow-post-reply-v2';
 			}
 		} else {
 			if ( $this->isUserTalkPage() ) {
-				return parent::getHeaderMessageKey() . "-user-talk";
+				return 'notification-header-flow-post-reply-user-talk';
 			} else {
-				return parent::getHeaderMessageKey();
+				return 'notification-header-flow-post-reply';
 			}
 		}
 	}
@@ -75,20 +77,26 @@ class PostReplyPresentationModel extends FlowPresentationModel {
 			return $msg;
 		} else {
 			$msg = parent::getHeaderMessage();
-			$msg->params( $this->getTruncatedTitleText( $this->event->getTitle(), true) );
+			$msg->params( $this->getTruncatedTitleText( $this->event->getTitle(), true ) );
 			$msg->plaintextParams( $this->getTopicTitle() );
 			return $msg;
 		}
 	}
 
+	public function getCompactHeaderMessage() {
+		$msg = $this->getMessageWithAgent( 'notification-compact-header-flow-post-reply' );
+		$msg->plaintextParams( $this->getContentSnippet() );
+		return $msg;
+	}
+
 	public function getBodyMessage() {
 		if ( !$this->isBundled() ) {
 			if ( $this->isUserTalkPage() ) {
-				$msg = $this->msg("notification-body-{$this->type}-v2");
+				$msg = $this->msg( "notification-body-flow-post-reply-v2" );
 			} else {
-				$msg = $this->msg("notification-body-{$this->type}-user-talk");
+				$msg = $this->msg( "notification-body-flow-post-reply-user-talk" );
 			}
-			$msg->params( $this->getContentSnippet() );
+			$msg->plaintextParams( $this->getContentSnippet() );
 			return $msg;
 		}
 	}

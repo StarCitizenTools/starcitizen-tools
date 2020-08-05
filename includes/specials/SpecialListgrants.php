@@ -69,10 +69,16 @@ class SpecialListGrants extends SpecialPage {
 				$grantCellHtml = '<ul><li>' . implode( "</li>\n<li>", $descs ) . '</li></ul>';
 			}
 
-			$id = \Sanitizer::escapeId( $grant );
+			$id = Sanitizer::escapeIdForAttribute( $grant );
 			$out->addHTML( \Html::rawElement( 'tr', [ 'id' => $id ],
-				"<td>" . $this->msg( "grant-$grant" )->escaped() . "</td>" .
-				"<td>" . $grantCellHtml . '</td>'
+				"<td>" .
+				$this->msg(
+					"listgrants-grant-display",
+					\User::getGrantName( $grant ),
+					"<span class='mw-listgrants-grant-name'>" . $id . "</span>"
+				)->parse() .
+				"</td>" .
+				"<td>" . $grantCellHtml . "</td>"
 			) );
 		}
 

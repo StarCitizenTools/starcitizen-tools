@@ -38,6 +38,9 @@ fi
 
 # Copy file(s)
 rsync --force ./node_modules/oojs/dist/oojs.jquery.js "$REPO_DIR/$TARGET_DIR"
+rsync --force ./node_modules/oojs/dist/AUTHORS.txt "$REPO_DIR/$TARGET_DIR"
+rsync --force ./node_modules/oojs/dist/LICENSE-MIT "$REPO_DIR/$TARGET_DIR"
+rsync --force ./node_modules/oojs/dist/README.md "$REPO_DIR/$TARGET_DIR"
 
 # Clean up temporary area
 rm -rf "$NPM_DIR"
@@ -49,7 +52,7 @@ COMMITMSG=$(cat <<END
 Update OOjs to v$OOJS_VERSION
 
 Release notes:
- https://phabricator.wikimedia.org/diffusion/GOJS/browse/master/History.md;v$OOJS_VERSION
+ https://gerrit.wikimedia.org/r/plugins/gitiles/oojs/core/+/v$OOJS_VERSION/History.md
 END
 )
 

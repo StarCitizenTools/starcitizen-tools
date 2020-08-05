@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on Sep 27, 2008
- *
  * Copyright © 2008 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -91,12 +87,12 @@ class ApiQueryDuplicateFiles extends ApiQueryGeneratorBase {
 
 		$sha1s = [];
 		foreach ( $files as $file ) {
-			/** @var $file File */
+			/** @var File $file */
 			$sha1s[$file->getName()] = $file->getSha1();
 		}
 
 		// find all files with the hashes, result format is:
-		// array( hash => array( dup1, dup2 ), hash1 => ... )
+		// [ hash => [ dup1, dup2 ], hash1 => ... ]
 		$filesToFindBySha1s = array_unique( array_values( $sha1s ) );
 		if ( $params['localonly'] ) {
 			$filesBySha1s = RepoGroup::singleton()->getLocalRepo()->findBySha1s( $filesToFindBySha1s );
@@ -114,7 +110,7 @@ class ApiQueryDuplicateFiles extends ApiQueryGeneratorBase {
 			if ( $params['dir'] == 'descending' ) {
 				$dupFiles = array_reverse( $dupFiles );
 			}
-			/** @var $dupFile File */
+			/** @var File $dupFile */
 			foreach ( $dupFiles as $dupFile ) {
 				$dupName = $dupFile->getName();
 				if ( $image == $dupName && $dupFile->isLocal() ) {
@@ -189,6 +185,6 @@ class ApiQueryDuplicateFiles extends ApiQueryGeneratorBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Duplicatefiles';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Duplicatefiles';
 	}
 }

@@ -5,7 +5,8 @@
 			"GreenZeb",
 			"Papuass",
 			"Xil",
-			"Yyy"
+			"Yyy",
+			"Zuiks"
 		]
 	},
 	"checkuser-desc": "Atļauj lietotājiem ar attiecīgām pilnvarām pārbaudīt lietotāja IP adresi un citu informāciju.",
@@ -27,12 +28,13 @@
 	"checkuser-month": "pēdējās 30 dienas",
 	"checkuser-all": "viss",
 	"checkuser-check": "Pārbaudīt",
+	"checkuser-check-this-user": "Pārbaudīt šo lietotāju",
 	"checkuser-blocked": "Bloķēts",
 	"checkuser-wasblocked": "Iepriekš bloķēts",
 	"checkuser-localonly": "Nav apvienots",
 	"checkuser-massblock": "Bloķēt izvēlētos lietotājus",
 	"checkuser-blocktag-talk": "Aizstāt lietotāja diskusijas lapu ar:",
-	"checkuser-massblock-commit": "Bloķēt izvēlētos lietotājus.",
+	"checkuser-massblock-commit": "Bloķēt izvēlētos dalībniekus.",
 	"checkuser-block-failure": "\"' Neviens lietotājs netika bloķēts.\" \"",
 	"checkuser-block-limit": "Izvēlēti pārāk daudzi lietotāji.",
 	"checkuser-block-noreason": "Jums jānorāda bloķēšanas iemesli.",

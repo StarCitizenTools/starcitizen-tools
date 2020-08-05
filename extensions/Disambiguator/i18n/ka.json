@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"David1010",
+			"BRUTE"
+		]
+	},
+	"disambig-desc": "დაამატებს ტეგს code><nowiki>__DISAMBIG__</nowiki></code> [[Special:DisambiguationPages|მრავალმნიშვნელობის გვერდების]] აღსანიშნავად.",
+	"disambiguationpages": "მრავალმნიშვნელოვანი გვერდები",
+	"disambiguationpages-summary": "აქ მოცემულია მრავალმნიშვნელობის გვერდების სია {{SITENAME}}-ზე.<br />\nგვერდი ჩაითვლება მრავალნიშვნელობის გვერდად, თუ შეიცავს ტეგს <code><nowiki>__DISAMBIG__</nowiki></code> (ან მის ექვივალენტს).",
+	"disambiguationpagelinks": "გვერდები, რომლებიც გადადის მრავალმნიშვნელობის გვერდებზე",
+	"disambiguationpagelinks-summary": "მომდევნო გვერდები შეიცავენ მინიმუმ ერთ ბმულს მრავალმნიშვნელობის გვერდზე.\nუმჯობესია, თუ ბმული გაკეთდება უფრო სპეციფიურ სტატიაზე.<br />\nგვერდი ჩაითვლება მრავალნიშვნელობის გვერდად, თუ შეიცავს ტეგს <code><nowiki>__DISAMBIG__</nowiki></code> (ან მის ექვივალენტს).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "ეს მარვალმნიშვნელობის გვერდია"
+}

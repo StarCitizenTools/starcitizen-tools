@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface plain text file transfer handler class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -29,7 +29,7 @@ ve.ui.PlainTextFileTransferHandler.static.name = 'plainTextFile';
 
 ve.ui.PlainTextFileTransferHandler.static.types = [ 'text/plain' ];
 
-ve.ui.PlainTextFileTransferHandler.static.extension = [ 'txt' ];
+ve.ui.PlainTextFileTransferHandler.static.extensions = [ 'txt' ];
 
 /* Methods */
 

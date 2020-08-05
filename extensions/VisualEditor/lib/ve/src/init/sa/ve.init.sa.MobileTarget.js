@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Standalone Initialization Mobile Target class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -17,8 +17,6 @@
 ve.init.sa.MobileTarget = function VeInitSaMobileTarget( config ) {
 	// Parent constructor
 	ve.init.sa.MobileTarget.super.call( this, config );
-
-	this.$element.addClass( 've-init-sa-mobileTarget' );
 };
 
 /* Inheritance */
@@ -29,56 +27,42 @@ OO.inheritClass( ve.init.sa.MobileTarget, ve.init.sa.Target );
 
 ve.init.sa.MobileTarget.static.toolbarGroups = [
 	// History
-	{
-		header: OO.ui.deferMsg( 'visualeditor-toolbar-history' ),
-		include: [ 'undo' ]
-	},
+	{ include: [ 'undo' ] },
 	// Style
 	{
+		header: OO.ui.deferMsg( 'visualeditor-toolbar-text-style' ),
+		title: OO.ui.deferMsg( 'visualeditor-toolbar-style-tooltip' ),
 		classes: [ 've-test-toolbar-style' ],
 		type: 'list',
 		icon: 'textStyle',
-		indicator: 'down',
-		title: OO.ui.deferMsg( 'visualeditor-toolbar-style-tooltip' ),
 		include: [ { group: 'textStyle' }, 'language', 'clear' ],
 		forceExpand: [ 'bold', 'italic', 'clear' ],
 		promote: [ 'bold', 'italic' ],
 		demote: [ 'strikethrough', 'code', 'underline', 'language', 'clear' ]
 	},
 	// Link
-	{
-		header: OO.ui.deferMsg( 'visualeditor-linkinspector-title' ),
-		include: [ 'link' ]
-	},
+	{ include: [ 'link' ] },
 	// Structure
 	{
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
+		title: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
 		type: 'list',
 		icon: 'listBullet',
-		indicator: 'down',
 		include: [ { group: 'structure' } ],
 		demote: [ 'outdent', 'indent' ]
 	},
 	// Insert
 	{
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
+		title: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
 		type: 'list',
 		icon: 'add',
 		label: '',
-		title: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
-		indicator: 'down',
 		include: '*'
 	}
 ];
 
 /* Methods */
-
-/**
- * @inheritdoc
- */
-ve.init.sa.MobileTarget.prototype.createSurface = function ( dmDoc, config ) {
-	return new ve.ui.MobileSurface( dmDoc, this.getSurfaceConfig( config ) );
-};
 
 /**
  * @inheritdoc

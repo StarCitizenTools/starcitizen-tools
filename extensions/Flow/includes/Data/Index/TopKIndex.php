@@ -2,15 +2,14 @@
 
 namespace Flow\Data\Index;
 
-use BagOStuff;
-use Flow\Data\BufferedCache;
+use Flow\Data\FlowObjectCache;
 use Flow\Data\ObjectManager;
 use Flow\Data\ObjectMapper;
 use Flow\Data\ObjectStorage;
 use Flow\Data\Compactor\ShallowCompactor;
 use Flow\Data\Utils\SortArrayByKeys;
 use Flow\Exception\DataModelException;
-use Flow\Exception\InvalidInputException;
+use Flow\Exception\InvalidParameterException;
 
 /**
  * Holds the top k items with matching $indexed columns.  List is sorted and truncated to specified size.
@@ -19,25 +18,27 @@ class TopKIndex extends FeatureIndex {
 	/**
 	 * @var array
 	 */
-	protected $options = array();
+	protected $options = [];
 
-	public function __construct( BufferedCache $cache, ObjectStorage $storage, ObjectMapper $mapper, $prefix, array $indexed, array $options = array() ) {
+	public function __construct( FlowObjectCache $cache, ObjectStorage $storage, ObjectMapper $mapper, $prefix, array $indexed, array $options = [] ) {
 		if ( empty( $options['sort'] ) ) {
-			throw new InvalidInputException( 'TopKIndex must be sorted', 'invalid-input' );
+			throw new InvalidParameterException( 'TopKIndex must be sorted' );
 		}
 
 		parent::__construct( $cache, $storage, $mapper, $prefix, $indexed );
 
-		$this->options = $options + array(
+		$this->options = $options + [
 			'limit' => 500,
 			'order' => 'DESC',
-			'create' => function() { return false; },
+			'create' => function () {
+				return false;
+			},
 			'shallow' => null,
-		);
+		];
 		$this->options['order'] = strtoupper( $this->options['order'] );
 
 		if ( !is_array( $this->options['sort'] ) ) {
-			$this->options['sort'] = array( $this->options['sort'] );
+			$this->options['sort'] = [ $this->options['sort'] ];
 		}
 		if ( $this->options['shallow'] ) {
 			// TODO: perhaps we shouldn't even get a shallow option, just receive a proper compactor in FeatureIndex::__construct
@@ -65,7 +66,7 @@ class TopKIndex extends FeatureIndex {
 		return $this->options['limit'];
 	}
 
-	protected function filterResults( array $results, array $options = array() ) {
+	protected function filterResults( array $results, array $options = [] ) {
 		foreach ( $results as $i => $result ) {
 			list( $offset, $limit ) = $this->getOffsetLimit( $result, $options );
 			$results[$i] = array_slice( $result, $offset, $limit, true );
@@ -76,7 +77,6 @@ class TopKIndex extends FeatureIndex {
 
 	// TODO: This is only left for now to handle non-ID offsets (e.g. updated
 	// timestamps).
-	//
 	// This has always been broken once you query past the TopKIndex limit.
 	/**
 	 * @param array $rows
@@ -98,7 +98,7 @@ class TopKIndex extends FeatureIndex {
 
 		if ( $offsetValue === null ) {
 			$offset = $dir === 'fwd' ? 0 : count( $rows ) - $limit;
-			return array( $offset, $limit );
+			return [ $offset, $limit ];
 		}
 
 		$offset = $this->getOffsetFromOffsetValue( $rows, $offsetValue );
@@ -129,7 +129,7 @@ class TopKIndex extends FeatureIndex {
 			$startPos = 0;
 		}
 
-		return array( $startPos, $limit );
+		return [ $startPos, $limit ];
 	}
 
 	/**
@@ -162,7 +162,7 @@ class TopKIndex extends FeatureIndex {
 	 *  want all rows before/after that timestamp.  This consists of values for each field
 	 *  we sort by, delimited by |.
 	 *
-	 * @return integer An integer less than, equal to, or greater than zero
+	 * @return int An integer less than, equal to, or greater than zero
 	 *  if $row is considered to be respectively less than, equal to, or
 	 *  greater than $offsetValue
 	 *
@@ -178,7 +178,7 @@ class TopKIndex extends FeatureIndex {
 			throw new DataModelException( 'This Index implementation does not support offset values', 'process-data' );
 		}
 
-		foreach( $sortFields as $field ) {
+		foreach ( $sortFields as $field ) {
 			$valueInRow = $row[$field];
 			$offsetValuePart = $splitOffsetValue[$fieldIndex];
 
@@ -193,119 +193,8 @@ class TopKIndex extends FeatureIndex {
 		return 0;
 	}
 
-	protected function maybeCreateIndex( array $indexed, array $sourceRow, array $compacted ) {
-		if ( call_user_func( $this->options['create'], $sourceRow ) ) {
-			$this->cache->set( $this->cacheKey( $indexed ), array( $compacted ) );
-			return true;
-		}
-		return false;
-	}
-
-	protected function addToIndex( array $indexed, array $row ) {
-		$self = $this;
-
-		// If this used redis instead of memcached, could it add to index in position
-		// without retry possibility? need a single number that will properly sort rows.
-		$this->cache->merge(
-			$this->cacheKey( $indexed ),
-			function( BagOStuff $cache, $key, $value ) use( $self, $row ) {
-				if ( $value === false ) {
-					return false;
-				}
-
-				if ( count( $value ) > 0 ) {
-					/*
-					 * Ideally, we'd expand the rows currently in cache, run them
-					 * through $this->storage->normalize & then re-compact them.
-					 * And then we can reliably locate $row in there.
-					 * However, that may require additional cache lookups for
-					 * the expand info.
-					 *
-					 * Instead of doing that, Let's just make the current row
-					 * columns conform the rows in cache ($schema)
-					 *
-					 * This is mostly to fight useless nullable columns in DB
-					 * (either in preparation for schema change or no longer needed)
-					 * Meaningful changes in data will need a cache key change, so
-					 * we're good here.
-					 */
-					$row = $self->normalizeCompressed( $row, array_keys( reset( $value ) ) );
-				}
-
-				$idx = array_search( $row, $value );
-				if ( $idx !== false ) {
-					return false; // This row already exists somehow
-				}
-				$retval = $value;
-				$retval[] = $row;
-				$retval = $self->sortIndex( $retval );
-				$retval = $self->limitIndexSize( $retval );
-				if ( $retval === $value ) {
-					// object didn't fit in index
-					return false;
-				} else {
-					return $retval;
-				}
-			}
-		);
-	}
-
 	protected function removeFromIndex( array $indexed, array $row ) {
-		$self = $this;
-
-		$this->cache->merge(
-			$this->cacheKey( $indexed ),
-			function( BagOStuff $cache, $key, $value ) use( $self, $row ) {
-				if ( $value === false ) {
-					return false;
-				}
-
-				if ( count( $value ) > 0 ) {
-					// see comment in self::addToIndex on why to normalize
-					$row = $self->normalizeCompressed( $row, array_keys( reset( $value ) ) );
-				}
-
-				$idx = array_search( $row, $value );
-				if ( $idx === false ) {
-					return false;
-				}
-				unset( $value[$idx] );
-				return $value;
-			}
-		);
-	}
-
-	protected function replaceInIndex( array $indexed, array $oldRow, array $newRow ) {
-		$self = $this;
-		$this->cache->merge(
-			$this->cacheKey( $indexed ),
-			function( BagOStuff $cache, $key, $value ) use( $self, $oldRow, $newRow ) {
-				if ( $value === false ) {
-					return false;
-				}
-				$retval = $value;
-
-				if ( count( $value ) > 0 ) {
-					// see comment in self::addToIndex on why to normalize
-					$oldRow = $self->normalizeCompressed( $oldRow, array_keys( reset( $value ) ) );
-					$newRow = $self->normalizeCompressed( $newRow, array_keys( reset( $value ) ) );
-				}
-
-				$idx = array_search( $oldRow, $retval );
-				if ( $idx !== false ) {
-					unset( $retval[$idx] );
-				}
-				$retval[] = $newRow;
-				$retval = $self->sortIndex( $retval );
-				$retval = $self->limitIndexSize( $retval );
-				if ( $value === $retval ) {
-					// new item didn't fit in index and old item wasn't found in index
-					return false;
-				} else {
-					return $retval;
-				}
-			}
-		);
+		$this->cache->delete( $this->cacheKey( $indexed ) );
 	}
 
 	/**
@@ -349,9 +238,9 @@ class TopKIndex extends FeatureIndex {
 
 	// INTERNAL: in 5.4 it can be protected
 	public function queryOptions() {
-		$options = array( 'LIMIT' => $this->options['limit'] );
+		$options = [ 'LIMIT' => $this->options['limit'] ];
 
-		$orderBy = array();
+		$orderBy = [];
 		$order = $this->options['order'];
 		foreach ( $this->options['sort'] as $key ) {
 			$orderBy[] = "$key $order";

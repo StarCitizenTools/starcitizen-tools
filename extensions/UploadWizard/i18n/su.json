@@ -1,23 +1,22 @@
 {
 	"@metadata": {
 		"authors": [
-			"Kandar"
+			"Kandar",
+			"Uchup19",
+			"Dipusparaga"
 		]
 	},
-	"uploadwizard": "Sulap Pamuatan",
-	"uploadwizard-desc": "Sulap Pamuatan, parabot pikeun muat multimédia",
-	"mwe-upwiz-uploadcampaigns": "Kampanyeu pamuatan",
-	"mwe-upwiz-uploadcampaign": "Setélan kampanyeu pamuatan",
-	"right-upwizcampaigns": "Setél kampanyeu Sulap Pamuatan",
-	"action-upwizcampaigns": "setél kampanyeu pamuatan",
-	"group-upwizcampeditors": "Editor kampanyeu Sulap Pamuatan",
-	"group-upwizcampeditors-member": "{{GENDER:$1|Editor kampanyeu Sulap Pamuatan}}",
-	"grouppage-upwizcampeditors": "{{ns:project}}:Editor kampanyeu Sulap Pamuatan",
-	"mwe-upwiz-js-off": "Ngarah antarmukana hadé, UploadWizard migunakeun JavaScript. Browser anjeun henteu ngadukung JavaScript atawa ditumpurkeun, ku kituna maké formulir pamuatan anu basajan.",
-	"mwe-upwiz-extension-disabled": "Ieu kaca ditumpurkun kusabab aya masalah téknis. Mangga cobi formulir pamuatan baku.",
-	"mwe-upwiz-code-unknown": "Basa teu dipikawanoh",
+	"uploadwizard": "Purah ngunjalkeun",
+	"uploadwizard-desc": "Purah Ngunjalkeun, parabot pikeun ngunjal multimédia",
+	"tag-uploadwizard": "Purah ngunjalkeun",
+	"right-upwizcampaigns": "Setél kampanyeu purah ngunjalkeun",
+	"action-upwizcampaigns": "setél kampanyeu ngunjalkeun",
+	"group-upwizcampeditors": "Éditor kampanyeu purah ngunjalkeun",
+	"group-upwizcampeditors-member": "{{GENDER:$1|Editor kampanyeu purah ngunjalkeun}}",
+	"grouppage-upwizcampeditors": "{{ns:project}}:Editor kampanyeu purah ngunjalkeun",
+	"mwe-upwiz-extension-disabled": "Ieu kaca ditumpurkun kusabab aya masalah téknis. Mangga cobi formulir unjalan baku.",
 	"mwe-upwiz-step-tutorial": "Lenyepan",
-	"mwe-upwiz-step-file": "Muat",
+	"mwe-upwiz-step-file": "Unjal",
 	"mwe-upwiz-step-deeds": "Hak medal",
 	"mwe-upwiz-step-details": "Pedar",
 	"mwe-upwiz-step-thanks": "Pamakéan",
@@ -31,9 +30,9 @@
 	"mwe-upwiz-add-file-flickr": "Bagi gambar ti Flickr",
 	"mwe-upwiz-add-file-flickr-n": "Tambahkeun gambar lianna ti Flickr",
 	"mwe-upwiz-add-flickr-or": "Atawa",
-	"mwe-upwiz-add-flickr": "Salin ti Flickr",
+	"mwe-upwiz-add-flickr": "Tiron ti Flickr",
 	"mwe-upwiz-flickr-input-placeholder": "URL Flickr",
-	"mwe-upwiz-select-flickr": "Muat gambar anu dipilih",
+	"mwe-upwiz-select-flickr": "Unjal gambar pinilih",
 	"mwe-upwiz-flickr-disclaimer1": "Ieu formulir bakal ngamuat kontén anu diimahan di flickr.com sarta dipayungan ku [https://www.flickr.com/help/terms/ katangtuan pamakéan] jeung [https://www.flickr.com/help/privacy-policy/ kawijakan privasi] Flickr.",
 	"mwe-upwiz-flickr-disclaimer2": "Tengetkeun yén ku migunakeun ieu parabot, alamat IP jeung wincikan rekés anjeun bakal disetorkeun ka Flickr.",
 	"mwe-upwiz-error-no-image-retrieved": "Berkasna teu bisa disalin ti $1.",
@@ -49,6 +48,11 @@
 	"mwe-upwiz-published": "Tos medal!",
 	"mwe-upwiz-failed": "Gagal.",
 	"mwe-upwiz-remove": "Hapus",
-	"mwe-upwiz-upload": "Muat",
-	"mwe-upwiz-copy-metadata-button": "Salin"
+	"mwe-upwiz-upload": "Unjal",
+	"mwe-upwiz-source-thirdparty-accept": "Heug",
+	"mwe-upwiz-copy-metadata-button": "Tiron",
+	"mwe-upwiz-thanks-intro": "Hatur nuhun tas ngunjal!",
+	"mwe-upwiz-ok": "Heug",
+	"mwe-upwiz-dialog-yes": "Nya",
+	"mwe-upwiz-errordialog-ok": "Heug"
 }

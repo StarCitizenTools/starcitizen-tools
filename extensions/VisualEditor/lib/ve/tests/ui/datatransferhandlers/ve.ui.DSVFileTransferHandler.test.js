@@ -1,14 +1,14 @@
 /*!
  * VisualEditor UserInterface DSVFileTransferHandler tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ui.DSVFileTransferHandler' );
 
 /* Tests */
 
-QUnit.test( 'getInsertableData', 1, function ( assert ) {
+QUnit.test( 'getInsertableData', function ( assert ) {
 	var handler,
 		done = assert.async(),
 		fn = function () {},

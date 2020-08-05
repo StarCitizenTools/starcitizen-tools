@@ -1,16 +1,40 @@
 /* Echo specific CSS */
+@import '../echo.variables';
 
-#mw-echo-more {
-	display: block;
-	text-align: center;
-	font-size: 13px;
+.mw-echo-special-container {
 	max-width: 600px;
 }
 
-/* Custom header styling for Vector and Monobook skins */
-.mw-special-Notifications.skin-vector #firstHeading,
-.mw-special-Notifications.skin-monobook #firstHeading {
-	max-width: 600px;
+.client-js .mw-echo-special-nojs {
+	min-height: 5em;
+	/* @embed */
+	background-image: url( ../../images/pending.gif );
+
+	.mw-echo-special-container {
+		display: none;
+	}
+}
+
+// Hide the help link and the preferences link
+// in the JS version, since both appear inside
+// the cog menu
+.client-js #mw-indicator-mw-helplink {
+	display: none;
+}
+
+.client-js #mw-echo-pref-link,
+.client-js #contentSub {
+	display: none;
+}
+
+@media all and ( min-width: @specialpage-hd-width ) {
+	.client-js #mw-content-text {
+		margin-top: 2em;
+	}
+}
+
+.mw-echo-special-markAllReadButton {
+	float: right;
 }
 
 /* Special styles to use if we're converting subtitle links into header icons */
@@ -20,75 +44,119 @@
 		height: 19px;
 		width: 19px;
 	}
-
-	#mw-echo-pref-link {
-		float: right;
-		margin: 5px 3px;
-		/* @embed */
-		background-image: url(../icons/Preferences.png);
-		background-repeat: no-repeat;
-		background-position: 0 0;
-		filter: alpha(opacity=50);
-		opacity: 0.5;
-
-		&:hover {
-			filter: alpha(opacity=100);
-			opacity: 1.0;
-		}
-	}
-
-	#mw-echo-moreinfo-link {
-		display: inline-block;
-		margin: 0 3px;
-		/* @embed */
-		background-image: url(../icons/Help.png);
-		background-repeat: no-repeat;
-		background-position: 0 0;
-		filter: alpha(opacity=50);
-		opacity: 0.5;
-
-		&:hover {
-			filter: alpha(opacity=100);
-			opacity: 1.0;
-		}
-	}
 }
 
 .mw-echo-date-section {
-	font-weight: 800;
-	font-size: 1.1em;
-	text-transform: uppercase;
-	border-bottom: 1px solid #C9C9C9;
-	margin: 30px 0 5px 50px;
-	color: #686868;
-	max-width: 550px;
+	border-bottom: 1px solid @border-color;
+	margin: 20px 0 5px 0;
+	color: @grey-light;
+	display: inline-block;
+	width: 100%;
+	padding-bottom: 0.5em;
 }
 
-ul#mw-echo-special-container {
+.mw-echo-date-section-text {
+	text-transform: uppercase;
+	font-size: 1.1em;
+	font-weight: 800;
+	display: inline-block;
+}
+
+ul.mw-echo-special-notifications {
+	div.mw-htmlform-submit-buttons {
+		margin: 0;
+	}
 	list-style: none none;
 	padding: 0;
-	margin: 30px 0 0 0;
-	max-width: 600px;
+	margin: 0;
+	width: 100%;
+}
+
+.mw-echo-special-navbar-top {
+	margin-bottom: 10px;
+}
+
+.mw-echo-special-navbar-bottom {
+	margin-top: 20px;
+	padding-top: 10px;
+	border-top: 1px solid @border-color;
 }
 
 .mw-echo-notification {
-	padding: 15px 35px 10px 0;
+	padding: 30px 40px 15px 10px;
+
+	.mw-echo-markAsReadButton {
+		display: none;
+
+		button {
+			padding: 0;
+		}
+	}
 }
 
-#mw-echo-special-container {
+.mw-echo-markAsReadSectionButton {
+	float: right;
+	display: inline-block;
+
+	button.oo-ui-buttonElement-button {
+		padding: 2px 12px 2px 12px;
+	}
+
+	// HACK: temporary workaround for T136024
+	line-height: normal;
+
+	.oo-ui-buttonElement-button {
+		.oo-ui-labelElement-label {
+			font-weight: normal;
+		}
+	}
+}
+
+.mw-echo-special-notifications {
+	overflow-y: auto;
+
 	.mw-echo-notification {
-		background-color: transparent;
+		background-color: #f8f9fa;
 
 		&:hover {
 			/* Fallback for IE<=8 */
-			background-color: #F6F6F6;
-			background-color: rgba(0, 0, 0, 0.035);
+			background-color: #f6f6f6;
+			background-color: rgba( 0, 0, 0, 0.035 );
 		}
 
-		&.mw-echo-unread {
+		&-unread {
+			color: @color-base;
+			background-color: transparent;
+			padding-right: 0;
+
 			.mw-echo-title {
 				font-weight: bold;
 			}
+
+			.mw-echo-markAsReadButton {
+				float: right;
+				display: inline-block;
+				margin: 0;
+
+				opacity: 0.5;
+				&:hover {
+					opacity: 1;
+				}
+			}
 		}
+	}
+}
+
+div.mw-htmlform-ooui-wrapper {
+	margin: 0;
+}
+
+@media all and ( max-width: ( @specialpage-hd-width - 1 ) ) {
+	.pre-content.heading-holder {
+		// Center 'preferences' in mobile special page
+		text-align: center;
+	}
+	.mw-echo-special-header-link {
+		display: none;
 	}
 }

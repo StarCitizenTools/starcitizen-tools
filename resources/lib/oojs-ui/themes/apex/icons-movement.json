@@ -3,25 +3,40 @@
 	"intro": "@import '../../../../src/styles/common';",
 	"images": {
 		"arrowNext": { "file": {
-			"ltr": "images/icons/arrow-ltr.svg",
-			"rtl": "images/icons/arrow-rtl.svg"
+			"ltr": "../wikimediaui/images/icons/arrowNext-ltr.svg",
+			"rtl": "../wikimediaui/images/icons/arrowNext-rtl.svg"
 		} },
-		"arrowLast": { "file": {
-			"ltr": "images/icons/arrow-rtl.svg",
-			"rtl": "images/icons/arrow-ltr.svg"
+		"arrowPrevious": { "file": {
+			"ltr": "../wikimediaui/images/icons/arrowPrevious-ltr.svg",
+			"rtl": "../wikimediaui/images/icons/arrowPrevious-rtl.svg"
 		} },
-		"caretNext": { "file": {
-			"ltr": "images/icons/caret-rtl.svg",
-			"rtl": "images/icons/caret-ltr.svg"
-		} },
-		"caretLast": { "file": {
-			"ltr": "images/icons/caret-ltr.svg",
-			"rtl": "images/icons/caret-rtl.svg"
-		} },
-		"caretDown": { "file": "images/icons/caretDown.svg" },
-		"caretUp": { "file": "images/icons/caretUp.svg" },
-		"downTriangle": { "file": "images/icons/downTriangle.svg" },
-		"move": { "file": "images/icons/move.svg" },
-		"upTriangle": { "file": "images/icons/upTriangle.svg" }
+		"collapse": { "file": "../wikimediaui/images/icons/collapse.svg" },
+		"downTriangle": { "file": "../wikimediaui/images/icons/downTriangle.svg" },
+		"draggable": { "file": "../wikimediaui/images/icons/draggable.svg" },
+		"expand": { "file": "../wikimediaui/images/icons/expand.svg" },
+		"move": {
+			"file": "../wikimediaui/images/icons/move.svg"
+		},
+		"next": { "file": {
+			"ltr": "../wikimediaui/images/icons/next-ltr.svg",
+			"rtl": "../wikimediaui/images/icons/next-rtl.svg"
+			}
+		},
+		"previous": { "file": {
+			"ltr": "../wikimediaui/images/icons/previous-ltr.svg",
+			"rtl": "../wikimediaui/images/icons/previous-rtl.svg"
+			}
+		},
+		"last": { "file": {
+			"ltr": "../wikimediaui/images/icons/moveLast-ltr.svg",
+			"rtl": "../wikimediaui/images/icons/moveLast-rtl.svg"
+			}
+		},
+		"first": { "file": {
+			"ltr": "../wikimediaui/images/icons/moveFirst-ltr.svg",
+			"rtl": "../wikimediaui/images/icons/moveFirst-rtl.svg"
+			}
+		},
+		"upTriangle": { "file": "../wikimediaui/images/icons/upTriangle.svg" }
 	}
 }

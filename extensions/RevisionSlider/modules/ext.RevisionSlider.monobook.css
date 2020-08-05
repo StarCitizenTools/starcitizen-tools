@@ -1,0 +1,7 @@
+/* HACK: Monobook uses x-small and a globalWrapper to make everything
+   inside of it appear normal. However, the revslider-tooltips are
+   not inside this globalWrapper, and thus need a separate CSS rule.
+   Once this issue is fixed, this rule can be removed. (T166231) */
+.mw-revslider-tooltip {
+	font-size: 0.8rem;
+}

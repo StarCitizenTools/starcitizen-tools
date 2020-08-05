@@ -86,11 +86,11 @@
 	 */
 	mw.flow.dm.APIHandler.prototype.getCategories = function () {
 		var params = {
-				action: 'query',
-				titles: this.page,
-				generator: 'categories',
-				gcllimit: 'max'
-			};
+			action: 'query',
+			titles: this.page,
+			generator: 'categories',
+			gcllimit: 'max'
+		};
 
 		return ( new mw.Api() ).get( $.extend( {}, this.requestParams, params ) )
 			.then( function ( response ) {
@@ -99,9 +99,33 @@
 	};
 
 	/**
+	 * Gets the reason the page was protected
+	 *
+	 * @return {jQuery.Promise}
+	 * @return {Function} return.done
+	 * @return {string} return.done.reason Reason, as HTML
+	 */
+	mw.flow.dm.APIHandler.prototype.getProtectionReason = function () {
+		var params = {
+			action: 'query',
+			list: 'logevents',
+			leprop: 'parsedcomment',
+			leaction: 'protect/protect',
+			letitle: this.page,
+			lelimit: 1
+		};
+
+		return ( new mw.Api() ).get( $.extend( {}, this.requestParams, params ) )
+			.then( function ( response ) {
+				return OO.getProp( response, 'query', 'logevents', 0, 'parsedcomment' );
+			} );
+	};
+
+	/**
 	 * Send a request to get topic list
 	 *
 	 * @param {string} orderType Sort order type, 'newest' or 'updated'
+	 * @param {Object} config Configuration
 	 * @cfg {string} [offset] Topic offset id or timestamp offset
 	 *  if given, the topic list will be returned with topics that
 	 *  are after (and including) the topic with the given uuid or
@@ -263,6 +287,7 @@
 	/**
 	 * Get a post.
 	 *
+	 * @param {string} topicId
 	 * @param {string} postId
 	 * @param {string} format
 	 * @return {jQuery.Promise} Promise that is resolved with the post revision data
@@ -292,12 +317,12 @@
 	 */
 	mw.flow.dm.APIHandler.prototype.savePost = function ( topicId, postId, content, format, captcha ) {
 		var params = {
-				page: this.getTopicTitle( topicId ),
-				epcontent: content,
-				epformat: format,
-				epprev_revision: this.currentRevision,
-				eppostId: postId
-			};
+			page: this.getTopicTitle( topicId ),
+			epcontent: content,
+			epformat: format,
+			epprev_revision: this.currentRevision,
+			eppostId: postId
+		};
 
 		this.addCaptcha( params, captcha );
 
@@ -337,11 +362,11 @@
 	 */
 	mw.flow.dm.APIHandler.prototype.saveTopicSummary = function ( topicId, content, format, captcha ) {
 		var params = {
-				page: this.getTopicTitle( topicId ),
-				etssummary: content,
-				etsformat: format,
-				etsprev_revision: this.currentRevision
-			};
+			page: this.getTopicTitle( topicId ),
+			etssummary: content,
+			etsformat: format,
+			etsprev_revision: this.currentRevision
+		};
 
 		this.addCaptcha( params, captcha );
 
@@ -361,10 +386,10 @@
 	 */
 	mw.flow.dm.APIHandler.prototype.saveTopicTitle = function ( topicId, content, captcha ) {
 		var params = {
-				page: this.getTopicTitle( topicId ),
-				etcontent: content,
-				etprev_revision: this.currentRevision
-			};
+			page: this.getTopicTitle( topicId ),
+			etcontent: content,
+			etprev_revision: this.currentRevision
+		};
 
 		this.addCaptcha( params, captcha );
 
@@ -384,10 +409,10 @@
 	 */
 	mw.flow.dm.APIHandler.prototype.lockTopic = function ( topicId, moderationState, reasonMsgKey ) {
 		var params = {
-				page: this.getTopicTitle( topicId ),
-				cotmoderationState: moderationState,
-				cotreason: mw.msg( reasonMsgKey )
-			};
+			page: this.getTopicTitle( topicId ),
+			cotmoderationState: moderationState,
+			cotreason: mw.msg( reasonMsgKey )
+		};
 
 		return this.postEdit( 'lock-topic', params )
 			.then( function ( data ) {

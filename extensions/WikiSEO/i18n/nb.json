@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jon Harald Søby"
+		]
+	},
+	"wiki-seo-desc": "Gjør det mulig å sette metainnstillinger som nøkkelord og beskrivelse per side, å endre tittelen og diverse andre sideverifiseringstagger.",
+	"wiki-seo-empty-attr-tag": "Feil: Taggen &lt;seo&gt; må inneholde minst ett ikke-tomt attributt.",
+	"wiki-seo-empty-attr-parser": "Feil: <nowiki>{{#seo:}}</nowiki> må inneholde minst ett ikke-tomt attributt.",
+	"wiki-seo-invalid-generator": "Feil: $1 er ikke en gyldig metadatagenerator.",
+	"wiki-seo-missing-page-title": "Feil: den gitte sidetittelen er ugyldig."
+}

@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16",
+			"Ricordisamoa"
+		]
+	},
+	"disambig-desc": "Aggiunge il tag <code><nowiki>__DISAMBIG__</nowiki></code> per marcare le [[Special:DisambiguationPages|pagine di disambiguazione]].",
+	"disambiguationpages": "Pagine di disambiguazione",
+	"disambiguationpages-summary": "Di seguito è riportato un elenco di tutte le pagine di disambiguazione su {{SITENAME}}.<br />\nUna pagina è considerata come una pagina di disambiguazione se contiene il tag <code><nowiki>__DISAMBIG__</nowiki></code> (o un alias equivalente).",
+	"disambiguationpagelinks": "Pagine che si collegano a pagine di disambiguazione",
+	"disambiguationpagelinks-summary": "Le pagine riportate di seguito contengono almeno un collegamento a una pagina di disambiguazione.\nPotresti modificare il collegamento affinché punti ad una pagina più appropriata.<br />\nUna pagina è considerata come una pagina di disambiguazione se la pagina contiene il tag <code><nowiki>__DISAMBIG__</nowiki></code> (o un alias equivalente).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Questa è una pagina di disambiguazione"
+}

@@ -1,9 +1,8 @@
-@import "mediawiki.mixins";
-@import "../mmv.mixins";
+@import 'mediawiki.mixins';
+@import '../mmv.mixins';
 
 .mw-mmv-permission-box {
 	position: relative;
-
 	width: 90%;
 	margin: 10px 20px 0;
 
@@ -14,21 +13,18 @@
 	h3 {
 		margin: 10px;
 		padding: 0;
-		color: #565656;
+		color: #54595d;
 		font-size: 0.95em;
 	}
 
 	.mw-mmv-permission-close {
 		display: none;
-
 		position: absolute;
 		top: 12px;
 		right: 8px;
-
 		width: 16px;
 		height: 16px;
-		.background-image('img/x_gray.svg');
-
+		.background-image( 'img/x_gray.svg' );
 		cursor: pointer;
 	}
 
@@ -38,27 +34,24 @@
 		@lines-shown: 3;
 
 		position: relative;
-
 		max-height: @lines-shown * @text-line-height * @text-font-size;
 		overflow: hidden;
 		margin: 0 10px 10px;
 		font-size: @text-font-size;
 		line-height: @text-line-height;
-		color: #555555;
+		color: #54595d;
 
 		.mw-mmv-permission-text-fader {
 			position: absolute;
-			top: (@lines-shown - 1) * @text-line-height * @text-font-size;
+			top: ( @lines-shown - 1 ) * @text-line-height * @text-font-size;
 			width: 100%;
 			height: @text-line-height * @text-font-size;
-
 			.fade-out-vertical();
-
 			text-align: right;
 
 			a {
 				padding: 3px 0 0 1em;
-				background-color: white;
+				background-color: #fff;
 				font-size: 1em;
 			}
 		}
@@ -82,7 +75,7 @@
 
 		.mw-mmv-permission-html {
 			display: block;
-			border-top: 1px solid #f0f0f0;
+			border-top: 1px solid #f8f9fa;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWMagicLinkNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,9 +15,9 @@
  * @param {ve.dm.MWMagicLinkNode} model Model to observe
  * @param {Object} [config] Configuration options
  */
-ve.ce.MWMagicLinkNode = function VeCeMWMagicLinkNode( model, config ) {
+ve.ce.MWMagicLinkNode = function VeCeMWMagicLinkNode() {
 	// Parent constructor
-	ve.ce.LeafNode.call( this, model, config );
+	ve.ce.MWMagicLinkNode.super.apply( this, arguments );
 
 	// Mixin constructors
 	ve.ce.FocusableNode.call( this );

@@ -1,9 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Malafaya"
+			"Malafaya",
+			"Lakaoso",
+			"Joao Xavier"
 		]
 	},
-	"nuke-submit-user": "Irar",
-	"nuke-submit-delete": "Efacez selektiti"
+	"nuke-submit-user": "Montrar listo di pagini",
+	"nuke-submit-delete": "Efacez selektiti",
+	"nuke-select": "Selektez: $1"
 }

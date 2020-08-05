@@ -1,9 +1,27 @@
-/*global CompletenessTest, sinon */
-/*jshint evil: true */
+/* global sinon */
 ( function ( $, mw, QUnit ) {
 	'use strict';
 
-	var mwTestIgnore, mwTester, addons;
+	var addons, nested;
+
+	/**
+	 * Make a safe copy of localEnv:
+	 * - Creates a new object that inherits, instead of modifying the original.
+	 *   This prevents recursion in the event that a test suite stores inherits
+	 *   hooks object statically and passes it to multiple QUnit.module() calls.
+	 * - Supporting QUnit 1.x 'setup' and 'teardown' hooks
+	 *   (deprecated in QUnit 1.16, removed in QUnit 2).
+	 */
+	function makeSafeEnv( localEnv ) {
+		var wrap = localEnv ? Object.create( localEnv ) : {};
+		if ( wrap.setup ) {
+			wrap.beforeEach = wrap.beforeEach || wrap.setup;
+		}
+		if ( wrap.teardown ) {
+			wrap.afterEach = wrap.afterEach || wrap.teardown;
+		}
+		return wrap;
+	}
 
 	/**
 	 * Add bogus to url to prevent IE crazy caching
@@ -26,6 +44,10 @@
 	// killing the test and assuming timeout failure.
 	QUnit.config.testTimeout = 60 * 1000;
 
+	// Reduce default animation duration from 400ms to 0ms for unit tests
+	// eslint-disable-next-line no-underscore-dangle
+	$.fx.speeds._default = 0;
+
 	// Add a checkbox to QUnit header to toggle MediaWiki ResourceLoader debug mode.
 	QUnit.config.urlConfig.push( {
 		id: 'debug',
@@ -35,24 +57,10 @@
 	} );
 
 	/**
-	 * CompletenessTest
-	 *
-	 * Adds toggle checkbox to header
-	 */
-	QUnit.config.urlConfig.push( {
-		id: 'completenesstest',
-		label: 'Run CompletenessTest',
-		tooltip: 'Run the completeness test'
-	} );
-
-	/**
 	 * SinonJS
 	 *
 	 * Glue code for nicer integration with QUnit setup/teardown
 	 * Inspired by http://sinonjs.org/releases/sinon-qunit-1.0.0.js
-	 * Fixes:
-	 * - Work properly with asynchronous QUnit by using module setup/teardown
-	 *   instead of synchronously wrapping QUnit.test.
 	 */
 	sinon.assert.fail = function ( msg ) {
 		QUnit.assert.ok( false, msg );
@@ -68,95 +76,66 @@
 		useFakeTimers: false,
 		useFakeServer: false
 	};
+	// Extend QUnit.module with:
+	// - Add support for QUnit 1.x 'setup' and 'teardown' hooks
+	// - Add a Sinon sandbox to the test context.
+	// - Add a test fixture to the test context.
 	( function () {
 		var orgModule = QUnit.module;
+		QUnit.module = function ( name, localEnv, executeNow ) {
+			var orgExecute, orgBeforeEach, orgAfterEach;
+			if ( nested ) {
+				// In a nested module, don't re-add our hooks, QUnit does that already.
+				return orgModule.apply( this, arguments );
+			}
+			if ( arguments.length === 2 && typeof localEnv === 'function' ) {
+				executeNow = localEnv;
+				localEnv = undefined;
+			}
+			if ( executeNow ) {
+				// Wrap executeNow() so that we can detect nested modules
+				orgExecute = executeNow;
+				executeNow = function () {
+					var ret;
+					nested = true;
+					ret = orgExecute.apply( this, arguments );
+					nested = false;
+					return ret;
+				};
+			}
 
-		QUnit.module = function ( name, localEnv ) {
-			localEnv = localEnv || {};
-			orgModule( name, {
-				setup: function () {
-					var config = sinon.getConfig( sinon.config );
-					config.injectInto = this;
-					sinon.sandbox.create( config );
+			localEnv = makeSafeEnv( localEnv );
+			orgBeforeEach = localEnv.beforeEach;
+			orgAfterEach = localEnv.afterEach;
 
-					if ( localEnv.setup ) {
-						localEnv.setup.call( this );
-					}
-				},
-				teardown: function () {
-					if ( localEnv.teardown ) {
-						localEnv.teardown.call( this );
-					}
+			localEnv.beforeEach = function () {
+				// Sinon sandbox
+				var config = sinon.getConfig( sinon.config );
+				config.injectInto = this;
+				sinon.sandbox.create( config );
 
-					this.sandbox.verifyAndRestore();
+				// Fixture element
+				this.fixture = document.createElement( 'div' );
+				this.fixture.id = 'qunit-fixture';
+				document.body.appendChild( this.fixture );
+
+				if ( orgBeforeEach ) {
+					return orgBeforeEach.apply( this, arguments );
 				}
-			} );
+			};
+			localEnv.afterEach = function () {
+				var ret;
+				if ( orgAfterEach ) {
+					ret = orgAfterEach.apply( this, arguments );
+				}
+				this.sandbox.verifyAndRestore();
+				this.fixture.parentNode.removeChild( this.fixture );
+				return ret;
+			};
+
+			return orgModule( name, localEnv, executeNow );
 		};
 	}() );
-
-	// Extend QUnit.module to provide a fixture element.
-	( function () {
-		var orgModule = QUnit.module;
-
-		QUnit.module = function ( name, localEnv ) {
-			var fixture;
-			localEnv = localEnv || {};
-			orgModule( name, {
-				setup: function () {
-					fixture = document.createElement( 'div' );
-					fixture.id = 'qunit-fixture';
-					document.body.appendChild( fixture );
-
-					if ( localEnv.setup ) {
-						localEnv.setup.call( this );
-					}
-				},
-				teardown: function () {
-					if ( localEnv.teardown ) {
-						localEnv.teardown.call( this );
-					}
-
-					fixture.parentNode.removeChild( fixture );
-				}
-			} );
-		};
-	}() );
-
-	// Initiate when enabled
-	if ( QUnit.urlParams.completenesstest ) {
-
-		// Return true to ignore
-		mwTestIgnore = function ( val, tester ) {
-
-			// Don't record methods of the properties of constructors,
-			// to avoid getting into a loop (prototype.constructor.prototype..).
-			// Since we're therefor skipping any injection for
-			// "new mw.Foo()", manually set it to true here.
-			if ( val instanceof mw.Map ) {
-				tester.methodCallTracker.Map = true;
-				return true;
-			}
-			if ( val instanceof mw.Title ) {
-				tester.methodCallTracker.Title = true;
-				return true;
-			}
-
-			// Don't record methods of the properties of a jQuery object
-			if ( val instanceof $ ) {
-				return true;
-			}
-
-			// Don't iterate over the module registry (the 'script' references would
-			// be listed as untested methods otherwise)
-			if ( val === mw.loader.moduleRegistry ) {
-				return true;
-			}
-
-			return false;
-		};
-
-		mwTester = new CompletenessTest( mw, mwTestIgnore );
-	}
 
 	/**
 	 * Reset mw.config and others to a fresh copy of the live config for each test(),
@@ -168,15 +147,18 @@
 	 */
 	QUnit.newMwEnvironment = ( function () {
 		var warn, error, liveConfig, liveMessages,
+			MwMap = mw.config.constructor, // internal use only
 			ajaxRequests = [];
 
-		liveConfig = mw.config.values;
-		liveMessages = mw.messages.values;
+		liveConfig = mw.config;
+		liveMessages = mw.messages;
 
 		function suppressWarnings() {
-			warn = mw.log.warn;
-			error = mw.log.error;
-			mw.log.warn = mw.log.error = $.noop;
+			if ( warn === undefined ) {
+				warn = mw.log.warn;
+				error = mw.log.error;
+				mw.log.warn = mw.log.error = $.noop;
+			}
 		}
 
 		function restoreWarnings() {
@@ -199,14 +181,14 @@
 			// NOTE: It is important that we suppress warnings because extend() will also access
 			// deprecated properties and trigger deprecation warnings from mw.log#deprecate.
 			suppressWarnings();
-			copy = $.extend( {}, liveConfig, custom );
+			copy = $.extend( {}, liveConfig.get(), custom );
 			restoreWarnings();
 
 			return copy;
 		}
 
 		function freshMessagesCopy( custom ) {
-			return $.extend( /*deep=*/true, {}, liveMessages, custom );
+			return $.extend( /* deep */true, {}, liveMessages.get(), custom );
 		}
 
 		/**
@@ -218,83 +200,102 @@
 			ajaxRequests.push( { xhr: jqXHR, options: ajaxOptions } );
 		}
 
-		return function ( localEnv ) {
-			localEnv = $.extend( {
-				// QUnit
-				setup: $.noop,
-				teardown: $.noop,
-				// MediaWiki
-				config: {},
-				messages: {}
-			}, localEnv );
+		return function ( orgEnv ) {
+			var localEnv, orgBeforeEach, orgAfterEach;
 
-			return {
-				setup: function () {
+			localEnv = makeSafeEnv( orgEnv );
+			// MediaWiki env testing
+			localEnv.config = localEnv.config || {};
+			localEnv.messages = localEnv.messages || {};
 
-					// Greetings, mock environment!
-					mw.config.values = freshConfigCopy( localEnv.config );
-					mw.messages.values = freshMessagesCopy( localEnv.messages );
-					this.suppressWarnings = suppressWarnings;
-					this.restoreWarnings = restoreWarnings;
+			orgBeforeEach = localEnv.beforeEach;
+			orgAfterEach = localEnv.afterEach;
 
-					// Start tracking ajax requests
-					$( document ).on( 'ajaxSend', trackAjax );
+			localEnv.beforeEach = function () {
+				// Greetings, mock environment!
+				mw.config = new MwMap();
+				mw.config.set( freshConfigCopy( localEnv.config ) );
+				mw.messages = new MwMap();
+				mw.messages.set( freshMessagesCopy( localEnv.messages ) );
+				// Update reference to mw.messages
+				mw.jqueryMsg.setParserDefaults( {
+					messages: mw.messages
+				} );
 
-					localEnv.setup.call( this );
-				},
+				this.suppressWarnings = suppressWarnings;
+				this.restoreWarnings = restoreWarnings;
 
-				teardown: function () {
-					var timers, pending, $activeLen;
+				// Start tracking ajax requests
+				$( document ).on( 'ajaxSend', trackAjax );
 
-					localEnv.teardown.call( this );
-
-					// Stop tracking ajax requests
-					$( document ).off( 'ajaxSend', trackAjax );
-
-					// Farewell, mock environment!
-					mw.config.values = liveConfig;
-					mw.messages.values = liveMessages;
-
-					// As a convenience feature, automatically restore warnings if they're
-					// still suppressed by the end of the test.
-					restoreWarnings();
-
-					// Tests should use fake timers or wait for animations to complete
-					// Check for incomplete animations/requests/etc and throw if there are any.
-					if ( $.timers && $.timers.length !== 0 ) {
-						timers = $.timers.length;
-						$.each( $.timers, function ( i, timer ) {
-							var node = timer.elem;
-							mw.log.warn( 'Unfinished animation #' + i + ' in ' + timer.queue + ' queue on ' +
-								mw.html.element( node.nodeName.toLowerCase(), $( node ).getAttrs() )
-							);
-						} );
-						// Force animations to stop to give the next test a clean start
-						$.fx.stop();
-
-						throw new Error( 'Unfinished animations: ' + timers );
-					}
-
-					// Test should use fake XHR, wait for requests, or call abort()
-					$activeLen = $.active;
-					if ( $activeLen !== undefined && $activeLen !== 0 ) {
-						pending = $.grep( ajaxRequests, function ( ajax ) {
-							return ajax.xhr.state() === 'pending';
-						} );
-						if ( pending.length !== $activeLen ) {
-							mw.log.warn( 'Pending requests does not match jQuery.active count' );
-						}
-						// Force requests to stop to give the next test a clean start
-						$.each( pending, function ( i, ajax ) {
-							mw.log.warn( 'Pending AJAX request #' + i, ajax.options );
-							ajax.xhr.abort();
-						} );
-						ajaxRequests = [];
-
-						throw new Error( 'Pending AJAX requests: ' + pending.length + ' (active: ' + $activeLen + ')' );
-					}
+				if ( orgBeforeEach ) {
+					return orgBeforeEach.apply( this, arguments );
 				}
 			};
+			localEnv.afterEach = function () {
+				var timers, pending, $activeLen, ret;
+
+				if ( orgAfterEach ) {
+					ret = orgAfterEach.apply( this, arguments );
+				}
+
+				// Stop tracking ajax requests
+				$( document ).off( 'ajaxSend', trackAjax );
+
+				// As a convenience feature, automatically restore warnings if they're
+				// still suppressed by the end of the test.
+				restoreWarnings();
+
+				// Farewell, mock environment!
+				mw.config = liveConfig;
+				mw.messages = liveMessages;
+				// Restore reference to mw.messages
+				mw.jqueryMsg.setParserDefaults( {
+					messages: liveMessages
+				} );
+
+				// Tests should use fake timers or wait for animations to complete
+				// Check for incomplete animations/requests/etc and throw if there are any.
+				if ( $.timers && $.timers.length !== 0 ) {
+					timers = $.timers.length;
+					$.each( $.timers, function ( i, timer ) {
+						var node = timer.elem;
+						mw.log.warn( 'Unfinished animation #' + i + ' in ' + timer.queue + ' queue on ' +
+							mw.html.element( node.nodeName.toLowerCase(), $( node ).getAttrs() )
+						);
+					} );
+					// Force animations to stop to give the next test a clean start
+					$.timers = [];
+					$.fx.stop();
+
+					throw new Error( 'Unfinished animations: ' + timers );
+				}
+
+				// Test should use fake XHR, wait for requests, or call abort()
+				$activeLen = $.active;
+				if ( $activeLen !== undefined && $activeLen !== 0 ) {
+					pending = ajaxRequests.filter( function ( ajax ) {
+						return ajax.xhr.state() === 'pending';
+					} );
+					if ( pending.length !== $activeLen ) {
+						mw.log.warn( 'Pending requests does not match jQuery.active count' );
+					}
+					// Force requests to stop to give the next test a clean start
+					ajaxRequests.forEach( function ( ajax, i ) {
+						mw.log.warn(
+							'AJAX request #' + i + ' (state: ' + ajax.xhr.state() + ')',
+							ajax.options
+						);
+						ajax.xhr.abort();
+					} );
+					ajaxRequests = [];
+
+					throw new Error( 'Pending AJAX requests: ' + pending.length + ' (active: ' + $activeLen + ')' );
+				}
+
+				return ret;
+			};
+			return localEnv;
 		};
 	}() );
 
@@ -366,32 +367,62 @@
 
 		// Expect boolean true
 		assertTrue: function ( actual, message ) {
-			QUnit.push( actual === true, actual, true, message );
+			this.pushResult( {
+				result: actual === true,
+				actual: actual,
+				expected: true,
+				message: message
+			} );
 		},
 
 		// Expect boolean false
 		assertFalse: function ( actual, message ) {
-			QUnit.push( actual === false, actual, false, message );
+			this.pushResult( {
+				result: actual === false,
+				actual: actual,
+				expected: false,
+				message: message
+			} );
 		},
 
 		// Expect numerical value less than X
 		lt: function ( actual, expected, message ) {
-			QUnit.push( actual < expected, actual, 'less than ' + expected, message );
+			this.pushResult( {
+				result: actual < expected,
+				actual: actual,
+				expected: 'less than ' + expected,
+				message: message
+			} );
 		},
 
 		// Expect numerical value less than or equal to X
 		ltOrEq: function ( actual, expected, message ) {
-			QUnit.push( actual <= expected, actual, 'less than or equal to ' + expected, message );
+			this.pushResult( {
+				result: actual <= expected,
+				actual: actual,
+				expected: 'less than or equal to ' + expected,
+				message: message
+			} );
 		},
 
 		// Expect numerical value greater than X
 		gt: function ( actual, expected, message ) {
-			QUnit.push( actual > expected, actual, 'greater than ' + expected, message );
+			this.pushResult( {
+				result: actual > expected,
+				actual: actual,
+				expected: 'greater than ' + expected,
+				message: message
+			} );
 		},
 
 		// Expect numerical value greater than or equal to X
 		gtOrEq: function ( actual, expected, message ) {
-			QUnit.push( actual >= expected, actual, 'greater than or equal to ' + expected, message );
+			this.pushResult( {
+				result: actual >= true,
+				actual: actual,
+				expected: 'greater than or equal to ' + expected,
+				message: message
+			} );
 		},
 
 		/**
@@ -404,16 +435,12 @@
 		htmlEqual: function ( actualHtml, expectedHtml, message ) {
 			var actual = getHtmlStructure( actualHtml ),
 				expected = getHtmlStructure( expectedHtml );
-
-			QUnit.push(
-				QUnit.equiv(
-					actual,
-					expected
-				),
-				actual,
-				expected,
-				message
-			);
+			this.pushResult( {
+				result: QUnit.equiv( actual, expected ),
+				actual: actual,
+				expected: expected,
+				message: message
+			} );
 		},
 
 		/**
@@ -427,15 +454,13 @@
 			var actual = getHtmlStructure( actualHtml ),
 				expected = getHtmlStructure( expectedHtml );
 
-			QUnit.push(
-				!QUnit.equiv(
-					actual,
-					expected
-				),
-				actual,
-				expected,
-				message
-			);
+			this.pushResult( {
+				result: !QUnit.equiv( actual, expected ),
+				actual: actual,
+				expected: expected,
+				message: message,
+				negative: true
+			} );
 		}
 	};
 
@@ -445,7 +470,7 @@
 	 * Small test suite to confirm proper functionality of the utilities and
 	 * initializations defined above in this file.
 	 */
-	QUnit.module( 'test.mediawiki.qunit.testrunner', QUnit.newMwEnvironment( {
+	QUnit.module( 'testrunner', QUnit.newMwEnvironment( {
 		setup: function () {
 			this.mwHtmlLive = mw.html;
 			mw.html = {
@@ -465,7 +490,7 @@
 		}
 	} ) );
 
-	QUnit.test( 'Setup', 3, function ( assert ) {
+	QUnit.test( 'Setup', function ( assert ) {
 		assert.equal( mw.html.escape( 'foo' ), 'mocked', 'setup() callback was ran.' );
 		assert.equal( mw.config.get( 'testVar' ), 'foo', 'config object applied' );
 		assert.equal( mw.messages.get( 'testMsg' ), 'Foo.', 'messages object applied' );
@@ -474,12 +499,12 @@
 		mw.messages.set( 'testMsg', 'Bar.' );
 	} );
 
-	QUnit.test( 'Teardown', 2, function ( assert ) {
+	QUnit.test( 'Teardown', function ( assert ) {
 		assert.equal( mw.config.get( 'testVar' ), 'foo', 'config object restored and re-applied after test()' );
 		assert.equal( mw.messages.get( 'testMsg' ), 'Foo.', 'messages object restored and re-applied after test()' );
 	} );
 
-	QUnit.test( 'Loader status', 2, function ( assert ) {
+	QUnit.test( 'Loader status', function ( assert ) {
 		var i, len, state,
 			modules = mw.loader.getModuleNames(),
 			error = [],
@@ -498,7 +523,7 @@
 		assert.deepEqual( missing, [], 'Modules in missing state' );
 	} );
 
-	QUnit.test( 'htmlEqual', 8, function ( assert ) {
+	QUnit.test( 'assert.htmlEqual', function ( assert ) {
 		assert.htmlEqual(
 			'<div><p class="some classes" data-length="10">Child paragraph with <a href="http://example.com">A link</a></p>Regular text<span>A span</span></div>',
 			'<div><p data-length=\'10\'  class=\'some classes\'>Child paragraph with <a href=\'http://example.com\' >A link</a></p>Regular text<span>A span</span></div>',
@@ -545,15 +570,83 @@
 			'foo<a href="http://example.com">example</a>quux',
 			'Outer text nodes are compared (last text node different)'
 		);
-
 	} );
 
-	QUnit.module( 'test.mediawiki.qunit.testrunner-after', QUnit.newMwEnvironment() );
+	QUnit.module( 'testrunner-after', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Teardown', 3, function ( assert ) {
+	QUnit.test( 'Teardown', function ( assert ) {
 		assert.equal( mw.html.escape( '<' ), '&lt;', 'teardown() callback was ran.' );
 		assert.equal( mw.config.get( 'testVar' ), null, 'config object restored to live in next module()' );
 		assert.equal( mw.messages.get( 'testMsg' ), null, 'messages object restored to live in next module()' );
+	} );
+
+	QUnit.module( 'testrunner-each', {
+		beforeEach: function () {
+			this.mwHtmlLive = mw.html;
+		},
+		afterEach: function () {
+			mw.html = this.mwHtmlLive;
+		}
+	} );
+	QUnit.test( 'beforeEach', function ( assert ) {
+		assert.ok( this.mwHtmlLive, 'setup() ran' );
+		mw.html = null;
+	} );
+	QUnit.test( 'afterEach', function ( assert ) {
+		assert.equal( mw.html.escape( '<' ), '&lt;', 'afterEach() ran' );
+	} );
+
+	QUnit.module( 'testrunner-each-compat', {
+		setup: function () {
+			this.mwHtmlLive = mw.html;
+		},
+		teardown: function () {
+			mw.html = this.mwHtmlLive;
+		}
+	} );
+	QUnit.test( 'setup', function ( assert ) {
+		assert.ok( this.mwHtmlLive, 'setup() ran' );
+		mw.html = null;
+	} );
+	QUnit.test( 'teardown', function ( assert ) {
+		assert.equal( mw.html.escape( '<' ), '&lt;', 'teardown() ran' );
+	} );
+
+	// Regression test for 'this.sandbox undefined' error, fixed by
+	// ensuring Sinon setup/teardown is not re-run on inner module.
+	QUnit.module( 'testrunner-nested', function () {
+		QUnit.module( 'testrunner-nested-inner', function () {
+			QUnit.test( 'Dummy', function ( assert ) {
+				assert.ok( true, 'Nested modules supported' );
+			} );
+		} );
+	} );
+
+	QUnit.module( 'testrunner-hooks-outer', function () {
+		var beforeHookWasExecuted = false,
+			afterHookWasExecuted = false;
+		QUnit.module( 'testrunner-hooks', {
+			before: function () {
+				beforeHookWasExecuted = true;
+
+				// This way we can be sure that module `testrunner-hook-after` will always
+				// be executed after module `testrunner-hooks`
+				QUnit.module( 'testrunner-hooks-after' );
+				QUnit.test(
+					'`after` hook for module `testrunner-hooks` was executed',
+					function ( assert ) {
+						assert.ok( afterHookWasExecuted );
+					}
+				);
+			},
+			after: function () {
+				afterHookWasExecuted = true;
+			}
+		} );
+
+		QUnit.test( '`before` hook was executed', function ( assert ) {
+			assert.ok( beforeHookWasExecuted );
+		} );
 	} );
 
 }( jQuery, mediaWiki, QUnit ) );

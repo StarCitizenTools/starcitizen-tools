@@ -1,17 +1,53 @@
+// Taken from WikimediaUI base v0.6.1
+// Background Colors
+@background-color-base: #fff;
+
+// Foreground Colors
+@color-base: #222;
+@color-base-active: #000;
+@color-base-emphasized: @color-base-active;
+// Primary 'Progressive' Color, Background Color
+@background-color-primary: #eaf3ff;
+@color-primary: #36c;
+// 'Destructive' Color
+@color-destructive: #d33;
+
+// Border Colors
+@border-color-heading: #c8ccd1;
+
+// Echo's original variables
+@grey-light: #72777d;
+@grey-medium: #54595d;
+
 @badge-padding: 0.12em;
 @badge-icon-size: 1.1em;
-@badge-distance-adjustment: -0.4em;
+@badge-distance-adjustment: 1em;
+@badge-offscreen-offset: 1000px;
+
+@notification-item-background-read: #eaecf0;
 
 @notification-background-unseen: #dce8ff;
-@notification-background-unread: white;
-@notification-background-read: #f1f1f1;
+@notification-background-unread: @background-color-base;
+@notification-background-read: #eaecf0;
 
-@notification-text-color: #111;
-@notification-body-color: #777;
+@badge-counter-background-seen: @grey-light;
+@badge-counter-background-unseen-alert: @color-destructive;
+@badge-counter-background-unseen-message: @color-primary;
+
+@notification-text-color: @color-base-emphasized;
+@notification-body-color: @grey-light;
 
 @bundle-group-padding: 0.7em;
 @notification-popup-width: 500px;
 
-@opacity-low: 0.5;
+@opacity-low: 0.6;
 @opacity-mid: 0.8;
 
+@specialpage-separation-unit: 0.7em;
+@specialpage-sidebar-width: 20em;
+
+@specialpage-hd-width: 982px;
+
+@specialpage-width: 1000px;
+
+@border-color: @border-color-heading;

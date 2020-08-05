@@ -20,6 +20,8 @@
  * @file
  */
 
+use Wikimedia\Rdbms\IDatabase;
+
 /**
  * The "CategoryFinder" class takes a list of articles, creates an internal
  * representation of all their parent categories (as well as parents of
@@ -33,14 +35,15 @@
  *
  *     $cf = new CategoryFinder;
  *     $cf->seed(
- *         array( 12345 ),
- *         array( 'Category 1', 'Category 2' ),
+ *         [ 12345 ],
+ *         [ 'Category 1', 'Category 2' ],
  *         'AND'
  *     );
  *     $a = $cf->run();
  *     print implode( ',' , $a );
  * @endcode
  *
+ * @deprecated since 1.31
  */
 class CategoryFinder {
 	/** @var int[] The original article IDs passed to the seed function */
@@ -49,11 +52,14 @@ class CategoryFinder {
 	/** @var array Array of DBKEY category names for categories that don't have a page */
 	protected $deadend = [];
 
-	/** @var array Array of [ID => array()] */
+	/** @var array Array of [ ID => [] ] */
 	protected $parents = [];
 
 	/** @var array Array of article/category IDs */
 	protected $next = [];
+
+	/** @var int Max layer depth **/
+	protected $maxdepth = -1;
 
 	/** @var array Array of DBKEY category names */
 	protected $targets = [];
@@ -64,7 +70,7 @@ class CategoryFinder {
 	/** @var string "AND" or "OR" */
 	protected $mode;
 
-	/** @var IDatabase Read-DB slave */
+	/** @var IDatabase Read-DB replica DB */
 	protected $dbr;
 
 	/**
@@ -72,12 +78,17 @@ class CategoryFinder {
 	 * @param array $articleIds Array of article IDs
 	 * @param array $categories FIXME
 	 * @param string $mode FIXME, default 'AND'.
+	 * @param int $maxdepth Maximum layer depth. Where:
+	 * 	-1 means deep recursion (default);
+	 * 	 0 means no-parents;
+	 * 	 1 means one parent layer, etc.
 	 * @todo FIXME: $categories/$mode
 	 */
-	public function seed( $articleIds, $categories, $mode = 'AND' ) {
+	public function seed( $articleIds, $categories, $mode = 'AND', $maxdepth = -1 ) {
 		$this->articles = $articleIds;
 		$this->next = $articleIds;
 		$this->mode = $mode;
+		$this->maxdepth = $maxdepth;
 
 		# Set the list of target categories; convert them to DBKEY form first
 		$this->targets = [];
@@ -96,9 +107,18 @@ class CategoryFinder {
 	 * @return array Array of page_ids (those given to seed() that match the conditions)
 	 */
 	public function run() {
-		$this->dbr = wfGetDB( DB_SLAVE );
-		while ( count( $this->next ) > 0 ) {
+		$this->dbr = wfGetDB( DB_REPLICA );
+
+		$i = 0;
+		$dig = true;
+		while ( count( $this->next ) && $dig ) {
 			$this->scanNextLayer();
+
+			// Is there any depth limit?
+			if ( $this->maxdepth !== -1 ) {
+				$dig = $i < $this->maxdepth;
+				$i++;
+			}
 		}
 
 		# Now check if this applies to the individual articles
@@ -185,12 +205,11 @@ class CategoryFinder {
 	 * Scans a "parent layer" of the articles/categories in $this->next
 	 */
 	private function scanNextLayer() {
-
 		# Find all parents of the article currently in $this->next
 		$layer = [];
 		$res = $this->dbr->select(
 			/* FROM   */ 'categorylinks',
-			/* SELECT */ '*',
+			/* SELECT */ [ 'cl_to', 'cl_from' ],
 			/* WHERE  */ [ 'cl_from' => $this->next ],
 			__METHOD__ . '-1'
 		);

@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eitvys200"
+		]
+	},
+	"getdata": "Gauti duomenys",
+	"externaldata-no-param-specified": "Klaida\" Nenurodytas joks „$1“ parametras.",
+	"externaldata-web-invalid-format": "Negalimas formatas: „$1“.",
+	"externaldata-ldap-unable-to-connect": "Negalima prisijungti prie $1.",
+	"externaldata-xml-error": "XML klaida: $1, eilutėje $2.",
+	"externaldata-invalid-json": "Klaida: Negalimas JSON.",
+	"externaldata-db-could-not-get-url": "Nepavyko gauti URL po $1 {{PLURAL:$1|bandymo|bandymų}}.",
+	"externaldata-db-unknown-type": "Klaida: Nežinomas duomenų bazės tipas.",
+	"externaldata-db-could-not-connect": "Klaida: Nepavyko prisijungti prie duomenų bazės.",
+	"externaldata-db-unknown-collection": "Klaida: Nežinoma MongoDB kolekcija.",
+	"externaldata-db-no-return-values": "Klaida: Nenurodytos jokios gražinimo reikšmės.",
+	"externaldata-db-invalid-query": "Negalima užklausa."
+}

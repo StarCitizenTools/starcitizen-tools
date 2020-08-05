@@ -1,8 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"Chrumps"
+			"Chrumps",
+			"Woytecr",
+			"Railfail536"
 		]
 	},
-	"codemirror-desc": "Edycja wiki z podświetleniem składni za pomocą [http://codemirror.net/ CodeMirror]"
+	"codemirror-desc": "Dostarcza podświetlanie składni w edytorze wikitekstu",
+	"codemirror-toggle-label": "Podświetlanie składni",
+	"codemirror-beta-title": "Podświetlanie składni wikitekstu",
+	"codemirror-beta-desc": "Podświetlanie składni ułatwia edytowanie przez wyróżnienie kodu spośród treści strony poprzez jego kolorowanie.",
+	"codemirror-popup-label": "Podświetlanie składni",
+	"codemirror-popup-desc": "Podświetlanie składni ułatwi rozróżnianie różnych elementów edytowanego tekstu przez ich kolorowanie.",
+	"codemirror-popup-btn-yes": "Wypróbuj",
+	"codemirror-popup-btn-no": "Nie, dziękuję"
 }

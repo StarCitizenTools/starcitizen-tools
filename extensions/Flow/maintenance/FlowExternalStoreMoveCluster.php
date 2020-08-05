@@ -1,11 +1,13 @@
 <?php
 
 use Flow\Container;
+use Flow\DbFactory;
 use Flow\Model\UUID;
+use Wikimedia\Rdbms\IDatabase;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
-	$IP = dirname( __FILE__ ) . '/../../..';
+	$IP = __DIR__ . '/../../..';
 }
 
 require_once "$IP/maintenance/Maintenance.php";
@@ -18,12 +20,12 @@ abstract class ExternalStoreMoveCluster extends Maintenance {
 	/**
 	 * Must return an array in the form:
 	 * array(
-	 *	'dbr' => DatabaseBase object,
-	 *	'dbw' => DatabaseBase object,
-	 *	'table' => 'flow_revision',
-	 *	'pk' => 'rev_id',
-	 *	'content' => 'rev_content',
-	 *	'flags' => 'rev_flags',
+	 * 	'dbr' => IDatabase object,
+	 * 	'dbw' => IDatabase object,
+	 * 	'table' => 'flow_revision',
+	 * 	'pk' => 'rev_id',
+	 * 	'content' => 'rev_content',
+	 * 	'flags' => 'rev_flags',
 	 * )
 	 *
 	 * It will roughly translate into these queries, where PK is the
@@ -35,7 +37,7 @@ abstract class ExternalStoreMoveCluster extends Maintenance {
 	 * SELECT <pk>, <content>, <flags>
 	 * FROM <table>
 	 * WHERE <flags> LIKE "%external%"
-	 *	AND <content> LIKE "DB://cluster/%";
+	 * 	AND <content> LIKE "DB://cluster/%";
 	 *
 	 * Against dbw:
 	 * UPDATE <table>
@@ -56,6 +58,8 @@ abstract class ExternalStoreMoveCluster extends Maintenance {
 		$this->addOption( 'dry-run', 'Outputs the old user content, inserts into new External Store, gives hypothetical new column values for flow_revision (but does not actually change flow_revision), and checks that old and new ES are the same.' );
 
 		$this->setBatchSize( 300 );
+
+		$this->requireExtension( 'Flow' );
 	}
 
 	public function execute() {
@@ -63,27 +67,28 @@ abstract class ExternalStoreMoveCluster extends Maintenance {
 		$to = explode( ',', $this->getOption( 'to' ) );
 
 		$schema = $this->schema();
-		/** @var DatabaseBase $dbr */
+		/** @var IDatabase $dbr */
 		$dbr = $schema['dbr'];
-		/** @var DatabaseBase $dbw */
+		/** @var IDatabase $dbw */
 		$dbw = $schema['dbw'];
 
 		$iterator = new BatchRowIterator( $dbr, $schema['table'], $schema['pk'], $this->mBatchSize );
-		$iterator->setFetchColumns( array( $schema['content'], $schema['flags'] ) );
+		$iterator->setFetchColumns( [ $schema['content'], $schema['flags'] ] );
 
-		$clusterConditions = array();
+		$clusterConditions = [];
 		foreach ( $from as $cluster ) {
 			$clusterConditions[] = $schema['content'] . $dbr->buildLike( "DB://$cluster/", $dbr->anyString() );
 		}
-		$iterator->addConditions( array(
+		$iterator->addConditions( [
+				$schema['wiki'] => wfWikiID(),
 				$schema['flags'] . $dbr->buildLike( $dbr->anyString(), 'external', $dbr->anyString() ),
 				$dbr->makeList( $clusterConditions, LIST_OR ),
-		) );
+		] );
 
 		$updateGenerator = new ExternalStoreUpdateGenerator( $this, $to, $schema );
 
 		if ( $this->hasOption( 'dry-run' ) ) {
-			$this->output( "Starting dry run\n\n");
+			$this->output( "Starting dry run\n\n" );
 			foreach ( $iterator as $rows ) {
 				$this->output( "Starting dry run batch\n" );
 				foreach ( $rows as $row ) {
@@ -99,8 +104,12 @@ abstract class ExternalStoreMoveCluster extends Maintenance {
 					$this->output( "flow_revision columns would become:\n" );
 					$this->output( var_export( $updatedColumns, true ) . "\n" );
 
-					$newContentUrl = $updatedColumns['rev_content'];
-					$newContent = ExternalStore::fetchFromURL( $newContentUrl );
+					$newContent = $updatedColumns[$schema['content']];
+					$newFlags = explode( ',', $updatedColumns[$schema['flags']] );
+					if ( in_array( 'external', $newFlags, true ) ) {
+						$newContent = $updateGenerator->read( $newContent, $newFlags );
+					}
+
 					if ( $newContent === $oldContent ) {
 						$this->output( "New external store content matches old external store content\n" );
 					} else {
@@ -120,7 +129,7 @@ abstract class ExternalStoreMoveCluster extends Maintenance {
 			new BatchRowWriter( $dbw, $schema['table'] ),
 			$updateGenerator
 		);
-		$updater->setOutput( array( $this, 'output' ) );
+		$updater->setOutput( [ $this, 'output' ] );
 		$updater->execute();
 	}
 
@@ -157,12 +166,12 @@ class ExternalStoreUpdateGenerator implements RowUpdateGenerator {
 	/**
 	 * @var array
 	 */
-	protected $stores = array();
+	protected $stores = [];
 
 	/**
 	 * @var array
 	 */
-	protected $schema = array();
+	protected $schema = [];
 
 	/**
 	 * @param ExternalStoreMoveCluster $script
@@ -189,13 +198,13 @@ class ExternalStoreUpdateGenerator implements RowUpdateGenerator {
 		} catch ( \Exception $e ) {
 			// something went wrong, just output the error & don't update!
 			$this->script->error( $e->getMessage(). "\n" );
-			return array();
+			return [];
 		}
 
-		return array(
+		return [
 			$this->schema['content'] => $data['content'],
 			$this->schema['flags'] => implode( ',', $data['flags'] ),
-		);
+		];
 	}
 
 	/**
@@ -204,7 +213,7 @@ class ExternalStoreUpdateGenerator implements RowUpdateGenerator {
 	 * @return string
 	 * @throws MWException
 	 */
-	public function read( $url, array $flags = array() ) {
+	public function read( $url, array $flags = [] ) {
 		$content = ExternalStore::fetchFromURL( $url );
 		if ( $content === false ) {
 			throw new MWException( "Failed to fetch content from URL: $url" );
@@ -224,23 +233,23 @@ class ExternalStoreUpdateGenerator implements RowUpdateGenerator {
 	 * @return array New ExternalStore data in the form of ['content' => ..., 'flags' => array( ... )]
 	 * @throws MWException
 	 */
-	protected function write( $content, array $flags = array() ) {
+	protected function write( $content, array $flags = [] ) {
 		// external, utf-8 & gzip flags are no longer valid at this point
-		$oldFlags = array_diff( $flags, array( 'external', 'utf-8', 'gzip' ) );
+		$oldFlags = array_diff( $flags, [ 'external', 'utf-8', 'gzip' ] );
 
 		if ( $content === '' ) {
 			// don't store empty content elsewhere
-			return array(
+			return [
 				'content' => $content,
 				'flags' => $oldFlags,
-			);
+			];
 		}
 
 		// re-compress (if $wgCompressRevisions is enabled) the content & set flags accordingly
 		$flags = array_filter( explode( ',', \Revision::compressRevisionText( $content ) ) );
 
 		// ExternalStore::insertWithFallback expects stores with protocol
-		$stores = array();
+		$stores = [];
 		foreach ( $this->stores as $store ) {
 			$stores[] = 'DB://' . $store;
 		}
@@ -253,28 +262,30 @@ class ExternalStoreUpdateGenerator implements RowUpdateGenerator {
 		$flags[] = 'external';
 		$flags = array_merge( $flags, $oldFlags );
 
-		return array(
+		return [
 			'content' => $url,
 			'flags' => array_unique( $flags ),
-		);
+		];
 	}
 }
 
 class FlowExternalStoreMoveCluster extends ExternalStoreMoveCluster {
 	protected function schema() {
 		$container = Container::getContainer();
+		/** @var DbFactory $dbFactory */
 		$dbFactory = $container['db.factory'];
 
-		return array(
-			'dbr' => $dbFactory->getDb( DB_SLAVE ),
+		return [
+			'dbr' => $dbFactory->getDb( DB_REPLICA ),
 			'dbw' => $dbFactory->getDb( DB_MASTER ),
 			'table' => 'flow_revision',
 			'pk' => 'rev_id',
 			'content' => 'rev_content',
 			'flags' => 'rev_flags',
-		);
+			'wiki' => 'rev_user_wiki',
+		];
 	}
 }
 
 $maintClass = 'FlowExternalStoreMoveCluster';
-require_once( RUN_MAINTENANCE_IF_MAIN );
+require_once RUN_MAINTENANCE_IF_MAIN;

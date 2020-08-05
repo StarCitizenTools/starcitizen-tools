@@ -9,7 +9,9 @@
 			"Rex",
 			"පසිඳු කාවින්ද",
 			"Raynasution",
-			"Iwan Novirion"
+			"Iwan Novirion",
+			"William Surya Permana",
+			"Pebaryan"
 		]
 	},
 	"pagetranslation": "Penerjemahan halaman",
@@ -29,6 +31,7 @@
 	"tpt-oldrevision": "$2 bukan revisi terakhir dari halaman [[:$1]].\nHanya revisi terakhir yang dapat ditandai untuk diterjemahkan.",
 	"tpt-notsuitable": "Halaman $1 tidak dapat diterjemahkan.\nPastikan bahwa halaman ini memiliki tag <nowiki><translate></nowiki> dan memiliki sintaksis yang valid.",
 	"tpt-saveok": "Halaman [[:$1]] telah ditandai untuk diterjemahkan dengan $2 {{PLURAL:$2|unit penerjemahan|unit penerjemahan}}.\nHalaman ini sekarang dapat <span class=\"plainlinks\">[$3 diterjemahkan]</span>.",
+	"tpt-saveok-first": "Anda dapat [[Special:PageMigration|mengimpor terjemahan yang sudah tersedia]] untuk halaman ini (jika ada).",
 	"tpt-showpage-intro": "Berikut adalah daftar bagian baru, bagian yang telah ada, dan bagian yang dihapus.\nSebelum menandai revisi ini untuk diterjemahkan, harap periksa agar perubahan ke bagian-bagian dapat diminimalisasi guna menghindarkan para penerjemah dari melakukan pekerjaan yang tidak diperlukan.",
 	"tpt-mark-summary": "Menandai revisi ini untuk diterjemahkan",
 	"tpt-edit-failed": "Tidak dapat memperbarui halaman: $1",
@@ -44,6 +47,7 @@
 	"translate-tag-markthisagain": "Halaman ini telah diubah <span class=\"plainlinks\">[$1 kali]</span> sejak terakhir <span class=\"plainlinks\">[$2 ditandai untuk diterjemahkan]</span>.",
 	"translate-tag-hasnew": "Halaman ini berisikan <span class=\"plainlinks\">[$1 revisi]</span> yang tidak ditandai untuk diterjemahkan.",
 	"tpt-translation-intro": "Halaman ini adalah sebuah <span class=\"plainlinks\">[$1 versi terjemahan]</span> dari halaman [[$2]] dan terjemahannya telah selesai $3% dari sumber terkini.",
+	"tpt-translation-intro-fuzzy": "Terjemahan usang ditandai seperti ini.",
 	"tpt-languages-legend": "Bahasa lain:",
 	"tpt-languages-nonzero": "$1 ($2% terjemahan)",
 	"tpt-target-page": "Halaman ini tidak dapat diperbarui secara manual.\nHalaman ini adalah terjemahan dari halaman [[$1]] dan terjemahannya dapat diperbarui menggunakan [$2 peralatan penerjemahan].",
@@ -53,7 +57,7 @@
 	"pt-parse-close": "Tag &lt;/translate> tidak seimbang.\nTemplat terjemahan: <pre>$1</pre>",
 	"pt-parse-nested": "Bagian &lt;translate> bersarang tidak diizinkan.\nTeks tanda: <pre>$1</pre>",
 	"pt-shake-multiple": "Penanda bagian ganda untuk satu bagian.\nTeks bagian: <pre>$1</pre>",
-	"pt-shake-position": "Penanda bagian di tempat tak terduka.\nTeks bagian: <pre>$1</pre>",
+	"pt-shake-position": "Penanda satuan terjemahan di tempat tak terduga.\nTeks satuan terjemahan: <pre>$1</pre>",
 	"pt-shake-empty": "Bagian kosong untuk penanda $1.",
 	"log-description-pagetranslation": "Log tindakan yang berhubungan dengan sistem penerjemahan halaman",
 	"log-name-pagetranslation": "Log penerjemahan halaman",

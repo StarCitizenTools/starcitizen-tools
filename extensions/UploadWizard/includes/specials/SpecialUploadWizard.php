@@ -10,9 +10,6 @@
  */
 
 class SpecialUploadWizard extends SpecialPage {
-	// the HTML form without javascript
-	private $simpleForm;
-
 	/**
 	 * The name of the upload wizard campaign, or null when none is specified.
 	 *
@@ -21,24 +18,19 @@ class SpecialUploadWizard extends SpecialPage {
 	 */
 	protected $campaign = null;
 
-	// $request is the request (usually wgRequest)
-	// $par is everything in the URL after Special:UploadWizard. Not sure what we can use it for
+	/**
+	 * @param WebRequest $request the request (usually wgRequest)
+	 * @param string|null $par everything in the URL after Special:UploadWizard.
+	 *   Not sure what we can use it for
+	 */
 	public function __construct( $request = null, $par = null ) {
 		parent::__construct( 'UploadWizard', 'upload' );
-
-		// create a simple form for non-JS fallback, which targets the old Special:Upload page.
-		// at some point, if we completely subsume its functionality, change that to point here again,
-		// but then we'll need to process non-JS uploads in the same way Special:Upload does.
-		$this->simpleForm = new UploadWizardSimpleForm();
-		$this->simpleForm->setTitle(
-			SpecialPage::getTitleFor( 'Upload' )
-		);
 	}
 
 	/**
 	 * Replaces default execute method
 	 * Checks whether uploading enabled, user permissions okay,
-	 * @param $subPage, e.g. the "foo" in Special:UploadWizard/foo.
+	 * @param string|null $subPage subpage, e.g. the "foo" in Special:UploadWizard/foo.
 	 */
 	public function execute( $subPage ) {
 		// side effects: if we can't upload, will print error page to wgOut
@@ -52,18 +44,9 @@ class SpecialUploadWizard extends SpecialPage {
 
 		$req = $this->getRequest();
 
-		// if query string includes 'skiptutorial=true' set config variable to true
-		$skipTutorial = $req->getCheck( 'skiptutorial' );
-		if ( $skipTutorial ) {
-			$skip = in_array( $skipTutorial, array( '1', 'true' ) );
-			if ( $skip === true ) {
-				UploadWizardConfig::setUrlSetting( 'tutorial', array() );
-			}
-		}
+		$urlArgs = [ 'caption', 'description', 'lat', 'lon', 'alt' ];
 
-		$urlArgs = array( 'description', 'lat', 'lon', 'alt' );
-
-		$urlDefaults = array();
+		$urlDefaults = [];
 		foreach ( $urlArgs as $arg ) {
 			$value = $req->getText( $arg );
 			if ( $value ) {
@@ -82,7 +65,7 @@ class SpecialUploadWizard extends SpecialPage {
 		UploadWizardConfig::setUrlSetting( 'defaults', $urlDefaults );
 
 		$fields = $req->getArray( 'fields' );
-		$fieldDefaults = array();
+		$fieldDefaults = [];
 
 		# Support id and id2 for field0 and field1
 		# Legacy support for old URL structure. They override fields[]
@@ -109,13 +92,20 @@ class SpecialUploadWizard extends SpecialPage {
 		// fallback for non-JS
 		$out->addHTML( '<div class="mwe-upwiz-unavailable">' );
 		$out->addHTML( '<p class="errorbox">' . $this->msg( 'mwe-upwiz-unavailable' )->parse() . '</p>' );
-		$this->simpleForm->show();
+		// create a simple form for non-JS fallback, which targets the old Special:Upload page.
+		// at some point, if we completely subsume its functionality, change that to point here again,
+		// but then we'll need to process non-JS uploads in the same way Special:Upload does.
+		$derivativeContext = new DerivativeContext( $this->getContext() );
+		$derivativeContext->setTitle( SpecialPage::getTitleFor( 'Upload' ) );
+		$simpleForm = new UploadWizardSimpleForm( [], $derivativeContext, $this->getLinkRenderer() );
+		$simpleForm->show();
 		$out->addHTML( '</div>' );
 
 		// global javascript variables
 		$this->addJsVars( $subPage );
 
 		// dependencies (css, js)
+		$out->addModules( 'uw.EventFlowLogger' );
 		$out->addModules( 'ext.uploadWizard.page' );
 		$out->addModuleStyles( 'ext.uploadWizard.page.styles' );
 
@@ -131,6 +121,9 @@ class SpecialUploadWizard extends SpecialPage {
 	 */
 	protected function handleCampaign() {
 		$campaignName = $this->getRequest()->getVal( 'campaign' );
+		if ( is_null( $campaignName ) ) {
+			$campaignName = UploadWizardConfig::getSetting( 'defaultCampaign' );
+		}
 
 		if ( !is_null( $campaignName ) && $campaignName !== '' ) {
 			$campaign = UploadWizardCampaign::newFromName( $campaignName );
@@ -157,7 +150,7 @@ class SpecialUploadWizard extends SpecialPage {
 	protected function displayError( $message ) {
 		$this->getOutput()->addHTML( Html::element(
 			'span',
-			array( 'class' => 'errorbox' ),
+			[ 'class' => 'errorbox' ],
 			$message
 		) . '<br /><br /><br />' );
 	}
@@ -169,11 +162,9 @@ class SpecialUploadWizard extends SpecialPage {
 	 * is fixed we should package configuration with the upload wizard instead of
 	 * in uploadWizard output page.
 	 *
-	 * @param subpage, e.g. the "foo" in Special:UploadWizard/foo
+	 * @param string $subPage subpage, e.g. the "foo" in Special:UploadWizard/foo
 	 */
 	public function addJsVars( $subPage ) {
-		global $wgSitename, $wgIllegalFileChars;
-
 		$config = UploadWizardConfig::getConfig( $this->campaign );
 
 		if ( array_key_exists( 'trackingCategory', $config ) ) {
@@ -232,7 +223,7 @@ class SpecialUploadWizard extends SpecialPage {
 				} else {
 					$userLicenseGroup = 'thirdParty';
 				}
-				$config['licensing'][$userLicenseGroup]['defaults'] = array( $userDefaultLicense );
+				$config['licensing'][$userLicenseGroup]['defaults'] = [ $userDefaultLicense ];
 				$config['licensing']['defaultType'] = $userLicenseType;
 
 				if ( $userDefaultLicense === 'custom' ) {
@@ -242,16 +233,17 @@ class SpecialUploadWizard extends SpecialPage {
 			}
 		}
 
+		// add an 'uploadwizard' tag, but only if it'll be allowed
+		UploadWizardHooks::onListDefinedTags( $tags );
+		$status = ChangeTags::canAddTagsAccompanyingChange( $tags, $this->getUser() );
+		$config['CanAddTags'] = $status->isOK();
+
 		$bitmapHandler = new BitmapHandler();
 		$this->getOutput()->addJsConfigVars(
-			array(
+			[
 				'UploadWizardConfig' => $config,
-
-				// Site name is a true global not specific to Upload Wizard
-				'wgSiteName' => $wgSitename,
 				'wgFileCanRotate' => $bitmapHandler->canRotate(),
-				'wgIllegalFileChars' => $wgIllegalFileChars . '#',
-			)
+			]
 		);
 	}
 
@@ -267,12 +259,9 @@ class SpecialUploadWizard extends SpecialPage {
 			return false;
 		}
 
-		// XXX does wgEnableAPI affect all uploads too?
-
 		// Check whether we actually want to allow changing stuff
 		if ( wfReadOnly() ) {
-			$this->getOutput()->readOnlyPage();
-			return false;
+			throw new ReadOnlyError;
 		}
 
 		// we got all the way here, so it must be okay to upload
@@ -282,10 +271,12 @@ class SpecialUploadWizard extends SpecialPage {
 	/**
 	 * Check if the user can upload
 	 * Side effect: will print error page to wgOut if cannot upload.
-	 * @param User
+	 * @param User $user
+	 * @throws PermissionsError
+	 * @throws UserBlockedError
 	 * @return boolean -- true if can upload
 	 */
-	private function isUserUploadAllowed( $user ) {
+	private function isUserUploadAllowed( User $user ) {
 		// Check permissions
 		$permissionRequired = UploadBase::isAllowed( $user );
 		if ( $permissionRequired !== true ) {
@@ -309,7 +300,7 @@ class SpecialUploadWizard extends SpecialPage {
 	/**
 	 * Return the basic HTML structure for the entire page
 	 * Will be enhanced by the javascript to actually do stuff
-	 * @return {string} html
+	 * @return string html
 	 */
 	protected function getWizardHtml() {
 		global $wgExtensionAssetsPath;
@@ -330,70 +321,46 @@ class SpecialUploadWizard extends SpecialPage {
 			$linkHtml = '';
 			$altUploadForm = Title::newFromText( $config[ 'altUploadForm' ] );
 			if ( $altUploadForm instanceof Title ) {
-				$linkHtml = Html::rawElement( 'p', array( 'style' => 'text-align: center;' ),
-					Html::rawElement( 'a', array( 'href' => $altUploadForm->getLocalURL() ),
+				$linkHtml = Html::rawElement( 'p', [ 'style' => 'text-align: center;' ],
+					Html::rawElement( 'a', [ 'href' => $altUploadForm->getLocalURL() ],
 						$config['altUploadForm']
 					)
 				);
 			}
 
-			return
+			return Html::rawElement(
+				'div',
+				[],
 				Html::rawElement(
-					'div',
-					array(),
-					Html::rawElement(
-						'p',
-						array( 'style' => 'text-align: center' ),
-						wfMessage( 'mwe-upwiz-extension-disabled' )->text()
-					) . $linkHtml
-				);
+					'p',
+					[ 'style' => 'text-align: center' ],
+					wfMessage( 'mwe-upwiz-extension-disabled' )->text()
+				) . $linkHtml
+			);
 		}
 
-		$tutorialHtml = '';
-		// only load the tutorial HTML if we aren't skipping the first step
-		if ( !$this->getUser()->getBoolOption( 'upwiz_skiptutorial' ) &&
-			$config['tutorial'] !== null && $config['tutorial'] !== array() &&
-			$config['tutorial']['skip'] !== true
-		) {
-			$tutorialHtml = UploadWizardTutorial::getHtml( $this->campaign );
-		}
+		// always load the html: even if the tutorial is skipped, users can
+		// still move back to view it
+		$tutorialHtml = UploadWizardTutorial::getHtml( $this->campaign );
 
 		// TODO move this into UploadWizard.js or some other javascript resource so the upload wizard
 		// can be dynamically included ( for example the add media wizard )
-		return
 		// @codingStandardsIgnoreStart
-			'<div id="upload-wizard" class="upload-section">' .
-				'<div id="mwe-upwiz-tutorial-html" style="display:none;">' .
-					$tutorialHtml .
-				'</div>' .
-
-				// if loading takes > 2 seconds display spinner. Note we are evading Resource Loader here, and linking directly. Because we want an image to appear if RL's package is late.
-				// using some &nbsp;'s which is a bit of superstition, to make sure jQuery will hide this (it seems that it doesn't sometimes, when it has no content)
-				// the min-width & max-width is copied from the #uploadWizard properties, so in nice browsers the spinner is right where the button will go.
-				'<div id="mwe-first-spinner" style="min-width:750px; max-width:900px; height:200px; line-height:200px; text-align:center;">' .
-					'&nbsp;<img src="' . $wgExtensionAssetsPath . '/UploadWizard/resources/images/24px-spinner-0645ad.gif" width="24" height="24" />&nbsp;' .
-				'</div>' .
-			'</div>';
+		return '<div id="upload-wizard" class="upload-section">' .
+			'<div id="mwe-upwiz-tutorial-html" style="display:none;">' .
+				$tutorialHtml .
+			'</div>' .
+			// if loading takes > 2 seconds display spinner. Note we are evading Resource Loader here, and linking directly. Because we want an image to appear if RL's package is late.
+			// using some &nbsp;'s which is a bit of superstition, to make sure jQuery will hide this (it seems that it doesn't sometimes, when it has no content)
+			// the min-width & max-width is copied from the #uploadWizard properties, so in nice browsers the spinner is right where the button will go.
+			'<div id="mwe-first-spinner" style="min-width:750px; max-width:900px; height:200px; line-height:200px; text-align:center;">' .
+				'&nbsp;<img src="' . $wgExtensionAssetsPath . '/UploadWizard/resources/images/24px-spinner-0645ad.gif" width="24" height="24" />&nbsp;' .
+			'</div>' .
+		'</div>';
 		// @codingStandardsIgnoreEnd
 	}
 
 	protected function getGroupName() {
 		return 'media';
-	}
-}
-
-
-/**
- * This is a hack on UploadForm, to make one that works from UploadWizard when JS is not available.
- */
-class UploadWizardSimpleForm extends UploadForm {
-
-	/*
-	 * Normally, UploadForm adds its own Javascript.
-	 * We wish to prevent this, because we want to control the case where we have Javascript.
-	 * So, we make the addUploadJS a no-op.
-	 */
-	protected function addUploadJS() {
-
 	}
 }

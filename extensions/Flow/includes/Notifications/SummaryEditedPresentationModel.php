@@ -21,19 +21,26 @@ class SummaryEditedPresentationModel extends FlowPresentationModel {
 
 	public function getSecondaryLinks() {
 		if ( $this->isBundled() ) {
-			return array( $this->getBoardLink() );
+			$links = [ $this->getBoardLink() ];
 		} else {
-			return array( $this->getAgentLink(), $this->getBoardLink() );
+			$links = [ $this->getAgentLink(), $this->getBoardLink() ];
+			if ( !$this->isFirstRevision() ) {
+				$links[] = $this->getDiffLink( false );
+			}
 		}
+
+		$links[] = $this->getFlowUnwatchDynamicActionLink( true );
+
+		return $links;
 	}
 
 	protected function getHeaderMessageKey() {
 		if ( $this->isBundled() ) {
-			$key = "notification-bundle-header-{$this->type}";
-		} elseif ( $this->event->getExtraParam( 'prev-revision-id' ) === null ) {
-			$key = parent::getHeaderMessageKey() . '-first';
+			$key = "notification-bundle-header-flow-summary-edited";
+		} elseif ( $this->isFirstRevision() ) {
+			$key = 'notification-header-flow-summary-edited-first';
 		} else {
-			$key = parent::getHeaderMessageKey();
+			$key = 'notification-header-flow-summary-edited';
 		}
 
 		if ( $this->isUserTalkPage() ) {
@@ -41,6 +48,10 @@ class SummaryEditedPresentationModel extends FlowPresentationModel {
 		}
 
 		return $key;
+	}
+
+	protected function isFirstRevision() {
+		return $this->event->getExtraParam( 'prev-revision-id' ) === null;
 	}
 
 	public function getHeaderMessage() {
@@ -51,15 +62,15 @@ class SummaryEditedPresentationModel extends FlowPresentationModel {
 	}
 
 	public function getBodyMessage() {
-		$key = "notification-body-{$this->type}";
+		$key = 'notification-body-flow-summary-edited';
 		if ( $this->isUserTalkPage() ) {
 			$key .= '-user-talk';
 		}
 
-		return $this->msg( $key )->params( $this->getContentSnippet() );
+		return $this->msg( $key )->plaintextParams( $this->getContentSnippet() );
 	}
 
-	protected function getDiffLink() {
+	protected function getDiffLink( $prioritized = true ) {
 		/** @var UrlGenerator $urlGenerator */
 		$urlGenerator = Container::get( 'url_generator' );
 		$anchor = $urlGenerator->diffSummaryLink(
@@ -68,12 +79,12 @@ class SummaryEditedPresentationModel extends FlowPresentationModel {
 			$this->event->getExtraParam( 'revision-id' )
 		);
 
-		return array(
+		return [
 			'url' => $anchor->getFullURL(),
 			'label' => $this->msg( 'notification-link-text-view-changes' )->params( $this->getViewingUserForGender() )->text(),
 			'description' => '',
 			'icon' => 'changes',
-			'prioritized' => true,
-		);
+			'prioritized' => $prioritized,
+		];
 	}
 }

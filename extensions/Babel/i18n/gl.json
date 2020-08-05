@@ -26,5 +26,9 @@
 	"babel-4-n": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|similar ao dun nativo]] de [[$2|galego]].",
 	"babel-5-n": "{{GENDER:$4|Este usuario|Esta usuaria}} ten un coñecemento [[$1|profesional]] de [[$2|galego]].",
 	"babel-N-n": "{{GENDER:$4|Este usuario|Esta usuaria}} é {{GENDER:$4|un|unha}} falante [[$1|{{GENDER:$4|nativo|nativa}}]] de [[$2|galego]].",
-	"babel-footer": "Usuarios por lingua"
+	"babel-footer": "Usuarios por lingua",
+	"apihelp-query+babel-description": "Obter información sobre as linguas que o usuario coñece",
+	"apihelp-query+babel-summary": "Obter información sobre as linguas que coñece o usuario",
+	"apihelp-query+babel-param-user": "Usuario do cal obter a información",
+	"apihelp-query+babel-example-1": "Obtener a información de Babel do usuario <kbd>Example</kbd>"
 }

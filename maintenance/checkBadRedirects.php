@@ -36,7 +36,7 @@ class CheckBadRedirects extends Maintenance {
 
 	public function execute() {
 		$this->output( "Fetching redirects...\n" );
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = $this->getDB( DB_REPLICA );
 		$result = $dbr->select(
 			[ 'page' ],
 			[ 'page_namespace', 'page_title', 'page_latest' ],
@@ -60,5 +60,5 @@ class CheckBadRedirects extends Maintenance {
 	}
 }
 
-$maintClass = "CheckBadRedirects";
+$maintClass = CheckBadRedirects::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

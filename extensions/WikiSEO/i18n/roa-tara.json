@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"wiki-seo-desc": "Permette a le 'mbostaziune de le meta de 'na pàgene cumme parole chiave e descrizione, cangianne 'u titole e le tag diverse de condrolle d'u site.",
+	"wiki-seo-empty-attr-tag": "Errore: 'u tag &lt;seo&gt; adda tenè ninde ninde 'nu attrebbute non vacande.",
+	"wiki-seo-empty-attr-parser": "Errore: <nowiki>{{#seo:}}</nowiki> adda tenè ninde ninde 'nu attrebbute non vacande.",
+	"wiki-seo-invalid-generator": "Errore: $1 non g'è 'nu generatore de metadate valide.",
+	"wiki-seo-missing-page-title": "Errore: 'u titole d'a pàgene specificate non g'è valide."
+}

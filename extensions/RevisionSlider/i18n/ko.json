@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ykhwong",
+			"Jonghaya",
+			"Macofe",
+			"Garam"
+		]
+	},
+	"revisionslider-preference-disable": "판 슬라이더를 보여주지 않기",
+	"revisionslider-toggle-label": "역사 찾아보기",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|바이트}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|바이트}}",
+	"revisionslider-label-date": "날짜",
+	"revisionslider-label-page-size": "문서 크기",
+	"revisionslider-label-change-size": "변경된 크기",
+	"revisionslider-label-comment": "요약",
+	"revisionslider-label-username": "{{GENDER:$1|사용자 이름}}",
+	"revisionslider-minoredit": "사소한 편집입니다",
+	"revisionslider-loading-failed": "판 슬라이더의 불러오기를 실패했습니다.",
+	"revisionslider-toggle-title-expand": "판 슬라이더 열기",
+	"revisionslider-toggle-title-collapse": "판 슬라이더 접기",
+	"revisionslider-turn-on-auto-expand-title": "판 슬라이더 항상 확장",
+	"revisionslider-turn-off-auto-expand-title": "자동으로 판 슬라이더 확장 안 함",
+	"revisionslider-arrow-tooltip-newer": "새로운 판 보기",
+	"revisionslider-arrow-tooltip-older": "과거 판 보기",
+	"revisionslider-show-help-tooltip": "도움말 텍스트 보기",
+	"revisionslider-help-dialog-slide1": "판 슬라이더는 판들을 둘러보고 판들 간의 차이점을 비교하는 일을 도와줍니다. 독일어 공동체 기술 요청 목록의 [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider 공동체 요구]에 기반을 두고 있습니다. [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider 여기]에 의견을 주시면 매우 감사하겠습니다.",
+	"revisionslider-help-dialog-slide2": "각각의 막대는 문서의 판을 나타냅니다. 막대들이 위쪽에 위치해 있으면 페이지 크기가 증가한 것을 뜻하며, 막대들이 아래에 위치해 있으면 감소했음을 뜻합니다. 그림에 보이는 판 1은 내용이 추가되었음을 나타내며, 판 2는 내용이 제거되었음을 나타냅니다.",
+	"revisionslider-help-dialog-slide3a": "<p>특정한 판끼리 비교하려면, 노란색과 파란색 손잡이를 써서 판을 선택합니다.</p><p>파란색 손잡이는 더 최신 판들을 조절하고, 노란색 손잡이는 더 과거 판을 탐색합니다.</p><p>끌어서 놓거나 슬라이더 선을 클릭하여 손잡이를 움직이세요.</p>",
+	"revisionslider-help-dialog-slide4": "좌우 화살표를 사용하면 판 역사를 둘러보며 과거의 판과 새로운 판을 표시할 수 있습니다.",
+	"revisionslider-tutorial": "판 슬라이더 강좌",
+	"revisionslider-previous-dialog": "이전",
+	"revisionslider-next-dialog": "다음",
+	"revisionslider-close-dialog": "닫기"
+}

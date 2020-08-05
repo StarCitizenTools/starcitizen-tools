@@ -1,4 +1,4 @@
-/*global moment*/
+/* global moment */
 ( function ( $, mw, moment ) {
 
 	/**
@@ -176,18 +176,18 @@
 
 		return this.upload.getApi().then(
 			function ( api ) {
-				return $.when(
-					booklet.upload.loadConfig(),
-					// If the user can't upload anything, don't give them the option to.
-					api.getUserInfo().then( function ( userInfo ) {
+				// If the user can't upload anything, don't give them the option to.
+				return api.getUserInfo().then(
+					function ( userInfo ) {
 						if ( userInfo.rights.indexOf( 'upload' ) === -1 ) {
-							// TODO Use a better error message when not all logged-in users can upload
-							booklet.getPage( 'upload' ).$element.msg( 'api-error-mustbeloggedin' );
+							if ( mw.user.isAnon() ) {
+								booklet.getPage( 'upload' ).$element.msg( 'apierror-mustbeloggedin', mw.msg( 'action-upload' ) );
+							} else {
+								booklet.getPage( 'upload' ).$element.msg( 'apierror-permissiondenied', mw.msg( 'action-upload' ) );
+							}
 						}
 						return $.Deferred().resolve();
-					} )
-				).then(
-					null,
+					},
 					// Always resolve, never reject
 					function () { return $.Deferred().resolve(); }
 				);
@@ -206,7 +206,14 @@
 	 * @return {mw.Upload} Upload model
 	 */
 	mw.Upload.BookletLayout.prototype.createUpload = function () {
-		return new mw.Upload();
+		return new mw.Upload( {
+			parameters: {
+				errorformat: 'html',
+				errorlang: mw.config.get( 'wgUserLanguage' ),
+				errorsuselocal: 1,
+				formatversion: 2
+			}
+		} );
 	};
 
 	/* Uploading */
@@ -223,7 +230,7 @@
 	 */
 	mw.Upload.BookletLayout.prototype.uploadFile = function () {
 		var deferred = $.Deferred(),
-			startTime = new Date(),
+			startTime = mw.now(),
 			layout = this,
 			file = this.getFile();
 
@@ -254,12 +261,11 @@
 			layout.emit( 'fileUploaded' );
 		}, function () {
 			// These errors will be thrown while the user is on the info page.
-			// Pretty sure it's impossible to get a warning other than 'stashfailed' here, which should
-			// really be an error...
-			var errorMessage = layout.getErrorMessageForStateDetails();
-			deferred.reject( errorMessage );
+			layout.getErrorMessageForStateDetails().then( function ( errorMessage ) {
+				deferred.reject( errorMessage );
+			} );
 		}, function ( progress ) {
-			var elapsedTime = new Date() - startTime,
+			var elapsedTime = mw.now() - startTime,
 				estimatedTotalTime = ( 1 / progress ) * elapsedTime,
 				estimatedRemainingTime = moment.duration( estimatedTotalTime - elapsedTime );
 			layout.emit( 'fileUploadProgress', progress, estimatedRemainingTime );
@@ -303,8 +309,9 @@
 				deferred.resolve();
 				layout.emit( 'fileSaved', layout.upload.getImageInfo() );
 			}, function () {
-				var errorMessage = layout.getErrorMessageForStateDetails();
-				deferred.reject( errorMessage );
+				layout.getErrorMessageForStateDetails().then( function ( errorMessage ) {
+					deferred.reject( errorMessage );
+				} );
 			} );
 		} );
 
@@ -316,111 +323,108 @@
 	 * state and state details.
 	 *
 	 * @protected
-	 * @return {OO.ui.Error} Error to display for given state and details.
+	 * @return {jQuery.Promise} A Promise that will be resolved with an OO.ui.Error.
 	 */
 	mw.Upload.BookletLayout.prototype.getErrorMessageForStateDetails = function () {
-		var message,
-			state = this.upload.getState(),
+		var state = this.upload.getState(),
 			stateDetails = this.upload.getStateDetails(),
-			error = stateDetails.error,
-			warnings = stateDetails.upload && stateDetails.upload.warnings;
+			error = stateDetails.errors ? stateDetails.errors[ 0 ] : false,
+			warnings = stateDetails.upload && stateDetails.upload.warnings,
+			$ul = $( '<ul>' ),
+			errorText;
 
 		if ( state === mw.Upload.State.ERROR ) {
 			if ( !error ) {
-				// If there's an 'exception' key, this might be a timeout, or other connection problem
-				return new OO.ui.Error(
-					$( '<p>' ).msg( 'api-error-unknownerror', JSON.stringify( stateDetails ) ),
-					{ recoverable: false }
-				);
-			}
-
-			// HACK We should either have a hook here to allow TitleBlacklist to handle this, or just have
-			// TitleBlacklist produce sane error messages that can be displayed without arcane knowledge
-			if ( error.info === 'TitleBlacklist prevents this title from being created' ) {
-				// HACK Apparently the only reliable way to determine whether TitleBlacklist was involved
-				return new OO.ui.Error(
-					// HACK TitleBlacklist doesn't have a sensible message, this one is from UploadWizard
-					$( '<p>' ).msg( 'api-error-blacklisted' ),
-					{ recoverable: false }
-				);
-			}
-
-			if ( error.code === 'protectedpage' ) {
-				message = mw.message( 'protectedpagetext' );
-			} else {
-				message = mw.message( 'api-error-' + error.code );
-				if ( !message.exists() ) {
-					message = mw.message( 'api-error-unknownerror', JSON.stringify( stateDetails ) );
+				if ( stateDetails.textStatus === 'timeout' ) {
+					// in case of $.ajax.fail(), there is no response json
+					errorText = mw.message( 'apierror-timeout' ).parse();
+				} else if ( stateDetails.xhr && stateDetails.xhr.status === 0 ) {
+					// failed to even connect to server
+					errorText = mw.message( 'apierror-offline' ).parse();
+				} else if ( stateDetails.textStatus ) {
+					errorText = stateDetails.textStatus;
+				} else {
+					errorText = mw.message( 'apierror-unknownerror', JSON.stringify( stateDetails ) ).parse();
 				}
+
+				// If there's an 'exception' key, this might be a timeout, or other connection problem
+				return $.Deferred().resolve( new OO.ui.Error(
+					$( '<p>' ).html( errorText ),
+					{ recoverable: false }
+				) );
 			}
-			return new OO.ui.Error(
-				$( '<p>' ).append( message.parseDom() ),
+
+			return $.Deferred().resolve( new OO.ui.Error(
+				$( '<p>' ).html( error.html ),
 				{ recoverable: false }
-			);
+			) );
 		}
 
 		if ( state === mw.Upload.State.WARNING ) {
 			// We could get more than one of these errors, these are in order
 			// of importance. For example fixing the thumbnail like file name
 			// won't help the fact that the file already exists.
-			if ( warnings.stashfailed !== undefined ) {
-				return new OO.ui.Error(
-					$( '<p>' ).msg( 'api-error-stashfailed' ),
-					{ recoverable: false }
-				);
-			} else if ( warnings.exists !== undefined ) {
-				return new OO.ui.Error(
+			if ( warnings.exists !== undefined ) {
+				return $.Deferred().resolve( new OO.ui.Error(
 					$( '<p>' ).msg( 'fileexists', 'File:' + warnings.exists ),
 					{ recoverable: false }
-				);
+				) );
 			} else if ( warnings[ 'exists-normalized' ] !== undefined ) {
-				return new OO.ui.Error(
+				return $.Deferred().resolve( new OO.ui.Error(
 					$( '<p>' ).msg( 'fileexists', 'File:' + warnings[ 'exists-normalized' ] ),
 					{ recoverable: false }
-				);
+				) );
 			} else if ( warnings[ 'page-exists' ] !== undefined ) {
-				return new OO.ui.Error(
+				return $.Deferred().resolve( new OO.ui.Error(
 					$( '<p>' ).msg( 'filepageexists', 'File:' + warnings[ 'page-exists' ] ),
 					{ recoverable: false }
-				);
-			} else if ( warnings.duplicate !== undefined ) {
-				return new OO.ui.Error(
-					$( '<p>' ).msg( 'api-error-duplicate', warnings.duplicate.length ),
+				) );
+			} else if ( Array.isArray( warnings.duplicate ) ) {
+				warnings.duplicate.forEach( function ( filename ) {
+					var $a = $( '<a>' ).text( filename ),
+						href = mw.Title.makeTitle( mw.config.get( 'wgNamespaceIds' ).file, filename ).getUrl( {} );
+
+					$a.attr( { href: href, target: '_blank' } );
+					$ul.append( $( '<li>' ).append( $a ) );
+				} );
+
+				return $.Deferred().resolve( new OO.ui.Error(
+					$( '<p>' ).msg( 'file-exists-duplicate', warnings.duplicate.length ).append( $ul ),
 					{ recoverable: false }
-				);
+				) );
 			} else if ( warnings[ 'thumb-name' ] !== undefined ) {
-				return new OO.ui.Error(
+				return $.Deferred().resolve( new OO.ui.Error(
 					$( '<p>' ).msg( 'filename-thumb-name' ),
 					{ recoverable: false }
-				);
+				) );
 			} else if ( warnings[ 'bad-prefix' ] !== undefined ) {
-				return new OO.ui.Error(
+				return $.Deferred().resolve( new OO.ui.Error(
 					$( '<p>' ).msg( 'filename-bad-prefix', warnings[ 'bad-prefix' ] ),
 					{ recoverable: false }
-				);
+				) );
 			} else if ( warnings[ 'duplicate-archive' ] !== undefined ) {
-				return new OO.ui.Error(
-					$( '<p>' ).msg( 'api-error-duplicate-archive', 1 ),
+				return $.Deferred().resolve( new OO.ui.Error(
+					$( '<p>' ).msg( 'file-deleted-duplicate', 'File:' + warnings[ 'duplicate-archive' ] ),
 					{ recoverable: false }
-				);
+				) );
 			} else if ( warnings[ 'was-deleted' ] !== undefined ) {
-				return new OO.ui.Error(
-					$( '<p>' ).msg( 'api-error-was-deleted' ),
+				return $.Deferred().resolve( new OO.ui.Error(
+					$( '<p>' ).msg( 'filewasdeleted', 'File:' + warnings[ 'was-deleted' ] ),
 					{ recoverable: false }
-				);
+				) );
 			} else if ( warnings.badfilename !== undefined ) {
 				// Change the name if the current name isn't acceptable
 				// TODO This might not really be the best place to do this
 				this.setFilename( warnings.badfilename );
-				return new OO.ui.Error(
+				return $.Deferred().resolve( new OO.ui.Error(
 					$( '<p>' ).msg( 'badfilename', warnings.badfilename )
-				);
+				) );
 			} else {
-				return new OO.ui.Error(
+				return $.Deferred().resolve( new OO.ui.Error(
 					// Let's get all the help we can if we can't pin point the error
 					$( '<p>' ).msg( 'api-error-unknown-warning', JSON.stringify( stateDetails ) ),
 					{ recoverable: false }
-				);
+				) );
 			}
 		}
 	};
@@ -527,11 +531,10 @@
 			required: true,
 			validate: /.+/
 		} );
-		this.descriptionWidget = new OO.ui.TextInputWidget( {
+		this.descriptionWidget = new OO.ui.MultilineTextInputWidget( {
 			indicator: 'required',
 			required: true,
 			validate: /\S+/,
-			multiline: true,
 			autosize: true
 		} );
 

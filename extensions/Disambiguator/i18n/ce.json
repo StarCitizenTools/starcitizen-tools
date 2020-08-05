@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Умар"
+		]
+	},
+	"disambig-desc": "ТӀетуху тег <code><nowiki>__DISAMBIG__</nowiki></code> [[Special:DisambiguationPages|дуккха маьӀнаш долу агӀонаш]] билгалъян",
+	"disambiguationpages": "Дуккха маьӀнаш долу агӀонаш",
+	"disambiguationpages-summary": "Лахахь гойту {{SITENAME}} чура дуккха маьӀнаш долу агӀонаш.<br />\nАгӀо дуккха маьӀнаш долуш лору цуна чохь тег <code><nowiki>__DISAMBIG__</nowiki></code> елахь.",
+	"disambiguationpagelinks": "Дуккха маьӀнаш долу хьажорца йолу агӀонаш",
+	"disambiguationpagelinks-summary": "Лахара агӀонаш чохь дуккха маьӀнаш долу агӀона тӀе цхьаъ мукъа хьажорг ю.\nЦарна оьшуш хилла мега царца йогӀуш йолу агӀона тӀе хьажорг.<br />\nАгӀо дуккха маьӀнаш долуш лору цуна чохь тег __DISAMBIG__ елахь.",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "ХӀокху агӀонан цӀеран дукху а маьӀнаш ду"
+}

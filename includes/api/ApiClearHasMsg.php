@@ -1,8 +1,6 @@
 <?php
 
 /**
- * Created on August 26, 2014
- *
  * Copyright © 2014 Petr Bena (benapetr@gmail.com)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,7 +37,7 @@ class ApiClearHasMsg extends ApiBase {
 	}
 
 	public function mustBePosted() {
-		return false;
+		return true;
 	}
 
 	protected function getExamplesMessages() {
@@ -50,6 +48,6 @@ class ApiClearHasMsg extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:ClearHasMsg';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:ClearHasMsg';
 	}
 }

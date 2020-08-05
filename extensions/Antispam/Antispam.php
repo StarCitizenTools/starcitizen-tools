@@ -18,7 +18,7 @@ require_once('cleantalk.class.php' );
  * Access key for cleantalk.org
  * @see https://clenatalk.org/register
  */
-$wgCTAccessKey = 'e8a4e4yhe7u4';
+$wgCTAccessKey = '';
 
 /**
  * Check registrations, when there is errors with connection to service

@@ -19,9 +19,14 @@
 	var CP;
 
 	/**
-	 * @class mw.mmv.Config
 	 * Contains/retrieves configuration/environment information for MediaViewer.
+	 * @class mw.mmv.Config
 	 * @constructor
+	 * @param {Object} viewerConfig
+	 * @param {mw.Map} mwConfig
+	 * @param {Object} mwUser
+	 * @param {mw.Api} api
+	 * @param {mw.storage} localStorage
 	 */
 	function Config( viewerConfig, mwConfig, mwUser, api, localStorage ) {
 		/**
@@ -50,7 +55,7 @@
 
 		/**
 		 * The localStorage object, for dependency injection
-		 * @type {Object}
+		 * @type {mw.storage}
 		 */
 		this.localStorage = localStorage;
 	}
@@ -58,81 +63,79 @@
 
 	/**
 	 * Get value from local storage or fail gracefully.
+	 *
 	 * @param {string} key
 	 * @param {*} [fallback] value to return when key is not set or localStorage is not supported
-	 * @returns {*} stored value or fallback or null if neither exists
+	 * @return {string|null} stored value or fallback or null if neither exists
 	 */
 	CP.getFromLocalStorage = function ( key, fallback ) {
-		var value = null;
-		if ( this.localStorage ) {
-			try {
-				value = this.localStorage.getItem( key );
-			} catch ( e ) {
-				mw.log( 'Failed to fetch item ' + key + ' from localStorage', e );
-			}
+		var value = this.localStorage.get( key );
+
+		// localStorage will only store strings; if values `null`, `false` or
+		// `0` are set, they'll come out as `"null"`, `"false"` or `"0"`, so we
+		// can be certain that an actual null is a failure to locate the item,
+		// and false is an issue with localStorage itself
+		if ( value !== null && value !== false ) {
+			return value;
 		}
-		if ( value === null && fallback !== undefined ) {
-			value = fallback;
+
+		if ( value === null ) {
+			mw.log( 'Failed to fetch item ' + key + ' from localStorage' );
 		}
-		return value;
+
+		return fallback !== undefined ? fallback : null;
 	};
 
 	/**
 	 * Set item in local storage or fail gracefully.
+	 *
 	 * @param {string} key
 	 * @param {*} value
 	 * @return {boolean} whether storing the item was successful
 	 */
 	CP.setInLocalStorage = function ( key, value ) {
-		var success = false;
-		if ( this.localStorage ) {
-			try {
-				this.localStorage.setItem( key, value );
-				success = true;
-			} catch ( e ) {}
-		}
-		return success;
+		return this.localStorage.set( key, value );
 	};
 
 	/**
 	 * Remove item from local storage or fail gracefully.
+	 *
 	 * @param {string} key
 	 * @return {boolean} whether storing the item was successful
 	 */
 	CP.removeFromLocalStorage = function ( key ) {
-		if ( this.localStorage ) {
-			try {
-				this.localStorage.removeItem( key );
-				return true;
-			} catch ( e ) {
-				return false;
-			}
-		}
-		return true; // since we never even stored the value, this is considered a success
+		this.localStorage.remove( key );
+
+		// mw.storage.remove catches all exceptions and returns false if any
+		// occur, so we can't distinguish between actual issues, and
+		// localStorage not being supported - however, localStorage.removeItem
+		// is not documented to throw any errors, so nothing to worry about;
+		// when localStorage is not supported, we'll consider removal successful
+		// (it can't have been there in the first place)
+		return true;
 	};
 
 	/**
 	 * Set user preference via AJAX
+	 *
 	 * @param {string} key
 	 * @param {string} value
-	 * @returns {jQuery.Promise} a deferred which resolves/rejects on success/failure respectively
+	 * @return {jQuery.Promise} a deferred which resolves/rejects on success/failure respectively
 	 */
 	CP.setUserPreference = function ( key, value ) {
-		return this.api.postWithToken( 'options', {
-			action: 'options',
-			optionname: key,
-			optionvalue: value
-		} );
+		return this.api.saveOption( key, value );
 	};
 
 	/**
 	 * Returns true if MediaViewer should handle thumbnail clicks.
+	 *
+	 * @return {boolean}
 	 */
 	CP.isMediaViewerEnabledOnClick = function () {
 		// IMPORTANT: mmv.head.js uses the same logic but does not use this class to be lightweight. Make sure to keep it in sync.
-		return this.mwConfig.get( 'wgMediaViewer' ) // global opt-out switch, can be set in user JS
-			&& this.mwConfig.get( 'wgMediaViewerOnClick' ) // thumbnail opt-out, can be set in preferences
-			&& ( !this.mwUser.isAnon() || this.getFromLocalStorage( 'wgMediaViewerOnClick', 1 ) === 1 ); // thumbnail opt-out for anons
+		return this.mwConfig.get( 'wgMediaViewer' ) && // global opt-out switch, can be set in user JS
+			this.mwConfig.get( 'wgMediaViewerOnClick' ) && // thumbnail opt-out, can be set in preferences
+			( !this.mwUser.isAnon() || this.getFromLocalStorage( 'wgMediaViewerOnClick', '1' ) === '1' ); // thumbnail opt-out for anons
 	};
 
 	/**
@@ -140,6 +143,7 @@
 	 * - for logged-in users, we use preferences
 	 * - for anons, we use localStorage
 	 * - for anons with old browsers, we don't do anything
+	 *
 	 * @param {boolean} enabled
 	 * @return {jQuery.Promise} a deferred which resolves/rejects on success/failure respectively
 	 */
@@ -187,28 +191,21 @@
 	};
 
 	/**
-	 * Returns true if #setMediaViewerEnabledOnClick() is supported.
-	 * @return {boolean}
-	 */
-	CP.canSetMediaViewerEnabledOnClick = function () {
-		return !this.mwUser.isAnon() || !!this.localStorage;
-	};
-
-
-	/**
 	 * True if info about enable/disable status should be displayed (mingle #719).
-	 * @returns {boolean}
+	 *
+	 * @return {boolean}
 	 */
 	CP.shouldShowStatusInfo = function () {
 		return !this.isMediaViewerEnabledOnClick() && this.getFromLocalStorage( 'mmv-showStatusInfo' ) === '1';
 	};
 
 	/**
-	 * @private
 	 * Called when MediaViewer is disabled. If status info was never displayed before, future
 	 * shouldShowStatusInfo() calls will return true.
+	 *
+	 * @private
 	 */
-	CP.maybeEnableStatusInfo = function ( ) {
+	CP.maybeEnableStatusInfo = function () {
 		var currentShowStatusInfo = this.getFromLocalStorage( 'mmv-showStatusInfo' );
 		if ( currentShowStatusInfo === null ) {
 			this.setInLocalStorage( 'mmv-showStatusInfo', '1' );
@@ -218,9 +215,58 @@
 	/**
 	 * Called when status info is displayed. Future shouldShowStatusInfo() calls will retrurn false.
 	 */
-	CP.disableStatusInfo = function ( ) {
+	CP.disableStatusInfo = function () {
 		this.setInLocalStorage( 'mmv-showStatusInfo', '0' );
 	};
 
+	/**
+	 * Returns file extensions handled by Media Viewer.
+	 *
+	 * The object's keys are the file extensions.
+	 * The object's values are either 'default' when Media Viewer handles that file extension
+	 * directly or the name of a ResourceLoader module to load when such a file is opened.
+	 *
+	 * @return {Object}
+	 */
+	CP.extensions = function () {
+		return this.viewerConfig.extensions;
+	};
+
+	/**
+	 * Returns UI language
+	 *
+	 * @return {string} Language code
+	 */
+	CP.language = function () {
+		return this.mwConfig.get( 'wgUserLanguage', false ) || this.mwConfig.get( 'wgContentLanguage', 'en' );
+	};
+
+	/**
+	 * Returns URI of virtual view beacon or false if not set
+	 *
+	 * @return {string|boolean} URI
+	 */
+	CP.recordVirtualViewBeaconURI = function () {
+		return this.viewerConfig.recordVirtualViewBeaconURI;
+	};
+
+	/**
+	 * Returns useThumbnailGuessing flag
+	 *
+	 * @return {boolean}
+	 */
+	CP.useThumbnailGuessing = function () {
+		return this.viewerConfig.useThumbnailGuessing;
+	};
+
+	/**
+	 * Returns imageQueryParameter, if set
+	 *
+	 * @return {string|boolean}
+	 */
+	CP.imageQueryParameter = function () {
+		return this.viewerConfig.imageQueryParameter;
+	};
+
 	mw.mmv.Config = Config;
-} ( mediaWiki, jQuery ) );
+}( mediaWiki, jQuery ) );

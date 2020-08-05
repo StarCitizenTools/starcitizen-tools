@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -19,14 +19,14 @@ class ApiTranslationStash extends ApiBase {
 		// The user we are operating on, not necessarly the user making the request
 		$user = $this->getUser();
 
-		if ( isset( $params['username'] ) ){
+		if ( isset( $params['username'] ) ) {
 			if ( $this->getUser()->isAllowed( 'translate-sandboxmanage' ) ) {
 				$user = User::newFromName( $params['username'] );
 				if ( !$user ) {
-					$this->dieUsageMsg( array( 'invalidparam', 'username' ) );
+					$this->dieWithError( [ 'apierror-badparameter', 'username' ], 'invalidparam' );
 				}
 			} else {
-				$this->dieUsageMsg( array( 'invalidparam', 'username' ) );
+				$this->dieWithError( [ 'apierror-badparameter', 'username' ], 'invalidparam' );
 			}
 		}
 
@@ -35,10 +35,10 @@ class ApiTranslationStash extends ApiBase {
 
 		if ( $action === 'add' ) {
 			if ( !isset( $params['title'] ) ) {
-				$this->dieUsageMsg( array( 'missingparam', 'title' ) );
+				$this->dieWithError( [ 'apierror-missingparam', 'title' ] );
 			}
 			if ( !isset( $params['translation'] ) ) {
-				$this->dieUsageMsg( array( 'missingparam', 'translation' ) );
+				$this->dieWithError( [ 'apierror-missingparam', 'translation' ] );
 			}
 
 			// @todo: Return value of Title::newFromText not checked
@@ -52,7 +52,7 @@ class ApiTranslationStash extends ApiBase {
 		}
 
 		if ( $action === 'query' ) {
-			$output['translations'] = array();
+			$output['translations'] = [];
 
 			$translations = $stash->getTranslations( $user );
 			foreach ( $translations as $translation ) {
@@ -82,13 +82,13 @@ class ApiTranslationStash extends ApiBase {
 			$comparison = $group->getMessage( $key, $handle->getCode() );
 		}
 
-		return array(
+		return [
 			'title' => $title->getPrefixedText(),
 			'definition' => $definition,
 			'translation' => $translation->getValue(),
 			'comparison' => $comparison,
 			'metadata' => $translation->getMetadata(),
-		);
+		];
 	}
 
 	public function isWriteMode() {
@@ -100,36 +100,36 @@ class ApiTranslationStash extends ApiBase {
 	}
 
 	public function getAllowedParams() {
-		return array(
-			'subaction' => array(
-				ApiBase::PARAM_TYPE => array( 'add', 'query' ),
+		return [
+			'subaction' => [
+				ApiBase::PARAM_TYPE => [ 'add', 'query' ],
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'title' => array(
+			],
+			'title' => [
 				ApiBase::PARAM_TYPE => 'string',
-			),
-			'translation' => array(
+			],
+			'translation' => [
 				ApiBase::PARAM_TYPE => 'string',
-			),
-			'metadata' => array(
+			],
+			'metadata' => [
 				ApiBase::PARAM_TYPE => 'string',
-			),
-			'token' => array(
+			],
+			'token' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_REQUIRED => true,
-			),
-			'username' => array(
+			],
+			'username' => [
 				ApiBase::PARAM_TYPE => 'string',
-			),
-		);
+			],
+		];
 	}
 
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=translationstash&subaction=add&title=MediaWiki:Jan/fi&translation=tammikuu&metadata={}'
 				=> 'apihelp-translationstash-example-1',
 			'action=translationstash&subaction=query'
 				=> 'apihelp-translationstash-example-2',
-		);
+		];
 	}
 }

@@ -32,14 +32,16 @@ from optparse import OptionParser
 import os
 import sys
 import re
+import multiprocessing
+import time
 
 try:
-	import Image
-	import ImageFont
-	import ImageDraw
-	import ImageEnhance
-	import ImageOps
-	import ImageMath
+	from PIL import Image
+	from PIL import ImageFont
+	from PIL import ImageDraw
+	from PIL import ImageEnhance
+	from PIL import ImageOps
+	from PIL import ImageMath
 except:
 	sys.exit("This script requires the Python Imaging Library - http://www.pythonware.com/products/pil/")
 
@@ -76,7 +78,7 @@ def gen_captcha(text, fontname, fontsize, file_name):
 	# white text on a black background
 	bgcolor = 0x0
 	fgcolor = 0xffffff
-	# create a font object 
+	# create a font object
 	font = ImageFont.truetype(fontname,fontsize)
 	# determine dimensions of the text
 	dim = font.getsize(text)
@@ -98,7 +100,7 @@ def gen_captcha(text, fontname, fontsize, file_name):
 		im = wobbly_copy(im, wob, bgcolor, i*2+1, rot+45)
 		im = wobbly_copy(im, wob, bgcolor, i*2+2, rot+90)
 		rot += 30
-	
+
 	# now get the bounding box of the nonzero parts of the image
 	bbox = im.getbbox()
 	bord = min(dim[0], dim[1])/4 # a bit of a border
@@ -155,27 +157,27 @@ def try_pick_word(words, blacklist, verbose, nwords, min_length, max_length):
 			word = word + chr(97 + random.randint(0,25))
 
 	if verbose:
-		print "word is %s" % word
+		print("word is %s" % word)
 
 	if len(word) < min_length:
 		if verbose:
-			print "skipping word pair '%s' because it has fewer than %d characters" % (word, min_length)
+			print("skipping word pair '%s' because it has fewer than %d characters" % (word, min_length))
 		return None
 
 	if max_length > 0 and len(word) > max_length:
 		if verbose:
-			print "skipping word pair '%s' because it has more than %d characters" % (word, max_length)
+			print("skipping word pair '%s' because it has more than %d characters" % (word, max_length))
 		return None
 
 	if nonalpha.search(word):
 		if verbose:
-			print "skipping word pair '%s' because it contains non-alphabetic characters" % word
+			print("skipping word pair '%s' because it contains non-alphabetic characters" % word)
 		return None
 
 	for naughty in blacklist:
 		if naughty in word:
 			if verbose:
-				print "skipping word pair '%s' because it contains blacklisted word '%s'" % (word, naughty)
+				print("skipping word pair '%s' because it contains blacklisted word '%s'" % (word, naughty))
 			return None
 	return word
 
@@ -192,11 +194,32 @@ def read_wordlist(filename):
 	f.close()
 	return words
 
+def run_in_thread(object):
+	count = object[0];
+	words = object[1]
+	blacklist = object[2]
+	opts = object[3]
+	font = object[4]
+	fontsize = object[5]
+
+	for i in range(count):
+		word = pick_word(words, blacklist, verbose, opts.number_words, opts.min_length, opts.max_length)
+		salt = "%08x" % random.randrange(2**32)
+		# 64 bits of hash is plenty for this purpose
+		md5hash = hashlib.md5((key+salt+word+key+salt).encode('utf-8')).hexdigest()[:16]
+		filename = "image_%s_%s.png" % (salt, md5hash)
+		if dirs:
+			subdir = gen_subdir(output, md5hash, dirs)
+			filename = os.path.join(subdir, filename)
+		if verbose:
+			print(filename)
+		gen_captcha(word, font, fontsize, os.path.join(output, filename))
+
 if __name__ == '__main__':
 	"""This grabs random words from the dictionary 'words' (one
 	word per line) and generates a captcha image for each one,
 	with a keyed salted hash of the correct answer in the filename.
-	
+
 	To check a reply, hash it in the same way with the same salt and
 	secret key, then compare with the hash value given.
 	"""
@@ -216,7 +239,8 @@ if __name__ == '__main__':
 	parser.add_option("--number-words", help="Number of words from the wordlist which make a captcha challenge (default 2)", type='int', default=2)
 	parser.add_option("--min-length", help="Minimum length for a captcha challenge", type='int', default=1)
 	parser.add_option("--max-length", help="Maximum length for a captcha challenge", type='int', default=-1)
-	
+	parser.add_option("--threads", help="Maximum number of threads to be used to generate captchas.", type='int', default=1)
+
 	opts, args = parser.parse_args()
 
 	if opts.wordlist:
@@ -244,6 +268,7 @@ if __name__ == '__main__':
 	dirs = opts.dirs
 	verbose = opts.verbose
 	fontsize = opts.font_size
+	threads = opts.threads
 
 	if fill:
 		count = max(0, fill - len(os.listdir(output)))
@@ -255,16 +280,19 @@ if __name__ == '__main__':
 			if len(x) in (4,5) and x[0] != "f"
 			and x[0] != x[1] and x[-1] != x[-2]]
 
-	for i in range(count):
-		word = pick_word(words, blacklist, verbose, opts.number_words, opts.min_length, opts.max_length)
-		salt = "%08x" % random.randrange(2**32)
-		# 64 bits of hash is plenty for this purpose
-		md5hash = hashlib.md5(key+salt+word+key+salt).hexdigest()[:16]
-		filename = "image_%s_%s.png" % (salt, md5hash)
-		if dirs:
-			subdir = gen_subdir(output, md5hash, dirs)
-			filename = os.path.join(subdir, filename)
-		if verbose:
-			print filename
-		gen_captcha(word, font, fontsize, os.path.join(output, filename))
+	if count == 0:
+		sys.exit("No need to generate CAPTCHA images.")
 
+	if count < threads:
+		chunks = 1
+		threads = 1
+	else:
+		chunks = (count / threads)
+
+	p = multiprocessing.Pool(threads);
+	data = []
+	print("Generating %s CAPTCHA images separated in %s image(s) per chunk run by %s threads..." % (count, chunks, threads))
+	for i in range(0, threads):
+		data.append([chunks, words, blacklist, opts, font, fontsize])
+
+	p.map(run_in_thread, data)

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface PositionedTargetToolbar class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -41,11 +41,18 @@ OO.inheritClass( ve.ui.PositionedTargetToolbar, ve.ui.TargetToolbar );
 /**
  * @inheritdoc
  */
-ve.ui.PositionedTargetToolbar.prototype.setup = function () {
+ve.ui.PositionedTargetToolbar.prototype.setup = function ( groups, surface ) {
+	var toolbarDialogs = surface.getToolbarDialogs();
+
 	// Parent method
 	ve.ui.PositionedTargetToolbar.super.prototype.setup.apply( this, arguments );
 
-	this.getSurface().getToolbarDialogs().connect( this, {
+	if ( this.position === 'bottom' ) {
+		this.$bar.prepend( toolbarDialogs.$element );
+	} else {
+		this.$bar.append( toolbarDialogs.$element );
+	}
+	toolbarDialogs.connect( this, {
 		opening: 'onToolbarDialogsOpeningOrClosing',
 		closing: 'onToolbarDialogsOpeningOrClosing'
 	} );
@@ -97,7 +104,7 @@ ve.ui.PositionedTargetToolbar.prototype.onWindowResize = function () {
  */
 ve.ui.PositionedTargetToolbar.prototype.calculateOffset = function () {
 	this.elementOffset = this.$element.offset();
-	this.elementOffset.right = this.$window.width() - this.$element.outerWidth() - this.elementOffset.left;
+	this.elementOffset.right = document.documentElement.clientWidth - this.$element[ 0 ].offsetWidth - this.elementOffset.left;
 };
 
 /**
@@ -126,7 +133,7 @@ ve.ui.PositionedTargetToolbar.prototype.getElementOffset = function () {
  */
 ve.ui.PositionedTargetToolbar.prototype.float = function () {
 	if ( !this.floating ) {
-		this.height = this.$element.height();
+		this.height = this.$element[ 0 ].offsetHeight;
 		// When switching into floating mode, set the height of the wrapper and
 		// move the bar to the same offset as the in-flow element
 		this.$element
@@ -185,6 +192,7 @@ ve.ui.PositionedTargetToolbar.prototype.isFloatable = function () {
  */
 ve.ui.PositionedTargetToolbar.prototype.onToolbarDialogsOpeningOrClosing = function ( win, openingOrClosing ) {
 	var width,
+		transitionDuration = OO.ui.theme.getDialogTransitionDuration(),
 		toolbar = this;
 
 	// win.isOpened before promise means we are closing
@@ -215,7 +223,7 @@ ve.ui.PositionedTargetToolbar.prototype.onToolbarDialogsOpeningOrClosing = funct
 			setTimeout( function () {
 				toolbar.onViewportResize();
 				toolbar.getSurface().getView().emit( 'position' );
-			}, 250 );
+			}, transitionDuration );
 			toolbar.getSurface().getView().emit( 'position' );
 		}
 		// Wait for window transition
@@ -225,7 +233,7 @@ ve.ui.PositionedTargetToolbar.prototype.onToolbarDialogsOpeningOrClosing = funct
 				toolbar.unfloat();
 				toolbar.float();
 			}
-		}, 250 );
+		}, transitionDuration );
 	} );
 };
 
@@ -233,14 +241,20 @@ ve.ui.PositionedTargetToolbar.prototype.onToolbarDialogsOpeningOrClosing = funct
  * Handle the visible part of the surface viewport change dimensions
  */
 ve.ui.PositionedTargetToolbar.prototype.onViewportResize = function () {
-	var viewportDimensions,
-		surface = this.getSurface(),
-		win = surface.getToolbarDialogs().getCurrentWindow();
+	var win, viewportDimensions, toolbarDialogs,
+		surface = this.getSurface();
+
+	if ( !surface ) {
+		return;
+	}
+
+	toolbarDialogs = surface.getToolbarDialogs();
+	win = toolbarDialogs.getCurrentWindow();
 
 	if ( win && win.constructor.static.position === 'side' ) {
 		viewportDimensions = surface.getViewportDimensions();
 		if ( viewportDimensions ) {
-			surface.getToolbarDialogs().getCurrentWindow().$frame.css(
+			toolbarDialogs.getCurrentWindow().$frame.css(
 				'height', Math.min( surface.getBoundingClientRect().height, viewportDimensions.height )
 			);
 		}

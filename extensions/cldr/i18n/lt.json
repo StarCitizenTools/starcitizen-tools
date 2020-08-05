@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Matasg"
+			"Matasg",
+			"Eitvys200"
 		]
 	},
-	"cldr-desc": "Priedas leidžiantis rodyti lokalizuotus kalbų pavadinimus"
+	"cldr-desc": "Priedas, pateikiantis lokalizuotus kalbų pavadinimus, paremtus  [http://cldr.unicode.org/index/downloads CLDR duomenimis]"
 }

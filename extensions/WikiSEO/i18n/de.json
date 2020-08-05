@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kghbln"
+		]
+	},
+	"wiki-seo-desc": "Ermöglicht das Festlegen von Meta-Elementen sowie das Anpassen des Seitentitels",
+	"wiki-seo-empty-attr-tag": "Fehler: Das Tag &lt;seo&gt; muss zu mindestens einem Meta-Element einen Wert enthalten.",
+	"wiki-seo-empty-attr-parser": "Fehler: Die Parser-Funktion <nowiki>{{#seo:}}</nowiki> muss zu mindestens einem Meta-Element einen Wert enthalten.",
+	"wiki-seo-invalid-generator": "Fehler: $1 ist kein valider Metadatengenerator.",
+	"wiki-seo-missing-page-title": "Fehler: Der angeebene Seitentitel ist nicht valide."
+}

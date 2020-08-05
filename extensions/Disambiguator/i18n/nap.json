@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"C.R."
+		]
+	},
+	"disambig-desc": "Azzecca 'o tag <code><nowiki>__DISAMBIG__</nowiki></code> pe' putè nzegnà [[Special:DisambiguationPages|paggene 'e disambiguaziona]]",
+	"disambiguationpages": "Paggene 'e disambiguaziona",
+	"disambiguationpages-summary": "L'elenco ccà abbascio mmustasse tutt' 'e paggene 'e disambbiguazione 'e {{SITENAME}}.<br />\nNa paggena è trattata comm'a na paggena 'e disambiugguazione si cuntenesse cocche tag accussì: <code><nowiki>__DISAMBIG__</nowiki></code> (o nu tag eguale).",
+	"disambiguationpagelinks": "Paggene cullegate a paggene 'e disambiguaziona",
+	"disambiguationpagelinks-summary": "'E paggene ccà abbascio cunteneno minimo nu link a na paggena 'e disambiguazione.\nChiste putessero avè abbisogno 'e se cullegà a cchiù paggene giuste.<br />\nNa paggena è trattata comm'a na paggena e disambiguaziona si cuntene 'o tag <code><nowiki>__DISAMBIG__</nowiki></code> (o n'aliasse equivalente).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Chest'è na paggena 'e disambiguazione"
+}

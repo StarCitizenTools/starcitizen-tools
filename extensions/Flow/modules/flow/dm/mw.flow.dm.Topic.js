@@ -18,7 +18,7 @@
 		mw.flow.dm.Topic.parent.call( this, config );
 
 		// Mixin constructor
-		mw.flow.dm.List.call( this, config );
+		mw.flow.dm.List.call( this );
 
 		this.setId( id );
 		this.populate( revisionData );
@@ -160,7 +160,7 @@
 	/**
 	 * Set the topic summary
 	 *
-	 * @param {string} Topic summary
+	 * @param {string} summary Topic summary
 	 * @fires summary
 	 */
 	mw.flow.dm.Topic.prototype.setSummary = function ( summary ) {

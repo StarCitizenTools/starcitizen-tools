@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"MGChecker",
+			"Purodha",
+			"Shirayuki",
+			"Umherirrender",
+			"Zoranzoki21"
+		]
+	},
+	"loops-desc": "{{desc|name=Loops|url=https://www.mediawiki.org/wiki/Extension:Loops}}",
+	"loops_max": "Used as error message.",
+	"loops-limitreport-count-limited": "Label for the \"ExtLoops count\" row in the limit report table",
+	"loops-limitreport-count-limited-value": "{{optional}}\nFormat for the \"ExtLoopscount\" row in the limit report table.\n\nParameters:\n* $1 - the usage\n* $2 - the maximum",
+	"loops-limitreport-count-unlimited": "Label for the \"ExtLoops count\" row in the limit report table",
+	"loops-limitreport-count-unlimited-value": "{{optional}}\nFormat for the \"ExtLoopscount\" row in the limit report table.\n\nParameters:\n* $1 - the usage",
+	"loops-config-countlimit": "Configuration setting description of $egLoopsCountLimit",
+	"loops-config-enabledfunctions": "Configuration setting description of $egLoopsEnabledFunctions"
+}

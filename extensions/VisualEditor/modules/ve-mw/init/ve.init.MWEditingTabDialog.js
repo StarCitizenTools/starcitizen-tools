@@ -1,13 +1,13 @@
 /*!
  * VisualEditor user interface MWEditingTabDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 mw.libs.ve = mw.libs.ve || {};
 /**
- * Dialog for allowing new users to change editing tab preferences to VisualEditor.
+ * Dialog for allowing new users to change editing tab preferences.
  *
  * @class
  * @extends OO.ui.MessageDialog
@@ -28,9 +28,7 @@ OO.inheritClass( mw.libs.ve.EditingTabDialog, OO.ui.MessageDialog );
 
 mw.libs.ve.EditingTabDialog.static.name = 'editingtab';
 
-mw.libs.ve.EditingTabDialog.static.size = 'small';
-
-mw.libs.ve.EditingTabDialog.static.verbose = true;
+mw.libs.ve.EditingTabDialog.static.size = 'medium';
 
 mw.libs.ve.EditingTabDialog.static.title = mw.msg( 'visualeditor-editingtabdialog-title' );
 

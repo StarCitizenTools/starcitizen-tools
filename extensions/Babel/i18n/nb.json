@@ -5,7 +5,8 @@
 			"Laaknor",
 			"Nghtwlkr",
 			"Jeblad",
-			"Danmichaelo"
+			"Danmichaelo",
+			"Jon Harald Søby"
 		]
 	},
 	"babel": "Babel brukerinformasjon",
@@ -30,5 +31,9 @@
 	"babel-5-n": "Denne brukeren behersker [[$2|norsk (bokmål)]] på [[$1|profesjonelt]] nivå.",
 	"babel-N-n": "Denne brukeren behersker [[$2|norsk (bokmål)]] på [[$1|morsmålsnivå]].",
 	"babel-template": "Template:Bruker $1",
-	"babel-footer": "Brukere etter språk"
+	"babel-footer": "Brukere etter språk",
+	"apihelp-query+babel-description": "Få informasjon om hvilke språk brukeren kan",
+	"apihelp-query+babel-summary": "Hent informasjon om hvilke språk brukeren kan",
+	"apihelp-query+babel-param-user": "Bruker det skal hentes informasjon om",
+	"apihelp-query+babel-example-1": "Hent Babel-informasjon for brukeren <kbd>Eksempel</kbd>"
 }

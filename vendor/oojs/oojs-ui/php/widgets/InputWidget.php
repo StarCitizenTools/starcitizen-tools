@@ -13,10 +13,6 @@ class InputWidget extends Widget {
 	use TitledElement;
 	use AccessKeyedElement;
 
-	/* Static Properties */
-
-	public static $supportsSimpleLabel = true;
-
 	/* Properties */
 
 	/**
@@ -38,6 +34,7 @@ class InputWidget extends Widget {
 	 * @param string $config['name'] HTML input name (default: '')
 	 * @param string $config['value'] Input value (default: '')
 	 * @param string $config['dir'] The directionality of the input (ltr/rtl)
+	 * @param string $config['inputId'] The value of the input’s HTML `id` attribute.
 	 */
 	public function __construct( array $config = [] ) {
 		// Parent constructor
@@ -70,6 +67,9 @@ class InputWidget extends Widget {
 		if ( isset( $config['dir'] ) ) {
 			$this->setDir( $config['dir'] );
 		}
+		if ( isset( $config['inputId'] ) ) {
+			$this->setInputId( $config['inputId'] );
+		}
 	}
 
 	/**
@@ -89,18 +89,6 @@ class InputWidget extends Widget {
 	 */
 	public function getValue() {
 		return $this->value;
-	}
-
-	/**
-	 * Set the directionality of the input, either RTL (right-to-left) or LTR (left-to-right).
-	 *
-	 * @deprecated since v0.13.1, use #setDir directly
-	 * @param boolean $isRTL Directionality is right-to-left
-	 * @return $this
-	 */
-	public function setRTL( $isRTL ) {
-		$this->setDir( $isRTL ? 'rtl' : 'ltr' );
-		return $this;
 	}
 
 	/**
@@ -154,6 +142,17 @@ class InputWidget extends Widget {
 		return $this;
 	}
 
+	/**
+	 * Set the 'id' attribute of the `<input>` element.
+	 *
+	 * @param string $id The ID of the input element
+	 * @return $this
+	 */
+	public function setInputId( $id ) {
+		$this->input->setAttributes( [ 'id' => $id ] );
+		return $this;
+	}
+
 	public function getConfig( &$config ) {
 		$name = $this->input->getAttribute( 'name' );
 		if ( $name !== null ) {
@@ -161,6 +160,10 @@ class InputWidget extends Widget {
 		}
 		if ( $this->value !== '' ) {
 			$config['value'] = $this->value;
+		}
+		$id = $this->input->getAttribute( 'id' );
+		if ( $id !== null ) {
+			$config['inputId'] = $id;
 		}
 		return parent::getConfig( $config );
 	}

@@ -3,7 +3,6 @@
 namespace Flow\Formatter;
 
 use Flow\Container;
-use Flow\Conversion\Utils;
 use Flow\FlowActions;
 use Flow\Model\Anchor;
 use Flow\Model\PostRevision;
@@ -66,7 +65,7 @@ abstract class AbstractFormatter {
 	 *  have the same kind of links available)
 	 * @return string HTML
 	 */
-	protected function formatTimestamp( array $data, $key = 'timeAndDate', $linkKeys = array( 'header-revision', 'topic-revision', 'post-revision', 'summary-revision' ) ) {
+	protected function formatTimestamp( array $data, $key = 'timeAndDate', $linkKeys = [ 'header-revision', 'topic-revision', 'post-revision', 'summary-revision' ] ) {
 		// Format timestamp: add link
 		$formattedTime = $data['dateFormats'][$key];
 
@@ -79,7 +78,7 @@ abstract class AbstractFormatter {
 			}
 		}
 
-		$class = array( 'mw-changeslist-date' );
+		$class = [ 'mw-changeslist-date' ];
 		if ( $data['isModeratedNotLocked'] ) {
 			$class[] = 'history-deleted';
 		}
@@ -87,11 +86,11 @@ abstract class AbstractFormatter {
 		if ( $anchor instanceof Anchor ) {
 			return Html::rawElement(
 				'span',
-				array( 'class' => $class ),
+				[ 'class' => $class ],
 				$anchor->toHtml( $formattedTime )
 			);
 		} else {
-			return Html::element( 'span', array( 'class' => $class ), $formattedTime );
+			return Html::element( 'span', [ 'class' => $class ], $formattedTime );
 		}
 	}
 
@@ -113,12 +112,12 @@ abstract class AbstractFormatter {
 		}
 		$have = array_combine( $request, $request );
 
-		$formatted = array();
+		$formatted = [];
 		foreach ( $links as $key => $link ) {
 			if ( isset( $have[$key] ) ) {
 				if ( $link instanceof Anchor ) {
 					$formatted[] = $link->toHtml();
-				} elseif( $link instanceof Message ) {
+				} elseif ( $link instanceof Message ) {
 					$formatted[] = $link->escaped();
 				} else {
 					// plain text
@@ -257,7 +256,7 @@ abstract class AbstractFormatter {
 	 */
 	protected function getDescriptionParams( array $data, FlowActions $actions, $changeType ) {
 		$source = $actions->getValue( $changeType, 'history', 'i18n-params' );
-		$params = array();
+		$params = [];
 		foreach ( $source as $param ) {
 			if ( isset( $data['properties'][$param] ) ) {
 				$params[] = $data['properties'][$param];
@@ -295,7 +294,7 @@ abstract class AbstractFormatter {
 		$ownerLink = Linker::link(
 			$row->workflow->getOwnerTitle(),
 			null,
-			array( 'class' => 'mw-title' )
+			[ 'class' => 'mw-title' ]
 		);
 
 		if ( !isset( $data['links']['topic'] ) || !$row->revision instanceof PostRevision ) {

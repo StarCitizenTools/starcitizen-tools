@@ -5,13 +5,16 @@
 			"Mormegil",
 			"Matěj Suchánek",
 			"Danny B.",
-			"Kusurija"
+			"Kusurija",
+			"Dvorapa",
+			"Ilimanaq29"
 		]
 	},
 	"uls-desc": "Nabízí uživateli několik způsobů volby jazyka a úpravy jazykových nastavení",
 	"uls-plang-title-languages": "Jazyky",
 	"ext-uls-select-language-settings-icon-tooltip": "Jazyková nastavení",
 	"ext-uls-undo-language-tooltip-text": "Jazyk změněn z $1",
+	"ext-uls-undo-language-tooltip-text-local": "Jazyk změněn pro tuto wiki. Pro změnu jazyka na všech wiki se podívejte na své [[Special:GlobalPreferences|globální nastavení]].",
 	"ext-uls-language-settings-preferences-link": "Další jazyková nastavení",
 	"uls-betafeature-label": "Kompaktní mezijazykové odkazy",
 	"uls-betafeature-desc": "Zobrazuje kratší verzi seznamu jazyků, obsahující jen jazyky, které jsou pro vás důležité.",
@@ -60,8 +63,7 @@
 	"ext-uls-language-settings-applying": "Provádí se…",
 	"ext-uls-compact-link-count": "$1 {{PLURAL:$1|další|další|dalších}}",
 	"ext-uls-compact-link-info": "Všechny jazyky (počáteční výběr ze společných voleb vás a ostatních)",
-	"apihelp-languagesearch-param-typos": "Počet pravopisných chyb povolených v řetězci pro vyhledávání.",
-	"apihelp-ulslocalization-param-language": "Kód jazyka.",
 	"prefs-languages": "Jazyky",
-	"ext-uls-compact-language-links-preference": "Používat kompaktní seznam jazyků pouze s jazyky pro vás relevantními."
+	"ext-uls-compact-language-links-preference": "Používat [[$1|kompaktní seznam jazyků]] pouze s jazyky pro vás relevantními",
+	"ext-uls-compact-no-results": "Tato stránka není dostupná v jazyce, který jste hledal/a."
 }

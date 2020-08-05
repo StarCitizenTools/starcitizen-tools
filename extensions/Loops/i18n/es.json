@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Armando-Martin"
+		]
+	},
+	"loops-desc": "Funciones de analizador (parser) para realizar bucles",
+	"loops_max": "Se ha realizado el número máximo de bucles"
+}

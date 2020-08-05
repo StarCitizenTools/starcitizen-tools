@@ -2,7 +2,6 @@
 
 namespace Flow\Tests\Formatter;
 
-use Flow\Exception\FlowException;
 use Flow\FlowActions;
 use Flow\Formatter\FormatterRow;
 use Flow\Formatter\RevisionFormatter;
@@ -57,104 +56,103 @@ class RevisionFormatterTest extends PostRevisionTestCase {
 		$postRevisionUnspecified = $this->mockPostRevision();
 		$postRevisionSpecified = $this->mockPostRevision();
 
-		return array(
-			array(
+		return [
+			[
 				'topic-title-html',
 				'fixed-html',
 				null,
 				$topicTitleRevisionUnspecified,
-			),
+			],
 			// Specified for a different revision, so uses canonicalized
 			// version of class default (fixed-html => topic-title-html).
-			array(
+			[
 				'topic-title-html',
 				'topic-title-wikitext',
 				$topicTitleRevisionSpecified->getRevisionId(),
 				$topicTitleRevisionUnspecified,
-			),
-			array(
+			],
+			[
 				'topic-title-wikitext',
 				'html',
 				null,
 				$topicTitleRevisionUnspecified,
-			),
-			array(
+			],
+			[
 				'topic-title-wikitext',
 				'wikitext',
 				null,
 				$topicTitleRevisionUnspecified,
-			),
-			array(
+			],
+			[
 				'fixed-html',
 				'fixed-html',
 				null,
 				$postRevisionUnspecified,
-			),
+			],
 			// We've specified it, but for another rev ID, so it uses the class default
 			// of fixed-html.
-			array(
+			[
 				'fixed-html',
 				'wikitext',
 				$postRevisionSpecified->getRevisionId(),
 				$postRevisionUnspecified,
-			),
-			array(
+			],
+			[
 				'html',
 				'html',
 				null,
 				$postRevisionUnspecified,
-			),
-			array(
+			],
+			[
 				'wikitext',
 				'wikitext',
 				null,
 				$postRevisionUnspecified,
-			),
-			array(
+			],
+			[
 				'topic-title-html',
 				'topic-title-html',
 				null,
 				$topicTitleRevisionUnspecified,
-			),
-			array(
+			],
+			[
 				'topic-title-wikitext',
 				'topic-title-wikitext',
 				null,
 				$topicTitleRevisionUnspecified,
-			),
-			array(
+			],
+			[
 				'topic-title-html',
 				'topic-title-html',
 				$topicTitleRevisionSpecified->getRevisionId(),
 				$topicTitleRevisionSpecified,
-			),
-			array(
+			],
+			[
 				'topic-title-wikitext',
 				'topic-title-wikitext',
 				$topicTitleRevisionSpecified->getRevisionId(),
 				$topicTitleRevisionSpecified,
-			),
-			array(
+			],
+			[
 				'fixed-html',
 				'fixed-html',
 				$postRevisionSpecified->getRevisionId(),
 				$postRevisionSpecified,
-			),
-			array(
+			],
+			[
 				'html',
 				'html',
 				$postRevisionSpecified->getRevisionId(),
 				$postRevisionSpecified,
-			),
-			array(
+			],
+			[
 				'wikitext',
 				'wikitext',
 				$postRevisionSpecified->getRevisionId(),
 				$postRevisionSpecified,
-			),
-		);
+			],
+		];
 	}
-
 
 	/**
 	 * @expectedException \Flow\Exception\FlowException
@@ -171,40 +169,40 @@ class RevisionFormatterTest extends PostRevisionTestCase {
 		$postRevisionSpecified = $this->mockPostRevision();
 		$postRevisionUnspecified = $this->mockPostRevision();
 
-		return array(
-			array(
+		return [
+			[
 				'wikitext',
 				$topicTitleRevisionSpecified->getRevisionId(),
 				$topicTitleRevisionSpecified,
-			),
-			array(
+			],
+			[
 				'topic-title-html',
 				$postRevisionSpecified->getRevisionId(),
 				$postRevisionSpecified,
-			),
-			array(
+			],
+			[
 				'topic-title-html',
 				null,
 				$postRevisionUnspecified,
-			),
-			array(
+			],
+			[
 				'topic-title-wikitext',
 				$postRevisionSpecified->getRevisionId(),
 				$postRevisionSpecified,
-			),
-			array(
+			],
+			[
 				'topic-title-wikitext',
 				null,
 				$postRevisionUnspecified,
-			),
-		);
+			],
+		];
 	}
 
 	/**
 	 * @expectedException \Flow\Exception\FlowException
 	 * @dataProvider setContentFormatInvalidProvider
 	 */
-	public function testSetContentFormatInvalidProvider( $requestedFormat, $revisionId) {
+	public function testSetContentFormatInvalidProvider( $requestedFormat, $revisionId ) {
 		list( $formatter ) = $this->makeFormatter();
 		$formatter->setContentFormat( $requestedFormat, $revisionId );
 	}
@@ -212,16 +210,16 @@ class RevisionFormatterTest extends PostRevisionTestCase {
 	public function setContentFormatInvalidProvider() {
 		$postRevisionSpecified = $this->mockPostRevision();
 
-		return array(
-			array(
+		return [
+			[
 				'fake-format',
 				null
-			),
-			array(
+			],
+			[
 				'another-fake-format',
 				$postRevisionSpecified->getRevisionId()
-			),
-		);
+			],
+		];
 	}
 
 	public function testMockFormatterBasicallyWorks() {
@@ -344,7 +342,7 @@ class RevisionFormatterTest extends PostRevisionTestCase {
 			->will( $this->returnArgument( 0 ) );
 		$templating->expects( $this->any() )
 			->method( 'getContent' )
-			->will( $this->returnCallback( function( $revision, $contentFormat ) {
+			->will( $this->returnCallback( function ( $revision, $contentFormat ) {
 				return $revision->getContent( $contentFormat );
 			} ) );
 
@@ -382,11 +380,10 @@ class RevisionFormatterTest extends PostRevisionTestCase {
 		$ctx = RequestContext::getMain();
 		$ctx->setUser( $this->user );
 
-
 		if ( $returnAll ) {
-			return array( $formatter, $ctx, $permissions, $templating, $usernames, $actions );
+			return [ $formatter, $ctx, $permissions, $templating, $usernames, $actions ];
 		} else {
-			return array( $formatter, $ctx );
+			return [ $formatter, $ctx ];
 		}
 	}
 }

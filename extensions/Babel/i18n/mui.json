@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jawadywn",
+			"Masjawad99"
+		]
+	},
+	"babel": "Informasi pemakék Babel",
+	"babel-desc": "Menambahkan fungsi parser <code>#babel</code> untuk menampilkan kolom kotak pengguna babel secara otomatis dengan kemampuan menggunakan templat yang dikustomisasi",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Pemakék dari basonyo",
+	"babel-autocreate-reason": "Muat kaco bangso [[$1|Babel]] secaro otomatis.",
+	"babel-autocreate-text-levels": "Pemakék di bangso ini pacak bebaso $2 tingkat $1.",
+	"babel-autocreate-text-main": "Pemakék di bangso ini pacak bebaso $1.",
+	"babel-autocreate-user": "Babel AutoCreate",
+	"babel-0": "Pemakék ini [[$1|lum pacak]] bebaso [[$2|$3]].",
+	"babel-1": "Pemakék ini pacak bebaso [[$2|$3]] tingkat [[$1|awal]].",
+	"babel-2": "Pemakék ini pacak bebaso [[$2|$3]] tingkat [[$1|jadilah]].",
+	"babel-3": "Pemakék ini pacak bebaso [[$2|$3]] tingkat [[$1|maju]].",
+	"babel-4": "Pemakék ini pacak bebaso [[$2|$3]] tingkat [[$1|déwo]].",
+	"babel-5": "Pemakék ini pacak bebaso [[$2|$3]] tingkat [[$1|tinggi]] .",
+	"babel-N": "Pemakék ini [[$1|aslinyo]] bebaso [[$2|$3]].",
+	"babel-0-n": "Pemakék ini [[$1|lum pacak]] bebaso [[$2|Pelémbang]].",
+	"babel-1-n": "Pemakék ini pacak bebaso [[$2|Pelémbang]] tingkat [[$1|awal]].",
+	"babel-2-n": "Pemakék ini pacak bebaso [[$2|Pelémbang]] tingkat [[$1|jadilah]].",
+	"babel-3-n": "Pemakék ini pacak bebaso [[$2|Pelémbang]] tingkat [[$1|maju]].",
+	"babel-4-n": "Pemakék ini pacak bebaso [[$2|Pelémbang]] tingkat [[$1|déwo]].",
+	"babel-5-n": "Pemakék ini pacak bebaso [[$2|Pelémbang]] tingkat [[$1|tinggi]] .",
+	"babel-N-n": "Pemakék ini [[$1|aslinyo]] bebaso [[$2|Pelémbang]].",
+	"babel-template": "Pemakék $1",
+	"babel-footer": "Jingok pemakék dari basonyo",
+	"apihelp-query+babel-description": "Gari baso apo yang pacak dipakék pemakék ini",
+	"apihelp-query+babel-summary": "Gari baso apo yang pacak dipakék pemakék ini",
+	"apihelp-query+babel-param-user": "Pemakék yang informasinyo nak dijingok",
+	"apihelp-query+babel-example-1": "Jingok informasi Babel dari pemakék <kbd>Contoh</kbd>"
+}

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWMagicLinkNodeContextItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -34,6 +34,8 @@ ve.ui.MWMagicLinkNodeContextItem.static.name = 'link/mwMagic';
 ve.ui.MWMagicLinkNodeContextItem.static.label = null; // see #setup()
 
 ve.ui.MWMagicLinkNodeContextItem.static.modelClasses = [ ve.dm.MWMagicLinkNode ];
+
+ve.ui.MWMagicLinkNodeContextItem.static.clearable = false;
 
 /* Methods */
 

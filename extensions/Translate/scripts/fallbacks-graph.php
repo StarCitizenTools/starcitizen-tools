@@ -4,8 +4,7 @@
  *
  * @author Niklas Laxström
  *
- * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -44,11 +43,10 @@ $1
 XML;
 
 		$langs = Language::fetchLanguageNames( null, 'mw' );
-		$nodes = $edges = array();
+		$nodes = $edges = [];
 		foreach ( $langs as $code => $name ) {
-
 			$fallbacks = Language::getFallbacksFor( $code );
-			if ( $fallbacks === array( 'en' ) ) {
+			if ( $fallbacks === [ 'en' ] ) {
 				continue;
 			}
 
@@ -57,7 +55,7 @@ XML;
 			$prev = $code;
 			foreach ( $fallbacks as $fb ) {
 				$nodes[$fb] = $this->createNode( $fb );
-				$edges[$fb . $prev] = Xml::element( 'edge', array( 'source' => $prev, 'target' => $fb ) );
+				$edges[$fb . $prev] = Xml::element( 'edge', [ 'source' => $prev, 'target' => $fb ] );
 				$prev = $fb;
 			}
 		}
@@ -68,16 +66,22 @@ XML;
 	}
 
 	protected function createNode( $code ) {
-		return
-			Xml::openElement( 'node', array( 'id' => $code ) )
-			. Xml::openElement( 'data', array( 'key' => 'code' ) )
-			. Xml::openElement( 'y:Shpapenode' )
-			. Xml::element( 'y:NodeLabel', array(), $code )
-			. Xml::closeElement( 'y:Shpapenode' )
+		return Xml::openElement( 'node', [ 'id' => $code ] )
+			. Xml::openElement( 'data', [ 'key' => 'code' ] )
+			. Xml::openElement( 'y:Shapenode' )
+			. Xml::element(
+				'y:Geometry',
+				[ 'height' => 30, 'width' => max( 30, 10 * strlen( $code ) ) ],
+				''
+			)
+			. Xml::element( 'y:NodeLabel', [], $code )
+			. Xml::element( 'y:BorderStyle', [ 'hasColor' => 'false' ], '' )
+			. Xml::element( 'y:Fill', [ 'hasColor' => 'false' ], '' )
+			. Xml::closeElement( 'y:Shapenode' )
 			. Xml::closeElement( 'data' )
 			. Xml::closeElement( 'node' );
 	}
 }
 
-$maintClass = 'FallbacksCompare';
-require_once DO_MAINTENANCE;
+$maintClass = FallbacksCompare::class;
+require_once RUN_MAINTENANCE_IF_MAIN;

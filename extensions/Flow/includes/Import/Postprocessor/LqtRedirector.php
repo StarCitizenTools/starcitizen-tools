@@ -12,9 +12,9 @@ use Flow\Import\TopicImportState;
 use Flow\Model\PostRevision;
 use Flow\Model\UUID;
 use Flow\UrlGenerator;
+use MediaWiki\MediaWikiServices;
 use Title;
 use User;
-use WatchedItem;
 use WikiPage;
 use WikitextContent;
 
@@ -28,7 +28,7 @@ class LqtRedirector implements Postprocessor {
 
 	public function __construct( UrlGenerator $urlGenerator, User $user ) {
 		$this->urlGenerator = $urlGenerator;
-		$this->redirectsToDo = array();
+		$this->redirectsToDo = [];
 		$this->user = $user;
 	}
 
@@ -38,11 +38,11 @@ class LqtRedirector implements Postprocessor {
 
 	public function afterPostImported( TopicImportState $state, IImportPost $post, PostRevision $newPost ) {
 		if ( $post instanceof ImportPost /* LQT */ ) {
-			$this->redirectsToDo[] = array(
+			$this->redirectsToDo[] = [
 				$post->getTitle(),
 				$state->topicWorkflow->getId(),
 				$newPost->getPostId()
-			);
+			];
 		}
 	}
 
@@ -54,15 +54,15 @@ class LqtRedirector implements Postprocessor {
 			$topic->getTitle(),
 			$state->topicWorkflow->getId()
 		);
-		foreach( $this->redirectsToDo as $args ) {
-			call_user_func_array( array( $this, 'doRedirect' ), $args );
+		foreach ( $this->redirectsToDo as $args ) {
+			call_user_func_array( [ $this, 'doRedirect' ], $args );
 		}
 
-		$this->redirectsToDo = array();
+		$this->redirectsToDo = [];
 	}
 
 	public function importAborted() {
-		$this->redirectsToDo = array();
+		$this->redirectsToDo = [];
 	}
 
 	protected function doRedirect( Title $fromTitle, UUID $toTopic, UUID $toPost = null ) {
@@ -79,6 +79,8 @@ class LqtRedirector implements Postprocessor {
 		$summary = wfMessage( 'flow-lqt-redirect-reason' )->plain();
 		$page->doEditContent( $newContent, $summary, EDIT_FORCE_BOT, false, $this->user );
 
-		WatchedItem::duplicateEntries( $fromTitle, $redirectTarget );
+		MediaWikiServices::getInstance()->getWatchedItemStore()->duplicateAllAssociatedEntries(
+			$fromTitle, $redirectTarget
+		);
 	}
 }

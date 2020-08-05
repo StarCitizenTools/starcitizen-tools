@@ -1,20 +1,20 @@
 /*!
  * VisualEditor DataModel InternalList tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.InternalList' );
 
 /* Tests */
 
-QUnit.test( 'getDocument', 1, function ( assert ) {
+QUnit.test( 'getDocument', function ( assert ) {
 	var doc = ve.dm.example.createExampleDocument(),
 		internalList = doc.getInternalList();
 	assert.deepEqual( internalList.getDocument(), doc, 'Returns original document' );
 } );
 
-QUnit.test( 'queueItemHtml/getItemHtmlQueue', 5, function ( assert ) {
+QUnit.test( 'queueItemHtml/getItemHtmlQueue', function ( assert ) {
 	var doc = ve.dm.example.createExampleDocument(),
 		internalList = doc.getInternalList();
 	assert.deepEqual(
@@ -44,19 +44,19 @@ QUnit.test( 'queueItemHtml/getItemHtmlQueue', 5, function ( assert ) {
 	assert.deepEqual( internalList.getItemHtmlQueue(), [ 'Bar', 'Baz', 'Quux' ], 'getItemHtmlQueue returns stored HTML items' );
 } );
 
-QUnit.test( 'convertToData', 2, function ( assert ) {
+QUnit.test( 'convertToData', function ( assert ) {
 	var doc = ve.dm.example.createExampleDocument(),
 		htmlDoc = doc.getHtmlDocument(),
 		internalList = doc.getInternalList(),
 		expectedData = [
 			{ type: 'internalList' },
 			{ type: 'internalItem', attributes: { originalHtml: 'Bar' } },
-			{ type: 'paragraph', internal: { generated: 'wrapper' } },
+			{ type: 'paragraph', internal: { generated: 'wrapper', metaItems: [] } },
 			'B', 'a', 'r',
 			{ type: '/paragraph' },
 			{ type: '/internalItem' },
 			{ type: 'internalItem', attributes: { originalHtml: 'Baz' } },
-			{ type: 'paragraph', internal: { generated: 'wrapper' } },
+			{ type: 'paragraph', internal: { generated: 'wrapper', metaItems: [] } },
 			'B', 'a', 'z',
 			{ type: '/paragraph' },
 			{ type: '/internalItem' },
@@ -76,7 +76,7 @@ QUnit.test( 'convertToData', 2, function ( assert ) {
 	assert.deepEqual( internalList.getItemHtmlQueue(), [], 'Items html is emptied after conversion' );
 } );
 
-QUnit.test( 'clone', 5, function ( assert ) {
+QUnit.test( 'clone', function ( assert ) {
 	var internalListClone, internalListClone2,
 		doc = ve.dm.example.createExampleDocument(),
 		doc2 = ve.dm.example.createExampleDocument(),

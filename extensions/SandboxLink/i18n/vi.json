@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minh Nguyen"
+		]
+	},
+	"sandboxlink-desc": "Thêm liên kết đến chỗ thử cá nhân của người dùng vào trình đơn công cụ cá nhân",
+	"sandboxlink-subpage-name": "thử",
+	"sandboxlink-portlet-label": "Chỗ thử",
+	"tooltip-pt-sandbox": "Chỗ thử riêng của bạn"
+}

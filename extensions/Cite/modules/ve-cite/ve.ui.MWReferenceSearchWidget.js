@@ -1,8 +1,8 @@
 /*!
  * VisualEditor UserInterface MWReferenceSearchWidget class.
  *
- * @copyright 2011-2016 Cite VisualEditor Team and others; see AUTHORS.txt
- * @license The MIT License (MIT); see LICENSE.txt
+ * @copyright 2011-2018 VisualEditor Team's Cite sub-team and others; see AUTHORS.txt
+ * @license MIT
  */
 
 /**
@@ -21,7 +21,7 @@ ve.ui.MWReferenceSearchWidget = function VeUiMWReferenceSearchWidget( config ) {
 	}, config );
 
 	// Parent constructor
-	OO.ui.SearchWidget.call( this, config );
+	ve.ui.MWReferenceSearchWidget.super.call( this, config );
 
 	// Properties
 	this.index = [];
@@ -46,7 +46,7 @@ OO.inheritClass( ve.ui.MWReferenceSearchWidget, OO.ui.SearchWidget );
  */
 ve.ui.MWReferenceSearchWidget.prototype.onQueryChange = function () {
 	// Parent method
-	OO.ui.SearchWidget.prototype.onQueryChange.call( this );
+	ve.ui.MWReferenceSearchWidget.super.prototype.onQueryChange.call( this );
 
 	// Populate
 	this.addResults();
@@ -60,8 +60,8 @@ ve.ui.MWReferenceSearchWidget.prototype.onQueryChange = function () {
 ve.ui.MWReferenceSearchWidget.prototype.setInternalList = function ( internalList ) {
 	var i, iLen, groupNames, groupName, groups = internalList.getNodeGroups();
 
-	if ( this.results.getSelectedItem() ) {
-		this.results.getSelectedItem().setSelected( false );
+	if ( this.results.findSelectedItem() ) {
+		this.results.findSelectedItem().setSelected( false );
 	}
 
 	this.internalList = internalList;
@@ -152,7 +152,7 @@ ve.ui.MWReferenceSearchWidget.prototype.buildIndex = function () {
 			n++;
 			refModel = ve.dm.MWReferenceModel.static.newFromReferenceNode( refNode );
 			view = new ve.ui.MWPreviewElement(
-				refModel.getDocument().getInternalList().getItemNode( refModel.getListIndex() )
+				this.internalList.getItemNode( refModel.getListIndex() )
 			);
 
 			refGroup = refModel.getGroup();
@@ -207,8 +207,7 @@ ve.ui.MWReferenceSearchWidget.prototype.isIndexEmpty = function () {
  */
 ve.ui.MWReferenceSearchWidget.prototype.addResults = function () {
 	var i, len, item, $citation, $name,
-		value = this.query.getValue(),
-		query = value.toLowerCase(),
+		query = this.query.getValue().trim().toLowerCase(),
 		items = [];
 
 	for ( i = 0, len = this.index.length; i < len; i++ ) {

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Giromin Cangiaxo"
+		]
+	},
+	"commonsmetadata-desc": "O l'estende e propietæ \"extmetadata\" do moddulo API pe-e informaçioin in sce-e immaggine, pe includde de informaçioin memorizæ inte paggine de descriçion de l'inmaggine ch'utilizzan i template comunemente in doeuvia insce Wikimedia Commons",
+	"commonsmetadata-trackingcategory-no-license": "File sença liçençia lezibbile da 'na macchina",
+	"commonsmetadata-trackingcategory-no-license-desc": "O file o no g'ha nisciun template de liçençia  [{{MediaWiki:Commonsmetadata-doc-url}} lezibbile da 'na macchina].",
+	"commonsmetadata-trackingcategory-no-description": "File sença descriçion lezibbile da 'na macchina",
+	"commonsmetadata-trackingcategory-no-description-desc": "O file o no g'ha arcun template d'informaçion [{{MediaWiki:Commonsmetadata-doc-url}} lezibbile da 'na macchina], ò no l'è compilou o campo de descriçion.",
+	"commonsmetadata-trackingcategory-no-author": "File sença aotô lezibbile da 'na macchina",
+	"commonsmetadata-trackingcategory-no-author-desc": "O file o no g'ha arcun template d'informazion [{{MediaWiki:Commonsmetadata-doc-url}} lezibbile da 'na macchina], ò no l'è compilou o campo aotô.",
+	"commonsmetadata-trackingcategory-no-source": "File sença fonte lezibile da 'na macchina",
+	"commonsmetadata-trackingcategory-no-source-desc": "O file o no g'ha arcun template d'informaçion [{{MediaWiki:Commonsmetadata-doc-url}} lezibbile da 'na macchina], ò no l'è compilou o campo da fonte."
+}

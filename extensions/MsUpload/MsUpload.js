@@ -17,20 +17,29 @@
 		galleryArray: [],
 		insertGallery: function () {
 			var galleryText = 'File:' + MsUpload.galleryArray.join( '\nFile:' );
-			mw.toolbar.insertTags( '<gallery>\n' + galleryText + '\n</gallery>\n', '', '', '' );
+			MsUpload.insertText( '<gallery>\n' + galleryText + '\n</gallery>\n' );
 		},
 
 		filesArray: [],
 		insertFiles: function () {
-			mw.toolbar.insertTags( '[[File:' + MsUpload.filesArray.join( ']]\n[[File:' ) + ']]\n', '', '', '' );
+			MsUpload.insertText( '[[File:' + MsUpload.filesArray.join( ']]\n[[File:' ) + ']]\n' );
 		},
 
 		insertLinks: function () {
 			if ( msuVars.useMsLinks === true ) {
-				mw.toolbar.insertTags( '*{{#l:' + MsUpload.filesArray.join( '}}\n*{{#l:' ) + '}}\n', '', '', '' );
+				MsUpload.insertText( '*{{#l:' + MsUpload.filesArray.join( '}}\n*{{#l:' ) + '}}\n' );
 			} else {
-				mw.toolbar.insertTags( '*[[:File:' + MsUpload.filesArray.join( ']]\n*[[:File:' ) + ']]\n', '', '', '' );
+				MsUpload.insertText( '*[[:File:' + MsUpload.filesArray.join( ']]\n*[[:File:' ) + ']]\n' );
 			}
+		},
+
+		/**
+		 * Add text to selection in the main textarea.
+		 *
+		 * @param {string} text
+		 */
+		insertText: function ( text ) {
+			$( '#wpTextbox1' ).textSelection( 'encapsulateSelection', { pre: text } );
 		},
 
 		unconfirmedReplacements: 0,
@@ -69,7 +78,11 @@
 						$( fileItem.warning ).find( 'div.thumb' ).hide();
 					} );
 
-					// If a file with the same name already exists, add a checkbox to confirm the replacement
+					/**
+					 * If a file with the same name already exists, add a checkbox to confirm the replacement
+					 * This checkbox will also appear when the file name differs only in the file extension
+					 * so the confirmation message must be kept generic enough
+					 */
 					if ( msuVars.confirmReplace ) {
 
 						MsUpload.unconfirmedReplacements++;
@@ -86,7 +99,7 @@
 							}
 							uploader.trigger( 'CheckFiles' );
 						} );
-						$( '<label>' ).append( checkbox ).append( mw.msg( 'msu-replace-file' ) ).appendTo( fileItem.warning );
+						$( '<label>' ).append( checkbox ).append( mw.msg( 'msu-continue' ) ).appendTo( fileItem.warning );
 					}
 					break;
 			}
@@ -267,11 +280,11 @@
 				runtimes: 'html5,flash,silverlight,html4',
 				browse_button: 'msupload-select',
 				container: 'msupload-container',
-				max_file_size: '100mb',
+				max_file_size: msuVars.uploadsize,
 				drop_element: 'msupload-dropzone',
 				url: msuVars.scriptPath + '/api.php',
-				flash_swf_url: msuVars.scriptPath + '/extensions/MsUpload/plupload/Moxie.swf',
-				silverlight_xap_url: msuVars.path + '/extensions/MsUpload/plupload/Moxie.xap'
+				flash_swf_url: msuVars.flash_swf_url,
+				silverlight_xap_url: msuVars.silverlight_xap_url
 			} );
 
 			// Bind events
@@ -360,7 +373,7 @@
 				token: mw.user.tokens.get( 'editToken' ),
 				action: 'upload',
 				ignorewarnings: true,
-				comment: mw.msg( 'msu-comment' ),
+				comment: mw.message( 'msu-comment' ).plain(),
 				format: 'json'
 			}; // Set multipart_params
 			$( '#' + file.id + ' .file-progress-state' ).text( '0%' );
@@ -404,9 +417,9 @@
 					}
 					$( '<a>' ).text( mw.msg( 'msu-insert-link' ) ).click( function () {
 						if ( msuVars.useMsLinks === true ) {
-							mw.toolbar.insertTags( '{{#l:' + file.name + '}}', '', '', '' ); // Insert link
+							MsUpload.insertText( '{{#l:' + file.name + '}}' ); // Insert link
 						} else {
-							mw.toolbar.insertTags( '[[:File:' + file.name + ']]', '', '', '' ); // Insert link
+							MsUpload.insertText( '[[:File:' + file.name + ']]' ); // Insert link
 						}
 					} ).appendTo( file.li );
 					if ( file.group === 'image' ) {
@@ -416,12 +429,12 @@
 						}
 						$( '<span>' ).text( ' | ' ).appendTo( file.li );
 						$( '<a>' ).text( mw.msg( 'msu-insert-image' ) ).click( function () {
-							mw.toolbar.insertTags( '[[File:' + file.name + msuVars.imgParams + ']]', '', '', '' );
+							MsUpload.insertText( '[[File:' + file.name + msuVars.imgParams + ']]' );
 						} ).appendTo( file.li );
 					} else if ( file.group === 'video' ) {
 						$( '<span>' ).text( ' | ' ).appendTo( file.li );
 						$( '<a>' ).text( mw.msg( 'msu-insert-video' ) ).click( function () {
-							mw.toolbar.insertTags( '[[File:' + file.name + ']]', '', '', '' );
+							MsUpload.insertText( '[[File:' + file.name + ']]' );
 						} ).appendTo( file.li );
 					}
 					MsUpload.filesArray.push( file.name );
@@ -485,11 +498,8 @@
 			if ( $.inArray( mw.config.get( 'wgAction' ), [ 'edit', 'submit' ] ) !== -1 ) {
 				mw.loader.using( 'user.options', function () {
 					if ( mw.user.options.get( 'usebetatoolbar' ) ) {
-						mw.loader.using( 'ext.wikiEditor.toolbar', function () {
-							$.when(
-								mw.loader.using( 'ext.wikiEditor.toolbar' ), $.ready
-							).then( MsUpload.createUploader );
-						} );
+						$.when( mw.loader.using( 'ext.wikiEditor' ), $.ready )
+							.then( MsUpload.createUploader );
 					}
 				} );
 			}

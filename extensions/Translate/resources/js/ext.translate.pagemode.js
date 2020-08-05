@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 	/**
 	 * Page mode plugin
@@ -10,10 +10,16 @@
 	 * Example usage:
 	 *
 	 * $( 'div.pagemode' ).pagemode( {
-	 *	message: messageObject, // Mandatory message object
-	 *	sourcelangcode: 'en', // Mandatory source language code
-	 *	targetlangcode: 'hi' // Mandatory target language code
+	 *     message: messageObject, // Mandatory message object
+	 *     sourcelangcode: 'en', // Mandatory source language code
+	 *     targetlangcode: 'hi' // Mandatory target language code
 	 * } );
+	 *
+	 * @param {Element} element
+	 * @param {Object} options
+	 * @param {Object} options.message
+	 * @param {string} options.sourcelangcode Language code.
+	 * @param {string} options.targetlangcode Language code.
 	 */
 	function PageMode( element, options ) {
 		this.$message = $( element );
@@ -30,6 +36,8 @@
 		 */
 		init: function () {
 			var pagemode = this;
+
+			this.message.proofreadable = false;
 
 			this.render();
 
@@ -91,9 +99,7 @@
 							.attr( 'title', mw.msg( 'translate-edit-title', this.message.key ) )
 							.addClass( 'tux-pagemode-edit' )
 					)
-			)
-
-			.addClass( this.message.properties.status );
+			).addClass( this.message.properties.status );
 		},
 
 		/**
@@ -127,4 +133,4 @@
 	};
 
 	$.fn.pagemode.Constructor = PageMode;
-}( jQuery, mediaWiki ) );
+}() );

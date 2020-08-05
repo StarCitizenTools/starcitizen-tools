@@ -1,0 +1,49 @@
+# @todo expand
+!! functionhooks
+var
+!! endfunctionhooks
+
+!! test
+#vardefine, #vardefineecho and #var
+!! input
+{{#vardefine: a | Test }}
+"{{#var: a }}"
+"{{#vardefineecho: a | Test 2 }}, {{#var: a }}"
+!!result
+<p>"Test"
+"Test 2, Test 2"
+</p>
+!! end
+
+!! test
+#varexists
+!! input
+{{#varexists: a }}{{#vardefine: a }}
+"{{#varexists: a }}"
+!!result
+<p>"1"
+</p>
+!! end
+
+!! test
+#var_final
+!! input
+"{{#var_final: a }}"
+{{#vardefine: a | something }}"{{#var: a }}"
+{{#vardefine: a | final }}"{{#var_final: a }}"
+!!result
+<p>"final"
+"something"
+"final"
+</p>
+!! end
+
+!! test
+Variables should not be reset on special page inclusion (old bug, solved in Variables 2.0)
+!! input
+{{#vardefine: a | 1 }}{{#vardefine: | {{Special:AllPages}} }}
+"{{#var: a }}"
+!!result
+<p>"1"
+</p>
+!! end

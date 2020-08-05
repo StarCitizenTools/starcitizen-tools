@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Raimond Spekking",
+			"Shirayuki",
+			"Umherirrender",
+			"Robby",
+			"Amire80"
+		]
+	},
+	"relatedarticles-desc": "{{desc|name=Related Articles|url=https://www.mediawiki.org/wiki/Extension:RelatedArticles}}",
+	"relatedarticles-read-more-heading": "The heading of a section added at the end of the page, that lists automatically-selected related pages."
+}

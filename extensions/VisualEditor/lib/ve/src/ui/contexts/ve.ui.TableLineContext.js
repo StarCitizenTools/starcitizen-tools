@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Table Context class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -16,7 +16,6 @@
  * @param {ve.ce.TableNode} tableNode
  * @param {string} itemGroup Tool group to use, 'col' or 'row'
  * @param {Object} [config] Configuration options
- * @cfg {string} [indicator] Indicator to use on button
  */
 ve.ui.TableLineContext = function VeUiTableLineContext( tableNode, itemGroup, config ) {
 	config = config || {};
@@ -27,18 +26,19 @@ ve.ui.TableLineContext = function VeUiTableLineContext( tableNode, itemGroup, co
 	// Properties
 	this.tableNode = tableNode;
 	this.itemGroup = itemGroup;
-	this.indicator = new OO.ui.IndicatorWidget( {
-		classes: [ 've-ui-tableLineContext-indicator' ],
-		indicator: itemGroup === 'col' ? 'down' : 'next'
+	this.icon = new OO.ui.IconWidget( {
+		icon: itemGroup === 'col' ? 'expand' : 'next'
 	} );
 	this.popup = new OO.ui.PopupWidget( {
 		classes: [ 've-ui-tableLineContext-menu' ],
 		$container: this.surface.$element,
+		$floatableContainer: this.icon.$element,
+		position: itemGroup === 'col' ? 'below' : 'after',
 		width: 180
 	} );
 
 	// Events
-	this.indicator.$element.on( 'mousedown', this.onIndicatorMouseDown.bind( this ) );
+	this.icon.$element.on( 'mousedown', this.onIconMouseDown.bind( this ) );
 	this.onDocumentMouseDownHandler = this.onDocumentMouseDown.bind( this );
 
 	// Initialization
@@ -48,7 +48,7 @@ ve.ui.TableLineContext = function VeUiTableLineContext( tableNode, itemGroup, co
 	// * ve-ui-tableLineContext-row
 	this.$element
 		.addClass( 've-ui-tableLineContext ve-ui-tableLineContext-' + itemGroup )
-		.append( this.indicator.$element, this.popup.$element );
+		.append( this.icon.$element, this.popup.$element );
 	// Visibility is handled by the table overlay
 	this.toggle( true );
 };
@@ -94,11 +94,11 @@ ve.ui.TableLineContext.prototype.onContextItemCommand = function () {
 };
 
 /**
- * Handle mouse down events on the indicator
+ * Handle mouse down events on the icon
  *
  * @param {jQuery.Event} e Mouse down event
  */
-ve.ui.TableLineContext.prototype.onIndicatorMouseDown = function ( e ) {
+ve.ui.TableLineContext.prototype.onIconMouseDown = function ( e ) {
 	e.preventDefault();
 	this.toggleMenu();
 };
@@ -115,6 +115,15 @@ ve.ui.TableLineContext.prototype.onDocumentMouseDown = function ( e ) {
 };
 
 /**
+ * Handle model select events
+ *
+ * @param {ve.dm.Selection} selection
+ */
+ve.ui.TableLineContext.prototype.onModelSelect = function () {
+	this.toggleMenu();
+};
+
+/**
  * @inheritdoc
  */
 ve.ui.TableLineContext.prototype.toggleMenu = function ( show ) {
@@ -126,7 +135,7 @@ ve.ui.TableLineContext.prototype.toggleMenu = function ( show ) {
 	this.popup.toggle( show );
 	if ( this.popup.isVisible() ) {
 		this.tableNode.setEditing( false );
-		surfaceModel.connect( this, { select: 'toggleMenu' } );
+		surfaceModel.connect( this, { select: 'onModelSelect' } );
 		surfaceView.$document.on( 'mousedown', this.onDocumentMouseDownHandler );
 		dir = surfaceView.getSelection().getDirection();
 		this.$element
@@ -137,6 +146,9 @@ ve.ui.TableLineContext.prototype.toggleMenu = function ( show ) {
 		surfaceView.$document.off( 'mousedown', this.onDocumentMouseDownHandler );
 	}
 
-	// Parent method - call after selection has been possible modified above
+	// Parent method - call after selection has been possibly modified above
 	ve.ui.TableLineContext.super.prototype.toggleMenu.call( this, show );
+
+	// Update popup positioning after the parent method fills in its contents
+	this.popup.position();
 };

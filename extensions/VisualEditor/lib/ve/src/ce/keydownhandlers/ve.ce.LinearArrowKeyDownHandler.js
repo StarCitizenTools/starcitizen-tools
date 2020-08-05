@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable linear arrow key down handler
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -25,7 +25,10 @@ OO.inheritClass( ve.ce.LinearArrowKeyDownHandler, ve.ce.KeyDownHandler );
 
 ve.ce.LinearArrowKeyDownHandler.static.name = 'linearArrow';
 
-ve.ce.LinearArrowKeyDownHandler.static.keys = [ OO.ui.Keys.UP, OO.ui.Keys.DOWN, OO.ui.Keys.LEFT, OO.ui.Keys.RIGHT ];
+ve.ce.LinearArrowKeyDownHandler.static.keys = [
+	OO.ui.Keys.UP, OO.ui.Keys.DOWN, OO.ui.Keys.LEFT, OO.ui.Keys.RIGHT,
+	OO.ui.Keys.HOME, OO.ui.Keys.END, OO.ui.Keys.PAGEUP, OO.ui.Keys.PAGEDOWN
+];
 
 ve.ce.LinearArrowKeyDownHandler.static.supportedSelections = [ 'linear' ];
 
@@ -35,8 +38,12 @@ ve.ce.LinearArrowKeyDownHandler.static.supportedSelections = [ 'linear' ];
  * @inheritdoc
  */
 ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
-	var nativeRange, collapseNode, collapseOffset, direction, directionality, upOrDown,
+	var nativeRange, collapseNode, collapseOffset, direction, directionality,
 		startFocusNode, startFocusOffset,
+		isBlockMove = e.keyCode === OO.ui.Keys.UP || e.keyCode === OO.ui.Keys.DOWN ||
+			e.keyCode === OO.ui.Keys.PAGEUP || e.keyCode === OO.ui.Keys.PAGEDOWN ||
+			e.keyCode === OO.ui.Keys.HOME || e.keyCode === OO.ui.Keys.END,
+		keyBlockDirection = e.keyCode === OO.ui.Keys.DOWN || e.keyCode === OO.ui.Keys.PAGEDOWN || e.keyCode === OO.ui.Keys.END ? 1 : -1,
 		range = surface.model.getSelection().getRange();
 
 	// TODO: onDocumentKeyDown did this already
@@ -44,20 +51,18 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 	// TODO: onDocumentKeyDown did this already
 	surface.surfaceObserver.pollOnce();
 
-	upOrDown = e.keyCode === OO.ui.Keys.UP || e.keyCode === OO.ui.Keys.DOWN;
-
 	if ( surface.focusedBlockSlug ) {
 		// Block level selection, so directionality is just css directionality
-		if ( upOrDown ) {
-			direction = e.keyCode === OO.ui.Keys.DOWN ? 1 : -1;
+		if ( isBlockMove ) {
+			direction = keyBlockDirection;
 		} else {
 			directionality = $( surface.focusedBlockSlug ).css( 'direction' );
-			/*jshint bitwise:false */
+			// eslint-disable-next-line no-bitwise
 			if ( e.keyCode === OO.ui.Keys.LEFT ^ directionality === 'rtl' ) {
-				// leftarrow in ltr, or rightarrow in rtl
+				// Left arrow in ltr, or right arrow in rtl
 				direction = -1;
 			} else {
-				// leftarrow in rtl, or rightarrow in ltr
+				// Left arrow in rtl, or right arrow in ltr
 				direction = 1;
 			}
 		}
@@ -74,16 +79,16 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 	}
 
 	if ( surface.focusedNode ) {
-		if ( upOrDown ) {
-			direction = e.keyCode === OO.ui.Keys.DOWN ? 1 : -1;
+		if ( isBlockMove ) {
+			direction = keyBlockDirection;
 		} else {
 			directionality = surface.getFocusedNodeDirectionality();
-			/*jshint bitwise:false */
+			// eslint-disable-next-line no-bitwise
 			if ( e.keyCode === OO.ui.Keys.LEFT ^ directionality === 'rtl' ) {
-				// leftarrow in ltr, or rightarrow in rtl
+				// Left arrow in ltr, or right arrow in rtl
 				direction = -1;
 			} else {
-				// leftarrow in rtl, or rightarrow in ltr
+				// Left arrow in rtl, or right arrow in ltr
 				direction = 1;
 			}
 		}
@@ -109,6 +114,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 			// edge of the focusedNode in the direction of motion (so the selection
 			// always grows). This means that clicking on the focusableNode then
 			// modifying the selection will always include the node.
+			// eslint-disable-next-line no-bitwise
 			if ( direction === -1 ^ range.isBackwards() ) {
 				range = range.flip();
 			}
@@ -117,8 +123,8 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 			// Move to start/end of node in the model in DM (and DOM)
 			range = new ve.Range( direction === 1 ? range.end : range.start );
 			surface.model.setLinearSelection( range );
-			if ( !upOrDown ) {
-				// un-shifted left/right: we've already moved so preventDefault
+			if ( !isBlockMove ) {
+				// Un-shifted left/right: we've already moved so preventDefault
 				e.preventDefault();
 				return true;
 			}
@@ -132,7 +138,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 		// is backwards, then use "collapse to anchor - observe - expand".
 		collapseNode = surface.nativeSelection.anchorNode;
 		collapseOffset = surface.nativeSelection.anchorOffset;
-	} else if ( e.shiftKey && !range.isCollapsed() && upOrDown ) {
+	} else if ( e.shiftKey && !range.isCollapsed() && isBlockMove ) {
 		// If selection is expanded and cursoring is up/down, use
 		// "collapse to focus - observe - expand" to work round quirks.
 		collapseNode = surface.nativeSelection.focusNode;
@@ -165,10 +171,10 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 
 		if ( viewNode.isFocusable() ) {
 			// We've landed in a focusable node; fixup the range
-			if ( upOrDown ) {
+			if ( isBlockMove ) {
 				// The intended direction is clear, even if the cursor did not move
 				// or did something completely preposterous
-				afterDirection = e.keyCode === OO.ui.Keys.DOWN ? 1 : -1;
+				afterDirection = keyBlockDirection;
 			} else {
 				// Observe which way the cursor moved
 				afterDirection = ve.compareDocumentOrder(
@@ -180,8 +186,8 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 			}
 			newRange = (
 				afterDirection > 0 ?
-				viewNode.getOuterRange() :
-				viewNode.getOuterRange().flip()
+					viewNode.getOuterRange() :
+					viewNode.getOuterRange().flip()
 			);
 		} else {
 			// Check where the range has moved to

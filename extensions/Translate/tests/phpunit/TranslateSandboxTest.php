@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -13,10 +13,10 @@
 class TranslateSandboxTest extends MediaWikiTestCase {
 	protected function setUp() {
 		parent::setUp();
-		$this->setMwGlobals( array(
+		$this->setMwGlobals( [
 			'wgTranslateUseSandbox' => true,
 			'wgTranslateSandboxPromotedGroup' => 'translator',
-		) );
+		] );
 
 		// Make sure the hooks are installed even if $wgTranslateUseSandbox is false.
 		TranslateHooks::setupTranslate();
@@ -28,7 +28,7 @@ class TranslateSandboxTest extends MediaWikiTestCase {
 
 		$groups = array_unique( $user->getGroups() );
 
-		$this->assertSame( array( 'translate-sandboxed' ), $groups, 'User is in the sandboxed group' );
+		$this->assertSame( [ 'translate-sandboxed' ], $groups, 'User is in the sandboxed group' );
 	}
 
 	public function testDeleteUser() {
@@ -37,13 +37,10 @@ class TranslateSandboxTest extends MediaWikiTestCase {
 		$this->assertFalse( $user->isLoggedIn(), 'User no longer exists' );
 	}
 
-	/**
-	 * @expectedException MWException
-	 * @expectedExceptionMessage Not a sandboxed user
-	 */
 	public function testDeleteUserPromoted() {
 		$user = TranslateSandbox::addUser( 'Test user3', 'test@blackhole.io', 'test password' );
 		TranslateSandbox::promoteUser( $user );
+		$this->setExpectedException( MWException::class, 'Not a sandboxed user' );
 		TranslateSandbox::deleteUser( $user );
 	}
 

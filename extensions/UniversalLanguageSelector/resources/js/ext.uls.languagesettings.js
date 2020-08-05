@@ -17,7 +17,7 @@
  * @licence MIT License
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var closeRow, settingsMenu, settingsPanel, windowTemplate, panelsRow, buttonsRow;
@@ -33,8 +33,8 @@
 	settingsPanel = '<div id="languagesettings-settings-panel" class="eight columns">' +
 		'</div>';
 	// Apply and Cancel buttons
-	buttonsRow = '<div class="row language-settings-buttons">' +
-		'<div class="eleven columns">' +
+	buttonsRow = '<div class="row collapse language-settings-buttons">' +
+		'<div class="twelve columns">' +
 		'<button class="mw-ui-button uls-settings-cancel" data-i18n="ext-uls-language-settings-cancel"></button>' +
 		'<button class="mw-ui-button mw-ui-progressive active uls-settings-apply" data-i18n="ext-uls-language-settings-apply" disabled></button>' +
 		'</div>' +
@@ -44,7 +44,7 @@
 		settingsMenu +
 		settingsPanel +
 		'</div>';
-	windowTemplate = '<div style="display: block;" id="language-settings-dialog" class="grid uls-menu uls-wide">' +
+	windowTemplate = '<div style="display: block;" id="language-settings-dialog" class="language-settings-dialog grid uls-menu uls-wide">' +
 		closeRow +
 		panelsRow +
 		buttonsRow +
@@ -74,18 +74,27 @@
 
 		// Register all event listeners to the ULS language settings here.
 		listen: function () {
-			this.$element.on( 'click', $.proxy( this.click, this ) );
+			this.$element.on( 'click', this.click.bind( this ) );
 
 			this.$window.find( '#languagesettings-close, button.uls-settings-cancel' )
-				.on( 'click', $.proxy( mw.hook( 'mw.uls.settings.cancel' ).fire, this ) );
+				.on( 'click', mw.hook( 'mw.uls.settings.cancel' ).fire.bind( this ) );
 			this.$window.find( 'button.uls-settings-apply' )
-				.on( 'click', $.proxy( mw.hook( 'mw.uls.settings.apply' ).fire, this ) );
+				.on( 'click', mw.hook( 'mw.uls.settings.apply' ).fire.bind( this ) );
 			// Hide the window when clicked outside
-			$( 'html' ).click( $.proxy( this.hide, this ) );
+			$( 'html' ).on( 'click', this.hide.bind( this ) );
 
 			// ... but when clicked on window do not hide.
 			this.$window.on( 'click', function ( event ) {
 				event.stopPropagation();
+			} );
+
+			// Map Escape to same action as the close button. This is keyup (and not keydown)
+			// because ULS also listens to keyup and we need to stop propagation.
+			this.$window.on( 'keyup', function ( event ) {
+				if ( event.which === 27 ) {
+					event.stopPropagation();
+					mw.hook( 'mw.uls.settings.cancel' ).fire();
+				}
 			} );
 		},
 
@@ -96,18 +105,14 @@
 
 			// Get the name of all registered modules and list them in left side menu.
 			// Sort the modules based on id
-			modules = $.map( $.fn.languagesettings.modules, function ( element, index ) {
-				return index;
-			} ).sort();
-			$.each( modules, function ( index, moduleName ) {
-				if ( $.fn.languagesettings.modules.hasOwnProperty( moduleName ) ) {
-					if ( !defaultModule ) {
-						defaultModule = moduleName;
-					}
-
-					// Call render function on the current setting module.
-					languageSettings.initModule( moduleName, defaultModule === moduleName );
+			modules = Object.keys( $.fn.languagesettings.modules ).sort();
+			modules.forEach( function ( moduleName ) {
+				if ( !defaultModule ) {
+					defaultModule = moduleName;
 				}
+
+				// Call render function on the current setting module.
+				languageSettings.initModule( moduleName, defaultModule === moduleName );
 			} );
 		},
 
@@ -130,7 +135,7 @@
 			$settingsText = $( '<span>' )
 				.addClass( 'settings-text' )
 				.attr( 'data-i18n', module.descriptionI18n );
-			$settingsLink = $( '<div>' )
+			$settingsLink = $( '<button>' )
 				.addClass( moduleName + '-settings-block menu-section' )
 				.prop( 'id', moduleName + '-panel-trigger' )
 				.data( 'module', module )
@@ -149,7 +154,9 @@
 				var $this = $( this );
 
 				$this.data( 'module' ).render();
-				languageSettings.$window.scrollIntoView();
+				if ( languageSettings.$window.is( ':visible' ) ) {
+					languageSettings.$window.scrollIntoView();
+				}
 				$settingsMenuItems.find( '.menu-section' ).removeClass( 'active' );
 				$this.addClass( 'active' );
 			} );
@@ -157,8 +164,8 @@
 			this.modules[ moduleName ] = module;
 
 			// Register cancel and apply hooks
-			mw.hook( 'mw.uls.settings.cancel' ).add( $.proxy( module.cancel, module ) );
-			mw.hook( 'mw.uls.settings.apply' ).add( $.proxy( module.apply, module ) );
+			mw.hook( 'mw.uls.settings.cancel' ).add( module.cancel.bind( module ) );
+			mw.hook( 'mw.uls.settings.apply' ).add( module.apply.bind( module ) );
 		},
 
 		position: function () {
@@ -182,16 +189,18 @@
 				this.initialized = true;
 			}
 			// Close other modal windows which listen to click events outside them
-			$( 'html' ).click();
+			$( 'html' ).trigger( 'click' );
 			this.i18n();
 			// Every time we show this window, make sure the current
 			// settings panels is up-to-date. So just click on active menu item.
-			this.$window.find( '.settings-menu-items > .active' ).click();
+			this.$window.find( '.settings-menu-items > .active' ).trigger( 'click' );
 
 			this.shown = true;
 			this.$window.show();
 			this.visible();
 			this.$window.scrollIntoView();
+			// For keyboard navigation, put the focus on an element inside the dialog
+			this.$window.find( '.menu-section.active' ).trigger( 'focus' );
 		},
 
 		/**
@@ -301,4 +310,5 @@
 	};
 
 	$.fn.languagesettings.Constructor = LanguageSettings;
-}( jQuery, mediaWiki ) );
+
+}() );

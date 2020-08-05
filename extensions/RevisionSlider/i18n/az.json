@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Serkanland"
+		]
+	},
+	"revisionslider": "TarixçəSürüşdürcüsü",
+	"revisionslider-desc": "Səhifənin tarixçələri arasındakı fərqləri sürüşdürərək görməyə imkan verir.",
+	"revisionslider-toggle-label": "Tarixçəni yüklə",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|bayt|bayt}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bayt|bayt}}",
+	"revisionslider-label-date": "Tarix",
+	"revisionslider-label-page-size": "Səhifə ölçüsü",
+	"revisionslider-label-change-size": "Dəyişiklik ölçüsü",
+	"revisionslider-label-comment": "Şərh",
+	"revisionslider-label-username": "{{GENDER:$1|İstifadəçi adı}}",
+	"revisionslider-minoredit": "Bu kiçik redaktədir",
+	"revisionslider-loading-failed": "Tarixçə sürüşdürücüsü yüklənmədi",
+	"revisionslider-toggle-title-expand": "Tarixçə sürüşdürücüsünü aç",
+	"revisionslider-toggle-title-collapse": "Tarixçə sürüşdürücüsünü yığ",
+	"revisionslider-turn-on-auto-expand-title": "Tarixçə sürüşdürücüsü həmişə açıq olsun",
+	"revisionslider-turn-off-auto-expand-title": "Tarixçə sürüşdürücüsünü avtomatik açıq olmasın",
+	"revisionslider-arrow-tooltip-newer": "Daha yeni tarixçə fərqlərini gör",
+	"revisionslider-arrow-tooltip-older": "Daha köhnə tarixçə fərqlərini gör",
+	"revisionslider-show-help-tooltip": "Köməkçi mətni gör",
+	"revisionslider-tutorial": "Tarixçə sürüşdürücüsü məşğələsi",
+	"revisionslider-previous-dialog": "Əvvəlki",
+	"revisionslider-next-dialog": "Sonrakı",
+	"revisionslider-close-dialog": "Bağla"
+}

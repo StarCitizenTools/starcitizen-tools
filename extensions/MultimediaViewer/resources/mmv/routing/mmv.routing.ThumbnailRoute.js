@@ -17,16 +17,17 @@
 
 ( function ( mw, oo ) {
 	/**
-	 * @class mw.mmv.routing.ThumbnailRoute
-	 * @extends mw.mmv.routing.Route
 	 * Route for a specific thumbnail on the current page. The thumbnail must be that of a wiki
 	 * file (can't be e.g. an external image); can be a file from a remote repo though.
+	 *
+	 * @class mw.mmv.routing.ThumbnailRoute
+	 * @extends mw.mmv.routing.Route
 	 * @constructor
 	 * @param {mw.Title} fileTitle the name of the image
 	 */
 	function ThumbnailRoute( fileTitle ) {
 		if ( !fileTitle ) {
-			throw 'mw.mmv.routing.ThumbnailRoute: fileTitle parameter is required';
+			throw new Error( 'mw.mmv.routing.ThumbnailRoute: fileTitle parameter is required' );
 		}
 		this.fileTitle = fileTitle;
 	}

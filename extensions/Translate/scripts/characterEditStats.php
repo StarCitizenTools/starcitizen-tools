@@ -3,8 +3,8 @@
  * Show number of characters translated over a given period of time.
  *
  * @author Santhosh Thottingal
- * @copyright Copyright 2013 Santhosh Thottingal
- * @license GPL-2.0+
+ * @copyright Copyright © 2013 Santhosh Thottingal
+ * @license GPL-2.0-or-later
  * @file
  * @ingroup Script Stats
  */
@@ -48,7 +48,7 @@ class CharacterEditStats extends Maintenance {
 		$days = (int)$this->getOption( 'days', 30 );
 		$top = (int)$this->getOption( 'top', -1 );
 
-		$namespaces = array();
+		$namespaces = [];
 		if ( $this->hasOption( 'ns' ) ) {
 			$input = explode( ',', $this->getOption( 'ns' ) );
 
@@ -65,7 +65,7 @@ class CharacterEditStats extends Maintenance {
 		$rows = self::getRevisionsFromHistory( $days, $namespaces );
 
 		// Get counts for edits per language code after filtering out edits by FuzzyBot
-		$codes = array();
+		$codes = [];
 
 		foreach ( $rows as $_ ) {
 			// Filter out edits by $wgTranslateFuzzyBotName
@@ -109,26 +109,42 @@ class CharacterEditStats extends Maintenance {
 	}
 
 	private function getRevisionsFromHistory( $days, array $namespaces ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$cutoff = $dbr->addQuotes( $dbr->timestamp( time() - $days * 24 * 3600 ) );
 
 		// The field renames are to be compatible with recentchanges table query
-		$fields = array(
-			'page_title as title',
-			'rev_user_text as user_text',
-			'rev_len as length',
-		);
-		$tables = array( 'revision', 'page' );
-		$conds = array(
+		if ( is_callable( Revision::class, 'getQueryInfo' ) ) {
+			$revQuery = Revision::getQueryInfo( [ 'page' ] );
+			$revUserText = $revQuery['fields']['rev_user_text'] ?? 'rev_user_text';
+		} else {
+			$revQuery = [
+				'tables' => [ 'revision', 'page' ],
+				'joins' => [
+					'page' => [ 'JOIN', 'rev_page = page_id' ],
+				]
+			];
+			$revUserText = 'rev_user_text';
+		}
+		$conds = [
 			"rev_timestamp > $cutoff",
-			'rev_page = page_id',
 			'page_namespace' => $namespaces,
-		);
+		];
 
-		$res = $dbr->select( $tables, $fields, $conds, __METHOD__ );
+		$res = $dbr->select(
+			$revQuery['tables'],
+			[
+				'title' => 'page_title',
+				'user_text' => $revUserText,
+				'length' => 'rev_len',
+			],
+			$conds,
+			__METHOD__,
+			[],
+			$revQuery['joins']
+		);
 		return iterator_to_array( $res );
 	}
 }
 
-$maintClass = 'CharacterEditStats';
+$maintClass = CharacterEditStats::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

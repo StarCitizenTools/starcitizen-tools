@@ -6,7 +6,7 @@
  * @author Niklas Laxström
  * @author Harry Burt
  * @copyright Copyright © 2012-2013, Harry Burt
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -24,16 +24,17 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 		$params = $this->extractRequestParams();
 		$filter = $params['filter'];
 
-		$groups = array();
+		$groups = [];
 
 		// Parameter root as all for all pages subgroups
 		if ( $params['root'] === 'all' ) {
 			$allGroups = MessageGroups::getAllGroups();
-			foreach ( $allGroups as $group ) {
+			foreach ( $allGroups as $id => $group ) {
 				if ( $group instanceof WikiPageMessageGroup ) {
-					$groups[] = $group;
+					$groups[$id] = $group;
 				}
 			}
+			TranslateMetadata::preloadGroups( array_keys( $groups ) );
 		} elseif ( $params['format'] === 'flat' ) {
 			if ( $params['root'] !== '' ) {
 				$group = MessageGroups::getGroup( $params['root'] );
@@ -42,29 +43,35 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 				}
 			} else {
 				$groups = MessageGroups::getAllGroups();
-				foreach ( MessageGroups::getDynamicGroups() as $id => $unused ) {
-					$groups[$id] = MessageGroups::getGroup( $id );
-				}
+				// Not sorted by default, so do it now
+				// Work around php bug: https://bugs.php.net/bug.php?id=50688
+				Wikimedia\suppressWarnings();
+				usort( $groups, [ 'MessageGroups', 'groupLabelSort' ] );
+				Wikimedia\restoreWarnings();
 			}
-
-			// Not sorted by default, so do it now
-			// Work around php bug: https://bugs.php.net/bug.php?id=50688
-			wfSuppressWarnings();
-			usort( $groups, array( 'MessageGroups', 'groupLabelSort' ) );
-			wfRestoreWarnings();
+			TranslateMetadata::preloadGroups( array_keys( $groups ) );
 		} elseif ( $params['root'] !== '' ) {
 			// format=tree from now on, as it is the only other valid option
 			$group = MessageGroups::getGroup( $params['root'] );
 			if ( $group instanceof AggregateMessageGroup ) {
-				$groups = MessageGroups::subGroups( $group );
+				$childIds = [];
+				$groups = MessageGroups::subGroups( $group, $childIds );
 				// The parent group is the first, ignore it
 				array_shift( $groups );
+				TranslateMetadata::preloadGroups( $childIds );
 			}
 		} else {
 			$groups = MessageGroups::getGroupStructure();
-			foreach ( MessageGroups::getDynamicGroups() as $id => $unused ) {
-				$groups[$id] = MessageGroups::getGroup( $id );
+			TranslateMetadata::preloadGroups( array_keys( MessageGroups::getAllGroups() ) );
+		}
+
+		if ( $params['root'] === '' ) {
+			$dynamicGroups = [];
+			foreach ( array_keys( MessageGroups::getDynamicGroups() ) as $id ) {
+				$dynamicGroups[$id] = MessageGroups::getGroup( $id );
 			}
+			// Have dynamic groups appear first in the list
+			$groups = $dynamicGroups + $groups;
 		}
 
 		// Do not list the sandbox group. The code that knows it
@@ -81,7 +88,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 		 * @var MessageGroup $mixed
 		 */
 		foreach ( $groups as $mixed ) {
-			if ( $filter !== array() && !$matcher->match( $mixed->getId() ) ) {
+			if ( $filter !== [] && !$matcher->match( $mixed->getId() ) ) {
 				continue;
 			}
 
@@ -90,16 +97,15 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 			$result->setIndexedTagName( $a, 'group' );
 
 			// @todo Add a continue?
-			$fit = $result->addValue( array( 'query', $this->getModuleName() ), null, $a );
+			$fit = $result->addValue( [ 'query', $this->getModuleName() ], null, $a );
 			if ( !$fit ) {
-				$this->setWarning( 'Could not fit all groups in the resultset.' );
 				// Even if we're not going to give a continue, no point carrying on
 				// if the result is full
 				break;
 			}
 		}
 
-		$result->addIndexedTagName( array( 'query', $this->getModuleName() ), 'group' );
+		$result->addIndexedTagName( [ 'query', $this->getModuleName() ], 'group' );
 	}
 
 	/**
@@ -110,10 +116,11 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 	 */
 	protected function formatGroup( $mixed, $props, $depth = 0 ) {
 		$params = $this->extractRequestParams();
+		$context = $this->getContext();
 
 		// Default
 		$g = $mixed;
-		$subgroups = array();
+		$subgroups = [];
 
 		// Format = tree and has subgroups
 		if ( is_array( $mixed ) ) {
@@ -121,7 +128,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 			$subgroups = $mixed;
 		}
 
-		$a = array();
+		$a = [];
 
 		$groupId = $g->getId();
 
@@ -130,11 +137,11 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 		}
 
 		if ( isset( $props['label'] ) ) {
-			$a['label'] = $g->getLabel();
+			$a['label'] = $g->getLabel( $context );
 		}
 
 		if ( isset( $props['description'] ) ) {
-			$a['description'] = $g->getDescription();
+			$a['description'] = $g->getDescription( $context );
 		}
 
 		if ( isset( $props['class'] ) ) {
@@ -176,7 +183,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 
 		Hooks::run(
 			'TranslateProcessAPIMessageGroupsProperties',
-			array( &$a, $props, $params, $g )
+			[ &$a, $props, $params, $g ]
 		);
 
 		// Depth only applies to tree format
@@ -188,7 +195,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 		}
 
 		// Always empty array for flat format, only sometimes for tree format
-		if ( $subgroups !== array() ) {
+		if ( $subgroups !== [] ) {
 			foreach ( $subgroups as $sg ) {
 				$a['groups'][] = $this->formatGroup( $sg, $props );
 			}
@@ -203,7 +210,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 	 * Get the workflow states applicable to the given message group
 	 *
 	 * @param MessageGroup $group
-	 * @return boolean|array Associative array with states as key and localized state
+	 * @return bool|array Associative array with states as key and localized state
 	 * labels as values
 	 */
 	protected function getWorkflowStates( MessageGroup $group ) {
@@ -213,7 +220,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 
 		$stateConfig = $group->getMessageGroupStates()->getStates();
 
-		if ( !is_array( $stateConfig ) || $stateConfig === array() ) {
+		if ( !is_array( $stateConfig ) || $stateConfig === [] ) {
 			return false;
 		}
 
@@ -241,35 +248,35 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 	}
 
 	public function getAllowedParams() {
-		$allowedParams = array(
-			'depth' => array(
+		$allowedParams = [
+			'depth' => [
 				ApiBase::PARAM_TYPE => 'integer',
-				ApiBase::PARAM_DFLT => '100',
-			),
-			'filter' => array(
+				ApiBase::PARAM_DFLT => 100,
+			],
+			'filter' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DFLT => '',
 				ApiBase::PARAM_ISMULTI => true,
-			),
-			'format' => array(
-				ApiBase::PARAM_TYPE => array( 'flat', 'tree' ),
+			],
+			'format' => [
+				ApiBase::PARAM_TYPE => [ 'flat', 'tree' ],
 				ApiBase::PARAM_DFLT => 'flat',
-			),
-			'iconsize' => array(
+			],
+			'iconsize' => [
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_DFLT => 64,
-			),
-			'prop' => array(
+			],
+			'prop' => [
 				ApiBase::PARAM_TYPE => array_keys( self::getPropertyList() ),
 				ApiBase::PARAM_DFLT => 'id|label|description|class|exists',
 				ApiBase::PARAM_ISMULTI => true,
-			),
-			'root' => array(
+			],
+			'root' => [
 				ApiBase::PARAM_TYPE => 'string',
 				ApiBase::PARAM_DFLT => '',
-			),
-		);
-		Hooks::run( 'TranslateGetAPIMessageGroupsParameterList', array( &$allowedParams ) );
+			],
+		];
+		Hooks::run( 'TranslateGetAPIMessageGroupsParameterList', [ &$allowedParams ] );
 
 		return $allowedParams;
 	}
@@ -280,7 +287,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 	 * @return array
 	 */
 	protected static function getPropertyList() {
-		$properties = array(
+		$properties = [
 			'id'             => ' id             - Include id of the group',
 			'label'          => ' label          - Include label of the group',
 			'description'    => ' description    - Include description of the group',
@@ -299,17 +306,17 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 					'setting forced',
 			'workflowstates' =>
 				' workflowstates - Include the workflow states for the message group',
-		);
+		];
 
-		Hooks::run( 'TranslateGetAPIMessageGroupsPropertyDescs', array( &$properties ) );
+		Hooks::run( 'TranslateGetAPIMessageGroupsPropertyDescs', [ &$properties ] );
 
 		return $properties;
 	}
 
 	protected function getExamplesMessages() {
-		return array(
+		return [
 			'action=query&meta=messagegroups'
 				=> 'apihelp-query+messagegroups-example-1',
-		);
+		];
 	}
 }

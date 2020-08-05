@@ -5,9 +5,11 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @ingroup TTMServer
  */
+
+use Wikimedia\Rdbms\DBQueryError;
 
 /**
  * Mysql based backend.
@@ -18,10 +20,10 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 	protected $sids;
 
 	/**
-	 * @param $mode int DB_SLAVE|DB_MASTER
-	 * @return DatabaseBase
+	 * @param int $mode DB_REPLICA|DB_MASTER
+	 * @return \Wikimedia\Rdbms\IDatabase
 	 */
-	protected function getDB( $mode = DB_SLAVE ) {
+	protected function getDB( $mode = DB_REPLICA ) {
 		return wfGetDB( $mode, 'ttmserver', $this->config['database'] );
 	}
 
@@ -54,10 +56,10 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 		 * get suggestions which do not match the original definition any
 		 * longer. The old translations are still kept until purged by
 		 * rerunning the bootstrap script. */
-		$conds = array(
+		$conds = [
 			'tms_context' => $context->getPrefixedText(),
 			'tms_text' => $definition,
-		);
+		];
 
 		$sid = $dbw->selectField( 'translate_tms', 'tms_sid', $conds, __METHOD__ );
 		if ( $sid === false ) {
@@ -65,17 +67,17 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 		}
 
 		// Delete old translations for this message if any. Could also use replace
-		$deleteConds = array(
+		$deleteConds = [
 			'tmt_sid' => $sid,
 			'tmt_lang' => $targetLanguage,
-		);
+		];
 		$dbw->delete( 'translate_tmt', $deleteConds, __METHOD__ );
 
 		// Insert the new translation
 		if ( $targetText !== null ) {
-			$row = $deleteConds + array(
+			$row = $deleteConds + [
 				'tmt_text' => $targetText,
-			);
+			];
 
 			$dbw->insert( 'translate_tmt', $row, __METHOD__ );
 		}
@@ -84,12 +86,12 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 	}
 
 	protected function insertSource( Title $context, $sourceLanguage, $text ) {
-		$row = array(
+		$row = [
 			'tms_lang' => $sourceLanguage,
 			'tms_len' => mb_strlen( $text ),
 			'tms_text' => $text,
 			'tms_context' => $context->getPrefixedText(),
-		);
+		];
 
 		$dbw = $this->getDB( DB_MASTER );
 		$dbw->insert( 'translate_tms', $row, __METHOD__ );
@@ -97,10 +99,10 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 
 		$fulltext = $this->filterForFulltext( $sourceLanguage, $text );
 		if ( count( $fulltext ) ) {
-			$row = array(
+			$row = [
 				'tmf_sid' => $sid,
 				'tmf_text' => implode( ' ', $fulltext ),
-			);
+			];
 			$dbw->insert( 'translate_tmf', $row, __METHOD__ );
 		}
 
@@ -123,8 +125,7 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 		$text = $lang->lc( $text );
 		$segments = preg_split( '/\s+/', $text, -1, PREG_SPLIT_NO_EMPTY );
 		if ( count( $segments ) < 4 ) {
-
-			return array();
+			return [];
 		}
 
 		foreach ( $segments as $i => $segment ) {
@@ -156,7 +157,7 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 	}
 
 	public function beginBatch() {
-		$this->sids = array();
+		$this->sids = [];
 	}
 
 	public function batchInsertDefinitions( array $batch ) {
@@ -170,14 +171,14 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 	}
 
 	public function batchInsertTranslations( array $batch ) {
-		$rows = array();
+		$rows = [];
 		foreach ( $batch as $key => $data ) {
 			list( , $language, $text ) = $data;
-			$rows[] = array(
+			$rows[] = [
 				'tmt_sid' => $this->sids[$key],
 				'tmt_lang' => $language,
 				'tmt_text' => $text,
-			);
+			];
 		}
 
 		$dbw = $this->getDB( DB_MASTER );
@@ -214,16 +215,16 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 		$max = floor( $len / $this->config['cutoff'] );
 
 		// We could use fulltext index to narrow the results further
-		$dbr = $this->getDB( DB_SLAVE );
-		$tables = array( 'translate_tmt', 'translate_tms' );
-		$fields = array( 'tms_context', 'tms_text', 'tmt_lang', 'tmt_text' );
+		$dbr = $this->getDB( DB_REPLICA );
+		$tables = [ 'translate_tmt', 'translate_tms' ];
+		$fields = [ 'tms_context', 'tms_text', 'tmt_lang', 'tmt_text' ];
 
-		$conds = array(
+		$conds = [
 			'tms_lang' => $sourceLanguage,
 			'tmt_lang' => $targetLanguage,
 			"tms_len BETWEEN $min AND $max",
 			'tms_sid = tmt_sid',
-		);
+		];
 
 		$fulltext = $this->filterForFulltext( $sourceLanguage, $text );
 		if ( $fulltext ) {
@@ -242,7 +243,7 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 		$timeLimit = microtime( true ) + 5;
 
 		$lenA = mb_strlen( $text );
-		$results = array();
+		$results = [];
 		foreach ( $res as $row ) {
 			if ( microtime( true ) > $timeLimit ) {
 				// Having no suggestions is better than preventing translation
@@ -264,14 +265,14 @@ class DatabaseTTMServer extends TTMServer implements WritableTTMServer, Readable
 			$quality = 1 - ( $dist * 0.9 / $len );
 
 			if ( $quality >= $this->config['cutoff'] ) {
-				$results[] = array(
+				$results[] = [
 					'source' => $row->tms_text,
 					'target' => $row->tmt_text,
 					'context' => $row->tms_context,
 					'location' => $row->tms_context . '/' . $targetLanguage,
 					'quality' => $quality,
-					'wiki' => isset( $row->tms_wiki ) ? $row->tms_wiki : wfWikiID(),
-				);
+					'wiki' => $row->tms_wiki ?? wfWikiID(),
+				];
 			}
 		}
 		$results = TTMServer::sortSuggestions( $results );

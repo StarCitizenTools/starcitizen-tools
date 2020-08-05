@@ -21,7 +21,6 @@
 	"checkuser-users": "Otener os nombres d'usuario",
 	"checkuser-edits": "Obtener as edicions",
 	"checkuser-ips": "Otener as adrezas IP",
-	"checkuser-search": "Mirar",
 	"checkuser-all": "tot",
 	"checkuser-empty": "No bi ha garra elemento en o rechistro.",
 	"checkuser-nomatch": "No s'ha trobato garra concordancia",
@@ -31,10 +30,10 @@
 	"checkuser-blocked": "Bloqueyato",
 	"checkuser-too-many": "Bi ha masiaus resultaus (seguntes a estimación d'a busca), cal que emplegue un CIDR más chicot. Aquí bi son as adrezas IP emplegatas (maximo 5000, ordenatas por  adreza):",
 	"checkuser-user-nonexistent": "O usuario especificato no existe.",
-	"checkuser-search-form": "Trobar dentradas d'o rechistro an que o $1 sía $2",
+	"checkuser-search": "Mirar",
 	"checkuser-search-submit": "Mirar",
 	"checkuser-search-initiator": "o encetador d'a consulta",
 	"checkuser-search-target": "obchectivo",
 	"checkuser-ipeditcount": "~$1 de totz os usuarios",
-	"checkuser-log-return": "Tornar ta o formulario prencipal de CheckUser (Comprebación d'usuarios)"
+	"checkuser-showmain": "Tornar ta o formulario prencipal de CheckUser (Comprebación d'usuarios)"
 }

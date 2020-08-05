@@ -4,33 +4,58 @@
  *
  * @author Amir E. Aharoni
  * @author Siebrand Mazeland
+ * @author Niklas Laxström
  * @copyright Copyright © 2012-2013 Amir E. Aharoni, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
-jQuery( document ).ready( function ( $ ) {
+( function () {
 	'use strict';
 
-	// Based on UploadWizard, TranslationNotifications
-	$( '#start' )
-		.datepicker( {
-			dateFormat: 'yymmdd',
-			constrainInput: false,
-			showOn: 'focus',
-			changeMonth: true,
-			changeYear: true,
-			showAnim: false,
-			showButtonPanel: true,
-			maxDate: new Date(),
-			onClose: function ( dateText, inst ) {
-				// TranslationStats works with the yyyymmddhhmmss format,
-				// so zeros that represents generic hh:mm:ss must be added.
-				// The zeros are added only if a date was actually selected
-				// and is not currently displayed.
-				if ( dateText !== '' && inst.input.val().length < 14 ) {
-					inst.input.val( dateText + '000000' );
+	$( function () {
+		var $input = $( '#start' ),
+			datepicker = mw.loader.getState( 'mediawiki.widgets.datetime' ) === null;
+
+		// Remove when MediaWiki 1.27 is no longer supported
+		if ( datepicker ) {
+			mw.loader.using( 'jquery.ui.datepicker' ).done( function () {
+				$input.datepicker( {
+					dateFormat: 'yy-mm-ddT00:00:00',
+					constrainInput: false,
+					showOn: 'focus',
+					changeMonth: true,
+					changeYear: true,
+					showAnim: false,
+					showButtonPanel: true,
+					maxDate: new Date()
+				} ).attr( 'autocomplete', 'off' );
+			} );
+		} else {
+			mw.loader.using( 'mediawiki.widgets.datetime' ).done( function () {
+				var widget, defaultValue, defaultDate;
+
+				defaultDate = new Date();
+				defaultDate.setDate( 1 );
+
+				if ( $input.val() ) {
+					defaultValue = new Date( $input.val() );
 				}
-			}
-		} )
-		.attr( 'autocomplete', 'off' );
-} );
+
+				widget = new mw.widgets.datetime.DateTimeInputWidget( {
+					formatter: {
+						format: '${year|0}-${month|0}-${day|0}',
+						defaultDate: defaultDate
+					},
+					type: 'date',
+					value: defaultValue,
+					max: new Date()
+				} );
+
+				$input.after( widget.$element ).hide();
+				widget.on( 'change', function ( data ) {
+					$input.val( data + 'T00:00:00' );
+				} );
+			} );
+		}
+	} );
+}() );

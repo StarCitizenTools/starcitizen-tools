@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @covers RightsLogFormatter
+ */
 class RightsLogFormatterTest extends LogFormatterTestCase {
 
 	/**
@@ -22,6 +25,41 @@ class RightsLogFormatterTest extends LogFormatterTestCase {
 					'params' => [
 						'4::oldgroups' => [],
 						'5::newgroups' => [ 'sysop', 'bureaucrat' ],
+						'oldmetadata' => [],
+						'newmetadata' => [
+							[ 'expiry' => null ],
+							[ 'expiry' => '20160101123456' ]
+						],
+					],
+				],
+				[
+					'text' => 'Sysop changed group membership for User from (none) to '
+						. 'bureaucrat (temporary, until 12:34, 1 January 2016) and administrator',
+					'api' => [
+						'oldgroups' => [],
+						'newgroups' => [ 'sysop', 'bureaucrat' ],
+						'oldmetadata' => [],
+						'newmetadata' => [
+							[ 'group' => 'sysop', 'expiry' => 'infinity' ],
+							[ 'group' => 'bureaucrat', 'expiry' => '2016-01-01T12:34:56Z' ],
+						],
+					],
+				],
+			],
+
+			// Previous format (oldgroups and newgroups as arrays, no metadata)
+			[
+				[
+					'type' => 'rights',
+					'action' => 'rights',
+					'comment' => 'rights comment',
+					'user' => 0,
+					'user_text' => 'Sysop',
+					'namespace' => NS_USER,
+					'title' => 'User',
+					'params' => [
+						'4::oldgroups' => [],
+						'5::newgroups' => [ 'sysop', 'bureaucrat' ],
 					],
 				],
 				[
@@ -30,11 +68,16 @@ class RightsLogFormatterTest extends LogFormatterTestCase {
 					'api' => [
 						'oldgroups' => [],
 						'newgroups' => [ 'sysop', 'bureaucrat' ],
+						'oldmetadata' => [],
+						'newmetadata' => [
+							[ 'group' => 'sysop', 'expiry' => 'infinity' ],
+							[ 'group' => 'bureaucrat', 'expiry' => 'infinity' ],
+						],
 					],
 				],
 			],
 
-			// Legacy format
+			// Legacy format (oldgroups and newgroups as numeric-keyed strings)
 			[
 				[
 					'type' => 'rights',
@@ -56,6 +99,11 @@ class RightsLogFormatterTest extends LogFormatterTestCase {
 					'api' => [
 						'oldgroups' => [],
 						'newgroups' => [ 'sysop', 'bureaucrat' ],
+						'oldmetadata' => [],
+						'newmetadata' => [
+							[ 'group' => 'sysop', 'expiry' => 'infinity' ],
+							[ 'group' => 'bureaucrat', 'expiry' => 'infinity' ],
+						],
 					],
 				],
 			],
@@ -116,6 +164,13 @@ class RightsLogFormatterTest extends LogFormatterTestCase {
 					'api' => [
 						'oldgroups' => [ 'sysop' ],
 						'newgroups' => [ 'sysop', 'bureaucrat' ],
+						'oldmetadata' => [
+							[ 'group' => 'sysop', 'expiry' => 'infinity' ],
+						],
+						'newmetadata' => [
+							[ 'group' => 'sysop', 'expiry' => 'infinity' ],
+							[ 'group' => 'bureaucrat', 'expiry' => 'infinity' ],
+						],
 					],
 				],
 			],
@@ -142,6 +197,13 @@ class RightsLogFormatterTest extends LogFormatterTestCase {
 					'api' => [
 						'oldgroups' => [ 'sysop' ],
 						'newgroups' => [ 'sysop', 'bureaucrat' ],
+						'oldmetadata' => [
+							[ 'group' => 'sysop', 'expiry' => 'infinity' ],
+						],
+						'newmetadata' => [
+							[ 'group' => 'sysop', 'expiry' => 'infinity' ],
+							[ 'group' => 'bureaucrat', 'expiry' => 'infinity' ],
+						],
 					],
 				],
 			],

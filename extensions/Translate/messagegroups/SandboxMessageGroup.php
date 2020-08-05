@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -48,7 +48,7 @@ class SandboxMessageGroup extends WikiMessageGroup {
 		global $wgTranslateSandboxSuggestions, $wgTranslateSandboxLimit;
 
 		// This will contain the list of messages shown to the user
-		$list = array();
+		$list = [];
 
 		// Ugly
 		$store = new TranslationStashStorage( wfGetDB( DB_MASTER ) );
@@ -77,12 +77,10 @@ class SandboxMessageGroup extends WikiMessageGroup {
 			$list[$index] = '';
 		}
 
-		// Message index of all known messages
-		$mi = MessageIndex::singleton();
 		// Get some random keys
-		$all = array_keys( $mi->retrieve() );
+		$all = MessageIndex::singleton()->getKeys();
 		// In case there aren't any messages
-		if ( $all === array() ) {
+		if ( $all === [] ) {
 			return $list;
 		}
 		$min = 0;

@@ -14,20 +14,10 @@ abstract class TidyDriverBase {
 
 	/**
 	 * Return true if validate() can be used
+	 * @return bool
 	 */
 	public function supportsValidate() {
 		return false;
-	}
-
-	/**
-	 * Check HTML for errors, used if $wgValidateAllHtml = true.
-	 *
-	 * @param string $text
-	 * @param string &$errorStr Return the error string
-	 * @return bool Whether the HTML is valid
-	 */
-	public function validate( $text, &$errorStr ) {
-		throw new MWException( get_class( $this ) . " does not support validate()" );
 	}
 
 	/**

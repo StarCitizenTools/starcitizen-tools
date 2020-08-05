@@ -6,8 +6,10 @@
 	 * @extends OO.ui.Widget
 	 *
 	 * @constructor
+	 * @param {string} topicId The id of the topic
 	 * @param {string} postId The id of the post to edit
 	 * @param {Object} [config] Configuration object
+	 * @cfg {Object} [editor] Config options to pass to mw.flow.ui.EditorWidget
 	 */
 	mw.flow.ui.EditPostWidget = function mwFlowUiEditPostWidget( topicId, postId, config ) {
 		config = config || {};
@@ -18,10 +20,10 @@
 		// Parent constructor
 		mw.flow.ui.EditPostWidget.parent.call( this, config );
 
-		this.editor = new mw.flow.ui.EditorWidget( {
+		this.editor = new mw.flow.ui.EditorWidget( $.extend( {
 			saveMsgKey: mw.user.isAnon() ? 'flow-post-action-edit-post-submit-anonymously' : 'flow-post-action-edit-post-submit',
 			classes: [ 'flow-ui-editPostWidget-editor' ]
-		} );
+		}, config.editor ) );
 		this.editor.toggle( true );
 
 		this.anonWarning = new mw.flow.ui.AnonWarningWidget();
@@ -45,12 +47,16 @@
 			cancel: 'onEditorCancel'
 		} );
 
+		this.$messages = $( '<div>' ).addClass( 'flow-ui-editorContainerWidget-messages' );
+
 		this.$element
 			.addClass( 'flow-ui-editPostWidget' )
 			.append(
-				this.anonWarning.$element,
-				this.error.$element,
-				this.captchaWidget.$element,
+				this.$messages.append(
+					this.anonWarning.$element,
+					this.error.$element,
+					this.captchaWidget.$element
+				),
 				this.editor.$element
 			);
 
@@ -79,11 +85,11 @@
 		var widget, contentFormat;
 
 		this.editor.pushPending();
-		this.editor.activate();
+		this.editor.load();
 
 		// Get the post from the API
 		widget = this;
-		contentFormat = this.editor.getContentFormat();
+		contentFormat = this.editor.getPreferredFormat();
 
 		this.api.getPost( this.topicId, this.postId, contentFormat ).then(
 			function ( post ) {
@@ -91,11 +97,11 @@
 					format = OO.getProp( post, 'content', 'format' );
 
 				if ( content !== undefined && format !== undefined ) {
-					// Give it to the editor
-					widget.editor.setContent( content, format );
-
 					// Update revisionId in the API
 					widget.api.setCurrentRevision( post.revisionId );
+
+					// Activate the editor
+					return widget.editor.activate( { content: content, format: format } );
 				}
 
 			},
@@ -122,6 +128,9 @@
 
 	/**
 	 * Respond to editor save
+	 *
+	 * @param {string} content Content
+	 * @param {string} format Format
 	 */
 	mw.flow.ui.EditPostWidget.prototype.onEditorSaveContent = function ( content, format ) {
 		var widget = this,
@@ -139,7 +148,7 @@
 
 				widget.emit( 'saveContent', workflow, content, format );
 			} )
-			.then( null, function ( errorCode, errorObj ) {
+			.catch( function ( errorCode, errorObj ) {
 				widget.captcha.update( errorCode, errorObj );
 				if ( !widget.captcha.isRequired() ) {
 					widget.error.setLabel( new OO.ui.HtmlSnippet( errorObj.error && errorObj.error.info || errorObj.exception ) );

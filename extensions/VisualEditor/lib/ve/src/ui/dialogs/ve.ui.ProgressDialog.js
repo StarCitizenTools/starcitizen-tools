@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ProgressDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -32,7 +32,8 @@ ve.ui.ProgressDialog.static.actions = [
 	{
 		action: 'cancel',
 		label: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' ),
-		flags: 'destructive'
+		flags: 'destructive',
+		modes: 'cancellable'
 	}
 ];
 
@@ -60,6 +61,7 @@ ve.ui.ProgressDialog.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.ProgressDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
 			var i, l, $row, progressBar, fieldLayout, cancelButton, cancelDeferred,
+				cancellable = false,
 				progresses = data.progresses;
 
 			this.inProgress = progresses.length;
@@ -77,25 +79,28 @@ ve.ui.ProgressDialog.prototype.getSetupProcess = function ( data ) {
 						align: 'top'
 					}
 				);
-				cancelButton = new OO.ui.ButtonWidget( {
-					framed: false,
-					icon: 'cancel',
-					iconTitle: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' )
-				} ).on( 'click', cancelDeferred.reject.bind( cancelDeferred ) );
 
-				this.text.$element.append(
-					$row.append(
-						fieldLayout.$element, cancelButton.$element
-					)
-				);
+				$row.append( fieldLayout.$element );
+
+				if ( progresses[ i ].cancellable ) {
+					cancelButton = new OO.ui.ButtonWidget( {
+						framed: false,
+						icon: 'cancel',
+						iconTitle: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' )
+					} ).on( 'click', cancelDeferred.reject.bind( cancelDeferred ) );
+					$row.append( cancelButton.$element );
+					cancellable = true;
+				}
+
+				this.text.$element.append( $row );
 				progresses[ i ].progressBarDeferred.resolve( progressBar, cancelDeferred.promise() );
-				/*jshint loopfunc:true */
 				progresses[ i ].progressCompletePromise.then(
 					this.progressComplete.bind( this, $row, false ),
 					this.progressComplete.bind( this, $row, true )
 				);
 				this.cancelDeferreds.push( cancelDeferred );
 			}
+			this.actions.setMode( cancellable ? 'cancellable' : 'default' );
 		}, this );
 };
 

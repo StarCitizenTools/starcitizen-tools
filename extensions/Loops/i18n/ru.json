@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Diman Russkov",
+			"Facenapalm",
+			"Okras"
+		]
+	},
+	"loops-desc": "Функции анализатора для выполнения циклов",
+	"loops_max": "Превышено максимальное количество выполняемых циклов",
+	"loops-limitreport-count-limited": "Количество ExtLoops",
+	"loops-limitreport-count-unlimited": "Количество ExtLoops",
+	"loops-config-countlimit": "Переменная конфигурации, определяющая максимально допустимое количество циклов ('-1' => без ограничений). '#forargs' и '#fornumargs' этим не ограничиваются.",
+	"loops-config-enabledfunctions": "Позволяет определить, какие функции, предоставляемые «Loops», должны быть включены для вики. Если расширение «Variables» не установлено, то '#loop', '#forargs' и '#fornumargs' будут автоматически отключены."
+}

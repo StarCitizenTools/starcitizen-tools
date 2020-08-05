@@ -4,8 +4,10 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
+
+use MediaWiki\MediaWikiServices;
 
 /**
  * Essentially random collection of helper functions, similar to GlobalFunctions.php.
@@ -21,7 +23,7 @@ class TranslateUtils {
 	 */
 	public static function title( $message, $code, $ns = NS_MEDIAWIKI ) {
 		// Cache some amount of titles for speed.
-		static $cache = array();
+		static $cache = [];
 		$key = $ns . ':' . $message;
 
 		if ( !isset( $cache[$key] ) ) {
@@ -46,7 +48,7 @@ class TranslateUtils {
 		$code = substr( $text, $pos + 1 );
 		$key = substr( $text, 0, $pos );
 
-		return array( $key, $code );
+		return [ $key, $code ];
 	}
 
 	/**
@@ -58,9 +60,9 @@ class TranslateUtils {
 	 */
 	public static function getMessageContent( $key, $language, $namespace = NS_MEDIAWIKI ) {
 		$title = self::title( $key, $language, $namespace );
-		$data = self::getContents( array( $title ), $namespace );
+		$data = self::getContents( [ $title ], $namespace );
 
-		return isset( $data[$title][0] ) ? $data[$title][0] : null;
+		return $data[$title][0] ?? null;
 	}
 
 	/**
@@ -72,24 +74,41 @@ class TranslateUtils {
 	 * text and last author indexed by page name.
 	 */
 	public static function getContents( $titles, $namespace ) {
-		$dbr = wfGetDB( DB_SLAVE );
-		$rows = $dbr->select( array( 'page', 'revision', 'text' ),
-			array( 'page_title', 'old_text', 'old_flags', 'rev_user_text' ),
-			array(
+		$dbr = wfGetDB( DB_REPLICA );
+
+		if ( class_exists( ActorMigration::class ) ) {
+			$actorQuery = ActorMigration::newMigration()->getJoin( 'rev_user' );
+		} else {
+			$actorQuery = [
+				'tables' => [],
+				'fields' => [ 'rev_user_text' => 'rev_user_text' ],
+				'joins' => [],
+			];
+		}
+
+		$rows = $dbr->select( [ 'page', 'revision', 'text' ] + $actorQuery['tables'],
+			[
+				'page_title', 'old_text', 'old_flags',
+				'rev_user_text' => $actorQuery['fields']['rev_user_text']
+			],
+			[
 				'page_namespace' => $namespace,
-				'page_latest=rev_id',
-				'rev_text_id=old_id',
 				'page_title' => $titles
-			),
-			__METHOD__
+			],
+			__METHOD__,
+			[],
+			[
+				'revision' => [ 'JOIN', 'page_latest=rev_id' ],
+				'text' => [ 'JOIN', 'rev_text_id=old_id' ],
+			] + $actorQuery['joins']
 		);
 
-		$titles = array();
+		$titles = [];
 		foreach ( $rows as $row ) {
-			$titles[$row->page_title] = array(
+			$titles[$row->page_title] = [
 				Revision::getRevisionText( $row ),
 				$row->rev_user_text
-			);
+			];
 		}
 		$rows->free();
 
@@ -106,35 +125,65 @@ class TranslateUtils {
 	 * @return array List of recent changes.
 	 */
 	public static function translationChanges(
-		$hours = 24, $bots = false, $ns = null, array $extraFields = array()
+		$hours = 24, $bots = false, $ns = null, array $extraFields = []
 	) {
 		global $wgTranslateMessageNamespaces;
 
-		$dbr = wfGetDB( DB_SLAVE );
-		$recentchanges = $dbr->tableName( 'recentchanges' );
+		$dbr = wfGetDB( DB_REPLICA );
+
+		if ( class_exists( ActorMigration::class ) ) {
+			$actorQuery = ActorMigration::newMigration()->getJoin( 'rc_user' );
+		} else {
+			$actorQuery = [
+				'tables' => [],
+				'fields' => [ 'rc_user_text' => 'rc_user_text' ],
+				'joins' => [],
+			];
+		}
+
 		$hours = (int)$hours;
 		$cutoff_unixtime = time() - ( $hours * 3600 );
 		$cutoff = $dbr->timestamp( $cutoff_unixtime );
 
-		$namespaces = $dbr->makeList( $wgTranslateMessageNamespaces );
-		if ( $ns ) {
-			$namespaces = $dbr->makeList( $ns );
+		$conds = [
+			'rc_timestamp >= ' . $dbr->addQuotes( $cutoff ),
+			'rc_namespace' => $ns ?: $wgTranslateMessageNamespaces,
+		];
+		if ( $bots ) {
+			$conds['rc_bot'] = 0;
 		}
 
-		$fields = array_merge(
-			array( 'rc_title', 'rc_timestamp', 'rc_user_text', 'rc_namespace' ),
-			$extraFields
+		$res = $dbr->select(
+			[ 'recentchanges' ] + $actorQuery['tables'],
+			array_merge( [
+				'rc_namespace', 'rc_title', 'rc_timestamp',
+				'rc_user_text' => $actorQuery['fields']['rc_user_text'],
+			], $extraFields ),
+			$conds,
+			__METHOD__,
+			[],
+			$actorQuery['joins']
 		);
-		$fields = implode( ',', $fields );
-		// @todo Raw SQL
-		$sql = "SELECT $fields, substring_index(rc_title, '/', -1) as lang FROM $recentchanges " .
-			"WHERE rc_timestamp >= '{$cutoff}' " .
-			( $bots ? '' : 'AND rc_bot = 0 ' ) .
-			"AND rc_namespace in ($namespaces) " .
-			'ORDER BY lang ASC, rc_timestamp DESC';
-
-		$res = $dbr->query( $sql, __METHOD__ );
 		$rows = iterator_to_array( $res );
+
+		// Calculate 'lang', then sort by it and rc_timestamp
+		foreach ( $rows as &$row ) {
+			$pos = strrpos( $row->rc_title, '/' );
+			$row->lang = $pos === false ? $row->rc_title : substr( $row->rc_title, $pos + 1 );
+		}
+		unset( $row );
+
+		usort( $rows, function ( $a, $b ) {
+			$x = strcmp( $a->lang, $b->lang );
+			if ( !$x ) {
+				// descending order
+				$x = strcmp(
+					wfTimestamp( TS_MW, $b->rc_timestamp ),
+					wfTimestamp( TS_MW, $a->rc_timestamp )
+				);
+			}
+			return $x;
+		} );
 
 		return $rows;
 	}
@@ -144,11 +193,11 @@ class TranslateUtils {
 	/**
 	 * Returns a localised language name.
 	 * @param string $code Language code.
-	 * @param null|string $language Language code of language the the name should be in.
+	 * @param null|string $language Language code of the language that the name should be in.
 	 * @return string Best-effort localisation of wanted language name.
 	 */
 	public static function getLanguageName( $code, $language = 'en' ) {
-		$languages = TranslateUtils::getLanguageNames( $language );
+		$languages = self::getLanguageNames( $language );
 
 		if ( isset( $languages[$code] ) ) {
 			return $languages[$code];
@@ -204,14 +253,12 @@ class TranslateUtils {
 	public static function getLanguageNames( $code ) {
 		$languageNames = Language::fetchLanguageNames( $code );
 
-		// Remove languages with deprecated codes (bug T37475)
-		global $wgDummyLanguageCodes;
-
-		foreach ( array_keys( $wgDummyLanguageCodes ) as $dummyLanguageCode ) {
-			unset( $languageNames[$dummyLanguageCode] );
+		$deprecatedCodes = LanguageCode::getDeprecatedCodeMapping();
+		foreach ( array_keys( $deprecatedCodes ) as $deprecatedCode ) {
+			unset( $languageNames[ $deprecatedCode ] );
 		}
 
-		Hooks::run( 'TranslateSupportedLanguages', array( &$languageNames, $code ) );
+		Hooks::run( 'TranslateSupportedLanguages', [ &$languageNames, $code ] );
 
 		return $languageNames;
 	}
@@ -241,7 +288,7 @@ class TranslateUtils {
 		if ( isset( $mi[$normkey] ) ) {
 			return (array)$mi[$normkey];
 		} else {
-			return array();
+			return [];
 		}
 	}
 
@@ -264,7 +311,7 @@ class TranslateUtils {
 	 * @param array $attributes Html attributes for the fieldset.
 	 * @return string Html.
 	 */
-	public static function fieldset( $legend, $contents, array $attributes = array() ) {
+	public static function fieldset( $legend, $contents, array $attributes = [] ) {
 		return Xml::openElement( 'fieldset', $attributes ) .
 			Xml::tags( 'legend', null, $legend ) . $contents .
 			Xml::closeElement( 'fieldset' );
@@ -347,7 +394,7 @@ class TranslateUtils {
 			return null;
 		}
 
-		$formats = array();
+		$formats = [];
 
 		$filename = substr( $icon, 7 );
 		$file = wfFindFile( $filename );
@@ -385,15 +432,150 @@ class TranslateUtils {
 	/**
 	 * Get a DB handle suitable for read and read-for-write cases
 	 *
-	 * @return DatabaseBase Master for HTTP POST, CLI, DB already changed; slave otherwise
+	 * @return \Wikimedia\Rdbms\IDatabase Master for HTTP POST, CLI, DB already changed;
+	 *  slave otherwise
 	 */
 	public static function getSafeReadDB() {
-		$index = (
-			PHP_SAPI === 'cli' ||
-			RequestContext::getMain()->getRequest()->wasPosted() ||
-			wfGetLB()->hasOrMadeRecentMasterChanges()
-		) ? DB_MASTER : DB_SLAVE;
+		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
+		// Parsing APIs need POST for payloads but are read-only, so avoid spamming
+		// the master then. No good way to check this at the moment...
+		if ( PageTranslationHooks::$renderingContext ) {
+			$index = DB_REPLICA;
+		} else {
+			$index = (
+				PHP_SAPI === 'cli' ||
+				RequestContext::getMain()->getRequest()->wasPosted() ||
+				$lb->hasOrMadeRecentMasterChanges()
+			) ? DB_MASTER : DB_REPLICA;
+		}
 
-		return wfGetDB( $index );
+		return $lb->getConnection( $index );
+	}
+
+	/**
+	 * Get an URL that points to an editor for this message handle.
+	 * @param MessageHandle $handle
+	 * @return string Domain relative URL
+	 * @since 2017.10
+	 */
+	public static function getEditorUrl( MessageHandle $handle ) {
+		if ( !$handle->isValid() ) {
+			return $handle->getTitle()->getLocalURL( [ 'action' => 'edit' ] );
+		}
+
+		$title = self::getSpecialPage( 'Translate' )->getPageTitle();
+		return $title->getLocalURL( [
+			'showMessage' => $handle->getInternalKey(),
+			'group' => $handle->getGroup()->getId(),
+			'language' => $handle->getCode(),
+		] );
+	}
+
+	/**
+	 * Compatibility for pre-1.32, when SpecialPageFactory methods were static.
+	 *
+	 * @see SpecialPageFactory::resolveAlias
+	 * @param string $text
+	 * @return array
+	 */
+	public static function resolveSpecialPageAlias( $text ) : array {
+		if ( method_exists( MediaWikiServices::class, 'getSpecialPageFactory' ) ) {
+			return MediaWikiServices::getInstance()->getSpecialPageFactory()->resolveAlias( $text );
+		}
+		return SpecialPageFactory::resolveAlias( $text );
+	}
+
+	/**
+	 * Compatibility for pre-1.32, when SpecialPageFactory methods were static.
+	 *
+	 * @see SpecialPageFactory::getPage
+	 * @param string $name
+	 * @return SpecialPage|null
+	 */
+	public static function getSpecialPage( $name ) {
+		if ( method_exists( MediaWikiServices::class, 'getSpecialPageFactory' ) ) {
+			return MediaWikiServices::getInstance()->getSpecialPageFactory()->getPage( $name );
+		}
+		return SpecialPageFactory::getPage( $name );
+	}
+
+	/**
+	 * Compatibility for pre-1.32, before OutputPage::addWikiTextAsInterface()
+	 *
+	 * @see OutputPage::addWikiTextAsInterface
+	 * @param OutputPage $out
+	 * @param string $text The wikitext to add to the output.
+	 */
+	public static function addWikiTextAsInterface( OutputPage $out, $text ) {
+		if ( is_callable( [ $out, 'addWikiTextAsInterface' ] ) ) {
+			$out->addWikiTextAsInterface( $text );
+		} else {
+			// $out->addWikiTextTitle is deprecated in 1.32, but has existed
+			// since (at least) MW 1.21, so use that as a fallback.
+			$out->addWikiTextTitle(
+				$text, $out->getTitle(),
+				/*linestart*/true, /*tidy*/true, /*interface*/true
+			);
+		}
+	}
+
+	/**
+	 * Compatibility for pre-1.32, before OutputPage::wrapWikiTextAsInterface()
+	 *
+	 * @see OutputPage::wrapWikiTextAsInterface
+	 * @param OutputPage $out
+	 * @param string $wrapperClass The class attribute value for the <div>
+	 *   wrapper in the output HTML
+	 * @param string $text The wikitext in the user interface language to
+	 *   add to the output.
+	 */
+	public static function wrapWikiTextAsInterface( OutputPage $out, $wrapperClass, $text ) {
+		if ( is_callable( [ $out, 'wrapWikiTextAsInterface' ] ) ) {
+			$out->wrapWikiTextAsInterface( $wrapperClass, $text );
+		} else {
+			// wfDeprecated( 'use OutputPage::wrapWikiTextAsInterface', '1.32')
+			if ( !$wrapperClass ) {
+				$wrapperClass = '';
+			}
+			$out->addHTML( Html::openElement(
+				'div', [ 'class' => $wrapperClass ]
+			) );
+			self::addWikiTextAsInterface( $out, $text );
+			$out->addHtml( Html::closeElement(
+				'div'
+			) );
+		}
+	}
+
+	/**
+	 * Compatibility for pre-1.33, before OutputPage::parseAsInterface()
+	 *
+	 * @see OutputPage::parseAsInterface
+	 * @param OutputPage $out
+	 * @param string $text The wikitext in the user interface language to
+	 *   be parsed
+	 * @return string HTML
+	 */
+	public static function parseAsInterface( OutputPage $out, $text ) {
+		if ( is_callable( [ $out, 'parseAsInterface' ] ) ) {
+			return $out->parseAsInterface( $text );
+		} else {
+			// wfDeprecated( 'use OutputPage::parseAsInterface', '1.33')
+			return $out->parse( $text, /*linestart*/true, /*interface*/true );
+		}
+	}
+
+	public static function parseInlineAsInterface( OutputPage $out, $text ) {
+		if ( is_callable( [ $out, 'parseInlineAsInterface' ] ) ) {
+			return $out->parseInlineAsInterface( $text );
+		} else {
+			// wfDeprecated( 'use OutputPage::parseInlineAsInterface', '1.33')
+			// The block wrapper stripping was slightly broken before 1.33
+			// as well.
+			$contents = $out->parse( $text, /*linestart*/true, /*interface*/true );
+			// Remove whatever block element wrapup the parser likes to add
+			$contents = preg_replace( '~^<([a-z]+)>(.*)</\1>$~us', '\2', $contents );
+			return $contents;
+		}
 	}
 }

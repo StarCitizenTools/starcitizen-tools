@@ -1,42 +1,55 @@
+/**
+ * Minimum available screen width at which a device can be considered a mobile device
+ * Many older feature phones have screens smaller than this value.
+ * Number is prone to change with new information.
+ * @since 1.31
+ */
+@width-breakpoint-mobile: 320px;
+
+/**
+ * Minimum available screen width at which a device can be considered a tablet
+ * The number is currently based on the device width of a Samsung Galaxy S5 mini and is low
+ * enough to cover iPad (768px). Number is prone to change with new information.
+ * @since 1.31
+ */
+@width-breakpoint-tablet: 720px;
+/**
+ * Minimum available screen width at which a device can be considered a desktop
+ * Number is prone to change with new information.
+ * @since 1.31
+ */
+@width-breakpoint-desktop: 1000px;
+
 // Colors for use in mediawiki.ui and elsewhere
 
-// Although this defines many shades, be parsimonious in your own use of grays. Prefer
-// colors already in use in MediaWiki. Prefer semantic color names such as "@colorText".
-@colorGray1: #111; // darkest
+// Although this defines many shades, be parsimonious in your own use of grays.
+// Prefer semantic color names such as `@colorText` below.
+@colorGray1: #000; // darkest
 @colorGray2: #222;
-@colorGray3: #333;
 @colorGray4: #444;
-@colorGray5: #555;
-@colorGray6: #666;
-@colorGray7: #777;
-@colorGray8: #888;
-@colorGray9: #999;
-@colorGray10: #aaa;
-@colorGray11: #bbb;
-@colorGray12: #ccc;
-@colorGray13: #ddd;
-@colorGray14: #eee;
-@colorGray15: #f9f9f9; // lightest
+@colorGray5: #54595d;
+@colorGray7: #72777d;
+@colorGray10: #a2a9b1;
+@colorGray12: #c8ccd1;
+@colorGray14: #eaecf0;
+@colorGray15: #f8f9fa; // lightest
+@colorBaseInverted: #fff;
 
-// Semantic background colors
+// Semantic colors
 // Blue; for contextual use of a continuing action
-@colorProgressive: #347bff;
-@colorProgressiveHighlight: #2962cc;
-@colorProgressiveActive: #2962cc;
-// Green; for contextual use of a positive finalizing action
-@colorConstructive: #00af89;
-@colorConstructiveHighlight: #008c6d;
-@colorConstructiveActive: #008c6d;
+@colorProgressive: #36c;
+@colorProgressiveHighlight: #447ff5;
+@colorProgressiveActive: #2a4b8d;
 // Orange; for contextual use of returning to a past action
 @colorRegressive: #ff5d00;
 // Red; for contextual use of a negative action of high severity
-@colorDestructive: #d11d13;
-@colorDestructiveHighlight: #a7170f;
-@colorDestructiveActive: #a7170f;
+@colorDestructive: #d33;
+@colorDestructiveHighlight: #ff4242;
+@colorDestructiveActive: #b32424;
 // Orange; for contextual use of a potentially negative action of medium severity
 @colorMediumSevere: #ff5d00;
 // Yellow; for contextual use of a potentially negative action of low severity
-@colorLowSevere: #ffb50d;
+@colorLowSevere: #fc3;
 
 // Used in mixins to darken contextual colors by the same amount (eg. focus)
 @colorDarkenPercentage: 13.5%;
@@ -45,34 +58,50 @@
 
 // Text colors
 @colorText: @colorGray2;
-@colorTextLight: @colorGray6;
-@colorButtonText: @colorGray5;
-@colorButtonTextHighlight: @colorGray7;
-@colorButtonTextActive: @colorGray7;
+@colorTextLight: @colorGray5;
+@colorButtonText: @colorGray2;
+@colorButtonTextHighlight: @colorGray4;
+@colorButtonTextActive: @colorGray1;
 @colorDisabledText: @colorGray12;
-@colorErrorText: #c00;
+@colorErrorText: #d33;
+@colorWarningText: #705000;
 
 // UI colors
-@colorFieldBorder: @colorGray12;
+@backgroundColorInputBinaryChecked: @colorProgressive;
+@backgroundColorInputBinaryActive: @colorProgressiveActive;
+@colorFieldBorder: #a2a9b1;
 @colorShadow: @colorGray14;
 @colorPlaceholder: @colorGray10;
 @colorNeutral: @colorGray7;
 
-// The following rules are deprecated
-@colorWhite: #fff;
-@colorOffWhite: #fafafa;
-@colorGrayDark: #898989;
-@colorGrayLight: #ccc;
-@colorGrayLighter: #ddd;
-@colorGrayLightest: #eee;
+// Border colors
+@borderColorInputBinaryChecked: @colorProgressive;
+@borderColorInputBinaryActive: @colorProgressiveActive;
+
+// Checked radio input border-width, equal to OOUI at 14px base font-size
+@borderWidthRadioChecked: 0.4285em;
 
 // Global border radius to be used to buttons and inputs
 @borderRadius: 2px;
+
+// Box shadows
+@boxShadowWidget: inset 0 0 0 1px transparent;
+@boxShadowWidgetFocus: inset 0 0 0 1px @colorProgressive;
+@boxShadowProgressiveFocus: inset 0 0 0 1px @colorProgressive, inset 0 0 0 2px @colorBaseInverted;
+@boxShadowInputBinaryActive: inset 0 0 0 1px @colorProgressiveActive;
 
 // Icon related variables
 @iconSize: 1.5em;
 @iconGutterWidth: 1em;
 
-// Form input sizes
-@checkboxSize: 2em;
-@radioSize: 2em;
+// Form input sizes, equal to OOUI at 14px base font-size
+@sizeInputBinary: 1.5625em;
+
+// Deprecated color variables from when WikimediaUI color palette wasn't around
+// See https://wikimedia.github.io/WikimediaUI-Style-Guide/visual-style_colors.html
+@colorGray3: #333;
+@colorGray6: #666;
+@colorGray8: #888;
+@colorGray9: #999;
+@colorGray11: #bbb;
+@colorGray13: #ddd;

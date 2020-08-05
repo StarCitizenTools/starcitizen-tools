@@ -1,25 +1,37 @@
 <?php
 
-use MediaWiki\Logger\LoggerFactory;
-
 /**
  * This class represents the controller for notifications
  */
 class EchoNotificationController {
 
 	/**
-	 * Echo event agent per wiki blacklist
+	 * Echo maximum number of users to cache
 	 *
-	 * @var string[]
+	 * @var int $maxRecipientCacheSize
 	 */
-	static protected $blacklist;
+	static protected $maxRecipientCacheSize = 200;
 
 	/**
-	 * Echo event agent per user whitelist, this overwrites $blacklist
+	 * Echo event agent per user blacklist
 	 *
-	 * @param string[]
+	 * @var MapCacheLRU
 	 */
-	static protected $userWhitelist;
+	static protected $blacklistByUser;
+
+	/**
+	 * Echo event agent per wiki blacklist
+	 *
+	 * @var EchoContainmentList|null
+	 */
+	static protected $wikiBlacklist;
+
+	/**
+	 * Echo event agent per user whitelist, this overwrites $blacklistByUser
+	 *
+	 * @var MapCacheLRU
+	 */
+	static protected $whitelistByUser;
 
 	/**
 	 * Returns the count passed in, or MWEchoNotifUser::MAX_BADGE_COUNT + 1,
@@ -37,15 +49,15 @@ class EchoNotificationController {
 	}
 
 	/**
-	* Format the notification count as a string.  This should only be used for an
-	* isolated string count, e.g. as displayed in personal tools or returned by the API.
-	*
-	* If using it in sentence context, pass the value from getCappedNotificationCount
-	* into a message and use PLURAL.  Example: notification-bundle-header-page-linked
-	*
-	* @param int count Notification count
-	* @return string Formatted count, after applying cap then formatting to string
-	*/
+	 * Format the notification count as a string.  This should only be used for an
+	 * isolated string count, e.g. as displayed in personal tools or returned by the API.
+	 *
+	 * If using it in sentence context, pass the value from getCappedNotificationCount
+	 * into a message and use PLURAL.  Example: notification-bundle-header-page-linked
+	 *
+	 * @param int $count Notification count
+	 * @return string Formatted count, after applying cap then formatting to string
+	 */
 	public static function formatNotificationCount( $count ) {
 		$cappedCount = self::getCappedNotificationCount( $count );
 
@@ -56,7 +68,7 @@ class EchoNotificationController {
 	 * Processes notifications for a newly-created EchoEvent
 	 *
 	 * @param EchoEvent $event
-	 * @param boolean $defer Defer to job queue or not
+	 * @param bool $defer Defer to job queue or not
 	 */
 	public static function notify( $event, $defer = true ) {
 		// Defer to job queue if defer to job queue is requested and
@@ -80,7 +92,7 @@ class EchoNotificationController {
 
 		$type = $event->getType();
 		$notifyTypes = self::getEventNotifyTypes( $type );
-		$userIds = array();
+		$userIds = [];
 		$userIdsCount = 0;
 		foreach ( self::getUsersToNotifyForEvent( $event ) as $user ) {
 			$userIds[$user->getId()] = $user->getId();
@@ -93,11 +105,11 @@ class EchoNotificationController {
 					$rev = Revision::newFromID( $extra['revid'], Revision::READ_LATEST );
 
 					if ( $rev->isMinor() ) {
-						$notifyTypes = array_diff( $notifyTypes, array( 'email' ) );
+						$notifyTypes = array_diff( $notifyTypes, [ 'email' ] );
 					}
 				}
 			}
-			Hooks::run( 'EchoGetNotificationTypes', array( $user, $event, &$userNotifyTypes ) );
+			Hooks::run( 'EchoGetNotificationTypes', [ $user, $event, &$userNotifyTypes ] );
 
 			// types such as web, email, etc
 			foreach ( $userNotifyTypes as $type ) {
@@ -108,7 +120,7 @@ class EchoNotificationController {
 			// Process 1000 users per NotificationDeleteJob
 			if ( $userIdsCount > 1000 ) {
 				self::enqueueDeleteJob( $userIds, $event );
-				$userIds = array();
+				$userIds = [];
 				$userIdsCount = 0;
 			}
 		}
@@ -122,7 +134,7 @@ class EchoNotificationController {
 	/**
 	 * Schedule a job to check and delete older notifications
 	 *
-	 * @param int $userIds
+	 * @param int[] $userIds
 	 * @param EchoEvent $event
 	 */
 	public static function enqueueDeleteJob( array $userIds, EchoEvent $event ) {
@@ -133,9 +145,9 @@ class EchoNotificationController {
 
 		$job = new EchoNotificationDeleteJob(
 			$event->getTitle() ?: Title::newMainPage(),
-			array(
+			[
 				'userIds' => $userIds
-			)
+			]
 		);
 		JobQueueGroup::singleton()->push( $job );
 	}
@@ -150,8 +162,6 @@ class EchoNotificationController {
 	public static function getEventNotifyTypes( $eventType ) {
 		global $wgDefaultNotifyTypeAvailability,
 			$wgEchoNotifications;
-
-		$notifyTypes = array();
 
 		$attributeManager = EchoAttributeManager::newFromGlobalVars();
 
@@ -184,11 +194,11 @@ class EchoNotificationController {
 	public static function enqueueEvent( EchoEvent $event ) {
 		$job = new EchoNotificationJob(
 			$event->getTitle() ?: Title::newMainPage(),
-			array(
+			[
 				'event' => $event,
 				'masterPos' => MWEchoDbFactory::newFromDefault()
 					->getMasterPosition(),
-			)
+			]
 		);
 		JobQueueGroup::singleton()->push( $job );
 	}
@@ -197,30 +207,69 @@ class EchoNotificationController {
 	 * Implements blacklist per active wiki expected to be initialized
 	 * from InitializeSettings.php
 	 *
-	 * @param EchoEvent $event The event to test for exclusion via global blacklist
-	 * @return boolean True when the event agent is in the global blacklist
+	 * @param EchoEvent $event The event to test for exclusion
+	 * @param User $user recipient of the notification for per-user blacklists
+	 * @return bool True when the event agent is blacklisted
 	 */
-	protected static function isBlacklisted( EchoEvent $event ) {
+	public static function isBlacklistedByUser( EchoEvent $event, User $user ) {
+		global $wgEchoAgentBlacklist, $wgEchoPerUserBlacklist;
+
+		$clusterCache = ObjectCache::getLocalClusterInstance();
+
 		if ( !$event->getAgent() ) {
 			return false;
 		}
 
-		if ( self::$blacklist === null ) {
-			global $wgEchoAgentBlacklist, $wgEchoOnWikiBlacklist;
-
-			self::$blacklist = new EchoContainmentSet;
-			self::$blacklist->addArray( $wgEchoAgentBlacklist );
-			if ( $wgEchoOnWikiBlacklist !== null ) {
-				self::$blacklist->addOnWiki(
-					NS_MEDIAWIKI,
-					$wgEchoOnWikiBlacklist,
-					ObjectCache::getLocalClusterInstance(),
-					wfMemcKey( "echo_on_wiki_blacklist" )
-				);
-			}
+		// Ensure we have a list of blacklists
+		if ( self::$blacklistByUser === null ) {
+			self::$blacklistByUser = new MapCacheLRU( self::$maxRecipientCacheSize );
 		}
 
-		return self::$blacklist->contains( $event->getAgent()->getName() );
+		// Ensure we have a blacklist for the user
+		if ( !self::$blacklistByUser->has( $user->getId() ) ) {
+			$blacklist = new EchoContainmentSet( $user );
+
+			// Add the config setting
+			$blacklist->addArray( $wgEchoAgentBlacklist );
+
+			// Add wiki-wide blacklist
+			$wikiBlacklist = self::getWikiBlacklist();
+			if ( $wikiBlacklist !== null ) {
+				$blacklist->add( $wikiBlacklist );
+			}
+
+			// Add to blacklist from user preference
+			if ( $wgEchoPerUserBlacklist ) {
+				$blacklist->addFromUserOption( 'echo-notifications-blacklist' );
+			}
+
+			// Add user's blacklist to dictionary if user wasn't already there
+			self::$blacklistByUser->set( $user->getId(), $blacklist );
+		} else {
+			// Just get the user's blacklist if it's already there
+			$blacklist = self::$blacklistByUser->get( $user->getId() );
+		}
+		return $blacklist->contains( $event->getAgent()->getName() );
+	}
+
+	/**
+	 * @return EchoContainmentList|null
+	 */
+	protected static function getWikiBlacklist() {
+		$clusterCache = ObjectCache::getLocalClusterInstance();
+		global $wgEchoOnWikiBlacklist;
+		if ( !$wgEchoOnWikiBlacklist ) {
+			return null;
+		}
+		if ( self::$wikiBlacklist === null ) {
+			self::$wikiBlacklist = new EchoCachedList(
+				$clusterCache,
+				$clusterCache->makeKey( "echo_on_wiki_blacklist" ),
+				new EchoOnWikiList( NS_MEDIAWIKI, $wgEchoOnWikiBlacklist )
+			);
+		}
+
+		return self::$wikiBlacklist;
 	}
 
 	/**
@@ -228,9 +277,10 @@ class EchoNotificationController {
 	 *
 	 * @param EchoEvent $event The event to test for inclusion in whitelist
 	 * @param User $user The user that owns the whitelist
-	 * @return boolean True when the event agent is in the user whitelist
+	 * @return bool True when the event agent is in the user whitelist
 	 */
 	public static function isWhitelistedByUser( EchoEvent $event, User $user ) {
+		$clusterCache = ObjectCache::getLocalClusterInstance();
 		global $wgEchoPerUserWhitelistFormat;
 
 		if ( $wgEchoPerUserWhitelistFormat === null || !$event->getAgent() ) {
@@ -242,18 +292,26 @@ class EchoNotificationController {
 			return false; // anonymous user
 		}
 
-		if ( !isset( self::$userWhitelist[$userId] ) ) {
-			self::$userWhitelist[$userId] = new EchoContainmentSet;
-			self::$userWhitelist[$userId]->addOnWiki(
-				NS_USER,
-				sprintf( $wgEchoPerUserWhitelistFormat, $user->getName() ),
-				ObjectCache::getLocalClusterInstance(),
-				wfMemcKey( "echo_on_wiki_whitelist_" . $userId )
-			);
+		// Ensure we have a list of whitelists
+		if ( self::$whitelistByUser === null ) {
+			self::$whitelistByUser = new MapCacheLRU( self::$maxRecipientCacheSize );
 		}
 
-		return self::$userWhitelist[$userId]
-			->contains( $event->getAgent()->getName() );
+		// Ensure we have a whitelist for the user
+		if ( !self::$whitelistByUser->has( $userId ) ) {
+			$whitelist = new EchoContainmentSet( $user );
+			self::$whitelistByUser->set( $userId, $whitelist );
+			$whitelist->addOnWiki(
+				NS_USER,
+				sprintf( $wgEchoPerUserWhitelistFormat, $user->getName() ),
+				$clusterCache,
+				$clusterCache->makeKey( "echo_on_wiki_whitelist_" . $userId )
+			);
+		} else {
+			// Just get the user's whitelist
+			$whitelist = self::$whitelistByUser->get( $userId );
+		}
+		return $whitelist->contains( $event->getAgent()->getName() );
 	}
 
 	/**
@@ -276,7 +334,7 @@ class EchoNotificationController {
 			throw new MWException( "Cannot notify anonymous user: {$user->getName()}" );
 		}
 
-		call_user_func_array( $wgEchoNotifiers[$type], array( $user, $event ) );
+		call_user_func_array( $wgEchoNotifiers[$type], [ $user, $event ] );
 	}
 
 	/**
@@ -290,16 +348,16 @@ class EchoNotificationController {
 	public static function evaluateUserCallable( EchoEvent $event, $locator = EchoAttributeManager::ATTR_LOCATORS ) {
 		$attributeManager = EchoAttributeManager::newFromGlobalVars();
 		$type = $event->getType();
-		$result = array();
+		$result = [];
 		foreach ( $attributeManager->getUserCallable( $type, $locator ) as $callable ) {
 			// locator options can be set per-event by using an array with
 			// name as first parameter.
 			if ( is_array( $callable ) ) {
 				$options = $callable;
-				$spliced = array_splice( $options, 0, 1, array( $event ) );
+				$spliced = array_splice( $options, 0, 1, [ $event ] );
 				$callable = reset( $spliced );
 			} else {
-				$options = array( $event );
+				$options = [ $event ];
 			}
 			if ( is_callable( $callable ) ) {
 				$result[] = call_user_func_array( $callable, $options );
@@ -325,8 +383,8 @@ class EchoNotificationController {
 
 		// Hook for injecting more users.
 		// @deprecated
-		$users = array();
-		Hooks::run( 'EchoGetDefaultNotifiedUsers', array( $event, &$users ) );
+		$users = [];
+		Hooks::run( 'EchoGetDefaultNotifiedUsers', [ $event, &$users ] );
 		if ( $users ) {
 			$notify->add( $users );
 		}
@@ -347,7 +405,7 @@ class EchoNotificationController {
 		}
 
 		// Filter non-User, anon and duplicate users
-		$seen = array();
+		$seen = [];
 		$notify->addFilter( function ( $user ) use ( &$seen ) {
 			if ( !$user instanceof User ) {
 				wfDebugLog( __METHOD__, 'Expected all User instances, received:' .
@@ -373,78 +431,28 @@ class EchoNotificationController {
 			} );
 		}
 
-		// Apply per-wiki event blacklist and per-user whitelists
-		// of that blacklist.
-		if ( self::isBlacklisted( $event ) ) {
-			$notify->addFilter( function ( $user ) use ( $event ) {
-				// don't use self:: - PHP5.3 closures don't inherit class scope
-				return EchoNotificationController::isWhitelistedByUser( $event, $user );
-			} );
-		}
+		// Apply blacklists and whitelists.
+		$notify->addFilter( function ( $user ) use ( $event ) {
+			$title = $event->getTitle();
+
+			if ( self::isBlacklistedByUser( $event, $user ) &&
+				(
+					$title === null ||
+					!(
+						// Still notify for posts anywhere in
+						// user's talk space
+						$title->getRootText() === $user->getName() &&
+						$title->getNamespace() === NS_USER_TALK
+					)
+				)
+			) {
+				return self::isWhitelistedByUser( $event, $user );
+			}
+
+			return true;
+		} );
 
 		return $notify->getIterator();
-	}
-
-	/**
-	 * Formats a notification
-	 *
-	 * @param EchoEvent $event The event for a notification.
-	 * @param User $user The user to format the notification for.
-	 * @param string $format The format to show the notification in: text, html, or email
-	 * @param string $type The type of notification being distributed (e.g. email, web)
-	 * @return string|array The formatted notification, or an array of subject
-	 *     and body (for emails), or an error message
-	 */
-	public static function formatNotification( EchoEvent $event, User $user, $format = 'text', $type = 'web' ) {
-		$eventType = $event->getType();
-
-		$res = '';
-		try {
-			$formatter = EchoNotificationFormatter::factory( $eventType );
-			$formatter->setOutputFormat( $format );
-		} catch ( InvalidArgumentException $e ) {
-			self::failFormatting( $event, $user );
-
-			return '';
-		}
-		set_error_handler( array( __CLASS__, 'formatterErrorHandler' ), -1 );
-		try {
-			$res = $formatter->format( $event, $user, $type );
-		} catch ( Exception $e ) {
-			$context = array(
-				'id' => $event->getId(),
-				'eventType' => $eventType,
-				'format' => $format,
-				'type' => $type,
-				'user' => $user ? $user->getName() : 'no user',
-				'exceptionName' => get_class( $e ),
-				'exceptionMessage' => $e->getMessage(),
-			);
-			LoggerFactory::getInstance( 'Echo' )->error( 'Error formatting notification', $context );
-			MWExceptionHandler::logException( $e );
-		}
-		restore_error_handler();
-
-		if ( $res === '' ) {
-			self::failFormatting( $event, $user );
-		}
-
-		return $res;
-	}
-
-	/**
-	 * Event has failed to format for the given user.  Mark it as read so
-	 * we do not continue to notify them about this broken event.
-	 *
-	 * @param EchoEvent $event
-	 * @param User $user
-	 */
-	protected static function failFormatting( EchoEvent $event, $user ) {
-		// FIXME: The only issue is that the badge count won't be up to date
-		// till you refresh the page.  Probably we could do this in the browser
-		// so that if the formatting is empty and the notif is unread, put it
-		// in the auto-mark-read APIs
-		EchoDeferredMarkAsReadUpdate::add( $event, $user );
 	}
 
 	/**
@@ -452,6 +460,12 @@ class EchoNotificationController {
 	 *
 	 * Converts E_RECOVERABLE_ERROR, such as passing null to a method expecting
 	 * a non-null object, into exceptions.
+	 * @param int $errno
+	 * @param string $errstr
+	 * @param string $errfile
+	 * @param int $errline
+	 * @return bool
+	 * @throws EchoCatchableFatalErrorException
 	 */
 	public static function formatterErrorHandler( $errno, $errstr, $errfile, $errline ) {
 		if ( $errno !== E_RECOVERABLE_ERROR ) {

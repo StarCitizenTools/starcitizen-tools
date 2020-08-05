@@ -21,6 +21,16 @@ use VirtualRESTServiceClient;
 
 abstract class Utils {
 	/**
+	 * @var VirtualRESTServiceClient
+	 */
+	protected static $serviceClient = null;
+
+	/**
+	 * @var \VirtualRESTService
+	 */
+	protected static $vrsObject = null;
+
+	/**
 	 * Convert from/to wikitext <=> html or topic-title-wikitext => topic-title-html.
 	 * Only these pairs are supported.  html => wikitext requires Parsoid, and
 	 * topic-title-html => topic-title-wikitext is not supported.
@@ -38,7 +48,7 @@ abstract class Utils {
 			return $content;
 		}
 
-		if ( $from === 'wt' ){
+		if ( $from === 'wt' ) {
 			$from = 'wikitext';
 		}
 
@@ -70,7 +80,7 @@ abstract class Utils {
 		/** @var Language $wgLang */
 		global $wgLang;
 
-		$plain = trim( html_entity_decode( strip_tags( $html ), ENT_QUOTES ) );
+		$plain = trim( Sanitizer::stripAllTags( $html ) );
 
 		if ( $truncateLength === null ) {
 			return $plain;
@@ -103,24 +113,24 @@ abstract class Utils {
 		}
 
 		$prefixedDbTitle = $title->getPrefixedDBkey();
-		$params = array(
+		$params = [
 			$from => $content,
 			'body_only' => 'true',
-		);
+		];
 		if ( $from === 'html' ) {
 			$params['scrub_wikitext'] = 'true';
 		}
 		$url = '/restbase/local/v1/transform/' . $from . '/to/' . $to . '/' .
 			urlencode( $prefixedDbTitle );
-		$request = array(
+		$request = [
 			'method' => 'POST',
 			'url' => $url,
 			'body' => $params,
-			'headers' => array(
-				'Accept' => 'text/html; charset=utf-8; profile="mediawiki.org/specs/html/1.2.0"',
+			'headers' => [
+				'Accept' => 'text/html; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/HTML/1.6.1"',
 				'User-Agent' => "Flow-MediaWiki/$wgVersion",
-			),
-		);
+			],
+		];
 		$response = $serviceClient->run( $request );
 		if ( $response['code'] !== 200 ) {
 			if ( $response['error'] !== '' ) {
@@ -129,10 +139,24 @@ abstract class Utils {
 				$statusMsg = $response['code'];
 			}
 			$vrsInfo = $serviceClient->getMountAndService( '/restbase/' );
-			$name = $vrsInfo[1] ? $vrsInfo[1]->getName() : 'VRS service';
-			$msg = "Request to " . $name . " for '$from' to '$to' conversion of content connected to title \"$prefixedDbTitle\" failed: $statusMsg";
-			wfDebugLog( 'Flow', __METHOD__ . ": $msg" );
-			throw new NoParserException( "$msg", 'process-wikitext' );
+			$serviceName = $vrsInfo[1] ? $vrsInfo[1]->getName() : 'VRS service';
+			$msg = "Request to " . $serviceName . " for \"$from\" to \"$to\" conversion of content connected to title \"$prefixedDbTitle\" failed: $statusMsg";
+			Container::get( 'default_logger' )->error(
+				'Request to {service} for "{sourceFormat}" to "{targetFormat}" conversion of content connected to title "{title}" failed.  Code: {code}, Reason: "{reason}", Body: "{body}", Error: "{error}"',
+				[
+					'service' => $serviceName,
+					'sourceFormat' => $from,
+					'targetFormat' => $to,
+					'title' => $prefixedDbTitle,
+					'code' => $response['code'],
+					'reason' => $response['reason'],
+					'error' => $response['error'], // This is sometimes/always empty string
+					'headers' => $response['headers'],
+					'body' => $response['body'],
+					'response' => $response,
+				]
+			);
+			throw new NoParserException( $msg, 'process-wikitext' );
 		}
 
 		$content = $response['body'];
@@ -189,30 +213,24 @@ abstract class Utils {
 
 		$options = new \ParserOptions;
 		$options->setTidy( true );
-		$options->setEditSection( false );
 
 		$output = $wgParser->parse( $content, $title, $options );
-		return $output->getText();
+		return $output->getText( [ 'enableSectionEditLinks' => false ] );
 	}
 
 	/**
 	 * Check to see whether a Parsoid or RESTBase service is configured.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function isParsoidConfigured() {
 		try {
-			self::getServiceClient();
+			self::getVRSObject();
 			return true;
 		} catch ( NoParserException $e ) {
 			return false;
 		}
 	}
-
-	/**
-	 * @var VirtualRESTServiceClient
-	 */
-	protected static $serviceClient = null;
 
 	/**
 	 * Returns Flow's Virtual REST Service for Parsoid/RESTBase.
@@ -223,13 +241,23 @@ abstract class Utils {
 	 * @throws NoParserException When Parsoid/RESTBase is unconfigured
 	 */
 	protected static function getServiceClient() {
-
 		if ( self::$serviceClient === null ) {
-			$sc = new VirtualRESTServiceClient( new MultiHttpClient( array() ) );
+			$sc = new VirtualRESTServiceClient( new MultiHttpClient( [] ) );
 			$sc->mount( '/restbase/', self::getVRSObject() );
 			self::$serviceClient = $sc;
 		}
 		return self::$serviceClient;
+	}
+
+	/**
+	 * @return \VirtualRESTService
+	 * @throws NoParserException
+	 */
+	private static function getVRSObject() {
+		if ( !self::$vrsObject ) {
+			self::$vrsObject = self::makeVRSObject();
+		}
+		return self::$vrsObject;
 	}
 
 	/**
@@ -245,13 +273,13 @@ abstract class Utils {
 	 * @return \VirtualRESTService the VirtualRESTService object to use
 	 * @throws NoParserException When Parsoid/RESTBase is not configured
 	 */
-	private static function getVRSObject() {
+	private static function makeVRSObject() {
 		global $wgVirtualRestConfig, $wgFlowParsoidURL, $wgFlowParsoidPrefix,
 			$wgFlowParsoidTimeout, $wgFlowParsoidForwardCookies,
 			$wgFlowParsoidHTTPProxy;
 
 		// the params array to create the service object with
-		$params = array();
+		$params = [];
 		// the VRS class to use; defaults to Parsoid
 		$class = 'ParsoidVirtualRESTService';
 		// the global virtual rest service config object, if any
@@ -262,7 +290,9 @@ abstract class Utils {
 			$params = $vrs['modules']['restbase'];
 			$params['parsoidCompat'] = false; // backward compatibility
 			$class = 'RestbaseVirtualRESTService';
-		} else*/if ( isset( $vrs['modules'] ) && isset( $vrs['modules']['parsoid'] ) ) {
+		} else
+		*/
+		if ( isset( $vrs['modules'] ) && isset( $vrs['modules']['parsoid'] ) ) {
 			// there's a global parsoid config, use it next
 			$params = $vrs['modules']['parsoid'];
 			$params['restbaseCompat'] = true;
@@ -271,13 +301,13 @@ abstract class Utils {
 			if ( !$wgFlowParsoidURL ) {
 				throw new NoParserException( 'Flow Parsoid configuration is unavailable', 'process-wikitext' );
 			}
-			$params = array(
+			$params = [
 				'URL' => $wgFlowParsoidURL,
 				'prefix' => $wgFlowParsoidPrefix,
 				'timeout' => $wgFlowParsoidTimeout,
 				'HTTPProxy' => $wgFlowParsoidHTTPProxy,
 				'forwardCookies' => $wgFlowParsoidForwardCookies
-			);
+			];
 		}
 		// merge the global and service-specific params
 		if ( isset( $vrs['global'] ) ) {
@@ -318,13 +348,13 @@ abstract class Utils {
 	 * 	801 - allow unrecognized tags like figcaption
 	 *
 	 * @param string $content
-	 * @param boolean[optional] $utf8Fragment If true, prefix $content with <?xml encoding="utf-8"?>
+	 * @param bool[optional] $utf8Fragment If true, prefix $content with <?xml encoding="utf-8"?>
 	 * @param array[optional] $ignoreErrorCodes
 	 * @return DOMDocument
 	 * @throws WikitextException
 	 * @see http://www.xmlsoft.org/html/libxml-xmlerror.html
 	 */
-	public static function createDOM( $content, $utf8Fragment = true, $ignoreErrorCodes = array( 9, 76, 513, 801 ) ) {
+	public static function createDOM( $content, $utf8Fragment = true, $ignoreErrorCodes = [ 9, 76, 513, 801 ] ) {
 		$dom = new DOMDocument();
 
 		// Otherwise the parser may attempt to load the dtd from an external source.
@@ -337,7 +367,8 @@ abstract class Utils {
 		// Work around DOMDocument's morbid insistence on using iso-8859-1
 		// Even $dom = new DOMDocument( '1.0', 'utf-8' ); doesn't work, you have to specify
 		// encoding ="utf-8" in the string fed to loadHTML()
-		$dom->loadHTML( ( $utf8Fragment ? '<?xml encoding="utf-8"?>' : '' ) . $content );
+		$html = ( $utf8Fragment ? '<?xml encoding="utf-8"?>' : '' ) . $content;
+		$dom->loadHTML( $html, LIBXML_PARSEHUGE );
 
 		libxml_disable_entity_loader( $loadEntities );
 
@@ -345,7 +376,7 @@ abstract class Utils {
 		// throw an exception
 		$errors = array_filter(
 			libxml_get_errors(),
-			function( $error ) use( $ignoreErrorCodes ) {
+			function ( $error ) use( $ignoreErrorCodes ) {
 				return !in_array( $error->code, $ignoreErrorCodes );
 			}
 		);
@@ -356,8 +387,15 @@ abstract class Utils {
 
 		if ( $errors ) {
 			throw new WikitextException(
-				implode( "\n", array_map( function( $error ) { return $error->message; }, $errors ) )
-				. "\n\nFrom source content:\n" . $content,
+				implode(
+					"\n",
+					array_map(
+						function ( $error ) {
+							return $error->message;
+						},
+						$errors
+					)
+				) . "\n\nFrom source content:\n" . $content,
 				'process-wikitext'
 			);
 		}
@@ -369,19 +407,18 @@ abstract class Utils {
 	 * Handler for FlowAddModules, avoids rest of Flow having to be aware if
 	 * Parsoid is in use.
 	 *
-	 * @param OutputPage $out OutputPage object
+	 * @param OutputPage $out
 	 * @return bool
 	 */
 	public static function onFlowAddModules( OutputPage $out ) {
-
 		if ( self::isParsoidConfigured() ) {
 			// The module is only necessary when we are using parsoid.
 			// XXX We only need the Parsoid CSS if some content being
 			// rendered has getContentFormat() === 'html'.
-			$out->addModuleStyles( array(
+			$out->addModuleStyles( [
 				'mediawiki.skinning.content.parsoid',
 				'ext.cite.style',
-			) );
+			] );
 		}
 
 		return true;
@@ -394,7 +431,7 @@ abstract class Utils {
 	 * @return string html of the nodes children
 	 */
 	public static function getInnerHtml( DOMNode $node = null ) {
-		$html = array();
+		$html = [];
 		if ( $node ) {
 			$dom = $node instanceof DOMDocument ? $node : $node->ownerDocument;
 			foreach ( $node->childNodes as $child ) {
@@ -438,16 +475,13 @@ abstract class Utils {
 		if ( !$response instanceof FauxResponse ) {
 			throw new FlowException( 'Expected a FauxResponse in CLI environment' );
 		}
-		// FauxResponse does not yet expose the full set of cookies
-		$reflProp = new \ReflectionProperty( $response, 'cookies' );
-		$reflProp->setAccessible( true );
-		$cookies = $reflProp->getValue( $response );
+		$cookies = $response->getCookies();
 
 		// now we need to convert the array into the cookie format of
 		// foo=bar; baz=bang
-		$output = array();
+		$output = [];
 		foreach ( $cookies as $key => $value ) {
-			$output[] = "$wgCookiePrefix$key=$value";
+			$output[] = "$wgCookiePrefix$key={$value['value']}";
 		}
 
 		return implode( '; ', $output );

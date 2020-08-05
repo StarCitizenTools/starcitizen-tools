@@ -6,9 +6,9 @@ use Flow\Model\PostRevision;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
-	$IP = dirname( __FILE__ ) . '/../../..';
+	$IP = __DIR__ . '/../../..';
 }
-require_once( "$IP/maintenance/Maintenance.php" );
+require_once "$IP/maintenance/Maintenance.php";
 
 /**
  * Update all xxx_user_wiki field to have the correct wiki name
@@ -25,6 +25,7 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->mDescription = "Update xxx_user_wiki field in tables: flow_workflow, flow_tree_revision, flow_revision";
+		$this->requireExtension( 'Flow' );
 		$this->setBatchSize( 300 );
 	}
 
@@ -37,12 +38,13 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 	 * empty *_user_id and *_user_ip, but this doesn't hurt. Alternatively, we could
 	 * add a check user_id != 0 and user_ip is not null to the query, but this will
 	 * result in more db queries
-	 *
+	 * @return true
+	 * @throws \MWException
 	 */
 	protected function doDBUpdates() {
 		$id = '';
 		$count = $this->mBatchSize;
-		$dbr = Container::get( 'db.factory' )->getDB( DB_SLAVE );
+		$dbr = Container::get( 'db.factory' )->getDB( DB_REPLICA );
 
 		// If table flow_header_revision does not exist, that means the wiki
 		// has run the data migration before or the wiki starts from scratch,
@@ -54,13 +56,13 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 		while ( $count == $this->mBatchSize ) {
 			$count = 0;
 			$res = $dbr->select(
-				array( 'flow_workflow' ),
-				array( 'workflow_wiki', 'workflow_id', 'workflow_type' ),
-				array(
+				[ 'flow_workflow' ],
+				[ 'workflow_wiki', 'workflow_id', 'workflow_type' ],
+				[
 					'workflow_id > ' . $dbr->addQuotes( $id ),
-				),
+				],
 				__METHOD__,
-				array( 'ORDER BY' => 'workflow_id ASC', 'LIMIT' => $this->mBatchSize )
+				[ 'ORDER BY' => 'workflow_id ASC', 'LIMIT' => $this->mBatchSize ]
 			);
 			if ( $res ) {
 				foreach ( $res as $row ) {
@@ -91,20 +93,20 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 	private function updateHeader( $workflow, $wiki ) {
 		$id = '';
 		$count = $this->mBatchSize;
-		$dbr = Container::get( 'db.factory' )->getDB( DB_SLAVE );
+		$dbr = Container::get( 'db.factory' )->getDB( DB_REPLICA );
 
 		while ( $count == $this->mBatchSize ) {
 			$count = 0;
 			$res = $dbr->select(
-				array( 'flow_header_revision', 'flow_revision' ),
-				array( 'rev_id', 'rev_type' ),
-				array(
+				[ 'flow_header_revision', 'flow_revision' ],
+				[ 'rev_id', 'rev_type' ],
+				[
 					'rev_id > ' . $dbr->addQuotes( $id ),
 					'header_rev_id = rev_id',
 					'header_workflow_id' => $workflow->getId()->getBinary()
-				),
+				],
 				__METHOD__,
-				array( 'ORDER BY' => 'header_rev_id ASC', 'LIMIT' => $this->mBatchSize )
+				[ 'ORDER BY' => 'header_rev_id ASC', 'LIMIT' => $this->mBatchSize ]
 			);
 			if ( $res ) {
 				foreach ( $res as $row ) {
@@ -128,19 +130,19 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 	private function updateTopicList( $workflow, $wiki ) {
 		$id = '';
 		$count = $this->mBatchSize;
-		$dbr = Container::get( 'db.factory' )->getDB( DB_SLAVE );
+		$dbr = Container::get( 'db.factory' )->getDB( DB_REPLICA );
 
 		while ( $count == $this->mBatchSize ) {
 			$count = 0;
 			$res = $dbr->select(
-				array( 'flow_topic_list' ),
-				array( 'topic_id' ),
-				array(
+				[ 'flow_topic_list' ],
+				[ 'topic_id' ],
+				[
 					'topic_list_id' => $workflow->getId()->getBinary(),
 					'topic_id > ' . $dbr->addQuotes( $id ),
-				),
+				],
 				__METHOD__,
-				array( 'ORDER BY' => 'topic_id ASC', 'LIMIT' => $this->mBatchSize )
+				[ 'ORDER BY' => 'topic_id ASC', 'LIMIT' => $this->mBatchSize ]
 			);
 			if ( $res ) {
 				$index = 0;
@@ -195,14 +197,14 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 		$dbw = Container::get( 'db.factory' )->getDB( DB_MASTER );
 		$res = $dbw->update(
 			'flow_revision',
-			array(
+			[
 				'rev_user_wiki' => $wiki,
 				'rev_mod_user_wiki' => $wiki,
 				'rev_edit_user_wiki' => $wiki,
-			),
-			array(
+			],
+			[
 				'rev_id' => $revision->getRevisionId()->getBinary(),
-			),
+			],
 			__METHOD__
 		);
 		if ( !$res ) {
@@ -213,12 +215,12 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 		if ( $type === 'post' ) {
 			$res = $dbw->update(
 				'flow_tree_revision',
-				array(
+				[
 					'tree_orig_user_wiki' => $wiki,
-				),
-				array(
+				],
+				[
 					'tree_rev_id' => $revision->getRevisionId()->getBinary(),
-				),
+				],
 				__METHOD__
 			);
 			if ( !$res ) {
@@ -226,7 +228,6 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 			}
 			$this->checkForSlave();
 		}
-
 	}
 
 	private function checkForSlave() {
@@ -250,4 +251,4 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 }
 
 $maintClass = "FlowUpdateUserWiki";
-require_once( DO_MAINTENANCE );
+require_once RUN_MAINTENANCE_IF_MAIN;

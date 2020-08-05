@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"1AnuraagPandey"
+		]
+	},
+	"api-error-noimageinfo": "अपलोड सफल, लेकिन सर्वर ने फ़ाइल के बारे में हमें कोई जानकारी नहीं दी."
+}

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor AnnotationContextItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -15,7 +15,7 @@
  * @param {ve.dm.Model} model Model item is related to
  * @param {Object} config Configuration options
  */
-ve.ui.AnnotationContextItem = function VeUiAnnotationontextItem( context, model, config ) {
+ve.ui.AnnotationContextItem = function VeUiAnnotationContextItem( context, model, config ) {
 	// Parent constructor
 	ve.ui.AnnotationContextItem.super.call( this, context, model, config );
 

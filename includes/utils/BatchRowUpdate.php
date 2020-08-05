@@ -4,7 +4,7 @@
  * method of batch updating rows in a database. To use create a class
  * implementing the RowUpdateGenerator interface and configure the
  * BatchRowIterator and BatchRowWriter for access to the correct table.
- * The components will handle reading, writing, and waiting for slaves
+ * The components will handle reading, writing, and waiting for replica DBs
  * while the generator implementation handles generating update arrays
  * for singular rows.
  *
@@ -64,9 +64,9 @@ class BatchRowUpdate {
 	protected $output;
 
 	/**
-	 * @param BatchRowIterator   $reader    Iterator that returns an
+	 * @param BatchRowIterator $reader Iterator that returns an
 	 *  array of database rows
-	 * @param BatchRowWriter     $writer    Writer capable of pushing
+	 * @param BatchRowWriter $writer Writer capable of pushing
 	 *  row updates to the database
 	 * @param RowUpdateGenerator $generator Generates single row updates
 	 *  based on the rows content
@@ -77,7 +77,7 @@ class BatchRowUpdate {
 		$this->reader = $reader;
 		$this->writer = $writer;
 		$this->generator = $generator;
-		$this->output = function() {
+		$this->output = function () {
 		}; // nop
 	}
 
@@ -112,15 +112,8 @@ class BatchRowUpdate {
 	 *
 	 * @param callable $output A callback taking a single string
 	 *  parameter to output
-	 *
-	 * @throws MWException
 	 */
-	public function setOutput( $output ) {
-		if ( !is_callable( $output ) ) {
-			throw new MWException(
-				'Provided $output param is required to be callable.'
-			);
-		}
+	public function setOutput( callable $output ) {
 		$this->output = $output;
 	}
 

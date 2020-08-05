@@ -16,11 +16,12 @@ class CampaignContentHandler extends JsonContentHandler {
 		parent::__construct( $modelId );
 	}
 
-	public function canBeUsedOn( Title $title ) {
-		return $title->inNamespace( NS_CAMPAIGN );
+	protected function getContentClass() {
+		return CampaignContent::class;
 	}
 
-	protected function getContentClass() {
-		return 'CampaignContent';
+	public function makeEmptyContent() {
+		$class = $this->getContentClass();
+		return new $class( '{"enabled":false}' );
 	}
 }

@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wertuose"
+		]
+	},
+	"popups-message": "Uçan pəncərələr",
+	"popups-desc": "İstifadəçi kursoru hansısa səhifənin daxili keçidinin üstünə gətirdikdə həmin səhifənin tərkibini əks etdirən kiçik pəncərə peyda olur.",
+	"popups-settings-title": "Səhifəyə öncədən baxış",
+	"popups-settings-option-simple": "Yandır",
+	"popups-settings-option-simple-description": "Bir məqalə oxuyarkən daxili keçidlərə cəld baxış.",
+	"popups-settings-option-off": "Söndür",
+	"popups-settings-save": "Qeyd et"
+}

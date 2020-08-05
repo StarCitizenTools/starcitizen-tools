@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface AnnotationAction class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,9 +13,9 @@
  * @constructor
  * @param {ve.ui.Surface} surface Surface to act on
  */
-ve.ui.AnnotationAction = function VeUiAnnotationAction( surface ) {
+ve.ui.AnnotationAction = function VeUiAnnotationAction() {
 	// Parent constructor
-	ve.ui.Action.call( this, surface );
+	ve.ui.AnnotationAction.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -101,6 +101,8 @@ ve.ui.AnnotationAction.prototype.toggle = function ( name, data ) {
 		} else {
 			fragment.annotateContent( 'clear', name );
 		}
+	} else if ( surfaceModel.sourceMode ) {
+		return false;
 	} else {
 		insertionAnnotations = surfaceModel.getInsertionAnnotations();
 		existingAnnotations = insertionAnnotations.getAnnotationsByName( annotation.name );

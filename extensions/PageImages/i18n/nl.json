@@ -2,9 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"AvatarTeam",
-			"Sjoerddebruin"
+			"Sjoerddebruin",
+			"Xxmarijnw"
 		]
 	},
 	"pageimages-desc": "Verzamelt informatie over afbeeldingen die worden gebruikt op de pagina",
-	"pageimages-info-label": "Pagina-afbeelding"
+	"pageimages-info-label": "Pagina-afbeelding",
+	"apihelp-query+pageimages-paramvalue-license-free": "Alleen vrije afbeeldingen"
 }

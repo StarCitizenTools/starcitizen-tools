@@ -83,11 +83,13 @@
 		}
 	} ) );
 
-	QUnit.test( 'Configuration', 1, function ( assert ) {
+	QUnit.test( 'Configuration', function ( assert ) {
 		assert.ok( mw.config.exists( 'wgEventLoggingBaseUri' ), 'Global config var "wgEventLoggingBaseUri" exists' );
 	} );
 
-	QUnit.test( 'validate', validationCases.length + 1, function ( assert ) {
+	QUnit.test( 'validate', function ( assert ) {
+		assert.expect( validationCases.length + 1 );
+
 		var meta = mw.eventLog.getSchema( 'earthquake' ),
 			errors = mw.eventLog.validate( {
 				epicenter: 'Valdivia',
@@ -102,7 +104,7 @@
 		} );
 	} );
 
-	QUnit.test( 'inSample', 2, function ( assert ) {
+	QUnit.test( 'inSample', function ( assert ) {
 		assert.strictEqual( mw.eventLog.inSample( 0 ), false );
 		assert.strictEqual( mw.eventLog.inSample( 1 ), true );
 
@@ -110,23 +112,22 @@
 		// want consistency in this case
 	} );
 
-	QUnit.test( 'randomTokenMatch', 2, function ( assert ) {
+	QUnit.test( 'randomTokenMatch', function ( assert ) {
 		var i, results = { 'true': 0, 'false': 0 };
 		for ( i = 0; i < 100; i++ ) {
 			results[ mw.eventLog.randomTokenMatch( 10 ) ]++;
 		}
-		assert.ok( results[ 'true' ] > 0 && results[ 'true' ] < 20, 'True: ' + results[ 'true' ] );
-		assert.ok( results[ 'false' ] > 80 && results[ 'false' ] < 100, 'False: ' + results[ 'false' ] );
+		assert.ok( results[ 'true' ] > 0 && results[ 'true' ] < 25, 'True: ' + results[ 'true' ] );
+		assert.ok( results[ 'false' ] > 75 && results[ 'false' ] < 100, 'False: ' + results[ 'false' ] );
 	} );
 
-	QUnit.asyncTest( 'logEvent', 1, function ( assert ) {
+	QUnit.test( 'logEvent', function ( assert ) {
 		var event = {
 			epicenter: 'Valdivia',
 			magnitude: 9.5
 		};
 
-		mw.eventLog.logEvent( 'earthquake', event ).always( function ( e ) {
-			QUnit.start();
+		return mw.eventLog.logEvent( 'earthquake', event ).then( function ( e ) {
 			assert.deepEqual( e.event, event, 'logEvent promise resolves with event' );
 		} );
 	} );
@@ -141,31 +142,35 @@
 			expected: 'Url exceeds maximum length'
 		}
 	}, function ( name, params ) {
-		QUnit.test( name, 1, function ( assert ) {
+		QUnit.test( name, function ( assert ) {
 			var url = new Array( params.size + 1 ).join( 'x' ),
 				result = mw.eventLog.checkUrlSize( 'earthquake', url );
 			assert.deepEqual( result, params.expected, name );
 		} );
 	} );
 
-	QUnit.asyncTest( 'logTooLongEvent', 1, function ( assert ) {
+	QUnit.test( 'logTooLongEvent', function ( assert ) {
 		var event = {
 			epicenter: 'Valdivia',
 			magnitude: 9.5,
 			article: new Array( mw.eventLog.maxUrlSize + 1 ).join( 'x' )
 		};
 
-		mw.eventLog.logEvent( 'earthquake', event ).always( function ( e, error ) {
-			QUnit.start();
+		mw.eventLog.logEvent( 'earthquake', event )
+		.done( function () {
+			assert.ok( false, 'Expected an error' );
+		} )
+		.fail( function ( e, error ) {
 			assert.deepEqual( error, 'Url exceeds maximum length',
 				'logEvent promise resolves with error' );
-		} );
+		} )
+		.always( assert.async() );
 	} );
 
-	QUnit.test( 'setDefaults', 1, function ( assert ) {
-		var prepared, defaults;
+	QUnit.test( 'setDefaults', function ( assert ) {
+		var prepared;
 
-		defaults = mw.eventLog.setDefaults( 'earthquake', {
+		mw.eventLog.setDefaults( 'earthquake', {
 			article: '[[1960 Valdivia earthquake]]',
 			epicenter: 'Valdivia'
 		} );
@@ -210,9 +215,7 @@
 			invalid: [ -1, {}, undefined ]
 		}
 	}, function ( type, cases ) {
-		var asserts = cases.valid.length + cases.invalid.length;
-
-		QUnit.test( type, asserts, function ( assert ) {
+		QUnit.test( type, function ( assert ) {
 			$.each( cases.valid, function ( index, value ) {
 				assert.strictEqual( mw.eventLog.isInstanceOf( value, type ), true,
 					JSON.stringify( value ) + ' is a ' + type );

@@ -3,7 +3,7 @@
  * Script to generate some random data to help testing sandbox.
  *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -44,7 +44,7 @@ class TranslateGenerateRandomSandboxData extends Maintenance {
 			for ( $j = 0; $j < $count; $j++ ) {
 				$title = Title::makeTitle( NS_MEDIAWIKI, wfRandomString( 24 ) . '/' . $language );
 
-				$value = array( 'Pupu söi' );
+				$value = [ 'Pupu söi' ];
 				for ( $k = rand( 0, 20 ); $k > 0; $k-- ) {
 					$value[] = wfRandomString( rand( 1, 28 ) );
 				}
@@ -59,7 +59,7 @@ class TranslateGenerateRandomSandboxData extends Maintenance {
 
 /*
  * Gauss functions are based on Mark Baker's code from
- * http://stackoverflow.com/questions/5188900/bell-curve-algorithm-with-php
+ * https://stackoverflow.com/questions/5188900/bell-curve-algorithm-with-php
  */
 
 function wfGauss() {
@@ -97,7 +97,7 @@ function wfGaussMs( $mean, $stddev ) {
 
 function wfRandom01() {
 	// Returns random number using mt_rand() with a flat distribution from 0 to 1 inclusive
-	return (float) mt_rand() / (float) mt_getrandmax();
+	return (float)mt_rand() / (float)mt_getrandmax();
 }
 
 function wfRandomPn() {
@@ -105,5 +105,5 @@ function wfRandomPn() {
 	return ( 2.0 * wfRandom01() ) - 1.0;
 }
 
-$maintClass = 'TranslateGenerateRandomSandboxData';
+$maintClass = TranslateGenerateRandomSandboxData::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

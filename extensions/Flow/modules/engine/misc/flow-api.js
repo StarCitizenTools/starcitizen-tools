@@ -1,6 +1,4 @@
 ( function ( mw, $ ) {
-	mw.flow = mw.flow || {}; // create mw.flow globally
-
 	var apiTransformMap = {
 		// Map of API submodule name, block name, and prefix name
 		'moderate-post': [ 'topic_', 'mp' ],
@@ -19,16 +17,17 @@
 		'edit-topic-summary': [ 'topicsummary_', 'ets' ]
 	};
 
+	mw.flow = mw.flow || {}; // create mw.flow globally
+
 	/**
 	 * Handles Flow API calls. Each FlowComponent has its own instance of FlowApi as component.Api,
 	 * so that it can store a workflowId and pageName permanently for simplicity.
+	 *
+	 * @constructor
 	 * @param {string} [workflowId]
 	 * @param {string} [pageName]
-	 * @return {FlowApi}
-	 * @constructor
 	 */
-	function FlowApi( storageEngine, workflowId, pageName ) {
-		this.StorageEngine = storageEngine;
+	function FlowApi( workflowId, pageName ) {
 		this.workflowId = workflowId;
 		this.pageName = pageName;
 
@@ -46,14 +45,6 @@
 
 			if ( ajaxTimeoutSec !== null && ajaxTimeoutSec > 0 ) {
 				apiConstructorParams.ajax.timeout = ajaxTimeoutSec * 1000;
-			}
-
-			// IE8 caches POST under some conditions, prevent that here.
-			// IE8 is most likely the only browser we support that doesn't
-			// have addEventListener, and anything else that gets caught
-			// up isn't that bad off.
-			if ( !document.addEventListener ) {
-				apiConstructorParams.ajax.cache = false;
 			}
 
 			mwApi = new mw.Api( apiConstructorParams );
@@ -93,8 +84,6 @@
 		this.apiCall = flowApiCall;
 	}
 
-	/** @type {Storer} */
-	FlowApi.prototype.StorageEngine = null;
 	/** @type {string} */
 	FlowApi.prototype.pageName = null;
 	/** @type {string} */
@@ -289,7 +278,7 @@
 	 * @param {Object} queryMap
 	 * @return {jQuery.Promise}
 	 */
-	function flowApiRequestFromNode( node, queryMap ) {
+	function flowApiRequestFromNode( node ) {
 		var $node = $( node );
 
 		if ( $node.is( 'a' ) ) {
@@ -312,15 +301,16 @@
 	 * @return {undefined|jQuery.Promise}
 	 */
 	function flowApiAbortOldRequestFromNode( $node, queryMap, startNewMethod ) {
+		var str, prevApiCall, newApiCall;
+
 		$node = $( $node );
 
 		// transform flow_* params into (nt_*, rep_*, ...)
 		queryMap = flowApiTransformMap( queryMap );
 
 		// If this anchor already has a request in flight, abort it
-		var str = 'flow-api-query-temp-' + queryMap.action + '-' + queryMap.submodule,
-			prevApiCall = $node.data( str ),
-			newApiCall;
+		str = 'flow-api-query-temp-' + queryMap.action + '-' + queryMap.submodule;
+		prevApiCall = $node.data( str );
 
 		// If a previous API call was found, let's abort it
 		if ( prevApiCall ) {

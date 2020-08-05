@@ -7,6 +7,7 @@
  *
  * @group API
  * @group medium
+ * @covers ApiFlickrBlacklist
  */
 class ApiFlickrBlacklistTest extends ApiTestCase {
 	/**
@@ -45,16 +46,16 @@ class ApiFlickrBlacklistTest extends ApiTestCase {
 		$this->setFlickrBlacklistPage( self::BLACKLIST_PAGE );
 		$this->editPage( self::BLACKLIST_PAGE, self::PASFAM_NSID );
 
-		list( $response, , ) = $this->doApiRequest( array(
+		list( $response, , ) = $this->doApiRequest( [
 			'action' => 'flickrblacklist',
 			'url' => self::PASFAM_IMAGE_STATIC,
-		) );
+		] );
 		$this->assertBlacklistMatch( $response );
 
-		list( $response, , ) = $this->doApiRequest( array(
+		list( $response, , ) = $this->doApiRequest( [
 			'action' => 'flickrblacklist',
 			'url' => self::PASFAM_IMAGE_PHOTO,
-		) );
+		] );
 		$this->assertBlacklistMatch( $response );
 	}
 
@@ -63,10 +64,10 @@ class ApiFlickrBlacklistTest extends ApiTestCase {
 		$this->setFlickrBlacklistPage( self::BLACKLIST_PAGE );
 		$this->editPage( self::BLACKLIST_PAGE, self::PASFAM_USERNAME );
 
-		list( $response, , ) = $this->doApiRequest( array(
+		list( $response, , ) = $this->doApiRequest( [
 			'action' => 'flickrblacklist',
 			'url' => self::PASFAM_IMAGE_STATIC,
-		) );
+		] );
 		$this->assertBlacklistMatch( $response );
 	}
 
@@ -75,10 +76,10 @@ class ApiFlickrBlacklistTest extends ApiTestCase {
 		$this->setFlickrBlacklistPage( self::BLACKLIST_PAGE );
 		$this->editPage( self::BLACKLIST_PAGE, 'foo bar ' . self::PASFAM_NSID . ' baz' );
 
-		list( $response, , ) = $this->doApiRequest( array(
+		list( $response, , ) = $this->doApiRequest( [
 			'action' => 'flickrblacklist',
 			'url' => self::PASFAM_IMAGE_STATIC,
-		) );
+		] );
 		$this->assertBlacklistMatch( $response );
 	}
 
@@ -87,16 +88,16 @@ class ApiFlickrBlacklistTest extends ApiTestCase {
 		$this->setFlickrBlacklistPage( self::BLACKLIST_PAGE );
 		$this->editPage( self::BLACKLIST_PAGE, self::FAKE_NSID );
 
-		list( $response, , ) = $this->doApiRequest( array(
+		list( $response, , ) = $this->doApiRequest( [
 			'action' => 'flickrblacklist',
 			'url' => self::PASFAM_IMAGE_STATIC,
-		) );
+		] );
 		$this->assertNotBlacklistMatch( $response );
 
-		list( $response, , ) = $this->doApiRequest( array(
+		list( $response, , ) = $this->doApiRequest( [
 			'action' => 'flickrblacklist',
 			'url' => self::PASFAM_IMAGE_PHOTO,
-		) );
+		] );
 		$this->assertNotBlacklistMatch( $response );
 	}
 
@@ -108,10 +109,10 @@ class ApiFlickrBlacklistTest extends ApiTestCase {
 		$this->setFlickrBlacklistPage( self::BLACKLIST_PAGE );
 		$this->editPage( self::BLACKLIST_PAGE, '# ' . self::PASFAM_NSID );
 
-		list( $response, , ) = $this->doApiRequest( array(
+		list( $response, , ) = $this->doApiRequest( [
 			'action' => 'flickrblacklist',
 			'url' => self::PASFAM_IMAGE_STATIC,
-		) );
+		] );
 		$this->assertNotBlacklistMatch( $response );
 	}
 
@@ -120,10 +121,10 @@ class ApiFlickrBlacklistTest extends ApiTestCase {
 		$this->setFlickrBlacklistPage( self::BLACKLIST_PAGE );
 		$this->editPage( self::BLACKLIST_PAGE, '26011645@N00' );
 
-		list( $response, , ) = $this->doApiRequest( array(
+		list( $response, , ) = $this->doApiRequest( [
 			'action' => 'flickrblacklist',
 			'list' => 1,
-		) );
+		] );
 
 		$this->assertArrayHasKey( 'flickrblacklist', $response );
 		$this->assertArrayHasKey( 'list', $response['flickrblacklist'] );
@@ -139,10 +140,10 @@ class ApiFlickrBlacklistTest extends ApiTestCase {
 		$this->checkApiSetup();
 		$this->setFlickrBlacklistPage( 'TestFlickrBlacklistPageDoesNotExist' );
 
-		list( $response, , ) = $this->doApiRequest( array(
+		list( $response, , ) = $this->doApiRequest( [
 			'action' => 'flickrblacklist',
 			'url' => self::PASFAM_IMAGE_STATIC,
-		) );
+		] );
 
 		$this->assertNotBlacklistMatch( $response );
 		// there should be no API call to Flickr; we have no good way of asserting that
@@ -170,11 +171,11 @@ class ApiFlickrBlacklistTest extends ApiTestCase {
 	 */
 	protected function setFlickrBlacklistPage( $page ) {
 		global $wgUploadWizardConfig;
-		$this->setMwGlobals( array(
-			'wgUploadWizardConfig' => array_merge( $wgUploadWizardConfig, array(
+		$this->setMwGlobals( [
+			'wgUploadWizardConfig' => array_merge( $wgUploadWizardConfig, [
 				'flickrBlacklistPage' => $page,
-			) ),
-		) );
+			] ),
+		] );
 
 		// clear blacklist cache
 		$reflection = new ReflectionClass( 'UploadWizardFlickrBlacklist' );

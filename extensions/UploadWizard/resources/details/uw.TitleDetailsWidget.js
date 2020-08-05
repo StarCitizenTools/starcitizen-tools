@@ -1,9 +1,14 @@
 ( function ( mw, uw, $, OO ) {
 
+	var NS_FILE = mw.config.get( 'wgNamespaceIds' ).file;
+
 	/**
 	 * A title field in UploadWizard's "Details" step form.
 	 *
+	 * @class uw.TitleDetailsWidget
 	 * @extends uw.DetailsWidget
+	 * @constructor
+	 * @param {Object} [config]
 	 */
 	uw.TitleDetailsWidget = function UWTitleDetailsWidget( config ) {
 		config = config || {};
@@ -25,6 +30,31 @@
 		);
 	};
 	OO.inheritClass( uw.TitleDetailsWidget, uw.DetailsWidget );
+
+	/**
+	 * Reliably turn input into a MediaWiki title that is located in the 'File:' namespace.
+	 * Also applies file-specific checks ($wgIllegalFileChars).
+	 *
+	 *     var title = uw.TitleDetailsWidget.static.makeTitleInFileNS( 'filename.ext' );
+	 *
+	 * @static
+	 * @param {string} filename Desired file name; optionally with 'File:' namespace prefixed
+	 * @return {mw.Title|null}
+	 */
+	uw.TitleDetailsWidget.static.makeTitleInFileNS = function ( filename ) {
+		var
+			mwTitle = mw.Title.newFromText( filename, NS_FILE ),
+			illegalFileChars = new RegExp( '[' + mw.config.get( 'wgIllegalFileChars', '' ) + ']' );
+		if ( mwTitle && mwTitle.getNamespaceId() !== NS_FILE ) {
+			// Force file namespace
+			mwTitle = mw.Title.makeTitle( NS_FILE, filename );
+		}
+		if ( mwTitle && illegalFileChars.test( mwTitle.getMainText() ) ) {
+			// Consider the title invalid if it contains characters disallowed in file names
+			mwTitle = null;
+		}
+		return mwTitle;
+	};
 
 	/**
 	 * @inheritdoc
@@ -53,7 +83,7 @@
 		}
 		extRegex = new RegExp( '\\.' + this.extension + '$', 'i' );
 		cleaned = value.replace( extRegex, '' ).replace( /\.+$/g, '' ).trim();
-		title = mw.UploadWizardDetails.makeTitleInFileNS( cleaned + '.' + this.extension );
+		title = uw.TitleDetailsWidget.static.makeTitleInFileNS( cleaned + '.' + this.extension );
 		return title;
 	};
 
@@ -73,7 +103,7 @@
 		}
 
 		if ( !title ) {
-			errors.push( mw.message( 'mwe-upwiz-unparseable-title' ) );
+			errors.push( mw.message( 'mwe-upwiz-error-title-invalid' ) );
 			return $.Deferred().resolve( errors ).promise();
 		}
 
@@ -85,7 +115,7 @@
 					moreErrors = moreErrors.concat(
 						mw.QuickTitleChecker.checkTitle( title.getNameText() ).map( function ( errorCode ) {
 							// Messages:
-							// mwe-upwiz-error-title-badchars, mwe-upwiz-error-title-senselessimagename,
+							// mwe-upwiz-error-title-invalid, mwe-upwiz-error-title-senselessimagename,
 							// mwe-upwiz-error-title-thumbnail, mwe-upwiz-error-title-extension,
 							return mw.message( 'mwe-upwiz-error-title-' + errorCode );
 						} )
@@ -120,10 +150,10 @@
 
 		try {
 			titleString = result.unique.title || result.title;
-			titleString = mw.UploadWizardDetails.makeTitleInFileNS( titleString ).getPrefixedText();
+			titleString = uw.TitleDetailsWidget.static.makeTitleInFileNS( titleString ).getPrefixedText();
 		} catch ( e ) {
 			// Unparseable result? This shouldn't happen, we checked for that earlier...
-			errors.push( mw.message( 'mwe-upwiz-unparseable-title' ) );
+			errors.push( mw.message( 'mwe-upwiz-error-title-invalid' ) );
 			return errors;
 		}
 
@@ -141,11 +171,12 @@
 		} else if ( result.unique.isProtected ) {
 			errors.push( mw.message( 'mwe-upwiz-error-title-protected' ) );
 		} else {
+			mw.messages.set( result.blacklist.blacklistMessage, result.blacklist.blacklistReason );
 			messageParams = [
 				'mwe-upwiz-blacklisted-details',
 				titleString,
 				function () {
-					mw.errorDialog( result.blacklist.blacklistReason );
+					mw.errorDialog( $( '<div>' ).msg( result.blacklist.blacklistMessage ) );
 				}
 			];
 
@@ -197,4 +228,4 @@
 		this.titleInput.setValue( serialized.title );
 	};
 
-} )( mediaWiki, mediaWiki.uploadWizard, jQuery, OO );
+}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );

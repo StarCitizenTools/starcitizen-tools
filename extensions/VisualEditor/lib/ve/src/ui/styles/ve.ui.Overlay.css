@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Overlay styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-overlay {
@@ -20,4 +20,25 @@
 .ve-ui-overlay-global {
 	/* Toolbar is z-index 1 */
 	z-index: 2;
+}
+
+/* Most vendor prefixes are not needed on mobile devices */
+
+.ve-ui-overlay-global-mobile {
+	height: 100%;
+	-webkit-transform: translate3d( 0, -100%, 0 );
+	transform: translate3d( 0, -100%, 0 );
+
+	-webkit-transition: -webkit-transform 0.3s, opacity 0.3s;
+	transition: transform 0.3s, opacity 0.3s;
+}
+
+.ve-ui-overlay-global-mobile-visible {
+	-webkit-transform: none;
+	transform: none;
+}
+
+.ve-ui-overlay-global-mobile-enabled {
+	height: 100%;
+	overflow: hidden;
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LanguageResultWidget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -30,23 +30,25 @@ OO.inheritClass( ve.ui.LanguageResultWidget, OO.ui.OptionWidget );
 
 /* Methods */
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Update labels based on query
  *
  * @param {string} query Query text which matched this result
  * @param {string} matchedProperty Data property which matched the query text
+ * @param {Function} [compare] String comparator
  * @chainable
  */
-ve.ui.LanguageResultWidget.prototype.updateLabel = function ( query, matchedProperty ) {
+ve.ui.LanguageResultWidget.prototype.updateLabel = function ( query, matchedProperty, compare ) {
 	var data = this.getData();
 
 	if ( matchedProperty === 'name' ) {
-		this.name.setHighlightedQuery( data.name, query );
+		this.name.setHighlightedQuery( data.name, query, compare );
 	} else {
 		this.name.setLabel( data.name );
 	}
 	if ( matchedProperty === 'code' || matchedProperty === 'autonym' ) {
-		this.otherMatch.setHighlightedQuery( data[ matchedProperty ], query );
+		this.otherMatch.setHighlightedQuery( data[ matchedProperty ], query, compare );
 	} else {
 		this.otherMatch.setLabel( data.code );
 	}

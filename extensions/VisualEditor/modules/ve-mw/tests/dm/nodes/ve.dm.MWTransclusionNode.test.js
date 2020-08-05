@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTransclusionNode tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -101,9 +101,8 @@ QUnit.test( 'getWikitext', function ( assert ) {
 				}
 			},
 			wikitext: '{{foo|bar=[[baz|quux]]}}'
-		}
-	];
-	QUnit.expect( cases.length );
+		} ];
+
 	for ( i = 0; i < cases.length; i++ ) {
 		node = new ve.dm.MWTransclusionNode(
 			{ type: 'mwTransclusion', attributes: { mw: cases[ i ].mw } }

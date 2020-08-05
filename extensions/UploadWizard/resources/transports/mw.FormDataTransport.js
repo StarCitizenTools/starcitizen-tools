@@ -5,29 +5,31 @@
 	 * @constructor
 	 * @class mw.FormDataTransport
 	 * @mixins OO.EventEmitter
-	 * @param {string} postUrl URL to post to.
+	 * @param {mw.Api} api
 	 * @param {Object} formData Additional form fields required for upload api call
 	 * @param {Object} [config]
 	 * @param {Object} [config.chunkSize]
 	 * @param {Object} [config.maxPhpUploadSize]
 	 * @param {Object} [config.useRetryTimeout]
 	 */
-	mw.FormDataTransport = function ( postUrl, formData, config ) {
+	mw.FormDataTransport = function ( api, formData, config ) {
 		this.config = config || mw.UploadWizard.config;
 
 		OO.EventEmitter.call( this );
 
 		this.formData = formData;
 		this.aborted = false;
-		this.api = new mw.Api();
+		this.api = api;
 
-		this.postUrl = postUrl;
 		// Set chunk size to configured chunk size or max php size,
 		// whichever is smaller.
 		this.chunkSize = Math.min( this.config.chunkSize, this.config.maxPhpUploadSize );
 		this.maxRetries = 2;
 		this.retries = 0;
 		this.firstPoll = false;
+
+		// running API request
+		this.request = null;
 	};
 
 	OO.mixinClass( mw.FormDataTransport, OO.EventEmitter );
@@ -35,128 +37,151 @@
 	mw.FormDataTransport.prototype.abort = function () {
 		this.aborted = true;
 
-		if ( this.xhr ) {
-			this.xhr.abort();
+		if ( this.request ) {
+			this.request.abort();
 		}
 	};
 
 	/**
-	 * Creates an XHR and sets some generic event handlers on it.
+	 * Submits an upload to the API.
 	 *
-	 * @param {jQuery.Deferred} deferred Object to send events to.
-	 * @return {XMLHttpRequest}
+	 * @param {Object} params Request params
+	 * @return {jQuery.Promise}
 	 */
-	mw.FormDataTransport.prototype.createXHR = function ( deferred ) {
-		var xhr = new XMLHttpRequest(),
-			transport = this;
+	mw.FormDataTransport.prototype.post = function ( params ) {
+		var deferred = $.Deferred();
 
-		xhr.upload.addEventListener( 'progress', function ( evt ) {
-			var fraction;
-			if ( evt.lengthComputable ) {
-				fraction = parseFloat( evt.loaded / evt.total );
-			} else {
-				fraction = null;
+		this.request = this.api.post( params, {
+			/*
+			 * $.ajax is not quite equiped to handle File uploads with params.
+			 * The most convenient way would be to submit it with a FormData
+			 * object, but mw.Api will already do that for us: it'll transform
+			 * params if it encounters a multipart/form-data POST request, and
+			 * submit it accordingly!
+			 *
+			 * @see https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Submitting_forms_and_uploading_files
+			 */
+			contentType: 'multipart/form-data',
+			/*
+			 * $.ajax also has no progress event that will allow us to figure
+			 * out how much of the upload has already gone out, so let's add it!
+			 */
+			xhr: function () {
+				var xhr = $.ajaxSettings.xhr();
+				xhr.upload.addEventListener( 'progress', function ( evt ) {
+					var fraction = null;
+					if ( evt.lengthComputable ) {
+						fraction = parseFloat( evt.loaded / evt.total );
+					}
+					deferred.notify( fraction );
+				}, false );
+				return xhr;
 			}
-			deferred.notify( fraction );
-		}, false );
+		} );
 
-		xhr.addEventListener( 'abort', function ( evt ) {
-			deferred.reject( transport.parseResponse( evt ) );
-		}, false );
+		// just pass on success & failures
+		this.request.then( deferred.resolve, deferred.reject );
 
-		return xhr;
+		return deferred.promise();
 	};
 
 	/**
-	 * Creates a FormData object suitable for upload.
+	 * Creates the upload API params.
 	 *
 	 * @param {string} filename
 	 * @param {number} [offset] For chunked uploads
-	 * @return {FormData}
+	 * @return {Object}
 	 */
-	mw.FormDataTransport.prototype.createFormData = function ( filename, offset ) {
-		var formData = new FormData();
+	mw.FormDataTransport.prototype.createParams = function ( filename, offset ) {
+		var params = OO.cloneObject( this.formData );
 
-		$.each( this.formData, function ( key, value ) {
-			formData.append( key, value );
+		$.extend( params, {
+			filename: filename,
+
+			// ignorewarnings is turned on, since warnings are presented in a
+			// later step and this transport doesn't know how to deal with them.
+			// Also, it's important to allow people to upload files with (for
+			// example) blacklisted names, and then rename them later in the
+			// wizard.
+			ignorewarnings: true,
+
+			offset: offset || 0
 		} );
 
-		formData.append( 'filename', filename );
-
-		// ignorewarnings is turned on, since warnings are presented in a
-		// later step and this transport doesn't know how to deal with them.
-		// Also, it's important to allow people to upload files with (for
-		// example) blacklisted names, and then rename them later in the
-		// wizard.
-		formData.append( 'ignorewarnings', true );
-
-		formData.append( 'offset', offset || 0 );
-
-		return formData;
-	};
-
-	/**
-	 * Sends data in a FormData object through an XHR.
-	 *
-	 * @param {XMLHttpRequest} xhr
-	 * @param {FormData} formData
-	 */
-	mw.FormDataTransport.prototype.sendData = function ( xhr, formData ) {
-		xhr.open( 'POST', this.postUrl, true );
-		xhr.send( formData );
+		return params;
 	};
 
 	/**
 	 * Start the upload with the provided file.
 	 *
+	 * @param {File} file
+	 * @param {string} tempFileName
 	 * @return {jQuery.Promise}
 	 */
-	mw.FormDataTransport.prototype.upload = function ( file ) {
-		var formData, deferred, ext, totalUploaded,
-			chunkSize = this.chunkSize,
-			transport = this;
+	mw.FormDataTransport.prototype.upload = function ( file, tempFileName ) {
+		var params, ext;
 
-		// use timestamp + filename to avoid conflicts on server
-		this.tempname = ( new Date() ).getTime().toString() + mw.UploadWizard.sanitizeFilename( file.name );
-		// remove unicode characters, tempname is only used during upload
-		this.tempname = this.tempname.split( '' ).map( function ( c ) {
-			return c.charCodeAt( 0 ) > 128 ? '_' : c;
-		} ).join( '' );
-		// Also limit length to 240 bytes (limit hardcoded in UploadBase.php).
+		this.tempname = tempFileName;
+		// Limit length to 240 bytes (limit hardcoded in UploadBase.php).
 		if ( this.tempname.length > 240 ) {
 			ext = this.tempname.split( '.' ).pop();
 			this.tempname = this.tempname.substr( 0, 240 - ext.length - 1 ) + '.' + ext;
 		}
 
-		if ( file.size > chunkSize ) {
-			totalUploaded = 0;
-			// The progress notifications give us per-chunk progress, filter them to get progress
-			// for the whole file
-			return this.uploadChunk( file, 0 ).then( null, null, function ( fraction ) {
-				if ( fraction === 1 ) {
-					// We completed a chunk
-					totalUploaded += chunkSize;
-					fraction = 0;
-				}
-				return ( totalUploaded + fraction * chunkSize ) / file.size;
-			} );
+		if ( file.size > this.chunkSize ) {
+			return this.chunkedUpload( file );
 		} else {
-			deferred = $.Deferred();
-			this.xhr = this.createXHR( deferred );
-			this.xhr.addEventListener( 'load', function ( evt ) {
-				deferred.resolve( transport.parseResponse( evt ) );
-			}, false );
-			this.xhr.addEventListener( 'error', function ( evt ) {
-				deferred.reject( transport.parseResponse( evt ) );
-			}, false );
-
-			formData = this.createFormData( this.tempname );
-			formData.append( 'file', file );
-
-			this.sendData( this.xhr, formData );
-
-			return deferred.promise();
+			params = this.createParams( this.tempname );
+			params.file = file;
+			return this.post( params );
 		}
+	};
+
+	/**
+	 * This function exists to safely chain several hundred promises without using .then() or nested
+	 * promises. We might divide a 4 GB file into 800 chunks of 5 MB each.
+	 *
+	 * In jQuery 2.x, nested promises result in nested call stacks when resolving/rejecting/notifying
+	 * the last promise in the chain and listening on the first one, and browsers have call stack
+	 * limits low enough that we previously ran into them for files around a couple hundred megabytes
+	 * (the worst is Firefox 47 with a limit of 1024 calls).
+	 *
+	 * @param {File} file
+	 * @return {jQuery.Promise} Promise which behaves identically to a regular non-chunked upload
+	 *   promise from #upload
+	 */
+	mw.FormDataTransport.prototype.chunkedUpload = function ( file ) {
+		var
+			offset,
+			prevPromise = $.Deferred().resolve(),
+			deferred = $.Deferred(),
+			fileSize = file.size,
+			chunkSize = this.chunkSize,
+			transport = this;
+
+		for ( offset = 0; offset < fileSize; offset += chunkSize ) {
+			// Capture offset in a closure
+			// eslint-disable-next-line no-loop-func
+			( function ( offset ) {
+				var
+					newPromise = $.Deferred(),
+					isLastChunk = offset + chunkSize >= fileSize,
+					thisChunkSize = isLastChunk ? ( fileSize % chunkSize ) : chunkSize;
+				prevPromise.done( function () {
+					transport.uploadChunk( file, offset )
+						.done( isLastChunk ? deferred.resolve : newPromise.resolve )
+						.fail( deferred.reject )
+						.progress( function ( fraction ) {
+							// The progress notifications give us per-chunk progress.
+							// Calculate progress for the whole file.
+							deferred.notify( ( offset + fraction * thisChunkSize ) / fileSize );
+						} );
+				} );
+				prevPromise = newPromise;
+			}( offset ) );
+		}
+
+		return deferred.promise();
 	};
 
 	/**
@@ -167,18 +192,20 @@
 	 * @return {jQuery.Promise}
 	 */
 	mw.FormDataTransport.prototype.uploadChunk = function ( file, offset ) {
-		var formData,
-			deferred = $.Deferred(),
+		var params = this.createParams( this.tempname, offset ),
 			transport = this,
 			bytesAvailable = file.size,
 			chunk;
 
 		if ( this.aborted ) {
-			if ( this.xhr ) {
-				this.xhr.abort();
-			}
-			return;
+			return $.Deferred().reject( 'aborted', {
+				errors: [ {
+					code: 'aborted',
+					html: mw.message( 'api-error-aborted' ).parse()
+				} ]
+			} );
 		}
+
 		// Slice API was changed and has vendor prefix for now
 		// new version now require start/end and not start/length
 		if ( file.mozSlice ) {
@@ -189,30 +216,21 @@
 			chunk = file.slice( offset, offset + this.chunkSize, file.type );
 		}
 
-		this.xhr = this.createXHR( deferred );
-		this.xhr.addEventListener( 'load', deferred.resolve, false );
-		this.xhr.addEventListener( 'error', deferred.reject, false );
-
-		formData = this.createFormData( this.tempname, offset );
-
 		// only enable async if file is larger 10Mb
 		if ( bytesAvailable > 10 * 1024 * 1024 ) {
-			formData.append( 'async', true );
+			params.async = true;
 		}
 
-		if ( this.filekey ) {
-			formData.append( 'filekey', this.filekey );
+		// If offset is 0, we're uploading the file from scratch. filekey may be set if we're retrying
+		// the first chunk. The API errors out if a filekey is given with zero offset (as it's
+		// nonsensical). TODO Why do we need to retry in this case, if we managed to upload something?
+		if ( this.filekey && offset !== 0 ) {
+			params.filekey = this.filekey;
 		}
-		formData.append( 'filesize', bytesAvailable );
-		formData.append( 'chunk', chunk );
+		params.filesize = bytesAvailable;
+		params.chunk = chunk;
 
-		this.sendData( this.xhr, formData );
-
-		return deferred.promise().then( function ( evt ) {
-			return transport.parseResponse( evt );
-		}, function ( evt ) {
-			return transport.parseResponse( evt );
-		} ).then( function ( response ) {
+		return this.post( params ).then( function ( response ) {
 			if ( response.upload && response.upload.filekey ) {
 				transport.filekey = response.upload.filekey;
 			}
@@ -222,8 +240,7 @@
 					case 'Continue':
 						// Reset retry counter
 						transport.retries = 0;
-						// Start uploading next chunk
-						return transport.uploadChunk( file, response.upload.offset );
+						/* falls through */
 					case 'Success':
 						// Just pass the response through.
 						return response;
@@ -232,18 +249,32 @@
 						return transport.retryWithMethod( 'checkStatus' );
 				}
 			} else {
-				// Failed to upload, try again in 3 seconds
 				return transport.maybeRetry(
 					'on unknown response',
+					response.error ? response.error.code : 'unknown-error',
 					response,
 					'uploadChunk',
 					file, offset
 				);
 			}
-		}, function ( response ) {
+		}, function ( code, result ) {
+			// Ain't this some great machine readable output eh
+			if (
+				result.errors &&
+				result.errors[ 0 ].code === 'stashfailed' &&
+				result.errors[ 0 ].html === mw.message( 'apierror-stashfailed-complete' ).parse()
+			) {
+				return transport.retryWithMethod( 'checkStatus' );
+			}
+
+			// Failed to upload, try again in 3 seconds
+			// This is really dumb, we should only do this for cases where retrying has a chance to work
+			// (so basically, network failures). If your upload was blocked by AbuseFilter you're
+			// shafted anyway. But some server-side errors really are temporary...
 			return transport.maybeRetry(
 				'on error event',
-				response,
+				code,
+				result,
 				'uploadChunk',
 				file, offset
 			);
@@ -254,18 +285,21 @@
 	 * Handle possible retry event - rejected if maximum retries already fired.
 	 *
 	 * @param {string} contextMsg
+	 * @param {string} code
 	 * @param {Object} response
 	 * @param {string} retryMethod
 	 * @param {File} [file]
 	 * @param {number} [offset]
 	 * @return {jQuery.Promise}
 	 */
-	mw.FormDataTransport.prototype.maybeRetry = function ( contextMsg, response, retryMethod, file, offset ) {
+	mw.FormDataTransport.prototype.maybeRetry = function ( contextMsg, code, response, retryMethod, file, offset ) {
 		this.retries++;
 
 		if ( this.tooManyRetries() ) {
 			mw.log.warn( 'Max retries exceeded ' + contextMsg );
-			return $.Deferred().reject( response );
+			return $.Deferred().reject( code, response );
+		} else if ( this.aborted ) {
+			return $.Deferred().reject( code, response );
 		} else {
 			mw.log( 'Retry #' + this.retries + ' ' + contextMsg );
 			return this.retryWithMethod( retryMethod, file, offset );
@@ -313,33 +347,38 @@
 	 */
 	mw.FormDataTransport.prototype.checkStatus = function () {
 		var transport = this,
-			params = {};
+			params = OO.cloneObject( this.formData );
 
 		if ( this.aborted ) {
-			return;
+			return $.Deferred().reject( 'aborted', {
+				errors: [ {
+					code: 'aborted',
+					html: mw.message( 'api-error-aborted' ).parse()
+				} ]
+			} );
 		}
 
 		if ( !this.firstPoll ) {
 			this.firstPoll = ( new Date() ).getTime();
 		}
-		$.each( this.formData, function ( key, value ) {
-			params[ key ] = value;
-		} );
-		params.checkstatus =  true;
-		params.filekey =  this.filekey;
-		return this.api.post( params )
+		params.checkstatus = true;
+		params.filekey = this.filekey;
+		this.request = this.api.post( params )
 			.then( function ( response ) {
 				if ( response.upload && response.upload.result === 'Poll' ) {
 					// If concatenation takes longer than 10 minutes give up
 					if ( ( ( new Date() ).getTime() - transport.firstPoll ) > 10 * 60 * 1000 ) {
-						return $.Deferred().reject( {
+						return $.Deferred().reject( 'server-error', { errors: [ {
 							code: 'server-error',
-							info: 'unknown server error'
-						} );
+							html: mw.message( 'apierror-unknownerror' ).parse()
+						} ] } );
 					} else {
-						if ( response.upload.stage === undefined && window.console ) {
-							window.console.log( 'Unable to check file\'s status' );
-							return $.Deferred().reject();
+						if ( response.upload.stage === undefined ) {
+							mw.log.warn( 'Unable to check file\'s status' );
+							return $.Deferred().reject( 'server-error', { errors: [ {
+								code: 'server-error',
+								html: mw.message( 'apierror-unknownerror' ).parse()
+							} ] } );
 						} else {
 							// Statuses that can be returned:
 							// * queued
@@ -352,30 +391,10 @@
 				}
 
 				return response;
+			}, function ( code, result ) {
+				return $.Deferred().reject( code, result );
 			} );
+
+		return this.request;
 	};
-
-	/**
-	 * Parse response from the server.
-	 *
-	 * @param {Event} evt
-	 * @return {Object}
-	 */
-	mw.FormDataTransport.prototype.parseResponse = function ( evt ) {
-		var response;
-
-		try {
-			response = $.parseJSON( evt.target.responseText );
-		} catch ( e ) {
-			response = {
-				error: {
-					code: evt.target.code,
-					info: evt.target.responseText
-				}
-			};
-		}
-
-		return response;
-	};
-
 }( mediaWiki, jQuery, OO ) );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LinkAnnotationWidget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -75,6 +75,7 @@ ve.ui.LinkAnnotationWidget.static.getAnnotationFromText = function ( value ) {
  *
  * @static
  * @param {ve.dm.LinkAnnotation|null} annotation Link annotation
+ * @return {string} Text value for the annotation
  */
 ve.ui.LinkAnnotationWidget.static.getTextFromAnnotation = function ( annotation ) {
 	return annotation ? annotation.getHref() : '';
@@ -115,6 +116,7 @@ ve.ui.LinkAnnotationWidget.prototype.setDisabled = function () {
  * Handle value-changing events from the text input
  *
  * @method
+ * @param {string} value New input value
  */
 ve.ui.LinkAnnotationWidget.prototype.onTextChange = function ( value ) {
 	var isExt,
@@ -125,15 +127,19 @@ ve.ui.LinkAnnotationWidget.prototype.onTextChange = function ( value ) {
 	if ( $( 'body' ).hasClass( 'rtl' ) ) {
 		isExt = ve.init.platform.getExternalLinkUrlProtocolsRegExp().test( value.trim() );
 		// If URL is external, flip to LTR. Otherwise, set back to RTL
-		this.getTextInputWidget().setRTL( !isExt );
+		this.getTextInputWidget().setDir( isExt ? 'ltr' : 'rtl' );
 	}
 
-	this.getTextInputWidget().isValid().done( function ( valid ) {
-		// Keep annotation in sync with value
-		widget.setAnnotation( valid ? widget.constructor.static.getAnnotationFromText( value ) : null, true );
-	} );
+	this.getTextInputWidget().getValidity()
+		.done( function () {
+			widget.setAnnotation( widget.constructor.static.getAnnotationFromText( value ), true );
+		} )
+		.fail( function () {
+			widget.setAnnotation( null, true );
+		} );
 };
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Sets the annotation value.
  *
@@ -146,8 +152,8 @@ ve.ui.LinkAnnotationWidget.prototype.onTextChange = function ( value ) {
  */
 ve.ui.LinkAnnotationWidget.prototype.setAnnotation = function ( annotation, fromText ) {
 	if ( ve.compare(
-			annotation ? annotation.getComparableObject() : {},
-			this.annotation ? this.annotation.getComparableObject() : {}
+		annotation ? annotation.getComparableObject() : {},
+		this.annotation ? this.annotation.getComparableObject() : {}
 	) ) {
 		// No change
 		return this;

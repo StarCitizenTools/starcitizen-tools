@@ -6,7 +6,7 @@
  * @file
  * @author Niklas Laxström
  * @author Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -16,20 +16,64 @@
  */
 class TranslateEditAddons {
 	/**
-	 * Keep the usual diiba daaba hidden from translators.
+	 * Do not show the usual introductory messages on edit page for messages.
 	 * Hook: AlternateEdit
+	 * @param EditPage $editPage
 	 */
-	public static function intro( EditPage $editpage ) {
-		$handle = new MessageHandle( $editpage->getTitle() );
+	public static function suppressIntro( EditPage $editPage ) {
+		$handle = new MessageHandle( $editPage->getTitle() );
 		if ( $handle->isValid() ) {
-			$editpage->suppressIntro = true;
-			$group = $handle->getGroup();
-			$languages = $group->getTranslatableLanguages();
-			if ( $languages !== null && $handle->getCode() && !isset( $languages[$handle->getCode()] ) ) {
-				$editpage->getArticle()->getContext()->getOutput()->wrapWikiMsg(
-					"<div class='error'>$1</div>", 'translate-language-disabled'
-				);
+			$editPage->suppressIntro = true;
+		}
+	}
 
+	/**
+	 * Prevent translations to non-translatable languages for the group
+	 * Hook: getUserPermissionsErrorsExpensive
+	 *
+	 * @param Title $title
+	 * @param User $user
+	 * @param string $action
+	 * @param mixed &$result
+	 * @return bool
+	 */
+	public static function disallowLangTranslations( Title $title, User $user,
+		$action, &$result
+	) {
+		global $wgTranslateBlacklist;
+
+		if ( $action !== 'edit' ) {
+			return true;
+		}
+
+		$handle = new MessageHandle( $title );
+		if ( !$handle->isValid() ) {
+			return true;
+		}
+
+		if ( $user->isAllowed( 'translate-manage' ) ) {
+			return true;
+		}
+
+		$group = $handle->getGroup();
+		$languages = $group->getTranslatableLanguages();
+		$langCode = $handle->getCode();
+		if ( $languages !== null && $langCode && !isset( $languages[$langCode] ) ) {
+			$result = [ 'translate-language-disabled' ];
+			return false;
+		}
+
+		$groupId = $group->getId();
+		$checks = [
+			$groupId,
+			strtok( $groupId, '-' ),
+			'*'
+		];
+
+		foreach ( $checks as $check ) {
+			if ( isset( $wgTranslateBlacklist[$check][$langCode] ) ) {
+				$reason = $wgTranslateBlacklist[$check][$langCode];
+				$result = [ 'translate-page-disabled', $reason ];
 				return false;
 			}
 		}
@@ -40,6 +84,8 @@ class TranslateEditAddons {
 	/**
 	 * Adds the translation aids and navigation to the normal edit page.
 	 * Hook: EditPage::showEditForm:initial
+	 * @param EditPage $object
+	 * @return true
 	 */
 	public static function addTools( EditPage $object ) {
 		$handle = new MessageHandle( $object->getTitle() );
@@ -56,11 +102,15 @@ class TranslateEditAddons {
 	 * Replace the normal save button with one that says if you are editing
 	 * message documentation to try to avoid accidents.
 	 * Hook: EditPageBeforeEditButtons
+	 *
+	 * @param EditPage $editpage
+	 * @param array &$buttons
+	 * @param int $tabindex
 	 */
 	public static function buttonHack( EditPage $editpage, &$buttons, $tabindex ) {
 		$handle = new MessageHandle( $editpage->getTitle() );
 		if ( !$handle->isValid() ) {
-			return true;
+			return;
 		}
 
 		$context = $editpage->getArticle()->getContext();
@@ -68,38 +118,43 @@ class TranslateEditAddons {
 		if ( $handle->isDoc() ) {
 			$langCode = $context->getLanguage()->getCode();
 			$name = TranslateUtils::getLanguageName( $handle->getCode(), $langCode );
-			$accessKey = $context->msg( 'accesskey-save' )->plain();
-			$temp = array(
+			$attribs = [
 				'id' => 'wpSave',
 				'name' => 'wpSave',
-				'type' => 'submit',
 				'tabindex' => ++$tabindex,
-				'value' => $context->msg( 'translate-save', $name )->text(),
-				'accesskey' => $accessKey,
-				'title' => $context->msg( 'tooltip-save' )->text() . ' [' . $accessKey . ']',
-			);
-			$buttons['save'] = Xml::element( 'input', $temp, '' );
+			] + Linker::tooltipAndAccesskeyAttribs( 'save' );
+
+			$saveConfig = OOUI\Element::configFromHtmlAttributes( $attribs );
+			$buttons['save'] = new OOUI\ButtonInputWidget( [
+				// Support: IE 6 – Use <input>, otherwise it can't distinguish which button was clicked
+				'useInputTag' => true,
+				'flags' => [ 'progressive', 'primary' ],
+				'label' => $context->msg( 'translate-save', $name )->text(),
+				'type' => 'submit',
+			] + $saveConfig );
 		}
 
 		try {
 			$supportUrl = SupportAid::getSupportUrl( $handle->getTitle() );
 		} catch ( TranslationHelperException $e ) {
-			return true;
+			return;
 		}
 
-		$temp = array(
+		$attribs = [
 			'id' => 'wpSupport',
 			'name' => 'wpSupport',
 			'type' => 'button',
 			'tabindex' => ++$tabindex,
-			'value' => $context->msg( 'translate-js-support' )->text(),
 			'title' => $context->msg( 'translate-js-support-title' )->text(),
-			'data-load-url' => $supportUrl,
-			'onclick' => "window.open( jQuery(this).attr('data-load-url') );",
-		);
-		$buttons['ask'] = Html::element( 'input', $temp, '' );
+		];
 
-		return true;
+		$attribs += [
+			'label' => $context->msg( 'translate-js-support' )->text(),
+			'href' => $supportUrl,
+			'target' => '_blank',
+		];
+		$saveConfig = OOUI\Element::configFromHtmlAttributes( $attribs );
+		$buttons['ask'] = new OOUI\ButtonWidget( $saveConfig );
 	}
 
 	/**
@@ -130,9 +185,19 @@ class TranslateEditAddons {
 	/**
 	 * Runs message checks, adds tp:transver tags and updates statistics.
 	 * Hook: PageContentSaveComplete
+	 * @param WikiPage $wikiPage
+	 * @param User $user
+	 * @param Content $content
+	 * @param string $summary
+	 * @param bool $minor
+	 * @param string $_1
+	 * @param bool $_2
+	 * @param int $flags
+	 * @param Revision|null $revision
+	 * @return true
 	 */
-	public static function onSave( WikiPage $wikiPage, $user, $content, $summary,
-		$minor, $_1, $_2, $flags, $revision
+	public static function onSave( WikiPage $wikiPage, User $user, Content $content, $summary,
+		$minor, $_1, $_2, $flags, Revision $revision = null
 	) {
 		global $wgEnablePageTranslation;
 
@@ -160,19 +225,22 @@ class TranslateEditAddons {
 		self::updateFuzzyTag( $title, $rev, $fuzzy );
 
 		$group = $handle->getGroup();
-		// Update translation stats - source language should always be update
+		// Update translation stats - source language should always be up to date
 		if ( $handle->getCode() !== $group->getSourceLanguage() ) {
+			// This will update in-process cache immediately, but the value is saved
+			// to the database in a deferred update. See MessageGroupStats::queueUpdates.
+			// In case an error happens before that, the stats may be stale, but that
+			// would be fixed by the next update or purge.
 			MessageGroupStats::clear( $handle );
-			MessageGroupStats::forItem( $group->getId(), $handle->getCode() );
 		}
 
 		MessageGroupStatesUpdaterJob::onChange( $handle );
 
 		if ( $fuzzy === false ) {
-			Hooks::run( 'Translate:newTranslation', array( $handle, $rev, $text, $user ) );
+			Hooks::run( 'Translate:newTranslation', [ $handle, $rev, $text, $user ] );
 		}
 
-		TTMServer::onChange( $handle, $text, $fuzzy );
+		TTMServer::onChange( $handle );
 
 		if ( $wgEnablePageTranslation && $handle->isPageTranslation() ) {
 			// Updates for translatable pages only
@@ -228,16 +296,16 @@ class TranslateEditAddons {
 	protected static function updateFuzzyTag( Title $title, $revision, $fuzzy ) {
 		$dbw = wfGetDB( DB_MASTER );
 
-		$conds = array(
+		$conds = [
 			'rt_page' => $title->getArticleID(),
 			'rt_type' => RevTag::getType( 'fuzzy' ),
 			'rt_revision' => $revision
-		);
+		];
 
 		// Replace the existing fuzzy tag, if any
 		if ( $fuzzy !== false ) {
 			$index = array_keys( $conds );
-			$dbw->replace( 'revtag', array( $index ), $conds, __METHOD__ );
+			$dbw->replace( 'revtag', [ $index ], $conds, __METHOD__ );
 		} else {
 			$dbw->delete( 'revtag', $conds, __METHOD__ );
 		}
@@ -276,14 +344,14 @@ class TranslateEditAddons {
 
 		$dbw = wfGetDB( DB_MASTER );
 
-		$conds = array(
+		$conds = [
 			'rt_page' => $title->getArticleID(),
 			'rt_type' => RevTag::getType( 'tp:transver' ),
 			'rt_revision' => $revision,
 			'rt_value' => $definitionRevision,
-		);
-		$index = array( 'rt_type', 'rt_page', 'rt_revision' );
-		$dbw->replace( 'revtag', array( $index ), $conds, __METHOD__ );
+		];
+		$index = [ 'rt_type', 'rt_page', 'rt_revision' ];
+		$dbw->replace( 'revtag', [ $index ], $conds, __METHOD__ );
 
 		return true;
 	}
@@ -294,7 +362,7 @@ class TranslateEditAddons {
 	 * @param ParserOptions $popts
 	 * @return bool
 	 */
-	public static function disablePreSaveTransform( $wikiPage, ParserOptions $popts ) {
+	public static function disablePreSaveTransform( WikiPage $wikiPage, ParserOptions $popts ) {
 		global $wgTranslateUsePreSaveTransform;
 
 		if ( !$wgTranslateUsePreSaveTransform ) {
@@ -309,6 +377,9 @@ class TranslateEditAddons {
 
 	/**
 	 * Hook: ArticleContentOnDiff
+	 * @param DifferenceEngine $de
+	 * @param OutputPage $out
+	 * @return true
 	 */
 	public static function displayOnDiff( DifferenceEngine $de, OutputPage $out ) {
 		$title = $de->getTitle();
@@ -322,23 +393,29 @@ class TranslateEditAddons {
 		$th->setEditMode( false );
 
 		$de->loadNewText();
-		if ( $de->mNewContent instanceof TextContent ) {
-			$th->setTranslation( $de->mNewContent->getNativeData() );
+		if ( method_exists( $de, 'getNewRevision' ) ) {
+			$newRevision = $de->getNewRevision();
+			$newContent = $newRevision ? $newRevision->getContent( 'main' ) : null;
+		} else {
+			$newContent = $de->mNewRev ? $de->mNewRev->getContent() : null;
+		}
+		if ( $newContent instanceof TextContent ) {
+			$th->setTranslation( $newContent->getNativeData() );
 		} else {
 			// Screw you, not interested.
 			return true;
 		}
 		TranslationHelpers::addModules( $out );
 
-		$boxes = array();
-		$boxes[] = $th->callBox( 'documentation', array( $th, 'getDocumentationBox' ) );
-		$boxes[] = $th->callBox( 'definition', array( $th, 'getDefinitionBox' ) );
-		$boxes[] = $th->callBox( 'translation', array( $th, 'getTranslationDisplayBox' ) );
+		$boxes = [];
+		$boxes[] = $th->callBox( 'documentation', [ $th, 'getDocumentationBox' ] );
+		$boxes[] = $th->callBox( 'definition', [ $th, 'getDefinitionBox' ] );
+		$boxes[] = $th->callBox( 'translation', [ $th, 'getTranslationDisplayBox' ] );
 
 		$output = implode( "\n", $boxes );
 		$output = Html::rawElement(
 			'div',
-			array( 'class' => 'mw-sp-translate-edit-fields' ),
+			[ 'class' => 'mw-sp-translate-edit-fields' ],
 			$output
 		);
 		$out->addHTML( $output );

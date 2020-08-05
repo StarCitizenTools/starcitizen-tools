@@ -13,7 +13,9 @@
 			"Hangsna",
 			"Lokal Profil",
 			"Jenniesarina",
-			"Jopparn"
+			"Jopparn",
+			"McDutchie",
+			"Bengtsson96"
 		]
 	},
 	"checkuser-summary": "Det här verktyget söker igenom de senaste ändringarna för att hämta IP-adresser för en användare, eller redigeringar och användare för en IP-adress.\nAnvändare och redigeringar kan visas med IP-adress från XFF genom att lägga till \"/xff\" efter IP-adressen. Verktyget stödjer IPv4 (CIDR $1-32) och IPv6 (CIDR $2-128).\nPå grund av prestandaskäl så visas inte mer än 5000 redigeringar. Använd verktyget i enlighet med policy.",
@@ -49,6 +51,8 @@
 	"checkuser-nomatch": "Inga träffar hittades.",
 	"checkuser-nomatch-edits": "Fick ingen träff.\nSenaste redigering var $1 kl $2.",
 	"checkuser-check": "Kontrollera",
+	"checkuser-check-this-user": "Granska den här användaren",
+	"checkuser-recent-checks": "Senaste kontroller för denna användare",
 	"checkuser-log-fail": "Loggposten kunde inte läggas i loggfilen.",
 	"checkuser-nolog": "Hittade ingen loggfil.",
 	"checkuser-blocked": "Blockerad",
@@ -93,7 +97,7 @@
 	"apihelp-query+checkuser-param-target": "Användarnamn, IP-adress eller CIDR-intervall att kontrollera.",
 	"apihelp-query+checkuser-param-reason": "Skäl att kontrollera.",
 	"apihelp-query+checkuser-param-limit": "Begränsning av rader.",
-	"apihelp-query+checkuser-param-timecond": "Tidsgräns för användardata (som \"2 weeks\").",
+	"apihelp-query+checkuser-param-timecond": "Tidsgräns för användardata (som \"-2 weeks\" eller \"2 weeks ago\").",
 	"apihelp-query+checkuser-param-xff": "Använd XFF data istället för IP-adress.",
 	"apihelp-query+checkuser-example-1": "Kontrollera IP-adresser för [[User:Example]]",
 	"apihelp-query+checkuser-example-2": "Kontrollera redigeringar från 192.0.2.0/24",

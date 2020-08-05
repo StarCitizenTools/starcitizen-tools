@@ -2,21 +2,21 @@
 
 namespace Flow\Repository;
 
-use Flow\Data\BufferedCache;
+use Flow\Data\FlowObjectCache;
 use Flow\Model\UUID;
-use Flow\Exception\InvalidInputException;
+use Flow\Exception\InvalidParameterException;
 
 class MultiGetList {
 
 	/**
-	 * @var BufferedCache
+	 * @var FlowObjectCache
 	 */
 	protected $cache;
 
 	/**
-	 * @param BufferedCache $cache
+	 * @param FlowObjectCache $cache
 	 */
-	public function __construct( BufferedCache $cache ) {
+	public function __construct( FlowObjectCache $cache ) {
 		$this->cache = $cache;
 	}
 
@@ -25,10 +25,10 @@ class MultiGetList {
 	 * @param array $ids
 	 * @param callable $loadCallback
 	 * @return array
-	 * @throws InvalidInputException
+	 * @throws InvalidParameterException
 	 */
 	public function get( $treeType, array $ids, $loadCallback ) {
-		$cacheKeys = array();
+		$cacheKeys = [];
 		foreach ( $ids as $id ) {
 			if ( $id instanceof UUID ) {
 				$cacheId = $id;
@@ -36,7 +36,7 @@ class MultiGetList {
 				$cacheId = UUID::create( $id );
 			} else {
 				$type = is_object( $id ) ? get_class( $id ) : gettype( $id );
-				throw new InvalidInputException( 'Not scalar:' . $type, 'invalid-input' );
+				throw new InvalidParameterException( 'Not scalar:' . $type, 'invalid-input' );
 			}
 			$cacheKeys[ TreeCacheKey::build( $treeType, $cacheId ) ] = $id;
 		}
@@ -50,9 +50,9 @@ class MultiGetList {
 	 */
 	public function getByKey( array $cacheKeys, $loadCallback ) {
 		if ( !$cacheKeys ) {
-			return array();
+			return [];
 		}
-		$result = array();
+		$result = [];
 		$multiRes = $this->cache->getMulti( array_keys( $cacheKeys ) );
 		if ( $multiRes === false ) {
 			// Falls through to query only backend
@@ -62,7 +62,9 @@ class MultiGetList {
 			// returns false for not found keys.
 			$multiRes = array_filter(
 				$multiRes,
-				function( $val ) { return $val !== false; }
+				function ( $val ) {
+					return $val !== false;
+				}
 			);
 			foreach ( $multiRes as $key => $value ) {
 				$idx = $cacheKeys[$key];
@@ -81,7 +83,7 @@ class MultiGetList {
 			// storage failure of some sort
 			return $result;
 		}
-		$invCacheKeys = array();
+		$invCacheKeys = [];
 		foreach ( $cacheKeys as $cacheKey => $id ) {
 			if ( $id instanceof UUID ) {
 				$id = $id->getAlphadecimal();

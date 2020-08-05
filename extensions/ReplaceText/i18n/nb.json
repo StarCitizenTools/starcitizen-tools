@@ -4,7 +4,8 @@
 			"Event",
 			"Laaknor",
 			"Nghtwlkr",
-			"Simny"
+			"Simny",
+			"Jon Harald Søby"
 		]
 	},
 	"replacetext": "Erstatt tekst",
@@ -13,7 +14,7 @@
 	"replacetext_originaltext": "Originaltekst:",
 	"replacetext_replacementtext": "Erstatningstekst:",
 	"replacetext_useregex": "Bruk regulæruttrykk",
-	"replacetext_regexdocu": "(Eksempel: Verdier for \"a(.*)c\" i \"Opprinnelig tekst\" og \"ac$1\" i \"Erstatningstekst\" erstatter \"abc\" med \"acb\".)",
+	"replacetext_regexdocu": "(Eksempel: Verdier for \"a(.*)c\" i \"{{int:replacetext_originaltext}}\" og \"ac$1\" i \"{{int:replacetext_replacementtext}}\" erstatter \"abc\" med \"acb\".)",
 	"replacetext_optionalfilters": "Valgfrie filter:",
 	"replacetext_categorysearch": "Erstatt kun i kategori:",
 	"replacetext_prefixsearch": "Erstatt kun i sider med prefikset:",
@@ -39,5 +40,6 @@
 	"replacetext_blankwarning": "Fordi erstatningsteksten er tom vil denne handlingen ikke kunne angres automatisk; fortsette?",
 	"replacetext_continue": "Fortsett",
 	"replacetext_editsummary": "Teksterstatting – «$1» til «$2»",
-	"right-replacetext": "Gjennomfør teksterstatninger på hele wikien"
+	"right-replacetext": "Gjennomfør teksterstatninger på hele wikien",
+	"action-replacetext": "gjennomføre strengerstatninger på hele wikien"
 }

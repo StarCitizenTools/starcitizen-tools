@@ -2,7 +2,7 @@
 /**
  *
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @file
  */
 
@@ -31,13 +31,13 @@ class CompileFontRepo extends Maintenance {
 
 		$list = $compiler->getRepository();
 
-		$json = FormatJson::encode( $list );
+		$json = FormatJson::encode( $list, "\t" );
 		$js = <<<JAVASCRIPT
-// Do not edit! This file is generated from data/fontrepo by data/fontrepo/scripts/compile.php
-( function ( $ ) {
+// Do not edit! This file is generated from data/fontrepo by scripts/compile-font-repo.php
+( function () {
 	$.webfonts = $.webfonts || {};
 	$.webfonts.repository = $json;
-}( jQuery ) );
+}() );
 
 JAVASCRIPT;
 		file_put_contents( "$base/resources/js/ext.uls.webfonts.repository.js", $js );
@@ -47,4 +47,4 @@ JAVASCRIPT;
 }
 
 $maintClass = 'CompileFontRepo';
-require_once DO_MAINTENANCE;
+require_once RUN_MAINTENANCE_IF_MAIN;

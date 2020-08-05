@@ -1,0 +1,14 @@
+*~
+.*.swp
+*.kate-swp
+.classpath
+.idea
+.metadata*
+.project
+.settings
+*.bak
+tests/pagetranslation/*.fail
+composer.lock
+extensions/
+vendor/
+node_modules/

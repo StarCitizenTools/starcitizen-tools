@@ -19,6 +19,9 @@
  * @ingroup RevisionDelete
  */
 
+use Wikimedia\Rdbms\FakeResultWrapper;
+use Wikimedia\Rdbms\IDatabase;
+
 /**
  * List for revision table items
  *
@@ -59,18 +62,19 @@ class RevDelRevisionList extends RevDelList {
 	 */
 	public function doQuery( $db ) {
 		$ids = array_map( 'intval', $this->ids );
+		$revQuery = Revision::getQueryInfo( [ 'page', 'user' ] );
 		$queryInfo = [
-			'tables' => [ 'revision', 'user' ],
-			'fields' => array_merge( Revision::selectFields(), Revision::selectUserFields() ),
+			'tables' => $revQuery['tables'],
+			'fields' => $revQuery['fields'],
 			'conds' => [
 				'rev_page' => $this->title->getArticleID(),
 				'rev_id' => $ids,
 			],
-			'options' => [ 'ORDER BY' => 'rev_id DESC' ],
-			'join_conds' => [
-				'page' => Revision::pageJoinCond(),
-				'user' => Revision::userJoinCond(),
+			'options' => [
+				'ORDER BY' => 'rev_id DESC',
+				'USE INDEX' => [ 'revision' => 'PRIMARY' ] // workaround for MySQL bug (T104313)
 			],
+			'join_conds' => $revQuery['joins'],
 		];
 		ChangeTags::modifyDisplayQuery(
 			$queryInfo['tables'],
@@ -94,13 +98,34 @@ class RevDelRevisionList extends RevDelList {
 			return $live;
 		}
 
-		// Check if any requested revisions are available fully deleted.
-		$archived = $db->select( [ 'archive' ], Revision::selectArchiveFields(),
-			[
-				'ar_rev_id' => $ids
+		$arQuery = Revision::getArchiveQueryInfo();
+		$archiveQueryInfo = [
+			'tables' => $arQuery['tables'],
+			'fields' => $arQuery['fields'],
+			'conds' => [
+				'ar_rev_id' => $ids,
 			],
+			'options' => [ 'ORDER BY' => 'ar_rev_id DESC' ],
+			'join_conds' => $arQuery['joins'],
+		];
+
+		ChangeTags::modifyDisplayQuery(
+			$archiveQueryInfo['tables'],
+			$archiveQueryInfo['fields'],
+			$archiveQueryInfo['conds'],
+			$archiveQueryInfo['join_conds'],
+			$archiveQueryInfo['options'],
+			''
+		);
+
+		// Check if any requested revisions are available fully deleted.
+		$archived = $db->select(
+			$archiveQueryInfo['tables'],
+			$archiveQueryInfo['fields'],
+			$archiveQueryInfo['conds'],
 			__METHOD__,
-			[ 'ORDER BY' => 'ar_rev_id DESC' ]
+			$archiveQueryInfo['options'],
+			$archiveQueryInfo['join_conds']
 		);
 
 		if ( $archived->numRows() == 0 ) {
@@ -150,10 +175,10 @@ class RevDelRevisionList extends RevDelList {
 		return Status::newGood();
 	}
 
-	public function doPostCommitUpdates() {
+	public function doPostCommitUpdates( array $visibilityChangeMap ) {
 		$this->title->purgeSquid();
 		// Extensions that require referencing previous revisions may need this
-		Hooks::run( 'ArticleRevisionVisibilitySet', [ $this->title, $this->ids ] );
+		Hooks::run( 'ArticleRevisionVisibilitySet', [ $this->title, $this->ids, $visibilityChangeMap ] );
 		return Status::newGood();
 	}
 }

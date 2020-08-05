@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Candalua"
+		]
+	},
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|ringràsia}}}}",
+	"thanks-thanked": "{{GENDER:$1|ringrassià}}",
+	"thanks-button-thank": "Ringrassia",
+	"thanks-button-thanked": "{{GENDER:$1|Ringrassià}}",
+	"thanks-error-undefined": "Eror durante el ringrassiamento. Próa da novo.",
+	"thanks-error-invalidrevision": "L'ID de la version no'l xe mia valido.",
+	"thanks-error-ratelimited": "Te ghè superà el limite massimo de ringrassiamenti. Speta un fià e ripróa.",
+	"thanks-thank-tooltip": "{{GENDER:$1|Màndeghe}} na notifica de ringrassiamento a {{GENDER:$2|sto|sta}} utente qua",
+	"thanks-thanked-notice": "Te ghè dito a $1 che te piase {{GENDER:$2|la so}} modifica.",
+	"echo-pref-subscription-edit-thank": "I me ringrassia par na me modifica",
+	"echo-pref-tooltip-edit-thank": "Avìseme co che qualcheduni me ringrassia par na modifica che gò fato.",
+	"echo-category-title-edit-thank": "Ringrassiamenti",
+	"notification-thanks-diff-link": "la to modifica",
+	"notification-header-rev-thank": "$1 {{GENDER:$4|el|la}} te gà {{GENDER:$2|ringrassià}} par la to modifica su <strong>$3</strong>.",
+	"log-name-thanks": "Registro dei ringrassiamenti",
+	"log-description-thanks": "Sta qua xe na lista dei utenti ringrassià da altri utenti.",
+	"logentry-thanks-thank": "$1 {{GENDER:$2|el|la}} gà ringrassià {{GENDER:$4|$3}}",
+	"log-show-hide-thanks": "$1 registro dei ringrassiamenti",
+	"notification-header-flow-thank": "$1 {{GENDER:$1|el|la}} te gà {{GENDER:$5|ringrassià}} par el to comento in \"<strong>$3</strong>\"."
+}

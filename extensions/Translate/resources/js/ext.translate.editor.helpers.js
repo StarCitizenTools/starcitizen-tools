@@ -1,7 +1,7 @@
 /*!
  * Translate editor additional helper functionality
  */
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var translateEditorHelpers = {
@@ -21,10 +21,8 @@
 
 			$messageDescViewer.addClass( 'hide' );
 
-			$messageDescEditor
-				.removeClass( 'hide' )
-				.find( '.tux-textarea-documentation' )
-					.focus();
+			$messageDescEditor.removeClass( 'hide' );
+			$messageDescEditor.find( '.tux-textarea-documentation' ).focus();
 
 			// So that the link won't be followed
 			return false;
@@ -49,17 +47,18 @@
 
 		/**
 		 * Save the documentation
+		 *
+		 * @return {jQuery.Promise}
 		 */
 		saveDocumentation: function () {
 			var translateEditor = this,
 				api = new mw.Api(),
 				newDocumentation = translateEditor.$editor.find( '.tux-textarea-documentation' ).val();
 
-			// Change to csrf when support for MW 1.25 is dropped
-			return api.postWithToken( 'edit', {
+			return api.postWithToken( 'csrf', {
 				action: 'edit',
 				title: translateEditor.message.title
-					.replace( /\/[a-z\-]+$/, '/' + mw.config.get( 'wgTranslateDocumentationLanguageCode' ) ),
+					.replace( /\/[a-z-]+$/, '/' + mw.config.get( 'wgTranslateDocumentationLanguageCode' ) ),
 				text: newDocumentation
 			} ).done( function ( response ) {
 				var $messageDesc = translateEditor.$editor.find( '.infocolumn-block .message-desc' );
@@ -138,6 +137,8 @@
 					.addClass( 'mw-content-' + documentationDir )
 					.html( documentation.html );
 
+				$messageDoc.find( 'a[href]' ).prop( 'target', '_blank' );
+
 				this.$editor.find( '.tux-textarea-documentation' )
 					.attr( langAttr )
 					.val( documentation.value );
@@ -210,15 +211,12 @@
 		 * @param {Array} translations An inotherlanguages array as returned by the translation helpers API.
 		 */
 		showAssistantLanguages: function ( translations ) {
-			var translateEditor = this,
-				$translationTextarea;
+			var translateEditor = this;
 
 			if ( translations.error ) {
 				// Do not proceed if errored/unsupported
 				return;
 			}
-
-			$translationTextarea = this.$editor.find( '.tux-textarea-translation' );
 
 			$.each( translations, function ( index ) {
 				var $otherLanguage, langAttr,
@@ -318,7 +316,7 @@
 						$( '<div>' )
 							.addClass( 'three columns quality text-right' )
 							.text( mw.msg( 'tux-editor-tm-match',
-								Math.floor( translation.quality * 100 ) ) ),
+								mw.language.convertNumber( Math.floor( translation.quality * 100 ) ) ) ),
 						$( '<div>' )
 							.addClass( 'row text-right' )
 							.append(
@@ -392,7 +390,7 @@
 
 		/**
 		 * Makes the $source element clickable and clicking it will replace the
-		 * transltion textarea with the given suggestion.
+		 * translation textarea with the given suggestion.
 		 *
 		 * @param {jQuery} $source
 		 * @param {string} suggestion Text to add
@@ -426,11 +424,8 @@
 		showSupportOptions: function ( support ) {
 			// Support URL
 			if ( support.url ) {
-				this.$editor.find( '.help' )
-					.find( 'a' )
-						.attr( 'href', support.url )
-						.end()
-					.removeClass( 'hide' );
+				this.$editor.find( '.help a' ).attr( 'href', support.url );
+				this.$editor.find( '.help' ).removeClass( 'hide' );
 			}
 		},
 
@@ -487,8 +482,7 @@
 
 			api.get( {
 				action: 'translationaids',
-				title: this.message.title,
-				format: 'json'
+				title: this.message.title
 			} ).done( function ( result ) {
 				translateEditor.$editor.find( '.infocolumn .loading' ).remove();
 
@@ -516,7 +510,7 @@
 					translateEditor.validateTranslation();
 				}
 
-				mw.translateHooks.run( 'showTranslationHelpers', result.helpers, translateEditor.$editor );
+				mw.hook( 'mw.translate.editor.showTranslationHelpers' ).fire( result.helpers, translateEditor.$editor );
 
 			} ).fail( function ( errorCode, results ) {
 				mw.log( 'Error loading translation aids', errorCode, results );
@@ -545,4 +539,4 @@
 	mw.translate.editor = mw.translate.editor || {};
 	$.extend( mw.translate.editor, translateEditorHelpers );
 
-}( jQuery, mediaWiki ) );
+}() );

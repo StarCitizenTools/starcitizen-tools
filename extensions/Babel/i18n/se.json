@@ -4,10 +4,18 @@
 			"GerardM"
 		]
 	},
-	"babel-1-n": "Dát geavaheaddji máhttá [[$1|veaháš]] [[$2|sámegiela]]",
-	"babel-2-n": "Dát geavaheaddji máhttá [[$2|sámegiela]] [[$1|viehka bures]]",
-	"babel-3-n": "Dát geavaheaddji máhttá [[$2|sámegiela]] [[$1|hui bures]]",
-	"babel-4-n": "Dát geavaheaddji máhttá [[$2|sámegiela]] [[$1|dego eatnigiela]]",
-	"babel-5-n": "Dát geavaheaddji máhttá [[$2|sámegiela]] [[$1|ámmátlaš dásis]]",
-	"babel-N-n": " Dát geavaheaddji máhttá [[$2|sámegiela]] [[$1|eatnigiellan]]"
+	"babel-0": "Dát geavaheaddji máhttá [[$2|$3]] [[$1|hui veaháš dahje ii máhte dan ollege]].",
+	"babel-1": "Dát geavaheaddji máhttá [[$1|veaháš]] [[$2|$3]].",
+	"babel-2": "Dát geavaheaddji máhttá [[$2|$3]] [[$1|viehka bures]].",
+	"babel-3": "Dát geavaheaddji máhttá [[$2|$3]] [[$1|hui bures]].",
+	"babel-4": "Dát geavaheaddji máhttá [[$2|$3]] [[$1|eatnigielat hupmi láhkai]].",
+	"babel-5": "Dát geavaheaddji máhttá [[$2|$3]] [[$1|ámmátlaš dásis]].",
+	"babel-N": "Dát geavaheaddji máhttá [[$2|$3]] [[$1|eatnigiellan]].",
+	"babel-0-n": "Dát geavaheaddji máhttá [[$2|davvisámegiela]] [[$1|hui veaháš dahje ii máhte dan ollege]].",
+	"babel-1-n": "Dát geavaheaddji máhttá [[$1|veaháš]] [[$2|davvisámegiela]]",
+	"babel-2-n": "Dát geavaheaddji máhttá [[$2|davvisámegiela]] [[$1|viehka bures]]",
+	"babel-3-n": "Dát geavaheaddji máhttá [[$2|davvisámegiela]] [[$1|hui bures]]",
+	"babel-4-n": "Dát geavaheaddji máhttá [[$2|davvisámegiela]] [[$1|dego eatnigiela]]",
+	"babel-5-n": "Dát geavaheaddji máhttá [[$2|davvisámegiela]] [[$1|ámmátlaš dásis]]",
+	"babel-N-n": " Dát geavaheaddji máhttá [[$2|davvisámegiela]] [[$1|eatnigiellan]]"
 }

@@ -5,8 +5,9 @@ namespace Flow\Tests\Import\Wikitext;
 use Flow\Container;
 use DateTime;
 use DateTimeZone;
+use ExtensionRegistry;
 use Flow\Import\SourceStore\SourceStoreInterface as ImportSourceStore;
-use Flow\Import\SourceStore\Null as NullImportSourceStore;
+use Flow\Import\SourceStore\NullImportSourceStore;
 use Flow\Import\Wikitext\ConversionStrategy;
 use LinkCache;
 use Parser;
@@ -85,17 +86,17 @@ class ConversionStrategyTest extends \MediaWikiTestCase {
 	}
 
 	public function testShouldConvertLqt() {
-		if( !class_exists( 'LqtDispatch' ) ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Liquid Threads' ) ) {
 			$this->markTestSkipped( 'LiquidThreads not enabled' );
 		}
 
 		$strategy = $this->createStrategy();
 
 		$lqtPagesName = 'Talk:Some ConversionStrategyTest LQT page';
-		$this->setMwGlobals( array(
-			'wgLqtNamespaces' => array( NS_HELP_TALK ),
-			'wgLqtPages' => array( $lqtPagesName ),
-		) );
+		$this->setMwGlobals( [
+			'wgLqtNamespaces' => [ NS_HELP_TALK ],
+			'wgLqtPages' => [ $lqtPagesName ],
+		] );
 
 		// Not subpage, not LQT
 		$nonLqtTitle = Title::newFromText( 'Talk:Some ConversionStrategyTest page' );
@@ -121,8 +122,8 @@ class ConversionStrategyTest extends \MediaWikiTestCase {
 			$strategy->shouldConvert( $lqtPagesTitle ),
 			'LQT wgLqtPages talk page should not be converted'
 		);
-
 	}
+
 	/**
 	 * @dataProvider provideMeetsSubpageRequirements
 	 */
@@ -150,32 +151,32 @@ class ConversionStrategyTest extends \MediaWikiTestCase {
 	}
 
 	public function provideMeetsSubpageRequirements() {
-		return array(
-			array(
+		return [
+			[
 				'Talk:Some ConversionStrategyTest page',
 				true,
 				true, // Shouldn't matter
 				'Non-subpage talk page',
-			),
-			array(
+			],
+			[
 				'Talk:Some/ConversionStrategyTest subpage 1',
 				true,
 				true,
 				'Talk subpage where subject exists',
-			),
-			array(
+			],
+			[
 				'Talk:Some/ConversionStrategyTest subpage 2',
 				false,
 				false,
 				'Talk subpage where subject doesn\'t exist',
-			),
-			array(
+			],
+			[
 				'User:Some/ConversionStrategyTest subpage',
 				false,
 				true,
 				'Existing subpage in subject namespace'
-			),
-		);
+			],
+		];
 	}
 
 	protected function createStrategy(
@@ -187,7 +188,8 @@ class ConversionStrategyTest extends \MediaWikiTestCase {
 		return new ConversionStrategy(
 			$parser ?: $wgParser,
 			$sourceStore ?: new NullImportSourceStore,
-			Container::get( 'default_logger' )
+			Container::get( 'default_logger' ),
+			Container::get( 'occupation_controller' )->getTalkpageManager()
 		);
 	}
 }

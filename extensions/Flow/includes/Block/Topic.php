@@ -3,9 +3,9 @@
 namespace Flow\Block;
 
 use Flow\Container;
-use Flow\Conversion\Utils;
 use Flow\Data\ManagerGroup;
 use Flow\Data\Pager\HistoryPager;
+use Flow\Exception\DataModelException;
 use Flow\Exception\FailCommitException;
 use Flow\Exception\FlowException;
 use Flow\Exception\InvalidActionException;
@@ -20,6 +20,7 @@ use Flow\Model\AbstractRevision;
 use Flow\Model\PostRevision;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
+use Flow\NotificationController;
 use Flow\Repository\RootPostLoader;
 use Message;
 
@@ -48,15 +49,15 @@ class TopicBlock extends AbstractBlock {
 	/**
 	 * @var array
 	 */
-	protected $requestedPost = array();
+	protected $requestedPost = [];
 
 	/**
 	 * @var array Map of data to be passed on as
 	 *  commit metadata for event handlers
 	 */
-	protected $extraCommitMetadata = array();
+	protected $extraCommitMetadata = [];
 
-	protected $supportedPostActions = array(
+	protected $supportedPostActions = [
 		// Standard editing
 		'edit-post', 'reply',
 		// Moderation
@@ -67,16 +68,16 @@ class TopicBlock extends AbstractBlock {
 		// Other stuff
 		'edit-title',
 		'undo-edit-post',
-	);
+	];
 
-	protected $supportedGetActions = array(
+	protected $supportedGetActions = [
 		'reply', 'view', 'history', 'edit-post', 'edit-title', 'compare-post-revisions', 'single-view',
 		'view-topic', 'view-topic-history', 'view-post', 'view-post-history', 'undo-edit-post',
 		'moderate-topic', 'moderate-post', 'lock-topic',
-	);
+	];
 
 	// @Todo - fill in the template names
-	protected $templates = array(
+	protected $templates = [
 		'single-view' => 'single_view',
 		'view' => '',
 		'reply' => '',
@@ -88,7 +89,7 @@ class TopicBlock extends AbstractBlock {
 		'moderate-topic' => 'moderate_topic',
 		'moderate-post' => 'moderate_post',
 		'lock-topic' => 'lock',
-	);
+	];
 
 	public function __construct( Workflow $workflow, ManagerGroup $storage, $root ) {
 		parent::__construct( $workflow, $storage );
@@ -97,7 +98,7 @@ class TopicBlock extends AbstractBlock {
 		} elseif ( $root instanceof RootPostLoader ) {
 			$this->rootLoader = $root;
 		} else {
-			throw new InvalidInputException(
+			throw new DataModelException(
 				'Expected PostRevision or RootPostLoader, received: ' . is_object( $root ) ? get_class( $root ) : gettype( $root ), 'invalid-input'
 			);
 		}
@@ -111,18 +112,7 @@ class TopicBlock extends AbstractBlock {
 			return;
 		}
 
-		// If the topic is locked, the only allowed action is to unlock it
-		if (
-			$topicTitle->isLocked()
-			&& (
-				$this->action !== 'lock-topic'
-				|| !in_array( $this->submitted['moderationState'], array( 'unlock', /* BC for unlock: */ 'reopen' ) )
-			)
-		) {
-			$this->addError( 'moderate', $this->context->msg( 'flow-error-topic-is-locked' ) );
-		}
-
-		switch( $this->action ) {
+		switch ( $this->action ) {
 		case 'edit-title':
 			$this->validateEditTitle();
 			break;
@@ -203,7 +193,7 @@ class TopicBlock extends AbstractBlock {
 					$topicTitle->getRevisionId()->getAlphadecimal(),
 					$this->context->getUser()->getName()
 				),
-				array( 'revision_id' => $topicTitle->getRevisionId()->getAlphadecimal() ) // save current revision ID
+				[ 'revision_id' => $topicTitle->getRevisionId()->getAlphadecimal() ] // save current revision ID
 			);
 			return;
 		}
@@ -296,7 +286,7 @@ class TopicBlock extends AbstractBlock {
 		// $moderationState should be a string like 'restore', 'suppress', etc.  The exact strings allowed
 		// are checked below with $post->isValidModerationState(), but this is checked first otherwise
 		// a blank string would restore a post(due to AbstractRevision::MODERATED_NONE === '').
-		if ( ! $moderationState ) {
+		if ( !$moderationState ) {
 			$this->addError( 'moderate', $this->context->msg( 'flow-error-invalid-moderation-state' ) );
 			return;
 		}
@@ -305,15 +295,15 @@ class TopicBlock extends AbstractBlock {
 		 * BC: 'suppress' used to be called 'censor', 'lock' was 'close' &
 		 * 'unlock' was 'reopen'
 		 */
-		$bc = array(
+		$bc = [
 			'censor' => AbstractRevision::MODERATED_SUPPRESSED,
 			'close' => AbstractRevision::MODERATED_LOCKED,
 			'reopen' => 'un' . AbstractRevision::MODERATED_LOCKED
-		);
+		];
 		$moderationState = str_replace( array_keys( $bc ), array_values( $bc ), $moderationState );
 
 		// these all just mean set to no moderation, it returns a post to unmoderated status
-		$allowedRestoreAliases = array( 'unlock', 'unhide', 'undelete', 'unsuppress', /* BC for unlock: */ 'reopen' );
+		$allowedRestoreAliases = [ 'unlock', 'unhide', 'undelete', 'unsuppress', /* BC for unlock: */ 'reopen' ];
 		if ( in_array( $moderationState, $allowedRestoreAliases ) ) {
 			$moderationState = 'restore';
 		}
@@ -328,7 +318,7 @@ class TopicBlock extends AbstractBlock {
 			$newState = $moderationState;
 		}
 
-		if ( ! $post->isValidModerationState( $newState ) ) {
+		if ( !$post->isValidModerationState( $newState ) ) {
 			$this->addError( 'moderate', $this->context->msg( 'flow-error-invalid-moderation-state' ) );
 			return;
 		}
@@ -378,7 +368,6 @@ class TopicBlock extends AbstractBlock {
 			// also exists a unique index on rev_prev_revision in mysql,
 			// meaning if someone else inserts against the parent we and
 			// the submitter think is the latest, our insert will fail.
-			//
 			// TODO: Catch whatever exception happens there, make sure the
 			// most recent revision is the one in the cache before handing
 			// user back to specific dialog indicating race condition
@@ -389,7 +378,7 @@ class TopicBlock extends AbstractBlock {
 					$post->getRevisionId()->getAlphadecimal(),
 					$this->context->getUser()->getName()
 				),
-				array( 'revision_id' => $post->getRevisionId()->getAlphadecimal() ) // save current revision ID
+				[ 'revision_id' => $post->getRevisionId()->getAlphadecimal() ] // save current revision ID
 			);
 			return;
 		}
@@ -411,11 +400,10 @@ class TopicBlock extends AbstractBlock {
 	}
 
 	public function commit() {
-
-		switch( $this->action ) {
+		switch ( $this->action ) {
 		case 'edit-topic-summary':
 			// pseudo-action does not do anything, only includes data in api response
-			return array();
+			return [];
 
 		case 'reply':
 		case 'moderate-topic':
@@ -429,10 +417,10 @@ class TopicBlock extends AbstractBlock {
 				throw new FailCommitException( 'Attempt to save null revision', 'fail-commit' );
 			}
 
-			$metadata = $this->extraCommitMetadata + array(
+			$metadata = $this->extraCommitMetadata + [
 				'workflow' => $this->workflow,
 				'topic-title' => $this->loadTopicTitle(),
-			);
+			];
 			if ( !$metadata['topic-title'] instanceof PostRevision ) {
 				// permissions failure, should never have gotten this far
 				throw new PermissionException( 'Not Allowed', 'insufficient-permission' );
@@ -450,6 +438,23 @@ class TopicBlock extends AbstractBlock {
 				$this->storage->put( $this->newRevision, $metadata );
 				$this->workflow->updateLastUpdated( $this->newRevision->getRevisionId() );
 				$this->storage->put( $this->workflow, $metadata );
+
+				if ( strpos( $this->action, 'moderate-' ) === 0 ) {
+					$topicId = $this->newRevision->getCollection()->getRoot()->getId();
+
+					$moderate = $this->newRevision->isModerated()
+						&& ( $this->newRevision->getModerationState() === PostRevision::MODERATED_DELETED
+							|| $this->newRevision->getModerationState() === PostRevision::MODERATED_SUPPRESSED );
+
+					/** @var NotificationController $controller */
+					$controller = Container::get( 'controller.notification' );
+					if ( $this->action === 'moderate-topic' ) {
+						$controller->moderateTopicNotifications( $topicId, $moderate );
+					} elseif ( $this->action === 'moderate-post' ) {
+						$postId = $this->newRevision->getPostId();
+						$controller->moderatePostNotifications( $topicId, $postId, $moderate );
+					}
+				}
 			}
 
 			$newRevision = $this->newRevision;
@@ -459,13 +464,13 @@ class TopicBlock extends AbstractBlock {
 			try {
 				$newRevision->getChildren();
 			} catch ( \MWException $e ) {
-				$newRevision->setChildren( array() );
+				$newRevision->setChildren( [] );
 			}
 
-			$returnMetadata = array(
+			$returnMetadata = [
 				'post-id' => $this->newRevision->getPostId(),
 				'post-revision-id' => $this->newRevision->getRevisionId(),
-			);
+			];
 
 			return $returnMetadata;
 
@@ -475,11 +480,11 @@ class TopicBlock extends AbstractBlock {
 	}
 
 	public function renderApi( array $options ) {
-		$output = array( 'type' => $this->getName() );
+		$output = [ 'type' => $this->getName() ];
 
 		$topic = $this->loadTopicTitle();
 		if ( !$topic ) {
-			return $output + $this->finalizeApiOutput($options);
+			return $output + $this->finalizeApiOutput( $options );
 		}
 
 		// there's probably some OO way to turn this stack of if/else into
@@ -553,7 +558,7 @@ class TopicBlock extends AbstractBlock {
 				break;
 		}
 
-		return $output + $this->finalizeApiOutput($options);
+		return $output + $this->finalizeApiOutput( $options );
 	}
 
 	/**
@@ -563,15 +568,15 @@ class TopicBlock extends AbstractBlock {
 	protected function finalizeApiOutput( $options ) {
 		if ( $this->wasSubmitted() ) {
 			// Failed actions, like reply, end up here
-			return array(
+			return [
 				'submitted' => $this->submitted,
 				'errors' => $this->errors,
-			);
+			];
 		} else {
-			return array(
+			return [
 				'submitted' => $options,
 				'errors' => $this->errors,
-			);
+			];
 		}
 	}
 
@@ -586,9 +591,9 @@ class TopicBlock extends AbstractBlock {
 		}
 		list( $new, $old ) = Container::get( 'query.post.view' )->getDiffViewResult( UUID::create( $options['newRevision'] ), UUID::create( $oldRevision ) );
 
-		return array(
+		return [
 			'revision' => Container::get( 'formatter.revision.diff.view' )->formatApi( $new, $old, $this->context )
-		);
+		];
 	}
 
 	// @Todo - duplicated logic in other single view block
@@ -597,12 +602,12 @@ class TopicBlock extends AbstractBlock {
 
 		if ( !$this->permissions->isAllowed( $row->revision, 'view' ) ) {
 			$this->addError( 'permissions', $this->getDisallowedErrorMessage( $row->revision ) );
-			return array();
+			return [];
 		}
 
-		return array(
+		return [
 			'revision' => Container::get( 'formatter.revisionview' )->formatApi( $row, $this->context )
-		);
+		];
 	}
 
 	protected function renderTopicApi( array $options, $workflowId = '' ) {
@@ -632,7 +637,7 @@ class TopicBlock extends AbstractBlock {
 
 		return $serializer->formatApi(
 			$this->workflow,
-			Container::get( 'query.topiclist' )->getResults( array( $workflowId ) ),
+			Container::get( 'query.topiclist' )->getResults( [ $workflowId ] ),
 			$this->context
 		);
 	}
@@ -641,6 +646,10 @@ class TopicBlock extends AbstractBlock {
 	 * @todo Any failed action performed against a single revisions ends up here.
 	 * To generate forms with validation errors in the non-javascript renders we
 	 * need to add something to this output, but not sure what yet
+	 * @param array $options
+	 * @param string $postId
+	 * @return null|array[]
+	 * @throws FlowException
 	 */
 	protected function renderPostApi( array $options, $postId = '' ) {
 		if ( $this->workflow->isNew() ) {
@@ -653,13 +662,13 @@ class TopicBlock extends AbstractBlock {
 		if ( !$postId ) {
 			if ( isset( $options['postId'] ) ) {
 				$postId = $options['postId'];
-			} elseif( $this->newRevision ) {
+			} elseif ( $this->newRevision ) {
 				// API results after a reply will have no $postId (ID is not yet
 				// known when the reply is submitted) so we'll grab it from the
 				// newly added revision
 				$postId = $this->newRevision->getPostId();
 			} else {
-				throw new FlowException('No post id specified');
+				throw new FlowException( 'No post id specified' );
 			}
 		} else {
 			// $postId is only set for lock-topic, which should default to
@@ -674,15 +683,15 @@ class TopicBlock extends AbstractBlock {
 			return null;
 		}
 
-		return array(
-			'roots' => array( $serialized['postId'] ),
-			'posts' => array(
-				$serialized['postId'] => array( $serialized['revisionId'] ),
-			),
-			'revisions' => array(
+		return [
+			'roots' => [ $serialized['postId'] ],
+			'posts' => [
+				$serialized['postId'] => [ $serialized['revisionId'] ],
+			],
+			'revisions' => [
 				$serialized['revisionId'] => $serialized,
-			)
-		);
+			]
+		];
 	}
 
 	protected function renderUndoApi( array $options ) {
@@ -758,7 +767,7 @@ class TopicBlock extends AbstractBlock {
 		$pager->doQuery();
 		$history = $pager->getResult();
 
-		$revisions = array();
+		$revisions = [];
 		foreach ( $history as $row ) {
 			$serialized = $serializer->formatApi( $row, $this->context, 'history' );
 			// if the user is not allowed to see this row it will return empty
@@ -767,7 +776,7 @@ class TopicBlock extends AbstractBlock {
 			}
 		}
 
-		$response = array( 'revisions' => $revisions );
+		$response = [ 'revisions' => $revisions ];
 		if ( $navbar ) {
 			$response['navbar'] = $pager->getNavigationBar();
 		}
@@ -786,7 +795,9 @@ class TopicBlock extends AbstractBlock {
 
 		if ( $this->permissions->isAllowed( $rootPost, 'view' ) ) {
 			// topicTitle is same as root, difference is root has children populated to full depth
-			return $this->topicTitle = $this->root = $rootPost;
+			$this->topicTitle = $rootPost;
+			$this->root = $rootPost;
+			return $rootPost;
 		}
 
 		$this->addError( 'moderation', $this->context->msg( 'flow-error-not-allowed' ) );
@@ -807,8 +818,8 @@ class TopicBlock extends AbstractBlock {
 		if ( $this->topicTitle === null ) {
 			$found = $this->storage->find(
 				'PostRevision',
-				array( 'rev_type_id' => $this->workflow->getId() ),
-				array( 'sort' => 'rev_id', 'order' => 'DESC', 'limit' => 1 )
+				[ 'rev_type_id' => $this->workflow->getId() ],
+				[ 'sort' => 'rev_id', 'order' => 'DESC', 'limit' => 1 ]
 			);
 			if ( !$found ) {
 				throw new InvalidDataException( 'Every workflow must have an associated topic title', 'missing-topic-title' );
@@ -817,7 +828,7 @@ class TopicBlock extends AbstractBlock {
 
 			// this method loads only title, nothing else; otherwise, you're
 			// looking for loadRootPost
-			$this->topicTitle->setChildren( array() );
+			$this->topicTitle->setChildren( [] );
 			$this->topicTitle->setDepth( 0 );
 			$this->topicTitle->setRootPost( $this->topicTitle );
 		}
@@ -836,7 +847,7 @@ class TopicBlock extends AbstractBlock {
 	 * @return Message
 	 */
 	protected function getDisallowedErrorMessage( AbstractRevision $revision ) {
-		if ( in_array( $this->action, array( 'moderate-topic', 'moderate-post' ) ) ) {
+		if ( in_array( $this->action, [ 'moderate-topic', 'moderate-post' ] ) ) {
 			/*
 			 * When failing to moderate an already moderated action (like
 			 * undo), show the more general "you have insufficient
@@ -850,12 +861,12 @@ class TopicBlock extends AbstractBlock {
 
 		// display simple message
 		// i18n messages:
-		//  flow-error-not-allowed-hide,
-		//  flow-error-not-allowed-reply-to-hide-topic
-		//  flow-error-not-allowed-delete
-		//  flow-error-not-allowed-reply-to-delete-topic
-		//  flow-error-not-allowed-suppress
-		//  flow-error-not-allowed-reply-to-suppress-topic
+		// flow-error-not-allowed-hide,
+		// flow-error-not-allowed-reply-to-hide-topic
+		// flow-error-not-allowed-delete
+		// flow-error-not-allowed-reply-to-delete-topic
+		// flow-error-not-allowed-suppress
+		// flow-error-not-allowed-reply-to-suppress-topic
 		if ( $revision instanceof PostRevision ) {
 			$type = $revision->isTopicTitle() ? 'topic' : 'post';
 		} else {
@@ -876,26 +887,26 @@ class TopicBlock extends AbstractBlock {
 				// get log extract
 				$entries = \LogEventsList::showLogExtract(
 					$output,
-					array( $state ),
+					[ $state ],
 					$this->workflow->getArticleTitle()->getPrefixedText(),
 					'',
-					array(
+					[
 						'lim' => 10,
 						'showIfEmpty' => false,
 						// i18n messages:
-						//  flow-error-not-allowed-hide-extract
-						//  flow-error-not-allowed-reply-to-hide-topic-extract
-						//  flow-error-not-allowed-delete-extract
-						//  flow-error-not-allowed-reply-to-delete-topic-extract
-						//  flow-error-not-allowed-suppress-extract
-						//  flow-error-not-allowed-reply-to-suppress-topic-extract
-						'msgKey' => array(
-							array(
+						// flow-error-not-allowed-hide-extract
+						// flow-error-not-allowed-reply-to-hide-topic-extract
+						// flow-error-not-allowed-delete-extract
+						// flow-error-not-allowed-reply-to-delete-topic-extract
+						// flow-error-not-allowed-suppress-extract
+						// flow-error-not-allowed-reply-to-suppress-topic-extract
+						'msgKey' => [
+							[
 								"flow-error-not-allowed-{$this->action}-to-$state-$type",
 								"flow-error-not-allowed-$state-extract",
-							),
-						)
-					)
+							],
+						]
+					]
 				);
 
 				// check if there were any log extracts
@@ -906,12 +917,12 @@ class TopicBlock extends AbstractBlock {
 			}
 		}
 
-		return $this->context->msg( array(
+		return $this->context->msg( [
 			// set of keys to try in order
 			"flow-error-not-allowed-{$this->action}-to-$state-$type",
 			"flow-error-not-allowed-$state",
 			"flow-error-not-allowed"
-		) );
+		] );
 	}
 
 	/**
@@ -966,7 +977,10 @@ class TopicBlock extends AbstractBlock {
 		return null;
 	}
 
-	// The prefix used for form data$pos
+	/**
+	 * The prefix used for form data$pos
+	 * @return string
+	 */
 	public function getName() {
 		return 'topic';
 	}
@@ -975,7 +989,7 @@ class TopicBlock extends AbstractBlock {
 	 * @param \OutputPage $out
 	 *
 	 * @todo Provide more informative page title for actions other than view,
-     *       e.g. "Hide post in <TITLE>", "Unlock <TITLE>", etc.
+	 *       e.g. "Hide post in <TITLE>", "Unlock <TITLE>", etc.
 	 */
 	public function setPageTitle( \OutputPage $out ) {
 		$topic = $this->loadTopicTitle( $this->action === 'history' ? 'history' : 'view' );
@@ -991,12 +1005,12 @@ class TopicBlock extends AbstractBlock {
 			} else {
 				$key = 'flow-topic-html-title';
 			}
-			$out->setHtmlTitle( $out->msg( $key, array(
+			$out->setHtmlTitle( $out->msg( $key, [
 				// This must be a rawParam to not expand {{foo}} in the title, it must
 				// not be htmlspecialchar'd because OutputPage::setHtmlTitle handles that.
 				Message::rawParam( $topic->getContent( 'topic-title-plaintext' ) ),
 				$title->getPrefixedText()
-			) ) );
+			] ) );
 		} else {
 			$out->setHtmlTitle( $title->getPrefixedText() );
 		}

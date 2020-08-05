@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable DocumentNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -9,6 +9,7 @@
  *
  * @class
  * @extends ve.ce.BranchNode
+ * @mixins ve.ce.ContentEditableNode
  * @constructor
  * @param {ve.dm.DocumentNode} model Model to observe
  * @param {ve.ce.Surface} surface Surface document is part of
@@ -18,6 +19,9 @@ ve.ce.DocumentNode = function VeCeDocumentNode( model, surface, config ) {
 	// Parent constructor
 	ve.ce.DocumentNode.super.call( this, model, config );
 
+	// Mixin constructor
+	ve.ce.ContentEditableNode.call( this );
+
 	// Properties
 	this.surface = surface;
 
@@ -26,12 +30,16 @@ ve.ce.DocumentNode = function VeCeDocumentNode( model, surface, config ) {
 
 	// DOM changes
 	this.$element.addClass( 've-ce-documentNode' );
-	this.$element.prop( { contentEditable: 'true', spellcheck: true } );
+	// Prevent Grammarly from polluting the DOM (T165746)
+	this.$element.attr( 'data-gramm', 'false' );
 };
 
 /* Inheritance */
 
 OO.inheritClass( ve.ce.DocumentNode, ve.ce.BranchNode );
+OO.mixinClass( ve.ce.DocumentNode, ve.ce.ContentEditableNode );
+
+/* Events */
 
 /* Static Properties */
 
@@ -67,7 +75,7 @@ ve.ce.DocumentNode.prototype.getSurface = function () {
  * @method
  */
 ve.ce.DocumentNode.prototype.disable = function () {
-	this.$element.prop( 'contentEditable', 'false' );
+	this.setContentEditable( false );
 };
 
 /**
@@ -76,7 +84,7 @@ ve.ce.DocumentNode.prototype.disable = function () {
  * @method
  */
 ve.ce.DocumentNode.prototype.enable = function () {
-	this.$element.prop( 'contentEditable', 'true' );
+	this.setContentEditable( true );
 };
 
 /* Registration */

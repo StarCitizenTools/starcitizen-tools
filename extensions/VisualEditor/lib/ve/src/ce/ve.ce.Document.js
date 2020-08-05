@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Document class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -16,12 +16,13 @@
  */
 ve.ce.Document = function VeCeDocument( model, surface ) {
 	// Parent constructor
-	ve.Document.call( this, new ve.ce.DocumentNode( model.getDocumentNode(), surface ) );
+	ve.ce.Document.super.call( this, new ve.ce.DocumentNode( model.getDocumentNode(), surface ) );
 
-	this.getDocumentNode().$element.prop( {
-		lang: model.getLang(),
-		dir: model.getDir()
-	} );
+	this.lang = null;
+	this.dir = null;
+
+	this.setLang( model.getLang() );
+	this.setDir( model.getDir() );
 
 	// Properties
 	this.model = model;
@@ -31,7 +32,55 @@ ve.ce.Document = function VeCeDocument( model, surface ) {
 
 OO.inheritClass( ve.ce.Document, ve.Document );
 
+/* Events */
+
+/**
+ * Language or direction changed
+ *
+ * @event langChange
+ */
+
 /* Methods */
+
+/**
+ * Set the document view language
+ *
+ * @param {string} lang Language code
+ */
+ve.ce.Document.prototype.setLang = function ( lang ) {
+	this.getDocumentNode().$element.prop( 'lang', lang );
+	this.lang = lang;
+	this.emit( 'langChange' );
+};
+
+/**
+ * Set the document view directionality
+ *
+ * @param {string} dir Directionality (ltr/rtl)
+ */
+ve.ce.Document.prototype.setDir = function ( dir ) {
+	this.getDocumentNode().$element.prop( 'dir', dir );
+	this.dir = dir;
+	this.emit( 'langChange' );
+};
+
+/**
+ * Get the document view language
+ *
+ * @return {string} Language code
+ */
+ve.ce.Document.prototype.getLang = function () {
+	return this.lang;
+};
+
+/**
+ * Get the document view directionality
+ *
+ * @return {string} Directionality (ltr/rtl)
+ */
+ve.ce.Document.prototype.getDir = function () {
+	return this.dir;
+};
 
 /**
  * Get a slug at an offset.
@@ -58,9 +107,9 @@ ve.ce.Document.prototype.getSlugAtOffset = function ( offset ) {
  * @throws {Error} Offset could not be translated to a DOM element and offset
  */
 ve.ce.Document.prototype.getNodeAndOffset = function ( offset ) {
-	var branchNode, position, count, step, node, model, steps,
-		countedNodes = [],
-		found = {};
+	var branchNode, count, i, ceChild, position, step, node, model, steps, found, prevNode,
+		$viewNodes,
+		countedNodes = [];
 
 	// 1. Step with ve.adjacentDomPosition( ..., { stop: function () { return true; } } )
 	// until we hit a position at the correct offset (which is guaranteed to be the first
@@ -82,8 +131,55 @@ ve.ce.Document.prototype.getNodeAndOffset = function ( offset ) {
 	// coordinates than any of its containers.
 
 	branchNode = this.getBranchNodeFromOffset( offset );
-	position = { node: branchNode.$element[ 0 ], offset: 0 };
 	count = branchNode.getOffset() + ( ( branchNode.isWrapped() ) ? 1 : 0 );
+
+	if ( !( branchNode instanceof ve.ce.ContentBranchNode ) ) {
+		// The cursor does not lie in a ContentBranchNode, so we can determine
+		// everything from the DM tree
+		for ( i = 0; ; i++ ) {
+			ceChild = branchNode.children[ i ];
+			if ( count === offset ) {
+				break;
+			}
+			if ( !ceChild ) {
+				throw new Error( 'Offset lies beyond branchNode' );
+			}
+			count += ceChild.getOuterLength();
+			if ( count > offset ) {
+				if ( ceChild.getOuterLength() !== 2 ) {
+					throw new Error( 'Offset lies inside child of strange size' );
+				}
+				node = ceChild.$element[ 0 ];
+				if ( node ) {
+					return { node: node, offset: 0 };
+				}
+				// Else ceChild has no DOM representation; step forwards
+				break;
+			}
+		}
+		// Offset lies directly in branchNode, just before ceChild
+		node = branchNode.$element[ 0 ];
+		while ( ceChild && !ceChild.$element[ 0 ] ) {
+			// Node does not have a DOM representation; move forwards past it
+			i++;
+			ceChild = branchNode.children[ i ];
+		}
+		if ( !ceChild || !ceChild.$element[ 0 ] ) {
+			// Offset lies just at the end of branchNode
+			return { node: node, offset: node.childNodes.length };
+		}
+		return {
+			node: node,
+			offset: Array.prototype.indexOf.call(
+				node.childNodes,
+				ceChild.$element[ 0 ]
+			)
+		};
+	}
+
+	// Else the cursor lies in a ContentBranchNode, so we must traverse the DOM, keeping
+	// count of the corresponding DM position until it reaches offset.
+	position = { node: branchNode.$element[ 0 ], offset: 0 };
 
 	function noDescend() {
 		return this.classList.contains( 've-ce-branchNode-blockSlug' ) ||
@@ -106,24 +202,24 @@ ve.ce.Document.prototype.getNodeAndOffset = function ( offset ) {
 		node = step.node;
 		if ( node.nodeType === Node.TEXT_NODE ) {
 			if ( step.type === 'leave' ) {
-				// skip without incrementing
+				// Skip without incrementing
 				continue;
 			}
-			// Else the code below always breaks or skips over the text node;
+			// else the code below always breaks or skips over the text node;
 			// therefore it is guaranteed that step.type === 'enter' (we just
 			// stepped in)
 			// TODO: what about zero-length text nodes?
 			if ( offset <= count + node.data.length ) {
-				// match the appropriate offset in the text node
+				// Match the appropriate offset in the text node
 				position = { node: node, offset: offset - count };
 				break;
 			} else {
-				// skip over the text node
+				// Skip over the text node
 				count += node.data.length;
 				position = { node: node, offset: node.data.length };
 				continue;
 			}
-		} // else is an element node (TODO: handle comment etc)
+		} // else it is an element node (TODO: handle comment etc)
 
 		if ( !(
 			node.classList.contains( 've-ce-branchNode' ) ||
@@ -168,7 +264,23 @@ ve.ce.Document.prototype.getNodeAndOffset = function ( offset ) {
 		}
 	}
 	// Now "position" is the first DOM position (in document order) at the correct
-	// model offset. Find all DOM positions at the same model offset
+	// model offset.
+
+	// If the position is exactly after the first of multiple view nodes sharing a model,
+	// then jump to the position exactly after the final such view node.
+	prevNode = position.node.childNodes[ position.offset - 1 ];
+	if ( prevNode && prevNode.nodeType === Node.ELEMENT_NODE && (
+		prevNode.classList.contains( 've-ce-branchNode' ) ||
+		prevNode.classList.contains( 've-ce-leafNode' )
+	) ) {
+		$viewNodes = $.data( prevNode, 'view' ).$element;
+		if ( $viewNodes.length > 1 ) {
+			position.node = $viewNodes.get( -1 ).parentNode;
+			position.offset = 1 + ve.parentIndex( $viewNodes.get( -1 ) );
+		}
+	}
+
+	// Find all subsequent DOM positions at the same model offset
 	found = {};
 	function stop( step ) {
 		var model;
@@ -253,7 +365,7 @@ ve.ce.Document.prototype.getDirectionFromRange = function ( range ) {
 		// Get the common parent node
 		effectiveNode = this.selectNodes( range, 'siblings' )[ 0 ].node.getParent();
 	} else {
-		// selection of a single node
+		// Selection of a single node
 		effectiveNode = selectedNodes[ 0 ].node;
 
 		while ( effectiveNode.isContent() ) {

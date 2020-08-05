@@ -26,7 +26,7 @@
 '.$sp.'';}).'		</ul>
 '.$sp.'	</div>
 '.$sp.'' : '').'</div>
-';},'flow_patrol_action' => function ($cx, $in, $sp) {return ''.$sp.''.((LCRun3::ifvar($cx, ((isset($in['revision']['rev_view_links']['markPatrolled']) && is_array($in['revision']['rev_view_links'])) ? $in['revision']['rev_view_links']['markPatrolled'] : null))) ? '<div class="patrollink">
+';},'flow_patrol_action' => function ($cx, $in, $sp) {return ''.$sp.''.((LCRun3::ifvar($cx, ((isset($in['revision']['rev_view_links']['markPatrolled']) && is_array($in['revision']['rev_view_links'])) ? $in['revision']['rev_view_links']['markPatrolled'] : null))) ? '<div class="patrollink" data-mw="interface">
 '.$sp.'        [<a class="mw-ui-quiet"
 '.$sp.'           href="'.htmlentities((string)((isset($in['revision']['rev_view_links']['markPatrolled']['url']) && is_array($in['revision']['rev_view_links']['markPatrolled'])) ? $in['revision']['rev_view_links']['markPatrolled']['url'] : null), ENT_QUOTES, 'UTF-8').'"
 '.$sp.'           title="'.LCRun3::ch($cx, 'l10n', array(array('flow-mark-revision-patrolled-link-title'),array()), 'encq').'"
@@ -46,7 +46,7 @@
 ' : '				'.LCRun3::ch($cx, 'l10nParse', array(array('flow-revision-permalink-warning-header-first',((isset($in['revision']['human_timestamp']) && is_array($in['revision'])) ? $in['revision']['human_timestamp'] : null),((isset($in['revision']['rev_view_links']['hist']['url']) && is_array($in['revision']['rev_view_links']['hist'])) ? $in['revision']['rev_view_links']['hist']['url'] : null),((isset($in['revision']['rev_view_links']['diff']['url']) && is_array($in['revision']['rev_view_links']['diff'])) ? $in['revision']['rev_view_links']['diff']['url'] : null)),array()), 'encq').'
 ').'		</div>
 
-		<div class="flow-revision-content">
+		<div class="flow-revision-content mw-parser-output">
 			'.LCRun3::ch($cx, 'escapeContent', array(array(((isset($in['revision']['content']['format']) && is_array($in['revision']['content'])) ? $in['revision']['content']['format'] : null),((isset($in['revision']['content']['content']) && is_array($in['revision']['content'])) ? $in['revision']['content']['content'] : null)),array()), 'encq').'
 		</div>
 

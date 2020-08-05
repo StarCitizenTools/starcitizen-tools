@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lam-ang"
+		]
+	},
+	"revisionslider": "RevisionSlider",
+	"revisionslider-preference-disable": "Saan nga ipakita ti RevisionSlider",
+	"revisionslider-desc": "Mangipakita ti uyasan a mangipalubos iti panagpili ken panangiyasping kadagiti rebision iti panid ti diperensia",
+	"revisionslider-toggle-label": "Agbasabasa iti pakasaritaan",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|a byte|kadagiti byte}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|a byte|kadagiti byte}}",
+	"revisionslider-label-date": "Petsa",
+	"revisionslider-label-page-size": "Kadakkel ti panid",
+	"revisionslider-label-change-size": "Kadakkel ti panagbaliw",
+	"revisionslider-label-comment": "Komentario",
+	"revisionslider-label-username": "{{GENDER:$1|Nagan ti agar-aramat}}",
+	"revisionslider-minoredit": "Daytoy ket bassit a panagurnos",
+	"revisionslider-loading-failed": "Napaay a naikarga ti uyasan ti rebision.",
+	"revisionslider-toggle-title-expand": "Lukatan ti uyasan ti rebision",
+	"revisionslider-toggle-title-collapse": "Rebbaen ti uyasan ti rebision",
+	"revisionslider-turn-on-auto-expand-title": "Kankanayon nga ipadakkel ti uyasan ti rebision",
+	"revisionslider-turn-off-auto-expand-title": "Saan nga automatiko nga ipadakkel ti uyasan ti rebision",
+	"revisionslider-arrow-tooltip-newer": "Kitaen dagiti barbaro a rebision",
+	"revisionslider-arrow-tooltip-older": "Kitaen dagiti nadadaan a rebision",
+	"revisionslider-show-help-tooltip": "Ipakita ti teksto ti tulong",
+	"revisionslider-help-dialog-slide1": "Ti uyasan ti rebision ket makatulong kenka a mangdaliasat ken mangiyasping kadagiti rebision iti panid ti diperensia. Daytoy ket naibatay iti [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider tarigagay ti komunidad] manipud iti teknikal a listaan ti tarigagay ti komunidad ti agsasao iti Aleman. Bigbigen unay ti pateg ti feedback [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider ditoy].",
+	"revisionslider-help-dialog-slide2": "Ti tunggal baras ket mangirepresenta ti maysa a rebision ti panid. Dagiti baras iti ngato ket mangipakita ti idadakkel ti panid, dagiti baras iti baba ket mangipakita ti panagpabassit. Iti ladawan, mangirepresenta ti rebision 1 ti nainayon a linaon, bayat a mangirepresenta ti rebision 2 ti panagikkat iti linaon.",
+	"revisionslider-help-dialog-slide4": "Usaren dagiti pana ti agpalikud ken agpasango tapno makapan iti pakasaritaan ti rebision ken ipakita dagiti nadadaan ken barbaro a rebision.",
+	"revisionslider-tutorial": "Sursuro iti uyasan ti rebision",
+	"revisionslider-previous-dialog": "Dati",
+	"revisionslider-next-dialog": "Sumaruno",
+	"revisionslider-close-dialog": "Irikep"
+}

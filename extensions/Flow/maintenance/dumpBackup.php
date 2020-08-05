@@ -2,11 +2,10 @@
 
 use Flow\Container;
 use Flow\Dump\Exporter;
-use Flow\Model\UUID;
 
 $maintPath = ( getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance'
-	: dirname( __FILE__ ) . '/../../../maintenance' );
+	: __DIR__ . '/../../../maintenance' );
 require_once $maintPath . '/Maintenance.php';
 require_once $maintPath . '/backup.inc';
 
@@ -36,6 +35,8 @@ TEXT
 		$this->addOption( 'end', 'Stop before page_id n (exclusive)', false, true );
 		$this->addOption( 'skip-header', 'Don\'t output the <mediawiki> header' );
 		$this->addOption( 'skip-footer', 'Don\'t output the </mediawiki> footer' );
+
+		$this->requireExtension( 'Flow' );
 
 		if ( $args ) {
 			$this->loadWithArgv( $args );
@@ -72,7 +73,7 @@ TEXT
 			ini_set( 'display_errors', 'stderr' );
 		}
 
-		$db = Container::get( 'db.factory' )->getDB( DB_SLAVE );
+		$db = Container::get( 'db.factory' )->getDB( DB_REPLICA );
 		$exporter = new Exporter( $db, $history, Exporter::STREAM, Exporter::TEXT );
 		$exporter->setOutputSink( $this->sink );
 
@@ -104,7 +105,12 @@ TEXT
 				$this->fatalError( "Unable to open file {$filename}\n" );
 			}
 			$pages = array_map( 'trim', $pages );
-			$this->pages = array_filter( $pages, function ( $x ) { return $x !== ''; } );
+			$this->pages = array_filter(
+				$pages,
+				function ( $x ) {
+					return $x !== '';
+				}
+			);
 		}
 
 		if ( $this->hasOption( 'start' ) ) {

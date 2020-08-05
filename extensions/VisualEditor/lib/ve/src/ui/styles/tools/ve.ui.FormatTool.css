@@ -1,7 +1,7 @@
 /*!
  * VisualEditor FormatTool styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .oo-ui-menuToolGroup .oo-ui-tool-name-paragraph .oo-ui-tool-title {
@@ -38,22 +38,15 @@
 	font-weight: bold;
 }
 
-.oo-ui-menuToolGroup .oo-ui-tool-name-heading1 .oo-ui-tool-title,
-.oo-ui-menuToolGroup .oo-ui-tool-name-heading2 .oo-ui-tool-title,
-.oo-ui-menuToolGroup .oo-ui-tool-name-heading3 .oo-ui-tool-title,
-.oo-ui-menuToolGroup .oo-ui-tool-name-heading4 .oo-ui-tool-title,
-.oo-ui-menuToolGroup .oo-ui-tool-name-heading5 .oo-ui-tool-title,
-.oo-ui-menuToolGroup .oo-ui-tool-name-heading6 .oo-ui-tool-title {
-	/* FIXME T126030: Use px so padding is not changed by font size */
-	padding-left: 6.4px;
-}
-
 .oo-ui-menuToolGroup .oo-ui-tool-name-preformatted .oo-ui-tool-title {
-	font-family: monospace, "Courier New";
+	/* Support: Blink, Gecko, Webkit */
+	/* Specify a valid second value to fix size, see T176636 */
+	font-family: monospace, monospace;
 }
 
 .oo-ui-menuToolGroup .oo-ui-tool-name-blockquote .oo-ui-tool-title {
-	padding-left: 1.5em;
+	/* Indent in addition to padding */
+	text-indent: 1.5em;
 }
 
 .oo-ui-menuToolGroup .oo-ui-tool-name-tableCellHeader .oo-ui-tool-title {

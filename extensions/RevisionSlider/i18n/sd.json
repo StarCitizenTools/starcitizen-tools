@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mehtab ahmed"
+		]
+	},
+	"revisionslider": "روينسلائيڊر",
+	"revisionslider-desc": "تفاوت صفحي تي سلائيڊر ڏيکاري ٿو جنھن سان روينس جي چونڊ ۽ ڀيٽ جي اجازت ملي ٿي",
+	"revisionslider-toggle-label": "جھانگ جي سوانح",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|ٻاٽڻ|ٻاٽڻيون}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|ٻاٽڻ|ٻاٽڻيون}}",
+	"revisionslider-label-date": "تاريخ",
+	"revisionslider-label-page-size": "صفحي جي ماپ",
+	"revisionslider-label-change-size": "ماپ بدلايو",
+	"revisionslider-label-comment": "تاثر",
+	"revisionslider-label-username": "{{GENDER:$1|واپرائيندڙ-نانءُ}}",
+	"revisionslider-minoredit": "هيءَ هڪ معمولي ترميم آهي",
+	"revisionslider-loading-failed": "روين سلائيڊر لھڻ ۾ ناڪام ٿيو.",
+	"revisionslider-toggle-title-expand": "روين سلائيڊر کوليو",
+	"revisionslider-toggle-title-collapse": "روين سلائيڊ لڪايو",
+	"revisionslider-turn-on-auto-expand-title": "خودبخود روين سلائيڊر کي کوليو",
+	"revisionslider-turn-off-auto-expand-title": "روين سلائيڊر کي خودبخود نہ کوليو",
+	"revisionslider-arrow-tooltip-newer": "نوان تر روينس ڏسو",
+	"revisionslider-arrow-tooltip-older": "پراڻا تر روينس ڏسو",
+	"revisionslider-show-help-tooltip": "مددي متن ڏيکاريو",
+	"revisionslider-help-dialog-slide1": "روين سلائيڊر توھان کي تفاوت صفحي جا روينس گھمڻ ۽ ڀيٽڻ ۾ مدد ڪري ٿو. ھي [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider نياتي خواھش] جرمن ڳالھائيندڙ ڪميونٽي جي تڪنيڪي خواھشي فھرست تي ٻڌل آھي. پذيرائي تمام گھڻو سرھائي ويندي [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider ھتي].",
+	"revisionslider-help-dialog-slide2": "ھر بار ھڪ صفحي روين کي ظاھر ڪري ٿو. مٿي بار صفحي جي ماپ ۾ واڌ کي ظاھر ڪن ٿا، ھيٺ بار گھاٽ کي ظاھر ڪن ٿا. عڪس ۾، روين 1 شامل ڪيل مواد کي ظاھر ڪري ٿو، جڏھن تہ روين 2 مواد جي ھٽاءَ  کي ظاھر ڪري ٿو.",
+	"revisionslider-help-dialog-slide4": "روين سوانح منجھان چرڻ ۽ پراڻن ۽ نون روينس ڏسڻ لاءِ پوئتي ۽ اڳتي وارا تير استعمال ڪريو.",
+	"revisionslider-tutorial": "روين سلائيڊر ٽيوٽرال",
+	"revisionslider-previous-dialog": "پويون",
+	"revisionslider-next-dialog": "اڳيون",
+	"revisionslider-close-dialog": "بند ڪريو"
+}

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Trigger tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ui.Trigger' );
@@ -20,7 +20,7 @@ QUnit.test( 'constructor', function ( assert ) {
 			event: event( { ctrlKey: true, which: 66 } )
 		}
 	];
-	QUnit.expect( 2 * tests.length );
+
 	for ( i = 0, len = tests.length; i < len; i++ ) {
 		assert.strictEqual(
 			new ve.ui.Trigger( tests[ i ].trigger ).toString(),

@@ -54,6 +54,8 @@ class SpecialNewpages extends IncludableSpecialPage {
 		$opts->add( 'feed', '' );
 		$opts->add( 'tagfilter', '' );
 		$opts->add( 'invert', false );
+		$opts->add( 'size-mode', 'max' );
+		$opts->add( 'size', 0 );
 
 		$this->customFilters = [];
 		Hooks::run( 'SpecialNewPagesFilters', [ $this, &$this->customFilters ] );
@@ -188,9 +190,13 @@ class SpecialNewpages extends IncludableSpecialPage {
 		unset( $changed['offset'] ); // Reset offset if query type changes
 
 		$self = $this->getPageTitle();
+		$linkRenderer = $this->getLinkRenderer();
 		foreach ( $filters as $key => $msg ) {
 			$onoff = 1 - $this->opts->getValue( $key );
-			$link = Linker::link( $self, $showhide[$onoff], [],
+			$link = $linkRenderer->makeLink(
+				$self,
+				new HtmlArmor( $showhide[$onoff] ),
+				[],
 				[ $key => $onoff ] + $changed
 			);
 			$links[$key] = $this->msg( $msg )->rawParams( $link )->escaped();
@@ -209,6 +215,9 @@ class SpecialNewpages extends IncludableSpecialPage {
 		$username = $this->opts->consumeValue( 'username' );
 		$tagFilterVal = $this->opts->consumeValue( 'tagfilter' );
 		$nsinvert = $this->opts->consumeValue( 'invert' );
+
+		$size = $this->opts->consumeValue( 'size' );
+		$max = $this->opts->consumeValue( 'size-mode' ) === 'max';
 
 		// Check username input validity
 		$ut = Title::makeTitleSafe( NS_USER, $username );
@@ -250,6 +259,11 @@ class SpecialNewpages extends IncludableSpecialPage {
 				'size' => 30,
 				'cssclass' => 'mw-autocomplete-user', // used by mediawiki.userSuggest
 			],
+			'size' => [
+				'type' => 'sizefilter',
+				'name' => 'size',
+				'default' => -$max * $size,
+			],
 		];
 
 		$htmlForm = new HTMLForm( $form, $this->getContext() );
@@ -264,19 +278,29 @@ class SpecialNewpages extends IncludableSpecialPage {
 			}
 		);
 		$htmlForm->setMethod( 'get' );
-
-		$out->addHTML( Xml::fieldset( $this->msg( 'newpages' )->text() ) );
-
+		$htmlForm->setWrapperLegend( true );
+		$htmlForm->setWrapperLegendMsg( 'newpages' );
+		$htmlForm->addFooterText( Html::rawElement(
+			'div',
+			null,
+			$this->filterLinks()
+		) );
 		$htmlForm->show();
+	}
 
-		$out->addHTML(
-			Html::rawElement(
-				'div',
-				null,
-				$this->filterLinks()
-			) .
-			Xml::closeElement( 'fieldset' )
-		);
+	/**
+	 * @param stdClass $result Result row from recent changes
+	 * @param Title $title
+	 * @return bool|Revision
+	 */
+	protected function revisionFromRcResult( stdClass $result, Title $title ) {
+		return new Revision( [
+			'comment' => CommentStore::getStore()->getComment( 'rc_comment', $result )->text,
+			'deleted' => $result->rc_deleted,
+			'user_text' => $result->rc_user_text,
+			'user' => $result->rc_user,
+			'actor' => $result->rc_actor,
+		], 0, $title );
 	}
 
 	/**
@@ -289,17 +313,12 @@ class SpecialNewpages extends IncludableSpecialPage {
 	public function formatRow( $result ) {
 		$title = Title::newFromRow( $result );
 
-		# Revision deletion works on revisions, so we should cast one
-		$row = [
-			'comment' => $result->rc_comment,
-			'deleted' => $result->rc_deleted,
-			'user_text' => $result->rc_user_text,
-			'user' => $result->rc_user,
-		];
-		$rev = new Revision( $row );
-		$rev->setTitle( $title );
+		// Revision deletion works on revisions,
+		// so cast our recent change row to a revision row.
+		$rev = $this->revisionFromRcResult( $result, $title );
 
 		$classes = [];
+		$attribs = [ 'data-mw-revid' => $result->rev_id ];
 
 		$lang = $this->getLanguage();
 		$dm = $lang->getDirMark();
@@ -307,28 +326,25 @@ class SpecialNewpages extends IncludableSpecialPage {
 		$spanTime = Html::element( 'span', [ 'class' => 'mw-newpages-time' ],
 			$lang->userTimeAndDate( $result->rc_timestamp, $this->getUser() )
 		);
-		$time = Linker::linkKnown(
+		$linkRenderer = $this->getLinkRenderer();
+		$time = $linkRenderer->makeKnownLink(
 			$title,
-			$spanTime,
+			new HtmlArmor( $spanTime ),
 			[],
-			[ 'oldid' => $result->rc_this_oldid ],
-			[]
+			[ 'oldid' => $result->rc_this_oldid ]
 		);
 
 		$query = $title->isRedirect() ? [ 'redirect' => 'no' ] : [];
 
-		// Linker::linkKnown() uses 'known' and 'noclasses' options.
-		// This breaks the colouration for stubs.
-		$plink = Linker::link(
+		$plink = $linkRenderer->makeKnownLink(
 			$title,
 			null,
 			[ 'class' => 'mw-newpages-pagename' ],
-			$query,
-			[ 'known' ]
+			$query
 		);
-		$histLink = Linker::linkKnown(
+		$histLink = $linkRenderer->makeKnownLink(
 			$title,
-			$this->msg( 'hist' )->escaped(),
+			$this->msg( 'hist' )->text(),
 			[],
 			[ 'action' => 'history' ]
 		);
@@ -367,19 +383,31 @@ class SpecialNewpages extends IncludableSpecialPage {
 			$tagDisplay = '';
 		}
 
-		$css = count( $classes ) ? ' class="' . implode( ' ', $classes ) . '"' : '';
-
 		# Display the old title if the namespace/title has been changed
 		$oldTitleText = '';
 		$oldTitle = Title::makeTitle( $result->rc_namespace, $result->rc_title );
 
 		if ( !$title->equals( $oldTitle ) ) {
 			$oldTitleText = $oldTitle->getPrefixedText();
-			$oldTitleText = $this->msg( 'rc-old-title' )->params( $oldTitleText )->escaped();
+			$oldTitleText = Html::rawElement(
+				'span',
+				[ 'class' => 'mw-newpages-oldtitle' ],
+				$this->msg( 'rc-old-title' )->params( $oldTitleText )->escaped()
+			);
 		}
 
-		return "<li{$css}>{$time} {$dm}{$plink} {$hist} {$dm}{$length} "
-			. "{$dm}{$ulink} {$comment} {$tagDisplay} {$oldTitleText}</li>\n";
+		$ret = "{$time} {$dm}{$plink} {$hist} {$dm}{$length} {$dm}{$ulink} {$comment} "
+			. "{$tagDisplay} {$oldTitleText}";
+
+		// Let extensions add data
+		Hooks::run( 'NewPagesLineEnding', [ $this, &$ret, $result, &$classes, &$attribs ] );
+		$attribs = wfArrayFilterByKey( $attribs, [ Sanitizer::class, 'isReservedDataAttribute' ] );
+
+		if ( count( $classes ) ) {
+			$attribs['class'] = implode( ' ', $classes );
+		}
+
+		return Html::rawElement( 'li', $attribs, $ret ) . "\n";
 	}
 
 	/**
@@ -463,19 +491,28 @@ class SpecialNewpages extends IncludableSpecialPage {
 
 	protected function feedItemDesc( $row ) {
 		$revision = Revision::newFromId( $row->rev_id );
-		if ( $revision ) {
-			// XXX: include content model/type in feed item?
-			return '<p>' . htmlspecialchars( $revision->getUserText() ) .
-				$this->msg( 'colon-separator' )->inContentLanguage()->escaped() .
-				htmlspecialchars( FeedItem::stripComment( $revision->getComment() ) ) .
-				"</p>\n<hr />\n<div>" .
-				nl2br( htmlspecialchars( $revision->getContent()->serialize() ) ) . "</div>";
+		if ( !$revision ) {
+			return '';
 		}
 
-		return '';
+		$content = $revision->getContent();
+		if ( $content === null ) {
+			return '';
+		}
+
+		// XXX: include content model/type in feed item?
+		return '<p>' . htmlspecialchars( $revision->getUserText() ) .
+			$this->msg( 'colon-separator' )->inContentLanguage()->escaped() .
+			htmlspecialchars( FeedItem::stripComment( $revision->getComment() ) ) .
+			"</p>\n<hr />\n<div>" .
+			nl2br( htmlspecialchars( $content->serialize() ) ) . "</div>";
 	}
 
 	protected function getGroupName() {
 		return 'changes';
+	}
+
+	protected function getCacheTTL() {
+		return 60 * 5;
 	}
 }

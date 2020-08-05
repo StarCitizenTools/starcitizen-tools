@@ -1,28 +1,43 @@
 /*!
  * VisualEditor MediaWiki test utilities.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 ve.test.utils.createSurfaceFromDocument = function ( doc ) {
-	var target, mwTarget;
+	// eslint-disable-next-line no-unused-vars
+	var target, mwTarget, surface;
 
 	// Prevent the target from setting up the surface immediately
 	ve.init.platform.initialized = $.Deferred();
 
-	// HACK: MW targets are async and heavy, use an SA target but
-	// override the global registration
-	target = new ve.init.sa.Target();
-	mwTarget = new ve.init.mw.ArticleTarget();
+	// HACK: MW targets are async and heavy, use a DummyTarget
+	// but override the global registration
+	target = new ve.test.utils.DummyTarget();
+
+	// HACK: Mock setDefaultMode() because it causes untracked
+	// ajax requests (T162810)
+	// HACK: Has to be a subclass instead of assignment to mwTarget
+	// because it is called in the constructor
+	function SubMwArticleTarget() {
+		SubMwArticleTarget.super.call( this );
+	}
+	OO.inheritClass( SubMwArticleTarget, ve.init.mw.ArticleTarget );
+	SubMwArticleTarget.prototype.setDefaultMode = function () {};
+
+	mwTarget = new SubMwArticleTarget();
 
 	$( '#qunit-fixture' ).append( target.$element );
 	target.addSurface( doc );
 
 	ve.init.platform.initialized.resolve();
 	mwTarget = null;
-	target.addSurface( doc );
-	return target.surface;
+	surface = target.addSurface( doc );
+	// HACK HACK HACK: The target fuckery above results in the surface not being attached to the DOM.
+	// I'm not debugging that, screw it. Let's add another hack on top, surely that won't be a problem.
+	$( '#qunit-fixture' ).append( surface.$element );
+	return surface;
 };
 
 // Unregister MW override nodes.
@@ -36,7 +51,8 @@ ve.dm.modelRegistry.register( ve.dm.InlineImageNode );
 ve.dm.modelRegistry.register( ve.dm.BlockImageNode );
 
 ve.test.utils.mwEnvironment = ( function () {
-	var overrides = [
+	var mwPlatform, corePlatform,
+		overrides = [
 			ve.dm.MWHeadingNode,
 			ve.dm.MWPreformattedNode,
 			ve.dm.MWTableNode,
@@ -47,6 +63,13 @@ ve.test.utils.mwEnvironment = ( function () {
 			ve.dm.BlockImageNode
 		];
 
+	corePlatform = ve.init.platform;
+	mwPlatform = new ve.init.mw.Platform();
+	// Disable some API requests from platform
+	mwPlatform.imageInfoCache = null;
+	// Unregister mwPlatform
+	ve.init.platform = corePlatform;
+
 	function setupOverrides() {
 		var i;
 		for ( i = 0; i < overrides.length; i++ ) {
@@ -55,6 +78,7 @@ ve.test.utils.mwEnvironment = ( function () {
 		for ( i = 0; i < overridden.length; i++ ) {
 			ve.dm.modelRegistry.unregister( overridden[ i ] );
 		}
+		ve.init.platform = mwPlatform;
 	}
 
 	function teardownOverrides() {
@@ -65,16 +89,17 @@ ve.test.utils.mwEnvironment = ( function () {
 		for ( i = 0; i < overridden.length; i++ ) {
 			ve.dm.modelRegistry.register( overridden[ i ] );
 		}
+		ve.init.platform = corePlatform;
 	}
 
 	// On load, teardown overrides so the first core tests run correctly
 	teardownOverrides();
 
-	return QUnit.newMwEnvironment( {
+	return {
 		setup: setupOverrides,
 		teardown: teardownOverrides
-	} );
-} )();
+	};
+}() );
 
 ( function () {
 	var getDomElementSummaryCore = ve.getDomElementSummary;
@@ -101,4 +126,4 @@ ve.test.utils.mwEnvironment = ( function () {
 			return value;
 		} );
 	};
-} )();
+}() );

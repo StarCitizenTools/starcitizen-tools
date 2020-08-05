@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nike",
+			"Pyscowicz"
+		]
+	},
+	"codemirror-toggle-label": "Syntaksin korostus",
+	"codemirror-beta-title": "Wikitekstin syntaksien korostus",
+	"codemirror-beta-desc": "Syntaksien korostus tekee muokkaamisesta helpompaa käyttämällä värejä ja sävyjä erottaakseen visuaalisesti artikkelin tekstin linkkien, viitteiden ja mallien koodista.",
+	"codemirror-popup-label": "Syntaksien korostus",
+	"codemirror-popup-btn-yes": "Kokeile sitä",
+	"codemirror-popup-btn-no": "Ei kiitos"
+}

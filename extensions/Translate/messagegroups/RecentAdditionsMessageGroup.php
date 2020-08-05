@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -13,7 +13,7 @@
  * @ingroup MessageGroup
  */
 class RecentAdditionsMessageGroup extends RecentMessageGroup {
-	protected $groupInfoCache = array();
+	protected $groupInfoCache = [];
 
 	public function getId() {
 		return '!additions';
@@ -35,14 +35,20 @@ class RecentAdditionsMessageGroup extends RecentMessageGroup {
 
 	protected function getQueryConditions() {
 		global $wgTranslateMessageNamespaces;
-		$db = wfGetDB( DB_SLAVE );
-		$conds = array(
+		$db = wfGetDB( DB_REPLICA );
+		$conds = [
 			'rc_title ' . $db->buildLike( $db->anyString(), '/en' ),
 			'rc_namespace' => $wgTranslateMessageNamespaces,
 			'rc_type != ' . RC_LOG,
 			'rc_id > ' . $this->getRCCutoff(),
-			'rc_user' => FuzzyBot::getUser()->getId(),
-		);
+		];
+
+		if ( class_exists( ActorMigration::class ) ) {
+			$conds[] = ActorMigration::newMigration()
+				->getWhere( $db, 'rc_user', FuzzyBot::getUser() )['conds'];
+		} else {
+			$conds['rc_user'] = FuzzyBot::getUser()->getId();
+		}
 
 		return $conds;
 	}
@@ -52,7 +58,7 @@ class RecentAdditionsMessageGroup extends RecentMessageGroup {
 	 * as they are not displayed in other places.
 	 *
 	 * @param MessageHandle $handle
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function matchingMessage( MessageHandle $handle ) {
 		return MessageGroups::isTranslatableMessage( $handle );

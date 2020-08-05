@@ -1,21 +1,29 @@
 {
 	"@metadata": {
 		"authors": [
-			"Byrial"
+			"Byrial",
+			"Saederup92"
 		]
 	},
 	"searchtranslations": "Søg oversættelser",
 	"tux-sst-edit": "Redigér oversættelse",
+	"tux-sst-view-foreign": "Vis på $1",
 	"tux-sst-search": "Søg",
 	"tux-sst-search-ph": "Søg oversættelser",
 	"tux-sst-count": "{{PLURAL:$1|Ét resultat fundet|$1 resultater fundet}}",
 	"tux-sst-facet-language": "Sprog",
 	"tux-sst-facet-group": "Beskedgrupper",
-	"tux-sst-facet-orphan": "(ingen)",
 	"tux-sst-nosolr-title": "Søgning er ikke tilgængelig",
 	"tux-sst-nosolr-body": "Denne wiki har ikke mulighed for oversættelsessøgning.",
 	"tux-sst-solr-offline-title": "Søgning er ikke tilgængelig",
 	"tux-sst-solr-offline-body": "Søgning er midlertidig utilgængelig.",
-	"tux-sst-next": "Næste resultater",
-	"tux-sst-prev": "Forrige resultater"
+	"tux-sst-next": "Næste ›",
+	"tux-sst-prev": "‹ Forrige",
+	"tux-sst-default": "Oversættelser",
+	"tux-sst-translated": "Oversættelser fra $1",
+	"tux-sst-untranslated": "Ingen oversættelser fra $1",
+	"tux-sst-outdated": "Forældede oversættelser fra $1",
+	"tux-sst-ellipsis-untranslated": "Ingen oversættelse",
+	"tux-sst-ellipsis-outdated": "Forældede oversættelser",
+	"tux-sst-link-all-match": "Kræv alle søgeord."
 }

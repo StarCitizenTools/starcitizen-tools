@@ -1,8 +1,8 @@
 /*!
  * VisualEditor MediaWiki Reference dialog tool classes.
  *
- * @copyright 2011-2016 Cite VisualEditor Team and others; see AUTHORS.txt
- * @license The MIT License (MIT); see LICENSE.txt
+ * @copyright 2011-2018 VisualEditor Team's Cite sub-team and others; see AUTHORS.txt
+ * @license MIT
  */
 
 /**
@@ -21,8 +21,16 @@ OO.inheritClass( ve.ui.MWReferenceDialogTool, ve.ui.FragmentWindowTool );
 ve.ui.MWReferenceDialogTool.static.name = 'reference';
 ve.ui.MWReferenceDialogTool.static.group = 'object';
 ve.ui.MWReferenceDialogTool.static.icon = 'reference';
-ve.ui.MWReferenceDialogTool.static.title =
-	OO.ui.deferMsg( 'cite-ve-dialogbutton-reference-tooltip' );
+if ( mw.config.get( 'wgCiteVisualEditorOtherGroup' ) ) {
+	ve.ui.MWReferenceDialogTool.static.title = OO.ui.deferMsg(
+		'cite-ve-othergroup-item',
+		OO.ui.msg( 'cite-ve-dialogbutton-reference-tooltip' )
+	);
+} else {
+	ve.ui.MWReferenceDialogTool.static.title = OO.ui.deferMsg(
+		'cite-ve-dialogbutton-reference-tooltip'
+	);
+}
 ve.ui.MWReferenceDialogTool.static.modelClasses = [ ve.dm.MWReferenceNode ];
 ve.ui.MWReferenceDialogTool.static.commandName = 'reference';
 ve.ui.MWReferenceDialogTool.static.autoAddToCatchall = false;
@@ -44,8 +52,16 @@ OO.inheritClass( ve.ui.MWUseExistingReferenceDialogTool, ve.ui.WindowTool );
 ve.ui.MWUseExistingReferenceDialogTool.static.name = 'reference/existing';
 ve.ui.MWUseExistingReferenceDialogTool.static.group = 'object';
 ve.ui.MWUseExistingReferenceDialogTool.static.icon = 'reference-existing';
-ve.ui.MWUseExistingReferenceDialogTool.static.title =
-	OO.ui.deferMsg( 'cite-ve-dialog-reference-useexisting-tool' );
+if ( mw.config.get( 'wgCiteVisualEditorOtherGroup' ) ) {
+	ve.ui.MWUseExistingReferenceDialogTool.static.title = OO.ui.deferMsg(
+		'cite-ve-othergroup-item',
+		OO.ui.msg( 'cite-ve-dialog-reference-useexisting-tool' )
+	);
+} else {
+	ve.ui.MWUseExistingReferenceDialogTool.static.title = OO.ui.deferMsg(
+		'cite-ve-dialog-reference-useexisting-tool'
+	);
+}
 ve.ui.MWUseExistingReferenceDialogTool.static.commandName = 'reference/existing';
 ve.ui.MWUseExistingReferenceDialogTool.static.autoAddToGroup = false;
 ve.ui.MWUseExistingReferenceDialogTool.static.autoAddToCatchall = false;
@@ -63,7 +79,12 @@ ve.ui.sequenceRegistry.register(
 	new ve.ui.Sequence( 'wikitextRef', 'reference', '<ref', 4 )
 );
 
+ve.ui.triggerRegistry.register(
+	'reference', { mac: new ve.ui.Trigger( 'cmd+shift+k' ), pc: new ve.ui.Trigger( 'ctrl+shift+k' ) }
+);
+
 ve.ui.commandHelpRegistry.register( 'insert', 'ref', {
+	trigger: 'reference',
 	sequences: [ 'wikitextRef' ],
 	label: OO.ui.deferMsg( 'cite-ve-dialog-reference-title' )
 } );

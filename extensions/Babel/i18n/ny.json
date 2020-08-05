@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Icem4k"
+		]
+	},
+	"babel": "Zambiri za Babel kwa wogwiritsa ntchito",
+	"babel-desc": "Ikuwonjezera <code>#babel</code> parser ntchito kuti ilowetse mzere wokhazikika wa khola la bokosi la bokosi labelle ndi kuthekera kuphatikiza mafayilo apamwamba",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - Ogwiritsa ntchito ndi chinenero",
+	"babel-autocreate-reason": "Kupanga tsamba lokha la [[$1|Babel]].",
+	"babel-autocreate-text-levels": "Ogwiritsa ntchito m'derali amasonyeza kuti ali ndi luso la $1 la chinenero $2.",
+	"babel-autocreate-text-main": "Ogwiritsa ntchito m'gulu lino amasonyeza chidziwitso chawo cha chinenero $1.",
+	"babel-0": "Wosuta ali ndi [[$1|palibe]] chidziwitso cha [[$2|$3]] (kapena kumvetsa ndi vuto lalikulu).",
+	"babel-1": "Wogwiritsa ntchitoyo [[$1|akudziŵa]] zambiri za [[$2|$3]].",
+	"babel-2": "Wosuta ali ndi chidziwitso [[$1|chapakati]] cha [[$2|$3]].",
+	"babel-3": "Wosutayu ali ndi chidziwitso  [[$1|chapamwamba]] cha [[$2|$3]]",
+	"babel-4": "Wogwiritsa ntchitoyo ali [[$1|pafupi ndi wolankhulira]] akudziŵa bwino [[$2|$3]].",
+	"babel-5": "Wosutayu ali ndi [[$1|nzeru zapamwamba]] za [[$2|$3]].",
+	"babel-N": "Wogwiritsa ntchitoyu [[$1|amamvetsa]] bwino za [[$2|$3]].",
+	"babel-0-n": "Wogwiritsa ntchitoyo [[$1|sadziwa]] [[$2|Chichewa]] (kapena amazimvetsa ndi vuto lalikulu).",
+	"babel-1-n": "Wosutayu ali ndi [[$1|chidziwitso]] chachikulu cha [[$2|Chichewa]].",
+	"babel-2-n": "Wosuta ali ndi chidziwitso [[$1|chapakati]] cha chachikulu [[$2|Chichewa]].",
+	"babel-3-n": "Wosutayu ali ndi chidziwitso  [[$1|chapamwamba]] cha [[$2|Chachewa]]",
+	"babel-4-n": "Wogwiritsa ntchitoyo ali [[$1|pafupi ndi wolankhulira]] akudziŵa bwino za [[$2|Chichewa]].",
+	"babel-5-n": "Wosutayu ali ndi [[$1|nzeru zapamwamba]] chachikulu cha [[$2|Chichewa]].",
+	"babel-N-n": "Wogwiritsa ntchitoyu [[$1|amamvetsa]] bwino za [[$2|Chichewa]].",
+	"babel-footer": "Ogwiritsa ntchito ndi chinenero",
+	"apihelp-query+babel-description": "Pezani zambiri pazinenero zomwe wosuta amadziwa",
+	"apihelp-query+babel-summary": "Pezani zambiri pazinenero zomwe wosuta amadziwa",
+	"apihelp-query+babel-param-user": "Mtumiki kuti mudziwe zambiri",
+	"apihelp-query+babel-example-1": "Pezani zambiri za Babel kwa mtumiaji <kbd>Chitsanzo</kbd>"
+}

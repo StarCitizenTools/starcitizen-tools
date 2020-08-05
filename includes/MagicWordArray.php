@@ -95,13 +95,22 @@ class MagicWordArray {
 	public function getBaseRegex() {
 		if ( is_null( $this->baseRegex ) ) {
 			$this->baseRegex = [ 0 => '', 1 => '' ];
+			$allGroups = [];
 			foreach ( $this->names as $name ) {
 				$magic = MagicWord::get( $name );
 				$case = intval( $magic->isCaseSensitive() );
 				foreach ( $magic->getSynonyms() as $i => $syn ) {
 					// Group name must start with a non-digit in PCRE 8.34+
 					$it = strtr( $i, '0123456789', 'abcdefghij' );
-					$group = "(?P<{$it}_{$name}>" . preg_quote( $syn, '/' ) . ')';
+					$groupName = $it . '_' . $name;
+					$group = '(?P<' . $groupName . '>' . preg_quote( $syn, '/' ) . ')';
+					// look for same group names to avoid same named subpatterns in the regex
+					if ( isset( $allGroups[$groupName] ) ) {
+						throw new MWException(
+							__METHOD__ . ': duplicate internal name in magic word array: ' . $name
+						);
+					}
+					$allGroups[$groupName] = true;
 					if ( $this->baseRegex[$case] === '' ) {
 						$this->baseRegex[$case] = $group;
 					} else {
@@ -194,7 +203,9 @@ class MagicWordArray {
 	 */
 	public function parseMatch( $m ) {
 		reset( $m );
-		while ( list( $key, $value ) = each( $m ) ) {
+		while ( ( $key = key( $m ) ) !== null ) {
+			$value = current( $m );
+			next( $m );
 			if ( $key === 0 || $value === '' ) {
 				continue;
 			}
@@ -260,7 +271,7 @@ class MagicWordArray {
 	 * Returns an associative array, ID => param value, for all items that match
 	 * Removes the matched items from the input string (passed by reference)
 	 *
-	 * @param string $text
+	 * @param string &$text
 	 *
 	 * @return array
 	 */
@@ -304,7 +315,7 @@ class MagicWordArray {
 	 * Return false if no match found and $text is not modified.
 	 * Does not match parameters.
 	 *
-	 * @param string $text
+	 * @param string &$text
 	 *
 	 * @return int|bool False on failure
 	 */

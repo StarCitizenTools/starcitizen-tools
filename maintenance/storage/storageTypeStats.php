@@ -23,9 +23,9 @@ require_once __DIR__ . '/../Maintenance.php';
 
 class StorageTypeStats extends Maintenance {
 	function execute() {
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = $this->getDB( DB_REPLICA );
 
-		$endId = $dbr->selectField( 'text', 'MAX(old_id)', false, __METHOD__ );
+		$endId = $dbr->selectField( 'text', 'MAX(old_id)', '', __METHOD__ );
 		if ( !$endId ) {
 			echo "No text rows!\n";
 			exit( 1 );
@@ -111,5 +111,5 @@ SQL;
 	}
 }
 
-$maintClass = 'StorageTypeStats';
+$maintClass = StorageTypeStats::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

@@ -6,6 +6,7 @@
 	"--output": "./js",
 	"--": [
 		"./external.js",
-		"../resources/uw/model"
+		"../resources/uw/model",
+		"../resources/jquery.arrowSteps/jquery.arrowSteps.js"
 	]
 }

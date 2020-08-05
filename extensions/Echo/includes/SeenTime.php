@@ -10,7 +10,7 @@ class EchoSeenTime {
 	 * Allowed notification types
 	 * @var array
 	 */
-	private static $allowedTypes = array( 'alert', 'message' );
+	private static $allowedTypes = [ 'alert', 'message' ];
 
 	/**
 	 * @var User
@@ -18,16 +18,10 @@ class EchoSeenTime {
 	private $user;
 
 	/**
-	 * @var BagOStuff
-	 */
-	private $cache;
-
-	/**
 	 * @param User $user A logged in user
 	 */
 	private function __construct( User $user ) {
 		$this->user = $user;
-		$this->cache = ObjectCache::getInstance( 'db-replicated' );
 	}
 
 	/**
@@ -39,44 +33,90 @@ class EchoSeenTime {
 	}
 
 	/**
-	 * @param int $flags BagOStuff::READ_LATEST to use the master
-	 * @return string|bool false if no stored time
+	 * Hold onto a cache for our operations. Static so it can reuse the same
+	 * in-process cache in different instances.
+	 *
+	 * @return BagOStuff
 	 */
-	public function getTime( $type = 'all', $flags = 0 ) {
-		$vals = array();
-		if ( $type === 'all' ) {
-			foreach ( self::$allowedTypes as $allowed ) {
-				$vals[] = $this->getTime( $allowed );
-			}
+	private static function cache() {
+		static $c = null;
 
-			return max( $vals );
+		// Use main stash for persistent storage, and
+		// wrap it with CachedBagOStuff for an in-process
+		// cache. (T144534)
+		if ( $c === null ) {
+			$c = new CachedBagOStuff(
+				ObjectCache::getMainStashInstance()
+			);
 		}
 
-		if ( $this->validateType( $type ) ) {
-			$key = wfMemcKey( 'echo', 'seen', $type, 'time', $this->user->getId() );
-			$cas = 0; // Unused, but we have to pass something by reference
-			$data = $this->cache->get( $key, $cas, $flags );
-			if ( $data === false ) {
-				// Check if the user still has it set in their preferences
-				$data = $this->user->getOption( 'echo-seen-time', false );
-			}
-		}
-
-		return $data;
+		return $c;
 	}
 
+	/**
+	 * @param string $type Type of seen time to get
+	 * @param int $format Format to return time in, defaults to TS_MW
+	 * @return string|bool Timestamp in specified format, or false if no stored time
+	 */
+	public function getTime( $type = 'all', $format = TS_MW ) {
+		$vals = [];
+		if ( $type === 'all' ) {
+			foreach ( self::$allowedTypes as $allowed ) {
+				// Use TS_MW, then convert later, so max works properly for
+				// all formats.
+				$vals[] = $this->getTime( $allowed, TS_MW );
+			}
+
+			return wfTimestamp( $format, min( $vals ) );
+		}
+
+		if ( !$this->validateType( $type ) ) {
+			return false;
+		}
+
+		$data = self::cache()->get( $this->getMemcKey( $type ) );
+
+		if ( $data === false ) {
+			// Check if the user still has it set in their preferences
+			$data = $this->user->getOption( 'echo-seen-time', false );
+		}
+
+		if ( $data === false ) {
+			// There is still no time set, so set time to the UNIX epoch.
+			// We can't remember their real seen time, so reset everything to
+			// unseen.
+			$data = wfTimestamp( TS_MW, 1 );
+			$this->setTime( $data, $type );
+		}
+		return wfTimestamp( $format, $data );
+	}
+
+	/**
+	 * Sets the seen time
+	 *
+	 * @param string $time Time, in TS_MW format
+	 * @param string $type Type of seen time to set
+	 */
 	public function setTime( $time, $type = 'all' ) {
 		if ( $type === 'all' ) {
 			foreach ( self::$allowedTypes as $allowed ) {
 				$this->setTime( $time, $allowed );
 			}
-		} else {
-			if ( $this->validateType( $type ) ) {
-				$key = wfMemcKey( 'echo', 'seen', $type, 'time', $this->user->getId() );
-
-				return $this->cache->set( $key, $time );
-			}
+			return;
 		}
+
+		if ( !$this->validateType( $type ) ) {
+			return;
+		}
+
+		// Write to the in-memory cache immediately, and defer writing to
+		// the real cache
+		$key = $this->getMemcKey( $type );
+		$cache = self::cache();
+		$cache->set( $key, $time, 0, BagOStuff::WRITE_CACHE_ONLY );
+		DeferredUpdates::addCallableUpdate( function () use ( $key, $time, $cache ) {
+			$cache->set( $key, $time );
+		} );
 	}
 
 	/**
@@ -87,5 +127,28 @@ class EchoSeenTime {
 	 */
 	private function validateType( $type ) {
 		return in_array( $type, self::$allowedTypes );
+	}
+
+	/**
+	 * Build a memcached key.
+	 *
+	 * @param string $type Given notification type
+	 * @return string Memcached key
+	 */
+	protected function getMemcKey( $type = 'all' ) {
+		$localKey = wfMemcKey( 'echo', 'seen', $type, 'time', $this->user->getId() );
+
+		if ( !$this->user->getOption( 'echo-cross-wiki-notifications' ) ) {
+			return $localKey;
+		}
+
+		$lookup = CentralIdLookup::factory();
+		$globalId = $lookup->centralIdFromLocalUser( $this->user, CentralIdLookup::AUDIENCE_RAW );
+
+		if ( !$globalId ) {
+			return $localKey;
+		}
+
+		return wfGlobalCacheKey( 'echo', 'seen', $type, 'time', $globalId );
 	}
 }

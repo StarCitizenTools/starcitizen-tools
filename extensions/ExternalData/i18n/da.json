@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
+			"Saederup92",
 			"Tjernobyl"
 		]
 	},
+	"externaldata-invalid-json": "Fejl: Ugyldigt JSON.",
 	"externaldata-db-invalid-query": "Ugyldig forespørgsel."
 }

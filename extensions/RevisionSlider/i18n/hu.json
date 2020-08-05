@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tacsipacsi",
+			"Dorgan",
+			"Bencemac"
+		]
+	},
+	"revisionslider-preference-disable": "Lapváltozat-csúszka kikapcsolása",
+	"revisionslider-desc": "Egy csúszkát jelenít meg lapváltozat-összehasonlításkor, ami lehetővé teszi a lap változatainak kiválasztását és összehasonlítását",
+	"revisionslider-toggle-label": "Laptörténet böngészése",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|bájt}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bájt}}",
+	"revisionslider-label-date": "Dátum",
+	"revisionslider-label-page-size": "Lapméret",
+	"revisionslider-label-change-size": "Méretváltozás",
+	"revisionslider-label-comment": "Összefoglaló",
+	"revisionslider-label-username": "{{GENDER:$1|Felhasználónév}}",
+	"revisionslider-minoredit": "Ez egy apró szerkesztés",
+	"revisionslider-loading-failed": "A lapváltozatcsúszka betöltése sikertelen.",
+	"revisionslider-toggle-title-expand": "Lapváltozatcsúszka kibontása",
+	"revisionslider-toggle-title-collapse": "Lapváltozatcsúszka összecsukása",
+	"revisionslider-turn-on-auto-expand-title": "Mindig nyissa ki a lapváltozatcsúszkát",
+	"revisionslider-turn-off-auto-expand-title": "Ne nyissa ki automatikusan a lapváltozatcsúszkát",
+	"revisionslider-arrow-tooltip-newer": "Újabb változatok",
+	"revisionslider-arrow-tooltip-older": "Régebbi változatok",
+	"revisionslider-show-help-tooltip": "Súgószöveg megjelenítése",
+	"revisionslider-tutorial": "Lapváltozatcsúszka – bemutató",
+	"revisionslider-previous-dialog": "Előző",
+	"revisionslider-next-dialog": "Következő",
+	"revisionslider-close-dialog": "Bezárás"
+}

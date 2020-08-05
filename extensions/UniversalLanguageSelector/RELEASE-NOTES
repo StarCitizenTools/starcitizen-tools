@@ -1,20 +1,15 @@
-== UniversalLanguageSelector 2016.08 ==
-Released at 2016-08-25.
+== UniversalLanguageSelector 2019.04 ==
+Released at 2019-04-25.
 
 === Noteworthy changes ===
-* Compact language links feature is much improved, and can now be enabled without being a beta feature.
-* Santhosh Thottingal added support for browser provided language preferences for compact language links.
-* Lots of styling updates.
-* Niklas Laxström did cleanups to language name search which might affect search results.
-* Niklas Laxström fixed style issues for input method listing.
-* Niklas Laxström updated the default geoip provider.
+* Various performance fixes.
+* Maintenance and localization updates.
 
-* Fonts:
-** Santhosh Thottingal added support for WOFF2 format for web fonts. Niklas Laxström dropped support for EOT and SVG formats.
-** Kartik Mistry updated Skiers II font for Gothic language. T124785
+==== Input Methods ====
+* New tilde-based layouts for several languages of Africa: Kabyle, Kabiye,
+  Kikuyu, Luganda, Lingala, Malagasy, Northern Sotho, Koyraboro Senni, Sango,
+  Sotho, Venda.
+* Added Latin Pinyin transliteration keyboard 
 
-* Input Methods:
-** Added Khmer NiDA standard Unicode keyboard.
-** Added Akan language keyboard.
-** Added Enhanced Ol Chiki InScript and Sarjom Baha phonetic keyboards for Santali language. 
-** Various fixes for Punjabi, Urdu keyboards.
+==== Fonts ====
+* Added fonts for Church Slavonic. (T156843)

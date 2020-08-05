@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on June 14, 2007
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -53,7 +49,7 @@ class ApiQueryCategoryMembers extends ApiQueryGeneratorBase {
 	 */
 	private function validateHexSortkey( $hexSortkey ) {
 		// A hex sortkey has an unbound number of 2 letter pairs
-		return preg_match( '/^(?:[a-fA-F0-9]{2})*$/D', $hexSortkey );
+		return (bool)preg_match( '/^(?:[a-fA-F0-9]{2})*$/D', $hexSortkey );
 	}
 
 	/**
@@ -65,7 +61,7 @@ class ApiQueryCategoryMembers extends ApiQueryGeneratorBase {
 
 		$categoryTitle = $this->getTitleOrPageId( $params )->getTitle();
 		if ( $categoryTitle->getNamespace() != NS_CATEGORY ) {
-			$this->dieUsage( 'The category name you entered is not valid', 'invalidcategory' );
+			$this->dieWithError( 'apierror-invalidcategory' );
 		}
 
 		$prop = array_flip( $params['prop'] );
@@ -97,7 +93,7 @@ class ApiQueryCategoryMembers extends ApiQueryGeneratorBase {
 		// how to have efficient subcategory access :-) ~~~~ (oh well, domas)
 		$miser_ns = [];
 		if ( $this->getConfig()->get( 'MiserMode' ) ) {
-			$miser_ns = $params['namespace'];
+			$miser_ns = $params['namespace'] ?: [];
 		} else {
 			$this->addWhereFld( 'page_namespace', $params['namespace'] );
 		}
@@ -153,7 +149,8 @@ class ApiQueryCategoryMembers extends ApiQueryGeneratorBase {
 					$startsortkey = Collation::singleton()->getSortKey( $params['startsortkeyprefix'] );
 				} elseif ( $params['starthexsortkey'] !== null ) {
 					if ( !$this->validateHexSortkey( $params['starthexsortkey'] ) ) {
-						$this->dieUsage( 'The starthexsortkey provided is not valid', 'bad_starthexsortkey' );
+						$encParamName = $this->encodeParamName( 'starthexsortkey' );
+						$this->dieWithError( [ 'apierror-badparameter', $encParamName ], "badvalue_$encParamName" );
 					}
 					$startsortkey = hex2bin( $params['starthexsortkey'] );
 				} else {
@@ -163,7 +160,8 @@ class ApiQueryCategoryMembers extends ApiQueryGeneratorBase {
 					$endsortkey = Collation::singleton()->getSortKey( $params['endsortkeyprefix'] );
 				} elseif ( $params['endhexsortkey'] !== null ) {
 					if ( !$this->validateHexSortkey( $params['endhexsortkey'] ) ) {
-						$this->dieUsage( 'The endhexsortkey provided is not valid', 'bad_endhexsortkey' );
+						$encParamName = $this->encodeParamName( 'endhexsortkey' );
+						$this->dieWithError( [ 'apierror-badparameter', $encParamName ], "badvalue_$encParamName" );
 					}
 					$endsortkey = hex2bin( $params['endhexsortkey'] );
 				} else {
@@ -389,6 +387,6 @@ class ApiQueryCategoryMembers extends ApiQueryGeneratorBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Categorymembers';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Categorymembers';
 	}
 }

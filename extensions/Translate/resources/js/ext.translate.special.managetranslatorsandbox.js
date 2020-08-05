@@ -4,10 +4,10 @@
  * @author Sucheta Ghoshal
  * @author Amir E. Aharoni
  * @author Pau Giner
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var delay;
@@ -31,9 +31,7 @@
 
 		options = $.extend( {}, { action: 'translatesandbox' }, options );
 
-		// Change to csrf when support for MW 1.25 is dropped
-		return api.postWithToken( 'edit', options )
-			.promise();
+		return api.postWithToken( 'csrf', options ).promise();
 	}
 
 	function removeSelectedRequests() {
@@ -70,11 +68,9 @@
 	 * @param {Object} request The request data set from backend on request items
 	 */
 	function displayRequestDetails( request ) {
-		var storage, reminders,
+		var storage,
 			$reminderStatus = $( '<span>' ).addClass( 'reminder-status' ),
 			$detailsPane = $( '.details.pane' );
-
-		reminders = request.reminders ? request.reminders.split( '|' ) : [];
 
 		if ( request.reminderscount ) {
 			$reminderStatus.text( mw.msg(
@@ -103,7 +99,7 @@
 								.text( mw.msg( 'tsb-reminder-sending' ) );
 
 							doApiAction( {
-								'do': 'remind',
+								do: 'remind',
 								userid: request.userid
 							} ).done( function () {
 								$reminderStatus.text( mw.msg( 'tsb-reminder-sent-new' ) );
@@ -124,11 +120,13 @@
 						.addClass( 'accept mw-ui-button mw-ui-progressive' )
 						.text( mw.msg( 'tsb-accept-button-label' ) )
 						.on( 'click', function () {
+							mw.notify( mw.msg( 'tsb-accept-confirmation', 1 ) );
+
 							window.tsbUpdatingUsers = true;
 
 							doApiAction( {
 								userid: request.userid,
-								'do': 'promote'
+								do: 'promote'
 							} ).done( function () {
 								removeSelectedRequests();
 
@@ -139,11 +137,13 @@
 						.addClass( 'reject mw-ui-button mw-ui-destructive' )
 						.text( mw.msg( 'tsb-reject-button-label' ) )
 						.on( 'click', function () {
+							mw.notify( mw.msg( 'tsb-reject-confirmation', 1 ) );
+
 							window.tsbUpdatingUsers = true;
 
 							doApiAction( {
 								userid: request.userid,
-								'do': 'delete'
+								do: 'delete'
 							} ).done( function () {
 								removeSelectedRequests();
 
@@ -218,7 +218,7 @@
 						.text( mw.msg( 'tsb-translations-current' ) )
 						.addClass( 'four columns' )
 				)
-			);
+		);
 
 		translations.translationstash.translations.sort( sortTranslationsByLanguage );
 		$.each( translations.translationstash.translations, function ( index, translation ) {
@@ -270,7 +270,7 @@
 			return $( checkedBox ).parents( 'div.request' ).data( 'data' ).userid;
 		} );
 
-		selectedUserIDs = selectedUserIDs.toArray().join( '|' );
+		selectedUserIDs = selectedUserIDs.toArray();
 
 		$( '.details.pane' ).empty().append(
 			$( '<div>' )
@@ -282,11 +282,13 @@
 						.addClass( 'accept-all mw-ui-button mw-ui-progressive' )
 						.text( mw.msg( 'tsb-accept-all-button-label' ) )
 						.on( 'click', function () {
+							mw.notify( mw.msg( 'tsb-accept-confirmation', selectedUserIDs.length ) );
+
 							window.tsbUpdatingUsers = true;
 
 							doApiAction( {
 								userid: selectedUserIDs,
-								'do': 'promote'
+								do: 'promote'
 							} ).done( function () {
 								removeSelectedRequests();
 
@@ -297,11 +299,13 @@
 						.addClass( 'reject-all mw-ui-button mw-ui-destructive' )
 						.text( mw.msg( 'tsb-reject-all-button-label' ) )
 						.on( 'click', function () {
+							mw.notify( mw.msg( 'tsb-reject-confirmation', selectedUserIDs.length ) );
+
 							window.tsbUpdatingUsers = true;
 
 							doApiAction( {
 								userid: selectedUserIDs,
-								'do': 'delete'
+								do: 'delete'
 							} ).done( function () {
 								removeSelectedRequests();
 
@@ -582,6 +586,7 @@
 				$clearButton.removeClass( 'hide' );
 				indicateOlderRequests();
 			},
+			ulsPurpose: 'translate-special-managetranslatorsandbox',
 			quickList: mw.uls.getFrequentLanguageList
 		} );
 
@@ -631,7 +636,7 @@
 
 	$.fn.languageFilter = function () {
 		return this.each( function () {
-			if ( !$.data( this, 'LanguageFilter' ) )  {
+			if ( !$.data( this, 'LanguageFilter' ) ) {
 				$.data( this, 'LanguageFilter', new LanguageFilter( this ) );
 			}
 		} );
@@ -646,7 +651,7 @@
 	}
 
 	TranslatorSearch.prototype.init = function () {
-		this.$search.on( 'search keyup', $.proxy( this.keyup, this ) );
+		this.$search.on( 'search keyup', this.keyup.bind( this ) );
 	};
 
 	TranslatorSearch.prototype.keyup = function () {
@@ -655,7 +660,7 @@
 
 		// Respond to the keypress events after a small timeout to avoid freeze when typed fast
 		delay( function () {
-			query = $.trim( translatorSearch.$search.val() ).toLowerCase().trim();
+			query = translatorSearch.$search.val().trim().toLowerCase();
 			translatorSearch.filter( query );
 		}, 300 );
 	};
@@ -703,7 +708,7 @@
 
 	$.fn.translatorSearch = function () {
 		return this.each( function () {
-			if ( !$.data( this, 'TranslatorSearch' ) )  {
+			if ( !$.data( this, 'TranslatorSearch' ) ) {
 				$.data( this, 'TranslatorSearch', new TranslatorSearch( this ) );
 			}
 		} );
@@ -718,7 +723,7 @@
 		};
 	}() );
 
-	$( document ).ready( function () {
+	$( function () {
 		var $requestCheckboxes = $( '.request-selector' ),
 			$selectAll = $( '.request-selector-all' ),
 			$requestRows = $( '.requests .request' );
@@ -737,9 +742,9 @@
 		$requestCheckboxes.on( 'click change', requestSelectHandler );
 
 		// Handle clicks on request rows.
-		$requestRows.on( 'click',  onSelectRequest );
+		$requestRows.on( 'click', onSelectRequest );
 
-		$( '.older-requests-indicator' ).on( 'click',  oldRequestSelector );
+		$( '.older-requests-indicator' ).on( 'click', oldRequestSelector );
 
 		if ( $requestRows.length ) {
 			$requestRows.first().click();
@@ -747,4 +752,4 @@
 
 		updateRequestCount();
 	} );
-}( jQuery, mediaWiki ) );
+}() );

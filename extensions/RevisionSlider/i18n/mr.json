@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"V.narsikar",
+			"Macofe"
+		]
+	},
+	"revisionslider": "आवृत्तीसरकपटल",
+	"revisionslider-preference-disable": "आवृत्ती सरकपटल दाखवू नका",
+	"revisionslider-desc": "फरक पानावरील आवृत्ती दर्शविणारा एक सरकपटल दाखवितो, जेणेकरुन त्यांची निवड व ताडणी करता येते",
+	"revisionslider-toggle-label": "इतिहास न्याहाळा",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|बाइट|बाइटस्}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|बाइट|बाइटस्}}",
+	"revisionslider-label-date": "दिनांक",
+	"revisionslider-label-page-size": "पानाचा आकार",
+	"revisionslider-label-change-size": "बदलाचा आकार",
+	"revisionslider-label-comment": "टिप्पणी",
+	"revisionslider-label-username": "{{GENDER:$1|सदस्यनाम}}",
+	"revisionslider-minoredit": "हे एक किरकोळ संपादन आहे",
+	"revisionslider-loading-failed": "आवृत्ती सरकपटल भारण होण्यात अयशस्वी.",
+	"revisionslider-toggle-title-expand": "आवृत्ती सरकपटल उघडा",
+	"revisionslider-toggle-title-collapse": "आवृत्ती सरकपटलाचा निपात करा",
+	"revisionslider-turn-on-auto-expand-title": "आवृत्ती सरकपटल नेहमीच विस्तारीत ठेवा",
+	"revisionslider-turn-off-auto-expand-title": "आवृत्ती सरकपटलाचा आपोआप विस्तार करु नका",
+	"revisionslider-arrow-tooltip-newer": "नविनतम आवृत्त्या बघा",
+	"revisionslider-arrow-tooltip-older": "जून्या आवृत्त्या बघा",
+	"revisionslider-show-help-tooltip": "साहाय्य मजकूर दाखवा",
+	"revisionslider-help-dialog-slide1": "फरक पानावरील आवृत्त्या सुचालनास व ताडण्यास 'आवृत्ती सरकपटल' हा आपणास मदत करतो. तो, जर्मन भाषा बोलणाऱ्या समाजाच्या   [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider समाज ईच्छा] तांत्रिक ईच्छायादीवर आधारीत आहे.[//www.mediawiki.org/wiki/Extension_talk:RevisionSlider येथे] प्रतिसाद दिल्यास बरे होईल.",
+	"revisionslider-help-dialog-slide2": "प्रत्येक बार हा एक पृष्ठ आवृत्ती दर्शवितो.वर असणारा बार हा पानाचा वाढलेला आकार दर्शवितो, खाली असणारा बार हे आकारातील घट दर्शवितो. चित्रात,आवृत्ती १ जोडलेला आशयाचे, तर, २ हे आशय काढण्याचे प्रतिनिधित्व करते.",
+	"revisionslider-help-dialog-slide4": "आवृत्तीच्या इतिहास धुंडाळण्यास व जून्या व नविनतम आवृत्त्या बघण्यास मागे व पुढे अशी दिशा असणाऱ्या बाणांचा वापर करा.",
+	"revisionslider-tutorial": "आवृत्ती सरकपटल प्रशिक्षण",
+	"revisionslider-previous-dialog": "मागील",
+	"revisionslider-next-dialog": "पुढील",
+	"revisionslider-close-dialog": "बंद करा"
+}

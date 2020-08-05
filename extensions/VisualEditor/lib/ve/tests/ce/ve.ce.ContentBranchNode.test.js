@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable ContentBranchNode tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ce.ContentBranchNode' );
@@ -364,7 +364,7 @@ QUnit.test( 'getRenderedContents', function ( assert ) {
 				html: 'abc<i><u><b>d</b></u></i><b><u>ef</u></b>ghi'
 			}
 		];
-	QUnit.expect( cases.length );
+
 	for ( i = 0, len = cases.length; i < len; i++ ) {
 		doc = new ve.dm.Document( ve.dm.example.preprocessAnnotations( cases[ i ].data ) );
 		$wrapper = $( new ve.ce.ParagraphNode( doc.getDocumentNode().getChildren()[ 0 ] ).getRenderedContents() );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Context class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -105,6 +105,8 @@ ve.ui.Context.prototype.getRelatedSources = null;
 ve.ui.Context.prototype.getSurface = function () {
 	return this.surface;
 };
+
+/* eslint-disable valid-jsdoc */
 
 /**
  * Toggle the menu.
@@ -214,6 +216,8 @@ ve.ui.Context.prototype.updateDimensions = function () {
 
 /**
  * Destroy the context, removing all DOM elements.
+ *
+ * @chainable
  */
 ve.ui.Context.prototype.destroy = function () {
 	// Disconnect events

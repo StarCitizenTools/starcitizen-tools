@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hamilton Abreu",
+			"Malafaya",
+			"Athena in Wonderland"
+		]
+	},
+	"sitenotice_close": "ignorar",
+	"sitenotice-desc": "Permite que os utilizadores fechem a notificação do sítio"
+}

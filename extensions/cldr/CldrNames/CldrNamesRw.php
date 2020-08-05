@@ -56,7 +56,7 @@ $languageNames = [
 	'lo' => 'Ikilawotiyani',
 	'lt' => 'Ikilituwaniya',
 	'lv' => 'Ikinyaletoviyani',
-	'mk' => 'Ikimasedoniyani',
+	'mk' => 'Ikimasedoniya',
 	'ml' => 'Ikimalayalami',
 	'mn' => 'Ikimongoli',
 	'mr' => 'Ikimarati',
@@ -109,6 +109,6 @@ $languageNames = [
 ];
 
 $countryNames = [
-	'RW' => 'Rwanda',
-	'TO' => 'Igitonga',
+	'RW' => 'U Rwanda',
+	'TO' => 'Tonga',
 ];

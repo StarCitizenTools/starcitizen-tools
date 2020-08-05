@@ -4,7 +4,7 @@
  * @author Niklas Laxström
  * @file
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -24,15 +24,15 @@ class MockMessageCollectionForExport extends MessageCollection {
 		$msg = new FatMessage( 'untranslatedmsg', 'definition' );
 		$this->messages['untranslatedmsg'] = $msg;
 
-		$this->tags = array(
-			'fuzzy' => array( 'fuzzymsg' ),
-		);
+		$this->tags = [
+			'fuzzy' => [ 'fuzzymsg' ],
+		];
 
 		$this->keys = array_flip( array_keys( $this->messages ) );
 	}
 
 	public function getAuthors() {
-		return array( 'Nike the bunny' );
+		return [ 'Nike the bunny' ];
 	}
 
 	public function getLanguage() {

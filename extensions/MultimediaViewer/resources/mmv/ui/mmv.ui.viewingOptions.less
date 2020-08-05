@@ -1,47 +1,32 @@
-@import "../mmv.globals";
-@import "../mmv.mixins";
-
-@shadow-color: #aaaaaa;
-@divider-border-height: 1px;
+@import '../mmv.globals';
+@import '../mmv.mixins';
 
 .mw-mmv-options-dialog {
-	@offset-top: (@buttons-offset-right + (2 * @buttons-offset-each-top) + 6px);
+	@offset-top: ( @buttons-offset-right + ( 2 * @buttons-offset-each-top ) + 6px );
 
 	top: @offset-top;
-
 	height: auto;
-
 	z-index: 1004;
-
 	padding: 15px;
 
 	&.mw-mmv-enable-confirmation-shown {
-		background-color: #00AF89;
-
-		box-shadow: 0 2px 0 #00634E;
+		background-color: #00af89;
+		box-shadow: 0 2px 0 #00634e;
 
 		.mw-mmv-dialog-down-arrow {
-			background-color: #00AF89;
+			background-color: #00af89;
 		}
 	}
 
-	&.mw-mmv-disable-confirmation-shown {
-		background-color: #EEE;
-
-		.mw-mmv-dialog-down-arrow {
-			background-color: #eee;
-		}
-	}
-
-	&.mw-mmv-enable-div-shown {
-		.mw-mmv-dialog-down-arrow {
-			background-color: #EEE;
-		}
+	&.mw-mmv-disable-confirmation-shown,
+	&.mw-mmv-disable-confirmation-shown .mw-mmv-dialog-down-arrow,
+	&.mw-mmv-enable-div-shown .mw-mmv-dialog-down-arrow {
+		background-color: #eaecf0;
 	}
 
 	.mw-mmv-dialog-down-arrow {
 		@arrow-size: 20px;
-		top: (@offset-top + (@arrow-size / 2 ));
+		top: ( @offset-top + ( @arrow-size / 2 ) );
 	}
 
 	.mw-mmv-enable-confirmation,
@@ -65,9 +50,9 @@
 		height: 15px;
 		cursor: pointer;
 		opacity: 0.75;
-
 		/* @embed */
-		background-image: url(img/x_gray.svg);
+		background-image: url( img/x_white.svg );
+		background-size: 15px 15px;
 
 		&:hover {
 			opacity: 1;
@@ -76,30 +61,23 @@
 
 	.mw-mmv-disable-confirmation {
 		.mw-mmv-options-dialog-header {
-			color: #333;
+			color: #222;
 			padding: 0;
 		}
 
 		.mw-mmv-options-text-header {
-			color: #555;
+			color: #222;
 		}
 	}
 
 	.mw-mmv-enable-confirmation {
 		.mw-mmv-options-dialog-header {
-			color: #FFF;
+			color: #fff;
 			padding: 0;
 		}
 
 		.mw-mmv-options-text-header {
-			color: #FFF;
-		}
-
-		.mw-mmv-confirmation-close {
-			/* @embed */
-			background-image: url(img/x_darkgreen.svg);
-			background-size: 15px 15px;
-			background-repeat: no-repeat;
+			color: #fff;
 		}
 	}
 
@@ -134,12 +112,11 @@
 }
 
 .mw-mmv-options-icon {
+	/* @embed */
+	background-image: url( img/icon_mmv.svg );
 	float: left;
 	width: 58px;
 	height: 52px;
-
-	/* @embed */
-	background-image: url(img/icon_mmv.svg);
 }
 
 .mw-mmv-options-cancel-button,
@@ -151,7 +128,7 @@
 	padding-top: 0;
 	font-weight: normal;
 	font-size: 1.25em;
-	color: #333;
+	color: #222;
 
 	.mw-mmv-options-enable & {
 		top: 35px;
@@ -161,25 +138,23 @@
 .mw-mmv-options-text-header {
 	margin: 0;
 	font-size: 1em;
-	color: #555;
+	color: #54595d;
 }
 
 .mw-mmv-options-text-body {
-	font-size: .9em;
-	color: #777;
+	font-size: 0.9em;
+	color: #72777d;
 }
 
 .mw-mmv-options-enable-alert {
+	background-color: #eaecf0;
+	color: #222;
 	position: absolute;
 	left: -15px;
 	right: -15px;
 	top: -15px;
-
+	border-top-right-radius: @border-radius;
+	border-top-left-radius: @border-radius;
 	padding: 10px 15px;
-
-	background-color: #EEE;
-	border-top-right-radius: 3px;
-	border-top-left-radius: 3px;
-	color: #555;
 	font-weight: 500;
 }

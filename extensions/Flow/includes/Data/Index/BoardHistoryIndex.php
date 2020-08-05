@@ -2,7 +2,7 @@
 
 namespace Flow\Data\Index;
 
-use Flow\Data\BufferedCache;
+use Flow\Data\FlowObjectCache;
 use Flow\Data\ObjectManager;
 use Flow\Data\ObjectMapper;
 use Flow\Data\Storage\BoardHistoryStorage;
@@ -11,6 +11,7 @@ use Flow\Model\AbstractRevision;
 use Flow\Model\PostSummary;
 use Flow\Model\PostRevision;
 use Flow\Model\TopicListEntry;
+use Flow\Model\UUID;
 use Flow\Model\Workflow;
 
 /**
@@ -26,22 +27,22 @@ abstract class BoardHistoryIndex extends TopKIndex {
 	protected $om;
 
 	public function __construct(
-		BufferedCache $cache,
+		FlowObjectCache $cache,
 		BoardHistoryStorage $storage,
 		ObjectMapper $mapper,
 		$prefix,
 		array $indexed,
-		array $options = array(),
+		array $options = [],
 		ObjectManager $om
 	) {
-		if ( $indexed !== array( 'topic_list_id' ) ) {
+		if ( $indexed !== [ 'topic_list_id' ] ) {
 			throw new DataModelException( __CLASS__ . ' is hardcoded to only index topic_list_id: ' . print_r( $indexed, true ), 'process-data' );
 		}
 		parent::__construct( $cache, $storage, $mapper, $prefix, $indexed, $options );
 		$this->om = $om;
 	}
 
-	public function findMulti( array $queries, array $options = array() ) {
+	public function findMulti( array $queries, array $options = [] ) {
 		if ( count( $queries ) > 1 ) {
 			// why?
 			throw new DataModelException( __METHOD__ . ' expects only one value in $queries', 'process-data' );
@@ -57,7 +58,7 @@ abstract class BoardHistoryIndex extends TopKIndex {
 		return $this->storage->findMulti(
 			$queries,
 			$this->queryOptions()
-		) ?: array();
+		) ?: [];
 	}
 
 	/**
@@ -65,7 +66,7 @@ abstract class BoardHistoryIndex extends TopKIndex {
 	 * @param string[] $row
 	 */
 	public function cachePurge( $object, array $row ) {
-		$row['topic_list_id'] = $this->findTopicListId( $object, $row, array() );
+		$row['topic_list_id'] = $this->findTopicListId( $object, $row, [] );
 		parent::cachePurge( $object, $row );
 	}
 
@@ -124,7 +125,7 @@ abstract class BoardHistoryIndex extends TopKIndex {
 			$topicId = $this->findTopicId( $object );
 		}
 
-		$found = $this->om->find( array( 'topic_id' => $topicId ) );
+		$found = $this->om->find( [ 'topic_id' => $topicId ] );
 		if ( !$found ) {
 			throw new DataModelException(
 				"No topic list contains topic " . $topicId->getAlphadecimal() .

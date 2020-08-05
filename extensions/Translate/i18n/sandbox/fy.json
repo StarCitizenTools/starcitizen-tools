@@ -1,8 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Robin0van0der0vliet"
+			"Robin0van0der0vliet",
+			"Robin van der Vliet",
+			"PiefPafPier"
 		]
 	},
-	"translationstash": "Wolkom"
+	"translationstash": "Wolkom",
+	"tsb-create-user-page": "Ienfâldige meidoggerside oanmakke",
+	"log-name-translatorsandbox": "Oersetsânbakloch"
 }

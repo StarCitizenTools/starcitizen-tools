@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel ParagraphNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -26,8 +26,6 @@ OO.inheritClass( ve.dm.ParagraphNode, ve.dm.ContentBranchNode );
 /* Static Properties */
 
 ve.dm.ParagraphNode.static.name = 'paragraph';
-
-ve.dm.ParagraphNode.static.canContainContent = true;
 
 ve.dm.ParagraphNode.static.matchTagNames = [ 'p' ];
 

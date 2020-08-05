@@ -3,7 +3,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -15,7 +15,7 @@ class MessageGroupConfigurationParser {
 
 	public function __construct() {
 		// Don't perform validations if library not available
-		if ( class_exists( 'RomaricDrigon\MetaYaml\MetaYaml' ) ) {
+		if ( class_exists( RomaricDrigon\MetaYaml\MetaYaml::class ) ) {
 			$this->baseSchema = $this->getBaseSchema();
 		}
 	}
@@ -25,7 +25,7 @@ class MessageGroupConfigurationParser {
 	 * schema will be ignored, if schema validation is enabled.
 	 *
 	 * @param string $data Yaml
-	 * @param callable $callback Optional callback which is called on errors. Parameters are
+	 * @param callable|null $callback Optional callback which is called on errors. Parameters are
 	 *   document index, processed configuration and error message.
 	 * @return array Group configurations indexed by message group id.
 	 */
@@ -38,7 +38,7 @@ class MessageGroupConfigurationParser {
 
 		$documents = self::getDocumentsFromYaml( $data );
 		$configurations = self::parseDocuments( $documents );
-		$groups = array();
+		$groups = [];
 
 		if ( is_array( $this->baseSchema ) ) {
 			foreach ( $configurations as $index => $config ) {
@@ -80,8 +80,8 @@ class MessageGroupConfigurationParser {
 	 * @return array Unvalidated group configurations
 	 */
 	public function parseDocuments( array $documents ) {
-		$groups = array();
-		$template = array();
+		$groups = [];
+		$template = [];
 
 		foreach ( $documents as $document ) {
 			$document = TranslateYaml::loadString( $document );
@@ -130,7 +130,7 @@ class MessageGroupConfigurationParser {
 				continue;
 			}
 
-			$extra = call_user_func( array( $class, 'getExtraSchema' ) );
+			$extra = call_user_func( [ $class, 'getExtraSchema' ] );
 			$schema = array_replace_recursive( $schema, $extra );
 		}
 

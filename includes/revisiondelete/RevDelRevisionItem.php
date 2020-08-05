@@ -47,6 +47,10 @@ class RevDelRevisionItem extends RevDelItem {
 		return 'rev_user_text';
 	}
 
+	public function getAuthorActorField() {
+		return 'rev_actor';
+	}
+
 	public function canView() {
 		return $this->revision->userCan( Revision::DELETED_RESTRICTED, $this->list->getUser() );
 	}
@@ -79,7 +83,7 @@ class RevDelRevisionItem extends RevDelItem {
 		$dbw->update( 'recentchanges',
 			[
 				'rc_deleted' => $bits,
-				'rc_patrolled' => 1
+				'rc_patrolled' => RecentChange::PRC_PATROLLED
 			],
 			[
 				'rc_this_oldid' => $this->revision->getId(), // condition
@@ -107,14 +111,14 @@ class RevDelRevisionItem extends RevDelItem {
 	 * @return string
 	 */
 	protected function getRevisionLink() {
-		$date = htmlspecialchars( $this->list->getLanguage()->userTimeAndDate(
-			$this->revision->getTimestamp(), $this->list->getUser() ) );
+		$date = $this->list->getLanguage()->userTimeAndDate(
+			$this->revision->getTimestamp(), $this->list->getUser() );
 
 		if ( $this->isDeleted() && !$this->canViewContent() ) {
-			return $date;
+			return htmlspecialchars( $date );
 		}
 
-		return Linker::linkKnown(
+		return $this->getLinkRenderer()->makeKnownLink(
 			$this->list->title,
 			$date,
 			[],
@@ -134,9 +138,9 @@ class RevDelRevisionItem extends RevDelItem {
 		if ( $this->isDeleted() && !$this->canViewContent() ) {
 			return $this->list->msg( 'diff' )->escaped();
 		} else {
-			return Linker::linkKnown(
+			return $this->getLinkRenderer()->makeKnownLink(
 					$this->list->title,
-					$this->list->msg( 'diff' )->escaped(),
+					$this->list->msg( 'diff' )->text(),
 					[],
 					[
 						'diff' => $this->revision->getId(),
@@ -188,10 +192,10 @@ class RevDelRevisionItem extends RevDelItem {
 		$ret = [
 			'id' => $rev->getId(),
 			'timestamp' => wfTimestamp( TS_ISO_8601, $rev->getTimestamp() ),
+			'userhidden' => (bool)$rev->isDeleted( Revision::DELETED_USER ),
+			'commenthidden' => (bool)$rev->isDeleted( Revision::DELETED_COMMENT ),
+			'texthidden' => (bool)$rev->isDeleted( Revision::DELETED_TEXT ),
 		];
-		$ret += $rev->isDeleted( Revision::DELETED_USER ) ? [ 'userhidden' => '' ] : [];
-		$ret += $rev->isDeleted( Revision::DELETED_COMMENT ) ? [ 'commenthidden' => '' ] : [];
-		$ret += $rev->isDeleted( Revision::DELETED_TEXT ) ? [ 'texthidden' => '' ] : [];
 		if ( $rev->userCan( Revision::DELETED_USER, $user ) ) {
 			$ret += [
 				'userid' => $rev->getUser( Revision::FOR_THIS_USER ),

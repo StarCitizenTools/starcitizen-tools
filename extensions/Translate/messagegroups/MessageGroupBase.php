@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2010-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -31,7 +31,7 @@ abstract class MessageGroupBase implements MessageGroup {
 	}
 
 	/**
-	 * @param $conf
+	 * @param array $conf
 	 *
 	 * @return MessageGroup
 	 */
@@ -84,7 +84,7 @@ abstract class MessageGroupBase implements MessageGroup {
 	}
 
 	protected function getFromConf( $section, $key ) {
-		return isset( $this->conf[$section][$key] ) ? $this->conf[$section][$key] : null;
+		return $this->conf[$section][$key] ?? null;
 	}
 
 	/**
@@ -124,7 +124,7 @@ abstract class MessageGroupBase implements MessageGroup {
 		}
 
 		foreach ( $checks as $check ) {
-			$checker->addCheck( array( $checker, $check ) );
+			$checker->addCheck( [ $checker, $check ] );
 		}
 
 		return $checker;
@@ -157,19 +157,34 @@ abstract class MessageGroupBase implements MessageGroup {
 	/**
 	 * Returns the configured InsertablesSuggester if any.
 	 * @since 2013.09
+	 * @return CombinedInsertablesSuggester
 	 */
 	public function getInsertablesSuggester() {
+		$allClasses = [];
+
 		$class = $this->getFromConf( 'INSERTABLES', 'class' );
-
-		if ( !$class ) {
-			return null;
+		if ( $class !== null ) {
+			$allClasses[] = $class;
 		}
 
-		if ( !class_exists( $class ) ) {
-			throw new MWException( "InsertablesSuggester class $class does not exist." );
+		$classes = $this->getFromConf( 'INSERTABLES', 'classes' );
+		if ( $classes !== null ) {
+			$allClasses = array_merge( $allClasses, $classes );
 		}
 
-		return new $class();
+		array_unique( $allClasses, SORT_REGULAR );
+
+		$suggesters = [];
+
+		foreach ( $allClasses as $class ) {
+			if ( !class_exists( $class ) ) {
+				throw new MWException( "InsertablesSuggester class $class does not exist." );
+			}
+
+			$suggesters[] = new $class();
+		}
+
+		return new CombinedInsertablesSuggester( $suggesters );
 	}
 
 	/**
@@ -192,7 +207,7 @@ abstract class MessageGroupBase implements MessageGroup {
 	 */
 	public function initCollection( $code ) {
 		$namespace = $this->getNamespace();
-		$messages = array();
+		$messages = [];
 
 		$cache = new MessageGroupCache( $this, $this->getSourceLanguage() );
 		if ( !$cache->exists() ) {
@@ -243,7 +258,7 @@ abstract class MessageGroupBase implements MessageGroup {
 
 	public function getTags( $type = null ) {
 		if ( $type === null ) {
-			$taglist = array();
+			$taglist = [];
 
 			foreach ( $this->getRawTags() as $type => $patterns ) {
 				$taglist[$type] = $this->parseTags( $patterns );
@@ -258,7 +273,7 @@ abstract class MessageGroupBase implements MessageGroup {
 	protected function parseTags( $patterns ) {
 		$messageKeys = $this->getKeys();
 
-		$matches = array();
+		$matches = [];
 
 		/**
 		 * Collect exact keys, no point running them trough string matcher
@@ -291,7 +306,7 @@ abstract class MessageGroupBase implements MessageGroup {
 
 	protected function getRawTags( $type = null ) {
 		if ( !isset( $this->conf['TAGS'] ) ) {
-			return array();
+			return [];
 		}
 
 		$tags = $this->conf['TAGS'];
@@ -303,7 +318,7 @@ abstract class MessageGroupBase implements MessageGroup {
 			return $tags[$type];
 		}
 
-		return array();
+		return [];
 	}
 
 	protected function setTags( MessageCollection $collection ) {
@@ -345,7 +360,7 @@ abstract class MessageGroupBase implements MessageGroup {
 		global $wgTranslateWorkflowStates;
 		if ( !$wgTranslateWorkflowStates ) {
 			// Not configured
-			$conf = array();
+			$conf = [];
 		} else {
 			$conf = $wgTranslateWorkflowStates;
 		}
@@ -361,6 +376,8 @@ abstract class MessageGroupBase implements MessageGroup {
 		// @todo Replace deprecated call.
 		$conf = $this->getWorkflowConfiguration();
 
+		Hooks::run( 'Translate:modifyMessageGroupStates', [ $this->getId(), &$conf ] );
+
 		return new MessageGroupStates( $conf );
 	}
 
@@ -370,39 +387,54 @@ abstract class MessageGroupBase implements MessageGroup {
 	 * @return array|null The language codes as array keys.
 	 */
 	public function getTranslatableLanguages() {
+		global $wgTranslateBlacklist;
+
 		$groupConfiguration = $this->getConfiguration();
 		if ( !isset( $groupConfiguration['LANGUAGES'] ) ) {
 			// No LANGUAGES section in the configuration.
 			return null;
 		}
 
-		$lists = $groupConfiguration['LANGUAGES'];
-		$codes = array(); // The list of languages to return
+		$codes = array_flip( array_keys( TranslateUtils::getLanguageNames( null ) ) );
 
+		$lists = $groupConfiguration['LANGUAGES'];
 		if ( isset( $lists['blacklist'] ) ) {
 			$blacklist = $lists['blacklist'];
-			if ( is_array( $blacklist ) ) {
-				$codes = array_flip( array_keys( TranslateUtils::getLanguageNames( 'en' ) ) );
+			if ( $blacklist === '*' ) {
+				// All languages blacklisted
+				$codes = [];
+			} elseif ( is_array( $blacklist ) ) {
 				foreach ( $blacklist as $code ) {
 					unset( $codes[$code] );
 				}
-			} else {
-				// All languages blacklisted. This is very rare but not impossible.
-				$codes = array();
+			}
+		} else {
+			// Treat lack of explicit blacklist the same as blacklisting everything. This way,
+			// when one defines only whitelist, it means that only those languages are allowed.
+			$codes = [];
+		}
+
+		// DWIM with $wgTranslateBlacklist, e.g. languages in that list should not unexpectedly
+		// be enabled when a whitelist is used to whitelist any language.
+		$checks = [ $this->getId(), strtok( $this->getId(), '-' ), '*' ];
+		foreach ( $checks as $check ) {
+			if ( isset( $wgTranslateBlacklist[ $check ] ) ) {
+				foreach ( array_keys( $wgTranslateBlacklist[ $check ] ) as $blacklistedCode ) {
+					unset( $codes[ $blacklistedCode ] );
+				}
 			}
 		}
 
-		$whitelist = array();
 		if ( isset( $lists['whitelist'] ) ) {
 			$whitelist = $lists['whitelist'];
 			if ( $whitelist === '*' ) {
-				// All languages whitelisted
+				// All languages whitelisted (except $wgTranslateBlacklist)
 				return null;
+			} elseif ( is_array( $whitelist ) ) {
+				foreach ( $whitelist as $code ) {
+					$codes[$code] = true;
+				}
 			}
-		}
-
-		foreach ( $whitelist as $code ) {
-			$codes[$code] = true;
 		}
 
 		return $codes;

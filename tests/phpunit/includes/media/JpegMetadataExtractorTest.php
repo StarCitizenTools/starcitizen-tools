@@ -1,7 +1,7 @@
 <?php
 /**
  * @todo Could use a test of extended XMP segments. Hard to find programs that
- * create example files, and creating my own in vim propbably wouldn't
+ * create example files, and creating my own in vim probably wouldn't
  * serve as a very good "test". (Adobe photoshop probably creates such files
  * but it costs money). The implementation of it currently in MediaWiki is based
  * solely on reading the standard, without any real world test files.
@@ -76,6 +76,12 @@ class JpegMetadataExtractorTest extends MediaWikiTestCase {
 		$this->assertEquals( $expected, bin2hex( $res['PSIR'][0] ) );
 	}
 
+	public function testXMPExtractionNullChar() {
+		$res = JpegMetadataExtractor::segmentSplitter( $this->filePath . 'jpeg-xmp-nullchar.jpg' );
+		$expected = file_get_contents( $this->filePath . 'jpeg-xmp-psir.xmp' );
+		$this->assertEquals( $expected, $res['XMP'] );
+	}
+
 	public function testXMPExtractionAltAppId() {
 		$res = JpegMetadataExtractor::segmentSplitter( $this->filePath . 'jpeg-xmp-alt.jpg' );
 		$expected = file_get_contents( $this->filePath . 'jpeg-xmp-psir.xmp' );
@@ -107,5 +113,22 @@ class JpegMetadataExtractorTest extends MediaWikiTestCase {
 		$res = JpegMetadataExtractor::segmentSplitter( $this->filePath . 'exif-user-comment.jpg' );
 		$expected = 'BE';
 		$this->assertEquals( $expected, $res['byteOrder'] );
+	}
+
+	public function testInfiniteRead() {
+		// test file truncated right after a segment, which previously
+		// caused an infinite loop looking for the next segment byte.
+		// Should get past infinite loop and throw in wfUnpack()
+		$this->setExpectedException( 'MWException' );
+		$res = JpegMetadataExtractor::segmentSplitter( $this->filePath . 'jpeg-segment-loop1.jpg' );
+	}
+
+	public function testInfiniteRead2() {
+		// test file truncated after a segment's marker and size, which
+		// would cause a seek past end of file. Seek past end of file
+		// doesn't actually fail, but prevents further reading and was
+		// devolving into the previous case (testInfiniteRead).
+		$this->setExpectedException( 'MWException' );
+		$res = JpegMetadataExtractor::segmentSplitter( $this->filePath . 'jpeg-segment-loop2.jpg' );
 	}
 }

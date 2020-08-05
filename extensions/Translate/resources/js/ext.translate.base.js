@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	mw.translate = mw.translate || {};
@@ -13,11 +13,11 @@
 		 * Checks if the input placeholder attribute
 		 * is supported on this element in this browser.
 		 *
-		 * @param {jQuery} element
+		 * @param {jQuery} $element
 		 * @return {boolean}
 		 */
-		isPlaceholderSupported: function ( element ) {
-			return ( 'placeholder' in element[ 0 ] );
+		isPlaceholderSupported: function ( $element ) {
+			return ( 'placeholder' in $element[ 0 ] );
 		},
 
 		// Storage for language stats loader functions from API,
@@ -34,7 +34,6 @@
 			if ( !mw.translate.languageStatsLoader[ language ] ) {
 				mw.translate.languageStatsLoader[ language ] = new mw.Api().get( {
 					action: 'query',
-					format: 'json',
 					meta: 'languagestats',
 					lslanguage: language
 				} );
@@ -57,7 +56,7 @@
 		getMessageGroup: function ( id, props ) {
 			var params, api;
 
-			if ( $.isArray( props ) ) {
+			if ( Array.isArray( props ) ) {
 				props = props.join( '|' );
 			} else if ( props === undefined ) {
 				props = 'id|label|description|icon|priority|prioritylangs|priorityforce|workflowstates';
@@ -67,7 +66,8 @@
 				meta: 'messagegroups',
 				mgformat: 'flat',
 				mgprop: props,
-				mgroot: id
+				mgroot: id,
+				formatversion: 2
 			};
 
 			api = new mw.Api();
@@ -138,16 +138,25 @@
 			return mw.config.get( 'DeleteRight' ) && mw.config.get( 'TranslateRight' );
 		},
 
-		addDocumentationLanguage: function () {
-			var docLanguageCode = mw.config.get( 'wgTranslateDocumentationLanguageCode' );
-			if ( $.uls.data.languages[ docLanguageCode ] ) {
-				return;
+		/**
+		 * Adds missing languages to the language database so that they can be used in ULS.
+		 *
+		 * @param {Object} languages Language tags mapped to language names
+		 * @param {Array} regions Which regions to add the languages.
+		 */
+		addExtraLanguagesToLanguageData: function ( languages, regions ) {
+			var code;
+			for ( code in languages ) {
+				if ( code in $.uls.data.languages ) {
+					continue;
+				}
+
+				$.uls.data.addLanguage( code, {
+					script: 'Zyyy',
+					regions: regions,
+					autonym: languages[ code ]
+				} );
 			}
-			$.uls.data.addLanguage( docLanguageCode, {
-				script: $.uls.data.getScript( mw.config.get( 'wgContentLanguage' ) ),
-				regions: [ 'SP' ],
-				autonym: mw.msg( 'translate-documentation-language' )
-			} );
 		},
 
 		isDirty: function () {
@@ -177,7 +186,7 @@
 		$( window ).on( 'pageshow.translate', pageShowHandler );
 	}
 
-	$( document ).ready( function () {
+	$( function () {
 		translateOnBeforeUnloadRegister();
 	} );
-}( jQuery, mediaWiki ) );
+}() );

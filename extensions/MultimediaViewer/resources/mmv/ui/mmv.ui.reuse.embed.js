@@ -33,6 +33,7 @@
 
 		/**
 		 * Formatter converting image data into formats needed for output
+		 *
 		 * @property {mw.mmv.EmbedFileFormatter}
 		 */
 		this.formatter = new mw.mmv.EmbedFileFormatter();
@@ -42,6 +43,7 @@
 
 		/**
 		 * Indicates whether or not the default option has been reset for both size menus.
+		 *
 		 * @property {boolean}
 		 */
 		this.isSizeMenuDefaultReset = false;
@@ -62,30 +64,35 @@
 
 		/**
 		 * Currently selected embed snippet.
+		 *
 		 * @property {jQuery}
 		 */
 		this.$currentMainEmbedText = mw.user.isAnon() ? this.embedTextHtml.$element : this.embedTextWikitext.$element;
 
 		/**
 		 * Default item for the html size menu.
+		 *
 		 * @property {OO.ui.MenuOptionWidget}
 		 */
-		this.defaultHtmlItem = this.embedSizeSwitchHtml.getMenu().getSelectedItem();
+		this.defaultHtmlItem = this.embedSizeSwitchHtml.getMenu().findSelectedItem();
 
 		/**
 		 * Default item for the wikitext size menu.
+		 *
 		 * @property {OO.ui.MenuOptionWidget}
 		 */
-		this.defaultWikitextItem = this.embedSizeSwitchWikitext.getMenu().getSelectedItem();
+		this.defaultWikitextItem = this.embedSizeSwitchWikitext.getMenu().findSelectedItem();
 
 		/**
 		 * Currently selected size menu.
+		 *
 		 * @property {OO.ui.MenuSelectWidget}
 		 */
 		this.currentSizeMenu = mw.user.isAnon() ? this.embedSizeSwitchHtml.getMenu() : this.embedSizeSwitchWikitext.getMenu();
 
 		/**
 		 * Current default item.
+		 *
 		 * @property {OO.ui.MenuOptionWidget}
 		 */
 		this.currentDefaultItem = mw.user.isAnon() ? this.defaultHtmlItem : this.defaultWikitextItem;
@@ -99,7 +106,6 @@
 	/** @property {number} Height threshold at which an image is to be considered "large" */
 	EP.LARGE_IMAGE_HEIGHT_THRESHOLD = 900;
 
-
 	/**
 	 * Creates text areas for html and wikitext snippets.
 	 *
@@ -111,9 +117,8 @@
 
 		( mw.user.isAnon() ? htmlClasses : wikitextClasses ).push( 'active' );
 
-		this.embedTextHtml = new oo.ui.TextInputWidget( {
+		this.embedTextHtml = new oo.ui.MultilineTextInputWidget( {
 			classes: htmlClasses,
-			multiline: true,
 			readOnly: true
 		} );
 
@@ -124,9 +129,8 @@
 			mw.mmv.actionLogger.log( 'embed-html-copied' );
 		} );
 
-		this.embedTextWikitext = new oo.ui.TextInputWidget( {
+		this.embedTextWikitext = new oo.ui.MultilineTextInputWidget( {
 			classes: wikitextClasses,
-			multiline: true,
 			readOnly: true
 		} );
 
@@ -137,10 +141,35 @@
 			mw.mmv.actionLogger.log( 'embed-wikitext-copied' );
 		} );
 
+		this.$copyButton = $( '<button>' )
+			.addClass( 'mw-mmv-button mw-mmv-dialog-copy' )
+			.click( function () {
+				// Select the text, and then try to copy the text.
+				// If the copy fails or is not supported, continue as if nothing had happened.
+				$( this ).parent().find( '.active > textarea' ).select();
+				try {
+					if ( document.queryCommandSupported &&
+						document.queryCommandSupported( 'copy' ) ) {
+						document.execCommand( 'copy' );
+					}
+				} catch ( e ) {
+					// queryCommandSupported in Firefox pre-41 can throw errors when used with
+					// clipboard commands. We catch and ignore these and other copy-command-related
+					// errors here.
+				}
+			} )
+			.prop( 'title', mw.msg( 'multimediaviewer-reuse-copy-embed' ) )
+			.text( mw.msg( 'multimediaviewer-reuse-copy-embed' ) )
+			.tipsy( {
+				delayIn: mw.config.get( 'wgMultimediaViewer' ).tooltipDelay,
+				gravity: this.correctEW( 'se' )
+			} );
+
 		$( '<p>' )
 			.append(
 				this.embedTextHtml.$element,
-				this.embedTextWikitext.$element
+				this.embedTextWikitext.$element,
+				this.$copyButton
 			)
 			.appendTo( $container );
 	};
@@ -251,7 +280,6 @@
 		var $htmlTextarea = this.embedTextHtml.$element.find( 'textarea' ),
 			$wikitextTextarea = this.embedTextWikitext.$element.find( 'textarea' );
 
-
 		mw.mmv.ui.reuse.Tab.prototype.unattach.call( this );
 
 		$htmlTextarea.off( 'focus mousedown click' );
@@ -332,7 +360,7 @@
 	 * @param {number} height New height to set
 	 */
 	EP.changeSize = function ( width, height ) {
-		var currentItem = this.embedSwitch.getSelectedItem();
+		var currentItem = this.embedSwitch.findSelectedItem();
 
 		if ( currentItem === null ) {
 			return;
@@ -354,6 +382,7 @@
 	 * Sets the HTML embed text.
 	 *
 	 * Assumes that the set() method has already been called to update this.embedFileInfo
+	 *
 	 * @param {mw.mmv.model.Thumbnail} thumbnail (can be just an empty object)
 	 * @param {number} width New width to set
 	 * @param {number} height New height to set
@@ -380,6 +409,7 @@
 	 * Updates the wikitext embed text with a new value for width.
 	 *
 	 * Assumes that the set method has already been called.
+	 *
 	 * @param {number} width
 	 */
 	EP.updateEmbedWikitext = function ( width ) {
@@ -405,9 +435,9 @@
 	 *
 	 * @param {number} width
 	 * @param {number} height
-	 * @returns {Object}
-	 * @returns {Object} return.html Collection of possible image sizes for html snippets
-	 * @returns {Object} return.wikitext Collection of possible image sizes for wikitext snippets
+	 * @return {Object}
+	 * @return {Object} return.html Collection of possible image sizes for html snippets
+	 * @return {Object} return.wikitext Collection of possible image sizes for wikitext snippets
 	 */
 	EP.getSizeOptions = function ( width, height ) {
 		var sizes = {};
@@ -474,40 +504,39 @@
 	 *
 	 * @param {number} width
 	 * @param {number} height
-	 * @returns {Object}
-	 * @returns { {width: number, height: number} } return.small
-	 * @returns { {width: number, height: number} } return.medium
-	 * @returns { {width: number, height: number} } return.large
+	 * @return {Object}
+	 * @return {Object} return.small
+	 * @return {Object} return.medium
+	 * @return {Object} return.large
 	 */
 	EP.getPossibleImageSizesForWikitext = function ( width, height ) {
 		var i, bucketName,
 			bucketWidth,
 			buckets = {
-				'small': 300,
-				'medium': 400,
-				'large': 500
+				small: 300,
+				medium: 400,
+				large: 500
 			},
 			sizes = {},
 			bucketNames = Object.keys( buckets ),
 			widthToHeight = height / width;
 
 		for ( i = 0; i < bucketNames.length; i++ ) {
-			bucketName = bucketNames[i];
-			bucketWidth = buckets[bucketName];
+			bucketName = bucketNames[ i ];
+			bucketWidth = buckets[ bucketName ];
 
 			if ( width > bucketWidth ) {
-				sizes[bucketName] = {
+				sizes[ bucketName ] = {
 					width: bucketWidth,
 					height: Math.round( bucketWidth * widthToHeight )
 				};
 			}
 		}
 
-		sizes['default'] = { width: null, height: null };
+		sizes.default = { width: null, height: null };
 
 		return sizes;
 	};
-
 
 	mw.mmv.ui.reuse.Embed = Embed;
 }( mediaWiki, jQuery, OO ) );

@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @author Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -20,13 +20,13 @@
  */
 class SpecialTranslationStats extends SpecialPage {
 	/// @since 2012-03-05
-	protected static $graphs = array(
+	protected static $graphs = [
 		'edits' => 'TranslatePerLanguageStats',
 		'users' => 'TranslatePerLanguageStats',
 		'registrations' => 'TranslateRegistrationStats',
 		'reviews' => 'ReviewPerLanguageStats',
 		'reviewers' => 'ReviewPerLanguageStats',
-	);
+	];
 
 	public function __construct() {
 		parent::__construct( 'TranslationStats' );
@@ -72,6 +72,7 @@ class SpecialTranslationStats extends SpecialPage {
 		$opts->add( 'group', '' );
 		$opts->add( 'uselang', '' );
 		$opts->add( 'start', '' );
+		$opts->add( 'imagescale', 1.0 );
 		$opts->fetchValuesFromRequest( $this->getRequest() );
 
 		$pars = explode( ';', $par );
@@ -90,12 +91,13 @@ class SpecialTranslationStats extends SpecialPage {
 		$opts->validateIntBounds( 'days', 1, 10000 );
 		$opts->validateIntBounds( 'width', 200, 1000 );
 		$opts->validateIntBounds( 'height', 200, 1000 );
+		$opts->validateBounds( 'imagescale', 1.0, 4.0 );
 
 		if ( $opts['start'] !== '' ) {
-			$opts['start'] = (string)( wfTimestamp( TS_MW, $opts['start'] ) );
+			$opts['start'] = rtrim( wfTimestamp( TS_ISO_8601, $opts['start'] ), 'Z' );
 		}
 
-		$validScales = array( 'months', 'weeks', 'days', 'hours' );
+		$validScales = [ 'months', 'weeks', 'days', 'hours' ];
 		if ( !in_array( $opts['scale'], $validScales ) ) {
 			$opts['scale'] = 'days';
 		}
@@ -109,7 +111,7 @@ class SpecialTranslationStats extends SpecialPage {
 			$opts['count'] = 'edits';
 		}
 
-		foreach ( array( 'group', 'language' ) as $t ) {
+		foreach ( [ 'group', 'language' ] as $t ) {
 			$values = array_map( 'trim', explode( ',', $opts[$t] ) );
 			$values = array_splice( $values, 0, 4 );
 			if ( $t === 'group' ) {
@@ -122,8 +124,7 @@ class SpecialTranslationStats extends SpecialPage {
 		if ( $this->including() ) {
 			$this->getOutput()->addHTML( $this->image( $opts ) );
 		} elseif ( $opts['graphit'] ) {
-
-			if ( !class_exists( 'PHPlot' ) ) {
+			if ( !class_exists( PHPlot::class ) ) {
 				header( 'HTTP/1.0 500 Multi fail' );
 				echo 'PHPlot not found';
 			}
@@ -143,6 +144,7 @@ class SpecialTranslationStats extends SpecialPage {
 	/**
 	 * Constructs the form which can be used to generate custom graphs.
 	 * @param FormOptions $opts
+	 * @suppress SecurityCheck-DoubleEscaped Intentionally outputting what user should type
 	 */
 	protected function form( FormOptions $opts ) {
 		global $wgScript;
@@ -154,7 +156,7 @@ class SpecialTranslationStats extends SpecialPage {
 
 		$out->addHTML(
 			Xml::fieldset( $this->msg( 'translate-statsf-options' )->text() ) .
-				Html::openElement( 'form', array( 'action' => $wgScript ) ) .
+				Html::openElement( 'form', [ 'action' => $wgScript ] ) .
 				Html::hidden( 'title', $this->getPageTitle()->getPrefixedText() ) .
 				Html::hidden( 'preview', 1 ) .
 				'<table>'
@@ -166,9 +168,9 @@ class SpecialTranslationStats extends SpecialPage {
 			$this->eInput( 'width', $opts ) .
 				$this->eInput( 'height', $opts ) .
 				'<tr><td colspan="2"><hr /></td></tr>' .
-				$this->eInput( 'start', $opts, 16 ) . // Should fit yyyymmddhhmmss
+				$this->eInput( 'start', $opts, 24 ) .
 				$this->eInput( 'days', $opts ) .
-				$this->eRadio( 'scale', $opts, array( 'months', 'weeks', 'days', 'hours' ) ) .
+				$this->eRadio( 'scale', $opts, [ 'months', 'weeks', 'days', 'hours' ] ) .
 				$this->eRadio( 'count', $opts, $this->getGraphTypes() ) .
 				'<tr><td colspan="2"><hr /></td></tr>' .
 				$this->eLanguage( 'language', $opts ) .
@@ -208,14 +210,14 @@ class SpecialTranslationStats extends SpecialPage {
 
 		$out->addHTML(
 			Html::element( 'hr' ) .
-				Html::element( 'pre', array(), "{{{$titleText}{$spiParams}}}" )
+				Html::element( 'pre', [], "{{{$titleText}{$spiParams}}}" )
 		);
 
 		$out->addHTML(
 			Html::element( 'hr' ) .
 				Html::rawElement(
 					'div',
-					array( 'style' => 'margin: 1em auto; text-align: center;' ),
+					[ 'style' => 'margin: 1em auto; text-align: center;' ],
 					$this->image( $opts )
 				)
 		);
@@ -231,9 +233,8 @@ class SpecialTranslationStats extends SpecialPage {
 	protected function eInput( $name, FormOptions $opts, $width = 4 ) {
 		$value = $opts[$name];
 
-		return
-			'<tr><td>' . $this->eLabel( $name ) . '</td><td>' .
-			Xml::input( $name, $width, $value, array( 'id' => $name ) ) .
+		return '<tr><td>' . $this->eLabel( $name ) . '</td><td>' .
+			Xml::input( $name, $width, $value, [ 'id' => $name ] ) .
 			'</td></tr>' . "\n";
 	}
 
@@ -250,7 +251,7 @@ class SpecialTranslationStats extends SpecialPage {
 		$label = 'translate-statsf-' . $name;
 		$label = $this->msg( $label )->escaped();
 
-		return Xml::tags( 'label', array( 'for' => $name ), $label );
+		return Xml::tags( 'label', [ 'for' => $name ], $label );
 	}
 
 	/**
@@ -267,11 +268,11 @@ class SpecialTranslationStats extends SpecialPage {
 		$label = $this->msg( $label )->escaped();
 		$s = '<tr><td>' . $label . '</td><td>';
 
-		$options = array();
+		$options = [];
 		foreach ( $alts as $alt ) {
 			$id = "$name-$alt";
 			$radio = Xml::radio( $name, $alt, $alt === $opts[$name],
-				array( 'id' => $id ) ) . ' ';
+				[ 'id' => $id ] ) . ' ';
 			$options[] = $radio . ' ' . $this->eLabel( $id );
 		}
 
@@ -293,10 +294,9 @@ class SpecialTranslationStats extends SpecialPage {
 		$select = $this->languageSelector();
 		$select->setTargetId( 'language' );
 
-		return
-			'<tr><td>' . $this->eLabel( $name ) . '</td><td>' .
+		return '<tr><td>' . $this->eLabel( $name ) . '</td><td>' .
 			$select->getHtmlAndPrepareJS() . '<br />' .
-			Xml::input( $name, 20, $value, array( 'id' => $name ) ) .
+			Xml::input( $name, 20, $value, [ 'id' => $name ] ) .
 			'</td></tr>' . "\n";
 	}
 
@@ -331,10 +331,9 @@ class SpecialTranslationStats extends SpecialPage {
 		$select = $this->groupSelector();
 		$select->setTargetId( 'group' );
 
-		return
-			'<tr><td>' . $this->eLabel( $name ) . '</td><td>' .
+		return '<tr><td>' . $this->eLabel( $name ) . '</td><td>' .
 			$select->getHtmlAndPrepareJS() . '<br />' .
-			Xml::input( $name, 20, $value, array( 'id' => $name ) ) .
+			Xml::input( $name, 20, $value, [ 'id' => $name ] ) .
 			'</td></tr>' . "\n";
 	}
 
@@ -345,7 +344,7 @@ class SpecialTranslationStats extends SpecialPage {
 	protected function groupSelector() {
 		$groups = MessageGroups::singleton()->getGroups();
 		/**
-		 * @var $group MessageGroup
+		 * @var MessageGroup $group
 		 */
 		foreach ( $groups as $key => $group ) {
 			if ( !$group->exists() ) {
@@ -376,15 +375,24 @@ class SpecialTranslationStats extends SpecialPage {
 	 */
 	protected function image( FormOptions $opts ) {
 		$title = $this->getPageTitle();
-		$cgiparams = wfArrayToCgi( array( 'graphit' => true ), $opts->getAllValues() );
-		$href = $title->getLocalURL( $cgiparams );
+
+		$params = $opts->getChangedValues();
+		$params[ 'graphit' ] = true;
+		$src = $title->getLocalURL( $params );
+
+		$srcsets = [];
+		foreach ( [ 1.5, 2, 3 ] as $scale ) {
+			$params[ 'imagescale' ] = $scale;
+			$srcsets[] = "{$title->getLocalURL( $params )} {$scale}x";
+		}
 
 		return Xml::element( 'img',
-			array(
-				'src' => $href,
+			[
+				'src' => $src,
+				'srcset' => implode( ', ', $srcsets ),
 				'width' => $opts['width'],
 				'height' => $opts['height'],
-			)
+			]
 		);
 	}
 
@@ -394,7 +402,7 @@ class SpecialTranslationStats extends SpecialPage {
 	 * @return array ( string => array ) Data indexed by their date labels.
 	 */
 	protected function getData( FormOptions $opts ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		$class = $this->getGraphClass( $opts['count'] );
 		$so = new $class( $opts );
@@ -419,14 +427,15 @@ class SpecialTranslationStats extends SpecialPage {
 			$end = null;
 		}
 
-		$tables = array();
-		$fields = array();
-		$conds = array();
+		$tables = [];
+		$fields = [];
+		$conds = [];
 		$type = __METHOD__;
-		$options = array();
+		$options = [];
+		$joins = [];
 
-		$so->preQuery( $tables, $fields, $conds, $type, $options, $start, $end );
-		$res = $dbr->select( $tables, $fields, $conds, $type, $options );
+		$so->preQuery( $tables, $fields, $conds, $type, $options, $joins, $start, $end );
+		$res = $dbr->select( $tables, $fields, $conds, $type, $options, $joins );
 		wfDebug( __METHOD__ . "-queryend\n" );
 
 		// Start processing the data
@@ -435,10 +444,10 @@ class SpecialTranslationStats extends SpecialPage {
 
 		$labels = $so->labels();
 		$keys = array_keys( $labels );
-		$values = array_pad( array(), count( $labels ), 0 );
+		$values = array_pad( [], count( $labels ), 0 );
 		$defaults = array_combine( $keys, $values );
 
-		$data = array();
+		$data = [];
 		// Allow 10 seconds in the future for processing time
 		$lastValue = $end !== null ? $end : $now + 10;
 		$lang = $this->getLanguage();
@@ -473,7 +482,7 @@ class SpecialTranslationStats extends SpecialPage {
 
 		// Don't display dummy label
 		if ( count( $labels ) === 1 && $labels[0] === 'all' ) {
-			$labels = array();
+			$labels = [];
 		}
 
 		foreach ( $labels as &$label ) {
@@ -500,7 +509,7 @@ class SpecialTranslationStats extends SpecialPage {
 			$data[key( $last ) . '*'] = current( $last );
 		}
 
-		return array( $labels, $data );
+		return [ $labels, $data ];
 	}
 
 	/**
@@ -561,16 +570,17 @@ class SpecialTranslationStats extends SpecialPage {
 	public function draw( FormOptions $opts ) {
 		global $wgTranslatePHPlotFont;
 
+		$imageScale = $opts->getValue( 'imagescale' );
 		$width = $opts->getValue( 'width' );
 		$height = $opts->getValue( 'height' );
 		// Define the object
-		$plot = new PHPlot( $width, $height );
+		$plot = new PHPlot( $width * $imageScale, $height * $imageScale );
 
 		list( $legend, $resData ) = $this->getData( $opts );
 		$count = count( $resData );
 		$skip = (int)( $count / ( $width / 60 ) - 1 );
 		$i = $count;
-		$data = array();
+		$data = [];
 
 		foreach ( $resData as $date => $edits ) {
 			if ( $skip > 0 &&
@@ -589,22 +599,24 @@ class SpecialTranslationStats extends SpecialPage {
 		}
 
 		$font = FCFontFinder::findFile( $this->getLanguage()->getCode() );
-
-		if ( $font ) {
-			$plot->SetDefaultTTFont( $font );
-		} else {
-			$plot->SetDefaultTTFont( $wgTranslatePHPlotFont );
+		if ( !$font ) {
+			$font = $wgTranslatePHPlotFont;
 		}
+		$numberFont = FCFontFinder::findFile( 'en' );
+		$plot->SetDefaultTTFont( $font );
+		$plot->SetFontTTF( 'generic', $font, 12 * $imageScale );
+		$plot->SetFontTTF( 'legend', $font, 12 * $imageScale );
+		$plot->SetFontTTF( 'x_title', $font, 10 * $imageScale );
+		$plot->SetFontTTF( 'y_title', $font, 10 * $imageScale );
+		$plot->SetFontTTF( 'x_label', $numberFont, 8 * $imageScale );
+		$plot->SetFontTTF( 'y_label', $numberFont, 8 * $imageScale );
+
 		$plot->SetDataValues( $data );
 
 		if ( $legend !== null ) {
 			$plot->SetLegend( $legend );
 		}
 
-		$numberFont = FCFontFinder::findFile( 'en' );
-
-		$plot->setFont( 'x_label', $numberFont, 8 );
-		$plot->setFont( 'y_label', $numberFont, 8 );
 		// Give grep a chance to find the usages:
 		// translate-stats-edits, translate-stats-users, translate-stats-registrations,
 		// translate-stats-reviews, translate-stats-reviewers
@@ -697,15 +709,16 @@ interface TranslationStatsInterface {
 
 	/**
 	 * Query details that the graph must fill.
-	 * @param array $tables Empty list. Append table names.
-	 * @param array $fields Empty list. Append field names.
-	 * @param array $conds Empty array. Append select conditions.
-	 * @param string $type Append graph type (used to identify queries).
-	 * @param array $options Empty array. Append extra query options.
+	 * @param array &$tables Empty list. Append table names.
+	 * @param array &$fields Empty list. Append field names.
+	 * @param array &$conds Empty array. Append select conditions.
+	 * @param string &$type Append graph type (used to identify queries).
+	 * @param array &$options Empty array. Append extra query options.
+	 * @param array &$joins Empty array. Append extra join conditions.
 	 * @param string $start Precalculated start cutoff timestamp
 	 * @param string $end Precalculated end cutoff timestamp
 	 */
-	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, $start, $end );
+	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, &$joins, $start, $end );
 
 	/**
 	 * Return the indexes which this result contributes to.
@@ -725,7 +738,7 @@ interface TranslationStatsInterface {
 	/**
 	 * Return the timestamp associated with this result row.
 	 * @param array $row Database Result Row
-	 * @return \string Timestamp.
+	 * @return string Timestamp.
 	 */
 	public function getTimestamp( $row );
 
@@ -752,11 +765,11 @@ abstract class TranslationStatsBase implements TranslationStatsInterface {
 	}
 
 	public function indexOf( $row ) {
-		return array( 'all' );
+		return [ 'all' ];
 	}
 
 	public function labels() {
-		return array( 'all' );
+		return [ 'all' ];
 	}
 
 	public function getDateFormat() {
@@ -773,9 +786,9 @@ abstract class TranslationStatsBase implements TranslationStatsInterface {
 	}
 
 	protected static function makeTimeCondition( $field, $start, $end ) {
-		$db = wfGetDB( DB_SLAVE );
+		$db = wfGetDB( DB_REPLICA );
 
-		$conds = array();
+		$conds = [];
 		if ( $start !== null ) {
 			$conds[] = "$field >= '{$db->timestamp( $start )}'";
 		}
@@ -786,9 +799,13 @@ abstract class TranslationStatsBase implements TranslationStatsInterface {
 		return $conds;
 	}
 
-	/// @since 2012-03-05
+	/**
+	 * @since 2012-03-05
+	 * @param array $groupIds
+	 * @return array
+	 */
 	protected static function namespacesFromGroups( $groupIds ) {
-		$namespaces = array();
+		$namespaces = [];
 		foreach ( $groupIds as $id ) {
 			$group = MessageGroups::getGroup( $id );
 			if ( $group ) {
@@ -806,7 +823,7 @@ abstract class TranslationStatsBase implements TranslationStatsInterface {
  * @ingroup Stats
  */
 class TranslatePerLanguageStats extends TranslationStatsBase {
-	/// array ( string => bool ) Cache used to count active users only once per day.
+	/** @var bool[] array( string => bool ) Cache used to count active users only once per day. */
 	protected $usercache;
 
 	protected $codes, $groups;
@@ -817,24 +834,25 @@ class TranslatePerLanguageStats extends TranslationStatsBase {
 		$opts->validateIntBounds( 'days', 1, 200 );
 	}
 
-	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, $start, $end ) {
+	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, &$joins, $start, $end ) {
 		global $wgTranslateMessageNamespaces;
 
-		$db = wfGetDB( DB_SLAVE );
+		$db = wfGetDB( DB_REPLICA );
 
-		$tables = array( 'recentchanges' );
-		$fields = array( 'rc_timestamp' );
+		$tables = [ 'recentchanges' ];
+		$fields = [ 'rc_timestamp' ];
+		$joins = [];
 
-		$conds = array(
+		$conds = [
 			'rc_namespace' => $wgTranslateMessageNamespaces,
 			'rc_bot' => 0,
 			'rc_type != ' . RC_LOG,
-		);
+		];
 
 		$timeConds = self::makeTimeCondition( 'rc_timestamp', $start, $end );
 		$conds = array_merge( $conds, $timeConds );
 
-		$options = array( 'ORDER BY' => 'rc_timestamp' );
+		$options = [ 'ORDER BY' => 'rc_timestamp' ];
 
 		$this->groups = array_filter( array_map( 'trim', explode( ',', $this->opts['group'] ) ) );
 		$this->groups = array_map( 'MessageGroups::normalizeId', $this->groups );
@@ -845,7 +863,7 @@ class TranslatePerLanguageStats extends TranslationStatsBase {
 			$conds['rc_namespace'] = $namespaces;
 		}
 
-		$languages = array();
+		$languages = [];
 		foreach ( $this->codes as $code ) {
 			$languages[] = 'rc_title ' . $db->buildLike( $db->anyString(), "/$code" );
 		}
@@ -860,7 +878,14 @@ class TranslatePerLanguageStats extends TranslationStatsBase {
 		}
 
 		if ( $this->opts['count'] === 'users' ) {
-			$fields[] = 'rc_user_text';
+			if ( class_exists( ActorMigration::class ) ) {
+				$actorQuery = ActorMigration::newMigration()->getJoin( 'rc_user' );
+				$tables += $actorQuery['tables'];
+				$fields['rc_user_text'] = $actorQuery['fields']['rc_user_text'];
+				$joins += $actorQuery['joins'];
+			} else {
+				$fields[] = 'rc_user_text';
+			}
 		}
 
 		$type .= '-perlang';
@@ -891,8 +916,8 @@ class TranslatePerLanguageStats extends TranslationStatsBase {
 		// The key-building needs to be in sync with ::labels().
 		list( $key, $code ) = TranslateUtils::figureMessage( $row->rc_title );
 
-		$groups = array();
-		$codes = array();
+		$groups = [];
+		$codes = [];
 
 		if ( $this->groups ) {
 			/*
@@ -904,7 +929,7 @@ class TranslatePerLanguageStats extends TranslationStatsBase {
 		}
 
 		if ( $this->codes ) {
-			$codes = array( $code );
+			$codes = [ $code ];
 		}
 
 		return $this->combineTwoArrays( $groups, $codes );
@@ -949,7 +974,7 @@ class TranslatePerLanguageStats extends TranslationStatsBase {
 			$codes[] = false;
 		}
 
-		$items = array();
+		$items = [];
 		foreach ( $groups as $group ) {
 			foreach ( $codes as $code ) {
 				$items[] = $this->makeLabel( $group, $code );
@@ -991,12 +1016,13 @@ class TranslatePerLanguageStats extends TranslationStatsBase {
  * @ingroup Stats
  */
 class TranslateRegistrationStats extends TranslationStatsBase {
-	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, $start, $end ) {
+	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, &$joins, $start, $end ) {
 		$tables = 'user';
 		$fields = 'user_registration';
 		$conds = self::makeTimeCondition( 'user_registration', $start, $end );
 		$type .= '-registration';
-		$options = array();
+		$options = [];
+		$joins = [];
 	}
 
 	public function getTimestamp( $row ) {
@@ -1010,23 +1036,24 @@ class TranslateRegistrationStats extends TranslationStatsBase {
  * @ingroup Stats
  */
 class ReviewPerLanguageStats extends TranslatePerLanguageStats {
-	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, $start, $end ) {
+	public function preQuery( &$tables, &$fields, &$conds, &$type, &$options, &$joins, $start, $end ) {
 		global $wgTranslateMessageNamespaces;
 
-		$db = wfGetDB( DB_SLAVE );
+		$db = wfGetDB( DB_REPLICA );
 
-		$tables = array( 'logging' );
-		$fields = array( 'log_timestamp' );
+		$tables = [ 'logging' ];
+		$fields = [ 'log_timestamp' ];
+		$joins = [];
 
-		$conds = array(
+		$conds = [
 			'log_namespace' => $wgTranslateMessageNamespaces,
 			'log_action' => 'message',
-		);
+		];
 
 		$timeConds = self::makeTimeCondition( 'log_timestamp', $start, $end );
 		$conds = array_merge( $conds, $timeConds );
 
-		$options = array( 'ORDER BY' => 'log_timestamp' );
+		$options = [ 'ORDER BY' => 'log_timestamp' ];
 
 		$this->groups = array_filter( array_map( 'trim', explode( ',', $this->opts['group'] ) ) );
 		$this->codes = array_filter( array_map( 'trim', explode( ',', $this->opts['language'] ) ) );
@@ -1036,7 +1063,7 @@ class ReviewPerLanguageStats extends TranslatePerLanguageStats {
 			$conds['log_namespace'] = $namespaces;
 		}
 
-		$languages = array();
+		$languages = [];
 		foreach ( $this->codes as $code ) {
 			$languages[] = 'log_title ' . $db->buildLike( $db->anyString(), "/$code" );
 		}
@@ -1051,7 +1078,14 @@ class ReviewPerLanguageStats extends TranslatePerLanguageStats {
 		}
 
 		if ( $this->opts['count'] === 'reviewers' ) {
-			$fields[] = 'log_user_text';
+			if ( class_exists( ActorMigration::class ) ) {
+				$actorQuery = ActorMigration::newMigration()->getJoin( 'log_user' );
+				$tables += $actorQuery['tables'];
+				$fields['log_user_text'] = $actorQuery['fields']['log_user_text'];
+				$joins += $actorQuery['joins'];
+			} else {
+				$fields[] = 'log_user_text';
+			}
 		}
 
 		$type .= '-reviews';
@@ -1082,8 +1116,8 @@ class ReviewPerLanguageStats extends TranslatePerLanguageStats {
 		// The key-building needs to be in sync with ::labels().
 		list( $key, $code ) = TranslateUtils::figureMessage( $row->log_title );
 
-		$groups = array();
-		$codes = array();
+		$groups = [];
+		$codes = [];
 
 		if ( $this->groups ) {
 			/* Get list of keys that the message belongs to, and filter
@@ -1093,7 +1127,7 @@ class ReviewPerLanguageStats extends TranslatePerLanguageStats {
 		}
 
 		if ( $this->codes ) {
-			$codes = array( $code );
+			$codes = [ $code ];
 		}
 
 		return $this->combineTwoArrays( $groups, $codes );

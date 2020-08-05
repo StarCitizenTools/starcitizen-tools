@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha",
+			"Macofe"
+		]
+	},
+	"revisionslider": "Väsjohne-Schihber",
+	"revisionslider-label-date": "Dattom",
+	"revisionslider-label-page-size": "Der Ömfang vun dä Sigg",
+	"revisionslider-label-change-size": "Der Ömvang wood verändert öm",
+	"revisionslider-label-comment": "Kommäntah",
+	"revisionslider-label-username": "<strong>{{GENDER:$2|Däm Metmaacher singe|Dä Metmaacherėn iere|Däm Metmaacher singe|Dä Metmaacherėn iere|Däm Metmaacher singe}} Nahme:</strong> [[$3|$1]]",
+	"revisionslider-minoredit": "Heh dat es en klein Mini-Änderong",
+	"revisionslider-loading-failed": "Mer kunnte der Väsjohne-Schihber it lahde.",
+	"revisionslider-arrow-tooltip-newer": "Neujere Väsjohne aanzeije",
+	"revisionslider-arrow-tooltip-older": "Ällder Väsjohne aanzeije",
+	"revisionslider-show-help-tooltip": "Donn ene Täx met Hölp un mih Ennfommazjuhne aanzeije",
+	"revisionslider-help-dialog-slide2": "Jehde Schtresch schteihjt för en Väsjohn vun dä Sigg. Schresche bovve schtonn för en Verjrühßerong, Schtreshe noh onge för en Verkleijnerong vum Ömfang vun dä Sigg. Em Belldsche zeijsch de Väsjohn 1 ene Zohwachs vum Ennhald un de Väsjohn 2 dat jät vun em fottjenumme wohd.",
+	"revisionslider-tutorial": "Annleijdong zom Väsjohne-Schihber",
+	"revisionslider-previous-dialog": "Vörijje",
+	"revisionslider-next-dialog": "Vörahn",
+	"revisionslider-close-dialog": "Zohmaache"
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"loops-desc": "Расчленувачки функции за вршење на повторувања (јамки)",
+	"loops_max": "Извршен е најголемиот допуштен број на повторувања",
+	"loops-limitreport-count-limited": "Број на ExtLoops",
+	"loops-limitreport-count-unlimited": "Број на ExtLoops",
+	"loops-config-countlimit": "Променлива во поставките со која се задава најголемиот дозволен број на јамки ('-1' => неограничено). „#forargs“ и „#fornumargs“ не се засегнати од ова.",
+	"loops-config-enabledfunctions": "Овозможува да се одреди кои можности на „Јамки“ да бидат вклучени за викито. Ако не е воспоставен додатокот „Променливи“, „#loop“, „#forargs“ и „#fornumargs“ ќе бидат автоматски исклучени."
+}

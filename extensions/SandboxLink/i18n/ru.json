@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Okras",
+			"Jack who built the house",
+			"Mailman"
+		]
+	},
+	"sandboxlink-desc": "Добавляет ссылку на пользовательскую песочницу в личное меню инструментов",
+	"sandboxlink-subpage-name": "песочница",
+	"sandboxlink-portlet-label": "Песочница",
+	"tooltip-pt-sandbox": "Ваша песочница"
+}

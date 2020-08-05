@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTransclusionNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -13,7 +13,6 @@
  * @extends ve.dm.LeafNode
  * @mixins ve.dm.GeneratedContentNode
  * @mixins ve.dm.FocusableNode
- * @mixins ve.dm.TableCellableNode
  *
  * @constructor
  * @param {Object} [element] Reference to element in linear model
@@ -25,7 +24,6 @@ ve.dm.MWTransclusionNode = function VeDmMWTransclusionNode() {
 	// Mixin constructors
 	ve.dm.GeneratedContentNode.call( this );
 	ve.dm.FocusableNode.call( this );
-	ve.dm.TableCellableNode.call( this );
 
 	// Properties
 	this.partsList = null;
@@ -41,8 +39,6 @@ OO.inheritClass( ve.dm.MWTransclusionNode, ve.dm.LeafNode );
 OO.mixinClass( ve.dm.MWTransclusionNode, ve.dm.GeneratedContentNode );
 
 OO.mixinClass( ve.dm.MWTransclusionNode, ve.dm.FocusableNode );
-
-OO.mixinClass( ve.dm.MWTransclusionNode, ve.dm.TableCellableNode );
 
 /* Static members */
 
@@ -71,6 +67,17 @@ ve.dm.MWTransclusionNode.static.getHashObject = function ( dataElement ) {
 	};
 };
 
+ve.dm.MWTransclusionNode.static.isDiffComparable = function ( element, other ) {
+	function getTemplateNames( parts ) {
+		return parts.map( function ( part ) {
+			return part.template ? part.template.target.wt : '';
+		} ).join( '|' );
+	}
+
+	return ve.dm.MWTransclusionNode.super.static.isDiffComparable.call( this, element, other ) &&
+		getTemplateNames( element.attributes.mw.parts ) === getTemplateNames( other.attributes.mw.parts );
+};
+
 /**
  * Node type to use when the transclusion is inline
  *
@@ -89,6 +96,15 @@ ve.dm.MWTransclusionNode.static.inlineType = 'mwTransclusionInline';
  */
 ve.dm.MWTransclusionNode.static.blockType = 'mwTransclusionBlock';
 
+/**
+ * Node type to use when the transclusion is cellable
+ *
+ * @static
+ * @property {string}
+ * @inheritable
+ */
+ve.dm.MWTransclusionNode.static.cellType = 'mwTransclusionTableCell';
+
 ve.dm.MWTransclusionNode.static.toDataElement = function ( domElements, converter ) {
 	var dataElement,
 		mwDataJSON = domElements[ 0 ].getAttribute( 'data-mw' ),
@@ -105,7 +121,7 @@ ve.dm.MWTransclusionNode.static.toDataElement = function ( domElements, converte
 	};
 
 	if ( domElements.length === 1 && [ 'td', 'th' ].indexOf( domElements[ 0 ].nodeName.toLowerCase() ) !== -1 ) {
-		dataElement.attributes.cellable = true;
+		dataElement.type = this.cellType;
 		ve.dm.TableCellableNode.static.setAttributes( dataElement.attributes, domElements );
 	}
 
@@ -117,9 +133,10 @@ ve.dm.MWTransclusionNode.static.toDataElement = function ( domElements, converte
 };
 
 ve.dm.MWTransclusionNode.static.toDomElements = function ( dataElement, doc, converter ) {
-	var els, i, len, span, index,
+	var els, i, len, span, value,
 		store = converter.getStore(),
-		originalMw = dataElement.attributes.originalMw;
+		originalMw = dataElement.attributes.originalMw,
+		originalDomElements = store.value( dataElement.originalDomElementsHash );
 
 	function wrapTextNode( node ) {
 		var wrapper;
@@ -134,23 +151,25 @@ ve.dm.MWTransclusionNode.static.toDomElements = function ( dataElement, doc, con
 	// If the transclusion is unchanged just send back the
 	// original DOM elements so selser can skip over it
 	if (
-		dataElement.originalDomElements &&
+		originalDomElements &&
 		originalMw && ve.compare( dataElement.attributes.mw, JSON.parse( originalMw ) )
 	) {
 		// originalDomElements is also used for CE rendering so return a copy
-		els = ve.copyDomElements( dataElement.originalDomElements, doc );
+		els = ve.copyDomElements( originalDomElements, doc );
 	} else {
 		if (
 			converter.isForClipboard() &&
 			// Use getHashObjectForRendering to get the rendering from the store
-			( index = store.indexOfHash( OO.getHash( [ this.getHashObjectForRendering( dataElement ), undefined ] ) ) ) !== null
+			( value = store.value( store.hashOfValue( null, OO.getHash( [ this.getHashObjectForRendering( dataElement ), undefined ] ) ) ) )
 		) {
 			// For the clipboard use the current DOM contents so the user has something
 			// meaningful to paste into external applications
-			els = ve.copyDomElements( store.value( index ), doc );
+			els = ve.copyDomElements( value, doc );
 			els[ 0 ] = wrapTextNode( els[ 0 ] );
-		} else if ( dataElement.originalDomElements ) {
-			els = [ doc.createElement( dataElement.originalDomElements[ 0 ].nodeName ) ];
+		} else if ( originalDomElements ) {
+			els = [ doc.createElement( originalDomElements[ 0 ].nodeName ) ];
+		} else if ( dataElement.type === this.cellType ) {
+			els = [ doc.createElement( dataElement.attributes.style === 'header' ? 'th' : 'td' ) ];
 		} else {
 			els = [ doc.createElement( 'span' ) ];
 		}
@@ -184,26 +203,73 @@ ve.dm.MWTransclusionNode.static.toDomElements = function ( dataElement, doc, con
 			els[ i ] = wrapTextNode( els[ i ] );
 			els[ i ].setAttribute( 'data-ve-ignore', 'true' );
 		}
-
-		// Resolve attributes
-		ve.resolveAttributes( $( els ), doc, ve.dm.Converter.static.computedAttributes );
 	}
 	return els;
 };
 
-/** */
-ve.dm.MWTransclusionNode.static.cloneElement = function () {
-	var i, len,
-		// Parent method
-		clone = ve.dm.MWTransclusionNode.super.static.cloneElement.apply( this, arguments );
+ve.dm.MWTransclusionNode.static.describeChanges = function ( attributeChanges ) {
+	var change, params, param, $descriptions;
 
-	delete clone.attributes.originalMw;
-	// Remove about attribute to prevent about grouping of duplicated transclusions
-	if ( clone.originalDomElements ) {
-		for ( i = 0, len = clone.originalDomElements.length; i < len; i++ ) {
-			clone.originalDomElements[ i ].removeAttribute( 'about' );
+	// This method assumes that the behavior of isDiffComparable above remains
+	// the same, so it doesn't have to consider whether the actual template
+	// involved has changed.
+
+	function getLabel( param ) {
+		// If a parameter is an object with a wt key, we just want the value of that.
+		if ( param && param.wt !== undefined ) {
+			// Can be `''`, and we're okay with that
+			return param.wt;
+		}
+		return param;
+	}
+
+	if ( attributeChanges.mw.from.parts.length === 1 && attributeChanges.mw.to.parts.length === 1 ) {
+		// Single-template transclusion, before and after. Relatively easy to summarize.
+		// TODO: expand this to well-represent transclusions that contain multiple templates.
+
+		// The bits of a template we care about are deeply-nested inside an
+		// attribute. We'll restructure this so that we can pretend template
+		// params are the direct attributes of the template.
+		params = {};
+		for ( param in attributeChanges.mw.from.parts[ 0 ].template.params ) {
+			params[ param ] = { from: getLabel( attributeChanges.mw.from.parts[ 0 ].template.params[ param ] ) };
+		}
+		for ( param in attributeChanges.mw.to.parts[ 0 ].template.params ) {
+			params[ param ] = ve.extendObject(
+				{ to: getLabel( attributeChanges.mw.to.parts[ 0 ].template.params[ param ] ) },
+				params[ param ]
+			);
+		}
+		for ( param in params ) {
+			// All we know is that *something* changed, without the normal
+			// helpful just-being-given-the-changed-bits, so we have to filter
+			// this ourselves.
+			if ( params[ param ].from !== params[ param ].to ) {
+				change = this.describeChange( param, params[ param ] );
+				if ( change ) {
+					if ( !$descriptions ) {
+						$descriptions = $( '<ul>' );
+					}
+					if ( change instanceof jQuery ) {
+						$descriptions.append( $( '<li>' ).append( change ) );
+					} else {
+						$descriptions.append( $( '<li>' ).text( change ) );
+					}
+				}
+			}
+		}
+		if ( $descriptions ) {
+			return [ ve.msg( 'visualeditor-changedesc-mwtransclusion' ), $descriptions ];
 		}
 	}
+	return [ ve.msg( 'visualeditor-changedesc-mwtransclusion' ) ];
+};
+
+/** */
+ve.dm.MWTransclusionNode.static.cloneElement = function () {
+	// Parent method
+	var clone = ve.dm.MWTransclusionNode.super.static.cloneElement.apply( this, arguments );
+	delete clone.attributes.originalMw;
 	return clone;
 };
 
@@ -276,6 +342,41 @@ ve.dm.MWTransclusionNode.static.escapeParameter = function ( param ) {
 	return output;
 };
 
+/**
+ * Get the wikitext for this transclusion.
+ *
+ * @static
+ * @param {Object} content MW data content
+ * @return {string} Wikitext like `{{foo|1=bar|baz=quux}}`
+ */
+ve.dm.MWTransclusionNode.static.getWikitext = function ( content ) {
+	var i, len, part, template, param,
+		wikitext = '';
+
+	// Normalize to multi template format
+	if ( content.params ) {
+		content = { parts: [ { template: content } ] };
+	}
+	// Build wikitext from content
+	for ( i = 0, len = content.parts.length; i < len; i++ ) {
+		part = content.parts[ i ];
+		if ( part.template ) {
+			// Template
+			template = part.template;
+			wikitext += '{{' + template.target.wt;
+			for ( param in template.params ) {
+				wikitext += '|' + param + '=' +
+					this.escapeParameter( template.params[ param ].wt );
+			}
+			wikitext += '}}';
+		} else {
+			// Plain wikitext
+			wikitext += part;
+		}
+	}
+	return wikitext;
+};
+
 /* Methods */
 
 /**
@@ -293,23 +394,18 @@ ve.dm.MWTransclusionNode.prototype.onAttributeChange = function ( key ) {
 };
 
 /**
- * @inheritdoc
- */
-ve.dm.MWTransclusionNode.prototype.isCellable = function () {
-	return !!this.getAttribute( 'cellable' );
-};
-
-/**
  * Check if transclusion contains only a single template.
  *
  * @param {string|string[]} [templates] Names of templates to allow, omit to allow any template name
  * @return {boolean} Transclusion only contains a single template, which is one of the ones in templates
  */
 ve.dm.MWTransclusionNode.prototype.isSingleTemplate = function ( templates ) {
-	var i, len, partsList = this.getPartsList();
+	var i, len,
+		templateNS = mw.config.get( 'wgNamespaceIds' ).template,
+		partsList = this.getPartsList();
 
-	function normalizeTitle( name ) {
-		var title = mw.Title.newFromText( name );
+	function normalizeTemplateTitle( name ) {
+		var title = mw.Title.newFromText( name, templateNS );
 		return title ? title.getPrefixedText() : name;
 	}
 
@@ -324,8 +420,8 @@ ve.dm.MWTransclusionNode.prototype.isSingleTemplate = function ( templates ) {
 	}
 	for ( i = 0, len = templates.length; i < len; i++ ) {
 		if (
-			partsList[ 0 ].template &&
-			normalizeTitle( partsList[ 0 ].template ) === normalizeTitle( templates[ i ] )
+			partsList[ 0 ].templatePage &&
+			partsList[ 0 ].templatePage === normalizeTemplateTitle( templates[ i ] )
 		) {
 			return true;
 		}
@@ -339,18 +435,23 @@ ve.dm.MWTransclusionNode.prototype.isSingleTemplate = function ( templates ) {
  * @return {Object[]} List of objects with either template or content properties
  */
 ve.dm.MWTransclusionNode.prototype.getPartsList = function () {
-	var i, len, part, content;
+	var i, len, href, page, part, content;
 
 	if ( !this.partsList ) {
 		this.partsList = [];
 		content = this.getAttribute( 'mw' );
 		for ( i = 0, len = content.parts.length; i < len; i++ ) {
 			part = content.parts[ i ];
-			this.partsList.push(
-				part.template ?
-					{ template: part.template.target.wt } :
-					{ content: part }
-			);
+			if ( part.template ) {
+				href = part.template.target.href;
+				page = href ? ve.normalizeParsoidResourceName( href ) : null;
+				this.partsList.push( {
+					template: part.template.target.wt,
+					templatePage: page
+				} );
+			} else {
+				this.partsList.push( { content: part } );
+			}
 		}
 	}
 
@@ -358,38 +459,13 @@ ve.dm.MWTransclusionNode.prototype.getPartsList = function () {
 };
 
 /**
- * Get the wikitext for this transclusion.
+ * Wrapper for static method
  *
  * @method
  * @return {string} Wikitext like `{{foo|1=bar|baz=quux}}`
  */
 ve.dm.MWTransclusionNode.prototype.getWikitext = function () {
-	var i, len, part, template, param,
-		content = this.getAttribute( 'mw' ),
-		wikitext = '';
-
-	// Normalize to multi template format
-	if ( content.params ) {
-		content = { parts: [ { template: content } ] };
-	}
-	// Build wikitext from content
-	for ( i = 0, len = content.parts.length; i < len; i++ ) {
-		part = content.parts[ i ];
-		if ( part.template ) {
-			// Template
-			template = part.template;
-			wikitext += '{{' + template.target.wt;
-			for ( param in template.params ) {
-				wikitext += '|' + param + '=' +
-					this.constructor.static.escapeParameter( template.params[ param ].wt );
-			}
-			wikitext += '}}';
-		} else {
-			// Plain wikitext
-			wikitext += part;
-		}
-	}
-	return wikitext;
+	return this.constructor.static.getWikitext( this.getAttribute( 'mw' ) );
 };
 
 /* Concrete subclasses */
@@ -405,7 +481,7 @@ ve.dm.MWTransclusionNode.prototype.getWikitext = function () {
  */
 ve.dm.MWTransclusionBlockNode = function VeDmMWTransclusionBlockNode() {
 	// Parent constructor
-	ve.dm.MWTransclusionNode.apply( this, arguments );
+	ve.dm.MWTransclusionBlockNode.super.apply( this, arguments );
 };
 
 OO.inheritClass( ve.dm.MWTransclusionBlockNode, ve.dm.MWTransclusionNode );
@@ -425,7 +501,7 @@ ve.dm.MWTransclusionBlockNode.static.name = 'mwTransclusionBlock';
  */
 ve.dm.MWTransclusionInlineNode = function VeDmMWTransclusionInlineNode() {
 	// Parent constructor
-	ve.dm.MWTransclusionNode.apply( this, arguments );
+	ve.dm.MWTransclusionInlineNode.super.apply( this, arguments );
 };
 
 OO.inheritClass( ve.dm.MWTransclusionInlineNode, ve.dm.MWTransclusionNode );
@@ -436,8 +512,35 @@ ve.dm.MWTransclusionInlineNode.static.name = 'mwTransclusionInline';
 
 ve.dm.MWTransclusionInlineNode.static.isContent = true;
 
+/**
+ * DataModel MediaWiki transclusion table cell node.
+ *
+ * @class
+ * @extends ve.dm.MWTransclusionNode
+ * @mixins ve.dm.TableCellableNode
+ *
+ * @constructor
+ * @param {Object} [element] Reference to element in linear model
+ */
+ve.dm.MWTransclusionTableCellNode = function VeDmMWTransclusionTableCellNode() {
+	// Parent constructor
+	ve.dm.MWTransclusionTableCellNode.super.apply( this, arguments );
+
+	// Mixin constructors
+	ve.dm.TableCellableNode.call( this );
+};
+
+OO.inheritClass( ve.dm.MWTransclusionTableCellNode, ve.dm.MWTransclusionNode );
+
+OO.mixinClass( ve.dm.MWTransclusionTableCellNode, ve.dm.TableCellableNode );
+
+ve.dm.MWTransclusionTableCellNode.static.matchTagNames = [];
+
+ve.dm.MWTransclusionTableCellNode.static.name = 'mwTransclusionTableCell';
+
 /* Registration */
 
 ve.dm.modelRegistry.register( ve.dm.MWTransclusionNode );
 ve.dm.modelRegistry.register( ve.dm.MWTransclusionBlockNode );
 ve.dm.modelRegistry.register( ve.dm.MWTransclusionInlineNode );
+ve.dm.modelRegistry.register( ve.dm.MWTransclusionTableCellNode );

@@ -44,7 +44,9 @@
 	"replacetext_warning": "Used in [[Special:ReplaceText]]. Parameters:\n* $1 - number of pages\n* $2 - replacement string",
 	"replacetext_blankwarning": "Used as warning message on [[Special:ReplaceText]]",
 	"replacetext_continue": "{{Identical|Continue}}",
+	"replacetext_announce": "Used as a label for a checkbox on [[Special:ReplaceText]]",
 	"replacetext_editsummary": "Used as Edit Summary in [[Special:ReplaceText]]. Parameters:\n* $1 - target string\n* $2 - replacement string",
 	"right-replacetext": "{{doc-right|replacetext}}",
-	"action-replacetext": "{{doc-action|replacetext}}"
+	"action-replacetext": "{{doc-action|replacetext}}",
+	"replacetext_reminder": "Used at the end of success message in [[Special:MovePage]]. Parameters:\n* $1 - link to ReplaceText page"
 }

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mx. Granger",
+			"StevenJ81"
+		]
+	},
+	"babel-0-n": "This user has [[$1|no]] knowledge of [[$2|American Sign Language]] (or understands it with considerable difficulty).",
+	"babel-1-n": "This user has [[$1|basic]] knowledge of [[$2|American Sign Language]].",
+	"babel-2-n": "This user has [[$1|intermediate]] knowledge of [[$2|American Sign Language]].",
+	"babel-3-n": "This user has [[$1|advanced]] knowledge of [[$2|American Sign Language]].",
+	"babel-4-n": "This user has [[$1|near native speaker]] knowledge of [[$2|American Sign Language]].",
+	"babel-5-n": "This user has [[$1|professional]] knowledge of [[$2|American Sign Language]].",
+	"babel-N-n": "This user has a [[$1|native]] understanding of [[$2|American Sign Language]]."
+}

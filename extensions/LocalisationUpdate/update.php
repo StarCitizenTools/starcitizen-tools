@@ -6,7 +6,7 @@ $IP = strval( getenv( 'MW_INSTALL_PATH' ) ) !== ''
 
 require "$IP/maintenance/Maintenance.php";
 
-class LU extends Maintenance {
+class Update extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->mDescription = 'Fetches translation updates to MediaWiki core, skins and extensions.';
@@ -16,6 +16,8 @@ class LU extends Maintenance {
 			false, /*required*/
 			true /*has arg*/
 		);
+
+		$this->requireExtension( 'LocalisationUpdate' );
 	}
 
 	public function execute() {
@@ -24,9 +26,7 @@ class LU extends Maintenance {
 		ini_set( "max_execution_time", 0 );
 		ini_set( 'memory_limit', -1 );
 
-		// @codingStandardsIgnoreStart Ignore MediaWiki.NamingConventions.ValidGlobalName.wgPrefix
 		global $IP;
-		// @codingStandardsIgnoreEnd
 		global $wgExtensionMessagesFiles;
 		global $wgLocalisationUpdateRepositories;
 		global $wgLocalisationUpdateRepository;
@@ -52,13 +52,18 @@ class LU extends Maintenance {
 		}
 		$repos = $wgLocalisationUpdateRepositories[$repoid];
 
+		// output and error methods are protected, hence we add logInfo and logError
+		// public methods, that hopefully won't conflict in the future with the base class.
+		$logger = $this;
+
 		// Do it ;)
 		$updater = new LocalisationUpdate\Updater();
 		$updatedMessages = $updater->execute(
 			$finder,
 			$readerFactory,
 			$fetcherFactory,
-			$repos
+			$repos,
+			$logger
 		);
 
 		// Store it ;)
@@ -74,7 +79,15 @@ class LU extends Maintenance {
 		}
 		$this->output( "Saved $count new translations\n" );
 	}
+
+	public function logInfo( $msg ) {
+		$this->output( $msg . "\n" );
+	}
+
+	public function logError( $msg ) {
+		$this->error( $msg );
+	}
 }
 
-$maintClass = 'LU';
+$maintClass = Update::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

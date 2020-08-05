@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization MobileArticleTarget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,17 +16,13 @@
  * @cfg {number} [section] Number of the section target should scroll to
  */
 ve.init.mw.MobileArticleTarget = function VeInitMwMobileArticleTarget( config ) {
-	var currentUri = new mw.Uri();
-
 	config = config || {};
 	config.toolbarConfig = $.extend( {
 		actions: false
 	}, config.toolbarConfig );
 
 	// Parent constructor
-	ve.init.mw.MobileArticleTarget.super.call(
-		this, mw.config.get( 'wgRelevantPageName' ), currentUri.query.oldid, config
-	);
+	ve.init.mw.MobileArticleTarget.super.call( this, config );
 
 	this.section = config.section;
 
@@ -48,7 +44,6 @@ ve.init.mw.MobileArticleTarget.static.toolbarGroups = [
 		classes: [ 've-test-toolbar-style' ],
 		type: 'list',
 		icon: 'textStyle',
-		indicator: 'down',
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-style-tooltip' ),
 		include: [ { group: 'textStyle' }, 'language', 'clear' ],
 		forceExpand: [ 'bold', 'italic', 'clear' ],
@@ -112,18 +107,33 @@ ve.init.mw.MobileArticleTarget.prototype.onSurfaceFocus = function () {
 /**
  * @inheritdoc
  */
-ve.init.mw.MobileArticleTarget.prototype.createSurface = function ( dmDoc, config ) {
-	return new ve.ui.MobileSurface( dmDoc, config );
+ve.init.mw.MobileArticleTarget.prototype.getSaveButtonLabel = function ( startProcess ) {
+	var suffix = startProcess ? '-start' : '';
+	// The following messages can be used here:
+	// * visualeditor-savedialog-label-publish-short
+	// * visualeditor-savedialog-label-publish-short-start
+	// * visualeditor-savedialog-label-save-short
+	// * visualeditor-savedialog-label-save-short-start
+	if ( mw.config.get( 'wgEditSubmitButtonLabelPublish' ) ) {
+		return OO.ui.deferMsg( 'visualeditor-savedialog-label-publish-short' + suffix );
+	}
+
+	return OO.ui.deferMsg( 'visualeditor-savedialog-label-save-short' + suffix );
 };
 
 /**
  * @inheritdoc
  */
-ve.init.mw.MobileArticleTarget.prototype.setupToolbarSaveButton = function () {
+ve.init.mw.MobileArticleTarget.prototype.createTargetWidget = function ( config ) {
 	// Parent method
-	ve.init.mw.MobileArticleTarget.super.prototype.setupToolbarSaveButton.call( this, {
-		label: ve.msg( 'visualeditor-toolbar-savedialog-short' )
+	var targetWidget = ve.init.mw.MobileArticleTarget.super.prototype.createTargetWidget.call( this, config );
+
+	targetWidget.once( 'setup', function () {
+		// Append the context to the toolbar
+		targetWidget.getToolbar().$bar.append( targetWidget.getSurface().getContext().$element );
 	} );
+
+	return targetWidget;
 };
 
 /**
@@ -151,29 +161,35 @@ ve.init.mw.MobileArticleTarget.prototype.attachToolbar = function () {
  * @inheritdoc
  */
 ve.init.mw.MobileArticleTarget.prototype.attachToolbarSaveButton = function () {
-	this.pageToolbar = new ve.ui.TargetToolbar( this, { actions: true } );
+	var surface = this.getSurface();
+
+	if ( !this.pageToolbar ) {
+		this.pageToolbar = new ve.ui.TargetToolbar( this, { actions: true } );
+	}
 
 	this.pageToolbar.setup( [
 		// Back
 		{ include: [ 'back' ] },
 		{
 			type: 'list',
-			icon: 'advanced',
-			indicator: 'down',
-			title: ve.msg( 'visualeditor-pagemenu-tooltip' ),
-			include: [ 'editModeSource' ]
+			icon: 'edit',
+			title: ve.msg( 'visualeditor-mweditmode-tooltip' ),
+			include: [ surface.getMode() === 'visual' ? 'editModeSource' : 'editModeVisual' ]
 		}
-	], this.getSurface() );
+	], surface );
 
 	this.pageToolbar.emit( 'updateState' );
 
-	$( '<div>' ).addClass( 've-init-mw-mobileArticleTarget-title-container' ).append(
-		$( '<div>' ).addClass( 've-init-mw-mobileArticleTarget-title' ).text(
-			new mw.Title( ve.init.target.pageName ).getMainText()
-		)
-	)
-		// Insert title between 'back' and 'advanced'
-		.insertAfter( this.pageToolbar.items[ 0 ].$element );
+	if ( !this.$title ) {
+		this.$title = $( '<div>' ).addClass( 've-init-mw-mobileArticleTarget-title-container' ).append(
+			$( '<div>' ).addClass( 've-init-mw-mobileArticleTarget-title' ).text(
+				new mw.Title( ve.init.target.pageName ).getMainText()
+			)
+		);
+	}
+
+	// Insert title between 'back' and 'advanced'
+	this.$title.insertAfter( this.pageToolbar.items[ 0 ].$element );
 
 	this.pageToolbar.$element.addClass( 've-init-mw-mobileArticleTarget-pageToolbar' );
 	this.pageToolbar.$actions.append(
@@ -209,12 +225,6 @@ ve.init.mw.MobileArticleTarget.prototype.scrollToHeading = function ( headingNod
 			ve.init.mw.MobileArticleTarget.super.prototype.scrollToHeading.call( target, headingNode );
 		}
 	} );
-};
-
-/**
- * Close the mobile editor
- */
-ve.init.mw.MobileArticleTarget.prototype.close = function () {
 };
 
 /**
@@ -263,7 +273,7 @@ ve.ui.MWBackCommand = function VeUiMWBackCommand() {
 };
 OO.inheritClass( ve.ui.MWBackCommand, ve.ui.Command );
 ve.ui.MWBackCommand.prototype.execute = function () {
-	ve.init.target.close();
+	ve.init.target.tryTeardown();
 };
 ve.ui.commandRegistry.register( new ve.ui.MWBackCommand() );
 

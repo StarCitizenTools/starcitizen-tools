@@ -4,11 +4,11 @@
 	"author": [
 		"[mailto:wiki@ratin.de Martin Schwindl]",
 		"[mailto:wiki@keyler-consult.de Martin Keyler]",
-		"[https://www.mediawiki.org/wiki/User:Luis_Felipe_Schenone Luis Felipe Schenone]"
+		"[https://www.mediawiki.org/wiki/User:Sophivorus Felipe Schenone]"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:MsUpload",
 	"descriptionmsg": "msu-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"MessagesDirs": {
 		"MsUpload": [
@@ -35,7 +35,7 @@
 				"msu-insert-image",
 				"msu-insert-video",
 				"msu-cancel-upload",
-				"msu-replace-file",
+				"msu-continue",
 				"msu-clean-all",
 				"msu-ext-not-allowed",
 				"msu-upload-this",
@@ -63,7 +63,8 @@
 		"MSU_checkAutoCat": true,
 		"MSU_useMsLinks": false,
 		"MSU_confirmReplace": true,
-		"MSU_imgParams": "400px"
+		"MSU_imgParams": "400px",
+		"MSU_uploadsize": "100mb"
 	},
 	"manifest_version": 1
 }

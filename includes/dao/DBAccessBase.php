@@ -1,5 +1,8 @@
 <?php
 
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\LoadBalancer;
+
 /**
  * Base class for objects that allow access to other wiki's databases using
  * the foreign database access mechanism implemented by LBFactoryMulti.
@@ -24,7 +27,7 @@
  * @file
  * @ingroup Database
  *
- * @licence GNU GPL v2+
+ * @license GNU GPL v2+
  * @author Daniel Kinzler
  */
 abstract class DBAccessBase implements IDBAccessObject {
@@ -53,7 +56,7 @@ abstract class DBAccessBase implements IDBAccessObject {
 	 * @param int $id Which connection to use
 	 * @param array $groups Query groups
 	 *
-	 * @return DatabaseBase
+	 * @return IDatabase
 	 */
 	protected function getConnection( $id, $groups = [] ) {
 		$loadBalancer = wfGetLB( $this->wiki );
@@ -68,9 +71,9 @@ abstract class DBAccessBase implements IDBAccessObject {
 	 *
 	 * @since 1.21
 	 *
-	 * @param DatabaseBase $db The database connection to release.
+	 * @param IDatabase $db The database connection to release.
 	 */
-	protected function releaseConnection( DatabaseBase $db ) {
+	protected function releaseConnection( IDatabase $db ) {
 		if ( $this->wiki !== false ) {
 			$loadBalancer = $this->getLoadBalancer();
 			$loadBalancer->reuseConnection( $db );

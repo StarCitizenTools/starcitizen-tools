@@ -2,11 +2,11 @@
  * TranslationStash front-end logic.
  *
  * @author Santhosh Thottingal
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @since 2013.10
  */
 
-( function ( $, mw ) {
+( function () {
 	'use strict';
 
 	var userTranslations = {},
@@ -22,7 +22,6 @@
 			action: 'query',
 			list: 'messagecollection',
 			mcgroup: messageGroup,
-			format: 'json',
 			mclanguage: language,
 			mcoffset: offset,
 			mclimit: limit,
@@ -77,7 +76,7 @@
 								dir: targetLanguageDir
 							} )
 							.text( message.translation || '' )
-						),
+					),
 				$( '<div>' )
 					.addClass( 'two columns tux-list-status text-center' )
 					.append(
@@ -201,18 +200,19 @@
 			} );
 	}
 
-	$( 'document' ).ready( function () {
+	$( function () {
 		var $messageTable = $( '.tux-messagelist' ),
 			$ulsTrigger = $( '.ext-translate-language-selector > .uls' );
 
 		// Some links in helpers will navigate away by default. But since the messages
 		// will change on this page on every load, we want to avoid that. Force the
 		// links to open on new window/tab.
-		mw.translateHooks.add( 'showTranslationHelpers', function ( helpers, $editor ) {
+		mw.hook( 'mw.translate.editor.showTranslationHelpers' ).add( function ( helpers, $editor ) {
 			$editor.find( 'a' ).prop( 'target', '_blank' );
 		} );
 
 		$ulsTrigger.uls( {
+			ulsPurpose: 'translate-special-translationstash',
 			onSelect: function ( language ) {
 				var direction = $.uls.data.getDir( language ),
 					autonym = $.uls.data.getAutonym( language );
@@ -247,4 +247,4 @@
 				loadMessages();
 			} );
 	} );
-}( jQuery, mediaWiki ) );
+}() );

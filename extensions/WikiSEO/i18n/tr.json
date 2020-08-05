@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"BaRaN6161 TURK"
+		]
+	},
+	"wiki-seo-desc": "Anahtar kelimeler ve açıklama gibi sayfa başına meta ayarlarına izin verir, başlığı ve çeşitli site doğrulama etiketlerini değiştirir.",
+	"wiki-seo-empty-attr-tag": "Hata: &lt;seo&gt; etiketi en az bir boş olmayan özellik içermelidir.",
+	"wiki-seo-empty-attr-parser": "Hata: <nowiki>{{#seo:}}</nowiki> en az bir boş olmayan öznitelik içermelidir.",
+	"wiki-seo-invalid-generator": "Hata: $1 geçerli bir meta veri üreticisi değil.",
+	"wiki-seo-missing-page-title": "Hata: verilen sayfa başlığı geçersiz."
+}

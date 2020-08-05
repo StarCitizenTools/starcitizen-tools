@@ -22,7 +22,7 @@
  * MalformedTitleException is thrown when a TitleParser is unable to parse a title string.
  * @since 1.23
  */
-class MalformedTitleException extends Exception {
+class MalformedTitleException extends Exception implements ILocalizedException {
 	private $titleText = null;
 	private $errorMessage = null;
 	private $errorMessageParameters = [];
@@ -34,7 +34,7 @@ class MalformedTitleException extends Exception {
 	 * $titleText will be appended if it's not null. (since MW 1.26)
 	 */
 	public function __construct(
-		$errorMessage = null, $titleText = null, $errorMessageParameters = []
+		$errorMessage, $titleText = null, $errorMessageParameters = []
 	) {
 		$this->errorMessage = $errorMessage;
 		$this->titleText = $titleText;
@@ -59,7 +59,7 @@ class MalformedTitleException extends Exception {
 
 	/**
 	 * @since 1.26
-	 * @return string|null
+	 * @return string
 	 */
 	public function getErrorMessage() {
 		return $this->errorMessage;
@@ -71,5 +71,13 @@ class MalformedTitleException extends Exception {
 	 */
 	public function getErrorMessageParameters() {
 		return $this->errorMessageParameters;
+	}
+
+	/**
+	 * @since 1.29
+	 * @return Message
+	 */
+	public function getMessageObject() {
+		return wfMessage( $this->getErrorMessage(), $this->getErrorMessageParameters() );
 	}
 }

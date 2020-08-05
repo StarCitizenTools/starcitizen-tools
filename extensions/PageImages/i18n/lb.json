@@ -5,5 +5,7 @@
 		]
 	},
 	"pageimages-desc": "Sammelt Informatiounen iwwer Biller déi op der Säit benotzt ginn",
-	"apihelp-query+pageimages-param-thumbsize": "Maximal Dimensioune fir Miniatur-Biller."
+	"apihelp-query+pageimages-param-thumbsize": "Maximal Breet a Pixel fir Miniatur-Biller.",
+	"apihelp-query+pageimages-paramvalue-license-free": "nëmme fräi Biller",
+	"apihelp-query+pageimages-paramvalue-license-any": "bescht Bild, egal ob fräi oder net."
 }

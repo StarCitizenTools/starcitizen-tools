@@ -21,12 +21,16 @@ class EchoNotificationJob extends Job {
 		return true;
 	}
 
-	// back compat detects masterPos from prior job params
+	/**
+	 * back compat detects masterPos from prior job params
+	 *
+	 * @return array
+	 */
 	function getMasterPosition() {
-		$masterPos = array(
+		$masterPos = [
 			'wikiDb' => false,
 			'echoDb' => false,
-		);
+		];
 		if ( !empty( $this->params['mainDbMasterPos'] ) ) {
 			$masterPos['wikiDb'] = $this->params['mainDbMasterPos'];
 		}

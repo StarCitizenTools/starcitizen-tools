@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Benel",
+			"Bunukwiki"
+		]
+	},
+	"babel": "Babel misaungayay a cesyun",
+	"babel-desc": "nipabeli <code>#babel</code> mapulita taneng malunuk masanga’ cacay tanengay pisaungay pakuniza misanga’ taazihan mitudungaya misaungayay kamu cesyun a langat",
+	"babel-url": "Project:Babel",
+	"babel-footer-url": ":Category:Babel - misaungayay (ahizan tu kamu)",
+	"babel-autocreate-reason": "lunuk patizeng [[$1|Babel]] kakuniza kasabelih.",
+	"babel-autocreate-text-levels": "i tina kakuniza a misaungayay dayhiw kya izaway kasaselel $1 a $2 kamu a icel.",
+	"babel-autocreate-text-main": "ilabu tina kakuniza a misaungayay dayhiw niza a kamu $1 matinengay a kasaselal.",
+	"babel-0": "tina misaungayay [[$1|caay]] matineng saca caay katinengen [[$2|$3]] (saca izaw ku kakaliyuhan matineng).",
+	"babel-1": "tina misaungayay matineng [[$1|angangan]] da’su a [[$2|$3]].",
+	"babel-2": "tina misaungayay matineng [[$1|teban]] da’su a [[$2|$3]].",
+	"babel-3": "tina misaungayay matineng [[$1|tapabaw]] da’su a [[$2|$3]].",
+	"babel-4": "tina misaungayay matineng [[$1|micapi kamu-nina]] da’su a [[$2|$3]].",
+	"babel-5": "tina misaungayay matineng [[$1|mitesekay]] da’su a [[$2|$3]]",
+	"babel-N": "tina misaungayay matineng [[$1|kamu nina]] da’su a [[$2|$3]].",
+	"babel-0-n": "tina misaungayay [[$1|caay]] matineng saca kaliyuhan matineng [[$2|Taywan Hulam a kamu]] (saca izaw ku cacay a kaliyuhan matineng).",
+	"babel-1-n": "tina misaungayay matineng [[$1|tapabaway a cakat]] da’su a [[$2|kamu nu Sakizaya]].",
+	"babel-2-n": "tina misaungayay matineng [[$1|teban a cakat]] da’su a [[$2|kamu nu Sakizya]].",
+	"babel-3-n": "tina misaungayay matineng [[$1| tapabaway a cakat ]] da’su a [[$2|kamu nu Sakizaya]].",
+	"babel-4-n": "tina misaungayay matineng [[$1|micapi tu kamu nu ina]] tanusukay [[$2|kamu nu Sakizaya]]",
+	"babel-5-n": "tina misaungayay matineng [[$1|mitesekay]] da’su a [[$2|kamu nu Sakizaya]].",
+	"babel-N-n": "tina misaungayay matineng[[$1|kamu-nina]] da’su a [[$2|kamu nu Sakizaya]].",
+	"babel-footer": "misaungayay (ahizan tu kamu)",
+	"apihelp-query+babel-description": "maala mahizaay misaungayay  matineng canan a kamu cesyun",
+	"apihelp-query+babel-param-user": "amiala mahizaay cesyun a misaungayay",
+	"apihelp-query+babel-example-1": "mialaan tu misaungayay <kbd>Example</kbd> a Babel cesyun"
+}

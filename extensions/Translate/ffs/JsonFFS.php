@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -17,25 +17,33 @@
  */
 class JsonFFS extends SimpleFFS {
 	/**
-	 * @param $data
+	 * @param string $data
 	 * @return bool
 	 */
 	public static function isValid( $data ) {
 		return is_array( FormatJson::decode( $data, /*as array*/true ) );
 	}
 
+	/**
+	 * @param FileBasedMessageGroup $group
+	 */
+	public function __construct( FileBasedMessageGroup $group ) {
+		parent::__construct( $group );
+		$this->flattener = $this->getFlattener();
+	}
+
 	public function getFileExtensions() {
-		return array( '.json' );
+		return [ '.json' ];
 	}
 
 	/**
-	 * @param array $data
+	 * @param string $data
 	 * @return array Parsed data.
 	 */
 	public function readFromVariable( $data ) {
-		$messages = (array) FormatJson::decode( $data, /*as array*/true );
-		$authors = array();
-		$metadata = array();
+		$messages = (array)FormatJson::decode( $data, /*as array*/true );
+		$authors = [];
+		$metadata = [];
 
 		if ( isset( $messages['@metadata']['authors'] ) ) {
 			$authors = (array)$messages['@metadata']['authors'];
@@ -48,18 +56,17 @@ class JsonFFS extends SimpleFFS {
 
 		unset( $messages['@metadata'] );
 
-		if ( isset( $this->extra['nestingSeparator'] ) ) {
-			 $flattener = new ArrayFlattener( $this->extra['nestingSeparator'] );
-			 $messages = $flattener->flatten( $messages );
+		if ( $this->flattener ) {
+			$messages = $this->flattener->flatten( $messages );
 		}
 
 		$messages = $this->group->getMangler()->mangle( $messages );
 
-		return array(
+		return [
 			'MESSAGES' => $messages,
 			'AUTHORS' => $authors,
 			'METADATA' => $metadata,
-		);
+		];
 	}
 
 	/**
@@ -67,10 +74,10 @@ class JsonFFS extends SimpleFFS {
 	 * @return string
 	 */
 	protected function writeReal( MessageCollection $collection ) {
-		$messages = array();
+		$messages = [];
 		$template = $this->read( $collection->getLanguage() );
 
-		$messages['@metadata'] = array();
+		$messages['@metadata'] = [];
 		if ( isset( $template['METADATA'] ) ) {
 			$messages['@metadata'] = $template['METADATA'];
 		}
@@ -82,7 +89,7 @@ class JsonFFS extends SimpleFFS {
 			$authors = array_unique( array_merge( $template['AUTHORS'], $authors ) );
 		}
 
-		if ( $authors !== array() ) {
+		if ( $authors !== [] ) {
 			$messages['@metadata']['authors'] = array_values( $authors );
 		}
 
@@ -110,30 +117,58 @@ class JsonFFS extends SimpleFFS {
 			return '';
 		}
 
-		if ( isset( $this->extra['nestingSeparator'] ) ) {
-			 $flattener = new ArrayFlattener( $this->extra['nestingSeparator'] );
-			 $messages = $flattener->unflatten( $messages );
+		if ( $this->flattener ) {
+			$messages = $this->flattener->unflatten( $messages );
+		}
+
+		if ( isset( $this->extra['includeMetadata'] ) && !$this->extra['includeMetadata'] ) {
+			unset( $messages['@metadata'] );
 		}
 
 		return FormatJson::encode( $messages, "\t", FormatJson::ALL_OK ) . "\n";
 	}
 
+	protected function getFlattener() {
+		if ( !isset( $this->extra['nestingSeparator'] ) ) {
+			return null;
+		}
+
+		$parseCLDRPlurals = $this->extra['parseCLDRPlurals'] ?? false;
+		$flattener = new ArrayFlattener( $this->extra['nestingSeparator'], $parseCLDRPlurals );
+
+		return $flattener;
+	}
+
+	public function isContentEqual( $a, $b ) {
+		if ( $this->flattener ) {
+			return $this->flattener->compareContent( $a, $b );
+		} else {
+			return parent::isContentEqual( $a, $b );
+		}
+	}
+
 	public static function getExtraSchema() {
-		$schema = array(
-			'root' => array(
+		$schema = [
+			'root' => [
 				'_type' => 'array',
-				'_children' => array(
-					'FILES' => array(
+				'_children' => [
+					'FILES' => [
 						'_type' => 'array',
-						'_children' => array(
-							'nestingSeparator' => array(
+						'_children' => [
+							'nestingSeparator' => [
 								'_type' => 'text',
-							),
-						)
-					)
-				)
-			)
-		);
+							],
+							'parseCLDRPlurals' => [
+								'_type' => 'boolean',
+							],
+							'includeMetadata' => [
+								'_type' => 'boolean',
+							]
+						]
+					]
+				]
+			]
+		];
 
 		return $schema;
 	}

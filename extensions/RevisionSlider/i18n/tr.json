@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Alpkant",
+			"Incelemeelemani",
+			"1917 Ekim Devrimi",
+			"Vito Genovese"
+		]
+	},
+	"revisionslider": "SürümKaydırıcı",
+	"revisionslider-preference-disable": "RevisionSlider gösterme",
+	"revisionslider-desc": "Sürüm farkı karşılaştırmasını bir kaydırıcı seçimi ile yapmanıza izin verir ve gösterir",
+	"revisionslider-toggle-label": "Geçmişine gözat",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|bayt|bayt}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|bayt|bayt}}",
+	"revisionslider-label-date": "Tarih",
+	"revisionslider-label-page-size": "Sayfa boyutu",
+	"revisionslider-label-change-size": "Boyut değişikliği",
+	"revisionslider-label-comment": "Açıklama",
+	"revisionslider-label-username": "{{GENDER:$1|Kullanıcı adı}}",
+	"revisionslider-minoredit": "Bu küçük bir değişiklik",
+	"revisionslider-loading-failed": "Sürüm kaydırıcı yüklenemedi.",
+	"revisionslider-toggle-title-expand": "Sürüm kaydırıcıyı aç",
+	"revisionslider-toggle-title-collapse": "Revizyon kaydırıcısını daralt",
+	"revisionslider-turn-on-auto-expand-title": "Her zaman sürüm kaydırıcısını genişlet",
+	"revisionslider-turn-off-auto-expand-title": "Sürüm kaydırıcı otomatik olarak genişlemesin",
+	"revisionslider-arrow-tooltip-newer": "Yeni sürümleri gör",
+	"revisionslider-arrow-tooltip-older": "Eski sürümleri gör",
+	"revisionslider-show-help-tooltip": "Yardım metnini göster",
+	"revisionslider-help-dialog-slide1": "Sürüm kaydırıcısı size sürümler arasındaki farkların karşılaştırmasında yardımcı olur. Bu araç Almanca konuşan topluluğun teknik isteğine [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider dayanmaktadır]. Görüşleriniz ise [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider burada] değerlendirilmektedir.",
+	"revisionslider-help-dialog-slide2": "Her bar çubuğu sayfadaki bir sürümü işaret eder. Alanın ortasından geçen çizginin üzerindeki barlar büyümeyi, altındaki barlar ise azalmayı göstermektedir. Sürüm 1 eklenmeyi temsil ederken, sürüm 2 içerikten yapılan çıkarmaları gösterir.",
+	"revisionslider-help-dialog-slide4": "Sürüm geçmişinde hareket etmek için önceki ve sonraki oklarını kullanarak daha eski ve yeni sürümleri görebilirsiniz.",
+	"revisionslider-tutorial": "Revizyon kaydırıcı öğretici",
+	"revisionslider-previous-dialog": "Önceki",
+	"revisionslider-next-dialog": "Sonraki",
+	"revisionslider-close-dialog": "Kapat"
+}

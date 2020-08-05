@@ -3,14 +3,12 @@
 		"authors": [
 			"Rachmat.Wahidi",
 			"Ayie7791",
-			"Si Gam Acèh"
+			"Si Gam Acèh",
+			"Rachmat04"
 		]
 	},
 	"translate": "Teujeumah",
 	"translate-desc": "[[Special:Translate|Laman kusuih]] keu neuteujeumah MediaWiki ngön nyang la'én",
-	"translate-taskui-view": "Peudeuh ban dum peusan",
-	"translate-taskui-untranslated": "Peudeuh peusan nyang gohlom meuteujeumah",
-	"translate-taskui-reviewall": "Kalön ban dum teujeumah",
 	"translate-taction-translate": "Teujeumah",
 	"translate-taction-proofread": "Kalön",
 	"translate-taction-lstats": "Keunira bahsa",
@@ -33,16 +31,15 @@
 	"translate-next": "Laman u keue",
 	"translate-prev": "Laman u likôt",
 	"translate-page-description-legend": "Hareutoe bhah kawan nyoe",
-	"translate-page-edit": "andam",
-	"translate-ext-url": "<hr />Alamat wèb: $1",
+	"translate-page-edit": "peusaneut",
 	"translate-optional": "(teunamah)",
 	"translate-ignored": "(hana peuhiröe)",
-	"translate-edit-title": "Andam \"$1\"",
+	"translate-edit-title": "Peusaneut \"$1\"",
 	"translate-edit-definition": "Hareutoe peusan",
 	"translate-edit-translation": "Teujeumah",
 	"translate-edit-contribute": "beuneuri",
 	"translate-edit-information": "Hareutoe bhah peusan ($1)",
 	"translate-edit-in-other-languages": "Peusan bak bahsa la'én",
-	"translate-edit-committed": "Teujeumah lam peukakah leumiek jinoe",
+	"translate-manage-import-new": "Peusan barô $1",
 	"translate-documentation-language": "Dokumentasi peusan"
 }

@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rail"
+		]
+	},
+	"wiki-seo-desc": "Pozwala na konfigurację meta-ustawień takich jak słowa kluczowe, opisy, zmiany tytułu i inne tagi weryfikacji na stronach.",
+	"wiki-seo-empty-attr-tag": "Błąd: tag &lt;seo&gt; musi zawierać przynajmniej jeden niepusty atrybut.",
+	"wiki-seo-empty-attr-parser": "Błąd: <nowiki>{{#seo:}}</nowiki> musi zawierać przynajmniej jeden niepusty atrybut.",
+	"wiki-seo-invalid-generator": "Błąd: $1 nie jest poprawnym generatorem metadanych.",
+	"wiki-seo-missing-page-title": "Błąd: Podany tytuł strony jest nieprawidłowy."
+}

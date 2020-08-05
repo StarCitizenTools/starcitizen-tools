@@ -19,6 +19,8 @@
  * @ingroup RevisionDelete
  */
 
+use Wikimedia\Rdbms\IDatabase;
+
 /**
  * List for filearchive table items
  */
@@ -38,15 +40,17 @@ class RevDelArchivedFileList extends RevDelFileList {
 	public function doQuery( $db ) {
 		$ids = array_map( 'intval', $this->ids );
 
+		$fileQuery = ArchivedFile::getQueryInfo();
 		return $db->select(
-			'filearchive',
-			ArchivedFile::selectFields(),
+			$fileQuery['tables'],
+			$fileQuery['fields'],
 			[
 				'fa_name' => $this->title->getDBkey(),
 				'fa_id' => $ids
 			],
 			__METHOD__,
-			[ 'ORDER BY' => 'fa_id DESC' ]
+			[ 'ORDER BY' => 'fa_id DESC' ],
+			$fileQuery['joins']
 		);
 	}
 

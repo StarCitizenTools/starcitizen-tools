@@ -1,0 +1,40 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16",
+			"Matteocng",
+			"Macofe",
+			"Ferdi2005",
+			"Valepert",
+			"Nastoshka"
+		]
+	},
+	"revisionslider": "Cursore delle versioni",
+	"revisionslider-preference-disable": "Non mostrare il RevisionSlider",
+	"revisionslider-desc": "Mostra un cursore che permette la selezione e il confronto tra le versioni di una pagina delle differenze",
+	"revisionslider-toggle-label": "Naviga nella cronologia",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte}}",
+	"revisionslider-label-date": "Data",
+	"revisionslider-label-page-size": "Dimensioni pagina",
+	"revisionslider-label-change-size": "Dimensione modifica",
+	"revisionslider-label-comment": "Commento",
+	"revisionslider-label-username": "{{GENDER:$1|Nome utente}}",
+	"revisionslider-minoredit": "Questa è una modifica minore",
+	"revisionslider-loading-failed": "Errore durante il caricamento di Revision Slider.",
+	"revisionslider-toggle-title-expand": "Apri RevisionSlider",
+	"revisionslider-toggle-title-collapse": "Nascondi cursore delle versioni",
+	"revisionslider-turn-on-auto-expand-title": "Mostra sempre il cursore delle versioni",
+	"revisionslider-turn-off-auto-expand-title": "Non mostrare automaticamente il cursore delle versioni",
+	"revisionslider-arrow-tooltip-newer": "Vedi le versioni più recenti",
+	"revisionslider-arrow-tooltip-older": "Vedi le versioni meno recenti",
+	"revisionslider-show-help-tooltip": "Mostra testo di aiuto",
+	"revisionslider-help-dialog-slide1": "Revision Slider ti consente di navigare e confrontare diverse versioni di una pagina (diff). È stata creata per realizzare una [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider proposta] espressa dalla comunità germanofona tra le richieste tecniche della comunità. Ogni commento sarà il benvenuto su [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider questa pagina].",
+	"revisionslider-help-dialog-slide2": "Ogni barra rappresenta una diversa versione della pagina. Le barre che sporgono verso l'alto mostrano un aumento della grandezza della pagina, le barre verso il basso, invece, una riduzione. Nell'immagine, la modifica 1 rappresenta un aggiunta di contenuti, mentre la modifica 2 una rimozione di contenuti.",
+	"revisionslider-help-dialog-slide3a": "<p>Per confrontare determinate modifiche ad una pagina seleziona le versioni usando i bottoni giallo e blu.</p><p>Il bottone blu indica la più recente delle modifiche da controllare, quello giallo la più vecchia.</p><p> Sposta i bottoni trascinandoli o cliccando su una barra.</p>",
+	"revisionslider-help-dialog-slide4": "Usa le frecce avanti e indietro per muoverti tra la cronologia e mostrare versioni più vecchie o più recenti.",
+	"revisionslider-tutorial": "Tutorial del Revision Slider",
+	"revisionslider-previous-dialog": "Precedente",
+	"revisionslider-next-dialog": "Successivo",
+	"revisionslider-close-dialog": "Chiudi"
+}

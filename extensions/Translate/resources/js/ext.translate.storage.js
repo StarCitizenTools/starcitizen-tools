@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	'use strict';
 
 	/**
@@ -24,8 +24,7 @@
 		save: function ( title, translation, editSummary ) {
 			var api = new mw.Api();
 
-			// Change to csrf when support for MW 1.25 is dropped
-			return api.postWithToken( 'edit', {
+			return api.postWithToken( 'csrf', {
 				action: 'edit',
 				title: title,
 				text: translation,
@@ -40,4 +39,4 @@
 
 	mw.translate = mw.translate || {};
 	mw.translate.TranslationApiStorage = TranslationApiStorage;
-}( mediaWiki ) );
+}() );

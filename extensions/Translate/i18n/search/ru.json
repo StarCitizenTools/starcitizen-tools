@@ -4,17 +4,21 @@
 			"Kaganer",
 			"Lockal",
 			"Okras",
-			"Translatobecomer"
+			"Translatobecomer",
+			"Mailman",
+			"Ole Yves",
+			"Stjn",
+			"Vlad5250"
 		]
 	},
 	"searchtranslations": "Поиск переводов",
 	"tux-sst-edit": "Редактировать перевод",
+	"tux-sst-view-foreign": "Смотреть в $1",
 	"tux-sst-search": "Найти",
 	"tux-sst-search-ph": "Поиск переводов",
 	"tux-sst-count": "{{PLURAL:$1|Найден $1 результат|Найдены $1 результата|Найдено $1 результатов}}",
 	"tux-sst-facet-language": "Языки",
 	"tux-sst-facet-group": "Группы сообщений",
-	"tux-sst-facet-orphan": "(сирота)",
 	"tux-sst-nosolr-title": "Поиск недоступен",
 	"tux-sst-nosolr-body": "В этой вики отсутствует сервис поиска переводов.",
 	"tux-sst-solr-offline-title": "Поиск недоступен",
@@ -22,7 +26,14 @@
 	"tux-sst-next": "Далее ›",
 	"tux-sst-prev": "‹ Назад",
 	"tux-sst-default": "Переводы",
+	"tux-sst-translated": "Переводы с $1",
+	"tux-sst-untranslated": "Нет переводов с $1",
+	"tux-sst-outdated": "Устаревшие переводы с $1",
 	"tux-sst-ellipsis-untranslated": "Нет перевода",
 	"tux-sst-ellipsis-outdated": "Устаревшие переводы",
-	"tux-sst-case-sensitive": "с учётом регистра"
+	"tux-sst-link-all-match": "Считать обязательными все поисковые слова.",
+	"tux-sst-match-message": "Показаны переводы, которые соответствуют любому из поисковых слов. $1",
+	"tux-sst-case-sensitive": "с учётом регистра",
+	"tux-sst-error-offset": "Больше невозможно показать результаты. Пожалуйста, уточните поиск.",
+	"tux-sst-error-language": "Этот язык не может использоваться для такого типа поиска."
 }

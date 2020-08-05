@@ -47,16 +47,16 @@ class RootPostLoader {
 		$rootId = $this->treeRepo->findRoot( $postId );
 		$found = $this->storage->findMulti(
 			'PostRevision',
-			array(
-				array( 'rev_type_id' => $postId ),
-				array( 'rev_type_id' => $rootId ),
-			),
-			array( 'sort' => 'rev_id', 'order' => 'DESC', 'limit' => 1 )
+			[
+				[ 'rev_type_id' => $postId ],
+				[ 'rev_type_id' => $rootId ],
+			],
+			[ 'sort' => 'rev_id', 'order' => 'DESC', 'limit' => 1 ]
 		);
-		$res = array(
+		$res = [
 			'post' => null,
 			'root' => null,
-		);
+		];
 		if ( !$found ) {
 			return $res;
 		}
@@ -65,7 +65,7 @@ class RootPostLoader {
 			$post = reset( $result );
 			if ( $postId->equals( $post->getPostId() ) ) {
 				$res['post'] = $post;
-			} elseif( $rootId->equals( $post->getPostId() ) ) {
+			} elseif ( $rootId->equals( $post->getPostId() ) ) {
 				$res['root'] = $post;
 			} else {
 				throw new InvalidDataException( 'Unmatched: ' . $post->getPostId()->getAlphadecimal() );
@@ -84,7 +84,7 @@ class RootPostLoader {
 	 * @throws InvalidDataException
 	 */
 	public function get( $topicId ) {
-		$result = $this->getMulti( array( $topicId ) );
+		$result = $this->getMulti( [ $topicId ] );
 		return reset( $result );
 	}
 
@@ -95,21 +95,21 @@ class RootPostLoader {
 	 */
 	public function getMulti( array $topicIds ) {
 		if ( !$topicIds ) {
-			return array();
+			return [];
 		}
 		// load posts for all located post ids
-		$allPostIds =  $this->fetchRelatedPostIds( $topicIds );
-		$queries = array();
+		$allPostIds = $this->fetchRelatedPostIds( $topicIds );
+		$queries = [];
 		foreach ( $allPostIds as $postId ) {
-			$queries[] = array( 'rev_type_id' => $postId );
+			$queries[] = [ 'rev_type_id' => $postId ];
 		}
-		$found = $this->storage->findMulti( 'PostRevision', $queries, array(
+		$found = $this->storage->findMulti( 'PostRevision', $queries, [
 			'sort' => 'rev_id',
 			'order' => 'DESC',
 			'limit' => 1,
-		) );
+		] );
 		/** @var PostRevision[] $posts */
-		$posts = $children = array();
+		$posts = $children = [];
 		foreach ( $found as $indexResult ) {
 			$post = reset( $indexResult ); // limit => 1 means only 1 result per query
 			if ( isset( $posts[$post->getPostId()->getAlphadecimal()] ) ) {
@@ -117,7 +117,7 @@ class RootPostLoader {
 			}
 			$posts[$post->getPostId()->getAlphadecimal()] = $post;
 		}
-		$prettyPostIds = array();
+		$prettyPostIds = [];
 		foreach ( $allPostIds as $id ) {
 			$prettyPostIds[] = $id->getAlphadecimal();
 		}
@@ -125,7 +125,7 @@ class RootPostLoader {
 		if ( $missing ) {
 			// convert string uuid's into UUID objects
 			/** @var UUID[] $missingUUID */
-			$missingUUID = array_map( array( 'Flow\Model\UUID', 'create' ), $missing );
+			$missingUUID = array_map( [ 'Flow\Model\UUID', 'create' ], $missing );
 
 			// we'll need to know parents to add stub post correctly in post hierarchy
 			$parents = $this->treeRepo->fetchParentMap( $missingUUID );
@@ -146,7 +146,7 @@ class RootPostLoader {
 				$post->setReplyToId( $parents[$postId->getAlphadecimal()] );
 				$posts[$postId->getAlphadecimal()] = $post;
 
-				wfWarn( 'Missing Posts: ' . FormatJson::encode( $missing ) );
+				wfDebugLog( 'Flow', __METHOD__ . ': Missing posts: ' . FormatJson::encode( $missing ) );
 			}
 		}
 		// another helper to catch bugs in dev
@@ -167,7 +167,7 @@ class RootPostLoader {
 		}
 
 		foreach ( $posts as $postId => $post ) {
-			$postChildren = array();
+			$postChildren = [];
 			$postDepth = 0;
 
 			// link parents to their children
@@ -191,7 +191,7 @@ class RootPostLoader {
 		// return only the requested posts, rest are available as children.
 		// Return in same order as requested
 		/** @var PostRevision[] $roots */
-		$roots = array();
+		$roots = [];
 		foreach ( $topicIds as $id ) {
 			$roots[$id->getAlphadecimal()] = $posts[$id->getAlphadecimal()];
 		}
@@ -215,13 +215,13 @@ class RootPostLoader {
 			// It should have returned at least $postIds
 			// TODO: log errors?
 			$res = $postIds;
-		} elseif( count( $nodeList ) === 1 ) {
+		} elseif ( count( $nodeList ) === 1 ) {
 			$res = reset( $nodeList );
 		} else {
 			$res = call_user_func_array( 'array_merge', $nodeList );
 		}
 
-		$retval = array();
+		$retval = [];
 		foreach ( $res as $id ) {
 			$retval[$id->getAlphadecimal()] = $id;
 		}

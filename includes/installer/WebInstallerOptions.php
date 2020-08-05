@@ -25,6 +25,8 @@ class WebInstallerOptions extends WebInstallerPage {
 	 * @return string|null
 	 */
 	public function execute() {
+		global $wgLang;
+
 		if ( $this->getVar( '_SkipOptional' ) == 'skip' ) {
 			$this->submitSkins();
 			return 'skip';
@@ -107,7 +109,7 @@ class WebInstallerOptions extends WebInstallerPage {
 		$skins = $this->parent->findExtensions( 'skins' );
 		$skinHtml = $this->getFieldsetStart( 'config-skins' );
 
-		$skinNames = array_map( 'strtolower', $skins );
+		$skinNames = array_map( 'strtolower', array_keys( $skins ) );
 		$chosenSkinName = $this->getVar( 'wgDefaultSkin', $this->parent->getDefaultSkin( $skinNames ) );
 
 		if ( $skins ) {
@@ -118,12 +120,17 @@ class WebInstallerOptions extends WebInstallerPage {
 				'value' => $chosenSkinName,
 			] );
 
-			foreach ( $skins as $skin ) {
+			foreach ( $skins as $skin => $info ) {
+				if ( isset( $info['screenshots'] ) ) {
+					$screenshotText = $this->makeScreenshotsLink( $skin, $info['screenshots'] );
+				} else {
+					$screenshotText = htmlspecialchars( $skin );
+				}
 				$skinHtml .=
 					'<div class="config-skins-item">' .
 					$this->parent->getCheckBox( [
 						'var' => "skin-$skin",
-						'rawtext' => $skin,
+						'rawtext' => $screenshotText,
 						'value' => $this->getVar( "skin-$skin", true ), // all found skins enabled by default
 					] ) .
 					'<div class="config-skins-use-as-default">' . $radioButtons[strtolower( $skin )] . '</div>' .
@@ -140,20 +147,93 @@ class WebInstallerOptions extends WebInstallerPage {
 		$this->addHTML( $skinHtml );
 
 		$extensions = $this->parent->findExtensions();
+		$dependencyMap = [];
 
 		if ( $extensions ) {
 			$extHtml = $this->getFieldsetStart( 'config-extensions' );
 
-			foreach ( $extensions as $ext ) {
-				$extHtml .= $this->parent->getCheckBox( [
-					'var' => "ext-$ext",
-					'rawtext' => $ext,
-				] );
+			$extByType = [];
+			$types = SpecialVersion::getExtensionTypes();
+			// Sort by type first
+			foreach ( $extensions as $ext => $info ) {
+				if ( !isset( $info['type'] ) || !isset( $types[$info['type']] ) ) {
+					// We let extensions normally define custom types, but
+					// since we aren't loading extensions, we'll have to
+					// categorize them under other
+					$info['type'] = 'other';
+				}
+				$extByType[$info['type']][$ext] = $info;
+			}
+
+			foreach ( $types as $type => $message ) {
+				if ( !isset( $extByType[$type] ) ) {
+					continue;
+				}
+				$extHtml .= Html::element( 'h2', [], $message );
+				foreach ( $extByType[$type] as $ext => $info ) {
+					$urlText = '';
+					if ( isset( $info['url'] ) ) {
+						$urlText = ' ' . Html::element( 'a', [ 'href' => $info['url'] ], '(more information)' );
+					}
+					$attribs = [
+						'data-name' => $ext,
+						'class' => 'config-ext-input'
+					];
+					$labelAttribs = [];
+					$fullDepList = [];
+					if ( isset( $info['requires']['extensions'] ) ) {
+						$dependencyMap[$ext]['extensions'] = $info['requires']['extensions'];
+						$labelAttribs['class'] = 'mw-ext-with-dependencies';
+					}
+					if ( isset( $info['requires']['skins'] ) ) {
+						$dependencyMap[$ext]['skins'] = $info['requires']['skins'];
+						$labelAttribs['class'] = 'mw-ext-with-dependencies';
+					}
+					if ( isset( $dependencyMap[$ext] ) ) {
+						$links = [];
+						// For each dependency, link to the checkbox for each
+						// extension/skin that is required
+						if ( isset( $dependencyMap[$ext]['extensions'] ) ) {
+							foreach ( $dependencyMap[$ext]['extensions'] as $name ) {
+								$links[] = Html::element(
+									'a',
+									[ 'href' => "#config_ext-$name" ],
+									$name
+								);
+							}
+						}
+						if ( isset( $dependencyMap[$ext]['skins'] ) ) {
+							foreach ( $dependencyMap[$ext]['skins'] as $name ) {
+								$links[] = Html::element(
+									'a',
+									[ 'href' => "#config_skin-$name" ],
+									$name
+								);
+							}
+						}
+
+						$text = wfMessage( 'config-extensions-requires' )
+							->rawParams( $ext, $wgLang->commaList( $links ) )
+							->escaped();
+					} else {
+						$text = $ext;
+					}
+					$extHtml .= $this->parent->getCheckBox( [
+						'var' => "ext-$ext",
+						'rawtext' => $text,
+						'attribs' => $attribs,
+						'labelAttribs' => $labelAttribs,
+					] );
+				}
 			}
 
 			$extHtml .= $this->parent->getHelpBox( 'config-extensions-help' ) .
 				$this->getFieldsetEnd();
 			$this->addHTML( $extHtml );
+			// Push the dependency map to the client side
+			$this->addHTML( Html::inlineScript(
+				'var extDependencyMap = ' . Xml::encodeJsVar( $dependencyMap )
+			) );
 		}
 
 		// Having / in paths in Windows looks funny :)
@@ -244,6 +324,31 @@ class WebInstallerOptions extends WebInstallerPage {
 		$this->endForm();
 
 		return null;
+	}
+
+	private function makeScreenshotsLink( $name, $screenshots ) {
+		global $wgLang;
+		if ( count( $screenshots ) > 1 ) {
+			$links = [];
+			$counter = 1;
+			foreach ( $screenshots as $shot ) {
+				$links[] = Html::element(
+					'a',
+					[ 'href' => $shot, 'target' => '_blank' ],
+					$wgLang->formatNum( $counter++ )
+				);
+			}
+			return wfMessage( 'config-skins-screenshots' )
+				->rawParams( $name, $wgLang->commaList( $links ) )
+				->escaped();
+		} else {
+			$link = Html::element(
+				'a',
+				[ 'href' => $screenshots[0], 'target' => '_blank' ],
+				wfMessage( 'config-screenshot' )->text()
+			);
+			return wfMessage( 'config-skins-screenshot', $name )->rawParams( $link )->escaped();
+		}
 	}
 
 	/**
@@ -345,7 +450,7 @@ class WebInstallerOptions extends WebInstallerPage {
 	 * @return bool
 	 */
 	public function submitSkins() {
-		$skins = $this->parent->findExtensions( 'skins' );
+		$skins = array_keys( $this->parent->findExtensions( 'skins' ) );
 		$this->parent->setVar( '_Skins', $skins );
 
 		if ( $skins ) {
@@ -398,7 +503,7 @@ class WebInstallerOptions extends WebInstallerPage {
 			$this->setVar( 'wgRightsIcon', '' );
 		}
 
-		$skinsAvailable = $this->parent->findExtensions( 'skins' );
+		$skinsAvailable = array_keys( $this->parent->findExtensions( 'skins' ) );
 		$skinsToInstall = [];
 		foreach ( $skinsAvailable as $skin ) {
 			$this->parent->setVarsFromRequest( [ "skin-$skin" ] );
@@ -419,7 +524,7 @@ class WebInstallerOptions extends WebInstallerPage {
 			$retVal = false;
 		}
 
-		$extsAvailable = $this->parent->findExtensions();
+		$extsAvailable = array_keys( $this->parent->findExtensions() );
 		$extsToInstall = [];
 		foreach ( $extsAvailable as $ext ) {
 			$this->parent->setVarsFromRequest( [ "ext-$ext" ] );

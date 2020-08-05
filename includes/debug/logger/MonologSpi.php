@@ -22,7 +22,7 @@ namespace MediaWiki\Logger;
 
 use MediaWiki\Logger\Monolog\BufferHandler;
 use Monolog\Logger;
-use ObjectFactory;
+use Wikimedia\ObjectFactory;
 
 /**
  * LoggerFactory service provider that creates loggers implemented by
@@ -39,79 +39,78 @@ use ObjectFactory;
  * global configuration variable used by LoggerFactory to construct its
  * default SPI provider:
  * @code
- * $wgMWLoggerDefaultSpi = array(
- *   'class' => '\\MediaWiki\\Logger\\MonologSpi',
- *   'args' => array( array(
- *       'loggers' => array(
- *           '@default' => array(
- *               'processors' => array( 'wiki', 'psr', 'pid', 'uid', 'web' ),
- *               'handlers'   => array( 'stream' ),
- *           ),
- *           'runJobs' => array(
- *               'processors' => array( 'wiki', 'psr', 'pid' ),
- *               'handlers'   => array( 'stream' ),
- *           )
- *       ),
- *       'processors' => array(
- *           'wiki' => array(
- *               'class' => '\\MediaWiki\\Logger\\Monolog\\WikiProcessor',
- *           ),
- *           'psr' => array(
- *               'class' => '\\Monolog\\Processor\\PsrLogMessageProcessor',
- *           ),
- *           'pid' => array(
- *               'class' => '\\Monolog\\Processor\\ProcessIdProcessor',
- *           ),
- *           'uid' => array(
- *               'class' => '\\Monolog\\Processor\\UidProcessor',
- *           ),
- *           'web' => array(
- *               'class' => '\\Monolog\\Processor\\WebProcessor',
- *           ),
- *       ),
- *       'handlers' => array(
- *           'stream' => array(
- *               'class'     => '\\Monolog\\Handler\\StreamHandler',
- *               'args'      => array( 'path/to/your.log' ),
+ * $wgMWLoggerDefaultSpi = [
+ *   'class' => \MediaWiki\Logger\MonologSpi::class,
+ *   'args' => [ [
+ *       'loggers' => [
+ *           '@default' => [
+ *               'processors' => [ 'wiki', 'psr', 'pid', 'uid', 'web' ],
+ *               'handlers'   => [ 'stream' ],
+ *           ],
+ *           'runJobs' => [
+ *               'processors' => [ 'wiki', 'psr', 'pid' ],
+ *               'handlers'   => [ 'stream' ],
+ *           ]
+ *       ],
+ *       'processors' => [
+ *           'wiki' => [
+ *               'class' => \MediaWiki\Logger\Monolog\WikiProcessor::class,
+ *           ],
+ *           'psr' => [
+ *               'class' => \Monolog\Processor\PsrLogMessageProcessor::class,
+ *           ],
+ *           'pid' => [
+ *               'class' => \Monolog\Processor\ProcessIdProcessor::class,
+ *           ],
+ *           'uid' => [
+ *               'class' => \Monolog\Processor\UidProcessor::class,
+ *           ],
+ *           'web' => [
+ *               'class' => \Monolog\Processor\WebProcessor::class,
+ *           ],
+ *       ],
+ *       'handlers' => [
+ *           'stream' => [
+ *               'class'     => \Monolog\Handler\StreamHandler::class,
+ *               'args'      => [ 'path/to/your.log' ],
  *               'formatter' => 'line',
- *           ),
- *           'redis' => array(
- *               'class'     => '\\Monolog\\Handler\\RedisHandler',
- *               'args'      => array( function() {
+ *           ],
+ *           'redis' => [
+ *               'class'     => \Monolog\Handler\RedisHandler::class,
+ *               'args'      => [ function() {
  *                       $redis = new Redis();
  *                       $redis->connect( '127.0.0.1', 6379 );
  *                       return $redis;
  *                   },
  *                   'logstash'
- *               ),
+ *               ],
  *               'formatter' => 'logstash',
  *               'buffer' => true,
- *           ),
- *           'udp2log' => array(
- *               'class' => '\\MediaWiki\\Logger\\Monolog\\LegacyHandler',
- *               'args' => array(
+ *           ],
+ *           'udp2log' => [
+ *               'class' => \MediaWiki\Logger\Monolog\LegacyHandler::class,
+ *               'args' => [
  *                   'udp://127.0.0.1:8420/mediawiki
- *               ),
+ *               ],
  *               'formatter' => 'line',
- *           ),
- *       ),
- *       'formatters' => array(
- *           'line' => array(
- *               'class' => '\\Monolog\\Formatter\\LineFormatter',
- *            ),
- *            'logstash' => array(
- *                'class' => '\\Monolog\\Formatter\\LogstashFormatter',
- *                'args'  => array( 'mediawiki', php_uname( 'n' ), null, '', 1 ),
- *            ),
- *       ),
- *   ) ),
- * );
+ *           ],
+ *       ],
+ *       'formatters' => [
+ *           'line' => [
+ *               'class' => \Monolog\Formatter\LineFormatter::class,
+ *            ],
+ *            'logstash' => [
+ *                'class' => \Monolog\Formatter\LogstashFormatter::class,
+ *                'args'  => [ 'mediawiki', php_uname( 'n' ), null, '', 1 ],
+ *            ],
+ *       ],
+ *   ] ],
+ * ];
  * @endcode
  *
  * @see https://github.com/Seldaek/monolog
  * @since 1.25
- * @author Bryan Davis <bd808@wikimedia.org>
- * @copyright © 2014 Bryan Davis and Wikimedia Foundation.
+ * @copyright © 2014 Wikimedia Foundation and contributors
  */
 class MonologSpi implements Spi {
 

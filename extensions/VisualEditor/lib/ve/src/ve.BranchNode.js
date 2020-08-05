@@ -1,7 +1,7 @@
 /*!
  * VisualEditor BranchNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -26,28 +26,25 @@ ve.BranchNode = function VeBranchNode( children ) {
 
 OO.initClass( ve.BranchNode );
 
-/* Static Methods */
+/* Methods */
 
 /**
  * Traverse a branch node depth-first.
  *
- * @param {ve.BranchNode} node Branch node to traverse
  * @param {Function} callback Callback to execute for each traversed node
  * @param {ve.Node} callback.node Node being traversed
  */
-ve.BranchNode.static.traverse = function ( node, callback ) {
+ve.BranchNode.prototype.traverse = function ( callback ) {
 	var i, len,
-		children = node.getChildren();
+		children = this.getChildren();
 
 	for ( i = 0, len = children.length; i < len; i++ ) {
 		callback.call( this, children[ i ] );
-		if ( children[ i ] instanceof ve.ce.BranchNode ) {
-			this.traverse( children[ i ], callback );
+		if ( children[ i ].hasChildren() ) {
+			children[ i ].traverse( callback );
 		}
 	}
 };
-
-/* Methods */
 
 /**
  * Check if the node has children.
@@ -85,17 +82,34 @@ ve.BranchNode.prototype.indexOf = function ( node ) {
  *
  * @method
  * @see ve.Node#setRoot
- * @param {ve.Node} root Node to use as root
+ * @param {ve.Node|null} root Node to use as root
  */
 ve.BranchNode.prototype.setRoot = function ( root ) {
-	var i;
-	if ( root === this.root ) {
+	var i, len,
+		oldRoot = this.root;
+	if ( root === oldRoot ) {
 		// Nothing to do, don't recurse into all descendants
 		return;
 	}
+	if ( oldRoot ) {
+		// Null the root, then recurse into children, then emit unroot.
+		// That way, at emit time, all this node's ancestors and descendants have
+		// null root.
+		this.root = null;
+		for ( i = 0, len = this.children.length; i < len; i++ ) {
+			this.children[ i ].setRoot( null );
+		}
+		this.emit( 'unroot', oldRoot );
+	}
 	this.root = root;
-	for ( i = 0; i < this.children.length; i++ ) {
-		this.children[ i ].setRoot( root );
+	if ( root ) {
+		// We've set the new root, so recurse into children, then emit root.
+		// That way, at emit time, all this node's ancestors and descendants have
+		// the new root.
+		for ( i = 0, len = this.children.length; i < len; i++ ) {
+			this.children[ i ].setRoot( root );
+		}
+		this.emit( 'root', root );
 	}
 };
 
@@ -107,14 +121,31 @@ ve.BranchNode.prototype.setRoot = function ( root ) {
  * @param {ve.Document} doc Document this node is a part of
  */
 ve.BranchNode.prototype.setDocument = function ( doc ) {
-	var i;
+	var i, len,
+		oldDoc = this.doc;
 	if ( doc === this.doc ) {
 		// Nothing to do, don't recurse into all descendants
 		return;
 	}
+	if ( oldDoc ) {
+		// Null the doc, then recurse into children, then notify the doc.
+		// That way, at notify time, all this node's ancestors and descendants have
+		// null doc.
+		this.doc = null;
+		for ( i = 0, len = this.children.length; i < len; i++ ) {
+			this.children[ i ].setDocument( null );
+		}
+		oldDoc.nodeDetached( this );
+	}
 	this.doc = doc;
-	for ( i = 0; i < this.children.length; i++ ) {
-		this.children[ i ].setDocument( doc );
+	if ( doc ) {
+		// We've set the new doc, so recurse into children, then notify the doc.
+		// That way, at notify time, all this node's ancestors and descendants have
+		// the new doc.
+		for ( i = 0, len = this.children.length; i < len; i++ ) {
+			this.children[ i ].setDocument( doc );
+		}
+		doc.nodeAttached( this );
 	}
 };
 
@@ -141,13 +172,13 @@ ve.BranchNode.prototype.getNodeFromOffset = function ( offset, shallow ) {
 	while ( currentNode.children.length ) {
 		for ( i = 0, length = currentNode.children.length; i < length; i++ ) {
 			childNode = currentNode.children[ i ];
-			if ( childNode instanceof ve.ce.InternalListNode ) {
-				break;
-			}
 			if ( offset === nodeOffset ) {
 				// The requested offset is right before childNode, so it's not
 				// inside any of currentNode's children, but is inside currentNode
 				return currentNode;
+			}
+			if ( childNode instanceof ve.ce.InternalListNode ) {
+				break SIBLINGS;
 			}
 			nodeLength = childNode.getOuterLength();
 			if ( offset >= nodeOffset && offset < nodeOffset + nodeLength ) {

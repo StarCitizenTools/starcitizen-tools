@@ -7,26 +7,30 @@ class TuxMessageTable extends ContextSource {
 	public function __construct( IContextSource $context, MessageGroup $group, $language ) {
 		$this->setContext( $context );
 		$this->group = $group;
-		$this->language = $language;
+		if ( Language::isKnownLanguageTag( $language ) ) {
+			$this->language = $language;
+		} else {
+			$this->language = $context->getLanguage()->getCode();
+		}
 	}
 
 	public function fullTable() {
-		$modules = array( 'ext.translate.editor' );
-		Hooks::run( 'TranslateBeforeAddModules', array( &$modules ) );
+		$modules = [];
+		Hooks::run( 'TranslateBeforeAddModules', [ &$modules ] );
 		$this->getOutput()->addModules( $modules );
 
 		$sourceLang = Language::factory( $this->group->getSourceLanguage() );
 		$targetLang = Language::factory( $this->language );
 		$batchSize = 100;
 
-		$list = Html::element( 'div', array(
+		$list = Html::element( 'div', [
 			'class' => 'row tux-messagelist',
 			'data-grouptype' => get_class( $this->group ),
 			'data-sourcelangcode' => $sourceLang->getCode(),
 			'data-sourcelangdir' => $sourceLang->getDir(),
 			'data-targetlangcode' => $targetLang->getCode(),
 			'data-targetlangdir' => $targetLang->getDir(),
-		) );
+		] );
 
 		$groupId = htmlspecialchars( $this->group->getId() );
 		$msg = $this->msg( 'tux-messagetable-loading-messages' )

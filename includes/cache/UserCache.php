@@ -80,6 +80,7 @@ class UserCache {
 	 * @param string $caller The calling method
 	 */
 	public function doQuery( array $userIds, $options = [], $caller = '' ) {
+		global $wgActorTableSchemaMigrationStage;
 
 		$usersToCheck = [];
 		$usersToQuery = [];
@@ -100,22 +101,35 @@ class UserCache {
 
 		// Lookup basic info for users not yet loaded...
 		if ( count( $usersToQuery ) ) {
-			$dbr = wfGetDB( DB_SLAVE );
-			$table = [ 'user' ];
+			$dbr = wfGetDB( DB_REPLICA );
+			$tables = [ 'user' ];
 			$conds = [ 'user_id' => $usersToQuery ];
 			$fields = [ 'user_name', 'user_real_name', 'user_registration', 'user_id' ];
+			$joinConds = [];
+
+			if ( $wgActorTableSchemaMigrationStage > MIGRATION_OLD ) {
+				$tables[] = 'actor';
+				$fields[] = 'actor_id';
+				$joinConds['actor'] = [
+					$wgActorTableSchemaMigrationStage === MIGRATION_NEW ? 'JOIN' : 'LEFT JOIN',
+					[ 'actor_user = user_id' ]
+				];
+			}
 
 			$comment = __METHOD__;
 			if ( strval( $caller ) !== '' ) {
 				$comment .= "/$caller";
 			}
 
-			$res = $dbr->select( $table, $fields, $conds, $comment );
+			$res = $dbr->select( $tables, $fields, $conds, $comment, [], $joinConds );
 			foreach ( $res as $row ) { // load each user into cache
 				$userId = (int)$row->user_id;
 				$this->cache[$userId]['name'] = $row->user_name;
 				$this->cache[$userId]['real_name'] = $row->user_real_name;
 				$this->cache[$userId]['registration'] = $row->user_registration;
+				if ( $wgActorTableSchemaMigrationStage > MIGRATION_OLD ) {
+					$this->cache[$userId]['actor'] = $row->actor_id;
+				}
 				$usersToCheck[$userId] = $row->user_name;
 			}
 		}
@@ -132,7 +146,6 @@ class UserCache {
 			}
 		}
 		$lb->execute();
-
 	}
 
 	/**

@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Purodha"
+			"Purodha",
+			"Amire80"
 		]
 	},
 	"uls-desc": "Jit dä Metmaachere ongerscheidlejje Müjjeleschkeite, en Schprohch ußzewähle un Enschtällonge för Schprohche ze maache.",
@@ -54,18 +55,8 @@
 	"ext-uls-input-disable-notification-info-personal": "De besöndere Wärkzüsch för et Enjävve kam_mer zoh jeeder Zigg en de Enschtällonge för de Schprohch widder aanschallde.",
 	"ext-uls-input-disable-notification-info-interlanguage": "De besöndere Wärkzüsch för et Enjävve kam_mer zoh jeeder Zigg en dä Enschtällonge för de Schprohch nävve dä Leß met de Schprohche widder aanschallde.",
 	"ext-uls-language-settings-applying": "Em Jang&nbsp;…",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|Noch eine|Noch $1|Keine mih}}.",
+	"ext-uls-compact-link-count": "{{PLURAL:$1|Noch eine|Noch $1.}}",
 	"ext-uls-compact-link-info": "Alle Schprohche (Am Aanfang wat ald öff ußjesöhkt wood)",
-	"apihelp-languagesearch-description": "Söhk oh Nahme för Schprohche en jeede Schreff.",
-	"apihelp-languagesearch-param-search": "Noh wat söhke?",
-	"apihelp-languagesearch-param-typos": "De Aanzahl Tippfähler, di mer övverjonn welle.",
-	"apihelp-languagesearch-example-1": "Söhk noh „Te“.",
-	"apihelp-languagesearch-example-2": "Söhk noh „ഫി“.",
-	"apihelp-languagesearch-example-3": "Söhk noh „ഫി“ met einem Tipfähler.",
-	"apihelp-ulslocalization-description": "Donn de localization för der <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"Universal Language Selector\">ULS</i> en dä aanjejovve Schprohch holle.",
-	"apihelp-ulslocalization-param-language": "Et Schprohcheköözel.",
-	"apihelp-ulslocalization-example-1": "Donn de localization för de tamihlesche Schprohch holle",
-	"apihelp-ulslocalization-example-2": "Donn de localization för de Schprohch Hindi holle",
 	"prefs-languages": "Schprohche",
 	"ext-uls-compact-language-links-preference": "Nämm de kompakte Leß met Schprohche, di för Desch vun Bedüggdeneß sin"
 }

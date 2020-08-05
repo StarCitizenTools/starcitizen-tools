@@ -38,7 +38,7 @@ class SpecialUserLogout extends UnlistedSpecialPage {
 	function execute( $par ) {
 		/**
 		 * Some satellite ISPs use broken precaching schemes that log people out straight after
-		 * they're logged in (bug 17790). Luckily, there's a way to detect such requests.
+		 * they're logged in (T19790). Luckily, there's a way to detect such requests.
 		 */
 		if ( isset( $_SERVER['REQUEST_URI'] ) && strpos( $_SERVER['REQUEST_URI'], '&amp;' ) !== false ) {
 			wfDebug( "Special:UserLogout request {$_SERVER['REQUEST_URI']} looks suspicious, denying.\n" );
@@ -47,6 +47,28 @@ class SpecialUserLogout extends UnlistedSpecialPage {
 
 		$this->setHeaders();
 		$this->outputHeader();
+
+		$out = $this->getOutput();
+		$user = $this->getUser();
+		$request = $this->getRequest();
+
+		$logoutToken = $request->getVal( 'logoutToken' );
+		$urlParams = [
+			'logoutToken' => $user->getEditToken( 'logoutToken', $request )
+		] + $request->getValues();
+		unset( $urlParams['title'] );
+		$continueLink = $this->getFullTitle()->getFullUrl( $urlParams );
+
+		if ( $logoutToken === null ) {
+			$this->getOutput()->addWikiMsg( 'userlogout-continue', $continueLink );
+			return;
+		}
+		if ( !$this->getUser()->matchEditToken(
+			$logoutToken, 'logoutToken', $this->getRequest(), 24 * 60 * 60
+		) ) {
+			$this->getOutput()->addWikiMsg( 'userlogout-sessionerror', $continueLink );
+			return;
+		}
 
 		// Make sure it's possible to log out
 		$session = MediaWiki\Session\SessionManager::getGlobalSession();

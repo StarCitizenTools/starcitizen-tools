@@ -25,16 +25,15 @@ class OldChangesList extends ChangesList {
 	/**
 	 * Format a line using the old system (aka without any javascript).
 	 *
-	 * @param RecentChange $rc Passed by reference
+	 * @param RecentChange &$rc Passed by reference
 	 * @param bool $watched (default false)
 	 * @param int $linenumber (default null)
 	 *
 	 * @return string|bool
 	 */
 	public function recentChangesLine( &$rc, $watched = false, $linenumber = null ) {
-
 		$classes = $this->getHTMLClasses( $rc, $watched );
-		// use mw-line-even/mw-line-odd class only if linenumber is given (feature from bug 14468)
+		// use mw-line-even/mw-line-odd class only if linenumber is given (feature from T16468)
 		if ( $linenumber ) {
 			if ( $linenumber & 1 ) {
 				$classes[] = 'mw-line-odd';
@@ -50,14 +49,23 @@ class OldChangesList extends ChangesList {
 				$rc->mAttribs['rc_namespace'] . '-' . $rc->mAttribs['rc_title'] );
 		}
 
-		if ( !Hooks::run( 'OldChangesListRecentChangesLine', [ &$this, &$html, $rc, &$classes ] ) ) {
+		$attribs = $this->getDataAttributes( $rc );
+
+		// Avoid PHP 7.1 warning from passing $this by reference
+		$list = $this;
+		if ( !Hooks::run( 'OldChangesListRecentChangesLine',
+			[ &$list, &$html, $rc, &$classes, &$attribs ] )
+		) {
 			return false;
 		}
+		$attribs = wfArrayFilterByKey( $attribs, [ Sanitizer::class, 'isReservedDataAttribute' ] );
 
 		$dateheader = ''; // $html now contains only <li>...</li>, for hooks' convenience.
 		$this->insertDateHeader( $dateheader, $rc->mAttribs['rc_timestamp'] );
 
-		return "$dateheader<li class=\"" . implode( ' ', $classes ) . "\">" . $html . "</li>\n";
+		$attribs['class'] = implode( ' ', $classes );
+
+		return $dateheader . Html::rawElement( 'li', $attribs,  $html ) . "\n";
 	}
 
 	/**
@@ -74,7 +82,7 @@ class OldChangesList extends ChangesList {
 		if ( $rc->mAttribs['rc_log_type'] ) {
 			$logtitle = SpecialPage::getTitleFor( 'Log', $rc->mAttribs['rc_log_type'] );
 			$this->insertLog( $html, $logtitle, $rc->mAttribs['rc_log_type'] );
-			$flags = $this->recentChangesFlags( [ 'unpatrolled' =>$unpatrolled,
+			$flags = $this->recentChangesFlags( [ 'unpatrolled' => $unpatrolled,
 				'bot' => $rc->mAttribs['rc_bot'] ], '' );
 			if ( $flags !== '' ) {
 				$html .= ' ' . $flags;
@@ -132,6 +140,15 @@ class OldChangesList extends ChangesList {
 		# How many users watch this page
 		if ( $rc->numberofWatchingusers > 0 ) {
 			$html .= ' ' . $this->numberofWatchingusers( $rc->numberofWatchingusers );
+		}
+
+		$html = Html::rawElement( 'span', [
+			'class' => 'mw-changeslist-line-inner',
+			'data-target-page' => $rc->getTitle(), // Used for reliable determination of the affiliated page
+		], $html );
+		if ( is_callable( $this->changeLinePrefixer ) ) {
+			$prefix = call_user_func( $this->changeLinePrefixer, $rc, $this, false );
+			$html = Html::rawElement( 'span', [ 'class' => 'mw-changeslist-line-prefix' ], $prefix ) . $html;
 		}
 
 		return $html;

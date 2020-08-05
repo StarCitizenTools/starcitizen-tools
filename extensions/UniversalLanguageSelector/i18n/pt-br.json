@@ -5,15 +5,21 @@
 			"Luckas",
 			"Caio1478",
 			"Helder.wiki",
-			"Dianakc"
+			"Dianakc",
+			"Opraco",
+			"Felipe L. Ewald",
+			"Eduardo Addad de Oliveira",
+			"TheEduGobi"
 		]
 	},
 	"uls-desc": "Oferece ao usuário várias maneiras para selecionar um idioma e ajustar as configurações de idioma",
 	"uls-plang-title-languages": "Idiomas",
 	"ext-uls-select-language-settings-icon-tooltip": "Configurações de idioma",
 	"ext-uls-undo-language-tooltip-text": "Idioma foi mudado de $1",
+	"ext-uls-undo-language-tooltip-text-local": "Idioma alterado para este wiki. Verifique suas [[Special:GlobalPreferences|preferências globais]] para mudar de idioma para todas as wikis.",
 	"ext-uls-language-settings-preferences-link": "Mais configurações de idioma",
 	"uls-betafeature-label": "Links de idiomas compactados",
+	"uls-betafeature-desc": "Mostre uma versão mais curta da lista de idiomas, com apenas os idiomas que são mais relevantes para você.",
 	"ext-uls-display-settings-title": "Exibir configurações",
 	"ext-uls-display-settings-language-tab": "Idioma",
 	"ext-uls-display-settings-fonts-tab": "Fontes",
@@ -57,8 +63,9 @@
 	"ext-uls-input-disable-notification-info-personal": "Você pode habilitar as ferramentas de entrada de texto a qualquer momento a partir das configurações de idioma.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Você pode habilitar as ferramentas de entrada de texto a qualquer momento a partir das configurações de idioma próximo da lista de idiomas.",
 	"ext-uls-language-settings-applying": "Aplicando…",
-	"apihelp-languagesearch-param-search": "Pesquisar string.",
-	"apihelp-languagesearch-example-1": "Pesquisar por \"Te\"",
-	"apihelp-languagesearch-example-2": "Pesquisar por \"ഫി\"",
-	"apihelp-languagesearch-example-3": "Pesquisar por \"ഫി\", permitindo um erro ortográfico"
+	"ext-uls-compact-link-count": "Mais {{PLURAL:$1|um|$1}}",
+	"ext-uls-compact-link-info": "Todos os idiomas (seleção inicial de escolhas comuns por você e outros)",
+	"prefs-languages": "Idiomas",
+	"ext-uls-compact-language-links-preference": "Usar uma [[$1|lista de idiomas compactos]], com idiomas relevantes para você.",
+	"ext-uls-compact-no-results": "Esta página não está disponível no idioma que você pesquisou."
 }

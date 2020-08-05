@@ -3,7 +3,8 @@
 		"authors": [
 			"Nullzero",
 			"Octahedron80",
-			"Horus"
+			"Horus",
+			"Aefgh39622"
 		]
 	},
 	"scribunto-desc": "กรอบงานสำหรับฝังภาษาสคริปต์ลงในหน้าของมีเดียวิกิ",
@@ -15,7 +16,7 @@
 	"scribunto-doc-page-name": "Module:$1/doc",
 	"scribunto-doc-page-does-not-exist": "''เอกสารการใช้งานสำหรับมอดูลนี้อาจสร้างขึ้นที่ [[$1]]''",
 	"scribunto-doc-page-header": "'''นี่คือหน้าเอกสารการใช้งานสำหรับ [[$1]]'''",
-	"scribunto-console-intro": "* การส่งออกมอดูลมีให้ใช้ได้เป็นตัวแปร \"p\" รวมถึงการแก้ไขเพิ่มเติมที่ยังไม่บันทึก\n* ขึ้นต้นบรรทัดด้วย \"=\" เพื่อประเมินเป็นนิพจน์ หรือใช้ print()\n* ใช้ mw.log() ในรหัสของมอดูลเพื่อส่งข้อความไปยังคอนโซลนี้",
+	"scribunto-console-intro": "* การส่งออกมอดูลมีให้ใช้ได้เป็นตัวแปร \"p\" รวมถึงการแก้ไขเพิ่มเติมที่ยังไม่บันทึก\n* ขึ้นต้นบรรทัดด้วย \"=\" เพื่อประเมินเป็นนิพจน์ หรือใช้ print() ใช้ mw.logObject() สำหรับตาราง\n* ใช้ mw.log() และ mw.logObject() ในรหัสของมอดูลเพื่อส่งข้อความไปยังคอนโซลนี้",
 	"scribunto-console-title": "คอนโซลดีบั๊ก",
 	"scribunto-console-too-large": "ช่วงเวลาสื่อสารคอนโซลนี้มากเกินไป กรุณาล้างประวัติคอนโซลหรือลดขนาดของมอดูล",
 	"scribunto-console-current-src": "ตัวป้อนเข้าคอนโซล",
@@ -41,7 +42,6 @@
 	"scribunto-luastandalone-proc-error": "สคริปต์ลูอาผิดพลาด: ไม่สามารถสร้างกระบวนการ",
 	"scribunto-luastandalone-proc-error-msg": "สคริปต์ลูอาผิดพลาด: ไม่สามารถสร้างกระบวนการ: $2",
 	"scribunto-luastandalone-proc-error-proc-open": "สคริปต์ลูอาผิดพลาด: ไม่สามารถสร้างกระบวนการ: proc_open ไม่มีให้ใช้ ให้ตรวจสอบตัวชี้แนะการตั้งค่า \"disable_functions\" ของ PHP",
-	"scribunto-luastandalone-proc-error-safe-mode": "สคริปต์ลูอาผิดพลาด: ไม่สามารภสร้างกระบวนการ: ให้สังเกตว่าตัวชี้แนะการตั้งค่า \"safe_mode\" ที่เลิกใช้แล้วของ PHP กำลังเปิดใช้งาน",
 	"scribunto-luastandalone-decode-error": "สคริปต์ลูอาผิดพลาด: ความผิดพลาดภายใน: ไม่สามารถถอดรหัสข้อความ",
 	"scribunto-luastandalone-write-error": "สคริปต์ลูอาผิดพลาด: ความผิดพลาดภายใน: การเขียนไปยังไฟป์ผิดพลาด",
 	"scribunto-luastandalone-read-error": "สคริปต์ลูอาผิดพลาด: ความผิดพลาดภายใน: การอ่านมาจากไพป์ผิดพลาด",
@@ -63,5 +63,7 @@
 	"apihelp-scribunto-console-param-content": "เนื้อหาใหม่ของมอดูล",
 	"apihelp-scribunto-console-param-session": "โทเค็นช่วงเวลาสื่อสาร",
 	"apihelp-scribunto-console-param-question": "บรรทัดถัดไปที่จะประเมินเป็นสคริปต์",
-	"apihelp-scribunto-console-param-clear": "ตั้งค่าเพื่อล้างสถานะช่วงเวลาสื่อสารปัจจุบัน"
+	"apihelp-scribunto-console-param-clear": "ตั้งค่าเพื่อล้างสถานะช่วงเวลาสื่อสารปัจจุบัน",
+	"nstab-module": "มอดูล",
+	"tooltip-ca-nstab-module": "ดูหน้ามอดูล"
 }

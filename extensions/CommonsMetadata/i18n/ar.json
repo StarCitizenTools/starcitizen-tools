@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Abanima"
+		]
+	},
+	"commonsmetadata-desc": "ملفات بلا اسم مؤلف قابل للقراءة الآلية",
+	"commonsmetadata-trackingcategory-no-license": "ملفات بلا رخصة قابلة للقراءة الآلية",
+	"commonsmetadata-trackingcategory-no-license-desc": "هذا الملف لم يوضع له قالب ترخيص [{{MediaWiki:Commonsmetadata-doc-url}} قابل للقراءة الآلية]",
+	"commonsmetadata-trackingcategory-no-description": "ملفات بلا وصف قابل للقراءة الآلية",
+	"commonsmetadata-trackingcategory-no-description-desc": "هذا الملف لم يوضع له قالب معلومات [{{MediaWiki:Commonsmetadata-doc-url}} قابل للقراءة الآلية] أو أن حقل الوصف في القالب متروك فارغاً.",
+	"commonsmetadata-trackingcategory-no-author": "ملفات بلا اسم مؤلف قابل للقراءة الآلية",
+	"commonsmetadata-trackingcategory-no-author-desc": "هذا الملف لم يوضع له قالب معلومات [{{MediaWiki:Commonsmetadata-doc-url}} قابل للقراءة الآلية] أو أن حقل المؤلف في القالب متروك فارغاً.",
+	"commonsmetadata-trackingcategory-no-source": "ملفات بلا مصدر قابل للقراءة الآلية",
+	"commonsmetadata-trackingcategory-no-source-desc": "هذا الملف لم يوضع له قالب معلومات [{{MediaWiki:Commonsmetadata-doc-url}} قابل للقراءة الآلية] أو أن حقل المصدر في القالب متروك فارغاً.",
+	"commonsmetadata-trackingcategory-no-patent": "ملفات بلا براءة اختراع قابلة للقراءة الآلية",
+	"commonsmetadata-trackingcategory-no-patent-desc": "هذا الملف لم يوضع له قالب براءة اختراع [{{MediaWiki:Commonsmetadata-doc-url}} قابل للقراءة الآلية]."
+}

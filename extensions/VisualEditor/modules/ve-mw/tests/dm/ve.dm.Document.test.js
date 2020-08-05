@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Document tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -12,8 +12,7 @@ QUnit.module( 've.dm.Document (MW)', ve.test.utils.mwEnvironment );
 // FIXME runner copypasted from core, use data provider
 QUnit.test( 'getRelativeRange (mwBlockImage / mwInlineImage)', function ( assert ) {
 	var documentModel, i, j,
-		expectCount = 0,
-		store = new ve.dm.IndexValueStore(),
+		store = new ve.dm.HashValueStore(),
 		storeItems = [
 			ve.dm.mwExample.MWBlockImage.storeItems,
 			ve.dm.mwExample.MWInlineImage.storeItems
@@ -231,13 +230,12 @@ QUnit.test( 'getRelativeRange (mwBlockImage / mwInlineImage)', function ( assert
 
 	for ( i = 0; i < storeItems.length; i++ ) {
 		for ( j = 0; j < storeItems[ i ].length; j++ ) {
-			store.index( storeItems[ i ][ j ].value, storeItems[ i ][ j ].hash );
+			store.hash( storeItems[ i ][ j ].value, storeItems[ i ][ j ].hash );
 		}
 	}
 	for ( i = 0; i < tests.length; i++ ) {
 		documentModel = new ve.dm.Document( new ve.dm.ElementLinearData( store, tests[ i ].data ) );
 		for ( j = 0; j < tests[ i ].cases.length; j++ ) {
-			expectCount++;
 			assert.equalRange(
 				documentModel.getRelativeRange(
 					tests[ i ].cases[ j ].given,
@@ -252,5 +250,4 @@ QUnit.test( 'getRelativeRange (mwBlockImage / mwInlineImage)', function ( assert
 			);
 		}
 	}
-	QUnit.expect( expectCount );
 } );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Node class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -22,20 +22,32 @@ ve.Node = function VeNode() {
 
 /**
  * @event attach
- * @param {ve.Node} parent
+ * @param {ve.Node} New parent
  */
 
 /**
  * @event detach
- * @param {ve.Node} parent
+ * @param {ve.Node} Old parent
  */
 
 /**
+ * The node has a new root assigned.
+ *
+ * The root will be consistent with that set in descendants and ancestors, but other parts of the
+ * tree may be inconsistent.
+ *
  * @event root
+ * @param {ve.Node} New root
  */
 
 /**
+ * The node root has been set to null.
+ *
+ * The root will be consistent with that set in descendants and ancestors, but other parts of the
+ * tree may be inconsistent.
+ *
  * @event unroot
+ * @param {ve.Node} Old root
  */
 
 /* Abstract Methods */
@@ -124,6 +136,15 @@ ve.Node.prototype.canContainContent = null;
  * @return {boolean} Node is content
  */
 ve.Node.prototype.isContent = null;
+
+/**
+ * Check if the node is an internal node
+ *
+ * @method
+ * @abstract
+ * @return {boolean} Node is an internal node
+ */
+ve.Node.prototype.isInternal = null;
 
 /**
  * Check if the node has a wrapped element in the document data.
@@ -282,7 +303,7 @@ ve.Node.prototype.getType = function () {
  * Get a reference to the node's parent.
  *
  * @method
- * @return {ve.Node} Reference to the node's parent
+ * @return {ve.Node|null} Reference to the node's parent, null if detached
  */
 ve.Node.prototype.getParent = function () {
 	return this.parent;
@@ -292,7 +313,7 @@ ve.Node.prototype.getParent = function () {
  * Get the root node of the tree the node is currently attached to.
  *
  * @method
- * @return {ve.Node} Root node
+ * @return {ve.Node|null} Root node, null if detached
  */
 ve.Node.prototype.getRoot = function () {
 	return this.root;
@@ -304,18 +325,22 @@ ve.Node.prototype.getRoot = function () {
  * This method is overridden by nodes with children.
  *
  * @method
- * @param {ve.Node} root Node to use as root
+ * @param {ve.Node|null} root Node to use as root
  * @fires root
  * @fires unroot
  */
 ve.Node.prototype.setRoot = function ( root ) {
-	if ( root !== this.root ) {
-		this.root = root;
-		if ( this.getRoot() ) {
-			this.emit( 'root' );
-		} else {
-			this.emit( 'unroot' );
-		}
+	var oldRoot = this.root;
+	if ( root === oldRoot ) {
+		return;
+	}
+	if ( oldRoot ) {
+		this.root = null;
+		this.emit( 'unroot', oldRoot );
+	}
+	this.root = root;
+	if ( root ) {
+		this.emit( 'root', root );
 	}
 };
 
@@ -323,7 +348,7 @@ ve.Node.prototype.setRoot = function ( root ) {
  * Get the document the node is a part of.
  *
  * @method
- * @return {ve.Document} Document the node is a part of
+ * @return {ve.Document|null} Document the node is a part of, null if detached
  */
 ve.Node.prototype.getDocument = function () {
 	return this.doc;
@@ -335,10 +360,21 @@ ve.Node.prototype.getDocument = function () {
  * This method is overridden by nodes with children.
  *
  * @method
- * @param {ve.Document} doc Document this node is a part of
+ * @param {ve.Document|null} doc Document this node is a part of
  */
 ve.Node.prototype.setDocument = function ( doc ) {
+	var oldDoc = this.doc;
+	if ( doc === oldDoc ) {
+		return;
+	}
+	if ( oldDoc ) {
+		this.doc = null;
+		oldDoc.nodeDetached( this );
+	}
 	this.doc = doc;
+	if ( doc ) {
+		doc.nodeAttached( this );
+	}
 };
 
 /**
@@ -350,8 +386,8 @@ ve.Node.prototype.setDocument = function ( doc ) {
  */
 ve.Node.prototype.attach = function ( parent ) {
 	this.parent = parent;
-	this.setRoot( parent.getRoot() );
 	this.setDocument( parent.getDocument() );
+	this.setRoot( parent.getRoot() );
 	this.emit( 'attach', parent );
 };
 
@@ -400,4 +436,28 @@ ve.Node.prototype.findParent = function ( type ) {
 	return this.traverseUpstream( function ( node ) {
 		return !( node instanceof type );
 	} );
+};
+
+/**
+ * Get the offset path from the document node to this node
+ *
+ * @return {number[]|null} The offset path, or null if not attached to a DocumentNode
+ */
+ve.Node.prototype.getOffsetPath = function () {
+	var parent,
+		node = this,
+		path = [];
+
+	while ( true ) {
+		if ( node.type === 'document' ) {
+			// We reached the ve.dm.DocumentNode/ve.ce.DocumentNode that this node is attached to
+			return path;
+		}
+		parent = node.getParent();
+		if ( !parent ) {
+			return null;
+		}
+		path.unshift( parent.indexOf( node ) );
+		node = parent;
+	}
 };

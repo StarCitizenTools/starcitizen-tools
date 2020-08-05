@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -26,10 +26,12 @@ class DocumentationAid extends TranslationAid {
 
 		$info = TranslateUtils::getMessageContent( $page, $wgTranslateDocumentationLanguageCode, $ns );
 
-		return array(
+		return [
 			'language' => $wgContLang->getCode(),
 			'value' => $info,
-			'html' => $this->context->getOutput()->parse( $info ),
-		);
+			'html' => TranslateUtils::parseAsInterface(
+				$this->context->getOutput(), $info
+			),
+		];
 	}
 }

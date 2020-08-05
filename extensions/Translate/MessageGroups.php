@@ -6,8 +6,9 @@
  * @author Niklas Laxström
  * @author Siebrand Mazeland
  * @copyright Copyright © 2008-2013, Niklas Laxström, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
+use \MediaWiki\MediaWikiServices;
 
 /**
  * Factory class for accessing message groups individually by id or
@@ -21,43 +22,102 @@ class MessageGroups {
 	protected static $prioritycache;
 
 	/**
-	 * @var array|null
+	 * @var MessageGroup[]|null Map of (group ID => MessageGroup)
 	 */
 	protected $groups;
 
 	/**
-	 * @var BagOStuff|null
+	 * @var WANObjectCache|null
 	 */
 	protected $cache;
 
-	/// Initialises the list of groups
+	/**
+	 * Tracks the current cache verison. Update this when there are incompatible changes
+	 * with the last version of the cache to force a new key to be used. The older cache
+	 * will automatically expire and be cleared off.
+	 * @var int
+	 */
+	const CACHE_VERSION = 2;
+
+	/**
+	 * Initialises the list of groups
+	 */
 	protected function init() {
-		global $wgAutoloadClasses;
-
 		if ( is_array( $this->groups ) ) {
-			return;
+			return; // groups already initialized
 		}
 
-		$key = wfMemcKey( 'translate-groups' );
-		$value = DependencyWrapper::getValueFromCache( $this->getCache(), $key );
+		$value = $this->getCachedGroupDefinitions();
+		$groups = $value['cc'];
 
-		if ( $value === null ) {
-			wfDebug( __METHOD__ . "-nocache\n" );
-			$groups = $this->loadGroupDefinitions();
-		} else {
-			wfDebug( __METHOD__ . "-withcache\n" );
-			$groups = $value['cc'];
-			self::appendAutoloader( $value['autoload'], $wgAutoloadClasses );
-		}
-
-		$this->postInit( $groups );
+		$this->initGroupsFromDefinitions( $groups );
 	}
 
 	/**
-	 * @param array $groups
+	 * @param bool|string $recache Either "recache" or false
+	 * @return array
 	 */
-	protected function postInit( $groups ) {
-		// Expand groups to objects
+	protected function getCachedGroupDefinitions( $recache = false ) {
+		global $wgAutoloadClasses, $wgVersion;
+
+		$regenerator = function () {
+			global $wgAutoloadClasses;
+
+			$groups = $deps = $autoload = [];
+			// This constructs the list of all groups from multiple different sources.
+			// When possible, a cache dependency is created to automatically recreate
+			// the cache when configuration changes.
+			Hooks::run( 'TranslatePostInitGroups', [ &$groups, &$deps, &$autoload ] );
+			// Register autoloaders for this request, both values modified by reference
+			self::appendAutoloader( $autoload, $wgAutoloadClasses );
+
+			$value = [
+				'ts' => wfTimestamp( TS_MW ),
+				'cc' => $groups,
+				'autoload' => $autoload
+			];
+			$wrapper = new DependencyWrapper( $value, $deps );
+			$wrapper->initialiseDeps();
+
+			return $wrapper; // save the new value to cache
+		};
+
+		$cache = $this->getCache();
+		/** @var DependencyWrapper $wrapper */
+		$wrapper = $cache->getWithSetCallback(
+			self::getCacheKey(),
+			$cache::TTL_DAY,
+			$regenerator,
+			[
+				'lockTSE' => 30, // avoid stampedes (mutex)
+				'checkKeys' => [ self::getCacheKey() ],
+				'touchedCallback' => function ( $value ) {
+					return ( $value instanceof DependencyWrapper && $value->isExpired() )
+						? time() // treat value as if it just expired (for "lockTSE")
+						: null;
+				},
+				'minAsOf' => $recache ? INF : $cache::MIN_TIMESTAMP_NONE, // "miss" on recache
+			]
+		);
+
+		// B/C for "touchedCallback" param not existing
+		if ( version_compare( $wgVersion, '1.33', '<' ) && $wrapper->isExpired() ) {
+			$wrapper = $regenerator();
+			$cache->set( self::getCacheKey(), $wrapper, $cache::TTL_DAY );
+		}
+
+		$value = $wrapper->getValue();
+		self::appendAutoloader( $value['autoload'], $wgAutoloadClasses );
+
+		return $value;
+	}
+
+	/**
+	 * Expand process cached groups to objects
+	 *
+	 * @param array $groups Map of (group ID => mixed)
+	 */
+	protected function initGroupsFromDefinitions( $groups ) {
 		foreach ( $groups as $id => $mixed ) {
 			if ( !is_object( $mixed ) ) {
 				$groups[$id] = call_user_func( $mixed, $id );
@@ -73,8 +133,15 @@ class MessageGroups {
 	 * @since 2015.04
 	 */
 	public function recache() {
-		$groups = $this->loadGroupDefinitions();
-		$this->postInit( $groups );
+		// Purge the value from all datacenters
+		$cache = $this->getCache();
+		$cache->touchCheckKey( self::getCacheKey() );
+		// Reload the cache value and update the local datacenter
+		$value = $this->getCachedGroupDefinitions( 'recache' );
+		$groups = $value['cc'];
+
+		$this->clearProcessCache();
+		$this->initGroupsFromDefinitions( $groups );
 	}
 
 	/**
@@ -84,7 +151,10 @@ class MessageGroups {
 	 */
 	public static function clearCache() {
 		$self = self::singleton();
-		$self->getCache()->delete( wfMemcKey( 'translate-groups' ) );
+
+		$cache = $self->getCache();
+		$cache->delete( self::getCacheKey(), 1 );
+
 		$self->clearProcessCache();
 	}
 
@@ -102,11 +172,11 @@ class MessageGroups {
 	/**
 	 * Returns a cacher object.
 	 *
-	 * @return BagOStuff
+	 * @return WANObjectCache
 	 */
 	protected function getCache() {
 		if ( $this->cache === null ) {
-			return wfGetCache( CACHE_ANYTHING );
+			return MediaWikiServices::getInstance()->getMainWANObjectCache();
 		} else {
 			return $this->cache;
 		}
@@ -115,17 +185,29 @@ class MessageGroups {
 	/**
 	 * Override cache, for example during tests.
 	 *
-	 * @param BagOStuff|null $cache
+	 * @param WANObjectCache|null $cache
 	 */
-	public function setCache( BagOStuff $cache = null ) {
+	public function setCache( WANObjectCache $cache = null ) {
 		$this->cache = $cache;
+	}
+
+	/**
+	 * Returns the cache key.
+	 *
+	 * @return string
+	 */
+	protected static function getCacheKey() {
+		$self = self::singleton();
+		$cache = $self->getCache();
+
+		return $cache->makeKey( 'translate-groups', 'v' . self::CACHE_VERSION );
 	}
 
 	/**
 	 * Safely merges first array to second array, throwing warning on duplicates and removing
 	 * duplicates from the first array.
-	 * @param array $additions Things to append
-	 * @param array $to Where to append
+	 * @param array &$additions Things to append
+	 * @param array &$to Where to append
 	 */
 	protected static function appendAutoloader( array &$additions, array &$to ) {
 		foreach ( $additions as $class => $file ) {
@@ -140,34 +222,11 @@ class MessageGroups {
 	}
 
 	/**
-	 * This constructs the list of all groups from multiple different
-	 * sources. When possible, a cache dependency is created to automatically
-	 * recreate the cache when configuration changes.
+	 * Hook: TranslatePostInitGroups
+	 * @param array &$groups
+	 * @param array &$deps
+	 * @param array &$autoload
 	 */
-	protected function loadGroupDefinitions() {
-		global $wgAutoloadClasses;
-
-		$groups = $deps = $autoload = array();
-
-		Hooks::run( 'TranslatePostInitGroups', array( &$groups, &$deps, &$autoload ) );
-
-		// Register autoloaders for this request, both values modified by reference
-		self::appendAutoloader( $autoload, $wgAutoloadClasses );
-
-		$key = wfMemcKey( 'translate-groups' );
-		$value = array(
-			'ts' => wfTimestamp( TS_MW ),
-			'cc' => $groups,
-			'autoload' => $autoload,
-		);
-
-		$wrapper = new DependencyWrapper( $value, $deps );
-		$wrapper->storeToCache( $this->getCache(), $key, 60 * 60 * 2 );
-
-		return $groups;
-	}
-
-	/// Hook: TranslatePostInitGroups
 	public static function getTranslatablePages( array &$groups, array &$deps, array &$autoload ) {
 		global $wgEnablePageTranslation;
 
@@ -179,21 +238,25 @@ class MessageGroups {
 
 		$db = TranslateUtils::getSafeReadDB();
 
-		$tables = array( 'page', 'revtag' );
-		$vars = array( 'page_id', 'page_namespace', 'page_title' );
-		$conds = array( 'page_id=rt_page', 'rt_type' => RevTag::getType( 'tp:mark' ) );
-		$options = array( 'GROUP BY' => 'rt_page' );
+		$tables = [ 'page', 'revtag' ];
+		$vars = [ 'page_id', 'page_namespace', 'page_title' ];
+		$conds = [ 'page_id=rt_page', 'rt_type' => RevTag::getType( 'tp:mark' ) ];
+		$options = [ 'GROUP BY' => 'rt_page' ];
 		$res = $db->select( $tables, $vars, $conds, __METHOD__, $options );
 
 		foreach ( $res as $r ) {
 			$title = Title::newFromRow( $r );
 			$id = TranslatablePage::getMessageGroupIdFromTitle( $title );
 			$groups[$id] = new WikiPageMessageGroup( $id, $title );
-			$groups[$id]->setLabel( $title->getPrefixedText() );
 		}
 	}
 
-	/// Hook: TranslatePostInitGroups
+	/**
+	 * Hook: TranslatePostInitGroups
+	 * @param array &$groups
+	 * @param array &$deps
+	 * @param array &$autoload
+	 */
 	public static function getConfiguredGroups( array &$groups, array &$deps, array &$autoload ) {
 		global $wgTranslateGroupFiles;
 
@@ -225,7 +288,12 @@ class MessageGroups {
 		}
 	}
 
-	/// Hook: TranslatePostInitGroups
+	/**
+	 * Hook: TranslatePostInitGroups
+	 * @param array &$groups
+	 * @param array &$deps
+	 * @param array &$autoload
+	 */
 	public static function getWorkflowGroups( array &$groups, array &$deps, array &$autoload ) {
 		global $wgTranslateWorkflowStates;
 
@@ -236,14 +304,28 @@ class MessageGroups {
 		}
 	}
 
-	/// Hook: TranslatePostInitGroups
+	/**
+	 * Hook: TranslatePostInitGroups
+	 * @param array &$groups
+	 * @param array &$deps
+	 * @param array &$autoload
+	 */
 	public static function getAggregateGroups( array &$groups, array &$deps, array &$autoload ) {
 		$groups += self::loadAggregateGroups();
 	}
 
-	/// Hook: TranslatePostInitGroups
+	/**
+	 * Hook: TranslatePostInitGroups
+	 * @param array &$groups
+	 * @param array &$deps
+	 * @param array &$autoload
+	 */
 	public static function getCCGroups( array &$groups, array &$deps, array &$autoload ) {
 		global $wgTranslateCC;
+
+		if ( $wgTranslateCC !== [] ) {
+			wfDeprecated( '$wgTranslateCC' );
+		}
 
 		$deps[] = new GlobalDependency( 'wgTranslateCC' );
 
@@ -312,6 +394,7 @@ class MessageGroups {
 	public static function labelExists( $name ) {
 		$groups = self::loadAggregateGroups();
 		$labels = array_map( function ( $g ) {
+			/** @var MessageGroup $g */
 			return $g->getLabel();
 		}, $groups );
 		return (bool)in_array( $name, $labels, true );
@@ -319,7 +402,7 @@ class MessageGroups {
 
 	/**
 	 * Get all enabled message groups.
-	 * @return array ( string => MessageGroup )
+	 * @return MessageGroup[] Map of (string => MessageGroup)
 	 */
 	public static function getAllGroups() {
 		return self::singleton()->getGroups();
@@ -336,12 +419,12 @@ class MessageGroups {
 	 */
 	public static function getPriority( $group ) {
 		if ( !isset( self::$prioritycache ) ) {
-			self::$prioritycache = array();
+			self::$prioritycache = [];
 			// Abusing this table originally intented for other purposes
-			$db = wfGetDB( DB_SLAVE );
+			$db = wfGetDB( DB_REPLICA );
 			$table = 'translate_groupreviews';
-			$fields = array( 'tgr_group', 'tgr_state' );
-			$conds = array( 'tgr_lang' => '*priority' );
+			$fields = [ 'tgr_group', 'tgr_state' ];
+			$conds = [ 'tgr_lang' => '*priority' ];
 			$res = $db->select( $table, $fields, $conds, __METHOD__ );
 			foreach ( $res as $row ) {
 				self::$prioritycache[$row->tgr_group] = $row->tgr_state;
@@ -354,12 +437,11 @@ class MessageGroups {
 			$id = self::normalizeId( $group );
 		}
 
-		return isset( self::$prioritycache[$id] ) ? self::$prioritycache[$id] : '';
+		return self::$prioritycache[$id] ?? '';
 	}
 
 	/**
 	 * Sets the message group priority.
-	 * @see MessageGroups::getPriority
 	 *
 	 * @param MessageGroup|string $group Message group
 	 * @param string $priority Priority (empty string to unset)
@@ -376,22 +458,26 @@ class MessageGroups {
 
 		$dbw = wfGetDB( DB_MASTER );
 		$table = 'translate_groupreviews';
-		$row = array(
+		$row = [
 			'tgr_group' => $id,
 			'tgr_lang' => '*priority',
 			'tgr_state' => $priority,
-		);
+		];
 
 		if ( $priority === '' ) {
 			unset( $row['tgr_state'] );
 			$dbw->delete( $table, $row, __METHOD__ );
 		} else {
-			$index = array( 'tgr_group', 'tgr_lang' );
-			$dbw->replace( $table, array( $index ), $row, __METHOD__ );
+			$index = [ 'tgr_group', 'tgr_lang' ];
+			$dbw->replace( $table, [ $index ], $row, __METHOD__ );
 		}
 	}
 
-	/// @since 2011-12-28
+	/**
+	 * @since 2011-12-28
+	 * @param MessageGroup $group
+	 * @return bool
+	 */
 	public static function isDynamic( MessageGroup $group ) {
 		$id = $group->getId();
 
@@ -432,8 +518,8 @@ class MessageGroups {
 	 */
 	public static function getParentGroups( MessageGroup $targetGroup ) {
 		$ids = self::getSharedGroups( $targetGroup );
-		if ( $ids === array() ) {
-			return array();
+		if ( $ids === [] ) {
+			return [];
 		}
 
 		$targetId = $targetGroup->getId();
@@ -453,7 +539,7 @@ class MessageGroups {
 		/* Now that we have all related groups, use them to find all paths
 		 * from top-level groups to target group with any number of subgroups
 		 * in between. */
-		$paths = array();
+		$paths = [];
 
 		/* This function recursively finds paths to the target group */
 		$pathFinder = function ( &$paths, $group, $targetId, $prefix = '' )
@@ -506,7 +592,7 @@ class MessageGroups {
 
 	/**
 	 * Constructor function.
-	 * @return MessageGroups
+	 * @return self
 	 */
 	public static function singleton() {
 		static $instance;
@@ -520,7 +606,7 @@ class MessageGroups {
 	/**
 	 * Get all enabled non-dynamic message groups.
 	 *
-	 * @return array
+	 * @return MessageGroup[] Map of (group ID => MessageGroup)
 	 */
 	public function getGroups() {
 		$this->init();
@@ -537,7 +623,7 @@ class MessageGroups {
 	 * @since 2012-02-13
 	 */
 	public static function getGroupsById( array $ids, $skipMeta = false ) {
-		$groups = array();
+		$groups = [];
 		foreach ( $ids as $id ) {
 			$group = self::getGroup( $id );
 
@@ -564,14 +650,26 @@ class MessageGroups {
 	 * @since 2012-02-13
 	 */
 	public static function expandWildcards( $ids ) {
-		$all = array();
+		$all = [];
 
 		$ids = (array)$ids;
 		foreach ( $ids as $index => $id ) {
-			$ids[$index] = self::normalizeId( $id );
+			// Fast path, no wildcards
+			if ( strcspn( $id, '*?' ) === strlen( $id ) ) {
+				$g = self::getGroup( $id );
+				if ( $g ) {
+					$all[] = $g->getId();
+				}
+				unset( $ids[$index] );
+			}
 		}
 
-		$matcher = new StringMatcher( '', (array)$ids );
+		if ( $ids === [] ) {
+			return $all;
+		}
+
+		// Slow path for the ones with wildcards
+		$matcher = new StringMatcher( '', $ids );
 		foreach ( self::getAllGroups() as $id => $_ ) {
 			if ( $matcher->match( $id ) ) {
 				$all[] = $id;
@@ -584,19 +682,20 @@ class MessageGroups {
 	/**
 	 * Contents on these groups changes on a whim.
 	 * @since 2011-12-28
+	 * @return array
 	 */
 	public static function getDynamicGroups() {
-		return array(
+		return [
 			'!recent' => 'RecentMessageGroup',
 			'!additions' => 'RecentAdditionsMessageGroup',
 			'!sandbox' => 'SandboxMessageGroup',
-		);
+		];
 	}
 
 	/**
 	 * Get only groups of specific type (class).
 	 * @param string $type Class name of wanted type
-	 * @return MessageGroupBase[]
+	 * @return MessageGroupBase[] Map of (group ID => MessageGroupBase)
 	 * @since 2012-04-30
 	 */
 	public static function getGroupsByType( $type ) {
@@ -618,7 +717,7 @@ class MessageGroups {
 	 * In other words: [Group1, Group2, [AggGroup, Group3, Group4]]
 	 *
 	 * @throws MWException If cyclic structure is detected.
-	 * @return array
+	 * @return array Map of (group ID => MessageGroup or recursive array)
 	 */
 	public static function getGroupStructure() {
 		$groups = self::getAllGroups();
@@ -646,9 +745,9 @@ class MessageGroups {
 
 		// Work around php bug: https://bugs.php.net/bug.php?id=50688
 		// Triggered by ApiQueryMessageGroups for example
-		wfSuppressWarnings();
-		usort( $tree, array( __CLASS__, 'groupLabelSort' ) );
-		wfRestoreWarnings();
+		Wikimedia\suppressWarnings();
+		usort( $tree, [ __CLASS__, 'groupLabelSort' ] );
+		Wikimedia\restoreWarnings();
 
 		/* Now we have two things left in $tree array:
 		 * - solitaries: top-level non-aggregate message groups
@@ -663,9 +762,9 @@ class MessageGroups {
 		 * groups not be included at all, because they have all unset each
 		 * other in the first loop. So now we check if there are groups left
 		 * over. */
-		$used = array();
+		$used = [];
 		// Hack to allow passing by reference
-		array_walk_recursive( $tree, array( __CLASS__, 'collectGroupIds' ), array( &$used ) );
+		array_walk_recursive( $tree, [ __CLASS__, 'collectGroupIds' ], [ &$used ] );
 		$unused = array_diff( array_keys( $groups ), array_keys( $used ) );
 		if ( count( $unused ) ) {
 			foreach ( $unused as $index => $id ) {
@@ -682,12 +781,22 @@ class MessageGroups {
 		return $tree;
 	}
 
-	/// See getGroupStructure, just collects ids into array
+	/**
+	 * See getGroupStructure, just collects ids into array
+	 * @param MessageGroup $value
+	 * @param string $key
+	 * @param bool $used
+	 */
 	public static function collectGroupIds( MessageGroup $value, $key, $used ) {
 		$used[0][$value->getId()] = true;
 	}
 
-	/// Sorts groups by label value
+	/**
+	 * Sorts groups by label value
+	 * @param MessageGroup $a
+	 * @param MessageGroup $b
+	 * @return int
+	 */
 	public static function groupLabelSort( $a, $b ) {
 		$al = $a->getLabel();
 		$bl = $b->getLabel();
@@ -700,17 +809,23 @@ class MessageGroups {
 	 * AggregateMessageGroup.
 	 *
 	 * @param AggregateMessageGroup $parent
+	 * @param string[] &$childIds Flat list of child group IDs [returned]
+	 * @param string $fname Calling method name; used to identify recursion [optional]
 	 * @throws MWException
 	 * @return array
 	 * @since Public since 2012-11-29
 	 */
-	public static function subGroups( AggregateMessageGroup $parent ) {
-		static $recursionGuard = array();
+	public static function subGroups(
+		AggregateMessageGroup $parent,
+		array &$childIds = [],
+		$fname = 'caller'
+) {
+		static $recursionGuard = [];
 
 		$pid = $parent->getId();
 		if ( isset( $recursionGuard[$pid] ) ) {
 			$tid = $pid;
-			$path = array( $tid );
+			$path = [ $tid ];
 			do {
 				$tid = $recursionGuard[$tid];
 				$path[] = $tid;
@@ -722,19 +837,26 @@ class MessageGroups {
 
 		// We don't care about the ids.
 		$tree = array_values( $parent->getGroups() );
-		usort( $tree, array( __CLASS__, 'groupLabelSort' ) );
+		usort( $tree, [ __CLASS__, 'groupLabelSort' ] );
 		// Expand aggregate groups (if any left) after sorting to form a tree
 		foreach ( $tree as $index => $group ) {
 			if ( $group instanceof AggregateMessageGroup ) {
 				$sid = $group->getId();
 				$recursionGuard[$pid] = $sid;
-				$tree[$index] = self::subGroups( $group );
+				$tree[$index] = self::subGroups( $group, $childIds, __METHOD__ );
 				unset( $recursionGuard[$pid] );
+
+				$childIds[$sid] = 1;
 			}
 		}
 
 		// Parent group must be first item in the array
 		array_unshift( $tree, $parent );
+
+		if ( $fname !== __METHOD__ ) {
+			// Move the IDs from the keys to the value for final return
+			$childIds = array_values( $childIds );
+		}
 
 		return $tree;
 	}
@@ -763,28 +885,27 @@ class MessageGroups {
 	/**
 	 * Get all the aggregate messages groups defined in translate_metadata table.
 	 *
-	 * @return array
+	 * @return MessageGroup[]
 	 */
 	protected static function loadAggregateGroups() {
-		$dbw = wfGetDB( DB_MASTER );
-		$tables = array( 'translate_metadata' );
-		$fields = array( 'tmd_group', 'tmd_value' );
-		$conds = array( 'tmd_key' => 'subgroups' );
-		$res = $dbw->select( $tables, $fields, $conds, __METHOD__ );
+		$dbr = TranslateUtils::getSafeReadDB();
+		$tables = [ 'translate_metadata' ];
+		$field = 'tmd_group';
+		$conds = [ 'tmd_key' => 'subgroups' ];
+		$groupIds = $dbr->selectFieldValues( $tables, $field, $conds, __METHOD__ );
+		TranslateMetadata::preloadGroups( $groupIds );
 
-		$groups = array();
-		foreach ( $res as $row ) {
-			$id = $row->tmd_group;
-
-			$conf = array();
-			$conf['BASIC'] = array(
+		$groups = [];
+		foreach ( $groupIds as $id ) {
+			$conf = [];
+			$conf['BASIC'] = [
 				'id' => $id,
 				'label' => TranslateMetadata::get( $id, 'name' ),
 				'description' => TranslateMetadata::get( $id, 'description' ),
 				'meta' => 1,
 				'class' => 'AggregateMessageGroup',
 				'namespace' => NS_TRANSLATIONS,
-			);
+			];
 			$conf['GROUPS'] = TranslateMetadata::getSubgroups( $id );
 			$group = MessageGroupBase::factory( $conf );
 
@@ -803,7 +924,7 @@ class MessageGroups {
 	 * @since 2013.10
 	 */
 	public static function isTranslatableMessage( MessageHandle $handle ) {
-		static $cache = array();
+		static $cache = [];
 
 		if ( !$handle->isValid() ) {
 			return false;
@@ -835,13 +956,13 @@ class MessageGroups {
 				}
 			}
 
-			$cache[$cacheKey] = array(
+			$cache[$cacheKey] = [
 				'relevant' => $allowed && !$discouraged,
-				'tags' => array(),
-			);
+				'tags' => [],
+			];
 
 			$groupTags = $group->getTags();
-			foreach ( array( 'ignored', 'optional' ) as $tag ) {
+			foreach ( [ 'ignored', 'optional' ] as $tag ) {
 				if ( isset( $groupTags[$tag] ) ) {
 					foreach ( $groupTags[$tag] as $key ) {
 						// TODO: ucfirst should not be here

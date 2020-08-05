@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Srdjan m"
+		]
+	},
+	"codemirror-desc": "Omogućava isticanje sintakse u uređivaču wikiteksta",
+	"codemirror-toggle-label": "Isticanje sintakse",
+	"codemirror-beta-title": "Isticanje sintakse wikiteksta",
+	"codemirror-beta-desc": "Isticanje sintakse olakšava uređivanje koristeći boje i nijanse za vizualno razlikovanje teksta na stranicama od koda za linkove, reference i šablone.",
+	"codemirror-popup-desc": "Isticanje sintakse pomoći će Vam da s lakoćom razlikujete razne dijelove teksta koji uređujete, dodavajući im boje.",
+	"codemirror-popup-btn-yes": "Isprobaj",
+	"codemirror-popup-btn-no": "Ne, hvala"
+}

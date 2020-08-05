@@ -1,5 +1,5 @@
 <?php
-if ( sizeof( $argv ) < 3 ) {
+if ( count( $argv ) < 3 ) {
 	print "Call with 2 arguments: the path to the load url and the file to output to";
 	exit();
 }
@@ -9,15 +9,14 @@ $outputFile = $argv[2];
 define( 'MEDIAWIKI', true );
 const NS_MAIN = 0;
 $wgVersion = 1.23;
-$wgSpecialPages = array();
-$wgResourceModules = array();
+$wgSpecialPages = [];
+$wgResourceModules = [];
 
 include "Resources.php";
 
-$query = array();
-$blacklist = array(
-);
-foreach( $wgResourceModules as $moduleName => $def ) {
+$query = [];
+$blacklist = [];
+foreach ( $wgResourceModules as $moduleName => $def ) {
 	if ( !in_array( $moduleName, $blacklist ) ) {
 		$query[] = $moduleName;
 	}
@@ -25,5 +24,5 @@ foreach( $wgResourceModules as $moduleName => $def ) {
 
 $url = $loadUrl . '?only=styles&skin=vector&modules=' . implode( '|', $query );
 echo $url;
-$css = file_get_contents($url);
+$css = file_get_contents( $url );
 file_put_contents( $outputFile, $css );

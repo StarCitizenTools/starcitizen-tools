@@ -19,6 +19,7 @@
 
 	/**
 	 * Represents an image on the page.
+	 *
 	 * @class mw.mmv.LightboxImage
 	 * @constructor
 	 * @param {string} fileLink Link to the file - generally a thumb URL
@@ -27,6 +28,7 @@
 	 * @param {number} index Which number file this is
 	 * @param {HTMLImageElement} thumb The thumbnail that represents this image on the page
 	 * @param {string} [caption] The caption, if any.
+	 * @param {string} [alt] The alt text of the image
 	 */
 	function LightboxImage( fileLink, filePageLink, fileTitle, index, thumb, caption, alt ) {
 		/** @property {string} Link to the file - generally a thumb URL */

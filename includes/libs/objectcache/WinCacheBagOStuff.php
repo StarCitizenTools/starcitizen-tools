@@ -41,7 +41,7 @@ class WinCacheBagOStuff extends BagOStuff {
 		$result = wincache_ucache_set( $key, serialize( $value ), $expire );
 
 		/* wincache_ucache_set returns an empty array on success if $value
-		   was an array, bool otherwise */
+		 * was an array, bool otherwise */
 		return ( is_array( $result ) && $result === [] ) || $result;
 	}
 
@@ -51,11 +51,14 @@ class WinCacheBagOStuff extends BagOStuff {
 		return true;
 	}
 
-	public function merge( $key, $callback, $exptime = 0, $attempts = 10, $flags = 0 ) {
-		if ( !is_callable( $callback ) ) {
-			throw new Exception( "Got invalid callback." );
+	public function merge( $key, callable $callback, $exptime = 0, $attempts = 10, $flags = 0 ) {
+		if ( wincache_lock( $key ) ) { // optimize with FIFO lock
+			$ok = $this->mergeViaLock( $key, $callback, $exptime, $attempts, $flags );
+			wincache_unlock( $key );
+		} else {
+			$ok = false;
 		}
 
-		return $this->mergeViaCas( $key, $callback, $exptime, $attempts );
+		return $ok;
 	}
 }

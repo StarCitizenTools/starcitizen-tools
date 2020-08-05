@@ -23,6 +23,8 @@
 
 require __DIR__ . '/../commandLine.inc';
 
+use Wikimedia\Rdbms\IMaintainableDatabase;
+
 /**
  * Maintenance script that upgrade for log_id/log_deleted fields in a
  * replication-safe way.
@@ -32,7 +34,7 @@ require __DIR__ . '/../commandLine.inc';
 class UpdateLogging {
 
 	/**
-	 * @var DatabaseBase
+	 * @var IMaintainableDatabase
 	 */
 	public $dbw;
 	public $batchSize = 1000;
@@ -130,13 +132,13 @@ EOT;
 	 */
 	function sync( $srcTable, $dstTable ) {
 		$batchSize = 1000;
-		$minTs = $this->dbw->selectField( $srcTable, 'MIN(log_timestamp)', false, __METHOD__ );
+		$minTs = $this->dbw->selectField( $srcTable, 'MIN(log_timestamp)', '', __METHOD__ );
 		$minTsUnix = wfTimestamp( TS_UNIX, $minTs );
 		$numRowsCopied = 0;
 
 		while ( true ) {
-			$maxTs = $this->dbw->selectField( $srcTable, 'MAX(log_timestamp)', false, __METHOD__ );
-			$copyPos = $this->dbw->selectField( $dstTable, 'MAX(log_timestamp)', false, __METHOD__ );
+			$maxTs = $this->dbw->selectField( $srcTable, 'MAX(log_timestamp)', '', __METHOD__ );
+			$copyPos = $this->dbw->selectField( $dstTable, 'MAX(log_timestamp)', '', __METHOD__ );
 			$maxTsUnix = wfTimestamp( TS_UNIX, $maxTs );
 			$copyPosUnix = wfTimestamp( TS_UNIX, $copyPos );
 

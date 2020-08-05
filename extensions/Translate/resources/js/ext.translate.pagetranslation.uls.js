@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	'use strict';
 
 	mw.uls.changeLanguage = function ( language ) {
@@ -7,9 +7,9 @@
 		page = 'Special:MyLanguage/' + mw.config.get( 'wgPageName' );
 
 		if ( mw.config.get( 'wgTranslatePageTranslation' ) === 'translation' ) {
-			page = page.replace( /\/[^\/]+$/, '' );
+			page = page.replace( /\/[^/]+$/, '' );
 		}
 
 		location.href = mw.util.getUrl( page, { setlang: language } );
 	};
-}( mediaWiki ) );
+}() );

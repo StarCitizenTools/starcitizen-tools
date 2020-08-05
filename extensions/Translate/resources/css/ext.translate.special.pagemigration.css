@@ -2,15 +2,11 @@
 .mw-tpm-sp-unit__target {
 	overflow-y: auto;
 	height: 150px;
-	border: 2px solid gray;
+	border: 2px solid #808080;
 }
 
 #title {
 	width: 35%;
-}
-
-.mw-tpm-sp-unit__actions {
-	border: 2px solid transparent;
 }
 
 .hide {
@@ -26,6 +22,10 @@
 	padding-bottom: 10px;
 }
 
+.grid .mw-tpm-sp-unit textarea {
+	padding: 10px;
+}
+
 .mw-tpm-sp-unit__source,
 .mw-tpm-sp-unit__target,
 .mw-tpm-sp-unit__actions {
@@ -33,41 +33,44 @@
 }
 
 .mw-tpm-sp-action {
-	width: 10%;
-	height: 10%;
-	float: left;
-	margin-left: 5%;
-	margin-right: 5%;
+	width: 25px;
+	height: 150px;
 	cursor: pointer;
 	display: inline-block;
+	margin-left: 20px;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 25px 25px;
 }
 
 .mw-tpm-sp-action--delete {
-	background: url('../images/trash_darkgray.png') transparent no-repeat;
-	background-image: -webkit-linear-gradient(transparent, transparent), url('../images/trash_darkgray.svg');
-	background-image: linear-gradient(transparent, transparent), url('../images/trash_darkgray.svg');
+	background-image: linear-gradient( transparent, transparent ), url( ../images/trash_darkgray.svg );
 }
 
 .mw-tpm-sp-action--swap {
-	background: url('../images/switch.png') transparent no-repeat;
-	background-image: -webkit-linear-gradient(transparent, transparent), url('../images/switch.svg');
-	background-image: linear-gradient(transparent, transparent), url('../images/switch.svg');
+	background-image: linear-gradient( transparent, transparent ), url( ../images/switch.svg );
 }
 
 .mw-tpm-sp-action--add {
-	background: url('../images/plus_darkgray.png') transparent no-repeat;
-	background-image: -webkit-linear-gradient(transparent, transparent), url('../images/plus_darkgray.svg');
-	background-image: linear-gradient(transparent, transparent), url('../images/plus_darkgray.svg');
+	background-image: linear-gradient( transparent, transparent ), url( ../images/plus_darkgray.svg );
 }
 
 .mw-tpm-sp-error__message {
 	font-size: 0.9em;
 	word-wrap: break-word;
-	color: #C00;
-	border: 1px solid #FAC5C5;
-	background-color: #FAE3E3;
+	color: #c00;
+	border: 1px solid #fac5c5;
+	background-color: #fae3e3;
 }
 
 .mw-tpm-sp-instructions {
-	margin: 0.7em 0em;
+	margin: 0.7em 0;
+}
+
+.client-nojs .grid {
+	display: none;
+}
+
+.client-js .tux-nojs {
+	display: none;
 }

@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow Board
 	 *
@@ -21,7 +21,7 @@
 		mw.flow.dm.Board.parent.call( this, config );
 
 		// Mixin constructor
-		mw.flow.dm.List.call( this, config );
+		mw.flow.dm.List.call( this );
 
 		this.categories = new mw.flow.dm.Categories();
 
@@ -77,12 +77,13 @@
 	 * @inheritdoc
 	 */
 	mw.flow.dm.Board.prototype.getHashObject = function () {
-		return $.extend( {
-			isDeleted: this.isDeleted(),
-			pagePrefixedDb: this.getPageTitle().getPrefixedDb(),
-			topicCount: this.getItemCount(),
-			description: this.getDescription() && this.getDescription().getHashObject()
-		},
+		return $.extend(
+			{
+				isDeleted: this.isDeleted(),
+				pagePrefixedDb: this.getPageTitle().getPrefixedDb(),
+				topicCount: this.getItemCount(),
+				description: this.getDescription() && this.getDescription().getHashObject()
+			},
 			// Parent
 			mw.flow.dm.Board.parent.prototype.getHashObject.call( this )
 		);
@@ -177,7 +178,7 @@
 	/**
 	 * Set board description
 	 *
-	 * @param {mw.flow.dm.BoardDescription} Board description
+	 * @param {mw.flow.dm.BoardDescription} desc Board description
 	 * @fires descriptionChange
 	 */
 	mw.flow.dm.Board.prototype.setDescription = function ( desc ) {
@@ -212,7 +213,7 @@
 	/**
 	 * Set board sort order, 'newest' or 'updated'
 	 *
-	 * @param {string} Board sort order
+	 * @param {string} order Board sort order
 	 * @fires sortOrderChange
 	 */
 	mw.flow.dm.Board.prototype.setSortOrder = function ( order ) {
@@ -224,6 +225,8 @@
 
 	/**
 	 * Get the last offset for the API's offsetId
+	 *
+	 * @return {string}
 	 */
 	mw.flow.dm.Board.prototype.getOffsetId = function () {
 		var topics = this.getItems();
@@ -235,6 +238,8 @@
 
 	/**
 	 * Get the last offset for the API's offset timestamp
+	 *
+	 * @return {number}
 	 */
 	mw.flow.dm.Board.prototype.getOffset = function () {
 		var topics = this.getItems();
@@ -254,4 +259,4 @@
 		this.clearItems();
 		this.emit( 'reset', order );
 	};
-}( jQuery ) );
+}() );

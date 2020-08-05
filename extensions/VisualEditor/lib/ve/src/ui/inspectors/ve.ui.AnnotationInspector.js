@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface AnnotationInspector class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -14,9 +14,9 @@
  * @constructor
  * @param {Object} [config] Configuration options
  */
-ve.ui.AnnotationInspector = function VeUiAnnotationInspector( config ) {
+ve.ui.AnnotationInspector = function VeUiAnnotationInspector() {
 	// Parent constructor
-	ve.ui.FragmentInspector.call( this, config );
+	ve.ui.AnnotationInspector.super.apply( this, arguments );
 
 	// Properties
 	this.initialSelection = null;
@@ -57,7 +57,7 @@ ve.ui.AnnotationInspector.static.actions = [
 	{
 		action: 'done',
 		label: OO.ui.deferMsg( 'visualeditor-dialog-action-insert' ),
-		flags: [ 'constructive', 'primary' ],
+		flags: [ 'progressive', 'primary' ],
 		modes: 'insert'
 	}
 ];
@@ -93,6 +93,9 @@ ve.ui.AnnotationInspector.prototype.getInsertionData = function () {
  * @return {string} Text to insert
  */
 ve.ui.AnnotationInspector.prototype.getInsertionText = function () {
+	if ( this.sourceMode ) {
+		return OO.ui.resolveMsg( this.constructor.static.title );
+	}
 	return '';
 };
 
@@ -158,6 +161,7 @@ ve.ui.AnnotationInspector.prototype.getMode = function () {
  * @method
  * @param {Object} [data] Inspector opening data
  * @param {boolean} [data.noExpand] Don't expand the selection when opening
+ * @return {OO.ui.Process}
  */
 ve.ui.AnnotationInspector.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.AnnotationInspector.super.prototype.getSetupProcess.call( this, data )
@@ -271,6 +275,9 @@ ve.ui.AnnotationInspector.prototype.getTeardownProcess = function ( data ) {
 			if ( !remove ) {
 				if ( data.action !== 'done' ) {
 					surfaceModel.popStaging();
+					if ( this.previousSelection ) {
+						surfaceModel.setSelection( this.previousSelection );
+					}
 					return;
 				}
 				if ( this.initialSelection.isCollapsed() ) {
@@ -321,7 +328,9 @@ ve.ui.AnnotationInspector.prototype.getTeardownProcess = function ( data ) {
 					fragment.annotateContent( 'set', annotation );
 				}
 			}
-			if ( !data.action || insertText ) {
+			// HACK: ui.WindowAction unsets previousSelection in source mode,
+			// so we can't rely on it existing.
+			if ( this.previousSelection && ( !data.action || insertText ) ) {
 				// Restore selection to what it was before we expanded it
 				selection = this.previousSelection;
 			}

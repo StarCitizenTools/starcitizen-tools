@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"alistair3149"
+		]
+	},
+	"shortdescription-desc": "{{desc|name=Short Description|url=https://www.mediawiki.org/wiki/Extension:ShortDescription}}",
+	"apihelp-query+description-summary": "{{doc-apihelp-summary|query+description}}",
+	"apihelp-query+description-example": "{{doc-apihelp-example|query+description}}"
+}

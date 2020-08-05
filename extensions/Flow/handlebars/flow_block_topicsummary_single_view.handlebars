@@ -19,8 +19,10 @@
 					revision.rev_view_links.diff.url}}
 			{{/if}}
 		</div>
-		<div class="flow-revision-content">
+		<div class="flow-revision-content mw-parser-output">
 			{{escapeContent revision.content.format revision.content.content}}
 		</div>
+
+        {{> flow_patrol_action}}
 	{{/if}}
 </div>

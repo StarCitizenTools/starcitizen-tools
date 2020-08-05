@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ClearAnnotationTool class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,12 +13,9 @@
  * @param {OO.ui.ToolGroup} toolGroup
  * @param {Object} [config] Configuration options
  */
-ve.ui.ClearAnnotationTool = function VeUiClearAnnotationTool( toolGroup, config ) {
+ve.ui.ClearAnnotationTool = function VeUiClearAnnotationTool() {
 	// Parent constructor
-	ve.ui.Tool.call( this, toolGroup, config );
-
-	// Initialization
-	this.setDisabled( true );
+	ve.ui.ClearAnnotationTool.super.apply( this, arguments );
 };
 
 /* Inheritance */

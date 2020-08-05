@@ -1,10 +1,14 @@
 /*!
  * VisualEditor mobile demo
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /* Demo */
+
+body {
+	font: normal 0.875em/1.5 sans-serif;
+}
 
 .ve-demo-logo {
 	padding-right: 1.1em;
@@ -30,9 +34,5 @@
 }
 
 .ve-init-sa-target-toolbar.ve-ui-toolbar-floating > .oo-ui-toolbar-bar {
-	border-top: none;
-}
-
-.ve-ui-debugBar {
-	border-bottom: 1px solid #ccc;
+	border-top: 0;
 }

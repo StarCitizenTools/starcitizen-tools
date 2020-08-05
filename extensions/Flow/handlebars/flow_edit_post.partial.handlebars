@@ -10,7 +10,7 @@
 	{{/ifAnonymous}}
 
 	<div class="flow-editor">
-		<textarea name="topic_content" class="mw-ui-input flow-form-collapsible" data-role="content">
+		<textarea name="topic_content" class="mw-ui-input flow-form-collapsible mw-editfont-{{@root.rootBlock.editFont}}" data-role="content">
 			{{~#if @root.rootBlock.submitted.content~}}
 				{{~@root.rootBlock.submitted.content~}}
 			{{~else~}}
@@ -20,11 +20,9 @@
 	</div>
 
 	<div class="flow-form-actions flow-form-collapsible">
-		<button class="mw-ui-button mw-ui-constructive"
-		        data-flow-api-handler="submitEditPost">
+		<button class="mw-ui-button mw-ui-progressive">
 			{{~l10n "flow-post-action-edit-post-submit"~}}
 		</button>
-		{{> flow_form_cancel_button }}
 		<small class="flow-terms-of-use plainlinks">
 			{{~l10nParse "flow-terms-of-use-edit"~}}
 		</small>

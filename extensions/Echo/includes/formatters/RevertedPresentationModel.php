@@ -33,22 +33,27 @@ class EchoRevertedPresentationModel extends EchoEventPresentationModel {
 	}
 
 	public function getPrimaryLink() {
-		$url = $this->event->getTitle()->getLocalURL( array(
+		$url = $this->event->getTitle()->getLocalURL( [
 			'oldid' => 'prev',
 			'diff' => $this->event->getExtraParam( 'revid' )
-		) );
-		return array(
+		] );
+		return [
 			'url' => $url,
 			'label' => $this->msg( 'notification-link-text-view-changes', $this->getViewingUserForGender() )->text()
-		);
+		];
 	}
 
 	public function getSecondaryLinks() {
-		$revertedTitleLink = $this->getPageLink(
-			$this->event->getTitle()->getTalkPage(), null, true
-		);
+		$links = [ $this->getAgentLink() ];
 
-		return array( $this->getAgentLink(), $revertedTitleLink );
+		$title = $this->event->getTitle();
+		if ( $title->canHaveTalkPage() ) {
+			$links[] = $this->getPageLink(
+				$title->getTalkPage(), null, true
+			);
+		}
+
+		return $links;
 	}
 
 	/**
@@ -72,5 +77,9 @@ class EchoRevertedPresentationModel extends EchoEventPresentationModel {
 		$autoSummary = $autoSummaryMsg->text();
 
 		return $summary === $autoSummary;
+	}
+
+	protected function getSubjectMessageKey() {
+		return 'notification-reverted-email-subject2';
 	}
 }

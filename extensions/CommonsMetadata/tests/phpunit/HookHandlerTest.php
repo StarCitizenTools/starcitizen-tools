@@ -8,7 +8,7 @@ require_once __DIR__ . "/ParserTestHelper.php";
  * @covers CommonsMetadata\HookHandler
  * @group Extensions/CommonsMetadata
  */
-class HookHandlerTest extends \PHPUnit_Framework_TestCase {
+class HookHandlerTest extends \PHPUnit\Framework\TestCase {
 	/** @var ParserTestHelper */
 	protected $parserTestHelper;
 
@@ -19,9 +19,10 @@ class HookHandlerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testLocalFile() {
 		$description = 'foo';
-		$categories = array( 'Bar', 'Baz' );
+		$categories = [ 'Bar', 'Baz' ];
 
-		$metadata = array( 'OldKey' => 'OldValue', 'Categories' => array( 'value' => 'I_will_be_overwritten' ) );
+		$metadata = [ 'OldKey' => 'OldValue',
+			'Categories' => [ 'value' => 'I_will_be_overwritten' ] ];
 		$maxCache = 3600;
 		$file = $this->parserTestHelper->getLocalFile( $description, $categories );
 		$context = $this->parserTestHelper->getContext( 'en' );
@@ -40,7 +41,8 @@ class HookHandlerTest extends \PHPUnit_Framework_TestCase {
 	public function testForeignApiFile() {
 		$description = 'foo';
 
-		$metadata = array( 'OldKey' => 'OldValue', 'Categories' => array( 'value' => 'I_will_remain' ) );
+		$metadata = [ 'OldKey' => 'OldValue',
+			'Categories' => [ 'value' => 'I_will_remain' ] ];
 		$maxCache = 3600;
 		$file = $this->parserTestHelper->getForeignApiFile( $description );
 		$context = $this->parserTestHelper->getContext( 'en' );
@@ -58,9 +60,10 @@ class HookHandlerTest extends \PHPUnit_Framework_TestCase {
 
 	public function testForeignDBFile() {
 		$description = 'foo';
-		$categories = array( 'Bar', 'Baz' );
+		$categories = [ 'Bar', 'Baz' ];
 
-		$metadata = array( 'OldKey' => 'OldValue', 'Categories' => array( 'value' => 'I_will_be_overwritten' ) );
+		$metadata = [ 'OldKey' => 'OldValue',
+			'Categories' => [ 'value' => 'I_will_be_overwritten' ] ];
 		$maxCache = 3600;
 		$file = $this->parserTestHelper->getForeignDbFile( $description, $categories );
 		$context = $this->parserTestHelper->getContext( 'en' );
@@ -79,14 +82,14 @@ class HookHandlerTest extends \PHPUnit_Framework_TestCase {
 	/*----------------------------------------------------------*/
 
 	/**
-	 * @dataProvider provideDesctiptionData
+	 * @dataProvider provideDescriptionData
 	 * @param string $testName a test name from ParserTestHelper::$testHTMLFiles
 	 */
 	public function testDescription( $testName ) {
 		$maxCache = 3600;
-		$actualMetadata = array();
+		$actualMetadata = [];
 		$description = $this->parserTestHelper->getTestHTML( $testName );
-		$file = $this->parserTestHelper->getLocalFile( $description, array() );
+		$file = $this->parserTestHelper->getLocalFile( $description, [] );
 		$context = $this->parserTestHelper->getContext( 'en' );
 
 		HookHandler::onGetExtendedMetadata( $actualMetadata, $file, $context, true, $maxCache );
@@ -94,16 +97,17 @@ class HookHandlerTest extends \PHPUnit_Framework_TestCase {
 		$expectedMetadata = $this->parserTestHelper->getMetadata( $testName );
 		foreach ( $expectedMetadata as $key => $val ) {
 			$this->assertArrayHasKey( $key, $actualMetadata, "Field $key missing from metadata" );
-			$this->assertEquals( $expectedMetadata[$key], $actualMetadata[$key], "Value for field $key does not match" );
+			$this->assertEquals( $expectedMetadata[$key], $actualMetadata[$key],
+				"Value for field $key does not match" );
 		}
 	}
 
-	public function provideDesctiptionData() {
-		return array(
-			array( 'noinfo' ),
-			array( 'simple' ),
-			array( 'singlelang' ),
-		);
+	public function provideDescriptionData() {
+		return [
+			[ 'noinfo' ],
+			[ 'simple' ],
+			[ 'singlelang' ],
+		];
 	}
 
 	/*----------------------------------------------------------*/

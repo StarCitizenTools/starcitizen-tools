@@ -2,7 +2,7 @@
 
 namespace Flow\Tests\Import;
 
-use Flow\Import\SourceStore\Null as NullImportSourceStore;
+use Flow\Import\SourceStore\NullImportSourceStore;
 use Flow\Import\PageImportState;
 use Flow\Import\Postprocessor\ProcessorGroup;
 use Flow\Model\PostRevision;
@@ -32,9 +32,6 @@ class PageImportStateTest extends \MediaWikiTestCase {
 			$storage,
 			new NullImportSourceStore(),
 			new NullLogger(),
-			$this->getMockBuilder( 'Flow\Data\BufferedCache' )
-				->disableOriginalConstructor()
-				->getMock(),
 			$this->getMockBuilder( 'Flow\DbFactory' )
 				->disableOriginalConstructor()
 				->getMock(),
@@ -42,7 +39,7 @@ class PageImportStateTest extends \MediaWikiTestCase {
 			new SplQueue
 		);
 		if ( $returnAll ) {
-			return array( $state, $workflow, $storage );
+			return [ $state, $workflow, $storage ];
 		} else {
 			return $state;
 		}

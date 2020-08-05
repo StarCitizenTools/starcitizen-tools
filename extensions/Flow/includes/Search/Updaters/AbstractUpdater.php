@@ -58,7 +58,7 @@ abstract class AbstractUpdater {
 			$this->connection->setTimeout( $clientSideTimeout );
 		}
 
-		$documents = array();
+		$documents = [];
 		$count = 0;
 		foreach ( $this->iterator as $revision ) {
 			try {
@@ -66,14 +66,14 @@ abstract class AbstractUpdater {
 				$count++;
 			} catch ( FlowException $e ) {
 				// just ignore revisions that fail to build document...
-				wfWarn( __METHOD__ . ': Failed to build document for ' . $revision->getRevisionId()->getAlphadecimal() . ': ' . $e->getMessage());
+				wfWarn( __METHOD__ . ': Failed to build document for ' . $revision->getRevisionId()->getAlphadecimal() . ': ' . $e->getMessage() );
 				MWExceptionHandler::logException( $e );
 			}
 
 			// send documents in small batches
 			if ( count( $documents ) > $batchSize ) {
 				$this->sendDocuments( $documents, $shardTimeout );
-				$documents = array();
+				$documents = [];
 			}
 		}
 
@@ -101,13 +101,13 @@ abstract class AbstractUpdater {
 				$bulk->setShardTimeout( $shardTimeout );
 			}
 
-			$index = $this->connection->getFlowIndex( wfWikiId() );
+			$index = $this->connection->getFlowIndex( wfWikiID() );
 			$type = $index->getType( $this->getTypeName() );
 			$bulk->setType( $type );
 			$bulk->addDocuments( $documents );
 			$bulk->send();
 		} catch ( \Exception $e ) {
-			$documentIds = array_map( function( $doc ) {
+			$documentIds = array_map( function ( $doc ) {
 				return $doc->getId();
 			}, $documents );
 			wfWarn( __METHOD__ . ': Failed updating documents (' . implode( ',', $documentIds ) . '): ' . $e->getMessage() );

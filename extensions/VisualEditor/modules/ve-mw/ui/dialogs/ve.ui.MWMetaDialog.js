@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWMetaDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -63,22 +63,21 @@ ve.ui.MWMetaDialog.prototype.initialize = function () {
 	// Properties
 	this.panels = new OO.ui.StackLayout();
 	this.bookletLayout = new OO.ui.BookletLayout( { outlined: true } );
-	this.settingsPage = new ve.ui.MWSettingsPage(
-		'settings',
-		{ $overlay: this.$overlay }
-	);
-	this.advancedSettingsPage = new ve.ui.MWAdvancedSettingsPage( 'advancedSettings' );
 	this.categoriesPage = new ve.ui.MWCategoriesPage( 'categories', { $overlay: this.$overlay } );
-	this.languagesPage = new ve.ui.MWLanguagesPage( 'languages' );
+	this.settingsPage = new ve.ui.MWSettingsPage( 'settings', { $overlay: this.$overlay } );
+	this.advancedSettingsPage = new ve.ui.MWAdvancedSettingsPage( 'advancedSettings', { $overlay: this.$overlay } );
+	this.languagesPage = new ve.ui.MWLanguagesPage( 'languages', { $overlay: this.$overlay } );
+	this.templatesUsedPage = new ve.ui.MWTemplatesUsedPage( 'templatesUsed', { $overlay: this.$overlay } );
 
 	// Initialization
 	this.$body.append( this.panels.$element );
 	this.panels.addItems( [ this.bookletLayout ] );
 	this.bookletLayout.addPages( [
+		this.categoriesPage,
 		this.settingsPage,
 		this.advancedSettingsPage,
-		this.categoriesPage,
-		this.languagesPage
+		this.languagesPage,
+		this.templatesUsedPage
 	] );
 };
 
@@ -108,7 +107,18 @@ ve.ui.MWMetaDialog.prototype.getSetupProcess = function ( data ) {
 	data = data || {};
 	return ve.ui.MWMetaDialog.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
-			var surfaceModel = this.getFragment().getSurface();
+			var surfaceModel = this.getFragment().getSurface(),
+				selectWidget = this.bookletLayout.outlineSelectWidget,
+				visualOnlyPages = [ 'categories', 'settings', 'advancedSettings', 'languages' ],
+				isSource = ve.init.target.getSurface().getMode() === 'source';
+
+			visualOnlyPages.forEach( function ( page ) {
+				selectWidget.findItemFromData( page ).setDisabled( isSource );
+			} );
+
+			if ( isSource && visualOnlyPages.indexOf( data.page || 'categories' ) !== -1 ) {
+				data.page = 'templatesUsed';
+			}
 
 			// Force all previous transactions to be separate from this history state
 			surfaceModel.pushStaging();
@@ -131,9 +141,9 @@ ve.ui.MWMetaDialog.prototype.getReadyProcess = function ( data ) {
 			}
 
 			// Let each page set itself up ('languages' page doesn't need this yet)
+			this.categoriesPage.setup( surfaceModel.metaList, data );
 			this.settingsPage.setup( surfaceModel.metaList, data );
 			this.advancedSettingsPage.setup( surfaceModel.metaList, data );
-			this.categoriesPage.setup( surfaceModel.metaList, data );
 		}, this );
 };
 
@@ -145,9 +155,9 @@ ve.ui.MWMetaDialog.prototype.getTeardownProcess = function ( data ) {
 	return ve.ui.MWMetaDialog.super.prototype.getTeardownProcess.call( this, data )
 		.first( function () {
 			// Let each page tear itself down ('languages' page doesn't need this yet)
+			this.categoriesPage.teardown( { action: data.action } );
 			this.settingsPage.teardown( { action: data.action } );
 			this.advancedSettingsPage.teardown( { action: data.action } );
-			this.categoriesPage.teardown( { action: data.action } );
 		}, this );
 };
 

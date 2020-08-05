@@ -12,13 +12,16 @@
  * Other FFS classes can extend SimpleFFS and override suitable methods.
  * @ingroup FFS
  */
+
+use UtfNormal\Validator;
+
 class SimpleFFS implements FFS {
 	public function supportsFuzzy() {
 		return 'no';
 	}
 
 	public function getFileExtensions() {
-		return array();
+		return [];
 	}
 
 	/**
@@ -117,7 +120,7 @@ class SimpleFFS implements FFS {
 			throw new MWException( "Contents of $filename are not valid utf-8." );
 		}
 
-		$input = UtfNormal::cleanUp( $input );
+		$input = Validator::cleanUp( $input );
 
 		try {
 			return $this->readFromVariable( $input );
@@ -143,7 +146,7 @@ class SimpleFFS implements FFS {
 
 		list( $authorsPart, $messagesPart ) = $parts;
 		$authors = explode( self::RECORD_SEPARATOR, $authorsPart );
-		$messages = array();
+		$messages = [];
 
 		foreach ( explode( self::RECORD_SEPARATOR, $messagesPart ) as $line ) {
 			if ( $line === '' ) {
@@ -163,10 +166,10 @@ class SimpleFFS implements FFS {
 
 		$messages = $this->group->getMangler()->mangle( $messages );
 
-		return array(
+		return [
 			'AUTHORS' => $authors,
 			'MESSAGES' => $messages,
-		);
+		];
 	}
 
 	/**
@@ -192,7 +195,9 @@ class SimpleFFS implements FFS {
 
 		$targetFile = $writePath . '/' . $this->group->getTargetFilename( $collection->code );
 
-		if ( file_exists( $targetFile ) ) {
+		$targetFileExists = file_exists( $targetFile );
+
+		if ( $targetFileExists ) {
 			$this->tryReadSource( $targetFile, $collection );
 		} else {
 			$sourceFile = $this->group->getSourceFilePath( $collection->code );
@@ -200,10 +205,22 @@ class SimpleFFS implements FFS {
 		}
 
 		$output = $this->writeReal( $collection );
-		if ( $output ) {
-			wfMkdirParents( dirname( $targetFile ), null, __METHOD__ );
-			file_put_contents( $targetFile, $output );
+		if ( !$output ) {
+			return;
 		}
+
+		// Some file formats might have changing parts, such as timestamp.
+		// This allows the file handler to skip updating files, where only
+		// the timestamp would change.
+		if ( $targetFileExists ) {
+			$oldContent = $this->tryReadFile( $targetFile );
+			if ( !$this->shouldOverwrite( $oldContent, $output ) ) {
+				return;
+			}
+		}
+
+		wfMkdirParents( dirname( $targetFile ), null, __METHOD__ );
+		file_put_contents( $targetFile, $output );
 	}
 
 	/**
@@ -350,5 +367,13 @@ class SimpleFFS implements FFS {
 		$data = str_replace( "\r", "\n", $data );
 
 		return $data;
+	}
+
+	public function isContentEqual( $a, $b ) {
+		return $a === $b;
+	}
+
+	public function shouldOverwrite( $a, $b ) {
+		return true;
 	}
 }

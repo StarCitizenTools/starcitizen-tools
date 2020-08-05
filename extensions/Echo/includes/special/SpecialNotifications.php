@@ -12,11 +12,17 @@ class SpecialNotifications extends SpecialPage {
 	}
 
 	public function execute( $par ) {
-
 		$this->setHeaders();
 
 		$out = $this->getOutput();
 		$out->setPageTitle( $this->msg( 'echo-specialpage' )->text() );
+
+		$this->addHelpLink( 'Help:Notifications/Special:Notifications' );
+
+		$out->addJsConfigVars( 'wgNotificationsSpecialPageLinks', [
+			'help' => '//www.mediawiki.org/wiki/Special:MyLanguage/Help:Notifications/Special:Notifications',
+			'preferences' => SpecialPage::getTitleFor( 'Preferences' )->getLinkURL() . '#mw-prefsection-echo',
+		] );
 
 		$user = $this->getUser();
 		if ( $user->isAnon() ) {
@@ -27,29 +33,28 @@ class SpecialNotifications extends SpecialPage {
 
 		$out->addSubtitle( $this->buildSubtitle() );
 
-		// The continue parameter to pull current set of data from, this
-		// would be used for browsers with javascript disabled
-		$continue = $this->getRequest()->getVal( 'continue', null );
+		$out->enableOOUI();
 
-		// Pull the notifications
-		$notif = array();
-		$notificationMapper = new EchoNotificationMapper();
+		$pager = new NotificationPager( $this->getContext() );
+		$pager->setOffset( $this->getRequest()->getVal( 'offset' ) );
+		$pager->setLimit( $this->getRequest()->getVal( 'limit', self::DISPLAY_NUM ) );
+		$notifications = $pager->getNotifications();
 
-		$attributeManager = EchoAttributeManager::newFromGlobalVars();
-		$notifications = $notificationMapper->fetchByUser(
-			$user,
-			/* $limit = */self::DISPLAY_NUM + 1,
-			$continue,
-			$attributeManager->getUserEnabledEvents( $user, 'web' )
-		);
+		$noJSDiv = new OOUI\Tag();
+		$noJSDiv->addClasses( [ 'mw-echo-special-nojs' ] );
 
 		// If there are no notifications, display a message saying so
 		if ( !$notifications ) {
-			$out->addWikiMsg( 'echo-none' );
-
+			// Wrap this with nojs so it is still hidden if JS is loading
+			$noJSDiv->appendContent(
+				new OOUI\LabelWidget( [ 'label' => $this->msg( 'echo-none' )->text() ] )
+			);
+			$out->addHTML( $noJSDiv );
+			$out->addModules( [ 'ext.echo.special' ] );
 			return;
 		}
 
+		$notif = [];
 		foreach ( $notifications as $notification ) {
 			$output = EchoDataOutputFormatter::formatOutput( $notification, 'special', $user, $this->getLanguage() );
 			if ( $output ) {
@@ -57,91 +62,178 @@ class SpecialNotifications extends SpecialPage {
 			}
 		}
 
-		// Check if there is more data to load for next request
-		if ( count( $notifications ) > self::DISPLAY_NUM ) {
-			$lastItem = array_pop( $notif );
-			$nextContinue = $lastItem['timestamp']['utcunix'] . '|' . $lastItem['id'];
-		} else {
-			$nextContinue = null;
-		}
-
 		// Add the notifications to the page (interspersed with date headers)
 		$dateHeader = '';
-		$notices = '';
-		$unread = array();
+		$unread = [];
+		$anyUnread = false;
 		$echoSeenTime = EchoSeenTime::newFromUser( $user );
 		$seenTime = $echoSeenTime->getTime();
+		$notifArray = [];
 		foreach ( $notif as $row ) {
-			$class = 'mw-echo-notification';
+			if ( !$row['*'] ) {
+				continue;
+			}
+
+			$classes = [ 'mw-echo-notification' ];
 
 			if ( !isset( $row['read'] ) ) {
-				$class .= ' mw-echo-unread';
+				$classes[] = 'mw-echo-notification-unread';
 				if ( !$row['targetpages'] ) {
 					$unread[] = $row['id'];
 				}
 			}
 
 			if ( $seenTime !== null && $row['timestamp']['mw'] > $seenTime ) {
-				$class .= ' mw-echo-unseen';
+				$classes[] = 'mw-echo-notification-unseen';
 			}
 
-			if ( !$row['*'] ) {
-				continue;
-			}
 			// Output the date header if it has not been displayed
 			if ( $dateHeader !== $row['timestamp']['date'] ) {
 				$dateHeader = $row['timestamp']['date'];
-				$notices .= Html::rawElement( 'li', array( 'class' => 'mw-echo-date-section' ), $dateHeader );
+				$notifArray[ $dateHeader ] = [
+					'unread' => [],
+					'notices' => []
+				];
 			}
 
-			$notices .= Html::rawElement(
-				'li',
-				array(
-					'class' => $class,
+			// Collect unread IDs
+			if ( !isset( $row['read'] ) ) {
+				$anyUnread = true;
+				$notifArray[ $dateHeader ][ 'unread' ][] = $row['id'];
+			}
+
+			$li = new OOUI\Tag( 'li' );
+			$li
+				->addClasses( $classes )
+				->setAttributes( [
 					'data-notification-category' => $row['category'],
 					'data-notification-event' => $row['id'],
 					'data-notification-type' => $row['type']
-				),
-				$row['*']
-			);
-		}
-		$html = Html::rawElement( 'ul', array( 'id' => 'mw-echo-special-container' ), $notices );
+				] )
+				->appendContent( new OOUI\HtmlSnippet( $row['*'] ) );
 
-		// Build the more link
-		if ( $nextContinue ) {
-			$html .= Html::element(
-				'a',
-				array(
-					'href' => SpecialPage::getTitleFor( 'Notifications' )->getLinkURL(
-						array( 'continue' => $nextContinue )
-					),
-					'class' => 'mw-ui-button mw-ui-primary',
-					'id' => 'mw-echo-more'
-				),
-				$this->msg( 'moredotdotdot' )->text()
-			);
+			// Store
+			$notifArray[ $dateHeader ][ 'notices' ][] = $li;
 		}
 
-		$out->addHTML( $html );
-		$out->addModules( 'ext.echo.special' );
-		$out->addJsConfigVars(
-			array(
-				'wgEchoDisplayNum' => self::DISPLAY_NUM,
-				'wgEchoNextContinue' => $nextContinue,
-				'wgEchoDateHeader' => $dateHeader
-			)
-		);
-		// For no-js support
-		$out->addModuleStyles( array( 'ext.echo.styles.notifications', 'ext.echo.styles.special' ) );
+		$markAllAsReadFormWrapper = '';
+		// Ensure there are some unread notifications
+		if ( $anyUnread ) {
+			$markReadSpecialPage = new SpecialNotificationsMarkRead();
 
-		DeferredUpdates::addCallableUpdate( function () use ( $user, $echoSeenTime, $unread ) {
-			// Mark items as read
-			if ( $unread ) {
-				MWEchoNotifUser::newFromUser( $user )->markRead( $unread );
+			$markAllAsReadText = $this->msg( 'echo-mark-all-as-read' )->text();
+			$markAllAsReadLabelIcon = new EchoOOUI\LabelIconWidget( [
+				'label' => $markAllAsReadText,
+				'icon' => 'checkAll',
+			] );
+
+			$markAllAsReadForm = $markReadSpecialPage->getMinimalForm(
+				[ 'ALL' ],
+				$markAllAsReadText,
+				true,
+				$markAllAsReadLabelIcon->toString()
+			);
+
+			$formHtml = $markAllAsReadForm->prepareForm()->getHTML( /* First submission attempt */ false );
+
+			$markAllAsReadFormWrapper = new OOUI\Tag();
+			$markAllAsReadFormWrapper
+				->addClasses( [ 'mw-echo-special-markAllReadButton' ] )
+				->appendContent( new OOUI\HtmlSnippet( $formHtml ) );
+		}
+
+		// Build the list
+		$notices = new OOUI\Tag( 'ul' );
+		$notices->addClasses( [ 'mw-echo-special-notifications' ] );
+
+		$markReadSpecialPage = new SpecialNotificationsMarkRead();
+		foreach ( $notifArray as $section => $data ) {
+			// Heading
+			$heading = ( new OOUI\Tag( 'li' ) )->addClasses( [ 'mw-echo-date-section' ] );
+
+			$dateTitle = new OOUI\LabelWidget( [
+				'classes' => [ 'mw-echo-date-section-text' ],
+				'label' => $section
+			] );
+
+			$heading->appendContent( $dateTitle );
+
+			// Mark all read button
+			if ( $data[ 'unread' ] !== [] ) {
+				// tell the UI to show 'unread' notifications only (instead of 'all')
+				$out->addJsConfigVars( 'wgEchoReadState', 'unread' );
+
+				$markReadSectionText = $this->msg( 'echo-specialpage-section-markread' )->text();
+				$markAsReadLabelIcon = new EchoOOUI\LabelIconWidget( [
+					'label' => $markReadSectionText,
+					'icon' => 'checkAll',
+				] );
+
+				// There are unread notices. Add the 'mark section as read' button
+				$markSectionAsReadForm = $markReadSpecialPage->getMinimalForm(
+					$data[ 'unread' ],
+					$markReadSectionText,
+					true,
+					$markAsReadLabelIcon->toString()
+				);
+
+				$formHtml = $markSectionAsReadForm->prepareForm()->getHTML( /* First submission attempt */ false );
+
+				$formWrapper = new OOUI\Tag();
+				$formWrapper
+					->addClasses( [ 'mw-echo-markAsReadSectionButton' ] )
+					->appendContent( new OOUI\HtmlSnippet( $formHtml ) );
+
+				$heading->appendContent( $formWrapper );
 			}
-			// Record time notifications have been seen
-			$echoSeenTime->setTime( wfTimestamp( TS_MW ) );
-		} );
+
+			// These two must be separate, because $data[ 'notices' ]
+			// is an array
+			$notices
+				->appendContent( $heading )
+				->appendContent( $data[ 'notices' ] );
+		}
+
+		$navBar = $pager->getNavigationBar();
+
+		$navTop = new OOUI\Tag();
+		$navBottom = new OOUI\Tag();
+		$container = new OOUI\Tag();
+
+		$navTop
+			->addClasses( [ 'mw-echo-special-navbar-top' ] )
+			->appendContent( new OOUI\HtmlSnippet( $navBar ) );
+		$navBottom
+			->addClasses( [ 'mw-echo-special-navbar-bottom' ] )
+			->appendContent( new OOUI\HtmlSnippet( $navBar ) );
+
+		// Put it all together
+		$container
+			->addClasses( [ 'mw-echo-special-container' ] )
+			->appendContent(
+				$navTop,
+				$markAllAsReadFormWrapper,
+				$notices,
+				$navBottom
+			);
+
+		// Wrap with nojs div
+		$noJSDiv->appendContent( $container );
+
+		$out->addHTML( $noJSDiv );
+
+		$out->addModules( [ 'ext.echo.special' ] );
+
+		// For no-js support
+		$out->addModuleStyles( [
+			'ext.echo.styles.notifications',
+			'ext.echo.styles.special',
+			// We already load badgeicons in the BeforePageDisplay hook, but not for minerva
+			'ext.echo.badgeicons'
+		] );
+
+		// Log visit
+		MWEchoEventLogging::logSpecialPageVisit( $user, $out->getSkin()->getSkinName() );
 	}
 
 	/**
@@ -149,33 +241,20 @@ class SpecialNotifications extends SpecialPage {
 	 * @return string HTML for the subtitle
 	 */
 	public function buildSubtitle() {
-		global $wgEchoHelpPage;
 		$lang = $this->getLanguage();
-		$subtitleLinks = array();
-		// More info link
-		$subtitleLinks[] = Html::rawElement(
-			'a',
-			array(
-				'href' => $wgEchoHelpPage,
-				'id' => 'mw-echo-moreinfo-link',
-				'class' => 'mw-echo-special-header-link',
-				'title' => $this->msg( 'echo-more-info' )->text(),
-				'target' => '_blank'
-			),
-			$this->msg( 'echo-more-info' )->text()
-		);
+		$subtitleLinks = [];
 		// Preferences link
-		$subtitleLinks[] = Html::rawElement(
+		$subtitleLinks[] = Html::element(
 			'a',
-			array(
+			[
 				'href' => SpecialPage::getTitleFor( 'Preferences' )->getLinkURL() . '#mw-prefsection-echo',
 				'id' => 'mw-echo-pref-link',
 				'class' => 'mw-echo-special-header-link',
 				'title' => $this->msg( 'preferences' )->text()
-			),
+			],
 			$this->msg( 'preferences' )->text()
 		);
-
+		// using pipeList to make it easier to add some links in the future
 		return $lang->pipeList( $subtitleLinks );
 	}
 

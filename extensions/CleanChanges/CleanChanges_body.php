@@ -6,12 +6,22 @@
 class NCL extends EnhancedChangesList {
 	/**
 	 * Determines which version of changes list to provide, or none.
+	 * @param User $user
+	 * @param Skin $skin
+	 * @param array &$list
+	 * @return bool
 	 */
 	public static function hook( User $user, Skin $skin, &$list ) {
+		global $wgCCTrailerFilter, $wgCCFiltersOnly;
+
 		$list = null;
 
-		if ( defined( 'ULS_VERSION' ) ) {
+		if ( $wgCCTrailerFilter && defined( 'ULS_VERSION' ) ) {
 			$skin->getOutput()->addModules( 'ext.cleanchanges.uls' );
+		}
+
+		if ( $wgCCFiltersOnly ) {
+			return;
 		}
 
 		/* allow override */
@@ -41,7 +51,7 @@ class NCL extends EnhancedChangesList {
 	protected static $userinfo = [];
 
 	/**
-	 * @param $vars array
+	 * @param array &$vars
 	 * @return bool
 	 */
 	public static function addScriptVariables( &$vars ) {
@@ -76,8 +86,7 @@ class NCL extends EnhancedChangesList {
 	public function beginRecentChangesList() {
 		parent::beginRecentChangesList();
 		$dir = $this->direction ? 'ltr' : 'rtl';
-		return
-			Xml::openElement(
+		return Xml::openElement(
 				'div',
 				[ 'style' => "direction: $dir" ]
 			);
@@ -91,7 +100,7 @@ class NCL extends EnhancedChangesList {
 	}
 
 	/**
-	 * @param RCCacheEntry $rc
+	 * @param RCCacheEntry|null $rc
 	 * @return int
 	 */
 	protected function isLog( RCCacheEntry $rc = null ) {
@@ -116,11 +125,12 @@ class NCL extends EnhancedChangesList {
 
 	/**
 	 * Format a line for enhanced recentchange (aka with JavaScript and block of lines).
-	 * @param RecentChange $baseRC
+	 * @param RecentChange &$baseRC
 	 * @param bool $watched
+	 * @param int|null $linenumber
 	 * @return string
 	 */
-	public function recentChangesLine( &$baseRC, $watched = false ) {
+	public function recentChangesLine( &$baseRC, $watched = false, $linenumber = null ) {
 		# Create a specialised object
 		$rc = RCCacheEntry::newFromParent( $baseRC );
 
@@ -261,8 +271,8 @@ class NCL extends EnhancedChangesList {
 		$overrides = [ 'minor' => false, 'bot' => false ];
 		$oldid = 0;
 		foreach ( $block as $rcObj ) {
-			$oldid = $rcObj->mAttribs['rc_last_oldid'];
-			if ( $rcObj->mAttribs['rc_new'] ) {
+			$oldid = $rcObj->getAttribute( 'rc_last_oldid' );
+			if ( $rcObj->getAttribute( 'rc_new' ) ) {
 				$isnew = $overrides['new'] = true;
 			}
 			$u = $rcObj->_user;
@@ -287,7 +297,8 @@ class NCL extends EnhancedChangesList {
 			'data-mw-cleanchanges-level' => $rci,
 			'data-mw-cleanchanges-other' => $rcm,
 			'data-mw-cleanchanges-link' => $rcl,
-			'href' => '#',
+			'tabindex' => '0',
+			'role' => 'button',
 			'class' => 'mw-cleanchanges-showblock'
 		];
 		$tl =
@@ -317,8 +328,8 @@ class NCL extends EnhancedChangesList {
 					$nchanges[$n],
 					[],
 					[
-						'curid' => $block[0]->mAttribs['rc_cur_id'],
-						'diff' => $block[0]->mAttribs['rc_this_oldid'],
+						'curid' => $block[0]->getAttribute( 'rc_cur_id' ),
+						'diff' => $block[0]->getAttribute( 'rc_this_oldid' ),
 						'oldid' => $oldid
 					]
 				);
@@ -326,7 +337,7 @@ class NCL extends EnhancedChangesList {
 				$changes = $nchanges[$n];
 			}
 
-			$size = $this->getCharacterDifference( $block[0], $block[count( $block ) -1] );
+			$size = $this->getCharacterDifference( $block[0], $block[count( $block ) - 1] );
 			$items[] = $this->changeInfo( $changes, $block[0]->_histLink, $size );
 		}
 
@@ -525,7 +536,7 @@ class NCL extends EnhancedChangesList {
 	 * @param int $userId user id, 0 for anons
 	 * @param string $userText username
 	 * @return array|string Either an array of html and array of messages, or ''
-	 *	[0]: html span and links to user tools
+	 * 	[0]: html span and links to user tools
 	 * 	[1]: array of escaped message strings
 	 */
 	public function userToolLinks( $userId, $userText ) {
@@ -548,7 +559,7 @@ class NCL extends EnhancedChangesList {
 		$userindex = array_search( $userText, $users, true );
 		if ( $userindex === false ) {
 			$users[] = $userText;
-			$userindex = count( $users ) -1;
+			$userindex = count( $users ) - 1;
 		}
 
 		global $wgExtensionAssetsPath;
@@ -565,7 +576,8 @@ class NCL extends EnhancedChangesList {
 		$rcl = 'RCUL' . $linkindex;
 		$rcm = 'RCUM' . $linkindex;
 		$linkAttribs = [
-			'href' => '#',
+			'tabindex' => '0',
+			'role' => 'button',
 			'class' => 'mw-cleanchanges-showuserinfo',
 			'data-mw-userinfo-id' => $rci,
 			'data-mw-userinfo-target' => $rcl
@@ -611,6 +623,8 @@ class NCL extends EnhancedChangesList {
 	/**
 	 * Makes aggregated list of contributors for a changes group.
 	 * Example: [Usera; AnotherUser; ActiveUser ‎(2×); Userabc ‎(6×)]
+	 * @param array $userlinks
+	 * @return string
 	 */
 	protected function makeUserlinks( $userlinks ) {
 		/*
@@ -636,7 +650,7 @@ class NCL extends EnhancedChangesList {
 
 	/**
 	 * @param RCCacheEntry $rc
-	 * @param array $overrides
+	 * @param array|null $overrides
 	 * @return string
 	 */
 	protected function getFlags( $rc, array $overrides = null ) {
@@ -653,7 +667,7 @@ class NCL extends EnhancedChangesList {
 		$items = [];
 		foreach ( $map as $item => $data ) {
 			list( $field, $flag ) = $data;
-			$bool = isset( $overrides[$item] ) ? $overrides[$item] : $rc->getAttribute( $field );
+			$bool = $overrides[$item] ?? $rc->getAttribute( $field );
 			$items[] = $bool ? $flag : $nothing;
 		}
 
@@ -719,8 +733,8 @@ class NCL extends EnhancedChangesList {
 	}
 
 	/**
-	 * @param $class
-	 * @param $content
+	 * @param string $class
+	 * @param string $content
 	 * @param string $tag
 	 * @param bool $escape
 	 * @return string

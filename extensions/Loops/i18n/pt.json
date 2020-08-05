@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cainamarques",
+			"Hamilton Abreu"
+		]
+	},
+	"loops-desc": "Funções sintáticas para executar ciclos",
+	"loops_max": "O número máximo de ciclos foi atingido",
+	"loops-limitreport-count-limited": "Contagem ExtLoops",
+	"loops-limitreport-count-unlimited": "Contagem ExtLoops",
+	"loops-config-countlimit": "Variável de configuração que define o número máximo permitido de ciclos ('-1' => sem limite). Este limite não se aplica a '#forargs' e '#fornumargs'.",
+	"loops-config-enabledfunctions": "Permite definir que funcionalidades fornecidas por 'Loops' devem ser ativadas para a wiki. Se a extensão 'Variables' não estiver instalada, '#loop', '#forargs' e '#fornumargs' serão desativados automaticamente."
+}

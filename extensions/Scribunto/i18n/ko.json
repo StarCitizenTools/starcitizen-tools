@@ -6,7 +6,8 @@
 			"Priviet",
 			"아라",
 			"SeoJeongHo",
-			"Hwangjy9"
+			"Hwangjy9",
+			"Ykhwong"
 		]
 	},
 	"scribunto-desc": "미디어위키 문서에 스크립트 언어를 넣기 위한 프레임워크",
@@ -42,7 +43,6 @@
 	"scribunto-luastandalone-proc-error": "Lua 오류: 프로세스를 생성할 수 없습니다.",
 	"scribunto-luastandalone-proc-error-msg": "Lua 오류: 프로세스를 생성할 수 없습니다: $2",
 	"scribunto-luastandalone-proc-error-proc-open": "Lua 오류: 프로세스를 생성할 수 없습니다: proc_open은 사용할 수 없습니다. PHP의 \"disable_functions\" 설정을 확인하십시오.",
-	"scribunto-luastandalone-proc-error-safe-mode": "Lua 오류: 프로세스를 생성할 수 없습니다. 참고로 PHP의 사용 폐기된 \"safe_mode\" 설정이 활성화되었습니다.",
 	"scribunto-luastandalone-decode-error": "Lua 오류: 내부 오류: 메시지를 디코드할 수 없습니다.",
 	"scribunto-luastandalone-write-error": "Lua 오류: 내부 오류: 파이프에 쓰는 도중 오류가 발생했습니다.",
 	"scribunto-luastandalone-read-error": "Lua 오류: 내부 오류: 파이프에서 읽는 도중 오류가 발생했습니다.",
@@ -50,6 +50,7 @@
 	"scribunto-luastandalone-signal": "Lua 오류: 내부 오류: 인터프리터가 \"$2\" 신호로 종료했습니다.",
 	"scribunto-luastandalone-exited": "Lua 오류: 내부 오류: 인터프리터가 $2 상태로 종료했습니다.",
 	"scribunto-module-with-errors-category": "오류가 있는 Scribunto 모듈",
+	"scribunto-module-with-errors-category-desc": "모듈 안에 오류가 있습니다.",
 	"scribunto-limitreport-timeusage": "루아 시간 사용",
 	"scribunto-limitreport-timeusage-value": "$1/$2초",
 	"scribunto-limitreport-virtmemusage": "루아 가상 크기",
@@ -57,5 +58,9 @@
 	"scribunto-limitreport-memusage": "루아 메모리 사용",
 	"scribunto-limitreport-profile": "루아 프로필",
 	"scribunto-limitreport-profile-ms": "$1ms",
-	"apihelp-scribunto-console-param-title": "모듈의 제목을 테스트 합니다."
+	"apihelp-scribunto-console-description": "Scribunto 콘솔에서 XHR 요청을 서비스하기 위한 내부 모듈입니다.",
+	"apihelp-scribunto-console-summary": "Scribunto 콘솔에서 XHR 요청을 서비스하기 위한 내부 모듈입니다.",
+	"apihelp-scribunto-console-param-title": "테스트할 모듈의 제목입니다.",
+	"nstab-module": "모듈",
+	"tooltip-ca-nstab-module": "모듈 문서 보기"
 }

@@ -22,18 +22,23 @@
  * @author Brian Wolff
  */
 
+use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\IDatabase;
+
 /**
  * @ingroup SpecialPage
  */
 class MediaStatisticsPage extends QueryPage {
 	protected $totalCount = 0, $totalBytes = 0;
+
 	/**
-	* @var integer $totalPerType Combined file size of all files in a section
-	*/
+	 * @var int $totalPerType Combined file size of all files in a section
+	 */
 	protected $totalPerType = 0;
+
 	/**
-	* @var integer $totalSize Combined file size of all files
-	*/
+	 * @var int $totalSize Combined file size of all files
+	 */
 	protected $totalSize = 0;
 
 	function __construct( $name = 'MediaStatistics' ) {
@@ -60,9 +65,10 @@ class MediaStatisticsPage extends QueryPage {
 	 * come out of querycache table is the order they went in. Which is hacky.
 	 * However, other special pages like Special:Deadendpages and
 	 * Special:BrokenRedirects also rely on this.
+	 * @return array
 	 */
 	public function getQueryInfo() {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$fakeTitle = $dbr->buildConcat( [
 			'img_media_type',
 			$dbr->addQuotes( ';' ),
@@ -80,10 +86,6 @@ class MediaStatisticsPage extends QueryPage {
 				'title' => $fakeTitle,
 				'namespace' => NS_MEDIA, /* needs to be something */
 				'value' => '1'
-			],
-			'conds' => [
-				// WMF has a random null row in the db
-				'img_media_type IS NOT NULL'
 			],
 			'options' => [
 				'GROUP BY' => [
@@ -112,7 +114,7 @@ class MediaStatisticsPage extends QueryPage {
 	 * @param OutputPage $out
 	 * @param Skin $skin (deprecated presumably)
 	 * @param IDatabase $dbr
-	 * @param ResultWrapper $res Results from query
+	 * @param IResultWrapper $res Results from query
 	 * @param int $num Number of results
 	 * @param int $offset Paging offset (Should always be 0 in our case)
 	 */
@@ -170,14 +172,15 @@ class MediaStatisticsPage extends QueryPage {
 	 *
 	 * @param string $mime mime type (e.g. image/jpeg)
 	 * @param int $count Number of images of this type
-	 * @param int $totalBytes Total space for images of this type
+	 * @param int $bytes Total space for images of this type
 	 */
 	protected function outputTableRow( $mime, $count, $bytes ) {
 		$mimeSearch = SpecialPage::getTitleFor( 'MIMEsearch', $mime );
+		$linkRenderer = $this->getLinkRenderer();
 		$row = Html::rawElement(
 			'td',
 			[],
-			Linker::link( $mimeSearch, htmlspecialchars( $mime ) )
+			$linkRenderer->makeLink( $mimeSearch, $mime )
 		);
 		$row .= Html::element(
 			'td',
@@ -197,7 +200,7 @@ class MediaStatisticsPage extends QueryPage {
 		$row .= Html::rawElement(
 			'td',
 			// Make sure js sorts it in numeric order
-			[ 'data-sort-value' =>  $bytes ],
+			[ 'data-sort-value' => $bytes ],
 			$this->msg( 'mediastatistics-nbytes' )
 				->numParams( $bytes )
 				->sizeParams( $bytes )
@@ -234,7 +237,8 @@ class MediaStatisticsPage extends QueryPage {
 	 * @return string Comma separated list of allowed extensions (e.g. ".ogg, .oga")
 	 */
 	private function getExtensionList( $mime ) {
-		$exts = MimeMagic::singleton()->getExtensionsForType( $mime );
+		$exts = MediaWiki\MediaWikiServices::getInstance()->getMimeAnalyzer()
+			->getExtensionsForType( $mime );
 		if ( $exts === null ) {
 			return '';
 		}
@@ -251,6 +255,7 @@ class MediaStatisticsPage extends QueryPage {
 	 * Output the start of the table
 	 *
 	 * Including opening <table>, and first <tr> with column headers.
+	 * @param string $mediaType
 	 */
 	protected function outputTableStart( $mediaType ) {
 		$this->getOutput()->addHTML(
@@ -307,6 +312,7 @@ class MediaStatisticsPage extends QueryPage {
 				// mediastatistics-header-video, mediastatistics-header-multimedia,
 				// mediastatistics-header-office, mediastatistics-header-text,
 				// mediastatistics-header-executable, mediastatistics-header-archive,
+				// mediastatistics-header-3d,
 				$this->msg( 'mediastatistics-header-' . strtolower( $mediaType ) )->text()
 			)
 		);
@@ -338,7 +344,7 @@ class MediaStatisticsPage extends QueryPage {
 	 * we need to implement since abstract in parent class.
 	 *
 	 * @param Skin $skin
-	 * @param stdObject $result Result row
+	 * @param stdClass $result Result row
 	 * @return bool|string|void
 	 * @throws MWException
 	 */
@@ -350,9 +356,10 @@ class MediaStatisticsPage extends QueryPage {
 	 * Initialize total values so we can figure out percentages later.
 	 *
 	 * @param IDatabase $dbr
-	 * @param ResultWrapper $res
+	 * @param IResultWrapper $res
 	 */
 	public function preprocessResults( $dbr, $res ) {
+		$this->executeLBFromResultWrapper( $res );
 		$this->totalCount = $this->totalBytes = 0;
 		foreach ( $res as $row ) {
 			$mediaStats = $this->splitFakeTitle( $row->title );

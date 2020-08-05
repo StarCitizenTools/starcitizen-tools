@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Armando-Martin"
+		]
+	},
+	"variables-desc": "Funciones de analizador (parser) que permiten trabajar con variables dinámicas en el contexto de un artículo"
+}

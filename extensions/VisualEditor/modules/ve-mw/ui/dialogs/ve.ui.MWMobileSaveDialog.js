@@ -1,15 +1,15 @@
 /*!
  * VisualEditor UserInterface MWMobileSaveDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 /**
  * Dialog for saving MediaWiki pages in mobile.
  *
- * Note that most methods are not safe to call before the dialog has initialized, except where
- * noted otherwise.
+ * TODO: Currently this does no overriding so could be removed, but we may want
+ * to customise the mobile save dialog in the near future.
  *
  * @class
  * @extends ve.ui.MWSaveDialog
@@ -17,9 +17,9 @@
  * @constructor
  * @param {Object} [config] Config options
  */
-ve.ui.MWMobileSaveDialog = function VeUiMwMobileSaveDialog( config ) {
+ve.ui.MWMobileSaveDialog = function VeUiMwMobileSaveDialog() {
 	// Parent constructor
-	ve.ui.MWMobileSaveDialog.super.call( this, config );
+	ve.ui.MWMobileSaveDialog.super.apply( this, arguments );
 
 	// Initialization
 	this.$element.addClass( 've-ui-mwMobileSaveDialog' );
@@ -30,20 +30,15 @@ ve.ui.MWMobileSaveDialog = function VeUiMwMobileSaveDialog( config ) {
 OO.inheritClass( ve.ui.MWMobileSaveDialog, ve.ui.MWSaveDialog );
 
 /* Methods */
-ve.ui.MWMobileSaveDialog.prototype.getSetupProcess = function ( data ) {
-	return ve.ui.MWMobileSaveDialog.super.prototype.getSetupProcess.call( this, data )
-		.next( function () {
-			// Update save button label
-			this.actions.forEach( { actions: 'save' }, function ( action ) {
-				action.setLabel(
-					ve.msg(
-						// Possible messages:
-						// visualeditor-savedialog-label-restore-short, visualeditor-savedialog-label-save-short
-						'visualeditor-savedialog-label-' + ( this.restoring ? 'restore' : 'save' ) + '-short'
-					)
-				);
-			} );
-		}, this );
+
+/**
+ * @inheritdoc
+ */
+ve.ui.MWMobileSaveDialog.prototype.initialize = function () {
+	// Parent method
+	ve.ui.MWMobileSaveDialog.super.prototype.initialize.call( this );
+
+	this.$reviewVisualDiff.addClass( 'content' );
 };
 
 /* Registration */

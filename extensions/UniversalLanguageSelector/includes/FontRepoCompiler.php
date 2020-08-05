@@ -91,17 +91,17 @@ class FontRepoCompiler {
 			$info['fontstyle'] = $font['fontstyle'];
 		}
 
-		foreach ( [ 'ttf', 'woff', 'woff2' ] as $format ) {
+		foreach ( [ 'woff', 'woff2' ] as $format ) {
 			if ( isset( $font[$format] ) ) {
-				$info[$format] = $this->getFontWebPath( $fontpath, $fontdir, $font[$format] );
+				$info[$format] = OutputPage::transformFilePath( $fontdir, $fontpath, $font[$format] );
 			}
 		}
 
 		// If font formats are not explicitly defined, scan the directory.
-		if ( !isset( $info['ttf'] ) ) {
-			foreach ( glob( "$fontpath/*.{ttf,woff,woff2}", GLOB_BRACE ) as $fontfile ) {
+		if ( !isset( $info['woff'] ) ) {
+			foreach ( glob( "$fontpath/*.{woff,woff2}", GLOB_BRACE ) as $fontfile ) {
 				$type = substr( $fontfile, strrpos( $fontfile, '.' ) + 1 );
-				$info[$type] = $this->getFontWebPath( $fontpath, $fontdir, basename( $fontfile ) );
+				$info[$type] = OutputPage::transformFilePath( $fontdir, $fontpath, basename( $fontfile ) );
 			}
 		}
 
@@ -119,15 +119,5 @@ class FontRepoCompiler {
 		}
 
 		return $info;
-	}
-
-	private function getFontWebPath( $path, $fontdir, $filename ) {
-		if ( method_exists( 'OutputPage', 'transformFilePath' ) ) {
-			return OutputPage::transformFilePath( $fontdir, $path, $filename );
-		}
-
-		// BC for MediaWiki <= 1.27
-		$hash = md5_file( "$path/$filename" );
-		return "$fontdir/$filename?" . substr( $hash, 0, 5 );
 	}
 }

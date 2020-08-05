@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Metalhead64"
+		]
+	},
+	"sandboxlink-desc": "Ergänzt im Werkzeugmenü einen Link zur persönlichen Benutzerspielwiese",
+	"sandboxlink-subpage-name": "Spielwiese",
+	"sandboxlink-portlet-label": "Spielwiese",
+	"tooltip-pt-sandbox": "Deine Spielwiese"
+}

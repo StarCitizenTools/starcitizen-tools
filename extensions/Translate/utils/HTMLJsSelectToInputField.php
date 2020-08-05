@@ -4,7 +4,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2010 Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -12,10 +12,10 @@
  */
 class HTMLJsSelectToInputField extends HTMLTextField {
 	/**
-	 * @param $value
+	 * @param string $value
 	 * @return string
 	 */
-	function getInputHTML( $value ) {
+	public function getInputHTML( $value ) {
 		$input = parent::getInputHTML( $value );
 
 		if ( isset( $this->mParams['select'] ) ) {
@@ -30,7 +30,7 @@ class HTMLJsSelectToInputField extends HTMLTextField {
 	}
 
 	/**
-	 * @param $value
+	 * @param string $value
 	 * @return array
 	 */
 	protected function tidy( $value ) {
@@ -41,11 +41,11 @@ class HTMLJsSelectToInputField extends HTMLTextField {
 	}
 
 	/**
-	 * @param $value
-	 * @param $alldata
-	 * @return bool|String
+	 * @param string $value
+	 * @param array $alldata
+	 * @return bool|string
 	 */
-	function validate( $value, $alldata ) {
+	public function validate( $value, $alldata ) {
 		$p = parent::validate( $value, $alldata );
 
 		if ( $p !== true ) {
@@ -73,11 +73,11 @@ class HTMLJsSelectToInputField extends HTMLTextField {
 	}
 
 	/**
-	 * @param $value
-	 * @param $alldata
+	 * @param string $value
+	 * @param array $alldata
 	 * @return string
 	 */
-	function filter( $value, $alldata ) {
+	public function filter( $value, $alldata ) {
 		$value = parent::filter( $value, $alldata );
 
 		return implode( ', ', $this->tidy( $value ) );

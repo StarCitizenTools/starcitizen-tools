@@ -37,9 +37,9 @@ cscope.out
 # Building & testing
 node_modules/
 /tests/phpunit/phpunit.phar
+/tests/phpunit/includes/Services
 
 # Composer
-/vendor
 /composer.lock
 /composer.json
 /composer.local.json
@@ -63,3 +63,4 @@ Thumbs.db
 /tags
 /.htaccess
 /.htpasswd
+/sitemap

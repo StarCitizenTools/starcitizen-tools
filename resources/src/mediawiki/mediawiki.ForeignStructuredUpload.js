@@ -1,8 +1,5 @@
 ( function ( mw, $, OO ) {
 	/**
-	 * @class mw.ForeignStructuredUpload
-	 * @extends mw.ForeignUpload
-	 *
 	 * Used to represent an upload in progress on the frontend.
 	 *
 	 * This subclass will upload to a wiki using a structured metadata
@@ -14,7 +11,12 @@
 	 * **TODO: This currently only supports uploads under CC-BY-SA 4.0,
 	 * and should really have support for more licenses.**
 	 *
-	 * @inheritdoc
+	 * @class mw.ForeignStructuredUpload
+	 * @extends mw.ForeignUpload
+	 *
+	 * @constructor
+	 * @param {string} [target]
+	 * @param {Object} [apiconfig]
 	 */
 	function ForeignStructuredUpload( target, apiconfig ) {
 		this.date = undefined;
@@ -65,8 +67,12 @@
 					// Foreign wiki might be running a pre-1.27 MediaWiki, without support for this
 					if ( resp.query && resp.query.uploaddialog ) {
 						upload.config = resp.query.uploaddialog;
+						return upload.config;
+					} else {
+						return $.Deferred().reject( 'upload-foreign-cant-load-config' );
 					}
-					return upload.config;
+				}, function () {
+					return $.Deferred().reject( 'upload-foreign-cant-load-config' );
 				} );
 			} );
 		}
@@ -80,12 +86,9 @@
 	 * @param {string[]} categories Array of categories to which this upload will be added.
 	 */
 	ForeignStructuredUpload.prototype.addCategories = function ( categories ) {
-		var i, category;
-
-		for ( i = 0; i < categories.length; i++ ) {
-			category = categories[ i ];
-			this.categories.push( category );
-		}
+		// The length of the array must be less than 10000.
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push#Merging_two_arrays
+		Array.prototype.push.apply( this.categories, categories );
 	};
 
 	/**
@@ -132,7 +135,7 @@
 	 */
 	ForeignStructuredUpload.prototype.getText = function () {
 		return this.config.format.filepage
-			// Replace "numbered parameters" with the given information
+			// Replace "named parameters" with the given information
 			.replace( '$DESCRIPTION', this.getDescriptions() )
 			.replace( '$DATE', this.getDate() )
 			.replace( '$SOURCE', this.getSource() )
@@ -145,7 +148,12 @@
 	 * @inheritdoc
 	 */
 	ForeignStructuredUpload.prototype.getComment = function () {
-		return this.config.comment
+		var
+			isLocal = this.target === 'local',
+			comment = typeof this.config.comment === 'string' ?
+				this.config.comment :
+				this.config.comment[ isLocal ? 'local' : 'foreign' ];
+		return comment
 			.replace( '$PAGENAME', mw.config.get( 'wgPageName' ) )
 			.replace( '$HOST', location.host );
 	};
@@ -172,18 +180,12 @@
 	 * @return {string}
 	 */
 	ForeignStructuredUpload.prototype.getDescriptions = function () {
-		var i, desc, templateCalls = [];
-
-		for ( i = 0; i < this.descriptions.length; i++ ) {
-			desc = this.descriptions[ i ];
-			templateCalls.push(
-				this.config.format.description
-					.replace( '$LANGUAGE', desc.language )
-					.replace( '$TEXT', desc.text )
-			);
-		}
-
-		return templateCalls.join( '\n' );
+		var upload = this;
+		return this.descriptions.map( function ( desc ) {
+			return upload.config.format.description
+				.replace( '$LANGUAGE', desc.language )
+				.replace( '$TEXT', desc.text );
+		} ).join( '\n' );
 	};
 
 	/**
@@ -194,18 +196,13 @@
 	 * @return {string}
 	 */
 	ForeignStructuredUpload.prototype.getCategories = function () {
-		var i, cat, categoryLinks = [];
-
 		if ( this.categories.length === 0 ) {
 			return this.config.format.uncategorized;
 		}
 
-		for ( i = 0; i < this.categories.length; i++ ) {
-			cat = this.categories[ i ];
-			categoryLinks.push( '[[Category:' + cat + ']]' );
-		}
-
-		return categoryLinks.join( '\n' );
+		return this.categories.map( function ( cat ) {
+			return '[[Category:' + cat + ']]';
+		} ).join( '\n' );
 	};
 
 	/**

@@ -15,22 +15,23 @@ class HeaderEditedPresentationModel extends FlowPresentationModel {
 
 	public function getPrimaryLink() {
 		$boardLink = $this->getBoardLink();
-		$boardLink['label'] = $this->msg( "notification-links-{$this->type}-view-page" )->params( $this->getViewingUserForGender() )->text();
+		$boardLink['label'] = $this->msg( "notification-links-flow-description-edited-view-page" )->params( $this->getViewingUserForGender() )->text();
 		return $boardLink;
 	}
 
 	public function getSecondaryLinks() {
-		return array(
+		return [
 			$this->getAgentLink(),
 			$this->getDiffLink(),
-		);
+			$this->getFlowUnwatchDynamicActionLink()
+		];
 	}
 
 	protected function getHeaderMessageKey() {
 		if ( $this->isBundled() ) {
-			$key = "notification-bundle-header-{$this->type}";
+			$key = 'notification-bundle-header-flow-description-edited';
 		} else {
-			$key = parent::getHeaderMessageKey();
+			$key = 'notification-header-flow-description-edited';
 		}
 
 		if ( $this->isUserTalkPage() ) {
@@ -48,12 +49,12 @@ class HeaderEditedPresentationModel extends FlowPresentationModel {
 	}
 
 	public function getBodyMessage() {
-		$key = "notification-body-{$this->type}";
+		$key = "notification-body-flow-description-edited";
 		if ( $this->isUserTalkPage() ) {
 			$key .= '-user-talk';
 		}
 
-		return $this->msg( $key )->params( $this->getContentSnippet() );
+		return $this->msg( $key )->plaintextParams( $this->getContentSnippet() );
 	}
 
 	protected function getDiffLink() {
@@ -65,12 +66,12 @@ class HeaderEditedPresentationModel extends FlowPresentationModel {
 			$this->event->getExtraParam( 'revision-id' )
 		);
 
-		return array(
+		return [
 			'url' => $anchor->getFullURL(),
 			'label' => $this->msg( 'notification-link-text-view-changes' )->params( $this->getViewingUserForGender() )->text(),
 			'description' => '',
 			'icon' => 'changes',
 			'prioritized' => true,
-		);
+		];
 	}
 }

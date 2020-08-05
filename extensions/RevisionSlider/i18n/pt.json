@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Vitorvicentevalente",
+			"He7d3r",
+			"Mansil",
+			"Hamilton Abreu"
+		]
+	},
+	"revisionslider": "Barra de revisões",
+	"revisionslider-preference-disable": "Não mostrar a barra de revisões",
+	"revisionslider-desc": "Mostra um controlo deslizante que permite a seleção e comparação de revisões numa página de diferenças entre edições",
+	"revisionslider-toggle-label": "Explorar histórico",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte|bytes}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte|bytes}}",
+	"revisionslider-label-date": "Data",
+	"revisionslider-label-page-size": "Tamanho da página",
+	"revisionslider-label-change-size": "Tamanho da alteração",
+	"revisionslider-label-comment": "Comentário",
+	"revisionslider-label-username": "Nome {{GENDER:$1|do utilizador|da utilizadora|de utilizador}}",
+	"revisionslider-minoredit": "Esta é uma edição menor",
+	"revisionslider-loading-failed": "A barra de revisões falhou ao carregar.",
+	"revisionslider-toggle-title-expand": "Abrir barra de revisões",
+	"revisionslider-toggle-title-collapse": "Fechar barra de revisões",
+	"revisionslider-turn-on-auto-expand-title": "Expandir sempre a barra de revisões",
+	"revisionslider-turn-off-auto-expand-title": "Não expandir automaticamente a barra de revisões",
+	"revisionslider-arrow-tooltip-newer": "Ver revisões mais recentes",
+	"revisionslider-arrow-tooltip-older": "Ver revisões mais antigas",
+	"revisionslider-show-help-tooltip": "Mostrar texto de ajuda",
+	"revisionslider-help-dialog-slide1": "A barra de revisões auxilia na navegação e comparação de revisões na página de diferença entre edições (dif). Foi concebida após [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider solicitação] da comunidade técnica alemã. A sua opinião é muito bem-vinda [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider aqui].",
+	"revisionslider-help-dialog-slide2": "Cada barra representa uma revisão da página. As barras no topo mostram o crescimento no tamanho da página, enquanto que na base é mostrada uma redução. Na imagem, a revisão 1 representa o conteúdo adicionado, enquanto a revisão 2 representa a remoção de conteúdo.",
+	"revisionslider-help-dialog-slide3a": "<p>Para comparar certas revisões, selecione-as  utilizando o ponteiro amarelo e azul.</p><p>O ponteiro azul controla a revisão mais recente e o amarelo a mais antiga.</p><p>Mova os ponteiros ao arrastar e soltar, ou clique na linha da barra.</p>",
+	"revisionslider-help-dialog-slide4": "Utilize as setas de avanço e retrocesso para consultar o histórico de revisões e mostrar as mais antigas e mais recentes.",
+	"revisionslider-tutorial": "Guia da barra de revisões",
+	"revisionslider-previous-dialog": "Anterior",
+	"revisionslider-next-dialog": "Seguinte",
+	"revisionslider-close-dialog": "Fechar"
+}

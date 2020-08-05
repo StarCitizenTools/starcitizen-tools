@@ -51,6 +51,7 @@ $namespaceAliases = [
 ];
 
 $separatorTransformTable = [ ',' => '.', '.' => ',' ];
+$minimumGroupingDigits = 2;
 
 $specialPageAliases = [
 	'Allmessages'               => [ 'Hemû_Peyam' ],
@@ -109,3 +110,4 @@ $magicWords = [
 	'pagesincategory_pages'     => [ '0', 'rûpel', 'pages' ],
 ];
 
+$linkTrail = '/^([a-zçêîşûẍḧÇÊÎŞÛẌḦ]+)(.*)$/sDu';

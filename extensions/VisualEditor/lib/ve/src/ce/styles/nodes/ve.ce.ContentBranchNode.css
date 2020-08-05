@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable ContentBranchNode styles.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /*
@@ -13,9 +13,15 @@
 	white-space: pre-wrap;
 }
 
+/* Hack for empty headings and paragraphs; can't use min-height because of IE */
+
+.ve-ce-contentBranchNode:empty:before {
+	content: url( data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 );
+}
+
 /*
  * Undo this hack on focusable nodes
  */
-.ve-ce-focusableNode {
+.ve-ce-focusableNode:not( pre ) {
 	white-space: normal;
 }

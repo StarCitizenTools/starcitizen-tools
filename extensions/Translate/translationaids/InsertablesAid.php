@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -16,7 +16,6 @@
  */
 class InsertablesAid extends TranslationAid {
 	public function getData() {
-
 		// We need to get the primary group to get the correct file
 		// So $group can be different from $this->group
 		$group = $this->handle->getGroup();
@@ -35,17 +34,17 @@ class InsertablesAid extends TranslationAid {
 			throw new TranslationHelperException( 'Group does not have a suggester' );
 		}
 
-		$insertables = $suggester->getInsertables( $this->getDefinition() );
-		$blob = array();
+		$insertables = $suggester->getInsertables( $this->dataProvider->getDefinition() );
+		$blob = [];
 		foreach ( $insertables as $insertable ) {
 			$displayText = $insertable->getDisplayText();
 
 			// The keys are used for de-duplication
-			$blob[$displayText] = array(
+			$blob[$displayText] = [
 				'display' => $displayText,
 				'pre' => $insertable->getPreText(),
 				'post' => $insertable->getPostText(),
-			);
+			];
 		}
 
 		$blob = array_values( $blob );

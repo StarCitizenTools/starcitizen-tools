@@ -4,17 +4,44 @@
  * @package VisualEditor
  */
 
-/*jshint node:true */
-module.exports = function ( grunt ) {
-	var modules = grunt.file.readJSON( 'lib/ve/build/modules.json' );
+require( 'babel-polyfill' );
 
-	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-contrib-csslint' );
-	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
-	grunt.loadNpmTasks( 'grunt-contrib-watch' );
-	grunt.loadNpmTasks( 'grunt-jsonlint' );
+/* eslint-env node, es6 */
+module.exports = function ( grunt ) {
+	var modules = grunt.file.readJSON( 'lib/ve/build/modules.json' ),
+		screenshotOptions = {
+			reporter: 'spec',
+			// TODO: Work out how to catch this timeout and continue.
+			// For now just make it very long.
+			timeout: 5 * 60 * 1000,
+			require: [
+				function () {
+					// eslint-disable-next-line no-undef, no-implicit-globals
+					langs = [ 'en' ];
+				}
+			]
+		},
+		screenshotOptionsAll = {
+			reporter: 'spec',
+			// TODO: Work out how to catch this timeout and continue.
+			// For now just make it very long.
+			timeout: 5 * 60 * 1000,
+			require: [
+				function () {
+					// eslint-disable-next-line no-undef, no-implicit-globals
+					langs = require( './build/tasks/screenshotLangs.json' ).langs;
+				}
+			]
+		};
+
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
-	grunt.loadNpmTasks( 'grunt-jscs' );
+	grunt.loadNpmTasks( 'grunt-contrib-copy' );
+	grunt.loadNpmTasks( 'grunt-contrib-watch' );
+	grunt.loadNpmTasks( 'grunt-eslint' );
+	grunt.loadNpmTasks( 'grunt-image' );
+	grunt.loadNpmTasks( 'grunt-jsonlint' );
+	grunt.loadNpmTasks( 'grunt-mocha-test' );
+	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.loadNpmTasks( 'grunt-tyops' );
 	grunt.loadTasks( 'lib/ve/build/tasks' );
 	grunt.loadTasks( 'build/tasks' );
@@ -52,57 +79,103 @@ module.exports = function ( grunt ) {
 				indent: '\t\t'
 			}
 		},
+		mochaTest: {
+			'screenshots-en': {
+				options: screenshotOptions,
+				src: [ 'build/screenshots.userGuide.js' ]
+			},
+			'screenshots-all': {
+				options: screenshotOptionsAll,
+				src: [ 'build/screenshots.userGuide.js' ]
+			},
+			'diff-screenshots-en': {
+				options: screenshotOptions,
+				src: [ 'build/screenshots.diffs.js' ]
+			},
+			'diff-screenshots-all': {
+				options: screenshotOptionsAll,
+				src: [ 'build/screenshots.diffs.js' ]
+			}
+		},
+		image: {
+			pngs: {
+				options: {
+					zopflipng: true,
+					pngout: true,
+					optipng: true,
+					advpng: true,
+					pngcrush: true
+				},
+				'screenshots-en': {
+					expand: true,
+					src: 'screenshots/*-en.png'
+				},
+				'screenshots-all': {
+					expand: true,
+					src: 'screenshots/*.png'
+				}
+			},
+			svgs: {
+				options: {
+					svgo: [
+						'--pretty',
+						'--enable=removeRasterImages',
+						'--enable=sortAttrs',
+						'--disable=cleanupIDs',
+						'--disable=removeDesc',
+						'--disable=removeTitle',
+						'--disable=removeViewBox',
+						'--disable=removeXMLProcInst'
+					]
+				},
+				expand: true,
+				src: 'images/*.svg'
+			}
+		},
 		tyops: {
 			options: {
 				typos: 'build/typos.json'
 			},
 			src: [
 				'**/*.{js,json,less,css,txt}',
+				'!package-lock.json',
 				'!build/typos.json',
 				'!lib/**',
 				'!{docs,node_modules,vendor}/**',
 				'!.git/**'
 			]
 		},
-		jshint: {
-			options: {
-				jshintrc: true
-			},
+		eslint: {
 			all: [
 				'*.js',
-				'{.jsduck,build}/**/*.js',
-				'modules/**/*.js'
+				'{build,modules}/**/*.js'
 			]
 		},
-		jscs: {
-			fix: {
-				options: {
-					fix: true
-				},
-				src: '<%= jshint.all %>'
-			},
-			main: {
-				src: '<%= jshint.all %>'
-			}
-		},
-		csslint: {
-			options: {
-				csslintrc: '.csslintrc'
-			},
-			all: 'modules/**/*.css'
+		stylelint: {
+			all: [
+				'**/*.css',
+				'**/*.less',
+				'!coverage/**',
+				'!dist/**',
+				'!docs/**',
+				'!lib/**',
+				'!node_modules/**',
+				'!vendor/**'
+			]
 		},
 		banana: {
 			all: [
-				'modules/ve-{mw,wmf}/i18n/',
-				'modules/ve-mw/tests/browser/i18n'
+				'i18n/{ve-mw,ve-wmf}'
 			]
 		},
 		jsonlint: {
 			all: [
 				'*.json',
+				'.{stylelintrc,eslintrc}.json',
 				'**/*.json',
 				'!**/node_modules/**',
-				'!lib/**'
+				'!lib/**',
+				'!vendor/**'
 			]
 		},
 		copy: {
@@ -114,9 +187,9 @@ module.exports = function ( grunt ) {
 		},
 		watch: {
 			files: [
-				'.{csslintrc,jscsrc,jshintignore,jshintrc}',
-				'<%= jshint.all %>',
-				'<%= csslint.all %>'
+				'.{stylelintrc,eslintrc}.json',
+				'<%= eslint.all %>',
+				'<%= stylelint.all %>'
 			],
 			tasks: 'test'
 		}
@@ -143,16 +216,17 @@ module.exports = function ( grunt ) {
 	} );
 
 	grunt.registerTask( 'build', [ 'jsduckcatconfig', 'buildloader' ] );
-	grunt.registerTask( 'lint', [ 'tyops', 'jshint', 'jscs:main', 'csslint', 'jsonlint', 'banana' ] );
-	grunt.registerTask( 'fix', [ 'jscs:fix' ] );
+	grunt.registerTask( 'lint', [ 'tyops', 'eslint', 'stylelint', 'jsonlint', 'banana' ] );
 	grunt.registerTask( 'test', [ 'build', 'lint' ] );
 	grunt.registerTask( 'test-ci', [ 'git-status' ] );
+	grunt.registerTask( 'screenshots', [ 'mochaTest:screenshots-en', 'image:pngs' ] );
+	grunt.registerTask( 'screenshots-all', [ 'mochaTest:screenshots-all', 'image:pngs' ] );
 	grunt.registerTask( 'default', 'test' );
 
 	if ( process.env.JENKINS_HOME ) {
 		grunt.renameTask( 'test', 'test-internal' );
 		grunt.registerTask( 'test', [ 'test-internal', 'test-ci' ] );
 	} else {
-		grunt.registerTask( 'ci', [ 'test', 'test-ci' ] );
+		grunt.registerTask( 'ci', [ 'test', 'image:svgs', 'test-ci' ] );
 	}
 };

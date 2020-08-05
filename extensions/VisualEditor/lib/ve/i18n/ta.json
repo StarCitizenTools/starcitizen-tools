@@ -8,7 +8,8 @@
 			"Kalyanasundar",
 			"ElangoRamanujam",
 			"Info-farmer",
-			"Dineshkumar Ponnusamy"
+			"Dineshkumar Ponnusamy",
+			"Balajijagadesh"
 		]
 	},
 	"visualeditor": "காட்சிசார்த் தொகுப்பி",
@@ -17,11 +18,13 @@
 	"visualeditor-align-widget-left": "இடது",
 	"visualeditor-align-widget-right": "வலது",
 	"visualeditor-alignablecontextitem-title": "ஒழுங்கமை",
+	"visualeditor-annotationbutton-big-tooltip": "பெரிய",
 	"visualeditor-annotationbutton-bold-tooltip": "தடித்த",
 	"visualeditor-annotationbutton-code-tooltip": "கணினிக் குறியீடு",
 	"visualeditor-annotationbutton-italic-tooltip": "சாய்ந்த",
 	"visualeditor-annotationbutton-language-tooltip": "மொழி",
 	"visualeditor-annotationbutton-link-tooltip": "இணைப்பு",
+	"visualeditor-annotationbutton-small-tooltip": "சிறிய",
 	"visualeditor-annotationbutton-strikethrough-tooltip": "குறுக்குக்கோடிட்டு மறை",
 	"visualeditor-annotationbutton-subscript-tooltip": "கீழொட்டு",
 	"visualeditor-annotationbutton-superscript-tooltip": "மேலொட்டு",
@@ -76,6 +79,7 @@
 	"visualeditor-indentationbutton-outdent-tooltip": "முன்னிடைவெளி குறை",
 	"visualeditor-inspector-close-tooltip": "மூடுக",
 	"visualeditor-inspector-remove-tooltip": "நீக்குக",
+	"visualeditor-key-home": "முகப்பு",
 	"visualeditor-language-search-input-placeholder": "மொழியின் பெயர் அல்லது குறியீட்டால் தேடல்",
 	"visualeditor-languageinspector-title": "மொழி",
 	"visualeditor-languageinspector-widget-changelang": "மொழியைக் கண்டறி",

@@ -22,7 +22,6 @@
 	"checkuser-users": "Кыттаачылары ыларга",
 	"checkuser-edits": "Көннөрүүлэри көрүү",
 	"checkuser-ips": "IP-лары көрдөр",
-	"checkuser-search": "Көрдөө",
 	"checkuser-period": "Уһуна:",
 	"checkuser-week-1": "бүтэһик нэдиэлэ",
 	"checkuser-week-2": "бүтэһик икки нэдиэлэ",
@@ -54,15 +53,15 @@
 	"checkuser-accounts": "$1 саҥа {{PLURAL:$1|аат|ааттар}}",
 	"checkuser-too-many": "Наһаа элбэх булулунна (көрдөбүл түмүгүнэн), бука диэн CIDR кыччатан биэр. \nТуһаныллыбыт IP (саамай элбэҕэ 5000, бу аадырыһынан наардаммыт):",
 	"checkuser-user-nonexistent": "Маннык ааттаах кыттааччы суох",
-	"checkuser-search-form": "$1 сурунаалга $2 буоларын бул",
+	"checkuser-search": "Көрдөө",
 	"checkuser-search-submit": "Буларга",
 	"checkuser-search-initiator": "саҕалааччы",
 	"checkuser-search-target": "сыал-сорук",
 	"checkuser-ipeditcount": "~$1 бары кыттааччылартан",
-	"checkuser-log-return": "Кытааччылары бэрэбиэркэлээһин сүрүн сирэйигэр төнүн",
+	"checkuser-showmain": "Кытааччылары бэрэбиэркэлээһин сүрүн сирэйигэр төнүн",
 	"checkuser-limited": "'''Түмүк, сиэрбэри наһаа ноҕуруускалаамаары, сорҕото быһыллыбыт.'''",
 	"checkuser-autocreate-action": "аптамаатынан оҥоһуллубут",
 	"checkuser-create-action": "оҥоһуллубут",
 	"checkuser-email-action": "\"$1\" кыттаачыга сурук ыыппыт",
-	"checkuser-reset-action": "\"$1\" киирии тылын бырахпыт"
+	"checkuser-reset-action": "\"$1\" кыттааччы аһарык тылын бырахпыт"
 }

@@ -4,10 +4,11 @@
 			"SMP",
 			"Solde",
 			"Jmarchn",
-			"Toniher"
+			"Toniher",
+			"Fitoschido"
 		]
 	},
-	"replacetext": "Reemplaça text",
+	"replacetext": "Substitució de text",
 	"replacetext-desc": "Proporciona una [[Special:ReplaceText|pàgina especial]] per permetre que els administradors a trobar-i-substituir una cadena global per a tots els continguts de les pàgines d'un wiki",
 	"replacetext_docu": "Per reemplaçar una cadena de text amb una altre a través de totes les pàgines regulars d'aquest wiki, introduïu les dues peces de text aquí i llavors polseu \"{{int:replacetext_continue}}\".\nA continuació es mostra una llista de les pàgines que contenen el text de cerca, i podreu triar les pàgines on voleu que es substitueixi.\nEl vostre nom apareixerà en la pàgina de l'historial com a usuari responsable d'aquests canvis.",
 	"replacetext_originaltext": "Text original:",

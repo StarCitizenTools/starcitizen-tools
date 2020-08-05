@@ -1,10 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Milicevic01"
+			"Milicevic01",
+			"Macofe",
+			"Obsuser"
 		]
 	},
-	"enableflow": "Omogući Flow",
+	"enablestructureddiscussions": "Omogući Flow",
 	"flow-board-header-browse-topics-link": "Spisak tema",
 	"flow-board-header": "O ovoj diskusiji",
 	"flow-board-collapse-description": "Sakrij opis",
@@ -56,7 +58,7 @@
 	"flow-rev-message-edit-header": "$1 je {{GENDER:$2|uredio|uredila}} opis",
 	"flow-rev-message-create-topic-summary": "$1 je {{GENDER:$2|sumirao|sumirala}} temu $3",
 	"flow-rev-message-deleted-topic": "$1 je {{GENDER:$2|obrisao|obrisala}} [$4 temu] „$6“ (<em>$5</em>)",
-	"flow-rev-message-locked-topic": "$1 je {{GENDER:$2|označio|označila}} [$4 temu] $6 rešenom (<em>$5</em>)",
+	"flow-rev-message-locked-topic": "$1 je {{GENDER:$2|označio|označila}} [$4 temu] „$6“ rešenom (<em>$5</em>)",
 	"flow-rev-message-restored-topic": "$1 je ponovo {{GENDER:$2|otvorio|otvorila}} [$4 temu] „$6“ (<em>$5</em>)",
 	"flow-rc-topic-of-board": "$1 na $2",
 	"flow-history-last4": "Prethodna 4 sata",
@@ -69,9 +71,11 @@
 	"flow-notification-reply": "<span class=\"plainlinks mw-echo-title-heading\">[$5 $2]</span><br />$1 je {{GENDER:$1|ostavio|ostavila}} komentar na '''$4'''.",
 	"flow-notification-reply-bundle": "<span class=\"plainlinks mw-echo-title-heading\">[$4 $2]</span><br />$1 i još {{PLURAL:$5|jedan korisnik|$5 korisnika|100=99+ korisnika}} su {{GENDER:$1|ostavili}} komentare na '''$3",
 	"flow-notification-edit": "<span class=\"plainlinks mw-echo-title-heading\">[$6 $2]</span><br />$1 je {{GENDER:$1|uredio|uredila}} Vaš <span class=\"plainlinks\">[$5 komentar]</span> na [[$3|$4]].",
-	"notification-header-flow-mention-post": "$1 Vas je {{GENDER:$2|spomenuo|spomenula}} {{GENDER:$4|u}} „$5“.",
+	"notification-header-flow-mention-post": "$1 Vas je {{GENDER:$2|pomenuo|pomenula}} {{GENDER:$4|u}} „'''$5'''“.",
 	"flow-notification-newtopic": "<span class=\"mw-echo-title-heading plainlinks\">[$5 $4]</span><br />$1 je {{GENDER:$1|napravio|napravila}} novu temu na '''$3'''.",
 	"flow-notification-newtopic-bundle": "{{PLURAL:$1|Jedna nova tema|$1 nove teme|$1 novih tema|100=99+ novih tema}} na <strong><span class=\"plainlinks\">[$3 $2]</span></strong>",
+	"echo-category-title-flow-discussion": "Flow diskusije",
+	"echo-pref-tooltip-flow-discussion": "Obaveštava vas o aktivnostima u temama ili na stranicama koje pratite.",
 	"flow-link-history": "istorija",
 	"flow-moderation-confirm-delete-topic": "Obriši",
 	"flow-moderation-confirm-hide-topic": "Sakrij",
@@ -96,8 +100,6 @@
 	"flow-next-diff": "Novija izmena →",
 	"flow-ve-mention-placeholder": "Korisničko ime",
 	"flow-ve-mention-tool-title": "Spomeni korisnika",
-	"flow-wikitext-switch-editor-tooltip": "Prebaci me na Vizuelni uređivač",
-	"flow-ve-switch-editor-tool-title": "Prebaci me na uređivač vikiteksta",
 	"flow-dialog-cancelconfirm-title": "Jeste li sigurni?",
 	"flow-guidedtour-optin-welcome": "{{GENDER:$1|Dobro došli}} na {{GENDER:$1|Vašu}} novu stranicu za razgovor",
 	"flow-guidedtour-optin-welcome-description": "{{GENDER:$1|Vaša}} stranica za razgovor je mesto gde vas drugi urednici kontaktiraju. Sa Flow-om, jednostavnije je napraviti novu temu i pratiti diskusiju.",

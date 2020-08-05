@@ -5,7 +5,9 @@
 		]
 	},
 	"cleanchanges-changerightslink": "pakeisti grupes",
+	"cleanchanges-desc": "Labiau kompaktiškas [[Special:RecentChanges|naujausių pakeitimų sąrašo]] rodinys",
 	"cleanchanges-language": "Kalba:",
 	"cleanchanges-language-na": "Visi",
+	"cleanchanges-users": "Vartotojai (Atskirti: |):",
 	"cleanchanges-showuserlinks": "Rodyti vartotojo nuorodas"
 }

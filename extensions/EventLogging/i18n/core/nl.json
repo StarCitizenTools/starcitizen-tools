@@ -3,15 +3,15 @@
 		"authors": [
 			"Siebrand",
 			"Mirolith",
-			"Esketti"
+			"Esketti",
+			"Mainframe98"
 		]
 	},
 	"eventlogging-desc": "Framework voor het vastleggen van gebeurtenissen aan de clientkant",
 	"eventlogging-invalid-json": "Ongeldige JSON",
 	"eventlogging-revision-id": "Versie $1",
 	"eventlogging-code-sample-logging-on-server-side": "Logboekregistratie voor PHP",
-	"eventlogging-code-sample-module-setup": "PHP-instellingen voor logboekregistratie voor JavaScript",
 	"eventlogging-code-sample-logging-on-client-side": "Logboekregistratie voor JavaScript",
 	"eventlogging-error-move-source": "Schemapagina's mogen niet hernoemd worden",
-	"eventlogging-error-move-destination": "Pagina 's kunnen niet hernoemd worden naar Schema' s"
+	"eventlogging-error-move-destination": "Pagina's kunnen niet hernoemd worden naar Schema pagina's"
 }

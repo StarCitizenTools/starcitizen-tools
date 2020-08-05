@@ -20,8 +20,15 @@
  * @file
  */
 
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\DBConnRef;
+use Wikimedia\Rdbms\MaintainableDBConnRef;
+use Wikimedia\Rdbms\DatabaseDomain;
+
 /**
- * DB accessable external objects.
+ * DB accessible external objects.
  *
  * In this system, each store "location" maps to a database "cluster".
  * The clusters must be defined in the normal LBFactory configuration.
@@ -87,9 +94,8 @@ class ExternalStoreDB extends ExternalStoreMedium {
 
 	public function store( $location, $data ) {
 		$dbw = $this->getMaster( $location );
-		$id = $dbw->nextSequenceValue( 'blob_blob_id_seq' );
 		$dbw->insert( $this->getTable( $dbw ),
-			[ 'blob_id' => $id, 'blob_text' => $data ],
+			[ 'blob_text' => $data ],
 			__METHOD__ );
 		$id = $dbw->insertId();
 		if ( !$id ) {
@@ -99,29 +105,32 @@ class ExternalStoreDB extends ExternalStoreMedium {
 		return "DB://$location/$id";
 	}
 
+	public function isReadOnly( $location ) {
+		return ( $this->getLoadBalancer( $location )->getReadOnlyReason() !== false );
+	}
+
 	/**
 	 * Get a LoadBalancer for the specified cluster
 	 *
 	 * @param string $cluster Cluster name
-	 * @return LoadBalancer
+	 * @return ILoadBalancer
 	 */
-	function getLoadBalancer( $cluster ) {
-		$wiki = isset( $this->params['wiki'] ) ? $this->params['wiki'] : false;
-
-		return wfGetLBFactory()->getExternalLB( $cluster, $wiki );
+	private function getLoadBalancer( $cluster ) {
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		return $lbFactory->getExternalLB( $cluster );
 	}
 
 	/**
-	 * Get a slave database connection for the specified cluster
+	 * Get a replica DB connection for the specified cluster
 	 *
 	 * @param string $cluster Cluster name
-	 * @return IDatabase
+	 * @return DBConnRef
 	 */
-	function getSlave( $cluster ) {
+	public function getSlave( $cluster ) {
 		global $wgDefaultExternalStore;
 
-		$wiki = isset( $this->params['wiki'] ) ? $this->params['wiki'] : false;
 		$lb = $this->getLoadBalancer( $cluster );
+		$domainId = $this->getDomainId( $lb->getServerInfo( $lb->getWriterIndex() ) );
 
 		if ( !in_array( "DB://" . $cluster, (array)$wgDefaultExternalStore ) ) {
 			wfDebug( "read only external store\n" );
@@ -130,7 +139,7 @@ class ExternalStoreDB extends ExternalStoreMedium {
 			wfDebug( "writable external store\n" );
 		}
 
-		$db = $lb->getConnection( DB_SLAVE, [], $wiki );
+		$db = $lb->getConnectionRef( DB_REPLICA, [], $domainId );
 		$db->clearFlag( DBO_TRX ); // sanity
 
 		return $db;
@@ -140,16 +149,43 @@ class ExternalStoreDB extends ExternalStoreMedium {
 	 * Get a master database connection for the specified cluster
 	 *
 	 * @param string $cluster Cluster name
-	 * @return IDatabase
+	 * @return MaintainableDBConnRef
 	 */
-	function getMaster( $cluster ) {
-		$wiki = isset( $this->params['wiki'] ) ? $this->params['wiki'] : false;
+	public function getMaster( $cluster ) {
 		$lb = $this->getLoadBalancer( $cluster );
+		$domainId = $this->getDomainId( $lb->getServerInfo( $lb->getWriterIndex() ) );
 
-		$db = $lb->getConnection( DB_MASTER, [], $wiki );
+		$db = $lb->getMaintenanceConnectionRef( DB_MASTER, [], $domainId );
 		$db->clearFlag( DBO_TRX ); // sanity
 
 		return $db;
+	}
+
+	/**
+	 * @param array $server Master DB server configuration array for LoadBalancer
+	 * @return string|bool Database domain ID or false
+	 */
+	private function getDomainId( array $server ) {
+		if ( isset( $this->params['wiki'] ) ) {
+			return $this->params['wiki']; // explicit domain
+		}
+
+		if ( isset( $server['dbname'] ) ) {
+			// T200471: for b/c, treat any "dbname" field as forcing which database to use.
+			// MediaWiki/LoadBalancer previously did not enforce any concept of a local DB
+			// domain, but rather assumed that the LB server configuration matched $wgDBname.
+			// This check is useful when the external storage DB for this cluster does not use
+			// the same name as the corresponding "main" DB(s) for wikis.
+			$domain = new DatabaseDomain(
+				$server['dbname'],
+				$server['schema'] ?? null,
+				$server['tablePrefix'] ?? ''
+			);
+
+			return $domain->getId();
+		}
+
+		return false; // local LB domain
 	}
 
 	/**
@@ -158,7 +194,7 @@ class ExternalStoreDB extends ExternalStoreMedium {
 	 * @param IDatabase $db
 	 * @return string Table name ('blobs' by default)
 	 */
-	function getTable( $db ) {
+	public function getTable( $db ) {
 		$table = $db->getLBInfo( 'blobs table' );
 		if ( is_null( $table ) ) {
 			$table = 'blobs';
@@ -175,9 +211,8 @@ class ExternalStoreDB extends ExternalStoreMedium {
 	 * @param string $id
 	 * @param string $itemID
 	 * @return HistoryBlob|bool Returns false if missing
-	 * @private
 	 */
-	function fetchBlob( $cluster, $id, $itemID ) {
+	private function fetchBlob( $cluster, $id, $itemID ) {
 		/**
 		 * One-step cache variable to hold base blobs; operations that
 		 * pull multiple revisions may often pull multiple times from
@@ -230,7 +265,7 @@ class ExternalStoreDB extends ExternalStoreMedium {
 	 * @return array A map from the blob_id's requested to their content.
 	 *   Unlocated ids are not represented
 	 */
-	function batchFetchBlobs( $cluster, array $ids ) {
+	private function batchFetchBlobs( $cluster, array $ids ) {
 		$dbr = $this->getSlave( $cluster );
 		$res = $dbr->select( $this->getTable( $dbr ),
 			[ 'blob_id', 'blob_text' ], [ 'blob_id' => array_keys( $ids ) ], __METHOD__ );
@@ -264,7 +299,7 @@ class ExternalStoreDB extends ExternalStoreMedium {
 	}
 
 	/**
-	 * Helper function for self::batchFetchBlobs for merging master/slave results
+	 * Helper function for self::batchFetchBlobs for merging master/replica DB results
 	 * @param array &$ret Current self::batchFetchBlobs return value
 	 * @param array &$ids Map from blob_id to requested itemIDs
 	 * @param mixed $res DB result from Database::select

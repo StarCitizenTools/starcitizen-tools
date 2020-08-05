@@ -19,12 +19,16 @@
  * @ingroup Pager
  */
 
+use Wikimedia\Rdbms\FakeResultWrapper;
+
 /**
  * Use TablePager for prettified output. We have to pretend that we're
  * getting data from a table when in fact not all of it comes from the database.
  *
  * @ingroup Pager
  */
+use MediaWiki\MediaWikiServices;
+
 class AllMessagesTablePager extends TablePager {
 
 	protected $filter, $prefix, $langcode, $displayPrefix;
@@ -56,7 +60,7 @@ class AllMessagesTablePager extends TablePager {
 
 		$this->lang = ( $langObj ? $langObj : $wgContLang );
 		$this->langcode = $this->lang->getCode();
-		$this->foreign = $this->langcode !== $wgContLang->getCode();
+		$this->foreign = !$this->lang->equals( $wgContLang );
 
 		$request = $this->getRequest();
 
@@ -184,7 +188,7 @@ class AllMessagesTablePager extends TablePager {
 
 	/**
 	 * Determine which of the MediaWiki and MediaWiki_talk namespace pages exist.
-	 * Returns array( 'pages' => ..., 'talks' => ... ), where the subarrays have
+	 * Returns [ 'pages' => ..., 'talks' => ... ], where the subarrays have
 	 * an entry for each existing page, with the key being the message name and
 	 * value arbitrary.
 	 *
@@ -196,7 +200,7 @@ class AllMessagesTablePager extends TablePager {
 	public static function getCustomisedStatuses( $messageNames, $langcode = 'en', $foreign = false ) {
 		// FIXME: This function should be moved to Language:: or something.
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$res = $dbr->select( 'page',
 			[ 'page_namespace', 'page_title' ],
 			[ 'page_namespace' => [ NS_MEDIAWIKI, NS_MEDIAWIKI_TALK ] ],
@@ -297,6 +301,7 @@ class AllMessagesTablePager extends TablePager {
 	}
 
 	function formatValue( $field, $value ) {
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 		switch ( $field ) {
 			case 'am_title' :
 				$title = Title::makeTitle( NS_MEDIAWIKI, $value . $this->suffix );
@@ -306,33 +311,26 @@ class AllMessagesTablePager extends TablePager {
 						'title' => 'Special:SearchTranslations',
 						'group' => 'mediawiki',
 						'grouppath' => 'mediawiki',
-						'query' => 'language:' . $this->getLanguage()->getCode() . '^25 ' .
-							'messageid:"MediaWiki:' . $value . '"^10 "' .
-							$this->msg( $value )->inLanguage( 'en' )->plain() . '"'
+						'language' => $this->getLanguage()->getCode(),
+						'query' => $value . ' ' . $this->msg( $value )->plain()
 					] ),
 					$this->msg( 'allmessages-filter-translate' )->text()
 				);
 
 				if ( $this->mCurrentRow->am_customised ) {
-					$title = Linker::linkKnown( $title, $this->getLanguage()->lcfirst( $value ) );
+					$title = $linkRenderer->makeKnownLink( $title, $this->getLanguage()->lcfirst( $value ) );
 				} else {
-					$title = Linker::link(
+					$title = $linkRenderer->makeBrokenLink(
 						$title,
-						$this->getLanguage()->lcfirst( $value ),
-						[],
-						[],
-						[ 'broken' ]
+						$this->getLanguage()->lcfirst( $value )
 					);
 				}
 				if ( $this->mCurrentRow->am_talk_exists ) {
-					$talk = Linker::linkKnown( $talk, $this->talk );
+					$talk = $linkRenderer->makeKnownLink( $talk, $this->talk );
 				} else {
-					$talk = Linker::link(
+					$talk = $linkRenderer->makeBrokenLink(
 						$talk,
-						$this->talk,
-						[],
-						[],
-						[ 'broken' ]
+						$this->talk
 					);
 				}
 
@@ -377,7 +375,9 @@ class AllMessagesTablePager extends TablePager {
 		}
 
 		if ( !$isSecond ) {
-			$arr['id'] = Sanitizer::escapeId( 'msg_' . $this->getLanguage()->lcfirst( $row->am_title ) );
+			$arr['id'] = Sanitizer::escapeIdForAttribute(
+				'msg_' . $this->getLanguage()->lcfirst( $row->am_title )
+			);
 		}
 
 		return $arr;

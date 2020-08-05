@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel BigAnnotation class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -28,6 +28,8 @@ OO.inheritClass( ve.dm.BigAnnotation, ve.dm.TextStyleAnnotation );
 ve.dm.BigAnnotation.static.name = 'textStyle/big';
 
 ve.dm.BigAnnotation.static.matchTagNames = [ 'big' ];
+
+ve.dm.BigAnnotation.static.removes = [ 'textStyle/small' ];
 
 /* Registration */
 

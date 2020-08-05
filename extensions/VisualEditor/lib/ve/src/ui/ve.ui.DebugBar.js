@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DebugBar class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -15,69 +15,67 @@
  * @param {Object} [config] Configuration options
  */
 ve.ui.DebugBar = function VeUiDebugBar( surface, config ) {
-	var dumpModelButtonGroup, hideDumpButton, closeButton;
+	var closeButton;
 
 	// Parent constructor
-	OO.ui.Element.call( this, config );
+	ve.ui.DebugBar.super.call( this, config );
 
 	this.surface = surface;
 
 	this.$commands = $( '<div>' ).addClass( 've-ui-debugBar-commands' );
-	this.$dumpLinmodData = $( '<td>' ).addClass( 've-ui-debugBar-dump-linmod-data' );
-	this.$dumpLinmodMetadata = $( '<td>' ).addClass( 've-ui-debugBar-dump-linmod-metadata' );
-	this.$dumpView = $( '<td>' ).addClass( 've-ui-debugBar-dump-view' );
-	this.$dumpModel = $( '<td>' ).addClass( 've-ui-debugBar-dump-model' );
-
-	hideDumpButton = new OO.ui.ButtonWidget( {
-		icon: 'collapse',
-		label: 'Hide'
-	} );
+	this.$linmodData = $( '<td>' ).addClass( 've-ui-debugBar-dump-linmod-data' );
+	this.$viewTree = $( '<td>' ).addClass( 've-ui-debugBar-view-tree' );
+	this.$modelTree = $( '<td>' ).addClass( 've-ui-debugBar-model-tree' );
 
 	closeButton = new OO.ui.ButtonWidget( {
 		icon: 'close',
-		label: 'Close'
+		label: ve.msg( 'visualeditor-debugbar-close' )
 	} );
 
+	// Widgets
+	this.selectionLabel = new OO.ui.LabelWidget( { classes: [ 've-ui-debugBar-selectionLabel' ] } );
+
+	this.logRangeButton = new OO.ui.ButtonWidget( { label: ve.msg( 'visualeditor-debugbar-logrange' ), disabled: true } );
+	this.showModelToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-showmodel' ) } );
+	this.updateModelToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-updatemodel' ) } );
+	this.transactionsToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-showtransactions' ) } );
+	this.inputDebuggingToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-inputdebug' ) } );
+	this.filibusterToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-startfilibuster' ) } );
+
 	this.$dump =
-		$( '<div class="ve-ui-debugBar-dump">' ).append(
-			hideDumpButton.$element,
-			$( '<table></table>' ).append(
-				$( '<thead><th>Linear model data</th><th>Linear model metadata</th><th>View tree</th><th>Model tree</th></thead>' ),
+		$( '<div>' ).addClass( 've-ui-debugBar-dump' ).append(
+			this.updateModelToggle.$element,
+			$( '<table>' ).append(
+				$( '<thead>' ).append(
+					$( '<th>' ).text( 'Linear model data' ),
+					$( '<th>' ).text( 'View tree' ),
+					$( '<th>' ).text( 'Model tree' )
+				),
 				$( '<tbody>' ).append(
 					$( '<tr>' ).append(
-						this.$dumpLinmodData, this.$dumpLinmodMetadata, this.$dumpView, this.$dumpModel
+						this.$linmodData, this.$viewTree, this.$modelTree
 					)
 				)
 			)
 		).hide();
 
-	this.$filibuster = $( '<div class="ve-ui-debugBar-filibuster"></div>' );
+	this.$transactions = $( '<div>' ).addClass( 've-ui-debugBar-transactions' );
 
-	// Widgets
-	this.selectionLabel = new OO.ui.LabelWidget( { classes: [ 've-ui-debugBar-selectionLabel' ] } );
-
-	this.logRangeButton = new OO.ui.ButtonWidget( { label: 'Log', disabled: true } );
-	this.dumpModelButton = new OO.ui.ButtonWidget( { label: 'Dump model' } );
-	this.dumpModelChangeToggle = new OO.ui.ToggleButtonWidget( { icon: 'check' } );
-	this.inputDebuggingToggle = new OO.ui.ToggleButtonWidget( { label: 'Input debugging' } );
-	this.filibusterToggle = new OO.ui.ToggleButtonWidget( { label: 'Filibuster' } );
-
-	dumpModelButtonGroup = new OO.ui.ButtonGroupWidget( { items: [
-		this.dumpModelButton,
-		this.dumpModelChangeToggle
-	] } );
+	this.$filibuster = $( '<div>' ).addClass( 've-ui-debugBar-filibuster' );
 
 	// Events
 	this.logRangeButton.on( 'click', this.onLogRangeButtonClick.bind( this ) );
-	this.dumpModelButton.on( 'click', this.onDumpModelButtonClick.bind( this ) );
-	this.dumpModelChangeToggle.on( 'click', this.onDumpModelChangeToggleClick.bind( this ) );
-	this.inputDebuggingToggle.on( 'click', this.onInputDebuggingToggleClick.bind( this ) );
+	this.showModelToggle.on( 'change', this.onShowModelToggleChange.bind( this ) );
+	this.updateModelToggle.on( 'change', this.onUpdateModelToggleChange.bind( this ) );
+	this.inputDebuggingToggle.on( 'change', this.onInputDebuggingToggleChange.bind( this ) );
 	this.filibusterToggle.on( 'click', this.onFilibusterToggleClick.bind( this ) );
-	hideDumpButton.on( 'click', this.$dump.hide.bind( this.$dump ) );
+	this.transactionsToggle.on( 'change', this.onTransactionsToggleChange.bind( this ) );
 	closeButton.on( 'click', this.$element.remove.bind( this.$element ) );
 
-	this.onDumpModelChangeToggleClick();
-	this.getSurface().getModel().connect( this, { select: 'onSurfaceSelect' } );
+	this.getSurface().getModel().connect( this, {
+		select: 'onSurfaceSelect',
+		history: 'onHistory'
+	} );
 	this.onSurfaceSelect( this.getSurface().getModel().getSelection() );
 
 	this.$element.addClass( 've-ui-debugBar' );
@@ -86,13 +84,15 @@ ve.ui.DebugBar = function VeUiDebugBar( surface, config ) {
 			this.selectionLabel.$element,
 			this.logRangeButton.$element,
 			$( this.constructor.static.dividerTemplate ),
-			dumpModelButtonGroup.$element,
+			this.showModelToggle.$element,
 			this.inputDebuggingToggle.$element,
 			this.filibusterToggle.$element,
+			this.transactionsToggle.$element,
 			$( this.constructor.static.dividerTemplate ),
 			closeButton.$element
 		),
 		this.$dump,
+		this.$transactions,
 		this.$filibuster
 	);
 
@@ -124,13 +124,24 @@ ve.ui.DebugBar.prototype.getSurface = function () {
  *
  * @param {ve.dm.Selection} selection
  */
-ve.ui.DebugBar.prototype.onSurfaceSelect = function ( selection ) {
+ve.ui.DebugBar.prototype.onSurfaceSelect = function () {
+	// Do not trust the emitted selection: nested emits can invalidate it. See T145938.
+	var selection = this.surface.model.getSelection();
 	this.selectionLabel.setLabel( selection.getDescription() );
 	this.logRangeButton.setDisabled( !(
 		( selection instanceof ve.dm.LinearSelection && !selection.isCollapsed() ) ||
 		selection instanceof ve.dm.TableSelection
 	) );
 };
+
+/**
+ * Handle history events on the attached surface
+ */
+ve.ui.DebugBar.prototype.onHistory = ve.debounce( function () {
+	if ( this.transactionsToggle.getValue() ) {
+		this.updateTransactions();
+	}
+} );
 
 /**
  * Handle click events on the log range button
@@ -148,80 +159,107 @@ ve.ui.DebugBar.prototype.onLogRangeButtonClick = function () {
 };
 
 /**
- * Handle click events on the dump model button
+ * Handle change events on the show model toggle
  *
- * @param {jQuery.Event} e Event
+ * @param {boolean} value Value
  */
-ve.ui.DebugBar.prototype.onDumpModelButtonClick = function () {
+ve.ui.DebugBar.prototype.onShowModelToggleChange = function ( value ) {
+	if ( value ) {
+		this.updateDump();
+		this.$dump.show();
+	} else {
+		this.updateModelToggle.setValue( false );
+		this.$dump.hide();
+	}
+};
+
+/**
+ * Update the model dump
+ */
+ve.ui.DebugBar.prototype.updateDump = function () {
 	var surface = this.getSurface(),
 		documentModel = surface.getModel().getDocument(),
 		documentView = surface.getView().getDocument();
 
-	// linear model dump
-	this.$dumpLinmodData.html( this.generateListFromLinearData( documentModel.data ) );
-	this.$dumpLinmodMetadata.html( this.generateListFromLinearData( documentModel.metadata ) );
-
-	this.$dumpModel.html(
+	// Linear model dump
+	this.$linmodData.html( this.generateListFromLinearData( documentModel.data ) );
+	this.$modelTree.html(
 		this.generateListFromNode( documentModel.getDocumentNode() )
 	);
-	this.$dumpView.html(
+	this.$viewTree.html(
 		this.generateListFromNode( documentView.getDocumentNode() )
 	);
-	this.$dump.show();
 };
 
 /**
  * Get an ordered list representation of some linear data
  *
- * @param {ve.dm.LinearData} linearData Linear data
+ * @param {ve.dm.ElementLinearData} linearData Linear data
  * @return {jQuery} Ordered list
  */
 ve.ui.DebugBar.prototype.generateListFromLinearData = function ( linearData ) {
-	var i, $li, $label, element, text, annotations, data,
-		$ol = $( '<ol start="0"></ol>' );
-
-	data = linearData instanceof ve.dm.LinearData ? linearData.data : linearData;
+	var i, $chunk, $annotations, $label, element, text, annotations,
+		prevType, prevAnnotations,
+		$ol = $( '<ol>' ).attr( 'start', '0' ),
+		data = linearData.data;
 
 	for ( i = 0; i < data.length; i++ ) {
-		$li = $( '<li>' );
 		$label = $( '<span>' );
 		element = data[ i ];
 		annotations = null;
-		if ( linearData instanceof ve.dm.MetaLinearData ) {
-			if ( element && element.length ) {
-				$li.append( this.generateListFromLinearData( element ) );
-			} else {
-				$li.append( $( '<span>undefined</span>' ).addClass( 've-ui-debugBar-dump-undefined' ) );
-			}
+		if ( element.type ) {
+			$label.addClass( 've-ui-debugBar-dump-element' );
+			text = element.type;
+			annotations = element.annotations;
+		} else if ( Array.isArray( element ) ) {
+			$label.addClass( 've-ui-debugBar-dump-achar' );
+			text = element[ 0 ];
+			annotations = element[ 1 ];
 		} else {
-			if ( element.type ) {
-				$label.addClass( 've-ui-debugBar-dump-element' );
-				text = element.type;
-				annotations = element.annotations;
-			} else if ( Array.isArray( element ) ) {
-				$label.addClass( 've-ui-debugBar-dump-achar' );
-				text = element[ 0 ];
-				annotations = element[ 1 ];
-			} else {
-				$label.addClass( 've-ui-debugBar-dump-char' );
-				text = element;
-			}
-			$label.html( ( text.match( /\S/ ) ? text : '&nbsp;' ) + ' ' );
-			if ( annotations ) {
-				$label.append(
-					/*jshint loopfunc:true */
-					$( '<span>' ).text(
-						'[' + this.getSurface().getModel().getDocument().getStore().values( annotations ).map( function ( ann ) {
-							return JSON.stringify( ann.getComparableObject() );
-						} ).join( ', ' ) + ']'
-					)
-				);
+			$label.addClass( 've-ui-debugBar-dump-char' );
+			text = element;
+		}
+
+		$label.html( text.match( /\S/ ) ? text : '&nbsp;' );
+
+		if ( $chunk && !prevType && !element.type && OO.compare( prevAnnotations, annotations ) ) {
+			// This is a run of text with identical annotations. Continue current chunk.
+			$chunk.append( $label );
+		} else {
+			// End current chunk, if any.
+			if ( $chunk ) {
+				if ( $annotations ) {
+					$chunk.append( $annotations );
+				}
+				$ol.append( $chunk );
+				$chunk = null;
+				$annotations = null;
 			}
 
-			$li.append( $label );
+			// Begin a new chunk
+			$chunk = $( '<li>' ).attr( 'value', i );
+			$chunk.append( $label );
+			if ( annotations ) {
+				$annotations = $( '<span>' ).addClass( 've-ui-debugBar-dump-note' ).text(
+					'[' + this.getSurface().getModel().getDocument().getStore().values( annotations ).map( function ( ann ) {
+						return JSON.stringify( ann.getComparableObject() );
+					} ).join( ', ' ) + ']'
+				);
+			}
 		}
-		$ol.append( $li );
+
+		prevType = element.type;
+		prevAnnotations = annotations;
 	}
+
+	// End current chunk, if any.
+	if ( $chunk ) {
+		if ( $annotations ) {
+			$chunk.append( $annotations );
+		}
+		$ol.append( $chunk );
+	}
+
 	return $ol;
 };
 
@@ -232,19 +270,17 @@ ve.ui.DebugBar.prototype.generateListFromLinearData = function ( linearData ) {
  * @return {jQuery} Ordered list
  */
 ve.ui.DebugBar.prototype.generateListFromNode = function ( node ) {
-	var $li, i, $label,
-		$ol = $( '<ol start="0"></ol>' );
+	var $li, i, $label, $note,
+		$ol = $( '<ol>' ).attr( 'start', '0' );
 
 	for ( i = 0; i < node.children.length; i++ ) {
 		$li = $( '<li>' );
 		$label = $( '<span>' ).addClass( 've-ui-debugBar-dump-element' );
+		$note = $( '<span>' ).addClass( 've-ui-debugBar-dump-note' );
 		if ( node.children[ i ].length !== undefined ) {
 			$li.append(
-				$label
-					.text( node.children[ i ].type )
-					.append(
-						$( '<span>' ).text( ' (' + node.children[ i ].length + ')' )
-					)
+				$label.text( node.children[ i ].type ),
+				$note.text( '(' + node.children[ i ].length + ')' )
 			);
 		} else {
 			$li.append( $label.text( node.children[ i ].type ) );
@@ -260,24 +296,29 @@ ve.ui.DebugBar.prototype.generateListFromNode = function ( node ) {
 };
 
 /**
- * Handle click events on the dump model toggle button
+ * Handle change events on the update model toggle button
  *
- * @param {jQuery.Event} e Event
+ * @param {boolean} value Value
  */
-ve.ui.DebugBar.prototype.onDumpModelChangeToggleClick = function () {
-	if ( this.dumpModelChangeToggle.getValue() ) {
-		this.onDumpModelButtonClick();
-		this.getSurface().model.connect( this, { documentUpdate: 'onDumpModelButtonClick' } );
+ve.ui.DebugBar.prototype.onUpdateModelToggleChange = function ( value ) {
+	if ( value ) {
+		this.updateDump();
+		this.getSurface().model.connect( this, { documentUpdate: 'updateDump' } );
 	} else {
-		this.getSurface().model.disconnect( this, { documentUpdate: 'onDumpModelButtonClick' } );
+		this.getSurface().model.disconnect( this, { documentUpdate: 'updateDump' } );
 	}
 };
 
-ve.ui.DebugBar.prototype.onInputDebuggingToggleClick = function () {
+/**
+ * Handle click events on the input debugging toggle button
+ *
+ * @param {boolean} value Value
+ */
+ve.ui.DebugBar.prototype.onInputDebuggingToggleChange = function ( value ) {
 	var surfaceModel = this.getSurface().getModel(),
 		selection = surfaceModel.getSelection();
 
-	ve.inputDebug = this.inputDebuggingToggle.getValue();
+	ve.inputDebug = value;
 
 	// Clear the cursor before rebuilding, it will be restored later
 	surfaceModel.setNullSelection();
@@ -295,7 +336,7 @@ ve.ui.DebugBar.prototype.onInputDebuggingToggleClick = function () {
 ve.ui.DebugBar.prototype.onFilibusterToggleClick = function () {
 	var debugBar = this;
 	if ( this.filibusterToggle.getValue() ) {
-		this.filibusterToggle.setLabel( 'Stop Filibuster' );
+		this.filibusterToggle.setLabel( ve.msg( 'visualeditor-debugbar-stopfilibuster' ) );
 		this.$filibuster.off( 'click' );
 		this.$filibuster.hide();
 		this.$filibuster.empty();
@@ -323,8 +364,37 @@ ve.ui.DebugBar.prototype.onFilibusterToggleClick = function () {
 				$li.toggleClass( 've-filibuster-frame-expanded' );
 			}
 		} );
-		this.filibusterToggle.setLabel( 'Start Filibuster' );
+		this.filibusterToggle.setLabel( ve.msg( 'visualeditor-debugbar-startfilibuster' ) );
 	}
+};
+
+/**
+ * Handle click events on the filibuster toggle button
+ *
+ * @param {boolean} value Value
+ */
+ve.ui.DebugBar.prototype.onTransactionsToggleChange = function ( value ) {
+	if ( value ) {
+		this.updateTransactions();
+	}
+	this.$transactions.toggleClass( 'oo-ui-element-hidden', !value );
+};
+
+/**
+ * Update the transaction dump
+ */
+ve.ui.DebugBar.prototype.updateTransactions = function () {
+	var surface = this.getSurface(),
+		$transactionsList = $( '<ol>' );
+
+	surface.getModel().getHistory().forEach( function ( item ) {
+		var $state = $( '<ol>' ).appendTo( $( '<li>' ).appendTo( $transactionsList ) );
+		item.transactions.forEach( function ( tx ) {
+			$state.append( $( '<li>' ).text( ve.summarizeTransaction( tx ) ) );
+		} );
+	} );
+
+	this.$transactions.empty().append( $transactionsList );
 };
 
 /**

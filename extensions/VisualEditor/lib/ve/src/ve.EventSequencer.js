@@ -1,7 +1,7 @@
 /*!
  * VisualEditor EventSequencer class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -123,6 +123,8 @@ ve.EventSequencer = function VeEventSequencer( eventNames ) {
 	 */
 	this.afterLoopTimeoutId = null;
 };
+
+/* eslint-disable valid-jsdoc */
 
 /**
  * Attach to a node, to listen to its jQuery events
@@ -259,9 +261,9 @@ ve.EventSequencer.prototype.onEvent = function ( eventName, ev ) {
 		this.doOnLoop();
 	}
 
-	onListeners = this.onListenersForEvent[ eventName ] || [];
+	// Listener list: take snapshot (for immutability if a listener adds another listener)
+	onListeners = ( this.onListenersForEvent[ eventName ] || [] ).slice();
 
-	// Length cache 'len' is required, as an onListener could add another onListener
 	for ( i = 0, len = onListeners.length; i < len; i++ ) {
 		onListener = onListeners[ i ];
 		this.callListener( 'on', eventName, i, onListener, ev );
@@ -297,11 +299,10 @@ ve.EventSequencer.prototype.onEvent = function ( eventName, ev ) {
 ve.EventSequencer.prototype.afterEvent = function ( eventName, ev ) {
 	var i, len, afterListeners, afterOneListeners;
 
-	// Snapshot the listener lists, and blank *OneListener list.
-	// This ensures reasonable behaviour if a function called adds another listener.
+	// Listener list: take snapshot (for immutability if a listener adds another listener)
 	afterListeners = ( this.afterListenersForEvent[ eventName ] || [] ).slice();
-	afterOneListeners = ( this.afterOneListenersForEvent[ eventName ] || [] ).slice();
-	( this.afterOneListenersForEvent[ eventName ] || [] ).length = 0;
+	// One-time listener list: take snapshot (for immutability) and blank the list
+	afterOneListeners = ( this.afterOneListenersForEvent[ eventName ] || [] ).splice( 0 );
 
 	for ( i = 0, len = afterListeners.length; i < len; i++ ) {
 		this.callListener( 'after', eventName, i, afterListeners[ i ], ev );
@@ -337,16 +338,15 @@ ve.EventSequencer.prototype.doAfterLoop = function ( myTimeoutId ) {
 	var i, len, afterLoopListeners, afterLoopOneListeners;
 
 	if ( this.afterLoopTimeoutId !== myTimeoutId ) {
-		// cancelled; do nothing
+		// Cancelled; do nothing
 		return;
 	}
 	this.afterLoopTimeoutId = null;
 
-	// Snapshot the listener lists, and blank *OneListener list.
-	// This ensures reasonable behaviour if a function called adds another listener.
+	// Loop listener list: take snapshot (for immutability if a listener adds another listener)
 	afterLoopListeners = this.afterLoopListeners.slice();
-	afterLoopOneListeners = this.afterLoopOneListeners.slice();
-	this.afterLoopOneListeners.length = 0;
+	// One-time loop listener list: take snapshot (for immutability) and blank the list
+	afterLoopOneListeners = this.afterLoopOneListeners.splice( 0 );
 
 	for ( i = 0, len = afterLoopListeners.length; i < len; i++ ) {
 		this.callListener( 'afterLoop', null, i, this.afterLoopListeners[ i ], null );
@@ -384,14 +384,15 @@ ve.EventSequencer.prototype.resetAfterLoopTimeout = function () {
  */
 ve.EventSequencer.prototype.runPendingCalls = function ( eventName ) {
 	var i, pendingCall,
-	afterKeyDownCalls = [];
+		afterKeyDownCalls = [];
+
 	for ( i = 0; i < this.pendingCalls.length; i++ ) {
 		// Length cache not possible, as a pending call appends another pending call.
 		// It's important that this list remains mutable, in the case that this
 		// function indirectly recurses.
 		pendingCall = this.pendingCalls[ i ];
 		if ( pendingCall.id === null ) {
-			// the call has already run
+			// The call has already run
 			continue;
 		}
 		if ( eventName === 'keypress' && pendingCall.eventName === 'keydown' ) {

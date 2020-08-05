@@ -4,7 +4,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2010 Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -13,9 +13,9 @@
 class PHPVariableLoader {
 	/**
 	 * Returns a global variable from PHP file by executing the file.
-	 * @param $_filename \string Path to the file.
-	 * @param $_variable \string Name of the variable.
-	 * @return \mixed The variable contents or null.
+	 * @param string $_filename Path to the file.
+	 * @param string $_variable Name of the variable.
+	 * @return mixed The variable contents or null.
 	 */
 	public static function loadVariableFromPHPFile( $_filename, $_variable ) {
 		if ( !file_exists( $_filename ) ) {
@@ -23,7 +23,7 @@ class PHPVariableLoader {
 		} else {
 			require $_filename;
 
-			return isset( $$_variable ) ? $$_variable : null;
+			return $$_variable ?? null;
 		}
 	}
 }

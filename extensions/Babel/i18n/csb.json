@@ -26,5 +26,9 @@
 	"babel-4-n": "Nen brëkòwnik rozmieje [[$2|kaszëbsczi jãzëk]] wnetka jakno [[$1|rodną mòwã]].",
 	"babel-5-n": "Nen brëkòwnik rozmieje [[$2|kaszëbsczi jãzëk]] na równi z [[$1|rodną mòwą]].",
 	"babel-N-n": "[[$2|Kaszëbsczi jãzëk]] je [[$1|rodną mòwą]] negò brëkòwnika.",
-	"babel-footer": "Jãzëczi brëkòwników"
+	"babel-footer": "Jãzëczi brëkòwników",
+	"apihelp-query+babel-description": "Dobiwô wëdowiédzã ò tim, jaczé jãzëczi znaje nen brëkòwnik.",
+	"apihelp-query+babel-summary": "Dobiwô wëdowiédzã ò tim, jaczé jãzëczi znaje nen brëkòwnik",
+	"apihelp-query+babel-param-user": "Brëkòwnik do dobicô ò nim wëdowiédzë",
+	"apihelp-query+babel-example-1": "Dibiwô wëdowiédzã Babel dlô brëkòwnika <kbd>Przëmiôr</kbd>"
 }

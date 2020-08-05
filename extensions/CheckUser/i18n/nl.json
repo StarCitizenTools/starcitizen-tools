@@ -5,7 +5,9 @@
 			"SPQRobin",
 			"Siebrand",
 			"Troefkaart",
-			"Sjoerddebruin"
+			"Sjoerddebruin",
+			"Akoopal",
+			"Mainframe98"
 		]
 	},
 	"checkuser-summary": "Dit hulpmiddel bekijkt recente wijzigingen om IP-adressen die een gebruiker heeft gebruikt te achterhalen of geeft de bewerkings- en gebruikersgegegevens weer voor een IP-adres.\nGebruikers en bewerkingen van een IP-adres van een client kunnen achterhaald worden via XFF-headers door \"/xff\" achter het IP-adres toe te voegen. IPv4 (CIDR $1-32) en IPv6 (CIDR $2-128) worden ondersteund.\nOm prestatieredenen worden niet meer dan 5.000 bewerkingen weergegeven.\nGebruik dit hulpmiddel volgens het vastgestelde beleid.",
@@ -50,6 +52,8 @@
 	"checkuser-localonly": "Niet samengevoegd",
 	"checkuser-massblock": "Geselecteerde gebruikers blokkeren",
 	"checkuser-massblock-text": "De geselecteerde gebruikers worden voor onbepaalde tijd geblokkeerd, met automatische IP-adresblokkade ingeschakeld en het aanmaken van nieuwe gebruikers uitgeschakeld.\nIP-adressen worden één week geblokkeerd voor anonieme gebruikers, met het aanmaken van nieuwe gebruikers uitgeschakeld.",
+	"checkuser-blockemail": "Gebruiker weerhouden van het sturen van e-mail",
+	"checkuser-blocktalk": "Voorkomen dat deze gebruiker tijdens de blokkade de eigen overlegpagina kan bewerken",
 	"checkuser-blocktag": "Gebruikerspagina's vervangen door:",
 	"checkuser-blocktag-talk": "Overlegpagina's vervangen door:",
 	"checkuser-massblock-commit": "Geselecteerde gebruikers blokkeren",
@@ -57,6 +61,7 @@
 	"checkuser-block-failure": "'''Geen gebruikers geblokkeerd.'''",
 	"checkuser-block-limit": "Te veel gebruikers geselecteerd.",
 	"checkuser-block-noreason": "U moet een reden opgeven voor de blokkades.",
+	"checkuser-centralauth-multilock": "Lock alle geselecteerde gebruikers",
 	"checkuser-noreason": "U moet een reden opgeven voor deze zoekopdracht.",
 	"checkuser-accounts": "$1 nieuwe {{PLURAL:$1|gebruiker|gebruikers}}",
 	"checkuser-too-many": "Te veel resultaten (volgens de schatting). Maak de CIDR kleiner:\nHieronder worden de gebruikte IP-adressen weergegeven (maximaal 5000, op IP-adres gesorteerd):",
@@ -70,6 +75,12 @@
 	"checkuser-ipeditcount": "~$1 van alle gebruikers",
 	"checkuser-showmain": "Naar het hoofdformulier van GebruikerControleren gaan",
 	"checkuser-limited": "'''Deze resultaten zijn niet volledig om prestatieredenen.'''",
+	"checkuser-log-entry-userips": "$3, $1 heeft IP-adressen opgevraagd voor $2",
+	"checkuser-log-entry-ipedits": "$3, $1 heeft bewerkingen opgevraagd voor $2",
+	"checkuser-log-entry-ipusers": "$3, $1 heeft gebruikers opgevraagd voor $2",
+	"checkuser-log-entry-ipedits-xff": "$3, $1 heeft bewerkingen opgevraagd voor XFF $2",
+	"checkuser-log-entry-ipusers-xff": "$3, $1 heeft gebruikers opgevraagd voor XFF $2",
+	"checkuser-log-entry-useredits": "$3, $1 heeft bewerkingen opgevraagd voor $2",
 	"checkuser-autocreate-action": "is automatisch aangemaakt",
 	"checkuser-create-action": "is aangemaakt",
 	"checkuser-email-action": "heeft een e-mail gestuurd aan \"$1\"",
@@ -91,5 +102,6 @@
 	"apihelp-query+checkuserlog-param-from": "Het tijdstip waar de opsomming begint.",
 	"apihelp-query+checkuserlog-param-to": "Het tijdstip waar de opsomming eindigt.",
 	"apihelp-query+checkuserlog-example-1": "Controles van [[User:Example]] weergeven.",
-	"apihelp-query+checkuserlog-example-2": "Controles van 192.0.2.0/24 na 2011-10-15T23:00:00Z weergeven."
+	"apihelp-query+checkuserlog-example-2": "Controles van 192.0.2.0/24 na 2011-10-15T23:00:00Z weergeven.",
+	"apierror-checkuser-missingsummary": "U moet een reden opgeven voor deze controle."
 }

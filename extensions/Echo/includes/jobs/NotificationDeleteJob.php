@@ -17,7 +17,7 @@ class EchoNotificationDeleteJob extends Job {
 	 * UserIds to be processed
 	 * @var int[]
 	 */
-	protected $userIds = array();
+	protected $userIds = [];
 
 	/**
 	 * @param Title $title
@@ -30,14 +30,15 @@ class EchoNotificationDeleteJob extends Job {
 
 	/**
 	 * Run the job of finding & deleting older notifications
+	 * @return true
 	 */
 	public function run() {
 		global $wgEchoMaxUpdateCount;
 		if ( count( $this->userIds ) > 1 ) {
 			// If there are multiple users, queue a single job for each one
-			$jobs = array();
+			$jobs = [];
 			foreach ( $this->userIds as $userId ) {
-				$jobs[] = new EchoNotificationDeleteJob( $this->title, array( 'userIds' => array( $userId ) ) );
+				$jobs[] = new EchoNotificationDeleteJob( $this->title, [ 'userIds' => [ $userId ] ] );
 			}
 			JobQueueGroup::singleton()->push( $jobs );
 
@@ -56,11 +57,6 @@ class EchoNotificationDeleteJob extends Job {
 			$res = $notifMapper->deleteByUserEventOffset(
 				$user, $notif->getEvent()->getId()
 			);
-			if ( $res ) {
-				$res = $targetMapper->deleteByUserEventOffset(
-					$user, $notif->getEvent()->getId()
-				);
-			}
 			if ( $res ) {
 				$notifUser = MWEchoNotifUser::newFromUser( $user );
 				$notifUser->resetNotificationCount( DB_MASTER );

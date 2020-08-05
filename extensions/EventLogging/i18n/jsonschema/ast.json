@@ -13,6 +13,7 @@
 	"jsonschema-invalid-missingfield": "Falta'l campu obligatoriu \"$1\"",
 	"jsonschema-invalid-notinenum": "El valor <code>$1</code> nun ta na enumeración de la propiedá $2",
 	"apihelp-jsonschema-description": "Recuperar una páxina d'esquema JSON.",
+	"apihelp-jsonschema-summary": "Recuperar una páxina d'esquema JSON.",
 	"apihelp-jsonschema-param-revid": "ID de revisión d'esquema.",
 	"apihelp-jsonschema-param-title": "Nome del esquema.",
 	"apihelp-jsonschema-example-1": "Recuperar l'esquema de la revisión 1234"

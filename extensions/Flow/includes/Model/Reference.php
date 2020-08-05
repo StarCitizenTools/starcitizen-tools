@@ -2,7 +2,7 @@
 
 namespace Flow\Model;
 
-use Flow\Exception\InvalidReferenceException;
+use Flow\Exception\InvalidParameterException;
 use Title;
 
 abstract class Reference {
@@ -43,19 +43,19 @@ abstract class Reference {
 	 */
 	protected $wikiId;
 
-	protected $validTypes = array( self::TYPE_LINK );
+	protected $validTypes = [ self::TYPE_LINK ];
 
 	/**
 	 * Standard constructor. Called from subclasses only
 	 *
-	 * @param UUID   $id          Id of the reference
-	 * @param string $wiki        Wiki ID of the reference source
-	 * @param UUID   $srcWorkflow Source Workflow's ID
-	 * @param Title  $srcTitle    Title of the Workflow from which this reference comes.
-	 * @param string $objectType  Output of getRevisionType for the AbstractRevision that this reference comes from.
-	 * @param UUID   $objectId    Unique identifier for the revisioned object containing the reference.
-	 * @param string $type        The type of reference
-	 * @throws InvalidReferenceException
+	 * @param UUID $id Id of the reference
+	 * @param string $wiki Wiki ID of the reference source
+	 * @param UUID $srcWorkflow Source Workflow's ID
+	 * @param Title $srcTitle Title of the Workflow from which this reference comes.
+	 * @param string $objectType Output of getRevisionType for the AbstractRevision that this reference comes from.
+	 * @param UUID $objectId Unique identifier for the revisioned object containing the reference.
+	 * @param string $type The type of reference
+	 * @throws InvalidParameterException
 	 */
 	protected function __construct( UUID $id, $wiki, UUID $srcWorkflow, Title $srcTitle, $objectType, UUID $objectId, $type ) {
 		$this->id = $id;
@@ -67,7 +67,7 @@ abstract class Reference {
 		$this->srcTitle = $srcTitle;
 
 		if ( !in_array( $type, $this->validTypes ) ) {
-			throw new InvalidReferenceException(
+			throw new InvalidParameterException(
 				"Invalid type $type specified for reference " . get_class( $this )
 			);
 		}
@@ -101,6 +101,7 @@ abstract class Reference {
 
 	/**
 	 * Gives the object type of the source object.
+	 * @return string
 	 */
 	public function getObjectType() {
 		return $this->objectType;
@@ -131,7 +132,7 @@ abstract class Reference {
 	 * @return array
 	 */
 	public function getStorageRow() {
-		return array(
+		return [
 			'ref_id' => $this->id->getAlphadecimal(),
 			'ref_src_wiki' => $this->wikiId,
 			'ref_src_workflow_id' => $this->workflowId->getAlphadecimal(),
@@ -140,7 +141,7 @@ abstract class Reference {
 			'ref_src_object_type' => $this->objectType,
 			'ref_src_object_id' => $this->objectId->getAlphadecimal(),
 			'ref_type' => $this->type,
-		);
+		];
 	}
 
 	/**
@@ -153,12 +154,11 @@ abstract class Reference {
 	}
 
 	public function getUniqueIdentifier() {
-		return 	$this->getSrcTitle() . '|' .
-				$this->getObjectType() . '|' .
-				$this->getObjectId()->getAlphadecimal() . '|' .
-				$this->getIdentifier();
+		return $this->getSrcTitle() . '|' .
+			$this->getObjectType() . '|' .
+			$this->getObjectId()->getAlphadecimal() . '|' .
+			$this->getIdentifier();
 	}
-
 
 	/**
 	 * We don't have a real PK (see comment in

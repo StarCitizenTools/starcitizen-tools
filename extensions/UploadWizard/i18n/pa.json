@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Speedytwo"
+			"Speedytwo",
+			"Babanwalia"
 		]
 	},
-	"uploadwizard": "ਅੱਪਲੋਡ ਵਿਜ਼ਰਦ"
+	"uploadwizard": "ਅੱਪਲੋਡ ਵਿਜ਼ਰਦ",
+	"api-error-noimageinfo": "ਅੱਪਲੋਡ ਸਫਲ਼ ਹੋਇਆ ਪਰ ਸਰਵਰ ਨੇ ਇਸ ਫ਼ਾਈਲ ਬਾਰੇ ਸਾਨੂੰ ਕੋਈ ਜਾਣਕਾਰੀ ਨਹੀਂ ਦਿੱਤੀ।"
 }

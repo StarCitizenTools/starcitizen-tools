@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Brad Jorsch <bjorsch@wikimedia.org>
+ * Copyright © 2016 Wikimedia Foundation and contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,16 +117,16 @@ class ApiQueryAuthManagerInfo extends ApiQueryBase {
 	protected function getExamplesMessages() {
 		return [
 			'action=query&meta=authmanagerinfo&amirequestsfor=' . urlencode( AuthManager::ACTION_LOGIN )
-				=> 'apihelp-query+filerepoinfo-example-login',
+				=> 'apihelp-query+authmanagerinfo-example-login',
 			'action=query&meta=authmanagerinfo&amirequestsfor=' . urlencode( AuthManager::ACTION_LOGIN ) .
 				'&amimergerequestfields=1'
-				=> 'apihelp-query+filerepoinfo-example-login-merged',
+				=> 'apihelp-query+authmanagerinfo-example-login-merged',
 			'action=query&meta=authmanagerinfo&amisecuritysensitiveoperation=foo'
-				=> 'apihelp-query+filerepoinfo-example-securitysensitiveoperation',
+				=> 'apihelp-query+authmanagerinfo-example-securitysensitiveoperation',
 		];
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Authmanagerinfo';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Authmanagerinfo';
 	}
 }

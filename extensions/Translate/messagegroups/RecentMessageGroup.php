@@ -6,7 +6,7 @@
  * @author Niklas Laxström
  * @author Siebrand Mazeland
  * @copyright Copyright © 2008-2013, Niklas Laxström, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -52,25 +52,26 @@ class RecentMessageGroup extends WikiMessageGroup {
 	}
 
 	protected function getRCCutoff() {
-		$db = wfGetDB( DB_SLAVE );
+		$db = wfGetDB( DB_REPLICA );
 		$tables = 'recentchanges';
-		$max = $db->selectField( $tables, 'MAX(rc_id)', array(), __METHOD__ );
+		$max = $db->selectField( $tables, 'MAX(rc_id)', [], __METHOD__ );
 
 		return max( 0, $max - 50000 );
 	}
 
 	/**
 	 * Allows subclasses to partially customize the query.
+	 * @return array
 	 */
 	protected function getQueryConditions() {
 		global $wgTranslateMessageNamespaces;
-		$db = wfGetDB( DB_SLAVE );
-		$conds = array(
+		$db = wfGetDB( DB_REPLICA );
+		$conds = [
 			'rc_title ' . $db->buildLike( $db->anyString(), '/' . $this->language ),
 			'rc_namespace' => $wgTranslateMessageNamespaces,
 			'rc_type != ' . RC_LOG,
 			'rc_id > ' . $this->getRCCutoff(),
-		);
+		];
 
 		return $conds;
 	}
@@ -79,7 +80,7 @@ class RecentMessageGroup extends WikiMessageGroup {
 	 * Allows subclasses to filter out more unwanted messages.
 	 *
 	 * @param MessageHandle $msg
-	 * @return boolean
+	 * @return bool
 	 */
 	protected function matchingMessage( MessageHandle $msg ) {
 		return true;
@@ -90,17 +91,36 @@ class RecentMessageGroup extends WikiMessageGroup {
 				throw new MWException( 'Language not set' );
 		}
 
-		$db = wfGetDB( DB_SLAVE );
-		$tables = 'recentchanges';
-		$fields = array( 'rc_namespace', 'rc_title' );
+		$db = wfGetDB( DB_REPLICA );
+
+		if ( is_callable( RecentChange::class, 'getQueryInfo' ) ) {
+			$rcQuery = RecentChange::getQueryInfo();
+			$tables = $rcQuery['tables'];
+			$joins = $rcQuery['joins'];
+		} else {
+			$tables = 'recentchanges';
+			$joins = [];
+		}
+
+		$fields = [ 'rc_namespace', 'rc_title' ];
 		$conds = $this->getQueryConditions();
-		$options = array(
+		$options = [
 			'ORDER BY' => 'rc_id DESC',
 			'LIMIT' => 5000
-		);
-		$res = $db->select( $tables, $fields, $conds, __METHOD__, $options );
+		];
+		$res = $db->select( $tables, $fields, $conds, __METHOD__, $options, $joins );
 
-		$defs = array();
+		$groupIdsPreload = [];
+		foreach ( $res as $row ) {
+			$title = Title::makeTitle( $row->rc_namespace, $row->rc_title );
+			$handle = new MessageHandle( $title );
+			if ( $handle->isValid() ) {
+				$groupIdsPreload[] = $handle->getGroup()->getId();
+			}
+		}
+		TranslateMetadata::preloadGroups( $groupIdsPreload );
+
+		$defs = [];
 		foreach ( $res as $row ) {
 			$title = Title::makeTitle( $row->rc_namespace, $row->rc_title );
 			$handle = new MessageHandle( $title );

@@ -24,6 +24,8 @@
  * @see http://exif.org/Exif2-2.PDF The Exif 2.2 specification
  * @file
  */
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Timestamp\TimestampException;
 
 /**
  * Format Image metadata values into a human readable form.
@@ -102,7 +104,6 @@ class FormatMetadata extends ContextSource {
 		unset( $tags['ResolutionUnit'] );
 
 		foreach ( $tags as $tag => &$vals ) {
-
 			// This seems ugly to wrap non-array's in an array just to unwrap again,
 			// especially when most of the time it is not an array
 			if ( !is_array( $tags[$tag] ) ) {
@@ -165,7 +166,6 @@ class FormatMetadata extends ContextSource {
 			}
 
 			foreach ( $vals as &$val ) {
-
 				switch ( $tag ) {
 					case 'Compression':
 						switch ( $val ) {
@@ -271,7 +271,7 @@ class FormatMetadata extends ContextSource {
 					// TODO: YCbCrCoefficients  #p27 (see annex E)
 					case 'ExifVersion':
 					case 'FlashpixVersion':
-						$val = "$val" / 100;
+						$val = (int)$val / 100;
 						break;
 
 					case 'ColorSpace':
@@ -418,12 +418,12 @@ class FormatMetadata extends ContextSource {
 
 					case 'Flash':
 						$flashDecode = [
-							'fired' => $val & bindec( '00000001' ),
-							'return' => ( $val & bindec( '00000110' ) ) >> 1,
-							'mode' => ( $val & bindec( '00011000' ) ) >> 3,
-							'function' => ( $val & bindec( '00100000' ) ) >> 5,
-							'redeye' => ( $val & bindec( '01000000' ) ) >> 6,
-// 						'reserved' => ($val & bindec( '10000000' )) >> 7,
+							'fired' => $val & 0b00000001,
+							'return' => ( $val & 0b00000110 ) >> 1,
+							'mode' => ( $val & 0b00011000 ) >> 3,
+							'function' => ( $val & 0b00100000 ) >> 5,
+							'redeye' => ( $val & 0b01000000 ) >> 6,
+							// 'reserved' => ( $val & 0b10000000 ) >> 7,
 						];
 						$flashMsgs = [];
 						# We do not need to handle unknown values since all are used.
@@ -740,8 +740,13 @@ class FormatMetadata extends ContextSource {
 
 					case 'Software':
 						if ( is_array( $val ) ) {
-							// if its a software, version array.
-							$val = $this->msg( 'exif-software-version-value', $val[0], $val[1] )->text();
+							if ( count( $val ) > 1 ) {
+								// if its a software, version array.
+								$val = $this->msg( 'exif-software-version-value', $val[0], $val[1] )->text();
+							} else {
+								// https://phabricator.wikimedia.org/T178130
+								$val = $this->exifMsg( $tag, '', $val[0] );
+							}
 						} else {
 							$val = $this->exifMsg( $tag, '', $val );
 						}
@@ -866,6 +871,7 @@ class FormatMetadata extends ContextSource {
 					// are included here as we really don't want
 					// commas inserted.
 					case 'ImageDescription':
+					case 'UserComment':
 					case 'Artist':
 					case 'Copyright':
 					case 'RelatedSoundFile':
@@ -1041,7 +1047,7 @@ class FormatMetadata extends ContextSource {
 
 		if ( !is_array( $vals ) ) {
 			return $vals; // do nothing if not an array;
-		} elseif ( count( $vals ) === 1 && $type !== 'lang' ) {
+		} elseif ( count( $vals ) === 1 && $type !== 'lang' && isset( $vals[0] ) ) {
 			return $vals[0];
 		} elseif ( count( $vals ) === 0 ) {
 			wfDebug( __METHOD__ . " metadata array with 0 elements!\n" );
@@ -1394,11 +1400,16 @@ class FormatMetadata extends ContextSource {
 	 * Format a coordinate value, convert numbers from floating point
 	 * into degree minute second representation.
 	 *
-	 * @param int $coord Degrees, minutes and seconds
-	 * @param string $type Latitude or longitude (for if its a NWS or E)
-	 * @return mixed A floating point number or whatever we were fed
+	 * @param float|string $coord Expected to be a number or numeric string in degrees
+	 * @param string $type "latitude" or "longitude"
+	 * @return string
 	 */
 	private function formatCoords( $coord, $type ) {
+		if ( !is_numeric( $coord ) ) {
+			wfDebugLog( 'exif', __METHOD__ . ": \"$coord\" is not a number" );
+			return (string)$coord;
+		}
+
 		$ref = '';
 		if ( $coord < 0 ) {
 			$nCoord = -$coord;
@@ -1408,7 +1419,7 @@ class FormatMetadata extends ContextSource {
 				$ref = 'W';
 			}
 		} else {
-			$nCoord = $coord;
+			$nCoord = (float)$coord;
 			if ( $type === 'latitude' ) {
 				$ref = 'N';
 			} elseif ( $type === 'longitude' ) {
@@ -1417,13 +1428,14 @@ class FormatMetadata extends ContextSource {
 		}
 
 		$deg = floor( $nCoord );
-		$min = floor( ( $nCoord - $deg ) * 60.0 );
-		$sec = round( ( ( $nCoord - $deg ) - $min / 60 ) * 3600, 2 );
+		$min = floor( ( $nCoord - $deg ) * 60 );
+		$sec = round( ( ( $nCoord - $deg ) * 60 - $min ) * 60, 2 );
 
 		$deg = $this->formatNum( $deg );
 		$min = $this->formatNum( $min );
 		$sec = $this->formatNum( $sec );
 
+		// Note the default message "$1° $2′ $3″ $4" ignores the 5th parameter
 		return $this->msg( 'exif-coordinate-format', $deg, $min, $sec, $ref, $coord )->text();
 	}
 
@@ -1581,14 +1593,14 @@ class FormatMetadata extends ContextSource {
 	 * @since 1.23
 	 */
 	public function fetchExtendedMetadata( File $file ) {
-		$cache = ObjectCache::getMainWANInstance();
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 
 		// If revision deleted, exit immediately
 		if ( $file->isDeleted( File::DELETED_FILE ) ) {
 			return [];
 		}
 
-		$cacheKey = wfMemcKey(
+		$cacheKey = $cache->makeKey(
 			'getExtendedMetadata',
 			$this->getLanguage()->getCode(),
 			(int)$this->singleLang,
@@ -1674,7 +1686,7 @@ class FormatMetadata extends ContextSource {
 	 *
 	 * @param File $file File to use
 	 * @param array $extendedMetadata
-	 * @param int $maxCacheTime Hook handlers might use this parameter to override cache time
+	 * @param int &$maxCacheTime Hook handlers might use this parameter to override cache time
 	 *
 	 * @return array [<property name> => ['value' => <value>]], or [] on error
 	 * @since 1.23
@@ -1682,7 +1694,6 @@ class FormatMetadata extends ContextSource {
 	protected function getExtendedMetadataFromHook( File $file, array $extendedMetadata,
 		&$maxCacheTime
 	) {
-
 		Hooks::run( 'GetExtendedMetadata', [
 			&$extendedMetadata,
 			$file,
@@ -1761,9 +1772,9 @@ class FormatMetadata extends ContextSource {
 			}
 			return $newValue;
 		} else { // _type is 'ul' or 'ol' or missing in which case it defaults to 'ul'
-			list( $k, $v ) = each( $value );
-			if ( $k === '_type' ) {
-				$v = current( $value );
+			$v = reset( $value );
+			if ( key( $value ) === '_type' ) {
+				$v = next( $value );
 			}
 			return $v;
 		}
@@ -1772,7 +1783,7 @@ class FormatMetadata extends ContextSource {
 	/**
 	 * Takes an array returned by the getExtendedMetadata* functions,
 	 * and resolves multi-language values in it.
-	 * @param array $metadata
+	 * @param array &$metadata
 	 * @since 1.23
 	 */
 	protected function resolveMultilangMetadata( &$metadata ) {
@@ -1789,7 +1800,7 @@ class FormatMetadata extends ContextSource {
 	/**
 	 * Takes an array returned by the getExtendedMetadata* functions,
 	 * and turns all fields into single-valued ones by dropping extra values.
-	 * @param array $metadata
+	 * @param array &$metadata
 	 * @since 1.25
 	 */
 	protected function discardMultipleValues( &$metadata ) {
@@ -1806,12 +1817,11 @@ class FormatMetadata extends ContextSource {
 				$field['value'] = $this->resolveMultivalueValue( $field['value'] );
 			}
 		}
-
 	}
 
 	/**
 	 * Makes sure the given array is a valid API response fragment
-	 * @param array $arr
+	 * @param array &$arr
 	 */
 	protected function sanitizeArrayForAPI( &$arr ) {
 		if ( !is_array( $arr ) ) {
@@ -1855,9 +1865,9 @@ class FormatMetadata extends ContextSource {
 		// drop all characters which are not valid in an XML tag name
 		// a bunch of non-ASCII letters would be valid but probably won't
 		// be used so we take the easy way
-		$key = preg_replace( '/[^a-zA-z0-9_:.-]/', '', $key );
+		$key = preg_replace( '/[^a-zA-z0-9_:.\-]/', '', $key );
 		// drop characters which are invalid at the first position
-		$key = preg_replace( '/^[\d-.]+/', '', $key );
+		$key = preg_replace( '/^[\d\-.]+/', '', $key );
 
 		if ( $key == '' ) {
 			$key = '_';

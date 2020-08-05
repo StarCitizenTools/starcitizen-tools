@@ -1,24 +1,27 @@
 /*!
  * VisualEditor UserInterface MWWikitextStringTransferHandler tests.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
-var MWWIKITEXT_MOCK_API = true;
+
+window.MWWIKITEXT_MOCK_API = true;
 
 QUnit.module( 've.ui.MWWikitextStringTransferHandler', QUnit.newMwEnvironment( {
 	setup: function () {
 		// Mock XHR for mw.Api()
-		this.server = MWWIKITEXT_MOCK_API ? this.sandbox.useFakeServer() : null;
-	}
+		this.server = window.MWWIKITEXT_MOCK_API ? this.sandbox.useFakeServer() : null;
+		ve.test.utils.mwEnvironment.setup.call( this );
+	},
+	teardown: ve.test.utils.mwEnvironment.teardown
 } ) );
 
 /* Tests */
 
-function runWikitextStringHandlerTest( assert, server, string, mimeType, expectedResponse, expectedData, annotations, msg ) {
+ve.test.utils.runWikitextStringHandlerTest = function ( assert, server, string, mimeType, expectedResponse, expectedData, annotations, assertDom, msg ) {
 	var handler, i, j, name,
 		done = assert.async(),
 		item = ve.ui.DataTransferItem.static.newFromString( string, mimeType ),
-		doc = ve.dm.example.createExampleDocument(),
+		doc = ve.dm.Document.static.newBlankDocument(),
 		mockSurface = {
 			getModel: function () {
 				return {
@@ -50,14 +53,25 @@ function runWikitextStringHandlerTest( assert, server, string, mimeType, expecte
 	// Invoke the handler
 	handler = ve.ui.dataTransferHandlerFactory.create( 'wikitextString', mockSurface, item );
 
-	handler.getInsertableData().done( function ( doc2 ) {
-		var actualData = doc2.getData();
-		ve.dm.example.postprocessAnnotations( actualData, doc2.getStore() );
-		assert.equalLinearData( actualData, expectedData, msg + ': data match' );
+	handler.getInsertableData().done( function ( docOrData ) {
+		var actualData, store;
+		if ( docOrData instanceof ve.dm.Document ) {
+			actualData = docOrData.getData();
+			store = docOrData.getStore();
+		} else {
+			actualData = docOrData;
+			store = new ve.dm.HashValueStore();
+		}
+		ve.dm.example.postprocessAnnotations( actualData, store );
+		if ( assertDom ) {
+			assert.equalLinearDataWithDom( store, actualData, expectedData, msg + ': data match (with DOM)' );
+		} else {
+			assert.equalLinearData( actualData, expectedData, msg + ': data match' );
+		}
 		done();
 	} );
 
-	if ( server ) {
+	if ( server && expectedResponse ) {
 		server.respond( [ 200, { 'Content-Type': 'application/json' }, JSON.stringify( {
 			visualeditor: {
 				result: 'success',
@@ -67,7 +81,7 @@ function runWikitextStringHandlerTest( assert, server, string, mimeType, expecte
 			}
 		} ) ] );
 	}
-}
+};
 
 QUnit.test( 'convert', function ( assert ) {
 	var i,
@@ -144,21 +158,34 @@ QUnit.test( 'convert', function ( assert ) {
 				]
 			},
 			{
-				msg: 'Heading',
+				msg: 'Headings, only RESTBase IDs stripped',
 				pasteString: '==heading==',
 				pasteType: 'text/plain',
-				parsoidResponse: '<h2>heading</h2>',
+				parsoidResponse: '<h2 id="mwAB">foo</h2><h2 id="mw-meaningful-id">bar</h2>',
 				annotations: [],
+				assertDom: true,
 				expectedData: [
-					{ type: 'heading', attributes: { level: 2 } },
-					'h',
-					'e',
-					'a',
-					'd',
-					'i',
-					'n',
-					'g',
-					{ type: '/heading' },
+					{ type: 'mwHeading', attributes: { level: 2 }, internal: { changesSinceLoad: 0, metaItems: [] }, originalDomElements: $( '<h2>foo</h2>' ).toArray() },
+					'f', 'o', 'o',
+					{ type: '/mwHeading' },
+					{ type: 'mwHeading', attributes: { level: 2 }, internal: { changesSinceLoad: 0, metaItems: [] }, originalDomElements: $( '<h2 id="mw-meaningful-id">bar</h2>' ).toArray() },
+					'b', 'a', 'r',
+					{ type: '/mwHeading' },
+					{ type: 'internalList' },
+					{ type: '/internalList' }
+				]
+			},
+			{
+				msg: 'Headings, parsoid fallback ids don\'t interfere with whitespace stripping',
+				pasteString: '== Tudnivalók ==',
+				pasteType: 'text/plain',
+				parsoidResponse: '<h2 id="Tudnivalók"><span id="Tudnival.C3.B3k" typeof="mw:FallbackId"></span> Tudnivalók </h2>',
+				annotations: [],
+				assertDom: true,
+				expectedData: [
+					{ type: 'mwHeading', attributes: { level: 2 }, internal: { changesSinceLoad: 0, metaItems: [] }, originalDomElements: $( '<h2 id="Tudnivalók"> Tudnivalók </h2>' ).toArray() },
+					'T', 'u', 'd', 'n', 'i', 'v', 'a', 'l', 'ó', 'k',
+					{ type: '/mwHeading' },
 					{ type: 'internalList' },
 					{ type: '/internalList' }
 				]
@@ -167,135 +194,62 @@ QUnit.test( 'convert', function ( assert ) {
 				msg: 'Magic link (RFC)',
 				pasteString: 'RFC 1234',
 				pasteType: 'text/plain',
-				parsoidResponse: '<p><a href="//tools.ietf.org/html/rfc1234" rel="mw:ExtLink">RFC 1234</a></p>',
+				parsoidResponse: false,
 				annotations: [],
 				expectedData: [
 					{
 						type: 'link/mwMagic',
 						attributes: {
-							content: 'RFC 1234',
-							origText: 'RFC 1234',
-							origHtml: 'RFC 1234'
+							content: 'RFC 1234'
 						}
 					},
 					{
 						type: '/link/mwMagic'
-					},
-					{ type: 'internalList' },
-					{ type: '/internalList' }
+					}
 				]
 			},
 			{
 				msg: 'Magic link (PMID)',
 				pasteString: 'PMID 1234',
 				pasteType: 'text/plain',
-				parsoidResponse: '<p><a href="//www.ncbi.nlm.nih.gov/pubmed/1234?dopt=Abstract" rel="mw:ExtLink">PMID 1234</a></p>',
+				parsoidResponse: false,
 				annotations: [],
 				expectedData: [
 					{
 						type: 'link/mwMagic',
 						attributes: {
-							content: 'PMID 1234',
-							origText: 'PMID 1234',
-							origHtml: 'PMID 1234'
+							content: 'PMID 1234'
 						}
 					},
 					{
 						type: '/link/mwMagic'
-					},
-					{ type: 'internalList' },
-					{ type: '/internalList' }
+					}
 				]
 			},
 			{
 				msg: 'Magic link (ISBN)',
 				pasteString: 'ISBN 123456789X',
 				pasteType: 'text/plain',
-				parsoidResponse: '<p><a href="./Special:BookSources/123456789X" rel="mw:ExtLink">ISBN 123456789X</a></p>',
+				parsoidResponse: false,
 				annotations: [],
 				expectedData: [
 					{
 						type: 'link/mwMagic',
 						attributes: {
-							content: 'ISBN 123456789X',
-							origText: 'ISBN 123456789X',
-							origHtml: 'ISBN 123456789X'
+							content: 'ISBN 123456789X'
 						}
 					},
 					{
 						type: '/link/mwMagic'
-					},
-					{ type: 'internalList' },
-					{ type: '/internalList' }
-				]
-			},
-			{
-				msg: 'Simple reference',
-				pasteString: '<ref>Foo</ref>',
-				pasteType: 'text/plain',
-				parsoidResponse: '<p><span about="#mwt2" class="mw-ref" id="cite_ref-1" rel="dc:references" typeof="mw:Extension/ref" data-mw=\'{"name":"ref","body":{"id":"mw-reference-text-cite_note-1"},"attrs":{}}\'>[1]</span></p>' +
-					'<ol class="mw-references" typeof="mw:Extension/references" about="#mwt3" data-mw=\'{"name":"references","attrs":{},"autoGenerated":true}\'>' +
-						'<li about="#cite_note-1" id="cite_note-1">↑ <span id="mw-reference-text-cite_note-1" class="mw-reference-text">Foo</span></li>' +
-					'</ol>',
-				annotations: [],
-				expectedData: [
-					{
-						type: 'mwReference',
-						attributes: {
-							mw: {
-								attrs: {},
-								body: {
-									id: 'mw-reference-text-cite_note-1'
-								},
-								name: 'ref'
-							},
-							contentsUsed: true,
-							listGroup: 'mwReference/',
-							listIndex: 0,
-							listKey: 'auto/0',
-							originalMw: '{"name":"ref","body":{"id":"mw-reference-text-cite_note-1"},"attrs":{}}',
-							refGroup: '',
-							refListItemId: 'mw-reference-text-cite_note-1'
-						}
-					},
-					{ type: '/mwReference' },
-					{ type: 'internalList' },
-					{ type: 'internalItem' },
-					{ type: 'paragraph', internal: { generated: 'wrapper' } },
-					'F', 'o', 'o',
-					{ type: '/paragraph' },
-					{ type: '/internalItem' },
-					{ type: '/internalList' }
-				]
-			},
-			{
-				msg: 'Reference template with autoGenerated content',
-				pasteString: '{{reference}}',
-				pasteType: 'text/plain',
-				parsoidResponse: '<p><span typeof="mw:Transclusion">[1]</span></p>' +
-					'<ol class="mw-references" typeof="mw:Extension/references" about="#mwt3" data-mw=\'{"name":"references","attrs":{},"autoGenerated":true}\'>' +
-						'<li>Reference list</li>' +
-					'</ol>',
-				annotations: [],
-				expectedData: [
-					{
-						type: 'mwTransclusionInline',
-						attributes: {
-							mw: {},
-							originalMw: null
-						}
-					},
-					{
-						type: '/mwTransclusionInline'
-					},
-					{ type: 'internalList' },
-					{ type: '/internalList' }
+					}
 				]
 			}
 		];
 
-	QUnit.expect( cases.length * 2 );
 	for ( i = 0; i < cases.length; i++ ) {
-		runWikitextStringHandlerTest( assert, this.server, cases[ i ].pasteString, cases[ i ].pasteType, cases[ i ].parsoidResponse, cases[ i ].expectedData, cases[ i ].annotations, cases[ i ].msg );
+		ve.test.utils.runWikitextStringHandlerTest(
+			assert, this.server, cases[ i ].pasteString, cases[ i ].pasteType, cases[ i ].parsoidResponse,
+			cases[ i ].expectedData, cases[ i ].annotations, cases[ i ].assertDom, cases[ i ].msg
+		);
 	}
 } );

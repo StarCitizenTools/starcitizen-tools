@@ -1,7 +1,6 @@
 @import 'mediawiki.mixins';
-@import 'flow.colors';
-@import 'flow.helpers';
-@import 'flow.variables';
+@import '../../flow.colors';
+@import '../../flow.variables';
 
 // Topic metadata
 .flow-topic-meta {
@@ -30,7 +29,7 @@
 	// and requires that you redefine :hover.
 	// I did know want to hard code the hover color
 	// from the theme we're using.
-	a.expand-collapse-posts-link:not(:hover) {
+	a.expand-collapse-posts-link:not( :hover ) {
 		color: @colorTextLight;
 	}
 }

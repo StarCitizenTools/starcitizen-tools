@@ -8,7 +8,7 @@
  * @author Niklas Laxström
  * @author Siebrand Mazeland
  * @copyright Copyright © 2008-2013, Niklas Laxström, Siebrand Mazeland
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -24,7 +24,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	protected $label = 'none';
 
 	/**
-	 * @param IContextSource $context
+	 * @param IContextSource|null $context
 	 * @return string
 	 */
 	public function getLabel( IContextSource $context = null ) {
@@ -32,7 +32,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	}
 
 	/**
-	 * @param $value string
+	 * @param string $value
 	 */
 	public function setLabel( $value ) {
 		$this->label = $value;
@@ -51,7 +51,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	}
 
 	/**
-	 * @param $value string
+	 * @param string $value
 	 */
 	public function setId( $value ) {
 		$this->id = $value;
@@ -64,12 +64,18 @@ abstract class MessageGroupOld implements MessageGroup {
 	 */
 	protected $namespace = NS_MEDIAWIKI;
 
-	/// Get the namespace where all the messages of this group belong.
+	/**
+	 * Get the namespace where all the messages of this group belong.
+	 * @return int
+	 */
 	public function getNamespace() {
 		return $this->namespace;
 	}
 
-	/// Set the namespace where all the messages of this group belong.
+	/**
+	 * Set the namespace where all the messages of this group belong.
+	 * @param int $ns
+	 */
 	public function setNamespace( $ns ) {
 		$this->namespace = $ns;
 	}
@@ -78,7 +84,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	 * List of messages that are hidden by default, but can still be translated if
 	 * needed.
 	 */
-	protected $optional = array();
+	protected $optional = [];
 
 	/**
 	 * @return array
@@ -88,7 +94,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	}
 
 	/**
-	 * @param $value array
+	 * @param array $value
 	 */
 	public function setOptional( $value ) {
 		$this->optional = $value;
@@ -97,7 +103,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	/**
 	 * List of messages that are always hidden and cannot be translated.
 	 */
-	protected $ignored = array();
+	protected $ignored = [];
 
 	/**
 	 * @return array
@@ -107,7 +113,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	}
 
 	/**
-	 * @param $value array
+	 * @param array $value
 	 */
 	public function setIgnored( $value ) {
 		$this->ignored = $value;
@@ -171,7 +177,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	}
 
 	public function load( $code ) {
-		return array();
+		return [];
 	}
 
 	/**
@@ -197,7 +203,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	 * @return array
 	 */
 	public function getUniqueDefinitions() {
-		return $this->meta ? array() : $this->getDefinitions();
+		return $this->meta ? [] : $this->getDefinitions();
 	}
 
 	/**
@@ -214,7 +220,7 @@ abstract class MessageGroupOld implements MessageGroup {
 		}
 		$key = strtolower( str_replace( ' ', '_', $key ) );
 
-		return isset( $this->messages[$code][$key] ) ? $this->messages[$code][$key] : null;
+		return $this->messages[$code][$key] ?? null;
 	}
 
 	public static function normaliseKeys( $array ) {
@@ -222,7 +228,7 @@ abstract class MessageGroupOld implements MessageGroup {
 			return null;
 		}
 
-		$new = array();
+		$new = [];
 		foreach ( $array as $key => $v ) {
 			$key = strtolower( str_replace( ' ', '_', $key ) );
 			$new[$key] = $v;
@@ -234,7 +240,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	/**
 	 * All the messages for this group, by language code.
 	 */
-	protected $messages = array();
+	protected $messages = [];
 
 	/**
 	 * Returns path to the file where translation of language code $code are.
@@ -251,7 +257,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	}
 
 	/**
-	 * @param $code
+	 * @param string $code
 	 * @return bool|string
 	 */
 	public function getMessageFileWithPath( $code ) {
@@ -272,8 +278,8 @@ abstract class MessageGroupOld implements MessageGroup {
 	/**
 	 * Creates a new MessageCollection for this group.
 	 *
-	 * @param $code \string Language code for this collection.
-	 * @param $unique \bool Whether to build collection for messages unique to this
+	 * @param string $code Language code for this collection.
+	 * @param bool $unique Whether to build collection for messages unique to this
 	 *                group only.
 	 * @return MessageCollection
 	 */
@@ -310,27 +316,30 @@ abstract class MessageGroupOld implements MessageGroup {
 	}
 
 	public function getTags( $type = null ) {
-		$tags = array(
+		$tags = [
 			'optional' => $this->optional,
 			'ignored' => $this->ignored,
-		);
+		];
 
 		if ( !$type ) {
 			return $tags;
 		}
 
-		return isset( $tags[$type] ) ? $tags[$type] : array();
+		return $tags[$type] ?? [];
 	}
 
 	/**
-	 * @param $code string
+	 * @param string $code
 	 * @return bool
 	 */
 	protected function isSourceLanguage( $code ) {
 		return $code === $this->getSourceLanguage();
 	}
 
-	// Unsupported stuff, just to satisfy the new interface
+	/**
+	 * Unsupported stuff, just to satisfy the new interface
+	 * @param array $conf
+	 */
 	public function setConfiguration( $conf ) {
 	}
 
@@ -348,7 +357,7 @@ abstract class MessageGroupOld implements MessageGroup {
 		global $wgTranslateWorkflowStates;
 		if ( !$wgTranslateWorkflowStates ) {
 			// Not configured
-			$conf = array();
+			$conf = [];
 		} else {
 			$conf = $wgTranslateWorkflowStates;
 		}
@@ -363,6 +372,8 @@ abstract class MessageGroupOld implements MessageGroup {
 	public function getMessageGroupStates() {
 		// @todo Replace deprecated call.
 		$conf = $this->getWorkflowConfiguration();
+
+		Hooks::run( 'Translate:modifyMessageGroupStates', [ $this->getId(), &$conf ] );
 
 		return new MessageGroupStates( $conf );
 	}
@@ -379,6 +390,8 @@ abstract class MessageGroupOld implements MessageGroup {
 	protected static function addContext( Message $message, IContextSource $context = null ) {
 		if ( $context ) {
 			$message->inLanguage( $context->getLanguage() );
+		} else {
+			$message->inLanguage( 'en' );
 		}
 
 		return $message;

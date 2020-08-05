@@ -1,0 +1,11 @@
+.svn
+*~
+*.kate-swp
+.*.swp
+docs/js
+*.pyc
+node_modules
+.tox
+vendor
+composer.lock
+.DS_Store

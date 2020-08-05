@@ -1,0 +1,45 @@
+@media print {
+	.mw-revslider-container {
+		display: none;
+	}
+}
+
+.mw-revslider-container {
+	/* This will flip with CSSJanus in case */
+	/* the interface is in RTL */
+	direction: ltr;
+	position: relative;
+	border: 1px solid #c8ccd1;
+
+	.mw-revslider-toggle-button.oo-ui-buttonElement-frameless.oo-ui-labelElement {
+		width: 100%;
+		text-align: center;
+		/* Overrule OOUI frameless button `margin` */
+		margin-left: 0 !important; /* stylelint-disable-line declaration-no-important */
+		margin-right: 0;
+	}
+}
+
+.mw-revslider-toggle-button {
+	.oo-ui-buttonElement-button {
+		width: 100%;
+	}
+
+	.oo-ui-iconElement-icon {
+		/* Overrule OOUI iconElement `left` */
+		left: auto !important; /* stylelint-disable-line declaration-no-important */
+		right: 0.28571429em;
+		/* For OOUI-Apex */
+		position: absolute;
+	}
+}
+
+.mw-revslider-slider-wrapper {
+	min-height: 142px;
+	border-top: 1px solid #c8ccd1;
+	padding: 20px 10px;
+}
+
+.mw-revslider-placeholder .oo-ui-progressBarWidget {
+	margin: 60px auto;
+}

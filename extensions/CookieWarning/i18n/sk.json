@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"TomášPolonec"
+		]
+	},
+	"cookiewarning-info": "Cookies nám pomáhajú poskytovať naše služby. Používaním našich služieb súhlasíte s použitím súborov cookies.",
+	"cookiewarning-desc": "Na vrchu stránky zobrazí upozornenie o cookies",
+	"cookiewarning-moreinfo-label": "Viac informácií",
+	"cookiewarning-ok-label": "OK"
+}

@@ -11,19 +11,21 @@
 			"The Evil IP address",
 			"Umherirrender",
 			"Yekrats",
-			"Liuxinyu970226"
+			"Liuxinyu970226",
+			"Matěj Suchánek",
+			"TTO"
 		]
 	},
-	"nuke": "{{doc-special|Nuke}}\nThe Nuke extension allows for sysops to delete a large number of pages (\"Mass delete\").\nFor more information, see http://www.mediawiki.org/wiki/Extension:Nuke\n{{Identical|Mass delete}}",
+	"nuke": "{{doc-special|Nuke}}\nThe Nuke extension allows for sysops to delete a large number of pages (\"Mass delete\").\nFor more information, see https://www.mediawiki.org/wiki/Extension:Nuke\n{{Identical|Mass delete}}",
 	"action-nuke": "{{doc-action|nuke}}",
 	"nuke-desc": "{{desc|name=Nuke|url=https://www.mediawiki.org/wiki/Extension:Nuke}}\nThe Nuke extension allows for sysops to delete a large number of pages (\"Mass delete\").",
 	"nuke-nopages": "Used if there are no pages to delete and the username is not empty.\n\nParameters:\n* $1 - a username\n\nSee also:\n* {{msg-mw|Nuke-nopages-global}}",
 	"nuke-list": "This message refers to:\n* the comment (reason) field which has the label {{msg-mw|deletecomment}}\n* the button labeled {{msg-mw|nuke-submit-delete}}.\nParameters:\n* $1 - username\nSee also:\n* {{msg-mw|Nuke-list-multiple}}",
 	"nuke-list-multiple": "This message refers to:\n* the comment (reason) field which has the label {{msg-mw|deletecomment}}\n* the button labeled {{msg-mw|nuke-submit-delete}}.\nSee also:\n* {{msg-mw|Nuke-list}}",
-	"nuke-defaultreason": "Reason for deletion in logs. {{msg-mw|nuke-multiplepeople}} is used when pages created by multiple people are deleted.\n\nParameters:\n* $1 - a username or IP address, with a link to their contributions",
+	"nuke-defaultreason": "Reason for deletion in logs. {{msg-mw|nuke-multiplepeople}} is used when pages created by multiple people are deleted.\n\nParameters:\n* $1 - a username or IP address",
 	"nuke-multiplepeople": "Reason for deletion in logs, when pages created by multiple users were deleted.\n\n{{msg-mw|nuke-defaultreason}} is used when pages created by only 1 user are deleted.",
 	"nuke-tools": "Used as intro text for the Nuke (mass deletion) form.",
-	"nuke-submit-user": "{{Identical|Go}}",
+	"nuke-submit-user": "The submit button of a form used to generate a list of pages. \"List\" is a verb here.",
 	"nuke-toggleinvert": "Used to invert checkbox selection.\n{{Identical|Invert}}",
 	"nuke-submit-delete": "Submit button to delete the selected pages.",
 	"right-nuke": "{{doc-right|nuke}}",
@@ -39,5 +41,6 @@
 	"nuke-viewchanges": "Used as link text.\n\nThe link points to History page of the page.\n\nThis message follows:\n* {{msg-mw|nuke-editby}} and {{msg-mw|comma-separator}}\n* or empty string (if username is empty).\n{{Identical|View changes}}",
 	"nuke-namespace": "Label shown on [[Special:Nuke]] in front of the namespace input that allows choosing a namespace to filter the search by",
 	"nuke-linkoncontribs": "Used as link text which is used on [[Special:Contributions]] and [[Special:DeletedContributions]].\n\nOnly added if a user has rights to nuke pages.\n\nThe link has the tooltip {{msg-mw|Nuke-linkoncontribs-text}}.\n{{Identical|Mass delete}}",
-	"nuke-linkoncontribs-text": "Tooltip for the link which is labeled {{msg-mw|Nuke-linkoncontribs}}."
+	"nuke-linkoncontribs-text": "Tooltip for the link which is labeled {{msg-mw|Nuke-linkoncontribs}} Parameters:\n* $1 is the target user name used for GENDER.",
+	"nuke-confirm": "Message when the user is trying to delete pages."
 }

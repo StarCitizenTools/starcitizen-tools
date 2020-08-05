@@ -23,14 +23,17 @@
 use Wikimedia\Assert\Assert;
 
 /**
- * Handles per process caching of items
+ * Class for process caching individual properties of expiring items
+ *
+ * When the key for an entire item is deleted, all properties for it are deleted
+ *
  * @ingroup Cache
  */
 class ProcessCacheLRU {
-	/** @var Array */
+	/** @var array */
 	protected $cache = []; // (key => prop => value)
 
-	/** @var Array */
+	/** @var array */
 	protected $cacheTimes = []; // (key => prop => UNIX timestamp)
 
 	protected $maxCacheKeys; // integer; max entries
@@ -148,5 +151,13 @@ class ProcessCacheLRU {
 		$item = $this->cache[$key];
 		unset( $this->cache[$key] );
 		$this->cache[$key] = $item;
+	}
+
+	/**
+	 * Get cache size
+	 * @return int
+	 */
+	public function getSize() {
+		return $this->maxCacheKeys;
 	}
 }

@@ -19,20 +19,21 @@
 	var MPSP;
 
 	/**
+	 * Handles scrolling behavior of the metadata panel.
+	 *
 	 * @class mw.mmv.ui.MetadataPanelScroller
 	 * @extends mw.mmv.ui.Element
-	 * Handles scrolling behavior of the metadata panel.
 	 * @constructor
 	 * @param {jQuery} $container The container for the panel (.mw-mmv-post-image).
 	 * @param {jQuery} $aboveFold The control bar element (.mw-mmv-above-fold).
-	 * @param {Object} localStorage the localStorage object, for dependency injection
+	 * @param {mw.storage} localStorage the localStorage object, for dependency injection
 	 */
 	function MetadataPanelScroller( $container, $aboveFold, localStorage ) {
 		mw.mmv.ui.Element.call( this, $container );
 
 		this.$aboveFold = $aboveFold;
 
-		/** @property {Object} localStorage the window.localStorage object */
+		/** @property {mw.storage} localStorage */
 		this.localStorage = localStorage;
 
 		/** @property {boolean} panelWasOpen state flag which will be used to detect open <-> closed transitions */
@@ -57,8 +58,6 @@
 	oo.inheritClass( MetadataPanelScroller, mw.mmv.ui.Element );
 	MPSP = MetadataPanelScroller.prototype;
 
-	MPSP.toggleScrollDuration = 400;
-
 	MPSP.attach = function () {
 		var panel = this;
 
@@ -66,18 +65,14 @@
 			panel.keydown( e );
 		} );
 
-		$.scrollTo().on( 'scroll.mmvp', $.throttle( 250, function () {
+		$( window ).on( 'scroll.mmvp', $.throttle( 250, function () {
 			panel.scroll();
 		} ) );
 
 		this.$container.on( 'mmv-metadata-open', function () {
-			if ( !panel.hasOpenedMetadata && panel.localStorage ) {
+			if ( !panel.hasOpenedMetadata && panel.localStorage.store ) {
 				panel.hasOpenedMetadata = true;
-				try {
-					panel.localStorage.setItem( 'mmv.hasOpenedMetadata', true );
-				} catch ( e ) {
-					// localStorage is full or disabled
-				}
+				panel.localStorage.set( 'mmv.hasOpenedMetadata', '1' );
 			}
 		} );
 
@@ -87,7 +82,7 @@
 
 	MPSP.unattach = function () {
 		this.clearEvents();
-		$.scrollTo().off( 'scroll.mmvp' );
+		$( window ).off( 'scroll.mmvp' );
 		this.$container.off( 'mmv-metadata-open' );
 	};
 
@@ -101,11 +96,12 @@
 	/**
 	 * Returns scroll top position when the panel is fully open.
 	 * (In other words, the height of the area that is outside the screen, in pixels.)
+	 *
 	 * @return {number}
 	 */
 	MPSP.getScrollTopWhenOpen = function () {
-		return this.$container.outerHeight() - parseInt( this.$aboveFold.css( 'min-height' ), 10 )
-			- parseInt( this.$aboveFold.css( 'padding-bottom' ), 10 );
+		return this.$container.outerHeight() - parseInt( this.$aboveFold.css( 'min-height' ), 10 ) -
+			parseInt( this.$aboveFold.css( 'padding-bottom' ), 10 );
 	};
 
 	/**
@@ -114,12 +110,14 @@
 	 * unfreezeHeight after the panel has been populeted with the new metadata.
 	 */
 	MPSP.freezeHeight = function () {
+		var scrollTop, scrollTopWhenOpen;
+
 		if ( !this.$container.is( ':visible' ) ) {
 			return;
 		}
 
-		var scrollTop = $.scrollTo().scrollTop(),
-			scrollTopWhenOpen = this.getScrollTopWhenOpen();
+		scrollTop = $( window ).scrollTop();
+		scrollTopWhenOpen = this.getScrollTopWhenOpen();
 
 		this.panelWasFullyOpen = ( scrollTop === scrollTopWhenOpen );
 		this.$container.css( 'min-height', this.$container.height() );
@@ -132,15 +130,21 @@
 
 		this.$container.css( 'min-height', '' );
 		if ( this.panelWasFullyOpen ) {
-			$.scrollTo( this.getScrollTopWhenOpen() );
+			$( window ).scrollTop( this.getScrollTopWhenOpen() );
 		}
 	};
 
-
 	MPSP.initialize = function () {
-		try {
-			this.hasOpenedMetadata = !this.localStorage || this.localStorage.getItem( 'mmv.hasOpenedMetadata' );
-		} catch ( e ) { // localStorage.getItem can throw exceptions
+		var value = this.localStorage.get( 'mmv.hasOpenedMetadata' );
+
+		// localStorage will only store strings; if values `null`, `false` or
+		// `0` are set, they'll come out as `"null"`, `"false"` or `"0"`, so we
+		// can be certain that an actual null is a failure to locate the item,
+		// and false is an issue with localStorage itself
+		if ( value !== false ) {
+			this.hasOpenedMetadata = value !== null;
+		} else {
+			// if there was an issue with localStorage, treat it as opened
 			this.hasOpenedMetadata = true;
 		}
 	};
@@ -157,23 +161,23 @@
 
 	/**
 	 * Toggles the metadata div being totally visible.
+	 *
 	 * @param {string} [forceDirection] 'up' or 'down' makes the panel move on that direction (and is a noop
 	 *  if the panel is already at the upmost/bottommost position); without the parameter, the panel position
 	 *  is toggled. (Partially open counts as open.)
-	 * @return {jQuery.Deferred} a deferred which resolves after the animation has finished.
+	 * @return {jQuery.Promise} A promise which resolves after the animation has finished.
 	 */
 	MPSP.toggle = function ( forceDirection ) {
-		var deferred = $.Deferred(),
-			scrollTopWhenOpen = this.getScrollTopWhenOpen(),
+		var scrollTopWhenOpen = this.getScrollTopWhenOpen(),
 			scrollTopWhenClosed = 0,
-			scrollTop = $.scrollTo().scrollTop(),
+			scrollTop = $( window ).scrollTop(),
 			panelIsOpen = scrollTop > scrollTopWhenClosed,
 			direction = forceDirection || ( panelIsOpen ? 'down' : 'up' ),
 			scrollTopTarget = ( direction === 'up' ) ? scrollTopWhenOpen : scrollTopWhenClosed;
 
 		// don't log / animate if the panel is already in the end position
 		if ( scrollTopTarget === scrollTop ) {
-			deferred.resolve();
+			return $.Deferred().resolve().promise();
 		} else {
 			mw.mmv.actionLogger.log( direction === 'up' ? 'metadata-open' : 'metadata-close' );
 			if ( direction === 'up' && !panelIsOpen ) {
@@ -185,17 +189,14 @@
 				this.$container.trigger( 'mmv-metadata-reveal-truncated-text' );
 				scrollTopTarget = this.getScrollTopWhenOpen();
 			}
-			$.scrollTo( scrollTopTarget, this.toggleScrollDuration, {
-				onAfter: function () {
-					deferred.resolve();
-				}
-			} );
+			return $( 'html, body' ).animate( { scrollTop: scrollTopTarget }, 'fast' ).promise();
 		}
-		return deferred;
 	};
 
 	/**
 	 * Handles keydown events for this element.
+	 *
+	 * @param {jQuery.Event} e Key down event
 	 */
 	MPSP.keydown = function ( e ) {
 		if ( e.altKey || e.shiftKey || e.ctrlKey || e.metaKey ) {
@@ -213,14 +214,16 @@
 
 	/**
 	 * Returns whether the metadata panel is open. (Partially open is considered to be open.)
+	 *
 	 * @return {boolean}
 	 */
 	MPSP.panelIsOpen = function () {
-		return $.scrollTo().scrollTop() > 0;
+		return $( window ).scrollTop() > 0;
 	};
 
 	/**
 	 * Receives the window's scroll events and and turns them into business logic events
+	 *
 	 * @fires mmv-metadata-open
 	 * @fires mmv-metadata-close
 	 */

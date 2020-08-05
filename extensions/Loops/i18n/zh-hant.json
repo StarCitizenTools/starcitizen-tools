@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kly"
+		]
+	},
+	"loops-desc": "執行循環的解析函式",
+	"loops_max": "已執行到最大循環數目",
+	"loops-limitreport-count-limited": "ExtLoops 總數",
+	"loops-limitreport-count-unlimited": "ExtLoops 總數",
+	"loops-config-countlimit": "定義允許循環最大值的設置變數（'-1' 代表無限）。'#forargs' 與 '#fornumargs' 不受此限制。",
+	"loops-config-enabledfunctions": "允許定義應啟用給 wiki，由 'Loops' 所提供的功能。如果擴充套件 'Variables' 未安裝，會自動停用 '#loop'、'#forargs' 與 '#fornumargs'。"
+}

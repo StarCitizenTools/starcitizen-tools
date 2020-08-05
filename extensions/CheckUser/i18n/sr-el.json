@@ -4,7 +4,8 @@
 			"Michaello",
 			"Milicevic01",
 			"Жељко Тодоровић",
-			"Михајло Анђелковић"
+			"Михајло Анђелковић",
+			"Сербијана"
 		]
 	},
 	"checkuser-summary": "Ova alatka pregleda skorašnje izmene i vraća IP adrese koje je korisnik koristio ili pokazuje podatke o korisniku/izmenama za dati IP. Korisnici i izmene klijentskog IP se mogu dobaviti preko XFF zaglavlja dodavanjem <code>/xff</code> iza IP adrese. Podržani su formati IPv4 (CIDR $1-32) i IPv6 (CIDR $2-128).\nZbog performansi neće biti vraćeno više od 5000 izmena.\nAlatku koristite u skladu sa politikom.",
@@ -70,6 +71,6 @@
 	"checkuser-limited": "'''Ovi rezultati su skraćeni zbog performansi.'''",
 	"checkuser-autocreate-action": "je automatski napravljen",
 	"checkuser-create-action": "je napravljen",
-	"checkuser-email-action": "e-poruka je poslata korisniku „$1“",
+	"checkuser-email-action": "imejl je poslata korisniku „$1“",
 	"checkuser-reset-action": "resetuj lozinku za korisnika „$1“"
 }

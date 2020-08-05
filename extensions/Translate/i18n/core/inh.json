@@ -6,5 +6,18 @@
 			"ElizaMag"
 		]
 	},
-	"translate-documentation-language": "Хоам бара документаци"
+	"translate-page-group": "Тоаба",
+	"translate-page-language": "Мотт",
+	"translate-edit-translation": "Таржам",
+	"translate-rcfilters-translations": "Таржамаш",
+	"translate-rcfilters-translations-only-label": "Таржамаш",
+	"translate-rcfilters-translations-filter-label": "Таржамаш дац",
+	"translations": "Деррига таржамаш",
+	"translate-language": "Мотт",
+	"translate-mgs-column-language": "Мотт",
+	"translate-documentation-language": "Хоам бара документаци",
+	"translate-searchprofile": "Таржамаш",
+	"translate-msggroupselector-search-all": "Деррига",
+	"tux-tab-all": "Деррига",
+	"tux-editor-message-tools-translations": "Деррига таржамаш"
 }

@@ -1,14 +1,16 @@
 ( function ( mw, $ ) {
-
-	// Support: MediaWiki < 1.26
-	// Cached HTML will not yet have this from OutputPage::getHeadScripts.
-	document.documentElement.className = document.documentElement.className
-		.replace( /(^|\s)client-nojs(\s|$)/, '$1client-js$2' );
-
-	mw.page = {};
+	// Break out of framesets
+	if ( mw.config.get( 'wgBreakFrames' ) ) {
+		// Note: In IE < 9 strict comparison to window is non-standard (the standard didn't exist yet)
+		// it works only comparing to window.self or window.window (http://stackoverflow.com/q/4850978/319266)
+		if ( window.top !== window.self ) {
+			// Un-trap us from framesets
+			window.top.location.href = location.href;
+		}
+	}
 
 	$( function () {
-		mw.util.init();
+		var $diff;
 
 		/**
 		 * Fired when wiki content is being added to the DOM
@@ -28,7 +30,7 @@
 		 */
 		mw.hook( 'wikipage.content' ).fire( $( '#mw-content-text' ) );
 
-		var $diff = $( 'table.diff[data-mw="interface"]' );
+		$diff = $( 'table.diff[data-mw="interface"]' );
 		if ( $diff.length ) {
 			/**
 			 * Fired when the diff is added to a page containing a diff

@@ -11,7 +11,7 @@
 	"babel-footer-url": ":Rummad:Wikipedourien hervez o yezhoù",
 	"babel-autocreate-reason": "Krouidigezh emgefre ur bajenn eus ar rummad [[$1|Babel]].",
 	"babel-autocreate-text-levels": "Disklêriet o deus implijerien ar rummad-mañ mestroniañ al live $1 evit ar yezh $2.",
-	"babel-autocreate-text-main": "Implijerien ar rummad-mañ a zisklêr kaout anaouedegezh eus ar yezh $1",
+	"babel-autocreate-text-main": "Implijerien ar rummad-mañ a zisklêr gouzout ar yezh $1",
 	"babel-0": "Ne oar an impljer-mañ [[$1|tamm]] [[$2|$3]] ebet (pe en deus mil boan o kompren anezhañ).",
 	"babel-1": "Ul live [[$2|brezhoneg]] [[$1|diazez]] zo gant an implijer-mañ.",
 	"babel-2": "Ul live [[$2|brezhoneg]] [[$1|etre]] zo gant an implijer-mañ.",
@@ -26,5 +26,8 @@
 	"babel-4-n": "[[$2|Brezhoneg]] a oar an implijer-mañ [[$1|evel pa vefe bet desket gantañ war barlenn e vamm]].",
 	"babel-5-n": "Ul live [[$2|Brezhoneg]] [[$1|a-vicher]] zo gant an implijer-mañ.",
 	"babel-N-n": "[[$1|A-vihanik]] e oar [[$2|brezhoneg]] an implijer-mañ.",
-	"babel-footer": "Implijerien dre yezh"
+	"babel-footer": "Implijerien dre yezh",
+	"apihelp-query+babel-description": "Gouzout peseurt yezhoù a oar an implijer",
+	"apihelp-query+babel-param-user": "Implijer da gaout titouroù diwar e benn",
+	"apihelp-query+babel-example-1": "Gouzout an titouroù Babel evit an implijer <kbd>Example</kbd>"
 }

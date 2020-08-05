@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Waldir"
+			"Waldir",
+			"Quintino Lopes Castro Tavares"
 		]
 	},
-	"cldr-desc": "Extensãu ki ta fornesi nomis di línguas lokalizadu, a partir di [http://cldr.unicode.org/index/downloads dadus di CLDR]"
+	"cldr-desc": "Ixtenson ki ta fornesi nomis di línguas lokalizadu, a partir di [http://cldr.unicode.org/index/downloads dadus di CLDR]"
 }

@@ -3,27 +3,22 @@
 /**
  * @group medium
  * @group API
- * @covers ApiQuery
+ * @group Database
+ * @covers ApiEchoMarkRead
  */
 class ApiEchoMarkReadTest extends ApiTestCase {
-
-	protected function setUp() {
-		parent::setUp();
-		$this->doLogin();
-	}
 
 	function getTokens() {
 		return $this->getTokenList( self::$users['sysop'] );
 	}
 
 	public function testMarkReadWithList() {
-
 		$tokens = $this->getTokens();
 		// Grouping by section
-		$data = $this->doApiRequest( array(
+		$data = $this->doApiRequest( [
 			'action' => 'echomarkread',
 			'notlist' => '121|122|123',
-			'token' => $tokens['edittoken'] ) );
+			'token' => $tokens['edittoken'] ] );
 
 		$this->assertArrayHasKey( 'query', $data[0] );
 		$this->assertArrayHasKey( 'echomarkread', $data[0]['query'] );
@@ -48,13 +43,12 @@ class ApiEchoMarkReadTest extends ApiTestCase {
 	}
 
 	public function testMarkReadWithAll() {
-
 		$tokens = $this->getTokens();
 		// Grouping by section
-		$data = $this->doApiRequest( array(
+		$data = $this->doApiRequest( [
 			'action' => 'echomarkread',
 			'notall' => '1',
-			'token' => $tokens['edittoken'] ) );
+			'token' => $tokens['edittoken'] ] );
 
 		$this->assertArrayHasKey( 'query', $data[0] );
 		$this->assertArrayHasKey( 'echomarkread', $data[0]['query'] );
@@ -79,13 +73,12 @@ class ApiEchoMarkReadTest extends ApiTestCase {
 	}
 
 	public function testMarkReadWithSections() {
-
 		$tokens = $this->getTokens();
 		// Grouping by section
-		$data = $this->doApiRequest( array(
+		$data = $this->doApiRequest( [
 			'action' => 'echomarkread',
 			'sections' => 'alert|message',
-			'token' => $tokens['edittoken'] ) );
+			'token' => $tokens['edittoken'] ] );
 
 		$this->assertArrayHasKey( 'query', $data[0] );
 		$this->assertArrayHasKey( 'echomarkread', $data[0]['query'] );

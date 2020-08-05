@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWTemplatePage class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,9 +15,11 @@
  * @param {ve.dm.MWTemplateModel} template Template model
  * @param {string} name Unique symbolic name of page
  * @param {Object} [config] Configuration options
+ * @cfg {jQuery} [$overlay] Overlay to render dropdowns in
  */
 ve.ui.MWTemplatePage = function VeUiMWTemplatePage( template, name, config ) {
-	var title;
+	var linkData, messageKey,
+		title = template.getTitle() ? mw.Title.newFromText( template.getTitle() ) : null;
 
 	// Configuration initialization
 	config = ve.extendObject( {
@@ -25,7 +27,7 @@ ve.ui.MWTemplatePage = function VeUiMWTemplatePage( template, name, config ) {
 	}, config );
 
 	// Parent constructor
-	OO.ui.PageLayout.call( this, name, config );
+	ve.ui.MWTemplatePage.super.call( this, name, config );
 
 	// Properties
 	this.template = template;
@@ -34,7 +36,7 @@ ve.ui.MWTemplatePage = function VeUiMWTemplatePage( template, name, config ) {
 	this.$description = $( '<div>' );
 	this.removeButton = new OO.ui.ButtonWidget( {
 		framed: false,
-		icon: 'remove',
+		icon: 'trash',
 		title: ve.msg( 'visualeditor-dialog-transclusion-remove-template' ),
 		flags: [ 'destructive' ],
 		classes: [ 've-ui-mwTransclusionDialog-removeButton' ]
@@ -42,7 +44,7 @@ ve.ui.MWTemplatePage = function VeUiMWTemplatePage( template, name, config ) {
 		.connect( this, { click: 'onRemoveButtonClick' } );
 	this.infoFieldset = new OO.ui.FieldsetLayout( {
 		label: this.spec.getLabel(),
-		icon: 'template'
+		icon: 'puzzle'
 	} );
 	this.addButton = new OO.ui.ButtonWidget( {
 		framed: false,
@@ -56,24 +58,34 @@ ve.ui.MWTemplatePage = function VeUiMWTemplatePage( template, name, config ) {
 	this.$description.addClass( 've-ui-mwTemplatePage-description' );
 	if ( this.spec.getDescription() ) {
 		this.$description.text( this.spec.getDescription() );
-	} else {
-		title = this.template.getTitle();
-		// The transcluded page may be dynamically generated or unspecified in the DOM
-		// for other reasons (bug 66724). In that case we can't tell the user what
-		// the template is called nor link to the template page.
-		if ( title ) {
-			title = mw.Title.newFromText( title );
-		}
 		if ( title ) {
 			this.$description
+				.append(
+					$( '<hr>' ),
+					$( '<span>' )
+						.addClass( 've-ui-mwTemplatePage-description-extra' )
+						.append( mw.message(
+							'visualeditor-dialog-transclusion-more-template-description',
+							title.getRelativeText( mw.config.get( 'wgNamespaceIds' ).template )
+						).parseDom() )
+				)
+				.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' );
+		}
+	} else {
+		// The transcluded page may be dynamically generated or unspecified in the DOM
+		// for other reasons (T68724). In that case we can't tell the user what the
+		// template is called, nor link to the template page. However, if we know for
+		// certain that the template doesn't exist, be explicit about it (T162694).
+		if ( title ) {
+			linkData = ve.init.platform.linkCache.getCached( '_missing/' + title );
+			messageKey = linkData && linkData.missing ?
+				'visualeditor-dialog-transclusion-absent-template' :
+				'visualeditor-dialog-transclusion-no-template-description';
+
+			this.$description
 				.addClass( 've-ui-mwTemplatePage-description-missing' )
-				.html( mw.message(
-					'visualeditor-dialog-transclusion-no-template-description',
-					title.getPrefixedText(),
-					// FIXME: Drop this no-longer needed second parameter after January 2016
-					mw.user
-				).parse() )
-				.find( 'a' ).attr( 'target', '_blank' );
+				.append( mw.message( messageKey, title.getPrefixedText() ).parseDom() )
+				.find( 'a' ).attr( 'target', '_blank' ).attr( 'rel', 'noopener' );
 		}
 	}
 
@@ -95,13 +107,13 @@ OO.inheritClass( ve.ui.MWTemplatePage, OO.ui.PageLayout );
 /**
  * @inheritdoc
  */
-ve.ui.MWTemplatePage.prototype.setOutlineItem = function ( outlineItem ) {
+ve.ui.MWTemplatePage.prototype.setOutlineItem = function () {
 	// Parent method
-	OO.ui.PageLayout.prototype.setOutlineItem.call( this, outlineItem );
+	ve.ui.MWTemplatePage.super.prototype.setOutlineItem.apply( this, arguments );
 
 	if ( this.outlineItem ) {
 		this.outlineItem
-			.setIcon( 'template' )
+			.setIcon( 'puzzle' )
 			.setMovable( true )
 			.setRemovable( true )
 			.setLabel( this.spec.getLabel() );

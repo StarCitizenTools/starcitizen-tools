@@ -5,8 +5,8 @@ namespace Flow;
 use DeferredUpdates;
 use Flow\Block\AbstractBlock;
 use Flow\Block\Block;
-use Flow\Data\BufferedCache;
 use Flow\Data\ManagerGroup;
+use Flow\Exception\FailCommitException;
 use Flow\Exception\InvalidDataException;
 use Flow\Exception\InvalidActionException;
 use Flow\Model\Workflow;
@@ -16,19 +16,14 @@ use SplQueue;
 class SubmissionHandler {
 
 	/**
-	 * @var ManagerGroup $storage
+	 * @var ManagerGroup
 	 */
 	protected $storage;
 
 	/**
-	 * @var DbFactory $dbFactory
+	 * @var DbFactory
 	 */
 	protected $dbFactory;
-
-	/**
-	 * @var BufferedCache $bufferedCache
-	 */
-	protected $bufferedCache;
 
 	/**
 	 * @var SplQueue Updates to add to DeferredUpdates post-commit
@@ -38,12 +33,10 @@ class SubmissionHandler {
 	public function __construct(
 		ManagerGroup $storage,
 		DbFactory $dbFactory,
-		BufferedCache $bufferedCache,
 		SplQueue $deferredQueue
 	) {
 		$this->storage = $storage;
 		$this->dbFactory = $dbFactory;
-		$this->bufferedCache = $bufferedCache;
 		$this->deferredQueue = $deferredQueue;
 	}
 
@@ -68,7 +61,7 @@ class SubmissionHandler {
 		$this->dbFactory->forceMaster();
 
 		/** @var Block[] $interestedBlocks */
-		$interestedBlocks = array();
+		$interestedBlocks = [];
 		foreach ( $blocks as $block ) {
 			// This is just a check whether the block understands the action,
 			// Doesn't consider permissions
@@ -82,7 +75,7 @@ class SubmissionHandler {
 			if ( !$blocks ) {
 				throw new InvalidDataException( 'No Blocks?!?', 'fail-load-data' );
 			}
-			$type = array();
+			$type = [];
 			foreach ( $blocks as $block ) {
 				$type[] = get_class( $block );
 			}
@@ -92,7 +85,7 @@ class SubmissionHandler {
 
 		// Check mediawiki core permissions for title protection, blocked
 		// status, etc.
-		$errors = $workflow->getPermissionErrors( 'edit', $context->getUser() );
+		$errors = $workflow->getPermissionErrors( 'edit', $context->getUser(), 'secure' );
 		if ( count( $errors ) ) {
 			foreach ( $errors as $errorMsgArgs ) {
 				$msg = wfMessage( array_shift( $errorMsgArgs ) );
@@ -103,83 +96,69 @@ class SubmissionHandler {
 				// so, this is misleading, since it could be protection,
 				// etc.  The specific error message (protect, block, etc.)
 				// will still be output, though.
-				//
 				// In theory, something could be relying on the string 'block',
 				// since it's exposed to the API, but probably not.
 				reset( $interestedBlocks )->addError( 'block', $msg );
 			}
-			return array();
+			return [];
 		}
 
 		$success = true;
 		foreach ( $interestedBlocks as $block ) {
 			$name = $block->getName();
-			$data = isset( $parameters[$name] ) ? $parameters[$name] : array();
+			$data = isset( $parameters[$name] ) ? $parameters[$name] : [];
 			$success &= $block->onSubmit( $data );
 		}
 
-		return $success ? $interestedBlocks : array();
+		return $success ? $interestedBlocks : [];
 	}
 
 	/**
 	 * @param Workflow $workflow
 	 * @param AbstractBlock[] $blocks
 	 * @return array Map from committed block name to an array of metadata returned
-	 *  about inserted objects.
+	 *  about inserted objects.  This must be non-empty.  An empty block array
+	 *  indicates there were errors, in which case this method should not be called.
 	 * @throws \Exception
 	 */
 	public function commit( Workflow $workflow, array $blocks ) {
-		$cache = $this->bufferedCache;
 		$dbw = $this->dbFactory->getDB( DB_MASTER );
 
-		/**
-		 * Ideally, I'd create the page in Workflow::toStorageRow, but
-		 * WikiPage::doEditContent uses transactions & our DB wrapper
-		 * doesn't allow nested transactions, so that part has moved.
-		 *
-		 * Don't safeAllowCreation() here: a board has to be explicitly created,
-		 * or allowed via the namespace content model, in which case
-		 * safeAllowCreation() won't be needed.
-		 *
-		 * @var OccupationController $occupationController
-		 */
+		/** @var OccupationController $occupationController */
 		$occupationController = Container::get( 'occupation_controller' );
 		$title = $workflow->getOwnerTitle();
-		$occupationController->ensureFlowRevision( new \Article( $title ), $workflow );
-		$isNew = $workflow->isNew();
+
+		if ( count( $blocks ) === 0 ) {
+			// This is a logic error in the code, but we need to preserve
+			// consistent state.
+			throw new FailCommitException(
+				__METHOD__ . ' was called with $blocks set to an empty ' .
+				'array or a falsy value.  This indicates the blocks are ' .
+				'not able to commit, so ' . __METHOD__ . ' should not be ' .
+				'called.',
+				'fail-commit'
+			);
+		}
 
 		try {
-			$dbw->begin( __METHOD__ );
-			$cache->begin();
-			$results = array();
+			$dbw->startAtomic( __METHOD__ );
+			// Create the occupation page/revision if needed
+			$occupationController->ensureFlowRevision( new \Article( $title ), $workflow );
+			// Create/modify each Flow block as requested
+			$results = [];
 			foreach ( $blocks as $block ) {
 				$results[$block->getName()] = $block->commit();
 			}
-			$dbw->commit( __METHOD__ );
-
-			// Now commit to cache. If this fails, cache keys should have been
-			// invalidated, but still log the failure.
-			if ( !$cache->commit() ) {
-				wfDebugLog( 'Flow', __METHOD__ . ': Committed to database but failed applying to cache' );
-			}
+			$dbw->endAtomic( __METHOD__ );
 		} catch ( \Exception $e ) {
-			while( !$this->deferredQueue->isEmpty() ) {
+			while ( !$this->deferredQueue->isEmpty() ) {
 				$this->deferredQueue->dequeue();
 			}
-
-			if ( $isNew ) {
-				$article = new \Article( $title );
-				$page = $article->getPage();
-				$reason = '/* Failed to create Flow board */';
-				$page->doDeleteArticleReal( $reason, false, 0, true, $errors, $occupationController->getTalkpageManager() );
-			}
-
-			$dbw->rollback( __METHOD__ );
-			$cache->rollback();
+			$this->dbFactory->rollbackMasterChanges( __METHOD__ );
 			throw $e;
 		}
 
-		while( !$this->deferredQueue->isEmpty() ) {
+		while ( !$this->deferredQueue->isEmpty() ) {
 			DeferredUpdates::addCallableUpdate( $this->deferredQueue->dequeue() );
 		}
 

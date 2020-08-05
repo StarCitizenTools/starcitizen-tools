@@ -20,6 +20,8 @@
  * @file
  */
 
+use Wikimedia\Rdbms\ResultWrapper;
+
 /**
  * Class for viewing MediaWiki file description pages
  *
@@ -53,18 +55,6 @@ class ImagePage extends Article {
 	}
 
 	/**
-	 * Constructor from a page id
-	 * @param int $id Article ID to load
-	 * @return ImagePage|null
-	 */
-	public static function newFromID( $id ) {
-		$t = Title::newFromID( $id );
-		# @todo FIXME: Doesn't inherit right
-		return $t == null ? null : new self( $t );
-		# return $t == null ? null : new static( $t ); // PHP 5.3
-	}
-
-	/**
 	 * @param File $file
 	 * @return void
 	 */
@@ -81,6 +71,7 @@ class ImagePage extends Article {
 		$this->fileLoaded = true;
 
 		$this->displayImg = $img = false;
+
 		Hooks::run( 'ImagePageFindFile', [ $this, &$img, &$this->displayImg ] );
 		if ( !$img ) { // not set by hook?
 			$img = wfFindFile( $this->getTitle() );
@@ -124,23 +115,11 @@ class ImagePage extends Article {
 
 		if ( $this->getTitle()->getNamespace() == NS_FILE && $this->mPage->getFile()->getRedirected() ) {
 			if ( $this->getTitle()->getDBkey() == $this->mPage->getFile()->getName() || $diff !== null ) {
-				// mTitle is the same as the redirect target so ask Article
-				// to perform the redirect for us.
 				$request->setVal( 'diffonly', 'true' );
-				parent::view();
-				return;
-			} else {
-				// mTitle is not the same as the redirect target so it is
-				// probably the redirect page itself. Fake the redirect symbol
-				$out->setPageTitle( $this->getTitle()->getPrefixedText() );
-				$out->addHTML( $this->viewRedirect(
-					Title::makeTitle( NS_FILE, $this->mPage->getFile()->getName() ),
-					/* $appendSubtitle */ true,
-					/* $forceKnown */ true )
-				);
-				$this->mPage->doViewUpdates( $this->getContext()->getUser(), $this->getOldID() );
-				return;
 			}
+
+			parent::view();
+			return;
 		}
 
 		if ( $wgShowEXIF && $this->displayImg->exists() ) {
@@ -222,11 +201,11 @@ class ImagePage extends Article {
 				$out->addStyle( $css );
 			}
 		}
-		// always show the local local Filepage.css, bug 29277
-		$out->addModuleStyles( 'filepage' );
 
-		// Add MediaWiki styles for a file page
-		$out->addModuleStyles( 'mediawiki.action.view.filepage' );
+		$out->addModuleStyles( [
+			'filepage', // always show the local local Filepage.css, T31277
+			'mediawiki.action.view.filepage', // Add MediaWiki styles for a file page
+		] );
 	}
 
 	/**
@@ -272,18 +251,20 @@ class ImagePage extends Article {
 	protected function makeMetadataTable( $metadata ) {
 		$r = "<div class=\"mw-imagepage-section-metadata\">";
 		$r .= $this->getContext()->msg( 'metadata-help' )->plain();
-		$r .= "<table id=\"mw_metadata\" class=\"mw_metadata\">\n";
+		// Intial state is collapsed
+		// see filepage.css and mediawiki.action.view.metadata module.
+		$r .= "<table id=\"mw_metadata\" class=\"mw_metadata collapsed\">\n";
 		foreach ( $metadata as $type => $stuff ) {
 			foreach ( $stuff as $v ) {
-				# @todo FIXME: Why is this using escapeId for a class?!
-				$class = Sanitizer::escapeId( $v['id'] );
+				$class = str_replace( ' ', '_', $v['id'] );
 				if ( $type == 'collapsed' ) {
-					// Handled by mediawiki.action.view.metadata module.
-					$class .= ' collapsable';
+					$class .= ' mw-metadata-collapsible';
 				}
-				$r .= "<tr class=\"$class\">\n";
-				$r .= "<th>{$v['name']}</th>\n";
-				$r .= "<td>{$v['value']}</td>\n</tr>";
+				$r .= Html::rawElement( 'tr',
+					[ 'class' => $class ],
+					Html::rawElement( 'th', [], $v['name'] )
+						. Html::rawElement( 'td', [], $v['value'] )
+				);
 			}
 		}
 		$r .= "</table>\n</div>\n";
@@ -303,6 +284,22 @@ class ImagePage extends Article {
 			return null;
 		}
 		return parent::getContentObject();
+	}
+
+	private function getLanguageForRendering( WebRequest $request, File $file ) {
+		$handler = $this->displayImg->getHandler();
+		if ( !$handler ) {
+			return null;
+		}
+
+		$requestLanguage = $request->getVal( 'lang' );
+		if ( !is_null( $requestLanguage ) ) {
+			if ( $handler->validateParam( 'lang', $requestLanguage ) ) {
+				return $requestLanguage;
+			}
+		}
+
+		return $handler->getDefaultRenderLanguage( $this->displayImg );
 	}
 
 	protected function openShowImage() {
@@ -329,14 +326,9 @@ class ImagePage extends Article {
 				$params = [ 'page' => $page ];
 			}
 
-			$renderLang = $request->getVal( 'lang' );
+			$renderLang = $this->getLanguageForRendering( $request, $this->displayImg );
 			if ( !is_null( $renderLang ) ) {
-				$handler = $this->displayImg->getHandler();
-				if ( $handler && $handler->validateParam( 'lang', $renderLang ) ) {
-					$params['lang'] = $renderLang;
-				} else {
-					$renderLang = null;
-				}
+				$params['lang'] = $renderLang;
 			}
 
 			$width_orig = $this->displayImg->getWidth( $page );
@@ -347,7 +339,10 @@ class ImagePage extends Article {
 			$filename = wfEscapeWikiText( $this->displayImg->getName() );
 			$linktext = $filename;
 
-			Hooks::run( 'ImageOpenShowImageInlineBefore', [ &$this, &$out ] );
+			// Avoid PHP 7.1 warning from passing $this by reference
+			$imagePage = $this;
+
+			Hooks::run( 'ImageOpenShowImageInlineBefore', [ &$imagePage, &$out ] );
 
 			if ( $this->displayImg->allowInlineDisplay() ) {
 				# image
@@ -440,7 +435,7 @@ class ImagePage extends Article {
 					$count = $this->displayImg->pageCount();
 
 					if ( $page > 1 ) {
-						$label = $out->parse( $this->getContext()->msg( 'imgmultipageprev' )->text(), false );
+						$label = $this->getContext()->msg( 'imgmultipageprev' )->text();
 						// on the client side, this link is generated in ajaxifyPageNavigation()
 						// in the mediawiki.page.image.pagination module
 						$link = Linker::linkKnown(
@@ -500,6 +495,7 @@ class ImagePage extends Article {
 						Xml::openElement( 'form', $formParams ) .
 						Html::hidden( 'title', $this->getTitle()->getPrefixedDBkey() ) .
 						$this->getContext()->msg( 'imgmultigoto' )->rawParams( $select )->parse() .
+						$this->getContext()->msg( 'word-separator' )->escaped() .
 						Xml::submitButton( $this->getContext()->msg( 'imgmultigo' )->text() ) .
 						Xml::closeElement( 'form' ) .
 						"<hr />$thumb1\n$thumb2<br style=\"clear: both\" /></div></td></tr></table>"
@@ -542,14 +538,14 @@ class ImagePage extends Article {
 				// this will get messy.
 				// The dirmark, however, must not be immediately adjacent
 				// to the filename, because it can get copied with it.
-				// See bug 25277.
-				// @codingStandardsIgnoreStart Ignore long line
+				// See T27277.
+				// phpcs:disable Generic.Files.LineLength
 				$out->addWikiText( <<<EOT
 <div class="fullMedia"><span class="dangerousLink">{$medialink}</span> $dirmark<span class="fileInfo">$longDesc</span></div>
 <div class="mediaWarning">$warning</div>
 EOT
 				);
-				// @codingStandardsIgnoreEnd
+				// phpcs:enable
 			} else {
 				$out->addWikiText( <<<EOT
 <div class="fullMedia">{$medialink} {$dirmark}<span class="fileInfo">$longDesc</span>
@@ -560,12 +556,7 @@ EOT
 
 			$renderLangOptions = $this->displayImg->getAvailableLanguages();
 			if ( count( $renderLangOptions ) >= 1 ) {
-				$currentLanguage = $renderLang;
-				$defaultLang = $this->displayImg->getDefaultRenderLanguage();
-				if ( is_null( $currentLanguage ) ) {
-					$currentLanguage = $defaultLang;
-				}
-				$out->addHTML( $this->doRenderLangOpt( $renderLangOptions, $currentLanguage, $defaultLang ) );
+				$out->addHTML( $this->doRenderLangOpt( $renderLangOptions, $renderLang ) );
 			}
 
 			// Add cannot animate thumbnail warning
@@ -593,15 +584,17 @@ EOT
 		} else {
 			# Image does not exist
 			if ( !$this->getId() ) {
+				$dbr = wfGetDB( DB_REPLICA );
+
 				# No article exists either
 				# Show deletion log to be consistent with normal articles
 				LogEventsList::showLogExtract(
 					$out,
-					[ 'delete', 'move' ],
+					[ 'delete', 'move', 'protect' ],
 					$this->getTitle()->getPrefixedText(),
 					'',
 					[ 'lim' => 10,
-						'conds' => [ "log_action != 'revision'" ],
+						'conds' => [ 'log_action != ' . $dbr->addQuotes( 'revision' ) ],
 						'showIfEmpty' => false,
 						'msgKey' => [ 'moveddeleted-notice' ]
 					]
@@ -635,11 +628,11 @@ EOT
 	/**
 	 * Make the text under the image to say what size preview
 	 *
-	 * @param $params array parameters for thumbnail
-	 * @param $sizeLinkBigImagePreview HTML for the current size
+	 * @param array $params parameters for thumbnail
+	 * @param string $sizeLinkBigImagePreview HTML for the current size
 	 * @return string HTML output
 	 */
-	private function getThumbPrevText( $params, $sizeLinkBigImagePreview ) {
+	protected function getThumbPrevText( $params, $sizeLinkBigImagePreview ) {
 		if ( $sizeLinkBigImagePreview ) {
 			// Show a different message of preview is different format from original.
 			$previewTypeDiffers = false;
@@ -677,7 +670,7 @@ EOT
 	 * @param int $height
 	 * @return string
 	 */
-	private function makeSizeLink( $params, $width, $height ) {
+	protected function makeSizeLink( $params, $width, $height ) {
 		$params['width'] = $width;
 		$params['height'] = $height;
 		$thumbnail = $this->displayImg->transform( $params );
@@ -809,7 +802,7 @@ EOT
 	 * @return ResultWrapper
 	 */
 	protected function queryImageLinks( $target, $limit ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		return $dbr->select(
 			[ 'imagelinks', 'page' ],
@@ -977,7 +970,7 @@ EOT
 				$fromSrc = $this->getContext()->msg(
 					'shared-repo-from',
 					$file->getRepo()->getDisplayName()
-				)->text();
+				)->escaped();
 			}
 			$out->addHTML( "<li>{$link} {$fromSrc}</li>\n" );
 		}
@@ -1061,59 +1054,30 @@ EOT
 	 * Output a drop-down box for language options for the file
 	 *
 	 * @param array $langChoices Array of string language codes
-	 * @param string $curLang Language code file is being viewed in.
-	 * @param string $defaultLang Language code that image is rendered in by default
+	 * @param string $renderLang Language code for the language we want the file to rendered in.
 	 * @return string HTML to insert underneath image.
 	 */
-	protected function doRenderLangOpt( array $langChoices, $curLang, $defaultLang ) {
+	protected function doRenderLangOpt( array $langChoices, $renderLang ) {
 		global $wgScript;
-		sort( $langChoices );
-		$curLang = wfBCP47( $curLang );
-		$defaultLang = wfBCP47( $defaultLang );
 		$opts = '';
-		$haveCurrentLang = false;
-		$haveDefaultLang = false;
 
-		// We make a list of all the language choices in the file.
-		// Additionally if the default language to render this file
-		// is not included as being in this file (for example, in svgs
-		// usually the fallback content is the english content) also
-		// include a choice for that. Last of all, if we're viewing
-		// the file in a language not on the list, add it as a choice.
+		$matchedRenderLang = $this->displayImg->getMatchedLanguage( $renderLang );
+
 		foreach ( $langChoices as $lang ) {
-			$code = wfBCP47( $lang );
-			$name = Language::fetchLanguageName( $code, $this->getContext()->getLanguage()->getCode() );
-			if ( $name !== '' ) {
-				$display = $this->getContext()->msg( 'img-lang-opt', $code, $name )->text();
-			} else {
-				$display = $code;
-			}
-			$opts .= "\n" . Xml::option( $display, $code, $curLang === $code );
-			if ( $curLang === $code ) {
-				$haveCurrentLang = true;
-			}
-			if ( $defaultLang === $code ) {
-				$haveDefaultLang = true;
-			}
+			$opts .= $this->createXmlOptionStringForLanguage(
+				$lang,
+				$matchedRenderLang === $lang
+			);
 		}
-		if ( !$haveDefaultLang ) {
-			// Its hard to know if the content is really in the default language, or
-			// if its just unmarked content that could be in any language.
-			$opts = Xml::option(
-					$this->getContext()->msg( 'img-lang-default' )->text(),
-				$defaultLang,
-				$defaultLang === $curLang
-			) . $opts;
-		}
-		if ( !$haveCurrentLang && $defaultLang !== $curLang ) {
-			$name = Language::fetchLanguageName( $curLang, $this->getContext()->getLanguage()->getCode() );
-			if ( $name !== '' ) {
-				$display = $this->getContext()->msg( 'img-lang-opt', $curLang, $name )->text();
-			} else {
-				$display = $curLang;
-			}
-			$opts = Xml::option( $display, $curLang, true ) . $opts;
-		}
+
+		// Allow for the default case in an svg <switch> that is displayed if no
+		// systemLanguage attribute matches
+		$opts .= "\n" .
+			Xml::option(
+				$this->getContext()->msg( 'img-lang-default' )->text(),
+				'und',
+				is_null( $matchedRenderLang )
+			);
 
 		$select = Html::rawElement(
 			'select',
@@ -1131,6 +1095,27 @@ EOT
 			Html::rawElement( 'form', [ 'action' => $wgScript ], $formContents )
 		);
 		return $langSelectLine;
+	}
+
+	/**
+	 * @param $lang string
+	 * @param $selected bool
+	 * @return string
+	 */
+	private function createXmlOptionStringForLanguage( $lang, $selected ) {
+		$code = LanguageCode::bcp47( $lang );
+		$name = Language::fetchLanguageName( $code, $this->getContext()->getLanguage()->getCode() );
+		if ( $name !== '' ) {
+			$display = $this->getContext()->msg( 'img-lang-opt', $code, $name )->text();
+		} else {
+			$display = $code;
+		}
+		return "\n" .
+			Xml::option(
+				$display,
+				$lang,
+				$selected
+			);
 	}
 
 	/**

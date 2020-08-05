@@ -3,7 +3,6 @@
 namespace Babel\Tests;
 
 use BabelAutoCreate;
-use Language;
 use MediaWikiTestCase;
 use Title;
 use WikiPage;
@@ -14,17 +13,15 @@ use WikiPage;
  * @group Babel
  * @group Database
  *
- * @licence GNU GPL v2+
- * @author Thiemo Mättig
+ * @license GPL-2.0-or-later
+ * @author Thiemo Kreuz
  */
 class BabelAutoCreateTest extends MediaWikiTestCase {
 
 	protected function setUp() {
 		parent::setUp();
 
-		$this->setMwGlobals( [
-			'wgContLang' => Language::factory( 'qqx' ),
-		] );
+		$this->setContentLang( 'qqx' );
 	}
 
 	public function testOnUserGetReservedNames() {
@@ -42,7 +39,7 @@ class BabelAutoCreateTest extends MediaWikiTestCase {
 		BabelAutoCreate::create( $category, $code, $level );
 		$page = WikiPage::factory( Title::newFromText( 'Category:' . $category ) );
 		$this->assertTrue( $page->exists() );
-		$this->assertSame( $expected, $page->getContent()->getNativeData() );
+		$this->assertSame( $expected, $page->getContent()->getText() );
 	}
 
 	public function createProvider() {

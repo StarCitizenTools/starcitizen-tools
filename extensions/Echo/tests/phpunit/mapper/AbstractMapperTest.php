@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @covers EchoAbstractMapper
+ */
 class EchoAbstractMapperTest extends MediaWikiTestCase {
 
 	public function testAttachListener() {
@@ -16,7 +19,7 @@ class EchoAbstractMapperTest extends MediaWikiTestCase {
 		$this->assertArrayHasKey( 'key_a', $listeners['testMethod'] );
 		$this->assertTrue( is_callable( $listeners['testMethod']['key_a'] ) );
 
-		return array( 'mapper' => $mapper, 'property' => $property );
+		return [ 'mapper' => $mapper, 'property' => $property ];
 	}
 
 	/**
@@ -62,16 +65,6 @@ class EchoAbstractMapperTest extends MediaWikiTestCase {
 		$listeners = $property->getValue( $mapper );
 		$this->assertArrayHasKey( 'testMethod', $listeners );
 		$this->assertTrue( !isset( $listeners['testMethod']['key_a'] ) );
-	}
-
-}
-
-/**
- * Create a stub class for testing the abstract class
- */
-class EchoAbstractMapperStub extends EchoAbstractMapper {
-
-	public function testMethod() {
 	}
 
 }

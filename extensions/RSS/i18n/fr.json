@@ -6,7 +6,8 @@
 			"Gomoko",
 			"IAlex",
 			"Peter17",
-			"Tpt"
+			"Tpt",
+			"Urhixidur"
 		]
 	},
 	"rss-desc": "Affiche un flux RSS sur une page du wiki",
@@ -20,6 +21,6 @@
 	"rss-ns-permission": "Les flux RSS ne sont pas autorisés dans cet espace de noms",
 	"rss-url-is-not-whitelisted": "\" $1 \" n'est pas dans la liste des flux autorisés.  {{PLURAL:$3|  $2  est le seul flux autorisé|Les flux autorisés sont :  $2}}.",
 	"rss-empty-whitelist": "\" $1 \" n'est pas dans la liste des flux autorisés.  Ils n'y a aucune URL de flux autorisés dans la liste.",
-	"rss-deprecated-wgrssallowedfeeds-found": "La variable obsolète <var>$wgRSSAllowedFeeds</var> a été détectée. Depuis RSS version 2.0, cette variable doit être remplacée par <var>$wgRSSUrlWhitelist</var> tel que décrit dans la page de manuel [https://www.mediawiki.org/wiki/Extension:RSS Extension:RSS].",
+	"rss-deprecated-wgrssallowedfeeds-found": "La variable désuète <var>$wgRSSAllowedFeeds</var> a été détectée. Depuis RSS version 2.0, cette variable doit être remplacée par <var>$wgRSSUrlWhitelist</var> tel que décrit dans la page de manuel [https://www.mediawiki.org/wiki/Extension:RSS Extension:RSS].",
 	"rss-feed": "<!--  ce qui suit est une alternative entre deux modèles. Le premier est le modèle de base par défaut pour les alimentations -->; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''\n: {{{description}}}\n: {{{author}}} {{{date}}}<!-- ne pas mettre de retour à la ligne ici --><!-- Le second est une version améliorée qui requiert Extension:ParserFunctions --><!-- ; '''<span class='plainlinks'>[{{{link}}} {{{title}}}]</span>'''{{#if: {{{description|}}}|: {{{description}}}}}{{#if: {{{author|}}} | {{#if: {{{date|}}} |: &mdash; {{{author}}} {{{date}}}}} | {{#if: {{{author|}}}|: &mdash; {{{author}}}}} {{#if: {{{date|}}}|:{{{date}}}}}|}} -->"
 }

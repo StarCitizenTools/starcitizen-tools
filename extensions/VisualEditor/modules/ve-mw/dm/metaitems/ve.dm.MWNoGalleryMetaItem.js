@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWNoGalleryMetaItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -13,9 +13,9 @@
  * @constructor
  * @param {Object} element Reference to element in meta-linmod
  */
-ve.dm.MWNoGalleryMetaItem = function VeDmMWNoGalleryMetaItem( element ) {
+ve.dm.MWNoGalleryMetaItem = function VeDmMWNoGalleryMetaItem() {
 	// Parent constructor
-	ve.dm.MetaItem.call( this, element );
+	ve.dm.MWNoGalleryMetaItem.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -32,7 +32,7 @@ ve.dm.MWNoGalleryMetaItem.static.matchTagNames = [ 'meta' ];
 
 ve.dm.MWNoGalleryMetaItem.static.matchRdfaTypes = [ 'mw:PageProp/nogallery' ];
 
-ve.dm.MWNoGalleryMetaItem.static.toDataElement = function ( ) {
+ve.dm.MWNoGalleryMetaItem.static.toDataElement = function () {
 	return { type: this.name };
 };
 

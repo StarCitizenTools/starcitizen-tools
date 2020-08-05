@@ -20,7 +20,7 @@
 
 	QUnit.module( 'mmv.ui.reuse.Embed', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'Sanity test, object creation and UI construction', 13, function ( assert ) {
+	QUnit.test( 'Sanity test, object creation and UI construction', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf );
 
 		assert.ok( embed, 'Embed UI element is created.' );
@@ -38,10 +38,12 @@
 		assert.ok( embed.currentDefaultItem, 'Current default item intialized.' );
 	} );
 
-	QUnit.test( 'changeSize(): Skip if no item selected.', 0, function ( assert ) {
+	QUnit.test( 'changeSize(): Skip if no item selected.', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
-		width = 10,
-		height = 20;
+			width = 10,
+			height = 20;
+
+		assert.expect( 0 );
 
 		// deselect items
 		embed.embedSwitch.selectItem();
@@ -56,12 +58,12 @@
 		embed.changeSize( width, height );
 	} );
 
-	QUnit.test( 'changeSize(): HTML size menu item selected.', 4, function ( assert ) {
+	QUnit.test( 'changeSize(): HTML size menu item selected.', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
-		width = 10,
-		height = 20;
+			width = 10,
+			height = 20;
 
-		embed.embedSwitch.getSelectedItem = function () {
+		embed.embedSwitch.findSelectedItem = function () {
 			return { getData: function () { return 'html'; } };
 		};
 		embed.updateEmbedHtml = function ( thumb, w, h ) {
@@ -79,12 +81,12 @@
 		embed.changeSize( width, height );
 	} );
 
-	QUnit.test( 'changeSize(): Wikitext size menu item selected.', 2, function ( assert ) {
+	QUnit.test( 'changeSize(): Wikitext size menu item selected.', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
-		width = 10,
-		height = 20;
+			width = 10,
+			height = 20;
 
-		embed.embedSwitch.getSelectedItem = function () {
+		embed.embedSwitch.findSelectedItem = function () {
 			return { getData: function () { return 'wikitext'; } };
 		};
 		embed.updateEmbedHtml = function () {
@@ -100,10 +102,12 @@
 		embed.changeSize( width, height );
 	} );
 
-	QUnit.test( 'updateEmbedHtml(): Do nothing if set() not called before.', 0, function ( assert ) {
+	QUnit.test( 'updateEmbedHtml(): Do nothing if set() not called before.', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
-		width = 10,
-		height = 20;
+			width = 10,
+			height = 20;
+
+		assert.expect( 0 );
 
 		embed.formatter.getThumbnailHtml = function () {
 			assert.ok( false, 'formatter.getThumbnailHtml() should not have been called.' );
@@ -111,7 +115,7 @@
 		embed.updateEmbedHtml( {}, width, height );
 	} );
 
-	QUnit.test( 'updateEmbedHtml():', 6, function ( assert ) {
+	QUnit.test( 'updateEmbedHtml():', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
 			url = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
 			thumbUrl = 'https://upload.wikimedia.org/wikipedia/thumb/Foobar.jpg',
@@ -147,9 +151,11 @@
 		embed.updateEmbedHtml( { url: thumbUrl }, width, height );
 	} );
 
-	QUnit.test( 'updateEmbedWikitext(): Do nothing if set() not called before.', 0, function ( assert ) {
+	QUnit.test( 'updateEmbedWikitext(): Do nothing if set() not called before.', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
-		width = 10;
+			width = 10;
+
+		assert.expect( 0 );
 
 		embed.formatter.getThumbnailWikitext = function () {
 			assert.ok( false, 'formatter.getThumbnailWikitext() should not have been called.' );
@@ -157,7 +163,7 @@
 		embed.updateEmbedWikitext( width );
 	} );
 
-	QUnit.test( 'updateEmbedWikitext():', 2, function ( assert ) {
+	QUnit.test( 'updateEmbedWikitext():', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
 			imageInfo = {},
 			repoInfo = {},
@@ -174,54 +180,53 @@
 		embed.updateEmbedWikitext( width );
 	} );
 
-	QUnit.test( 'getPossibleImageSizesForWikitext()', 3, function ( assert ) {
+	QUnit.test( 'getPossibleImageSizesForWikitext()', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
-		exampleSizes = [
-			// Big wide image
-			{
-				width: 2048, height: 1536,
-				expected: {
-					small: { width: 300, height: 225 },
-					medium: { width: 400, height: 300 },
-					large: { width: 500, height: 375 },
-					'default': { width: null, height: null }
-				}
-			},
+			exampleSizes = [
+				// Big wide image
+				{
+					width: 2048, height: 1536,
+					expected: {
+						small: { width: 300, height: 225 },
+						medium: { width: 400, height: 300 },
+						large: { width: 500, height: 375 },
+						'default': { width: null, height: null }
+					}
+				},
 
-			// Big tall image
-			{
-				width: 201, height: 1536,
-				expected: {
-					'default': { width: null, height: null }
-				}
-			},
+				// Big tall image
+				{
+					width: 201, height: 1536,
+					expected: {
+						'default': { width: null, height: null }
+					}
+				},
 
-			// Very small image
-			{
-				width: 15, height: 20,
-				expected: {
-					'default': { width: null, height: null }
+				// Very small image
+				{
+					width: 15, height: 20,
+					expected: {
+						'default': { width: null, height: null }
+					}
 				}
-			}
-		],
-		i, cursize, opts;
+			],
+			i, cursize, opts;
 		for ( i = 0; i < exampleSizes.length; i++ ) {
-			cursize = exampleSizes[i];
+			cursize = exampleSizes[ i ];
 			opts = embed.getPossibleImageSizesForWikitext( cursize.width, cursize.height );
 			assert.deepEqual( opts, cursize.expected, 'We got the expected results out of the size calculation function.' );
 		}
 	} );
 
-	QUnit.test( 'set():', 8, function ( assert ) {
+	QUnit.test( 'set():', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
-		title = mw.Title.newFromText( 'File:Foobar.jpg' ),
-		src = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
-		url = 'https://commons.wikimedia.org/wiki/File:Foobar.jpg',
-		embedFileInfo = new mw.mmv.model.EmbedFileInfo( title, src, url ),
-		width = 15,
-		height = 20;
-
-		QUnit.stop();
+			title = mw.Title.newFromText( 'File:Foobar.jpg' ),
+			src = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
+			url = 'https://commons.wikimedia.org/wiki/File:Foobar.jpg',
+			embedFileInfo = new mw.mmv.model.EmbedFileInfo( title, src, url ),
+			calledSelect = false,
+			width = 15,
+			height = 20;
 
 		embed.utils.updateMenuOptions = function ( sizes, options ) {
 			assert.strictEqual( options.length, 4, 'Options passed correctly.' );
@@ -236,8 +241,7 @@
 			assert.ok( true, 'updateEmbedHtml() is called after data is collected.' );
 		};
 		embed.select = function () {
-			assert.ok( true, 'select() is called after data is collected.' );
-			QUnit.start();
+			calledSelect = true;
 		};
 
 		assert.ok( !embed.embedFileInfo, 'embedFileInfo not set yet.' );
@@ -246,12 +250,13 @@
 
 		assert.ok( embed.embedFileInfo, 'embedFileInfo correctly set.' );
 		assert.strictEqual( embed.isSizeMenuDefaultReset, false, 'Reset flag cleared.' );
+		assert.strictEqual( calledSelect, true, 'select() is called' );
 	} );
 
-	QUnit.test( 'empty():', 6, function ( assert ) {
+	QUnit.test( 'empty():', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
-		width = 15,
-		height = 20;
+			width = 15,
+			height = 20;
 
 		embed.formatter = {
 			getThumbnailWikitextFromEmbedFileInfo: function () { return 'wikitext'; },
@@ -273,14 +278,14 @@
 		assert.ok( !embed.embedSizeSwitchWikitext.getMenu().isVisible(), 'Wikitext size menu should be hidden.' );
 	} );
 
-	QUnit.test( 'attach()/unattach():', 5, function ( assert ) {
+	QUnit.test( 'attach()/unattach():', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf ),
-		title = mw.Title.newFromText( 'File:Foobar.jpg' ),
-		src = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
-		url = 'https://commons.wikimedia.org/wiki/File:Foobar.jpg',
-		embedFileInfo = new mw.mmv.model.EmbedFileInfo( title, src, url ),
-		width = 15,
-		height = 20;
+			title = mw.Title.newFromText( 'File:Foobar.jpg' ),
+			src = 'https://upload.wikimedia.org/wikipedia/commons/3/3a/Foobar.jpg',
+			url = 'https://commons.wikimedia.org/wiki/File:Foobar.jpg',
+			embedFileInfo = new mw.mmv.model.EmbedFileInfo( title, src, url ),
+			width = 15,
+			height = 20;
 
 		embed.set( { width: width, height: height }, embedFileInfo );
 
@@ -300,9 +305,9 @@
 		embed.embedTextWikitext.$element.find( 'textarea' ).triggerHandler( 'focus' );
 		embed.embedSwitch.emit( 'select' );
 		embed.embedSizeSwitchHtml.getMenu().emit(
-			'choose', embed.embedSizeSwitchHtml.getMenu().getSelectedItem() );
+			'choose', embed.embedSizeSwitchHtml.getMenu().findSelectedItem() );
 		embed.embedSizeSwitchWikitext.getMenu().emit(
-			'choose', embed.embedSizeSwitchWikitext.getMenu().getSelectedItem() );
+			'choose', embed.embedSizeSwitchWikitext.getMenu().findSelectedItem() );
 
 		embed.selectAllOnEvent = function () {
 			assert.ok( true, 'selectAllOnEvent was called.' );
@@ -321,9 +326,9 @@
 		embed.embedTextWikitext.$element.find( 'textarea' ).triggerHandler( 'focus' );
 		embed.embedSwitch.emit( 'select' );
 		embed.embedSizeSwitchHtml.getMenu().emit(
-			'choose', embed.embedSizeSwitchHtml.getMenu().getSelectedItem() );
+			'choose', embed.embedSizeSwitchHtml.getMenu().findSelectedItem() );
 		embed.embedSizeSwitchWikitext.getMenu().emit(
-			'choose', embed.embedSizeSwitchWikitext.getMenu().getSelectedItem() );
+			'choose', embed.embedSizeSwitchWikitext.getMenu().findSelectedItem() );
 
 		// Test the unattach part
 		embed.selectAllOnEvent = function () {
@@ -343,12 +348,12 @@
 		embed.embedTextWikitext.$element.find( 'textarea' ).triggerHandler( 'focus' );
 		embed.embedSwitch.emit( 'select' );
 		embed.embedSizeSwitchHtml.getMenu().emit(
-			'choose', embed.embedSizeSwitchHtml.getMenu().getSelectedItem() );
+			'choose', embed.embedSizeSwitchHtml.getMenu().findSelectedItem() );
 		embed.embedSizeSwitchWikitext.getMenu().emit(
-			'choose', embed.embedSizeSwitchWikitext.getMenu().getSelectedItem() );
+			'choose', embed.embedSizeSwitchWikitext.getMenu().findSelectedItem() );
 	} );
 
-	QUnit.test( 'handleTypeSwitch():', 6, function ( assert ) {
+	QUnit.test( 'handleTypeSwitch():', function ( assert ) {
 		var embed = new mw.mmv.ui.reuse.Embed( $qf );
 
 		assert.strictEqual( embed.isSizeMenuDefaultReset, false, 'Reset flag intialized correctly.' );
@@ -374,7 +379,7 @@
 		assert.ok( !embed.embedSizeSwitchHtml.getMenu().isVisible(), 'HTML size menu should be hidden.' );
 	} );
 
-	QUnit.test( 'Logged out', 4, function ( assert ) {
+	QUnit.test( 'Logged out', function ( assert ) {
 		var embed,
 			oldUserIsAnon = mw.user.isAnon;
 

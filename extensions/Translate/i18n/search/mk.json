@@ -9,10 +9,9 @@
 	"tux-sst-view-foreign": "Пог. на $1",
 	"tux-sst-search": "Пребарај",
 	"tux-sst-search-ph": "Пребарајте преводи",
-	"tux-sst-count": "{{PLURAL:$1|Пронајден е еден резултат|Пронајдени се $1 резултати}}",
+	"tux-sst-count": "{{PLURAL:$1|Пронајдена е една ставка|Пронајдени се $1 ставки}}",
 	"tux-sst-facet-language": "Јазици",
 	"tux-sst-facet-group": "Групи на пораки",
-	"tux-sst-facet-orphan": "(осамена)",
 	"tux-sst-nosolr-title": "Пребарувањето е недостапно",
 	"tux-sst-nosolr-body": "Ова вики нема пребарувач.",
 	"tux-sst-solr-offline-title": "Пребарувањето е недостапно",
@@ -27,5 +26,7 @@
 	"tux-sst-ellipsis-outdated": "Застарени преводи",
 	"tux-sst-link-all-match": "Дај за пребараното како целина",
 	"tux-sst-match-message": "Прикажани се преводите што одговараат на било кој од пребараните зборови. $1",
-	"tux-sst-case-sensitive": "Разликувај големи/мали букви"
+	"tux-sst-case-sensitive": "Разликувај големи/мали букви",
+	"tux-sst-error-offset": "Не можам да прикажам повеќе исходни ставки. Уточнете го пребарувањето.",
+	"tux-sst-error-language": "Овој јазик не може да се користи за ваков вид пребарување."
 }

@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Դավիթ Սարոյան"
+		]
+	},
+	"revisionslider-preference-disable": "Թաքցնել տարբերակների սահիչը",
+	"revisionslider-desc": "Ցուցադրել էջերի տարբերակների ընտրման և համեմատման համար նախատեսված սահիչը։",
+	"revisionslider-toggle-label": "Դիտել պատմությունը",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|բայթ}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|բայթ}}",
+	"revisionslider-label-date": "Ամսաթիվ",
+	"revisionslider-label-page-size": "Էջի չափը",
+	"revisionslider-label-change-size": "Փոփոխության չափը",
+	"revisionslider-label-comment": "Մեկնաբանություն",
+	"revisionslider-label-username": "{{GENDER:$1|Մասնակցային անուն}}",
+	"revisionslider-minoredit": "Սա չնչին խմբագրում է",
+	"revisionslider-loading-failed": "Տարբերակների սահիչը չհաջողվեց բեռնել։",
+	"revisionslider-toggle-title-expand": "Բացել տարբերակների սահիչը",
+	"revisionslider-toggle-title-collapse": "Ծածկել տարբերակների սահիչը",
+	"revisionslider-turn-on-auto-expand-title": "Միշտ ցուցադրել տարբերակների սահիչը",
+	"revisionslider-turn-off-auto-expand-title": "Ավտոմատ չցուցադրել տարբերակների սահիչը",
+	"revisionslider-arrow-tooltip-newer": "Տեսնել նոր տարբերակները",
+	"revisionslider-arrow-tooltip-older": "Տեսնել հին տարբերակները",
+	"revisionslider-show-help-tooltip": "Ցուցադրել օգնության տեքստը",
+	"revisionslider-help-dialog-slide2": "Յուրաքանչյուր սյունակ էջի մեկ տարբերակ է։ Գծից վերև գտնվող սյունակները ցուցադրում են էջի ծավալի մեծացումը, ներքև գտնվող սյունակները՝ ծավալի կրճատումը։ Պատկերում տարբերակ 1-ը՝ ավելացված բովանդակությունն է, 2-ը՝ բովանդակության հեռացումը։",
+	"revisionslider-help-dialog-slide3a": "<p>Կոնկրետ տարբերակները համեմատելու համար օգտագործեք կապույտ և դեղին ցուցանշանները։</p><p>Կապույտ ցուցանշանը կառավարում է նոր տարբերակները, դեղին ցուցանշանը՝ հին տարբերակները։</p><p>Շարժե՛ք ցուցանշանները քաշել-գցելով կամ կտտացնելով սահիչի գծին։</p>",
+	"revisionslider-help-dialog-slide4": "Օգտագործեք ետ և առաջ սլաքները՝ փոփոխությունների պատմության մեջ նավարկելու և հին ու նոր տարբերակները դիտելու համար։",
+	"revisionslider-tutorial": "Տարբերակների սահիչի ուղեցույց",
+	"revisionslider-previous-dialog": "Նախորդ",
+	"revisionslider-next-dialog": "Հաջորդ",
+	"revisionslider-close-dialog": "Փակել"
+}

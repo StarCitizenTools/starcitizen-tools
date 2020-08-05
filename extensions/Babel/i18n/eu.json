@@ -3,7 +3,8 @@
 		"authors": [
 			"An13sa",
 			"Kobazulo",
-			"Theklan"
+			"Theklan",
+			"Sator"
 		]
 	},
 	"babel": "Lankideen babel informazioa",
@@ -12,7 +13,7 @@
 	"babel-footer-url": ":Category:Babel - Erabiltzaileak hizkuntzaren arabear",
 	"babel-autocreate-reason": "Automatikoki sorturiko [[$1|Babel]] kategoria orrialdea.",
 	"babel-autocreate-text-levels": "Kategoria honetako lankideek $1 maila dutela $2 hizkuntzan adierazten du.",
-	"babel-autocreate-text-main": "Kategoria honetan dauden lankideek $1 hizkuntzaren jakintza dute.",
+	"babel-autocreate-text-main": "Kategoria honetan dauden lankideek $1 hizkuntzaren ezagutza dute.",
 	"babel-autocreate-user": "Babel AutoSorrera",
 	"babel-0": "Lankide honek [[$1|ez daki]] [[$2|$3]]z (edo oso zaila da berarentzat ulertzea).",
 	"babel-1": "Lankide honek [[$2|$3]]zko [[$1|oinarrizko ezagutza]] du.",
@@ -28,5 +29,9 @@
 	"babel-4-n": "Erabiltzaile honek [[$1|euskaldun zahar baten antzeko mailan]] lagun dezake [[$2|euskara]]z.",
 	"babel-5-n": "Erabiltzaile honek [[$2|euskara]] [[$1|aditu]] mailan erabiltzen du.",
 	"babel-N-n": "Erabiltzaile hau [[$1|euskaldun zaharra]] da ([[$2|euskara]] du ama hizkuntza).",
-	"babel-footer": "Lankideak hizkuntzaren arabera"
+	"babel-footer": "Lankideak hizkuntzaren arabera",
+	"apihelp-query+babel-description": "Eskuratu lakideak dakizkien hizkuntzen inguruko informazioa",
+	"apihelp-query+babel-summary": "Lankideak dakizkien hizkuntzen inguruko informazioa jaso",
+	"apihelp-query+babel-param-user": "Zein lankideren informazioa lortu",
+	"apihelp-query+babel-example-1": "<kbd>Adibide</kbd> lankidearen Babel informazioa lortu"
 }

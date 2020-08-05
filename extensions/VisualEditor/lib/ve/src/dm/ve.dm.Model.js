@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Model class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -16,6 +16,7 @@
 ve.dm.Model = function VeDmModel( element ) {
 	// Properties
 	this.element = element || { type: this.constructor.static.name };
+	this.store = null;
 };
 
 /* Inheritance */
@@ -210,13 +211,14 @@ ve.dm.Model.static.preserveHtmlAttributes = true;
  * @return {Object} Hash object
  */
 ve.dm.Model.static.getHashObject = function ( dataElement ) {
-	return {
+	var hash = {
 		type: dataElement.type,
-		attributes: dataElement.attributes,
-		// For uniqueness we are only concerned with the first node
-		originalDomElements: dataElement.originalDomElements &&
-			dataElement.originalDomElements[ 0 ].cloneNode( false ).outerHTML
+		attributes: dataElement.attributes
 	};
+	if ( dataElement.originalDomElementsHash !== undefined ) {
+		hash.originalDomElementsHash = dataElement.originalDomElementsHash;
+	}
+	return hash;
 };
 
 /**
@@ -237,6 +239,57 @@ ve.dm.Model.static.getMatchRdfaTypes = function () {
  */
 ve.dm.Model.static.getAllowedRdfaTypes = function () {
 	return this.allowedRdfaTypes;
+};
+
+/**
+ * Describe attribute changes in the model
+ *
+ * @param {Object} attributeChanges Attribute changes, keyed list containing objects with from and to properties
+ * @param {Object} attributes New attributes
+ * @param {Object} element New element
+ * @return {Array} Descriptions, list of strings or jQuery objects
+ */
+ve.dm.Model.static.describeChanges = function ( attributeChanges ) {
+	var key, change,
+		descriptions = [];
+	for ( key in attributeChanges ) {
+		change = this.describeChange( key, attributeChanges[ key ] );
+		if ( change ) {
+			descriptions.push( change );
+		}
+	}
+	return descriptions;
+};
+
+/**
+ * Describe a single attribute change in the model
+ *
+ * @param {string} key Attribute key
+ * @param {Object} change Change object with from and to properties
+ * @return {string|jQuery|null} Description (string or jQuery object), or null if nothing to describe
+ */
+ve.dm.Model.static.describeChange = function ( key, change ) {
+	if ( ( typeof change.from === 'object' && change.from !== null ) || ( typeof change.to === 'object' && change.to !== null ) ) {
+		return ve.msg( 'visualeditor-changedesc-unknown', key );
+	} else if ( change.from === undefined ) {
+		return ve.msg( 'visualeditor-changedesc-set', key, change.to );
+	} else if ( change.to === undefined ) {
+		return ve.msg( 'visualeditor-changedesc-unset', key, change.from );
+	} else {
+		return ve.msg( 'visualeditor-changedesc-changed', key, change.from, change.to );
+	}
+};
+
+/**
+ * Check if this element is of the same type as another element for the purposes of diffing.
+ *
+ * @static
+ * @param {Object} element This element
+ * @param {Object} other Another element
+ * @return {boolean} Elements are of a comparable type
+ */
+ve.dm.Model.static.isDiffComparable = function ( element, other ) {
+	return element.type === other.type;
 };
 
 /* Methods */
@@ -273,6 +326,16 @@ ve.dm.Model.prototype.isEditable = function () {
  */
 ve.dm.Model.prototype.getElement = function () {
 	return this.element;
+};
+
+/**
+ * Get a reference to the hash-value store used by the element.
+ *
+ * @method
+ * @return {ve.dm.HashValueStore} Hash-value store
+ */
+ve.dm.Model.prototype.getStore = function () {
+	return this.store;
 };
 
 /**
@@ -325,10 +388,20 @@ ve.dm.Model.prototype.getAttributes = function ( prefix ) {
 /**
  * Get the DOM element(s) this model was originally converted from, if any.
  *
+ * @return {string|undefined} Store hash of DOM elements this model was converted from
+ */
+ve.dm.Model.prototype.getOriginalDomElementsHash = function () {
+	return this.element ? this.element.originalDomElementsHash : undefined;
+};
+
+/**
+ * Get the DOM element(s) this model was originally converted from, if any.
+ *
+ * @param {ve.dm.HashValueStore} store Hash value store where the DOM elements are stored
  * @return {HTMLElement[]} DOM elements this model was converted from, empty if not applicable
  */
-ve.dm.Model.prototype.getOriginalDomElements = function () {
-	return ( this.element && this.element.originalDomElements ) || [];
+ve.dm.Model.prototype.getOriginalDomElements = function ( store ) {
+	return store.value( this.getOriginalDomElementsHash() ) || [];
 };
 
 /**
@@ -355,4 +428,17 @@ ve.dm.Model.prototype.getClonedElement = function () {
  */
 ve.dm.Model.prototype.getHashObject = function () {
 	return this.constructor.static.getHashObject( this.element );
+};
+
+/**
+ * Check if this element is of the same type as another element for the purposes of diffing.
+ *
+ * Elements which aren't of the same type will always be shown as removal and an insertion,
+ * whereas comarable elements will be shown as an attribute change.
+ *
+ * @param {Object} other Another element
+ * @return {boolean} Elements are of a comparable type
+ */
+ve.dm.Model.prototype.isDiffComparable = function ( other ) {
+	return this.constructor.static.isDiffComparable( this.element, other.element );
 };

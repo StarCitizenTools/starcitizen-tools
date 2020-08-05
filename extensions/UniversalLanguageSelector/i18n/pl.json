@@ -9,13 +9,15 @@
 			"Nemo bis",
 			"Peter Bowman",
 			"Woytecr",
-			"Sethakill"
+			"Sethakill",
+			"Railfail536"
 		]
 	},
 	"uls-desc": "Daje użytkownikowi kilka sposobów, aby wybrać język i dostosować ustawienia języka",
 	"uls-plang-title-languages": "Języki",
 	"ext-uls-select-language-settings-icon-tooltip": "Ustawienia języka",
 	"ext-uls-undo-language-tooltip-text": "Poprzedni język: $1",
+	"ext-uls-undo-language-tooltip-text-local": "Język zmieniony dla tej wiki. Sprawdź [[Special:GlobalPreferences|globalne preferencje]], aby zmienić język dla wszystkich wiki.",
 	"ext-uls-language-settings-preferences-link": "Więcej ustawień języka",
 	"uls-betafeature-label": "Skrócona wersja linków interwiki",
 	"uls-betafeature-desc": "Pokazuj krótszą wersję listy odnośników interwiki, zawierającą tylko języki, które są istotne dla Ciebie.",
@@ -62,9 +64,8 @@
 	"ext-uls-input-disable-notification-info-personal": "Możesz w dowolnym momencie włączyć narzędzia wprowadzania tekstu w ustawieniach języka.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Możesz w dowolnym momencie włączyć narzędzia wprowadzania tekstu w ustawieniach języka, obok listy języków.",
 	"ext-uls-language-settings-applying": "Realizacja w toku...",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|Kolejny język|$1 kolejne języki|$1 kolejnych języków}}",
-	"apihelp-languagesearch-param-search": "Wyszukaj tekst.",
-	"apihelp-ulslocalization-param-language": "Kod języka.",
+	"ext-uls-compact-link-count": "{{PLURAL:$1|Jeden więcej|$1 więcej}}",
 	"prefs-languages": "Języki",
-	"ext-uls-compact-language-links-preference": "Używaj kompaktowej listy języków z językami najbardziej Ci odpowiadającymi."
+	"ext-uls-compact-language-links-preference": "Używaj [[$1|kompaktowej listy języków]] z językami najbardziej Ci odpowiadającymi.",
+	"ext-uls-compact-no-results": "Ta strona nie jest dostępna w języku którego szukasz."
 }

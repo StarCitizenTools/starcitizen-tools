@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aftabuzzaman"
+		]
+	},
+	"templatestyles": "টেমপ্লেটশৈলী",
+	"templatestyles-desc": "টেমপ্লেটের জন্য শৈলীপত্রক বাস্তবায়ন করে",
+	"templatestyles-bad-src-missing": "[[:$1|$2]] পাতায় কোন বিষয়বস্তু নেই।",
+	"templatestyles-error-bad-escape": "$1 নং লাইনের $2 নং অক্ষরে অব্যাহতিতে অক্ষর অবৈধ।",
+	"templatestyles-error-missing-keyframe-name": "$1 নং লাইনের $2 নং অক্ষরে <code>@keyframes</code>-এর জন্য নাম অনুপস্থিত।"
+}

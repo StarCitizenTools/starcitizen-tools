@@ -1,7 +1,7 @@
 /*!
  * VisualEditor CommandHelpRegistry class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -27,38 +27,39 @@ OO.inheritClass( ve.ui.CommandHelpRegistry, OO.Registry );
  *
  * @static
  * @param {string} groupName Dialog-category in which to display this
- * @param {string} commandName Name of the command
+ * @param {string} commandHelpName Name of the command help item.
  * @param {Object} details Details about the command
  * @param {Function|string} details.label Label describing the command. String or deferred message function.
  * @param {string} [details.trigger] Symbolic name of trigger this for this command
- * @param {string} [details.shortcut] Keyboard shortcut if this is not a real trigger (e.g. copy/paste)
+ * @param {string[]} [details.shortcuts] Keyboard shortcuts if this is not a real trigger (e.g. copy/paste)
  * @param {string[]} [details.sequences] Symbolic names of sequences, if this is a sequence, not a trigger
  */
-ve.ui.CommandHelpRegistry.prototype.register = function ( groupName, commandName, details ) {
-	var existingCommand;
+ve.ui.CommandHelpRegistry.prototype.register = function ( groupName, commandHelpName, details ) {
+	var existingCommand, i, shortcut,
+		platform = ve.getSystemPlatform(),
+		platformKey = platform === 'mac' ? 'mac' : 'pc';
 
-	existingCommand = this.registry[ commandName ];
+	existingCommand = this.registry[ commandHelpName ];
 	if ( existingCommand ) {
-		// This is _almost_ just doing extend(existingCommand, details)
-		// But some values need special handling, so we can't do that.
-		if ( details.label ) {
-			existingCommand.label = details.label;
-		}
-		if ( details.trigger ) {
-			existingCommand.trigger = details.trigger;
-		}
-		if ( details.shortcuts ) {
-			existingCommand.shortcuts = details.shortcuts;
-		}
 		if ( details.sequences ) {
-			existingCommand.sequences = ( existingCommand.sequences || [] ).concat( details.sequences );
+			details = ve.copy( details );
+			details.sequences = ( existingCommand.sequences || [] ).concat( details.sequences );
 		}
-		details = existingCommand;
+		details = ve.extendObject( existingCommand, details );
+	}
+
+	if ( details.shortcuts ) {
+		for ( i = 0; i < details.shortcuts.length; i++ ) {
+			shortcut = details.shortcuts[ i ];
+			if ( ve.isPlainObject( shortcut ) ) {
+				details.shortcuts[ i ] = shortcut[ platformKey ];
+			}
+		}
 	}
 
 	details.group = groupName;
 
-	OO.Registry.prototype.register.call( this, commandName, details );
+	OO.Registry.prototype.register.call( this, commandHelpName, details );
 };
 
 /**
@@ -68,10 +69,10 @@ ve.ui.CommandHelpRegistry.prototype.register = function ( groupName, commandName
  * @return {Object} Commands associated with the group
  */
 ve.ui.CommandHelpRegistry.prototype.lookupByGroup = function ( groupName ) {
-	var commandName, matches = {};
-	for ( commandName in this.registry ) {
-		if ( groupName === this.registry[ commandName ].group ) {
-			matches[ commandName ] = this.registry[ commandName ];
+	var commandHelpName, matches = {};
+	for ( commandHelpName in this.registry ) {
+		if ( groupName === this.registry[ commandHelpName ].group ) {
+			matches[ commandHelpName ] = this.registry[ commandHelpName ];
 		}
 	}
 	return matches;
@@ -118,6 +119,19 @@ ve.ui.commandHelpRegistry.register( 'clipboard', 'paste', {
 } );
 ve.ui.commandHelpRegistry.register( 'clipboard', 'pasteSpecial', { trigger: 'pasteSpecial', label: OO.ui.deferMsg( 'visualeditor-clipboard-paste-special' ) } );
 
+// Dialog
+ve.ui.commandHelpRegistry.register( 'dialog', 'dialogCancel', {
+	shortcuts: [ 'escape' ],
+	label: OO.ui.deferMsg( 'visualeditor-command-dialog-cancel' )
+} );
+ve.ui.commandHelpRegistry.register( 'dialog', 'dialogConfirm', {
+	shortcuts: [ {
+		mac: 'cmd+enter',
+		pc: 'ctrl+enter'
+	} ],
+	label: OO.ui.deferMsg( 'visualeditor-command-dialog-confirm' )
+} );
+
 // Formatting
 ve.ui.commandHelpRegistry.register( 'formatting', 'paragraph', { trigger: 'paragraph', label: OO.ui.deferMsg( 'visualeditor-formatdropdown-format-paragraph' ) } );
 ve.ui.commandHelpRegistry.register( 'formatting', 'heading', { shortcuts: [ 'ctrl+1-6' ], label: OO.ui.deferMsg( 'visualeditor-formatdropdown-format-heading-label' ) } );
@@ -137,4 +151,5 @@ ve.ui.commandHelpRegistry.register( 'other', 'findAndReplace', { trigger: 'findA
 ve.ui.commandHelpRegistry.register( 'other', 'findNext', { trigger: 'findNext', label: OO.ui.deferMsg( 'visualeditor-find-and-replace-next-button' ) } );
 ve.ui.commandHelpRegistry.register( 'other', 'findPrevious', { trigger: 'findPrevious', label: OO.ui.deferMsg( 'visualeditor-find-and-replace-previous-button' ) } );
 ve.ui.commandHelpRegistry.register( 'other', 'selectAll', { trigger: 'selectAll', label: OO.ui.deferMsg( 'visualeditor-content-select-all' ) } );
+ve.ui.commandHelpRegistry.register( 'other', 'changeDirectionality', { trigger: 'changeDirectionality', label: OO.ui.deferMsg( 'visualeditor-changedir' ) } );
 ve.ui.commandHelpRegistry.register( 'other', 'commandHelp', { trigger: 'commandHelp', label: OO.ui.deferMsg( 'visualeditor-dialog-command-help-title' ) } );

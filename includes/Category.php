@@ -40,15 +40,19 @@ class Category {
 	/** Counts of membership (cat_pages, cat_subcats, cat_files) */
 	private $mPages = null, $mSubcats = null, $mFiles = null;
 
+	const LOAD_ONLY = 0;
+	const LAZY_INIT_ROW = 1;
+
 	private function __construct() {
 	}
 
 	/**
 	 * Set up all member variables using a database query.
+	 * @param int $mode
 	 * @throws MWException
 	 * @return bool True on success, false on failure.
 	 */
-	protected function initialize() {
+	protected function initialize( $mode = self::LOAD_ONLY ) {
 		if ( $this->mName === null && $this->mID === null ) {
 			throw new MWException( __METHOD__ . ' has both names and IDs null' );
 		} elseif ( $this->mID === null ) {
@@ -60,7 +64,7 @@ class Category {
 			return true;
 		}
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$row = $dbr->selectRow(
 			'category',
 			[ 'cat_id', 'cat_title', 'cat_pages', 'cat_subcats', 'cat_files' ],
@@ -79,6 +83,11 @@ class Category {
 				$this->mSubcats = 0;
 				$this->mFiles = 0;
 
+				# If the title exists, call refreshCounts to add a row for it.
+				if ( $mode === self::LAZY_INIT_ROW && $this->mTitle->exists() ) {
+					DeferredUpdates::addCallableUpdate( [ $this, 'refreshCounts' ] );
+				}
+
 				return true;
 			} else {
 				return false; # Fail
@@ -91,11 +100,17 @@ class Category {
 		$this->mSubcats = $row->cat_subcats;
 		$this->mFiles = $row->cat_files;
 
-		# (bug 13683) If the count is negative, then 1) it's obviously wrong
+		# (T15683) If the count is negative, then 1) it's obviously wrong
 		# and should not be kept, and 2) we *probably* don't have to scan many
 		# rows to obtain the correct figure, so let's risk a one-time recount.
 		if ( $this->mPages < 0 || $this->mSubcats < 0 || $this->mFiles < 0 ) {
-			$this->refreshCounts();
+			$this->mPages = max( $this->mPages, 0 );
+			$this->mSubcats = max( $this->mSubcats, 0 );
+			$this->mFiles = max( $this->mFiles, 0 );
+
+			if ( $mode === self::LAZY_INIT_ROW ) {
+				DeferredUpdates::addCallableUpdate( [ $this, 'refreshCounts' ] );
+			}
 		}
 
 		return true;
@@ -104,9 +119,9 @@ class Category {
 	/**
 	 * Factory function.
 	 *
-	 * @param array $name A category name (no "Category:" prefix).  It need
+	 * @param string $name A category name (no "Category:" prefix).  It need
 	 *   not be normalized, with spaces replaced by underscores.
-	 * @return mixed Category, or false on a totally invalid name
+	 * @return Category|bool Category, or false on a totally invalid name
 	 */
 	public static function newFromName( $name ) {
 		$cat = new self();
@@ -159,7 +174,7 @@ class Category {
 	 * @param Title $title Optional title object for the category represented by
 	 *   the given row. May be provided if it is already known, to avoid having
 	 *   to re-create a title object later.
-	 * @return Category
+	 * @return Category|false
 	 */
 	public static function newFromRow( $row, $title = null ) {
 		$cat = new self();
@@ -238,7 +253,7 @@ class Category {
 			return $this->mTitle;
 		}
 
-		if ( !$this->initialize() ) {
+		if ( !$this->initialize( self::LAZY_INIT_ROW ) ) {
 			return false;
 		}
 
@@ -249,13 +264,12 @@ class Category {
 	/**
 	 * Fetch a TitleArray of up to $limit category members, beginning after the
 	 * category sort key $offset.
-	 * @param int $limit
+	 * @param int|bool $limit
 	 * @param string $offset
 	 * @return TitleArray TitleArray object for category members.
 	 */
 	public function getMembers( $limit = false, $offset = '' ) {
-
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		$conds = [ 'cl_to' => $this->getName(), 'cl_from = page_id' ];
 		$options = [ 'ORDER BY' => 'cl_sortkey' ];
@@ -288,7 +302,7 @@ class Category {
 	 * @return bool
 	 */
 	private function getX( $key ) {
-		if ( !$this->initialize() ) {
+		if ( !$this->initialize( self::LAZY_INIT_ROW ) ) {
 			return false;
 		}
 		return $this->{$key};
@@ -307,11 +321,18 @@ class Category {
 		# If we have just a category name, find out whether there is an
 		# existing row. Or if we have just an ID, get the name, because
 		# that's what categorylinks uses.
-		if ( !$this->initialize() ) {
+		if ( !$this->initialize( self::LOAD_ONLY ) ) {
 			return false;
 		}
 
 		$dbw = wfGetDB( DB_MASTER );
+		# Avoid excess contention on the same category (T162121)
+		$name = __METHOD__ . ':' . md5( $this->mName );
+		$scopedLock = $dbw->getScopedLockAndFlush( $name, __METHOD__, 0 );
+		if ( !$scopedLock ) {
+			return false;
+		}
+
 		$dbw->startAtomic( __METHOD__ );
 
 		$cond1 = $dbw->conditional( [ 'page_namespace' => NS_CATEGORY ], 1, 'NULL' );
@@ -327,21 +348,35 @@ class Category {
 			[ 'LOCK IN SHARE MODE' ]
 		);
 
+		$shouldExist = $result->pages > 0 || $this->getTitle()->exists();
+
 		if ( $this->mID ) {
-			# The category row already exists, so do a plain UPDATE instead
-			# of INSERT...ON DUPLICATE KEY UPDATE to avoid creating a gap
-			# in the cat_id sequence. The row may or may not be "affected".
-			$dbw->update(
-				'category',
-				[
-					'cat_pages' => $result->pages,
-					'cat_subcats' => $result->subcats,
-					'cat_files' => $result->files
-				],
-				[ 'cat_title' => $this->mName ],
-				__METHOD__
-			);
-		} else {
+			if ( $shouldExist ) {
+				# The category row already exists, so do a plain UPDATE instead
+				# of INSERT...ON DUPLICATE KEY UPDATE to avoid creating a gap
+				# in the cat_id sequence. The row may or may not be "affected".
+				$dbw->update(
+					'category',
+					[
+						'cat_pages' => $result->pages,
+						'cat_subcats' => $result->subcats,
+						'cat_files' => $result->files
+					],
+					[ 'cat_title' => $this->mName ],
+					__METHOD__
+				);
+			} else {
+				# The category is empty and has no description page, delete it
+				$dbw->delete(
+					'category',
+					[ 'cat_title' => $this->mName ],
+					__METHOD__
+				);
+				$this->mID = false;
+			}
+		} elseif ( $shouldExist ) {
+			# The category row doesn't exist but should, so create it. Use
+			# upsert in case of races.
 			$dbw->upsert(
 				'category',
 				[
@@ -358,6 +393,8 @@ class Category {
 				],
 				__METHOD__
 			);
+			// @todo: Should we update $this->mID here? Or not since Category
+			// objects tend to be short lived enough to not matter?
 		}
 
 		$dbw->endAtomic( __METHOD__ );

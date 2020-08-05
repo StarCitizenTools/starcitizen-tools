@@ -20,36 +20,41 @@
  * @file
  */
 
+require_once __DIR__ . '/libs/mime/defines.php';
+require_once __DIR__ . '/libs/rdbms/defines.php';
+require_once __DIR__ . '/compat/normal/UtfNormalDefines.php';
+
+use Wikimedia\Rdbms\IDatabase;
+
 /**
  * @defgroup Constants MediaWiki constants
  */
 
-/**@{
- * Database related constants
+/**
+ * The running version of MediaWiki.
+ *
+ * This replaces the the $wgVersion global found in earlier versions.
+ *
+ * @since 1.31.7
  */
-define( 'DBO_DEBUG', 1 );
-define( 'DBO_NOBUFFER', 2 );
-define( 'DBO_IGNORE', 4 );
-define( 'DBO_TRX', 8 ); // automatically start transaction on first query
-define( 'DBO_DEFAULT', 16 );
-define( 'DBO_PERSISTENT', 32 );
-define( 'DBO_SYSDBA', 64 ); // for oracle maintenance
-define( 'DBO_DDLMODE', 128 ); // when using schema files: mostly for Oracle
-define( 'DBO_SSL', 256 );
-define( 'DBO_COMPRESS', 512 );
-/**@}*/
-
-/**@{
- * Valid database indexes
- * Operation-based indexes
- */
-define( 'DB_SLAVE', -1 );     # Read from the slave (or only server)
-define( 'DB_MASTER', -2 );    # Write to master (or only server)
-/**@}*/
+define( 'MW_VERSION', '1.31.8' );
 
 # Obsolete aliases
-define( 'DB_READ', -1 );
-define( 'DB_WRITE', -2 );
+/**
+ * @deprecated since 1.28
+ */
+define( 'DB_SLAVE', -1 );
+
+/**@{
+ * Obsolete IDatabase::makeList() constants
+ * These are also available as Database class constants
+ */
+define( 'LIST_COMMA', IDatabase::LIST_COMMA );
+define( 'LIST_AND', IDatabase::LIST_AND );
+define( 'LIST_SET', IDatabase::LIST_SET );
+define( 'LIST_NAMES', IDatabase::LIST_NAMES );
+define( 'LIST_OR', IDatabase::LIST_OR );
+/**@}*/
 
 /**@{
  * Virtual namespaces; don't appear in the page database
@@ -90,8 +95,13 @@ define( 'NS_CATEGORY_TALK', 15 );
  * When writing code that should be compatible with older MediaWiki
  * versions, either stick to the old names or define the new constants
  * yourself, if they're not defined already.
+ *
+ * @deprecated since 1.14
  */
 define( 'NS_IMAGE', NS_FILE );
+/**
+ * @deprecated since 1.14
+ */
 define( 'NS_IMAGE_TALK', NS_FILE_TALK );
 /**@}*/
 
@@ -102,34 +112,7 @@ define( 'CACHE_ANYTHING', -1 );  // Use anything, as long as it works
 define( 'CACHE_NONE', 0 );       // Do not cache
 define( 'CACHE_DB', 1 );         // Store cache objects in the DB
 define( 'CACHE_MEMCACHED', 2 );  // MemCached, must specify servers in $wgMemCacheServers
-define( 'CACHE_ACCEL', 3 );      // APC, XCache or WinCache
-/**@}*/
-
-/**@{
- * Media types.
- * This defines constants for the value returned by File::getMediaType()
- */
-// unknown format
-define( 'MEDIATYPE_UNKNOWN', 'UNKNOWN' );
-// some bitmap image or image source (like psd, etc). Can't scale up.
-define( 'MEDIATYPE_BITMAP', 'BITMAP' );
-// some vector drawing (SVG, WMF, PS, ...) or image source (oo-draw, etc). Can scale up.
-define( 'MEDIATYPE_DRAWING', 'DRAWING' );
-// simple audio file (ogg, mp3, wav, midi, whatever)
-define( 'MEDIATYPE_AUDIO', 'AUDIO' );
-// simple video file (ogg, mpg, etc;
-// no not include formats here that may contain executable sections or scripts!)
-define( 'MEDIATYPE_VIDEO', 'VIDEO' );
-// Scriptable Multimedia (flash, advanced video container formats, etc)
-define( 'MEDIATYPE_MULTIMEDIA', 'MULTIMEDIA' );
-// Office Documents, Spreadsheets (office formats possibly containing apples, scripts, etc)
-define( 'MEDIATYPE_OFFICE', 'OFFICE' );
-// Plain text (possibly containing program code or scripts)
-define( 'MEDIATYPE_TEXT', 'TEXT' );
-// binary executable
-define( 'MEDIATYPE_EXECUTABLE', 'EXECUTABLE' );
-// archive file (zip, tar, etc)
-define( 'MEDIATYPE_ARCHIVE', 'ARCHIVE' );
+define( 'CACHE_ACCEL', 3 );      // APC or WinCache
 /**@}*/
 
 /**@{
@@ -183,23 +166,8 @@ define( 'EDIT_SUPPRESS_RC', 8 );
 define( 'EDIT_FORCE_BOT', 16 );
 define( 'EDIT_DEFER_UPDATES', 32 ); // Unused since 1.27
 define( 'EDIT_AUTOSUMMARY', 64 );
+define( 'EDIT_INTERNAL', 128 );
 /**@}*/
-
-/**@{
- * Flags for Database::makeList()
- * These are also available as Database class constants
- */
-define( 'LIST_COMMA', 0 );
-define( 'LIST_AND', 1 );
-define( 'LIST_SET', 2 );
-define( 'LIST_NAMES', 3 );
-define( 'LIST_OR', 4 );
-/**@}*/
-
-/**
- * Unicode and normalisation related
- */
-require_once __DIR__ . '/compat/normal/UtfNormalDefines.php';
 
 /**@{
  * Hook support constants
@@ -310,4 +278,29 @@ define( 'CONTENT_FORMAT_XML', 'application/xml' );
  * Max string length for shell invocations; based on binfmts.h
  */
 define( 'SHELL_MAX_ARG_STRLEN', '100000' );
+/**@}*/
+
+/**@{
+ * Schema change migration flags.
+ *
+ * Used as values of a feature flag for an orderly transition from an old
+ * schema to a new schema.
+ *
+ * - MIGRATION_OLD: Only read and write the old schema. The new schema need not
+ *   even exist. This is used from when the patch is merged until the schema
+ *   change is actually applied to the database.
+ * - MIGRATION_WRITE_BOTH: Write both the old and new schema. Read the new
+ *   schema preferentially, falling back to the old. This is used while the
+ *   change is being tested, allowing easy roll-back to the old schema.
+ * - MIGRATION_WRITE_NEW: Write only the new schema. Read the new schema
+ *   preferentially, falling back to the old. This is used while running the
+ *   maintenance script to migrate existing entries in the old schema to the
+ *   new schema.
+ * - MIGRATION_NEW: Only read and write the new schema. The old schema (and the
+ *   feature flag) may now be removed.
+ */
+define( 'MIGRATION_OLD', 0 );
+define( 'MIGRATION_WRITE_BOTH', 1 );
+define( 'MIGRATION_WRITE_NEW', 2 );
+define( 'MIGRATION_NEW', 3 );
 /**@}*/

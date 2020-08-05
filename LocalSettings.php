@@ -1,11 +1,18 @@
 <?php
 # Protect against web entry
 if ( !defined( 'MEDIAWIKI' ) ) {
-	exit;
+  exit;
 }
 
+/* DEBUG ONLY */
+$wgShowExceptionDetails = true;
+
+#Tidy HTML output
+$wgUseTidy = true;
+$wgTidyConfig = [ 'driver' => 'RemexHtml' ];
+
 #General Settings
-$wgSitename = "Star Citizen";
+$wgSitename = "Star Citizen Wiki";
 $wgMetaNamespace = "Star_Citizen";
 $wgAllowSiteCSSOnRestrictedPages = true;
 
@@ -24,14 +31,25 @@ $wgDebugDumpSql = false;
 $wgDebugComments = false;
 
 ## The protocol and server name to use in fully-qualified URLs
-$wgServer = "https://starcitizen.tools";
+#$wgServer = ""; NOW PLACED IN EXTERNAL INCLUDES FOLDER
+
+## Enable strict referrer policy
+$wgReferrerPolicy = array('strict-origin-when-cross-origin', 'strict-origin');
+
+## Output a canonical meta tag on every page
+$wgEnableCanonicalServerLink = true;
 
 ## The URL path to static resources (images, scripts, etc.)
 $wgResourceBasePath = $wgScriptPath;
 
 ## The URL path to the logo.  Make sure you change this from the default,
 ## or else you'll overwrite your logo when you upgrade!
-$wgLogo = "$wgResourceBasePath/resources/assets/sclogo.png";
+$wgLogo = "$wgResourceBasePath/resources/assets/sitelogo.png";
+$wgLogoHD = [
+  "svg" => "$wgResourceBasePath/resources/assets/sitelogo.svg"
+];
+$wgFavicon = "$wgResourceBasePath/resources/assets/favicon.ico";
+$wgAppleTouchIcon = "$wgResourceBasePath/resources/assets/apple-touch-icon.png";
 
 ## UPO means: this is also a user preference option
 $wgEnableEmail = true;
@@ -43,6 +61,9 @@ $wgPasswordSender = "do-not-reply@starcitizen.tools";
 $wgEnotifUserTalk = false; # UPO
 $wgEnotifWatchlist = false; # UPO
 $wgEmailAuthentication = true;
+
+# Disable the real name field
+$wgHiddenPrefs[] = 'realname';
 
 # MySQL table options to use during installation or update
 $wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=utf8";
@@ -58,11 +79,38 @@ $wgMemCachedServers = array();
 ## To enable image uploads, make sure the 'images' directory
 ## is writable, then set this to true:
 $wgEnableUploads = true;
-$wgGenerateThumbnailOnParse = true;
+$wgGenerateThumbnailOnParse = false;
+#$wgThumbnailScriptPath = "{$wgScriptPath}/thumb.php";
 $wgUseImageMagick = true;
-$wgImageMagickConvertCommand = "/usr/bin/convert";
+$wgThumbnailEpoch = "20190815000000";
+$wgIgnoreImageErrors = true;
+
+$wgDefaultUserOptions['imagesize'] = 4; // image size 1280, 1024
+
+$wgThumbLimits = array(
+  120, // thumb size 1
+  150, // thumb size 2
+  180, // thumb size 3
+  200, // thumb size 4
+  250, // thumb size 5
+  300 // thumb size 6
+);
+
+$wgDefaultUserOptions['thumbsize'] = 5; // thumb size 300
 
 $wgMaxImageArea = 6.4e7;
+
+# Gallery settings
+$wgGalleryOptions = [
+  'imagesPerRow' => 0, // Default number of images per-row in the gallery. 0: Adapt to screensize
+  'imageWidth' => 180, // Width of the cells containing images in galleries (in "px")
+  'imageHeight' => 180, // Height of the cells containing images in galleries (in "px")
+  'captionLength' => true, // Length of caption to truncate (in characters) in special pages or when the showfilename parameter is used
+                           // A value of 'true' will truncate the filename to one line using CSS.
+                           // Deprecated since 1.28. Default value of 25 before 1.28.
+  'showBytes' => true, // Show the filesize in bytes in categories
+    'mode' => 'packed', // One of "traditional", "nolines", "packed", "packed-hover", "packed-overlay", "slideshow" (1.28+)
+];
 
 # InstantCommons allows wiki to use images from https://commons.wikimedia.org
 $wgUseInstantCommons = true;
@@ -93,7 +141,11 @@ $wgRightsPage = ""; # Set to the title of a wiki page that describes your licens
 $wgRightsUrl = "https://creativecommons.org/licenses/by-sa/4.0/";
 $wgRightsText = "Creative Commons Attribution-ShareAlike";
 $wgRightsIcon = "$wgResourceBasePath/resources/assets/licenses/cc-by-sa.png";
-$wgFavicon = "$wgScriptPath/favicon.ico";
+
+# Enable new filters for RC
+# Depreciate in > MW 1.32
+$wgStructuredChangeFiltersShowPreference = true;
+$wgStructuredChangeFiltersOnWatchlist = true;
 
 # Path to the GNU diff3 utility. Used for conflict resolution.
 $wgDiff3 = "/usr/bin/diff3";
@@ -103,35 +155,48 @@ $wgAllowUserCss = true;
 
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'vector', 'monobook':
-$wgDefaultSkin = "vector";
+$wgDefaultSkin = 'citizen';
 
 # Enabled skins.
 # The following skins were automatically enabled:
-wfLoadSkin( 'Vector' );
-#wfLoadSkin( 'Citizen' );
+wfLoadSkin( 'Citizen' );
+
+# Citizen skin config
+# Enable Preconnect for the defined domain
+$wgCitizenEnablePreconnect = true;
+$wgCitizenPreconnectURL = 'https://www.google-analytics.com';
+# CSP
+$wgCitizenEnableCSP = true;
+$wgCitizenCSPDirective = 'default-src \'none\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\' https://commons.wikimedia.org https://www.mediawiki.org https://ajax.cloudflare.com/ https://*.starcitizen.tools https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.google-analytics.com https://ssl.google-analytics.com; style-src \'self\' \'unsafe-inline\' https://*.starcitizen.tools https://commons.wikimedia.org https://www.mediawiki.org; img-src \'self\' data: https://www.google-analytics.com https://upload.wikimedia.org; font-src \'self\'; connect-src \'self\' https://*.starcitizen.tools https://www.google-analytics.com https://secure.flickr.com; manifest-src \'self\'; frame-src https://www.google.com/recaptcha/ https://www.youtube.com; frame-ancestors \'none\'; form-action \'self\'; upgrade-insecure-requests; base-uri \'self\'';
+# HSTS
+$wgCitizenEnableHSTS = true;
+$wgCitizenHSTSMaxAge = 63072000; # 2 year
+$wgCitizenHSTSIncludeSubdomains = true;
+$wgCitizenHSTSPreload = true;
+# Enable the deny X-Frame-Options header
+$wgCitizenEnableDenyXFrameOptions = true;
+# Enable X-XSS-Protection header
+$wgCitizenEnableXXSSProtection = true;
+# Enable strict-origin-when-cross-origin referrer policy	
+$wgCitizenEnableStrictReferrerPolicy = true;
+# Feature policy
+$wgCitizenEnableFeaturePolicy = true;
+$wgCitizenFeaturePolicyDirective = 'autoplay \'none\'; camera \'none\'; fullscreen \'self\'; geolocation \'none\'; microphone \'none\'; midi \'none\'; payment \'none\'' ;
+# Search description source
+$wgCitizenSearchDescriptionSource = 'wikidata';
+# Number of search results in suggestion
+$wgCitizenMaxSearchResults = 6;
 
 #Maintenance
 #$wgReadOnly = 'Maintenance is underway. Website is on read-only mode';
 
 #SVG Support
-#$wgFileExtensions[] = 'svg';
+$wgFileExtensions[] = 'svg';
 $wgAllowTitlesInSVG = true;
 $wgSVGConverter = 'ImageMagick';
 
-#Javascript
-$wgResourceModules['WaveJS'] = array(
-    'scripts' => array('waves.min.js'),
-);
-
-function onBeforePageDisplay( OutputPage &$out, Skin &$skin )
-{
-    $script = '<script></script>';
-    $out->addHeadItem("head script", $script);
-    $out->addModules('WaveJS');
-    return true;
-};
-
-$wgHooks['BeforePageDisplay'][] ='onBeforePageDisplay';
+#Open external link in new tab/window
+$wgExternalLinkTarget = '_blank';
 
 #=============================================== External Includes ===============================================
 
@@ -142,16 +207,18 @@ require_once("/home/www-data/external_includes/secret_keys.php");
 
 wfLoadExtension( 'ParserFunctions' );
 wfLoadExtension( 'EmbedVideo' );
-wfLoadExtension( 'MsUpload' );
+#wfLoadExtension( 'MsUpload' ); - No longer used
 wfLoadExtension( 'InputBox' );
 wfLoadExtension( 'WikiSEO' );
 wfLoadExtension( 'Cite' );
-wfLoadExtension("DynamicPageList");
+wfLoadExtension( 'CiteThisPage' );
+wfLoadExtension( 'DynamicPageList' );
 wfLoadExtension( 'Nuke' );
 wfLoadExtension( 'CommonsMetadata' );
 wfLoadExtension( 'ReplaceText' );
 wfLoadExtension( 'TextExtracts' );
 wfLoadExtension( 'Popups' );
+wfLoadExtension( 'GoogleAnalytics' );
 wfLoadExtension( 'RevisionSlider' );
 wfLoadExtension( 'CheckUser' );
 wfLoadExtension( 'Babel' );
@@ -162,23 +229,33 @@ wfLoadExtension( 'UniversalLanguageSelector' );
 wfLoadExtensions( array( 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ) );
 wfLoadExtension( 'CodeMirror' );
 wfLoadExtension( 'CookieWarning' );
-require_once "$IP/extensions/CSS/CSS.php";
-require_once "$IP/extensions/Tabber/Tabber.php";
-require_once "$IP/extensions/RSS/RSS.php";
-require_once "$IP/extensions/PageImages/PageImages.php";
-require_once "$IP/extensions/MultimediaViewer/MultimediaViewer.php";
-require_once "$IP/extensions/Echo/Echo.php";
-require_once "$IP/extensions/Flow/Flow.php";
+wfLoadExtension( 'UploadWizard' );
+wfLoadExtension( 'MultimediaViewer' );
+wfLoadExtension( 'Echo' );
+wfLoadExtension( 'Flow' );
+wfLoadExtension( 'Tabber' );
+wfLoadExtension( 'RSS' );
+wfLoadExtension( 'TemplateData' );
+wfLoadExtension( 'PageImages' );
+#wfLoadExtension( 'RelatedArticles' );
+wfLoadExtension( 'WikiEditor' );
+wfLoadExtension( 'CodeEditor' );
+wfLoadExtension( 'VisualEditor' );
+wfLoadExtension( 'Scribunto' );
+wfLoadExtension( 'EventLogging' );
+wfLoadExtension( 'Renameuser' );
+wfLoadExtension( 'ExternalData' );
+wfLoadExtension( 'TemplateStyles' );
+wfLoadExtension( 'Variables' );
+wfLoadExtension( 'Loops' );
+wfLoadExtension( 'ShortDescription' );
+wfLoadExtension( 'NativeSvgHandler' );
+wfLoadExtension( 'CategoryTree' );
+wfLoadExtension( 'Disambiguator' );
+wfLoadExtension( 'DismissableSiteNotice' );
+wfLoadExtension( 'SandboxLink' );
+wfLoadExtension( 'Thanks' );
 require_once "$IP/extensions/Translate/Translate.php";
-require_once "$IP/extensions/googleAnalytics/googleAnalytics.php";
-require_once "$IP/extensions/VisualEditor/VisualEditor.php";
-require_once "$IP/extensions/Scribunto/Scribunto.php";
-require_once( "$IP/extensions/UploadWizard/UploadWizard.php" );
-require_once "$IP/extensions/EventLogging/EventLogging.php";
-require_once "$IP/extensions/ExternalData/ExternalData.php";
-require_once "$IP/extensions/Renameuser/Renameuser.php";
-require_once "$IP/extensions/NativeSvgHandler/NativeSvgHandler.php";
-#require_once "$IP/extensions/Lazyload/Lazyload.php";
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================
@@ -193,28 +270,107 @@ $wgAllowCopyUploads = true;
 $wgCopyUploadsDomains = array( '*.flickr.com', '*.staticflickr.com' );
 $wgUploadNavigationUrl = '/Special:UploadWizard';
 $wgUploadWizardConfig = array(
-	'debug' => false,
-	'altUploadForm' => 'Special:Upload',
-	'fallbackToAltUploadForm' => false,
-	'enableFormData' => true,
-	'enableMultipleFiles' => true,
-	'enableMultiFileSelect' => false,
-	'tutorial' => array(
-	 	'skip' => true
-		),
-	'maxUploads' => 15,
-	'fileExtensions' => $wgFileExtensions,
-	'flickrApiUrl' => 'https://secure.flickr.com/services/rest/?',
-	);
+  'debug' => false,
+  'altUploadForm' => 'Special:Upload',
+  'fallbackToAltUploadForm' => false,
+  'alternativeUploadToolsPage' => false,
+  'enableFormData' => true,
+  'enableMultipleFiles' => true,
+  'enableMultiFileSelect' => false,
+  'tutorial' => array(
+    'skip' => true
+  ),
+  'maxUploads' => 15,
+  'fileExtensions' => $wgFileExtensions,
+  'flickrApiUrl' => 'https://secure.flickr.com/services/rest/?',
+  'licenses' => array(
+    # Cloud Imperium license
+    'rsilicense' => array(
+      'msg' => 'mwe-upwiz-license-rsi',
+      'templates' => array('RSIlicense')
+    ),
+    # CC-BY-NC-SA-2.0 required by Flickr
+    # Note that this need to be added to mw.FlickrChecker.js every time it is updated
+    'cc-by-nc-sa-2.0' => array(
+      'msg' => 'mwe-upwiz-license-cc-by-nc-sa-2.0',
+      'templates' => array('cc-by-nc-sa-2.0'),
+      #'icons' => array('cc-by','cc-nc','cc-sa'), NC icon is missing
+      'url' => '//creativecommons.org/licenses/by-nc-sa/2.0/',
+      'languageCodePrefix' => 'deed.'
+    ),
+    # CC-BY-NC-2.0 required by Flickr
+    # Note that this need to be added to mw.FlickrChecker.js every time it is updated
+    'cc-by-nc-2.0' => array(
+      'msg' => 'mwe-upwiz-license-cc-by-nc-2.0',
+      'templates' => array('cc-by-nc-2.0'),
+      #'icons' => array('cc-by','cc-nc'), NC icon is missing
+      'url' => '//creativecommons.org/licenses/by-nc/2.0/',
+      'languageCodePrefix' => 'deed.'
+    ),
+  ),
+  # License selection page
+  'licensing' => array(
+    'thirdParty' => array(
+      'type' => 'or',
+      'defaults' => 'rsilicense',
+      'licenseGroups' => array(
+        array(
+          'head' => 'mwe-upwiz-license-sc-head',
+          'licenses' => array(
+            'rsilicense'
+          )
+        ),
+        array(
+          # This should be a list of all CC licenses we can reasonably expect to find around the web
+          'head' => 'mwe-upwiz-license-cc-head',
+          'subhead' => 'mwe-upwiz-license-cc-subhead',
+          'licenses' => array(
+            'cc-by-sa-4.0',
+            'cc-by-sa-3.0',
+            'cc-by-sa-2.5',
+            'cc-by-4.0',
+            'cc-by-3.0',
+            'cc-by-2.5',
+            'cc-zero'
+          )
+        ),
+        array(
+          # Flickr still uses CC 2.0
+          'head' => 'mwe-upwiz-license-flickr-head',
+          'subhead'=> 'mwe-upwiz-license-flickr-subhead',
+          'licenses'=> array(
+            'cc-by-nc-sa-2.0',
+            'cc-by-nc-2.0',
+            'cc-by-sa-2.0',
+            'cc-by-2.0'
+          )
+        ),
+        array(
+          'head' => 'mwe-upwiz-license-custom-head',
+          'special' => 'custom',
+          'licenses' => array( 'custom' ),
+        ),
+        array(
+          'head' => 'mwe-upwiz-license-none-head',
+          'licenses' => array( 'none' )
+        ),
+      )
+    )
+  )
+);
 
 #TextExtracts
 $wgExtractsRemoveClasses[] = 'dd';
 $wgExtractsRemoveClasses[] = 'dablink';
 $wgExtractsRemoveClasses[] = 'translate';
 
+#WikiSEO
+#Disable wgLogo as fallback image
+$wgWikiSeoDisableLogoFallbackImage = true;
+
 #MsUpload
-$wgMSU_useDragDrop = true;
-$wgMSU_showAutoCat = true;
+#$wgMSU_useDragDrop = true;
+#$wgMSU_showAutoCat = true;
 
 #MultimediaViewer
 $wgMediaViewerEnableByDefault = true;
@@ -226,9 +382,9 @@ $wgCaptchaTriggers['edit']          = true;
 $wgCaptchaTriggers['create']        = true;
 
 #CleanChanges
-$wgCCTrailerFilter = true;
-$wgCCUserFilter = false;
-$wgDefaultUserOptions['usenewrc'] = 1;
+#$wgCCTrailerFilter = true;
+#$wgCCUserFilter = false;
+#$wgDefaultUserOptions['usenewrc'] = 1;
 
 #Translate
 $wgLocalisationUpdateDirectory = "$IP/cache";
@@ -250,18 +406,41 @@ $wgTranslateBlacklist = array(
     ),
 );
 
+#Universal Language Selector
+$wgULSGeoService = false;
+
 #Google Analytics
 $wgGoogleAnalyticsAccount = 'UA-48789297-5';
+# No bot group analytics.
+$wgGroupPermissions['bot']['noanalytics'] = true;
 
 #ExternalData
 # $edgCacheTable = 'ed_url_cache'; Need to run ExternalData.sql first
+# $wgHTTPTimeout = 60; Set HTTP request timeout to 60s
 $edgCacheExpireTime = 3 * 24 * 60 * 60;
-$edgAllowExternalDataFrom = array('https://starcitizen.tools','http://starcitizendb.com/','http://pledgetrack.rabbitsraiders.net');
+$edgAllowExternalDataFrom = array('https://starcitizen.tools','http://starcitizendb.com/', 'https://scwdev.czen.me');
 $edgExternalValueVerbose = false;
 
 #Visual Editor
 $wgDefaultUserOptions['visualeditor-enable'] = 1;
-$wgHiddenPrefs[] = 'visualeditor-enable';
+$wgDefaultUserOptions['visualeditor-editor'] = "visualeditor";
+$wgDefaultUserOptions['visualeditor-newwikitext'] = 1;
+$wgPrefs[] = 'visualeditor-enable';
+$wgVisualEditorEnableWikitext = true;
+$wgVisualEditorEnableDiffPage = true;
+$wgVisualEditorUseSingleEditTab = true;
+$wgVisualEditorEnableVisualSectionEditing = true;
+
+#Code Editor
+$wgDefaultUserOptions['usebetatoolbar'] = 1; // user option provided by WikiEditor extension
+
+#RelatedArticles 
+# $wgRelatedArticlesFooterWhitelistedSkins = [ 'citizen', 'vector', 'timeless' ];
+# Enable when moved to 1.3.4
+# $wgRelatedArticlesDescriptionSource = 'textextracts';
+# Enable when CirrusSearch is installed
+# $wgRelatedArticlesUseCirrusSearch = true;
+# $wgRelatedArticlesOnlyUseCirrusSearch = true;
 
 #Eventlogging
 $wgEventLoggingBaseUri = 'https://starcitizen.tools:8080/event.gif';
@@ -304,7 +483,34 @@ $wgDefaultUserOptions['usecodemirror'] = 0;
 
 #CookieWarning
 $wgCookieWarningEnabled = true;
-$wgCookieWarningGeoIPLookup = none;
+$wgCookieWarningGeoIPLookup = 'none';
+
+#DynamicPageList
+$wgDplSettings['recursiveTagParse'] = true;
+$wgDplSettings['allowUnlimitedResults'] = true;
+#TemplateStyles
+$wgTemplateStylesAllowedUrls = [
+  "audio" => [
+    "<^https://starcitizen\\.tools/>",
+    "<^https://scwdev\\.czen\\.me/>"
+  ],
+  "image" => [
+    "<^https://starcitizen\\.tools/>",
+    "<^https://scwdev\\.czen\\.me/>"
+  ],
+  "svg" => [
+    "<^https://starcitizen\\.tools/[^?#]*\\.svg(?:[?#]|$)>",
+    "<^https://scwdev\\.czen\\.me/[^?#]*\\.svg(?:[?#]|$)>"
+  ],
+  "font" => [
+    "<^https://starcitizen\\.tools/>",
+    "<^https://scwdev\\.czen\\.me/>"
+  ],
+  "namespace" => [
+      "<.>"
+  ],
+  "css" => []
+];
 
 #=============================================== Namespaces ===============================================
 define("NS_COMMLINK", 3000);
@@ -313,23 +519,18 @@ $wgExtraNamespaces[NS_COMMLINK] = "Comm-Link";
 $wgExtraNamespaces[NS_COMMLINK_TALK] = "Comm-Link_talk";
 $wgNamespacesWithSubpages[NS_COMMLINK] = true;
 $wgNamespacesToBeSearchedDefault[NS_COMMLINK] = true;
-$wgNamespaceContentModels[NS_COMMLINK_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 define("NS_PROJMGMT", 3002);
 define("NS_PROJMGMT_TALK", 3003);
 $wgExtraNamespaces[NS_PROJMGMT] = "ProjMGMT";
 $wgExtraNamespaces[NS_PROJMGMT_TALK] = "ProjMGMT_talk";
 $wgNamespacesWithSubpages[NS_PROJMGMT] = true;
-#$wgNamespacesToBeSearchedDefault[NS_PROJMGMT] = true;
-$wgNamespaceContentModels[NS_PROJMGMT_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 define("NS_ISSUE", 3004);
 define("NS_ISSUE_TALK", 3005);
 $wgExtraNamespaces[NS_ISSUE] = "Issue";
 $wgExtraNamespaces[NS_ISSUE_TALK] = "Issue_talk";
 $wgNamespacesWithSubpages[NS_ISSUE] = true;
-#$wgNamespacesToBeSearchedDefault[NS_ISSUE] = true;
-$wgNamespaceContentModels[NS_ISSUE_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 define("NS_GUIDE", 3006);
 define("NS_GUIDE_TALK", 3007);
@@ -337,23 +538,19 @@ $wgExtraNamespaces[NS_GUIDE] = "Guide";
 $wgExtraNamespaces[NS_GUIDE_TALK] = "Guide_talk";
 $wgNamespacesWithSubpages[NS_GUIDE] = true;
 $wgNamespacesToBeSearchedDefault[NS_GUIDE] = true;
-$wgNamespaceContentModels[NS_GUIDE_TALK] = CONTENT_MODEL_FLOW_BOARD;
+
 
 define("NS_ORG", 3008);
 define("NS_ORG_TALK", 3009);
 $wgExtraNamespaces[NS_ORG] = "ORG";
 $wgExtraNamespaces[NS_ORG_TALK] = "ORG_talk";
 $wgNamespacesWithSubpages[NS_ORG] = true;
-#$wgNamespacesToBeSearchedDefault[NS_ORG] = true;
-$wgNamespaceContentModels[NS_ORG_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 define("NS_EVENT", 3010);
 define("NS_EVENT_TALK", 3011);
 $wgExtraNamespaces[NS_EVENT] = "EVENT";
 $wgExtraNamespaces[NS_EVENT_TALK] = "EVENT_talk";
 $wgNamespacesWithSubpages[NS_EVENT] = true;
-#$wgNamespacesToBeSearchedDefault[NS_EVENT] = true;
-$wgNamespaceContentModels[NS_EVENT_TALK] = CONTENT_MODEL_FLOW_BOARD;
 
 # Citizen Star News Archive project
 define("NS_CSN", 3012);
@@ -362,21 +559,15 @@ $wgExtraNamespaces[NS_CSN] = "CSN";
 $wgExtraNamespaces[NS_CSN_TALK] = "CSN_talk";
 $wgNamespacesWithSubpages[NS_CSN] = true;
 $wgNamespacesToBeSearchedDefault[NS_CSN] = true;
-$wgNamespaceContentModels[NS_CSN_TALK] = CONTENT_MODEL_FLOW_BOARD;
+
+define("NS_TRANSCRIPT", 3014);
+define("NS_TRANSCRIPT_TALK", 3015);
+$wgExtraNamespaces[NS_TRANSCRIPT] = "Transcript";
+$wgExtraNamespaces[NS_TRANSCRIPT_TALK] = "Transcript_talk";
+$wgNamespacesWithSubpages[NS_TRANSCRIPT] = true;
 
 $wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
 $wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
-
-$wgNamespaceContentModels[NS_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_USER_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_COMMLINK_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_PROJECT_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_FILE_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_MEDIAWIKI_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_TEMPLATE_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_HELP_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[NS_CATEGORY_TALK] = CONTENT_MODEL_FLOW_BOARD;
-$wgNamespaceContentModels[$wgPageTranslationNamespace+1] = CONTENT_MODEL_FLOW_BOARD;
 
 $wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
 $wgNamespaceProtection[NS_COMMLINK] = array( 'commlink-edit' );
@@ -386,27 +577,36 @@ $wgNamespaceProtection[NS_GUIDE] = array( 'guide-edit' );
 $wgNamespaceProtection[NS_ORG] = array( 'org-edit' );
 $wgNamespaceProtection[NS_EVENT] = array( 'event-edit' );
 
+# Namespace alias
+$wgNamespaceAliases['SC'] = NS_PROJECT;
+$wgNamespaceAliases['ST'] = NS_PROJECT_TALK;
+$wgNamespaceAliases['H'] = NS_HELP;
+$wgNamespaceAliases['T'] = NS_TEMPLATE;
+$wgNamespaceAliases['CAT'] = NS_CATEGORY;
+$wgNamespaceAliases['CL'] = NS_COMMLINK;
+
 $wgVisualEditorAvailableNamespaces = array(
-	NS_MAIN     => true,
-	NS_USER     => true,
-	NS_HELP     => true,
-	NS_PROJECT  => true,
-	NS_COMMLINK => true,
-	NS_PROJMGMT => true,
-	NS_ISSUE    => true,
-	NS_GUIDE    => true,
-	NS_ORG      => true,
-	NS_EVENT    => true,
-	NS_CSN    => true
+  NS_MAIN     	=> true,
+  NS_USER     	=> true,
+  NS_HELP     	=> true,
+  NS_PROJECT 	=> true,
+  NS_COMMLINK 	=> true,
+  NS_PROJMGMT 	=> true,
+  NS_ISSUE    	=> true,
+  NS_GUIDE    	=> true,
+  NS_ORG      	=> true,
+  NS_EVENT    	=> true,
+  NS_CSN    	=> true,
+  NS_TRANSCRIPT => true
 );
 
 #=============================================== Permissions ===============================================
 $wgAutopromote = array(
-	"autoconfirmed" => array( "&",
-		array( APCOND_EDITCOUNT, &$wgAutoConfirmCount ),
-		array( APCOND_AGE, &$wgAutoConfirmAge ),
+  "autoconfirmed" => array( "&",
+    array( APCOND_EDITCOUNT, &$wgAutoConfirmCount ),
+    array( APCOND_AGE, &$wgAutoConfirmAge ),
     APCOND_EMAILCONFIRMED,
-	),
+  ),
   "Trusted" => array( "&",
     array( APCOND_EDITCOUNT, 300),
     array( APCOND_INGROUPS, "Verified"),
@@ -418,7 +618,6 @@ $wgGroupPermissions['*']['createaccount'] = true;
 $wgGroupPermissions['*']['edit'] = false;
 $wgGroupPermissions['*']['createpage'] = false;
 $wgGroupPermissions['*']['writeapi'] = false;
-$wgGroupPermissions['*']['flow-hide'] = false;
 $wgGroupPermissions['*']['createtalk'] = false;
 
 #user
@@ -442,11 +641,9 @@ $wgGroupPermissions['ORG-Editor']['org-edit'] = true;
 #autoconfirmed
 $wgAutoConfirmAge = 86400*3; // three days
 $wgAutoConfirmCount = 20;
-$wgGroupPermissions['autoconfirmed'] = $wgGroupPermissions['user'];
 $wgGroupPermissions['autoconfirmed']['upload_by_url'] = true;
 $wgGroupPermissions['autoconfirmed']['createpage'] = true;
 $wgGroupPermissions['autoconfirmed']['createtalk'] = true;
-$wgGroupPermissions['autoconfirmed']['edit'] = true;
 
 #verified
 $wgGroupPermissions['Verified'] = $wgGroupPermissions['autoconfirmed'];
@@ -498,8 +695,6 @@ $wgGroupPermissions['Editor']['undelete'] = true;
 $wgGroupPermissions['Editor']['mergehistory'] = true;
 $wgGroupPermissions['Editor']['browsearchive'] = true;
 $wgGroupPermissions['Editor']['noratelimit'] = true;
-$wgGroupPermissions['Editor']['flow-delete'] = true;
-$wgGroupPermissions['Editor']['flow-lock'] = true;
 $wgGroupPermissions['Editor']['move-rootuserpages'] = true;
 $wgGroupPermissions['Editor']['org-edit'] = true;
 
@@ -513,3 +708,109 @@ $wgGroupPermissions['sysop']['editinterface'] = true;
 $wgGroupPermissions['sysop']['delete'] = true;
 $wgGroupPermissions['sysop']['renameuser'] = true;
 $wgGroupPermissions['sysop']['import'] = true;
+$wgGroupPermissions['sysop']['importupload'] = true;
+
+#=============================================== Footer ===============================================
+
+$wgFooterIcons = [
+    "poweredby" => [
+        "mediawiki" => [
+            "src" => "$wgResourceBasePath/resources/assets/badge-mediawiki.svg",
+            "url" => "https://www.mediawiki.org",
+            "alt" => "Powered by MediaWiki",
+            "height" => "50",
+            "width" => "95",
+        ]
+    ],
+/*
+    "monitoredby" => [
+          "wikiapiary" => [
+              "src" => "$wgResourceBasePath/resources/assets/badge-wikiapiary.svg",
+              "url" => "https://wikiapiary.com/wiki/The_Star_Citizen_Wiki",
+              "alt" => "Monitored By Wikiapiary",
+              "height" => "54",
+              "width" => "95",
+          ]
+    ],
+*/
+/*
+  "gdprcompliance" => [
+        "gdpr" => [
+            "src" => "$wgResourceBasePath/resources/assets/badge-gdpr.svg",
+            "url" => "https://gdpr.eu",
+            "alt" => "GDPR compliant",
+	    "height" => "50",
+            "width" => "50",
+        ]
+    ],
+*/
+    "copyright" => [
+        "copyright" => [
+        "src" => "$wgResourceBasePath/resources/assets/badge-ccbysa.svg",
+        "url" => $wgRightsUrl,
+        "alt" => $wgRightsText,
+	"height" => "50",
+        "width" => "110",
+      ]
+    ],
+    "madeby" => [
+          "thecommunity" => [
+              "src" => "$wgResourceBasePath/resources/assets/badge-starcitizencommunity.svg",
+              "url" => "https://robertsspaceindustries.com",
+              "alt" => "Made by the community",
+	      "height" => "50",
+              "width" => "50",
+          ]
+    ],
+    "partof" => [
+        "starcitizentools" => [
+            "src" => "$wgResourceBasePath/resources/assets/badge-starcitizentools.svg",
+            "url" => "https://starcitizen.tools",
+            "alt" => "Part of Star Citizen Tools",
+	    "height" => "50",
+            "width" => "50",
+        ]
+    ]
+];
+
+# Add cookie statement to footer
+$wgHooks['SkinTemplateOutputPageBeforeExec'][] = function( $sk, &$tpl ) {
+  $tpl->set( 'cookiestatement', $sk->footerLink( 'cookiestatement', 'cookiestatementpage' ) );
+  // or to add non-link text:
+  $tpl->set( 'footertext', 'Text to show in footer' );
+  $tpl->data['footerlinks']['places'][] = 'cookiestatement';
+  return true;
+};
+
+#============================== Final External Includes ===============================================
+
+require_once("/home/www-data/external_includes/misc_server_settings.php");
+
+# Override multilingual interface messages
+$wgHooks['MessageCache::get'][] = function ( &$key ) {
+    $keys = [
+            'badaccess-groups',
+            'citizen-footer-desc',
+            'citizen-footer-tagline',
+            'copyright',
+            'noarticletext',
+            'noarticletext-nopermission',
+            'tagline',
+    ];
+
+    if ( in_array( $key, $keys, true ) ) {
+            $key = "i18n-$key";
+    }
+};
+
+# Use domain root as the canonical URL 
+$wgHooks['GetLocalURL'][] = function ( &$title, &$url, $query ) {
+	if ( !$title->isExternal() && $query == '' && $title->isMainPage() ) {
+		$url = '/';
+	}
+};
+
+# Tell MediaWiki that "/" should not be redirected
+$wgHooks['TestCanonicalRedirect'][] = function ( $request ) {
+	return $request->getRequestURL() !== '/';
+};

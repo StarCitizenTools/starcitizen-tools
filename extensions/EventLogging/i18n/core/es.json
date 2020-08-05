@@ -11,7 +11,7 @@
 	"eventlogging-invalid-json": "JSON no válido",
 	"eventlogging-revision-id": "Revisión $1",
 	"eventlogging-code-sample-logging-on-server-side": "Registro PHP",
-	"eventlogging-code-sample-module-setup": "Configuración PHP para el registro de JavaScript",
+	"eventlogging-code-sample-module-setup-json": "Configuración de extension.json para el registro de sucesos de JavaScript",
 	"eventlogging-code-sample-logging-on-client-side": "Registro JavaScript",
 	"eventlogging-error-move-source": "No se pueden renombrar las páginas de esquema"
 }

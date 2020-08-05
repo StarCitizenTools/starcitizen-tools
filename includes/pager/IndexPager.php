@@ -21,6 +21,9 @@
  * @ingroup Pager
  */
 
+use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\IDatabase;
+
 /**
  * IndexPager is an efficient pager which uses a (roughly unique) index in the
  * data set to implement paging, rather than a "LIMIT offset,limit" clause.
@@ -121,7 +124,7 @@ abstract class IndexPager extends ContextSource implements Pager {
 	/**
 	 * Result object for the query. Warning: seek before use.
 	 *
-	 * @var ResultWrapper
+	 * @var IResultWrapper
 	 */
 	public $mResult;
 
@@ -145,8 +148,8 @@ abstract class IndexPager extends ContextSource implements Pager {
 		}
 
 		$this->mIsBackwards = ( $this->mRequest->getVal( 'dir' ) == 'prev' );
-		# Let the subclass set the DB here; otherwise use a slave DB for the current wiki
-		$this->mDb = $this->mDb ?: wfGetDB( DB_SLAVE );
+		# Let the subclass set the DB here; otherwise use a replica DB for the current wiki
+		$this->mDb = $this->mDb ?: wfGetDB( DB_REPLICA );
 
 		$index = $this->getIndexField(); // column to sort on
 		$extraSort = $this->getExtraSortFields(); // extra columns to sort on for query planning
@@ -159,8 +162,8 @@ abstract class IndexPager extends ContextSource implements Pager {
 				: [];
 		} elseif ( is_array( $index ) ) {
 			# First element is the default
-			reset( $index );
-			list( $this->mOrderType, $this->mIndexField ) = each( $index );
+			$this->mIndexField = reset( $index );
+			$this->mOrderType = key( $index );
 			$this->mExtraSortFields = isset( $extraSort[$this->mOrderType] )
 				? (array)$extraSort[$this->mOrderType]
 				: [];
@@ -195,7 +198,7 @@ abstract class IndexPager extends ContextSource implements Pager {
 	 */
 	public function doQuery() {
 		# Use the child class name for profiling
-		$fname = __METHOD__ . ' (' . get_class( $this ) . ')';
+		$fname = __METHOD__ . ' (' . static::class . ')';
 		$section = Profiler::instance()->scopedProfileIn( $fname );
 
 		// @todo This should probably compare to DIR_DESCENDING and DIR_ASCENDING constants
@@ -229,7 +232,7 @@ abstract class IndexPager extends ContextSource implements Pager {
 	}
 
 	/**
-	 * @return ResultWrapper The result wrapper.
+	 * @return IResultWrapper The result wrapper.
 	 */
 	function getResult() {
 		return $this->mResult;
@@ -289,9 +292,9 @@ abstract class IndexPager extends ContextSource implements Pager {
 	 * @param bool $isFirst False if there are rows before those fetched (i.e.
 	 *     if a "previous" link would make sense)
 	 * @param int $limit Exact query limit
-	 * @param ResultWrapper $res
+	 * @param IResultWrapper $res
 	 */
-	function extractResultInfo( $isFirst, $limit, ResultWrapper $res ) {
+	function extractResultInfo( $isFirst, $limit, IResultWrapper $res ) {
 		$numRows = $res->numRows();
 		if ( $numRows ) {
 			# Remove any table prefix from index field
@@ -346,7 +349,7 @@ abstract class IndexPager extends ContextSource implements Pager {
 	 * @return string
 	 */
 	function getSqlComment() {
-		return get_class( $this );
+		return static::class;
 	}
 
 	/**
@@ -356,7 +359,7 @@ abstract class IndexPager extends ContextSource implements Pager {
 	 * @param string $offset Index offset, inclusive
 	 * @param int $limit Exact query limit
 	 * @param bool $descending Query direction, false for ascending, true for descending
-	 * @return ResultWrapper
+	 * @return IResultWrapper
 	 */
 	public function reallyDoQuery( $offset, $limit, $descending ) {
 		list( $tables, $fields, $conds, $fname, $options, $join_conds ) =
@@ -403,7 +406,7 @@ abstract class IndexPager extends ContextSource implements Pager {
 	/**
 	 * Pre-process results; useful for performing batch existence checks, etc.
 	 *
-	 * @param ResultWrapper $result
+	 * @param IResultWrapper $result
 	 */
 	protected function preprocessResults( $result ) {
 	}
@@ -700,8 +703,8 @@ abstract class IndexPager extends ContextSource implements Pager {
 	 * not be used in the pager offset or in any links for users.
 	 *
 	 * If getIndexField() returns an array of 'querykey' => 'indexfield' pairs then
-	 * this must return a corresponding array of 'querykey' => array( fields...) pairs
-	 * in order for a request with &count=querykey to use array( fields...) to sort.
+	 * this must return a corresponding array of 'querykey' => [ fields... ] pairs
+	 * in order for a request with &count=querykey to use [ fields... ] to sort.
 	 *
 	 * This is useful for pagers that GROUP BY a unique column (say page_id)
 	 * and ORDER BY another (say page_len). Using GROUP BY and ORDER BY both on
@@ -734,6 +737,6 @@ abstract class IndexPager extends ContextSource implements Pager {
 	 * @return bool
 	 */
 	protected function getDefaultDirections() {
-		return IndexPager::DIR_ASCENDING;
+		return self::DIR_ASCENDING;
 	}
 }

@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on Sep 7, 2006
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -46,6 +42,15 @@ abstract class ApiQueryGeneratorBase extends ApiQueryBase {
 	}
 
 	/**
+	 * Indicate whether the module is in generator mode
+	 * @since 1.28
+	 * @return bool
+	 */
+	public function isInGeneratorMode() {
+		return $this->mGeneratorPageSet !== null;
+	}
+
+	/**
 	 * Get the PageSet object to work on.
 	 * If this module is generator, the pageSet object is different from other module's
 	 * @return ApiPageSet
@@ -84,12 +89,9 @@ abstract class ApiQueryGeneratorBase extends ApiQueryBase {
 		}
 	}
 
-	/**
-	 * @see ApiBase::getHelpFlags()
-	 *
-	 * Corresponding messages: api-help-flag-generator
-	 */
+	/** @inheritDoc */
 	protected function getHelpFlags() {
+		// Corresponding messages: api-help-flag-generator
 		$flags = parent::getHelpFlags();
 		$flags[] = 'generator';
 		return $flags;

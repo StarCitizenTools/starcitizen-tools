@@ -1,8 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Fraxinus"
+			"Fraxinus",
+			"Bugoslav",
+			"Obsuser"
 		]
 	},
-	"scribunto-lua-error": "Lua pogreška: $2."
+	"scribunto-common-timeout": "Vrijeme izdvojeno za pokretanje skripti je isteklo.",
+	"scribunto-lua-error": "Lua pogreška: $2.",
+	"nstab-module": "Modul"
 }

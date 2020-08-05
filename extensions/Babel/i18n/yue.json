@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Deryck Chan",
-			"Shinjiman"
+			"Shinjiman",
+			"Ktchankt"
 		]
 	},
 	"babel": "巴別用戶資料",
@@ -11,7 +12,7 @@
 	"babel-footer-url": ":Category:巴别 - 跟語言分類用戶",
 	"babel-autocreate-reason": "自動建立緊[[$1|巴別]]分類頁。",
 	"babel-autocreate-text-levels": "呢個分類入面嘅用戶話佢哋識$2程度嘅$1。",
-	"babel-autocreate-text-main": "呢個分類入面嘅用戶話佢哋識講$1。",
+	"babel-autocreate-text-main": "呢個分類入面嘅用戶話佢哋對 $1 嘅熟悉程度。",
 	"babel-0": "呢位用戶[[$1|完全唔識]]（或者唔係好明）[[$2|$3]]。",
 	"babel-1": "呢位用戶有[[$1|基本]]嘅[[$2|$3]]知識。",
 	"babel-2": "呢位用戶有[[$1|中等]]嘅[[$2|$3]]知識。",
@@ -26,5 +27,8 @@
 	"babel-4-n": "呢位用戶有[[$1|接近母語程度]]嘅[[$2|廣東話]]知識。",
 	"babel-5-n": "呢位用戶有[[$1|專業]]嘅[[$2|廣東話]]知識。",
 	"babel-N-n": "呢位用戶嘅[[$1|母語]]係[[$2|廣東話]]。",
-	"babel-footer": "用戶（跟語言分類）"
+	"babel-footer": "用戶（跟語言分類）",
+	"apihelp-query+babel-description": "攞用戶識咩嘢語言嘅資訊",
+	"apihelp-query+babel-param-user": "要攞相關資訊嘅用戶",
+	"apihelp-query+babel-example-1": "攞用戶 <kbd>Example</kbd> 嘅 Babel 資訊"
 }

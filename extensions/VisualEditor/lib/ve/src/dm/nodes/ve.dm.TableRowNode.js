@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel TableRowNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -26,11 +26,16 @@ ve.dm.TableRowNode = function VeDmTableRowNode() {
 
 OO.inheritClass( ve.dm.TableRowNode, ve.dm.BranchNode );
 
+/**
+ * @event cellAttributeChange
+ * @param {ve.dm.TableCellableNode} cell
+ */
+
 /* Static Properties */
 
 ve.dm.TableRowNode.static.name = 'tableRow';
 
-ve.dm.TableRowNode.static.childNodeTypes = [ 'tableCell' ];
+ve.dm.TableRowNode.static.childNodeTypes = [ 'tableCell', 'alienTableCell' ];
 
 ve.dm.TableRowNode.static.parentNodeTypes = [ 'tableSection' ];
 
@@ -68,9 +73,26 @@ ve.dm.TableRowNode.static.createData = function ( options ) {
  * Handle splicing of child nodes
  */
 ve.dm.TableRowNode.prototype.onSplice = function () {
+	var i,
+		nodes = Array.prototype.slice.call( arguments, 2 );
 	if ( this.getRoot() ) {
 		this.getParent().getParent().getMatrix().invalidate();
 	}
+	for ( i = 0; i < nodes.length; i++ ) {
+		nodes[ i ].connect( this, {
+			attributeChange: [ 'onCellAttributeChange', nodes[ i ] ]
+		} );
+	}
+};
+
+/**
+ * Handle cell attribute changes
+ *
+ * @param {ve.dm.TableCellableNode} cell
+ * @fires cellAttributeChange
+ */
+ve.dm.TableRowNode.prototype.onCellAttributeChange = function ( cell ) {
+	this.emit( 'cellAttributeChange', cell );
 };
 
 /* Registration */

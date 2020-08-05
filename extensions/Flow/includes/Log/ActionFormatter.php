@@ -20,7 +20,7 @@ class ActionFormatter extends LogFormatter {
 	/**
 	 * @var UUID[]
 	 */
-	static $uuids = array();
+	private static $uuids = [];
 
 	/**
 	 * @var RevisionActionPermissions
@@ -103,11 +103,9 @@ class ActionFormatter extends LogFormatter {
 		$rootLastRevision = $root->getLastRevision();
 
 		// Give grep a chance to find the usages:
-		//
 		// A few of the -topic-title-not-visible are not reachable with the current
 		// config (since people looking at the suppression log can see suppressed
 		// content), but are included to make it less brittle.
-		//
 		// logentry-delete-flow-delete-post, logentry-delete-flow-delete-post-topic-title-not-visible,
 		// logentry-delete-flow-restore-post, logentry-delete-flow-restore-post-topic-title-not-visible,
 		// logentry-suppress-flow-restore-post, logentry-suppress-flow-restore-post-topic-title-not-visible,
@@ -126,16 +124,16 @@ class ActionFormatter extends LogFormatter {
 		}
 
 		$message = $this->msg( $messageKey )
-			->params( array(
+			->params( [
 				Message::rawParam( $this->getPerformerElement() ),
 				$this->entry->getPerformer()->getName(),
-			) );
+			] );
 
 		if ( $isTopicTitleVisible ) {
-			$message->params( array(
+			$message->params( [
 				$title, // Title of topic
 				$title->getFullUrl(), // Full URL of topic, with highlighted post if applicable
-			) );
+			] );
 
 			$message->plaintextParams( $this->templating->getContent( $rootLastRevision, 'topic-title-plaintext' ) );
 		}
@@ -146,7 +144,7 @@ class ActionFormatter extends LogFormatter {
 
 		return \Html::rawElement(
 			'span',
-			array( 'class' => 'plainlinks' ),
+			[ 'class' => 'plainlinks' ],
 			$message
 		);
 	}

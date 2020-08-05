@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sator"
+			"Sator",
+			"Subi"
 		]
 	},
+	"cookiewarning-moreinfo-label": "Informazio gehiago",
 	"cookiewarning-ok-label": "OK"
 }

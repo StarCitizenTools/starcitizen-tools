@@ -2,13 +2,28 @@
 	"@metadata": {
 		"authors": [
 			"Stryn",
-			"Mikahama"
+			"Mikahama",
+			"Nike",
+			"Pyscowicz",
+			"Pxos"
 		]
 	},
-	"popups-message": "Ponnahduskortit",
-	"popups-desc": "Näyttää ponnahduskortissa yhteenvedon sivun sisällöstä, kun käyttäjä laittaa hiiren sivulle osoittavan linkin päälle.",
-	"popups-last-edited": "Viimeksi muokattu $1",
-	"popups-redirects": "ohjaa sivulle <h3>$1</h3>",
-	"popups-mobile-continue-to-page": "Jatka sivulle",
-	"popups-mobile-dismiss": "Ohita"
+	"popups-message": "Sivun esikatselut",
+	"popups-desc": "Näyttää esikatselut, kun käyttäjä vie hiiren sivulle osoittavan linkin päälle",
+	"popups-settings-title": "Sivun esikatselu",
+	"popups-settings-option-simple": "Ota käyttöön",
+	"popups-settings-option-simple-description": "Näytä aiheiden pikaesikatselut lukutilassa.",
+	"popups-settings-option-advanced": "Laajennettu",
+	"popups-settings-option-off": "Poista käytöstä",
+	"popups-settings-save": "Tallenna",
+	"popups-settings-help-ok": "Valmis",
+	"popups-settings-cancel": "Peruuta",
+	"popups-settings-enable": "Ota esikatselu käyttöön",
+	"popups-preview-no-preview": "Virheen vuoksi esikatselua ei voida näyttää",
+	"popups-preview-footer-read": "Lue",
+	"prefs-reading": "Lukemisen asetukset",
+	"popups-prefs-optin-title": "Sivun esikatselut\n\n<em>Näe nopeasti aiheen esikatselut sivua lukiessasi</em>",
+	"popups-prefs-optin-enabled-label": "Ota käyttöön",
+	"popups-prefs-optin-disabled-label": "Poista käytöstä",
+	"popups-prefs-conflicting-gadgets-info": "Tietyt gadgetit ja muut muokkaukset voivat vaikuttaa tämän ominaisuuden suorituskykyyn. Jos sinulla on ongelmia, tutustu gadgeteihisi ja käyttäjäskripteihisi, mukaan lukien järjestelmänlaajuiset."
 }

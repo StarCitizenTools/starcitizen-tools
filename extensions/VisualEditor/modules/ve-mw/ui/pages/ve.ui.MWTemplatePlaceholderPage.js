@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWTemplatePlaceholderPage class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,7 +15,7 @@
  * @param {ve.dm.MWTemplatePlaceholderModel} placeholder Template placeholder
  * @param {string} name Unique symbolic name of page
  * @param {Object} [config] Configuration options
- * @cfg {jQuery} [$overlay] Overlay for dropdowns
+ * @cfg {jQuery} [$overlay] Overlay to render dropdowns in
  */
 ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeholder, name, config ) {
 	var addTemplateActionFieldLayout;
@@ -25,7 +25,7 @@ ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeh
 	}, config );
 
 	// Parent constructor
-	OO.ui.PageLayout.call( this, name, config );
+	ve.ui.MWTemplatePlaceholderPage.super.call( this, name, config );
 
 	// Properties
 	this.placeholder = placeholder;
@@ -41,7 +41,7 @@ ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeh
 
 	this.addTemplateButton = new OO.ui.ButtonWidget( {
 		label: ve.msg( 'visualeditor-dialog-transclusion-add-template' ),
-		flags: [ 'constructive' ],
+		flags: [ 'progressive' ],
 		classes: [ 've-ui-mwTransclusionDialog-addButton' ],
 		disabled: true
 	} )
@@ -49,7 +49,7 @@ ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeh
 
 	this.removeButton = new OO.ui.ButtonWidget( {
 		framed: false,
-		icon: 'remove',
+		icon: 'trash',
 		title: ve.msg( 'visualeditor-dialog-transclusion-remove-template' ),
 		flags: [ 'destructive' ],
 		classes: [ 've-ui-mwTransclusionDialog-removeButton' ]
@@ -67,7 +67,7 @@ ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeh
 
 	this.addTemplateFieldset = new OO.ui.FieldsetLayout( {
 		label: ve.msg( 'visualeditor-dialog-transclusion-placeholder' ),
-		icon: 'template',
+		icon: 'puzzle',
 		classes: [ 've-ui-mwTransclusionDialog-addTemplateFieldset' ],
 		items: [ addTemplateActionFieldLayout ]
 	} );
@@ -87,13 +87,13 @@ OO.inheritClass( ve.ui.MWTemplatePlaceholderPage, OO.ui.PageLayout );
 /**
  * @inheritdoc
  */
-ve.ui.MWTemplatePlaceholderPage.prototype.setOutlineItem = function ( outlineItem ) {
+ve.ui.MWTemplatePlaceholderPage.prototype.setOutlineItem = function () {
 	// Parent method
-	OO.ui.PageLayout.prototype.setOutlineItem.call( this, outlineItem );
+	ve.ui.MWTemplatePlaceholderPage.super.prototype.setOutlineItem.apply( this, arguments );
 
 	if ( this.outlineItem ) {
 		this.outlineItem
-			.setIcon( 'template' )
+			.setIcon( 'puzzle' )
 			.setMovable( true )
 			.setRemovable( true )
 			.setFlags( [ 'placeholder' ] )
@@ -102,22 +102,29 @@ ve.ui.MWTemplatePlaceholderPage.prototype.setOutlineItem = function ( outlineIte
 };
 
 ve.ui.MWTemplatePlaceholderPage.prototype.onAddTemplate = function () {
-	var part,
+	var part, name,
 		transclusion = this.placeholder.getTransclusion(),
 		menu = this.addTemplateInput.getLookupMenu();
 
 	if ( menu.isVisible() ) {
-		menu.chooseItem( menu.getSelectedItem() );
+		menu.chooseItem( menu.findSelectedItem() );
 	}
-	part = ve.dm.MWTemplateModel.newFromName( transclusion, this.addTemplateInput.getTitle() );
+	name = this.addTemplateInput.getMWTitle();
+	if ( !name ) {
+		// Invalid titles return null, so abort here.
+		return;
+	}
+	part = ve.dm.MWTemplateModel.newFromName( transclusion, name );
 	transclusion.replacePart( this.placeholder, part );
 	this.addTemplateInput.pushPending();
+	// abort pending lookups, also, so the menu can't appear after we've left the page
+	this.addTemplateInput.closeLookupMenu();
 	this.addTemplateButton.setDisabled( true );
 	this.removeButton.setDisabled( true );
 };
 
 ve.ui.MWTemplatePlaceholderPage.prototype.onTemplateInputChange = function () {
-	this.addTemplateButton.setDisabled( this.addTemplateInput.getTitle() === null );
+	this.addTemplateButton.setDisabled( this.addTemplateInput.getMWTitle() === null );
 };
 
 ve.ui.MWTemplatePlaceholderPage.prototype.onRemoveButtonClick = function () {

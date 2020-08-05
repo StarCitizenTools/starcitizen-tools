@@ -1,12 +1,14 @@
 <?php
 
+use Wikimedia\Rdbms\LikeMatch;
+
 /**
+ * @covers LinkFilter
  * @group Database
  */
 class LinkFilterTest extends MediaWikiLangTestCase {
 
 	protected function setUp() {
-
 		parent::setUp();
 
 		$this->setMwGlobals( 'wgUrlProtocols', [
@@ -26,7 +28,6 @@ class LinkFilterTest extends MediaWikiLangTestCase {
 			'mms://',
 			'//',
 		] );
-
 	}
 
 	/**
@@ -38,11 +39,9 @@ class LinkFilterTest extends MediaWikiLangTestCase {
 	 * @return string Regex
 	 */
 	function createRegexFromLIKE( $like ) {
-
 		$regex = '!^';
 
 		foreach ( $like as $item ) {
-
 			if ( $item instanceof LikeMatch ) {
 				if ( $item->toString() == '%' ) {
 					$regex .= '.*';
@@ -58,7 +57,6 @@ class LinkFilterTest extends MediaWikiLangTestCase {
 		$regex .= '$!';
 
 		return $regex;
-
 	}
 
 	/**
@@ -67,7 +65,6 @@ class LinkFilterTest extends MediaWikiLangTestCase {
 	 * @return array
 	 */
 	public static function provideValidPatterns() {
-
 		return [
 			// Protocol, Search pattern, URL which matches the pattern
 			[ 'http://', '*.test.com', 'http://www.test.com' ],
@@ -164,7 +161,6 @@ class LinkFilterTest extends MediaWikiLangTestCase {
 			// [ '', 'https://*.wikimedia.org/r/#/q/status:open,n,z',
 			// 	'https://gerrit.wikimedia.org/XXX/r/#/q/status:open,n,z', false ],
 		];
-
 	}
 
 	/**
@@ -181,7 +177,6 @@ class LinkFilterTest extends MediaWikiLangTestCase {
 	 * @param bool $shouldBeFound Should the URL be found? (defaults true)
 	 */
 	function testMakeLikeArrayWithValidPatterns( $protocol, $pattern, $url, $shouldBeFound = true ) {
-
 		$indexes = wfMakeUrlIndexes( $url );
 		$likeArray = LinkFilter::makeLikeArray( $pattern, $protocol );
 
@@ -211,7 +206,6 @@ class LinkFilterTest extends MediaWikiLangTestCase {
 				"Search pattern '$protocol$pattern' should not find url '$url' \n$debugmsg"
 			);
 		}
-
 	}
 
 	/**
@@ -220,7 +214,6 @@ class LinkFilterTest extends MediaWikiLangTestCase {
 	 * @return array
 	 */
 	public static function provideInvalidPatterns() {
-
 		return [
 			[ '' ],
 			[ '*' ],
@@ -240,7 +233,6 @@ class LinkFilterTest extends MediaWikiLangTestCase {
 			[ 'test.com/*/index' ],
 			[ 'test.com/dir/index?arg=*' ],
 		];
-
 	}
 
 	/**
@@ -253,12 +245,10 @@ class LinkFilterTest extends MediaWikiLangTestCase {
 	 * @param string $pattern Invalid search pattern
 	 */
 	function testMakeLikeArrayWithInvalidPatterns( $pattern ) {
-
 		$this->assertFalse(
 			LinkFilter::makeLikeArray( $pattern ),
 			"'$pattern' is not a valid pattern and should be rejected"
 		);
-
 	}
 
 }

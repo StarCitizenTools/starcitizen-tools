@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eduardo Addad de Oliveira"
+		]
+	},
+	"jsonschema-badidref": "idref incorreto: \"$1\"",
+	"jsonschema-idconvert": "Não é possível converter var em id:<code>$1</code>",
+	"jsonschema-invalidkey": "Chave inválida \"$1\" em \"$2\"",
+	"jsonschema-invalidempty": "Não é válida com este esquema (<i>schema</i>) uma estrutura de dados vazia",
+	"jsonschema-invalidnode": "Nó inválido: era esperado \"$1\", foi recebido \"$2\". Localização: \"$3\"",
+	"jsonschema-invalid-missingfield": "Campo obrigatório \"$1\" em falta",
+	"jsonschema-invalid-notinenum": "O valor <code>$1</code> não está na enumeração da propriedade $2",
+	"apihelp-jsonschema-description": "Obter uma página de esquema (<i>schema</i>) JSON.",
+	"apihelp-jsonschema-summary": "Obter uma página de esquema (<i>schema</i>) JSON.",
+	"apihelp-jsonschema-param-revid": "Identificador da revisão do esquema (<i>schema</i>).",
+	"apihelp-jsonschema-param-title": "Nome do esquema.",
+	"apihelp-jsonschema-example-1": "Obter o esquema (<i>schema</i>) da revisão 1234"
+}

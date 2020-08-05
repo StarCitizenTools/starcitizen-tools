@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eitvys200",
+			"Macofe",
+			"Zygimantus",
+			"Manvydasz"
+		]
+	},
+	"revisionslider": "Versijų apžvalga",
+	"revisionslider-preference-disable": "Nerodyti versijų apžvalgos",
+	"revisionslider-desc": "Rodo slankiklį skirtumų tarp puslapio versijų puslapyje, leidžiantį pasirinkti ir palyginti versijas",
+	"revisionslider-toggle-label": "Naršyti istoriją",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|baitas|baitai|baitų}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|baitas|baitai|baitų}}",
+	"revisionslider-label-date": "Data",
+	"revisionslider-label-page-size": "Puslapio dydis",
+	"revisionslider-label-change-size": "Dydžio kitimas",
+	"revisionslider-label-comment": "Komentaras",
+	"revisionslider-label-username": "{{GENDER:$1|Naudotojo vardas|Naudotojos vardas}}",
+	"revisionslider-minoredit": "Tai smulkus pakeitimas",
+	"revisionslider-loading-failed": "Nepavyko įkelti versijų apžvalgos slankiklio.",
+	"revisionslider-toggle-title-expand": "Atidaryti versijų apžvalgos slankiklį",
+	"revisionslider-toggle-title-collapse": "Sutraukti versijų apžvalgos slankiklį",
+	"revisionslider-turn-on-auto-expand-title": "Visada išskleisti versijų apžvalgos slankiklį",
+	"revisionslider-turn-off-auto-expand-title": "Automatiškai neišskleisti versijų apžvalgos slankiklio",
+	"revisionslider-arrow-tooltip-newer": "Rodyti naujesnes versijas",
+	"revisionslider-arrow-tooltip-older": "Rodyti senesnes versijas",
+	"revisionslider-show-help-tooltip": "Rodyti pagalbinį tekstą",
+	"revisionslider-help-dialog-slide1": "Versijų apžvalga padeda naršyti ir palyginti versijas skirtumų tarp puslapio versijų puslapyje. Ji sukurta [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider bendruomenės noru] iš vokiškai kalbančios bendruomenės techninio pageidavimų sąrašo. Atsiliepimai yra labai vertingi, juos palikti galite [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider čia].",
+	"revisionslider-help-dialog-slide2": "Kiekvienas stulpelis atitinka puslapio versiją. Stulpeliai viršuje rodo puslapio dydžio augimą, stulpeliai apačioje rodo sumažėjimą. Paveikslėlyje versija 1 vaizduoja pridėtą turinį, o versija 2 vaizduoja turinio pašalinimą.",
+	"revisionslider-help-dialog-slide3a": "<p>Norėdami palyginti tam tikrus pataisymus, pasirinkite versijas naudodami geltoną ir mėlyną taškelius.</p><p>Mėlynas taškelis žymi naujesnę versiją, o geltonasis - ankstesnę versiją.</p><p>Judinti taškelius galite paspaudę ant jų arba spustelėję slankiklio liniją.</p>",
+	"revisionslider-help-dialog-slide4": "Naudokite rodykles, norėdami judėti per versijų istoriją ir peržiūrėti senesnius ir naujesnius pakeitimus.",
+	"revisionslider-tutorial": "Versijų apžvalgos instrukcijos",
+	"revisionslider-previous-dialog": "Ankstesnis",
+	"revisionslider-next-dialog": "Kitas",
+	"revisionslider-close-dialog": "Uždaryti"
+}

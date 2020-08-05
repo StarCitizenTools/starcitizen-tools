@@ -40,8 +40,6 @@ class DjVuImage {
 	const DJVUTXT_MEMORY_LIMIT = 300000;
 
 	/**
-	 * Constructor
-	 *
 	 * @param string $filename The DjVu file name.
 	 */
 	function __construct( $filename ) {
@@ -84,11 +82,9 @@ class DjVuImage {
 	function dump() {
 		$file = fopen( $this->mFilename, 'rb' );
 		$header = fread( $file, 12 );
-		// @todo FIXME: Would be good to replace this extract() call with
-		// something that explicitly initializes local variables.
-		extract( unpack( 'a4magic/a4chunk/NchunkLength', $header ) );
-		/** @var string $chunk
-		 * @var string $chunkLength */
+		$arr = unpack( 'a4magic/a4chunk/NchunkLength', $header );
+		$chunk = $arr['chunk'];
+		$chunkLength = $arr['chunkLength'];
 		echo "$chunk $chunkLength\n";
 		$this->dumpForm( $file, $chunkLength, 1 );
 		fclose( $file );
@@ -103,11 +99,9 @@ class DjVuImage {
 			if ( $chunkHeader == '' ) {
 				break;
 			}
-			// @todo FIXME: Would be good to replace this extract() call with
-			// something that explicitly initializes local variables.
-			extract( unpack( 'a4chunk/NchunkLength', $chunkHeader ) );
-			/** @var string $chunk
-			 * @var string $chunkLength */
+			$arr = unpack( 'a4chunk/NchunkLength', $chunkHeader );
+			$chunk = $arr['chunk'];
+			$chunkLength = $arr['chunkLength'];
 			echo str_repeat( ' ', $indent * 4 ) . "$chunk $chunkLength\n";
 
 			if ( $chunk == 'FORM' ) {
@@ -123,9 +117,9 @@ class DjVuImage {
 	}
 
 	function getInfo() {
-		MediaWiki\suppressWarnings();
+		Wikimedia\suppressWarnings();
 		$file = fopen( $this->mFilename, 'rb' );
-		MediaWiki\restoreWarnings();
+		Wikimedia\restoreWarnings();
 		if ( $file === false ) {
 			wfDebug( __METHOD__ . ": missing or failed file read\n" );
 
@@ -138,24 +132,19 @@ class DjVuImage {
 		if ( strlen( $header ) < 16 ) {
 			wfDebug( __METHOD__ . ": too short file header\n" );
 		} else {
-			// @todo FIXME: Would be good to replace this extract() call with
-			// something that explicitly initializes local variables.
-			extract( unpack( 'a4magic/a4form/NformLength/a4subtype', $header ) );
+			$arr = unpack( 'a4magic/a4form/NformLength/a4subtype', $header );
 
-			/** @var string $magic
-			 * @var string $subtype
-			 * @var string $formLength
-			 * @var string $formType */
-			if ( $magic != 'AT&T' ) {
+			$subtype = $arr['subtype'];
+			if ( $arr['magic'] != 'AT&T' ) {
 				wfDebug( __METHOD__ . ": not a DjVu file\n" );
 			} elseif ( $subtype == 'DJVU' ) {
 				// Single-page document
 				$info = $this->getPageInfo( $file );
 			} elseif ( $subtype == 'DJVM' ) {
 				// Multi-page document
-				$info = $this->getMultiPageInfo( $file, $formLength );
+				$info = $this->getMultiPageInfo( $file, $arr['formLength'] );
 			} else {
-				wfDebug( __METHOD__ . ": unrecognized DJVU file type '$formType'\n" );
+				wfDebug( __METHOD__ . ": unrecognized DJVU file type '{$arr['subtype']}'\n" );
 			}
 		}
 		fclose( $file );
@@ -168,13 +157,9 @@ class DjVuImage {
 		if ( strlen( $header ) < 8 ) {
 			return [ false, 0 ];
 		} else {
-			// @todo FIXME: Would be good to replace this extract() call with
-			// something that explicitly initializes local variables.
-			extract( unpack( 'a4chunk/Nlength', $header ) );
+			$arr = unpack( 'a4chunk/Nlength', $header );
 
-			/** @var string $chunk
-			 * @var string $length */
-			return [ $chunk, $length ];
+			return [ $arr['chunk'], $arr['length'] ];
 		}
 	}
 
@@ -236,31 +221,22 @@ class DjVuImage {
 			return false;
 		}
 
-		// @todo FIXME: Would be good to replace this extract() call with
-		// something that explicitly initializes local variables.
-		extract( unpack(
+		$arr = unpack(
 			'nwidth/' .
 			'nheight/' .
 			'Cminor/' .
 			'Cmajor/' .
 			'vresolution/' .
-			'Cgamma', $data ) );
+			'Cgamma', $data );
 
 		# Newer files have rotation info in byte 10, but we don't use it yet.
 
-		/** @var string $width
-		 * @var string $height
-		 * @var string $major
-		 * @var string $minor
-		 * @var string $resolution
-		 * @var string $length
-		 * @var string $gamma */
 		return [
-			'width' => $width,
-			'height' => $height,
-			'version' => "$major.$minor",
-			'resolution' => $resolution,
-			'gamma' => $gamma / 10.0 ];
+			'width' => $arr['width'],
+			'height' => $arr['height'],
+			'version' => "{$arr['major']}.{$arr['minor']}",
+			'resolution' => $arr['resolution'],
+			'gamma' => $arr['gamma'] / 10.0 ];
 	}
 
 	/**
@@ -276,7 +252,7 @@ class DjVuImage {
 
 		if ( isset( $wgDjvuDump ) ) {
 			# djvudump is faster as of version 3.5
-			# http://sourceforge.net/tracker/index.php?func=detail&aid=1704049&group_id=32953&atid=406583
+			# https://sourceforge.net/p/djvu/bugs/71/
 			$cmd = wfEscapeShellArg( $wgDjvuDump ) . ' ' . wfEscapeShellArg( $this->mFilename );
 			$dump = wfShellExec( $cmd );
 			$xml = $this->convertDumpToXML( $dump );
@@ -299,9 +275,9 @@ class DjVuImage {
 				$reg = <<<EOR
 					/\(page\s[\d-]*\s[\d-]*\s[\d-]*\s[\d-]*\s*"
 					((?>    # Text to match is composed of atoms of either:
-					  \\\\. # - any escaped character
-					  |     # - any character different from " and \
-					  [^"\\\\]+
+						\\\\. # - any escaped character
+						|     # - any character different from " and \
+						[^"\\\\]+
 					)*?)
 					"\s*\)
 					| # Or page can be empty ; in this case, djvutxt dumps ()

@@ -1,14 +1,17 @@
 {
 	"name": "External Data",
-	"version": "1.8.2",
+	"version": "2.1",
 	"author": [
 		"Yaron Koren",
 		"..."
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:External_Data",
 	"descriptionmsg": "externaldata-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.28.0"
+	},
 	"SpecialPages": {
 		"GetData": "EDGetData"
 	},
@@ -18,18 +21,42 @@
 		]
 	},
 	"ExtensionMessagesFiles": {
-		"ExternalDataMagic": "ExternalData.i18n.magic.php"
+		"ExternalDataMagic": "ExternalData.i18n.magic.php",
+		"ExternalDataAlias": "ExternalData.i18n.alias.php"
 	},
 	"AutoloadClasses": {
-		"ExternalDataHooks": "ExternalData.hooks.php",
-		"EDUtils": "ED_Utils.php",
-		"EDParserFunctions": "ED_ParserFunctions.php",
-		"EDGetData": "ED_GetData.php"
+		"ExternalDataHooks": "includes/ExternalDataHooks.php",
+		"EDUtils": "includes/EDUtils.php",
+		"EDHttpWithHeaders": "includes/EDHttpWithHeaders.php",
+		"EDParserFunctions": "includes/EDParserFunctions.php",
+		"EDGetData": "includes/EDGetData.php",
+		"EDJsonObject": "includes/EDJsonObject.php",
+		"EDArraySlice": "includes/EDArraySlice.php"
 	},
 	"Hooks": {
-		"ParserFirstCallInit": [
-			"ExternalDataHooks::registerParser"
-		]
+		"ParserFirstCallInit": "ExternalDataHooks::registerParser"
+	},
+	"config": {
+		"_prefix": "edg",
+		"Values": [],
+		"StringReplacements": [],
+		"CacheTable": null,
+		"AllowSSL": true,
+		"ExternalValueVerbose": true,
+		"CacheExpireTime": 604800,
+		"DBServer": [],
+		"DBServerType ": [],
+		"DBName": [],
+		"DBUser": [],
+		"DBPass": [],
+		"DBDirectory": [],
+		"DBFlags": [],
+		"DBTablePrefix": [],
+		"DirectoryPath": [],
+		"FilePath": [],
+		"HTTPOptions": {
+			"timeout": "default"
+		}
 	},
 	"manifest_version": 1
 }

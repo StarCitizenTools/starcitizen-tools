@@ -1,11 +1,35 @@
 {
-    "@metadata": {
-        "authors": [
-            "WMDE"
-        ]
-    },
-    "revisionslider": "RevisionSlider",
-    "revisionslider-desc": "Shows a slider allowing selecting and comparing of revisions on a diff page",
-    "revisionslider-loading-placeholder": "The revision slider is loading.",
-    "revisionslider-loading-noscript": "As you have JavaScript disabled the revision slider will not be able to load."
+	"@metadata": {
+		"authors": [
+			"WMDE"
+		]
+	},
+	"revisionslider": "RevisionSlider",
+	"revisionslider-preference-disable": "Don't show the revision slider",
+	"revisionslider-desc": "Shows a slider allowing selecting and comparing of revisions on a diff page",
+	"revisionslider-toggle-label": "Browse history",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|byte|bytes}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|byte|bytes}}",
+	"revisionslider-label-date": "Date",
+	"revisionslider-label-page-size": "Page size",
+	"revisionslider-label-change-size": "Change size",
+	"revisionslider-label-comment": "Comment",
+	"revisionslider-label-username": "{{GENDER:$1|Username}}",
+	"revisionslider-minoredit": "This is a minor edit",
+	"revisionslider-loading-failed": "The revision slider failed to load.",
+	"revisionslider-toggle-title-expand": "Open revision slider",
+	"revisionslider-toggle-title-collapse": "Collapse revision slider",
+	"revisionslider-turn-on-auto-expand-title": "Always expand the revision slider",
+	"revisionslider-turn-off-auto-expand-title": "Do not automatically expand the revision slider",
+	"revisionslider-arrow-tooltip-newer": "See newer revisions",
+	"revisionslider-arrow-tooltip-older": "See older revisions",
+	"revisionslider-show-help-tooltip": "Show help text",
+	"revisionslider-help-dialog-slide1": "The revision slider helps you to navigate and compare revisions on the diff page. It is based on a [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider community wish] from the German-speaking community technical wishlist. Feedback is very much appreciated [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider here].",
+	"revisionslider-help-dialog-slide2": "Each bar represents a page revision. Bars on the top show growth in size of the page, bars on the bottom show a reduction. In the image, revision 1 represents added content, while revision 2 represents removal of content.",
+	"revisionslider-help-dialog-slide3a": "<p>To compare certain revisions, select the revisions using the yellow and blue knobs.</p><p>The blue knob controls the newer revision, the yellow knob maps to the older revision.</p><p>Move the knobs by drag and drop or clicking on the slider line.</p>",
+	"revisionslider-help-dialog-slide4": "Use the backward and forward arrows to move through revision history and show older and newer revisions.",
+	"revisionslider-tutorial": "Revision slider tutorial",
+	"revisionslider-previous-dialog": "Previous",
+	"revisionslider-next-dialog": "Next",
+	"revisionslider-close-dialog": "Close"
 }

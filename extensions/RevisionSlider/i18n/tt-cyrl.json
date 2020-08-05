@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ильнар"
+		]
+	},
+	"revisionslider": "Юрамалар гизгече",
+	"revisionslider-desc": "Битнең юрамаларында булган аермалыкларны ачыклауда һәм ул аермалыклар арасында күчеш ясарга ярдәм итә",
+	"revisionslider-toggle-label": "Тарих буенча карау",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|байт}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|байт}}",
+	"revisionslider-label-date": "Дата",
+	"revisionslider-label-page-size": "Битнең зурлыгы",
+	"revisionslider-label-change-size": "Төзәтмәләр зурлыгы",
+	"revisionslider-label-comment": "Искәрмә",
+	"revisionslider-label-username": "{{GENDER:$1|Кулланучы}}",
+	"revisionslider-minoredit": "Бу кече үзгәртү",
+	"revisionslider-loading-failed": "Юрамалар гизгечен ачып булмады.",
+	"revisionslider-toggle-title-expand": "Юрамалар гизгечен ачу",
+	"revisionslider-toggle-title-collapse": "Юрамалар гизгечен ябу",
+	"revisionslider-turn-on-auto-expand-title": "Юрамалар гизгечен автоматик рәвештә ачып кую",
+	"revisionslider-turn-off-auto-expand-title": "Юрамалар гизгечен ябык килеш тотарга",
+	"revisionslider-arrow-tooltip-newer": "Яңарак юрамалрны карау",
+	"revisionslider-arrow-tooltip-older": "Искерәк юрамаларны карау",
+	"revisionslider-show-help-tooltip": "Төзәтмәнең текстын күрсәтү",
+	"revisionslider-help-dialog-slide1": "Юрамалар гизгече сезгә битнең юрамаларында булган аермалыкларны ачыклауда һәм ул аермалыклар арасында күчеш ясарга ярдәм итәчәк. Гизгеч – Алман [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider кулланучылар берлеге соравы] буенча тормышка ашырыла. Теләкләрегезне [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider монда] җибәрә аласыз.",
+	"revisionslider-help-dialog-slide2": "Һәрбер багана битнең билгеле бер юрамасын күрсәтә. Югары урнашкан баганалар — битнең зураюын, ә аска таба караган баганалар — битнең кимүен билгели. Рәсемдә 1 — мәгълүмат өстәүне, ә 2 — аны бетерүне күрсәтә.",
+	"revisionslider-help-dialog-slide4": "Яңа һәм иске юрамалардагы күчешне уңга яисә сулга караган уклар ярдәмендә ясый аласыз.",
+	"revisionslider-tutorial": "Юрамалар гизгечен куллану",
+	"revisionslider-previous-dialog": "Алдагы",
+	"revisionslider-next-dialog": "Киләсе",
+	"revisionslider-close-dialog": "Ябу"
+}

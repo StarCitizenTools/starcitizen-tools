@@ -1,0 +1,140 @@
+# Map author and committer names and email addresses to canonical real names
+# and email addresses.
+#
+# To update the CREDITS file, run maintenance/updateCredits.php
+#
+# Two types of entries are useful here. The first sets a canonical author
+# name for a given email address:
+#
+#   Canonical Author Name <author email>
+#
+# The second allows collecting alternate email addresses into a single
+# canonical author name and email address:
+#
+#   Canonical Author Name <author email> <alternate email>
+#
+# Mappings are only needed for authors who have used multiple author names
+# and/or author emails for revisions over time. Author names beginning with
+# "[BOT]" will be omitted from the CREDITS file.
+#
+# See also: https://git-scm.com/docs/git-shortlog#_mapping_authors
+#
+[BOT] jenkins-bot <jenkins-bot@gerrit.wikimedia.org>
+[BOT] Translation updater bot <l10n-bot@translatewiki.net>
+Aaron Schulz <aschulz@wikimedia.org>
+Alexander Monk <krenair@gmail.com>
+Alexandre Emsenhuber <ialex.wiki@gmail.com>
+Alexandre Emsenhuber <ialex.wiki@gmail.com> <ialex@users.mediawiki.org>
+Amir E. Aharoni <amir.aharoni@mail.huji.ac.il>
+Amir E. Aharoni <amir.aharoni@mail.huji.ac.il> <amire80@users.mediawiki.org>
+Ankur Anand <drecodeam@gmail.com>
+Antoine Musso <hashar@free.fr>
+Antoine Musso <hashar@free.fr> <hashar@users.mediawiki.org>
+Arthur Richards <arichards@wikimedia.org>
+Bartosz Dziewoński <matma.rex@gmail.com>
+Bene <benestar.wikimedia@gmail.com>
+Bene <benestar.wikimedia@gmail.com> <benestar.wikimedia@googlemail.com>
+Benny Situ <bsitu@wikimedia.org>
+Brad Jorsch <bjorsch@wikimedia.org>
+Brad Jorsch <bjorsch@wikimedia.org> <anomie.wikipedia@gmail.com>
+Brian Wolff <bawolff+wn@gmail.com>
+Brion Vibber <brion@wikimedia.org>
+Brion Vibber <brion@wikimedia.org> <brion@pobox.com>
+Brion Vibber <brion@wikimedia.org> <brion@users.mediawiki.org>
+Chad Horohoe <chadh@wikimedia.org>
+Chad Horohoe <chadh@wikimedia.org> <demon@users.mediawiki.org>
+Chris McMahon <cmcmahon@wikimedia.org>
+Dan Duvall <dduvall@wikimedia.org>
+dan-nl <d_entous@yahoo.com>
+Derk-Jan Hartman <hartman@videolan.org>
+Derk-Jan Hartman <hartman@videolan.org> <hartman.wiki@gmail.com>
+Derk-Jan Hartman <hartman@videolan.org> <hartman@users.mediawiki.org>
+Diederik van Liere <dvanliere@gmail.com>
+Diederik van Liere <dvanliere@gmail.com> <diederik@users.mediawiki.org>
+Ebrahim Byagowi <ebrahim@gnu.org>
+Erik Moeller <erik@wikimedia.org>
+Erik Moeller <erik@wikimedia.org> <erik@users.mediawiki.org>
+Federico Leva <federicoleva@tiscali.it>
+Florian Schmidt <florian.schmidt.welzow@t-online.de>
+Florian Schmidt <florian.schmidt.welzow@t-online.de> <florian.schmidt.stargatewissen@gmail.com>
+fomafix <fomafix@googlemail.com>
+Geoffrey Mon <geofbot@gmail.com>
+Gergő Tisza <gtisza@wikimedia.org>
+Gergő Tisza <gtisza@wikimedia.org> <tgr.huwiki@gmail.com>
+Gilles Dubuc <gdubuc@wikimedia.org>
+Ian Baker <ibaker@wikimedia.org>
+Ian Baker <ibaker@wikimedia.org> <raindrift@users.mediawiki.org>
+James Forrester <jforrester@wikimedia.org>
+Jan Gerber <j@thing.net>
+Jan Gerber <j@thing.net> <j@users.mediawiki.org>
+Jeff Janes <jeff.janes@gmail.com>
+Jeroen De Dauw <jeroendedauw@gmail.com>
+Jeroen De Dauw <jeroendedauw@gmail.com> <jeroendedauw@users.mediawiki.org>
+John Du Hart <john@compwhizii.net>
+John Du Hart <john@compwhizii.net> <johnduhart@users.mediawiki.org>
+Kunal Mehta <legoktm@member.fsf.org>
+Kunal Mehta <legoktm@member.fsf.org> <legoktm@gmail.com>
+Leo Koppelkamm <diebuche@gmail.com>
+Leo Koppelkamm <diebuche@gmail.com> <diebuche@users.mediawiki.org>
+liangent <liangent@gmail.com>
+Lupo <lupo.bugzilla@gmail.com>
+m4tx <m4tx@m4tx.pl>
+Mark Hershberger <mah@everybody.org>
+Mark Hershberger <mah@everybody.org> <mah@users.mediawiki.org>
+Mark Holmquist <mtraceur@member.fsf.org>
+Mark Holmquist <mtraceur@member.fsf.org> <mholmquist@wikimedia.org>
+Matthew Flaschen <mflaschen@wikimedia.org>
+Matthias Mullie <git@mullie.eu>
+Matthias Mullie <git@mullie.eu> <mmullie@wikimedia.org>
+Max Semenik <maxsem.wiki@gmail.com>
+Max Semenik <maxsem.wiki@gmail.com> <maxsem@users.mediawiki.org>
+Michael Dale <mdale@wikimedia.org>
+Michael Dale <mdale@wikimedia.org> <dale@users.mediawiki.org>
+Neil Kandalgaonkar <neilk@wikimedia.org>
+Neil Kandalgaonkar <neilk@wikimedia.org> <neilk@users.mediawiki.org>
+Nemo bis <federicoleva@tiscali.it>
+Niklas Laxström <niklas.laxstrom@gmail.com>
+Niklas Laxström <niklas.laxstrom@gmail.com> <nikerabbit@users.mediawiki.org>
+Nischay Nahata <nischayn22@gmail.com>
+Ori Livneh <ori@wikimedia.org>
+Ori Livneh <ori@wikimedia.org> <ori.livneh@gmail.com>
+paladox <thomasmulhall410@yahoo.com>
+Platonides <platonides@gmail.com>
+Platonides <platonides@gmail.com> <platonides@users.mediawiki.org>
+PranavK <pranavmk98@gmail.com>
+Prateek Saxena <psaxena@wikimedia.org>
+Prateek Saxena <psaxena@wikimedia.org> <prtksxna@gmail.com>
+Purodha Blissenbach <purodha@blissenbach.org>
+Purodha Blissenbach <purodha@blissenbach.org> <purodha@users.mediawiki.org>
+Raimond Spekking <raimond.spekking@gmail.com>
+Raimond Spekking <raimond.spekking@gmail.com> <raymond@users.mediawiki.org>
+Ricordisamoa <ricordisamoa@openmailbox.org>
+rillke <rillke@wikipedia.de>
+rillke <rillke@wikipedia.de> <rainerrillke@hotmail.com>
+Roan Kattouw <roan.kattouw@gmail.com>
+Roan Kattouw <roan.kattouw@gmail.com> <catrope@users.mediawiki.org>
+Rob Moen <rmoen@mediawiki.org>
+Rob Moen <rmoen@mediawiki.org> <rmoen@wikimedia.org>
+Robin Pepermans <robinp.1273@gmail.com>
+Robin Pepermans <robinp.1273@gmail.com> <robin@users.mediawiki.org>
+Ryan Kaldari <rkaldari@wikimedia.org>
+Ryan Kaldari <rkaldari@wikimedia.org> <kaldari@gmail.com>
+Ryan Kaldari <rkaldari@wikimedia.org> <kaldari@users.mediawiki.org>
+Sam Reed <reedy@wikimedia.org>
+Sam Reed <reedy@wikimedia.org> <reedy@users.mediawiki.org>
+Siebrand Mazeland <s.mazeland@xs4all.nl>
+Siebrand Mazeland <s.mazeland@xs4all.nl> <siebrand@kitano.nl>
+Siebrand Mazeland <s.mazeland@xs4all.nl> <siebrand@users.mediawiki.org>
+Siebrand Mazeland <s.mazeland@xs4all.nl> <siebrand@wikimedia.org>
+Tim Starling <tstarling@wikimedia.org>
+Tim Starling <tstarling@wikimedia.org> <tstarling@users.mediawiki.org>
+Timo Tijhof <krinklemail@gmail.com>
+Timo Tijhof <krinklemail@gmail.com> <krinkle@users.mediawiki.org>
+Tony Thomas <01tonythomas@gmail.com>
+Trevor Parscal <trevorparscal@gmail.com>
+Trevor Parscal <trevorparscal@gmail.com> <tparscal@users.mediawiki.org>
+Umherirrender <umherirrender_de.wp@web.de>
+Vikas S Yaligar <vikasyaligar.it@gmail.com>
+Yuri Astrakhan <yurik@wikimedia.org>
+Yuvi Panda <yuvipanda@gmail.com>
+Željko Filipin <zeljko.filipin@gmail.com>

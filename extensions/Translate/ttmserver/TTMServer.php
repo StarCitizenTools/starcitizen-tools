@@ -4,7 +4,7 @@
  *
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  * @defgroup TTMServer The Translate extension translation memory interface
  */
 
@@ -15,13 +15,22 @@
  * @ingroup TTMServer
  */
 class TTMServer {
+	/** @var array */
 	protected $config;
 
-	protected function __construct( $config ) {
+	/**
+	 * @param array $config
+	 */
+	protected function __construct( array $config ) {
 		$this->config = $config;
 	}
 
-	public static function factory( $config ) {
+	/**
+	 * @param array $config
+	 * @return TTMServer|null
+	 * @throws MWException
+	 */
+	public static function factory( array $config ) {
 		if ( isset( $config['class'] ) ) {
 			$class = $config['class'];
 
@@ -38,19 +47,20 @@ class TTMServer {
 			}
 		}
 
-		throw new MWEXception( 'TTMServer with no type' );
+		throw new MWException( 'TTMServer with no type' );
 	}
 
 	/**
 	 * Returns the primary server instance, useful for chaining.
-	 * Primary one is defined as config with key TTMServer
-	 * in $wgTranslateTranslationServices.
+	 * Primary instance is defined by $wgTranslateTranslationDefaultService
+	 * which is a key to $wgTranslateTranslationServices.
 	 * @return WritableTTMServer
 	 */
 	public static function primary() {
-		global $wgTranslateTranslationServices;
-		if ( isset( $wgTranslateTranslationServices['TTMServer'] ) ) {
-			$obj = self::factory( $wgTranslateTranslationServices['TTMServer'] );
+		global $wgTranslateTranslationServices,
+			$wgTranslateTranslationDefaultService;
+		if ( isset( $wgTranslateTranslationServices[$wgTranslateTranslationDefaultService] ) ) {
+			$obj = self::factory( $wgTranslateTranslationServices[$wgTranslateTranslationDefaultService] );
 			if ( $obj instanceof WritableTTMServer ) {
 				return $obj;
 			}
@@ -59,14 +69,23 @@ class TTMServer {
 		return new FakeTTMServer();
 	}
 
+	/**
+	 * @param array[] $suggestions
+	 * @return array[]
+	 */
 	public static function sortSuggestions( array $suggestions ) {
-		usort( $suggestions, array( __CLASS__, 'qualitySort' ) );
+		usort( $suggestions, [ __CLASS__, 'qualitySort' ] );
 
 		return $suggestions;
 	}
 
+	/**
+	 * @param array $a
+	 * @param array $b
+	 * @return int
+	 */
 	protected static function qualitySort( $a, $b ) {
-		list( $c, $d ) = array( $a['quality'], $b['quality'] );
+		list( $c, $d ) = [ $a['quality'], $b['quality'] ];
 		if ( $c === $d ) {
 			return 0;
 		}
@@ -107,7 +126,7 @@ class TTMServer {
 
 		$prevRow = range( 0, $length2 );
 		for ( $i = 0; $i < $length1; $i++ ) {
-			$currentRow = array();
+			$currentRow = [];
 			$currentRow[0] = $i + 1;
 			$c1 = mb_substr( $str1, $i, 1 );
 			for ( $j = 0; $j < $length2; $j++ ) {
@@ -123,26 +142,66 @@ class TTMServer {
 		return $prevRow[$length2];
 	}
 
-	/// Hook: ArticleDeleteComplete
+	/**
+	 * Hook: ArticleDeleteComplete
+	 * @param WikiPage $wikipage
+	 */
 	public static function onDelete( WikiPage $wikipage ) {
 		$handle = new MessageHandle( $wikipage->getTitle() );
 		$job = TTMServerMessageUpdateJob::newJob( $handle, 'delete' );
 		JobQueueGroup::singleton()->push( $job );
 	}
 
-	/// Called from TranslateEditAddons::onSave
-	public static function onChange( MessageHandle $handle, $text, $fuzzy ) {
+	/**
+	 * Called from TranslateEditAddons::onSave
+	 * @param MessageHandle $handle
+	 */
+	public static function onChange( MessageHandle $handle ) {
 		$job = TTMServerMessageUpdateJob::newJob( $handle, 'refresh' );
 		JobQueueGroup::singleton()->push( $job );
 	}
 
-	public static function onGroupChange( MessageHandle $handle, $old, $new ) {
-		if ( $old === array() ) {
+	/**
+	 * @param MessageHandle $handle
+	 * @param array $old
+	 */
+	public static function onGroupChange( MessageHandle $handle, $old ) {
+		if ( $old === [] ) {
 			// Don't bother for newly added messages
 			return;
 		}
 
 		$job = TTMServerMessageUpdateJob::newJob( $handle, 'rebuild' );
 		JobQueueGroup::singleton()->push( $job );
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public function getMirrors() {
+		global $wgTranslateTranslationServices;
+		if ( isset( $this->config['mirrors'] ) ) {
+			$mirrors = [];
+			foreach ( $this->config['mirrors'] as $name ) {
+				if ( !is_string( $name ) ) {
+					throw new TTMServerException( "Invalid configuration set in " .
+						"mirrors, expected an array of strings" );
+				}
+				if ( !isset( $wgTranslateTranslationServices[$name] ) ) {
+					throw new TTMServerException( "Invalid configuration in " .
+						"mirrors, unknown service $name" );
+				}
+				$mirrors[$name] = true;
+			}
+			return array_keys( $mirrors );
+		}
+		return [];
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isFrozen() {
+		return false;
 	}
 }

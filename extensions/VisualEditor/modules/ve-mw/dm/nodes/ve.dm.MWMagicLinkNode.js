@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWMagicLinkNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -17,7 +17,7 @@
  */
 ve.dm.MWMagicLinkNode = function VeDmMWMagicLinkNode() {
 	// Parent constructor
-	ve.dm.LeafNode.apply( this, arguments );
+	ve.dm.MWMagicLinkNode.super.apply( this, arguments );
 
 	// Mixin constructors
 	ve.dm.FocusableNode.call( this );
@@ -44,6 +44,7 @@ ve.dm.MWMagicLinkNode.static.blacklistedAnnotationTypes = [ 'link' ];
 /**
  * Determine whether the given `element` is a magic link.
  *
+ * @param {HTMLElement} element Element
  * @return {boolean} True if the element is a magic link
  */
 ve.dm.MWMagicLinkNode.static.matchFunction = function ( element ) {
@@ -113,6 +114,7 @@ ve.dm.MWMagicLinkNode.static.validateHref = function ( content, href ) {
  * with the given content into a simple link, or `null` if the given
  * content is not a valid magic link.
  *
+ * @param {string} content Content
  * @return {ve.dm.MWExternalLinkAnnotation|ve.dm.MWInternalLinkAnnotation|null}
  */
 ve.dm.MWMagicLinkNode.static.annotationFromContent = function ( content ) {
@@ -350,19 +352,19 @@ ve.dm.MWMagicLinkIsbnType.prototype.getHref = function () {
  * @inheritdoc
  */
 ve.dm.MWMagicLinkIsbnType.prototype.matchHref = function ( href ) {
-	var conf, m, normalized;
+	var normalized,
+		conf = mw.config.get( 'wgVisualEditorConfig' ),
+		matches = /^(?:[.]+\/)*([^/]+)\/(\d+[Xx]?)$/.exec( href );
 
-	conf = mw.config.get( 'wgVisualEditorConfig' );
-	m = /^(?:[.]+\/)*([^\/]+)\/(\d+[Xx]?)$/.exec( href );
-	if ( !m ) {
+	if ( !matches ) {
 		return false;
 	}
 	// conf.specialBooksources has localized name for Special:Booksources
-	normalized = ve.safeDecodeURIComponent( m[ 1 ] ).replace( ' ', '_' );
+	normalized = ve.decodeURIComponentIntoArticleTitle( matches[ 1 ], true ).replace( ' ', '_' );
 	if ( normalized !== 'Special:BookSources' && normalized !== conf.specialBooksources ) {
 		return false;
 	}
-	if ( m[ 2 ] !== this.code ) {
+	if ( matches[ 2 ] !== this.code ) {
 		return false;
 	}
 	return true;
@@ -386,7 +388,7 @@ ve.dm.MWMagicLinkPmidType = function VeDmMWMagicLinkPmidType( content ) {
 OO.inheritClass( ve.dm.MWMagicLinkPmidType, ve.dm.MWMagicLinkType );
 
 ve.dm.MWMagicLinkPmidType.prototype.getHref = function () {
-	return '//www.ncbi.nlm.nih.gov/pubmed/' + this.code + '?dopt=Abstract';
+	return mw.msg( 'pubmedurl', this.code );
 };
 
 /**
@@ -407,7 +409,7 @@ ve.dm.MWMagicLinkRfcType = function VeDmMWMagicLinkRfcType( content ) {
 OO.inheritClass( ve.dm.MWMagicLinkRfcType, ve.dm.MWMagicLinkType );
 
 ve.dm.MWMagicLinkRfcType.prototype.getHref = function () {
-	return '//tools.ietf.org/html/rfc' + this.code;
+	return mw.msg( 'rfcurl', this.code );
 };
 
 /* Registration */

@@ -1,0 +1,53 @@
+{
+	"name": "Loops",
+	"version": "1.0.0-beta",
+	"author": [
+		"David M. Sledge",
+		"[https://www.mediawiki.org/wiki/User:Danwe Daniel Werner]"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:Loops",
+	"descriptionmsg": "loops-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">=1.29"
+	},
+	"config_prefix": "eg",
+	"config": {
+		"LoopsEnabledFunctions": {
+			"value": [
+				"while",
+				"dowhile",
+				"loop",
+				"forargs",
+				"fornumargs"
+			],
+			"path": false,
+			"descriptionmsg": "loops-config-enabledfunctions",
+			"public": true
+		},
+		"LoopsCountLimit": {
+			"value": 100,
+			"path": false,
+			"descriptionmsg": "loops-config-countlimit",
+			"public": true
+		}
+	},
+	"MessagesDirs": {
+		"Loops": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"LoopsMagic": "Loops.i18n.magic.php"
+	},
+	"AutoloadClasses": {
+		"ExtLoops": "ExtLoops.php"
+	},
+	"Hooks": {
+		"ParserFirstCallInit": "ExtLoops::init",
+		"ParserLimitReportPrepare": "ExtLoops::onParserLimitReportPrepare",
+		"ParserClearState": "ExtLoops::onParserClearState"
+	},
+	"manifest_version": 2
+}

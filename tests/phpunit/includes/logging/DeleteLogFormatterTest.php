@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @covers DeleteLogFormatter
+ */
 class DeleteLogFormatterTest extends LogFormatterTestCase {
 
 	/**
@@ -59,6 +62,32 @@ class DeleteLogFormatterTest extends LogFormatterTestCase {
 	public static function provideRestoreLogDatabaseRows() {
 		return [
 			// Current format
+			[
+				[
+					'type' => 'delete',
+					'action' => 'restore',
+					'comment' => 'delete comment',
+					'namespace' => NS_MAIN,
+					'title' => 'Page',
+					'params' => [
+						':assoc:count' => [
+							'revisions' => 2,
+							'files' => 1,
+						],
+					],
+				],
+				[
+					'text' => 'User restored page Page (2 revisions and 1 file)',
+					'api' => [
+						'count' => [
+							'revisions' => 2,
+							'files' => 1,
+						],
+					],
+				],
+			],
+
+			// Legacy format without counts
 			[
 				[
 					'type' => 'delete',

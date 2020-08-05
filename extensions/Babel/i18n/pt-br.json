@@ -5,16 +5,19 @@
 			"Eduardo.mps",
 			"Giro720",
 			"555",
-			"Opraco"
+			"Opraco",
+			"TheEduGobi",
+			"Felipe L. Ewald"
 		]
 	},
-	"babel": "Informação Babel {{GENDER:$1|do usuário|da usuária|do(a) usuário(a)}}",
+	"babel": "Informação do usuário Babel",
 	"babel-desc": "Adiciona a função do analisador parser <code>#babel</code> para permitir a geração automática de um coluna de caixas de babel de um usuário coma possibilidade de incluir predefinições personalizadas",
 	"babel-url": "Project:Babel",
 	"babel-footer-url": ":Categoria:Babel - Usuários por língua",
 	"babel-autocreate-reason": "Criando automaticamente a página da categoria [[$1|Babel]].",
 	"babel-autocreate-text-levels": "Os usuários nesta categoria indicam que possuem um nível de conhecimento $1 na língua $2.",
-	"babel-autocreate-text-main": "Os usuários nesta categoria indicam que possuem conhecimentos da língua $1.",
+	"babel-autocreate-text-main": "Os usuários nesta categoria indicam que possuem conhecimento de $1.",
+	"babel-autocreate-user": "Babel AutoCreate",
 	"babel-0": "Este usuário [[$1|não]] têm conhecimento de [[$2|$3]] (ou compreende com dificuldades consideráveis).",
 	"babel-1": "Este usuário têm um [[$1|básico]] conhecimento de [[$2|$3]].",
 	"babel-2": "Este usuário têm um conhecimento [[$1|intermediário]] de [[$2|$3]].",
@@ -29,5 +32,10 @@
 	"babel-4-n": "{{GENDER:$4|Este usuário|Esta usuária}} pode contribuir com um nível [[$1|quase nativo]] de [[$2|português no dialeto brasileiro]].",
 	"babel-5-n": "{{GENDER:$4|Este usuário|Esta usuária}} pode contribuir com um nível [[$1|profissional]] de [[$2|português no dialeto brasileiro]].",
 	"babel-N-n": "{{GENDER:$4|Este usuário|Esta usuária}} tem como língua [[$1|materna]] o [[$2|dialeto brasileiro da língua portuguesa]].",
-	"babel-footer": "Usuários por língua"
+	"babel-template": "Template:Usuário $1",
+	"babel-footer": "Usuários por língua",
+	"apihelp-query+babel-description": "Obter informações sobre quais línguas o(a) usuário(a) conhece",
+	"apihelp-query+babel-summary": "Obter informações sobre quais línguas o(a) usuário(a) conhece",
+	"apihelp-query+babel-param-user": "Usuário(a) do(a) qual serão obtidas as informações",
+	"apihelp-query+babel-example-1": "Obter informações do Babel sobre <kbd>Example</kbd>"
 }

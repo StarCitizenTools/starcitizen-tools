@@ -6,15 +6,11 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = $vendorDir;
 
 return array(
-    'TextCat' => array($vendorDir . '/wikimedia/textcat'),
-    'Psr\\Log\\' => array($vendorDir . '/psr/log'),
     'PEAR' => array($vendorDir . '/pear/pear_exception'),
-    'Net' => array($vendorDir . '/pear/net_socket', $vendorDir . '/pear/net_smtp'),
-    'Mail_mimeDecode' => array($vendorDir . '/pear/mail_mime-decode'),
-    'Mail' => array($vendorDir . '/pear/mail_mime', $vendorDir . '/pear/mail'),
+    'Net' => array($vendorDir . '/pear/net_smtp', $vendorDir . '/pear/net_socket'),
+    'Mail' => array($vendorDir . '/pear/mail', $vendorDir . '/pear/mail_mime'),
     'Liuggio' => array($vendorDir . '/liuggio/statsd-php-client/src'),
-    'Less' => array($vendorDir . '/oyejorge/less.php/lib'),
-    'Kafka\\' => array($vendorDir . '/nmred/kafka-php/src'),
+    'Less' => array($vendorDir . '/wikimedia/less.php/lib'),
     'Console' => array($vendorDir . '/pear/console_getopt'),
     '' => array($vendorDir . '/cssjanus/cssjanus/src', $vendorDir . '/pear/pear-core-minimal/src'),
 );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Surface class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -12,14 +12,17 @@
  * @extends OO.ui.Widget
  *
  * @constructor
- * @param {HTMLDocument|Array|ve.dm.LinearData|ve.dm.Document} dataOrDoc Document data to edit
+ * @param {HTMLDocument|Array|ve.dm.ElementLinearData|ve.dm.Document} dataOrDoc Document data to edit
  * @param {Object} [config] Configuration options
+ * @cfg {string} [mode] Editing mode
  * @cfg {jQuery} [$scrollContainer] The scroll container of the surface
  * @cfg {ve.ui.CommandRegistry} [commandRegistry] Command registry to use
  * @cfg {ve.ui.SequenceRegistry} [sequenceRegistry] Sequence registry to use
+ * @cfg {ve.ui.DataTransferHandlerFactory} [dataTransferHandlerFactory] Data transfer handler factory to use
  * @cfg {string[]|null} [includeCommands] List of commands to include, null for all registered commands
  * @cfg {string[]} [excludeCommands] List of commands to exclude
  * @cfg {Object} [importRules] Import rules
+ * @cfg {boolean} [multiline=true] Multi-line surface
  * @cfg {string} [placeholder] Placeholder text to display when the surface is empty
  * @cfg {string} [inDialog] The name of the dialog this surface is in
  */
@@ -34,15 +37,21 @@ ve.ui.Surface = function VeUiSurface( dataOrDoc, config ) {
 	// Properties
 	this.$scrollContainer = config.$scrollContainer || $( this.getElementWindow() );
 	this.inDialog = config.inDialog || '';
-	this.globalOverlay = new ve.ui.Overlay( { classes: [ 've-ui-overlay-global' ] } );
+	this.mode = config.mode;
+
+	// The following classes are used here:
+	// * ve-ui-overlay-global-mobile
+	// * ve-ui-overlay-global-desktop
+	this.globalOverlay = new ve.ui.Overlay( { classes: [ 've-ui-overlay-global', 've-ui-overlay-global-' + ( OO.ui.isMobile() ? 'mobile' : 'desktop' ) ] } );
 	this.localOverlay = new ve.ui.Overlay( { classes: [ 've-ui-overlay-local' ] } );
 	this.$selections = $( '<div>' );
 	this.$blockers = $( '<div>' );
 	this.$controls = $( '<div>' );
 	this.$menus = $( '<div>' );
 	this.$placeholder = $( '<div>' ).addClass( 've-ui-surface-placeholder' );
-	this.commandRegistry = config.commandRegistry || ve.init.target.commandRegistry;
-	this.sequenceRegistry = config.sequenceRegistry || ve.init.target.sequenceRegistry;
+	this.commandRegistry = config.commandRegistry || ve.ui.commandRegistry;
+	this.sequenceRegistry = config.sequenceRegistry || ve.ui.sequenceRegistry;
+	this.dataTransferHandlerFactory = config.dataTransferHandlerFactory || ve.ui.dataTransferHandlerFactory;
 	this.commands = OO.simpleArrayDifference(
 		config.includeCommands || this.commandRegistry.getNames(), config.excludeCommands || []
 	);
@@ -50,7 +59,7 @@ ve.ui.Surface = function VeUiSurface( dataOrDoc, config ) {
 	if ( dataOrDoc instanceof ve.dm.Document ) {
 		// ve.dm.Document
 		documentModel = dataOrDoc;
-	} else if ( dataOrDoc instanceof ve.dm.LinearData || Array.isArray( dataOrDoc ) ) {
+	} else if ( dataOrDoc instanceof ve.dm.ElementLinearData || Array.isArray( dataOrDoc ) ) {
 		// LinearData or raw linear data
 		documentModel = new ve.dm.Document( dataOrDoc );
 	} else {
@@ -61,12 +70,16 @@ ve.ui.Surface = function VeUiSurface( dataOrDoc, config ) {
 	this.view = this.createView( this.model );
 	this.dialogs = this.createDialogWindowManager();
 	this.importRules = config.importRules || {};
+	this.multiline = config.multiline !== false;
 	this.context = this.createContext();
 	this.progresses = [];
 	this.showProgressDebounced = ve.debounce( this.showProgress.bind( this ) );
 	this.filibuster = null;
 	this.debugBar = null;
+	this.placeholder = null;
+	this.placeholderVisible = false;
 	this.setPlaceholder( config.placeholder );
+	this.scrollPosition = null;
 
 	this.toolbarHeight = 0;
 	this.toolbarDialogs = new ve.ui.ToolbarDialogWindowManager( this, {
@@ -75,13 +88,19 @@ ve.ui.Surface = function VeUiSurface( dataOrDoc, config ) {
 	} );
 
 	// Events
-	this.getView().connect( this, { keyup: 'scrollCursorIntoView' } );
+	this.getModel().connect( this, { select: 'scrollCursorIntoView' } );
 	this.getModel().getDocument().connect( this, { transact: 'onDocumentTransact' } );
+	this.dialogs.connect( this, { opening: 'onWindowOpening' } );
+	this.context.getInspectors().connect( this, { opening: 'onWindowOpening' } );
+	this.getView().connect( this, { position: 'onViewPosition' } );
 
 	// Initialization
 	this.$menus.append( this.context.$element );
 	this.$element
-		.addClass( 've-ui-surface' )
+		// The following classes are used here:
+		// * ve-ui-surface-visual
+		// * ve-ui-surface-source
+		.addClass( 've-ui-surface ve-ui-surface-' + this.mode )
 		.append( this.view.$element );
 	this.view.$element.after( this.localOverlay.$element );
 	this.localOverlay.$element.append( this.$selections, this.$blockers, this.$controls, this.$menus );
@@ -106,6 +125,12 @@ OO.inheritClass( ve.ui.Surface, OO.ui.Widget );
  * @event scroll
  */
 
+/**
+ * The surface has been submitted by user action, e.g. Ctrl+Enter
+ *
+ * @event submit
+ */
+
 /* Static Properties */
 
 /**
@@ -118,6 +143,8 @@ OO.inheritClass( ve.ui.Surface, OO.ui.Widget );
 ve.ui.Surface.static.isMobile = false;
 
 /* Methods */
+
+/* eslint-disable valid-jsdoc */
 
 /**
  * Destroy the surface, releasing all memory and removing all DOM elements.
@@ -138,6 +165,12 @@ ve.ui.Surface.prototype.destroy = function () {
 	if ( this.debugBar ) {
 		this.debugBar.destroy();
 	}
+
+	// Disconnect events
+	this.dialogs.disconnect( this );
+	this.context.getInspectors().disconnect( this );
+
+	this.toggleMobileGlobalOverlay( false );
 
 	// Remove DOM elements
 	this.$element.remove();
@@ -165,8 +198,8 @@ ve.ui.Surface.prototype.initialize = function () {
 	}
 
 	// The following classes can be used here:
-	// ve-ui-surface-dir-ltr
-	// ve-ui-surface-dir-rtl
+	// * ve-ui-surface-dir-ltr
+	// * ve-ui-surface-dir-rtl
 	this.$element.addClass( 've-ui-surface-dir-' + this.getDir() );
 
 	this.getView().initialize();
@@ -177,10 +210,10 @@ ve.ui.Surface.prototype.initialize = function () {
 /**
  * Get the DOM representation of the surface's current state.
  *
- * @return {HTMLDocument} HTML document
+ * @return {HTMLDocument|string} HTML document (visual mode) or text (source mode)
  */
 ve.ui.Surface.prototype.getDom = function () {
-	return ve.dm.converter.getDomFromModel( this.getModel().getDocument() );
+	return this.getModel().getDom();
 };
 
 /**
@@ -189,26 +222,42 @@ ve.ui.Surface.prototype.getDom = function () {
  * @return {string} HTML
  */
 ve.ui.Surface.prototype.getHtml = function () {
-	return ve.properInnerHtml( this.getDom().body );
+	return this.getModel().getHtml();
+};
+
+/**
+ * Get the surface's editing mode
+ *
+ * @return {string} Editing mode
+ */
+ve.ui.Surface.prototype.getMode = function () {
+	return this.mode;
 };
 
 /**
  * Create a context.
  *
  * @method
- * @abstract
  * @return {ve.ui.Context} Context
  */
-ve.ui.Surface.prototype.createContext = null;
+ve.ui.Surface.prototype.createContext = function () {
+	return OO.ui.isMobile() ? new ve.ui.MobileContext( this ) : new ve.ui.DesktopContext( this );
+};
 
 /**
  * Create a dialog window manager.
  *
  * @method
- * @abstract
  * @return {ve.ui.WindowManager} Dialog window manager
  */
-ve.ui.Surface.prototype.createDialogWindowManager = null;
+ve.ui.Surface.prototype.createDialogWindowManager = function () {
+	return OO.ui.isMobile() ?
+		new ve.ui.MobileWindowManager( this, {
+			factory: ve.ui.windowFactory,
+			overlay: this.globalOverlay
+		} ) :
+		new ve.ui.SurfaceWindowManager( this, { factory: ve.ui.windowFactory } );
+};
 
 /**
  * Create a surface model
@@ -217,7 +266,7 @@ ve.ui.Surface.prototype.createDialogWindowManager = null;
  * @return {ve.dm.Surface} Surface model
  */
 ve.ui.Surface.prototype.createModel = function ( doc ) {
-	return new ve.dm.Surface( doc );
+	return new ve.dm.Surface( doc, { sourceMode: this.getMode() === 'source' } );
 };
 
 /**
@@ -244,7 +293,7 @@ ve.ui.Surface.prototype.isMobile = function () {
  */
 ve.ui.Surface.prototype.setupDebugBar = function () {
 	this.debugBar = new ve.ui.DebugBar( this );
-	this.debugBar.$element.insertAfter( this.$element );
+	this.$element.append( this.debugBar.$element );
 };
 
 /**
@@ -407,6 +456,15 @@ ve.ui.Surface.prototype.enable = function () {
 };
 
 /**
+ * Give focus to the surface
+ */
+ve.ui.Surface.prototype.focus = function () {
+	this.getView().focus();
+};
+
+/* eslint-enable valid-jsdoc */
+
+/**
  * Handle transact events from the document model
  *
  * @param {ve.dm.Transaction} Transaction
@@ -418,37 +476,57 @@ ve.ui.Surface.prototype.onDocumentTransact = function () {
 };
 
 /**
- * Scroll the cursor into view.
+ * Scroll the cursor into view
+ *
+ * Called in response to selection events.
  *
  * This is required when the cursor disappears under the floating toolbar.
  */
 ve.ui.Surface.prototype.scrollCursorIntoView = function () {
-	var view, nativeRange, clientRect, cursorTop, scrollTo, toolbarBottom;
-
-	if ( !this.toolbarHeight ) {
-		return;
-	}
+	var view, clientRect, surfaceRect, cursorTop, cursorBottom, scrollTo, bottomBound, topBound;
 
 	view = this.getView();
-	nativeRange = view.getNativeRange();
-	if ( !nativeRange ) {
+
+	if ( !view.nativeSelection.focusNode || OO.ui.contains( view.$pasteTarget[ 0 ], view.nativeSelection.focusNode, true ) ) {
 		return;
 	}
 
-	if ( OO.ui.contains( view.$pasteTarget[ 0 ], nativeRange.startContainer, true ) ) {
+	if ( this.getView().dragging ) {
+		// Allow native scroll behavior while dragging, as the start/end
+		// points are unreliable until we're finished. Without this, trying to
+		// drag a selection larger than a single screen will sometimes lock
+		// the viewport in place, as it tries to keep the wrong end of the
+		// selection on-screen.
 		return;
 	}
 
-	clientRect = RangeFix.getBoundingClientRect( nativeRange );
+	// We only care about the focus end of the selection, the anchor never
+	// moves and should be allowed off screen. Thus, we collapse the selection
+	// to the anchor point (collapseToTo) before measuring.
+	clientRect = this.getView().getSelection( this.getModel().getSelection().collapseToTo() ).getSelectionBoundingRect();
 	if ( !clientRect ) {
 		return;
 	}
 
-	cursorTop = clientRect.top - 5;
-	toolbarBottom = this.toolbarHeight;
+	// We want viewport-relative coordinates, so we need to translate it
+	surfaceRect = this.getBoundingClientRect();
+	clientRect = ve.translateRect( clientRect, surfaceRect.left, surfaceRect.top );
 
-	if ( cursorTop < toolbarBottom ) {
-		scrollTo = this.$scrollContainer.scrollTop() + cursorTop - toolbarBottom;
+	// TODO: this has some long-standing assumptions that we're going to be in
+	// the context we expect. If we get VE in a scrollable div or suchlike,
+	// we'd no longer be able to make these assumptions about top/bottom of
+	// window.
+	topBound = this.toolbarHeight; // top of the window + height of the toolbar
+	bottomBound = window.innerHeight; // bottom of the window
+
+	cursorTop = clientRect.top - 5;
+	cursorBottom = clientRect.bottom + 5;
+
+	if ( cursorTop < topBound ) {
+		scrollTo = this.$scrollContainer.scrollTop() + ( cursorTop - topBound );
+		this.scrollTo( scrollTo );
+	} else if ( cursorBottom > bottomBound ) {
+		scrollTo = this.$scrollContainer.scrollTop() + ( cursorBottom - bottomBound );
 		this.scrollTo( scrollTo );
 	}
 };
@@ -465,6 +543,61 @@ ve.ui.Surface.prototype.scrollTo = function ( offset ) {
 };
 
 /**
+ * Handle an dialog opening event.
+ *
+ * @param {OO.ui.Window} win Window that's being opened
+ * @param {jQuery.Promise} opening Promise resolved when window is opened; when the promise is
+ *   resolved the first argument will be a promise which will be resolved when the window begins
+ *   closing, the second argument will be the opening data
+ * @param {Object} data Window opening data
+ */
+ve.ui.Surface.prototype.onWindowOpening = function ( win, opening ) {
+	var surface = this;
+
+	if ( OO.ui.isMobile() ) {
+		opening
+			.progress( function ( data ) {
+				if ( data.state === 'setup' ) {
+					surface.toggleMobileGlobalOverlay( true );
+				}
+			} )
+			.always( function ( opened ) {
+				opened.always( function ( closed ) {
+					closed.always( function () {
+						surface.toggleMobileGlobalOverlay( false );
+					} );
+				} );
+			} );
+	}
+};
+
+/**
+ * Show or hide mobile global overlay.
+ *
+ * @param {boolean} show Show the global overlay.
+ */
+ve.ui.Surface.prototype.toggleMobileGlobalOverlay = function ( show ) {
+	var $body = $( 'body' );
+
+	if ( !OO.ui.isMobile() ) {
+		return;
+	}
+
+	// Store current position before we set overflow: hidden on body
+	if ( show ) {
+		this.scrollPosition = $body.scrollTop();
+	}
+
+	$( 'html, body' ).toggleClass( 've-ui-overlay-global-mobile-enabled', show );
+	this.globalOverlay.$element.toggleClass( 've-ui-overlay-global-mobile-visible', show );
+
+	// Restore previous position after we remove overflow: hidden on body
+	if ( !show ) {
+		$body.scrollTop( this.scrollPosition );
+	}
+};
+
+/**
  * Set placeholder text
  *
  * @param {string} [placeholder] Placeholder text, clears placeholder if not set
@@ -476,6 +609,8 @@ ve.ui.Surface.prototype.setPlaceholder = function ( placeholder ) {
 		this.updatePlaceholder();
 	} else {
 		this.$placeholder.detach();
+		this.placeholderVisible = false;
+		this.getView().$element.css( 'min-height', '' );
 	}
 };
 
@@ -487,6 +622,7 @@ ve.ui.Surface.prototype.updatePlaceholder = function () {
 		hasContent = this.getModel().getDocument().data.hasContent();
 
 	this.$placeholder.toggleClass( 'oo-ui-element-hidden', hasContent );
+	this.placeholderVisible = !hasContent;
 	if ( !hasContent ) {
 		// Use a clone of the first node in the document so the placeholder
 		// styling matches the text the users sees when they start typing
@@ -501,6 +637,17 @@ ve.ui.Surface.prototype.updatePlaceholder = function () {
 			$wrapper = $( '<p>' );
 		}
 		this.$placeholder.empty().append( $wrapper.text( this.placeholder ) );
+	} else {
+		this.getView().$element.css( 'min-height', '' );
+	}
+};
+
+/**
+ * Handle position events from the view
+ */
+ve.ui.Surface.prototype.onViewPosition = function () {
+	if ( this.placeholderVisible ) {
+		this.getView().$element.css( 'min-height', this.$placeholder.outerHeight() );
 	}
 };
 
@@ -577,13 +724,15 @@ ve.ui.Surface.prototype.setToolbarHeight = function ( toolbarHeight ) {
  *
  * @param {jQuery.Promise} progressCompletePromise Promise which resolves when the progress action is complete
  * @param {jQuery|string|Function} label Progress bar label
+ * @param {boolean} nonCancellable Progress item can't be cancelled
  * @return {jQuery.Promise} Promise which resolves with a progress bar widget and a promise which fails if cancelled
  */
-ve.ui.Surface.prototype.createProgress = function ( progressCompletePromise, label ) {
+ve.ui.Surface.prototype.createProgress = function ( progressCompletePromise, label, nonCancellable ) {
 	var progressBarDeferred = $.Deferred();
 
 	this.progresses.push( {
 		label: label,
+		cancellable: !nonCancellable,
 		progressCompletePromise: progressCompletePromise,
 		progressBarDeferred: progressBarDeferred
 	} );
@@ -594,10 +743,9 @@ ve.ui.Surface.prototype.createProgress = function ( progressCompletePromise, lab
 };
 
 ve.ui.Surface.prototype.showProgress = function () {
-	var dialogs = this.dialogs,
-		progresses = this.progresses;
+	var progresses = this.progresses;
 
-	dialogs.openWindow( 'progress', { progresses: progresses } );
+	this.dialogs.openWindow( 'progress', { progresses: progresses, $returnFocusTo: null } );
 	this.progresses = [];
 };
 
@@ -608,6 +756,15 @@ ve.ui.Surface.prototype.showProgress = function () {
  */
 ve.ui.Surface.prototype.getImportRules = function () {
 	return this.importRules;
+};
+
+/**
+ * Check if the surface is multi-line
+ *
+ * @return {boolean} Surface is multi-line
+ */
+ve.ui.Surface.prototype.isMultiline = function () {
+	return this.multiline;
 };
 
 /**
@@ -624,14 +781,14 @@ ve.ui.Surface.prototype.initFilibuster = function () {
 	this.filibuster = new ve.Filibuster()
 		.wrapClass( ve.EventSequencer )
 		.wrapNamespace( ve.dm, 've.dm', [
-			// blacklist
+			// Blacklist
 			ve.dm.LinearSelection.prototype.getDescription,
 			ve.dm.TableSelection.prototype.getDescription,
 			ve.dm.NullSelection.prototype.getDescription
 		] )
 		.wrapNamespace( ve.ce, 've.ce' )
 		.wrapNamespace( ve.ui, 've.ui', [
-			// blacklist
+			// Blacklist
 			ve.ui.Surface.prototype.startFilibuster,
 			ve.ui.Surface.prototype.stopFilibuster
 		] )
@@ -662,8 +819,8 @@ ve.ui.Surface.prototype.initFilibuster = function () {
 				startOffset: nativeRange.startOffset,
 				endContainer: (
 					nativeRange.startContainer === nativeRange.endContainer ?
-					'(=startContainer)' :
-					ve.serializeNodeDebug( nativeRange.endContainer )
+						'(=startContainer)' :
+						ve.serializeNodeDebug( nativeRange.endContainer )
 				),
 				endOffset: nativeRange.endOffset
 			} );

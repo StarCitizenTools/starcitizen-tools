@@ -5,6 +5,7 @@
 			"Crazymadlover",
 			"Fitoschido",
 			"Imre",
+			"Indiralena",
 			"Manuelt15",
 			"Sanbec",
 			"Translationista"
@@ -13,7 +14,7 @@
 	"getdata": "Obtener datos",
 	"externaldata-desc": "Permite la recuperación de datos estructurados a partir de direcciones URL externas, bases de datos y otras fuentes",
 	"externaldata-no-param-specified": "Error: No se ha especificado el parámetro «$1».",
-	"externaldata-web-invalid-format": "Formato inválido: \"$1\"",
+	"externaldata-web-invalid-format": "El formato «$1» no es válido.",
 	"externaldata-ldap-unable-to-connect": "No se pudo conectar con $1",
 	"externaldata-xml-error": "Error XML: $1 en línea $2",
 	"externaldata-invalid-json": "Error: JSON no válido",
@@ -23,5 +24,5 @@
 	"externaldata-db-could-not-connect": "Error: No se pudo lograr conexión con la base de datos.",
 	"externaldata-db-unknown-collection": "Error: colección de MongoDB desconocida.",
 	"externaldata-db-no-return-values": "Error: No se ha especificado valores de retorno.",
-	"externaldata-db-invalid-query": "Consulta inválida."
+	"externaldata-db-invalid-query": "Consulta no válida."
 }

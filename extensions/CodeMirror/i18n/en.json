@@ -5,6 +5,11 @@
 		]
 	},
 	"codemirror-desc": "Provides syntax highlighting in wikitext editor",
-	"codemirror-enable-label": "Enable CodeMirror (Syntaxhighlight)",
-	"codemirror-disable-label": "Disable CodeMirror (Syntaxhighlight)"
+	"codemirror-toggle-label": "Syntax highlighting",
+	"codemirror-beta-title": "Wikitext syntax highlighting",
+	"codemirror-beta-desc": "Syntax highlighting makes editing easier by using color and shade to visually separate page text from the code for links, references and templates.",
+	"codemirror-popup-label": "Syntax Highlighting",
+	"codemirror-popup-desc": "Syntax highlighting will help you easily distinguish different parts of your edit by color coding them.",
+	"codemirror-popup-btn-yes": "Try it",
+	"codemirror-popup-btn-no": "No, thank you"
 }

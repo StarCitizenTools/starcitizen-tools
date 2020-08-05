@@ -38,7 +38,7 @@ class XmlDumpWriter {
 	 * @return string
 	 */
 	function openStream() {
-		global $wgLanguageCode;
+		global $wgContLang;
 		$ver = WikiExporter::schemaVersion();
 		return Xml::element( 'mediawiki', [
 			'xmlns'              => "http://www.mediawiki.org/xml/export-$ver/",
@@ -51,12 +51,12 @@ class XmlDumpWriter {
 			 * you copy in the new xsd file.
 			 *
 			 * After it is reviewed, merged and deployed (sync-docroot), the index.html needs purging.
-			 * echo "http://www.mediawiki.org/xml/index.html" | mwscript purgeList.php --wiki=aawiki
+			 * echo "https://www.mediawiki.org/xml/index.html" | mwscript purgeList.php --wiki=aawiki
 			 */
 			'xsi:schemaLocation' => "http://www.mediawiki.org/xml/export-$ver/ " .
 				"http://www.mediawiki.org/xml/export-$ver.xsd",
 			'version'            => $ver,
-			'xml:lang'           => $wgLanguageCode ],
+			'xml:lang'           => $wgContLang->getHtmlCode() ],
 			null ) .
 			"\n" .
 			$this->siteInfo();
@@ -199,7 +199,6 @@ class XmlDumpWriter {
 	 * @access private
 	 */
 	function writeRevision( $row ) {
-
 		$out = "    <revision>\n";
 		$out .= "      " . Xml::element( 'id', null, strval( $row->rev_id ) ) . "\n";
 		if ( isset( $row->rev_parent_id ) && $row->rev_parent_id ) {
@@ -219,8 +218,11 @@ class XmlDumpWriter {
 		}
 		if ( isset( $row->rev_deleted ) && ( $row->rev_deleted & Revision::DELETED_COMMENT ) ) {
 			$out .= "      " . Xml::element( 'comment', [ 'deleted' => 'deleted' ] ) . "\n";
-		} elseif ( $row->rev_comment != '' ) {
-			$out .= "      " . Xml::elementClean( 'comment', [], strval( $row->rev_comment ) ) . "\n";
+		} else {
+			$comment = CommentStore::getStore()->getComment( 'rev_comment', $row )->text;
+			if ( $comment != '' ) {
+				$out .= "      " . Xml::elementClean( 'comment', [], strval( $comment ) ) . "\n";
+			}
 		}
 
 		if ( isset( $row->rev_content_model ) && !is_null( $row->rev_content_model ) ) {
@@ -269,7 +271,9 @@ class XmlDumpWriter {
 			$out .= "      <sha1/>\n";
 		}
 
-		Hooks::run( 'XmlDumpWriterWriteRevision', [ &$this, &$out, $row, $text ] );
+		// Avoid PHP 7.1 warning from passing $this by reference
+		$writer = $this;
+		Hooks::run( 'XmlDumpWriterWriteRevision', [ &$writer, &$out, $row, $text ] );
 
 		$out .= "    </revision>\n";
 
@@ -285,7 +289,6 @@ class XmlDumpWriter {
 	 * @access private
 	 */
 	function writeLogItem( $row ) {
-
 		$out = "  <logitem>\n";
 		$out .= "    " . Xml::element( 'id', null, strval( $row->log_id ) ) . "\n";
 
@@ -299,8 +302,11 @@ class XmlDumpWriter {
 
 		if ( $row->log_deleted & LogPage::DELETED_COMMENT ) {
 			$out .= "    " . Xml::element( 'comment', [ 'deleted' => 'deleted' ] ) . "\n";
-		} elseif ( $row->log_comment != '' ) {
-			$out .= "    " . Xml::elementClean( 'comment', null, strval( $row->log_comment ) ) . "\n";
+		} else {
+			$comment = CommentStore::getStore()->getComment( 'log_comment', $row )->text;
+			if ( $comment != '' ) {
+				$out .= "    " . Xml::elementClean( 'comment', null, strval( $comment ) ) . "\n";
+			}
 		}
 
 		$out .= "    " . Xml::element( 'type', null, strval( $row->log_type ) ) . "\n";
@@ -397,7 +403,7 @@ class XmlDumpWriter {
 		if ( $file->isDeleted( File::DELETED_COMMENT ) ) {
 			$comment = Xml::element( 'comment', [ 'deleted' => 'deleted' ] );
 		} else {
-			$comment = Xml::elementClean( 'comment', null, $file->getDescription() );
+			$comment = Xml::elementClean( 'comment', null, strval( $file->getDescription() ) );
 		}
 		return "    <upload>\n" .
 			$this->writeTimestamp( $file->getTimestamp() ) .
@@ -430,6 +436,9 @@ class XmlDumpWriter {
 
 		global $wgContLang;
 		$prefix = $wgContLang->getFormattedNsText( $title->getNamespace() );
+
+		// @todo Emit some kind of warning to the user if $title->getNamespace() !==
+		// NS_MAIN and $prefix === '' (viz. pages in an unregistered namespace)
 
 		if ( $prefix !== '' ) {
 			$prefix .= ':';

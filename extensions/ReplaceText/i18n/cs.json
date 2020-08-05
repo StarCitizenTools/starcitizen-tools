@@ -6,7 +6,9 @@
 			"Matěj Grabovský",
 			"Mormegil",
 			"Paxt",
-			"Vks"
+			"Vks",
+			"Ilimanaq29",
+			"Matěj Suchánek"
 		]
 	},
 	"replacetext": "Nahradit text",
@@ -42,5 +44,6 @@
 	"replacetext_continue": "Pokračovat",
 	"replacetext_editsummary": "Nahrazení textu „$1“ textem „$2“",
 	"right-replacetext": "Hledání a nahrazování textu na celé wiki",
-	"action-replacetext": "nahrazovat text na celé wiki"
+	"action-replacetext": "nahrazovat text na celé wiki",
+	"replacetext_reminder": "Pokud také chcete na jiných stránkách upravit odkazy na tuto stránku, jděte na $1."
 }

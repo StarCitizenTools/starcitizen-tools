@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"AmaryllisGardener"
+		]
+	},
+	"getdata": "Get data",
+	"externaldata-desc": "Allaes for retrievin structurt data frae freemit URLs, databases an ither soorces",
+	"externaldata-no-param-specified": "Error: No \"$1\" parameter specified.",
+	"externaldata-web-invalid-format": "Invalid format: \"$1\".",
+	"externaldata-ldap-unable-to-connect": "Unable tae connect tae $1.",
+	"externaldata-xml-error": "XML error: $1 at line $2.",
+	"externaldata-invalid-json": "Error: Invalid JSON.",
+	"externaldata-db-incomplete-information": "Error: Incomplete information for this database ID.",
+	"externaldata-db-could-not-get-url": "Couldna get URL efter $1 {{PLURAL:$1|try|tries}}.",
+	"externaldata-db-unknown-type": "Error: Unkent database teep.",
+	"externaldata-db-could-not-connect": "Error: Couldna connect tae database.",
+	"externaldata-db-unknown-collection": "Error: Unkent MongoDB collection.",
+	"externaldata-db-no-return-values": "Error: No return values specified.",
+	"externaldata-db-invalid-query": "Invalid query."
+}

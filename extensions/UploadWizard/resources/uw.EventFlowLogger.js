@@ -17,9 +17,9 @@
 
 ( function ( mw, uw ) {
 	/**
-	 * @class uw.EventFlowLogger
 	 * Event logging helper for funnel analysis. Should be instantiated at the very beginning; uses internal state
 	 * to link events together.
+	 * @class uw.EventFlowLogger
 	 * @constructor
 	 */
 	uw.EventFlowLogger = function UWEventFlowLogger() {
@@ -110,6 +110,27 @@
 	};
 
 	/**
+	 * Logs user action on the tutorial page for UploadWizard.
+	 *
+	 * @param {'load'|'helpdesk-click'|'skip-check'|'skip-uncheck'|'continue'} type
+	 */
+	uw.EventFlowLogger.prototype.logTutorialAction = function ( type ) {
+		var payload, thisUri;
+
+		payload = {};
+		payload.username = mw.config.get( 'wgUserName' );
+		payload.language = mw.config.get( 'wgUserLanguage' );
+
+		thisUri = new mw.Uri( window.location.href, { overrideKeys: true } );
+		if ( thisUri.query.uselang ) {
+			payload.language = thisUri.query.uselang;
+		}
+
+		payload.action = type;
+		mw.track( 'event.UploadWizardTutorialActions', payload );
+	};
+
+	/**
 	 * Logs an event.
 	 *
 	 * @param {string} name Event name. Recognized names:
@@ -162,6 +183,60 @@
 	};
 
 	/**
+	 * Sets up logging for global javascript errors.
+	 */
+	uw.EventFlowLogger.prototype.installExceptionLogger = function () {
+		var self = this;
+
+		function toNumber( val ) {
+			var num = parseInt( val, 10 );
+			if ( isNaN( num ) ) {
+				return undefined;
+			}
+			return num;
+		}
+
+		mw.trackSubscribe( 'global.error', function ( topic, data ) {
+			self.log( 'UploadWizardExceptionFlowEvent', {
+				message: data.errorMessage,
+				url: data.url,
+				line: toNumber( data.lineNumber ),
+				column: toNumber( data.columnNumber ),
+				stack: undefined // T91347
+			} );
+		} );
+
+		mw.trackSubscribe( 'resourceloader.exception', function ( topic, data ) {
+			// Ignore noise about 'localStorage' being undefined or module store exceeding the quota
+			if (
+				data.source === 'store-localstorage-init' ||
+				data.source === 'store-localstorage-json' ||
+				data.source === 'store-localstorage-update'
+			) {
+				return;
+			}
+
+			self.log( 'UploadWizardExceptionFlowEvent', {
+				message: data.exception.message,
+				url: 'resourceLoader://' + data.source + '/' + data.module, // Bleh
+				line: 0,
+				column: 0,
+				stack: undefined // T91347
+			} );
+		} );
+
+		mw.trackSubscribe( 'mediawiki.jqueryMsg', function ( topic, data ) {
+			self.log( 'UploadWizardExceptionFlowEvent', {
+				message: data.errorMessage,
+				url: 'jqueryMsg://' + data.messageKey, // Yeah, we're abusing the schema
+				line: 0,
+				column: 0,
+				stack: undefined
+			} );
+		} );
+	};
+
+	/**
 	 * Logs an upload event.
 	 *
 	 * @param {string} name Event name. Recognized names:
@@ -188,6 +263,35 @@
 		this.log( 'UploadWizardUploadFlowEvent', data );
 	};
 
+	/**
+	 * If `err` is a Firefox 'NS_ERROR_NOT_AVAILABLE' exception, such as those occasionally spuriously
+	 * throw when calling `canvas.getContext( '2d' ).drawImage( … )`, log it for future debugging
+	 * along with more data about the image that failed to be drawn. See T136831.
+	 *
+	 * @param {Error} err
+	 * @param {Object} img
+	 */
+	uw.EventFlowLogger.prototype.maybeLogFirefoxCanvasException = function ( err, img ) {
+		if ( err.name !== 'NS_ERROR_NOT_AVAILABLE' ) {
+			return;
+		}
+
+		this.log( 'UploadWizardExceptionFlowEvent', {
+			message: ( err.message || '' ),
+			url: 'debug://NS_ERROR_NOT_AVAILABLE',
+			line: 0,
+			column: 0,
+			stack: JSON.stringify( {
+				type: img.tagName,
+				url: String( img.src ).slice( 0, 100 ),
+				// Both of these should be truthy if the image is actually loaded
+				complete: img.complete,
+				naturalWidth: img.naturalWidth
+			} )
+		} );
+	};
+
 	// FIXME
 	uw.eventFlowLogger = new uw.EventFlowLogger();
+	uw.eventFlowLogger.installExceptionLogger();
 }( mediaWiki, mediaWiki.uploadWizard ) );

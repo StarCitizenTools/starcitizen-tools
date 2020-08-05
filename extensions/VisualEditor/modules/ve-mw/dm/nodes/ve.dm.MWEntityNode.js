@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWEntityNode class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,7 +16,7 @@
  */
 ve.dm.MWEntityNode = function VeDmMWEntityNode() {
 	// Parent constructor
-	ve.dm.LeafNode.apply( this, arguments );
+	ve.dm.MWEntityNode.super.apply( this, arguments );
 };
 
 /* Inheritance */

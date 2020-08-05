@@ -1,7 +1,7 @@
 /*!
  * VisualEditor LinkContextItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -61,7 +61,8 @@ ve.ui.LinkContextItem.prototype.renderBody = function () {
 			.text( this.getDescription() )
 			.attr( {
 				href: ve.resolveUrl( this.model.getHref(), htmlDoc ),
-				target: '_blank'
+				target: '_blank',
+				rel: 'noopener'
 			} )
 	);
 };

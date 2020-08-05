@@ -1,147 +1,39 @@
 <?php
+
+if ( function_exists( 'wfLoadExtension' ) ) {
+	wfLoadExtension( 'Scribunto' );
+	// Keep i18n globals so mergeMessageFileList.php doesn't break
+	$wgMessagesDirs['Scribunto'] = __DIR__ . '/i18n';
+	$wgExtensionMessagesFiles['ScribuntoMagic'] = __DIR__ . '/Scribunto.magic.php';
+	$wgExtensionMessagesFiles['ScribuntoNamespaces'] = __DIR__ . '/Scribunto.namespaces.php';
+	/* wfWarn(
+		'Deprecated PHP entry point used for Scribunto extension. Please use wfLoadExtension instead,' .
+		' see https://www.mediawiki.org/wiki/Extension_registration for more details.'
+	); */
+	return true;
+} else {
+	die( 'This version of the Scribunto extension requires MediaWiki 1.27+' );
+}
+
 /**
- * Wikitext scripting infrastructure for MediaWiki.
- * Copyright (C) 2009-2012 Victor Vasiliev <vasilvv@gmail.com>
- * http://www.mediawiki.org/
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- * http://www.gnu.org/copyleft/gpl.html
+ * The rest of this file is a PHP stub for providing documentation
+ * about the various configuration settings for Scribunto, as well
+ * as providing hints for IDEs. It is not executed by MediaWiki.
  */
 
-if ( !defined( 'MEDIAWIKI' ) )
-	die();
-
-$wgExtensionCredits['parserhook']['Scribunto'] = array(
-	'path'           => __FILE__,
-	'name'           => 'Scribunto',
-	'author'         => array( 'Victor Vasiliev', 'Tim Starling', 'Brad Jorsch' ),
-	'descriptionmsg' => 'scribunto-desc',
-	'url'            => 'https://www.mediawiki.org/wiki/Extension:Scribunto',
-);
-
-define( 'CONTENT_MODEL_SCRIBUNTO', 'Scribunto' );
-
-$dir = __DIR__ . '/';
-$wgMessagesDirs['Scribunto'] = __DIR__ . '/i18n';
-$wgExtensionMessagesFiles['Scribunto'] = $dir . 'Scribunto.i18n.php';
-$wgExtensionMessagesFiles['ScribuntoMagic'] = $dir . 'Scribunto.magic.php';
-$wgExtensionMessagesFiles['ScribuntoNamespaces'] = $dir . 'Scribunto.namespaces.php';
-
-$wgAutoloadClasses['ScribuntoEngineBase'] = $dir.'common/Base.php';
-$wgAutoloadClasses['ScribuntoModuleBase'] = $dir.'common/Base.php';
-$wgAutoloadClasses['ScribuntoHooks'] = $dir.'common/Hooks.php';
-$wgAutoloadClasses['ScribuntoException'] = $dir.'common/Common.php';
-$wgAutoloadClasses['Scribunto'] = $dir.'common/Common.php';
-$wgAutoloadClasses['ApiScribuntoConsole'] = $dir.'common/ApiScribuntoConsole.php';
-$wgAutoloadClasses['ScribuntoContentHandler'] = $dir.'common/ScribuntoContentHandler.php';
-$wgAutoloadClasses['ScribuntoContent'] = $dir.'common/ScribuntoContent.php';
-$wgAutoloadClasses['Scribunto_LuaError'] = $dir.'engines/LuaCommon/LuaCommon.php';
-$wgAutoloadClasses['Scribunto_LuaInterpreterNotFoundError'] = $dir.'engines/LuaCommon/LuaInterpreter.php';
-$wgAutoloadClasses['Scribunto_LuaSandboxInterpreter'] = $dir.'engines/LuaSandbox/Engine.php';
-$wgAutoloadClasses['Scribunto_LuaSandboxCallback'] = $dir.'engines/LuaSandbox/Engine.php';
-$wgAutoloadClasses['Scribunto_LuaStandaloneInterpreterFunction'] = $dir.'engines/LuaStandalone/LuaStandaloneEngine.php';
-$wgAutoloadClasses['Scribunto_LuaEngineTestSkip'] = $dir.'tests/engines/LuaCommon/LuaEngineTestBase.php';
-
-$wgHooks['SoftwareInfo'][] = 'ScribuntoHooks::getSoftwareInfo';
-
-$wgHooks['ParserFirstCallInit'][] = 'ScribuntoHooks::setupParserHook';
-$wgHooks['ParserLimitReport']['scribunto'] = 'ScribuntoHooks::reportLimits';
-$wgHooks['ParserLimitReportPrepare'][] = 'ScribuntoHooks::reportLimitData';
-$wgHooks['ParserLimitReportFormat'][] = 'ScribuntoHooks::formatLimitData';
-$wgHooks['ParserClearState'][] = 'ScribuntoHooks::clearState';
-$wgHooks['ParserCloned'][] = 'ScribuntoHooks::parserCloned';
-
-$wgHooks['CanonicalNamespaces'][] = 'ScribuntoHooks::addCanonicalNamespaces';
-$wgHooks['CodeEditorGetPageLanguage'][] = 'ScribuntoHooks::getCodeLanguage';
-$wgHooks['EditPageBeforeEditChecks'][] = 'ScribuntoHooks::beforeEditChecks';
-$wgHooks['EditPage::showReadOnlyForm:initial'][] = 'ScribuntoHooks::showReadOnlyFormInitial';
-$wgHooks['EditPageBeforeEditButtons'][] = 'ScribuntoHooks::beforeEditButtons';
-$wgHooks['EditFilterMerged'][] = 'ScribuntoHooks::validateScript';
-$wgHooks['ArticleViewHeader'][] = 'ScribuntoHooks::showDocPageHeader';
-$wgHooks['ContentHandlerDefaultModelFor'][] = 'ScribuntoHooks::contentHandlerDefaultModelFor';
-
-$wgHooks['UnitTestsList'][] = 'ScribuntoHooks::unitTestsList';
-$wgParserTestFiles[] = $dir . 'tests/engines/LuaCommon/luaParserTests.txt';
-
-$wgContentHandlers[CONTENT_MODEL_SCRIBUNTO] = 'ScribuntoContentHandler';
-
-$sbtpl = array(
-	'localBasePath' => dirname( __FILE__ ) . '/modules',
-	'remoteExtPath' => 'Scribunto/modules',
-);
-
-$wgResourceModules['ext.scribunto.errors'] = $sbtpl + array(
-	'scripts' => 'ext.scribunto.errors.js',
-	'styles' => 'ext.scribunto.errors.css',
-	'dependencies' => array( 'jquery.ui.dialog' ),
-	'messages' => array(
-		'scribunto-parser-dialog-title'
-	),
-);
-$wgResourceModules['ext.scribunto.logs'] = $sbtpl + array(
-	'styles' => 'ext.scribunto.logs.css',
-	'position' => 'top',
-);
-$wgResourceModules['ext.scribunto.edit'] = $sbtpl + array(
-	'scripts' => 'ext.scribunto.edit.js',
-	'styles' => 'ext.scribunto.edit.css',
-	'dependencies' => array( 'mediawiki.api', 'jquery.spinner' ),
-	'messages' => array(
-		'scribunto-console-title',
-		'scribunto-console-intro',
-		'scribunto-console-clear',
-		'scribunto-console-cleared',
-		'scribunto-console-cleared-session-lost',
-	),
-);
-$wgAPIModules['scribunto-console'] = 'ApiScribuntoConsole';
-
-/***** Individual engines and their configurations *****/
-
-$wgAutoloadClasses['Scribunto_LuaEngine'] = $dir.'engines/LuaCommon/LuaCommon.php';
-$wgAutoloadClasses['Scribunto_LuaModule'] = $dir.'engines/LuaCommon/LuaCommon.php';
-$wgAutoloadClasses['Scribunto_LuaInterpreter'] = $dir.'engines/LuaCommon/LuaInterpreter.php';
-$wgAutoloadClasses['Scribunto_LuaSandboxEngine'] = $dir.'engines/LuaSandbox/Engine.php';
-$wgAutoloadClasses['Scribunto_LuaStandaloneEngine'] = $dir.'engines/LuaStandalone/LuaStandaloneEngine.php';
-$wgAutoloadClasses['Scribunto_LuaStandaloneInterpreter'] = $dir.'engines/LuaStandalone/LuaStandaloneEngine.php';
-
-/***** Individual libraries and their configurations *****/
-$wgAutoloadClasses['Scribunto_LuaLibraryBase'] = $dir.'engines/LuaCommon/LibraryBase.php';
-$wgAutoloadClasses['Scribunto_LuaEngineTestBase'] = $dir.'tests/engines/LuaCommon/LuaEngineTestBase.php';
-$wgAutoloadClasses['Scribunto_LuaDataProvider'] = $dir.'tests/engines/LuaCommon/LuaDataProvider.php';
-$wgAutoloadClasses['Scribunto_LuaSiteLibrary'] = $dir.'engines/LuaCommon/SiteLibrary.php';
-$wgAutoloadClasses['Scribunto_LuaUriLibrary'] = $dir.'engines/LuaCommon/UriLibrary.php';
-$wgAutoloadClasses['Scribunto_LuaUstringLibrary'] = $dir.'engines/LuaCommon/UstringLibrary.php';
-$wgAutoloadClasses['Scribunto_LuaLanguageLibrary'] = $dir.'engines/LuaCommon/LanguageLibrary.php';
-$wgAutoloadClasses['Scribunto_LuaMessageLibrary'] = $dir.'engines/LuaCommon/MessageLibrary.php';
-$wgAutoloadClasses['Scribunto_LuaTitleLibrary'] = $dir.'engines/LuaCommon/TitleLibrary.php';
-$wgAutoloadClasses['Scribunto_LuaTextLibrary'] = $dir.'engines/LuaCommon/TextLibrary.php';
-$wgAutoloadClasses['Scribunto_LuaHtmlLibrary'] = $dir.'engines/LuaCommon/HtmlLibrary.php';
-
-/***** Configuration *****/
+define( 'NS_MODULE', 828 );
+define( 'NS_MODULE_TALK', 829 );
 
 /**
  * The name of the default script engine.
  */
-$wgScribuntoDefaultEngine = 'luastandalone';
+$wgScribuntoDefaultEngine = 'luaautodetect';
 
 /**
  * Configuration for each script engine
  */
-$wgScribuntoEngineConf = array(
-	'luasandbox' => array(
+$wgScribuntoEngineConf = [
+	'luasandbox' => [
 		'class' => 'Scribunto_LuaSandboxEngine',
 		'memoryLimit' => 50 * 1024 * 1024,
 		'cpuLimit' => 7,
@@ -155,8 +47,15 @@ $wgScribuntoEngineConf = array(
 		// implemented in the future, and there is no guarantee that a
 		// simulation of setfenv() and getfenv() will be provided.
 		'allowEnvFuncs' => false,
-	),
-	'luastandalone' => array(
+
+		// The maximum number of languages about which data can be requested.
+		// The cost is about 1.5MB of memory usage per language on default
+		// installations (during recache), but if recaching is disabled with
+		// $wgLocalisationCacheConf['manualRecache'] = false
+		// then memory usage is perhaps 10x smaller.
+		'maxLangCacheSize' => 30,
+	],
+	'luastandalone' => [
 		'class' => 'Scribunto_LuaStandaloneEngine',
 
 		// A filename to act as the destination for stderr from the Lua
@@ -169,18 +68,22 @@ $wgScribuntoEngineConf = array(
 		'memoryLimit' => 50 * 1024 * 1024,
 		'cpuLimit' => 7,
 		'allowEnvFuncs' => false,
-	),
-);
+		'maxLangCacheSize' => 30,
+	],
+	'luaautodetect' => [
+		'factory' => 'Scribunto_LuaEngine::newAutodetectEngine',
+	],
+];
 
 /**
  * Set to true to enable the SyntaxHighlight_GeSHi extension
  */
-$wgScribuntoUseGeSHi = false;
+$wgScribuntoUseGeSHi = true;
 
 /**
  * Set to true to enable the CodeEditor extension
  */
-$wgScribuntoUseCodeEditor = false;
+$wgScribuntoUseCodeEditor = true;
 
 /**
  * Set to true to enable gathering and reporting of performance data
@@ -194,13 +97,3 @@ $wgScribuntoGatherFunctionStats = false;
  * a value between 0 and 1 (exclusive).
  */
 $wgScribuntoSlowFunctionThreshold = 0.90;
-
-define( 'NS_MODULE', 828 );
-define( 'NS_MODULE_TALK', 829 );
-
-// Set subpages by default
-$wgNamespacesWithSubpages[NS_MODULE] = true;
-$wgNamespacesWithSubpages[NS_MODULE_TALK] = true;
-
-$wgTrackingCategories[] = 'scribunto-common-error-category';
-$wgTrackingCategories[] = 'scribunto-module-with-errors-category';

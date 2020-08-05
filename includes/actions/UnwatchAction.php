@@ -31,26 +31,32 @@ class UnwatchAction extends WatchAction {
 		return 'unwatch';
 	}
 
-	protected function getDescription() {
-		return $this->msg( 'removewatch' )->escaped();
-	}
-
 	public function onSubmit( $data ) {
 		self::doUnwatch( $this->getTitle(), $this->getUser() );
 
 		return true;
 	}
 
+	protected function getFormFields() {
+		return [
+			'intro' => [
+				'type' => 'info',
+				'vertical-label' => true,
+				'raw' => true,
+				'default' => $this->msg( 'confirm-unwatch-top' )->parse()
+			]
+		];
+	}
+
 	protected function alterForm( HTMLForm $form ) {
+		parent::alterForm( $form );
+		$form->setWrapperLegendMsg( 'removewatch' );
 		$form->setSubmitTextMsg( 'confirm-unwatch-button' );
 	}
 
-	protected function preText() {
-		return $this->msg( 'confirm-unwatch-top' )->parse();
-	}
-
 	public function onSuccess() {
-		$this->getOutput()->addWikiMsg( 'removedwatchtext', $this->getTitle()->getPrefixedText() );
+		$msgKey = $this->getTitle()->isTalkPage() ? 'removedwatchtext-talk' : 'removedwatchtext';
+		$this->getOutput()->addWikiMsg( $msgKey, $this->getTitle()->getPrefixedText() );
 	}
 
 	public function doesWrites() {

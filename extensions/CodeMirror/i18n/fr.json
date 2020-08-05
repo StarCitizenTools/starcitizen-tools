@@ -1,10 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Gomoko"
+			"Gomoko",
+			"Wladek92",
+			"Trizek (WMF)",
+			"Thibaut120094"
 		]
 	},
 	"codemirror-desc": "Fournit une mise en évidence de la syntaxe dans l’éditeur wikitexte",
-	"codemirror-enable-label": "Activer CodeMirror (Syntaxhighlight)",
-	"codemirror-disable-label": "Désactiver CodeMirror (Syntaxhighlight)"
+	"codemirror-toggle-label": "Colorisation syntaxique",
+	"codemirror-beta-title": "Coloration syntaxique du wikitexte",
+	"codemirror-beta-desc": "La mise en forme de la syntaxe rend la modification plus facile de par l'utilisation de couleurs et d’ombres pour séparer visuellement le texte des pages et le code concernant les liens, les références et les modèles.",
+	"codemirror-popup-label": "Colorisation syntaxique",
+	"codemirror-popup-desc": "La mise en forme de la syntaxe vous aidera à distinguer facilement les différentes parties de vos modifications en les colorisant.",
+	"codemirror-popup-btn-yes": "Essayez le",
+	"codemirror-popup-btn-no": "Non, merci"
 }

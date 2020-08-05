@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16"
+		]
+	},
+	"loops-desc": "Funzioni parser per l'esecuzione di cicli",
+	"loops_max": "E' stato eseguito il numero massimo di cicli"
+}

@@ -13,5 +13,7 @@
 	"commonsmetadata-trackingcategory-no-author": "Податотеки без машински читлив автор",
 	"commonsmetadata-trackingcategory-no-author-desc": "Податотекава нема [{{MediaWiki:Commonsmetadata-doc-url}} машински читлив] информативен шаблон, или пак не му е пополнето полето за автор.",
 	"commonsmetadata-trackingcategory-no-source": "Податотеки без машински читлив извор",
-	"commonsmetadata-trackingcategory-no-source-desc": "Податотекава нема [{{MediaWiki:Commonsmetadata-doc-url}} машински читлив] информативен шаблон, или пак не му е пополнето полето за извор."
+	"commonsmetadata-trackingcategory-no-source-desc": "Податотекава нема [{{MediaWiki:Commonsmetadata-doc-url}} машински читлив] информативен шаблон, или пак не му е пополнето полето за извор.",
+	"commonsmetadata-trackingcategory-no-patent": "Податотеки без машински читлив патент",
+	"commonsmetadata-trackingcategory-no-patent-desc": "Податотекава нема [{{MediaWiki:Commonsmetadata-doc-url}} машински читлив] патентен шаблон."
 }

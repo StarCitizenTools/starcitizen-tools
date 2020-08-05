@@ -4,7 +4,7 @@
  *
  * @file
  * @author Santhosh Thottingal
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -132,13 +132,13 @@ HTML
 		$sourceLang = $this->getSourceLanguage();
 		$targetLang = $this->getTargetLanguage();
 
-		$list = Html::element( 'div', array(
+		$list = Html::element( 'div', [
 			'class' => 'row tux-messagelist',
 			'data-sourcelangcode' => $sourceLang->getCode(),
 			'data-sourcelangdir' => $sourceLang->getDir(),
 			'data-targetlangcode' => $targetLang->getCode(),
 			'data-targetlangdir' => $targetLang->getDir(),
-		) );
+		] );
 
 		return $list;
 	}
@@ -151,17 +151,17 @@ HTML
 
 		$label = Html::element(
 			'span',
-			array( 'class' => 'ext-translate-language-selector-label' ),
+			[ 'class' => 'ext-translate-language-selector-label' ],
 			$this->msg( 'tux-languageselector' )->text()
 		);
 
 		$trigger = Html::element(
 			'span',
-			array(
+			[
 				'class' => 'uls',
 				'lang' => $language->getHtmlCode(),
 				'dir' => $language->getDir(),
-			),
+			],
 			$targetLangName
 		);
 
@@ -186,7 +186,7 @@ HTML
 	protected function getTargetLanguage() {
 		$ui = $this->getLanguage();
 		$source = $this->getSourceLanguage();
-		if ( $ui->getCode() !== $source->getCode() ) {
+		if ( !$ui->equals( $source ) ) {
 			return $ui;
 		}
 

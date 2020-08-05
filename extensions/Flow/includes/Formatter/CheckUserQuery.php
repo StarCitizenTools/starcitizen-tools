@@ -4,7 +4,6 @@ namespace Flow\Formatter;
 
 use Flow\Exception\FlowException;
 use Flow\Model\UUID;
-use CheckUser;
 
 class CheckUserQuery extends AbstractQuery {
 	/**
@@ -20,7 +19,7 @@ class CheckUserQuery extends AbstractQuery {
 	 * @param \stdClass[] $rows List of checkuser database rows
 	 */
 	public function loadMetadataBatch( $rows ) {
-		$needed = array();
+		$needed = [];
 
 		foreach ( $rows as $row ) {
 			if ( $row->cuc_type != RC_FLOW || !$row->cuc_comment ) {
@@ -46,14 +45,14 @@ class CheckUserQuery extends AbstractQuery {
 			$needed[$revisionType][] = $revisionId;
 		}
 
-		$found = array();
+		$found = [];
 		foreach ( $needed as $type => $uids ) {
 			$found[] = $this->storage->getMulti( $type, $uids );
 		}
 
 		$count = count( $found );
 		if ( $count === 0 ) {
-			$results = array();
+			$results = [];
 		} elseif ( $count === 1 ) {
 			$results = reset( $found );
 		} else {
@@ -66,12 +65,11 @@ class CheckUserQuery extends AbstractQuery {
 	}
 
 	/**
-	 * @param CheckUser $checkUser
 	 * @param \StdClass $row
-	 * @return CheckUserRow|null
+	 * @return FormatterRow|bool
 	 * @throws FlowException
 	 */
-	public function getResult( CheckUser $checkUser, $row ) {
+	public function getResult( $row ) {
 		if ( $row->cuc_type != RC_FLOW || !$row->cuc_comment ) {
 			return false;
 		}
@@ -88,9 +86,8 @@ class CheckUserQuery extends AbstractQuery {
 		}
 		$revision = $this->revisionCache[$alpha];
 
-		$res = new CheckUserRow;
+		$res = new FormatterRow();
 		$this->buildResult( $revision, 'cuc_timestamp', $res );
-		$res->checkUser = $checkUser;
 
 		return $res;
 	}
@@ -131,13 +128,6 @@ class CheckUserQuery extends AbstractQuery {
 				return false;
 		}
 
-		return array( $workflowId, $revisionId, $postId );
+		return [ $workflowId, $revisionId, $postId ];
 	}
-}
-
-class CheckUserRow extends FormatterRow {
-	/**
-	 * @var CheckUser
-	 */
-	public $checkUser;
 }

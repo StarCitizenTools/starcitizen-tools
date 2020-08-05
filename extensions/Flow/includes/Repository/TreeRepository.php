@@ -2,12 +2,13 @@
 
 namespace Flow\Repository;
 
-use Flow\Data\BufferedCache;
+use Flow\Data\FlowObjectCache;
 use Flow\Data\ObjectManager;
 use Flow\DbFactory;
 use Flow\Model\UUID;
-use BagOStuff;
 use Flow\Exception\DataModelException;
+use Wikimedia\Rdbms\DBQueryError;
+use Wikimedia\Rdbms\DatabaseMysqlBase;
 
 /*
  *
@@ -44,15 +45,15 @@ class TreeRepository {
 	protected $dbFactory;
 
 	/**
-	 * @var BufferedCache
+	 * @var FlowObjectCache
 	 */
 	protected $cache;
 
 	/**
 	 * @param DbFactory $dbFactory Factory to source connection objects from
-	 * @param BufferedCache $cache
+	 * @param FlowObjectCache $cache
 	 */
-	public function __construct( DbFactory $dbFactory, BufferedCache $cache ) {
+	public function __construct( DbFactory $dbFactory, FlowObjectCache $cache ) {
 		$this->dbFactory = $dbFactory;
 		$this->cache = $cache;
 	}
@@ -70,66 +71,62 @@ class TreeRepository {
 	/**
 	 * Insert a new tree node.  If ancestor === null then this node is a root.
 	 *
-	 * To also write this to cache we would have to read our own write, which
-	 * isn't guaranteed during a node split. Master reads can potentially be
-	 * a different server than master writes.
-	 *
-	 * The way to do it without that is to CAS update memcache, assuming it currently
-	 * has what we need
+	 * Also delete cache entries related to this tree.
+	 * @param UUID $descendant
+	 * @param UUID|null $ancestor
+	 * @return true
+	 * @throws DataModelException
 	 */
 	public function insert( UUID $descendant, UUID $ancestor = null ) {
-		$subtreeKey = $this->cacheKey( 'subtree', $descendant );
-		$parentKey = $this->cacheKey( 'parent', $descendant );
-		$pathKey = $this->cacheKey( 'rootpath', $descendant );
-		$this->cache->set( $subtreeKey, array( $descendant ) );
+		$this->cache->delete( $this->cacheKey( 'subtree', $descendant ) );
+		$this->cache->delete( $this->cacheKey( 'parent', $descendant ) );
+		$this->cache->delete( $this->cacheKey( 'rootpath', $descendant ) );
+
 		if ( $ancestor === null ) {
-			$this->cache->set( $parentKey, null );
-			$this->cache->set( $pathKey, array( $descendant ) );
-			$path = array( $descendant );
+			$path = [ $descendant ];
 		} else {
-			$this->cache->set( $parentKey, $ancestor );
 			$path = $this->findRootPath( $ancestor );
 			$path[] = $descendant;
-			$this->cache->set( $pathKey, $path );
 		}
+		$this->deleteSubtreeCache( $descendant, $path );
 
 		$dbw = $this->dbFactory->getDB( DB_MASTER );
 		$res = $dbw->insert(
 			$this->tableName,
-			array(
+			[
 				'tree_descendant_id' => $descendant->getBinary(),
 				'tree_ancestor_id' => $descendant->getBinary(),
 				'tree_depth' => 0,
-			),
+			],
 			__METHOD__
 		);
 
 		if ( $res && $ancestor !== null ) {
 			try {
-				if ( defined( 'MW_PHPUNIT_TEST' ) && $dbw instanceof \DatabaseMysqlBase ) {
+				if ( defined( 'MW_PHPUNIT_TEST' ) && $dbw instanceof DatabaseMysqlBase ) {
 					/*
 					 * Combination of MW unit tests + MySQL DB is known to cause
 					 * query failures of code 1137, so instead of executing a
 					 * known bad query, let's just consider it failed right away
 					 * (and let catch statement deal with it)
 					 */
-					throw new \DBQueryError( $dbw, 'Prevented execution of known bad query', 1137, '', __METHOD__ );
+					throw new DBQueryError( $dbw, 'Prevented execution of known bad query', 1137, '', __METHOD__ );
 				}
 
 				$res = $dbw->insertSelect(
 					$this->tableName,
 					$this->tableName,
-					array(
+					[
 						'tree_descendant_id' => $dbw->addQuotes( $descendant->getBinary() ),
 						'tree_ancestor_id' => 'tree_ancestor_id',
 						'tree_depth' => 'tree_depth + 1',
-					),
-					array(
+					],
+					[
 						'tree_descendant_id' => $ancestor->getBinary(),
-					),
+					],
 					__METHOD__
 				);
-			} catch( \DBQueryError $e ) {
+			} catch ( DBQueryError $e ) {
 				$res = false;
 
 				/*
@@ -148,8 +145,8 @@ class TreeRepository {
 
 					$rows = $dbw->select(
 						$this->tableName,
-						array( 'tree_depth', 'tree_ancestor_id' ),
-						array( 'tree_descendant_id' => $ancestor->getBinary() ),
+						[ 'tree_depth', 'tree_ancestor_id' ],
+						[ 'tree_descendant_id' => $ancestor->getBinary() ],
 						__METHOD__
 					);
 
@@ -157,11 +154,11 @@ class TreeRepository {
 						foreach ( $rows as $row ) {
 							$res &= $dbw->insert(
 								$this->tableName,
-								array(
+								[
 									'tree_descendant_id' => $descendant->getBinary(),
 									'tree_ancestor_id' => $row->tree_ancestor_id,
 									'tree_depth' => $row->tree_depth + 1,
-								),
+								],
 								__METHOD__
 							);
 						}
@@ -171,34 +168,16 @@ class TreeRepository {
 		}
 
 		if ( !$res ) {
-			$this->cache->delete( $parentKey );
-			$this->cache->delete( $pathKey );
 			throw new DataModelException( 'Failed inserting new tree node', 'process-data' );
 		}
-		$this->appendToSubtreeCache( $descendant, $path );
+
 		return true;
 	}
 
-	protected function appendToSubtreeCache( UUID $descendant, array $rootPath ) {
-		$callback = function( BagOStuff $cache, $key, $value ) use( $descendant ) {
-			if ( $value === false ) {
-				return false;
-			}
-			$value[$descendant->getAlphadecimal()] = $descendant;
-			return $value;
-		};
-
-		// This could be pretty slow if there is contention
+	protected function deleteSubtreeCache( UUID $descendant, array $rootPath ) {
 		foreach ( $rootPath as $subtreeRoot ) {
 			$cacheKey = $this->cacheKey( 'subtree', $subtreeRoot );
-			$success = $this->cache->merge( $cacheKey, $callback );
-
-			// $success is always true if bufferCache starts with begin()
-			// if we failed to CAS new data, kill the cached value so it'll be
-			// re-fetched from DB
-			if ( !$success ) {
-				$this->cache->delete( $cacheKey );
-			}
+			$this->cache->delete( $cacheKey );
 		}
 	}
 
@@ -212,9 +191,9 @@ class TreeRepository {
 		$dbw = $this->dbFactory->getDB( DB_MASTER );
 		$res = $dbw->delete(
 			$this->tableName,
-			array(
+			[
 				'tree_descendant_id' => $descendant->getBinary(),
-			),
+			],
 			__METHOD__
 		);
 
@@ -232,7 +211,7 @@ class TreeRepository {
 	}
 
 	public function findParent( UUID $descendant ) {
-		$map = $this->fetchParentMap( array( $descendant ) );
+		$map = $this->fetchParentMap( [ $descendant ] );
 		return isset( $map[$descendant->getAlphadecimal()] ) ? $map[$descendant->getAlphadecimal()] : null;
 	}
 
@@ -244,40 +223,40 @@ class TreeRepository {
 	 */
 	public function findRootPaths( array $descendants ) {
 		// alphadecimal => cachekey
-		$cacheKeys = array();
+		$cacheKeys = [];
 		// alphadecimal => cache result ( distance => parent uuid obj )
-		$cacheValues = array();
+		$cacheValues = [];
 		// list of binary values for db query
-		$missingValues = array();
+		$missingValues = [];
 		// alphadecimal => distance => parent uuid obj
-		$paths = array();
+		$paths = [];
 
-		foreach( $descendants as $descendant ) {
+		foreach ( $descendants as $descendant ) {
 			$cacheKeys[$descendant->getAlphadecimal()] = $this->cacheKey( 'rootpath', $descendant );
 		}
 
 		$cacheResult = $this->cache->getMulti( array_values( $cacheKeys ) );
-		foreach( $descendants as $descendant ) {
+		foreach ( $descendants as $descendant ) {
 			$alpha = $descendant->getAlphadecimal();
 			if ( isset( $cacheResult[$cacheKeys[$alpha]] ) ) {
 				$cacheValues[$alpha] = $cacheResult[$cacheKeys[$alpha]];
 			} else {
 				$missingValues[] = $descendant->getBinary();
-				$paths[$alpha] = array();
+				$paths[$alpha] = [];
 			}
 		}
 
-		if ( ! count( $missingValues ) ) {
+		if ( !count( $missingValues ) ) {
 			return $cacheValues;
 		}
 
-		$dbr = $this->dbFactory->getDB( DB_SLAVE );
+		$dbr = $this->dbFactory->getDB( DB_REPLICA );
 		$res = $dbr->select(
 			$this->tableName,
-			array( 'tree_descendant_id', 'tree_ancestor_id', 'tree_depth' ),
-			array(
+			[ 'tree_descendant_id', 'tree_ancestor_id', 'tree_depth' ],
+			[
 				'tree_descendant_id' => $missingValues,
-			),
+			],
 			__METHOD__
 		);
 
@@ -290,7 +269,7 @@ class TreeRepository {
 			$paths[$alpha][$row->tree_depth] = UUID::create( $row->tree_ancestor_id );
 		}
 
-		foreach( $paths as $descendantId => &$path ) {
+		foreach ( $paths as $descendantId => &$path ) {
 			if ( !$path ) {
 				$path = null;
 				continue;
@@ -309,25 +288,25 @@ class TreeRepository {
 
 	/**
 	 * Finds the root path for a single post ID.
-	 * @param  UUID   $descendant Post ID
+	 * @param UUID $descendant Post ID
 	 * @return UUID[]|null Path to the root of that node.
 	 */
 	public function findRootPath( UUID $descendant ) {
-		$paths = $this->findRootPaths( array( $descendant ) );
+		$paths = $this->findRootPaths( [ $descendant ] );
 
 		return isset( $paths[$descendant->getAlphadecimal()] ) ? $paths[$descendant->getAlphadecimal()] : null;
 	}
 
 	/**
 	 * Finds the root posts of a list of posts.
-	 * @param  UUID[]  $descendants Array of PostRevision objects to find roots for.
+	 * @param UUID[] $descendants Array of PostRevision objects to find roots for.
 	 * @return UUID[] Associative array of post ID (as hex) to UUID object representing its root.
 	 */
 	public function findRoots( array $descendants ) {
 		$paths = $this->findRootPaths( $descendants );
-		$roots = array();
+		$roots = [];
 
-		foreach( $descendants as $descendant ) {
+		foreach ( $descendants as $descendant ) {
 			$alpha = $descendant->getAlphadecimal();
 			if ( isset( $paths[$alpha] ) ) {
 				$roots[$alpha] = $paths[$alpha][0];
@@ -372,7 +351,7 @@ class TreeRepository {
 	public function fetchSubtreeIdentityMap( $roots ) {
 		$roots = ObjectManager::makeArray( $roots );
 		if ( !$roots ) {
-			return array();
+			return [];
 		}
 		$nodes = $this->fetchSubtreeNodeList( $roots );
 		if ( !$nodes ) {
@@ -382,10 +361,10 @@ class TreeRepository {
 		} else {
 			$parentMap = $this->fetchParentMap( call_user_func_array( 'array_merge', $nodes ) );
 		}
-		$identityMap = array();
+		$identityMap = [];
 		foreach ( $parentMap as $child => $parent ) {
 			if ( !array_key_exists( $child, $identityMap ) ) {
-				$identityMap[$child] = array( 'children' => array() );
+				$identityMap[$child] = [ 'children' => [] ];
 			}
 			// Root nodes have no parent
 			if ( $parent !== null ) {
@@ -424,14 +403,14 @@ class TreeRepository {
 		$res = $list->get(
 			'subtree',
 			$roots,
-			array( $this, 'fetchSubtreeNodeListFromDb' )
+			[ $this, 'fetchSubtreeNodeListFromDb' ]
 		);
 		if ( $res === false ) {
 			wfDebugLog( 'Flow', __METHOD__ . ': Failure fetching node list from cache' );
 			return false;
 		}
 		// $idx is a binary UUID
-		$retval = array();
+		$retval = [];
 		foreach ( $res as $idx => $val ) {
 			$retval[UUID::create( $idx )->getAlphadecimal()] = $val;
 		}
@@ -439,12 +418,12 @@ class TreeRepository {
 	}
 
 	public function fetchSubtreeNodeListFromDb( array $roots ) {
-		$res = $this->dbFactory->getDB( DB_SLAVE )->select(
+		$res = $this->dbFactory->getDB( DB_REPLICA )->select(
 			$this->tableName,
-			array( 'tree_ancestor_id', 'tree_descendant_id' ),
-			array(
+			[ 'tree_ancestor_id', 'tree_descendant_id' ],
+			[
 				'tree_ancestor_id' => UUID::convertUUIDs( $roots ),
-			),
+			],
 			__METHOD__
 		);
 		if ( $res === false ) {
@@ -452,9 +431,9 @@ class TreeRepository {
 			return false;
 		}
 		if ( !$res ) {
-			return array();
+			return [];
 		}
-		$nodes = array();
+		$nodes = [];
 		foreach ( $res as $node ) {
 			$ancestor = UUID::create( $node->tree_ancestor_id );
 			$descendant = UUID::create( $node->tree_descendant_id );
@@ -467,13 +446,15 @@ class TreeRepository {
 	/**
 	 * Fetch the id of the immediate parent node of all ids in $nodes.  Non-existent
 	 * nodes are not represented in the result set.
+	 * @param array $nodes
+	 * @return array
 	 */
 	public function fetchParentMap( array $nodes ) {
 		$list = new MultiGetList( $this->cache );
 		return $list->get(
 			'parent',
 			$nodes,
-			array( $this, 'fetchParentMapFromDb' )
+			[ $this, 'fetchParentMapFromDb' ]
 		);
 	}
 
@@ -484,20 +465,20 @@ class TreeRepository {
 	 */
 	public function fetchParentMapFromDb( array $nodes ) {
 		// Find out who the parent is for those nodes
-		$dbr = $this->dbFactory->getDB( DB_SLAVE );
+		$dbr = $this->dbFactory->getDB( DB_REPLICA );
 		$res = $dbr->select(
 			$this->tableName,
-			array( 'tree_ancestor_id', 'tree_descendant_id' ),
-			array(
+			[ 'tree_ancestor_id', 'tree_descendant_id' ],
+			[
 				'tree_descendant_id' => UUID::convertUUIDs( $nodes ),
 				'tree_depth' => 1,
-			),
+			],
 			__METHOD__
 		);
 		if ( !$res ) {
-			return array();
+			return [];
 		}
-		$result = array();
+		$result = [];
 		foreach ( $res as $node ) {
 			if ( isset( $result[$node->tree_descendant_id] ) ) {
 				throw new DataModelException( 'Already have a parent for ' . $node->tree_descendant_id, 'process-data' );

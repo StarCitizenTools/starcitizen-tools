@@ -5,11 +5,14 @@
 			"Iwan Novirion",
 			"පසිඳු කාවින්ද",
 			"William Surya Permana",
-			"Bennylin"
+			"Bennylin",
+			"Xð",
+			"Kenrick95",
+			"Gombang"
 		]
 	},
 	"uls-desc": "Memberikan pengguna beberapa cara untuk memilih bahasa dan menyesuaikan pengaturan bahasa",
-	"uls-plang-title-languages": "Bahasa-bahasa",
+	"uls-plang-title-languages": "Bahasa",
 	"ext-uls-select-language-settings-icon-tooltip": "Setelan bahasa",
 	"ext-uls-undo-language-tooltip-text": "Bahasa berubah dari $1",
 	"ext-uls-language-settings-preferences-link": "Setelan lanjutan",
@@ -60,16 +63,7 @@
 	"ext-uls-language-settings-applying": "Menerapkan...",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Satu lagi|$1 lagi}}",
 	"ext-uls-compact-link-info": "Semua bahasa (pilihan awal berasal dari pilihan umum oleh Anda dan orang lain)",
-	"apihelp-languagesearch-description": "Cari nama bahasa dalam aksara apa pun.",
-	"apihelp-languagesearch-param-search": "Cari kata.",
-	"apihelp-languagesearch-param-typos": "Jumlah kesalahan eja yang diperbolehkan dalam kata pencarian.",
-	"apihelp-languagesearch-example-1": "Cari \"Te\"",
-	"apihelp-languagesearch-example-2": "Cari \"ഫി\"",
-	"apihelp-languagesearch-example-3": "Cari \"ഫി\", memperbolehkan satu kesalahan ketik",
-	"apihelp-ulslocalization-description": "Dapatkan lokalisasi ULS dalam bahasa yang diberikan.",
-	"apihelp-ulslocalization-param-language": "Kode bahasa.",
-	"apihelp-ulslocalization-example-1": "Dapatkan lokalisasi Tamil",
-	"apihelp-ulslocalization-example-2": "Dapatkan lokalisasi Hindi",
 	"prefs-languages": "Bahasa-bahasa",
-	"ext-uls-compact-language-links-preference": "Gunakan daftar bahasa pendek, dengan bahasa-bahasa yang relevan dengan Anda."
+	"ext-uls-compact-language-links-preference": "Gunakan [[$1|daftar bahasa pendek]], dengan bahasa-bahasa yang relevan dengan Anda.",
+	"ext-uls-compact-no-results": "Halaman ini tidak tersedia dalam bahasa yang Anda cari."
 }

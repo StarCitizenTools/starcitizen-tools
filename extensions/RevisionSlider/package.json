@@ -1,14 +1,24 @@
 {
-  "name": "RevisionSlider",
-  "version": "0.0.0",
-  "scripts": {
-    "test": "grunt test"
-  },
-  "devDependencies": {
-    "grunt": "1.0.1",
-    "grunt-contrib-jshint": "1.0.0",
-    "grunt-banana-checker": "0.5.0",
-    "grunt-jscs": "2.1.0",
-    "grunt-jsonlint": "1.0.7"
-  }
+	"name": "RevisionSlider",
+	"version": "1.0.0",
+	"homepage": "https://www.mediawiki.org/wiki/Extension:RevisionSlider",
+	"repository": {
+		"type": "git",
+		"url": "https://phabricator.wikimedia.org/diffusion/ERSL/RevisionSlider.git"
+	},
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"test": "grunt test"
+	},
+	"devDependencies": {
+		"eslint": "4.9.0",
+		"eslint-config-wikimedia": "0.5.0",
+		"grunt": "1.0.1",
+		"grunt-banana-checker": "0.6.0",
+		"grunt-eslint": "20.1.0",
+		"grunt-jsonlint": "1.1.0",
+		"grunt-stylelint": "0.9.0",
+		"stylelint": "8.2.0",
+		"stylelint-config-wikimedia": "0.4.2"
+	}
 }

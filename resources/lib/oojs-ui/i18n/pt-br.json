@@ -11,7 +11,9 @@
 			"OTAVIO1981",
 			555,
 			"TheEduGobi",
-			"TheGabrielZaum"
+			"TheGabrielZaum",
+			"Felipe L. Ewald",
+			"Eduardo Addad de Oliveira"
 		]
 	},
 	"ooui-outline-control-move-down": "Mover item para baixo",
@@ -20,11 +22,12 @@
 	"ooui-toolbar-more": "Mais",
 	"ooui-toolgroup-expand": "Mais",
 	"ooui-toolgroup-collapse": "Menos",
+	"ooui-item-remove": "Remover",
 	"ooui-dialog-message-accept": "OK",
 	"ooui-dialog-message-reject": "Cancelar",
 	"ooui-dialog-process-error": "Algo deu errado",
 	"ooui-dialog-process-dismiss": "Dispensar",
-	"ooui-dialog-process-retry": "Tentar novamente",
+	"ooui-dialog-process-retry": "Tente novamente",
 	"ooui-dialog-process-continue": "Continuar",
 	"ooui-selectfile-button-select": "Selecionar um arquivo",
 	"ooui-selectfile-not-supported": "O selecionamento de arquivos não é suportado",

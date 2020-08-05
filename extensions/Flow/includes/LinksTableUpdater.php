@@ -2,7 +2,7 @@
 
 namespace Flow;
 
-use DataUpdate;
+use DeferredUpdates;
 use Flow\Data\ManagerGroup;
 use Flow\Model\Reference;
 use Flow\Model\URLReference;
@@ -19,7 +19,6 @@ class LinksTableUpdater {
 	protected $storage;
 
 	/**
-	 * Constructor
 	 * @param ManagerGroup $storage A ManagerGroup
 	 */
 	public function __construct( ManagerGroup $storage ) {
@@ -31,12 +30,14 @@ class LinksTableUpdater {
 		$page = WikiPage::factory( $title );
 		$content = $page->getContent();
 		if ( $content === null ) {
-			$updates = array();
+			$updates = [];
 		} else {
 			$updates = $content->getSecondaryDataUpdates( $title );
 		}
 
-		DataUpdate::runUpdates( $updates );
+		foreach ( $updates as $update ) {
+			DeferredUpdates::addUpdate( $update, DeferredUpdates::PRESEND );
+		}
 	}
 
 	/**
@@ -51,11 +52,11 @@ class LinksTableUpdater {
 
 		$linkBatch = new LinkBatch();
 		/** @var Title[] $internalLinks */
-		$internalLinks = array();
+		$internalLinks = [];
 		/** @var Title[] $templates */
-		$templates = array();
+		$templates = [];
 
-		foreach( $references as $reference ) {
+		foreach ( $references as $reference ) {
 			if ( $reference->getType() === 'link' ) {
 				if ( $reference instanceof URLReference ) {
 					$parserOutput->mExternalLinks[$reference->getURL()] = true;
@@ -88,22 +89,22 @@ class LinksTableUpdater {
 		$linkBatch->execute();
 		$linkCache = LinkCache::singleton();
 
-		foreach( $internalLinks as $title ) {
+		foreach ( $internalLinks as $title ) {
 			$ns = $title->getNamespace();
 			$dbk = $title->getDBkey();
 			if ( !isset( $parserOutput->mLinks[$ns] ) ) {
-				$parserOutput->mLinks[$ns] = array();
+				$parserOutput->mLinks[$ns] = [];
 			}
 
 			$id = $linkCache->getGoodLinkID( $title->getPrefixedDBkey() );
 			$parserOutput->mLinks[$ns][$dbk] = $id;
 		}
 
-		foreach( $templates as $title ) {
+		foreach ( $templates as $title ) {
 			$ns = $title->getNamespace();
 			$dbk = $title->getDBkey();
 			if ( !isset( $parserOutput->mTemplates[$ns] ) ) {
-				$parserOutput->mTemplates[$ns] = array();
+				$parserOutput->mTemplates[$ns] = [];
 			}
 
 			$id = $linkCache->getGoodLinkID( $title->getPrefixedDBkey() );
@@ -114,25 +115,25 @@ class LinksTableUpdater {
 	public function getReferencesForTitle( Title $title ) {
 		$wikiReferences = $this->storage->find(
 			'WikiReference',
-			array(
-				'ref_src_wiki' => wfWikiId(),
+			[
+				'ref_src_wiki' => wfWikiID(),
 				'ref_src_namespace' => $title->getNamespace(),
 				'ref_src_title' => $title->getDBkey(),
-			)
+			]
 		);
 
 		$urlReferences = $this->storage->find(
 			'URLReference',
-			array(
-				'ref_src_wiki' => wfWikiId(),
+			[
+				'ref_src_wiki' => wfWikiID(),
 				'ref_src_namespace' => $title->getNamespace(),
 				'ref_src_title' => $title->getDBkey(),
-			)
+			]
 		);
 
 		// let's make sure the merge doesn't fail when nothing was found
-		$wikiReferences = $wikiReferences ?: array();
-		$urlReferences = $urlReferences ?: array();
+		$wikiReferences = $wikiReferences ?: [];
+		$urlReferences = $urlReferences ?: [];
 
 		return array_merge( $wikiReferences, $urlReferences );
 	}

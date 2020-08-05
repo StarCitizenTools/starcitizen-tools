@@ -33,6 +33,8 @@
  * @author לערי ריינהארט
  */
 
+$fallback = 'cs';
+
 $specialPageAliases = [
 	'Activeusers'               => [ 'AktívniPoužívatelia' ],
 	'Allmessages'               => [ 'VšetkySprávy' ],
@@ -136,6 +138,8 @@ $datePreferenceMigrationMap = [
 	'short tdmy',
 ];
 
+$defaultDateFormat = 'dmy';
+
 $dateFormats = [
 	/*
 	'Default',
@@ -173,9 +177,9 @@ $bookstoreList = [
 	'Haugenbok' => 'http://www.haugenbok.no/searchresults.cfm?searchtype=simple&isbn=$1',
 	'Akademika' => 'http://www.akademika.no/sok.php?isbn=$1',
 	'Gnist' => 'http://www.gnist.no/sok.php?isbn=$1',
-	'Amazon.co.uk' => 'http://www.amazon.co.uk/exec/obidos/ISBN=$1',
-	'Amazon.de' => 'http://www.amazon.de/exec/obidos/ISBN=$1',
-	'Amazon.com' => 'http://www.amazon.com/exec/obidos/ISBN=$1'
+	'Amazon.co.uk' => 'https://www.amazon.co.uk/exec/obidos/ISBN=$1',
+	'Amazon.de' => 'https://www.amazon.de/exec/obidos/ISBN=$1',
+	'Amazon.com' => 'https://www.amazon.com/exec/obidos/ISBN=$1'
 ];
 
 $magicWords = [
@@ -248,8 +252,8 @@ $namespaceNames = [
 	NS_MEDIA            => 'Médiá',
 	NS_SPECIAL          => 'Špeciálne',
 	NS_TALK             => 'Diskusia',
-	NS_USER             => 'Redaktor',
-	NS_USER_TALK        => 'Diskusia_s_redaktorom',
+	NS_USER             => 'Užívateľ',
+	NS_USER_TALK        => 'Diskusia_s_užívateľom',
 	NS_PROJECT_TALK     => 'Diskusia_k_{{GRAMMAR:datív|$1}}',
 	NS_FILE             => 'Súbor',
 	NS_FILE_TALK        => 'Diskusia_k_súboru',
@@ -265,6 +269,8 @@ $namespaceNames = [
 
 $namespaceAliases = [
 	"Komentár"               => NS_TALK,
+	'Redaktor'               => NS_USER,
+	'Diskusia_s_redaktorom'  => NS_USER_TALK,
 	"Komentár_k_redaktorovi" => NS_USER_TALK,
 	"Komentár_k_Wikipédii"   => NS_PROJECT_TALK,
 	'Obrázok' => NS_FILE,
@@ -273,10 +279,14 @@ $namespaceAliases = [
 	"Komentár_k_MediaWiki"   => NS_MEDIAWIKI_TALK,
 ];
 
+$namespaceGenderAliases = [
+	NS_USER => [ 'male' => 'Užívateľ', 'female' => 'Užívateľka' ],
+	NS_USER_TALK => [ 'male' => 'Diskusia_s_užívateľom', 'female' => 'Diskusia_s_užívateľkou' ],
+];
+
 $separatorTransformTable = [
 	',' => "\xc2\xa0",
 	'.' => ','
 ];
 
 $linkTrail = '/^([a-záäčďéíľĺňóôŕšťúýž]+)(.*)$/sDu';
-

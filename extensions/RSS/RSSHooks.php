@@ -4,22 +4,22 @@ class RSSHooks {
 
 	/**
 	 * Tell the parser how to handle <rss> elements
-	 * @param $parser Parser Object
+	 * @param Parser $parser Parser Object
 	 * @return bool
 	 */
-	static function parserInit( $parser ) {
-		# Install parser hook for <rss> tags
-		$parser->setHook( 'rss', array( __CLASS__, 'renderRss' ) );
+	static function onParserFirstCallInit( $parser ) {
+		// Install parser hook for <rss> tags
+		$parser->setHook( 'rss', [ __CLASS__, 'renderRss' ] );
 		return true;
 	}
 
 	/**
 	 * Static function wrapping RSSParser to handle rendering of RSS elements
-	 * @param $input String: text inside the tags.
-	 * @param $args Array: value associative list of the element attributes and
+	 * @param string $input text inside the tags.
+	 * @param array $args value associative list of the element attributes and
 	 * 						their values.
-	 * @param $parser Parser
-	 * @param $frame PPFrame parser context
+	 * @param Parser $parser
+	 * @param PPFrame $frame parser context
 	 * @return string
 	 */
 	static function renderRss( $input, array $args, Parser $parser, PPFrame $frame ) {
@@ -27,11 +27,10 @@ class RSSHooks {
 			$wgRSSUrlWhitelist,$wgRSSAllowedFeeds;
 
 		if ( is_array( $wgRSSNamespaces ) && count( $wgRSSNamespaces ) ) {
-
 			$ns = $parser->getTitle()->getNamespace();
 			$checkNS = array_flip( $wgRSSNamespaces );
 
-			if( !isset( $checkNS[$ns] ) ) {
+			if ( !isset( $checkNS[$ns] ) ) {
 				return RSSUtils::RSSError( 'rss-ns-permission' );
 			}
 		}
@@ -45,7 +44,6 @@ class RSSHooks {
 		if ( !isset( $wgRSSUrlWhitelist )
 			|| !is_array( $wgRSSUrlWhitelist )
 			|| ( count( $wgRSSUrlWhitelist ) === 0 ) ) {
-
 			return RSSUtils::RSSError( 'rss-empty-whitelist',
 				$input
 			);
@@ -58,12 +56,11 @@ class RSSHooks {
 
 		if ( !( in_array( $input, $wgRSSUrlWhitelist ) )
 			&& !( in_array( "*", $wgRSSUrlWhitelist ) ) ) {
-
 			$listOfAllowed = $parser->getFunctionLang()->listToText( $wgRSSUrlWhitelist );
 			$numberAllowed = $parser->getFunctionLang()->formatNum( count( $wgRSSUrlWhitelist ) );
 
 			return RSSUtils::RSSError( 'rss-url-is-not-whitelisted',
-				array( $input, $listOfAllowed, $numberAllowed )
+				[ $input, $listOfAllowed, $numberAllowed ]
 			);
 
 		}

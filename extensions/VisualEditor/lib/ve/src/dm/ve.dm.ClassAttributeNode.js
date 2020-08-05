@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel ClassAttribute class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -31,6 +31,10 @@ OO.initClass( ve.dm.ClassAttributeNode );
  * @type {Object}
  */
 ve.dm.ClassAttributeNode.static.classAttributes = {};
+
+ve.dm.ClassAttributeNode.static.preserveHtmlAttributes = function ( attribute ) {
+	return attribute !== 'class';
+};
 
 /**
  * Set attributes from a class attribute

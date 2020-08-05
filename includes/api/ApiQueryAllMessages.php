@@ -1,9 +1,5 @@
 <?php
 /**
- *
- *
- * Created on Dec 1, 2007
- *
  * Copyright © 2006 Yuri Astrakhan "<Firstname><Lastname>@gmail.com"
  *
  * This program is free software; you can redistribute it and/or modify
@@ -41,7 +37,9 @@ class ApiQueryAllMessages extends ApiQueryBase {
 		if ( is_null( $params['lang'] ) ) {
 			$langObj = $this->getLanguage();
 		} elseif ( !Language::isValidCode( $params['lang'] ) ) {
-			$this->dieUsage( 'Invalid language code for parameter lang', 'invalidlang' );
+			$this->dieWithError(
+				[ 'apierror-invalidlang', $this->encodeParamName( 'lang' ) ], 'invalidlang'
+			);
 		} else {
 			$langObj = Language::factory( $params['lang'] );
 		}
@@ -50,7 +48,7 @@ class ApiQueryAllMessages extends ApiQueryBase {
 			if ( !is_null( $params['title'] ) ) {
 				$title = Title::newFromText( $params['title'] );
 				if ( !$title || $title->isExternal() ) {
-					$this->dieUsageMsg( [ 'invalidtitle', $params['title'] ] );
+					$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['title'] ) ] );
 				}
 			} else {
 				$title = Title::newFromText( 'API' );
@@ -113,15 +111,14 @@ class ApiQueryAllMessages extends ApiQueryBase {
 		$customiseFilterEnabled = $params['customised'] !== 'all';
 		if ( $customiseFilterEnabled ) {
 			global $wgContLang;
-			$lang = $langObj->getCode();
 
 			$customisedMessages = AllMessagesTablePager::getCustomisedStatuses(
 				array_map(
 					[ $langObj, 'ucfirst' ],
 					$messages_target
 				),
-				$lang,
-				$lang != $wgContLang->getCode()
+				$langObj->getCode(),
+				!$langObj->equals( $wgContLang )
 			);
 
 			$customised = $params['customised'] === 'modified';
@@ -255,6 +252,6 @@ class ApiQueryAllMessages extends ApiQueryBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/API:Allmessages';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Allmessages';
 	}
 }

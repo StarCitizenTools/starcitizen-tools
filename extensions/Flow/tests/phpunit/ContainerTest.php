@@ -14,14 +14,14 @@ class ContainerTest extends FlowTestCase {
 		$container = Container::getContainer();
 
 		foreach ( $container->keys() as $key ) {
-			$this->assertNotNull( $container[$key], $key );
+			$this->assertArrayHasKey( $key, $container );
 		}
 	}
 
 	public function objectManagerKeyProvider() {
-		$tests = array();
+		$tests = [];
 		foreach ( array_unique( Container::get( 'storage.manager_list' ) ) as $key ) {
-			$tests[] = array( $key );
+			$tests[] = [ $key ];
 		}
 		return $tests;
 	}

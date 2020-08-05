@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LinkAnnotationInspector class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,7 +16,7 @@
  */
 ve.ui.MWLinkAnnotationInspector = function VeUiMWLinkAnnotationInspector( config ) {
 	// Parent constructor
-	ve.ui.MWLinkAnnotationInspector.super.call( this, config );
+	ve.ui.MWLinkAnnotationInspector.super.call( this, ve.extendObject( { padded: false }, config ) );
 };
 
 /* Inheritance */
@@ -55,14 +55,14 @@ ve.ui.MWLinkAnnotationInspector.prototype.initialize = function () {
 		expanded: false
 	} );
 
-	this.linkTypeIndex.addCards( [
-		new OO.ui.CardLayout( 'internal', {
+	this.linkTypeIndex.addTabPanels( [
+		new OO.ui.TabPanelLayout( 'internal', {
 			label: ve.msg( 'visualeditor-linkinspector-button-link-internal' ),
 			expanded: false,
 			scrollable: false,
 			padded: true
 		} ),
-		new OO.ui.CardLayout( 'external', {
+		new OO.ui.TabPanelLayout( 'external', {
 			label: ve.msg( 'visualeditor-linkinspector-button-link-external' ),
 			expanded: false,
 			scrollable: false,
@@ -76,6 +76,7 @@ ve.ui.MWLinkAnnotationInspector.prototype.initialize = function () {
 	this.externalAnnotationInput.connect( this, { change: 'onExternalLinkChange' } );
 	this.internalAnnotationInput.input.getResults().connect( this, { choose: 'onFormSubmit' } );
 	// Form submit only auto triggers on enter when there is one input
+	this.internalAnnotationInput.getTextInputWidget().connect( this, { change: 'onInternalLinkInputChange' } );
 	this.internalAnnotationInput.getTextInputWidget().connect( this, { enter: 'onFormSubmit' } );
 	this.externalAnnotationInput.getTextInputWidget().connect( this, { enter: 'onFormSubmit' } );
 
@@ -91,8 +92,8 @@ ve.ui.MWLinkAnnotationInspector.prototype.initialize = function () {
 	// Initialization
 	// HACK: IndexLayout is absolutely positioned, so place actions inside it
 	this.linkTypeIndex.$content.append( this.$otherActions );
-	this.linkTypeIndex.getCard( 'internal' ).$element.append( this.internalAnnotationInput.$element );
-	this.linkTypeIndex.getCard( 'external' ).$element.append( this.externalAnnotationInput.$element );
+	this.linkTypeIndex.getTabPanel( 'internal' ).$element.append( this.internalAnnotationInput.$element );
+	this.linkTypeIndex.getTabPanel( 'external' ).$element.append( this.externalAnnotationInput.$element );
 	this.form.$element.append( this.linkTypeIndex.$element );
 };
 
@@ -102,7 +103,7 @@ ve.ui.MWLinkAnnotationInspector.prototype.initialize = function () {
  * @return {boolean} Input mode is for external links
  */
 ve.ui.MWLinkAnnotationInspector.prototype.isExternal = function () {
-	return this.linkTypeIndex.getCurrentCardName() === 'external';
+	return this.linkTypeIndex.getCurrentTabPanelName() === 'external';
 };
 
 /**
@@ -110,34 +111,7 @@ ve.ui.MWLinkAnnotationInspector.prototype.isExternal = function () {
  *
  * @param {ve.dm.MWInternalLinkAnnotation} annotation Annotation
  */
-ve.ui.MWLinkAnnotationInspector.prototype.onInternalLinkChange = function ( annotation ) {
-	var targetData,
-		href = annotation ? annotation.getAttribute( 'title' ) : '',
-		// Have to check that this.getFragment() is defined because parent class's teardown
-		// invokes setAnnotation( null ) which calls this code after fragment is unset
-		htmlDoc = this.getFragment() && this.getFragment().getDocument().getHtmlDocument();
-
-	if ( htmlDoc && ve.init.platform.getExternalLinkUrlProtocolsRegExp().test( href ) ) {
-		// Check if the 'external' link is in fact a page on the same wiki
-		// e.g. http://en.wikipedia.org/wiki/Target -> Target
-		targetData = ve.dm.MWInternalLinkAnnotation.static.getTargetDataFromHref(
-			href,
-			htmlDoc
-		);
-		if ( targetData.isInternal ) {
-			this.internalAnnotationInput.getTextInputWidget().setValue( targetData.title );
-			return;
-		}
-	}
-
-	if (
-		!this.allowProtocolInInternal &&
-		ve.init.platform.getExternalLinkUrlProtocolsRegExp().test( href )
-	) {
-		this.linkTypeIndex.setCard( 'external' );
-		// Changing card focuses and selects the input, so collapse the cursor back to the end.
-		this.externalAnnotationInput.getTextInputWidget().moveCursorToEnd();
-	}
+ve.ui.MWLinkAnnotationInspector.prototype.onInternalLinkChange = function () {
 	this.updateActions();
 };
 
@@ -193,6 +167,35 @@ ve.ui.MWLinkAnnotationInspector.prototype.updateActions = function () {
 };
 
 /**
+ * Handle change events on the internal link widget's input
+ *
+ * @param {string} value Current value of input widget
+ */
+ve.ui.MWLinkAnnotationInspector.prototype.onInternalLinkInputChange = function ( value ) {
+	// If this looks like an external link, switch to the correct tabPanel.
+	// Note: We don't care here if it's a *valid* link, so we just
+	// check whether it looks like a URI -- i.e. whether it starts with
+	// something that appears to be a schema per RFC1630. Later the external
+	// link inspector will use getExternalLinkUrlProtocolsRegExp for validity
+	// checking.
+	// Note 2: RFC1630 might be too broad in practice. You don't really see
+	// schemas that use the full set of allowed characters, and we might get
+	// more false positives by checking for them.
+	// Note 3: We allow protocol-relative URIs here.
+	if ( this.internalAnnotationInput.getTextInputWidget().getValue() !== value ) {
+		return;
+	}
+	if (
+		!this.allowProtocolInInternal &&
+		/^(?:[a-z][a-z0-9$\-_@.&!*"'(),]*:)?\/\//i.test( value.trim() )
+	) {
+		this.linkTypeIndex.setTabPanel( 'external' );
+		// Changing tabPanel focuses and selects the input, so collapse the cursor back to the end.
+		this.externalAnnotationInput.getTextInputWidget().moveCursorToEnd();
+	}
+};
+
+/**
  * @inheritdoc
  */
 ve.ui.MWLinkAnnotationInspector.prototype.createAnnotationInput = function () {
@@ -205,7 +208,7 @@ ve.ui.MWLinkAnnotationInspector.prototype.createAnnotationInput = function () {
 ve.ui.MWLinkAnnotationInspector.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.MWLinkAnnotationInspector.super.prototype.getSetupProcess.call( this, data )
 		.next( function () {
-			this.linkTypeIndex.setCard(
+			this.linkTypeIndex.setTabPanel(
 				this.initialAnnotation instanceof ve.dm.MWExternalLinkAnnotation ? 'external' : 'internal'
 			);
 			this.annotationInput.setAnnotation( this.initialAnnotation );
@@ -258,7 +261,6 @@ ve.ui.MWLinkAnnotationInspector.prototype.getTeardownProcess = function ( data )
 					}
 				] );
 				data.setAnnotationsAtOffset( 0, annotations );
-				data.setAnnotationsAtOffset( 1, annotations );
 				fragment.insertContent( data.getData(), true );
 			}
 
@@ -273,7 +275,7 @@ ve.ui.MWLinkAnnotationInspector.prototype.getTeardownProcess = function ( data )
 /**
  * Handle set events from the linkTypeIndex layout
  *
- * @param {OO.ui.CardLayout} card Current card
+ * @param {OO.ui.TabPanelLayout} tabPanel Current tabPanel
  */
 ve.ui.MWLinkAnnotationInspector.prototype.onLinkTypeIndexSet = function () {
 	var text = this.annotationInput.getTextInputWidget().getValue(),
@@ -297,6 +299,10 @@ ve.ui.MWLinkAnnotationInspector.prototype.onLinkTypeIndexSet = function () {
 	// 2. User clicks external link tab (unnecessary, because we'd auto-switch, but the user doesn't know that)
 	// 3. User pastes a link, intending to replace the existing prefilled link
 	this.annotationInput.getTextInputWidget().$input[ 0 ].setSelectionRange( 0, end );
+	// Focusing a TextInputWidget normally unsets validity. However, because
+	// we're kind of pretending this is the same input, just in a different
+	// mode, it doesn't make sense to the user that the focus behavior occurs.
+	this.annotationInput.getTextInputWidget().setValidityFlag();
 
 	this.updateActions();
 };

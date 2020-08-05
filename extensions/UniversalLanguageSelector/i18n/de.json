@@ -11,6 +11,7 @@
 	"uls-plang-title-languages": "Sprachen",
 	"ext-uls-select-language-settings-icon-tooltip": "Spracheinstellungen",
 	"ext-uls-undo-language-tooltip-text": "Sprache geändert von $1",
+	"ext-uls-undo-language-tooltip-text-local": "Die Sprache wurde für dieses Wiki geändert. Gehe zu deinen [[Special:GlobalPreferences|globalen Einstellungen]], um die Sprache für alle Wikis zu ändern.",
 	"ext-uls-language-settings-preferences-link": "Weitere Spracheinstellungen",
 	"uls-betafeature-label": "Kompakte Sprachlinks",
 	"uls-betafeature-desc": "Zeigt eine kürzere Version der Sprachenliste mit den für dich relevanten Sprachen an.",
@@ -59,16 +60,7 @@
 	"ext-uls-language-settings-applying": "Anwenden …",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Eine weitere|$1 weitere}}",
 	"ext-uls-compact-link-info": "Alle Sprachen (erste Auswahl der häufigen Auswahlen von dir und anderen)",
-	"apihelp-languagesearch-description": "Sucht nach Sprachnamen in beliebiger Schrift.",
-	"apihelp-languagesearch-param-search": "Such-Zeichenfolge.",
-	"apihelp-languagesearch-param-typos": "Anzahl der erlaubten Rechtschreibfehler in der Sucheingabe.",
-	"apihelp-languagesearch-example-1": "Sucht nach „Te“",
-	"apihelp-languagesearch-example-2": "Sucht nach „ഫി“",
-	"apihelp-languagesearch-example-3": "Sucht nach „ഫി“, erlaubt einen Tippfehler",
-	"apihelp-ulslocalization-description": "Ruft die Lokalisierung von ULS in der vorgegebenen Sprache ab.",
-	"apihelp-ulslocalization-param-language": "Sprachcode.",
-	"apihelp-ulslocalization-example-1": "Ruft die Tamil-Lokalisierung ab",
-	"apihelp-ulslocalization-example-2": "Ruft die Hindi-Lokalisierung ab",
 	"prefs-languages": "Sprachen",
-	"ext-uls-compact-language-links-preference": "Eine kompakte Sprachliste mit für dich relevanten Sprachen verwenden."
+	"ext-uls-compact-language-links-preference": "Eine [[$1|kompakte Sprachliste]] mit für dich relevanten Sprachen verwenden.",
+	"ext-uls-compact-no-results": "Diese Seite ist nicht in der gewünschten Sprache verfügbar."
 }

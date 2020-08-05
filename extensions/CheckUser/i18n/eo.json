@@ -3,7 +3,8 @@
 		"authors": [
 			"Blahma",
 			"Michawiki",
-			"Yekrats"
+			"Yekrats",
+			"Robin van der Vliet"
 		]
 	},
 	"checkuser-summary": "Ĉi tiu ilo skanas lastajn ŝanĝojn por akiri la IP-adresojn uzatajn de uzanto aŭ montri la datenojn de redakto/uzanto por aparta IP-adreso.\nUzantoj kaj redaktoj de klienta IP-adreso povas esti akirita per XFF-titolaro postaldonante al la IP-adreso kun \"/xff\".\nIPv4 (CIDR $1-32) kaj IPv6 (CIDR $2-128) estas subtenataj.\nNeniom pli ol 5000 redaktoj estos montrita pro bona datumbaza funkciado.\nUzu ĉi tion laŭ regularo.",
@@ -14,7 +15,7 @@
 	"checkuser-contribs": "kontroli IP-adresojn de uzantoj",
 	"checkuser-contribs-log": "lastaj kontroloj de uzantoj",
 	"group-checkuser": "Kontrolaj uzantoj",
-	"group-checkuser-member": "{{GENDER:$1|Kontrolanto de IP-adresoj|Kontrolantino de IP-adresoj}}",
+	"group-checkuser-member": "{{GENDER:$1|kontrolanto de IP-adresoj}}",
 	"right-checkuser": "Kontroli la IP-adreson kaj alian informon de uzanto",
 	"right-checkuser-log": "Vidi la protokolon pri kontrolantoj de IP-adresoj",
 	"action-checkuser": "kontroli la IP-adreson kaj aliajn informojn de la uzanto",
@@ -28,7 +29,6 @@
 	"checkuser-users": "Akiri uzantojn",
 	"checkuser-edits": "Mendi redaktojn",
 	"checkuser-ips": "Preni IP-adresojn",
-	"checkuser-search": "Serĉi",
 	"checkuser-period": "Daŭro:",
 	"checkuser-week-1": "lasta semajno",
 	"checkuser-week-2": "lastaj du semajnoj",
@@ -60,12 +60,12 @@
 	"checkuser-accounts": "$1 {{PLURAL:$1|nova konto|novaj kontoj}}",
 	"checkuser-too-many": "Tro da rezultoj, laŭ taskoj de serĉomendo. Bonvolu malvastigi la CIDR.\nJen la IP-adresoj uzitaj (maksimume 5000, ordigita laŭ adresoj):",
 	"checkuser-user-nonexistent": "La donata uzanto ne ekzistas.",
-	"checkuser-search-form": "Trovi protokolerojn en kiu la $1 estas $2",
+	"checkuser-search": "Serĉi",
 	"checkuser-search-submit": "Serĉi",
 	"checkuser-search-initiator": "inicianto",
 	"checkuser-search-target": "celo",
 	"checkuser-ipeditcount": "~$1 de ĉiuj uzantoj",
-	"checkuser-log-return": "Reiri al ĉefa kamparo por CheckUser",
+	"checkuser-showmain": "Reiri al ĉefa kamparo por CheckUser",
 	"checkuser-limited": "'''Ĉi tiuj rezultoj estis stumpigitaj pro laborecaj kialoj.",
 	"checkuser-autocreate-action": "estis aŭtomate kreita",
 	"checkuser-create-action": "estis kreita",

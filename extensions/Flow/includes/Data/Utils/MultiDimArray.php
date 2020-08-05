@@ -29,14 +29,17 @@ use RecursiveIteratorIterator;
  *   )
  */
 class MultiDimArray implements \ArrayAccess {
-	protected $data = array();
+	protected $data = [];
 
 	public function all() {
 		return $this->data;
 	}
 
-	// Probably not what you want.  primary key value is lost, you only
-	// receive the final key in a composite key set.
+	/**
+	 * Probably not what you want.  primary key value is lost, you only
+	 * receive the final key in a composite key set.
+	 * @return RecursiveIteratorIterator
+	 */
 	public function getIterator() {
 		$it = new RecursiveArrayIterator( $this->data );
 		return new RecursiveIteratorIterator( $it );
@@ -44,9 +47,9 @@ class MultiDimArray implements \ArrayAccess {
 
 	public function offsetSet( $offset, $value ) {
 		$data =& $this->data;
-		foreach ( (array) $offset as $key ) {
+		foreach ( (array)$offset as $key ) {
 			if ( !isset( $data[$key] ) ) {
-				$data[$key] = array();
+				$data[$key] = [];
 			}
 			$data =& $data[$key];
 		}
@@ -55,11 +58,11 @@ class MultiDimArray implements \ArrayAccess {
 
 	public function offsetGet( $offset ) {
 		$data =& $this->data;
-		foreach ( (array) $offset as $key ) {
+		foreach ( (array)$offset as $key ) {
 			if ( !isset( $data[$key] ) ) {
 				throw new \OutOfBoundsException( 'Does not exist' );
-			} elseif ( ! is_array( $data ) ) {
-				throw new \OutOfBoundsException( "Requested offset {$key} (full offset ".implode(':', $offset)."), but $data is not an array." );
+			} elseif ( !is_array( $data ) ) {
+				throw new \OutOfBoundsException( "Requested offset {$key} (full offset ".implode( ':', $offset )."), but $data is not an array." );
 			}
 			$data =& $data[$key];
 		}
@@ -67,10 +70,10 @@ class MultiDimArray implements \ArrayAccess {
 	}
 
 	public function offsetUnset( $offset ) {
-		$offset = (array) $offset;
+		$offset = (array)$offset;
 		// while loop is required to not leave behind empty arrays
 		$first = true;
-		while( $offset ) {
+		while ( $offset ) {
 			$end = array_pop( $offset );
 			$data =& $this->data;
 			foreach ( $offset as $key ) {
@@ -88,11 +91,11 @@ class MultiDimArray implements \ArrayAccess {
 
 	public function offsetExists( $offset ) {
 		$data =& $this->data;
-		foreach ( (array) $offset as $key ) {
+		foreach ( (array)$offset as $key ) {
 			if ( !isset( $data[$key] ) ) {
 				return false;
-			} elseif ( ! is_array( $data ) ) {
-				throw new \OutOfBoundsException( "Requested offset {$key} (full offset ".implode(':', $offset)."), but $data is not an array." );
+			} elseif ( !is_array( $data ) ) {
+				throw new \OutOfBoundsException( "Requested offset {$key} (full offset ".implode( ':', $offset )."), but $data is not an array." );
 			}
 			$data =& $data[$key];
 		}

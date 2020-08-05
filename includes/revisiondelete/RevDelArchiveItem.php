@@ -45,6 +45,10 @@ class RevDelArchiveItem extends RevDelRevisionItem {
 		return 'ar_user_text';
 	}
 
+	public function getAuthorActorField() {
+		return 'ar_actor';
+	}
+
 	public function getId() {
 		# Convert DB timestamp to MW timestamp
 		return $this->revision->getTimestamp();
@@ -68,14 +72,14 @@ class RevDelArchiveItem extends RevDelRevisionItem {
 	}
 
 	protected function getRevisionLink() {
-		$date = htmlspecialchars( $this->list->getLanguage()->userTimeAndDate(
-			$this->revision->getTimestamp(), $this->list->getUser() ) );
+		$date = $this->list->getLanguage()->userTimeAndDate(
+			$this->revision->getTimestamp(), $this->list->getUser() );
 
 		if ( $this->isDeleted() && !$this->canViewContent() ) {
-			return $date;
+			return htmlspecialchars( $date );
 		}
 
-		return Linker::link(
+		return $this->getLinkRenderer()->makeLink(
 			SpecialPage::getTitleFor( 'Undelete' ),
 			$date,
 			[],
@@ -91,9 +95,9 @@ class RevDelArchiveItem extends RevDelRevisionItem {
 			return $this->list->msg( 'diff' )->escaped();
 		}
 
-		return Linker::link(
+		return $this->getLinkRenderer()->makeLink(
 			SpecialPage::getTitleFor( 'Undelete' ),
-			$this->list->msg( 'diff' )->escaped(),
+			$this->list->msg( 'diff' )->text(),
 			[],
 			[
 				'target' => $this->list->title->getPrefixedText(),

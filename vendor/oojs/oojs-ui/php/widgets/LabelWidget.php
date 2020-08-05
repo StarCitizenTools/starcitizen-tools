@@ -10,7 +10,7 @@ class LabelWidget extends Widget {
 
 	/* Static Properties */
 
-	public static $tagName = 'span';
+	public static $tagName = 'label';
 
 	/* Properties */
 
@@ -37,6 +37,9 @@ class LabelWidget extends Widget {
 		$this->input = isset( $config['input'] ) ? $config['input'] : null;
 
 		// Initialization
+		if ( $this->input && $this->input->getInputId() ) {
+			$this->setAttributes( [ 'for' => $this->input->getInputId() ] );
+		}
 		$this->addClasses( [ 'oo-ui-labelWidget' ] );
 	}
 

@@ -22,6 +22,10 @@
 /**
  * @ingroup Pager
  */
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\FakeResultWrapper;
+
 class ImageListPager extends TablePager {
 
 	protected $mFieldNames = null;
@@ -74,7 +78,7 @@ class ImageListPager extends TablePager {
 			$nt = Title::newFromText( $this->mSearch );
 
 			if ( $nt ) {
-				$dbr = wfGetDB( DB_SLAVE );
+				$dbr = wfGetDB( DB_REPLICA );
 				$this->mQueryConds[] = 'LOWER(img_name)' .
 					$dbr->buildLike( $dbr->anyString(),
 						strtolower( $nt->getDBkey() ), $dbr->anyString() );
@@ -130,13 +134,20 @@ class ImageListPager extends TablePager {
 		$conds = [];
 
 		if ( !is_null( $this->mUserName ) ) {
-			$conds[$prefix . '_user_text'] = $this->mUserName;
+			// getQueryInfoReal() should have handled the tables and joins.
+			$dbr = wfGetDB( DB_REPLICA );
+			$actorWhere = ActorMigration::newMigration()->getWhere(
+				$dbr,
+				$prefix . '_user',
+				User::newFromName( $this->mUserName, false )
+			);
+			$conds[] = $actorWhere['conds'];
 		}
 
 		if ( $this->mSearch !== '' ) {
 			$nt = Title::newFromText( $this->mSearch );
 			if ( $nt ) {
-				$dbr = wfGetDB( DB_SLAVE );
+				$dbr = wfGetDB( DB_REPLICA );
 				$conds[] = 'LOWER(' . $prefix . '_name)' .
 					$dbr->buildLike( $dbr->anyString(),
 						strtolower( $nt->getDBkey() ), $dbr->anyString() );
@@ -189,8 +200,9 @@ class ImageListPager extends TablePager {
 		}
 		$sortable = [ 'img_timestamp', 'img_name', 'img_size' ];
 		/* For reference, the indicies we can use for sorting are:
-		 * On the image table: img_usertext_timestamp, img_size, img_timestamp
-		 * On oldimage: oi_usertext_timestamp, oi_name_timestamp
+		 * On the image table: img_user_timestamp/img_usertext_timestamp/img_actor_timestamp,
+		 * img_size, img_timestamp
+		 * On oldimage: oi_usertext_timestamp/oi_actor_timestamp, oi_name_timestamp
 		 *
 		 * In particular that means we cannot sort by timestamp when not filtering
 		 * by user and including old images in the results. Which is sad.
@@ -239,7 +251,10 @@ class ImageListPager extends TablePager {
 		$prefix = $table === 'oldimage' ? 'oi' : 'img';
 
 		$tables = [ $table ];
-		$fields = array_keys( $this->getFieldNames() );
+		$fields = $this->getFieldNames();
+		unset( $fields['img_description'] );
+		unset( $fields['img_user_text'] );
+		$fields = array_keys( $fields );
 
 		if ( $table === 'oldimage' ) {
 			foreach ( $fields as $id => &$field ) {
@@ -254,10 +269,24 @@ class ImageListPager extends TablePager {
 				$fields[array_search( 'top', $fields )] = "'yes' AS top";
 			}
 		}
-		$fields[] = $prefix . '_user AS img_user';
 		$fields[array_search( 'thumb', $fields )] = $prefix . '_name AS thumb';
 
 		$options = $join_conds = [];
+
+		# Description field
+		$commentQuery = CommentStore::getStore()->getJoin( $prefix . '_description' );
+		$tables += $commentQuery['tables'];
+		$fields += $commentQuery['fields'];
+		$join_conds += $commentQuery['joins'];
+		$fields['description_field'] = "'{$prefix}_description'";
+
+		# User fields
+		$actorQuery = ActorMigration::newMigration()->getJoin( $prefix . '_user' );
+		$tables += $actorQuery['tables'];
+		$join_conds += $actorQuery['joins'];
+		$fields['img_user'] = $actorQuery['fields'][$prefix . '_user'];
+		$fields['img_user_text'] = $actorQuery['fields'][$prefix . '_user_text'];
+		$fields['img_actor'] = $actorQuery['fields'][$prefix . '_actor'];
 
 		# Depends on $wgMiserMode
 		# Will also not happen if mShowAll is true.
@@ -272,14 +301,9 @@ class ImageListPager extends TablePager {
 			}
 			unset( $field );
 
-			$dbr = wfGetDB( DB_SLAVE );
-			if ( $dbr->implicitGroupby() ) {
-				$options = [ 'GROUP BY' => 'img_name' ];
-			} else {
-				$columnlist = preg_grep( '/^img/', array_keys( $this->getFieldNames() ) );
-				$options = [ 'GROUP BY' => array_merge( [ 'img_user' ], $columnlist ) ];
-			}
-			$join_conds = [ 'oldimage' => [ 'LEFT JOIN', 'oi_name = img_name' ] ];
+			$columnlist = preg_grep( '/^img/', array_keys( $this->getFieldNames() ) );
+			$options = [ 'GROUP BY' => array_merge( [ $fields['img_user'] ], $columnlist ) ];
+			$join_conds['oldimage'] = [ 'LEFT JOIN', 'oi_name = img_name' ];
 		}
 
 		return [
@@ -339,8 +363,8 @@ class ImageListPager extends TablePager {
 	 *
 	 * Note: This will throw away some results
 	 *
-	 * @param ResultWrapper $res1
-	 * @param ResultWrapper $res2
+	 * @param IResultWrapper $res1
+	 * @param IResultWrapper $res2
 	 * @param int $limit
 	 * @param bool $ascending See note about $asc in $this->reallyDoQuery
 	 * @return FakeResultWrapper $res1 and $res2 combined
@@ -371,16 +395,12 @@ class ImageListPager extends TablePager {
 			}
 		}
 
-		// @codingStandardsIgnoreStart Squiz.WhiteSpace.SemicolonSpacing.Incorrect
 		for ( ; $i < $limit && $topRes1; $i++ ) {
-			// @codingStandardsIgnoreEnd
 			$resultArray[] = $topRes1;
 			$topRes1 = $res1->next();
 		}
 
-		// @codingStandardsIgnoreStart Squiz.WhiteSpace.SemicolonSpacing.Incorrect
 		for ( ; $i < $limit && $topRes2; $i++ ) {
-			// @codingStandardsIgnoreEnd
 			$resultArray[] = $topRes2;
 			$topRes2 = $res2->next();
 		}
@@ -422,6 +442,7 @@ class ImageListPager extends TablePager {
 	 * @throws MWException
 	 */
 	function formatValue( $field, $value ) {
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 		switch ( $field ) {
 			case 'thumb':
 				$opt = [ 'time' => wfTimestamp( TS_MW, $this->mCurrentRow->img_timestamp ) ];
@@ -429,8 +450,11 @@ class ImageListPager extends TablePager {
 				// If statement for paranoia
 				if ( $file ) {
 					$thumb = $file->transform( [ 'width' => 180, 'height' => 360 ] );
-
-					return $thumb->toHtml( [ 'desc-link' => true ] );
+					if ( $thumb ) {
+						return $thumb->toHtml( [ 'desc-link' => true ] );
+					} else {
+						return wfMessage( 'thumbnail_error', '' )->escaped();
+					}
 				} else {
 					return htmlspecialchars( $value );
 				}
@@ -443,12 +467,12 @@ class ImageListPager extends TablePager {
 					$imgfile = $this->msg( 'imgfile' )->text();
 				}
 
-				// Weird files can maybe exist? Bug 22227
+				// Weird files can maybe exist? T24227
 				$filePage = Title::makeTitleSafe( NS_FILE, $value );
 				if ( $filePage ) {
-					$link = Linker::linkKnown(
+					$link = $linkRenderer->makeKnownLink(
 						$filePage,
-						htmlspecialchars( $filePage->getText() )
+						$filePage->getText()
 					);
 					$download = Xml::element( 'a',
 						[ 'href' => wfLocalFile( $filePage )->getUrl() ],
@@ -459,9 +483,9 @@ class ImageListPager extends TablePager {
 					// Add delete links if allowed
 					// From https://github.com/Wikia/app/pull/3859
 					if ( $filePage->userCan( 'delete', $this->getUser() ) ) {
-						$deleteMsg = $this->msg( 'listfiles-delete' )->escaped();
+						$deleteMsg = $this->msg( 'listfiles-delete' )->text();
 
-						$delete = Linker::linkKnown(
+						$delete = $linkRenderer->makeKnownLink(
 							$filePage, $deleteMsg, [], [ 'action' => 'delete' ]
 						);
 						$delete = $this->msg( 'parentheses' )->rawParams( $delete )->escaped();
@@ -476,9 +500,9 @@ class ImageListPager extends TablePager {
 			case 'img_user_text':
 				if ( $this->mCurrentRow->img_user ) {
 					$name = User::whoIs( $this->mCurrentRow->img_user );
-					$link = Linker::link(
+					$link = $linkRenderer->makeLink(
 						Title::makeTitle( NS_USER, $name ),
-						htmlspecialchars( $name )
+						$name
 					);
 				} else {
 					$link = htmlspecialchars( $value );
@@ -488,6 +512,8 @@ class ImageListPager extends TablePager {
 			case 'img_size':
 				return htmlspecialchars( $this->getLanguage()->formatSize( $value ) );
 			case 'img_description':
+				$field = $this->mCurrentRow->description_field;
+				$value = CommentStore::getStore()->getComment( $field, $this->mCurrentRow )->text;
 				return Linker::formatComment( $value );
 			case 'count':
 				return $this->getLanguage()->formatNum( intval( $value ) + 1 );

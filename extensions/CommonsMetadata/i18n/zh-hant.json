@@ -4,8 +4,19 @@
 			"Liuxinyu970226",
 			"Cwlin0416",
 			"LNDDYL",
-			"Zhxy 519"
+			"Zhxy 519",
+			"Kly"
 		]
 	},
-	"commonsmetadata-desc": "延伸圖片資訊 API 模組的 \"extmetadata\" 屬性包含儲存於圖片描述頁面內的資訊，常用於維基共享資源的模板"
+	"commonsmetadata-desc": "延伸圖片資訊 API 模組的 \"extmetadata\" 屬性包含儲存於圖片描述頁面內的資訊，常用於維基共享資源的模板",
+	"commonsmetadata-trackingcategory-no-license": "不帶機器可讀授權的檔案",
+	"commonsmetadata-trackingcategory-no-license-desc": "檔案沒有任何[{{MediaWiki:Commonsmetadata-doc-url}} 機器可讀]授權模板。",
+	"commonsmetadata-trackingcategory-no-description": "不帶機器可讀描述的檔案",
+	"commonsmetadata-trackingcategory-no-description-desc": "檔案沒有任何[{{MediaWiki:Commonsmetadata-doc-url}} 機器可讀]資訊模板，或是該描述欄位未填寫。",
+	"commonsmetadata-trackingcategory-no-author": "不帶機器可讀作者的檔案",
+	"commonsmetadata-trackingcategory-no-author-desc": "檔案沒有任何[{{MediaWiki:Commonsmetadata-doc-url}} 機器可讀]資訊模板，或是該作者欄位未填寫。",
+	"commonsmetadata-trackingcategory-no-source": "不帶機器可讀來源的檔案",
+	"commonsmetadata-trackingcategory-no-source-desc": "檔案沒有任何[{{MediaWiki:Commonsmetadata-doc-url}} 機器可讀]資訊模板，或是該來源欄位未填寫。",
+	"commonsmetadata-trackingcategory-no-patent": "不帶機器可讀專利的檔案",
+	"commonsmetadata-trackingcategory-no-patent-desc": "檔案沒有任何[{{MediaWiki:Commonsmetadata-doc-url}} 機器可讀]專利模板。"
 }

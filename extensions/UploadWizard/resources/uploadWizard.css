@@ -9,29 +9,32 @@ form.mwe-upwiz-form {
 }
 
 #mwe-upwiz-steps {
-	background-color: white;
-	background-image: none;
-	border: none;
+	margin: 0;
+	padding: 0;
+	font-size: 0.96em;
+	line-height: 1.3;
+	background-color: #fff;
+	border: 0;
 }
 
 #mwe-upwiz-steps li {
-	color: #666666;
-	font-size: 1.2em;
+	color: #54595d;
 	margin-right: -1px;
-	border-top: solid 1px #a7d7f9;
-	border-bottom: solid 1px #a7d7f9;
+	border-color: #a7d7f9;
+	border-style: solid;
+	border-width: 1px 0;
 }
 
-#mwe-upwiz-step-tutorial {
-	border-left: solid 1px #a7d7f9;
+#mwe-upwiz-steps li:first-child {
+	border-left-width: 1px;
 }
 
-#mwe-upwiz-step-thanks {
-	border-right: solid 1px #a7d7f9;
+#mwe-upwiz-steps li:last-child {
+	border-right-width: 1px;
 }
 
 #mwe-upwiz-steps li.head {
-	color: #000000;
+	color: #000;
 }
 
 .mwe-upwiz-clearing {
@@ -51,7 +54,8 @@ form.mwe-upwiz-form {
 	display: block;
 }
 
-.mwe-upwiz-add-files-0, #mwe-upwiz-files {
+.mwe-upwiz-add-files-0,
+#mwe-upwiz-files {
 	margin-top: 3em;
 	margin-bottom: 1em;
 }
@@ -64,7 +68,7 @@ form.mwe-upwiz-form {
 	font-size: large;
 }
 
-#mwe-upwiz-add-file {
+#mwe-upwiz-add-file .oo-ui-buttonElement-button {
 	position: relative;
 	overflow: hidden;
 }
@@ -90,10 +94,11 @@ form.mwe-upwiz-form {
 }
 
 .mwe-upwiz-file.odd .mwe-upwiz-visible-file {
-	background: #f5f5f5;
+	background: #f8f9fa;
 }
 
-.mwe-upwiz-file-indicator, .mwe-upwiz-count {
+.mwe-upwiz-file-indicator,
+.mwe-upwiz-count {
 	float: right;
 	margin-left: 0.5em;
 	padding: 0.5em;
@@ -105,8 +110,19 @@ form.mwe-upwiz-form {
 
 .mwe-upwiz-visible-file {
 	display: none;
-	position:relative;
+	position: relative;
 	z-index: 2;
+	width: 100%; /* of containing mwe-upwiz-file */
+	overflow: hidden;
+}
+
+.mwe-upwiz-file:hover .mwe-upwiz-visible-file {
+	background: #e0f0ff !important; /* stylelint-disable-line declaration-no-important */
+}
+
+#mwe-upwiz-files {
+	margin-right: 8em;
+	margin-left: 8em;
 }
 
 .mwe-upwiz-file.filled .mwe-upwiz-visible-file {
@@ -119,13 +135,18 @@ form.mwe-upwiz-form {
 	overflow: hidden;
 }
 
+#mwe-upwiz-filelist {
+	/* We rely on the margin collapsing with that on #mwe-upwiz-files */
+	margin-top: 3em;
+}
+
 .mwe-upwiz-filled-filelist {
-	border: 1px solid #d8d8d8;
+	border: 1px solid #c8ccd1;
 }
 
 .mwe-upwiz-file-status {
 	display: none;
-	color: #797979;
+	color: #72777d;
 }
 
 .mwe-upwiz-file-status-line ul {
@@ -138,11 +159,11 @@ form.mwe-upwiz-form {
 	height: 100px;
 	width: 100px;
 	padding: 0.5em;
-	border: 1px solid #e0e0e0;
+	border: 1px solid #eaecf0;
 	margin-right: 1em;
 	text-align: center;
 	/* @embed */
-	background: url('images/32px-Blank-document.svg.png') no-repeat center center;
+	background: url( images/32px-Blank-document.svg.png ) no-repeat center center;
 }
 
 .mwe-upwiz-file-texts {
@@ -153,23 +174,39 @@ form.mwe-upwiz-form {
 
 .mwe-upwiz-file-preview-broken {
 	/* @embed */
-	background: url('images/32px-Blank-document-broken.svg.png') no-repeat center center !important;
+	background: url( images/32px-Blank-document-broken.svg.png ) no-repeat center center !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .mwe-upwiz-add-files-n {
 	float: left;
 }
 
-#mwe-upwiz-add-file-container.mwe-upwiz-add-files-n, .mwe-upwiz-progress-bar-etr {
+#mwe-upwiz-add-file-container.mwe-upwiz-add-files-n,
+.mwe-upwiz-progress-bar-etr {
 	width: 300px;
 }
 
-/* Flickr Interface CSS*/
-
-.ui-helper-center-fix {
-	display: inline-block;
-	position: relative;
+.mwe-upwiz-patent-rights .oo-ui-panelLayout .oo-ui-panelLayout:not( :last-child ) {
+	box-shadow: 0 1em 1px -1em #bbb;
 }
+
+.mwe-upwiz-patent-rights-filelist {
+	display: block;
+	text-align: center;
+	box-shadow: 0 0 1px 0 #bbb;
+}
+
+.mwe-upwiz-patent-weapon-policy {
+	margin-top: 1em;
+	padding: 0 1em 0 calc( 32px + 2em );
+	border: 1px solid #c8ccd1;
+	white-space: pre-wrap;
+	/* @embed */
+	background: #f2f4f7 url( images/no-weapons.svg ) no-repeat 1em 1em;
+	background-size: 32px 32px;
+}
+
+/* Flickr Interface CSS*/
 
 #mwe-upwiz-upload-ctr-divide {
 	display: block;
@@ -177,6 +214,8 @@ form.mwe-upwiz-form {
 }
 
 #mwe-upwiz-flickr-input {
+	display: inline-block;
+	position: relative;
 	font-size: 1.2em;
 	width: 250px;
 	padding: 4px;
@@ -187,73 +226,42 @@ form.mwe-upwiz-form {
 }
 
 #mwe-upwiz-flickr-select-list-container {
-	width: 580px; /* based on values in #mwe-upwiz-flickrSelectlist li */
 	margin: 0 auto;
 	display: none;
 	text-align: center;
 }
+
 #mwe-upwiz-flickr-select-list {
-	list-style: none;
 	clear: both;
 	overflow: hidden;
 	margin-bottom: 1em;
 }
 
-#mwe-upwiz-flickr-select-list .ui-selecting {
-	background: #FECA40;
-}
-
-#mwe-upwiz-flickr-select-list .ui-selected {
-	background: green;
-}
-
-#mwe-upwiz-flickr-select-list li {
+#mwe-upwiz-flickr-select-list .oo-ui-checkboxMultioptionWidget {
 	margin: 6px;
 	padding: 1px;
 	float: left;
 	display: block;
-	width: 100px;
-	height: 100px;
-	background: none;
+}
+
+#mwe-upwiz-flickr-select-list img {
+	width: 75px;
+	height: 75px;
 }
 
 #mwe-upwiz-flickr-disclaimer {
+	background-color: #eaf3ff;
 	font-size: 92%;
 	margin: 1em 0;
 	padding: 0.5em;
-	background-color: #DFEFFA;
-}
-
-#mwe-upwiz-flickr-select-list li img {
-	margin: 12.5px;
-	display: block;
-	position: relative;
-}
-
-.mwe-upwiz-visible-file {
-	width: 100%; /* of containing mwe-upwiz-file */
-	overflow: hidden;
-}
-
-.mwe-upwiz-file:hover .mwe-upwiz-visible-file {
-	background: #e0f0ff !important;
-}
-
-#mwe-upwiz-files {
-	margin-right: 8em;
-	margin-left: 8em;
 }
 
 .filled + .filled {
-	border-top: 1px solid #d8d8d8;
+	border-top: 1px solid #c8ccd1;
 }
 
 #mwe-upwiz-upload-ctrls {
 	margin-top: 1em;
-}
-
-#mwe-upwiz-stepdiv-file .mwe-upwiz-buttons {
-	display: none;
 }
 
 #mwe-upwiz-stepdiv-file .mwe-upwiz-buttons .mwe-upwiz-file-endchoice {
@@ -265,25 +273,26 @@ form.mwe-upwiz-form {
 	width: 40px;
 }
 
-#mwe-upwiz-flickr-select-list li,
+#mwe-upwiz-flickr-select-list img,
 .mwe-upwiz-status-progress {
 	/* @embed */
-	background: url('images/24px-spinner-0645ad.gif') no-repeat center center;
+	background: url( images/24px-spinner-0645ad.gif ) no-repeat center center;
 }
 
 .mwe-upwiz-file.odd .mwe-upwiz-status-progress {
 	/* @embed */
-	background: url('images/24px-spinner-0645ad-f5f5f5.gif') no-repeat center center;
+	background: url( images/24px-spinner-0645ad-f5f5f5.gif ) no-repeat center center;
 }
 
 .mwe-upwiz-file:hover .mwe-upwiz-status-progress {
 	/* @embed */
-	background: url('images/24px-spinner-0645ad-e0f0ff.gif') no-repeat center center;
+	background: url( images/24px-spinner-0645ad-e0f0ff.gif ) no-repeat center center;
 }
 
-.mwe-upwiz-status-stashed, .mwe-upwiz-status-uploaded {
+.mwe-upwiz-status-stashed,
+.mwe-upwiz-status-uploaded {
 	/* @embed */
-	background: url('images/32px-check.png') no-repeat center center;
+	background: url( images/32px-check.png ) no-repeat center center;
 }
 
 .mwe-upwiz-license-icon {
@@ -295,24 +304,24 @@ form.mwe-upwiz-form {
 
 .mwe-upwiz-cc-zero-icon {
 	/* @embed */
-	background: url('images/18px-Cc-zero.svg.png') no-repeat center center;
+	background: url( images/18px-Cc-zero.svg.png ) no-repeat center center;
 }
 
 .mwe-upwiz-cc-sa-icon {
 	/* @embed */
-	background: url('images/18px-Share_Alike.svg.png') no-repeat center center;
+	background: url( images/18px-Share_Alike.svg.png ) no-repeat center center;
 }
 
 .mwe-upwiz-cc-by-icon {
 	/* @embed */
-	background: url('images/18px-Cc-by_new_white.svg.png') no-repeat center center;
+	background: url( images/18px-Cc-by_new_white.svg.png ) no-repeat center center;
 }
 
 .mwe-upwiz-status-error {
 	/* @embed */
-	background: url('images/32px-alert.png') no-repeat center center;
+	background: url( images/32px-alert.png ) no-repeat center center;
 	font-weight: bold;
-	color: #CC0000;
+	color: #d33;
 }
 
 .mwe-upwiz-progress {
@@ -328,9 +337,10 @@ form.mwe-upwiz-form {
 }
 
 .mwe-upwiz-thumbnail {
-	border: 1px solid #cccccc;
+	background-color: #fff;
+	border: 1px solid #c8ccd1;
+	border-radius: 2px;
 	text-align: center;
-	background: #ffffff;
 	width: 100px;
 	height: 100px;
 	padding: 8px;
@@ -343,10 +353,20 @@ form.mwe-upwiz-form {
 	width: 116px; /* see .mwe-upwiz-thumbnail, 100 + 8 + 8 */
 }
 
+.mwe-upwiz-remove-upload {
+	/* Positioned below the thumbnail. All the floats make it more difficult than it seems
+	   to do this in a less hacky way. */
+	position: absolute;
+	left: -132px;
+	margin-left: -1em;
+	top: 132px;
+}
+
 #mwe-upwiz-deeds-thumbnails {
+	background-color: #f8f9fa;
+	border-radius: 2px;
 	text-align: center;
 	margin: 1em 0;
-	background: #f0f0f0;
 }
 
 #mwe-upwiz-deeds-thumbnails .mwe-upwiz-thumbnail {
@@ -378,7 +398,9 @@ form.mwe-upwiz-form {
 	font-weight: bold;
 }
 
-.mwe-more-options, .mwe-upwiz-macro-deeds-return, .mwe-upwiz-deed-header-link {
+.mwe-more-options,
+.mwe-upwiz-macro-deeds-return,
+.mwe-upwiz-deed-header-link {
 	cursor: pointer;
 }
 
@@ -391,7 +413,7 @@ form.mwe-upwiz-form {
 }
 
 .mwe-upwiz-details-fieldname {
-	padding-top:  0.3em;
+	padding-top: 0.3em;
 }
 
 .mwe-title {
@@ -429,21 +451,24 @@ label.mwe-upwiz-copyright-info {
 	text-align: right;
 }
 
+.mwe-upwiz-button-previous {
+	float: left;
+}
+
 a.mwe-upwiz-tooltip-link {
 	cursor: pointer;
 }
 
-input[type='radio'].mwe-upwiz-copyright-info-radio {
+input[ type='radio' ].mwe-upwiz-copyright-info-radio {
 	vertical-align: top;
 }
 
 .mwe-upwiz-details-more-options,
 .mwe-upwiz-details-copy-metadata,
 .mwe-upwiz-deed-license-group-head {
-	margin-top: 10px;
 	padding-left: 1.5em;
 	cursor: pointer;
-	outline: none;
+	outline: 0;
 	display: block;
 }
 
@@ -456,9 +481,33 @@ input[type='radio'].mwe-upwiz-copyright-info-radio {
 	background-position: left center;
 }
 
+.mwe-upwiz-deed-license-group-head {
+	margin-top: 10px;
+}
+
 .mwe-upwiz-deed-license-group-body {
 	margin-bottom: 1em;
 	padding-left: 1.5em;
+}
+
+.mwe-upwiz-license-custom {
+	overflow: hidden;
+}
+
+.mwe-upwiz-license-custom .oo-ui-buttonElement {
+	float: right;
+	width: 9em;
+	padding-left: 1em;
+	margin-right: 0;
+}
+
+.mwe-upwiz-license-custom .oo-ui-textInputWidget {
+	width: auto;
+	margin-right: 10em;
+}
+
+.mwe-upwiz-license-custom .oo-ui-textInputWidget textarea {
+	font-family: monospace, monospace;
 }
 
 .mwe-upwiz-thanks {
@@ -466,60 +515,30 @@ input[type='radio'].mwe-upwiz-copyright-info-radio {
 }
 
 .mwe-readonly {
-	background-color: #ffffff;
+	background-color: #fff;
 	padding: 0.25em;
 }
 
-.mwe-upwiz-metadata-copier .mw-collapsible-content,
 .mwe-more-details .mw-collapsible-content {
 	margin-bottom: 1em;
 }
 
-#upload-wizard .ui-corner-tl {
-	border-top-left-radius: 4px;
+.ui-corner-top {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
 }
 
-#upload-wizard .ui-corner-tr {
-	border-top-right-radius: 4px;
+.ui-corner-bottom {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
 }
 
-#upload-wizard .ui-corner-bl {
-	border-bottom-left-radius: 4px;
-}
-
-#upload-wizard .ui-corner-br {
-	border-bottom-right-radius: 4px;
-}
-
-#upload-wizard .ui-corner-top {
-	border-top-left-radius: 4px;
-	border-top-right-radius: 4px;
-}
-
-#upload-wizard .ui-corner-bottom {
-	border-bottom-left-radius: 4px;
-	border-bottom-right-radius: 4px;
-}
-
-#upload-wizard .ui-corner-left {
-	border-top-left-radius: 4px;
-	border-bottom-left-radius: 4px;
-}
-
-#upload-wizard .ui-corner-right {
-	border-top-right-radius: 4px;
-	border-bottom-right-radius: 4px;
-}
-
-#upload-wizard .ui-corner-all {
-	border-top-left-radius: 4px;
-	border-top-right-radius: 4px;
-	border-bottom-left-radius: 4px;
-	border-bottom-right-radius: 4px;
+.ui-corner-all {
+	border-radius: 2px;
 }
 
 .mwe-upwiz-deed-license-group-subhead {
-	color: #797979;
+	color: #72777d;
 	margin-top: 0;
 	margin-bottom: 0;
 }
@@ -533,7 +552,7 @@ input[type='radio'].mwe-upwiz-copyright-info-radio {
 }
 
 .mwe-upwiz-objref-pick-image input:disabled + label {
-	color: grey;
+	color: #72777d;
 	font-weight: normal;
 }
 
@@ -541,19 +560,24 @@ input[type='radio'].mwe-upwiz-copyright-info-radio {
 	font-weight: bold;
 }
 
-/* This is basically a custom widget, ugh */
-.mwe-upwiz-metadata-copier .oo-ui-fieldsetLayout {
-	padding-top: 0.25em;
-	padding-bottom: 0.5em;
-}
-
-.mwe-upwiz-metadata-copier .oo-ui-fieldLayout {
-	margin-bottom: 0;
-}
-
 .mwe-upwiz-sign {
 	max-width: 20em;
 	display: inline-block;
 	margin-right: 0;
 	vertical-align: baseline;
+}
+
+.ui-helper-clearfix:before,
+.ui-helper-clearfix:after {
+	content: '';
+	display: table;
+	border-collapse: collapse;
+}
+
+.ui-helper-clearfix:after {
+	clear: both;
+}
+
+.ui-helper-clearfix {
+	zoom: 1;
 }

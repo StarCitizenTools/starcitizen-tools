@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eitvys200"
+		]
+	},
+	"eventlogging-invalid-json": "Negalimas JSON",
+	"eventlogging-code-sample-logging-on-server-side": "PHP įrašimas",
+	"eventlogging-code-sample-logging-on-client-side": "JavaScript įrašimas"
+}

@@ -4,6 +4,7 @@ namespace Flow\Formatter;
 
 use Flow\Data\ManagerGroup;
 use Flow\Exception\InvalidInputException;
+use Flow\Exception\InvalidParameterException;
 use Flow\Exception\PermissionException;
 use Flow\Model\AbstractRevision;
 use Flow\Model\UUID;
@@ -33,26 +34,26 @@ abstract class RevisionViewQuery extends AbstractQuery {
 
 	/**
 	 * Create a revision based on revisionId
-	 * @param UUID|string
+	 * @param UUID|string $revId
 	 * @return AbstractRevision
 	 */
 	abstract protected function createRevision( $revId );
 
 	/**
 	 * Get the data for rendering single revision view
-	 * @param string
+	 * @param string $revId
 	 * @return FormatterRow
 	 * @throws InvalidInputException
 	 */
 	public function getSingleViewResult( $revId ) {
 		if ( !$revId ) {
-			throw new InvalidInputException( 'Missing revision', 'missing-revision' );
+			throw new InvalidParameterException( 'Missing revision' );
 		}
 		$rev = $this->createRevision( $revId );
 		if ( !$rev ) {
 			throw new InvalidInputException( 'Could not find revision: ' . $revId, 'missing-revision' );
 		}
-		$this->loadMetadataBatch( array( $rev ) );
+		$this->loadMetadataBatch( [ $rev ] );
 		return $this->buildResult( $rev, null );
 	}
 
@@ -92,7 +93,6 @@ abstract class RevisionViewQuery extends AbstractQuery {
 			$newRev = $prev;
 		}
 
-		/** @var RevisionActionPermissions $permission */
 		if (
 			!$this->permissions->isAllowed( $oldRev, 'view' ) ||
 			!$this->permissions->isAllowed( $newRev, 'view' )
@@ -100,12 +100,12 @@ abstract class RevisionViewQuery extends AbstractQuery {
 			throw new PermissionException( 'Insufficient permission to compare revisions', 'insufficient-permission' );
 		}
 
-		$this->loadMetadataBatch( array( $oldRev, $newRev ) );
+		$this->loadMetadataBatch( [ $oldRev, $newRev ] );
 
-		return array(
+		return [
 			$this->buildResult( $newRev, null ),
 			$this->buildResult( $oldRev, null ),
-		);
+		];
 	}
 
 	public function getUndoDiffResult( $startUndoId, $endUndoId ) {
@@ -133,13 +133,13 @@ abstract class RevisionViewQuery extends AbstractQuery {
 			throw new PermissionException( 'Insufficient permission to undo revisions', 'insufficient-permission' );
 		}
 
-		$this->loadMetadataBatch( array( $start, $end, $current ) );
+		$this->loadMetadataBatch( [ $start, $end, $current ] );
 
-		return array(
+		return [
 			$this->buildResult( $start, null ),
 			$this->buildResult( $end, null ),
 			$this->buildResult( $current, null ),
-		);
+		];
 	}
 
 	public function isComparable( AbstractRevision $cur, AbstractRevision $prev ) {
@@ -154,7 +154,7 @@ abstract class RevisionViewQuery extends AbstractQuery {
 class HeaderViewQuery extends RevisionViewQuery {
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	protected function createRevision( $revId ) {
 		if ( !$revId instanceof UUID ) {
@@ -170,7 +170,7 @@ class HeaderViewQuery extends RevisionViewQuery {
 class PostViewQuery extends RevisionViewQuery {
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	protected function createRevision( $revId ) {
 		if ( !$revId instanceof UUID ) {
@@ -186,7 +186,7 @@ class PostViewQuery extends RevisionViewQuery {
 class PostSummaryViewQuery extends RevisionViewQuery {
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	protected function createRevision( $revId ) {
 		if ( !$revId instanceof UUID ) {

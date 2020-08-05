@@ -22,6 +22,7 @@ class JsonContent extends TextContent {
 
 	/**
 	 * @param string $text JSON
+	 * @param string $modelId
 	 */
 	public function __construct( $text, $modelId = CONTENT_MODEL_JSON ) {
 		parent::__construct( $text, $modelId );
@@ -74,8 +75,8 @@ class JsonContent extends TextContent {
 	/**
 	 * Beautifies JSON prior to save.
 	 *
-	 * @param Title $title Title
-	 * @param User $user User
+	 * @param Title $title
+	 * @param User $user
 	 * @param ParserOptions $popts
 	 * @return JsonContent
 	 */
@@ -86,7 +87,7 @@ class JsonContent extends TextContent {
 			return $this;
 		}
 
-		return new static( $this->beautifyJSON() );
+		return new static( self::normalizeLineEndings( $this->beautifyJSON() ) );
 	}
 
 	/**
@@ -96,7 +97,7 @@ class JsonContent extends TextContent {
 	 * @param int $revId
 	 * @param ParserOptions $options
 	 * @param bool $generateHtml
-	 * @param ParserOutput $output
+	 * @param ParserOutput &$output
 	 */
 	protected function fillParserOutput( Title $title, $revId,
 		ParserOptions $options, $generateHtml, ParserOutput &$output

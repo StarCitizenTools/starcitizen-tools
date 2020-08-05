@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Medol",
+			"Fitoschido"
+		]
+	},
+	"revisionslider-toggle-label": "Exploració de l’historial",
+	"revisionslider-label-date": "Data",
+	"revisionslider-label-page-size": "Mida de la pàgina",
+	"revisionslider-label-change-size": "Mida del canvi",
+	"revisionslider-label-comment": "Comentari",
+	"revisionslider-label-username": "Nom d’{{GENDER:$1|usuari|usuària}}",
+	"revisionslider-minoredit": "Aquesta és una modificació menor",
+	"revisionslider-show-help-tooltip": "Mostra el text d’ajuda",
+	"revisionslider-previous-dialog": "Anterior",
+	"revisionslider-next-dialog": "Següent",
+	"revisionslider-close-dialog": "Tanca"
+}

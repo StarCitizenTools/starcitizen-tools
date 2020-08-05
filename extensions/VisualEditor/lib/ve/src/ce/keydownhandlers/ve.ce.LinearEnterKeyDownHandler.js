@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable linear enter key down handler
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -35,12 +35,13 @@ ve.ce.LinearEnterKeyDownHandler.static.supportedSelections = [ 'linear' ];
  * @inheritdoc
  */
 ve.ce.LinearEnterKeyDownHandler.static.execute = function ( surface, e ) {
-	var txRemove, txInsert, outerParent, outerChildrenCount, list, prevContentOffset,
+	var txRemove, txInsert, outerParent, outerChildrenCount, list, listParent, prevContentOffset,
 		insertEmptyParagraph, node, focusedNode,
 		range = surface.model.getSelection().getRange(),
 		cursor = range.from,
 		documentModel = surface.model.getDocument(),
 		emptyParagraph = [ { type: 'paragraph' }, { type: '/paragraph' } ],
+		emptyListItem = [ { type: 'listItem' }, { type: 'paragraph' }, { type: '/paragraph' }, { type: '/listItem' } ],
 		advanceCursor = true,
 		stack = [],
 		outermostNode = null,
@@ -49,23 +50,38 @@ ve.ce.LinearEnterKeyDownHandler.static.execute = function ( surface, e ) {
 
 	e.preventDefault();
 
+	if ( e.ctrlKey || e.metaKey ) {
+		// CTRL+Enter emits a 'submit' event from the surface
+		surface.getSurface().emit( 'submit' );
+		return true;
+	}
+
 	focusedNode = surface.getFocusedNode();
 	if ( focusedNode ) {
-		focusedNode.executeCommand();
+		if ( focusedNode.getModel().isEditable() ) {
+			focusedNode.executeCommand();
+		}
+		return true;
+	}
+
+	node = surface.getDocument().getBranchNodeFromOffset( range.from );
+
+	if ( !node.isMultiline() ) {
 		return true;
 	}
 
 	// Handle removal first
 	if ( !range.isCollapsed() ) {
-		txRemove = ve.dm.Transaction.newFromRemoval( documentModel, range );
+		txRemove = ve.dm.TransactionBuilder.static.newFromRemoval( documentModel, range );
 		range = txRemove.translateRange( range );
 		// We do want this to propagate to the surface
 		surface.model.change( txRemove, new ve.dm.LinearSelection( documentModel, range ) );
+		// Remove may have changed node at range.from
+		node = surface.getDocument().getBranchNodeFromOffset( range.from );
 	}
 
-	node = surface.documentView.getBranchNodeFromOffset( range.from );
 	if ( node !== null ) {
-		// assertion: node is certainly a contentBranchNode
+		// Assertion: node is certainly a contentBranchNode
 		nodeModel = node.getModel();
 		nodeModelRange = nodeModel.getRange();
 	}
@@ -83,18 +99,18 @@ ve.ce.LinearEnterKeyDownHandler.static.execute = function ( surface, e ) {
 		// If we're at the start/end of something that's not a paragraph, insert a paragraph
 		// before/after. Insert after for empty nodes (from === to).
 		if ( cursor === nodeModelRange.to ) {
-			txInsert = ve.dm.Transaction.newFromInsertion(
+			txInsert = ve.dm.TransactionBuilder.static.newFromInsertion(
 				documentModel, nodeModel.getOuterRange().to, emptyParagraph
 			);
 		} else if ( cursor === nodeModelRange.from ) {
-			txInsert = ve.dm.Transaction.newFromInsertion(
+			txInsert = ve.dm.TransactionBuilder.static.newFromInsertion(
 				documentModel, nodeModel.getOuterRange().from, emptyParagraph
 			);
 			advanceCursor = false;
 		}
 	} else if ( e.shiftKey && nodeModel.hasSignificantWhitespace() ) {
 		// Insert newline
-		txInsert = ve.dm.Transaction.newFromInsertion( documentModel, range.from, '\n' );
+		txInsert = ve.dm.TransactionBuilder.static.newFromInsertion( documentModel, range.from, '\n' );
 	} else if ( !node.splitOnEnter() ) {
 		// Cannot split, so insert some appropriate node
 
@@ -112,7 +128,7 @@ ve.ce.LinearEnterKeyDownHandler.static.execute = function ( surface, e ) {
 		}
 
 		if ( insertEmptyParagraph ) {
-			txInsert = ve.dm.Transaction.newFromInsertion(
+			txInsert = ve.dm.TransactionBuilder.static.newFromInsertion(
 				documentModel, cursor, emptyParagraph
 			);
 		} else {
@@ -166,28 +182,48 @@ ve.ce.LinearEnterKeyDownHandler.static.execute = function ( surface, e ) {
 		) {
 			// Enter was pressed in an empty list item.
 			list = outermostNode.getModel().getParent();
+			listParent = list.getParent();
+			advanceCursor = false;
 			if ( list.getChildren().length === 1 ) {
 				// The list item we're about to remove is the only child of the list
 				// Remove the list
-				txInsert = ve.dm.Transaction.newFromRemoval(
+				txInsert = ve.dm.TransactionBuilder.static.newFromRemoval(
 					documentModel, list.getOuterRange()
 				);
 			} else {
 				// Remove the list item
-				txInsert = ve.dm.Transaction.newFromRemoval(
+				txInsert = ve.dm.TransactionBuilder.static.newFromRemoval(
 					documentModel, outermostNode.getModel().getOuterRange()
 				);
+			}
+
+			if (
+				// The removed item was in a nested list node
+				listParent.type === 'listItem' &&
+				// This was the last item in the nested list
+				listParent.getChildren()[ listParent.getChildren().length - 1 ] === list
+			) {
 				surface.model.change( txInsert );
 				range = txInsert.translateRange( range );
-				// Insert a paragraph
-				txInsert = ve.dm.Transaction.newFromInsertion(
+				// Add a new listItem to the parent list
+				txInsert = ve.dm.TransactionBuilder.static.newFromInsertion(
+					documentModel, listParent.getOuterRange().to, emptyListItem
+				);
+				// ...and push forward to be within it
+				advanceCursor = true;
+			} else if ( list.getChildren().length !== 1 ) {
+				// Otherwise, if we just removed a list item, insert a paragraph
+
+				surface.model.change( txInsert );
+				range = txInsert.translateRange( range );
+
+				txInsert = ve.dm.TransactionBuilder.static.newFromInsertion(
 					documentModel, list.getOuterRange().to, emptyParagraph
 				);
 			}
-			advanceCursor = false;
 		} else {
 			// We must process the transaction first because getRelativeContentOffset can't help us yet
-			txInsert = ve.dm.Transaction.newFromInsertion( documentModel, range.from, stack );
+			txInsert = ve.dm.TransactionBuilder.static.newFromInsertion( documentModel, range.from, stack );
 		}
 	}
 
@@ -204,7 +240,7 @@ ve.ce.LinearEnterKeyDownHandler.static.execute = function ( surface, e ) {
 	if ( cursor === -1 ) {
 		// Cursor couldn't be placed in a nearby content node, so create an empty paragraph
 		surface.model.change(
-			ve.dm.Transaction.newFromInsertion(
+			ve.dm.TransactionBuilder.static.newFromInsertion(
 				documentModel, range.from, emptyParagraph
 			)
 		);

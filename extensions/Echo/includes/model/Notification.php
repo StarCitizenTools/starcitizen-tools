@@ -1,6 +1,6 @@
 <?php
 
-class EchoNotification extends EchoAbstractEntity {
+class EchoNotification extends EchoAbstractEntity implements Bundleable {
 
 	/**
 	 * @var User
@@ -50,6 +50,11 @@ class EchoNotification extends EchoAbstractEntity {
 	protected $bundleDisplayHash = '';
 
 	/**
+	 * @var EchoNotification[]
+	 */
+	protected $bundledNotifications;
+
+	/**
 	 * Do not use this constructor.
 	 */
 	protected function __construct() {
@@ -57,7 +62,7 @@ class EchoNotification extends EchoAbstractEntity {
 
 	/**
 	 * Creates an EchoNotification object based on event and user
-	 * @param $info array The following keys are required:
+	 * @param array $info The following keys are required:
 	 * - 'event' The EchoEvent being notified about.
 	 * - 'user' The User being notified.
 	 * @throws MWException
@@ -65,7 +70,7 @@ class EchoNotification extends EchoAbstractEntity {
 	 */
 	public static function create( array $info ) {
 		$obj = new EchoNotification();
-		static $validFields = array( 'event', 'user' );
+		static $validFields = [ 'event', 'user' ];
 
 		foreach ( $validFields as $field ) {
 			if ( isset( $info[$field] ) ) {
@@ -75,12 +80,12 @@ class EchoNotification extends EchoAbstractEntity {
 			}
 		}
 
-		if ( !$obj->user instanceof User && !$obj->user instanceof StubObject ) {
-			throw new MWException( 'Invalid user parameter, expected: User/StubObject object' );
+		if ( !$obj->user instanceof User ) {
+			throw new InvalidArgumentException( 'Invalid user parameter, expected: User object' );
 		}
 
 		if ( !$obj->event instanceof EchoEvent ) {
-			throw new MWException( 'Invalid event parameter, expected: EchoEvent object' );
+			throw new InvalidArgumentException( 'Invalid event parameter, expected: EchoEvent object' );
 		}
 
 		// Notification timestamp should be the same as event timestamp
@@ -107,13 +112,9 @@ class EchoNotification extends EchoAbstractEntity {
 		// Get the bundle key for this event if web bundling is enabled
 		$bundleKey = '';
 		if ( !empty( $wgEchoNotifications[$this->event->getType()]['bundle']['web'] ) ) {
-			Hooks::run( 'EchoGetBundleRules', array( $this->event, &$bundleKey ) );
+			Hooks::run( 'EchoGetBundleRules', [ $this->event, &$bundleKey ] );
 		}
 
-		// The list of event ids to be removed from echo_target_page,
-		// this is mainly for bundled notifications when an event is
-		// no longer the bundle base
-		$eventIds = array();
 		if ( $bundleKey ) {
 			$hash = md5( $bundleKey );
 			$this->bundleHash = $hash;
@@ -124,35 +125,12 @@ class EchoNotification extends EchoAbstractEntity {
 			// 2. last bundle notification with the same hash was read
 			if ( $lastNotif && !$lastNotif->getReadTimestamp() ) {
 				$this->bundleDisplayHash = $lastNotif->getBundleDisplayHash();
-				$lastEvent = $lastNotif->getEvent();
-				if ( $lastEvent ) {
-					$eventIds[] = $lastEvent->getId();
-				}
 			} else {
 				$this->bundleDisplayHash = md5( $bundleKey . '-display-hash-' . wfTimestampNow() );
 			}
 		}
 
-		// Create a target page object if specified by event
-		$event = $this->event;
-		$user = $this->user;
-		$targetPages = self::resolveTargetPages( $event->getExtraParam( 'target-page' ) );
-		if ( $targetPages ) {
-			$notifMapper->attachListener( 'insert', 'add-target-page', function () use ( $event, $user, $eventIds, $targetPages ) {
-				$targetMapper = new EchoTargetPageMapper();
-				if ( $eventIds ) {
-					$targetMapper->deleteByUserEvents( $user, $eventIds );
-				}
-				foreach ( $targetPages as $title ) {
-					$targetPage = EchoTargetPage::create( $user, $title, $event );
-					if ( $targetPage ) {
-						$targetMapper->insert( $targetPage );
-					}
-				}
-			} );
-		}
-
-		$notifUser = MWEchoNotifUser::newFromUser( $user );
+		$notifUser = MWEchoNotifUser::newFromUser( $this->user );
 		$section = $this->event->getSection();
 
 		// Add listener to refresh notification count upon insert
@@ -164,44 +142,18 @@ class EchoNotification extends EchoAbstractEntity {
 
 		$notifMapper->insert( $this );
 
-		if ( $event->getType() === 'edit-user-talk' ) {
+		if ( $this->event->getCategory() === 'edit-user-talk' ) {
 			$notifUser->flagCacheWithNewTalkNotification();
+			$this->user->setNewtalk( true );
 		}
-		Hooks::run( 'EchoCreateNotificationComplete', array( $this ) );
-	}
-
-	/**
-	 * @param int[]|int|false $targetPageIds
-	 * @return Title[]
-	 */
-	protected static function resolveTargetPages( $targetPageIds ) {
-		if ( !$targetPageIds ) {
-			return array();
-		}
-		if ( !is_array( $targetPageIds ) ) {
-			$targetPageIds = array( $targetPageIds );
-		}
-		$result = array();
-		foreach ( $targetPageIds as $targetPageId ) {
-			// Make sure the target-page id is a valid id
-			$title = Title::newFromID( $targetPageId );
-			// Try master if there is no match
-			if ( !$title ) {
-				$title = Title::newFromID( $targetPageId, Title::GAID_FOR_UPDATE );
-			}
-			if ( $title ) {
-				$result[] = $title;
-			}
-		}
-
-		return $result;
+		Hooks::run( 'EchoCreateNotificationComplete', [ $this ] );
 	}
 
 	/**
 	 * Load a notification record from std class
-	 * @param stdClass
-	 * @param EchoTargetPage[]|null An array of EchoTargetPage instances, or null if not loaded.
-	 * @return EchoNotification
+	 * @param stdClass $row
+	 * @param EchoTargetPage[]|null $targetPages An array of EchoTargetPage instances, or null if not loaded.
+	 * @return EchoNotification|bool false if failed to load/unserialize
 	 */
 	public static function newFromRow( $row, $targetPages = null ) {
 		$notification = new EchoNotification();
@@ -210,6 +162,10 @@ class EchoNotification extends EchoAbstractEntity {
 			$notification->event = EchoEvent::newFromRow( $row );
 		} else {
 			$notification->event = EchoEvent::newFromID( $row->notification_event );
+		}
+
+		if ( $notification->event === false ) {
+			return false;
 		}
 
 		$notification->targetPages = $targetPages;
@@ -233,7 +189,7 @@ class EchoNotification extends EchoAbstractEntity {
 	 * @return array
 	 */
 	public function toDbArray() {
-		return array(
+		return [
 			'notification_event' => $this->event->getId(),
 			'notification_user' => $this->user->getId(),
 			'notification_timestamp' => $this->timestamp,
@@ -241,7 +197,7 @@ class EchoNotification extends EchoAbstractEntity {
 			'notification_bundle_base' => $this->bundleBase,
 			'notification_bundle_hash' => $this->bundleHash,
 			'notification_bundle_display_hash' => $this->bundleDisplayHash
-		);
+		];
 	}
 
 	/**
@@ -276,6 +232,10 @@ class EchoNotification extends EchoAbstractEntity {
 		return $this->readTimestamp;
 	}
 
+	public function isRead() {
+		return $this->getReadTimestamp() !== null;
+	}
+
 	/**
 	 * Getter method
 	 * @return int Notification bundle base
@@ -308,5 +268,41 @@ class EchoNotification extends EchoAbstractEntity {
 	 */
 	public function getTargetPages() {
 		return $this->targetPages;
+	}
+
+	public function setBundledNotifications( $notifications ) {
+		$this->bundledNotifications = $notifications;
+	}
+
+	public function getBundledNotifications() {
+		return $this->bundledNotifications;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function canBeBundled() {
+		return !$this->isRead();
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getBundlingKey() {
+		return $this->getBundleHash();
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function setBundledElements( $bundleables ) {
+		$this->setBundledNotifications( $bundleables );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getSortingKey() {
+		return ( $this->isRead() ? '0' : '1' ) . '_' . $this->getTimestamp();
 	}
 }

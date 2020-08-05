@@ -21,6 +21,7 @@
 	/**
 	 * Represents the buttons which are displayed over the image - next, previous, close
 	 * and fullscreen.
+	 *
 	 * @class mw.mmv.ui.CanvasButtons
 	 * @extends mw.mmv.ui.Element
 	 * @constructor
@@ -37,7 +38,7 @@
 		this.$close = $closeButton;
 		this.$fullscreen = $fullscreenButton;
 
-		this.$reuse = $( '<div>' )
+		this.$reuse = $( '<button>' )
 			.addClass( 'mw-mmv-reuse-button' )
 			.html( '&nbsp;' )
 			.prop( 'title', mw.message( 'multimediaviewer-reuse-link' ).text() )
@@ -46,7 +47,7 @@
 				gravity: this.correctEW( 'se' )
 			} );
 
-		this.$options = $( '<div>' )
+		this.$options = $( '<button>' )
 			.text( ' ' )
 			.prop( 'title', mw.message( 'multimediaviewer-options-tooltip' ).text() )
 			.addClass( 'mw-mmv-options-button' )
@@ -55,7 +56,7 @@
 				gravity: this.correctEW( 'se' )
 			} );
 
-		this.$download = $( '<div>' )
+		this.$download = $( '<button>' )
 			.addClass( 'mw-mmv-download-button' )
 			.html( '&nbsp;' )
 			.prop( 'title', mw.message( 'multimediaviewer-download-link' ).text() )
@@ -64,11 +65,13 @@
 				gravity: this.correctEW( 'se' )
 			} );
 
-		this.$next = $( '<div>' )
+		this.$next = $( '<button>' )
+			.prop( 'title', mw.message( 'multimediaviewer-next-image-alt-text' ).text() )
 			.addClass( 'mw-mmv-next-image disabled' )
 			.html( '&nbsp;' );
 
-		this.$prev = $( '<div>' )
+		this.$prev = $( '<button>' )
+			.prop( 'title', mw.message( 'multimediaviewer-prev-image-alt-text' ).text() )
 			.addClass( 'mw-mmv-prev-image disabled' )
 			.html( '&nbsp;' );
 
@@ -106,6 +109,7 @@
 
 	/**
 	 * Sets the top offset for the navigation buttons.
+	 *
 	 * @param {number} offset
 	 */
 	CBP.setOffset = function ( offset ) {
@@ -128,6 +132,7 @@
 
 	/**
 	 * Toggles buttons being disabled or not
+	 *
 	 * @param {boolean} showPrevButton
 	 * @param {boolean} showNextButton
 	 */
@@ -154,9 +159,10 @@
 
 	/**
 	 * Checks if any active buttons are currently hovered, given a position
+	 *
 	 * @param {number} x The horizontal coordinate of the position
 	 * @param {number} y The vertical coordinate of the position
-	 * @return bool
+	 * @return {boolean}
 	 */
 	CBP.isAnyActiveButtonHovered = function ( x, y ) {
 		// We don't use mouseenter/mouseleave events because content is subject
@@ -168,10 +174,13 @@
 			var $e = $( e ),
 				offset = $e.offset();
 
-			if ( y >= offset.top
-				&& y <= offset.top + $e.height()
-				&& x >= offset.left
-				&& x <= offset.left + $e.width() ) {
+			if ( y >= offset.top &&
+				// using css( 'height' ) & css( 'width' ) instead of .height()
+				// and .width() since those don't include padding, and as a
+				// result can return a smaller size than is actually the button
+				y <= offset.top + parseInt( $e.css( 'height' ) ) &&
+				x >= offset.left &&
+				x <= offset.left + parseInt( $e.css( 'width' ) ) ) {
 				hovered = true;
 			}
 		} );
@@ -181,6 +190,8 @@
 
 	/**
 	 * Reveals all active buttons and schedule a fade out if needed
+	 *
+	 * @param {Object} [mousePosition] Mouse position containing 'x' and 'y' properties
 	 */
 	CBP.revealAndFade = function ( mousePosition ) {
 		if ( this.buttonsFadeTimeout ) {
@@ -192,8 +203,8 @@
 
 		// mousePosition can be empty, for instance when we enter fullscreen and haven't
 		// recorded a real mousemove event yet
-		if ( !mousePosition
-			|| !this.isAnyActiveButtonHovered( mousePosition.x, mousePosition.y ) ) {
+		if ( !mousePosition ||
+			!this.isAnyActiveButtonHovered( mousePosition.x, mousePosition.y ) ) {
 			this.fadeOut();
 		}
 	};

@@ -11,7 +11,7 @@
 	"babel-footer-url": ":Category:Babel - Utinde pe lènghe",
 	"babel-autocreate-reason": "Stoche a ccreje automatecamende 'a pàgene de categorije [[$1|Babel]].",
 	"babel-autocreate-text-levels": "L'utinde jndr'à sta categorije indichescene ca lore onne 'nu levèlle $1 pa lènghe $2.",
-	"babel-autocreate-text-main": "L'utinde jndr'à sta categorije indichescene ca onne 'na canoscenze d'a lènghe $1.",
+	"babel-autocreate-text-main": "Le utinde jndr'à sta categorije indichescene ca onne 'na canoscenze d'a lènghe $1.",
 	"babel-0": "'Stu crestiáne ste'''[[$1|'nderre a le carvune]]''' cu 'u '''[[$2|$3]]'''.",
 	"babel-1": "'Stu crestiáne pô ajutà' cu 'na canoscènze '''[[$1|tèrra-tèrre]]''' d'u '''[[$2|$3]]'''.",
 	"babel-2": "'Stu crestiáne pô ajutà' cu 'nna canoscènze '''[[$1|'ndermèdie]]''' d'u '''[[$2|$3]]'''.",
@@ -26,5 +26,9 @@
 	"babel-4-n": "Stu crestiáne quase quase parle 'u '''[[$2|tarandine]]''' cumme a 'a '''[[$1|lènga madre]]'''.",
 	"babel-5-n": "Stu crestiáne è proprie 'nu '''[[$1|professore]]''' de '''[[$2|tarandine]]'''.",
 	"babel-N-n": "Quìste utende jè de [[$1|madrelènga]] [[$2|tarandine]].",
-	"babel-footer": "Utinde pe lènghe"
+	"babel-footer": "Utinde pe lènghe",
+	"apihelp-query+babel-description": "Pigghie 'mbormaziune sus a quale lènghe l'utende canosce",
+	"apihelp-query+babel-summary": "Pigghie le 'mbormazziune sus a quale lènghe l'utende canosce",
+	"apihelp-query+babel-param-user": "Utende sus a 'u quale pigghià 'mbormaziune",
+	"apihelp-query+babel-example-1": "Pigghie 'mbormaziune de Babel pe l'utende <kbd>Example</kbd>"
 }

@@ -24,6 +24,11 @@
 
 require_once __DIR__ . '/Maintenance.php';
 
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Rdbms\ResultWrapper;
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\DBQueryError;
+
 /**
  * Maintenance script that sends SQL queries from the specified file to the database.
  *
@@ -34,57 +39,68 @@ class MwSql extends Maintenance {
 		parent::__construct();
 		$this->addDescription( 'Send SQL queries to a MediaWiki database. ' .
 			'Takes a file name containing SQL as argument or runs interactively.' );
-		$this->addOption( 'query', 'Run a single query instead of running interactively', false, true );
+		$this->addOption( 'query',
+			'Run a single query instead of running interactively', false, true );
+		$this->addOption( 'json', 'Output the results as JSON instead of PHP objects' );
 		$this->addOption( 'cluster', 'Use an external cluster by name', false, true );
-		$this->addOption( 'wikidb', 'The database wiki ID to use if not the current one', false, true );
-		$this->addOption( 'slave', 'Use a slave server (either "any" or by name)', false, true );
+		$this->addOption( 'wikidb',
+			'The database wiki ID to use if not the current one', false, true );
+		$this->addOption( 'replicadb',
+			'Replica DB server to use instead of the master DB (can be "any")', false, true );
 	}
 
 	public function execute() {
+		global $IP;
+
 		// We wan't to allow "" for the wikidb, meaning don't call select_db()
 		$wiki = $this->hasOption( 'wikidb' ) ? $this->getOption( 'wikidb' ) : false;
 		// Get the appropriate load balancer (for this wiki)
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 		if ( $this->hasOption( 'cluster' ) ) {
-			$lb = wfGetLBFactory()->getExternalLB( $this->getOption( 'cluster' ), $wiki );
+			$lb = $lbFactory->getExternalLB( $this->getOption( 'cluster' ) );
 		} else {
-			$lb = wfGetLB( $wiki );
+			$lb = $lbFactory->getMainLB( $wiki );
 		}
 		// Figure out which server to use
-		if ( $this->hasOption( 'slave' ) ) {
-			$server = $this->getOption( 'slave' );
-			if ( $server === 'any' ) {
-				$index = DB_SLAVE;
-			} else {
-				$index = null;
-				$serverCount = $lb->getServerCount();
-				for ( $i = 0; $i < $serverCount; ++$i ) {
-					if ( $lb->getServerName( $i ) === $server ) {
-						$index = $i;
-						break;
-					}
+		$replicaDB = $this->getOption( 'replicadb', $this->getOption( 'slave', '' ) );
+		if ( $replicaDB === 'any' ) {
+			$index = DB_REPLICA;
+		} elseif ( $replicaDB != '' ) {
+			$index = null;
+			$serverCount = $lb->getServerCount();
+			for ( $i = 0; $i < $serverCount; ++$i ) {
+				if ( $lb->getServerName( $i ) === $replicaDB ) {
+					$index = $i;
+					break;
 				}
-				if ( $index === null ) {
-					$this->error( "No slave server configured with the name '$server'.", 1 );
-				}
+			}
+			if ( $index === null ) {
+				$this->fatalError( "No replica DB server configured with the name '$replicaDB'." );
 			}
 		} else {
 			$index = DB_MASTER;
 		}
-		// Get a DB handle (with this wiki's DB selected) from the appropriate load balancer
+
+		/** @var IDatabase $db DB handle for the appropriate cluster/wiki */
 		$db = $lb->getConnection( $index, [], $wiki );
-		if ( $this->hasOption( 'slave' ) && $db->getLBInfo( 'master' ) !== null ) {
-			$this->error( "The server selected ({$db->getServer()}) is not a slave.", 1 );
+		if ( $replicaDB != '' && $db->getLBInfo( 'master' ) !== null ) {
+			$this->fatalError( "The server selected ({$db->getServer()}) is not a replica DB." );
+		}
+
+		if ( $index === DB_MASTER ) {
+			$updater = DatabaseUpdater::newForDB( $db, true, $this );
+			$db->setSchemaVars( $updater->getSchemaVars() );
 		}
 
 		if ( $this->hasArg( 0 ) ) {
 			$file = fopen( $this->getArg( 0 ), 'r' );
 			if ( !$file ) {
-				$this->error( "Unable to open input file", true );
+				$this->fatalError( "Unable to open input file" );
 			}
 
-			$error = $db->sourceStream( $file, false, [ $this, 'sqlPrintResult' ] );
+			$error = $db->sourceStream( $file, null, [ $this, 'sqlPrintResult' ] );
 			if ( $error !== true ) {
-				$this->error( $error, true );
+				$this->fatalError( $error );
 			} else {
 				exit( 0 );
 			}
@@ -97,14 +113,15 @@ class MwSql extends Maintenance {
 			return;
 		}
 
-		$useReadline = function_exists( 'readline_add_history' )
-			&& Maintenance::posix_isatty( 0 /*STDIN*/ );
-
-		if ( $useReadline ) {
-			global $IP;
+		if (
+			function_exists( 'readline_add_history' ) &&
+			Maintenance::posix_isatty( 0 /*STDIN*/ )
+		) {
 			$historyFile = isset( $_ENV['HOME'] ) ?
 				"{$_ENV['HOME']}/.mwsql_history" : "$IP/maintenance/.mwsql_history";
 			readline_read_history( $historyFile );
+		} else {
+			$historyFile = null;
 		}
 
 		$wholeLine = '';
@@ -125,10 +142,10 @@ class MwSql extends Maintenance {
 				$prompt = '    -> ';
 				continue;
 			}
-			if ( $useReadline ) {
+			if ( $historyFile ) {
 				# Delimiter is eated by streamStatementEnd, we add it
-				# up in the history (bug 37020)
-				readline_add_history( $wholeLine . $db->getDelimiter() );
+				# up in the history (T39020)
+				readline_add_history( $wholeLine . ';' );
 				readline_write_history( $historyFile );
 			}
 			$this->sqlDoQuery( $db, $wholeLine, $doDie );
@@ -138,28 +155,38 @@ class MwSql extends Maintenance {
 		wfWaitForSlaves();
 	}
 
-	protected function sqlDoQuery( $db, $line, $dieOnError ) {
+	protected function sqlDoQuery( IDatabase $db, $line, $dieOnError ) {
 		try {
 			$res = $db->query( $line );
 			$this->sqlPrintResult( $res, $db );
 		} catch ( DBQueryError $e ) {
-			$this->error( $e, $dieOnError );
+			if ( $dieOnError ) {
+				$this->fatalError( $e );
+			} else {
+				$this->error( $e );
+			}
 		}
 	}
 
 	/**
 	 * Print the results, callback for $db->sourceStream()
-	 * @param ResultWrapper $res The results object
-	 * @param DatabaseBase $db
+	 * @param ResultWrapper|bool $res
+	 * @param IDatabase $db
 	 */
 	public function sqlPrintResult( $res, $db ) {
 		if ( !$res ) {
 			// Do nothing
 			return;
 		} elseif ( is_object( $res ) && $res->numRows() ) {
+			$out = '';
 			foreach ( $res as $row ) {
-				$this->output( print_r( $row, true ) );
+				$out .= print_r( $row, true );
+				$rows[] = $row;
 			}
+			if ( $this->hasOption( 'json' ) ) {
+				$out = json_encode( $rows, JSON_PRETTY_PRINT );
+			}
+			$this->output( $out . "\n" );
 		} else {
 			$affected = $db->affectedRows();
 			$this->output( "Query OK, $affected row(s) affected\n" );
@@ -174,5 +201,5 @@ class MwSql extends Maintenance {
 	}
 }
 
-$maintClass = "MwSql";
+$maintClass = MwSql::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

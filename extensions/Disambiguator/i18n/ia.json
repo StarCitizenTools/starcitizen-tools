@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"disambig-desc": "Adde le etiquetta <code><nowiki>__DISAMBIG__</nowiki></code> pro marcar [[Special:DisambiguationPages|paginas de disambiguation]]",
+	"disambiguationpages": "Paginas de disambiguation",
+	"disambiguationpages-summary": "Lo sequente es un lista de tote le paginas de disambiguation in {{SITENAME}}.<br />Un pagina es tractate como pagina de disambiguation si illo contine le codice <code><nowiki>__DISAMBIG__</nowiki></code> (o un alias equivalente).",
+	"disambiguationpagelinks": "Paginas con ligamines a paginas de disambiguation",
+	"disambiguationpagelinks-summary": "Le sequente paginas contine al minus un ligamine a un pagina de disambiguation. Illos debe forsan ligar a un pagina plus appropriate.<br />Un pagina es tractate como pagina de disambiguation si illo contine le etiquetta <nowiki>__DISAMBIG__</nowiki></code> (o un alias equivalente).",
+	"visualeditor-dialog-meta-settings-disambiguation-label": "Isto es un pagina de disambiguation"
+}

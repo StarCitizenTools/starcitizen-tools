@@ -18,7 +18,7 @@
 ( function ( mw, uw ) {
 	QUnit.module( 'uw.EventFlowLogger', QUnit.newMwEnvironment() );
 
-	QUnit.test( 'sanity test', 5, function ( assert ) {
+	QUnit.test( 'sanity test', function ( assert ) {
 		var logger = new uw.EventFlowLogger();
 		this.sandbox.stub( mw, 'track' );
 

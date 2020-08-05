@@ -15,6 +15,19 @@ class ButtonWidget extends Widget {
 	use TabIndexedElement;
 	use AccessKeyedElement;
 
+	/* Static Properties */
+
+	public static $tagName = 'span';
+
+	/* Properties */
+
+	/**
+	 * Whether button is active.
+	 *
+	 * @var boolean
+	 */
+	protected $active = false;
+
 	/**
 	 * Hyperlink to visit when clicked.
 	 *
@@ -40,9 +53,10 @@ class ButtonWidget extends Widget {
 
 	/**
 	 * @param array $config Configuration options
+	 * @param bool $config['active'] Whether button should be shown as active (default: false)
 	 * @param string $config['href'] Hyperlink to visit when clicked
 	 * @param string $config['target'] Target to open hyperlink in
-	 * @param boolean $config['noFollow'] Search engine traversal hint (default: true)
+	 * @param bool $config['noFollow'] Search engine traversal hint (default: true)
 	 */
 	public function __construct( array $config = [] ) {
 		// Parent constructor
@@ -67,6 +81,7 @@ class ButtonWidget extends Widget {
 			->addClasses( [ 'oo-ui-buttonWidget' ] )
 			->appendContent( $this->button );
 
+		$this->setActive( isset( $config['active'] ) ? $config['active'] : false );
 		$this->setHref( isset( $config['href'] ) ? $config['href'] : null );
 		$this->setTarget( isset( $config['target'] ) ? $config['target'] : null );
 		$this->setNoFollow( isset( $config['noFollow'] ) ? $config['noFollow'] : true );
@@ -93,7 +108,7 @@ class ButtonWidget extends Widget {
 	/**
 	 * Get search engine traversal hint.
 	 *
-	 * @return boolean Whether search engines should avoid traversing this hyperlink
+	 * @return bool Whether search engines should avoid traversing this hyperlink
 	 */
 	public function getNoFollow() {
 		return $this->noFollow;
@@ -149,7 +164,7 @@ class ButtonWidget extends Widget {
 	/**
 	 * Set search engine traversal hint.
 	 *
-	 * @param boolean $noFollow True if search engines should avoid traversing this hyperlink
+	 * @param bool $noFollow True if search engines should avoid traversing this hyperlink
 	 * @return $this
 	 */
 	public function setNoFollow( $noFollow ) {
@@ -164,7 +179,33 @@ class ButtonWidget extends Widget {
 		return $this;
 	}
 
+	/**
+	 * Toggle active state.
+	 *
+	 * A button should be marked as active when clicking it would only refresh the page.
+	 *
+	 * @param bool $active Make button active
+	 * @return $this
+	 */
+	public function setActive( $active = null ) {
+		$this->active = !!$active;
+		$this->toggleClasses( [ 'oo-ui-buttonElement-active' ], $this->active );
+		return $this;
+	}
+
+	/**
+	 * Check if button is active.
+	 *
+	 * @return bool Button is active
+	 */
+	public function isActive() {
+		return $this->active;
+	}
+
 	public function getConfig( &$config ) {
+		if ( $this->active !== false ) {
+			$config['active'] = $this->active;
+		}
 		if ( $this->href !== null ) {
 			$config['href'] = $this->href;
 		}

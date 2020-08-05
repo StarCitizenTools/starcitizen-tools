@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Standalone Initialization Platform class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -26,8 +26,8 @@ ve.init.sa.Platform = function VeInitSaPlatform( messagePaths ) {
 	ve.init.Platform.call( this );
 
 	// Properties
-	this.externalLinkUrlProtocolsRegExp = /^https?\:\/\//i;
-	this.unanchoredExternalLinkUrlProtocolsRegExp = /https?\:\/\//i;
+	this.externalLinkUrlProtocolsRegExp = /^https?:\/\//i;
+	this.unanchoredExternalLinkUrlProtocolsRegExp = /https?:\/\//i;
 	this.messagePaths = messagePaths || [];
 	this.parsedMessages = {};
 	this.userLanguages = [ 'en' ];
@@ -87,10 +87,14 @@ ve.init.sa.Platform.prototype.getUserConfig = function ( keys ) {
 		for ( i = 0, l = keys.length; i < l; i++ ) {
 			values[ keys[ i ] ] = this.getUserConfig( keys[ i ] );
 		}
+		return values;
 	} else {
-		return JSON.parse( localStorage.getItem( 've-' + keys ) );
+		try {
+			return JSON.parse( localStorage.getItem( 've-' + keys ) );
+		} catch ( e ) {
+			return null;
+		}
 	}
-	return values;
 };
 
 /**
@@ -101,13 +105,53 @@ ve.init.sa.Platform.prototype.setUserConfig = function ( keyOrValueMap, value ) 
 	if ( typeof keyOrValueMap === 'object' ) {
 		for ( i in keyOrValueMap ) {
 			if ( keyOrValueMap.hasOwnProperty( i ) ) {
-				this.setUserConfig( i, keyOrValueMap[ i ] );
+				if ( !this.setUserConfig( i, keyOrValueMap[ i ] ) ) {
+					// localStorage will fail if the quota is full, so further
+					// sets won't work anyway.
+					return false;
+				}
 			}
 		}
 	} else {
-		localStorage.setItem( 've-' + keyOrValueMap, JSON.stringify( value ) );
+		try {
+			localStorage.setItem( 've-' + keyOrValueMap, JSON.stringify( value ) );
+		} catch ( e ) {
+			return false;
+		}
 	}
 	return true;
+};
+
+/**
+ * @inheritdoc
+ */
+ve.init.sa.Platform.prototype.getSession = function ( key ) {
+	try {
+		return window.sessionStorage.getItem( key );
+	} catch ( e ) {}
+	return false;
+};
+
+/**
+ * @inheritdoc
+ */
+ve.init.sa.Platform.prototype.setSession = function ( key, value ) {
+	try {
+		window.sessionStorage.setItem( key, value );
+		return true;
+	} catch ( e ) {}
+	return false;
+};
+
+/**
+ * @inheritdoc
+ */
+ve.init.sa.Platform.prototype.removeSession = function ( key ) {
+	try {
+		window.sessionStorage.removeItem( key );
+		return true;
+	} catch ( e ) {}
+	return false;
 };
 
 /**

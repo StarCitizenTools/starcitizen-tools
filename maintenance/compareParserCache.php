@@ -21,6 +21,8 @@
 
 require_once __DIR__ . '/Maintenance.php';
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * @ingroup Maintenance
  */
@@ -35,14 +37,20 @@ class CompareParserCache extends Maintenance {
 	public function execute() {
 		$pages = $this->getOption( 'maxpages' );
 
-		$dbr = $this->getDB( DB_SLAVE );
+		$dbr = $this->getDB( DB_REPLICA );
 
 		$totalsec = 0.0;
 		$scanned = 0;
 		$withcache = 0;
 		$withdiff = 0;
+		$parserCache = MediaWikiServices::getInstance()->getParserCache();
 		while ( $pages-- > 0 ) {
-			$row = $dbr->selectRow( 'page', '*',
+			$row = $dbr->selectRow( 'page',
+				// @todo Title::selectFields() or Title::getQueryInfo() or something
+				[
+					'page_namespace', 'page_title', 'page_id',
+					'page_len', 'page_is_redirect', 'page_latest',
+				],
 				[
 					'page_namespace' => $this->getOption( 'namespace' ),
 					'page_is_redirect' => 0,
@@ -66,7 +74,7 @@ class CompareParserCache extends Maintenance {
 
 			$parserOptions = $page->makeParserOptions( 'canonical' );
 
-			$parserOutputOld = ParserCache::singleton()->get( $page, $parserOptions );
+			$parserOutputOld = $parserCache->get( $page, $parserOptions );
 
 			if ( $parserOutputOld ) {
 				$t1 = microtime( true );
@@ -100,5 +108,5 @@ class CompareParserCache extends Maintenance {
 	}
 }
 
-$maintClass = "CompareParserCache";
+$maintClass = CompareParserCache::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

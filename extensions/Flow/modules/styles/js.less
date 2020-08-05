@@ -1,66 +1,58 @@
 @import 'mediawiki.mixins';
 @import 'flow.colors';
-@import 'flow.helpers';
 
 // @todo: Find better home for this css
 .client-js {
-	// Hide the component while it is loading if Javascript
-	// is enabled.
-	.flow-ui-load-overlay {
-		z-index: 101;
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		cursor: wait;
-	}
-
-	.flow-component {
-		position: relative;
-		opacity: 0.5;
-
-		&-ready {
-			opacity: 1;
-
-			-moz-transition: opacity 0.5s;
-			-webkit-transition: opacity 0.5s;
-			-o-transition: opacity 0.5s;
-			transition: opacity 0.5s;
+	.flow-action-view {
+		// Hide the component while it is loading if Javascript
+		// is enabled.
+		.flow-ui-load-overlay {
+			z-index: 101;
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			cursor: wait;
 		}
-	}
 
-	/*
-	Fallback elements
+		.flow-component {
+			position: relative;
+			opacity: 0.5;
 
-	Fallback elements are invisible when JavaScript is enabled. They only exist when JavaScript does not run.
+			&-ready {
+				opacity: 1;
 
-	Markup:
-	<div class="flow-ui-fallback-element"></div>
+				-moz-transition: opacity 0.5s;
+				-webkit-transition: opacity 0.5s;
+				-o-transition: opacity 0.5s;
+				transition: opacity 0.5s;
+			}
+		}
 
-	Styleguide X.
-	*/
-	.flow-ui-fallback-element {
-		visibility: hidden;
-		height: 0;
-	}
+		/*
+		Fallback elements
 
-	// With JS, hide .flow-nojs & display .flow-js elements
-	.flow-nojs {
-		display: none;
-	}
-	.flow-js {
-		display: block;
-	}
-}
+		Fallback elements are invisible when JavaScript is enabled. They only exist when JavaScript does not run.
 
-.client-nojs {
-	// Without JS, hide .flow-js & display .flow-nojs elements
-	.flow-nojs {
-		display: block;
-	}
-	.flow-js {
-		display: none;
+		Markup:
+		<div class="flow-ui-fallback-element"></div>
+
+		Styleguide X.
+		*/
+		.flow-ui-fallback-element {
+			visibility: hidden;
+			height: 0;
+		}
+
+		// With JS, hide .flow-nojs & display .flow-js elements
+		.flow-nojs {
+			display: none;
+		}
+		.flow-js {
+			display: block;
+		}
+
 	}
 }
 
@@ -86,31 +78,53 @@
 		-ms-animation: spin infinite 2s linear;
 		-o-animation: spin infinite 2s linear;
 		animation: spin infinite 2s linear;
-
-		&.mw-ui-icon-before:before {
-			margin-right: 0;
-		}
 	}
 }
 
 // Basic API interaction indicator
-div#content div#bodyContent .flow-api-inprogress {
+div#content div#bodyContent .flow-api-inprogress { /* stylelint-disable-line selector-max-id */
 	opacity: 0.5;
 	cursor: wait;
 }
 
 @-webkit-keyframes spin {
-	0% { -webkit-transform: rotate(0deg); opacity: .5; }
-	50% { opacity: .75; }
-	100% { -webkit-transform: rotate(360deg); opacity: .5; }
+	0% {
+		-webkit-transform: rotate( 0deg );
+		opacity: 0.5;
+	}
+	50% {
+		opacity: 0.75;
+	}
+	100% {
+		-webkit-transform: rotate( 360deg );
+		opacity: 0.5;
+	}
 }
+
 @-moz-keyframes spin {
-	0% { -moz-transform: rotate(0deg); opacity: .5; }
-	50% { opacity: .75; }
-	100% { -moz-transform: rotate(360deg); opacity: .5; }
+	0% {
+		-moz-transform: rotate( 0deg );
+		opacity: 0.5;
+	}
+	50% {
+		opacity: 0.75;
+	}
+	100% {
+		-moz-transform: rotate( 360deg );
+		opacity: 0.5;
+	}
 }
+
 @keyframes spin {
-	0% { transform:rotate(0deg); opacity: .5; }
-	50% { opacity: .75; }
-	100% { transform:rotate(360deg); opacity: .5; }
+	0% {
+		transform: rotate( 0deg );
+		opacity: 0.5;
+	}
+	50% {
+		opacity: 0.75;
+	}
+	100% {
+		transform: rotate( 360deg );
+		opacity: 0.5;
+	}
 }

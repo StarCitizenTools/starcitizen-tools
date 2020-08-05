@@ -4,6 +4,13 @@ class CCFilters {
 
 	/**
 	 * Hook: ChangesListSpecialPageQuery
+	 * @param string $name
+	 * @param array &$tables
+	 * @param array &$fields
+	 * @param array &$conds
+	 * @param array &$query_options
+	 * @param array &$join_conds
+	 * @param FormOptions $opts
 	 */
 	public static function user(
 		$name,
@@ -26,23 +33,27 @@ class CCFilters {
 			return;
 		}
 
-		$idfilters = [];
-		$userArr = explode( '|', $users );
-		foreach ( $userArr as $u ) {
-			$id = User::idFromName( $u );
-			if ( $id !== null ) {
-				$idfilters[] = $id;
+		$userArr = UserArray::newFromNames( explode( '|', $users ) );
+		if ( $userArr->count() ) {
+			$dbr = wfGetDB( DB_REPLICA );
+			if ( class_exists( 'ActorMigration' ) ) {
+				$conds[] = ActorMigration::newMigration()
+					->getWhere( $dbr, 'rc_user', iterator_to_array( $userArr ) )['conds'];
+			} else {
+				$ids = [];
+				foreach ( $userArr as $user ) {
+					$ids[] = $user->getId();
+				}
+				$conds['rc_user'] = $ids;
 			}
-		}
-		if ( count( $idfilters ) ) {
-			$dbr = wfGetDB( DB_SLAVE );
-			$conds[] = 'rc_user IN (' . $dbr->makeList( $idfilters ) . ')';
 			$opts->setValue( 'users', $users );
 		}
 	}
 
 	/**
 	 * Hook: SpecialRecentChangesPanel
+	 * @param array &$items
+	 * @param FormOptions $opts
 	 */
 	public static function userForm( &$items, FormOptions $opts ) {
 		global $wgRequest, $wgCCUserFilter;
@@ -65,6 +76,13 @@ class CCFilters {
 
 	/**
 	 * Hook: ChangesListSpecialPageQuery
+	 * @param string $name
+	 * @param array &$tables
+	 * @param array &$fields
+	 * @param array &$conds
+	 * @param array &$query_options
+	 * @param array &$join_conds
+	 * @param FormOptions $opts
 	 */
 	public static function trailer(
 		$name,
@@ -87,13 +105,15 @@ class CCFilters {
 			return;
 		}
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$conds[] = 'rc_title ' . $dbr->buildLike( $dbr->anyString(), $trailer );
 		$opts->setValue( 'trailer', $trailer );
 	}
 
 	/**
 	 * Hook: SpecialRecentChangesPanel
+	 * @param array &$items
+	 * @param FormOptions $opts
 	 */
 	public static function trailerForm( &$items, FormOptions $opts ) {
 		/**

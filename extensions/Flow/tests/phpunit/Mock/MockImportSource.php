@@ -13,28 +13,28 @@ class MockImportSource implements IImportSource {
 	protected $topics;
 
 	/**
-	 * @var IImportHeader|null $header
+	 * @var IImportHeader|null
 	 */
 	protected $header;
 
 	/**
 	 * @param IImportHeader|null $header
-	 * @param IImportTopic[]
+	 * @param IImportTopic[] $topics
 	 */
-	public function __construct( MockImportHeader $header = null, array $topics = array() ) {
+	public function __construct( MockImportHeader $header = null, array $topics = [] ) {
 		$this->topics = $topics;
 		$this->header = $header;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getTopics() {
 		return new ArrayIterator( $this->topics );
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getHeader() {
 		return $this->header;

@@ -16,12 +16,12 @@
 /*
  * @example QUnit
  * <code>
-	QUnit.test( 'Output matches PHP parser', mw.libs.phpParserData.tests.length, function ( assert ) {
+	QUnit.test( 'Output matches PHP parser', function ( assert ) {
 		mw.messages.set( mw.libs.phpParserData.messages );
 		$.each( mw.libs.phpParserData.tests, function ( i, test ) {
 			QUnit.stop();
 			getMwLanguage( test.lang, function ( langClass ) {
-				var parser = new mw.jqueryMsg.parser( { language: langClass } );
+				var parser = new mw.jqueryMsg.Parser( { language: langClass } );
 				assert.equal(
 					parser.parse( test.key, test.args ).html(),
 					test.result,
@@ -50,7 +50,7 @@
 				}, 'Language class should be loaded', 1000 );
 				runs( function () {
 					console.log( test.lang, 'running tests' );
-					var parser = new mw.jqueryMsg.parser( { language: langClass } );
+					var parser = new mw.jqueryMsg.Parser( { language: langClass } );
 					expect(
 						parser.parse( test.key, test.args ).html()
 					).toEqual( test.result );
@@ -133,7 +133,7 @@ class GenerateJqueryMsgData extends Maintenance {
 				. "// languages, and parser modes. Intended for use by a unit test framework by looping\n"
 				. "// through the object and comparing its parser return value with the 'result' property.\n"
 				. '// Last generated with ' . basename( __FILE__ ) . ' at ' . gmdate( 'r' ) . "\n"
-				. "//jscs:disable\n"
+				. "/* eslint-disable */\n"
 				. "\n"
 				. 'mediaWiki.libs.phpParserData = ' . FormatJson::encode( $phpParserData, true ) . ";\n";
 

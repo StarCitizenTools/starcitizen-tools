@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Base",
+			"Piramidion"
+		]
+	},
+	"relatedarticles-desc": "Додає посилання на пов'язані сторінки на бічну панель або внизу сторінки, якщо користувач вмикає це в бета-функціях.",
+	"relatedarticles-read-more-heading": "Пов'язані сторінки"
+}

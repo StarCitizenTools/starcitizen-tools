@@ -4,7 +4,6 @@ namespace Flow\Import\Wikitext;
 
 use ArrayIterator;
 use Flow\Import\TemplateHelper;
-use FlowHooks;
 use Flow\Import\ImportException;
 use Flow\Import\Plain\ImportHeader;
 use Flow\Import\Plain\ObjectRevision;
@@ -15,6 +14,7 @@ use ParserOptions;
 use Revision;
 use StubObject;
 use Title;
+use User;
 
 /**
  * Imports the header of a wikitext talk page. Does not attempt to
@@ -22,19 +22,26 @@ use Title;
  * ConversionStrategy for more details.
  */
 class ImportSource implements IImportSource {
+	/** @var User User doing the conversion actions (e.g. initial description, wikitext
+	 *    archive edit).  However, actions will be attributed to the original user if
+	 *    applicable.
+	 */
+	protected $user;
 
 	/**
 	 * @param Title $title
 	 * @param Parser|StubObject $parser
+	 * @param User $user User to take actions as
 	 * @param string $headerSuffix
 	 * @throws ImportException When $title is an external title
 	 */
-	public function __construct( Title $title, $parser, $headerSuffix = null ) {
+	public function __construct( Title $title, $parser, User $user, $headerSuffix = null ) {
 		if ( $title->isExternal() ) {
 			throw new ImportException( "Invalid non-local title: $title" );
 		}
 		$this->title = $title;
 		$this->parser = $parser;
+		$this->user = $user;
 		$this->headerSuffix = $headerSuffix;
 	}
 
@@ -66,10 +73,10 @@ class ImportSource implements IImportSource {
 		$content = TemplateHelper::extractTemplates( $content, $this->title );
 
 		$template = wfMessage( 'flow-importer-wt-converted-template' )->inContentLanguage()->plain();
-		$arguments = implode( '|', array(
+		$arguments = implode( '|', [
 			'archive=' . $this->title->getPrefixedText(),
 			'date=' . MWTimestamp::getInstance()->timestamp->format( 'Y-m-d' ),
-		) );
+		] );
 		$content .= "\n\n{{{$template}|$arguments}}";
 
 		if ( $this->headerSuffix && !empty( $this->headerSuffix ) ) {
@@ -77,21 +84,20 @@ class ImportSource implements IImportSource {
 		}
 
 		return new ImportHeader(
-			array( new ObjectRevision(
+			[ new ObjectRevision(
 				$content,
 				wfTimestampNow(),
-				FlowHooks::getOccupationController()->getTalkpageManager()->getName(),
+				$this->user->getName(),
 				"wikitext-import:header-revision:{$revision->getId()}"
-			) ),
+			) ],
 			"wikitext-import:header:{$this->title->getPrefixedText()}"
 		);
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getTopics() {
-		return new ArrayIterator( array() );
+		return new ArrayIterator( [] );
 	}
 }
-

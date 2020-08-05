@@ -3,7 +3,9 @@
 namespace Flow\Import\LiquidThreadsApi;
 
 use ApiBase;
+use ApiErrorFormatter;
 use ApiMain;
+use ApiMessage;
 use Exception;
 use FauxRequest;
 use Flow\Import\ImportException;
@@ -13,6 +15,7 @@ use RequestContext;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use ApiUsageException;
 use UsageException;
 use User;
 
@@ -78,21 +81,21 @@ class ImportSource implements IImportSource {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getHeader() {
 		return new ImportHeader( $this->api, $this, $this->pageName );
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function getTopics() {
 		return new TopicIterator( $this, $this->threadData, $this->pageName );
 	}
 
 	/**
-	 * @param integer $id
+	 * @param int $id
 	 * @return ImportTopic|null
 	 */
 	public function getTopic( $id ) {
@@ -131,7 +134,7 @@ class ImportSource implements IImportSource {
 	}
 
 	/**
-	 * @param integer $id
+	 * @param int $id
 	 * @return ImportPost
 	 */
 	public function getPost( $id ) {
@@ -139,7 +142,7 @@ class ImportSource implements IImportSource {
 	}
 
 	/**
-	 * @param integer $id
+	 * @param int $id
 	 * @return array
 	 */
 	public function getThreadData( $id ) {
@@ -151,7 +154,7 @@ class ImportSource implements IImportSource {
 	}
 
 	/**
-	 * @param integer[]|integer $pageIds
+	 * @param int[]|int $pageIds
 	 * @return array
 	 */
 	public function getPageData( $pageIds ) {
@@ -164,7 +167,7 @@ class ImportSource implements IImportSource {
 
 	/**
 	 * @param string $pageName
-	 * @param integer $startId
+	 * @param int $startId
 	 * @return array
 	 */
 	public function getFromPage( $pageName, $startId = 0 ) {
@@ -188,7 +191,7 @@ class ImportSource implements IImportSource {
 	 */
 	public function getObjectKey( /* $args */ ) {
 		$components = array_merge(
-			array( 'lqt-api', $this->getApiKey() ),
+			[ 'lqt-api', $this->getApiKey() ],
 			func_get_args()
 		);
 
@@ -214,7 +217,7 @@ abstract class ApiBackend implements LoggerAwareInterface {
 	/**
 	 * Retrieves LiquidThreads data from the API
 	 *
-	 * @param  array  $conditions The parameters to pass to select the threads. Usually used in two ways: with thstartid/thpage, or with ththreadid
+	 * @param array $conditions The parameters to pass to select the threads. Usually used in two ways: with thstartid/thpage, or with ththreadid
 	 * @return array Data as returned under query.threads by the API
 	 * @throws ApiNotFoundException Thrown when the remote api reports that the provided conditions
 	 *  have no matching records.
@@ -222,17 +225,17 @@ abstract class ApiBackend implements LoggerAwareInterface {
 	 *  a bad request or lqt threw an exception trying to respond to a valid request.
 	 */
 	public function retrieveThreadData( array $conditions ) {
-		$params = array(
+		$params = [
 			'action' => 'query',
 			'list' => 'threads',
 			'thprop' => 'id|subject|page|parent|ancestor|created|modified|author|summaryid|type|rootid|replies|signature',
 			'rawcontinue' => 1, // We're doing continuation a different way, but this avoids a warning.
 			'format' => 'json',
 			'limit' => ApiBase::LIMIT_BIG1,
-		);
+		];
 		$data = $this->apiCall( $params + $conditions );
 
-		if ( ! isset( $data['query']['threads'] ) ) {
+		if ( !isset( $data['query']['threads'] ) ) {
 			if ( $this->isNotFoundError( $data ) ) {
 				$message = "Did not find thread with conditions: " . json_encode( $conditions );
 				$this->logger->debug( __METHOD__ . ": $message" );
@@ -244,7 +247,7 @@ abstract class ApiBackend implements LoggerAwareInterface {
 		}
 
 		$firstThread = reset( $data['query']['threads'] );
-		if ( ! isset( $firstThread['replies'] ) ) {
+		if ( !isset( $firstThread['replies'] ) ) {
 			throw new ImportException( "Foreign API does not support reply exporting:" . json_encode( $data ) );
 		}
 
@@ -254,7 +257,7 @@ abstract class ApiBackend implements LoggerAwareInterface {
 	/**
 	 * Retrieves data about a set of pages from the API
 	 *
-	 * @param  array  $pageIds Page IDs to return data for.
+	 * @param array $pageIds Page IDs to return data for.
 	 * @return array The query.pages part of the API response.
 	 * @throws \MWException
 	 */
@@ -263,9 +266,9 @@ abstract class ApiBackend implements LoggerAwareInterface {
 			throw new \MWException( 'At least one page id must be provided' );
 		}
 
-		return $this->retrievePageData( array(
+		return $this->retrievePageData( [
 			'pageids' => implode( '|', $pageIds ),
-		) );
+		] );
 	}
 
 	/**
@@ -282,18 +285,18 @@ abstract class ApiBackend implements LoggerAwareInterface {
 			throw new \MWException( 'At least one title must be provided' );
 		}
 
-		return $this->retrievePageData( array(
+		return $this->retrievePageData( [
 			'titles' => implode( '|', $titles ),
 			'rvlimit' => 1,
 			'rvdir' => 'older',
-		), true );
+		], true );
 	}
 
 	/**
 	 * Retrieves data about a set of pages from the API
 	 *
-	 * @param array $conditions     Conditions to retrieve pages by; to be sent to the API.
-	 * @param bool  $expectContinue Pass true here when caller expects more revisions to exist than
+	 * @param array $conditions Conditions to retrieve pages by; to be sent to the API.
+	 * @param bool $expectContinue Pass true here when caller expects more revisions to exist than they are requesting information about.
 	 *  they are requesting information about.
 	 * @return array The query.pages part of the API response.
 	 * @throws ApiNotFoundException Thrown when the remote api reports that the provided conditions
@@ -304,7 +307,7 @@ abstract class ApiBackend implements LoggerAwareInterface {
 	 *  query and the calling code does not set $expectContinue to true.
 	 */
 	public function retrievePageData( array $conditions, $expectContinue = false ) {
-		$conditions += array(
+		$conditions += [
 			'action' => 'query',
 			'prop' => 'revisions',
 			'rvprop' => 'timestamp|user|content|ids',
@@ -312,16 +315,16 @@ abstract class ApiBackend implements LoggerAwareInterface {
 			'rvlimit' => 5000,
 			'rvdir' => 'newer',
 			'continue' => '',
-		);
+		];
 		$data = $this->apiCall( $conditions );
 
-		if ( ! isset( $data['query'] ) ) {
-			$this->logger->error( __METHOD__ . ': Failed API call against ' . $this->getKey() . ' with conditions : ' . json_encode( $conditions ) );
+		if ( !isset( $data['query'] ) ) {
 			if ( $this->isNotFoundError( $data ) ) {
 				$message = "Did not find pages: " . json_encode( $conditions );
 				$this->logger->debug( __METHOD__ . ": $message" );
 				throw new ApiNotFoundException( $message );
 			} else {
+				$this->logger->error( __METHOD__ . ': Failed API call against ' . $this->getKey() . ' with conditions : ' . json_encode( $conditions ) );
 				throw new ImportException( "Null response from API module: " . json_encode( $data ) );
 			}
 		} elseif ( !$expectContinue && isset( $data['continue'] ) ) {
@@ -335,7 +338,7 @@ abstract class ApiBackend implements LoggerAwareInterface {
 	 * Calls the remote API
 	 *
 	 * @param array $params The API request to send
-	 * @param int   $retry  Retry the request on failure this many times
+	 * @param int $retry Retry the request on failure this many times
 	 * @return array API return value, decoded from JSON into an array.
 	 */
 	abstract function apiCall( array $params, $retry = 1 );
@@ -352,7 +355,7 @@ abstract class ApiBackend implements LoggerAwareInterface {
 	protected function isNotFoundError( $apiResponse ) {
 		// LQT has some bugs where not finding the requested item in the database throws
 		// returns this exception.
-		$expect = 'Exception Caught: DatabaseBase::makeList: empty input for field thread_parent';
+		$expect = 'Exception Caught: IDatabase::makeList: empty input for field thread_parent';
 		return false !== strpos( $apiResponse['error']['info'], $expect );
 	}
 }
@@ -428,18 +431,36 @@ class LocalApiBackend extends ApiBackend {
 
 			$api = new ApiMain( $context );
 			$api->execute();
-			return $api->getResult()->getResultData( null, array( 'Strip' => 'all' ) );
+			return $api->getResult()->getResultData( null, [ 'Strip' => 'all' ] );
+		} catch ( ApiUsageException $exception ) {
+			// Mimic the behaviour when called remotely
+			$errors = $exception->getStatusValue()->getErrorsByType( 'error' );
+			if ( !$errors ) {
+				$errors = $exception->getStatusValue()->getErrorsByType( 'warning' );
+			}
+			if ( !$errors ) {
+				$errors = [ [ 'message' => 'unknownerror-nocode', 'params' => [] ] ];
+			}
+			$msg = ApiMessage::create( $errors[0] );
+			return [
+				'error' => [
+					'code' => $msg->getApiCode(),
+					'info' => ApiErrorFormatter::stripMarkup(
+						$msg->inLanguage( 'en' )->useDatabase( 'false' )->text()
+					),
+				] + $msg->getApiData()
+			];
 		} catch ( UsageException $exception ) {
 			// Mimic the behaviour when called remotely
-			return array( 'error' => $exception->getMessageArray() );
+			return [ 'error' => $exception->getMessageArray() ];
 		} catch ( Exception $exception ) {
 			// Mimic behaviour when called remotely
-			return array(
-				'error' => array(
+			return [
+				'error' => [
 					'code' => 'internal_api_error_' . get_class( $exception ),
 					'info' => 'Exception Caught: ' . $exception->getMessage(),
-				),
-			);
+				],
+			];
 		}
 	}
 }

@@ -1,9 +1,9 @@
 /*!
  * VisualEditor ElementLinearData classes.
  *
- * Class containing element linear data and an index-value store.
+ * Class containing element linear data and an hash-value store.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -12,7 +12,7 @@
  * @class
  * @extends ve.dm.FlatLinearData
  * @constructor
- * @param {ve.dm.IndexValueStore} store Index-value store
+ * @param {ve.dm.HashValueStore} store Hash-value store
  * @param {Array} [data] Linear data
  */
 ve.dm.ElementLinearData = function VeDmElementLinearData() {
@@ -40,14 +40,16 @@ ve.dm.ElementLinearData.static.endWordRegExp = new RegExp(
  * Compare two elements' basic properties
  *
  * Elements are comparable if they have the same type and attributes, or
- * have the same text data.
+ * have the same text data. Anything semantically irrelevant is filtered
+ * out first.
  *
  * @param {Object|Array|string} a First element
  * @param {Object|Array|string} b Second element
  * @return {boolean} Elements are comparable
  */
-ve.dm.ElementLinearData.static.compareElements = function ( a, b ) {
-	var aPlain = a,
+ve.dm.ElementLinearData.static.compareElementsUnannotated = function ( a, b ) {
+	var aType, bType,
+		aPlain = a,
 		bPlain = b;
 
 	if ( a === undefined || b === undefined ) {
@@ -60,19 +62,105 @@ ve.dm.ElementLinearData.static.compareElements = function ( a, b ) {
 	if ( Array.isArray( b ) ) {
 		bPlain = b[ 0 ];
 	}
+	if ( aPlain === bPlain ) {
+		return true;
+	}
 	if ( a && a.type ) {
-		aPlain = {
-			type: a.type,
-			attributes: a.attributes
-		};
+		aType = a.type;
+		if ( ve.dm.LinearData.static.isOpenElementData( a ) ) {
+			// Ignore semantically irrelevant differences
+			aPlain = ve.dm.modelRegistry.lookup( aType ).static.getHashObject( a );
+			delete aPlain.originalDomElementsHash;
+		} else {
+			aPlain = {
+				type: aType
+			};
+		}
 	}
 	if ( b && b.type ) {
-		bPlain = {
-			type: b.type,
-			attributes: b.attributes
-		};
+		bType = b.type;
+		if ( ve.dm.LinearData.static.isOpenElementData( b ) ) {
+			// Ignore semantically irrelevant differences
+			bPlain = ve.dm.modelRegistry.lookup( bType ).static.getHashObject( b );
+			delete bPlain.originalDomElementsHash;
+		} else {
+			bPlain = {
+				type: bType
+			};
+		}
 	}
 	return ve.compare( aPlain, bPlain );
+};
+
+/**
+ * Compare two elements' basic properties and annotations
+ *
+ * Elements are comparable if they have the same type, attributes,
+ * text data and annotations, as determined by
+ * ve.dm.AnnotationSet#compareTo .
+ *
+ * @param {Object|Array|string} a First element
+ * @param {Object|Array|string} b Second element
+ * @param {ve.dm.HashValueStore} aStore First element's store
+ * @param {ve.dm.HashValueStore} [bStore] Second element's store, if different
+ * @return {boolean} Elements are comparable
+ */
+ve.dm.ElementLinearData.static.compareElements = function ( a, b, aStore, bStore ) {
+	var aType, aSet, bSet, aAnnotations, bAnnotations;
+
+	if ( a === b ) {
+		return true;
+	}
+
+	aType = typeof a;
+
+	if ( aType !== typeof b ) {
+		// Different types
+		return false;
+	}
+	if ( aType === 'string' ) {
+		// Both strings, and not equal
+		return false;
+	}
+	if ( !this.compareElementsUnannotated( a, b ) ) {
+		return false;
+	}
+	// Elements are equal without annotations, now compare annotations:
+	if ( Array.isArray( a ) ) {
+		aAnnotations = a[ 1 ];
+	}
+	if ( Array.isArray( b ) ) {
+		bAnnotations = b[ 1 ];
+	}
+	if ( a && a.type ) {
+		aAnnotations = a.annotations;
+	}
+	if ( b && b.type ) {
+		bAnnotations = b.annotations;
+	}
+
+	aSet = new ve.dm.AnnotationSet( aStore, aAnnotations || [] );
+	bSet = new ve.dm.AnnotationSet( bStore || aStore, bAnnotations || [] );
+
+	return aSet.compareTo( bSet );
+};
+
+/**
+ * Read the array of annotation store hashes from an item of linear data
+ *
+ * @param {string|Array|Object} item of linear data
+ * @return {string[]} An array of annotation store hashes
+ */
+ve.dm.ElementLinearData.static.getAnnotationHashesFromItem = function ( item ) {
+	if ( typeof item === 'string' ) {
+		return [];
+	} else if ( item.annotations ) {
+		return item.annotations.slice();
+	} else if ( item[ 1 ] ) {
+		return item[ 1 ].slice();
+	} else {
+		return [];
+	}
 };
 
 /* Methods */
@@ -281,16 +369,40 @@ ve.dm.ElementLinearData.prototype.isContentData = function () {
 };
 
 /**
- * Get annotations' store indexes covered by an offset.
+ * Check if an annotation can be applied at a specific offset
+ *
+ * @param {number} offset Offset
+ * @param {ve.dm.Annotation} annotation Annotation
+ * @param {boolean} [ignoreClose] Ignore close elements, otherwise check if their open element is annotatable
+ * @return {boolean} Annotation can be applied at this offset
+ */
+ve.dm.ElementLinearData.prototype.canTakeAnnotationAtOffset = function ( offset, annotation, ignoreClose ) {
+	var type;
+	if ( this.isElementData( offset ) ) {
+		if ( ignoreClose && this.isCloseElementData( offset ) ) {
+			return false;
+		}
+		type = this.getType( offset );
+		// Structural nodes are never annotatable
+		// Blacklisted annotations can't be set
+		return ve.dm.nodeFactory.isNodeContent( type ) && ve.dm.nodeFactory.canNodeTakeAnnotation( type, annotation );
+	} else {
+		// Text is always annotatable
+		return true;
+	}
+};
+
+/**
+ * Get annotations' store hashes covered by an offset.
  *
  * @method
  * @param {number} offset Offset to get annotations for
  * @param {boolean} [ignoreClose] Ignore annotations on close elements
- * @return {number[]} An array of annotation store indexes the offset is covered by
+ * @return {string[]} An array of annotation store hashes the offset is covered by
  * @throws {Error} offset out of bounds
  */
-ve.dm.ElementLinearData.prototype.getAnnotationIndexesFromOffset = function ( offset, ignoreClose ) {
-	var element;
+ve.dm.ElementLinearData.prototype.getAnnotationHashesFromOffset = function ( offset, ignoreClose ) {
+	var item;
 	if ( offset < 0 || offset > this.getLength() ) {
 		throw new Error( 'offset ' + offset + ' out of bounds' );
 	}
@@ -300,22 +412,16 @@ ve.dm.ElementLinearData.prototype.getAnnotationIndexesFromOffset = function ( of
 	if (
 		!ignoreClose &&
 		this.isCloseElementData( offset ) &&
-		!ve.dm.nodeFactory.canNodeHaveChildren( this.getType( offset ) ) // leaf node
+		!ve.dm.nodeFactory.canNodeHaveChildren( this.getType( offset ) ) // Leaf node
 	) {
 		offset = this.getRelativeContentOffset( offset, -1 );
+		if ( offset === -1 ) {
+			return [];
+		}
 	}
 
-	element = this.getData( offset );
-
-	if ( element === undefined || typeof element === 'string' ) {
-		return [];
-	} else if ( element.annotations ) {
-		return element.annotations.slice();
-	} else if ( element[ 1 ] ) {
-		return element[ 1 ].slice();
-	} else {
-		return [];
-	}
+	item = this.getData( offset );
+	return this.constructor.static.getAnnotationHashesFromItem( item ) || [];
 };
 
 /**
@@ -330,7 +436,7 @@ ve.dm.ElementLinearData.prototype.getAnnotationIndexesFromOffset = function ( of
  * @throws {Error} offset out of bounds
  */
 ve.dm.ElementLinearData.prototype.getAnnotationsFromOffset = function ( offset, ignoreClose ) {
-	return new ve.dm.AnnotationSet( this.getStore(), this.getAnnotationIndexesFromOffset( offset, ignoreClose ) );
+	return new ve.dm.AnnotationSet( this.getStore(), this.getAnnotationHashesFromOffset( offset, ignoreClose ) );
 };
 
 /**
@@ -343,30 +449,30 @@ ve.dm.ElementLinearData.prototype.getAnnotationsFromOffset = function ( offset, 
  * @param {ve.dm.AnnotationSet} annotations Annotations to set
  */
 ve.dm.ElementLinearData.prototype.setAnnotationsAtOffset = function ( offset, annotations ) {
-	this.setAnnotationIndexesAtOffset( offset, this.getStore().indexes( annotations.get() ) );
+	this.setAnnotationHashesAtOffset( offset, this.getStore().hashAll( annotations.get() ) );
 };
 
 /**
- * Set annotations' store indexes at a specified offset.
+ * Set annotations' store hashes at a specified offset.
  *
- * Cleans up data structure if indexes array is empty.
+ * Cleans up data structure if hashes array is empty.
  *
  * @method
- * @param {number} offset Offset to set annotation indexes at
- * @param {number[]} indexes Annotations' store indexes
+ * @param {number} offset Offset to set annotation hashes at
+ * @param {string[]} hashes Annotations' store hashes
  */
-ve.dm.ElementLinearData.prototype.setAnnotationIndexesAtOffset = function ( offset, indexes ) {
+ve.dm.ElementLinearData.prototype.setAnnotationHashesAtOffset = function ( offset, hashes ) {
 	var character,
 		item = this.getData( offset ),
 		isElement = this.isElementData( offset );
-	if ( indexes.length > 0 ) {
+	if ( hashes.length > 0 ) {
 		if ( isElement ) {
 			// New element annotation
-			item.annotations = indexes;
+			item.annotations = hashes;
 		} else {
 			// New character annotation
 			character = this.getCharacterData( offset );
-			this.setData( offset, [ character, indexes ] );
+			this.setData( offset, [ character, hashes ] );
 		}
 	} else {
 		if ( isElement ) {
@@ -588,7 +694,7 @@ ve.dm.ElementLinearData.prototype.getInsertionAnnotationsFromRange = function ( 
 ve.dm.ElementLinearData.prototype.hasAnnotationsInRange = function ( range ) {
 	var i;
 	for ( i = range.start; i < range.end; i++ ) {
-		if ( this.getAnnotationIndexesFromOffset( i, true ).length ) {
+		if ( this.getAnnotationHashesFromOffset( i, true ).length ) {
 			return true;
 		}
 	}
@@ -617,21 +723,38 @@ ve.dm.ElementLinearData.prototype.trimOuterSpaceFromRange = function ( range ) {
 /**
  * Check if the data is just plain (un-annotated) text
  *
- * @param {boolean} [allowNonContentNodes] Include non-content nodes in the definition of plain text, e.g. paragraphs, headings, lists
  * @param {ve.Range} [range] Range to get the data for. The whole data set if not specified.
+ * @param {boolean} [allowNonContentNodes] Include non-content nodes in the definition of plain text, e.g. paragraphs, headings, lists
+ * @param {string[]} [allowedTypes] Only allow specific non-content types
+ * @param {boolean} [ignoreCoveringAnnotations] Ignore covering annotations
  * @return {boolean} The data is plain text
  */
-ve.dm.ElementLinearData.prototype.isPlainText = function ( allowNonContentNodes, range ) {
-	var i;
+ve.dm.ElementLinearData.prototype.isPlainText = function ( range, allowNonContentNodes, allowedTypes, ignoreCoveringAnnotations ) {
+	var i, type, annotations;
+
 	range = range || new ve.Range( 0, this.getLength() );
 
+	if ( ignoreCoveringAnnotations ) {
+		annotations = this.getAnnotationsFromRange( range );
+	}
+
 	for ( i = range.start; i < range.end; i++ ) {
-		if (
-			typeof this.data[ i ] === 'string' ||
-			allowNonContentNodes && this.isElementData( i ) &&
-			!ve.dm.nodeFactory.isNodeContent( this.getType( i ) )
+		if ( typeof this.data[ i ] === 'string' ) {
+			continue;
+		} else if (
+			ignoreCoveringAnnotations && Array.isArray( this.data[ i ] ) &&
+			annotations.containsAllOf( this.getAnnotationsFromOffset( i ) )
 		) {
 			continue;
+		} else if ( ( allowNonContentNodes || allowedTypes ) && this.isElementData( i ) ) {
+			type = this.getType( i );
+			if ( allowedTypes && allowedTypes.indexOf( type ) !== -1 ) {
+				continue;
+			}
+			if ( allowNonContentNodes && !ve.dm.nodeFactory.isNodeContent( type ) ) {
+				continue;
+			}
+			return false;
 		} else {
 			return false;
 		}
@@ -661,6 +784,33 @@ ve.dm.ElementLinearData.prototype.getText = function ( maintainIndices, range ) 
 };
 
 /**
+ * Get the data as original source text (source mode only)
+ *
+ * Split paragraphs are converted to single line breaks. It is assumed the
+ * document contains nothing but plain text and paragraph elements.
+ *
+ * @param {ve.Range} [range] Range to get the data for. The whole data set if not specified.
+ * @return {string} Data as original source text
+ */
+ve.dm.ElementLinearData.prototype.getSourceText = function ( range ) {
+	var i,
+		data = this.data,
+		text = '';
+
+	range = range || new ve.Range( 0, this.getLength() );
+
+	for ( i = range.start; i < range.end; i++ ) {
+		if ( data[ i ].type === '/paragraph' && ( !data[ i + 1 ] || data[ i + 1 ].type === 'paragraph' ) ) {
+			text += '\n';
+		} else if ( !data[ i ].type ) {
+			text += data[ i ];
+		}
+	}
+
+	return text;
+};
+
+/**
  * Get an offset at a distance to an offset that passes a validity test.
  *
  * - If {offset} is not already valid, one step will be used to move it to a valid one.
@@ -684,7 +834,6 @@ ve.dm.ElementLinearData.prototype.getText = function ( maintainIndices, range ) 
  * given initial argument of offset
  * @param {...Mixed} [args] Additional arguments to pass to the callback
  * @return {number} Relative valid offset or -1 if there are no valid offsets in data
- * @throws {Error} offset was inside an ignoreChildren node
  */
 ve.dm.ElementLinearData.prototype.getRelativeOffset = function ( offset, distance, callback ) {
 	var i, direction,
@@ -732,7 +881,7 @@ ve.dm.ElementLinearData.prototype.getRelativeOffset = function ( offset, distanc
 			} else {
 				ignoreChildrenDepth--;
 				if ( ignoreChildrenDepth < 0 ) {
-					throw new Error( 'offset was inside an ignoreChildren node' );
+					return -1;
 				}
 			}
 		}
@@ -920,16 +1069,17 @@ ve.dm.ElementLinearData.prototype.getWordRange = function ( offset ) {
 };
 
 /**
- * Finds all instances of items being stored in the index-value store for this data store
+ * Finds all instances of items being stored in the hash-value store for this data store
  *
  * Currently this is just all annotations still in use.
  *
  * @method
  * @param {ve.Range} [range] Optional range to get store values for
- * @return {Object} Object containing all store values, indexed by store index
+ * @return {Object} Object containing all store values, keyed by store hash
  */
 ve.dm.ElementLinearData.prototype.getUsedStoreValues = function ( range ) {
-	var i, index, indexes, j,
+	var i, hash, hashes, j,
+		store = this.getStore(),
 		valueStore = {};
 
 	range = range || new ve.Range( 0, this.data.length );
@@ -937,39 +1087,19 @@ ve.dm.ElementLinearData.prototype.getUsedStoreValues = function ( range ) {
 	for ( i = range.start; i < range.end; i++ ) {
 		// Annotations
 		// Use ignoreClose to save time; no need to count every element annotation twice
-		indexes = this.getAnnotationIndexesFromOffset( i, true );
-		j = indexes.length;
+		hashes = this.getAnnotationHashesFromOffset( i, true );
+		j = hashes.length;
 		while ( j-- ) {
-			index = indexes[ j ];
-			if ( !Object.prototype.hasOwnProperty.call( valueStore, index ) ) {
-				valueStore[ index ] = this.getStore().value( index );
+			hash = hashes[ j ];
+			if ( !Object.prototype.hasOwnProperty.call( valueStore, hash ) ) {
+				valueStore[ hash ] = store.value( hash );
 			}
+		}
+		if ( this.data[ i ].originalDomElementsHash !== undefined ) {
+			valueStore[ this.data[ i ].originalDomElementsHash ] = store.value( this.data[ i ].originalDomElementsHash );
 		}
 	}
 	return valueStore;
-};
-
-/**
- * Remap the store indexes used in this linear data.
- *
- * Remaps annotations and calls remapStoreIndexes() on each node.
- *
- * @method
- * @param {Object} mapping Mapping from store indexes to store indexes
- */
-ve.dm.ElementLinearData.prototype.remapStoreIndexes = function ( mapping ) {
-	var i, ilen, j, jlen, indexes, nodeClass;
-	for ( i = 0, ilen = this.data.length; i < ilen; i++ ) {
-		indexes = this.getAnnotationIndexesFromOffset( i, true );
-		for ( j = 0, jlen = indexes.length; j < jlen; j++ ) {
-			indexes[ j ] = mapping[ indexes[ j ] ];
-		}
-		this.setAnnotationIndexesAtOffset( i, indexes );
-		if ( this.isOpenElementData( i ) ) {
-			nodeClass = ve.dm.nodeFactory.lookup( this.getType( i ) );
-			nodeClass.static.remapStoreIndexes( this.data[ i ], mapping );
-		}
-	}
 };
 
 /**
@@ -1011,6 +1141,31 @@ ve.dm.ElementLinearData.prototype.remapInternalListKeys = function ( internalLis
 };
 
 /**
+ * Remap an annotation hash when it changes
+ *
+ * @param  {string} oldHash Old hash to replace
+ * @param  {string} newHash New hash to replace it with
+ */
+ve.dm.ElementLinearData.prototype.remapAnnotationHash = function ( oldHash, newHash ) {
+	var i, ilen, spliceAt;
+	for ( i = 0, ilen = this.data.length; i < ilen; i++ ) {
+		if ( this.data[ i ] === undefined || typeof this.data[ i ] === 'string' ) {
+			// Common case, cheap, avoid the isArray check
+			continue;
+		} else if ( Array.isArray( this.data[ i ] ) ) {
+			spliceAt = this.data[ i ][ 1 ].indexOf( oldHash );
+			if ( spliceAt !== -1 ) {
+				if ( this.data[ i ][ 1 ].indexOf( newHash ) === -1 ) {
+					this.data[ i ][ 1 ].splice( spliceAt, 1, newHash );
+				} else {
+					this.data[ i ][ 1 ].splice( spliceAt, 1, newHash );
+				}
+			}
+		}
+	}
+};
+
+/**
  * Sanitize data according to a set of rules.
  *
  * @param {Object} rules Sanitization rules
@@ -1021,28 +1176,54 @@ ve.dm.ElementLinearData.prototype.remapInternalListKeys = function ( internalLis
  * @param {boolean} [rules.allowBreaks] Allow <br> line breaks, otherwise the node will be split
  * @param {boolean} [rules.preserveHtmlWhitespace] Preserve non-semantic HTML whitespace
  * @param {boolean} [rules.nodeSanitization] Apply per-type node sanitizations via ve.dm.Node#sanitize
- * @param {boolean} [keepEmptyContentBranches=false] Preserve empty content branch nodes
+ * @param {boolean} [rules.keepEmptyContentBranches] Preserve empty content branch nodes
+ * @param {boolean} [rules.singleLine] Don't allow more that one ContentBranchNode
+ * @param {boolean} [rules.allowMetaData] Don't strip metadata
  */
-ve.dm.ElementLinearData.prototype.sanitize = function ( rules, keepEmptyContentBranches ) {
-	var i, len, annotations, emptySet, setToRemove, type, canContainContent, contentElement, isOpen, nodeClass,
+ve.dm.ElementLinearData.prototype.sanitize = function ( rules ) {
+	var i, len, annotations, emptySet, setToRemove, type, oldHash, newHash,
+		canContainContent, contentElement, isOpen, nodeClass, ann, start,
+		elementStack = [],
+		store = this.getStore(),
 		allAnnotations = this.getAnnotationsFromRange( new ve.Range( 0, this.getLength() ), true );
 
 	if ( rules.plainText ) {
-		emptySet = new ve.dm.AnnotationSet( this.getStore() );
+		emptySet = new ve.dm.AnnotationSet( store );
 	} else {
 		if ( rules.removeOriginalDomElements ) {
 			// Remove originalDomElements from annotations
 			for ( i = 0, len = allAnnotations.getLength(); i < len; i++ ) {
-				delete allAnnotations.get( i ).element.originalDomElements;
+				ann = allAnnotations.get( i );
+				if ( ann.element.originalDomElementsHash !== undefined ) {
+					// This changes the hash of the value, so we have to
+					// update that. If we don't do this, other assumptions
+					// that values fetched from the store are actually in the
+					// store will fail.
+					oldHash = store.hashOfValue( ann );
+					delete allAnnotations.get( i ).element.originalDomElementsHash;
+					newHash = store.replaceHash( oldHash, ann );
+					this.remapAnnotationHash( oldHash, newHash );
+					if ( allAnnotations.storeHashes.indexOf( newHash ) !== -1 ) {
+						// New annotation-value was already in the set, which
+						// just reduces the effective-length of the set.
+						allAnnotations.storeHashes.splice( i, 1 );
+						i--;
+						len--;
+					} else {
+						allAnnotations.storeHashes.splice( i, 1, newHash );
+					}
+				}
 			}
 		}
 
 		// Create annotation set to remove from blacklist
 		setToRemove = allAnnotations.filter( function ( annotation ) {
-			return ( rules.blacklist && rules.blacklist.indexOf( annotation.name ) !== -1 ) || (
-					// If original DOM element references are being removed, remove spans
-					annotation.name === 'textStyle/span' && rules.removeOriginalDomElements
-				);
+			return (
+				rules.blacklist && rules.blacklist.indexOf( annotation.name ) !== -1
+			) || (
+				// If original DOM element references are being removed, remove spans
+				annotation.name === 'textStyle/span' && rules.removeOriginalDomElements
+			);
 		} );
 	}
 
@@ -1052,6 +1233,11 @@ ve.dm.ElementLinearData.prototype.sanitize = function ( rules, keepEmptyContentB
 			canContainContent = ve.dm.nodeFactory.canNodeContainContent( type );
 			isOpen = this.isOpenElementData( i );
 
+			if ( isOpen ) {
+				elementStack.push( this.getData( i ) );
+			} else {
+				elementStack.pop();
+			}
 			// Apply type conversions
 			if ( rules.conversions && rules.conversions[ type ] ) {
 				type = rules.conversions[ type ];
@@ -1066,48 +1252,64 @@ ve.dm.ElementLinearData.prototype.sanitize = function ( rules, keepEmptyContentB
 				} );
 			}
 
-			// Remove blacklisted nodes
+			// Remove blacklisted nodes, and metadata if disallowed
 			if (
 				( rules.blacklist && rules.blacklist.indexOf( type ) !== -1 ) ||
-				( rules.plainText && type !== 'paragraph' && type !== 'internalList' )
+				( rules.plainText && type !== 'paragraph' && type !== 'internalList' ) ||
+				( !rules.allowMetadata && ve.dm.nodeFactory.isMetaData( type ) )
 			) {
 				this.splice( i, 1 );
-				// Make sure you haven't just unwrapped a wrapper paragraph
-				if ( ve.getProp( this.getData( i ), 'internal', 'generated' ) ) {
-					delete this.getData( i ).internal.generated;
-					if ( ve.isEmptyObject( this.getData( i ).internal ) ) {
-						delete this.getData( i ).internal;
-					}
-				}
-				i--;
 				len--;
+				// Make sure you haven't just unwrapped a wrapper paragraph
+				if ( isOpen ) {
+					ve.deleteProp( this.getData( i ), 'internal', 'generated' );
+				}
+				// Move pointer back and continue
+				i--;
 				continue;
 			}
 
 			// Split on breaks
 			if ( !rules.allowBreaks && type === 'break' && contentElement ) {
-				this.splice( i, 2, { type: '/' + contentElement.type }, ve.copy( contentElement ) );
+				if ( this.isOpenElementData( i - 1 ) && this.isCloseElementData( i + 2 ) ) {
+					// If the break is the only element in another element it was likely added
+					// to force it open, so remove it.
+					this.splice( i, 2 );
+					len -= 2;
+				} else {
+					this.splice( i, 2, { type: '/' + contentElement.type }, ve.copy( contentElement ) );
+				}
+				// Move pointer back and continue
+				i--;
+				continue;
 			}
 
 			// If a node is empty but can contain content, then just remove it
 			if (
-				!keepEmptyContentBranches &&
-				i > 0 && !isOpen && this.isOpenElementData( i - 1 ) &&
+				!rules.keepEmptyContentBranches &&
+				isOpen && this.isCloseElementData( i + 1 ) &&
+				!ve.getProp( this.getData( i ), 'internal', 'generated' ) &&
 				canContainContent
 			) {
-				this.splice( i - 1, 2 );
-				i -= 2;
+				this.splice( i, 2 );
 				len -= 2;
+				// Move pointer back and continue
+				i--;
 				continue;
 			}
 
 			if ( !rules.preserveHtmlWhitespace ) {
-				if ( ve.getProp( this.getData( i ), 'internal', 'whitespace' ) ) {
-					delete this.getData( i ).internal.whitespace;
-					if ( ve.isEmptyObject( this.getData( i ).internal ) ) {
-						delete this.getData( i ).internal;
-					}
+				ve.deleteProp( this.getData( i ), 'internal', 'whitespace' );
+			}
+
+			if ( canContainContent && !isOpen && rules.singleLine ) {
+				i++;
+				start = i;
+				while ( i < len && !( this.isOpenElementData( i ) && this.getType( i ) === 'internalList' ) ) {
+					i++;
 				}
+				this.splice( start, i - start );
+				break;
 			}
 
 			// Store the current contentElement for splitting
@@ -1119,15 +1321,39 @@ ve.dm.ElementLinearData.prototype.sanitize = function ( rules, keepEmptyContentB
 			// Remove plain newline characters, as they are semantically meaningless
 			// and will confuse the user. Firefox adds these automatically when copying
 			// line-wrapped HTML. T104790
-			if ( this.getCharacterData( i ) === '\n' ) {
+			// However, don't remove them if we're in a situation where they might
+			// actually be meaningful -- i.e. if we're inside a <pre>. T132006
+			if (
+				this.getCharacterData( i ) === '\n' &&
+				// Get last open type from the stack
+				!ve.dm.nodeFactory.doesNodeHaveSignificantWhitespace( elementStack[ elementStack.length - 1 ].type )
+			) {
 				if ( this.getCharacterData( i + 1 ).match( /\s/ ) || this.getCharacterData( i - 1 ).match( /\s/ ) ) {
 					// If whitespace-adjacent, remove the newline to avoid double spaces
 					this.splice( i, 1 );
-					i--;
 					len--;
+					// Move pointer back and continue
+					i--;
 					continue;
 				} else {
 					// ...otherwise replace it with a space
+					if ( typeof this.getData( i ) === 'string' ) {
+						this.data[ i ] = ' ';
+					} else {
+						this.data[ i ][ 0 ] = ' ';
+					}
+				}
+			}
+			// Support: Chrome, Safari
+			// Sometimes all spaces are replaced with NBSP by the browser, so replace those
+			// which aren't adjacent to plain spaces. T183647
+			if (
+				this.getCharacterData( i ) === '\u00a0' &&
+				// Get last open type from the stack
+				!ve.dm.nodeFactory.doesNodeHaveSignificantWhitespace( elementStack[ elementStack.length - 1 ].type )
+			) {
+				if ( !( this.getCharacterData( i + 1 ) === ' ' || this.getCharacterData( i - 1 ) === ' ' ) ) {
+					// Replace with a space
 					if ( typeof this.getData( i ) === 'string' ) {
 						this.data[ i ] = ' ';
 					} else {
@@ -1154,7 +1380,7 @@ ve.dm.ElementLinearData.prototype.sanitize = function ( rules, keepEmptyContentB
 			}
 			if ( rules.removeOriginalDomElements ) {
 				// Remove originalDomElements from nodes
-				delete this.getData( i ).originalDomElements;
+				delete this.getData( i ).originalDomElementsHash;
 			}
 		}
 	}
@@ -1168,12 +1394,13 @@ ve.dm.ElementLinearData.prototype.sanitize = function ( rules, keepEmptyContentB
  * @param {boolean} preserveGenerated Preserve internal.generated properties of elements
  */
 ve.dm.ElementLinearData.prototype.cloneElements = function ( preserveGenerated ) {
-	var i, len, nodeClass;
+	var i, len, nodeClass,
+		store = this.getStore();
 	for ( i = 0, len = this.getLength(); i < len; i++ ) {
 		if ( this.isOpenElementData( i ) ) {
 			nodeClass = ve.dm.nodeFactory.lookup( this.getType( i ) );
 			if ( nodeClass ) {
-				this.setData( i, nodeClass.static.cloneElement( this.getData( i ), preserveGenerated ) );
+				this.setData( i, nodeClass.static.cloneElement( this.getData( i ), store, preserveGenerated ) );
 			}
 		}
 	}

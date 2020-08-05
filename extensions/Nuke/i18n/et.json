@@ -13,7 +13,7 @@
 	"nuke-defaultreason": "Kasutaja [[Special:Contributions/$1|$1]] lisatud lehekülgede lauseemaldamine",
 	"nuke-multiplepeople": "Hiljuti lisatud lehekülgede lauskustutamine",
 	"nuke-tools": "See tööriist võimaldab kasutaja või IP-aadressi hiljuti lisatud leheküljed lauskustutada.\nKustutatavate lehekülgede nimekirja näitamiseks sisesta kasutajanimi või IP-aadress. Kõigi kasutajate lisatud lehekülgede jaoks jäta väli tühjaks.",
-	"nuke-submit-user": "Mine",
+	"nuke-submit-user": "Loetle leheküljed",
 	"nuke-toggleinvert": "Pööra ümber",
 	"nuke-submit-delete": "Kustuta väljavalitud",
 	"right-nuke": "Lehekülgi lauskustutada",
@@ -25,9 +25,9 @@
 	"nuke-not-deleted": "Lehekülge [[:$1]] '''ei saa''' kustutada.",
 	"nuke-delete-more": "[[Special:Nuke|Kustuta veel lehekülgi]]",
 	"nuke-pattern": "Lehekülje pealkirja kuju:",
-	"nuke-nopages-global": "[[Special:RecentChanges|Viimaste muudatuste]] all pole uusi lehekülgi.",
+	"nuke-nopages-global": "Sinu otsingule vastavad leheküljepealkirjad puuduvad.",
 	"nuke-viewchanges": "vaata muudatusi",
 	"nuke-namespace": "Nimeruumipiirang:",
 	"nuke-linkoncontribs": "lauskustutamine",
-	"nuke-linkoncontribs-text": "Lauskustuta leheküljed, mille ainus autor on see kasutaja"
+	"nuke-linkoncontribs-text": "Lauskustuta leheküljed, mille ainus autor on see {{GENDER:$1|kasutaja}}"
 }

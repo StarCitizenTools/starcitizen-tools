@@ -4,8 +4,15 @@
 			"Red Winged Duck"
 		]
 	},
+	"commonsmetadata-desc": "Пашырае ўласьцівасьць «extmetadata» API-модулю зьвестак выявы, каб яна ўключала інфармацыю, якая захоўваецца на старонках апісаньня выяваў, на якіх ужываюцца звычайныя для Вікісховішча шаблёны",
+	"commonsmetadata-trackingcategory-no-license": "Файлы без машыначытэльнай ліцэнзіі",
 	"commonsmetadata-trackingcategory-no-license-desc": "Файл ня мае [{{MediaWiki:Commonsmetadata-doc-url}} машыначытэльнага] шаблёну ліцэнзіі.",
+	"commonsmetadata-trackingcategory-no-description": "Файлы без машыначытэльнага апісаньня",
 	"commonsmetadata-trackingcategory-no-description-desc": "Файл ня мае [{{MediaWiki:Commonsmetadata-doc-url}} машыначытэльнага] інфармацыйнага шаблёну або ў ім не запоўненае поле апісаньня.",
+	"commonsmetadata-trackingcategory-no-author": "Файлы без машыначытэльнага аўтарства",
 	"commonsmetadata-trackingcategory-no-author-desc": "Файл ня мае [{{MediaWiki:Commonsmetadata-doc-url}} машыначытэльнага] інфармацыйнага шаблёну або ў ім не запоўненае поле аўтара.",
-	"commonsmetadata-trackingcategory-no-source-desc": "Файл ня мае [{{MediaWiki:Commonsmetadata-doc-url}} машыначытэльнага] інфармацыйнага шаблёну або ў ім не запоўненае поле крыніцы."
+	"commonsmetadata-trackingcategory-no-source": "Файлы без машыначытэльнай крыніцы",
+	"commonsmetadata-trackingcategory-no-source-desc": "Файл ня мае [{{MediaWiki:Commonsmetadata-doc-url}} машыначытэльнага] інфармацыйнага шаблёну або ў ім не запоўненае поле крыніцы.",
+	"commonsmetadata-trackingcategory-no-patent": "Файлы без машыначытэльнага патэнту",
+	"commonsmetadata-trackingcategory-no-patent-desc": "Гэты файл ня мае [{{MediaWiki:Commonsmetadata-doc-url}} машыначытэльнага] шаблёну патэнту."
 }

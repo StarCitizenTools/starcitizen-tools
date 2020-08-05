@@ -3,7 +3,8 @@
 		"authors": [
 			"පසිඳු කාවින්ද",
 			"عثمان خان شاہ",
-			"Obaid Raza"
+			"Obaid Raza",
+			"Muhammad Shuaib"
 		]
 	},
 	"pagetranslation": "صفحہ ترجمہ",
@@ -15,7 +16,7 @@
 	"tpt-old-pages-title": "ترجمہ میں صفحات",
 	"tpt-other-pages-title": "ٹوٹ کے صفحات",
 	"tpt-select-prioritylangs-reason": "وجہ:",
-	"tpt-sections-prioritylangs": "ترجیح کی زبانیں",
+	"tpt-sections-prioritylangs": "ترجیحی زبانیں",
 	"tpt-rev-mark": "ترجمہ کے لئے نشان زد کریں",
 	"tpt-rev-unmark": "ترجمہ سے حذف کریں",
 	"tpt-rev-encourage": "بحال",
@@ -24,6 +25,7 @@
 	"tpt-rev-encourage-tooltip": "عمومی ترجمہ کرنے کے لئے اس صفحے کو بحال.",
 	"translate-tag-translate-link-desc": "اس صفحہ کا ترجمہ",
 	"translate-tag-markthis": "ترجمہ کے لئے اس صفحے نشان زد کریں",
+	"tpt-translation-intro": "پیش نظر صفحہ [[$2]]  کا <span class=\"plainlinks\">[$1 ترجمہ شدہ نسخہ]</span> ہے اور ترجمہ $3 فیصد مکمل ہے۔",
 	"tpt-languages-legend": "دیگر زبانیں:",
 	"tpt-languages-zero": "اس زبان کے لئے ترجمہ شروع",
 	"tpt-languages-nonzero": "$1 ($2% ترجمہ ہوا)",

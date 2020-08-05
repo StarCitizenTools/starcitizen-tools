@@ -1,10 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Danmichaelo"
+			"Danmichaelo",
+			"Jon Harald Søby"
 		]
 	},
 	"eventlogging-desc": "Rammeverk for å logge hendelser fra klientside-kode",
 	"eventlogging-invalid-json": "Ugyldig JSON",
-	"eventlogging-revision-id": "Revisjon $1"
+	"eventlogging-revision-id": "Revisjon $1",
+	"eventlogging-code-sample-logging-on-server-side": "PHP-logging",
+	"eventlogging-code-sample-module-setup-json": "extension.json-oppsett for JavaScript-logging",
+	"eventlogging-code-sample-logging-on-client-side": "JavaScript-logging",
+	"eventlogging-error-move-source": "Schema-sider kan ikke døpes om",
+	"eventlogging-error-move-destination": "Sider kan ikke omdøpes til Schema-sider"
 }

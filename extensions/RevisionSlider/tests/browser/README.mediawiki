@@ -1,0 +1,2 @@
+For updated information about running browser tests for MediaWiki extension please see
+https://www.mediawiki.org/wiki/Browser_testing/Running_tests

@@ -1,7 +1,7 @@
 /**
  * @class mw
- * @singleton
  * <https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw>
+ * @singleton
  */
 
 /**
@@ -23,6 +23,11 @@
  * @class mw.Map
  * Associative array which is used for various configuration objects, most prominently mw.config:
  * <https://www.mediawiki.org/wiki/Manual:Interface/JavaScript#mw.config>
+ */
+
+/**
+ * @class mw.storage
+ * <https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.storage>
  */
 
 /**

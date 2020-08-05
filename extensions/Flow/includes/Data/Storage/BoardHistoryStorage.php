@@ -11,14 +11,14 @@ use Flow\Exception\DataModelException;
  * has a distinct backend.
  */
 abstract class BoardHistoryStorage extends DbStorage {
-	abstract public function find( array $attributes, array $options = array() );
+	abstract public function find( array $attributes, array $options = [] );
 
-	public function findMulti( array $queries, array $options = array() ) {
+	public function findMulti( array $queries, array $options = [] ) {
 		if ( count( $queries ) !== 1 ) {
 			throw new DataModelException( __METHOD__ . ' expects exactly one value in $queries', 'process-data' );
 		}
 
-		$result = array();
+		$result = [];
 		foreach ( $queries as $i => $attributes ) {
 			$result[$i] = $this->find( $attributes, $options );
 		}
@@ -33,14 +33,14 @@ abstract class BoardHistoryStorage extends DbStorage {
 	 * will be called to fetch the content. This could fail, resulting in the
 	 * content being a 'false' value.
 	 *
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function validate( array $row ) {
 		return !isset( $row['rev_content'] ) || $row['rev_content'] !== false;
 	}
 
 	public function getPrimaryKeyColumns() {
-		return array( 'topic_list_id' );
+		return [ 'topic_list_id' ];
 	}
 
 	public function insert( array $row ) {

@@ -76,31 +76,6 @@ class SrConverter extends LanguageConverter {
 	}
 
 	/**
-	 * rules should be defined as -{ekavian | iyekavian-} -or-
-	 * -{code:text | code:text | ...}-
-	 *
-	 * update: delete all rule parsing because it's not used
-	 * currently, and just produces a couple of bugs
-	 *
-	 * @param string $rule
-	 * @param array $flags
-	 * @return array
-	 */
-	function parseManualRule( $rule, $flags = [] ) {
-		if ( in_array( 'T', $flags ) ) {
-			return parent::parseManualRule( $rule, $flags );
-		}
-
-		$carray = [];
-		// otherwise ignore all formatting
-		foreach ( $this->mVariants as $v ) {
-			$carray[$v] = $rule;
-		}
-
-		return $carray;
-	}
-
-	/**
 	 * A function wrapper:
 	 *   - if there is no selected variant, leave the link
 	 *     names as they were
@@ -140,7 +115,8 @@ class SrConverter extends LanguageConverter {
 		$breaks = '[^\w\x80-\xff]';
 
 		// regexp for roman numbers
-		$roman = 'M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})';
+		// Lookahead assertion ensures $roman doesn't match the empty string
+		$roman = '(?=[MDCLXVI])M{0,4}(C[DM]|D?C{0,3})(X[LC]|L?X{0,3})(I[VX]|V?I{0,3})';
 
 		$reg = '/^' . $roman . '$|^' . $roman . $breaks . '|' . $breaks
 			. $roman . '$|' . $breaks . $roman . $breaks . '/';
@@ -156,7 +132,7 @@ class SrConverter extends LanguageConverter {
 		$ret = $this->mTables[$toVariant]->replace( $m[0] );
 		$mstart = $m[1] + strlen( $m[0] );
 		foreach ( $matches as $m ) {
-			$ret .= substr( $text, $mstart, $m[1] -$mstart );
+			$ret .= substr( $text, $mstart, $m[1] - $mstart );
 			$ret .= parent::translate( $m[0], $toVariant );
 			$mstart = $m[1] + strlen( $m[0] );
 		}
@@ -186,7 +162,6 @@ class SrConverter extends LanguageConverter {
 		} else {
 			return false;
 		}
-
 	}
 
 }

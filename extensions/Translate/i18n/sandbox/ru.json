@@ -2,7 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Kaganer",
-			"Okras"
+			"Okras",
+			"Redredsonia",
+			"Ole Yves",
+			"Stjn",
+			"Vlad5250"
 		]
 	},
 	"managetranslatorsandbox": "Управление песочницей переводчика",
@@ -33,6 +37,8 @@
 	"tsb-translations-user": "Переводы {{GENDER:$1|пользователя}}",
 	"tsb-translations-current": "Существующие переводы",
 	"tsb-delete-userpage-summary": "Удаление страницы участника, относящейся к участнику из песочницы",
+	"tsb-reject-confirmation": "Отклонено: $1 участник{{PLURAL:$1||а|ов}}",
+	"tsb-accept-confirmation": "Принято: $1 участник{{PLURAL:$1||а|ов}}",
 	"translationstash": "Добро пожаловать",
 	"translate-translationstash-welcome": "Добро пожаловать, {{GENDER:$1|$1}}, теперь вы новый переводчик",
 	"translate-translationstash-welcome-note": "Ознакомьтесь с инструментами перевода. Переведите несколько сообщений и получите полные права переводчика, чтобы принять участие в понравившемся проекте.",
@@ -42,10 +48,10 @@
 	"tsb-limit-reached-title": "Спасибо за ваши переводы",
 	"tsb-limit-reached-body": "Вы достигли предела переводов для новых переводчиков.\nНаша команда проверит и обновит вашу учётную запись в ближайшее время.\nПосле этого вы сможете переводить без ограничений.",
 	"tsb-no-requests-from-new-users": "Нет запросов от новых участников",
-	"tsb-create-user-page": "Создал простую страницу участника",
-	"log-name-translatorsandbox": "Песочница для переводов",
+	"tsb-create-user-page": "Создана основная страница участника",
+	"log-name-translatorsandbox": "Журнал песочницы для переводов",
 	"log-description-translatorsandbox": "Журнал действий с участниками песочницы переводов",
-	"logentry-translatorsandbox-promoted": "$1 сделал{{GENDER:$2||а}}$3 {{GENDER:$4|переводчиком}}.",
+	"logentry-translatorsandbox-promoted": "$1 сделал{{GENDER:$2||а}} $3 {{GENDER:$4|переводчиком}}",
 	"logentry-translatorsandbox-rejected": "$1 отклонил{{GENDER:$2||а}} запрос от «$3» на получение статуса переводчика.",
 	"logentry-newusers-tsbpromoted": "Учётная запись участника $3 была {{GENDER:$2|создана}} из записи в песочнице"
 }

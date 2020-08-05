@@ -7,7 +7,6 @@
 	},
 	"checkuser-reason": "कारणम् :",
 	"checkuser-reason-api": "API: $1",
-	"checkuser-search": "अन्वेषणम्",
 	"checkuser-period": "कालः :",
 	"checkuser-week-1": "गतसप्ताहः",
 	"checkuser-week-2": "गतसप्ताहद्वयम्",
@@ -16,6 +15,7 @@
 	"checkuser-check": "परीक्ष्यताम्",
 	"checkuser-blocked": "अवरुद्धम्",
 	"checkuser-locked": "कीलितम्",
+	"checkuser-search": "अन्वेषणम्",
 	"checkuser-search-submit": "अन्वेषणम्",
 	"checkuser-search-target": "लक्ष्यम्"
 }

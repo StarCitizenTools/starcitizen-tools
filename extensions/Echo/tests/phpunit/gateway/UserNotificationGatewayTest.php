@@ -1,61 +1,64 @@
 <?php
 
+/**
+ * @covers EchoUserNotificationGateway
+ */
 class EchoUserNotificationGatewayTest extends MediaWikiTestCase {
 
 	public function testMarkRead() {
 		// no event ids to mark
 		$gateway = new EchoUserNotificationGateway( User::newFromId( 1 ), $this->mockMWEchoDbFactory() );
-		$this->assertNull( $gateway->markRead( array() ) );
+		$this->assertFalse( $gateway->markRead( [] ) );
 
 		// successful update
-		$gateway = new EchoUserNotificationGateway( User::newFromId( 1 ), $this->mockMWEchoDbFactory( array( 'update' => true ) ) );
-		$this->assertTrue( $gateway->markRead( array( 2 ) ) );
+		$gateway = new EchoUserNotificationGateway( User::newFromId( 1 ), $this->mockMWEchoDbFactory( [ 'update' => true ] ) );
+		$this->assertTrue( $gateway->markRead( [ 2 ] ) );
 
 		// unsuccessful update
-		$gateway = new EchoUserNotificationGateway( User::newFromId( 1 ), $this->mockMWEchoDbFactory( array( 'update' => false ) ) );
-		$this->assertFalse( $gateway->markRead( array( 2 ) ) );
+		$gateway = new EchoUserNotificationGateway( User::newFromId( 1 ), $this->mockMWEchoDbFactory( [ 'update' => false ] ) );
+		$this->assertFalse( $gateway->markRead( [ 2 ] ) );
 	}
 
 	public function testMarkAllRead() {
 		// successful update
-		$gateway = new EchoUserNotificationGateway( User::newFromId( 1 ), $this->mockMWEchoDbFactory( array( 'update' => true ) ) );
-		$this->assertTrue( $gateway->markAllRead( array( 2 ) ) );
+		$gateway = new EchoUserNotificationGateway( User::newFromId( 1 ), $this->mockMWEchoDbFactory( [ 'update' => true ] ) );
+		$this->assertTrue( $gateway->markAllRead( [ 2 ] ) );
 
 		// unsuccessful update
-		$gateway = new EchoUserNotificationGateway( User::newFromId( 1 ), $this->mockMWEchoDbFactory( array( 'update' => false ) ) );
-		$this->assertFalse( $gateway->markAllRead( array( 2 ) ) );
+		$gateway = new EchoUserNotificationGateway( User::newFromId( 1 ), $this->mockMWEchoDbFactory( [ 'update' => false ] ) );
+		$this->assertFalse( $gateway->markAllRead( [ 2 ] ) );
 	}
 
 	public function testGetNotificationCount() {
 		// unsuccessful select
-		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( array( 'selectRowCount' => 0 ) ) );
-		$this->assertEquals( 0, $gateway->getCappedNotificationCount( DB_SLAVE, array( 'event_one' ) ) );
+		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( [ 'selectRowCount' => 0 ] ) );
+		$this->assertEquals( 0, $gateway->getCappedNotificationCount( DB_REPLICA, [ 'event_one' ] ) );
 
 		// successful select of alert
-		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( array( 'selectRowCount' => 2 ) ) );
-		$this->assertEquals( 2, $gateway->getCappedNotificationCount( DB_SLAVE, array( 'event_one', 'event_two' ) ) );
+		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( [ 'selectRowCount' => 2 ] ) );
+		$this->assertEquals( 2, $gateway->getCappedNotificationCount( DB_REPLICA, [ 'event_one', 'event_two' ] ) );
 
 		// there is event, should return 0
-		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( array( 'selectRowCount' => 2 ) ) );
-		$this->assertEquals( 0, $gateway->getCappedNotificationCount( DB_SLAVE, array() ) );
+		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( [ 'selectRowCount' => 2 ] ) );
+		$this->assertEquals( 0, $gateway->getCappedNotificationCount( DB_REPLICA, [] ) );
 
 		// successful select
-		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( array( 'selectRowCount' => 3 ) ) );
-		$this->assertEquals( 3, $gateway->getCappedNotificationCount( DB_SLAVE, array( 'event_one' ) ) );
+		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( [ 'selectRowCount' => 3 ] ) );
+		$this->assertEquals( 3, $gateway->getCappedNotificationCount( DB_REPLICA, [ 'event_one' ] ) );
 	}
 
 	public function testGetUnreadNotifications() {
-		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( array( 'select' => false ) ) );
+		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( [ 'select' => false ] ) );
 		$this->assertEmpty( $gateway->getUnreadNotifications( 'user_talk' ) );
 
-		$dbResult = array(
-			(object)array( 'notification_event' => 1 ),
-			(object)array( 'notification_event' => 2 ),
-			(object)array( 'notification_event' => 3 ),
-		);
-		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( array( 'select' => $dbResult ) ) );
+		$dbResult = [
+			(object)[ 'notification_event' => 1 ],
+			(object)[ 'notification_event' => 2 ],
+			(object)[ 'notification_event' => 3 ],
+		];
+		$gateway = new EchoUserNotificationGateway( $this->mockUser(), $this->mockMWEchoDbFactory( [ 'select' => $dbResult ] ) );
 		$res = $gateway->getUnreadNotifications( 'user_talk' );
-		$this->assertEquals( $res, array( 1 => 1, 2 => 2, 3 => 3 ) );
+		$this->assertEquals( $res, [ 1 => 1, 2 => 2, 3 => 3 ] );
 	}
 
 	/**
@@ -73,7 +76,7 @@ class EchoUserNotificationGatewayTest extends MediaWikiTestCase {
 			->will( $this->returnValue( true ) );
 		$user->expects( $this->any() )
 			->method( 'getGroups' )
-			->will( $this->returnValue( array( $group ) ) );
+			->will( $this->returnValue( [ $group ] ) );
 
 		return $user;
 	}
@@ -81,7 +84,7 @@ class EchoUserNotificationGatewayTest extends MediaWikiTestCase {
 	/**
 	 * Mock object of MWEchoDbFactory
 	 */
-	protected function mockMWEchoDbFactory( array $dbResult = array() ) {
+	protected function mockMWEchoDbFactory( array $dbResult = [] ) {
 		$dbFactory = $this->getMockBuilder( 'MWEchoDbFactory' )
 			->disableOriginalConstructor()
 			->getMock();
@@ -93,16 +96,17 @@ class EchoUserNotificationGatewayTest extends MediaWikiTestCase {
 	}
 
 	/**
-	 * Mock object of DatabaseMysql ( DatabaseBase )
+	 * Returns a mock database object
+	 * @return \Wikimedia\Rdbms\IDatabase
 	 */
-	protected function mockDb( array $dbResult = array() ) {
-		$dbResult += array(
+	protected function mockDb( array $dbResult = [] ) {
+		$dbResult += [
 			'update' => '',
 			'select' => '',
 			'selectRow' => '',
 			'selectRowCount' => '',
-		);
-		$db = $this->getMockBuilder( 'DatabaseMysql' )
+		];
+		$db = $this->getMockBuilder( 'DatabaseMysqli' )
 			->disableOriginalConstructor()
 			->getMock();
 		$db->expects( $this->any() )
@@ -117,9 +121,10 @@ class EchoUserNotificationGatewayTest extends MediaWikiTestCase {
 		$db->expects( $this->any() )
 			->method( 'selectRowCount' )
 			->will( $this->returnValue( $dbResult['selectRowCount'] ) );
+		$numRows = is_array( $dbResult['select'] ) ? count( $dbResult['select'] ) : 0;
 		$db->expects( $this->any() )
 			->method( 'numRows' )
-			->will( $this->returnValue( count( $dbResult['select'] ) ) );
+			->will( $this->returnValue( $numRows ) );
 
 		return $db;
 	}

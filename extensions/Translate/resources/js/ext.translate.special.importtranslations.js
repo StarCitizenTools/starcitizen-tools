@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	'use strict';
 
 	function buttoner( $input ) {
@@ -9,7 +9,7 @@
 		}
 	}
 
-	$( document ).ready( function ( ) {
+	$( function () {
 		var $input = $( '#mw-translate-up-local-input' );
 		$input.on( 'change', function () {
 			buttoner( $input );
@@ -17,4 +17,4 @@
 
 		buttoner( $input );
 	} );
-}( jQuery ) );
+}() );

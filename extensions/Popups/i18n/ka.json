@@ -2,19 +2,23 @@
 	"@metadata": {
 		"authors": [
 			"Otogi",
-			"David1010"
+			"David1010",
+			"MIKHEIL"
 		]
 	},
 	"popups-message": "კონტექსტური სარკმელი",
 	"popups-desc": "ასახავს კონტექსტურ სარკმელს, სადაც ჩანს არსებული გვერდის შემცვლელობა; ვლინდება კურსორის მიტანისას სტატიათა ბმულზე.",
 	"popups-settings-title": "გვერდის წინასწარი გადახედვა",
-	"popups-settings-description": "ეს ხელსაწყო იძლევა ლურჯი ბმულებისა და სქოლიოს წინასწარი ხილვის შესაძლებლობას",
-	"popups-settings-option-simple": "მარტივი",
+	"popups-settings-option-simple": "ჩართვა",
 	"popups-settings-option-simple-description": "გვერდზე აჩვენებს პირველ წინადადებასა და ილუსტრაციას. რეკომენდებულ­ია მკითხველთათვის.",
 	"popups-settings-option-advanced": "გაფართოებული",
-	"popups-settings-option-off": "წინასწარი გადახედვის გათიშვა",
-	"popups-settings-option-off-description": "თქვენ შეგიძლიათ შეცვალოთ ეს პარამეტრი გვერდის ქვედა ნაწილში ბმულის გამოყენებით.",
+	"popups-settings-option-off": "გათიშვა",
 	"popups-settings-save": "შენახვა",
-	"popups-settings-help-ok": "კარგი",
-	"popups-settings-cancel": "გაუქმება"
+	"popups-settings-help-ok": "გაკეთდა",
+	"popups-settings-cancel": "გაუქმება",
+	"popups-preview-no-preview": "გვერდის წინასწარი გადახედვა მიუწვდომელია",
+	"popups-preview-footer-read": "გვერდზე გადასვლა",
+	"prefs-reading": "წაკითხვის დაყენება",
+	"popups-prefs-optin-title": "გვერდის წინასწარი გადახედვა\n\n<em>თემის სწრაფი წინასწარი ჩვენება გვერდის კითვისას</em>",
+	"popups-prefs-conflicting-gadgets-info": "ზოგიერთმა გაჯეტმა და სხვა მომართვებმა შეიძლება გავლენა იქონიონ ამ ფუნქციის წარმოებაზე. თუკი შეგექმნათ პრობლემები, გთხოვთ, გადახედეთ თქვენ გაჯეტებსა და სამომხმარებლო სკრიპტებს, გლობალურის ჩათვლით."
 }

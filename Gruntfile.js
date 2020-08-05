@@ -1,32 +1,47 @@
-/*jshint node:true */
+/* eslint-env node */
+
 module.exports = function ( grunt ) {
-	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
-	grunt.loadNpmTasks( 'grunt-contrib-watch' );
-	grunt.loadNpmTasks( 'grunt-banana-checker' );
-	grunt.loadNpmTasks( 'grunt-jscs' );
-	grunt.loadNpmTasks( 'grunt-jsonlint' );
-	grunt.loadNpmTasks( 'grunt-karma' );
 
 	var wgServer = process.env.MW_SERVER,
 		wgScriptPath = process.env.MW_SCRIPT_PATH,
 		karmaProxy = {};
 
-	karmaProxy[ wgScriptPath ] = wgServer + wgScriptPath;
+	grunt.loadNpmTasks( 'grunt-banana-checker' );
+	grunt.loadNpmTasks( 'grunt-contrib-copy' );
+	grunt.loadNpmTasks( 'grunt-contrib-watch' );
+	grunt.loadNpmTasks( 'grunt-eslint' );
+	grunt.loadNpmTasks( 'grunt-jsonlint' );
+	grunt.loadNpmTasks( 'grunt-karma' );
+	grunt.loadNpmTasks( 'grunt-stylelint' );
+	grunt.loadNpmTasks( 'grunt-webdriver' );
+
+	karmaProxy[ wgScriptPath ] = {
+		target: wgServer + wgScriptPath,
+		changeOrigin: true
+	};
 
 	grunt.initConfig( {
-		jshint: {
-			options: {
-				jshintrc: true
-			},
-			all: '.'
-		},
-		jscs: {
-			all: '.'
+		eslint: {
+			all: [
+				'**/*.js',
+				'!docs/**',
+				'!node_modules/**',
+				'!resources/lib/**',
+				'!resources/src/jquery.tipsy/**',
+				'!resources/src/jquery/jquery.farbtastic.js',
+				'!resources/src/mediawiki.libs/**',
+				// Third-party code of PHPUnit coverage report
+				'!tests/coverage/**',
+				'!vendor/**',
+				// Explicitly say "**/*.js" here in case of symlinks
+				'!extensions/**/*.js',
+				'!skins/**/*.js',
+				// Skip functions aren't even parseable
+				'!resources/src/mediawiki.hidpi-skip.js'
+			]
 		},
 		jsonlint: {
 			all: [
-				'.jscsrc',
 				'**/*.json',
 				'!{docs/js,extensions,node_modules,skins,vendor}/**'
 			]
@@ -39,9 +54,12 @@ module.exports = function ( grunt ) {
 			api: 'includes/api/i18n/',
 			installer: 'includes/installer/i18n/'
 		},
+		stylelint: {
+			src: '{resources/src,mw-config}/**/*.{css,less}'
+		},
 		watch: {
 			files: [
-				'.js*',
+				'.{stylelintrc,eslintrc.json}',
 				'**/*',
 				'!{docs,extensions,node_modules,skins,vendor}/**'
 			],
@@ -58,17 +76,23 @@ module.exports = function ( grunt ) {
 				} ],
 				logLevel: 'DEBUG',
 				frameworks: [ 'qunit' ],
-				reporters: [ 'progress' ],
+				reporters: [ 'mocha' ],
 				singleRun: true,
 				autoWatch: false,
 				// Some tests in extensions don't yield for more than the default 10s (T89075)
-				browserNoActivityTimeout: 60 * 1000
+				browserNoActivityTimeout: 60 * 1000,
+				// Karma requires Same-Origin (or CORS) by default since v1.1.1
+				// for better stacktraces. But we load the first request from wgServer
+				crossOriginAttribute: false
 			},
 			main: {
 				browsers: [ 'Chrome' ]
 			},
-			more: {
-				browsers: [ 'Chrome', 'Firefox' ]
+			chromium: {
+				browsers: [ 'Chromium' ]
+			},
+			firefox: {
+				browsers: [ 'Firefox' ]
 			}
 		},
 		copy: {
@@ -80,7 +104,15 @@ module.exports = function ( grunt ) {
 					return require( 'path' ).join( dest, src.replace( 'resources/', '' ) );
 				}
 			}
+		},
+
+		// Configure WebdriverIO task
+		webdriver: {
+			test: {
+				configFile: './tests/selenium/wdio.conf.js'
+			}
 		}
+
 	} );
 
 	grunt.registerTask( 'assert-mw-env', function () {
@@ -96,7 +128,7 @@ module.exports = function ( grunt ) {
 		return !!( process.env.MW_SERVER && process.env.MW_SCRIPT_PATH );
 	} );
 
-	grunt.registerTask( 'lint', [ 'jshint', 'jscs', 'jsonlint', 'banana' ] );
+	grunt.registerTask( 'lint', [ 'eslint', 'banana', 'stylelint' ] );
 	grunt.registerTask( 'qunit', [ 'assert-mw-env', 'karma:main' ] );
 
 	grunt.registerTask( 'test', [ 'lint' ] );

@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226",
+			"SolidBlock"
+		]
+	},
+	"revisionslider": "修订滑块",
+	"revisionslider-preference-disable": "不要显示修订滑块",
+	"revisionslider-desc": "显示一个滑块，它允许在差异页面上选择和比较修订",
+	"revisionslider-toggle-label": "浏览历史",
+	"revisionslider-page-size": "$1{{PLURAL:$2|字节}}",
+	"revisionslider-change-size": "$1{{PLURAL:$3|字节}}",
+	"revisionslider-label-date": "日期",
+	"revisionslider-label-page-size": "页面大小",
+	"revisionslider-label-change-size": "更改大小",
+	"revisionslider-label-comment": "注释",
+	"revisionslider-label-username": "{{GENDER:$1|用户名}}",
+	"revisionslider-minoredit": "这是一个小编辑",
+	"revisionslider-loading-failed": "修订滑块无法加载。",
+	"revisionslider-toggle-title-expand": "开启修订滑块",
+	"revisionslider-toggle-title-collapse": "关闭修订滑块",
+	"revisionslider-turn-on-auto-expand-title": "总是展开修订滑块",
+	"revisionslider-turn-off-auto-expand-title": "不要自动展开修订滑块",
+	"revisionslider-arrow-tooltip-newer": "查看更新修订版本",
+	"revisionslider-arrow-tooltip-older": "查看更旧修订版本",
+	"revisionslider-show-help-tooltip": "显示帮助文本",
+	"revisionslider-help-dialog-slide1": "修订滑块帮助您在差异页面上导航并比较修订版本。它基于来自德语社群技术愿望单中的一个[//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider 社群愿望]。非常感谢您的使用，请[//www.mediawiki.org/wiki/Extension_talk:RevisionSlider 在此]提供反馈。",
+	"revisionslider-help-dialog-slide2": "每个竖条代表一个页面修订版本。顶部的竖条显示页面的增长大小，底部的竖条显示减少大小。在图片中，修订1代表添加的内容，而修订2则代表内容的移除。",
+	"revisionslider-help-dialog-slide3a": "<p>要比较特定修订版本，使用黄色和蓝色旋钮选择修订版本。</p><p>蓝色旋钮控制较新修订版本，黄色旋钮映射到较早修订版本。</p><p>通过拖放或在滑块上点击移动旋钮。</p>",
+	"revisionslider-help-dialog-slide4": "使用向后和向前箭头在修订版本历史间移动，并显示较早和较新的修订版本。",
+	"revisionslider-tutorial": "修订滑块指导",
+	"revisionslider-previous-dialog": "上一步",
+	"revisionslider-next-dialog": "下一个",
+	"revisionslider-close-dialog": "关闭"
+}

@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mogoeilor"
+		]
+	},
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|مأنمۈن}}}}",
+	"thanks-thank-tooltip": "{{GENDER:$1|کل کرد}} یه گل منمونداری وارسیارکن سی ای {{GENDER:$2|کارور}}"
+}

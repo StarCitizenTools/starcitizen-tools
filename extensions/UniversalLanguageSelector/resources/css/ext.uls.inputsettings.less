@@ -1,14 +1,5 @@
 @import 'mediawiki.mixins';
 
-.input-settings-block {
-	background: transparent no-repeat left top;
-	.background-image-svg( '../images/input.svg', '../images/input.png' );
-	background-size: 20px auto;
-	color: #252525;
-	padding-left: 26px;
-	cursor: pointer;
-}
-
 .imelabel {
 	display: block;
 	padding-bottom: 10px;
@@ -25,12 +16,12 @@
 }
 
 .uls-ime-menu-settings-item {
-	background-color: #f0f0f0;
-	border-radius: 0 0 5px 5px;
-	border-top: 1px solid #ddd;
+	background-color: #f8f9fa;
+	color: #222;
+	border-top: 1px solid #c8ccd1;
+	border-radius: 0 0 2px 2px;
 	margin-top: 6px;
 	padding: 4px 2px;
-	color: #444;
 	position: relative;
 }
 
@@ -48,7 +39,7 @@
 	background: transparent no-repeat center top;
 	.background-image-svg( '../images/cog.svg', '../images/cog.png' );
 	background-size: auto 14px;
-	border-left: 1px solid #ccc;
+	border-left: 1px solid #c8ccd1;
 	width: 22px;
 	height: 14px;
 	position: absolute;
@@ -57,7 +48,7 @@
 }
 
 .uls-ime-menu-settings-item > a:hover {
-	background-color: #f0f0f0;
+	background-color: #f8f9fa;
 	color: #000;
 }
 
@@ -67,7 +58,7 @@
 
 .uls-input-settings-disable-info,
 .uls-input-settings-no-inputmethods {
-	color: #565656;
+	color: #54595d;
 	padding-top: 10px;
 	padding-bottom: 15px;
 	font-size: 11pt;
@@ -80,7 +71,7 @@
 	border-top: 0;
 	border-right: 8px solid transparent;
 	border-left: 8px solid transparent;
-	border-bottom: 8px solid #f0f0f0;
+	border-bottom: 8px solid #f8f9fa;
 	content: '';
 	position: relative;
 	vertical-align: bottom;
@@ -97,7 +88,12 @@
 .uls-input-settings .uls-input-settings-inputmethods-list {
 	margin: 12px 0;
 	padding: 6px 10px;
-	background: #f0f0f0;
+	background: #f8f9fa;
+
+	.uls-input-settings-name {
+		unicode-bidi: -moz-isolate;
+		unicode-bidi: isolate;
+	}
 }
 
 .uls-input-settings-inputmethods-list .mw-ui-radio {
@@ -105,7 +101,7 @@
 }
 
 .uls-ime-notification-bubble .link {
-	color: #0645ad;
+	color: #36c;
 	cursor: pointer;
 }
 
@@ -125,11 +121,12 @@
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	right: 0;
-	opacity: 0.75;
+	right: 4px;
+	opacity: 0.81;
 	padding: 0;
-	background: transparent no-repeat left center;
+	background: transparent no-repeat right center;
 	.background-image-svg( '../images/help.svg', '../images/help.png' );
+	background-size: 16px 16px;
 }
 
 .ime-checked .ime-perime-help:hover {

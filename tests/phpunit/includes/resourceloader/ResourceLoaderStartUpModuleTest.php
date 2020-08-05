@@ -2,18 +2,13 @@
 
 class ResourceLoaderStartUpModuleTest extends ResourceLoaderTestCase {
 
-	// Version hash for a blank file module.
-	// Result of ResourceLoader::makeHash(), ResourceLoaderTestModule
-	// and ResourceLoaderFileModule::getDefinitionSummary().
-	protected static $blankVersion = 'GqV9IPpY';
-
 	protected static function expandPlaceholders( $text ) {
 		return strtr( $text, [
-			'{blankVer}' => self::$blankVersion
+			'{blankVer}' => self::BLANK_VERSION
 		] );
 	}
 
-	public static function provideGetModuleRegistrations() {
+	public function provideGetModuleRegistrations() {
 		return [
 			[ [
 				'msg' => 'Empty registry',
@@ -37,6 +32,88 @@ mw.loader.register( [
     [
         "test.blank",
         "{blankVer}"
+    ]
+] );',
+			] ],
+			[ [
+				'msg' => 'Omit raw modules from registry',
+				'modules' => [
+					'test.raw' => new ResourceLoaderTestModule( [ 'isRaw' => true ] ),
+					'test.blank' => new ResourceLoaderTestModule(),
+				],
+				'out' => '
+mw.loader.addSource( {
+    "local": "/w/load.php"
+} );
+mw.loader.register( [
+    [
+        "test.blank",
+        "{blankVer}"
+    ]
+] );',
+			] ],
+			[ [
+				'msg' => 'Version falls back gracefully if getVersionHash throws',
+				'modules' => [
+					'test.fail' => (
+						( $mock = $this->getMockBuilder( ResourceLoaderTestModule::class )
+							->setMethods( [ 'getVersionHash' ] )->getMock() )
+						&& $mock->method( 'getVersionHash' )->will(
+							$this->throwException( new Exception )
+						)
+					) ? $mock : $mock
+				],
+				'out' => '
+mw.loader.addSource( {
+    "local": "/w/load.php"
+} );
+mw.loader.register( [
+    [
+        "test.fail",
+        ""
+    ]
+] );
+mw.loader.state( {
+    "test.fail": "error"
+} );',
+			] ],
+			[ [
+				'msg' => 'Use version from getVersionHash',
+				'modules' => [
+					'test.version' => (
+						( $mock = $this->getMockBuilder( ResourceLoaderTestModule::class )
+							->setMethods( [ 'getVersionHash' ] )->getMock() )
+						&& $mock->method( 'getVersionHash' )->willReturn( '1234567' )
+					) ? $mock : $mock
+				],
+				'out' => '
+mw.loader.addSource( {
+    "local": "/w/load.php"
+} );
+mw.loader.register( [
+    [
+        "test.version",
+        "1234567"
+    ]
+] );',
+			] ],
+			[ [
+				'msg' => 'Re-hash version from getVersionHash if too long',
+				'modules' => [
+					'test.version' => (
+						( $mock = $this->getMockBuilder( ResourceLoaderTestModule::class )
+							->setMethods( [ 'getVersionHash' ] )->getMock() )
+						&& $mock->method( 'getVersionHash' )->willReturn( '12345678' )
+					) ? $mock : $mock
+				],
+				'out' => '
+mw.loader.addSource( {
+    "local": "/w/load.php"
+} );
+mw.loader.register( [
+    [
+        "test.version",
+        "016es8l"
     ]
 ] );',
 			] ],
@@ -308,9 +385,8 @@ mw.loader.register( [
 
 	/**
 	 * @dataProvider provideGetModuleRegistrations
-	 * @covers ResourceLoaderStartUpModule::compileUnresolvedDependencies
 	 * @covers ResourceLoaderStartUpModule::getModuleRegistrations
-	 * @covers ResourceLoader::makeLoaderSourcesScript
+	 * @covers ResourceLoaderStartUpModule::compileUnresolvedDependencies
 	 * @covers ResourceLoader::makeLoaderRegisterScript
 	 */
 	public function testGetModuleRegistrations( $case ) {
@@ -323,6 +399,10 @@ mw.loader.register( [
 		$rl->register( $case['modules'] );
 		$module = new ResourceLoaderStartUpModule();
 		$out = ltrim( $case['out'], "\n" );
+
+		// Disable log from getModuleRegistrations via MWExceptionHandler
+		// for case where getVersionHash() is expected to throw.
+		$this->setLogger( 'exception', new Psr\Log\NullLogger() );
 
 		$this->assertEquals(
 			self::expandPlaceholders( $out ),
@@ -350,6 +430,7 @@ mw.loader.register( [
 		];
 	}
 	/**
+	 * @covers ResourceLoaderStartUpModule::getModuleRegistrations
 	 * @dataProvider provideRegistrations
 	 */
 	public function testRegistrationsMinified( $modules ) {
@@ -374,6 +455,7 @@ mw.loader.register( [
 	}
 
 	/**
+	 * @covers ResourceLoaderStartUpModule::getModuleRegistrations
 	 * @dataProvider provideRegistrations
 	 */
 	public function testRegistrationsUnminified( $modules ) {

@@ -2,12 +2,15 @@
 /**
  * @file
  * @author Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 namespace LocalisationUpdate;
 
-class JSONReaderTest extends \PHPUnit_Framework_TestCase {
+/**
+ * @covers \LocalisationUpdate\JSONReader
+ */
+class JSONReaderTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @dataProvider parseProvider
 	 */
@@ -18,22 +21,22 @@ class JSONReaderTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function parseProvider() {
-		return array(
-			array(
+		return [
+			[
 				'{}',
-				array(),
+				[],
 				'empty file',
-			),
-			array(
+			],
+			[
 				'{"key":"value"}',
-				array( 'key' => 'value' ),
+				[ 'key' => 'value' ],
 				'file with one string',
-			),
-			array(
+			],
+			[
 				'{"@metadata":{"authors":["Nike"]},"key":"value2"}',
-				array( 'key' => 'value2' ),
+				[ 'key' => 'value2' ],
 				'@metadata is ignored',
-			)
-		);
+			]
+		];
 	}
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWCategoryMetaItem class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -13,9 +13,9 @@
  * @constructor
  * @param {Object} element Reference to element in meta-linmod
  */
-ve.dm.MWCategoryMetaItem = function VeDmMWCategoryMetaItem( element ) {
+ve.dm.MWCategoryMetaItem = function VeDmMWCategoryMetaItem() {
 	// Parent constructor
-	ve.dm.MetaItem.call( this, element );
+	ve.dm.MWCategoryMetaItem.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -34,17 +34,17 @@ ve.dm.MWCategoryMetaItem.static.matchRdfaTypes = [ 'mw:PageProp/Category' ];
 
 ve.dm.MWCategoryMetaItem.static.toDataElement = function ( domElements ) {
 	var href = domElements[ 0 ].getAttribute( 'href' ),
-		/*jshint regexp:false */
-		matches = href.match( /^((?:\.\.?\/)*)(.*?)(?:#(.*))?$/ ),
-		rawSortkey = matches[ 3 ] || '';
+		data = ve.parseParsoidResourceName( href ),
+		rawTitleAndFragment = data.rawTitle.match( /^(.*?)(?:#(.*))?$/ ),
+		titleAndFragment = data.title.match( /^(.*?)(?:#(.*))?$/ );
 	return {
 		type: this.name,
 		attributes: {
-			hrefPrefix: matches[ 1 ],
-			category: ve.safeDecodeURIComponent( matches[ 2 ] ).replace( /_/g, ' ' ),
-			origCategory: matches[ 2 ],
-			sortkey: ve.safeDecodeURIComponent( rawSortkey ).replace( /_/g, ' ' ),
-			origSortkey: rawSortkey
+			hrefPrefix: data.hrefPrefix,
+			category: titleAndFragment[ 1 ],
+			origCategory: rawTitleAndFragment[ 1 ],
+			sortkey: titleAndFragment[ 2 ] || '',
+			origSortkey: rawTitleAndFragment[ 2 ] || ''
 		}
 	};
 };
@@ -57,8 +57,8 @@ ve.dm.MWCategoryMetaItem.static.toDomElements = function ( dataElement, doc ) {
 		sortkey = dataElement.attributes.sortkey || '',
 		origCategory = dataElement.attributes.origCategory || '',
 		origSortkey = dataElement.attributes.origSortkey || '',
-		normalizedOrigCategory = ve.safeDecodeURIComponent( origCategory ).replace( /_/g, ' ' ),
-		normalizedOrigSortkey = ve.safeDecodeURIComponent( origSortkey ).replace( /_/g, ' ' );
+		normalizedOrigCategory = ve.decodeURIComponentIntoArticleTitle( origCategory ),
+		normalizedOrigSortkey = ve.decodeURIComponentIntoArticleTitle( origSortkey );
 	if ( normalizedOrigSortkey === sortkey ) {
 		sortkey = origSortkey;
 	} else {

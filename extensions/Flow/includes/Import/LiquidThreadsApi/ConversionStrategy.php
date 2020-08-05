@@ -2,7 +2,7 @@
 
 namespace Flow\Import\LiquidThreadsApi;
 
-use DatabaseBase;
+use Wikimedia\Rdbms\IDatabase;
 use Flow\Import\ArchiveNameHelper;
 use Flow\Import\IConversionStrategy;
 use Flow\Import\SourceStore\SourceStoreInterface as ImportSourceStore;
@@ -30,7 +30,7 @@ use WikitextContent;
  */
 class ConversionStrategy implements IConversionStrategy {
 	/**
-	 * @var DatabaseBase Master database for the current wiki
+	 * @var IDatabase Master database for the current wiki
 	 */
 	protected $dbw;
 
@@ -60,7 +60,7 @@ class ConversionStrategy implements IConversionStrategy {
 	protected $notificationController;
 
 	public function __construct(
-		DatabaseBase $dbw,
+		IDatabase $dbw,
 		ImportSourceStore $sourceStore,
 		ApiBackend $api,
 		UrlGenerator $urlGenerator,
@@ -110,9 +110,9 @@ class ConversionStrategy implements IConversionStrategy {
 	 */
 	public function decideArchiveTitle( Title $source ) {
 		$archiveNameHelper = new ArchiveNameHelper();
-		return $archiveNameHelper->decideArchiveTitle( $source, array(
+		return $archiveNameHelper->decideArchiveTitle( $source, [
 			'%s/LQT Archive %d',
-		) );
+		] );
 	}
 
 	/**
@@ -147,7 +147,7 @@ class ConversionStrategy implements IConversionStrategy {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @inheritDoc
 	 */
 	public function shouldConvert( Title $sourceTitle ) {
 		// The expensive part of this (user-override checking) is cached by LQT.
@@ -175,10 +175,10 @@ class ConversionStrategy implements IConversionStrategy {
 	 * @return string
 	 */
 	protected function getPrefixText( WikitextContent $content, Title $title ) {
-		$arguments = implode( '|', array(
+		$arguments = implode( '|', [
 			'from=' . $title->getPrefixedText(),
 			'date=' . MWTimestamp::getInstance()->timestamp->format( 'Y-m-d' ),
-		) );
+		] );
 
 		$template = wfMessage( 'flow-importer-lqt-converted-archive-template' )->inContentLanguage()->plain();
 
@@ -194,8 +194,10 @@ class ConversionStrategy implements IConversionStrategy {
 		$patterns = array_map(
 			// delete any status: enabled or disabled doesn't matter (we're
 			// adding disabled magic word anyway and having it twice is messy)
-			function( $word ) { return '/{{\\s*#' . preg_quote( $word ) . ':\\s*[01]*\\s*}}/i'; },
-			array( 'useliquidthreads' ) + MagicWord::get( 'useliquidthreads' )->getSynonyms() );
+			function ( $word ) {
+				return '/{{\\s*#' . preg_quote( $word ) . ':\\s*[01]*\\s*}}/i';
+			},
+			[ 'useliquidthreads' ] + MagicWord::get( 'useliquidthreads' )->getSynonyms() );
 
 		return preg_replace( $patterns, '', $content );
 	}

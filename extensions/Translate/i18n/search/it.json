@@ -17,7 +17,6 @@
 	"tux-sst-count": "{{PLURAL:$1|Un risultato trovato|$1 risultati trovati}}",
 	"tux-sst-facet-language": "Lingue",
 	"tux-sst-facet-group": "Gruppi di messaggi",
-	"tux-sst-facet-orphan": "(orfano)",
 	"tux-sst-nosolr-title": "Ricerca non disponibile",
 	"tux-sst-nosolr-body": "Questo wiki non ha un servizio di ricerca delle traduzioni.",
 	"tux-sst-solr-offline-title": "Ricerca non disponibile",
@@ -30,5 +29,7 @@
 	"tux-sst-outdated": "Traduzioni non aggiornate da $1",
 	"tux-sst-ellipsis-untranslated": "Nessuna traduzione",
 	"tux-sst-ellipsis-outdated": "Traduzioni non aggiornate",
-	"tux-sst-case-sensitive": "Distingui maiuscole e minuscole"
+	"tux-sst-case-sensitive": "Distingui maiuscole e minuscole",
+	"tux-sst-error-offset": "Non è possibile visualizzare ulteriori risultati. Restringi la ricerca.",
+	"tux-sst-error-language": "Questa lingua non può essere utilizzata con questo tipo di ricerca."
 }

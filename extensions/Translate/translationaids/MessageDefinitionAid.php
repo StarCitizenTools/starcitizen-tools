@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2012-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -19,9 +19,9 @@ class MessageDefinitionAid extends TranslationAid {
 	public function getData() {
 		$language = $this->group->getSourceLanguage();
 
-		return array(
-			'value' => $this->getDefinition(),
+		return [
+			'value' => $this->dataProvider->getDefinition(),
 			'language' => $language,
-		);
+		];
 	}
 }

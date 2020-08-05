@@ -29,11 +29,11 @@
 class RevisionDeleter {
 	/** List of known revdel types, with their corresponding list classes */
 	private static $allowedTypes = [
-		'revision' => 'RevDelRevisionList',
-		'archive' => 'RevDelArchiveList',
-		'oldimage' => 'RevDelFileList',
-		'filearchive' => 'RevDelArchivedFileList',
-		'logging' => 'RevDelLogList',
+		'revision' => RevDelRevisionList::class,
+		'archive' => RevDelArchiveList::class,
+		'oldimage' => RevDelFileList::class,
+		'filearchive' => RevDelArchivedFileList::class,
+		'logging' => RevDelLogList::class,
 	];
 
 	/** Type map to support old log entries */
@@ -98,7 +98,7 @@ class RevisionDeleter {
 	 * @param int $field The bitmask describing the single option.
 	 * @param int $diff The xor of the old and new bitfields.
 	 * @param int $new The new bitfield
-	 * @param array $arr The array to update.
+	 * @param array &$arr The array to update.
 	 */
 	protected static function checkItem( $desc, $field, $diff, $new, &$arr ) {
 		if ( $diff & $field ) {
@@ -213,7 +213,7 @@ class RevisionDeleter {
 	 * @return bool|mixed
 	 */
 	public static function checkRevisionExistence( $title, $revid ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$exists = $dbr->selectField( 'revision', '1',
 				[ 'rev_id' => $revid ], __METHOD__ );
 
@@ -234,7 +234,7 @@ class RevisionDeleter {
 	 * @since 1.22
 	 * @param array $bitPars ExtractBitParams() params
 	 * @param int $oldfield Current bitfield
-	 * @return integer
+	 * @return int
 	 */
 	public static function extractBitfield( array $bitPars, $oldfield ) {
 		// Build the actual new rev_deleted bitfield

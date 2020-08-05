@@ -1,8 +1,8 @@
 ( function ( $ ) {
 	QUnit.module( 'ext.wikiEditor.toolbar', QUnit.newMwEnvironment( {
 		setup: function () {
-			var $fixture = $( '#qunit-fixture' );
-			var $target = $( '<textarea id="wpTextBox1">' );
+			var $fixture = $( '#qunit-fixture' ),
+				$target = $( '<textarea id="wpTextBox1">' );
 			this.$target = $target;
 			$fixture.append( $target );
 			$target.wikiEditor( 'addModule', 'toolbar' );
@@ -10,7 +10,7 @@
 		}
 	} ) );
 
-	QUnit.test( 'Toolbars', 16, function ( assert ) {
+	QUnit.test( 'Toolbars', function ( assert ) {
 		// Add toolbar section
 		var data = {
 			sections: {
@@ -141,7 +141,7 @@
 		assert.equal( this.$ui.find( '*[rel="emoticons"].section' ).length, 0, 'After removing toolbar section' );
 	} );
 
-	QUnit.test( 'Booklets', 20, function ( assert ) {
+	QUnit.test( 'Booklets', function ( assert ) {
 		// Add booklet section
 		var data = {
 			sections: {

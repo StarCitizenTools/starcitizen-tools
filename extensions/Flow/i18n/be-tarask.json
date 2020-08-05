@@ -5,12 +5,12 @@
 			"Renessaince"
 		]
 	},
-	"notification-bundle-header-flow-post-reply": "$1 новых адказаў у «$2».",
-	"echo-pref-tooltip-flow-discussion": "Паведамляць мне, калі зьвязаныя са мной дзеяньні адбываюцца ў Flow.",
-	"right-flow-hide": "хаваць тэмы і паведамленьні Flow",
-	"right-flow-lock": "пазначэньне тэмаў Flow як вырашаных",
-	"right-flow-delete": "выдаленьне тэмаў і запісаў Flow",
-	"right-flow-edit-post": "рэдагаваньне запісаў іншых удзельнікаў у Flow",
-	"right-flow-suppress": "падаўленьне вэрсіяў Flow",
+	"echo-category-title-flow-discussion": "Структураваная дыскусія",
+	"echo-pref-tooltip-flow-discussion": "Паведамляць мне пра актыўнасьць у тэмах і на старонках, за якімі я сачу.",
+	"right-flow-hide": "Хаваць тэмы і паведамленьні структураваных дыскусіяў",
+	"right-flow-lock": "Пазначэньне тэмаў структураваных дыскусіяў як вырашаных",
+	"right-flow-delete": "Выдаленьне тэмаў і запісаў структураваных дыскусіяў",
+	"right-flow-edit-post": "Рэдагаваць запісы іншых удзельнікаў у структураваных дыскусіях",
+	"right-flow-suppress": "Хаваньне вэрсіяў структураваных дыскусіяў",
 	"flow-special-type": "Тып"
 }

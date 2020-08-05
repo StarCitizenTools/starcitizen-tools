@@ -3,7 +3,8 @@
 		"authors": [
 			"Kghbln",
 			"Metalhead64",
-			"TMg"
+			"TMg",
+			"Man77"
 		]
 	},
 	"uls-region-WW": "Weltweit",
@@ -12,11 +13,12 @@
 	"uls-region-AF": "Afrika",
 	"uls-region-EU": "Europa",
 	"uls-region-AS": "Asien",
-	"uls-region-ME": "Mittlerer Osten",
+	"uls-region-ME": "Naher Osten",
 	"uls-region-PA": "Pazifik",
+	"uls-region-all": "Alle Sprachen",
 	"uls-no-results-found": "Es wurden keine Ergebnisse gefunden.",
 	"uls-common-languages": "Vorgeschlagene Sprachen",
 	"uls-no-results-suggestion-title": "Dies könnte dich interessieren:",
 	"uls-search-help": "Du kannst nach dem Namen der Sprache suchen, dem Namen der Schrift, dem ISO-Code der Sprache oder aber die Suche über eine Region durchführen.",
-	"uls-search-placeholder": "Sprachensuche"
+	"uls-search-placeholder": "Nach einer Sprache suchen"
 }

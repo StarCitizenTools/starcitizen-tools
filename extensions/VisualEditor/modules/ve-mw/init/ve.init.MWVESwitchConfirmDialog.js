@@ -1,7 +1,7 @@
 /*
  * VisualEditor user interface MWVESwitchConfirmDialog class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -27,10 +27,6 @@ OO.inheritClass( mw.libs.ve.SwitchConfirmDialog, OO.ui.MessageDialog );
 /* Static Properties */
 
 mw.libs.ve.SwitchConfirmDialog.static.name = 'veswitchconfirm';
-
-mw.libs.ve.SwitchConfirmDialog.static.verbose = true;
-
-mw.libs.ve.SwitchConfirmDialog.static.size = 'small';
 
 mw.libs.ve.SwitchConfirmDialog.static.title =
 	mw.msg( 'visualeditor-mweditmodeve-title' );
@@ -64,10 +60,12 @@ mw.libs.ve.SwitchConfirmDialog.static.actions = [
 /**
  * @inheritdoc
  */
-mw.libs.ve.SwitchConfirmDialog.prototype.getSetupProcess = function () {
+mw.libs.ve.SwitchConfirmDialog.prototype.getSetupProcess = function ( data ) {
 	return mw.libs.ve.SwitchConfirmDialog.super.prototype.getSetupProcess.apply( this, arguments )
 		.next( function () {
-			if (
+			if ( data && data.mode ) {
+				this.actions.setMode( data.mode );
+			} else if (
 				mw.config.get( 'wgVisualEditorConfig' ).fullRestbaseUrl &&
 				!$( 'input[name=wpSection]' ).val()
 			) {

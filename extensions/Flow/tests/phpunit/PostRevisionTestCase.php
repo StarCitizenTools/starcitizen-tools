@@ -22,7 +22,7 @@ use User;
  * @group Database
  */
 class PostRevisionTestCase extends FlowTestCase {
-	protected $tablesUsed = array(
+	protected $tablesUsed = [
 		'flow_revision',
 		'flow_topic_list',
 		'flow_tree_node',
@@ -30,25 +30,26 @@ class PostRevisionTestCase extends FlowTestCase {
 		'flow_workflow',
 		'page',
 		'revision',
+		'ip_changes',
 		'text',
-	);
+	];
 
 	/**
 	 * @var PostRevision[]
 	 */
-	protected $revisions = array();
+	protected $revisions = [];
 
 	/**
 	 * @var Workflow[]
 	 */
-	protected $workflows = array();
+	protected $workflows = [];
 
 	protected function setUp() {
 		parent::setUp();
 
 		// Revisions must be blanked here otherwise phpunit run with --repeat will remember
 		// ths revision list between multiple invocations of the test causing issues.
-		$this->revisions = array();
+		$this->revisions = [];
 	}
 
 	/**
@@ -60,7 +61,7 @@ class PostRevisionTestCase extends FlowTestCase {
 		foreach ( $this->revisions as $revision ) {
 			try {
 				$workflow = $revision->getCollection()->getWorkflow();
-				$this->getStorage()->multiRemove( array( $revision ), array( 'workflow' => $workflow ) );
+				$this->getStorage()->multiRemove( [ $revision ], [ 'workflow' => $workflow ] );
 			} catch ( \MWException $e ) {
 				// ignore - lifecyclehandlers may cause issues with tests, where
 				// not all related stuff is loaded
@@ -69,9 +70,9 @@ class PostRevisionTestCase extends FlowTestCase {
 
 		foreach ( $this->workflows as $workflow ) {
 			try {
-				$this->getStorage()->multiRemove( array( $workflow ) );
+				$this->getStorage()->multiRemove( [ $workflow ] );
 
-				$found = $this->getStorage()->find( 'TopicListEntry', array( 'topic_id' => $workflow->getId() ) );
+				$found = $this->getStorage()->find( 'TopicListEntry', [ 'topic_id' => $workflow->getId() ] );
 				if ( $found ) {
 					$this->getStorage()->multiRemove( $found );
 				}
@@ -102,14 +103,14 @@ class PostRevisionTestCase extends FlowTestCase {
 	 * @param array[optional] $row DB row data (only specify override columns)
 	 * @return array
 	 */
-	protected function generateRow( array $row = array() ) {
-		$workflow = $this->generateWorkflow( array( 'workflow_type' => 'topic' ) );
+	protected function generateRow( array $row = [] ) {
+		$workflow = $this->generateWorkflow( [ 'workflow_type' => 'topic' ] );
 		$uuidRevision = UUID::create();
 
 		$user = User::newFromName( 'UTSysop' );
 		$tuple = UserTuple::newFromUser( $user );
 
-		return $row + array(
+		return $row + [
 			// flow_revision
 			'rev_id' => $uuidRevision->getBinary(),
 			'rev_type' => 'post',
@@ -141,7 +142,7 @@ class PostRevisionTestCase extends FlowTestCase {
 			'tree_orig_user_id' => $tuple->id,
 			'tree_orig_user_ip' => $tuple->ip,
 			'tree_parent_id' => null,
-		);
+		];
 	}
 
 	/**
@@ -150,11 +151,11 @@ class PostRevisionTestCase extends FlowTestCase {
 	 * @param array $row
 	 * @return Workflow
 	 */
-	protected function generateWorkflow( $row = array() ) {
-		$row = $row + array(
+	protected function generateWorkflow( $row = [] ) {
+		$row = $row + [
 			'workflow_id' => UUID::create()->getBinary(),
 			'workflow_type' => 'topic',
-			'workflow_wiki' => wfWikiId(),
+			'workflow_wiki' => wfWikiID(),
 			// The test workflow has no real associated page, this is
 			// just a random page number
 			'workflow_page_id' => 1,
@@ -162,7 +163,7 @@ class PostRevisionTestCase extends FlowTestCase {
 			'workflow_title_text' => 'Test',
 			'workflow_lock_state' => 0,
 			'workflow_last_update_timestamp' => wfTimestampNow(),
-		);
+		];
 		$workflow = Workflow::fromStorageRow( $row );
 
 		// store workflow:
@@ -185,7 +186,7 @@ class PostRevisionTestCase extends FlowTestCase {
 	 * @param int[optional] $depth Depth of the PostRevision object
 	 * @return PostRevision
 	 */
-	protected function generateObject( array $row = array(), $children = array(), $depth = 0 ) {
+	protected function generateObject( array $row = [], $children = [], $depth = 0 ) {
 		$row = $this->generateRow( $row );
 
 		$revision = PostRevision::fromStorageRow( $row );
@@ -215,15 +216,15 @@ class PostRevisionTestCase extends FlowTestCase {
 			->createWorkflowLoader( $topicWorkflow->getOwnerTitle() )
 			->getWorkflow();
 
-		$metadata = array(
+		$metadata = [
 			'workflow' => $topicWorkflow,
 			'board-workflow' => $boardWorkflow,
 			// @todo: Topic.php also adds 'topic-title'
-		);
+		];
 
 		// check if this topic (+ workflow + board workflow + board page) have
 		// already been inserted or do so now
-		$found = $this->getStorage()->find( 'TopicListEntry', array( 'topic_id' => $topicWorkflow->getId() ) );
+		$found = $this->getStorage()->find( 'TopicListEntry', [ 'topic_id' => $topicWorkflow->getId() ] );
 		if ( !$found ) {
 			$title = $boardWorkflow->getOwnerTitle();
 			$user = User::newFromName( '127.0.0.1', false );
@@ -231,7 +232,7 @@ class PostRevisionTestCase extends FlowTestCase {
 			/** @var OccupationController $occupationController */
 			$occupationController = Container::get( 'occupation_controller' );
 			// make sure user has rights to create board
-			$user->mRights = array_merge( $user->getRights(), array( 'flow-create-board' ) );
+			$user->mRights = array_merge( $user->getRights(), [ 'flow-create-board' ] );
 			$occupationController->safeAllowCreation( $title, $user );
 			$occupationController->ensureFlowRevision( new \Article( $title ), $boardWorkflow );
 
@@ -246,7 +247,7 @@ class PostRevisionTestCase extends FlowTestCase {
 
 		/** @var SplQueue $deferredQueue */
 		$deferredQueue = Container::get( 'deferred_queue' );
-		while( !$deferredQueue->isEmpty() ) {
+		while ( !$deferredQueue->isEmpty() ) {
 			try {
 				DeferredUpdates::addCallableUpdate( $deferredQueue->dequeue() );
 
@@ -264,12 +265,12 @@ class PostRevisionTestCase extends FlowTestCase {
 
 	protected function clearExtraLifecycleHandlers() {
 		$container = Container::getContainer();
-		foreach( array_unique( $container['storage.manager_list'] ) as $storage ) {
+		foreach ( array_unique( $container['storage.manager_list'] ) as $storage ) {
 			if ( !isset( $container["$storage.listeners"] ) ) {
 				continue;
 			}
 
-			$container->extend( "$storage.listeners", function( $listeners ) {
+			$container->extend( "$storage.listeners", function ( $listeners ) {
 				unset(
 					// putting together the right metadata for a commit is beyond the
 					// scope of these tests

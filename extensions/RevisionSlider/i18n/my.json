@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ninjastrikers"
+		]
+	},
+	"revisionslider-page-size": "$1 {{PLURAL:$2|ဘိုက်|ဘိုက်}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|ဘိုက်|ဘိုက်}}"
+}

@@ -5,7 +5,7 @@
  * @file
  * @author Niklas Laxström
  * @copyright Copyright © 2008-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -15,14 +15,14 @@
  */
 class TranslateDeleteJob extends Job {
 	/**
-	 * @param $target Title
-	 * @param $base
-	 * @param $full
-	 * @param $performer
-	 * @param $reason
-	 * @return TranslateDeleteJob
+	 * @param Title $target
+	 * @param string $base
+	 * @param string $full
+	 * @param User $performer
+	 * @param string $reason
+	 * @return self
 	 */
-	public static function newJob( Title $target, $base, $full, /*User*/$performer, $reason ) {
+	public static function newJob( Title $target, $base, $full, /*User*/ $performer, $reason ) {
 		$job = new self( $target );
 		$job->setUser( FuzzyBot::getUser() );
 		$job->setFull( $full );
@@ -38,10 +38,9 @@ class TranslateDeleteJob extends Job {
 	/**
 	 * @param Title $title
 	 * @param array $params
-	 * @param int $id
 	 */
-	public function __construct( $title, $params = array(), $id = 0 ) {
-		parent::__construct( __CLASS__, $title, $params, $id );
+	public function __construct( $title, $params = [] ) {
+		parent::__construct( __CLASS__, $title, $params );
 	}
 
 	public function run() {
@@ -59,12 +58,13 @@ class TranslateDeleteJob extends Job {
 
 		$error = '';
 		$wikipage = new WikiPage( $title );
-		$status = $wikipage->doDeleteArticleReal( "{$summary}: $reason", false, 0, true, $error, $user );
+		$status = $wikipage->doDeleteArticleReal( "{$summary}: $reason", false, 0, true, $error,
+			$user, [], 'delete', true );
 		if ( !$status->isGood() ) {
-			$params = array(
+			$params = [
 				'target' => $base,
 				'errors' => $status->getErrorsArray(),
-			);
+			];
 
 			$type = $this->getFull() ? 'deletefnok' : 'deletelnok';
 			$entry = new ManualLogEntry( 'pagetranslation', $type );
@@ -129,7 +129,7 @@ class TranslateDeleteJob extends Job {
 	}
 
 	/**
-	 * @param $performer User|string
+	 * @param User|string $performer
 	 */
 	public function setPerformer( $performer ) {
 		if ( is_object( $performer ) ) {
@@ -144,7 +144,7 @@ class TranslateDeleteJob extends Job {
 	}
 
 	/**
-	 * @param $user User|string
+	 * @param User|string $user
 	 */
 	public function setUser( $user ) {
 		if ( is_object( $user ) ) {

@@ -9,7 +9,7 @@
  * @defgroup FFS File format support
  * @author Niklas Laxström
  * @copyright Copyright © 2008-2013, Niklas Laxström
- * @license GPL-2.0+
+ * @license GPL-2.0-or-later
  */
 
 /**
@@ -52,7 +52,7 @@ interface FFS {
 	 * Writes to the location provided with setWritePath and group specific
 	 * directory structure. Exports translations included in the given
 	 * collection with any special handling needed.
-	 * @param $collection MessageCollection
+	 * @param MessageCollection $collection
 	 */
 	public function write( MessageCollection $collection );
 
@@ -76,10 +76,34 @@ interface FFS {
 	public function supportsFuzzy();
 
 	/**
+	 * Checks whether two strings are equal. Sometimes same content might
+	 * have multiple representations. The main case are inline plurals,
+	 * which in some formats require expansion at export time.
+	 *
+	 * @param string $a
+	 * @param string $b
+	 * @return bool
+	 * @since 2016.11
+	 */
+	public function isContentEqual( $a, $b );
+
+	/**
 	 * Return the commonly used file extensions for these formats.
 	 * Include the dot.
 	 * @return string[]
 	 * @since 2013-04
 	 */
 	public function getFileExtensions();
+
+	/**
+	 * Allows to skip writing the export output into a file. This is useful
+	 * to skip updates that would only update irrelevant parts, such as the
+	 * timestamp of the export.
+	 *
+	 * @param string $a The existing content.
+	 * @param string $b The new export content.
+	 * @return bool
+	 * @since 2017.04
+	 */
+	public function shouldOverwrite( $a, $b );
 }

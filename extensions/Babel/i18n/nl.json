@@ -7,7 +7,9 @@
 			"MarkAHershberger",
 			"McDutchie",
 			"SPQRobin",
-			"Siebrand"
+			"Siebrand",
+			"Mainframe98",
+			"Huhbakker"
 		]
 	},
 	"babel": "Taalvaardigheid",
@@ -31,5 +33,9 @@
 	"babel-4-n": "Deze gebruiker beheerst het [[$2|Nederlands]] als ware het zijn [[$1|moedertaal]].",
 	"babel-5-n": "Deze gebruiker heeft [[$1|professionele]] kennis van het [[$2|Nederlands]].",
 	"babel-N-n": "Deze gebruiker heeft het [[$2|Nederlands]] als [[$1|moedertaal]].",
-	"babel-footer": "Gebruikers per taal"
+	"babel-footer": "Gebruikers per taal",
+	"apihelp-query+babel-description": "Informatie verkrijgen over de talen die de gebruiker kent",
+	"apihelp-query+babel-summary": "Informatie verkrijgen over de talen die de gebruiker kent",
+	"apihelp-query+babel-param-user": "Gebruiker om informatie over te verkrijgen",
+	"apihelp-query+babel-example-1": "Voor de Babel informatie voor de gebruiker <kbd>Voorbeeld</kbd>"
 }

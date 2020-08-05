@@ -1,60 +1,266 @@
 {
 	"name": "RevisionSlider",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"author": [
-		"WMDE"
+		"TCB team (Wikimedia Deutschland)",
+		"Addshore",
+		"Leszek Manicki",
+		"Jakob Warkotsch",
+		"Tobias Gritschacher",
+		"Christoph Jauera"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:RevisionSlider",
 	"namemsg": "revisionslider",
 	"descriptionmsg": "revisionslider-desc",
-	"license-name": "GPL-2.0+",
+	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"manifest_version": 1,
+	"requires": {
+		"MediaWiki": ">= 1.30.0"
+	},
+	"ConfigRegistry": {
+		"revisionslider": "GlobalVarConfig::newInstance"
+	},
 	"MessagesDirs": {
 		"RevisionSlider": [
 			"i18n"
 		]
 	},
 	"AutoloadClasses": {
-		"RevisionSliderHooks": "RevisionSlider.hooks.php"
+		"RevisionSliderHooks": "src/RevisionSliderHooks.php"
 	},
 	"ResourceModules": {
+		"ext.RevisionSlider.lazyCss": {
+			"styles": [
+				"modules/ext.RevisionSlider.lazy.less"
+			]
+		},
+		"ext.RevisionSlider.lazyJs": {
+			"scripts": [
+				"modules/ext.RevisionSlider.lazy.js"
+			],
+			"dependencies": [
+				"oojs-ui.styles.icons-movement",
+				"ext.RevisionSlider.Settings"
+			]
+		},
 		"ext.RevisionSlider.init": {
 			"scripts": [
 				"modules/ext.RevisionSlider.init.js"
 			],
 			"styles": [
-				"modules/ext.RevisionSlider.css"
+				"modules/ext.RevisionSlider.less"
 			],
+			"skinStyles": {
+				"monobook": [
+					"modules/ext.RevisionSlider.monobook.css"
+				],
+				"modern": [
+					"modules/ext.RevisionSlider.modern.css"
+				]
+			},
 			"dependencies": [
+				"oojs-ui",
+				"oojs-ui.styles.icons-movement",
+				"mediawiki.jqueryMsg",
+				"ext.RevisionSlider.util",
+				"ext.RevisionSlider.Settings",
+				"ext.RevisionSlider.Slider",
 				"ext.RevisionSlider.Revision",
-				"ext.RevisionSlider.rainbow",
-				"ext.RevisionSlider.fetchRevisions"
+				"ext.RevisionSlider.RevisionList",
+				"ext.RevisionSlider.HelpDialog",
+				"ext.RevisionSlider.Api",
+				"ext.RevisionSlider.icons",
+				"mediawiki.api.options",
+				"mediawiki.util"
 			],
-			"position": "top"
-		},
-		"ext.RevisionSlider.rainbow": {
-			"scripts": [
-				"modules/ext.RevisionSlider.rainbow.js"
+			"messages": [
+				"revisionslider-show-help-tooltip",
+				"revisionslider-loading-failed",
+				"revisionslider-toggle-title-expand",
+				"revisionslider-toggle-title-collapse",
+				"revisionslider-turn-on-auto-expand-title",
+				"revisionslider-turn-off-auto-expand-title"
 			]
 		},
-		"ext.RevisionSlider.fetchRevisions": {
+		"ext.RevisionSlider.noscript": {
+			"styles": "modules/ext.RevisionSlider.noscript.css"
+		},
+		"ext.RevisionSlider.util": {
 			"scripts": [
-				"modules/ext.RevisionSlider.fetchRevisions.js"
+				"modules/ext.RevisionSlider.util.js"
+			]
+		},
+		"ext.RevisionSlider.Api": {
+			"scripts": [
+				"modules/ext.RevisionSlider.Api.js"
+			]
+		},
+		"ext.RevisionSlider.Settings": {
+			"scripts": [
+				"modules/ext.RevisionSlider.Settings.js"
+			],
+			"dependencies": [
+				"mediawiki.user",
+				"mediawiki.storage",
+				"mediawiki.cookie"
 			]
 		},
 		"ext.RevisionSlider.Revision": {
 			"scripts": [
 				"modules/ext.RevisionSlider.Revision.js"
+			],
+			"dependencies": [
+				"moment"
 			]
+		},
+		"ext.RevisionSlider.Pointer": {
+			"scripts": [
+				"modules/ext.RevisionSlider.Pointer.js"
+			],
+			"dependencies": [
+				"ext.RevisionSlider.PointerView",
+				"ext.RevisionSlider.PointerLine"
+			]
+		},
+		"ext.RevisionSlider.PointerView": {
+			"scripts": [
+				"modules/ext.RevisionSlider.PointerView.js"
+			]
+		},
+		"ext.RevisionSlider.PointerLine": {
+			"scripts": [
+				"modules/ext.RevisionSlider.PointerLine.js"
+			]
+		},
+		"ext.RevisionSlider.Slider": {
+			"scripts": [
+				"modules/ext.RevisionSlider.Slider.js"
+			],
+			"dependencies": [
+				"ext.RevisionSlider.SliderView"
+			]
+		},
+		"ext.RevisionSlider.SliderView": {
+			"scripts": [
+				"modules/ext.RevisionSlider.SliderView.js",
+				"modules/ext.RevisionSlider.SliderArrowView.js"
+			],
+			"dependencies": [
+				"jquery.ui.draggable",
+				"mediawiki.util",
+				"oojs-ui",
+				"oojs-ui.styles.icons-movement",
+				"ext.RevisionSlider.util",
+				"ext.RevisionSlider.DiffPage",
+				"ext.RevisionSlider.HelpDialog",
+				"ext.RevisionSlider.Pointer"
+			],
+			"messages": [
+				"revisionslider-arrow-tooltip-newer",
+				"revisionslider-arrow-tooltip-older"
+			]
+		},
+		"ext.RevisionSlider.DiffPage": {
+			"scripts": [
+				"modules/ext.RevisionSlider.DiffPage.js"
+			],
+			"dependencies": [
+				"mediawiki.Uri",
+				"mediawiki.util"
+			]
+		},
+		"ext.RevisionSlider.RevisionList": {
+			"scripts": [
+				"modules/ext.RevisionSlider.RevisionList.js"
+			],
+			"dependencies": [
+				"ext.RevisionSlider.Revision",
+				"ext.RevisionSlider.RevisionListView"
+			]
+		},
+		"ext.RevisionSlider.RevisionListView": {
+			"scripts": [
+				"modules/ext.RevisionSlider.RevisionListView.js"
+			],
+			"messages": [
+				"colon-separator",
+				"revisionslider-page-size",
+				"revisionslider-change-size",
+				"revisionslider-label-date",
+				"revisionslider-label-page-size",
+				"revisionslider-label-change-size",
+				"revisionslider-label-username",
+				"revisionslider-label-comment",
+				"revisionslider-minoredit"
+			],
+			"dependencies": [
+				"mediawiki.language",
+				"mediawiki.util",
+				"oojs-ui"
+			]
+		},
+		"ext.RevisionSlider.icons": {
+			"class": "ResourceLoaderImageModule",
+			"selectorWithoutVariant": ".mw-revslider-{name}-button .oo-ui-iconElement-icon",
+			"selectorWithVariant": ".mw-revslider-{name}-button .oo-ui-iconElement-icon.oo-ui-image-invert",
+			"variants": {
+				"invert": {
+					"color": "#ffffff",
+					"global": true
+				}
+			},
+			"images": {
+				"auto-expand": "resources/ext.RevisionSlider.icons/pin.svg"
+			}
+		},
+		"ext.RevisionSlider.HelpDialog": {
+			"scripts": [
+				"modules/ext.RevisionSlider.HelpDialog.js",
+				"modules/ext.RevisionSlider.HelpButtonView.js"
+			],
+			"dependencies": [
+				"oojs-ui",
+				"oojs-ui.styles.icons-interactions",
+				"ext.RevisionSlider.dialogImages"
+			],
+			"messages": [
+				"revisionslider-help-dialog-slide1",
+				"revisionslider-help-dialog-slide2",
+				"revisionslider-help-dialog-slide3a",
+				"revisionslider-help-dialog-slide4",
+				"revisionslider-tutorial",
+				"revisionslider-previous-dialog",
+				"revisionslider-next-dialog",
+				"revisionslider-close-dialog"
+			]
+		},
+		"ext.RevisionSlider.dialogImages": {
+			"class": "ResourceLoaderImageModule",
+			"selector": ".mw-revslider-help-dialog-slide-{name}",
+			"images": {
+				"1": {
+					"file": {
+						"ltr": "resources/ext.RevisionSlider.helpDialog/slide1-ltr.svg",
+						"rtl": "resources/ext.RevisionSlider.helpDialog/slide1-rtl.svg"
+					}
+				},
+				"2": "resources/ext.RevisionSlider.helpDialog/slide2.svg",
+				"3a": "resources/ext.RevisionSlider.helpDialog/slide3a.svg",
+				"4a": "resources/ext.RevisionSlider.helpDialog/slide4a.svg"
+			}
 		}
 	},
 	"ResourceFileModulePaths": {
-		"localBasePath": ""
+		"localBasePath": "",
+		"remoteExtPath": "RevisionSlider"
 	},
 	"Hooks": {
 		"DiffViewHeader": [
 			"RevisionSliderHooks::onDiffViewHeader"
+		],
+		"GetPreferences": [
+			"RevisionSliderHooks::onGetPreferences"
 		],
 		"ResourceLoaderTestModules": [
 			"RevisionSliderHooks::onResourceLoaderTestModules"

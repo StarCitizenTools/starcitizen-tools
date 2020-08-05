@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Milicevic01",
+			"Macofe",
+			"Obsuser",
+			"BadDog"
+		]
+	},
+	"revisionslider-preference-disable": "Не приказуј клизач за измене",
+	"revisionslider-toggle-label": "Претрага историје",
+	"revisionslider-page-size": "$1 {{PLURAL:$2|бајт|бајта|бајтова}}",
+	"revisionslider-change-size": "$1 {{PLURAL:$3|бајт|бајта|бајтова}}",
+	"revisionslider-label-date": "Датум",
+	"revisionslider-label-page-size": "Величина странице",
+	"revisionslider-label-change-size": "Промена величине",
+	"revisionslider-label-comment": "Коментар",
+	"revisionslider-label-username": "{{GENDER:$1|Корисничко име}}",
+	"revisionslider-minoredit": "Ово је мања измена",
+	"revisionslider-toggle-title-expand": "Отвори клизач за измене",
+	"revisionslider-toggle-title-collapse": "Затвори клизач за измене",
+	"revisionslider-turn-on-auto-expand-title": "Увек отвори клизач за измене",
+	"revisionslider-turn-off-auto-expand-title": "Искључивање аутоматског отварања клизача за измене",
+	"revisionslider-arrow-tooltip-newer": "Прикажи новије измене",
+	"revisionslider-arrow-tooltip-older": "Прикажи старије измене",
+	"revisionslider-show-help-tooltip": "Прикажи водич",
+	"revisionslider-help-dialog-slide1": "Клизач за измене Вам помаже да претражујете и упоређујете разлике измена странице. Настао је [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider жељом заједнице Викимедије Немачке]. Повратне информације можете оставити [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider овде].",
+	"revisionslider-help-dialog-slide2": "Свака усправна трака представља једну измену странице. Горње траке означавају повећање странице (додавање садржаја), а доње смањење странице (уклањање садржаја). На датој слици, у измени 1 је повећан број бајтова а у измени 2 смањен.",
+	"revisionslider-help-dialog-slide3a": "<p>Да бисте упоредили одређене измене, селектујте их користећи жуте и плаве кружиће.</p><p>Плави кружић контролише новију измену, а жути води до старије.</p><p>Померајте кружиће превлачењем или само кликните на линију клизача.</p>",
+	"revisionslider-help-dialog-slide4": "Користите стрелице (<) назад и напред (>) за кретање кроз историју измена односно приказ старијих и новијих измена.",
+	"revisionslider-tutorial": "Водич за употребу",
+	"revisionslider-previous-dialog": "Претходно",
+	"revisionslider-next-dialog": "Следеће",
+	"revisionslider-close-dialog": "Затвори"
+}

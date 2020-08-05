@@ -1,9 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Hakka"
+			"Hakka",
+			"唐吉訶德的侍從"
 		]
 	},
-	"checkuser-search": "Chhìm-cháu",
-	"checkuser-search-submit": "Chhìm-cháu"
+	"checkuser-search": "Chhìm",
+	"checkuser-search-submit": "Chhìm"
 }

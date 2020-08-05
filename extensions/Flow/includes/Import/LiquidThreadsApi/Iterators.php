@@ -18,7 +18,7 @@ class TopicIterator implements Iterator {
 	protected $threadData;
 
 	/**
-	 * @var integer|false|null Lqt id of the current topic, false if no current topic, null if unknown.
+	 * @var int|false|null Lqt id of the current topic, false if no current topic, null if unknown.
 	 */
 	protected $current = false;
 
@@ -39,14 +39,14 @@ class TopicIterator implements Iterator {
 	protected $topicIdIterator;
 
 	/**
-	 * @var integer The maximum id received by self::loadMore
+	 * @var int The maximum id received by self::loadMore
 	 */
 	protected $maxId;
 
 	/**
-	 * @param ImportSource     $source
+	 * @param ImportSource $source
 	 * @param CachedThreadData $threadData
-	 * @param string           $pageName
+	 * @param string $pageName
 	 */
 	public function __construct( ImportSource $source, CachedThreadData $threadData, $pageName ) {
 		$this->importSource = $source;
@@ -67,7 +67,7 @@ class TopicIterator implements Iterator {
 	}
 
 	/**
-	 * @return integer
+	 * @return int
 	 */
 	public function key() {
 		return $this->current;
@@ -80,7 +80,7 @@ class TopicIterator implements Iterator {
 
 		$lastOffset = $this->key();
 		do {
-			while( $this->topicIdIterator->valid() ) {
+			while ( $this->topicIdIterator->valid() ) {
 				$topicId = $this->topicIdIterator->current();
 				$this->topicIdIterator->next();
 
@@ -99,7 +99,7 @@ class TopicIterator implements Iterator {
 				$this->currentTopic = $topic;
 				return;
 			}
-		} while( $this->loadMore() );
+		} while ( $this->loadMore() );
 
 		// nothing found, nothing more to load
 		$this->current = false;
@@ -165,14 +165,14 @@ class ReplyIterator implements Iterator {
 	}
 
 	/**
-	 * @return integer
+	 * @return int
 	 */
 	public function key() {
 		return $this->replyIndex;
 	}
 
 	public function next() {
-		while( ++$this->replyIndex < count( $this->threadReplies ) ) {
+		while ( ++$this->replyIndex < count( $this->threadReplies ) ) {
 			try {
 				$replyId = $this->threadReplies[$this->replyIndex]['id'];
 				$this->current = $this->post->getSource()->getPost( $replyId );

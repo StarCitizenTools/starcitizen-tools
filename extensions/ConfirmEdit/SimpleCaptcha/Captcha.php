@@ -1,8 +1,10 @@
 <?php
 
 use MediaWiki\Auth\AuthenticationRequest;
-use MediaWiki\Logger\LoggerFactory;
 
+/**
+ * Demo CAPTCHA (not for production usage) and base class for real CAPTCHAs
+ */
 class SimpleCaptcha {
 	protected static $messagePrefix = 'captcha-';
 
@@ -19,10 +21,16 @@ class SimpleCaptcha {
 	/** @var string Used in log messages. */
 	protected $trigger;
 
+	/**
+	 * @param string $action
+	 */
 	public function setAction( $action ) {
 		$this->action = $action;
 	}
 
+	/**
+	 * @param string $trigger
+	 */
 	public function setTrigger( $trigger ) {
 		$this->trigger = $trigger;
 	}
@@ -30,7 +38,7 @@ class SimpleCaptcha {
 	/**
 	 * Return the error from the last passCaptcha* call.
 	 * Not implemented but needed by some child classes.
-	 * @return
+	 * @return mixed
 	 */
 	public function getError() {
 		return null;
@@ -57,6 +65,9 @@ class SimpleCaptcha {
 		return [ 'question' => $test, 'answer' => $answer ];
 	}
 
+	/**
+	 * @param array &$resultArr
+	 */
 	function addCaptchaAPI( &$resultArr ) {
 		$captcha = $this->getCaptcha();
 		$index = $this->storeCaptcha( $captcha );
@@ -84,26 +95,84 @@ class SimpleCaptcha {
 	 *
 	 * Override this!
 	 *
-	 * @return string HTML
+	 * It is not guaranteed that the CAPTCHA will load synchronously with the main page
+	 * content. So you can not rely on registering handlers before page load. E.g.:
+	 *
+	 * NOT SAFE: $( window ).on( 'load', handler )
+	 * SAFE: $( handler )
+	 *
+	 * However, if the HTML is loaded dynamically via AJAX, the following order will
+	 * be used.
+	 *
+	 * headitems => modulestyles + modules => add main HTML to DOM when modulestyles +
+	 * modules are ready.
+	 *
+	 * @param int $tabIndex Tab index to start from
+	 *
+	 * @return array Associative array with the following keys:
+	 *   string html - Main HTML
+	 *   array modules (optional) - Array of ResourceLoader module names
+	 *   array modulestyles (optional) - Array of ResourceLoader module names to be
+	 * 		included as style-only modules.
+	 *   array headitems (optional) - Head items (see OutputPage::addHeadItems), as a numeric array
+	 * 		of raw HTML strings. Do not use unless no other option is feasible.
 	 */
-	function getForm( OutputPage $out, $tabIndex = 1 ) {
+	public function getFormInformation( $tabIndex = 1 ) {
 		$captcha = $this->getCaptcha();
 		$index = $this->storeCaptcha( $captcha );
 
-		return "<p><label for=\"wpCaptchaWord\">{$captcha['question']} = </label>" .
-			Xml::element( 'input', [
-				'name' => 'wpCaptchaWord',
-				'class' => 'mw-ui-input',
-				'id'   => 'wpCaptchaWord',
-				'size'  => 5,
-				'autocomplete' => 'off',
-				'tabindex' => $tabIndex ] ) . // tab in before the edit textarea
-			"</p>\n" .
-			Xml::element( 'input', [
-				'type'  => 'hidden',
-				'name'  => 'wpCaptchaId',
-				'id'    => 'wpCaptchaId',
-				'value' => $index ] );
+		return [
+			'html' => "<p><label for=\"wpCaptchaWord\">{$captcha['question']} = </label>" .
+				Xml::element( 'input', [
+					'name' => 'wpCaptchaWord',
+					'class' => 'mw-ui-input',
+					'id'   => 'wpCaptchaWord',
+					'size'  => 5,
+					'autocomplete' => 'off',
+					'tabindex' => $tabIndex ] ) . // tab in before the edit textarea
+				"</p>\n" .
+				Xml::element( 'input', [
+					'type'  => 'hidden',
+					'name'  => 'wpCaptchaId',
+					'id'    => 'wpCaptchaId',
+					'value' => $index ] )
+		];
+	}
+
+	/**
+	 * Uses getFormInformation() to get the CAPTCHA form and adds it to the given
+	 * OutputPage object.
+	 *
+	 * @param OutputPage $out The OutputPage object to which the form should be added
+	 * @param int $tabIndex See self::getFormInformation
+	 */
+	public function addFormToOutput( OutputPage $out, $tabIndex = 1 ) {
+		$this->addFormInformationToOutput( $out, $this->getFormInformation( $tabIndex ) );
+	}
+
+	/**
+	 * Processes the given $formInformation array and adds the options (see getFormInformation())
+	 * to the given OutputPage object.
+	 *
+	 * @param OutputPage $out The OutputPage object to which the form should be added
+	 * @param array $formInformation
+	 */
+	public function addFormInformationToOutput( OutputPage $out, array $formInformation ) {
+		if ( !$formInformation ) {
+			return;
+		}
+		if ( isset( $formInformation['html'] ) ) {
+			$out->addHTML( $formInformation['html'] );
+		}
+		if ( isset( $formInformation['modules'] ) ) {
+			$out->addModules( $formInformation['modules'] );
+		}
+		if ( isset( $formInformation['modulestyles'] ) ) {
+			$out->addModuleStyles( $formInformation['modulestyles'] );
+		}
+		if ( isset( $formInformation['headitems'] ) ) {
+			$out->addHeadItems( $formInformation['headitems'] );
+		}
 	}
 
 	/**
@@ -117,8 +186,8 @@ class SimpleCaptcha {
 
 	/**
 	 * Show error message for missing or incorrect captcha on EditPage.
-	 * @param EditPage $editPage
-	 * @param OutputPage $out
+	 * @param EditPage &$editPage
+	 * @param OutputPage &$out
 	 */
 	function showEditFormFields( &$editPage, &$out ) {
 		$page = $editPage->getArticle()->getPage();
@@ -129,7 +198,7 @@ class SimpleCaptcha {
 		if ( $this->action !== 'edit' ) {
 			unset( $page->ConfirmEdit_ActivateCaptcha );
 			$out->addWikiText( $this->getMessage( $this->action )->text() );
-			$out->addHTML( $this->getForm( $out ) );
+			$this->addFormToOutput( $out );
 		}
 	}
 
@@ -145,7 +214,7 @@ class SimpleCaptcha {
 			$this->shouldCheck( $page, '', '', $context )
 		) {
 			$out->addWikiText( $this->getMessage( $this->action )->text() );
-			$out->addHTML( $this->getForm( $out ) );
+			$this->addFormToOutput( $out );
 		}
 		unset( $page->ConfirmEdit_ActivateCaptcha );
 	}
@@ -154,7 +223,7 @@ class SimpleCaptcha {
 	 * Show a message asking the user to enter a captcha on edit
 	 * The result will be treated as wiki text
 	 *
-	 * @param $action string Action being performed
+	 * @param string $action Action being performed
 	 * @return Message
 	 */
 	public function getMessage( $action ) {
@@ -164,129 +233,33 @@ class SimpleCaptcha {
 		$msg = wfMessage( $name );
 		// obtain a more tailored message, if possible, otherwise, fall back to
 		// the default for edits
-		return $msg->isDisabled() ? wfMessage( static::$messagePrefix . 'edit' )  : $msg;
+		return $msg->isDisabled() ? wfMessage( static::$messagePrefix . 'edit' ) : $msg;
 	}
 
 	/**
 	 * Inject whazawhoo
 	 * @fixme if multiple thingies insert a header, could break
-	 * @param $form HTMLForm
+	 * @param HTMLForm &$form
 	 * @return bool true to keep running callbacks
 	 */
 	function injectEmailUser( &$form ) {
-		global $wgCaptchaTriggers, $wgOut, $wgUser;
-		if ( $wgCaptchaTriggers['sendemail'] ) {
+		$out = $form->getOutput();
+		$user = $form->getUser();
+		if ( $this->triggersCaptcha( CaptchaTriggers::SENDEMAIL ) ) {
 			$this->action = 'sendemail';
-			if ( $wgUser->isAllowed( 'skipcaptcha' ) ) {
+			if ( $user->isAllowed( 'skipcaptcha' ) ) {
 				wfDebug( "ConfirmEdit: user group allows skipping captcha on email sending\n" );
 				return true;
 			}
+			$formInformation = $this->getFormInformation();
+			$formMetainfo = $formInformation;
+			unset( $formMetainfo['html'] );
+			$this->addFormInformationToOutput( $out, $formMetainfo );
 			$form->addFooterText(
 				"<div class='captcha'>" .
-				$wgOut->parse( $this->getMessage( 'sendemail' )->text() ) .
-				$this->getForm( $wgOut ) .
+				$out->parse( $this->getMessage( 'sendemail' )->text() ) .
+				$formInformation['html'] .
 				"</div>\n" );
-		}
-		return true;
-	}
-
-	/**
-	 * Inject whazawhoo
-	 * @fixme if multiple thingies insert a header, could break
-	 * @param QuickTemplate $template
-	 * @return bool true to keep running callbacks
-	 * @deprecated 1.27 pre-AuthManager logic
-	 */
-	function injectUserCreate( &$template ) {
-		global $wgCaptchaTriggers, $wgOut, $wgUser;
-		if ( $wgCaptchaTriggers['createaccount'] ) {
-			$this->action = 'createaccount';
-			if ( $wgUser->isAllowed( 'skipcaptcha' ) ) {
-				wfDebug( "ConfirmEdit: user group allows skipping captcha on account creation\n" );
-				return true;
-			}
-			LoggerFactory::getInstance( 'authmanager' )->info( 'Captcha shown on account creation', [
-				'event' => 'captcha.display',
-				'type' => 'accountcreation',
-			] );
-			$captcha = "<div class='captcha'>" .
-				$wgOut->parse( $this->getMessage( 'createaccount' )->text() ) .
-				// FIXME: Hardcoded tab index
-				// Usually, the CAPTCHA is added after the E-Mail address field,
-				// which actually has 6 as the tabIndex, but
-				// there may are wikis which allows to mention the "real name",
-				// which would have 7 as tabIndex, so increase
-				// 6 by 2 and use it for the CAPTCHA -> 8 (the submit button has a tabIndex of 10)
-				$this->getForm( $wgOut, 8 ) .
-				"</div>\n";
-			// for older MediaWiki versions
-			if ( is_callable( [ $template, 'extend' ] ) ) {
-				$template->extend( 'extrafields', $captcha );
-			} else {
-				$template->set( 'header', $captcha );
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Inject a captcha into the user login form after a failed
-	 * password attempt as a speedbump for mass attacks.
-	 * @fixme if multiple thingies insert a header, could break
-	 * @param $template QuickTemplate
-	 * @return bool true to keep running callbacks
-	 * @deprecated 1.27 pre-AuthManager logic
-	 */
-	function injectUserLogin( &$template ) {
-		$perUserTriggered = false;
-		$username = $template->get( 'name', '' );
-		if ( $username !== '' ) {
-			// Note: The first time the user attempts to login, they may
-			// get a incorrect password error due to the captcha not being
-			// shown since we don't know that they will attempt to login in
-			// to a captcha-limitted user account, until they actually try.
-			$perUserTriggered = $this->isBadLoginPerUserTriggered( $username );
-		}
-		$perIPTriggered = $this->isBadLoginTriggered();
-		if ( $perIPTriggered || $perUserTriggered ) {
-			global $wgOut;
-
-			LoggerFactory::getInstance( 'authmanager' )->info( 'Captcha shown on login', [
-				'event' => 'captcha.display',
-				'type' => 'login',
-				'perIp' => $perIPTriggered,
-				'perUser' => $perUserTriggered
-			] );
-			$this->action = 'badlogin';
-			$captcha = "<div class='captcha'>" .
-				$wgOut->parse( $this->getMessage( 'badlogin' )->text() ) .
-				$this->getForm( $wgOut ) .
-				"</div>\n";
-			// for older MediaWiki versions
-			if ( is_callable( [ $template, 'extend' ] ) ) {
-				$template->extend( 'extrafields', $captcha );
-			} else {
-				$template->set( 'header', $captcha );
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * When a bad login attempt is made, increment an expiring counter
-	 * in the memcache cloud. Later checks for this may trigger a
-	 * captcha display to prevent too many hits from the same place.
-	 * @param User $user
-	 * @param string $password
-	 * @param int $retval authentication return value
-	 * @return bool true to keep running callbacks
-	 * @deprecated 1.27 pre-AuthManager hook handler
-	 */
-	function triggerUserLogin( $user, $password, $retval ) {
-		if ( $retval === LoginForm::WRONG_PASS ) {
-			$this->increaseBadLoginCounter( $user->getName() );
-		} elseif ( $retval === LoginForm::SUCCESS ) {
-			$this->resetBadLoginCounter( $user->getName() );
 		}
 		return true;
 	}
@@ -298,11 +271,11 @@ class SimpleCaptcha {
 	 * TODO use Throttler
 	 */
 	public function increaseBadLoginCounter( $username ) {
-		global $wgCaptchaTriggers, $wgCaptchaBadLoginExpiration,
-			   $wgCaptchaBadLoginPerUserExpiration;
+		global $wgCaptchaBadLoginExpiration, $wgCaptchaBadLoginPerUserExpiration;
+
 		$cache = ObjectCache::getLocalClusterInstance();
 
-		if ( $wgCaptchaTriggers['badlogin'] ) {
+		if ( $this->triggersCaptcha( CaptchaTriggers::BAD_LOGIN ) ) {
 			$key = $this->badLoginKey();
 			$count = ObjectCache::getLocalClusterInstance()->get( $key );
 			if ( !$count ) {
@@ -312,7 +285,7 @@ class SimpleCaptcha {
 			$cache->incr( $key );
 		}
 
-		if ( $wgCaptchaTriggers['badloginperuser'] && $username ) {
+		if ( $this->triggersCaptcha( CaptchaTriggers::BAD_LOGIN_PER_USER ) && $username ) {
 			$key = $this->badLoginPerUserKey( $username );
 			$count = $cache->get( $key );
 			if ( !$count ) {
@@ -328,9 +301,7 @@ class SimpleCaptcha {
 	 * @param string $username
 	 */
 	public function resetBadLoginCounter( $username ) {
-		global $wgCaptchaTriggers;
-
-		if ( $wgCaptchaTriggers['badloginperuser'] && $username ) {
+		if ( $this->triggersCaptcha( CaptchaTriggers::BAD_LOGIN_PER_USER ) && $username ) {
 			$cache = ObjectCache::getLocalClusterInstance();
 			$cache->delete( $this->badLoginPerUserKey( $username ) );
 		}
@@ -343,26 +314,28 @@ class SimpleCaptcha {
 	 * @access private
 	 */
 	public function isBadLoginTriggered() {
-		global $wgCaptchaTriggers, $wgCaptchaBadLoginAttempts;
+		global $wgCaptchaBadLoginAttempts;
+
 		$cache = ObjectCache::getLocalClusterInstance();
-		return $wgCaptchaTriggers['badlogin']
+		return $this->triggersCaptcha( CaptchaTriggers::BAD_LOGIN )
 			&& (int)$cache->get( $this->badLoginKey() ) >= $wgCaptchaBadLoginAttempts;
 	}
 
 	/**
 	 * Is the per-user captcha triggered?
 	 *
-	 * @param $u User|String User object, or name
-	 * @return boolean|null False: no, null: no, but it will be triggered next time
+	 * @param User|string $u User object, or name
+	 * @return bool|null False: no, null: no, but it will be triggered next time
 	 */
 	public function isBadLoginPerUserTriggered( $u ) {
-		global $wgCaptchaTriggers, $wgCaptchaBadLoginPerUserAttempts;
+		global $wgCaptchaBadLoginPerUserAttempts;
+
 		$cache = ObjectCache::getLocalClusterInstance();
 
 		if ( is_object( $u ) ) {
 			$u = $u->getName();
 		}
-		return $wgCaptchaTriggers['badloginperuser']
+		return $this->triggersCaptcha( CaptchaTriggers::BAD_LOGIN_PER_USER )
 			&& (int)$cache->get( $this->badLoginPerUserKey( $u ) ) >= $wgCaptchaBadLoginPerUserAttempts;
 	}
 
@@ -454,17 +427,16 @@ class SimpleCaptcha {
 	/**
 	 * Internal cache key for badlogin checks.
 	 * @return string
-	 * @access private
 	 */
-	function badLoginKey() {
+	private function badLoginKey() {
 		global $wgRequest;
 		$ip = $wgRequest->getIP();
 		return wfGlobalCacheKey( 'captcha', 'badlogin', 'ip', $ip );
 	}
 
-	/*
+	/**
 	 * Cache key for badloginPerUser checks.
-	 * @param $username string
+	 * @param string $username
 	 * @return string
 	 */
 	private function badLoginPerUserKey( $username ) {
@@ -492,30 +464,58 @@ class SimpleCaptcha {
 	 * @param Title $title
 	 * @param string $action (edit/create/addurl...)
 	 * @return bool true if action triggers captcha on $title's namespace
+	 * @deprecated since 1.5.1 Use triggersCaptcha instead
 	 */
-	function captchaTriggers( $title, $action ) {
-		global $wgCaptchaTriggers, $wgCaptchaTriggersOnNamespace;
-		// Special config for this NS?
-		if ( isset( $wgCaptchaTriggersOnNamespace[$title->getNamespace()][$action] ) ) {
-			return $wgCaptchaTriggersOnNamespace[$title->getNamespace()][$action];
-	 }
+	public function captchaTriggers( $title, $action ) {
+		return $this->triggersCaptcha( $action, $title );
+	}
 
-		return ( !empty( $wgCaptchaTriggers[$action] ) ); // Default
+	/**
+	 * Checks, whether the passed action should trigger a CAPTCHA. The optional $title parameter
+	 * will be used to check namespace specific CAPTCHA triggers.
+	 *
+	 * @param string $action The CAPTCHA trigger to check (see CaptchaTriggers for ConfirmEdit
+	 * built-in triggers)
+	 * @param Title|null $title An optional Title object, if the namespace specific triggers
+	 * should be checked, too.
+	 * @return bool True, if the action should trigger a CAPTCHA, false otherwise
+	 */
+	public function triggersCaptcha( $action, $title = null ) {
+		global $wgCaptchaTriggers, $wgCaptchaTriggersOnNamespace;
+
+		$result = false;
+		$triggers = $wgCaptchaTriggers;
+		$attributeCaptchaTriggers = ExtensionRegistry::getInstance()
+			->getAttribute( CaptchaTriggers::EXT_REG_ATTRIBUTE_NAME );
+		if ( is_array( $attributeCaptchaTriggers ) ) {
+			$triggers += $attributeCaptchaTriggers;
+		}
+
+		if ( isset( $triggers[$action] ) ) {
+			$result = $triggers[$action];
+		}
+
+		if (
+			$title !== null &&
+			isset( $wgCaptchaTriggersOnNamespace[$title->getNamespace()][$action] )
+		) {
+			$result = $wgCaptchaTriggersOnNamespace[$title->getNamespace()][$action];
+		}
+
+		return $result;
 	}
 
 	/**
 	 * @param WikiPage $page
-	 * @param $content Content|string
-	 * @param $section string
+	 * @param Content|string $content
+	 * @param string $section
 	 * @param IContextSource $context
-	 * @param $oldtext string The content of the revision prior to $content.  When
+	 * @param string $oldtext The content of the revision prior to $content When
 	 *  null this will be loaded from the database.
 	 * @return bool true if the captcha should run
 	 */
 	function shouldCheck( WikiPage $page, $content, $section, $context, $oldtext = null ) {
-		// @codingStandardsIgnoreStart
-		global $ceAllowConfirmedEmail;
-		// @codingStandardsIgnoreEnd
+		global $wgAllowConfirmedEmail;
 
 		if ( !$context instanceof IContextSource ) {
 			$context = RequestContext::getMain();
@@ -531,7 +531,7 @@ class SimpleCaptcha {
 		} elseif ( $this->isIPWhitelisted() ) {
 			wfDebug( "ConfirmEdit: user IP is whitelisted" );
 			return false;
-		} elseif ( $ceAllowConfirmedEmail && $user->isEmailConfirmed() ) {
+		} elseif ( $wgAllowConfirmedEmail && $user->isEmailConfirmed() ) {
 			wfDebug( "ConfirmEdit: user has confirmed mail, skipping captcha\n" );
 			return false;
 		}
@@ -551,7 +551,7 @@ class SimpleCaptcha {
 			$isEmpty = $content === '';
 		}
 
-		if ( $this->captchaTriggers( $title, 'edit' ) ) {
+		if ( $this->triggersCaptcha( 'edit', $title ) ) {
 			// Check on all edits
 			$this->trigger = sprintf( "edit trigger by '%s' at [[%s]]",
 				$user->getName(),
@@ -561,7 +561,7 @@ class SimpleCaptcha {
 			return true;
 		}
 
-		if ( $this->captchaTriggers( $title, 'create' ) && !$title->exists() ) {
+		if ( $this->triggersCaptcha( 'create', $title ) && !$title->exists() ) {
 			// Check if creating a page
 			$this->trigger = sprintf( "Create trigger by '%s' at [[%s]]",
 				$user->getName(),
@@ -580,7 +580,7 @@ class SimpleCaptcha {
 			return false;
 		}
 
-		if ( !$isEmpty && $this->captchaTriggers( $title, 'addurl' ) ) {
+		if ( !$isEmpty && $this->triggersCaptcha( 'addurl', $title ) ) {
 			// Only check edits that add URLs
 			if ( $content instanceof Content ) {
 				// Get links from the database
@@ -652,7 +652,7 @@ class SimpleCaptcha {
 
 	/**
 	 * Filter callback function for URL whitelisting
-	 * @param $url string to check
+	 * @param string $url string to check
 	 * @return bool true if unknown, false if whitelisted
 	 * @access private
 	 */
@@ -683,7 +683,7 @@ class SimpleCaptcha {
 
 	/**
 	 * Build regex from whitelist
-	 * @param $lines string from [[MediaWiki:Captcha-addurl-whitelist]]
+	 * @param string $lines string from [[MediaWiki:Captcha-addurl-whitelist]]
 	 * @return array Regexes
 	 * @access private
 	 */
@@ -757,11 +757,11 @@ class SimpleCaptcha {
 
 	/**
 	 * Load external links from the externallinks table
-	 * @param $title Title
-	 * @return Array
+	 * @param Title $title
+	 * @return array
 	 */
 	function getLinksFromTracker( $title ) {
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$id = $title->getArticleID(); // should be zero queries
 		$res = $dbr->select( 'externallinks', [ 'el_to' ],
 			[ 'el_from' => $id ], __METHOD__ );
@@ -773,10 +773,10 @@ class SimpleCaptcha {
 	}
 
 	/**
-	 * Backend function for confirmEdit() and confirmEditAPI()
+	 * Backend function for confirmEditMerged()
 	 * @param WikiPage $page
-	 * @param $newtext string
-	 * @param $section
+	 * @param string $newtext
+	 * @param string $section
 	 * @param IContextSource $context
 	 * @return bool false if the CAPTCHA is rejected, true otherwise
 	 */
@@ -807,18 +807,12 @@ class SimpleCaptcha {
 	 * @param RequestContext $context
 	 * @param Content $content
 	 * @param Status $status
-	 * @param $summary
-	 * @param $user
-	 * @param $minorEdit
+	 * @param string $summary
+	 * @param User $user
+	 * @param bool $minorEdit
 	 * @return bool
 	 */
 	function confirmEditMerged( $context, $content, $status, $summary, $user, $minorEdit ) {
-		$legacyMode = !defined( 'MW_EDITFILTERMERGED_SUPPORTS_API' );
-		if ( defined( 'MW_API' ) && $legacyMode ) {
-			# API mode
-			# The CAPTCHA was already checked and approved
-			return true;
-		}
 		if ( !$context->canUseWikiPage() ) {
 			// we check WikiPage only
 			// try to get an appropriate title for this page
@@ -837,9 +831,6 @@ class SimpleCaptcha {
 		}
 		$page = $context->getWikiPage();
 		if ( !$this->doConfirmEdit( $page, $content, false, $context ) ) {
-			if ( $legacyMode ) {
-				$status->fatal( 'hookaborted' );
-			}
 			$status->value = EditPage::AS_HOOK_ERROR_EXPECTED;
 			$status->apiHookResult = [];
 			// give an error message for the user to know, what goes wrong here.
@@ -858,54 +849,7 @@ class SimpleCaptcha {
 			}
 			$this->addCaptchaAPI( $status->apiHookResult );
 			$page->ConfirmEdit_ActivateCaptcha = true;
-			return $legacyMode;
-		}
-		return true;
-	}
-
-	function confirmEditAPI( $editPage, $newText, &$resultArr ) {
-		$page = $editPage->getArticle()->getPage();
-		if ( !$this->doConfirmEdit( $page, $newText, false, $editPage->getArticle()->getContext() ) ) {
-			$this->addCaptchaAPI( $resultArr );
 			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Hook for user creation form submissions.
-	 * @param User $u
-	 * @param string $message
-	 * @param Status $status
-	 * @return bool true to continue, false to abort user creation
-	 * @deprecated 1.27 pre-AuthManager logic
-	 */
-	function confirmUserCreate( $u, &$message, &$status = null ) {
-		global $wgUser, $wgRequest;
-
-		if ( $this->needCreateAccountCaptcha() ) {
-			$this->trigger = "new account '" . $u->getName() . "'";
-			$success = $this->passCaptchaLimitedFromRequest( $wgRequest, $wgUser );
-			LoggerFactory::getInstance(
-				'authmanager'
-			)->info( 'Captcha submitted on account creation', [
-				'event' => 'captcha.submit',
-				'type' => 'accountcreation',
-				'successful' => $success,
-			] );
-			if ( !$success ) {
-				// For older MediaWiki
-				$message = wfMessage( 'captcha-createaccount-fail' )->text();
-				// For MediaWiki 1.23+
-				$status = Status::newGood();
-
-				// Apply a *non*-fatal warning. This will still abort the
-				// account creation but returns a "Warning" response to the
-				// API or UI.
-				$status->warning( 'captcha-createaccount-fail' );
-				return false;
-			}
 		}
 		return true;
 	}
@@ -918,10 +862,10 @@ class SimpleCaptcha {
 	 * @return bool true to show captcha, false to skip captcha
 	 */
 	public function needCreateAccountCaptcha( User $creatingUser = null ) {
-		global $wgCaptchaTriggers, $wgUser;
+		global $wgUser;
 		$creatingUser = $creatingUser ?: $wgUser;
 
-		if ( $wgCaptchaTriggers['createaccount'] ) {
+		if ( $this->triggersCaptcha( CaptchaTriggers::CREATE_ACCOUNT ) ) {
 			if ( $creatingUser->isAllowed( 'skipcaptcha' ) ) {
 				wfDebug( "ConfirmEdit: user group allows skipping captcha on account creation\n" );
 				return false;
@@ -935,67 +879,35 @@ class SimpleCaptcha {
 	}
 
 	/**
-	 * Hook for user login form submissions.
-	 * @param $u User
-	 * @param $pass
-	 * @param $retval
-	 * @return bool true to continue, false to abort user creation
-	 * @deprecated 1.27 pre-AuthManager logic
-	 */
-	function confirmUserLogin( $u, $pass, &$retval ) {
-		global $wgUser, $wgRequest;
-
-		if ( $this->isBadLoginTriggered() || $this->isBadLoginPerUserTriggered( $u ) ) {
-			if ( $this->isIPWhitelisted() ) {
-				return true;
-	  }
-
-			$this->trigger = "post-badlogin login '" . $u->getName() . "'";
-			$success = $this->passCaptchaLimitedFromRequest( $wgRequest, $wgUser );
-			LoggerFactory::getInstance( 'authmanager' )->info( 'Captcha submitted on login', [
-				'event' => 'captcha.submit',
-				'type' => 'login',
-				'successful' => $success,
-			] );
-			if ( !$success ) {
-				// Emulate a bad-password return to confuse the shit out of attackers
-				$retval = LoginForm::WRONG_PASS;
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * Check the captcha on Special:EmailUser
-	 * @param $from MailAddress
-	 * @param $to MailAddress
-	 * @param $subject String
-	 * @param $text String
-	 * @param $error String reference
-	 * @return Bool true to continue saving, false to abort and show a captcha form
+	 * @param MailAddress $from
+	 * @param MailAddress $to
+	 * @param string $subject
+	 * @param string $text
+	 * @param string &$error
+	 * @return bool true to continue saving, false to abort and show a captcha form
 	 */
 	function confirmEmailUser( $from, $to, $subject, $text, &$error ) {
-		global $wgCaptchaTriggers, $wgUser, $wgRequest;
+		global $wgUser, $wgRequest;
 
-		if ( $wgCaptchaTriggers['sendemail'] ) {
+		if ( $this->triggersCaptcha( CaptchaTriggers::SENDEMAIL ) ) {
 			if ( $wgUser->isAllowed( 'skipcaptcha' ) ) {
 				wfDebug( "ConfirmEdit: user group allows skipping captcha on email sending\n" );
 				return true;
 			}
 			if ( $this->isIPWhitelisted() ) {
 				return true;
-	  }
+			}
 
 			if ( defined( 'MW_API' ) ) {
 				# API mode
 				# Asking for captchas in the API is really silly
-				$error = wfMessage( 'captcha-disabledinapi' )->text();
+				$error = Status::newFatal( 'captcha-disabledinapi' );
 				return false;
 			}
 			$this->trigger = "{$wgUser->getName()} sending email";
 			if ( !$this->passCaptchaLimitedFromRequest( $wgRequest, $wgUser ) ) {
-				$error = wfMessage( 'captcha-sendemail-fail' )->text();
+				$error = Status::newFatal( 'captcha-sendemail-fail' );
 				return false;
 			}
 		}
@@ -1003,48 +915,27 @@ class SimpleCaptcha {
 	}
 
 	/**
-	 * @param $module ApiBase
+	 * @param ApiBase $module
 	 * @return bool
 	 */
 	protected function isAPICaptchaModule( $module ) {
-		return $module instanceof ApiEditPage || $module instanceof ApiCreateAccount;
+		return $module instanceof ApiEditPage;
 	}
 
 	/**
-	 * @param $module ApiBase
-	 * @param $params array
-	 * @param $flags int
+	 * @param ApiBase &$module
+	 * @param array &$params
+	 * @param int $flags
 	 * @return bool
 	 */
 	public function APIGetAllowedParams( &$module, &$params, $flags ) {
 		if ( $this->isAPICaptchaModule( $module ) ) {
-			if ( defined( 'ApiBase::PARAM_HELP_MSG' ) ) {
-				$params['captchaword'] = [
-					ApiBase::PARAM_HELP_MSG => 'captcha-apihelp-param-captchaword',
-				];
-				$params['captchaid'] = [
-					ApiBase::PARAM_HELP_MSG => 'captcha-apihelp-param-captchaid',
-				];
-			} else {
-				// @todo: Remove this branch when support for MediaWiki < 1.25 is dropped
-				$params['captchaword'] = null;
-				$params['captchaid'] = null;
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * @deprecated Since MediaWiki 1.25
-	 * @param $module ApiBase
-	 * @param $desc array
-	 * @return bool
-	 */
-	public function APIGetParamDescription( &$module, &$desc ) {
-		if ( $this->isAPICaptchaModule( $module ) ) {
-			$desc['captchaid'] = 'CAPTCHA ID from previous request';
-			$desc['captchaword'] = 'Answer to the CAPTCHA';
+			$params['captchaword'] = [
+				ApiBase::PARAM_HELP_MSG => 'captcha-apihelp-param-captchaword',
+			];
+			$params['captchaid'] = [
+				ApiBase::PARAM_HELP_MSG => 'captcha-apihelp-param-captchaid',
+			];
 		}
 
 		return true;
@@ -1087,7 +978,7 @@ class SimpleCaptcha {
 		// don't increase pingLimiter here, just check, if CAPTCHA limit exceeded
 		if ( $user->pingLimiter( 'badcaptcha', 0 ) ) {
 			// for debugging add an proper error message, the user just see an false captcha error message
-			$this->log( 'User reached RateLimit, preventing action.' );
+			$this->log( 'User reached RateLimit, preventing action' );
 			return false;
 		}
 
@@ -1109,7 +1000,7 @@ class SimpleCaptcha {
 	 */
 	public function passCaptchaFromRequest( WebRequest $request, User $user ) {
 		list( $index, $word ) = $this->getCaptchaParamsFromRequest( $request );
-		return $this->passCaptcha( $index, $word, $user );
+		return $this->passCaptcha( $index, $word );
 	}
 
 	/**
@@ -1185,6 +1076,7 @@ class SimpleCaptcha {
 	/**
 	 * Clear out existing captcha info from the session, to ensure
 	 * it can't be reused.
+	 * @param string $index
 	 */
 	public function clearCaptcha( $index ) {
 		CaptchaStore::get()->clear( $index );
@@ -1194,29 +1086,31 @@ class SimpleCaptcha {
 	 * Retrieve the current version of the page or section being edited...
 	 * @param Title $title
 	 * @param string $section
-	 * @param integer $flags Flags for Revision loading methods
+	 * @param int $flags Flags for Revision loading methods
 	 * @return string
 	 * @access private
 	 */
 	function loadText( $title, $section, $flags = Revision::READ_LATEST ) {
+		global $wgParser;
+
 		$rev = Revision::newFromTitle( $title, false, $flags );
 		if ( is_null( $rev ) ) {
 			return "";
-		} else {
-			$text = $rev->getText();
-			if ( $section != '' ) {
-				global $wgParser;
-				return $wgParser->getSection( $text, $section );
-			} else {
-				return $text;
-			}
 		}
+
+		$content = $rev->getContent();
+		$text = ContentHandler::getContentText( $content );
+		if ( $section !== '' ) {
+			return $wgParser->getSection( $text, $section );
+		}
+
+		return $text;
 	}
 
 	/**
 	 * Extract a list of all recognized HTTP links in the text.
-	 * @param $title Title
-	 * @param $text string
+	 * @param Title $title
+	 * @param string $text
 	 * @return array of strings
 	 */
 	function findLinks( $title, $text ) {
@@ -1242,73 +1136,6 @@ class SimpleCaptcha {
 	}
 
 	/**
-	 * Pass API captcha parameters on to the login form when using
-	 * API account creation.
-	 *
-	 * @param ApiCreateAccount $apiModule
-	 * @param LoginForm $loginForm
-	 * @return hook return value
-	 * @deprecated 1.27 pre-AuthManager logic
-	 */
-	public function addNewAccountApiForm( $apiModule, $loginForm ) {
-		global $wgRequest;
-		$main = $apiModule->getMain();
-
-		$id = $main->getVal( 'captchaid' );
-		if ( $id ) {
-			$wgRequest->setVal( 'wpCaptchaId', $id );
-
-			// Suppress "unrecognized parameter" warning:
-			$main->getVal( 'wpCaptchaId' );
-		}
-
-		$word = $main->getVal( 'captchaword' );
-		if ( $word ) {
-			$wgRequest->setVal( 'wpCaptchaWord', $word );
-
-			// Suppress "unrecognized parameter" warning:
-			$main->getVal( 'wpCaptchaWord' );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Pass extra data back in API results for account creation.
-	 *
-	 * @param ApiCreateAccount $apiModule
-	 * @param LoginForm &loginPage
-	 * @param array &$result
-	 * @return bool: Hook return value
-	 * @deprecated 1.27 pre-AuthManager logic
-	 */
-	public function addNewAccountApiResult( $apiModule, $loginPage, &$result ) {
-		if ( $result['result'] !== 'Success' && $this->needCreateAccountCaptcha() ) {
-
-			// If we failed a captcha, override the generic 'Warning' result string
-			if ( $result['result'] === 'Warning' && isset( $result['warnings'] ) ) {
-				$warnings = ApiResult::stripMetadataNonRecursive( $result['warnings'] );
-				foreach ( $warnings as $warning ) {
-					if ( $warning['message'] === 'captcha-createaccount-fail' ) {
-						$this->addCaptchaAPI( $result );
-						$result['result'] = 'NeedCaptcha';
-
-						LoggerFactory::getInstance(
-							'authmanager'
-						)->info( 'Captcha data added in account creation API', [
-							'event' => 'captcha.display',
-							'type' => 'accountcreation',
-						] );
-
-						break;
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * @return CaptchaAuthenticationRequest
 	 */
 	public function createAuthenticationRequest() {
@@ -1321,7 +1148,7 @@ class SimpleCaptcha {
 	 * Modify the apprearance of the captcha field
 	 * @param AuthenticationRequest[] $requests
 	 * @param array $fieldInfo Field description as given by AuthenticationRequest::mergeFieldInfo
-	 * @param array $formDescriptor A form descriptor suitable for the HTMLForm constructor
+	 * @param array &$formDescriptor A form descriptor suitable for the HTMLForm constructor
 	 * @param string $action One of the AuthManager::ACTION_* constants
 	 */
 	public function onAuthChangeFormFields(

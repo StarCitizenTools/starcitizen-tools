@@ -4,23 +4,24 @@
  * @copyright 2011-2015 MediaWiki Widgets Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
+@import 'mediawiki.mixins';
 
 .mw-widget-titleWidget-menu {
 	.mw-widget-titleOptionWidget {
 		line-height: normal;
 
 		&-description {
-			color: #888;
+			color: #72777d;
 		}
 	}
 
 	&-withImages {
 		.mw-widget-titleOptionWidget {
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
+			.box-sizing( border-box );
 			min-height: 3.75em;
 			padding-left: 4.75em;
+			padding-top: 0.5em;
+			padding-bottom: 0.5em;
 
 			&:not( :last-child ) {
 				margin-bottom: 2px;
@@ -37,7 +38,7 @@
 					height: 3.75em;
 					left: 0;
 					&:not( .mw-widget-titleOptionWidget-hasImage ) {
-						background-color: #ccc;
+						background-color: #c8ccd1;
 						opacity: 0.4;
 					}
 					&.mw-widget-titleOptionWidget-hasImage {
@@ -48,7 +49,8 @@
 				}
 			}
 
-			&.oo-ui-optionWidget-highlighted, &.oo-ui-optionWidget-selected {
+			&.oo-ui-optionWidget-highlighted,
+			&.oo-ui-optionWidget-selected {
 				&.oo-ui-iconElement > .mw-widget-titleOptionWidget-hasImage {
 					opacity: 1;
 				}
@@ -71,9 +73,36 @@
 		}
 	}
 
-	&:not(&-withDescriptions) {
+	&:not( &-withDescriptions ) {
 		.mw-widget-titleOptionWidget-description {
 			display: none;
 		}
 	}
+}
+
+/* Icons */
+
+.oo-ui-icon-page-disambiguation {
+	/* @embed */
+	background-image: url( images/page-disambiguation-ltr.svg );
+}
+
+.oo-ui-icon-page-existing {
+	/* @embed */
+	background-image: url( images/page-existing-ltr.svg );
+}
+
+.oo-ui-icon-page-not-found {
+	/* @embed */
+	background-image: url( images/page-not-found-ltr.svg );
+}
+
+.oo-ui-icon-page-not-found:lang( he ) {
+	/* @embed */
+	background-image: url( images/page-not-found-he-yi.svg );
+}
+
+.oo-ui-icon-page-redirect {
+	/* @embed */
+	background-image: url( images/page-redirect-ltr.svg );
 }

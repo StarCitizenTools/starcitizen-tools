@@ -6,6 +6,19 @@
 	user-select: none;
 }
 
+.mw-references-columns {
+	-webkit-column-width: 30em;
+	-moz-column-width: 30em;
+	column-width: 30em;
+}
+
+/* Avoid elements from breaking between columns */
+.mw-references-columns li {
+	-webkit-column-break-inside: avoid;
+	page-break-inside: avoid;
+	break-inside: avoid-column;
+}
+
 sup.reference {
 	/* Isolation to fix references in case of RTL words at the end of a reference */
 	unicode-bidi: -moz-isolate;
@@ -20,8 +33,7 @@ sup.reference {
 /* Highlight clicked reference in blue to help navigation */
 ol.references li:target,
 sup.reference:target {
-	background-color: #def; /* fallback */
-	background-color: rgba(0, 127, 255, 0.133);
+	background-color: #eaf3ff;
 }
 
 /* Make cite errors "strong" */

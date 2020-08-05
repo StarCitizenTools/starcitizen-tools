@@ -30,26 +30,23 @@ class ExportTest extends MediaWikiLangTestCase {
 
 		$title = Title::newFromText( $pageTitle );
 
-		ob_start();
+		$sink = new DumpStringOutput;
+		$exporter->setOutputSink( $sink );
 		$exporter->openStream();
 		$exporter->pageByTitle( $title );
 		$exporter->closeStream();
-		$xmlString = ob_get_clean();
 
 		// This throws error if invalid xml output
-		$xmlObject = simplexml_load_string( $xmlString );
+		$xmlObject = simplexml_load_string( $sink );
 
 		/**
 		 * Check namespaces match xml
 		 */
-		$xmlNamespaces = (array)$xmlObject->siteinfo->namespaces->namespace;
-		$xmlNamespaces = str_replace( ' ', '_', $xmlNamespaces );
-		unset( $xmlNamespaces[ '@attributes' ] );
-		foreach ( $xmlNamespaces as &$namespaceObject ) {
-			if ( is_object( $namespaceObject ) ) {
-				$namespaceObject = '';
-			}
+		foreach ( $xmlObject->siteinfo->namespaces->children() as $namespace ) {
+			// Get the text content of the SimpleXMLElement
+			$xmlNamespaces[] = (string)$namespace;
 		}
+		$xmlNamespaces = str_replace( ' ', '_', $xmlNamespaces );
 
 		$actualNamespaces = (array)$wgContLang->getNamespaces();
 		$actualNamespaces = array_values( $actualNamespaces );

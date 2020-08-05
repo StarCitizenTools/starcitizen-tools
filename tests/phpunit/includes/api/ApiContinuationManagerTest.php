@@ -22,7 +22,7 @@ class ApiContinuationManagerTest extends MediaWikiTestCase {
 		$generator = new MockApiQueryBase( 'generator' );
 
 		$manager = self::getManager( '', $allModules, [ 'mock1', 'mock2' ] );
-		$this->assertSame( 'ApiMain', $manager->getSource() );
+		$this->assertSame( ApiMain::class, $manager->getSource() );
 		$this->assertSame( false, $manager->isGeneratorDone() );
 		$this->assertSame( $allModules, $manager->getRunModules() );
 		$manager->addContinueParam( $allModules[0], 'm1continue', [ 1, 2 ] );
@@ -160,10 +160,8 @@ class ApiContinuationManagerTest extends MediaWikiTestCase {
 		try {
 			self::getManager( 'foo', $allModules, [ 'mock1', 'mock2' ] );
 			$this->fail( 'Expected exception not thrown' );
-		} catch ( UsageException $ex ) {
-			$this->assertSame(
-				'Invalid continue param. You should pass the original value returned by the previous query',
-				$ex->getMessage(),
+		} catch ( ApiUsageException $ex ) {
+			$this->assertTrue( ApiTestCase::apiExceptionHasCode( $ex, 'badcontinue' ),
 				'Expected exception'
 			);
 		}
@@ -195,7 +193,6 @@ class ApiContinuationManagerTest extends MediaWikiTestCase {
 				'Expected exception'
 			);
 		}
-
 	}
 
 }

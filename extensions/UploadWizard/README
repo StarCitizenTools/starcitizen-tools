@@ -6,14 +6,6 @@ help greatly.
 
 UploadWizard is licensed under the same terms as MediaWiki itself.
 
-UploadWizard by:
-@author Neil Kandalgaonkar <neilk@wikimedia.org>
-@author Jeroen de Dauw <jereoendedauw@gmail.com>
-@author Ryan Kaldari <rkaldari@wikimedia.org>
-@author Ian Baker <ibaker@wikimedia.org>
-@author Nischay Nahata <nischayn22@gmail.com>
-@author Yuvi Panda <yuvipanda@gmail.com>
-
 If you are using UploadWizard in an environment where licenses are not used, you may want to add the
 configuration below in LocalSettings.php. This will limit the license choices to a single default that
 references the wiki's generic disclaimer. Note that there are many other configuration settings to add

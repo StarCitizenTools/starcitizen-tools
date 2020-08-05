@@ -1,5 +1,7 @@
 <?php
+
 use MediaWiki\MediaWikiServices;
+use Wikimedia\TestingAccessWrapper;
 
 /**
  * @group Search
@@ -26,6 +28,11 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 		$this->insertPage( 'Example Foo' );
 		$this->insertPage( 'Example Foo/Bar' );
 		$this->insertPage( 'Example/Baz' );
+		$this->insertPage( 'Sample' );
+		$this->insertPage( 'Sample Ban' );
+		$this->insertPage( 'Sample Eat' );
+		$this->insertPage( 'Sample Who' );
+		$this->insertPage( 'Sample Zoo' );
 		$this->insertPage( 'Redirect test', '#REDIRECT [[Redirect Test]]' );
 		$this->insertPage( 'Redirect Test' );
 		$this->insertPage( 'Redirect Test Worse Result' );
@@ -56,8 +63,8 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 		$this->search = MediaWikiServices::getInstance()->newSearchEngine();
 		$this->search->setNamespaces( [] );
 
-		$this->originalHandlers = TestingAccessWrapper::newFromClass( 'Hooks' )->handlers;
-		TestingAccessWrapper::newFromClass( 'Hooks' )->handlers = [];
+		$this->originalHandlers = TestingAccessWrapper::newFromClass( Hooks::class )->handlers;
+		TestingAccessWrapper::newFromClass( Hooks::class )->handlers = [];
 
 		SpecialPageFactory::resetList();
 	}
@@ -65,7 +72,7 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 	public function tearDown() {
 		parent::tearDown();
 
-		TestingAccessWrapper::newFromClass( 'Hooks' )->handlers = $this->originalHandlers;
+		TestingAccessWrapper::newFromClass( Hooks::class )->handlers = $this->originalHandlers;
 
 		SpecialPageFactory::resetList();
 	}
@@ -94,15 +101,15 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 			] ],
 			[ [
 				'Main namespace with title prefix',
-				'query' => 'Ex',
+				'query' => 'Sa',
 				'results' => [
-					'Example',
-					'Example/Baz',
-					'Example Bar',
+					'Sample',
+					'Sample Ban',
+					'Sample Eat',
 				],
 				// Third result when testing offset
 				'offsetresult' => [
-					'Example Foo',
+					'Sample Who',
 				],
 			] ],
 			[ [
@@ -126,11 +133,11 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 				'results' => [
 					'Special:ActiveUsers',
 					'Special:AllMessages',
-					'Special:AllMyFiles',
+					'Special:AllMyUploads',
 				],
 				// Third result when testing offset
 				'offsetresult' => [
-					'Special:AllMyUploads',
+					'Special:AllPages',
 				],
 			] ],
 			[ [
@@ -143,7 +150,7 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 				],
 				// Third result when testing offset
 				'offsetresult' => [
-					'Special:UncategorizedImages',
+					'Special:UncategorizedPages',
 				],
 			] ],
 			[ [
@@ -178,9 +185,10 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 	public function testSearch( array $case ) {
 		$this->search->setLimitOffset( 3 );
 		$results = $this->search->defaultPrefixSearch( $case['query'] );
-		$results = array_map( function( Title $t ) {
+		$results = array_map( function ( Title $t ) {
 			return $t->getPrefixedText();
 		}, $results );
+
 		$this->assertEquals(
 			$case['results'],
 			$results,
@@ -195,7 +203,7 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 	public function testSearchWithOffset( array $case ) {
 		$this->search->setLimitOffset( 3, 1 );
 		$results = $this->search->defaultPrefixSearch( $case['query'] );
-		$results = array_map( function( Title $t ) {
+		$results = array_map( function ( Title $t ) {
 			return $t->getPrefixedText();
 		}, $results );
 
@@ -230,7 +238,7 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 				],
 			] ],
 			[ [
-				'Exact match not on top (bug 70958)',
+				'Exact match not on top (T72958)',
 				'provision' => [
 					'Barcelona',
 					'Bar',
@@ -244,7 +252,7 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 				],
 			] ],
 			[ [
-				'Exact match missing (bug 70958)',
+				'Exact match missing (T72958)',
 				'provision' => [
 					'Barcelona',
 					'Barbara',
@@ -329,7 +337,7 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 	 * @covers PrefixSearch::searchBackend
 	 */
 	public function testSearchBackend( array $case ) {
-		$search = $stub = $this->getMockBuilder( 'SearchEngine' )
+		$search = $stub = $this->getMockBuilder( SearchEngine::class )
 			->setMethods( [ 'completionSearchBackend' ] )->getMock();
 
 		$return = SearchSuggestionSet::fromStrings( $case['provision'] );
@@ -341,7 +349,7 @@ class SearchEnginePrefixTest extends MediaWikiLangTestCase {
 		$search->setLimitOffset( 3 );
 		$results = $search->completionSearch( $case['query'] );
 
-		$results = $results->map( function( SearchSuggestion $s ) {
+		$results = $results->map( function ( SearchSuggestion $s ) {
 			return $s->getText();
 		} );
 

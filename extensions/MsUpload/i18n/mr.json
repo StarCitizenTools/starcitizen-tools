@@ -1,8 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Anuragbihani94"
+			"Anuragbihani94",
+			"V.narsikar"
 		]
 	},
-	"msu-insert-link": "दुवा जोडा"
+	"msu-insert-link": "दुवा जोडा",
+	"msu-insert-video": "चित्रपट घाला.",
+	"msu-continue": "तरीही पुढे चलावयाचे काय?"
 }

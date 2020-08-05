@@ -1,14 +1,18 @@
 {
-	"@metadata": [],
+	"@metadata": {
+		"authors": [
+			"Aefgh39622"
+		]
+	},
 	"checkuser": "ກວດຜູ້ໃຊ້",
 	"checkuserlog": "ບັນທຶກການກວດຜູ້ໃຊ້",
 	"checkuser-reason": "ເຫດຜົນ:",
 	"checkuser-showlog": "ສະແດງບັນທຶກ",
-	"checkuser-target": "ຜູ້ໃຊ້ ຫຼື IP",
+	"checkuser-target": "ທີ່ຢູ່ IP ຫຼື ຊື່ຜູ້ໃຊ້:",
 	"checkuser-edits": "ເອົາ ການດັດແກ້ ຈາກ ທີ່ຢູ່ IP",
 	"checkuser-ips": "ເອົາ ທີ່ຢູ່ IP",
-	"checkuser-search": "ຊອກຫາ",
 	"checkuser-empty": "ບໍ່ມີເນື້ອໃນຖືກບັນທຶກ",
 	"checkuser-nomatch": "ບໍ່ພົບສິ່ງທີ່ຊອກຫາ",
-	"checkuser-check": "ກວດ"
+	"checkuser-check": "ກວດ",
+	"checkuser-search": "ຊອກຫາ"
 }

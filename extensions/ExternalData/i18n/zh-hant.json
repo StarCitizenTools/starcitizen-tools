@@ -1,9 +1,24 @@
 {
 	"@metadata": {
 		"authors": [
+			"Kly",
 			"LNDDYL"
 		]
 	},
 	"getdata": "取得資料",
-	"externaldata-db-invalid-query": "無效的查詢。"
+	"externaldata-desc": "允許外部 URL、資料庫，以及其它來源檢索結構化資料",
+	"externaldata-no-param-specified": "錯誤：未指定「$1」參數。",
+	"externaldata-web-invalid-format": "無效格式：「$1」。",
+	"externaldata-ldap-unable-to-connect": "無法連結至 $1。",
+	"externaldata-xml-error": "XML 錯誤：在第 $2 行出現 $1。",
+	"externaldata-invalid-json": "錯誤：無效的 JSON。",
+	"externaldata-jsonpath-error": "錯誤：無效的 JSONPath 表示。",
+	"externaldata-db-incomplete-information": "錯誤：此資料庫的 ID 訊息不完整。",
+	"externaldata-db-could-not-get-url": "在 $1 {{PLURAL:$1| 次嘗試| 次嘗試}}後仍無法取得 URL。",
+	"externaldata-db-unknown-type": "錯誤：無效資料庫類型。",
+	"externaldata-db-could-not-connect": "錯誤：無法連結至資料庫。",
+	"externaldata-db-unknown-collection": "錯誤：未知的 MongoDB 集合。",
+	"externaldata-db-no-return-values": "錯誤：沒有回傳指定的值。",
+	"externaldata-db-invalid-query": "無效的查詢。",
+	"externaldata-no-css-selector": "缺少函式庫：$1，在使用不帶 '$3' 選項的 '$2' 格式時為必須。"
 }

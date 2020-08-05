@@ -2,6 +2,8 @@
 
 namespace Flow\Tests\Api;
 
+use Sanitizer;
+
 /**
  * @group Flow
  * @group medium
@@ -10,7 +12,7 @@ class ApiFlowReplyTest extends ApiTestCase {
 	public function testTopLevelReply() {
 		$topic = $this->createTopic();
 
-		$data = $this->doApiRequest( array(
+		$data = $this->doApiRequest( [
 			'page' => $topic['topic-page'],
 			'token' => $this->getEditToken(),
 			'action' => 'flow',
@@ -18,7 +20,7 @@ class ApiFlowReplyTest extends ApiTestCase {
 			'repreplyTo' => $topic['topic-id'],
 			'repcontent' => '⎛ ﾟ∩ﾟ⎞⎛ ⍜⌒⍜⎞⎛ ﾟ⌒ﾟ⎞',
 			'repformat' => 'wikitext',
-		) );
+		] );
 
 		$debug = json_encode( $data );
 		$this->assertEquals( 'ok', $data[0]['flow']['reply']['status'], $debug );
@@ -27,13 +29,13 @@ class ApiFlowReplyTest extends ApiTestCase {
 		$replyPostId = $data[0]['flow']['reply']['committed']['topic']['post-id'];
 		$replyRevisionId = $data[0]['flow']['reply']['committed']['topic']['post-revision-id'];
 
-		$data = $this->doApiRequest( array(
+		$data = $this->doApiRequest( [
 			'page' => $topic['topic-page'],
 			'action' => 'flow',
 			'submodule' => 'view-post',
 			'vppostId' => $replyPostId,
 			'vpformat' => 'html',
-		) );
+		] );
 
 		$debug = json_encode( $data );
 		$revision = $data[0]['flow']['view-post']['result']['topic']['revisions'][$replyRevisionId];
@@ -41,7 +43,7 @@ class ApiFlowReplyTest extends ApiTestCase {
 		$this->assertEquals( 'reply', $revision['changeType'], $debug );
 		$this->assertEquals(
 			'⎛ ﾟ∩ﾟ⎞⎛ ⍜⌒⍜⎞⎛ ﾟ⌒ﾟ⎞',
-			trim( strip_tags( $revision['content']['content'] ) ),
+			trim( Sanitizer::stripAllTags( $revision['content']['content'] ) ),
 			$debug
 		);
 		$this->assertEquals( 'html', $revision['content']['format'], $debug );

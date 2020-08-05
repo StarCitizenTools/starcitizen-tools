@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface UrlStringTransferHandler class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -131,7 +131,7 @@ ve.ui.UrlStringTransferHandler.prototype.process = function () {
 	links.forEach( function ( link ) {
 		var i,
 			annotation = linkAction.getLinkAnnotation( link.href ),
-			annotationSet = new ve.dm.AnnotationSet( store, store.indexes( [
+			annotationSet = new ve.dm.AnnotationSet( store, store.hashAll( [
 				annotation
 			] ) ),
 			title = link.title || annotation.getDisplayTitle(),

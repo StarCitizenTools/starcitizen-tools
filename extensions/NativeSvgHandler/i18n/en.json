@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Povilas Kanapickas",
+			"Ilaï Deutel"
+		]
+	},
+	"nativesvghandler-extensionname": "NativeSvgHandler",
+	"nativesvghandler-desc": "Serves SVG images directly to clients"
+}
