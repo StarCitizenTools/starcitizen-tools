@@ -5,3 +5,11 @@
 .client-nojs #upload-wizard {
 	display: none;
 }
+
+.mwe-first-spinner {
+	min-width: 750px;
+	max-width: 900px;
+	height: 200px;
+	line-height: 200px;
+	text-align: center;
+}

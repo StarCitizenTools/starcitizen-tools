@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 	/**
 	 * The thanks step.
 	 *
@@ -49,7 +49,7 @@
 			return;
 		}
 
-		$.each( uploads, function ( i, upload ) {
+		uploads.forEach( function ( upload ) {
 			thanks.ui.addUpload( upload );
 		} );
 	};
@@ -66,4 +66,4 @@
 		return false;
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

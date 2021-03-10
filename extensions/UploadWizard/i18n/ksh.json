@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Purodha",
+			"Envlh",
 			"Matma Rex",
-			"Envlh"
+			"Purodha"
 		]
 	},
 	"uploadwizard": "et frünndlejje Projramm för et Huhlaade",
@@ -59,7 +59,6 @@
 	"mwe-upwiz-remove-upload": "Donn di Dattei uß dä Leß zom Huhlaade wider eruß nämme",
 	"mwe-upwiz-remove-description": "Donn heh Täx fott schmiiße",
 	"mwe-upwiz-upload": "Huhlaade",
-	"mwe-upwiz-file-upload-notcapable": "Dinge Brauser kann kein Datteije huhlaade.\nBes esu jood un versöhg et med enem andere Brauser.",
 	"mwe-upwiz-file-all-ok": "Et Huhlaade hät för se all jeflupp.",
 	"mwe-upwiz-file-some-failed": "Et Huhlaade es för eine Deil vun dä Datteije donävve jejange.",
 	"mwe-upwiz-file-retry": "Wat donävve jejange wohr, norr_ens versöhke",
@@ -158,7 +157,6 @@
 	"mwe-upwiz-next": "Nächs",
 	"mwe-upwiz-next-file": "Wiggermaache",
 	"mwe-upwiz-next-deeds": "Nächs",
-	"mwe-upwiz-next-details": "Nächs",
 	"mwe-upwiz-home": "Jangk op dem Wiki sing Houpsigg",
 	"mwe-upwiz-upload-another": "Mih Datteije huhlaade",
 	"mwe-upwiz-prevent-close-wait": "wann De vun heh dä Sigg fott jeihs, künnte all Ding Änderonge fott kumme. Bes esu johd un donn noch e paa sekonde wahde.",
@@ -237,7 +235,7 @@
 	"mwe-upwiz-license-own-pd": "Allmende (<i lang=\"en\">Public Domain</i>) — alle Rääschde fottjejovve noh de <i lang=\"en\">Creative Commons</i> ier Lizänz CC0",
 	"mwe-upwiz-license-pd-old-100": "Der Urhävver es zick mih wi 100 Johre duhd.",
 	"mwe-upwiz-license-pd-old": "Der Urhävver es allt zick mih wi 70 Johr duhd.",
-	"mwe-upwiz-license-pd-us": "Et eets en der USA öffentlesch jemaat un dat vör em Johr 1923",
+	"mwe-upwiz-license-pd-us": "Et eets en der USA öffentlesch jemaat un dat vör em Johr 1925",
 	"mwe-upwiz-license-pd-usgov": "Ojinaal Wärk vun de Rejierong vun de USA",
 	"mwe-upwiz-license-pd-usgov-nasa": "Ojinaal Wärk vun de NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Ojinaal Wärk vun de USA ierem Militär sing Marine",
@@ -265,7 +263,7 @@
 	"mwe-upwiz-license-external": "Heh di Dattei es op $1 onger dä Lezänz $2 ze han.",
 	"mwe-upwiz-license-external-invalid": "Op $1 schteiht di Dattei onger dä Lezänz: $2.\nSchaad dröm.\nDi künne mer heh em Wikki nit jebruche.",
 	"mwe-upwiz-license-photoset-invalid": "Leider hät kei Fotto en däm Knubbel en Lezänz, met dä mer et heh em Wikki bruche künnt.",
-	"mwe-upwiz-license-pd-old-70-1923": "Et eezde Mohl vör 1923 veröffentlesch un der Schrihver es vör mih wi 70 Johr jeschtorrve",
+	"mwe-upwiz-license-pd-old-70-1923": "Et eezde Mohl vör 1925 veröffentlesch un der Schrihver es vör mih wi 70 Johr jeschtorrve",
 	"mwe-upwiz-url-invalid": "Heh dä <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"Uniform Ressource Locator\">URL</i> weed nit ongerschtöz udder zeisch obb en onjöltisch udder beschrängk Beld udder Saz vun Bellder op $1 un es dröm nit ze bruche.",
 	"mwe-upwiz-user-blacklisted": "Leide künne Belder vum dämm Metmaacher bei $1 heh nit huhjelahde wähde.",
 	"mwe-upwiz-categories": "Saachjroppe",
@@ -293,18 +291,9 @@
 	"mwe-upwiz-prefs-def-license-def": "Nemm der Schtandatt — ejahl wat dadd es",
 	"mwe-upwiz-prefs-license-own": "Eije Wärk - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "Enenm Andere si Wärk - $1",
-	"mwe-upwiz-prefs-chunked": "Dateije övver $1 mem Projramm för et Huhlaade",
 	"mwe-upwiz-prefs-skiptutorial": "Lohß dä Övverblegg övver de Lizänze aam Aanfang fott.",
 	"mwe-upwiz-prefs-maxsimultaneous-upload": "De hühste Zahl Datteije zom parrallel Huhloahde",
 	"campaigns": "Kampannje em Projramm för et Huhlaade",
 	"mwe-upload-campaigns-pagination-next": "De näxde Sigg",
-	"mwe-upload-campaigns-list-title": "Leß met de Kampannje zom Huhlahde",
-	"apihelp-flickrblacklist-param-url": "Dä <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"Uniform Ressource Locator\">URL</i> bei <i xml:lang=\"en\" lang=\"en\" dir=\"ltr\" title=\"„Dorsch jät, wi Bellder, fleppe udder bläddere“\">Flickr</i> zom Pröhfe.",
-	"apihelp-flickrblacklist-param-list": "Wann dat jesaz es, donn de jannze „schwazze Leß“ ußjävve. Kam_mer nit zersamme met <code lang=\"en\" xml:lang=\"en\" dir=\"ltr\">$1url</code> bruche.",
-	"apihelp-flickrblacklist-example-1": "Donn en <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"Uniform Ressource Locator\">URL</i> jähje de „schwazze Leß“ pröhve.",
-	"apihelp-flickrblacklist-example-2": "Donn de jannze „schwazze Leß“ ußjävve.",
-	"apihelp-query+allcampaigns-description": "Donn alle Kampannje vum frünndlejje Projramm för et Huhlahde opzälle.",
-	"apihelp-query+allcampaigns-param-enabledonly": "Donn blohß de aanjeshalld Kampannje opzälle.",
-	"apihelp-query+allcampaigns-param-limit": "De Aanzahl Kampannje zom ußjävve.",
-	"apihelp-query+allcampaigns-example-1": "Donn de aanjeshalld Kampannje opzälle."
+	"mwe-upload-campaigns-list-title": "Leß met de Kampannje zom Huhlahde"
 }

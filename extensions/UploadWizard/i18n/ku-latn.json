@@ -1,10 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"George Animal",
-			"Gomada",
 			"Bikarhêner",
-			"Ghybu"
+			"George Animal",
+			"Ghybu",
+			"Gomada"
 		]
 	},
 	"mwe-upwiz-step-tutorial": "Fêr bibe",
@@ -59,7 +59,6 @@
 	"mwe-upwiz-next": "Pêşve",
 	"mwe-upwiz-next-file": "Bidomîne",
 	"mwe-upwiz-next-deeds": "Pêşve",
-	"mwe-upwiz-next-details": "Pêşve",
 	"mwe-upwiz-upload-another": "Bêhtir dosyeyan bar bike",
 	"mwe-upwiz-deeds-need-license": "Ji kerema xwe lîsansê hilbijêre.",
 	"mwe-upwiz-license-show-all": "Lîsanseke din hilbijêre.",

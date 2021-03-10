@@ -1,5 +1,7 @@
 <?php
 
+// This is a GET module, not a POST module, for multi-DC support. See T222851.
+// Note that this module doesn't write to the database, only to the seentime cache.
 class ApiEchoMarkSeen extends ApiBase {
 
 	public function execute() {
@@ -20,7 +22,10 @@ class ApiEchoMarkSeen extends ApiBase {
 			$outputTimestamp = wfTimestamp( TS_ISO_8601, $timestamp );
 		} else {
 			// MW
-			$this->addDeprecation( 'apiwarn-echo-deprecation-timestampformat', 'action=echomarkseen&timestampFormat=MW' );
+			$this->addDeprecation(
+				'apiwarn-echo-deprecation-timestampformat',
+				'action=echomarkseen&timestampFormat=MW'
+			);
 
 			$outputTimestamp = $timestamp;
 		}
@@ -33,9 +38,6 @@ class ApiEchoMarkSeen extends ApiBase {
 
 	public function getAllowedParams() {
 		return [
-			'token' => [
-				ApiBase::PARAM_REQUIRED => true,
-			],
 			'type' => [
 				ApiBase::PARAM_REQUIRED => true,
 				ApiBase::PARAM_TYPE => [ 'alert', 'message', 'all' ],
@@ -48,25 +50,9 @@ class ApiEchoMarkSeen extends ApiBase {
 		];
 	}
 
-	public function needsToken() {
-		return 'csrf';
-	}
-
-	public function getTokenSalt() {
-		return '';
-	}
-
-	public function mustBePosted() {
-		return true;
-	}
-
-	public function isWriteMode() {
-		return true;
-	}
-
 	/**
 	 * @see ApiBase::getExamplesMessages()
-	 * @return array
+	 * @return string[]
 	 */
 	protected function getExamplesMessages() {
 		return [
@@ -75,6 +61,6 @@ class ApiEchoMarkSeen extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/Echo_(Notifications)/API';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/Echo_(Notifications)/API';
 	}
 }

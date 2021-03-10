@@ -3,7 +3,8 @@
 /**
  * Caches the result of EchoUnreadWikis::getUnreadCounts() and interprets the results in various useful ways.
  *
- * If the user has disabled cross-wiki notifications in their preferences (see isEnabledByUser()), this class
+ * If the user has disabled cross-wiki notifications in their preferences
+ * (see {@see EchoForeignNotifications::isEnabledByUser}), this class
  * won't do anything and will behave as if the user has no foreign notifications. For example, getCount() will
  * return 0. If you need to get foreign notification information for a user even though they may not have
  * enabled the preference, set $forceEnable=true in the constructor.
@@ -20,12 +21,12 @@ class EchoForeignNotifications {
 	protected $enabled = false;
 
 	/**
-	 * @var array [(str) section => (int) count, ...]
+	 * @var int[] [(str) section => (int) count, ...]
 	 */
 	protected $counts = [ EchoAttributeManager::ALERT => 0, EchoAttributeManager::MESSAGE => 0 ];
 
 	/**
-	 * @var array [(str) section => (string[]) wikis, ...]
+	 * @var array[] [(str) section => (string[]) wikis, ...]
 	 */
 	protected $wikis = [ EchoAttributeManager::ALERT => [], EchoAttributeManager::MESSAGE => [] ];
 
@@ -35,7 +36,7 @@ class EchoForeignNotifications {
 	protected $timestamps = [ EchoAttributeManager::ALERT => false, EchoAttributeManager::MESSAGE => false ];
 
 	/**
-	 * @var array [(str) wiki => [ (str) section => (MWTimestamp) timestamp, ...], ...]
+	 * @var array[] [(str) wiki => [ (str) section => (MWTimestamp) timestamp, ...], ...]
 	 */
 	protected $wikiTimestamps = [];
 
@@ -71,7 +72,7 @@ class EchoForeignNotifications {
 		if ( $section === EchoAttributeManager::ALL ) {
 			$count = array_sum( $this->counts );
 		} else {
-			$count = isset( $this->counts[$section] ) ? $this->counts[$section] : 0;
+			$count = $this->counts[$section] ?? 0;
 		}
 
 		return MWEchoNotifUser::capNotificationCount( $count );
@@ -98,7 +99,7 @@ class EchoForeignNotifications {
 			return $max;
 		}
 
-		return isset( $this->timestamps[$section] ) ? $this->timestamps[$section] : false;
+		return $this->timestamps[$section] ?? false;
 	}
 
 	/**
@@ -117,7 +118,7 @@ class EchoForeignNotifications {
 			return array_unique( $all );
 		}
 
-		return isset( $this->wikis[$section] ) ? $this->wikis[$section] : [];
+		return $this->wikis[$section] ?? [];
 	}
 
 	public function getWikiTimestamp( $wiki, $section = EchoAttributeManager::ALL ) {
@@ -136,7 +137,7 @@ class EchoForeignNotifications {
 			}
 			return $max;
 		}
-		return isset( $this->wikiTimestamps[$wiki][$section] ) ? $this->wikiTimestamps[$wiki][$section] : false;
+		return $this->wikiTimestamps[$wiki][$section] ?? false;
 	}
 
 	protected function populate() {
@@ -224,7 +225,7 @@ class EchoForeignNotifications {
 	protected static function getWikiTitle( $wikiId, array $siteFromDB = null ) {
 		global $wgConf, $wgLang;
 
-		$msg = wfMessage( 'project-localized-name-'.$wikiId );
+		$msg = wfMessage( 'project-localized-name-' . $wikiId );
 		// check if WikimediaMessages localized project names are available
 		if ( $msg->exists() ) {
 			return $msg->text();

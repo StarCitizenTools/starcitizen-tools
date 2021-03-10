@@ -49,7 +49,7 @@ class ApiQueryAllCampaigns extends ApiQueryBase {
 			'campaign_enabled'
 		] );
 
-		if ( !is_null( $params['continue'] ) ) {
+		if ( $params['continue'] !== null ) {
 			$from_id = (int)$params['continue'];
 			// Not SQL Injection, since we already force this to be an integer
 			$this->addWhere( "campaign_id >= $from_id" );
@@ -85,7 +85,7 @@ class ApiQueryAllCampaigns extends ApiQueryBase {
 			$result->addValue(
 				$campaignPath,
 				'trackingCategory',
-				$campaign->getTrackingCategory()->getDBKey()
+				$campaign->getTrackingCategory()->getDBkey()
 			);
 			$result->addValue(
 				$campaignPath,
@@ -134,6 +134,6 @@ class ApiQueryAllCampaigns extends ApiQueryBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/Extension:UploadWizard/API';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:UploadWizard';
 	}
 }

@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow navigation widget
 	 *
@@ -14,7 +14,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.flow.ui.NavigationWidget.parent.call( this, config );
+		mw.flow.ui.NavigationWidget.super.call( this, config );
 
 		this.board = system.getBoard();
 
@@ -118,6 +118,7 @@
 
 		if ( isScrolledDown ) {
 			// TODO use binary search
+			// eslint-disable-next-line no-jquery/no-global-selector
 			$( '.flow-topic' ).each( function () {
 				if ( isElementInView( $( this ) ) ) {
 					topicId = $( this ).data( 'flowId' );
@@ -145,4 +146,4 @@
 
 		this.reorderTopicsWidget.toggle( !isScrolledDown );
 	};
-}( jQuery ) );
+}() );

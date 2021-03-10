@@ -91,6 +91,33 @@ return [
 				],
 				"lon" => [
 					"type" => "number"
+				],
+				"statements" => [
+					"type" => "array",
+					"items" => [
+						[
+							"type" => "object",
+							"properties" =>
+								[
+									"propertyId" => [
+										"type" => "string"
+									],
+									"dataType" => [
+										// ATM only properties with dataType 'wikibase-entityid'
+										// are supported
+										"type" => "string"
+									],
+									"values" => [
+										"type" => "array",
+										"items" => [
+											[
+												"value" => "string"
+											]
+										]
+									]
+								]
+						]
+					]
 				]
 			]
 		],
@@ -292,6 +319,23 @@ return [
 					],
 				],
 			],
+		],
+		"wikibase" => [
+			"type" => "object",
+			"properties" => [
+				'enabled' => [
+					"type" => "boolean",
+				],
+				'captions' => [
+					"type" => "boolean",
+				],
+				'statements' => [
+					"type" => "boolean",
+				],
+				'nonDefaultStatements' => [
+					"type" => "boolean",
+				]
+			]
 		],
 	]
 ];

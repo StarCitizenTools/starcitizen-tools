@@ -8,6 +8,7 @@ class EchoModelFormatter extends EchoEventFormatter {
 	/**
 	 * @param EchoEventPresentationModel $model
 	 * @return array
+	 * @suppress SecurityCheck-DoubleEscaped
 	 */
 	protected function formatModel( EchoEventPresentationModel $model ) {
 		$data = $model->jsonSerialize();
@@ -17,9 +18,12 @@ class EchoModelFormatter extends EchoEventFormatter {
 			$data['links']['primary']['url'] = wfExpandUrl( $data['links']['primary']['url'] );
 		}
 
+		// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
 		foreach ( $data['links']['secondary'] as &$link ) {
+			// @phan-suppress-next-line PhanTypeMismatchDimAssignment
 			$link['url'] = wfExpandUrl( $link['url'] );
 		}
+		unset( $link );
 
 		$bundledIds = $model->getBundledIds();
 		if ( $bundledIds ) {

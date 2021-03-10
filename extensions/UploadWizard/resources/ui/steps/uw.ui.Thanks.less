@@ -1,3 +1,10 @@
+@import 'mediawiki.mixins';
+
+@base90: #f8f9fa;
+@green30: #14866d;
+@base-unit: 16px;
+@width-breakpoint-desktop-wide: 1200px;
+
 #mwe-upwiz-stepdiv-thanks {
 	.mwe-upwiz-thanks-explain,
 	.mwe-upwiz-thanks-header,
@@ -12,5 +19,89 @@
 
 	.mwe-upwiz-thanks-update-delay {
 		font-weight: bold;
+	}
+
+	.mwe-upwiz-mv-cta {
+		.box-shadow(0 1px 4px rgba( 0, 0, 0, 0.25 ));
+		.flex-display();
+		align-items: center;
+		border-radius: @base-unit / 2;
+		flex-direction: column;
+		justify-content: center;
+		margin-bottom: @base-unit;
+		padding: @base-unit * 1.5;
+		position: relative;
+
+		@media screen and ( min-width: @width-breakpoint-desktop-wide ) {
+			flex-direction: row;
+		}
+	}
+
+	.mwe-upwiz-mv-cta-dismiss {
+		margin: 0;
+		position: absolute;
+		right: 0;
+		top: @base-unit / 2;
+
+		a {
+			background: transparent;
+			border: 0;
+		}
+	}
+
+	.mwe-upwiz-mv-cta-icon {
+		background-image: url( ../../images/cta-icon.svg );
+		background-position: center center;
+		background-repeat: no-repeat;
+		background-size: 100% auto;
+		flex-shrink: 0;
+		height: 8.5em;
+		width: 8.5em;
+	}
+
+	.mwe-upwiz-mv-cta-content {
+		padding-top: @base-unit;
+
+		@media screen and ( min-width: @width-breakpoint-desktop-wide ) {
+			padding-left: @base-unit * 2.5;
+			padding-top: 0;
+		}
+	}
+
+	.mwe-upwiz-mv-cta-heading {
+		margin-bottom: 0.5em;
+		padding-top: 0;
+	}
+
+	.mwe-upwiz-mv-cta-checkbox-section {
+		padding-bottom: 1em;
+
+		@media screen and ( min-width: @width-breakpoint-desktop-wide ) {
+			padding-bottom: 1.5em;
+			position: relative;
+		}
+	}
+
+	.mwe-upwiz-mv-cta-confirmation {
+		@keyframes fadeIn {
+			0% {
+				opacity: 0;
+			}
+
+			100% {
+				opacity: 1;
+			}
+		}
+		animation: fadeIn 0.5s;
+		color: @green30;
+		// The margin-left is the width of the checkbox and the padding-left
+		// matches the padding-left of the checkbox label, thus aligning this
+		// text with the checkbox label.
+		margin: 0 0 0 1.42857143em;
+		padding-left: 6px;
+
+		@media screen and ( min-width: @width-breakpoint-desktop-wide ) {
+			position: absolute;
+		}
 	}
 }

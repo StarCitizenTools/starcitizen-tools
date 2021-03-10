@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Janezdrilc"
+		]
+	},
+	"apihelp-flickrblacklist-param-url": "Spletni naslov Flickra za preizkus.",
+	"apihelp-flickrblacklist-example-1": "Preveri spletni naslov napram črnemu seznamu",
+	"apihelp-query+allcampaigns-description": "Prikaži vse kampanje čarovnika za nalaganje.",
+	"apihelp-query+allcampaigns-summary": "Prikaži vse kampanje čarovnika za nalaganje.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Prikaži samo omogočene kampanje.",
+	"apihelp-query+allcampaigns-param-limit": "Število prikazanih kampanj.",
+	"apihelp-query+allcampaigns-example-1": "Prikaži omogočene kampanje"
+}

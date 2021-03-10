@@ -2,13 +2,15 @@
 
 namespace Flow\Tests\Data;
 
-use Closure;
-use ReflectionClass;
-use Flow\Repository\UserNameBatch;
 use Flow\Data\Listener\UserNameListener;
+use Flow\Repository\UserNameBatch;
 use Flow\Tests\FlowTestCase;
+use ReflectionClass;
 
 /**
+ * @covers \Flow\Data\Listener\AbstractListener
+ * @covers \Flow\Data\Listener\UserNameListener
+ *
  * @group Database
  * @group Flow
  */
@@ -32,7 +34,7 @@ class UserNameListenerTest extends FlowTestCase {
 	 * @dataProvider onAfterLoadDataProvider
 	 */
 	public function testOnAfterLoad( array $row, array $key, $expectedWiki, $defaultWiki = null ) {
-		$batch = new UserNameBatch( $this->getMock( '\Flow\Repository\UserName\UserNameQuery' ) );
+		$batch = new UserNameBatch( $this->createMock( \Flow\Repository\UserName\UserNameQuery::class ) );
 		$listener = new UserNameListener( $batch, $key, $defaultWiki );
 		$listener->onAfterLoad( (object)$row, $row );
 
@@ -41,8 +43,8 @@ class UserNameListenerTest extends FlowTestCase {
 		$prop->setAccessible( true );
 		$queued = $prop->getValue( $batch );
 
-		if ( $expectedWiki instanceof Closure ) {
-			$expectedWiki = call_user_func( $expectedWiki );
+		if ( is_callable( $expectedWiki ) ) {
+			$expectedWiki = $expectedWiki();
 		}
 
 		if ( $expectedWiki ) {

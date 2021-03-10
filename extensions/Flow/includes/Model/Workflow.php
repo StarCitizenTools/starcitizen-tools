@@ -7,7 +7,9 @@ use Flow\Exception\DataModelException;
 use Flow\Exception\FailCommitException;
 use Flow\Exception\InvalidInputException;
 use MapCacheLRU;
+use MediaWiki\MediaWikiServices;
 use MWTimestamp;
+use RequestContext;
 use Title;
 use User;
 
@@ -21,7 +23,7 @@ class Workflow {
 	/**
 	 * @var string[]
 	 */
-	static private $allowedTypes = [ 'discussion', 'topic' ];
+	private static $allowedTypes = [ 'discussion', 'topic' ];
 
 	/**
 	 * @var UUID
@@ -250,7 +252,10 @@ class Workflow {
 			if ( $title ) {
 				self::$titleCache->set( $key, $title );
 			} else {
-				throw new InvalidInputException( "Fail to create title from namespace $namespace and title text '$titleText'", 'invalid-input' );
+				throw new InvalidInputException(
+					"Fail to create title from namespace $namespace and title text '$titleText'",
+					'invalid-input'
+				);
 			}
 		}
 
@@ -285,7 +290,15 @@ class Workflow {
 	 */
 	public function isDeleted() {
 		if ( $this->exists === null ) {
-			$this->exists = Title::newFromID( $this->pageId ) !== null;
+			// If in the context of a POST request, check against the master DB.
+			// This is important for recentchanges actions; if a user posts a topic on an
+			// empty flow board then querying the replica results in $this->exists getting set to
+			// false. Querying the master DB correctly returns that the title exists, and the
+			// recent changes event can propagate.
+			$this->exists = Title::newFromID(
+				$this->pageId,
+				RequestContext::getMain()->getRequest()->wasPosted() ? Title::GAID_FOR_UPDATE : 0
+			) !== null;
 		}
 
 		// a board that does not yet exist (because workflow has not yet
@@ -324,9 +337,8 @@ class Workflow {
 	 * @return string
 	 */
 	public function getNamespaceName() {
-		global $wgContLang;
-
-		return $wgContLang->getNsText( $this->namespace );
+		$contentLang = MediaWikiServices::getInstance()->getContentLanguage();
+		return $contentLang->getNsText( $this->namespace );
 	}
 
 	/**
@@ -370,7 +382,10 @@ class Workflow {
 		// the anonymous version can be cached and served to many different IP
 		// addresses which will not all be blocked.
 		// See T61928
-		!( $user->isLoggedIn() && $user->isBlockedFrom( $this->getOwnerTitle(), true ) );
+
+		!( $user->isLoggedIn() &&
+			MediaWikiServices::getInstance()->getPermissionManager()
+				->isBlockedFrom( $user, $this->getOwnerTitle(), true ) );
 	}
 
 	/**
@@ -385,8 +400,8 @@ class Workflow {
 	 */
 	public function getPermissionErrors( $permission, $user, $rigor ) {
 		$title = $this->type === 'topic' ? $this->getOwnerTitle() : $this->getArticleTitle();
-
-		$editErrors = $title->getUserPermissionsErrors( $permission, $user, $rigor );
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+		$editErrors = $permissionManager->getPermissionErrors( $permission, $user, $title, $rigor );
 
 		$errors = $editErrors;
 
@@ -401,7 +416,7 @@ class Workflow {
 			}, $editErrors );
 
 			// Pass in the edit errors to avoid duplicates
-			$createErrors = $title->getUserPermissionsErrors( 'create', $user, $rigor, $editErrorKeys );
+			$createErrors = $permissionManager->getPermissionErrors( 'create', $user, $title, $rigor, $editErrorKeys );
 			$errors = array_merge( $errors, $createErrors );
 		}
 

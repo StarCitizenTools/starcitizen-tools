@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Praveenp"
+		]
+	},
+	"apihelp-flickrblacklist-description": "കരിമ്പട്ടികക്കുള്ള ഉപയോക്തൃ ഐ.ഡി. (NSID) ഉപയോഗിച്ച് ഫ്ലിക്കർ യു.ആർ.എല്ലിന്റെ സാധുത ഉറപ്പാക്കുക.\n\n<var>പട്ടിക</var> ഐച്ഛികവുമായി ഉപയോഗിക്കുമ്പോൾ കരിമ്പട്ടികയിലെ എല്ലാ ഐ.ഡി.യും നൽകുക.",
+	"apihelp-flickrblacklist-param-url": "ഫ്ലിക്കർ യു.ആർ.എൽ. പരിശോധിക്കുന്നു.",
+	"apihelp-flickrblacklist-param-list": "സജ്ജമാക്കിയാൽ പൂർണ്ണമായ കരിമ്പട്ടിക നൽകുന്നതാണ്. ഇതിനൊപ്പം $1url ഉപയോഗിക്കാനാവുന്നതല്ല.",
+	"apihelp-flickrblacklist-example-1": "കരിമ്പട്ടികയിൽ ഒരു യു.ആർ.എൽ. പരിശോധിക്കുക",
+	"apihelp-flickrblacklist-example-2": "പൂർണ്ണമായ കരിമ്പട്ടിക നൽകുക",
+	"apihelp-query+allcampaigns-description": "എല്ലാ അപ്‌ലോഡ് സഹായി മേളകളുടെയും എണ്ണമെടുക്കുക.",
+	"apihelp-query+allcampaigns-summary": "എല്ലാ അപ്‌ലോഡ് സഹായി മേളയുടേയും കണക്കെടുക്കുക.",
+	"apihelp-query+allcampaigns-param-enabledonly": "സജ്ജമാക്കിയ മേളകൾ മാത്രം പട്ടികയാക്കുക.",
+	"apihelp-query+allcampaigns-param-limit": "നൽകേണ്ട മേളകളുടെ എണ്ണം.",
+	"apihelp-query+allcampaigns-example-1": "സജ്ജമാക്കിയ മേളകളുടെ എണ്ണം."
+}

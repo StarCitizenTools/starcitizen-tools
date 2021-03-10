@@ -1,0 +1,22 @@
+@thumbnail-width: 30px;
+
+.mwe-upwiz-metadata-page {
+	.mwe-upwiz-metadata-page-thumbnail {
+		.mwe-upwiz-thumbnail-link {
+			display: inline-block;
+			width: @thumbnail-width;
+			vertical-align: middle;
+		}
+
+		.mwe-upwiz-thumbnail-filename {
+			display: inline-block;
+			vertical-align: middle;
+			// make sure long filenames don't push the left column too far, but get truncated
+			width: ~'calc( 100% - 10px - @{thumbnail-width} )'; // ~ is required to disable LESS auto-calculation...
+			margin-left: 10px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+}

@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Bundle notification item widget.
 	 * This widget is expandable and displays
@@ -12,17 +12,12 @@
 	 * @param {mw.echo.dm.BundleNotificationItem} model Notification group model
 	 * @param {Object} [config] Configuration object
 	 * @cfg {boolean} [animateSorting=false] Animate the sorting of items
-	 * @cfg {jQuery} [$overlay] A jQuery element functioning as an overlay
-	 *  for popups.
 	 */
 	mw.echo.ui.BundleNotificationItemWidget = function MwEchoUiBundleNotificationItemWidget( controller, model, config ) {
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.ui.BundleNotificationItemWidget.parent.call( this, controller, model, config );
-
-		this.controller = controller;
-		this.model = model;
+		mw.echo.ui.BundleNotificationItemWidget.super.call( this, controller, model, config );
 
 		this.toggleMarkAsReadButtons( true );
 
@@ -194,8 +189,11 @@
 		this.expanded = show !== undefined ? !!show : !this.expanded;
 
 		if ( show ) {
+			// FIXME: Use CSS transition
+			// eslint-disable-next-line no-jquery/no-slide
 			this.getList().$element.slideDown();
 		} else {
+			// eslint-disable-next-line no-jquery/no-slide
 			this.getList().$element.slideUp();
 		}
 	};
@@ -224,4 +222,4 @@
 	mw.echo.ui.BundleNotificationItemWidget.prototype.getList = function () {
 		return this.listWidget;
 	};
-}( mediaWiki, jQuery ) );
+}() );

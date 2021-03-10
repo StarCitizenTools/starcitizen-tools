@@ -3,17 +3,20 @@
 namespace Flow\Tests;
 
 use Flow\Container;
+use Flow\Model\Anchor;
 use Flow\Model\UUID;
 use Title;
 
 /**
+ * @covers \Flow\UrlGenerator
+ *
  * @group Flow
  */
 class UrlGeneratorTest extends FlowTestCase {
 
 	protected $urlGenerator;
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 		$this->urlGenerator = Container::get( 'url_generator' );
 	}
@@ -48,7 +51,7 @@ class UrlGeneratorTest extends FlowTestCase {
 	 */
 	public function testBoardLink( Title $title, $sortBy = null, $saveSortBy = false ) {
 		$anchor = $this->urlGenerator->boardLink( $title, $sortBy, $saveSortBy );
-		$this->assertInstanceOf( '\Flow\Model\Anchor', $anchor );
+		$this->assertInstanceOf( Anchor::class, $anchor );
 
 		$link = $anchor->getFullURL();
 		$option = wfParseUrl( $link );
@@ -58,7 +61,7 @@ class UrlGeneratorTest extends FlowTestCase {
 		if ( $sortBy !== null ) {
 			$this->assertEquals( $sortBy, $query['topiclist_sortby'] );
 			if ( $saveSortBy ) {
-				$this->assertEquals( '1', $query['topiclist_savesortby'] );
+				$this->assertSame( '1', $query['topiclist_savesortby'] );
 			}
 		}
 	}
@@ -89,7 +92,7 @@ class UrlGeneratorTest extends FlowTestCase {
 	 */
 	public function testWatchTopicLink( Title $title, $workflowId ) {
 		$anchor = $this->urlGenerator->watchTopicLink( $title, $workflowId );
-		$this->assertInstanceOf( '\Flow\Model\Anchor', $anchor );
+		$this->assertInstanceOf( Anchor::class, $anchor );
 
 		$link = $anchor->getFullURL();
 		$option = wfParseUrl( $link );
@@ -103,7 +106,7 @@ class UrlGeneratorTest extends FlowTestCase {
 	 */
 	public function testUnwatchTopicLink( Title $title, $workflowId ) {
 		$anchor = $this->urlGenerator->unwatchTopicLink( $title, $workflowId );
-		$this->assertInstanceOf( '\Flow\Model\Anchor', $anchor );
+		$this->assertInstanceOf( Anchor::class, $anchor );
 
 		$link = $anchor->getFullURL();
 		$option = wfParseUrl( $link );

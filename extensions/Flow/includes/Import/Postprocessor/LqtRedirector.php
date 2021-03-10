@@ -19,11 +19,11 @@ use WikiPage;
 use WikitextContent;
 
 class LqtRedirector implements Postprocessor {
-	/** @var UrlGenerator **/
+	/** @var UrlGenerator */
 	protected $urlGenerator;
-	/** @var array **/
+	/** @var array */
 	protected $redirectsToDo;
-	/** @var User **/
+	/** @var User */
 	protected $user;
 
 	public function __construct( UrlGenerator $urlGenerator, User $user ) {
@@ -55,7 +55,7 @@ class LqtRedirector implements Postprocessor {
 			$state->topicWorkflow->getId()
 		);
 		foreach ( $this->redirectsToDo as $args ) {
-			call_user_func_array( [ $this, 'doRedirect' ], $args );
+			$this->doRedirect( ...$args );
 		}
 
 		$this->redirectsToDo = [];
@@ -74,7 +74,7 @@ class LqtRedirector implements Postprocessor {
 
 		$redirectTarget = $redirectAnchor->resolveTitle();
 
-		$newContent = new WikitextContent( "#REDIRECT [[".$redirectTarget->getFullText()."]]" );
+		$newContent = new WikitextContent( "#REDIRECT [[" . $redirectTarget->getFullText() . "]]" );
 		$page = WikiPage::factory( $fromTitle );
 		$summary = wfMessage( 'flow-lqt-redirect-reason' )->plain();
 		$page->doEditContent( $newContent, $summary, EDIT_FORCE_BOT, false, $this->user );

@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	/**
 	 * Sorted list widget. This is a group widget that sorts its items
 	 * according to a given sorting callback.
@@ -22,7 +22,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.ui.SortedListWidget.parent.call( this, config );
+		mw.echo.ui.SortedListWidget.super.call( this, config );
 		// Mixin constructor
 		OO.SortedEmitterList.call( this, sortingCallback );
 
@@ -83,10 +83,13 @@
 			this.addItems( fakeWidget );
 
 			// fade out fake
+			// FIXME: Use CSS transition
+			// eslint-disable-next-line no-jquery/no-fade
 			fakeWidget.$element.fadeOut( 400, function () {
 				// remove fake
 				widget.removeItems( fakeWidget );
 				// fade-in real item
+				// eslint-disable-next-line no-jquery/no-fade
 				item.$element.fadeIn( 400 );
 			} );
 		} else {
@@ -150,7 +153,6 @@
 		return null;
 	};
 
-	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Remove items.
 	 *
@@ -241,7 +243,6 @@
 		}
 	};
 
-	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Clear all items
 	 *
@@ -277,4 +278,4 @@
 		);
 	};
 
-}( mediaWiki ) );
+}() );

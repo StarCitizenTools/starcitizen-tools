@@ -6,25 +6,28 @@
  * It paginates on notification_event for a specific user, only for the enabled event types.
  */
 class NotificationPager extends ReverseChronologicalPager {
-	public function __construct() {
+	/**
+	 * @param IContextSource $context
+	 */
+	public function __construct( IContextSource $context ) {
 		$dbFactory = MWEchoDbFactory::newFromDefault();
 		$this->mDb = $dbFactory->getEchoDb( DB_REPLICA );
 
-		parent::__construct();
+		parent::__construct( $context );
 	}
 
-	function formatRow( $row ) {
-		$msg = "This pager does not support row formatting. Use 'getNotifications()' to get a list of EchoNotification objects.";
-		throw new Exception( $msg );
+	public function formatRow( $row ) {
+		throw new Exception( "This pager does not support row formatting. " .
+			"Use 'getNotifications()' to get a list of EchoNotification objects." );
 	}
 
-	function getQueryInfo() {
+	public function getQueryInfo() {
 		$attributeManager = EchoAttributeManager::newFromGlobalVars();
 		$eventTypes = $attributeManager->getUserEnabledEvents( $this->getUser(), 'web' );
 
 		return [
 			'tables' => [ 'echo_notification', 'echo_event' ],
-			'fields' => '*',
+			'fields' => EchoNotification::selectFields(),
 			'conds' => [
 				'notification_user' => $this->getUser()->getId(),
 				'event_type' => $eventTypes,
@@ -63,7 +66,7 @@ class NotificationPager extends ReverseChronologicalPager {
 		return $notifications;
 	}
 
-	function getIndexField() {
+	public function getIndexField() {
 		return 'notification_event';
 	}
 }

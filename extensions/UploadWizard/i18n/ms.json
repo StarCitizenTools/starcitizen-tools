@@ -3,10 +3,10 @@
 		"authors": [
 			"Anakmalaysia",
 			"Diagramma Della Verita",
-			"Pizza1016",
-			"Matma Rex",
+			"Envlh",
 			"Macofe",
-			"Envlh"
+			"Matma Rex",
+			"Pizza1016"
 		]
 	},
 	"uploadwizard": "Alat muat naik ajaib",
@@ -59,7 +59,6 @@
 	"mwe-upwiz-remove-upload": "Gugurkan fail ini daripada senarai fail untuk dimuat naik",
 	"mwe-upwiz-remove-description": "Gugurkan keterangan ini",
 	"mwe-upwiz-upload": "Muat naik",
-	"mwe-upwiz-file-upload-notcapable": "Maaf, pelayar anda tidak mampu memuat naik fail.\nSila cuba pelayar yang lain.",
 	"mwe-upwiz-file-all-ok": "Semua muat naik berjaya!",
 	"mwe-upwiz-file-some-failed": "Beberapa muat naik gagal.",
 	"mwe-upwiz-file-retry": "Cuba lagi muat naik yang gagal",
@@ -150,7 +149,6 @@
 	"mwe-upwiz-next": "Berikutnya",
 	"mwe-upwiz-next-file": "Sambung",
 	"mwe-upwiz-next-deeds": "Berikutnya",
-	"mwe-upwiz-next-details": "Berikutnya",
 	"mwe-upwiz-home": "Pergi ke laman utama wiki",
 	"mwe-upwiz-upload-another": "Muat naik fail lain",
 	"mwe-upwiz-prevent-close-wait": "Tindakan keluar dari laman ini boleh menyebabkan kehilangan semua suntingan anda. Sila tunggu sebentar.",
@@ -222,7 +220,7 @@
 	"mwe-upwiz-license-own-pd": "Semua hak dilepaskan dengan lesen Creative Commons Zero (seperti domain awam)",
 	"mwe-upwiz-license-pd-old-100": "Pengarang meninggal dunia lebih 100 tahun yang lalu",
 	"mwe-upwiz-license-pd-old": "Pengarang meninggal dunia lebih 70 tahun yang lalu",
-	"mwe-upwiz-license-pd-us": "Mula-mula diterbitkan di Amerika Syarikat sebelum tahun 1923",
+	"mwe-upwiz-license-pd-us": "Mula-mula diterbitkan di Amerika Syarikat sebelum tahun 1925",
 	"mwe-upwiz-license-pd-usgov": "Karya asal Kerajaan Persekutuan Amerika Syarikat",
 	"mwe-upwiz-license-pd-usgov-nasa": "Karya asal NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Karya asal Tentera Laut Amerika Syarikat",
@@ -273,7 +271,6 @@
 	"mwe-upwiz-prefs-def-license-def": "Gunakan apa sahaja asalinya",
 	"mwe-upwiz-prefs-license-own": "Karya sendiri - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "Karya orang lain - $1",
-	"mwe-upwiz-prefs-chunked": "Muat turun berangkai untuk fail-fail yang melebihi $1 di Upload Wizard",
 	"mwe-upwiz-prefs-skiptutorial": "Langkau tutorial pelesenan permulaan",
 	"mwe-upwiz-prefs-maxsimultaneous-upload": "Bilangan pemuatnaikan serentak maksimum"
 }

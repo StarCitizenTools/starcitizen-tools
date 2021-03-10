@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, $, uw, OO ) {
+( function ( uw ) {
 	/**
 	 * Represents the UI for the wizard's Thanks step.
 	 *
@@ -27,7 +27,8 @@
 	uw.ui.Thanks = function UWUIThanks( config ) {
 		var $header,
 			beginButtonTarget,
-			thanks = this;
+			thanks = this,
+			userGroups = mw.config.get( 'wgUserGroups' );
 
 		this.config = config;
 
@@ -90,6 +91,20 @@
 		} );
 
 		this.$buttons.append( this.buttonGroup.$element );
+
+		// If appropriate, add a dismissable Machine Vision CTA above content.
+		mw.loader.using( 'ext.MachineVision.config' ).then( function ( require ) {
+			var machineVisionConfig = require( 'ext.MachineVision.config' );
+			if ( machineVisionConfig && userGroups &&
+				machineVisionConfig.showComputerAidedTaggingCallToAction === true &&
+				userGroups.indexOf( 'autoconfirmed' ) !== -1 &&
+				( machineVisionConfig.testersOnly === false ||
+					userGroups.indexOf( 'machinevision-tester' ) !== -1 ) ) {
+				thanks.mvCtaCheckbox = new OO.ui.CheckboxInputWidget( { value: 'Notify me' } )
+					.connect( thanks, { change: thanks.onMvCtaCheckboxChange } );
+				thanks.addMachineVisionCta();
+			}
+		} );
 	};
 
 	OO.inheritClass( uw.ui.Thanks, uw.ui.Step );
@@ -127,20 +142,12 @@
 			.addClass( 'mwe-upwiz-data' )
 			.appendTo( $thanksDiv )
 			.append(
-				$( '<p>' )
-					.text( mw.message( 'mwe-upwiz-thanks-wikitext' ).text() )
-					.append(
-						$( '<br />' ),
-						this.makeReadOnlyInput( thumbWikiText )
-					),
-				$( '<p/>' ).text( mw.message( 'mwe-upwiz-thanks-url' ).text() )
-					.append(
-						$( '<br />' ),
-						this.makeReadOnlyInput( upload.imageinfo.descriptionurl )
-					)
+				this.makeReadOnlyInput( thumbWikiText, mw.message( 'mwe-upwiz-thanks-wikitext' ).text(), true ),
+				this.makeReadOnlyInput( upload.imageinfo.descriptionurl, mw.message( 'mwe-upwiz-thanks-url' ).text() )
 			);
 
-		upload.getThumbnail().done( function ( thumb ) {
+		// This must match the CSS dimensions of .mwe-upwiz-thumbnail
+		upload.getThumbnail( 120, 120 ).done( function ( thumb ) {
 			mw.UploadWizard.placeThumbnail( $thumbnailDiv, thumb );
 		} );
 
@@ -154,20 +161,149 @@
 	};
 
 	/**
-	 * Make a read only text input, which self-selects on gaining focus
+	 * Add a call to action to opt into notifications for the machine vision
+	 * tool, and to visit the tool to tag popular uploads.
+	 */
+	uw.ui.Thanks.prototype.addMachineVisionCta = function () {
+		var mvCtaDismissedKey = 'upwiz_mv_cta_dismissed',
+			$mvCtaDiv,
+			$mvCtaDismiss,
+			$mvCtaContent,
+			$mvCtaCheckboxSection,
+			mvCtaCheckboxField;
+
+		// If the user has already opted into notifications or dismissed the
+		// CTA previously, don't show this.
+		if ( Number( mw.user.options.get( 'echo-subscriptions-web-machinevision' ) ) === 1 ||
+			Number( mw.user.options.get( mvCtaDismissedKey ) ) === 1 ) {
+			return;
+		}
+
+		// Wrapper div.
+		$mvCtaDiv = $( '<div>' ).addClass( 'mwe-upwiz-mv-cta' );
+
+		// Add dismiss icon button.
+		$mvCtaDismiss = new OO.ui.ButtonWidget( {
+			classes: [ 'mwe-upwiz-mv-cta-dismiss' ],
+			icon: 'close',
+			invisibleLabel: true,
+			label: mw.message( 'mwe-upwiz-mv-cta-dismiss' ).text(),
+			title: mw.message( 'mwe-upwiz-mv-cta-dismiss' ).text()
+		} ).on( 'click', function () {
+			$mvCtaDiv.remove();
+
+			// Set user preference to not show this again.
+			new mw.Api().saveOption( mvCtaDismissedKey, 1 );
+			mw.user.options.set( mvCtaDismissedKey, 1 );
+		} );
+		$mvCtaDismiss.$element.appendTo( $mvCtaDiv );
+
+		// Add icon div.
+		$mvCtaDiv.append( $( '<div>' ).addClass( 'mwe-upwiz-mv-cta-icon' ) );
+
+		// Add wrapper for everything to the right of the icon.
+		$mvCtaContent = $( '<div>' )
+			.addClass( 'mwe-upwiz-mv-cta-content' )
+			.appendTo( $mvCtaDiv );
+
+		// Add heading.
+		$mvCtaContent.append( $( '<h3>' )
+			.addClass( 'mwe-upwiz-mv-cta-heading' )
+			.msg( 'mwe-upwiz-mv-cta-heading' )
+		);
+
+		// Add description text.
+		$mvCtaContent.append( $( '<p>' )
+			.addClass( 'mwe-upwiz-mv-cta-description' )
+			.msg( 'mwe-upwiz-mv-cta-description' )
+		);
+
+		// Add wrapper checkbox and confirmation message.
+		$mvCtaCheckboxSection = $( '<div>' )
+			.addClass( 'mwe-upwiz-mv-cta-checkbox-section' )
+			.appendTo( $mvCtaContent );
+
+		// Add checkbox field layout.
+		mvCtaCheckboxField = new OO.ui.FieldLayout( this.mvCtaCheckbox, {
+			label: mw.message( 'mwe-upwiz-mv-cta-checkbox-label' ).text(),
+			align: 'inline'
+		} );
+		mvCtaCheckboxField.$element.appendTo( $mvCtaCheckboxSection );
+
+		// Add final CTA to go to the MV tool.
+		$mvCtaContent.append( $( '<p>' )
+			.addClass( 'mwe-upwiz-mv-cta-final-cta' )
+			.msg( 'mwe-upwiz-mv-cta-final-cta' )
+		);
+
+		// Add entire element above the main content of this step.
+		this.$div.find( '.mwe-upwiz-thanks-header' ).before( $mvCtaDiv );
+	};
+
+	/**
+	 * Handle user preference update when user checks box to opt into or out of
+	 * notifications for the machine vision tool.
+	 */
+	uw.ui.Thanks.prototype.onMvCtaCheckboxChange = function () {
+		var self = this,
+			selected = this.mvCtaCheckbox.isSelected(),
+			key = 'echo-subscriptions-web-machinevision',
+			value = selected ? 1 : 0,
+			message = selected ?
+				'mwe-upwiz-mv-cta-user-preference-set' :
+				'mwe-upwiz-mv-cta-user-preference-unset',
+			$mvCtaCheckboxSection = this.$div.find( '.mwe-upwiz-mv-cta-checkbox-section' );
+
+		// Remove existing confirmation message if there is one.
+		this.$div.find( '.mwe-upwiz-mv-cta-confirmation' ).remove();
+
+		// Disable the checkbox until API call finishes.
+		this.mvCtaCheckbox.setDisabled( true );
+
+		// Update the user preference in the database and in local storage.
+		// Only authenticated users can use UW, so no need to check isAnon().
+		new mw.Api().saveOption( key, value )
+			.done( function () {
+				// Show the appropriate message.
+				$mvCtaCheckboxSection.append( $( '<p>' )
+					.addClass( 'mwe-upwiz-mv-cta-confirmation' )
+					.msg( message )
+				);
+				mw.user.options.set( key, value );
+			} )
+			.fail( function () {
+				message = 'mwe-upwiz-mv-cta-user-preference-set-failed';
+				$mvCtaCheckboxSection.append( $( '<p>' )
+					.addClass( 'mwe-upwiz-mv-cta-confirmation' )
+					.msg( message )
+				);
+			} )
+			.always( function () {
+				self.mvCtaCheckbox.setDisabled( false );
+			} );
+	};
+
+	/**
+	 * Make an mw.widgets.CopyTextLayout, which features a button
+	 * to copy the text provided.
 	 *
-	 * @param {string} s Text it will contain
+	 * @param {string} value Text it will contain
+	 * @param {string} label Label
+	 * @param {string} [useEditFont] Use edit font (for wikitext values)
 	 * @return {jQuery}
 	 */
-	uw.ui.Thanks.prototype.makeReadOnlyInput = function ( s ) {
-		return $( '<input>' )
-			.attr( 'readonly', 'readonly' )
-			.addClass( 'mwe-title mwe-readonly ui-corner-all' )
-			.val( s )
-			.click( function () {
-				this.focus();
-				this.select();
-			} );
+	uw.ui.Thanks.prototype.makeReadOnlyInput = function ( value, label, useEditFont ) {
+		var copyText = new mw.widgets.CopyTextLayout( {
+			align: 'top',
+			label: label,
+			copyText: value
+		} );
+
+		if ( useEditFont ) {
+			copyText.textInput.$element.addClass( 'mw-editfont-' + mw.user.options.get( 'editfont' ) );
+		}
+
+		return copyText.$element;
 	};
 
 	/**
@@ -217,4 +353,4 @@
 		return this.config.defaults && this.config.defaults.objref !== '';
 	};
 
-}( mediaWiki, jQuery, mediaWiki.uploadWizard, OO ) );
+}( mw.uploadWizard ) );

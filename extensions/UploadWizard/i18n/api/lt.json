@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Manvydasz",
+			"Salpusnis"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Valdykite Flickr URL, naudodami naudotojo ID (NSID) įtraukimui į juodąjį sąrašą.\n\nNustačius <var>sąrašo</var> parinktį, grąžinami visi ID iš juodojo sąrašo.",
+	"apihelp-flickrblacklist-param-url": "Flickr URL turi būti išbandytas.",
+	"apihelp-flickrblacklist-param-list": "Nustačius grąžinamas pilnas juodasis sąrašas. Negali būti naudojamas kartu su $1url.",
+	"apihelp-flickrblacklist-example-1": "Patikrinti URL pagal juodąjį sąrašą",
+	"apihelp-flickrblacklist-example-2": "Grąžinti pilną juodąjį sąrašą",
+	"apihelp-query+allcampaigns-description": "Išvardinti visas Įkėlimo vedlio kampanijas.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Pateikti tik aktyvuotas kampanijas.",
+	"apihelp-query+allcampaigns-param-limit": "Grąžinamų kampanijų skaičius.",
+	"apihelp-query+allcampaigns-example-1": "Išvardinti aktyvuotas kampanijas"
+}

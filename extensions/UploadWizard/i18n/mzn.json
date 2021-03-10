@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Envlh",
 			"Huji",
-			"محک",
-			"Envlh"
+			"محک"
 		]
 	},
 	"uploadwizard": "جادوگر باربی‌یشتن",
@@ -88,7 +88,6 @@
 	"mwe-upwiz-next": "پس",
 	"mwe-upwiz-next-file": "دمباله",
 	"mwe-upwiz-next-deeds": "پس",
-	"mwe-upwiz-next-details": "پس",
 	"mwe-upwiz-home": "بوردن به گت صفحهٔ ویکی",
 	"mwe-upwiz-upload-another": "باربی‌یشتن پرونده‌ئون ویشتر",
 	"mwe-upwiz-prevent-close": "شما هنتا باربی‌یشتن و انتشار این {{PLURAL:$1|پرونده|پرونده‌ئون}} ره توم نکاردنی.",

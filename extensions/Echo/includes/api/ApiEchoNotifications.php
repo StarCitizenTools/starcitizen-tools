@@ -1,6 +1,8 @@
 <?php
 
-class ApiEchoNotifications extends ApiCrossWikiBase {
+class ApiEchoNotifications extends ApiQueryBase {
+	use ApiCrossWiki;
+
 	/**
 	 * @var bool
 	 */
@@ -22,9 +24,11 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 
 		/* @deprecated */
 		if ( $params['format'] === 'flyout' ) {
-			$this->addDeprecation( 'apiwarn-echo-deprecation-flyout', 'action=query&meta=notifications&notformat=flyout' );
+			$this->addDeprecation( 'apiwarn-echo-deprecation-flyout',
+				'action=query&meta=notifications&notformat=flyout' );
 		} elseif ( $params['format'] === 'html' ) {
-			$this->addDeprecation( 'apiwarn-echo-deprecation-html', 'action=query&meta=notifications&notformat=html' );
+			$this->addDeprecation( 'apiwarn-echo-deprecation-html',
+				'action=query&meta=notifications&notformat=html' );
 		}
 
 		if ( $this->allowCrossWikiNotifications() ) {
@@ -70,7 +74,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 		$prop = $params['prop'];
 		$titles = null;
 		if ( $params['titles'] ) {
-			$titles = array_values( array_filter( array_map( 'Title::newFromText', $params['titles'] ) ) );
+			$titles = array_values( array_filter( array_map( [ Title::class, 'newFromText' ], $params['titles'] ) ) );
 			if ( in_array( '[]', $params['titles'] ) ) {
 				$titles[] = null;
 			}
@@ -106,7 +110,9 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 
 				// if exactly 1 section is specified, we consider only that section, otherwise
 				// we pass ALL to consider all foreign notifications
-				$section = count( $params['sections'] ) === 1 ? reset( $params['sections'] ) : EchoAttributeManager::ALL;
+				$section = count( $params['sections'] ) === 1
+					? reset( $params['sections'] )
+					: EchoAttributeManager::ALL;
 				if ( $this->crossWikiSummary ) {
 					$foreignNotification = $this->makeForeignNotification( $user, $params['format'], $section );
 					if ( $foreignNotification ) {
@@ -137,7 +143,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 	 * Internal method for getting the property 'list' data for individual section
 	 * @param User $user
 	 * @param string $section 'alert' or 'message'
-	 * @param string $filter 'all', 'read' or 'unread'
+	 * @param string[] $filter 'all', 'read' or 'unread'
 	 * @param int $limit
 	 * @param string $continue
 	 * @param string $format
@@ -146,7 +152,17 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 	 * @param bool $bundle
 	 * @return array
 	 */
-	protected function getSectionPropList( User $user, $section, $filter, $limit, $continue, $format, array $titles = null, $unreadFirst = false, $bundle = false ) {
+	protected function getSectionPropList(
+		User $user,
+		$section,
+		$filter,
+		$limit,
+		$continue,
+		$format,
+		array $titles = null,
+		$unreadFirst = false,
+		$bundle = false
+	) {
 		$attributeManager = EchoAttributeManager::newFromGlobalVars();
 		$sectionEvents = $attributeManager->getUserEnabledEventsbySections( $user, 'web', [ $section ] );
 
@@ -170,7 +186,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 	 * of a set of sections or a single section
 	 * @param User $user
 	 * @param string[] $eventTypes
-	 * @param string $filter 'all', 'read' or 'unread'
+	 * @param string[] $filter 'all', 'read' or 'unread'
 	 * @param int $limit
 	 * @param string $continue
 	 * @param string $format
@@ -179,7 +195,17 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 	 * @param bool $bundle
 	 * @return array
 	 */
-	protected function getPropList( User $user, array $eventTypes, $filter, $limit, $continue, $format, array $titles = null, $unreadFirst = false, $bundle = false ) {
+	protected function getPropList(
+		User $user,
+		array $eventTypes,
+		$filter,
+		$limit,
+		$continue,
+		$format,
+		array $titles = null,
+		$unreadFirst = false,
+		$bundle = false
+	) {
 		$result = [
 			'list' => [],
 			'continue' => null
@@ -212,7 +238,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 					/** @var EchoNotification $first */
 					$first = reset( $notifs );
 					$continueId = intval( trim( strrchr( $continue, '|' ), '|' ) );
-					if ( $first->getEvent()->getID() !== $continueId ) {
+					if ( $first->getEvent()->getId() !== $continueId ) {
 						// notification doesn't match continue id, it must've been
 						// about read notifications: discard all unread ones
 						$notifs = [];
@@ -254,6 +280,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 		/** @var EchoNotification $overfetchedItem */
 		$overfetchedItem = count( $notifs ) > $limit ? array_pop( $notifs ) : null;
 
+		$bundler = null;
 		if ( $bundle ) {
 			$bundler = new Bundler();
 			$notifs = $bundler->bundle( $notifs );
@@ -265,7 +292,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 			$output = EchoDataOutputFormatter::formatOutput( $notif, $format, $user, $this->getLanguage() );
 			if ( $output !== false ) {
 				$result['list'][] = $output;
-			} elseif ( $bundle && $notif->getBundledNotifications() ) {
+			} elseif ( $bundler && $notif->getBundledNotifications() ) {
 				// when the bundle_base gets filtered out, bundled notifications
 				// have to be re-bundled and formatted
 				$notifs = array_merge( $bundler->bundle( $notif->getBundledNotifications() ), $notifs );
@@ -297,7 +324,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 
 		$totalRawCount = 0;
 		foreach ( $sections as $section ) {
-			$rawCount = $notifUser->getNotificationCount( /* $tryCache = */true, DB_REPLICA, $section, $global );
+			$rawCount = $notifUser->getNotificationCount( $section, $global );
 			if ( $groupBySection ) {
 				$result[$section]['rawcount'] = $rawCount;
 				$result[$section]['count'] = EchoNotificationController::formatNotificationCount( $rawCount );
@@ -342,60 +369,17 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 	 * @param string $section
 	 * @return array|false A formatted notification, or false if there are no foreign notifications
 	 */
-	protected function makeForeignNotification( User $user, $format, $section = EchoAttributeManager::ALL ) {
-		global $wgEchoSectionTransition, $wgEchoBundleTransition;
-		if (
-			( $wgEchoSectionTransition && $section !== EchoAttributeManager::ALL ) ||
-			$wgEchoBundleTransition
-		) {
-			// In section transition mode we trust that echo_unread_wikis is accurate for the total of alerts+messages,
-			// but not for each section individually (i.e. we don't trust that notifications won't be misclassified).
-			// We get all wikis that have any notifications at all according to the euw table,
-			// and query them to find out what's really there.
-			// In bundle transition mode, we trust that notifications are classified correctly, but we don't
-			// trust the counts in the table.
-			$potentialWikis = $this->foreignNotifications->getWikis( $wgEchoSectionTransition ? EchoAttributeManager::ALL : $section );
-			if ( !$potentialWikis ) {
-				return false;
-			}
-			$foreignResults = $this->getFromForeign( $potentialWikis, [ $this->getModulePrefix() . 'filter' => '!read' ] );
-
-			$countsByWiki = [];
-			$timestampsByWiki = [];
-			foreach ( $foreignResults as $wiki => $result ) {
-				if ( isset( $result['query']['notifications']['list'] ) ) {
-					$notifs = $result['query']['notifications']['list'];
-					$countsByWiki[$wiki] = intval( $result['query']['notifications']['count'] );
-				} elseif ( isset( $result['query']['notifications'][$section]['list'] ) ) {
-					$notifs = $result['query']['notifications'][$section]['list'];
-					$countsByWiki[$wiki] = intval( $result['query']['notifications'][$section]['count'] );
-				} else {
-					$notifs = false;
-					$countsByWiki[$wiki] = 0;
-				}
-				if ( $notifs ) {
-					$timestamps = array_filter( array_map( function ( $n ) {
-						return $n['timestamp']['mw'];
-					}, $notifs ) );
-					$timestampsByWiki[$wiki] = $timestamps ? max( $timestamps ) : 0;
-				}
-			}
-
-			$wikis = array_keys( $timestampsByWiki );
-			$count = array_sum( $countsByWiki );
-			$maxTimestamp = new MWTimestamp( $timestampsByWiki ? max( $timestampsByWiki ) : 0 );
-			$timestampsByWiki = array_map( function ( $ts ) {
-				return new MWTimestamp( $ts );
-			}, $timestampsByWiki );
-		} else {
-			// In non-transition mode, or when querying all sections, we can trust the euw table
-			$wikis = $this->foreignNotifications->getWikis( $section );
-			$count = $this->foreignNotifications->getCount( $section );
-			$maxTimestamp = $this->foreignNotifications->getTimestamp( $section );
-			$timestampsByWiki = [];
-			foreach ( $wikis as $wiki ) {
-				$timestampsByWiki[$wiki] = $this->foreignNotifications->getWikiTimestamp( $wiki, $section );
-			}
+	protected function makeForeignNotification(
+		User $user,
+		$format,
+		$section = EchoAttributeManager::ALL
+	) {
+		$wikis = $this->getForeignNotifications()->getWikis( $section );
+		$count = $this->getForeignNotifications()->getCount( $section );
+		$maxTimestamp = $this->getForeignNotifications()->getTimestamp( $section );
+		$timestampsByWiki = [];
+		foreach ( $wikis as $wiki ) {
+			$timestampsByWiki[$wiki] = $this->getForeignNotifications()->getWikiTimestamp( $wiki, $section );
 		}
 
 		if ( $count === 0 || $wikis === [] ) {
@@ -404,18 +388,17 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 
 		// Sort wikis by timestamp, in descending order (newest first)
 		usort( $wikis, function ( $a, $b ) use ( $section, $timestampsByWiki ) {
-			return $timestampsByWiki[$b]->getTimestamp( TS_UNIX ) - $timestampsByWiki[$a]->getTimestamp( TS_UNIX );
+			return (int)$timestampsByWiki[$b]->getTimestamp( TS_UNIX )
+				- (int)$timestampsByWiki[$a]->getTimestamp( TS_UNIX );
 		} );
 
-		$row = new StdClass;
+		$row = new stdClass;
 		$row->event_id = -1;
 		$row->event_type = 'foreign';
 		$row->event_variant = null;
 		$row->event_agent_id = $user->getId();
 		$row->event_agent_ip = null;
 		$row->event_page_id = null;
-		$row->event_page_namespace = null;
-		$row->event_page_title = null;
 		$row->event_extra = serialize( [
 			'section' => $section ?: 'all',
 			'wikis' => $wikis,
@@ -426,9 +409,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 		$row->notification_user = $user->getId();
 		$row->notification_timestamp = $maxTimestamp;
 		$row->notification_read_timestamp = null;
-		$row->notification_bundle_base = 1;
 		$row->notification_bundle_hash = md5( 'bogus' );
-		$row->notification_bundle_display_hash = md5( 'also-bogus' );
 
 		// Format output like any other notification
 		$notif = EchoNotification::newFromRow( $row );
@@ -446,7 +427,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 	}
 
 	protected function getForeignQueryParams() {
-		$params = parent::getForeignQueryParams();
+		$params = $this->getRequest()->getValues();
 
 		// don't request cross-wiki notification summaries
 		unset( $params['notcrosswikisummary'] );
@@ -455,9 +436,9 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 	}
 
 	/**
-	 * @param array $results
+	 * @param array[] $results
 	 * @param array $params
-	 * @return mixed
+	 * @return array
 	 */
 	protected function mergeResults( array $results, array $params ) {
 		$master = array_shift( $results );
@@ -481,7 +462,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 
 	/**
 	 * @param array $master
-	 * @param array $results
+	 * @param array[] $results
 	 * @param bool $groupBySection
 	 * @return array
 	 */
@@ -516,7 +497,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 
 	/**
 	 * @param array $master
-	 * @param array $results
+	 * @param array[] $results
 	 * @param bool $groupBySection
 	 * @return array
 	 */
@@ -529,7 +510,8 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 				foreach ( $results as $result ) {
 					$master[$section]['rawcount'] += $result[$section]['rawcount'];
 				}
-				$master[$section]['count'] = EchoNotificationController::formatNotificationCount( $master[$section]['rawcount'] );
+				$master[$section]['count'] = EchoNotificationController::formatNotificationCount(
+					$master[$section]['rawcount'] );
 			}
 		}
 
@@ -548,8 +530,7 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 	public function getAllowedParams() {
 		$sections = EchoAttributeManager::$sections;
 
-		$params = parent::getAllowedParams();
-		$params += [
+		$params = $this->getCrossWikiParams() + [
 			'filter' => [
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_DFLT => 'read|!read',
@@ -643,6 +624,6 @@ class ApiEchoNotifications extends ApiCrossWikiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/Echo_(Notifications)/API';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/Echo_(Notifications)/API';
 	}
 }

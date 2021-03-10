@@ -1,5 +1,5 @@
 /* global moment */
-( function ( mw, $, moment ) {
+( function () {
 	/**
 	 * This is a progress bar for monitoring multiple objects, giving summary view
 	 *
@@ -14,15 +14,15 @@
 	 */
 	mw.GroupProgressBar = function ( selector, uploads, successStates, errorStates, progressProperty, weightProperty ) {
 		this.$selector = $( selector );
-		this.$selector.html(
-			'<div class="mwe-upwiz-progress-inner">' +
-				'<div class="mwe-upwiz-progress-bar-etr-container">' +
-					'<div class="mwe-upwiz-progress-bar-etr" style="display: none">' +
-						'<div class="mwe-upwiz-etr"></div>' +
-					'</div>' +
-				'</div>' +
-				'<div class="mwe-upwiz-count"></div>' +
-			'</div>'
+		this.$selector.empty().append(
+			$( '<div>' ).addClass( 'mwe-upwiz-progress-inner' ).append(
+				$( '<div>' ).addClass( 'mwe-upwiz-progress-bar-etr-container' ).append(
+					$( '<div>' ).addClass( 'mwe-upwiz-progress-bar-etr' ).hide().append(
+						$( '<div>' ).addClass( 'mwe-upwiz-etr' )
+					)
+				),
+				$( '<div>' ).addClass( 'mwe-upwiz-count' )
+			)
 		);
 
 		this.progressBarWidget = new OO.ui.ProgressBarWidget( {
@@ -47,6 +47,8 @@
 		 * Show the progress bar
 		 */
 		showBar: function () {
+			// FIXME: Use CSS transition
+			// eslint-disable-next-line no-jquery/no-fade
 			this.$selector.find( '.mwe-upwiz-progress-bar-etr' ).fadeIn( 200 );
 		},
 
@@ -66,18 +68,18 @@
 					errorStateCount = 0,
 					hasData = false;
 
-				$.each( bar.uploads, function ( i, upload ) {
+				bar.uploads.forEach( function ( upload ) {
 					totalWeight += upload[ bar.weightProperty ];
 				} );
 
-				$.each( bar.uploads, function ( i, upload ) {
+				bar.uploads.forEach( function ( upload ) {
 					if ( upload.state === 'aborted' ) {
 						return;
 					}
-					if ( $.inArray( upload.state, bar.successStates ) !== -1 ) {
+					if ( bar.successStates.indexOf( upload.state ) !== -1 ) {
 						successStateCount++;
 					}
-					if ( $.inArray( upload.state, bar.errorStates ) !== -1 ) {
+					if ( bar.errorStates.indexOf( upload.state ) !== -1 ) {
 						errorStateCount++;
 					}
 					if ( upload[ bar.progressProperty ] !== undefined ) {
@@ -104,7 +106,9 @@
 				} else {
 					bar.showProgress( 1.0 );
 					bar.finished = true;
-					setTimeout( function () { bar.hideBar(); }, 500 );
+					setTimeout( function () {
+						bar.hideBar();
+					}, 500 );
 				}
 			}
 			displayer();
@@ -114,6 +118,8 @@
 		 * Hide the progress bar with a slideup motion
 		 */
 		hideBar: function () {
+			// FIXME: Use CSS transition
+			// eslint-disable-next-line no-jquery/no-fade
 			this.$selector.find( '.mwe-upwiz-progress-bar-etr' ).fadeOut( 200 );
 		},
 
@@ -189,7 +195,7 @@
 
 		countRemoved: function () {
 			var count = 0;
-			$.each( this.uploads, function ( i, upload ) {
+			this.uploads.forEach( function ( upload ) {
 				if ( !upload || upload.state === 'aborted' ) {
 					count += 1;
 				}
@@ -197,4 +203,4 @@
 			return count;
 		}
 	};
-}( mediaWiki, jQuery, moment ) );
+}() );

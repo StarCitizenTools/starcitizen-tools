@@ -7,7 +7,6 @@ QUnit.test( 'Initialize flow system', function ( assert ) {
 		executeOperation = function ( obj, operation, params ) {
 			return obj[ operation ].apply( obj, params );
 		},
-		expectCounter = 0,
 		truncatedApiData = {
 			submitted: {
 				'offset-dir': 'fwd',
@@ -130,7 +129,7 @@ QUnit.test( 'Initialize flow system', function ( assert ) {
 					isModerated: false,
 					size: {
 						old: '0',
-						'new': '12'
+						new: '12'
 					},
 					author: {
 						name: 'Tester',
@@ -211,7 +210,7 @@ QUnit.test( 'Initialize flow system', function ( assert ) {
 					isModerated: false,
 					size: {
 						old: '0',
-						'new': '29'
+						new: '29'
 					},
 					author: {
 						name: 'Tester',
@@ -341,8 +340,5 @@ QUnit.test( 'Initialize flow system', function ( assert ) {
 		} else {
 			assert.deepEqual( result, op.expected, op.msg );
 		}
-		expectCounter++;
 	}
-
-	assert.expect( expectCounter );
 } );

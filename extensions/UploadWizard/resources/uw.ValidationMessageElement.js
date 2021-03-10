@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * Element that is able to display validation messages from itself or another widget.
@@ -17,6 +17,8 @@
 		this.$messages = $( '<ul>' );
 
 		this.errors = [];
+		this.warnings = [];
+		this.successMessages = [];
 		this.notices = [];
 
 		this.validatedWidget.connect( this, {
@@ -75,20 +77,19 @@
 	 * @return {jQuery}
 	 */
 	uw.ValidationMessageElement.prototype.makeMessage = function ( kind, error ) {
-		var code, content, $listItem;
-		if ( error.parse ) {
+		var code, $content, $listItem;
+		if ( error.parseDom ) {
 			// mw.Message object
 			code = error.key;
-			content = new OO.ui.HtmlSnippet( error.parse() );
+			$content = error.parseDom();
 		} else {
 			// { key: ..., html: ... } object (= formatted API error responses)
 			code = error.code;
-			content = $( $.parseHTML( error.html ) );
+			$content = $( $.parseHTML( error.html ) );
 		}
-
-		$listItem = OO.ui.FieldLayout.prototype.makeMessage.call( this, kind, content )
+		$listItem = OO.ui.FieldLayout.prototype.makeMessage.call( this, kind, $content )
 			.addClass( 'mwe-upwiz-fieldLayout-' + kind + '-' + code );
 		return $listItem;
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

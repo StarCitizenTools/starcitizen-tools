@@ -3,23 +3,29 @@
 namespace Flow\Conversion;
 
 use DOMDocument;
+use DOMElement;
 use DOMNode;
 use FauxResponse;
 use Flow\Container;
 use Flow\Exception\FlowException;
 use Flow\Exception\NoParserException;
 use Flow\Exception\WikitextException;
+use Flow\Parsoid\ContentFixer;
+use Flow\Parsoid\Fixer\EmptyNodeFixer;
+use Html;
 use Language;
 use Linker;
-use MultiHttpClient;
+use MediaWiki\MediaWikiServices;
 use OutputPage;
 use RequestContext;
 use Sanitizer;
 use Title;
-use User;
 use VirtualRESTServiceClient;
 
 abstract class Utils {
+
+	public const PARSOID_VERSION = '2.0.0';
+
 	/**
 	 * @var VirtualRESTServiceClient
 	 */
@@ -42,6 +48,7 @@ abstract class Utils {
 	 * @return string
 	 * @throws WikitextException When the requested conversion is unsupported
 	 * @throws NoParserException When the conversion fails
+	 * @param-taint $content escapes_escaped
 	 */
 	public static function convert( $from, $to, $content, Title $title ) {
 		if ( $from === $to || $content === '' ) {
@@ -60,7 +67,8 @@ abstract class Utils {
 					return self::parser( $from, $to, $content, $title );
 				}
 			} else {
-				throw new WikitextException( "Conversion from '$from' to '$to' was requested, but this is not supported." );
+				throw new WikitextException( "Conversion from '$from' to '$to' was requested, " .
+					"but this is not supported." );
 			}
 		} else {
 			return self::commentParser( $from, $to, $content );
@@ -72,8 +80,8 @@ abstract class Utils {
 	 * and other places where a roundtrip is undesired.
 	 *
 	 * @param string $html
-	 * @param int|null $truncateLength Maximum length (including ellipses) or null for whole string.
-	 * @param Language $lang Language to use for truncation.  Defaults to $wgLang
+	 * @param int|null $truncateLength Maximum length in characters (including ellipses) or null for whole string.
+	 * @param Language|null $lang Language to use for truncation.  Defaults to $wgLang
 	 * @return string plaintext
 	 */
 	public static function htmlToPlaintext( $html, $truncateLength = null, Language $lang = null ) {
@@ -86,7 +94,7 @@ abstract class Utils {
 			return $plain;
 		} else {
 			$lang = $lang ?: $wgLang;
-			return $lang->truncate( $plain, $truncateLength );
+			return $lang->truncateForVisual( $plain, $truncateLength );
 		}
 	}
 
@@ -104,8 +112,6 @@ abstract class Utils {
 	 * @throws WikitextException When conversion is unsupported
 	 */
 	protected static function parsoid( $from, $to, $content, Title $title ) {
-		global $wgVersion;
-
 		$serviceClient = self::getServiceClient();
 
 		if ( $from !== 'html' && $from !== 'wikitext' ) {
@@ -114,8 +120,7 @@ abstract class Utils {
 
 		$prefixedDbTitle = $title->getPrefixedDBkey();
 		$params = [
-			$from => $content,
-			'body_only' => 'true',
+			$from => $content
 		];
 		if ( $from === 'html' ) {
 			$params['scrub_wikitext'] = 'true';
@@ -127,8 +132,12 @@ abstract class Utils {
 			'url' => $url,
 			'body' => $params,
 			'headers' => [
-				'Accept' => 'text/html; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/HTML/1.6.1"',
-				'User-Agent' => "Flow-MediaWiki/$wgVersion",
+				'Accept' =>
+					sprintf(
+						'text/html; charset=utf-8; profile="https://www.mediawiki.org/wiki/Specs/HTML/%s"',
+						self::PARSOID_VERSION
+					),
+				'User-Agent' => 'Flow-MediaWiki/' . MW_VERSION,
 			],
 		];
 		$response = $serviceClient->run( $request );
@@ -140,9 +149,12 @@ abstract class Utils {
 			}
 			$vrsInfo = $serviceClient->getMountAndService( '/restbase/' );
 			$serviceName = $vrsInfo[1] ? $vrsInfo[1]->getName() : 'VRS service';
-			$msg = "Request to " . $serviceName . " for \"$from\" to \"$to\" conversion of content connected to title \"$prefixedDbTitle\" failed: $statusMsg";
+			$msg = "Request to " . $serviceName . " for \"$from\" to \"$to\" conversion of " .
+				"content connected to title \"$prefixedDbTitle\" failed: $statusMsg";
 			Container::get( 'default_logger' )->error(
-				'Request to {service} for "{sourceFormat}" to "{targetFormat}" conversion of content connected to title "{title}" failed.  Code: {code}, Reason: "{reason}", Body: "{body}", Error: "{error}"',
+				'Request to {service} for "{sourceFormat}" to "{targetFormat}" conversion of " .
+					"content connected to title "{title}" failed.  Code: {code}, " .
+					"Reason: "{reason}", Body: "{body}", Error: "{error}"',
 				[
 					'service' => $serviceName,
 					'sourceFormat' => $from,
@@ -159,7 +171,11 @@ abstract class Utils {
 			throw new NoParserException( $msg, 'process-wikitext' );
 		}
 
+		// Add attributes for parsoid version and base url if converting to HTML.
 		$content = $response['body'];
+		if ( $to === 'html' ) {
+			$content = self::encodeHeadInfo( $content );
+		}
 		// HACK remove trailing newline inserted by Parsoid (T106925)
 		if ( $to === 'wikitext' ) {
 			$content = preg_replace( '/\\n$/', '', $content );
@@ -181,7 +197,8 @@ abstract class Utils {
 			$from !== 'topic-title-wikitext' ||
 			( $to !== 'topic-title-html' && $to !== 'topic-title-plaintext' )
 		) {
-			throw new WikitextException( "Conversion from '$from' to '$to' was requested, but this is not supported." );
+			throw new WikitextException( "Conversion from '$from' to '$to' was requested, " .
+				"but this is not supported." );
 		}
 
 		$html = Linker::formatLinksInComment( Sanitizer::escapeHtmlAllowEntities( $content ) );
@@ -206,15 +223,15 @@ abstract class Utils {
 	 */
 	protected static function parser( $from, $to, $content, Title $title ) {
 		if ( $from !== 'wikitext' || $to !== 'html' ) {
-			throw new WikitextException( "Conversion from '$from' to '$to' was requested, but core's Parser only supports 'wikitext' to 'html' conversion", 'process-wikitext' );
+			throw new WikitextException( "Conversion from '$from' to '$to' was requested, but " .
+				"core's Parser only supports 'wikitext' to 'html' conversion", 'process-wikitext' );
 		}
-
-		global $wgParser;
 
 		$options = new \ParserOptions;
 		$options->setTidy( true );
 
-		$output = $wgParser->parse( $content, $title, $options );
+		$output = MediaWikiServices::getInstance()->getParser()
+			->parse( $content, $title, $options );
 		return $output->getText( [ 'enableSectionEditLinks' => false ] );
 	}
 
@@ -242,7 +259,9 @@ abstract class Utils {
 	 */
 	protected static function getServiceClient() {
 		if ( self::$serviceClient === null ) {
-			$sc = new VirtualRESTServiceClient( new MultiHttpClient( [] ) );
+			$sc = new VirtualRESTServiceClient(
+				MediaWikiServices::getInstance()->getHttpRequestFactory()->createMultiClient()
+			);
 			$sc->mount( '/restbase/', self::getVRSObject() );
 			self::$serviceClient = $sc;
 		}
@@ -314,7 +333,10 @@ abstract class Utils {
 			$params = array_merge( $vrs['global'], $params );
 		}
 		// set up cookie forwarding
-		if ( $params['forwardCookies'] && !User::isEveryoneAllowed( 'read' ) ) {
+		// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
+		if ( $params['forwardCookies'] &&
+				!MediaWikiServices::getInstance()->getPermissionManager()->isEveryoneAllowed( 'read' )
+		) {
 			if ( PHP_SAPI === 'cli' ) {
 				// From the command line we need to generate a cookie
 				$params['forwardCookies'] = self::generateForwardedCookieForCli();
@@ -348,13 +370,17 @@ abstract class Utils {
 	 * 	801 - allow unrecognized tags like figcaption
 	 *
 	 * @param string $content
-	 * @param bool[optional] $utf8Fragment If true, prefix $content with <?xml encoding="utf-8"?>
-	 * @param array[optional] $ignoreErrorCodes
+	 * @param bool $utf8Fragment If true, prefix $content with <?xml encoding="utf-8"?>
+	 * @param array $ignoreErrorCodes
 	 * @return DOMDocument
 	 * @throws WikitextException
 	 * @see http://www.xmlsoft.org/html/libxml-xmlerror.html
 	 */
-	public static function createDOM( $content, $utf8Fragment = true, $ignoreErrorCodes = [ 9, 76, 513, 801 ] ) {
+	public static function createDOM(
+		$content,
+		$utf8Fragment = true,
+		array $ignoreErrorCodes = [ 9, 76, 513, 801 ]
+	) {
 		$dom = new DOMDocument();
 
 		// Otherwise the parser may attempt to load the dtd from an external source.
@@ -425,20 +451,103 @@ abstract class Utils {
 	}
 
 	/**
-	 * Retrieves the html of the nodes children.
+	 * Retrieves the html of the node's children.
 	 *
 	 * @param DOMNode|null $node
 	 * @return string html of the nodes children
 	 */
 	public static function getInnerHtml( DOMNode $node = null ) {
-		$html = [];
+		$html = '';
 		if ( $node ) {
 			$dom = $node instanceof DOMDocument ? $node : $node->ownerDocument;
+			// Don't use saveHTML(), it has bugs (T217766); instead use XML serialization
+			// with a workaround for empty non-void nodes
+			$fixer = new ContentFixer( new EmptyNodeFixer );
+			$fixer->applyToDom( $dom, Title::newMainPage() );
+
 			foreach ( $node->childNodes as $child ) {
-				$html[] = $dom->saveHTML( $child );
+				$html .= $dom->saveXML( $child );
 			}
 		}
-		return implode( '', $html );
+		return $html;
+	}
+
+	/**
+	 * Gets the HTML of a node. This is like getInnterHtml(), but includes the node's tag itself too.
+	 * @param DOMNode $node
+	 * @return string HTML
+	 */
+	public static function getOuterHtml( DOMNode $node ) {
+		$dom = $node instanceof DOMDocument ? $node : $node->ownerDocument;
+		// Don't use saveHTML(), it has bugs (T217766); instead use XML serialization
+		// with a workaround for empty non-void nodes
+		$fixer = new ContentFixer( new EmptyNodeFixer );
+		$fixer->applyToDom( $dom, Title::newMainPage() );
+		return $dom->saveXML( $node );
+	}
+
+	/**
+	 * Encode information from the <head> tag as attributes on the <body> tag, then
+	 * drop the <head>.
+	 *
+	 * Specifically, add the Parsoid version number in the parsoid-version attribute;
+	 * put the href of the <base> tag in the base-url attribute;
+	 * and remove the class attribute from the <body>.
+	 *
+	 * @param string $html HTML
+	 * @return string HTML with <head> information encoded as attributes on the <body>
+	 * @throws WikitextException
+	 * @suppress PhanUndeclaredMethod,PhanTypeMismatchArgumentNullable Apparently a phan bug / wrong built-in PHP stubs
+	 */
+	public static function encodeHeadInfo( $html ) {
+		$dom = ContentFixer::createDOM( $html );
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+		$base = $head ? $head->getElementsByTagName( 'base' )->item( 0 ) : null;
+		$body->setAttribute( 'parsoid-version', self::PARSOID_VERSION );
+		if ( $base instanceof DOMElement && $base->getAttribute( 'href' ) ) {
+			$body->setAttribute( 'base-url', $base->getAttribute( 'href' ) );
+		}
+		// The class attribute is not used by us and is wastefully long, remove it
+		$body->removeAttribute( 'class' );
+		return self::getOuterHtml( $body );
+	}
+
+	/**
+	 * Put the base URI from the <body>'s base-url attribute back in the <head> as a <base> tag.
+	 * This reverses (part of) the transformation done by encodeHeadInfo().
+	 *
+	 * @param string $html HTML (may be a full document, <body> tag  or unwrapped <body> contents)
+	 * @return string HTML (<html> tag with <head> and <body>) with the <base> tag restored
+	 * @throws WikitextException
+	 * @suppress PhanUndeclaredMethod,PhanTypeMismatchArgumentNullable Apparently a phan bug / wrong built-in PHP stubs
+	 */
+	public static function decodeHeadInfo( $html ) {
+		$dom = ContentFixer::createDOM( $html );
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		$baseUrl = $body->getAttribute( 'base-url' );
+		return Html::rawElement( 'html', [],
+			Html::rawElement( 'head', [],
+				// Only set base href if there's a value to set.
+				$baseUrl ? Html::element( 'base', [ 'href' => $baseUrl ] ) : ''
+			) .
+			self::getOuterHtml( $body )
+		);
+	}
+
+	/**
+	 * Get the Parsoid version from HTML content stored in the database.
+	 * This interprets the transformation done by encodeHeadInfo().
+	 *
+	 * @param string $html
+	 * @return string|null Parsoid version number, or null if none found
+	 * @suppress PhanUndeclaredMethod Apparently a phan bug / wrong built-in PHP stubs
+	 */
+	public static function getParsoidVersion( $html ) {
+		$dom = ContentFixer::createDOM( $html );
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		$version = $body->getAttribute( 'parsoid-version' );
+		return $version !== '' ? $version : null;
 	}
 
 	/**

@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
+			"Ilja.mos",
 			"Mashoi7",
-			"Ilja.mos"
+			"Pyscowicz"
 		]
 	},
 	"mwe-upwiz-step-tutorial": "Opastu",
 	"mwe-upwiz-step-thanks": "Käytä",
-	"mwe-upwiz-add-flickr-or": "Libo",
+	"mwe-upwiz-add-flickr-or": "libo",
 	"mwe-upwiz-publish": "Piästetäh ilmah...",
 	"mwe-upwiz-published": "Piästetty ilmah!",
 	"mwe-upwiz-finished": "Valmis!",
@@ -16,7 +17,6 @@
 	"mwe-upwiz-next": "Tulii",
 	"mwe-upwiz-next-file": "Jatka",
 	"mwe-upwiz-next-deeds": "Tulii",
-	"mwe-upwiz-next-details": "Tulii",
 	"mwe-upwiz-home": "Mene wikin ezisivule",
 	"mwe-upwiz-error-blank": "Tämä tiedo piädy.",
 	"mwe-upwiz-file-too-large": "Failu on liijan suuri.",

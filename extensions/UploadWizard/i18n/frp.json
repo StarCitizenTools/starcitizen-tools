@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"ChrisPtDe",
-			"Matma Rex",
-			"Envlh"
+			"Envlh",
+			"Matma Rex"
 		]
 	},
 	"uploadwizard": "Assistent d’importacion",
@@ -106,7 +106,6 @@
 	"mwe-upwiz-next": "Aprés",
 	"mwe-upwiz-next-file": "Continuar",
 	"mwe-upwiz-next-deeds": "Aprés",
-	"mwe-upwiz-next-details": "Aprés",
 	"mwe-upwiz-home": "Alar a la pâge de reçua du vouiqui",
 	"mwe-upwiz-upload-another": "Tèlèchargiér més de fichiérs",
 	"mwe-upwiz-prevent-close": "Vos éd p’oncor chavonâ lo tèlèchargement et la publecacion de {{PLURAL:$1|cél fichiér|celos fichiérs}}.",
@@ -169,7 +168,7 @@
 	"mwe-upwiz-license-own-pd": "Tôs los drêts renonciês avouéc la licence Creative Commons zérô (coment lo domêno publico)",
 	"mwe-upwiz-license-pd-old-100": "L’ôtor est môrt cen fât més de 100 ans",
 	"mwe-upwiz-license-pd-old": "L’ôtor est môrt cen fât més de 70 ans",
-	"mwe-upwiz-license-pd-us": "Publeyê d’abôrd ux Ètats-Unis devant 1923",
+	"mwe-upwiz-license-pd-us": "Publeyê d’abôrd ux Ètats-Unis devant 1925",
 	"mwe-upwiz-license-pd-usgov": "Ôvra originâla a l’administracion fèdèrâla des Ètats-Unis",
 	"mwe-upwiz-license-pd-usgov-nasa": "Ôvra originâla de la NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Ôvra originâla a la marena militèra des Ètats-Unis",

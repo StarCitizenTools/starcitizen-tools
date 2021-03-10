@@ -3,7 +3,7 @@
  * @todo Clean up the remaining code that may not need to be here.
  */
 
-( function ( $, mw ) {
+( function () {
 	/**
 	 * Constructor class for instantiating a new Flow board.
 	 *
@@ -66,6 +66,7 @@
 	/**
 	 * Sets up the board and base properties on this class.
 	 * Returns either FALSE for failure, or jQuery object of old nodes that were replaced.
+	 *
 	 * @param {jQuery|boolean} $container
 	 * @return {boolean|jQuery}
 	 */
@@ -78,10 +79,13 @@
 
 		// Trigger this on FlowBoardAndHistoryComponentBase
 		// @todo use EventEmitter to do this?
-		$retObj = FlowBoardComponent.parent.prototype.reinitializeContainer.call( this, $container );
+		$retObj = FlowBoardComponent.super.prototype.reinitializeContainer.call( this, $container );
 		// Find any new (or previous) elements
+		// eslint-disable-next-line no-jquery/no-sizzle
 		$header = $container.find( '.flow-board-header' ).addBack().filter( '.flow-board-header:first' );
+		// eslint-disable-next-line no-jquery/no-sizzle
 		$boardNavigation = $container.find( '.flow-board-navigation' ).addBack().filter( '.flow-board-navigation:first' );
+		// eslint-disable-next-line no-jquery/no-sizzle
 		$board = $container.find( '.flow-board' ).addBack().filter( '.flow-board:first' );
 
 		if ( $retObj === false ) {
@@ -133,6 +137,7 @@
 
 	/**
 	 * Helper receives
+	 *
 	 * @param {jQuery} $container
 	 * @param {string} uid Anchor to scroll to
 	 * @param {string} [option] 'newer' if all posts equal to or newer than uid should be
@@ -173,11 +178,12 @@
 	 */
 	function _overrideWatchlistNotification() {
 		var _notify = mw.notify;
-		mw.notify = function ( message, options ) {
+		mw.notify = function ( $message, options ) {
 			// override message when we've just watched the board
+			// eslint-disable-next-line no-jquery/no-global-selector
 			if ( options && options.tag === 'watch-self' && $( '#ca-watch' ).length ) {
 				// Render a div telling the user that they have subscribed
-				message = $( mw.flow.TemplateEngine.processTemplateGetFragment(
+				$message = $( mw.flow.TemplateEngine.processTemplateGetFragment(
 					'flow_subscribed.partial',
 					{
 						type: 'board',
@@ -186,7 +192,7 @@
 				) ).children();
 			}
 
-			return _notify.apply( this, arguments );
+			return _notify.call( this, $message, options );
 		};
 	}
-}( jQuery, mediaWiki ) );
+}() );

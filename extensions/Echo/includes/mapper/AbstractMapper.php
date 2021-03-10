@@ -13,7 +13,7 @@ abstract class EchoAbstractMapper {
 
 	/**
 	 * Event listeners for method like insert/delete
-	 * @var array
+	 * @var array[]
 	 */
 	protected $listeners;
 
@@ -62,18 +62,15 @@ abstract class EchoAbstractMapper {
 	 * Get the listener for a method
 	 *
 	 * @param string $method
-	 * @return array
+	 * @return callable[]
 	 * @throws MWException
 	 */
 	public function getMethodListeners( $method ) {
 		if ( !method_exists( $this, $method ) ) {
 			throw new MWException( $method . ' does not exist in ' . get_class( $this ) );
 		}
-		if ( isset( $this->listeners[$method] ) ) {
-			return $this->listeners[$method];
-		} else {
-			return [];
-		}
+
+		return $this->listeners[$method] ?? [];
 	}
 
 }

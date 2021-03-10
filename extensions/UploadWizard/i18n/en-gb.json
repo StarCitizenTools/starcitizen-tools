@@ -1,13 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
-			"Reedy",
-			"Shirayuki",
+			"Andibing",
 			"Caliburn",
-			"Sator",
-			"Usandaru555",
 			"Codynguyen1116",
-			"Andibing"
+			"Pasianssi",
+			"Reedy",
+			"Sator",
+			"Sau226",
+			"Shirayuki",
+			"Usandaru555"
 		]
 	},
 	"uploadwizard": "Upload Wizard",
@@ -55,16 +57,18 @@
 	"mwe-upwiz-copied-metadata": "Copied!",
 	"mwe-upwiz-undid-metadata": "Copy undone.",
 	"mwe-upwiz-title": "Title",
+	"mwe-upwiz-date-created": "Date",
 	"mwe-upwiz-location": "Location",
 	"mwe-upwiz-ok": "OK",
 	"mwe-upwiz-next": "Next",
 	"mwe-upwiz-next-file": "Continue",
 	"mwe-upwiz-next-deeds": "Next",
-	"mwe-upwiz-next-details": "Next",
+	"mwe-upwiz-publish-details": "Publish",
 	"mwe-upwiz-tooltip-more-info": "Learn more.",
 	"mwe-upwiz-deeds-need-license": "Aukeratu mesedez lizentzia bat.",
 	"mwe-upwiz-license-show-all": "Use a different licence",
 	"mwe-upwiz-license-show-recommended": "Use the site's recommended licence",
+	"mwe-upwiz-label-optional": "Optional",
 	"mwe-upwiz-error-license-wikitext-too-short": "The wikitext here is too short to be a licence",
 	"mwe-upwiz-dialog-yes": "Yes",
 	"mwe-upwiz-dialog-no": "No",

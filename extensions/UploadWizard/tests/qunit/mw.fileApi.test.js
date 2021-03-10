@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw ) {
+( function () {
 	QUnit.module( 'mw.fileApi', QUnit.newMwEnvironment() );
 
 	QUnit.test( 'isPreviewableFile', function ( assert ) {
@@ -64,4 +64,4 @@
 		assert.strictEqual( fakeVideo.canPlayType.callCount, 1 );
 	} );
 
-}( mediaWiki ) );
+}() );

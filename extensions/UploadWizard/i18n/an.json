@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Envlh",
 			"Juanpabl",
-			"Matma Rex",
-			"Envlh"
+			"Matma Rex"
 		]
 	},
 	"uploadwizard": "Asistent ta cargar fichers",
@@ -98,7 +98,6 @@
 	"mwe-upwiz-next": "Siguient",
 	"mwe-upwiz-next-file": "Continar",
 	"mwe-upwiz-next-deeds": "Siguient",
-	"mwe-upwiz-next-details": "Siguient",
 	"mwe-upwiz-home": "Ir ta la pachina prencipal d'o wiki",
 	"mwe-upwiz-upload-another": "Cargar mas fichers",
 	"mwe-upwiz-prevent-close": "Encara no ha rematau de cargar y publicar {{PLURAL:$1|iste fichero|istes fichers}}.",
@@ -160,7 +159,7 @@
 	"mwe-upwiz-license-own-pd": "Renuncia a totz os dreitos con a licencia Creative Commons zero (como baixo dominio publico)",
 	"mwe-upwiz-license-pd-old-100": "L'autor falleció fa mas de 100 anyos",
 	"mwe-upwiz-license-pd-old": "L'autor falleció fa mas de 70 anyos",
-	"mwe-upwiz-license-pd-us": "Publicau por primer vegada en los Estaus Unius antes de 1923",
+	"mwe-upwiz-license-pd-us": "Publicau por primer vegada en los Estaus Unius antes de 1925",
 	"mwe-upwiz-license-pd-usgov": "Obra orichinal d'o Gubierno Federal d'os EE.UU.",
 	"mwe-upwiz-license-pd-usgov-nasa": "Obra orichinal d'a NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Obra orichinal d'a Marina Militar d'os Estaus Unius",

@@ -3,8 +3,8 @@
 namespace Flow\Repository;
 
 use Flow\Data\FlowObjectCache;
-use Flow\Model\UUID;
 use Flow\Exception\InvalidParameterException;
+use Flow\Model\UUID;
 
 class MultiGetList {
 
@@ -36,8 +36,9 @@ class MultiGetList {
 				$cacheId = UUID::create( $id );
 			} else {
 				$type = is_object( $id ) ? get_class( $id ) : gettype( $id );
-				throw new InvalidParameterException( 'Not scalar:' . $type, 'invalid-input' );
+				throw new InvalidParameterException( "Not scalar: $type" );
 			}
+			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable
 			$cacheKeys[ TreeCacheKey::build( $treeType, $cacheId ) ] = $id;
 		}
 		return $this->getByKey( $cacheKeys, $loadCallback );
@@ -54,31 +55,27 @@ class MultiGetList {
 		}
 		$result = [];
 		$multiRes = $this->cache->getMulti( array_keys( $cacheKeys ) );
-		if ( $multiRes === false ) {
-			// Falls through to query only backend
-			wfDebugLog( 'Flow', __METHOD__ . ': Failure querying memcache' );
-		} else {
-			// Memcached BagOStuff only returns found keys, but the redis bag
-			// returns false for not found keys.
-			$multiRes = array_filter(
-				$multiRes,
-				function ( $val ) {
-					return $val !== false;
-				}
-			);
-			foreach ( $multiRes as $key => $value ) {
-				$idx = $cacheKeys[$key];
-				if ( $idx instanceof UUID ) {
-					$idx = $idx->getAlphadecimal();
-				}
-				$result[$idx] = $value;
-				unset( $cacheKeys[$key] );
+		// Memcached BagOStuff only returns found keys, but the redis bag
+		// returns false for not found keys.
+		$multiRes = array_filter(
+			$multiRes,
+			function ( $val ) {
+				return $val !== false;
 			}
+		);
+		foreach ( $multiRes as $key => $value ) {
+			$idx = $cacheKeys[$key];
+			if ( $idx instanceof UUID ) {
+				$idx = $idx->getAlphadecimal();
+			}
+			$result[$idx] = $value;
+			unset( $cacheKeys[$key] );
 		}
+
 		if ( count( $cacheKeys ) === 0 ) {
 			return $result;
 		}
-		$res = call_user_func( $loadCallback, array_values( $cacheKeys ) );
+		$res = $loadCallback( array_values( $cacheKeys ) );
 		if ( !$res ) {
 			// storage failure of some sort
 			return $result;
@@ -91,11 +88,7 @@ class MultiGetList {
 			$invCacheKeys[$id] = $cacheKey;
 		}
 		foreach ( $res as $id => $row ) {
-			// If we failed contacting memcache a moment ago don't bother trying to
-			// push values either.
-			if ( $multiRes !== false ) {
-				$this->cache->set( $invCacheKeys[$id], $row );
-			}
+			$this->cache->set( $invCacheKeys[$id], $row );
 			$result[$id] = $row;
 		}
 

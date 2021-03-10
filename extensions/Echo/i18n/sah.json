@@ -1,20 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Kaganer",
 			"HalanTul",
-			"София",
+			"Kaganer",
 			"Марианна",
+			"София",
 			"Туллук"
 		]
 	},
 	"echo-desc": "Иһитиннэриилэр уонна түбэлтэлэр тустарынан кыттааччыларга биллэрэр систиэмэ",
 	"prefs-echo": "Биллэриилэр",
 	"prefs-emailsettings": "Email туруоруулара",
-	"prefs-displaynotifications": "Туруоруулары көрдөр",
 	"prefs-echosubscriptions": "Бу түбэлтэлэр тустарынан миэхэ биллэрэн ис",
 	"prefs-echocrosswiki": "Кросс-вики биллэрии",
-	"prefs-newmessageindicator": "Саҥа сурук кэллэҕинэ көстөр",
 	"echo-pref-send-me": "Миэхэ манна ыыт:",
 	"echo-pref-send-to": "Манна ыыт:",
 	"echo-pref-email-format": "Сурук формаата",
@@ -27,7 +25,6 @@
 	"echo-pref-email-format-html": "HTML",
 	"echo-pref-email-format-plain-text": "Көннөрү тиэкис",
 	"echo-pref-cross-wiki-notifications": "Атын биики биллэриилэрин эмиэ көрдөр",
-	"echo-pref-beta-feature-cross-wiki-message": "Тупсарыллыбыт биллэриилэр",
 	"echo-learn-more": "Эбии билии",
 	"echo-log": "Аһаҕас сурунаал",
 	"echo-new-messages": "Эйиэхэ саҥа сурук кэлбит",
@@ -52,8 +49,6 @@
 	"echo-specialpage-markasread": "Биллэрии: Ааҕыллыбыт курдук бэлиэтээ",
 	"notificationsmarkread-legend": "Биллэриини ааҕыллыбыт курдук бэлиэтээ",
 	"echo-none": "Эн биллэриини тута иликкин.",
-	"echo-more-info": "Сиһилии",
-	"echo-feedback": "Ситимнэһии",
 	"echo-api-failure": "Биллэриилэри тутар табыллыбата.",
 	"echo-notification-placeholder": "Биллэрии суох.",
 	"echo-notification-loginrequired": "Биллэриилэри көрөргө бастаан киир.",
@@ -82,7 +77,7 @@
 	"notification-link-text-view-edit": "Көннөрүүнү көр",
 	"notification-header-reverted": "<strong>$3</strong> сирэйгэ оҥорбут {{PLURAL:$4|1=Эн көннөрүүҥ|Эн көннөрүүлэриҥ}} {{GENDER:$2|{{PLURAL:$4|ууратылынна|ууратылыннылар}}}}",
 	"notification-header-emailuser": "$1 {{GENDER:$2|sent}} эйиэхэ сурук ыытта.",
-	"notification-reverted-email-subject2": "{{GENDER:$1|Ким эрэ}} {{PLURAL:$3|1=эн көннөрүүгүн|эн көннөрүүлэргин}} «{{SITENAME}}» ситим-сиргэ көтүрбүт",
+	"notification-reverted-email-subject2": "{{GENDER:$2|Ким эрэ}} {{PLURAL:$4|1=эн көннөрүүгүн|эн көннөрүүлэргин}} «{{SITENAME}}» ситим-сиргэ көтүрбүт",
 	"notification-user-rights-email-subject": "{{SITENAME}}  сайтка эhиги быраапкыт уларыйда",
 	"notification-timestamp-ago-seconds": "{{PLURAL:$1|Систиэмнэй}}",
 	"notification-timestamp-ago-minutes": "{{PLURAL:$1|$1 мүн}}",

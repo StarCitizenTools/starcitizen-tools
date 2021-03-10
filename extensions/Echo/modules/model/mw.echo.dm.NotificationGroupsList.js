@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	/**
 	 * Notification groups list data structure.
 	 * It contains mw.echo.dm.NotificationsList items
@@ -18,7 +18,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.dm.NotificationGroupsList.parent.call( this );
+		mw.echo.dm.NotificationGroupsList.super.call( this );
 
 		// Sorting callback
 		this.setSortingCallback( function ( a, b ) {
@@ -161,4 +161,4 @@
 		}
 		return null;
 	};
-}( mediaWiki ) );
+}() );

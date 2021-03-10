@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow board categories widget
 	 *
@@ -18,7 +18,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.flow.ui.CategoriesWidget.parent.call( this, config );
+		mw.flow.ui.CategoriesWidget.super.call( this, config );
 
 		// Mixin constructor
 		OO.ui.mixin.GroupElement.call( this, $.extend( { $group: $categoryList }, config ) );
@@ -111,4 +111,4 @@
 			mw.msg( 'pagecategories', this.model.getCategories().getItemCount() )
 		);
 	};
-}( jQuery ) );
+}() );

@@ -1,12 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Vadgt",
-			"Xelgen",
-			"Աշոտ1997",
-			"Vahe Gharakhanyan",
+			"23artashes",
 			"Kareyac",
-			"23artashes"
+			"Vadgt",
+			"Vahe Gharakhanyan",
+			"Xelgen",
+			"Աշոտ1997"
 		]
 	},
 	"uploadwizard": "Վերբեռնման օգնական",
@@ -17,9 +17,11 @@
 	"mwe-upwiz-step-file": "Վերբեռնեք",
 	"mwe-upwiz-step-deeds": "Ազատ թողարկեք",
 	"mwe-upwiz-step-details": "Նկարագրեք",
+	"mwe-upwiz-step-metadata": "Ավելացնել տվյալներ",
 	"mwe-upwiz-step-thanks": "Օգտագործեք",
 	"mwe-upwiz-api-warning-exists": "Վիքիում այս անունով արդեն [$1 այլ նիշք] կա։",
 	"mwe-upwiz-add-file-n": "Եվս մեկ նիշք ավելացնել",
+	"mwe-upwiz-add-flickr-or": "կամ",
 	"mwe-upwiz-transport-started": "Մեկնարկում…",
 	"mwe-upwiz-uploading": "Վերբեռնվում է…",
 	"mwe-upwiz-transported": "Վերբեռնումը ավարտվում է…",
@@ -43,6 +45,7 @@
 	"mwe-upwiz-copy-description": "Պատճենել նկարագրությունը",
 	"mwe-upwiz-copy-date": "Պատճենել ամսաթիվը",
 	"mwe-upwiz-copy-categories": "Պատճենել կատեգորիաները",
+	"mwe-upwiz-publish-metadata": "Հրապարակել",
 	"mwe-upwiz-upload-another": "Բեռնել ավելի շատ ֆայլեր",
 	"mwe-upwiz-campaign-contributors-count-desc": "{{PLURAL:$1|Ներդրող|Ներդրողներ}}",
 	"prefs-uploads": "Բեռնումներ"

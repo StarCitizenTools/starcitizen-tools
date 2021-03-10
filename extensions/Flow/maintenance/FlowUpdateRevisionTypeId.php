@@ -18,7 +18,7 @@ class FlowUpdateRevisionTypeId extends LoggedUpdateMaintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = "Update flow_revision.rev_type_id";
+		$this->addDescription( "Update flow_revision.rev_type_id" );
 		$this->requireExtension( 'Flow' );
 		$this->setBatchSize( 300 );
 	}
@@ -68,7 +68,7 @@ class FlowUpdateRevisionTypeId extends LoggedUpdateMaintenance {
 			} else {
 				throw new MWException( 'SQL error in maintenance script ' . __CLASS__ . '::' . __METHOD__ );
 			}
-			$dbFactory->waitForSlaves();
+			$dbFactory->waitForReplicas();
 		}
 
 		$dbw->dropTable( 'flow_header_revision', __METHOD__ );
@@ -104,5 +104,5 @@ class FlowUpdateRevisionTypeId extends LoggedUpdateMaintenance {
 	}
 }
 
-$maintClass = 'FlowUpdateRevisionTypeId';
+$maintClass = FlowUpdateRevisionTypeId::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

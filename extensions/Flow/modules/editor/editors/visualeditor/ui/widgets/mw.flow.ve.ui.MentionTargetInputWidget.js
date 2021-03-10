@@ -1,4 +1,4 @@
-( function ( $, mw, OO ) {
+( function () {
 	'use strict';
 
 	/**
@@ -14,7 +14,8 @@
 	 *   without duplicates.
 	 */
 	mw.flow.ve.ui.MentionTargetInputWidget = function FlowVeUiMentionTargetInputWidget( config ) {
-		mw.flow.ve.ui.MentionTargetInputWidget.parent.call(
+		// Parent constructor
+		mw.flow.ve.ui.MentionTargetInputWidget.super.call(
 			this,
 			$.extend(
 				{ placeholder: mw.msg( 'flow-ve-mention-placeholder' ) },
@@ -28,14 +29,15 @@
 		// Properties
 		this.username = null;
 		// Exclude anonymous users, since they do not receive pings.
-		this.loggedInTopicPosters = $.grep( config.topicPosters || [], function ( poster ) {
-			return !mw.util.isIPAddress( poster, false );
+		this.loggedInTopicPosters = ( config.topicPosters || [] ).filter( function ( poster ) {
+			return !mw.util.isIPAddress( poster );
 		} );
 		// TODO do this in a more sensible place in the future
 		mw.flow.ve.userCache.setAsExisting( this.loggedInTopicPosters );
 
 		// Initialization
 		this.$element.addClass( 'flow-ve-ui-mentionTargetInputWidget' );
+		this.$input.attr( 'aria-label', mw.msg( 'flow-ve-mention-placeholder' ) );
 		this.lookupMenu.$element.addClass( 'flow-ve-ui-mentionTargetInputWidget-menu' );
 	};
 
@@ -85,12 +87,13 @@
 	 */
 	mw.flow.ve.ui.MentionTargetInputWidget.prototype.getLookupRequest = function () {
 		var xhr,
+			widget = this,
 			initialUpperValue = this.value.charAt( 0 ).toUpperCase() + this.value.slice( 1 );
 
 		if ( this.value === '' ) {
 			return $.Deferred()
 				.resolve( this.loggedInTopicPosters.slice() )
-				.promise( { abort: $.noop } );
+				.promise( { abort: function () {} } );
 		}
 
 		xhr = new mw.Api().get( {
@@ -102,10 +105,14 @@
 		} );
 		return xhr
 			.then( function ( data ) {
-				return $.map( OO.getProp( data, 'query', 'allusers' ) || [], function ( user ) {
+				var allUsers = ( OO.getProp( data, 'query', 'allusers' ) || [] ).map( function ( user ) {
 					mw.flow.ve.userCache.setFromApiData( user );
 					return user.name;
 				} );
+				// Append prefix-matches from the topic list
+				return OO.unique( widget.loggedInTopicPosters.filter( function ( poster ) {
+					return poster.indexOf( initialUpperValue ) === 0;
+				} ).concat( allUsers ) );
 			} )
 			.promise( { abort: xhr.abort } );
 	};
@@ -121,7 +128,7 @@
 	 * @return {OO.ui.MenuOptionWidget[]} Menu items
 	 */
 	mw.flow.ve.ui.MentionTargetInputWidget.prototype.getLookupMenuOptionsFromData = function ( data ) {
-		return $.map( data, function ( username ) {
+		return data.map( function ( username ) {
 			return new OO.ui.MenuOptionWidget( {
 				data: username,
 				label: username
@@ -146,4 +153,4 @@
 			this.username = item.getData();
 		}
 	};
-}( jQuery, mediaWiki, OO ) );
+}() );

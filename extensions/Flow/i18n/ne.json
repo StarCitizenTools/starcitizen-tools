@@ -1,20 +1,22 @@
 {
 	"@metadata": {
 		"authors": [
-			"सरोज कुमार ढकाल",
 			"Ganesh Paudel",
-			"Nirjal stha",
-			"बिप्लब आनन्द",
 			"NehalDaveND",
+			"Nirajan pant",
+			"Nirjal stha",
+			"पर्वत सुबेदी",
+			"बिप्लब आनन्द",
 			"राम प्रसाद जोशी",
-			"Nirajan pant"
+			"सरोज कुमार ढकाल"
 		]
 	},
 	"notification-dynamic-actions-flow-topic-unwatch": "एइ विषय हेर्न बन्द गर",
-	"notification-dynamic-actions-flow-topic-unwatch-confirmation-description": "तपाईं [$2 this topic] जहिले पनि हेर्न सक्नुहुन्छ।",
+	"notification-dynamic-actions-flow-topic-unwatch-confirmation-description": "{{GENDER:$3|तपाईँ}} [$2 this topic] जहिले पनि हेर्न सक्नुहुन्छ।",
 	"flow-board-header": "छलफलको बारेमा",
 	"flow-board-collapse-description": "वर्णन लुकाउने",
 	"flow-board-expand-description": "वर्णन देखाउने",
+	"flow-edit-header-link": "विवरण सम्पादन गर्नुहोस्",
 	"flow-topic-moderated-reason-prefix": "कारण:",
 	"flow-post-actions": "कार्यहरू",
 	"flow-topic-actions": "कार्यहरू",
@@ -33,6 +35,7 @@
 	"flow-post-action-edit-post": "सम्पादन",
 	"flow-post-action-edit-post-submit": "परिवर्तन सङ्ग्रह गर्नुहोस्",
 	"flow-post-action-restore-post": "पूर्वावस्थामा ल्याउनुहोस्",
+	"flow-topic-action-watchlist": "अवलोकनसूची",
 	"flow-topic-action-history": "इतिहास",
 	"flow-topic-action-undo-moderation": "पूर्ववत गर्ने",
 	"flow-error-allowcreation-already-exists": "पृष्ठ पहिला देखि नै उपलब्ध छ, तर पहिला आवश्यक थिएन",
@@ -50,8 +53,10 @@
 	"flow-load-more": "थप पढ्ने",
 	"flow-special-uuid": "UUID",
 	"flow-special-enableflow-invalid-title": "अबैध पृष्ठ शिर्षक राखिएको थियो",
+	"flow-edited-by": "$1द्वारा सम्पादित",
 	"flow-undo": "पूर्ववत गर्ने",
 	"flow-undo-your-text": "तपाईंको पाठ",
+	"flow-undo-edit-header": "विवरण सम्पादन गरिँदै",
 	"flow-ve-mention-inspector-remove-label": "हटाउने",
 	"flow-ve-mention-placeholder": "प्रयोगकर्ता नाम"
 }

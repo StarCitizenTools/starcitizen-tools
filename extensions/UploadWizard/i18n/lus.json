@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Envlh",
 			"RMizo",
-			"Shirayuki",
-			"Envlh"
+			"Shirayuki"
 		]
 	},
 	"uploadwizard": "Hlànkàina kháwlrelh",
@@ -97,7 +97,6 @@
 	"mwe-upwiz-next": "Dawt",
 	"mwe-upwiz-next-file": "Chhunzawmna",
 	"mwe-upwiz-next-deeds": "Dawt",
-	"mwe-upwiz-next-details": "Dawt",
 	"mwe-upwiz-home": "Wiki phêkpuia kalna",
 	"mwe-upwiz-upload-another": "Taksa hlànkài belhna",
 	"mwe-upwiz-prevent-close": "{{PLURAL:$1|Hë taksa|Hêng taksate}} hlànkài leh tlángzarh i la zo rih lo.",
@@ -145,7 +144,7 @@
 	"mwe-upwiz-license-own-pd": "Creative Commons Zero phalphung hmangin khuahkhirhna zawng zawng hlih vek a ni (vantlang thil ang a ni)",
 	"mwe-upwiz-license-pd-old-100": "Kum 100 aia tam liam tâah a siamtu a boral tawh.",
 	"mwe-upwiz-license-pd-old": "A siamtu kum 70 aia tam kaltâah khan a thi tawh",
-	"mwe-upwiz-license-pd-us": "Kum 1923 hmaah United States-ah chhuah hmasak ber a ni",
+	"mwe-upwiz-license-pd-us": "Kum 1925 hmaah United States-ah chhuah hmasak ber a ni",
 	"mwe-upwiz-license-pd-usgov": "US rorèl khawlpui kutchhuak",
 	"mwe-upwiz-license-pd-usgov-nasa": "NASA kutchhuak",
 	"mwe-upwiz-license-pd-usgov-military-navy": "US tui sipaite kutchhuak",
@@ -188,6 +187,5 @@
 	"mwe-upwiz-prefs-def-license-def": "Thlansâ hmang ṭhuai rawh.",
 	"mwe-upwiz-prefs-license-own": "Mahni kutchhuak - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "Midang kutchhuak - $1",
-	"mwe-upwiz-prefs-chunked": "Hlánkàina kháwlrelha taksa hlànkài $1 aia lian ṭhensawm.",
 	"mwe-upwiz-prefs-skiptutorial": "Phalphung inzirtirna kalkânna"
 }

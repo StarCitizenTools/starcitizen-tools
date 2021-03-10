@@ -1,34 +1,46 @@
 <?php
 
+use MediaWiki\Revision\RevisionRecord;
+
 /**
  * Utility class that formats a notification in the format specified
  */
 class EchoDataOutputFormatter {
 
 	/**
-	 * @var array type => class
+	 * @var string[] type => class
 	 */
 	protected static $formatters = [
-		'flyout' => 'EchoFlyoutFormatter',
-		'model' => 'EchoModelFormatter',
-		'special' => 'SpecialNotificationsFormatter',
-		'html' => 'SpecialNotificationsFormatter',
+		'flyout' => EchoFlyoutFormatter::class,
+		'model' => EchoModelFormatter::class,
+		'special' => SpecialNotificationsFormatter::class,
+		'html' => SpecialNotificationsFormatter::class,
 	];
 
 	/**
 	 * Format a notification for a user in the format specified
 	 *
+	 * This method returns an array of data, some of it html
+	 * escaped, some of it not. This confuses phan-taint-check,
+	 * so mark it as safe for html and safe to be escaped again.
+	 * @return-taint onlysafefor_htmlnoent
+	 *
 	 * @param EchoNotification $notification
-	 * @param string|bool $format output format, false to not format any notifications
+	 * @param string|false $format Output format, false to not format any notifications
 	 * @param User $user the target user viewing the notification
 	 * @param Language $lang Language to format the notification in
-	 * @return array|bool false if it could not be formatted
+	 * @return array|false False if it could not be formatted
 	 */
-	public static function formatOutput( EchoNotification $notification, $format = false, User $user, Language $lang ) {
+	public static function formatOutput(
+		EchoNotification $notification,
+		$format,
+		User $user,
+		Language $lang
+	) {
 		$event = $notification->getEvent();
 		$timestamp = $notification->getTimestamp();
 		$utcTimestampIso8601 = wfTimestamp( TS_ISO_8601, $timestamp );
-		$utcTimestampUnix = wfTimestamp( TS_UNIX, $timestamp );
+		$utcTimestampUnix = (int)wfTimestamp( TS_UNIX, $timestamp );
 		$utcTimestampMW = wfTimestamp( TS_MW, $timestamp );
 		$bundledIds = null;
 
@@ -47,7 +59,7 @@ class EchoDataOutputFormatter {
 		$timestampMw = self::getUserLocalTime( $user, $timestamp );
 
 		// Start creating date section header
-		$now = wfTimestamp();
+		$now = (int)wfTimestamp();
 		$dateFormat = substr( $timestampMw, 0, 8 );
 		$timeDiff = $now - $utcTimestampUnix;
 		// Most notifications would be more than two days ago, check this
@@ -70,6 +82,7 @@ class EchoDataOutputFormatter {
 			'id' => $event->getId(),
 			'type' => $event->getType(),
 			'category' => $event->getCategory(),
+			'section' => $event->getSection(),
 			'timestamp' => [
 				// ISO 8601 is supposed to be the *only* format used for
 				// date output, but back-compat...
@@ -96,7 +109,7 @@ class EchoDataOutputFormatter {
 		if ( $title ) {
 			$output['title'] = [
 				'full' => $title->getPrefixedText(),
-				'namespace' => $title->getNSText(),
+				'namespace' => $title->getNsText(),
 				'namespace-key' => $title->getNamespace(),
 				'text' => $title->getText(),
 			];
@@ -104,7 +117,7 @@ class EchoDataOutputFormatter {
 
 		$agent = $event->getAgent();
 		if ( $agent ) {
-			if ( $event->userCan( Revision::DELETED_USER, $user ) ) {
+			if ( $event->userCan( RevisionRecord::DELETED_USER, $user ) ) {
 				$output['agent'] = [
 					'id' => $agent->getId(),
 					'name' => $agent->getName(),
@@ -141,15 +154,20 @@ class EchoDataOutputFormatter {
 			}
 			$output['*'] = $formatted;
 
-			if ( $notification->getBundledNotifications() && self::isBundleExpandable( $event->getType() ) ) {
-				$output['bundledNotifications'] = array_values( array_filter( array_map( function ( EchoNotification $notification ) use ( $format, $user, $lang ) {
-					// remove nested notifications to
-					// - ensure they are formatted as single notifications (not bundled)
-					// - prevent further re-entrance on the current notification
-					$notification->setBundledNotifications( [] );
-					$notification->getEvent()->setBundledEvents( [] );
-					return self::formatOutput( $notification, $format, $user, $lang );
-				}, array_merge( [ $notification ], $notification->getBundledNotifications() ) ) ) );
+			if ( $notification->getBundledNotifications() &&
+				self::isBundleExpandable( $event->getType() )
+			) {
+				$output['bundledNotifications'] = array_values( array_filter( array_map(
+					function ( EchoNotification $notification ) use ( $format, $user, $lang ) {
+						// remove nested notifications to
+						// - ensure they are formatted as single notifications (not bundled)
+						// - prevent further re-entrance on the current notification
+						$notification->setBundledNotifications( [] );
+						$notification->getEvent()->setBundledEvents( [] );
+						return self::formatOutput( $notification, $format, $user, $lang );
+					},
+					array_merge( [ $notification ], $notification->getBundledNotifications() )
+				) ) );
 			}
 		}
 
@@ -161,7 +179,7 @@ class EchoDataOutputFormatter {
 	 * @param User $user
 	 * @param string $format
 	 * @param Language $lang
-	 * @return string|bool false if it could not be formatted
+	 * @return string[]|string|false False if it could not be formatted
 	 */
 	protected static function formatNotification( EchoEvent $event, User $user, $format, $lang ) {
 		if ( isset( self::$formatters[$format] ) ) {
@@ -169,9 +187,9 @@ class EchoDataOutputFormatter {
 			/** @var EchoEventFormatter $formatter */
 			$formatter = new $class( $user, $lang );
 			return $formatter->format( $event );
-		} else {
-			return false;
 		}
+
+		return false;
 	}
 
 	/**
@@ -192,7 +210,7 @@ class EchoDataOutputFormatter {
 	 * Helper function for converting UTC timezone to a user's timezone
 	 *
 	 * @param User $user
-	 * @param string $ts
+	 * @param string|int $ts
 	 * @param int $format output format
 	 *
 	 * @return string
@@ -210,7 +228,8 @@ class EchoDataOutputFormatter {
 	 */
 	public static function isBundleExpandable( $type ) {
 		global $wgEchoNotifications;
-		return isset( $wgEchoNotifications[$type]['bundle']['expandable'] ) && $wgEchoNotifications[$type]['bundle']['expandable'];
+		return isset( $wgEchoNotifications[$type]['bundle']['expandable'] )
+			&& $wgEchoNotifications[$type]['bundle']['expandable'];
 	}
 
 }

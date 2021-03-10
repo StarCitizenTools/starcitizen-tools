@@ -10,12 +10,14 @@ use Flow\Exception\FlowException;
 use Flow\Model\AbstractRevision;
 use Flow\Model\PostRevision;
 use Flow\Model\TopicListEntry;
-use Flow\Model\Workflow;
 use Flow\Model\UserTuple;
 use Flow\Model\UUID;
+use Flow\Model\Workflow;
 use Flow\OccupationController;
+use MediaWiki\MediaWikiServices;
 use SplQueue;
 use User;
+use WikiPage;
 
 /**
  * @group Flow
@@ -44,7 +46,7 @@ class PostRevisionTestCase extends FlowTestCase {
 	 */
 	protected $workflows = [];
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 
 		// Revisions must be blanked here otherwise phpunit run with --repeat will remember
@@ -55,7 +57,7 @@ class PostRevisionTestCase extends FlowTestCase {
 	/**
 	 * Reset the container and with it any state
 	 */
-	protected function tearDown() {
+	protected function tearDown() : void {
 		parent::tearDown();
 
 		foreach ( $this->revisions as $revision ) {
@@ -100,7 +102,7 @@ class PostRevisionTestCase extends FlowTestCase {
 	 * With no arguments tossed in, default data (resembling a newly-created
 	 * topic title) will be returned.
 	 *
-	 * @param array[optional] $row DB row data (only specify override columns)
+	 * @param array $row DB row data (only specify override columns)
 	 * @return array
 	 */
 	protected function generateRow( array $row = [] ) {
@@ -181,9 +183,11 @@ class PostRevisionTestCase extends FlowTestCase {
 	 * With no arguments tossed in, a default revision (resembling a newly-
 	 * created topic title) will be returned.
 	 *
-	 * @param array[optional] $row DB row data (only specify override columns)
-	 * @param array[optional] $children Array of child PostRevision objects
-	 * @param int[optional] $depth Depth of the PostRevision object
+	 * @note This must not be called from a data provider, since it accesses the database!
+	 *
+	 * @param array $row DB row data (only specify override columns)
+	 * @param PostRevision[] $children Array of child PostRevision objects
+	 * @param int $depth Depth of the PostRevision object
 	 * @return PostRevision
 	 */
 	protected function generateObject( array $row = [], $children = [], $depth = 0 ) {
@@ -232,9 +236,13 @@ class PostRevisionTestCase extends FlowTestCase {
 			/** @var OccupationController $occupationController */
 			$occupationController = Container::get( 'occupation_controller' );
 			// make sure user has rights to create board
-			$user->mRights = array_merge( $user->getRights(), [ 'flow-create-board' ] );
+			$user->mRights = array_merge( MediaWikiServices::getInstance()->getPermissionManager()
+				->getUserPermissions( $user ), [ 'flow-create-board' ] );
 			$occupationController->safeAllowCreation( $title, $user );
-			$occupationController->ensureFlowRevision( new \Article( $title ), $boardWorkflow );
+			$occupationController->ensureFlowRevision(
+				WikiPage::factory( $title ),
+				$boardWorkflow
+			);
 
 			$topicListEntry = TopicListEntry::create( $boardWorkflow, $topicWorkflow );
 

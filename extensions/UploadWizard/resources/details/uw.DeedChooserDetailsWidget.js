@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * A deed chooser field in UploadWizard's "Details" step form.
@@ -13,13 +13,19 @@
 	};
 	OO.inheritClass( uw.DeedChooserDetailsWidget, uw.DetailsWidget );
 
+	uw.DeedChooserDetailsWidget.prototype.unload = function () {
+		if ( this.deedChooser.deed ) {
+			this.deedChooser.deed.unload();
+		}
+	};
+
 	/**
 	 * Toggles whether we use the 'macro' deed or our own
 	 *
 	 * @param {mw.UploadWizardUpload} upload
 	 */
 	uw.DeedChooserDetailsWidget.prototype.useCustomDeedChooser = function ( upload ) {
-		var deedDiv;
+		var $deedDiv;
 
 		// Defining own deedChooser for uploads coming from external service
 		if ( upload.file.fromURL ) {
@@ -41,7 +47,7 @@
 
 			if ( upload.file.license ) {
 				// XXX need to add code in the remaining functions
-				this.$element.append( upload.file.licenseMessage );
+				this.$element.append( document.createTextNode( upload.file.licenseMessage ) );
 				this.deedChooser.deed = new uw.deed.Custom( mw.UploadWizard.config, upload );
 			} else {
 				this.deedChooser.deed = new uw.deed.External(
@@ -50,14 +56,14 @@
 					{ type: 'or', licenses: [ 'custom' ], special: 'custom' }
 				);
 				this.$element.append( this.deedChooser.deed.licenseInputField.$element );
-				this.$element.append( upload.file.licenseMessage );
+				this.$element.append( document.createTextNode( upload.file.licenseMessage ) );
 			}
 		} else {
-			deedDiv = $( '<div class="mwe-upwiz-custom-deed" />' );
-			this.$element.append( deedDiv );
+			$deedDiv = $( '<div>' ).addClass( 'mwe-upwiz-custom-deed' );
+			this.$element.append( $deedDiv );
 			this.deedChooser = upload.deedChooser = new mw.UploadWizardDeedChooser(
 				mw.UploadWizard.config,
-				deedDiv,
+				$deedDiv,
 				mw.UploadWizard.getLicensingDeeds( [ upload ], mw.UploadWizard.config ),
 				[ upload ] );
 			this.deedChooser.onLayoutReady();
@@ -97,4 +103,4 @@
 		}
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

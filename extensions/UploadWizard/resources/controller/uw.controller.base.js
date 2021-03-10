@@ -18,4 +18,4 @@
 ( function ( uw ) {
 	// create UploadWizard controller namespace
 	uw.controller = {};
-}( mediaWiki.uploadWizard ) );
+}( mw.uploadWizard ) );

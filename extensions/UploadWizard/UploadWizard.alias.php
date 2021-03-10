@@ -193,6 +193,12 @@ $specialPageAliases['pa'] = [
 	'UploadWizard' => [ 'ਅੱਪਲੋਡ_ਵਿਜ਼ਾਰਡ' ],
 ];
 
+/** Polish (polski) */
+$specialPageAliases['pl'] = [
+	'Campaigns' => [ 'Inicjatywy' ],
+	'UploadWizard' => [ 'Kreator_przesyłania' ],
+];
+
 /** Russian (русский) */
 $specialPageAliases['ru'] = [
 	'UploadWizard' => [ 'Мастер_загрузки' ],
@@ -206,6 +212,18 @@ $specialPageAliases['scn'] = [
 /** Sinhala (සිංහල) */
 $specialPageAliases['si'] = [
 	'UploadWizard' => [ 'උඩුගත_කිරීමේ_මාය_අඳුන' ],
+];
+
+/** Serbian Cyrillic (српски (ћирилица)) */
+$specialPageAliases['sr-ec'] = [
+	'Campaigns' => [ 'Кампање' ],
+	'UploadWizard' => [ 'Чаробњак_за_отпремање' ],
+];
+
+/** Serbian Latin (srpski (latinica)) */
+$specialPageAliases['sr-el'] = [
+	'Campaigns' => [ 'Kampanje' ],
+	'UploadWizard' => [ 'Čarobnjak_za_otpremanje' ],
 ];
 
 /** Swedish (svenska) */

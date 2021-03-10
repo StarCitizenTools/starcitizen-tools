@@ -3,6 +3,9 @@
 use Flow\Container;
 use Flow\DbFactory;
 use Flow\Import\ArchiveNameHelper;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Storage\RevisionRecord;
 
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
@@ -32,10 +35,12 @@ class FlowRestoreLQT extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 
-		$this->mDescription = 'Restores LQT boards after a Flow conversion (revert LQT conversion edits & move LQT boards back)';
+		$this->addDescription( 'Restores LQT boards after a Flow conversion (revert LQT conversion ' .
+			'edits & move LQT boards back)' );
 
 		$this->addOption( 'dryrun', 'Simulate script run, without making actual changes' );
-		$this->addOption( 'overwrite-flow', 'Removes the Flow board entirely, restoring LQT to its original location' );
+		$this->addOption( 'overwrite-flow', 'Removes the Flow board entirely, restoring LQT to ' .
+			'its original location' );
 
 		$this->setBatchSize( 1 );
 
@@ -43,7 +48,7 @@ class FlowRestoreLQT extends Maintenance {
 	}
 
 	public function execute() {
-		$this->talkpageManagerUser = FlowHooks::getOccupationController()->getTalkpageManager();
+		$this->talkpageManagerUser = Flow\Hooks::getOccupationController()->getTalkpageManager();
 		$this->dbFactory = Container::get( 'db.factory' );
 		$this->dryRun = $this->getOption( 'dryrun', false );
 		$this->overwrite = $this->getOption( 'overwrite-flow', false );
@@ -71,6 +76,8 @@ class FlowRestoreLQT extends Maintenance {
 		$logWhere = ActorMigration::newMigration()
 			->getWhere( $dbr, 'log_user', $this->talkpageManagerUser );
 
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+
 		foreach ( $revWhere['orconds'] as $revCond ) {
 			foreach ( $logWhere['orconds'] as $logCond ) {
 				$startId = 0;
@@ -83,7 +90,8 @@ class FlowRestoreLQT extends Maintenance {
 						// page_namespace & page_title will be the current location
 						// rev_id is the first Flow talk page manager edit id
 						// log_id is the log entry for when importer moved LQT page
-						[ 'log_namespace', 'log_title', 'page_id', 'page_namespace', 'page_title', 'rev_id' => 'MIN(rev_id)', 'log_id' ],
+						[ 'log_namespace', 'log_title', 'page_id', 'page_namespace', 'page_title',
+							'rev_id' => 'MIN(rev_id)', 'log_id' ],
 						[
 							$logCond,
 							'log_type' => 'move',
@@ -120,7 +128,7 @@ class FlowRestoreLQT extends Maintenance {
 						$startId = $row->page_id;
 					}
 
-					wfWaitForSlaves();
+					$lbFactory->waitForReplication();
 				} while ( $rows->numRows() >= $this->mBatchSize );
 			}
 		}
@@ -136,6 +144,8 @@ class FlowRestoreLQT extends Maintenance {
 
 		$revWhere = ActorMigration::newMigration()
 			->getWhere( $dbr, 'rev_user', $this->talkpageManagerUser );
+
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 
 		foreach ( $revWhere['orconds'] as $revCond ) {
 			$startId = 0;
@@ -170,7 +180,7 @@ class FlowRestoreLQT extends Maintenance {
 					$startId = $row->rev_page;
 				}
 
-				wfWaitForSlaves();
+				$lbFactory->waitForReplication();
 			} while ( $rows->numRows() >= $this->mBatchSize );
 		}
 	}
@@ -224,7 +234,8 @@ class FlowRestoreLQT extends Maintenance {
 				);
 
 				if ( $count > 0 ) {
-					$this->output( "Ensuring LQT board '{$lqt->getPrefixedDBkey()}' is recognized as archive of Flow board '{$flow->getPrefixedDBkey()}'.\n" );
+					$this->output( "Ensuring LQT board '{$lqt->getPrefixedDBkey()}' is " .
+						"recognized as archive of Flow board '{$flow->getPrefixedDBkey()}'.\n" );
 
 					// 1: move Flow board out of the way so we can restore LQT to
 					// its original location
@@ -241,11 +252,22 @@ class FlowRestoreLQT extends Maintenance {
 					$this->movePage( $archive, $flow, '/* Restore Flow board to correct location */' );
 				}
 			} else {
-				$this->output( "Deleting '{$flow->getPrefixedDBkey()}' & moving '{$lqt->getPrefixedDBkey()}' there.\n" );
+				$this->output( "Deleting '{$flow->getPrefixedDBkey()}' & moving " .
+					"'{$lqt->getPrefixedDBkey()}' there.\n" );
 
 				if ( !$this->dryRun ) {
 					$page = WikiPage::factory( $flow );
-					$page->doDeleteArticleReal( '/* Make place to restore LQT board */', false, null, null, $error, $this->talkpageManagerUser );
+					$page->doDeleteArticleReal(
+						'/* Make place to restore LQT board */',
+						$this->talkpageManagerUser,
+						false,
+						null,
+						$error,
+						null,
+						[],
+						'delete',
+						true
+					);
 				}
 
 				$this->movePage( $lqt, $flow, '/* Restore LQT board to original location */' );
@@ -285,24 +307,25 @@ class FlowRestoreLQT extends Maintenance {
 		global $wgLang;
 
 		$page = WikiPage::newFromID( $pageId );
-		$revisionId = $page->getTitle()->getPreviousRevisionID( $nextRevisionId );
-		$revision = Revision::newFromPageId( $pageId, $revisionId );
+		$revisionLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+		$nextRevision = $revisionLookup->getRevisionById( $nextRevisionId );
+		$revision = $revisionLookup->getPreviousRevision( $nextRevision );
 
-		if ( $page->getContent()->equals( $revision->getContent() ) ) {
+		if ( $page->getContent()->equals( $revision->getContent( SlotRecord::MAIN ) ) ) {
 			// has correct content already (probably a rerun of this script)
 			return Status::newGood();
 		}
 
-		$content = $revision->getContent()->serialize();
-		$content = $wgLang->truncate( $content, 150 );
+		$content = $revision->getContent( SlotRecord::MAIN )->serialize();
+		$content = $wgLang->truncateForVisual( $content, 150 );
 		$content = str_replace( "\n", '\n', $content );
-		$this->output( "Restoring revision {$revisionId} for LQT page {$pageId}: {$content}\n" );
+		$this->output( "Restoring revision {$revision->getId()} for LQT page {$pageId}: {$content}\n" );
 
 		if ( $this->dryRun ) {
 			return Status::newGood();
 		} else {
 			return $page->doEditContent(
-				$revision->getContent( Revision::RAW ),
+				$revision->getContent( SlotRecord::MAIN, RevisionRecord::RAW ),
 				'/* Restore LQT topic content */',
 				EDIT_UPDATE | EDIT_MINOR | EDIT_FORCE_BOT,
 				$revision->getId(),
@@ -312,5 +335,5 @@ class FlowRestoreLQT extends Maintenance {
 	}
 }
 
-$maintClass = 'FlowRestoreLQT';
+$maintClass = FlowRestoreLQT::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

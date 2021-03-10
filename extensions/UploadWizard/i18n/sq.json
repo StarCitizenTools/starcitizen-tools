@@ -1,12 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Envlh",
 			"FatosMorina",
-			"Olsi",
 			"Kosovastar",
-			"Matma Rex",
 			"Liridon",
-			"Envlh"
+			"Matma Rex",
+			"Olsi"
 		]
 	},
 	"uploadwizard": "Eksperti për ngarkim",
@@ -111,7 +111,6 @@
 	"mwe-upwiz-next": "Më pas",
 	"mwe-upwiz-next-file": "Vazhdo",
 	"mwe-upwiz-next-deeds": "Më pas",
-	"mwe-upwiz-next-details": "Më pas",
 	"mwe-upwiz-home": "Shko te faqja kryesore e wikit",
 	"mwe-upwiz-upload-another": "Ngarko më shumë skeda",
 	"mwe-upwiz-prevent-close": "Ju nuk përdunduar së ngarkuari dhe publikuari {{PLURAL:$1|këtë skedë|këto skeda}} akoma.",
@@ -176,7 +175,7 @@
 	"mwe-upwiz-license-own-pd": "Të gjitha të drejtat janë të lëshuara me licencën Creative Commons Zero (si domeni publik)",
 	"mwe-upwiz-license-pd-old-100": "Autori ka më shumë se 100 vjet që ka vdekur",
 	"mwe-upwiz-license-pd-old": "Autori ka më shumë se 70 vjet që ka vdekur",
-	"mwe-upwiz-license-pd-us": "Fillimisht publikuar në Shtetet e Bashkuara përpara 1923",
+	"mwe-upwiz-license-pd-us": "Fillimisht publikuar në Shtetet e Bashkuara përpara 1925",
 	"mwe-upwiz-license-pd-usgov": "Punë origjinale e Qeverisë Amerikane",
 	"mwe-upwiz-license-pd-usgov-nasa": "Punë origjinale e NASA-s",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Punë origjinale u Ushtrisë Amerikane",

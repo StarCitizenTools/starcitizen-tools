@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Arystanbek",
 			"Amankel'dy",
+			"Arystanbek",
 			"Macofe"
 		]
 	},
@@ -49,7 +49,6 @@
 	"mwe-upwiz-remove-upload": "Бұл файлды жүктелген файлдар тізімінен аластау",
 	"mwe-upwiz-remove-description": "Бұл сипаттаманы аластау",
 	"mwe-upwiz-upload": "Жүктеу",
-	"mwe-upwiz-file-upload-notcapable": "Өкінішке орай броузеріңіз файлдарды жүктеуге қабілетті емес. Басқа броузермен қайта байқап көріңіз.",
 	"mwe-upwiz-file-all-ok": "Барлығы сәтті жүктелді!",
 	"mwe-upwiz-file-some-failed": "Кейбір жүктеулер сәтсіздікке ұшырады.",
 	"mwe-upwiz-file-retry": "Орындалмаған жүктеулерді қайталау",
@@ -102,7 +101,6 @@
 	"mwe-upwiz-next": "Келесі",
 	"mwe-upwiz-next-file": "Жалғастыру",
 	"mwe-upwiz-next-deeds": "Келесі",
-	"mwe-upwiz-next-details": "Келесі",
 	"mwe-upwiz-home": "Уикидің басты бетіне өту",
 	"mwe-upwiz-upload-another": "Басқа да файлдарды жүктеу",
 	"mwe-upwiz-prevent-close": "Бірақ {{PLURAL:$1|бұл файлды|бұл файлдарды}} жүктеуді және жариялауды аяқтамадыңыз.",
@@ -158,7 +156,7 @@
 	"mwe-upwiz-license-fal": "Ашық көркемөнер лицензиясы",
 	"mwe-upwiz-license-pd-old-100": "Авторы 100 жылдан бұрын қайтыс болған",
 	"mwe-upwiz-license-pd-old": "Авторы 70 жылдан бұрын қайтыс болған",
-	"mwe-upwiz-license-pd-us": "1923 жылдан бұрын АҚШ-та басылған",
+	"mwe-upwiz-license-pd-us": "1925 жылдан бұрын АҚШ-та басылған",
 	"mwe-upwiz-license-pd-usgov": "АҚШ федерал үкіметінің бастапқы жұмысы",
 	"mwe-upwiz-license-pd-usgov-nasa": "NASA-ның бастапқы жұмысы",
 	"mwe-upwiz-license-pd-ineligible": "Авторлық құқықпен қорғау үшін тым қарапайым",

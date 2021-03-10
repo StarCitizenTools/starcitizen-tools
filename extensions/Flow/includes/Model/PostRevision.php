@@ -11,7 +11,7 @@ use Title;
 use User;
 
 class PostRevision extends AbstractRevision {
-	const MAX_TOPIC_LENGTH = 260;
+	public const MAX_TOPIC_LENGTH = 260;
 
 	/**
 	 * @var UUID
@@ -116,6 +116,7 @@ class PostRevision extends AbstractRevision {
 	 * @param PostRevision|null $obj
 	 * @return PostRevision
 	 * @throws DataModelException
+	 * @suppress PhanUndeclaredProperty Types not inferred
 	 */
 	public static function fromStorageRow( array $row, $obj = null ) {
 		/** @var $obj PostRevision */
@@ -145,6 +146,7 @@ class PostRevision extends AbstractRevision {
 	/**
 	 * @param PostRevision $rev
 	 * @return string[]
+	 * @suppress PhanParamSignatureMismatch It doesn't match
 	 */
 	public static function toStorageRow( $rev ) {
 		return parent::toStorageRow( $rev ) + [
@@ -163,7 +165,7 @@ class PostRevision extends AbstractRevision {
 	 * @param User $user
 	 * @param string $content
 	 * @param string $format wikitext|html
-	 * @param string[optional] $changeType
+	 * @param string $changeType
 	 * @return PostRevision
 	 */
 	public function reply( Workflow $workflow, User $user, $content, $format, $changeType = 'reply' ) {

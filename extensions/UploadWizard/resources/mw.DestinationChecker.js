@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 
 	mw.DestinationChecker = {
 
@@ -124,8 +124,8 @@
 					if ( data.query.pages[ -1 ] && !data.query.pages[ -1 ].imageinfo ) {
 						protection = data.query.pages[ -1 ].protection;
 						if ( protection && protection.length > 0 ) {
-							$.each( protection, function ( i, val ) {
-								if ( $.inArray( val.level, mw.config.get( 'wgUserGroups' ) ) === -1 ) {
+							protection.forEach( function ( val ) {
+								if ( mw.config.get( 'wgUserGroups' ).indexOf( val.level ) === -1 ) {
 									result = {
 										isUnique: true,
 										isProtected: true
@@ -138,7 +138,7 @@
 						}
 					} else {
 						for ( pageId in data.query.pages ) {
-							if ( !data.query.pages.hasOwnProperty( pageId ) ) {
+							if ( !Object.prototype.hasOwnProperty.call( data.query.pages, pageId ) ) {
 								continue;
 							}
 							ntitle = data.query.pages[ pageId ].title;
@@ -235,4 +235,4 @@
 
 	};
 
-}( mediaWiki, jQuery ) );
+}() );

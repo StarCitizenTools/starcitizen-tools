@@ -5,8 +5,13 @@ namespace Flow\Tests\Api;
 use Sanitizer;
 
 /**
+ * @covers \Flow\Api\ApiFlowBase
+ * @covers \Flow\Api\ApiFlowBasePost
+ * @covers \Flow\Api\ApiFlowReply
+ *
  * @group Flow
  * @group medium
+ * @group Database
  */
 class ApiFlowReplyTest extends ApiTestCase {
 	public function testTopLevelReply() {

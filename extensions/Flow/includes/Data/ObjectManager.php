@@ -59,7 +59,7 @@ use SplObjectStorage;
  * same operation as their namesake but with fewer network operations when
  * dealing with multiple objects of the same type.
  *
- *  @todo Information about Indexes and LifecycleHandlers
+ * @todo Information about Indexes and LifecycleHandlers
  */
 class ObjectManager extends ObjectLocator {
 	/**
@@ -303,7 +303,7 @@ class ObjectManager extends ObjectLocator {
 	/**
 	 * @inheritDoc
 	 */
-	protected function load( $row ) {
+	protected function load( array $row ) {
 		$object = parent::load( $row );
 		$this->loaded[$object] = $row;
 		return $object;
@@ -378,7 +378,7 @@ class ObjectManager extends ObjectLocator {
 	 * all keys are set.
 	 *
 	 * @param array $row
-	 * @param array $keys
+	 * @param string[] $keys
 	 * @return array|null
 	 */
 	public static function splitFromRow( array $row, array $keys ) {

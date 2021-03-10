@@ -15,10 +15,8 @@
 	 * @param {Object} [config] Configuration options
 	 */
 	mw.flow.dm.Board = function mwFlowDmBoard( data, config ) {
-		config = config || {};
-
 		// Parent constructor
-		mw.flow.dm.Board.parent.call( this, config );
+		mw.flow.dm.Board.super.call( this, config );
 
 		// Mixin constructor
 		mw.flow.dm.List.call( this );
@@ -84,13 +82,14 @@
 				topicCount: this.getItemCount(),
 				description: this.getDescription() && this.getDescription().getHashObject()
 			},
-			// Parent
-			mw.flow.dm.Board.parent.prototype.getHashObject.call( this )
+			// Parent method
+			mw.flow.dm.Board.super.prototype.getHashObject.apply( this, arguments )
 		);
 	};
 
 	/**
 	 * Add raw categories from the initial board api response
+	 *
 	 * @param {Object} categories Categories object
 	 */
 	mw.flow.dm.Board.prototype.setCategoriesFromObject = function ( categories ) {
@@ -142,6 +141,7 @@
 
 	/**
 	 * Check whether the board has any categories
+	 *
 	 * @return {boolean} Board has categories
 	 */
 	mw.flow.dm.Board.prototype.hasCategories = function () {

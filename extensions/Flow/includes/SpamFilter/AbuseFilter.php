@@ -2,9 +2,10 @@
 
 namespace Flow\SpamFilter;
 
-use Flow\Model\AbstractRevision;
 use ExtensionRegistry;
+use Flow\Model\AbstractRevision;
 use IContextSource;
+use MediaWiki\Extension\AbuseFilter\VariableGenerator\VariableGenerator;
 use Status;
 use Title;
 
@@ -63,13 +64,20 @@ class AbuseFilter implements SpamFilter {
 	 * @param Title $ownerTitle
 	 * @return Status
 	 */
-	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title, Title $ownerTitle ) {
-		$vars = \AbuseFilter::getEditVars( $title );
-		$vars->addHolders(
-			\AbuseFilter::generateUserVars( $context->getUser() ),
-			\AbuseFilter::generateTitleVars( $title, 'ARTICLE' ),
-			\AbuseFilter::generateTitleVars( $ownerTitle, 'BOARD' )
-		);
+	public function validate(
+		IContextSource $context,
+		AbstractRevision $newRevision,
+		?AbstractRevision $oldRevision,
+		Title $title,
+		Title $ownerTitle
+	) {
+		$gen = new VariableGenerator( new \AbuseFilterVariableHolder );
+		$vars = $gen
+			->addEditVars( $title )
+			->addUserVars( $context->getUser() )
+			->addTitleVars( $title, 'page' )
+			->addTitleVars( $ownerTitle, 'board' )
+			->getVariableHolder();
 
 		$vars->setVar( 'ACTION', $newRevision->getChangeType() );
 
@@ -90,7 +98,7 @@ class AbuseFilter implements SpamFilter {
 		$vars->setLazyLoadVar( 'old_wikitext', 'FlowRevisionContent', [ 'revision' => $oldRevision ] );
 		$vars->setLazyLoadVar( 'old_size', 'length', [ 'length-var' => 'old_wikitext' ] );
 
-		return \AbuseFilter::filterAction( $vars, $title, $this->group );
+		return \AbuseFilter::filterAction( $vars, $title, $this->group, $context->getUser() );
 	}
 
 	/**
@@ -111,12 +119,10 @@ class AbuseFilter implements SpamFilter {
 	public function lazyLoadMethods() {
 		return [
 			/**
-			 * @param string $method: Method to generate the variable
 			 * @param \AbuseFilterVariableHolder $vars
 			 * @param array $parameters Parameters with data to compute the value
-			 * @param mixed &$result Result of the computation
 			 */
-			'FlowRevisionContent' => function ( \AbuseFilterVariableHolder $vars, $parameters ) {
+			'FlowRevisionContent' => function ( \AbuseFilterVariableHolder $vars, array $parameters ) {
 				if ( !isset( $parameters['revision'] ) ) {
 					return '';
 				}

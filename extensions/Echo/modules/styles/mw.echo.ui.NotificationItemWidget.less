@@ -1,6 +1,6 @@
-@import 'mediawiki.mixins';
-@import '../echo.variables';
-@import '../echo.mixins';
+@import 'mediawiki.mixins.less';
+@import '../echo.variables.less';
+@import '../echo.mixins.less';
 
 .mw-echo-ui-notificationItemWidget {
 	background-color: @notification-item-background-read;
@@ -8,7 +8,6 @@
 	white-space: normal;
 	padding: 0.8em 1em 0.5em 1em;
 	.box-sizing( border-box );
-
 	border: 1px solid #c8ccd1;
 	border-bottom: 0;
 
@@ -79,14 +78,16 @@
 			&-header {
 				color: @notification-text-color;
 			}
+
 			&-body {
+				color: @notification-body-color;
+				margin-top: 4px;
+
 				// In the popup only, truncate the text to one-line
 				// with ellipses
 				.mw-echo-ui-notificationBadgeButtonPopupWidget-popup & {
-					.mw-echo-ui-mixin-one-line-truncated;
+					.text-overflow( @visible: false );
 				}
-				color: @notification-body-color;
-				margin-top: 4px;
 			}
 		}
 
@@ -102,6 +103,7 @@
 
 			& > &-buttons.oo-ui-buttonSelectWidget {
 				display: table-cell;
+				white-space: nowrap;
 				vertical-align: bottom;
 			}
 
@@ -125,12 +127,11 @@
 				display: table-cell;
 				vertical-align: bottom;
 				text-align: right;
-				color: @color-base-emphasized;
+				color: @color-base--emphasized;
 				opacity: @opacity-low;
 				white-space: nowrap;
 				width: 100%;
 			}
-
 		}
 	}
 
@@ -176,7 +177,6 @@
 						height: 1.5em;
 						width: 1.5em;
 					}
-
 				}
 
 				&-content-message {
@@ -261,6 +261,7 @@
 	from {
 		background-color: @notification-background-unseen;
 	}
+
 	to {
 		background-color: @notification-background-unread;
 	}
@@ -270,6 +271,7 @@
 	from {
 		background-color: @notification-background-unseen;
 	}
+
 	to {
 		background-color: @notification-background-unread;
 	}
@@ -279,6 +281,7 @@
 	from {
 		background-color: @notification-background-unseen;
 	}
+
 	to {
 		background-color: @notification-background-read;
 	}
@@ -288,6 +291,7 @@
 	from {
 		background-color: @notification-background-unseen;
 	}
+
 	to {
 		background-color: @notification-background-read;
 	}

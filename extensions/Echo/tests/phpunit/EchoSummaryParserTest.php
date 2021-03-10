@@ -9,8 +9,9 @@ class EchoSummaryParserTest extends MediaWikiTestCase {
 		'Jorm',
 		'Jim Carter',
 	];
+
 	/**
-	 * @covers EchoSummaryParser::parse
+	 * @covers \EchoSummaryParser::parse
 	 * @dataProvider provideParse
 	 *
 	 * @param string $summary
@@ -26,7 +27,7 @@ class EchoSummaryParserTest extends MediaWikiTestCase {
 
 		$users = $parser->parse( $summary );
 		foreach ( $users as $name => $user ) {
-			$this->assertType( User::class, $user );
+			$this->assertInstanceof( User::class, $user );
 			$this->assertEquals( $name, $user->getName() );
 		}
 

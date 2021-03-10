@@ -35,8 +35,8 @@ class ArchiveNameHelper {
 
 	/**
 	 * @param Title $source
-	 * @param array $formats
-	 * @param TitleRepository $titleRepo
+	 * @param string[] $formats
+	 * @param TitleRepository|null $titleRepo
 	 * @return bool|mixed
 	 */
 	public function findLatestArchiveTitle( Title $source, array $formats, TitleRepository $titleRepo = null ) {
@@ -46,9 +46,9 @@ class ArchiveNameHelper {
 
 	/**
 	 * @param Title $source
-	 * @param array $formats
-	 * @param TitleRepository $titleRepo
-	 * @return bool|mixed
+	 * @param string[] $formats
+	 * @param TitleRepository|null $titleRepo
+	 * @return bool|array
 	 */
 	protected function findLatestArchiveInfo( Title $source, array $formats, TitleRepository $titleRepo = null ) {
 		if ( $titleRepo === null ) {
@@ -70,25 +70,19 @@ class ArchiveNameHelper {
 			return false;
 		}
 
-		$archivePages = [];
+		$latestArchiveInfo = false;
 		for ( $n = 1; $n <= 20; ++$n ) {
 			$title = Title::newFromText( sprintf( $format, $text, $n ) );
-			if ( $title && $titleRepo->exists( $title ) ) {
-				$archivePages[] = [
-					'title' => $title,
-					'format' => $format,
-					'counter' => $n
-				];
-			} else {
+			if ( !$title || !$titleRepo->exists( $title ) ) {
 				break;
 			}
+			$latestArchiveInfo = [
+				'title' => $title,
+				'format' => $format,
+				'counter' => $n
+			];
 		}
-
-		if ( $archivePages ) {
-			return end( $archivePages );
-		}
-
-		return false;
+		return $latestArchiveInfo;
 	}
 
 }

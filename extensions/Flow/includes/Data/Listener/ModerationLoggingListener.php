@@ -13,7 +13,7 @@ class ModerationLoggingListener extends AbstractListener {
 	 */
 	protected $moderationLogger;
 
-	function __construct( ModerationLogger $moderationLogger ) {
+	public function __construct( ModerationLogger $moderationLogger ) {
 		$this->moderationLogger = $moderationLogger;
 	}
 
@@ -22,7 +22,7 @@ class ModerationLoggingListener extends AbstractListener {
 	 * @param array $row
 	 * @param array $metadata (must contain 'workflow' key with a Workflow object)
 	 */
-	function onAfterInsert( $object, array $row, array $metadata ) {
+	public function onAfterInsert( $object, array $row, array $metadata ) {
 		if ( $object instanceof PostRevision ) {
 			$this->log( $object, $metadata['workflow'] );
 		}

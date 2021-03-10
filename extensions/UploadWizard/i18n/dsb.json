@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Derbeth",
-			"Michawiki",
-			"Matma Rex"
+			"Matma Rex",
+			"Michawiki"
 		]
 	},
 	"uploadwizard": "Asistent za nagraśa",
@@ -61,7 +61,6 @@
 	"mwe-upwiz-next": "Dalej",
 	"mwe-upwiz-next-file": "Dalej cyniś",
 	"mwe-upwiz-next-deeds": "Dalej",
-	"mwe-upwiz-next-details": "Dalej",
 	"mwe-upwiz-home": "Ku głownemu bokoju wikija",
 	"mwe-upwiz-upload-another": "Dalšne dataje nagraś",
 	"mwe-upwiz-tooltip-more-info": "Dalšne informacije",

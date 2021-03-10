@@ -6,10 +6,16 @@ use BaseBlacklist;
 use Flow\Model\PostRevision;
 use Flow\SpamFilter\SpamBlacklist;
 use Flow\Tests\PostRevisionTestCase;
+use MediaWiki\MediaWikiServices;
 use Title;
 
 /**
+ * @covers \Flow\Model\AbstractRevision
+ * @covers \Flow\Model\PostRevision
+ * @covers \Flow\SpamFilter\SpamBlacklist
+ *
  * @group Flow
+ * @group Database
  */
 class SpamBlacklistTest extends PostRevisionTestCase {
 	/**
@@ -39,17 +45,17 @@ class SpamBlacklistTest extends PostRevisionTestCase {
 	public function spamProvider() {
 		return [
 			'default new topic title revision - no spam' => [
-				$this->generateObject(),
+				[],
 				null,
 				true
 			],
 			'revision with spam' => [
-				$this->generateObject( [ 'rev_content' => 'http://01bags.com', 'rev_flags' => 'html' ] ),
+				[ 'rev_content' => 'http://01bags.com', 'rev_flags' => 'html' ],
 				null,
 				false
 			],
 			'revision with domain blacklisted as spam, but subdomain whitelisted' => [
-				$this->generateObject( [ 'rev_content' => 'http://a5b.sytes.net', 'rev_flags' => 'html' ] ),
+				[ 'rev_content' => 'http://a5b.sytes.net', 'rev_flags' => 'html' ],
 				null,
 				true
 			],
@@ -59,14 +65,15 @@ class SpamBlacklistTest extends PostRevisionTestCase {
 	/**
 	 * @dataProvider spamProvider
 	 */
-	public function testSpam( PostRevision $newRevision, PostRevision $oldRevision = null, $expected ) {
+	public function testSpam( $newRevisionRow, ?PostRevision $oldRevision, $expected ) {
+		$newRevision = $this->generateObject( $newRevisionRow );
 		$title = Title::newFromText( 'UTPage' );
 
-		$status = $this->spamFilter->validate( $this->getMock( 'IContextSource' ), $newRevision, $oldRevision, $title, $title );
+		$status = $this->spamFilter->validate( $this->createMock( \IContextSource::class ), $newRevision, $oldRevision, $title, $title );
 		$this->assertEquals( $expected, $status->isOK() );
 	}
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 
 		// create spam filter
@@ -79,7 +86,7 @@ class SpamBlacklistTest extends PostRevisionTestCase {
 			'files' => [],
 		] );
 
-		\MessageCache::singleton()->enable();
+		MediaWikiServices::getInstance()->getMessageCache()->enable();
 		$this->insertPage( 'MediaWiki:Spam-blacklist', implode( "\n", $this->blacklist ) );
 		$this->insertPage( 'MediaWiki:Spam-whitelist', implode( "\n", $this->whitelist ) );
 
@@ -90,8 +97,8 @@ class SpamBlacklistTest extends PostRevisionTestCase {
 		$reflProp->setValue( $instance, false );
 	}
 
-	protected function tearDown() {
-		\MessageCache::singleton()->disable();
+	protected function tearDown() : void {
+		MediaWikiServices::getInstance()->getMessageCache()->disable();
 		parent::tearDown();
 	}
 }

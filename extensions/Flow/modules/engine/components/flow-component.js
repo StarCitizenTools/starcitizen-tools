@@ -2,11 +2,13 @@
  * Contains base FlowComponent class.
  */
 
-( function ( $, mw ) {
+( function () {
 	var _totalInstanceCount = 0;
 
 	/**
 	 * Inherited base class. Stores the instance in the class's instance registry.
+	 *
+	 * @class FlowComponent
 	 * @param {jQuery} $container
 	 * @mixins FlowComponentEventsMixin
 	 * @mixins FlowComponentEnginesMixin
@@ -14,7 +16,7 @@
 	 * @constructor
 	 */
 	function FlowComponent( $container ) {
-		var parent = this.constructor.parent;
+		var parent = this.constructor.super;
 
 		// Run progressive enhancements if any are needed by this container
 		mw.flow.TemplateEngine.processProgressiveEnhancement( $container );
@@ -40,7 +42,7 @@
 		// Keep this in the registry to find it by other means
 		while ( parent ) {
 			parent._instanceRegistryById[ this.id ] = parent._instanceRegistry.push( this ) - 1;
-			parent = parent.parent; // and add it to every instance registry
+			parent = parent.super; // and add it to every instance registry
 		}
 		_totalInstanceCount++;
 	}
@@ -52,6 +54,7 @@
 
 	/**
 	 * Takes any length of arguments, and passes it off to console.log.
+	 *
 	 * @param {boolean} [isError=true]
 	 */
 	mw.flow.debug = FlowComponent.prototype.debug = function ( isError ) {
@@ -118,21 +121,23 @@
 
 	/**
 	 * Returns all the registered instances of a given FlowComponent.
+	 *
 	 * @return {FlowComponent[]}
 	 */
 	FlowComponent.prototype.getInstances = function () {
 		// Use the correct context (instance vs prototype)
-		return ( this.constructor.parent || this )._instanceRegistry;
+		return ( this.constructor.super || this )._instanceRegistry;
 	};
 
 	/**
 	 * Goes up the DOM tree to find which FlowComponent $el belongs to, via .flow-component[flow-id].
+	 *
 	 * @param {jQuery} $el
 	 * @return {FlowComponent|boolean}
 	 */
 	FlowComponent.prototype.getInstanceByElement = function ( $el ) {
 		var $container = $el.closest( '.flow-component' ),
-			context = this.constructor.parent || this, // Use the correct context (instance vs prototype)
+			context = this.constructor.super || this, // Use the correct context (instance vs prototype)
 			id;
 
 		// This element isn't _within_ any actual component; was it spawned _by_ a component?
@@ -162,6 +167,7 @@
 	 * Sets the FlowComponent's $container element as the data-flow-spawned-by attribute on $el.
 	 * Fires ALL events from within $el onto $eventTarget, albeit with the whole event intact.
 	 * This allows us to listen for events from outside of FlowComponent's nodes, but still trigger them within.
+	 *
 	 * @param {jQuery} $el
 	 * @param {jQuery} [$eventTarget]
 	 */
@@ -221,10 +227,10 @@
 			handlerQueue = [];
 
 		// Make a writable jQuery.Event from the native event object
-		event = jQuery.event.fix( event );
+		event = $.event.fix( event );
 		args = Array.prototype.slice.call( arguments, 0 );
-		handlers = ( jQuery._data( this, 'events' ) || {} )[ event.type ] || [];
-		special = jQuery.event.special[ event.type ] || {};
+		handlers = ( $._data( this, 'events' ) || {} )[ event.type ] || [];
+		special = $.event.special[ event.type ] || {};
 
 		// Use the fix-ed jQuery.Event rather than the (read-only) native event
 		args[ 0 ] = event;
@@ -237,7 +243,7 @@
 
 		// Determine handlers
 		// The important modification: we use container instead of this as the context
-		handlerQueue = jQuery.event.handlers.call( container, event, handlers );
+		handlerQueue = $.event.handlers.call( container, event, handlers );
 
 		// Run delegates first; they may want to stop propagation beneath us
 		i = 0;
@@ -253,7 +259,7 @@
 					event.handleObj = handleObj;
 					event.data = handleObj.data;
 
-					ret = ( ( jQuery.event.special[ handleObj.origType ] || {} ).handle || handleObj.handler )
+					ret = ( ( $.event.special[ handleObj.origType ] || {} ).handle || handleObj.handler )
 						.apply( matched.elem, args );
 
 					if ( ret !== undefined ) {
@@ -275,4 +281,4 @@
 	}
 
 	mw.flow.registerComponent( 'component', FlowComponent );
-}( jQuery, mediaWiki ) );
+}() );

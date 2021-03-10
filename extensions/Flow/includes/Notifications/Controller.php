@@ -1,9 +1,13 @@
 <?php
 
-namespace Flow;
+namespace Flow\Notifications;
 
+use EchoEvent;
 use EchoEventMapper;
 use EchoModerationController;
+use ExtensionRegistry;
+use Flow\Container;
+use Flow\Conversion\Utils;
 use Flow\Exception\FlowException;
 use Flow\Model\AbstractRevision;
 use Flow\Model\Header;
@@ -11,15 +15,13 @@ use Flow\Model\PostRevision;
 use Flow\Model\PostSummary;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
-use Flow\Conversion\Utils;
 use Flow\Repository\TreeRepository;
-use EchoEvent;
-use ExtensionRegistry;
 use Language;
+use MediaWiki\MediaWikiServices;
 use Title;
 use User;
 
-class NotificationController {
+class Controller {
 	/**
 	 * @var Language
 	 */
@@ -40,34 +42,52 @@ class NotificationController {
 	}
 
 	public static function onBeforeCreateEchoEvent( &$notifs, &$categories, &$icons ) {
-		$notifs += require __DIR__ . "/Notifications.php";
+		$notifs += require dirname( dirname( __DIR__ ) ) . "/Notifications.php";
 		$categories['flow-discussion'] = [
 			'priority' => 3,
 			'tooltip' => 'echo-pref-tooltip-flow-discussion',
 		];
 		$icons['flow-new-topic'] = [
-			'path' => 'Flow/modules/notification/icon/flow-new-topic.svg',
+			'path' => [
+				'ltr' => 'Flow/modules/notification/icon/flow-new-topic-ltr.svg',
+				'rtl' => 'Flow/modules/notification/icon/flow-new-topic-rtl.svg'
+			]
 		];
 		$icons['flowusertalk-new-topic'] = [
-			'path' => 'Flow/modules/notification/icon/flowusertalk-new-topic.svg',
+			'path' => [
+				'ltr' => 'Flow/modules/notification/icon/flow-new-topic-ltr.svg',
+				'rtl' => 'Flow/modules/notification/icon/flow-new-topic-rtl.svg'
+			]
 		];
 		$icons['flow-post-edited'] = $icons['flowusertalk-post-edited'] = [
-			'path' => 'Flow/modules/notification/icon/flow-post-edited.svg',
+			'path' => [
+				'ltr' => 'Flow/modules/notification/icon/flow-post-edited-ltr.svg',
+				'rtl' => 'Flow/modules/notification/icon/flow-post-edited-rtl.svg'
+			]
 		];
 		$icons['flow-topic-renamed'] = $icons['flowusertalk-topic-renamed'] = [
-			'path' => 'Flow/modules/notification/icon/flow-topic-renamed.svg',
+			'path' => [
+				'ltr' => 'Flow/modules/notification/icon/flow-topic-renamed-ltr.svg',
+				'rtl' => 'Flow/modules/notification/icon/flow-topic-renamed-rtl.svg'
+			]
 		];
 		$icons['flow-topic-resolved'] = $icons['flowusertalk-topic-resolved'] = [
-			'path' => 'Flow/modules/notification/icon/flow-topic-resolved.svg',
+			'path' => [
+				'ltr' => 'Flow/modules/notification/icon/flow-topic-resolved-ltr.svg',
+				'rtl' => 'Flow/modules/notification/icon/flow-topic-resolved-rtl.svg'
+			]
 		];
 		$icons['flow-topic-reopened'] = $icons['flowusertalk-topic-reopened'] = [
-			'path' => 'Flow/modules/notification/icon/flow-topic-reopened.svg',
+			'path' => [
+				'ltr' => 'Flow/modules/notification/icon/flow-topic-reopened-ltr.svg',
+				'rtl' => 'Flow/modules/notification/icon/flow-topic-reopened-rtl.svg'
+			]
 		];
 	}
 
 	/**
 	 * Causes notifications to be fired for a Header-related event.
-	 * @param array $data Associative array of parameters. * revision: The PostRevision created by the action. Always required. * board-workflow: The Workflow object for the board. Always required. * timestamp: Original event timestamp, for imports. Optional. * extra-data: Additional data to pass along to Event extra.
+	 * @param array $data Associative array of parameters.
 	 * * revision: The PostRevision created by the action. Always required.
 	 * * board-workflow: The Workflow object for the board. Always required.
 	 * * timestamp: Original event timestamp, for imports. Optional.
@@ -138,11 +158,11 @@ class NotificationController {
 
 	/**
 	 * Causes notifications to be fired for a Flow event.
-	 * @param String $eventName The event that occurred. Choice of:
+	 * @param string $eventName The event that occurred. Choice of:
 	 * * flow-post-reply
 	 * * flow-topic-renamed
 	 * * flow-post-edited
-	 * @param array $data Associative array of parameters. * user: The user who made the change. Always required. * revision: The PostRevision created by the action. Always required. * title: The Title on which this Topic sits. Always required. * topic-workflow: The Workflow object for the topic. Always required. * topic-title: The Title of the Topic that the post belongs to. Required except for topic renames. * old-subject: The old subject of a Topic. Required for topic renames. * new-subject: The new subject of a Topic. Required for topic renames.
+	 * @param array $data Associative array of parameters.
 	 * * user: The user who made the change. Always required.
 	 * * revision: The PostRevision created by the action. Always required.
 	 * * title: The Title on which this Topic sits. Always required.
@@ -193,7 +213,7 @@ class NotificationController {
 				$extraData += [
 					'reply-to' => $revision->getReplyToId(),
 					'content' => Utils::htmlToPlaintext( $revision->getContent(), 200, $this->language ),
-					'topic-title' => $this->language->truncate( $topicRevision->getContent( 'topic-title-plaintext' ), 200 ),
+					'topic-title' => $this->language->truncateForVisual( $topicRevision->getContent( 'topic-title-plaintext' ), 200 ),
 				];
 
 				// if we're looking at the initial post (submitted along with the topic
@@ -225,14 +245,14 @@ class NotificationController {
 			case 'flow-topic-renamed':
 				$previousRevision = $revision->getCollection()->getPrevRevision( $revision );
 				$extraData += [
-					'old-subject' => $this->language->truncate( $previousRevision->getContent( 'topic-title-plaintext' ), 200 ),
-					'new-subject' => $this->language->truncate( $revision->getContent( 'topic-title-plaintext' ), 200 ),
+					'old-subject' => $this->language->truncateForVisual( $previousRevision->getContent( 'topic-title-plaintext' ), 200 ),
+					'new-subject' => $this->language->truncateForVisual( $revision->getContent( 'topic-title-plaintext' ), 200 ),
 				];
 			break;
 			case 'flow-post-edited':
 				$extraData += [
 					'content' => Utils::htmlToPlaintext( $revision->getContent(), 200, $this->language ),
-					'topic-title' => $this->language->truncate( $topicRevision->getContent( 'topic-title-plaintext' ), 200 ),
+					'topic-title' => $this->language->truncateForVisual( $topicRevision->getContent( 'topic-title-plaintext' ), 200 ),
 				];
 			break;
 		}
@@ -270,7 +290,7 @@ class NotificationController {
 
 	/**
 	 * Causes notifications to be fired for a Summary-related event.
-	 * @param array $data Associative array of parameters. * revision: The PostRevision created by the action. Always required. * topic-title: The PostRevision object for the topic title. Always required. * topic-workflow: The Workflow object for the board. Always required. * extra-data: Additional data to pass along to Event extra.
+	 * @param array $data Associative array of parameters.
 	 * * revision: The PostRevision created by the action. Always required.
 	 * * topic-title: The PostRevision object for the topic title. Always required.
 	 * * topic-workflow: The Workflow object for the board. Always required.
@@ -299,11 +319,12 @@ class NotificationController {
 		$user = $revision->getUser();
 		list( $mentionedUsers, $mentionsSkipped ) = $this->getMentionedUsersAndSkipState( $revision );
 
+		$extraData = [];
 		$extraData['content'] = Utils::htmlToPlaintext( $revision->getContent(), 200, $this->language );
 		$extraData['revision-id'] = $revision->getRevisionId();
 		$extraData['prev-revision-id'] = $revision->getPrevRevisionId();
 		$extraData['topic-workflow'] = $topicWorkflow->getId();
-		$extraData['topic-title'] = $this->language->truncate( $topicRevision->getContent( 'topic-title-plaintext' ), 200 );
+		$extraData['topic-title'] = $this->language->truncateForVisual( $topicRevision->getContent( 'topic-title-plaintext' ), 200 );
 		$extraData['target-page'] = $topicWorkflow->getArticleTitle()->getArticleID();
 		// pass along mentioned users to other notification, so it knows who to ignore
 		$extraData['mentioned-users'] = $mentionedUsers;
@@ -386,7 +407,7 @@ class NotificationController {
 				'board-workflow' => $boardWorkflow->getId(),
 				'topic-workflow' => $topicWorkflow->getId(),
 				'post-id' => $firstPost ? $firstPost->getRevisionId() : null,
-				'topic-title' => $this->language->truncate( $topicTitle->getContent( 'topic-title-plaintext' ), 200 ),
+				'topic-title' => $this->language->truncateForVisual( $topicTitle->getContent( 'topic-title-plaintext' ), 200 ),
 				'content' => $firstPost
 					? Utils::htmlToPlaintext( $firstPost->getContent(), 200, $this->language )
 					: null,
@@ -428,7 +449,7 @@ class NotificationController {
 	 * @param string $type flow-topic-resolved|flow-topic-reopened
 	 * @param array $data
 	 * @return array
-	 * @throws Exception\InvalidDataException
+	 * @throws \Flow\Exception\InvalidDataException
 	 * @throws FlowException
 	 * @throws \MWException
 	 */
@@ -446,6 +467,7 @@ class NotificationController {
 			throw new FlowException( 'Expected Workflow but received ' . get_class( $topicWorkflow ) );
 		}
 
+		$extraData = [];
 		$extraData['topic-workflow'] = $topicWorkflow->getId();
 		$extraData['topic-title'] = Utils::htmlToPlaintext( $revision->getContent( 'topic-title-html' ), 200, $this->language );
 		$extraData['target-page'] = $topicWorkflow->getArticleTitle()->getArticleID();
@@ -483,9 +505,6 @@ class NotificationController {
 			'type' => 'flow-enabled-on-talkpage',
 			'agent' => $user,
 			'title' => $user->getTalkPage(),
-			'extra' => [
-				'notifyAgent' => true,
-			],
 		] );
 
 		return $events;
@@ -499,12 +518,12 @@ class NotificationController {
 	 * @param array $mentionedUsers
 	 * @param bool $mentionsSkipped Were mentions skipped due to too many mentions being attempted?
 	 * @return bool|EchoEvent[]
-	 * @throws Exception\InvalidDataException
+	 * @throws \Flow\Exception\InvalidDataException
 	 * @throws \MWException
 	 */
 	protected function generateMentionEvents(
 		AbstractRevision $content,
-		PostRevision $topic = null,
+		?PostRevision $topic,
 		Workflow $workflow,
 		User $user,
 		array $mentionedUsers,
@@ -520,6 +539,7 @@ class NotificationController {
 		$extraData['mentioned-users'] = $mentionedUsers;
 		$extraData['target-page'] = $workflow->getArticleTitle()->getArticleID();
 		// don't include topic content again if the notification IS in the title
+		// @phan-suppress-next-line PhanImpossibleTypeComparison
 		$extraData['content'] = $content === $topic ? '' : Utils::htmlToPlaintext( $content->getContent(), 200, $this->language );
 		// lets us differentiate between different revision types
 		$extraData['revision-type'] = $content->getRevisionType();
@@ -531,7 +551,7 @@ class NotificationController {
 		// needed to render topic title text & link to topic
 		if ( $topic !== null ) {
 			$extraData['topic-workflow'] = $workflow->getId();
-			$extraData['topic-title'] = $this->language->truncate( $topic->getContent( 'topic-title-plaintext' ), 200 );
+			$extraData['topic-title'] = $this->language->truncateForVisual( $topic->getContent( 'topic-title-plaintext' ), 200 );
 		}
 
 		$events = [];
@@ -545,9 +565,9 @@ class NotificationController {
 			$extra = [
 				'topic-workflow' => $workflow->getId(),
 				'max-mentions' => $wgFlowMaxMentionCount,
+				// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
 				'section-title' => $extraData['topic-title'],
 				'failure-type' => 'too-many',
-				'notifyAgent' => true
 			];
 			if ( $content->getRevisionType() === 'post' ) {
 				$extra['post-id'] = $content->getCollection()->getId();
@@ -569,6 +589,7 @@ class NotificationController {
 	 * @return array
 	 *          0 => int[] Array of user IDs
 	 *          1 => bool Were some mentions ignored due to $wgFlowMaxMentionCount?
+	 * @phan-return array{0:int[],1:bool}
 	 */
 	protected function getMentionedUsersAndSkipState( AbstractRevision $revision ) {
 		// At the moment, it is not possible to get a list of mentioned users from HTML
@@ -601,6 +622,7 @@ class NotificationController {
 	 * @return array
 	 *          0 => int[] Array of user IDs
 	 *          1 => bool Were some mentions ignored due to $wgFlowMaxMentionCount?
+	 * @phan-return array{0:int[],1:bool}
 	 */
 	protected function filterMentionedUsers( $mentions, AbstractRevision $revision ) {
 		global $wgFlowMaxMentionCount;
@@ -636,14 +658,13 @@ class NotificationController {
 	 * @return User[] Array of User objects
 	 */
 	protected function getMentionedUsersFromWikitext( $wikitext ) {
-		global $wgParser;
-
 		$title = Title::newMainPage(); // Bogus title used for parser
 
 		$options = new \ParserOptions;
 		$options->setTidy( true );
 
-		$output = $wgParser->parse( $wikitext, $title, $options );
+		$output = MediaWikiServices::getInstance()->getParser()
+			->parse( $wikitext, $title, $options );
 
 		$links = $output->getLinks();
 
@@ -755,7 +776,7 @@ class NotificationController {
 		 * other side are also very rare: who on earth can refresh the page, read
 		 * the post and write a meaningful reply in just 1 second? :)
 		 */
-		$diff = $postId->getTimestamp( TS_UNIX ) - $workflowId->getTimestamp( TS_UNIX );
+		$diff = (int)$postId->getTimestamp( TS_UNIX ) - (int)$workflowId->getTimestamp( TS_UNIX );
 		return $diff <= 1;
 	}
 
@@ -765,7 +786,7 @@ class NotificationController {
 	 * This is the lowest-number post, numbering them using a pre-order depth-first
 	 *  search
 	 *
-	 * @param array $bundledEvents Array of EchoEvents
+	 * @param EchoEvent[] $bundledEvents
 	 * @return UUID|null Post ID, or null on failure
 	 */
 	public function getTopmostPostId( array $bundledEvents ) {
@@ -796,7 +817,7 @@ class NotificationController {
 	 *  UUID post ID
 	 * @param UUID $root Root node
 	 * @param array $tree Tree structure
-	 * @return UUID First post ID found, or null on failure
+	 * @return UUID|null First post ID found, or null on failure
 	 */
 	protected function getFirstPreorderDepthFirst( array $relevantPostIds, UUID $root, array $tree ) {
 		$rootAlpha = $root->getAlphadecimal();
@@ -826,7 +847,7 @@ class NotificationController {
 	 *
 	 * This is the root of the smallest subtree all the posts are in.
 	 *
-	 * @param array $rootPaths Associative array mapping post IDs to root paths
+	 * @param array[] $rootPaths Associative array mapping post IDs to root paths
 	 * @return UUID|null Common root, or null on failure
 	 */
 	protected function getDeepestCommonRoot( array $rootPaths ) {

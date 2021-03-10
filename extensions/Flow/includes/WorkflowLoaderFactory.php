@@ -3,8 +3,6 @@
 namespace Flow;
 
 use Flow\Content\BoardContent;
-use Flow\Model\UUID;
-use Flow\Model\Workflow;
 use Flow\Data\ManagerGroup;
 use Flow\Exception\CrossWikiException;
 use Flow\Exception\InvalidDataException;
@@ -12,6 +10,8 @@ use Flow\Exception\InvalidInputException;
 use Flow\Exception\InvalidParameterException;
 use Flow\Exception\InvalidTopicUuidException;
 use Flow\Exception\UnknownWorkflowIdException;
+use Flow\Model\UUID;
+use Flow\Model\Workflow;
 use Title;
 
 class WorkflowLoaderFactory {
@@ -40,7 +40,7 @@ class WorkflowLoaderFactory {
 	 * @param BlockFactory $blockFactory
 	 * @param SubmissionHandler $submissionHandler
 	 */
-	function __construct(
+	public function __construct(
 		ManagerGroup $storage,
 		BlockFactory $blockFactory,
 		SubmissionHandler $submissionHandler
@@ -141,7 +141,7 @@ class WorkflowLoaderFactory {
 	 * @throws InvalidInputException When the Title does not represent a valid uuid
 	 */
 	public static function uuidFromTitle( Title $title ) {
-		return self::uuidFromTitlePair( $title->getNamespace(), $title->getDbKey() );
+		return self::uuidFromTitlePair( $title->getNamespace(), $title->getDBkey() );
 	}
 
 	/**
@@ -160,7 +160,7 @@ class WorkflowLoaderFactory {
 		try {
 			return UUID::create( strtolower( $dbKey ) );
 		} catch ( InvalidInputException $e ) {
-			throw new InvalidTopicUuidException( "$dbKey is not a valid UUID", 0, $e );
+			throw new InvalidTopicUuidException( "$dbKey is not a valid UUID" );
 		}
 	}
 }

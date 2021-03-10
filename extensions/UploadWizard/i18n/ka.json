@@ -4,12 +4,12 @@
 			"BRUTE",
 			"David1010",
 			"Dawid Deutschland",
+			"Envlh",
 			"ITshnik",
-			"Tokoko",
-			"გიორგიმელა",
 			"MIKHEIL",
 			"Macofe",
-			"Envlh"
+			"Tokoko",
+			"გიორგიმელა"
 		]
 	},
 	"uploadwizard": "ფაილთა ატვირთვის ასისტენტი",
@@ -61,7 +61,6 @@
 	"mwe-upwiz-remove-upload": "მოაშორეთ ეს ფაილი ფაილთა სიას ატვირთვისთვის.",
 	"mwe-upwiz-remove-description": "მოაშორეთ ეს აღწერა.",
 	"mwe-upwiz-upload": "ატვირთვა",
-	"mwe-upwiz-file-upload-notcapable": "სამწუხაროდ თქვენ ბრაუზერს არ შეუძლია ფაილების ჩატვირთვა.\nგთხოვთ, სცადოთ სხვა ბრაუზერი.",
 	"mwe-upwiz-file-all-ok": "ყველა ატვირთვა განხორციელდა წარმატებით!",
 	"mwe-upwiz-file-some-failed": "ზოგიერთი ფაილი არ აიტვირთა.",
 	"mwe-upwiz-file-retry": "სცადე ხელმეორედ ატვირთვა.",
@@ -159,7 +158,6 @@
 	"mwe-upwiz-next": "შემდეგი",
 	"mwe-upwiz-next-file": "გაგრძელება",
 	"mwe-upwiz-next-deeds": "შემდეგი",
-	"mwe-upwiz-next-details": "შემდეგი",
 	"mwe-upwiz-home": "ვიკის მთავარი გვერდისკენ",
 	"mwe-upwiz-upload-another": "კიდევ სხვა ფაილების ატვირთვა",
 	"mwe-upwiz-prevent-close": "{{PLURAL:$1|ამ ფაილის|ამ ფაილების}} ატვირთვისა და გამოქვეყნების პროცესი ჯერ დასრულებული არაა.",
@@ -236,7 +234,7 @@
 	"mwe-upwiz-license-own-pd": "ყველა უფლების უარყოფა Creative Commons Zero ლიცენზიის პირობების თანახმად (როგორც საზოგადოებრივი საკუთრება)",
 	"mwe-upwiz-license-pd-old-100": "ავტორი გარდაიცვალა 100-ზე მეტი წლის წინ",
 	"mwe-upwiz-license-pd-old": "ავტორი გარდაიცვალა 70-ზე მეტი წლის წინ",
-	"mwe-upwiz-license-pd-us": "პირველად გამოქვეყნდა აშშ-ში 1923 წლამდე",
+	"mwe-upwiz-license-pd-us": "პირველად გამოქვეყნდა აშშ-ში 1925 წლამდე",
 	"mwe-upwiz-license-pd-usgov": "აშშ-ის ფედერალური მთავრობის ორიგინალი ნამუშევარი",
 	"mwe-upwiz-license-pd-usgov-nasa": "NASA-ს ორიგინალი ნამუშევარი",
 	"mwe-upwiz-license-pd-usgov-military-navy": "აშშ-ის სამხედრო-საზღვაო ძალების ორიგინალი ნამუშევარი",
@@ -284,7 +282,6 @@
 	"mwe-upwiz-prefs-def-license-def": "იმის გამოყენება, რაც ნაგულისხმევია",
 	"mwe-upwiz-prefs-license-own": "საკუთარი ნამუშევარი - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "სხვისი ნამუშევარი - $1",
-	"mwe-upwiz-prefs-chunked": "ფაილების ატვირთვა, რომელთა ზომაც აღემატება 1მბ",
 	"mwe-upwiz-prefs-skiptutorial": "ლიცენზირების გაცნობითი სახელმძღვანელო გამოტოვება",
 	"mwe-upload-campaigns-pagination-next": "შემდეგი გვერდი"
 }

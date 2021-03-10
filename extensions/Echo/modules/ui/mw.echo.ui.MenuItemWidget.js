@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	/**
 	 * Secondary menu item
 	 *
@@ -8,8 +8,11 @@
 	 *
 	 * @constructor
 	 * @param {Object} [config] Configuration object
+	 * @cfg {string} [type] Optional action type. Used to note a dynamic action, by setting it to 'dynamic-action'
+	 * @cfg {string} [url] Item URL for links
+	 * @cfg {string} [tooltip] Tooltip for links
 	 * @cfg {string} [description] An optional description for the item
-	 * @cfg {string} [icon] An optional icon for the item
+	 * @cfg {Object} [actionData] Action data
 	 * @cfg {boolean} [prioritized] The item is prioritized outside the
 	 *  popup menu.
 	 */
@@ -22,7 +25,7 @@
 		this.isLink = config.url && !this.isDynamicAction();
 
 		// Parent constructor
-		mw.echo.ui.MenuItemWidget.parent.call( this, config );
+		mw.echo.ui.MenuItemWidget.super.call( this, config );
 
 		// Mixin constructors
 		OO.ui.mixin.PendingElement.call( this, config );
@@ -77,7 +80,7 @@
 		// If we have a link force selectability to false, otherwise defer to parent method
 		// Without a link (for dynamic actions or specific internal actions) we need this widget
 		// to be selectable so it emits the 'choose' event
-		return !this.isLink && mw.echo.ui.MenuItemWidget.parent.prototype.isSelectable.apply( this, arguments );
+		return !this.isLink && mw.echo.ui.MenuItemWidget.super.prototype.isSelectable.apply( this, arguments );
 	};
 
 	/**
@@ -121,4 +124,4 @@
 	mw.echo.ui.MenuItemWidget.prototype.isDynamicAction = function () {
 		return this.dynamic;
 	};
-}( mediaWiki ) );
+}() );

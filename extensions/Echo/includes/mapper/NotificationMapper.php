@@ -1,5 +1,6 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
 use Wikimedia\Rdbms\IDatabase;
 
 /**
@@ -22,31 +23,11 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 			$dbw,
 			__METHOD__,
 			function ( IDatabase $dbw, $fname ) use ( $row, $listeners ) {
-				// Reset the bundle base if this notification has a display hash
-				// the result of this operation is that all previous notifications
-				// with the same display hash are set to non-base because new record
-				// is becoming the bundle base
-				if ( $row['notification_bundle_display_hash'] ) {
-					$dbw->update(
-						'echo_notification',
-						[ 'notification_bundle_base' => 0 ],
-						[
-							'notification_user' => $row['notification_user'],
-							'notification_bundle_display_hash' =>
-								$row['notification_bundle_display_hash'],
-							'notification_bundle_base' => 1
-						],
-						$fname
-					);
-				}
-
 				$row['notification_timestamp'] =
 					$dbw->timestamp( $row['notification_timestamp'] );
-				$res = $dbw->insert( 'echo_notification', $row, $fname );
-				if ( $res ) {
-					foreach ( $listeners as $listener ) {
-						$dbw->onTransactionIdle( $listener );
-					}
+				$dbw->insert( 'echo_notification', $row, $fname );
+				foreach ( $listeners as $listener ) {
+					$dbw->onTransactionCommitOrIdle( $listener, $fname );
 				}
 			}
 		) );
@@ -54,7 +35,7 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 
 	/**
 	 * Extract the offset used for notification list
-	 * @param string $continue String Used for offset
+	 * @param string|null $continue String Used for offset
 	 * @throws MWException
 	 * @return int[]
 	 */
@@ -83,15 +64,22 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 	 * which is done via a deleteJob
 	 * @param User $user
 	 * @param int $limit
-	 * @param string $continue Used for offset
+	 * @param string|null $continue Used for offset
 	 * @param string[] $eventTypes
 	 * @param Title[]|null $titles If set, only return notifications for these pages.
 	 *  To find notifications not associated with any page, add null as an element to this array.
-	 * @param int $dbSource Use master or slave database
+	 * @param int $dbSource Use master or replica database
 	 * @return EchoNotification[]
 	 */
-	public function fetchUnreadByUser( User $user, $limit, $continue, array $eventTypes = [], array $titles = null, $dbSource = DB_REPLICA ) {
-		$conds['notification_read_timestamp'] = null;
+	public function fetchUnreadByUser(
+		User $user,
+		$limit,
+		$continue,
+		array $eventTypes = [],
+		array $titles = null,
+		$dbSource = DB_REPLICA
+	) {
+		$conds = [ 'notification_read_timestamp' => null ];
 		if ( $titles ) {
 			$conds['event_page_id'] = $this->getIdsForTitles( $titles );
 			if ( !$conds['event_page_id'] ) {
@@ -109,14 +97,21 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 	 * which is done via a deleteJob
 	 * @param User $user
 	 * @param int $limit
-	 * @param string $continue Used for offset
+	 * @param string|null $continue Used for offset
 	 * @param string[] $eventTypes
 	 * @param Title[]|null $titles If set, only return notifications for these pages.
 	 *  To find notifications not associated with any page, add null as an element to this array.
-	 * @param int $dbSource Use master or slave database
+	 * @param int $dbSource Use master or replica database
 	 * @return EchoNotification[]
 	 */
-	public function fetchReadByUser( User $user, $limit, $continue, array $eventTypes = [], array $titles = null, $dbSource = DB_REPLICA ) {
+	public function fetchReadByUser(
+		User $user,
+		$limit,
+		$continue,
+		array $eventTypes = [],
+		array $titles = null,
+		$dbSource = DB_REPLICA
+	) {
 		$conds = [ 'notification_read_timestamp IS NOT NULL' ];
 		if ( $titles ) {
 			$conds['event_page_id'] = $this->getIdsForTitles( $titles );
@@ -132,14 +127,21 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 	 *
 	 * @param User $user the user to get notifications for
 	 * @param int $limit The maximum number of notifications to return
-	 * @param string $continue Used for offset
+	 * @param string|null $continue Used for offset
 	 * @param array $eventTypes Event types to load
 	 * @param array $excludeEventIds Event id's to exclude.
 	 * @param Title[]|null $titles If set, only return notifications for these pages.
 	 *  To find notifications not associated with any page, add null as an element to this array.
 	 * @return EchoNotification[]
 	 */
-	public function fetchByUser( User $user, $limit, $continue, array $eventTypes = [], array $excludeEventIds = [], array $titles = null ) {
+	public function fetchByUser(
+		User $user,
+		$limit,
+		$continue,
+		array $eventTypes = [],
+		array $excludeEventIds = [],
+		array $titles = null
+	) {
 		$dbr = $this->dbFactory->getEchoDb( DB_REPLICA );
 
 		$conds = [];
@@ -171,13 +173,20 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 	/**
 	 * @param User $user the user to get notifications for
 	 * @param int $limit The maximum number of notifications to return
-	 * @param string $continue Used for offset
+	 * @param string|null $continue Used for offset
 	 * @param array $eventTypes Event types to load
 	 * @param array $conds Additional query conditions.
-	 * @param int $dbSource Use master or slave database
+	 * @param int $dbSource Use master or replica database
 	 * @return EchoNotification[]
 	 */
-	protected function fetchByUserInternal( User $user, $limit, $continue, array $eventTypes = [], array $conds = [], $dbSource = DB_REPLICA ) {
+	protected function fetchByUserInternal(
+		User $user,
+		$limit,
+		$continue,
+		array $eventTypes = [],
+		array $conds = [],
+		$dbSource = DB_REPLICA
+	) {
 		$dbr = $this->dbFactory->getEchoDb( $dbSource );
 
 		if ( !$eventTypes ) {
@@ -191,7 +200,7 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 		// the notification volume is in a reasonable amount for such case.  The other option
 		// is to denormalize notification table with event_type and lookup index.
 		$conds = [
-			'notification_user' => $user->getID(),
+			'notification_user' => $user->getId(),
 			'event_type' => $eventTypes,
 			'event_deleted' => 0,
 		] + $conds;
@@ -202,12 +211,13 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 		if ( $offset['timestamp'] && $offset['offset'] ) {
 			$ts = $dbr->addQuotes( $dbr->timestamp( $offset['timestamp'] ) );
 			// The offset and timestamp are those of the first notification we want to return
-			$conds[] = "notification_timestamp < $ts OR ( notification_timestamp = $ts AND notification_event <= " . $offset['offset'] . " )";
+			$conds[] = "notification_timestamp < $ts OR " .
+				"( notification_timestamp = $ts AND notification_event <= " . $offset['offset'] . " )";
 		}
 
 		$res = $dbr->select(
 			[ 'echo_notification', 'echo_event' ],
-			'*',
+			EchoNotification::selectFields(),
 			$conds,
 			__METHOD__,
 			[
@@ -224,6 +234,7 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 			return [];
 		}
 
+		/** @var EchoNotification[] $allNotifications */
 		$allNotifications = [];
 		foreach ( $res as $row ) {
 			try {
@@ -232,14 +243,13 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 					$allNotifications[] = $notification;
 				}
 			} catch ( Exception $e ) {
-				$id = isset( $row->event_id ) ? $row->event_id : 'unknown event';
+				$id = $row->event_id ?? 'unknown event';
 				wfDebugLog( 'Echo', __METHOD__ . ": Failed initializing event: $id" );
 				MWExceptionHandler::logException( $e );
 			}
 		}
 
 		$data = [];
-		/** @var EchoNotification $notification */
 		foreach ( $allNotifications as $notification ) {
 			$data[ $notification->getEvent()->getId() ] = $notification;
 		}
@@ -248,47 +258,18 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 	}
 
 	/**
-	 * Get the last notification in a set of bundle-able notifications by a bundle hash
-	 * @param User $user
-	 * @param string $bundleHash The hash used to identify a set of bundle-able notifications
-	 * @return EchoNotification|bool
-	 */
-	public function fetchNewestByUserBundleHash( User $user, $bundleHash ) {
-		$dbr = $this->dbFactory->getEchoDb( DB_REPLICA );
-
-		$row = $dbr->selectRow(
-			[ 'echo_notification', 'echo_event' ],
-			[ '*' ],
-			[
-				'notification_user' => $user->getId(),
-				'notification_bundle_hash' => $bundleHash
-			],
-			__METHOD__,
-			[ 'ORDER BY' => 'notification_timestamp DESC', 'LIMIT' => 1 ],
-			[
-				'echo_event' => [ 'LEFT JOIN', 'notification_event=event_id' ],
-			]
-		);
-		if ( $row ) {
-			return EchoNotification::newFromRow( $row );
-		} else {
-			return false;
-		}
-	}
-
-	/**
 	 * Fetch EchoNotifications by user and event IDs.
 	 *
 	 * @param User $user
 	 * @param int[] $eventIds
-	 * @return EchoNotification[]|bool
+	 * @return EchoNotification[]|false
 	 */
-	public function fetchByUserEvents( User $user, $eventIds ) {
+	public function fetchByUserEvents( User $user, array $eventIds ) {
 		$dbr = $this->dbFactory->getEchoDb( DB_REPLICA );
 
 		$result = $dbr->select(
 			[ 'echo_notification', 'echo_event' ],
-			'*',
+			EchoNotification::selectFields(),
 			[
 				'notification_user' => $user->getId(),
 				'notification_event' => $eventIds
@@ -316,13 +297,13 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 	 * know that passing a big number for offset is NOT going to work
 	 * @param User $user
 	 * @param int $offset
-	 * @return EchoNotification|bool
+	 * @return EchoNotification|false
 	 */
 	public function fetchByUserOffset( User $user, $offset ) {
 		$dbr = $this->dbFactory->getEchoDb( DB_REPLICA );
 		$row = $dbr->selectRow(
 			[ 'echo_notification', 'echo_event' ],
-			[ '*' ],
+			EchoNotification::selectFields(),
 			[
 				'notification_user' => $user->getId(),
 				'event_deleted' => 0,
@@ -352,17 +333,48 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 	 * @return bool
 	 */
 	public function deleteByUserEventOffset( User $user, $eventId ) {
+		global $wgUpdateRowsPerQuery;
+		$eventMapper = new EchoEventMapper( $this->dbFactory );
+		$userId = $user->getId();
 		$dbw = $this->dbFactory->getEchoDb( DB_MASTER );
-		$res = $dbw->delete(
-			'echo_notification',
-			[
-				'notification_user' => $user->getId(),
-				'notification_event < ' . (int)$eventId
-			],
-			__METHOD__
-		);
+		$dbr = $this->dbFactory->getEchoDb( DB_REPLICA );
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		$ticket = $lbFactory->getEmptyTransactionTicket( __METHOD__ );
+		$domainId = $dbw->getDomainID();
 
-		return $res;
+		$iterator = new BatchRowIterator(
+			$dbr,
+			'echo_notification',
+			'notification_event',
+			$wgUpdateRowsPerQuery
+		);
+		$iterator->addConditions( [
+			'notification_user' => $userId,
+			'notification_event < ' . (int)$eventId
+		] );
+
+		foreach ( $iterator as $batch ) {
+			$eventIds = [];
+			foreach ( $batch as $row ) {
+				$eventIds[] = $row->notification_event;
+			}
+			$dbw->delete(
+				'echo_notification',
+				[
+					'notification_user' => $userId,
+					'notification_event' => $eventIds,
+				],
+				__METHOD__
+			);
+
+			// Find out which events are now orphaned, i.e. no longer referenced in echo_notifications
+			// (besides the rows we just deleted) or in echo_email_batch, and delete them
+			$eventMapper->deleteOrphanedEvents( $eventIds, $userId, 'echo_notification' );
+
+			$lbFactory->commitAndWaitForReplication(
+				__METHOD__, $ticket, [ 'domain' => $domainId ] );
+		}
+		return true;
 	}
 
 	/**
@@ -371,7 +383,7 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 	 * @param int[] $eventIds
 	 * @return int[]|false
 	 */
-	public function fetchUsersWithNotificationsForEvents( $eventIds ) {
+	public function fetchUsersWithNotificationsForEvents( array $eventIds ) {
 		$dbr = $this->dbFactory->getEchoDb( DB_REPLICA );
 
 		$res = $dbr->select(

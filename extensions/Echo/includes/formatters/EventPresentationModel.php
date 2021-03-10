@@ -1,5 +1,6 @@
 <?php
 
+use MediaWiki\Revision\RevisionRecord;
 use Wikimedia\Timestamp\TimestampException;
 
 /**
@@ -9,27 +10,32 @@ use Wikimedia\Timestamp\TimestampException;
 abstract class EchoEventPresentationModel implements JsonSerializable {
 
 	/**
-	 * Recommended length of usernames included in messages
+	 * Recommended length of usernames included in messages, in
+	 * characters (not bytes).
 	 */
 	const USERNAME_RECOMMENDED_LENGTH = 20;
 
 	/**
-	 * Recommended length of usernames used as link label
+	 * Recommended length of usernames used as link label, in
+	 * characters (not bytes).
 	 */
 	const USERNAME_AS_LABEL_RECOMMENDED_LENGTH = 15;
 
 	/**
-	 * Recommended length of page names included in messages
+	 * Recommended length of page names included in messages, in
+	 * characters (not bytes).
 	 */
 	const PAGE_NAME_RECOMMENDED_LENGTH = 50;
 
 	/**
-	 * Recommended length of page names used as link label
+	 * Recommended length of page names used as link label, in
+	 * characters (not bytes).
 	 */
 	const PAGE_NAME_AS_LABEL_RECOMMENDED_LENGTH = 15;
 
 	/**
-	 * Recommended length of section titles included in messages
+	 * Recommended length of section titles included in messages, in
+	 * characters (not bytes).
 	 */
 	const SECTION_TITLE_RECOMMENDED_LENGTH = 50;
 
@@ -60,38 +66,49 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 
 	/**
 	 * @param EchoEvent $event
-	 * @param Language|string $language
+	 * @param Language $language
 	 * @param User $user Only used for permissions checking and GENDER
 	 * @param string $distributionType
 	 */
-	protected function __construct( EchoEvent $event, $language, User $user, $distributionType ) {
+	protected function __construct(
+		EchoEvent $event,
+		Language $language,
+		User $user,
+		$distributionType
+	) {
 		$this->event = $event;
 		$this->type = $event->getType();
-		$this->language = wfGetLangObj( $language );
+		$this->language = $language;
 		$this->user = $user;
 		$this->distributionType = $distributionType;
 	}
 
 	/**
 	 * Convenience function to detect whether the event type
-	 * has been updated to use the presentation model system
+	 * has a presentation model available for rendering
 	 *
 	 * @param string $type event type
 	 * @return bool
 	 */
 	public static function supportsPresentationModel( $type ) {
 		global $wgEchoNotifications;
-		return isset( $wgEchoNotifications[$type]['presentation-model'] );
+		return isset( $wgEchoNotifications[$type]['presentation-model'] )
+			&& class_exists( $wgEchoNotifications[$type]['presentation-model'] );
 	}
 
 	/**
 	 * @param EchoEvent $event
-	 * @param Language|string $language
+	 * @param Language $language
 	 * @param User $user
 	 * @param string $distributionType 'web' or 'email'
 	 * @return EchoEventPresentationModel
 	 */
-	public static function factory( EchoEvent $event, $language, User $user, $distributionType = 'web' ) {
+	public static function factory(
+		EchoEvent $event,
+		Language $language,
+		User $user,
+		$distributionType = 'web'
+	) {
 		global $wgEchoNotifications;
 		// @todo don't depend upon globals
 
@@ -127,16 +144,26 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	}
 
 	/**
+	 * Get the distribution type
+	 *
+	 * @return string 'web' or 'email'
+	 */
+	final public function getDistributionType() {
+		return $this->distributionType;
+	}
+
+	/**
 	 * Equivalent to IContextSource::msg for the current
 	 * language
 	 *
+	 * @param string ...$args
 	 * @return Message
 	 */
-	protected function msg( /* ,,, */ ) {
+	protected function msg( ...$args ) {
 		/**
 		 * @var Message $msg
 		 */
-		$msg = call_user_func_array( 'wfMessage', func_get_args() );
+		$msg = wfMessage( ...$args );
 		$msg->inLanguage( $this->language );
 
 		// Notifications are considered UI (and should be in UI language, not
@@ -156,7 +183,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	/**
 	 * Get the ids of the bundled notifications or false if it's not bundled
 	 *
-	 * @return int[]|bool
+	 * @return int[]|false
 	 */
 	public function getBundledIds() {
 		if ( $this->isBundled() ) {
@@ -188,7 +215,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * If $includeCurrent is false, all events in the same group as the current one will be ignored.
 	 *
 	 * @param bool $includeCurrent Include the current event (and its group)
-	 * @param callable $groupCallback Callback that takes an EchoEvent and returns a grouping value
+	 * @param callable|null $groupCallback Callback that takes an EchoEvent and returns a grouping value
 	 * @return int Number of bundled events or groups
 	 * @throws InvalidArgumentException
 	 */
@@ -214,10 +241,10 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	/**
 	 * Return the count of notifications bundled together.
 	 *
-	 * For parameters, see getBundleCount().
+	 * For parameters, see {@see EchoEventPresentationModel::getBundleCount}.
 	 *
 	 * @param bool $includeCurrent
-	 * @param callable $groupCallback
+	 * @param callable|null $groupCallback
 	 * @return int count
 	 */
 	final protected function getNotificationCountForOutput( $includeCurrent = true, $groupCallback = null ) {
@@ -241,7 +268,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	/**
 	 * Helper for EchoEvent::userCan
 	 *
-	 * @param int $type Revision::DELETED_* constant
+	 * @param int $type RevisionRecord::DELETED_* constant
 	 * @return bool
 	 */
 	final protected function userCan( $type ) {
@@ -249,7 +276,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	}
 
 	/**
-	 * @return array|bool ['wikitext to display', 'username for GENDER'], false if no agent
+	 * @return string[]|false ['wikitext to display', 'username for GENDER'], false if no agent
 	 *
 	 * We have to display wikitext so we can add CSS classes for revision deleted user.
 	 * The goal of this function is for callers not to worry about whether
@@ -266,7 +293,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 			return false;
 		}
 
-		if ( $this->userCan( Revision::DELETED_USER ) ) {
+		if ( $this->userCan( RevisionRecord::DELETED_USER ) ) {
 			// Not deleted
 			return [
 				$this->getTruncatedUsername( $agent ),
@@ -393,6 +420,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 */
 	public function getSubjectMessage() {
 		$msg = $this->getMessageWithAgent( $this->getSubjectMessageKey() );
+		$msg->params( $this->getViewingUserForGender() );
 		if ( $msg->isDisabled() ) {
 			// Back-compat for models that haven't been updated yet
 			$msg = $this->getHeaderMessage();
@@ -413,7 +441,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	/**
 	 * Array of primary link details, with possibly-relative URL & label.
 	 *
-	 * @return array|bool Array of link data, or false for no link:
+	 * @return array|false Array of link data, or false for no link:
 	 *                    ['url' => (string) url, 'label' => (string) link text (non-escaped)]
 	 */
 	abstract public function getPrimaryLink();
@@ -422,19 +450,27 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * Like getPrimaryLink(), but with the URL altered to add ?markasread=XYZ. When this link is followed,
 	 * the notification is marked as read.
 	 *
-	 * When the notification is a bundle, the notification IDs are added to the parameter value
-	 * separated by a "|".
+	 * If the notification is a bundle, the notification IDs are added to the parameter value
+	 * separated by a "|". If cross-wiki notifications are enabled, a markasreadwiki parameter is
+	 * added.
 	 *
-	 * @return array|bool
+	 * @return array|false
 	 */
 	final public function getPrimaryLinkWithMarkAsRead() {
+		global $wgEchoCrossWikiNotifications;
 		$primaryLink = $this->getPrimaryLink();
 		if ( $primaryLink ) {
 			$eventIds = [ $this->event->getId() ];
 			if ( $this->getBundledIds() ) {
 				$eventIds = array_merge( $eventIds, $this->getBundledIds() );
 			}
-			$primaryLink['url'] = wfAppendQuery( $primaryLink['url'], [ 'markasread' => implode( '|', $eventIds ) ] );
+
+			$queryParams = [ 'markasread' => implode( '|', $eventIds ) ];
+			if ( $wgEchoCrossWikiNotifications ) {
+				$queryParams['markasreadwiki'] = wfWikiID();
+			}
+
+			$primaryLink['url'] = wfAppendQuery( $primaryLink['url'], $queryParams );
 		}
 		return $primaryLink;
 	}
@@ -443,13 +479,18 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * Array of secondary link details, including possibly-relative URLs, label,
 	 * description & icon name.
 	 *
-	 * @return array Array of links in the format of:
+	 * @return (null|array)[] Array of links in the format of:
 	 *               [['url' => (string) url,
 	 *                 'label' => (string) link text (non-escaped),
 	 *                 'description' => (string) descriptive text (optional, non-escaped),
 	 *                 'icon' => (bool|string) symbolic ooui icon name (or false if there is none),
-	 *                 'type' => (string) optional action type. Used to note a dynamic action, by setting it to 'dynamic-action'
-	 *                 'data' => (array) optional array containing information about the dynamic action. It must include 'tokenType' (string), 'messages' (array) with messages supplied for the item and the confirmation dialog and 'params' (array) for the API operation needed to complete the action. For example:
+	 *                 'type' => (string) optional action type. Used to note a dynamic action,
+	 *                           by setting it to 'dynamic-action'
+	 *                 'data' => (array) optional array containing information about the dynamic
+	 *                           action. It must include 'tokenType' (string), 'messages' (array)
+	 *                           with messages supplied for the item and the confirmation dialog
+	 *                           and 'params' (array) for the API operation needed to complete the
+	 *                           action. For example:
 	 *                 'data' => [
 	 *                     'tokenType' => 'watch',
 	 *                     'params' => [
@@ -463,8 +504,13 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 *                         ]
 	 *                     ]
 	 *                 	]
-	 *                 'prioritized' => (bool) true if the link should be outside the
-	 *                                  action menu, false for inside)],
+	 *                 'prioritized' => (bool) true to request the link be placed outside the action menu.
+	 *                                  false or omitted for the default behavior. By default, a link will
+	 *                                  be placed inside the menu, unless there are maxPrioritizedActions
+	 *                                  or fewer secondary links. If there are maxPrioritizedActions or
+	 *                                  fewer secondary links, they will all appear outside the action menu.
+	 *                                  At most maxPrioritizedActions links will be placed outside the action menu.
+	 *                                  maxPrioritizedActions is 2 on desktop and 1 on mobile.
 	 *                ...]
 	 *
 	 *               Note that you should call array_values(array_filter()) on the
@@ -506,7 +552,8 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * @return string
 	 */
 	protected function getTruncatedUsername( User $user ) {
-		return $this->language->embedBidi( $this->language->truncate( $user->getName(), self::USERNAME_RECOMMENDED_LENGTH, '...', false ) );
+		return $this->language->embedBidi( $this->language->truncateForVisual(
+			$user->getName(), self::USERNAME_RECOMMENDED_LENGTH, '...', false ) );
 	}
 
 	/**
@@ -516,7 +563,8 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 */
 	protected function getTruncatedTitleText( Title $title, $includeNamespace = false ) {
 		$text = $includeNamespace ? $title->getPrefixedText() : $title->getText();
-		return $this->language->embedBidi( $this->language->truncate( $text, self::PAGE_NAME_RECOMMENDED_LENGTH, '...', false ) );
+		return $this->language->embedBidi( $this->language->truncateForVisual(
+			$text, self::PAGE_NAME_RECOMMENDED_LENGTH, '...', false ) );
 	}
 
 	/**
@@ -528,7 +576,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 			return null;
 		}
 
-		if ( !$this->userCan( Revision::DELETED_USER ) ) {
+		if ( !$this->userCan( RevisionRecord::DELETED_USER ) ) {
 			return null;
 		}
 
@@ -537,7 +585,8 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 			: $user->getUserPage()->getFullURL();
 
 		$label = $user->getName();
-		$truncatedLabel = $this->language->truncate( $label, self::USERNAME_AS_LABEL_RECOMMENDED_LENGTH, '...', false );
+		$truncatedLabel = $this->language->truncateForVisual(
+			$label, self::USERNAME_AS_LABEL_RECOMMENDED_LENGTH, '...', false );
 		$isTruncated = $label !== $truncatedLabel;
 
 		return [
@@ -569,7 +618,8 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 		return [
 			'url' => $title->getFullURL( $query ),
 			'label' => $this->language->embedBidi(
-				$this->language->truncate( $title->getText(), self::PAGE_NAME_AS_LABEL_RECOMMENDED_LENGTH, '...', false )
+				$this->language->truncateForVisual(
+					$title->getText(), self::PAGE_NAME_AS_LABEL_RECOMMENDED_LENGTH, '...', false )
 			),
 			'tooltip' => $title->getPrefixedText(),
 			'description' => $description,
@@ -582,15 +632,22 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * Get a dynamic action link
 	 *
 	 * @param Title $title Title relating to this action
-	 * @param bool $icon Optional. Symbolic name of the OOUI icon to use
+	 * @param string|false $icon Optional. Symbolic name of the OOUI icon to use
 	 * @param string $label link text (non-escaped)
-	 * @param string $description descriptive text (optional, non-escaped)
+	 * @param string|null $description descriptive text (optional, non-escaped)
 	 * @param array $data Action data
 	 * @param array $query
 	 * @return array Array compatible with the structure of
 	 *  secondary links
 	 */
-	final protected function getDynamicActionLink( Title $title, $icon, $label, $description = null, $data = [], $query = [] ) {
+	final protected function getDynamicActionLink(
+		Title $title,
+		$icon,
+		$label,
+		$description = null,
+		$data = [],
+		$query = []
+	) {
 		if ( !$icon && $title->getNamespace() === NS_USER_TALK ) {
 			$icon = 'userSpeechBubble';
 		} elseif ( !$icon && $title->isTalkPage() ) {
@@ -669,7 +726,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 					$this->getTruncatedTitleText( $title ),
 					$title->getFullURL( [ 'action' => $availableAction ] ),
 					$this->getUser()->getName()
-				),
+				)->escaped(),
 			null,
 			$data,
 			[ 'action' => $availableAction ]

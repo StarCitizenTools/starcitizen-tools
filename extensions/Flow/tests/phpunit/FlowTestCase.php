@@ -2,16 +2,16 @@
 
 namespace Flow\Tests;
 
-use EventRelayerNull;
 use ExtensionRegistry;
 use Flow\Container;
 use Flow\Data\FlowObjectCache;
 use Flow\Model\UUID;
 use HashBagOStuff;
+use MediaWikiTestCase;
 use WANObjectCache;
 
-class FlowTestCase extends \MediaWikiTestCase {
-	protected function setUp() {
+class FlowTestCase extends MediaWikiTestCase {
+	protected function setUp() : void {
 		Container::reset();
 		parent::setUp();
 	}
@@ -35,7 +35,6 @@ class FlowTestCase extends \MediaWikiTestCase {
 		$wanCache = new WANObjectCache( [
 			'cache' => new HashBagOStuff(),
 			'pool' => 'testcache-hash',
-			'relayer' => new EventRelayerNull( [] )
 		] );
 
 		return new FlowObjectCache( $wanCache, Container::get( 'db.factory' ), $wgFlowCacheTime );
@@ -46,8 +45,7 @@ class FlowTestCase extends \MediaWikiTestCase {
 		$data = $registry->readFromQueue( [ __DIR__ . '/../../extension.json' => 1 ] );
 		$perms = $data['globals']['wgGroupPermissions'];
 		unset( $perms[$registry::MERGE_STRATEGY] );
-		$this->stashMwGlobals( [ 'wgGroupPermissions' ] );
 		global $wgGroupPermissions;
-		$wgGroupPermissions = wfArrayPlus2d( $perms, $wgGroupPermissions );
+		$this->setMwGlobals( 'wgGroupPermissions', wfArrayPlus2d( $perms, $wgGroupPermissions ) );
 	}
 }

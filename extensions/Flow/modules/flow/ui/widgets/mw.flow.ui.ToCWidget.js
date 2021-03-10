@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow ToC widget
 	 *
@@ -14,7 +14,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.flow.ui.ToCWidget.parent.call( this, config );
+		mw.flow.ui.ToCWidget.super.call( this, config );
 
 		this.system = system;
 		this.board = this.system.getBoard();
@@ -22,7 +22,7 @@
 
 		this.button = new OO.ui.ButtonWidget( {
 			framed: false,
-			icon: 'stripeToC',
+			icon: 'listBullet',
 			label: this.originalButtonLabel,
 			classes: [ 'flow-ui-tocWidget-button' ]
 		} );
@@ -69,6 +69,7 @@
 
 	/**
 	 * Respond to topic select choose event
+	 *
 	 * @param {string} topicId Topic id
 	 */
 	mw.flow.ui.ToCWidget.prototype.onTopicSelectTopic = function ( topicId ) {
@@ -80,6 +81,7 @@
 		// scroll, the topics do not unstub themselves, so we can't trust that.
 		if ( $topic.length > 0 ) {
 			// Scroll down to the topic
+			// eslint-disable-next-line no-jquery/no-global-selector
 			$( 'html, body' ).animate( {
 				scrollTop: ( $topic.offset().top - this.$element.height() ) + 'px'
 			}, 'fast' );
@@ -112,4 +114,4 @@
 	mw.flow.ui.ToCWidget.prototype.updateLabel = function ( label ) {
 		this.button.setLabel( label || this.originalButtonLabel );
 	};
-}( jQuery ) );
+}() );

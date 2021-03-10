@@ -50,7 +50,7 @@ class EchoIcon {
 	 * Get a link to a rasterized version of the icon
 	 *
 	 * @param string $icon Icon name
-	 * @param string $lang Language
+	 * @param string $lang
 	 * @return string URL to the rasterized version of the icon
 	 */
 	public static function getRasterizedUrl( $icon, $lang ) {
@@ -59,9 +59,7 @@ class EchoIcon {
 			throw new InvalidArgumentException( "The $icon icon is not registered" );
 		}
 
-		$url = isset( $wgEchoNotificationIcons[ $icon ][ 'url' ] ) ?
-			$wgEchoNotificationIcons[ $icon ][ 'url' ] :
-			null;
+		$url = $wgEchoNotificationIcons[ $icon ][ 'url' ] ?? null;
 
 		// If the defined URL is explicitly false, use placeholder
 		if ( $url === false ) {

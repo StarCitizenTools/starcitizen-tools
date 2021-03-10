@@ -2,13 +2,13 @@
 
 namespace Flow\Formatter;
 
+use ChangesList;
 use Flow\Model\Header;
 use Flow\Model\PostRevision;
 use Flow\Model\PostSummary;
 use Flow\Model\UUID;
 use Flow\UrlGenerator;
 use IContextSource;
-use ChangesList;
 
 class RevisionViewFormatter {
 	/**
@@ -42,7 +42,9 @@ class RevisionViewFormatter {
 	public function formatApi( FormatterRow $row, IContextSource $ctx ) {
 		$res = $this->serializer->formatApi( $row, $ctx );
 		$res['rev_view_links'] = $this->buildLinks( $row, $ctx );
-		$res['human_timestamp'] = $this->getHumanTimestamp( $res['timestamp'] );
+		$res['human_timestamp'] = $ctx->getLanguage()->getHumanTimestamp(
+			new \MWTimestamp( $res['timestamp'] )
+		);
 		if ( $row->revision instanceof PostRevision ) {
 			$res['properties']['topic-of-post'] = $this->serializer->processParam(
 				'topic-of-post',
@@ -94,6 +96,7 @@ class RevisionViewFormatter {
 			$links['single-view'] = $this->urlGenerator->postRevisionLink(
 				$title,
 				$workflowId,
+				// @phan-suppress-next-line PhanUndeclaredMethod Type not correctly inferred
 				$row->revision->getPostId(),
 				$row->revision->getRevisionId()
 			);
@@ -122,7 +125,7 @@ class RevisionViewFormatter {
 				null,
 				$workflowId
 			);
-			$links['diff']->setMessage( wfMessage( 'diff' ) );
+			$links['diff']->setMessage( $ctx->msg( 'diff' ) );
 		} else {
 			$links['diff'] = [
 				'url' => '',
@@ -145,11 +148,6 @@ class RevisionViewFormatter {
 		}
 
 		return $links;
-	}
-
-	public function getHumanTimestamp( $timestamp ) {
-		$ts = new \MWTimestamp( $timestamp );
-		return $ts->getHumanTimestamp();
 	}
 
 }

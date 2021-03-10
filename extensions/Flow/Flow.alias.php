@@ -30,6 +30,12 @@ $specialPageAliases['bn'] = [
 	'EnableStructuredDiscussions' => [ 'ফ্লো_সক্রিয়করণ' ],
 ];
 
+/** Czech (čeština) */
+$specialPageAliases['cs'] = [
+	'StructuredDiscussions' => [ 'Strukturované_diskuse' ],
+	'EnableStructuredDiscussions' => [ 'Povolit_strukturovanou_diskusi' ],
+];
+
 /** German (Deutsch) */
 $specialPageAliases['de'] = [
 	'EnableStructuredDiscussions' => [ 'Flow_aktivieren' ],
@@ -59,8 +65,8 @@ $specialPageAliases['hu'] = [
 
 /** Korean (한국어) */
 $specialPageAliases['ko'] = [
-	'StructuredDiscussions' => [ '플로우' ],
-	'EnableStructuredDiscussions' => [ '플로우활성화' ],
+	'StructuredDiscussions' => [ '구조화된토론', '플로우' ],
+	'EnableStructuredDiscussions' => [ '구조화된토론활성화', '플로우활성화' ],
 ];
 
 /** Northern Luri (لۊری شومالی) */

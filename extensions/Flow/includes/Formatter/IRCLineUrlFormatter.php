@@ -4,7 +4,9 @@ namespace Flow\Formatter;
 
 use Flow\Container;
 use Flow\RevisionActionPermissions;
+use FormatJson;
 use IContextSource;
+use MediaWiki\Logger\LoggerFactory;
 use RCFeedFormatter;
 use RecentChange;
 use SplObjectStorage;
@@ -35,6 +37,7 @@ class IRCLineUrlFormatter extends AbstractFormatter implements RCFeedFormatter {
 	/**
 	 * Allows us to set the rc_comment field
 	 */
+
 	/**
 	 * @param array $feed
 	 * @param RecentChange $rc
@@ -46,13 +49,21 @@ class IRCLineUrlFormatter extends AbstractFormatter implements RCFeedFormatter {
 
 		$serialized = $this->serializeRcRevision( $rc, $ctx );
 		if ( !$serialized ) {
+			LoggerFactory::getInstance( 'Flow' )->debug(
+				__METHOD__ . ': Failed to obtain serialized RC revision.',
+				[
+					'rc_attributes' => FormatJson::encode( $rc->getAttributes(), true ),
+					'user_id' => $ctx->getUser()->getId(),
+				]
+			);
 			return null;
 		}
 
-		// @todo Public access to $rc->mAttribs should be deprecated in core.
-		$rc->mAttribs['rc_comment'] = $this->formatDescription( $serialized, $ctx );
-		$rc->mAttribs['rc_comment_text'] = $rc->mAttribs['rc_comment'];
-		$rc->mAttribs['rc_comment_data'] = null;
+		$rcAttribs = $rc->getAttributes();
+		$rcAttribs['rc_comment'] = $this->formatDescription( $serialized, $ctx );
+		$rcAttribs['rc_comment_text'] = $rcAttribs['rc_comment'];
+		$rcAttribs['rc_comment_data'] = null;
+		$rc->setAttribs( $rcAttribs );
 
 		/** @var RCFeedFormatter $formatter */
 		$formatter = new $feed['original_formatter']();
@@ -72,9 +83,16 @@ class IRCLineUrlFormatter extends AbstractFormatter implements RCFeedFormatter {
 	protected function serializeRcRevision( RecentChange $rc, IContextSource $ctx ) {
 		/** @var RecentChangesQuery $query */
 		$query = Container::get( 'query.changeslist' );
-		$query->loadMetadataBatch( [ (object)$rc->mAttribs ] );
+		$query->loadMetadataBatch( [ (object)$rc->getAttributes() ] );
 		$rcRow = $query->getResult( null, $rc );
 		if ( !$rcRow ) {
+			LoggerFactory::getInstance( 'Flow' )->debug(
+				__METHOD__ . ': Failed to load result.',
+				[
+					'rc_attributes' => FormatJson::encode( $rc->getAttributes(), true ),
+					'user_id' => $ctx->getUser()->getId()
+				]
+			);
 			return false;
 		}
 
@@ -127,8 +145,8 @@ class IRCLineUrlFormatter extends AbstractFormatter implements RCFeedFormatter {
 		}
 
 		wfDebugLog( 'Flow', __METHOD__
-				. ': No url generated for action ' . $change['action']
-				. ' on revision ' . $change['revision']
+				. ': No url generated for action ' . $row->workflow->getType()
+				. ' on revision ' . $row->revision->getRevisionId()
 		);
 		return null;
 	}

@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kghbln"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Bestätigen Sie eine Flickr-URL, indem Sie die Nutzerkennung (NSID) für das Eintragen in die Negativliste benutzen.\n\nWenn sie mit der <var>list</var>-Option benutzt wird, gibt sie alle Kennungen wider, die in der Negativliste stehen."
+}

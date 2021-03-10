@@ -15,7 +15,7 @@
  * along with DetailsWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( $, mw, uw ) {
+( function ( uw ) {
 	QUnit.module( 'uw.controller.Details', QUnit.newMwEnvironment() );
 
 	function createTestUpload( sandbox, customDeedChooser, aborted ) {
@@ -31,7 +31,7 @@
 
 			deedChooser: { deed: { name: customDeedChooser ? 'custom' : 'cc-by-sa-4.0' } },
 
-			on: $.noop,
+			on: function () {},
 
 			details: {
 				useCustomDeedChooser: stubs.ucdc,
@@ -156,4 +156,4 @@
 		} );
 	} );
 
-}( jQuery, mediaWiki, mediaWiki.uploadWizard ) );
+}( mw.uploadWizard ) );

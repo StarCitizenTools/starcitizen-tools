@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	/**
 	 * A widget that displays wikis and their pages to choose a filter
 	 *
@@ -17,8 +17,8 @@
 	mw.echo.ui.PageFilterWidget = function MwEchoUiPageFilterWidget( filterModel, source, config ) {
 		config = config || {};
 
-		// Parent
-		mw.echo.ui.PageFilterWidget.parent.call( this, config );
+		// Parent constructor
+		mw.echo.ui.PageFilterWidget.super.call( this, config );
 
 		this.model = filterModel;
 		this.source = source;
@@ -43,7 +43,8 @@
 		// Initialization
 		this.populateDataFromModel();
 		this.$element
-			.addClass( 'mw-echo-ui-pageFilterWidget' );
+			.addClass( 'mw-echo-ui-pageFilterWidget' )
+			.attr( 'aria-label', mw.message( 'echo-specialpage-pagefilterwidget-aria-label' ).text() );
 	};
 
 	/* Initialization */
@@ -153,4 +154,4 @@
 	mw.echo.ui.PageFilterWidget.prototype.sortingFunction = function ( item, otherItem ) {
 		return Number( otherItem.getCount() ) - Number( item.getCount() );
 	};
-}( jQuery, mediaWiki ) );
+}() );

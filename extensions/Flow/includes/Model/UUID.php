@@ -5,11 +5,9 @@ namespace Flow\Model;
 use ApiSerializable;
 use Flow\Data\ObjectManager;
 use Flow\Exception\FlowException;
-use Flow\Exception\InvalidParameterException;
 use Flow\Exception\InvalidInputException;
-use Language;
+use Flow\Exception\InvalidParameterException;
 use MWTimestamp;
-use User;
 use Wikimedia\Rdbms\Blob;
 use Wikimedia\Timestamp\TimestampException;
 
@@ -21,7 +19,7 @@ use Wikimedia\Timestamp\TimestampException;
  */
 class UUID implements ApiSerializable {
 	/**
-	 * @var UUID[][][]
+	 * @var UUID[][]
 	 */
 	private static $instances;
 
@@ -35,14 +33,14 @@ class UUID implements ApiSerializable {
 	/**
 	 * base16 representation
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	protected $hexValue;
 
 	/**
 	 * base36 representation
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	protected $alphadecimalValue;
 
@@ -56,26 +54,24 @@ class UUID implements ApiSerializable {
 	/**
 	 * Acceptable input values for constructor.
 	 * Values are the property names the input data will be saved to.
-	 *
-	 * @var string
 	 */
-	const INPUT_BIN = 'binaryValue',
+	private const INPUT_BIN = 'binaryValue',
 		INPUT_HEX = 'hexValue',
 		INPUT_ALNUM = 'alphadecimalValue';
 
 	// UUID length in hex, always padded
-	const HEX_LEN = 22;
+	public const HEX_LEN = 22;
 	// UUID length in binary, always padded
-	const BIN_LEN = 11;
+	public const BIN_LEN = 11;
 	// UUID length in base36, with padding
-	const ALNUM_LEN = 19;
+	public const ALNUM_LEN = 19;
 	// unpadded base36 input string
-	const MIN_ALNUM_LEN = 16;
+	public const MIN_ALNUM_LEN = 16;
 
 	// 126 bit binary length
-	const OLD_BIN_LEN = 16;
+	public const OLD_BIN_LEN = 16;
 	// 128 bit hex length
-	const OLD_HEX_LEN = 32;
+	public const OLD_HEX_LEN = 32;
 
 	/**
 	 * Constructs a UUID object based on either the binary, hex or alphanumeric
@@ -96,11 +92,16 @@ class UUID implements ApiSerializable {
 		// doublecheck validity of inputs, based on pre-determined lengths
 		$len = strlen( $value );
 		if ( $format === static::INPUT_BIN && $len !== self::BIN_LEN ) {
-			throw new InvalidInputException( 'Expected ' . self::BIN_LEN . ' char binary string, got: ' . $value, 'invalid-input' );
+			throw new InvalidInputException( 'Expected ' . self::BIN_LEN .
+				' char binary string, got: ' . $value, 'invalid-input' );
 		} elseif ( $format === static::INPUT_HEX && $len !== self::HEX_LEN ) {
-			throw new InvalidInputException( 'Expected ' . self::HEX_LEN . ' char hex string, got: ' . $value, 'invalid-input' );
-		} elseif ( $format === static::INPUT_ALNUM && ( $len < self::MIN_ALNUM_LEN || $len > self::ALNUM_LEN || !ctype_alnum( $value ) ) ) {
-			throw new InvalidInputException( 'Expected ' . self::MIN_ALNUM_LEN . ' to ' . self::ALNUM_LEN . ' char alphanumeric string, got: ' . $value, 'invalid-input' );
+			throw new InvalidInputException( 'Expected ' . self::HEX_LEN .
+				' char hex string, got: ' . $value, 'invalid-input' );
+		} elseif ( $format === static::INPUT_ALNUM &&
+			( $len < self::MIN_ALNUM_LEN || $len > self::ALNUM_LEN || !ctype_alnum( $value ) )
+		) {
+			throw new InvalidInputException( 'Expected ' . self::MIN_ALNUM_LEN . ' to ' .
+				self::ALNUM_LEN . ' char alphanumeric string, got: ' . $value, 'invalid-input' );
 		}
 
 		// If this is not a binary UUID, reject any string containing upper case characters.
@@ -154,14 +155,17 @@ class UUID implements ApiSerializable {
 		if ( is_string( $input ) || is_int( $input ) || $input === false ) {
 			if ( $input === false ) {
 				// new uuid in base 16 and pad to HEX_LEN with 0's
-				$hexValue = str_pad( \UIDGenerator::newTimestampedUID88( 16 ), self::HEX_LEN, '0', STR_PAD_LEFT );
+				$hexValue = str_pad( \UIDGenerator::newTimestampedUID88( 16 ),
+					self::HEX_LEN, '0', STR_PAD_LEFT );
 				return new static( $hexValue, static::INPUT_HEX );
 			} else {
 				$len = strlen( $input );
 				if ( $len === self::BIN_LEN ) {
 					$value = $input;
 					$type = static::INPUT_BIN;
-				} elseif ( $len >= self::MIN_ALNUM_LEN && $len <= self::ALNUM_LEN && ctype_alnum( $input ) ) {
+				} elseif ( $len >= self::MIN_ALNUM_LEN && $len <= self::ALNUM_LEN &&
+					ctype_alnum( $input )
+				) {
 					$value = $input;
 					$type = static::INPUT_ALNUM;
 				} elseif ( $len === self::HEX_LEN && ctype_xdigit( $input ) ) {
@@ -181,11 +185,7 @@ class UUID implements ApiSerializable {
 					throw new InvalidInputException( 'Unknown input to UUID class', 'invalid-input' );
 				}
 
-				if ( isset( self::$instances[$type][$value] ) ) {
-					return self::$instances[$type][$value];
-				} else {
-					return new static( $value, $type );
-				}
+				return self::$instances[$type][$value] ?? new static( $value, $type );
 			}
 		} elseif ( is_array( $input ) ) {
 			// array syntax in the url (?foo[]=bar) will make $input an array
@@ -319,25 +319,6 @@ class UUID implements ApiSerializable {
 	}
 
 	/**
-	 * @param UUID|MWTimestamp|null $relativeTo
-	 * @param User|null $user
-	 * @param Language|null $lang
-	 * @return string|false
-	 * @throws InvalidParameterException
-	 */
-	public function getHumanTimestamp( $relativeTo = null, User $user = null, Language $lang = null ) {
-		if ( $relativeTo instanceof UUID ) {
-			$rel = $relativeTo->getTimestampObj();
-		} elseif ( $relativeTo instanceof MWTimestamp ) {
-			$rel = $relativeTo;
-		} else {
-			throw new InvalidParameterException( 'Expected MWTimestamp or UUID, got ' . get_class( $relativeTo ) );
-		}
-		$ts = $this->getTimestampObj();
-		return $ts ? $ts->getHumanTimestamp( $rel, $user, $lang ) : false;
-	}
-
-	/**
 	 * Takes an array of rows going to/from the database/cache.  Converts uuid and
 	 * things that look like uuids into the requested format.
 	 *
@@ -396,9 +377,9 @@ class UUID implements ApiSerializable {
 		// It should be comparable with UUIDs in binary mode.
 		// Easiest way to do this is to take the 46 MSBs of the UNIX timestamp * 1000
 		// and pad the remaining characters with zeroes.
-		$millitime = wfTimestamp( TS_UNIX, $ts ) * 1000;
+		$millitime = (int)wfTimestamp( TS_UNIX, $ts ) * 1000;
 		// base 10 -> base 2, taking 46 bits
-		$timestampBinary = \Wikimedia\base_convert( $millitime, 10, 2, 46 );
+		$timestampBinary = \Wikimedia\base_convert( (string)$millitime, 10, 2, 46 );
 		// pad out the 46 bits to binary len with 0's
 		$uuidBase2 = str_pad( $timestampBinary, self::BIN_LEN * 8, '0', STR_PAD_RIGHT );
 		// base 2 -> base 16
@@ -457,19 +438,5 @@ class UUID implements ApiSerializable {
 	public static function hex2timestamp( $hex ) {
 		$msTimestamp = hexdec( substr( $hex, 0, 12 ) ) >> 2;
 		return intval( $msTimestamp / 1000 );
-	}
-}
-
-/**
- * Extend Blob so we can identify UUID specific blobs
- */
-class UUIDBlob extends Blob {
-	/**
-	 * We'll want to be able to compare the (string) value of 2 blobs.
-	 *
-	 * @return string
-	 */
-	public function __toString() {
-		return $this->fetch();
 	}
 }

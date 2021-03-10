@@ -1,8 +1,10 @@
 <?php
 
 use Flow\Container;
-use Flow\Model\UUID;
 use Flow\Model\PostRevision;
+use Flow\Model\UUID;
+use Flow\Model\Workflow;
+use MediaWiki\MediaWikiServices;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
@@ -24,7 +26,7 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = "Update xxx_user_wiki field in tables: flow_workflow, flow_tree_revision, flow_revision";
+		$this->addDescription( "Update xxx_user_wiki field in tables: flow_workflow, flow_tree_revision, flow_revision" );
 		$this->requireExtension( 'Flow' );
 		$this->setBatchSize( 300 );
 	}
@@ -89,6 +91,8 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 
 	/**
 	 * Update header
+	 * @param Workflow $workflow
+	 * @param string $wiki
 	 */
 	private function updateHeader( $workflow, $wiki ) {
 		$id = '';
@@ -126,6 +130,8 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 
 	/**
 	 * Update topic list
+	 * @param Workflow $workflow
+	 * @param string $wiki
 	 */
 	private function updateTopicList( $workflow, $wiki ) {
 		$id = '';
@@ -163,6 +169,8 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 
 	/**
 	 * Update post
+	 * @param PostRevision $post
+	 * @param string $wiki
 	 */
 	private function updatePost( $post, $wiki ) {
 		$this->updateHistory( $post, $wiki );
@@ -174,6 +182,8 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 
 	/**
 	 * Update history revision
+	 * @param PostRevision $post
+	 * @param string $wiki
 	 */
 	private function updateHistory( PostRevision $post, $wiki ) {
 		if ( $post->getPrevRevisionId() ) {
@@ -187,6 +197,8 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 
 	/**
 	 * Update either header or post revision
+	 * @param PostRevision $revision
+	 * @param string $wiki
 	 */
 	private function updateRevision( $revision, $wiki ) {
 		if ( !$revision ) {
@@ -210,7 +222,7 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 		if ( !$res ) {
 			throw new \MWException( 'SQL error in maintenance script ' . __CLASS__ . '::' . __METHOD__ );
 		}
-		$this->checkForSlave();
+		$this->checkForReplica();
 
 		if ( $type === 'post' ) {
 			$res = $dbw->update(
@@ -226,16 +238,17 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 			if ( !$res ) {
 				throw new \MWException( 'SQL error in maintenance script ' . __CLASS__ . '::' . __METHOD__ );
 			}
-			$this->checkForSlave();
+			$this->checkForReplica();
 		}
 	}
 
-	private function checkForSlave() {
+	private function checkForReplica() {
 		global $wgFlowCluster;
 
 		$this->updatedCount++;
 		if ( $this->updatedCount > $this->mBatchSize ) {
-			wfWaitForSlaves( false, false, $wgFlowCluster );
+			$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+			$lbFactory->waitForReplication( [ 'cluster' => $wgFlowCluster ] );
 			$this->updatedCount = 0;
 		}
 	}
@@ -250,5 +263,5 @@ class FlowUpdateUserWiki extends LoggedUpdateMaintenance {
 	}
 }
 
-$maintClass = "FlowUpdateUserWiki";
+$maintClass = FlowUpdateUserWiki::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

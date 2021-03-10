@@ -10,7 +10,7 @@ namespace Flow\Data\Utils;
 class Merger {
 
 	/**
-	 * @param array $source input two dimensional array
+	 * @param array[] $source input two dimensional array
 	 * @param string $fromKey Key in nested arrays of $source containing foreign key
 	 * @param callable $callable Callable receiving array of foreign keys returning map
 	 *  from foreign key to its value
@@ -32,16 +32,16 @@ class Merger {
 		if ( !$ids ) {
 			return $source;
 		}
-		$res = call_user_func( $callable, $ids );
+		$res = $callable( $ids );
 		if ( $res === false ) {
-			return false;
+			return [];
 		}
 		foreach ( $source as $idx => $row ) {
 			$id = $row[$fromKey];
 			if ( $id === null ) {
 				continue;
 			}
-			$source[$idx][$name] = isset( $res[$id] ) ? $res[$id] : $default;
+			$source[$idx][$name] = $res[$id] ?? $default;
 		}
 		return $source;
 	}
@@ -76,9 +76,9 @@ class Merger {
 		if ( !$ids ) {
 			return $multiSource;
 		}
-		$res = call_user_func( $callable, array_unique( $ids ) );
+		$res = $callable( array_unique( $ids ) );
 		if ( $res === false ) {
-			return false;
+			return [];
 		}
 		foreach ( $multiSource as $i => $source ) {
 			if ( $source === null ) {
@@ -89,7 +89,7 @@ class Merger {
 				if ( $id === null ) {
 					continue;
 				}
-				$multiSource[$i][$j][$name] = isset( $res[$id] ) ? $res[$id] : $default;
+				$multiSource[$i][$j][$name] = $res[$id] ?? $default;
 			}
 		}
 		return $multiSource;

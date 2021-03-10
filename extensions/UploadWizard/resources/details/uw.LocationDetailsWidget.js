@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * A set of location fields in UploadWizard's "Details" step form.
@@ -254,4 +254,4 @@
 		return ( degrees * 1 ) + ( minutes / 60.0 ) + ( seconds / 3600.0 );
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

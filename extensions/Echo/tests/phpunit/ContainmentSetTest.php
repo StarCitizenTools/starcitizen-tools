@@ -1,8 +1,9 @@
 <?php
 
 /**
- * @covers EchoContainmentSet
+ * @covers \EchoContainmentSet
  * @group Echo
+ * @group Database
  */
 class ContainmentSetTest extends MediaWikiTestCase {
 
@@ -22,22 +23,20 @@ class ContainmentSetTest extends MediaWikiTestCase {
 	}
 
 	public function testCachedListInnerListIsOnlyCalledOnce() {
-		// the global $wgMemc during tests is an EmptyBagOStuff, so it
-		// wont do anything.  We use a HashBagOStuff to get more like a real
-		// client
-		$innerCache = new HashBagOStuff;
+		$innerCache = new HashBagOStuff; // simulate caching
+		$wanCache = new WANObjectCache( [ 'cache' => $innerCache ] );
 
 		$inner = [ 'bing', 'bang' ];
 		// We use a mock instead of the real thing for the $this->once() assertion
 		// verifying that the cache doesn't just keep asking the inner object
-		$list = $this->getMockBuilder( 'EchoArrayList' )
+		$list = $this->getMockBuilder( EchoArrayList::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$list->expects( $this->once() )
 			->method( 'getValues' )
 			->will( $this->returnValue( $inner ) );
 
-		$cached = new EchoCachedList( $innerCache, 'test_key', $list );
+		$cached = new EchoCachedList( $wanCache, 'test_key', $list );
 
 		// First run through should hit the main list, and save to innerCache
 		$this->assertEquals( $inner, $cached->getValues() );
@@ -45,12 +44,12 @@ class ContainmentSetTest extends MediaWikiTestCase {
 
 		// Reinitialize to get a fresh instance that will pull directly from
 		// innerCache without hitting the $list
-		$freshCached = new EchoCachedList( $innerCache, 'test_key', $list );
+		$freshCached = new EchoCachedList( $wanCache, 'test_key', $list );
 		$this->assertEquals( $inner, $freshCached->getValues() );
 	}
 
 	/**
-	 * @Database
+	 * @group Database
 	 */
 	public function testOnWikiList() {
 		$this->editPage( 'User:Foo/Bar-baz', "abc\ndef\r\nghi\n\n\n" );
@@ -65,12 +64,5 @@ class ContainmentSetTest extends MediaWikiTestCase {
 	public function testOnWikiListNonExistant() {
 		$list = new EchoOnWikiList( NS_USER, "Some_Non_Existant_Page" );
 		$this->assertEquals( [], $list->getValues() );
-	}
-
-	protected function editPage( $pageName, $text, $summary = '', $defaultNs = NS_MAIN ) {
-		$title = Title::newFromText( $pageName, $defaultNs );
-		$page = WikiPage::factory( $title );
-
-		return $page->doEditContent( ContentHandler::makeContent( $text, $title ), $summary );
 	}
 }

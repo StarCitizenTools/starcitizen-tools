@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Felipe L. Ewald"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Valide um URL do Flickr usando o ID do usuário (NSID) para a lista negra.\n\nQuando usado com a opção <var>list</var>, retorna todas as ID da lista negra.",
+	"apihelp-flickrblacklist-summary": "Valide um URL do Flickr usando o ID do usuário (NSID) para a lista negra.",
+	"apihelp-flickrblacklist-extended-description": "Quando usado com a opção <var>list</var>, retorna todos os IDs da lista negra.",
+	"apihelp-flickrblacklist-param-url": "O URL do Flickr a ser testado.",
+	"apihelp-flickrblacklist-param-list": "Quando definido, a lista negra completa é retornada. Não pode ser usado em conjunto com $1url.",
+	"apihelp-flickrblacklist-example-1": "Verifique um URL contra a lista negra",
+	"apihelp-flickrblacklist-example-2": "Retorna a lista negra inteira",
+	"apihelp-query+allcampaigns-description": "Enumerar todas as campanhas do UploadWizard.",
+	"apihelp-query+allcampaigns-summary": "Enumerar todas as campanhas do UploadWizard.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Apenas lista as campanhas habilitadas.",
+	"apihelp-query+allcampaigns-param-limit": "Número de campanhas para retornar.",
+	"apihelp-query+allcampaigns-example-1": "Enumerar todas as campanhas"
+}

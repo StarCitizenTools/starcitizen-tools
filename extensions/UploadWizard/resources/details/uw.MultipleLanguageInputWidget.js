@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * A multi-language input field in UploadWizard's "Details" step form.
@@ -28,7 +28,9 @@
 
 		this.required = !!this.config.required;
 		this.addButton = new OO.ui.ButtonWidget( {
-			framed: false,
+			classes: [ 'mwe-upwiz-multipleLanguageInputWidget-addItem' ],
+			framed: true,
+			icon: 'add',
 			flags: [ 'progressive' ],
 			label: this.getLabelText()
 		} );
@@ -60,7 +62,7 @@
 	OO.mixinClass( uw.MultipleLanguageInputWidget, OO.ui.mixin.GroupElement );
 
 	/**
-	 * @param {object} config
+	 * @param {Object} config
 	 * @param {string} [text]
 	 */
 	uw.MultipleLanguageInputWidget.prototype.addLanguageInput = function ( config, text ) {
@@ -191,7 +193,7 @@
 
 		languages = {};
 		for ( code in mw.UploadWizard.config.uwLanguages ) {
-			if ( mw.UploadWizard.config.uwLanguages.hasOwnProperty( code ) ) {
+			if ( Object.prototype.hasOwnProperty.call( mw.UploadWizard.config.uwLanguages, code ) ) {
 				languages[ code ] = mw.UploadWizard.config.uwLanguages[ code ];
 			}
 		}
@@ -230,7 +232,7 @@
 	};
 
 	/**
-	 * @return {object} Object where the properties are language codes & values are input
+	 * @return {Object} Object where the properties are language codes & values are input
 	 */
 	uw.MultipleLanguageInputWidget.prototype.getValues = function () {
 		var values = {},
@@ -296,4 +298,4 @@
 		}
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

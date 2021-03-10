@@ -89,7 +89,7 @@ class UploadWizardConfig {
 			$mergedConfig = true;
 		}
 
-		if ( !is_null( $campaignName ) ) {
+		if ( $campaignName !== null ) {
 			$wgUploadWizardConfig = self::array_replace_sanely(
 				$wgUploadWizardConfig,
 				self::getCampaignConfig( $campaignName )
@@ -150,7 +150,7 @@ class UploadWizardConfig {
 	 * @return array
 	 */
 	protected static function getCampaignConfig( $campaignName ) {
-		if ( !is_null( $campaignName ) ) {
+		if ( $campaignName !== null ) {
 			$campaign = UploadWizardCampaign::newFromName( $campaignName );
 
 			if ( $campaign !== false && $campaign->getIsEnabled() ) {

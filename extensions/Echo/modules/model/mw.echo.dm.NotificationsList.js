@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	/**
 	 * Notifications list data structure.
 	 *
@@ -20,13 +20,13 @@
 	 * @cfg {string} [sourceURL] The URL for the article base of the remote
 	 *  group or wiki
 	 * @cfg {string} [timestamp=0] A timestamp representing the latest item in
-	 *  then list.
+	 *  the list.
 	 */
 	mw.echo.dm.NotificationsList = function MwEchoDmNotificationsList( config ) {
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.dm.NotificationsList.parent.call( this );
+		mw.echo.dm.NotificationsList.super.call( this );
 
 		this.name = config.name || 'local';
 		this.source = config.source || 'local';
@@ -268,4 +268,4 @@
 		return this.getSource() !== 'local';
 	};
 
-}( mediaWiki ) );
+}() );

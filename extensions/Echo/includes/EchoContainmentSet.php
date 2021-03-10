@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\Preferences\MultiUsernameFilter;
+
 /**
  * Utilizes EchoContainmentList interface to provide a fluent interface to whitelist/blacklist
  * from multiple sources like global variables, wiki pages, etc.
@@ -57,10 +59,29 @@ class EchoContainmentSet {
 		$preference = $this->recipient->getOption( $preferenceName, [] );
 
 		if ( $preference ) {
+			$ids = MultiUsernameFilter::splitIds( $preference );
 			$lookup = CentralIdLookup::factory();
-			$names = $lookup->namesFromCentralIds( $preference, $this->recipient );
+			$names = $lookup->namesFromCentralIds( $ids, $this->recipient );
 			$this->addArray( $names );
 		}
+	}
+
+	/**
+	 * Add a list of title IDs from a user preference to the set of lists
+	 * checked by self::contains().
+	 *
+	 * @param string $preferenceName
+	 */
+	public function addTitleIDsFromUserOption( string $preferenceName ) :void {
+		$preference = $this->recipient->getOption( $preferenceName, [] );
+		if ( !is_string( $preference ) ) {
+			// We expect the preference data to be saved as a string via the
+			// preferences form; if the user modified their data so it's no
+			// longer a string, ignore it.
+			return;
+		}
+		$titleIDs = preg_split( '/\n/', $preference, -1, PREG_SPLIT_NO_EMPTY );
+		$this->addArray( $titleIDs );
 	}
 
 	/**
@@ -70,12 +91,14 @@ class EchoContainmentSet {
 	 *
 	 * @param int $namespace An NS_* constant representing the mediawiki namespace of the page containing the list.
 	 * @param string $title The title of the page containing the list.
-	 * @param BagOStuff|null $cache An object to cache the page with or null for no cache.
+	 * @param WANObjectCache|null $cache An object to cache the page with or null for no cache.
 	 * @param string $cacheKeyPrefix A prefix to be combined with the pages latest revision id and used as a cache key.
 	 *
 	 * @throws MWException
 	 */
-	public function addOnWiki( $namespace, $title, BagOStuff $cache = null, $cacheKeyPrefix = '' ) {
+	public function addOnWiki(
+		$namespace, $title, WANObjectCache $cache = null, $cacheKeyPrefix = ''
+	) {
 		$list = new EchoOnWikiList( $namespace, $title );
 		if ( $cache ) {
 			if ( $cacheKeyPrefix === '' ) {

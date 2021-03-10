@@ -11,6 +11,8 @@
 
 /**
  * This is a hack on UploadForm, to make one that works from UploadWizard when JS is not available.
+ *
+ * @codeCoverageIgnore
  */
 class UploadWizardSimpleForm extends UploadForm {
 

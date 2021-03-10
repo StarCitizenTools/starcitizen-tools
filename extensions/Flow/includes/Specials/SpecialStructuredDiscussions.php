@@ -9,8 +9,8 @@ namespace Flow\Specials;
 use Flow\Container;
 use Flow\Data\ObjectManager;
 use Flow\Exception\FlowException;
-use Flow\Model\Workflow;
 use Flow\Model\UUID;
+use Flow\Model\Workflow;
 use Flow\Repository\TreeRepository;
 use FormSpecialPage;
 use HTMLForm;
@@ -30,8 +30,16 @@ class SpecialStructuredDiscussions extends FormSpecialPage {
 	 */
 	protected $uuid;
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct( 'StructuredDiscussions' );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function execute( $par ) {
+		parent::execute( $par );
+		$this->addHelplink( 'Help:Structured_Discussions' );
 	}
 
 	/**

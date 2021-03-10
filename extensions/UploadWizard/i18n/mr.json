@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Anuragbihani94",
 			"Kaajawa",
 			"Mahitgar",
 			"Mvkulkarni23",
@@ -8,8 +9,8 @@
 			"Rahuldeshmukh101",
 			"V.narsikar",
 			"कोल्हापुरी",
-			"संतोष दहिवळ",
-			"Anuragbihani94"
+			"ज्ञानदा गद्रे-फडके",
+			"संतोष दहिवळ"
 		]
 	},
 	"uploadwizard": "चढवय्या सुक्षमता-प्रणाली (अपलोड विझार्ड)",
@@ -93,7 +94,7 @@
 	"mwe-upwiz-upload-error-bad-filename-no-extension": "ह्या विकिस संचिकेचे विस्तारीकरण  - संचिकेच्या नावाशेवटी  \".JPG\" असे हवे",
 	"mwe-upwiz-upload-error-duplicate-filename-error": "तुम्ही  $1 ही  संचिका  चढवण्यास ह्या पुर्वीच सुरुवात केलेली आहे.",
 	"mwe-upwiz-allowed-filename-extensions": "मान्य विस्तारके (एक्स्टेंशन) अशी आहेत:",
-	"mwe-upwiz-upload-error-duplicate": "या विकिवर हि संचिका(file ) यापुर्वी चढवली गेली होती.",
+	"mwe-upwiz-upload-error-duplicate": "या विकिवर ही संचिका(file ) यापूर्वी चढवली गेली होती.",
 	"mwe-upwiz-upload-error-duplicate-archive": "ही संचिका यापूर्वी या विकिवर अपभारीत करण्यात आली होती, पण नंतर वगळण्यात आली.",
 	"mwe-upwiz-upload-error-stashed-anyway": "तरीही अपभारण करावयाचे?",
 	"mwe-upwiz-deleted-duplicate-unknown-filename": "अनोळखी संचिकानाम",
@@ -102,7 +103,6 @@
 	"mwe-upwiz-next": "पुढील",
 	"mwe-upwiz-next-file": "चालू ठेवा",
 	"mwe-upwiz-next-deeds": "पुढील",
-	"mwe-upwiz-next-details": "पुढील",
 	"mwe-upwiz-home": "विकीच्या मुखपृष्ठाकडे जा",
 	"mwe-upwiz-upload-another": "आणखी संचिका चढवा",
 	"mwe-upwiz-prevent-close": "आपण अद्याप अपभारण प्रक्रिया संपविलेली नाही!",
@@ -206,6 +206,5 @@
 	"mwe-upwiz-prefs-def-license": "डिफॉल्ट परवाना",
 	"mwe-upwiz-prefs-def-license-def": "जे काही अविचल (डिफॉल्ट) असेल ते वापरा",
 	"mwe-upwiz-prefs-license-own": "स्वतःची निर्मिती - $1",
-	"mwe-upwiz-prefs-license-thirdparty": "दुसऱ्या कोणाचीतरी निर्मिती - $1",
-	"mwe-upwiz-prefs-chunked": "$1 पेक्षा जास्त असलेल्या संचिका तुकडे करून अपभारणासाठी असलेला अपभारण जादूगार(विझार्ड) - $2 पासून $3 असा संचिकाआकार वाढविते"
+	"mwe-upwiz-prefs-license-thirdparty": "दुसऱ्या कोणाचीतरी निर्मिती - $1"
 }

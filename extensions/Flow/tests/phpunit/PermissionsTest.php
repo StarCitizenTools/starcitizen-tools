@@ -10,6 +10,10 @@ use Flow\RevisionActionPermissions;
 use User;
 
 /**
+ * @covers \Flow\Model\AbstractRevision
+ * @covers \Flow\Model\PostRevision
+ * @covers \Flow\RevisionActionPermissions
+ *
  * @group Database
  * @group Flow
  */
@@ -87,9 +91,9 @@ class PermissionsTest extends PostRevisionTestCase {
 	/**
 	 * @var User
 	 */
-	protected $oversightUser;
+	protected $suppressUser;
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 
 		// We don't want local config getting in the way of testing whether or
@@ -98,10 +102,6 @@ class PermissionsTest extends PostRevisionTestCase {
 
 		// load actions object
 		$this->actions = Container::get( 'flow_actions' );
-	}
-
-	protected function tearDown() {
-		parent::tearDown();
 	}
 
 	/**
@@ -126,134 +126,137 @@ class PermissionsTest extends PostRevisionTestCase {
 	public function permissionsProvider() {
 		return [
 			// anon users can submit content, but not moderate
-			[ $this->anonUser(), null, 'create-header', true ],
-			// array( $this->anonUser(), $this->header(), 'edit-header', true ),
-			[ $this->anonUser(), $this->topic(), 'edit-title', true ],
-			[ $this->anonUser(), null, 'new-post', true ],
-			[ $this->anonUser(), $this->post(), 'edit-post', false ],
-			[ $this->anonUser(), $this->post(), 'hide-post', true ],
-			[ $this->anonUser(), $this->topic(), 'hide-topic', true ],
-			[ $this->anonUser(), $this->topic(), 'lock-topic', false ],
-			[ $this->anonUser(), $this->post(), 'delete-post', false ],
-			[ $this->anonUser(), $this->topic(), 'delete-topic', false ],
-			[ $this->anonUser(), $this->post(), 'suppress-post', false ],
-			[ $this->anonUser(), $this->topic(), 'suppress-topic', false ],
-			[ $this->anonUser(), $this->post(), 'restore-post', false ],
-			[ $this->anonUser(), $this->topic(), 'restore-topic', false ],
-			[ $this->anonUser(), $this->post(), 'history', true ],
-			[ $this->anonUser(), $this->post(), 'view', true ],
-			[ $this->anonUser(), $this->post(), 'reply', true ],
+			[ 'anonUser', null, 'create-header', true ],
+			// array( 'anonUser', 'header', 'edit-header', true ),
+			[ 'anonUser', 'topic', 'edit-title', true ],
+			[ 'anonUser', null, 'new-post', true ],
+			[ 'anonUser', 'post', 'edit-post', false ],
+			[ 'anonUser', 'post', 'hide-post', true ],
+			[ 'anonUser', 'topic', 'hide-topic', true ],
+			[ 'anonUser', 'topic', 'lock-topic', false ],
+			[ 'anonUser', 'post', 'delete-post', false ],
+			[ 'anonUser', 'topic', 'delete-topic', false ],
+			[ 'anonUser', 'post', 'suppress-post', false ],
+			[ 'anonUser', 'topic', 'suppress-topic', false ],
+			[ 'anonUser', 'post', 'restore-post', false ],
+			[ 'anonUser', 'topic', 'restore-topic', false ],
+			[ 'anonUser', 'post', 'history', true ],
+			[ 'anonUser', 'post', 'view', true ],
+			[ 'anonUser', 'post', 'reply', true ],
 
 			// unconfirmed users can also hide posts...
-			[ $this->unconfirmedUser(), null, 'create-header', true ],
-			// array( $this->unconfirmedUser(), $this->header(), 'edit-header', true ),
-			[ $this->unconfirmedUser(), $this->topic(), 'edit-title', true ],
-			[ $this->unconfirmedUser(), null, 'new-post', true ],
-			[ $this->unconfirmedUser(), $this->post(), 'edit-post', true ], // can edit own post
-			[ $this->unconfirmedUser(), $this->post(), 'hide-post', true ],
-			[ $this->unconfirmedUser(), $this->topic(), 'hide-topic', true ],
-			[ $this->unconfirmedUser(), $this->topic(), 'lock-topic', true ],
-			[ $this->unconfirmedUser(), $this->post(), 'delete-post', false ],
-			[ $this->unconfirmedUser(), $this->topic(), 'delete-topic', false ],
-			[ $this->unconfirmedUser(), $this->post(), 'suppress-post', false ],
-			[ $this->unconfirmedUser(), $this->topic(), 'suppress-topic', false ],
-			[ $this->unconfirmedUser(), $this->post(), 'restore-post', false ], // $this->post is not hidden
-			[ $this->unconfirmedUser(), $this->topic(), 'restore-topic', false ], // $this->topic is not hidden
-			[ $this->unconfirmedUser(), $this->post(), 'history', true ],
-			[ $this->unconfirmedUser(), $this->post(), 'view', true ],
-			[ $this->unconfirmedUser(), $this->post(), 'reply', true ],
+			[ 'unconfirmedUser', null, 'create-header', true ],
+			// array( 'unconfirmedUser', 'header', 'edit-header', true ),
+			[ 'unconfirmedUser', 'topic', 'edit-title', true ],
+			[ 'unconfirmedUser', null, 'new-post', true ],
+			[ 'unconfirmedUser', 'post', 'edit-post', true ], // can edit own post
+			[ 'unconfirmedUser', 'post', 'hide-post', true ],
+			[ 'unconfirmedUser', 'topic', 'hide-topic', true ],
+			[ 'unconfirmedUser', 'topic', 'lock-topic', true ],
+			[ 'unconfirmedUser', 'post', 'delete-post', false ],
+			[ 'unconfirmedUser', 'topic', 'delete-topic', false ],
+			[ 'unconfirmedUser', 'post', 'suppress-post', false ],
+			[ 'unconfirmedUser', 'topic', 'suppress-topic', false ],
+			[ 'unconfirmedUser', 'post', 'restore-post', false ], // $this->post is not hidden
+			[ 'unconfirmedUser', 'topic', 'restore-topic', false ], // $this->topic is not hidden
+			[ 'unconfirmedUser', 'post', 'history', true ],
+			[ 'unconfirmedUser', 'post', 'view', true ],
+			[ 'unconfirmedUser', 'post', 'reply', true ],
 
 			// ... as well as restore hidden posts
-			[ $this->unconfirmedUser(), $this->hiddenPost(), 'restore-post', true ],
-			[ $this->unconfirmedUser(), $this->hiddenTopic(), 'restore-topic', true ],
+			[ 'unconfirmedUser', 'hiddenPost', 'restore-post', true ],
+			[ 'unconfirmedUser', 'hiddenTopic', 'restore-topic', true ],
 
 			// ... but not restore deleted/suppressed posts
-			[ $this->unconfirmedUser(), $this->deletedPost(), 'restore-post', false ],
-			[ $this->unconfirmedUser(), $this->deletedTopic(), 'restore-topic', false ],
-			[ $this->unconfirmedUser(), $this->suppressedPost(), 'restore-post', false ],
-			[ $this->unconfirmedUser(), $this->suppressedTopic(), 'restore-topic', false ],
+			[ 'unconfirmedUser', 'deletedPost', 'restore-post', false ],
+			[ 'unconfirmedUser', 'deletedTopic', 'restore-topic', false ],
+			[ 'unconfirmedUser', 'suppressedPost', 'restore-post', false ],
+			[ 'unconfirmedUser', 'suppressedTopic', 'restore-topic', false ],
 
 			// confirmed users are the same as unconfirmed users, in terms of permissions
-			[ $this->confirmedUser(), null, 'create-header', true ],
-			// array( $this->confirmedUser(), $this->header(), 'edit-header', true ),
-			[ $this->confirmedUser(), $this->topic(), 'edit-title', true ],
-			[ $this->confirmedUser(), null, 'new-post', true ],
-			[ $this->confirmedUser(), $this->post(), 'edit-post', false ],
-			[ $this->confirmedUser(), $this->post(), 'hide-post', true ],
-			[ $this->confirmedUser(), $this->topic(), 'hide-topic', true ],
-			[ $this->confirmedUser(), $this->post(), 'delete-post', false ],
-			[ $this->confirmedUser(), $this->topic(), 'delete-topic', false ],
-			[ $this->confirmedUser(), $this->topic(), 'lock-topic', true ],
-			[ $this->confirmedUser(), $this->post(), 'suppress-post', false ],
-			[ $this->confirmedUser(), $this->topic(), 'suppress-topic', false ],
-			[ $this->confirmedUser(), $this->post(), 'restore-post', false ], // $this->post is not hidden
-			[ $this->confirmedUser(), $this->topic(), 'restore-topic', false ], // $this->topic is not hidden
-			[ $this->confirmedUser(), $this->post(), 'history', true ],
-			[ $this->confirmedUser(), $this->post(), 'view', true ],
-			[ $this->confirmedUser(), $this->post(), 'reply', true ],
-			[ $this->confirmedUser(), $this->hiddenPost(), 'restore-post', true ],
-			[ $this->confirmedUser(), $this->hiddenTopic(), 'restore-topic', true ],
-			[ $this->confirmedUser(), $this->deletedPost(), 'restore-post', false ],
-			[ $this->confirmedUser(), $this->deletedTopic(), 'restore-topic', false ],
-			[ $this->confirmedUser(), $this->suppressedPost(), 'restore-post', false ],
-			[ $this->confirmedUser(), $this->suppressedTopic(), 'restore-topic', false ],
+			[ 'confirmedUser', null, 'create-header', true ],
+			// array( 'confirmedUser', 'header', 'edit-header', true ),
+			[ 'confirmedUser', 'topic', 'edit-title', true ],
+			[ 'confirmedUser', null, 'new-post', true ],
+			[ 'confirmedUser', 'post', 'edit-post', false ],
+			[ 'confirmedUser', 'post', 'hide-post', true ],
+			[ 'confirmedUser', 'topic', 'hide-topic', true ],
+			[ 'confirmedUser', 'post', 'delete-post', false ],
+			[ 'confirmedUser', 'topic', 'delete-topic', false ],
+			[ 'confirmedUser', 'topic', 'lock-topic', true ],
+			[ 'confirmedUser', 'post', 'suppress-post', false ],
+			[ 'confirmedUser', 'topic', 'suppress-topic', false ],
+			[ 'confirmedUser', 'post', 'restore-post', false ], // $this->post is not hidden
+			[ 'confirmedUser', 'topic', 'restore-topic', false ], // $this->topic is not hidden
+			[ 'confirmedUser', 'post', 'history', true ],
+			[ 'confirmedUser', 'post', 'view', true ],
+			[ 'confirmedUser', 'post', 'reply', true ],
+			[ 'confirmedUser', 'hiddenPost', 'restore-post', true ],
+			[ 'confirmedUser', 'hiddenTopic', 'restore-topic', true ],
+			[ 'confirmedUser', 'deletedPost', 'restore-post', false ],
+			[ 'confirmedUser', 'deletedTopic', 'restore-topic', false ],
+			[ 'confirmedUser', 'suppressedPost', 'restore-post', false ],
+			[ 'confirmedUser', 'suppressedTopic', 'restore-topic', false ],
 
 			// sysops can do all (incl. editing posts) but suppressing
-			[ $this->sysopUser(), null, 'create-header', true ],
-			// array( $this->sysopUser(), $this->header(), 'edit-header', true ),
-			[ $this->sysopUser(), $this->topic(), 'edit-title', true ],
-			[ $this->sysopUser(), null, 'new-post', true ],
-			[ $this->sysopUser(), $this->post(), 'edit-post', true ],
-			[ $this->sysopUser(), $this->post(), 'hide-post', true ],
-			[ $this->sysopUser(), $this->topic(), 'hide-topic', true ],
-			[ $this->sysopUser(), $this->topic(), 'lock-topic', true ],
-			[ $this->sysopUser(), $this->post(), 'delete-post', true ],
-			[ $this->sysopUser(), $this->topic(), 'delete-topic', true ],
-			[ $this->sysopUser(), $this->post(), 'suppress-post', false ],
-			[ $this->sysopUser(), $this->topic(), 'suppress-topic', false ],
-			[ $this->sysopUser(), $this->post(), 'restore-post', false ], // $this->post is not hidden
-			[ $this->sysopUser(), $this->topic(), 'restore-topic', false ], // $this->topic is not hidden
-			[ $this->sysopUser(), $this->topic(), 'history', true ],
-			[ $this->sysopUser(), $this->post(), 'view', true ],
-			[ $this->sysopUser(), $this->post(), 'reply', true ],
-			[ $this->sysopUser(), $this->hiddenPost(), 'restore-post', true ],
-			[ $this->sysopUser(), $this->hiddenTopic(), 'restore-topic', true ],
-			[ $this->sysopUser(), $this->deletedPost(), 'restore-post', true ],
-			[ $this->sysopUser(), $this->deletedTopic(), 'restore-topic', true ],
-			[ $this->sysopUser(), $this->suppressedPost(), 'restore-post', false ],
-			[ $this->sysopUser(), $this->suppressedTopic(), 'restore-topic', false ],
+			[ 'sysopUser', null, 'create-header', true ],
+			// array( 'sysopUser', 'header', 'edit-header', true ),
+			[ 'sysopUser', 'topic', 'edit-title', true ],
+			[ 'sysopUser', null, 'new-post', true ],
+			[ 'sysopUser', 'post', 'edit-post', true ],
+			[ 'sysopUser', 'post', 'hide-post', true ],
+			[ 'sysopUser', 'topic', 'hide-topic', true ],
+			[ 'sysopUser', 'topic', 'lock-topic', true ],
+			[ 'sysopUser', 'post', 'delete-post', true ],
+			[ 'sysopUser', 'topic', 'delete-topic', true ],
+			[ 'sysopUser', 'post', 'suppress-post', false ],
+			[ 'sysopUser', 'topic', 'suppress-topic', false ],
+			[ 'sysopUser', 'post', 'restore-post', false ], // $this->post is not hidden
+			[ 'sysopUser', 'topic', 'restore-topic', false ], // $this->topic is not hidden
+			[ 'sysopUser', 'topic', 'history', true ],
+			[ 'sysopUser', 'post', 'view', true ],
+			[ 'sysopUser', 'post', 'reply', true ],
+			[ 'sysopUser', 'hiddenPost', 'restore-post', true ],
+			[ 'sysopUser', 'hiddenTopic', 'restore-topic', true ],
+			[ 'sysopUser', 'deletedPost', 'restore-post', true ],
+			[ 'sysopUser', 'deletedTopic', 'restore-topic', true ],
+			[ 'sysopUser', 'suppressedPost', 'restore-post', false ],
+			[ 'sysopUser', 'suppressedTopic', 'restore-topic', false ],
 
-			// oversighters can do everything + suppress (but not edit!)
-			[ $this->oversightUser(), null, 'create-header', true ],
-			// array( $this->oversightUser(), $this->header(), 'edit-header', true ),
-			[ $this->oversightUser(), $this->topic(), 'edit-title', true ],
-			[ $this->oversightUser(), null, 'new-post', true ],
-			[ $this->oversightUser(), $this->post(), 'edit-post', false ],
-			[ $this->oversightUser(), $this->post(), 'hide-post', true ],
-			[ $this->oversightUser(), $this->topic(), 'hide-topic', true ],
-			[ $this->oversightUser(), $this->topic(), 'lock-topic', true ],
-			[ $this->oversightUser(), $this->post(), 'delete-post', true ],
-			[ $this->oversightUser(), $this->topic(), 'delete-topic', true ],
-			[ $this->oversightUser(), $this->post(), 'suppress-post', true ],
-			[ $this->oversightUser(), $this->topic(), 'suppress-topic', true ],
-			[ $this->oversightUser(), $this->post(), 'restore-post', false ], // $this->post is not hidden
-			[ $this->oversightUser(), $this->topic(), 'restore-topic', false ], // $this->topic is not hidden
-			[ $this->oversightUser(), $this->post(), 'history', true ],
-			[ $this->oversightUser(), $this->post(), 'view', true ],
-			[ $this->oversightUser(), $this->post(), 'reply', true ],
-			[ $this->oversightUser(), $this->hiddenPost(), 'restore-post', true ],
-			[ $this->oversightUser(), $this->hiddenTopic(), 'restore-topic', true ],
-			[ $this->oversightUser(), $this->deletedPost(), 'restore-post', true ],
-			[ $this->oversightUser(), $this->deletedTopic(), 'restore-topic', true ],
-			[ $this->oversightUser(), $this->suppressedPost(), 'restore-post', true ],
-			[ $this->oversightUser(), $this->suppressedTopic(), 'restore-topic', true ],
+			// suppressors can do everything + suppress (but not edit!)
+			[ 'suppressUser', null, 'create-header', true ],
+			// array( 'suppressUser', 'header', 'edit-header', true ),
+			[ 'suppressUser', 'topic', 'edit-title', true ],
+			[ 'suppressUser', null, 'new-post', true ],
+			[ 'suppressUser', 'post', 'edit-post', false ],
+			[ 'suppressUser', 'post', 'hide-post', true ],
+			[ 'suppressUser', 'topic', 'hide-topic', true ],
+			[ 'suppressUser', 'topic', 'lock-topic', true ],
+			[ 'suppressUser', 'post', 'delete-post', true ],
+			[ 'suppressUser', 'topic', 'delete-topic', true ],
+			[ 'suppressUser', 'post', 'suppress-post', true ],
+			[ 'suppressUser', 'topic', 'suppress-topic', true ],
+			[ 'suppressUser', 'post', 'restore-post', false ], // $this->post is not hidden
+			[ 'suppressUser', 'topic', 'restore-topic', false ], // $this->topic is not hidden
+			[ 'suppressUser', 'post', 'history', true ],
+			[ 'suppressUser', 'post', 'view', true ],
+			[ 'suppressUser', 'post', 'reply', true ],
+			[ 'suppressUser', 'hiddenPost', 'restore-post', true ],
+			[ 'suppressUser', 'hiddenTopic', 'restore-topic', true ],
+			[ 'suppressUser', 'deletedPost', 'restore-post', true ],
+			[ 'suppressUser', 'deletedTopic', 'restore-topic', true ],
+			[ 'suppressUser', 'suppressedPost', 'restore-post', true ],
+			[ 'suppressUser', 'suppressedTopic', 'restore-topic', true ],
 		];
 	}
 
 	/**
 	 * @dataProvider permissionsProvider
 	 */
-	public function testPermissions( User $user, PostRevision $revision = null, $action, $expected ) {
+	public function testPermissions( $userGetterName, $revisionGetterName, $action, $expected ) {
+		$user = $this->$userGetterName();
+		$revision = $revisionGetterName ? $this->$revisionGetterName() : null;
+
 		$permissions = new RevisionActionPermissions( $this->actions, $user );
 		$this->assertEquals( $expected, $permissions->isRevisionAllowed( $revision, $action ) );
 	}
@@ -296,14 +299,14 @@ class PermissionsTest extends PostRevisionTestCase {
 		return $this->sysopUser;
 	}
 
-	protected function oversightUser() {
-		if ( !$this->oversightUser ) {
-			$this->oversightUser = User::newFromName( 'UTFlowOversight' );
-			$this->oversightUser->addToDatabase();
-			$this->oversightUser->addGroup( 'oversight' );
+	protected function suppressUser() {
+		if ( !$this->suppressUser ) {
+			$this->suppressUser = User::newFromName( 'UTFlowSuppress' );
+			$this->suppressUser->addToDatabase();
+			$this->suppressUser->addGroup( 'suppress' );
 		}
 
-		return $this->oversightUser;
+		return $this->suppressUser;
 	}
 
 	protected function topic() {

@@ -2,8 +2,8 @@
 
 namespace Flow\Formatter;
 
-use Flow\FlowActions;
 use Flow\Data\ManagerGroup;
+use Flow\FlowActions;
 use Flow\Model\AbstractRevision;
 use Flow\Model\UUID;
 use Flow\Repository\TreeRepository;
@@ -11,11 +11,11 @@ use Flow\Repository\TreeRepository;
 abstract class HistoryQuery extends AbstractQuery {
 	// This requests extra to take into account that we will filter some out,
 	// to try to reduce the number of rounds (preferably to 1).
-	// If you raise this, also increase history_index_limit and bump the
-	// key of the indexes using history_index_limit
+	// If you raise this, also increase FLOW_HISTORY_INDEX_LIMIT and bump the
+	// key of the indexes using FLOW_HISTORY_INDEX_LIMIT
 	// This magic number is based on new-post/new-topic being about 26% of post revisions.
 	// (queried from production), since that is the only thing currently excluded.
-	const POST_OVERFETCH_FACTOR = 1.36;
+	protected const POST_OVERFETCH_FACTOR = 1.36;
 
 	/**
 	 * @var FlowActions
@@ -53,7 +53,7 @@ abstract class HistoryQuery extends AbstractQuery {
 	 *  the offset.  'rev' means to get items newer.  Either way, an individual page is
 	 *  eventually returned and displayed in descending order.
 	 * @param int $limit Maximum number of items
-	 * @param UUID $offset UUID to use as offset (optional)
+	 * @param UUID|null $offset UUID to use as offset (optional)
 	 * @return array Associative array of options for query
 	 */
 	protected function getOptions( $direction, $limit, UUID $offset = null ) {
@@ -79,7 +79,7 @@ abstract class HistoryQuery extends AbstractQuery {
 	 * @param string $storageClass Storage class ID
 	 * @param array $attributes Query attriutes
 	 * @param array $options Query options, including offset-id and limit
-	 * @param int $overfetchFactor Factor to overfetch by to anticipate excludes
+	 * @param float $overfetchFactor Factor to overfetch by to anticipate excludes
 	 * @return array Array of history rows
 	 */
 	protected function doInternalQueries( $storageClass, $attributes, $options, $overfetchFactor ) {

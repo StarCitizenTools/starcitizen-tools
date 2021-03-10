@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Protnet"
+		]
+	},
+	"apihelp-flickrblacklist-param-url": "Η προς δοκιμή διεύθυνση URL του Flickr.",
+	"apihelp-flickrblacklist-example-1": "Έλεγχος διεύθυνσης URL στη μαύρη λίστα",
+	"apihelp-flickrblacklist-example-2": "Επιστροφή ολόκληρης της μαύρης λίστας",
+	"apihelp-query+allcampaigns-description": "Απαρίθμηση όλων των εκστρατειών του Οδηγού Ανεβάσματος."
+}

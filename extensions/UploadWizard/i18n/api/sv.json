@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lokal Profil",
+			"WikiPhoenix"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Validera en Flickr-URL genom att använda användar-ID:et (NSID) för svartlistning.\n\nNär detta används med alternativet <var>list</var>, returnerar alla svartlistade ID:n.",
+	"apihelp-flickrblacklist-summary": "Validera en Flickr-URL med hjälp av användar-ID (NSID) för svartlistor.",
+	"apihelp-flickrblacklist-extended-description": "Returnerar alla svartlistade ID:n när det används med alternativet <var>list</var>.",
+	"apihelp-flickrblacklist-param-url": "Webbadress till Flickr att testa.",
+	"apihelp-flickrblacklist-param-list": "När angiven, returneras den kompletta svartlistan. Kan inte användas tillsammans med $1url.",
+	"apihelp-flickrblacklist-example-1": "Kontrollera en URL-adress mot svartlistan",
+	"apihelp-flickrblacklist-example-2": "Returnera hela svartlistan",
+	"apihelp-query+allcampaigns-description": "Räkna upp alla UploadWizard-kampanjer.",
+	"apihelp-query+allcampaigns-summary": "Räkna upp alla UploadWizard-kampanjer.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Lista enbart kampanjer som är aktiverade.",
+	"apihelp-query+allcampaigns-param-limit": "Antal kampanjer att returnera.",
+	"apihelp-query+allcampaigns-example-1": "Räkna upp aktiverade kampanjer"
+}

@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, $, uw, OO ) {
+( function ( uw ) {
 	/**
 	 * Represents the UI for the wizard's Details step.
 	 *
@@ -41,7 +41,7 @@
 			.attr( 'id', 'mwe-upwiz-details-warning-count' );
 
 		this.nextButton = new OO.ui.ButtonWidget( {
-			label: mw.message( 'mwe-upwiz-next-details' ).text(),
+			label: mw.message( 'mwe-upwiz-publish-details' ).text(),
 			flags: [ 'progressive', 'primary' ]
 		} ).on( 'click', startDetails );
 
@@ -72,12 +72,26 @@
 	uw.ui.Details.prototype.load = function ( uploads ) {
 		uw.ui.Step.prototype.load.call( this, uploads );
 
+		if ( mw.UploadWizard.config.wikibase.enabled && mw.UploadWizard.config.wikibase.captions ) {
+			this.$div.prepend(
+				$( '<div>' )
+					.addClass( 'mwe-upwiz-license-metadata ui-corner-all' )
+					.append(
+						$( '<h4>' ).text( mw.msg( 'mwe-upwiz-license-metadata-title' ) ),
+						$( '<p>' ).append( mw.message( 'mwe-upwiz-license-metadata-content' ).parseDom() )
+							// wikitext links in i18n messages don't support target=_blank, but we
+							// really don't want to take people away from their uploads...
+							.find( 'a' ).attr( 'target', '_blank' ).end()
+					)
+			);
+		}
+
 		if ( uploads.filter( this.needsPatentAgreement.bind( this ) ).length > 0 ) {
 			this.$div.prepend(
 				$( '<div>' )
 					.addClass( 'mwe-upwiz-patent-weapon-policy ui-corner-all' )
 					.append(
-						$( '<p>' ).append( mw.msg( 'mwe-upwiz-patent-weapon-policy' ) ),
+						$( '<p>' ).text( mw.msg( 'mwe-upwiz-patent-weapon-policy' ) ),
 						$( '<p>' ).append(
 							$( '<a>' )
 								.text( mw.msg( 'mwe-upwiz-patent-weapon-policy-link' ) )
@@ -196,6 +210,7 @@
 
 		if ( errorCount > 0 ) {
 			// Errors supersede warnings, so stop any animating to the warnings before we animate to the errors
+			// eslint-disable-next-line no-jquery/no-global-selector
 			$( 'html, body' ).stop();
 
 			this.$errorCount
@@ -203,6 +218,7 @@
 				// TODO The IconWidget and 'warning' flag is specific to MediaWiki theme, looks weird in Apex
 				.prepend( new OO.ui.IconWidget( { icon: 'alert', flags: [ 'warning' ] } ).$element, ' ' );
 			// Scroll to the first error
+			// eslint-disable-next-line no-jquery/no-global-selector
 			$( 'html, body' ).animate( { scrollTop: $( $errorElements[ 0 ] ).offset().top - 50 }, 'slow' );
 		} else {
 			this.$errorCount.empty();
@@ -233,6 +249,7 @@
 				// TODO The IconWidget is specific to MediaWiki theme, looks weird in Apex
 				.prepend( new OO.ui.IconWidget( { icon: 'info' } ).$element, ' ' );
 			// Scroll to the first warning
+			// eslint-disable-next-line no-jquery/no-global-selector
 			$( 'html, body' ).animate( { scrollTop: $( $warningElements[ 0 ] ).offset().top - 50 }, 'slow' );
 		} else {
 			this.$warningCount.empty();
@@ -246,7 +263,7 @@
 	uw.ui.Details.prototype.needsPatentAgreement = function ( upload ) {
 		var extensions = mw.UploadWizard.config.patents.extensions;
 
-		return $.inArray( upload.title.getExtension().toLowerCase(), extensions ) >= 0;
+		return extensions.indexOf( upload.title.getExtension().toLowerCase() ) !== -1;
 	};
 
-}( mediaWiki, jQuery, mediaWiki.uploadWizard, OO ) );
+}( mw.uploadWizard ) );

@@ -1,4 +1,10 @@
 <?php
+
+use MediaWiki\Linker\LinkTarget;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Storage\EditResult;
+use MediaWiki\User\UserIdentity;
+
 /**
  * Hooks for managing JSON Schema namespace and content model.
  *
@@ -36,23 +42,23 @@ class CampaignHooks {
 	 * Acts everytime a page in the NS_CAMPAIGN namespace is saved
 	 *
 	 * @param WikiPage $wikiPage
-	 * @param User $user
-	 * @param Content $content
+	 * @param UserIdentity $userIdentity
 	 * @param string $summary
-	 * @param bool $isMinor
-	 * @param bool $isWatch
-	 * @param string $section
 	 * @param int $flags
-	 * @param Revision $revision
-	 * @param Status $status
-	 * @param int $baseRevId
+	 * @param RevisionRecord $revisionRecord
+	 * @param EditResult $editResult
 	 *
 	 * @return bool
 	 */
-	public static function onPageContentSaveComplete(
-		WikiPage $wikiPage, $user, $content, $summary, $isMinor, $isWatch,
-		$section, $flags, $revision, $status, $baseRevId
+	public static function onPageSaveComplete(
+		WikiPage $wikiPage,
+		UserIdentity $userIdentity,
+		string $summary,
+		int $flags,
+		RevisionRecord $revisionRecord,
+		EditResult $editResult
 	) {
+		$content = $wikiPage->getContent();
 		if ( !$content instanceof CampaignContent ) {
 			return true;
 		}
@@ -61,21 +67,23 @@ class CampaignHooks {
 
 		$campaignData = $content->getJsonData();
 		$insertData = [
-			'campaign_enabled' => $campaignData['enabled'] ? 1 : 0
+			'campaign_enabled' => $campaignData !== null && $campaignData['enabled'] ? 1 : 0
 		];
 		$success = $dbw->upsert(
 			'uw_campaigns',
-			array_merge( [
-				'campaign_name' => $wikiPage->getTitle()->getDBkey()
-			], $insertData ),
-			[ 'campaign_name' ],
-			$insertData
+			array_merge(
+				[ 'campaign_name' => $wikiPage->getTitle()->getDBkey() ],
+				$insertData
+			),
+			'campaign_name',
+			$insertData,
+			__METHOD__
 		);
 
 		$campaign = new UploadWizardCampaign( $wikiPage->getTitle(), $content->getJsonData() );
 		$dbw->onTransactionPreCommitOrIdle( function () use ( $campaign ) {
 			$campaign->invalidateCache();
-		} );
+		}, __METHOD__ );
 
 		return $success;
 	}
@@ -99,6 +107,7 @@ class CampaignHooks {
 
 		return true;
 	}
+
 	/**
 	 * Deletes entries from uc_campaigns table when a Campaign is deleted
 	 * @param Article $article
@@ -116,28 +125,38 @@ class CampaignHooks {
 			return true;
 		}
 
+		$fname = __METHOD__;
 		$dbw = wfGetDB( DB_MASTER );
-		$dbw->onTransactionPreCommitOrIdle( function () use ( $dbw, $article ) {
+		$dbw->onTransactionPreCommitOrIdle( function () use ( $dbw, $article, $fname ) {
 			$dbw->delete(
 				'uw_campaigns',
-				[ 'campaign_name' => $article->getTitle()->getDBKey() ]
+				[ 'campaign_name' => $article->getTitle()->getDBkey() ],
+				$fname
 			);
-		} );
+		}, $fname );
 
 		return true;
 	}
 
 	/**
 	 * Update campaign names when the Campaign page moves
-	 * @param Title $oldTitle
-	 * @param Title $newTitle
-	 * @param User $user
+	 * @param LinkTarget $oldTitle
+	 * @param LinkTarget $newTitle
+	 * @param UserIdentity $user
 	 * @param int $pageid
 	 * @param int $redirid
+	 * @param string $reason
+	 * @param RevisionRecord $revisionRecord
 	 * @return bool
 	 */
-	public static function onTitleMoveComplete(
-		Title $oldTitle, Title $newTitle, $user, $pageid, $redirid
+	public static function onPageMoveComplete(
+		LinkTarget $oldTitle,
+		LinkTarget $newTitle,
+		UserIdentity $user,
+		int $pageid,
+		int $redirid,
+		string $reason,
+		RevisionRecord $revisionRecord
 	) {
 		if ( !$oldTitle->inNamespace( NS_CAMPAIGN ) ) {
 			return true;
@@ -146,8 +165,9 @@ class CampaignHooks {
 		$dbw = wfGetDB( DB_MASTER );
 		$success = $dbw->update(
 			'uw_campaigns',
-			[ 'campaign_name' => $newTitle->getDBKey() ],
-			[ 'campaign_name' => $oldTitle->getDBKey() ]
+			[ 'campaign_name' => $newTitle->getDBkey() ],
+			[ 'campaign_name' => $oldTitle->getDBkey() ],
+			__METHOD__
 		);
 
 		return $success;

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kaganer",
+			"Okras"
+		]
+	},
+	"apihelp-flickrblacklist-param-url": "URL-адрес на Flickr, который должен быть проверен.",
+	"apihelp-flickrblacklist-param-list": "При установке возвращается полный чёрный список. Не может использоваться вместе с $1url.",
+	"apihelp-flickrblacklist-example-1": "Проверить URL-адрес по чёрному списку",
+	"apihelp-flickrblacklist-example-2": "Вернуть запись чёрного списка",
+	"apihelp-query+allcampaigns-description": "Перечислить все кампании Мастера загрузки.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Список только тех кампаний, которые сейчас активны.",
+	"apihelp-query+allcampaigns-param-limit": "Возвращаемое число кампаний.",
+	"apihelp-query+allcampaigns-example-1": "Перечислить включённые кампании"
+}

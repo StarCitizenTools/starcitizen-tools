@@ -1,6 +1,8 @@
 <?php
 
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
 
 /**
  * Immutable class to represent an event.
@@ -8,41 +10,46 @@ use MediaWiki\Logger\LoggerFactory;
  */
 class EchoEvent extends EchoAbstractEntity implements Bundleable {
 
+	/** @var string|null */
 	protected $type = null;
+	/** @var int|null|false */
 	protected $id = null;
+	/** @var string|null */
 	protected $variant = null;
 	/**
-	 * @var User
+	 * @var User|null
 	 */
 	protected $agent = null;
 
 	/**
 	 * Loaded dynamically on request
 	 *
-	 * @var Title
+	 * @var Title|null
 	 */
 	protected $title = null;
+	/** @var int|null */
 	protected $pageId = null;
 
 	/**
 	 * Loaded dynamically on request
 	 *
-	 * @var Revision
+	 * @var RevisionRecord|null
 	 */
 	protected $revision = null;
 
+	/** @var array */
 	protected $extra = [];
 
 	/**
 	 * Notification timestamp
-	 * @var string
+	 * @var string|null
 	 */
 	protected $timestamp = null;
 
 	/**
 	 * A hash used to bundle a set of events, events that can be
 	 * grouped for a user has the same bundle hash
-	 * @var string
+	 * @var string|null
 	 */
 	protected $bundleHash;
 
@@ -71,7 +78,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	}
 
 	## Save the id and timestamp
-	function __sleep() {
+	public function __sleep() {
 		if ( !$this->id ) {
 			throw new MWException( "Unable to serialize an uninitialized EchoEvent" );
 		}
@@ -79,11 +86,11 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		return [ 'id', 'timestamp' ];
 	}
 
-	function __wakeup() {
+	public function __wakeup() {
 		$this->loadFromID( $this->id );
 	}
 
-	function __toString() {
+	public function __toString() {
 		return "EchoEvent(id={$this->id}; type={$this->type})";
 	}
 
@@ -97,7 +104,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	 * extra: Event-specific extra information (e.g. post content)
 	 *
 	 * @throws MWException
-	 * @return EchoEvent|bool false if aborted via hook or Echo DB is read-only
+	 * @return EchoEvent|false False if aborted via hook or Echo DB is read-only
 	 */
 	public static function create( $info = [] ) {
 		global $wgEchoNotifications;
@@ -121,7 +128,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		}
 
 		$obj->id = false;
-		if ( isset( $info['timestamp'] ) ) {
+		if ( isset( $info['timestamp'] ) && $info[ 'timestamp' ] !== null ) {
 			$obj->timestamp = $info['timestamp'];
 		} else {
 			$obj->timestamp = wfTimestampNow();
@@ -150,7 +157,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 			$obj->setTitle( $obj->title );
 		}
 
-		if ( $obj->agent && ! $obj->agent instanceof User ) {
+		if ( $obj->agent && !$obj->agent instanceof User ) {
 			throw new InvalidArgumentException( "Invalid user parameter" );
 		}
 
@@ -195,7 +202,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		if ( $this->pageId ) {
 			$data['event_page_id'] = $this->pageId;
 		} elseif ( $this->title ) {
-			$pageId = $this->title->getArticleId();
+			$pageId = $this->title->getArticleID();
 			// Don't need any special handling for title with no id
 			// as they are already stored in extra data array
 			if ( $pageId ) {
@@ -272,7 +279,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	 * @return bool Whether loading was successful
 	 */
 	public function loadFromRow( $row ) {
-		$this->id = $row->event_id;
+		$this->id = (int)$row->event_id;
 		$this->type = $row->event_type;
 
 		// If the object is loaded from __sleep(), timestamp should be already set
@@ -301,14 +308,15 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		$this->deleted = $row->event_deleted;
 
 		if ( $row->event_agent_id ) {
-			$this->agent = User::newFromID( $row->event_agent_id );
+			$this->agent = User::newFromId( $row->event_agent_id );
 		} elseif ( $row->event_agent_ip ) {
+			// @phan-suppress-next-line PhanTypeMismatchArgument Not null here
 			$this->agent = User::newFromName( $row->event_agent_ip, false );
 		}
 
 		// Lazy load the title from getTitle() so that we can do a batch-load
 		if (
-			isset( $this->extra['page_title'], $this->extra['page_namespace'] )
+			isset( $this->extra['page_title'] ) && isset( $this->extra['page_namespace'] )
 			&& !$row->event_page_id
 		) {
 			$this->title = Title::makeTitleSafe(
@@ -318,6 +326,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		}
 		if ( $row->event_page_id ) {
 			$titleCache = EchoTitleLocalCache::create();
+			// @phan-suppress-next-line PhanTypeMismatchArgument Not null here
 			$titleCache->add( $row->event_page_id );
 		}
 		if ( isset( $this->extra['revid'] ) && $this->extra['revid'] ) {
@@ -362,7 +371,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	 * Creates an EchoEvent from a row object
 	 *
 	 * @param stdClass $row row object from echo_event
-	 * @return EchoEvent|bool
+	 * @return EchoEvent|false
 	 */
 	public static function newFromRow( $row ) {
 		$obj = new EchoEvent();
@@ -375,7 +384,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	 * Creates an EchoEvent from the database by ID
 	 *
 	 * @param int $id Event ID
-	 * @return EchoEvent|bool
+	 * @return EchoEvent|false
 	 */
 	public static function newFromID( $id ) {
 		$obj = new EchoEvent();
@@ -386,12 +395,12 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 
 	/**
 	 * Serialize the extra data for event
-	 * @return string
+	 * @return string|null
 	 */
 	public function serializeExtra() {
 		if ( is_array( $this->extra ) || is_object( $this->extra ) ) {
 			$extra = serialize( $this->extra );
-		} elseif ( is_null( $this->extra ) ) {
+		} elseif ( $this->extra === null ) {
 			$extra = null;
 		} else {
 			$extra = serialize( [ $this->extra ] );
@@ -401,58 +410,40 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	}
 
 	/**
-	 * Check if the event is dismissable for the given distribution type
-	 *
-	 * @param string $distribution notification distribution web/email
-	 * @return bool
-	 */
-	public function isDismissable( $distribution ) {
-		global $wgEchoNotificationCategories;
-
-		$category = $this->getCategory();
-		if ( isset( $wgEchoNotificationCategories[$category]['no-dismiss'] ) ) {
-			$noDismiss = $wgEchoNotificationCategories[$category]['no-dismiss'];
-		} else {
-			$noDismiss = [];
-		}
-		if ( !in_array( $distribution, $noDismiss ) && !in_array( 'all', $noDismiss ) ) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
 	 * Determine if the current user is allowed to view a particular
 	 * field of this revision, if it's marked as deleted.  When no
 	 * revision is attached always returns true.
 	 *
-	 * @param int $field One of Revision::DELETED_TEXT,
-	 *                              Revision::DELETED_COMMENT,
-	 *                              Revision::DELETED_USER
+	 * @param int $field One of RevisionRecord::DELETED_TEXT,
+	 *                              RevisionRecord::DELETED_COMMENT,
+	 *                              RevisionRecord::DELETED_USER
 	 * @param User $user User object to check
 	 * @return bool
 	 */
 	public function userCan( $field, User $user ) {
 		$revision = $this->getRevision();
 		// User is handled specially
-		if ( $field === Revision::DELETED_USER ) {
+		if ( $field === RevisionRecord::DELETED_USER ) {
 			$agent = $this->getAgent();
 			if ( !$agent ) {
 				// No user associated, so they can see it.
 				return true;
-			} elseif ( $revision
-				&& $agent->getName() === $revision->getUserText( Revision::RAW )
+			}
+
+			if (
+				$revision
+				&& $agent->getName() === $revision->getUser( RevisionRecord::RAW )->getName()
 			) {
 				// If the agent and the revision user are the same, use rev_deleted
-				return $revision->userCan( $field, $user );
+				return $revision->audienceCan( $field, RevisionRecord::FOR_THIS_USER, $user );
 			} else {
 				// Use User::isHidden()
-				return $user->isAllowedAny( 'viewsuppressed', 'hideuser' ) || !$agent->isHidden();
+				$permManager = MediaWikiServices::getInstance()->getPermissionManager();
+				return $permManager->userHasAnyRight( $user, 'viewsuppressed', 'hideuser' ) || !$agent->isHidden();
 			}
 		} elseif ( $revision ) {
 			// A revision is set, use rev_deleted
-			return $revision->userCan( $field, $user );
+			return $revision->audienceCan( $field, RevisionRecord::FOR_THIS_USER, $user );
 		} else {
 			// Not a user, and there is no associated revision, so the user can see it
 			return true;
@@ -460,6 +451,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	}
 
 	## Accessors
+
 	/**
 	 * @return int
 	 */
@@ -489,14 +481,14 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	}
 
 	/**
-	 * @return array|null
+	 * @return array
 	 */
 	public function getExtra() {
 		return $this->extra;
 	}
 
 	public function getExtraParam( $key, $default = null ) {
-		return isset( $this->extra[$key] ) ? $this->extra[$key] : $default;
+		return $this->extra[$key] ?? $default;
 	}
 
 	/**
@@ -504,6 +496,21 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	 */
 	public function getAgent() {
 		return $this->agent;
+	}
+
+	/**
+	 * Check whether this event allows its agent to be notified.
+	 *
+	 * Notifying the agent is only allowed if the event's type allows it, or if the event extra
+	 * explicity specifies 'notifyAgent' => true.
+	 *
+	 * @return bool
+	 */
+	public function canNotifyAgent() {
+		global $wgEchoNotifications;
+		$allowedInConfig = $wgEchoNotifications[$this->getType()]['canNotifyAgent'] ?? false;
+		$allowedInExtra = $this->getExtraParam( 'notifyAgent', false );
+		return $allowedInConfig || $allowedInExtra;
 	}
 
 	/**
@@ -523,7 +530,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 
 			$this->title = Title::newFromID( $this->pageId, $fromMaster ? Title::GAID_FOR_UPDATE : 0 );
 			return $this->title;
-		} elseif ( isset( $this->extra['page_title'], $this->extra['page_namespace'] ) ) {
+		} elseif ( isset( $this->extra['page_title'] ) && isset( $this->extra['page_namespace'] ) ) {
 			$this->title = Title::makeTitleSafe(
 				$this->extra['page_namespace'],
 				$this->extra['page_title']
@@ -535,12 +542,14 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	}
 
 	/**
-	 * @return Revision|null
+	 * @return RevisionRecord|null
 	 */
 	public function getRevision() {
 		if ( $this->revision ) {
 			return $this->revision;
-		} elseif ( isset( $this->extra['revid'] ) ) {
+		}
+
+		if ( isset( $this->extra['revid'] ) ) {
 			$revisionCache = EchoRevisionLocalCache::create();
 			$revision = $revisionCache->get( $this->extra['revid'] );
 			if ( $revision ) {
@@ -548,7 +557,8 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 				return $this->revision;
 			}
 
-			$this->revision = Revision::newFromId( $this->extra['revid'] );
+			$store = MediaWikiServices::getInstance()->getRevisionStore();
+			$this->revision = $store->getRevisionById( $this->extra['revid'] );
 			return $this->revision;
 		}
 
@@ -618,44 +628,36 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	/**
 	 * Get the message key of the primary or secondary link for a notification type.
 	 *
-	 * @param String $rank 'primary' or 'secondary'
-	 * @return String i18n message key
+	 * @param string $rank 'primary' or 'secondary'
+	 * @return string i18n message key
 	 */
 	public function getLinkMessage( $rank ) {
 		global $wgEchoNotifications;
 		$type = $this->getType();
-		if ( isset( $wgEchoNotifications[$type][$rank . '-link']['message'] ) ) {
-			return $wgEchoNotifications[$type][$rank . '-link']['message'];
-		}
-
-		return '';
+		return $wgEchoNotifications[$type][$rank . '-link']['message'] ?? '';
 	}
 
 	/**
 	 * Get the link destination of the primary or secondary link for a notification type.
 	 *
-	 * @param String $rank 'primary' or 'secondary'
-	 * @return String The link destination, e.g. 'agent'
+	 * @param string $rank 'primary' or 'secondary'
+	 * @return string The link destination, e.g. 'agent'
 	 */
 	public function getLinkDestination( $rank ) {
 		global $wgEchoNotifications;
 		$type = $this->getType();
-		if ( isset( $wgEchoNotifications[$type][$rank . '-link']['destination'] ) ) {
-			return $wgEchoNotifications[$type][$rank . '-link']['destination'];
-		}
-
-		return '';
+		return $wgEchoNotifications[$type][$rank . '-link']['destination'] ?? '';
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
 	public function getBundleHash() {
 		return $this->bundleHash;
 	}
 
 	/**
-	 * @param string $hash
+	 * @param string|null $hash
 	 */
 	public function setBundleHash( $hash ) {
 		$this->bundleHash = $hash;
@@ -668,7 +670,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		return $this->deleted === 1;
 	}
 
-	public function setBundledEvents( $events ) {
+	public function setBundledEvents( array $events ) {
 		$this->bundledEvents = $events;
 	}
 
@@ -693,7 +695,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	/**
 	 * @inheritDoc
 	 */
-	public function setBundledElements( $bundleables ) {
+	public function setBundledElements( array $bundleables ) {
 		$this->setBundledEvents( $bundleables );
 	}
 
@@ -703,4 +705,23 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	public function getSortingKey() {
 		return $this->getTimestamp();
 	}
+
+	/**
+	 * Return the list of fields that should be selected to create
+	 * a new event with EchoEvent::newFromRow
+	 * @return string[]
+	 */
+	public static function selectFields() {
+		return [
+			'event_id',
+			'event_type',
+			'event_variant',
+			'event_agent_id',
+			'event_agent_ip',
+			'event_extra',
+			'event_page_id',
+			'event_deleted',
+		];
+	}
+
 }

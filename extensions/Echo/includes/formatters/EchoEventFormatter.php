@@ -1,4 +1,5 @@
 <?php
+
 use MediaWiki\Logger\LoggerFactory;
 
 /**
@@ -13,6 +14,13 @@ use MediaWiki\Logger\LoggerFactory;
  * arguments passed in the constructor (user and language)
  */
 abstract class EchoEventFormatter {
+
+	/** @var User */
+	protected $user;
+
+	/** @var Language */
+	protected $language;
+
 	public function __construct( User $user, Language $language ) {
 		$this->user = $user;
 		$this->language = $language;
@@ -22,13 +30,14 @@ abstract class EchoEventFormatter {
 	 * Equivalent to IContextSource::msg for the current
 	 * language
 	 *
+	 * @param string ...$args
 	 * @return Message
 	 */
-	protected function msg( /* ,,, */ ) {
+	protected function msg( ...$args ) {
 		/**
 		 * @var Message $msg
 		 */
-		$msg = call_user_func_array( 'wfMessage', func_get_args() );
+		$msg = wfMessage( ...$args );
 		$msg->inLanguage( $this->language );
 
 		return $msg;
@@ -36,7 +45,7 @@ abstract class EchoEventFormatter {
 
 	/**
 	 * @param EchoEvent $event
-	 * @return string|array|bool Output format depends on implementation, false if it cannot be formatted
+	 * @return string[]|string|false Output format depends on implementation, false if it cannot be formatted
 	 */
 	final public function format( EchoEvent $event ) {
 		// Deleted events should have been filtered out before getting there.
@@ -46,8 +55,8 @@ abstract class EchoEventFormatter {
 		}
 
 		if ( !EchoEventPresentationModel::supportsPresentationModel( $event->getType() ) ) {
-			LoggerFactory::getInstance( 'Echo' )->warning(
-				"Ignoring event type \"{type}\" since it does not support Echo presentation model.",
+			LoggerFactory::getInstance( 'Echo' )->debug(
+				"No presentation model found for event type \"{type}\"",
 				[
 					'type' => $event->getType(),
 				]
@@ -65,7 +74,7 @@ abstract class EchoEventFormatter {
 
 	/**
 	 * @param EchoEventPresentationModel $model
-	 * @return string|array
+	 * @return string[]|string
 	 */
 	abstract protected function formatModel( EchoEventPresentationModel $model );
 }

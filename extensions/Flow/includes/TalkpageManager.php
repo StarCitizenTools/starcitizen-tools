@@ -2,79 +2,18 @@
 
 namespace Flow;
 
-use Flow\Content\BoardContent;
-use Flow\Exception\InvalidInputException;
-use Flow\Model\Workflow;
-use Article;
 use CentralAuthUser;
 use ContentHandler;
 use ExtensionRegistry;
+use Flow\Content\BoardContent;
+use Flow\Exception\InvalidInputException;
+use Flow\Model\Workflow;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\SlotRecord;
 use Status;
 use Title;
 use User;
-
-interface OccupationController {
-	/**
-	 * @param Article $title
-	 * @param Workflow $workflow
-	 * @return Status
-	 */
-	public function ensureFlowRevision( Article $title, Workflow $workflow );
-
-	/**
-	 * Checks whether creation is technically possible.
-	 *
-	 * This considers all issues other than the user.
-	 *
-	 * @param Title $title Title to check
-	 * @param bool $mustNotExist Whether the page is required to not exist; true means
-	 *  it must not exist.
-	 * @return Status Status indicating whether the creation is technically allowed
-	 */
-	public function checkIfCreationIsPossible( Title $title, $mustNotExist = true );
-
-	/**
-	 * Check if user has permission to create board.
-	 *
-	 * @param Title $title Title to check
-	 * @param User $user User doing creation or move
-	 * @return Status Status indicating whether the creation is technically allowed
-	 */
-	public function checkIfUserHasPermission( Title $title, User $user );
-
-	/**
-	 * Checks whether the given user is allowed to create a board at the given
-	 * title.  If so, allows it to be created.
-	 *
-	 * @param Title $title Title to check
-	 * @param User $user User who wants to create a board
-	 * @param bool $mustNotExist Whether the page is required to not exist; defaults to
-	 *   true.
-	 * @return Status Returns successful status when the provided user has the rights to
-	 *  convert $title from whatever it is now to a flow board; otherwise, specifies
-	 *  the error.
-	 */
-	public function safeAllowCreation( Title $title, User $user, $mustNotExist = true );
-
-	/**
-	 * Allows creation, *WITHOUT* checks.
-	 *
-	 * checkIfCreationIsPossible *MUST* be called earlier, and
-	 * checkIfUserHasPermission *MUST* be called earlier except when permission checks
-	 * are deliberately being bypassed (very rare cases like global rename)
-	 *
-	 * @param Title $title
-	 */
-	public function forceAllowCreation( Title $title );
-
-	/**
-	 * Gives a user object used to manage talk pages
-	 *
-	 * @return User User to manage talkpages
-	 * @throws \MWException If a user cannot be created.
-	 */
-	public function getTalkpageManager();
-}
+use WikiPage;
 
 class TalkpageManager implements OccupationController {
 	/**
@@ -103,21 +42,20 @@ class TalkpageManager implements OccupationController {
 	 * or the like.  Those happen much earlier in the request and should be checked
 	 * before even attempting to create revisions.
 	 *
-	 * @param \Article $article
+	 * @param WikiPage $page
 	 * @param Workflow $workflow
 	 * @return Status Status for revision creation; On success (including if it already
 	 *  had a top-most Flow revision), it will return a good status with an associative
-	 *  array value.  $status->getValue()['revision'] will be a Revision
+	 *  array value.  $status->getValue()['revision-record'] will be a RevisionRecord
 	 *  $status->getValue()['already-existed'] will be set to true if no revision needed
 	 *  to be created
 	 * @throws InvalidInputException
 	 */
-	public function ensureFlowRevision( Article $article, Workflow $workflow ) {
-		$page = $article->getPage();
-		$revision = $page->getRevision();
+	public function ensureFlowRevision( WikiPage $page, Workflow $workflow ) {
+		$revision = $page->getRevisionRecord();
 
 		if ( $revision !== null ) {
-			$content = $revision->getContent();
+			$content = $revision->getContent( SlotRecord::MAIN );
 			if ( $content instanceof BoardContent && $content->getWorkflowId() ) {
 				// Revision is already a valid BoardContent
 				return Status::newGood( [
@@ -145,14 +83,6 @@ class TalkpageManager implements OccupationController {
 	 * @inheritDoc
 	 */
 	public function checkIfCreationIsPossible( Title $title, $mustNotExist = true, $forWrite = true ) {
-		global $wgContentHandlerUseDB;
-
-		// Arbitrary pages can only be enabled when content handler
-		// can store that content model in the database.
-		if ( !$wgContentHandlerUseDB ) {
-			return Status::newFatal( 'flow-error-allowcreation-no-usedb' );
-		}
-
 		// Only allow converting a non-existent page to Flow
 		if ( $mustNotExist ) {
 			if ( $title->exists( $forWrite ? Title::GAID_FOR_UPDATE : 0 ) ) {
@@ -174,7 +104,8 @@ class TalkpageManager implements OccupationController {
 			// Gate this on the flow-create-board right, essentially giving
 			// wiki communities control over if Flow board creation is allowed
 			// to everyone or just a select few.
-			$title->userCan( 'flow-create-board', $user )
+			MediaWikiServices::getInstance()->getPermissionManager()
+				->userCan( 'flow-create-board', $user, $title )
 		) {
 			return Status::newGood();
 		} else {

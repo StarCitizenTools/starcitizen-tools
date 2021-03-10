@@ -2,7 +2,6 @@
 
 namespace Flow\Import\Postprocessor;
 
-use Wikimedia\Rdbms\IDatabase;
 use BatchRowIterator;
 use EchoCallbackIterator;
 use EchoEvent;
@@ -10,13 +9,14 @@ use Flow\Import\IImportHeader;
 use Flow\Import\IImportPost;
 use Flow\Import\IImportTopic;
 use Flow\Import\ImportException;
-use Flow\Import\LiquidThreadsApi\ImportTopic as LqtImportTopic;
+use Flow\Import\LiquidThreadsApi\ImportTopic;
 use Flow\Import\PageImportState;
 use Flow\Import\TopicImportState;
 use Flow\Model\PostRevision;
-use Flow\NotificationController;
+use Flow\Notifications\Controller;
 use RecursiveIteratorIterator;
 use User;
+use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Converts LQT unread notifications into Echo notifications after a topic is imported
@@ -24,7 +24,7 @@ use User;
 class LqtNotifications implements Postprocessor {
 
 	/**
-	 * @var NotificationController
+	 * @var Controller
 	 */
 	protected $controller;
 
@@ -38,7 +38,7 @@ class LqtNotifications implements Postprocessor {
 	 */
 	protected $postsImported = [];
 
-	public function __construct( NotificationController $controller, IDatabase $dbw ) {
+	public function __construct( Controller $controller, IDatabase $dbw ) {
 		$this->controller = $controller;
 		$this->dbw = $dbw;
 		$this->overrideUsersToNotify();
@@ -53,7 +53,7 @@ class LqtNotifications implements Postprocessor {
 
 		// Remove the user-locators that choose on a per-notification basis who
 		// should be notified.
-		$notifications = require __DIR__ . '/../../Notifications/Notifications.php';
+		$notifications = require dirname( dirname( dirname( __DIR__ ) ) ) . '/Notifications.php';
 		foreach ( array_keys( $notifications ) as $type ) {
 			unset( $wgEchoNotifications[$type]['user-locators'] );
 
@@ -79,7 +79,7 @@ class LqtNotifications implements Postprocessor {
 	 * @param EchoEvent $event
 	 * @param int $batchSize
 	 * @throws ImportException
-	 * @return \Iterator[User]
+	 * @return EchoCallbackIterator
 	 */
 	public function locateUsersWithPendingLqtNotifications( EchoEvent $event, $batchSize = 500 ) {
 		$activeThreadId = $event->getExtraParam( 'lqtThreadId' );
@@ -110,7 +110,7 @@ class LqtNotifications implements Postprocessor {
 	}
 
 	public function afterTopicImported( TopicImportState $state, IImportTopic $topic ) {
-		if ( !$topic instanceof LqtImportTopic ) {
+		if ( !$topic instanceof ImportTopic ) {
 			return;
 		}
 		if ( empty( $this->postsImported ) ) {

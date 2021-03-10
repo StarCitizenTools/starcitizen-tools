@@ -4,6 +4,10 @@
 			"Adam-Yourist"
 		]
 	},
+	"uploadwizard": "Файл чуяккхара пхьар",
+	"uploadwizard-desc": "Файл чуяккхара пхьар — медиафайлаш чуяха атта хургдолаш лелаю кечал я",
+	"tag-uploadwizard": "Файл чуяккхара пхьар",
 	"mwe-upwiz-copy-metadata-button": "Кеп яьккха",
-	"mwe-upwiz-copied-metadata": "Кеп яьккхай"
+	"mwe-upwiz-copied-metadata": "Кеп яьккхай",
+	"prefs-uploads": "Чуяккхар"
 }

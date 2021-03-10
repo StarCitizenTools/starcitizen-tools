@@ -1,4 +1,4 @@
-( function ( mw, uw ) {
+( function ( uw ) {
 
 	var scaleMsgKeys = [ 'size-bytes', 'size-kilobytes', 'size-megabytes', 'size-gigabytes' ];
 
@@ -22,4 +22,4 @@
 		}
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard ) );
+}( mw.uploadWizard ) );

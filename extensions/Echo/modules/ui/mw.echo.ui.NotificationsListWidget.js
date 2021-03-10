@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Notifications list widget.
 	 * All of its items must be of the mw.echo.ui.NotificationItem type.
@@ -11,13 +11,15 @@
 	 * @param {mw.echo.dm.ModelManager} manager Model manager
 	 * @param {Object} [config] Configuration object
 	 *  marked as read when they are seen.
+	 * @cfg {string} [timestamp=0] A timestamp representing the latest item in
+	 *  the list.
 	 * @cfg {jQuery} [$overlay] A jQuery element functioning as an overlay
 	 *  for popups.
 	 */
 	mw.echo.ui.NotificationsListWidget = function MwEchoUiNotificationsListWidget( controller, manager, config ) {
 		config = config || {};
 		// Parent constructor
-		mw.echo.ui.NotificationsListWidget.parent.call(
+		mw.echo.ui.NotificationsListWidget.super.call(
 			this,
 			// Sorting callback
 			function ( a, b ) {
@@ -241,4 +243,4 @@
 			itemWidgets[ i ].resetInitiallyUnseen();
 		}
 	};
-}( mediaWiki, jQuery ) );
+}() );

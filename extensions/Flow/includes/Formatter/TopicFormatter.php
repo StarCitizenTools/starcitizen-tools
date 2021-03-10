@@ -57,7 +57,7 @@ class TopicFormatter {
 
 		foreach ( $revisions as $i => $serialized ) {
 			$alpha = $serialized['postId'];
-			$revisions[$i]['replies'] = isset( $replies[$alpha] ) ? $replies[$alpha] : [];
+			$revisions[$i]['replies'] = $replies[$alpha] ?? [];
 		}
 
 		$alpha = $listWorkflow->getId()->getAlphadecimal();
@@ -109,12 +109,12 @@ class TopicFormatter {
 			}
 		} while ( !$stack->isEmpty() );
 
-		$workflow = isset( $workflows[$postAlphaId] ) ? $workflows[$postAlphaId] : null;
+		$workflow = $workflows[$postAlphaId] ?? null;
 
 		return [
 			'reply_count' => $replies,
 			// ms timestamp
-			'last_updated' => $workflow ? $workflow->getLastUpdatedObj()->getTimestamp() * 1000 : null,
+			'last_updated' => $workflow ? (int)$workflow->getLastUpdatedObj()->getTimestamp() * 1000 : null,
 		];
 	}
 }

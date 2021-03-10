@@ -1,6 +1,8 @@
-( function ( $ ) {
+/* eslint-disable no-jquery/no-global-selector */
+( function () {
 	/**
 	 * Initializer object for flow-initialize
+	 *
 	 * @class
 	 *
 	 * @constructor
@@ -70,6 +72,7 @@
 
 				// Replace reply forms
 				self.replaceReplyForms( self.$board );
+				self.reopenPostWidgets( self.$board );
 			},
 			// HACK: Update the DM when topic is refreshed
 			refreshTopic: function ( workflowId, topicData ) {
@@ -90,6 +93,7 @@
 
 				// Replace reply forms
 				self.replaceReplyForms( topicData.$topic );
+				self.reopenPostWidgets( topicData.$topic );
 			}
 		} );
 	};
@@ -98,7 +102,7 @@
 	 * Set up the window manager
 	 */
 	mw.flow.Initializer.prototype.setupWindowManager = function () {
-		$( 'body' ).append( mw.flow.ui.windowManager.$element );
+		$( document.body ).append( mw.flow.ui.windowManager.$element );
 	};
 
 	/**
@@ -109,8 +113,10 @@
 			self = this;
 
 		if (
+			// eslint-disable-next-line no-jquery/no-class-state
 			this.$component.hasClass( 'flow-topic-page' ) &&
-			$( 'body' ).hasClass( 'action-view' )
+			// eslint-disable-next-line no-jquery/no-class-state
+			$( document.body ).hasClass( 'action-view' )
 		) {
 			this.$board.toggleClass( 'flow-board-expanded', this.siderailCollapsed );
 
@@ -156,6 +162,24 @@
 		this.setupEditPostAction();
 		this.setupEditTopicSummaryAction();
 		this.setupEditTopicTitleAction();
+
+		this.reopenNewTopicWidget();
+		this.reopenDescriptionWidget();
+		this.reopenPostWidgets();
+	};
+
+	/**
+	 * Re-open any post widgets with stored data
+	 *
+	 * @param {jQuery} [$container] Container, defaults to this.$component
+	 */
+	mw.flow.Initializer.prototype.reopenPostWidgets = function ( $container ) {
+		$container = $container || this.$component;
+
+		this.reopenReplyWidgets( $container );
+		this.reopenTopicTitleWidgets( $container );
+		this.reopenEditPostWidgets( $container );
+		this.reopenEditTopicSummaryWidget( $container );
 	};
 
 	/**
@@ -169,6 +193,7 @@
 
 	/**
 	 * Initialize the data model objects
+	 *
 	 * @param {Object} config Configuration options for the mw.flow.dm.System
 	 */
 	mw.flow.Initializer.prototype.initDataModel = function ( config ) {
@@ -189,7 +214,7 @@
 					item = newItems[ i ];
 					itemId = item.getId();
 
-					if ( $.inArray( itemId, self.flowBoard.orderedTopicIds ) === -1 ) {
+					if ( self.flowBoard.orderedTopicIds.indexOf( itemId ) === -1 ) {
 						self.flowBoard.orderedTopicIds.push( itemId );
 					}
 
@@ -352,7 +377,7 @@
 		this.newTopicWidget.connect( this, {
 			save: function ( newTopicId ) {
 				// Display the new topic with the old system
-				var $stub = $( '<div class="flow-topic"><div></div></div>' ).prependTo( self.flowBoard.$container.find( '.flow-topics' ) );
+				var $stub = $( '<div>' ).addClass( 'flow-topic' ).append( $( '<div>' ) ).prependTo( self.flowBoard.$container.find( '.flow-topics' ) );
 				return this.flowBoard.flowBoardComponentRefreshTopic( $stub.find( 'div' ), newTopicId );
 			}
 		} ).once( 'save', this.reloadOnCreate ); // Reload page if board is new so we get page actions at top
@@ -361,24 +386,37 @@
 	};
 
 	/**
+	 * Re-open the new topic widget if it has stored data
+	 */
+	mw.flow.Initializer.prototype.reopenNewTopicWidget = function () {
+		if ( this.newTopicWidget.title.getValue() || mw.storage.session.get( this.newTopicWidget.id + '/ve-docstate' ) ) {
+			this.newTopicWidget.activate();
+		}
+	};
+
+	/**
 	 * Set up the description widget and its events
 	 *
 	 * @param {jQuery} $element Description DOM element
 	 */
 	mw.flow.Initializer.prototype.setupDescriptionWidget = function ( $element ) {
-		var descriptionWidget;
-
+		var initializer = this;
 		if ( !$element.length ) {
 			return;
 		}
 
-		descriptionWidget = new mw.flow.ui.BoardDescriptionWidget( this.board, {
+		this.descriptionWidget = new mw.flow.ui.BoardDescriptionWidget( this.board, {
 			$existing: $( '.flow-ui-boardDescriptionWidget-content' ).contents(),
 			$categories: $( '.flow-board-header-category-view-nojs' ).contents(),
 			editor: {
 				confirmLeave: !!mw.user.options.get( 'useeditwarning' )
 			}
-		} ).once( 'saveContent', this.reloadOnCreate ); // Reload page if board is new so we get page actions at top
+		} )
+			// Reload page if board is new so we get page actions at top
+			.once( 'saveContent', this.reloadOnCreate )
+			.on( 'saveContent', function () {
+				mw.hook( 'wikipage.content' ).fire( initializer.descriptionWidget.$content );
+			} );
 
 		// The category widget is inside the board description widget.
 		// Remove it from the nojs version here
@@ -386,7 +424,16 @@
 		// HACK: Remove the MW page categories
 		$( '.catlinks:not(.flow-ui-categoriesWidget)' ).detach();
 
-		$element.replaceWith( descriptionWidget.$element );
+		$element.replaceWith( this.descriptionWidget.$element );
+	};
+
+	/**
+	 * Re-open the board description widget if it has stored data
+	 */
+	mw.flow.Initializer.prototype.reopenDescriptionWidget = function () {
+		if ( this.descriptionWidget && mw.storage.session.get( this.descriptionWidget.id + '/ve-docstate' ) ) {
+			this.descriptionWidget.onEditButtonClick();
+		}
 	};
 
 	/**
@@ -423,14 +470,15 @@
 				} );
 
 			replyWidget.on( 'saveContent', function ( workflow ) {
-				replyWidget.destroy();
-				replyWidget.$element.remove();
+				replyWidget.destroy().then( function () {
+					replyWidget.$element.remove();
 
-				// HACK: get the old system to rerender the topic
-				return self.flowBoard.flowBoardComponentRefreshTopic(
-					$topic,
-					workflow
-				);
+					// HACK: get the old system to rerender the topic
+					self.flowBoard.flowBoardComponentRefreshTopic(
+						$topic,
+						workflow
+					);
+				} );
 			} );
 			replyWidget.$element.data( 'self', replyWidget );
 
@@ -461,24 +509,43 @@
 			} );
 			editPostWidget
 				.on( 'saveContent', function ( workflow ) {
-					editPostWidget.destroy();
-					editPostWidget.$element.remove();
+					editPostWidget.destroy().then( function () {
+						editPostWidget.$element.remove();
 
-					// HACK get the old system to rerender the topic
-					return flowBoard.flowBoardComponentRefreshTopic(
-						$topic,
-						workflow
-					);
+						// HACK get the old system to rerender the topic
+						flowBoard.flowBoardComponentRefreshTopic(
+							$topic,
+							workflow
+						);
+					} );
 				} )
 				.on( 'cancel', function () {
-					editPostWidget.destroy();
-					editPostWidget.$element.replaceWith( $postMain );
+					editPostWidget.destroy().then( function () {
+						editPostWidget.$element.replaceWith( $postMain );
+					} );
 				} );
 
 			$postMain.replaceWith( editPostWidget.$element );
 			editPostWidget.activate();
 
 			event.preventDefault();
+		} );
+	};
+
+	/**
+	 * Re-open any edit post widgets with stored data
+	 *
+	 * @param {jQuery} $container
+	 */
+	mw.flow.Initializer.prototype.reopenEditPostWidgets = function ( $container ) {
+		// Re-open widgets with stored data
+		$container.find( '.flow-ui-edit-post-link' ).each( function () {
+			var $post = $( this ).closest( '.flow-post' ),
+				postId = $post.data( 'flow-id' );
+
+			if ( mw.storage.session.get( 'edit/' + postId + '/ve-docstate' ) ) {
+				$( this ).trigger( 'click' );
+			}
 		} );
 	};
 
@@ -528,11 +595,33 @@
 						if ( !skipSummarize ) {
 							self.startEditTopicSummary( true, topicId, action );
 						}
+					} )
+					.fail( function ( code, result ) {
+						var errorMsg = self.flowBoard.constructor.static.getApiErrorMessage( code, result );
+
+						self.flowBoard.emit( 'removeError', $topic );
+						self.flowBoard.emit( 'showError', $topic, errorMsg );
 					} );
 
 				// Prevent default
 				return false;
 			} );
+	};
+
+	/**
+	 * Re-open any edit topic summary widgets with stored data
+	 *
+	 * @param {jQuery} $container
+	 */
+	mw.flow.Initializer.prototype.reopenEditTopicSummaryWidget = function ( $container ) {
+		$container.find( '.flow-ui-summarize-topic-link' ).each( function () {
+			var $topic = $( this ).closest( '.flow-topic' ),
+				topicId = $topic.data( 'flow-id' );
+
+			if ( mw.storage.session.get( 'edit-summary/' + topicId + '/ve-docstate' ) ) {
+				$( this ).trigger( 'click' );
+			}
+		} );
 	};
 
 	/**
@@ -583,6 +672,22 @@
 	};
 
 	/**
+	 * Re-open any edit topic title widgets with stored data
+	 *
+	 * @param {jQuery} $container
+	 */
+	mw.flow.Initializer.prototype.reopenTopicTitleWidgets = function ( $container ) {
+		$container.find( 'a.flow-ui-edit-title-link' ).each( function () {
+			var $topic = $( this ).closest( '.flow-topic' ),
+				topicId = $topic.data( 'flow-id' );
+
+			if ( mw.storage.session.get( 'edit-topic/' + topicId + '/title' ) ) {
+				$( this ).trigger( 'click' );
+			}
+		} );
+	};
+
+	/**
 	 * Take over the action of the 'reply' links.  This is delegated,
 	 * so it applies to current and future links.
 	 */
@@ -593,6 +698,7 @@
 		this.$component.on( 'click', 'a.flow-reply-link', function () {
 			// Store the needed details so we can get rid of the URL in JS mode
 			var replyWidget,
+				existingWidget,
 				href = $( this ).attr( 'href' ),
 				uri = new mw.Uri( href ),
 				replyTo = uri.query.topic_postId,
@@ -607,8 +713,9 @@
 			// Check that there's not already a reply widget existing in the same place
 			if ( $existingWidget.length > 0 ) {
 				// Focus the existing reply widget
-				$existingWidget.data( 'self' ).activateEditor();
-				$existingWidget.data( 'self' ).focus();
+				existingWidget = $existingWidget.data( 'self' );
+				existingWidget.activateEditor();
+				existingWidget.focus();
 				return false;
 			}
 
@@ -628,21 +735,49 @@
 
 			replyWidget
 				.on( 'saveContent', function ( workflow ) {
-					replyWidget.destroy();
-					replyWidget.$element.remove();
+					replyWidget.destroy().then( function () {
+						replyWidget.$element.remove();
 
-					// HACK get the old system to rerender the topic
-					return self.flowBoard.flowBoardComponentRefreshTopic(
-						$topic,
-						workflow
-					);
+						// HACK get the old system to rerender the topic
+						self.flowBoard.flowBoardComponentRefreshTopic(
+							$topic,
+							workflow
+						);
+					} );
 				} )
 				.on( 'cancel', function () {
-					replyWidget.destroy();
-					replyWidget.$element.remove();
+					replyWidget.destroy().then( function () {
+						replyWidget.$element.remove();
+					} );
 				} );
 
 			return false;
+		} );
+	};
+
+	/**
+	 * Re-open any reply widgets with stored data
+	 *
+	 * @param {jQuery} $container
+	 */
+	mw.flow.Initializer.prototype.reopenReplyWidgets = function ( $container ) {
+		var queuedClicks = {};
+
+		$container.find( 'a.flow-reply-link' ).each( function () {
+			var href = $( this ).attr( 'href' ),
+				uri = new mw.Uri( href ),
+				replyTo = uri.query.topic_postId;
+
+			if ( mw.storage.session.get( 'reply/' + replyTo + '/ve-docstate' ) ) {
+				// There can be multiple links to reply to a given topicId. They all behave
+				// the same but show the widget in a slightly different place.
+				// Assume the user wanted to use the last one.
+				queuedClicks[ replyTo ] = this;
+			}
+		} );
+
+		Object.keys( queuedClicks ).forEach( function ( replyTo ) {
+			$( queuedClicks[ replyTo ] ).trigger( 'click' );
 		} );
 	};
 
@@ -683,29 +818,31 @@
 		editTopicSummaryWidget = new mw.flow.ui.EditTopicSummaryWidget( topicId, { editor: editorOptions } );
 		editTopicSummaryWidget
 			.on( 'saveContent', function ( workflow ) {
-				editTopicSummaryWidget.destroy();
-				editTopicSummaryWidget.$element.remove();
+				editTopicSummaryWidget.destroy().then( function () {
+					editTopicSummaryWidget.$element.remove();
 
-				if ( isFullBoard ) {
-					// HACK get the old system to rerender the topic
-					return self.flowBoard.flowBoardComponentRefreshTopic(
-						$topic,
-						workflow
-					);
-				} else {
-					// HACK: redirect to topic view
-					window.location.href = title.getUrl();
-				}
+					if ( isFullBoard ) {
+						// HACK get the old system to rerender the topic
+						self.flowBoard.flowBoardComponentRefreshTopic(
+							$topic,
+							workflow
+						);
+					} else {
+						// HACK: redirect to topic view
+						window.location.href = title.getUrl();
+					}
+				} );
 			} )
 			.on( 'cancel', function () {
-				editTopicSummaryWidget.destroy();
-				editTopicSummaryWidget.$element.remove();
-				if ( isFullBoard ) {
-					$summaryContainer.append( $topicSummary );
-				} else {
-					// HACK: redirect to topic view
-					window.location.href = title.getUrl();
-				}
+				editTopicSummaryWidget.destroy().then( function () {
+					editTopicSummaryWidget.$element.remove();
+					if ( isFullBoard ) {
+						$summaryContainer.append( $topicSummary );
+					} else {
+						// HACK: redirect to topic view
+						window.location.href = title.getUrl();
+					}
+				} );
 			} );
 
 		$topicSummary.remove();
@@ -725,14 +862,15 @@
 			self = this;
 
 		function saveOrCancelHandler( workflow ) {
-			editPostWidget.destroy();
-			editPostWidget.$element.remove();
+			editPostWidget.destroy().then( function () {
+				editPostWidget.$element.remove();
 
-			// HACK get the old system to rerender the topic
-			return self.flowBoard.flowBoardComponentRefreshTopic(
-				$topic,
-				workflow
-			);
+				// HACK get the old system to rerender the topic
+				self.flowBoard.flowBoardComponentRefreshTopic(
+					$topic,
+					workflow
+				);
+			} );
 		}
 
 		if ( !$element.length ) {
@@ -765,9 +903,10 @@
 	 * @param {jQuery} $domToReplace The element, usually a form, that the new editor replaces
 	 * @param {string} [content] The content of the editing area
 	 * @param {string} [saveMsgKey] The message key for the editor save button
+	 * @param {string} [id] Editor ID
 	 * @return {mw.flow.ui.EditorWidget}
 	 */
-	mw.flow.Initializer.prototype.createEditorWidget = function ( $domToReplace, content, saveMsgKey ) {
+	mw.flow.Initializer.prototype.createEditorWidget = function ( $domToReplace, content, saveMsgKey, id ) {
 		var $wrapper,
 			$messages = $( '<div>' ).addClass( 'flow-ui-editorContainerWidget-messages' ),
 			isProbablyEditable = mw.config.get( 'wgIsProbablyEditable' ),
@@ -786,7 +925,8 @@
 			} ),
 			editor = new mw.flow.ui.EditorWidget( {
 				saveMsgKey: saveMsgKey,
-				confirmLeave: !!mw.user.options.get( 'useeditwarning' )
+				confirmLeave: !!mw.user.options.get( 'useeditwarning' ),
+				id: id
 			} );
 
 		function handleFailure( errorCode, errorObj ) {
@@ -904,8 +1044,19 @@
 					'flow-topic-action-update-topic-summary'
 				]
 			} )[ undoType ][ mw.user.isAnon() ? 0 : 1 ],
-			editor = this.createEditorWidget( $undoForm, content, saveMsgKey );
+			editor = this.createEditorWidget( $undoForm, content, saveMsgKey, 'undo/' + prevRevId );
 
+		if (
+			mw.config.get( 'wgEditSubmitButtonLabelPublish' ) &&
+			undoType !== 'topicsummary'
+		) {
+			// i18n messages:
+			// 'flow-post-action-edit-post-submit-anonymously-publish',
+			// 'flow-post-action-edit-post-submit-publish'
+			// 'flow-edit-header-submit-anonymously-publish',
+			// 'flow-edit-header-submit-publish'
+			saveMsgKey += '-publish';
+		}
 		editor
 			.on( 'afterSaveContent', function ( content, contentFormat, captcha, handleFailure ) {
 				save( content, contentFormat, captcha )
@@ -929,4 +1080,4 @@
 		}
 		$( '.flow-ui-load-overlay' ).addClass( 'oo-ui-element-hidden' );
 	};
-}( jQuery ) );
+}() );

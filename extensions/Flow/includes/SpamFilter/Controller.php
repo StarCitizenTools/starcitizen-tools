@@ -5,8 +5,8 @@ namespace Flow\SpamFilter;
 use Flow\Exception\FlowException;
 use Flow\Model\AbstractRevision;
 use IContextSource;
-use Title;
 use Status;
+use Title;
 
 class Controller {
 	/**
@@ -40,7 +40,13 @@ class Controller {
 	 * @param Title $ownerTitle Board title
 	 * @return Status
 	 */
-	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title, Title $ownerTitle ) {
+	public function validate(
+		IContextSource $context,
+		AbstractRevision $newRevision,
+		?AbstractRevision $oldRevision,
+		Title $title,
+		Title $ownerTitle
+	) {
 		foreach ( $this->spamfilters as $spamfilter ) {
 			if ( !$spamfilter->enabled() ) {
 				continue;
@@ -51,10 +57,12 @@ class Controller {
 			// no need to go through other filters when invalid data is discovered
 			if ( !$status->isOK() ) {
 				$titleString = $title->getPrefixedDBkey();
-				$oldRevid = ( $oldRevision !== null ) ? $oldRevision->getRevisionId()->getAlphadecimal() : 'None';
+				$oldRevid = ( $oldRevision !== null )
+					? $oldRevision->getRevisionId()->getAlphadecimal() : 'None';
 				$newRevid = $newRevision->getRevisionId()->getAlphadecimal();
 				$klass = get_class( $spamfilter );
-				wfDebugLog( 'Flow', __METHOD__ . ": Spam filter failed on '" . $titleString . "'.  Old revid: $oldRevid.  New revid: $newRevid.  Filter: $klass" );
+				wfDebugLog( 'Flow', __METHOD__ . ": Spam filter failed on '" . $titleString . "'.
+					Old revid: $oldRevid.  New revid: $newRevid.  Filter: $klass" );
 				return $status;
 			}
 		}

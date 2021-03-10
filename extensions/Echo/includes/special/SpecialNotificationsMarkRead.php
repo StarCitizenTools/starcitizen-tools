@@ -39,7 +39,7 @@ class SpecialNotificationsMarkRead extends FormSpecialPage {
 
 	/**
 	 * Get an HTMLForm descriptor array
-	 * @return array
+	 * @return array[]
 	 */
 	protected function getFormFields() {
 		return [
@@ -103,7 +103,9 @@ class SpecialNotificationsMarkRead extends FormSpecialPage {
 		// manually.
 		$form->suppressDefaultSubmit();
 
-		$form->setAction( $this->getPageTitle()->getLocalURL() );
+		$pageTitle = $this->getPageTitle();
+		$form->setTitle( $pageTitle );
+		$form->setAction( $pageTitle->getLocalURL() );
 
 		$form->addButton( [
 			'name' => 'submit',
@@ -129,7 +131,7 @@ class SpecialNotificationsMarkRead extends FormSpecialPage {
 	/**
 	 * Process the form on POST submission.
 	 * @param array $data
-	 * @return bool|string|array|Status As documented for HTMLForm::trySubmit.
+	 * @return bool
 	 */
 	public function onSubmit( array $data ) {
 		$notifUser = MWEchoNotifUser::newFromUser( $this->getUser() );
@@ -146,6 +148,6 @@ class SpecialNotificationsMarkRead extends FormSpecialPage {
 
 	public function onSuccess() {
 		$page = SpecialPage::getTitleFor( 'Notifications' );
-		$this->getOutput()->redirect( $page->getFullUrl() );
+		$this->getOutput()->redirect( $page->getFullURL() );
 	}
 }

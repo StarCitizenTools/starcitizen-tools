@@ -10,7 +10,7 @@ class BaseTopicListFormatter {
 	 * Builds the results for an empty topic.
 	 *
 	 * @param Workflow $workflow Workflow for topic list
-	 * @return array Associative array with the the result
+	 * @return array Associative array with the result
 	 */
 	public function buildEmptyResult( Workflow $workflow ) {
 		return [
@@ -24,9 +24,9 @@ class BaseTopicListFormatter {
 
 	/**
 	 * @param Workflow $workflow Topic list workflow
-	 * @param array $links pagination link data
+	 * @param array[] $links pagination link data
 	 *
-	 * @return array link structure
+	 * @return Anchor[] link structure
 	 */
 	protected function buildPaginationLinks( Workflow $workflow, array $links ) {
 		$res = [];

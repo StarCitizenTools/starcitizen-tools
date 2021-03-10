@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( uw, $ ) {
+( function ( uw ) {
 	QUnit.module( 'uw.ConcurrentQueue', QUnit.newMwEnvironment() );
 
 	// This is a bogus action that will be executed for every item added to the
@@ -409,4 +409,4 @@
 		queue.startExecuting();
 	} );
 
-}( mediaWiki.uploadWizard, jQuery ) );
+}( mw.uploadWizard ) );

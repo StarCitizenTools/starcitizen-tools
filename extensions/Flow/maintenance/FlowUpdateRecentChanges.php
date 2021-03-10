@@ -1,6 +1,7 @@
 <?php
 
 use Flow\Data\Listener\RecentChangesListener;
+use MediaWiki\MediaWikiServices;
 use Wikimedia\Rdbms\IDatabase;
 
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
@@ -39,9 +40,11 @@ class FlowUpdateRecentChanges extends LoggedUpdateMaintenance {
 
 		$continue = 0;
 
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+
 		while ( $continue !== null ) {
 			$continue = $this->refreshBatch( $dbw, $continue );
-			wfWaitForSlaves();
+			$lbFactory->waitForReplication();
 		}
 
 		return true;
@@ -51,8 +54,8 @@ class FlowUpdateRecentChanges extends LoggedUpdateMaintenance {
 	 * Refreshes a batch of recentchanges entries
 	 *
 	 * @param IDatabase $dbw
-	 * @param int[optional] $continue The next batch starting at rc_id
-	 * @return int Start id for the next batch
+	 * @param int|null $continue The next batch starting at rc_id
+	 * @return int|null Start id for the next batch
 	 */
 	public function refreshBatch( IDatabase $dbw, $continue = null ) {
 		$rows = $dbw->select(
@@ -161,7 +164,8 @@ class FlowUpdateRecentChanges extends LoggedUpdateMaintenance {
 			$dbw->update(
 				'recentchanges',
 				[ 'rc_params' => serialize( $params ) ],
-				[ 'rc_id' => $row->rc_id ]
+				[ 'rc_id' => $row->rc_id ],
+				__METHOD__
 			);
 
 			$this->completeCount++;
@@ -180,5 +184,5 @@ class FlowUpdateRecentChanges extends LoggedUpdateMaintenance {
 	}
 }
 
-$maintClass = 'FlowUpdateRecentChanges'; // Tells it to run the class
+$maintClass = FlowUpdateRecentChanges::class; // Tells it to run the class
 require_once RUN_MAINTENANCE_IF_MAIN;

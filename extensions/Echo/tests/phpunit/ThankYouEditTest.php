@@ -2,10 +2,11 @@
 
 /**
  * @group Echo
+ * @group Database
  */
 class MWEchoThankYouEditTest extends MediaWikiTestCase {
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 		$this->tablesUsed[] = 'echo_event';
 		$this->tablesUsed[] = 'echo_notification';
@@ -17,6 +18,9 @@ class MWEchoThankYouEditTest extends MediaWikiTestCase {
 		$db->delete( 'echo_notification', '*', __METHOD__ );
 	}
 
+	/**
+	 * @covers \EchoHooks::onPageSaveComplete
+	 */
 	public function testFirstEdit() {
 		// setup
 		$this->deleteEchoData();
@@ -33,9 +37,12 @@ class MWEchoThankYouEditTest extends MediaWikiTestCase {
 
 		/** @var EchoNotification $notification */
 		$notification = reset( $notifications );
-		$this->assertEquals( 1, $notification->getEvent()->getExtraParam( 'editCount', 'not found' ) );
+		$this->assertSame( 1, $notification->getEvent()->getExtraParam( 'editCount', 'not found' ) );
 	}
 
+	/**
+	 * @covers \EchoHooks::onPageSaveComplete
+	 */
 	public function testTenthEdit() {
 		// setup
 		$this->deleteEchoData();
@@ -48,6 +55,8 @@ class MWEchoThankYouEditTest extends MediaWikiTestCase {
 		// are not generated
 		for ( $i = 0; $i < 12; $i++ ) {
 			$this->edit( $title, $user, "this is edit #$i" );
+			// Reload to reflect deferred update
+			$user->clearInstanceCache();
 		}
 
 		// assertions
@@ -57,7 +66,7 @@ class MWEchoThankYouEditTest extends MediaWikiTestCase {
 
 		/** @var EchoNotification $notification */
 		$notification = reset( $notifications );
-		$this->assertEquals( 10, $notification->getEvent()->getExtraParam( 'editCount', 'not found' ) );
+		$this->assertSame( 10, $notification->getEvent()->getExtraParam( 'editCount', 'not found' ) );
 	}
 
 	private function edit( Title $title, User $user, $text ) {

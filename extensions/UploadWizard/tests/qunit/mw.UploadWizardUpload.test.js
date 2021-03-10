@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw ) {
+( function () {
 	QUnit.module( 'mw.UploadWizardUpload', QUnit.newMwEnvironment() );
 
 	function createUpload( filename ) {
@@ -57,4 +57,4 @@
 		upload = createUpload( '///////////' );
 		assert.strictEqual( upload.getBasename(), '', 'Nonsensical path is just removed' );
 	} );
-}( mediaWiki ) );
+}() );

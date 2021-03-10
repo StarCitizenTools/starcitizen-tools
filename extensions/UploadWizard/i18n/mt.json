@@ -2,9 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Chrisportelli",
-			"පසිඳු කාවින්ද",
 			"Leli Forte",
-			"Matma Rex"
+			"Matma Rex",
+			"පසිඳු කාවින්ද"
 		]
 	},
 	"api-error-noimageinfo": "It-tlugħ tal-fajl irnexxa, imma s-server ma ta lura l-ebda informazzjoni dwar il-fajl.",
@@ -115,7 +115,6 @@
 	"mwe-upwiz-next": "Li jmiss",
 	"mwe-upwiz-next-file": "Kompli",
 	"mwe-upwiz-next-deeds": "Li jmiss",
-	"mwe-upwiz-next-details": "Li jmiss",
 	"mwe-upwiz-home": "Mur fil-paġna prinċipali tal-wiki",
 	"mwe-upwiz-upload-another": "Tella' iktar fajls",
 	"mwe-upwiz-prevent-close": "Għadek ma lestejtx ittella' u tippubblika {{PLURAL:$1|dan il-fajl|dawn il-fajls}}.",
@@ -173,7 +172,7 @@
 	"mwe-upwiz-license-custom": "Il-liċenzja hija deskritta mit-test wiki segwenti (għandu jkollu [$2 tikketta tal-copyright] valida):",
 	"mwe-upwiz-license-pd-old-100": "L-awtur miet iktar minn 100 sena ilu",
 	"mwe-upwiz-license-pd-old": "L-awtur miet iktar minn 70 sena ilu",
-	"mwe-upwiz-license-pd-us": "Ippubblikata għall-ewwel darba fl-Istati Uniti qabel l-1923",
+	"mwe-upwiz-license-pd-us": "Ippubblikata għall-ewwel darba fl-Istati Uniti qabel l-1925",
 	"mwe-upwiz-license-pd-usgov": "Opra oriġinali tal-Gvern Federali tal-Istati Uniti",
 	"mwe-upwiz-license-pd-usgov-nasa": "Opra oriġinali tan-NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Opra oriġinali tan-Navi Militari tal-Istati Uniti",

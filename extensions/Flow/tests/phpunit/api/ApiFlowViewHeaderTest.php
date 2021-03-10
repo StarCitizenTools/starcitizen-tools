@@ -5,8 +5,13 @@ namespace Flow\Tests\Api;
 use Sanitizer;
 
 /**
+ * @covers \Flow\Api\ApiFlowBase
+ * @covers \Flow\Api\ApiFlowBaseGet
+ * @covers \Flow\Api\ApiFlowViewHeader
+ *
  * @group Flow
  * @group medium
+ * @group Database
  */
 class ApiFlowViewHeaderTest extends ApiTestCase {
 	public function testViewEmptyHeader() {
@@ -72,7 +77,7 @@ class ApiFlowViewHeaderTest extends ApiTestCase {
 	/**
 	 * @todo
 	 *
-	public function testViewHistorical() {
-	}
+	 * public function testViewHistorical() {
+	 * }
 	 */
 }

@@ -2,14 +2,16 @@
 
 namespace Flow\Formatter;
 
+use ChangesList;
+use Flow\Conversion\Utils;
+use Flow\Data\Listener\RecentChangesListener;
 use Flow\Exception\FlowException;
 use Flow\Exception\PermissionException;
 use Flow\Model\Anchor;
-use ChangesList;
 use Flow\Model\UUID;
-use Flow\Conversion\Utils;
 use IContextSource;
 use Linker;
+use MediaWiki\MediaWikiServices;
 
 class ChangesListFormatter extends AbstractFormatter {
 	protected function getHistoryType() {
@@ -89,12 +91,11 @@ class ChangesListFormatter extends AbstractFormatter {
 
 		// Below code is inspired by Linker::formatAutocomments
 		$prefix = $ctx->msg( 'autocomment-prefix' )->inContentLanguage()->escaped();
-		$link = Linker::link(
-			$title = $row->workflow->getOwnerTitle(),
+		$link = MediaWikiServices::getInstance()->getLinkRenderer()->makeLink(
+			$row->workflow->getOwnerTitle(),
 			$ctx->getLanguage()->getArrow( 'backwards' ),
 			[],
-			[],
-			'noclasses'
+			[]
 		);
 		$summary = '<span class="autocomment">' . $msg->text() . '</span>';
 
@@ -160,6 +161,9 @@ class ChangesListFormatter extends AbstractFormatter {
 	 * @throws PermissionException
 	 */
 	public function getTimestampLink( $row, $ctx ) {
+		$this->serializer->setIncludeHistoryProperties( true );
+		$this->serializer->setIncludeContent( false );
+
 		$data = $this->serializer->formatApi( $row, $ctx, 'recentchanges' );
 		if ( $data === false ) {
 			throw new PermissionException( 'Insufficient permissions for ' . $row->revision->getRevisionId()->getAlphadecimal() );
@@ -171,7 +175,7 @@ class ChangesListFormatter extends AbstractFormatter {
 	/**
 	 * @param RecentChangesRow $row
 	 * @param IContextSource $ctx
-	 * @param array $block
+	 * @param \RCCacheEntry[] $block
 	 * @param array $links
 	 * @return array|false Links array, or false on failure
 	 * @throws FlowException
@@ -183,11 +187,21 @@ class ChangesListFormatter extends AbstractFormatter {
 			return false;
 		}
 
-		$old = unserialize( $block[count( $block ) - 1]->mAttribs['rc_params'] );
+		// Find the last (oldest) row in $block that is a Flow row. Note that there can be non-Flow
+		// things in $block (T228290).
+		$flowRows = array_filter( $block, function ( $blockRow ) {
+			$source = $blockRow->getAttribute( 'rc_source' );
+			return $source === RecentChangesListener::SRC_FLOW ||
+				( $source === null && $blockRow->getAttribute( 'rc_type' ) === RC_FLOW );
+		} );
+		$oldestRow = end( $flowRows ) ?? $row->recentChange;
+
+		$old = unserialize( $oldestRow->getAttribute( 'rc_params' ) );
 		$oldId = $old ? UUID::create( $old['flow-workflow-change']['revision'] ) : $row->revision->getRevisionId();
 
 		if ( isset( $data['links']['topic'] ) ) {
 			// add highlight details to anchor
+			// FIXME: This doesn't work well if the different rows in $block are for different topics
 			/** @var Anchor $anchor */
 			$anchor = clone $data['links']['topic'];
 			$anchor->query['fromnotif'] = '1';

@@ -6,9 +6,11 @@ use Flow\Data\Mapper\CachingObjectMapper;
 use Flow\Tests\FlowTestCase;
 
 /**
+ * @covers \Flow\Data\Mapper\CachingObjectMapper
+ *
  * @group Flow
  */
-class CachingObjectManagerTest extends FlowTestCase {
+class CachingObjectMapperTest extends FlowTestCase {
 
 	public function testReturnsSameObject() {
 		$mapper = $this->createMapper();
@@ -26,11 +28,10 @@ class CachingObjectManagerTest extends FlowTestCase {
 			return (array)$object;
 		};
 		$fromStorageRow = function ( array $row, $object ) {
-			if ( $object === null ) {
-				return (object)$row;
-			} else {
+			if ( $object ) {
 				return (object)( $row + (array)$object );
 			}
+			return (object)$row;
 		};
 		return new CachingObjectMapper( $toStorageRow, $fromStorageRow, [ 'id' ] );
 	}

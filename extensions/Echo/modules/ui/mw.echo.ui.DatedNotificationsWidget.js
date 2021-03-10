@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	/**
 	 * A notifications list organized and separated by dates
 	 *
@@ -17,7 +17,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.ui.DatedNotificationsWidget.parent.call( this, config );
+		mw.echo.ui.DatedNotificationsWidget.super.call( this, config );
 		// Mixin constructors
 		OO.ui.mixin.PendingElement.call( this, config );
 
@@ -94,7 +94,7 @@
 	 * @param {Object} models List models, indexed by ID
 	 */
 	mw.echo.ui.DatedNotificationsWidget.prototype.populateFromModel = function ( models ) {
-		var modelId, model, subgroupWidget, widget,
+		var modelId, model, subgroupWidget,
 			groupWidgets = [];
 
 		// Detach all attached models
@@ -176,4 +176,4 @@
 		return count;
 	};
 
-}( jQuery, mediaWiki ) );
+}() );

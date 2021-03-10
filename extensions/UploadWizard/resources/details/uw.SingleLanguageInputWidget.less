@@ -1,16 +1,28 @@
 .mwe-upwiz-singleLanguageInputWidget {
+	background-color: #f8f9fa;
+	padding: 10px;
+	border: 1px solid #eaecf0;
+	border-radius: 2px;
+
+	&:not( :first-of-type ) {
+		border-top: 0;
+	}
+
 	.mwe-upwiz-singleLanguageInputWidget-language {
 		width: 11.5em;
 	}
 
 	.mwe-upwiz-singleLanguageInputWidget-text {
-		width: 30.5em;
+		padding-top: 0.5em;
+		width: 100%;
 	}
 
 	.mwe-upwiz-singleLanguageInputWidget-removeItem {
-		// HACK Until T97631 is fixed, otherwise the icons look awful
+		float: right;
+		margin-right: 0;
+
 		&.oo-ui-iconElement > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
-			width: 24px;
+			float: right;
 		}
 	}
 

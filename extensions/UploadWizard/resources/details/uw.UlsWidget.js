@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * A ULS within a description field in UploadWizard's "Details" step form.
@@ -33,6 +33,13 @@
 			this.$element.addClass( config.classes[ i ] );
 		}
 
+		// Show the ULS when a user tabs into the language selection field
+		this.$element.find( '.oo-ui-dropdownWidget-handle' ).on( 'keyup', function ( e ) {
+			if ( e.key === 'Tab' ) {
+				$( this ).trigger( 'click' );
+			}
+		} );
+
 		if ( mw.loader.getState( 'ext.uls.mediawiki' ) === 'ready' ) {
 			this.initialiseUls( config.languages );
 		}
@@ -45,10 +52,10 @@
 
 		this.languages = languages;
 
-		this.uls = $( this.$element ).uls( {
+		this.uls = this.$element.uls( {
 			onSelect: function ( language ) {
 				ulsWidget.setValue( language );
-				ulsWidget.$element.parent().find( '.oo-ui-inputWidget-input' ).focus();
+				ulsWidget.$element.parent().find( '.oo-ui-inputWidget-input' ).trigger( 'focus' );
 			},
 			languages: languages,
 			ulsPurpose: 'upload-wizard-description',
@@ -63,14 +70,10 @@
 				this.$menu.css( offset );
 			}
 		} );
-		// Show the ULS when a user tabs into the language selection field
-		this.$element.find( '.oo-ui-dropdownWidget-handle' ).on( 'focus', function () {
-			$( this ).click();
-		} );
 	};
 
 	/**
-	 * @param {object} languages
+	 * @param {Object} languages
 	 */
 	uw.UlsWidget.prototype.updateLanguages = function ( languages ) {
 		this.uls.off().removeData( 'uls' );
@@ -103,4 +106,4 @@
 		return this.$element;
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

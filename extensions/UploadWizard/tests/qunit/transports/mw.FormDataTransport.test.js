@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, $ ) {
+( function () {
 	QUnit.module( 'mw.FormDataTransport', QUnit.newMwEnvironment() );
 
 	function createTransport( chunkSize, api ) {
@@ -149,7 +149,7 @@
 		transport.checkStatus().fail( tstub, function () {
 			assert.ok( tstub.calledWith( 'server-error', { errors: [ {
 				code: 'server-error',
-				html: mw.message( 'apierror-unknownerror' ).parse()
+				html: mw.message( 'api-clientside-error-invalidresponse' ).parse()
 			} ] } ) );
 			done();
 		} );
@@ -200,7 +200,7 @@
 
 		return transport.checkStatus().done( tstub, function () {
 			assert.ok( tstub.calledWith( 'testing' ) );
-			assert.ok( !usstub.called );
+			assert.notOk( usstub.called );
 		} );
 	} );
 
@@ -220,9 +220,9 @@
 
 		transport.checkStatus().fail( tstub, function () {
 			assert.ok( tstub.calledWith( 'testing', { error: 'testing' } ) );
-			assert.ok( !usstub.called );
+			assert.notOk( usstub.called );
 			done();
 		} );
 	} );
 
-}( mediaWiki, jQuery ) );
+}() );

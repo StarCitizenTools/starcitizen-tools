@@ -7,39 +7,40 @@
  *
  * @group API
  * @group medium
+ * @group Database
  * @covers ApiFlickrBlacklist
  */
 class ApiFlickrBlacklistTest extends ApiTestCase {
 	/**
 	 * Page used to store the blacklist. Will be created by the tests.
 	 */
-	const BLACKLIST_PAGE = 'TestFlickrBlacklistPage';
+	private const BLACKLIST_PAGE = 'TestFlickrBlacklistPage';
 
 	/**
 	 * NSID of the test user (actually, a real Flickr user chosen randomly
 	 * from the blacklist at Commons).
 	 */
-	const PASFAM_NSID = '26011645@N00';
+	private const PASFAM_NSID = '26011645@N00';
 
 	/**
 	 * Username of the test Flickr user.
 	 */
-	const PASFAM_USERNAME = 'pasfam';
+	private const PASFAM_USERNAME = 'pasfam';
 
 	/**
 	 * A photo from the test user.
 	 */
-	const PASFAM_IMAGE_PHOTO = 'http://www.flickr.com/photos/pasfam/147426941/';
+	private const PASFAM_IMAGE_PHOTO = 'http://www.flickr.com/photos/pasfam/147426941/';
 
 	/**
 	 * Static image URL for the test photo.
 	 */
-	const PASFAM_IMAGE_STATIC = 'http://farm1.staticflickr.com/44/147426941_98baf36fd1_o.jpg';
+	private const PASFAM_IMAGE_STATIC = 'http://farm1.staticflickr.com/44/147426941_98baf36fd1_o.jpg';
 
 	/**
 	 * A non-existing userid that won't match anything.
 	 */
-	const FAKE_NSID = '11111111@N00';
+	private const FAKE_NSID = '11111111@N00';
 
 	public function testBlacklistMatchByNsid() {
 		$this->checkApiSetup();
@@ -164,6 +165,7 @@ class ApiFlickrBlacklistTest extends ApiTestCase {
 			$this->markTestSkipped( $wgUploadWizardConfig['flickrApiUrl'] . ' is unreachable.' );
 		}
 	}
+
 	/**
 	 * Changes global parameter for blacklist page in such a way that the change can be
 	 * unrolled after the test. Also clears the cache for the blacklist.
@@ -178,7 +180,7 @@ class ApiFlickrBlacklistTest extends ApiTestCase {
 		] );
 
 		// clear blacklist cache
-		$reflection = new ReflectionClass( 'UploadWizardFlickrBlacklist' );
+		$reflection = new ReflectionClass( UploadWizardFlickrBlacklist::class );
 		$property = $reflection->getProperty( 'blacklist' );
 		$property->setAccessible( true );
 		$property->setValue( null, null );

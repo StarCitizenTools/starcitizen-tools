@@ -4,11 +4,11 @@
  * @group medium
  * @group API
  * @group Database
- * @covers ApiEchoMarkRead
+ * @covers \ApiEchoMarkRead
  */
 class ApiEchoMarkReadTest extends ApiTestCase {
 
-	function getTokens() {
+	public function getTokens() {
 		return $this->getTokenList( self::$users['sysop'] );
 	}
 
@@ -29,13 +29,11 @@ class ApiEchoMarkReadTest extends ApiTestCase {
 		$this->assertArrayHasKey( 'count', $result );
 		$this->assertArrayHasKey( 'rawcount', $result );
 
-		// Alert
 		$this->assertArrayHasKey( 'alert', $result );
 		$alert = $result['alert'];
 		$this->assertArrayHasKey( 'rawcount', $alert );
 		$this->assertArrayHasKey( 'count', $alert );
 
-		// Message
 		$this->assertArrayHasKey( 'message', $result );
 		$message = $result['message'];
 		$this->assertArrayHasKey( 'rawcount', $message );
@@ -59,13 +57,11 @@ class ApiEchoMarkReadTest extends ApiTestCase {
 		$this->assertArrayHasKey( 'count', $result );
 		$this->assertArrayHasKey( 'rawcount', $result );
 
-		// Alert
 		$this->assertArrayHasKey( 'alert', $result );
 		$alert = $result['alert'];
 		$this->assertArrayHasKey( 'rawcount', $alert );
 		$this->assertArrayHasKey( 'count', $alert );
 
-		// Message
 		$this->assertArrayHasKey( 'message', $result );
 		$message = $result['message'];
 		$this->assertArrayHasKey( 'rawcount', $message );
@@ -89,13 +85,11 @@ class ApiEchoMarkReadTest extends ApiTestCase {
 		$this->assertArrayHasKey( 'count', $result );
 		$this->assertArrayHasKey( 'rawcount', $result );
 
-		// Alert
 		$this->assertArrayHasKey( 'alert', $result );
 		$alert = $result['alert'];
 		$this->assertArrayHasKey( 'rawcount', $alert );
 		$this->assertArrayHasKey( 'count', $alert );
 
-		// Message
 		$this->assertArrayHasKey( 'message', $result );
 		$message = $result['message'];
 		$this->assertArrayHasKey( 'rawcount', $message );

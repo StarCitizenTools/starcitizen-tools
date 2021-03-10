@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/* global moment:false */
 	/**
 	 * A base widget for displaying notification items.
@@ -22,8 +22,8 @@
 
 		config = config || {};
 
-		// Parent
-		mw.echo.ui.NotificationItemWidget.parent.call( this, $.extend( { data: model.getId() }, config ) );
+		// Parent constructor
+		mw.echo.ui.NotificationItemWidget.super.call( this, $.extend( { data: model.getId() }, config ) );
 
 		this.controller = controller;
 		this.model = model;
@@ -47,7 +47,11 @@
 		if ( this.model.getIconURL() ) {
 			$icon = $( '<div>' )
 				.addClass( 'mw-echo-ui-notificationItemWidget-icon' )
-				.append( $( '<img>' ).attr( 'src', this.model.getIconURL() ) );
+				.append( $( '<img>' ).attr( {
+					src: this.model.getIconURL(),
+					role: 'presentation',
+					alt: ' '
+				} ) );
 		}
 
 		// Content
@@ -73,7 +77,8 @@
 
 		// Actions menu
 		this.actionsButtonSelectWidget = new OO.ui.ButtonSelectWidget( {
-			classes: [ 'mw-echo-ui-notificationItemWidget-content-actions-buttons' ]
+			classes: [ 'mw-echo-ui-notificationItemWidget-content-actions-buttons' ],
+			tabIndex: -1
 		} );
 
 		// Popup menu
@@ -81,7 +86,7 @@
 			framed: false,
 			icon: 'ellipsis',
 			$overlay: this.$overlay,
-			menuWidth: 200,
+			horizontalPosition: this.bundle ? 'end' : 'auto',
 			title: mw.msg( 'echo-notification-more-options-tooltip' ),
 			classes: [ 'mw-echo-ui-notificationItemWidget-content-actions-menu' ]
 		} );
@@ -130,7 +135,18 @@
 			// prioritized explicitly, *except* for items inside a bundle
 			// (where all actions are inside the menu) or there are more than
 			// two prioritized actions (all others go into the menu)
-			isOutsideMenu = !this.bundle && urlObj.prioritized && outsideMenuItemCounter < mw.echo.config.maxPrioritizedActions;
+			isOutsideMenu = !this.bundle &&
+					(
+						(
+							// Make sure we don't have too many prioritized items
+							urlObj.prioritized &&
+							outsideMenuItemCounter < mw.echo.config.maxPrioritizedActions
+						) ||
+						// If the number of total items are equal to or less than the
+						// maximum allowed, they all go outside the menu
+						// mw.echo.config.maxPrioritizedActions is 2 on desktop and 1 on mobile.
+						secondaryUrls.length <= mw.echo.config.maxPrioritizedActions
+					);
 
 			linkButton = new mw.echo.ui.MenuItemWidget( {
 				type: urlObj.type,
@@ -146,6 +162,7 @@
 			// Limit to 2 items outside the menu
 			if ( isOutsideMenu ) {
 				this.actionsButtonSelectWidget.addItems( [ linkButton ] );
+				this.actionsButtonSelectWidget.setTabIndex( 0 );
 				outsideMenuItemCounter++;
 			} else {
 				this.menuPopupButtonWidget.getMenu().addItems( [ linkButton ] );
@@ -419,4 +436,4 @@
 	mw.echo.ui.NotificationItemWidget.prototype.isFake = function () {
 		return false;
 	};
-}( mediaWiki, jQuery ) );
+}() );

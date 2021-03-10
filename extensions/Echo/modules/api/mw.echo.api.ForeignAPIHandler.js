@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Foreign notification API handler
 	 *
@@ -16,7 +16,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.api.ForeignAPIHandler.parent.call( this, config );
+		mw.echo.api.ForeignAPIHandler.super.call( this, config );
 
 		this.api = new mw.ForeignApi( apiUrl );
 		this.unreadOnly = config.unreadOnly !== undefined ? !!config.unreadOnly : false;
@@ -41,4 +41,4 @@
 
 		return $.extend( {}, this.typeParams[ type ], params );
 	};
-}( mediaWiki, jQuery ) );
+}() );

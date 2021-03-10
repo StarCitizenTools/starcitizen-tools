@@ -18,4 +18,4 @@
 ( function ( uw ) {
 	// create UploadWizard deed namespace
 	uw.deed = {};
-}( mediaWiki.uploadWizard ) );
+}( mw.uploadWizard ) );

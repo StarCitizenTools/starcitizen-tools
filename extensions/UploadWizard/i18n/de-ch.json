@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Das Schäfchen",
 			"Filzstift",
-			"Geitost",
-			"Das Schäfchen"
+			"Geitost"
 		]
 	},
 	"mwe-upwiz-tutorial-error-cannot-transform": "Es konnte leider kein Bild des Lernprogramms aufgerufen werden, das sich der Bildschirmgrösse anpasst. Dies könnte ein vorübergehendes Problem von ''Wikimedia Commons'' sein. Versuche es später noch einmal.",

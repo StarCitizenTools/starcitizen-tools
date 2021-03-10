@@ -1,15 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Envlh",
+			"Macofe",
 			"Pasanbhathiya2",
 			"Singhalawap",
+			"Susith Chandira Gts",
+			"SusithCM",
 			"පසිඳු කාවින්ද",
 			"බිඟුවා",
-			"Susith Chandira Gts",
-			"Macofe",
-			"SusithCM",
-			1100100,
-			"Envlh"
+			1100100
 		]
 	},
 	"uploadwizard": "උඩුගත කිරීමේ මායා අඳුන",
@@ -113,7 +113,6 @@
 	"mwe-upwiz-next": "ඊලඟ",
 	"mwe-upwiz-next-file": "දිගටම කරගෙන යන්න",
 	"mwe-upwiz-next-deeds": "ඊලඟ",
-	"mwe-upwiz-next-details": "ඊලඟ",
 	"mwe-upwiz-home": "විකී මුල් පිටුව වෙත යන්න",
 	"mwe-upwiz-upload-another": "තව ගොනු උඩුගත කරන්න",
 	"mwe-upwiz-prevent-close": "ඔබ විසින් තවමත් {{PLURAL:$1|මෙම ගොනුව|මෙම ගොනු}} උඩුගත කරමින් ප්‍රකාශයට පත්කොට අවසන් වී නොමැත.",
@@ -169,7 +168,7 @@
 	"mwe-upwiz-license-fal": "නිදහස් කලා බලපත්‍රය",
 	"mwe-upwiz-license-pd-old-100": "කතුවරයා අවුරුදු 100 කටත් පෙර මිය ගොස් ඇත",
 	"mwe-upwiz-license-pd-old": "කතුවරයා අවුරුදු 70 කටත් පෙර මිය ගොස් ඇත",
-	"mwe-upwiz-license-pd-us": "1923 ට පෙර එක්සත් ජනපදයේදී ප්‍රථම වරට ප්‍රකාශයට පත්කල",
+	"mwe-upwiz-license-pd-us": "1925 ට පෙර එක්සත් ජනපදයේදී ප්‍රථම වරට ප්‍රකාශයට පත්කල",
 	"mwe-upwiz-license-pd-usgov": "ඒජනපද සන්ධීය ආණ්ඩුක්‍රමයේ නියම වැඩක්",
 	"mwe-upwiz-license-pd-usgov-nasa": "නාසා හී නියම වැඩක්",
 	"mwe-upwiz-license-pd-usgov-military-navy": "ඒජනපද නාවික හමුදාවේ නියම වැඩක්",

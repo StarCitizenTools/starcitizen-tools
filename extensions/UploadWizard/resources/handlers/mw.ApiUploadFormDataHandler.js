@@ -1,4 +1,4 @@
-( function ( mw, OO ) {
+( function () {
 	/**
 	 * Represents an object which configures an html5 FormData object to upload.
 	 * Large files are uploaded in chunks.
@@ -67,4 +67,4 @@
 			handler.formData.token = token;
 		} );
 	};
-}( mediaWiki, OO ) );
+}() );

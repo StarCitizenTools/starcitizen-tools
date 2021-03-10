@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Abstract notification API handler
 	 *
@@ -77,7 +77,7 @@
 	 * @param {string|string[]} [sources=*] Requested sources. If not given
 	 *  or if a '*' is given, all available sources will be queried
 	 * @return {jQuery.Promise} Promise that is resolved with an object
-	 *	of pages with the number of unread notifications per wiki
+	 *  of pages with the number of unread notifications per wiki
 	 */
 	mw.echo.api.APIHandler.prototype.fetchUnreadNotificationPages = function ( sources ) {
 		var params = {
@@ -107,11 +107,11 @@
 		return Array.isArray( sources ) ?
 			(
 				sources.indexOf( 'local' ) !== -1 ||
-				sources.indexOf( mw.config.get( 'wgDBname' ) ) !== -1
+				sources.indexOf( mw.config.get( 'wgWikiID' ) ) !== -1
 			) :
 			(
 				sources === 'local' ||
-				sources === mw.config.get( 'wgDBname' )
+				sources === mw.config.get( 'wgWikiID' )
 			);
 	};
 
@@ -182,6 +182,7 @@
 	/**
 	 * Mark all notifications as read
 	 *
+	 * @param {string} source Wiki name
 	 * @param {string|string[]} type Notification type 'message', 'alert' or 'all'.
 	 * @return {jQuery.Promise} A promise that resolves when all notifications
 	 *  are marked as read.
@@ -192,6 +193,7 @@
 	 * Mark multiple notification items as read using specific IDs
 	 *
 	 * @abstract
+	 * @param {string} source Wiki name
 	 * @param {string[]} itemIdArray An array of notification item IDs
 	 * @param {boolean} [isRead] Item's new read state; true for marking the item
 	 *  as read, false for marking the item as unread
@@ -270,4 +272,4 @@
 	mw.echo.api.APIHandler.prototype.getTypeParams = function ( type ) {
 		return this.typeParams[ type ];
 	};
-}( mediaWiki, jQuery ) );
+}() );

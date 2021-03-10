@@ -3,9 +3,9 @@
 		"authors": [
 			"Borichèt",
 			"Dragonòt",
-			"Matma Rex",
+			"Envlh",
 			"Macofe",
-			"Envlh"
+			"Matma Rex"
 		]
 	},
 	"uploadwizard": "Assistent d'amportassion",
@@ -58,7 +58,6 @@
 	"mwe-upwiz-remove-upload": "Gavé s'archivi da la lista dj'archivi da carié",
 	"mwe-upwiz-remove-description": "Scancelé costa descrission",
 	"mwe-upwiz-upload": "Carié",
-	"mwe-upwiz-file-upload-notcapable": "Belavans sò navigador a peul pa carié d'archivi.\nPër piasì, ch'a preuva con n'àutr navigador.",
 	"mwe-upwiz-file-all-ok": "Tùit ij cariagi a son andàit bin!",
 	"mwe-upwiz-file-some-failed": "Chèich càrigh a l'han falì.",
 	"mwe-upwiz-file-retry": "Ch'a pruva torna ij càrigh falì",
@@ -147,7 +146,6 @@
 	"mwe-upwiz-next": "Apress",
 	"mwe-upwiz-next-file": "Continua",
 	"mwe-upwiz-next-deeds": "Apress",
-	"mwe-upwiz-next-details": "Apress",
 	"mwe-upwiz-home": "Andé a la pàgina d'intrada dla wiki",
 	"mwe-upwiz-upload-another": "Carié pì d'archivi",
 	"mwe-upwiz-prevent-close": "A l'ha pa anco' finì ëd carié e ëd publiché {{PLURAL:$1|cost archivi|costi archivi}}.",
@@ -221,7 +219,7 @@
 	"mwe-upwiz-license-own-pd": "Tuti ij drit con licensa Creative Commons Zero (com un domini pùblich)",
 	"mwe-upwiz-license-pd-old-100": "L'autor a l'é mòrt pi che 100 agn fà",
 	"mwe-upwiz-license-pd-old": "L'autor a l'é mòrt pi che 70 agn fà",
-	"mwe-upwiz-license-pd-us": "Publicà për la prima vira ant jë Stat Unì prima dël 1923",
+	"mwe-upwiz-license-pd-us": "Publicà për la prima vira ant jë Stat Unì prima dël 1925",
 	"mwe-upwiz-license-pd-usgov": "Travaj original dël Govern Federal US",
 	"mwe-upwiz-license-pd-usgov-nasa": "Travaj original ëd la NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Travaj original ëd la Marin-a Militar US",
@@ -272,7 +270,6 @@
 	"mwe-upwiz-prefs-def-license-def": "Dovré col ch'a sia ël valor dë stàndard",
 	"mwe-upwiz-prefs-license-own": "Travaj pròpi - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "Travaj ëd cheidun d'àutri - $1",
-	"mwe-upwiz-prefs-chunked": "Cariament framentà për j'archivi ëd pi d'$1 ant l'Assistent ëd cariament",
 	"mwe-upwiz-prefs-skiptutorial": "Sauté le spiegassion d'antrodussion ëd le license",
 	"mwe-upwiz-prefs-maxsimultaneous-upload": "Nùmer màssim ëd cariagi simultani",
 	"campaigns": "Carié l'assistent ëd campagne",

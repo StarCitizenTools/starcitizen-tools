@@ -1,4 +1,5 @@
-( function ( $, mw ) {
+( function () {
+	var configVars = require( './config.json' );
 	mw.echo = mw.echo || {};
 
 	/**
@@ -15,18 +16,6 @@
 
 		this.clickThroughEnabled = config.clickThroughEnabled || this.constructor.static.clickThroughEnabled;
 		this.notificationsIdCache = [];
-		if ( this.clickThroughEnabled ) {
-			// This should usually already be loaded, but not always
-			this.deferred = mw.loader.using( 'ext.eventLogging', function () {
-				mw.eventLog.setDefaults( 'EchoInteraction', {
-					version: mw.config.get( 'wgEchoEventLoggingVersion' ),
-					userId: +mw.config.get( 'wgUserId' ),
-					editCount: +mw.config.get( 'wgUserEditCount' )
-				} );
-			} );
-		} else {
-			this.deferred = $.Deferred().resolve();
-		}
 	};
 
 	OO.initClass( mw.echo.Logger );
@@ -40,11 +29,7 @@
 	 * @static
 	 * @property {boolean}
 	 */
-	mw.echo.Logger.static.clickThroughEnabled = OO.getProp(
-		mw.config.get( 'wgEchoEventLoggingSchemas' ),
-		'EchoInteraction',
-		'enabled'
-	);
+	mw.echo.Logger.static.clickThroughEnabled = !!configVars.EchoInteractionLogging && !mw.user.isAnon();
 
 	/**
 	 * Context definitions.
@@ -99,7 +84,10 @@
 		}
 
 		myEvt = {
-			action: action
+			action: action,
+			version: configVars.EchoEventLoggingVersion,
+			userId: +mw.config.get( 'wgUserId' ),
+			editCount: +mw.config.get( 'wgUserEditCount' )
 		};
 
 		// All the fields below are optional
@@ -116,13 +104,11 @@
 			myEvt.mobile = mobile || mw.config.get( 'skin' ) === 'minerva';
 		}
 
-		if ( notifWiki && notifWiki !== mw.config.get( 'wgDBname' ) && notifWiki !== 'local' ) {
+		if ( notifWiki && notifWiki !== mw.config.get( 'wgWikiID' ) && notifWiki !== 'local' ) {
 			myEvt.notifWiki = notifWiki;
 		}
 
-		this.deferred.done( function () {
-			mw.eventLog.logEvent( 'EchoInteraction', myEvt );
-		} );
+		mw.track( 'event.EchoInteraction', myEvt );
 	};
 
 	/**
@@ -138,7 +124,7 @@
 		var i, len, key;
 
 		for ( i = 0, len = notificationIds.length; i < len; i++ ) {
-			key = notifWiki && notifWiki !== mw.config.get( 'wgDBname' ) && notifWiki !== 'local' ?
+			key = notifWiki && notifWiki !== mw.config.get( 'wgWikiID' ) && notifWiki !== 'local' ?
 				notificationIds[ i ] + '-' + notifWiki :
 				notificationIds[ i ];
 
@@ -152,4 +138,4 @@
 	};
 
 	mw.echo.logger = new mw.echo.Logger();
-}( jQuery, mediaWiki ) );
+}() );

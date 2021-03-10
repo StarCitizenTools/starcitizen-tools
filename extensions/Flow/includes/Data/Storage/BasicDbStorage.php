@@ -2,13 +2,13 @@
 
 namespace Flow\Data\Storage;
 
-use Flow\Model\UUID;
-use Flow\DbFactory;
 use Flow\Data\ObjectManager;
 use Flow\Data\Utils\MultiDimArray;
 use Flow\Data\Utils\RawSql;
+use Flow\DbFactory;
 use Flow\Exception\DataModelException;
 use Flow\Exception\DataPersistenceException;
+use Flow\Model\UUID;
 
 /**
  * Standard backing store for data model with no special cases which is stored
@@ -49,7 +49,6 @@ class BasicDbStorage extends DbStorage {
 	 * @param array $rows The rows to insert. Also accepts a single row.
 	 * @return array|false An array of the rows that now exist
 	 * in the database. Integrity of keys is guaranteed.
-	 * False if we failed.
 	 */
 	public function insert( array $rows ) {
 		// Only allow the row to include key/value pairs.
@@ -61,16 +60,13 @@ class BasicDbStorage extends DbStorage {
 		}
 
 		// insert returns boolean true/false
-		$res = $this->dbFactory->getDB( DB_MASTER )->insert(
+		$this->dbFactory->getDB( DB_MASTER )->insert(
 			$this->table,
 			$insertRows,
 			__METHOD__ . " ({$this->table})"
 		);
-		if ( $res ) {
-			return $rows;
-		} else {
-			return false;
-		}
+
+		return $rows;
 	}
 
 	/**
@@ -99,10 +95,9 @@ class BasicDbStorage extends DbStorage {
 
 		$dbw = $this->dbFactory->getDB( DB_MASTER );
 		// update returns boolean true/false as $res
-		$res = $dbw->update( $this->table, $updates, $pk, __METHOD__ . " ({$this->table})" );
-		// $dbw->update returns boolean true/false as $res
+		$dbw->update( $this->table, $updates, $pk, __METHOD__ . " ({$this->table})" );
 		// we also want to check that $pk actually selected a row to update
-		return $res && $dbw->affectedRows();
+		return $dbw->affectedRows() ? true : false;
 	}
 
 	/**

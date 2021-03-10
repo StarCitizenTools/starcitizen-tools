@@ -1,14 +1,47 @@
 {
 	"@metadata": {
 		"authors": [
-			"Malafaya",
-			"Joao Xavier"
+			"Joao Xavier",
+			"Malafaya"
 		]
 	},
+	"uploadwizard": "Instrukturi pri adkargo di arkivi",
+	"mwe-upwiz-step-tutorial": "Lernar",
+	"mwe-upwiz-step-file": "Sendar arkivo",
+	"mwe-upwiz-step-deeds": "Autoroyuro dil arkio",
+	"mwe-upwiz-step-details": "Deskriptez l'arkivo",
 	"mwe-upwiz-tutorial-error-localized-file-missing": "Pardonez, ni ne trovis uzado-instrucioni en vua linguo. Vice, ni montras la versiono $1.",
+	"mwe-upwiz-add-file-n": "Adjuntar plusa arkivi",
+	"mwe-upwiz-uploading": "Karganta...",
+	"mwe-upwiz-stashed-upload": "Sendita",
+	"mwe-upwiz-upload": "Sendar",
+	"mwe-upwiz-file-all-ok": "Omna sendaji esis sucesoza!",
+	"mwe-upwiz-skip-tutorial-future": "Ne montrez ica etapo future",
+	"mwe-upwiz-progressbar-uploading": "Karganta",
 	"mwe-upwiz-source-ownwork-cc-by-3.0-explain": "(Irgu povas uzar, partigar od adaptar {{PLURAL:$1|ica laboro|ici labori}}, se mencionez me kom lua kreinto.)",
 	"mwe-upwiz-source-thirdparty-intro": "Mencionez l'adreso interretala ube vu trovis singla arkivo.",
+	"mwe-upwiz-source-thirdparty-accept": "O.K.",
+	"mwe-upwiz-patent-dialog-link-warranty": "Lernez pluse",
+	"mwe-upwiz-patent-dialog-link-license": "Savez pluse",
+	"mwe-upwiz-more-options": "Adjuntez loko, e plusa informi ...",
+	"mwe-upwiz-desc": "Deskripto",
+	"mwe-upwiz-location-button": "Montrez sur mapo",
+	"mwe-upwiz-copyright-info": "Autoroyuro dil arkivo",
 	"mwe-upwiz-ok": "O.K.",
+	"mwe-upwiz-fileexists-replace-no-link": "Voluntez selektar altra titulo, nam ca titulo ja uzesas da altra arkivo.",
+	"mwe-upwiz-next": "Sequanta",
+	"mwe-upwiz-next-file": "Durar l'agado",
+	"mwe-upwiz-next-deeds": "Sequanta",
+	"mwe-upwiz-home": "Irar a la chefpagino dil Wiki",
+	"mwe-upwiz-tooltip-source": "De ube venis ca arkivo - povas esar URL, libro o publikigajo.",
 	"mwe-upwiz-tooltip-more-info": "Lernez pluse.",
-	"mwe-upwiz-license-custom": "La permiso deskriptesas per la sequanta wikitexto (mustas kontenar valida [$2 informo pri autoroyuro]):"
+	"mwe-upwiz-error-title-thumbnail": "To semblas esar titulo di miniaturo. Voluntez ne sendar miniaturi de ula imajo a la sama Wiki de ube vu kopiis ol. Se vu ne kopiis ca imajo de ca Wiki, voluntez chanjar lua nomo, por ol ne semblar esar miniaturo.",
+	"mwe-upwiz-too-many-files-text": "Vu povas sendar nur $1 {{PLURAL:$1|arkivo|arkivi}} quik, ma vu probis sendar entote $2 {{PLURAL:$2|arkivo|arkivi}} quik. Probez itere sendar min artikli per foyo!",
+	"mwe-upwiz-campaign-upload-button": "Kargar!",
+	"mwe-upwiz-campaign-media-count-desc": "{{PLURAL:$1|Arkivo|Arkivi}} kargita",
+	"mwe-upwiz-license-custom": "La permiso deskriptesas per la sequanta wikitexto (mustas kontenar valida [$2 informo pri autoroyuro]):",
+	"mwe-upwiz-subhead-alt-upload": "Retroirar a l'anciena formulario",
+	"mwe-upwiz-feedback-prompt": "Sendez komenti pri l'instrukturi",
+	"mwe-upwiz-errordialog-ok": "O.K.",
+	"prefs-uploads": "Karganta"
 }

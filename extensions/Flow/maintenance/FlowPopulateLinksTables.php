@@ -18,7 +18,7 @@ require_once getenv( 'MW_INSTALL_PATH' ) !== false
 class FlowPopulateLinksTables extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = "Populates links tables for wikis deployed before change 110090";
+		$this->addDescription( "Populates links tables for wikis deployed before change 110090" );
 		$this->requireExtension( 'Flow' );
 	}
 
@@ -70,7 +70,7 @@ class FlowPopulateLinksTables extends LoggedUpdateMaintenance {
 					);
 				}
 			}
-			$dbf->waitForSlaves();
+			$dbf->waitForReplicas();
 		}
 	}
 
@@ -114,5 +114,5 @@ class FlowPopulateLinksTables extends LoggedUpdateMaintenance {
 	}
 }
 
-$maintClass = "FlowPopulateLinksTables";
+$maintClass = FlowPopulateLinksTables::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

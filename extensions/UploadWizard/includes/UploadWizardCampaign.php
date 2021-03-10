@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Class that represents a single upload campaign.
  * An upload campaign is stored as a row in the uw_campaigns table,
@@ -70,11 +72,11 @@ class UploadWizardCampaign {
 		return new UploadWizardCampaign( $campaignTitle );
 	}
 
-	function __construct( $title, $config = null, $context = null ) {
+	public function __construct( $title, $config = null, $context = null ) {
 		$this->title = $title;
 		if ( $config === null ) {
 			$content = WikiPage::factory( $title )->getContent();
-			if ( $content->getModel() !== 'Campaign' ) {
+			if ( !$content instanceof CampaignContent ) {
 				throw new MWException( 'Wrong content model' );
 			}
 			$this->config = $content->getJsonData();
@@ -96,7 +98,7 @@ class UploadWizardCampaign {
 	 * @return bool
 	 */
 	public function getIsEnabled() {
-		return $this->config['enabled'];
+		return $this->config !== null && $this->config['enabled'];
 	}
 
 	/**
@@ -126,52 +128,56 @@ class UploadWizardCampaign {
 	}
 
 	public function getTotalContributorsCount() {
-		global $wgMemc;
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		$fname = __METHOD__;
 
-		$key = wfMemcKey( 'uploadwizard', 'campaign', $this->getName(), 'contributors-count' );
-		$data = $wgMemc->get( $key );
-		if ( $data === false ) {
-			wfDebug( __METHOD__ . ' cache miss for key ' . $key );
-			$dbr = wfGetDB( DB_REPLICA );
+		return $cache->getWithSetCallback(
+			$cache->makeKey( 'uploadwizard-campaign-contributors-count', $this->getName() ),
+			UploadWizardConfig::getSetting( 'campaignStatsMaxAge' ),
+			function ( $oldValue, &$ttl, array &$setOpts ) use ( $fname ) {
+				$dbr = wfGetDB( DB_REPLICA );
+				$setOpts += Database::getCacheSetOptions( $dbr );
 
-			if ( class_exists( ActorMigration::class ) ) {
-				$actorQuery = ActorMigration::newMigration()->getJoin( 'img_user' );
-			} else {
-				$actorQuery = [
-					'tables' => [],
-					'fields' => [ 'img_user' => 'img_user' ],
-					'joins' => [],
-				];
+				if ( class_exists( ActorMigration::class ) ) {
+					$actorQuery = ActorMigration::newMigration()->getJoin( 'img_user' );
+				} else {
+					$actorQuery = [
+						'tables' => [],
+						'fields' => [ 'img_user' => 'img_user' ],
+						'joins' => [],
+					];
+				}
+
+				$result = $dbr->select(
+					[ 'categorylinks', 'page', 'image' ] + $actorQuery['tables'],
+					[ 'count' => 'COUNT(DISTINCT ' . $actorQuery['fields']['img_user'] . ')' ],
+					[ 'cl_to' => $this->getTrackingCategory()->getDBkey(), 'cl_type' => 'file' ],
+					$fname,
+					[
+						'USE INDEX' => [ 'categorylinks' => 'cl_timestamp' ]
+					],
+					[
+						'page' => [ 'INNER JOIN', 'cl_from=page_id' ],
+						'image' => [ 'INNER JOIN', 'page_title=img_name' ]
+					] + $actorQuery['joins']
+				);
+
+				return $result->current()->count;
 			}
-
-			$result = $dbr->select(
-				[ 'categorylinks', 'page', 'image' ] + $actorQuery['tables'],
-				[ 'count' => 'COUNT(DISTINCT ' . $actorQuery['fields']['img_user'] . ')' ],
-				[ 'cl_to' => $this->getTrackingCategory()->getDBKey(), 'cl_type' => 'file' ],
-				__METHOD__,
-				[
-					'USE INDEX' => [ 'categorylinks' => 'cl_timestamp' ]
-				],
-				[
-					'page' => [ 'INNER JOIN', 'cl_from=page_id' ],
-					'image' => [ 'INNER JOIN', 'page_title=img_name' ]
-				] + $actorQuery['joins']
-			);
-
-			$data = $result->current()->count;
-
-			$wgMemc->set( $key, $data, UploadWizardConfig::getSetting( 'campaignStatsMaxAge' ) );
-		}
-
-		return $data;
+		);
 	}
 
+	/**
+	 * @param int $limit
+	 *
+	 * @return Title[]
+	 */
 	public function getUploadedMedia( $limit = 24 ) {
 		$dbr = wfGetDB( DB_REPLICA );
 		$result = $dbr->select(
 			[ 'categorylinks', 'page' ],
 			[ 'cl_from', 'page_namespace', 'page_title' ],
-			[ 'cl_to' => $this->getTrackingCategory()->getDBKey(), 'cl_type' => 'file' ],
+			[ 'cl_to' => $this->getTrackingCategory()->getDBkey(), 'cl_type' => 'file' ],
 			__METHOD__,
 			[
 				'ORDER BY' => 'cl_timestamp DESC',
@@ -223,48 +229,39 @@ class UploadWizardCampaign {
 	 *
 	 * @since 1.3
 	 *
-	 * @return String parsed wikitext
+	 * @return string HTML
 	 */
 	private function parseValue( $value, Language $lang ) {
-		global $wgParser;
-
 		$parserOptions = ParserOptions::newFromContext( $this->context );
-		if ( !defined( 'ParserOutput::SUPPORTS_STATELESS_TRANSFORMS' ) ) {
-			$parserOptions->setEditSection( false );
-		}
 		$parserOptions->setInterfaceMessage( true );
 		$parserOptions->setUserLang( $lang );
 		$parserOptions->setTargetLanguage( $lang );
 		$parserOptions->setTidy( true );
 
-		$output = $wgParser->parse( $value, $this->getTitle(),
-									$parserOptions );
+		$output = MediaWikiServices::getInstance()->getParser()->parse(
+			$value, $this->getTitle(), $parserOptions
+		);
 		$parsed = $output->getText( [
 			'enableSectionEditLinks' => false,
 		] );
 
-		// Strip out the surrounding <p> tags
-		$m = [];
-		if ( preg_match( '/^<p>(.*)\n?<\/p>\n?/sU', $parsed, $m ) ) {
-			$parsed = $m[1];
-		}
-
 		$this->updateTemplates( $output );
 
-		return $parsed;
+		return Parser::stripOuterParagraph( $parsed );
 	}
 
 	/**
 	 * Parses the values in an assoc array as wikitext
 	 *
 	 * @param array $array
-	 * @param array $forKeys Array of keys whose values should be parsed
+	 * @param Language $lang
+	 * @param array|null $forKeys Array of keys whose values should be parsed
 	 *
 	 * @since 1.3
 	 *
 	 * @return array
 	 */
-	private function parseArrayValues( $array, $lang, $forKeys = null ) {
+	private function parseArrayValues( $array, Language $lang, $forKeys = null ) {
 		$parsed = [];
 		foreach ( $array as $key => $value ) {
 			if ( $forKeys !== null ) {
@@ -292,7 +289,7 @@ class UploadWizardCampaign {
 	 * @param Language|null $lang
 	 * @return array
 	 */
-	public function getParsedConfig( $lang = null ) {
+	public function getParsedConfig( Language $lang = null ) {
 		if ( $lang === null ) {
 			$lang = $this->context->getLanguage();
 		}
@@ -301,7 +298,7 @@ class UploadWizardCampaign {
 		// we then check to make sure that it is the latest version - by verifying that its
 		// timestamp is greater than or equal to the timestamp of the last time an invalidate was
 		// issued.
-		$cache = ObjectCache::getMainWANInstance();
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$memKey = wfMemcKey(
 			'uploadwizard', 'campaign', $this->getName(), 'parsed-config', $lang->getCode()
 		);
@@ -422,14 +419,14 @@ class UploadWizardCampaign {
 	 * for the campaign will be regenerated the next time there is a read.
 	 */
 	public function invalidateCache() {
-		$cache = ObjectCache::getMainWANInstance();
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$cache->touchCheckKey( $this->makeInvalidateTimestampKey() );
 	}
 
 	/**
 	 * Returns key used to store the last time the cache for a particular campaign was invalidated
 	 *
-	 * @return String
+	 * @return string
 	 */
 	private function makeInvalidateTimestampKey() {
 		return wfMemcKey(
@@ -440,6 +437,8 @@ class UploadWizardCampaign {
 	/**
 	 * Checks the current date against the configured start and end dates to determine
 	 * whether the campaign is currently active.
+	 *
+	 * @return bool
 	 */
 	private function isActive() {
 		$today = strtotime( date( "Y-m-d" ) );
@@ -456,6 +455,8 @@ class UploadWizardCampaign {
 	/**
 	 * Checks the current date against the configured start and end dates to determine
 	 * whether the campaign is currently active.
+	 *
+	 * @return bool
 	 */
 	private function wasActive() {
 		$today = strtotime( date( "Y-m-d" ) );
@@ -476,8 +477,9 @@ class UploadWizardCampaign {
 		$arrObjRef = explode( '|', $objRef );
 		if ( count( $arrObjRef ) > 1 ) {
 			list( $wiki, $title ) = $arrObjRef;
-			if ( Interwiki::isValidInterwiki( $wiki ) ) {
-				return str_replace( '$1', $title, Interwiki::fetch( $wiki )->getURL() );
+			$lookup = MediaWikiServices::getInstance()->getInterwikiLookup();
+			if ( $lookup->isValidInterwiki( $wiki ) ) {
+				return str_replace( '$1', $title, $lookup->fetch( $wiki )->getURL() );
 			}
 		}
 		return false;

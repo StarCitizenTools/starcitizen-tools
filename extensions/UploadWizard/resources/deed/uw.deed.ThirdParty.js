@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 	/**
 	 * Set up the form and deed object for the deed option that says these uploads are the work of a third party.
 	 *
@@ -102,7 +102,6 @@
 		} );
 
 		this.licenseInput = new mw.UploadWizardLicenseInput(
-			undefined,
 			this.config.licensing.thirdParty,
 			this.uploadCount,
 			api
@@ -110,7 +109,8 @@
 		this.licenseInput.$element.addClass( 'mwe-upwiz-deed-license-groups' );
 		this.licenseInput.setDefaultValues();
 		this.licenseInputField = new uw.FieldLayout( this.licenseInput, {
-			label: mw.message( 'mwe-upwiz-source-thirdparty-cases', this.uploadCount ).text()
+			label: mw.message( 'mwe-upwiz-source-thirdparty-cases', this.uploadCount ).text(),
+			required: true
 		} );
 
 		if ( this.threeDCount > 0 ) {
@@ -119,6 +119,10 @@
 	};
 
 	OO.inheritClass( uw.deed.ThirdParty, uw.deed.Abstract );
+
+	uw.deed.ThirdParty.prototype.unload = function () {
+		this.licenseInput.unload();
+	};
 
 	/**
 	 * @return {uw.FieldLayout[]} Fields that need validation
@@ -132,24 +136,21 @@
 	};
 
 	uw.deed.ThirdParty.prototype.setFormFields = function ( $selector ) {
-		var $defaultLicense, defaultLicense, defaultLicenseNum, defaultType, collapsible,
-			$formFields = $( '<div class="mwe-upwiz-deed-form-internal" />' );
+		var $formFields = $( '<div>' ).addClass( 'mwe-upwiz-deed-form-internal' );
 
 		this.$form = $( '<form>' );
-
-		defaultType = this.config.licensing.defaultType;
 
 		if ( this.uploadCount > 1 ) {
 			$formFields.append( $( '<div>' ).msg( 'mwe-upwiz-source-thirdparty-custom-multiple-intro' ) );
 		}
 
 		$formFields.append(
-			$( '<div class="mwe-upwiz-source-thirdparty-custom-multiple-intro" />' ),
-			$( '<div class="mwe-upwiz-thirdparty-fields" />' )
+			$( '<div>' ).addClass( 'mwe-upwiz-source-thirdparty-custom-multiple-intro' ),
+			$( '<div>' ).addClass( 'mwe-upwiz-thirdparty-fields' )
 				.append( this.sourceInputField.$element ),
-			$( '<div class="mwe-upwiz-thirdparty-fields" />' )
+			$( '<div>' ).addClass( 'mwe-upwiz-thirdparty-fields' )
 				.append( this.authorInputField.$element ),
-			$( '<div class="mwe-upwiz-thirdparty-license" />' )
+			$( '<div>' ).addClass( 'mwe-upwiz-thirdparty-license' )
 				.append( this.licenseInputField.$element )
 		);
 
@@ -160,23 +161,6 @@
 		this.$form.append( $formFields );
 
 		$selector.append( this.$form );
-
-		if ( defaultType === 'thirdparty' ) {
-			defaultLicense = this.config.licensing.thirdParty.defaults;
-
-			defaultLicenseNum = this.findLicenseRecursively( this.config, defaultLicense );
-
-			if ( defaultLicenseNum ) {
-				$defaultLicense = $( '#license' + defaultLicenseNum );
-				collapsible = $defaultLicense
-					.closest( '.mwe-upwiz-deed-license-group' )
-					.data( 'mw-collapsible' );
-				if ( collapsible ) {
-					collapsible.expand();
-				}
-				$defaultLicense.prop( 'checked', true );
-			}
-		}
 	};
 
 	/**
@@ -233,35 +217,4 @@
 			this.licenseInput.setSerialized( serialized.license );
 		}
 	};
-
-	/**
-	 * Runs through the third-party license groups and finds the
-	 * relevant ID for that license. Probably really hacky.
-	 * TODO do this properly once we build the license links properly
-	 *
-	 * @param {Object} config
-	 * @param {string} license
-	 * @return {string|false}
-	 */
-	uw.deed.ThirdParty.prototype.findLicenseRecursively = function ( config, license ) {
-		var val,
-			count = 0;
-
-		$.each( this.config.licensing.thirdParty.licenseGroups, function ( i, licenseGroup ) {
-			$.each( licenseGroup.licenses, function ( j, licenseCandidate ) {
-				if ( licenseCandidate === license ) {
-					val = '2_' + count;
-					return false;
-				}
-
-				count++;
-			} );
-
-			if ( val !== undefined ) {
-				return false;
-			}
-		} );
-
-		return val;
-	};
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

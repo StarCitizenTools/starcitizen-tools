@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	/**
 	 * Source pages model for notification filtering
 	 *
@@ -34,7 +34,7 @@
 	 * The state of the source page model has changed
 	 */
 
-	/* Methds */
+	/* Methods */
 
 	/**
 	 * Set the current source and page.
@@ -83,7 +83,7 @@
 
 		this.reset();
 		for ( source in sourceData ) {
-			if ( sourceData.hasOwnProperty( source ) ) {
+			if ( Object.prototype.hasOwnProperty.call( sourceData, source ) ) {
 				this.setSourcePagesDetails( source, sourceData[ source ] );
 			}
 		}
@@ -177,4 +177,4 @@
 			this.sources[ source ].pages[ page.title ] = page;
 		}
 	};
-}( mediaWiki ) );
+}() );

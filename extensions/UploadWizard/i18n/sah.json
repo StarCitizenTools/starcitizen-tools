@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"HalanTul",
-			"Matma Rex",
-			"Macofe"
+			"Macofe",
+			"Matma Rex"
 		]
 	},
 	"uploadwizard": "Киллэрии маастара",
@@ -51,7 +51,6 @@
 	"mwe-upwiz-remove-upload": "Бу билэни хачайданар билэлэр тиһиктэриттэн сот",
 	"mwe-upwiz-remove-description": "Бу быһаарыыны сот",
 	"mwe-upwiz-upload": "Киллэрии",
-	"mwe-upwiz-file-upload-notcapable": "Хомойуох иһин Эн браузерыҥ билэни кыайан хачайдаабат эбит. Бука диэн, атын браузеры туһанан көр.",
 	"mwe-upwiz-file-all-ok": "Туох баар хачайдааһыннар сатаннылар!",
 	"mwe-upwiz-file-some-failed": "Сорҕото сатаммата.",
 	"mwe-upwiz-file-retry": "Сатамматаҕы хат ыытарга",
@@ -86,7 +85,6 @@
 	"mwe-upwiz-next": "Аныгыскы",
 	"mwe-upwiz-next-file": "Салгыы",
 	"mwe-upwiz-next-deeds": "Аныгыскы",
-	"mwe-upwiz-next-details": "Аныгыскы",
 	"mwe-upwiz-home": "Дьиэ-биикигэ көһүү",
 	"mwe-upwiz-upload-another": "Өссө билэни киллэрии",
 	"mwe-upwiz-prevent-close": "{{PLURAL:$1|Бу билэни|Бу билэлэри}} өссө да киллэрэ, бэчээккэ таһаара иликкин.",

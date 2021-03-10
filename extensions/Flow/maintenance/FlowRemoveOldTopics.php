@@ -42,9 +42,10 @@ class FlowRemoveOldTopics extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 
-		$this->mDescription = "Deletes old topics";
+		$this->addDescription( "Deletes old topics" );
 
-		$this->addOption( 'date', 'Date cutoff (in any format understood by wfTimestamp), topics older than this date will be deleted.', true, true );
+		$this->addOption( 'date', 'Date cutoff (in any format understood by wfTimestamp), topics ' .
+			'older than this date will be deleted.', true, true );
 		$this->addOption( 'dryrun', 'Simulate script run, without actually deleting anything' );
 
 		$this->setBatchSize( 10 );
@@ -149,9 +150,10 @@ class FlowRemoveOldTopics extends Maintenance {
 				]
 			);
 
-			$this->output( 'Removing ' . count( $revisions ) . ' header revisions from ' . count( $uuids ) . ' headers (up to ' . $startId->getTimestamp() . ")\n" );
+			$this->output( 'Removing ' . count( $revisions ) . ' header revisions from ' .
+				count( $uuids ) . ' headers (up to ' . $startId->getTimestamp() . ")\n" );
 
-			$this->dbFactory->getDB( DB_MASTER )->begin();
+			$this->dbFactory->getDB( DB_MASTER )->begin( __METHOD__ );
 
 			foreach ( $revisions as $revision ) {
 				$this->removeReferences( $revision );
@@ -160,10 +162,10 @@ class FlowRemoveOldTopics extends Maintenance {
 			$this->multiRemove( $revisions );
 
 			if ( $this->dryRun ) {
-				$this->dbFactory->getDB( DB_MASTER )->rollback();
+				$this->dbFactory->getDB( DB_MASTER )->rollback( __METHOD__ );
 			} else {
-				$this->dbFactory->getDB( DB_MASTER )->commit();
-				$this->dbFactory->waitForSlaves();
+				$this->dbFactory->getDB( DB_MASTER )->commit( __METHOD__ );
+				$this->dbFactory->waitForReplicas();
 			}
 		} while ( !empty( $revisions ) );
 	}
@@ -201,7 +203,8 @@ class FlowRemoveOldTopics extends Maintenance {
 			/** @var UUID $startId */
 			$startId = end( $workflows )->getId();
 
-			$this->output( 'Removing ' . count( $workflows ) . ' topic workflows (up to ' . $startId->getTimestamp() . ")\n" );
+			$this->output( 'Removing ' . count( $workflows ) .
+				' topic workflows (up to ' . $startId->getTimestamp() . ")\n" );
 			$this->removeWorkflows( $workflows );
 		} while ( !empty( $workflows ) );
 	}
@@ -213,7 +216,7 @@ class FlowRemoveOldTopics extends Maintenance {
 	 */
 	protected function removeTopicsWithFlowUpdates( $timestamp ) {
 		$dbr = $this->dbFactory->getDB( DB_REPLICA );
-		$talkpageManager = FlowHooks::getOccupationController()->getTalkpageManager();
+		$talkpageManager = Flow\Hooks::getOccupationController()->getTalkpageManager();
 
 		// start from around unix epoch - there can be no Flow data before that
 		$batchStartId = UUID::getComparisonUUID( '1' );
@@ -261,7 +264,8 @@ class FlowRemoveOldTopics extends Maintenance {
 			/** @var UUID $batchStartId */
 			$batchStartId = end( $workflows )->getId();
 
-			$this->output( 'Removing ' . count( $workflows ) . ' topic workflows with recent Flow updates (up to ' . $batchStartId->getTimestamp() . ")\n" );
+			$this->output( 'Removing ' . count( $workflows ) . ' topic workflows with recent ' .
+				'Flow updates (up to ' . $batchStartId->getTimestamp() . ")\n" );
 			$this->removeWorkflows( $workflows );
 		} while ( !empty( $workflows ) );
 	}
@@ -271,7 +275,7 @@ class FlowRemoveOldTopics extends Maintenance {
 	 * @throws \Wikimedia\Rdbms\DBUnexpectedError
 	 */
 	protected function removeWorkflows( array $workflows ) {
-		$this->dbFactory->getDB( DB_MASTER )->begin();
+		$this->dbFactory->getDB( DB_MASTER )->begin( __METHOD__ );
 
 		foreach ( $workflows as $workflow ) {
 			$this->removeSummary( $workflow );
@@ -282,10 +286,10 @@ class FlowRemoveOldTopics extends Maintenance {
 		$this->multiRemove( $workflows );
 
 		if ( $this->dryRun ) {
-			$this->dbFactory->getDB( DB_MASTER )->rollback();
+			$this->dbFactory->getDB( DB_MASTER )->rollback( __METHOD__ );
 		} else {
-			$this->dbFactory->getDB( DB_MASTER )->commit();
-			$this->dbFactory->waitForSlaves();
+			$this->dbFactory->getDB( DB_MASTER )->commit( __METHOD__ );
+			$this->dbFactory->waitForReplicas();
 		}
 	}
 
@@ -387,5 +391,5 @@ class FlowRemoveOldTopics extends Maintenance {
 	}
 }
 
-$maintClass = 'FlowRemoveOldTopics';
+$maintClass = FlowRemoveOldTopics::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

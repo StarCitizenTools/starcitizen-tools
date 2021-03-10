@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	/**
 	 *
 	 *    <div class="flow-component" data-flow-component="boardHistory" data-flow-id="rqx495tvz888x5ur">...</div>
@@ -32,7 +32,7 @@
 	 * @param {string} info.status "done" or "fail"
 	 * @param {jQuery} info.$target
 	 * @param {Object} data
-	 * @param {jqXHR} jqxhr
+	 * @param {jQuery.jqXHR} jqxhr
 	 * @return {jQuery.Promise}
 	 */
 	function flowBoardHistoryModerationCallback( info ) {
@@ -59,6 +59,7 @@
 
 	/**
 	 * Reloads the history page after resolving or reopening a topic.
+	 *
 	 * @param {Object} info
 	 * @param {Object} data
 	 * @return {jQuery.Promise}
@@ -74,4 +75,4 @@
 		return $.Deferred().resolve().promise();
 	};
 
-}( jQuery, mediaWiki ) );
+}() );

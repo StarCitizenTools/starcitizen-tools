@@ -1,8 +1,11 @@
 <?php
 
-use Flow\Content\BoardContent;
 use Flow\Container;
+use Flow\Content\BoardContent;
 use Flow\Exception\UnknownWorkflowIdException;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Storage\RevisionRecord;
+use MediaWiki\Storage\SlotRecord;
 
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
@@ -16,7 +19,7 @@ require_once getenv( 'MW_INSTALL_PATH' ) !== false
  *
  * @ingroup Maintenance
  */
-class FlowFixInconsistentBoards extends LoggedUpdateMaintenance {
+class FlowFixInconsistentBoards extends Maintenance {
 	/**
 	 * @var Flow\DbFactory
 	 */
@@ -40,20 +43,20 @@ class FlowFixInconsistentBoards extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
 
-		$this->mDescription = 'Changes Flow boards and their topics to be associated with their current title, based on the JSON content.  Must be run separately for each affected wiki.';
+		$this->addDescription( 'Changes Flow boards and their topics to be associated with their ' .
+			'current title, based on the JSON content.  Must be run separately for each affected wiki.' );
 
 		$this->addOption( 'dry-run', 'Only prints the board names, without changing anything.' );
 		$this->addOption( 'namespaceName', 'Name of namespace to check, otherwise all', false, true );
-		$this->addOption( 'limit', 'Limit of inconsistent pages to identify (and fix if not a dry run).  Defaults to no limit', false, true );
+		$this->addOption( 'limit', 'Limit of inconsistent pages to identify (and fix if not a dry ' .
+			'run). Defaults to no limit', false, true );
 
 		$this->setBatchSize( 300 );
+
+		$this->requireExtension( 'Flow' );
 	}
 
-	protected function getUpdateKey() {
-		return 'FlowFixInconsistentBoards:version1';
-	}
-
-	public function doDBUpdates() {
+	public function execute() {
 		global $wgLang;
 
 		$this->dbFactory = Container::get( 'db.factory' );
@@ -79,12 +82,12 @@ class FlowFixInconsistentBoards extends LoggedUpdateMaintenance {
 
 			if ( !$namespaceId ) {
 				$this->error( "'$namespaceName' is not a valid namespace name" );
-				return;
+				return false;
 			}
 
 			if ( $namespaceId == NS_TOPIC ) {
 				$this->error( 'This script can not be run on the Flow topic namespace' );
-				return;
+				return false;
 			}
 
 			$iterator->addConditions( [
@@ -106,15 +109,16 @@ class FlowFixInconsistentBoards extends LoggedUpdateMaintenance {
 			foreach ( $rows as $row ) {
 				$checkedCount++;
 				$coreTitle = Title::makeTitle( $row->page_namespace, $row->page_title );
-				$revision = Revision::newFromId( $row->page_latest );
-				$content = $revision->getContent( Revision::RAW );
+				$revision = MediaWikiServices::getInstance()->getRevisionLookup()->getRevisionById( $row->page_latest );
+				$content = $revision->getContent( SlotRecord::MAIN, RevisionRecord::RAW );
 				if ( !$content instanceof BoardContent ) {
-					$actualClass = get_class( $content );
-					$this->error( "ERROR: '$coreTitle' content is a '$actualClass', but should be '" . BoardContent::class . "'." );
+					$actualClass = ( is_object( $content ) ? get_class( $content ) : gettype( $content ) );
+					$this->error( "ERROR: '$coreTitle' content is a '$actualClass', but should be '"
+						. BoardContent::class . "'." );
 					continue;
 				}
 				$workflowId = $content->getWorkflowId();
-				if ( is_null( $workflowId ) ) {
+				if ( $workflowId === null ) {
 					// See T153320.  If the workflow exists, it could
 					// be looked up by title/page ID and the JSON could
 					// be fixed with an edit.
@@ -131,7 +135,8 @@ class FlowFixInconsistentBoards extends LoggedUpdateMaintenance {
 				} catch ( UnknownWorkflowIdException $ex ) {
 					// This is a different error (a core page refers to
 					// a non-existent workflow), which this script can not fix.
-					$this->error( "ERROR: '$coreTitle' refers to workflow ID '$workflowIdAlphadecimal', which could not be found." );
+					$this->error( "ERROR: '$coreTitle' refers to workflow ID " .
+						"'$workflowIdAlphadecimal', which could not be found." );
 					continue;
 				}
 
@@ -139,7 +144,8 @@ class FlowFixInconsistentBoards extends LoggedUpdateMaintenance {
 					$pageId = (int)$row->page_id;
 
 					$workflowTitle = $workflow->getOwnerTitle();
-					$this->output( "INCONSISTENT: Core title for '$workflowIdAlphadecimal' is '$coreTitle', but Flow title is '$workflowTitle'\n" );
+					$this->output( "INCONSISTENT: Core title for '$workflowIdAlphadecimal' is " .
+						"'$coreTitle', but Flow title is '$workflowTitle'\n" );
 
 					$inconsistentCount++;
 
@@ -150,14 +156,16 @@ class FlowFixInconsistentBoards extends LoggedUpdateMaintenance {
 						] );
 
 					if ( !$workflowByPageId ) {
-						$this->error( "ERROR: '$coreTitle' has page ID '$pageId', but no workflow is linked to this page ID" );
+						$this->error( "ERROR: '$coreTitle' has page ID '$pageId', but no workflow " .
+							"is linked to this page ID" );
 						continue;
 					}
 
 					if ( !$dryRun ) {
 						$this->boardMover->move( $pageId, $coreTitle );
 						$this->boardMover->commit();
-						$this->output( "FIXED: Updated '$workflowIdAlphadecimal' to match core title, '$coreTitle'\n" );
+						$this->output( "FIXED: Updated '$workflowIdAlphadecimal' to match core " .
+							"title, '$coreTitle'\n" );
 					}
 
 					$fixableInconsistentCount++;
@@ -169,16 +177,15 @@ class FlowFixInconsistentBoards extends LoggedUpdateMaintenance {
 			}
 
 			$action = $dryRun ? 'identified as fixable' : 'fixed';
-			$this->output( "\nChecked a total of $checkedCount Flow boards.  Of those, $inconsistentCount boards had an inconsistent title; $fixableInconsistentCount were $action.\n" );
+			$this->output( "\nChecked a total of $checkedCount Flow boards.  Of those, " .
+				"$inconsistentCount boards had an inconsistent title; $fixableInconsistentCount " .
+				"were $action.\n" );
 			if ( $limit !== null && $fixableInconsistentCount >= $limit ) {
 				break;
 			}
 		}
-
-		// Only mark it as completed if it's run on everything.
-		return ( !$dryRun && $limit === null && !$this->hasOption( 'namespaceName' ) );
 	}
 }
 
-$maintClass = 'FlowFixInconsistentBoards';
+$maintClass = FlowFixInconsistentBoards::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

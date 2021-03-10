@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"L2212"
+		]
+	},
+	"uploadwizard": "Assistente de carrigamentu",
+	"tag-uploadwizard": "Assistente de carrigamentu",
+	"tag-uploadwizard-description": "Carrigamentos fatos cun s'Assistente de carrigamentu",
+	"tag-uploadwizard-flickr-description": "Carrigamentos de Flickr fatos cun s'Assistente de carrigamentu",
+	"mwe-upwiz-step-tutorial": "Impara",
+	"mwe-upwiz-step-file": "Càrriga",
+	"mwe-upwiz-step-deeds": "Diritos de publicatzione",
+	"mwe-upwiz-step-details": "Descrie",
+	"mwe-upwiz-step-metadata": "Annanghe datos",
+	"mwe-upwiz-step-thanks": "Imprea",
+	"mwe-upwiz-flickr-input-placeholder": "URL de Flickr",
+	"mwe-upwiz-select-flickr": "Càrriga sas immàgines seletzionadas",
+	"mwe-upwiz-finished": "Acabadu!",
+	"mwe-upwiz-patent-dialog-button-next": "Sighi",
+	"mwe-upwiz-next": "Sighi",
+	"mwe-upwiz-next-deeds": "Sighi",
+	"mwe-upwiz-dialog-yes": "Eja",
+	"mwe-upwiz-dialog-no": "Nono",
+	"mwe-upload-campaigns-pagination-next": "Pàgina imbeniente"
+}

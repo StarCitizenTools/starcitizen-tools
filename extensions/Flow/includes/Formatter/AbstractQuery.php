@@ -11,7 +11,7 @@ use Flow\Model\PostSummary;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
 use Flow\Repository\TreeRepository;
-use Wikimedia\Rdbms\ResultWrapper;
+use Wikimedia\Rdbms\IResultWrapper;
 
 /**
  * Base class that collects the data necessary to utilize AbstractFormatter
@@ -74,7 +74,7 @@ abstract class AbstractQuery {
 	 * Entry point for batch loading metadata for a variety of revisions
 	 * into the internal cache.
 	 *
-	 * @param AbstractRevision[]|ResultWrapper $results
+	 * @param AbstractRevision[]|IResultWrapper $results
 	 */
 	protected function loadMetadataBatch( $results ) {
 		// Batch load data related to a list of revisions
@@ -194,7 +194,7 @@ abstract class AbstractQuery {
 	 * for rendering a revision.
 	 *
 	 * @param AbstractRevision $revision
-	 * @param string $indexField The field used for pagination
+	 * @param string|null $indexField The field used for pagination
 	 * @param FormatterRow|null $row Row to populate
 	 * @return FormatterRow
 	 * @throws FlowException
@@ -205,7 +205,8 @@ abstract class AbstractQuery {
 
 		$workflow = $this->getWorkflow( $revision );
 		if ( !$workflow ) {
-			throw new FlowException( "could not locate workflow for revision " . $revision->getRevisionId()->getAlphadecimal() );
+			throw new FlowException( "could not locate workflow for revision " .
+				$revision->getRevisionId()->getAlphadecimal() );
 		}
 
 		$row = $row ?: new FormatterRow;
@@ -243,10 +244,13 @@ abstract class AbstractQuery {
 			return false;
 		}
 
-		// we can use the timestamps to check if the reply was created at roughly the same time the topic was created
-		// if they're 0 or 1 seconds apart, they must have been created in the same request
-		// unless our servers are extremely slow and can't create topic + first reply in < 1 seconds, this should be a pretty safe method to detect first reply
-		if ( $revision->getPostId()->getTimestamp( TS_UNIX ) - $root->getPostId()->getTimestamp( TS_UNIX ) >= 2 ) {
+		// we can use the timestamps to check if the reply was created at roughly the same time the
+		// topic was created if they're 0 or 1 seconds apart, they must have been created in the
+		// same request unless our servers are extremely slow and can't create topic + first reply
+		// in < 1 seconds, this should be a pretty safe method to detect first reply
+		if ( (int)$revision->getPostId()->getTimestamp( TS_UNIX ) -
+			(int)$root->getPostId()->getTimestamp( TS_UNIX ) >= 2
+		) {
 			return false;
 		}
 
@@ -304,7 +308,8 @@ abstract class AbstractQuery {
 	/**
 	 * Retrieves the previous revision for a given AbstractRevision
 	 * @param AbstractRevision $revision The revision to retrieve the previous revision for.
-	 * @return AbstractRevision|null AbstractRevision of the previous revision or null if no previous revision.
+	 * @return AbstractRevision|null AbstractRevision of the previous revision or null if no
+	 *   previous revision.
 	 */
 	protected function getPreviousRevision( AbstractRevision $revision ) {
 		$previousRevisionId = $revision->getPrevRevisionId();
@@ -337,7 +342,7 @@ abstract class AbstractQuery {
 		}
 
 		$currentRevisionId = $this->currentRevisionsCache[$cacheKey];
-		return $this->revisionCache[$currentRevisionId->getAlphaDecimal()];
+		return $this->revisionCache[$currentRevisionId->getAlphadecimal()];
 	}
 
 	/**
@@ -353,7 +358,7 @@ abstract class AbstractQuery {
 		$rootPostId = $this->getRootPostId( $revision );
 
 		if ( !isset( $this->postCache[$rootPostId->getAlphadecimal()] ) ) {
-			throw new \MwException( 'Did not load root post ' . $rootPostId->getAlphadecimal() );
+			throw new \MWException( 'Did not load root post ' . $rootPostId->getAlphadecimal() );
 		}
 
 		$rootPost = $this->postCache[$rootPostId->getAlphadecimal()];
@@ -405,39 +410,5 @@ abstract class AbstractQuery {
 	 */
 	protected function getCurrentRevisionCacheKey( AbstractRevision $revision ) {
 		return $revision->getRevisionType() . '-' . $revision->getCollectionId()->getAlphadecimal();
-	}
-}
-
-/**
- * Helper class represents a row of data from AbstractQuery
- */
-class FormatterRow {
-	/** @var AbstractRevision */
-	public $revision;
-	/** @var AbstractRevision|null */
-	public $previousRevision;
-	/** @var AbstractRevision */
-	public $currentRevision;
-	/** @var Workflow */
-	public $workflow;
-	/** @var string */
-	public $indexFieldName;
-	/** @var string */
-	public $indexFieldValue;
-	/** @var PostRevision|null */
-	public $rootPost;
-	/** @var bool */
-	public $isLastReply = false;
-	/** @var bool */
-	public $isFirstReply = false;
-
-	// protect against typos
-	public function __get( $attribute ) {
-		throw new \MWException( "Accessing non-existent parameter: $attribute" );
-	}
-
-	// protect against typos
-	public function __set( $attribute, $value ) {
-		throw new \MWException( "Accessing non-existent parameter: $attribute" );
 	}
 }

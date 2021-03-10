@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow anonymous editor warning widget.
 	 *
@@ -26,7 +26,7 @@
 		shouldDisplay = isProbablyEditable && mw.user.isAnon();
 
 		// Parent constructor
-		mw.flow.ui.AnonWarningWidget.parent.call( this, config );
+		mw.flow.ui.AnonWarningWidget.super.call( this, config );
 
 		this.icon = new OO.ui.IconWidget( { icon: 'userAnonymous' } );
 		this.label = new OO.ui.LabelWidget();
@@ -64,4 +64,4 @@
 
 	OO.inheritClass( mw.flow.ui.AnonWarningWidget, OO.ui.Widget );
 
-}( jQuery ) );
+}() );

@@ -36,15 +36,18 @@ class FeatureCompactor implements Compactor {
 		}
 		foreach ( $row as $foo ) {
 			if ( $foo !== null && !is_scalar( $foo ) ) {
-				throw new DataModelException( 'Attempted to compact row containing objects, must be scalar values: ' . print_r( $foo, true ), 'process-data' );
+				throw new DataModelException(
+					'Attempted to compact row containing objects, must be scalar values: ' .
+					print_r( $foo, true ), 'process-data'
+				);
 			}
 		}
 		return $row;
 	}
 
 	/**
-	 * @param array $rows
-	 * @return array
+	 * @param array[] $rows
+	 * @return array[]
 	 */
 	public function compactRows( array $rows ) {
 		return array_map( [ $this, 'compactRow' ], $rows );
@@ -66,20 +69,29 @@ class FeatureCompactor implements Compactor {
 	 */
 	public function expandCacheResult( array $cached, array $keyToQuery ) {
 		foreach ( $cached as $key => $rows ) {
-			$query = isset( $keyToQuery[$key] ) ? $keyToQuery[$key] : [];
+			$query = $keyToQuery[$key] ?? [];
 			if ( !is_array( $query ) ) {
-				throw new DataModelException( 'Cached data for "' . $key . '"" should map to a valid query: ' . print_r( $query, true ), 'process-data' );
+				throw new DataModelException( 'Cached data for "' . $key .
+					'"" should map to a valid query: ' . print_r( $query, true ), 'process-data' );
 			}
 
 			foreach ( $query as $foo ) {
 				if ( $foo !== null && !is_scalar( $foo ) ) {
-					throw new DataModelException( 'Query values to merge with cache contains objects, should be scalar values: ' . print_r( $foo, true ), 'process-data' );
+					throw new DataModelException(
+						'Query values to merge with cache contains objects, should be scalar values: ' .
+						print_r( $foo, true ),
+						'process-data'
+					);
 				}
 			}
 			foreach ( $rows as $k => $row ) {
 				foreach ( $row as $foo ) {
 					if ( $foo !== null && !is_scalar( $foo ) ) {
-						throw new DataModelException( 'Result from cache contains objects, should be scalar values: ' . print_r( $foo, true ), 'process-data' );
+						throw new DataModelException(
+							'Result from cache contains objects, should be scalar values: ' .
+							print_r( $foo, true ),
+							'process-data'
+						);
 					}
 				}
 				$cached[$key][$k] += $query;

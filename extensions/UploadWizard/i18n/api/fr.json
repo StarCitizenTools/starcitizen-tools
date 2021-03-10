@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Framafan",
+			"Gomoko",
+			"Wladek92"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Valider une URL Flickr en utilisant l’ID de l’utilisateur (NSID) d’après la liste noire.\n\nQuand utilisé avec l’option <var>list</var>, renvoie toutes les IDs en liste noire.",
+	"apihelp-flickrblacklist-summary": "Valider une URL Flickr en utilisant l’ID utilisateur (NSID) dans la liste noire.",
+	"apihelp-flickrblacklist-extended-description": "Quand utilisé avec l’option <var>list</var>, renvoie tous les IDs en liste noire.",
+	"apihelp-flickrblacklist-param-url": "Le lien Flickr à tester.",
+	"apihelp-flickrblacklist-param-list": "Si positionné, la liste noire complète est renvoyée. Impossible à utiliser avec $1url.",
+	"apihelp-flickrblacklist-example-1": "Vérifier une URL d’après la liste noire",
+	"apihelp-flickrblacklist-example-2": "Renvoyer la liste noire complète",
+	"apihelp-query+allcampaigns-description": "Énumérer toutes les campagnes UploadWizard",
+	"apihelp-query+allcampaigns-summary": "Énumérer toutes les campagnes de UploadWizard.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Lister uniquement les campagnes qui sont activées.",
+	"apihelp-query+allcampaigns-param-limit": "Nombre de campagnes à renvoyer.",
+	"apihelp-query+allcampaigns-example-1": "Énumérer les campagnes activées"
+}

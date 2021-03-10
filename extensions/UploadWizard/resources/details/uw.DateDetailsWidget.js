@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * A date field in UploadWizard's "Details" step form.
@@ -145,7 +145,7 @@
 					if ( warnLicenses[ i ] in licenses ) {
 						license = licenses[ warnLicenses[ i ] ];
 						licenseMsg = mw.message( license.msg, 0, license.url ? license.url : '#missing license URL' );
-						warnings.push( mw.message( 'mwe-upwiz-error-date-license-unlikely', licenseMsg.parse() ) );
+						warnings.push( mw.message( 'mwe-upwiz-error-date-license-unlikely', licenseMsg.parseDom() ) );
 					}
 				}
 			}
@@ -167,16 +167,16 @@
 
 		if ( this.dateInputWidget.getValue().trim() === '' ) {
 			errors.push( mw.message( 'mwe-upwiz-error-blank' ) );
-		} else if ( 'pd-us' in licenses && date.getFullYear() >= 1923 ) {
+		} else if ( 'pd-us' in licenses && date.getFullYear() >= new Date().getFullYear() - 95 ) {
 			// if the license stated the work is public domain, it must've been
 			// created a really long time ago
-			errors.push( mw.message( 'mwe-upwiz-error-date-license-mismatch', mw.message( licenses[ 'pd-us' ].msg ).parse() ) );
+			errors.push( mw.message( 'mwe-upwiz-error-date-license-mismatch', mw.message( licenses[ 'pd-us' ].msg ).parseDom() ) );
 		} else if ( 'pd-old' in licenses && date > old ) {
 			// if the author died 70 years ago, the timestamp should reflect that
-			errors.push( mw.message( 'mwe-upwiz-error-date-license-mismatch', mw.message( licenses[ 'pd-old' ].msg ).parse() ) );
+			errors.push( mw.message( 'mwe-upwiz-error-date-license-mismatch', mw.message( licenses[ 'pd-old' ].msg ).parseDom() ) );
 		} else if ( 'pd-old-100' in licenses && date > old100 ) {
 			// if the author died 100 years ago, the timestamp should reflect that
-			errors.push( mw.message( 'mwe-upwiz-error-date-license-mismatch', mw.message( licenses[ 'pd-old-100' ].msg ).parse() ) );
+			errors.push( mw.message( 'mwe-upwiz-error-date-license-mismatch', mw.message( licenses[ 'pd-old-100' ].msg ).parseDom() ) );
 		}
 
 		return $.Deferred().resolve( errors ).promise();
@@ -211,4 +211,4 @@
 		this.dateInputWidget.setValue( serialized.value );
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

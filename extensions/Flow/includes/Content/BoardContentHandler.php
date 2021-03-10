@@ -2,8 +2,10 @@
 
 namespace Flow\Content;
 
+use Article;
 use Flow\Actions\FlowAction;
 use Flow\Container;
+use Flow\Diff\FlowBoardContentDiffView;
 use Flow\FlowActions;
 use Flow\Model\UUID;
 use FormatJson;
@@ -14,10 +16,14 @@ use Page;
 class BoardContentHandler extends \ContentHandler {
 	public function __construct( $modelId ) {
 		if ( $modelId !== CONTENT_MODEL_FLOW_BOARD ) {
-			throw new MWException( __CLASS__." initialised for invalid content model" );
+			throw new MWException( __CLASS__ . " initialised for invalid content model" );
 		}
 
 		parent::__construct( CONTENT_MODEL_FLOW_BOARD, [ CONTENT_FORMAT_JSON ] );
+	}
+
+	protected function getDiffEngineClass() {
+		return FlowBoardContentDiffView::class;
 	}
 
 	public function isSupportedFormat( $format ) {
@@ -48,7 +54,7 @@ class BoardContentHandler extends \ContentHandler {
 		$info = [];
 
 		if ( $content->getWorkflowId() ) {
-			$info['flow-workflow'] = $content->getWorkflowId()->getAlphaDecimal();
+			$info['flow-workflow'] = $content->getWorkflowId()->getAlphadecimal();
 		}
 
 		return FormatJson::encode( $info );
@@ -60,7 +66,7 @@ class BoardContentHandler extends \ContentHandler {
 	 * @since 1.21
 	 *
 	 * @param string $blob Serialized form of the content
-	 * @param string $format The format used for serialization
+	 * @param string|null $format The format used for serialization
 	 *
 	 * @return BoardContent The Content object created by deserializing $blob
 	 */
@@ -133,9 +139,13 @@ class BoardContentHandler extends \ContentHandler {
 				continue;
 			}
 
-			if ( $actionData['handler-class'] === 'Flow\Actions\FlowAction' ) {
-				$output[$action] = function ( Page $page, IContextSource $source ) use ( $action ) {
-					return new FlowAction( $page, $source, $action );
+			if ( $actionData['handler-class'] === FlowAction::class ) {
+				$output[$action] = function (
+					Page $article,
+					IContextSource $source
+				) use ( $action ) {
+					/** @var Article $article */
+					return new FlowAction( $article, $source, $action );
 				};
 			} else {
 				$output[$action] = $actionData['handler-class'];
@@ -143,7 +153,7 @@ class BoardContentHandler extends \ContentHandler {
 		}
 
 		// Flow has its own handling for action=edit
-		$output['edit'] = 'Flow\Actions\EditAction';
+		$output['edit'] = \Flow\Actions\EditAction::class;
 
 		return $output;
 	}

@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * A single logical field in UploadWizard's "Details" step form.
@@ -80,4 +80,4 @@
 	 */
 	uw.DetailsWidget.prototype.setSerialized = null;
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

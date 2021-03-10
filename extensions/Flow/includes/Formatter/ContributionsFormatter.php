@@ -2,13 +2,13 @@
 
 namespace Flow\Formatter;
 
+use ChangesList;
+use Flow\Conversion\Utils;
 use Flow\Exception\FlowException;
 use Flow\Model\Anchor;
 use Flow\Model\PostRevision;
-use Flow\Conversion\Utils;
-use ChangesList;
-use IContextSource;
 use Html;
+use IContextSource;
 
 class ContributionsFormatter extends AbstractFormatter {
 	protected function getHistoryType() {
@@ -72,6 +72,7 @@ class ContributionsFormatter extends AbstractFormatter {
 			return '';
 		}
 
+		// @phan-suppress-next-line PhanUndeclaredMethod Phan doesn't infer $row->revision is PostRevision
 		$type = $row->revision->isTopicTitle() ? 'topic' : 'post';
 
 		if ( isset( $data['actions']['hide'] ) ) {
@@ -88,7 +89,7 @@ class ContributionsFormatter extends AbstractFormatter {
 
 		/** @var Anchor $anchor */
 		$anchor = $data['actions'][$key];
-		$message = ' ' . wfMessage( 'parentheses' )->rawParams( Html::rawElement(
+		$message = ' ' . $ctx->msg( 'parentheses' )->rawParams( Html::rawElement(
 			'a',
 			[
 				'href' => $anchor->getFullURL(),

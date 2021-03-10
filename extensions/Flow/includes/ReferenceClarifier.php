@@ -3,17 +3,17 @@
 namespace Flow;
 
 use Flow\Data\ManagerGroup;
-use Flow\Model\Reference;
-use Flow\Model\WikiReference;
 use Flow\Exception\CrossWikiException;
+use Flow\Model\Reference;
 use Flow\Model\UUID;
+use Flow\Model\WikiReference;
 use Title;
 
 class ReferenceClarifier {
 	protected $storage, $urlGenerator;
 	protected $referenceCache;
 
-	function __construct( ManagerGroup $storage, UrlGenerator $urlGenerator ) {
+	public function __construct( ManagerGroup $storage, UrlGenerator $urlGenerator ) {
 		$this->storage = $storage;
 		$this->urlGenerator = $urlGenerator;
 		$this->referenceCache = [];
@@ -74,9 +74,7 @@ class ReferenceClarifier {
 		$fromT = $from->getPrefixedDBkey();
 		$toT = 'title:' . $to->getPrefixedDBkey();
 
-		return isset( $this->referenceCache[$fromT][$toT] )
-			? $this->referenceCache[$fromT][$toT]
-			: [];
+		return $this->referenceCache[$fromT][$toT] ?? [];
 	}
 
 	/**
@@ -88,7 +86,7 @@ class ReferenceClarifier {
 	protected function getObjectLink( UUID $workflow, $objectType, UUID $objectId ) {
 		if ( $objectType === 'post' ) {
 			$anchor = $this->urlGenerator->postLink( null, $workflow, $objectId );
-		} elseif ( $objectType === 'header' ) {
+		} elseif ( $objectType === 'header' || $objectType === 'post-summary' ) {
 			$anchor = $this->urlGenerator->workflowLink( null, $workflow );
 		} else {
 			wfDebugLog( 'Flow', __METHOD__ . ": Unknown \$objectType: $objectType" );

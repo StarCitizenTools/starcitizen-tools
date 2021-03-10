@@ -1,4 +1,4 @@
-( function ( $, mw, OO ) {
+( function () {
 	mw.flow = mw.flow || {};
 
 	/**
@@ -30,16 +30,17 @@
 	);
 
 	mw.flow.MessagePoster.prototype.post = function ( subject, body ) {
-		mw.flow.MessagePoster.parent.prototype.post.call( this, subject, body );
+		// Parent method
+		mw.flow.MessagePoster.super.prototype.post.apply( this, arguments );
 
-		return this.api.postWithToken( 'csrf', {
+		return this.api.postWithToken( 'csrf', this.api.assertCurrentUser( {
 			action: 'flow',
 			submodule: 'new-topic',
 			page: this.title.getPrefixedDb(),
 			nttopic: subject,
 			ntcontent: body,
 			ntformat: 'wikitext'
-		} ).catch(
+		} ) ).catch(
 			function ( code, details ) {
 				return $.Deferred().reject( 'api-fail', code, details );
 			}
@@ -47,4 +48,4 @@
 	};
 
 	mw.messagePoster.factory.register( 'flow-board', mw.flow.MessagePoster );
-}( jQuery, mediaWiki, OO ) );
+}() );

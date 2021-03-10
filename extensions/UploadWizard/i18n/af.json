@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Matma Rex",
 			"Naudefj",
-			"පසිඳු කාවින්ද",
-			"Matma Rex"
+			"පසිඳු කාවින්ද"
 		]
 	},
 	"uploadwizard": "foto wizard",
@@ -68,7 +68,6 @@
 	"mwe-upwiz-next": "Volgende",
 	"mwe-upwiz-next-file": "Gaan voort",
 	"mwe-upwiz-next-deeds": "Volgende",
-	"mwe-upwiz-next-details": "Volgende",
 	"mwe-upwiz-home": "Gaan na die wiki se tuisblad",
 	"mwe-upwiz-upload-another": "Laai meer lêers op",
 	"mwe-upwiz-tooltip-author": "Die naam van die persoon wat die foto geneem het, of die prentjie geverf het, wys die tekening, ens.",
@@ -104,7 +103,7 @@
 	"mwe-upwiz-license-fal": "Free Art lisensie",
 	"mwe-upwiz-license-pd-old-100": "Skrywer gesterf het meer as 100 jaar gelede",
 	"mwe-upwiz-license-pd-old": "Skrywer gesterf het meer as 70 jaar gelede",
-	"mwe-upwiz-license-pd-us": "Die eerste keer gepubliseer in die Verenigde State voor 1923",
+	"mwe-upwiz-license-pd-us": "Die eerste keer gepubliseer in die Verenigde State voor 1925",
 	"mwe-upwiz-license-pd-usgov": "Oorspronklike werk van die Amerikaanse Federale Regering",
 	"mwe-upwiz-license-pd-usgov-nasa": "Oorspronklike werk van NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Oorspronklike werk van die VSA se militêre Navy",

@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Schery19"
+		]
+	},
+	"mwe-upwiz-error-title-too-long": "Tit sa twò long.\nTanpri asire ke tit sa fè pou pi plis $1 {{PLURAL:$1|byte|bytes}}.",
+	"mwe-upwiz-error-title-too-short": "Tit sa twò kout.\nTanpri asire ke tit sa fè pou piti $1 {{PLURAL:$1|byte|bytes}}."
+}

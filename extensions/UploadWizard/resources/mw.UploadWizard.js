@@ -1,7 +1,7 @@
 /**
  * Object that represents the entire multi-step Upload Wizard
  */
-( function ( mw, uw, $ ) {
+( function ( uw ) {
 
 	mw.UploadWizard = function ( config ) {
 		var maxSimPref;
@@ -28,7 +28,9 @@
 
 		this.maxSimultaneousConnections = config.maxSimultaneousConnections;
 
-		mw.loader.load( 'ext.uls.mediawiki' );
+		if ( mw.loader.getState( 'ext.uls.mediawiki' ) !== null ) {
+			mw.loader.load( 'ext.uls.mediawiki' );
+		}
 	};
 
 	mw.UploadWizard.DEBUG = true;
@@ -36,8 +38,6 @@
 	mw.UploadWizard.userAgent = 'UploadWizard';
 
 	mw.UploadWizard.prototype = {
-		stepNames: [ 'tutorial', 'file', 'deeds', 'details', 'thanks' ],
-
 		/**
 		 * Create the basic interface to make an upload in this div
 		 *
@@ -46,37 +46,74 @@
 		createInterface: function ( selector ) {
 			this.ui = new uw.ui.Wizard( selector );
 
-			this.initialiseSteps();
-
-			// "select" the first step - highlight, make it visible, hide all others
-			this.steps.tutorial.load( [] );
+			this.initialiseSteps().then( function ( steps ) {
+				// "select" the first step - highlight, make it visible, hide all others
+				steps.tutorial.load( [] );
+			} );
 		},
 
 		/**
 		 * Initialise the steps in the wizard
+		 *
+		 * @return {jQuery.Promise}
 		 */
 		initialiseSteps: function () {
-			this.steps.tutorial = new uw.controller.Tutorial( this.api, this.config );
-			this.steps.file = new uw.controller.Upload( this.api, this.config );
-			this.steps.deeds = new uw.controller.Deed( this.api, this.config );
-			this.steps.details = new uw.controller.Details( this.api, this.config );
-			this.steps.thanks = new uw.controller.Thanks( this.api, this.config );
+			var self = this,
+				steps = {};
 
-			this.steps.tutorial.setNextStep( this.steps.file );
+			steps.tutorial = new uw.controller.Tutorial( this.api, this.config );
+			steps.file = new uw.controller.Upload( this.api, this.config );
+			steps.deeds = new uw.controller.Deed( this.api, this.config );
+			steps.details = new uw.controller.Details( this.api, this.config );
+			steps.thanks = new uw.controller.Thanks( this.api, this.config );
 
-			this.steps.file.setPreviousStep( this.steps.tutorial );
-			this.steps.file.setNextStep( this.steps.deeds );
+			steps.tutorial.setNextStep( steps.file );
 
-			this.steps.deeds.setPreviousStep( this.steps.file );
-			this.steps.deeds.setNextStep( this.steps.details );
+			steps.file.setPreviousStep( steps.tutorial );
+			steps.file.setNextStep( steps.deeds );
 
-			this.steps.details.setPreviousStep( this.steps.deeds );
-			this.steps.details.setNextStep( this.steps.thanks );
+			steps.deeds.setPreviousStep( steps.file );
+			steps.deeds.setNextStep( steps.details );
+
+			steps.details.setPreviousStep( steps.deeds );
+			steps.details.setNextStep( steps.thanks );
 
 			// thanks doesn't need a "previous" step, there's no undoing uploads!
-			this.steps.thanks.setNextStep( this.steps.file );
+			steps.thanks.setNextStep( steps.file );
 
-			$( '#mwe-upwiz-steps' ).arrowSteps();
+			return $.Deferred().resolve( steps ).promise()
+				.then( function ( steps ) {
+					if (
+						self.config.wikibase.enabled &&
+						// .depicts is for backward compatibility - this config
+						// var used to be called differently...
+						( self.config.wikibase.statements || self.config.wikibase.depicts )
+					) {
+						// mediainfo has a couple of widgets that we'll be using, but they're not
+						// necessarily a hard dependency for UploadWizard
+						// let's just attempt to load it - if it's not available, we just won't
+						// have that extra step then...
+						return mw.loader.using( [ 'wikibase', 'wikibase.mediainfo.statements' ] ).then(
+							function () {
+								// interject metadata step in between details & thanks
+								steps.metadata = new uw.controller.Metadata( self.api, self.config );
+
+								steps.details.setNextStep( steps.metadata );
+								// metadata has no "previous" step - the file
+								// has already been uploaded at this point
+								steps.metadata.setNextStep( steps.thanks );
+
+								return steps;
+							},
+							function () { return steps; /* just move on without metadata... */ }
+						);
+					}
+					return steps;
+				} )
+				.always( function ( steps ) {
+					self.steps = steps;
+					self.ui.initialiseSteps( steps );
+				} );
 		},
 
 		/**
@@ -86,6 +123,9 @@
 		 * comes back for whatever reason, things can get confusing.
 		 * I'll monkeypatch around such cases so that we can always rely on the
 		 * error response the way we want it to be.
+		 *
+		 * TODO: Instead of this monkeypatching, we could call api.getErrorMessage()
+		 * in the error handlers to get nice messages.
 		 *
 		 * @param {Object} options
 		 * @return {mw.Api}
@@ -112,7 +152,7 @@
 					function ( code, result ) { // fail handler
 						var response = { errors: [ {
 							code: code,
-							html: result.textStatus || mw.message( 'apierror-unknownerror' ).parse()
+							html: result.textStatus || mw.message( 'api-clientside-error-invalidresponse' ).parse()
 						} ] };
 
 						if ( result.errors && result.errors[ 0 ] ) {
@@ -120,12 +160,12 @@
 							response = result;
 						} else if ( result && result.textStatus === 'timeout' ) {
 							// in case of $.ajax.fail(), there is no response json
-							response.errors[ 0 ].html = mw.message( 'apierror-timeout' ).parse();
+							response.errors[ 0 ].html = mw.message( 'api-clientside-error-timeout' ).parse();
 						} else if ( result && result.textStatus === 'parsererror' ) {
 							response.errors[ 0 ].html = mw.message( 'api-error-parsererror' ).parse();
 						} else if ( code === 'http' && result && result.xhr && result.xhr.status === 0 ) {
 							// failed to even connect to server
-							response.errors[ 0 ].html = mw.message( 'apierror-offline' ).parse();
+							response.errors[ 0 ].html = mw.message( 'api-clientside-error-noconnect' ).parse();
 						}
 
 						return $.Deferred().reject( code, response, response );
@@ -195,11 +235,11 @@
 
 		$( selector )
 			.css( { background: 'none' } )
-			.html(
+			.prepend(
 				$( '<a>' )
 					.addClass( 'mwe-upwiz-thumbnail-link' )
 					.append( image )
 			);
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery ) );
+}( mw.uploadWizard ) );

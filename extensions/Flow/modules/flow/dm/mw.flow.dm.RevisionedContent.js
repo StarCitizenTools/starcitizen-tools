@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow RevisionedContent class
 	 *
@@ -9,12 +9,9 @@
 	 * @constructor
 	 * @param {Object} [config] Configuration options
 	 */
-	mw.flow.dm.RevisionedContent = function mwFlowRevisionedContent( config ) {
-		// Configuration initialization
-		config = config || {};
-
+	mw.flow.dm.RevisionedContent = function mwFlowRevisionedContent() {
 		// Parent constructor
-		mw.flow.dm.RevisionedContent.parent.call( this, config );
+		mw.flow.dm.RevisionedContent.super.apply( this, arguments );
 
 		// Initialize properties
 		this.content = new mw.flow.dm.Content();
@@ -98,7 +95,7 @@
 			watched: this.isWatched(),
 			watchable: this.isWatchable(),
 			editable: this.isEditable()
-		}, mw.flow.dm.RevisionedContent.parent.prototype.getHashObject.call( this ) );
+		}, mw.flow.dm.RevisionedContent.super.prototype.getHashObject.apply( this, arguments ) );
 	};
 
 	/**
@@ -416,6 +413,7 @@
 
 	/**
 	 * Toggle the watchable state of a topic
+	 *
 	 * @param {boolean} [watchable] Topic is watchable
 	 * @fires watchable
 	 */
@@ -427,6 +425,7 @@
 
 	/**
 	 * Toggle the editability state of this revision
+	 *
 	 * @param {boolean} [editable] The revision is editable
 	 * @fires editableChange
 	 */
@@ -447,4 +446,4 @@
 	mw.flow.dm.RevisionedContent.prototype.isEditable = function () {
 		return this.editable;
 	};
-}( jQuery ) );
+}() );

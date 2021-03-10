@@ -2,11 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Lucyin",
+			"Reptilien.19831209BE1",
 			"Srtxg"
 		]
 	},
-	"uploadwizard": "Aidant a l' eberwetaedje",
-	"uploadwizard-desc": "Aidant a l' eberwetaedje, diswalpé avou les subzides ''Multimedia Usability''",
+	"uploadwizard": "Aidant a l’&nbsp;eberwetaedje",
+	"uploadwizard-desc": "Aidant a l’&nbsp;eberwetaedje, ene ustêye po-z eberweter des fitchîs limerikes",
 	"api-error-noimageinfo": "L' eberwetaedje a bén stî, mins l' sierveu n' a pont dné d' racsegnes sol fitchî",
 	"mwe-upwiz-extension-disabled": "Cisse pådje la a stî disraloyeye a cåze d' ene aroke d' on moumint. So ç' tins la, sayîz avou l' fôrmulaire d' eberwetaedje estandård",
 	"mwe-upwiz-step-tutorial": "Aprinde",
@@ -86,7 +87,6 @@
 	"mwe-upwiz-next": "Shuvant",
 	"mwe-upwiz-next-file": "Porshure",
 	"mwe-upwiz-next-deeds": "Shuvant",
-	"mwe-upwiz-next-details": "Shuvant",
 	"mwe-upwiz-home": "Aler al pådje divantrinne",
 	"mwe-upwiz-upload-another": "Eberweter èn ôte fitchî",
 	"mwe-upwiz-prevent-close": "Vos n' av nén co tot eberweté {{PLURAL:$1|ci fitchî|ces fitchîs}} la.",
@@ -124,7 +124,7 @@
 	"mwe-upwiz-license-own-pd": "Dominne publik (gn a pupont d' abondroets avou l' licince Creative Commons Zero)",
 	"mwe-upwiz-license-pd-old-100": "L' oteur est moirt dispoy dipus d' cint-z ans",
 	"mwe-upwiz-license-pd-old": "L' oteur est moirt dispoy dipus d' septante ans",
-	"mwe-upwiz-license-pd-us": "Eplaidî pol prumî côp ezès Stats Unis divant 1923",
+	"mwe-upwiz-license-pd-us": "Eplaidî pol prumî côp ezès Stats Unis divant 1925",
 	"mwe-upwiz-license-pd-ineligible": "Trop simpe po poleur riclamer des abondroets",
 	"mwe-upwiz-license-pd-ineligible-help": "Asteme ! L' imådje doet esse foirt simpe, come on vete rond ou on rodje cwåré",
 	"mwe-upwiz-license-pd-textlogo": "Imådjete avou fok do scrijhaedje (mot-marke)",
@@ -143,7 +143,7 @@
 	"mwe-upwiz-subhead-bugs": "[$1 Arokes conoxhowes]",
 	"mwe-upwiz-subhead-alt-upload": "Eraler å vî sistinme",
 	"mwe-upwiz-feedback-prompt": "Dijhoz nos cwè å dfwait do novea sistinme d' eberwetaedje",
-	"mwe-upwiz-feedback-title": "Dijhoz l' vosse so l' aidant a l' eberwetaedje",
+	"mwe-upwiz-feedback-title": "Dijhoz çou k’&nbsp;vos pinsez so l’&nbsp;aidant a l’&nbsp;eberwetaedje",
 	"mwe-upwiz-errordialog-title": "Gn a ene flotche dins çou ki vos vloz eberweter",
 	"mwe-upwiz-errordialog-ok": "i va"
 }

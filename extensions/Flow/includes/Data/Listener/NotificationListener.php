@@ -6,16 +6,16 @@ use Flow\Exception\InvalidDataException;
 use Flow\Model\AbstractRevision;
 use Flow\Model\PostRevision;
 use Flow\Model\Workflow;
-use Flow\NotificationController;
+use Flow\Notifications\Controller;
 
 class NotificationListener extends AbstractListener {
 
 	/**
-	 * @var NotificationController
+	 * @var Controller
 	 */
 	protected $notificationController;
 
-	public function __construct( NotificationController $notificationController ) {
+	public function __construct( Controller $notificationController ) {
 		$this->notificationController = $notificationController;
 	}
 
@@ -32,13 +32,13 @@ class NotificationListener extends AbstractListener {
 		switch ( $row['rev_change_type'] ) {
 		// Actually new-topic @todo rename
 		case 'new-post':
-			if ( !isset(
-				$metadata['board-workflow'],
-				$metadata['workflow'],
-				$metadata['topic-title'],
-				$metadata['first-post']
-			) ) {
-				throw new InvalidDataException( 'Invalid metadata for revision ' . $object->getRevisionId()->getAlphadecimal(), 'missing-metadata' );
+			if ( !isset( $metadata['board-workflow'] ) ||
+				!isset( $metadata['workflow'] ) ||
+				!isset( $metadata['topic-title'] ) ||
+				!isset( $metadata['first-post'] )
+			) {
+				throw new InvalidDataException( 'Invalid metadata for revision ' .
+					$object->getRevisionId()->getAlphadecimal(), 'missing-metadata' );
 			}
 
 			$this->notificationController->notifyNewTopic( [
@@ -50,14 +50,17 @@ class NotificationListener extends AbstractListener {
 			break;
 
 		case 'edit-title':
+			// @phan-suppress-next-line PhanTypeMismatchArgument
 			$this->notifyPostChange( 'flow-topic-renamed', $object, $metadata );
 			break;
 
 		case 'reply':
+			// @phan-suppress-next-line PhanTypeMismatchArgument
 			$this->notifyPostChange( 'flow-post-reply', $object, $metadata );
 			break;
 
 		case 'edit-post':
+			// @phan-suppress-next-line PhanTypeMismatchArgument
 			$this->notifyPostChange( 'flow-post-edited', $object, $metadata );
 			break;
 
@@ -111,11 +114,11 @@ class NotificationListener extends AbstractListener {
 	 * @throws InvalidDataException
 	 */
 	protected function notifyPostChange( $type, PostRevision $object, $metadata, array $params = [] ) {
-		if ( !isset(
-			$metadata['workflow'],
-			$metadata['topic-title']
-		) ) {
-			throw new InvalidDataException( 'Invalid metadata for topic|post revision ' . $object->getRevisionId()->getAlphadecimal(), 'missing-metadata' );
+		if ( !isset( $metadata['workflow'] ) ||
+			!isset( $metadata['topic-title'] )
+		) {
+			throw new InvalidDataException( 'Invalid metadata for topic|post revision ' .
+				$object->getRevisionId()->getAlphadecimal(), 'missing-metadata' );
 		}
 
 		$workflow = $metadata['workflow'];

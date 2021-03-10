@@ -10,17 +10,15 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-eslint' );
-	grunt.loadNpmTasks( 'grunt-jsonlint' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 
 	grunt.initConfig( {
 		eslint: {
-			all: [
-				'*.js',
-				'{resources,docs,tests}/**/*.js',
-				// TODO: Move to a /lib folder
-				'!resources/jquery/jquery.lazyload.js'
-			]
+			options: {
+				cache: true,
+				fix: grunt.option( 'fix' )
+			},
+			all: '.'
 		},
 		stylelint: {
 			options: {
@@ -36,16 +34,9 @@ module.exports = function ( grunt ) {
 				'<%= stylelint.all %>'
 			],
 			tasks: 'test'
-		},
-		jsonlint: {
-			all: [
-				'**/*.json',
-				'!node_modules/**',
-				'!vendor/**'
-			]
 		}
 	} );
 
-	grunt.registerTask( 'test', [ 'eslint', 'stylelint', 'jsonlint', 'banana' ] );
+	grunt.registerTask( 'test', [ 'eslint', 'stylelint', 'banana' ] );
 	grunt.registerTask( 'default', 'test' );
 };

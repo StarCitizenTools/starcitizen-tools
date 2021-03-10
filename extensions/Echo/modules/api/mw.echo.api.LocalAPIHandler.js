@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Notification API handler
 	 *
@@ -9,10 +9,8 @@
 	 * @param {Object} [config] Configuration object
 	 */
 	mw.echo.api.LocalAPIHandler = function MwEchoApiLocalAPIHandler( config ) {
-		config = config || {};
-
 		// Parent constructor
-		mw.echo.api.LocalAPIHandler.parent.call( this,
+		mw.echo.api.LocalAPIHandler.super.call( this,
 			new mw.Api( { ajax: { cache: false } } ),
 			config
 		);
@@ -42,7 +40,8 @@
 	mw.echo.api.LocalAPIHandler.prototype.updateSeenTime = function ( type ) {
 		type = Array.isArray( type ) ? type : [ type ];
 
-		return this.api.postWithToken( 'csrf', {
+		// This is a GET request, not a POST request, for multi-DC support (see T222851)
+		return this.api.get( {
 			action: 'echomarkseen',
 			type: type.length === 1 ? type[ 0 ] : 'all',
 			timestampFormat: 'ISO_8601'
@@ -55,13 +54,18 @@
 	/**
 	 * @inheritdoc
 	 */
-	mw.echo.api.LocalAPIHandler.prototype.markAllRead = function ( type ) {
+	mw.echo.api.LocalAPIHandler.prototype.markAllRead = function ( source, type ) {
+		var data;
 		type = Array.isArray( type ) ? type : [ type ];
-
-		return this.api.postWithToken( 'csrf', {
+		data = {
 			action: 'echomarkread',
 			sections: type.join( '|' )
-		} )
+		};
+		if ( !this.isSourceLocal( source ) ) {
+			data.wikis = source;
+		}
+
+		return this.api.postWithToken( 'csrf', data )
 			.then( function ( result ) {
 				return OO.getProp( result.query, 'echomarkread', type, 'rawcount' ) || 0;
 			} );
@@ -70,10 +74,14 @@
 	/**
 	 * @inheritdoc
 	 */
-	mw.echo.api.LocalAPIHandler.prototype.markItemsRead = function ( itemIdArray, isRead ) {
+	mw.echo.api.LocalAPIHandler.prototype.markItemsRead = function ( source, itemIdArray, isRead ) {
 		var data = {
 			action: 'echomarkread'
 		};
+
+		if ( !this.isSourceLocal( source ) ) {
+			data.wikis = source;
+		}
 
 		if ( isRead ) {
 			data.list = itemIdArray.join( '|' );
@@ -127,4 +135,4 @@
 			notcrosswikisummary: 1
 		} );
 	};
-}( mediaWiki, jQuery ) );
+}() );

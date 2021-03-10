@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow List mixin
 	 * Must be mixed into an mw.flow.dm.Item element
@@ -42,6 +42,7 @@
 
 	/**
 	 * Get an item by its id
+	 *
 	 * @param {string} id Item id
 	 * @return {mw.flow.dm.Item} Item
 	 */
@@ -89,7 +90,6 @@
 	 * @param {Object.<string,string|null>} events An object keyed by the name of the event that should be
 	 *  aggregated  (e.g., ‘click’) and the value of the new name to use (e.g., ‘groupClick’).
 	 *  A `null` value will remove aggregated events.
-
 	 * @throws {Error} An error is thrown if aggregation already exists.
 	 */
 	mw.flow.dm.List.prototype.aggregate = function ( events ) {
@@ -134,7 +134,6 @@
 		}
 	};
 
-	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Add items
 	 *
@@ -193,7 +192,6 @@
 		return this;
 	};
 
-	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Remove items
 	 *
@@ -234,7 +232,6 @@
 		return this;
 	};
 
-	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Clear all items
 	 *
@@ -266,4 +263,4 @@
 
 		return this;
 	};
-}( jQuery ) );
+}() );

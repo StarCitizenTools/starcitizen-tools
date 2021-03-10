@@ -2,11 +2,11 @@
 
 namespace Flow\Data\Index;
 
+use Flow\Data\Compactor\ShallowCompactor;
 use Flow\Data\FlowObjectCache;
 use Flow\Data\ObjectManager;
 use Flow\Data\ObjectMapper;
 use Flow\Data\ObjectStorage;
-use Flow\Data\Compactor\ShallowCompactor;
 use Flow\Data\Utils\SortArrayByKeys;
 use Flow\Exception\DataModelException;
 use Flow\Exception\InvalidParameterException;
@@ -20,7 +20,14 @@ class TopKIndex extends FeatureIndex {
 	 */
 	protected $options = [];
 
-	public function __construct( FlowObjectCache $cache, ObjectStorage $storage, ObjectMapper $mapper, $prefix, array $indexed, array $options = [] ) {
+	public function __construct(
+		FlowObjectCache $cache,
+		ObjectStorage $storage,
+		ObjectMapper $mapper,
+		$prefix,
+		array $indexed,
+		array $options = []
+	) {
 		if ( empty( $options['sort'] ) ) {
 			throw new InvalidParameterException( 'TopKIndex must be sorted' );
 		}
@@ -41,8 +48,10 @@ class TopKIndex extends FeatureIndex {
 			$this->options['sort'] = [ $this->options['sort'] ];
 		}
 		if ( $this->options['shallow'] ) {
-			// TODO: perhaps we shouldn't even get a shallow option, just receive a proper compactor in FeatureIndex::__construct
-			$this->rowCompactor = new ShallowCompactor( $this->rowCompactor, $this->options['shallow'], $this->options['sort'] );
+			// TODO: perhaps we shouldn't even get a shallow option, just receive a proper compactor in
+			// FeatureIndex::__construct
+			$this->rowCompactor = new ShallowCompactor(
+				$this->rowCompactor, $this->options['shallow'], $this->options['sort'] );
 		}
 	}
 
@@ -51,11 +60,13 @@ class TopKIndex extends FeatureIndex {
 			return false;
 		}
 
-		if ( isset( $options['offset-id'] ) || ( isset( $options['offset-dir'] ) && $options['offset-dir'] !== 'fwd' ) ) {
+		if ( isset( $options['offset-id'] ) ||
+			( isset( $options['offset-dir'] ) && $options['offset-dir'] !== 'fwd' )
+		) {
 			return false;
 		}
 
-		if ( isset( $options['sort'], $options['order'] ) ) {
+		if ( isset( $options['sort'] ) && isset( $options['order'] ) ) {
 			return ObjectManager::makeArray( $options['sort'] ) === $this->options['sort']
 				&& strtoupper( $options['order'] ) === $this->options['order'];
 		}
@@ -66,6 +77,12 @@ class TopKIndex extends FeatureIndex {
 		return $this->options['limit'];
 	}
 
+	/**
+	 * @param array[] $results
+	 * @param array $options
+	 *
+	 * @return array[]
+	 */
 	protected function filterResults( array $results, array $options = [] ) {
 		foreach ( $results as $i => $result ) {
 			list( $offset, $limit ) = $this->getOffsetLimit( $result, $options );
@@ -78,15 +95,16 @@ class TopKIndex extends FeatureIndex {
 	// TODO: This is only left for now to handle non-ID offsets (e.g. updated
 	// timestamps).
 	// This has always been broken once you query past the TopKIndex limit.
+
 	/**
 	 * @param array $rows
 	 * @param array $options
 	 * @return array [offset, limit] 0-based index to start with and limit.
 	 */
-	protected function getOffsetLimit( $rows, $options ) {
-		$limit = isset( $options['limit'] ) ? $options['limit'] : $this->getLimit();
+	protected function getOffsetLimit( array $rows, array $options ) {
+		$limit = $options['limit'] ?? $this->getLimit();
 
-		$offsetValue = isset( $options['offset-value'] ) ? $options['offset-value'] : null;
+		$offsetValue = $options['offset-value'] ?? null;
 
 		$dir = 'fwd';
 		if (
@@ -142,7 +160,7 @@ class TopKIndex extends FeatureIndex {
 	 * @return int The position of $offsetValue within $rows
 	 * @throws DataModelException When $offsetValue is not found within $rows
 	 */
-	protected function getOffsetFromOffsetValue( $rows, $offsetValue ) {
+	protected function getOffsetFromOffsetValue( array $rows, $offsetValue ) {
 		$rowIndex = 0;
 		$nextInOrder = $this->getOrder() === 'DESC' ? -1 : 1;
 		foreach ( $rows as $row ) {
@@ -175,7 +193,8 @@ class TopKIndex extends FeatureIndex {
 		$fieldIndex = 0;
 
 		if ( $sortFields === false ) {
-			throw new DataModelException( 'This Index implementation does not support offset values', 'process-data' );
+			throw new DataModelException( 'This Index implementation does not support offset values',
+				'process-data' );
 		}
 
 		foreach ( $sortFields as $field ) {
@@ -242,6 +261,7 @@ class TopKIndex extends FeatureIndex {
 
 		$orderBy = [];
 		$order = $this->options['order'];
+		// @phan-suppress-next-line PhanTypeNoPropertiesForeach
 		foreach ( $this->options['sort'] as $key ) {
 			$orderBy[] = "$key $order";
 		}

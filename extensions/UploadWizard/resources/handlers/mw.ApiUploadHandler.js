@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 	var NS_FILE = mw.config.get( 'wgNamespaceIds' ).file;
 
 	/**
@@ -22,18 +22,18 @@
 		this.upload.on( 'remove-upload', this.abort.bind( this ) );
 	};
 
-	mw.ApiUploadHandler.prototype.abort = function () {
-		throw new Error( 'Not implemented.' );
-	};
-
-	/* eslint-disable valid-jsdoc */
 	/**
+	 * @method
+	 * @abstract
+	 */
+	mw.ApiUploadHandler.prototype.abort = null;
+
+	/**
+	 * @method
+	 * @abstract
 	 * @return {jQuery.Promise}
 	 */
-	/* eslint-enable valid-jsdoc */
-	mw.ApiUploadHandler.prototype.submit = function () {
-		throw new Error( 'Not implemented.' );
-	};
+	mw.ApiUploadHandler.prototype.submit = null;
 
 	/**
 	 * @return {jQuery.Promise}
@@ -48,7 +48,7 @@
 	/**
 	 * Process a successful upload.
 	 *
-	 * @param {object} result
+	 * @param {Object} result
 	 */
 	mw.ApiUploadHandler.prototype.setTransported = function ( result ) {
 		var code;
@@ -162,7 +162,7 @@
 	 * @param {string} code
 	 * @param {Object} result
 	 * @param {string[] }duplicates
-	 * @return {$.Promise}
+	 * @return {jQuery.Promise}
 	 */
 	mw.ApiUploadHandler.prototype.processDuplicateError = function ( code, result, duplicates ) {
 		var files = this.getFileLinks( duplicates ),
@@ -182,7 +182,7 @@
 
 	/**
 	 * @param {string[]} duplicates Array of duplicate filenames
-	 * @return {$.Promise}
+	 * @return {jQuery.Promise}
 	 */
 	mw.ApiUploadHandler.prototype.getDuplicateSource = function ( duplicates ) {
 		return this.getImageInfo( duplicates, 'url' ).then( function ( result ) {
@@ -195,12 +195,15 @@
 			}
 
 			// map of normalized titles, so we can find original title
-			$.each( result.query.normalized, function ( i, data ) {
-				normalized[ data.to ] = data.from;
-			} );
+			if ( result.query.normalized ) {
+				result.query.normalized.forEach( function ( data ) {
+					normalized[ data.to ] = data.from;
+				} );
+			}
 
-			$.each( result.query.pages, function ( i, page ) {
-				var title = page.title in normalized ? normalized[ page.title ] : page.title;
+			Object.keys( result.query.pages ).forEach( function ( pageId ) {
+				var page = result.query.pages[ pageId ],
+					title = page.title in normalized ? normalized[ page.title ] : page.title;
 				if ( page.imagerepository === 'local' ) {
 					local[ title ] = page.imageinfo[ 0 ].descriptionurl;
 				} else if ( page.imagerepository !== '' ) {
@@ -219,7 +222,7 @@
 	 * @param {Object} result The API result in parsed JSON form
 	 * @param {Object} localDuplicates Array of [duplicate filenames => local url]
 	 * @param {Object} foreignDuplicates Array of [duplicate filenames => foreign url]
-	 * @param {int} unknownAmount Amount of unknown filenames (e.g. revdeleted)
+	 * @param {number} unknownAmount Amount of unknown filenames (e.g. revdeleted)
 	 */
 	mw.ApiUploadHandler.prototype.setDuplicateError = function ( code, result, localDuplicates, foreignDuplicates, unknownAmount ) {
 		var allDuplicates = $.extend( {}, localDuplicates, foreignDuplicates ),
@@ -231,7 +234,8 @@
 
 		unknownAmount = unknownAmount || 0;
 
-		$.each( allDuplicates, function ( filename, href ) {
+		Object.keys( allDuplicates ).forEach( function ( filename ) {
+			var href = allDuplicates[ filename ];
 			$a = $( '<a>' ).text( filename );
 			$a.attr( { href: href, target: '_blank' } );
 			$ul.append( $( '<li>' ).append( $a ) );
@@ -292,7 +296,7 @@
 	/**
 	 * @param {string|string[]} titles File title or array of titles
 	 * @param {string|string[]} prop Image props
-	 * @return {$.Promise}
+	 * @return {jQuery.Promise}
 	 */
 	mw.ApiUploadHandler.prototype.getImageInfo = function ( titles, prop ) {
 		return this.api.get( {
@@ -312,7 +316,7 @@
 	mw.ApiUploadHandler.prototype.getFileLinks = function ( filenames ) {
 		var files = [];
 
-		$.each( filenames, function ( i, filename ) {
+		filenames.forEach( function ( filename ) {
 			var title;
 			try {
 				title = mw.Title.makeTitle( NS_FILE, filename );
@@ -359,4 +363,4 @@
 	mw.ApiUploadHandler.prototype.isIgnoredWarning = function ( code ) {
 		return this.ignoreWarnings.indexOf( code ) > -1;
 	};
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

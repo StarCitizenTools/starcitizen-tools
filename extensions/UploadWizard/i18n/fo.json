@@ -3,9 +3,9 @@
 		"authors": [
 			"Diupwijk",
 			"EileenSanda",
-			"Snævar",
+			"Macofe",
 			"Matma Rex",
-			"Macofe"
+			"Snævar"
 		]
 	},
 	"uploadwizard": "Leiðbeining til at leggja út fílur",
@@ -45,7 +45,6 @@
 	"mwe-upwiz-remove-upload": "Tak burtur hesa fíluna frá listanum yvir fílur sum skulu leggjast út",
 	"mwe-upwiz-remove-description": "Tak burtur hesa frágreiðingina",
 	"mwe-upwiz-upload": "Legg út",
-	"mwe-upwiz-file-upload-notcapable": "Tíverri ber tað ikki til hjá tínum internetkaga at leggja fílur út.\nVinarliga royn eitt annað slag av internetkaga (brovsara).",
 	"mwe-upwiz-file-all-ok": "Alt ið tú legði út eydnaðist væl!",
 	"mwe-upwiz-file-some-failed": "Okkurt av tí ið tú legði út miseydnaðist.",
 	"mwe-upwiz-file-retry": "Royn umaftur at leggja út tað ið miseydnaðist",
@@ -88,7 +87,6 @@
 	"mwe-upwiz-next": "Næsta",
 	"mwe-upwiz-next-file": "Halt fram",
 	"mwe-upwiz-next-deeds": "Næsta",
-	"mwe-upwiz-next-details": "Næsta",
 	"mwe-upwiz-home": "Far til startsíðuna á hesi wiki",
 	"mwe-upwiz-upload-another": "Legg fleiri fílur upp",
 	"mwe-upwiz-prevent-close": "Tú ert ikki liðug/ur við at leggja upp og útgeva {{PLURAL:$1|hesa fílu|hesar fílur}} enn.",

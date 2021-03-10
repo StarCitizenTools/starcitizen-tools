@@ -1,17 +1,25 @@
 {
 	"@metadata": {
 		"authors": [
+			"Aursani",
 			"Mehtab ahmed",
-			"Aursani"
+			"Tweety"
 		]
 	},
+	"mwe-upwiz-step-details": "بين ڪريو",
+	"mwe-upwiz-transport-started": "شروع-ڪندي…",
+	"mwe-upwiz-getting-metadata": "فائل جي معلومات ۽ پيش-نگاھون وٺندي…",
+	"mwe-upwiz-patent-dialog-button-next": "اڳيون",
+	"mwe-upwiz-copy-metadata-button-undo": "اڻڪريو",
 	"mwe-upwiz-location-heading": "سرخي",
+	"mwe-upwiz-thanks-intro": "چاڙھڻ لاءِ مھربانيون!",
 	"mwe-upwiz-deleted-duplicate-unknown-filename": "اڻڄاتل فائيل‌نانءُ",
 	"mwe-upwiz-next": "اڳيون",
+	"mwe-upwiz-next-file": "جاري",
 	"mwe-upwiz-next-deeds": "اڳيون",
-	"mwe-upwiz-next-details": "اڳيون",
-	"mwe-upwiz-license-show-recommended": "سرزمين جو سفارش ڪيل لائيسنس استعمال ڪريو",
+	"mwe-upwiz-license-show-recommended": "سرزمين جو سفارشي اجازتنامو استعمال ڪريو",
 	"mwe-upwiz-subhead-alternatives": "ڄاڙهڻ جا متبادل طريقا",
 	"mwe-upwiz-calendar-date": "ڪئلينڊر مان تاريخ چونڊيو",
-	"prefs-uploads": "چاڙهيندي"
+	"prefs-uploads": "چاڙهيندي",
+	"mwe-upload-campaigns-pagination-next": "اڳيون صفحو"
 }

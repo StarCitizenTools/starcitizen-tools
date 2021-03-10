@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	var NS_CATEGORY = mw.config.get( 'wgNamespaceIds' ).category;
 
@@ -14,8 +14,8 @@
 
 		this.categoriesWidget = new mw.widgets.CategoryMultiselectWidget();
 
-		this.categoriesWidget.createItemWidget = function ( data ) {
-			var widget = this.constructor.prototype.createItemWidget.call( this, data );
+		this.categoriesWidget.createTagItemWidget = function ( data ) {
+			var widget = this.constructor.prototype.createTagItemWidget.call( this, data );
 			if ( !widget ) {
 				return null;
 			}
@@ -31,7 +31,7 @@
 			// Keep only valid titles
 			return !!mw.Title.makeTitle( NS_CATEGORY, cat );
 		} );
-		this.categoriesWidget.setItemsFromData( categories );
+		this.categoriesWidget.setValue( categories );
 
 		this.$element.addClass( 'mwe-upwiz-categoriesDetailsWidget' );
 		this.$element.append( this.categoriesWidget.$element );
@@ -53,10 +53,12 @@
 	 */
 	uw.CategoriesDetailsWidget.prototype.getWarnings = function () {
 		var warnings = [];
-		if ( mw.UploadWizard.config.enableCategoryCheck && this.categoriesWidget.getItemsData().length === 0 ) {
+		if ( mw.UploadWizard.config.enableCategoryCheck && this.categoriesWidget.getItems().length === 0 ) {
 			warnings.push( mw.message( 'mwe-upwiz-warning-categories-missing' ) );
 		}
-		if ( this.categoriesWidget.getItems().some( function ( item ) { return item.missing; } ) ) {
+		if ( this.categoriesWidget.getItems().some( function ( item ) {
+			return item.missing;
+		} ) ) {
 			warnings.push( mw.message( 'mwe-upwiz-categories-missing' ) );
 		}
 		return $.Deferred().resolve( warnings ).promise();
@@ -93,7 +95,9 @@
 			missingCatsWikiText = mw.UploadWizard.config.missingCategoriesWikiText;
 		}
 
-		categories = this.categoriesWidget.getItemsData();
+		categories = this.categoriesWidget.getItems().map( function ( item ) {
+			return item.data;
+		} );
 
 		// add all categories
 		wikiText = categories.concat( hiddenCats )
@@ -116,7 +120,9 @@
 	 */
 	uw.CategoriesDetailsWidget.prototype.getSerialized = function () {
 		return {
-			value: this.categoriesWidget.getItemsData()
+			value: this.categoriesWidget.getItems().map( function ( item ) {
+				return item.data;
+			} )
 		};
 	};
 
@@ -126,7 +132,7 @@
 	 * @param {string[]} serialized.value List of categories
 	 */
 	uw.CategoriesDetailsWidget.prototype.setSerialized = function ( serialized ) {
-		this.categoriesWidget.setItemsFromData( serialized.value );
+		this.categoriesWidget.setValue( serialized.value );
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

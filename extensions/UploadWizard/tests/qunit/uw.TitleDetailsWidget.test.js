@@ -1,4 +1,4 @@
-( function ( mw, uw, $ ) {
+( function ( uw ) {
 	'use strict';
 
 	var fileNs, makeTitleInFileNSCases;
@@ -34,13 +34,13 @@
 	QUnit.test( '.static.makeTitleInFileNS()', function ( assert ) {
 		var makeTitleInFileNS = uw.TitleDetailsWidget.static.makeTitleInFileNS;
 
-		$.each( makeTitleInFileNSCases, function ( i, test ) {
+		makeTitleInFileNSCases.forEach( function ( test ) {
 			var title = makeTitleInFileNS( test.filename );
-			assert.equal(
+			assert.strictEqual(
 				title ? title.getPrefixedText() : title,
 				test.prefixedText,
 				test.desc
 			);
 		} );
 	} );
-}( mediaWiki, mediaWiki.uploadWizard, jQuery ) );
+}( mw.uploadWizard ) );

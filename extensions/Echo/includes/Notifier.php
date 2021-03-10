@@ -55,17 +55,21 @@ class EchoNotifier {
 		$userEmailNotifications = $attributeManager->getUserEnabledEvents( $user, 'email' );
 		// See if the user wants to receive emails for this category or the user is eligible to receive this email
 		if ( in_array( $event->getType(), $userEmailNotifications ) ) {
-			global $wgEchoEnableEmailBatch, $wgEchoNotifications, $wgNotificationSender, $wgNotificationReplyName;
+			global $wgEchoEnableEmailBatch, $wgEchoNotifications, $wgPasswordSender, $wgNoReplyAddress;
 
 			$priority = $attributeManager->getNotificationPriority( $event->getType() );
 
 			$bundleString = $bundleHash = '';
 
-			// We should have bundling for email digest as long as either web or email bundling is on, for example, talk page
-			// email bundling is off, but if a user decides to receive email digest, we should bundle those messages
-			if ( !empty( $wgEchoNotifications[$event->getType()]['bundle']['web'] ) || !empty( $wgEchoNotifications[$event->getType()]['bundle']['email'] ) ) {
+			// We should have bundling for email digest as long as either web or email bundling is on,
+			// for example, talk page email bundling is off, but if a user decides to receive email
+			// digest, we should bundle those messages
+			if ( !empty( $wgEchoNotifications[$event->getType()]['bundle']['web'] ) ||
+				!empty( $wgEchoNotifications[$event->getType()]['bundle']['email'] )
+			) {
 				Hooks::run( 'EchoGetBundleRules', [ $event, &$bundleString ] );
 			}
+			// @phan-suppress-next-line PhanImpossibleCondition May be set by hook
 			if ( $bundleString ) {
 				$bundleHash = md5( $bundleString );
 			}
@@ -86,8 +90,11 @@ class EchoNotifier {
 
 			// instant email notification
 			$toAddress = MailAddress::newFromUser( $user );
-			$fromAddress = new MailAddress( $wgNotificationSender, EchoHooks::getNotificationSenderName() );
-			$replyAddress = new MailAddress( $wgNotificationSender, $wgNotificationReplyName );
+			$fromAddress = new MailAddress(
+				$wgPasswordSender,
+				wfMessage( 'emailsender' )->inContentLanguage()->text()
+			);
+			$replyAddress = new MailAddress( $wgNoReplyAddress );
 			// Since we are sending a single email, should set the bundle hash to null
 			// if it is set with a value from somewhere else
 			$event->setBundleHash( null );
@@ -109,11 +116,11 @@ class EchoNotifier {
 	/**
 	 * @param EchoEvent $event
 	 * @param User $user
-	 * @return bool|array An array of 'subject' and 'body', or false if things went wrong
+	 * @return array|false An array of 'subject' and 'body', or false if things went wrong
 	 */
 	private static function generateEmail( EchoEvent $event, User $user ) {
 		$emailFormat = MWEchoNotifUser::newFromUser( $user )->getEmailFormat();
-		$lang = wfGetLangObj( $user->getOption( 'language' ) );
+		$lang = Language::factory( $user->getOption( 'language' ) );
 		$formatter = new EchoPlainTextEmailFormatter( $user, $lang );
 		$content = $formatter->format( $event );
 		if ( !$content ) {

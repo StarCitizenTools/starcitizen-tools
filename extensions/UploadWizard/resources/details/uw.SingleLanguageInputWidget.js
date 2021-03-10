@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * A single language input field in UploadWizard's "Details" step form.
@@ -9,14 +9,17 @@
 	 * @param {Object} config.languages { langcode: text } map of languages
 	 * @param {Object} [config.defaultLanguage]
 	 * @param {boolean} [config.canBeRemoved=true]
-	 * @param {mw.Message} [config.placeholder] Placeholder text for input field
 	 * @param {mw.Message} [config.remove] Title text for remove icon
 	 * @param {number} [config.minLength=0] Minimum input length
 	 * @param {number} [config.maxLength=99999] Maximum input length
 	 */
 	uw.SingleLanguageInputWidget = function UWSingleLanguageInputWidget( config ) {
 		this.config = $.extend( {
-			placeholder: mw.message( '' ),
+			inputWidgetConstructor: OO.ui.MultilineTextInputWidget.bind( null, {
+				classes: [ 'mwe-upwiz-singleLanguageInputWidget-text' ],
+				autosize: true,
+				rows: 2
+			} ),
 			remove: mw.message( '' ),
 			minLength: 0,
 			maxLength: 99999
@@ -38,12 +41,8 @@
 		}
 		this.languageSelector.setValue( config.defaultLanguage || this.getDefaultLanguage() );
 
-		this.textInput = new OO.ui.MultilineTextInputWidget( {
-			classes: [ 'mwe-upwiz-singleLanguageInputWidget-text' ],
-			placeholder: this.config.placeholder.exists() ? this.config.placeholder.text() : '',
-			autosize: true,
-			rows: 2
-		} );
+		// eslint-disable-next-line new-cap
+		this.textInput = new this.config.inputWidgetConstructor();
 		this.removeButton = new OO.ui.ButtonWidget( {
 			classes: [ 'mwe-upwiz-singleLanguageInputWidget-removeItem' ],
 			icon: 'trash',
@@ -62,16 +61,15 @@
 		this.textInput.on( 'change', OO.ui.debounce( this.emit.bind( this, 'change' ), 500 ) );
 
 		this.$element.addClass( 'mwe-upwiz-singleLanguageInputWidget' );
-		this.$element.append(
-			this.languageSelector.getElement(),
-			this.textInput.$element
-		);
+		this.$element.append( this.languageSelector.getElement() );
 		// HACK: ValidationMessageElement will append messages after this.$body
 		this.$body = this.textInput.$element;
 		if ( this.config.canBeRemoved !== false ) {
 			this.$element.append( this.removeButton.$element );
 			this.$body = this.removeButton.$element; // HACK
 		}
+		this.$element.append( this.textInput.$element );
+
 	};
 	OO.inheritClass( uw.SingleLanguageInputWidget, uw.DetailsWidget );
 	OO.mixinClass( uw.SingleLanguageInputWidget, uw.ValidationMessageElement );
@@ -84,7 +82,7 @@
 	uw.SingleLanguageInputWidget.prototype.onRemoveClick = function () {
 		var element = this.getElementGroup();
 
-		if ( element && $.isFunction( element.removeItems ) ) {
+		if ( element && typeof element.removeItems === 'function' ) {
 			element.removeItems( [ this ] );
 		}
 	};
@@ -93,7 +91,7 @@
 	 * Check if the given language code can be used for inputs.
 	 * If not, try finding a similar language code that can be.
 	 *
-	 * @private
+	 * @public
 	 * @param {string} code Language code
 	 * @param {string} [fallback] Language code to use when there's nothing close,
 	 *   defaults to result of #getDefaultLanguage
@@ -117,7 +115,7 @@
 	 * Get the default language to use for inputs.
 	 * Choose a sane default based on user preferences and wiki config.
 	 *
-	 * @private
+	 * @public
 	 * @return {string}
 	 */
 	uw.SingleLanguageInputWidget.prototype.getDefaultLanguage = function () {
@@ -170,7 +168,7 @@
 	};
 
 	/**
-	 * @param {object} languages
+	 * @param {Object} languages
 	 */
 	uw.SingleLanguageInputWidget.prototype.updateLanguages = function ( languages ) {
 		this.languageSelector.updateLanguages( languages );
@@ -245,4 +243,4 @@
 		this.setText( serialized.text );
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

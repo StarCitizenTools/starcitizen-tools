@@ -3,7 +3,7 @@
 namespace Flow;
 
 class Container extends \Pimple\Container {
-	static private $container;
+	private static $container;
 
 	/**
 	 * Get a Flow Container
@@ -18,12 +18,7 @@ class Container extends \Pimple\Container {
 	 */
 	public static function getContainer() {
 		if ( self::$container === null ) {
-			if ( defined( 'MW_PHPUNIT_TEST' ) ) {
-				$file = 'container-test.php';
-			} else {
-				$file = 'container.php';
-			}
-			self::$container = include __DIR__ . "/../$file";
+			self::$container = include __DIR__ . "/../container.php";
 		}
 		return self::$container;
 	}

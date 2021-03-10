@@ -6,6 +6,7 @@ use ApiBase;
 use ApiModuleManager;
 use Flow\Container;
 use Hooks;
+use MediaWiki\MediaWikiServices;
 use Title;
 
 class ApiFlow extends ApiBase {
@@ -17,41 +18,44 @@ class ApiFlow extends ApiBase {
 
 	private static $alwaysEnabledModules = [
 		// POST
-		'new-topic' => 'Flow\Api\ApiFlowNewTopic',
-		'edit-header' => 'Flow\Api\ApiFlowEditHeader',
-		'edit-post' => 'Flow\Api\ApiFlowEditPost',
-		'edit-topic-summary' => 'Flow\Api\ApiFlowEditTopicSummary',
-		'reply' => 'Flow\Api\ApiFlowReply',
-		'moderate-post' => 'Flow\Api\ApiFlowModeratePost',
-		'moderate-topic' => 'Flow\Api\ApiFlowModerateTopic',
-		'edit-title' => 'Flow\Api\ApiFlowEditTitle',
-		'lock-topic' => 'Flow\Api\ApiFlowLockTopic',
-		'close-open-topic' => 'Flow\Api\ApiFlowLockTopic', // BC: has been renamed to lock-topic
-		'undo-edit-header' => 'Flow\Api\ApiFlowUndoEditHeader',
-		'undo-edit-post' => 'Flow\Api\ApiFlowUndoEditPost',
-		'undo-edit-topic-summary' => 'Flow\Api\ApiFlowUndoEditTopicSummary',
+		'new-topic' => \Flow\Api\ApiFlowNewTopic::class,
+		'edit-header' => \Flow\Api\ApiFlowEditHeader::class,
+		'edit-post' => \Flow\Api\ApiFlowEditPost::class,
+		'edit-topic-summary' => \Flow\Api\ApiFlowEditTopicSummary::class,
+		'reply' => \Flow\Api\ApiFlowReply::class,
+		'moderate-post' => \Flow\Api\ApiFlowModeratePost::class,
+		'moderate-topic' => \Flow\Api\ApiFlowModerateTopic::class,
+		'edit-title' => \Flow\Api\ApiFlowEditTitle::class,
+		'lock-topic' => \Flow\Api\ApiFlowLockTopic::class,
+		'close-open-topic' => \Flow\Api\ApiFlowLockTopic::class, // BC: has been renamed to lock-topic
+		'undo-edit-header' => \Flow\Api\ApiFlowUndoEditHeader::class,
+		'undo-edit-post' => \Flow\Api\ApiFlowUndoEditPost::class,
+		'undo-edit-topic-summary' => \Flow\Api\ApiFlowUndoEditTopicSummary::class,
 
 		// GET
 		// action 'view' exists in Topic.php & TopicList.php, for topic, post &
 		// topiclist - we'll want to know topic-/post- or topiclist-view ;)
-		'view-topiclist' => 'Flow\Api\ApiFlowViewTopicList',
-		'view-post' => 'Flow\Api\ApiFlowViewPost',
-		'view-post-history' => 'Flow\Api\ApiFlowViewPostHistory',
-		'view-topic' => 'Flow\Api\ApiFlowViewTopic',
-		'view-topic-history' => 'Flow\Api\ApiFlowViewTopicHistory',
-		'view-header' => 'Flow\Api\ApiFlowViewHeader',
-		'view-topic-summary' => 'Flow\Api\ApiFlowViewTopicSummary',
+		'view-topiclist' => \Flow\Api\ApiFlowViewTopicList::class,
+		'view-post' => \Flow\Api\ApiFlowViewPost::class,
+		'view-post-history' => \Flow\Api\ApiFlowViewPostHistory::class,
+		'view-topic' => \Flow\Api\ApiFlowViewTopic::class,
+		'view-topic-history' => \Flow\Api\ApiFlowViewTopicHistory::class,
+		'view-header' => \Flow\Api\ApiFlowViewHeader::class,
+		'view-topic-summary' => \Flow\Api\ApiFlowViewTopicSummary::class,
 	];
 
 	private static $searchModules = [
-		'search' => 'Flow\Api\ApiFlowSearch',
+		'search' => \Flow\Api\ApiFlowSearch::class,
 	];
 
 	public function __construct( $main, $action ) {
 		global $wgFlowSearchEnabled;
 
 		parent::__construct( $main, $action );
-		$this->moduleManager = new ApiModuleManager( $this );
+		$this->moduleManager = new ApiModuleManager(
+			$this,
+			MediaWikiServices::getInstance()->getObjectFactory()
+		);
 
 		$enabledModules = self::$alwaysEnabledModules;
 		if ( $wgFlowSearchEnabled ) {
@@ -65,6 +69,9 @@ class ApiFlow extends ApiBase {
 		return $this->moduleManager;
 	}
 
+	/**
+	 * @suppress PhanUndeclaredMethod Phan doesn't infer $module is ApiFlowBase
+	 */
 	public function execute() {
 		// To avoid API warning, register the parameter used to bust browser cache
 		$this->getMain()->getVal( '_' );
@@ -92,13 +99,11 @@ class ApiFlow extends ApiBase {
 		}
 
 		$module->extractRequestParams();
-		$module->profileIn();
 		if ( $module->needsPage() ) {
 			$module->setPage( $this->getPage( $params ) );
 		}
 		$module->execute();
 		Hooks::run( 'APIFlowAfterExecute', [ $module ] );
-		$module->profileOut();
 	}
 
 	/**
@@ -132,6 +137,7 @@ class ApiFlow extends ApiBase {
 			}
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchReturnNullable T240141
 		return $page;
 	}
 

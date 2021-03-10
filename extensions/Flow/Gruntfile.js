@@ -4,14 +4,13 @@
  * @package Flow
  */
 
-/* eslint-env node: */
+/* eslint-env node */
 module.exports = function ( grunt ) {
 	var conf = grunt.file.readJSON( 'extension.json' );
 
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-eslint' );
-	grunt.loadNpmTasks( 'grunt-jsonlint' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.loadNpmTasks( 'grunt-tyops' );
 
@@ -27,9 +26,13 @@ module.exports = function ( grunt ) {
 			]
 		},
 		eslint: {
+			options: {
+				cache: true,
+				fix: grunt.option( 'fix' )
+			},
 			all: [
-				'**/*.js',
-				'!{node_modules,vendor,docs}/**/*.js'
+				'**/*.{js,json}',
+				'!{modules/libs,docs,vendor,node_modules}/**'
 			]
 		},
 		stylelint: {
@@ -41,7 +44,8 @@ module.exports = function ( grunt ) {
 				'modules/**/*.less'
 			]
 		},
-		banana: conf.MessagesDirs,
+		// eslint-disable-next-line es/no-object-assign
+		banana: Object.assign( { options: { requireLowerCase: false } }, conf.MessagesDirs ),
 		watch: {
 			files: [
 				'.{stylelintrc,eslintrc}.json',
@@ -49,17 +53,10 @@ module.exports = function ( grunt ) {
 				'<%= stylelint.all %>'
 			],
 			tasks: 'test'
-		},
-		jsonlint: {
-			all: [
-				'**/*.json',
-				'!node_modules/**',
-				'!vendor/**'
-			]
 		}
 	} );
 
-	grunt.registerTask( 'lint', [ 'tyops', 'eslint', 'stylelint', 'jsonlint', 'banana' ] );
+	grunt.registerTask( 'lint', [ 'tyops', 'eslint', 'stylelint', 'banana' ] );
 	grunt.registerTask( 'test', 'lint' );
 	grunt.registerTask( 'default', 'test' );
 };

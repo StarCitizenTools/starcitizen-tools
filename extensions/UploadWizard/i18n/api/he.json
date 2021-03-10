@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80"
+		]
+	},
+	"apihelp-flickrblacklist-description": "אימות URL באמצעות שימוש במזהה משתמש (NSID) לחסימה ברשימה שחורה.",
+	"apihelp-flickrblacklist-summary": "בדיקת תקינות URL של פילקר באמצעות שימוש במזהה משתמש (NSID) להוספה לרשימה השחורה.",
+	"apihelp-flickrblacklist-extended-description": "בעת שימוש באפשרות <var>list</var>, זה יחזיר את כל המזהים ברשימה השחורה.",
+	"apihelp-flickrblacklist-param-url": "URL בפליקר שצריך לבדוק.",
+	"apihelp-flickrblacklist-param-list": "כשזה מוגדר, מוחזרת כל הרשימה השחורה. אי־אפשר להשתמש בזה יחד עם $1url.",
+	"apihelp-flickrblacklist-example-1": "בדיקה של URL אל מול הרשימה השחורה",
+	"apihelp-flickrblacklist-example-2": "החזרת כל הרשימה השחורה",
+	"apihelp-query+allcampaigns-description": "ספירה כל מסעות הפרסום של אשף ההעלאות.",
+	"apihelp-query+allcampaigns-summary": "למנות את כל מבצעי קידום ההעלאות של אשף ההעלאות.",
+	"apihelp-query+allcampaigns-param-enabledonly": "רשימה רק של מסעות פרסום מופעלים.",
+	"apihelp-query+allcampaigns-param-limit": "מספר מסעות הפרסום שצריך להחזיר.",
+	"apihelp-query+allcampaigns-example-1": "ספירה של מסעות פרסום מופעלים"
+}

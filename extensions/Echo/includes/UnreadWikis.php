@@ -4,9 +4,7 @@
  * Manages what wikis a user has unread notifications on
  */
 class EchoUnreadWikis {
-	/**
-	 * @var string
-	 */
+
 	const DEFAULT_TS = '00000000000000';
 
 	/**
@@ -31,7 +29,7 @@ class EchoUnreadWikis {
 	 * Use the user id provided by the CentralIdLookup
 	 *
 	 * @param User $user
-	 * @return EchoUnreadWikis|bool
+	 * @return EchoUnreadWikis|false
 	 */
 	public static function newFromUser( User $user ) {
 		$lookup = CentralIdLookup::factory();
@@ -52,7 +50,7 @@ class EchoUnreadWikis {
 	}
 
 	/**
-	 * @return array
+	 * @return array[][]
 	 */
 	public function getUnreadCounts() {
 		$dbr = $this->getDB( DB_REPLICA );
@@ -115,11 +113,11 @@ class EchoUnreadWikis {
 		if ( $alertCount || $msgCount ) {
 			$values = [
 				'euw_alerts' => $alertCount,
-				'euw_alerts_ts' => $alertCount
+				'euw_alerts_ts' => $alertTime
 					? $alertTime->getTimestamp( TS_MW )
 					: static::DEFAULT_TS,
 				'euw_messages' => $msgCount,
-				'euw_messages_ts' => $msgCount
+				'euw_messages_ts' => $msgTime
 					? $msgTime->getTimestamp( TS_MW )
 					: static::DEFAULT_TS,
 			];
@@ -128,7 +126,7 @@ class EchoUnreadWikis {
 			$dbw->upsert(
 				'echo_unread_wikis',
 				$conditions + $values,
-				[ 'euw_user', 'euw_wiki' ],
+				[ [ 'euw_user', 'euw_wiki' ] ],
 				$values,
 				__METHOD__
 			);

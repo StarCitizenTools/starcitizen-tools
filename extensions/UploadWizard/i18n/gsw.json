@@ -3,12 +3,12 @@
 		"authors": [
 			"Als-Chlämens",
 			"Als-Holder",
-			"Imbericle",
+			"Envlh",
 			"Geitost",
-			"Matma Rex",
+			"Imbericle",
 			"Macofe",
-			"Regemeitli",
-			"Envlh"
+			"Matma Rex",
+			"Regemeitli"
 		]
 	},
 	"uploadwizard": "Assischtänt zum Uffelade",
@@ -48,7 +48,6 @@
 	"mwe-upwiz-remove-upload": "Nimm die Datei uuse us dr Lischt vu dr Dateie, wu uffeglede wäre solle",
 	"mwe-upwiz-remove-description": "Nimm die Bschryybig uuse",
 	"mwe-upwiz-upload": "Uffelade",
-	"mwe-upwiz-file-upload-notcapable": "Mit Dyym Browser chasch leider kei Dateie uffelade.\nBitte nimm en alternative Browser.",
 	"mwe-upwiz-file-all-ok": "S Uffealde isch bi allne Dateie erfolgryych gsi!",
 	"mwe-upwiz-file-some-failed": "S Uffelade vu ne baar Dateie isch fählgschlaa.",
 	"mwe-upwiz-file-retry": "Fählgschlageni Uffeladige nomo versueche.",
@@ -136,7 +135,6 @@
 	"mwe-upwiz-next": "Negschti",
 	"mwe-upwiz-next-file": "Wytermache",
 	"mwe-upwiz-next-deeds": "Negschti",
-	"mwe-upwiz-next-details": "Negschti",
 	"mwe-upwiz-home": "Zue dr Hauptsyte vum Wiki",
 	"mwe-upwiz-upload-another": "Wyteri Dateie uffelade",
 	"mwe-upwiz-prevent-close": "S Uffelade un d Veröffentlichig vo {{PLURAL:$1|derrer Datei|dänne Dateie}} isch no nit abgschlosse.",
@@ -202,7 +200,7 @@
 	"mwe-upwiz-license-own-pd": "Gmäss de ''Creative-Commons''-Lizänz «CC0 1.0 Universal» wird uff alli Rächt verzichtet (entspricht de Gmeinfrejheit).",
 	"mwe-upwiz-license-pd-old-100": "De Autor isch vor über 70 Joor gstorbe",
 	"mwe-upwiz-license-pd-old": "De Autor isch vor über 70 Joor gstorbe",
-	"mwe-upwiz-license-pd-us": "Zum erste Mool vor em Joor 1923 in de Vereinigte Staate vo Amerika veröffentlicht worde",
+	"mwe-upwiz-license-pd-us": "Zum erste Mool vor em Joor 1925 in de Vereinigte Staate vo Amerika veröffentlicht worde",
 	"mwe-upwiz-license-pd-usgov": "Eiges Werch vo de US-Bundesregierig",
 	"mwe-upwiz-license-pd-usgov-nasa": "Eiges Werch vo de NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Eiges Werch vo de US-Marine",
@@ -250,6 +248,5 @@
 	"mwe-upwiz-prefs-def-license-def": "Dr Standard neh, egal was es isch.",
 	"mwe-upwiz-prefs-license-own": "Eige Wärch - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "Främd Wärch - $1",
-	"mwe-upwiz-prefs-chunked": "Uffelade vu Dateie, wu greßer sin wie $1, in mehrere Teil (''Upload Wizard'')",
 	"mwe-upwiz-prefs-skiptutorial": "Yyfierigstutorial zue Lizänze überspringe."
 }

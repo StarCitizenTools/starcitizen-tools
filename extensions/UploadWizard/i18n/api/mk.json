@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Провери URL-адреса од Flickr во црниот список користејќи ја корисничката назнака (NSID).\n\nКога се користи со можноста за списочен испис (<var>list</var>), дај ги сите назнаки на црниот список.",
+	"apihelp-flickrblacklist-summary": "Завери URL од Flickr користејќи ја корисничката назнака (NSID) за црн список.",
+	"apihelp-flickrblacklist-extended-description": "Кога се користи со можноста за список (<var>list</var>), ги дава сите назнаки на црниот список.",
+	"apihelp-flickrblacklist-param-url": "URL-адреса од Flickr што треба да се провери.",
+	"apihelp-flickrblacklist-param-list": "Кога е зададено, ќе се даде целиот црн список. Не може да се користи заедно со $1url.",
+	"apihelp-flickrblacklist-example-1": "Провери URL во црниот список",
+	"apihelp-flickrblacklist-example-2": "Дај го целиот црн список",
+	"apihelp-query+allcampaigns-description": "Наброј ги сите походи на Помошникот за подигање.",
+	"apihelp-query+allcampaigns-summary": "Наброј ги сите походи на Помошникот за подигање.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Испиши ги само походите кои се во тек.",
+	"apihelp-query+allcampaigns-param-limit": "Број на походи во исписот.",
+	"apihelp-query+allcampaigns-example-1": "Наброј ги тековните походи"
+}

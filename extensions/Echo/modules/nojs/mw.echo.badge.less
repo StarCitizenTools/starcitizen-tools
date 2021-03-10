@@ -1,5 +1,5 @@
-@import '../echo.variables';
-@import 'mediawiki.mixins';
+@import '../echo.variables.less';
+@import 'mediawiki.mixins.less';
 
 /* stylelint-disable no-descending-specificity */
 /* We have to include the #pt-notifications selector due to monobook */
@@ -12,37 +12,30 @@
 		height: 20px;
 		margin: 0 2px;
 		// Hide the text, but keep accessible for screen-readers
-		// Later we put the icons back onscreen with an opposite offset
-		top: -@badge-offscreen-offset - 5px;
+		// Later we put the counter back onscreen with a zero text-indent
+		top: -5px;
+		text-indent: -9999px;
+		border-radius: @border-radius-base;
 		cursor: pointer;
 		text-decoration: none;
 		line-height: normal;
 		.box-sizing( border-box );
+		opacity: 0.87;
+		color: transparent;
 
 		&:hover,
 		&:active,
 		&:focus {
 			outline: 0;
-			-moz-outline-style: 0;
 		}
 
-		&-dimmed {
-			opacity: 0.4;
-		}
+		&:focus {
+			.box-shadow( ~'0 0 0 1px #fff, 0 0 0 3px #36c' );
+			opacity: 1;
 
-		// Background icon
-		&:before {
-			position: absolute;
-			display: inline-block;
-			cursor: pointer;
-			opacity: 0.8;
-			content: '';
-			background-repeat: no-repeat;
-			// Bring it back onscreen
-			top: @badge-offscreen-offset;
-			left: 0;
-			width: 100%;
-			height: 100%;
+			&:after {
+				border-color: #36c;
+			}
 		}
 
 		// Counter
@@ -51,27 +44,33 @@
 			display: inline-block;
 			cursor: pointer;
 			// Bring it back onscreen
-			top: @badge-offscreen-offset + 9px;
+			top: 9px;
+			text-indent: 0;
 			left: 55%;
 			font-size: 0.9em;
 			font-weight: bold;
 			padding: 0 0.3em;
 			border: 1px solid #fff;
-			border-radius: 2px;
+			border-radius: @border-radius-base;
 			background-color: @badge-counter-background-seen;
 			content: attr( data-counter-text );
 			color: #fff;
 		}
 
+		&-dimmed {
+			opacity: 0.4;
+		}
+
 		&.mw-echo-notifications-badge-long-label {
 			margin-right: 0.5em;
+
 			&:after {
 				left: 35%;
 			}
 		}
 
 		&.mw-echo-notifications-badge-all-read {
-			opacity: 0.625;
+			opacity: 0.51;
 
 			&:after {
 				visibility: hidden;
@@ -79,17 +78,14 @@
 		}
 	}
 
-	#pt-notifications-alert & {
-		&:before {
-			/* @embed */
-			background-image: url( ../icons/bell.svg );
+	&.oo-ui-flaggedElement-unseen,
+	&.mw-echo-unseen-notifications {
+		#pt-notifications-alert &:after {
+			background-color: @badge-counter-background-unseen-alert;
 		}
-	}
 
-	#pt-notifications-notice & {
-		&:before {
-			/* @embed */
-			background-image: url( ../icons/tray.svg );
+		#pt-notifications-notice &:after {
+			background-color: @badge-counter-background-unseen-message;
 		}
 	}
 }

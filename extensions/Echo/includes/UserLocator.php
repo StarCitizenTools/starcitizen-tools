@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 class EchoUserLocator {
 	/**
 	 * Return all users watching the event title.
@@ -9,7 +11,7 @@ class EchoUserLocator {
 	 *
 	 * @param EchoEvent $event
 	 * @param int $batchSize
-	 * @return User[]
+	 * @return User[]|Iterator<User>
 	 */
 	public static function locateUsersWatchingTitle( EchoEvent $event, $batchSize = 500 ) {
 		$title = $event->getTitle();
@@ -40,7 +42,7 @@ class EchoUserLocator {
 	}
 
 	/**
-	 * If the event occured on the talk page of a registered
+	 * If the event occurred on the talk page of a registered
 	 * user return that user.
 	 *
 	 * @param EchoEvent $event
@@ -55,9 +57,9 @@ class EchoUserLocator {
 		$user = User::newFromName( $title->getDBkey() );
 		if ( $user && !$user->isAnon() ) {
 			return [ $user->getId() => $user ];
-		} else {
-			return [];
 		}
+
+		return [];
 	}
 
 	/**
@@ -70,9 +72,9 @@ class EchoUserLocator {
 		$agent = $event->getAgent();
 		if ( $agent && !$agent->isAnon() ) {
 			return [ $agent->getId() => $agent ];
-		} else {
-			return [];
 		}
+
+		return [];
 	}
 
 	/**
@@ -83,19 +85,14 @@ class EchoUserLocator {
 	 * @return User[]
 	 */
 	public static function locateArticleCreator( EchoEvent $event ) {
-		$agent = $event->getAgent();
 		$title = $event->getTitle();
 
 		if ( !$title || $title->getArticleID() <= 0 ) {
 			return [];
 		}
-		// why?
-		if ( !$agent ) {
-			return [];
-		}
 
 		$dbr = wfGetDB( DB_REPLICA );
-		$revQuery = Revision::getQueryInfo();
+		$revQuery = MediaWikiServices::getInstance()->getRevisionStore()->getQueryInfo();
 		$res = $dbr->selectRow(
 			$revQuery['tables'],
 			[ 'rev_user' => $revQuery['fields']['rev_user'] ],
@@ -111,9 +108,9 @@ class EchoUserLocator {
 		$user = User::newFromId( $res->rev_user );
 		if ( $user ) {
 			return [ $user->getId() => $user ];
-		} else {
-			return [];
 		}
+
+		return [];
 	}
 
 	/**
@@ -136,7 +133,8 @@ class EchoUserLocator {
 			$userIds = $event->getExtraParam( $key );
 			if ( !$userIds ) {
 				continue;
-			} elseif ( !is_array( $userIds ) ) {
+			}
+			if ( !is_array( $userIds ) ) {
 				$userIds = [ $userIds ];
 			}
 			foreach ( $userIds as $userId ) {

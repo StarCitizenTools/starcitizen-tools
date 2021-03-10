@@ -7,6 +7,8 @@ use Flow\Model\UUIDBlob;
 use Flow\Tests\FlowTestCase;
 
 /**
+ * @covers \Flow\Model\UUID
+ *
  * @group Flow
  */
 class UUIDTest extends FlowTestCase {
@@ -42,9 +44,9 @@ class UUIDTest extends FlowTestCase {
 
 	/**
 	 * @dataProvider invalidInputProvider
-	 * @expectedException \Flow\Exception\InvalidInputException
 	 */
 	public function testInvalidInputOnCreate( $invalidInput ) {
+		$this->expectException( \Flow\Exception\InvalidInputException::class );
 		UUID::create( $invalidInput );
 	}
 
@@ -153,7 +155,7 @@ class UUIDTest extends FlowTestCase {
 	}
 
 	public function testConversionToTimestamp() {
-		$this->assertEquals( '20150303221220', UUID::create( 'scv3pvbt40kcyy4g' )->getTimestamp() );
+		$this->assertSame( '20150303221220', UUID::create( 'scv3pvbt40kcyy4g' )->getTimestamp() );
 	}
 
 	public function testCreateLowNumber() {

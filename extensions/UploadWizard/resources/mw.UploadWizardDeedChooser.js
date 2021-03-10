@@ -1,12 +1,12 @@
-( function ( mw, uw, $ ) {
+( function () {
 
 	/**
 	 * Interface widget to choose among various deeds -- for instance, if own work, or not own work, or other such cases.
 	 *
 	 * @param {Object} config The UW config
-	 * @param {string|jQuery} selector where to put this deed chooser
-	 * @param {UploadWizardDeed[]} deeds
-	 * @param {UploadWizardUpload[]} uploads that this applies to (this is just to make deleting and plurals work)
+	 * @param {string|jQuery} selector Where to put this deed chooser
+	 * @param {Object} deeds Keyed object of UploadWizardDeed items
+	 * @param {mw.UploadWizardUpload[]} uploads Uploads that this applies to (this is just to make deleting and plurals work)
 	 */
 	mw.UploadWizardDeedChooser = function ( config, selector, deeds, uploads ) {
 		var chooser = this;
@@ -20,36 +20,39 @@
 
 		this.onLayoutReady = function () {};
 
-		$.each( this.deeds, function ( i, deed ) {
-			var id = chooser.name + '-' + deed.name,
-				$deedInterface = $(
-					'<div class="mwe-upwiz-deed mwe-upwiz-deed-' + deed.name + '">' +
-						'<div class="mwe-upwiz-deed-option-title">' +
-							'<span class="mwe-upwiz-deed-header">' +
-								'<input id="' + id + '" name="' + chooser.name + '" type="radio" value="' + deed.name + ' /">' +
-								'<label for="' + id + '" class="mwe-upwiz-deed-name">' +
-									mw.message( 'mwe-upwiz-source-' + deed.name, chooser.uploads.length ).escaped() +
-								'</label>' +
-							'</span>' +
-						'</div>' +
-						'<div class="mwe-upwiz-deed-form"></div>' +
-					'</div>'
+		Object.keys( this.deeds ).forEach( function ( name ) {
+			var deed = chooser.deeds[ name ],
+				radio = new OO.ui.RadioSelectWidget( {
+					items: [ new OO.ui.RadioOptionWidget( {
+						label: mw.message( 'mwe-upwiz-source-' + deed.name, chooser.uploads.length ).text()
+					} ) ]
+				} ),
+				$deedInterface = $( '<div>' ).addClass( 'mwe-upwiz-deed mwe-upwiz-deed-' + deed.name ).append(
+					$( '<div>' ).addClass( 'mwe-upwiz-deed-option-title' ).append(
+						$( '<span>' ).addClass( 'mwe-upwiz-deed-header' ).append(
+							radio.$element
+						)
+					),
+					$( '<div>' ).addClass( 'mwe-upwiz-deed-form' ).hide()
 				);
+
+			// Set the name attribute manually. We can't use RadioInputWidget which has
+			// a name config because they don't emit change events. Ideally we would use
+			// one RadioSelectWidget and not have to set this property.
+			radio.items[ 0 ].radio.$input.attr( 'name', chooser.name );
 
 			chooser.$selector.append( $deedInterface );
 
 			deed.setFormFields( $deedInterface.find( '.mwe-upwiz-deed-form' ) );
 
-			if ( deeds.length === 1 ) {
+			if ( Object.keys( chooser.deeds ).length === 1 ) {
 				chooser.onLayoutReady = chooser.selectDeed.bind( chooser, deed );
 			} else {
 				if ( config.licensing.defaultType === deed.name ) {
 					chooser.onLayoutReady = chooser.selectDeed.bind( chooser, deed );
 				}
-				$deedInterface.find( 'span.mwe-upwiz-deed-header input' ).click( function () {
-					if ( $( this ).is( ':checked' ) ) {
-						chooser.selectDeed( deed );
-					}
+				radio.on( 'choose', function () {
+					chooser.selectDeed( deed );
 				} );
 			}
 		} );
@@ -91,10 +94,11 @@
 
 			this.deed = deed;
 
-			$.each( this.uploads, function ( i, upload ) {
+			this.uploads.forEach( function ( upload ) {
 				upload.deedChooser = chooser;
 			} );
 
+			// eslint-disable-next-line no-jquery/no-global-selector
 			$( '#mwe-upwiz-stepdiv-deeds .mwe-upwiz-button-next' ).show();
 		},
 
@@ -105,13 +109,18 @@
 		 */
 		deselectDeedInterface: function ( $deedSelector ) {
 			$deedSelector.removeClass( 'selected' );
-			$.each( $deedSelector.find( '.mwe-upwiz-deed-form' ), function ( i, form ) {
-				var $form = $( form );
+			$deedSelector.find( '.mwe-upwiz-deed-form' ).each( function () {
+				var $form = $( this );
 				// Prevent validation of deselected deeds by disabling all form inputs
+				// TODO: Use a tag selector
+				// eslint-disable-next-line no-jquery/no-sizzle
 				$form.find( ':input' ).prop( 'disabled', true );
+				// eslint-disable-next-line no-jquery/no-sizzle
 				if ( $form.parents().is( ':hidden' ) ) {
 					$form.hide();
 				} else {
+					// FIXME: Use CSS transition
+					// eslint-disable-next-line no-jquery/no-slide
 					$form.slideUp( 500 );
 				}
 			} );
@@ -125,15 +134,24 @@
 		selectDeedInterface: function ( $deedSelector ) {
 			var $otherDeeds = $deedSelector.siblings().filter( '.mwe-upwiz-deed' );
 			this.deselectDeedInterface( $otherDeeds );
+			// FIXME: Use CSS transition
+			// eslint-disable-next-line no-jquery/no-fade
 			$deedSelector.addClass( 'selected' ).fadeTo( 'fast', 1.0 );
-			$.each( $deedSelector.find( '.mwe-upwiz-deed-form' ), function ( i, form ) {
-				var $form = $( form );
+			$deedSelector.find( '.mwe-upwiz-deed-form' ).each( function () {
+				var $form = $( this );
 				// (Re-)enable all form inputs
+				// TODO: Use a tag selector
+				// eslint-disable-next-line no-jquery/no-sizzle
 				$form.find( ':input' ).prop( 'disabled', false );
+				// eslint-disable-next-line no-jquery/no-sizzle
 				if ( $form.is( ':hidden' ) ) {
 					// if the form was hidden, set things up so a slide-down works
+					// FIXME: Use CSS transition
+					// eslint-disable-next-line no-jquery/no-slide
 					$form.show().slideUp( 0 );
 				}
+				// FIXME: Use CSS transition
+				// eslint-disable-next-line no-jquery/no-slide
 				$form.slideDown( 500 );
 			} );
 		},
@@ -164,4 +182,4 @@
 
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery ) );
+}() );

@@ -2,9 +2,10 @@
  * @todo break this down into mixins for each callback section (eg. post actions, read topics)
  */
 
-( function ( $, mw ) {
+( function () {
 	/**
 	 * Binds API events to FlowBoardComponent
+	 *
 	 * @class
 	 * @extends FlowComponent
 	 * @constructor
@@ -36,6 +37,7 @@
 	 * subsequently be re-submitted (to overwrite the conflicting content)
 	 * This will prepare the data-to-be-submitted so that the override is
 	 * submitted against the most current revision ID.
+	 *
 	 * @param {Event} event
 	 * @param {Object} info
 	 * @param {Object} queryMap
@@ -65,6 +67,7 @@
 
 	/**
 	 * Adjusts query params to use global watch action, and specifies it should use a watch token.
+	 *
 	 * @param {Event} event
 	 * @param {Object} info
 	 * @param {Object} queryMap
@@ -93,11 +96,12 @@
 
 	/**
 	 * On complete board reprocessing through view-topiclist (eg. change topic sort order), re-render any given blocks.
+	 *
 	 * @param {Object} info
 	 * @param {string} info.status "done" or "fail"
 	 * @param {jQuery} info.$target
 	 * @param {Object} data
-	 * @param {jqXHR} jqxhr
+	 * @param {jQuery.jqXHR} jqxhr
 	 * @return {jQuery.Promise}
 	 */
 	FlowBoardComponentApiEventsMixin.UI.events.apiHandlers.board = function ( info, data ) {
@@ -133,7 +137,7 @@
 	 * @param {string} info.status "done" or "fail"
 	 * @param {jQuery} info.$target
 	 * @param {Object} data
-	 * @param {jqXHR} jqxhr
+	 * @param {jQuery.jqXHR} jqxhr
 	 * @return {jQuery.Promise}
 	 */
 	FlowBoardComponentApiEventsMixin.UI.events.apiHandlers.submitTopicTitle = function ( info, data ) {
@@ -154,7 +158,7 @@
 	 * @param {string} info.status "done" or "fail"
 	 * @param {jQuery} info.$target
 	 * @param {Object} data
-	 * @param {jqXHR} jqxhr
+	 * @param {jQuery.jqXHR} jqxhr
 	 * @return {jQuery.Promise}
 	 */
 	FlowBoardComponentApiEventsMixin.UI.events.apiHandlers.watchItem = function ( info, data ) {
@@ -281,7 +285,7 @@
 	 * @return {Function} Callback processing the response after submit of a moderation form
 	 * @return {Object} return.info `{status: done|fail, $target: jQuery}`
 	 * @return {Object} return.data
-	 * @return {jqXHR} return.jqxhr
+	 * @return {jQuery.jqXHR} return.jqxhr
 	 * @return {jQuery.Promise} return.return
 	 */
 	function _genModerateHandler( action, successCallback ) {
@@ -355,7 +359,7 @@
 			flowBoard.emit( 'refreshTopic', workflowId, result );
 		} ).fail( function ( code, result ) {
 			var errorMsg = flowBoard.constructor.static.getApiErrorMessage( code, result );
-			errorMsg = mw.msg( 'flow-error-fetch-after-open-lock', errorMsg );
+			errorMsg = mw.msg( 'flow-error-external', errorMsg );
 
 			flowBoard.emitWithReturn( 'removeError', $target );
 			flowBoard.emitWithReturn( 'showError', $target, errorMsg );
@@ -369,4 +373,4 @@
 
 	// Mixin to FlowBoardComponent
 	mw.flow.mixinComponent( 'board', FlowBoardComponentApiEventsMixin );
-}( jQuery, mediaWiki ) );
+}() );

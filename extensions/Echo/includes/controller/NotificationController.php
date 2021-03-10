@@ -1,5 +1,9 @@
 <?php
 
+use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionStore;
+
 /**
  * This class represents the controller for notifications
  */
@@ -10,28 +14,42 @@ class EchoNotificationController {
 	 *
 	 * @var int $maxRecipientCacheSize
 	 */
-	static protected $maxRecipientCacheSize = 200;
+	protected static $maxRecipientCacheSize = 200;
+
+	/**
+	 * Max number of users for which we in-process cache titles.
+	 *
+	 * @var int
+	 */
+	protected static $maxUsersTitleCacheSize = 200;
 
 	/**
 	 * Echo event agent per user blacklist
 	 *
 	 * @var MapCacheLRU
 	 */
-	static protected $blacklistByUser;
+	protected static $blacklistByUser;
+
+	/**
+	 * Echo event agent per page linked event title mute list.
+	 *
+	 * @var MapCacheLRU
+	 */
+	protected static $mutedPageLinkedTitlesCache;
 
 	/**
 	 * Echo event agent per wiki blacklist
 	 *
 	 * @var EchoContainmentList|null
 	 */
-	static protected $wikiBlacklist;
+	protected static $wikiBlacklist;
 
 	/**
 	 * Echo event agent per user whitelist, this overwrites $blacklistByUser
 	 *
 	 * @var MapCacheLRU
 	 */
-	static protected $whitelistByUser;
+	protected static $whitelistByUser;
 
 	/**
 	 * Returns the count passed in, or MWEchoNotifUser::MAX_BADGE_COUNT + 1,
@@ -77,8 +95,7 @@ class EchoNotificationController {
 			// defer job insertion till end of request when all primary db transactions
 			// have been committed
 			DeferredUpdates::addCallableUpdate( function () use ( $event ) {
-				// can't use self::, php 5.3 doesn't inherit class scope
-				EchoNotificationController::enqueueEvent( $event );
+				self::enqueueEvent( $event );
 			} );
 
 			return;
@@ -99,15 +116,11 @@ class EchoNotificationController {
 			$userNotifyTypes = $notifyTypes;
 			// Respect the enotifminoredits preference
 			// @todo should this be checked somewhere else?
-			if ( !$user->getOption( 'enotifminoredits' ) ) {
-				$extra = $event->getExtra();
-				if ( !empty( $extra['revid'] ) ) {
-					$rev = Revision::newFromID( $extra['revid'], Revision::READ_LATEST );
-
-					if ( $rev->isMinor() ) {
-						$notifyTypes = array_diff( $notifyTypes, [ 'email' ] );
-					}
-				}
+			if (
+				!$user->getOption( 'enotifminoredits' ) &&
+				self::hasMinorRevision( $event )
+			) {
+				$notifyTypes = array_diff( $notifyTypes, [ 'email' ] );
 			}
 			Hooks::run( 'EchoGetNotificationTypes', [ $user, $event, &$userNotifyTypes ] );
 
@@ -129,6 +142,35 @@ class EchoNotificationController {
 		if ( $userIds ) {
 			self::enqueueDeleteJob( $userIds, $event );
 		}
+	}
+
+	/**
+	 * Check if an event is associated with a minor revision.
+	 *
+	 * @param EchoEvent $event
+	 * @return bool
+	 */
+	private static function hasMinorRevision( EchoEvent $event ) {
+		$revId = $event->getExtraParam( 'revid' );
+		if ( !$revId ) {
+			return false;
+		}
+
+		$revisionStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$rev = $revisionStore->getRevisionById( $revId, RevisionStore::READ_LATEST );
+		if ( !$rev ) {
+			$logger = LoggerFactory::getInstance( 'Echo' );
+			$logger->debug(
+				'Notifying for event {eventId}. Revision \'{revId}\' not found.',
+				[
+					'eventId' => $event->getId(),
+					'revId' => $revId,
+				]
+			);
+			return false;
+		}
+
+		return $rev->isMinor();
 	}
 
 	/**
@@ -160,30 +202,13 @@ class EchoNotificationController {
 	 *  this event type
 	 */
 	public static function getEventNotifyTypes( $eventType ) {
-		global $wgDefaultNotifyTypeAvailability,
-			$wgEchoNotifications;
-
 		$attributeManager = EchoAttributeManager::newFromGlobalVars();
 
 		$category = $attributeManager->getNotificationCategory( $eventType );
 
-		// If the category is displayed in preferences, we should go by that, rather
-		// than overrides that are inconsistent with what the user saw in preferences.
-		$isTypeSpecificConsidered = !$attributeManager->isCategoryDisplayedInPreferences(
-			$category
-		);
-
-		$notifyTypes = $wgDefaultNotifyTypeAvailability;
-
-		if ( $isTypeSpecificConsidered && isset( $wgEchoNotifications[$eventType]['notify-type-availability'] ) ) {
-			$notifyTypes = array_merge(
-				$notifyTypes,
-				$wgEchoNotifications[$eventType]['notify-type-availability']
-			);
-		}
-
-		// Category settings for availability are considered in EchoNotifier
-		return array_keys( array_filter( $notifyTypes ) );
+		return array_keys( array_filter(
+			$attributeManager->getNotifyTypeAvailabilityForCategory( $category )
+		) );
 	}
 
 	/**
@@ -195,9 +220,7 @@ class EchoNotificationController {
 		$job = new EchoNotificationJob(
 			$event->getTitle() ?: Title::newMainPage(),
 			[
-				'event' => $event,
-				'masterPos' => MWEchoDbFactory::newFromDefault()
-					->getMasterPosition(),
+				'eventId' => $event->getId(),
 			]
 		);
 		JobQueueGroup::singleton()->push( $job );
@@ -214,8 +237,6 @@ class EchoNotificationController {
 	public static function isBlacklistedByUser( EchoEvent $event, User $user ) {
 		global $wgEchoAgentBlacklist, $wgEchoPerUserBlacklist;
 
-		$clusterCache = ObjectCache::getLocalClusterInstance();
-
 		if ( !$event->getAgent() ) {
 			return false;
 		}
@@ -226,7 +247,7 @@ class EchoNotificationController {
 		}
 
 		// Ensure we have a blacklist for the user
-		if ( !self::$blacklistByUser->has( $user->getId() ) ) {
+		if ( !self::$blacklistByUser->has( (string)$user->getId() ) ) {
 			$blacklist = new EchoContainmentSet( $user );
 
 			// Add the config setting
@@ -244,24 +265,50 @@ class EchoNotificationController {
 			}
 
 			// Add user's blacklist to dictionary if user wasn't already there
-			self::$blacklistByUser->set( $user->getId(), $blacklist );
+			self::$blacklistByUser->set( (string)$user->getId(), $blacklist );
 		} else {
 			// Just get the user's blacklist if it's already there
-			$blacklist = self::$blacklistByUser->get( $user->getId() );
+			$blacklist = self::$blacklistByUser->get( (string)$user->getId() );
 		}
-		return $blacklist->contains( $event->getAgent()->getName() );
+		return $blacklist->contains( $event->getAgent()->getName() ) ||
+			( $wgEchoPerUserBlacklist &&
+				$event->getType() === 'page-linked' &&
+				self::isPageLinkedTitleMutedByUser( $event->getTitle(), $user ) );
+	}
+
+	/**
+	 * Check if a title is in the user's page-linked event blacklist.
+	 *
+	 * @param Title $title
+	 * @param User $user
+	 * @return bool
+	 */
+	public static function isPageLinkedTitleMutedByUser( Title $title, User $user ) {
+		if ( self::$mutedPageLinkedTitlesCache === null ) {
+			self::$mutedPageLinkedTitlesCache = new MapCacheLRU( self::$maxUsersTitleCacheSize );
+		}
+		if ( !self::$mutedPageLinkedTitlesCache->has( (string)$user->getId() ) ) {
+			$pageLinkedTitleMutedList = new EchoContainmentSet( $user );
+			$pageLinkedTitleMutedList->addTitleIDsFromUserOption(
+				'echo-notifications-page-linked-title-muted-list'
+			);
+			self::$mutedPageLinkedTitlesCache->set( (string)$user->getId(), $pageLinkedTitleMutedList );
+		} else {
+			$pageLinkedTitleMutedList = self::$mutedPageLinkedTitlesCache->get( (string)$user->getId() );
+		}
+		return $pageLinkedTitleMutedList->contains( (string)$title->getArticleID() );
 	}
 
 	/**
 	 * @return EchoContainmentList|null
 	 */
 	protected static function getWikiBlacklist() {
-		$clusterCache = ObjectCache::getLocalClusterInstance();
 		global $wgEchoOnWikiBlacklist;
 		if ( !$wgEchoOnWikiBlacklist ) {
 			return null;
 		}
 		if ( self::$wikiBlacklist === null ) {
+			$clusterCache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 			self::$wikiBlacklist = new EchoCachedList(
 				$clusterCache,
 				$clusterCache->makeKey( "echo_on_wiki_blacklist" ),
@@ -280,14 +327,14 @@ class EchoNotificationController {
 	 * @return bool True when the event agent is in the user whitelist
 	 */
 	public static function isWhitelistedByUser( EchoEvent $event, User $user ) {
-		$clusterCache = ObjectCache::getLocalClusterInstance();
+		$clusterCache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		global $wgEchoPerUserWhitelistFormat;
 
 		if ( $wgEchoPerUserWhitelistFormat === null || !$event->getAgent() ) {
 			return false;
 		}
 
-		$userId = $user->getID();
+		$userId = $user->getId();
 		if ( $userId === 0 ) {
 			return false; // anonymous user
 		}
@@ -298,9 +345,9 @@ class EchoNotificationController {
 		}
 
 		// Ensure we have a whitelist for the user
-		if ( !self::$whitelistByUser->has( $userId ) ) {
+		if ( !self::$whitelistByUser->has( (string)$userId ) ) {
 			$whitelist = new EchoContainmentSet( $user );
-			self::$whitelistByUser->set( $userId, $whitelist );
+			self::$whitelistByUser->set( (string)$userId, $whitelist );
 			$whitelist->addOnWiki(
 				NS_USER,
 				sprintf( $wgEchoPerUserWhitelistFormat, $user->getName() ),
@@ -309,7 +356,7 @@ class EchoNotificationController {
 			);
 		} else {
 			// Just get the user's whitelist
-			$whitelist = self::$whitelistByUser->get( $userId );
+			$whitelist = self::$whitelistByUser->get( (string)$userId );
 		}
 		return $whitelist->contains( $event->getAgent()->getName() );
 	}
@@ -334,7 +381,7 @@ class EchoNotificationController {
 			throw new MWException( "Cannot notify anonymous user: {$user->getName()}" );
 		}
 
-		call_user_func_array( $wgEchoNotifiers[$type], [ $user, $event ] );
+		( $wgEchoNotifiers[$type] )( $user, $event );
 	}
 
 	/**
@@ -360,7 +407,7 @@ class EchoNotificationController {
 				$options = [ $event ];
 			}
 			if ( is_callable( $callable ) ) {
-				$result[] = call_user_func_array( $callable, $options );
+				$result[] = $callable( ...$options );
 			} else {
 				wfDebugLog( __CLASS__, __FUNCTION__ . ": Invalid $locator returned for $type" );
 			}
@@ -385,6 +432,7 @@ class EchoNotificationController {
 		// @deprecated
 		$users = [];
 		Hooks::run( 'EchoGetDefaultNotifiedUsers', [ $event, &$users ] );
+		// @phan-suppress-next-line PhanImpossibleCondition May be set by hook
 		if ( $users ) {
 			$notify->add( $users );
 		}
@@ -406,9 +454,10 @@ class EchoNotificationController {
 
 		// Filter non-User, anon and duplicate users
 		$seen = [];
-		$notify->addFilter( function ( $user ) use ( &$seen ) {
+		$fname = __METHOD__;
+		$notify->addFilter( function ( $user ) use ( &$seen, $fname ) {
 			if ( !$user instanceof User ) {
-				wfDebugLog( __METHOD__, 'Expected all User instances, received:' .
+				wfDebugLog( $fname, 'Expected all User instances, received:' .
 					( is_object( $user ) ? get_class( $user ) : gettype( $user ) )
 				);
 
@@ -422,9 +471,8 @@ class EchoNotificationController {
 			return true;
 		} );
 
-		// Don't notify the person who initiated the event unless the event extra says to do so
-		$extra = $event->getExtra();
-		if ( ( !isset( $extra['notifyAgent'] ) || !$extra['notifyAgent'] ) && $event->getAgent() ) {
+		// Don't notify the person who initiated the event unless the event allows it
+		if ( !$event->canNotifyAgent() && $event->getAgent() ) {
 			$agentId = $event->getAgent()->getId();
 			$notify->addFilter( function ( $user ) use ( $agentId ) {
 				return $user->getId() != $agentId;

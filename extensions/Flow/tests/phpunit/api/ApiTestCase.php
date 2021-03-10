@@ -2,9 +2,9 @@
 
 namespace Flow\Tests\Api;
 
-use ApiTestCase as BaseApiTestCase;
 use Flow\Container;
-use FlowHooks;
+use Flow\Hooks;
+use HashConfig;
 use MediaWiki\MediaWikiServices;
 use User;
 
@@ -12,7 +12,7 @@ use User;
  * @group Flow
  * @group medium
  */
-abstract class ApiTestCase extends BaseApiTestCase {
+abstract class ApiTestCase extends \ApiTestCase {
 	protected $tablesUsed = [
 		'flow_ext_ref',
 		'flow_revision',
@@ -27,13 +27,21 @@ abstract class ApiTestCase extends BaseApiTestCase {
 		'text',
 	];
 
-	protected function setUp() {
-		$this->setMwGlobals( 'wgNamespaceContentModels', [
+	protected function setUp() : void {
+		parent::setUp();
+
+		$namespaceContentModels = [
 			NS_TALK => CONTENT_MODEL_FLOW_BOARD,
 			NS_TOPIC => CONTENT_MODEL_FLOW_BOARD,
-		] );
+		];
 
-		parent::setUp();
+		// TODO: remove this once core no longer accesses wgNamespaceContentModels directly.
+		$this->setMwGlobals( 'wgNamespaceContentModels', $namespaceContentModels );
+
+		$this->overrideMwServices( new HashConfig( [
+			'NamespaceContentModels' => $namespaceContentModels
+		] ) );
+
 		$this->setCurrentUser( self::$users['sysop']->getUser() );
 	}
 
@@ -61,7 +69,7 @@ abstract class ApiTestCase extends BaseApiTestCase {
 		User $user = null, $tokenType = null
 	) {
 		// reset flow state before each request
-		FlowHooks::resetFlowExtension();
+		Hooks::resetFlowExtension();
 		return parent::doApiRequest( $params, $session, $appendModule, $user );
 	}
 
@@ -101,7 +109,7 @@ abstract class ApiTestCase extends BaseApiTestCase {
 		$container = Container::getContainer();
 		$wanCache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 
-		$mock = $this->getMockBuilder( 'Flow\Data\FlowObjectCache' )
+		$mock = $this->getMockBuilder( \Flow\Data\FlowObjectCache::class )
 			->setConstructorArgs( [ $wanCache, $container['db.factory'], $wgFlowCacheTime ] )
 			->enableProxyingToOriginalMethods()
 			->getMock();

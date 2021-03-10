@@ -5,10 +5,10 @@ namespace Flow\Repository;
 use Flow\Data\FlowObjectCache;
 use Flow\Data\ObjectManager;
 use Flow\DbFactory;
-use Flow\Model\UUID;
 use Flow\Exception\DataModelException;
-use Wikimedia\Rdbms\DBQueryError;
+use Flow\Model\UUID;
 use Wikimedia\Rdbms\DatabaseMysqlBase;
+use Wikimedia\Rdbms\DBQueryError;
 
 /*
  *
@@ -91,7 +91,7 @@ class TreeRepository {
 		$this->deleteSubtreeCache( $descendant, $path );
 
 		$dbw = $this->dbFactory->getDB( DB_MASTER );
-		$res = $dbw->insert(
+		$dbw->insert(
 			$this->tableName,
 			[
 				'tree_descendant_id' => $descendant->getBinary(),
@@ -101,7 +101,8 @@ class TreeRepository {
 			__METHOD__
 		);
 
-		if ( $res && $ancestor !== null ) {
+		$ok = true;
+		if ( $ancestor !== null ) {
 			try {
 				if ( defined( 'MW_PHPUNIT_TEST' ) && $dbw instanceof DatabaseMysqlBase ) {
 					/*
@@ -113,7 +114,7 @@ class TreeRepository {
 					throw new DBQueryError( $dbw, 'Prevented execution of known bad query', 1137, '', __METHOD__ );
 				}
 
-				$res = $dbw->insertSelect(
+				$dbw->insertSelect(
 					$this->tableName,
 					$this->tableName,
 					[
@@ -127,8 +128,6 @@ class TreeRepository {
 					__METHOD__
 				);
 			} catch ( DBQueryError $e ) {
-				$res = false;
-
 				/*
 				 * insertSelect won't work on temporary tables (as used for MW
 				 * unit tests), because it refers to the same table twice, in
@@ -141,8 +140,6 @@ class TreeRepository {
 				 * @see http://dba.stackexchange.com/questions/45270/mysql-error-1137-hy000-at-line-9-cant-reopen-table-temp-table
 				 */
 				if ( $e->errno === 1137 ) {
-					$res = true;
-
 					$rows = $dbw->select(
 						$this->tableName,
 						[ 'tree_depth', 'tree_ancestor_id' ],
@@ -152,7 +149,7 @@ class TreeRepository {
 
 					if ( $rows ) {
 						foreach ( $rows as $row ) {
-							$res &= $dbw->insert(
+							$dbw->insert(
 								$this->tableName,
 								[
 									'tree_descendant_id' => $descendant->getBinary(),
@@ -163,11 +160,13 @@ class TreeRepository {
 							);
 						}
 					}
+				} else {
+					$ok = false;
 				}
 			}
 		}
 
-		if ( !$res ) {
+		if ( !$ok ) {
 			throw new DataModelException( 'Failed inserting new tree node', 'process-data' );
 		}
 
@@ -212,7 +211,7 @@ class TreeRepository {
 
 	public function findParent( UUID $descendant ) {
 		$map = $this->fetchParentMap( [ $descendant ] );
-		return isset( $map[$descendant->getAlphadecimal()] ) ? $map[$descendant->getAlphadecimal()] : null;
+		return $map[$descendant->getAlphadecimal()] ?? null;
 	}
 
 	/**
@@ -294,7 +293,7 @@ class TreeRepository {
 	public function findRootPath( UUID $descendant ) {
 		$paths = $this->findRootPaths( [ $descendant ] );
 
-		return isset( $paths[$descendant->getAlphadecimal()] ) ? $paths[$descendant->getAlphadecimal()] : null;
+		return $paths[$descendant->getAlphadecimal()] ?? null;
 	}
 
 	/**
@@ -328,7 +327,7 @@ class TreeRepository {
 		// of caching our own value
 		$path = $this->findRootPath( $descendant );
 		if ( !$path ) {
-			throw new DataModelException( $descendant->getAlphadecimal().' has no root post. Probably is a root post.', 'process-data' );
+			throw new DataModelException( $descendant->getAlphadecimal() . ' has no root post. Probably is a root post.', 'process-data' );
 		}
 
 		$root = array_shift( $path );
@@ -355,11 +354,14 @@ class TreeRepository {
 		}
 		$nodes = $this->fetchSubtreeNodeList( $roots );
 		if ( !$nodes ) {
-			throw new DataModelException( 'subtree node list should have at least returned root: ' . $root, 'process-data' );
+			throw new DataModelException(
+				'subtree node list should have at least returned root: ' . implode( ', ', $roots ),
+				'process-data'
+			);
 		} elseif ( count( $nodes ) === 1 ) {
 			$parentMap = $this->fetchParentMap( reset( $nodes ) );
 		} else {
-			$parentMap = $this->fetchParentMap( call_user_func_array( 'array_merge', $nodes ) );
+			$parentMap = $this->fetchParentMap( array_merge( ...array_values( $nodes ) ) );
 		}
 		$identityMap = [];
 		foreach ( $parentMap as $child => $parent ) {
@@ -378,8 +380,8 @@ class TreeRepository {
 		return $identityMap;
 	}
 
-	public function fetchSubtree( UUID $root, $maxDepth = null ) {
-		$identityMap = $this->fetchSubtreeIdentityMap( $root, $maxDepth );
+	public function fetchSubtree( UUID $root ) {
+		$identityMap = $this->fetchSubtreeIdentityMap( $root );
 		if ( !isset( $identityMap[$root->getAlphadecimal()] ) ) {
 			throw new DataModelException( 'No root exists in the identityMap', 'process-data' );
 		}
@@ -395,7 +397,7 @@ class TreeRepository {
 	 * Return the id's of all nodes which are a descendant of provided roots
 	 *
 	 * @param UUID[] $roots
-	 * @return array|bool map from root id to its descendant list or false
+	 * @return array map from root id to its descendant list
 	 * @throws \Flow\Exception\InvalidInputException
 	 */
 	public function fetchSubtreeNodeList( array $roots ) {
@@ -405,10 +407,6 @@ class TreeRepository {
 			$roots,
 			[ $this, 'fetchSubtreeNodeListFromDb' ]
 		);
-		if ( $res === false ) {
-			wfDebugLog( 'Flow', __METHOD__ . ': Failure fetching node list from cache' );
-			return false;
-		}
 		// $idx is a binary UUID
 		$retval = [];
 		foreach ( $res as $idx => $val ) {
@@ -461,7 +459,7 @@ class TreeRepository {
 	/**
 	 * @param UUID[] $nodes
 	 * @return UUID[]
-	 * @throws \Flow\Exception\DataModelException
+	 * @throws DataModelException
 	 */
 	public function fetchParentMapFromDb( array $nodes ) {
 		// Find out who the parent is for those nodes

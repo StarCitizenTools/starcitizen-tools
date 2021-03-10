@@ -1,6 +1,7 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
-	var NS_FILE = mw.config.get( 'wgNamespaceIds' ).file;
+	var NS_FILE = mw.config.get( 'wgNamespaceIds' ).file,
+		byteLength = require( 'mediawiki.String' ).byteLength;
 
 	/**
 	 * A title field in UploadWizard's "Details" step form.
@@ -14,11 +15,12 @@
 		config = config || {};
 		uw.TitleDetailsWidget.parent.call( this );
 
+		this.config = config;
 		this.extension = config.extension;
 		// We wouldn't want or use any of mw.widgets.TitleInputWidget functionality.
 		this.titleInput = new OO.ui.TextInputWidget( {
 			classes: [ 'mwe-title', 'mwe-upwiz-titleDetailsWidget-title' ],
-			maxLength: 250
+			maxLength: config.maxLength
 		} );
 
 		// Aggregate 'change' event (with delay)
@@ -88,17 +90,29 @@
 	};
 
 	/**
-	 * @inheritdoc
+	 * @return {jQuery.Promise}
 	 */
 	uw.TitleDetailsWidget.prototype.getErrors = function () {
 		var
 			errors = [],
 			value = this.titleInput.getValue().trim(),
 			processDestinationCheck = this.processDestinationCheck,
-			title = this.getTitle();
+			title = this.getTitle(),
+			// title length is dependent on DB column size and is bytes rather than characters
+			length = byteLength( value );
 
 		if ( value === '' ) {
 			errors.push( mw.message( 'mwe-upwiz-error-blank' ) );
+			return $.Deferred().resolve( errors ).promise();
+		}
+
+		if ( this.config.minLength && length < this.config.minLength ) {
+			errors.push( mw.message( 'mwe-upwiz-error-title-too-short', this.config.minLength ) );
+			return $.Deferred().resolve( errors ).promise();
+		}
+
+		if ( this.config.maxLength && length > this.config.maxLength ) {
+			errors.push( mw.message( 'mwe-upwiz-error-title-too-long', this.config.maxLength ) );
 			return $.Deferred().resolve( errors ).promise();
 		}
 
@@ -228,4 +242,4 @@
 		this.titleInput.setValue( serialized.title );
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

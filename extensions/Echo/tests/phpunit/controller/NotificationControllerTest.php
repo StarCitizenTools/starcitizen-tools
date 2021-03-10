@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @covers EchoNotificationController
+ * @covers \EchoNotificationController
  */
 class NotificationControllerTest extends MediaWikiTestCase {
 
@@ -54,7 +54,7 @@ class NotificationControllerTest extends MediaWikiTestCase {
 				[ [ 123 ] ],
 				// event user locator config
 				[
-					[ 'EchoUserLocator::locateFromEventExtra', [ 'other-user' ] ],
+					[ [ EchoUserLocator::class, 'locateFromEventExtra' ], [ 'other-user' ] ],
 				],
 				// additional setup
 				function ( $test, $event ) {
@@ -79,7 +79,7 @@ class NotificationControllerTest extends MediaWikiTestCase {
 			],
 		] );
 
-		$event = $this->getMockBuilder( 'EchoEvent' )
+		$event = $this->getMockBuilder( EchoEvent::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$event->expects( $this->any() )
@@ -97,7 +97,7 @@ class NotificationControllerTest extends MediaWikiTestCase {
 	public function testEvaluateUserLocatorPassesParameters() {
 		$test = $this;
 		$callback = function ( $event, $firstOption, $secondOption ) use ( $test ) {
-			$test->assertInstanceOf( 'EchoEvent', $event );
+			$test->assertInstanceOf( EchoEvent::class, $event );
 			$test->assertEquals( 'first', $firstOption );
 			$test->assertEquals( 'second', $secondOption );
 
@@ -157,7 +157,7 @@ class NotificationControllerTest extends MediaWikiTestCase {
 			],
 		] );
 
-		$event = $this->getMockBuilder( 'EchoEvent' )
+		$event = $this->getMockBuilder( EchoEvent::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$event->expects( $this->any() )
@@ -173,7 +173,7 @@ class NotificationControllerTest extends MediaWikiTestCase {
 	}
 
 	public function testDoesNotDeliverDisabledEvent() {
-		$event = $this->getMockBuilder( 'EchoEvent' )
+		$event = $this->getMockBuilder( EchoEvent::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$event->expects( $this->any() )
@@ -197,44 +197,42 @@ class NotificationControllerTest extends MediaWikiTestCase {
 				'bar',
 				// default notification types configuration
 				[ 'web' => true ],
-				// type-specific
+				// per-category notification type availability
+				[
+					'f' => [ 'email' => true ]
+				],
+				// event types
 				[
 					'foo' => [
-						'notify-type-availability' => [ 'email' => true ],
+						'category' => 'f',
 					],
+					'bar' => [
+						'category' => 'b',
+					]
 				],
 			],
 
 			[
-				'Overrides `all` configuration with event type configuration',
+				'Overrides `all` configuration with event category configuration',
 				// expected result
 				[ 'web' ],
 				// event type
 				'foo',
 				// default notification types configuration
 				[ 'web' => true, 'email' => true ],
-				// type-specific
+				// per-category notification type availability
+				[
+					'f' => [ 'email' => false ],
+					'b' => [ 'sms' => true ],
+				],
+				// event types
 				[
 					'foo' => [
-						'notify-type-availability' => [ 'email' => false ],
+						'category' => 'f',
 					],
 					'bar' => [
-						'notify-type-availability' => [ 'sms' => true ],
+						'category' => 'b',
 					],
-				],
-			],
-
-			[
-				'Uses all configuration when notify-type-availability not set at all',
-				// expected result
-				[ 'web', 'email' ],
-				// event type
-				'baz',
-				// default notification types configuration
-				[ 'web' => true, 'email' => true ],
-				// type-specific
-				[
-					'baz' => [],
 				],
 			]
 		];
@@ -243,10 +241,22 @@ class NotificationControllerTest extends MediaWikiTestCase {
 	/**
 	 * @dataProvider getEventNotifyTypesProvider
 	 */
-	public function testGetEventNotifyTypes( $message, $expect, $type, array $defaultNotifyTypeAvailability, array $notifications ) {
+	public function testGetEventNotifyTypes(
+		$message,
+		$expect,
+		$type,
+		array $defaultNotifyTypeAvailability,
+		array $notifyTypeAvailabilityByCategory,
+		array $notifications
+	) {
 		$this->setMwGlobals( [
 			'wgDefaultNotifyTypeAvailability' => $defaultNotifyTypeAvailability,
+			'wgNotifyTypeAvailabilityByCategory' => $notifyTypeAvailabilityByCategory,
 			'wgEchoNotifications' => $notifications,
+			'wgEchoNotificationCategories' => array_fill_keys(
+				array_keys( $notifyTypeAvailabilityByCategory ),
+				[ 'priority' => 4 ]
+			),
 		] );
 		$result = EchoNotificationController::getEventNotifyTypes( $type );
 		$this->assertEquals( $expect, $result, $message );

@@ -1,6 +1,8 @@
 <?php
 
-class ApiEchoUnreadNotificationPages extends ApiCrossWikiBase {
+class ApiEchoUnreadNotificationPages extends ApiQueryBase {
+	use ApiCrossWiki;
+
 	/**
 	 * @var bool
 	 */
@@ -28,7 +30,7 @@ class ApiEchoUnreadNotificationPages extends ApiCrossWikiBase {
 		$params = $this->extractRequestParams();
 
 		$result = [];
-		if ( in_array( wfWikiId(), $this->getRequestedWikis() ) ) {
+		if ( in_array( wfWikiID(), $this->getRequestedWikis() ) ) {
 			$result[wfWikiID()] = $this->getFromLocal( $params['limit'], $params['grouppages'] );
 		}
 
@@ -36,7 +38,7 @@ class ApiEchoUnreadNotificationPages extends ApiCrossWikiBase {
 			$result += $this->getUnreadNotificationPagesFromForeign();
 		}
 
-		$apis = $this->foreignNotifications->getApiEndpoints( $this->getRequestedWikis() );
+		$apis = $this->getForeignNotifications()->getApiEndpoints( $this->getRequestedWikis() );
 		foreach ( $result as $wiki => $data ) {
 			$result[$wiki]['source'] = $apis[$wiki];
 			$result[$wiki]['pages'] = $data['pages'] ?: [];
@@ -49,6 +51,7 @@ class ApiEchoUnreadNotificationPages extends ApiCrossWikiBase {
 	 * @param int $limit
 	 * @param bool $groupPages
 	 * @return array
+	 * @phan-return array{pages:array[],totalCount:int}
 	 */
 	protected function getFromLocal( $limit, $groupPages ) {
 		$attributeManager = EchoAttributeManager::newFromGlobalVars();
@@ -75,19 +78,24 @@ class ApiEchoUnreadNotificationPages extends ApiCrossWikiBase {
 		);
 
 		if ( $rows === false ) {
-			return [];
+			return [
+				'pages' => [],
+				'totalCount' => 0,
+			];
 		}
 
 		$nullCount = 0;
 		$pageCounts = [];
 		foreach ( $rows as $row ) {
 			if ( $row->event_page_id !== null ) {
+				// @phan-suppress-next-line PhanTypeMismatchDimAssignment
 				$pageCounts[$row->event_page_id] = intval( $row->count );
 			} else {
 				$nullCount = intval( $row->count );
 			}
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchArgument
 		$titles = Title::newFromIDs( array_keys( $pageCounts ) );
 
 		$groupCounts = [];
@@ -99,7 +107,8 @@ class ApiEchoUnreadNotificationPages extends ApiCrossWikiBase {
 				$pageName = $title->getPrefixedText();
 			}
 
-			$count = $pageCounts[$title->getArticleId()];
+			// @phan-suppress-next-line PhanTypeMismatchDimFetch
+			$count = $pageCounts[$title->getArticleID()];
 			if ( isset( $groupCounts[$pageName] ) ) {
 				$groupCounts[$pageName] += $count;
 			} else {
@@ -160,7 +169,7 @@ class ApiEchoUnreadNotificationPages extends ApiCrossWikiBase {
 	}
 
 	/**
-	 * @return array
+	 * @return array[]
 	 */
 	protected function getUnreadNotificationPagesFromForeign() {
 		$result = [];
@@ -172,12 +181,12 @@ class ApiEchoUnreadNotificationPages extends ApiCrossWikiBase {
 	}
 
 	/**
-	 * @return array
+	 * @return array[]
 	 */
 	public function getAllowedParams() {
 		global $wgEchoMaxUpdateCount;
 
-		return parent::getAllowedParams() + [
+		return $this->getCrossWikiParams() + [
 			'grouppages' => [
 				ApiBase::PARAM_TYPE => 'boolean',
 				ApiBase::PARAM_DFLT => false,
@@ -199,7 +208,7 @@ class ApiEchoUnreadNotificationPages extends ApiCrossWikiBase {
 
 	/**
 	 * @see ApiBase::getExamplesMessages()
-	 * @return array
+	 * @return string[]
 	 */
 	protected function getExamplesMessages() {
 		return [
@@ -208,6 +217,6 @@ class ApiEchoUnreadNotificationPages extends ApiCrossWikiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/Echo_(Notifications)/API';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/Echo_(Notifications)/API';
 	}
 }

@@ -4,13 +4,13 @@ namespace Flow\Log;
 
 use Flow\Collection\PostCollection;
 use Flow\Container;
+use Flow\Conversion\Utils;
 use Flow\Data\ManagerGroup;
 use Flow\Model\UUID;
-use Flow\Conversion\Utils;
 use Flow\Repository\TreeRepository;
+use Flow\RevisionActionPermissions;
 use Flow\Templating;
 use Flow\UrlGenerator;
-
 use LogEntry;
 use LogFormatter;
 use LogPage;
@@ -132,7 +132,7 @@ class ActionFormatter extends LogFormatter {
 		if ( $isTopicTitleVisible ) {
 			$message->params( [
 				$title, // Title of topic
-				$title->getFullUrl(), // Full URL of topic, with highlighted post if applicable
+				$title->getFullURL(), // Full URL of topic, with highlighted post if applicable
 			] );
 
 			$message->plaintextParams( $this->templating->getContent( $rootLastRevision, 'topic-title-plaintext' ) );
@@ -145,7 +145,7 @@ class ActionFormatter extends LogFormatter {
 		return \Html::rawElement(
 			'span',
 			[ 'class' => 'plainlinks' ],
-			$message
+			$message->parse()
 		);
 	}
 
@@ -173,7 +173,8 @@ class ActionFormatter extends LogFormatter {
 		try {
 			if ( !isset( $params['topicId'] ) ) {
 				// failed finding the expected data in storage
-				wfWarn( __METHOD__ . ': Failed to locate topicId in log_params for: ' . serialize( $params ) . ' (forgot to run FlowFixLog.php?)' );
+				wfWarn( __METHOD__ . ': Failed to locate topicId in log_params for: ' . serialize( $params ) .
+					' (forgot to run FlowFixLog.php?)' );
 				return false;
 			}
 
@@ -185,7 +186,8 @@ class ActionFormatter extends LogFormatter {
 			return $collection;
 		} catch ( \Exception $e ) {
 			// failed finding the expected data in storage
-			wfWarn( __METHOD__ . ': Failed to locate root for: ' . serialize( $params ) . ' (potentially storage issue)' );
+			wfWarn( __METHOD__ . ': Failed to locate root for: ' . serialize( $params ) .
+				' (potentially storage issue)' );
 			return false;
 		}
 	}

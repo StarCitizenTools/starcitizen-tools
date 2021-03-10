@@ -11,6 +11,9 @@ class SpecialNotifications extends SpecialPage {
 		parent::__construct( 'Notifications' );
 	}
 
+	/**
+	 * @param string|null $par
+	 */
 	public function execute( $par ) {
 		$this->setHeaders();
 
@@ -20,7 +23,6 @@ class SpecialNotifications extends SpecialPage {
 		$this->addHelpLink( 'Help:Notifications/Special:Notifications' );
 
 		$out->addJsConfigVars( 'wgNotificationsSpecialPageLinks', [
-			'help' => '//www.mediawiki.org/wiki/Special:MyLanguage/Help:Notifications/Special:Notifications',
 			'preferences' => SpecialPage::getTitleFor( 'Preferences' )->getLinkURL() . '#mw-prefsection-echo',
 		] );
 
@@ -37,7 +39,7 @@ class SpecialNotifications extends SpecialPage {
 
 		$pager = new NotificationPager( $this->getContext() );
 		$pager->setOffset( $this->getRequest()->getVal( 'offset' ) );
-		$pager->setLimit( $this->getRequest()->getVal( 'limit', self::DISPLAY_NUM ) );
+		$pager->setLimit( $this->getRequest()->getInt( 'limit', self::DISPLAY_NUM ) );
 		$notifications = $pager->getNotifications();
 
 		$noJSDiv = new OOUI\Tag();
@@ -120,6 +122,7 @@ class SpecialNotifications extends SpecialPage {
 		// Ensure there are some unread notifications
 		if ( $anyUnread ) {
 			$markReadSpecialPage = new SpecialNotificationsMarkRead();
+			$markReadSpecialPage->setContext( $this->getContext() );
 
 			$markAllAsReadText = $this->msg( 'echo-mark-all-as-read' )->text();
 			$markAllAsReadLabelIcon = new EchoOOUI\LabelIconWidget( [
@@ -147,8 +150,8 @@ class SpecialNotifications extends SpecialPage {
 		$notices->addClasses( [ 'mw-echo-special-notifications' ] );
 
 		$markReadSpecialPage = new SpecialNotificationsMarkRead();
+		$markReadSpecialPage->setContext( $this->getContext() );
 		foreach ( $notifArray as $section => $data ) {
-			// Heading
 			$heading = ( new OOUI\Tag( 'li' ) )->addClasses( [ 'mw-echo-date-section' ] );
 
 			$dateTitle = new OOUI\LabelWidget( [
@@ -228,8 +231,8 @@ class SpecialNotifications extends SpecialPage {
 		$out->addModuleStyles( [
 			'ext.echo.styles.notifications',
 			'ext.echo.styles.special',
-			// We already load badgeicons in the BeforePageDisplay hook, but not for minerva
-			'ext.echo.badgeicons'
+			// We already load OOUI icons in the BeforePageDisplay hook, but not for minerva
+			'oojs-ui.styles.icons-alerts'
 		] );
 
 		// Log visit

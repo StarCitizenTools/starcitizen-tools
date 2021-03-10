@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow edit topic summary widget
 	 *
@@ -16,12 +16,13 @@
 		this.topicId = topicId;
 
 		// Parent constructor
-		mw.flow.ui.EditTopicSummaryWidget.parent.call( this, config );
+		mw.flow.ui.EditTopicSummaryWidget.super.call( this, config );
 
 		this.editor = new mw.flow.ui.EditorWidget( $.extend( {
 			saveMsgKey: 'flow-topic-action-update-topic-summary',
 			classes: [ 'flow-ui-editTopicSummaryWidget-editor' ],
-			placeholder: mw.msg( 'flow-edit-summary-placeholder' )
+			placeholder: mw.msg( 'flow-edit-summary-placeholder' ),
+			id: 'edit-summary/' + this.topicId
 		}, config.editor ) );
 		this.editor.toggle( true );
 
@@ -68,6 +69,7 @@
 
 	/**
 	 * Save the content of the reply
+	 *
 	 * @event saveContent
 	 * @param {string} workflow The workflow this reply was saved under
 	 * @param {string} content The content of the reply
@@ -171,9 +173,11 @@
 
 	/**
 	 * Destroy the widget
+	 *
+	 * @return {jQuery.Promise} Promise which resolves when the widget is destroyed
 	 */
 	mw.flow.ui.EditTopicSummaryWidget.prototype.destroy = function () {
-		this.editor.destroy();
+		return this.editor.destroy();
 	};
 
-}( jQuery ) );
+}() );

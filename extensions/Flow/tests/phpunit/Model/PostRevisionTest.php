@@ -6,11 +6,15 @@ use Flow\Model\PostRevision;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
 use Flow\Tests\PostRevisionTestCase;
-use User;
 use Title;
+use User;
 
 /**
+ * @covers \Flow\Model\AbstractRevision
+ * @covers \Flow\Model\PostRevision
+ *
  * @group Flow
+ * @group Database
  */
 class PostRevisionTest extends PostRevisionTestCase {
 	/**
@@ -43,7 +47,7 @@ class PostRevisionTest extends PostRevisionTestCase {
 		$workflow = Workflow::create( 'topic', $title );
 
 		$topic = PostRevision::createTopicPost( $workflow, $user, $content );
-		$this->assertEquals( 0, $topic->getPreviousContentLength() );
+		$this->assertSame( 0, $topic->getPreviousContentLength() );
 		$this->assertEquals( mb_strlen( $content ), $topic->getContentLength() );
 
 		$next = $topic->newNextRevision( $user, $nextContent, 'topic-title-wikitext', 'edit-title', $title );

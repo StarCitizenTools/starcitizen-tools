@@ -5,7 +5,7 @@
  *   'new' 'transporting' 'transported' 'metadata' 'stashed' 'details' 'submitting-details' 'complete' 'error'
  * should fork this into two -- local and remote, e.g. filename
  */
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 	/**
 	 * Constructor for objects representing uploads. The workhorse of this entire extension.
 	 *
@@ -19,7 +19,7 @@
 	 * @class mw.UploadWizardUpload
 	 * @mixins OO.EventEmitter
 	 * @constructor
-	 * @param {Step} controller
+	 * @param {uw.controller.Step} controller
 	 * @param {File} file
 	 */
 	mw.UploadWizardUpload = function MWUploadWizardUpload( controller, file ) {
@@ -34,7 +34,7 @@
 		this.state = 'new';
 		this.imageinfo = {};
 		this.title = undefined;
-		this.thumbnailPromise = null;
+		this.thumbnailPromise = {};
 
 		this.fileKey = undefined;
 
@@ -86,9 +86,7 @@
 	 */
 	mw.UploadWizardUpload.prototype.remove = function () {
 		// remove the div that passed along the trigger
-		var $div = $( this.ui.div );
-		$div.off(); // unbind everything
-		$div.remove();
+		this.ui.$div.remove();
 
 		this.state = 'aborted';
 	};
@@ -105,7 +103,7 @@
 		}
 		this.state = 'transporting';
 		this.transportProgress = fraction;
-		$( this.ui.div ).trigger( 'transportProgressEvent' );
+		this.ui.$div.trigger( 'transportProgressEvent' );
 	};
 
 	/**
@@ -201,7 +199,7 @@
 	 * @return {jQuery.Promise} A promise, resolved when we're done
 	 */
 	mw.UploadWizardUpload.prototype.extractMetadataFromJpegMeta = function () {
-		var binReader,
+		var binReader, jpegmeta,
 			deferred = $.Deferred(),
 			upload = this;
 		if ( this.file && this.file.type === 'image/jpeg' ) {
@@ -228,7 +226,8 @@
 					}
 				}
 				try {
-					meta = mw.libs.jpegmeta( binStr, upload.file.fileName );
+					jpegmeta = require( 'mediawiki.libs.jpegmeta' );
+					meta = jpegmeta( binStr, upload.file.fileName );
 					// eslint-disable-next-line camelcase, no-underscore-dangle
 					meta._binary_data = null;
 				} catch ( e ) {
@@ -313,12 +312,6 @@
 		var key,
 			upload = this;
 
-		function setMetadata( i, pair ) {
-			if ( pair !== undefined ) {
-				upload.imageinfo.metadata[ pair.name.toLowerCase() ] = pair.value;
-			}
-		}
-
 		for ( key in imageinfo ) {
 			// we get metadata as list of key-val pairs; convert to object for easier lookup. Assuming that EXIF fields are unique.
 			if ( key === 'metadata' ) {
@@ -326,7 +319,11 @@
 					this.imageinfo.metadata = {};
 				}
 				if ( imageinfo.metadata && imageinfo.metadata.length ) {
-					$.each( imageinfo.metadata, setMetadata );
+					imageinfo.metadata.forEach( function ( pair ) {
+						if ( pair !== undefined ) {
+							upload.imageinfo.metadata[ pair.name.toLowerCase() ] = pair.value;
+						}
+					} );
 				}
 			} else {
 				this.imageinfo[ key ] = imageinfo[ key ];
@@ -370,7 +367,7 @@
 		}
 
 		if ( width !== undefined || height !== undefined ) {
-			if ( !$.inArray( 'url', props ) ) {
+			if ( props.indexOf( 'url' ) === -1 ) {
 				props.push( 'url' );
 			}
 			if ( width !== undefined ) {
@@ -402,7 +399,8 @@
 
 			if ( data && data.query && data.query.pages ) {
 				found = false;
-				$.each( data.query.pages, function ( pageId, page ) {
+				Object.keys( data.query.pages ).forEach( function ( pageId ) {
+					var page = data.query.pages[ pageId ];
 					if ( page.title && page.title === requestedTitle && page.imageinfo ) {
 						found = true;
 						callback( page.imageinfo );
@@ -435,7 +433,7 @@
 		};
 
 		if ( width !== undefined || height !== undefined ) {
-			if ( !$.inArray( 'url', props ) ) {
+			if ( props.indexOf( 'url' ) === -1 ) {
 				props.push( 'url' );
 			}
 			if ( width !== undefined ) {
@@ -452,7 +450,7 @@
 	/**
 	 * Get the upload handler per browser capabilities
 	 *
-	 * @return {ApiUploadFormDataHandler|ApiUploadPostHandler} upload handler object
+	 * @return {mw.ApiUploadFormDataHandler|mw.ApiUploadPostHandler} upload handler object
 	 */
 	mw.UploadWizardUpload.prototype.getUploadHandler = function () {
 		var constructor; // must be the name of a function in 'mw' namespace
@@ -491,7 +489,7 @@
 				// they are actually there yet. Keep trying to set the source ( which should trigger "error" or "load" event )
 				// on the image. If it loads publish the event with the image. If it errors out too many times, give up and publish
 				// the event with a null.
-				$.each( thumbnails, function ( i, thumb ) {
+				thumbnails.forEach( function ( thumb ) {
 					var timeoutMs, image;
 
 					if ( thumb.thumberror || ( !( thumb.thumburl && thumb.thumbwidth && thumb.thumbheight ) ) ) {
@@ -549,7 +547,7 @@
 	 * Return the orientation of the image in degrees. Relies on metadata that
 	 * may have been extracted at filereader stage, or after the upload when we fetch metadata. Default returns 0.
 	 *
-	 * @return {Integer} orientation in degrees: 0, 90, 180 or 270
+	 * @return {number} orientation in degrees: 0, 90, 180 or 270
 	 */
 	mw.UploadWizardUpload.prototype.getOrientationDegrees = function () {
 		var orientation = 0;
@@ -587,10 +585,11 @@
 	 */
 	mw.UploadWizardUpload.prototype.getScalingFromConstraints = function ( image, constraints ) {
 		var scaling = 1;
-		$.each( [ 'width', 'height' ], function ( i, dim ) {
-			var s;
-			if ( constraints[ dim ] && image[ dim ] > constraints[ dim ] ) {
-				s = constraints[ dim ] / image[ dim ];
+		Object.keys( constraints ).forEach( function ( dim ) {
+			var s,
+				constraint = constraints[ dim ];
+			if ( constraint && image[ dim ] > constraint ) {
+				s = constraint / image[ dim ];
 				if ( s < scaling ) {
 					scaling = s;
 				}
@@ -601,7 +600,7 @@
 
 	/**
 	 * Given an image (already loaded), dimension constraints
-	 * return canvas object scaled & transformedi ( & rotated if metadata indicates it's needed )
+	 * return canvas object scaled & transformed ( & rotated if metadata indicates it's needed )
 	 *
 	 * @private
 	 * @param {HTMLImageElement} image
@@ -609,8 +608,9 @@
 	 * @return {HTMLCanvasElement|null}
 	 */
 	mw.UploadWizardUpload.prototype.getTransformedCanvasElement = function ( image, constraints ) {
-		var angle, scaleConstraints, scaling, width, height,
-			dx, dy, x, y, $canvas, ctx,
+		var angle, scaling, width, height,
+			dimensions, dx, dy, x, y, $canvas, ctx,
+			scaleConstraints = constraints,
 			rotation = 0;
 
 		// if this wiki can rotate images to match their EXIF metadata,
@@ -622,15 +622,13 @@
 
 		// swap scaling constraints if needed by rotation...
 		if ( rotation === 90 || rotation === 270 ) {
-			scaleConstraints = {
-				width: constraints.height,
-				height: constraints.width
-			};
-		} else {
-			scaleConstraints = {
-				width: constraints.width,
-				height: constraints.height
-			};
+			scaleConstraints = {};
+			if ( 'height' in constraints ) {
+				scaleConstraints.width = constraints.height;
+			}
+			if ( 'width' in constraints ) {
+				scaleConstraints.height = constraints.width;
+			}
 		}
 
 		scaling = this.getScalingFromConstraints( image, scaleConstraints );
@@ -638,9 +636,14 @@
 		width = image.width * scaling;
 		height = image.height * scaling;
 
-		// Determine the offset required to center the image
-		dx = ( constraints.width - width ) / 2;
-		dy = ( constraints.height - height ) / 2;
+		dimensions = { width: width, height: height };
+		if ( rotation === 90 || rotation === 270 ) {
+			dimensions = { width: height, height: width };
+		}
+
+		// Start drawing at offset 0,0
+		dx = 0;
+		dy = 0;
 
 		switch ( rotation ) {
 			// If a rotation is applied, the direction of the axis
@@ -649,14 +652,14 @@
 			// where the positive axis direction is
 			case 90:
 				x = dx;
-				y = dy - constraints.height;
+				y = dy - height;
 				break;
 			case 180:
-				x = dx - constraints.width;
-				y = dy - constraints.height;
+				x = dx - width;
+				y = dy - height;
 				break;
 			case 270:
-				x = dx - constraints.width;
+				x = dx - width;
 				y = dy;
 				break;
 			default:
@@ -665,9 +668,9 @@
 				break;
 		}
 
-		$canvas = $( '<canvas>' ).attr( constraints );
+		$canvas = $( '<canvas>' ).attr( dimensions );
 		ctx = $canvas[ 0 ].getContext( '2d' );
-		ctx.clearRect( 0, 0, width, height );
+		ctx.clearRect( dx, dy, width, height );
 		ctx.rotate( rotation / 180 * Math.PI );
 		try {
 			// Calling #drawImage likes to throw all kinds of ridiculous exceptions in various browsers,
@@ -697,14 +700,11 @@
 	 */
 	mw.UploadWizardUpload.prototype.getBrowserScaledImageElement = function ( image, constraints ) {
 		var scaling = this.getScalingFromConstraints( image, constraints );
-		return $( '<img/>' )
+		return $( '<img>' )
 			.attr( {
 				width: parseInt( image.width * scaling, 10 ),
 				height: parseInt( image.height * scaling, 10 ),
-				src:	image.src
-			} )
-			.css( {
-				'margin-top': ( parseInt( ( constraints.height - image.height * scaling ) / 2, 10 ) ).toString() + 'px'
+				src: image.src
 			} );
 	};
 
@@ -713,16 +713,20 @@
 	 *
 	 * @private
 	 * @param {HTMLImageElement} image
-	 * @param {Integer} width
-	 * @param {Integer} height
+	 * @param {number} width
+	 * @param {number} height
 	 * @return {HTMLCanvasElement|HTMLImageElement}
 	 */
 	mw.UploadWizardUpload.prototype.getScaledImageElement = function ( image, width, height ) {
-		var constraints, transform;
-		constraints = {
-			width: width,
-			height: height
-		};
+		var constraints = {},
+			transform;
+
+		if ( width ) {
+			constraints.width = width;
+		}
+		if ( height ) {
+			constraints.height = height;
+		}
 
 		if ( mw.canvas.isAvailable() ) {
 			transform = this.getTransformedCanvasElement( image, constraints );
@@ -730,6 +734,7 @@
 				return transform;
 			}
 		}
+
 		// No canvas support or canvas drawing failed mysteriously, fall back
 		return this.getBrowserScaledImageElement( image, constraints );
 	};
@@ -737,20 +742,19 @@
 	/**
 	 * Acquire a thumbnail for this upload.
 	 *
+	 * @param {number} width
+	 * @param {number} height
 	 * @return {jQuery.Promise} Promise resolved with the HTMLImageElement or HTMLCanvasElement
 	 *   containing a thumbnail, or resolved with `null` when one can't be produced
 	 */
-	mw.UploadWizardUpload.prototype.getThumbnail = function () {
+	mw.UploadWizardUpload.prototype.getThumbnail = function ( width, height ) {
 		var upload = this,
-			// This must match the CSS dimensions of .mwe-upwiz-file-preview and .mwe-upwiz-thumbnail
-			width = 100,
-			height = 100,
 			deferred = $.Deferred();
 
-		if ( this.thumbnailPromise ) {
-			return this.thumbnailPromise;
+		if ( this.thumbnailPromise[ width + 'x' + height ] ) {
+			return this.thumbnailPromise[ width + 'x' + height ];
 		}
-		this.thumbnailPromise = deferred.promise();
+		this.thumbnailPromise[ width + 'x' + height ] = deferred.promise();
 
 		/**
 		 * @param {HTMLImageElement|null} image
@@ -767,7 +771,7 @@
 		}
 
 		this.extractMetadataFromJpegMeta()
-			.then( upload.makePreview.bind( upload ) )
+			.then( upload.makePreview.bind( upload, width ) )
 			.done( imageCallback )
 			.fail( function () {
 				// Can't generate the thumbnail locally, get the thumbnail via API after
@@ -782,7 +786,7 @@
 				}
 			} );
 
-		return this.thumbnailPromise;
+		return this.thumbnailPromise[ width + 'x' + height ];
 	};
 
 	/**
@@ -796,9 +800,10 @@
 	 * Make a preview for the file.
 	 *
 	 * @private
+	 * @param {number} width
 	 * @return {jQuery.Promise}
 	 */
-	mw.UploadWizardUpload.prototype.makePreview = function () {
+	mw.UploadWizardUpload.prototype.makePreview = function ( width ) {
 		var first, video, url, dataUrlReader,
 			deferred = $.Deferred(),
 			upload = this;
@@ -827,7 +832,7 @@
 						setTimeout( function () {
 							var context,
 								canvas = document.createElement( 'canvas' );
-							canvas.width = 100;
+							canvas.width = width;
 							canvas.height = Math.round( canvas.width * video.videoHeight / video.videoWidth );
 							context = canvas.getContext( '2d' );
 							try {
@@ -883,7 +888,7 @@
 		try {
 			image.src = url;
 		} catch ( er ) {
-			// On Internet Explorer 10-11 and Edge, this occasionally causes an exception (possibly
+			// On Internet Explorer 11 and Edge, this occasionally causes an exception (possibly
 			// localised) like "Not enough storage is available to complete this operation". (T136239)
 			deferred.reject();
 		}
@@ -916,4 +921,4 @@
 		return mw.fileApi.isPreviewableVideo( this.file );
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Умар"
+		]
+	},
+	"apihelp-flickrblacklist-param-url": "Талла дезаш долу Flickr тӀехь долу URL-адрес.",
+	"apihelp-flickrblacklist-example-1": "URL-адрес Ӏаьржачу могӀаман таллар",
+	"apihelp-flickrblacklist-example-2": "Ӏаьржачу могӀаман дӀаярдар юхадерзор",
+	"apihelp-query+allcampaigns-description": "Чуяхаран говзанчан массо кампанеш ягаръян.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Жигара йолу кампанийн могӀам бен.",
+	"apihelp-query+allcampaigns-param-limit": "Юхаерзош йолу кампанийн дукхалла.",
+	"apihelp-query+allcampaigns-example-1": "Юкъахь йолу кампанеш ягаръян"
+}

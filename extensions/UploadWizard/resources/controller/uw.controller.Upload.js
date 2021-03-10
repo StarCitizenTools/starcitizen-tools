@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * Upload step controller.
@@ -96,7 +96,7 @@
 			 * with new uploads, and still understand the existing files that
 			 * we've just reset the state for.
 			 */
-			$.each( uploads, function ( i, upload ) {
+			uploads.forEach( function ( upload ) {
 				upload.state = upload.fileKey === undefined ? 'error' : controller.finishState;
 			} );
 
@@ -194,11 +194,10 @@
 		var controller = this;
 		uw.eventFlowLogger.logEvent( 'retry-uploads-button-clicked' );
 
-		$.each( this.uploads, function ( i, upload ) {
+		this.uploads.forEach( function ( upload ) {
 			if ( upload.state === 'error' ) {
 				// reset any uploads in error state back to be shiny & new
 				upload.state = 'new';
-				upload.ui.clearIndicator();
 				upload.ui.clearStatus();
 				// and queue them
 				controller.queueUpload( upload );
@@ -213,7 +212,7 @@
 	 * itself; and immediately fill it with a file and add it to the list of uploads.
 	 *
 	 * @param {File} file
-	 * @return {UploadWizardUpload|false} The new upload, or false if it can't be added
+	 * @return {mw.UploadWizardUpload|boolean} The new upload, or false if it can't be added
 	 */
 	uw.controller.Upload.prototype.addFile = function ( file ) {
 		var upload;
@@ -243,22 +242,26 @@
 	 * Do everything that needs to be done to start uploading a file. Calls #addFile, then appends
 	 * each mw.UploadWizardUploadInterface to the DOM and queues thumbnails to be generated.
 	 *
-	 * @param {File[]} files
+	 * @param {FileList} files
 	 */
 	uw.controller.Upload.prototype.addFiles = function ( files ) {
 		var
 			uploadObj,
+			i,
+			file,
 			uploadObjs = [],
 			controller = this;
 
-		$.each( files, function ( i, file ) {
+		for ( i = 0; i < files.length; i++ ) {
+			file = files[ i ];
 			uploadObj = controller.addFile( file );
 			if ( uploadObj ) {
 				uploadObjs.push( uploadObj );
 			}
-		} );
+		}
 
 		this.ui.displayUploads( uploadObjs );
+		this.updateFileCounts();
 
 		uw.eventFlowLogger.logUploadEvent( 'uploads-added', { quantity: files.length } );
 	};
@@ -290,7 +293,6 @@
 	 */
 	uw.controller.Upload.prototype.setUploadFilled = function ( upload ) {
 		this.addUpload( upload );
-		this.updateFileCounts();
 		// Start uploads now, no reason to wait--leave the remove button alone
 		this.queueUpload( upload );
 		this.startQueuedUploads();
@@ -341,7 +343,7 @@
 
 		if (
 			mw.UploadWizard.config.fileExtensions !== null &&
-			$.inArray( extension.toLowerCase(), mw.UploadWizard.config.fileExtensions ) === -1
+			mw.UploadWizard.config.fileExtensions.indexOf( extension.toLowerCase() ) === -1
 		) {
 			this.ui.showBadExtensionError( filename, extension );
 			return false;
@@ -360,4 +362,4 @@
 		return true;
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

@@ -3,7 +3,7 @@
  * Implements mw.Modal functionality.
  */
 
-( function ( mw, $ ) {
+( function () {
 	// Make it easier to remove this later on, should it be implemented in Core
 	if ( mw.Modal ) {
 		return;
@@ -35,7 +35,7 @@
 	 * @todo Implement multi-step
 	 * @todo Implement data-mwui handlers
 	 * @todo Implement OOjs & events
-	 * @class
+	 * @class MwUiModal
 	 * @constructor
 	 * @param {string} [name] Name of modal (may be omitted)
 	 * @param {Object} [settings]
@@ -71,6 +71,7 @@
 	}
 
 	/** Stores template
+	 *
 	 * @todo use data-mwui attributes instead of data-flow **/
 	MwUiModal.prototype.template =
 		'<div class="flow-ui-modal">' +
@@ -152,12 +153,13 @@
 		}
 
 		// Drop it into the page
-		$node.appendTo( 'body' );
+		$node.appendTo( document.body );
 
 		// Hide the tick box @todo implement multi-step and event handling / form binding
 		$node.find( this.nextSelector ).hide();
 
 		// If something in here did not auto-focus, let's focus something
+		// eslint-disable-next-line no-jquery/no-sizzle
 		$fields = $node.find( 'textarea, input, select' ).filter( ':visible' );
 		if ( !$fields.filter( ':focus' ).length ) {
 			// Try to focus on an autofocus field
@@ -166,12 +168,12 @@
 				$fields.trigger( 'focus' );
 			} else {
 				// Try to focus on ANY input
-				$fields = $fields.end().filter( ':first' );
+				$fields = $fields.end().first();
 				if ( $fields.length ) {
 					$fields.trigger( 'focus' );
 				} else {
 					// Give focus to the wrapper itself
-					$node.focus();
+					$node.trigger( 'focus' );
 				}
 			}
 		}
@@ -179,7 +181,6 @@
 		return this;
 	};
 
-	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Changes the title of the modal.
 	 *
@@ -233,6 +234,7 @@
 
 	/**
 	 * Returns the modal's wrapper Element, which contains the header node and content node.
+	 *
 	 * @return {jQuery}
 	 */
 	MwUiModal.prototype.getNode = function () {
@@ -261,6 +263,7 @@
 
 	/**
 	 * Returns the wrapping Element on which you can bind bubbling events for your content.
+	 *
 	 * @return {jQuery}
 	 */
 	MwUiModal.prototype.getContentNode = function () {
@@ -324,13 +327,14 @@
 	/**
 	 * For a multi-step modal, goes to the next step (if any), otherwise, submits the form.
 	 *
- * @return {MwUiModal|boolean} false if no next step and no button to click, MwUiModal on success
+	 * @return {MwUiModal|boolean} false if no next step and no button to click, MwUiModal on success
 	 */
 	MwUiModal.prototype.nextOrSubmit = function () {
 		var $button;
 
 		if ( this.next() === false && this.$node ) {
 			// Find an anchor or button with role=primary
+			// eslint-disable-next-line no-jquery/no-sizzle
 			$button = this.$node.find( this.contentSelector ).find( 'a, input, button' ).filter( ':visible' ).filter( '[type=submit], [data-role=submit]' );
 
 			if ( !$button.length ) {
@@ -397,11 +401,11 @@
 		}
 
 		// No node given; return the last-opened modal on the page
-		return $( 'body' ).children( MwUiModal.prototype.wrapperSelector ).filter( ':last' ).data( 'MwUiModal' ) || false;
+		return $( document.body ).children( MwUiModal.prototype.wrapperSelector ).last().data( 'MwUiModal' ) || false;
 	};
 
 	// Transforms: automatically map these functions to call their mw.Modal methods globally, on any active instance
-	$.each( [ 'close', 'getName', 'prev', 'next', 'prevOrClose', 'nextOrSubmit', 'go' ], function ( i, fn ) {
+	[ 'close', 'getName', 'prev', 'next', 'prevOrClose', 'nextOrSubmit', 'go' ].forEach( function ( fn ) {
 		mw.Modal[ fn ] = function () {
 			var args = Array.prototype.splice.call( arguments, 0, arguments.length - 1 ),
 				node = arguments[ arguments.length - 1 ],
@@ -423,4 +427,4 @@
 			}
 		};
 	} );
-}( mw, jQuery ) );
+}() );

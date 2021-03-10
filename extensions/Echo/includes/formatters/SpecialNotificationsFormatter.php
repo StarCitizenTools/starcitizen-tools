@@ -23,7 +23,7 @@ class SpecialNotificationsFormatter extends EchoEventFormatter {
 
 		$markAsReadIcon = new OOUI\IconWidget( [
 			'icon' => 'close',
-			'title' => wfMessage( 'echo-notification-markasread' ),
+			'title' => wfMessage( 'echo-notification-markasread' )->text(),
 		] );
 
 		$markAsReadForm = $markReadSpecialPage->getMinimalForm(
@@ -86,11 +86,14 @@ class SpecialNotificationsFormatter extends EchoEventFormatter {
 			);
 		}
 
-		$pipe = wfMessage( 'pipe-separator' )->inLanguage( $this->language )->escaped();
+		$pipe = wfMessage( 'pipe-separator' )->inLanguage( $this->language )->text();
 		$html .= Xml::tags(
 			'div',
 			[ 'class' => 'mw-echo-notification-footer' ],
-			implode( Html::element( 'span', [ 'class' => 'mw-echo-notification-footer-element' ], $pipe ), $footerItems )
+			implode(
+				Html::element( 'span', [ 'class' => 'mw-echo-notification-footer-element' ], $pipe ),
+				$footerItems
+			)
 		) . "\n";
 
 		// Wrap everything in mw-echo-content class

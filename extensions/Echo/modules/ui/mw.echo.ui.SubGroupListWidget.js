@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Sub group list widget.
 	 * This widget contains a list of notifications from a single source
@@ -25,7 +25,7 @@
 		this.model = listModel;
 
 		// Parent constructor
-		mw.echo.ui.SubGroupListWidget.parent.call( this, $.extend( { data: this.getSource() }, config ) );
+		mw.echo.ui.SubGroupListWidget.super.call( this, $.extend( { data: this.getSource() }, config ) );
 
 		this.showTitle = !!config.showTitle;
 		this.showMarkAllRead = !!config.showMarkAllRead;
@@ -119,8 +119,9 @@
 				this.listWidget.$element
 			);
 
+		// eslint-disable-next-line no-jquery/no-global-selector
 		this.$pageContentText = $( '#mw-content-text' );
-		$( window ).resize( this.resizeHeader.bind( this ) );
+		$( window ).on( 'resize', this.resizeHeader.bind( this ) );
 
 		// Resize the header after the stack finishes loading
 		// so the widget is attached
@@ -320,4 +321,4 @@
 	mw.echo.ui.SubGroupListWidget.prototype.getId = function () {
 		return this.model.getName();
 	};
-}( mediaWiki, jQuery ) );
+}() );

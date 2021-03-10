@@ -8,6 +8,11 @@ class BoardDescriptionWidget extends \OOUI\Widget {
 
 	protected $description = '';
 
+	/**
+	 * @var \OOUI\Tag
+	 */
+	private $contentWrapper;
+
 	public function __construct( array $config = [] ) {
 		parent::__construct( $config );
 
@@ -47,10 +52,10 @@ class BoardDescriptionWidget extends \OOUI\Widget {
 	 * Wrap some content in a div
 	 *
 	 * @param string $content Content to wrap
-	 * @param string $classes Classes to add to the div
-	 * @return OOUI\Tag New div with content
+	 * @param string[] $classes Classes to add to the div
+	 * @return \OOUI\Tag New div with content
 	 */
-	private function wrapInDiv( $content, $classes = [] ) {
+	private function wrapInDiv( $content, array $classes = [] ) {
 		$tag = new \OOUI\Tag( 'div' );
 		$tag->addClasses( $classes );
 		$tag->appendContent( new \OOUI\HtmlSnippet( $content ) );

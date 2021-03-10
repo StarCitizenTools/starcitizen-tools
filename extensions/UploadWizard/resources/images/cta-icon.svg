@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="121" height="89" viewBox="0 0 121 89">
+    <title>
+        Group Copy 2
+    </title>
+    <desc>
+        Created with Sketch.
+    </desc>
+    <defs>
+        <rect id="path-1" width="119" height="83" x="0" y="4" rx="2"/>
+        <rect id="path-3" width="119" height="83" x="0" y="4" rx="2"/>
+    </defs>
+    <g id="mocks" fill="none" fill-rule="evenodd" stroke="none" stroke-width="1">
+        <g id="opt-in-v3-checked" transform="translate(-224 -305)">
+            <g id="Group-Copy-2" transform="translate(225 306)">
+                <rect id="Second-image" width="114" height="79" x="3" y="0" fill="#EAF3FF" stroke="#A2A9B1" stroke-width="2" rx="2"/>
+                <mask id="mask-2" fill="#fff">
+                    <use xlink:href="#path-1"/>
+                </mask>
+                <use id="Mask" fill="#EAF3FF" xlink:href="#path-1"/>
+                <circle id="Oval" cx="18.5" cy="24.5" r="10.5" fill="#FC3" mask="url(#mask-2)"/>
+                <path id="Path-3" fill="#FF9500" d="M79.1738416,46 C79.1738416,46 99.4202508,58.8627036 103.975462,54.1302623 C108.530673,49.397821 103.975462,61 103.975462,61 L64,61" mask="url(#mask-2)"/>
+                <path id="Path-4" fill="#FF9500" d="M0,53 C0,53 16.0479204,63.9689139 38.4123321,63.9689139 C60.7767438,63.9689139 43.884196,71 43.884196,71 L0.048807616,71" mask="url(#mask-2)"/>
+                <path id="Path-2" fill="#FC3" d="M79.5902784,50.6961072 C68.58761,70.9405048 119,45.9416322 119,45.9416322 L119,70.6756757 L119,95 L0,95 L8.25728375e-16,70.6756757 C8.25728375e-16,70.6756757 90.5929468,30.4517096 79.5902784,50.6961072 Z" mask="url(#mask-2)"/>
+                <mask id="mask-4" fill="#fff">
+                    <use xlink:href="#path-3"/>
+                </mask>
+                <use id="Mask" stroke="#A2A9B1" stroke-width="2" xlink:href="#path-3"/>
+            </g>
+        </g>
+    </g>
+</svg>

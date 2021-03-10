@@ -9,6 +9,7 @@ use Flow\Formatter\IRCLineUrlFormatter;
 use Flow\Model\AbstractRevision;
 use Flow\Model\Workflow;
 use Flow\Repository\UserNameBatch;
+use MediaWiki\MediaWikiServices;
 use RecentChange;
 
 /**
@@ -17,7 +18,7 @@ use RecentChange;
 class RecentChangesListener extends AbstractListener {
 
 	// Value used in rc_source field of recentchanges to identify flow specific changes
-	const SRC_FLOW = "flow";
+	public const SRC_FLOW = "flow";
 
 	/**
 	 * @var FlowActions
@@ -82,6 +83,8 @@ class RecentChangesListener extends AbstractListener {
 		}
 
 		$title = $this->getRcTitle( $workflow, $revision->getChangeType() );
+		$autopatrolAllowed = MediaWikiServices::getInstance()->getPermissionManager()
+			->userHasRight( $user, 'autopatrol' );
 		$attribs = [
 			'rc_namespace' => $title->getNamespace(),
 			'rc_title' => $title->getDBkey(),
@@ -92,11 +95,12 @@ class RecentChangesListener extends AbstractListener {
 			'rc_minor' => 0,
 			'rc_bot' => 0, // TODO: is revision by bot
 			'rc_new' => 0,
-			'rc_patrolled' => $user->isAllowed( 'autopatrol' ) ? RecentChange::PRC_AUTOPATROLLED : RecentChange::PRC_UNPATROLLED,
+			'rc_patrolled' => $autopatrolAllowed ? RecentChange::PRC_AUTOPATROLLED : RecentChange::PRC_UNPATROLLED,
 			'rc_old_len' => $revision->getPreviousContentLength(),
 			'rc_new_len' => $revision->getContentLength(),
 			'rc_this_oldid' => 0,
 			'rc_last_oldid' => 0,
+			'rc_logid' => 0,
 			'rc_log_type' => null,
 			'rc_params' => serialize( [
 				'flow-workflow-change' => [
@@ -115,7 +119,8 @@ class RecentChangesListener extends AbstractListener {
 		];
 
 		$rc = $this->rcFactory->newFromRow( (object)$attribs );
-		$rc->save( /* $noudp = */ true );  // Insert into db
+		// Insert into db only, don't send to any RC feeds (yet)
+		$rc->save( RecentChange::SEND_NONE );
 		$feeds = $wgRCFeeds;
 		// Override the IRC formatter with our own formatter
 		foreach ( array_keys( $feeds ) as $name ) {

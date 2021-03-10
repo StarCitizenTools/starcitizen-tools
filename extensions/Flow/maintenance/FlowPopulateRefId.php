@@ -2,6 +2,7 @@
 
 use Flow\Container;
 use Flow\Data\ObjectManager;
+use MediaWiki\MediaWikiServices;
 
 $installPath = getenv( 'MW_INSTALL_PATH' ) !== false ?
 	getenv( 'MW_INSTALL_PATH' ) :
@@ -21,7 +22,7 @@ class FlowPopulateRefId extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
 
-		$this->mDescription = 'Populates ref_id in flow_wiki_ref & flow_ext_ref';
+		$this->addDescription( 'Populates ref_id in flow_wiki_ref & flow_ext_ref' );
 
 		$this->setBatchSize( 300 );
 
@@ -55,6 +56,9 @@ class FlowPopulateRefId extends LoggedUpdateMaintenance {
 		global $wgFlowCluster;
 
 		$total = 0;
+
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+
 		while ( true ) {
 			$references = (array)$storage->find( [ 'ref_id' => null, 'ref_src_wiki' => wfWikiID() ], [ 'limit' => $this->mBatchSize ] );
 			if ( !$references ) {
@@ -64,10 +68,10 @@ class FlowPopulateRefId extends LoggedUpdateMaintenance {
 			$storage->multiPut( $references, [] );
 			$total += count( $references );
 			$this->output( "Ensured ref_id for " . $total . " " . get_class( $references[0] ) . " references...\n" );
-			wfWaitForSlaves( false, false, $wgFlowCluster );
+			$lbFactory->waitForReplication( [ 'cluster' => $wgFlowCluster ] );
 		}
 	}
 }
 
-$maintClass = 'FlowPopulateRefId';
+$maintClass = FlowPopulateRefId::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

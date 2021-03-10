@@ -21,18 +21,24 @@ class ConfirmEdit implements SpamFilter {
 	 * @param Title $ownerTitle
 	 * @return Status
 	 */
-	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title, Title $ownerTitle ) {
+	public function validate(
+		IContextSource $context,
+		AbstractRevision $newRevision,
+		?AbstractRevision $oldRevision,
+		Title $title,
+		Title $ownerTitle
+	) {
 		$newContent = $newRevision->getContentInWikitext();
 		$oldContent = ( $oldRevision !== null ) ? $oldRevision->getContentInWikitext() : '';
 
 		/** @var SimpleCaptcha $captcha */
 		$captcha = ConfirmEditHooks::getInstance();
-		$wikiPage = new WikiPage( $title );
+		$wikiPage = WikiPage::factory( $title );
 
 		// first check if the submitted content is offensive (as flagged by
 		// ConfirmEdit), next check for a (valid) captcha to have been entered
 		if (
-			$captcha->shouldCheck( $wikiPage, $newContent, false, $context, $oldContent ) &&
+			$captcha->shouldCheck( $wikiPage, $newContent, '', $context, $oldContent ) &&
 			!$captcha->passCaptchaLimitedFromRequest( $context->getRequest(), $context->getUser() )
 		) {
 			// getting here means we submitted bad content without good captcha

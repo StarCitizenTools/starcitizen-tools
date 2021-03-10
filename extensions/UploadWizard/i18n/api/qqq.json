@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"apihelp-flickrblacklist-description": "{{doc-apihelp-description|flickrblacklist}}",
+	"apihelp-flickrblacklist-summary": "{{doc-apihelp-summary|flickrblacklist}}",
+	"apihelp-flickrblacklist-extended-description": "{{doc-apihelp-extended-description|flickrblacklist}}",
+	"apihelp-flickrblacklist-param-url": "{{doc-apihelp-param|flickrblacklist|url}}",
+	"apihelp-flickrblacklist-param-list": "{{doc-apihelp-param|flickrblacklist|list}}",
+	"apihelp-flickrblacklist-example-1": "{{doc-apihelp-example|flickrblacklist}}",
+	"apihelp-flickrblacklist-example-2": "{{doc-apihelp-example|flickrblacklist}}",
+	"apihelp-query+allcampaigns-description": "{{doc-apihelp-description|query+allcampaigns}}",
+	"apihelp-query+allcampaigns-summary": "{{doc-apihelp-summary|query+allcampaigns}}",
+	"apihelp-query+allcampaigns-param-enabledonly": "{{doc-apihelp-param|query+allcampaigns|enabledonly}}",
+	"apihelp-query+allcampaigns-param-limit": "{{doc-apihelp-param|query+allcampaigns|limit}}",
+	"apihelp-query+allcampaigns-example-1": "{{doc-apihelp-example|query+allcampaigns}}"
+}

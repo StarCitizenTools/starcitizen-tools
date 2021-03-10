@@ -28,10 +28,10 @@ class FlowFixUserIp extends LoggedUpdateMaintenance {
 	 */
 	protected $storage;
 
-	static private $types = [
-		'post' => 'Flow\Model\PostRevision',
-		'header' => 'Flow\Model\Header',
-		'post-summary' => 'Flow\Model\PostSummary',
+	private static $types = [
+		'post' => \Flow\Model\PostRevision::class,
+		'header' => \Flow\Model\Header::class,
+		'post-summary' => \Flow\Model\PostSummary::class,
 	];
 
 	public function __construct() {
@@ -45,14 +45,15 @@ class FlowFixUserIp extends LoggedUpdateMaintenance {
 		/** @var DbFactory $dbf */
 		$dbf = Container::get( 'db.factory' );
 		$dbw = $dbf->getDB( DB_MASTER );
+		$fname = __METHOD__;
 
-		$runUpdate = function ( $callback ) use ( $dbf, $dbw, $storage ) {
+		$runUpdate = function ( $callback ) use ( $dbf, $dbw, $storage, $fname ) {
 			$continue = "\0";
 			do {
-				$dbw->begin( __METHOD__ );
-				$continue = call_user_func( $callback, $dbw, $continue );
-				$dbw->commit( __METHOD__ );
-				$dbf->waitForSlaves();
+				$dbw->begin( $fname );
+				$continue = $callback( $dbw, $continue );
+				$dbw->commit( $fname );
+				$dbf->waitForReplicas();
 				$storage->clear();
 			} while ( $continue !== null );
 		};
@@ -168,5 +169,5 @@ class FlowFixUserIp extends LoggedUpdateMaintenance {
 	}
 }
 
-$maintClass = 'FlowFixUserIp'; // Tells it to run the class
+$maintClass = FlowFixUserIp::class; // Tells it to run the class
 require_once RUN_MAINTENANCE_IF_MAIN;

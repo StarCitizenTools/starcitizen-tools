@@ -1,22 +1,20 @@
 {
-	"extends": "wikimedia",
-	"env": {
-		"browser": true,
-		"jquery": true,
-		"qunit": true
-	},
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/jquery",
+		"wikimedia/mediawiki",
+		"wikimedia/jsduck"
+	],
 	"globals": {
-		"mw": true,
-		"ve": false,
-		"mediaWiki": false,
-		"OO": false,
-		"Handlebars": false,
-		"moment": false
+		"Handlebars": "readonly",
+		"moment": "readonly"
 	},
 	"rules": {
-		"dot-notation": [ "error", { "allowKeywords": true } ],
-		"no-underscore-dangle": 0,
-		"camelcase": 0,
-		"no-use-before-define": 0
+		"no-underscore-dangle": "off",
+		"camelcase": "off",
+		"no-use-before-define": "off",
+		"max-len": "off",
+		"mediawiki/class-doc": "warn"
 	}
 }

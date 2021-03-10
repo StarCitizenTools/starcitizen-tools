@@ -3,9 +3,9 @@
 namespace Flow\Repository;
 
 use Flow\Data\ManagerGroup;
+use Flow\Exception\InvalidDataException;
 use Flow\Model\PostRevision;
 use Flow\Model\UUID;
-use Flow\Exception\InvalidDataException;
 use FormatJson;
 
 /**
@@ -38,9 +38,10 @@ class RootPostLoader {
 	 * Retrieves a single post and the related topic title.
 	 *
 	 * @param UUID|string $postId The uid of the post being requested
-	 * @return PostRevision[]|null[] associative array with 'root' and 'post' keys. Array
+	 * @return (PostRevision|null)[] associative array with 'root' and 'post' keys. Array
 	 *   values may be null if not found.
 	 * @throws InvalidDataException
+	 * @phan-return array{root:null|PostRevision,post:null|PostRevision}
 	 */
 	public function getWithRoot( $postId ) {
 		$postId = UUID::create( $postId );
@@ -113,7 +114,10 @@ class RootPostLoader {
 		foreach ( $found as $indexResult ) {
 			$post = reset( $indexResult ); // limit => 1 means only 1 result per query
 			if ( isset( $posts[$post->getPostId()->getAlphadecimal()] ) ) {
-				throw new InvalidDataException( 'Multiple results for id: ' . $post->getPostId()->getAlphadecimal(), 'fail-load-data' );
+				throw new InvalidDataException(
+					'Multiple results for id: ' . $post->getPostId()->getAlphadecimal(),
+					'fail-load-data'
+				);
 			}
 			$posts[$post->getPostId()->getAlphadecimal()] = $post;
 		}
@@ -125,7 +129,7 @@ class RootPostLoader {
 		if ( $missing ) {
 			// convert string uuid's into UUID objects
 			/** @var UUID[] $missingUUID */
-			$missingUUID = array_map( [ 'Flow\Model\UUID', 'create' ], $missing );
+			$missingUUID = array_map( [ UUID::class, 'create' ], $missing );
 
 			// we'll need to know parents to add stub post correctly in post hierarchy
 			$parents = $this->treeRepo->fetchParentMap( $missingUUID );
@@ -133,7 +137,10 @@ class RootPostLoader {
 			if ( $missingParents ) {
 				// if we can't fetch a post's original position in the tree
 				// hierarchy, we can't create a stub post to display, so bail
-				throw new InvalidDataException( 'Missing Posts & parents: ' . json_encode( $missingParents ), 'fail-load-data' );
+				throw new InvalidDataException(
+					'Missing Posts & parents: ' . json_encode( $missingParents ),
+					'fail-load-data'
+				);
 			}
 
 			foreach ( $missingUUID as $postId ) {
@@ -152,7 +159,10 @@ class RootPostLoader {
 		// another helper to catch bugs in dev
 		$extra = array_diff( array_keys( $posts ), $prettyPostIds );
 		if ( $extra ) {
-			throw new InvalidDataException( 'Found unrequested posts: ' . FormatJson::encode( $extra ), 'fail-load-data' );
+			throw new InvalidDataException(
+				'Found unrequested posts: ' . FormatJson::encode( $extra ),
+				'fail-load-data'
+			);
 		}
 
 		// populate array of children
@@ -163,7 +173,10 @@ class RootPostLoader {
 		}
 		$extraParents = array_diff( array_keys( $children ), $prettyPostIds );
 		if ( $extraParents ) {
-			throw new InvalidDataException( 'Found posts with unrequested parents: ' . FormatJson::encode( $extraParents ), 'fail-load-data' );
+			throw new InvalidDataException(
+				'Found posts with unrequested parents: ' . FormatJson::encode( $extraParents ),
+				'fail-load-data'
+			);
 		}
 
 		foreach ( $posts as $postId => $post ) {
@@ -218,7 +231,7 @@ class RootPostLoader {
 		} elseif ( count( $nodeList ) === 1 ) {
 			$res = reset( $nodeList );
 		} else {
-			$res = call_user_func_array( 'array_merge', $nodeList );
+			$res = array_merge( ...array_values( $nodeList ) );
 		}
 
 		$retval = [];

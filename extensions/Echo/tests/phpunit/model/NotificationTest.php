@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @covers EchoNotification
+ * @covers \EchoNotification
  */
 class EchoNotificationTest extends MediaWikiTestCase {
 
@@ -9,14 +9,14 @@ class EchoNotificationTest extends MediaWikiTestCase {
 		$row = $this->mockNotificationRow() + $this->mockEventRow();
 
 		$notif = EchoNotification::newFromRow( (object)$row );
-		$this->assertInstanceOf( 'EchoNotification', $notif );
+		$this->assertInstanceOf( EchoNotification::class, $notif );
 		// getReadTimestamp() should return null
 		$this->assertNull( $notif->getReadTimestamp() );
 		$this->assertEquals(
 			$notif->getTimestamp(),
 			wfTimestamp( TS_MW, $row['notification_timestamp'] )
 		);
-		$this->assertInstanceOf( 'EchoEvent', $notif->getEvent() );
+		$this->assertInstanceOf( EchoEvent::class, $notif->getEvent() );
 		$this->assertNull( $notif->getTargetPages() );
 
 		// Provide a read timestamp
@@ -33,18 +33,16 @@ class EchoNotificationTest extends MediaWikiTestCase {
 		] );
 		$this->assertNotEmpty( $notif->getTargetPages() );
 		foreach ( $notif->getTargetPages() as $targetPage ) {
-			$this->assertInstanceOf( 'EchoTargetPage', $targetPage );
+			$this->assertInstanceOf( EchoTargetPage::class, $targetPage );
 		}
 	}
 
-	/**
-	 * @expectedException MWException
-	 */
 	public function testNewFromRowWithException() {
 		$row = $this->mockNotificationRow();
 		// Provide an invalid event id
 		$row['notification_event'] = -1;
-		$noitf = EchoNotification::newFromRow( (object)$row );
+		$this->expectException( MWException::class );
+		EchoNotification::newFromRow( (object)$row );
 	}
 
 	/**
@@ -56,9 +54,7 @@ class EchoNotificationTest extends MediaWikiTestCase {
 			'notification_event' => 1,
 			'notification_timestamp' => time(),
 			'notification_read_timestamp' => '',
-			'notification_bundle_base' => 1,
 			'notification_bundle_hash' => 'testhash',
-			'notification_bundle_display_hash' => 'testdisplayhash'
 		];
 	}
 

@@ -3,15 +3,17 @@
 namespace Flow\Import\Wikitext;
 
 use ArrayIterator;
-use Flow\Import\TemplateHelper;
+use Flow\Import\IImportSource;
 use Flow\Import\ImportException;
 use Flow\Import\Plain\ImportHeader;
 use Flow\Import\Plain\ObjectRevision;
-use Flow\Import\IImportSource;
+use Flow\Import\TemplateHelper;
+use IDBAccessObject;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Storage\SlotRecord;
 use MWTimestamp;
 use Parser;
 use ParserOptions;
-use Revision;
 use StubObject;
 use Title;
 use User;
@@ -29,10 +31,25 @@ class ImportSource implements IImportSource {
 	protected $user;
 
 	/**
+	 * @var Title
+	 */
+	private $title;
+
+	/**
+	 * @var Parser|StubObject
+	 */
+	private $parser;
+
+	/**
+	 * @var string|null
+	 */
+	private $headerSuffix;
+
+	/**
 	 * @param Title $title
 	 * @param Parser|StubObject $parser
 	 * @param User $user User to take actions as
-	 * @param string $headerSuffix
+	 * @param string|null $headerSuffix
 	 * @throws ImportException When $title is an external title
 	 */
 	public function __construct( Title $title, $parser, User $user, $headerSuffix = null ) {
@@ -56,21 +73,27 @@ class ImportSource implements IImportSource {
 	 * @throws ImportException When source header revision can not be loaded
 	 */
 	public function getHeader() {
-		$revision = Revision::newFromTitle( $this->title, /* $id= */ 0, Revision::READ_LATEST );
+		$revision = MediaWikiServices::getInstance()
+			->getRevisionLookup()
+			->getRevisionByTitle( $this->title, 0, IDBAccessObject::READ_LATEST );
 		if ( !$revision ) {
 			throw new ImportException( "Failed to load revision for title: {$this->title->getPrefixedText()}" );
 		}
 
 		// If sections exist only take the content from the top of the page
 		// to the first section.
-		$content = $revision->getContent()->getNativeData();
-		$output = $this->parser->parse( $content, $this->title, new ParserOptions );
+		$nativeContent = $revision->getContent( SlotRecord::MAIN )->getNativeData();
+		$output = $this->parser->parse(
+			$nativeContent,
+			$this->title,
+			new ParserOptions( $this->user )
+		);
 		$sections = $output->getSections();
 		if ( $sections ) {
-			$content = substr( $content, 0, $sections[0]['byteoffset'] );
+			$nativeContent = substr( $nativeContent, 0, $sections[0]['byteoffset'] );
 		}
 
-		$content = TemplateHelper::extractTemplates( $content, $this->title );
+		$content = TemplateHelper::extractTemplates( $nativeContent, $this->title );
 
 		$template = wfMessage( 'flow-importer-wt-converted-template' )->inContentLanguage()->plain();
 		$arguments = implode( '|', [
@@ -79,7 +102,7 @@ class ImportSource implements IImportSource {
 		] );
 		$content .= "\n\n{{{$template}|$arguments}}";
 
-		if ( $this->headerSuffix && !empty( $this->headerSuffix ) ) {
+		if ( $this->headerSuffix ) {
 			$content .= "\n\n{$this->headerSuffix}";
 		}
 

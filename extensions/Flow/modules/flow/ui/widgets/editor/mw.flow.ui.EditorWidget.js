@@ -1,4 +1,5 @@
-( function ( $ ) {
+/* global ve */
+( function () {
 	/**
 	 * Flow editor widget
 	 *
@@ -27,7 +28,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.flow.ui.EditorWidget.parent.call( this, config );
+		mw.flow.ui.EditorWidget.super.call( this, config );
 
 		// Mixin constructors
 		OO.ui.mixin.PendingElement.call( this, config );
@@ -38,6 +39,7 @@
 		this.confirmCancel = !!config.confirmCancel || config.cancelOnEscape === undefined;
 		this.confirmLeave = !!config.confirmLeave || config.confirmLeave === undefined;
 		this.leaveCallback = config.leaveCallback;
+		this.id = config.id;
 
 		this.loadPromise = null;
 
@@ -45,10 +47,6 @@
 			classes: [ 'flow-ui-editorWidget-error flow-errors errorbox' ]
 		} );
 		this.error.toggle( false );
-
-		this.$element
-			.on( 'focusin', this.onEditorFocusIn.bind( this ) )
-			.on( 'focusout', this.onEditorFocusOut.bind( this ) );
 
 		this.editorControlsWidget = new mw.flow.ui.EditorControlsWidget( {
 			termsMsgKey: config.termsMsgKey || 'flow-terms-of-use-edit',
@@ -62,21 +60,19 @@
 			label: $( '<span>' ).append(
 				mw.message( 'flow-wikitext-editor-help-and-preview' ).params( [
 					// Link to help page
-					$( '<div>' )
+					$( '<span>' )
 						.html( mw.message( 'flow-wikitext-editor-help-uses-wikitext' ).parse() )
 						.find( 'a' )
 						.attr( 'target', '_blank' )
-						.end()
-						.html(),
+						.end(),
 					// Preview link
 					$( '<a>' )
 						.attr( 'href', '#' )
 						.addClass( 'flow-ui-editorWidget-label-preview' )
 						.text( mw.message( 'flow-wikitext-editor-help-preview-the-result' ).text() )
-						.get( 0 ).outerHTML
 				] ).parse() )
 				.find( '.flow-ui-editorWidget-label-preview' )
-				.click( this.onPreviewLinkClick.bind( this ) )
+				.on( 'click', this.onPreviewLinkClick.bind( this ) )
 				.end()
 		} );
 		this.wikitextHelpLabel.toggle( false );
@@ -103,6 +99,10 @@
 				enter: 'onTargetSubmit'
 			} );
 			this.$editorWrapper.append( this.input.$element );
+			// VE focus listeners are bound in #onTargetSurfaceReady
+			this.$element
+				.on( 'focusin', this.onEditorFocusIn.bind( this ) )
+				.on( 'focusout', this.onEditorFocusOut.bind( this ) );
 		}
 
 		this.toggleAutoFocus( config.autoFocus === undefined ? true : !!config.autoFocus );
@@ -170,16 +170,26 @@
 
 	/**
 	 * Preload the VisualEditor modules so that loading the editor later will be faster.
+	 *
 	 * @return {jQuery.Promise} Promise that resolves when the VisualEditor modules have been loaded
 	 */
 	mw.flow.ui.EditorWidget.static.preload = function () {
-		var modules;
+		var conf, modules;
 		if ( !this.preloadPromise ) {
 			if ( this.isVisualEditorSupported() ) {
+				conf = mw.config.get( 'wgVisualEditorConfig' );
 				modules = [ 'ext.flow.visualEditor' ].concat(
-					mw.config.get( 'wgVisualEditorConfig' ).pluginModules.filter( mw.loader.getState )
+					conf.pluginModules.filter( mw.loader.getState )
 				);
-				this.preloadPromise = mw.loader.using( modules );
+				this.preloadPromise =
+					mw.loader.using( conf.preloadModules )
+						// If these fail, we still want to continue loading, so convert failure to success
+						.catch( function () {
+							return $.Deferred().resolve();
+						} )
+						.then( function () {
+							return mw.loader.using( modules );
+						} );
 			} else {
 				this.preloadPromise = $.Deferred().resolve().promise();
 			}
@@ -206,7 +216,7 @@
 		if ( !this.loadPromise ) {
 			this.loadPromise = this.constructor.static.preload()
 				.then( function () {
-					widget.target = ve.init.mw.targetFactory.create( 'flow' );
+					widget.target = ve.init.mw.targetFactory.create( 'flow', { id: widget.id } );
 					widget.target.connect( widget, {
 						surfaceReady: 'onTargetSurfaceReady',
 						switchMode: 'onTargetSwitchMode',
@@ -245,6 +255,7 @@
 				widget.bindBeforeUnloadHandler();
 				widget.maybeAutoFocus();
 				widget.wikitextHelpLabel.toggle( widget.target.getDefaultMode() === 'source' );
+				widget.target.getSurface().getView().getDocument().getDocumentNode().$element.attr( 'aria-label', widget.placeholder );
 			}, function ( error ) {
 				widget.error.setLabel( $( '<span>' ).text( error || mw.msg( 'flow-error-default' ) ) );
 				widget.error.toggle( true );
@@ -270,10 +281,6 @@
 
 		if ( content ) {
 			contentToLoad = content.content;
-			if ( content.format === 'html' ) {
-				// loadContent expects a full document, but we were only given the body content
-				contentToLoad = '<body>' + contentToLoad + '</body>';
-			}
 			contentFormat = content.format;
 		} else {
 			contentToLoad = '';
@@ -289,6 +296,7 @@
 
 	/**
 	 * If autofocus is enabled, focus the editor and move the cursor to the end.
+	 *
 	 * @private
 	 */
 	mw.flow.ui.EditorWidget.prototype.maybeAutoFocus = function () {
@@ -300,6 +308,7 @@
 
 	/**
 	 * Toggle whether the editor is automatically focused after activating and switching.
+	 *
 	 * @param {boolean} [autoFocus] Whether to focus automatically; if unset, flips current value
 	 */
 	mw.flow.ui.EditorWidget.prototype.toggleAutoFocus = function ( autoFocus ) {
@@ -362,7 +371,11 @@
 		var surface = this.target.getSurface();
 
 		surface.setPlaceholder( this.placeholder );
-		surface.getModel().connect( this, { documentUpdate: [ 'onSurfaceDocumentUpdate' ] } );
+		surface.getModel().connect( this, { documentUpdate: 'onSurfaceDocumentUpdate' } );
+		surface.getView().connect( this, {
+			focus: 'onEditorFocusIn',
+			blur: 'onEditorFocusOut'
+		} );
 	};
 
 	/**
@@ -592,12 +605,12 @@
 		return this.isPending() ||
 			!this.isSaveable() ||
 			// Parent method
-			mw.flow.ui.EditorWidget.parent.prototype.isDisabled.apply( this, arguments );
+			mw.flow.ui.EditorWidget.super.prototype.isDisabled.apply( this, arguments );
 	};
 
-	mw.flow.ui.EditorWidget.prototype.setDisabled = function ( disabled ) {
+	mw.flow.ui.EditorWidget.prototype.setDisabled = function () {
 		// Parent method
-		mw.flow.ui.EditorWidget.parent.prototype.setDisabled.call( this, disabled );
+		mw.flow.ui.EditorWidget.super.prototype.setDisabled.apply( this, arguments );
 
 		if ( this.editorControlsWidget ) {
 			this.editorControlsWidget.setDisabled( this.isDisabled() );
@@ -663,16 +676,23 @@
 		}
 
 		if ( this.target ) {
+			this.target.clearDocState();
 			this.target.clearSurfaces();
 		}
 	};
 
 	/**
 	 * Destroy the widget.
+	 *
+	 * @return {jQuery.Promise} Promise which resolves when the widget is destroyed
 	 */
 	mw.flow.ui.EditorWidget.prototype.destroy = function () {
 		if ( this.target ) {
+			// clearDocState is called by #destroy
 			this.target.destroy();
+			// TODO: We should be able to just return target.destroy()
+			return this.target.teardownPromise;
 		}
+		return $.Deferred().resolve().promise();
 	};
-}( jQuery ) );
+}() );

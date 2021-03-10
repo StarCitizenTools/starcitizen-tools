@@ -2,8 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Bonevarluri",
-			"Mogoeilor",
-			"Macofe"
+			"Lorestani",
+			"Macofe",
+			"Mogoeilor"
 		]
 	},
 	"uploadwizard": "جادو سوارکرد",
@@ -36,7 +37,7 @@
 	"mwe-upwiz-failed": "شکست حرده.",
 	"mwe-upwiz-remove": "ؤرداشتن",
 	"mwe-upwiz-override": "د هر شلکی سوار کرد نه انجوم به",
-	"mwe-upwiz-remove-upload": "ای جانیا نه د نوم گه جانیایا سی سوار کرد جا وه جا کو",
+	"mwe-upwiz-remove-upload": "اؽ جانؽا ناْ د نومگٱ جانؽایا سی سڤار کرد جا ڤ جا کو",
 	"mwe-upwiz-upload": "سوار کرد",
 	"mwe-upwiz-file-all-ok": "همه سوارکردیا خو بینه!",
 	"mwe-upwiz-file-some-failed": "یه قرئ د سوارکردیا انجوم نبی.",
@@ -72,7 +73,6 @@
 	"mwe-upwiz-next": "نهایی",
 	"mwe-upwiz-next-file": "ادامه دئین",
 	"mwe-upwiz-next-deeds": "نهایی",
-	"mwe-upwiz-next-details": "نهایی",
 	"mwe-upwiz-home": "رو د سرآسونه ویکی",
 	"mwe-upwiz-upload-another": "سوار کردن جانیایا هنی",
 	"mwe-upwiz-tooltip-more-info": "بيشتر يا بيئريت",
@@ -113,7 +113,5 @@
 	"prefs-upwiz-interface": "مین پیوست کارور",
 	"mwe-upwiz-prefs-def-license": "لیسانس پیش فرض",
 	"mwe-upwiz-prefs-license-thirdparty": "کسی ترم کار می که-$1",
-	"mwe-upload-campaigns-pagination-next": "بلگه نهایی",
-	"apihelp-flickrblacklist-param-url": "یو آر ال فلیکر ازماشت بیه.",
-	"apihelp-flickrblacklist-example-1": "یه گل یو آر ال نه سی نومگه سئ وارسی بک"
+	"mwe-upload-campaigns-pagination-next": "بلگه نهایی"
 }

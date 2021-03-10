@@ -1,11 +1,11 @@
 <?php
 
+use Flow\Collection\PostCollection;
 use Flow\Container;
 use Flow\Data\ManagerGroup;
 use Flow\Exception\InvalidDataException;
 use Flow\Model\PostRevision;
 use Flow\Model\UUID;
-use Flow\Collection\PostCollection;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
@@ -24,7 +24,7 @@ class FlowFixLog extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
 
-		$this->mDescription = 'Fixes Flow log entries';
+		$this->addDescription( 'Fixes Flow log entries' );
 
 		$this->setBatchSize( 300 );
 
@@ -63,7 +63,7 @@ class FlowFixLog extends LoggedUpdateMaintenance {
 	 * a Closure.
 	 *
 	 * @param string $out
-	 * @param mixed $channel
+	 * @param mixed|null $channel
 	 */
 	public function output( $out, $channel = null ) {
 		parent::output( $out, $channel );
@@ -96,10 +96,11 @@ class LogRowUpdateGenerator implements RowUpdateGenerator {
 
 	public function update( $row ) {
 		$updates = [];
+		$logId = (int)$row->log_id;
 
 		$params = unserialize( $row->log_params );
 		if ( !$params ) {
-			$this->maintenance->error( "Failed to unserialize log_params for log_id {$row->log_id}" );
+			$this->maintenance->error( "Failed to unserialize log_params for log_id $logId" );
 			return [];
 		}
 
@@ -114,7 +115,7 @@ class LogRowUpdateGenerator implements RowUpdateGenerator {
 		}
 
 		if ( !$topic ) {
-			$this->maintenance->error( "Missing topicId & postId for log_id {$row->log_id}" );
+			$this->maintenance->error( "Missing topicId & postId for log_id $logId" );
 			return [];
 		}
 
@@ -123,7 +124,7 @@ class LogRowUpdateGenerator implements RowUpdateGenerator {
 			$updates['log_namespace'] = $topic->getTitle()->getNamespace();
 			$updates['log_title'] = $topic->getTitle()->getDBkey();
 		} catch ( \Exception $e ) {
-			$this->maintenance->error( "Couldn't load Title for log_id {$row->log_id}" );
+			$this->maintenance->error( "Couldn't load Title for log_id $logId" );
 			$updates = [];
 		}
 
@@ -162,7 +163,7 @@ class LogRowUpdateGenerator implements RowUpdateGenerator {
 
 	/**
 	 * @param UUID $postId
-	 * @return PostCollection
+	 * @return PostCollection|false
 	 */
 	protected function loadPost( UUID $postId ) {
 		try {
@@ -196,5 +197,5 @@ class LogRowUpdateGenerator implements RowUpdateGenerator {
 	}
 }
 
-$maintClass = 'FlowFixLog';
+$maintClass = FlowFixLog::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

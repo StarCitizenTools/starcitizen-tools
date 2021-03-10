@@ -14,7 +14,7 @@
  */
 class CampaignContent extends JsonContent {
 
-	function __construct( $text ) {
+	public function __construct( $text ) {
 		parent::__construct( $text, 'Campaign' );
 	}
 
@@ -24,10 +24,10 @@ class CampaignContent extends JsonContent {
 	 * @throws JsonSchemaException If invalid.
 	 * @return bool True if valid.
 	 */
-	function validate() {
+	public function validate() {
 		$campaign = $this->getJsonData();
 		if ( !is_array( $campaign ) ) {
-			throw new JsonSchemaException( wfMessage( 'eventlogging-invalid-json' )->parse() );
+			throw new JsonSchemaException( 'eventlogging-invalid-json' );
 		}
 
 		$schema = include __DIR__ . '/CampaignSchema.php';
@@ -52,7 +52,7 @@ class CampaignContent extends JsonContent {
 	/**
 	 * @return bool Whether content is valid JSON Schema.
 	 */
-	function isValid() {
+	public function isValid() {
 		try {
 			return parent::isValid() && $this->validate();
 		} catch ( JsonSchemaException $e ) {
@@ -68,7 +68,7 @@ class CampaignContent extends JsonContent {
 	 * @param bool $generateHtml
 	 * @return ParserOutput
 	 */
-	function getParserOutput( Title $title,
+	public function getParserOutput( Title $title,
 		$revId = null,
 		ParserOptions $options = null, $generateHtml = true
 	) {
@@ -94,7 +94,7 @@ class CampaignContent extends JsonContent {
 		return $po;
 	}
 
-	function generateHtml( $campaign ) {
+	public function generateHtml( $campaign ) {
 		$formatter = new CampaignPageFormatter( $campaign );
 
 		return $formatter->generateReadHtml();

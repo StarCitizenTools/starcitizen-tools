@@ -36,7 +36,7 @@ class EchoDiffParser {
 	protected $prefixLength = 1;
 
 	/**
-	 * @var array $left The text of the left side of the diff operation
+	 * @var string[] $left The text of the left side of the diff operation
 	 */
 	protected $left;
 
@@ -46,7 +46,7 @@ class EchoDiffParser {
 	protected $leftPos;
 
 	/**
-	 * @var array $right The text of the right side of the diff operation
+	 * @var string[] $right The text of the right side of the diff operation
 	 */
 	protected $right;
 
@@ -95,7 +95,7 @@ class EchoDiffParser {
 	 * If we add content to an empty page the changeSet can be composed straightaway
 	 *
 	 * @param string $right
-	 * @return array[] see getChangeSet()
+	 * @return array[] See {@see getChangeSet}
 	 */
 	private function getChangeSetFromEmptyLeft( $right ) {
 		$rightLines = explode( "\n", $right );
@@ -158,19 +158,19 @@ class EchoDiffParser {
 		}
 		if ( $change === null ) {
 			return $this->changeSet;
-		} else {
-			return array_merge( $this->changeSet, $change->getChangeSet() );
 		}
+
+		return array_merge( $this->changeSet, $change->getChangeSet() );
 	}
 
 	/**
 	 * Parse the next line of the unified diff output
 	 *
 	 * @param string $line The next line of the unified diff
-	 * @param EchoDiffGroup|null $change Changes the the immediately previous lines
+	 * @param EchoDiffGroup|null $change Changes the immediately previous lines
 	 *
 	 * @throws MWException
-	 * @return EchoDiffGroup Changes to this line and any changed lines immediately previous
+	 * @return EchoDiffGroup|null Changes to this line and any changed lines immediately previous
 	 */
 	protected function parseLine( $line, EchoDiffGroup $change = null ) {
 		if ( $line ) {
@@ -191,9 +191,11 @@ class EchoDiffParser {
 					$change = null;
 				}
 				// @@ -start,numLines +start,numLines @@
-				list( , $left, $right ) = explode( ' ', $line );
-				list( $this->leftPos ) = explode( ',', substr( $left, 1 ) );
-				list( $this->rightPos ) = explode( ',', substr( $right, 1 ) );
+				list( , $left, $right ) = explode( ' ', $line, 3 );
+				list( $this->leftPos ) = explode( ',', substr( $left, 1 ), 2 );
+				list( $this->rightPos ) = explode( ',', substr( $right, 1 ), 2 );
+				$this->leftPos = (int)$this->leftPos;
+				$this->rightPos = (int)$this->rightPos;
 
 				// -1 because diff is 1 indexed and we are 0 indexed
 				$this->leftPos--;
@@ -214,6 +216,7 @@ class EchoDiffParser {
 					throw new MWException( 'Positional error: left' );
 				}
 				if ( $change === null ) {
+					// @phan-suppress-next-line PhanTypeMismatchArgument
 					$change = new EchoDiffGroup( $this->leftPos, $this->rightPos );
 				}
 				$change->subtract( $line );
@@ -225,6 +228,7 @@ class EchoDiffParser {
 					throw new MWException( 'Positional error: right' );
 				}
 				if ( $change === null ) {
+					// @phan-suppress-next-line PhanTypeMismatchArgument
 					$change = new EchoDiffGroup( $this->leftPos, $this->rightPos );
 				}
 				$change->add( $line );

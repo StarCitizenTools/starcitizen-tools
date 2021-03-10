@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pyscowicz"
+		]
+	},
+	"mwe-upwiz-step-file": "Lattaa ylös",
+	"mwe-upwiz-source-ownwork": "{{PLURAL:$1|Tämä fiili oon itte tekemäni|Nämä fiilit ovat itte tekemiäni}}.",
+	"mwe-upwiz-patent-dialog-button-back": "Takashiin",
+	"mwe-upwiz-patent-dialog-button-next": "Seuraava",
+	"mwe-upwiz-patent-dialog-link-warranty": "Lue lissää",
+	"mwe-upwiz-patent-dialog-link-license": "Lue lissää",
+	"mwe-upwiz-source": "Lähe",
+	"mwe-upwiz-deleted-duplicate-unknown-filename": "Tuntematon fiilinimi",
+	"mwe-upwiz-publish-details": "Anna ulos fiilit",
+	"mwe-upwiz-publish-metadata": "Anna ulos taatta",
+	"mwe-upwiz-previous": "Takashiin",
+	"mwe-upwiz-home": "Siiry wikin alkusivule",
+	"mwe-upwiz-dialog-yes": "Joo",
+	"mwe-upwiz-dialog-no": "Ei",
+	"mwe-upwiz-dialog-title": "Varotus",
+	"mwe-upwiz-license-custom-preview": "Esikattelu",
+	"mwe-upwiz-categories": "Katekuurit"
+}

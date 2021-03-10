@@ -9,7 +9,7 @@ use Flow\Model\URLReference;
 use Flow\Model\WikiReference;
 use Flow\Model\Workflow;
 use LinkBatch;
-use LinkCache;
+use MediaWiki\MediaWikiServices;
 use ParserOutput;
 use Title;
 use WikiPage;
@@ -29,9 +29,9 @@ class LinksTableUpdater {
 		$title = $workflow->getArticleTitle();
 		$page = WikiPage::factory( $title );
 		$content = $page->getContent();
-		if ( $content === null ) {
-			$updates = [];
-		} else {
+		$updates = [];
+		// Must have an article ID in order for LinksUpdate to not fail in getSecondaryDataUpdates.
+		if ( $content !== null && $title->getArticleID( Title::GAID_FOR_UPDATE ) ) {
 			$updates = $content->getSecondaryDataUpdates( $title );
 		}
 
@@ -43,9 +43,9 @@ class LinksTableUpdater {
 	/**
 	 * @param Title $title
 	 * @param ParserOutput $parserOutput
-	 * @param Reference[] $references
+	 * @param Reference[]|null $references
 	 */
-	public function mutateParserOutput( Title $title, ParserOutput $parserOutput, $references = null ) {
+	public function mutateParserOutput( Title $title, ParserOutput $parserOutput, array $references = null ) {
 		if ( $references === null ) {
 			$references = $this->getReferencesForTitle( $title );
 		}
@@ -59,7 +59,7 @@ class LinksTableUpdater {
 		foreach ( $references as $reference ) {
 			if ( $reference->getType() === 'link' ) {
 				if ( $reference instanceof URLReference ) {
-					$parserOutput->mExternalLinks[$reference->getURL()] = true;
+					$parserOutput->addExternalLink( $reference->getUrl() );
 				} elseif ( $reference instanceof WikiReference ) {
 					$internalLinks[$reference->getTitle()->getPrefixedDBkey()] = $reference->getTitle();
 					$linkBatch->addObj( $reference->getTitle() );
@@ -87,7 +87,7 @@ class LinksTableUpdater {
 		}
 
 		$linkBatch->execute();
-		$linkCache = LinkCache::singleton();
+		$linkCache = MediaWikiServices::getInstance()->getLinkCache();
 
 		foreach ( $internalLinks as $title ) {
 			$ns = $title->getNamespace();

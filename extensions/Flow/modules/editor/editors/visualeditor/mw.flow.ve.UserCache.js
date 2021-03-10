@@ -1,14 +1,16 @@
-( function ( $, mw, OO, ve ) {
+( function () {
 	'use strict';
 
 	/**
 	 * Cache information about users.
+	 *
 	 * @class
 	 * @extends ve.init.mw.ApiResponseCache
 	 * @constructor
 	 */
 	mw.flow.ve.UserCache = function FlowVeUserCache() {
-		mw.flow.ve.UserCache.parent.call( this );
+		// Parent constructor
+		mw.flow.ve.UserCache.super.apply( this, arguments );
 	};
 
 	/* Inheritance */
@@ -66,6 +68,7 @@
 
 	/**
 	 * Add data from a partial API response
+	 *
 	 * @param {Object} apiData API data for a single item
 	 */
 	mw.flow.ve.UserCache.prototype.setFromApiData = function ( apiData ) {
@@ -76,6 +79,7 @@
 
 	/**
 	 * Mark a list of user names as valid and existing.
+	 *
 	 * @param {string|string[]} usernames One or more user names
 	 */
 	mw.flow.ve.UserCache.prototype.setAsExisting = function ( usernames ) {
@@ -91,4 +95,4 @@
 
 	// TODO we need a platform class or some other place to put this
 	mw.flow.ve.userCache = new mw.flow.ve.UserCache();
-}( jQuery, mediaWiki, OO, ve ) );
+}() );

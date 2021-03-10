@@ -2,50 +2,42 @@
 
 /**
  * @group Echo
- * @group DataBase
+ * @group Database
  * @group medium
  */
 class EchoTalkPageFunctionalTest extends ApiTestCase {
 
-	protected $dbr;
-
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
-		$this->dbr = MWEchoDbFactory::getDB( DB_REPLICA );
+		$this->db->delete( 'echo_event', '*' );
 	}
 
 	/**
 	 * Creates and updates a user talk page a few times to ensure proper events are
 	 * created. The user performing the edits is self::$users['sysop'].
-	 * @group Broken
+	 * @covers \EchoDiscussionParser
 	 */
 	public function testAddCommentsToTalkPage() {
-		$editor = self::$users['sysop']->getUser()->getName();
 		$talkPage = self::$users['uploader']->getUser()->getName();
-		// A set of messages which will be inserted
-		$messages = [
-			'Moar Cowbell',
-			"I can haz test\n\nplz?", // checks that the parser allows multi-line comments
-			'blah blah',
-		];
 
 		$messageCount = 0;
 		$this->assertCount( $messageCount, $this->fetchAllEvents() );
 
 		// Start a talkpage
-		$content = "== Section 8 ==\n\n" . $this->signedMessage( $editor, $messages[$messageCount] );
+		$content = "== Section 8 ==\n\nblah blah ~~~~\n";
 		$this->editPage( $talkPage, $content, '', NS_USER_TALK );
 
 		// Ensure the proper event was created
 		$events = $this->fetchAllEvents();
-		$this->assertCount( 1 + $messageCount, $events, 'After initial edit a single event must exist.' ); // +1 is due to 0 index
+		// +1 is due to 0 index
+		$this->assertCount( 1 + $messageCount, $events, 'After initial edit a single event must exist.' );
 		$row = array_shift( $events );
 		$this->assertEquals( 'edit-user-talk', $row->event_type );
 		$this->assertEventSectionTitle( 'Section 8', $row );
 
 		// Add another message to the talk page
 		$messageCount++;
-		$content .= $this->signedMessage( $editor, $messages[$messageCount] );
+		$content .= "More content ~~~~\n";
 		$this->editPage( $talkPage, $content, '', NS_USER_TALK );
 
 		// Ensure another event was created
@@ -57,7 +49,7 @@ class EchoTalkPageFunctionalTest extends ApiTestCase {
 
 		// Add a new section and a message within it
 		$messageCount++;
-		$content .= "\n\n== EE ==\n\n" . $this->signedMessage( $editor, $messages[$messageCount] );
+		$content .= "\n\n== EE ==\n\nhere we go with a new section ~~~~\n";
 		$this->editPage( $talkPage, $content, '', NS_USER_TALK );
 
 		// Ensure this event has the new section title
@@ -76,16 +68,14 @@ class EchoTalkPageFunctionalTest extends ApiTestCase {
 	}
 
 	/**
-	 * @return array All events in db sorted from oldest to newest
+	 * @return \stdClass[] All non-watchlist events in db sorted from oldest to newest
 	 */
 	protected function fetchAllEvents() {
-		$res = $this->dbr->select( 'echo_event', [ '*' ], [], __METHOD__, [ 'ORDER BY' => 'event_id ASC' ] );
+		$res = $this->db->select( 'echo_event', EchoEvent::selectFields(), [
+				'event_type != "watchlist-change"'
+			], __METHOD__, [ 'ORDER BY' => 'event_id ASC' ] );
 
 		return iterator_to_array( $res );
-	}
-
-	protected function signedMessage( $name, $content = 'Moar cowbell', $depth = 1 ) {
-		return str_repeat( ':', $depth ) . " $content [[User:$name|$name]] ([[User talk:$name|$name]]) 00:17, 7 May 2013 (UTC)\n";
 	}
 
 }

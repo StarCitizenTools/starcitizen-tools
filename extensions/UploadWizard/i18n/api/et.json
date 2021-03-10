@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pikne"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Flickri internetiaadressi mustas nimekirjas oleku kontroll kasutajaidentifikaatori (NSID) abil.\n\nKui kasutatakse valikuga <var>list</var>, tagastab kõik musta nimekirja kantud identifikaatorid.",
+	"apihelp-flickrblacklist-param-url": "Flickri internetiaadress, mida kontrollida.",
+	"apihelp-flickrblacklist-param-list": "Kui määratud, tagastatakse kogu must nimekiri. Ei saa kasutada koos atribuudiga \"$1url\".",
+	"apihelp-flickrblacklist-example-1": "Kontrolli internetiaadressi musta nimekirja vastu",
+	"apihelp-flickrblacklist-example-2": "Tagasta kogu must nimekiri",
+	"apihelp-query+allcampaigns-description": "Üleslaadimisviisardi kõigi kampaaniate loetlemine.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Loetle ainult lubatud kampaaniad.",
+	"apihelp-query+allcampaigns-param-limit": "Tagastatavate kampaaniate arv.",
+	"apihelp-query+allcampaigns-example-1": "Loetle lubatud kampaaniad"
+}

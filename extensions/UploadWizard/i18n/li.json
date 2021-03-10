@@ -1,13 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ooswesthoesbes",
+			"Envlh",
 			"Matma Rex",
-			"Envlh"
+			"Ooswesthoesbes"
 		]
 	},
 	"uploadwizard": "Uploadwizzerd",
 	"uploadwizard-desc": "Uploadwizzerd, óntwikkeldj veur 't gaeve vanne multimediabroekbaarheid",
+	"tag-uploadwizard": "Uploadwizzerd",
+	"tag-uploadwizard-description": "Uploads mit de uploadwizzerd",
+	"tag-uploadwizard-flickr-description": "Flickr-uploads mit de uploadwizzerd",
+	"right-mass-upload": "Batchupload van mieër bestenj in eine gank mit de uplaodwizzerd",
 	"right-upwizcampaigns": "Configureer campagnes van de Wizard Uploaden",
 	"action-upwizcampaigns": "configure upload campaigns",
 	"group-upwizcampeditors": "Campagnebehierders van de Uploadwizard",
@@ -126,7 +130,6 @@
 	"mwe-upwiz-next": "Volgende",
 	"mwe-upwiz-next-file": "Doorgaon",
 	"mwe-upwiz-next-deeds": "Volgende",
-	"mwe-upwiz-next-details": "Volgende",
 	"mwe-upwiz-home": "Gank nao 't veurblaad vanne wiki",
 	"mwe-upwiz-upload-another": "Upload mier bestenj",
 	"mwe-upwiz-prevent-close": "Doe bös nag neet klaot mit 't uploade en publicere van {{PLURAL:$1|dit bestandj|dees bestenj}}.",
@@ -191,7 +194,7 @@
 	"mwe-upwiz-license-own-pd": "Aalle rèchte vriegegaeve via de licensie Creative Commons 0 (wie pebliek demein)",
 	"mwe-upwiz-license-pd-old-100": "Sjriever al mier es 100 jaor doed",
 	"mwe-upwiz-license-pd-old": "Sjriever al mier es 70 jaor doed",
-	"mwe-upwiz-license-pd-us": "Veur 't iers gepubliceerd inne VS veur 1923",
+	"mwe-upwiz-license-pd-us": "Veur 't iers gepubliceerd inne VS veur 1925",
 	"mwe-upwiz-license-pd-usgov": "Origineel wirk vanne Amerikaanse fidderaole regering",
 	"mwe-upwiz-license-pd-usgov-nasa": "Origineel wirk vanne NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Origineel wirk vanne Amerikaanse Marine",
@@ -239,6 +242,5 @@
 	"mwe-upwiz-prefs-def-license-def": "Gebroek de standerd",
 	"mwe-upwiz-prefs-license-own": "Eige wèrk - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "Emes anges zie wèrk - $1",
-	"mwe-upwiz-prefs-chunked": "Verdeildje uploads veur bestenj die grótter es $1 zeen bieje Upload Wizard",
 	"mwe-upwiz-prefs-skiptutorial": "Slaon inleiing licensies euver"
 }

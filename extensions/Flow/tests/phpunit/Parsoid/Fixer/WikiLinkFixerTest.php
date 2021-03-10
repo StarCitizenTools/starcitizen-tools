@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:disable Generic.Files.LineLength -- Long html test examples
+
 namespace Flow\Tests\Parsoid\Fixer;
 
 use Flow\Parsoid\ContentFixer;
@@ -8,7 +10,12 @@ use Flow\Tests\PostRevisionTestCase;
 use Title;
 
 /**
+ * @covers \Flow\Model\AbstractRevision
+ * @covers \Flow\Model\PostRevision
+ * @covers \Flow\Parsoid\Fixer\WikiLinkFixer
+ *
  * @group Flow
+ * @group Database
  */
 class WikiLinkFixerTest extends PostRevisionTestCase {
 
@@ -64,8 +71,8 @@ class WikiLinkFixerTest extends PostRevisionTestCase {
 	 * @dataProvider redLinkProvider
 	 */
 	public function testAppliesRedLinks( $message, $anchor, $expect ) {
-		$fixer = new ContentFixer( new WikiLinkFixer( $this->getMock( 'LinkBatch' ) ) );
+		$fixer = new ContentFixer( new WikiLinkFixer( $this->createMock( \LinkBatch::class ) ) );
 		$result = $fixer->apply( $anchor, Title::newMainPage() );
-		$this->assertContains( $expect, $result, $message );
+		$this->assertStringContainsString( $expect, $result, $message );
 	}
 }

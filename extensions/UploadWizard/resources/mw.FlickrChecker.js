@@ -1,5 +1,5 @@
 /* eslint-disable camelcase, no-underscore-dangle */
-( function ( mw, $, OO ) {
+( function () {
 	mw.FlickrChecker = function ( ui, selectButton ) {
 		this.ui = ui;
 		this.imageUploads = [];
@@ -13,6 +13,7 @@
 	 * Used to avoid name conflicts. Filenames are not removed when an upload is cancelled, so this can
 	 * contain fakes. Since we only use the list to choose an ugly but more unique file format on conflict,
 	 * and never refuse an upload based on it, that is not really a problem.
+	 *
 	 * @type {Object}
 	 */
 	mw.FlickrChecker.fileNames = {};
@@ -21,12 +22,14 @@
 	 * Cache for Flickr blacklist lookups.
 	 * Resolves to a hash whose keys are the blacklisted Flickr NSIDs.
 	 * Use `FlickrChecker.getBlacklist()` instead of accessing this directly.
+	 *
 	 * @type {jQuery.Promise}
 	 */
 	mw.FlickrChecker.blacklist = null;
 
 	/**
 	 * Cache for Flickr license lookups.
+	 *
 	 * @type {jQuery.Promise}
 	 */
 	mw.FlickrChecker.licensePromise = null;
@@ -41,16 +44,16 @@
 	// Live list at http://api.flickr.com/services/rest/?&method=flickr.photos.licenses.getInfo&api_key=...
 	mw.FlickrChecker.licenseMaps = {
 		'All Rights Reserved': 'invalid',
-		'Attribution License': '{{FlickrVerifiedByUploadWizard|cc-by-2.0}}{{cc-by-2.0}}',
+		'Attribution License': '{{cc-by-2.0}}{{flickrreview}}',
 		'Attribution-NoDerivs License': 'invalid',
 		'Attribution-NonCommercial-NoDerivs License': 'invalid',
-		'Attribution-NonCommercial License': '{{FlickrVerifiedByUploadWizard|cc-by-nc-2.0}}{{cc-by-nc-2.0}}',
-		'Attribution-NonCommercial-ShareAlike License': '{{FlickrVerifiedByUploadWizard|cc-by-nc-sa-2.0}}{{cc-by-nc-sa-2.0}}',
-		'Attribution-ShareAlike License': '{{FlickrVerifiedByUploadWizard|cc-by-sa-2.0}}{{cc-by-sa-2.0}}',
-		'No known copyright restrictions': '{{FlickrVerifiedByUploadWizard|Flickr-no known copyright restrictions}}{{Flickr-no known copyright restrictions}}',
-		'United States Government Work': '{{FlickrVerifiedByUploadWizard|PD-USGov}}{{PD-USGov}}',
-		'Public Domain Dedication (CC0)': '{{FlickrVerifiedByUploadWizard|cc-zero}}{{cc-zero}}',
-		'Public Domain Mark': '{{FlickrVerifiedByUploadWizard|Public Domain Mark}}' // T105629
+		'Attribution-NonCommercial License': 'invalid',
+		'Attribution-NonCommercial-ShareAlike License': 'invalid',
+		'Attribution-ShareAlike License': '{{cc-by-sa-2.0}}{{flickrreview}}',
+		'No known copyright restrictions': '{{Flickr-no known copyright restrictions}}{{flickrreview}}',
+		'United States Government Work': '{{PD-USGov}}{{flickrreview}}',
+		'Public Domain Dedication (CC0)': '{{cc-zero}}{{flickrreview}}',
+		'Public Domain Mark': '{{flickrreview}}' // T105629, user needs to add a valid PD license
 	};
 
 	mw.FlickrChecker.prototype = {
@@ -76,6 +79,7 @@
 			userFavoritesMatches = flickrInputUrl.match( /flickr\.com\/(?:x\/t\/[^/]+\/)?photos\/([^/]+)\/favorites/ );
 
 			this.$spinner = $.createSpinner( { size: 'large', type: 'block' } );
+			// eslint-disable-next-line no-jquery/no-global-selector
 			$( '#mwe-upwiz-flickr-select-list-container' ).after( this.$spinner );
 
 			if ( photoIdMatches === null ) {
@@ -84,6 +88,7 @@
 			}
 			if ( albumIdMatches || photoIdMatches || userCollectionMatches || userPhotostreamMatches ||
 				groupPoolMatches || userGalleryMatches || userFavoritesMatches ) {
+				// eslint-disable-next-line no-jquery/no-global-selector
 				$( '#mwe-upwiz-upload-add-flickr-container' ).hide();
 				this.imageUploads = [];
 				if ( albumIdMatches && albumIdMatches[ 2 ] > 0 ) {
@@ -233,33 +238,34 @@
 		buildCollectionLinks: function ( appendId, data ) {
 			var $elem = $( '<ul>' ),
 				that = this,
-				li, ul;
+				$li, $ul;
 			if ( appendId ) {
 				$elem.attr( 'id', 'mwe-upwiz-files-collection-chooser' );
 			}
-			$.each( data.collection, function ( index, value ) {
-				li = $( '<li>' );
-				li.append( value.title );
+			data.collection.forEach( function ( value ) {
+				$li = $( '<li>' );
+				$li.append( value.title );
 				if ( value.collection !== undefined ) {
-					li.append( that.buildCollectionLinks( false, value ) );
+					$li.append( that.buildCollectionLinks( false, value ) );
 				}
 				if ( value.set !== undefined ) {
-					ul = $( '<ul>' );
-					$.each( value.set, function ( index2, value2 ) {
-						var link = $( '<a>', { href: '#', role: 'button', 'data-id': value2.id } );
-						link.append( value2.title );
-						link.click( function () {
+					$ul = $( '<ul>' );
+					value.set.forEach( function ( value2 ) {
+						var $link = $( '<a>' ).attr( { href: '#', role: 'button', 'data-id': value2.id } );
+						$link.append( value2.title );
+						$link.on( 'click', function () {
+							// eslint-disable-next-line no-jquery/no-global-selector
 							$( '#mwe-upwiz-files-collection-chooser' ).remove();
 							that.getPhotos( 'photoset', {
 								method: 'flickr.photosets.getPhotos',
-								photoset_id: link.data( 'id' )
+								photoset_id: $link.data( 'id' )
 							} );
 						} );
-						ul.append( $( '<li>' ).append( link ) );
+						$ul.append( $( '<li>' ).append( $link ) );
 					} );
-					li.append( ul );
+					$li.append( $ul );
 				}
-				$elem.append( li );
+				$elem.append( $li );
 			} );
 			return $elem;
 		},
@@ -289,6 +295,7 @@
 				}
 
 				return checker.flickrRequest( req ).then( function ( data ) {
+					// eslint-disable-next-line no-jquery/no-global-selector
 					$( '#mwe-upwiz-files' ).append( checker.buildCollectionLinks( true, data.collections ) );
 				} );
 			} );
@@ -333,10 +340,10 @@
 		 * Retrieves a list of photos and displays it.
 		 *
 		 * @param {string} mode may be: 'photoset' - for use with photosets,
-		 *	 or 'photos' - for use with everything else (the parameter is used
-		 *	 to determine how the properties in retrieved JSON are named)
+		 *  or 'photos' - for use with everything else (the parameter is used
+		 *  to determine how the properties in retrieved JSON are named)
 		 * @param {Object} options options to pass to the API call; especially API method
-		 *	 and some "***_id"s (photoset_id, etc.)
+		 *  and some "***_id"s (photoset_id, etc.)
 		 * @return {jQuery.Promise}
 		 */
 		getPhotos: function ( mode, options ) {
@@ -374,10 +381,10 @@
 
 				checker.$spinner.remove();
 
-				$.each( photoset.photo, function ( i, item ) {
+				photoset.photo.forEach( function ( item, i ) {
 					var flickrUpload, license, licenseValue, ownerId;
 
-					license = checker.checkLicense( item.license, i );
+					license = checker.checkLicense( item.license );
 					licenseValue = license.licenseValue;
 					if ( licenseValue === 'invalid' ) {
 						return;
@@ -385,10 +392,10 @@
 
 					if ( mode === 'photoset' ) {
 						ownerId = photoset.owner;
-						sourceURL = 'http://www.flickr.com/photos/' + photoset.owner + '/' + item.id + '/';
+						sourceURL = 'https://www.flickr.com/photos/' + photoset.owner + '/' + item.id + '/';
 					} else if ( mode === 'photos' ) {
 						ownerId = item.owner;
-						sourceURL = 'http://www.flickr.com/photos/' + item.owner + '/' + item.id + '/';
+						sourceURL = 'https://www.flickr.com/photos/' + item.owner + '/' + item.id + '/';
 					}
 
 					if ( ownerId in blacklist || item.pathalias in blacklist ) {
@@ -436,6 +443,7 @@
 					}
 				} );
 				checkboxesWidget.addItems( checkboxes );
+				// eslint-disable-next-line no-jquery/no-global-selector
 				$( '#mwe-upwiz-flickr-select-list' ).append( checkboxesWidget.$element );
 				// Set up checkboxes
 				checkboxesWidget.on( 'select', function () {
@@ -445,7 +453,7 @@
 					// Limit the number of selectable images
 					checkboxesWidget.getItems().forEach( function ( checkbox ) {
 						if ( !checkbox.isSelected() ) {
-							checkbox.setDisabled( selectedCount >= mw.UploadWizard.config.maxUploads );
+							checkbox.setDisabled( selectedCount >= mw.UploadWizard.config.maxFlickrUploads );
 						}
 					} );
 				} );
@@ -453,8 +461,11 @@
 				checker.selectButton.on( 'click', function () {
 					var uploads = [];
 					checker.$spinner = $.createSpinner( { size: 'large', type: 'block' } );
+					// eslint-disable-next-line no-jquery/no-global-selector
 					$( '#mwe-upwiz-flickr-select-list-container' ).hide();
+					// eslint-disable-next-line no-jquery/no-global-selector
 					$( '#mwe-upwiz-upload-ctrls' ).show();
+					// eslint-disable-next-line no-jquery/no-global-selector
 					$( '#mwe-upwiz-flickr-select-list-container' ).after( checker.$spinner );
 					$.when.apply( $, checkboxesWidget.findSelectedItemsData().map( function ( image ) {
 						uploads.push( checker.imageUploads[ image ] );
@@ -477,8 +488,10 @@
 				if ( checker.imageUploads.length === 0 ) {
 					return $.Deferred().reject( mw.message( 'mwe-upwiz-license-photoset-invalid' ).escaped() );
 				} else {
+					// eslint-disable-next-line no-jquery/no-global-selector
 					$( '#mwe-upwiz-flickr-select-list-container' ).show();
 					// Lazy-load images
+					// eslint-disable-next-line no-jquery/no-global-selector
 					$( 'img.lazy-thumbnail' ).lazyload( {
 						// jQuery considers all images without 'src' to not be ':visible'
 						skip_invisible: false
@@ -542,7 +555,7 @@
 					photoAuthor = photo.owner.username;
 				}
 				// get the URL of the photo page
-				$.each( photo.urls.url, function ( index, url ) {
+				photo.urls.url.forEach( function ( url ) {
 					if ( url.type === 'photopage' ) {
 						sourceURL = url._content;
 						// break each loop
@@ -623,7 +636,7 @@
 				} ).then( function ( data ) {
 					var blacklist = {};
 					if ( data.flickrblacklist && data.flickrblacklist.list ) {
-						$.each( data.flickrblacklist.list, function ( i, username ) {
+						data.flickrblacklist.list.forEach( function ( username ) {
 							blacklist[ username ] = true;
 						} );
 					}
@@ -644,12 +657,13 @@
 			}
 
 			// Workaround for http://bugs.jquery.com/ticket/8283
-			jQuery.support.cors = true;
+			// eslint-disable-next-line no-jquery/no-support
+			$.support.cors = true;
 			mw.FlickrChecker.licensePromise = this.flickrRequest( {
 				method: 'flickr.photos.licenses.getInfo'
 			} ).then( function ( data ) {
 				if ( typeof data.licenses !== 'undefined' ) {
-					$.each( data.licenses.license, function ( index, value ) {
+					data.licenses.license.forEach( function ( value ) {
 						mw.FlickrChecker.licenseList[ value.id ] = value.name;
 					} );
 				}
@@ -746,9 +760,9 @@
 
 			// Set the license message to show the user.
 			if ( licenseValue === 'invalid' ) {
-				licenseMessage = mw.message( 'mwe-upwiz-license-external-invalid', 'Flickr', licenseName ).escaped();
+				licenseMessage = mw.msg( 'mwe-upwiz-license-external-invalid', 'Flickr', licenseName );
 			} else {
-				licenseMessage = mw.message( 'mwe-upwiz-license-external', 'Flickr', licenseName ).escaped();
+				licenseMessage = mw.msg( 'mwe-upwiz-license-external', 'Flickr', licenseName );
 			}
 
 			license = {
@@ -761,4 +775,4 @@
 		}
 	};
 
-}( mediaWiki, jQuery, OO ) );
+}() );

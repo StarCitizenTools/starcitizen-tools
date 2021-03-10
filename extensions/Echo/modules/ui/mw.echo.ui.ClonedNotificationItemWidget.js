@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	/* global moment:false */
 	/**
 	 * A wrapper widget for a fake, cloned notification. This is used
@@ -18,8 +18,8 @@
 	mw.echo.ui.ClonedNotificationItemWidget = function MwEchoUiClonedNotificationItemWidget( $element, config ) {
 		config = config || {};
 
-		// Parent
-		mw.echo.ui.ClonedNotificationItemWidget.parent.call( this, config );
+		// Parent constructor
+		mw.echo.ui.ClonedNotificationItemWidget.super.call( this, config );
 
 		this.$element = $element;
 		this.timestamp = config.timestamp || moment.utc().format( 'YYYY-MM-DD[T]HH:mm:ss[Z]' );
@@ -84,4 +84,4 @@
 	mw.echo.ui.ClonedNotificationItemWidget.prototype.resetInitiallyUnseen = function () {
 	};
 
-}( mediaWiki ) );
+}() );

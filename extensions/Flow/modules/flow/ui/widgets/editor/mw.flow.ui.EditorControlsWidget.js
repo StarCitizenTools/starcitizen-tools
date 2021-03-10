@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow editor controls widget
 	 *
@@ -13,21 +13,23 @@
 	 * @cfg {boolean} [saveable=true] Initial state of saveable flag
 	 */
 	mw.flow.ui.EditorControlsWidget = function mwFlowUiEditorControlsWidget( config ) {
-		var $buttons = $( '<div>' )
-			.addClass( 'flow-ui-editorControlsWidget-buttons' );
+		var $buttons = $( '<div>' ).addClass( 'flow-ui-editorControlsWidget-buttons' ),
+			widget = this;
 
 		config = config || {};
 
 		// Parent constructor
-		mw.flow.ui.EditorControlsWidget.parent.call( this, config );
+		mw.flow.ui.EditorControlsWidget.super.call( this, config );
 
 		this.termsLabel = new OO.ui.LabelWidget( {
 			classes: [ 'flow-ui-editorControlsWidget-termsLabel' ],
+			// eslint-disable-next-line mediawiki/msg-doc
 			label: $( $.parseHTML( mw.message( config.termsMsgKey || 'flow-terms-of-use-edit' ).parse() ) )
 		} );
 
 		this.saveButton = new OO.ui.ButtonWidget( {
 			flags: [ 'primary', 'progressive' ],
+			// eslint-disable-next-line mediawiki/msg-doc
 			label: mw.msg( config.saveMsgKey || 'flow-newtopic-save' ),
 			classes: [ 'flow-ui-editorControlsWidget-saveButton' ]
 		} );
@@ -35,9 +37,26 @@
 		this.cancelButton = new OO.ui.ButtonWidget( {
 			flags: 'destructive',
 			framed: false,
+			// eslint-disable-next-line mediawiki/msg-doc
 			label: mw.msg( config.cancelMsgKey || 'flow-cancel' ),
 			classes: [ 'flow-ui-editorControlsWidget-cancelButton' ]
 		} );
+
+		// Keyboard shortcut messages are provided by VE, so only do this when VE is installed
+		if ( mw.loader.getState( 'ext.visualEditor.core' ) ) {
+			mw.loader.using( 'ext.visualEditor.core' ).then( function () {
+				widget.cancelButton.setTitle(
+					widget.cancelButton.getLabel() +
+					// eslint-disable-next-line no-undef
+					' [' + new ve.ui.Trigger( 'escape' ).getMessage() + ']'
+				);
+				widget.saveButton.setTitle(
+					widget.saveButton.getLabel() +
+					// eslint-disable-next-line no-undef
+					' [' + ve.ui.triggerRegistry.lookup( 'submit' )[ 0 ].getMessage() + ']'
+				);
+			} );
+		}
 
 		$buttons.append(
 			this.cancelButton.$element,
@@ -75,6 +94,7 @@
 
 	/**
 	 * Toggle whether the save button can be used
+	 *
 	 * @param {boolean} [saveable=!this.saveable] Whether the save button can be used
 	 */
 	mw.flow.ui.EditorControlsWidget.prototype.toggleSaveable = function ( saveable ) {
@@ -82,9 +102,9 @@
 		this.saveButton.setDisabled( this.isDisabled() || !this.saveable );
 	};
 
-	mw.flow.ui.EditorControlsWidget.prototype.setDisabled = function ( disabled ) {
+	mw.flow.ui.EditorControlsWidget.prototype.setDisabled = function () {
 		// Parent method
-		mw.flow.ui.EditorControlsWidget.parent.prototype.setDisabled.call( this, disabled );
+		mw.flow.ui.EditorControlsWidget.super.prototype.setDisabled.apply( this, arguments );
 
 		if ( this.cancelButton && this.saveButton ) {
 			this.cancelButton.setDisabled( this.isDisabled() );
@@ -92,4 +112,4 @@
 		}
 	};
 
-}( jQuery ) );
+}() );

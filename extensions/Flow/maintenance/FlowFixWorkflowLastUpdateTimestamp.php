@@ -9,6 +9,7 @@ use Flow\Model\PostRevision;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
 use Flow\Repository\RootPostLoader;
+use MediaWiki\MediaWikiServices;
 use Wikimedia\Timestamp\TimestampException;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
@@ -27,7 +28,7 @@ class FlowFixWorkflowLastUpdateTimestamp extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 
-		$this->mDescription = 'Fixes any incorrect workflow_last_update_timestamp for topics';
+		$this->addDescription( 'Fixes any incorrect workflow_last_update_timestamp for topics' );
 
 		$this->setBatchSize( 10 );
 
@@ -61,7 +62,7 @@ class FlowFixWorkflowLastUpdateTimestamp extends Maintenance {
 	 * a Closure.
 	 *
 	 * @param string $out
-	 * @param mixed $channel
+	 * @param mixed|null $channel
 	 */
 	public function output( $out, $channel = null ) {
 		parent::output( $out, $channel );
@@ -92,7 +93,7 @@ class UpdateWorkflowLastUpdateTimestampGenerator implements RowUpdateGenerator {
 	 * @param stdClass $row
 	 * @return array
 	 * @throws TimestampException
-	 * @throws \Flow\Exception\FlowException
+	 * @throws FlowException
 	 * @throws \Flow\Exception\InvalidInputException
 	 */
 	public function update( $row ) {
@@ -194,7 +195,7 @@ class UpdateWorkflowLastUpdateTimestampWriter extends BatchRowWriter {
 		);
 
 		/** @var UUID[] $uuids */
-		$uuids = array_map( [ 'Flow\\Model\\UUID', 'create' ], array_keys( $timestamps ) );
+		$uuids = array_map( [ UUID::class, 'create' ], array_keys( $timestamps ) );
 
 		/** @var Workflow[] $workflows */
 		$workflows = $this->storage->getMulti( 'Workflow', $uuids );
@@ -208,7 +209,8 @@ class UpdateWorkflowLastUpdateTimestampWriter extends BatchRowWriter {
 		// prevent memory from filling up
 		$this->storage->clear();
 
-		wfWaitForSlaves( false, false, $this->clusterName );
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		$lbFactory->waitForReplication( [ 'cluster' => $this->clusterName ] );
 	}
 
 	/**
@@ -225,5 +227,5 @@ class UpdateWorkflowLastUpdateTimestampWriter extends BatchRowWriter {
 	}
 }
 
-$maintClass = 'FlowFixWorkflowLastUpdateTimestamp';
+$maintClass = FlowFixWorkflowLastUpdateTimestamp::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

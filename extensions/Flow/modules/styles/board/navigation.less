@@ -31,6 +31,7 @@
 			padding: 0.25em 0.75em;
 			color: @colorTextLight;
 		}
+
 		&:hover,
 		&:focus,
 		&.flow-board-navigator-link-highlight {
@@ -58,6 +59,7 @@
 			float: right;
 			position: static;
 			padding-right: 0;
+
 			span {
 				display: inline-block;
 			}
@@ -66,11 +68,11 @@
 
 	// Added by JS when the window has been scrolled beyond the navigation, so it sticks to the viewport
 	&.flow-board-navigation-affixed {
+		background: @background-color-base;
 		position: fixed;
 		z-index: 2;
 		top: 0;
 		width: 100%;
-		background: #fff;
 
 		.flow-board-toc-menu {
 			.flow-list {
@@ -88,12 +90,9 @@
 			& > a.flow-board-navigator-active {
 				// Clip the topic title
 				display: block;
-				overflow: hidden;
-				white-space: nowrap;
-				text-overflow: ellipsis;
+				.text-overflow( @visible: false );
 			}
 		}
-
 	}
 }
 
@@ -102,7 +101,6 @@
 	position: relative;
 	float: right;
 	width: 100%;
-
 	font-size: 0.875em;
 
 	// Make TOC wide
@@ -119,12 +117,10 @@
 
 		a {
 			display: block;
-			overflow: hidden;
-			white-space: nowrap;
 			text-align: left;
-			text-overflow: ellipsis;
 			padding-left: 0;
 			padding-right: 0;
+			.text-overflow( @visible: false );
 
 			&.active {
 				font-weight: bold;
@@ -138,6 +134,7 @@
 	html .flow-board-navigation {
 		font-size: 1.15em;
 		margin-top: 0.5em;
+
 		.oo-ui-iconElement-icon {
 			font-size: 1 / 1.15em;
 		}

@@ -5,76 +5,84 @@
  * $wgUploadWizardConfig[ 'name'] =  'value';
  */
 global $wgFileExtensions, $wgServer, $wgScriptPath, $wgAPIModules, $wgLang,
-	$wgMemc, $wgUploadWizardConfig, $wgCheckFileExtensions, $wgUser;
+	$wgCheckFileExtensions, $wgUser, $wgWBRepoSettings;
 
 $userLangCode = $wgLang->getCode();
-// We need to get a list of languages for the description dropdown.
-// Increase the number below to invalidate the cache if this code changes.
-$cacheKey = wfMemcKey( 'uploadwizard', 'language-templates3', $userLangCode );
-// Try to get a cached version of the list
-$uwLanguages = $wgMemc->get( $cacheKey );
 // Commons only: ISO 646 code of Tagalog is 'tl', but language template is 'tgl'
 $uwDefaultLanguageFixups = [ 'tl' => 'tgl' ];
-if ( !$uwLanguages ) {
-	$uwLanguages = [];
 
-	// First, get a list of languages we support.
-	$baseLangs = Language::fetchLanguageNames( $userLangCode, 'all' );
-	// We need to take into account languageTemplateFixups
-	if (
-		is_array( $wgUploadWizardConfig ) &&
-		array_key_exists( 'languageTemplateFixups', $wgUploadWizardConfig )
-	) {
-		$languageFixups = $wgUploadWizardConfig['languageTemplateFixups'];
-		if ( !is_array( $languageFixups ) ) {
-			$languageFixups = [];
-		}
-	} else {
-		$languageFixups = $uwDefaultLanguageFixups;
-	}
-	// Use LinkBatch to make this a little bit more faster.
-	// It works because $title->exists (below) will use LinkCache.
-	$linkBatch = new LinkBatch();
-	foreach ( $baseLangs as $code => $name ) {
-		$fixedCode = array_key_exists( $code, $languageFixups ) ? $languageFixups[$code] : $code;
-		if ( is_string( $fixedCode ) && $fixedCode !== '' ) {
-			$title = Title::makeTitle( NS_TEMPLATE, Title::capitalize( $fixedCode, NS_TEMPLATE ) );
-			$linkBatch->addObj( $title );
-		}
-	}
-	$linkBatch->execute();
+$cache = \MediaWiki\MediaWikiServices::getInstance()->getMainWANObjectCache();
+$uwLanguages = $cache->getWithSetCallback(
+	// We need to get a list of languages for the description dropdown.
+	// Increase the 'version' number in the options below if this logic or format changes.
+	$cache->makeKey( 'uploadwizard-language-templates', $userLangCode ),
+	$cache::TTL_DAY,
+	function () use ( $userLangCode, $uwDefaultLanguageFixups ) {
+		global $wgUploadWizardConfig;
 
-	// Then, check that there's a template for each one.
-	foreach ( $baseLangs as $code => $name ) {
-		$fixedCode = array_key_exists( $code, $languageFixups ) ? $languageFixups[$code] : $code;
-		if ( is_string( $fixedCode ) && $fixedCode !== '' ) {
-			$title = Title::makeTitle( NS_TEMPLATE, Title::capitalize( $fixedCode, NS_TEMPLATE ) );
-			if ( $title->exists() ) {
-				// If there is, then it's in the final picks!
-				$uwLanguages[$code] = $name;
+		$uwLanguages = [];
+
+		// First, get a list of languages we support.
+		$baseLangs = Language::fetchLanguageNames( $userLangCode, 'all' );
+		// We need to take into account languageTemplateFixups
+		if (
+			is_array( $wgUploadWizardConfig ) &&
+			array_key_exists( 'languageTemplateFixups', $wgUploadWizardConfig )
+		) {
+			$languageFixups = $wgUploadWizardConfig['languageTemplateFixups'];
+			if ( !is_array( $languageFixups ) ) {
+				$languageFixups = [];
+			}
+		} else {
+			$languageFixups = $uwDefaultLanguageFixups;
+		}
+		// Use LinkBatch to make this a little bit more faster.
+		// It works because $title->exists (below) will use LinkCache.
+		$linkBatch = new LinkBatch();
+		foreach ( $baseLangs as $code => $name ) {
+			$fixedCode = array_key_exists( $code, $languageFixups ) ? $languageFixups[$code] : $code;
+			if ( is_string( $fixedCode ) && $fixedCode !== '' ) {
+				$title = Title::makeTitle( NS_TEMPLATE, Title::capitalize( $fixedCode, NS_TEMPLATE ) );
+				$linkBatch->addObj( $title );
 			}
 		}
-	}
+		$linkBatch->execute();
 
-	// Skip the duplicate deprecated language codes if the new one is okay to use.
-	foreach ( LanguageCode::getDeprecatedCodeMapping() as $oldKey => $newKey ) {
-		if ( isset( $uwLanguages[$newKey] ) && isset( $uwLanguages[$oldKey] ) ) {
-			unset( $uwLanguages[$oldKey] );
+		// Then, check that there's a template for each one.
+		foreach ( $baseLangs as $code => $name ) {
+			$fixedCode = array_key_exists( $code, $languageFixups ) ? $languageFixups[$code] : $code;
+			if ( is_string( $fixedCode ) && $fixedCode !== '' ) {
+				$title = Title::makeTitle( NS_TEMPLATE, Title::capitalize( $fixedCode, NS_TEMPLATE ) );
+				if ( $title->exists() ) {
+					// If there is, then it's in the final picks!
+					$uwLanguages[$code] = $name;
+				}
+			}
 		}
-	}
 
-	// Sort the list by the language name.
-	if ( class_exists( 'Collator' ) ) {
-		// If a specific collation is not available for the user's language,
-		// this falls back to a generic 'root' one.
-		$collator = Collator::create( $userLangCode );
-		$collator->asort( $uwLanguages );
-	} else {
-		natcasesort( $uwLanguages );
-	}
-	// Cache the list for 1 day
-	$wgMemc->set( $cacheKey, $uwLanguages, 60 * 60 * 24 );
-}
+		// Skip the duplicate deprecated language codes if the new one is okay to use.
+		foreach ( LanguageCode::getDeprecatedCodeMapping() as $oldKey => $newKey ) {
+			if ( isset( $uwLanguages[$newKey] ) && isset( $uwLanguages[$oldKey] ) ) {
+				unset( $uwLanguages[$oldKey] );
+			}
+		}
+
+		// Sort the list by the language name.
+		if ( class_exists( Collator::class ) ) {
+			// If a specific collation is not available for the user's language,
+			// this falls back to a generic 'root' one.
+			$collator = Collator::create( $userLangCode );
+			$collator->asort( $uwLanguages );
+		} else {
+			natcasesort( $uwLanguages );
+		}
+
+		return $uwLanguages;
+	},
+	[
+		'version' => 3,
+	]
+);
 
 return [
 	// Upload wizard has an internal debug flag
@@ -409,7 +417,7 @@ return [
 		],
 		'pd-us' => [
 			'msg' => 'mwe-upwiz-license-pd-us',
-			'templates' => [ 'PD-1923' ]
+			'templates' => [ 'PD-US-expired' ]
 		],
 		'pd-usgov' => [
 			'msg' => 'mwe-upwiz-license-pd-usgov',
@@ -535,7 +543,7 @@ return [
 		'extensions' => [ 'stl' ],
 		'template' => '3dpatent',
 		'url' => [
-			'legalcode' => '//wikimediafoundation.org/wiki/Wikimedia_3D_file_patent_license',
+			'legalcode' => '//foundation.wikimedia.org/wiki/Wikimedia_3D_file_patent_license',
 			'warranty' => '//meta.wikimedia.org/wiki/Wikilegal/3D_files_and_3D_printing',
 			'license' => '//meta.wikimedia.org/wiki/Wikilegal/3D_files_and_3D_printing',
 			'weapons' => '//meta.wikimedia.org/wiki/Wikilegal/3D_files_and_3D_printing#Weapons',
@@ -555,16 +563,16 @@ return [
 	'minSourceLength' => 5,
 
 	// Max file title string length
-	'maxTitleLength' => 500,
+	'maxTitleLength' => 240,
 
 	// Min file title string length
 	'minTitleLength' => 5,
 
 	// Max file caption length
-	'maxCaptionLength' => 255,
+	'maxCaptionLength' => $wgWBRepoSettings['string-limits']['multilang']['length'] ?? 250,
 
 	// Min file caption length
-	'minCaptionLength' => 0,
+	'minCaptionLength' => 5,
 
 	// Max file description length
 	'maxDescriptionLength' => 10000,
@@ -580,6 +588,10 @@ return [
 
 	// Max number of uploads for a given form
 	'maxUploads' => $wgUser->isAllowed( 'mass-upload' ) ? 500 : 50,
+
+	// Max number of files that can be imported from Flickr at one time (T236341)
+	// Note that these numbers should always be equal to or less than the maxUploads above.
+	'maxFlickrUploads' => $wgUser->isAllowed( 'mass-upload' ) ? 500 : 4,
 
 	// Max file size that is allowed by PHP (may be higher/lower than MediaWiki file size limit).
 	// When using chunked uploading, these limits can be ignored.
@@ -633,12 +645,17 @@ return [
 	// If you want to use a wiki page, set this to a falsy value,
 	// and set feedbackPage to the name of the wiki page.
 	// @codingStandardsIgnoreStart
-	'feedbackLink' => 'https://phabricator.wikimedia.org/maniphest/task/edit/form/1/?projects=MediaWiki-extensions-UploadWizard',
+	'feedbackLink' => '',
 	// @codingStandardsIgnoreEnd
 
 	// [deprecated] Wiki page for leaving Upload Wizard feedback,
 	// for example 'Commons:Upload wizard feedback'
 	'feedbackPage' => '',
+
+	// Link to page containing a list of categories that the user can use for uploaded files.
+	// Shown on the Details stage, above the category selection field.
+	'allCategoriesLink' => 'https://commons.wikimedia.org/wiki/Commons:Categories',
+
 	// @codingStandardsIgnoreStart
 	// Title of page for alternative uploading form, e.g.:
 	//   'altUploadForm' => 'Special:Upload',
@@ -672,7 +689,10 @@ return [
 	// enable structured data to go into a wikibase repository
 	'wikibase' => [
 		'enabled' => false,
+		'captions' => true,
+		'statements' => true,
+		'nonDefaultStatements' => true,
 		// url to wikibase repo API
-		'api' => $wgScriptPath. '/api.php',
+		'api' => $wgScriptPath . '/api.php',
 	],
 ];

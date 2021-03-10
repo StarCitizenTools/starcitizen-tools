@@ -14,7 +14,6 @@
 	"mwe-upwiz-add-file-n": "Fügen Sie eine weitere Datei hinzu",
 	"mwe-upwiz-remove-upload": "Entfernen Sie diese Datei aus der Liste der hochzuladenden Dateien",
 	"mwe-upwiz-remove-description": "Entfernen Sie diese Beschreibung",
-	"mwe-upwiz-file-upload-notcapable": "Ihr Browser kann leider nicht zum Hochladen von Dateien verwendet werden.\nBitte nutzen Sie einen alternativen Browser.",
 	"mwe-upwiz-source-ownwork-assert-note": "Ich, der Rechteinhaber {{PLURAL:$2|dieses Werks|dieser Werke}}, veröffentliche {{PLURAL:$2|dieses Werk|diese Werke}} unter der Lizenz $1.",
 	"mwe-upwiz-source-permission": "Deren Urheber hat Ihnen die ausdrückliche Erlaubnis gegeben, sie hochzuladen.",
 	"mwe-upwiz-source-thirdparty-intro": "Bitte geben Sie die jeweilige Internetadresse an, unter der Sie jede der Dateien gefunden haben.",

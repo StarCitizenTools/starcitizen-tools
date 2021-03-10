@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\Revision\RevisionRecord;
+
 class EchoRevertedPresentationModel extends EchoEventPresentationModel {
 
 	public function getIconType() {
@@ -19,8 +21,11 @@ class EchoRevertedPresentationModel extends EchoEventPresentationModel {
 
 	public function getBodyMessage() {
 		$summary = $this->event->getExtraParam( 'summary' );
-		if ( !$this->isAutomaticSummary( $summary ) && $this->userCan( Revision::DELETED_COMMENT ) ) {
-			$msg = $this->msg( "notification-body-{$this->type}" );
+		if (
+			!$this->isAutomaticSummary( $summary ) &&
+			$this->userCan( RevisionRecord::DELETED_COMMENT )
+		) {
+			$msg = $this->msg( 'notification-body-reverted' );
 			$msg->plaintextParams( $this->formatSummary( $summary ) );
 			return $msg;
 		} else {
@@ -49,7 +54,7 @@ class EchoRevertedPresentationModel extends EchoEventPresentationModel {
 		$title = $this->event->getTitle();
 		if ( $title->canHaveTalkPage() ) {
 			$links[] = $this->getPageLink(
-				$title->getTalkPage(), null, true
+				$title->getTalkPage(), '', true
 			);
 		}
 
@@ -81,5 +86,9 @@ class EchoRevertedPresentationModel extends EchoEventPresentationModel {
 
 	protected function getSubjectMessageKey() {
 		return 'notification-reverted-email-subject2';
+	}
+
+	public function getSubjectMessage() {
+		return parent::getSubjectMessage()->params( $this->getNumberOfEdits() );
 	}
 }

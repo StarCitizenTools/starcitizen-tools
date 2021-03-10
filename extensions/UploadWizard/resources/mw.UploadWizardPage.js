@@ -7,7 +7,7 @@
  */
 
 // Create UploadWizard
-( function ( mw, $ ) {
+( function () {
 
 	function isCompatible() {
 		var
@@ -34,8 +34,10 @@
 		config.maxUploads = config.maxUploads || 10;
 
 		// Remove the initial spinner
-		$( '#mwe-first-spinner' ).remove();
+		// eslint-disable-next-line no-jquery/no-global-selector
+		$( '.mwe-first-spinner' ).remove();
 
+		// eslint-disable-next-line no-jquery/no-global-selector
 		if ( $( '#upload-wizard' ).length === 0 ) {
 			mw.log( 'UploadWizard is disabled, nothing to do.' );
 			return;
@@ -43,6 +45,7 @@
 
 		if ( !isCompatible() ) {
 			// Display the same error message as for grade-C browsers
+			// eslint-disable-next-line no-jquery/no-global-selector
 			$( '.mwe-upwiz-unavailable' ).show();
 			return;
 		}
@@ -56,4 +59,4 @@
 		mw.UploadWizardPage();
 	} );
 
-}( mediaWiki, jQuery ) );
+}() );

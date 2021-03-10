@@ -6,7 +6,7 @@
 mw.flow.ui.enhance = {};
 
 /** @class mw.ui.enhance */
-( function ( mw, $ ) {
+( function () {
 	/*
 	* Reduce eye-wandering due to adjacent colorful buttons
 	* This will make unhovered and unfocused sibling buttons become faded and blurred
@@ -92,6 +92,7 @@ mw.flow.ui.enhance = {};
 
 	/**
 	 * Disables action and submit buttons when a form has required fields
+	 *
 	 * @param {jQuery} $form jQuery object corresponding to a form element.
 	 */
 	function enableFormWithRequiredFields( $form ) {
@@ -143,13 +144,13 @@ mw.flow.ui.enhance = {};
 	 * Renders tooltips on over, and also via mw.tooltip.
 	 */
 	$( function () {
-		var _$tooltip = $(
-				'<span class="flow-ui-tooltip flow-ui-tooltip-left">' +
-					'<span class="flow-ui-tooltip-content"></span>' +
-					'<span class="flow-ui-tooltip-triangle"></span>' +
-					'<span class="flow-ui-tooltip-close"></span>' +
-				'</span>'
-			),
+		var $tooltipTemplate = $( '<span>' )
+				.addClass( 'flow-ui-tooltip flow-ui-tooltip-left' )
+				.append(
+					$( '<span>' ).addClass( 'flow-ui-tooltip-content' ),
+					$( '<span>' ).addClass( 'flow-ui-tooltip-triangle' ),
+					$( '<span>' ).addClass( 'flow-ui-tooltip-close' )
+				),
 			$activeTooltips = $(),
 			_mwUiTooltipExpireTimer;
 
@@ -232,7 +233,7 @@ mw.flow.ui.enhance = {};
 			if ( !$tooltip ) {
 				// See if content itself is a tooltip
 				try {
-					if ( $.type( content ) === 'string' ) {
+					if ( typeof content === 'string' ) {
 						$tooltip = $( $.parseHTML( content ) );
 					} else {
 						$tooltip = $( content );
@@ -240,14 +241,16 @@ mw.flow.ui.enhance = {};
 				} catch ( e ) {}
 				if ( !$tooltip || !$tooltip.is( '.flow-ui-tooltip' ) && !$tooltip.find( '.flow-ui-tooltip' ).length ) {
 					// Content is not and does not contain a tooltip, so instead, put content inside a new tooltip wrapper
-					$tooltip = _$tooltip.clone();
+					$tooltip = $tooltipTemplate.clone();
 				}
 			}
 
 			// Try to inherit tooltipContext from the target's classes
 			if ( !optionsUnreferenced.tooltipContext ) {
+				// eslint-disable-next-line no-jquery/no-class-state
 				if ( $target.hasClass( 'mw-ui-progressive' ) ) {
 					optionsUnreferenced.tooltipContext = 'progressive';
+				// eslint-disable-next-line no-jquery/no-class-state
 				} else if ( $target.hasClass( 'mw-ui-destructive' ) ) {
 					optionsUnreferenced.tooltipContext = 'destructive';
 				}
@@ -263,17 +266,21 @@ mw.flow.ui.enhance = {};
 				.css( { position: 'absolute', zIndex: 1000, top: 0, left: '-999em' } )
 				// Render
 				// @todo inject at #bodyContent to inherit (font-)styling
-				.appendTo( 'body' );
+				.appendTo( document.body );
 
 			// Tooltip style context
 			if ( optionsUnreferenced.tooltipContext ) {
 				$tooltip.removeClass( 'mw-ui-progressive mw-ui-destructive' );
+				// Classes documented above
+				// eslint-disable-next-line mediawiki/class-doc
 				$tooltip.addClass( 'mw-ui-' + optionsUnreferenced.tooltipContext );
 			}
 
 			// Tooltip size (small, large)
 			if ( optionsUnreferenced.tooltipSize ) {
 				$tooltip.removeClass( 'flow-ui-tooltip-sm flow-ui-tooltip-lg' );
+				// Classes documented above
+				// eslint-disable-next-line mediawiki/class-doc
 				$tooltip.addClass( 'flow-ui-tooltip-' + optionsUnreferenced.tooltipSize );
 			}
 
@@ -295,10 +302,18 @@ mw.flow.ui.enhance = {};
 
 			// Use the preferred pointing direction first
 			switch ( optionsUnreferenced.tooltipPointing ) {
-				case 'left': locationOrder = [ 'left', 'right', 'left' ]; break;
-				case 'right': locationOrder = [ 'right', 'left', 'right' ]; break;
-				case 'down': locationOrder = [ 'down', 'up', 'down' ]; break;
-				default: locationOrder = [ 'up', 'down', 'up' ];
+				case 'left':
+					locationOrder = [ 'left', 'right', 'left' ];
+					break;
+				case 'right':
+					locationOrder = [ 'right', 'left', 'right' ];
+					break;
+				case 'down':
+					locationOrder = [ 'down', 'up', 'down' ];
+					break;
+				default:
+					locationOrder = [ 'up', 'down', 'up' ];
+					break;
 			}
 
 			do {
@@ -337,6 +352,8 @@ mw.flow.ui.enhance = {};
 			} while ( ++i <= locationOrder.length );
 
 			// Add the pointing direction class from the loop
+			// Classes documented above
+			// eslint-disable-next-line mediawiki/class-doc
 			$tooltip.addClass( 'flow-ui-tooltip-' + locationOrder[ i ] );
 
 			// Apply the new location CSS
@@ -357,6 +374,7 @@ mw.flow.ui.enhance = {};
 
 		/**
 		 * Hides the tooltip associated with target instantly.
+		 *
 		 * @param {HTMLElement|jQuery} target
 		 */
 		function mwUiTooltipHide( target ) {
@@ -392,6 +410,7 @@ mw.flow.ui.enhance = {};
 
 				// Remove the tooltip if this tooltip has been removed,
 				// or if target is not visible (hidden or removed from DOM)
+				// eslint-disable-next-line no-jquery/no-sizzle
 				if ( !this.parentNode || !$target.is( ':visible' ) ) {
 					// Remove the tooltip from the DOM
 					$this.remove();
@@ -418,6 +437,7 @@ mw.flow.ui.enhance = {};
 
 		/**
 		 * Event handler for mouse entering on a .flow-ui-tooltip-target
+		 *
 		 * @param {jQuery.Event} event
 		 */
 		function onMwUiTooltipFocus() {
@@ -426,6 +446,7 @@ mw.flow.ui.enhance = {};
 
 		/**
 		 * Event handler for mouse leaving a .flow-ui-tooltip-target
+		 *
 		 * @param {jQuery.Event} event
 		 */
 		function onMwUiTooltipBlur() {
@@ -437,4 +458,4 @@ mw.flow.ui.enhance = {};
 			.on( 'mouseenter.mw-ui-enhance focus.mw-ui-enhance', '.flow-ui-tooltip-target', onMwUiTooltipFocus )
 			.on( 'mouseleave.mw-ui-enhance blur.mw-ui-enhance click.mw-ui-enhance', '.flow-ui-tooltip-target', onMwUiTooltipBlur );
 	} );
-}( mw, jQuery ) );
+}() );

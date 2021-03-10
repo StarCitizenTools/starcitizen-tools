@@ -8,7 +8,7 @@
 class EchoTargetPage extends EchoAbstractEntity {
 
 	/**
-	 * @var Title|null|bool false if not initialized yet
+	 * @var Title|null|false False if not initialized yet
 	 */
 	protected $title = false;
 
@@ -92,7 +92,7 @@ class EchoTargetPage extends EchoAbstractEntity {
 	 */
 	public function getTitle() {
 		if ( $this->title === false ) {
-			$this->title = Title::newFromId( $this->pageId );
+			$this->title = Title::newFromID( $this->pageId );
 		}
 
 		return $this->title;
@@ -136,7 +136,7 @@ class EchoTargetPage extends EchoAbstractEntity {
 
 	/**
 	 * Convert the properties to a database row
-	 * @return array
+	 * @return int[]
 	 */
 	public function toDbArray() {
 		return [

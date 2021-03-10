@@ -5,15 +5,17 @@ namespace Flow;
 use Article;
 use ContextSource;
 use Flow\Block\AbstractBlock;
+use Flow\Block\Block;
 use Flow\Block\TopicBlock;
 use Flow\Exception\InvalidActionException;
 use Flow\Model\Anchor;
 use Flow\Model\HtmlRenderingInformation;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
-use Html;
 use Hooks;
+use Html;
 use IContextSource;
+use MediaWiki\MediaWikiServices;
 use Message;
 use OutputPage;
 use Title;
@@ -34,7 +36,7 @@ class View extends ContextSource {
 	 */
 	protected $actions;
 
-	function __construct(
+	public function __construct(
 		UrlGenerator $urlGenerator,
 		TemplateHelper $lightncandy,
 		IContextSource $requestContext,
@@ -58,7 +60,7 @@ class View extends ContextSource {
 			$retval = $this->handleSubmit( $loader, $action, $parameters );
 			// successful submission
 			if ( $retval === true ) {
-				$this->redirect( $loader->getWorkflow(), 'view' );
+				$this->redirect( $loader->getWorkflow() );
 				return;
 			// only render the returned subset of blocks
 			} elseif ( is_array( $retval ) ) {
@@ -77,11 +79,23 @@ class View extends ContextSource {
 			$block->setPageTitle( $output );
 		}
 
+		if ( $this->actions->getValue( $action, 'hasUserGeneratedContent' ) ) {
+			$output->setCopyright( true );
+		}
+
 		$robotPolicy = $this->getRobotPolicy( $action, $loader->getWorkflow(), $blocks );
+		// @phan-suppress-next-line SecurityCheck-DoubleEscaped
 		$this->renderApiResponse( $apiResponse, $robotPolicy );
 	}
 
-	private function getRobotPolicy( $action, $workflow, $blocks ) {
+	/**
+	 * @param string $action
+	 * @param Workflow $workflow
+	 * @param Block[] $blocks
+	 *
+	 * @return string[]
+	 */
+	private function getRobotPolicy( $action, Workflow $workflow, array $blocks ) {
 		if ( $action !== 'view' ) {
 			// consistent with 'edit' and other action pages in Core
 			return [
@@ -93,6 +107,7 @@ class View extends ContextSource {
 		if ( $workflow->getType() === 'topic' ) {
 			/** @var TopicBlock $topic */
 			$topic = $blocks[ 'topic' ];
+			// @phan-suppress-next-line PhanUndeclaredMethod Cannot infer type
 			$topicRev = $topic->loadTopicTitle();
 			if ( !$topicRev || $topicRev->isHidden() ) {
 				return [
@@ -104,7 +119,7 @@ class View extends ContextSource {
 
 		$boardTitle = $workflow->getOwnerTitle();
 		$article = Article::newFromTitle( $boardTitle, $this->getContext() );
-		return $article->getRobotPolicy( /* unused $action parameter */ null );
+		return $article->getRobotPolicy( $action );
 	}
 
 	protected function addModules( OutputPage $out, $action ) {
@@ -123,7 +138,6 @@ class View extends ContextSource {
 				'mediawiki.ui.button',
 				'mediawiki.ui.input',
 				'mediawiki.ui.icon',
-				'mediawiki.ui.text',
 				'mediawiki.special.changeslist',
 				'mediawiki.editfont.styles',
 				'ext.flow.styles.base' ,
@@ -183,7 +197,10 @@ class View extends ContextSource {
 				'name' => $value,
 				'exists' => $categoryTitle->exists()
 			];
-			$linkedCategories[] = \Linker::link( $categoryTitle, htmlspecialchars( $categoryTitle->getText() ) );
+			$linkedCategories[] = MediaWikiServices::getInstance()->getLinkRenderer()->makeLink(
+				$categoryTitle,
+				$categoryTitle->getText()
+			);
 		}
 
 		// @todo This and API should use same code
@@ -196,14 +213,25 @@ class View extends ContextSource {
 			'specialCategoryLink' => \SpecialPage::getTitleFor( 'Categories' )->getLocalURL(),
 			'workflow' => $workflow->isNew() ? '' : $workflow->getId()->getAlphadecimal(),
 			'blocks' => [],
-			'isWatched' => $user->isWatched( $title ),
+			// see https://phabricator.wikimedia.org/T223165
+			'isWatched' => (
+				$title->isWatchable() &&
+				MediaWikiServices::getInstance()->getPermissionManager()->userHasRight(
+					$user,
+					'viewmywatchlist'
+				) &&
+				MediaWikiServices::getInstance()->getWatchedItemStore()->isWatched(
+					$user,
+					$title
+				)
+			),
 			'watchable' => !$user->isAnon(),
 			'links' => [
 				'watch-board' => [
-					'url' => $title->getLocalUrl( 'action=watch' ),
+					'url' => $title->getLocalURL( 'action=watch' ),
 				],
 				'unwatch-board' => [
-					'url' => $title->getLocalUrl( 'action=unwatch' ),
+					'url' => $title->getLocalURL( 'action=unwatch' ),
 				],
 			]
 		];
@@ -230,21 +258,23 @@ class View extends ContextSource {
 		// Add category items to the header if they exist
 		if ( count( $linkedCategories ) > 0 && isset( $apiResponse['blocks']['header'] ) ) {
 			$apiResponse['blocks']['header']['categories'] = [
-				'link' => \Linker::link(
+				'link' => MediaWikiServices::getInstance()->getLinkRenderer()->makeLink(
 						\SpecialPage::getTitleFor( 'Categories' ),
-						wfMessage( 'pagecategories' )->params( count( $linkedCategories ) )->text()
-					) . wfMessage( 'colon-separator' )->text(),
+						$this->msg( 'pagecategories' )->params( count( $linkedCategories ) )->text()
+					) . $this->msg( 'colon-separator' )->escaped(),
 				'items' => $linkedCategories
 			];
 		}
 
 		if ( isset( $topicListBlock ) && isset( $parameters['topiclist'] ) ) {
 			$apiResponse['toc'] = $topicListBlock->renderTocApi(
+				// @phan-suppress-next-line PhanTypeArraySuspiciousNullable,PhanTypePossiblyInvalidDimOffset
 				$apiResponse['blocks']['topiclist'],
 				$parameters['topiclist']
 			);
 		}
 
+		// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
 		if ( count( $apiResponse['blocks'] ) === 0 ) {
 			throw new InvalidActionException( "No blocks accepted action: $action", 'invalid-action' );
 		}
@@ -277,6 +307,7 @@ class View extends ContextSource {
 		}
 
 		$out = $this->getOutput();
+		$config = $this->getConfig();
 
 		$jsonBlobResponse = $apiResponse;
 
@@ -289,6 +320,8 @@ class View extends ContextSource {
 
 		// Add JSON blob for OOUI widgets
 		$out->addJsConfigVars( 'wgFlowData', $jsonBlobResponse );
+		$out->addJsConfigVars( 'wgEditSubmitButtonLabelPublish',
+			$config->get( 'EditSubmitButtonLabelPublish' ) );
 
 		$renderedBlocks = [];
 		foreach ( $apiResponse['blocks'] as $block ) {
@@ -354,7 +387,6 @@ class View extends ContextSource {
 				],
 				$template( $apiResponse )
 			) );
-
 			$out->setIndexPolicy( $robotPolicy[ 'index' ] );
 			$out->setFollowPolicy( $robotPolicy[ 'follow' ] );
 		}

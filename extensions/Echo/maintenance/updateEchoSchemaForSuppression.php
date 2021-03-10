@@ -38,8 +38,17 @@ class UpdateEchoSchemaForSuppression extends LoggedUpdateMaintenance {
 
 	public function doDBUpdates() {
 		global $wgEchoCluster;
+		$lbFactory = MWEchoDbFactory::newFromDefault();
 
-		$reader = new BatchRowIterator( MWEchoDbFactory::getDB( DB_REPLICA ), $this->table, $this->idField, $this->mBatchSize );
+		$dbr = $lbFactory->getEchoDb( DB_REPLICA );
+		$dbw = $lbFactory->getEchoDb( DB_MASTER );
+
+		if ( !$dbw->fieldExists( 'echo_event', 'event_page_title', __METHOD__ ) ) {
+			$this->output( "No event_page_title field, skipping migration from event_page_title to event_page_id\n" );
+			return true;
+		}
+
+		$reader = new BatchRowIterator( $dbr, $this->table, $this->idField, $this->mBatchSize );
 		$reader->addConditions( [
 			"event_page_title IS NOT NULL",
 			"event_page_id" => null,
@@ -48,7 +57,7 @@ class UpdateEchoSchemaForSuppression extends LoggedUpdateMaintenance {
 
 		$updater = new BatchRowUpdate(
 			$reader,
-			new BatchRowWriter( MWEchoDbFactory::getDB( DB_MASTER ), $this->table, $wgEchoCluster ),
+			new BatchRowWriter( $dbw, $this->table, $wgEchoCluster ),
 			new EchoSuppressionRowUpdateGenerator
 		);
 		$updater->setOutput( function ( $text ) {
@@ -59,5 +68,5 @@ class UpdateEchoSchemaForSuppression extends LoggedUpdateMaintenance {
 	}
 }
 
-$maintClass = 'UpdateEchoSchemaForSuppression'; // Tells it to run the class
+$maintClass = UpdateEchoSchemaForSuppression::class; // Tells it to run the class
 require_once RUN_MAINTENANCE_IF_MAIN;

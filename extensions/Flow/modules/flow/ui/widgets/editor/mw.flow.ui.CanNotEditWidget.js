@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	// Should be refined later to handle different scenarios (block/protect/etc.) explicitly.
 	/**
 	 * Flow error widget for when the user can not edit/post/etc.
@@ -39,7 +39,7 @@
 		this.label = new OO.ui.LabelWidget();
 
 		// Parent constructor
-		mw.flow.ui.CanNotEditWidget.parent.call( this, config );
+		mw.flow.ui.CanNotEditWidget.super.call( this, config );
 
 		// Initialize
 		this.$element
@@ -116,10 +116,14 @@
 						reason = mw.message( 'flow-error-protected-unknown-reason' ).text();
 					}
 
+					// Message keys are documented above
+					// eslint-disable-next-line mediawiki/msg-doc
 					message = mw.message( messageKey, reason );
 
 					dfd.resolve( message );
 				} ).fail( function () {
+					// Message keys are documented above
+					// eslint-disable-next-line mediawiki/msg-doc
 					message = mw.message( messageKey, mw.message( 'flow-error-protected-unknown-reason' ).text() );
 
 					dfd.resolve( message );
@@ -138,8 +142,12 @@
 	 * @return {mw.Message} Message to use for error
 	 */
 	mw.flow.ui.CanNotEditWidget.prototype.getGenericMessage = function () {
-		var messageKey = mw.user.isAnon() ? 'flow-error-can-not-edit-logged-out' : 'flow-error-can-not-edit-logged-in';
-		return mw.message( messageKey, mw.user );
+		return mw.message(
+			mw.user.isAnon() ?
+				'flow-error-can-not-edit-logged-out' :
+				'flow-error-can-not-edit-logged-in',
+			mw.user
+		);
 	};
 
 	/**
@@ -149,8 +157,9 @@
 	 * @return {boolean} The group is both required to edit and missing
 	 */
 	mw.flow.ui.CanNotEditWidget.prototype.isMissingRequiredGroup = function ( groupName ) {
-		var isGroupRequired = $.inArray( groupName, this.restrictionEdit ) !== -1,
-			acceptableGroups, i;
+		var isGroupRequired = this.restrictionEdit.indexOf( groupName ) !== -1,
+			userGroups = this.userGroups,
+			acceptableGroups;
 
 		if ( isGroupRequired ) {
 			acceptableGroups = [ groupName ];
@@ -161,15 +170,11 @@
 				acceptableGroups.push( 'confirmed' );
 			}
 
-			for ( i = 0; i < acceptableGroups.length; i++ ) {
-				if ( $.inArray( acceptableGroups[ i ], this.userGroups ) !== -1 ) {
-					return false;
-				}
-			}
-
-			return true;
+			return acceptableGroups.every( function ( group ) {
+				return userGroups.indexOf( group ) === -1;
+			} );
 		} else {
 			return false;
 		}
 	};
-}( mediaWiki, jQuery ) );
+}() );

@@ -3,9 +3,10 @@
 		"authors": [
 			"AZISS",
 			"Cekli829",
+			"Matma Rex",
+			"Toghrul Rahimli",
 			"Vugar 1981",
-			"Wertuose",
-			"Matma Rex"
+			"Wertuose"
 		]
 	},
 	"uploadwizard": "Yükləmə sehrbazı",
@@ -39,7 +40,6 @@
 	"mwe-upwiz-next": "Sonrakı",
 	"mwe-upwiz-next-file": "Davam et",
 	"mwe-upwiz-next-deeds": "Sonrakı",
-	"mwe-upwiz-next-details": "Sonrakı",
 	"mwe-upwiz-tooltip-more-info": "Daha ətraflı öyrən.",
 	"mwe-upwiz-license-cc-by-sa-3.0": "Creative Commons Attribution ShareAlike 3.0 ([$2 qanuni kod])",
 	"mwe-upwiz-license-cc-by-sa-3.0-at": "Creative Commons Attribution ShareAlike 3.0 Avstriya ([$2qanuni kod])",
@@ -60,7 +60,7 @@
 	"mwe-upwiz-license-fal": "Azad İncəsənət Lisenziyası",
 	"mwe-upwiz-license-pd-old-100": "Müəllif 100 ildən daha əvvəl vəfat edib",
 	"mwe-upwiz-license-pd-old": "Müəllif 70 ildən daha əvvəl vəfat edib",
-	"mwe-upwiz-license-pd-us": "İlk dəfə 1923-cü ildən əvvəl ABŞ-da nəşr edilib",
+	"mwe-upwiz-license-pd-us": "ABŞ-da ilk dəfə 1925-cü ildən əvvəl nəşr edilib",
 	"mwe-upwiz-license-pd-usgov-nasa": "NASA-nın orijinal işi",
 	"mwe-upwiz-license-pd-usgov-military-navy": "ABŞ Hərbi Donanmasının orijinal işi",
 	"mwe-upwiz-license-gfdl": "GNU Azad Sənədləşdirmə Lisenziyası",

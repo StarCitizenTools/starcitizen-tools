@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	/**
 	 * An inbox-type widget that encompases a dated notifications list with pagination
 	 *
@@ -11,6 +11,7 @@
 	 * @param {mw.echo.dm.ModelManager} manager Model manager
 	 * @param {Object} [config] Configuration object
 	 * @cfg {number} [limit=25] Limit the number of notifications per page
+	 * @cfg {string} [prefLink] Link to preferences page
 	 * @cfg {jQuery} [$overlay] An overlay for the popup menus
 	 */
 	mw.echo.ui.NotificationsInboxWidget = function MwEchoUiNotificationsInboxWidget( controller, manager, config ) {
@@ -18,8 +19,8 @@
 
 		config = config || {};
 
-		// Parent
-		mw.echo.ui.NotificationsInboxWidget.parent.call( this, config );
+		// Parent constructor
+		mw.echo.ui.NotificationsInboxWidget.super.call( this, config );
 		// Mixin constructors
 		OO.ui.mixin.PendingElement.call( this, config );
 
@@ -66,7 +67,6 @@
 			this.manager,
 			{
 				framed: true,
-				helpLink: config.helpLink,
 				prefLink: config.prefLink,
 				$overlay: this.$overlay
 			}
@@ -292,7 +292,7 @@
 	};
 
 	/**
-	 * Reset the the text of the error message that displays in place of the list
+	 * Reset the text of the error message that displays in place of the list
 	 * in case the list is empty.
 	 */
 	mw.echo.ui.NotificationsInboxWidget.prototype.resetMessageLabel = function () {
@@ -321,4 +321,4 @@
 		this.datedListWidget.toggle( !displayMessage );
 	};
 
-}( jQuery, mediaWiki ) );
+}() );

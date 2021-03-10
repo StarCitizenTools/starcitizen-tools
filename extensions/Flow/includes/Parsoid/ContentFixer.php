@@ -45,7 +45,7 @@ class ContentFixer {
 
 	/**
 	 * Applies all contained content fixers to the provided HTML content.
-	 * The resulting content is then suitible for display to the end user.
+	 * The resulting content is then suitable for display to the end user.
 	 *
 	 * @param string $content Html
 	 * @param Title $title
@@ -53,11 +53,24 @@ class ContentFixer {
 	 */
 	public function apply( $content, Title $title ) {
 		$dom = self::createDOM( $content );
+		$this->applyToDom( $dom, $title );
+		return Utils::getInnerHtml( $dom->getElementsByTagName( 'body' )->item( 0 ) );
+	}
+
+	/**
+	 * Applies all content fixers to the provided DOMDocument.
+	 * Like apply(), but modifies a DOM in place rather than parsing and reserializing a string.
+	 *
+	 * @param DOMDocument $dom
+	 * @param Title $title
+	 */
+	public function applyToDom( DOMDocument $dom, Title $title ) {
 		$xpath = new DOMXPath( $dom );
 		foreach ( $this->contentFixers as $i => $contentFixer ) {
 			$found = $xpath->query( $contentFixer->getXPath() );
 			if ( !$found ) {
-				wfDebugLog( 'Flow', __METHOD__ . ': Invalid XPath from ' . get_class( $contentFixer ) . ' of: ' . $contentFixer->getXPath() );
+				wfDebugLog( 'Flow', __METHOD__ . ': Invalid XPath from ' . get_class( $contentFixer ) . ' of: ' .
+					$contentFixer->getXPath() );
 				unset( $this->contentFixers[$i] );
 				continue;
 			}
@@ -66,8 +79,6 @@ class ContentFixer {
 				$contentFixer->apply( $node, $title );
 			}
 		}
-
-		return Utils::getInnerHtml( $dom->getElementsByTagName( 'body' )->item( 0 ) );
 	}
 
 	/**
@@ -76,15 +87,17 @@ class ContentFixer {
 	 *
 	 * @param string $content HTML from parsoid
 	 * @return DOMDocument
+	 * @throws \Flow\Exception\WikitextException
 	 */
 	public static function createDOM( $content ) {
-		/*
-		 * The body tag is required otherwise <meta> tags at the top are
-		 * magic'd into <head> rather than kept with the content.
-		 */
+		 // The body tag is required otherwise <meta> tags at the top are
+		 // magic'd into <head> rather than kept with the content.
 		if (
 			substr( $content, 0, 5 ) !== '<body'
 			&& substr( $content, 0, 9 ) !== '<!DOCTYPE'
+			// We might have set the html/head/base href in AbstractRevision#getContent, so
+			// make one more check before body wrapping the content.
+			&& substr( $content, 0, 12 ) !== '<html><head>'
 		) {
 			// BC: content currently comes from parsoid and is stored
 			// wrapped in <body> tags, but prior to I0d9659f we were

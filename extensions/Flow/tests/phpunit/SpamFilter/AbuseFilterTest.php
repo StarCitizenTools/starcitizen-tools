@@ -1,20 +1,25 @@
 <?php
 
+// phpcs:disable Generic.Files.LineLength -- Long html test examples
+
 namespace Flow\Tests\SpamFilter;
 
-use Flow\Model\PostRevision;
 use Flow\SpamFilter\AbuseFilter;
 use Flow\Tests\PostRevisionTestCase;
 use Title;
 use User;
 
 /**
+ * @covers \Flow\Model\AbstractRevision
+ * @covers \Flow\Model\PostRevision
+ * @covers \Flow\SpamFilter\AbuseFilter
+ *
  * @group Database
  * @group Flow
  */
 class AbuseFilterTest extends PostRevisionTestCase {
-	const BAD_TOPIC_TITLE_TEXT = 'Topic:Tnprd6ksfu1v1nme';
-	const BAD_OWNER_TITLE_TEXT = 'BadBoard';
+	private const BAD_TOPIC_TITLE_TEXT = 'Topic:Tnprd6ksfu1v1nme';
+	private const BAD_OWNER_TITLE_TEXT = 'BadBoard';
 
 	/**
 	 * @var AbuseFilter
@@ -29,8 +34,8 @@ class AbuseFilterTest extends PostRevisionTestCase {
 	protected $filters = [
 		// no CSS screen hijack
 		'(new_wikitext rlike "position\s*:\s*(fixed|absolute)|style\s*=\s*\"[a-z0-9:;\s]*&|z-index\s*:\s*\d|\|([4-9]\d{3}|\d{5,})px")' => 'disallow',
-		'(ARTICLE_PREFIXEDTEXT === "Topic:Tnprd6ksfu1v1nme")' => 'disallow',
-		'(BOARD_PREFIXEDTEXT === "BadBoard")' => 'disallow',
+		'(page_prefixedtitle === "Topic:Tnprd6ksfu1v1nme" & page_prefixedtitle === article_prefixedtext)' => 'disallow',
+		'(board_prefixedtitle === "BadBoard" & board_prefixedtitle === board_prefixedtext)' => 'disallow',
 	];
 
 	public function spamProvider() {
@@ -47,7 +52,7 @@ class AbuseFilterTest extends PostRevisionTestCase {
 				$goodTopicTitle,
 				$goodOwnerTitle,
 				// default new topic title revision, both good titles - no spam
-				$this->generateObject(),
+				[],
 				null,
 				true,
 			],
@@ -56,14 +61,14 @@ class AbuseFilterTest extends PostRevisionTestCase {
 				$goodOwnerTitle,
 				// revision with spam
 				// https://www.mediawiki.org/w/index.php?title=Talk:Sandbox&workflow=050bbdd07b64a1c028b2782bcb087b42#flow-post-050bbdd07b70a1c028b2782bcb087b42
-				$this->generateObject( [ 'rev_content' => '<div style="background: yellow; position: fixed; top: 0; left: 0; width: 3000px; height: 3000px; z-index: 1111;">test</div>', 'rev_flags' => 'html' ] ),
+				[ 'rev_content' => '<div style="background: yellow; position: fixed; top: 0; left: 0; width: 3000px; height: 3000px; z-index: 1111;">test</div>', 'rev_flags' => 'html' ],
 				null,
 				false,
 			],
 			[
 				$badTopicTitle,
 				$goodOwnerTitle,
-				$this->generateObject(),
+				[],
 				// Topic title matches
 				null,
 				false,
@@ -71,7 +76,7 @@ class AbuseFilterTest extends PostRevisionTestCase {
 			[
 				$goodTopicTitle,
 				$badOwnerTitle,
-				$this->generateObject(),
+				[],
 				// Owner title matches
 				null,
 				false,
@@ -82,8 +87,11 @@ class AbuseFilterTest extends PostRevisionTestCase {
 	/**
 	 * @dataProvider spamProvider
 	 */
-	public function testSpam( $title, $ownerTitle, PostRevision $newRevision, PostRevision $oldRevision = null, $expected ) {
-		$context = $this->getMockBuilder( 'ContextSource' )
+	public function testSpam( $title, $ownerTitle, $newRevisionRow, $oldRevisionRow, $expected ) {
+		$newRevision = $this->generateObject( $newRevisionRow );
+		$oldRevision = $oldRevisionRow ? $this->generateObject( $oldRevisionRow ) : null;
+
+		$context = $this->getMockBuilder( \ContextSource::class )
 				->setMethods( [ 'getUser' ] )
 				->getMock();
 		$context->expects( $this->any() )
@@ -94,7 +102,7 @@ class AbuseFilterTest extends PostRevisionTestCase {
 		$this->assertEquals( $expected, $status->isOK() );
 	}
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 
 		global $wgFlowAbuseFilterGroup,
@@ -126,7 +134,7 @@ class AbuseFilterTest extends PostRevisionTestCase {
 		}
 	}
 
-	protected function tearDown() {
+	protected function tearDown() : void {
 		parent::tearDown();
 		foreach ( $this->tablesUsed as $table ) {
 			$this->db->delete( $table, '*', __METHOD__ );
@@ -137,7 +145,7 @@ class AbuseFilterTest extends PostRevisionTestCase {
 	 * Inserts a filter into stub database.
 	 *
 	 * @param string $pattern
-	 * @param string[optional] $action
+	 * @param string $action
 	 */
 	protected function createFilter( $pattern, $action = 'disallow' ) {
 		global $wgFlowAbuseFilterGroup;

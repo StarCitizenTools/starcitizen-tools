@@ -22,7 +22,7 @@ class UserMerger {
 	protected $storage;
 
 	/**
-	 * @var array
+	 * @var array[][]
 	 */
 	protected $config;
 
@@ -60,7 +60,7 @@ class UserMerger {
 	 */
 	public function getAccountFields() {
 		$fields = [];
-		$dbw = $this->dbFactory->getDb( DB_MASTER );
+		$dbw = $this->dbFactory->getDB( DB_MASTER );
 		foreach ( $this->config as $table => $config ) {
 			$row = [
 				'db' => $dbw,
@@ -82,7 +82,7 @@ class UserMerger {
 	 * @param int $newUserId
 	 */
 	public function finalizeMerge( $oldUserId, $newUserId ) {
-		$dbw = $this->dbFactory->getDb( DB_MASTER );
+		$dbw = $this->dbFactory->getDB( DB_MASTER );
 		foreach ( $this->config as $table => $config ) {
 			foreach ( $config['userColumns'] as $column => $userTupleGetter ) {
 				$it = new BatchRowIterator( $dbw, $table, $config['pk'], 500 );
@@ -106,7 +106,7 @@ class UserMerger {
 	protected function purgeTable( Iterator $it, $oldUserId, $callback, $userTupleGetter ) {
 		foreach ( $it as $batch ) {
 			foreach ( $batch as $pkRow ) {
-				$obj = call_user_func( $callback, $pkRow );
+				$obj = $callback( $pkRow );
 				if ( !$obj ) {
 					continue;
 				}
@@ -114,7 +114,7 @@ class UserMerger {
 				// the db with new user ids, or the cache with old user ids.
 				// We need to tweak this object to look like the old user ids and then
 				// purge caches so they get the old user id cache keys.
-				$tuple = call_user_func( [ $obj, $userTupleGetter ] );
+				$tuple = $obj->$userTupleGetter();
 				if ( !$tuple ) {
 					continue;
 				}
@@ -133,7 +133,7 @@ class UserMerger {
 	 * @return PostRevision|null
 	 */
 	protected function loadFromTreeRevision( $row ) {
-		return $this->storage->get( 'PostRevision', $row->tree_rev_id );
+		return $this->storage->get( PostRevision::class, $row->tree_rev_id );
 	}
 
 	/**
@@ -142,12 +142,13 @@ class UserMerger {
 	 */
 	protected function loadFromRevision( $row ) {
 		$revTypes = [
-			'header' => 'Flow\Model\Header',
-			'post-summary' => 'Flow\Model\PostSummary',
-			'post' => 'Flow\Model\PostRevision',
+			'header' => \Flow\Model\Header::class,
+			'post-summary' => \Flow\Model\PostSummary::class,
+			'post' => PostRevision::class,
 		];
 		if ( !isset( $revTypes[$row->rev_type] ) ) {
-			wfDebugLog( 'Flow', __METHOD__ . ': Unknown revision type ' . $row->rev_type . ' did not merge ' . UUID::create( $row->rev_id )->getAlphadecimal() );
+			wfDebugLog( 'Flow', __METHOD__ . ': Unknown revision type ' . $row->rev_type . ' did not merge ' .
+				UUID::create( $row->rev_id )->getAlphadecimal() );
 			return null;
 		}
 

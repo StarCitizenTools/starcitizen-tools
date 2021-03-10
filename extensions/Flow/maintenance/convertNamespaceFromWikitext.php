@@ -1,6 +1,7 @@
 <?php
 
 use Flow\Utils\NamespaceIterator;
+use MediaWiki\MediaWikiServices;
 
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
@@ -14,7 +15,7 @@ require_once getenv( 'MW_INSTALL_PATH' ) !== false
 class ConvertNamespaceFromWikitext extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = "Converts a single namespace of wikitext talk pages to Flow";
+		$this->addDescription( "Converts a single namespace of wikitext talk pages to Flow" );
 		$this->addArg( 'namespaceName', 'Name of the namespace to convert' );
 		$this->addOption(
 			'no-convert-templates',
@@ -34,7 +35,7 @@ class ConvertNamespaceFromWikitext extends Maintenance {
 	}
 
 	public function execute() {
-		global $wgLang, $wgParser;
+		global $wgLang;
 
 		$provided = $this->getArg( 0 );
 		$namespace = $wgLang->getNsIndex( $provided );
@@ -43,7 +44,7 @@ class ConvertNamespaceFromWikitext extends Maintenance {
 			return;
 		}
 		$namespaceName = $wgLang->getNsText( $namespace );
-		if ( !MWNamespace::hasSubpages( $namespace ) ) {
+		if ( !MediaWikiServices::getInstance()->getNamespaceInfo()->hasSubpages( $namespace ) ) {
 			$this->error( "Subpages are not enabled in the $namespaceName namespace." );
 			$this->error( "In order to convert this namespace to Flow, you must enable subpages using:" );
 			$this->error( "\$wgNamespacesWithSubpages[$namespace] = true;" );
@@ -69,7 +70,7 @@ class ConvertNamespaceFromWikitext extends Maintenance {
 		$logger = new MaintenanceDebugLogger( $this );
 
 		$dbw = wfGetDB( DB_MASTER );
-		$talkpageManager = FlowHooks::getOccupationController()->getTalkpageManager();
+		$talkpageManager = Flow\Hooks::getOccupationController()->getTalkpageManager();
 		$converter = new \Flow\Import\Converter(
 			$dbw,
 			Flow\Container::get( 'importer' ),
@@ -77,7 +78,7 @@ class ConvertNamespaceFromWikitext extends Maintenance {
 			$talkpageManager,
 
 			new Flow\Import\Wikitext\ConversionStrategy(
-				$wgParser,
+				MediaWikiServices::getInstance()->getParser(),
 				new Flow\Import\SourceStore\NullImportSourceStore(),
 				$logger,
 				$talkpageManager,
@@ -100,5 +101,5 @@ class ConvertNamespaceFromWikitext extends Maintenance {
 	}
 }
 
-$maintClass = "ConvertNamespaceFromWikitext";
+$maintClass = ConvertNamespaceFromWikitext::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

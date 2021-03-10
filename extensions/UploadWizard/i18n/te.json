@@ -1,10 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
+			"Chaduvari",
 			"Praveen Illa",
-			"Veeven",
 			"Ravichandra",
-			"Chaduvari"
+			"Veeven"
 		]
 	},
 	"api-error-noimageinfo": "ఎక్కింపు జయప్రదమైంది. కానీ సర్వరు, ఆ ఫైలు గురించిన సమాచారమేమీ ఇవ్వలేదు.",
@@ -20,7 +20,7 @@
 	"mwe-upwiz-transport-started": "ప్రారంభిస్తున్నది...",
 	"mwe-upwiz-uploading": "ఎక్కిస్తున్నది...",
 	"mwe-upwiz-transported": "సరే",
-	"mwe-upwiz-stashed-upload": "సరే",
+	"mwe-upwiz-stashed-upload": "ఎక్కించబడింది",
 	"mwe-upwiz-submitting-details": "వివరాలను దాఖలుచేసి ప్రచురిస్తున్నది...",
 	"mwe-upwiz-published": "ప్రచురితమైంది!",
 	"mwe-upwiz-failed": "విఫలమైంది.",
@@ -41,10 +41,11 @@
 	"mwe-upwiz-source-ownwork-assert-custom": "నేను, $2, ఈ {{PLURAL:$1|కృతి|కృతుల}} యొక్క కాపీహక్కుదారున్ని, ఈ {{PLURAL:$1|కృతిని|కృతులను}} ఇందుమూలముగా ఈ క్రింది లైసెన్సు(ల) ప్రకారం ప్రచురిస్తున్నాను:",
 	"mwe-upwiz-source-thirdparty": "ఈ {{PLURAL:$1|దస్త్రం నా స్వంత కృతి కాదు|దస్త్రాలు నా స్వంత కృతులు కావు}}.",
 	"mwe-upwiz-source-thirdparty-accept": "సరే",
+	"mwe-upwiz-patent-weapon-policy": "వాడుకరులు, ఆయుధానిది గాని \"రక్షణకు ఉపయోగపడే వస్తువు\"ది గానీ 3డి నమూనాలను ఎక్కించకూడదు. \nకామన్స్ సముదాయం మోడరేషన్ జరిగాక, అలాంటి అంశాలను తొలగించవచ్చు.",
 	"mwe-upwiz-more-options": "వర్గాలను మరియు మరింత సమాచారాన్ని చేర్చండి...",
 	"mwe-upwiz-desc": "వివరణ",
-	"mwe-upwiz-title": "శీర్షిక",
-	"mwe-upwiz-date-created": "సృష్టించిన తేదీ",
+	"mwe-upwiz-title": "బొమ్మ శీర్షిక",
+	"mwe-upwiz-date-created": "తేదీ",
 	"mwe-upwiz-location": "ప్రాంతం",
 	"mwe-upwiz-location-button": "పటంలో చూపించు",
 	"mwe-upwiz-location-lat": "అక్షాంశం",
@@ -67,7 +68,6 @@
 	"mwe-upwiz-next": "తదుపరి",
 	"mwe-upwiz-next-file": "కొనసాగించు",
 	"mwe-upwiz-next-deeds": "తదుపరి",
-	"mwe-upwiz-next-details": "తదుపరి",
 	"mwe-upwiz-upload-another": "మరిన్ని దస్త్రాలను ఎక్కించండి",
 	"mwe-upwiz-tooltip-more-info": "మరింత తెలుసుకోండి.",
 	"mwe-upwiz-file-need-file": "ముందుగా ఒక ఎక్కింపుని చేర్చండి.",
@@ -106,7 +106,7 @@
 	"mwe-upwiz-subhead-alt-upload": "తిరిగి పాత ఫారానికి",
 	"mwe-upwiz-feedback-prompt": "ప్రతిస్పందనను తెలియజేయండి",
 	"mwe-upwiz-errordialog-ok": "సరే",
-	"prefs-uploads": "ఎక్కింపులు",
+	"prefs-uploads": "ఎక్కిస్తోంది",
 	"prefs-upwiz-experimental": "ప్రయోగాత్మక సౌలభ్యాలు",
 	"mwe-upwiz-prefs-def-license": "అప్రమేయ లైసెన్సు",
 	"mwe-upwiz-prefs-license-own": "స్వంత కృతి - $1",

@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Cross-wiki notification item widget.
 	 * This widget is expandable and displays groups of
@@ -17,19 +17,14 @@
 	 * @param {mw.echo.dm.CrossWikiNotificationItem} model Notification group model
 	 * @param {Object} [config] Configuration object
 	 * @cfg {boolean} [animateSorting=false] Animate the sorting of items
-	 * @cfg {jQuery} [$overlay] A jQuery element functioning as an overlay
-	 *  for popups.
 	 */
 	mw.echo.ui.CrossWikiNotificationItemWidget = function MwEchoUiCrossWikiNotificationItemWidget( controller, model, config ) {
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.ui.CrossWikiNotificationItemWidget.parent.call( this, controller, model, config );
+		mw.echo.ui.CrossWikiNotificationItemWidget.super.call( this, controller, model, config );
 		// Mixin constructors
 		OO.ui.mixin.PendingElement.call( this, config );
-
-		this.controller = controller;
-		this.model = model;
 
 		// In cross-wiki groups we only have 'mark as read'
 		this.toggleMarkAsReadButtons( true );
@@ -146,8 +141,8 @@
 			this.controller.getTypeString() // The type of the list in general
 		);
 
-		// Parent
-		return mw.echo.ui.CrossWikiNotificationItemWidget.parent.prototype.onMarkAsReadButtonClick.call( this );
+		// Parent method
+		return mw.echo.ui.CrossWikiNotificationItemWidget.super.prototype.onMarkAsReadButtonClick.call( this );
 	};
 
 	/**
@@ -316,8 +311,11 @@
 		this.$element.toggleClass( 'mw-echo-ui-crossWikiNotificationItemWidget-expanded', this.expanded );
 
 		if ( this.expanded ) {
+			// FIXME: Use CSS transition
+			// eslint-disable-next-line no-jquery/no-slide
 			this.getList().$element.slideDown();
 		} else {
+			// eslint-disable-next-line no-jquery/no-slide
 			this.getList().$element.slideUp();
 		}
 	};
@@ -332,8 +330,8 @@
 			this.expanded ?
 				mw.msg( 'notification-link-text-collapse-all' ) :
 				// Messages that appear here are:
-				// notification-link-text-expand-alert-count
-				// notification-link-text-expand-notice-count
+				// * notification-link-text-expand-alert-count
+				// * notification-link-text-expand-notice-count
 				mw.msg(
 					'notification-link-text-expand-' +
 						( type === 'message' ? 'notice' : type ) +
@@ -356,4 +354,4 @@
 	mw.echo.ui.CrossWikiNotificationItemWidget.prototype.getList = function () {
 		return this.listWidget;
 	};
-}( mediaWiki, jQuery ) );
+}() );

@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Envlh",
 			"Gazeb",
-			"Matma Rex",
-			"Envlh"
+			"Matma Rex"
 		]
 	},
 	"uploadwizard": "Спроваджаня начітанём файлів",
@@ -126,7 +126,6 @@
 	"mwe-upwiz-next": "Далшы",
 	"mwe-upwiz-next-file": "Продовжыти",
 	"mwe-upwiz-next-deeds": "Далшы",
-	"mwe-upwiz-next-details": "Далшы",
 	"mwe-upwiz-home": "Іти на вікі домашню сторінку",
 	"mwe-upwiz-upload-another": "Награти веце файлів",
 	"mwe-upwiz-prevent-close": "Докы сьте {{gender:|не докінчів|не докончіла|не докончіли}} начітаня і публікованя {{PLURAL:$1|того файлу|тых файлів}}.",
@@ -190,7 +189,7 @@
 	"mwe-upwiz-license-own-pd": "Зречіня ся вшыткых прав за помочі Creative Commons Zero (як вольный твор)",
 	"mwe-upwiz-license-pd-old-100": "Автор помер перед веце як 100 роками",
 	"mwe-upwiz-license-pd-old": "Автор помер перед веце як 70 роками",
-	"mwe-upwiz-license-pd-us": "Першыраз публіковане в США перед роком 1923",
+	"mwe-upwiz-license-pd-us": "Першыраз публіковане в США перед роком 1925",
 	"mwe-upwiz-license-pd-usgov": "Оріґінална робота влады США",
 	"mwe-upwiz-license-pd-usgov-nasa": "Оріґіналне дїло НАСА",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Оріґінална робота воєньского наморництва США",
@@ -238,6 +237,5 @@
 	"mwe-upwiz-prefs-def-license-def": "Хосновати передволене най буде хоцьяке",
 	"mwe-upwiz-prefs-license-own": "Властна робота - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "Чуджый твор -- $1",
-	"mwe-upwiz-prefs-chunked": "Роздїлене наладованя файлів понад $1 в Спроваджаню ладованя файлів",
 	"mwe-upwiz-prefs-skiptutorial": "Перескочіти вступне спроваджана ліценцованём"
 }

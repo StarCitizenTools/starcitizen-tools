@@ -16,4 +16,4 @@
  */
 
 // create UploadWizard namespace
-mediaWiki.uploadWizard = {};
+mw.uploadWizard = {};

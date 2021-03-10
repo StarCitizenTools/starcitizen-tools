@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Class to encapsulate all the html generation associated with the UploadWizard tutorial.
  * Might be a start for a subclass of UploadWizard, if we ever free it of its WMF-oriented features
@@ -8,14 +10,14 @@
 class UploadWizardTutorial {
 
 	// Id of imagemap used in tutorial.
-	const IMAGEMAP_ID = 'tutorialMap';
+	private const IMAGEMAP_ID = 'tutorialMap';
 
 	/**
 	 * Fetches appropriate HTML for the tutorial portion of the wizard.
 	 * Looks up an image on the current wiki. This will work as is on Commons, and will also work
 	 * on test wikis that enable instantCommons.
-	 * @param String|null $campaign Upload Wizard campaign for which the tutorial should be displayed.
-	 * @return String html that will display the tutorial.
+	 * @param string|null $campaign Upload Wizard campaign for which the tutorial should be displayed.
+	 * @return string html that will display the tutorial.
 	 */
 	public static function getHtml( $campaign = null ) {
 		global $wgLang;
@@ -86,14 +88,15 @@ class UploadWizardTutorial {
 	/**
 	 * Get tutorial file for a particular language, or false if not available.
 	 *
-	 * @param String $langCode language Code
-	 * @param String|null $tutorial Upload Wizard campaign for which the tutorial should be displayed.
+	 * @param string $langCode language Code
+	 * @param string[] $tutorial Upload Wizard campaign for which the tutorial should be displayed.
 	 *
 	 * @return File|false
 	 */
 	public static function getFile( $langCode, $tutorial ) {
 		$tutorialName = str_replace( '$1', $langCode, $tutorial['template'] );
-		return wfFindFile( Title::newFromText( $tutorialName, NS_FILE ) );
+		return MediaWikiServices::getInstance()->getRepoGroup()
+			->findFile( Title::newFromText( $tutorialName, NS_FILE ) );
 	}
 
 	/**
@@ -101,9 +104,9 @@ class UploadWizardTutorial {
 	 * including an imagemap for the clickable "Help desk" button.
 	 *
 	 * @param MediaTransformOutput $thumb
-	 * @param String|null $tutorial Upload Wizard campaign for which the tutorial should be displayed.
+	 * @param string[] $tutorial Upload Wizard campaign for which the tutorial should be displayed.
 	 *
-	 * @return String HTML representing the image, with clickable helpdesk button
+	 * @return string HTML representing the image, with clickable helpdesk button
 	 */
 	public static function getImageHtml( MediaTransformOutput $thumb, $tutorial ) {
 		$helpDeskUrl = wfMessage( 'mwe-upwiz-help-desk-url' )->text();

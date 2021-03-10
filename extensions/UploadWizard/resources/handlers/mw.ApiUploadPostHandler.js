@@ -1,4 +1,4 @@
-( function ( mw, OO ) {
+( function () {
 	/**
 	 * Represents an object which send a direct request to the MediaWiki API.
 	 * This is used when there is no actual file payload (eg. Flickr import)
@@ -42,4 +42,4 @@
 
 		return this.request;
 	};
-}( mediaWiki, OO ) );
+}() );

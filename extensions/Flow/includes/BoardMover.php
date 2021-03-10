@@ -2,13 +2,13 @@
 
 namespace Flow;
 
-use Wikimedia\Rdbms\IDatabase;
 use Flow\Data\ManagerGroup;
 use Flow\Exception\FlowException;
 use Flow\Model\Header;
 use Flow\Model\Workflow;
 use Title;
 use User;
+use Wikimedia\Rdbms\IDatabase;
 
 class BoardMover {
 	/**
@@ -56,7 +56,7 @@ class BoardMover {
 	 *
 	 * @param int $oldPageId Page ID before move/change
 	 * @param Title $newPage Page after move/change
-	 * @throws Exception\DataModelException
+	 * @throws \Flow\Exception\DataModelException
 	 * @throws FlowException
 	 */
 	public function move( $oldPageId, Title $newPage ) {

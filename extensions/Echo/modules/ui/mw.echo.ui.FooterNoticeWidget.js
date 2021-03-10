@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Footer notice widget.
 	 *
@@ -8,7 +8,6 @@
 	 * @constructor
 	 * @param {Object} [config] Configuration object
 	 * @cfg {string} [iconUrl] The source URL of the feedback icon
-	 * @cfg {string} [url] The URL for the survey
 	 * @cfg {string} [message] The message to display, in HTML or jQuery object.
 	 *  The message should already be formatted properly.
 	 */
@@ -20,7 +19,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.ui.FooterNoticeWidget.parent.call( this, config );
+		mw.echo.ui.FooterNoticeWidget.super.call( this, config );
 
 		if ( config.iconUrl ) {
 			$icon = $( '<div>' )
@@ -78,4 +77,4 @@
 		this.toggle( false );
 		this.emit( 'dismiss' );
 	};
-}( mediaWiki, jQuery ) );
+}() );

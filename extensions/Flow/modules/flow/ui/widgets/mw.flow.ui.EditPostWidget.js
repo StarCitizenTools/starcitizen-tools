@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow edit post widget
 	 *
@@ -12,17 +12,28 @@
 	 * @cfg {Object} [editor] Config options to pass to mw.flow.ui.EditorWidget
 	 */
 	mw.flow.ui.EditPostWidget = function mwFlowUiEditPostWidget( topicId, postId, config ) {
+		var msgKey;
+
 		config = config || {};
 
 		this.topicId = topicId;
 		this.postId = postId;
 
 		// Parent constructor
-		mw.flow.ui.EditPostWidget.parent.call( this, config );
+		mw.flow.ui.EditPostWidget.super.call( this, config );
+
+		if ( mw.config.get( 'wgEditSubmitButtonLabelPublish' ) ) {
+			msgKey = mw.user.isAnon() ? 'flow-post-action-edit-post-submit-anonymously-publish' : 'flow-post-action-edit-post-submit-publish';
+		} else {
+			msgKey = mw.user.isAnon() ?
+				'flow-post-action-edit-post-submit-anonymously' :
+				'flow-post-action-edit-post-submit';
+		}
 
 		this.editor = new mw.flow.ui.EditorWidget( $.extend( {
-			saveMsgKey: mw.user.isAnon() ? 'flow-post-action-edit-post-submit-anonymously' : 'flow-post-action-edit-post-submit',
-			classes: [ 'flow-ui-editPostWidget-editor' ]
+			saveMsgKey: msgKey,
+			classes: [ 'flow-ui-editPostWidget-editor' ],
+			id: 'edit/' + postId
 		}, config.editor ) );
 		this.editor.toggle( true );
 
@@ -70,6 +81,7 @@
 
 	/**
 	 * Save the content of the reply
+	 *
 	 * @event saveContent
 	 * @param {string} workflow The workflow this reply was saved under
 	 * @param {string} content The content of the reply
@@ -169,9 +181,11 @@
 
 	/**
 	 * Destroy the widget
+	 *
+	 * @return {jQuery.Promise} Promise which resolves when the widget is destroyed
 	 */
 	mw.flow.ui.EditPostWidget.prototype.destroy = function () {
-		this.editor.destroy();
+		return this.editor.destroy();
 	};
 
-}( jQuery ) );
+}() );

@@ -2,7 +2,7 @@
 
 /**
  * @group Database
- * @covers EchoUserLocator
+ * @covers \EchoUserLocator
  */
 class EchoUserLocatorTest extends MediaWikiTestCase {
 
@@ -21,7 +21,7 @@ class EchoUserLocatorTest extends MediaWikiTestCase {
 		}
 		wfGetDB( DB_MASTER )->insert( 'watchlist', $rows, __METHOD__ );
 
-		$event = $this->getMockBuilder( 'EchoEvent' )
+		$event = $this->getMockBuilder( EchoEvent::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$event->expects( $this->any() )
@@ -29,11 +29,7 @@ class EchoUserLocatorTest extends MediaWikiTestCase {
 			->will( $this->returnValue( $title ) );
 
 		$it = EchoUserLocator::locateUsersWatchingTitle( $event, 10 );
-		$count = 0;
-		foreach ( $it as $user ) {
-			++$count;
-		}
-		$this->assertEquals( 50, $count );
+		$this->assertCount( 50, $it );
 		// @todo assert more than one query was issued
 	}
 
@@ -264,7 +260,7 @@ class EchoUserLocatorTest extends MediaWikiTestCase {
 	}
 
 	protected function mockEchoEvent() {
-		return $this->getMockBuilder( 'EchoEvent' )
+		return $this->getMockBuilder( EchoEvent::class )
 			->disableOriginalConstructor()
 			->getMock();
 	}

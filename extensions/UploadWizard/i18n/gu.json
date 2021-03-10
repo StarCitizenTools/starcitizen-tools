@@ -3,12 +3,12 @@
 		"authors": [
 			"Ashok modhvadia",
 			"Dsvyas",
+			"Envlh",
 			"KartikMistry",
-			"Rangilo Gujarati",
-			"Sushant savla",
-			"NehalDaveND",
 			"Matma Rex",
-			"Envlh"
+			"NehalDaveND",
+			"Rangilo Gujarati",
+			"Sushant savla"
 		]
 	},
 	"uploadwizard": "અપલોડ વિઝાર્ડ",
@@ -111,7 +111,6 @@
 	"mwe-upwiz-next": "આગળ",
 	"mwe-upwiz-next-file": "ચાલુ રાખો",
 	"mwe-upwiz-next-deeds": "આગળ",
-	"mwe-upwiz-next-details": "આગળ",
 	"mwe-upwiz-home": "વિકિ મુખપૃષ્ઠ પર જાવ",
 	"mwe-upwiz-upload-another": "વધુ ફાઈલ્સ અપલોડ કરો",
 	"mwe-upwiz-prevent-close": "તમે હજી આ {{PLURAL:$1|ફાઈલ |ફાઈલો}} ના પ્રકાશન કે ચઢાવવાનું કાર્ય સંપન્ન કર્યું નથી",

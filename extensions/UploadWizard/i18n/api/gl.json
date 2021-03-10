@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elisardojm",
+			"Toliño"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Validar un enderezo URL do Flickr usando o identificador de usuario (NSID).\n\nAo utilizalo coa opción <var>list</var> devolve todos os identificadores que están na lista negra.",
+	"apihelp-flickrblacklist-summary": "Validar unha URL de Flickr verificando o identificador do usuario (NSID) na lista negra.",
+	"apihelp-flickrblacklist-extended-description": "Cando se usa coa opción <var>list</var>, devolve tódolos identificadores da lista negra.",
+	"apihelp-flickrblacklist-param-url": "O enderezo URL do Flickr a probar.",
+	"apihelp-flickrblacklist-param-list": "Ao definilo, devólvese a lista negra ao completo. Non se pode utilizar xunto a $1url.",
+	"apihelp-flickrblacklist-example-1": "Comprobar un enderezo URL coa lista negra.",
+	"apihelp-flickrblacklist-example-2": "Devolver a lista negra ao completo",
+	"apihelp-query+allcampaigns-description": "Enumerar todas as campañas do asistente de cargas.",
+	"apihelp-query+allcampaigns-summary": "Enumerar todas as campañas do asistente de cargas.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Listar unicamente as campañas activas.",
+	"apihelp-query+allcampaigns-param-limit": "Número de campañas a devolver.",
+	"apihelp-query+allcampaigns-example-1": "Enumerar as campañas activas"
+}

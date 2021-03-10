@@ -6,12 +6,12 @@
 	 *
 	 * @constructor
 	 * @param {Object} [representations]
-	 * 	{
-	 * 		content: "content in the default format",
-	 * 		format: "name of the default format",
-	 * 		"(other format name 1)": "content in the specified format"
-	 * 		"(other format name n)": "content in the specified format"
-	 * 	}
+	 *  {
+	 *    content: "content in the default format",
+	 *    format: "name of the default format",
+	 *    "(other format name 1)": "content in the specified format"
+	 *    "(other format name n)": "content in the specified format"
+	 *  }
 	 */
 	mw.flow.dm.Content = function mwFlowContent( representations ) {
 		// Mixin constructor
@@ -38,8 +38,8 @@
 	/**
 	 * Get content representation for the specified format or the default format if none is specified.
 	 *
-	 * @param {string} [format=this.defaultFormat]; can be wikitext, html, fixed-html, topic-title-wikitext, topic-title-html, plaintext
-	 * @return {string} Content
+	 * @param {string} [format=this.defaultFormat] Can be wikitext, html, fixed-html, topic-title-wikitext, topic-title-html, plaintext
+	 * @return {string|null} Content
 	 */
 	mw.flow.dm.Content.prototype.get = function ( format ) {
 		if ( !this.contentRepresentations ) {
@@ -48,7 +48,7 @@
 
 		format = format || this.defaultFormat;
 
-		if ( this.contentRepresentations.hasOwnProperty( format ) ) {
+		if ( Object.prototype.hasOwnProperty.call( this.contentRepresentations, format ) ) {
 			return this.contentRepresentations[ format ];
 		}
 		return null;
@@ -70,7 +70,7 @@
 			this.contentRepresentations[ this.defaultFormat ] = representations.content;
 
 			for ( format in representations ) {
-				if ( representations.hasOwnProperty( format ) ) {
+				if ( Object.prototype.hasOwnProperty.call( representations, format ) ) {
 					this.contentRepresentations[ format ] = representations[ format ];
 				}
 			}

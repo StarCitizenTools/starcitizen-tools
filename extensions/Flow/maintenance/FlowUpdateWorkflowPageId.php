@@ -21,7 +21,7 @@ require_once "$IP/includes/utils/RowUpdateGenerator.php";
 class FlowUpdateWorkflowPageId extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = "Update workflow_page_id with the page id of its specified ns/title";
+		$this->addDescription( "Update workflow_page_id with the page id of its specified ns/title" );
 		$this->requireExtension( 'Flow' );
 		$this->setBatchSize( 300 );
 	}
@@ -134,7 +134,10 @@ class WorkflowPageIdUpdateGenerator implements RowUpdateGenerator {
 
 		try {
 			$status = $occupationController->safeAllowCreation( $title, $occupationController->getTalkpageManager() );
-			$status2 = $occupationController->ensureFlowRevision( new Article( $title ), $workflow );
+			$status2 = $occupationController->ensureFlowRevision(
+				WikiPage::factory( $title ),
+				$workflow
+			);
 
 			$status->merge( $status2 );
 		} catch ( \Exception $e ) {
@@ -158,5 +161,5 @@ class WorkflowPageIdUpdateGenerator implements RowUpdateGenerator {
 	}
 }
 
-$maintClass = "FlowUpdateWorkflowPageId";
+$maintClass = FlowUpdateWorkflowPageId::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

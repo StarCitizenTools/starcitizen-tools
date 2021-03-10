@@ -3,7 +3,7 @@
  * This is functionality that is used by both types of page, but not any other components.
  */
 
-( function ( $, mw ) {
+( function () {
 	var inTopicNamespace = mw.config.get( 'wgNamespaceNumber' ) === mw.config.get( 'wgNamespaceIds' ).topic;
 
 	/**
@@ -34,6 +34,7 @@
 	/**
 	 * Sets up the board and base properties on this class.
 	 * Returns either FALSE for failure, or jQuery object of old nodes that were replaced.
+	 *
 	 * @param {jQuery|boolean} $container
 	 * @return {boolean|jQuery}
 	 */
@@ -143,7 +144,7 @@
 			role = $this.data( 'role' ),
 			template = $this.data( 'flow-template' ),
 			params = {
-				editToken: mw.user.tokens.get( 'editToken' ), // might be unnecessary
+				editToken: mw.user.tokens.get( 'csrfToken' ), // might be unnecessary
 				submitted: {
 					moderationState: role
 				},
@@ -183,6 +184,7 @@
 
 	/**
 	 * Cancels and closes a form. If text has been entered, issues a warning first.
+	 *
 	 * @param {Event} event
 	 * @return {jQuery.Promise}
 	 */
@@ -190,7 +192,7 @@
 		var target = this,
 			$form = $( this ).closest( 'form' ),
 			flowComponent = mw.flow.getPrototypeMethod( 'boardAndHistoryBase', 'getInstanceByElement' )( $form ),
-			$fields = $form.find( 'textarea, :text' ),
+			$fields = $form.find( 'textarea, [type=text]' ),
 			changedFieldCount = 0,
 			$deferred = $.Deferred(),
 			callbacks = $form.data( 'flow-cancel-callback' ) || [],
@@ -235,7 +237,7 @@
 		$form[ 0 ].reset();
 
 		// Trigger for flow-actions-disabler
-		$form.find( 'textarea, :text' ).trigger( 'keyup' );
+		$form.find( 'textarea, [type=text]' ).trigger( 'keyup' );
 
 		// Hide the form
 		flowComponent.emitWithReturn( 'hideForm', $form );
@@ -244,7 +246,7 @@
 		flowComponent.emitWithReturn( 'removeError', $form );
 
 		// Trigger the cancel callback
-		$.each( callbacks, function ( idx, fn ) {
+		callbacks.forEach( function ( fn ) {
 			fn.call( target, event );
 		} );
 
@@ -258,6 +260,7 @@
 	/**
 	 * Return true page is in topic namespace,
 	 * and if $el is given, that if $el is also within .flow-post.
+	 *
 	 * @param {jQuery} [$el]
 	 * @return {boolean}
 	 */
@@ -265,4 +268,4 @@
 		return inTopicNamespace && ( !$el || $el.closest( '.flow-post' ).length === 0 );
 	}
 	FlowBoardAndHistoryComponentBase.static.inTopicNamespace = flowBoardInTopicNamespace;
-}( jQuery, mediaWiki ) );
+}() );

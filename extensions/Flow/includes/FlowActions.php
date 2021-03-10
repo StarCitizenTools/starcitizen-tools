@@ -19,7 +19,7 @@ class FlowActions {
 	}
 
 	/**
-	 * @return array
+	 * @return string[]
 	 */
 	public function getActions() {
 		return array_keys( $this->actions->all() );
@@ -29,7 +29,7 @@ class FlowActions {
 	 * Function can be overloaded depending on how deep the desired value is.
 	 *
 	 * @param string $action
-	 * @param string[optional] $type
+	 * @param string $type
 	 * @return bool True when the requested parameter exists and is not null
 	 */
 	public function hasValue( $action, $type = null /* [, $option = null [, ...]] */ ) {
@@ -63,7 +63,7 @@ class FlowActions {
 	 * Function can be overloaded depending on how deep the desired value is.
 	 *
 	 * @param string $action
-	 * @param string[optional] $type
+	 * @param string $type
 	 * @return mixed|null Requested value or null if missing
 	 */
 	public function getValue( $action, $type = null /* [, $option = null [, ...]] */ ) {
@@ -83,11 +83,10 @@ class FlowActions {
 		try {
 			$referencedAction = $this->actions[$action];
 			if ( is_string( $referencedAction ) && $referencedAction != $action ) {
-				// Replace action name in arguments.
+				// Remove action name from arguments
 				array_shift( $arguments );
-				array_unshift( $arguments, $referencedAction );
 
-				return call_user_func_array( [ $this, 'getValue' ], $arguments );
+				return $this->getValue( $referencedAction, ...$arguments );
 			}
 		} catch ( \OutOfBoundsException $e ) {
 			// Do nothing; the whole remainder of this method is fail-case.

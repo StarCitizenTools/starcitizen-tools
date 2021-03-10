@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"apihelp-flickrblacklist-description": "Validate a Flickr URL by using the user ID (NSID) for blacklisting.\n\nWhen used with the <var>list</var> option, returns all blacklisted IDs.",
+	"apihelp-flickrblacklist-summary": "Validate a Flickr URL by using the user ID (NSID) for blacklisting.",
+	"apihelp-flickrblacklist-extended-description": "When used with the <var>list</var> option, returns all blacklisted IDs.",
+	"apihelp-flickrblacklist-param-url": "The Flickr URL to be tested.",
+	"apihelp-flickrblacklist-param-list": "When set, the complete blacklist is returned. Cannot be used together with $1url.",
+	"apihelp-flickrblacklist-example-1": "Check a URL against the blacklist",
+	"apihelp-flickrblacklist-example-2": "Return the entire blacklist",
+	"apihelp-query+allcampaigns-description": "Enumerate all UploadWizard campaigns.",
+	"apihelp-query+allcampaigns-summary": "Enumerate all UploadWizard campaigns.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Only list campaigns that are enabled.",
+	"apihelp-query+allcampaigns-param-limit": "Number of campaigns to return.",
+	"apihelp-query+allcampaigns-example-1": "Enumerate enabled campaigns"
+}

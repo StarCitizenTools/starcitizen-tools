@@ -5,8 +5,13 @@ namespace Flow\Tests\Api;
 use Flow\Model\AbstractRevision;
 
 /**
+ * @covers \Flow\Api\ApiFlowBase
+ * @covers \Flow\Api\ApiFlowBasePost
+ * @covers \Flow\Api\ApiFlowModerateTopic
+ *
  * @group Flow
  * @group medium
+ * @group Database
  */
 class ApiFlowModerateTopicTest extends ApiTestCase {
 	protected $tablesUsed = [
@@ -24,6 +29,9 @@ class ApiFlowModerateTopicTest extends ApiTestCase {
 		'logging',
 	];
 
+	/**
+	 * @group Broken
+	 */
 	public function testModerateTopic() {
 		$topic = $this->createTopic();
 
@@ -80,6 +88,10 @@ class ApiFlowModerateTopicTest extends ApiTestCase {
 		$this->assertEquals( $topic['topic-id'], $logParams['topicId'], $debug );
 	}
 
+	/**
+	 * @throws \ApiUsageException
+	 * @group Broken
+	 */
 	public function testModerateLockedTopic() {
 		$topic = $this->createTopic();
 

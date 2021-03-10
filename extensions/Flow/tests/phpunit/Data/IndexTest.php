@@ -2,22 +2,26 @@
 
 namespace Flow\Tests\Data;
 
-use Flow\Container;
 use Flow\Data\Index\FeatureIndex;
 use Flow\Data\Index\TopKIndex;
 use Flow\Data\Index\UniqueFeatureIndex;
 use Flow\Tests\FlowTestCase;
 
 /**
+ * @covers \Flow\Data\Index\FeatureIndex
+ * @covers \Flow\Data\Index\TopKIndex
+ * @covers \Flow\Data\Index\UniqueFeatureIndex
+ *
  * @group Flow
  */
 class IndexTest extends FlowTestCase {
 
 	public function testShallow() {
+		global $wgFlowCacheVersion;
 		$cache = $this->getCache();
 
 		// fake ObjectMapper that doesn't roundtrip to- & fromStorageRow
-		$mapper = $this->getMockBuilder( 'Flow\Data\Mapper\BasicObjectMapper' )
+		$mapper = $this->getMockBuilder( \Flow\Data\Mapper\BasicObjectMapper::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$mapper->expects( $this->any() )
@@ -26,7 +30,7 @@ class IndexTest extends FlowTestCase {
 
 		// As we are only testing the cached result, storage should never be called
 		// not sure how to test that
-		$storage = $this->getMock( 'Flow\\Data\\ObjectStorage' );
+		$storage = $this->createMock( \Flow\Data\ObjectStorage::class );
 
 		$unique = new UniqueFeatureIndex(
 			$cache, $storage, $mapper, 'unique',
@@ -43,13 +47,13 @@ class IndexTest extends FlowTestCase {
 		);
 
 		$db = FeatureIndex::cachedDbId();
-		$v = Container::get( 'cache.version' );
-		$cache->set( "$db:unique:" . md5( '1' ) . ":$v", [ [ 'id' => 1, 'name' => 'foo', 'other' => 'ppp' ] ] );
-		$cache->set( "$db:unique:" . md5( '2' ) . ":$v", [ [ 'id' => 2, 'name' => 'foo', 'other' => 'qqq' ] ] );
-		$cache->set( "$db:unique:" . md5( '3' ) . ":$v", [ [ 'id' => 3, 'name' => 'baz', 'other' => 'lll' ] ] );
+		$v = $wgFlowCacheVersion;
+		$cache->set( "global:unique:$db:" . md5( '1' ) . ":$v", [ [ 'id' => 1, 'name' => 'foo', 'other' => 'ppp' ] ] );
+		$cache->set( "global:unique:$db:" . md5( '2' ) . ":$v", [ [ 'id' => 2, 'name' => 'foo', 'other' => 'qqq' ] ] );
+		$cache->set( "global:unique:$db:" . md5( '3' ) . ":$v", [ [ 'id' => 3, 'name' => 'baz', 'other' => 'lll' ] ] );
 
-		$cache->set( "$db:secondary:" . md5( 'foo' ) . ":$v", [ [ 'id' => 1 ], [ 'id' => 2 ] ] );
-		$cache->set( "$db:secondary:" . md5( 'baz' ) . ":$v", [ [ 'id' => 3 ] ] );
+		$cache->set( "global:secondary:$db:" . md5( 'foo' ) . ":$v", [ [ 'id' => 1 ], [ 'id' => 2 ] ] );
+		$cache->set( "global:secondary:$db:" . md5( 'baz' ) . ":$v", [ [ 'id' => 3 ] ] );
 
 		$expect = [
 			[ 'id' => 1, 'name' => 'foo', 'other' => 'ppp', ],
@@ -64,11 +68,12 @@ class IndexTest extends FlowTestCase {
 	}
 
 	public function testCompositeShallow() {
+		global $wgFlowCacheVersion;
 		$cache = $this->getCache();
-		$storage = $this->getMock( 'Flow\\Data\\ObjectStorage' );
+		$storage = $this->createMock( \Flow\Data\ObjectStorage::class );
 
 		// fake ObjectMapper that doesn't roundtrip to- & fromStorageRow
-		$mapper = $this->getMockBuilder( 'Flow\Data\Mapper\BasicObjectMapper' )
+		$mapper = $this->getMockBuilder( \Flow\Data\Mapper\BasicObjectMapper::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$mapper->expects( $this->any() )
@@ -92,16 +97,16 @@ class IndexTest extends FlowTestCase {
 		// remember: unique index still stores an array of results to be consistent with other indexes
 		// even though, due to uniqueness, there is only one value per set of keys
 		$db = FeatureIndex::cachedDbId();
-		$v = Container::get( 'cache.version' );
-		$cache->set( "$db:unique:" . md5( '1:9' ) . ":$v", [ [ 'id' => 1, 'ot' => 9, 'name' => 'foo' ] ] );
-		$cache->set( "$db:unique:" . md5( '1:8' ) . ":$v", [ [ 'id' => 1, 'ot' => 8, 'name' => 'foo' ] ] );
-		$cache->set( "$db:unique:" . md5( '3:7' ) . ":$v", [ [ 'id' => 3, 'ot' => 7, 'name' => 'baz' ] ] );
+		$v = $wgFlowCacheVersion;
+		$cache->set( "global:unique:$db:" . md5( '1:9' ) . ":$v", [ [ 'id' => 1, 'ot' => 9, 'name' => 'foo' ] ] );
+		$cache->set( "global:unique:$db:" . md5( '1:8' ) . ":$v", [ [ 'id' => 1, 'ot' => 8, 'name' => 'foo' ] ] );
+		$cache->set( "global:unique:$db:" . md5( '3:7' ) . ":$v", [ [ 'id' => 3, 'ot' => 7, 'name' => 'baz' ] ] );
 
-		$cache->set( "$db:secondary:" . md5( 'foo' ) . ":$v", [
+		$cache->set( "global:secondary:$db:" . md5( 'foo' ) . ":$v", [
 			[ 'id' => 1, 'ot' => 9 ],
 			[ 'id' => 1, 'ot' => 8 ],
 		] );
-		$cache->set( "$db:secondary:" . md5( 'baz' ). ":$v", [
+		$cache->set( "global:secondary:$db:" . md5( 'baz' ) . ":$v", [
 			[ 'id' => 3, 'ot' => 7 ],
 		] );
 

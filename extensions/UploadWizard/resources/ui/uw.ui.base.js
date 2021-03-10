@@ -18,4 +18,4 @@
 ( function ( uw ) {
 	// create UploadWizard UI namespace
 	uw.ui = {};
-}( mediaWiki.uploadWizard ) );
+}( mw.uploadWizard ) );

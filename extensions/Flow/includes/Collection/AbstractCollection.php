@@ -5,8 +5,8 @@ namespace Flow\Collection;
 use Flow\Container;
 use Flow\Data\ManagerGroup;
 use Flow\Data\ObjectManager;
-use Flow\Exception\InvalidDataException;
 use Flow\Exception\FlowException;
+use Flow\Exception\InvalidDataException;
 use Flow\Model\AbstractRevision;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
@@ -75,7 +75,8 @@ abstract class AbstractCollection {
 	 * (post ID, header ID, etc.)
 	 *
 	 * @param UUID $uuid
-	 * @return AbstractCollection
+	 * @return static
+	 * @suppress PhanTypeInstantiateAbstractStatic Phan is right, though
 	 */
 	public static function newFromId( UUID $uuid ) {
 		return new static( $uuid );
@@ -91,7 +92,10 @@ abstract class AbstractCollection {
 		$revision = static::getStorage()->get( $revId );
 
 		if ( $revision === null ) {
-			throw new InvalidDataException( 'Revisions for ' . $revId->getAlphadecimal() . ' could not be found', 'invalid-revision-id' );
+			throw new InvalidDataException(
+				'Revisions for ' . $revId->getAlphadecimal() . ' could not be found',
+				'invalid-revision-id'
+			);
 		}
 
 		return static::newFromRevision( $revision );
@@ -143,7 +147,10 @@ abstract class AbstractCollection {
 			);
 
 			if ( !$revisions ) {
-				throw new InvalidDataException( 'Revisions for ' . $this->uuid->getAlphadecimal() . ' could not be found', 'invalid-type-id' );
+				throw new InvalidDataException(
+					'Revisions for ' . $this->uuid->getAlphadecimal() . ' could not be found',
+					'invalid-type-id'
+				);
 			}
 
 			foreach ( $revisions as $revision ) {
@@ -248,7 +255,7 @@ abstract class AbstractCollection {
 		if ( !$this->workflow ) {
 			$uuid = $this->getWorkflowId();
 
-			$this->workflow = self::getStorage( 'Flow\\Model\\Workflow' )->get( $uuid );
+			$this->workflow = self::getStorage( Workflow::class )->get( $uuid );
 			if ( !$this->workflow ) {
 				throw new InvalidDataException( 'Invalid workflow: ' . $uuid->getAlphadecimal(), 'invalid-workflow' );
 			}
@@ -258,6 +265,6 @@ abstract class AbstractCollection {
 	}
 
 	public function getBoardWorkflow() {
-		return self::getStorage( 'Flow\\Model\\Workflow' )->get( $this->getBoardWorkflowId() );
+		return self::getStorage( Workflow::class )->get( $this->getBoardWorkflowId() );
 	}
 }

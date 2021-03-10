@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../../maintenance/benchmarks/Benchmarker.php';
 class BenchUuidConversions extends \Benchmarker {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Benchmark uuid timstamp extraction implementations';
+		$this->addDescription( 'Benchmark uuid timstamp extraction implementations' );
 	}
 
 	public function execute() {
@@ -70,18 +70,19 @@ class BenchUuidConversions extends \Benchmarker {
 			],
 		] );
 
-		$this->output( $this->getFormattedResults() );
+		// @fixme Find a replacement for this (removed from core in 1.29)
+		// $this->output( $this->getFormattedResults() );
 	}
 
 	public function oldhex2timestamp( $hex ) {
 		$bits = \Wikimedia\base_convert( $hex, 16, 2, 88 );
-		$msTimestamp = \Wikimedia\base_convert( substr( $bits, 0, 46 ), 2, 10 );
+		$msTimestamp = (int)\Wikimedia\base_convert( substr( $bits, 0, 46 ), 2, 10 );
 		return intval( $msTimestamp / 1000 );
 	}
 
 	public function oldalphadecimal2timestamp( $alpha ) {
 		$bits = \Wikimedia\base_convert( $alpha, 36, 2, 88 );
-		$msTimestamp = \Wikimedia\base_convert( substr( $bits, 0, 46 ), 2, 10 );
+		$msTimestamp = (int)\Wikimedia\base_convert( substr( $bits, 0, 46 ), 2, 10 );
 		return intval( $msTimestamp / 1000 );
 	}
 
@@ -131,5 +132,5 @@ class BenchUuidConversions extends \Benchmarker {
 	}
 }
 
-$maintClass = 'BenchUuidConversions';
+$maintClass = BenchUuidConversions::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

@@ -6,6 +6,7 @@ use BaseBlacklist;
 use ExtensionRegistry;
 use Flow\Model\AbstractRevision;
 use IContextSource;
+use MediaWiki\MediaWikiServices;
 use Status;
 use Title;
 
@@ -18,7 +19,13 @@ class SpamBlacklist implements SpamFilter {
 	 * @param Title $ownerTitle
 	 * @return Status
 	 */
-	public function validate( IContextSource $context, AbstractRevision $newRevision, AbstractRevision $oldRevision = null, Title $title, Title $ownerTitle ) {
+	public function validate(
+		IContextSource $context,
+		AbstractRevision $newRevision,
+		?AbstractRevision $oldRevision,
+		Title $title,
+		Title $ownerTitle
+	) {
 		$spamObj = BaseBlacklist::getInstance( 'spam' );
 		if ( !$spamObj instanceof \SpamBlacklist ) {
 			wfWarn( __METHOD__ . ': Expected a SpamBlacklist instance but instead received: ' . get_class( $spamObj ) );
@@ -50,9 +57,9 @@ class SpamBlacklist implements SpamFilter {
 	 * @return array
 	 */
 	public function getLinks( AbstractRevision $revision, Title $title ) {
-		global $wgParser;
 		$options = new \ParserOptions;
-		$output = $wgParser->parse( $revision->getContentInWikitext(), $title, $options );
+		$output = MediaWikiServices::getInstance()->getParser()
+			->parse( $revision->getContentInWikitext(), $title, $options );
 		return array_keys( $output->getExternalLinks() );
 	}
 

@@ -19,7 +19,7 @@ class SpecialUploadWizard extends SpecialPage {
 	protected $campaign = null;
 
 	/**
-	 * @param WebRequest $request the request (usually wgRequest)
+	 * @param WebRequest|null $request the request (usually wgRequest)
 	 * @param string|null $par everything in the URL after Special:UploadWizard.
 	 *   Not sure what we can use it for
 	 */
@@ -108,6 +108,8 @@ class SpecialUploadWizard extends SpecialPage {
 		$out->addModules( 'uw.EventFlowLogger' );
 		$out->addModules( 'ext.uploadWizard.page' );
 		$out->addModuleStyles( 'ext.uploadWizard.page.styles' );
+		// load spinner styles early
+		$out->addModuleStyles( 'jquery.spinner.styles' );
 
 		// where the uploadwizard will go
 		// TODO import more from UploadWizard's createInterface call.
@@ -121,11 +123,11 @@ class SpecialUploadWizard extends SpecialPage {
 	 */
 	protected function handleCampaign() {
 		$campaignName = $this->getRequest()->getVal( 'campaign' );
-		if ( is_null( $campaignName ) ) {
+		if ( $campaignName === null ) {
 			$campaignName = UploadWizardConfig::getSetting( 'defaultCampaign' );
 		}
 
-		if ( !is_null( $campaignName ) && $campaignName !== '' ) {
+		if ( $campaignName !== null && $campaignName !== '' ) {
 			$campaign = UploadWizardCampaign::newFromName( $campaignName );
 
 			if ( $campaign === false ) {
@@ -215,6 +217,8 @@ class SpecialUploadWizard extends SpecialPage {
 						) ||
 						in_array( $userDefaultLicense, UploadWizardConfig::getThirdPartyLicenses() ) );
 					break;
+				default:
+					throw new LogicException( 'Bad ownWorkDefault config' );
 			}
 
 			if ( $defaultInAllowedLicenses ) {
@@ -250,7 +254,7 @@ class SpecialUploadWizard extends SpecialPage {
 	/**
 	 * Check if anyone can upload (or if other sitewide config prevents this)
 	 * Side effect: will print error page to wgOut if cannot upload.
-	 * @return boolean -- true if can upload
+	 * @return bool -- true if can upload
 	 */
 	private function isUploadAllowed() {
 		// Check uploading enabled
@@ -260,9 +264,7 @@ class SpecialUploadWizard extends SpecialPage {
 		}
 
 		// Check whether we actually want to allow changing stuff
-		if ( wfReadOnly() ) {
-			throw new ReadOnlyError;
-		}
+		$this->checkReadOnly();
 
 		// we got all the way here, so it must be okay to upload
 		return true;
@@ -274,7 +276,7 @@ class SpecialUploadWizard extends SpecialPage {
 	 * @param User $user
 	 * @throws PermissionsError
 	 * @throws UserBlockedError
-	 * @return boolean -- true if can upload
+	 * @return bool -- true if can upload
 	 */
 	private function isUserUploadAllowed( User $user ) {
 		// Check permissions
@@ -284,7 +286,7 @@ class SpecialUploadWizard extends SpecialPage {
 		}
 
 		// Check blocks
-		if ( $user->isBlocked() ) {
+		if ( $user->isBlockedFromUpload() ) {
 			throw new UserBlockedError( $user->getBlock() );
 		}
 
@@ -301,16 +303,16 @@ class SpecialUploadWizard extends SpecialPage {
 	 * Return the basic HTML structure for the entire page
 	 * Will be enhanced by the javascript to actually do stuff
 	 * @return string html
+	 * @suppress SecurityCheck-XSS The documentation of $config['display']['headerLabel'] says,
+	 *   it is wikitext, but all *label are used as html
 	 */
 	protected function getWizardHtml() {
-		global $wgExtensionAssetsPath;
-
 		$config = UploadWizardConfig::getConfig( $this->campaign );
 
 		if ( array_key_exists(
 			'display', $config ) && array_key_exists( 'headerLabel', $config['display'] )
 		) {
-			$this->getOutput()->addHtml( $config['display']['headerLabel'] );
+			$this->getOutput()->addHTML( $config['display']['headerLabel'] );
 		}
 
 		if ( array_key_exists( 'fallbackToAltUploadForm', $config )
@@ -322,7 +324,7 @@ class SpecialUploadWizard extends SpecialPage {
 			$altUploadForm = Title::newFromText( $config[ 'altUploadForm' ] );
 			if ( $altUploadForm instanceof Title ) {
 				$linkHtml = Html::rawElement( 'p', [ 'style' => 'text-align: center;' ],
-					Html::rawElement( 'a', [ 'href' => $altUploadForm->getLocalURL() ],
+					Html::element( 'a', [ 'href' => $altUploadForm->getLocalURL() ],
 						$config['altUploadForm']
 					)
 				);
@@ -331,7 +333,7 @@ class SpecialUploadWizard extends SpecialPage {
 			return Html::rawElement(
 				'div',
 				[],
-				Html::rawElement(
+				Html::element(
 					'p',
 					[ 'style' => 'text-align: center' ],
 					wfMessage( 'mwe-upwiz-extension-disabled' )->text()
@@ -350,11 +352,8 @@ class SpecialUploadWizard extends SpecialPage {
 			'<div id="mwe-upwiz-tutorial-html" style="display:none;">' .
 				$tutorialHtml .
 			'</div>' .
-			// if loading takes > 2 seconds display spinner. Note we are evading Resource Loader here, and linking directly. Because we want an image to appear if RL's package is late.
-			// using some &nbsp;'s which is a bit of superstition, to make sure jQuery will hide this (it seems that it doesn't sometimes, when it has no content)
-			// the min-width & max-width is copied from the #uploadWizard properties, so in nice browsers the spinner is right where the button will go.
-			'<div id="mwe-first-spinner" style="min-width:750px; max-width:900px; height:200px; line-height:200px; text-align:center;">' .
-				'&nbsp;<img src="' . $wgExtensionAssetsPath . '/UploadWizard/resources/images/24px-spinner-0645ad.gif" width="24" height="24" />&nbsp;' .
+			'<div class="mwe-first-spinner">' .
+				new \MediaWiki\Widget\SpinnerWidget( [ 'size' => 'large' ] ) .
 			'</div>' .
 		'</div>';
 		// @codingStandardsIgnoreEnd

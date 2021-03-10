@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Alifakoor",
+			"Ladsgroup",
+			"Reza1615"
+		]
+	},
+	"apihelp-flickrblacklist-extended-description": "وقتی با گزینهٔ <var>list</var> استفاده شود، تمامی شناسه‌های مشمول در فهرست سیاه رابرمی‌گرداند.",
+	"apihelp-flickrblacklist-param-url": "نشانی فلیکر بررسی شد.",
+	"apihelp-flickrblacklist-param-list": "وفتی که تنظیم شود تمام فهرست سیاه  به صورت کامل برگردانده می‌شود. نمی‌توان همطمان با $1url از آن استفاده کرد",
+	"apihelp-flickrblacklist-example-1": "آزمایش یک  پیوند در برابر فهرست سیاه",
+	"apihelp-flickrblacklist-example-2": "کل فهرست سیاه را برگردان",
+	"apihelp-query+allcampaigns-description": "شمارش همهٔ کمپین‌های جادوگرهای بارگذاری.",
+	"apihelp-query+allcampaigns-summary": "شمارش همهٔ کمپین‌های جادوگرهای بارگذاری",
+	"apihelp-query+allcampaigns-param-enabledonly": "فقط فهرست کردن کمپین‌هایی که فعال هستند",
+	"apihelp-query+allcampaigns-param-limit": "تعداد کمپین‌ها برای ارائه",
+	"apihelp-query+allcampaigns-example-1": "آوردن تمام کمپین‌های فعال"
+}

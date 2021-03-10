@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 	/**
 	 * Deed step controller.
 	 *
@@ -86,21 +86,26 @@
 		}
 	};
 
+	uw.controller.Deed.prototype.unload = function () {
+		var deedController = this;
+		uw.controller.Step.prototype.unload.call( this );
+
+		Object.keys( this.deeds ).forEach( function ( name ) {
+			deedController.deeds[ name ].unload();
+		} );
+	};
+
 	/**
 	 * Move to this step.
 	 *
 	 * @param {mw.UploadWizardUpload[]} uploads
 	 */
 	uw.controller.Deed.prototype.load = function ( uploads ) {
-		var customDeed, previousDeed, fromStepName,
-			showDeed = false;
+		var customDeed, previousDeed, fromStepName, showDeed;
 
-		$.each( uploads, function ( i, upload ) {
+		showDeed = uploads.some( function ( upload ) {
 			fromStepName = upload.state;
-			if ( !upload.file.fromURL ) {
-				showDeed = true;
-				return false;
-			}
+			return !upload.file.fromURL;
 		} );
 
 		uw.controller.Step.prototype.load.call( this, uploads );
@@ -145,7 +150,7 @@
 			.insertBefore( this.deedChooser.$selector.find( '.mwe-upwiz-deed-ownwork' ) )
 			.msg( 'mwe-upwiz-deeds-macro-prompt', this.uploads.length, mw.user );
 
-		$.each( uploads, function ( i, upload ) {
+		uploads.forEach( function ( upload ) {
 			// Add previews and details to the DOM
 			if ( !upload.file.fromURL ) {
 				upload.deedPreview = new uw.ui.DeedPreview( upload );
@@ -182,7 +187,7 @@
 	};
 
 	/**
-	 * @param {UploadWizardUpload} upload
+	 * @param {mw.UploadWizardUpload} upload
 	 */
 	uw.controller.Deed.prototype.removeUpload = function ( upload ) {
 		uw.controller.Step.prototype.removeUpload.call( this, upload );
@@ -192,4 +197,4 @@
 		}
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

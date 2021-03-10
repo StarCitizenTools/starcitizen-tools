@@ -1,10 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sindhu",
-			"Mehtab ahmed",
 			"Aursani",
-			"Indus Asia"
+			"Indus Asia",
+			"Mehtab ahmed",
+			"Sindhu",
+			"Tweety"
 		]
 	},
 	"flow-topic-collapse-siderail": "پوري ويڪر تي پڙھو",
@@ -12,10 +13,12 @@
 	"flow-show-change": "تبديليون ڏيکاريو",
 	"flow-last-modified-by": "$1 پاران آخري ڀيرو {{GENDER:$1|سنواريل}}",
 	"flow-post-action-edit-post-submit": "تبديليون سانڍيو",
+	"flow-post-action-undo-moderation": "اڻڪريو",
+	"flow-topic-action-undo-moderation": "اڻڪريو",
 	"flow-topic-action-watchlist-add": "هن موضوع کي سبسڪرائب ڪريو",
 	"flow-topic-action-watchlist-remove": "اڻ سبسڪرائب ڪريو",
 	"flow-edit-post-submit": "ترمرميمون اماڻيو",
+	"flow-undo": "اڻڪريو",
 	"group-flow-bot-member": "منظم بحث بوٽ",
-	"flow-notification-enabled-on-talkpage-email-subject-message": "$2 تي نئون مباحثي سرشتو",
 	"flow-dialog-cancelconfirm-discard": "تبديليون ڦٽو ڪريو"
 }

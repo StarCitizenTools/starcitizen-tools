@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow Item
 	 *
@@ -33,6 +33,7 @@
 
 	/**
 	 * Get item id
+	 *
 	 * @return {string} Item Id
 	 */
 	mw.flow.dm.Item.prototype.getId = function () {
@@ -41,6 +42,7 @@
 
 	/**
 	 * Set item id
+	 *
 	 * @param {string} id Item Id
 	 */
 	mw.flow.dm.Item.prototype.setId = function ( id ) {
@@ -77,4 +79,4 @@
 	mw.flow.dm.Item.prototype.hasBeenChanged = function () {
 		return !OO.compare( this.comparableHash, this.getHashObject() );
 	};
-}( jQuery ) );
+}() );

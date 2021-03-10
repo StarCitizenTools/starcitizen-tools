@@ -11,10 +11,10 @@ use Flow\Exception\InvalidInputException;
  */
 class Pager {
 	private static $VALID_DIRECTIONS = [ 'fwd', 'rev' ];
-	const DEFAULT_DIRECTION = 'fwd';
-	const DEFAULT_LIMIT = 1;
-	const MAX_LIMIT = 500;
-	const MAX_QUERIES = 4;
+	private const DEFAULT_DIRECTION = 'fwd';
+	private const DEFAULT_LIMIT = 1;
+	private const MAX_LIMIT = 500;
+	private const MAX_QUERIES = 4;
 
 	/**
 	 * @var ObjectManager
@@ -74,7 +74,7 @@ class Pager {
 		$indexOptions = [
 			'limit' => $this->options['pager-limit']
 		];
-		if ( isset( $this->options['sort'], $this->options['order'] ) ) {
+		if ( isset( $this->options['sort'] ) && isset( $this->options['order'] ) ) {
 			$indexOptions += [
 				'sort' => [ $this->options['sort'] ],
 				'order' => $this->options['order'],
@@ -133,7 +133,7 @@ class Pager {
 				// nothing found
 				break;
 			}
-			$filtered = $filter ? call_user_func( $filter, $found ) : $found;
+			$filtered = $filter ? $filter( $found ) : $found;
 			if ( $this->options['pager-dir'] === 'rev' ) {
 				// Paging A-Z with pager-offset F, pager-dir rev, pager-limit 2 gives
 				// DE on first query, BC on second, and A on third.  The output
@@ -161,7 +161,12 @@ class Pager {
 		if ( $queries >= self::MAX_QUERIES ) {
 			$count = count( $results );
 			$limit = $this->options['pager-limit'];
-			wfDebugLog( 'Flow', __METHOD__ . "Reached maximum of $queries queries with $count results of $limit requested with query of " . json_encode( $this->query ) . ' and options ' . json_encode( $options ) );
+			wfDebugLog(
+				'Flow',
+				__METHOD__ . "Reached maximum of $queries queries with $count results of $limit " .
+					"requested with query of " . json_encode( $this->query ) . ' and options ' .
+					json_encode( $options )
+			);
 		}
 
 		if ( $results ) {
@@ -176,7 +181,7 @@ class Pager {
 	 * @return PagerPage
 	 * @throws InvalidInputException
 	 */
-	protected function processPage( $results ) {
+	protected function processPage( array $results ) {
 		$pagingLinks = [];
 
 		// Retrieve paging links

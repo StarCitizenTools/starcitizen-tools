@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Translatealcd",
-			"Hitaypayan"
+			"Hitaypayan",
+			"Translatealcd"
 		]
 	},
 	"uploadwizard": "Qayqaya’ na ppawsa’ sa kktan",
@@ -58,7 +58,6 @@
 	"mwe-upwiz-ok": "Wal balay",
 	"mwe-upwiz-next": "Suruw niya’ lga",
 	"mwe-upwiz-next-file": "Siy lhingiy",
-	"mwe-upwiz-next-details": "Suruw niya’ lga",
 	"mwe-upwiz-previous": "’bzinah",
 	"mwe-upwiz-upload-another": "Pawsa’ pzyux na’ na Tang’an",
 	"mwe-upwiz-tooltip-more-info": "Pzyux na’ musa’ baqun.",

@@ -7,7 +7,12 @@
  * 4. Have the ability to fetch individual prototype methods from classes in the registry, as they are out of scope.
  */
 
-( function ( $, mw ) {
+/**
+ * @class FlowComponent
+ * TODO: Use @-external in JSDoc
+ */
+
+( function () {
 	var _componentRegistry = new OO.Registry();
 
 	/** @class mw.flow */
@@ -17,6 +22,7 @@
 	 * Instantiate one or more new FlowComponents.
 	 * Uses data-flow-component to find the right class, and returns that new instance.
 	 * Accepts one or more container elements in $container. If multiple, returns an array of FlowBoardComponents.
+	 *
 	 * @param {jQuery} $container
 	 * @return {FlowComponent|boolean|Array} The created FlowComponent instance, or an
 	 *  array of FlowComponent instances, or boolean false in case of an error.
@@ -32,13 +38,13 @@
 		 */
 		function _RecursiveConstructor() {
 			var constructors = [],
-				parent = this.constructor.parent,
+				parent = this.constructor.super,
 				i, j, parentReturn;
 
 			// Find each parent class
 			while ( parent ) {
 				constructors.push( parent );
-				parent = parent.parent;
+				parent = parent.super;
 			}
 
 			// Call each parent in reverse (starting with the base class and moving up the chain)
@@ -92,6 +98,7 @@
 	/**
 	 * Registers a given FlowComponent into the component registry, and also has it inherit another class using the
 	 * prototypeName argument (defaults to 'component', which returns FlowComponent).
+	 *
 	 * @param {string} name Name of component to register
 	 * @param {Function} constructorClass Actual class to link to that name
 	 * @param {string} [prototypeName='component'] A base class which this one will inherit
@@ -133,21 +140,22 @@
 
 		if ( !registeredClass ) {
 			mw.flow.debug( 'Failed to find FlowComponent.', arguments );
-			return $.noop;
+			return function () {};
 		}
 
 		method = registeredClass.prototype[ methodName ];
 		if ( !method ) {
 			mw.flow.debug( 'Failed to find FlowComponent method.', arguments );
-			return $.noop;
+			return function () {};
 		}
 
-		return $.proxy( method, context || registeredClass );
+		return method.bind( context || registeredClass );
 	}
 	mw.flow.getPrototypeMethod = getFlowPrototypeMethod;
 
 	/**
 	 * Mixes in the given mixinClass to be copied to an existing class, by name.
+	 *
 	 * @param {string} targetName Target component
 	 * @param {Function} mixinClass Class with extension to add to target
 	 */
@@ -167,4 +175,4 @@
 		}
 	}
 	mw.flow.mixinComponent = mixinFlowComponent;
-}( jQuery, mediaWiki ) );
+}() );

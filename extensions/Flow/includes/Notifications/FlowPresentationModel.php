@@ -1,9 +1,12 @@
 <?php
 
-namespace Flow;
+namespace Flow\Notifications;
 
 use EchoEventPresentationModel;
+use Flow\Container;
 use Flow\Model\UUID;
+use Flow\UrlGenerator;
+use MediaWiki\MediaWikiServices;
 use Title;
 
 abstract class FlowPresentationModel extends EchoEventPresentationModel {
@@ -34,12 +37,11 @@ abstract class FlowPresentationModel extends EchoEventPresentationModel {
 	 * @return string
 	 */
 	protected function getPostLinkUrl( $firstChronologicallyPostId = null, $anchorPostId = null ) {
-		/** @var UUID $workflowId */
-		$workflowId = $this->event->getExtraParam( 'topic-workflow' );
 		if ( $firstChronologicallyPostId === null ) {
 			/** @var UUID $firstChronologicallyPostId */
 			$firstChronologicallyPostId = $this->event->getExtraParam( 'post-id' );
 		}
+		'@phan-var UUID $firstChronologicallyPostId';
 
 		if ( $anchorPostId === null ) {
 			$anchorPostId = $firstChronologicallyPostId;
@@ -65,12 +67,7 @@ abstract class FlowPresentationModel extends EchoEventPresentationModel {
 	 * @return string
 	 */
 	protected function getTopicLinkUrl() {
-		/** @var UUID $workflowId */
-		$workflowId = $this->event->getExtraParam( 'topic-workflow' );
-
-		$url = $this->getTopicTitleObj()->getFullURL( [ 'fromnotif' => 1 ] );
-
-		return $url;
+		return $this->getTopicTitleObj()->getFullURL( [ 'fromnotif' => 1 ] );
 	}
 
 	/**
@@ -80,7 +77,9 @@ abstract class FlowPresentationModel extends EchoEventPresentationModel {
 	 * @return Title
 	 */
 	protected function getTopicTitleObj( $fragment = '' ) {
+		/** @var UUID $workflowId */
 		$workflowId = $this->event->getExtraParam( 'topic-workflow' );
+		'@phan-var UUID $workflowId';
 
 		return Title::makeTitleSafe(
 			NS_TOPIC,
@@ -92,7 +91,7 @@ abstract class FlowPresentationModel extends EchoEventPresentationModel {
 	/**
 	 * Return a full url to a board sorted by newest topic
 	 *   ?topiclist_sortby=newest
-	 * @return string
+	 * @return array
 	 */
 	protected function getBoardLinkByNewestTopic() {
 		return [
@@ -104,12 +103,15 @@ abstract class FlowPresentationModel extends EchoEventPresentationModel {
 	protected function getBoardByNewestTopicUrl() {
 		/** @var UrlGenerator $urlGenerator */
 		$urlGenerator = Container::get( 'url_generator' );
-		$url = $urlGenerator->boardLink( $this->event->getTitle(), 'newest' )->getFullURL();
-		return $url;
+		return $urlGenerator->boardLink( $this->event->getTitle(), 'newest' )->getFullURL();
 	}
 
 	protected function getViewTopicLink() {
-		$title = Title::newFromText( $this->event->getExtraParam( 'topic-workflow' )->getAlphadecimal(), NS_TOPIC );
+		/** @var UUID $workflow */
+		$workflow = $this->event->getExtraParam( 'topic-workflow' );
+		'@phan-var UUID $workflow';
+
+		$title = Title::newFromText( $workflow->getAlphadecimal(), NS_TOPIC );
 		return [
 			'url' => $title->getFullURL(),
 			'label' => $this->msg( 'flow-notification-link-text-view-topic' )->text(),
@@ -138,7 +140,7 @@ abstract class FlowPresentationModel extends EchoEventPresentationModel {
 
 	protected function truncateTopicTitle( $topicTitle ) {
 		return $this->language->embedBidi(
-			$this->language->truncate(
+			$this->language->truncateForVisual(
 				$topicTitle,
 				self::SECTION_TITLE_RECOMMENDED_LENGTH,
 				'...',
@@ -173,7 +175,18 @@ abstract class FlowPresentationModel extends EchoEventPresentationModel {
 		$type = $isTopic ? 'topic' : 'board';
 		$stringPageTitle = $isTopic ? $this->getTopicTitle() : $this->getTruncatedTitleText( $title );
 
-		if ( $this->isUserTalkPage() || !$this->getUser()->isWatched( $title ) ) {
+		if ( $this->isUserTalkPage() ||
+			 !(
+				$title->isWatchable() &&
+				MediaWikiServices::getInstance()->getPermissionManager()->userHasRight(
+					$this->getUser(),
+					'viewmywatchlist'
+				) &&
+				MediaWikiServices::getInstance()->getWatchedItemStore()->isWatched(
+					$this->getUser(),
+					$title
+				)
+			) ) {
 			return null;
 		}
 

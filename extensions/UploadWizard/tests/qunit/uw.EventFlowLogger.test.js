@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, uw ) {
+( function ( uw ) {
 	QUnit.module( 'uw.EventFlowLogger', QUnit.newMwEnvironment() );
 
 	QUnit.test( 'sanity test', function ( assert ) {
@@ -35,4 +35,4 @@
 		assert.strictEqual( mw.track.firstCall.args[ 1 ].flowId,
 			mw.track.thirdCall.args[ 1 ].flowId, 'flowId is constant' );
 	} );
-}( mediaWiki, mediaWiki.uploadWizard ) );
+}( mw.uploadWizard ) );

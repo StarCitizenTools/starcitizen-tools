@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hamilton Abreu"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Validar um URL do Flickr verificando o identificador do utilizador (NSID) contra a lista negra.\n\nQuando usado com a opção <var>list</var>, devolve todos os identificadores na lista negra.",
+	"apihelp-flickrblacklist-summary": "Validar um URL do Flickr verificando o identificador do utilizador (NSID) contra a lista negra.",
+	"apihelp-flickrblacklist-extended-description": "Quando usado com a opção <var>list</var>, devolve todos os identificadores na lista negra.",
+	"apihelp-flickrblacklist-param-url": "O URL do Flickr a ser testado.",
+	"apihelp-flickrblacklist-param-list": "Quando definido, a lista negra completa é devolvida. Não pode ser usado em conjunto com $1url.",
+	"apihelp-flickrblacklist-example-1": "Verificar um URL contra a lista negra",
+	"apihelp-flickrblacklist-example-2": "Devolver a lista negra completa",
+	"apihelp-query+allcampaigns-description": "Enumerar todas as campanhas do Assistente de Envio de Ficheiros.",
+	"apihelp-query+allcampaigns-summary": "Enumerar todas as campanhas do Assistente de Envio de Ficheiros.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Listar só as campanhas que estão ativas.",
+	"apihelp-query+allcampaigns-param-limit": "Número de campanhas a serem listadas.",
+	"apihelp-query+allcampaigns-example-1": "Enumerar as campanhas ativas"
+}

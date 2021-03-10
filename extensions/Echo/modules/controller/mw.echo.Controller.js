@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/* global moment:false */
 	/**
 	 * Controller for Echo notifications
@@ -91,11 +91,11 @@
 					foreignSources = {};
 
 				for ( source in data ) {
-					if ( source !== mw.config.get( 'wgDBname' ) ) {
+					if ( source !== mw.config.get( 'wgWikiID' ) ) {
 						// Collect sources for API
 						foreignSources[ source ] = data[ source ].source;
 					}
-					result[ source === mw.config.get( 'wgDBname' ) ? 'local' : source ] = data[ source ];
+					result[ source === mw.config.get( 'wgWikiID' ) ? 'local' : source ] = data[ source ];
 				}
 
 				// Register the foreign sources in the API
@@ -128,7 +128,7 @@
 			this.manager.getTypeString(),
 			currentSource,
 			{
-				'continue': continueValue,
+				continue: continueValue,
 				readState: filters.getReadState(),
 				titles: filters.getSourcePagesModel().getGroupedPagesForCurrentTitle()
 			}
@@ -335,7 +335,7 @@
 								// but is not an array. We should log this in the console
 								mw.log.warn(
 									'newNotifData.bundledNotifications is expected to be an array,' +
-									'but instead received "' + $.type( newNotifData.bundledNotifications ) + '"'
+									'but instead received "' + typeof newNotifData.bundledNotifications + '"'
 								);
 							}
 						}
@@ -499,13 +499,11 @@
 	 */
 	mw.echo.Controller.prototype.markLocalNotificationsRead = function () {
 		var modelName, model,
-			itemIds = [],
 			readState = this.manager.getFiltersModel().getReadState(),
 			modelItems = {};
 
 		this.manager.getLocalNotifications().forEach( function ( notification ) {
 			if ( !notification.isRead() ) {
-				itemIds = itemIds.concat( notification.getAllIds() );
 				notification.toggleRead( true );
 
 				modelName = notification.getModelName();
@@ -525,9 +523,8 @@
 		// Update pagination count
 		this.manager.updateCurrentPageItemCount();
 
-		this.manager.getUnreadCounter().estimateChange( -itemIds.length );
-		this.manager.getLocalCounter().estimateChange( -itemIds.length );
-		return this.api.markItemsRead( itemIds, 'local', true ).then( this.refreshUnreadCount.bind( this ) );
+		this.manager.getLocalCounter().setCount( 0, false );
+		return this.api.markAllRead( 'local', this.getTypeString() ).then( this.refreshUnreadCount.bind( this ) );
 	};
 
 	/**
@@ -791,4 +788,4 @@
 	mw.echo.Controller.prototype.getTypeString = function () {
 		return this.manager.getTypeString();
 	};
-}( mediaWiki, jQuery ) );
+}() );

@@ -1,4 +1,11 @@
 <?php
+// phpcs:disable Generic.Files.LineLength -- Long html test examples
+// @phan-file-suppress PhanUndeclaredClassMethod, PhanUndeclaredClassConstant Other extensions used for testing purposes
+
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\SlotRecord;
+use Wikibase\Client\Hooks\EchoNotificationsHandlers;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
@@ -26,9 +33,11 @@ class GenerateSampleNotifications extends Maintenance {
 		'page-connection',
 	];
 
+	private $timestampCounter = 5;
+
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = "Generate sample notifications";
+		$this->addDescription( "Generate sample notifications" );
 
 		$this->addOption(
 			'force',
@@ -57,6 +66,13 @@ class GenerateSampleNotifications extends Maintenance {
 			true, true, 'o' );
 
 		$this->requireExtension( 'Echo' );
+
+		$this->addOption(
+			'timestamp',
+			'Add notification timestamps (Epoch time format). All notifications that are not ' .
+				'related directly to edits will be created with a timestamp starting 5 minutes ' .
+				'before the given timestamp, and increasing by 1 minute per notification.',
+			false, false, 'k' );
 	}
 
 	public function execute() {
@@ -127,6 +143,35 @@ class GenerateSampleNotifications extends Maintenance {
 		$this->output( "Completed \n" );
 	}
 
+	/**
+	 * Get the set timestamp of the event
+	 *
+	 * @param bool $getEpoch Get the epoch value
+	 * @return int Timestamp for the operation
+	 */
+	private function getTimestamp( $getEpoch = false ) {
+		$startTime = $this->getOption( 'timestamp' ) ?: time();
+
+		// Incrementally decrease X minutes from start time
+		$timestamp = strtotime( '-' . $this->timestampCounter++ . ' minute', $startTime );
+
+		return $getEpoch ? $timestamp : (int)wfTimestamp( TS_UNIX, $timestamp );
+	}
+
+	/**
+	 * Add a timestamp string to the output, if a timestamp option was given,
+	 * to note the time of the new generated event.
+	 *
+	 * @param string $output New output message with timestamp
+	 * @return string
+	 */
+	private function addTimestampToOutput( $output ) {
+		if ( $this->getOption( 'timestamp' ) ) {
+			$output .= ' (Using timestamp: ' . date( 'Y-m-d H:i:s', $this->getTimestamp( true ) ) . ')';
+		}
+		return $output;
+	}
+
 	private function generateEditUserTalk( User $user, User $agent ) {
 		$this->output( "{$agent->getName()} is writing on {$user->getName()}'s user talk page\n" );
 		$editId = $this->generateRandomString();
@@ -169,12 +214,12 @@ class GenerateSampleNotifications extends Maintenance {
 	private function addToPageContent( Title $title, User $agent, $contentText ) {
 		$page = WikiPage::factory( $title );
 		$previousContent = "";
-		$page->loadPageData( 'fromdbmaster' );
-		$revision = $page->getRevision();
+		$page->loadPageData( WikiPage::READ_LATEST );
+		$revision = $page->getRevisionRecord();
 		if ( $revision ) {
-			$content = $revision->getContent( Revision::FOR_PUBLIC );
+			$content = $revision->getContent( SlotRecord::MAIN, RevisionRecord::FOR_PUBLIC );
 			if ( $content instanceof WikitextContent ) {
-				$previousContent = $content->getNativeData();
+				$previousContent = $content->getText();
 			}
 		}
 		$status = $page->doEditContent(
@@ -186,10 +231,10 @@ class GenerateSampleNotifications extends Maintenance {
 		);
 
 		if ( !$status->isGood() ) {
-			$this->error( "Failed to edit {$title->getPrefixedText()}: {$status->getMessage()}" );
+			$this->error( "Failed to edit {$title->getPrefixedText()}: {$status->getMessage()->text()}" );
 		}
 
-		return $status->getValue()['revision'];
+		return $status->getValue()['revision-record'];
 	}
 
 	private function generateMention( User $user, User $agent, User $otherUser, Title $title ) {
@@ -230,24 +275,31 @@ class GenerateSampleNotifications extends Maintenance {
 		$this->output( "{$agent->getName()} is reverting {$user->getName()}'s edit on {$moai->getPrefixedText()}\n" );
 		$this->addToPageContent( $moai, $agent, "\ncreating a good revision here\n" );
 		$this->addToPageContent( $moai, $user, "\nadding a line here\n" );
-		$content = $page->getUndoContent( $page->getRevision(), $page->getRevision()->getPrevious() );
-		$status = $page->doEditContent( $content, 'undo', 0, false, $agent, null, [], $page->getRevision()->getId() );
-		if ( !$status->isGood() ) {
-			$this->error( "Failed to undo {$moai->getPrefixedText()}: {$status->getMessage()}" );
-		}
 
-		// rollback
-		$moai2 = Title::newFromText( 'Moai2' );
-		$page = WikiPage::factory( $moai2 );
-		$this->output( "{$agent->getName()} is rolling back {$user->getName()}'s edits on {$moai2->getPrefixedText()}\n" );
-		$this->addToPageContent( $moai2, $agent, "\ncreating a good revision here\n" );
-		$this->addToPageContent( $moai2, $user, "\nadding a line here\n" );
-		$this->addToPageContent( $moai2, $user, "\nadding a line here\n" );
-		$details = [];
-		$token = $agent->getEditToken( 'rollback', null );
-		$errors = $page->doRollback( $user->getName(), 'generating reverted notification', $token, false, $details, $agent );
-		if ( $errors ) {
-			$this->error( serialize( $errors ) );
+		$undoRev = $page->getRevisionRecord();
+		$previous = MediaWikiServices::getInstance()
+			->getRevisionLookup()
+			->getPreviousRevision( $undoRev );
+
+		$handler = MediaWikiServices::getInstance()
+			->getContentHandlerFactory()
+			->getContentHandler(
+				$undoRev->getSlot( SlotRecord::MAIN, RevisionRecord::RAW )
+					->getModel()
+			);
+		$undoContent = $undoRev->getContent( SlotRecord::MAIN );
+		$previousContent = $previous->getContent( SlotRecord::MAIN );
+
+		$content = $handler->getUndoContent(
+			$undoContent,
+			$undoContent,
+			$previousContent,
+			true // undoIsLatest
+		);
+
+		$status = $page->doEditContent( $content, 'undo', 0, false, $agent, null, [], $undoRev->getId() );
+		if ( !$status->isGood() ) {
+			$this->error( "Failed to undo {$moai->getPrefixedText()}: {$status->getMessage()->text()}" );
 		}
 	}
 
@@ -256,14 +308,13 @@ class GenerateSampleNotifications extends Maintenance {
 		EchoEvent::create( [
 			'type' => 'welcome',
 			'agent' => $user,
-			'extra' => [
-				'notifyAgent' => true
-			]
+			'timestamp' => $this->getTimestamp(),
 		] );
 	}
 
 	private function generateEmail( User $user, User $agent ) {
-		$this->output( "{$agent->getName()} is emailing {$user->getName()}\n" );
+		$output = $this->addTimestampToOutput( "{$agent->getName()} is emailing {$user->getName()}" );
+		$this->output( "$output\n" );
 		EchoEvent::create( [
 			'type' => 'emailuser',
 			'extra' => [
@@ -271,11 +322,13 @@ class GenerateSampleNotifications extends Maintenance {
 				'subject' => 'Long time no see',
 			],
 			'agent' => $agent,
+			'timestamp' => $this->getTimestamp(),
 		] );
 	}
 
 	private function generateUserRights( User $user, User $agent ) {
-		$this->output( "{$agent->getName()} is changing {$user->getName()}'s rights\n" );
+		$output = $this->addTimestampToOutput( "{$agent->getName()} is changing {$user->getName()}'s rights" );
+		$this->output( "$output\n" );
 		$this->createUserRightsNotification( $user, $agent, [ 'OnlyAdd-1' ], null );
 		$this->createUserRightsNotification( $user, $agent, null, [ 'JustRemove-1', 'JustRemove-2' ] );
 		$this->createUserRightsNotification( $user, $agent, [ 'Add-1', 'Add-2' ], [ 'Remove-1', 'Remove-2' ] );
@@ -286,12 +339,13 @@ class GenerateSampleNotifications extends Maintenance {
 			[
 				'type' => 'user-rights',
 				'extra' => [
-					'user' => $user->getID(),
+					'user' => $user->getId(),
 					'add' => $add,
 					'remove' => $remove,
 					'reason' => 'This is the [[reason]] for changing your user rights.',
 				],
 				'agent' => $agent,
+				'timestamp' => $this->getTimestamp(),
 			]
 		);
 	}
@@ -309,6 +363,7 @@ class GenerateSampleNotifications extends Maintenance {
 					'extra' => [
 						'recipient' => $user->getId(),
 					],
+					'timestamp' => $this->getTimestamp(),
 				]
 			);
 		}
@@ -320,6 +375,7 @@ class GenerateSampleNotifications extends Maintenance {
 					'recipient' => $user->getId(),
 					'lastTranslationTitle' => 'History of the People\'s Republic of China'
 				],
+				'timestamp' => $this->getTimestamp(),
 			]
 		);
 	}
@@ -346,7 +402,7 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function generateOpenStackManager( User $user, User $agent ) {
-		if ( !class_exists( 'OpenStackManagerHooks' ) ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'OpenStackManager' ) ) {
 			return;
 		}
 
@@ -361,7 +417,8 @@ class GenerateSampleNotifications extends Maintenance {
 					'instanceName' => 'instance1',
 					'projectName' => 'TheProject',
 					'notifyAgent' => true,
-				]
+				],
+				'timestamp' => $this->getTimestamp(),
 			] );
 		}
 
@@ -370,10 +427,11 @@ class GenerateSampleNotifications extends Maintenance {
 			'title' => Title::newFromText( "Moai" ),
 			'agent' => $agent,
 			'extra' => [ 'userAdded' => $user->getId() ],
+			'timestamp' => $this->getTimestamp(),
 		] );
 	}
 
-	private function shouldGenerate( $type, $types ) {
+	private function shouldGenerate( $type, array $types ) {
 		return array_search( $type, $types ) !== false;
 	}
 
@@ -388,52 +446,58 @@ class GenerateSampleNotifications extends Maintenance {
 		}
 		// make an edit, thank it once
 		$title = $this->generateNewPageTitle();
-		$revision = $this->addToPageContent( $title, $user, "an awesome edit! ~~~~" );
+		$revisionRecord = $this->addToPageContent( $title, $user, "an awesome edit! ~~~~" );
 		EchoEvent::create( [
 			'type' => 'edit-thank',
 			'title' => $title,
 			'extra' => [
-				'revid' => $revision->getId(),
+				'revid' => $revisionRecord->getId(),
 				'thanked-user-id' => $user->getId(),
 				'source' => 'generateSampleNotifications.php',
 			],
 			'agent' => $agent,
+			'timestamp' => $this->getTimestamp(),
 		] );
-		$this->output( "{$agent->getName()} is thanking {$user->getName()} for edit {$revision->getId()} on {$title->getPrefixedText()}\n" );
+		$output = $this->addTimestampToOutput( "{$agent->getName()} is thanking {$user->getName()} for edit {$revisionRecord->getId()} on {$title->getPrefixedText()}" );
+		$this->output( "$output\n" );
 	}
+
 	private function generateMultipleEditThanks( User $user, User $agent, User $otherUser ) {
 		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Thanks' ) ) {
 			return;
 		}
 		// make an edit, thank it twice
 		$title = $this->generateNewPageTitle();
-		$revision = $this->addToPageContent( $title, $user, "an even better edit! ~~~~" );
+		$revisionRecord = $this->addToPageContent( $title, $user, "an even better edit! ~~~~" );
 		EchoEvent::create( [
 			'type' => 'edit-thank',
 			'title' => $title,
 			'extra' => [
-				'revid' => $revision->getId(),
+				'revid' => $revisionRecord->getId(),
 				'thanked-user-id' => $user->getId(),
 				'source' => 'generateSampleNotifications.php',
 			],
 			'agent' => $agent,
+			'timestamp' => $this->getTimestamp(),
 		] );
 		EchoEvent::create( [
 			'type' => 'edit-thank',
 			'title' => $title,
 			'extra' => [
-				'revid' => $revision->getId(),
+				'revid' => $revisionRecord->getId(),
 				'thanked-user-id' => $user->getId(),
 				'source' => 'generateSampleNotifications.php',
 			],
 			'agent' => $otherUser,
+			'timestamp' => $this->getTimestamp(),
 		] );
-		$this->output( "{$agent->getName()} and {$otherUser->getName()} are thanking {$user->getName()} for edit {$revision->getId()} on {$title->getPrefixedText()}\n" );
+		$output = $this->addTimestampToOutput( "{$agent->getName()} and {$otherUser->getName()} are thanking {$user->getName()} for edit {$revisionRecord->getId()} on {$title->getPrefixedText()}" );
+		$this->output( "$output\n" );
 	}
 
 	private function generateEducationProgram( User $user, User $agent ) {
-		if ( !class_exists( 'EducationProgram\Extension' ) ) {
-			$this->output( 'class EducationProgram\Extension not found' );
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'EducationProgram' ) ) {
+			$this->output( "Skipping EducationProgram. Extension not installed.\n" );
 			return;
 		}
 
@@ -444,7 +508,8 @@ class GenerateSampleNotifications extends Maintenance {
 
 		$notificationManager = EducationProgram\Extension::globalInstance()->getNotificationsManager();
 
-		$this->output( "{$agent->getName()} is adding {$user->getName()} to {$chem101->getPrefixedText()} as instructor, student, campus volunteer and online volunteer.\n" );
+		$output = $this->addTimestampToOutput( "{$agent->getName()} is adding {$user->getName()} to {$chem101->getPrefixedText()} as instructor, student, campus volunteer and online volunteer" );
+		$this->output( "$output\n" );
 
 		$types = [
 			'ep-instructor-add-notification',
@@ -468,8 +533,9 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function generateWikibase( User $user, User $agent ) {
-		if ( !class_exists( 'Wikibase\Client\Hooks\EchoNotificationsHandlers' ) ) {
-			$this->output( 'class Wikibase\Client\Hooks\EchoNotificationsHandlers not found' );
+		if ( !class_exists( EchoNotificationsHandlers::class ) ) {
+			// should use !ExtensionRegistry::getInstance()->isLoaded( 'Wikibase' ) when possible
+			$this->output( "Skipping Wikibase. Extension not installed.\n" );
 			return;
 		}
 
@@ -478,18 +544,21 @@ class GenerateSampleNotifications extends Maintenance {
 		$helpPage = Title::newFromText( 'Project:Wikidata' );
 		$this->addToPageContent( $helpPage, $user, "this is the help page" );
 
-		$this->output( "{$agent->getName()} is connecting {$user->getName()}'s page {$title->getPrefixedText()} to an item\n" );
+		$output = $this->addTimestampToOutput( "{$agent->getName()} is connecting {$user->getName()}'s page {$title->getPrefixedText()} to an item" );
+		$this->output( "$output\n" );
 		EchoEvent::create( [
-			'type' => Wikibase\Client\Hooks\EchoNotificationsHandlers::NOTIFICATION_TYPE,
+			'type' => EchoNotificationsHandlers::NOTIFICATION_TYPE,
 			'title' => $title,
 			'extra' => [
 				'url' => Title::newFromText( 'Item:Q1' )->getFullURL(),
-				'repoSiteName' => 'Wikidata'
+				'repoSiteName' => 'Wikidata',
+				'entity' => 'Q1',
 			],
 			'agent' => $agent,
+			'timestamp' => $this->getTimestamp(),
 		] );
 	}
 }
 
-$maintClass = "GenerateSampleNotifications";
+$maintClass = GenerateSampleNotifications::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

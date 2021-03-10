@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 
 	mw.canvas = {
 		/**
@@ -10,4 +10,4 @@
 
 	};
 
-}( mediaWiki ) );
+}() );

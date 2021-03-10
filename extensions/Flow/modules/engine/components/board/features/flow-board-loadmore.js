@@ -2,9 +2,15 @@
  * Contains loadMore, jumpToTopic, and topic titles list functionality.
  */
 
-( function ( $, mw, moment ) {
+/**
+ * @class FlowBoardComponent
+ * TODO: Use @-external in JSDoc
+ */
+
+( function () {
 	/**
 	 * Bind UI events and infinite scroll handler for load more and titles list functionality.
+	 *
 	 * @param {jQuery} $container
 	 * @this FlowBoardComponent
 	 * @constructor
@@ -38,10 +44,10 @@
 	 * 1. If topic is rendered, scrolls to it.
 	 * 2. Otherwise, we load the topic itself
 	 * 3b. When the user scrolls up, we begin loading the topics in between.
+	 *
 	 * @param {string} topicId
 	 */
 	function flowBoardComponentLoadMoreFeatureJumpTo( topicId ) {
-		/** @type FlowBoardComponent*/
 		var apiParameters,
 			flowBoard = this,
 			// Scrolls to the given topic, but disables infinite scroll loading while doing so
@@ -55,10 +61,11 @@
 					// Not going the full $( '.flow-board-navigation' ).height()
 					// because then the load more button (above the new topic)
 					// would get in sight and any scroll would fire it
+					// eslint-disable-next-line no-jquery/no-global-selector
 					$( 'html, body' ).scrollTop( $renderedTopic.offset().top - 20 );
 
 					// Focus on given topic
-					$renderedTopic.click().focus();
+					$renderedTopic.trigger( 'click' ).trigger( 'focus' );
 
 					/*
 					 * Re-enable infinite scroll. Only doing that after a couple
@@ -154,10 +161,11 @@
 	/**
 	 * On before board reloading (eg. change sort).
 	 * This method only clears the storage in preparation for it to be reloaded.
+	 *
 	 * @param {Event} event
 	 * @param {Object} info
 	 * @param {jQuery} info.$target
-	 * @param {Object} queryMap
+	 * @param {Object} info.queryMap
 	 * @param {FlowBoardComponent} info.component
 	 */
 	function flowBoardComponentLoadMoreFeatureBoardApiPreHandler( event, info ) {
@@ -176,12 +184,13 @@
 
 	/**
 	 * On failed board reloading (eg. change sort), restore old data.
+	 *
 	 * @param {Object} info
 	 * @param {string} info.status "done" or "fail"
 	 * @param {jQuery} info.$target
 	 * @param {FlowBoardComponent} info.component
 	 * @param {Object} data
-	 * @param {jqXHR} jqxhr
+	 * @param {jQuery.jqXHR} jqxhr
 	 */
 	function flowBoardComponentLoadMoreFeatureBoardApiCallback( info ) {
 		if ( info.status !== 'done' ) {
@@ -198,16 +207,18 @@
 
 	/**
 	 * Loads more content
+	 *
 	 * @param {Object} info
 	 * @param {string} info.status "done" or "fail"
 	 * @param {jQuery} info.$target
 	 * @param {FlowBoardComponent} info.component
 	 * @param {Object} data
-	 * @param {jqXHR} jqxhr
+	 * @param {jQuery.jqXHR} jqxhr
 	 * @return {jQuery.Promise}
 	 */
 	function flowBoardComponentLoadMoreFeatureTopicsApiCallback( info, data ) {
 		var scrollTarget,
+			$scrollTarget,
 			$scrollContainer,
 			topicsData,
 			readingTopicPosition,
@@ -248,17 +259,17 @@
 		$target.remove();
 
 		if ( scrollTarget === 'window' ) {
-			scrollTarget = $( window );
+			$scrollTarget = $( window );
 
 			if ( readingTopicPosition ) {
 				readingTopicPosition.anuStart = flowBoard.renderedTopics[ readingTopicPosition.id ].offset().top;
 				if ( readingTopicPosition.anuStart > readingTopicPosition.topicStart ) {
 					// Looks like the topic we are reading got pushed down. Let's jump to where we were before
-					scrollTarget.scrollTop( readingTopicPosition.anuStart + readingTopicPosition.topicPlace );
+					$scrollTarget.scrollTop( readingTopicPosition.anuStart + readingTopicPosition.topicPlace );
 				}
 			}
 		} else {
-			scrollTarget = $.findWithParent( this, scrollTarget );
+			$scrollTarget = $.findWithParent( this, scrollTarget );
 		}
 
 		/*
@@ -267,7 +278,7 @@
 		 * fetch more instead of waiting for the user to scroll again (when
 		 * there's no reason to scroll)
 		 */
-		_flowBoardComponentLoadMoreFeatureInfiniteScrollCheck.call( flowBoard, $scrollContainer, scrollTarget );
+		_flowBoardComponentLoadMoreFeatureInfiniteScrollCheck.call( flowBoard, $scrollContainer, $scrollTarget );
 		return $.Deferred().resolve().promise();
 	}
 	FlowBoardComponentLoadMoreFeatureMixin.UI.events.apiHandlers.loadMoreTopics = flowBoardComponentLoadMoreFeatureTopicsApiCallback;
@@ -335,6 +346,7 @@
 
 	/**
 	 * Stores a list of all topics currently visible on the page.
+	 *
 	 * @param {jQuery} $topic
 	 */
 	function flowBoardComponentLoadMoreFeatureElementLoadTopic( $topic ) {
@@ -345,6 +357,7 @@
 		this.renderedTopics[ currentTopicId ] = $topic;
 
 		// Remove any topics that are no longer on the page, just in case
+		// eslint-disable-next-line no-jquery/no-each-util
 		$.each( this.renderedTopics, function ( topicId, $topic ) {
 			if ( !$topic.closest( self.$board ).length ) {
 				delete self.renderedTopics[ topicId ];
@@ -416,6 +429,7 @@
 
 	/**
 	 * Called on scroll. Checks to see if a FlowBoard needs to have more content loaded.
+	 *
 	 * @param {jQuery} $searchContainer Container to find 'load more' buttons in
 	 * @param {jQuery} $calculationContainer Container to do scroll calculations on (height, scrollTop, offset, etc.)
 	 */
@@ -431,6 +445,7 @@
 		calculationContainerScroll = $calculationContainer.scrollTop();
 
 		// Find load more buttons within our search container, and they must be visible
+		// eslint-disable-next-line no-jquery/no-sizzle
 		$searchContainer.find( this.$loadMoreNodes ).filter( ':visible' ).each( function () {
 			var $this = $( this ),
 				nodeOffset = $this.offset().top,
@@ -455,6 +470,7 @@
 
 	/**
 	 * Renders and inserts a list of new topics.
+	 *
 	 * @param {FlowBoardComponent} flowBoard
 	 * @param {Object} topicsData
 	 * @param {boolean} [forceShowLoadMore]
@@ -526,6 +542,7 @@
 
 		/**
 		 * Renders topics by IDs from topicsData, and returns the elements.
+		 *
 		 * @param {Array} toRender List of topic IDs in topicsData
 		 * @return {jQuery}
 		 * @private
@@ -559,7 +576,7 @@
 				flowBoard.renderedTopics[ topicId ] = _render( [ topicId ] );
 				$allRendered.push( flowBoard.renderedTopics[ topicId ][ 0 ] );
 				toInsert.push( topicId );
-				if ( $.inArray( topicId, flowBoard.orderedTopicIds ) === -1 ) {
+				if ( flowBoard.orderedTopicIds.indexOf( topicId ) === -1 ) {
 					flowBoard.orderedTopicIds.push( topicId );
 				}
 				// @todo this is already done elsewhere, but it runs after insert
@@ -578,7 +595,7 @@
 			// initial page load starts at the begining.
 			for ( i = 1; i < flowBoard.orderedTopicIds.length; i++ ) {
 				// topic is not to be inserted yet.
-				if ( $.inArray( flowBoard.orderedTopicIds[ i ], toInsert ) === -1 ) {
+				if ( toInsert.indexOf( flowBoard.orderedTopicIds[ i ] ) === -1 ) {
 					continue;
 				}
 
@@ -593,6 +610,7 @@
 				// Put the new topic after the found topic above it
 				if ( j >= 0 ) {
 					// If there is a load-more here, insert after that as well
+					// eslint-disable-next-line no-jquery/no-class-state
 					if ( $topic.next().hasClass( 'flow-load-more' ) ) {
 						$topic = $topic.next();
 					}
@@ -604,14 +622,14 @@
 			// page but also the ones loaded by the toc.  If these topics are due
 			// to a jump rather than forward auto-pagination the prior topic will
 			// not be rendered.
-			i = $.inArray( topicsData.roots[ 0 ], flowBoard.orderedTopicIds );
+			i = flowBoard.orderedTopicIds.indexOf( topicsData.roots[ 0 ] );
 			if ( i > 0 && flowBoard.renderedTopics[ flowBoard.orderedTopicIds[ i - 1 ] ] === undefined ) {
 				_createRevPagination( flowBoard.renderedTopics[ topicsData.roots[ 0 ] ] );
 			}
 			// Same for forward pagination, if we jumped and then scrolled backwards the
 			// topic after the last will already be rendered, and forward pagination
 			// will not be necessary.
-			i = $.inArray( topicsData.roots[ topicsData.roots.length - 1 ], flowBoard.orderedTopicIds );
+			i = flowBoard.orderedTopicIds.indexOf( topicsData.roots[ topicsData.roots.length - 1 ] );
 			if ( i === flowBoard.orderedTopicIds.length - 1 || flowBoard.renderedTopics[ flowBoard.orderedTopicIds[ i + 1 ] ] === undefined ) {
 				_createFwdPagination( flowBoard.renderedTopics[ topicsData.roots[ topicsData.roots.length - 1 ] ] );
 			}
@@ -628,4 +646,4 @@
 
 	// Mixin to FlowBoardComponent
 	mw.flow.mixinComponent( 'board', FlowBoardComponentLoadMoreFeatureMixin );
-}( jQuery, mediaWiki, moment ) );
+}() );

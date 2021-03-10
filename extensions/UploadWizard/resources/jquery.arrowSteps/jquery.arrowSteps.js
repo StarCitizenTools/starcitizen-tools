@@ -12,7 +12,7 @@
 /**
  * @class jQuery.plugin.arrowSteps
  */
-( function ( $ ) {
+( function () {
 	/**
 	 * Show users their progress through a series of steps, via a row of items that fit
 	 * together like arrows. One item can be highlighted at a time.
@@ -35,26 +35,18 @@
 	 * @chainable
 	 */
 	$.fn.arrowSteps = function () {
-		var $steps, width, arrowWidth, $stepDiv,
-			$el = this,
-			paddingSide = $( 'body' ).hasClass( 'rtl' ) ? 'padding-left' : 'padding-right';
+		var $steps, width,
+			$el = this;
 
 		$el.addClass( 'arrowSteps' );
 		$steps = $el.find( 'li' );
 
-		width = parseInt( 100 / $steps.length, 10 );
+		width = Math.floor( 100 / $steps.length * 100 ) / 100;
 		$steps.css( 'width', width + '%' );
 
 		// Every step except the last one has an arrow pointing forward:
 		// at the right hand side in LTR languages, and at the left hand side in RTL.
-		// Also add in the padding for the calculated arrow width.
-		$stepDiv = $steps.filter( ':not(:last-child)' ).addClass( 'arrow' ).find( 'div' );
-
-		// Execute when complete page is fully loaded, including all frames, objects and images
-		$( window ).on( 'load', function () {
-			arrowWidth = parseInt( $el.outerHeight(), 10 );
-			$stepDiv.css( paddingSide, arrowWidth.toString() + 'px' );
-		} );
+		$steps.filter( ':not(:last-child)' ).addClass( 'arrow' );
 
 		$el.data( 'arrowSteps', $steps );
 
@@ -77,8 +69,8 @@
 	$.fn.arrowStepsHighlight = function ( selector ) {
 		var $previous,
 			$steps = this.data( 'arrowSteps' );
-		$.each( $steps, function ( i, step ) {
-			var $step = $( step );
+		$steps.each( function () {
+			var $step = $( this );
 			if ( $step.is( selector ) ) {
 				if ( $previous ) {
 					$previous.addClass( 'tail' );
@@ -95,4 +87,4 @@
 	 * @class jQuery
 	 * @mixins jQuery.plugin.arrowSteps
 	 */
-}( jQuery ) );
+}() );

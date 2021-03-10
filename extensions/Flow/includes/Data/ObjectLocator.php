@@ -2,8 +2,8 @@
 
 namespace Flow\Data;
 
-use Flow\DbFactory;
 use Flow\Data\Utils\RawSql;
+use Flow\DbFactory;
 use Flow\Exception\NoIndexException;
 use Flow\Model\UUID;
 use FormatJson;
@@ -48,7 +48,13 @@ class ObjectLocator {
 	 * @param Index[] $indexes
 	 * @param LifecycleHandler[] $lifecycleHandlers
 	 */
-	public function __construct( ObjectMapper $mapper, ObjectStorage $storage, DbFactory $dbFactory, array $indexes = [], array $lifecycleHandlers = [] ) {
+	public function __construct(
+		ObjectMapper $mapper,
+		ObjectStorage $storage,
+		DbFactory $dbFactory,
+		array $indexes = [],
+		array $lifecycleHandlers = []
+	) {
 		$this->mapper = $mapper;
 		$this->storage = $storage;
 		$this->indexes = $indexes;
@@ -100,7 +106,10 @@ class ObjectLocator {
 			} else {
 				wfDebugLog( 'FlowDebug', __METHOD__ . ': ' . $e->getMessage() );
 			}
-			$res = $this->storage->findMulti( $this->convertToDbQueries( $queries, $options ), $this->convertToDbOptions( $options ) );
+			$res = $this->storage->findMulti(
+				$this->convertToDbQueries( $queries, $options ),
+				$this->convertToDbOptions( $options )
+			);
 		}
 
 		$output = [];
@@ -123,7 +132,7 @@ class ObjectLocator {
 	 * additional data may be loaded at once.
 	 *
 	 * @param array $attributes Attributes to find()
-	 * @param array[optional] $options Options to find()
+	 * @param array $options Options to find()
 	 * @return bool
 	 */
 	public function found( array $attributes, array $options = [] ) {
@@ -138,7 +147,7 @@ class ObjectLocator {
 	 * additional data may be loaded at once.
 	 *
 	 * @param array $queries Queries to findMulti()
-	 * @param array[optional] $options Options to findMulti()
+	 * @param array $options Options to findMulti()
 	 * @return bool
 	 */
 	public function foundMulti( array $queries, array $options = [] ) {
@@ -188,7 +197,7 @@ class ObjectLocator {
 		}
 		$primaryKey = $this->storage->getPrimaryKeyColumns();
 		$queries = [];
-		$retval = null;
+		$retval = [];
 		foreach ( $objectIds as $id ) {
 			// check internal cache
 			$query = array_combine( $primaryKey, ObjectManager::makeArray( $id ) );
@@ -302,7 +311,7 @@ class ObjectLocator {
 		return $current;
 	}
 
-	protected function load( $row ) {
+	protected function load( array $row ) {
 		$object = $this->mapper->fromStorageRow( $row );
 		foreach ( $this->lifecycleHandlers as $handler ) {
 			$handler->onAfterLoad( $object, $row );
@@ -315,7 +324,7 @@ class ObjectLocator {
 	 * @param array $options
 	 * @return array
 	 */
-	protected function convertToDbOptions( $options ) {
+	protected function convertToDbOptions( array $options ) {
 		$dbOptions = $orderBy = [];
 		$order = '';
 
@@ -343,11 +352,11 @@ class ObjectLocator {
 	/**
 	 * Uses options to figure out conditions to add to the DB queries.
 	 *
-	 * @param array $queries Array of queries, with each element an array of attributes
+	 * @param array[] $queries Array of queries, with each element an array of attributes
 	 * @param array $options Options for queries
 	 * @return array Queries for BasicDbStorage class
 	 */
-	protected function convertToDbQueries( $queries, $options ) {
+	protected function convertToDbQueries( array $queries, array $options ) {
 		if ( isset( $options['offset-id'] ) &&
 			isset( $options['sort'] ) && count( $options['sort'] ) === 1 &&
 			preg_match( '/_id$/', $options['sort'][0] ) ) {
@@ -366,7 +375,9 @@ class ObjectLocator {
 				}
 
 				$dbr = $this->dbFactory->getDB( DB_REPLICA );
-				$condition = new RawSql( $options['sort'][0] . ' ' . $operator . ' ' . $dbr->addQuotes( $options['offset-id']->getBinary() ) );
+				// @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+				$condition = new RawSql( $options['sort'][0] . ' ' . $operator . ' ' .
+					$dbr->addQuotes( $options['offset-id']->getBinary() ) );
 
 				foreach ( $queries as &$query ) {
 					$query[] = $condition;

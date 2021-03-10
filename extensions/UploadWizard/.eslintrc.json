@@ -1,17 +1,26 @@
 {
-	"extends": "wikimedia",
-	"env": {
-		"browser": true,
-		"jquery": true,
-		"qunit": true
-	},
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/jquery",
+		"wikimedia/mediawiki"
+	],
 	"globals": {
-		"require": false,
-		"OO": false,
-		"mediaWiki": false,
-		"sinon": false
+		"wikibase": "readonly"
 	},
 	"rules": {
-		"dot-notation": [ "error", { "allowKeywords": true } ]
+		"max-len": "off",
+		"mediawiki/class-doc": "warn",
+		"mediawiki/msg-doc": "warn",
+		"jquery/no-each-util": "off",
+		"jquery/no-map-util": "off",
+		"jsdoc/no-undefined-types": [
+			"warn",
+			{
+				"definedTypes": [
+					"uw"
+				]
+			}
+		]
 	}
 }

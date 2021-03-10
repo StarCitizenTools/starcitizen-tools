@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * An other informations field in UploadWizard's "Details" step form.
@@ -51,4 +51,4 @@
 		this.textInput.setValue( serialized.other );
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

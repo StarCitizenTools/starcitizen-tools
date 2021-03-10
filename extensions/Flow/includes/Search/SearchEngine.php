@@ -8,10 +8,8 @@ use Elastica\Query;
 use Flow\Exception\InvalidParameterException;
 
 class SearchEngine extends \SearchEngine {
-	/**
-	 * @var int
-	 */
-	const MAX_OFFSET = 100000;
+
+	private const MAX_OFFSET = 100000;
 
 	/**
 	 * @var string|false $type Type of revisions to retrieve
@@ -42,7 +40,7 @@ class SearchEngine extends \SearchEngine {
 
 	/**
 	 * @param string $term text to search
-	 * @return \Status
+	 * @return \Status|null
 	 */
 	public function searchText( $term ) {
 		$term = trim( $term );
@@ -76,6 +74,7 @@ class SearchEngine extends \SearchEngine {
 
 		// only apply filters if there are any
 		if ( $filter->toArray() ) {
+			// @phan-suppress-next-line PhanTypeMismatchArgumentReal
 			$query->setPostFilter( $filter );
 		}
 

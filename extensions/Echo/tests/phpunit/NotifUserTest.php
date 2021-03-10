@@ -1,8 +1,9 @@
 <?php
+
 use MediaWiki\MediaWikiServices;
 
 /**
- * @covers MWEchoNotifUser
+ * @covers \MWEchoNotifUser
  * @group Echo
  */
 class MWEchoNotifUserTest extends MediaWikiTestCase {
@@ -12,7 +13,7 @@ class MWEchoNotifUserTest extends MediaWikiTestCase {
 	 */
 	private $cache;
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 		$this->cache = new WANObjectCache( [
 			'cache' => MediaWikiServices::getInstance()->getMainObjectStash(),
@@ -31,46 +32,7 @@ class MWEchoNotifUserTest extends MediaWikiTestCase {
 		$this->assertTrue( $exception, "Got exception" );
 
 		$notifUser = MWEchoNotifUser::newFromUser( User::newFromId( 2 ) );
-		$this->assertInstanceOf( 'MWEchoNotifUser', $notifUser );
-	}
-
-	public function testFlagCacheWithNewTalkNotification() {
-		$notifUser = $this->newNotifUser();
-
-		$notifUser->flagCacheWithNewTalkNotification();
-		$this->assertEquals( '1', $this->cache->get( $notifUser->getTalkNotificationCacheKey() ) );
-	}
-
-	public function testFlagCacheWithNoTalkNotification() {
-		$notifUser = $this->newNotifUser();
-
-		$notifUser->flagCacheWithNoTalkNotification();
-		$this->assertEquals( '0', $this->cache->get( $notifUser->getTalkNotificationCacheKey() ) );
-	}
-
-	public function testNotifCountHasReachedMax() {
-		$notifUser = $this->newNotifUser();
-
-		if ( $notifUser->getLocalNotificationCount() > MWEchoNotifUser::MAX_BADGE_COUNT ) {
-			$this->assertTrue( $notifUser->notifCountHasReachedMax() );
-		} else {
-			$this->assertFalse( $notifUser->notifCountHasReachedMax() );
-		}
-	}
-
-	public function testClearTalkNotification() {
-		$notifUser = $this->newNotifUser();
-
-		$notifUser->flagCacheWithNewTalkNotification();
-
-		$hasMax = $notifUser->notifCountHasReachedMax();
-
-		$notifUser->clearTalkNotification();
-		if ( $hasMax ) {
-			$this->assertEquals( '1', $this->cache->get( $notifUser->getTalkNotificationCacheKey() ) );
-		} else {
-			$this->assertEquals( '0', $this->cache->get( $notifUser->getTalkNotificationCacheKey() ) );
-		}
+		$this->assertInstanceOf( MWEchoNotifUser::class, $notifUser );
 	}
 
 	public function testGetEmailFormat() {
@@ -151,18 +113,24 @@ class MWEchoNotifUserTest extends MediaWikiTestCase {
 		$dbResult += [
 			'markRead' => true
 		];
-		$gateway = $this->getMockBuilder( 'EchoUserNotificationGateway' )
+		$gateway = $this->getMockBuilder( EchoUserNotificationGateway::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$gateway->expects( $this->any() )
 			->method( 'markRead' )
 			->will( $this->returnValue( $dbResult['markRead'] ) );
+		$gateway->expects( $this->any() )
+			->method( 'getDB' )
+			->will( $this->returnValue(
+				$this->getMockBuilder( IDatabase::class )
+					->disableOriginalConstructor()->getMock()
+			) );
 
 		return $gateway;
 	}
 
 	public function mockEchoNotificationMapper( array $result = [] ) {
-		$mapper = $this->getMockBuilder( 'EchoNotificationMapper' )
+		$mapper = $this->getMockBuilder( EchoNotificationMapper::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$mapper->expects( $this->any() )
@@ -179,7 +147,7 @@ class MWEchoNotifUserTest extends MediaWikiTestCase {
 	}
 
 	protected function mockEchoNotification() {
-		$notification = $this->getMockBuilder( 'EchoNotification' )
+		$notification = $this->getMockBuilder( EchoNotification::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$notification->expects( $this->any() )
@@ -190,7 +158,7 @@ class MWEchoNotifUserTest extends MediaWikiTestCase {
 	}
 
 	protected function mockEchoEvent() {
-		$event = $this->getMockBuilder( 'EchoEvent' )
+		$event = $this->getMockBuilder( EchoEvent::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$event->expects( $this->any() )

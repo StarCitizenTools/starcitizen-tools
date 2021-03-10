@@ -6,17 +6,17 @@ use Flow\Exception\FlowException;
 use Flow\Model\UUID;
 
 class CheckUserQuery extends AbstractQuery {
+
 	/**
 	 * Revision data will be stored in cuc_comment & prefixed with this string
 	 * so we can distinguish between different kinds of data in there, should we
 	 * change that data format later.
-	 *
-	 * @var string
 	 */
-	const VERSION_PREFIX = 'v1';
+	public const VERSION_PREFIX = 'v1';
 
 	/**
 	 * @param \stdClass[] $rows List of checkuser database rows
+	 * @suppress PhanParamSignatureMismatch The signature doesn't match though
 	 */
 	public function loadMetadataBatch( $rows ) {
 		$needed = [];
@@ -56,7 +56,7 @@ class CheckUserQuery extends AbstractQuery {
 		} elseif ( $count === 1 ) {
 			$results = reset( $found );
 		} else {
-			$results = call_user_func_array( 'array_merge', $found );
+			$results = array_merge( ...array_values( $found ) );
 		}
 
 		if ( $results ) {
@@ -98,7 +98,7 @@ class CheckUserQuery extends AbstractQuery {
 	 * format.
 	 *
 	 * @param \StdClass $row
-	 * @return UUID[]|false Array with workflow, revision & post id (when
+	 * @return (UUID|null)[]|false Array with workflow, revision & post id (when
 	 *  applicable), or false on error
 	 */
 	protected function extractIds( $row ) {
@@ -113,6 +113,8 @@ class CheckUserQuery extends AbstractQuery {
 		// remove the version specifier
 		array_shift( $data );
 
+		$revisionId = null;
+		$workflowId = null;
 		$postId = null;
 		switch ( count( $data ) ) {
 			/** @noinspection PhpMissingBreakStatementInspection */
@@ -124,7 +126,8 @@ class CheckUserQuery extends AbstractQuery {
 				$workflowId = UUID::create( $data[1] );
 				break;
 			default:
-				wfDebugLog( 'Flow', __METHOD__ . ': Invalid number of parameters received from cuc_comment.  Expected 2 or 3 but received ' . count( $data ) );
+				wfDebugLog( 'Flow', __METHOD__ . ': Invalid number of parameters received from cuc_comment.' .
+					' Expected 2 or 3 but received ' . count( $data ) );
 				return false;
 		}
 

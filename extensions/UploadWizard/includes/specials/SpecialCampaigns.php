@@ -2,23 +2,25 @@
 
 class SpecialCampaigns extends SpecialPage {
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct( "Campaigns" );
 	}
 
+	/**
+	 * @param string|null $subPage
+	 */
 	public function execute( $subPage ) {
 		$request = $this->getRequest();
 		$dbr = wfGetDB( DB_REPLICA );
 
-		$start = (int)$request->getVal( 'start' );
+		$start = $request->getIntOrNull( 'start' );
 
 		$limit = 50;
 
 		$cond = [ 'campaign_enabled = 1' ];
 
 		if ( $start !== null ) {
-			// Not SQL Injection, since $start is cast to (int)
-			$cond[] = "campaign_id > $start";
+			$cond[] = 'campaign_id > ' . $start;
 		}
 
 		$res = $dbr->select(
@@ -59,13 +61,14 @@ class SpecialCampaigns extends SpecialPage {
 	private function getHtmlForCampaign( UploadWizardCampaign $campaign ) {
 		$config = $campaign->getParsedConfig();
 		$campaignURL = $campaign->getTitle()->getLocalURL();
-		$campaignTitle = array_key_exists( 'title', $config ) ? $config['title'] : $campaign->getName();
+		$campaignTitle = array_key_exists( 'title', $config )
+			? $config['title'] : htmlspecialchars( $campaign->getName() );
 		$campaignDescription = array_key_exists( 'description', $config ) ? $config['description'] : '';
 		$returnHTML =
 			Html::rawElement( 'dt', [],
 				Html::rawElement( 'a', [ 'href' => $campaignURL ], $campaignTitle )
 			) .
-				Html::element( 'dd', [], $campaignDescription );
+				Html::rawElement( 'dd', [], $campaignDescription );
 		return $returnHTML;
 	}
 

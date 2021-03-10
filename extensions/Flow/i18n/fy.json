@@ -2,8 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Kening Aldgilles",
-			"Robin0van0der0vliet",
-			"Robin van der Vliet"
+			"PiefPafPier",
+			"Robin van der Vliet",
+			"Robin0van0der0vliet"
 		]
 	},
 	"flow-topic-moderated-reason-prefix": "Reden:",
@@ -13,10 +14,13 @@
 	"flow-post-action-delete-post": "Fuortsmite",
 	"flow-post-action-edit-post": "Bewurkje",
 	"flow-topic-action-history": "Skiednis",
+	"flow-topic-action-summarize-topic": "Gearfetsje",
 	"flow-board-history": "\"$1\" skiednis",
 	"flow-history-day": "Hjoed",
+	"echo-category-title-flow-discussion": "Strukturearre diskusje",
 	"flow-link-history": "skiednis",
 	"flow-moderation-confirm-delete-post": "Fuortsmite",
 	"flow-moderation-confirm-delete-topic": "Fuortsmite",
-	"flow-load-more": "Mear laden"
+	"flow-load-more": "Mear laden",
+	"flow-preference-visualeditor": "De fisuële bewurker en de nije wikitekstmodus ynskeakelje yn Strukturearre diskusjes"
 }

@@ -1,4 +1,5 @@
 <?php
+
 use MediaWiki\MediaWikiServices;
 use Wikimedia\Rdbms\LoadBalancer;
 
@@ -10,7 +11,7 @@ class MWEchoDbFactory {
 
 	/**
 	 * The cluster for the database
-	 * @var string|bool
+	 * @var string|false
 	 */
 	private $cluster;
 
@@ -19,9 +20,9 @@ class MWEchoDbFactory {
 	private $sharedCluster;
 
 	/**
-	 * @param string|bool $cluster
-	 * @param string|bool $shared
-	 * @param string|bool $sharedCluster
+	 * @param string|false $cluster
+	 * @param string|false $shared
+	 * @param string|false $sharedCluster
 	 */
 	public function __construct( $cluster = false, $shared = false, $sharedCluster = false ) {
 		$this->cluster = $cluster;
@@ -80,19 +81,19 @@ class MWEchoDbFactory {
 	/**
 	 * Get the database connection for Echo
 	 * @param int $db Index of the connection to get
-	 * @param mixed $groups Query groups.
+	 * @param string[] $groups Query groups.
 	 * @return \Wikimedia\Rdbms\IDatabase
 	 */
-	public function getEchoDb( $db, $groups = [] ) {
+	public function getEchoDb( $db, array $groups = [] ) {
 		return $this->getLB()->getConnection( $db, $groups );
 	}
 
 	/**
 	 * @param int $db Index of the connection to get
-	 * @param array $groups Query groups
+	 * @param string[] $groups Query groups
 	 * @return bool|\Wikimedia\Rdbms\IDatabase false if no shared db is configured
 	 */
-	public function getSharedDb( $db, $groups = [] ) {
+	public function getSharedDb( $db, array $groups = [] ) {
 		if ( !$this->shared ) {
 			return false;
 		}
@@ -108,11 +109,11 @@ class MWEchoDbFactory {
 	 *
 	 * @deprecated Use newFromDefault() instead to create a db factory
 	 * @param int $db Index of the connection to get
-	 * @param mixed $groups Query groups.
+	 * @param string[] $groups Query groups.
 	 * @param string|bool $wiki The wiki ID, or false for the current wiki
 	 * @return \Wikimedia\Rdbms\IDatabase
 	 */
-	public static function getDB( $db, $groups = [], $wiki = false ) {
+	public static function getDB( $db, array $groups = [], $wiki = false ) {
 		global $wgEchoCluster;
 
 		$services = MediaWikiServices::getInstance();
@@ -132,15 +133,15 @@ class MWEchoDbFactory {
 	}
 
 	/**
-	 * Wait for the slaves of the database
+	 * Wait for the replicas of the database
 	 */
-	public function waitForSlaves() {
+	public function waitForReplicas() {
 		$this->waitFor( $this->getMasterPosition() );
 	}
 
 	/**
 	 * Get the current master position for the wiki and echo
-	 * db when they have at least one slave in their cluster.
+	 * db when they have at least one replica in their cluster.
 	 *
 	 * @return array
 	 */
@@ -152,7 +153,7 @@ class MWEchoDbFactory {
 		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 		if ( $lb->getServerCount() > 1 ) {
 			$position['wikiDb'] = $lb->getMasterPos();
-		};
+		}
 
 		if ( $this->cluster ) {
 			$lb = $this->getLB();
@@ -166,7 +167,7 @@ class MWEchoDbFactory {
 
 	/**
 	 * Receives the output of self::getMasterPosition. Waits
-	 * for slaves to catch up to the master position at that
+	 * for replicas to catch up to the master position at that
 	 * point.
 	 *
 	 * @param array $position

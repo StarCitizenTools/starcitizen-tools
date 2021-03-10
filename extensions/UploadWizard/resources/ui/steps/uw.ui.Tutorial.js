@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, $, uw, OO ) {
+( function ( uw ) {
 	/**
 	 * Checkbox with popup information.
 	 *
@@ -83,10 +83,12 @@
 		} );
 
 		// grab the tutorial HTML that was injected into this document
-		this.tutorialHtml = $( '#mwe-upwiz-tutorial-html' );
+		// eslint-disable-next-line no-jquery/no-global-selector
+		this.$tutorialHtml = $( '#mwe-upwiz-tutorial-html' );
 
 		// Helpdesk link click
-		$( '#mwe-upwiz-tutorial-helpdesk' ).click( function () {
+		// eslint-disable-next-line no-jquery/no-global-selector
+		$( '#mwe-upwiz-tutorial-helpdesk' ).on( 'click', function () {
 			ui.emit( 'helpdesk-click' );
 		} );
 
@@ -108,7 +110,7 @@
 				.attr( 'id', 'mwe-upwiz-tutorial' )
 				.append(
 					// TODO move this to JavaScript, too.
-					this.tutorialHtml.show()
+					this.$tutorialHtml.show()
 				)
 		);
 
@@ -134,4 +136,4 @@
 			);
 		} );
 	};
-}( mediaWiki, jQuery, mediaWiki.uploadWizard, OO ) );
+}( mw.uploadWizard ) );

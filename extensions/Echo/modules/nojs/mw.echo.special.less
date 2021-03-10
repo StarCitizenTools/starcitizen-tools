@@ -1,5 +1,5 @@
 /* Echo specific CSS */
-@import '../echo.variables';
+@import '../echo.variables.less';
 
 .mw-echo-special-container {
 	max-width: 600px;
@@ -15,12 +15,9 @@
 	}
 }
 
-// Hide the help link and the preferences link
-// in the JS version, since both appear inside
+// Hide the preferences link
+// in the JS version, since it appear inside
 // the cog menu
-.client-js #mw-indicator-mw-helplink {
-	display: none;
-}
 
 .client-js #mw-echo-pref-link,
 .client-js #contentSub {
@@ -119,9 +116,7 @@ ul.mw-echo-special-notifications {
 		background-color: #f8f9fa;
 
 		&:hover {
-			/* Fallback for IE<=8 */
-			background-color: #f6f6f6;
-			background-color: rgba( 0, 0, 0, 0.035 );
+			background-color: #eaecf0;
 		}
 
 		&-unread {
@@ -137,8 +132,8 @@ ul.mw-echo-special-notifications {
 				float: right;
 				display: inline-block;
 				margin: 0;
-
 				opacity: 0.5;
+
 				&:hover {
 					opacity: 1;
 				}
@@ -156,6 +151,7 @@ div.mw-htmlform-ooui-wrapper {
 		// Center 'preferences' in mobile special page
 		text-align: center;
 	}
+
 	.mw-echo-special-header-link {
 		display: none;
 	}

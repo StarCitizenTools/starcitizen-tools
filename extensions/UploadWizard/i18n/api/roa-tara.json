@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Valide 'na URL de Flickr ausanne l'ID de l'utende (NSID) pa lista gnore.\n\nQuanne jè ausate cu l'opzione <var>list</var>, torne tutte le ID jndr'à lista gnore.",
+	"apihelp-flickrblacklist-summary": "Valide 'na URL de Flickr ausanne l'ID de l'utende (NSID) pa lista gnore.",
+	"apihelp-flickrblacklist-extended-description": "Quanne jè ausate cu l'opzione <var>list</var>, torne tutte le ID jndr'à lista gnore.",
+	"apihelp-flickrblacklist-param-url": "L'URL Flickr da pruvà.",
+	"apihelp-flickrblacklist-param-list": "Quanne 'mbostate, avène date 'a lista gnore comblete. Non ge pò essere ausate 'nzieme cu $1url.",
+	"apihelp-flickrblacklist-example-1": "Condrolle 'n'URL jndr'à lista gnore",
+	"apihelp-flickrblacklist-example-2": "Tuèrne totte 'a lista gnore",
+	"apihelp-query+allcampaigns-description": "Numere tutte le cambagne UploadWizard.",
+	"apihelp-query+allcampaigns-summary": "Numere tutte le cambagne UploadWizard.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Sulamende le elenghe de le cambagne ca sò attive.",
+	"apihelp-query+allcampaigns-param-limit": "Numere de le cambagne da dà.",
+	"apihelp-query+allcampaigns-example-1": "Numere le cambagne attive"
+}

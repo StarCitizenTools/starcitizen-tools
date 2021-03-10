@@ -6,12 +6,22 @@ use Flow\Model\UUID;
 use Title;
 
 /**
+ * @covers \Flow\Api\ApiFlowBase
+ * @covers \Flow\Api\ApiFlowBaseGet
+ * @covers \Flow\Api\ApiFlowViewTopicList
+ *
  * @group Flow
  * @group medium
+ * @group Database
  */
 class ApiFlowViewTopicListTest extends ApiTestCase {
-	const TITLE_PREFIX = 'VTL Test ';
+	private const TITLE_PREFIX = 'VTL Test ';
 
+	/**
+	 * Flaky test causing random failures, see T209535
+	 *
+	 * @group Broken
+	 */
 	public function testTocOnly() {
 		$topicData = [];
 		for ( $i = 0; $i < 3; $i++ ) {
@@ -198,7 +208,8 @@ class ApiFlowViewTopicListTest extends ApiTestCase {
 
 			$newPostId = $replyResponse[0]['flow']['reply']['committed']['topic']['post-id'];
 			$topicData[$topicDataInd]['updateTimestamp'] = UUID::create( $newPostId )->getTimestamp();
-			$topicData[$topicDataInd]['expectedRevision']['last_updated'] = wfTimestamp( TS_UNIX, $topicData[$topicDataInd]['updateTimestamp'] ) * 1000;
+			$topicData[$topicDataInd]['expectedRevision']['last_updated'] =
+				wfTimestamp( TS_UNIX, $topicData[$topicDataInd]['updateTimestamp'] ) * 1000;
 		}
 
 		$expectedUpdatedResponse = array_merge_recursive( [

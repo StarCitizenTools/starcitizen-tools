@@ -1,10 +1,11 @@
-( function ( mw, $ ) {
+( function () {
 	var FlowEventLogRegistry = {
 		funnels: {},
 		generateFunnelId: mw.user.generateRandomSessionId
 	};
 
 	/**
+	 * @class FlowEventLog
 	 * @constructor
 	 * @param {string} schemaName Canonical schema name.
 	 * @param {Object} [eventInstance] Shared event instance data.
@@ -29,9 +30,10 @@
 	// Export
 	/**
 	 * EventLogging wrapper
+	 *
 	 * @type {FlowEventLog}
 	 */
 	mw.flow.EventLog = FlowEventLog;
 
 	mw.flow.EventLogRegistry = FlowEventLogRegistry;
-}( mw, jQuery ) );
+}() );

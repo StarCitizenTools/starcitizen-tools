@@ -1,33 +1,61 @@
 <?php
 
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Session\SessionManager;
 
 class EchoForeignWikiRequest {
 
+	/** @var User */
+	protected $user;
+
+	/** @var array */
+	protected $params;
+
+	/** @var array */
+	protected $wikis;
+
+	/** @varstring|null */
+	protected $wikiParam;
+
+	/** @var string */
+	protected $method;
+
+	/** @var string|null */
+	protected $tokenType;
+
+	/** @var string[]|null */
+	protected $csrfTokens;
+
 	/**
-	 * @param User $user User object
+	 * @param User $user
 	 * @param array $params Request parameters
 	 * @param array $wikis Wikis to send the request to
-	 * @param string $wikiParam Parameter name to set to the name of the wiki
+	 * @param string|null $wikiParam Parameter name to set to the name of the wiki
+	 * @param string|null $postToken If set, use POST requests and inject a token of this type;
+	 *  if null, use GET requests.
 	 */
-	public function __construct( User $user, array $params, array $wikis, $wikiParam = null ) {
+	public function __construct( User $user, array $params, array $wikis, $wikiParam = null, $postToken = null ) {
 		$this->user = $user;
 		$this->params = $params;
 		$this->wikis = $wikis;
 		$this->wikiParam = $wikiParam;
+		$this->method = $postToken === null ? 'GET' : 'POST';
+		$this->tokenType = $postToken;
+
+		$this->csrfTokens = null;
 	}
 
 	/**
 	 * Execute the request
-	 * @return array [ wiki => result ]
+	 * @return array[] [ wiki => result ]
 	 */
 	public function execute() {
 		if ( !$this->canUseCentralAuth() ) {
 			return [];
 		}
 
-		$reqs = $this->getRequestParams();
+		$reqs = $this->getRequestParams( $this->method, [ $this, 'getQueryParams' ] );
 		return $this->doRequests( $reqs );
 	}
 
@@ -66,7 +94,8 @@ class EchoForeignWikiRequest {
 			return $api->getResult()->getResultData( [ 'centralauthtoken', 'centralauthtoken' ] );
 		} catch ( Exception $ex ) {
 			LoggerFactory::getInstance( 'Echo' )->debug(
-				'Exception when fetching CentralAuth token: wiki: {wiki}, userName: {userName}, userId: {userId}, centralId: {centralId}, exception: {exception}',
+				'Exception when fetching CentralAuth token: wiki: {wiki}, userName: {userName}, ' .
+					'userId: {userId}, centralId: {centralId}, exception: {exception}',
 				[
 					'wiki' => wfWikiID(),
 					'userName' => $user->getName(),
@@ -83,9 +112,38 @@ class EchoForeignWikiRequest {
 	}
 
 	/**
-	 * @return array
+	 * Get the CSRF token for a given wiki.
+	 * This method fetches the tokens for all requested wikis at once and caches the result.
+	 *
+	 * @param string $wiki Name of the wiki to get a token for
+	 * @suppress PhanTypeInvalidCallableArraySize getRequestParams can take an array, too (phan bug)
+	 * @return string Token
 	 */
-	protected function getRequestParams() {
+	protected function getCsrfToken( $wiki ) {
+		if ( $this->csrfTokens === null ) {
+			$this->csrfTokens = [];
+			$reqs = $this->getRequestParams( 'GET', [
+				'action' => 'query',
+				'meta' => 'tokens',
+				'type' => $this->tokenType,
+				'format' => 'json',
+				'centralauthtoken' => $this->getCentralAuthToken( $this->user ),
+			] );
+			$responses = $this->doRequests( $reqs );
+			foreach ( $responses as $w => $response ) {
+				$this->csrfTokens[$w] = $response['query']['tokens']['csrftoken'];
+			}
+		}
+		return $this->csrfTokens[$wiki];
+	}
+
+	/**
+	 * @param string $method 'GET' or 'POST'
+	 * @param array|callable $params Associative array of query string / POST parameters,
+	 *  or a callback that takes a wiki name and returns such an array
+	 * @return array[] Array of request parameters to pass to doRequests(), keyed by wiki name
+	 */
+	protected function getRequestParams( $method, $params ) {
 		$apis = EchoForeignNotifications::getApiEndpoints( $this->wikis );
 		if ( !$apis ) {
 			return [];
@@ -93,10 +151,11 @@ class EchoForeignWikiRequest {
 
 		$reqs = [];
 		foreach ( $apis as $wiki => $api ) {
+			$queryKey = $method === 'POST' ? 'body' : 'query';
 			$reqs[$wiki] = [
-				'method' => 'GET',
+				'method' => $method,
 				'url' => $api['url'],
-				'query' => $this->getQueryParams( $wiki ),
+				$queryKey => is_callable( $params ) ? $params( $wiki ) : $params
 			];
 		}
 
@@ -114,6 +173,9 @@ class EchoForeignWikiRequest {
 			// cross-wiki api requests...
 			$extraParams[$this->wikiParam] = $wiki;
 		}
+		if ( $this->method === 'POST' ) {
+			$extraParams['token'] = $this->getCsrfToken( $wiki );
+		}
 
 		return [
 			'centralauthtoken' => $this->getCentralAuthToken( $this->user ),
@@ -128,11 +190,11 @@ class EchoForeignWikiRequest {
 
 	/**
 	 * @param array $reqs API request params
-	 * @return array
+	 * @return array[]
 	 * @throws Exception
 	 */
 	protected function doRequests( array $reqs ) {
-		$http = new MultiHttpClient( [] );
+		$http = MediaWikiServices::getInstance()->getHttpRequestFactory()->createMultiClient();
 		$responses = $http->runMulti( $reqs );
 
 		$results = [];

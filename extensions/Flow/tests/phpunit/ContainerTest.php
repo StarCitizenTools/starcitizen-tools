@@ -3,8 +3,12 @@
 namespace Flow\Tests;
 
 use Flow\Container;
+use Flow\Data\Index;
+use Flow\Data\LifecycleHandler;
 
 /**
+ * @covers \Flow\Container
+ *
  * @group Flow
  */
 class ContainerTest extends FlowTestCase {
@@ -33,11 +37,11 @@ class ContainerTest extends FlowTestCase {
 		$c = Container::getContainer();
 		$this->assertNotNull( $c[$key] );
 		foreach ( $c["$key.indexes"] as $pos => $index ) {
-			$this->assertInstanceOf( 'Flow\Data\Index', $index, "At $key.indexes[$pos]" );
+			$this->assertInstanceOf( Index::class, $index, "At $key.indexes[$pos]" );
 		}
 		if ( isset( $c["$key.listeners"] ) ) {
 			foreach ( $c["$key.listeners"] as $pos => $listener ) {
-				$this->assertInstanceOf( "Flow\Data\LifecycleHandler", $listener, "At $key.listeners[$pos]" );
+				$this->assertInstanceOf( LifecycleHandler::class, $listener, "At $key.listeners[$pos]" );
 			}
 		}
 	}

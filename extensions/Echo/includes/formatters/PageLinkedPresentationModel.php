@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 class EchoPageLinkedPresentationModel extends EchoEventPresentationModel {
 
 	private $pageFrom;
@@ -34,7 +36,8 @@ class EchoPageLinkedPresentationModel extends EchoEventPresentationModel {
 
 	public function getSecondaryLinks() {
 		$whatLinksHereLink = [
-			'url' => SpecialPage::getTitleFor( 'Whatlinkshere', $this->event->getTitle()->getPrefixedText() )->getFullURL(),
+			'url' => SpecialPage::getTitleFor( 'Whatlinkshere', $this->event->getTitle()->getPrefixedText() )
+				->getFullURL(),
 			'label' => $this->msg( 'notification-link-text-what-links-here' )->text(),
 			'description' => '',
 			'icon' => 'linked',
@@ -46,21 +49,75 @@ class EchoPageLinkedPresentationModel extends EchoEventPresentationModel {
 		if ( $revid !== null ) {
 			$diffLink = [
 				'url' => $this->getPageFrom()->getFullURL( [ 'diff' => $revid, 'oldid' => 'prev' ] ),
-				'label' => $this->msg( 'notification-link-text-view-changes', $this->getViewingUserForGender() )->text(),
+				'label' => $this->msg( 'notification-link-text-view-changes', $this->getViewingUserForGender() )
+					->text(),
 				'description' => '',
 				'icon' => 'changes',
 				'prioritized' => true
 			];
 		}
 
-		return [ $whatLinksHereLink, $diffLink ];
+		return [ $whatLinksHereLink, $diffLink, $this->getMuteLink() ];
+	}
+
+	protected function getMuteLink() {
+		if ( !MediaWikiServices::getInstance()->getMainConfig()->get( 'EchoPerUserBlacklist' ) ) {
+			return null;
+		}
+		$title = $this->event->getTitle();
+		$isPageMuted = EchoNotificationController::isPageLinkedTitleMutedByUser( $title, $this->getUser() );
+		$action = $isPageMuted ? 'unmute' : 'mute';
+		$prefTitle = SpecialPage::getTitleFor( 'Preferences', false, 'mw-prefsection-echo-mutedpageslist' );
+		$data = [
+			'tokenType' => 'csrf',
+			'params' => [
+				'action' => 'echomute',
+				'type' => 'page-linked-title',
+			],
+			'messages' => [
+				'confirmation' => [
+					// notification-dynamic-actions-mute-page-linked-confirmation
+					// notification-dynamic-actions-unmute-page-linked-confirmation
+					'title' => $this
+						->msg( 'notification-dynamic-actions-' . $action . '-page-linked-confirmation' )
+						->params(
+							$this->getTruncatedTitleText( $title ),
+							$this->getViewingUserForGender()
+						),
+					// notification-dynamic-actions-mute-page-linked-confirmation-description
+					// notification-dynamic-actions-unmute-page-linked-confirmation-description
+					'description' => $this
+						->msg( 'notification-dynamic-actions-' . $action . '-page-linked-confirmation-description' )
+						->params(
+							$prefTitle->getFullURL(),
+							$this->getViewingUserForGender()
+						)
+				]
+			]
+		];
+		$data['params'][$isPageMuted ? 'unmute' : 'mute'] = $title->getPrefixedText();
+
+		return $this->getDynamicActionLink(
+			$prefTitle,
+			$isPageMuted ? 'bell' : 'unbell',
+			// notification-dynamic-actions-mute-page-linked
+			// notification-dynamic-actions-unmute-page-linked
+			$this->msg( 'notification-dynamic-actions-' . $action . '-page-linked' )
+				->params(
+					$this->getTruncatedTitleText( $title ),
+					$this->getViewingUserForGender()
+				)->text(),
+			null,
+			$data,
+			[]
+		);
 	}
 
 	protected function getHeaderMessageKey() {
 		if ( $this->getBundleCount( true, [ $this, 'getLinkedPageId' ] ) > 1 ) {
-			return "notification-bundle-header-{$this->type}";
+			return 'notification-bundle-header-page-linked';
 		}
-		return "notification-header-{$this->type}";
+		return 'notification-header-page-linked';
 	}
 
 	public function getHeaderMessage() {
@@ -95,7 +152,7 @@ class EchoPageLinkedPresentationModel extends EchoEventPresentationModel {
 		if ( isset( $extra['link-from-namespace'] ) && isset( $extra['link-from-title'] ) ) {
 			$title = Title::makeTitleSafe( $extra['link-from-namespace'], $extra['link-from-title'] );
 			if ( $title ) {
-				return $title->getArticleId();
+				return $title->getArticleID();
 			}
 		}
 		return 0;
@@ -103,7 +160,7 @@ class EchoPageLinkedPresentationModel extends EchoEventPresentationModel {
 
 	private function getPageFrom() {
 		if ( !$this->pageFrom ) {
-			$this->pageFrom = Title::newFromId( $this->getLinkedPageId( $this->event ) );
+			$this->pageFrom = Title::newFromID( $this->getLinkedPageId( $this->event ) );
 		}
 		return $this->pageFrom;
 	}

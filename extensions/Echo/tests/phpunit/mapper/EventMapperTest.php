@@ -1,9 +1,19 @@
 <?php
 
+use Wikimedia\Rdbms\IDatabase;
+
 /**
- * @covers EchoEventMapper
+ * @group Database
+ * @covers \EchoEventMapper
  */
 class EchoEventMapperTest extends MediaWikiTestCase {
+
+	protected function setUp() : void {
+		parent::setUp();
+		$this->tablesUsed[] = 'echo_event';
+		$this->tablesUsed[] = 'echo_notification';
+		$this->tablesUsed[] = 'echo_target_page';
+	}
 
 	public function provideDataTestInsert() {
 		return [
@@ -16,12 +26,7 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 				'successful insert with insert id = 2',
 				[ 'insert' => true, 'insertId' => 2 ],
 				2
-			],
-			[
-				'unsuccessful insert',
-				[ 'insert' => false, 'insertId' => 2 ],
-				false
-			],
+			]
 		];
 	}
 
@@ -55,12 +60,9 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 			)
 		);
 		$res = $eventMapper->fetchById( 1 );
-		$this->assertInstanceOf( 'EchoEvent', $res );
+		$this->assertInstanceOf( EchoEvent::class, $res );
 	}
 
-	/**
-	 * @expectedException MWException
-	 */
 	public function testUnsuccessfulFetchById() {
 		$eventMapper = new EchoEventMapper(
 			$this->mockMWEchoDbFactory(
@@ -69,15 +71,15 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 				]
 			)
 		);
-		$res = $eventMapper->fetchById( 1 );
-		$this->assertInstanceOf( 'EchoEvent', $res );
+		$this->expectException( MWException::class );
+		$eventMapper->fetchById( 1 );
 	}
 
 	/**
-	 * Mock object of EchoEvent
+	 * @return EchoEvent
 	 */
 	protected function mockEchoEvent() {
-		$event = $this->getMockBuilder( 'EchoEvent' )
+		$event = $this->getMockBuilder( EchoEvent::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$event->expects( $this->any() )
@@ -88,10 +90,10 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 	}
 
 	/**
-	 * Mock object of MWEchoDbFactory
+	 * @return MWEchoDbFactory
 	 */
 	protected function mockMWEchoDbFactory( $dbResult ) {
-		$dbFactory = $this->getMockBuilder( 'MWEchoDbFactory' )
+		$dbFactory = $this->getMockBuilder( MWEchoDbFactory::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$dbFactory->expects( $this->any() )
@@ -102,8 +104,7 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 	}
 
 	/**
-	 * Returns a mock database object
-	 * @return \Wikimedia\Rdbms\IDatabase
+	 * @return IDatabase
 	 */
 	protected function mockDb( array $dbResult ) {
 		$dbResult += [
@@ -112,9 +113,7 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 			'select' => '',
 			'selectRow' => ''
 		];
-		$db = $this->getMockBuilder( 'DatabaseMysqli' )
-			->disableOriginalConstructor()
-			->getMock();
+		$db = $this->createMock( IDatabase::class );
 		$db->expects( $this->any() )
 			->method( 'insert' )
 			->will( $this->returnValue( $dbResult['insert'] ) );
@@ -129,6 +128,41 @@ class EchoEventMapperTest extends MediaWikiTestCase {
 			->will( $this->returnValue( $dbResult['selectRow'] ) );
 
 		return $db;
+	}
+
+	/**
+	 * @covers \EchoEventMapper::fetchIdsByPage
+	 */
+	public function testFetchByPage() {
+		$user = $this->getTestUser()->getUser();
+		$page = $this->getExistingTestPage();
+
+		// Create a notification that is not associated with any page
+		EchoEvent::create( [
+			'type' => 'welcome',
+			'agent' => $user,
+		] );
+
+		// Create a notification with a title
+		$eventWithTitle = EchoEvent::create( [
+			'type' => 'welcome',
+			'agent' => $user,
+			'title' => $page->getTitle()
+		] );
+
+		// Create a notification with a target-page
+		$eventWithTargetPage = EchoEvent::create( [
+			'type' => 'welcome',
+			'agent' => $user,
+			'extra' => [ 'target-page' => $page->getId() ]
+		] );
+
+		$eventMapper = new EchoEventMapper();
+
+		$this->assertArrayEquals(
+			[ $eventWithTitle->getId(), $eventWithTargetPage->getId() ],
+			$eventMapper->fetchIdsByPage( $page->getId() )
+		);
 	}
 
 }

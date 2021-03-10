@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * A custom campaign-defined field in UploadWizard's "Details" step form.
@@ -87,4 +87,4 @@
 		this.input.setValue( serialized.value );
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

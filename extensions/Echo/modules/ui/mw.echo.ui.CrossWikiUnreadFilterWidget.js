@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	/**
 	 * A filter for cross-wiki unread notifications
 	 *
@@ -16,8 +16,8 @@
 
 		config = config || {};
 
-		// Parent
-		mw.echo.ui.CrossWikiUnreadFilterWidget.parent.call( this,
+		// Parent constructor
+		mw.echo.ui.CrossWikiUnreadFilterWidget.super.call( this,
 			// Sorting callback
 			function ( a, b ) {
 				var diff;
@@ -170,4 +170,4 @@
 		this.setItemSelected( item );
 	};
 
-}( jQuery, mediaWiki ) );
+}() );

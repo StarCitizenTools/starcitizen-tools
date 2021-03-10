@@ -1,8 +1,10 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * @group Echo
- * @covers EchoSuppressionRowUpdateGenerator
+ * @covers \EchoSuppressionRowUpdateGenerator
  */
 class SuppressionMaintenanceTest extends MediaWikiTestCase {
 
@@ -101,8 +103,11 @@ class SuppressionMaintenanceTest extends MediaWikiTestCase {
 	}
 
 	protected static function attachTitleFor( $id, $providedText, $providedNamespace ) {
-		return function ( $test, $gen ) use ( $id, $providedText, $providedNamespace ) {
-			$title = $test->getMock( 'Title' );
+		return function (
+			TestCase $test,
+			EchoSuppressionRowUpdateGenerator $gen
+		) use ( $id, $providedText, $providedNamespace ) {
+			$title = $test->createMock( Title::class );
 			$title->expects( $test->any() )
 				->method( 'getArticleId' )
 				->will( $test->returnValue( $id ) );
@@ -110,11 +115,7 @@ class SuppressionMaintenanceTest extends MediaWikiTestCase {
 			$titles = [ $providedNamespace => [ $providedText => $title ] ];
 
 			$gen->setNewTitleFromNsAndText( function ( $namespace, $text ) use ( $titles ) {
-				if ( isset( $titles[$namespace][$text] ) ) {
-					return $titles[$namespace][$text];
-				}
-
-				return Title::makeTitleSafe( $namespace, $text );
+				return $titles[$namespace][$text] ?? Title::makeTitleSafe( $namespace, $text );
 			} );
 		};
 	}
@@ -122,7 +123,7 @@ class SuppressionMaintenanceTest extends MediaWikiTestCase {
 	/**
 	 * @dataProvider provider_updateRow
 	 */
-	public function testUpdateRow( $message, $expected, $input, $callable = null ) {
+	public function testUpdateRow( $message, array $expected, array $input, callable $callable = null ) {
 		$gen = new EchoSuppressionRowUpdateGenerator;
 		if ( $callable ) {
 			call_user_func( $callable, $this, $gen );

@@ -2,11 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Ansumang",
+			"Envlh",
 			"Jnanaranjan Sahu",
 			"Odisha1",
 			"Psubhashish",
-			"Shisir 1945",
-			"Envlh"
+			"Shisir 1945"
 		]
 	},
 	"uploadwizard": "ଅପଲୋଡ଼ ଉଇଜାର୍ଡ଼",
@@ -58,7 +58,6 @@
 	"mwe-upwiz-remove-upload": "ଅପଲୋଡ଼ ତାଲିକାରେ ଥିବା ଫାଇଲ ଭିତରୁ ଏହି ଫାଇଲଟିକୁ ବାହାର କରିଦେବେ",
 	"mwe-upwiz-remove-description": "ବିବରଣୀଟିକୁ ବାହାର କରିଦେବେ",
 	"mwe-upwiz-upload": "ଅପଲୋଡ଼ କରନ୍ତୁ",
-	"mwe-upwiz-file-upload-notcapable": "ଦୁଖୀତଃ ଆପଣଙ୍କ ବ୍ରାଉଜରଟି ଫାଇଲ ଅପଲୋଡ କରିପାରୁନାହିଁ ।\nଦୟାକରି ଅନ୍ୟ ଏକ ବ୍ରାଉଜର ବ୍ୟବହାର କରନ୍ତୁ ।",
 	"mwe-upwiz-file-all-ok": "ଅପଲୋଡ଼ସବୁ ସଫଳ ହେଲା!",
 	"mwe-upwiz-file-some-failed": "କେତେକ ଅପଲୋଡ଼ ବିଫଳ ହେଲା ।",
 	"mwe-upwiz-file-retry": "ବିଫଳ ଅପଲୋଡ଼କୁ ଆଉଥରେ ଅପଲୋଡ଼ କରିବା ପାଇଁ ଚେଷ୍ଟା କରିବେ",
@@ -146,7 +145,6 @@
 	"mwe-upwiz-next": "ପର",
 	"mwe-upwiz-next-file": "ଚାଲୁରଖନ୍ତୁ",
 	"mwe-upwiz-next-deeds": "ପର",
-	"mwe-upwiz-next-details": "ପର",
 	"mwe-upwiz-home": "ଉଇକି ପ୍ରଧାନ ପୃଷ୍ଠାକୁ ଯିବେ",
 	"mwe-upwiz-upload-another": "ଅଧିକ ଫାଇଲ ଅପଲୋଡ଼ କରିବେ",
 	"mwe-upwiz-prevent-close": "ଆପଣ {{PLURAL:$1|ଏହି ଫାଇଲ|ଏହି ଫାଇଲସବୁ}} ଏବେ ଯାଏଁ ଅପଲୋଡ଼ ଓ ପ୍ରକାଶ କରିନାହାନ୍ତି ।",
@@ -262,6 +260,5 @@
 	"mwe-upwiz-prefs-def-license-def": "ଆପେଆପେ ଥିବା ଲାଇସେନ୍ସ ବ୍ୟବହାର କରିବେ",
 	"mwe-upwiz-prefs-license-own": "ଆପଣା କାମ - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "ଆଉ କାହାର କାମ - $1",
-	"mwe-upwiz-prefs-chunked": "ଅପଲୋଡ ପ୍ରକ୍ରିୟାରେ $1ରୁ ଅଧିକ ହେଇଥିବା ଯୋଗୁ ଅସଫଳ ଅପଲୋଡଗୁଡିକ",
 	"mwe-upwiz-prefs-skiptutorial": "ପ୍ରାରମ୍ଭିକ ଲାଇସେନ୍ସିଙ୍ଗ ଶିକ୍ଷଣକୁ ବାଦ ଦେବେ"
 }

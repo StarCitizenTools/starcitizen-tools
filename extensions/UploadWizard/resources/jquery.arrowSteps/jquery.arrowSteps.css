@@ -10,36 +10,77 @@
 	padding: 0;
 	margin: 0;
 	border: 0 none;
+	height: 50px;
+	color: #72777d;
+	background-color: #eaecf0;
+	position: relative;
 }
 
 .arrowSteps li div {
-	padding: 0.5em;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
 	text-align: center;
 	white-space: nowrap;
 	overflow: hidden;
 }
 
-.arrowSteps li.arrow div {
-	/* @embed */
-	background: url( images/divider-ltr.png ) no-repeat right center;
-}
-
-/* applied to the element preceding the highlighted step */
-.arrowSteps li.arrow.tail div {
-	/* @embed */
-	background: url( images/tail-ltr.png ) no-repeat right center;
-}
-
-/* this applies to all highlighted, including the last */
-.arrowSteps li.head div {
-	/* @embed */
-	background: url( images/head-ltr.png ) no-repeat left center;
+#mwe-upwiz-steps li.head {
+	color: #36c;
+	background-color: #eaf3ff;
 	font-weight: bold;
 }
 
-/* this applies to all highlighted arrows except the last */
-.arrowSteps li.arrow.head div {
-	/* TODO: eliminate duplication of head.png embedding */
-	/* @embed */
-	background: url( images/head-ltr.png ) no-repeat right center;
+.arrowSteps li:after,
+.arrowSteps li:before {
+	left: 100%;
+	top: 50%;
+	border: solid transparent;
+	content: ' ';
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.arrowSteps li.arrow:after {
+	border-left-color: #eaecf0;
+	/* half the height of .arrowSteps li */
+	border-width: 25px;
+	margin-top: -25px;
+	z-index: 1;
+}
+
+.arrowSteps li.arrow:before {
+	border-left-color: #fff;
+	/* half the height of .arrowSteps li + width of the arrow border */
+	border-width: 30px;
+	margin-top: -30px;
+	z-index: 1;
+}
+
+#mwe-upwiz-steps li.head:after {
+	border-left-color: #eaf3ff;
+}
+
+/*
+ * Arrow is added *after* the div with the content, so we need to push
+ * the content slightly to the right (the previous one's arrow is
+ * overlapped on this element) to make sure it remains balanced.
+ */
+.arrowSteps li:not( :first-child ):not( :last-child ) div {
+	padding-left: 30px;
+}
+
+/*
+ * First item: nothing on the left, arrow on the right, and 25px wide
+ * (+5px separation).
+ * If we want this one to appear centered, we're going to have to push
+ * it slightly to the right, so that it closer to the right hand side,
+ * which is extended because of the arrow.
+ * Last item: previous arrow is poking into the element (25 + 5 = 30px),
+ * so let's also move it slightly to the right to appear centered.
+ */
+.arrowSteps li:first-child div,
+.arrowSteps li:last-child div {
+	padding-left: 15px;
 }

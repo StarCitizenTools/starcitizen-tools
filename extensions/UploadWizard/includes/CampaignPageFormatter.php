@@ -9,6 +9,8 @@
  * @author Yuvi Panda <yuvipanda@gmail.com>
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Helper class to produce formatted HTML output for Campaigns
  */
@@ -28,8 +30,9 @@ class CampaignPageFormatter {
 	}
 
 	private function isCampaignExtensionEnabled() {
-		global $wgResourceModules;
-		return isset( $wgResourceModules['ext.campaigns'] );
+		$rl = MediaWikiServices::getInstance()->getResourceLoader();
+		// FIXME: This string exists nowhere in Wikimedia Gerrit outside this file.
+		return $rl->isModuleRegistered( 'ext.campaigns' );
 	}
 
 	public function generateReadHtml() {
@@ -43,8 +46,8 @@ class CampaignPageFormatter {
 
 		$gallery = ImageGalleryBase::factory( 'packed-hover' );
 		$gallery->setContext( $this->context );
-		$gallery->setWidths( 180 );
-		$gallery->setHeights( 180 );
+		$gallery->setWidths( '180' );
+		$gallery->setHeights( '180' );
 		$gallery->setShowBytes( false );
 
 		$this->context->getOutput()->setCdnMaxage(
@@ -79,7 +82,7 @@ class CampaignPageFormatter {
 			] );
 		}
 
-		if ( count( $images ) === 0 ) {
+		if ( $images === [] ) {
 			$body = Html::element(
 				'div',
 				[ 'id' => 'mw-campaign-no-uploads-yet' ],

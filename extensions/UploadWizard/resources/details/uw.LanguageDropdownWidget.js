@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * A language dropdown within a description field in UploadWizard's "Details" step form.
@@ -21,7 +21,7 @@
 	OO.mixinClass( uw.LanguageDropdownWidget, OO.EventEmitter );
 
 	/**
-	 * @param {object} languages
+	 * @param {Object} languages
 	 */
 	uw.LanguageDropdownWidget.prototype.updateLanguages = function ( languages ) {
 		var menu = this.languageDropdown.getMenu(),
@@ -30,7 +30,9 @@
 
 		// remove all items except the one currently selected (don't want
 		// to trigger another select by removing it)
-		menu.removeItems( currentMenuItems.filter( function ( item ) { return !item.isSelected(); } ) );
+		menu.removeItems( currentMenuItems.filter( function ( item ) {
+			return !item.isSelected();
+		} ) );
 
 		// and add the rest of the languages back in there
 		delete languages[ currentValue ];
@@ -66,18 +68,12 @@
 	 * @return {OO.ui.MenuOptionWidget[]}
 	 */
 	uw.LanguageDropdownWidget.prototype.getLanguageMenuOptionWidgets = function ( languages ) {
-		var options;
-
-		options = [];
-		$.each( languages, function ( code, language ) {
-			options.push(
-				new OO.ui.MenuOptionWidget( {
-					data: code,
-					label: language
-				} )
-			);
+		return Object.keys( languages ).map( function ( code ) {
+			return new OO.ui.MenuOptionWidget( {
+				data: code,
+				label: languages[ code ]
+			} );
 		} );
-		return options;
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

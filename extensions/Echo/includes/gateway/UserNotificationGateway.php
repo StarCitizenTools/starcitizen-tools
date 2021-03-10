@@ -30,14 +30,24 @@ class EchoUserNotificationGateway {
 	 * @var string
 	 */
 	protected static $notificationTable = 'echo_notification';
+	/**
+	 * @var Config
+	 */
+	private $config;
 
 	/**
 	 * @param User $user
 	 * @param MWEchoDbFactory $dbFactory
+	 * @param Config $config
 	 */
-	public function __construct( User $user, MWEchoDbFactory $dbFactory ) {
+	public function __construct( User $user, MWEchoDbFactory $dbFactory, Config $config ) {
 		$this->user = $user;
 		$this->dbFactory = $dbFactory;
+		$this->config = $config;
+	}
+
+	public function getDB( $dbSource ) {
+		return $this->dbFactory->getEchoDb( $dbSource );
 	}
 
 	/**
@@ -51,21 +61,28 @@ class EchoUserNotificationGateway {
 			return false;
 		}
 
-		$dbw = $this->dbFactory->getEchoDb( DB_MASTER );
+		$dbw = $this->getDB( DB_MASTER );
 		if ( $dbw->isReadOnly() ) {
 			return false;
 		}
 
-		return $dbw->update(
-			self::$notificationTable,
-			[ 'notification_read_timestamp' => $dbw->timestamp( wfTimestampNow() ) ],
-			[
-				'notification_user' => $this->user->getId(),
-				'notification_event' => $eventIDs,
-				'notification_read_timestamp' => null,
-			],
-			__METHOD__
-		);
+		$success = true;
+		foreach (
+			array_chunk( $eventIDs, $this->config->get( 'UpdateRowsPerQuery' ) ) as $batch
+		) {
+			$success = $dbw->update(
+				self::$notificationTable,
+				[ 'notification_read_timestamp' => $dbw->timestamp( wfTimestampNow() ) ],
+				[
+					'notification_user' => $this->user->getId(),
+					'notification_event' => $batch,
+					'notification_read_timestamp' => null,
+				],
+				__METHOD__
+			) && $success;
+		}
+
+		return $success;
 	}
 
 	/**
@@ -79,29 +96,41 @@ class EchoUserNotificationGateway {
 			return false;
 		}
 
-		$dbw = $this->dbFactory->getEchoDb( DB_MASTER );
+		$dbw = $this->getDB( DB_MASTER );
+		if ( $dbw->isReadOnly() ) {
+			return false;
+		}
 
-		return $dbw->update(
-			self::$notificationTable,
-			[ 'notification_read_timestamp' => null ],
-			[
-				'notification_user' => $this->user->getId(),
-				'notification_event' => $eventIDs,
-				'notification_read_timestamp IS NOT NULL'
-			],
-			__METHOD__
-		);
+		$success = true;
+		foreach (
+			array_chunk( $eventIDs, $this->config->get( 'UpdateRowsPerQuery' ) ) as $batch
+		) {
+			$success = $dbw->update(
+				self::$notificationTable,
+				[ 'notification_read_timestamp' => null ],
+				[
+					'notification_user' => $this->user->getId(),
+					'notification_event' => $batch,
+					'notification_read_timestamp IS NOT NULL'
+				],
+				__METHOD__
+			) && $success;
+		}
+		return $success;
 	}
 
 	/**
-	 * Mark all notification as read, use MWEchoNotifUer::markAllRead() instead
+	 * Mark all notification as read, use MWEchoNotifUser::markAllRead() instead
 	 * @deprecated may need this when running in a job or revive this when we
 	 * have updateJoin()
 	 */
 	public function markAllRead() {
-		$dbw = $this->dbFactory->getEchoDb( DB_MASTER );
+		$dbw = $this->getDB( DB_MASTER );
+		if ( $dbw->isReadOnly() ) {
+			return false;
+		}
 
-		return $dbw->update(
+		$dbw->update(
 			self::$notificationTable,
 			[ 'notification_read_timestamp' => $dbw->timestamp( wfTimestampNow() ) ],
 			[
@@ -110,16 +139,22 @@ class EchoUserNotificationGateway {
 			],
 			__METHOD__
 		);
+
+		return true;
 	}
 
 	/**
 	 * Get notification count for the types specified
-	 * @param int $dbSource use master or slave storage to pull count
+	 * @param int $dbSource use master or replica storage to pull count
 	 * @param array $eventTypesToLoad event types to retrieve
 	 * @param int $cap Max count
 	 * @return int
 	 */
-	public function getCappedNotificationCount( $dbSource, array $eventTypesToLoad = [], $cap = MWEchoNotifUser::MAX_BADGE_COUNT ) {
+	public function getCappedNotificationCount(
+		$dbSource,
+		array $eventTypesToLoad = [],
+		$cap = MWEchoNotifUser::MAX_BADGE_COUNT
+	) {
 		// double check
 		if ( !in_array( $dbSource, [ DB_REPLICA, DB_MASTER ] ) ) {
 			$dbSource = DB_REPLICA;
@@ -129,13 +164,13 @@ class EchoUserNotificationGateway {
 			return 0;
 		}
 
-		$db = $this->dbFactory->getEchoDb( $dbSource );
+		$db = $this->getDB( $dbSource );
 		return $db->selectRowCount(
 			[
 				self::$notificationTable,
 				self::$eventTable
 			],
-			[ '1' ],
+			'1',
 			[
 				'notification_user' => $this->user->getId(),
 				'notification_read_timestamp' => null,
@@ -158,7 +193,7 @@ class EchoUserNotificationGateway {
 	 * @return int[]
 	 */
 	public function getUnreadNotifications( $type ) {
-		$dbr = $this->dbFactory->getEchoDb( DB_REPLICA );
+		$dbr = $this->getDB( DB_REPLICA );
 		$res = $dbr->select(
 			[
 				self::$notificationTable,

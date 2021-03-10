@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	var NS_FILE = mw.config.get( 'wgNamespaceIds' ).file;
 
@@ -7,19 +7,20 @@
 	 * n.b. each upload gets its own details.
 	 *
 	 * @param {mw.UploadWizardUpload} upload
-	 * @param {jQuery} containerDiv The `div` to put the interface into
+	 * @param {jQuery} $containerDiv The `div` to put the interface into
 	 */
-	mw.UploadWizardDetails = function ( upload, containerDiv ) {
+	mw.UploadWizardDetails = function ( upload, $containerDiv ) {
 		this.upload = upload;
-		this.containerDiv = containerDiv;
+		this.$containerDiv = $containerDiv;
 		this.api = upload.api;
 
 		this.mainFields = [];
 
 		this.deedChooserDetails = new uw.DeedChooserDetailsWidget();
 		this.customDeedChooser = false;
+		this.captionSubmissionErrors = {};
 
-		this.div = $( '<div class="mwe-upwiz-info-file ui-helper-clearfix filled"></div>' );
+		this.$div = $( '<div>' ).addClass( 'mwe-upwiz-info-file ui-helper-clearfix filled' );
 	};
 
 	mw.UploadWizardDetails.prototype = {
@@ -33,15 +34,18 @@
 		buildInterface: function () {
 			var descriptionRequired, uri,
 				$moreDetailsWrapperDiv, $moreDetailsDiv,
-				details = this;
+				details = this,
+				config = mw.UploadWizard.config;
 
-			this.thumbnailDiv = $( '<div class="mwe-upwiz-thumbnail mwe-upwiz-thumbnail-side"></div>' );
+			this.$thumbnailDiv = $( '<div>' ).addClass( 'mwe-upwiz-thumbnail mwe-upwiz-thumbnail-side' );
 
-			this.dataDiv = $( '<div class="mwe-upwiz-data"></div>' );
+			this.$dataDiv = $( '<div>' ).addClass( 'mwe-upwiz-data' );
 
 			this.titleDetails = new uw.TitleDetailsWidget( {
 				// Normalize file extension, e.g. 'JPEG' to 'jpg'
-				extension: mw.Title.normalizeExtension( this.upload.title.getExtension() )
+				extension: mw.Title.normalizeExtension( this.upload.title.getExtension() ),
+				minLength: config.minTitleLength,
+				maxLength: config.maxTitleLength
 			} );
 			this.titleDetailsField = new uw.FieldLayout( this.titleDetails, {
 				label: mw.message( 'mwe-upwiz-title' ).text(),
@@ -51,20 +55,23 @@
 			this.mainFields.push( this.titleDetailsField );
 
 			this.captionsDetails = new uw.MultipleLanguageInputWidget( {
+				inputWidgetConstructor: OO.ui.TextInputWidget.bind( null, {
+					classes: [ 'mwe-upwiz-singleLanguageInputWidget-text' ]
+				} ),
 				required: false,
 				// Messages: mwe-upwiz-caption-add-0, mwe-upwiz-caption-add-n
 				label: mw.message( 'mwe-upwiz-caption-add' ),
 				error: mw.message( 'mwe-upwiz-error-bad-captions' ),
 				remove: mw.message( 'mwe-upwiz-remove-caption' ),
-				minLength: mw.UploadWizard.config.minCaptionLength,
-				maxLength: mw.UploadWizard.config.maxCaptionLength
+				minLength: config.minCaptionLength,
+				maxLength: config.maxCaptionLength
 			} );
 			this.captionsDetailsField = new uw.FieldLayout( this.captionsDetails, {
 				required: false,
 				label: mw.message( 'mwe-upwiz-caption' ).text(),
 				help: mw.message( 'mwe-upwiz-tooltip-caption' ).text()
 			} );
-			if ( mw.UploadWizard.config.wikibase.enabled ) {
+			if ( config.wikibase.enabled && config.wikibase.captions ) {
 				this.mainFields.push( this.captionsDetailsField );
 			}
 
@@ -72,9 +79,9 @@
 			// Description is not required if a campaign provides alternative wikitext fields,
 			// which are assumed to function like a description
 			descriptionRequired = !(
-				mw.UploadWizard.config.fields &&
-				mw.UploadWizard.config.fields.length &&
-				mw.UploadWizard.config.fields[ 0 ].wikitext
+				config.fields &&
+				config.fields.length &&
+				config.fields[ 0 ].wikitext
 			);
 			this.descriptionsDetails = new uw.MultipleLanguageInputWidget( {
 				required: descriptionRequired,
@@ -82,8 +89,8 @@
 				label: mw.message( 'mwe-upwiz-desc-add' ),
 				error: mw.message( 'mwe-upwiz-error-bad-descriptions' ),
 				remove: mw.message( 'mwe-upwiz-remove-description' ),
-				minLength: mw.UploadWizard.config.minDescriptionLength,
-				maxLength: mw.UploadWizard.config.maxDescriptionLength
+				minLength: config.minDescriptionLength,
+				maxLength: config.maxDescriptionLength
 			} );
 			this.descriptionsDetailsField = new uw.FieldLayout( this.descriptionsDetails, {
 				required: descriptionRequired,
@@ -105,7 +112,7 @@
 				help: new OO.ui.HtmlSnippet(
 					mw.message( 'mwe-upwiz-tooltip-categories', $( '<a>' ).attr( {
 						target: '_blank',
-						href: 'https://commons.wikimedia.org/wiki/Commons:Categories'
+						href: config.allCategoriesLink
 					} ) ).parse()
 				)
 			} );
@@ -128,13 +135,7 @@
 
 			this.locationInput = new uw.LocationDetailsWidget( { showHeading: true } );
 			this.locationInputField = new uw.FieldLayout( this.locationInput, {
-				// No 'label', labels are included in this widget
-				help: new OO.ui.HtmlSnippet(
-					mw.message( 'mwe-upwiz-tooltip-location', $( '<a>' ).attr( {
-						target: '_blank',
-						href: '//commons.wikimedia.org/wiki/Commons:Geocoding'
-					} ) ).parse()
-				)
+				label: mw.message( 'mwe-upwiz-location' ).text()
 			} );
 			this.mainFields.push( this.locationInputField );
 
@@ -142,7 +143,7 @@
 			this.$form = $( '<form id="mwe-upwiz-detailsform' + this.upload.index + '"></form>' ).addClass( 'detailsForm' );
 			this.$form.append(
 				this.titleDetailsField.$element,
-				mw.UploadWizard.config.wikibase.enabled ? this.captionsDetailsField.$element : null,
+				config.wikibase.enabled && config.wikibase.captions ? this.captionsDetailsField.$element : null,
 				this.descriptionsDetailsField.$element,
 				this.deedChooserDetailsField.$element,
 				this.dateDetailsField.$element,
@@ -155,7 +156,7 @@
 			} );
 
 			this.campaignDetailsFields = [];
-			$.each( mw.UploadWizard.config.fields, function ( i, field ) {
+			config.fields.forEach( function ( field ) {
 				var customDetails, customDetailsField;
 
 				if ( field.wikitext ) {
@@ -174,7 +175,7 @@
 				}
 			} );
 
-			$moreDetailsWrapperDiv = $( '<div class="mwe-more-details">' );
+			$moreDetailsWrapperDiv = $( '<div>' ).addClass( 'mwe-more-details' );
 			$moreDetailsDiv = $( '<div>' );
 
 			$moreDetailsDiv.append(
@@ -220,52 +221,65 @@
 				} );
 			} );
 
-			this.$form.append( this.removeCtrl.$element );
+			this.$thumbnailDiv.append( this.removeCtrl.$element );
 
-			this.submittingDiv = $( '<div>' ).addClass( 'mwe-upwiz-submitting' )
+			this.statusMessage = new OO.ui.MessageWidget( { inline: true } );
+			this.statusMessage.toggle( false );
+			this.$spinner = $.createSpinner( { size: 'small', type: 'inline' } );
+			this.$spinner.hide();
+			this.$indicator = $( '<div>' ).addClass( 'mwe-upwiz-file-indicator' ).append(
+				this.$spinner,
+				this.statusMessage.$element
+			);
+
+			this.$submittingDiv = $( '<div>' ).addClass( 'mwe-upwiz-submitting' )
 				.append(
-					$( '<div>' ).addClass( 'mwe-upwiz-file-indicator' ),
+					this.$indicator,
 					$( '<div>' ).addClass( 'mwe-upwiz-details-texts' ).append(
 						$( '<div>' ).addClass( 'mwe-upwiz-visible-file-filename-text' ),
 						$( '<div>' ).addClass( 'mwe-upwiz-file-status-line' )
 					)
 				);
 
-			$( this.dataDiv ).append(
+			this.$dataDiv.append(
 				this.$form,
-				this.submittingDiv
+				this.$submittingDiv
 			).morphCrossfader();
 
-			$( this.div ).append(
-				this.thumbnailDiv,
-				this.dataDiv
+			this.$div.append(
+				this.$thumbnailDiv,
+				this.$dataDiv
 			);
 
 			uri = new mw.Uri( location.href, { overrideKeys: true } );
-			if ( mw.UploadWizard.config.defaults.caption || uri.query.captionlang ) {
+			if ( config.defaults.caption || uri.query.captionlang ) {
 				this.captionsDetails.setSerialized( {
 					inputs: [
 						{
-							language: uri.query.captionlang ?
-								uw.SingleLanguageInputWidget.static.getClosestAllowedLanguage( uri.query.captionlang ) :
-								uw.SingleLanguageInputWidget.static.getDefaultLanguage(),
-							text: mw.UploadWizard.config.defaults.caption || ''
+							text: config.defaults.caption || ''
 						}
 					]
 				} );
+				this.captionsDetails.getItems()[ 0 ].setLanguage(
+					uri.query.captionlang ?
+						this.captionsDetails.getItems()[ 0 ].getClosestAllowedLanguage( uri.query.captionlang ) :
+						this.captionsDetails.getItems()[ 0 ].getDefaultLanguage()
+				);
 			}
 
-			if ( mw.UploadWizard.config.defaults.description || uri.query.descriptionlang ) {
+			if ( config.defaults.description || uri.query.descriptionlang ) {
 				this.descriptionsDetails.setSerialized( {
 					inputs: [
 						{
-							language: uri.query.descriptionlang ?
-								uw.SingleLanguageInputWidget.static.getClosestAllowedLanguage( uri.query.descriptionlang ) :
-								uw.SingleLanguageInputWidget.static.getDefaultLanguage(),
-							text: mw.UploadWizard.config.defaults.description || ''
+							text: config.defaults.description || ''
 						}
 					]
 				} );
+				this.descriptionsDetails.getItems()[ 0 ].setLanguage(
+					uri.query.descriptionlang ?
+						this.descriptionsDetails.getItems()[ 0 ].getClosestAllowedLanguage( uri.query.descriptionlang ) :
+						this.descriptionsDetails.getItems()[ 0 ].getDefaultLanguage()
+				);
 			}
 
 			this.populate();
@@ -290,16 +304,16 @@
 				details = this;
 
 			function maybeBuild() {
-				if ( !this.interfaceBuilt && $window.scrollTop() + $window.height() + 1000 >= details.div.offset().top ) {
+				if ( !this.interfaceBuilt && $window.scrollTop() + $window.height() + 1000 >= details.$div.offset().top ) {
 					details.buildInterface();
 					$window.off( 'scroll', maybeBuild );
 				}
 			}
 
 			if ( !this.isAttached ) {
-				$( this.containerDiv ).append( this.div );
+				this.$containerDiv.append( this.$div );
 
-				if ( $window.scrollTop() + $window.height() + 1000 >= this.div.offset().top ) {
+				if ( $window.scrollTop() + $window.height() + 1000 >= this.$div.offset().top ) {
 					this.buildInterface();
 				} else {
 					$window.on( 'scroll', maybeBuild );
@@ -315,7 +329,14 @@
 		 * @return {mw.Title|null}
 		 */
 		getTitle: function () {
-			return this.titleDetails.getTitle();
+			// title will not be set until we've actually submitted the file
+			if ( this.title === undefined ) {
+				return this.titleDetails.getTitle();
+			}
+
+			// once the file has been submitted, we'll have confirmation on
+			// the filename and trust the authoritative source over own input
+			return this.title;
 		},
 
 		/**
@@ -390,7 +411,7 @@
 		 */
 		getThumbnailCaption: function () {
 			var captions = [];
-			if ( mw.UploadWizard.config.wikibase.enabled ) {
+			if ( mw.UploadWizard.config.wikibase.enabled && mw.UploadWizard.config.wikibase.captions ) {
 				captions = this.captionsDetails.getSerialized().inputs;
 			} else {
 				captions = this.descriptionsDetails.getSerialized().inputs;
@@ -415,12 +436,12 @@
 		 * Pull some info into the form ( for instance, extracted from EXIF, desired filename )
 		 */
 		populate: function () {
-			var thumbnailDiv = this.thumbnailDiv;
-			this.upload.getThumbnail().done( function ( thumb ) {
-				mw.UploadWizard.placeThumbnail( thumbnailDiv, thumb );
+			var $thumbnailDiv = this.$thumbnailDiv;
+			// This must match the CSS dimensions of .mwe-upwiz-thumbnail
+			this.upload.getThumbnail( 230 ).done( function ( thumb ) {
+				mw.UploadWizard.placeThumbnail( $thumbnailDiv, thumb );
 			} );
 			this.prefillDate();
-			this.prefillAuthor();
 			this.prefillTitle();
 			this.prefillDescription();
 			this.prefillLocation();
@@ -455,7 +476,7 @@
 
 			if ( this.upload.imageinfo.metadata ) {
 				metadata = this.upload.imageinfo.metadata;
-				$.each( [ 'datetimeoriginal', 'datetimedigitized', 'datetime', 'date' ], function ( i, propName ) {
+				[ 'datetimeoriginal', 'datetimedigitized', 'datetime', 'date' ].some( function ( propName ) {
 					var matches, timeMatches,
 						dateInfo = metadata[ propName ];
 					if ( dateInfo ) {
@@ -474,9 +495,10 @@
 									parseInt( matches[ 2 ], 10 ) - 1,
 									parseInt( matches[ 3 ], 10 ) );
 							}
-							return false; // break from $.each
+							return true; // break from Array.some
 						}
 					}
+					return false;
 				} );
 			}
 
@@ -559,12 +581,14 @@
 					this.descriptionsDetails.setSerialized( {
 						inputs: [
 							{
-								// The language is probably wrong in many cases...
-								language: uw.DescriptionDetailsWidget.static.getClosestAllowedLanguage( mw.config.get( 'wgContentLanguage' ) ),
 								text: descText.trim()
 							}
 						]
 					} );
+					// The language is probably wrong in many cases...
+					this.descriptionsDetails.getItems()[ 0 ].setLanguage(
+						this.descriptionsDetails.getItems()[ 0 ].getClosestAllowedLanguage( mw.config.get( 'wgContentLanguage' ) )
+					);
 				}
 			}
 		},
@@ -632,16 +656,6 @@
 			if ( modified ) {
 				this.$form.find( '.mwe-more-details' )
 					.data( 'mw-collapsible' ).expand();
-			}
-		},
-
-		/**
-		 * Prefill author (such as can be determined) from image info and metadata
-		 * XXX user pref?
-		 */
-		prefillAuthor: function () {
-			if ( this.upload.imageinfo.metadata && this.upload.imageinfo.metadata.author ) {
-				$( this.authorInput ).val( this.upload.imageinfo.metadata.author );
 			}
 		},
 
@@ -754,23 +768,23 @@
 			// https://commons.wikimedia.org/wiki/Template:Information
 			// can we be more slick and do this with maps, applys, joins?
 			information = {
-				// {{lang|description in lang}}*   required
+				// {{lang|description in lang}}* (required)
 				description: '',
-				// YYYY, YYYY-MM, or YYYY-MM-DD	 required  - use jquery but allow editing, then double check for sane date.
+				// YYYY, YYYY-MM, or YYYY-MM-DD (required) use jquery but allow editing, then double check for sane date.
 				date: '',
-				// {{own}} or wikitext	optional
+				// {{own}} or wikitext (optional)
 				source: '',
-				// any wikitext, but particularly {{Creator:Name Surname}}   required
+				// any wikitext, but particularly {{Creator:Name Surname}} (required)
 				author: '',
-				// leave blank unless OTRS pending; by default will be "see below"   optional
+				// leave blank unless OTRS pending; by default will be "see below" (optional)
 				permission: '',
-				// pipe separated list, other versions	 optional
+				// pipe separated list, other versions (optional)
 				'other versions': ''
 			};
 
 			information.description = this.descriptionsDetails.getWikiText();
 
-			$.each( this.campaignDetailsFields, function ( i, layout ) {
+			this.campaignDetailsFields.forEach( function ( layout ) {
 				information.description += layout.fieldWidget.getWikiText();
 			} );
 
@@ -785,7 +799,7 @@
 			info = '';
 
 			for ( key in information ) {
-				if ( information.hasOwnProperty( key ) ) {
+				if ( Object.prototype.hasOwnProperty.call( information, key ) ) {
 					info += '|' + key.replace( /:/g, '_' );
 					info += '=' + mw.Escaper.escapeForTemplate( information[ key ] ) + '\n';
 				}
@@ -834,9 +848,9 @@
 		 */
 		submit: function () {
 			var details = this,
-				wikitext, captions, promise;
+				wikitext, captions, promise, languageCodes, allLanguages, errorString;
 
-			$( 'form', this.containerDiv ).submit();
+			this.$containerDiv.find( 'form' ).trigger( 'submit' );
 
 			this.upload.title = this.getTitle();
 			this.upload.state = 'submitting-details';
@@ -847,100 +861,91 @@
 			promise = this.submitWikiText( wikitext );
 
 			captions = this.captionsDetails.getValues();
-			if ( mw.UploadWizard.config.wikibase.enabled && Object.keys( captions ).length > 0 ) {
+			if (
+				mw.UploadWizard.config.wikibase.enabled &&
+				mw.UploadWizard.config.wikibase.captions &&
+				Object.keys( captions ).length > 0
+			) {
 				promise = promise
-					.then( function ( result ) {
-						// after having submitted the upload, fetch the entity id from page_props
-						// we might fail to retrieve the prop if it has not yet been created,
-						// so try at least 20 times...
-						var status = mw.message( 'mwe-upwiz-submitting-captions', Object.keys( captions ).length ),
-							title = mw.Title.makeTitle( 6, result.upload.filename ),
-							callable = details.getPageProp.bind( details, title, 'mediainfo_entity' );
+					.then( function () {
+						// just work out the mediainfo entity id from the page id
+						// @todo FIXME clean this up
+						var status = mw.message( 'mwe-upwiz-submitting-captions', Object.keys( captions ).length );
 						details.setStatus( status.text() );
-						return details.attemptExecute( callable, 20 );
+						return details.getMediaInfoEntityId(); // (T208545)
 					} )
 					// submit captions to wikibase
-					.then( this.submitCaptions.bind( this, captions ) )
-					.catch( function ( code, result ) {
-						var languageCodes = Object.keys( captions ),
-							allLanguages = mw.UploadWizard.config.uwLanguages,
-							message = mw.message(
-								'mwe-upwiz-error-submit-captions',
-								details.upload.imageinfo.canonicaltitle,
-								result.errors[ 0 ].html,
-								languageCodes.length
-							).parse(),
-							$list,
-							i;
-
-						// add captions as well, so they can easily be copied over
-						for ( i = 0; i < languageCodes.length; i++ ) {
-							$list = $( '<dl>' );
-							$list.append( $( '<dt>' ).text( allLanguages[ languageCodes[ i ] ] ) );
-							$list.append( $( '<dd>' ).text( captions[ languageCodes[ i ] ] ) );
-						}
-						message += $list[ 0 ].outerHTML;
-
-						details.upload.state = 'error';
-						details.showError( 'caption-fail', message );
-
-						return $.Deferred().reject( code, result ).promise();
-					} );
+					.then( this.submitCaptions.bind( this, captions ) );
 			}
 
 			return promise.then( function () {
-				details.showIndicator( 'uploaded' );
-				details.setStatus( mw.message( 'mwe-upwiz-published' ).text() );
+				if ( Object.keys( details.captionSubmissionErrors ).length > 0 ) {
+					languageCodes = Object.keys( captions );
+					allLanguages = mw.UploadWizard.config.uwLanguages;
+
+					errorString = '<strong>' + mw.message(
+						'mwe-upwiz-error-submit-captions',
+						languageCodes.length
+					).parse() + '</strong>';
+
+					Object.keys( details.captionSubmissionErrors ).forEach( function ( langCode ) {
+						var msgs = [],
+							error = details.captionSubmissionErrors[ langCode ];
+						error.result.errors.forEach( function ( errorObject ) {
+							var newMsg = '<p>' + errorObject.html + '</p>';
+							if ( msgs.indexOf( newMsg ) === -1 ) {
+								msgs.push( newMsg );
+								errorString += newMsg;
+							}
+						} );
+						errorString += '<dl>' +
+							'<dt>' + allLanguages[ langCode ] + '</dt>' +
+							'<dd>' + captions[ langCode ] + '</dd>' +
+							'</dl>';
+					} );
+
+					errorString += '<strong>' + mw.message(
+						'mwe-upwiz-error-submit-captions-remedy',
+						details.upload.imageinfo.canonicaltitle
+					).parse() + '</strong>';
+
+					details.upload.state = 'sdc-api-error';
+					details.showError(
+						'caption-fail',
+						errorString
+					);
+					// If there is a captions error, then details for how to deal with it are
+					// in the errorString above, no need to show anything else
+					// eslint-disable-next-line no-jquery/no-global-selector
+					$( '#mwe-upwiz-details-warning-count' ).hide();
+					// eslint-disable-next-line no-jquery/no-global-selector
+					$( '.mwe-upwiz-remove-upload' ).hide();
+					// Remove the beforeunload warning, as the image is now as uploaded
+					// as it's going to get
+					$( window ).off( 'beforeunload' );
+				} else {
+					details.showIndicator( 'success' );
+					details.setStatus( mw.message( 'mwe-upwiz-published' ).text() );
+				}
 			} );
 		},
 
 		/**
-		 * Attempt to resolve a promise (a couple of times, with an increasing delay).
-		 *
-		 * @param {function} callable
-		 * @param {number} attempts
 		 * @return {jQuery.Promise}
 		 */
-		attemptExecute: function ( callable, attempts ) {
-			var deferred = $.Deferred(),
-				attempt = 0,
-				retry;
+		getMediaInfoEntityId: function () {
+			var self = this;
 
-			attempts = attempts || 10;
-			retry = function () {
-				callable().then(
-					deferred.resolve,
-					function () {
-						attempt++;
-						if ( attempt >= attempts ) {
-							// don't keep trying forever; just give up if we fail a few times
-							deferred.reject.apply( deferred, arguments );
-						} else {
-							// try again on failure, with an increasing timeout...
-							setTimeout( retry, 2000 * attempt );
-						}
+			if ( this.mediaInfoEntityId !== undefined ) {
+				return $.Deferred().resolve( this.mediaInfoEntityId ).promise();
+			}
 
-					}
-				);
-			};
-
-			retry();
-
-			return deferred.promise();
-		},
-
-		/**
-		 * @param {mw.Title} title
-		 * @param {string} prop
-		 * @return {jQuery.Promise}
-		 */
-		getPageProp: function ( title, prop ) {
 			return this.upload.api.get( {
 				action: 'query',
-				prop: 'pageprops',
-				titles: title.getPrefixedDb()
+				prop: 'info',
+				titles: this.getTitle().getPrefixedDb()
 			} ).then( function ( result ) {
-				var props, message;
+				var message;
 
 				if ( result.query.pages[ 0 ].missing ) {
 					// page doesn't exist (yet)
@@ -948,14 +953,9 @@
 					return $.Deferred().reject( 'pageprops-missing-page', { errors: [ { html: message } ] } ).promise();
 				}
 
-				props = result.query.pages[ 0 ].pageprops;
-				if ( !props || !( prop in props ) ) {
-					// prop doesn't exist (yet)
-					message = mw.message( 'mwe-upwiz-error-pageprops-missing-prop' ).parse();
-					return $.Deferred().reject( 'pageprops-missing-prop', { errors: [ { html: message } ] } ).promise();
-				}
-
-				return props[ prop ];
+				// FIXME: This just fetches the pageid and then hard-codes knowing that M+pageid is what we need
+				self.mediaInfoEntityId = 'M' + result.query.pages[ 0 ].pageid;
+				return self.mediaInfoEntityId;
 			} );
 		},
 
@@ -970,7 +970,9 @@
 		 */
 		submitWikiText: function ( wikiText ) {
 			var params,
-				tags = [ 'uploadwizard' ];
+				tags = [ 'uploadwizard' ],
+				deed = this.upload.deedChooser.deed,
+				comment = '';
 
 			this.firstPoll = ( new Date() ).getTime();
 
@@ -978,11 +980,17 @@
 				tags.push( 'uploadwizard-' + this.upload.file.source );
 			}
 
+			if ( deed.name === 'ownwork' ) {
+				comment = 'Uploaded own work with ' + mw.UploadWizard.userAgent;
+			} else {
+				comment = 'Uploaded a work by ' + deed.getAuthorWikiText() + ' from ' + deed.getSourceWikiText() + ' with ' + mw.UploadWizard.userAgent;
+			}
+
 			params = {
 				action: 'upload',
 				filekey: this.upload.fileKey,
 				filename: this.getTitle().getMain(),
-				comment: 'User created page with ' + mw.UploadWizard.userAgent,
+				comment: comment,
 				tags: mw.UploadWizard.config.CanAddTags ? tags : [],
 				// we can ignore upload warnings here, we've already checked
 				// when stashing the file
@@ -997,58 +1005,73 @@
 				params.async = true;
 			}
 
-			params.text = this.getWikiText();
 			return this.submitWikiTextInternal( params );
 		},
 
 		/**
-		 * @param {object} captions {<languagecode>: <caption text>} map
+		 * @param {Object} captions {<languagecode>: <caption text>} map
 		 * @param {string} entityId
 		 * @return {jQuery.Promise}
 		 */
 		submitCaptions: function ( captions, entityId ) {
-			var languages = Object.keys( captions ),
-				// `promises` will hold all promises for all captions;
-				// prefilling with a bogus promise to ensure $.when always
-				// resolves with an array of multiple results (if there's
-				// just 1, it would otherwise have just that one's arguments,
-				// instead of a multi-dimensional array of results)
-				promises = [ $.Deferred().resolve().promise() ],
-				callable, promise, language, text, i;
+			var self = this,
+				languages = Object.keys( captions ),
+				promise = $.Deferred().resolve().promise(),
+				callable = function ( language, result ) {
+					var text = captions[ language ],
+						baseRevId = result && result.entity && result.entity.lastrevid || null;
+					return self.submitCaption( entityId, baseRevId, language, text );
+				},
+				i;
 
 			for ( i = 0; i < languages.length; i++ ) {
-				language = languages[ i ];
-				text = captions[ language ];
-				callable = this.submitCaption.bind( this, entityId, language, text );
-
-				promise = this.attemptExecute( callable, 3 );
-				promises.push( promise );
+				promise = promise.then( callable.bind( promise, languages[ i ] ) );
 			}
 
-			return $.when.apply( $, promises );
+			return promise;
 		},
 
 		/**
 		 * @param {string} id
+		 * @param {number|null} baseRevId
 		 * @param {string} language
 		 * @param {string} value
 		 * @return {jQuery.Promise}
 		 */
-		submitCaption: function ( id, language, value ) {
-			var config = mw.UploadWizard.config.wikibase,
+		submitCaption: function ( id, baseRevId, language, value ) {
+			var self = this,
+				config = mw.UploadWizard.config,
 				params = {
 					action: 'wbsetlabel',
 					id: id,
 					language: language,
-					value: value
+					value: value,
+					// baserevid is intentionally left blank: captions can be submitted
+					// without baserevid just fine, it just won't prevent all edit conflicts
+					// (though it still somewhat prevent against it)
+					// if we were to set the correct baserevid, we might fail to submit
+					// some captions because of bots making edits immediately after upload
+					// (e.g. https://phabricator.wikimedia.org/T219677)
+					// this is a brand new upload, this is *supposed* to be the very
+					// first content, entered at time of upload; the only edit conflict
+					// that could happen would be caused by bots...
+					baserevid: undefined
 				},
-				ajaxOptions = { url: config.api };
+				ajaxOptions = { url: config.wikibase.api };
 
-			if ( !config.enabled ) {
+			if ( !config.wikibase.enabled && config.wikibase.captions ) {
 				return $.Deferred().reject().promise();
 			}
 
-			return this.upload.api.postWithEditToken( params, ajaxOptions );
+			return this.upload.api.postWithEditToken(
+				params, ajaxOptions
+			)
+				.catch( function ( code, result ) {
+					self.captionSubmissionErrors[ language ] = {
+						code: code,
+						result: result
+					};
+				} );
 		},
 
 		/**
@@ -1070,6 +1093,7 @@
 				// making it here means the upload is a success, or it would've been
 				// rejected by now (either by HTTP status code, or in validateWikiTextSubmitResult)
 				.then( function ( result ) {
+					details.title = mw.Title.makeTitle( 6, result.upload.filename );
 					details.upload.extractImageInfo( result.upload.imageinfo );
 					details.upload.thisProgress = 1.0;
 					details.upload.state = 'complete';
@@ -1156,7 +1180,7 @@
 				ignoreTheseWarnings = true;
 			}
 			for ( wx in warnings ) {
-				if ( warnings.hasOwnProperty( wx ) ) {
+				if ( Object.prototype.hasOwnProperty.call( warnings, wx ) ) {
 					// if there are other warnings, deal with those first
 					ignoreTheseWarnings = false;
 				}
@@ -1196,10 +1220,7 @@
 						message = mw.message( 'mwe-upwiz-upload-error-duplicate-archive' ).parse();
 					}
 				} else {
-					warningsKeys = [];
-					$.each( warnings, function ( key ) {
-						warningsKeys.push( key );
-					} );
+					warningsKeys = Object.keys( warnings );
 					code = 'unknown-warning';
 					message = mw.message( 'api-error-unknown-warning', warningsKeys.join( ', ' ) ).parse();
 				}
@@ -1219,7 +1240,7 @@
 		recoverFromError: function ( code, html ) {
 			uw.eventFlowLogger.logError( 'details', { code: code, message: html } );
 			this.upload.state = 'recoverable-error';
-			this.dataDiv.morphCrossfade( '.detailsForm' );
+			this.$dataDiv.morphCrossfade( '.detailsForm' );
 			this.titleDetailsField.setErrors( [ { code: code, html: html } ] );
 		},
 
@@ -1288,21 +1309,27 @@
 		},
 
 		setStatus: function ( s ) {
-			this.div.find( '.mwe-upwiz-file-status-line' ).html( s ).show();
+			this.$div.find( '.mwe-upwiz-file-status-line' ).html( s ).show();
 		},
 
-		showIndicator: function ( statusStr ) {
-			this.div.find( '.mwe-upwiz-file-indicator' )
-				.show()
-				.removeClass( 'mwe-upwiz-status-progress mwe-upwiz-status-error mwe-upwiz-status-uploaded' )
-				.addClass( 'mwe-upwiz-status-' + statusStr );
+		// TODO: De-duplicate with code form mw.UploadWizardUploadInterface.js
+		showIndicator: function ( status ) {
+			this.$spinner.hide();
+			this.statusMessage.toggle( false );
+
+			if ( status === 'progress' ) {
+				this.$spinner.show();
+			} else if ( status ) {
+				this.statusMessage.toggle( true ).setType( status );
+			}
+			this.$indicator.toggleClass( 'mwe-upwiz-file-indicator-visible', !!status );
 		},
 
 		setVisibleTitle: function ( s ) {
-			$( this.submittingDiv )
+			$( this.$submittingDiv )
 				.find( '.mwe-upwiz-visible-file-filename-text' )
 				.text( s );
 		}
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

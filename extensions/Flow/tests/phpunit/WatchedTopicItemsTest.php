@@ -5,12 +5,14 @@ namespace Flow\Tests;
 use Flow\Model\UUID;
 use Flow\WatchedTopicItems;
 use User;
-use Wikimedia\Rdbms\DatabaseMysqli;
+use Wikimedia\Rdbms\IDatabase;
 
 /**
+ * @covers \Flow\WatchedTopicItems
+ *
  * @group Flow
  */
-class WatchedTopicItemTest extends FlowTestCase {
+class WatchedTopicItemsTest extends FlowTestCase {
 
 	public function provideDataGetWatchStatus() {
 		// number of test cases
@@ -54,7 +56,7 @@ class WatchedTopicItemTest extends FlowTestCase {
 	/**
 	 * @dataProvider provideDataGetWatchStatus
 	 */
-	public function testGetWatchStatus( $uuids, $dbResult, $result ) {
+	public function testGetWatchStatus( $uuids, $dbResult, array $result ) {
 		// give it a fake user id
 		$watchedTopicItems = new WatchedTopicItems( User::newFromId( 1 ), $this->mockDb( $dbResult ) );
 		$res = $watchedTopicItems->getWatchStatus( $uuids );
@@ -72,12 +74,9 @@ class WatchedTopicItemTest extends FlowTestCase {
 	}
 
 	protected function mockDb( $dbResult ) {
-		$db = $this->getMockBuilder( DatabaseMysqli::class )
-			->disableOriginalConstructor()
-			->getMock();
-		$db->expects( $this->any() )
-			->method( 'select' )
-			->will( $this->returnValue( $dbResult ) );
+		$db = $this->createMock( IDatabase::class );
+		$db->method( 'select' )
+			->willReturn( $dbResult );
 		return $db;
 	}
 }

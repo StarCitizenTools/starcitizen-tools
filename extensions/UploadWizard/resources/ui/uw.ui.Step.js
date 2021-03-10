@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, $, uw, OO ) {
+( function ( uw ) {
 	/**
 	 * Represents a generic UI for a step.
 	 *
@@ -36,15 +36,8 @@
 			.addClass( 'mwe-upwiz-stepdiv' )
 			.hide();
 
+		// eslint-disable-next-line no-jquery/no-global-selector
 		$( '#mwe-upwiz-content' ).append( this.$div );
-
-		this.$arrow = $( '<li>' )
-			.attr( 'id', 'mwe-upwiz-step-' + this.name )
-			.append(
-				$( '<div>' ).text( mw.message( 'mwe-upwiz-step-' + this.name ).text() )
-			);
-
-		$( '#mwe-upwiz-steps' ).append( this.$arrow );
 
 		// this will make sure that buttons will only be added if they've been
 		// set in the controller, otherwise there's nowhere to go...
@@ -60,14 +53,15 @@
 	 * @param {mw.UploadWizardUpload[]} uploads
 	 */
 	uw.ui.Step.prototype.load = function ( uploads ) {
-		var offset = $( 'h1:first' ).offset();
+		// eslint-disable-next-line no-jquery/no-global-selector
+		var offset = $( 'h1' ).first().offset();
 
 		this.movedFrom = false;
 
 		this.uploads = uploads;
 		this.$div.append( this.$buttons ).show();
-		$( '#mwe-upwiz-steps' ).arrowStepsHighlight( this.$arrow );
 
+		// eslint-disable-next-line no-jquery/no-global-selector
 		$( 'html, body' ).animate( {
 			scrollTop: offset.top,
 			scrollLeft: offset.left
@@ -127,4 +121,4 @@
 			ui.$buttons.append( ui.previousButton.$element );
 		} );
 	};
-}( mediaWiki, jQuery, mediaWiki.uploadWizard, OO ) );
+}( mw.uploadWizard ) );

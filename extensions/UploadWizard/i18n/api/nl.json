@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Siebrand"
+		]
+	},
+	"apihelp-flickrblacklist-example-2": "Volledige zwarte lijst ophalen",
+	"apihelp-query+allcampaigns-description": "Alle UploadWizardcampagnes inventariseren."
+}

@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( $, mw, uw ) {
+( function ( uw ) {
 	QUnit.module( 'uw.controller.Thanks', QUnit.newMwEnvironment() );
 
 	QUnit.test( 'Constructor sanity test', function ( assert ) {
@@ -31,9 +31,9 @@
 
 		this.sandbox.stub( step.ui, 'load' );
 		step.load( [
-			{ on: $.noop },
-			{ on: $.noop },
-			{ on: $.noop }
+			{ on: function () {} },
+			{ on: function () {} },
+			{ on: function () {} }
 		] );
 
 		assert.strictEqual( auStub.callCount, 3 );
@@ -54,25 +54,25 @@
 			},
 			uiThanks = new uw.ui.Thanks( config );
 
-		assert.equal(
+		assert.strictEqual(
 			uiThanks.homeButton.getLabel(),
 			'This is just a test',
 			'The label of the home button matches the configured text.'
 		);
 
-		assert.equal(
+		assert.strictEqual(
 			uiThanks.homeButton.getHref(),
 			'https://wiki.example.com/wiki/Main_Page',
 			'The target of the home button matches the configured URL.'
 		);
 
-		assert.equal(
+		assert.strictEqual(
 			uiThanks.beginButton.getLabel(),
 			'Let me start again',
 			'The label of the begin button matches the configured text.'
 		);
 
-		assert.equal(
+		assert.strictEqual(
 			uiThanks.beginButton.getHref(),
 			'https://commons.wikimedia.org/wiki/Special:UploadWizard',
 			'The target of the begin button matches the configured URL.'
@@ -84,11 +84,11 @@
 		var uiThanks = new uw.ui.Thanks( {} ),
 			locationHref = 'https://commons.wikimedia.org/wiki/Special:UploadWizard?campaign=somecampaign&objref=testRef|MyPage|342&updateList=1&somevar=someval';
 
-		assert.equal(
+		assert.strictEqual(
 			uiThanks.dropParameterFromURL( locationHref, 'updateList' ),
 			'https://commons.wikimedia.org/wiki/Special:UploadWizard?campaign=somecampaign&objref=testRef%7CMyPage%7C342&somevar=someval',
 			'The href of the begin button does not contain the updateList parameter.'
 		);
 	} );
 
-}( jQuery, mediaWiki, mediaWiki.uploadWizard ) );
+}( mw.uploadWizard ) );

@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 
 	OO.ui.getWindowManager().addWindows( {
 		upwizErrorDialog: new OO.ui.MessageDialog( { size: 'medium' } )
@@ -24,4 +24,4 @@
 		} );
 	};
 
-}( mediaWiki ) );
+}() );

@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tacsipacsi"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Egy Flickr-URL érvényesítése a felhasználóazonosító (NSID) használatával feketelistázáshoz.\n\nA <var>list</var> paraméterrel használva az összes feketelistázott azonosítót adja vissza.",
+	"apihelp-flickrblacklist-summary": "Egy Flickr-URL érvényesítése a felhasználóazonosító (NSID) használatával feketelistázáshoz.",
+	"apihelp-flickrblacklist-extended-description": "A <var>list</var> paraméterrel használva az összes feketelistázott azonosítót adja vissza.",
+	"apihelp-flickrblacklist-param-url": "A tesztelendő Flickr-URL.",
+	"apihelp-flickrblacklist-param-list": "Ha meg van adva, a teljes feketelista visszaadása. Nem használható az <var>$1url</var> paraméterrel együtt.",
+	"apihelp-flickrblacklist-example-1": "Egy URL ellenőrzése a feketelista alapján.",
+	"apihelp-flickrblacklist-example-2": "A teljes feketelista lekérése.",
+	"apihelp-query+allcampaigns-description": "Az összes Feltöltésvarázsló-kampány felsorolása.",
+	"apihelp-query+allcampaigns-summary": "Az összes Feltöltésvarázsló-kampány felsorolása.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Csak az engedélyezett kampányok listázása.",
+	"apihelp-query+allcampaigns-param-limit": "A lekérendő kampányok száma.",
+	"apihelp-query+allcampaigns-example-1": "Az engedélyezett kampányok felsorolása"
+}

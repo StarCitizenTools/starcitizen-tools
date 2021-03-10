@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby"
+		]
+	},
+	"apihelp-flickrblacklist-param-url": "D'Flickr-URL déi getest gi soll",
+	"apihelp-flickrblacklist-example-1": "Nokucken ob eng URL op der schwaarzer Lëscht steet",
+	"apihelp-flickrblacklist-example-2": "Déi komplett schwaarz Lëscht zréckschécken"
+}

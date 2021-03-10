@@ -49,7 +49,7 @@ class MigrateCampaigns extends Maintenance {
 		parent::__construct();
 
 		$this->requireExtension( 'Upload Wizard' );
-		$this->mDescription = "Migrate UploadCampaigns from database storage to pages";
+		$this->addDescription( "Migrate UploadCampaigns from database storage to pages" );
 		$this->addOption( 'user', 'The user to perform the migration as', false, true, 'u' );
 	}
 
@@ -257,7 +257,9 @@ class MigrateCampaigns extends Maintenance {
 		$this->dbr = wfGetDB( DB_MASTER );
 		$campaigns = $this->dbr->select(
 			'uw_campaigns',
-			'*'
+			'*',
+			[],
+			__METHOD__
 		);
 
 		if ( !$campaigns->numRows() ) {
@@ -270,7 +272,7 @@ class MigrateCampaigns extends Maintenance {
 			$newConfig = $this->getConfigForJSON( $campaign, $oldConfig );
 
 			$title = Title::makeTitleSafe( NS_CAMPAIGN, $campaign->campaign_name );
-			$page = Wikipage::factory( $title );
+			$page = WikiPage::factory( $title );
 
 			$content = new CampaignContent( json_encode( $newConfig ) );
 			$page->doEditContent(
@@ -284,5 +286,5 @@ class MigrateCampaigns extends Maintenance {
 	}
 }
 
-$maintClass = "MigrateCampaigns";
+$maintClass = MigrateCampaigns::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

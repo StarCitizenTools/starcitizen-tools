@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\Revision\RevisionRecord;
+
 class EchoMentionInSummaryPresentationModel extends EchoEventPresentationModel {
 
 	public function getIconType() {
@@ -13,15 +15,15 @@ class EchoMentionInSummaryPresentationModel extends EchoEventPresentationModel {
 	public function getHeaderMessage() {
 		$msg = $this->getMessageWithAgent( 'notification-header-mention-summary' );
 		$msg->params( $this->getViewingUserForGender() );
-		$msg->params( $this->getTruncatedTitleText( $this->event->getTitle() ) );
+		$msg->params( $this->getTruncatedTitleText( $this->event->getTitle(), true ) );
 
 		return $msg;
 	}
 
 	public function getBodyMessage() {
-		if ( $this->userCan( Revision::DELETED_COMMENT ) ) {
-			$revision = $this->event->getRevision();
-			$summary = $revision->getComment();
+		$revision = $this->event->getRevision();
+		if ( $revision && $revision->getComment() && $this->userCan( RevisionRecord::DELETED_COMMENT ) ) {
+			$summary = $revision->getComment()->text;
 			$summary = Linker::formatComment( $summary );
 			$summary = Sanitizer::stripAllTags( $summary );
 

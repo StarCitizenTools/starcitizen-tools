@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Lakzon",
 			"Hosseinblue",
+			"Lakzon",
 			"Macofe"
 		]
 	},
@@ -56,7 +56,6 @@
 	"mwe-upwiz-remove-upload": "حذف این پرونده از فهرست پرونده‌هایی که قرار است بارگذاری شوند",
 	"mwe-upwiz-remove-description": "حذف این توضیحات",
 	"mwe-upwiz-upload": "بارگذاری",
-	"mwe-upwiz-file-upload-notcapable": "متأسفانه مرورگرتان قابلیت بارگذاری پرونده‌ها را ندارد.\nلطفاً از مرورگر دیگری استفاده کنید.",
 	"mwe-upwiz-file-all-ok": "تمام بارگذاری‌ها موفق بودند!",
 	"mwe-upwiz-file-some-failed": "برخی از بارگذاری‌ها ناموفق بودند.",
 	"mwe-upwiz-file-retry": "تلاش برای انجام دوبارهٔ بارگذاری‌های ناموفق",
@@ -123,7 +122,6 @@
 	"mwe-upwiz-next": "بچۆ نووآ",
 	"mwe-upwiz-next-file": "ادامه-دؤم گرتن",
 	"mwe-upwiz-next-deeds": "بچۆ نووآ",
-	"mwe-upwiz-next-details": "بچۆ نووآ",
 	"mwe-upwiz-home": "بچۆ سەرپەڕە",
 	"mwe-upwiz-upload-another": "بارگذاری پرونده‌های بیشتر",
 	"mwe-upwiz-prevent-close-wait": "ترک‌کردن این صفحه ممکن است منجر به از دست‌دادن همه تغییراتی که اعمال کردید شود. لطفاً  چند ثانیه صبر کنید.",

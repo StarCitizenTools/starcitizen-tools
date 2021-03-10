@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * A small wrapper around ObjectCache to manage
  * storing the last time a user has seen notifications
@@ -8,7 +10,7 @@ class EchoSeenTime {
 
 	/**
 	 * Allowed notification types
-	 * @var array
+	 * @var string[]
 	 */
 	private static $allowedTypes = [ 'alert', 'message' ];
 
@@ -39,24 +41,29 @@ class EchoSeenTime {
 	 * @return BagOStuff
 	 */
 	private static function cache() {
-		static $c = null;
+		static $wrappedCache = null;
 
-		// Use main stash for persistent storage, and
-		// wrap it with CachedBagOStuff for an in-process
-		// cache. (T144534)
-		if ( $c === null ) {
-			$c = new CachedBagOStuff(
-				ObjectCache::getMainStashInstance()
-			);
+		// Use a configurable cache backend (T222851) and wrap it with CachedBagOStuff
+		// for an in-process cache (T144534)
+		if ( $wrappedCache === null ) {
+			$cacheConfig = MediaWikiServices::getInstance()->getMainConfig()->get( 'EchoSeenTimeCacheType' );
+			if ( $cacheConfig === null ) {
+				// EchoHooks::initEchoExtension sets EchoSeenTimeCacheType to $wgMainStash if it's
+				// null, so this can only happen if $wgMainStash is also null
+				throw new UnexpectedValueException(
+					'Either $wgEchoSeenTimeCacheType or $wgMainStash must be set'
+				);
+			}
+			return new CachedBagOStuff( ObjectCache::getInstance( $cacheConfig ) );
 		}
 
-		return $c;
+		return $wrappedCache;
 	}
 
 	/**
 	 * @param string $type Type of seen time to get
 	 * @param int $format Format to return time in, defaults to TS_MW
-	 * @return string|bool Timestamp in specified format, or false if no stored time
+	 * @return string|false Timestamp in specified format, or false if no stored time
 	 */
 	public function getTime( $type = 'all', $format = TS_MW ) {
 		$vals = [];
@@ -82,11 +89,9 @@ class EchoSeenTime {
 		}
 
 		if ( $data === false ) {
-			// There is still no time set, so set time to the UNIX epoch.
 			// We can't remember their real seen time, so reset everything to
 			// unseen.
 			$data = wfTimestamp( TS_MW, 1 );
-			$this->setTime( $data, $type );
 		}
 		return wfTimestamp( $format, $data );
 	}
@@ -113,9 +118,9 @@ class EchoSeenTime {
 		// the real cache
 		$key = $this->getMemcKey( $type );
 		$cache = self::cache();
-		$cache->set( $key, $time, 0, BagOStuff::WRITE_CACHE_ONLY );
+		$cache->set( $key, $time, $cache::TTL_YEAR, BagOStuff::WRITE_CACHE_ONLY );
 		DeferredUpdates::addCallableUpdate( function () use ( $key, $time, $cache ) {
-			$cache->set( $key, $time );
+			$cache->set( $key, $time, $cache::TTL_YEAR );
 		} );
 	}
 
@@ -136,7 +141,9 @@ class EchoSeenTime {
 	 * @return string Memcached key
 	 */
 	protected function getMemcKey( $type = 'all' ) {
-		$localKey = wfMemcKey( 'echo', 'seen', $type, 'time', $this->user->getId() );
+		$localKey = self::cache()->makeKey(
+			'echo', 'seen', $type, 'time', $this->user->getId()
+		);
 
 		if ( !$this->user->getOption( 'echo-cross-wiki-notifications' ) ) {
 			return $localKey;
@@ -149,6 +156,8 @@ class EchoSeenTime {
 			return $localKey;
 		}
 
-		return wfGlobalCacheKey( 'echo', 'seen', $type, 'time', $globalId );
+		return self::cache()->makeGlobalKey(
+			'echo', 'seen', $type, 'time', $globalId
+		);
 	}
 }

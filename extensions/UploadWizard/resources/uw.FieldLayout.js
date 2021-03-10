@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * FieldLayout with some UploadWizard-specific bonuses.
@@ -13,15 +13,19 @@
 	 * @param {boolean} [config.align='top']
 	 */
 	uw.FieldLayout = function UWFieldLayout( fieldWidget, config ) {
-		config = $.extend( { align: 'top', required: false }, config );
+		// FieldLayout will add an icon which, when clicked, reveals more information
+		// about the input. We'll want to display that by default, so we're getting
+		// rid of the "help" property here & will later append that after the header
+		var help = config && config.help ? config.help : '';
+		config = $.extend( { align: 'top', required: false }, config, { help: '' } );
+
 		uw.FieldLayout.parent.call( this, fieldWidget, config );
 		uw.ValidationMessageElement.call( this, { validatedWidget: fieldWidget } );
 
 		this.required = null;
-		this.requiredMarker = new OO.ui.IndicatorWidget( {
+		this.optionalMarker = new OO.ui.LabelWidget( {
 			classes: [ 'mwe-upwiz-fieldLayout-indicator' ],
-			indicator: 'required',
-			title: mw.msg( 'mwe-upwiz-error-blank' )
+			label: mw.msg( 'mwe-upwiz-label-optional' )
 		} );
 
 		this.$element.addClass( 'mwe-upwiz-fieldLayout' );
@@ -30,28 +34,28 @@
 		this.$label.addClass( 'mwe-upwiz-details-fieldname' );
 		this.$field.addClass( 'mwe-upwiz-details-input' );
 
+		if ( help ) {
+			this.help = new OO.ui.LabelWidget( { label: help } );
+			this.$header.after( this.help.$element.addClass( 'mwe-upwiz-details-help' ) );
+		}
+
 		this.setRequired( config.required );
 	};
 	OO.inheritClass( uw.FieldLayout, OO.ui.FieldLayout );
 	OO.mixinClass( uw.FieldLayout, uw.ValidationMessageElement );
 
 	/**
-	 * @return {boolean} Whether this field is marked as required
-	 */
-	uw.FieldLayout.prototype.getRequired = function () {
-		return this.required;
-	};
-
-	/**
 	 * @param {boolean} required Whether to mark this field as required
 	 */
 	uw.FieldLayout.prototype.setRequired = function ( required ) {
 		this.required = !!required;
-		if ( this.required ) {
-			this.$label.after( this.requiredMarker.$element );
+		// only add 'optional' marker after the label if that label
+		// has content...
+		if ( !this.required && this.$label.text() !== '' ) {
+			this.$header.after( this.optionalMarker.$element );
 		} else {
-			this.requiredMarker.$element.remove();
+			this.optionalMarker.$element.remove();
 		}
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

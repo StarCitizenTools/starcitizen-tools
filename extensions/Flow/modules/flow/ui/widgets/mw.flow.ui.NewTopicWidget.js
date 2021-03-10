@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow new topic widget
 	 *
@@ -18,7 +18,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.flow.ui.NewTopicWidget.parent.call( this, config );
+		mw.flow.ui.NewTopicWidget.super.call( this, config );
 
 		this.isProbablyEditable = mw.config.get( 'wgIsProbablyEditable' );
 
@@ -45,10 +45,15 @@
 		} );
 		this.canNotEdit.toggle( false );
 
+		this.id = 'new-topic/' + mw.flow.system.boardId;
+
 		this.title = new OO.ui.TextInputWidget( {
 			placeholder: mw.msg( 'flow-newtopic-start-placeholder' ),
-			classes: [ 'flow-ui-newTopicWidget-title' ]
+			classes: [ 'flow-ui-newTopicWidget-title' ],
+			value: mw.storage.session.get( this.id + '/title' )
 		} );
+		this.title.$input
+			.attr( 'aria-label', mw.msg( 'flow-newtopic-start-placeholder' ) );
 
 		this.editor = new mw.flow.ui.EditorWidget( $.extend( {
 			placeholder: mw.msg( 'flow-newtopic-content-placeholder', this.page ),
@@ -60,7 +65,8 @@
 				if ( widget.title.getValue() !== '' ) {
 					return false;
 				}
-			}
+			},
+			id: this.id
 		}, config.editor ) );
 		this.editor.toggle( false );
 
@@ -90,8 +96,10 @@
 		this.title.connect( this, {
 			change: 'updateFormState'
 		} );
-		this.title.$element.on( 'focusin', this.onTitleFocusIn.bind( this ) );
-		this.title.$element.on( 'keydown', this.onTitleKeydown.bind( this ) );
+		this.title.$element.on( {
+			focusin: this.onTitleFocusIn.bind( this ),
+			keydown: this.onTitleKeydown.bind( this )
+		} );
 
 		// Initialization
 		this.updateFormState();
@@ -118,6 +126,7 @@
 
 	/**
 	 * Update the state of the form.
+	 *
 	 * @private
 	 */
 	mw.flow.ui.NewTopicWidget.prototype.updateFormState = function () {
@@ -125,6 +134,8 @@
 
 		this.title.setDisabled( isDisabled );
 		this.editor.setDisabled( isDisabled );
+
+		mw.storage.session.set( this.id + '/title', this.title.getValue() );
 
 		this.editor.editorControlsWidget.toggleSaveable(
 			this.isProbablyEditable &&
@@ -135,6 +146,7 @@
 
 	/**
 	 * Respond to title input focusin event
+	 *
 	 * @private
 	 */
 	mw.flow.ui.NewTopicWidget.prototype.onTitleFocusIn = function () {
@@ -143,6 +155,7 @@
 
 	/**
 	 * Expand the widget and make it ready to create a new topic
+	 *
 	 * @param {Object} content Content to preload into the editor
 	 * @param {string} content.content Content
 	 * @param {string} content.format Format of content ('html' or 'wikitext')
@@ -179,11 +192,13 @@
 
 	/**
 	 * Respond to keydown events in title input, and cancel when escape is pressed.
+	 *
 	 * @param {jQuery.Event} e Keydown event
 	 */
 	mw.flow.ui.NewTopicWidget.prototype.onTitleKeydown = function ( e ) {
 		if ( e.which === OO.ui.Keys.ESCAPE ) {
-			this.onEditorCancel();
+			// Trigger editor cancel, potentially prompting about discarding changes
+			this.editor.onEditorControlsWidgetCancel();
 			e.preventDefault();
 			e.stopPropagation();
 		}
@@ -252,6 +267,7 @@
 
 	/**
 	 * Get the expanded state of the widget
+	 *
 	 * @return {boolean} expanded Widget is expanded
 	 */
 	mw.flow.ui.NewTopicWidget.prototype.isExpanded = function () {
@@ -260,6 +276,7 @@
 
 	/**
 	 * Toggle the expanded state of the widget
+	 *
 	 * @param {boolean} expanded Widget is expanded
 	 */
 	mw.flow.ui.NewTopicWidget.prototype.toggleExpanded = function ( expanded ) {
@@ -277,4 +294,4 @@
 			this.title.setValue( '' );
 		}
 	};
-}( jQuery ) );
+}() );

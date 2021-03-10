@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow board categories widget
 	 *
@@ -14,10 +14,8 @@
 	mw.flow.ui.CategoryItemWidget = function mwFlowUiCategoryItemWidget( categoryModel, config ) {
 		var prefixedCleanName, $link;
 
-		config = config || {};
-
 		// Parent constructor
-		mw.flow.ui.CategoryItemWidget.parent.call( this, config );
+		mw.flow.ui.CategoryItemWidget.super.call( this, config );
 
 		this.model = categoryModel;
 		this.name = this.model.getId();
@@ -28,7 +26,7 @@
 		$link = $( '<a>' )
 			.attr( 'href', mw.util.getUrl( this.title && this.title.getPrefixedDb() || this.name ) )
 			.attr( 'title', this.exists ? prefixedCleanName : mw.msg( 'red-link-title', prefixedCleanName ) )
-			.text( this.title && this.title.getNameText() || this.name )
+			.text( prefixedCleanName )
 			.toggleClass( 'new', !this.exists );
 
 		this.$element
@@ -50,4 +48,4 @@
 	mw.flow.ui.CategoryItemWidget.prototype.getData = function () {
 		return this.name;
 	};
-}( jQuery ) );
+}() );

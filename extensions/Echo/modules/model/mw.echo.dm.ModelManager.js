@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	/**
 	 * A container that manages all models that are involved in creating
 	 * the notification list. There are currently two types of models:
@@ -152,8 +152,8 @@
 	 * @param {Object} modelDefinitions An object defining the models
 	 * The format for the definition object is:
 	 * {
-	 * 		'modelId': {mw.echo.dm.SortedList},
-	 * 		...
+	 *   'modelId': {mw.echo.dm.SortedList},
+	 *   ...
 	 * }
 	 */
 	mw.echo.dm.ModelManager.prototype.setNotificationModels = function ( modelDefinitions ) {
@@ -262,7 +262,7 @@
 		var model;
 
 		for ( model in this.notificationModels ) {
-			if ( this.notificationModels.hasOwnProperty( model ) ) {
+			if ( Object.prototype.hasOwnProperty.call( this.notificationModels, model ) ) {
 				this.notificationModels[ model ].disconnect( this );
 				delete this.notificationModels[ model ];
 			}
@@ -481,4 +481,4 @@
 
 	};
 
-}( mediaWiki, jQuery ) );
+}() );

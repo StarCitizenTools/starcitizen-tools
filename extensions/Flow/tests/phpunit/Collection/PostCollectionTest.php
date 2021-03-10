@@ -3,9 +3,16 @@
 namespace Flow\Tests\Collection;
 
 use Flow\Collection\PostCollection;
+use Flow\Model\PostRevision;
 use Flow\Tests\PostRevisionTestCase;
 
 /**
+ * @covers \Flow\Collection\AbstractCollection
+ * @covers \Flow\Collection\LocalCacheAbstractCollection
+ * @covers \Flow\Collection\PostCollection
+ * @covers \Flow\Model\AbstractRevision
+ * @covers \Flow\Model\PostRevision
+ *
  * @group Flow
  * @group Database
  */
@@ -15,7 +22,7 @@ class PostCollectionTest extends PostRevisionTestCase {
 	 */
 	protected $tablesUsed = [ 'flow_revision', 'flow_tree_revision' ];
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 
 		// recent changes isn't fully setup here, just skip it
@@ -49,19 +56,19 @@ class PostCollectionTest extends PostRevisionTestCase {
 	public function testGetCollection() {
 		$revision = $this->revisions[0];
 		$collection = $revision->getCollection();
-		$this->assertInstanceOf( 'Flow\Collection\PostCollection', $collection );
+		$this->assertInstanceOf( PostCollection::class, $collection );
 	}
 
 	public function testNewFromId() {
 		$uuidPost = $this->revisions[0]->getPostId();
 		$collection = PostCollection::newFromId( $uuidPost );
-		$this->assertInstanceOf( 'Flow\Collection\PostCollection', $collection );
+		$this->assertInstanceOf( PostCollection::class, $collection );
 	}
 
 	public function testNewFromRevision() {
 		$revision = $this->revisions[0];
 		$collection = PostCollection::newFromRevision( $revision );
-		$this->assertInstanceOf( 'Flow\Collection\PostCollection', $collection );
+		$this->assertInstanceOf( PostCollection::class, $collection );
 	}
 
 	public function testGetRevision() {
@@ -69,30 +76,43 @@ class PostCollectionTest extends PostRevisionTestCase {
 
 		$expected = $this->revisions[1];
 		$revision = $collection->getRevision( $expected->getRevisionId() );
-		$this->assertInstanceOf( 'Flow\Model\PostRevision', $revision );
+		$this->assertInstanceOf( PostRevision::class, $revision );
 		$this->assertTrue( $expected->getRevisionId()->equals( $revision->getRevisionId() ) );
 	}
 
+	/**
+	 * Flaky test causing random failures, see T210204
+	 *
+	 * @group Broken
+	 */
 	public function testGetLastRevision() {
 		$collection = $this->revisions[0]->getCollection();
 
 		$expected = end( $this->revisions );
 		$revision = $collection->getLastRevision();
 
-		$this->assertInstanceOf( 'Flow\Model\PostRevision', $revision );
+		$this->assertInstanceOf( PostRevision::class, $revision );
 		$this->assertTrue( $expected->getRevisionId()->equals( $revision->getRevisionId() ) );
 	}
 
+	/**
+	 * Flaky test causing random failures, see T207173
+	 *
+	 * @group Broken
+	 */
 	public function testGetFirstRevision() {
 		$collection = $this->revisions[1]->getCollection();
 
 		$expected = reset( $this->revisions );
 		$revision = $collection->getFirstRevision();
 
-		$this->assertInstanceOf( 'Flow\Model\PostRevision', $revision );
+		$this->assertInstanceOf( PostRevision::class, $revision );
 		$this->assertTrue( $expected->getRevisionId()->equals( $revision->getRevisionId() ) );
 	}
 
+	/**
+	 * @group Broken
+	 */
 	public function testGetNextRevision() {
 		$start = $this->revisions[0];
 		$collection = $start->getCollection();
@@ -100,7 +120,7 @@ class PostCollectionTest extends PostRevisionTestCase {
 		$expected = $this->revisions[1];
 		$revision = $collection->getNextRevision( $start );
 
-		$this->assertInstanceOf( 'Flow\Model\PostRevision', $revision );
+		$this->assertInstanceOf( PostRevision::class, $revision );
 		$this->assertTrue( $expected->getRevisionId()->equals( $revision->getRevisionId() ) );
 	}
 
@@ -111,7 +131,7 @@ class PostCollectionTest extends PostRevisionTestCase {
 		$expected = $this->revisions[0];
 		$revision = $collection->getPrevRevision( $start );
 
-		$this->assertInstanceOf( 'Flow\Model\PostRevision', $revision );
+		$this->assertInstanceOf( PostRevision::class, $revision );
 		$this->assertTrue( $expected->getRevisionId()->equals( $revision->getRevisionId() ) );
 	}
 

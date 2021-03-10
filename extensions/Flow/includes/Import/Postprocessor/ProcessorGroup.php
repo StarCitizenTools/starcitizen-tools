@@ -2,15 +2,15 @@
 
 namespace Flow\Import\Postprocessor;
 
-use Flow\Model\PostRevision;
 use Flow\Import\IImportHeader;
 use Flow\Import\IImportPost;
 use Flow\Import\IImportTopic;
-use Flow\Import\TopicImportState;
 use Flow\Import\PageImportState;
+use Flow\Import\TopicImportState;
+use Flow\Model\PostRevision;
 
 class ProcessorGroup implements Postprocessor {
-	/** @var array<Postprocessor> **/
+	/** @var array<Postprocessor> */
 	protected $processors;
 
 	public function __construct() {
@@ -39,7 +39,7 @@ class ProcessorGroup implements Postprocessor {
 
 	protected function call( $name, $args ) {
 		foreach ( $this->processors as $proc ) {
-			call_user_func_array( [ $proc, $name ], $args );
+			$proc->$name( ...$args );
 		}
 	}
 }

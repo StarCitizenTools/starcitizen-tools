@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 class EchoNotification extends EchoAbstractEntity implements Bundleable {
 
 	/**
@@ -31,23 +33,10 @@ class EchoNotification extends EchoAbstractEntity implements Bundleable {
 	protected $readTimestamp;
 
 	/**
-	 * Determine whether this is a bundle base.  Default is 1,
-	 * which means it's a bundle base
-	 * @var int
-	 */
-	protected $bundleBase = 1;
-
-	/**
 	 * The hash used to determine if a set of event could be bundled
 	 * @var string
 	 */
 	protected $bundleHash = '';
-
-	/**
-	 * The hash used to bundle events to display
-	 * @var string
-	 */
-	protected $bundleDisplayHash = '';
 
 	/**
 	 * @var EchoNotification[]
@@ -115,36 +104,27 @@ class EchoNotification extends EchoAbstractEntity implements Bundleable {
 			Hooks::run( 'EchoGetBundleRules', [ $this->event, &$bundleKey ] );
 		}
 
+		// @phan-suppress-next-line PhanImpossibleCondition May be set by hook
 		if ( $bundleKey ) {
 			$hash = md5( $bundleKey );
 			$this->bundleHash = $hash;
-			$lastNotif = $notifMapper->fetchNewestByUserBundleHash( $this->user, $hash );
-
-			// Use a new display hash if:
-			// 1. there was no last bundle notification
-			// 2. last bundle notification with the same hash was read
-			if ( $lastNotif && !$lastNotif->getReadTimestamp() ) {
-				$this->bundleDisplayHash = $lastNotif->getBundleDisplayHash();
-			} else {
-				$this->bundleDisplayHash = md5( $bundleKey . '-display-hash-' . wfTimestampNow() );
-			}
 		}
 
 		$notifUser = MWEchoNotifUser::newFromUser( $this->user );
-		$section = $this->event->getSection();
 
 		// Add listener to refresh notification count upon insert
 		$notifMapper->attachListener( 'insert', 'refresh-notif-count',
-			function () use ( $notifUser, $section ) {
-				$notifUser->resetNotificationCount( DB_MASTER );
+			function () use ( $notifUser ) {
+				$notifUser->resetNotificationCount();
 			}
 		);
 
 		$notifMapper->insert( $this );
 
 		if ( $this->event->getCategory() === 'edit-user-talk' ) {
-			$notifUser->flagCacheWithNewTalkNotification();
-			$this->user->setNewtalk( true );
+			MediaWikiServices::getInstance()
+				->getTalkPageNotificationManager()
+				->setUserHasNewMessages( $this->user );
 		}
 		Hooks::run( 'EchoCreateNotificationComplete', [ $this ] );
 	}
@@ -153,9 +133,9 @@ class EchoNotification extends EchoAbstractEntity implements Bundleable {
 	 * Load a notification record from std class
 	 * @param stdClass $row
 	 * @param EchoTargetPage[]|null $targetPages An array of EchoTargetPage instances, or null if not loaded.
-	 * @return EchoNotification|bool false if failed to load/unserialize
+	 * @return EchoNotification|false False if failed to load/unserialize
 	 */
-	public static function newFromRow( $row, $targetPages = null ) {
+	public static function newFromRow( $row, array $targetPages = null ) {
 		$notification = new EchoNotification();
 
 		if ( property_exists( $row, 'event_type' ) ) {
@@ -177,9 +157,7 @@ class EchoNotification extends EchoAbstractEntity implements Bundleable {
 		if ( $row->notification_read_timestamp ) {
 			$notification->readTimestamp = wfTimestamp( TS_MW, $row->notification_read_timestamp );
 		}
-		$notification->bundleBase = $row->notification_bundle_base;
 		$notification->bundleHash = $row->notification_bundle_hash;
-		$notification->bundleDisplayHash = $row->notification_bundle_display_hash;
 
 		return $notification;
 	}
@@ -194,9 +172,7 @@ class EchoNotification extends EchoAbstractEntity implements Bundleable {
 			'notification_user' => $this->user->getId(),
 			'notification_timestamp' => $this->timestamp,
 			'notification_read_timestamp' => $this->readTimestamp,
-			'notification_bundle_base' => $this->bundleBase,
 			'notification_bundle_hash' => $this->bundleHash,
-			'notification_bundle_display_hash' => $this->bundleDisplayHash
 		];
 	}
 
@@ -238,26 +214,10 @@ class EchoNotification extends EchoAbstractEntity implements Bundleable {
 
 	/**
 	 * Getter method
-	 * @return int Notification bundle base
-	 */
-	public function getBundleBase() {
-		return $this->bundleBase;
-	}
-
-	/**
-	 * Getter method
 	 * @return string|null Notification bundle hash
 	 */
 	public function getBundleHash() {
 		return $this->bundleHash;
-	}
-
-	/**
-	 * Getter method
-	 * @return string|null Notification bundle display hash
-	 */
-	public function getBundleDisplayHash() {
-		return $this->bundleDisplayHash;
 	}
 
 	/**
@@ -270,7 +230,7 @@ class EchoNotification extends EchoAbstractEntity implements Bundleable {
 		return $this->targetPages;
 	}
 
-	public function setBundledNotifications( $notifications ) {
+	public function setBundledNotifications( array $notifications ) {
 		$this->bundledNotifications = $notifications;
 	}
 
@@ -295,7 +255,7 @@ class EchoNotification extends EchoAbstractEntity implements Bundleable {
 	/**
 	 * @inheritDoc
 	 */
-	public function setBundledElements( $bundleables ) {
+	public function setBundledElements( array $bundleables ) {
 		$this->setBundledNotifications( $bundleables );
 	}
 
@@ -304,5 +264,20 @@ class EchoNotification extends EchoAbstractEntity implements Bundleable {
 	 */
 	public function getSortingKey() {
 		return ( $this->isRead() ? '0' : '1' ) . '_' . $this->getTimestamp();
+	}
+
+	/**
+	 * Return the list of fields that should be selected to create
+	 * a new event with EchoNotification::newFromRow
+	 * @return string[]
+	 */
+	public static function selectFields() {
+		return array_merge( EchoEvent::selectFields(), [
+			'notification_event',
+			'notification_user',
+			'notification_timestamp',
+			'notification_read_timestamp',
+			'notification_bundle_hash',
+		] );
 	}
 }

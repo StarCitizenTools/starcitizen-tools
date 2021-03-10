@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Maroen1990",
+			"Meno25",
+			"ديفيد"
+		]
+	},
+	"apihelp-flickrblacklist-description": "تحقق من مسار فلكر عن طريق استخدام رقم المستخدم (NSID) للقائمة السوداء.\n\nعند الاستخدام مع خيار <var>list</var>، فسيرجع كل الأرقام في القائمة السوداء.",
+	"apihelp-flickrblacklist-summary": "تحقق من مسار Flickr بواسطة استخدام معرف المستخدم (NSID) للقائمة السوداء.",
+	"apihelp-flickrblacklist-extended-description": "عند استخدامه مع خيار <var>list</var>، يرجع كل المعرفات في القائمة السوداء.",
+	"apihelp-flickrblacklist-param-url": "مسار Flickr للاختبار.",
+	"apihelp-flickrblacklist-param-list": "عندما تكون مضبوطة، يتم إرجاع القائمة السوداء الكاملة. لا يمكن استخدامها مع $1url.",
+	"apihelp-flickrblacklist-example-1": "تحقق من الرابط في قائمة السوداء",
+	"apihelp-flickrblacklist-example-2": "العودة إلى القائمة السوداء",
+	"apihelp-query+allcampaigns-description": "رقم كل حملات UploadWizard.",
+	"apihelp-query+allcampaigns-summary": "رقم كل حملات UploadWizard.",
+	"apihelp-query+allcampaigns-param-enabledonly": "فقط اعرض الحملات المفعلة.",
+	"apihelp-query+allcampaigns-param-limit": "عدد من الحملات للعودة.",
+	"apihelp-query+allcampaigns-example-1": "رقم الحملات المفعلة"
+}

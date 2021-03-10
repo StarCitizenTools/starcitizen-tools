@@ -2,12 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"AnakngAraw",
+			"BadDog",
+			"Envlh",
 			"Jojit fb",
-			"Sky Harbor",
-			"Matma Rex",
 			"Leeheonjin",
 			"Macofe",
-			"Envlh"
+			"Matma Rex",
+			"Sky Harbor",
+			"Zoranzoki21"
 		]
 	},
 	"uploadwizard": "Salamangkero ng Pagkarga",
@@ -59,8 +61,8 @@
 	"mwe-upwiz-finished": "Tapos na!",
 	"mwe-upwiz-deeds-macro-prompt": "Nangangailangan ang pook na ito na makapagbigay ka ng kabatiran ukol sa karapatang-ari para sa {{PLURAL:$1|akdang ito|mga akdang ito}}, upang makatiyak na ang lahat ng tao ay makabatas na muling magamit {{PLURAL:$1|ito|ang mga ito}}.",
 	"mwe-upwiz-source-ownwork": "{{PLURAL:$1|Ang talaksang ito|Ang mga talaksang ito}} ay sariling akda ko.",
-	"mwe-upwiz-source-ownwork-assert-any-license": "Ako, si $2, na may hawak ng karapatang-ari ng {{PLURAL|$1|akdang ito|mga akdang ito}}, ay alinsunod na nagkakaloob kaninuman ng hindi mapapawalang-bisa na karapatang paggamit, pagbago, at muling pamamahagi ng {{PLURAL:$1|akdang ito|mga akdang ito}} para sa anumang layunin, at sa dahilang ito ay inilalathala ko {{PLURAL:$1|ito|ang mga ito}} sa ilalim ng sumusunod na mga pagtatakda:",
-	"mwe-upwiz-source-ownwork-assert": "Ako, si $2, na may hawak ng karapatang-ari ng {{PLURAL|$1|akdang ito|mga akdang ito}}, ay alinsunod na nagkakaloob kaninuman ng hindi mapapawalang-bisa na karapatang paggamit ng {{PLURAL:$1|akdang ito|mga akdang ito}} para sa anumang layunin, hangga't may pagpapatungkol sa akin at magpapamahagi ng hinangong akda sa ilalim ng katulad na mga pagtatakda.",
+	"mwe-upwiz-source-ownwork-assert-any-license": "Ako, si $2, na may hawak ng karapatang-ari ng {{PLURAL:$1|akdang ito|mga akdang ito}}, ay alinsunod na nagkakaloob kaninuman ng hindi mapapawalang-bisa na karapatang paggamit, pagbago, at muling pamamahagi ng {{PLURAL:$1|akdang ito|mga akdang ito}} para sa anumang layunin, at sa dahilang ito ay inilalathala ko {{PLURAL:$1|ito|ang mga ito}} sa ilalim ng sumusunod na mga pagtatakda:",
+	"mwe-upwiz-source-ownwork-assert": "Ako, si $2, na may hawak ng karapatang-ari ng {{PLURAL:$1|akdang ito|mga akdang ito}}, ay alinsunod na nagkakaloob kaninuman ng hindi mapapawalang-bisa na karapatang paggamit ng {{PLURAL:$1|akdang ito|mga akdang ito}} para sa anumang layunin, hangga't may pagpapatungkol sa akin at magpapamahagi ng hinangong akda sa ilalim ng katulad na mga pagtatakda.",
 	"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0": "Ako, si $2, ang tagapaghawak ng karapatan sa paglalathala ng {{PLURAL:$1|akdang ito|mga akdang ito}}, ay hindi na babawiin pa na ipinagkakaloob sa kaninuman ang karapatan na gamitin ang {{PLURAL:$1|akdang ito|mga akdang ito}} sa ilalim ng lisensiya ng Pagbanggit na Magkatulad na Pinagsasaluhan 3.0 ng Malikhaing Pangkaraniwan (Creative Commons Attribution ShareAlike 3.0) ([kodigong pambatas na $3]).",
 	"mwe-upwiz-source-ownwork-cc-by-sa-3.0-explain": "(Maaaring gamitin, ibahagi o muling paghaluin ninuman ang {{PLURAL:$1|akdang ito|mga akdang ito}}, basta ba babanggitin nila ako at ibabahagi ang anumang hinangong akda sa ilalim ng lisensiyang ito.)",
 	"mwe-upwiz-source-ownwork-assert-cc-by-sa-3.0-at": "Ako, si $2, ang tagapaghawak ng karapatan sa paglalathala ng {{PLURAL:$1|akdang ito|mga akdang ito}}, ay hindi na babawiin pa na ipinagkakaloob sa kaninuman ang karapatan na gamitin ang {{PLURAL:$1|akdang ito|mga akdang ito}} sa ilalim ng lisensiya ng Pagbanggit na Magkatulad na Pinagsasaluhan 3.0 ng Malikhaing Pangkaraniwan (Creative Commons Attribution ShareAlike 3.0) ng Australiya ([kodigong pambatas na $3]).",
@@ -87,7 +89,7 @@
 	"mwe-upwiz-source-ownwork-cc-by-3.0-explain": "(Maaaring gamitin, pagsaluhan o muling paghaluin ninuman ang {{PLURAL:$1|akdang ito|ang mga akdang ito}}, basta ba babanggitin nila ako.)",
 	"mwe-upwiz-source-ownwork-assert-cc-zero": "Ako, si $2, ang tagapaghawak ng karapatan sa paglalathala ng {{PLURAL:$1|akdang ito|mga akdang ito}}, ay hindi na babawiin pa na ipinagkakaloob sa kaninuman ang karapatan na gamitin ang {{PLURAL:$1|akdang ito|mga akdang ito}} sa ilalim ng lisensiya ng Paghahandog sa Nasasakupan ng Madla na 3.0 ng Malikhaing Pangkaraniwan (Creative Commons Public Domain Dedication 3.0) ([kodigong pambatas na $3]).",
 	"mwe-upwiz-source-ownwork-cc-zero-explain": "(Maaaring gamitin, pagsaluhan o muling paghaluin ninuman ang {{PLURAL:$1|akdang ito|ang mga akdang ito}}, na walang kahit na anong mga pagbabawal.)",
-	"mwe-upwiz-source-ownwork-assert-custom": "Ako, na si $2, na may hawak ng karapatang-ari ng {{PLURAL|$1|akdang ito|mga akdang ito}}, ay hindi na mababawi ipinagkakaloob sa sinuman ang karapatan na gamitin ang {{PLURAL:$1|akdang ito|mga akdang ito}} sa ilalim ng sumusunod na lisensiya:",
+	"mwe-upwiz-source-ownwork-assert-custom": "Ako, na si $2, na may hawak ng karapatang-ari ng {{PLURAL:$1|akdang ito|mga akdang ito}}, ay hindi na mababawi ipinagkakaloob sa sinuman ang karapatan na gamitin ang {{PLURAL:$1|akdang ito|mga akdang ito}} sa ilalim ng sumusunod na lisensiya:",
 	"mwe-upwiz-source-ownwork-assert-note": "Ako, na tagapaghawak ng karapatang-ari ng {{PLURAL:$2|akdang ito|mga akdang ito}}, ay inilalathala ang {{PLURAL:$2|akdang ito|mga akdang ito}} sa ilalim ng lisensiyang $1.",
 	"mwe-upwiz-source-permission": "Ang mga may-akda ng mga ito ay nagbibigay sa iyo ng tahasang pahintulot na maikarga sila",
 	"mwe-upwiz-source-thirdparty": "{{PLURAL:$1|Ang talaksang ito|Ang mga talaksang ito}} ay hindi ko sariling gawa.",
@@ -134,7 +136,6 @@
 	"mwe-upwiz-next": "Kasunod",
 	"mwe-upwiz-next-file": "Magpatuloy",
 	"mwe-upwiz-next-deeds": "Kasunod",
-	"mwe-upwiz-next-details": "Kasunod",
 	"mwe-upwiz-home": "Pumunta sa bahay-pahina ng wiki",
 	"mwe-upwiz-upload-another": "Mag-upload ng mas maraming pang mga file",
 	"mwe-upwiz-prevent-close": "Hindi mo pa nakumpleto ang prosesong pagkakarga paitaas (upload)!",
@@ -202,7 +203,7 @@
 	"mwe-upwiz-license-own-pd": "Isinuko ang lahat ng mga karapatan na may lisensiyang Malikhaing Pangkaraniwan na Sero (katulad ng sakop ng madla)",
 	"mwe-upwiz-license-pd-old-100": "Namatay ang may-akda mahigit sa 100 mga taon na ang nakalilipas",
 	"mwe-upwiz-license-pd-old": "Namatay ang may-akda mahigit sa 70 mga taon na ang nakalilipas",
-	"mwe-upwiz-license-pd-us": "Unang nalathala sa Estados Unidos bago ang 1923",
+	"mwe-upwiz-license-pd-us": "Unang nalathala sa Estados Unidos bago ang 1925",
 	"mwe-upwiz-license-pd-usgov": "Orihinal na akda ng Pamahalaang Pederal ng Estados Unidos",
 	"mwe-upwiz-license-pd-usgov-nasa": "Orihinal na akda ng NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Orihinal na akda ng Hukbong Dagat ng Militar ng Estados Unidos",
@@ -251,6 +252,5 @@
 	"mwe-upwiz-prefs-def-license-def": "Gamitin ang kung anuman ang likas na nakatakda",
 	"mwe-upwiz-prefs-license-own": "Sariling gawa - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "Gawa ng ibang tao - $1",
-	"mwe-upwiz-prefs-chunked": "Nakatipak na mga pagkakargang papaitaas para sa mga talaksan na lampas sa $1 na nasa loob ng Masalamangkang Pagkakargang Papaitaas",
 	"mwe-upwiz-prefs-skiptutorial": "Laktawan ang pagtuturo ng pagpapakilala sa paglilisensiya"
 }

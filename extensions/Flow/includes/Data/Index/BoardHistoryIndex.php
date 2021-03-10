@@ -8,8 +8,8 @@ use Flow\Data\ObjectMapper;
 use Flow\Data\Storage\BoardHistoryStorage;
 use Flow\Exception\DataModelException;
 use Flow\Model\AbstractRevision;
-use Flow\Model\PostSummary;
 use Flow\Model\PostRevision;
+use Flow\Model\PostSummary;
 use Flow\Model\TopicListEntry;
 use Flow\Model\UUID;
 use Flow\Model\Workflow;
@@ -26,17 +26,23 @@ abstract class BoardHistoryIndex extends TopKIndex {
 	 */
 	protected $om;
 
+	/**
+	 * @inheritDoc
+	 */
 	public function __construct(
 		FlowObjectCache $cache,
 		BoardHistoryStorage $storage,
 		ObjectMapper $mapper,
 		$prefix,
 		array $indexed,
-		array $options = [],
+		array $options,
 		ObjectManager $om
 	) {
 		if ( $indexed !== [ 'topic_list_id' ] ) {
-			throw new DataModelException( __CLASS__ . ' is hardcoded to only index topic_list_id: ' . print_r( $indexed, true ), 'process-data' );
+			throw new DataModelException(
+				__CLASS__ . ' is hardcoded to only index topic_list_id: ' . print_r( $indexed, true ),
+				'process-data'
+			);
 		}
 		parent::__construct( $cache, $storage, $mapper, $prefix, $indexed, $options );
 		$this->om = $om;
@@ -129,7 +135,7 @@ abstract class BoardHistoryIndex extends TopKIndex {
 		if ( !$found ) {
 			throw new DataModelException(
 				"No topic list contains topic " . $topicId->getAlphadecimal() .
-				", called for revision " .  $object->getRevisionId()->getAlphadecimal()
+				", called for revision " . $object->getRevisionId()->getAlphadecimal()
 			);
 		}
 

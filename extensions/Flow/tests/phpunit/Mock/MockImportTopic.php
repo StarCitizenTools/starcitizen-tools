@@ -2,9 +2,9 @@
 
 namespace Flow\Tests\Mock;
 
-use Flow\Import\IObjectRevision;
 use Flow\Import\IImportSummary;
 use Flow\Import\IImportTopic;
+use Flow\Import\IObjectRevision;
 
 class MockImportTopic extends MockImportPost implements IImportTopic {
 	/**
@@ -13,11 +13,11 @@ class MockImportTopic extends MockImportPost implements IImportTopic {
 	protected $summary;
 
 	/**
-	 * @param IImportSummary $summary
+	 * @param IImportSummary|null $summary
 	 * @param IObjectRevision[] $revisions
 	 * @param IImportPost[] $replies
 	 */
-	public function __construct( IImportSummary $summary = null, array $revisions, array $replies ) {
+	public function __construct( ?IImportSummary $summary, array $revisions, array $replies ) {
 		parent::__construct( $revisions, $replies );
 		$this->summary = $summary;
 	}

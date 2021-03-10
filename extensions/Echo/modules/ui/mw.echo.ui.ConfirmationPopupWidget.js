@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Confirmation overlay widget, especially for mobile display.
 	 * The behavior of this widget is to appear with a given confirmation
@@ -16,7 +16,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.ui.ConfirmationPopupWidget.parent.call( this, config );
+		mw.echo.ui.ConfirmationPopupWidget.super.call( this, config );
 
 		this.labelWidget = new OO.ui.LabelWidget( config );
 		this.iconWidget = new OO.ui.IconWidget( $.extend( { icon: 'checkAll' }, config ) );
@@ -56,6 +56,8 @@
 	 * @private
 	 */
 	mw.echo.ui.ConfirmationPopupWidget.prototype.hide = function () {
+		// FIXME: Use CSS transition
+		// eslint-disable-next-line no-jquery/no-fade
 		this.$element.fadeOut();
 	};
 
@@ -68,4 +70,4 @@
 	mw.echo.ui.ConfirmationPopupWidget.prototype.setLabel = function ( label ) {
 		this.labelWidget.setLabel( label );
 	};
-}( mediaWiki, jQuery ) );
+}() );

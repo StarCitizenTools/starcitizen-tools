@@ -6,9 +6,8 @@
 .flow-component {
 	.ve-init-target {
 		&.flow-ui-focused {
-			outline: 0;
-			border-color: #a7dcff;
-			box-shadow: 0 0 0.3em #a7dcff, 0 0 0 #fff;
+			border-color: #ace;
+			box-shadow: 0 0 2px 2px #ace;
 		}
 	}
 
@@ -30,18 +29,9 @@
 		}
 	}
 
-	.oo-ui-toolbar-bar {
-		// The default border is only appropriate in the default ve, with
-		// the toolbar above the editing surface.
-		border: 0;
-		// When we apply a pending texture to the editor, we don't want the toolbar to display
-		// in solid white on top of that.
-		background: transparent;
-		box-shadow: none;
-	}
-
 	.ve-ui-debugBar {
 		font-size: @uiFontSize;
+
 		&-selectionLabel {
 			min-width: 10em;
 		}
@@ -56,11 +46,11 @@
 	// Undo border & box-shadow on textarea and re-apply it on the
 	// div that contains textarea + legal text + switch button
 	border: 1px solid #c8ccd1;
-	border-radius: @borderRadius;
+	border-radius: @border-radius-base;
+	transition: border-color 250ms, box-shadow 250ms;
 
 	.flow-ui-editorWidget-focused & {
-		outline: 0;
-		border-color: #a7dcff;
-		box-shadow: 0 0 0.3em #a7dcff, 0 0 0 #fff;
+		border-color: #ace;
+		box-shadow: 0 0 2px 2px #ace;
 	}
 }

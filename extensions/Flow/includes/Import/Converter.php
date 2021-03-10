@@ -3,14 +3,17 @@
 namespace Flow\Import;
 
 use ActorMigration;
-use Wikimedia\Rdbms\IDatabase;
 use Flow\Exception\FlowException;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\SlotRecord;
 use MovePage;
 use MWExceptionHandler;
 use Psr\Log\LoggerInterface;
-use Revision;
 use Title;
+use Traversable;
 use User;
+use Wikimedia\Rdbms\IDatabase;
 use WikiPage;
 use WikitextContent;
 
@@ -147,19 +150,22 @@ class Converter {
 	protected function isAllowed( Title $title ) {
 		// Only make changes to wikitext pages
 		if ( $title->getContentModel() !== CONTENT_MODEL_WIKITEXT ) {
-			$this->logger->warning( "WARNING: The title '" . $title->getPrefixedDBkey() . "' is being skipped because it has content model '" . $title->getContentModel() . "''." );
+			$this->logger->warning( "WARNING: The title '" . $title->getPrefixedDBkey() .
+				"' is being skipped because it has content model '" . $title->getContentModel() . "''." );
 			return false;
 		}
 
 		if ( !$title->exists() ) {
-			$this->logger->warning( "WARNING: The title '" . $title->getPrefixedDBkey() . "' is being skipped because it does not exist." );
+			$this->logger->warning( "WARNING: The title '" . $title->getPrefixedDBkey() .
+				"' is being skipped because it does not exist." );
 			return false;
 		}
 
 		// At some point we may want to handle these, but for now just
 		// let them be
 		if ( $title->isRedirect() ) {
-			$this->logger->warning( "WARNING: The title '" . $title->getPrefixedDBkey() . "' is being skipped because it is a redirect." );
+			$this->logger->warning( "WARNING: The title '" . $title->getPrefixedDBkey() .
+				"' is being skipped because it is a redirect." );
 			return false;
 		}
 
@@ -180,7 +186,10 @@ class Converter {
 			$archiveTitle = $this->strategy->decideArchiveTitle( $title );
 			$this->logger->info( "Archiving page from $title to $archiveTitle" );
 			$this->movePage( $title, $archiveTitle );
-			wfWaitForSlaves(); // Wait for slaves to pick up the move
+
+			$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+			// Wait for replicas to pick up the page move
+			$lbFactory->waitForReplication();
 		}
 
 		$source = $this->strategy->createImportSource( $archiveTitle );
@@ -276,14 +285,14 @@ class Converter {
 	protected function createArchiveCleanupRevision( Title $title, Title $archiveTitle ) {
 		$page = WikiPage::factory( $archiveTitle );
 		// doEditContent will do this anyway, but we need to now for the revision.
-		$page->loadPageData( 'fromdbmaster' );
-		$revision = $page->getRevision();
+		$page->loadPageData( WikiPage::READ_LATEST );
+		$revision = $page->getRevisionRecord();
 		if ( $revision === null ) {
 			throw new ImportException( "Expected a revision at {$archiveTitle}" );
 		}
 
 		// Do not create revisions based on rev_deleted revisions.
-		$content = $revision->getContent( Revision::FOR_PUBLIC );
+		$content = $revision->getContent( SlotRecord::MAIN, RevisionRecord::FOR_PUBLIC );
 		if ( !$content instanceof WikitextContent ) {
 			throw new ImportException( "Expected wikitext content at: {$archiveTitle}" );
 		}

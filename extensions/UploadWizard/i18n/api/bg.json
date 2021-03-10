@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"StanProg"
+		]
+	},
+	"apihelp-flickrblacklist-param-url": "URL-адрес от Flickr за тестване."
+}

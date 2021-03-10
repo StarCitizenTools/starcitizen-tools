@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 	/**
 	 * @param {Object} config Dialog config
 	 * @param {Object} uwConfig UploadWizard config
@@ -57,7 +57,7 @@
 
 		uw.PatentDialog.super.prototype.initialize.apply( this, arguments );
 
-		$.each( this.uploads, function ( i, upload ) {
+		this.uploads.forEach( function ( upload ) {
 			filenames.push(
 				// use given title (if available already) or fall back to filename
 				upload.details ? upload.details.getTitle().getMainText() : upload.title.getMainText()
@@ -67,17 +67,17 @@
 		this.content = new OO.ui.PanelLayout( { padded: false, expanded: false } );
 		this.content.$element.addClass( 'mwe-upwiz-patent-rights' );
 
-		if ( $.inArray( 'filelist', this.panels ) >= 0 ) {
+		if ( this.panels.indexOf( 'filelist' ) !== -1 ) {
 			label.setLabel( mw.msg( 'mwe-upwiz-patent-dialog-title-filename', mw.language.listToText( filenames ) ) );
 			label.$element.addClass( 'oo-ui-processDialog-title mwe-upwiz-patent-rights-filelist' );
 			this.content.$element.append( label.$element );
 		}
 
-		if ( $.inArray( 'warranty', this.panels ) >= 0 ) {
+		if ( this.panels.indexOf( 'warranty' ) !== -1 ) {
 			panels.$element.append( this.getWarrantyLayout().$element );
 		}
 
-		if ( $.inArray( 'license', this.panels ) >= 0 ) {
+		if ( this.panels.indexOf( 'license' ) !== -1 ) {
 			panels.$element.append( this.getLicenseLayout().$element );
 		}
 
@@ -169,4 +169,4 @@
 	uw.PatentDialog.prototype.getBodyHeight = function () {
 		return this.content.$element.outerHeight( true );
 	};
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

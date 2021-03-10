@@ -22,7 +22,7 @@ class ManagerGroup {
 	protected $classMap;
 
 	/**
-	 * @var string[] List of container keys that have been used
+	 * @var bool[] List of container keys that have been used
 	 */
 	protected $used = [];
 
@@ -63,7 +63,8 @@ class ManagerGroup {
 	 */
 	public function getStorage( $className ) {
 		if ( !isset( $this->classMap[$className] ) ) {
-			throw new DataModelException( "Request for '$className' is not in classmap: " . implode( ', ', array_keys( $this->classMap ) ), 'process-data' );
+			throw new DataModelException( "Request for '$className' is not in classmap: " .
+				implode( ', ', array_keys( $this->classMap ) ), 'process-data' );
 		}
 		$key = $this->classMap[$className];
 		$this->used[$key] = true;
@@ -86,7 +87,7 @@ class ManagerGroup {
 	 * @param array $metadata
 	 * @throws DataModelException
 	 */
-	protected function multiMethod( $method, $objects, array $metadata ) {
+	protected function multiMethod( $method, array $objects, array $metadata ) {
 		$itemsByClass = [];
 
 		foreach ( $objects as $object ) {
@@ -123,33 +124,30 @@ class ManagerGroup {
 	protected function call( $method, $args ) {
 		$className = array_shift( $args );
 
-		return call_user_func_array(
-			[ $this->getStorage( $className ), $method ],
-			$args
-		);
+		return $this->getStorage( $className )->$method( ...$args );
 	}
 
-	public function get( /* ... */ ) {
-		return $this->call( __FUNCTION__, func_get_args() );
+	public function get( ...$args ) {
+		return $this->call( __FUNCTION__, $args );
 	}
 
-	public function getMulti( /* ... */ ) {
-		return $this->call( __FUNCTION__, func_get_args() );
+	public function getMulti( ...$args ) {
+		return $this->call( __FUNCTION__, $args );
 	}
 
-	public function find( /* ... */ ) {
-		return $this->call( __FUNCTION__, func_get_args() );
+	public function find( ...$args ) {
+		return $this->call( __FUNCTION__, $args );
 	}
 
-	public function findMulti( /* ... */ ) {
-		return $this->call( __FUNCTION__, func_get_args() );
+	public function findMulti( ...$args ) {
+		return $this->call( __FUNCTION__, $args );
 	}
 
-	public function found( /* ... */ ) {
-		return $this->call( __FUNCTION__, func_get_args() );
+	public function found( ...$args ) {
+		return $this->call( __FUNCTION__, $args );
 	}
 
-	public function foundMulti( /* ... */ ) {
-		return $this->call( __FUNCTION__, func_get_args() );
+	public function foundMulti( ...$args ) {
+		return $this->call( __FUNCTION__, $args );
 	}
 }

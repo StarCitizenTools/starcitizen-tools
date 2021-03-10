@@ -7,8 +7,12 @@ use Flow\Data\Storage\HeaderRevisionStorage;
 use Flow\Data\Storage\PostRevisionStorage;
 use Flow\Model\UUID;
 use Flow\Tests\FlowTestCase;
+use Wikimedia\Rdbms\IDatabase;
 
 /**
+ * @covers \Flow\Data\Storage\DbStorage
+ * @covers \Flow\Data\Storage\RevisionStorage
+ *
  * @group Flow
  */
 class RevisionStorageTest extends FlowTestCase {
@@ -55,7 +59,7 @@ class RevisionStorageTest extends FlowTestCase {
 		'FlowMock://location1',
 	];
 
-	protected function setUp() {
+	protected function setUp() : void {
 		$this->setMwGlobals( [
 			'wgExternalStores' => [ 'FlowMock' ],
 			'wgDefaultExternalStore' => [ 'FlowMock://location1' ]
@@ -71,8 +75,7 @@ class RevisionStorageTest extends FlowTestCase {
 
 		$diff = $revStorage->calcUpdates( $this->BEFORE_WITHOUT_CONTENT_CHANGE, $this->AFTER_WITHOUT_CONTENT_CHANGE );
 
-		$this->assertSame(
-			false,
+		$this->assertFalse(
 			\ExternalStoreFlowMock::$isUsed,
 			'When content changes are allowed, but there is no content change, ExternalStoreFlowMock is untouched'
 		);
@@ -89,8 +92,7 @@ class RevisionStorageTest extends FlowTestCase {
 
 		$diff = $revStorage->calcUpdates( $this->BEFORE_WITH_CONTENT_CHANGE, $this->AFTER_WITH_CONTENT_CHANGE );
 
-		$this->assertSame(
-			true,
+		$this->assertTrue(
 			\ExternalStoreFlowMock::$isUsed,
 			'When content changes are allowed, and there is a content change, an ExternalStoreFlowMock is constructed'
 		);
@@ -107,8 +109,7 @@ class RevisionStorageTest extends FlowTestCase {
 
 		$diff = $revStorage->calcUpdates( $this->BEFORE_WITHOUT_CONTENT_CHANGE, $this->AFTER_WITHOUT_CONTENT_CHANGE );
 
-		$this->assertSame(
-			false,
+		$this->assertFalse(
 			\ExternalStoreFlowMock::$isUsed,
 			'When content changes are not allowed, and there is no content change, ExternalStoreFlowMock is untouched'
 		);
@@ -120,12 +121,10 @@ class RevisionStorageTest extends FlowTestCase {
 		);
 	}
 
-	/**
-	 * @expectedException \Flow\Exception\DataModelException
-	 */
 	public function testCalcUpdatesWithContentChangeWhenNotAllowed() {
 		$revStorage = $this->getRevisionStorageWithMockExternalStore( false );
 
+		$this->expectException( \Flow\Exception\DataModelException::class );
 		$revStorage->calcUpdates( $this->BEFORE_WITH_CONTENT_CHANGE, $this->AFTER_WITH_CONTENT_CHANGE );
 	}
 
@@ -137,18 +136,15 @@ class RevisionStorageTest extends FlowTestCase {
 			true
 		);
 
-		$this->assertSame(
-			true,
+		$this->assertTrue(
 			\ExternalStoreFlowMock::$isUsed,
 			'When content changes are allowed, and there is a content change, an ExternalStoreFlowMock is constructed'
 		);
 	}
 
-	/**
-	 * @expectedException \Flow\Exception\DataModelException
-	 */
 	public function testUpdatingContentWhenNotAllowed() {
 		$revStorage = $this->getRevisionStorageWithMockExternalStore( false );
+		$this->expectException( \Flow\Exception\DataModelException::class );
 		$revStorage->update(
 			$this->BEFORE_WITH_CONTENT_CHANGE,
 			$this->AFTER_WITH_CONTENT_CHANGE
@@ -157,15 +153,12 @@ class RevisionStorageTest extends FlowTestCase {
 
 	// A rev ID will be added to $old and $new automatically.
 	protected function helperToTestUpdating( $old, $new, $expectedUpdateValues, $isContentUpdatingAllowed ) {
-		$dbw = $this->getMockBuilder( 'DatabaseMysqli' )
+		$dbw = $this->createMock( IDatabase::class );
+		$factory = $this->getMockBuilder( \Flow\DbFactory::class )
 			->disableOriginalConstructor()
 			->getMock();
-		$factory = $this->getMockBuilder( 'Flow\DbFactory' )
-			->disableOriginalConstructor()
-			->getMock();
-		$factory->expects( $this->any() )
-			->method( 'getDB' )
-			->will( $this->returnValue( $dbw ) );
+		$factory->method( 'getDB' )
+			->willReturn( $dbw );
 		$id = UUID::create();
 
 		$old['rev_id'] = $id->getBinary();
@@ -234,7 +227,7 @@ class RevisionStorageTest extends FlowTestCase {
 	}
 
 	protected function setWhetherContentUpdatingAllowed( $revisionStorage, $allowContentUpdates ) {
-		$klass = new \ReflectionClass( 'Flow\Data\Storage\HeaderRevisionStorage' );
+		$klass = new \ReflectionClass( HeaderRevisionStorage::class );
 		$allowedUpdateColumnsProp = $klass->getProperty( 'allowedUpdateColumns' );
 		$allowedUpdateColumnsProp->setAccessible( true );
 
@@ -327,7 +320,7 @@ class RevisionStorageTest extends FlowTestCase {
 	/**
 	 * @dataProvider issuesQueryCountProvider
 	 */
-	public function testIssuesQueryCount( $msg, $count, $queries, $options ) {
+	public function testIssuesQueryCount( $msg, $count, array $queries, array $options ) {
 		if ( !isset( $options['LIMIT'] ) || $options['LIMIT'] != 1 ) {
 			$this->fail( 'Can only generate result set for LIMIT = 1' );
 		}
@@ -342,7 +335,7 @@ class RevisionStorageTest extends FlowTestCase {
 			$result[] = (object)( $query + [ 'rev_id' => 42, 'tree_rev_id' => 42, 'rev_flags' => '' ] );
 		}
 
-		$treeRepo = $this->getMockBuilder( 'Flow\Repository\TreeRepository' )
+		$treeRepo = $this->getMockBuilder( \Flow\Repository\TreeRepository::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$factory = $this->mockDbFactory();
@@ -357,15 +350,15 @@ class RevisionStorageTest extends FlowTestCase {
 	}
 
 	public function testPartialResult() {
-		$treeRepo = $this->getMockBuilder( 'Flow\Repository\TreeRepository' )
+		$treeRepo = $this->getMockBuilder( \Flow\Repository\TreeRepository::class )
 			->disableOriginalConstructor()
 			->getMock();
 		$factory = $this->mockDbFactory();
 		$factory->getDB( null )->expects( $this->once() )
 			->method( 'select' )
-			->will( $this->returnValue( [
+			->willReturn( [
 				(object)[ 'rev_id' => 42, 'rev_flags' => '' ]
-			] ) );
+			] );
 
 		$storage = new PostRevisionStorage( $factory, false, $treeRepo );
 
@@ -390,14 +383,11 @@ class RevisionStorageTest extends FlowTestCase {
 	}
 
 	protected function mockDbFactory() {
-		$dbw = $this->getMockBuilder( 'DatabaseMysqli' )
-			->disableOriginalConstructor()
-			->getMock();
+		$dbw = $this->createMock( \IDatabase::class );
 
-		$factory = $this->getMock( 'Flow\DbFactory' );
-		$factory->expects( $this->any() )
-			->method( 'getDB' )
-			->will( $this->returnValue( $dbw ) );
+		$factory = $this->createMock( \Flow\DbFactory::class );
+		$factory->method( 'getDB' )
+			->willReturn( $dbw );
 
 		return $factory;
 	}

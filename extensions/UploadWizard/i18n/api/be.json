@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liashko"
+		]
+	},
+	"apihelp-flickrblacklist-param-url": "URL-адрас на Flickr, які мусіць быць правераны.",
+	"apihelp-flickrblacklist-param-list": "Пры ўсталяванні вяртаецца поўны чорны спіс. Не можа выкарыстоўвацца разам з $1url.",
+	"apihelp-flickrblacklist-example-1": "Праверыць URL-адрас у чорным спісе",
+	"apihelp-flickrblacklist-example-2": "Вярнуць запіс чорнага спіса",
+	"apihelp-query+allcampaigns-description": "Пералічыць усе кампаніі Майстра загрузкі.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Спіс толькі тых кампаній, якія зараз актыўныя.",
+	"apihelp-query+allcampaigns-param-limit": "Колькасць кампаній для вяртання.",
+	"apihelp-query+allcampaigns-example-1": "Пералічыць уключаныя кампаніі"
+}

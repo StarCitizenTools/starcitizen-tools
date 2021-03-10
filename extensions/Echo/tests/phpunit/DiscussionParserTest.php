@@ -1,15 +1,18 @@
 <?php
 
+// phpcs:disable Generic.Files.LineLength -- Long html test examples
+
+use MediaWiki\MediaWikiServices;
 use Wikimedia\TestingAccessWrapper;
 
 /**
- * @covers EchoDiscussionParser
+ * @covers \EchoDiscussionParser
  * @group Echo
  * @group Database
  */
 class EchoDiscussionParserTest extends MediaWikiTestCase {
 	/**
-	 * @var array
+	 * @var string[]
 	 */
 	protected $tablesUsed = [ 'user', 'revision', 'ip_changes', 'text', 'page' ];
 
@@ -18,7 +21,7 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 	 * Can be setup one by one using the setupTestUser() method
 	 * Or all at once using the setupAllTestUsers() method
 	 *
-	 * @var array [username => [user preference => preference value]]
+	 * @var array[] [username => [user preference => preference value]]
 	 */
 	protected $testUsers = [
 		'Werdna' => [
@@ -127,12 +130,12 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 		],
 	];
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 		$this->setMwGlobals( [ 'wgDiff' => false ] );
 	}
 
-	protected function tearDown() {
+	protected function tearDown() : void {
 		parent::tearDown();
 
 		global $wgHooks;
@@ -416,14 +419,12 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'type' => 'mention-failure',
 						'agent' => 'Admin',
 						'section-title' => 'Hello Users',
-						'notifyAgent' => true,
 						'subject-name' => 'Ping',
 					],
 					[
 						'type' => 'mention-failure',
 						'agent' => 'Admin',
 						'section-title' => 'Hello Users',
-						'notifyAgent' => true,
 						'subject-name' => 'Po?ng',
 					],
 				],
@@ -440,14 +441,12 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'type' => 'mention',
 						'agent' => 'Admin',
 						'section-title' => 'Hello Users',
-						'notifyAgent' => null,
 						'subject-name' => null,
 					],
 					[
 						'type' => 'mention-success',
 						'agent' => 'Admin',
 						'section-title' => 'Hello Users',
-						'notifyAgent' => true,
 						'subject-name' => 'Test11',
 					],
 				],
@@ -464,7 +463,6 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'type' => 'mention-failure',
 						'agent' => 'Admin',
 						'section-title' => 'Section 2',
-						'notifyAgent' => true,
 						'subject-name' => 'NoUser',
 					],
 				],
@@ -481,7 +479,6 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'type' => 'mention-failure',
 						'agent' => 'Admin',
 						'section-title' => 'Section 2',
-						'notifyAgent' => true,
 						'subject-name' => 'NoUser',
 					],
 				],
@@ -508,14 +505,12 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'agent' => 'Admin',
 						'section-title' => 'Section 1.5',
 						'subject-name' => null,
-						'notifyAgent' => null,
 					],
 					[
 						'type' => 'mention-success',
 						'agent' => 'Admin',
 						'section-title' => 'Section 1.5',
 						'subject-name' => 'Test11',
-						'notifyAgent' => true,
 					],
 				],
 			],
@@ -532,14 +527,12 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'agent' => 'Admin',
 						'section-title' => 'Section 1.5',
 						'subject-name' => 'NoUser1.5',
-						'notifyAgent' => true,
 					],
 					[
 						'type' => 'mention-failure',
 						'agent' => 'Admin',
 						'section-title' => 'Section 2',
 						'subject-name' => 'NoUser2',
-						'notifyAgent' => true,
 					],
 				],
 			],
@@ -556,21 +549,18 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'agent' => 'Admin',
 						'section-title' => 'Section 1',
 						'subject-name' => 'NoUser1',
-						'notifyAgent' => true,
 					],
 					[
 						'type' => 'mention-failure',
 						'agent' => 'Admin',
 						'section-title' => 'Section 1.75',
 						'subject-name' => 'NoUser1.75',
-						'notifyAgent' => true,
 					],
 					[
 						'type' => 'mention-failure',
 						'agent' => 'Admin',
 						'section-title' => 'Section 2',
 						'subject-name' => 'NoUser2',
-						'notifyAgent' => true,
 					],
 				],
 				[
@@ -585,7 +575,6 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'agent' => 'Admin',
 						'section-title' => false,
 						'subject-name' => null,
-						'notifyAgent' => null,
 					] ],
 				],
 				[
@@ -601,21 +590,18 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 							'agent' => 'Admin',
 							'section-title' => 'Section 1',
 							'subject-name' => null,
-							'notifyAgent' => null,
 						],
 						[
 							'type' => 'mention-success',
 							'agent' => 'Admin',
 							'section-title' => 'Section 1',
 							'subject-name' => 'Test11',
-							'notifyAgent' => true,
 						],
 						[
 							'type' => 'edit-user-talk',
 							'agent' => 'Admin',
 							'section-title' => 'Section 1',
 							'subject-name' => null,
-							'notifyAgent' => null,
 						],
 					],
 				],
@@ -633,21 +619,18 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'agent' => 'Admin',
 						'section-title' => 'Section 1',
 						'subject-name' => null,
-						'notifyAgent' => null,
 					],
 					[
 						'type' => 'mention-success',
 						'agent' => 'Admin',
 						'section-title' => 'Section 1',
 						'subject-name' => 'Test11',
-						'notifyAgent' => true,
 					],
 					[
 						'type' => 'edit-user-talk',
 						'agent' => 'Admin',
 						'section-title' => false,
 						'subject-name' => null,
-						'notifyAgent' => null,
 					],
 				],
 			],
@@ -664,21 +647,18 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'agent' => 'Admin',
 						'section-title' => 'Section 2',
 						'subject-name' => null,
-						'notifyAgent' => null,
 					],
 					[
 						'type' => 'mention-success',
 						'agent' => 'Admin',
 						'section-title' => 'Section 2',
 						'subject-name' => 'Test11',
-						'notifyAgent' => true,
 					],
 					[
 						'type' => 'edit-user-talk',
 						'agent' => 'Admin',
 						'section-title' => 'Section 2',
 						'subject-name' => null,
-						'notifyAgent' => null,
 					],
 				],
 			],
@@ -695,14 +675,12 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 						'agent' => 'Admin',
 						'section-title' => false,
 						'subject-name' => null,
-						'notifyAgent' => null,
 					],
 					[
 						'type' => 'mention-success',
 						'agent' => 'Admin',
 						'section-title' => false,
 						'subject-name' => 'Test11',
-						'notifyAgent' => true,
 					],
 				],
 			],
@@ -727,7 +705,6 @@ class EchoDiscussionParserTest extends MediaWikiTestCase {
 					'type' => $event->getType(),
 					'agent' => $event->getAgent()->getName(),
 					'section-title' => $event->getExtraParam( 'section-title' ),
-					'notifyAgent' => $event->getExtraParam( 'notifyAgent' ),
 					'subject-name' => $event->getExtraParam( 'subject-name' ),
 				];
 				return false;
@@ -902,7 +879,7 @@ TEXT
 	 * @dataProvider provider_extractSections
 	 */
 	public function testExtractSections( $content, $result ) {
-		$discussionParser = TestingAccessWrapper::newFromClass( 'EchoDiscussionParser' );
+		$discussionParser = TestingAccessWrapper::newFromClass( EchoDiscussionParser::class );
 		$sections = $discussionParser->extractSections( $content );
 
 		$this->assertEquals( $result, $sections );
@@ -949,15 +926,16 @@ TEXT
 	private function setupTestRevisionsForEventGeneration( $newId, $oldId, $username, $lang, $pages,
 		$title, $summary = ''
 	) {
-		$langObj = Language::factory( $lang );
+		$store = MediaWikiServices::getInstance()->getRevisionStore();
+		// Content language is used by the code that interprets the namespace part of titles
+		// (Title::getTitleParser), so should be the fake language ;)
+		$this->setContentLang( $lang );
 		$this->setMwGlobals( [
-			// this global is used by the code that interprets the namespace part of
-			// titles (Title::getTitleParser), so should be the fake language ;)
-			'wgContLang' => $langObj,
 			// this one allows Mediawiki:xyz pages to be set as messages
 			'wgUseDatabaseMessages' => true
 		] );
-		$this->overrideMwServices();
+
+		$this->resetServices();
 
 		// pages to be created: templates may be used to ping users (e.g.
 		// {{u|...}}) but if we don't have that template, it just won't work!
@@ -967,9 +945,9 @@ TEXT
 			$template->doEditContent( new WikitextContent( $pageText ), '' );
 		}
 
-		// force i18n messages to be reloaded (from DB, where a new message
+		// force i18n messages to be reloaded from MessageCache (from DB, where a new message
 		// might have been created as page)
-		MessageCache::destroyInstance();
+		$this->resetServices();
 
 		// grab revision excerpts (didn't include them in this src file because
 		// they can be pretty long)
@@ -985,7 +963,7 @@ TEXT
 		$property->setAccessible( true );
 		$property->setValue( $title, $lang );
 
-		// create stub Revision object
+		// create stub MutableRevisionRecord object
 		$row = [
 			'id' => $newId,
 			'user_text' => $username,
@@ -995,16 +973,17 @@ TEXT
 			'title' => $title,
 			'comment' => $summary,
 		];
-		$revision = Revision::newFromRow( $row );
+		$revision = $store->newMutableRevisionFromArray( $row );
+		$userName = $revision->getUser()->getName();
 
 		// generate diff between 2 revisions
 		$changes = EchoDiscussionParser::getMachineReadableDiff( $oldText, $newText );
-		$output = EchoDiscussionParser::interpretDiff( $changes, $revision->getUserText(), $title );
+		$output = EchoDiscussionParser::interpretDiff( $changes, $userName, $title );
 
 		// store diff in some local cache var, to circumvent
 		// EchoDiscussionParser::getChangeInterpretationForRevision's attempt to
 		// retrieve parent revision from DB
-		$class = new ReflectionClass( 'EchoDiscussionParser' );
+		$class = new ReflectionClass( EchoDiscussionParser::class );
 		$property = $class->getProperty( 'revisionInterpretationCache' );
 		$property->setAccessible( true );
 		$property->setValue( [ $revision->getId() => $output ] );
@@ -1031,13 +1010,13 @@ TEXT
 		$timestampRegex = EchoDiscussionParser::getTimestampRegex();
 
 		$match = preg_match( '/' . $timestampRegex . '/u', $exemplarTimestamp );
-		$this->assertEquals( 1, $match );
+		$this->assertSame( 1, $match );
 	}
 
 	public function testGetTimestampPosition() {
 		$line = 'Hello World. ' . self::getExemplarTimestamp();
 		$pos = EchoDiscussionParser::getTimestampPosition( $line );
-		$this->assertEquals( 13, $pos );
+		$this->assertSame( 13, $pos );
 	}
 
 	/**
@@ -1058,7 +1037,7 @@ TEXT
 		$output = EchoDiscussionParser::getUserFromLine( $line );
 
 		if ( $output === false ) {
-			$this->assertEquals( false, $expectedUser );
+			$this->assertFalse( $expectedUser );
 		} elseif ( is_array( $expectedUser ) ) {
 			// Sometimes testing for correct user detection,
 			// sometimes testing for offset detection
@@ -1507,14 +1486,16 @@ TEXT
 		];
 	}
 
-	public static function getExemplarTimestamp() {
-		$title = Title::newMainPage();
-		$user = User::newFromName( 'Test' );
-		$options = new ParserOptions;
+	public function getExemplarTimestamp() {
+		$title = $this->createMock( Title::class );
 
-		global $wgParser;
+		$user = $this->createMock( User::class );
+
+		$options = ParserOptions::newFromAnon();
+
+		$parser = MediaWikiServices::getInstance()->getParser();
 		$exemplarTimestamp =
-			$wgParser->preSaveTransform( '~~~~~', $title, $user, $options );
+			$parser->preSaveTransform( '~~~~~', $title, $user, $options );
 
 		return $exemplarTimestamp;
 	}
@@ -1703,11 +1684,11 @@ TEXT
 		$two = "===SubZomg===\nHi there\n";
 		$three = "==Header==\nOh Hai!\n";
 
-		$this->assertEquals( 1, EchoDiscussionParser::getSectionCount( $one ) );
-		$this->assertEquals( 2, EchoDiscussionParser::getSectionCount( $one . $two ) );
-		$this->assertEquals( 2, EchoDiscussionParser::getSectionCount( $one . $three ) );
-		$this->assertEquals( 3, EchoDiscussionParser::getSectionCount( $one . $two . $three ) );
-		$this->assertEquals( 30, EchoDiscussionParser::getSectionCount(
+		$this->assertSame( 1, EchoDiscussionParser::getSectionCount( $one ) );
+		$this->assertSame( 2, EchoDiscussionParser::getSectionCount( $one . $two ) );
+		$this->assertSame( 2, EchoDiscussionParser::getSectionCount( $one . $three ) );
+		$this->assertSame( 3, EchoDiscussionParser::getSectionCount( $one . $two . $three ) );
+		$this->assertSame( 30, EchoDiscussionParser::getSectionCount(
 			file_get_contents( __DIR__ . '/revision_txt/637638133.txt' )
 		) );
 	}
@@ -1719,8 +1700,8 @@ TEXT
 			'anonymousUsers' => [ '127.0.0.1' ],
 		];
 
-		$discussionParser = TestingAccessWrapper::newFromClass( 'EchoDiscussionParser' );
-		$this->assertEquals( 4, $discussionParser->getOverallUserMentionsCount( $userMentions ) );
+		$discussionParser = TestingAccessWrapper::newFromClass( EchoDiscussionParser::class );
+		$this->assertSame( 4, $discussionParser->getOverallUserMentionsCount( $userMentions ) );
 	}
 
 	public function provider_getUserMentions() {
@@ -1751,7 +1732,7 @@ TEXT
 	 */
 	public function testGetUserMentions( $userLinks, $expectedUserMentions, $agent ) {
 		$title = Title::newFromText( 'Test' );
-		$discussionParser = TestingAccessWrapper::newFromClass( 'EchoDiscussionParser' );
+		$discussionParser = TestingAccessWrapper::newFromClass( EchoDiscussionParser::class );
 		$this->assertEquals( $expectedUserMentions, $discussionParser->getUserMentions( $title, $agent, $userLinks ) );
 	}
 
@@ -1796,8 +1777,8 @@ TEXT
 		] );
 
 		$title = Title::newFromText( 'Test' );
-		$discussionParser = TestingAccessWrapper::newFromClass( 'EchoDiscussionParser' );
-		$this->assertEquals( 4, $discussionParser->getOverallUserMentionsCount( $discussionParser->getUserMentions( $title, 1, $userLinks ) ) );
+		$discussionParser = TestingAccessWrapper::newFromClass( EchoDiscussionParser::class );
+		$this->assertSame( 4, $discussionParser->getOverallUserMentionsCount( $discussionParser->getUserMentions( $title, 1, $userLinks ) ) );
 	}
 
 	protected function isParserFunctionsInstalled() {

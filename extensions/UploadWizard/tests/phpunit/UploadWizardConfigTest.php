@@ -2,17 +2,23 @@
 
 /**
  * Test the Upload Wizard Configuration
+ *
  * @group Upload
+ * @covers UploadWizardCampaign
  * @covers UploadWizardConfig
  */
 class UploadWizardConfigTest extends MediaWikiTestCase {
-	public function setUp() {
+	public function setUp() : void {
 		parent::setUp();
+
+		// Test expects empty defaults; otheriwse they will override the
+		// parameters passed in by the test.
+		UploadWizardConfig::setUrlSetting( 'defaults', [] );
 
 		// insert a interwiki prefixes for testing inter-language links.
 		// This is based on ParserTestRunner::setupInterwikis, which does
 		// exactly the same (but with more prefixes) for parser tests.
-		Hooks::register( 'InterwikiLoadPrefix', function ( $prefix, &$iwData ) {
+		$this->setTemporaryHook( 'InterwikiLoadPrefix', function ( $prefix, &$iwData ) {
 			static $testInterwikis = [
 				'es' => [
 					'iw_url' => 'http://es.wikipedia.org/wiki/$1',
@@ -27,12 +33,6 @@ class UploadWizardConfigTest extends MediaWikiTestCase {
 			// We only want to rely on the above fixtures
 			return false;
 		} );
-	}
-
-	public function tearDown() {
-		parent::tearDown();
-
-		Hooks::clear( 'InterwikiLoadPrefix' );
 	}
 
 	public function objRefProvider() {

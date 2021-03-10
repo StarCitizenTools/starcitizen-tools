@@ -7,7 +7,7 @@ UploadWizard Extension, v.1.1
 	$wgUseImageMagick = true;
 	$wgImageMagickConvertCommand = <path to your convert command>;  # often /usr/bin/convert
 
-	require_once( "$IP/extensions/UploadWizard/UploadWizard.php" );
+	wfLoadExtension( 'UploadWizard' );
 
 * check out the Special:Version page to verify the installation 
 * make sure that your $IP/images directory is writable by the web server

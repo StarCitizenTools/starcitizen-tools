@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, uw ) {
+( function ( uw ) {
 	/**
 	 * Represents a generic deed.
 	 *
@@ -36,6 +36,8 @@
 	 */
 	uw.deed.Abstract.prototype.instanceCount = 0;
 
+	uw.deed.Abstract.prototype.unload = function () {};
+
 	/**
 	 * @return {number}
 	 */
@@ -53,47 +55,33 @@
 	/**
 	 * @param {jQuery} $selector
 	 */
-	/* eslint-disable no-unused-vars */
-	uw.deed.Abstract.prototype.setFormFields = function ( $selector ) {};
-	/* eslint-enable no-unused-vars */
+	uw.deed.Abstract.prototype.setFormFields = function () {};
 
-	/* eslint-disable valid-jsdoc */
 	/**
+	 * @method
+	 * @abstract
 	 * @param {mw.UploadWizardUpload} upload
 	 * @return {string}
 	 */
-	/* eslint-enable valid-jsdoc */
-	/* eslint-disable no-unused-vars */
-	uw.deed.Abstract.prototype.getSourceWikiText = function ( upload ) {
-		throw new Error( 'Not implemented.' );
-	};
-	/* eslint-enable no-unused-vars */
+	uw.deed.Abstract.prototype.getSourceWikiText = null;
 
-	/* eslint-disable valid-jsdoc */
 	/**
+	 * @method
+	 * @abstract
 	 * @param {mw.UploadWizardUpload} upload
 	 * @return {string}
 	 */
-	/* eslint-enable valid-jsdoc */
-	/* eslint-disable no-unused-vars */
-	uw.deed.Abstract.prototype.getAuthorWikiText = function ( upload ) {
-		throw new Error( 'Not implemented.' );
-	};
-	/* eslint-enable no-unused-vars */
+	uw.deed.Abstract.prototype.getAuthorWikiText = null;
 
-	/* eslint-disable valid-jsdoc */
 	/**
 	 * Get wikitext representing the licenses selected in the license object
 	 *
+	 * @method
+	 * @abstract
 	 * @param {mw.UploadWizardUpload} upload
 	 * @return {string} wikitext of all applicable license templates.
 	 */
-	/* eslint-enable valid-jsdoc */
-	/* eslint-disable no-unused-vars */
-	uw.deed.Abstract.prototype.getLicenseWikiText = function ( upload ) {
-		throw new Error( 'Not implemented.' );
-	};
-	/* eslint-enable no-unused-vars */
+	uw.deed.Abstract.prototype.getLicenseWikiText = null;
 
 	/**
 	 * @return {Object}
@@ -120,7 +108,7 @@
 	uw.deed.Abstract.prototype.needsPatentAgreement = function ( upload ) {
 		var extensions = this.config.patents ? this.config.patents.extensions : [];
 
-		return $.inArray( upload.title.getExtension().toLowerCase(), extensions ) >= 0;
+		return extensions.indexOf( upload.title.getExtension().toLowerCase() ) !== -1;
 	};
 
 	/**
@@ -170,7 +158,7 @@
 			windowManager = new OO.ui.WindowManager();
 			dialog = this.getPatentDialog( uploads );
 
-			$( 'body' ).append( windowManager.$element );
+			$( document.body ).append( windowManager.$element );
 			windowManager.addWindows( [ dialog ] );
 			windowManager.openWindow( dialog );
 
@@ -187,4 +175,4 @@
 			return $.Deferred().resolve( [] ).promise();
 		}
 	};
-}( mediaWiki, mediaWiki.uploadWizard ) );
+}( mw.uploadWizard ) );

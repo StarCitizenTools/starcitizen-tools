@@ -1,12 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Milicevic01",
 			"Macofe",
-			"Obsuser"
+			"Milicevic01",
+			"Obsuser",
+			"Zoranzoki21"
 		]
 	},
 	"enablestructureddiscussions": "Omogući Flow",
+	"logentry-delete-flow-delete-topic": "$1 {{GENDER:$2|je obrisao|je obrisala}} temu \"[[$3|$5]]\" na [[$6]]",
 	"flow-board-header-browse-topics-link": "Spisak tema",
 	"flow-board-header": "O ovoj diskusiji",
 	"flow-board-collapse-description": "Sakrij opis",
@@ -41,6 +43,7 @@
 	"flow-topic-action-summarize-topic": "Sumiraj",
 	"flow-topic-action-undo-moderation": "Opozovi",
 	"flow-topic-notification-subscribe-title": "Ova tema je dodata na {{GENDER:$1|Vaš}} spisak nadgledanja.",
+	"flow-error-not-allowed": "Nemate odgovarajuću dozvolu za izvršenje ove akcije.",
 	"flow-error-not-allowed-delete": "Ova tema je obrisana.",
 	"flow-error-not-allowed-suppress": "Ova tema je obrisana.",
 	"flow-error-no-commit": "Navedenu radnju nije moguće sačuvati.",
@@ -86,6 +89,7 @@
 	"right-flow-create-board": "pravljenje Flow tabli bilo gde",
 	"right-flow-hide": "skrivanje tema i komentara u Flow-u",
 	"right-flow-lock": "označavanje tema rešenim u Flow-u",
+	"right-flow-delete": "Brisanje tema i objava strukturiranih diskusija",
 	"right-flow-edit-post": "uređivanje tuđih komentara u Flow-u",
 	"flow-cancel-warning": "Uneli ste tekst u ovaj okvir. Da li sigurno želite da ga odbacite?",
 	"flow-load-more": "Učitaj još",
@@ -95,9 +99,14 @@
 	"flow-terms-of-use-summarize": "Klikom na „{{int:flow-topic-action-update-topic-summary}}“, prihvatate uslove korišćenja ovog vikija.",
 	"flow-terms-of-use-lock-topic": "Klikom na „{{int:flow-topic-action-lock-topic}}“, prihvatate uslove korišćenja ovog vikija.",
 	"flow-terms-of-use-unlock-topic": "Klikom na „{{int:flow-topic-action-unlock-topic}}“, prihvatate uslove korišćenja ovog vikija.",
+	"structureddiscussions": "Strukturirane diskusije",
 	"flow-special-type": "Tip",
+	"flow-special-enableflow-page": "Stranica na kojoj je potrebno omogućiti Strukturiranu Diskusiju",
 	"flow-previous-diff": "← Starija izmena",
 	"flow-next-diff": "Novija izmena →",
+	"group-flow-bot": "Botovi strukturiranih diskusija",
+	"group-flow-bot-member": "Bot strukturiranih diskusija",
+	"grouppage-flow-bot": "Project:Botovi strukturiranih diskusija",
 	"flow-ve-mention-placeholder": "Korisničko ime",
 	"flow-ve-mention-tool-title": "Spomeni korisnika",
 	"flow-dialog-cancelconfirm-title": "Jeste li sigurni?",

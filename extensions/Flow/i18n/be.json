@@ -1,10 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Artsiom91",
 			"Дзяніс Тутэйшы"
 		]
 	},
+	"abusefilter-edit-builder-vars-board-id": "Ідэнтыфікатар старонкі дошкі «Структураваных абмеркаванняў»",
+	"abusefilter-edit-builder-vars-board-namespace": "Прастора назваў дошкі «Структураваных абмеркаванняў»",
+	"abusefilter-edit-builder-vars-board-title": "Назва (без прасторвы назваў) старонкі дошкі «Структураваных абмеркаванняў»",
+	"abusefilter-edit-builder-vars-board-prefixedtitle": "Поўная назва дошкі «Структураваных абмеркаванняў»",
+	"flow-topic-moderated-reason-prefix": "Прычына:",
 	"flow-post-action-hide-post": "Схаваць",
-	"flow-notification-mention": "$1 {{GENDER:$1|упамянуў|упамянула}} {{GENDER:$5|вас}} у {{GENDER:$1|сваім}} <span class=\"plainlinks\">[$2 паведамленні]</span> у \"$3\" на \"$4\".",
-	"flow-notification-mention-email-subject": "$1 {{GENDER:$1|упамянуў|упамянула}} {{GENDER:$3|Вас}} на $2"
+	"notification-header-flow-topic-renamed-user-talk": "Тэма \"<strong>$1</strong>\" была перайменавана ў \"<strong>$2</strong>\" на <strong>{{GENDER:$3|Вашай}} старонцы размоў</strong>."
 }

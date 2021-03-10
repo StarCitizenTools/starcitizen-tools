@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	/**
 	 * Bundle notification item model. Contains a list of bundled notifications.
 	 * Is expandable.
@@ -12,9 +12,8 @@
 	 * @param {Object} [config] Configuration object
 	 */
 	mw.echo.dm.BundleNotificationItem = function MwEchoDmBundleNotificationItem( id, bundledNotificationModels, config ) {
-		config = config || {};
-
-		mw.echo.dm.BundleNotificationItem.parent.call( this, id, config );
+		// Parent constructor
+		mw.echo.dm.BundleNotificationItem.super.call( this, id, config );
 
 		this.getSecondaryUrls().forEach( function ( link ) {
 			// hack: put all secondary actions in the menu for now
@@ -60,8 +59,9 @@
 	 * @return {boolean} Whether this bundle is completely read
 	 */
 	mw.echo.dm.BundleNotificationItem.prototype.isRead = function () {
-		var itemIsRead = function ( item ) { return item.isRead(); };
-		return this.list.getItems().every( itemIsRead );
+		return this.list.getItems().every( function ( item ) {
+			return item.isRead();
+		} );
 	};
 
 	/**
@@ -159,4 +159,4 @@
 		return this.getModelName();
 	};
 
-}( mediaWiki ) );
+}() );

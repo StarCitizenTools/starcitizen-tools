@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Notification badge button widget for echo popup.
 	 *
@@ -8,11 +8,13 @@
 	 * @constructor
 	 * @param {mw.echo.Controller} controller Echo notifications controller
 	 * @param {mw.echo.dm.ModelManager} manager Model manager
-	 * @param {Object} [config] Configuration object
+	 * @param {Object} links Links object, containing 'notifications' and 'preferences' URLs
+	 * @param {Object} config Configuration object
 	 * @cfg {string|string[]} [type='message'] The type or array of types of
 	 *  notifications that are in this model. They can be 'alert', 'message' or
 	 *  an array of both. Defaults to 'message'
 	 * @cfg {number} [numItems=0] The number of items that are in the button display
+	 * @cfg {string} [convertedNumber] A converted version of the initial count
 	 * @cfg {string} [badgeLabel=0] The initial label for the badge. This is the
 	 *  formatted version of the number of items in the badge.
 	 * @cfg {boolean} [hasUnseen=false] Whether there are unseen items
@@ -22,15 +24,14 @@
 	 * @cfg {jQuery} [$overlay] A jQuery element functioning as an overlay
 	 *  for popups.
 	 */
-	mw.echo.ui.NotificationBadgeWidget = function MwEchoUiNotificationBadgeButtonPopupWidget( controller, manager, config ) {
+	mw.echo.ui.NotificationBadgeWidget = function MwEchoUiNotificationBadgeButtonPopupWidget( controller, manager, links, config ) {
 		var buttonFlags, allNotificationsButton, preferencesButton, footerButtonGroupWidget, $footer,
 			adjustedTypeString;
 
 		config = config || {};
-		config.links = config.links || {};
 
 		// Parent constructor
-		mw.echo.ui.NotificationBadgeWidget.parent.call( this, config );
+		mw.echo.ui.NotificationBadgeWidget.super.call( this, config );
 
 		// Mixin constructors
 		OO.ui.mixin.PendingElement.call( this, config );
@@ -64,8 +65,8 @@
 			numItems: this.numItems,
 			flags: buttonFlags,
 			// The following messages can be used here:
-			// tooltip-pt-notifications-alert
-			// tooltip-pt-notifications-notice
+			// * tooltip-pt-notifications-alert
+			// * tooltip-pt-notifications-notice
 			title: mw.msg( 'tooltip-pt-notifications-' + adjustedTypeString ),
 			href: config.href
 		} );
@@ -85,16 +86,18 @@
 		allNotificationsButton = new OO.ui.ButtonWidget( {
 			icon: 'next',
 			label: mw.msg( 'echo-overlay-link' ),
-			href: config.links.notifications,
+			href: links.notifications,
 			classes: [ 'mw-echo-ui-notificationBadgeButtonPopupWidget-footer-allnotifs' ]
 		} );
+		allNotificationsButton.$element.children().first().removeAttr( 'role' );
 
 		preferencesButton = new OO.ui.ButtonWidget( {
-			icon: 'advanced',
+			icon: 'settings',
 			label: mw.msg( 'mypreferences' ),
-			href: config.links.preferences,
+			href: links.preferences,
 			classes: [ 'mw-echo-ui-notificationBadgeButtonPopupWidget-footer-preferences' ]
 		} );
+		preferencesButton.$element.children().first().removeAttr( 'role' );
 
 		footerButtonGroupWidget = new OO.ui.ButtonGroupWidget( {
 			items: [ allNotificationsButton, preferencesButton ],
@@ -118,8 +121,8 @@
 			$autoCloseIgnore: this.$element.add( this.$menuOverlay ),
 			head: true,
 			// The following messages can be used here:
-			// echo-notification-alert-text-only
-			// echo-notification-notice-text-only
+			// * echo-notification-alert-text-only
+			// * echo-notification-notice-text-only
 			label: mw.msg(
 				'echo-notification-' + adjustedTypeString +
 				'-text-only'
@@ -164,8 +167,8 @@
 		this.$element
 			.prop( 'id', 'pt-notifications-' + adjustedTypeString )
 			// The following classes can be used here:
-			// mw-echo-ui-notificationBadgeButtonPopupWidget-alert
-			// mw-echo-ui-notificationBadgeButtonPopupWidget-message
+			// * mw-echo-ui-notificationBadgeButtonPopupWidget-alert
+			// * mw-echo-ui-notificationBadgeButtonPopupWidget-message
 			.addClass(
 				'mw-echo-ui-notificationBadgeButtonPopupWidget ' +
 				'mw-echo-ui-notificationBadgeButtonPopupWidget-' + adjustedTypeString
@@ -239,7 +242,6 @@
 
 		unreadCount = this.manager.getUnreadCounter().getCount();
 		cappedUnreadCount = this.manager.getUnreadCounter().getCappedNotificationCount( unreadCount );
-		cappedUnreadCount = mw.language.convertNumber( cappedUnreadCount );
 		badgeLabel = mw.message( 'echo-badge-count', mw.language.convertNumber( cappedUnreadCount ) ).text();
 
 		this.badgeButton.setLabel( badgeLabel );
@@ -344,4 +346,4 @@
 			} );
 		this.hasRunFirstTime = true;
 	};
-}( mediaWiki, jQuery ) );
+}() );

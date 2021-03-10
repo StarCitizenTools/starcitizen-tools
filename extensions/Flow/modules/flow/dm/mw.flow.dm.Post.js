@@ -15,7 +15,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.flow.dm.Post.parent.call( this, config );
+		mw.flow.dm.Post.super.call( this, config );
 
 		// Mixin constructor
 		mw.flow.dm.List.call( this );
@@ -86,11 +86,12 @@
 		this.replyIds = data.replies || [];
 
 		// Parent method
-		mw.flow.dm.Post.parent.prototype.populate.call( this, data );
+		mw.flow.dm.Post.super.prototype.populate.apply( this, arguments );
 	};
 
 	/**
 	 * Get an array of post ids attached to this post
+	 *
 	 * @return {string[]} Post reply ids
 	 */
 	mw.flow.dm.Post.prototype.getReplyIds = function () {

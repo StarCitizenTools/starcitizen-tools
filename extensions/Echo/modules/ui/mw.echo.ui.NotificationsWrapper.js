@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	/**
 	 * Wrapper for the notifications widget, for view outside the popup.
 	 *
@@ -10,12 +10,14 @@
 	 * @param {mw.echo.Controller} controller Echo controller
 	 * @param {mw.echo.dm.ModelManager} model Notifications model manager
 	 * @param {Object} [config] Configuration object
+	 * @cfg {jQuery} [$overlay] A jQuery element functioning as an overlay
+	 *  for popups.
 	 */
 	mw.echo.ui.NotificationsWrapper = function MwEchoUiNotificationsWrapper( controller, model, config ) {
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.ui.NotificationsWrapper.parent.call( this, config );
+		mw.echo.ui.NotificationsWrapper.super.call( this, config );
 
 		// Mixin constructor
 		OO.ui.mixin.PendingElement.call( this, config );
@@ -80,4 +82,4 @@
 				widget.promiseRunning = false;
 			} );
 	};
-}( mediaWiki ) );
+}() );

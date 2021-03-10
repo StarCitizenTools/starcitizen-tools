@@ -1,4 +1,4 @@
-( function ( mw, OO, ve ) {
+( function () {
 	'use strict';
 
 	/**
@@ -12,8 +12,9 @@
 	 * @param {Object} [config] Configuration options
 	 */
 
-	mw.flow.ve.ui.MentionInspectorTool = function FlowVeMentionInspectorTool( toolGroup, config ) {
-		mw.flow.ve.ui.MentionInspectorTool.parent.call( this, toolGroup, config );
+	mw.flow.ve.ui.MentionInspectorTool = function FlowVeMentionInspectorTool() {
+		// Parent constructor
+		mw.flow.ve.ui.MentionInspectorTool.super.apply( this, arguments );
 	};
 
 	OO.inheritClass( mw.flow.ve.ui.MentionInspectorTool, ve.ui.InspectorTool );
@@ -38,4 +39,4 @@
 	};
 
 	ve.ui.toolFactory.register( mw.flow.ve.ui.MentionInspectorTool );
-}( mediaWiki, OO, ve ) );
+}() );

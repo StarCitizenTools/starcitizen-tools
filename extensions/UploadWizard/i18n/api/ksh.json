@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"apihelp-flickrblacklist-param-url": "Dä <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"Uniform Ressource Locator\">URL</i> bei <i xml:lang=\"en\" lang=\"en\" dir=\"ltr\" title=\"„Dorsch jät, wi Bellder, fleppe udder bläddere“\">Flickr</i> zom Pröhfe.",
+	"apihelp-flickrblacklist-param-list": "Wann dat jesaz es, donn de jannze „schwazze Leß“ ußjävve. Kam_mer nit zersamme met <code lang=\"en\" xml:lang=\"en\" dir=\"ltr\">$1url</code> bruche.",
+	"apihelp-flickrblacklist-example-1": "Donn en <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"Uniform Ressource Locator\">URL</i> jähje de „schwazze Leß“ pröhve.",
+	"apihelp-flickrblacklist-example-2": "Donn de jannze „schwazze Leß“ ußjävve.",
+	"apihelp-query+allcampaigns-description": "Donn alle Kampannje vum frünndlejje Projramm för et Huhlahde opzälle.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Donn blohß de aanjeshalld Kampannje opzälle.",
+	"apihelp-query+allcampaigns-param-limit": "De Aanzahl Kampannje zom ußjävve.",
+	"apihelp-query+allcampaigns-example-1": "Donn de aanjeshalld Kampannje opzälle."
+}

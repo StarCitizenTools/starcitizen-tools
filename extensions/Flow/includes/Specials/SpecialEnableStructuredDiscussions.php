@@ -3,13 +3,14 @@
 namespace Flow\Specials;
 
 use ExtensionRegistry;
-use FormSpecialPage;
-use Status;
-use Title;
 use Flow\Container;
 use Flow\Import\Converter;
 use Flow\Import\EnableFlow\EnableFlowWikitextConversionStrategy;
 use Flow\Import\SourceStore\NullImportSourceStore;
+use FormSpecialPage;
+use MediaWiki\MediaWikiServices;
+use Status;
+use Title;
 
 /**
  * A special page that allows users with the flow-create-board right to create
@@ -39,6 +40,8 @@ class SpecialEnableStructuredDiscussions extends FormSpecialPage {
 	}
 
 	public function execute( $par ) {
+		$this->addHelpLink( 'Help:Structured Discussions/Activation' );
+
 		if ( $par !== null ) {
 			$title = Title::newFromText( $par );
 			if ( $title ) {
@@ -107,7 +110,7 @@ class SpecialEnableStructuredDiscussions extends FormSpecialPage {
 				$logger,
 				$this->getUser(),
 				new EnableFlowWikitextConversionStrategy(
-					Container::get( 'parser' ),
+					MediaWikiServices::getInstance()->getParser(),
 					new NullImportSourceStore(),
 					$logger,
 					$this->getUser(),

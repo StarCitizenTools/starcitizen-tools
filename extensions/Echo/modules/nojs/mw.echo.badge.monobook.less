@@ -1,36 +1,14 @@
-@import '../echo.variables';
+@import '../echo.variables.less';
 
-/* We have to include the #pt-notifications selector due to monobook */
-.mw-echo-notifications-badge {
-	#pt-notifications-notice &,
-	#pt-notifications-alert & {
-		display: inline-block;
-		width: 16px;
-		height: 16px;
-		top: -@badge-offscreen-offset - 1px;
+#pt-notifications-notice .mw-echo-notifications-badge,
+#pt-notifications-alert .mw-echo-notifications-badge {
+	display: inline-block;
+	background-size: 16px 16px;
+	background-repeat: no-repeat;
+	top: -1px;
 
-		&:before {
-			background-size: 16px 16px;
-		}
-
-		&:after {
-			top: @badge-offscreen-offset + 3px;
-		}
+	&:after {
+		top: 6px;
+		left: 45%;
 	}
-
-	&.oo-ui-flaggedElement-unseen,
-	&.mw-echo-unseen-notifications {
-		#pt-notifications-alert &:after {
-			background-color: @badge-counter-background-unseen-alert;
-		}
-
-		#pt-notifications-notice &:after {
-			background-color: @badge-counter-background-unseen-message;
-		}
-	}
-}
-
-#p-personal #pt-notifications-alert,
-#p-personal #pt-notifications-notice {
-	margin-right: 0.2em;
 }

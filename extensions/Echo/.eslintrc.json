@@ -1,15 +1,15 @@
 {
-	"extends": "wikimedia",
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/jquery",
+		"wikimedia/mediawiki"
+	],
 	"env": {
-		"browser": true,
-		"jquery": true,
-		"qunit": true
-	},
-	"globals": {
-		"OO": false,
-		"mediaWiki": false
+		"commonjs": true
 	},
 	"rules": {
-		"dot-notation": [ "error", { "allowKeywords": true } ]
+		"max-len": "off",
+		"mediawiki/class-doc": "warn"
 	}
 }

@@ -42,7 +42,7 @@ abstract class RevisionViewQuery extends AbstractQuery {
 	/**
 	 * Get the data for rendering single revision view
 	 * @param string $revId
-	 * @return FormatterRow
+	 * @return FormatterRow|null
 	 * @throws InvalidInputException
 	 */
 	public function getSingleViewResult( $revId ) {
@@ -73,9 +73,13 @@ abstract class RevisionViewQuery extends AbstractQuery {
 		if ( !$prevId ) {
 			$prevId = $cur->getPrevRevisionId();
 		}
+		// @phan-suppress-next-line PhanTypeMismatchArgumentNullable
 		$prev = $this->createRevision( $prevId );
 		if ( !$prev ) {
-			throw new InvalidInputException( 'Could not find revision to compare against: ' . $curId->getAlphadecimal(), 'missing-revision' );
+			throw new InvalidInputException(
+				'Could not find revision to compare against: ' . $curId->getAlphadecimal(),
+				'missing-revision'
+			);
 		}
 		if ( !$this->isComparable( $cur, $prev ) ) {
 			throw new InvalidInputException( 'Attempt to compare revisions of different types', 'revision-comparison' );
@@ -148,53 +152,5 @@ abstract class RevisionViewQuery extends AbstractQuery {
 		} else {
 			return false;
 		}
-	}
-}
-
-class HeaderViewQuery extends RevisionViewQuery {
-
-	/**
-	 * @inheritDoc
-	 */
-	protected function createRevision( $revId ) {
-		if ( !$revId instanceof UUID ) {
-			$revId = UUID::create( $revId );
-		}
-		return $this->storage->get(
-			'Header',
-			$revId
-		);
-	}
-}
-
-class PostViewQuery extends RevisionViewQuery {
-
-	/**
-	 * @inheritDoc
-	 */
-	protected function createRevision( $revId ) {
-		if ( !$revId instanceof UUID ) {
-			$revId = UUID::create( $revId );
-		}
-		return $this->storage->get(
-			'PostRevision',
-			$revId
-		);
-	}
-}
-
-class PostSummaryViewQuery extends RevisionViewQuery {
-
-	/**
-	 * @inheritDoc
-	 */
-	protected function createRevision( $revId ) {
-		if ( !$revId instanceof UUID ) {
-			$revId = UUID::create( $revId );
-		}
-		return $this->storage->get(
-			'PostSummary',
-			$revId
-		);
 	}
 }

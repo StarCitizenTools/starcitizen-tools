@@ -6,17 +6,16 @@ use Content;
 use DerivativeContext;
 use FauxRequest;
 use Flow\Container;
-use Flow\Exception\UnknownWorkflowIdException;
 use Flow\LinksTableUpdater;
 use Flow\Model\UUID;
 use Flow\View;
 use Flow\WorkflowLoaderFactory;
 use Hooks;
+use MediaWiki\MediaWikiServices;
 use OutputPage;
 use ParserOptions;
 use ParserOutput;
 use RequestContext;
-use Revision;
 use Title;
 use User;
 use WikiPage;
@@ -128,7 +127,7 @@ class BoardContent extends \AbstractContent {
 	 *
 	 * @since 1.21
 	 *
-	 * @param bool $hasLinks If it is known whether this content contains
+	 * @param bool|null $hasLinks If it is known whether this content contains
 	 *    links, provide this information here, to avoid redundant parsing to
 	 *    find out.
 	 *
@@ -149,8 +148,8 @@ class BoardContent extends \AbstractContent {
 	 *       may call ParserOutput::recordOption() on the output object.
 	 *
 	 * @param Title $title The page title to use as a context for rendering.
-	 * @param int $revId Optional revision ID being rendered.
-	 * @param ParserOptions $options Any parser options.
+	 * @param int|null $revId Optional revision ID being rendered.
+	 * @param ParserOptions|null $options Any parser options.
 	 * @param bool $generateHtml Whether to generate HTML (default: true). If false,
 	 *        the result of calling getText() on the ParserOutput object returned by
 	 *        this method is undefined.
@@ -171,7 +170,7 @@ class BoardContent extends \AbstractContent {
 				global $wgUser;
 				$user = $options ? $options->getUser() : $wgUser;
 				$parserOutput = $this->generateHtml( $title, $user );
-			} catch ( UnknownWorkflowIdException $e ) {
+			} catch ( \Exception $e ) {
 				// Workflow does not yet exist (may be in the process of being created)
 				$parserOutput = new ParserOutput();
 			}
@@ -182,10 +181,11 @@ class BoardContent extends \AbstractContent {
 		$parserOutput->updateCacheExpiry( 0 );
 
 		if ( $revId === null ) {
-			$wikiPage = new WikiPage( $title );
+			$wikiPage = WikiPage::factory( $title );
 			$timestamp = $wikiPage->getTimestamp();
 		} else {
-			$timestamp = Revision::getTimestampFromId( $title, $revId );
+			$timestamp = MediaWikiServices::getInstance()->getRevisionLookup()
+				->getTimestampFromId( $revId );
 		}
 
 		$parserOutput->setTimestamp( $timestamp );
@@ -228,7 +228,6 @@ class BoardContent extends \AbstractContent {
 		$parserOutput->setText( $childContext->getOutput()->getHTML() );
 		$parserOutput->addModules( $childContext->getOutput()->getModules() );
 		$parserOutput->addModuleStyles( $childContext->getOutput()->getModuleStyles() );
-		$parserOutput->addModuleScripts( $childContext->getOutput()->getModuleScripts() );
 
 		return $parserOutput;
 	}

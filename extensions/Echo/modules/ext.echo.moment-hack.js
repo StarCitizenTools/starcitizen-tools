@@ -1,4 +1,4 @@
-( function ( mw ) {
+( function () {
 	/* global moment:false */
 	'use strict';
 
@@ -20,6 +20,13 @@
 				y: 'years',
 				yy: 'years'
 			};
+			// The following messages are used here:
+			// * notification-timestamp-ago-seconds
+			// * notification-timestamp-ago-minutes
+			// * notification-timestamp-ago-hours
+			// * notification-timestamp-ago-days
+			// * notification-timestamp-ago-months
+			// * notification-timestamp-ago-years
 			return mw.msg( 'notification-timestamp-ago-' + keymap[ key ], mw.language.convertNumber( number ) );
 		},
 		calendar: {
@@ -45,4 +52,4 @@
 	} );
 	// Reset back to original locale
 	moment.locale( momentOrigLocale );
-}( mediaWiki ) );
+}() );

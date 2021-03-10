@@ -3,10 +3,19 @@
 namespace Flow\Tests\Api;
 
 /**
+ * @covers \Flow\Api\ApiFlowBase
+ * @covers \Flow\Api\ApiFlowBasePost
+ * @covers \Flow\Api\ApiFlowEditTitle
+ *
  * @group Flow
  * @group medium
+ * @group Database
  */
 class ApiFlowEditTitleTest extends ApiTestCase {
+
+	/**
+	 * @group Broken
+	 */
 	public function testEditTitle() {
 		$topic = $this->createTopic();
 

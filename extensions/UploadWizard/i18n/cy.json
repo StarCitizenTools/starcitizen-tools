@@ -1,14 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Lloffiwr",
-			"Pwyll",
-			"Xxglennxx",
-			"Matma Rex",
-			"Robin Owain",
 			"Diafol",
+			"Envlh",
+			"Lloffiwr",
 			"Macofe",
-			"Envlh"
+			"Matma Rex",
+			"Pwyll",
+			"Robin Owain",
+			"Xxglennxx"
 		]
 	},
 	"uploadwizard": "Dewin Uwchlwytho",
@@ -61,7 +61,6 @@
 	"mwe-upwiz-remove-upload": "Tynnu'r ffeil hon oddi ar restr y ffeiliau i'w huwchlwytho",
 	"mwe-upwiz-remove-description": "Tynnu'r disgrifiad hwn",
 	"mwe-upwiz-upload": "Uwchlwyther",
-	"mwe-upwiz-file-upload-notcapable": "Yn anffodus nid yw'ch porwr yn gallu uwchlwytho ffeiliau.\nCeisiwch eto gyda phorwr arall.",
 	"mwe-upwiz-file-all-ok": "Llwyddodd yr holl uwchlwytho!",
 	"mwe-upwiz-file-some-failed": "Methodd rhai o'r uwchlwythiadau.",
 	"mwe-upwiz-file-retry": "Ceisio eilwaith i lwytho'r ffeiliau y methwyd eu huwchlwytho",
@@ -150,7 +149,6 @@
 	"mwe-upwiz-next": "Nesaf",
 	"mwe-upwiz-next-file": "Ymlaen",
 	"mwe-upwiz-next-deeds": "Nesaf",
-	"mwe-upwiz-next-details": "Nesaf",
 	"mwe-upwiz-home": "Ewch i hafan y wici",
 	"mwe-upwiz-upload-another": "Uwchlwytho mwy o ffeiliau",
 	"mwe-upwiz-prevent-close": "Nid ydych wedi gorffen uwchlwytho a chyhoeddi'r {{PLURAL:$1||ffeil hon|ffeiliau hyn}} eto.",
@@ -225,7 +223,7 @@
 	"mwe-upwiz-license-own-pd": "Ildiwyd pob hawl gyda'r drwydded Creative Commons Zero (yn debyg i'r parth cyhoeddus)",
 	"mwe-upwiz-license-pd-old-100": "Bu farw'r awdur mwy na 100 mlynedd yn ôl",
 	"mwe-upwiz-license-pd-old": "Bu farw'r awdur mwy na 70 mlynedd yn ôl",
-	"mwe-upwiz-license-pd-us": "Cyhoeddwyd yn gyntaf yn UDA, a hynny cyn 1923",
+	"mwe-upwiz-license-pd-us": "Cyhoeddwyd yn gyntaf yn UDA, a hynny cyn 1925",
 	"mwe-upwiz-license-pd-usgov": "Gwaith gwreiddiol o waith Llywodraeth Ffederal yr Unol Daleithiau",
 	"mwe-upwiz-license-pd-usgov-nasa": "Gwaith gwreiddiol o NASA",
 	"mwe-upwiz-license-pd-usgov-military-navy": "Gwaith gwreiddiol o waith Llynges Filwrol yr Unol Daleithiau",
@@ -276,7 +274,6 @@
 	"mwe-upwiz-prefs-def-license-def": "Defnyddio'r un diofyn",
 	"mwe-upwiz-prefs-license-own": "Gwaith eich hun - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "Gwaith rhywun arall - $1",
-	"mwe-upwiz-prefs-chunked": "Uwchlwytho ffeiliau mwy nag $1 fesul talp gyda'r Dewin Uwchlwytho",
 	"mwe-upwiz-prefs-skiptutorial": "Hepgor y tiwtorial trwyddedi",
 	"mwe-upwiz-prefs-maxsimultaneous-upload": "Uchafswm nifer yr uwchlwythiadau y gellir eu huwchlwytho ar yr un pryd",
 	"campaigns": "Ymgyrchoedd y Dewin Uwchlwytho",

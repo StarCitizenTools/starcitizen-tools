@@ -4,6 +4,7 @@
  *
  * @ingroup Maintenance
  */
+
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
 	: __DIR__ . '/../../../maintenance/Maintenance.php';
@@ -19,21 +20,22 @@ class RemoveInvalidNotification extends Maintenance {
 	protected $invalidEventType = [ 'article-linked' ];
 
 	public function __construct() {
-		$this->mDescription = "Removes invalid notifications from the database.";
+		parent::__construct();
+
+		$this->addDescription( "Removes invalid notifications from the database." );
 		$this->requireExtension( 'Echo' );
 	}
 
 	public function execute() {
+		$lbFactory = MWEchoDbFactory::newFromDefault();
 		if ( !$this->invalidEventType ) {
 			$this->output( "There is nothing to process\n" );
 
 			return;
 		}
 
-		global $wgEchoCluster;
-
-		$dbw = MWEchoDbFactory::getDB( DB_MASTER );
-		$dbr = MWEchoDbFactory::getDB( DB_REPLICA );
+		$dbw = $lbFactory->getEchoDb( DB_MASTER );
+		$dbr = $lbFactory->getEchoDb( DB_REPLICA );
 
 		$count = $this->batchSize;
 
@@ -55,7 +57,7 @@ class RemoveInvalidNotification extends Maintenance {
 					$event[] = $row->event_id;
 				}
 				$count++;
-			};
+			}
 
 			if ( $event ) {
 				$this->beginTransaction( $dbw, __METHOD__ );
@@ -74,7 +76,7 @@ class RemoveInvalidNotification extends Maintenance {
 				$this->commitTransaction( $dbw, __METHOD__ );
 
 				$this->output( "processing " . count( $event ) . " invalid events\n" );
-				wfWaitForSlaves( false, false, $wgEchoCluster );
+				$lbFactory->waitForReplicas();
 			}
 
 			// Cleanup is not necessary for
@@ -83,5 +85,5 @@ class RemoveInvalidNotification extends Maintenance {
 	}
 }
 
-$maintClass = 'RemoveInvalidNotification'; // Tells it to run the class
+$maintClass = RemoveInvalidNotification::class; // Tells it to run the class
 require_once RUN_MAINTENANCE_IF_MAIN;

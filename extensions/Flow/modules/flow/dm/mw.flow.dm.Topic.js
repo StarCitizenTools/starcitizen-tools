@@ -1,4 +1,4 @@
-( function ( $ ) {
+( function () {
 	/**
 	 * Flow Topic
 	 *
@@ -15,7 +15,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.flow.dm.Topic.parent.call( this, config );
+		mw.flow.dm.Topic.super.call( this, config );
 
 		// Mixin constructor
 		mw.flow.dm.List.call( this );
@@ -101,7 +101,7 @@
 				summary: this.getSummary()
 			},
 			// Parent
-			mw.flow.dm.Topic.parent.prototype.getHashObject.call( this )
+			mw.flow.dm.Topic.super.prototype.getHashObject.apply( this, arguments )
 		);
 	};
 
@@ -117,7 +117,7 @@
 		this.replyIds = data.replies || [];
 
 		// Parent method
-		mw.flow.dm.Topic.parent.prototype.populate.call( this, data );
+		mw.flow.dm.Topic.super.prototype.populate.apply( this, arguments );
 
 		if ( data.replies !== undefined ) {
 			this.unStub();
@@ -126,6 +126,7 @@
 
 	/**
 	 * Get an array of post ids attached to this topic
+	 *
 	 * @return {string[]} Post reply ids
 	 */
 	mw.flow.dm.Topic.prototype.getReplyIds = function () {
@@ -134,7 +135,8 @@
 
 	/**
 	 * Check if a topic is a stub
-	 * @return {Boolean} Topic is a stub
+	 *
+	 * @return {boolean} Topic is a stub
 	 */
 	mw.flow.dm.Topic.prototype.isStub = function () {
 		return this.stub;
@@ -142,6 +144,7 @@
 
 	/**
 	 * Unstub a topic when all available information exists on it
+	 *
 	 * @private
 	 */
 	mw.flow.dm.Topic.prototype.unStub = function () {
@@ -168,4 +171,4 @@
 		this.emit( 'summaryChange', this.summary );
 	};
 
-}( jQuery ) );
+}() );

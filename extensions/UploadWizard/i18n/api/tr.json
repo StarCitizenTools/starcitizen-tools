@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"BaRaN6161 TURK"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Kara liste için kullanıcı kimliğini (NSID) kullanarak bir Flickr URL'sini doğrulayın.\n\n<var>list</var> seçeneğiyle kullanıldığında, kara listeye alınan tüm ID'leri döndürür.",
+	"apihelp-flickrblacklist-summary": "Kara liste için kullanıcı kimliğini (NSID) kullanarak bir Flickr URL'sini doğrulayın.",
+	"apihelp-flickrblacklist-extended-description": "<var>list</var> seçeneğiyle kullanıldığında, kara listeye alınan tüm ID'leri döndürür.",
+	"apihelp-flickrblacklist-param-url": "Test edilecek Flickr URL'si.",
+	"apihelp-flickrblacklist-param-list": "Ayarlandığında, kara listenin tamamı döndürülür. $1url ile birlikte kullanılamaz.",
+	"apihelp-flickrblacklist-example-1": "Kara listeye karşı bir URL kontrol edin",
+	"apihelp-flickrblacklist-example-2": "Tüm kara listeye dön",
+	"apihelp-query+allcampaigns-description": "Tüm UploadWizard kampanyalarını numaralandırın.",
+	"apihelp-query+allcampaigns-summary": "Tüm UploadWizard kampanyalarını numaralandırın.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Yalnızca etkin olan kampanyaları listele.",
+	"apihelp-query+allcampaigns-param-limit": "Döndürülecek kampanya sayısı.",
+	"apihelp-query+allcampaigns-example-1": "Etkinleştirilmiş kampanyaları numaralandır"
+}

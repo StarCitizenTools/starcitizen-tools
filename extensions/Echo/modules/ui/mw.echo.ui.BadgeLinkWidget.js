@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Notification badge button widget for echo popup.
 	 *
@@ -10,13 +10,14 @@
 	 * @cfg {string} [type] The notification types this button represents;
 	 *  'message', 'alert' or 'all'
 	 * @cfg {string} [href] URL the badge links to
+	 * @cfg {string} [numItems=0] The number of items that are in the button display
 	 * @cfg {string} [convertedNumber] A converted version of the initial count
 	 */
 	mw.echo.ui.BadgeLinkWidget = function MwEchoUiBadgeLinkWidget( config ) {
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.ui.BadgeLinkWidget.parent.call( this, config );
+		mw.echo.ui.BadgeLinkWidget.super.call( this, config );
 
 		// Mixin constructors
 		OO.ui.mixin.LabelElement.call( this, $.extend( { $label: this.$element }, config ) );
@@ -29,10 +30,17 @@
 
 		this.count = 0;
 		this.type = config.type || 'alert';
-		this.setCount( config.numItems, config.convertedNumber );
+		this.setCount( config.numItems || 0, config.convertedNumber );
 
 		if ( config.href !== undefined && OO.ui.isSafeUrl( config.href ) ) {
 			this.$element.attr( 'href', config.href );
+		}
+		if ( this.type === 'alert' ) {
+			this.$element
+				.addClass( 'oo-ui-icon-bell' );
+		} else {
+			this.$element
+				.addClass( 'oo-ui-icon-tray' );
 		}
 	};
 
@@ -74,4 +82,4 @@
 			mw.hook( 'ext.echo.badge.countChange' ).fire( this.type, this.count, convertedNumber );
 		}
 	};
-}( mediaWiki, jQuery ) );
+}() );

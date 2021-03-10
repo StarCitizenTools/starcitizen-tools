@@ -18,4 +18,4 @@
 ( function ( uw ) {
 	// create UploadWizard deed.dialog namespace
 	uw.deed.dialog = {};
-}( mediaWiki.uploadWizard ) );
+}( mw.uploadWizard ) );

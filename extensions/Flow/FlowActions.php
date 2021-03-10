@@ -1,12 +1,12 @@
 <?php
 
+use Flow\Data\Listener\RecentChangesListener;
+use Flow\Log\ModerationLogger;
 use Flow\Model\AbstractRevision;
+use Flow\Model\Header;
 use Flow\Model\PostRevision;
 use Flow\Model\PostSummary;
-use Flow\Model\Header;
 use Flow\RevisionActionPermissions;
-use Flow\Log\ModerationLogger;
-use Flow\Data\Listener\RecentChangesListener;
 
 /**
  * Flow actions: key => value map with key being the action name.
@@ -46,6 +46,7 @@ use Flow\Data\Listener\RecentChangesListener;
  * *   All actions other than view should have an array here, unless the default
  * *   modules are known to work.  You can specify an empty array, or a custom set of modules.
  * * moduleStyles: Style modules to insert with RL to html page for this action instead of the defaults
+ * * hasUserGeneratedContent: Whether this action renders a page consisting of user-generated content
  */
 $wgFlowActions = [
 	'create-header' => [
@@ -85,7 +86,7 @@ $wgFlowActions = [
 			],
 			'class' => 'flow-history-edit-header',
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 		'editcount' => true,
 	],
@@ -109,7 +110,7 @@ $wgFlowActions = [
 			],
 			'class' => 'flow-history-edit-header',
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'editcount' => true,
 		// theis modules/moduleStyles is repeated in all the undo-* actions. Find a way to share.
 		'moduleStyles' => [
@@ -136,7 +137,10 @@ $wgFlowActions = [
 			PostRevision::MODERATED_NONE => '',
 			PostRevision::MODERATED_LOCKED => '',
 		],
-		'links' => [ 'topic', 'topic-history', 'diff-post-summary', 'watch-topic', 'unwatch-topic', 'summary-revision' ],
+		'links' => [
+			'topic', 'topic-history', 'diff-post-summary', 'watch-topic', 'unwatch-topic',
+			'summary-revision'
+		],
 		'actions' => [ 'edit-topic-summary', 'lock-topic', 'restore-topic' ],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-create-topic-summary',
@@ -165,8 +169,13 @@ $wgFlowActions = [
 			PostRevision::MODERATED_NONE => '',
 			PostRevision::MODERATED_LOCKED => '',
 		],
-		'links' => [ 'topic', 'topic-history', 'diff-post-summary', 'watch-topic', 'unwatch-topic', 'summary-revision' ],
-		'actions' => [ 'edit-topic-summary', 'lock-topic', 'restore-topic', 'undo-edit-topic-summary' ],
+		'links' => [
+			'topic', 'topic-history', 'diff-post-summary', 'watch-topic', 'unwatch-topic',
+			'summary-revision'
+		],
+		'actions' => [
+			'edit-topic-summary', 'lock-topic', 'restore-topic', 'undo-edit-topic-summary'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-edit-topic-summary',
 			'i18n-params' => [
@@ -176,7 +185,7 @@ $wgFlowActions = [
 			],
 			'class' => 'flow-history-edit-topic-summary',
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 		'editcount' => true,
 	],
@@ -208,7 +217,7 @@ $wgFlowActions = [
 			],
 			'class' => 'flow-history-edit-topic-summary',
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'editcount' => true,
 		'moduleStyles' => [
 			'mediawiki.ui.button',
@@ -226,8 +235,13 @@ $wgFlowActions = [
 		'permissions' => [
 			PostRevision::MODERATED_NONE => '',
 		],
-		'links' => [ 'topic', 'topic-history', 'diff-post', 'topic-revision', 'watch-topic', 'unwatch-topic' ],
-		'actions' => [ 'reply', 'thank', 'edit-title', 'lock-topic', 'hide-topic', 'delete-topic', 'suppress-topic', 'edit-topic-summary', 'lock-topic', 'restore-topic' ],
+		'links' => [
+			'topic', 'topic-history', 'diff-post', 'topic-revision', 'watch-topic', 'unwatch-topic'
+		],
+		'actions' => [
+			'reply', 'thank', 'edit-title', 'lock-topic', 'hide-topic', 'delete-topic',
+			'suppress-topic', 'edit-topic-summary', 'lock-topic', 'restore-topic'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-edit-title',
 			'i18n-params' => [
@@ -239,10 +253,10 @@ $wgFlowActions = [
 			],
 			'class' => 'flow-history-edit-title',
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 		'watch' => [
-			'immediate' => [ 'Flow\\Data\\Listener\\ImmediateWatchTopicListener', 'getCurrentUser' ],
+			'immediate' => [ \Flow\Data\Listener\ImmediateWatchTopicListener::class, 'getCurrentUser' ],
 		],
 		'editcount' => true,
 	],
@@ -259,13 +273,19 @@ $wgFlowActions = [
 		// You should also adjust the memcached indices for best results.
 		'exclude_from_history' => true,
 
-		// exclude_from_recentchanges only refers to the actual Special:RecentChanges.  It does not affect Special:Watchlist.
+		// exclude_from_recentchanges only refers to the actual Special:RecentChanges.
+		// It does not affect Special:Watchlist.
 		'exclude_from_recentchanges' => true,
 		'permissions' => [
 			PostRevision::MODERATED_NONE => '',
 		],
-		'links' => [ 'topic-history', 'topic', 'post', 'topic-revision', 'watch-topic', 'unwatch-topic' ],
-		'actions' => [ 'reply', 'thank', 'edit-title', 'hide-topic', 'delete-topic', 'suppress-topic', 'edit-topic-summary', 'lock-topic', 'restore-topic' ],
+		'links' => [
+			'topic-history', 'topic', 'post', 'topic-revision', 'watch-topic', 'unwatch-topic'
+		],
+		'actions' => [
+			'reply', 'thank', 'edit-title', 'hide-topic', 'delete-topic', 'suppress-topic',
+			'edit-topic-summary', 'lock-topic', 'restore-topic'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-new-post',
 			'i18n-params' => [
@@ -276,10 +296,10 @@ $wgFlowActions = [
 			],
 			'class' => 'flow-history-new-post',
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 		'watch' => [
-			'immediate' => [ 'Flow\\Data\\Listener\\ImmediateWatchTopicListener', 'getCurrentUser' ],
+			'immediate' => [ \Flow\Data\Listener\ImmediateWatchTopicListener::class, 'getCurrentUser' ],
 		],
 		'editcount' => true,
 	],
@@ -290,7 +310,9 @@ $wgFlowActions = [
 		'rc_insert' => true,
 		'permissions' => [
 			// no permissions needed for own posts
-			PostRevision::MODERATED_NONE => function ( PostRevision $post, RevisionActionPermissions $permissions ) {
+			PostRevision::MODERATED_NONE => function (
+				PostRevision $post, RevisionActionPermissions $permissions
+			) {
 				return $post->isCreator( $permissions->getUser() ) ? '' : 'flow-edit-post';
 			}
 		],
@@ -298,7 +320,10 @@ $wgFlowActions = [
 			PostRevision::MODERATED_NONE => '',
 		],
 		'links' => [ 'post-history', 'topic-history', 'topic', 'post', 'diff-post', 'post-revision' ],
-		'actions' => [ 'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post', 'suppress-post', 'undo-edit-post' ],
+		'actions' => [
+			'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post',
+			'suppress-post', 'undo-edit-post'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-edit-post',
 			'i18n-params' => [
@@ -309,10 +334,10 @@ $wgFlowActions = [
 			],
 			'class' => 'flow-history-edit-post',
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 		'watch' => [
-			'immediate' => [ 'Flow\\Data\\Listener\\ImmediateWatchTopicListener', 'getCurrentUser' ],
+			'immediate' => [ \Flow\Data\Listener\ImmediateWatchTopicListener::class, 'getCurrentUser' ],
 		],
 		'editcount' => true,
 	],
@@ -324,7 +349,9 @@ $wgFlowActions = [
 		'rc_insert' => true,
 		'permissions' => [
 			// no permissions needed for own posts
-			PostRevision::MODERATED_NONE => function ( PostRevision $post, RevisionActionPermissions $permissions ) {
+			PostRevision::MODERATED_NONE => function (
+				PostRevision $post, RevisionActionPermissions $permissions
+			) {
 				return $post->isCreator( $permissions->getUser() ) ? '' : 'flow-edit-post';
 			}
 		],
@@ -332,7 +359,10 @@ $wgFlowActions = [
 			PostRevision::MODERATED_NONE => '',
 		],
 		'links' => [ 'post-history', 'topic-history', 'topic', 'post', 'diff-post', 'post-revision' ],
-		'actions' => [ 'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post', 'suppress-post', 'undo-edit-post' ],
+		'actions' => [
+			'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post',
+			'suppress-post', 'undo-edit-post'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-edit-post',
 			'i18n-params' => [
@@ -343,9 +373,9 @@ $wgFlowActions = [
 			],
 			'class' => 'flow-history-edit-post',
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'watch' => [
-			'immediate' => [ 'Flow\\Data\\Listener\\ImmediateWatchTopicListener', 'getCurrentUser' ],
+			'immediate' => [ \Flow\Data\Listener\ImmediateWatchTopicListener::class, 'getCurrentUser' ],
 		],
 		'editcount' => true,
 		'moduleStyles' => [
@@ -375,7 +405,9 @@ $wgFlowActions = [
 			PostRevision::MODERATED_HIDDEN => '',
 		],
 		'links' => [ 'topic', 'post', 'post-history', 'topic-history', 'post-revision' ],
-		'actions' => [ 'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post', 'suppress-post' ],
+		'actions' => [
+			'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post', 'suppress-post'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-hid-post',
 			'i18n-params' => [
@@ -397,8 +429,12 @@ $wgFlowActions = [
 		'permissions' => [
 			PostRevision::MODERATED_NONE => [ 'flow-hide', 'flow-delete', 'flow-suppress' ],
 		],
-		'links' => [ 'topic', 'post', 'topic-history', 'post-history', 'topic-revision', 'watch-topic', 'unwatch-topic' ],
-		'actions' => [ 'reply', 'thank', 'edit-title', 'restore-topic', 'hide-topic', 'delete-topic', 'suppress-topic' ],
+		'links' => [
+			'topic', 'post', 'topic-history', 'post-history', 'topic-revision', 'watch-topic', 'unwatch-topic'
+		],
+		'actions' => [
+			'reply', 'thank', 'edit-title', 'restore-topic', 'hide-topic', 'delete-topic', 'suppress-topic'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-hid-topic',
 			'i18n-params' => [
@@ -421,8 +457,12 @@ $wgFlowActions = [
 			PostRevision::MODERATED_NONE => [ 'flow-delete', 'flow-suppress' ],
 			PostRevision::MODERATED_HIDDEN => [ 'flow-delete', 'flow-suppress' ],
 		],
-		'links' => [ 'topic', 'post', 'post-history', 'topic-history', 'post-revision', 'watch-topic', 'unwatch-topic' ],
-		'actions' => [ 'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post', 'suppress-post' ],
+		'links' => [
+			'topic', 'post', 'post-history', 'topic-history', 'post-revision', 'watch-topic', 'unwatch-topic'
+		],
+		'actions' => [
+			'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post', 'suppress-post'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-deleted-post',
 			'i18n-params' => [
@@ -447,7 +487,10 @@ $wgFlowActions = [
 			PostRevision::MODERATED_LOCKED => [ 'flow-delete', 'flow-suppress' ],
 		],
 		'links' => [ 'topic', 'topic-history', 'topic-revision', 'watch-topic', 'unwatch-topic' ],
-		'actions' => [ 'reply', 'thank', 'edit-title', 'hide-topic', 'delete-topic', 'suppress-topic', 'edit-topic-summary', 'lock-topic', 'restore-topic' ],
+		'actions' => [
+			'reply', 'thank', 'edit-title', 'hide-topic', 'delete-topic', 'suppress-topic',
+			'edit-topic-summary', 'lock-topic', 'restore-topic'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-deleted-topic',
 			'i18n-params' => [
@@ -472,7 +515,9 @@ $wgFlowActions = [
 			PostRevision::MODERATED_DELETED => 'flow-suppress',
 		],
 		'links' => [ 'topic', 'post', 'topic-history', 'post-revision' ],
-		'actions' => [ 'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post', 'suppress-post' ],
+		'actions' => [
+			'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post', 'suppress-post'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-suppressed-post',
 			'i18n-params' => [
@@ -498,7 +543,10 @@ $wgFlowActions = [
 			PostRevision::MODERATED_LOCKED => 'flow-suppress',
 		],
 		'links' => [ 'topic', 'topic-history', 'topic-revision', 'watch-topic', 'unwatch-topic' ],
-		'actions' => [ 'reply', 'thank', 'edit-title', 'hide-topic', 'delete-topic', 'suppress-topic', 'edit-topic-summary', 'lock-topic', 'restore-topic' ],
+		'actions' => [
+			'reply', 'thank', 'edit-title', 'hide-topic', 'delete-topic', 'suppress-topic',
+			'edit-topic-summary', 'lock-topic', 'restore-topic'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-suppressed-topic',
 			'i18n-params' => [
@@ -535,7 +583,7 @@ $wgFlowActions = [
 			],
 			'class' => 'flow-history-locked-topic',
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 
@@ -572,7 +620,9 @@ $wgFlowActions = [
 			PostRevision::MODERATED_SUPPRESSED => 'flow-suppress',
 		],
 		'links' => [ 'topic', 'post', 'post-history', 'post-revision' ],
-		'actions' => [ 'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post', 'suppress-post' ],
+		'actions' => [
+			'reply', 'thank', 'edit-post', 'restore-post', 'hide-post', 'delete-post', 'suppress-post'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-restored-post',
 			'i18n-params' => [
@@ -589,7 +639,7 @@ $wgFlowActions = [
 				return "flow-history-un$state-post";
 			}
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 
@@ -627,7 +677,10 @@ $wgFlowActions = [
 			PostRevision::MODERATED_SUPPRESSED => 'flow-suppress',
 		],
 		'links' => [ 'topic', 'topic-history', 'topic-revision', 'watch-topic', 'unwatch-topic' ],
-		'actions' => [ 'reply', 'thank', 'edit-title', 'hide-topic', 'delete-topic', 'suppress-topic', 'edit-topic-summary', 'lock-topic', 'restore-topic' ],
+		'actions' => [
+			'reply', 'thank', 'edit-title', 'hide-topic', 'delete-topic', 'suppress-topic',
+			'edit-topic-summary', 'lock-topic', 'restore-topic'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-restored-topic',
 			'i18n-params' => [
@@ -644,17 +697,19 @@ $wgFlowActions = [
 				return "flow-history-un$state-topic";
 			}
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 
 	'view' => [
 		'performs-writes' => false,
+		'hasUserGeneratedContent' => true,
 		'log_type' => false, // don't log views
 		'rc_insert' => false, // won't even be called, actually; only for writes
 		'permissions' => [
 			PostRevision::MODERATED_NONE => '',
-			// Everyone has permission to see this, but hidden comments are only visible (collapsed) on permalinks directly to them.
+			// Everyone has permission to see this,
+			// but hidden comments are only visible (collapsed) on permalinks directly to them.
 			PostRevision::MODERATED_HIDDEN => '',
 			PostRevision::MODERATED_LOCKED => '',
 			PostRevision::MODERATED_DELETED => [ 'flow-delete', 'flow-suppress' ],
@@ -664,7 +719,7 @@ $wgFlowActions = [
 		'links' => [], // @todo
 		'actions' => [], // view is not a recorded change type, no actions will be requested
 		'history' => [], // views don't generate history
-		'handler-class' => 'Flow\Actions\ViewAction',
+		'handler-class' => \Flow\Actions\ViewAction::class,
 	],
 
 	'reply' => [
@@ -678,7 +733,10 @@ $wgFlowActions = [
 			PostRevision::MODERATED_NONE => '',
 		],
 		'links' => [ 'topic-history', 'topic', 'post', 'post-revision', 'watch-topic', 'unwatch-topic' ],
-		'actions' => [ 'reply', 'thank', 'edit-post', 'hide-post', 'delete-post', 'suppress-post', 'edit-topic-summary', 'lock-topic', 'restore-topic' ],
+		'actions' => [
+			'reply', 'thank', 'edit-post', 'hide-post', 'delete-post', 'suppress-post',
+			'edit-topic-summary', 'lock-topic', 'restore-topic'
+		],
 		'history' => [
 			'i18n-message' => 'flow-rev-message-reply',
 			'i18n-params' => [
@@ -697,10 +755,10 @@ $wgFlowActions = [
 				'class' => 'flow-history-bundle',
 			],
 		],
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 		'watch' => [
-			'immediate' => [ 'Flow\\Data\\Listener\\ImmediateWatchTopicListener', 'getCurrentUser' ],
+			'immediate' => [ \Flow\Data\Listener\ImmediateWatchTopicListener::class, 'getCurrentUser' ],
 		],
 		'editcount' => true,
 	],
@@ -710,7 +768,10 @@ $wgFlowActions = [
 		'log_type' => false,
 		'rc_insert' => false, // won't even be called, actually; only for writes
 		'permissions' => [
-			PostRevision::MODERATED_NONE => function ( AbstractRevision $revision, RevisionActionPermissions $permissions ) {
+			PostRevision::MODERATED_NONE => function (
+				AbstractRevision $revision,
+				RevisionActionPermissions $permissions
+			) {
 				static $previousCollectionId;
 
 				/*
@@ -723,7 +784,7 @@ $wgFlowActions = [
 				 * We don't want that test to happen; otherwise, when a post
 				 * has just been restored in the most recent revisions, that
 				 * would result in none of the previous revisions being
-				 * available (because a user would need permissions for the the
+				 * available (because a user would need permissions for the
 				 * state the last revision was restored from)
 				 */
 				$collection = $revision->getCollection();
@@ -755,7 +816,9 @@ $wgFlowActions = [
 				if ( strpos( $revision->getChangeType(), 'restore-' ) === 0 ) {
 					$previous = $collection->getPrevRevision( $revision );
 
-					if ( $previous === null || $previous->getModerationState() === AbstractRevision::MODERATED_NONE ) {
+					if ( $previous === null ||
+						$previous->getModerationState() === AbstractRevision::MODERATED_NONE
+					) {
 						return '';
 					}
 
@@ -782,7 +845,7 @@ $wgFlowActions = [
 		],
 		'core-delete-permissions' => [ 'deletedhistory' ],
 		'history' => [], // views don't generate history
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 	],
 
 	// Pseudo-action to determine when to show thank links,
@@ -801,11 +864,13 @@ $wgFlowActions = [
 
 	'view-topic-summary' => [
 		'performs-writes' => false,
+		'hasUserGeneratedContent' => true,
 		'log_type' => false, // don't log views
 		'rc_insert' => false, // won't even be called, actually; only for writes
 		'permissions' => [
 			PostRevision::MODERATED_NONE => '',
-			// Everyone has permission to see this, but hidden comments are only visible (collapsed) on permalinks directly to them.
+			// Everyone has permission to see this,
+			// but hidden comments are only visible (collapsed) on permalinks directly to them.
 			PostRevision::MODERATED_HIDDEN => '',
 			PostRevision::MODERATED_LOCKED => '',
 			PostRevision::MODERATED_DELETED => [ 'flow-delete', 'flow-suppress' ],
@@ -820,7 +885,7 @@ $wgFlowActions = [
 		'links' => [], // @todo
 		'actions' => [], // view is not a recorded change type, no actions will be requested
 		'history' => [], // views don't generate history
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 
@@ -831,6 +896,7 @@ $wgFlowActions = [
 	// title.
 	'view-topic-title' => [
 		'performs-writes' => false,
+		'hasUserGeneratedContent' => true,
 		'log_type' => false, // don't log views
 		'rc_insert' => false, // won't even be called, actually; only for writes
 		'permissions' => [
@@ -854,36 +920,37 @@ $wgFlowActions = [
 	// or just move these to a different file
 	// @todo: we should probably at least add 'permissions' in these below
 	'compare-header-revisions' => [
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'hasUserGeneratedContent' => true,
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 	'view-header' => [
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'hasUserGeneratedContent' => true,
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 	'compare-post-revisions' => [
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'hasUserGeneratedContent' => true,
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 	// @todo - This is a very bad action name, consolidate with view-post action
 	'single-view' => [
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'hasUserGeneratedContent' => true,
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 	'compare-postsummary-revisions' => [
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'hasUserGeneratedContent' => true,
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 	'moderate-topic' => [
-		'handler-class' => 'Flow\Actions\FlowAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 	'moderate-post' => [
-		'handler-class' => 'Flow\Actions\FlowAction',
-		'modules' => [],
-	],
-	'purge' => [
-		'handler-class' => 'Flow\Actions\PurgeAction',
+		'handler-class' => \Flow\Actions\FlowAction::class,
 		'modules' => [],
 	],
 

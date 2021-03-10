@@ -1,4 +1,4 @@
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 
 	/**
 	 * Metadata copier in UploadWizard's "Details" step form.
@@ -22,7 +22,7 @@
 		this.savedSerializedData = [];
 
 		for ( metadataType in uw.CopyMetadataWidget.static.copyMetadataTypes ) {
-			if ( uw.CopyMetadataWidget.static.copyMetadataTypes.hasOwnProperty( metadataType ) ) {
+			if ( Object.prototype.hasOwnProperty.call( uw.CopyMetadataWidget.static.copyMetadataTypes, metadataType ) ) {
 				defaultStatus = uw.CopyMetadataWidget.static.copyMetadataTypes[ metadataType ];
 				// mwe-upwiz-copy-title, mwe-upwiz-copy-caption, mwe-upwiz-copy-description,
 				// mwe-upwiz-copy-date, mwe-upwiz-copy-categories, mwe-upwiz-copy-location,
@@ -118,6 +118,8 @@
 		this.copyMetadata( metadataTypes );
 
 		this.undoButton.toggle( true );
+		// FIXME: Use CSS transition
+		// eslint-disable-next-line no-jquery/no-fade
 		this.$success
 			.text( mw.message( 'mwe-upwiz-copied-metadata' ).text() )
 			.show()
@@ -133,6 +135,8 @@
 		this.restoreMetadata();
 
 		this.undoButton.toggle( false );
+		// FIXME: Use CSS transition
+		// eslint-disable-next-line no-jquery/no-fade
 		this.$success
 			.text( mw.message( 'mwe-upwiz-undid-metadata' ).text() )
 			.show()
@@ -170,7 +174,7 @@
 		if ( copyingTitle ) {
 			titleZero = sourceValue.title.title;
 			// Add number suffix to first title if no numbering present
-			matches = titleZero.match( /(\D+)(\d{1,3})(\D*)$/ );
+			matches = titleZero.match( /(\D+)(\d{1,3})(\.\D*)?$/ );
 			if ( matches === null ) {
 				titleZero = titleZero + ' 01';
 			}
@@ -210,4 +214,4 @@
 		}
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

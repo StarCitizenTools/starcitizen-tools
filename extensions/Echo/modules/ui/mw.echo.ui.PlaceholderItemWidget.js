@@ -1,4 +1,4 @@
-( function ( mw, $ ) {
+( function () {
 	/**
 	 * Placeholder notification option widget for echo popup.
 	 *
@@ -14,7 +14,7 @@
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.ui.PlaceholderItemWidget.parent.call( this, $.extend( { data: null }, config ) );
+		mw.echo.ui.PlaceholderItemWidget.super.call( this, $.extend( { data: null }, config ) );
 
 		// Mixin constructor
 		OO.ui.mixin.LabelElement.call( this, config );
@@ -30,7 +30,7 @@
 	/**
 	 * Set (or unset) the main link url for this widget
 	 *
-	 * @param {string} url The widget url
+	 * @param {string} [url] The widget url
 	 */
 	mw.echo.ui.PlaceholderItemWidget.prototype.setLink = function ( url ) {
 		var $link;
@@ -89,4 +89,4 @@
 	 */
 	mw.echo.ui.PlaceholderItemWidget.prototype.resetInitiallyUnseen = function () {};
 
-}( mediaWiki, jQuery ) );
+}() );

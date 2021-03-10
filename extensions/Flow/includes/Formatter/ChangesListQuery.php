@@ -2,8 +2,8 @@
 
 namespace Flow\Formatter;
 
-use Flow\Data\ManagerGroup;
 use Flow\Data\Listener\RecentChangesListener;
+use Flow\Data\ManagerGroup;
 use Flow\Exception\FlowException;
 use Flow\FlowActions;
 use Flow\Model\UUID;
@@ -45,6 +45,7 @@ class ChangesListQuery extends AbstractQuery {
 	/**
 	 * @param \stdClass[] $rows List of recentchange database rows
 	 * @param bool $isWatchlist
+	 * @suppress PhanParamSignatureMismatch The signature doesn't match, though
 	 */
 	public function loadMetadataBatch( $rows, $isWatchlist = false ) {
 		$needed = [];
@@ -92,7 +93,7 @@ class ChangesListQuery extends AbstractQuery {
 		} elseif ( $count === 1 ) {
 			$results = reset( $found );
 		} else {
-			$results = call_user_func_array( 'array_merge', $found );
+			$results = array_merge( ...array_values( $found ) );
 		}
 
 		if ( $results ) {
@@ -237,11 +238,4 @@ class ChangesListQuery extends AbstractQuery {
 	protected function changeSeparator() {
 		return ' <span class="mw-changeslist-separator">. .</span> ';
 	}
-}
-
-class RecentChangesRow extends FormatterRow {
-	/**
-	 * @var RecentChange
-	 */
-	public $recentChange;
 }

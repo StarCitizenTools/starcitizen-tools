@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Validar una URL de Flickr usando la ID d'usuariu (NSID) pa llista prieta.\n\nCuando s'usa cola opción <var>list</var>, devuelve toles IDs que tán na llista prieta.",
+	"apihelp-flickrblacklist-summary": "Validar una URL de Flickr usando l'identificador del usuariu (NSID) na llista prieta.",
+	"apihelp-flickrblacklist-extended-description": "Cuando s'usa cola opción <var>list</var>, devuelve toles IDs de la llista prieta.",
+	"apihelp-flickrblacklist-param-url": "La URL de Flickr a comprobar.",
+	"apihelp-flickrblacklist-param-list": "Al definilo, devuélvese la llista prieta completa. Nun puede utilizase xunto con $1url.",
+	"apihelp-flickrblacklist-example-1": "Comprobar una URL escontra la llista prieta",
+	"apihelp-flickrblacklist-example-2": "Devuelve la llista prieta completa",
+	"apihelp-query+allcampaigns-description": "Enumerar toles campañes del Asistente de cargues.",
+	"apihelp-query+allcampaigns-summary": "Enumerar toles campañes del Asistente de cargues.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Llistar sólo les campañes actives.",
+	"apihelp-query+allcampaigns-param-limit": "Númberu de campañes a devolver.",
+	"apihelp-query+allcampaigns-example-1": "Enumerar les campañes actives"
+}

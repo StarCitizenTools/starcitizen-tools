@@ -1,4 +1,4 @@
-( function ( $, mw ) {
+( function () {
 	/**
 	 * A pagination widget allowing the user to go forward, backwards,
 	 * and after a couple of pages, go back to home.
@@ -20,8 +20,8 @@
 	mw.echo.ui.PaginationWidget = function MwEchoUiPaginationWidget( paginationModel, config ) {
 		config = config || {};
 
-		// Parent
-		mw.echo.ui.PaginationWidget.parent.call( this, config );
+		// Parent constructor
+		mw.echo.ui.PaginationWidget.super.call( this, config );
 
 		this.model = paginationModel;
 
@@ -127,7 +127,6 @@
 		this.labelWidget.toggle( !this.isDisabled() );
 	};
 
-	// eslint-disable-next-line valid-jsdoc
 	/**
 	 * Set the 'disabled' state of the widget.
 	 *
@@ -135,8 +134,8 @@
 	 * @chainable
 	 */
 	mw.echo.ui.PaginationWidget.prototype.setDisabled = function ( disabled ) {
-		// Parent
-		mw.echo.ui.PaginationWidget.parent.prototype.setDisabled.call( this, disabled );
+		// Parent method
+		mw.echo.ui.PaginationWidget.super.prototype.setDisabled.call( this, disabled );
 
 		if (
 			this.dirSelectWidget &&
@@ -176,4 +175,4 @@
 
 		this.labelWidget.setLabel( label );
 	};
-}( jQuery, mediaWiki ) );
+}() );

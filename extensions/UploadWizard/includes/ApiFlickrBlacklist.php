@@ -26,7 +26,7 @@ class ApiFlickrBlacklist extends ApiBase {
 			$this->getResult()->addValue( 'flickrblacklist', 'list', $list );
 		}
 
-		if ( !is_null( $params['url'] ) ) {
+		if ( $params['url'] !== null ) {
 			if ( $flickrBlacklist->isBlacklisted( $params['url'] ) ) {
 				$this->getResult()->addValue( 'flickrblacklist', 'result', 'bad' );
 			} else {

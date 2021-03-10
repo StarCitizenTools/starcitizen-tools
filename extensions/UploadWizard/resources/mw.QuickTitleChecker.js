@@ -13,8 +13,8 @@
  *   - we can't check autoconfirmed-ness of users here, so we ignore it
  *   - Javascript doesn't have a standard way to access unicode character properties in regexes, so \p{PROPERTY}, \P{PROPERTY}, and [[:PROPERTY:]] have been changed when possible
  *     or the associated regex removed
-*/
-( function ( mw, $ ) {
+ */
+( function () {
 
 	mw.QuickTitleChecker = {};
 
@@ -71,8 +71,9 @@
 	 */
 	mw.QuickTitleChecker.checkTitle = function ( title ) {
 		var errors = [];
-		$.each( mw.QuickTitleChecker.regexSets, function ( setName, regexes ) {
-			$.each( regexes, function ( i, regex ) {
+		Object.keys( mw.QuickTitleChecker.regexSets ).forEach( function ( setName ) {
+			var regexes = mw.QuickTitleChecker.regexSets[ setName ];
+			regexes.forEach( function ( regex ) {
 				if ( title.match( regex ) ) {
 					errors.push( setName );
 				}
@@ -81,4 +82,4 @@
 		return errors;
 	};
 
-}( mediaWiki, jQuery ) );
+}() );

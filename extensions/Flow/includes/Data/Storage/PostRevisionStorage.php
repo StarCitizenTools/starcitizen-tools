@@ -38,10 +38,15 @@ class PostRevisionStorage extends RevisionStorage {
 		return 'post';
 	}
 
+	/**
+	 * @param array|array[] $rows
+	 * @return array[]
+	 */
 	protected function insertRelated( array $rows ) {
 		if ( !is_array( reset( $rows ) ) ) {
 			$rows = [ $rows ];
 		}
+		'@phan-var array[] $rows';
 
 		$trees = [];
 		foreach ( $rows as $key => $row ) {
@@ -49,7 +54,7 @@ class PostRevisionStorage extends RevisionStorage {
 		}
 
 		$dbw = $this->dbFactory->getDB( DB_MASTER );
-		$res = $dbw->insert(
+		$dbw->insert(
 			$this->joinTable(),
 			$this->preprocessNestedSqlArray( $trees ),
 			__METHOD__
@@ -57,19 +62,13 @@ class PostRevisionStorage extends RevisionStorage {
 
 		// If this is a brand new root revision it needs to be added to the tree
 		// If it has a rev_parent_id then its already a part of the tree
-		if ( $res ) {
-			foreach ( $rows as $row ) {
-				if ( $row['rev_parent_id'] === null ) {
-					$res = $res && $this->treeRepo->insert(
-						UUID::create( $row['tree_rev_descendant_id'] ),
-						UUID::create( $row['tree_parent_id'] )
-					);
-				}
+		foreach ( $rows as $row ) {
+			if ( $row['rev_parent_id'] === null ) {
+				$this->treeRepo->insert(
+					UUID::create( $row['tree_rev_descendant_id'] ),
+					UUID::create( $row['tree_parent_id'] )
+				);
 			}
-		}
-
-		if ( !$res ) {
-			return [];
 		}
 
 		return $rows;
@@ -92,16 +91,12 @@ class PostRevisionStorage extends RevisionStorage {
 		}
 
 		$dbw = $this->dbFactory->getDB( DB_MASTER );
-		$res = $dbw->update(
+		$dbw->update(
 			$this->joinTable(),
 			$this->preprocessSqlArray( $treeChanges ),
 			[ 'tree_rev_id' => $old['tree_rev_id'] ],
 			__METHOD__
 		);
-
-		if ( !$res ) {
-			return [];
-		}
 
 		return $changes;
 	}
@@ -116,7 +111,8 @@ class PostRevisionStorage extends RevisionStorage {
 	protected function removeRelated( array $row ) {
 		return $this->dbFactory->getDB( DB_MASTER )->delete(
 			$this->joinTable(),
-			$this->preprocessSqlArray( [ $this->joinField() => $row['rev_id'] ] )
+			$this->preprocessSqlArray( [ $this->joinField() => $row['rev_id'] ] ),
+			__METHOD__
 		);
 	}
 }

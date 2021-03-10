@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cwlin0416",
+			"Kly"
+		]
+	},
+	"apihelp-flickrblacklist-description": "透過利用使用者 ID（NSID）驗證 Flickr URL 來列入黑名單。\n\n當與 <var>list</var> 選項使用時，回傳所有列入黑名單的 ID。",
+	"apihelp-flickrblacklist-summary": "透過利用使用者 ID（NSID）驗證 Flickr URL 來列入黑名單。",
+	"apihelp-flickrblacklist-extended-description": "當與 <var>list</var> 選項使用時，回傳所有列入黑名單的 ID。",
+	"apihelp-flickrblacklist-param-url": "要測試的 Flickr URL。",
+	"apihelp-flickrblacklist-param-list": "當設定後，會回傳完整的黑名單。不能與 $1url 一同使用。",
+	"apihelp-flickrblacklist-example-1": "檢查 URL 是否於封鎖清單中",
+	"apihelp-flickrblacklist-example-2": "返回完整封鎖清單",
+	"apihelp-query+allcampaigns-description": "列舉所有上傳精靈行動。",
+	"apihelp-query+allcampaigns-summary": "列舉所有上傳精靈行動。",
+	"apihelp-query+allcampaigns-param-enabledonly": "僅列出已啟用的行動",
+	"apihelp-query+allcampaigns-param-limit": "要回傳的行動數量。",
+	"apihelp-query+allcampaigns-example-1": "列舉已啟用的行動。"
+}

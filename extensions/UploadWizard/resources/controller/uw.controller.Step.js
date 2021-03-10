@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, uw, OO, $ ) {
+( function ( uw ) {
 	/**
 	 * Represents a step in the wizard.
 	 *
@@ -43,6 +43,9 @@
 		this.ui = ui;
 
 		this.uploads = [];
+
+		// children are expected to override this with the actual step name
+		this.stepName = new Error( 'Undefined stepName' );
 
 		/**
 		 * Upload object event handlers to be bound on load & unbound on unload.
@@ -120,7 +123,7 @@
 			test: step.hasData.bind( this )
 		} );
 
-		$.each( this.uploads, function ( i, upload ) {
+		this.uploads.forEach( function ( upload ) {
 			upload.state = step.stepName;
 
 			step.bindUploadHandlers( upload );
@@ -136,7 +139,7 @@
 	uw.controller.Step.prototype.unload = function () {
 		var step = this;
 
-		$.each( this.uploads, function ( i, upload ) {
+		this.uploads.forEach( function ( upload ) {
 			step.unbindUploadHandlers( upload );
 		} );
 
@@ -176,7 +179,8 @@
 	uw.controller.Step.prototype.bindUploadHandlers = function ( upload ) {
 		var controller = this;
 
-		$.each( this.uploadHandlers, function ( event, callback ) {
+		Object.keys( this.uploadHandlers ).forEach( function ( event ) {
+			var callback = controller.uploadHandlers[ event ];
 			upload.on( event, callback, [ upload ], controller );
 		} );
 	};
@@ -189,7 +193,8 @@
 	uw.controller.Step.prototype.unbindUploadHandlers = function ( upload ) {
 		var controller = this;
 
-		$.each( this.uploadHandlers, function ( event, callback ) {
+		Object.keys( this.uploadHandlers ).forEach( function ( event ) {
+			var callback = controller.uploadHandlers[ event ];
 			upload.off( event, callback, controller );
 		} );
 	};
@@ -260,7 +265,7 @@
 		// normalize to array of states, even though input can be 1 string
 		states = Array.isArray( states ) ? states : [ states ];
 
-		$.each( this.uploads, function ( i, upload ) {
+		this.uploads.forEach( function ( upload ) {
 			if ( states.indexOf( upload.state ) > -1 ) {
 				count++;
 			}
@@ -334,7 +339,7 @@
 		// We must not remove items from an array while iterating over it with $.each (it causes the
 		// next item to be skipped). Find and queue them first, then remove them.
 		var toRemove = [];
-		$.each( this.uploads, function ( i, upload ) {
+		this.uploads.forEach( function ( upload ) {
 			if ( upload.state === 'error' || upload.state === 'recoverable-error' ) {
 				toRemove.push( upload );
 			}
@@ -343,4 +348,4 @@
 		this.removeUploads( toRemove );
 	};
 
-}( mediaWiki, mediaWiki.uploadWizard, OO, jQuery ) );
+}( mw.uploadWizard ) );

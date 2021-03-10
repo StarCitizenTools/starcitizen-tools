@@ -2,12 +2,16 @@
 
 namespace Flow\Tests\Api;
 
+use MediaWiki\MediaWikiServices;
 use Title;
 use User;
 
 /**
+ * @covers Flow\Hooks
+ *
  * @group Flow
  * @group medium
+ * @group Database
  */
 class ApiWatchTopicTest extends ApiTestCase {
 
@@ -19,7 +23,10 @@ class ApiWatchTopicTest extends ApiTestCase {
 				'watched',
 				// initialization
 				function ( User $user, Title $title ) {
-					$user->removeWatch( $title, false );
+					$store = MediaWikiServices::getInstance()->getWatchedItemStore();
+					$store->removeWatch( $user, $title->getSubjectPage() );
+					$store->removeWatch( $user, $title->getTalkPage() );
+					$title->invalidateCache();
 				},
 				// extra request parameters
 				[],
@@ -30,7 +37,11 @@ class ApiWatchTopicTest extends ApiTestCase {
 				'unwatched',
 				// initialization
 				function ( User $user, Title $title ) {
-					$user->addWatch( $title, false );
+					MediaWikiServices::getInstance()->getWatchedItemStore()->addWatchBatchForUser(
+						$user,
+						[ $title->getSubjectPage(), $title->getTalkPage() ]
+					);
+					$user->invalidateCache();
 				},
 				// extra request parameters
 				[ 'unwatch' => 1 ],

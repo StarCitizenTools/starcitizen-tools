@@ -1,4 +1,4 @@
-( function ( mw, OO ) {
+( function () {
 	mw.Escaper = {
 		/**
 		 * Escapes wikitext for use inside {{templates}}.
@@ -48,7 +48,7 @@
 		 * replacements back into this.restoreExtracts.
 		 *
 		 * @param {string} wikitext
-		 * @return {array} [{string} wikitext, {Object} replacements]
+		 * @return {Array} [{string} wikitext, {Object} replacements]
 		 */
 		extractTemplates: function ( wikitext ) {
 			var extracts = {},
@@ -93,7 +93,7 @@
 		 * replacements back into this.restoreExtracts.
 		 *
 		 * @param {string} wikitext
-		 * @return {array} [{string} wikitext, {Object} replacements]
+		 * @return {Array} [{string} wikitext, {Object} replacements]
 		 */
 		extractLinks: function ( wikitext ) {
 			var extracts = {};
@@ -117,7 +117,7 @@
 		restoreExtracts: function ( wikitext, replacements ) {
 			// turn search keys into a regular expression, allowing us to match
 			// all of them at once
-			var searchValues = Object.keys( replacements ).map( mw.RegExp.escape ),
+			var searchValues = Object.keys( replacements ).map( mw.util.escapeRegExp ),
 				searchRegex = new RegExp( '(' + searchValues.join( '|' ) + ')', 'g' ),
 				callback = function ( match ) {
 					var replacement = replacements[ match ];
@@ -148,4 +148,4 @@
 			return wikitext.replace( searchRegex, callback );
 		}
 	};
-}( mediaWiki, OO ) );
+}() );

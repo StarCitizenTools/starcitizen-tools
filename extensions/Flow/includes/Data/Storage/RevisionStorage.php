@@ -2,15 +2,15 @@
 
 namespace Flow\Data\Storage;
 
-use Wikimedia\Rdbms\IDatabase;
 use ExternalStore;
+use Flow\Data\ObjectManager;
 use Flow\Data\Utils\Merger;
 use Flow\Data\Utils\ResultDuplicator;
-use Flow\Data\ObjectManager;
 use Flow\DbFactory;
 use Flow\Exception\DataModelException;
 use Flow\Model\UUID;
 use MWException;
+use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Abstract storage implementation for models extending from AbstractRevision
@@ -106,7 +106,7 @@ abstract class RevisionStorage extends DbStorage {
 
 	/**
 	 * Find one by specific attributes
-	 * @todo: this method can probably be generalized in parent class?
+	 * @todo this method can probably be generalized in parent class?
 	 * @param array $attributes
 	 * @param array $options
 	 * @return mixed
@@ -144,7 +144,8 @@ abstract class RevisionStorage extends DbStorage {
 			$tables, '*', $this->preprocessSqlArray( $attributes ), __METHOD__, $options, $joins
 		);
 		if ( $res === false ) {
-			throw new DataModelException( __METHOD__ . ': Query failed: ' . $dbr->lastError(), 'process-data' );
+			throw new DataModelException( __METHOD__ . ': Query failed: ' . $dbr->lastError(),
+				'process-data' );
 		}
 
 		$retval = [];
@@ -207,7 +208,7 @@ abstract class RevisionStorage extends DbStorage {
 		// the index can ask directly for just the list of rev_id instead of whole rows,
 		// but would still have the need to run a bunch of queries serially.
 		if ( count( $options ) === 2 &&
-			isset( $options['LIMIT'], $options['ORDER BY'] ) &&
+			isset( $options['LIMIT'] ) && isset( $options['ORDER BY'] ) &&
 			$options['ORDER BY'] === [ 'rev_id DESC' ]
 		) {
 			return $this->fallbackFindMulti( $queries, $options );
@@ -251,12 +252,14 @@ abstract class RevisionStorage extends DbStorage {
 		$res = $dbr->select(
 			[ 'flow_revision' ],
 			[ 'rev_id' => "MAX( 'rev_id' )" ],
-			[ 'rev_type' => $this->getRevType() ] + $this->preprocessSqlArray( $this->buildCompositeInCondition( $dbr, $duplicator->getUniqueQueries() ) ),
+			[ 'rev_type' => $this->getRevType() ] + $this->preprocessSqlArray(
+				$this->buildCompositeInCondition( $dbr, $duplicator->getUniqueQueries() ) ),
 			__METHOD__,
 			[ 'GROUP BY' => 'rev_type_id' ]
 		);
 		if ( $res === false ) {
-			throw new DataModelException( __METHOD__ . ': Query failed: ' . $dbr->lastError(), 'process-data' );
+			throw new DataModelException( __METHOD__ . ': Query failed: ' . $dbr->lastError(),
+				'process-data' );
 		}
 
 		$revisionIds = [];
@@ -299,7 +302,8 @@ abstract class RevisionStorage extends DbStorage {
 				$joins
 			);
 			if ( $res === false ) {
-				throw new DataModelException( __METHOD__ . ': Query failed: ' . $dbr->lastError(), 'process-data' );
+				throw new DataModelException( __METHOD__ . ': Query failed: ' . $dbr->lastError(),
+					'process-data' );
 			}
 
 			foreach ( $res as $row ) {
@@ -381,15 +385,11 @@ abstract class RevisionStorage extends DbStorage {
 		}
 
 		$dbw = $this->dbFactory->getDB( DB_MASTER );
-		$res = $dbw->insert(
+		$dbw->insert(
 			'flow_revision',
 			$this->preprocessNestedSqlArray( $revisions ),
 			__METHOD__
 		);
-		if ( !$res ) {
-			// throw exception?
-			return false;
-		}
 
 		return $this->insertRelated( $rows );
 	}
@@ -422,8 +422,10 @@ abstract class RevisionStorage extends DbStorage {
 		}
 
 		// we're only able to update part of the columns required to update content
+		// @phan-suppress-next-line PhanImpossibleTypeComparison
 		if ( $diff !== $requiredColumnNames ) {
-			throw new DataModelException( "Allowed update column configuration is inconsistent", 'allowed-update-inconsistent' );
+			throw new DataModelException( "Allowed update column configuration is inconsistent",
+				'allowed-update-inconsistent' );
 		}
 
 		// content changes aren't allowed
@@ -520,13 +522,13 @@ abstract class RevisionStorage extends DbStorage {
 
 		if ( $rev ) {
 			$dbw = $this->dbFactory->getDB( DB_MASTER );
-			$res = $dbw->update(
+			$dbw->update(
 				'flow_revision',
 				$this->preprocessSqlArray( $rev ),
 				$this->preprocessSqlArray( [ 'rev_id' => $old['rev_id'] ] ),
 				__METHOD__
 			);
-			if ( !( $res && $dbw->affectedRows() ) ) {
+			if ( !$dbw->affectedRows() ) {
 				return false;
 			}
 		}
@@ -578,7 +580,7 @@ abstract class RevisionStorage extends DbStorage {
 	 * columns.
 	 *
 	 * @param array $row Rows to split
-	 * @param string[optional] $prefix
+	 * @param string $prefix
 	 * @return array Remaining rows
 	 */
 	protected function splitUpdate( array $row, $prefix = 'rev' ) {

@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Checks Flickr images against a blacklist of users
  */
@@ -7,12 +9,12 @@ class UploadWizardFlickrBlacklist {
 	/**
 	 * Regexp to extract photo id (as match group 1) from a static image URL.
 	 */
-	const IMAGE_URL_REGEXP = '!static\.?flickr\.com/[^/]+/([0-9]+)_!';
+	private const IMAGE_URL_REGEXP = '!static\.?flickr\.com/[^/]+/([0-9]+)_!';
 
 	/**
 	 * Regexp to extract photo id (as match group 1) from a photo page URL.
 	 */
-	const PHOTO_URL_REGEXP = '!flickr\.com/(?:x/t/[^/]+/)?photos/[^/]+/([0-9]+)!';
+	private const PHOTO_URL_REGEXP = '!flickr\.com/(?:x/t/[^/]+/)?photos/[^/]+/([0-9]+)!';
 
 	/**
 	 * An array of the blacklisted Flickr NSIDs and path_aliases.
@@ -133,7 +135,8 @@ class UploadWizardFlickrBlacklist {
 				'nojsoncallback' => 1,
 			],
 		];
-		$response = Http::post( $this->flickrApiUrl, $params );
+		$response = MediaWikiServices::getInstance()->getHttpRequestFactory()
+			->post( $this->flickrApiUrl, $params, __METHOD__ );
 		if ( $response !== false ) {
 			$response = json_decode( $response, true );
 		}

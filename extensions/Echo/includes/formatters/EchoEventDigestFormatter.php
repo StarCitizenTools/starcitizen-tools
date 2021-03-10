@@ -7,6 +7,13 @@
  * arguments passed in the constructor (user and language)
  */
 abstract class EchoEventDigestFormatter {
+
+	/** @var User */
+	protected $user;
+
+	/** @var Language */
+	protected $language;
+
 	public function __construct( User $user, Language $language ) {
 		$this->user = $user;
 		$this->language = $language;
@@ -16,13 +23,14 @@ abstract class EchoEventDigestFormatter {
 	 * Equivalent to IContextSource::msg for the current
 	 * language
 	 *
+	 * @param string ...$args
 	 * @return Message
 	 */
-	protected function msg( /* ,,, */ ) {
+	protected function msg( ...$args ) {
 		/**
 		 * @var Message $msg
 		 */
-		$msg = call_user_func_array( 'wfMessage', func_get_args() );
+		$msg = wfMessage( ...$args );
 		$msg->inLanguage( $this->language );
 
 		return $msg;
@@ -31,7 +39,7 @@ abstract class EchoEventDigestFormatter {
 	/**
 	 * @param EchoEvent[] $events
 	 * @param string $distributionType 'web' or 'email'
-	 * @return array|bool|string Output format depends on implementation, false if it cannot be formatted
+	 * @return string[]|false Output format depends on implementation, false if it cannot be formatted
 	 */
 	final public function format( array $events, $distributionType ) {
 		$models = [];
@@ -47,7 +55,7 @@ abstract class EchoEventDigestFormatter {
 
 	/**
 	 * @param EchoEventPresentationModel[] $models
-	 * @return string|array
+	 * @return string[]|string
 	 */
 	abstract protected function formatModels( array $models );
 }

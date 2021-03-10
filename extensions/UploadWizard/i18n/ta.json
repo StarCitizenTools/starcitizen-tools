@@ -2,17 +2,17 @@
 	"@metadata": {
 		"authors": [
 			"Balajijagadesh",
+			"ElangoRamanujam",
 			"Karthi.dr",
 			"Logicwiki",
+			"Macofe",
 			"Mahir78",
+			"Matma Rex",
 			"Shanmugamp7",
 			"Sodabottle",
 			"Surya Prakash.S.A.",
 			"TRYPPN",
-			"மதனாஹரன்",
-			"ElangoRamanujam",
-			"Macofe",
-			"Matma Rex"
+			"மதனாஹரன்"
 		]
 	},
 	"uploadwizard": "பதிவேற்றக் கருவி",
@@ -112,7 +112,6 @@
 	"mwe-upwiz-next": "அடுத்தது",
 	"mwe-upwiz-next-file": "தொடர்க",
 	"mwe-upwiz-next-deeds": "அடுத்தது",
-	"mwe-upwiz-next-details": "அடுத்தது",
 	"mwe-upwiz-home": "முகப்புப் பக்கத்திற்குச் செல்க",
 	"mwe-upwiz-upload-another": "மேலும் கோப்புகளைப் பதிவேற்றுக",
 	"mwe-upwiz-prevent-close": "நீங்கள் இதுவரை {{PLURAL:$1|இந்தக் கோப்பைப்|இந்தக் கோப்புகளைப்}} பதிவேற்றவும் வெளியிடவும் இல்லை.",
@@ -153,7 +152,7 @@
 	"mwe-upwiz-file-too-large": "கோப்பு மிகப் பெரிதாக உள்ளது.",
 	"mwe-upwiz-license-pd-old-100": "ஆக்கியவர் 100 ஆண்டுகளுக்கு  முன்பே இறந்துவிட்டார்",
 	"mwe-upwiz-license-pd-old": "ஆக்கியவர் 70 ஆண்டுகளுக்கு  முன்பே இறந்துவிட்டார்",
-	"mwe-upwiz-license-pd-us": "அமெரிக்காவில் 1923க்கு முன் வெளியிடப்பட்டது",
+	"mwe-upwiz-license-pd-us": "அமெரிக்காவில் 1925க்கு முன் வெளியிடப்பட்டது",
 	"mwe-upwiz-license-pd-usgov-nasa": "நாசாவின் அசல் வேலை",
 	"mwe-upwiz-license-copyrighted-free-use": "பதிப்புரிமைக்குட்பட்டது, ஆனாலும் வணிக நோக்கம் உட்பட எந்தவொரு நோக்கத்துக்கும் பயன்படுத்தலாம்",
 	"mwe-upwiz-license-gfdl": " க்னூ கட்டற்ற ஆக்க உரிமம்",

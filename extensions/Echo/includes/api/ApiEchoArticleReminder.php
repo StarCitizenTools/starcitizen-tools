@@ -25,7 +25,6 @@ class ApiEchoArticleReminder extends ApiBase {
 			'agent' => $user,
 			'title' => $this->getTitleFromTitleOrPageId( $params ),
 			'extra' => [
-				'notifyAgent' => true,
 				'comment' => $params['comment'],
 			],
 		] );
@@ -91,7 +90,7 @@ class ApiEchoArticleReminder extends ApiBase {
 
 	/**
 	 * @see ApiBase::getExamplesMessages()
-	 * @return array
+	 * @return string[]
 	 */
 	protected function getExamplesMessages() {
 		$todayDate = new DateTime();
@@ -108,6 +107,6 @@ class ApiEchoArticleReminder extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/Echo_(Notifications)/API';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/Echo_(Notifications)/API';
 	}
 }

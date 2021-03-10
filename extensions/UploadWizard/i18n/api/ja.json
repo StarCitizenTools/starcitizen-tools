@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"2nd-player",
+			"Shirayuki",
+			"Yusuke1109"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Flickr URL のユーザー ID (NSID) を使用してその URL がブラックリストに登録されているか検証します。\n\n<var>list</var> オプション付きで使用した場合は、ブラックリストに登録されている ID をすべて返します。",
+	"apihelp-flickrblacklist-param-url": "テストする Flickr URL です。",
+	"apihelp-flickrblacklist-param-list": "設定すると、ブラックリスト全体を返します。$1url とは同時に使用できません。",
+	"apihelp-flickrblacklist-example-1": "URL をブラックリストで検証",
+	"apihelp-flickrblacklist-example-2": "ブラックリスト全体を返す",
+	"apihelp-query+allcampaigns-description": "アップロードウィザードのキャンペーンをすべて列挙します。",
+	"apihelp-query+allcampaigns-param-enabledonly": "有効になっているキャンペーンのみを列挙します。",
+	"apihelp-query+allcampaigns-param-limit": "キャンペーンの件数を返します。",
+	"apihelp-query+allcampaigns-example-1": "有効になっているキャンペーンを列挙する"
+}

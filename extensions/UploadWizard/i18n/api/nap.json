@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"C.R."
+		]
+	},
+	"apihelp-flickrblacklist-description": "Validateve a Flickr ll'URL quanno ausate 'o nomme utente ID (NISD) pe' ffà elenco nero.\n\nQuanno ausate l'elenco 'e st'opzione, se turnassero tuttuquante indirizzi 'n lista nera comme ID.",
+	"apihelp-flickrblacklist-param-url": "'O sito ncopp'a Flickr cu n'URL a se pruvà.",
+	"apihelp-flickrblacklist-param-list": "Quanno fossere mis'apposto, 'a lista nera fatta se turnasse. Nun se putess'ausà nziem'a $1url.",
+	"apihelp-flickrblacklist-example-1": "Cuntrullate n'URL nfacci' 'a lista nera",
+	"apihelp-flickrblacklist-example-2": "Torna 'a lista nera sana sana",
+	"apihelp-query+allcampaigns-description": "Ennummera tuttuquante iniziative d' 'o Carrecatore Guidato.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Elenca surtanto 'iniziative ca fossero abbiàte.",
+	"apihelp-query+allcampaigns-param-limit": "Nummero 'e campagne 'a turnà.",
+	"apihelp-query+allcampaigns-example-1": "Miette nummero a 'e campagne abbiàte"
+}

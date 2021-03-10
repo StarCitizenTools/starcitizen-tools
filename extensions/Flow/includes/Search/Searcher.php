@@ -2,18 +2,18 @@
 
 namespace Flow\Search;
 
+use Elastica\Exception\ExceptionInterface;
 use Elastica\Query;
 use Elastica\Query\QueryString;
-use Elastica\Exception\ExceptionInterface;
 use Elastica\Request;
 use Flow\Container;
 use PoolCounterWorkViaCallback;
 use Status;
 
 class Searcher {
-	const HIGHLIGHT_FIELD = 'revisions.text';
-	const HIGHLIGHT_PRE = '<span class="searchmatch">';
-	const HIGHLIGHT_POST = '</span>';
+	public const HIGHLIGHT_FIELD = 'revisions.text';
+	public const HIGHLIGHT_PRE = '<span class="searchmatch">';
+	public const HIGHLIGHT_POST = '</span>';
 
 	/**
 	 * @var string|bool
@@ -88,7 +88,8 @@ class Searcher {
 		$search = $searchable->createSearch( $this->query );
 
 		// @todo: PoolCounter config at PoolCounterSettings-eqiad.php
-		// @todo: do we want this class to extend from ElasticsearchIntermediary and use its success & failure methods (like CirrusSearch/Searcher does)?
+		// @todo: do we want this class to extend from ElasticsearchIntermediary and use its success &
+		// failure methods (like CirrusSearch/Searcher does)?
 
 		// Perform the search
 		$work = new PoolCounterWorkViaCallback( 'Flow-Search', "_elasticsearch", [

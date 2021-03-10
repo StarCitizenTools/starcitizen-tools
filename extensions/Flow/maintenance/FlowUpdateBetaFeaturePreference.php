@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
 	: __DIR__ . '/../../../maintenance/Maintenance.php';
@@ -42,7 +44,8 @@ class FlowUpdateBetaFeaturePreference extends LoggedUpdateMaintenance {
 			[
 				'up_property' => BETA_FEATURE_FLOW_USER_TALK_PAGE,
 				'up_value' => 1
-			]
+			],
+			__METHOD__
 		);
 
 		$result = $db->select(
@@ -62,6 +65,8 @@ class FlowUpdateBetaFeaturePreference extends LoggedUpdateMaintenance {
 			]
 		);
 
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+
 		$i = 0;
 		$users = UserArray::newFromResult( $result );
 		foreach ( $users as $user ) {
@@ -69,7 +74,7 @@ class FlowUpdateBetaFeaturePreference extends LoggedUpdateMaintenance {
 			$user->saveSettings();
 
 			if ( ++$i % $this->mBatchSize === 0 ) {
-				wfWaitForSlaves();
+				$lbFactory->waitForReplication();
 			}
 		}
 
@@ -91,5 +96,5 @@ class FlowUpdateBetaFeaturePreference extends LoggedUpdateMaintenance {
 	}
 }
 
-$maintClass = 'FlowUpdateBetaFeaturePreference'; // Tells it to run the class
+$maintClass = FlowUpdateBetaFeaturePreference::class; // Tells it to run the class
 require_once RUN_MAINTENANCE_IF_MAIN;

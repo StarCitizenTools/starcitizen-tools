@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
 	: __DIR__ . '/../../../maintenance/Maintenance.php';
@@ -26,8 +28,8 @@ class FlowCreateTemplates extends LoggedUpdateMaintenance {
 			// Template:FlowMention, used to render mentions in Flow's Visual Editor
 			'flow-ve-mention-template-title' => function ( Title $title ) {
 				// get "User:" namespace prefix in wiki language
-				global $wgContLang;
-				$namespaces = $wgContLang->getFormattedNamespaces();
+				$namespaces = MediaWikiServices::getInstance()->getContentLanguage()
+					->getFormattedNamespaces();
 
 				return '@[[' . $namespaces[NS_USER] . ':{{{1|Example}}}|{{{2|{{{1|Example}}}}}}]]';
 			},
@@ -60,7 +62,7 @@ class FlowCreateTemplates extends LoggedUpdateMaintenance {
 	public function __construct() {
 		parent::__construct();
 
-		$this->mDescription = "Creates templates required by Flow";
+		$this->addDescription( "Creates templates required by Flow" );
 
 		$this->requireExtension( 'Flow' );
 	}
@@ -98,10 +100,9 @@ class FlowCreateTemplates extends LoggedUpdateMaintenance {
 	 * @throws MWException
 	 */
 	protected function create( Title $title, WikitextContent $content ) {
-		$article = new Article( $title );
-		$page = $article->getPage();
+		$page = WikiPage::factory( $title );
 
-		if ( $page->getRevision() !== null ) {
+		if ( $page->getRevisionRecord() !== null ) {
 			// template already exists, don't overwrite it
 			return Status::newGood();
 		}
@@ -111,10 +112,10 @@ class FlowCreateTemplates extends LoggedUpdateMaintenance {
 			'/* Automatically created by Flow */',
 			EDIT_FORCE_BOT | EDIT_SUPPRESS_RC,
 			false,
-			FlowHooks::getOccupationController()->getTalkpageManager()
+			Flow\Hooks::getOccupationController()->getTalkpageManager()
 		);
 	}
 }
 
-$maintClass = 'FlowCreateTemplates';
+$maintClass = FlowCreateTemplates::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

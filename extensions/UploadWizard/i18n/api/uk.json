@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Piramidion",
+			"Ата"
+		]
+	},
+	"apihelp-flickrblacklist-description": "Перевірити URL-адресу Flickr з використанням ID користувача (NSID) для занесення в чорний список.\n\nПри використанні з параметром <var>list</var>, виводяться всі ідентифікатори, які перебувають у чорному списку.",
+	"apihelp-flickrblacklist-summary": "Перевірити URL-адресу Flickr за допомогою ідентифікатора (NSID) користувача для занесення в чорний список.",
+	"apihelp-flickrblacklist-extended-description": "При використанні опції <var>list</var> виводить усі ідентифікатори, що перебувають у чорному списку.",
+	"apihelp-flickrblacklist-param-url": "URL-адреса Flickr для тестування.",
+	"apihelp-flickrblacklist-param-list": "З цим вибором виводиться повний чорний список. Не можна використати разом з $1url.",
+	"apihelp-flickrblacklist-example-1": "Перевірити URL-адресу у чорному списку",
+	"apihelp-flickrblacklist-example-2": "Видати весь чорний список",
+	"apihelp-query+allcampaigns-description": "Перераховувати всі кампанії Майстра завантажень.",
+	"apihelp-query+allcampaigns-summary": "Перерахувати всі кампанії Майстра завантаження.",
+	"apihelp-query+allcampaigns-param-enabledonly": "Тільки список увімкнених кампаній.",
+	"apihelp-query+allcampaigns-param-limit": "Кількість кампаній для виведення.",
+	"apihelp-query+allcampaigns-example-1": "Перерахувати увімкнені кампанії"
+}

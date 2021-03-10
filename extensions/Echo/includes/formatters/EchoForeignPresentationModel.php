@@ -15,7 +15,8 @@ class EchoForeignPresentationModel extends EchoEventPresentationModel {
 
 		// notification-header-foreign-alert
 		// notification-header-foreign-notice
-		return "notification-header-{$this->type}-{$section}";
+		// notification-header-foreign-all
+		return "notification-header-foreign-{$section}";
 	}
 
 	public function getHeaderMessage() {
@@ -33,7 +34,7 @@ class EchoForeignPresentationModel extends EchoEventPresentationModel {
 
 	public function getBodyMessage() {
 		$data = $this->event->getExtra();
-		$msg = wfMessage( "notification-body-{$this->type}" );
+		$msg = wfMessage( 'notification-body-foreign' );
 		$msg->params( $this->language->listToText( $this->getWikiNames( $data['wikis'] ) ) );
 		return $msg;
 	}

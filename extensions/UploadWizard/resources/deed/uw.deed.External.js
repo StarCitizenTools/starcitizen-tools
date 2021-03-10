@@ -15,7 +15,7 @@
  * along with UploadWizard.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function ( mw, uw, $, OO ) {
+( function ( uw ) {
 	/**
 	 * @param {Object} config The UW config
 	 * @param {mw.UploadWizardUpload} upload Uploads that this deed refers to
@@ -26,8 +26,7 @@
 		uw.deed.Custom.call( this, config, upload );
 
 		this.licenseInput = new mw.UploadWizardLicenseInput(
-			undefined,
-			config,
+			config.licensing.thirdParty,
 			1,
 			upload.api
 		);
@@ -37,6 +36,10 @@
 	};
 
 	OO.inheritClass( uw.deed.External, uw.deed.Custom );
+
+	uw.deed.External.prototype.unload = function () {
+		this.licenseInput.unload();
+	};
 
 	/**
 	 * @return {uw.FieldLayout[]} Fields that need validation
@@ -75,4 +78,4 @@
 			this.licenseInput.setSerialized( serialized.license );
 		}
 	};
-}( mediaWiki, mediaWiki.uploadWizard, jQuery, OO ) );
+}( mw.uploadWizard ) );

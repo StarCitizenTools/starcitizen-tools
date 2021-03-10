@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Envlh",
 			"Khalid Mahmood",
-			"Matma Rex",
-			"Envlh"
+			"Matma Rex"
 		]
 	},
 	"uploadwizard": "فائل چرھان والا",
@@ -91,7 +91,6 @@
 	"mwe-upwiz-next": "اگلا",
 	"mwe-upwiz-next-file": "چل ریا اے",
 	"mwe-upwiz-next-deeds": "اگلا",
-	"mwe-upwiz-next-details": "اگلا",
 	"mwe-upwiz-home": "وکی دے ہوم پیج تے چلو",
 	"mwe-upwiz-upload-another": "ہور فائلاں چڑھاؤ",
 	"mwe-upwiz-prevent-close": "تساں نین ہلے وی {{PLURAL:$1|ایہ فائل|ایہ فائلاں}} فائل چڑھان دا کم تے چھاپن مکایا نئیں۔",
@@ -142,7 +141,7 @@
 	"mwe-upwiz-license-own-pd": "سارے حق ‍ لوکاں ل‏ی چھڈ دتے",
 	"mwe-upwiz-license-pd-old-100": "بنان والا 100 ورے پہلے مرگیا",
 	"mwe-upwiz-license-pd-old": "بنان والا 70 ورے پہلے مرگیا۔",
-	"mwe-upwiz-license-pd-us": "پہلی واری امریکہ چ 1923 تون پہلے چھپی",
+	"mwe-upwiz-license-pd-us": "پہلی واری امریکہ چ 1925 تون پہلے چھپی",
 	"mwe-upwiz-license-pd-usgov": "امریکی سرکار دا اصل کم",
 	"mwe-upwiz-license-pd-usgov-nasa": "ناسا دا کم",
 	"mwe-upwiz-license-pd-usgov-military-navy": "امریکی سمندری فوج دا اصل کم",

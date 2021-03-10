@@ -17,6 +17,7 @@ use Flow\Model\Workflow;
 use Flow\OccupationController;
 use MWException;
 use WikiImporter;
+use WikiPage;
 use XMLReader;
 
 class Importer {
@@ -129,7 +130,10 @@ class Importer {
 			throw new MWException( $creationStatus->getWikiText() );
 		}
 
-		$ensureStatus = $occupationController->ensureFlowRevision( new \Article( $title ), $this->boardWorkflow );
+		$ensureStatus = $occupationController->ensureFlowRevision(
+			WikiPage::factory( $title ),
+			$this->boardWorkflow
+		);
 		if ( !$ensureStatus->isOK() ) {
 			throw new MWException( $ensureStatus->getWikiText() );
 		}
@@ -143,7 +147,7 @@ class Importer {
 
 		$metadata = [ 'workflow' => $this->boardWorkflow ];
 
-		$revisions = $this->getRevisions( [ 'Flow\\Model\\Header', 'fromStorageRow' ] );
+		$revisions = $this->getRevisions( [ Header::class, 'fromStorageRow' ] );
 		foreach ( $revisions as $revision ) {
 			$this->put( $revision, $metadata );
 		}
@@ -190,7 +194,7 @@ class Importer {
 		}
 
 		$ensureStatus = $occupationController->ensureFlowRevision(
-			new \Article( $this->topicWorkflow->getArticleTitle() ),
+			WikiPage::factory( $this->topicWorkflow->getArticleTitle() ),
 			$this->topicWorkflow
 		);
 		if ( !$ensureStatus->isOK() ) {
@@ -210,7 +214,7 @@ class Importer {
 			// @todo: topic-title? (used only in NotificationListener)
 		];
 
-		$revisions = $this->getRevisions( [ 'Flow\\Model\\PostRevision', 'fromStorageRow' ] );
+		$revisions = $this->getRevisions( [ PostRevision::class, 'fromStorageRow' ] );
 		foreach ( $revisions as $revision ) {
 			$this->put( $revision, $metadata );
 		}
@@ -227,7 +231,7 @@ class Importer {
 
 		$metadata = [ 'workflow' => $this->topicWorkflow ];
 
-		$revisions = $this->getRevisions( [ 'Flow\\Model\\PostSummary', 'fromStorageRow' ] );
+		$revisions = $this->getRevisions( [ PostSummary::class, 'fromStorageRow' ] );
 		foreach ( $revisions as $revision ) {
 			$this->put( $revision, $metadata );
 		}
@@ -246,7 +250,9 @@ class Importer {
 		$revisions = [];
 
 		// keep processing <revision> nodes until </revisions>
-		while ( $this->importer->getReader()->localName !== 'revisions' || $this->importer->getReader()->nodeType !== XMLReader::END_ELEMENT ) {
+		while ( $this->importer->getReader()->localName !== 'revisions' ||
+			$this->importer->getReader()->nodeType !== XMLReader::END_ELEMENT
+		) {
 			if ( $this->importer->getReader()->localName === 'revision' ) {
 				$revisions[] = $this->getRevision( $callback );
 			}
@@ -288,11 +294,11 @@ class Importer {
 				$globalUserIdField = 'global' . $userField . 'id';
 				if ( isset( $attribs[ $globalUserIdField ] ) ) {
 					$localUser = $this->lookup->localUserFromCentralId(
-						$attribs[ $globalUserIdField ],
+						(int)$attribs[ $globalUserIdField ],
 						\CentralIdLookup::AUDIENCE_RAW
 					);
 					if ( !$localUser ) {
-						$localUser = $this->createLocalUser( $attribs[ $globalUserIdField ] );
+						$localUser = $this->createLocalUser( (int)$attribs[ $globalUserIdField ] );
 					}
 					$attribs[ $userField . 'id' ] = $localUser->getId();
 					$attribs[ $userField . 'wiki' ] = wfWikiID();
@@ -321,7 +327,7 @@ class Importer {
 		$keys = array_fill_keys( array_keys( Exporter::$map ), null );
 		$attribs += $keys;
 
-		return call_user_func( $callback, $attribs );
+		return $callback( $attribs );
 	}
 
 	/**
@@ -352,7 +358,7 @@ class Importer {
 	private function checkTransWikiMode( $boardWorkflowId, $title ) {
 		/** @var DbFactory $dbFactory */
 		$dbFactory = Container::get( 'db.factory' );
-		$workflowExist = !!$dbFactory->getDB( DB_MASTER )->selectField(
+		$workflowExist = (bool)$dbFactory->getDB( DB_MASTER )->selectField(
 			'flow_workflow',
 			'workflow_id',
 			[ 'workflow_id' => UUID::create( $boardWorkflowId )->getBinary() ],
@@ -374,7 +380,8 @@ class Importer {
 	 */
 	private function createLocalUser( $globalUserId ) {
 		if ( !( $this->lookup instanceof \CentralAuthIdLookup ) ) {
-			throw new ImportException( 'Creating local users is not supported with central id provider: ' . get_class( $this->lookup ) );
+			throw new ImportException( 'Creating local users is not supported with central id provider: ' .
+				get_class( $this->lookup ) );
 		}
 
 		$globalUser = \CentralAuthUser::newFromId( $globalUserId );

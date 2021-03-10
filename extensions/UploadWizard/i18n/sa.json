@@ -2,12 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Ansumang",
+			"Envlh",
 			"Hemant wikikosh1",
-			"Shubha",
-			"NehalDaveND",
 			"Matma Rex",
+			"NehalDaveND",
 			"Shreekant Hegde",
-			"Envlh"
+			"Shubha"
 		]
 	},
 	"uploadwizard": "विझर्ड् उपारोप्यताम्",
@@ -135,7 +135,6 @@
 	"mwe-upwiz-next": "अग्रिमम्",
 	"mwe-upwiz-next-file": "तनोति",
 	"mwe-upwiz-next-deeds": "अग्रिमम्",
-	"mwe-upwiz-next-details": "अग्रिमम्",
 	"mwe-upwiz-home": "विक्याः मुखपृष्ठं प्रति गम्यताम्",
 	"mwe-upwiz-upload-another": "अधिकाः सञ्चिकाः निवेश्यन्ताम्",
 	"mwe-upwiz-prevent-close": "{{PLURAL:$1|एतस्याः सञ्चिकायाः|एतासां सञ्चिकानां}} उपारोपणं प्रकाशनं वा न समाप्तम् इतोपि ।",
@@ -251,7 +250,6 @@
 	"mwe-upwiz-prefs-def-license-def": "यदभावे उपयुज्यताम्",
 	"mwe-upwiz-prefs-license-own": "स्वनिर्मितिः - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "अन्येषां कार्यम् - $1",
-	"mwe-upwiz-prefs-chunked": "१ एम् बि अपेक्षया बृहतां सञ्चिकानां विझर्ड्-उपारोपणे घनोपारोपणानि",
 	"mwe-upwiz-prefs-skiptutorial": "अनुमतिशिक्षणस्य प्रास्ताविकं त्यज्यताम्",
 	"mwe-upload-campaigns-pagination-next": "अग्रिमं पृष्ठम्"
 }

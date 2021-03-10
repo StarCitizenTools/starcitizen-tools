@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226"
+		]
+	},
+	"apihelp-flickrblacklist-description": "通过使用用户ID（NSID）验证Flickr链接是否触发黑名单。\n\n当使用<var>list</var>选项时，返回所有黑名单ID。",
+	"apihelp-flickrblacklist-summary": "使用用户ID（NSID）验证Flickr URL以将其列入黑名单。",
+	"apihelp-flickrblacklist-extended-description": "当与<var>list</var>选项一起使用时，返回所有列入黑名单的ID。",
+	"apihelp-flickrblacklist-param-url": "要测试的Flickr URL。",
+	"apihelp-flickrblacklist-param-list": "一旦设置，就会返回完整的黑名单。不能与$1url一起使用。",
+	"apihelp-flickrblacklist-example-1": "检查URL是否触发黑名单",
+	"apihelp-flickrblacklist-example-2": "返回全部黑名单",
+	"apihelp-query+allcampaigns-description": "列举所有UploadWizard活动。",
+	"apihelp-query+allcampaigns-summary": "列举所有UploadWizard活动。",
+	"apihelp-query+allcampaigns-param-enabledonly": "只列出启用的通告。",
+	"apihelp-query+allcampaigns-param-limit": "要返回的通告数。",
+	"apihelp-query+allcampaigns-example-1": "列举启用的通告"
+}

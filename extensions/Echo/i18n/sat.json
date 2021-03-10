@@ -2,10 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Albinus",
+			"Fagunkoyel Hansdah",
 			"Manik Soren",
 			"Ramjit Tudu"
 		]
 	},
+	"echo-pref-web": "ᱣᱮᱵᱽ",
 	"echo-pref-email": "ᱤᱢᱮᱞ",
 	"echo-learn-more": "ᱟᱨᱦᱚᱸ ᱪᱮᱫᱽᱢᱮ",
 	"tooltip-pt-notifications-alert": "{{GENDER:|ᱟᱢᱟᱜ}} ᱵᱟᱰᱟᱭᱡᱚᱝ",

@@ -1,16 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
+			"Aefgh39622",
+			"Envlh",
 			"Horus",
 			"Octahedron80",
 			"Sasakubo",
-			"Taweetham",
-			"Envlh",
-			"Aefgh39622"
+			"Taweetham"
 		]
 	},
 	"uploadwizard": "ตัวช่วยการอัปโหลด",
 	"uploadwizard-desc": "ตัวช่วยการอัปโหลด เครื่องมือสำหรับการอัปโหลดมัลติมีเดียอย่างง่าย",
+	"tag-uploadwizard": "ตัวช่วยการอัปโหลด",
+	"tag-uploadwizard-description": "การอัปโหลดที่ผ่านตัวช่วยการอัปโหลด",
 	"right-upwizcampaigns": "กำหนดค่าตัวช่วยแคมเปญการอัปโหลด",
 	"action-upwizcampaigns": "กำหนดค่าแคมเปญการอัปโหลด",
 	"group-upwizcampeditors": "ตัวแก้ไขตัวช่วยแคมเปญการอัปโหลด",
@@ -58,7 +60,6 @@
 	"mwe-upwiz-remove-upload": "เอาไฟล์นี้ออกจากรายการไฟล์ที่จะอัปโหลด",
 	"mwe-upwiz-remove-description": "เอาคำอธิบายนี้ออก",
 	"mwe-upwiz-upload": "อัปโหลด",
-	"mwe-upwiz-file-upload-notcapable": "เบราว์เซอร์ของคุณไม่สามารถอัปโหลดไฟล์ได้\nโปรดลองใช้เบราว์เซอร์อื่น",
 	"mwe-upwiz-file-all-ok": "อัปโหลดทั้งหมดเสร็จสมบูรณ์",
 	"mwe-upwiz-file-some-failed": "อัปโหลดบางส่วนล้มเหลว",
 	"mwe-upwiz-file-retry": "อัปโหลดที่ล้มเหลวใหม่อีกครั้ง",
@@ -119,7 +120,7 @@
 	"mwe-upwiz-copy-other": "คัดลอกข้อมูลอื่น ๆ",
 	"mwe-upwiz-desc": "คำอธิบาย",
 	"mwe-upwiz-title": "ชื่อเรื่อง",
-	"mwe-upwiz-date-created": "วันที่สร้าง",
+	"mwe-upwiz-date-created": "วันที่",
 	"mwe-upwiz-location": "ที่ตั้ง",
 	"mwe-upwiz-location-lat": "ละติจูด",
 	"mwe-upwiz-location-lon": "ลองจิจูด",
@@ -146,7 +147,6 @@
 	"mwe-upwiz-next": "ถัดไป",
 	"mwe-upwiz-next-file": "ดำเนินการต่อ",
 	"mwe-upwiz-next-deeds": "ถัดไป",
-	"mwe-upwiz-next-details": "ถัดไป",
 	"mwe-upwiz-home": "ไปที่หน้าแรกวิกิ",
 	"mwe-upwiz-upload-another": "อัปโหลดไฟล์เพิ่ม",
 	"mwe-upwiz-prevent-close": "คุณยังอัปโหลดและเผยแพร่{{PLURAL:$1|แฟ้มนี้|แฟ้มเหล่านี้}}ไม่เสร็จสิ้น",
@@ -212,7 +212,7 @@
 	"mwe-upwiz-license-own-pd": "สิทธิทั้งหมดที่สละด้วยสัญญาอนุญาตครีเอทีฟคอมมอนส์ซีโร (เช่นเดียวกับสาธารณสมบัติ)",
 	"mwe-upwiz-license-pd-old-100": "ผู้สร้างสรรค์เสียชีวิตกว่า 100 ปีมาแล้ว",
 	"mwe-upwiz-license-pd-old": "ผู้สร้างสรรค์เสียชีวิตกว่า 70 ปีมาแล้ว",
-	"mwe-upwiz-license-pd-us": "เผยแพร่ครั้งแรกในสหรัฐอเมริกาก่อน ค.ศ. 1923",
+	"mwe-upwiz-license-pd-us": "เผยแพร่ครั้งแรกในสหรัฐก่อน ค.ศ. 1925",
 	"mwe-upwiz-license-pd-usgov": "งานของรัฐบาลกลางสหรัฐอเมริกา",
 	"mwe-upwiz-license-pd-usgov-nasa": "งานต้นฉบับของนาซา",
 	"mwe-upwiz-license-pd-usgov-military-navy": "งานต้นฉบับของกองทัพเรือสหรัฐอเมริกา",
@@ -262,7 +262,6 @@
 	"mwe-upwiz-prefs-def-license-def": "ใช้สิ่งที่เป็นค่าเริ่มต้น",
 	"mwe-upwiz-prefs-license-own": "งานของตนเอง - $1",
 	"mwe-upwiz-prefs-license-thirdparty": "งานของคนอื่น - $1",
-	"mwe-upwiz-prefs-chunked": "อัพโหลดเป็นชิ้นส่วนกว่า $1 ในตัวช่วยการอัปโหลดไฟล์ - เพิ่มขนาดการอัปโหลดไฟล์สูงสุดจาก $2 เป็น $3",
 	"mwe-upwiz-prefs-skiptutorial": "ข้ามคำแนะนำเกี่ยวกับสัญญาอนุญาตและลิขสิทธิ์",
 	"mwe-upwiz-prefs-maxsimultaneous-upload": "จำนวนสูงสุดที่อัปโหลดพร้อมกัน"
 }
