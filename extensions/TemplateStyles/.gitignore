@@ -21,3 +21,4 @@ sftp-config.json
 
 # NPM
 /node_modules
+/.eslintcache

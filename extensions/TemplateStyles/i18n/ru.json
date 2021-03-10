@@ -1,19 +1,28 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sunpriat"
+			"Movses",
+			"Ole Yves",
+			"Stjn",
+			"Sunpriat",
+			"Vlad5250"
 		]
 	},
 	"templatestyles": "TemplateStyles",
 	"templatestyles-desc": "Реализует таблицы стилей для каждого шаблона",
 	"templatestyles-missing-src": "В теге TemplateStyles атрибут <code>src</code> не должен быть пустым.",
 	"templatestyles-invalid-src": "Неверно задано название страницы в атрибуте <code>src</code> тега TemplateStyles.",
+	"templatestyles-invalid-wrapper": "Неверное значение атрибута <code>src</code> в TemplateStyles.",
 	"templatestyles-bad-src-missing": "Страница [[:$1|$2]] не имеет содержания.",
 	"templatestyles-bad-src": "Для использования в TemplateStyles у страницы [[:$1|$2]] должна быть модель содержания \"{{int:content-model-sanitized-css}}\"  (текущая модель: \"$3\").",
 	"templatestyles-errorcomment": "Ошибки обработки таблицы стилей [[:$1]] (версия $2):\n$3",
 	"templatestyles-size-exceeded": "Эта таблица стилей больше чем максимальный размер в $2.",
 	"templatestyles-end-tag-injection": "Поставляемая таблица стилей содержит <code>&lt;/style</code>, который не разрешён.",
 	"content-model-sanitized-css": "Sanitized CSS",
+	"templatestyles-stylesheet-error-category": "Стилевые файлы с ошибками стилей шаблонов",
+	"templatestyles-stylesheet-error-category-desc": "Файл «Стилей шаблонов» с ошибкой.",
+	"templatestyles-page-error-category": "Страницы с ошибками стилей шаблонов",
+	"templatestyles-page-error-category-desc": "При попытке обработки тега <code><nowiki><templatestyles/></nowiki></code> на странице произошла ошибка.",
 	"templatestyles-error-at-rule-block-not-allowed": "Блок набора правил не разрешён для <code>@$3</code> в: строка $1 символ $2.",
 	"templatestyles-error-at-rule-block-required": "Блок набора правил обязателен для <code>@$3</code> в: строка $1 символ $2.",
 	"templatestyles-error-bad-character-in-url": "Неподходящий символ в URL в: строка $1 символ $2.",

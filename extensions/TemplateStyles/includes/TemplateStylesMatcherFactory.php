@@ -4,9 +4,9 @@
  * @license GPL-2.0-or-later
  */
 
-use Wikimedia\CSS\Objects\Token;
 use Wikimedia\CSS\Grammar\TokenMatcher;
 use Wikimedia\CSS\Grammar\UrlMatcher;
+use Wikimedia\CSS\Objects\Token;
 
 /**
  * Extend the standard factory for TemplateStyles-specific matchers
@@ -33,6 +33,7 @@ class TemplateStylesMatcherFactory extends \Wikimedia\CSS\Grammar\MatcherFactory
 		// Undo unnecessary percent encoding
 		$url = preg_replace_callback( '/%[2-7][0-9A-Fa-f]/', function ( $m ) {
 			$char = urldecode( $m[0] );
+			/** @phan-suppress-next-line PhanParamSuspiciousOrder */
 			if ( strpos( '"#%<>[\]^`{|}/?&=+;', $char ) === false ) {
 				# Unescape it
 				return $char;
@@ -47,7 +48,7 @@ class TemplateStylesMatcherFactory extends \Wikimedia\CSS\Grammar\MatcherFactory
 		}
 
 		// Run it through the whitelist
-		$regexes = isset( $this->allowedDomains[$type] ) ? $this->allowedDomains[$type] : [];
+		$regexes = $this->allowedDomains[$type] ?? [];
 		foreach ( $regexes as $regex ) {
 			if ( preg_match( $regex, $url ) ) {
 				return true;

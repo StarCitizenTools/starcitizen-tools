@@ -16,7 +16,7 @@ class MatcherFactory {
 	/** @var MatcherFactory|null */
 	private static $instance = null;
 
-	/** @var Matcher[] Cache of constructed matchers */
+	/** @var (Matcher|Matcher[])[] Cache of constructed matchers */
 	protected $cache = [];
 
 	/** @var string[] length units */
@@ -85,6 +85,24 @@ class MatcherFactory {
 			$this->cache[__METHOD__] = new TokenMatcher( Token::T_IDENT );
 		}
 		return $this->cache[__METHOD__];
+	}
+
+	/**
+	 * Matcher for a <custom-ident>
+	 *
+	 * Note this doesn't implement the semantic restriction about assigning
+	 * meaning to various idents in a complex value, as CSS Sanitizer doesn't
+	 * deal with semantics on that level.
+	 *
+	 * @see https://www.w3.org/TR/2016/CR-css-values-3-20160929/#identifier-value
+	 * @param string[] $exclude Additional values to exclude, all-lowercase.
+	 * @return Matcher
+	 */
+	public function customIdent( array $exclude = [] ) {
+		$exclude = array_merge( [ 'initial', 'inherit', 'unset', 'default' ], $exclude );
+		return new TokenMatcher( Token::T_IDENT, function ( Token $t ) use ( $exclude ) {
+			return !in_array( strtolower( $t->value() ), $exclude, true );
+		} );
 	}
 
 	/**
@@ -543,7 +561,7 @@ class MatcherFactory {
 
 	/**
 	 * Matcher for a color value
-	 * @see https://www.w3.org/TR/2011/REC-css3-color-20110607/#colorunits
+	 * @see https://www.w3.org/TR/2018/PR-css-color-3-20180315/#colorunits
 	 * @return Matcher
 	 */
 	public function color() {
@@ -681,7 +699,7 @@ class MatcherFactory {
 
 	/**
 	 * Matcher for a position value
-	 * @see https://www.w3.org/TR/2014/CR-css3-background-20140909/#ltpositiongt
+	 * @see https://www.w3.org/TR/2017/CR-css-backgrounds-3-20171017/#typedef-bg-position
 	 * @return Matcher
 	 */
 	public function position() {
@@ -709,7 +727,7 @@ class MatcherFactory {
 
 	/**
 	 * Matcher for a CSS media query
-	 * @see https://www.w3.org/TR/2016/WD-mediaqueries-4-20160706/#mq-syntax
+	 * @see https://www.w3.org/TR/2017/CR-mediaqueries-4-20170905/#mq-syntax
 	 * @param bool $strict Only allow defined query types
 	 * @return Matcher
 	 */
@@ -732,7 +750,7 @@ class MatcherFactory {
 				];
 				$discreteFeatures = [
 					'orientation', 'scan', 'grid', 'update', 'overflow-block', 'overflow-inline', 'color-gamut',
-					'pointer', 'hover', 'any-pointer', 'any-hover', 'scripting', 'prefers-color-scheme'
+					'pointer', 'hover', 'any-pointer', 'any-hover', 'scripting'
 				];
 				$mfName = new KeywordMatcher( array_merge(
 					$rangeFeatures,
@@ -779,16 +797,22 @@ class MatcherFactory {
 
 			$mediaInParens = new NothingMatcher(); // temporary
 			$mediaNot = new Juxtaposition( [ new KeywordMatcher( 'not' ), &$mediaInParens ] );
-			$mediaAnd = new Juxtaposition( [
-				&$mediaInParens,
-				Quantifier::plus( new Juxtaposition( [ new KeywordMatcher( 'and' ), &$mediaInParens ] ) )
+			$mediaAnd = new Juxtaposition( [ new KeywordMatcher( 'and' ), &$mediaInParens ] );
+			$mediaOr = new Juxtaposition( [ new KeywordMatcher( 'or' ), &$mediaInParens ] );
+			$mediaCondition = new Alternative( [
+				$mediaNot,
+				new Juxtaposition( [
+					&$mediaInParens,
+					new Alternative( [
+						Quantifier::star( $mediaAnd ),
+						Quantifier::star( $mediaOr ),
+					] )
+				] ),
 			] );
-			$mediaOr = new Juxtaposition( [
-				&$mediaInParens,
-				Quantifier::plus( new Juxtaposition( [ new KeywordMatcher( 'or' ), &$mediaInParens ] ) )
+			$mediaConditionWithoutOr = new Alternative( [
+				$mediaNot,
+				new Juxtaposition( [ &$mediaInParens, Quantifier::star( $mediaAnd ) ] ),
 			] );
-			$mediaCondition = new Alternative( [ $mediaNot, $mediaAnd, $mediaOr, &$mediaInParens ] );
-			$mediaConditionWithoutOr = new Alternative( [ $mediaNot, $mediaAnd, &$mediaInParens ] );
 			$mediaFeature = new BlockMatcher( Token::T_LEFT_PAREN, new Alternative( [
 				new Juxtaposition( [ $mfName, new TokenMatcher( Token::T_COLON ), $mfValue ] ), // <mf-plain>
 				$mfName, // <mf-boolean>
@@ -821,7 +845,7 @@ class MatcherFactory {
 
 	/**
 	 * Matcher for a CSS media query list
-	 * @see https://www.w3.org/TR/2016/WD-mediaqueries-4-20160706/#mq-syntax
+	 * @see https://www.w3.org/TR/2017/CR-mediaqueries-4-20170905/#mq-syntax
 	 * @param bool $strict Only allow defined query types
 	 * @return Matcher
 	 */
@@ -835,14 +859,37 @@ class MatcherFactory {
 	}
 
 	/**
+	 * Matcher for single timing functions from CSS Timing Functions Level 1
+	 * @see https://www.w3.org/TR/2017/WD-css-timing-1-20170221/#single-timing-function-production
+	 * @return Matcher
+	 */
+	public function cssSingleTimingFunction() {
+		if ( !isset( $this->cache[__METHOD__] ) ) {
+			$this->cache[__METHOD__] = new Alternative( [
+				new KeywordMatcher( [
+					'ease', 'linear', 'ease-in', 'ease-out', 'ease-in-out', 'step-start', 'step-end'
+				] ),
+				new FunctionMatcher( 'steps', new Juxtaposition( [
+					$this->integer(),
+					Quantifier::optional( new KeywordMatcher( [ 'start', 'end' ] ) ),
+				], true ) ),
+				new FunctionMatcher( 'cubic-bezier', Quantifier::hash( $this->number(), 4, 4 ) ),
+				new FunctionMatcher( 'frames', $this->integer() ),
+			] );
+		}
+
+		return $this->cache[__METHOD__];
+	}
+
+	/**
 	 * @name   CSS Selectors Level 3
 	 * @{
 	 *
-	 * https://www.w3.org/TR/2011/REC-css3-selectors-20110929/#w3cselgrammar
+	 * https://www.w3.org/TR/2018/CR-selectors-3-20180130/#w3cselgrammar
 	 */
 
 	/**
-	 * List of selectors
+	 * List of selectors (selectors_group)
 	 *
 	 *     selector [ COMMA S* selector ]*
 	 *
@@ -862,7 +909,7 @@ class MatcherFactory {
 	}
 
 	/**
-	 * A single selector
+	 * A single selector (selector)
 	 *
 	 *     simple_selector_sequence [ combinator simple_selector_sequence ]*
 	 *
@@ -886,7 +933,7 @@ class MatcherFactory {
 	}
 
 	/**
-	 * A CSS combinator
+	 * A CSS combinator (combinator)
 	 *
 	 *     PLUS S* | GREATER S* | TILDE S* | S+
 	 *
@@ -910,7 +957,7 @@ class MatcherFactory {
 	}
 
 	/**
-	 * A simple selector sequence
+	 * A simple selector sequence (simple_selector_sequence)
 	 *
 	 *     [ type_selector | universal ]
 	 *     [ HASH | class | attrib | pseudo | negation ]*
@@ -952,7 +999,7 @@ class MatcherFactory {
 	}
 
 	/**
-	 * A type selector (i.e. a tag name)
+	 * A type selector, i.e. a tag name (type_selector)
 	 *
 	 *     [ namespace_prefix ] ? element_name
 	 *
@@ -974,7 +1021,7 @@ class MatcherFactory {
 	}
 
 	/**
-	 * A namespace prefix
+	 * A namespace prefix (namespace_prefix)
 	 *
 	 *      [ IDENT | '*' ]? '|'
 	 *
@@ -1010,7 +1057,7 @@ class MatcherFactory {
 	}
 
 	/**
-	 * The universal selector
+	 * The universal selector (universal)
 	 *
 	 *     [ namespace_prefix ]? '*'
 	 *
@@ -1045,7 +1092,7 @@ class MatcherFactory {
 	}
 
 	/**
-	 * A class selector
+	 * A class selector (class)
 	 *
 	 *     '.' IDENT
 	 *
@@ -1063,7 +1110,7 @@ class MatcherFactory {
 	}
 
 	/**
-	 * An attribute selector
+	 * An attribute selector (attrib)
 	 *
 	 *     '[' S* [ namespace_prefix ]? IDENT S*
 	 *         [ [ PREFIXMATCH |
@@ -1117,13 +1164,17 @@ class MatcherFactory {
 	}
 
 	/**
-	 * A pseudo-class or pseudo-element
+	 * A pseudo-class or pseudo-element (pseudo)
 	 *
 	 *     ':' ':'? [ IDENT | functional_pseudo ]
 	 *
+	 * Where functional_pseudo is
+	 *
+	 *     FUNCTION S* expression ')'
+	 *
 	 * Although this actually only matches the pseudo-selectors defined in the
 	 * following sources:
-	 * - https://www.w3.org/TR/2011/REC-css3-selectors-20110929/#pseudo-classes
+	 * - https://www.w3.org/TR/2018/CR-selectors-3-20180130/#pseudo-classes
 	 * - https://www.w3.org/TR/2016/WD-css-pseudo-4-20160607/
 	 *
 	 * @return Matcher
@@ -1156,7 +1207,7 @@ class MatcherFactory {
 					$colon,
 					new KeywordMatcher( [
 						'first-line', 'first-letter', 'before', 'after', 'selection', 'inactive-selection',
-						'spelling-error', 'grammar-error', 'placeholder'
+						'spelling-error', 'grammar-error', 'marker', 'placeholder'
 					] ),
 				] ),
 			] );
@@ -1238,7 +1289,7 @@ class MatcherFactory {
 	}
 
 	/**
-	 * A negation
+	 * A negation (negation)
 	 *
 	 *     ':' not( S* [ type_selector | universal | HASH | class | attrib | pseudo ] S* ')'
 	 *

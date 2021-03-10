@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Brad Jorsch",
 			"Marc A. Pelletier",
-			"Amire80",
 			"Umherirrender"
 		]
 	},
@@ -11,12 +11,17 @@
 	"templatestyles-desc": "{{desc|name=TemplateStyles|url=https://www.mediawiki.org/wiki/Extension:TemplateStyles}}",
 	"templatestyles-missing-src": "Error message displayed when the <code>src</code> attribute is not present on <code><nowiki><templatestyles></nowiki></code>.",
 	"templatestyles-invalid-src": "Error message displayed when the <code>src</code> attribute is not a valid title.",
+	"templatestyles-invalid-wrapper": "Error message displayed when the <code>wrapper</code> attribute is not valid.",
 	"templatestyles-bad-src-missing": "Error message displayed when the title specified has no content. Parameters:\n* $1 - The title specified.\n* $2 - The title with wikitext escaped.",
 	"templatestyles-bad-src": "Error message displayed when the title specified is not a usable stylesheet. Parameters:\n* $1 - The title specified.\n* $2 - The title with wikitext escaped.\n* $3 - Current content model of the page in question.",
 	"templatestyles-errorcomment": "Formatting for the comment used to display TemplateStyles errors encountered during the parse. Parameters:\n* $1 - Source stylesheet.\n* $2 - Revision of the stylesheet.\n* $3 - Errors.",
 	"templatestyles-size-exceeded": "Error returned when the stylesheet is more than $wgTemplateStylesMaxStylesheetSize bytes. Parameters:\n* $1 - Maximum size in bytes\n* $2 - Maximum size in \"human units\" (i.e. KB, MB, GB, etc).",
 	"templatestyles-end-tag-injection": "Error returned when the stylesheet contains <code>&lt;/style</code>, which is likely an attempt at HTML injection.",
 	"content-model-sanitized-css": "Name for TemplateStyles sanitized-css content model.",
+	"templatestyles-stylesheet-error-category": "Tracking category for TemplateStyles stylesheets with errors.",
+	"templatestyles-stylesheet-error-category-desc": "Description on [[Special:TrackingCategories]] for the {{msg-mw|templatestyles-stylesheet-error-category}} tracking category.",
+	"templatestyles-page-error-category": "Tracking category for pages with errors from <code><nowiki><templatestyles/></nowiki></code>.",
+	"templatestyles-page-error-category-desc": "Description on [[Special:TrackingCategories]] for the {{msg-mw|templatestyles-page-error-category}} tracking category.",
 	"templatestyles-error-at-rule-block-not-allowed": "Error in CSS validation. Note \"block\" in this message refers to the part of CSS syntax inside the <code>{ ... }</code>. Parameters:\n* $1 - Line number of the error.\n* $2 - Location of the error within the line.\n* $3 - Name of the at-rule in question.",
 	"templatestyles-error-at-rule-block-required": "Error in CSS validation. Note \"block\" in this message refers to the part of CSS syntax inside the <code>{ ... }</code>. Parameters:\n* $1 - Line number of the error.\n* $2 - Location of the error within the line.\n* $3 - Name of the at-rule in question.",
 	"templatestyles-error-bad-character-in-url": "Error in CSS parsing. Parameters:\n* $1 - Line number of the error.\n* $2 - Location of the error within the line.",

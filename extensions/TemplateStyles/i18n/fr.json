@@ -1,21 +1,27 @@
 {
 	"@metadata": {
 		"authors": [
-			"Wladek92",
 			"Gomoko",
-			"Urhixidur"
+			"Thibaut120094",
+			"Urhixidur",
+			"Wladek92"
 		]
 	},
 	"templatestyles": "Styles de modèles",
 	"templatestyles-desc": "Implémenter les feuilles de style par modèle",
 	"templatestyles-missing-src": "L’attribut <code>src</code> de TemplateStyles ne doit pas être vide.",
 	"templatestyles-invalid-src": "Titre non valide pour l’attribut <code>src</code> de TemplateStyles.",
+	"templatestyles-invalid-wrapper": "Valeur non valide pour l'attribut <code>wrapper</code> de TemplateStyles.",
 	"templatestyles-bad-src-missing": "La page [[:$1|$2]] n’a pas de contenu.",
-	"templatestyles-bad-src": "La page [[:$1|$2]] doit avoir un modèle de contenu « {{int:content-model-sanitized-css}} » pour TemplateStyles (le modèle actuel est « $3 »).",
+	"templatestyles-bad-src": "La page [[:$1|$2]] doit avoir un modèle de contenu « {{int:content-model-sanitized-css}} » pour TemplateStyles (le modèle actuel est « $3 »).",
 	"templatestyles-errorcomment": "Erreurs en appliquant la feuille de style [[:$1]] (rév. $2) :\n$3",
 	"templatestyles-size-exceeded": "La feuille de style est plus large que la taille maximale de $2.",
 	"templatestyles-end-tag-injection": "La page de style fournie contient <code>&lt;/style</code>, qui n’est pas autorisé.",
 	"content-model-sanitized-css": "CSS nettoyé",
+	"templatestyles-stylesheet-error-category": "Pages de style TemplateStyles avec des erreurs",
+	"templatestyles-stylesheet-error-category-desc": "La feuille de style TemplateStyles a une erreur.",
+	"templatestyles-page-error-category": "Pages avec des erreurs TemplateStyles",
+	"templatestyles-page-error-category-desc": "Il y a eu une erreur en traitant une balise <code><nowiki><templatestyles/></nowiki></code> sur la page.",
 	"templatestyles-error-at-rule-block-not-allowed": "Bloc non autorisé pour <code>@$3</code> à la ligne $1, caractère $2.",
 	"templatestyles-error-at-rule-block-required": "Bloc obligatoire pour <code>@$3</code> à la ligne $1, caractère $2.",
 	"templatestyles-error-bad-character-in-url": "Caractère non valide dans l’URL à la ligne $1, caractère $2.",

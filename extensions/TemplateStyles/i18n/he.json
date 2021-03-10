@@ -1,19 +1,26 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80"
+			"Amire80",
+			"Guycn2",
+			"פוילישער"
 		]
 	},
 	"templatestyles": "סגנונות תבנית",
 	"templatestyles-desc": "מימוש גיליונות סגנון עבור כל תבנית ותבנית",
 	"templatestyles-missing-src": "המאפיין <code dir=\"ltr\">src</code> של סגנונות תבנית אינו יכול להיות ריק.",
 	"templatestyles-invalid-src": "כותרת בלתי־תקינה במאפיין <code dir=\"ltr\">src</code> של סגנונות תבנית.",
+	"templatestyles-invalid-wrapper": "ערך בלתי־תקין עבור מאפיין <code>wrapper</code> של סגנונות תבנית.",
 	"templatestyles-bad-src-missing": "בדף [[:$1|$2]] אין תוכן.",
 	"templatestyles-bad-src": "הדף [[:$1|$2]] צריך להיות במודל התוכן \"{{int:content-model-sanitized-css}}\" בשביל סגנונות תבנית (המודל הנוכחי הוא \"$3\").",
 	"templatestyles-errorcomment": "שגיאות בעיבוד גיליון הסגנון  [[:$1]] (גרסה $2):\n$3",
 	"templatestyles-size-exceeded": "גיליון הסגנון גדול מ־$2, שהוא הגודל המרבי.",
 	"templatestyles-end-tag-injection": "גיליון הסגנון שסופק מכיל <code dir=\"ltr\">&lt;/style</code> וזה אסור.",
 	"content-model-sanitized-css": "CSS מחוטא",
+	"templatestyles-stylesheet-error-category": "גיליונות סגנון של תבניות המכילים שגיאות",
+	"templatestyles-stylesheet-error-category-desc": "יש שגיאה בגיליון הסגנונות של התבנית.",
+	"templatestyles-page-error-category": "דפים עם שגיאות בתג סגנונות התבנית",
+	"templatestyles-page-error-category-desc": "אירעה שגיאה בעיבוד התג <code dir=\"ltr\"><nowiki><templatestyles/></nowiki></code> בדף.",
 	"templatestyles-error-at-rule-block-not-allowed": "גוש אסור עבור <code dir=\"ltr\">@$3</code> בשורה $1 בתו $2.",
 	"templatestyles-error-at-rule-block-required": "גוש נדרש עבור <code dir=\"ltr\">@$3</code> בשורה $1 בתו $2.",
 	"templatestyles-error-bad-character-in-url": "תו בלתי־תקין ב־URL בשורה $1 בתו $2.",

@@ -1,11 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Liuxinyu970226"
+			"A2093064",
+			"Liuxinyu970226",
+			"Shizhao",
+			"Xiplus"
 		]
 	},
 	"templatestyles": "模板样式",
-	"templatestyles-desc": "实施按名字空间的样式表",
+	"templatestyles-desc": "实施基于模板的样式表",
 	"templatestyles-missing-src": "模板样式的<code>src</code>属性不得为空。",
 	"templatestyles-invalid-src": "用于模板样式<code>src</code>属性的标题无效。",
 	"templatestyles-bad-src-missing": "页面[[:$1|$2]]没有内容。",
@@ -13,7 +16,11 @@
 	"templatestyles-errorcomment": "解析样式表[[:$1]]（修订版本$2）时出错：$3",
 	"templatestyles-size-exceeded": "样式表超过最高大小$2。",
 	"templatestyles-end-tag-injection": "提供的样式表包含<code>&lt;/style</code>，这是不允许的。",
-	"content-model-sanitized-css": "纯CSS",
+	"content-model-sanitized-css": "已过滤的CSS",
+	"templatestyles-stylesheet-error-category": "有错误的模板样式表",
+	"templatestyles-stylesheet-error-category-desc": "模板样式表存在错误。",
+	"templatestyles-page-error-category": "有模板样式错误的页面",
+	"templatestyles-page-error-category-desc": "处理页面上的<code><nowiki><templatestyles/></nowiki></code>时出现错误。",
 	"templatestyles-error-at-rule-block-not-allowed": "在第$1行字符$2中，不允许将代码块用于<code>@$3</code>。",
 	"templatestyles-error-at-rule-block-required": "在第$1行字符$2中，<code>@$3</code>需要代码块。",
 	"templatestyles-error-bad-character-in-url": "在第$1行字符$2的URL中有无效字符。",
@@ -58,7 +65,7 @@
 	"templatestyles-error-unexpected-eof-in-block": "在第$1行字符$2的代码块中存在意外的样式表结尾。",
 	"templatestyles-error-unexpected-eof-in-function": "在第$1行字符$2的函数中存在意外的样式表结尾。",
 	"templatestyles-error-unexpected-eof-in-rule": "在第$1行字符$2的规则中存在意外的样式表结尾。",
-	"templatestyles-error-unexpected-token-in-declaration-list": "在第$1行字符$2的声明列表中存在意外令牌。",
+	"templatestyles-error-unexpected-token-in-declaration-list": "在第$1行字符$2的声明列表中存在意外符号。",
 	"templatestyles-error-unrecognized-property": "在第$1行字符$2中有不被认可或不受支持的属性。",
 	"templatestyles-error-unrecognized-rule": "在第$1行字符$2中有不被认可或不受支持的规则。"
 }

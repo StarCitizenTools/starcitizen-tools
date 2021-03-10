@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"!Silent",
+			"Eduardo Addad de Oliveira",
 			"Felipe L. Ewald"
 		]
 	},
@@ -9,12 +10,17 @@
 	"templatestyles-desc": "Implementar folhas de estilo por predefinição",
 	"templatestyles-missing-src": "O atributo <code>src</code> do TemplateStyles não deve estar vazio.",
 	"templatestyles-invalid-src": "Título inválido para o atributo <code>src</code> do TemplateStyles.",
+	"templatestyles-invalid-wrapper": "Valor inválido para o atributo <code>wrapper</code> de TemplateStyles",
 	"templatestyles-bad-src-missing": "Página [[:$1|$2]] não tem conteúdo.",
 	"templatestyles-bad-src": "Página[[:$1|$2]] deve ter o modelo de conteúdo \"{{int: content-model-sanitized-css}}\" para TemplateStyles (o modelo atual é \"$3\").",
 	"templatestyles-errorcomment": "Erros no processamento da folha de estilo[[:$1]] (rev $2):\n$3",
 	"templatestyles-size-exceeded": "A folha de estilos é maior do que o tamanho máximo de $2.",
 	"templatestyles-end-tag-injection": "A folha de estilo fornecida contém<code>&lt;/style</code>, o que não é permitido.",
 	"content-model-sanitized-css": "CSS limpo",
+	"templatestyles-stylesheet-error-category": "Estilos de TemplateStyles com erros",
+	"templatestyles-stylesheet-error-category-desc": "A folha de estilos TemplateStyles tem um erro.",
+	"templatestyles-page-error-category": "Páginas com erros de TemplateStyles",
+	"templatestyles-page-error-category-desc": "Ocorreu um erro ao processar um <code><nowiki><templatestyles/></nowiki></code> etiqueta na página.",
 	"templatestyles-error-at-rule-block-not-allowed": "Bloqueio não permitido para <code>@$3</code> na linha $1 caractere $2.",
 	"templatestyles-error-at-rule-block-required": "Bloqueio requerido para <code>@$3</code> na linha $1 caractere $2.",
 	"templatestyles-error-bad-character-in-url": "Caractere inválido no URL na linha $1 caractere $2.",
