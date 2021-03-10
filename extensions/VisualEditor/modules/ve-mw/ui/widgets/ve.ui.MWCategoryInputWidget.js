@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWCategoryInputWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,7 +15,7 @@
  * @constructor
  * @param {ve.ui.MWCategoryWidget} categoryWidget
  * @param {Object} [config] Configuration options
- * @cfg {mw.Api} [api] API object to use, creates a default mw.Api instance if not specified
+ * @cfg {mw.Api} [api] API object to use, uses Target#getContentApi if not specified
  */
 ve.ui.MWCategoryInputWidget = function VeUiMWCategoryInputWidget( categoryWidget, config ) {
 	// Config initialization
@@ -31,11 +31,14 @@ ve.ui.MWCategoryInputWidget = function VeUiMWCategoryInputWidget( categoryWidget
 
 	// Properties
 	this.categoryWidget = categoryWidget;
-	this.api = config.api || new mw.Api();
+	this.api = config.api || ve.init.target.getContentApi();
+
+	this.$input.attr( 'aria-label', ve.msg( 'visualeditor-dialog-meta-categories-input-placeholder' ) );
 
 	// Initialization
 	this.$element.addClass( 've-ui-mwCategoryInputWidget' );
 	this.lookupMenu.$element.addClass( 've-ui-mwCategoryInputWidget-menu' );
+	this.lookupMenu.$element.attr( 'aria-label', ve.msg( 'visualeditor-dialog-meta-categories-data-label' ) );
 };
 
 /* Inheritance */
@@ -82,16 +85,21 @@ ve.ui.MWCategoryInputWidget.prototype.getLookupCacheDataFromResponse = function 
 		linkCacheUpdate = {},
 		query = data.query || {};
 
+	// eslint-disable-next-line no-jquery/no-each-util
 	$.each( query.pages || [], function ( pageId, categoryPage ) {
 		result.push( mw.Title.newFromText( categoryPage.title ).getMainText() );
 		linkCacheUpdate[ categoryPage.title ] = {
-			missing: categoryPage.hasOwnProperty( 'missing' ),
-			hidden: categoryPage.categoryinfo && categoryPage.categoryinfo.hasOwnProperty( 'hidden' )
+			missing: Object.prototype.hasOwnProperty.call( categoryPage, 'missing' ),
+			hidden: (
+				categoryPage.categoryinfo &&
+				Object.prototype.hasOwnProperty.call( categoryPage.categoryinfo, 'missing' )
+			)
 		};
 	} );
 
+	// eslint-disable-next-line no-jquery/no-each-util
 	$.each( query.redirects || [], function ( index, redirect ) {
-		if ( !linkCacheUpdate.hasOwnProperty( redirect.to ) ) {
+		if ( !Object.prototype.hasOwnProperty.call( linkCacheUpdate, redirect.to ) ) {
 			linkCacheUpdate[ redirect.to ] = ve.init.platform.linkCache.getCached( redirect.to ) ||
 				{ missing: false, redirectFrom: [ redirect.from ] };
 		}
@@ -136,6 +144,7 @@ ve.ui.MWCategoryInputWidget.prototype.getLookupMenuOptionsFromData = function ( 
 		canonicalQueryValue = canonicalQueryValue.getMainText();
 	}
 
+	// eslint-disable-next-line no-jquery/no-each-util
 	$.each( data, function ( index, suggestedCategory ) {
 		var suggestedCategoryTitle = mw.Title.newFromText(
 				suggestedCategory,
@@ -160,6 +169,7 @@ ve.ui.MWCategoryInputWidget.prototype.getLookupMenuOptionsFromData = function ( 
 	} );
 
 	// Existing categories
+	// eslint-disable-next-line no-jquery/no-each-util
 	$.each( existingCategories, function ( index, existingCategory ) {
 		if ( existingCategory === canonicalQueryValue ) {
 			exactMatch = true;
@@ -179,6 +189,7 @@ ve.ui.MWCategoryInputWidget.prototype.getLookupMenuOptionsFromData = function ( 
 	ve.init.platform.linkCache.set( linkCacheUpdate );
 
 	// Add sections for non-empty groups. Each section consists of an id, a label and items
+	// eslint-disable-next-line no-jquery/no-each-util
 	$.each( [
 		{
 			id: 'newCategory',
@@ -206,6 +217,7 @@ ve.ui.MWCategoryInputWidget.prototype.getLookupMenuOptionsFromData = function ( 
 				data: sectionData.id,
 				label: sectionData.label
 			} ) );
+			// eslint-disable-next-line no-jquery/no-each-util
 			$.each( sectionData.items, function ( index, categoryItem ) {
 				itemWidgets.push( widget.getCategoryWidgetFromName( categoryItem ) );
 			} );
@@ -218,7 +230,7 @@ ve.ui.MWCategoryInputWidget.prototype.getLookupMenuOptionsFromData = function ( 
 /**
  * @inheritdoc
  */
-ve.ui.MWCategoryInputWidget.prototype.onLookupMenuItemChoose = function ( item ) {
+ve.ui.MWCategoryInputWidget.prototype.onLookupMenuChoose = function ( item ) {
 	this.emit( 'choose', item );
 
 	// Reset input
@@ -228,7 +240,6 @@ ve.ui.MWCategoryInputWidget.prototype.onLookupMenuItemChoose = function ( item )
 /**
  * Take a category name and turn it into a menu item widget, following redirects.
  *
- * @method
  * @param {string} name Category name
  * @return {OO.ui.MenuOptionWidget} Menu item widget to be shown
  */
@@ -245,8 +256,11 @@ ve.ui.MWCategoryInputWidget.prototype.getCategoryWidgetFromName = function ( nam
 			autoFitLabel: false,
 			label: $( '<span>' )
 				.text( labelText )
-				.append( '<br>↳ ' )
-				.append( $( '<span>' ).text( mw.Title.newFromText( name ).getMainText() ) )
+				.append(
+					$( '<br>' ),
+					document.createTextNode( '↳ ' ),
+					$( '<span>' ).text( mw.Title.newFromText( name ).getMainText() )
+				)
 		} );
 	} else {
 		labelText = name;

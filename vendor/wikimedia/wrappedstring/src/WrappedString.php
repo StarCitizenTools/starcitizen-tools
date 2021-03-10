@@ -24,7 +24,7 @@
  * @file
  */
 
-namespace WrappedString;
+namespace Wikimedia;
 
 class WrappedString {
 	/** @var string */
@@ -38,8 +38,8 @@ class WrappedString {
 
 	/**
 	 * @param string $value
-	 * @param string $prefix
-	 * @param string $suffix
+	 * @param string|null $prefix
+	 * @param string|null $suffix
 	 */
 	public function __construct( $value, $prefix = null, $suffix = null ) {
 		$this->value = $value;
@@ -48,7 +48,7 @@ class WrappedString {
 	}
 
 	/**
-	 * @param string $content
+	 * @param string $value
 	 * @return WrappedString Newly wrapped string
 	 */
 	protected function extend( $value ) {
@@ -62,17 +62,32 @@ class WrappedString {
 	}
 
 	/**
-	 * Merge consecutive wrapped strings with the same before/after values.
+	 * Merge consecutive WrappedString objects with the same prefix and suffix.
 	 *
 	 * Does not modify the array or the WrappedString objects.
 	 *
-	 * @param WrappedString[] $wraps
-	 * @return WrappedString[]
+	 * NOTE: This is an internal method. Use join() or WrappedStringList instead.
+	 *
+	 * @param (string|WrappedString|WrappedStringList)[] $wraps
+	 * @return string[] Compacted list to be treated as strings
+	 * (may contain WrappedString and WrappedStringList objects)
 	 */
-	protected static function compact( array &$wraps ) {
-		$consolidated = array();
-		$prev = current( $wraps );
-		while ( ( $wrap = next( $wraps ) ) !== false ) {
+	public static function compact( array $wraps ) {
+		$consolidated = [];
+		if ( $wraps === [] ) {
+			// Return early so that we don't have to deal with $prev being
+			// set or not set, and avoid risk of adding $prev's initial null
+			// value to the list as extra value (T196496).
+			return $consolidated;
+		}
+		$first = true;
+		$prev = null;
+		foreach ( $wraps as $wrap ) {
+			if ( $first ) {
+				$first = false;
+				$prev = $wrap;
+				continue;
+			}
 			if ( $prev instanceof WrappedString
 				&& $wrap instanceof WrappedString
 				&& $prev->prefix !== null
@@ -93,14 +108,18 @@ class WrappedString {
 	}
 
 	/**
-	 * Join a several wrapped strings with a separator between each.
+	 * Join several wrapped strings with a separator between each.
+	 *
+	 * This method is compatibile with native PHP implode(). The actual join
+	 * operation is deferred to WrappedStringList::__toString(). This allows
+	 * callers to collect multiple lists and compact them together.
 	 *
 	 * @param string $sep
-	 * @param WrappedString[] $wraps
-	 * @return string
+	 * @param (string|WrappedString|WrappedStringList)[] $wraps
+	 * @return WrappedStringList
 	 */
 	public static function join( $sep, array $wraps ) {
-		return implode( $sep, self::compact( $wraps ) );
+		return new WrappedStringList( $sep, $wraps );
 	}
 
 	/** @return string */

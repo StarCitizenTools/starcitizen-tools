@@ -1,21 +1,20 @@
 {
 	"@metadata": {
 		"authors": [
+			"Andrew Dalby",
 			"Autokrator",
 			"Chorobek",
-			"Tynchtyk Chorotegin",
-			"UV",
-			"Викиней",
-			"Andrew Dalby",
+			"Guillermo2149",
 			"Jdforrester",
 			"Laurentianus",
-			"Guillermo2149"
+			"Tynchtyk Chorotegin",
+			"UV",
+			"Викиней"
 		]
 	},
 	"tooltip-ca-createsource": "Fontem huius paginae creare",
 	"tooltip-ca-editsource": "Fontem huius paginae recensere",
 	"tooltip-ca-ve-edit": "Hanc paginam recensere",
-	"visualeditor-beta-label": "beta",
 	"visualeditor-ca-createsource": "Fontem creare",
 	"visualeditor-ca-editsource": "Fontem recensere",
 	"visualeditor-ca-editsource-section": "fontem recensere",
@@ -78,8 +77,6 @@
 	"visualeditor-preference-core-label": "Editor visualis",
 	"visualeditor-savedialog-label-create": "Paginam creare",
 	"visualeditor-savedialog-label-save-short": "Servare",
-	"visualeditor-toolbar-savedialog-short": "Servare",
 	"visualeditor-version-label": "Versio",
-	"visualeditor-viewpage-savewarning-discard": "Abrogare",
 	"visualeditor-wikitext-progress": "Convertere vicitextum"
 }

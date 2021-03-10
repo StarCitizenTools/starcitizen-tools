@@ -1,15 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
-			"Paulu",
+			"Jumpy01",
+			"Macofe",
 			"Nemo bis",
-			"Macofe"
+			"Paulu"
 		]
 	},
 	"tooltip-ca-createsource": "Creà u codice fonte di 'ssa pagina",
 	"tooltip-ca-editsource": "Edità u codice fonte di 'ssa pagina",
-	"tooltip-ca-ve-edit": "Edità 'ssa pagina incù VisualEditor",
-	"visualeditor-beta-label": "beta",
+	"tooltip-ca-ve-edit": "Edità 'ssa pagina",
 	"visualeditor-ca-createsource": "Creà a fonte",
 	"visualeditor-ca-editsource": "Edità a fonte",
 	"visualeditor-ca-editsource-section": "edità a fonte",
@@ -43,7 +43,7 @@
 	"visualeditor-dialog-transclusion-add-template": "Aghjustà un mudellu",
 	"visualeditor-dialog-transclusion-content": "Cuntenutu",
 	"visualeditor-dialog-transclusion-options": "Ozzione",
-	"visualeditor-dialog-transclusion-placeholder": "Mudellu novu",
+	"visualeditor-dialog-transclusion-placeholder": "Aghjustà un mudellu",
 	"visualeditor-dialog-transclusion-remove-content": "Caccià u cuntenutu",
 	"visualeditor-dialog-transclusion-remove-param": "Caccià u parametru",
 	"visualeditor-dialog-transclusion-remove-template": "Caccià u mudellu",
@@ -60,7 +60,6 @@
 	"visualeditor-formatdropdown-format-mw-heading6": "Sottu-intestatura 4",
 	"visualeditor-languages-tool": "Lingue",
 	"visualeditor-linkinspector-illegal-title": "Illecitu titulu di pagina",
-	"visualeditor-media-input-placeholder": "Ricerca di media",
 	"visualeditor-meta-tool": "Arrigulamenti per a pagina",
 	"visualeditor-parameter-input-placeholder": "Nome di parametru",
 	"visualeditor-parameter-search-unknown": "Parametru scunnisciutu",
@@ -73,6 +72,5 @@
 	"visualeditor-savedialog-label-warning": "Attentu",
 	"visualeditor-savedialog-title-conflict": "Cunflittu",
 	"visualeditor-savedialog-title-review": "Verificà i cambiamenti",
-	"visualeditor-savedialog-title-save": "Arrighjistrà i cambiamenti",
-	"visualeditor-toolbar-savedialog": "Arrighjistrà a pagina"
+	"visualeditor-savedialog-title-save": "Arrighjistrà i cambiamenti"
 }

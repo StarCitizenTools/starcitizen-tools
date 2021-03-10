@@ -1,20 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"Otogi",
-			"MIKHEIL",
+			"BRUTE",
 			"David1010",
-			"BRUTE"
+			"MIKHEIL",
+			"Otogi"
 		]
 	},
 	"templatedata-doc-desc-empty": "არ არის აღწერა.",
 	"templatedata-doc-no-params-set": "პარამეტრები არ არის მითითებული",
 	"templatedata-doc-param-autovalue": "საკუთარი მნიშვნელობა",
-	"templatedata-doc-param-autovalue-empty": "ცარიელი",
 	"templatedata-doc-param-default": "სტანდარტული",
-	"templatedata-doc-param-default-empty": "ცარიელი",
 	"templatedata-doc-param-example": "მაგალითი",
-	"templatedata-doc-param-example-empty": "ცარიელი",
 	"templatedata-doc-param-desc": "აღწერა",
 	"templatedata-doc-param-desc-empty": "არ არის აღწერა",
 	"templatedata-doc-param-name": "პარამეტრი",
@@ -37,7 +34,7 @@
 	"templatedata-doc-param-type-wiki-user-name": "მომხმარებელი",
 	"templatedata-doc-params": "თარგის პარამეტრები",
 	"templatedata-editbutton": "TemplateData-ის მართვა",
-	"templatedata-exists-on-related-page": "მიაქციეთ ყურადღება: უკვე არის TemplateData-ის ბლოკი დაკავშირებულ გვერდზე „[[$1]]“.",
+	"templatedata-exists-on-related-page": "მიაქციეთ ყურადღება: უკვე არსებობს TemplateData-ის ბლოკი დაკავშირებულ გვერდზე „[[$1]]“.",
 	"templatedata-helplink": "ინფორმაცია TemplateData-ის შესახებ",
 	"templatedata-invalid-parse": "სინტაქსური შეცდომა JSON-ში.",
 	"templatedata-modal-button-add-language": "ენის დამატება",

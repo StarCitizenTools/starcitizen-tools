@@ -2,12 +2,12 @@
  * Build a static loader file from a template
  */
 
-/* eslint-env node, es6 */
+'use strict';
+
 module.exports = function ( grunt ) {
 
 	grunt.registerMultiTask( 'buildloader', function () {
-		var configScript,
-			styles = [],
+		const styles = [],
 			scripts = [],
 			loadedModules = [],
 			targetFile = this.data.targetFile,
@@ -22,16 +22,17 @@ module.exports = function ( grunt ) {
 			placeholders = this.data.placeholders || {},
 			dir = this.data.dir,
 			langList = this.data.langList !== undefined ? this.data.langList : true,
-			text = grunt.file.read( this.data.template ),
 			done = this.async(),
-			moduleUtils = require( '../moduleUtils' );
+			moduleUtils = require( '../moduleUtils' ),
+			stringifyObject = require( 'stringify-object' );
+		let text = grunt.file.read( this.data.template );
 
 		function scriptTag( src ) {
 			return indent + '<script src="' + pathPrefix + src.file + '"></script>';
 		}
 
 		function styleTag( group, src ) {
-			var rtlFilepath = src.file.replace( /\.css$/, '.rtl.css' );
+			const rtlFilepath = src.file.replace( /\.css$/, '.rtl.css' );
 
 			if ( grunt.file.exists( rtlFilepath ) ) {
 				if ( !dir ) {
@@ -64,30 +65,28 @@ module.exports = function ( grunt ) {
 		}
 
 		function placeholder( input, id, replacement, callback ) {
-			var output,
-				rComment = new RegExp( '<!-- ' + id + ' -->', 'm' );
+			const rComment = new RegExp( '<!-- ' + id + ' -->', 'm' );
 			if ( typeof replacement === 'function' ) {
 				replacement( function ( response ) {
-					output = input.replace( rComment, response );
+					const output = input.replace( rComment, response );
 					callback( output );
 				} );
 			} else {
-				output = input.replace( rComment, replacement );
+				const output = input.replace( rComment, replacement );
 				callback( output );
 			}
 		}
 
 		function addModules( load ) {
-			var module, moduleStyles, moduleScripts, dependency, dependencies;
-			dependencies = moduleUtils.buildDependencyList( modules, load );
-			for ( dependency in dependencies ) {
-				module = dependencies[ dependency ];
+			const dependencies = moduleUtils.buildDependencyList( modules, load );
+			for ( const dependency in dependencies ) {
+				const module = dependencies[ dependency ];
 				if ( loadedModules.indexOf( module ) > -1 ) {
 					continue;
 				}
 				loadedModules.push( module );
 				if ( modules[ module ].scripts ) {
-					moduleScripts = modules[ module ].scripts
+					const moduleScripts = modules[ module ].scripts
 						.map( expand ).filter( filter.bind( this, 'scripts' ) ).map( scriptTag )
 						.join( '\n' );
 					if ( moduleScripts ) {
@@ -95,7 +94,7 @@ module.exports = function ( grunt ) {
 					}
 				}
 				if ( modules[ module ].styles ) {
-					moduleStyles = modules[ module ].styles
+					const moduleStyles = modules[ module ].styles
 						.map( expand ).filter( filter.bind( this, 'styles' ) ).map( styleTag.bind( styleTag, modules[ module ].styleGroup ) )
 						.join( '\n' );
 					if ( moduleStyles ) {
@@ -108,35 +107,34 @@ module.exports = function ( grunt ) {
 		addModules( load );
 
 		if ( i18n.length || demoPages ) {
-			configScript = indent + '<script>\n';
+			let configScript = indent + '<script>\n';
 
 			if ( i18n.length ) {
 				configScript +=
-					// TODO: Build real JS, instead of using JSON.stringify
-					indent + '\t/* eslint-disable */\n' +
 					indent + '\tve.messagePaths = ' +
-					JSON.stringify(
+					stringifyObject(
 						i18n.map( function ( path ) { return pathPrefix + path; } )
-					) + ';\n';
+					).replace( /\n/g, '\n\t' + indent ) + ';\n';
 
 				if ( langList ) {
 					configScript += indent + '\tve.availableLanguages = ' +
-						JSON.stringify(
-							grunt.file.expand(
-								i18n.map( function ( path ) { return path + '*.json'; } )
-							).map( function ( file ) {
-								return file.split( '/' ).pop().slice( 0, -5 );
-							} )
-						) +
+						stringifyObject(
+							Array.from( new Set(
+								grunt.file.expand(
+									i18n.map( function ( path ) { return path + '*.json'; } )
+								).map( function ( file ) {
+									return file.split( '/' ).pop().slice( 0, -5 );
+								} )
+							) ).sort()
+						).replace( /\n\t*/g, ' ' ) +
 						';\n';
 				}
 			}
 			if ( demoPages ) {
-				configScript += indent + '\tve.demoPages = ' + JSON.stringify( demoPages ) + ';\n';
+				configScript += indent + '\tve.demoPages = ' + stringifyObject( demoPages ).replace( /\n/g, '\n\t' + indent ) + ';\n';
 			}
 
 			configScript +=
-				indent + '\t/* eslint-enable */\n' +
 				indent + '</script>';
 			scripts.push( configScript );
 		}

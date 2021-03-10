@@ -7,6 +7,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Overrides Special:Movepage to to allow renaming a page translation page and
  * all related translations and derivative pages.
@@ -16,59 +18,21 @@
 class SpecialPageTranslationMovePage extends MovePageForm {
 	// Basic form parameters both as text and as titles
 	protected $newText, $oldText;
-
-	/**
-	 * @var Title
-	 */
-	protected $newTitle, $oldTitle;
-
 	// Other form parameters
 	/**
 	 * 'check' or 'perform'
 	 */
 	protected $subaction;
-
-	/**
-	 * There must be reason for everything.
-	 */
-	protected $reason;
-
-	/**
-	 * Allow skipping non-translation subpages.
-	 */
-	protected $moveSubpages;
-
-	/**
-	 * @var TranslatablePage instance.
-	 */
+	/** @var TranslatablePage instance. */
 	protected $page;
-
 	/**
 	 * Whether MovePageForm extends SpecialPage
 	 */
 	protected $old;
-
-	/**
-	 * @var Title[] Cached list of translation pages. Not yet loaded if null.
-	 */
+	/** @var Title[] Cached list of translation pages. Not yet loaded if null. */
 	protected $translationPages;
-
-	/**
-	 * @var Title[] Cached list of section pages. Not yet loaded if null.
-	 */
+	/** @var Title[] Cached list of section pages. Not yet loaded if null. */
 	protected $sectionPages;
-
-	public function __construct() {
-		parent::__construct( 'Movepage' );
-	}
-
-	public function doesWrites() {
-		return true;
-	}
-
-	public function isListed() {
-		return false;
-	}
 
 	/**
 	 * Partially copies from SpecialMovepage.php, because it cannot be
@@ -80,14 +44,13 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 	public function execute( $par ) {
 		$request = $this->getRequest();
 		$user = $this->getUser();
-
-		$par = is_null( $par ) ? '' : $par; // Title::newFromText expects strings only
+		$this->addHelpLink( 'Help:Extension:Translate/Move_translatable_page' );
 
 		// Yes, the use of getVal() and getText() is wanted, see bug T22365
 		$this->oldText = $request->getVal( 'wpOldTitle', $request->getVal( 'target', $par ) );
 		$this->newText = $request->getText( 'wpNewTitle' );
 
-		$this->oldTitle = Title::newFromText( $this->oldText );
+		$this->oldTitle = Title::newFromText( $this->oldText ?? '' );
 		$this->newTitle = Title::newFromText( $this->newText );
 
 		$this->reason = $request->getText( 'reason' );
@@ -125,7 +88,7 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 			}
 
 			if ( $subaction === 'check' && $this->checkToken() && $request->wasPosted() ) {
-				$blockers = $this->checkMoveBlockers();
+				$blockers = $this->checkMoveBlockers( $user );
 				if ( count( $blockers ) ) {
 					$this->showErrors( $blockers );
 					$this->showForm( [] );
@@ -165,7 +128,8 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 		}
 
 		// Check rights
-		$permErrors = $this->oldTitle->getUserPermissionsErrors( 'move', $this->getUser() );
+		$permErrors = MediaWikiServices::getInstance()->getPermissionManager()
+			->getPermissionErrors( 'move', $this->getUser(), $this->oldTitle );
 		if ( count( $permErrors ) ) {
 			throw new PermissionsError( 'move', $permErrors );
 		}
@@ -183,24 +147,28 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 
 	/**
 	 * Pretty-print the list of errors.
-	 * @param array $errors Array with message key and parameters
+	 * @param SplObjectStorage $errors Array with message key and parameters
 	 */
-	protected function showErrors( array $errors ) {
-		if ( count( $errors ) ) {
-			$out = $this->getOutput();
+	protected function showErrors( SplObjectStorage $errors ): void {
+		$out = $this->getOutput();
 
-			$out->addHTML( Html::openElement( 'div', [ 'class' => 'error' ] ) );
-			$out->addWikiMsg(
-				'pt-movepage-blockers',
-				$this->getLanguage()->formatNum( count( $errors ) )
-			);
-			$s = '';
-			foreach ( $errors as $error ) {
-				$s .= '* ' . wfMessage( ...$error )->plain() . "\n";
-			}
-			TranslateUtils::addWikiTextAsInterface( $out, $s );
-			$out->addHTML( '</div>' );
+		$out->addHTML( Html::openElement( 'div', [ 'class' => 'errorbox' ] ) );
+		$out->addWikiMsg(
+			'pt-movepage-blockers',
+			$this->getLanguage()->formatNum( count( $errors ) )
+		);
+
+		// If there are many errors, for performance reasons we must parse them all at once
+		$s = '';
+		$context = 'pt-movepage-error-placeholder';
+		foreach ( $errors as $title ) {
+			$titleText = $title->getPrefixedText();
+			$s .= "'''$titleText'''\n\n";
+			$s .= $errors[ $title ]->getWikiText( false, $context );
 		}
+
+		$out->addWikiTextAsInterface( $s );
+		$out->addHTML( Html::closeElement( 'div' ) );
 	}
 
 	/**
@@ -216,37 +184,26 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 			'wpOldTitle' => [
 				'type' => 'text',
 				'name' => 'wpOldTitle',
-				'label' => $this->msg( 'pt-movepage-current' )->text(),
-				'size' => 30,
+				'label-message' => 'pt-movepage-current',
 				'default' => $this->oldText,
 				'readonly' => true,
 			],
 			'wpNewTitle' => [
 				'type' => 'text',
 				'name' => 'wpNewTitle',
-				'label' => $this->msg( 'pt-movepage-new' )->text(),
-				'size' => 30,
+				'label-message' => 'pt-movepage-new',
 				'default' => $this->newText,
 			],
 			'reason' => [
 				'type' => 'text',
 				'name' => 'reason',
-				'label' => $this->msg( 'pt-movepage-reason' )->text(),
-				'size' => 45,
+				'label-message' => 'pt-movepage-reason',
+				'maxlength' => CommentStore::COMMENT_CHARACTER_LIMIT,
 				'default' => $this->reason,
-			],
-			'subpages' => [
-				'type' => 'check',
-				'name' => 'subpages',
-				'id' => 'mw-subpages',
-				'label' => $this->msg( 'pt-movepage-subpages' )->text(),
-				'default' => $this->moveSubpages,
 			]
 		];
 
-		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() );
-		$htmlForm
-			->addHiddenField( 'wpEditToken', $this->getUser()->getEditToken() )
+		HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
 			->setMethod( 'post' )
 			->setAction( $this->getPageTitle( $this->oldText )->getLocalURL() )
 			->setSubmitName( 'subaction' )
@@ -254,33 +211,6 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 			->setWrapperLegendMsg( 'pt-movepage-legend' )
 			->prepareForm()
 			->displayForm( false );
-	}
-
-	/**
-	 * Shortcut for keeping the code at least a bit readable. Adds label and
-	 * input into $form array.
-	 *
-	 * @param string[] &$form Array where input element and label is appended.
-	 * @param string $label Label text.
-	 * @param string $name Name attribute.
-	 * @param bool|int $size Size attribute of the input element. Default false.
-	 * @param bool|string $text Text of the value attribute. Default false.
-	 * @param array $attribs Extra attributes. Default empty array.
-	 */
-	protected function addInputLabel( &$form, $label, $name, $size = false, $text = false,
-		array $attribs = []
-	) {
-		$br = Html::element( 'br' );
-		list( $label, $input ) = Xml::inputLabelSep(
-			$label,
-			$name,
-			$name,
-			$size,
-			$text,
-			$attribs
-		);
-		$form[] = $label . $br;
-		$form[] = $input . $br;
 	}
 
 	/**
@@ -295,95 +225,102 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 		$base = $this->oldTitle->getPrefixedText();
 		$target = $this->newTitle;
 		$count = 0;
+		$subpagesCount = 0;
 
 		$types = [
 			'pt-movepage-list-pages' => [ $this->oldTitle ],
 			'pt-movepage-list-translation' => $this->getTranslationPages(),
 			'pt-movepage-list-section' => $this->getSectionPages(),
-			'pt-movepage-list-translatable' => $this->getTranslatableSubpages(),
-			'pt-movepage-list-other' => $this->getNormalSubpages(),
+			'pt-movepage-list-translatable' => $this->getTranslatableSubpages()
 		];
 
+		if ( TranslateUtils::allowsSubpages( $this->oldTitle ) ) {
+			$types[ 'pt-movepage-list-other'] = $this->getNormalSubpages();
+		}
+
 		foreach ( $types as $type => $pages ) {
-			$out->wrapWikiMsg( '=== $1 ===', [ $type, count( $pages ) ] );
+			$pageCount = count( $pages );
+			$out->wrapWikiMsg( '=== $1 ===', [ $type, $pageCount ] );
+
+			if ( !$pageCount ) {
+				$out->addWikiMsg( 'pt-movepage-list-no-pages' );
+				continue;
+			}
+
 			if ( $type === 'pt-movepage-list-translatable' ) {
-				$out->addWikiMsg( 'pt-movepage-list-translatable-note' );
+				$out->wrapWikiMsg(
+					"'''$1'''", $this->msg( 'pt-movepage-list-translatable-note' )
+				);
 			}
 
 			$lines = [];
 			foreach ( $pages as $old ) {
-				$toBeMoved = true;
-
-				// These pages need specific checks
-				if ( $type === 'pt-movepage-list-other' ) {
-					$toBeMoved = $this->moveSubpages;
-				}
-
-				if ( $type === 'pt-movepage-list-translatable' ) {
-					$toBeMoved = false;
-				}
-
-				if ( $toBeMoved ) {
+				$canBeMoved = $type !== 'pt-movepage-list-translatable';
+				if ( $canBeMoved ) {
 					$count++;
 				}
 
-				$lines[] = $this->getChangeLine( $base, $old, $target, $toBeMoved );
+				if ( $type === 'pt-movepage-list-other' ) {
+					$subpagesCount++;
+				}
+
+				$lines[] = $this->getChangeLine( $base, $old, $target, $canBeMoved );
 			}
 
-			TranslateUtils::addWikiTextAsInterface( $out, implode( "\n", $lines ) );
+			$out->addWikiTextAsInterface( implode( "\n", $lines ) );
 		}
 
-		TranslateUtils::addWikiTextAsInterface( $out, "----\n" );
-		$out->addWikiMsg( 'pt-movepage-list-count', $this->getLanguage()->formatNum( $count ) );
+		$out->addWikiTextAsInterface( "----\n" );
+		$out->addWikiMsg(
+			'pt-movepage-list-count',
+			$this->getLanguage()->formatNum( $count ),
+			$this->getLanguage()->formatNum( $subpagesCount )
+		);
 
-		$br = Html::element( 'br' );
-		$readonly = [ 'readonly' => 'readonly' ];
-		$subaction = [ 'name' => 'subaction' ];
-		$formParams = [
-			'method' => 'post',
-			'action' => $this->getPageTitle( $this->oldText )->getLocalURL()
+		$formDescriptor = [
+			'wpOldTitle' => [
+				'type' => 'text',
+				'name' => 'wpOldTitle',
+				'label-message' => 'pt-movepage-current',
+				'default' => $this->oldText,
+				'readonly' => true,
+			],
+			'wpNewTitle' => [
+				'type' => 'text',
+				'name' => 'wpNewTitle',
+				'label-message' => 'pt-movepage-new',
+				'default' => $this->newText,
+				'readonly' => true,
+			],
+			'reason' => [
+				'type' => 'text',
+				'name' => 'reason',
+				'label-message' => 'pt-movepage-reason',
+				'maxlength' => CommentStore::COMMENT_CHARACTER_LIMIT,
+				'default' => $this->reason,
+			],
+			'subpages' => [
+				'type' => 'check',
+				'name' => 'subpages',
+				'id' => 'mw-subpages',
+				'label-message' => 'pt-movepage-subpages',
+				'default' => $this->moveSubpages,
+			]
 		];
 
-		$form = [];
-		$form[] = Xml::fieldset( $this->msg( 'pt-movepage-legend' )->text() );
-		$form[] = Html::openElement( 'form', $formParams );
-		$form[] = Html::hidden( 'wpEditToken', $this->getUser()->getEditToken() );
-		$this->addInputLabel(
-			$form,
-			$this->msg( 'pt-movepage-current' )->text(),
-			'wpOldTitle',
-			30,
-			$this->oldText,
-			$readonly
-		);
-		$this->addInputLabel(
-			$form,
-			$this->msg( 'pt-movepage-new' )->text(),
-			'wpNewTitle',
-			30,
-			$this->newText,
-			$readonly
-		);
-		$this->addInputLabel(
-			$form,
-			$this->msg( 'pt-movepage-reason' )->text(),
-			'reason',
-			60,
-			$this->reason
-		);
-		$form[] = Html::hidden( 'subpages', $this->moveSubpages );
-		$form[] = Xml::checkLabel(
-			$this->msg( 'pt-movepage-subpages' )->text(),
-			'subpagesFake',
-			'mw-subpages',
-			$this->moveSubpages,
-			$readonly
-		) . $br;
-		$form[] = Xml::submitButton( $this->msg( 'pt-movepage-action-perform' )->text(), $subaction );
-		$form[] = Xml::submitButton( $this->msg( 'pt-movepage-action-other' )->text(), $subaction );
-		$form[] = Xml::closeElement( 'form' );
-		$form[] = Xml::closeElement( 'fieldset' );
-		$out->addHTML( implode( "\n", $form ) );
+		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() );
+		$htmlForm
+			->addButton( [
+				'name' => 'subaction',
+				'value' => $this->msg( 'pt-movepage-action-other' )->text(),
+			] )
+			->setMethod( 'post' )
+			->setAction( $this->getPageTitle( $this->oldText )->getLocalURL() )
+			->setSubmitName( 'subaction' )
+			->setSubmitTextMsg( 'pt-movepage-action-perform' )
+			->setWrapperLegendMsg( 'pt-movepage-legend' )
+			->prepareForm()
+			->displayForm( false );
 	}
 
 	/**
@@ -438,55 +375,62 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 		$this->getOutput()->addWikiMsg( 'pt-movepage-started' );
 	}
 
-	protected function checkMoveBlockers() {
-		$blockers = [];
+	protected function checkMoveBlockers( User $user ) {
+		$blockers = new SplObjectStorage();
 
+		$source = $this->oldTitle;
 		$target = $this->newTitle;
 
 		if ( !$target ) {
-			$blockers[] = [ 'pt-movepage-block-base-invalid' ];
+			$blockers[$source] = Status::newFatal( 'pt-movepage-block-base-invalid' );
 
 			return $blockers;
 		}
 
 		if ( $target->inNamespaces( NS_MEDIAWIKI, NS_TRANSLATIONS ) ) {
-			$blockers[] = [ 'immobile-target-namespace', $target->getNsText() ];
+			$blockers[$source] = Status::newFatal(
+				'immobile-target-namespace', $target->getNsText()
+			);
 
 			return $blockers;
 		}
 
-		$base = $this->oldTitle->getPrefixedText();
-
 		if ( $target->exists() ) {
-			$blockers[] = [ 'pt-movepage-block-base-exists', $target->getPrefixedText() ];
+			$blockers[$source] = Status::newFatal(
+				'pt-movepage-block-base-exists', $target->getPrefixedText()
+			);
 		} else {
-			$errors = $this->oldTitle->isValidMoveOperation( $target, true, $this->reason );
-			if ( is_array( $errors ) ) {
-				$blockers = array_merge( $blockers, $errors );
+			$movePage = MediaWikiServices::getInstance()
+				->getMovePageFactory()
+				->newMovePage( $this->oldTitle, $target );
+			$status = $movePage->isValidMove();
+			$status->merge( $movePage->checkPermissions( $user, $this->reason ) );
+			if ( !$status->isOK() ) {
+				$blockers[$source] = $status;
 			}
 		}
 
 		// Don't spam the same errors for all pages if base page fails
-		if ( $blockers ) {
+		if ( count( $blockers ) ) {
 			return $blockers;
 		}
 
 		// Collect all the old and new titles for checcks
 		$titles = [];
-
+		$base = $this->oldTitle->getPrefixedText();
 		$pages = $this->getTranslationPages();
 		foreach ( $pages as $old ) {
 			$titles['tp'][] = [ $old, $this->newPageTitle( $base, $old, $target ) ];
 		}
 
-		$pages = $this->getSectionPages();
-		foreach ( $pages as $old ) {
-			$titles['section'][] = [ $old, $this->newPageTitle( $base, $old, $target ) ];
-		}
-
 		$subpages = $this->moveSubpages ? $this->getNormalSubpages() : [];
 		foreach ( $subpages as $old ) {
 			$titles['subpage'][] = [ $old, $this->newPageTitle( $base, $old, $target ) ];
+		}
+
+		$pages = $this->getSectionPages();
+		foreach ( $pages as $old ) {
+			$titles['section'][] = [ $old, $this->newPageTitle( $base, $old, $target ) ];
 		}
 
 		// Check that all new titles are valid
@@ -498,10 +442,10 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 			foreach ( $list as $pair ) {
 				list( $old, $new ) = $pair;
 				if ( $new === null ) {
-					$blockers[] = [
+					$blockers[$old] = Status::newFatal(
 						"pt-movepage-block-$type-invalid",
 						$old->getPrefixedText()
-					];
+					);
 					continue;
 				}
 				$lb->addObj( $old );
@@ -509,7 +453,7 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 			}
 		}
 
-		if ( $blockers ) {
+		if ( count( $blockers ) ) {
 			return $blockers;
 		}
 
@@ -522,23 +466,29 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 			foreach ( $list as $pair ) {
 				list( $old, $new ) = $pair;
 				if ( $new->exists() ) {
-					$blockers[] = [
+					$blockers[$old] = Status::newFatal(
 						"pt-movepage-block-$type-exists",
 						$old->getPrefixedText(),
 						$new->getPrefixedText()
-					];
+					);
 				} else {
 					/* This method has terrible performance:
 					 * - 2 queries by core
 					 * - 3 queries by lqt
 					 * - and no obvious way to preload the data! */
-					$errors = $old->isValidMoveOperation( $target, false );
-					if ( is_array( $errors ) ) {
-						$blockers = array_merge( $blockers, $errors );
+					$movePage = MediaWikiServices::getInstance()
+						->getMovePageFactory()
+						->newMovePage( $old, $target );
+					$status = $movePage->isValidMove();
+					// Do not check for permissions here, as these pages are not editable/movable
+					// in regular use
+					if ( !$status->isOK() ) {
+						$blockers[$old] = $status;
 					}
 
-					/* Because of the above, check only one of the possibly thousands
-					 * of section pages and assume rest are fine. */
+					/* Because of the poor performance, check only one of the possibly thousands
+					 * of section pages and assume rest are fine. This assumes section pages are
+					 * listed last in the array. */
 					if ( $type === 'section' ) {
 						break;
 					}
@@ -587,7 +537,7 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 
 	/**
 	 * Returns only translation subpages.
-	 * @return Array of titles.
+	 * @return Title[]
 	 */
 	protected function getTranslationPages() {
 		if ( !isset( $this->translationPages ) ) {
@@ -599,15 +549,20 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 
 	/**
 	 * Returns all subpages, if the namespace has them enabled.
-	 * @return mixed TitleArray, or empty array if this page's namespace doesn't allow subpages
+	 * @return Title[]
 	 */
 	protected function getSubpages() {
-		return $this->page->getTitle()->getSubpages();
+		$pages = $this->page->getTitle()->getSubpages();
+		if ( $pages instanceof Traversable ) {
+			$pages = iterator_to_array( $pages );
+		}
+
+		return $pages;
 	}
 
 	private function getNormalSubpages() {
 		return array_filter(
-			iterator_to_array( $this->getSubpages() ),
+			$this->getSubpages(),
 			function ( $page ) {
 				return !(
 					TranslatablePage::isTranslationPage( $page ) ||
@@ -619,7 +574,7 @@ class SpecialPageTranslationMovePage extends MovePageForm {
 
 	private function getTranslatableSubpages() {
 		return array_filter(
-			iterator_to_array( $this->getSubpages() ),
+			$this->getSubpages(),
 			function ( $page ) {
 				return TranslatablePage::isSourcePage( $page );
 			}

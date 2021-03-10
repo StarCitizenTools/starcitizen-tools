@@ -27,11 +27,10 @@
 	}
 
 	function doApiAction( options ) {
-		var api = new mw.Api();
+		var api = new mw.Api(),
+			optionsWithDefaults = $.extend( {}, { action: 'translatesandbox' }, options );
 
-		options = $.extend( {}, { action: 'translatesandbox' }, options );
-
-		return api.postWithToken( 'csrf', options ).promise();
+		return api.postWithToken( 'csrf', optionsWithDefaults ).promise();
 	}
 
 	function removeSelectedRequests() {
@@ -55,7 +54,7 @@
 		}
 
 		if ( $nextRequest.length ) {
-			$nextRequest.click();
+			$nextRequest.trigger( 'click' );
 			updateSelectedIndicator( 1 );
 		} else {
 			updateSelectedIndicator( 0 );
@@ -87,7 +86,9 @@
 			$( '<div>' )
 				.addClass( 'reminder-email row' )
 				.append(
-					$( '<span>' ).text( request.email ),
+					$( '<span>' )
+						.attr( { dir: 'ltr' } )
+						.text( request.email ),
 					$( '<a>' )
 						.prop( 'href', '#' )
 						.addClass( 'send-reminder link' )
@@ -157,7 +158,7 @@
 
 		if ( request.languagepreferences ) {
 			if ( request.languagepreferences.languages ) {
-				$.each( request.languagepreferences.languages, function ( index, language ) {
+				request.languagepreferences.languages.forEach( function ( language ) {
 					$detailsPane.find( '.languages' ).append(
 						$( '<span>' )
 							.prop( {
@@ -221,7 +222,7 @@
 		);
 
 		translations.translationstash.translations.sort( sortTranslationsByLanguage );
-		$.each( translations.translationstash.translations, function ( index, translation ) {
+		translations.translationstash.translations.forEach( function ( translation ) {
 			showTranslation( translation );
 		} );
 	}
@@ -268,9 +269,7 @@
 	function displayOnMultipleSelection() {
 		var selectedUserIDs = $( '.request-selector:checked' ).map( function ( i, checkedBox ) {
 			return $( checkedBox ).parents( 'div.request' ).data( 'data' ).userid;
-		} );
-
-		selectedUserIDs = selectedUserIDs.toArray();
+		} ).toArray();
 
 		$( '.details.pane' ).empty().append(
 			$( '<div>' )
@@ -549,7 +548,7 @@
 		getOlderRequests().each( function ( index, request ) {
 			$( request ).find( '.request-selector' )
 				.prop( 'checked', true ) // Otherwise the state doesn't actually change
-				.change();
+				.trigger( 'change' );
 		} );
 	}
 
@@ -690,7 +689,7 @@
 			$firstVisibleUser = $( '.request:not(.hide)' ).first();
 
 		if ( $firstVisibleUser.length ) {
-			$firstVisibleUser.click();
+			$firstVisibleUser.trigger( 'click' );
 		} else {
 			$( '.details.pane' ).empty();
 			$selectedRequests = $( '.request-selector:checked' );
@@ -747,7 +746,7 @@
 		$( '.older-requests-indicator' ).on( 'click', oldRequestSelector );
 
 		if ( $requestRows.length ) {
-			$requestRows.first().click();
+			$requestRows.first().trigger( 'click' );
 		}
 
 		updateRequestCount();

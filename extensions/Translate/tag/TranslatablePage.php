@@ -1,64 +1,54 @@
 <?php
-/**
- * Translatable page model.
- *
- * @file
- * @author Niklas Laxström
- * @license GPL-2.0-or-later
- */
 
+use MediaWiki\Extension\Translate\PageTranslation\TranslationPage;
+use MediaWiki\Extension\Translate\PageTranslation\TranslationUnit;
+use MediaWiki\Extension\Translate\Services;
+use MediaWiki\Linker\LinkTarget;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionLookup;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\SlotRecord;
 use Wikimedia\Rdbms\Database;
 
 /**
- * Class to parse translatable wiki pages.
+ * Mixed bag of methods related to translatable pages.
  *
+ * @author Niklas Laxström
+ * @license GPL-2.0-or-later
  * @ingroup PageTranslation
  */
 class TranslatablePage {
 	/**
-	 * Title of the page.
+	 * List of keys in the metadata table that need to be handled for moves and deletions
+	 * @phpcs-require-sorted-array
 	 */
+	public const METADATA_KEYS = [
+		'maxid',
+		'priorityforce',
+		'prioritylangs',
+		'priorityreason',
+		'transclusion',
+		'version'
+	];
+
+	/** @var Title */
 	protected $title;
-
-	/**
-	 * Text contents of the page.
-	 */
+	/** @var ?string Text contents of the page. */
 	protected $text;
-
-	/**
-	 * Revision of the page, if applicaple.
-	 *
-	 * @var int
-	 */
+	/** @var ?int Revision of the page, if applicable. */
 	protected $revision;
-
-	/**
-	 * From which source this object was constructed.
-	 * Can be: text, revision, title
-	 */
+	/** @var string From which source this object was constructed: text, revision or title */
 	protected $source;
-
-	/**
-	 * Whether the page contents is already loaded.
-	 */
-	protected $init = false;
-
-	/**
-	 * Name of the section which contains the translated page title.
-	 */
+	/** @var string Name of the section which contains the translated page title. */
 	protected $displayTitle = 'Page display title';
-
-	/**
-	 * Whether the title should be translated
-	 * @var bool
-	 */
+	/** @var ?bool Whether the title should be translated */
 	protected $pageDisplayTitle;
-
+	/** @var ?TPParse */
 	protected $cachedParse;
+	/** @var ?string */
+	private $targetLanguage;
 
-	/**
-	 * @param Title $title Title object for the page
-	 */
+	/** @param Title $title Title object for the page */
 	protected function __construct( Title $title ) {
 		$this->title = $title;
 	}
@@ -91,8 +81,10 @@ class TranslatablePage {
 	 * @throws MWException
 	 * @return self
 	 */
-	public static function newFromRevision( Title $title, $revision ) {
-		$rev = Revision::newFromTitle( $title, $revision );
+	public static function newFromRevision( Title $title, int $revision ) {
+		$rev = MediaWikiServices::getInstance()
+			->getRevisionLookup()
+			->getRevisionByTitle( $title, $revision );
 		if ( $rev === null ) {
 			throw new MWException( 'Revision is null' );
 		}
@@ -106,7 +98,7 @@ class TranslatablePage {
 
 	/**
 	 * Constructs a translatable page from title.
-	 * The text of last marked revision is loaded when neded.
+	 * The text of last marked revision is loaded when needed.
 	 *
 	 * @param Title $title
 	 * @return self
@@ -128,29 +120,38 @@ class TranslatablePage {
 
 	/**
 	 * Returns the text for this translatable page.
-	 * @throws MWException
 	 * @return string
 	 */
-	public function getText() {
-		if ( $this->init === false ) {
-			switch ( $this->source ) {
-				case 'text':
-					break;
-				/** @noinspection PhpMissingBreakStatementInspection */
-				case 'title':
-					$this->revision = $this->getMarkedTag();
-				case 'revision':
-					$rev = Revision::newFromTitle( $this->getTitle(), $this->revision );
-					$this->text = ContentHandler::getContentText( $rev->getContent() );
-					break;
+	public function getText(): string {
+		if ( $this->text !== null ) {
+			return $this->text;
+		}
+
+		$page = $this->getTitle()->getPrefixedDBkey();
+
+		if ( $this->source === 'title' ) {
+			$revision = $this->getMarkedTag();
+			if ( !is_int( $revision ) ) {
+				throw new LogicException(
+					"Trying to load a text for $page which is not marked for translation"
+				);
 			}
+			$this->revision = $revision;
 		}
 
-		if ( !is_string( $this->text ) ) {
-			throw new MWException( 'We have no text' );
+		$flags = TranslateUtils::shouldReadFromMaster()
+			? RevisionLookup::READ_LATEST
+			: RevisionLookup::READ_NORMAL;
+		$rev = MediaWikiServices::getInstance()
+			->getRevisionLookup()
+			->getRevisionByTitle( $this->getTitle(), $this->revision, $flags );
+		$text = ContentHandler::getContentText( $rev->getContent( SlotRecord::MAIN ) );
+
+		if ( !is_string( $text ) ) {
+			throw new RuntimeException( "Failed to load text for $page" );
 		}
 
-		$this->init = true;
+		$this->text = $text;
 
 		return $this->text;
 	}
@@ -159,18 +160,8 @@ class TranslatablePage {
 	 * Revision is null if object was constructed using newFromText.
 	 * @return null|int
 	 */
-	public function getRevision() {
+	public function getRevision(): ?int {
 		return $this->revision;
-	}
-
-	/**
-	 * Manually set a revision number to use loading page text.
-	 * @param int $revision
-	 */
-	public function setRevision( $revision ) {
-		$this->revision = $revision;
-		$this->source = 'revision';
-		$this->init = false;
 	}
 
 	/**
@@ -266,84 +257,21 @@ class TranslatablePage {
 			return $this->cachedParse;
 		}
 
-		$text = $this->getText();
+		$services = Services::getInstance();
+		$parser = $services->getTranslatablePageParser();
+		$placeholderFactory = $services->getParsingPlaceholderFactory();
 
-		$nowiki = [];
-		$text = self::armourNowiki( $nowiki, $text );
-
-		$sections = [];
+		$parserOutput = $parser->parse( $this->getText() );
 
 		// Add section to allow translating the page name
-		$displaytitle = new TPSection;
-		$displaytitle->id = $this->displayTitle;
-		$displaytitle->text = $this->getTitle()->getPrefixedText();
-		$sections[TranslateUtils::getPlaceholder()] = $displaytitle;
-
-		$tagPlaceHolders = [];
-
-		while ( true ) {
-			$re = '~(<translate>)(.*?)(</translate>)~s';
-			$matches = [];
-			$ok = preg_match_all( $re, $text, $matches, PREG_OFFSET_CAPTURE );
-
-			if ( $ok === 0 ) {
-				break; // No matches
-			}
-
-			// Do-placehold for the whole stuff
-			$ph = TranslateUtils::getPlaceholder();
-			$start = $matches[0][0][1];
-			$len = strlen( $matches[0][0][0] );
-			$end = $start + $len;
-			$text = self::index_replace( $text, $ph, $start, $end );
-
-			// Sectionise the contents
-			// Strip the surrounding tags
-			$contents = $matches[0][0][0]; // full match
-			$start = $matches[2][0][1] - $matches[0][0][1]; // bytes before actual content
-			$len = strlen( $matches[2][0][0] ); // len of the content
-			$end = $start + $len;
-
-			$sectiontext = substr( $contents, $start, $len );
-
-			if ( strpos( $sectiontext, '<translate>' ) !== false ) {
-				throw new TPException( [ 'pt-parse-nested', $sectiontext ] );
-			}
-
-			$sectiontext = self::unArmourNowiki( $nowiki, $sectiontext );
-
-			$parse = self::sectionise( $sectiontext );
-			$sections += $parse['sections'];
-
-			$tagPlaceHolders[$ph] =
-				self::index_replace( $contents, $parse['template'], $start, $end );
-		}
-
-		$prettyTemplate = $text;
-		foreach ( $tagPlaceHolders as $ph => $value ) {
-			$prettyTemplate = str_replace( $ph, '[...]', $prettyTemplate );
-		}
-
-		if ( strpos( $text, '<translate>' ) !== false ) {
-			throw new TPException( [ 'pt-parse-open', $prettyTemplate ] );
-		} elseif ( strpos( $text, '</translate>' ) !== false ) {
-			throw new TPException( [ 'pt-parse-close', $prettyTemplate ] );
-		}
-
-		foreach ( $tagPlaceHolders as $ph => $value ) {
-			$text = str_replace( $ph, $value, $text );
-		}
-
-		if ( count( $sections ) === 1 ) {
-			// Don't return display title for pages which have no sections
-			$sections = [];
-		}
-
-		$text = self::unArmourNowiki( $nowiki, $text );
+		$displayTitle = new TranslationUnit();
+		$displayTitle->id = $this->displayTitle;
+		$displayTitle->text = $this->getTitle()->getPrefixedText();
 
 		$parse = new TPParse( $this->getTitle() );
-		$parse->template = $text;
-		$parse->sections = $sections;
+		$parse->template = $parserOutput->sourcePageTemplate();
+		// Make it be the first section
+		$parse->sections = [ $placeholderFactory->make() => $displayTitle ] + $parserOutput->units();
 
 		// Cache it
 		$this->cachedParse = $parse;
@@ -352,149 +280,52 @@ class TranslatablePage {
 	}
 
 	/**
-	 * Remove all opening and closing translate tags following the same whitespace rules
-	 * as the regular parsing. The difference is that this doesn't try to parse the page,
-	 * so it can handle unbalanced tags.
-	 *
-	 * @param string $text Wikitext
-	 * @return string Wikitext without translate tags.
-	 */
-	public static function cleanupTags( $text ) {
-		$nowiki = [];
-		$text = self::armourNowiki( $nowiki, $text );
-		$text = preg_replace( '~<translate>\n?~s', '', $text );
-		$text = preg_replace( '~\n?</translate>~s', '', $text );
-		// Mirroring what TPSection::getTextForTrans does
-		$text = preg_replace( '~<tvar\|([^>]+)>(.*?)</>~u', '\2', $text );
-
-		$text = self::unArmourNowiki( $nowiki, $text );
-		return $text;
-	}
-
-	/**
-	 * @param array &$holders
-	 * @param string $text
 	 * @return string
+	 * @since 2020.07
 	 */
-	public static function armourNowiki( &$holders, $text ) {
-		$re = '~(<nowiki>)(.*?)(</nowiki>)~s';
-
-		while ( preg_match( $re, $text, $matches ) ) {
-			$ph = TranslateUtils::getPlaceholder();
-			$text = str_replace( $matches[0], $ph, $text );
-			$holders[$ph] = $matches[0];
-		}
+	public function getStrippedSourcePageText(): string {
+		$parser = Services::getInstance()->getTranslatablePageParser();
+		$text = $parser->cleanupTags( $this->getText() );
+		$text = preg_replace( '~<languages\s*/>\n?~s', '', $text );
 
 		return $text;
 	}
 
 	/**
-	 * @param array $holders
-	 * @param string $text
-	 * @return mixed
+	 * @param Title $title
+	 * @return ?TranslationPage
+	 * @since 2020.07
 	 */
-	public static function unArmourNowiki( $holders, $text ) {
-		foreach ( $holders as $ph => $value ) {
-			$text = str_replace( $ph, $value, $text );
+	public static function getTranslationPageFromTitle( Title $title ): ?TranslationPage {
+		$self = self::isTranslationPage( $title );
+		if ( !$self ) {
+			return null;
 		}
 
-		return $text;
+		return $self->getTranslationPage( $self->targetLanguage );
 	}
 
 	/**
-	 * @param string $string
-	 * @param string $rep
-	 * @param int $start
-	 * @param int $end
-	 * @return string
+	 * @param string $targetLanguage
+	 * @return TranslationPage
+	 * @since 2020.07
 	 */
-	protected static function index_replace( $string, $rep, $start, $end ) {
-		return substr( $string, 0, $start ) . $rep . substr( $string, $end );
-	}
+	public function getTranslationPage( string $targetLanguage ): TranslationPage {
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+		$parser = Services::getInstance()->getTranslatablePageParser();
+		$parserOutput = $parser->parse( $this->getText() );
+		$pageVersion = (int)TranslateMetadata::get( $this->getMessageGroupId(), 'version' );
+		$wrapUntranslated = $pageVersion >= 2;
 
-	/**
-	 * Splits the content marked with \<translate> tags into sections, which
-	 * are separated with with two or more newlines. Extra whitespace is captured
-	 * in the template and is not included in the sections.
-	 *
-	 * @param string $text Contents of one pair of \<translate> tags.
-	 * @return array Contains a template and array of unparsed sections.
-	 */
-	public static function sectionise( $text ) {
-		$flags = PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE;
-		$parts = preg_split( '~(^\s*|\s*\n\n\s*|\s*$)~', $text, -1, $flags );
-
-		$inline = preg_match( '~\n~', $text ) === 0;
-
-		$template = '';
-		$sections = [];
-
-		foreach ( $parts as $_ ) {
-			if ( trim( $_ ) === '' ) {
-				$template .= $_;
-			} else {
-				$ph = TranslateUtils::getPlaceholder();
-				$tpsection = self::shakeSection( $_ );
-				$tpsection->setIsInline( $inline );
-				$sections[$ph] = $tpsection;
-				$template .= $ph;
-			}
-		}
-
-		return [
-			'template' => $template,
-			'sections' => $sections,
-		];
-	}
-
-	/**
-	 * Checks if this section already contains a section marker. If there
-	 * is not, a new one will be created. Marker will have the value of
-	 * -1, which will later be replaced with a real value.
-	 *
-	 * May throw a TPException if there is error with existing section
-	 * markers.
-	 *
-	 * @param string $content Content of one section
-	 * @throws TPException
-	 * @return TPSection
-	 */
-	public static function shakeSection( $content ) {
-		$re = '~<!--T:(.*?)-->~';
-		$matches = [];
-		$count = preg_match_all( $re, $content, $matches, PREG_SET_ORDER );
-
-		if ( $count > 1 ) {
-			throw new TPException( [ 'pt-shake-multiple', $content ] );
-		}
-
-		$section = new TPSection;
-		if ( $count === 1 ) {
-			foreach ( $matches as $match ) {
-				list( /*full*/, $id ) = $match;
-				$section->id = $id;
-
-				// Currently handle only these two standard places.
-				// Is this too strict?
-				$rer1 = '~^<!--T:(.*?)-->( |\n)~'; // Normal sections
-				$rer2 = '~\s*<!--T:(.*?)-->$~m'; // Sections with title
-				$content = preg_replace( $rer1, '', $content );
-				$content = preg_replace( $rer2, '', $content );
-
-				if ( preg_match( $re, $content ) === 1 ) {
-					throw new TPException( [ 'pt-shake-position', $content ] );
-				} elseif ( trim( $content ) === '' ) {
-					throw new TPException( [ 'pt-shake-empty', $id ] );
-				}
-			}
-		} else {
-			// New section
-			$section->id = -1;
-		}
-
-		$section->text = $content;
-
-		return $section;
+		return new TranslationPage(
+			$parserOutput,
+			$this->getMessageGroup(),
+			Language::factory( $targetLanguage ),
+			Language::factory( $this->getSourceLanguageCode() ),
+			$config->get( 'TranslateKeepOutdatedTranslations' ),
+			$wrapUntranslated,
+			$this->getTitle()->getPrefixedDBkey() . '/'
+		);
 	}
 
 	protected static $tagCache = [];
@@ -507,6 +338,7 @@ class TranslatablePage {
 	 */
 	public function addMarkedTag( $revision, $value = null ) {
 		$this->addTag( 'tp:mark', $revision, $value );
+		self::clearSourcePageCache();
 	}
 
 	/**
@@ -584,6 +416,7 @@ class TranslatablePage {
 		$dbw->delete( 'revtag', $conds, __METHOD__ );
 		$dbw->delete( 'translate_sections', [ 'trs_page' => $aid ], __METHOD__ );
 		unset( self::$tagCache[$aid] );
+		self::clearSourcePageCache();
 	}
 
 	/**
@@ -674,7 +507,7 @@ class TranslatablePage {
 		$prefix = $this->getTitle()->getText();
 		/** @var Title $title */
 		foreach ( $titles as $title ) {
-			list( $name, $code ) = TranslateUtils::figureMessage( $title->getText() );
+			[ $name, $code ] = TranslateUtils::figureMessage( $title->getText() );
 			if ( !isset( $codes[$code] ) || $name !== $prefix ) {
 				continue;
 			}
@@ -689,7 +522,7 @@ class TranslatablePage {
 	 * @return string[] List of string
 	 * @since 2012-08-06
 	 */
-	protected function getSections() {
+	public function getSections() {
 		$dbr = TranslateUtils::getSafeReadDB();
 
 		$conds = [ 'trs_page' => $this->getTitle()->getArticleID() ];
@@ -707,7 +540,7 @@ class TranslatablePage {
 	 * Returns a list of translation unit pages.
 	 * @param string $set Can be either 'all', or 'active'
 	 * @param string|bool $code Only list unit pages in given language.
-	 * @return Title[] List of Titles.
+	 * @return Title[]
 	 * @since 2012-08-06
 	 */
 	public function getTranslationUnitPages( $set = 'active', $code = false ) {
@@ -760,10 +593,7 @@ class TranslatablePage {
 		return $units;
 	}
 
-	/**
-	 *
-	 * @return array
-	 */
+	/** @return array */
 	public function getTranslationPercentages() {
 		// Calculate percentages for the available translations
 		$group = $this->getMessageGroup();
@@ -810,6 +640,36 @@ class TranslatablePage {
 		return $db->selectField( 'revtag', $fields, $conds, __METHOD__, $options );
 	}
 
+	public function supportsTransclusion(): ?bool {
+		$transclusion = TranslateMetadata::get( $this->getMessageGroupId(), 'transclusion' );
+		if ( $transclusion === false ) {
+			return null;
+		}
+
+		return $transclusion === '1';
+	}
+
+	public function setTransclusion( bool $supportsTransclusion ): void {
+		TranslateMetadata::set(
+			$this->getMessageGroupId(),
+			'transclusion',
+			$supportsTransclusion ? '1' : '0'
+		);
+	}
+
+	public function getRevisionRecordWithFallback(): ?RevisionRecord {
+		$title = $this->getTitle();
+		$store = MediaWikiServices::getInstance()->getRevisionStore();
+		$revRecord = $store->getRevisionByTitle( $title->getSubpage( $this->targetLanguage ) );
+		if ( $revRecord ) {
+			return $revRecord;
+		}
+
+		// Fetch the source fallback
+		$sourceLanguage = $this->getMessageGroup()->getSourceLanguage();
+		return $store->getRevisionByTitle( $title->getSubpage( $sourceLanguage ) );
+	}
+
 	/**
 	 * @param Title $title
 	 * @return bool|self
@@ -843,6 +703,8 @@ class TranslatablePage {
 			return false;
 		}
 
+		$page->targetLanguage = $code;
+
 		return $page;
 	}
 
@@ -851,26 +713,62 @@ class TranslatablePage {
 	}
 
 	/**
+	 * Helper to guess translation page from translation unit.
+	 *
+	 * @param LinkTarget $translationUnit
+	 * @return array
+	 * @since 2019.10
+	 */
+	public static function parseTranslationUnit( LinkTarget $translationUnit ): array {
+		// Format is Translations:SourcePageNamespace:SourcePageName/SectionName/LanguageCode.
+		// We will drop the namespace immediately here.
+		$parts = explode( '/', $translationUnit->getText() );
+
+		// LanguageCode and SectionName are guaranteed to not have '/'.
+		$language = array_pop( $parts );
+		$section = array_pop( $parts );
+		$sourcepage = implode( '/', $parts );
+
+		return [
+			'sourcepage' => $sourcepage,
+			'section' => $section,
+			'language' => $language
+		];
+	}
+
+	/**
 	 * @param Title $title
 	 * @return bool
 	 */
 	public static function isSourcePage( Title $title ) {
-		$cache = ObjectCache::getMainWANInstance();
-		$pcTTL = $cache::TTL_PROC_LONG;
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		$cacheKey = $cache->makeKey( 'pagetranslation', 'sourcepages' );
 
 		$translatablePageIds = $cache->getWithSetCallback(
-			$cache->makeKey( 'pagetranslation', 'sourcepages' ),
-			$cache::TTL_MINUTE * 5,
+			$cacheKey,
+			$cache::TTL_HOUR * 2,
 			function ( $oldValue, &$ttl, array &$setOpts ) {
 				$dbr = wfGetDB( DB_REPLICA );
 				$setOpts += Database::getCacheSetOptions( $dbr );
 
 				return self::getTranslatablePages();
 			},
-			[ 'pcTTL' => $pcTTL, 'pcGroup' => __CLASS__ . ':30' ]
+			[
+				'checkKeys' => [ $cacheKey ],
+				'pcTTL' => $cache::TTL_PROC_SHORT,
+				'pcGroup' => __CLASS__ . ':1'
+			]
 		);
 
 		return in_array( $title->getArticleID(), $translatablePageIds );
+	}
+
+	/**
+	 * Clears the source page cache
+	 */
+	public static function clearSourcePageCache(): void {
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		$cache->touchCheckKey( $cache->makeKey( 'pagetranslation', 'sourcepages' ) );
 	}
 
 	/**

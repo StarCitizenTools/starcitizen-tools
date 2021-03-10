@@ -1,7 +1,7 @@
 /*!
  * VisualEditor LanguageContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -39,6 +39,8 @@ ve.ui.LanguageContextItem.static.modelClasses = [ ve.dm.LanguageAnnotation ];
 ve.ui.LanguageContextItem.static.embeddable = false;
 
 ve.ui.LanguageContextItem.static.commandName = 'language';
+
+ve.ui.LanguageContextItem.static.clearMsg = OO.ui.deferMsg( 'visualeditor-languagecontext-remove' );
 
 /* Methods */
 

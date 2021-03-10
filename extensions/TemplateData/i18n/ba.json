@@ -3,23 +3,17 @@
 		"authors": [
 			"Азат Хәлилов",
 			"Аҡҡашҡа",
-			"Янмурза Баки",
 			"Лилиә",
-			"Ләйсән"
+			"Ләйсән",
+			"Янмурза Баки"
 		]
 	},
-	"apihelp-templatedata-description": "TemplateData киңәйтеүендә һаҡланыусы мәғлүмәттәрҙе алырға.",
-	"apihelp-templatedata-example-1": "Ҡалыптар булмаһа, йәки булып та, уларҙың TemplateData булмаһа, [[Template:Stub]] һәм  [[Template:Example]] өсөн TemplateData һөҙөмтәләре менән кире ҡайтарырға",
-	"apihelp-templatedata-param-lang": "Был телдәге локалләшкән дәүмәлдәрҙе кире ҡайтарырға. Бөтә асыҡ дәүмәлдәр ғәмәлдә кире ҡайтарыла.",
 	"templatedata-desc": "Ҡалыптың параметрҙарына һаҡлағысҡты тормошҡа ашырыу (JSON ярҙамында)",
 	"templatedata-doc-desc-empty": "Аңлатма юҡ.",
 	"templatedata-doc-no-params-set": "Бер параметр ҙа күрһәтелмәгән.",
 	"templatedata-doc-param-autovalue": "Авто-мәғәнә.",
-	"templatedata-doc-param-autovalue-empty": "Буш.",
 	"templatedata-doc-param-default": "Һайланмаған",
-	"templatedata-doc-param-default-empty": "Буш.",
 	"templatedata-doc-param-example": "Миҫал",
-	"templatedata-doc-param-example-empty": "Буш.",
 	"templatedata-doc-param-desc": "Тасуирлау",
 	"templatedata-doc-param-desc-empty": "Аңлатма юҡ.",
 	"templatedata-doc-param-name": "Параметр",

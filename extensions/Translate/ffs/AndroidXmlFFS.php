@@ -13,6 +13,9 @@
  * @ingroup FFS
  */
 class AndroidXmlFFS extends SimpleFFS {
+	/** @var ArrayFlattener */
+	private $flattener;
+
 	public function __construct( FileBasedMessageGroup $group ) {
 		parent::__construct( $group );
 		$this->flattener = $this->getFlattener();
@@ -35,6 +38,9 @@ class AndroidXmlFFS extends SimpleFFS {
 
 		$messages = [];
 		$mangler = $this->group->getMangler();
+
+		$regexBacktrackLimit = ini_get( 'pcre.backtrack_limit' );
+		ini_set( 'pcre.backtrack_limit', 10 );
 
 		/** @var SimpleXMLElement $element */
 		foreach ( $reader as $element ) {
@@ -60,16 +66,16 @@ class AndroidXmlFFS extends SimpleFFS {
 			$messages[$key] = $value;
 		}
 
+		ini_set( 'pcre.backtrack_limit', $regexBacktrackLimit );
+
 		return [
 			'AUTHORS' => $this->scrapeAuthors( $data ),
-			'MESSAGES' => $mangler->mangle( $messages ),
+			'MESSAGES' => $mangler->mangleArray( $messages ),
 		];
 	}
 
 	protected function scrapeAuthors( $string ) {
-		$match = [];
-		preg_match( '~<!-- Authors:\n((?:\* .*\n)*)-->~', $string, $match );
-		if ( !$match ) {
+		if ( !preg_match( '~<!-- Authors:\n((?:\* .*\n)*)-->~', $string, $match ) ) {
 			return [];
 		}
 
@@ -82,13 +88,24 @@ class AndroidXmlFFS extends SimpleFFS {
 		return $authors;
 	}
 
-	protected function readElementContents( $element ) {
-		return stripcslashes( (string)$element );
+	protected function readElementContents( $element ): string {
+		$elementStr = (string)$element;
+
+		// Convert string of format \uNNNN (eg: \u1234) to symbols
+		$converted = preg_replace_callback(
+			'/(?<!\\\\)(?:\\\\{2})*+\\K\\\\u([0-9A-Fa-f]{4,6})+/',
+			function ( array $matches ) {
+				return IntlChar::chr( hexdec( $matches[1] ) );
+			},
+			$elementStr
+		);
+
+		return stripcslashes( $converted );
 	}
 
 	protected function formatElementContents( $contents ) {
 		// Kudos to the brilliant person who invented this braindead file format
-		$escaped = addcslashes( $contents, '"\'' );
+		$escaped = addcslashes( $contents, '"\'\\' );
 		if ( substr( $escaped, 0, 1 ) === '@' ) {
 			// '@' at beginning of string refers to another string by name.
 			// Add backslash to escape it too.
@@ -126,21 +143,29 @@ class AndroidXmlFFS extends SimpleFFS {
 	}
 
 	protected function writeReal( MessageCollection $collection ) {
-		$template  = '<?xml version="1.0" encoding="utf-8"?>';
-		$template .= $this->doAuthors( $collection );
-		$template .= '<resources></resources>';
-
-		$writer = new SimpleXMLElement( $template );
-		$mangler = $this->group->getMangler();
+		global $wgTranslateDocumentationLanguageCode;
 
 		$collection->filter( 'hastranslation', false );
 		if ( count( $collection ) === 0 ) {
 			return '';
 		}
 
-		/**
-		 * @var $m TMessage
-		 */
+		$template = '<?xml version="1.0" encoding="utf-8"?>';
+		$template .= $this->doAuthors( $collection );
+		$template .= '<resources></resources>';
+
+		$writer = new SimpleXMLElement( $template );
+
+		if ( $collection->getLanguage() === $wgTranslateDocumentationLanguageCode ) {
+			$writer->addAttribute(
+				'tools:ignore',
+				'all',
+				'http://schemas.android.com/tools'
+			);
+		}
+
+		$mangler = $this->group->getMangler();
+		/** @var TMessage $m */
 		foreach ( $collection as $key => $m ) {
 			$key = $mangler->unmangle( $key );
 

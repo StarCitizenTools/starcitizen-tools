@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Милан Јелисавчић",
+			"BadDog",
 			"Milicevic01",
-			"Сербијана",
 			"Obsuser",
-			"BadDog"
+			"Zoranzoki21",
+			"Милан Јелисавчић",
+			"Сербијана"
 		]
 	},
 	"searchtranslations": "Претрага превода",
@@ -30,5 +31,7 @@
 	"tux-sst-ellipsis-outdated": "Застарели преводи",
 	"tux-sst-link-all-match": "Ограничи на све речи из претраге.",
 	"tux-sst-match-message": "Приказани су преводи који одговарају било којој речи из претраге. $1",
-	"tux-sst-case-sensitive": "Разликуј велика и мала слова"
+	"tux-sst-case-sensitive": "Разликуј велика и мала слова",
+	"tux-sst-error-offset": "Није могуће приказати више резултата претраге. Сузите претрагу.",
+	"tux-sst-error-language": "Није могуће користити овај језик са овим типом претраге."
 }

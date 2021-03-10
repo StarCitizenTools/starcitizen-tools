@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface UrlStringTransferHandler class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -45,6 +45,7 @@ ve.ui.UrlStringTransferHandler.static.handlesPaste = true;
 
 /**
  * RegExp matching an external url.
+ *
  * @property {RegExp}
  * @private
  */

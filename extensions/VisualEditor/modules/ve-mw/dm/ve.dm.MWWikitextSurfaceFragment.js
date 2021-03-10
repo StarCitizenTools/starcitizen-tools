@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWWikitextSurfaceFragment class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -72,6 +72,7 @@ ve.dm.MWWikitextSurfaceFragment.prototype.hasMatchingAncestor = function ( type,
  * @param {string} after Text to go after selection
  * @param {Function|string} placeholder Placeholder text to insert at an empty selection
  * @param {boolean} forceWrap Force wrapping, even if matching wrapping exists
+ * @return {ve.dm.MWWikitextSurfaceFragment}
  * @chainable
  */
 ve.dm.MWWikitextSurfaceFragment.prototype.wrapText = function ( before, after, placeholder, forceWrap ) {
@@ -116,6 +117,7 @@ ve.dm.MWWikitextSurfaceFragment.prototype.wrapText = function ( before, after, p
  *
  * @param {number} before Amount of text to remove from start
  * @param {number} after Amount of text to remove from end
+ * @return {ve.dm.MWWikitextSurfaceFragment}
  * @chainable
  */
 ve.dm.MWWikitextSurfaceFragment.prototype.unwrapText = function ( before, after ) {
@@ -131,7 +133,7 @@ ve.dm.MWWikitextSurfaceFragment.prototype.convertToSource = function ( doc ) {
 	var wikitextPromise, progressPromise;
 
 	if ( !doc.data.hasContent() ) {
-		return $.Deferred().resolve( '' ).promise();
+		return ve.createDeferred().resolve( '' ).promise();
 	}
 
 	wikitextPromise = ve.init.target.getWikitextFragment( doc, false );
@@ -145,10 +147,14 @@ ve.dm.MWWikitextSurfaceFragment.prototype.convertToSource = function ( doc ) {
 		} );
 	} );
 
-	return $.when( wikitextPromise, progressPromise ).then( function ( wikitext ) {
-		var deferred = $.Deferred();
+	return ve.promiseAll( [ wikitextPromise, progressPromise ] ).then( function ( wikitext ) {
+		var deferred = ve.createDeferred();
 		setTimeout( function () {
-			deferred.resolve( wikitext );
+			if ( wikitext !== undefined ) {
+				deferred.resolve( wikitext );
+			} else {
+				deferred.reject();
+			}
 		}, ve.init.target.getSurface().dialogs.getTeardownDelay() );
 		return deferred.promise();
 	} );
@@ -160,7 +166,7 @@ ve.dm.MWWikitextSurfaceFragment.prototype.convertToSource = function ( doc ) {
 ve.dm.MWWikitextSurfaceFragment.prototype.convertFromSource = function ( source ) {
 	var parsePromise;
 	if ( !source ) {
-		parsePromise = $.Deferred().resolve(
+		parsePromise = ve.createDeferred().resolve(
 			ve.dm.Document.static.newBlankDocument()
 		).promise();
 	} else {
@@ -172,13 +178,15 @@ ve.dm.MWWikitextSurfaceFragment.prototype.convertFromSource = function ( source 
 	}
 
 	// TODO: Show progress bar without breaking WindowAction
-	// ve.init.target.getSurface().createProgress(
-	// 	parsePromise, ve.msg( 'visualeditor-generating-wikitext-progress' )
-	// ).done( function ( progressBar, cancelPromise ) {
-	// 	cancelPromise.fail( function () {
-	// 		parsePromise.abort();
-	// 	} );
-	// } );
+	/*
+	ve.init.target.getSurface().createProgress(
+		parsePromise, ve.msg( 'visualeditor-generating-wikitext-progress' )
+	).done( function ( progressBar, cancelPromise ) {
+		cancelPromise.fail( function () {
+			parsePromise.abort();
+		} );
+	} );
+	*/
 
 	return parsePromise;
 };

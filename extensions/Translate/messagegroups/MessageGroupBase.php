@@ -8,6 +8,11 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\TranslatorInterface\Insertable\CombinedInsertablesSuggester;
+use MediaWiki\Extension\Translate\TranslatorInterface\Insertable\InsertableFactory;
+use MediaWiki\Extension\Translate\Validation\ValidationRunner;
+use MediaWiki\MediaWikiServices;
+
 /**
  * This class implements some basic functions that wrap around the YAML
  * message group configurations. These message groups use the FFS classes
@@ -20,11 +25,7 @@
 abstract class MessageGroupBase implements MessageGroup {
 	protected $conf;
 	protected $namespace;
-	protected $groups;
-
-	/**
-	 * @var StringMatcher
-	 */
+	/** @var StringMatcher */
 	protected $mangler;
 
 	protected function __construct() {
@@ -74,7 +75,7 @@ abstract class MessageGroupBase implements MessageGroup {
 	public function getSourceLanguage() {
 		$conf = $this->getFromConf( 'BASIC', 'sourcelanguage' );
 
-		return $conf !== null ? $conf : 'en';
+		return $conf ?? 'en';
 	}
 
 	public function getDefinitions() {
@@ -83,7 +84,10 @@ abstract class MessageGroupBase implements MessageGroup {
 		return $defs;
 	}
 
-	protected function getFromConf( $section, $key ) {
+	protected function getFromConf( $section, $key = null ) {
+		if ( $key === null ) {
+			return $this->conf[$section] ?? null;
+		}
 		return $this->conf[$section][$key] ?? null;
 	}
 
@@ -105,29 +109,28 @@ abstract class MessageGroupBase implements MessageGroup {
 		return new $class( $this );
 	}
 
-	public function getChecker() {
-		$class = $this->getFromConf( 'CHECKER', 'class' );
-
-		if ( $class === null ) {
+	public function getValidator() {
+		$validatorConfigs = $this->getFromConf( 'VALIDATORS' );
+		if ( $validatorConfigs === null ) {
 			return null;
 		}
 
-		if ( !class_exists( $class ) ) {
-			throw new MWException( "Checker class $class does not exist." );
+		$msgValidator = new ValidationRunner( $this->getId() );
+
+		foreach ( $validatorConfigs as $config ) {
+			try {
+				$msgValidator->addValidator( $config );
+			} catch ( Exception $e ) {
+				$id = $this->getId();
+				throw new InvalidArgumentException(
+					"Unable to construct validator for message group $id: " . $e->getMessage(),
+					0,
+					$e
+				);
+			}
 		}
 
-		$checker = new $class( $this );
-		$checks = $this->getFromConf( 'CHECKER', 'checks' );
-
-		if ( !is_array( $checks ) ) {
-			throw new MWException( "Checker class $class not supplied with proper checks." );
-		}
-
-		foreach ( $checks as $check ) {
-			$checker->addCheck( [ $checker, $check ] );
-		}
-
-		return $checker;
+		return $msgValidator;
 	}
 
 	public function getMangler() {
@@ -135,7 +138,7 @@ abstract class MessageGroupBase implements MessageGroup {
 			$class = $this->getFromConf( 'MANGLER', 'class' );
 
 			if ( $class === null ) {
-				$this->mangler = StringMatcher::EmptyMatcher();
+				$this->mangler = new StringMatcher();
 
 				return $this->mangler;
 			}
@@ -144,9 +147,7 @@ abstract class MessageGroupBase implements MessageGroup {
 				throw new MWException( "Mangler class $class does not exist." );
 			}
 
-			/**
-			 * @todo Branch handling, merge with upper branch keys
-			 */
+			/** @todo Branch handling, merge with upper branch keys */
 			$this->mangler = new $class();
 			$this->mangler->setConf( $this->conf['MANGLER'] );
 		}
@@ -160,100 +161,39 @@ abstract class MessageGroupBase implements MessageGroup {
 	 * @return CombinedInsertablesSuggester
 	 */
 	public function getInsertablesSuggester() {
-		$allClasses = [];
-
-		$class = $this->getFromConf( 'INSERTABLES', 'class' );
-		if ( $class !== null ) {
-			$allClasses[] = $class;
-		}
-
-		$classes = $this->getFromConf( 'INSERTABLES', 'classes' );
-		if ( $classes !== null ) {
-			$allClasses = array_merge( $allClasses, $classes );
-		}
-
-		array_unique( $allClasses, SORT_REGULAR );
-
 		$suggesters = [];
+		$insertableConf = $this->getFromConf( 'INSERTABLES' ) ?? [];
 
-		foreach ( $allClasses as $class ) {
-			if ( !class_exists( $class ) ) {
-				throw new MWException( "InsertablesSuggester class $class does not exist." );
+		foreach ( $insertableConf as $config ) {
+			if ( !isset( $config['class'] ) ) {
+				throw new InvalidArgumentException(
+					'Insertable configuration for group: ' . $this->getId() .
+					' does not provide a class.'
+				);
 			}
 
-			$suggesters[] = new $class();
+			if ( !is_string( $config['class'] ) ) {
+				throw new InvalidArgumentException(
+					'Expected Insertable class to be string, got: ' . gettype( $config['class'] ) .
+					' for group: ' . $this->getId()
+				);
+			}
+
+			$suggesters[] = InsertableFactory::make( $config['class'], $config['params'] ?? [] );
+		}
+
+		// Get validators marked as insertable
+		$messageValidator = $this->getValidator();
+		if ( $messageValidator ) {
+			$suggesters = array_merge( $suggesters, $messageValidator->getInsertableValidators() );
 		}
 
 		return new CombinedInsertablesSuggester( $suggesters );
 	}
 
-	/**
-	 * Optimized version of array_keys( $_->getDefinitions() ).
-	 * @return array
-	 * @since 2012-08-21
-	 */
+	/** @inheritDoc */
 	public function getKeys() {
-		$cache = new MessageGroupCache( $this, $this->getSourceLanguage() );
-		if ( !$cache->exists() ) {
-			return array_keys( $this->getDefinitions() );
-		} else {
-			return $cache->getKeys();
-		}
-	}
-
-	/**
-	 * @param string $code Language code.
-	 * @return MessageCollection
-	 */
-	public function initCollection( $code ) {
-		$namespace = $this->getNamespace();
-		$messages = [];
-
-		$cache = new MessageGroupCache( $this, $this->getSourceLanguage() );
-		if ( !$cache->exists() ) {
-			wfWarn( "By-passing message group cache for {$this->getId()}" );
-			$messages = $this->getDefinitions();
-		} else {
-			foreach ( $cache->getKeys() as $key ) {
-				$messages[$key] = $cache->get( $key );
-			}
-		}
-
-		$definitions = new MessageDefinitions( $messages, $namespace );
-		$collection = MessageCollection::newFromDefinitions( $definitions, $code );
-		$this->setTags( $collection );
-
-		return $collection;
-	}
-
-	/**
-	 * @param string $key Message key
-	 * @param string $code Language code
-	 * @return string|null
-	 */
-	public function getMessage( $key, $code ) {
-		$cache = new MessageGroupCache( $this, $code );
-		if ( $cache->exists() ) {
-			$msg = $cache->get( $key );
-
-			if ( $msg !== false ) {
-				return $msg;
-			}
-
-			// Try harder
-			$nkey = str_replace( ' ', '_', strtolower( $key ) );
-			$keys = $cache->getKeys();
-
-			foreach ( $keys as $k ) {
-				if ( $nkey === str_replace( ' ', '_', strtolower( $k ) ) ) {
-					return $cache->get( $k );
-				}
-			}
-
-			return null;
-		} else {
-			return null;
-		}
+		return array_keys( $this->getDefinitions() );
 	}
 
 	public function getTags( $type = null ) {
@@ -295,7 +235,7 @@ abstract class MessageGroupBase implements MessageGroup {
 			 * Use mangler to find messages that match.
 			 */
 			foreach ( $messageKeys as $key ) {
-				if ( $mangler->match( $key ) ) {
+				if ( $mangler->matches( $key ) ) {
 					$matches[] = $key;
 				}
 			}
@@ -314,11 +254,7 @@ abstract class MessageGroupBase implements MessageGroup {
 			return $tags;
 		}
 
-		if ( isset( $tags[$type] ) ) {
-			return $tags[$type];
-		}
-
-		return [];
+		return $tags[$type] ?? [];
 	}
 
 	protected function setTags( MessageCollection $collection ) {
@@ -338,9 +274,8 @@ abstract class MessageGroupBase implements MessageGroup {
 			return constant( $ns );
 		}
 
-		global $wgContLang;
-
-		$index = $wgContLang->getNsIndex( $ns );
+		$index = MediaWikiServices::getInstance()->getContentLanguage()
+			->getNsIndex( $ns );
 
 		if ( !$index ) {
 			throw new MWException( "No valid namespace defined, got $ns." );
@@ -353,9 +288,7 @@ abstract class MessageGroupBase implements MessageGroup {
 		return $code === $this->getSourceLanguage();
 	}
 
-	/**
-	 * @deprecated Use getMessageGroupStates
-	 */
+	/** @deprecated Use getMessageGroupStates */
 	public function getWorkflowConfiguration() {
 		global $wgTranslateWorkflowStates;
 		if ( !$wgTranslateWorkflowStates ) {

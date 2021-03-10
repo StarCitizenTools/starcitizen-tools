@@ -1,13 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"Indunil Chamara",
+			"Susith Chandira Gts",
 			"චතුනි අලහප්පෙරුම",
 			"තඹරු විජේසේකර",
 			"පසිඳු කාවින්ද",
 			"බිඟුවා",
 			"ශ්වෙත",
-			"Indunil Chamara",
-			"Susith Chandira Gts",
 			"හරිත",
 			1100100
 		]
@@ -34,12 +34,10 @@
 	"tpt-mark-nochanges": "මෙම සංශෝධනය හා අවසන් වරට ලකුණු කල සංශෝධනය අතර කිසිදු වෙනසක් නොමැත.",
 	"tpt-edit-failed": "පිටුව යාවත්කාලීන කල නොහැක: $1",
 	"tpt-duplicate": "$1 පරිවතන ඒකක නාමය එකකට වඩා භාවිතා කර ඇත.",
-	"tpt-already-marked": "මෙම පිටුවෙහි නවතම අනුවාදය පරිවර්තනය සඳහා දැනටමත් සලකුණු කොට ඇත.",
 	"tpt-unmarked": "$1 පිටුව පරිවර්තනය සඳහා තවදුරටත් සලකුණු කර නොමැත.",
 	"tpt-new-pages-title": "පරිවර්තනය සඳහා යෝජිත පිටු",
 	"tpt-old-pages-title": "පරිවර්තනයේ ඇති පිටු",
 	"tpt-other-pages-title": "බිඳුණු පිටු",
-	"tpt-discouraged-pages-title": "අධෛර්යකල පිටු",
 	"tpt-old-pages": "පරිවර්තනය සඳහා {{PLURAL:$1|මෙම පිටුවේ|මෙම පිටුවල}} සමහර අනුවාදයන් සලකුණු කරන ලදී.",
 	"tpt-select-prioritylangs": "කොමාවෙන්-වෙන්වූ ප්‍රමුඛතා භාෂා කේතයන් ලැයිස්තුව:",
 	"tpt-select-prioritylangs-force": "ප්‍රමුඛතා භාෂාවන්ට වඩා වෙන භාෂාවන්ට කරන පරිවර්තන වලක්වන්න",
@@ -60,7 +58,6 @@
 	"tpt-languages-legend": "වෙනත් භාෂා:",
 	"tpt-languages-zero": "මෙම භාෂාව සඳහා පරිවර්තනය අරඹන්න",
 	"tpt-languages-nonzero": "$1 ($2% පරිවර්තිතයි)",
-	"tpt-discouraged-language-reason": "හේතුව: $1",
 	"tpt-render-summary": "මූලාශ්‍ර පිටුවේ නව අනුවාදය වෙත ගැලපීම සඳහා යාවත්කාලීන කරමින්",
 	"aggregategroups": "සමස්ත කාණ්ඩයන්",
 	"tpt-aggregategroup-add": "එක් කරන්න",

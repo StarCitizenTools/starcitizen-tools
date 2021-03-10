@@ -36,6 +36,7 @@ abstract class TranslationWebService implements LoggerAwareInterface {
 			'microsoft' => 'MicrosoftWebService',
 			'apertium' => 'ApertiumWebService',
 			'yandex' => 'YandexWebService',
+			'google' => 'GoogleTranslateWebService',
 			'remote-ttmserver' => 'RemoteTTMServerWebService',
 			'cxserver' => 'CxserverWebService',
 			'restbase' => 'RESTBaseWebService',
@@ -46,23 +47,8 @@ abstract class TranslationWebService implements LoggerAwareInterface {
 			$config['timeout'] = 3;
 		}
 
-		// Alter local ttmserver instance to appear as remote
-		// to take advantage of the query aggregator. But only
-		// if they are public.
-		if (
-			isset( $config['class'] ) &&
-			$config['class'] === 'ElasticSearchTTMServer' &&
-			isset( $config['public'] ) &&
-			$config['public'] === true
-		) {
-			$config['type'] = 'remote-ttmserver';
-			$config['service'] = $name;
-			$config['url'] = wfExpandUrl( wfScript( 'api' ), PROTO_CANONICAL );
-		}
-
-		if ( isset( $handlers[$config['type']] ) ) {
-			$class = $handlers[$config['type']];
-
+		$class = $handlers[$config['type']] ?? null;
+		if ( $class ) {
 			$obj = new $class( $name, $config );
 			$obj->setLogger( LoggerFactory::getInstance( 'translationservices' ) );
 			return $obj;
@@ -186,15 +172,12 @@ abstract class TranslationWebService implements LoggerAwareInterface {
 
 	/* Default implementation */
 
-	/**
-	 * @var string Name of this webservice.
-	 */
+	/** @var string Name of this webservice. */
 	protected $service;
-
-	/**
-	 * @var array
-	 */
+	/** @var array */
 	protected $config;
+	/** @var LoggerInterface */
+	protected $logger;
 
 	/**
 	 * @param string $service Name of the webservice
@@ -228,20 +211,23 @@ abstract class TranslationWebService implements LoggerAwareInterface {
 	 * @throws TranslationWebServiceConfigurationException
 	 */
 	protected function getSupportedLanguagePairs() {
-		$key = wfMemcKey( 'translate-tmsug-pairs-' . $this->service );
-		$pairs = wfGetCache( CACHE_ANYTHING )->get( $key );
-		if ( !is_array( $pairs ) ) {
-			try {
-				$pairs = $this->doPairs();
-			} catch ( Exception $e ) {
-				$this->reportTranslationServiceFailure( $e->getMessage() );
-				return [];
-			}
-			// Cache the result for a day
-			wfGetCache( CACHE_ANYTHING )->set( $key, $pairs, 60 * 60 * 24 );
-		}
+		$cache = ObjectCache::getInstance( CACHE_ANYTHING );
 
-		return $pairs;
+		return $cache->getWithSetCallback(
+			$cache->makeKey( 'translate-tmsug-pairs-' . $this->service ),
+			$cache::TTL_DAY,
+			function ( &$ttl ) use ( $cache ) {
+				try {
+					$pairs = $this->doPairs();
+				} catch ( Exception $e ) {
+					$pairs = [];
+					$this->reportTranslationServiceFailure( $e->getMessage() );
+					$ttl = $cache::TTL_UNCACHEABLE;
+				}
+
+				return $pairs;
+			}
+		);
 	}
 
 	/**
@@ -280,7 +266,6 @@ abstract class TranslationWebService implements LoggerAwareInterface {
 	 * consider the service being temporarily off-line.
 	 */
 	protected $serviceFailureCount = 5;
-
 	/**
 	 * @var int How long after the last detected failure we clear the status and
 	 * try again.
@@ -293,18 +278,21 @@ abstract class TranslationWebService implements LoggerAwareInterface {
 	 */
 	public function checkTranslationServiceFailure() {
 		$service = $this->service;
-		$key = wfMemcKey( "translate-service-$service" );
-		$value = wfGetCache( CACHE_ANYTHING )->get( $key );
+		$cache = ObjectCache::getInstance( CACHE_ANYTHING );
+
+		$key = $cache->makeKey( "translate-service-$service" );
+		$value = $cache->get( $key );
 		if ( !is_string( $value ) ) {
 			return false;
 		}
+
 		list( $count, $failed ) = explode( '|', $value, 2 );
 
 		if ( $failed + ( 2 * $this->serviceFailurePeriod ) < wfTimestamp() ) {
 			if ( $count >= $this->serviceFailureCount ) {
 				$this->logger->warning( "Translation service $service (was) restored" );
 			}
-			wfGetCache( CACHE_ANYTHING )->delete( $key );
+			$cache->delete( $key );
 
 			return false;
 		} elseif ( $failed + $this->serviceFailurePeriod < wfTimestamp() ) {
@@ -327,8 +315,10 @@ abstract class TranslationWebService implements LoggerAwareInterface {
 		$service = $this->service;
 		$this->logger->warning( "Translation service $service problem: $msg" );
 
-		$key = wfMemcKey( "translate-service-$service" );
-		$value = wfGetCache( CACHE_ANYTHING )->get( $key );
+		$cache = ObjectCache::getInstance( CACHE_ANYTHING );
+		$key = $cache->makeKey( "translate-service-$service" );
+
+		$value = $cache->get( $key );
 		if ( !is_string( $value ) ) {
 			$count = 0;
 		} else {
@@ -337,7 +327,7 @@ abstract class TranslationWebService implements LoggerAwareInterface {
 
 		$count++;
 		$failed = wfTimestamp();
-		wfGetCache( CACHE_ANYTHING )->set(
+		$cache->set(
 			$key,
 			"$count|$failed",
 			$this->serviceFailurePeriod * 5

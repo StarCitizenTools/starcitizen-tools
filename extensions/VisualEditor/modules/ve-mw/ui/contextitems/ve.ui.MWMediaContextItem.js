@@ -32,7 +32,7 @@ ve.ui.MWMediaContextItem = function VeUiMWMediaContextItem( context, model ) {
 		Audio: 'play',
 		Video: 'play'
 	}[ mediaClass ] );
-	// The following messages can be used here
+	// The following messages are used here:
 	// * visualeditor-media-title-audio
 	// * visualeditor-media-title-image
 	// * visualeditor-media-title-video
@@ -69,11 +69,12 @@ ve.ui.MWMediaContextItem.prototype.getDescription = function () {
  * @inheritdoc
  */
 ve.ui.MWMediaContextItem.prototype.renderBody = function () {
+	var title = mw.Title.newFromText( mw.libs.ve.normalizeParsoidResourceName( this.model.getAttribute( 'resource' ) ) );
 	this.$body.append(
 		$( '<a>' )
 			.text( this.getDescription() )
 			.attr( {
-				href: mw.util.getUrl( this.model.getAttribute( 'resource' ) ),
+				href: title.getUrl(),
 				target: '_blank',
 				rel: 'noopener'
 			} )

@@ -4,18 +4,12 @@
 			"Purodha"
 		]
 	},
-	"apihelp-templatedata-description": "Holl Dahte, di dat Zohsazprojramm för de Schablohne_Dahte faßjehallde hät.",
-	"apihelp-templatedata-example-1": "Holl Dahte för de Schablohne <code lang=\"en\" xml:lang=\"en\" dir=\"ltr\">[[Template:Stub]]</code> un <code lang=\"en\" xml:lang=\"en\" dir=\"ltr\">[[Template:Example]]</code>",
-	"apihelp-templatedata-param-lang": "Jivv övversaz Wääte uß en däh Schprohch. Schtandattmääßesch wähde alle Schprohche jelivvet, di doh sin.",
 	"templatedata-desc": "Brängk ene Dahteschpeijscher för de Parramehtere vun Schablohne en et Wikki, met <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"JavaScript Object Notation\">JSON</i>.",
 	"templatedata-doc-desc-empty": "Kein Äklihrong.",
 	"templatedata-doc-no-params-set": "Kein Parramehtere aanjejovve",
 	"templatedata-doc-param-autovalue": "Automattesch",
-	"templatedata-doc-param-autovalue-empty": "läddesch",
 	"templatedata-doc-param-default": "Schtandatt",
-	"templatedata-doc-param-default-empty": "läddesch",
 	"templatedata-doc-param-example": "Bäijshpell",
-	"templatedata-doc-param-example-empty": "läddesch",
 	"templatedata-doc-param-desc": "Äklihrong",
 	"templatedata-doc-param-desc-empty": "kein Äklihrong",
 	"templatedata-doc-param-name": "Parramehtere",

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Wikitext command registry
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -26,7 +26,12 @@ OO.inheritClass( ve.ui.MWWikitextCommandRegistry, ve.ui.CommandRegistry );
 /* Methods */
 
 /**
- * @inheritdoc
+ * Get data for a given symbolic name.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.Registry.html
+ *
+ * @param {string} name Symbolic name
+ * @return {Mixed|undefined} Data associated with symbolic name
  */
 ve.ui.MWWikitextCommandRegistry.prototype.lookup = function ( name ) {
 	// Parent method
@@ -138,15 +143,12 @@ ve.ui.wikitextCommandRegistry.register(
 
 	function unformat( text ) {
 		/* Use lazy .+? in the middle so whitespace is matched to wrappers */
-		var headings, pre, blockquotes;
+		var headings, pre;
 		if ( ( headings = text.match( /^((={1,6})\s*).+?(\s*\2\s*)$/ ) ) ) {
 			return [ headings[ 1 ].length, headings[ 3 ].length ];
 		}
 		if ( ( pre = text.match( /^ +/ ) ) ) {
 			return [ pre[ 0 ].length, 0 ];
-		}
-		if ( ( blockquotes = text.match( /^(<blockquote[^>]*>\s*).+?(\s*<\/blockquote>)$/ ) ) ) {
-			return [ blockquotes[ 1 ].length, blockquotes[ 2 ].length ];
 		}
 	}
 
@@ -159,6 +161,13 @@ ve.ui.wikitextCommandRegistry.register(
 					args: [
 						heading + ' ',
 						' ' + heading,
+						// The following messages can be used here:
+						// * visualeditor-formatdropdown-format-heading1
+						// * visualeditor-formatdropdown-format-heading2
+						// * visualeditor-formatdropdown-format-heading3
+						// * visualeditor-formatdropdown-format-heading4
+						// * visualeditor-formatdropdown-format-heading5
+						// * visualeditor-formatdropdown-format-heading6
 						OO.ui.deferMsg( 'visualeditor-formatdropdown-format-heading' + i ),
 						unformat
 					],
@@ -182,8 +191,8 @@ ve.ui.wikitextCommandRegistry.register(
 	);
 	ve.ui.wikitextCommandRegistry.register(
 		new ve.ui.Command(
-			'blockquote', 'mwWikitext', 'wrapLine',
-			{ args: [ '<blockquote>', '</blockquote>', OO.ui.deferMsg( 'visualeditor-formatdropdown-format-blockquote' ), unformat ], supportedSelections: [ 'linear' ] }
+			'blockquote', 'mwWikitext', 'toggleWrapSelection',
+			{ args: [ '<blockquote>', '</blockquote>', OO.ui.deferMsg( 'visualeditor-formatdropdown-format-blockquote' ) ], supportedSelections: [ 'linear' ] }
 		)
 	);
 

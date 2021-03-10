@@ -1,8 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Irus"
+			"Irus",
+			"Mtonihouse",
+			"Nkankane"
 		]
 	},
-	"visualeditor-ca-editsource": "Hlela umthombo"
+	"tooltip-ca-ve-edit": "Hlela leli khasi",
+	"visualeditor-ca-editsource": "Hlela umthombo",
+	"visualeditor-ca-editsource-section": "Hlela umthombo"
 }

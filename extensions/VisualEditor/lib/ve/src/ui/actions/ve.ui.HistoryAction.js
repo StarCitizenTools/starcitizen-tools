@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface HistoryAction class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -26,12 +26,6 @@ OO.inheritClass( ve.ui.HistoryAction, ve.ui.Action );
 
 ve.ui.HistoryAction.static.name = 'history';
 
-/**
- * List of allowed methods for the action.
- *
- * @static
- * @property
- */
 ve.ui.HistoryAction.static.methods = [ 'undo', 'redo' ];
 
 /* Methods */
@@ -39,7 +33,6 @@ ve.ui.HistoryAction.static.methods = [ 'undo', 'redo' ];
 /**
  * Step backwards in time.
  *
- * @method
  * @return {boolean} Action was executed
  */
 ve.ui.HistoryAction.prototype.undo = function () {
@@ -50,7 +43,6 @@ ve.ui.HistoryAction.prototype.undo = function () {
 /**
  * Step forwards in time.
  *
- * @method
  * @return {boolean} Action was executed
  */
 ve.ui.HistoryAction.prototype.redo = function () {

@@ -8,6 +8,8 @@
  */
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\SlotRecord;
 
 /**
  * Essentially random collection of helper functions, similar to GlobalFunctions.php.
@@ -75,44 +77,78 @@ class TranslateUtils {
 	 */
 	public static function getContents( $titles, $namespace ) {
 		$dbr = wfGetDB( DB_REPLICA );
+		$revStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$titleContents = [];
 
-		if ( class_exists( ActorMigration::class ) ) {
-			$actorQuery = ActorMigration::newMigration()->getJoin( 'rev_user' );
-		} else {
-			$actorQuery = [
-				'tables' => [],
-				'fields' => [ 'rev_user_text' => 'rev_user_text' ],
-				'joins' => [],
-			];
-		}
-
-		$rows = $dbr->select( [ 'page', 'revision', 'text' ] + $actorQuery['tables'],
-			[
-				'page_title', 'old_text', 'old_flags',
-				'rev_user_text' => $actorQuery['fields']['rev_user_text']
-			],
+		$query = $revStore->getQueryInfo( [ 'page', 'user' ] );
+		$rows = $dbr->select(
+			$query['tables'],
+			$query['fields'],
 			[
 				'page_namespace' => $namespace,
-				'page_title' => $titles
+				'page_title' => $titles,
+				'page_latest=rev_id',
 			],
 			__METHOD__,
 			[],
-			[
-				'revision' => [ 'JOIN', 'page_latest=rev_id' ],
-				'text' => [ 'JOIN', 'rev_text_id=old_id' ],
-			] + $actorQuery['joins']
+			$query['joins']
 		);
 
-		$titles = [];
+		$revisions = $revStore->newRevisionsFromBatch( $rows, [
+			'slots' => true,
+			'content' => true
+		] )->getValue();
+
 		foreach ( $rows as $row ) {
-			$titles[$row->page_title] = [
-				Revision::getRevisionText( $row ),
-				$row->rev_user_text
-			];
+			/** @var RevisionRecord|null $rev */
+			$rev = $revisions[$row->rev_id];
+			if ( $rev ) {
+				/** @var TextContent $content */
+				$content = $rev->getContent( SlotRecord::MAIN );
+				if ( $content ) {
+					$titleContents[$row->page_title] = [
+						$content->getText(),
+						$row->rev_user_text
+					];
+				}
+			}
 		}
+
 		$rows->free();
 
-		return $titles;
+		return $titleContents;
+	}
+
+	/**
+	 * Returns the content for a given title and adds the fuzzy tag if requested.
+	 * @param Title $title
+	 * @param bool $addFuzzy Add the fuzzy tag if appropriate.
+	 * @return string|null
+	 */
+	public static function getContentForTitle( Title $title, $addFuzzy = false ) {
+		$store = MediaWikiServices::getInstance()->getRevisionStore();
+		$revision = $store->getRevisionByTitle( $title );
+
+		if ( $revision === null ) {
+			return null;
+		}
+
+		$wiki = ContentHandler::getContentText( $revision->getContent( SlotRecord::MAIN ) );
+
+		if ( !$wiki ) {
+			return null;
+		}
+
+		if ( !$addFuzzy ) {
+			return $wiki;
+		}
+
+		$handle = new MessageHandle( $title );
+		if ( $handle->isFuzzy() ) {
+			$wiki = TRANSLATE_FUZZY . str_replace( TRANSLATE_FUZZY, '', $wiki );
+		}
+
+		return $wiki;
 	}
 
 	/**
@@ -131,15 +167,7 @@ class TranslateUtils {
 
 		$dbr = wfGetDB( DB_REPLICA );
 
-		if ( class_exists( ActorMigration::class ) ) {
-			$actorQuery = ActorMigration::newMigration()->getJoin( 'rc_user' );
-		} else {
-			$actorQuery = [
-				'tables' => [],
-				'fields' => [ 'rc_user_text' => 'rc_user_text' ],
-				'joins' => [],
-			];
-		}
+		$actorQuery = ActorMigration::newMigration()->getJoin( 'rc_user' );
 
 		$hours = (int)$hours;
 		$cutoff_unixtime = time() - ( $hours * 3600 );
@@ -198,12 +226,7 @@ class TranslateUtils {
 	 */
 	public static function getLanguageName( $code, $language = 'en' ) {
 		$languages = self::getLanguageNames( $language );
-
-		if ( isset( $languages[$code] ) ) {
-			return $languages[$code];
-		} else {
-			return $code;
-		}
+		return $languages[$code] ?? $code;
 	}
 
 	/**
@@ -325,11 +348,11 @@ class TranslateUtils {
 	 *
 	 * This is also implemented in JavaScript in ext.translate.quickedit.
 	 *
-	 * @param string $msg Plain text string.
+	 * @param string $message Plain text string.
 	 * @return string Text string that is ready for outputting.
 	 */
-	public static function convertWhiteSpaceToHTML( $msg ) {
-		$msg = htmlspecialchars( $msg );
+	public static function convertWhiteSpaceToHTML( $message ) {
+		$msg = htmlspecialchars( $message );
 		$msg = preg_replace( '/^ /m', '&#160;', $msg );
 		$msg = preg_replace( '/ $/m', '&#160;', $msg );
 		$msg = preg_replace( '/  /', '&#160; ', $msg );
@@ -397,7 +420,7 @@ class TranslateUtils {
 		$formats = [];
 
 		$filename = substr( $icon, 7 );
-		$file = wfFindFile( $filename );
+		$file = MediaWikiServices::getInstance()->getRepoGroup()->findFile( $filename );
 		if ( !$file ) {
 			wfWarn( "Unknown message group icon file $icon" );
 
@@ -433,23 +456,31 @@ class TranslateUtils {
 	 * Get a DB handle suitable for read and read-for-write cases
 	 *
 	 * @return \Wikimedia\Rdbms\IDatabase Master for HTTP POST, CLI, DB already changed;
-	 *  slave otherwise
+	 *  replica otherwise
 	 */
 	public static function getSafeReadDB() {
+		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
+		$index = self::shouldReadFromMaster() ? DB_MASTER : DB_REPLICA;
+
+		return $lb->getConnectionRef( $index );
+	}
+
+	/**
+	 * Check whether master should be used for reads to avoid reading stale data.
+	 *
+	 * @return bool
+	 */
+	public static function shouldReadFromMaster() {
 		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 		// Parsing APIs need POST for payloads but are read-only, so avoid spamming
 		// the master then. No good way to check this at the moment...
 		if ( PageTranslationHooks::$renderingContext ) {
-			$index = DB_REPLICA;
-		} else {
-			$index = (
-				PHP_SAPI === 'cli' ||
-				RequestContext::getMain()->getRequest()->wasPosted() ||
-				$lb->hasOrMadeRecentMasterChanges()
-			) ? DB_MASTER : DB_REPLICA;
+			return false;
 		}
 
-		return $lb->getConnection( $index );
+		return PHP_SAPI === 'cli' ||
+			RequestContext::getMain()->getRequest()->wasPosted() ||
+			$lb->hasOrMadeRecentMasterChanges();
 	}
 
 	/**
@@ -463,7 +494,8 @@ class TranslateUtils {
 			return $handle->getTitle()->getLocalURL( [ 'action' => 'edit' ] );
 		}
 
-		$title = self::getSpecialPage( 'Translate' )->getPageTitle();
+		$title = MediaWikiServices::getInstance()
+			->getSpecialPageFactory()->getPage( 'Translate' )->getPageTitle();
 		return $title->getLocalURL( [
 			'showMessage' => $handle->getInternalKey(),
 			'group' => $handle->getGroup()->getId(),
@@ -472,110 +504,70 @@ class TranslateUtils {
 	}
 
 	/**
-	 * Compatibility for pre-1.32, when SpecialPageFactory methods were static.
-	 *
-	 * @see SpecialPageFactory::resolveAlias
-	 * @param string $text
-	 * @return array
+	 * Serialize the given value
+	 * @param mixed $value
+	 * @return string
 	 */
-	public static function resolveSpecialPageAlias( $text ) : array {
-		if ( method_exists( MediaWikiServices::class, 'getSpecialPageFactory' ) ) {
-			return MediaWikiServices::getInstance()->getSpecialPageFactory()->resolveAlias( $text );
-		}
-		return SpecialPageFactory::resolveAlias( $text );
+	public static function serialize( $value ) {
+		return serialize( $value );
 	}
 
 	/**
-	 * Compatibility for pre-1.32, when SpecialPageFactory methods were static.
-	 *
-	 * @see SpecialPageFactory::getPage
-	 * @param string $name
-	 * @return SpecialPage|null
+	 * Deserialize the given string
+	 * @param string $str
+	 * @param array|null $opts
+	 * @return mixed
 	 */
-	public static function getSpecialPage( $name ) {
-		if ( method_exists( MediaWikiServices::class, 'getSpecialPageFactory' ) ) {
-			return MediaWikiServices::getInstance()->getSpecialPageFactory()->getPage( $name );
-		}
-		return SpecialPageFactory::getPage( $name );
+	public static function deserialize( $str, $opts = [ 'allowed_classes' => false ] ) {
+		return unserialize( $str, $opts );
 	}
 
 	/**
-	 * Compatibility for pre-1.32, before OutputPage::addWikiTextAsInterface()
-	 *
-	 * @see OutputPage::addWikiTextAsInterface
-	 * @param OutputPage $out
-	 * @param string $text The wikitext to add to the output.
+	 * @return string
+	 * @since 2020.05
 	 */
-	public static function addWikiTextAsInterface( OutputPage $out, $text ) {
-		if ( is_callable( [ $out, 'addWikiTextAsInterface' ] ) ) {
-			$out->addWikiTextAsInterface( $text );
-		} else {
-			// $out->addWikiTextTitle is deprecated in 1.32, but has existed
-			// since (at least) MW 1.21, so use that as a fallback.
-			$out->addWikiTextTitle(
-				$text, $out->getTitle(),
-				/*linestart*/true, /*tidy*/true, /*interface*/true
-			);
+	public static function getVersion(): string {
+		// Avoid parsing JSON multiple time per request
+		static $version = null;
+		if ( $version === null ) {
+			$version = json_decode( file_get_contents( __DIR__ . '/extension.json' ) )->version;
 		}
+		return $version;
 	}
 
 	/**
-	 * Compatibility for pre-1.32, before OutputPage::wrapWikiTextAsInterface()
+	 * Checks if the namespace that the title belongs to allows subpages
 	 *
-	 * @see OutputPage::wrapWikiTextAsInterface
-	 * @param OutputPage $out
-	 * @param string $wrapperClass The class attribute value for the <div>
-	 *   wrapper in the output HTML
-	 * @param string $text The wikitext in the user interface language to
-	 *   add to the output.
+	 * @internal - For internal use only
+	 * @param Title $title
+	 * @return bool
 	 */
-	public static function wrapWikiTextAsInterface( OutputPage $out, $wrapperClass, $text ) {
-		if ( is_callable( [ $out, 'wrapWikiTextAsInterface' ] ) ) {
-			$out->wrapWikiTextAsInterface( $wrapperClass, $text );
-		} else {
-			// wfDeprecated( 'use OutputPage::wrapWikiTextAsInterface', '1.32')
-			if ( !$wrapperClass ) {
-				$wrapperClass = '';
-			}
-			$out->addHTML( Html::openElement(
-				'div', [ 'class' => $wrapperClass ]
-			) );
-			self::addWikiTextAsInterface( $out, $text );
-			$out->addHtml( Html::closeElement(
-				'div'
-			) );
+	public static function allowsSubpages( Title $title ): bool {
+		$mwInstance = MediaWikiServices::getInstance();
+		$namespaceInfo = $mwInstance->getNamespaceInfo();
+		return $namespaceInfo->hasSubpages( $title->getNamespace() );
+	}
+
+	public static function isEditPage( WebRequest $request ): bool {
+		$veAction = $request->getVal( 'veaction' );
+		if ( $veAction ) {
+			return true;
 		}
+
+		$action = $request->getVal( 'action' );
+		return $action === 'edit';
 	}
 
 	/**
-	 * Compatibility for pre-1.33, before OutputPage::parseAsInterface()
-	 *
-	 * @see OutputPage::parseAsInterface
-	 * @param OutputPage $out
-	 * @param string $text The wikitext in the user interface language to
-	 *   be parsed
-	 * @return string HTML
+	 * Add support for <= 1.34. Wrapper method to fetch the the MW version
+	 * @return string
 	 */
-	public static function parseAsInterface( OutputPage $out, $text ) {
-		if ( is_callable( [ $out, 'parseAsInterface' ] ) ) {
-			return $out->parseAsInterface( $text );
-		} else {
-			// wfDeprecated( 'use OutputPage::parseAsInterface', '1.33')
-			return $out->parse( $text, /*linestart*/true, /*interface*/true );
+	public static function getMWVersion(): string {
+		if ( defined( 'MW_VERSION' ) ) {
+			return MW_VERSION;
 		}
-	}
 
-	public static function parseInlineAsInterface( OutputPage $out, $text ) {
-		if ( is_callable( [ $out, 'parseInlineAsInterface' ] ) ) {
-			return $out->parseInlineAsInterface( $text );
-		} else {
-			// wfDeprecated( 'use OutputPage::parseInlineAsInterface', '1.33')
-			// The block wrapper stripping was slightly broken before 1.33
-			// as well.
-			$contents = $out->parse( $text, /*linestart*/true, /*interface*/true );
-			// Remove whatever block element wrapup the parser likes to add
-			$contents = preg_replace( '~^<([a-z]+)>(.*)</\1>$~us', '\2', $contents );
-			return $contents;
-		}
+		global $wgVersion;
+		return $wgVersion;
 	}
 }

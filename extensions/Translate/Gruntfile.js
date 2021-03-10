@@ -1,28 +1,22 @@
+'use strict';
 /* eslint-env node */
 module.exports = function ( grunt ) {
-	'use strict';
+	var conf = grunt.file.readJSON( 'extension.json' );
 
 	grunt.loadNpmTasks( 'grunt-eslint' );
-	grunt.loadNpmTasks( 'grunt-jsonlint' );
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 
 	grunt.initConfig( {
 		eslint: {
+			options: {
+				cache: true,
+				fix: grunt.option( 'fix' )
+			},
 			all: [
-				'**/*.js',
-				'!node_modules/**',
-				'!extensions/**',
-				'!resources/js/jquery.autosize.js',
-				'!vendor/**'
-			]
-		},
-		jsonlint: {
-			all: [
-				'**/*.json',
-				'!node_modules/**',
-				'!extensions/**',
-				'!vendor/**'
+				'**/*.{js,json}',
+				'!resources/lib/**',
+				'!{vendor,node_modules}/**'
 			]
 		},
 		stylelint: {
@@ -30,21 +24,18 @@ module.exports = function ( grunt ) {
 				'**/*.css',
 				'**/*.less',
 				'!node_modules/**',
-				'!extensions/**',
-				'!vendor/**'
+				'!vendor/**',
+				'!resources/lib/**'
 			]
 		},
-		banana: {
-			all: [
-				'i18n/api',
-				'i18n/core',
-				'i18n/pagetranslation',
-				'i18n/sandbox',
-				'i18n/search'
-			]
-		}
+		// eslint-disable-next-line es/no-object-assign
+		banana: Object.assign( conf.MessagesDirs, {
+			options: {
+				requireLowerCase: 'initial'
+			}
+		} )
 	} );
 
-	grunt.registerTask( 'test', [ 'eslint', 'jsonlint', 'banana', 'stylelint' ] );
+	grunt.registerTask( 'test', [ 'eslint', 'banana', 'stylelint' ] );
 	grunt.registerTask( 'default', 'test' );
 };

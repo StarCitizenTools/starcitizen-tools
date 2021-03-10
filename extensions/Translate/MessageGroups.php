@@ -8,7 +8,7 @@
  * @copyright Copyright © 2008-2013, Niklas Laxström, Siebrand Mazeland
  * @license GPL-2.0-or-later
  */
-use \MediaWiki\MediaWikiServices;
+use MediaWiki\MediaWikiServices;
 
 /**
  * Factory class for accessing message groups individually by id or
@@ -16,19 +16,13 @@ use \MediaWiki\MediaWikiServices;
  * @todo Clean up the mixed static/member method interface.
  */
 class MessageGroups {
-	/**
-	 * @var string[]|null Cache for message group priorities
-	 */
+	/** @var string[]|null Cache for message group priorities */
 	protected static $prioritycache;
-
-	/**
-	 * @var MessageGroup[]|null Map of (group ID => MessageGroup)
-	 */
+	/** @var MessageGroup[]|null Map of (group ID => MessageGroup) */
 	protected $groups;
-
-	/**
-	 * @var WANObjectCache|null
-	 */
+	/** @var MessageGroupLoader[]|null */
+	protected $groupLoaders;
+	/** @var WANObjectCache|null */
 	protected $cache;
 
 	/**
@@ -37,7 +31,7 @@ class MessageGroups {
 	 * will automatically expire and be cleared off.
 	 * @var int
 	 */
-	const CACHE_VERSION = 2;
+	private const CACHE_VERSION = 4;
 
 	/**
 	 * Initialises the list of groups
@@ -50,6 +44,9 @@ class MessageGroups {
 		$value = $this->getCachedGroupDefinitions();
 		$groups = $value['cc'];
 
+		foreach ( $this->getGroupLoaders() as $loader ) {
+			$groups += $loader->getGroups();
+		}
 		$this->initGroupsFromDefinitions( $groups );
 	}
 
@@ -58,7 +55,7 @@ class MessageGroups {
 	 * @return array
 	 */
 	protected function getCachedGroupDefinitions( $recache = false ) {
-		global $wgAutoloadClasses, $wgVersion;
+		global $wgAutoloadClasses;
 
 		$regenerator = function () {
 			global $wgAutoloadClasses;
@@ -66,7 +63,8 @@ class MessageGroups {
 			$groups = $deps = $autoload = [];
 			// This constructs the list of all groups from multiple different sources.
 			// When possible, a cache dependency is created to automatically recreate
-			// the cache when configuration changes.
+			// the cache when configuration changes. Currently used by other extensions
+			// such as Banner Messages and test cases to load message groups.
 			Hooks::run( 'TranslatePostInitGroups', [ &$groups, &$deps, &$autoload ] );
 			// Register autoloaders for this request, both values modified by reference
 			self::appendAutoloader( $autoload, $wgAutoloadClasses );
@@ -100,12 +98,6 @@ class MessageGroups {
 			]
 		);
 
-		// B/C for "touchedCallback" param not existing
-		if ( version_compare( $wgVersion, '1.33', '<' ) && $wrapper->isExpired() ) {
-			$wrapper = $regenerator();
-			$cache->set( self::getCacheKey(), $wrapper, $cache::TTL_DAY );
-		}
-
 		$value = $wrapper->getValue();
 		self::appendAutoloader( $value['autoload'], $wgAutoloadClasses );
 
@@ -136,11 +128,21 @@ class MessageGroups {
 		// Purge the value from all datacenters
 		$cache = $this->getCache();
 		$cache->touchCheckKey( self::getCacheKey() );
+
+		$this->clearProcessCache();
+
+		foreach ( $this->getCacheGroupLoaders() as $cacheLoader ) {
+			$cacheLoader->recache();
+		}
+
 		// Reload the cache value and update the local datacenter
 		$value = $this->getCachedGroupDefinitions( 'recache' );
 		$groups = $value['cc'];
 
-		$this->clearProcessCache();
+		foreach ( $this->getGroupLoaders() as $loader ) {
+			$groups += $loader->getGroups();
+		}
+
 		$this->initGroupsFromDefinitions( $groups );
 	}
 
@@ -155,6 +157,10 @@ class MessageGroups {
 		$cache = $self->getCache();
 		$cache->delete( self::getCacheKey(), 1 );
 
+		foreach ( $self->getCacheGroupLoaders() as $cacheLoader ) {
+			$cacheLoader->clearCache();
+		}
+
 		$self->clearProcessCache();
 	}
 
@@ -167,6 +173,9 @@ class MessageGroups {
 	 */
 	public function clearProcessCache() {
 		$this->groups = null;
+		$this->groupLoaders = null;
+
+		self::$prioritycache = null;
 	}
 
 	/**
@@ -222,114 +231,56 @@ class MessageGroups {
 	}
 
 	/**
-	 * Hook: TranslatePostInitGroups
-	 * @param array &$groups
-	 * @param array &$deps
-	 * @param array &$autoload
+	 * Loads and returns group loaders. Group loaders must implement MessageGroupLoader
+	 * and may additionaly implement CachedMessageGroupLoader
+	 * @return MessageGroupLoader[]
 	 */
-	public static function getTranslatablePages( array &$groups, array &$deps, array &$autoload ) {
-		global $wgEnablePageTranslation;
-
-		$deps[] = new GlobalDependency( 'wgEnablePageTranslation' );
-
-		if ( !$wgEnablePageTranslation ) {
-			return;
+	protected function getGroupLoaders() {
+		if ( $this->groupLoaders !== null ) {
+			return $this->groupLoaders;
 		}
 
-		$db = TranslateUtils::getSafeReadDB();
+		$cache = $this->getCache();
 
-		$tables = [ 'page', 'revtag' ];
-		$vars = [ 'page_id', 'page_namespace', 'page_title' ];
-		$conds = [ 'page_id=rt_page', 'rt_type' => RevTag::getType( 'tp:mark' ) ];
-		$options = [ 'GROUP BY' => 'rt_page' ];
-		$res = $db->select( $tables, $vars, $conds, __METHOD__, $options );
+		$groupLoaderInstances = $this->groupLoaders = [];
 
-		foreach ( $res as $r ) {
-			$title = Title::newFromRow( $r );
-			$id = TranslatablePage::getMessageGroupIdFromTitle( $title );
-			$groups[$id] = new WikiPageMessageGroup( $id, $title );
+		// Initialize the dependencies
+		$deps = [
+			'database' => TranslateUtils::getSafeReadDB(),
+			'cache' => $cache
+		];
+
+		Hooks::run( 'TranslateInitGroupLoaders', [ &$groupLoaderInstances, $deps ] );
+
+		if ( $groupLoaderInstances === [] ) {
+			return $this->groupLoaders;
 		}
-	}
 
-	/**
-	 * Hook: TranslatePostInitGroups
-	 * @param array &$groups
-	 * @param array &$deps
-	 * @param array &$autoload
-	 */
-	public static function getConfiguredGroups( array &$groups, array &$deps, array &$autoload ) {
-		global $wgTranslateGroupFiles;
-
-		$deps[] = new GlobalDependency( 'wgTranslateGroupFiles' );
-
-		$parser = new MessageGroupConfigurationParser();
-		foreach ( $wgTranslateGroupFiles as $configFile ) {
-			$deps[] = new FileDependency( realpath( $configFile ) );
-
-			$yaml = file_get_contents( $configFile );
-			$fgroups = $parser->getHopefullyValidConfigurations(
-				$yaml,
-				function ( $index, $config, $errmsg ) use ( $configFile ) {
-					trigger_error( "Document $index in $configFile is invalid: $errmsg", E_USER_WARNING );
-				}
-			);
-
-			foreach ( $fgroups as $id => $conf ) {
-				if ( !empty( $conf['AUTOLOAD'] ) && is_array( $conf['AUTOLOAD'] ) ) {
-					$dir = dirname( $configFile );
-					$additions = array_map( function ( $file ) use ( $dir ) {
-						return "$dir/$file";
-					}, $conf['AUTOLOAD'] );
-					self::appendAutoloader( $additions, $autoload );
-				}
-
-				$groups[$id] = MessageGroupBase::factory( $conf );
+		// @phan-suppress-next-line PhanEmptyForeach False positive
+		foreach ( $groupLoaderInstances as $loader ) {
+			if ( !$loader instanceof MessageGroupLoader ) {
+				throw new \InvalidArgumentException(
+					"MessageGroupLoader - $loader must implement the " .
+					"MessageGroupLoader interface."
+				);
 			}
+
+			$this->groupLoaders[] = $loader;
 		}
+
+		return $this->groupLoaders;
 	}
 
 	/**
-	 * Hook: TranslatePostInitGroups
-	 * @param array &$groups
-	 * @param array &$deps
-	 * @param array &$autoload
+	 * Returns group loaders that implement the CachedMessageGroupLoader
+	 *
+	 * @return CachedMessageGroupLoader[]
 	 */
-	public static function getWorkflowGroups( array &$groups, array &$deps, array &$autoload ) {
-		global $wgTranslateWorkflowStates;
-
-		$deps[] = new GlobalDependency( 'wgTranslateWorkflowStates' );
-
-		if ( $wgTranslateWorkflowStates ) {
-			$groups['translate-workflow-states'] = new WorkflowStatesMessageGroup();
-		}
-	}
-
-	/**
-	 * Hook: TranslatePostInitGroups
-	 * @param array &$groups
-	 * @param array &$deps
-	 * @param array &$autoload
-	 */
-	public static function getAggregateGroups( array &$groups, array &$deps, array &$autoload ) {
-		$groups += self::loadAggregateGroups();
-	}
-
-	/**
-	 * Hook: TranslatePostInitGroups
-	 * @param array &$groups
-	 * @param array &$deps
-	 * @param array &$autoload
-	 */
-	public static function getCCGroups( array &$groups, array &$deps, array &$autoload ) {
-		global $wgTranslateCC;
-
-		if ( $wgTranslateCC !== [] ) {
-			wfDeprecated( '$wgTranslateCC' );
-		}
-
-		$deps[] = new GlobalDependency( 'wgTranslateCC' );
-
-		$groups += $wgTranslateCC;
+	protected function getCacheGroupLoaders() {
+		// @phan-suppress-next-line PhanTypeMismatchReturn
+		return array_filter( $this->getGroupLoaders(), function ( $groupLoader ) {
+			return $groupLoader instanceof CachedMessageGroupLoader;
+		} );
 	}
 
 	/**
@@ -392,7 +343,8 @@ class MessageGroups {
 	 * @return bool
 	 */
 	public static function labelExists( $name ) {
-		$groups = self::loadAggregateGroups();
+		$loader = AggregateMessageGroupLoader::getInstance();
+		$groups = $loader->loadAggregateGroups();
 		$labels = array_map( function ( $g ) {
 			/** @var MessageGroup $g */
 			return $g->getLabel();
@@ -418,7 +370,7 @@ class MessageGroups {
 	 * @since 2011-12-12
 	 */
 	public static function getPriority( $group ) {
-		if ( !isset( self::$prioritycache ) ) {
+		if ( self::$prioritycache === null ) {
 			self::$prioritycache = [];
 			// Abusing this table originally intented for other purposes
 			$db = wfGetDB( DB_REPLICA );
@@ -454,6 +406,7 @@ class MessageGroups {
 			$id = self::normalizeId( $group );
 		}
 
+		// FIXME: This assumes prioritycache has been populated
 		self::$prioritycache[$id] = $priority;
 
 		$dbw = wfGetDB( DB_MASTER );
@@ -503,6 +456,7 @@ class MessageGroups {
 		foreach ( $ids as $index => $id ) {
 			if ( $id === $group->getId() ) {
 				unset( $ids[$index] );
+				break;
 			}
 		}
 
@@ -545,9 +499,7 @@ class MessageGroups {
 		$pathFinder = function ( &$paths, $group, $targetId, $prefix = '' )
 		use ( &$pathFinder ) {
 			if ( $group instanceof AggregateMessageGroup ) {
-				/**
-				 * @var MessageGroup $subgroup
-				 */
+				/** @var MessageGroup $subgroup */
 				foreach ( $group->getGroups() as $subgroup ) {
 					$subId = $subgroup->getId();
 					if ( $subId === $targetId ) {
@@ -571,9 +523,7 @@ class MessageGroups {
 			}
 
 			foreach ( $structure as $rootGroup ) {
-				/**
-				 * @var MessageGroup $rootGroup
-				 */
+				/** @var MessageGroup $rootGroup */
 				if ( $rootGroup->getId() === $group->getId() ) {
 					// Yay we found a top-level group
 					$pathFinder( $paths, $rootGroup, $targetId, $id );
@@ -590,10 +540,7 @@ class MessageGroups {
 		return $paths;
 	}
 
-	/**
-	 * Constructor function.
-	 * @return self
-	 */
+	/** @return self */
 	public static function singleton() {
 		static $instance;
 		if ( !$instance instanceof self ) {
@@ -671,7 +618,7 @@ class MessageGroups {
 		// Slow path for the ones with wildcards
 		$matcher = new StringMatcher( '', $ids );
 		foreach ( self::getAllGroups() as $id => $_ ) {
-			if ( $matcher->match( $id ) ) {
+			if ( $matcher->matches( $id ) ) {
 				$all[] = $id;
 			}
 		}
@@ -724,9 +671,7 @@ class MessageGroups {
 
 		// Determine the top level groups of the tree
 		$tree = $groups;
-		/**
-		 * @var MessageGroup $o
-		 */
+		/** @var MessageGroup $o */
 		foreach ( $groups as $id => $o ) {
 			if ( !$o->exists() ) {
 				unset( $groups[$id], $tree[$id] );
@@ -734,20 +679,14 @@ class MessageGroups {
 			}
 
 			if ( $o instanceof AggregateMessageGroup ) {
-				/**
-				 * @var AggregateMessageGroup $o
-				 */
+				/** @var AggregateMessageGroup $o */
 				foreach ( $o->getGroups() as $sid => $so ) {
 					unset( $tree[$sid] );
 				}
 			}
 		}
 
-		// Work around php bug: https://bugs.php.net/bug.php?id=50688
-		// Triggered by ApiQueryMessageGroups for example
-		Wikimedia\suppressWarnings();
 		usort( $tree, [ __CLASS__, 'groupLabelSort' ] );
-		Wikimedia\restoreWarnings();
 
 		/* Now we have two things left in $tree array:
 		 * - solitaries: top-level non-aggregate message groups
@@ -785,7 +724,7 @@ class MessageGroups {
 	 * See getGroupStructure, just collects ids into array
 	 * @param MessageGroup $value
 	 * @param string $key
-	 * @param bool $used
+	 * @param array $used
 	 */
 	public static function collectGroupIds( MessageGroup $value, $key, $used ) {
 		$used[0][$value->getId()] = true;
@@ -880,39 +819,6 @@ class MessageGroups {
 		}
 
 		return $seen;
-	}
-
-	/**
-	 * Get all the aggregate messages groups defined in translate_metadata table.
-	 *
-	 * @return MessageGroup[]
-	 */
-	protected static function loadAggregateGroups() {
-		$dbr = TranslateUtils::getSafeReadDB();
-		$tables = [ 'translate_metadata' ];
-		$field = 'tmd_group';
-		$conds = [ 'tmd_key' => 'subgroups' ];
-		$groupIds = $dbr->selectFieldValues( $tables, $field, $conds, __METHOD__ );
-		TranslateMetadata::preloadGroups( $groupIds );
-
-		$groups = [];
-		foreach ( $groupIds as $id ) {
-			$conf = [];
-			$conf['BASIC'] = [
-				'id' => $id,
-				'label' => TranslateMetadata::get( $id, 'name' ),
-				'description' => TranslateMetadata::get( $id, 'description' ),
-				'meta' => 1,
-				'class' => 'AggregateMessageGroup',
-				'namespace' => NS_TRANSLATIONS,
-			];
-			$conf['GROUPS'] = TranslateMetadata::getSubgroups( $id );
-			$group = MessageGroupBase::factory( $conf );
-
-			$groups[$id] = $group;
-		}
-
-		return $groups;
 	}
 
 	/**

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Plain text string transfer handler class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -29,7 +29,7 @@ ve.ui.PlainTextStringTransferHandler.static.name = 'plainTextString';
 
 ve.ui.PlainTextStringTransferHandler.static.types = [ 'text/plain' ];
 
-ve.ui.PlainTextStringTransferHandler.static.handlesPaste = true;
+ve.ui.PlainTextStringTransferHandler.static.handlesPaste = false;
 
 /* Methods */
 

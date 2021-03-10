@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Snævar",
-			"Maxí",
 			"Jonbg",
+			"Maxí",
+			"Snævar",
 			"Sveinn í Felli"
 		]
 	},
@@ -31,17 +31,14 @@
 	"tpt-mark-nochanges": "Engar breytingar til að yfirfara. Að merkja þessa síðu til þýðingar mun ekki breyta síðunni eða neinni fyrirliggjandi þýðingareiningu.",
 	"tpt-edit-failed": "Gat ekki uppfært síðuna: $1",
 	"tpt-duplicate": "Nafn þýðingareiningar $1 er notað oftar en einu sinni.",
-	"tpt-already-marked": "Síðasta útgáfa þessarar síðu er þegar merkt til þýðingar.",
 	"tpt-unmarked": "Síðan $1 er ekki lengur merkt til þýðingar.",
 	"tpt-list-nopages": "Engar síður eru merktar til þýðingar eða eru tilbúnar til að vera merktar til þýðingar.",
 	"tpt-new-pages-title": "Síður sem stungið er upp á að þýða",
 	"tpt-old-pages-title": "Síður í þýðingu",
 	"tpt-other-pages-title": "Rofnar síður",
-	"tpt-discouraged-pages-title": "Síður sem á að forðast",
 	"tpt-new-pages": "{{PLURAL:$1|Þessi síða inniheldur|Þessar síður innihalda}} texta með þýðingamerkjum,\nen engin útgáfa {{PLURAL:$1|þessarar síðu er|þessara síðna er}} merkt til þýðinga í augnablikinu.",
 	"tpt-old-pages": "Einhver útgáfa {{PLURAL:$1|þessarar síðu|þessara síðna}} hefur verið merkt til þýðingar.",
 	"tpt-other-pages": "{{PLURAL:$1|Eldri útgáfa þessarar síðu er merkt|Eldri útgáfur þessara síðna eru merktar}} til þýðingar,\nen {{PLURAL:$1|nýjustu útgáfuna|nýjustu útgáfurnar}} er ekki hægt að merkja til þýðingar.",
-	"tpt-discouraged-pages": "Mælt hefur verið gegn því að {{PLURAL:$1|þessi síða sé|þessar síður séu}} þýddar frekar.",
 	"tpt-select-prioritylangs": "Listi yfir kóða tungumála í forgangi, aðskilinn með kommum:",
 	"tpt-select-prioritylangs-force": "Hindra þýðingar á þeim tungumálum sem ekki eru forgangstungumál",
 	"tpt-select-prioritylangs-reason": "Ástæða:",
@@ -71,8 +68,6 @@
 	"tpt-discouraged-language-header": "Að þýða á $1 er ekki í forgangi fyrir þessa síðu.",
 	"tpt-discouraged-language-content": "Kerfisstjóri þýðinga ákvað að áhersla sé lögð á að þýða á $1.",
 	"tpt-discouraged-language-force": "<strong>Þessa síðu er ekki hægt að þýða á $2.</strong>\n\nKerfisstjóri þýðinga ákvað að þessa síðu sé einungis hægt að þýða á $3.",
-	"tpt-discouraged-language": "<strong>Að þýða á $2 er ekki í forgangi fyrir þessa síðu.</strong>\n\nKerfisstjóri þýðinga ákvað að áhersla sé lögð á að þýða á $3.",
-	"tpt-discouraged-language-reason": "Ástæða: $1",
 	"tpt-priority-languages": "Kerfisstjóri þýðinga stillti forgangstungumál þessa hóps sem $1.",
 	"tpt-render-summary": "Uppfæri til að samsvara nýrri útgáfu grunnsíðunnar",
 	"aggregategroups": "Safna saman hópum",

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel SurfaceSynchronizer class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 /* global io */
 
@@ -17,8 +17,11 @@
  * @param {string} documentId Document ID
  * @param {Object} [config] Configuration options
  * @cfg {string} [server] IO server
+ * @cfg {string} [defaultName] Default username
  */
 ve.dm.SurfaceSynchronizer = function VeDmSurfaceSynchronizer( surface, documentId, config ) {
+	var path, options, authorData;
+
 	config = config || {};
 
 	// Mixin constructors
@@ -29,33 +32,46 @@ ve.dm.SurfaceSynchronizer = function VeDmSurfaceSynchronizer( surface, documentI
 	this.surface = surface;
 	this.doc = surface.documentModel;
 	this.store = this.doc.getStore();
+	this.authors = {};
 	this.authorSelections = {};
-	this.authorNames = {};
-	this.authorColors = {};
 	this.documentId = documentId;
 
 	// Whether the document has been initialized
 	this.initialized = false;
 	// Whether we are currently synchronizing the model
 	this.applying = false;
+	this.token = null;
+	this.serverId = null;
+	this.loadSessionKey();
+	this.paused = false;
 
 	// SocketIO events
-	this.socket = io( ( config.server || '' ) + '/' + this.documentId, { query: { docName: this.documentId } } );
+	path = ( config.server || '' );
+	options = {
+		query: {
+			docName: this.documentId,
+			authorId: this.getAuthorId() || '',
+			token: this.token || ''
+		},
+		transports: [ 'websocket' ]
+	};
+	this.socket = io( path, options );
 	this.socket.on( 'registered', this.onRegistered.bind( this ) );
 	this.socket.on( 'initDoc', this.onInitDoc.bind( this ) );
 	this.socket.on( 'newChange', this.onNewChange.bind( this ) );
-	this.socket.on( 'nameChange', this.onNameChange.bind( this ) );
-	this.socket.on( 'colorChange', this.onColorChange.bind( this ) );
+	this.socket.on( 'authorChange', this.onAuthorChange.bind( this ) );
 	this.socket.on( 'authorDisconnect', this.onAuthorDisconnect.bind( this ) );
-	// TODO: unbreak then re-enable usurp
-	// this.tryUsurp();
+
+	authorData = ve.init.platform.sessionStorage.getObject( 've-collab-author' );
+	if ( authorData ) {
+		this.changeAuthor( authorData );
+	} else if ( config.defaultName ) {
+		this.changeAuthor( { name: config.defaultName } );
+	}
 
 	// Events
-	this.doc.connect( this, {
-		transact: 'onDocumentTransact'
-	} );
-
 	this.surface.connect( this, {
+		history: 'onSurfaceHistory',
 		select: 'onSurfaceSelect'
 	} );
 
@@ -75,11 +91,75 @@ OO.mixinClass( ve.dm.SurfaceSynchronizer, ve.dm.RebaseClient );
  */
 
 /**
- * @event authorNameChange
- * @param {number} authorId The author whose name has changed
+ * @event authorChange
+ * @param {number} authorId The author whose data has changed
+ */
+
+/**
+ * @event wrongDoc
+ */
+
+/**
+ * @event initDoc
+ * @param {Error} Error, if there was a problem initializing the document
+ */
+
+/**
+ * @event disconnect
+ */
+
+/**
+ * @event pause
+ * The synchronizer is paused or resumes
  */
 
 /* Methods */
+
+/**
+ * Destroy the synchronizer
+ */
+ve.dm.SurfaceSynchronizer.prototype.destroy = function () {
+	this.socket.disconnect();
+	this.doc.disconnect( this );
+	this.surface.disconnect( this );
+	this.initialized = false;
+};
+
+/**
+ * Pause sending/receiving changes
+ */
+ve.dm.SurfaceSynchronizer.prototype.pauseChanges = function () {
+	if ( this.paused ) {
+		return;
+	}
+	this.paused = true;
+	this.queuedChanges = [];
+	this.emit( 'pause' );
+};
+
+/**
+ * Resume sending/receiving changes
+ */
+ve.dm.SurfaceSynchronizer.prototype.resumeChanges = function () {
+	var i;
+	if ( !this.paused ) {
+		return;
+	}
+	this.applying = true;
+	try {
+		// Don't cache length, as it's not inconceivable acceptChange could
+		// cause another change to arrive in some weird setup
+		for ( i = 0; i < this.queuedChanges.length; i++ ) {
+			this.acceptChange( this.queuedChanges[ i ] );
+		}
+	} finally {
+		this.applying = false;
+	}
+	this.paused = false;
+	// Schedule submission of unsent local changes, if any
+	this.submitChangeThrottled();
+	this.emit( 'pause' );
+};
 
 /**
  * @inheritdoc
@@ -114,7 +194,7 @@ ve.dm.SurfaceSynchronizer.prototype.submitChange = function () {
 ve.dm.SurfaceSynchronizer.prototype.sendChange = function ( backtrack, change ) {
 	this.socket.emit( 'submitChange', {
 		backtrack: this.backtrack,
-		change: change.serialize()
+		change: change
 	} );
 };
 
@@ -166,42 +246,34 @@ ve.dm.SurfaceSynchronizer.prototype.removeFromHistory = function ( change ) {
  * @inheritdoc
  */
 ve.dm.SurfaceSynchronizer.prototype.logEvent = function ( event ) {
-	// Serialize the event data and pass it on to the server for logging
-	var key,
-		ob = {};
 	if ( !this.initialized ) {
 		// Do not log before initialization is complete; this prevents us from logging the entire
 		// document history during initialization
 		return;
 	}
-	ob.sendTimestamp = Date.now();
-	for ( key in event ) {
-		if ( event[ key ] instanceof ve.dm.Change ) {
-			ob[ key ] = event[ key ].serialize();
-		} else {
-			ob[ key ] = event[ key ];
-		}
-	}
-	this.socket.emit( 'logEvent', ob );
+	this.socket.emit( 'logEvent', ve.extendObject( { sendTimestamp: Date.now() }, event ) );
 };
 
 /**
  * Respond to transactions happening on the document. Ignores transactions applied by
  * SurfaceSynchronizer itself.
- *
- * @param {ve.dm.Transaction} tx Transaction that was applied
  */
-ve.dm.SurfaceSynchronizer.prototype.onDocumentTransact = function ( tx ) {
-	if ( this.applying || !this.initialized ) {
+ve.dm.SurfaceSynchronizer.prototype.onSurfaceHistory = function () {
+	var change, authorId;
+	if ( this.applying || !this.initialized || this.paused ) {
 		// Ignore our own synchronization or initialization transactions
 		return;
 	}
-	// HACK annotate transaction with authorship information
+	change = this.getChangeSince( this.sentLength, true );
+	authorId = this.authorId;
+	// HACK annotate transactions with authorship information
 	// This relies on being able to access the transaction object by reference;
 	// we should probably set the author deeper in dm.Surface or dm.Document instead.
-	tx.authorId = this.authorId;
+	change.transactions.forEach( function ( tx ) {
+		tx.authorId = authorId;
+	} );
 	// TODO deal with staged transactions somehow
-	this.applyNewSelections( this.authorSelections, tx );
+	this.applyNewSelections( this.authorSelections, change );
 	this.submitChangeThrottled();
 };
 
@@ -209,6 +281,9 @@ ve.dm.SurfaceSynchronizer.prototype.onDocumentTransact = function ( tx ) {
  * Respond to selection changes.
  */
 ve.dm.SurfaceSynchronizer.prototype.onSurfaceSelect = function () {
+	if ( this.paused ) {
+		return;
+	}
 	this.submitChangeThrottled();
 };
 
@@ -243,25 +318,34 @@ ve.dm.SurfaceSynchronizer.prototype.applyNewSelections = function ( newSelection
 	}
 };
 
-ve.dm.SurfaceSynchronizer.prototype.onNameChange = function ( data ) {
-	this.authorNames[ data.authorId ] = data.authorName;
-	this.emit( 'authorNameChange', data.authorId );
+/**
+ * Get author data object
+ *
+ * @param {number} [authorId] Author ID, defaults to current author
+ * @return {Object} Author object, containing 'name' and 'color'
+ */
+ve.dm.SurfaceSynchronizer.prototype.getAuthorData = function ( authorId ) {
+	if ( authorId === undefined ) {
+		authorId = this.getAuthorId();
+	}
+	return this.authors[ authorId ];
 };
 
-ve.dm.SurfaceSynchronizer.prototype.onColorChange = function ( data ) {
-	this.authorColors[ data.authorId ] = data.authorColor;
-	this.emit( 'authorColorChange', data.authorId );
+ve.dm.SurfaceSynchronizer.prototype.onAuthorChange = function ( data ) {
+	this.authors[ data.authorId ] = data.authorData;
+	this.emit( 'authorChange', data.authorId );
+
+	if ( data.authorId === this.getAuthorId() ) {
+		ve.init.platform.sessionStorage.setObject( 've-collab-author', data.authorData );
+	}
 };
 
-ve.dm.SurfaceSynchronizer.prototype.changeName = function ( newName ) {
-	this.socket.emit( 'changeName', newName );
-};
-
-ve.dm.SurfaceSynchronizer.prototype.changeColor = function ( newColor ) {
-	this.socket.emit( 'changeColor', newColor );
+ve.dm.SurfaceSynchronizer.prototype.changeAuthor = function ( data ) {
+	this.socket.emit( 'changeAuthor', ve.extendObject( {}, this.getAuthorData( this.getAuthorId() ), data ) );
 };
 
 ve.dm.SurfaceSynchronizer.prototype.onAuthorDisconnect = function ( authorId ) {
+	delete this.authors[ authorId ];
 	delete this.authorSelections[ authorId ];
 	this.emit( 'authorDisconnect', authorId );
 };
@@ -271,27 +355,37 @@ ve.dm.SurfaceSynchronizer.prototype.onAuthorDisconnect = function ( authorId ) {
  *
  * @param {Object} data
  * @param {number} data.authorId The author ID allocated by the server
+ * @param {string} data.token
+ * @fires wrongDoc
  */
 ve.dm.SurfaceSynchronizer.prototype.onRegistered = function ( data ) {
-	this.setAuthorId( data.authorId );
-	this.surface.setAuthorId( this.authorId );
-
-	if ( window.sessionStorage ) {
-		window.sessionStorage.setItem( 'visualeditor-author', JSON.stringify( data ) );
-	}
-};
-
-ve.dm.SurfaceSynchronizer.prototype.tryUsurp = function () {
-	var storedData = window.sessionStorage && window.sessionStorage.getItem( 'visualeditor-author' );
-	if ( !storedData ) {
+	if ( this.serverId && this.serverId !== data.serverId ) {
+		this.socket.disconnect();
+		this.emit( 'wrongDoc' );
 		return;
 	}
-	try {
-		storedData = JSON.parse( storedData );
-		this.socket.emit( 'usurp', storedData );
-	} catch ( e ) {
-		// eslint-disable-next-line no-console
-		console.warn( 'Failed to parse data in session storage', e );
+	this.serverId = data.serverId;
+	this.setAuthorId( data.authorId );
+	this.surface.setAuthorId( this.authorId );
+	this.token = data.token;
+	this.saveSessionKey();
+};
+
+ve.dm.SurfaceSynchronizer.prototype.saveSessionKey = function () {
+	ve.init.platform.sessionStorage.setObject( 'visualeditor-session-key', {
+		serverId: this.serverId,
+		docName: this.documentId,
+		authorId: this.getAuthorId(),
+		token: this.token
+	} );
+};
+
+ve.dm.SurfaceSynchronizer.prototype.loadSessionKey = function () {
+	var data = ve.init.platform.sessionStorage.getObject( 'visualeditor-session-key' );
+	if ( data && data.docName === this.documentId ) {
+		this.serverId = data.serverId;
+		this.setAuthorId( data.authorId );
+		this.token = data.token;
 	}
 };
 
@@ -300,7 +394,8 @@ ve.dm.SurfaceSynchronizer.prototype.tryUsurp = function () {
  *
  * @param {Object} data
  * @param {Object} data.history Serialized change representing the server's history
- * @param {Object} data.names Object mapping author IDs to names
+ * @param {Object} data.authors Object mapping author IDs to author data objects (name/color)
+ * @fires initDoc
  */
 ve.dm.SurfaceSynchronizer.prototype.onInitDoc = function ( data ) {
 	var history, authorId;
@@ -308,11 +403,21 @@ ve.dm.SurfaceSynchronizer.prototype.onInitDoc = function ( data ) {
 		// Ignore attempt to initialize a second time
 		return;
 	}
-	for ( authorId in data.names ) {
-		this.onNameChange( { authorId: +authorId, authorName: data.names[ authorId ] } );
+	for ( authorId in data.authors ) {
+		this.onAuthorChange( {
+			authorId: +authorId,
+			authorData: data.authors[ authorId ]
+		} );
 	}
-	history = ve.dm.Change.static.deserialize( data.history, this.doc );
-	this.acceptChange( history );
+	try {
+		history = ve.dm.Change.static.deserialize( data.history );
+		this.acceptChange( history );
+	} catch ( e ) {
+		this.socket.disconnect();
+		this.emit( 'initDoc', e );
+		return;
+	}
+	this.emit( 'initDoc' );
 
 	// Mark ourselves as initialized and retry any prevented submissions
 	this.initialized = true;
@@ -334,7 +439,11 @@ ve.dm.SurfaceSynchronizer.prototype.onInitDoc = function ( data ) {
  * @param {Object} serializedChange Serialized ve.dm.Change that the server has applied
  */
 ve.dm.SurfaceSynchronizer.prototype.onNewChange = function ( serializedChange ) {
-	var change = ve.dm.Change.static.deserialize( serializedChange, this.doc );
+	var change = ve.dm.Change.static.deserialize( serializedChange );
+	if ( this.paused ) {
+		this.queuedChanges.push( change );
+		return;
+	}
 	// Make sure we don't attempt to submit any of the transactions we commit while manipulating
 	// the state of the document
 	this.applying = true;
@@ -345,4 +454,9 @@ ve.dm.SurfaceSynchronizer.prototype.onNewChange = function ( serializedChange ) 
 	}
 	// Schedule submission of unsent local changes, if any
 	this.submitChangeThrottled();
+};
+
+ve.dm.SurfaceSynchronizer.prototype.onDisconnect = function () {
+	this.initialized = false;
+	this.emit( 'disconnect' );
 };

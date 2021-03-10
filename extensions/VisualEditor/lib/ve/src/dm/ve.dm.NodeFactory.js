@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel NodeFactory class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -25,7 +25,6 @@ OO.inheritClass( ve.dm.NodeFactory, ve.dm.ModelFactory );
 /**
  * Get a document data element.
  *
- * @method
  * @param {string} type Node type
  * @param {Object} attributes Node attributes, defaults will be used where needed
  * @return {Object} Data element
@@ -46,7 +45,6 @@ ve.dm.NodeFactory.prototype.getDataElement = function ( type, attributes ) {
 /**
  * Get allowed child node types for a node.
  *
- * @method
  * @param {string} type Node type
  * @return {string[]|null} List of node types allowed as children or null if any type is allowed
  * @throws {Error} Unknown node type
@@ -61,7 +59,6 @@ ve.dm.NodeFactory.prototype.getChildNodeTypes = function ( type ) {
 /**
  * Get allowed parent node types for a node.
  *
- * @method
  * @param {string} type Node type
  * @return {string[]|null} List of node types allowed as parents or null if any type is allowed
  * @throws {Error} Unknown node type
@@ -76,7 +73,6 @@ ve.dm.NodeFactory.prototype.getParentNodeTypes = function ( type ) {
 /**
  * Get suggested parent node types for a node.
  *
- * @method
  * @param {string} type Node type
  * @return {string[]|null} List of node types suggested as parents or null if any type is suggested
  * @throws {Error} Unknown node type
@@ -91,7 +87,6 @@ ve.dm.NodeFactory.prototype.getSuggestedParentNodeTypes = function ( type ) {
 /**
  * Check if a node can have children.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} The node can have children
  * @throws {Error} Unknown node type
@@ -110,7 +105,6 @@ ve.dm.NodeFactory.prototype.canNodeHaveChildren = function ( type ) {
 /**
  * Check if a node can have children but not content nor be content.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} The node can have children but not content nor be content
  * @throws {Error} Unknown node type
@@ -127,7 +121,6 @@ ve.dm.NodeFactory.prototype.canNodeHaveChildrenNotContent = function ( type ) {
 /**
  * Check if a node has a wrapped element in the document data.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} Whether the node has a wrapping element
  * @throws {Error} Unknown node type
@@ -142,7 +135,6 @@ ve.dm.NodeFactory.prototype.isNodeWrapped = function ( type ) {
 /**
  * Check if a node is unwrappable.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} Whether the node is unwrappable
  * @throws {Error} Unknown node type
@@ -157,7 +149,6 @@ ve.dm.NodeFactory.prototype.isNodeUnwrappable = function ( type ) {
 /**
  * Check if a node is a meta item element
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} Whether the node is meta data
  * @throws {Error} Unknown node type
@@ -170,9 +161,22 @@ ve.dm.NodeFactory.prototype.isMetaData = function ( type ) {
 };
 
 /**
+ * Check if a given type of meta item is removable
+ *
+ * @param {string} type Meta item type
+ * @return {boolean} The type is removable
+ * @throws {Error} Unknown item type
+ */
+ve.dm.NodeFactory.prototype.isRemovableMetaData = function ( type ) {
+	if ( Object.prototype.hasOwnProperty.call( this.registry, type ) ) {
+		return this.registry[ type ].static.removable;
+	}
+	throw new Error( 'Unknown item type: ' + type );
+};
+
+/**
  * Check if a node can contain content.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} The node contains content
  * @throws {Error} Unknown node type
@@ -187,21 +191,20 @@ ve.dm.NodeFactory.prototype.canNodeContainContent = function ( type ) {
 /**
  * Check if node can take an annotation.
  *
- * @method
  * @param {string} type Node type
  * @param {ve.dm.Annotation} annotation Annotation to test
  * @return {boolean} Node can take annotations of this type
  * @throws {Error} Unknown node type
  */
 ve.dm.NodeFactory.prototype.canNodeTakeAnnotation = function ( type, annotation ) {
-	var i, len, blacklist;
+	var i, len, disallowedList;
 	if ( !Object.prototype.hasOwnProperty.call( this.registry, type ) ) {
 		throw new Error( 'Unknown node type: ' + type );
 	}
-	blacklist = this.registry[ type ].static.blacklistedAnnotationTypes;
+	disallowedList = this.registry[ type ].static.disallowedAnnotationTypes;
 
-	for ( i = 0, len = blacklist.length; i < len; i++ ) {
-		if ( annotation instanceof ve.dm.annotationFactory.lookup( blacklist[ i ] ) ) {
+	for ( i = 0, len = disallowedList.length; i < len; i++ ) {
+		if ( annotation instanceof ve.dm.annotationFactory.lookup( disallowedList[ i ] ) ) {
 			return false;
 		}
 	}
@@ -211,7 +214,6 @@ ve.dm.NodeFactory.prototype.canNodeTakeAnnotation = function ( type, annotation 
 /**
  * Check if a node is content.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} The node is content
  * @throws {Error} Unknown node type
@@ -226,7 +228,6 @@ ve.dm.NodeFactory.prototype.isNodeContent = function ( type ) {
 /**
  * Check if a node can be serialized into a content position
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} The node is content or can be round-tripped into a content position
  * @throws {Error} Unknown node type
@@ -242,7 +243,6 @@ ve.dm.NodeFactory.prototype.canNodeSerializeAsContent = function ( type ) {
 /**
  * Check if the node is focusable.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} Whether the node is focusable
  * @throws {Error} Unknown node type
@@ -259,7 +259,6 @@ ve.dm.NodeFactory.prototype.isNodeFocusable = function ( type ) {
  *
  * Can only be true if canContainContent is also true.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} The node has significant whitespace
  * @throws {Error} Unknown node type
@@ -274,7 +273,6 @@ ve.dm.NodeFactory.prototype.doesNodeHaveSignificantWhitespace = function ( type 
 /**
  * Check if the node handles its own children.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} Whether the node handles its own children
  * @throws {Error} Unknown node type
@@ -289,7 +287,6 @@ ve.dm.NodeFactory.prototype.doesNodeHandleOwnChildren = function ( type ) {
 /**
  * Check if the node's children should be ignored.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} Whether the node's children should be ignored
  * @throws {Error} Unknown node type
@@ -304,7 +301,6 @@ ve.dm.NodeFactory.prototype.shouldIgnoreChildren = function ( type ) {
 /**
  * Check if the node is internal.
  *
- * @method
  * @param {string} type Node type
  * @return {boolean} Whether the node is internal
  * @throws {Error} Unknown node type

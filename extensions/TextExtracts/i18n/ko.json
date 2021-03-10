@@ -5,7 +5,5 @@
 			"Ykhwong"
 		]
 	},
-	"textextracts-desc": "문서 내용을 추출한 일반 텍스트나 제한된 HTML을 제공",
-	"apihelp-query+extracts-summary": "주어진 문서의 플레인 텍스트 또는 제한된 HTML 추출 정보를 반환합니다.",
-	"apiwarn-textextracts-sentences-and-html": "<var>$1sentences</var> 변수는 HTML 모드에서 사용할 때 예측하지 못한 결과가 있을 수 있습니다."
+	"textextracts-desc": "문서 내용을 추출한 일반 텍스트나 제한된 HTML을 제공"
 }

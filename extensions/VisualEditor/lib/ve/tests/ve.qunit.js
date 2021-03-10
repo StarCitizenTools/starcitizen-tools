@@ -1,7 +1,7 @@
 /*!
  * VisualEditor plugin for QUnit.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /* global difflib,diffview */
@@ -20,7 +20,6 @@
 	 * Generated summaries contain node types, lengths, outer lengths, attributes and summaries for
 	 * each child recursively. It's simple and fast to use deepEqual on this.
 	 *
-	 * @method
 	 * @private
 	 * @param {ve.Node} node Node tree to summarize
 	 * @param {boolean} [shallow] Do not summarize each child recursively
@@ -54,7 +53,6 @@
 	 * Generated summaries contain length of results as well as node summaries, ranges, indexes, indexes
 	 * within parent and node ranges for each result. It's simple and fast to use deepEqual on this.
 	 *
-	 * @method
 	 * @private
 	 * @param {Object[]} selection Selection to summarize
 	 * @return {Object} Summary of selection
@@ -121,13 +119,13 @@
 
 	/**
 	 * Assertion helpers for VisualEditor test suite.
+	 *
 	 * @class ve.QUnit.assert
 	 */
 
 	/**
 	 * Assert that summaries of two node trees are equal.
 	 *
-	 * @method
 	 * @static
 	 * @param {ve.Node} actual
 	 * @param {ve.Node} expected
@@ -151,7 +149,6 @@
 	};
 
 	/**
-	 * @method
 	 * @static
 	 * @param {Object[]} actual
 	 * @param {Object[]} expected
@@ -182,7 +179,6 @@
 	};
 
 	/**
-	 * @method
 	 * @static
 	 * @param {HTMLElement} actual
 	 * @param {HTMLElement} expected
@@ -203,7 +199,6 @@
 	};
 
 	/**
-	 * @method
 	 * @static
 	 * @param {HTMLElement} actual
 	 * @param {HTMLElement} expected
@@ -270,7 +265,6 @@
 	/**
 	 * Assert that two objects which may contain DOM elements are equal.
 	 *
-	 * @method
 	 * @static
 	 * @param {Object} actual
 	 * @param {Object} expected
@@ -292,7 +286,6 @@
 	/**
 	 * Assert that two objects which may contain node trees are equal.
 	 *
-	 * @method
 	 * @static
 	 * @param {Object} actual
 	 * @param {Object} expected

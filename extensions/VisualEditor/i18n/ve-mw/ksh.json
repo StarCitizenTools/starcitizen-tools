@@ -1,13 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
+			"DannyS712",
 			"Purodha"
 		]
 	},
-	"apihelp-visualeditoredit-param-captchaid": "Däm <span style=\"text-transform:uppercase\" title=\"Jät zom Ennjävve, öm ze zeije, dadd ene Minsch vör em Kompjuhter sez\">Kaptscha</span> sing Kännong, wam_mer beim Affschpeijschere met ene Antwood obb e <span style=\"text-transform:uppercase\" title=\"Jät zom Ennjävve, öm ze zeije, dadd ene Minsch vör em Kompjuhter sez\">Kaptscha</span> es.",
-	"apihelp-visualeditoredit-param-captchaword": "De Antwood obb et <span style=\"text-transform:uppercase\" title=\"Jät zom Ennjävve, öm ze zeije, dadd ene Minsch vör em Kompjuhter sez\">Kaptscha</span>, wam_mer beim Affschpeijschere met ene Antwood obb e <span style=\"text-transform:uppercase\" title=\"Jät zom Ennjävve, öm ze zeije, dadd ene Minsch vör em Kompjuhter sez\">Kaptscha</span> es.",
-	"apihelp-visualeditoredit-param-minor": "Kännzeijsce för en klein Minni_Änderong.",
-	"apihelp-visualeditoredit-param-summary": "{{int:Summary}}.",
 	"tooltip-ca-edit": "Donn dä Sigg iere Wikkitäx beärbeide.",
 	"tooltip-ca-ve-edit": "Don heh di Sigg beärbeide.",
 	"visualeditor-advancedsettings-tool": "Fottjeschredde Enschtällonge",
@@ -20,7 +17,7 @@
 	"visualeditor-ca-ve-edit": "Sigge beldlesch beärbeide",
 	"visualeditor-categories-tool": "Zoote",
 	"visualeditor-desc": "Määd_et müjjelesch, em MedijaWikki Sigge beldlesch ze beärbeide.",
-	"visualeditor-descriptionpagelink": "Project:<i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"„Projramm för ‚seeschbaa‘ aan Täxte jät ze änndere“\">VisualEditor</i>",
+	"visualeditor-descriptionpagelink": "Project:VisualEditor",
 	"visualeditor-dialog-media-change-image": "Dat Beld ändere",
 	"visualeditor-dialog-media-choose-image": "Dat Beld ändere",
 	"visualeditor-dialog-media-content-filename": "Dä Dattei iehre Nahme",
@@ -33,8 +30,6 @@
 	"visualeditor-dialog-media-info-moreinfo": "Mih Aanjahbe",
 	"visualeditor-dialog-media-info-readmore": "Mih lässe",
 	"visualeditor-dialog-media-info-uploaded": "Huhjelahde: $1",
-	"visualeditor-dialog-media-noresults": "Nix jefonge.",
-	"visualeditor-dialog-media-originaldimensions": "Ojinahl Jrühße",
 	"visualeditor-dialog-media-page-advanced": "Fottjeschredde Enschtällonge",
 	"visualeditor-dialog-media-page-general": "Alljemein Enschtällonge",
 	"visualeditor-dialog-media-position-center": "Medde",
@@ -49,7 +44,6 @@
 	"visualeditor-dialog-media-size-choosecustom": "Obb_en beschtemmte Jrühße säze",
 	"visualeditor-dialog-media-size-choosedefault": "Op de Schtandatt_Jrühße säze",
 	"visualeditor-dialog-media-size-choosefull": "Op de volle Jrühße säze",
-	"visualeditor-dialog-media-size-originalsize-error": "Mer kunnne dä ojinahle Ömfang vun dä Dattei nit eruß fenge.",
 	"visualeditor-dialog-media-size-section": "De Beldjrühße",
 	"visualeditor-dialog-media-thumbdimensions": "De Afmäßonge vum Minnibelldsche",
 	"visualeditor-dialog-media-title": "Enschtälonge för Mehdijje_Datteije",
@@ -107,7 +101,6 @@
 	"visualeditor-dialog-transclusion-add-param": "Donn mih Aanjahbe derbei",
 	"visualeditor-dialog-transclusion-add-template": "Donn en Schablohn dobei",
 	"visualeditor-dialog-transclusion-content": "Enhald",
-	"visualeditor-dialog-transclusion-contextitem-description": "Generated from: $1\n<!-- \nhttps://translatewiki.net/wiki/Thread:Support/About_MediaWiki:Visualeditor-dialog-transclusion-contextitem-description/en\n-->",
 	"visualeditor-dialog-transclusion-param-default": "Schtandatt: $1",
 	"visualeditor-dialog-transclusion-param-example": "För e Beijschpell: $1",
 	"visualeditor-dialog-transclusion-raw-fallback": "Retour op der einfache Wikitäx",
@@ -121,13 +114,9 @@
 	"visualeditor-linkinspector-convert-link-isbn": "En en Lengk obbe ene ISBN wanndelle",
 	"visualeditor-linkinspector-convert-link-rfc": "En en Lengk obbe ene RFC wanndelle",
 	"visualeditor-linkinspector-educationpopup-title": "Lengks",
-	"visualeditor-loaderror-message": "Ene Fähler es opjetrodde, wi mer Dahte vum ẞööver holle wullte. Dä Fähler es: $1",
-	"visualeditor-loaderror-title": "Et Projramm zom Änndere un Beärrbeijde leht sesch nit lahde.",
-	"visualeditor-loadwarning": "Ene Fähler es opjetrodde beim Daate Laade vum däm ẞööver: <i lang=\"en\">$1</i>.",
 	"visualeditor-magiclinknodeinspector-convert-link": "En ene jewöhnlijje lengk wandelle",
 	"visualeditor-magiclinknodeinspector-title-isbn": "<i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"International Standard Book Number - „de engernazjonahle schtandattmähßejje Bohchnommer“\">ISBN</i> met Lengk",
 	"visualeditor-mweditmodesource-warning-cancel": "Ophühre",
-	"visualeditor-mweditmodesource-warning-switch": "De Veränderonge faßhallde",
 	"visualeditor-mweditmodesource-warning-switch-discard": "De Veränderonge fottschmiiße",
 	"visualeditor-mweditmodewt-popup-body": "Klegg op heh dat Belldsche. Esu kütt mer obbet Wikki-Quälltäx-Beärbeijde zerök.",
 	"visualeditor-mweditmodewt-popup-title": "Op der <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"„Projramm för ‚seeschbaa‘ aan Täxte jät ze änndere“\">VisualEditor</i> öjeschalld.",
@@ -173,13 +162,7 @@
 	"visualeditor-savedialog-title-review": "Donn Ding Änderonge nohlohre.",
 	"visualeditor-savedialog-title-save": "Donn Ding Änderonge faßhallde",
 	"visualeditor-saveerror": "Ene Fähler es opjetrodde beim Daate Faßhallde op däm ẞööver: <i lang=\"en\">$1</i>.",
-	"visualeditor-saveerror-titleblacklist": "Di Sigg wohd nit faßjehallde, dä ier Övverschrevv es nämmlesch en de „schwazze Leß“.",
 	"visualeditor-settings-tool": "Enschtällonge för di Sigg",
-	"visualeditor-shortcuts-insert": "Enföhje",
 	"visualeditor-special-characters-group-other": "Öff jebruch",
-	"visualeditor-toolbar-savedialog": "De Sigg faßhallde",
-	"visualeditor-toolbar-savedialog-short": "Faßhalde",
-	"visualeditor-version-label": "Väsjohn",
-	"visualeditor-viewpage-savewarning": "Wells De verhaftesch retuur jonn op et beldlesch Beärbeide, der ohne eeds_ens di Sigg met Dinge Änderonge em Wiki faßzehallde?",
-	"visualeditor-viewpage-savewarning-title": "Verhaftesch?"
+	"visualeditor-version-label": "Väsjohn"
 }

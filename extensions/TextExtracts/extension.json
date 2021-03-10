@@ -4,7 +4,7 @@
 		"Max Semenik"
 	],
 	"requires": {
-		"MediaWiki": ">= 1.29.0"
+		"MediaWiki": ">= 1.31.0"
 	},
 	"url": "https://www.mediawiki.org/wiki/Extension:TextExtracts",
 	"descriptionmsg": "textextracts-desc",
@@ -21,40 +21,40 @@
 	},
 	"MessagesDirs": {
 		"TextExtracts": [
-			"i18n"
+			"i18n",
+			"i18n/api"
 		]
 	},
-	"AutoloadClasses": {
-		"TextExtracts\\ApiQueryExtracts": "includes/ApiQueryExtracts.php",
-		"TextExtracts\\ExtractFormatter": "includes/ExtractFormatter.php",
-		"TextExtracts\\Hooks": "includes/Hooks.php"
+	"AutoloadNamespaces": {
+		"TextExtracts\\": "includes/"
 	},
 	"Hooks": {
-		"OpenSearchXml": [
-			"TextExtracts\\Hooks::onApiOpenSearchSuggest"
-		],
 		"ApiOpenSearchSuggest": [
 			"TextExtracts\\Hooks::onApiOpenSearchSuggest"
 		]
 	},
 	"config": {
-		"ExtractsRemoveClasses": [
-			"table",
-			"div",
-			"script",
-			"input",
-			"style",
-			"ul.gallery",
-			".mw-editsection",
-			"sup.reference",
-			"ol.references",
-			".error",
-			".nomobile",
-			".noprint",
-			".noexcerpt",
-			".sortkey"
-		],
-		"ExtractsExtendOpenSearchXml": false
+		"ExtractsRemoveClasses": {
+			"value": [
+				"table",
+				"div",
+				"script",
+				"input",
+				"style",
+				"ul.gallery",
+				".mw-editsection",
+				"sup.reference",
+				"ol.references",
+				".error",
+				".nomobile",
+				".noprint",
+				".noexcerpt",
+				".sortkey"
+			]
+		},
+		"ExtractsExtendOpenSearchXml": {
+			"value": false
+		}
 	},
-	"manifest_version": 1
+	"manifest_version": 2
 }

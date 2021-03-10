@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Node class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -44,6 +44,18 @@ OO.mixinClass( ve.ce.Node, ve.Node );
 ve.ce.Node.static.splitOnEnter = false;
 
 /**
+ * Whether Enter removes the empty last child of this node.
+ *
+ * Set true on the parent of a splitOnEnter node (e.g. a ListNode) to ensure that the last splittable
+ * child (e.g a ListItemNode) is removed when empty and enter is pressed.
+ *
+ * @static
+ * @property {boolean}
+ * @inheritable
+ */
+ve.ce.Node.static.removeEmptyLastChildOnEnter = false;
+
+/**
  * Whether a node supports multiline input at all.
  *
  * If set to false, pressing Enter will not perform any splitting at all. If set to null, traverse
@@ -54,6 +66,15 @@ ve.ce.Node.static.splitOnEnter = false;
  * @inheritable
  */
 ve.ce.Node.static.isMultiline = null;
+
+/**
+ * Whether a node traps the cursor when active, e.g. in table cells
+ *
+ * @static
+ * @property {boolean}
+ * @inheritable
+ */
+ve.ce.Node.static.trapsCursor = false;
 
 /**
  * Command to execute when Enter is pressed while this node is selected, or when the node is double-clicked.
@@ -120,6 +141,13 @@ ve.ce.Node.prototype.canHaveChildrenNotContent = function () {
  */
 ve.ce.Node.prototype.isInternal = function () {
 	return this.model.isInternal();
+};
+
+/**
+ * @inheritdoc ve.Node
+ */
+ve.ce.Node.prototype.isMetaData = function () {
+	return this.model.isMetaData();
 };
 
 /**
@@ -235,6 +263,15 @@ ve.ce.Node.prototype.splitOnEnter = function () {
 };
 
 /**
+ * Check if the node removes its empty last child on 'enter'.
+ *
+ * @return {boolean} Node removes empty last child on 'enter'
+ */
+ve.ce.Node.prototype.removeEmptyLastChildOnEnter = function () {
+	return this.constructor.static.removeEmptyLastChildOnEnter;
+};
+
+/**
  * Check if the node is supports multiline input.
  *
  * Traverses upstream until a boolean value is found. If no value
@@ -251,6 +288,15 @@ ve.ce.Node.prototype.isMultiline = function () {
 	} else {
 		return !this.root || this.getRoot().getSurface().getSurface().isMultiline();
 	}
+};
+
+/**
+ * Check if the node traps cursor when active
+ *
+ * @return {boolean} Node traps cursor
+ */
+ve.ce.Node.prototype.trapsCursor = function () {
+	return this.constructor.static.trapsCursor;
 };
 
 /**

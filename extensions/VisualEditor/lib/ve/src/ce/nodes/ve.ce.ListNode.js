@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable ListNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -29,6 +29,8 @@ OO.inheritClass( ve.ce.ListNode, ve.ce.BranchNode );
 
 ve.ce.ListNode.static.name = 'list';
 
+ve.ce.ListNode.static.removeEmptyLastChildOnEnter = true;
+
 /* Methods */
 
 /**
@@ -53,8 +55,6 @@ ve.ce.ListNode.prototype.getTagName = function () {
  * Handle model update events.
  *
  * If the style changed since last update the DOM wrapper will be replaced with an appropriate one.
- *
- * @method
  */
 ve.ce.ListNode.prototype.onUpdate = function () {
 	this.updateTagName();

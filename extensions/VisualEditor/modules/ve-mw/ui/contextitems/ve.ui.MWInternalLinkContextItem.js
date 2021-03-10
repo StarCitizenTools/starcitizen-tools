@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWInternalLinkContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -47,17 +47,18 @@ ve.ui.MWInternalLinkContextItem.static.modelClasses = [ ve.dm.MWInternalLinkAnno
 ve.ui.MWInternalLinkContextItem.static.generateBody = function ( linkCache, model, htmlDoc, context ) {
 	var icon, $description,
 		title = model.getAttribute( 'lookupTitle' ),
-		description = model.getAttribute( 'normalizedTitle' ),
+		normalizedTitle = model.getAttribute( 'normalizedTitle' ),
 		href = model.getHref(),
+		titleObj = mw.Title.newFromText( mw.libs.ve.normalizeParsoidResourceName( href ) ),
 		fragment = model.getFragment(),
-		usePageImages = mw.config.get( 'wgVisualEditor' ).usePageImages,
-		usePageDescriptions = mw.config.get( 'wgVisualEditor' ).usePageDescriptions,
+		usePageImages = mw.config.get( 'wgVisualEditorConfig' ).usePageImages,
+		usePageDescriptions = mw.config.get( 'wgVisualEditorConfig' ).usePageDescriptions,
 		$wrapper = $( '<div>' ),
 		$link = $( '<a>' )
-			.addClass( 've-ui-mwInternalLinkContextItem-link' )
-			.text( description )
+			.addClass( 've-ui-linkContextItem-link' )
+			.text( normalizedTitle )
 			.attr( {
-				href: ve.resolveUrl( href, htmlDoc ),
+				href: titleObj.getUrl(),
 				target: '_blank',
 				rel: 'noopener'
 			} );
@@ -123,6 +124,10 @@ ve.ui.MWInternalLinkContextItem.prototype.renderBody = function () {
 		this.context.getSurface().getModel().getDocument().getHtmlDocument(),
 		this.context
 	) );
+	if ( !this.context.isMobile() ) {
+		this.$body.append( this.$labelLayout );
+	}
+	this.updateLabelPreview();
 };
 
 /* Registration */

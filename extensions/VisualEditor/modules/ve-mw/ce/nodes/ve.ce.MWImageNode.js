@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWImageNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -36,12 +36,13 @@ ve.ce.MWImageNode = function VeCeMWImageNode( $focusable, $image, config ) {
 
 	// Mixin constructors
 	ve.ce.FocusableNode.call( this, $focusable, config );
-	if ( this.$image.length ) {
-		ve.ce.MWResizableNode.call( this, this.$image, config );
-	}
+	ve.ce.MWResizableNode.call( this, this.$image, config );
 
 	// Events
 	this.model.connect( this, { attributeChange: 'onAttributeChange' } );
+
+	// Initialization
+	this.updateMediaType();
 };
 
 /* Inheritance */
@@ -75,7 +76,6 @@ ve.ce.MWImageNode.static.getDescription = function ( model ) {
  * Update the rendering of the 'align', src', 'width' and 'height' attributes
  * when they change in the model.
  *
- * @method
  * @param {string} key Attribute key
  * @param {string} from Old value
  * @param {string} to New value
@@ -96,22 +96,33 @@ ve.ce.MWImageNode.prototype.onGeneratedContentNodeUpdate = function () {
  * @inheritdoc ve.ce.GeneratedContentNode
  */
 ve.ce.MWImageNode.prototype.generateContents = function () {
-	var xhr,
-		width = this.getModel().getAttribute( 'width' ),
-		height = this.getModel().getAttribute( 'height' ),
-		deferred = $.Deferred();
+	var xhr, params,
+		model = this.getModel(),
+		width = model.getAttribute( 'width' ),
+		height = model.getAttribute( 'height' ),
+		mwData = model.getAttribute( 'mw' ) || {},
+		deferred = ve.createDeferred();
 
 	// If the current rendering is larger don't fetch a new image, just let the browser resize
 	if ( this.renderedDimensions && this.renderedDimensions.width > width ) {
 		return deferred.reject().promise();
 	}
 
-	xhr = new mw.Api().get( {
+	if ( mwData.thumbtime !== undefined ) {
+		params = 'seek=' + mwData.thumbtime;
+	} else if ( mwData.page !== undefined ) {
+		params = 'page' + mwData.page + '-' + width + 'px';
+		// Don't send width twice
+		width = undefined;
+	}
+
+	xhr = ve.init.target.getContentApi( this.getModel().getDocument() ).get( {
 		action: 'query',
 		prop: 'imageinfo',
 		iiprop: 'url',
 		iiurlwidth: width,
 		iiurlheight: height,
+		iiurlparam: params,
 		titles: this.getModel().getFilename()
 	} )
 		.done( this.onParseSuccess.bind( this, deferred ) )
@@ -127,14 +138,9 @@ ve.ce.MWImageNode.prototype.generateContents = function () {
  * @param {Object} response Response data
  */
 ve.ce.MWImageNode.prototype.onParseSuccess = function ( deferred, response ) {
-	var id, src, pages = ve.getProp( response, 'query', 'pages' );
-	for ( id in pages ) {
-		if ( pages[ id ].imageinfo ) {
-			src = pages[ id ].imageinfo[ 0 ].thumburl;
-		}
-	}
-	if ( src ) {
-		deferred.resolve( src );
+	var thumburl = ve.getProp( response.query.pages[ 0 ], 'imageinfo', 0, 'thumburl' );
+	if ( thumburl ) {
+		deferred.resolve( thumburl );
 	} else {
 		deferred.reject();
 	}
@@ -161,4 +167,15 @@ ve.ce.MWImageNode.prototype.render = function ( generatedContents ) {
  */
 ve.ce.MWImageNode.prototype.onParseError = function ( deferred ) {
 	deferred.reject();
+};
+
+/**
+ * Update rendering when media type changes
+ */
+ve.ce.MWImageNode.prototype.updateMediaType = function () {
+	if ( this.model.getMediaType() === 'AUDIO' ) {
+		this.$image.addClass( 've-ce-mwImageNode-audioPlayer' );
+	} else {
+		this.$image.removeClass( 've-ce-mwImageNode-audioPlayer' );
+	}
 };

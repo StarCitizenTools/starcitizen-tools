@@ -8,17 +8,16 @@
 /**
  * @group Database
  * @group medium
+ * @covers MessageCollection
  */
-class MessageCollectionTest extends MediaWikiTestCase {
-	protected function setUp() {
+class MessageCollectionTest extends MediaWikiIntegrationTestCase {
+	protected function setUp(): void {
 		parent::setUp();
 
-		global $wgHooks;
 		$this->setMwGlobals( [
-			'wgHooks' => $wgHooks,
 			'wgTranslateTranslationServices' => [],
 		] );
-		$wgHooks['TranslatePostInitGroups'] = [ [ $this, 'getTestGroups' ] ];
+		$this->setTemporaryHook( 'TranslatePostInitGroups', [ $this, 'getTestGroups' ] );
 
 		$mg = MessageGroups::singleton();
 		$mg->setCache( new WANObjectCache( [ 'cache' => wfGetCache( 'hash' ) ] ) );
@@ -32,6 +31,8 @@ class MessageCollectionTest extends MediaWikiTestCase {
 		$messages = [
 			'translated' => 'bunny',
 			'untranslated' => 'fanny',
+			'changedtranslated_1' => 'bunny',
+			'changedtranslated_2' => 'fanny'
 		];
 		$list['test-group'] = new MockWikiMessageGroup( 'test-group', $messages );
 
@@ -40,15 +41,15 @@ class MessageCollectionTest extends MediaWikiTestCase {
 
 	public function testMessage() {
 		$user = $this->getTestSysop()->getUser();
-		$title = Title::newFromText( 'MediaWiki:translated/fi' );
+		$title = Title::newFromText( 'MediaWiki:Translated/fi' );
 		$page = WikiPage::factory( $title );
 		$content = ContentHandler::makeContent( 'pupuliini', $title );
 
 		$status = $page->doEditContent( $content, __METHOD__, 0, false, $user );
 
 		$value = $status->getValue();
-		$rev = $value['revision'];
-		$revision = $rev->getId();
+		$revisionRecord = $value['revision-record'];
+		$revisionId = $revisionRecord->getId();
 
 		$group = MessageGroups::getGroup( 'test-group' );
 		$collection = $group->initCollection( 'fi' );
@@ -67,19 +68,42 @@ class MessageCollectionTest extends MediaWikiTestCase {
 			$translated->getProperty( 'status' ),
 			'message status is translated'
 		);
-		$this->assertEquals( $revision, $translated->getProperty( 'revision' ) );
+		$this->assertEquals( $revisionId, $translated->getProperty( 'revision' ) );
 
 		/** @var TMessage $untranslated */
 		$untranslated = $collection['untranslated'];
 		$this->assertInstanceOf( 'TMessage', $untranslated );
-		$this->assertEquals( null, $untranslated->translation(), 'no translation is null' );
-		$this->assertEquals( false, $untranslated->getProperty( 'last-translator-text' ) );
-		$this->assertEquals( false, $untranslated->getProperty( 'last-translator-id' ) );
+		$this->assertNull( $untranslated->translation(), 'no translation is null' );
+		$this->assertNull( $untranslated->getProperty( 'last-translator-text' ) );
+		$this->assertNull( $untranslated->getProperty( 'last-translator-id' ) );
 		$this->assertEquals(
 			'untranslated',
 			$untranslated->getProperty( 'status' ),
 			'message status is untranslated'
 		);
-		$this->assertEquals( false, $untranslated->getProperty( 'revision' ) );
+		$this->assertNull( $untranslated->getProperty( 'revision' ) );
+	}
+
+	/** @covers MessageCollection::filterChanged */
+	public function testFilterChanged() {
+		$this->assertTrue(
+			$this->editPage( 'MediaWiki:Changedtranslated_1/fi', 'pupuliini_1' )->isGood()
+		);
+		$this->assertTrue(
+			$this->editPage( 'MediaWiki:Changedtranslated_2/fi', 'pupuliini_modified' )->isGood()
+		);
+		$group = MessageGroups::getGroup( 'test-group' );
+		$collection = $group->initCollection( 'fi' );
+		$collection->loadTranslations();
+		$this->assertArrayHasKey( 'changedtranslated_1', $collection->keys() );
+		$this->assertArrayHasKey( 'changedtranslated_2', $collection->keys() );
+		// Trick message collection to think it was loaded from file.
+		$collection->setInFile( [
+			'changedtranslated_1' => 'pupuliini_1',
+			'changedtranslated_2' => 'pupuliini_2'
+		] );
+		$collection->filter( 'changed' );
+		$this->assertContains( 'changedtranslated_2', $collection->getMessageKeys() );
+		$this->assertNotContains( 'changedtranslated_1', $collection->getMessageKeys() );
 	}
 }

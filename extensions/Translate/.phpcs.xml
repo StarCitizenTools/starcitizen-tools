@@ -2,28 +2,67 @@
 <ruleset>
 	<rule ref="./vendor/mediawiki/mediawiki-codesniffer/MediaWiki">
 		<exclude name="Generic.Files.OneObjectStructurePerFile.MultipleFound" />
-		<exclude name="MediaWiki.Commenting.FunctionAnnotations.UnrecognizedAnnotation" />
+		<exclude name="MediaWiki.Commenting.FunctionComment.MissingDocumentationPrivate" />
 		<exclude name="MediaWiki.Commenting.FunctionComment.MissingDocumentationProtected"/>
-		<exclude name="MediaWiki.Commenting.FunctionComment.MissingDocumentationPublic"/>
+		<exclude name="MediaWiki.Commenting.FunctionComment.MissingDocumentationPublic" />
 		<exclude name="MediaWiki.Commenting.FunctionComment.WrongStyle" />
 		<exclude name="MediaWiki.Commenting.MissingCovers.MissingCovers" />
-		<exclude name="MediaWiki.Files.ClassMatchesFilename.NotMatch" />
-		<exclude name="MediaWiki.NamingConventions.LowerCamelFunctionsName.FunctionName" />
-		<exclude name="MediaWiki.Usage.DeprecatedGlobalVariables.Deprecated$wgContLang" />
-		<exclude name="MediaWiki.Usage.DeprecatedGlobalVariables.Deprecated$wgParser" />
-		<exclude name="MediaWiki.Usage.ForbiddenFunctions.escapeshellarg" />
+		<exclude name="MediaWiki.Commenting.PropertyDocumentation.MissingDocumentationPrivate" />
+		<exclude name="MediaWiki.Commenting.PropertyDocumentation.MissingDocumentationProtected" />
+		<exclude name="MediaWiki.Commenting.PropertyDocumentation.MissingVar" />
+		<exclude name="MediaWiki.Commenting.PropertyDocumentation.WrongStyle" />
+		<exclude name="MediaWiki.PHPUnit.AssertCount.NotUsed" />
+		<exclude name="MediaWiki.Usage.ExtendClassUsage.FunctionConfigUsage" />
 		<exclude name="MediaWiki.WhiteSpace.SpaceBeforeSingleLineComment.NewLineComment" />
+		<exclude name="PSR2.Classes.PropertyDeclaration.Multiple" />
 	</rule>
 	<rule ref="Generic.Files.LineLength">
 		<exclude-pattern>Translate\.alias\.php</exclude-pattern>
+		<exclude-pattern>Translate\.i18n\.magic\.php</exclude-pattern>
 	</rule>
 	<rule ref="MediaWiki.NamingConventions.ValidGlobalName">
 		<properties>
 			<property name="ignoreList" type="array" value="$IP" />
 		</properties>
 	</rule>
+	<!-- New code uses parameter and return type hints. Repeating them in tags adds no additional value. -->
+	<rule ref="MediaWiki.Commenting.FunctionComment.MissingParamTag">
+		<!-- exclude pattern here does not support relative path and CI exclude this for the whole repo -->
+		<exclude-pattern>Translate/src/</exclude-pattern>
+		<exclude-pattern>Translate/tests/</exclude-pattern>
+	</rule>
+	<!-- Same as above. No idea why it is named without "Tag". -->
+	<rule ref="MediaWiki.Commenting.FunctionComment.MissingReturn">
+		<!-- exclude pattern here does not support relative path and CI exclude this for the whole repo -->
+		<exclude-pattern>Translate/src/</exclude-pattern>
+		<exclude-pattern>Translate/tests/</exclude-pattern>
+	</rule>
+	<rule ref="MediaWiki.Files.ClassMatchesFilename.NotMatch">
+		<exclude-pattern>tests/|ttmserver/|scripts/|Message\.php</exclude-pattern>
+	</rule>
 	<file>.</file>
-	<arg name="extensions" value="php,php5,inc"/>
+	<arg name="extensions" value="php"/>
 	<arg name="encoding" value="UTF-8"/>
-	<exclude-pattern type="relative">^extensions</exclude-pattern>
+
+	<!-- See https://github.com/slevomat/coding-standard#sniffs-included-in-this-standard -->
+	<config name="installed_paths" value="../../slevomat/coding-standard"/>
+	<rule ref="SlevomatCodingStandard.ControlStructures.RequireNullCoalesceOperator" />
+	<rule ref="SlevomatCodingStandard.ControlStructures.UselessIfConditionWithReturn" />
+	<rule ref="SlevomatCodingStandard.ControlStructures.UselessTernaryOperator" />
+	<rule ref="SlevomatCodingStandard.Classes.PropertySpacing">
+		<properties>
+			<property name="minLinesCountBeforeWithComment" value="0"/>
+			<property name="maxLinesCountBeforeWithComment" value="0"/>
+			<property name="minLinesCountBeforeWithoutComment" value="0"/>
+			<property name="maxLinesCountBeforeWithoutComment" value="0"/>
+		</properties>
+	</rule>
+	<!-- Remove once decision has been made on: https://phabricator.wikimedia.org/T220719 -->
+	<rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing">
+		<properties>
+			<property name="spacesCountBeforeColon" value="0"/>
+		</properties>
+	</rule>
+	<rule ref="SlevomatCodingStandard.Commenting.RequireOneLineDocComment" />
+	<rule ref="SlevomatCodingStandard.Whitespaces.DuplicateSpaces" />
 </ruleset>

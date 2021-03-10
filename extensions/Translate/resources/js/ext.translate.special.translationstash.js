@@ -68,7 +68,7 @@
 						// unicode-bidi: isolate
 						// is supported everywhere
 						$( '<span>' )
-							.html( $( 'body' ).hasClass( 'rtl' ) ? '&rlm;' : '&lrm;' ),
+							.html( $( document.body ).hasClass( 'rtl' ) ? '&rlm;' : '&lrm;' ),
 						$( '<span>' )
 							.addClass( 'tux-list-translation' )
 							.attr( {
@@ -82,6 +82,13 @@
 					.append(
 						$( '<span>' )
 							.addClass( statusClass )
+							// The following messages are used here:
+							// * tux-status-optional
+							// * tux-status-fuzzy
+							// * tux-status-proofread
+							// * tux-status-translated
+							// * tux-status-saving
+							// * tux-status-unsaved
 							.text( statusMsg ? mw.msg( statusMsg ) : '' )
 					),
 				$( '<div>' )
@@ -167,10 +174,10 @@
 
 		getMessages( messagegroup, $messageTable.data( 'targetlangcode' ) )
 			.done( function ( result ) {
-				var untranslated, messages = result.query.messagecollection;
+				var $untranslated, messages = result.query.messagecollection;
 
 				$messageTable.empty();
-				$.each( messages, function ( index, message ) {
+				messages.forEach( function ( message ) {
 					message.properties = {};
 					message.properties.status = 'untranslated';
 
@@ -184,11 +191,11 @@
 				} );
 
 				// Show the editor for the first untranslated message.
-				untranslated = $( '.tux-message' )
+				$untranslated = $( '.tux-message' )
 					.has( '.tux-message-item.untranslated' )
 					.first();
-				if ( untranslated.length ) {
-					untranslated.data( 'translateeditor' ).show();
+				if ( $untranslated.length ) {
+					$untranslated.data( 'translateeditor' ).show();
 				}
 
 				updateStats();
@@ -239,10 +246,9 @@
 		translationStashStorage.getUserTranslations()
 			.done( function ( translations ) {
 				if ( translations.translationstash.translations ) {
-					$.each( translations.translationstash.translations,
-						function ( index, translation ) {
-							userTranslations[ translation.title ] = translation;
-						} );
+					translations.translationstash.translations.forEach( function ( translation ) {
+						userTranslations[ translation.title ] = translation;
+					} );
 				}
 				loadMessages();
 			} );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MediaWiki-specific SurfaceFragment tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -37,7 +37,9 @@ QUnit.test( 'insertContent (MWheading)', function ( assert ) {
 			'b',
 			{ type: '/paragraph' },
 			{ type: '/listItem' },
-			{ type: '/list' }
+			{ type: '/list' },
+			{ type: 'internalList' },
+			{ type: '/internalList' }
 		] ),
 		surface = new ve.dm.Surface( doc ),
 		fragment = surface.getLinearFragment( new ve.Range( 4, 4 ) ),

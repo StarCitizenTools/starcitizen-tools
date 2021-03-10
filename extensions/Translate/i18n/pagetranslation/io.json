@@ -1,17 +1,26 @@
 {
 	"@metadata": {
 		"authors": [
-			"Malafaya",
-			"Joao Xavier"
+			"Joao Xavier",
+			"Malafaya"
 		]
 	},
+	"tpt-diff-old": "Antea texto",
+	"tpt-diff-new": "Nova texto",
+	"tpt-tag-oldsyntax": "anciena sintaxo",
 	"tpt-select-prioritylangs-reason": "Motivo:",
+	"tpt-sections-syntaxversion": "Versiono di la sintaxo",
 	"tpt-rev-encourage": "restaurar",
+	"translate-tag-translate-link-desc": "Tradukar ca pagino",
 	"tpt-languages-legend": "Altra lingui:",
 	"tpt-languages-nonzero": "$1 ($2% tradukita)",
-	"tpt-discouraged-language-reason": "Motivo: $1",
+	"tpt-tab-translate": "Tradukar",
 	"tpt-aggregategroup-new-description": "Deskripto (fakultativa):",
+	"tpt-aggregategroup-update-cancel": "Nuligar",
 	"log-name-pagetranslation": "Protokolo ('log') pri tradukajo",
 	"pt-movepage-block-base-invalid": "La nova nomo quan vu deziras donar a la pagino ne esas valida.",
+	"pt-deletepage-list-no-pages": "Nula pagino trovesis.",
+	"pm-cancel-button-label": "Nuligar",
+	"pp-cancel-button-label": "Nuligar",
 	"tpt-generic-button": "Konfirmez"
 }

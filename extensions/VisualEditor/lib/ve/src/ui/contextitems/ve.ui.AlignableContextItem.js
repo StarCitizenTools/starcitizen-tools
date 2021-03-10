@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Alignable class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -27,6 +27,12 @@ ve.ui.AlignableContextItem = function VeUiAlignableContextItem( context, model, 
 	} );
 	this.align.selectItemByData( align );
 	this.align.connect( this, { choose: 'onAlignChoose' } );
+
+	if ( OO.ui.isMobile() ) {
+		this.align.items.forEach( function ( item ) {
+			item.setInvisibleLabel( true );
+		} );
+	}
 
 	// Initialization
 	this.$element.addClass( 've-ui-alignableContextItem' );
@@ -57,15 +63,18 @@ ve.ui.AlignableContextItem.static.isCompatibleWith = function ( model ) {
 /**
  * @inheritdoc
  */
-ve.ui.AlignableContextItem.prototype.renderBody = function () {
-	this.$body.empty().append( this.align.$element );
+ve.ui.AlignableContextItem.prototype.setup = function () {
+	this.align.setDisabled( this.context.getSurface().isReadOnly() );
+
+	// Parent method
+	ve.ui.AlignableContextItem.super.prototype.setup.apply( this, arguments );
 };
 
 /**
  * @inheritdoc
  */
-ve.ui.AlignableContextItem.prototype.renderDescription = function () {
-	this.$description.empty().append( this.align.$element );
+ve.ui.AlignableContextItem.prototype.renderBody = function () {
+	this.$body.empty().append( this.align.$element );
 };
 
 ve.ui.AlignableContextItem.prototype.onAlignChoose = function ( item ) {

@@ -1,21 +1,23 @@
 <?php
 /**
- * This file a contains a message group implementation.
- *
  * @file
  * @author Niklas Laxström
- * @copyright Copyright © 2010-2013, Niklas Laxström
  * @license GPL-2.0-or-later
  */
 
 /**
- * Groups multiple message groups together as one big group.
+ * Groups multiple message groups together as one group.
  *
  * Limitations:
  *  - Only groups in the same namespace.
+ *  - Only groups with the same source language.
  * @ingroup MessageGroup
  */
 class AggregateMessageGroup extends MessageGroupBase {
+	/** @var MessageGroup[] */
+	private $groups;
+
+	/** @inheritDoc */
 	public function exists() {
 		// Group exists if there are any subgroups.
 		$exists = (bool)$this->conf['GROUPS'];
@@ -23,12 +25,11 @@ class AggregateMessageGroup extends MessageGroupBase {
 		return $exists;
 	}
 
+	/** @inheritDoc */
 	public function load( $code ) {
 		$messages = [];
 
-		/**
-		 * @var $group MessageGroup
-		 */
+		/** @var $group MessageGroup */
 		foreach ( $this->getGroups() as $group ) {
 			$messages += $group->load( $code );
 		}
@@ -36,16 +37,21 @@ class AggregateMessageGroup extends MessageGroupBase {
 		return $messages;
 	}
 
+	/** @inheritDoc */
 	public function getMangler() {
-		if ( !isset( $this->mangler ) ) {
-			$this->mangler = StringMatcher::EmptyMatcher();
+		if ( $this->mangler === null ) {
+			$this->mangler = new StringMatcher();
 		}
 
 		return $this->mangler;
 	}
 
-	public function getGroups() {
-		if ( !isset( $this->groups ) ) {
+	/**
+	 * Returns a list of message groups that this group consists of.
+	 * @return MessageGroup[]
+	 */
+	public function getGroups(): array {
+		if ( $this->groups === null ) {
 			$groups = [];
 			$ids = (array)$this->conf['GROUPS'];
 			$ids = MessageGroups::expandWildcards( $ids );
@@ -87,8 +93,9 @@ class AggregateMessageGroup extends MessageGroupBase {
 				$messages += $this->loadMessagesFromCache( $group->getGroups() );
 				continue;
 			}
+			'@phan-var FileBasedMessageGroup $group';
 
-			$cache = new MessageGroupCache( $group );
+			$cache = $group->getMessageGroupCache( $group->getSourceLanguage() );
 			if ( $cache->exists() ) {
 				foreach ( $cache->getKeys() as $key ) {
 					$messages[$key] = $cache->get( $key );
@@ -99,6 +106,7 @@ class AggregateMessageGroup extends MessageGroupBase {
 		return $messages;
 	}
 
+	/** @inheritDoc */
 	public function initCollection( $code ) {
 		$messages = $this->loadMessagesFromCache( $this->getGroups() );
 		$namespace = $this->getNamespace();
@@ -110,11 +118,7 @@ class AggregateMessageGroup extends MessageGroupBase {
 		return $collection;
 	}
 
-	/**
-	 * @param string $key Message key
-	 * @param string $code Language code
-	 * @return null|string
-	 */
+	/** @inheritDoc */
 	public function getMessage( $key, $code ) {
 		/* Just hand over the message content retrieval to the primary message
 		 * group directly. This used to iterate over the subgroups looking for
@@ -142,12 +146,10 @@ class AggregateMessageGroup extends MessageGroupBase {
 		}
 	}
 
+	/** @inheritDoc */
 	public function getTags( $type = null ) {
 		$tags = [];
 
-		/**
-		 * @var $group MessageGroup
-		 */
 		foreach ( $this->getGroups() as $group ) {
 			$tags = array_merge_recursive( $tags, $group->getTags( $type ) );
 		}
@@ -155,22 +157,13 @@ class AggregateMessageGroup extends MessageGroupBase {
 		return $tags;
 	}
 
+	/** @inheritDoc */
 	public function getKeys() {
 		$keys = [];
-		/**
-		 * @var $group MessageGroup
-		 */
 		foreach ( $this->getGroups() as $group ) {
-			// @todo Not all oldstyle groups have getKeys yet
-			if ( method_exists( $group, 'getKeys' ) ) {
-				$moreKeys = $group->getKeys();
-			} else {
-				$moreKeys = array_keys( $group->getDefinitions() );
-			}
-
 			// Array merge is *really* slow (tested in PHP 7.1), so avoiding it. A loop
 			// followed by array_unique (which we need anyway) is magnitudes faster.
-			foreach ( $moreKeys as $key ) {
+			foreach ( $group->getKeys() as $key ) {
 				$keys[] = $key;
 			}
 		}

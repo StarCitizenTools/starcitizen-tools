@@ -120,8 +120,8 @@ class ArrayUtils {
 		$max = $valueCount;
 		do {
 			$mid = $min + ( ( $max - $min ) >> 1 );
-			$item = call_user_func( $valueCallback, $mid );
-			$comparison = call_user_func( $comparisonCallback, $target, $item );
+			$item = $valueCallback( $mid );
+			$comparison = $comparisonCallback( $target, $item );
 			if ( $comparison > 0 ) {
 				$min = $mid;
 			} elseif ( $comparison == 0 ) {
@@ -133,8 +133,8 @@ class ArrayUtils {
 		} while ( $min < $max - 1 );
 
 		if ( $min == 0 ) {
-			$item = call_user_func( $valueCallback, $min );
-			$comparison = call_user_func( $comparisonCallback, $target, $item );
+			$item = $valueCallback( $min );
+			$comparison = $comparisonCallback( $target, $item );
 			if ( $comparison < 0 ) {
 				// Before the first item
 				return false;
@@ -151,13 +151,11 @@ class ArrayUtils {
 	 * @since 1.23
 	 *
 	 * @param array $array1 The array to compare from
-	 * @param array $array2,... More arrays to compare against
+	 * @param array ...$arrays More arrays to compare against
 	 * @return array An array containing all the values from array1
 	 *               that are not present in any of the other arrays.
 	 */
-	public static function arrayDiffAssocRecursive( $array1 ) {
-		$arrays = func_get_args();
-		array_shift( $arrays );
+	public static function arrayDiffAssocRecursive( $array1, ...$arrays ) {
 		$ret = [];
 
 		foreach ( $array1 as $key => $value ) {
@@ -168,7 +166,7 @@ class ArrayUtils {
 						$args[] = $array[$key];
 					}
 				}
-				$valueret = call_user_func_array( __METHOD__, $args );
+				$valueret = self::arrayDiffAssocRecursive( ...$args );
 				if ( count( $valueret ) ) {
 					$ret[$key] = $valueret;
 				}
@@ -183,5 +181,73 @@ class ArrayUtils {
 		}
 
 		return $ret;
+	}
+
+	/**
+	 * Make an array consisting of every combination of the elements of the
+	 * input arrays. Each element of the output array is an array with a number
+	 * of elements equal to the number of input parameters.
+	 *
+	 * In mathematical terms, this is an n-ary Cartesian product.
+	 *
+	 * For example, ArrayUtils::cartesianProduct( [ 1, 2 ], [ 'a', 'b' ] )
+	 * produces [ [ 1, 'a' ], [ 1, 'b' ], [ 2, 'a' ], [ 2, 'b' ] ]
+	 *
+	 * If any of the input arrays is empty, the result is the empty array [].
+	 * This is in keeping with the mathematical definition.
+	 *
+	 * If no parameters are given, the result is also the empty array.
+	 *
+	 * The array keys are ignored. This implementation uses the internal
+	 * pointers of the input arrays to keep track of the current position
+	 * without referring to the keys.
+	 *
+	 * @since 1.35
+	 *
+	 * @param array ...$inputArrays
+	 * @return array
+	 */
+	public static function cartesianProduct( ...$inputArrays ) {
+		$numInputs = count( $inputArrays );
+		if ( $numInputs === 0 ) {
+			return [];
+		}
+
+		// Reset the internal pointers
+		foreach ( $inputArrays as &$inputArray ) {
+			if ( !count( $inputArray ) ) {
+				return [];
+			}
+			reset( $inputArray );
+		}
+		unset( $inputArray );
+
+		$outputArrays = [];
+		$done = false;
+		while ( !$done ) {
+			// Construct the output array element
+			$element = [];
+			foreach ( $inputArrays as $paramIndex => $inputArray ) {
+				$element[] = current( $inputArray );
+			}
+			$outputArrays[] = $element;
+
+			// Increment the pointers starting from the least significant.
+			// If the least significant rolls over back to the start of the
+			// array, continue with the next most significant, and so on until
+			// that stops happening. If all pointers roll over, we are done.
+			$done = true;
+			for ( $paramIndex = $numInputs - 1; $paramIndex >= 0; $paramIndex-- ) {
+				next( $inputArrays[$paramIndex] );
+				if ( key( $inputArrays[$paramIndex] ) === null ) {
+					reset( $inputArrays[$paramIndex] );
+					// continue
+				} else {
+					$done = false;
+					break;
+				}
+			}
+		}
+		return $outputArrays;
 	}
 }

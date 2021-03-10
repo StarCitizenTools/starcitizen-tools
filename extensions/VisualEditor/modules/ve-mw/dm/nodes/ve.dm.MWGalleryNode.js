@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWGalleryNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -39,7 +39,7 @@ ve.dm.MWGalleryNode.static.matchTagNames = [ 'ul' ];
 
 ve.dm.MWGalleryNode.static.childNodeTypes = [ 'mwGalleryCaption', 'mwGalleryImage' ];
 
-ve.dm.MWGalleryNode.static.blacklistedAnnotationTypes = [ 'link' ];
+ve.dm.MWGalleryNode.static.disallowedAnnotationTypes = [ 'link' ];
 
 ve.dm.MWGalleryNode.static.cloneElement = function () {
 	// Parent method
@@ -72,7 +72,6 @@ ve.dm.MWGalleryNode.static.toDomElements = function ( data, doc ) {
 	var ul = doc.createElement( 'ul' );
 
 	// Build ul
-	ul.classList.add( 'gallery' );
 	ul.setAttribute( 'typeof', 'mw:Extension/gallery' );
 	ul.setAttribute( 'data-mw', JSON.stringify( data.attributes.mw ) );
 
@@ -106,7 +105,6 @@ ve.dm.MWGalleryNode.static.describeChange = function ( key ) {
 /**
  * Get the gallery's caption node.
  *
- * @method
  * @return {ve.dm.MWImageCaptionNode|null} Caption node, if present
  */
 ve.dm.MWGalleryNode.prototype.getCaptionNode = function () {
@@ -117,7 +115,6 @@ ve.dm.MWGalleryNode.prototype.getCaptionNode = function () {
 /**
  * Get the gallery's image nodes.
  *
- * @method
  * @return {ve.dm.MWGalleryImageNode[]} Gallery image nodes (may be empty if none are present)
  */
 ve.dm.MWGalleryNode.prototype.getImageNodes = function () {

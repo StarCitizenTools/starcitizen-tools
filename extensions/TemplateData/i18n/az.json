@@ -1,20 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
+			"Dağlı95",
 			"Eminn",
 			"Serkanland",
-			"Dağlı95",
+			"Toghrul Rahimli",
 			"Wertuose"
 		]
 	},
 	"templatedata-doc-desc-empty": "İzahı yoxdur.",
 	"templatedata-doc-no-params-set": "Xüsusi parametrlər yoxdur",
 	"templatedata-doc-param-autovalue": "Avtomatik dəyər",
-	"templatedata-doc-param-autovalue-empty": "boş",
 	"templatedata-doc-param-default": "Susmaya görə",
-	"templatedata-doc-param-default-empty": "boş",
 	"templatedata-doc-param-example": "Nümunə",
-	"templatedata-doc-param-example-empty": "boş",
 	"templatedata-doc-param-desc": "İzah",
 	"templatedata-doc-param-desc-empty": "izahı yoxdur",
 	"templatedata-doc-param-name": "Parametr",
@@ -37,7 +35,7 @@
 	"templatedata-doc-params": "Şablon parametrləri",
 	"templatedata-editbutton": "TemplateData meneceri",
 	"templatedata-errormsg-jsonbadformat": "Pis JSON formatı. Əgər bu əməliyyat düzgün aparılıbsa, siz bildirişi ləğv edərək <templatedata> teqlərini silib və yenidən yükləyə bilərsiniz və yaxud davam edərək cari TemplateData-nı yenisi ilə əvəzləyə bilərsiniz.",
-	"templatedata-exists-on-related-page": "Xahiş edirik nəzərə alın: TemplateDta bloku artıq \"[[$1]]\" səhifəsinə əlavə edilib.",
+	"templatedata-exists-on-related-page": "Xahiş edirik, nəzərə alın: TemplateData bloku artıq \"[[$1]]\" səhifəsinə əlavə edilib.",
 	"templatedata-helplink": "TemplateData haqqında məlumat",
 	"templatedata-invalid-length": "Məlumat yaddaşda saxlamaq üçün çox böyükdür ({{formatnum:$1}} bayt, {{PLURAL:$2|limit:}}  {{formatnum:$2}})",
 	"templatedata-invalid-parse": "JSON-da sintaksis səhv.",

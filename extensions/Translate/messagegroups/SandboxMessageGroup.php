@@ -7,6 +7,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\TranslatorSandbox\TranslationStashStorage;
+
 /**
  * @since 2013.06
  * @ingroup MessageGroup
@@ -17,7 +19,6 @@ class SandboxMessageGroup extends WikiMessageGroup {
 	 * @see MessageCollection::getPages()
 	 */
 	protected $namespace = false;
-
 	protected $language;
 
 	/**
@@ -45,7 +46,7 @@ class SandboxMessageGroup extends WikiMessageGroup {
 	}
 
 	public function getDefinitions() {
-		global $wgTranslateSandboxSuggestions, $wgTranslateSandboxLimit;
+		global $wgTranslateSandboxLimit;
 
 		// This will contain the list of messages shown to the user
 		$list = [];
@@ -61,19 +62,6 @@ class SandboxMessageGroup extends WikiMessageGroup {
 			$title = $translation->getTitle();
 			$handle = new MessageHandle( $title );
 			$index = $title->getNamespace() . ':' . $handle->getKey();
-			$list[$index] = '';
-		}
-
-		// Always add the regular suggestions
-		foreach ( $wgTranslateSandboxSuggestions as $titleText ) {
-			$title = Title::newFromText( $titleText );
-			if ( !$title ) {
-				wfWarn( "Invalid title in \$wgTranslateSandboxSuggestions: $titleText" );
-				continue;
-			}
-
-			$index = $title->getNamespace() . ':' . $handle->getKey();
-			// This index might already exist, but that is okay
 			$list[$index] = '';
 		}
 
@@ -99,7 +87,7 @@ class SandboxMessageGroup extends WikiMessageGroup {
 		$messagesToProvide = $wgTranslateSandboxLimit * 2;
 
 		foreach ( $list as $index => &$translation ) {
-			list( $ns, $page ) = explode( ':', $index, 2 );
+			[ $ns, $page ] = explode( ':', $index, 2 );
 			$title = Title::makeTitle( $ns, "$page/{$this->language}" );
 			$handle = new MessageHandle( $title );
 
@@ -115,8 +103,7 @@ class SandboxMessageGroup extends WikiMessageGroup {
 				}
 			} else {
 				// This might include messages that the user has already translated
-				// or messages given in $wgTranslateSandboxSuggestions or just dated
-				// message index.
+				// or just dated message index.
 				unset( $list[$index] );
 
 				continue;
@@ -135,7 +122,7 @@ class SandboxMessageGroup extends WikiMessageGroup {
 		return $list;
 	}
 
-	public function getChecker() {
+	public function getValidator() {
 		return null;
 	}
 
@@ -155,11 +142,8 @@ class SandboxMessageGroup extends WikiMessageGroup {
 		}
 
 		// Try harder
-		if ( method_exists( $group, 'getKeys' ) ) {
-			$keys = $group->getKeys();
-		} else {
-			$keys = array_keys( $group->getDefinitions() );
-		}
+		$keys = $group->getKeys();
+
 		// Try to find the original key with correct case
 		foreach ( $keys as $realkey ) {
 			if ( $key === strtolower( $realkey ) ) {

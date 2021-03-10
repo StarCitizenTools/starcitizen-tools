@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Document class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -85,7 +85,6 @@ ve.ce.Document.prototype.getDir = function () {
 /**
  * Get a slug at an offset.
  *
- * @method
  * @param {number} offset Offset to get slug at
  * @return {HTMLElement} Slug at offset
  */
@@ -111,10 +110,10 @@ ve.ce.Document.prototype.getNodeAndOffset = function ( offset ) {
 		$viewNodes,
 		countedNodes = [];
 
-	// 1. Step with ve.adjacentDomPosition( ..., { stop: function () { return true; } } )
+	// 1. Step with ve.adjacentDomPosition( …, { stop: function () { return true; } } )
 	// until we hit a position at the correct offset (which is guaranteed to be the first
 	// such position in document order).
-	// 2. Use ve.adjacentDomPosition( ..., { stop: ... } ) once to return all
+	// 2. Use ve.adjacentDomPosition( …, { stop: … } ) once to return all
 	// subsequent positions at the same offset.
 	// 3. Look at the possible positions and pick as follows:
 	//   - If there is a unicorn, return just inside it
@@ -130,6 +129,9 @@ ve.ce.Document.prototype.getNodeAndOffset = function ( offset ) {
 	// contents. In this case, a maximally deep element gives better bounding rectangle
 	// coordinates than any of its containers.
 
+	if ( !this.model.getDocumentRange().containsRange( new ve.Range( offset ) ) ) {
+		throw new Error( 'Offset is out of bounds' );
+	}
 	branchNode = this.getBranchNodeFromOffset( offset );
 	count = branchNode.getOffset() + ( ( branchNode.isWrapped() ) ? 1 : 0 );
 
@@ -352,11 +354,10 @@ ve.ce.Document.prototype.getNodeAndOffset = function ( offset ) {
  *
  * Uses the computed CSS direction value of the current node
  *
- * @method
  * @param {ve.Range} range Range
  * @return {string} 'rtl', 'ltr'
  */
-ve.ce.Document.prototype.getDirectionFromRange = function ( range ) {
+ve.ce.Document.prototype.getDirectionalityFromRange = function ( range ) {
 	var effectiveNode,
 		selectedNodes = this.selectNodes( range, 'covered' );
 

@@ -4,7 +4,7 @@
 	/*!
 	 * VisualEditor keyboard event logger page
 	 *
-	 * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+	 * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
 	 */
 	-->
 	<head>
@@ -47,6 +47,7 @@
 				overflow-y: auto;
 			}
 		</style>
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-apex.css" class="stylesheet-ltr stylesheet-read">
 	</head>
 	<body>
 		<form class="ve-demo-form">
@@ -66,12 +67,40 @@
 		<script src="../../src/ve.EventSequencer.js"></script>
 		<script>
 			( function () {
-				var $form, $content, $log, startTime,
+				var startTime,
+					/* eslint-disable no-jquery/no-global-selector */
+					sel = document.getSelection(),
+					$form = $( '.ve-demo-form' ),
+					$content = $( '.ve-demo-content' ).addClass( 'oo-ui-element-hidden' ),
+					content = $content[ 0 ],
+					$log = $( '.ve-demo-log' ).val( '' ),
+					$imeIdentifier = $( '.ve-demo-identifier' ),
+					/* eslint-enable no-jquery/no-global-selector */
 					oldHtml = '',
-					oldStartOffset = 0,
-					oldEndOffset = 0,
+					oldAnchorPosition = null,
+					oldFocusPosition = null,
 					comments,
 					log = [];
+
+				function getPosition( node, offset ) {
+					var position;
+					if ( node === null ) {
+						return null;
+					}
+					position = [ offset ];
+					while ( node.parentNode !== null && node !== content ) {
+						position.splice(
+							0,
+							0,
+							Array.prototype.indexOf.call(
+								node.parentNode.childNodes,
+								node
+							)
+						);
+						node = node.parentNode;
+					}
+					return position;
+				}
 
 				function eventToObject( e ) {
 					// TODO: flesh this out more
@@ -101,8 +130,8 @@
 					var args = [],
 						msUtc = ( new Date().getTime() - startTime ) / 1000,
 						newHtml = $content.html(),
-						newStartOffset = document.getSelection().anchorOffset,
-						newEndOffset = document.getSelection().focusOffset;
+						newAnchorPosition = getPosition( sel.anchorNode, sel.anchorOffset ),
+						newFocusPosition = getPosition( sel.focusNode, sel.focusOffset );
 
 					if ( oldHtml !== newHtml ) {
 						logWrite( {
@@ -114,20 +143,20 @@
 						oldHtml = newHtml;
 					}
 					if (
-						oldStartOffset !== newStartOffset ||
-						oldEndOffset !== newEndOffset
+						JSON.stringify( oldAnchorPosition ) !== JSON.stringify( newAnchorPosition ) ||
+						JSON.stringify( oldFocusPosition ) !== JSON.stringify( newFocusPosition )
 					) {
 						logWrite( {
 							seq: log.length,
 							time: msUtc,
 							action: 'changeSel',
 							args: [
-								newStartOffset,
-								newEndOffset
+								newAnchorPosition,
+								newFocusPosition
 							]
 						} );
-						oldStartOffset = newStartOffset;
-						oldEndOffset = newEndOffset;
+						oldAnchorPosition = newAnchorPosition;
+						oldFocusPosition = newFocusPosition;
 					}
 					if ( eventName !== undefined ) {
 						args.push( eventName );
@@ -159,16 +188,16 @@
 					e.preventDefault();
 
 					comments = {
-						imeIdentifier: $( '.ve-demo-identifier' ).val(),
+						imeIdentifier: $imeIdentifier.val(),
 						userAgent: navigator.userAgent,
 						startDom: $content.html()
 					};
 
-					$form.hide();
-					$content.show().focus();
+					$form.addClass( 'oo-ui-element-hidden' );
+					$content.removeClass( 'oo-ui-element-hidden' ).trigger( 'focus' );
 				}
 
-				function init() {
+				( function () {
 					var i, len,
 						handlers = {},
 						eventNames = [
@@ -179,10 +208,6 @@
 							'keypress',
 							'input'
 						];
-
-					$form = $( '.ve-demo-form' );
-					$content = $( '.ve-demo-content' ).hide();
-					$log = $( '.ve-demo-log' ).val( '' );
 
 					for ( i = 0, len = eventNames.length; i < len; i++ ) {
 						handlers[ eventNames[ i ] ] =
@@ -195,6 +220,9 @@
 						.on( handlers )
 						.afterLoop( makeAfterLoopHandler() );
 
+					$( document ).on( 'selectstart', makeEventHandler( 'selectstart' ) );
+					$( document ).on( 'selectionchange', makeEventHandler( 'selectionchange' ) );
+
 					startTime = new Date().getTime();
 
 					$form.on( 'submit', start );
@@ -204,9 +232,8 @@
 							this.select();
 						}
 					} );
-				}
+				}() );
 
-				init();
 			}() );
 		</script>
 	</body>

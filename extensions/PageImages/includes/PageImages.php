@@ -1,12 +1,33 @@
 <?php
 
+namespace PageImages;
+
+use ApiBase;
+use ApiMain;
+use FauxRequest;
+use File;
+use IContextSource;
+use MediaWiki\MediaWikiServices;
+use OutputPage;
+use Skin;
+use Title;
+
 /**
- * @license WTFPL 2.0
+ * @license WTFPL
  * @author Max Semenik
  * @author Brad Jorsch
  * @author Thiemo Kreuz
  */
 class PageImages {
+	/**
+	 * @const value for free images
+	 */
+	public const LICENSE_FREE = 'free';
+
+	/**
+	 * @const value for images with any type of license
+	 */
+	public const LICENSE_ANY = 'any';
 
 	/**
 	 * Page property used to store the best page image information.
@@ -17,7 +38,7 @@ class PageImages {
 	 * and cause them to be regenerated.
 	 * @see PageImages::PROP_NAME_FREE
 	 */
-	const PROP_NAME = 'page_image';
+	public const PROP_NAME = 'page_image';
 
 	/**
 	 * Page property used to store the best free page image information
@@ -25,7 +46,7 @@ class PageImages {
 	 * existing page property names on a production instance
 	 * and cause them to be regenerated.
 	 */
-	const PROP_NAME_FREE = 'page_image_free';
+	public const PROP_NAME_FREE = 'page_image_free';
 
 	/**
 	 * Get property name used in page_props table. When a page image
@@ -40,6 +61,24 @@ class PageImages {
 	}
 
 	/**
+	 * Get property names used in page_props table
+	 *
+	 * If the license is free, then only the free property name will be returned,
+	 * otherwise both free and non-free property names will be returned. That's
+	 * because we save the image name only once if it's free and the best image.
+	 *
+	 * @param string $license either LICENSE_FREE or LICENSE_ANY,
+	 * specifying whether to return the non-free property name or not
+	 * @return string|array
+	 */
+	public static function getPropNames( $license ) {
+		if ( $license === self::LICENSE_FREE ) {
+			return self::getPropName( true );
+		}
+		return [ self::getPropName( true ), self::getPropName( false ) ];
+	}
+
+	/**
 	 * Returns page image for a given title
 	 *
 	 * @param Title $title Title to get page image for
@@ -47,9 +86,23 @@ class PageImages {
 	 * @return File|bool
 	 */
 	public static function getPageImage( Title $title ) {
+		// Do not query for special pages or other titles never in the database
+		if ( !$title->canExist() ) {
+			return false;
+		}
+
+		if ( $title->inNamespace( NS_FILE ) ) {
+			return MediaWikiServices::getInstance()->getRepoGroup()->findFile( $title );
+		}
+
+		if ( !$title->exists() ) {
+			// No page id to select from
+			return false;
+		}
+
 		$dbr = wfGetDB( DB_REPLICA );
 		$fileName = $dbr->selectField( 'page_props',
-			[ 'pp_value' ],
+			'pp_value',
 			[
 				'pp_page' => $title->getArticleID(),
 				'pp_propname' => [ self::PROP_NAME, self::PROP_NAME_FREE ]
@@ -60,7 +113,7 @@ class PageImages {
 
 		$file = false;
 		if ( $fileName ) {
-			$file = wfFindFile( $fileName );
+			$file = MediaWikiServices::getInstance()->getRepoGroup()->findFile( $fileName );
 		}
 
 		return $file;
@@ -184,25 +237,11 @@ class PageImages {
 			$api = new ApiMain( new FauxRequest( $request ) );
 			$api->execute();
 
-			if ( defined( 'ApiResult::META_CONTENT' ) ) {
-				$ret += (array)$api->getResult()->getResultData( [ 'query', 'pages' ],
-					[ 'Strip' => 'base' ] );
-			} else {
-				$data = $api->getResultData();
-				if ( isset( $data['query']['pages'] ) ) {
-					$ret += $data['query']['pages'];
-				}
-			}
+			$ret += (array)$api->getResult()->getResultData(
+				[ 'query', 'pages' ], [ 'Strip' => 'base' ]
+			);
 		}
 		return $ret;
-	}
-
-	/**
-	 * Hook function called after the extension is loaded to define PAGE_IMAGES_INSTALLED
-	 * @return null
-	 */
-	public static function onRegistration() {
-		define( 'PAGE_IMAGES_INSTALLED', true );
 	}
 
 	/**

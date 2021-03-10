@@ -8,14 +8,14 @@
 /**
  * Mostly test mirroring and failure modes.
  */
-class TTMServerMessageUpdateJobTest extends MediaWikiTestCase {
+class TTMServerMessageUpdateJobTest extends MediaWikiIntegrationTestCase {
 	/**
 	 * @var WritableTTMServer[] used to link our mocks with TestableTTMServer built by the
 	 * factory
 	 */
 	public static $mockups = [];
 
-	public function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		self::$mockups = [];
 		$this->setMwGlobals( [
@@ -36,7 +36,7 @@ class TTMServerMessageUpdateJobTest extends MediaWikiTestCase {
 		] );
 	}
 
-	public function tearDown() {
+	protected function tearDown(): void {
 		parent::tearDown();
 		self::$mockups = [];
 	}
@@ -93,7 +93,7 @@ class TTMServerMessageUpdateJobTest extends MediaWikiTestCase {
 				->getMock()
 		);
 		$job->run();
-		$this->assertEquals( 1, count( $job->getResentJobs() ) );
+		$this->assertCount( 1, $job->getResentJobs() );
 		$expectedParams = [
 			'errorCount' => 1,
 			'service' => 'secondary',
@@ -132,7 +132,7 @@ class TTMServerMessageUpdateJobTest extends MediaWikiTestCase {
 				->getMock()
 		);
 		$job->run();
-		$this->assertEquals( 2, count( $job->getResentJobs() ) );
+		$this->assertCount( 2, $job->getResentJobs() );
 		$expectedParams = [
 			'errorCount' => 1,
 			'service' => 'primary',
@@ -249,7 +249,7 @@ class TTMServerMessageUpdateJobTest extends MediaWikiTestCase {
 				->getMock()
 		);
 		$job->run();
-		$this->assertEquals( 1, count( $job->getResentJobs() ) );
+		$this->assertCount( 1, $job->getResentJobs() );
 		$expectedParams = [
 			'errorCount' => 0,
 			'retryCount' => 1,
@@ -296,7 +296,7 @@ class TTMServerMessageUpdateJobTest extends MediaWikiTestCase {
 				->getMock()
 		);
 		$job->run();
-		$this->assertEquals( 2, count( $job->getResentJobs() ) );
+		$this->assertCount( 2, $job->getResentJobs() );
 		$expectedParams = [
 			'errorCount' => 1,
 			'retryCount' => 0,
@@ -357,7 +357,7 @@ class TTMServerMessageUpdateJobTest extends MediaWikiTestCase {
 				->getMock()
 		);
 		$job->run();
-		$this->assertEquals( 0, count( $job->getResentJobs() ) );
+		$this->assertCount( 0, $job->getResentJobs() );
 	}
 }
 
@@ -370,10 +370,12 @@ class TTMServerMessageUpdateJobTest extends MediaWikiTestCase {
 class TestableTTMServerMessageUpdateJob extends TTMServerMessageUpdateJob {
 	private $resentJobs = [];
 	private $handleMock;
+
 	public function __construct( Title $title, $params, $handleMock ) {
 		parent::__construct( $title, $params );
 		$this->handleMock = $handleMock;
 	}
+
 	public function resend( TTMServerMessageUpdateJob $job ) {
 		$this->resentJobs[] = $job;
 	}
@@ -399,6 +401,7 @@ class TestableTTMServerMessageUpdateJob extends TTMServerMessageUpdateJob {
  */
 class TestableTTMServer extends TTMServer implements WritableTTMServer {
 	private $delegate;
+
 	public function __construct( array $config ) {
 		parent::__construct( $config );
 		$this->delegate = TTMServerMessageUpdateJobTest::$mockups[$config['name']];
@@ -434,5 +437,9 @@ class TestableTTMServer extends TTMServer implements WritableTTMServer {
 
 	public function isFrozen() {
 		return $this->delegate->isFrozen();
+	}
+
+	public function setDoReIndex() {
+		return $this->delegate->setDoReIndex();
 	}
 }

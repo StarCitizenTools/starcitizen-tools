@@ -1,17 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"BukhariSaeed",
 			"Muhammad Shuaib"
 		]
 	},
 	"templatedata-doc-desc-empty": "کوئی وضاحت نہیں۔",
 	"templatedata-doc-no-params-set": "کوئی پیرامیٹر درج نہیں کیا گیا",
 	"templatedata-doc-param-autovalue": "خودکار قدر",
-	"templatedata-doc-param-autovalue-empty": "خالی",
 	"templatedata-doc-param-default": "طے شدہ",
-	"templatedata-doc-param-default-empty": "خالی",
 	"templatedata-doc-param-example": "مثال",
-	"templatedata-doc-param-example-empty": "خالی",
 	"templatedata-doc-param-desc": "وضاحت",
 	"templatedata-doc-param-desc-empty": "کوئی وضاحت نہیں",
 	"templatedata-doc-param-name": "پیرامیٹر",
@@ -25,7 +23,7 @@
 	"templatedata-doc-param-type-date": "تاریخ",
 	"templatedata-doc-param-type-line": "سطر",
 	"templatedata-doc-param-type-number": "عدد",
-	"templatedata-doc-param-type-string": "سٹرنگ",
+	"templatedata-doc-param-type-string": "اِسٹرنگ",
 	"templatedata-doc-param-type-unbalanced-wikitext": "غیر متوازن ویکی متن",
 	"templatedata-doc-param-type-url": "یو آر ایل",
 	"templatedata-doc-param-type-wiki-file-name": "فائل",

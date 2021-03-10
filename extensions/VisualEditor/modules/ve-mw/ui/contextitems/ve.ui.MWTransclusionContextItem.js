@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWTransclusionContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -67,10 +67,11 @@ ve.ui.MWTransclusionContextItem.static.isCompatibleWith =
  * @inheritdoc
  */
 ve.ui.MWTransclusionContextItem.prototype.getDescription = function () {
+	var nodeClass = ve.ce.nodeFactory.lookup( this.model.constructor.static.name );
 	return ve.msg(
 		'visualeditor-dialog-transclusion-contextitem-description',
-		ve.ce.MWTransclusionNode.static.getDescription( this.model ),
-		ve.ce.MWTransclusionNode.static.getTemplatePartDescriptions( this.model ).length
+		nodeClass.static.getDescription( this.model ),
+		nodeClass.static.getTemplatePartDescriptions( this.model ).length
 	);
 };
 
@@ -82,7 +83,9 @@ ve.ui.MWTransclusionContextItem.prototype.onEditButtonClick = function () {
 		selection = surfaceModel.getSelection();
 
 	if ( selection instanceof ve.dm.TableSelection ) {
-		surfaceModel.setLinearSelection( selection.getOuterRanges()[ 0 ] );
+		surfaceModel.setLinearSelection( selection.getOuterRanges(
+			surfaceModel.getDocument()
+		)[ 0 ] );
 	}
 
 	// Parent method

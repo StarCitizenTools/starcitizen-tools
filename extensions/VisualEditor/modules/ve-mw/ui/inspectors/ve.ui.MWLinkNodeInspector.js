@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWLinkNodeInspector class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -79,6 +79,7 @@ ve.ui.MWLinkNodeInspector.prototype.getSetupProcess = function ( data ) {
 			this.targetInput.setValue(
 				this.selectedNode ? this.selectedNode.getAttribute( 'href' ) : ''
 			);
+			this.targetInput.setReadOnly( this.isReadOnly() );
 		}, this );
 };
 
@@ -134,21 +135,9 @@ ve.ui.MWLinkNodeInspector.prototype.getTeardownProcess = function ( data ) {
 					ve.dm.TransactionBuilder.static.newFromReplacement( doc, nodeRange, content )
 				);
 				setTimeout( function () {
-					// This just removed the node and turned it into an annotation. Thus, this inspector
-					// is about to go away. It'll be replaced by a context popup for the new annotation,
-					// because the cursor will still be contained within it. Before it goes away, adjust
-					// the selection to make _sure_ that if the user just starts typing, it won't delete
-					// the entire link. We need to manually fiddle the selection a little, because
-					// annotations mean that the LinearSelection can't granularly say whether the
-					// selection starts inside or outside of the node.
-					// If you can think of a test function for "the selection has stabilised", this could
-					// be moved to ve.scheduler.
-					// Note: we can't rely on surfaceView.activeLink, because the selection-focus created
-					// by the transaction might be outside the link node. As such, get the node immediately
-					// after the offset where we inserted the annotation, and then get the closest link
-					// annotation to it.
-					var node = surfaceView.getDocument().getNodeAndOffset( nodeRange.start + 1 ).node;
-					surfaceView.selectNodeContents( $( node ).closest( '.ve-ce-linkAnnotation' )[ 0 ] );
+					surfaceView.selectAnnotation( function ( view ) {
+						return view.model instanceof ve.dm.MWExternalLinkAnnotation;
+					} );
 				} );
 			} else {
 				surfaceModel.change(

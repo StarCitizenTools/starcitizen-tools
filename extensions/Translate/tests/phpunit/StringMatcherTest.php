@@ -6,21 +6,21 @@
  * @file
  */
 
-class StringMatcherTest extends MediaWikiTestCase {
-	/**
-	 * @dataProvider messageKeyProvider
-	 */
-	public function testKeyPrefixing( $key, $expected, $prefix, $rules, $comment ) {
+class StringMatcherTest extends MediaWikiIntegrationTestCase {
+	/** @dataProvider messageKeyProvider */
+	public function testKeyPrefixing(
+		string $key, string $expected, string $prefix, array $rules
+	): void {
 		$matcher = new StringMatcher( $prefix, $rules );
 		$mangled = $matcher->mangle( $key );
 		$title = Title::makeTitleSafe( NS_MEDIAWIKI, $mangled );
 		$this->assertInstanceOf( 'Title', $title, "Key '$mangled' did not produce valid title" );
 		$unmangled = $matcher->unmangle( $mangled );
-		$this->assertEquals( $key, $unmangled, 'Mangling is reversable' );
+		$this->assertEquals( $key, $unmangled, 'Mangling is reversible' );
 		$this->assertEquals( $expected, $mangled, 'Message is prefixed correctly' );
 	}
 
-	public function messageKeyProvider() {
+	public function messageKeyProvider(): array {
 		// The fourth parameter causes the key to be prefixed or unprefixed
 		$keys = [
 			[ 'key', 'p-key', 'p-', [ 'key' ], 'Exact match' ],
@@ -43,28 +43,28 @@ class StringMatcherTest extends MediaWikiTestCase {
 				'Message key with special chars'
 			],
 			[ 'keyblah/i', 'p-keyblah/i', 'p-', [ 'key*/i' ], 'Slash in pattern does not trigger modifier' ],
+			[
+				'p-key', 'p-key', 'p-', [ 'b-*' ],
+				'Unmangle does not remove prefix if pattern doesn\'t match'
+			]
 		];
 
 		return $keys;
 	}
 
-	/**
-	 * @dataProvider problematicMessageKeyProvider
-	 */
-	public function testKeyMangling( $key, $comment ) {
-		$matcher = StringMatcher::EmptyMatcher();
+	/** @dataProvider problematicMessageKeyProvider */
+	public function testKeyMangling( string $key ): void {
+		$matcher = new StringMatcher();
 		$mangled = $matcher->mangle( $key );
-
 		$title = Title::makeTitleSafe( NS_MEDIAWIKI, $mangled );
 		$this->assertInstanceOf( 'Title', $title, "Key '$mangled' did not produce a valid title" );
+
 		$unmangled = $matcher->unmangle( $mangled );
 		$this->assertEquals( $key, $unmangled, 'Mangling is reversible' );
 	}
 
-	/**
-	 * @dataProvider problematicMessageKeyProvider
-	 */
-	public function testKeyManglingWithPrefixing( $key, $comment ) {
+	/** @dataProvider problematicMessageKeyProvider */
+	public function testKeyManglingWithPrefixing( string $key ): void {
 		$matcher = new StringMatcher( 'prefix', [ '*' ] );
 		$mangled = $matcher->mangle( $key );
 		$title = Title::makeTitleSafe( NS_MEDIAWIKI, $mangled );
@@ -74,7 +74,7 @@ class StringMatcherTest extends MediaWikiTestCase {
 		$this->assertEquals( $key, $unmangled, 'Mangling is reversible' );
 	}
 
-	public function problematicMessageKeyProvider() {
+	public function problematicMessageKeyProvider(): array {
 		$keys = [
 			[ 'key', 'simple string' ],
 			[ 'key[]', 'string with brackets' ],

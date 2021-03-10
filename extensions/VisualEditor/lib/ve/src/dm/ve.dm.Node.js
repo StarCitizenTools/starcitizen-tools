@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Node class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -29,8 +29,15 @@ ve.dm.Node = function VeDmNode( element ) {
 };
 
 /**
+ * @event attributeChange
+ * @param {string} key
+ * @param {Mixed} oldValue
+ * @param {Mixed} newValue
+ */
+
+/**
  * @event lengthChange
- * @param diff
+ * @param {number} diff
  */
 
 /**
@@ -186,6 +193,24 @@ ve.dm.Node.static.isCellable = false;
 ve.dm.Node.static.canContainContent = false;
 
 /**
+ * Whether this node type behaves like a list when diffing.
+ *
+ * @static
+ * @property {boolean}
+ * @inheritable
+ */
+ve.dm.Node.static.isDiffedAsList = false;
+
+/**
+ * Whether this node type behaves like a leaf when diffing.
+ *
+ * @static
+ * @property {boolean}
+ * @inheritable
+ */
+ve.dm.Node.static.isDiffedAsLeaf = false;
+
+/**
  * Whether this node type has significant whitespace. Only applies to content container nodes
  * (i.e. can only be true if canContainContent is also true).
  *
@@ -242,7 +267,7 @@ ve.dm.Node.static.suggestedParentNodeTypes = null;
  * @property {string[]}
  * @inheritable
  */
-ve.dm.Node.static.blacklistedAnnotationTypes = [];
+ve.dm.Node.static.disallowedAnnotationTypes = [];
 
 /**
  * Default attributes to set for newly created linear model elements. These defaults will be used
@@ -438,6 +463,13 @@ ve.dm.Node.prototype.isInternal = function () {
 /**
  * @inheritdoc ve.Node
  */
+ve.dm.Node.prototype.isMetaData = function () {
+	return this.constructor.static.isMetaData;
+};
+
+/**
+ * @inheritdoc ve.Node
+ */
 ve.dm.Node.prototype.isWrapped = function () {
 	return this.constructor.static.isWrapped;
 };
@@ -492,9 +524,22 @@ ve.dm.Node.prototype.isCellEditable = function () {
 };
 
 /**
+ * @inheritdoc ve.Node
+ */
+ve.dm.Node.prototype.isDiffedAsList = function () {
+	return this.constructor.static.isDiffedAsList;
+};
+
+/**
+ * @inheritdoc ve.Node
+ */
+ve.dm.Node.prototype.isDiffedAsLeaf = function () {
+	return this.constructor.static.isDiffedAsLeaf;
+};
+
+/**
  * Check if the node can have a slug before it.
  *
- * @method
  * @return {boolean} Whether the node can have a slug before it
  */
 ve.dm.Node.prototype.canHaveSlugBefore = function () {
@@ -508,6 +553,19 @@ ve.dm.Node.prototype.canHaveSlugBefore = function () {
  * @return {boolean} Whether the node can have a slug after it
  */
 ve.dm.Node.prototype.canHaveSlugAfter = ve.dm.Node.prototype.canHaveSlugBefore;
+
+/**
+ * A string identifier used to suppress slugs
+ *
+ * If sequential nodes have the same non-null suppressSlugType, then
+ * no slug is shown, e.g. two floated images can return 'float' to
+ * suppress the slug between them.
+ *
+ * @return {string|null} Type
+ */
+ve.dm.Node.prototype.suppressSlugType = function () {
+	return null;
+};
 
 /**
  * @inheritdoc ve.Node
@@ -531,9 +589,17 @@ ve.dm.Node.prototype.shouldIgnoreChildren = function () {
 };
 
 /**
+ * Check if the node can be the root of a branch exposed in a ve.ce.Surface
+ *
+ * @return {boolean} Node can be the root of a surfaced branch
+ */
+ve.dm.Node.prototype.isSurfaceable = function () {
+	return this.hasChildren() && !this.canContainContent() && !this.isMetaData() && !this.getChildNodeTypes();
+};
+
+/**
  * Check if the node has an ancestor with matching type and attribute values.
  *
- * @method
  * @param {string} type Node type to match
  * @param {Object} [attributes] Node attributes to match
  * @return {boolean} Node has an ancestor with matching type and attribute values
@@ -554,7 +620,6 @@ ve.dm.Node.prototype.hasMatchingAncestor = function ( type, attributes ) {
 /**
  * Check if the node matches type and attribute values.
  *
- * @method
  * @param {string} type Node type to match
  * @param {Object} [attributes] Node attributes to match
  * @return {boolean} Node matches type and attribute values
@@ -590,7 +655,6 @@ ve.dm.Node.prototype.getLength = function () {
  * This should only be called after a relevant change to the document data. Calling this method will
  * not change the document data.
  *
- * @method
  * @param {number} length Length of content
  * @fires lengthChange
  * @fires update
@@ -620,7 +684,6 @@ ve.dm.Node.prototype.setLength = function ( length ) {
  * This should only be called after a relevant change to the document data. Calling this method will
  * not change the document data.
  *
- * @method
  * @param {number} adjustment Amount to adjust length by
  * @fires lengthChange
  * @fires update
@@ -663,7 +726,6 @@ ve.dm.Node.prototype.getOffset = function () {
  *  - Have the same depth
  *  - Have similar ancestry (each node upstream must have the same type)
  *
- * @method
  * @param {ve.dm.Node} node Node to consider merging with
  * @return {boolean} Nodes can be merged
  */

@@ -2,9 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Aftab1995",
+			"Aftabuzzaman",
 			"Leemon2010",
 			"Tauhid16",
-			"Aftabuzzaman"
+			"আফতাবুজ্জামান"
 		]
 	},
 	"templatedata-doc-desc-empty": "বিবরণ নেই।",
@@ -13,11 +14,8 @@
 	"templatedata-doc-format-inline": "এই টেমপ্লেটটি প্যারামিটারের একই সরলরেখা বিন্যাসন পছন্দ করে।",
 	"templatedata-doc-no-params-set": "কোন প্যারামিটার নির্দিষ্ট করা হয়নি",
 	"templatedata-doc-param-autovalue": "স্বয়ংক্রিয় মান",
-	"templatedata-doc-param-autovalue-empty": "খালি",
 	"templatedata-doc-param-default": "পূর্বনির্ধারিত",
-	"templatedata-doc-param-default-empty": "খালি",
 	"templatedata-doc-param-example": "উদাহরণ",
-	"templatedata-doc-param-example-empty": "খালি",
 	"templatedata-doc-param-desc": "বিবরণ",
 	"templatedata-doc-param-desc-empty": "বিবরণ নেই",
 	"templatedata-doc-param-name": "প্যারামিটার",

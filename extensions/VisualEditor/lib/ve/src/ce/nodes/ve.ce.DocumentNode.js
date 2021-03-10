@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable DocumentNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -16,22 +16,27 @@
  * @param {Object} [config] Configuration options
  */
 ve.ce.DocumentNode = function VeCeDocumentNode( model, surface, config ) {
+	// Properties
+	this.surface = surface;
+
 	// Parent constructor
 	ve.ce.DocumentNode.super.call( this, model, config );
 
 	// Mixin constructor
 	ve.ce.ContentEditableNode.call( this );
 
-	// Properties
-	this.surface = surface;
-
 	// Set root
 	this.setRoot( this );
 
 	// DOM changes
-	this.$element.addClass( 've-ce-documentNode' );
+	// TODO: Remove ve-ce-rootNode class
+	this.$element
+		.addClass( 've-ce-documentNode ve-ce-attachedRootNode ve-ce-rootNode' )
+		.attr( 'tabindex', 0 );
 	// Prevent Grammarly from polluting the DOM (T165746)
 	this.$element.attr( 'data-gramm', 'false' );
+
+	this.$element.attr( 'role', 'textbox' );
 };
 
 /* Inheritance */
@@ -52,7 +57,6 @@ ve.ce.DocumentNode.static.name = 'document';
  *
  * For a document node is the same as the inner length, which is why we override it here.
  *
- * @method
  * @return {number} Length of the entire node
  */
 ve.ce.DocumentNode.prototype.getOuterLength = function () {
@@ -62,29 +66,10 @@ ve.ce.DocumentNode.prototype.getOuterLength = function () {
 /**
  * Get the surface the document is attached to.
  *
- * @method
  * @return {ve.ce.Surface} Surface the document is attached to
  */
 ve.ce.DocumentNode.prototype.getSurface = function () {
 	return this.surface;
-};
-
-/**
- * Disable editing.
- *
- * @method
- */
-ve.ce.DocumentNode.prototype.disable = function () {
-	this.setContentEditable( false );
-};
-
-/**
- * Enable editing.
- *
- * @method
- */
-ve.ce.DocumentNode.prototype.enable = function () {
-	this.setContentEditable( true );
 };
 
 /* Registration */

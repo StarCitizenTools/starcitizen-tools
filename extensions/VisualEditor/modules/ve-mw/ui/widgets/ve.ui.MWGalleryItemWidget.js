@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWGalleryItemWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -34,10 +34,14 @@ ve.ui.MWGalleryItemWidget = function VeUiMWGalleryItemWidget( imageInfo, config 
 
 	this.$element
 		.addClass( 've-ui-mwGalleryDialog-image-container' ) // TODO: put in new CSS file?
+		.addClass( config.isMobile ?
+			've-ui-mwGalleryDialog-image-container-mobile' :
+			've-ui-mwGalleryDialog-image-container-desktop'
+		)
 		.css( 'background-image', 'url(' + this.thumbUrl + ')' );
 
 	// Mixin constructors
-	OO.ui.mixin.DraggableElement.call( this, ve.extendObject( { $handle: this.$element }, this.config ) );
+	OO.ui.mixin.DraggableElement.call( this, ve.extendObject( { $handle: this.$element }, config ) );
 	OO.ui.mixin.TabIndexedElement.call( this, config );
 
 	this.$element.on( {
@@ -72,6 +76,7 @@ ve.ui.MWGalleryItemWidget.prototype.onItemClick = function () {
  * Handle key press events
  *
  * @param {jQuery.Event} e Key press event
+ * @return {boolean}
  */
 ve.ui.MWGalleryItemWidget.prototype.onItemKeyPress = function ( e ) {
 	if ( e.which === OO.ui.Keys.ENTER ) {

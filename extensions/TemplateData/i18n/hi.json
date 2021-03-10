@@ -1,18 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Siddhartha Ghai",
+			"Ajeetsinghawadhi",
 			"Phoenix303",
-			"Sfic"
+			"Sfic",
+			"Siddhartha Ghai"
 		]
 	},
 	"templatedata-desc": "साँचा प्राचलों के लिए डाटा स्टोरेज सुविधा प्रदान करता है (JSON के प्रयोग द्वारा)",
 	"templatedata-doc-desc-empty": "कोई विवरण नहीं।",
-	"templatedata-doc-param-autovalue-empty": "खाली",
 	"templatedata-doc-param-default": "डिफ़ॉल्ट",
-	"templatedata-doc-param-default-empty": "खाली",
 	"templatedata-doc-param-example": "उदाहरण",
-	"templatedata-doc-param-example-empty": "खाली",
 	"templatedata-doc-param-desc": "वर्णन",
 	"templatedata-doc-param-desc-empty": "कोई विवरण नहीं",
 	"templatedata-doc-param-name": "प्राचल",
@@ -59,6 +57,7 @@
 	"templatedata-modal-errormsg": "त्रुटियाँ पाई गयीं। कृपया सुनिश्चित करें कि कोई भी प्राचल नाम खाली ना हों और प्रतिलिपियाँ ना हों, और प्राचल नामों में \"$1\", \"$2\" अथवा \"$3\" न हो।",
 	"templatedata-modal-errormsg-import-noparams": "आयात के समय कोई नये प्राचल नहीं पाए गये।",
 	"templatedata-modal-format-block": "अवरोध",
+	"templatedata-modal-format-inline": "इनलाइन",
 	"templatedata-modal-json-error-replace": "बदलें",
 	"templatedata-modal-notice-import-numparams": "$1 {{PLURAL:$1|नया प्राचल आयात किया गया|नये प्राचल आयत किये गये}}।",
 	"templatedata-modal-table-param-actions": "क्रियाएँ",

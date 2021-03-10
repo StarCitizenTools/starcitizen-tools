@@ -8,12 +8,16 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\Jobs\GenericTranslateJob;
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+use MediaWiki\MediaWikiServices;
+
 /**
  * Logic for handling automatic message group state changes
  *
  * @ingroup JobQueue
  */
-class MessageGroupStatesUpdaterJob extends Job {
+class MessageGroupStatesUpdaterJob extends GenericTranslateJob {
 	/**
 	 * @param Title $title
 	 * @param array $params
@@ -47,6 +51,11 @@ class MessageGroupStatesUpdaterJob extends Job {
 	}
 
 	public function run() {
+		$lb = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		if ( !$lb->waitForReplication() ) {
+			$this->logWarning( 'Continuing despite replication lag' );
+		}
+
 		$title = $this->title;
 		$handle = new MessageHandle( $title );
 		$code = $handle->getCode();
@@ -128,7 +137,7 @@ class MessageGroupStatesUpdaterJob extends Job {
 	 */
 	public static function getNewState( $stats, $transitions ) {
 		foreach ( $transitions as $transition ) {
-			list( $newState, $conds ) = $transition;
+			[ $newState, $conds ] = $transition;
 			$match = true;
 
 			foreach ( $conds as $type => $cond ) {

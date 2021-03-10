@@ -1,11 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"Diki Ananta",
 			"NoiX180",
-			"Pras"
+			"Pras",
+			"Sumbukompor"
 		]
 	},
-	"scribunto-desc": "Rangka kerja kanggo nyisipaké basa skrip nèng kaca MediaWiki",
+	"scribunto-desc": "Rangka kerja kanggo nyisipaké basa skrip nèng kaca MédiaWiki",
 	"scribunto-line": "ing larik $1",
 	"scribunto-module-line": "ing $1 larik $2",
 	"scribunto-parser-dialog-title": "Masalah skrip",
@@ -27,9 +29,6 @@
 	"scribunto-module-with-errors-category-desc": "Modhulé ngemu masalah ing njeroné.",
 	"scribunto-limitreport-timeusage": "Panggunané wektu Lua",
 	"scribunto-limitreport-timeusage-value": "$1/$2 sekon",
-	"apihelp-scribunto-console-param-title": "Sesirah modhul sing arep diuji.",
-	"apihelp-scribunto-console-param-content": "Kontèn anyaré modhul.",
-	"apihelp-scribunto-console-param-session": "Token sèsi.",
 	"nstab-module": "Modhul",
 	"tooltip-ca-nstab-module": "Deleng kaca modhul"
 }

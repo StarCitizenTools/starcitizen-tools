@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Surface class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -15,8 +15,7 @@
 ve.ce.SurfaceObserver = function VeCeSurfaceObserver( surface ) {
 	// Properties
 	this.surface = surface;
-	this.documentView = surface.getDocument();
-	this.domDocument = this.documentView.getDocumentNode().getElementDocument();
+	this.domDocument = surface.attachedRoot.getElementDocument();
 	this.polling = false;
 	this.disabled = false;
 	this.timeoutId = null;
@@ -32,8 +31,6 @@ OO.initClass( ve.ce.SurfaceObserver );
 
 /**
  * Clear polling data.
- *
- * @method
  */
 ve.ce.SurfaceObserver.prototype.clear = function () {
 	this.rangeState = null;
@@ -41,20 +38,15 @@ ve.ce.SurfaceObserver.prototype.clear = function () {
 
 /**
  * Detach from the document view
- *
- * @method
  */
 ve.ce.SurfaceObserver.prototype.detach = function () {
 	this.surface = null;
-	this.documentView = null;
 	this.domDocument = null;
 	this.rangeState = null;
 };
 
 /**
  * Start the setTimeout synchronisation loop
- *
- * @method
  */
 ve.ce.SurfaceObserver.prototype.startTimerLoop = function () {
 	this.polling = true;
@@ -64,7 +56,6 @@ ve.ce.SurfaceObserver.prototype.startTimerLoop = function () {
 /**
  * Loop once with `setTimeout`
  *
- * @method
  * @param {boolean} firstTime Wait before polling
  */
 ve.ce.SurfaceObserver.prototype.timerLoop = function ( firstTime ) {
@@ -87,8 +78,6 @@ ve.ce.SurfaceObserver.prototype.timerLoop = function ( firstTime ) {
 
 /**
  * Stop polling
- *
- * @method
  */
 ve.ce.SurfaceObserver.prototype.stopTimerLoop = function () {
 	if ( this.polling === true ) {
@@ -114,8 +103,6 @@ ve.ce.SurfaceObserver.prototype.enable = function () {
 
 /**
  * Poll for changes.
- *
- * @method
  */
 ve.ce.SurfaceObserver.prototype.pollOnce = function () {
 	this.pollOnceInternal( true );
@@ -123,8 +110,6 @@ ve.ce.SurfaceObserver.prototype.pollOnce = function () {
 
 /**
  * Poll to update SurfaceObserver, but don't signal any changes back to the Surface
- *
- * @method
  */
 ve.ce.SurfaceObserver.prototype.pollOnceNoCallback = function () {
 	this.pollOnceInternal( false );
@@ -134,8 +119,6 @@ ve.ce.SurfaceObserver.prototype.pollOnceNoCallback = function () {
  * Poll to update SurfaceObserver, but only check for selection changes
  *
  * Used as an optimisation when you know the content hasn't changed
- *
- * @method
  */
 ve.ce.SurfaceObserver.prototype.pollOnceSelection = function () {
 	this.pollOnceInternal( true, true );
@@ -144,7 +127,6 @@ ve.ce.SurfaceObserver.prototype.pollOnceSelection = function () {
 /**
  * Poll for changes.
  *
- * @method
  * @private
  * @param {boolean} signalChanges If there changes are observed, call Surface#handleObservedChange
  * @param {boolean} selectionOnly Check for selection changes only
@@ -159,7 +141,7 @@ ve.ce.SurfaceObserver.prototype.pollOnceInternal = function ( signalChanges, sel
 	oldState = this.rangeState;
 	newState = new ve.ce.RangeState(
 		oldState,
-		this.documentView.getDocumentNode(),
+		this.surface.attachedRoot,
 		selectionOnly
 	);
 	this.rangeState = newState;

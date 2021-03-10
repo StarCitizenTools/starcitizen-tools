@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel BranchNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -56,7 +56,6 @@ OO.mixinClass( ve.dm.BranchNode, ve.BranchNode );
 /**
  * Add a child node to the end of the list.
  *
- * @method
  * @param {ve.dm.BranchNode} childModel Item to add
  * @return {number} New number of children
  * @fires splice
@@ -70,7 +69,6 @@ ve.dm.BranchNode.prototype.push = function ( childModel ) {
 /**
  * Remove a child node from the end of the list.
  *
- * @method
  * @return {ve.dm.BranchNode} Removed childModel
  * @fires splice
  * @fires update
@@ -87,7 +85,6 @@ ve.dm.BranchNode.prototype.pop = function () {
 /**
  * Add a child node to the beginning of the list.
  *
- * @method
  * @param {ve.dm.BranchNode} childModel Item to add
  * @return {number} New number of children
  * @fires splice
@@ -101,7 +98,6 @@ ve.dm.BranchNode.prototype.unshift = function ( childModel ) {
 /**
  * Remove a child node from the beginning of the list.
  *
- * @method
  * @return {ve.dm.BranchNode} Removed childModel
  * @fires splice
  * @fires update
@@ -118,7 +114,6 @@ ve.dm.BranchNode.prototype.shift = function () {
 /**
  * Add and/or remove child nodes at an offset.
  *
- * @method
  * @param {number} index Index to remove and or insert nodes at
  * @param {number} howmany Number of nodes to remove
  * @param {...ve.dm.BranchNode} [nodes] Variadic list of nodes to insert
@@ -159,7 +154,8 @@ ve.dm.BranchNode.prototype.splice = function () {
  * TODO: The function name is misleading: in ContentBranchNodes it sets up inline slugs
  */
 ve.dm.BranchNode.prototype.setupBlockSlugs = function () {
-	var i, len,
+	var i, j, len, canHaveSlugAfter, canHaveSlugBefore,
+		suppressSlugTypeAfter, suppressSlugTypeBefore,
 		isBlock = this.canHaveChildrenNotContent();
 
 	this.slugPositions = {};
@@ -169,44 +165,47 @@ ve.dm.BranchNode.prototype.setupBlockSlugs = function () {
 		return;
 	}
 
+	// Consider every position between two child nodes, before first child and after last child.
+	// Skip over metadata children. Add slugs in appropriate places.
+
 	// Support: Firefox
-	// If this content branch no longer has any non-internal items, insert a slug to keep the node
-	// from becoming invisible/unfocusable. In Firefox, backspace after Ctrl+A leaves the document
-	// completely empty, so this ensures DocumentNode gets a slug.
-	if (
-		this.getLength() === 0 ||
-		( this.children.length === 1 && this.children[ 0 ].isInternal() )
-	) {
-		this.slugPositions[ 0 ] = true;
-	} else {
-		// Iterate over all children of this branch and add slugs in appropriate places
-		for ( i = 0, len = this.children.length; i < len; i++ ) {
-			// Don't put slugs after internal nodes
-			if ( this.children[ i ].isInternal() ) {
-				continue;
-			}
-			// First sluggable child (left side)
-			if ( i === 0 && this.children[ i ].canHaveSlugBefore() ) {
-				this.slugPositions[ i ] = true;
-			}
-			if ( this.children[ i ].canHaveSlugAfter() ) {
-				if (
-					// Last sluggable child (right side)
-					i === this.children.length - 1 ||
-					// Sluggable child followed by another sluggable child (in between)
-					( this.children[ i + 1 ] && this.children[ i + 1 ].canHaveSlugBefore() )
-				) {
-					this.slugPositions[ i + 1 ] = true;
-				}
+	// Note that this inserts a slug at position 0 if this content branch has no items or only
+	// internal items, keeping the node from becoming invisible/unfocusable. In Firefox, backspace
+	// after Ctrl+A leaves the document completely empty, so this ensures DocumentNode gets a slug.
+
+	len = this.children.length;
+	i = -1; // from -1 to len-1
+	j = 0; // from 0 to len
+	while ( i < len ) {
+		// If the next node is a meta item, find the first non-meta node after it, and consider that
+		// one instead when deciding to insert a slug. Meta nodes themselves don't have slugs.
+		while ( j < len && this.children[ j ].isMetaData() ) {
+			j++;
+		}
+
+		// Can have slug at the beginning, or after every node which allows it (except internal nodes)
+		canHaveSlugAfter = i === -1 || ( this.children[ i ].canHaveSlugAfter() &&
+			!this.children[ i ].isInternal() );
+		// Can have slug at the end, or before every node which allows it
+		canHaveSlugBefore = j === len || this.children[ j ].canHaveSlugBefore();
+
+		if ( canHaveSlugAfter && canHaveSlugBefore ) {
+			suppressSlugTypeAfter = this.children[ j ] && this.children[ j ].suppressSlugType();
+			suppressSlugTypeBefore = this.children[ i ] && this.children[ i ].suppressSlugType();
+			// Slugs are suppressed if they have the same string type, e.g. for adjacent floated images
+			if ( !( typeof suppressSlugTypeAfter === 'string' && suppressSlugTypeAfter === suppressSlugTypeBefore ) ) {
+				this.slugPositions[ j ] = true;
 			}
 		}
+
+		i = j;
+		j++;
 	}
 };
 
 /**
  * Check in the branch node has a slug at a particular offset
  *
- * @method
  * @param {number} offset Offset to check for a slug at
  * @return {boolean} There is a slug at the offset
  */

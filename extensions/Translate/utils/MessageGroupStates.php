@@ -14,7 +14,7 @@
  * @since 2012-10-05
  */
 class MessageGroupStates {
-	const CONDKEY = 'state conditions';
+	private const CONDKEY = 'state conditions';
 
 	protected $config;
 
@@ -31,10 +31,6 @@ class MessageGroupStates {
 
 	public function getConditions() {
 		$conf = $this->config;
-		if ( isset( $conf[self::CONDKEY] ) ) {
-			return $conf[self::CONDKEY];
-		} else {
-			return [];
-		}
+		return $conf[self::CONDKEY] ?? [];
 	}
 }

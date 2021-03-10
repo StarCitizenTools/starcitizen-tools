@@ -1,15 +1,22 @@
 <?php
+declare( strict_types = 1 );
 
-class MessageGroupBaseTest extends MediaWikiTestCase {
+use MediaWiki\Extension\Translate\TranslatorInterface\Insertable\Insertable;
+use MediaWiki\Extension\Translate\TranslatorInterface\Insertable\InsertablesSuggester;
+use MediaWiki\Extension\Translate\Validation\MessageValidator;
+use MediaWiki\Extension\Translate\Validation\ValidationIssues;
+use MediaWiki\Extension\Translate\Validation\ValidationRunner;
 
-	/**
-	 * @var MessageGroup
-	 */
+/**
+ * @license GPL-2.0-or-later
+ * @covers MessageGroupBase
+ */
+class MessageGroupBaseTest extends MediaWikiIntegrationTestCase {
+	/** @var MessageGroup */
 	protected $group;
-
 	protected $groupConfiguration = [
 		'BASIC' => [
-			'class' => 'FileBasedMessageGroup',
+			'class' => FileBasedMessageGroup::class,
 			'id' => 'test-id',
 			'label' => 'Test Label',
 			'namespace' => 'NS_MEDIAWIKI',
@@ -17,12 +24,12 @@ class MessageGroupBaseTest extends MediaWikiTestCase {
 		],
 	];
 
-	protected function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		$this->group = MessageGroupBase::factory( $this->groupConfiguration );
 	}
 
-	protected function tearDown() {
+	protected function tearDown(): void {
 		unset( $this->group );
 		parent::tearDown();
 	}
@@ -83,70 +90,11 @@ class MessageGroupBaseTest extends MediaWikiTestCase {
 		);
 	}
 
-	public function testInsertablesSuggesterClass() {
-		$conf = $this->groupConfiguration;
-		$conf['INSERTABLES']['class'] = 'FakeInsertablesSuggester';
-		$this->group = MessageGroupBase::factory( $conf );
-
-		$this->assertArrayEquals(
-			[ new Insertable( 'Fake', 'Insertables', 'Suggester' ) ],
-			$this->group->getInsertablesSuggester()->getInsertables( '' ),
-			'should correctly get an InsertablesSuggester using \'class\' option.'
-		);
-	}
-
-	public function testInsertablesSuggesterClasses() {
-		$conf = $this->groupConfiguration;
-		$conf['INSERTABLES']['classes'] = [
-			'FakeInsertablesSuggester',
-			'AnotherFakeInsertablesSuggester',
-		];
-		$this->group = MessageGroupBase::factory( $conf );
-
-		$this->assertArrayEquals(
-			[
-				new Insertable( 'Fake', 'Insertables', 'Suggester' ),
-				new Insertable( 'AnotherFake', 'Insertables', 'Suggester' ),
-			],
-			$this->group->getInsertablesSuggester()->getInsertables( '' ),
-			'should correctly get InsertablesSuggesters using \'classes\' option.'
-		);
-	}
-
-	public function testInsertablesSuggesterClassAndClasses() {
-		$conf = $this->groupConfiguration;
-		$conf['INSERTABLES']['class'] = 'FakeInsertablesSuggester';
-		$conf['INSERTABLES']['classes'] = [ 'AnotherFakeInsertablesSuggester' ];
-		$this->group = MessageGroupBase::factory( $conf );
-
-		$this->assertArrayEquals(
-			[
-				new Insertable( 'Fake', 'Insertables', 'Suggester' ),
-				new Insertable( 'AnotherFake', 'Insertables', 'Suggester' ),
-			],
-			$this->group->getInsertablesSuggester()->getInsertables( '' ),
-			'should correctly get InsertablesSuggesters using both \'class\' and \'classes\' options.'
-		);
-
-		$conf['INSERTABLES']['classes'][] = 'FakeInsertablesSuggester';
-		$conf['INSERTABLES']['classes'][] = 'AnotherFakeInsertablesSuggester';
-		$this->group = MessageGroupBase::factory( $conf );
-
-		$this->assertArrayEquals(
-			[
-				new Insertable( 'Fake', 'Insertables', 'Suggester' ),
-				new Insertable( 'AnotherFake', 'Insertables', 'Suggester' ),
-			],
-			$this->group->getInsertablesSuggester()->getInsertables( '' ),
-			'should correctly get InsertablesSuggesters using ' .
-			'both \'class\' and \'classes\' options and removing duplicates.'
-		);
-	}
-
 	public function testGetNamespaceInvalid() {
 		$conf = $this->groupConfiguration;
 		$conf['BASIC']['namespace'] = 'ergweofijwef';
-		$this->setExpectedException( MWException::class, 'No valid namespace defined' );
+		$this->expectException( MWException::class );
+		$this->expectExceptionMessage( 'No valid namespace defined' );
 		MessageGroupBase::factory( $conf );
 	}
 
@@ -176,16 +124,108 @@ class MessageGroupBaseTest extends MediaWikiTestCase {
 		$states = $this->group->getMessageGroupStates()->getStates();
 		$this->assertEquals( $expectedStates, $states );
 	}
+
+	public function testInsertableValidatorConfiguration() {
+		$conf = $this->groupConfiguration;
+
+		$conf['INSERTABLES'] = [
+			[ 'class' => AnotherFakeInsertablesSuggester::class ]
+		];
+		$conf['VALIDATORS'] = [];
+		$conf['VALIDATORS'][] = [
+			'class' => FakeInsertableValidator::class,
+			'insertable' => true,
+			'params' => 'TEST'
+		];
+
+		$conf['VALIDATORS'][] = [
+			'class' => AnotherFakeInsertableValidator::class,
+			'insertable' => false,
+			'params' => 'TEST2'
+		];
+
+		$this->group = MessageGroupBase::factory( $conf );
+		$messageValidators = $this->group->getValidator();
+		$insertables = $this->group->getInsertablesSuggester()->getInsertables( '' );
+
+		$this->assertInstanceOf( ValidationRunner::class, $messageValidators,
+			"should correctly fetch a 'ValidationRunner' using the 'VALIDATOR' configuration."
+		);
+
+		// Returns insertables from,
+		// 1. INSERTABLES > AnotherFakeInsertablesSuggester
+		// 2. VALIDATORS > FakeInsertableValidator ( insertable => true )
+		// Does not return VALIDATORS > AnotherFakeInsertableValidator ( insertable => false )
+		$this->assertCount( 2, $insertables,
+			"should not add non-insertable validator when 'insertable' is false."
+		);
+
+		$this->assertEquals(
+			new Insertable( 'Fake', 'Insertable', 'Validator' ),
+			$insertables[1],
+			"should correctly fetch an 'InsertableValidator' when 'insertable' is true."
+		);
+	}
+
+	public function testInsertableArrayConfiguration() {
+		$conf = $this->groupConfiguration;
+
+		$conf['INSERTABLES'] = [
+			[
+				'class' => FakeInsertableValidator::class,
+				'params' => 'Regex'
+			],
+			[
+				'class' => AnotherFakeInsertableValidator::class,
+				'params' => 'Regex'
+			]
+		];
+
+		$this->group = MessageGroupBase::factory( $conf );
+		$insertables = $this->group->getInsertablesSuggester()->getInsertables( '' );
+
+		$this->assertCount( 2, $insertables,
+			"should fetch the correct count of 'Insertables' when 'InsertablesSuggesters' " .
+			"are configured using the array configuration."
+		);
+
+		$this->assertEquals(
+			new Insertable( 'Another', 'Fake Insertable', 'Validator' ),
+			$insertables[1],
+			"should fetch the correct 'Insertables' when 'InsertablesSuggesters' " .
+			"are configured using the array configuration."
+		);
+	}
 }
 
 class FakeInsertablesSuggester implements InsertablesSuggester {
-	public function getInsertables( $text ) {
+	public function getInsertables( string $text ): array {
 		return [ new Insertable( 'Fake', 'Insertables', 'Suggester' ) ];
 	}
 }
 
 class AnotherFakeInsertablesSuggester implements InsertablesSuggester {
-	public function getInsertables( $text ) {
+	public function getInsertables( string $text ): array {
 		return [ new Insertable( 'AnotherFake', 'Insertables', 'Suggester' ) ];
+	}
+}
+
+class FakeInsertableValidator implements MessageValidator, InsertablesSuggester {
+	public function getIssues( TMessage $message, string $targetLanguage ): ValidationIssues {
+		return new ValidationIssues();
+	}
+
+	public function getInsertables( string $text ): array {
+		return [ new Insertable( 'Fake', 'Insertable', 'Validator' ) ];
+	}
+}
+
+class AnotherFakeInsertableValidator implements MessageValidator, InsertablesSuggester {
+	public function getIssues( TMessage $message, string $targetLanguage ): ValidationIssues {
+		return new ValidationIssues();
+	}
+
+	public function getInsertables( string $text ): array {
+		return [ new Insertable( 'Another', 'Fake Insertable', 'Validator' ) ];
 	}
 }

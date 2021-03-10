@@ -255,7 +255,7 @@ wfLoadExtension( 'Disambiguator' );
 wfLoadExtension( 'DismissableSiteNotice' );
 wfLoadExtension( 'SandboxLink' );
 wfLoadExtension( 'Thanks' );
-require_once "$IP/extensions/Translate/Translate.php";
+wfLoadExtension( 'Translate' );
 #require_once "$IP/extensions/Antispam/Antispam.php";
 
 #=============================================== Extension Config ===============================================
@@ -566,8 +566,8 @@ $wgExtraNamespaces[NS_TRANSCRIPT] = "Transcript";
 $wgExtraNamespaces[NS_TRANSCRIPT_TALK] = "Transcript_talk";
 $wgNamespacesWithSubpages[NS_TRANSCRIPT] = true;
 
-$wgExtraNamespaces[$wgPageTranslationNamespace]   = 'Translations';
-$wgExtraNamespaces[$wgPageTranslationNamespace+1] = 'Translations_talk';
+#$wgExtraNamespaces[1198]   = 'Translations';
+#$wgExtraNamespaces[1199] = 'Translations_talk';
 
 $wgNamespaceProtection[NS_TEMPLATE] = array( 'template-edit' );
 $wgNamespaceProtection[NS_COMMLINK] = array( 'commlink-edit' );

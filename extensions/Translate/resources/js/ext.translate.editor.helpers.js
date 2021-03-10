@@ -5,7 +5,6 @@
 	'use strict';
 
 	var translateEditorHelpers = {
-
 		showDocumentationEditor: function () {
 			var $infoColumnBlock = this.$editor.find( '.infocolumn-block' ),
 				$editColumn = this.$editor.find( '.editcolumn' ),
@@ -22,7 +21,7 @@
 			$messageDescViewer.addClass( 'hide' );
 
 			$messageDescEditor.removeClass( 'hide' );
-			$messageDescEditor.find( '.tux-textarea-documentation' ).focus();
+			$messageDescEditor.find( '.tux-textarea-documentation' ).trigger( 'focus' );
 
 			// So that the link won't be followed
 			return false;
@@ -69,13 +68,15 @@
 					).done( function ( parsedDocumentation ) {
 						$messageDesc.html( parsedDocumentation );
 					} ).fail( function ( errorCode, results ) {
+						// Note: It is possible for results to be undefined.
+						var errorInfo = results && results.error ? results.error.info : 'No information';
 						$messageDesc.html( newDocumentation );
-						mw.log( 'Error parsing documentation ' + errorCode + ' ' + results.error.info );
+						mw.log( 'Error parsing documentation ' + errorCode + ' ' + errorInfo );
+					} ).always( function () {
+						// A collapsible element etc. may have been added
+						mw.hook( 'wikipage.content' ).fire( $messageDesc );
+						translateEditor.hideDocumentationEditor();
 					} );
-					// A collapsible element may have been added
-					$( '.mw-identical-title' ).makeCollapsible();
-
-					translateEditor.hideDocumentationEditor();
 				} else {
 					mw.notify( 'Error saving message documentation' );
 					mw.log( 'Error saving documentation', response );
@@ -163,7 +164,7 @@
 					$readMore = $( '<span>' )
 						.addClass( 'read-more column' )
 						.text( mw.msg( 'tux-editor-message-desc-more' ) )
-						.click( readMore );
+						.on( 'click', readMore );
 
 					$messageDescViewer.find( '.message-desc-control' )
 						.prepend( $readMore );
@@ -171,9 +172,8 @@
 					$messageDoc.addClass( 'long compact' ).on( 'mouseenter mouseleave', expand );
 				}
 
-				// Enable the collapsible elements,
-				// used in {{Identical}} on translatewiki.net
-				$( '.mw-identical-title' ).makeCollapsible();
+				// Enable dynamic content, such as collapsible elements
+				mw.hook( 'wikipage.content' ).fire( $messageDoc );
 			} else {
 				$descEditLink.text( mw.msg( 'tux-editor-add-desc' ) );
 			}
@@ -211,23 +211,25 @@
 		 * @param {Array} translations An inotherlanguages array as returned by the translation helpers API.
 		 */
 		showAssistantLanguages: function ( translations ) {
-			var translateEditor = this;
+			var $elements;
 
 			if ( translations.error ) {
-				// Do not proceed if errored/unsupported
 				return;
 			}
 
-			$.each( translations, function ( index ) {
-				var $otherLanguage, langAttr,
-					translation = translations[ index ];
+			if ( !translations.length ) {
+				return;
+			}
+
+			$elements = translations.map( function ( translation ) {
+				var $element, langAttr;
 
 				langAttr = {
 					lang: translation.language,
 					dir: $.uls.data.getDir( translation.language )
 				};
 
-				$otherLanguage = $( '<div>' )
+				$element = $( '<div>' )
 					.addClass( 'row in-other-language' )
 					.append(
 						$( '<div>' )
@@ -240,24 +242,26 @@
 							.text( $.uls.data.getAutonym( translation.language ) )
 					);
 
-				translateEditor.suggestionAdder( $otherLanguage, translation.value );
+				this.suggestionAdder( $element, translation.value );
 
-				translateEditor.$editor.find( '.in-other-languages-title' )
-					.removeClass( 'hide' )
-					.after( $otherLanguage );
-			} );
+				return $element;
+			}.bind( this ) );
+
+			this.$editor.find( '.in-other-languages-title' )
+				.removeClass( 'hide' )
+				.after( $elements );
 		},
 
 		/**
 		 * Shows the translation suggestions from Translation Memory
 		 *
-		 * @param {Array} suggestions A ttmserver array as returned by API.
+		 * @param {Array} translations A ttmserver array as returned by API.
 		 */
-		showTranslationMemory: function ( suggestions ) {
-			var $heading, $tmSuggestions, $messageList, translationLang, translationDir,
-				translateEditor = this;
+		showTranslationMemory: function ( translations ) {
+			var $heading, $tmSuggestions, $messageList, lang, dir,
+				suggestions = {};
 
-			if ( !suggestions.length ) {
+			if ( !translations.length ) {
 				return;
 			}
 
@@ -268,73 +272,125 @@
 			$heading.after( $tmSuggestions );
 
 			$messageList = $( '.tux-messagelist' );
-			translationLang = $messageList.data( 'targetlangcode' );
-			translationDir = $messageList.data( 'targetlangdir' );
+			lang = $messageList.data( 'targetlangcode' );
+			dir = $messageList.data( 'targetlangdir' );
 
-			$.each( suggestions, function ( index, translation ) {
-				var $translation,
-					alreadyOnTheList = false;
+			translations.forEach( function ( translation ) {
+				var suggestion;
 
-				if ( translation.local && translation.location === translateEditor.message.title ) {
+				// Remove once formatversion=2
+				if ( translation.local === '' ) {
+					translation.local = true;
+				} else if ( translation.local === undefined ) {
+					translation.local = false;
+				}
+
+				if ( translation.local && translation.location === this.message.title ) {
 					// Do not add self-suggestions
-					return true;
+					return;
 				}
 
-				// See if it is already listed, and increment use count
-				$tmSuggestions.find( '.tm-suggestion' ).each( function () {
-					var $uses, count,
-						$suggestion = $( this );
+				// Check if suggestion with this value already exists
+				suggestion = suggestions[ translation.target ];
+				if ( suggestion ) {
+					suggestion.count++;
+					suggestion.sources.push( translation );
+					suggestion.$showSourcesElement.children( 'a' ).text(
+						mw.msg(
+							'tux-editor-n-uses',
+							mw.language.convertNumber( suggestion.count )
+						)
+					);
 
-					if ( $suggestion.find( '.suggestiontext ' ).text() === translation.target ) {
-						// Update the message and data value
-						$uses = $suggestion.find( '.n-uses' );
-						count = $uses.data( 'n' ) + 1;
-						$uses.data( 'n', count );
-						$uses.text( mw.msg( 'tux-editor-n-uses', count ) + '  〉' );
-
-						// Halt processing
-						alreadyOnTheList = true;
-						return false;
-					}
-				} );
-
-				if ( alreadyOnTheList ) {
-					// Continue to the next one
-					return true;
+					return;
 				}
 
-				$translation = $( '<div>' )
+				suggestion = {};
+
+				suggestion.$showSourcesElement = $( '<div>' )
+					.addClass( 'text-right columns twelve' )
+					.append( $( '<a>' ).addClass( 'n-uses' ) );
+
+				suggestion.$element = $( '<div>' )
 					.addClass( 'row tm-suggestion' )
 					.append(
 						$( '<div>' )
 							.addClass( 'nine columns suggestiontext' )
 							.attr( {
-								lang: translationLang,
-								dir: translationDir
+								lang: lang,
+								dir: dir
 							} )
 							.text( translation.target ),
 						$( '<div>' )
 							.addClass( 'three columns quality text-right' )
-							.text( mw.msg( 'tux-editor-tm-match',
-								mw.language.convertNumber( Math.floor( translation.quality * 100 ) ) ) ),
-						$( '<div>' )
-							.addClass( 'row text-right' )
-							.append(
-								$( '<a>' )
-									.addClass( 'n-uses' )
-									.data( 'n', 1 )
-							)
+							.text(
+								mw.msg(
+									'tux-editor-tm-match',
+									mw.language.convertNumber( Math.floor( translation.quality * 100 ) )
+								)
+							),
+						suggestion.$showSourcesElement
 					);
 
-				translateEditor.suggestionAdder( $translation, translation.target );
+				suggestion.count = 1;
+				suggestion.sources = [];
+				suggestion.sources.push( translation );
 
-				$tmSuggestions.append( $translation );
+				this.suggestionAdder( suggestion.$element, translation.target );
+
+				suggestions[ translation.target ] = suggestion;
+			}, this );
+
+			if ( $.isEmptyObject( suggestions ) ) {
+				return;
+			}
+
+			Object.keys( suggestions ).forEach( function ( key ) {
+				var suggestion = suggestions[ key ];
+
+				suggestion.$showSourcesElement.on( 'click', function ( e ) {
+					this.onShowTranslationMemorySources( e, suggestion );
+				}.bind( this ) );
+				$tmSuggestions.append( suggestion.$element );
+			}, this );
+
+			$heading.removeClass( 'hide' );
+		},
+
+		onShowTranslationMemorySources: function ( e, suggestion ) {
+			e.stopPropagation();
+
+			if ( suggestion.$sourcesElement ) {
+				suggestion.$sourcesElement.toggleClass( 'hide' );
+				return;
+			}
+
+			// Build the sources list. Add class to show external icons :(
+			suggestion.$sourcesElement = $( '<ul>' )
+				.addClass( 'tux-tm-suggestion-source mw-parser-output' );
+
+			// Sort local suggestions first, then alphabetically
+			suggestion.sources.sort( function ( a, b ) {
+				if ( a.local === b.local ) {
+					return a.location.localeCompare( b.location );
+				} else {
+					return a.local ? -1 : 1;
+				}
 			} );
 
-			// Show the heading only if we actually have suggestions
-			if ( $tmSuggestions.length ) {
-				$heading.removeClass( 'hide' );
-			}
+			suggestion.sources.forEach( function ( translation ) {
+				suggestion.$sourcesElement.append(
+					$( '<li>' )
+						.append(
+							$( '<a>' )
+								.prop( 'target', '_blank' )
+								.prop( 'href', translation.editorUrl || translation.uri )
+								.text( translation.location )
+								.toggleClass( 'external', !translation.local )
+						)
+				);
+			} );
+			suggestion.$element.after( suggestion.$sourcesElement );
 		},
 
 		/**
@@ -364,7 +420,7 @@
 			translationLang = $messageList.data( 'targetlangcode' );
 			translationDir = $messageList.data( 'targetlangdir' );
 
-			$.each( suggestions, function ( index, translation ) {
+			suggestions.forEach( function ( translation ) {
 				var $translation;
 
 				$translation = $( '<div>' )
@@ -408,7 +464,7 @@
 				}
 
 				if ( !selection ) {
-					$target.val( suggestion ).focus().trigger( 'input' );
+					$target.val( suggestion ).trigger( 'focus' ).trigger( 'input' );
 				}
 			};
 
@@ -465,7 +521,7 @@
 					pre: data.pre,
 					post: data.post
 				} );
-				$textarea.focus().trigger( 'input' );
+				$textarea.trigger( 'focus' ).trigger( 'input' );
 			} );
 
 			this.resizeInsertables( $textarea );
@@ -477,44 +533,53 @@
 		showTranslationHelpers: function () {
 			// API call to get translation suggestions from other languages
 			// callback should render suggestions to the editor's info column
-			var translateEditor = this,
-				api = new mw.Api();
+			var api = new mw.Api();
 
 			api.get( {
 				action: 'translationaids',
 				title: this.message.title
 			} ).done( function ( result ) {
-				translateEditor.$editor.find( '.infocolumn .loading' ).remove();
+				this.$editor.find( '.infocolumn .loading' ).remove();
 
 				if ( !result.helpers ) {
-					mw.log( 'API did not return any translation helpers.' );
+					mw.log.warn( 'API did not return any translation helpers.' );
 					return false;
 				}
 
-				translateEditor.showMessageDocumentation( result.helpers.documentation );
-				translateEditor.showUneditableDocumentation( result.helpers.gettext );
-				translateEditor.showAssistantLanguages( result.helpers.inotherlanguages );
-				translateEditor.showTranslationMemory( result.helpers.ttmserver );
-				translateEditor.showMachineTranslations( result.helpers.mt );
-				translateEditor.showSupportOptions( result.helpers.support );
-				translateEditor.addDefinitionDiff( result.helpers.definitiondiff );
-				translateEditor.addInsertables( result.helpers.insertables );
+				this.showMessageDocumentation( result.helpers.documentation );
+				this.showUneditableDocumentation( result.helpers.gettext );
+				this.showAssistantLanguages( result.helpers.inotherlanguages );
+				this.showTranslationMemory( result.helpers.ttmserver );
+				this.showMachineTranslations( result.helpers.mt );
+				this.showSupportOptions( result.helpers.support );
+				this.addDefinitionDiff( result.helpers.definitiondiff );
+				this.addInsertables( result.helpers.insertables );
 
 				// Load the possible warnings as soon as possible, do not wait
 				// for the user to make changes. Otherwise users might try confirming
 				// translations which fail checks. Confirmation seems to work but
 				// the message will continue to appear outdated.
-				if ( translateEditor.message.properties &&
-					translateEditor.message.properties.status === 'fuzzy'
+				if ( this.message.properties &&
+					this.message.properties.status === 'fuzzy'
 				) {
-					translateEditor.validateTranslation();
+					this.validateTranslation();
 				}
 
-				mw.hook( 'mw.translate.editor.showTranslationHelpers' ).fire( result.helpers, translateEditor.$editor );
+				mw.hook( 'mw.translate.editor.showTranslationHelpers' ).fire(
+					result.helpers, this.$editor
+				);
 
-			} ).fail( function ( errorCode, results ) {
-				mw.log( 'Error loading translation aids', errorCode, results );
-			} );
+			}.bind( this ) ).fail( function ( errorCode, results ) {
+				// results.error may be undefined
+				var errorInfo = results && results.error && results.error.info || 'Unknown error';
+				this.$editor.find( '.infocolumn .loading' ).remove();
+				this.$editor.find( '.infocolumn' ).append(
+					$( '<div>' )
+						.text( mw.msg( 'tux-editor-loading-failed', errorInfo ) )
+						.addClass( 'warningbox tux-translation-aid-error' )
+				);
+				mw.log.error( 'Error loading translation aids:', errorCode, results );
+			}.bind( this ) );
 		}
 	};
 

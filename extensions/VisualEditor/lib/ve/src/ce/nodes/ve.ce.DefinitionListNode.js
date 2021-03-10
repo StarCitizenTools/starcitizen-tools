@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable DefinitionListNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -27,6 +27,8 @@ OO.inheritClass( ve.ce.DefinitionListNode, ve.ce.BranchNode );
 ve.ce.DefinitionListNode.static.name = 'definitionList';
 
 ve.ce.DefinitionListNode.static.tagName = 'dl';
+
+ve.ce.DefinitionListNode.static.removeEmptyLastChildOnEnter = true;
 
 /* Registration */
 

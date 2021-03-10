@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pyscowicz"
+		]
+	},
+	"searchtranslations": "Eti käänöksiä",
+	"tux-sst-edit": "Mookkaa käänöstä",
+	"tux-sst-view-foreign": "Näytä sivula $1",
+	"tux-sst-search": "Eti",
+	"tux-sst-search-ph": "Eti käännöksiä",
+	"tux-sst-count": "{{PLURAL:$1|Yksi hakuresyltaatti|$1 hakuresyltaattia}}",
+	"tux-sst-facet-group": "Viestijoukot",
+	"tux-sst-next": "Seuraava ›",
+	"tux-sst-prev": "‹ Eelinen",
+	"tux-sst-default": "Käänökset",
+	"tux-sst-translated": "Käänetty kielestä $1",
+	"tux-sst-outdated": "Vanhentuneet käänökset kielestä $1",
+	"tux-sst-ellipsis-outdated": "Vanhentuneet käänökset",
+	"tux-sst-match-message": "Näytethään mihin tahansa hakusanaan täsmäävät käänökset. $1",
+	"tux-sst-case-sensitive": "puustaavikoko oon merkitsevä"
+}

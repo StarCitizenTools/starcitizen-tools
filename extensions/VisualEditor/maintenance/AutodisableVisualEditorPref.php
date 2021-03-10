@@ -2,13 +2,15 @@
 /**
  * Sets the VisualEditor autodisable preference on appropriate users.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license MIT
  * @author Alex Monk <amonk@wikimedia.org>
  * @file
  * @ingroup Extensions
  * @ingroup Maintenance
  */
+
+use MediaWiki\MediaWikiServices;
 
 $maintenancePath = getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
@@ -23,7 +25,7 @@ class AutodisableVisualEditorPref extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->requireExtension( 'VisualEditor' );
-		$this->mDescription = "Sets the VisualEditor autodisable preference on appropriate users.";
+		$this->addDescription( "Sets the VisualEditor autodisable preference on appropriate users." );
 		$this->setBatchSize( 500 );
 	}
 
@@ -32,6 +34,7 @@ class AutodisableVisualEditorPref extends Maintenance {
 	 */
 	public function execute() {
 		$dbr = wfGetDB( DB_REPLICA );
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 
 		$lastUserId = -1;
 		do {
@@ -64,11 +67,11 @@ class AutodisableVisualEditorPref extends Maintenance {
 				$lastUserId = $userRow->user_id;
 			}
 			$this->output( "Added preference for " . $results->numRows() . " users.\n" );
-			wfWaitForSlaves();
+			$lbFactory->waitForReplication();
 		} while ( $results->numRows() == $this->mBatchSize );
 		$this->output( "done.\n" );
 	}
 }
 
-$maintClass = "AutodisableVisualEditorPref";
+$maintClass = AutodisableVisualEditorPref::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

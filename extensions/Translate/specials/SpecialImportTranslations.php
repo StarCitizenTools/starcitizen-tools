@@ -27,7 +27,7 @@ class SpecialImportTranslations extends SpecialPage {
 	}
 
 	protected function getGroupName() {
-		return 'wiki';
+		return 'translation';
 	}
 
 	/**
@@ -87,8 +87,8 @@ class SpecialImportTranslations extends SpecialPage {
 		}
 
 		$messages = $data['MESSAGES'];
-		$group = $data['METADATA']['group'];
-		$code = $data['METADATA']['code'];
+		$group = $data['EXTRA']['METADATA']['group'];
+		$code = $data['EXTRA']['METADATA']['code'];
 
 		if ( !MessageGroups::exists( $group ) ) {
 			$errorWrap = "<div class='error'>\n$1\n</div>";
@@ -117,7 +117,6 @@ class SpecialImportTranslations extends SpecialPage {
 		// translate-import-err-dl-failed, translate-import-err-ul-failed,
 		// translate-import-err-invalid-title, translate-import-err-no-such-file,
 		// translate-import-err-stale-group, translate-import-err-no-headers,
-		// translate-import-err-warnings
 		if ( $msg[0] !== 'ok' ) {
 			$errorWrap = "<div class='error'>\n$1\n</div>";
 			$msg[0] = 'translate-import-err-' . $msg[0];
@@ -183,62 +182,63 @@ class SpecialImportTranslations extends SpecialPage {
 	 * @param string $data
 	 * @return array
 	 */
-	protected function parseFile( $data ) {
+	protected function parseFile( string $data ): array {
 		/** Construct a dummy group for us...
 		 * @todo Time to rethink the interface again?
 		 * @var FileBasedMessageGroup $group
 		 */
 		$group = MessageGroupBase::factory( [
 			'FILES' => [
-				'class' => 'GettextFFS',
+				'class' => GettextFFS::class,
 				'CtxtAsKey' => true,
 			],
 			'BASIC' => [
-				'class' => 'FileBasedMessageGroup',
+				'class' => FileBasedMessageGroup::class,
 				'namespace' => -1,
 			]
 		] );
+		'@phan-var FileBasedMessageGroup $group';
 
 		$ffs = new GettextFFS( $group );
-		$data = $ffs->readFromVariable( $data );
 
-		/**
-		 * Special data added by GettextFFS
-		 */
-		$metadata = $data['METADATA'];
+		try {
+			$parseOutput = $ffs->readFromVariable( $data );
+		} catch ( GettextParseException $e ) {
+			return [ 'no-headers' ];
+		}
 
-		/**
-		 * This should catch everything that is not a gettext file exported from us
-		 */
+		// Special data added by GettextFFS
+		$metadata = $parseOutput['EXTRA']['METADATA'];
+
+		// This should catch everything that is not a Gettext file exported from us
 		if ( !isset( $metadata['code'] ) || !isset( $metadata['group'] ) ) {
 			return [ 'no-headers' ];
 		}
 
-		/**
-		 * And check for stupid editors that drop msgctxt which
-		 * unfortunately breaks submission.
-		 */
-		if ( isset( $metadata['warnings'] ) ) {
-			return [ 'warnings', $this->getLanguage()->commaList( $metadata['warnings'] ) ];
-		}
+		return [ 'ok', $parseOutput ];
+	}
 
-		return [ 'ok', $data ];
+	private function getCache() {
+		return ObjectCache::getInstance( CACHE_DB );
 	}
 
 	protected function setCachedData( $data ) {
-		$key = wfMemcKey( 'translate', 'webimport', $this->getUser()->getId() );
-		wfGetCache( CACHE_DB )->set( $key, $data, 60 * 30 );
+		$cache = self::getCache();
+		$key = $cache->makeKey( 'translate', 'webimport', $this->getUser()->getId() );
+		$cache->set( $key, $data, 60 * 30 );
 	}
 
 	protected function getCachedData() {
-		$key = wfMemcKey( 'translate', 'webimport', $this->getUser()->getId() );
+		$cache = self::getCache();
+		$key = $cache->makeKey( 'translate', 'webimport', $this->getUser()->getId() );
 
-		return wfGetCache( CACHE_DB )->get( $key );
+		return $cache->get( $key );
 	}
 
 	protected function deleteCachedData() {
-		$key = wfMemcKey( 'translate', 'webimport', $this->getUser()->getId() );
+		$cache = self::getCache();
+		$key = $cache->makeKey( 'translate', 'webimport', $this->getUser()->getId() );
 
-		return wfGetCache( CACHE_DB )->delete( $key );
+		return $cache->delete( $key );
 	}
 }

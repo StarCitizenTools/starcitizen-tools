@@ -1,15 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Nirjal stha",
-			"NehalDaveND"
+			"NehalDaveND",
+			"Nirjal stha"
 		]
 	},
-	"templatedata-doc-param-autovalue-empty": "रित्तो",
 	"templatedata-doc-param-default": "पूर्वनिर्धारित",
-	"templatedata-doc-param-default-empty": "रित्तो",
 	"templatedata-doc-param-example": "उदाहरण",
-	"templatedata-doc-param-example-empty": "खाली",
 	"templatedata-doc-param-desc": "विवरण",
 	"templatedata-doc-param-status": "स्थिति",
 	"templatedata-doc-param-status-optional": "वैकल्पिक",

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWNumberedExternalLinkNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -37,16 +37,18 @@ ve.dm.MWNumberedExternalLinkNode.static.isContent = true;
 
 ve.dm.MWNumberedExternalLinkNode.static.matchTagNames = [ 'a' ];
 
-ve.dm.MWNumberedExternalLinkNode.static.matchRdfaTypes = [ 'mw:ExtLink', 'mw:NumberedLink' ];
+ve.dm.MWNumberedExternalLinkNode.static.matchRdfaTypes = [ 'mw:ExtLink', 've:NumberedLink' ];
 
-ve.dm.MWNumberedExternalLinkNode.static.blacklistedAnnotationTypes = [ 'link' ];
+ve.dm.MWNumberedExternalLinkNode.static.disallowedAnnotationTypes = [ 'link' ];
 
 ve.dm.MWNumberedExternalLinkNode.static.matchFunction = function ( domElement ) {
 	// Must be empty, or explicitly flagged as a numbered link. We can't just
 	// rely on emptiness, because we give the link content for cross-document
 	// pastes so it won't be pruned. (And so it'll be functional in non-wiki
 	// contexts.)
-	return domElement.childNodes.length === 0 || domElement.getAttribute( 'rel' ).indexOf( 'mw:NumberedLink' ) !== -1;
+	// Note that ve:NumberedLink is only used internally by VE for cross-document
+	// pastes and is never sent to Parsoid.
+	return domElement.childNodes.length === 0 || domElement.getAttribute( 'rel' ).indexOf( 've:NumberedLink' ) !== -1;
 };
 
 ve.dm.MWNumberedExternalLinkNode.static.toDataElement = function ( domElements ) {
@@ -63,6 +65,9 @@ ve.dm.MWNumberedExternalLinkNode.static.toDomElements = function ( dataElement, 
 		node = this,
 		domElement = doc.createElement( 'a' );
 
+	domElement.setAttribute( 'href', dataElement.attributes.href );
+	domElement.setAttribute( 'rel', 'mw:ExtLink' );
+
 	// Ensure there is a text version of the counter in the clipboard
 	// as external documents may not have the same stylesheet - and Firefox
 	// discards empty tags on copy.
@@ -78,9 +83,9 @@ ve.dm.MWNumberedExternalLinkNode.static.toDomElements = function ( dataElement, 
 			} );
 		}
 		domElement.appendChild( doc.createTextNode( '[' + counter + ']' ) );
+		// Explicitly mark as a numbered link as the node is no longer empty.
+		domElement.setAttribute( 'rel', 've:NumberedLink' );
 	}
-	domElement.setAttribute( 'href', dataElement.attributes.href );
-	domElement.setAttribute( 'rel', 'mw:ExtLink mw:NumberedLink' );
 	return [ domElement ];
 };
 

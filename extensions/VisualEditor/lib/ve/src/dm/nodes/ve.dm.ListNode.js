@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel ListNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -35,6 +35,17 @@ ve.dm.ListNode.static.defaultAttributes = {
 
 ve.dm.ListNode.static.matchTagNames = [ 'ul', 'ol' ];
 
+ve.dm.ListNode.static.isDiffedAsList = true;
+
+/**
+ * Creates a list item element
+ *
+ * @return {Object} Element data
+ */
+ve.dm.ListNode.static.createItem = function () {
+	return { type: 'listItem' };
+};
+
 ve.dm.ListNode.static.toDataElement = function ( domElements ) {
 	var style = domElements[ 0 ].nodeName.toLowerCase() === 'ol' ? 'number' : 'bullet';
 	return { type: this.name, attributes: { style: style } };
@@ -47,10 +58,12 @@ ve.dm.ListNode.static.toDomElements = function ( dataElement, doc ) {
 
 ve.dm.ListNode.static.describeChange = function ( key, change ) {
 	if ( key === 'style' ) {
-		return ve.msg( 'visualeditor-changedesc-no-key',
-			// Either visualeditor-listbutton-bullet-tooltip or visualeditor-listbutton-number-tooltip
-			ve.msg( 'visualeditor-listbutton-' + change.from + '-tooltip' ),
-			ve.msg( 'visualeditor-listbutton-' + change.to + '-tooltip' )
+		return ve.htmlMsg( 'visualeditor-changedesc-no-key',
+			// The following messages are used here:
+			// * visualeditor-listbutton-bullet-tooltip
+			// * visualeditor-listbutton-number-tooltip
+			this.wrapText( 'del', ve.msg( 'visualeditor-listbutton-' + change.from + '-tooltip' ) ),
+			this.wrapText( 'ins', ve.msg( 'visualeditor-listbutton-' + change.to + '-tooltip' ) )
 		);
 	}
 	// Parent method
@@ -60,6 +73,7 @@ ve.dm.ListNode.static.describeChange = function ( key, change ) {
 /* Methods */
 
 ve.dm.ListNode.prototype.canHaveSlugAfter = function () {
+	// A paragraph can be added after a list by pressing enter in an empty list item
 	return false;
 };
 

@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"CoderSI",
+			"Malikxan",
 			"Noor2020",
 			"Sociologist",
 			"පසිඳු කාවින්ද"
@@ -10,7 +11,6 @@
 	"tooltip-ca-createsource": "Ushbu sahifaning manba kodini yaratish",
 	"tooltip-ca-editsource": "Sahifa manba kodini tahrirlash",
 	"tooltip-ca-ve-edit": "Ushbu sahifani tahrirlash",
-	"visualeditor-beta-label": "sinov-versiyasi",
 	"visualeditor-browserwarning": "Siz rasman VisualEditor qoʻllanmaydigan brauzerdan foydalanmoqdasiz.",
 	"visualeditor-ca-createsource": "Manba kodi sifatida yaratish",
 	"visualeditor-ca-editsource": "Manbasini tahrirlash",
@@ -41,6 +41,7 @@
 	"visualeditor-dialog-transclusion-add-param": "Parametr qoʻshish",
 	"visualeditor-dialog-transclusion-add-template": "Andoza qoʻshish",
 	"visualeditor-dialog-transclusion-content": "Tarkib",
+	"visualeditor-dialog-transclusion-loading": "Yuklanmoqda...",
 	"visualeditor-dialog-transclusion-options": "Moslamalar",
 	"visualeditor-dialog-transclusion-placeholder": "Yangi andoza",
 	"visualeditor-dialog-transclusion-remove-content": "Tarkibni oʻchirish",
@@ -61,7 +62,6 @@
 	"visualeditor-formatdropdown-format-mw-heading6": "Ostsarlavha 4",
 	"visualeditor-linkinspector-illegal-title": "Notoʻgri sahifa sarlavhasi",
 	"visualeditor-mainnamespacepagelink": "Project:Asosiy nomfazo",
-	"visualeditor-media-input-placeholder": "Media qidirish",
 	"visualeditor-meta-tool": "Sahifa parametrlari",
 	"visualeditor-parameter-input-placeholder": "Parametr nomi",
 	"visualeditor-parameter-search-no-unused": "Foydalanilmagan parametrlar yoʻq",
@@ -80,10 +80,8 @@
 	"visualeditor-savedialog-warning-dirty": "Sizning tahrirlaringiz noaniq boʻlishi mumkin — iltimos, saqlashdan oldin tekshiring.",
 	"visualeditor-saveerror": "Maʼlumotlarni saqlashda xatolik: $1.",
 	"visualeditor-serializeerror": "Maʼlumotlarni serverdan yuklashda xatolik: $1",
-	"visualeditor-toolbar-savedialog": "Sahifani saqlash",
 	"visualeditor-usernamespacepagelink": "Project:Shaxsiy nomfazo",
-	"visualeditor-version-label": "Versiya",
-	"visualeditor-viewpage-savewarning": "Siz haqiqatdan ham oʻzgarishlarni saqlamasdan koʻrish tartibiga oʻtishni xohlaysizmi?",
+	"visualeditor-version-label": "Versiyasi",
 	"visualeditor-wikitext-warning": "Siz VisualEditordan foydalanmoqdasiz — [[{{MediaWiki:visualeditor-wikitext-warning-link}}|viki-belgilar]] bu yerda ishlamaydi. Sahifani viki-matn tartibida tahrirlash uchun \"{{MediaWiki:visualeditor-ca-editsource}}\"ni bosing. Saqlanmagan oʻzgarishlar yoʻqoladi.",
 	"visualeditor-wikitext-warning-title": "Viki-belgi aniqlandi"
 }

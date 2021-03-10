@@ -4,6 +4,32 @@
 	'use strict';
 
 	/**
+	 * Dictionary of classes that will be used by different types of notices
+	 * TODO: Should probably review and rename these classes in the future to
+	 * be more unique to the translate extension? Some themes use warning,
+	 * error classes to style elements, and we do take help from these.
+	 */
+	var noticeTypes = {
+		warning: 'warning',
+		error: 'error',
+		translateFail: 'translation-saving',
+		diff: 'diff',
+		fuzzy: 'fuzzy',
+		getAllClasses: function () {
+			var prop,
+				classes = [];
+
+			for ( prop in this ) {
+				if ( typeof this[ prop ] === 'string' ) {
+					classes.push( this[ prop ] );
+				}
+			}
+
+			return classes;
+		}
+	};
+
+	/**
 	 * TranslateEditor Plugin
 	 * Prepare the translation editor UI for a translation unit (message).
 	 * This is mainly used with the messagetable plugin,
@@ -29,7 +55,7 @@
 	 * @param {Function} [options.onSave] Callback to call when translation has been saved.
 	 * @param {Function} [options.onSkip] Callback to call when a message is skipped.
 	 * @param {Object} options.message Object as returned by messagecollection api.
-	 * @param {TranslationApiStorage} [options.storage]
+	 * @param {mw.translate.TranslationApiStorage} [options.storage]
 	 */
 	function TranslateEditor( element, options ) {
 		this.$editTrigger = $( element );
@@ -45,6 +71,7 @@
 		this.storage = this.options.storage || new mw.translate.TranslationApiStorage();
 		this.canDelete = mw.translate.canDelete();
 		this.delayValidation = delayer();
+		this.validating = null;
 	}
 
 	TranslateEditor.prototype = {
@@ -82,9 +109,9 @@
 			this.$editTrigger.append( this.$editor );
 
 			if ( this.message.properties && this.message.properties.status === 'fuzzy' ) {
-				this.addWarning(
-					mw.message( 'tux-editor-outdated-warning' ).escaped(),
-					'fuzzy'
+				this.addNotice(
+					mw.message( 'tux-editor-outdated-notice' ).escaped(),
+					noticeTypes.fuzzy
 				);
 			}
 
@@ -113,7 +140,7 @@
 		 * Mark the message as unsaved because of saving failure.
 		 */
 		markUnsavedFailure: function () {
-			this.markUnsaved( 'tux-warning' );
+			this.markUnsaved( 'tux-notice' );
 		},
 
 		/**
@@ -183,7 +210,7 @@
 				translateEditor = this;
 
 			mw.hook( 'mw.translate.editor.beforeSubmit' ).fire( translateEditor.$editor );
-			translation = translateEditor.$editor.find( '.editcolumn textarea' ).val();
+			translation = translateEditor.$editor.find( '.tux-textarea-translation' ).val();
 			editSummary = translateEditor.$editor.find( '.tux-input-editsummary' ).val() || '';
 
 			translateEditor.saving = true;
@@ -217,27 +244,42 @@
 				if ( editResp.result === 'Success' ) {
 					translateEditor.message.translation = translation;
 					translateEditor.onSaveSuccess();
-				// Handle errors
-				} else if ( editResp.spamblacklist ) {
-					// @todo Show exactly which blacklisted URL triggered it
-					translateEditor.onSaveFail( mw.msg( 'spamprotectiontext' ) );
-				} else if ( editResp.info &&
-					editResp.info.indexOf( 'Hit AbuseFilter:' ) === 0 &&
-					editResp.warning
-				) {
-					translateEditor.onSaveFail( editResp.warning );
 				} else {
 					translateEditor.onSaveFail( mw.msg( 'tux-save-unknown-error' ) );
 					mw.log( response, xhr );
 				}
 			} ).fail( function ( errorCode, response ) {
-				translateEditor.onSaveFail(
-					response.error && response.error.info || mw.msg( 'tux-save-unknown-error' )
-				);
+				translateEditor.removeNotices( noticeTypes.translateFail );
+
 				if ( errorCode === 'assertuserfailed' ) {
 					// eslint-disable-next-line no-alert
 					alert( mw.msg( 'tux-session-expired' ) );
+				} else if ( errorCode === 'translate-validation-failed' ) {
+					// Cancel the translation check API call to avoid extra notices
+					// from appearing.
+					if ( translateEditor.validating ) {
+						translateEditor.validating.abort();
+					} else {
+						// Cancel the translation check API call that might be made in the future.
+						translateEditor.delayValidation( false );
+					}
+
+					translateEditor.removeNotices( [ noticeTypes.error, noticeTypes.warning ] );
+
+					if ( response.error && response.error.validation ) {
+						translateEditor.displayNotices( response.error.validation.warnings, noticeTypes.warning );
+						translateEditor.displayNotices( response.error.validation.errors, noticeTypes.error );
+					}
 				}
+
+				// This is placed at the bottom to ensure that the save error appears at the
+				// top of the notices
+				translateEditor.onSaveFail(
+					response.error && response.error.info || mw.msg( 'tux-save-unknown-error' )
+				);
+
+				// Display all the notices whenever an error occurs.
+				translateEditor.showMoreNotices();
 			} );
 		},
 
@@ -250,13 +292,11 @@
 				.text( this.message.translation );
 			this.saving = false;
 
-			// remove warnings if any.
-			this.removeWarning( 'diff' );
-			this.removeWarning( 'fuzzy' );
-			this.removeWarning( 'validation' );
+			// remove notices if any.
+			this.removeNotices( noticeTypes.getAllClasses() );
 
-			this.$editor.find( '.tux-warning' ).empty();
-			this.$editor.find( '.tux-more-warnings' )
+			this.$editor.find( '.tux-notice' ).empty();
+			this.$editor.find( '.tux-more-notices' )
 				.addClass( 'hide' )
 				.empty();
 
@@ -284,12 +324,12 @@
 		/**
 		 * Marks that there was a problem saving a translation.
 		 *
-		 * @param {string} error Strings of warnings to display.
+		 * @param {string} error Strings of notices to display.
 		 */
 		onSaveFail: function ( error ) {
-			this.addWarning(
+			this.addNotice(
 				mw.msg( 'tux-editor-save-failed', error ),
-				'translation-saving'
+				noticeTypes.translateFail
 			);
 			this.saving = false;
 			this.markUnsavedFailure();
@@ -357,6 +397,7 @@
 						href: uri.toString(),
 						target: '_blank'
 					} )
+					// eslint-disable-next-line mediawiki/msg-doc
 					.text( mw.msg( message ) )
 				);
 		},
@@ -426,7 +467,8 @@
 				{
 					title: 'Special:Translate',
 					showMessage: this.message.key,
-					group: this.message.primaryGroup
+					group: this.message.primaryGroup,
+					language: this.message.targetLanguage
 				},
 				'tux-editor-message-tools-linktothis'
 			);
@@ -442,9 +484,9 @@
 				originalTranslation,
 				$editorColumn,
 				$messageKeyLabel,
-				$moreWarningsTab,
-				$warnings,
-				$warningsBlock,
+				$moreNoticesTab,
+				$notices,
+				$noticesBlock,
 				$editAreaBlock,
 				$textarea,
 				$controlButtonBlock,
@@ -453,7 +495,7 @@
 				$editSummary,
 				$editSummaryBlock,
 				$discardChangesButton = $( [] ),
-				$saveButton,
+				$saveButton = $( [] ),
 				$requestRight,
 				$skipButton,
 				$cancelButton,
@@ -533,19 +575,19 @@
 				.append( $sourceString )
 			);
 
-			$warnings = $( '<div>' )
-				.addClass( 'tux-warning hide' );
+			$notices = $( '<div>' )
+				.addClass( 'tux-notice hide' );
 
-			$moreWarningsTab = $( '<div>' )
-				.addClass( 'tux-more-warnings hide' )
+			$moreNoticesTab = $( '<div>' )
+				.addClass( 'tux-more-notices hide' )
 				.on( 'click', function () {
 					var $this = $( this ),
-						$moreWarnings = $warnings.children(),
-						lastWarningIndex = $moreWarnings.length - 1;
+						$moreNotices = $notices.children(),
+						lastNoticeIndex = $moreNotices.length - 1;
 
-					// If the warning list is not open, only one warning is shown
+					// If the notice list is not open, only one notice is shown
 					if ( $this.hasClass( 'open' ) ) {
-						$moreWarnings.each( function ( index, element ) {
+						$moreNotices.each( function ( index, element ) {
 							// The first element must always be shown
 							if ( index ) {
 								$( element ).addClass( 'hide' );
@@ -554,9 +596,9 @@
 
 						$this
 							.removeClass( 'open' )
-							.text( mw.msg( 'tux-warnings-more', lastWarningIndex ) );
+							.text( mw.msg( 'tux-notices-more', lastNoticeIndex ) );
 					} else {
-						$moreWarnings.each( function ( index, element ) {
+						$moreNotices.each( function ( index, element ) {
 							// The first element must always be shown
 							if ( index ) {
 								$( element ).removeClass( 'hide' );
@@ -565,11 +607,13 @@
 
 						$this
 							.addClass( 'open' )
-							.text( mw.msg( 'tux-warnings-hide' ) );
+							.text( mw.msg( 'tux-notices-hide' ) );
 					}
+
+					translateEditor.toggleMoreButtonClass();
 				} );
 
-			targetLangCode = $messageList.data( 'targetlangcode' );
+			targetLangCode = this.message.targetLanguage;
 			if ( targetLangCode === mw.config.get( 'wgTranslateDocumentationLanguageCode' ) ) {
 				targetLangAttrib = mw.config.get( 'wgContentLanguage' );
 				targetLangDir = $.uls.data.getDir( targetLangAttrib );
@@ -592,14 +636,14 @@
 
 			// Shortcuts for various insertable things
 			$textarea.on( 'keyup keydown', function ( e ) {
-				var index, info, direction;
+				var index, $info, direction;
 
 				if ( e.type === 'keydown' && e.altKey === true ) {
 					// Up and down arrows
 					if ( e.keyCode === 38 || e.keyCode === 40 ) {
 						direction = e.keyCode === 40 ? 1 : -1;
-						info = translateEditor.$editor.find( '.infocolumn' );
-						info.scrollTop( info.scrollTop() + 100 * direction );
+						$info = translateEditor.$editor.find( '.infocolumn' );
+						$info.scrollTop( $info.scrollTop() + 100 * direction );
 						translateEditor.showShortcuts();
 					}
 				}
@@ -635,9 +679,7 @@
 			} );
 
 			$textarea.on( 'textchange', function () {
-				var $textarea = $( this ),
-					$saveButton = translateEditor.$editor.find( '.tux-editor-save-button' ),
-					$pasteSourceButton = translateEditor.$editor.find( '.tux-editor-paste-original-button' ),
+				var $pasteSourceButton = translateEditor.$editor.find( '.tux-editor-paste-original-button' ),
 					original = translateEditor.message.translation || '',
 					current = $textarea.val() || '';
 
@@ -647,7 +689,7 @@
 
 				/* Avoid Unsaved marking when translated message is not changed in content.
 				 * - translateEditor.dirty: internal book keeping
-				 * - mw.translate.dirty: "you have unchanged edits" warning
+				 * - mw.translate.dirty: "you have unchanged edits" notice
 				 */
 				if ( original === current ) {
 					translateEditor.markUnunsaved();
@@ -675,15 +717,15 @@
 				}, 500 );
 			} );
 
-			$warningsBlock = $( '<div>' )
-				.addClass( 'tux-warnings-block' )
-				.append( $moreWarningsTab, $warnings );
+			$noticesBlock = $( '<div>' )
+				.addClass( 'tux-notices-block' )
+				.append( $moreNoticesTab, $notices );
 
 			$editAreaBlock = $( '<div>' )
 				.addClass( 'row tux-editor-editarea-block' )
 				.append( $( '<div>' )
 					.addClass( 'editarea twelve columns' )
-					.append( $warningsBlock, $textarea )
+					.append( $noticesBlock, $textarea )
 				);
 
 			$editorColumn.append( $editAreaBlock );
@@ -694,7 +736,7 @@
 					.text( mw.msg( 'tux-editor-paste-original-button-label' ) )
 					.on( 'click', function () {
 						$textarea
-							.focus()
+							.trigger( 'focus' )
 							.val( sourceString )
 							.trigger( 'input' );
 
@@ -725,10 +767,10 @@
 					}
 
 					if ( !$saveButton.is( ':disabled' ) ) {
-						$saveButton.click();
+						$saveButton.trigger( 'click' );
 						return;
 					}
-					$skipButton.click();
+					$skipButton.trigger( 'click' );
 				} );
 
 				if ( originalTranslation !== null ) {
@@ -738,7 +780,7 @@
 						.on( 'click', function () {
 							// Restore the translation
 							$textarea
-								.focus()
+								.trigger( 'focus' )
 								.val( originalTranslation );
 
 							// and go back to hiding.
@@ -923,7 +965,7 @@
 
 		/**
 		 * Validate the current translation using the API
-		 * and show the warnings if necessary.
+		 * and show the notices.
 		 */
 		validateTranslation: function () {
 			var translateEditor = this,
@@ -932,85 +974,150 @@
 
 			api = new mw.Api();
 
-			api.post( {
+			this.validating = api.post( {
 				action: 'translationcheck',
 				title: this.message.title,
 				translation: $textarea.val()
 			} ).done( function ( data ) {
-				var warningIndex,
-					warnings = data.warnings;
+				var warnings = data.validation.warnings,
+					errors = data.validation.errors;
 
-				translateEditor.removeWarning( 'validation' );
-				if ( !warnings || !warnings.length ) {
+				translateEditor.removeNotices( [
+					noticeTypes.error,
+					noticeTypes.warning,
+					noticeTypes.translateFail
+				] );
+
+				if ( ( !warnings || !warnings.length ) &&
+					( !errors || !errors.length ) ) {
 					return;
 				}
 
-				// Remove useless fuzzy warning if we have more details
-				translateEditor.removeWarning( 'fuzzy' );
+				// Remove useless fuzzy notice if we have more details
+				translateEditor.removeNotices( noticeTypes.fuzzy );
 
 				// Disable confirm translation button, since fuzzy translations
 				// cannot be confirmed. The check for dirty state can be removed
-				// to prevent translations with warnings.
+				// to prevent translations with notices.
 				if ( !translateEditor.dirty ) {
 					translateEditor.$editor.find( '.tux-editor-save-button' )
 						.prop( 'disabled', true );
 				}
 
-				for ( warningIndex = 0; warningIndex < warnings.length; warningIndex++ ) {
-					translateEditor.addWarning( warnings[ warningIndex ], 'validation' );
+				// Don't allow users to save if there are errors but allow admins to save
+				// even if there are errors.
+				if ( !mw.translate.canManage() ) {
+					if ( errors && errors.length > 0 ) {
+						translateEditor.$editor.find( '.tux-editor-save-button' )
+							.prop( 'disabled', true );
+					}
 				}
+
+				translateEditor.displayNotices( warnings, noticeTypes.warning );
+				translateEditor.displayNotices( errors, noticeTypes.error );
+
+			} ).always( function () {
+				translateEditor.validating = null;
 			} );
 		},
 
 		/**
-		 * Remove all warning of given type
+		 * Remove all notices of given types
 		 *
-		 * @param {string} type
+		 * @param {(string|string[])} types
 		 */
-		removeWarning: function ( type ) {
-			var $tuxWarning = this.$editor.find( '.tux-warning' );
+		removeNotices: function ( types ) {
+			var $tuxNotice = this.$editor.find( '.tux-notice' ),
+				stringTypes = [],
+				$currentNotices,
+				index,
+				errMsg,
+				allNoticeTypes = noticeTypes.getAllClasses();
 
-			$tuxWarning.find( '.' + type ).remove();
-			if ( !$tuxWarning.children().length ) {
-				this.$editor.find( '.tux-more-warnings' ).addClass( 'hide' );
+			if ( typeof types === 'string' ) {
+				stringTypes.push( types );
+			} else {
+				stringTypes = types;
 			}
+
+			for ( index = 0; index < stringTypes.length; index++ ) {
+				if ( allNoticeTypes.indexOf( stringTypes[ index ] ) === -1 ) {
+					errMsg = 'tux: Invalid notice type removeNotice - ' + stringTypes[ index ];
+					mw.log.error( errMsg );
+					throw new Error( errMsg );
+				}
+				$tuxNotice.find( '.' + stringTypes[ index ] ).remove();
+			}
+
+			$currentNotices = $tuxNotice.children();
+			// If a single notice is shown, we can hide the more notice button,
+			// and display the hidden notice.
+			if ( $currentNotices.length <= 1 ) {
+				this.$editor.find( '.tux-more-notices' ).addClass( 'hide' );
+				$currentNotices.removeClass( 'hide' );
+			}
+			this.toggleMoreButtonClass();
 		},
 
 		/**
-		 * Displays the supplied warning above the translation edit area.
-		 * Newer warnings are added to the top while older warnings are
-		 * added to the bottom. This also means that older warnings will
-		 * not be shown by default unless the user clicks "more warnings" tab.
+		 * Displays the supplied notice above the translation edit area.
+		 * Newer notices are added to the top while older notices are
+		 * added to the bottom. This also means that older notices will
+		 * not be shown by default unless the user clicks "more notices" tab.
 		 *
-		 * @param {string} warning used as html for the warning display
-		 * @param {string} type used to group the warnings.eg: validation, diff, error
-		 * @return {jQuery} the new warning element
+		 * @param {string} notice used as html for the notices display
+		 * @param {string} type used to group the notices.eg: warning, diff, error
+		 * @return {jQuery} the new notice element
 		 */
-		addWarning: function ( warning, type ) {
-			var warningCount,
-				$warnings = this.$editor.find( '.tux-warning' ),
-				$moreWarningsTab = this.$editor.find( '.tux-more-warnings' ),
-				$newWarning = $( '<div>' )
-					.addClass( 'tux-warning-message ' + type )
-					.html( warning );
+		addNotice: function ( notice, type ) {
+			var noticeCount,
+				$notices = this.$editor.find( '.tux-notice' ),
+				$moreNoticesTab = this.$editor.find( '.tux-more-notices' ),
+				$newNotice = $( '<div>' )
+					.addClass( 'tux-notice-message ' + type )
+					.html( notice );
 
-			this.$editor.find( '.tux-warning-message' ).addClass( 'hide' );
+			this.$editor.find( '.tux-notice-message' ).addClass( 'hide' );
 
-			$warnings
+			$notices
 				.removeClass( 'hide' )
-				.prepend( $newWarning );
+				.prepend( $newNotice );
 
-			warningCount = $warnings.find( '.tux-warning-message' ).length;
+			noticeCount = $notices.find( '.tux-notice-message' ).length;
 
-			if ( warningCount > 1 ) {
-				$moreWarningsTab
-					.text( mw.msg( 'tux-warnings-more', warningCount - 1 ) )
+			if ( noticeCount > 1 ) {
+				$moreNoticesTab
+					.text( mw.msg( 'tux-notices-more', noticeCount - 1 ) )
 					.removeClass( 'hide open' );
 			} else {
-				$moreWarningsTab.addClass( 'hide' );
+				$moreNoticesTab.addClass( 'hide' );
 			}
+			this.toggleMoreButtonClass();
 
-			return $newWarning;
+			return $newNotice;
+		},
+
+		/**
+		 * Toggles the class on the more button based on the types of notice displayed, and whether
+		 * the more section is expanded. This is done in order to change the background color of the
+		 * button.
+		 */
+		toggleMoreButtonClass: function () {
+			var $allNotices = this.$editor.find( '.tux-notice-message' ),
+				errorCount = $allNotices.filter( '.tux-notice-message.' + noticeTypes.error ).length +
+					$allNotices.filter( '.tux-notice-message.' + noticeTypes.translateFail ).length,
+				otherErrorsCount = $allNotices.length - errorCount,
+				$moreButton = this.$editor.find( '.tux-more-notices' );
+
+			if ( errorCount === 0 ) {
+				// if no error, no classes needed.
+				$moreButton.removeClass( 'tux-has-errors' );
+			} else if ( otherErrorsCount > 0 && $moreButton.hasClass( 'open' ) ) {
+				// there are other notices, and more section is expanded.
+				$moreButton.removeClass( 'tux-has-errors' );
+			} else {
+				$moreButton.addClass( 'tux-has-errors' );
+			}
 		},
 
 		prepareInfoColumn: function () {
@@ -1097,7 +1204,7 @@
 			}
 
 			$infoColumn.append( $( '<div>' )
-				.addClass( 'row uneditable-documentation hide' )
+				.addClass( 'row uneditable-documentation hide mw-parser-output' )
 			);
 
 			$infoColumn.append( $( '<div>' )
@@ -1155,7 +1262,7 @@
 
 			this.$messageItem.addClass( 'hide' );
 			this.$editor.removeClass( 'hide' );
-			$textarea.focus();
+			$textarea.trigger( 'focus' );
 
 			autosize( $textarea );
 			this.resizeInsertables( $textarea );
@@ -1246,15 +1353,15 @@
 
 			$trigger = $( '<span>' )
 				.addClass( 'show-diff-link' )
-				.text( mw.msg( 'tux-editor-outdated-warning-diff-link' ) )
+				.text( mw.msg( 'tux-editor-outdated-notice-diff-link' ) )
 				.on( 'click', function () {
 					$( this ).parent().html( definitiondiff.html );
 				} );
 
-			this.removeWarning( 'fuzzy' );
-			this.addWarning(
-				mw.message( 'tux-editor-outdated-warning' ).escaped(),
-				'diff'
+			this.removeNotices( noticeTypes.fuzzy );
+			this.addNotice(
+				mw.message( 'tux-editor-outdated-notice' ).escaped(),
+				noticeTypes.diff
 			).append( $trigger );
 		},
 
@@ -1264,7 +1371,7 @@
 		listen: function () {
 			var translateEditor = this;
 
-			this.$editTrigger.find( '.tux-message-item' ).click( function () {
+			this.$editTrigger.find( '.tux-message-item' ).on( 'click', function () {
 				translateEditor.show();
 
 				return false;
@@ -1272,7 +1379,7 @@
 		},
 
 		/**
-		 * Makes the textare large enough for insertables and positions the insertables.
+		 * Makes the textarea large enough for insertables and positions the insertables.
 		 *
 		 * @param {jQuery} $textarea Text area.
 		 */
@@ -1284,6 +1391,31 @@
 			$textarea.css( 'padding-bottom', buttonAreaHeight + 5 );
 			$buttonArea.css( 'top', -buttonAreaHeight );
 			autosize.update( $textarea );
+		},
+
+		/**
+		 * Utility method to display a list of notices on the UI
+		 *
+		 * @param {Array} notices
+		 * @param {string} noticeType
+		 */
+		displayNotices: function ( notices, noticeType ) {
+			var index;
+			for ( index = 0; index < notices.length; ++index ) {
+				this.addNotice( notices[ index ], noticeType );
+			}
+		},
+
+		/**
+		 * Ensures that all the notices are displayed
+		 */
+		showMoreNotices: function () {
+			var $moreNoticesTab = this.$editor.find( '.tux-more-notices' );
+			if ( $moreNoticesTab.hasClass( 'open' ) ) {
+				return;
+			}
+
+			$moreNoticesTab.trigger( 'click' );
 		}
 	};
 
@@ -1317,6 +1449,13 @@
 
 			return function ( callback, milliseconds ) {
 				clearTimeout( timer );
+
+				if ( callback === false ) {
+					// sometimes we need to just cancel the timer without
+					// setting up another one
+					return;
+				}
+
 				timer = setTimeout( callback, milliseconds );
 			};
 		}() );

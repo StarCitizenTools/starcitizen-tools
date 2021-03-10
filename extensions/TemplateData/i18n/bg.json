@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"StanProg",
 			"Vodnokon4e",
-			"Лорд Бъмбъри",
-			"StanProg"
+			"Лорд Бъмбъри"
 		]
 	},
 	"templatedata-doc-desc-empty": "Няма описание.",
@@ -12,11 +12,8 @@
 	"templatedata-doc-format-inline": "За предпочитане е този шаблон да се използва с вградено форматиране на параметри.",
 	"templatedata-doc-no-params-set": "Не са указани параметри",
 	"templatedata-doc-param-autovalue": "Автоматична стойност",
-	"templatedata-doc-param-autovalue-empty": "празно",
 	"templatedata-doc-param-default": "По подразбиране",
-	"templatedata-doc-param-default-empty": "празно",
 	"templatedata-doc-param-example": "Пример",
-	"templatedata-doc-param-example-empty": "празно",
 	"templatedata-doc-param-desc": "Описание",
 	"templatedata-doc-param-desc-empty": "липсва описание",
 	"templatedata-doc-param-name": "Параметър",

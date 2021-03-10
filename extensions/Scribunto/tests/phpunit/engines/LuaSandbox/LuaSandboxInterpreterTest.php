@@ -9,8 +9,8 @@ require_once __DIR__ . '/../LuaCommon/LuaInterpreterTest.php';
 /**
  * @group Lua
  * @group LuaSandbox
+ * @covers Scribunto_LuaSandboxInterpreter
  */
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
 class Scribunto_LuaSandboxInterpreterTest extends Scribunto_LuaInterpreterTest {
 	public $stdOpts = [
 		'memoryLimit' => 50000000,

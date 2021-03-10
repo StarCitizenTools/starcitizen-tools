@@ -23,9 +23,13 @@ class FileBasedMessageGroup extends MessageGroupBase implements MetaYamlSchemaEx
 	 * Constructs a FileBasedMessageGroup from any normal message group.
 	 * Useful for doing special Gettext exports from any group.
 	 * @param MessageGroup $group
+	 * @param string $targetPattern Value for FILES.targetPattern
 	 * @return self
 	 */
-	public static function newFromMessageGroup( $group ) {
+	public static function newFromMessageGroup(
+		MessageGroup $group,
+		string $targetPattern = ''
+	) {
 		$conf = [
 			'BASIC' => [
 				'class' => self::class,
@@ -35,7 +39,7 @@ class FileBasedMessageGroup extends MessageGroupBase implements MetaYamlSchemaEx
 			],
 			'FILES' => [
 				'sourcePattern' => '',
-				'targetPattern' => '',
+				'targetPattern' => $targetPattern,
 			],
 		];
 
@@ -43,7 +47,9 @@ class FileBasedMessageGroup extends MessageGroupBase implements MetaYamlSchemaEx
 	}
 
 	public function exists() {
-		return $this->getFFS()->exists();
+		$ffs = $this->getFFS();
+		'@phan-var SimpleFFS $ffs';
+		return $ffs->exists();
 	}
 
 	public function load( $code ) {
@@ -52,6 +58,25 @@ class FileBasedMessageGroup extends MessageGroupBase implements MetaYamlSchemaEx
 		$data = $ffs->read( $code );
 
 		return $data ? $data['MESSAGES'] : [];
+	}
+
+	/**
+	 * @param string $code Language tag.
+	 * @return array Array with keys MESSAGES, AUTHORS and EXTRA, containing only primitive values.
+	 * @since 2020.04
+	 */
+	public function parseExternal( string $code ): array {
+		$supportedKeys = [ 'MESSAGES', 'AUTHORS', 'EXTRA' ];
+
+		$parsedData = $this->getFFS()->read( $code );
+
+		// Ensure we return correct keys
+		$data = [];
+		foreach ( $supportedKeys as $key ) {
+			$data[$key] = $parsedData[$key] ?? [];
+		}
+
+		return $data;
 	}
 
 	/**
@@ -116,6 +141,7 @@ class FileBasedMessageGroup extends MessageGroupBase implements MetaYamlSchemaEx
 			'%CODE%' => $this->mapCode( $code ),
 			'%MWROOT%' => $IP,
 			'%GROUPROOT%' => $wgTranslateGroupRoot,
+			'%GROUPID%' => $this->getId(),
 		];
 
 		Hooks::run( 'TranslateMessageGroupPathVariables', [ $this, &$variables ] );
@@ -181,5 +207,71 @@ class FileBasedMessageGroup extends MessageGroupBase implements MetaYamlSchemaEx
 		];
 
 		return $schema;
+	}
+
+	/** @inheritDoc */
+	public function getKeys() {
+		$cache = $this->getMessageGroupCache( $this->getSourceLanguage() );
+		if ( !$cache->exists() ) {
+			return array_keys( $this->getDefinitions() );
+		} else {
+			return $cache->getKeys();
+		}
+	}
+
+	/** @inheritDoc */
+	public function initCollection( $code ) {
+		$namespace = $this->getNamespace();
+		$messages = [];
+
+		$cache = $this->getMessageGroupCache( $this->getSourceLanguage() );
+		if ( !$cache->exists() ) {
+			wfWarn( "By-passing message group cache for {$this->getId()}" );
+			$messages = $this->getDefinitions();
+		} else {
+			foreach ( $cache->getKeys() as $key ) {
+				$messages[$key] = $cache->get( $key );
+			}
+		}
+
+		$definitions = new MessageDefinitions( $messages, $namespace );
+		$collection = MessageCollection::newFromDefinitions( $definitions, $code );
+		$this->setTags( $collection );
+
+		return $collection;
+	}
+
+	/** @inheritDoc */
+	public function getMessage( $key, $code ) {
+		$cache = $this->getMessageGroupCache( $code );
+		if ( $cache->exists() ) {
+			$msg = $cache->get( $key );
+
+			if ( $msg !== false ) {
+				return $msg;
+			}
+
+			// Try harder
+			$nkey = str_replace( ' ', '_', strtolower( $key ) );
+			$keys = $cache->getKeys();
+
+			foreach ( $keys as $k ) {
+				if ( $nkey === str_replace( ' ', '_', strtolower( $k ) ) ) {
+					return $cache->get( $k );
+				}
+			}
+
+			return null;
+		} else {
+			return null;
+		}
+	}
+
+	public function getMessageGroupCache( string $code ): MessageGroupCache {
+		$cacheFilePath = TranslateUtils::cacheFile(
+			"translate_groupcache-{$this->getId()}/{$code}.cdb"
+		);
+
+		return new MessageGroupCache( $this, $code, $cacheFilePath );
 	}
 }

@@ -2,16 +2,15 @@
 	"@metadata": {
 		"authors": [
 			"Bachounda",
-			"Oldstoneage",
+			"GeekEmad",
 			"Hussam",
-			"GeekEmad"
+			"Oldstoneage"
 		]
 	},
 	"tooltip-ca-createsource": "اصنع الكود المصدري لهذه الباجة",
 	"tooltip-ca-editsource": "بدل الكود المصدري لهاذ الباجة",
 	"tooltip-ca-ve-edit": "بدّل هاد الـصفحه",
 	"visualeditor-advancedsettings-tool": "إعدادات متقدمة",
-	"visualeditor-beta-label": "بيتا",
 	"visualeditor-beta-warning": "teqder tḥawel l lwikitext editor fi ay waqt ki tekliki ɛla $1, bech tḥafed ɛla tebdal li dertah. ila jawek ay machakil madabik tkhabarna taḥt.",
 	"visualeditor-browserwarning": "المحرر المرئي ما يدعمش رسميا البروزر الي تخدم بيه.",
 	"visualeditor-ca-createlocaldescriptionsource": "زيد توصاف مبلّد",
@@ -24,7 +23,6 @@
 	"visualeditor-descriptionpagelink": "Project:كاتبي منظور (VisualEditor)",
 	"visualeditor-dialog-media-content-section": "تعليق",
 	"visualeditor-dialog-media-goback": "ارجع (ولّي)",
-	"visualeditor-dialog-media-noresults": "ما كانش نتائج",
 	"visualeditor-dialog-media-position-center": "وسط",
 	"visualeditor-dialog-media-position-left": "يسار",
 	"visualeditor-dialog-media-position-none": "بدون",
@@ -65,7 +63,6 @@
 	"visualeditor-linknodeinspector-title": "وصلة بسيطة",
 	"visualeditor-meta-tool": "خيارات",
 	"visualeditor-mweditmodesource-warning-cancel": "فوتها",
-	"visualeditor-mweditmodesource-warning-switch": "احتفظ بالتعديلات",
 	"visualeditor-preference-core-label": "المحرر المرئي",
 	"visualeditor-savedialog-label-create": "اصنع صفحة",
 	"visualeditor-savedialog-label-error": "غلطه",
@@ -80,8 +77,5 @@
 	"visualeditor-savedialog-title-save": "سجل تبديلات نتاعك",
 	"visualeditor-savedialog-warning-dirty": "بالك تحريرك صرالو عطب – مادا بيك راجع قبل الحفظ.",
 	"visualeditor-saveerror": "صرات غلطه وقت حفظ المعلومات للخادم: $1.",
-	"visualeditor-toolbar-savedialog": "سجل الباجة",
-	"visualeditor-version-label": "نسخة",
-	"visualeditor-viewpage-savewarning-keep": "واصل التعديل",
-	"visualeditor-viewpage-savewarning-title": "متأكد؟"
+	"visualeditor-version-label": "نسخة"
 }

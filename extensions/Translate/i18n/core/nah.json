@@ -1,14 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Akapochtli",
 			"Fluence",
 			"Ricardo gs",
-			"Teòtlalili",
 			"Taresi",
-			"Akapochtli"
+			"Teòtlalili"
 		]
 	},
-	"translate": "Tictlahtōlcuepāz",
+	"translate": "Tictlahtolcuepaz",
+	"translate-taction-translate": "Tictlahtolcuepaz",
 	"translate-page-group": "Olōlli",
 	"translate-page-language": "Tlahtolli",
 	"translate-page-navigation-legend": "Panoliztli",
@@ -20,17 +21,12 @@
 	"translate-page-description-legend": "Olōltechopa",
 	"translate-page-edit": "xicpatla",
 	"translate-edit-contribute": "titlapalēhuīz",
-	"translate-edit-in-other-languages": "Tētītlaniliztli occē tlahtōltica",
-	"translate-magic-cm-export": "Ticnamacāz",
-	"translate-magic-cm-to-be": "Yez",
-	"translate-magic-cm-current": "Āxcān",
-	"translate-magic-cm-original": "Achto",
-	"translate-magic-cm-save": "Ticpiyāz",
-	"translate-magic-namespace": "Tōcātzintli ītōca",
+	"translate-rcfilters-translations": "Tlahtolcuepaliztli",
+	"translate-rcfilters-translations-only-label": "Tlahtolcuepaliztli",
 	"translate-rc-translation-filter-no": "Ahtlein titlachīhuāz",
 	"translationstats": "Tlahtōlcuepaliztli tlapōhualli",
 	"translate-stats-edits": "Tlapatlaliztli",
-	"translate-stats-users": "Tlahtōlcuepalōnih",
+	"translate-stats-users": "Tlahtolcuepqueh",
 	"translate-statsf-scale-days": "Tōnalli",
 	"translate-statsf-submit": "Achtochīhualiztli",
 	"translate-tag-page-desc": "Huiquizāzanilli ītlahtōlcuepaliz [[$2|$1]].",
@@ -38,6 +34,12 @@
 	"translations": "Mochi tlahtōlcuepaliztli",
 	"translate-translations-none": "Ayāc tlahtōlcuepaliztli ic \"$1\"",
 	"translate-translations-fieldset-title": "Tlahtoltitlaniliztli",
+	"translate-language": "Tlahtolli",
+	"translate-mgs-column-language": "Tlahtolli",
+	"supportedlanguages-translators": "{{PLURAL:$2|{{GENDER:$3|Tlahtolcuepqui}}|Tlahtolcuepqueh}}: $1",
+	"translate-searchprofile": "Tlahtolcuepaliztli",
+	"tux-languageselector": "Tictlahtolcuepaz ihuic",
 	"tux-editor-cancel-button-label": "Moxitiniz",
-	"tux-editor-doc-editor-cancel": "Moxitiniz"
+	"tux-editor-doc-editor-cancel": "Moxitiniz",
+	"tux-empty-list-translated-action": "Tictlahtolcuepaz"
 }

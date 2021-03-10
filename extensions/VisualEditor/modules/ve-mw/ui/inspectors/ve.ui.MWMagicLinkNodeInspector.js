@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWMagicLinkNodeInspector class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -113,6 +113,10 @@ ve.ui.MWMagicLinkNodeInspector.prototype.getSetupProcess = function ( data ) {
 			null;
 
 	data = $.extend( {
+		// The following messages are used here
+		// * visualeditor-magiclinknodeinspector-title-isbn
+		// * visualeditor-magiclinknodeinspector-title-pmid
+		// * visualeditor-magiclinknodeinspector-title-rfc
 		title: msg ? OO.ui.deferMsg( msg ) : null
 	}, data );
 	return ve.ui.MWMagicLinkNodeInspector.super.prototype.getSetupProcess.call( this, data )
@@ -120,7 +124,7 @@ ve.ui.MWMagicLinkNodeInspector.prototype.getSetupProcess = function ( data ) {
 			// Initialization
 			this.targetInput.setValue(
 				this.selectedNode ? this.selectedNode.getAttribute( 'content' ) : ''
-			);
+			).setReadOnly( this.isReadOnly() );
 		}, this );
 };
 
@@ -142,6 +146,7 @@ ve.ui.MWMagicLinkNodeInspector.prototype.getTeardownProcess = function ( data ) 
 	return ve.ui.MWMagicLinkNodeInspector.super.prototype.getTeardownProcess.call( this, data )
 		.first( function () {
 			var content, annotation, annotations,
+				surfaceView = this.manager.getSurface().getView(),
 				surfaceModel = this.getFragment().getSurface(),
 				doc = surfaceModel.getDocument(),
 				nodeRange = this.selectedNode.getOuterRange(),
@@ -166,6 +171,11 @@ ve.ui.MWMagicLinkNodeInspector.prototype.getTeardownProcess = function ( data ) 
 					surfaceModel.change(
 						ve.dm.TransactionBuilder.static.newFromReplacement( doc, nodeRange, content )
 					);
+					setTimeout( function () {
+						surfaceView.selectAnnotation( function ( view ) {
+							return view.model instanceof ve.dm.LinkAnnotation;
+						} );
+					} );
 				}
 			} else if ( done && this.validate( value ) ) {
 				surfaceModel.change(

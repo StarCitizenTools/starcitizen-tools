@@ -1,16 +1,12 @@
 /*!
- * OOUI v0.26.3
+ * OOUI v0.39.3
  * https://www.mediawiki.org/wiki/OOUI
  *
- * Copyright 2011–2018 OOUI Team and other contributors.
+ * Copyright 2011–2020 OOUI Team and other contributors.
  * Released under the MIT license
  * http://oojs.mit-license.org
  *
- * Date: 2018-04-10T22:15:43Z
- */
-/**
- * WikimediaUI Base v0.10.0
- * Wikimedia Foundation user interface base variables
+ * Date: 2020-07-10T06:32:25Z
  */
 .oo-ui-icon-alignCenter {
   background-image: url('themes/wikimediaui/images/icons/alignCenter.png');
@@ -84,17 +80,77 @@
   background-image: url('themes/wikimediaui/images/icons/code-progressive.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/code-progressive.svg');
 }
-.oo-ui-icon-find {
-  background-image: url('themes/wikimediaui/images/icons/articleSearch.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/articleSearch.svg');
+.oo-ui-icon-hieroglyph {
+  background-image: url('themes/wikimediaui/images/icons/hieroglyph.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/hieroglyph.svg');
 }
-.oo-ui-image-invert.oo-ui-icon-find {
-  background-image: url('themes/wikimediaui/images/icons/articleSearch-invert.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/articleSearch-invert.svg');
+.oo-ui-image-invert.oo-ui-icon-hieroglyph {
+  background-image: url('themes/wikimediaui/images/icons/hieroglyph-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/hieroglyph-invert.svg');
 }
-.oo-ui-image-progressive.oo-ui-icon-find {
-  background-image: url('themes/wikimediaui/images/icons/articleSearch-progressive.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/articleSearch-progressive.svg');
+.oo-ui-image-progressive.oo-ui-icon-hieroglyph {
+  background-image: url('themes/wikimediaui/images/icons/hieroglyph-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/hieroglyph-progressive.svg');
+}
+.oo-ui-icon-imageLayoutBasic {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutBasic.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutBasic.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-imageLayoutBasic {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutBasic-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutBasic-invert.svg');
+}
+.oo-ui-image-progressive.oo-ui-icon-imageLayoutBasic {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutBasic-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutBasic-progressive.svg');
+}
+.oo-ui-icon-imageLayoutFrame {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutFrame.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutFrame.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-imageLayoutFrame {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutFrame-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutFrame-invert.svg');
+}
+.oo-ui-image-progressive.oo-ui-icon-imageLayoutFrame {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutFrame-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutFrame-progressive.svg');
+}
+.oo-ui-icon-imageLayoutFrameless {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutFrameless.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutFrameless.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-imageLayoutFrameless {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutFrameless-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutFrameless-invert.svg');
+}
+.oo-ui-image-progressive.oo-ui-icon-imageLayoutFrameless {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutFrameless-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutFrameless-progressive.svg');
+}
+.oo-ui-icon-imageLayoutThumbnail {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutThumbnail.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutThumbnail.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-imageLayoutThumbnail {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutThumbnail-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutThumbnail-invert.svg');
+}
+.oo-ui-image-progressive.oo-ui-icon-imageLayoutThumbnail {
+  background-image: url('themes/wikimediaui/images/icons/imageLayoutThumbnail-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/imageLayoutThumbnail-progressive.svg');
+}
+.oo-ui-icon-labFlask {
+  background-image: url('themes/wikimediaui/images/icons/labFlask.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/labFlask.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-labFlask {
+  background-image: url('themes/wikimediaui/images/icons/labFlask-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/labFlask-invert.svg');
+}
+.oo-ui-image-progressive.oo-ui-icon-labFlask {
+  background-image: url('themes/wikimediaui/images/icons/labFlask-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/labFlask-progressive.svg');
 }
 .oo-ui-icon-language {
   background-image: url('themes/wikimediaui/images/icons/language.png');
@@ -131,6 +187,54 @@
 .oo-ui-image-progressive.oo-ui-icon-markup {
   background-image: url('themes/wikimediaui/images/icons/markup-progressive.png');
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/markup-progressive.svg');
+}
+.oo-ui-icon-mathematics {
+  background-image: url('themes/wikimediaui/images/icons/mathematics.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematics.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-mathematics {
+  background-image: url('themes/wikimediaui/images/icons/mathematics-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematics-invert.svg');
+}
+.oo-ui-image-progressive.oo-ui-icon-mathematics {
+  background-image: url('themes/wikimediaui/images/icons/mathematics-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematics-progressive.svg');
+}
+.oo-ui-icon-mathematicsDisplayBlock {
+  background-image: url('themes/wikimediaui/images/icons/mathematicsDisplayBlock.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematicsDisplayBlock.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-mathematicsDisplayBlock {
+  background-image: url('themes/wikimediaui/images/icons/mathematicsDisplayBlock-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematicsDisplayBlock-invert.svg');
+}
+.oo-ui-image-progressive.oo-ui-icon-mathematicsDisplayBlock {
+  background-image: url('themes/wikimediaui/images/icons/mathematicsDisplayBlock-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematicsDisplayBlock-progressive.svg');
+}
+.oo-ui-icon-mathematicsDisplayDefault {
+  background-image: url('themes/wikimediaui/images/icons/mathematicsDisplayDefault.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematicsDisplayDefault.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-mathematicsDisplayDefault {
+  background-image: url('themes/wikimediaui/images/icons/mathematicsDisplayDefault-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematicsDisplayDefault-invert.svg');
+}
+.oo-ui-image-progressive.oo-ui-icon-mathematicsDisplayDefault {
+  background-image: url('themes/wikimediaui/images/icons/mathematicsDisplayDefault-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematicsDisplayDefault-progressive.svg');
+}
+.oo-ui-icon-mathematicsDisplayInline {
+  background-image: url('themes/wikimediaui/images/icons/mathematicsDisplayInline.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematicsDisplayInline.svg');
+}
+.oo-ui-image-invert.oo-ui-icon-mathematicsDisplayInline {
+  background-image: url('themes/wikimediaui/images/icons/mathematicsDisplayInline-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematicsDisplayInline-invert.svg');
+}
+.oo-ui-image-progressive.oo-ui-icon-mathematicsDisplayInline {
+  background-image: url('themes/wikimediaui/images/icons/mathematicsDisplayInline-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/mathematicsDisplayInline-progressive.svg');
 }
 .oo-ui-icon-newline {
   background-image: url('themes/wikimediaui/images/icons/newline-ltr.png');
@@ -265,28 +369,28 @@
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/table-progressive.svg');
 }
 .oo-ui-icon-tableAddColumnAfter {
-  background-image: url('themes/wikimediaui/images/icons/tableAddColumnAfter.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnAfter.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableAddColumnAfter-ltr.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnAfter-ltr.svg');
 }
 .oo-ui-image-invert.oo-ui-icon-tableAddColumnAfter {
-  background-image: url('themes/wikimediaui/images/icons/tableAddColumnAfter-invert.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnAfter-invert.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableAddColumnAfter-ltr-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnAfter-ltr-invert.svg');
 }
 .oo-ui-image-progressive.oo-ui-icon-tableAddColumnAfter {
-  background-image: url('themes/wikimediaui/images/icons/tableAddColumnAfter-progressive.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnAfter-progressive.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableAddColumnAfter-ltr-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnAfter-ltr-progressive.svg');
 }
 .oo-ui-icon-tableAddColumnBefore {
-  background-image: url('themes/wikimediaui/images/icons/tableAddColumnBefore.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnBefore.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableAddColumnBefore-ltr.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnBefore-ltr.svg');
 }
 .oo-ui-image-invert.oo-ui-icon-tableAddColumnBefore {
-  background-image: url('themes/wikimediaui/images/icons/tableAddColumnBefore-invert.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnBefore-invert.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableAddColumnBefore-ltr-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnBefore-ltr-invert.svg');
 }
 .oo-ui-image-progressive.oo-ui-icon-tableAddColumnBefore {
-  background-image: url('themes/wikimediaui/images/icons/tableAddColumnBefore-progressive.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnBefore-progressive.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableAddColumnBefore-ltr-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableAddColumnBefore-ltr-progressive.svg');
 }
 .oo-ui-icon-tableAddRowAfter {
   background-image: url('themes/wikimediaui/images/icons/tableAddRowAfter.png');
@@ -337,28 +441,28 @@
   background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMergeCells-progressive.svg');
 }
 .oo-ui-icon-tableMoveColumnAfter {
-  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnAfter.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnAfter.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnAfter-ltr.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnAfter-ltr.svg');
 }
 .oo-ui-image-invert.oo-ui-icon-tableMoveColumnAfter {
-  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnAfter-invert.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnAfter-invert.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnAfter-ltr-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnAfter-ltr-invert.svg');
 }
 .oo-ui-image-progressive.oo-ui-icon-tableMoveColumnAfter {
-  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnAfter-progressive.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnAfter-progressive.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnAfter-ltr-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnAfter-ltr-progressive.svg');
 }
 .oo-ui-icon-tableMoveColumnBefore {
-  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnBefore.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnBefore.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnBefore-ltr.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnBefore-ltr.svg');
 }
 .oo-ui-image-invert.oo-ui-icon-tableMoveColumnBefore {
-  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnBefore-invert.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnBefore-invert.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnBefore-ltr-invert.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnBefore-ltr-invert.svg');
 }
 .oo-ui-image-progressive.oo-ui-icon-tableMoveColumnBefore {
-  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnBefore-progressive.png');
-  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnBefore-progressive.svg');
+  background-image: url('themes/wikimediaui/images/icons/tableMoveColumnBefore-ltr-progressive.png');
+  background-image: linear-gradient(transparent, transparent), /* @embed */ url('themes/wikimediaui/images/icons/tableMoveColumnBefore-ltr-progressive.svg');
 }
 .oo-ui-icon-tableMoveRowAfter {
   background-image: url('themes/wikimediaui/images/icons/tableMoveRowAfter.png');

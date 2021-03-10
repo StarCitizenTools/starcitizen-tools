@@ -1,13 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sindhu",
 			"Aursani",
-			"Mehtab ahmed"
+			"Mehtab ahmed",
+			"Sindhu"
 		]
 	},
 	"tpt-diff-old": "پويون متن",
-	"tpt-mark-nochanges": "تبديلين جي ڪا به نظرثاني نه. ترجمي لاءِ هي صفحو نشاني بڻائڻ صفحي کي ترميم نه ڪندو، نه ئي اڳ موجود ترجمي جي يونٽ کي ترميم ڪندو",
+	"tpt-mark-nochanges": "نظر ثاني لاءِ ڪي بہ تبديليون ناھن. ھن صفحي ترجمي لاءِ نشان ھڻڻ سان صفحو نہ سنواربو نہ ئي ڪو موجود ترجمي جو ايڪو.",
 	"tpt-languages-nonzero": "$1 ($2% ترجمو ٿيل)",
 	"tpt-aggregategroup-save": "سانڍيو",
 	"tpt-aggregategroup-update": "سانڍيو",
@@ -16,5 +16,6 @@
 	"pm-cancel-button-label": "رد",
 	"pp-save-button-label": "سانڍيو",
 	"pp-cancel-button-label": "رد",
+	"tpt-unlink-summary": "ترجمي کان صفحو ھٽايو ويو",
 	"tpt-generic-button": "پڪ ڪريو"
 }

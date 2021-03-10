@@ -15,16 +15,14 @@
 class SpecialSearchTranslations extends SpecialPage {
 	/** @var FormOptions */
 	protected $opts;
-
 	/**
-	 * Placeholders used for highlighting. Solr can mark the beginning and
+	 * Placeholders used for highlighting. Search backend can mark the beginning and
 	 * end but we need to run htmlspecialchars on the result first and then
 	 * replace the placeholders with the html. It is assumed placeholders
 	 * don't contain any chars that are escaped in html.
 	 * @var array
 	 */
 	protected $hl = [];
-
 	/**
 	 * How many search results to display per page
 	 * @var int
@@ -39,17 +37,6 @@ class SpecialSearchTranslations extends SpecialPage {
 		];
 	}
 
-	public function setHeaders() {
-		// Overwritten the parent because it sucks!
-		// We want to set <title> but not <h1>
-		$out = $this->getOutput();
-		$out->setArticleRelated( false );
-		$out->setRobotPolicy( 'noindex,nofollow' );
-		$name = $this->msg( 'searchtranslations' );
-		$name = Sanitizer::stripAllTags( $name );
-		$out->setHTMLTitle( $this->msg( 'pagetitle' )->rawParams( $name ) );
-	}
-
 	public function execute( $par ) {
 		global $wgLanguageCode;
 		$this->setHeaders();
@@ -62,7 +49,7 @@ class SpecialSearchTranslations extends SpecialPage {
 
 		$out = $this->getOutput();
 		$out->addModuleStyles( 'jquery.uls.grid' );
-		$out->addModuleStyles( 'ext.translate.special.searchtranslations.styles' );
+		$out->addModuleStyles( 'ext.translate.specialpages.styles' );
 		$out->addModuleStyles( 'ext.translate.special.translate.styles' );
 		$out->addModuleStyles( [ 'mediawiki.ui.button', 'mediawiki.ui.input', 'mediawiki.ui.checkbox' ] );
 		$out->addModules( 'ext.translate.special.searchtranslations' );
@@ -173,10 +160,12 @@ class SpecialSearchTranslations extends SpecialPage {
 					$this->getContext(),
 					$dataProvider
 				);
-				$document['wiki'] = wfWikiID();
-				$document['localid'] = $handle->getTitleForBase()->getPrefixedText();
-				$document['content'] = $aid->getData()['value'];
-				$document['language'] = $handle->getCode();
+				$document = [
+					'wiki' => wfWikiID(),
+					'localid' => $handle->getTitleForBase()->getPrefixedText(),
+					'content' => $aid->getData()['value'],
+					'language' => $handle->getCode(),
+				];
 				array_unshift( $documents, $document );
 				$total++;
 			}
@@ -240,8 +229,7 @@ class SpecialSearchTranslations extends SpecialPage {
 				'dir' => $language->getDir(),
 			];
 
-			$resultsHtml = $resultsHtml
-				. Html::openElement( 'div', $resultAttribs )
+			$resultsHtml .= Html::openElement( 'div', $resultAttribs )
 				. Html::rawElement( 'div', $textAttribs, $text )
 				. Html::element( 'div', $titleAttribs, $titleText )
 				. $access
@@ -275,7 +263,7 @@ class SpecialSearchTranslations extends SpecialPage {
 			"$prev $next"
 		);
 
-		$count = $this->msg( 'tux-sst-count' )->numParams( $total );
+		$count = $this->msg( 'tux-sst-count' )->numParams( $total )->escaped();
 
 		$this->showSearch( $search, $count, $facetHtml, $resultsHtml, $total );
 	}
@@ -332,7 +320,7 @@ class SpecialSearchTranslations extends SpecialPage {
 			} else {
 				$subgroups = [];
 			}
-
+			'@phan-var MessageGroup $group';
 			$id = $group->getId();
 
 			if ( $id !== $selected && !isset( $counts[$id] ) ) {
@@ -489,15 +477,13 @@ HTML
 		];
 
 		$selected = $this->opts->getValue( 'filter' );
-		$keys = array_keys( $tabs );
-		if ( in_array( $selected, array_values( $ellipsisOptions ) ) ) {
-			$key = $keys[count( $keys ) - 1];
-			$ellipsisOptions = [ $key => $tabs[$key] ];
+		if ( in_array( $selected, $ellipsisOptions ) ) {
+			$ellipsisOptions = array_slice( $tabs, -1 );
 
 			// Remove the last tab
-			unset( $tabs[$key] );
+			array_pop( $tabs );
 			$tabs = array_merge( $tabs, [ 'outdated' => $selected ] );
-		} elseif ( !in_array( $selected, array_values( $tabs ) ) ) {
+		} elseif ( !in_array( $selected, $tabs ) ) {
 			$selected = '';
 		}
 
@@ -533,7 +519,7 @@ HTML
 			}
 
 			if ( $selected === $filter ) {
-				$tabClass = $tabClass . ' selected';
+				$tabClass .= ' selected';
 			}
 			$output .= Html::rawElement( 'li', [
 				'class' => [ 'column', $tabClass ],
@@ -548,16 +534,14 @@ HTML
 			$container .
 			Html::closeElement( 'li' );
 
-		$output .= Html::closeElement( 'ul' );
-		$output .= Html::closeElement( 'div' );
-		$output .= Html::closeElement( 'div' );
+		$output .= Html::closeElement( 'ul' ) . Html::closeElement( 'div' ) . Html::closeElement( 'div' );
 
 		return $output;
 	}
 
 	protected function getSearchInput( $query ) {
 		$attribs = [
-			'placeholder' => $this->msg( 'tux-sst-search-ph' ),
+			'placeholder' => $this->msg( 'tux-sst-search-ph' )->text(),
 			'class' => 'searchinputbox mw-ui-input',
 			'dir' => $this->getLanguage()->getDir(),
 		];
@@ -565,8 +549,8 @@ HTML
 		$title = Html::hidden( 'title', $this->getPageTitle()->getPrefixedText() );
 		$input = Xml::input( 'query', false, $query, $attribs );
 		$submit = Xml::submitButton(
-			$this->msg( 'tux-sst-search' ),
-			[ 'class' => 'mw-ui-button' ]
+			$this->msg( 'tux-sst-search' )->text(),
+			[ 'class' => 'mw-ui-button mw-ui-progressive' ]
 		);
 
 		$nondefaults = $this->opts->getChangedValues();
@@ -584,12 +568,16 @@ HTML
 			Html::closeElement( 'div' );
 
 		$lang = $this->getRequest()->getVal( 'language' );
-		$language = is_null( $lang ) ? '' : Html::hidden( 'language', $lang );
+		$language = $lang === null ? '' : Html::hidden( 'language', $lang );
 
 		$form = Html::rawElement( 'form', [ 'action' => wfScript(), 'name' => 'searchform' ],
 			$title . $input . $submit . $checkLabel . $language
 		);
 
 		return $form;
+	}
+
+	protected function getGroupName() {
+		return 'translation';
 	}
 }

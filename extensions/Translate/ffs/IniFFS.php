@@ -17,16 +17,16 @@
  */
 class IniFFS extends SimpleFFS {
 	public static function isValid( $data ) {
-		$conf = [ 'BASIC' => [ 'class' => 'FileBasedMessageGroup', 'namespace' => 8 ] ];
-		/**
-		 * @var FileBasedMessageGroup $group
-		 */
+		$conf = [
+			'BASIC' => [ 'class' => FileBasedMessageGroup::class, 'namespace' => 8 ],
+			'FILES' => []
+		];
+		/** @var FileBasedMessageGroup $group */
 		$group = MessageGroupBase::factory( $conf );
+		'@phan-var FileBasedMessageGroup $group';
 
-		Wikimedia\suppressWarnings();
 		$ffs = new self( $group );
 		$parsed = $ffs->readFromVariable( $data );
-		Wikimedia\restoreWarnings();
 
 		return (bool)count( $parsed['MESSAGES'] );
 	}
@@ -57,7 +57,7 @@ class IniFFS extends SimpleFFS {
 
 		$messages = parse_ini_string( $data );
 		if ( is_array( $messages ) ) {
-			$messages = $this->group->getMangler()->mangle( $messages );
+			$messages = $this->group->getMangler()->mangleArray( $messages );
 		} else {
 			$messages = null;
 		}
@@ -72,9 +72,7 @@ class IniFFS extends SimpleFFS {
 		$output = '';
 		$mangler = $this->group->getMangler();
 
-		/**
-		 * @var $m ThinMessage
-		 */
+		/** @var TMessage $m */
 		foreach ( $collection as $key => $m ) {
 			$value = $m->translation();
 			if ( $value === null ) {

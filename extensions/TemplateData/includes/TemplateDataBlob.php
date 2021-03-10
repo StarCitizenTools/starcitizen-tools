@@ -3,6 +3,7 @@
  * @file
  * @ingroup Extensions
  */
+use MediaWiki\MediaWikiServices;
 
 /**
  * Represents the information about a template,
@@ -12,39 +13,45 @@
  * @class
  */
 class TemplateDataBlob {
-	// Size of MySQL 'blob' field; page_props table where the data is stored uses one.
-	const MAX_LENGTH = 65535;
-
 	/**
 	 * @var stdClass
 	 */
-	private $data;
+	protected $data;
 
 	/**
 	 * @var string|null In-object cache for getJSON()
 	 */
-	private $json = null;
-
-	/**
-	 * @var string|null In-object cache for getJSONForDatabase()
-	 */
-	private $jsonDB = null;
+	protected $json = null;
 
 	/**
 	 * @var Status Cache of TemplateDataBlob::parse
 	 */
-	private $status;
+	protected $status;
 
 	/**
-	 * Parse and validate passed JSON and create a TemplateDataBlob object.
+	 * @var string[] Predefined formats for TemplateData to check against
+	 */
+	protected static $formats = [
+		'block' => "{{_\n| _ = _\n}}",
+		'inline' => '{{_|_=_}}',
+	];
+
+	/**
+	 * Parse and validate passed JSON and create a blob handling
+	 * instance.
 	 * Accepts and handles user-provided data.
 	 *
+	 * @param IDatabase $db
 	 * @param string $json
+	 * @return TemplateDataBlob|TemplateDataCompressedBlob
 	 * @throws Exception
-	 * @return TemplateDataBlob
 	 */
-	public static function newFromJSON( $json ) {
-		$tdb = new self( json_decode( $json ) );
+	public static function newFromJSON( $db, $json ) {
+		if ( $db->getType() === 'mysql' ) {
+			$tdb = new TemplateDataCompressedBlob( json_decode( $json ) );
+		} else {
+			$tdb = new TemplateDataBlob( json_decode( $json ) );
+		}
 
 		$status = $tdb->parse();
 
@@ -59,7 +66,6 @@ class TemplateDataBlob {
 			$tdb->data = new stdClass();
 			$tdb->data->description = null;
 			$tdb->data->params = new stdClass();
-			$tdb->data->paramOrder = [];
 			$tdb->data->format = null;
 			$tdb->data->sets = [];
 			$tdb->data->maps = new stdClass();
@@ -69,17 +75,19 @@ class TemplateDataBlob {
 	}
 
 	/**
-	 * Parse and validate passed JSON (possibly gzip-compressed) and create a TemplateDataBlob object.
+	 * Parse and validate passed JSON (possibly gzip-compressed) and create a blob handling
+	 * instance.
 	 *
+	 * @param IDatabase $db
 	 * @param string $json
-	 * @return TemplateDataBlob
+	 * @return TemplateDataBlob or TemplateDataCompressedBlob
 	 */
-	public static function newFromDatabase( $json ) {
+	public static function newFromDatabase( $db, $json ) {
 		// Handle GZIP compression. \037\213 is the header for GZIP files.
 		if ( substr( $json, 0, 2 ) === "\037\213" ) {
 			$json = gzdecode( $json );
 		}
-		return self::newFromJSON( $json );
+		return self::newFromJSON( $db, $json );
 	}
 
 	/**
@@ -88,7 +96,7 @@ class TemplateDataBlob {
 	 * See Specification.md for the expected format of the JSON object.
 	 * @return Status
 	 */
-	private function parse() {
+	protected function parse() {
 		$data = $this->data;
 
 		static $rootKeys = [
@@ -130,11 +138,6 @@ class TemplateDataBlob {
 			'wiki-template-name',
 		];
 
-		static $formats = [
-			'block' => "{{_\n| _ = _\n}}",
-			'inline' => '{{_|_=_}}',
-		];
-
 		static $typeCompatMap = [
 			'string/line' => 'line',
 			'string/wiki-page-name' => 'wiki-page-name',
@@ -168,8 +171,8 @@ class TemplateDataBlob {
 
 		// Root.format
 		if ( isset( $data->format ) && $data->format !== null ) {
-			$f = isset( $formats[$data->format] ) ? $formats[$data->format] :
-				$data->format;
+			// @phan-suppress-next-line PhanTypeMismatchDimFetchNullable isset makes this non-null
+			$f = self::$formats[$data->format] ?? $data->format;
 			if (
 				!is_string( $f ) ||
 				!preg_match( '/^\n?\{\{ *_+\n? *\|\n? *_+ *= *_+\n? *\}\}\n?$/', $f )
@@ -424,8 +427,6 @@ class TemplateDataBlob {
 				}
 				$seen[$param] = $i;
 			}
-		} else {
-			$data->paramOrder = $paramNames;
 		}
 
 		// Root.sets
@@ -550,12 +551,6 @@ class TemplateDataBlob {
 				}
 			}
 		}
-
-		$length = strlen( $this->getJSONForDatabase() );
-		if ( $length > self::MAX_LENGTH ) {
-			return Status::newFatal( 'templatedata-invalid-length', $length, self::MAX_LENGTH );
-		}
-
 		return Status::newGood();
 	}
 
@@ -566,9 +561,9 @@ class TemplateDataBlob {
 	 */
 	protected static function normaliseInterfaceText( $text ) {
 		if ( is_string( $text ) ) {
-			global $wgContLang;
+			$contLang = MediaWikiServices::getInstance()->getContentLanguage();
 			$ret = new stdClass();
-			$ret->{ $wgContLang->getCode() } = $text;
+			$ret->{ $contLang->getCode() } = $text;
 			return $ret;
 		}
 		return $text;
@@ -693,25 +688,24 @@ class TemplateDataBlob {
 	}
 
 	/**
-	 * @return string JSON (gzip compressed)
+	 * @return string JSON
 	 */
 	public function getJSONForDatabase() {
-		if ( $this->jsonDB === null ) {
-			// Cache for repeat calls
-			$this->jsonDB = gzencode( $this->getJSON() );
-		}
-		return $this->jsonDB;
+		return $this->getJSON();
 	}
 
 	public function getHtml( Language $lang ) {
 		$data = $this->getDataInLanguage( $lang->getCode() );
+		$icon = 'settings';
 		if ( $data->format === null ) {
 			$formatMsg = null;
-		} elseif ( isset( $formats[$data->format] ) ) {
+		} elseif ( isset( self::$formats[$data->format] ) ) {
 			$formatMsg = $data->format;
+			$icon = 'template-format-' . $formatMsg;
 		} else {
 			$formatMsg = 'custom';
 		}
+		$sorting = count( (array)$data->params ) > 1 ? " sortable" : "";
 		$html =
 			Html::openElement( 'div', [ 'class' => 'mw-templatedata-doc-wrap' ] )
 			. Html::element(
@@ -722,11 +716,10 @@ class TemplateDataBlob {
 						'mw-templatedata-doc-muted' => $data->description === null,
 					]
 				],
-				$data->description !== null ?
-					$data->description :
+				$data->description ??
 					wfMessage( 'templatedata-doc-desc-empty' )->inLanguage( $lang )->text()
 			)
-			. '<table class="wikitable mw-templatedata-doc-params sortable">'
+			. '<table class="wikitable mw-templatedata-doc-params' . $sorting . '">'
 			. Html::rawElement(
 				'caption',
 				[],
@@ -739,7 +732,7 @@ class TemplateDataBlob {
 					Html::rawElement(
 						'p',
 						[],
-						new OOUI\IconWidget( [ 'icon' => 'template-format-' . $formatMsg ] )
+						new OOUI\IconWidget( [ 'icon' => $icon ] )
 						. Html::element(
 							'span',
 							[ 'class' => 'mw-templatedata-format' ],
@@ -788,7 +781,9 @@ class TemplateDataBlob {
 			)
 			. '</tr>';
 		}
-		foreach ( $data->paramOrder as $paramName ) {
+
+		$paramNames = $data->paramOrder ?? array_keys( (array)$data->params );
+		foreach ( $paramNames as $paramName ) {
 			$paramObj = $data->params->$paramName;
 			$description = '';
 			$default = '';
@@ -796,7 +791,8 @@ class TemplateDataBlob {
 			$aliases = '';
 			if ( count( $paramObj->aliases ) ) {
 				foreach ( $paramObj->aliases as $alias ) {
-					$aliases .= Html::element( 'code', [
+					$aliases .= wfMessage( 'word-separator' )->inLanguage( $lang )->escaped()
+					. Html::element( 'code', [
 						'class' => 'mw-templatedata-doc-param-alias'
 					], $alias );
 				}
@@ -816,11 +812,7 @@ class TemplateDataBlob {
 
 			$html .= '<tr>'
 			// Label
-			. Html::element( 'th', [],
-				$paramObj->label !== null ?
-					$paramObj->label :
-					$lang->ucfirst( $paramName )
-			)
+			. Html::element( 'th', [], $paramObj->label ?? $lang->ucfirst( $paramName ) )
 			// Parameters and aliases
 			. Html::rawElement( 'td', [ 'class' => 'mw-templatedata-doc-param-name' ],
 				Html::element( 'code', [], $paramName ) . $aliases
@@ -832,50 +824,31 @@ class TemplateDataBlob {
 					]
 				],
 				Html::element( 'p', [],
-					$paramObj->description !== null ?
-					$paramObj->description :
-					wfMessage( 'templatedata-doc-param-desc-empty' )->inLanguage( $lang )->text()
+					$paramObj->description ??
+						wfMessage( 'templatedata-doc-param-desc-empty' )->inLanguage( $lang )->text()
 				)
 				. Html::rawElement( 'dl', [],
-					Html::element( 'dt', [],
+					// Default
+					( $paramObj->default !== null ? ( Html::element( 'dt', [],
 						wfMessage( 'templatedata-doc-param-default' )->inLanguage( $lang )->text()
 					)
-					// Default
-					. Html::element( 'dd', [
-							'class' => [
-								'mw-templatedata-doc-muted' => $paramObj->default === null
-							]
-						],
-						$paramObj->default !== null ?
-							$paramObj->default :
-							wfMessage( 'templatedata-doc-param-default-empty' )->inLanguage( $lang )->text()
-					)
+					. Html::element( 'dd', [],
+						$paramObj->default
+					) ) : '' )
 					// Example
-					. Html::element( 'dt', [],
+					. ( $paramObj->example !== null ? ( Html::element( 'dt', [],
 						wfMessage( 'templatedata-doc-param-example' )->inLanguage( $lang )->text()
 					)
-					. Html::element( 'dd', [
-							'class' => [
-								'mw-templatedata-doc-muted' => $paramObj->example === null
-							]
-						],
-						$paramObj->example !== null ?
-							$paramObj->example :
-							wfMessage( 'templatedata-doc-param-example-empty' )->inLanguage( $lang )->text()
-					)
+					. Html::element( 'dd', [],
+						$paramObj->example
+					) ) : '' )
 					// Auto value
-					. Html::element( 'dt', [],
+					. ( $paramObj->autovalue !== null ? ( Html::element( 'dt', [],
 						wfMessage( 'templatedata-doc-param-autovalue' )->inLanguage( $lang )->text()
 					)
-					. Html::rawElement( 'dd', [
-							'class' => [
-								'mw-templatedata-doc-muted' => $paramObj->autovalue === null
-							]
-						],
-						$paramObj->autovalue !== null ?
-							Html::element( 'code', [], $paramObj->autovalue ) :
-							wfMessage( 'templatedata-doc-param-autovalue-empty' )->inLanguage( $lang )->escaped()
-					)
+					. Html::rawElement( 'dd', [],
+						Html::element( 'code', [], $paramObj->autovalue )
+					) ) : '' )
 				)
 			)
 			// Type
@@ -917,10 +890,18 @@ class TemplateDataBlob {
 	 */
 	public static function getRawParams( $wikitext ) {
 		// This regex matches the one in ext.TemplateDataGenerator.sourceHandler.js
-		preg_match_all( '/{{3,}(.*?)[<|}]/m', $wikitext, $rawParams );
+		preg_match_all( '/{{3,}([^#]*?)([<|]|}{3,})/m', $wikitext, $rawParams );
 		$params = [];
+		$normalizedParams = [];
 		if ( isset( $rawParams[1] ) ) {
 			foreach ( $rawParams[1] as $rawParam ) {
+				// This normalization process is repeated in JS in ext.TemplateDataGenerator.sourceHandler.js
+				$normalizedParam = preg_replace( '/[-_ ]+/', ' ', strtolower( $rawParam ) );
+				if ( in_array( $normalizedParam, $normalizedParams ) ) {
+					// This or a similarly-named parameter has already been found.
+					continue;
+				}
+				$normalizedParams[] = $normalizedParam;
 				$params[ $rawParam ] = [];
 			}
 		}

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTransclusionModel class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,17 +16,20 @@
 	 * @mixins OO.EventEmitter
 	 *
 	 * @constructor
+	 * @param {ve.dm.Document} doc Document to use associate with API requests
 	 */
-	ve.dm.MWTransclusionModel = function VeDmMWTransclusionModel() {
+	ve.dm.MWTransclusionModel = function VeDmMWTransclusionModel( doc ) {
 		// Mixin constructors
 		OO.EventEmitter.call( this );
 
 		// Properties
+		this.doc = doc;
 		this.parts = [];
 		this.uid = 0;
 		this.requests = [];
 		this.queue = [];
 		this.specCache = specCache;
+
 	};
 
 	/* Inheritance */
@@ -61,13 +64,12 @@
 	 */
 	ve.dm.MWTransclusionModel.prototype.insertTransclusionNode = function ( surfaceFragment, forceType ) {
 		var model = this,
-			deferred = $.Deferred(),
+			deferred = ve.createDeferred(),
 			baseNodeClass = ve.dm.MWTransclusionNode;
 
 		function insertNode( isInline, generatedContents ) {
 			var hash, store, nodeClass,
 				type = isInline ? baseNodeClass.static.inlineType : baseNodeClass.static.blockType,
-				range = surfaceFragment.getSelection().getCoveringRange(),
 				data = [
 					{
 						type: type,
@@ -87,16 +89,8 @@
 				store.hash( generatedContents, hash );
 			}
 
-			if ( range.isCollapsed() ) {
-				surfaceFragment.insertContent( data );
-			} else {
-				// Generate a replacement transaction instead of using surfaceFragment.insertContent
-				// (which generates a removal and insertion) as blanking a reference triggers T135127.
-				// TODO: Once T135127 is fixed, revert to using surfaceFragment.insert.
-				surfaceFragment.getSurface().change(
-					ve.dm.TransactionBuilder.static.newFromReplacement( surfaceFragment.getDocument(), range, data )
-				);
-			}
+			surfaceFragment.insertContent( data );
+
 			deferred.resolve();
 		}
 
@@ -111,6 +105,8 @@
 				var contentNodes;
 
 				if ( ve.getProp( response, 'visualeditor', 'result' ) === 'success' ) {
+					// This method is only ever run by a client, so it is okay to use jQuery
+					// eslint-disable-next-line no-undef
 					contentNodes = $.parseHTML( response.visualeditor.content, surfaceFragment.getDocument().getHtmlDocument() ) || [];
 					contentNodes = ve.ce.MWTransclusionNode.static.filterRendering( contentNodes );
 					insertNode(
@@ -166,14 +162,14 @@
 			for ( i = 0, len = data.parts.length; i < len; i++ ) {
 				part = data.parts[ i ];
 				if ( part.template ) {
-					deferred = $.Deferred();
+					deferred = ve.createDeferred();
 					promises.push( deferred.promise() );
 					this.queue.push( {
 						add: ve.dm.MWTemplateModel.newFromData( this, part.template ),
 						deferred: deferred
 					} );
 				} else if ( typeof part === 'string' ) {
-					deferred = $.Deferred();
+					deferred = ve.createDeferred();
 					promises.push( deferred.promise() );
 					this.queue.push( {
 						add: new ve.dm.MWTransclusionContentModel( this, part ),
@@ -184,7 +180,7 @@
 			setTimeout( this.fetch.bind( this ) );
 		}
 
-		return $.when.apply( $, promises );
+		return ve.promiseAll( promises );
 	};
 
 	/**
@@ -304,12 +300,11 @@
 	};
 
 	ve.dm.MWTransclusionModel.prototype.fetchRequest = function ( titles, specs, queue ) {
-		var xhr = new mw.Api().get( {
+		var xhr = ve.init.target.getContentApi( this.doc ).get( {
 			action: 'templatedata',
 			titles: titles,
 			lang: mw.config.get( 'wgUserLanguage' ),
 			format: 'json',
-			formatversion: '2',
 			doNotIgnoreMissingTitles: '1',
 			redirects: '1'
 		} ).done( this.fetchRequestDone.bind( this, titles, specs ) );
@@ -331,8 +326,9 @@
 					missingTitle = {};
 					missingTitle[ title ] = { missing: true };
 					ve.init.platform.linkCache.setMissing( missingTitle );
-				} else if ( data.pages[ id ].notemplatedata ) {
-					// Prevent asking again for templates that have no specs
+				} else if ( data.pages[ id ].notemplatedata && !OO.isPlainObject( data.pages[ id ].params ) ) {
+					// (T243868) Prevent asking again for templates that have neither user-provided specs
+					// nor automatically detected params
 					specs[ title ] = null;
 				} else {
 					specs[ title ] = data.pages[ id ];
@@ -444,7 +440,7 @@
 	 * @return {jQuery.Promise} Promise, resolved when part is added
 	 */
 	ve.dm.MWTransclusionModel.prototype.replacePart = function ( remove, add ) {
-		var deferred = $.Deferred();
+		var deferred = ve.createDeferred();
 		if (
 			!( remove instanceof ve.dm.MWTransclusionPartModel ) ||
 			!( add instanceof ve.dm.MWTransclusionPartModel )
@@ -471,7 +467,7 @@
 	 * @return {jQuery.Promise} Promise, resolved when part is added
 	 */
 	ve.dm.MWTransclusionModel.prototype.addPart = function ( part, index ) {
-		var deferred = $.Deferred();
+		var deferred = ve.createDeferred();
 		if ( !( part instanceof ve.dm.MWTransclusionPartModel ) ) {
 			throw new Error( 'Invalid transclusion part' );
 		}

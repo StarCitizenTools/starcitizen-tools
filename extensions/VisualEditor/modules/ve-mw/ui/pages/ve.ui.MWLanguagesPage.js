@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWLanguagesPage class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -110,13 +110,13 @@ ve.ui.MWLanguagesPage.prototype.onLoadLanguageData = function ( languages ) {
  */
 ve.ui.MWLanguagesPage.prototype.onAllLanguageItemsSuccess = function ( deferred, response ) {
 	var i, iLen, languages = [],
-		langlinks = response && response.visualeditor && response.visualeditor.langlinks;
+		langlinks = OO.getProp( response, 'query', 'pages', 0, 'langlinks' );
 	if ( langlinks ) {
 		for ( i = 0, iLen = langlinks.length; i < iLen; i++ ) {
 			languages.push( {
 				lang: langlinks[ i ].lang,
-				langname: langlinks[ i ].langname,
-				title: langlinks[ i ][ '*' ],
+				langname: langlinks[ i ].autonym,
+				title: langlinks[ i ].title,
 				metaItem: null
 			} );
 		}
@@ -131,7 +131,7 @@ ve.ui.MWLanguagesPage.prototype.onAllLanguageItemsSuccess = function ( deferred,
  * @return {Object} item
  */
 ve.ui.MWLanguagesPage.prototype.getLanguageItemFromMetaListItem = function ( metaItem ) {
-	// TODO: get real values from metaItem once Parsoid actually provides them - bug 48970
+	// TODO: get real values from metaItem once Parsoid actually provides them - T50970
 	return {
 		lang: 'lang',
 		langname: 'langname',
@@ -165,12 +165,15 @@ ve.ui.MWLanguagesPage.prototype.getLocalLanguageItems = function () {
  * @return {jQuery.Promise}
  */
 ve.ui.MWLanguagesPage.prototype.getAllLanguageItems = function () {
-	var deferred = $.Deferred();
+	var deferred = ve.createDeferred();
 	// TODO: Detect paging token if results exceed limit
-	new mw.Api().get( {
-		action: 'visualeditor',
-		paction: 'getlanglinks',
-		page: ve.init.target.pageName
+	ve.init.target.getContentApi().get( {
+		format: 'json',
+		action: 'query',
+		prop: 'langlinks',
+		llprop: 'autonym',
+		lllimit: 500,
+		titles: ve.init.target.getPageName()
 	} )
 		.done( this.onAllLanguageItemsSuccess.bind( this, deferred ) )
 		.fail( this.onAllLanguageItemsError.bind( this, deferred ) );
@@ -183,3 +186,9 @@ ve.ui.MWLanguagesPage.prototype.getAllLanguageItems = function () {
  * TODO: This error function should probably not be empty.
  */
 ve.ui.MWLanguagesPage.prototype.onAllLanguageItemsError = function () {};
+
+ve.ui.MWLanguagesPage.prototype.getFieldsets = function () {
+	return [
+		this.languagesFieldset
+	];
+};

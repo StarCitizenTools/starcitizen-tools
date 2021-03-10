@@ -1,8 +1,34 @@
 {
 	"@metadata": {
 		"authors": [
-			"ArmenBakkalian"
+			"ArmenBakkalian",
+			"Azniv Stepanian",
+			"Kareyac",
+			"Շահէն"
 		]
 	},
-	"translate-documentation-language": "Հաղորդագրութեան փաստագրութիւն"
+	"translate": "Թարգմանութիւն",
+	"translate-extensionname": "Թարգմանութիւն",
+	"translate-taction-translate": "Թարգմանութիւն",
+	"translate-page-settings-legend": "Կարգաւորումներ",
+	"translate-page-language": "Լեզու",
+	"translate-page-limit": "Սահման",
+	"translate-page-navigation-legend": "Նաւարկութիւն",
+	"translate-page-paging-links": "[$1][$2]",
+	"translate-next": "Յաջորդ էջը",
+	"translate-prev": "Նախորդ էջը",
+	"translate-page-edit": "Խմբագրել",
+	"translate-export-form-format": "Ձեւաւորել",
+	"translate-rcfilters-translations": "Թարգմանութիւններ",
+	"translate-stats-edits": "Խմբագրումներ",
+	"translate-stats-users": "Թարգմանիչներ",
+	"translate-statsf-scale-months": "Ամիսներ",
+	"translate-statsf-scale-weeks": "Շաբաթներ",
+	"translate-statsf-scale-days": "Օրեր",
+	"translate-statsf-scale-hours": "Ժամեր",
+	"translate-statsf-submit": "Կանխաստուգել",
+	"translate-smg-rename-cancel": "Չեղարկել",
+	"translate-smg-strong-sync-help": "Օգնութիւն",
+	"translate-documentation-language": "Հաղորդագրութեան փաստագրութիւն",
+	"tux-editor-translate-mode": "Ցանկ"
 }

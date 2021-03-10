@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface DimensionsWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -15,6 +15,7 @@
  * @param {Object} [config] Configuration options
  * @cfg {Object} [defaults] Default dimensions
  * @cfg {Object} [validate] Validation pattern passed to TextInputWidgets
+ * @cfg {boolean} [readOnly=false] Prevent changes to the value of the widget.
  */
 ve.ui.DimensionsWidget = function VeUiDimensionsWidget( config ) {
 	var labelTimes, labelPx;
@@ -33,6 +34,7 @@ ve.ui.DimensionsWidget = function VeUiDimensionsWidget( config ) {
 	} );
 
 	this.defaults = config.defaults || { width: '', height: '' };
+	this.setReadOnly( !!config.readOnly );
 	this.renderDefaults();
 
 	labelTimes = new OO.ui.LabelWidget( {
@@ -101,12 +103,15 @@ ve.ui.DimensionsWidget.prototype.onHeightChange = function ( value ) {
  * Set default dimensions
  *
  * @param {Object} dimensions Default dimensions, width and height
+ * @return {ve.ui.DimensionsWidget}
+ * @chainable
  */
 ve.ui.DimensionsWidget.prototype.setDefaults = function ( dimensions ) {
 	if ( dimensions.width && dimensions.height ) {
 		this.defaults = ve.copy( dimensions );
 		this.renderDefaults();
 	}
+	return this;
 };
 
 /**
@@ -128,10 +133,14 @@ ve.ui.DimensionsWidget.prototype.getDefaults = function () {
 
 /**
  * Remove the default dimensions
+ *
+ * @return {ve.ui.DimensionsWidget}
+ * @chainable
  */
 ve.ui.DimensionsWidget.prototype.removeDefaults = function () {
 	this.defaults = { width: '', height: '' };
 	this.renderDefaults();
+	return this;
 };
 
 /**
@@ -149,17 +158,25 @@ ve.ui.DimensionsWidget.prototype.isEmpty = function () {
 /**
  * Set an empty value for the dimensions inputs so they show
  * the placeholders if those exist.
+ *
+ * @return {ve.ui.DimensionsWidget}
+ * @chainable
  */
 ve.ui.DimensionsWidget.prototype.clear = function () {
 	this.widthInput.setValue( '' );
 	this.heightInput.setValue( '' );
+	return this;
 };
 
 /**
  * Reset the dimensions to the default dimensions.
+ *
+ * @return {ve.ui.DimensionsWidget}
+ * @chainable
  */
 ve.ui.DimensionsWidget.prototype.reset = function () {
 	this.setDimensions( this.getDefaults() );
+	return this;
 };
 
 /**
@@ -168,6 +185,8 @@ ve.ui.DimensionsWidget.prototype.reset = function () {
  * @param {Object} dimensions The width and height values of the inputs
  * @param {number} dimensions.width The value of the width input
  * @param {number} dimensions.height The value of the height input
+ * @return {ve.ui.DimensionsWidget}
+ * @chainable
  */
 ve.ui.DimensionsWidget.prototype.setDimensions = function ( dimensions ) {
 	if ( dimensions.width ) {
@@ -176,6 +195,7 @@ ve.ui.DimensionsWidget.prototype.setDimensions = function ( dimensions ) {
 	if ( dimensions.height ) {
 		this.setHeight( dimensions.height );
 	}
+	return this;
 };
 
 /**
@@ -195,17 +215,46 @@ ve.ui.DimensionsWidget.prototype.getDimensions = function () {
 /**
  * Disable or enable the inputs
  *
- * @param {boolean} isDisabled Set disabled or enabled
+ * @param {boolean} disabled Set disabled or enabled
+ * @return {ve.ui.DimensionsWidget}
+ * @chainable
  */
-ve.ui.DimensionsWidget.prototype.setDisabled = function ( isDisabled ) {
+ve.ui.DimensionsWidget.prototype.setDisabled = function ( disabled ) {
+	// Parent method
+	ve.ui.DimensionsWidget.super.prototype.setDisabled.call( this, disabled );
+
 	// The 'setDisabled' method runs in the constructor before the
 	// inputs are initialized
 	if ( this.widthInput ) {
-		this.widthInput.setDisabled( isDisabled );
+		this.widthInput.setDisabled( disabled );
 	}
 	if ( this.heightInput ) {
-		this.heightInput.setDisabled( isDisabled );
+		this.heightInput.setDisabled( disabled );
 	}
+	return this;
+};
+
+/**
+ * Check if the widget is read-only
+ *
+ * @return {boolean}
+ */
+ve.ui.DimensionsWidget.prototype.isReadOnly = function () {
+	return this.readOnly;
+};
+
+/**
+ * Set the read-only state of the widget
+ *
+ * @param {boolean} readOnly Make widget read-only
+ * @return {ve.ui.DimensionsWidget}
+ * @chainable
+ */
+ve.ui.DimensionsWidget.prototype.setReadOnly = function ( readOnly ) {
+	this.readOnly = readOnly;
+	this.widthInput.setReadOnly( readOnly );
+	this.heightInput.setReadOnly( readOnly );
+	return this;
 };
 
 /**
@@ -230,24 +279,34 @@ ve.ui.DimensionsWidget.prototype.getHeight = function () {
  * Set a value for the width input
  *
  * @param {string} value
+ * @return {ve.ui.DimensionsWidget}
+ * @chainable
  */
 ve.ui.DimensionsWidget.prototype.setWidth = function ( value ) {
 	this.widthInput.setValue( value );
+	return this;
 };
 
 /**
  * Set a value for the height input
  *
  * @param {string} value
+ * @return {ve.ui.DimensionsWidget}
+ * @chainable
  */
 ve.ui.DimensionsWidget.prototype.setHeight = function ( value ) {
 	this.heightInput.setValue( value );
+	return this;
 };
 
 /**
  * Sets the 'invalid' flag appropriately on both text inputs.
+ *
+ * @return {ve.ui.DimensionsWidget}
+ * @chainable
  */
 ve.ui.DimensionsWidget.prototype.setValidityFlag = function () {
 	this.widthInput.setValidityFlag();
 	this.heightInput.setValidityFlag();
+	return this;
 };

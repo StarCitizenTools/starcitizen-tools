@@ -2,15 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Armando-Martin",
-			"Ryo567",
+			"Fitoschido",
 			"Macofe",
-			"Fitoschido"
+			"Ryo567"
 		]
 	},
 	"pageimages-desc": "Recopila información sobre las imágenes utilizadas en la página",
-	"pageimages-info-label": "Imagen de la página",
-	"apihelp-query+pageimages-example-1": "Obtener el nombre y una miniatura de <kbd>100</kbd> píxeles de una imagen en la página de <kbd>Albert Einstein</kbd>.",
-	"apihelp-query+pageimages-param-thumbsize": "Anchura máxima en píxeles de las miniaturas.",
-	"apihelp-query+pageimages-paramvalue-license-free": "solo imágenes libres",
-	"apihelp-query+pageimages-paramvalue-license-any": "la mejor imagen, sea libre o no."
+	"pageimages-info-label": "Imagen de la página"
 }

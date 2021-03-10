@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Surface class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -52,6 +52,11 @@ ve.ce.MWWikitextSurface.prototype.onCopy = function ( e ) {
 			// Clone the elements in the slice
 			slice.data.cloneElements( true );
 			clipboardData.setData( 'text/xcustom', clipboardKey );
+
+			// Explicitly store wikitext as text/x-wiki, so that wikitext-aware paste
+			// contexts can accept it without having to do any content-
+			// sniffing.
+			clipboardData.setData( 'text/x-wiki', text );
 		}
 	} else {
 		originalSelection = new ve.SelectionState( this.nativeSelection );
@@ -70,7 +75,7 @@ ve.ce.MWWikitextSurface.prototype.onCopy = function ( e ) {
 		// setTimeout: postpone until after the default copy action
 		setTimeout( function () {
 			// Change focus back
-			view.$documentNode[ 0 ].focus();
+			view.$attachedRootNode[ 0 ].focus();
 			view.showSelectionState( originalSelection );
 			// Restore scroll position
 			view.$window.scrollTop( scrollTop );
@@ -80,4 +85,55 @@ ve.ce.MWWikitextSurface.prototype.onCopy = function ( e ) {
 			view.pasteTargetInput.$element.detach();
 		} );
 	}
+};
+
+/**
+ * @inheritdoc
+ */
+ve.ce.MWWikitextSurface.prototype.afterPasteInsertExternalData = function ( targetFragment, pastedDocumentModel, contextRange ) {
+	var windowAction, deferred,
+		view = this;
+
+	function makePlain() {
+		pastedDocumentModel = pastedDocumentModel.shallowCloneFromRange( contextRange );
+		pastedDocumentModel.data.sanitize( { plainText: true, keepEmptyContentBranches: true } );
+		// We just turned this into plaintext, which probably
+		// affected the content-length. Luckily, because of
+		// the earlier clone, we know we just want the whole
+		// document, and because of the major change to
+		// plaintext, the difference between originalRange and
+		// balancedRange don't really apply. As such, clear
+		// out newDocRange. (Can't just make it undefined;
+		// need to exclude the internal list, and since we're
+		// from a paste we also have to exclude the
+		// opening/closing paragraph.)
+		contextRange = new ve.Range( pastedDocumentModel.getDocumentRange().from + 1, pastedDocumentModel.getDocumentRange().to - 1 );
+		view.pasteSpecial = true;
+	}
+
+	if ( !pastedDocumentModel.data.isPlainText( contextRange, true, undefined, true ) ) {
+		// Not plaintext. We need to ask whether we should convert it to
+		// wikitext, or just strip the formatting out.
+		deferred = ve.createDeferred();
+		windowAction = ve.ui.actionFactory.create( 'window', this.getSurface() );
+		windowAction.open( 'wikitextconvertconfirm', { deferred: deferred } );
+		return deferred.promise().then( function ( usePlain ) {
+			var insertPromise;
+			if ( usePlain ) {
+				makePlain();
+			}
+			insertPromise = ve.ce.MWWikitextSurface.super.prototype.afterPasteInsertExternalData.call( view, targetFragment, pastedDocumentModel, contextRange );
+			if ( !usePlain ) {
+				insertPromise = insertPromise.then( null, function () {
+					// Rich text conversion failed, insert plain text
+					makePlain();
+					return ve.ce.MWWikitextSurface.super.prototype.afterPasteInsertExternalData.call( view, targetFragment, pastedDocumentModel, contextRange );
+				} );
+			}
+			return insertPromise;
+		} );
+	}
+	// isPlainText is true but we still need sanitize (e.g. remove lists)
+	makePlain();
+	return ve.ce.MWWikitextSurface.super.prototype.afterPasteInsertExternalData.call( this, targetFragment, pastedDocumentModel, contextRange );
 };

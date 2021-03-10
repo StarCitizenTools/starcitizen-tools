@@ -28,7 +28,7 @@
 		 * Get language stats for a language from the API.
 		 *
 		 * @param {string} language Language code.
-		 * @return {deferred}
+		 * @return {jQuery.Deferred}
 		 */
 		loadLanguageStats: function ( language ) {
 			if ( !mw.translate.languageStatsLoader[ language ] ) {
@@ -82,20 +82,20 @@
 		 * and recurse it through sub groups.
 		 *
 		 * @param {string} id Group id to search for.
-		 * @param {Array} groups Array of message grous
+		 * @param {Array} groups Array of message groups
 		 * @return {Object} Message group object
 		 */
 		findGroup: function ( id, groups ) {
-			var result = null;
+			var result;
 
 			if ( !id ) {
 				return groups;
 			}
 
-			$.each( groups, function ( index, group ) {
+			groups.some( function ( group ) {
 				if ( group.id === id ) {
 					result = group;
-					return false;
+					return true;
 				}
 
 				if ( group.groups ) {
@@ -103,9 +103,11 @@
 
 					if ( group ) {
 						result = group;
-						return false;
+						return true;
 					}
 				}
+
+				return false;
 			} );
 
 			return result;
@@ -139,6 +141,15 @@
 		},
 
 		/**
+		 * Check if the current user can update and manage message groups.
+		 *
+		 * @return {boolean}
+		 */
+		canManage: function () {
+			return mw.config.get( 'TranslateManageRight' );
+		},
+
+		/**
 		 * Adds missing languages to the language database so that they can be used in ULS.
 		 *
 		 * @param {Object} languages Language tags mapped to language names
@@ -160,10 +171,9 @@
 		},
 
 		isDirty: function () {
-			return $( '.mw-ajax-dialog:visible' ).length || // For old Translate
-				// For new Translate, something being typed in the current editor.
-				mw.translate.dirty ||
-				// For new translate, previous editors has some unsaved edits
+			// Something being typed in the current editor.
+			return mw.translate.dirty ||
+				// Previous editors has some unsaved edits
 				$( '.tux-status-unsaved' ).length;
 		}
 	} );

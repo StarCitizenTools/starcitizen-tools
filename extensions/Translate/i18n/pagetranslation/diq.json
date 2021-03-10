@@ -1,11 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Erdemaslancan",
-			"Mirzali",
-			"Marmase",
-			"Kumkumuk",
 			"Asmen",
+			"Erdemaslancan",
+			"Kumkumuk",
+			"Marmase",
+			"Mirzali",
 			"Orbot707"
 		]
 	},
@@ -17,12 +17,10 @@
 	"tpt-diff-new": "Metno newe",
 	"tpt-old-pages-title": "Pela açarnayışi",
 	"tpt-other-pages-title": "Pela şahtiyayi",
-	"tpt-discouraged-pages-title": "Vatenena pelayan",
 	"tpt-select-prioritylangs-reason": "Sebeb:",
 	"translate-tag-translate-link-desc": "Na perer açarnê",
 	"tpt-languages-legend": "Zıwanê bini:",
 	"tpt-languages-nonzero": "$1 ($2% çarniyayi)",
-	"tpt-discouraged-language-reason": "Sebeb: $1",
 	"aggregategroups": "Grubi pêro",
 	"tpt-aggregategroup-add": "Cı ke",
 	"tpt-aggregategroup-save": "Qeyd ke",

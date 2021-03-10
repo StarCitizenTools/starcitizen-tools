@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable SectionNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -60,8 +60,6 @@ ve.ce.SectionNode.prototype.getTagName = function () {
  * Handle model update events.
  *
  * If the style changed since last update the DOM wrapper will be replaced with an appropriate one.
- *
- * @method
  */
 ve.ce.SectionNode.prototype.onUpdate = function () {
 	this.updateTagName();

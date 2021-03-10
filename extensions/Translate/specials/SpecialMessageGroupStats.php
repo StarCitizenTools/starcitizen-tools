@@ -21,10 +21,10 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 	protected $noComplete = false;
 	/// Overwritten from SpecialLanguageStats
 	protected $noEmpty = true;
-
 	protected $names;
-
 	protected $translate;
+	/** @var int */
+	private $numberOfShownLanguages;
 
 	public function __construct() {
 		SpecialPage::__construct( 'MessageGroupStats' );
@@ -77,7 +77,12 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 	protected function outputIntroduction() {
 		$priorityLangs = TranslateMetadata::get( $this->target, 'prioritylangs' );
 		if ( $priorityLangs ) {
-			$this->getOutput()->addWikiMsg( 'tpt-priority-languages', $priorityLangs );
+			$hasPriorityForce = TranslateMetadata::get( $this->target, 'priorityforce' ) === 'on';
+			if ( $hasPriorityForce ) {
+				$this->getOutput()->addWikiMsg( 'tpt-priority-languages-force', $priorityLangs );
+			} else {
+				$this->getOutput()->addWikiMsg( 'tpt-priority-languages', $priorityLangs );
+			}
 		}
 	}
 
@@ -233,7 +238,12 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 		$this->numberOfShownLanguages += 1;
 		$this->totals = MessageGroupStats::multiAdd( $this->totals, $stats );
 
-		$out = "\t" . Html::openElement( 'tr' );
+		$rowParams = [];
+		if ( $this->numberOfShownLanguages % 2 === 0 ) {
+			$rowParams[ 'class' ] = 'tux-statstable-even';
+		}
+
+		$out = "\t" . Html::openElement( 'tr', $rowParams );
 		$out .= "\n\t\t" . $this->getMainColumnCell( $code, $extra );
 		$out .= $this->table->makeNumberColumns( $stats );
 		$state = $this->getWorkflowStateValue( $code );
@@ -281,6 +291,8 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 	 * @return array
 	 */
 	protected function getWorkflowStates( $field = 'tgr_lang', $filter = 'tgr_group' ) {
+		// This override is needed because default values for $field and $filter
+		// are different than in the parent class.
 		return parent::getWorkflowStates( $field, $filter );
 	}
 
@@ -300,5 +312,9 @@ class SpecialMessageGroupStats extends SpecialLanguageStats {
 		}
 
 		return $options;
+	}
+
+	protected function getGroupName() {
+		return 'translation';
 	}
 }

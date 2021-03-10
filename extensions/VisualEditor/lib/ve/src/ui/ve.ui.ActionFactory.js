@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ActionFactory class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -25,7 +25,6 @@ OO.inheritClass( ve.ui.ActionFactory, OO.Factory );
 /**
  * Check if an action supports a method.
  *
- * @method
  * @param {string} action Name of action
  * @param {string} method Name of method
  * @return {boolean} The action supports the method

@@ -2,14 +2,15 @@
  * Change the in-memory package version to contain the git HEAD
  */
 
-/* eslint-env node, es6 */
+'use strict';
+
 module.exports = function ( grunt ) {
 
 	grunt.registerTask( 'git-build', function () {
-		var done = this.async();
+		const done = this.async();
 		require( 'child_process' ).exec( 'git rev-parse HEAD', function ( err, stout, stderr ) {
 			if ( !stout || err || stderr ) {
-				grunt.log.err( err || stderr );
+				grunt.log.error( err || stderr );
 				done( false );
 				return;
 			}

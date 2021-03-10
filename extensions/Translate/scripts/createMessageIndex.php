@@ -21,7 +21,8 @@ require_once "$IP/maintenance/Maintenance.php";
 class CreateMessageIndex extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Creates or updates a message index.';
+		$this->addDescription( 'Creates or updates a message index.' );
+		$this->requireExtension( 'Translate' );
 	}
 
 	public function execute() {

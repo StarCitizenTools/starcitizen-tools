@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWImageModel class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -54,7 +54,7 @@ ve.dm.MWImageModel = function VeDmMWImageModel( parentDoc, config ) {
 
 	// Get wiki default thumbnail size
 	this.defaultThumbSize = mw.config.get( 'wgVisualEditorConfig' )
-		.defaultUserOptions.defaultthumbsize;
+		.thumbLimits[ mw.user.options.get( 'thumbsize' ) ];
 
 	if ( config.resourceName ) {
 		this.setImageResourceName( config.resourceName );
@@ -123,7 +123,8 @@ ve.dm.MWImageModel.static.infoCache = {};
  */
 ve.dm.MWImageModel.static.createImageNode = function ( attributes, imageType ) {
 	var attrs, newNode, newDimensions,
-		defaultThumbSize = mw.config.get( 'wgVisualEditorConfig' ).defaultUserOptions.defaultthumbsize;
+		defaultThumbSize = mw.config.get( 'wgVisualEditorConfig' )
+			.thumbLimits[ mw.user.options.get( 'thumbsize' ) ];
 
 	attrs = ve.extendObject( {
 		mediaClass: 'Image',
@@ -179,7 +180,7 @@ ve.dm.MWImageModel.static.newFromImageAttributes = function ( attrs, parentDoc )
 	imgModel.cacheOriginalImageAttributes( attrs );
 
 	imgModel.setImageSource( attrs.src );
-	imgModel.setFilename( new mw.Title( ve.normalizeParsoidResourceName( attrs.resource ) ).getMainText() );
+	imgModel.setFilename( new mw.Title( mw.libs.ve.normalizeParsoidResourceName( attrs.resource ) ).getMainText() );
 	imgModel.setImageHref( attrs.href );
 
 	// Set bounding box
@@ -283,7 +284,7 @@ ve.dm.MWImageModel.prototype.changeImageSource = function ( attrs, APIinfo ) {
 	}
 	if ( attrs.resource ) {
 		this.setImageResourceName( attrs.resource );
-		this.setFilename( new mw.Title( ve.normalizeParsoidResourceName( attrs.resource ) ).getMainText() );
+		this.setFilename( new mw.Title( mw.libs.ve.normalizeParsoidResourceName( attrs.resource ) ).getMainText() );
 	}
 
 	if ( attrs.src ) {
@@ -438,7 +439,7 @@ ve.dm.MWImageModel.prototype.updateImageNode = function ( node, surfaceModel ) {
  * @throws {Error} Unknown image node type
  */
 ve.dm.MWImageModel.prototype.insertImageNode = function ( fragment ) {
-	var captionDoc, offset, contentToInsert, selectedNode,
+	var offset, contentToInsert, selectedNode,
 		nodeType = this.getImageNodeType(),
 		surfaceModel = fragment.getSurface();
 
@@ -467,7 +468,7 @@ ve.dm.MWImageModel.prototype.insertImageNode = function ( fragment ) {
 				offset = fragment.getDocument().data.getNearestContentOffset( fragment.getSelection().getRange().start );
 			}
 			if ( offset > -1 ) {
-				fragment = fragment.clone( new ve.dm.LinearSelection( fragment.getDocument(), new ve.Range( offset ) ) );
+				fragment = fragment.clone( new ve.dm.LinearSelection( new ve.Range( offset ) ) );
 			}
 			fragment.insertContent( contentToInsert );
 			return fragment;
@@ -476,21 +477,17 @@ ve.dm.MWImageModel.prototype.insertImageNode = function ( fragment ) {
 			// Try to put the image in front of the structural node
 			offset = fragment.getDocument().data.getNearestStructuralOffset( fragment.getSelection().getRange().start, -1 );
 			if ( offset > -1 ) {
-				fragment = fragment.clone( new ve.dm.LinearSelection( fragment.getDocument(), new ve.Range( offset ) ) );
+				fragment = fragment.clone( new ve.dm.LinearSelection( new ve.Range( offset ) ) );
 			}
 			fragment.insertContent( contentToInsert );
-			// Check if there is caption document and insert it
-			captionDoc = this.getCaptionDocument();
-			if ( captionDoc.data.hasContent() ) {
-				// Add contents of new caption
-				surfaceModel.change(
-					ve.dm.TransactionBuilder.static.newFromDocumentInsertion(
-						surfaceModel.getDocument(),
-						fragment.getSelection().getRange().start + 2,
-						this.getCaptionDocument()
-					)
-				);
-			}
+			// Add contents of new caption
+			surfaceModel.change(
+				ve.dm.TransactionBuilder.static.newFromDocumentInsertion(
+					surfaceModel.getDocument(),
+					fragment.getSelection().getRange().start + 2,
+					this.getCaptionDocument()
+				)
+			);
 			return fragment;
 
 		default:
@@ -506,7 +503,7 @@ ve.dm.MWImageModel.prototype.insertImageNode = function ( fragment ) {
 ve.dm.MWImageModel.prototype.getData = function () {
 	var data,
 		originalAttrs = ve.copy( this.getOriginalImageAttributes() ),
-		editAttributes = $.extend( originalAttrs, this.getUpdatedAttributes() ),
+		editAttributes = ve.extendObject( originalAttrs, this.getUpdatedAttributes() ),
 		nodeType = this.getImageNodeType();
 
 	// Remove old classes
@@ -571,11 +568,6 @@ ve.dm.MWImageModel.prototype.getUpdatedAttributes = function () {
 	attrs.src = this.getImageSource();
 	attrs.href = this.getImageHref();
 	attrs.resource = this.getImageResourceName();
-
-	// If converting from block to inline, set isLinked=true to avoid |link=
-	if ( origAttrs.isLinked === undefined && this.getImageNodeType() === 'mwInlineImage' ) {
-		attrs.isLinked = true;
-	}
 
 	return attrs;
 };
@@ -652,7 +644,8 @@ ve.dm.MWImageModel.prototype.setMediaType = function ( type ) {
  * @return {boolean} Default size flag on or off
  */
 ve.dm.MWImageModel.prototype.isDefaultSize = function () {
-	return this.scalable.isDefault();
+	// An image with 'frame' always ignores the size specification
+	return this.scalable.isDefault() || this.getType() === 'frame';
 };
 
 /**
@@ -767,6 +760,8 @@ ve.dm.MWImageModel.prototype.getType = function () {
 
 /**
  * Get the image size type of the image
+ *
+ * @return {string} Size type
  */
 ve.dm.MWImageModel.prototype.getSizeType = function () {
 	return this.sizeType;
@@ -785,6 +780,8 @@ ve.dm.MWImageModel.prototype.getMediaType = function () {
 
 /**
  * Get Parsoid media class: Image, Video or Audio
+ *
+ * @return {string} Media class
  */
 ve.dm.MWImageModel.prototype.getMediaClass = function () {
 	var mediaType = this.getMediaType();
@@ -994,7 +991,7 @@ ve.dm.MWImageModel.prototype.setType = function ( type ) {
 ve.dm.MWImageModel.prototype.resetDefaultDimensions = function () {
 	var originalDimensions = this.scalable.getOriginalDimensions();
 
-	if ( !$.isEmptyObject( originalDimensions ) ) {
+	if ( !ve.isEmptyObject( originalDimensions ) ) {
 		if ( this.getType() === 'thumb' || this.getType() === 'frameless' ) {
 			// Default is thumb size
 			if ( originalDimensions.width <= this.defaultThumbSize ) {
@@ -1132,7 +1129,7 @@ ve.dm.MWImageModel.prototype.getImageHref = function () {
  * @param {ve.dm.Scalable} scalable Scalable object
  */
 ve.dm.MWImageModel.prototype.attachScalable = function ( scalable ) {
-	var imageName = ve.normalizeParsoidResourceName( this.getResourceName() ),
+	var imageName = mw.libs.ve.normalizeParsoidResourceName( this.getResourceName() ),
 		imageModel = this;
 
 	if ( this.scalable instanceof ve.dm.Scalable ) {
@@ -1162,7 +1159,7 @@ ve.dm.MWImageModel.prototype.attachScalable = function ( scalable ) {
 			// We have to adjust the details in the initial hash if the original
 			// image was 'default' since we didn't have default until now and the
 			// default dimensions that were 'recorded' were wrong
-			if ( !$.isEmptyObject( imageModel.initialHash ) && imageModel.initialHash.scalable.isDefault ) {
+			if ( !ve.isEmptyObject( imageModel.initialHash ) && imageModel.initialHash.scalable.isDefault ) {
 				imageModel.initialHash.scalable.currentDimensions = imageModel.scalable.getDefaultDimensions();
 			}
 

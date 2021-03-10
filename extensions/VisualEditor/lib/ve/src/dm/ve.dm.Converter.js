@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Converter class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -24,7 +24,7 @@ ve.dm.Converter = function VeDmConverter( modelRegistry, nodeFactory, annotation
 	this.documentData = null;
 	this.store = null;
 	this.internalList = null;
-	this.forClipboard = null;
+	this.mode = null;
 	this.fromClipboard = null;
 	this.contextStack = null;
 };
@@ -52,6 +52,10 @@ ve.dm.Converter.static.computedAttributes = [ 'href', 'src' ];
  * @type {RegExp}
  */
 ve.dm.Converter.static.whitespaceList = ' \\t\\f\\u200b\\r\\n';
+
+ve.dm.Converter.static.PARSER_MODE = 0;
+ve.dm.Converter.static.CLIPBOARD_MODE = 1;
+ve.dm.Converter.static.PREVIEW_MODE = 2;
 
 /* Static Methods */
 
@@ -178,10 +182,11 @@ ve.dm.Converter.static.renderHtmlAttributeList = function ( originalDomElements,
 		}
 		for ( j = 0, jlen = attrs.length; j < jlen; j++ ) {
 			if (
+				targetDomElements[ i ].nodeType === Node.ELEMENT_NODE &&
 				!targetDomElements[ i ].hasAttribute( attrs[ j ].name ) &&
 				( filter === true || filter( attrs[ j ].name ) )
 			) {
-				if ( computed && ve.dm.Converter.static.computedAttributes.indexOf( attrs[ j ].name ) !== -1 ) {
+				if ( computed && this.computedAttributes.indexOf( attrs[ j ].name ) !== -1 ) {
 					value = originalDomElements[ i ][ attrs[ j ].name ];
 				} else {
 					value = attrs[ j ].value;
@@ -190,7 +195,7 @@ ve.dm.Converter.static.renderHtmlAttributeList = function ( originalDomElements,
 			}
 
 			if ( filter === true || filter( attrs[ j ].name ) ) {
-				value = computed && ve.dm.Converter.static.computedAttributes.indexOf( attrs[ j ].name ) !== -1 ?
+				value = computed && this.computedAttributes.indexOf( attrs[ j ].name ) !== -1 ?
 					originalDomElements[ i ][ attrs[ j ].name ] :
 					attrs[ j ].value;
 			}
@@ -198,7 +203,7 @@ ve.dm.Converter.static.renderHtmlAttributeList = function ( originalDomElements,
 
 		// Descend into element children only (skipping text nodes, comment nodes and nodes we just created)
 		if ( deep && !targetDomElements[ i ].veFromDataElement && originalDomElements[ i ].children.length > 0 ) {
-			ve.dm.Converter.static.renderHtmlAttributeList(
+			this.renderHtmlAttributeList(
 				originalDomElements[ i ].children,
 				targetDomElements[ i ].children,
 				filter,
@@ -307,7 +312,6 @@ ve.dm.Converter.static.moveInlineMetaItems = function ( data ) {
 /**
  * Check whether this converter instance is currently inside a getModelFromDom() conversion.
  *
- * @method
  * @return {boolean} Whether we're converting
  */
 ve.dm.Converter.prototype.isConverting = function () {
@@ -317,7 +321,6 @@ ve.dm.Converter.prototype.isConverting = function () {
 /**
  * Get the HashValueStore used for the current conversion.
  *
- * @method
  * @return {ve.dm.HashValueStore|null} Current store, or null if not converting
  */
 ve.dm.Converter.prototype.getStore = function () {
@@ -327,7 +330,6 @@ ve.dm.Converter.prototype.getStore = function () {
 /**
  * Get the HTML document currently being converted
  *
- * @method
  * @return {HTMLDocument|null} HTML document being converted, or null if not converting
  */
 ve.dm.Converter.prototype.getHtmlDocument = function () {
@@ -337,7 +339,6 @@ ve.dm.Converter.prototype.getHtmlDocument = function () {
 /**
  * Get the HTML document we are converting data for
  *
- * @method
  * @return {HTMLDocument|null} HTML document being converted for, or null if not converting
  */
 ve.dm.Converter.prototype.getTargetHtmlDocument = function () {
@@ -345,19 +346,53 @@ ve.dm.Converter.prototype.getTargetHtmlDocument = function () {
 };
 
 /**
+ * Get the converter mode, one of PARSER_MODE, CLIPBOARD_MODE or PREVIEW_MODE
+ *
+ * @return {number} Converter mode
+ */
+ve.dm.Converter.prototype.getMode = function () {
+	return this.mode;
+};
+
+/**
+ * Checks if the current mode needs a full view rendering in the HTML
+ *
+ * @return {boolean} Mode needs a rendering
+ */
+ve.dm.Converter.prototype.doesModeNeedRendering = function () {
+	return this.getMode() !== this.constructor.static.PARSER_MODE;
+};
+
+/**
+ * Is the current conversion for the parser
+ *
+ * @return {boolean} The conversion is for the paser
+ */
+ve.dm.Converter.prototype.isForParser = function () {
+	return this.getMode() === this.constructor.static.PARSER_MODE;
+};
+
+/**
  * Is the current conversion for the clipboard
  *
- * @method
- * @return {boolean|null} The conversion is for the clipboard, or null if not converting
+ * @return {boolean} The conversion is for the clipboard
  */
 ve.dm.Converter.prototype.isForClipboard = function () {
-	return this.forClipboard;
+	return this.getMode() === this.constructor.static.CLIPBOARD_MODE;
+};
+
+/**
+ * Is the current conversion for the preview
+ *
+ * @return {boolean} The conversion is for the preview
+ */
+ve.dm.Converter.prototype.isForPreview = function () {
+	return this.getMode() === this.constructor.static.PREVIEW_MODE;
 };
 
 /**
  * Is the current conversion from the clipboard
  *
- * @method
  * @return {boolean|null} The conversion is from the clipboard, or null if not converting
  */
 ve.dm.Converter.prototype.isFromClipboard = function () {
@@ -367,7 +402,6 @@ ve.dm.Converter.prototype.isFromClipboard = function () {
 /**
  * Get the current conversion context. This is the recursion state of getDataFromDomSubtree().
  *
- * @method
  * @return {Object|null} Context object, or null if not converting
  */
 ve.dm.Converter.prototype.getCurrentContext = function () {
@@ -378,7 +412,6 @@ ve.dm.Converter.prototype.getCurrentContext = function () {
  * Get the annotations currently being applied by the converter. Note that this is specific to
  * the current recursion level.
  *
- * @method
  * @return {ve.dm.AnnotationSet|null} Annotation set, or null if not converting
  */
 ve.dm.Converter.prototype.getActiveAnnotations = function () {
@@ -390,7 +423,6 @@ ve.dm.Converter.prototype.getActiveAnnotations = function () {
  * Whether the converter is currently expecting content. Note that this is specific to the current
  * recursion level.
  *
- * @method
  * @return {boolean|null} Boolean indicating whether content is expected, or null if not converting
  */
 ve.dm.Converter.prototype.isExpectingContent = function () {
@@ -401,7 +433,6 @@ ve.dm.Converter.prototype.isExpectingContent = function () {
 /**
  * Whether the converter can currently accept a child node with the given type.
  *
- * @method
  * @param {string} nodeType
  * @return {boolean|null} Whether the node type is valid, or null if not converting
  */
@@ -419,7 +450,6 @@ ve.dm.Converter.prototype.isValidChildNodeType = function ( nodeType ) {
  * Whether the conversion is currently inside a wrapper paragraph generated by the converter.
  * Note that this is specific to the current recursion level.
  *
- * @method
  * @return {boolean|null} Boolean indicating whether we're wrapping, or null if not converting
  */
 ve.dm.Converter.prototype.isInWrapper = function () {
@@ -431,7 +461,6 @@ ve.dm.Converter.prototype.isInWrapper = function () {
  * Whether the active wrapper can be closed. Note that this is specific to the current recursion
  * level. If there is no active wrapper, this returns false.
  *
- * @method
  * @return {boolean|null} Boolean indicating whether the wrapper can be closed, or null if not converting
  */
 ve.dm.Converter.prototype.canCloseWrapper = function () {
@@ -444,7 +473,6 @@ ve.dm.Converter.prototype.canCloseWrapper = function () {
  *
  * This invokes the toDomElements function registered for the element type.
  *
- * @method
  * @param {Object|Array} dataElements Linear model element or data slice
  * @param {HTMLDocument} doc Document to create DOM elements in
  * @param {Node[]} [childDomElements] Array of child DOM elements to pass in (annotations only)
@@ -470,7 +498,7 @@ ve.dm.Converter.prototype.getDomElementsFromDataElement = function ( dataElement
 	originalDomElements = this.store.value( dataElement.originalDomElementsHash );
 	// Optimization: don't call renderHtmlAttributeList if returned domElements are equal to the originals
 	if ( originalDomElements && !ve.isEqualDomElements( domElements, originalDomElements ) ) {
-		ve.dm.Converter.static.renderHtmlAttributeList(
+		this.constructor.static.renderHtmlAttributeList(
 			originalDomElements,
 			domElements,
 			nodeClass.static.preserveHtmlAttributes,
@@ -488,7 +516,11 @@ ve.dm.Converter.prototype.getDomElementsFromDataElement = function ( dataElement
 	if ( dataElement.internal && dataElement.internal.diff ) {
 		Array.prototype.forEach.call( domElements, function ( domElement ) {
 			for ( key in dataElement.internal.diff ) {
-				domElement.setAttribute( key, dataElement.internal.diff[ key ] );
+				// toDomElements is a misnomer, it can actually return other nodes,
+				// such as comment nodes or text nodes.
+				if ( domElement.setAttribute ) {
+					domElement.setAttribute( key, dataElement.internal.diff[ key ] );
+				}
 			}
 		} );
 	}
@@ -543,7 +575,6 @@ ve.dm.Converter.prototype.createDataElements = function ( modelClass, domElement
 /**
  * Build an HTML DOM node for a linear model annotation.
  *
- * @method
  * @param {Object} dataAnnotation Annotation object
  * @param {HTMLDocument} doc HTML document to create element with
  * @return {HTMLElement} HTML DOM node
@@ -560,18 +591,19 @@ ve.dm.Converter.prototype.getDomElementFromDataAnnotation = function ( dataAnnot
  * Convert an HTML document to a document model.
  *
  * @param {HTMLDocument} doc HTML document to convert
- * @param {Object} options Conversion options
+ * @param {Object} [options] Conversion options
  * @param {HTMLDocument} [options.targetDoc=doc] Target HTML document we are converting for, if different from doc
  * @param {boolean} [options.fromClipboard=false] Conversion is from clipboard
  * @param {string} [options.lang] Document language code
  * @param {string} [options.dir] Document directionality (ltr/rtl)
+ * @param {ve.dm.HashValueStore} [store] Hash value store
  * @return {ve.dm.Document} Document model
  */
-ve.dm.Converter.prototype.getModelFromDom = function ( doc, options ) {
+ve.dm.Converter.prototype.getModelFromDom = function ( doc, options, store ) {
 	var data, linearData, refData, innerWhitespace,
-		store = new ve.dm.HashValueStore(),
 		internalList = new ve.dm.InternalList();
 
+	store = store || new ve.dm.HashValueStore();
 	options = options || {};
 
 	// Set up the converter state
@@ -609,7 +641,6 @@ ve.dm.Converter.prototype.getModelFromDom = function ( doc, options ) {
  *
  * TODO: This is kind of a hack, better implementation would be more appropriate in near future.
  *
- * @method
  * @param {HTMLElement} domElement HTML element to convert
  * @param {Object} [wrapperElement] Data element to wrap the returned data in
  * @param {ve.dm.AnnotationSet} [annotationSet] Override the set of annotations to use
@@ -627,7 +658,6 @@ ve.dm.Converter.prototype.getDataFromDomClean = function ( domElement, wrapperEl
  * Get linear model data from a DOM node. Called recursively. For internal use
  * and ve.dm.Model.static.toDataElement() implementations.
  *
- * @method
  * @param {HTMLElement} domElement HTML element to convert
  * @param {Object} [wrapperElement] Data element to wrap the returned data in
  * @param {ve.dm.AnnotationSet} [annotationSet] Override the set of annotations to use
@@ -637,6 +667,7 @@ ve.dm.Converter.prototype.getDataFromDomSubtree = function ( domElement, wrapper
 	var i, childNode, childNodes, childDataElements, text, matches,
 		wrappingParagraph, prevElement, childAnnotations, modelName, modelClass,
 		annotation, childIsContent, aboutGroup, emptyParagraph,
+		converter = this,
 		whitespaceList = this.constructor.static.whitespaceList,
 		modelRegistry = this.modelRegistry,
 		data = [],
@@ -690,7 +721,7 @@ ve.dm.Converter.prototype.getDataFromDomSubtree = function ( domElement, wrapper
 			if ( wrappedMetaItems[ i ].type && wrappedMetaItems[ i ].type.charAt( 0 ) !== '/' ) {
 				if ( wrappedMetaItems[ i ].internal && wrappedMetaItems[ i ].internal.whitespace ) {
 					if ( whitespaceTreatment === 'restore' ) {
-						ve.batchPush( toInsert, ve.dm.Converter.static.getDataContentFromText(
+						ve.batchPush( toInsert, converter.constructor.static.getDataContentFromText(
 							wrappedMetaItems[ i ].internal.whitespace[ 0 ], context.annotations
 						) );
 						delete wrappedMetaItems[ i ].internal;
@@ -844,7 +875,11 @@ ve.dm.Converter.prototype.getDataFromDomSubtree = function ( domElement, wrapper
 					childDataElements = this.getDataFromDomSubtree( childNode, undefined, childAnnotations );
 					if ( !childDataElements.length || isAllInstanceOf( childDataElements, ve.dm.AlienMetaItem ) ) {
 						// Empty annotation, create a meta item
-						childDataElements = this.createDataElements( ve.dm.AlienMetaItem, childNodes );
+						if ( !childDataElements.length || isAllInstanceOf( childDataElements, ve.dm.RemovableAlienMetaItem ) ) {
+							childDataElements = this.createDataElements( ve.dm.RemovableAlienMetaItem, childNodes );
+						} else {
+							childDataElements = this.createDataElements( ve.dm.AlienMetaItem, childNodes );
+						}
 						childDataElements.push( { type: '/' + childDataElements[ 0 ].type } );
 						// Annotate meta item
 						if ( !context.annotations.isEmpty() ) {
@@ -976,7 +1011,7 @@ ve.dm.Converter.prototype.getDataFromDomSubtree = function ( domElement, wrapper
 							wrappedWhitespace = text;
 							wrappedWhitespaceIndex = data.length;
 							ve.batchPush( data,
-								ve.dm.Converter.static.getDataContentFromText( wrappedWhitespace, context.annotations )
+								this.constructor.static.getDataContentFromText( wrappedWhitespace, context.annotations )
 							);
 						} else {
 							// We're not in wrapping mode, store this whitespace
@@ -1030,12 +1065,12 @@ ve.dm.Converter.prototype.getDataFromDomSubtree = function ( domElement, wrapper
 							// We were already wrapping in a paragraph,
 							// so the leading whitespace must be output
 							ve.batchPush( data,
-								ve.dm.Converter.static.getDataContentFromText( matches[ 1 ], context.annotations )
+								this.constructor.static.getDataContentFromText( matches[ 1 ], context.annotations )
 							);
 						}
 						// Output the text sans whitespace
 						ve.batchPush( data,
-							ve.dm.Converter.static.getDataContentFromText( matches[ 2 ], context.annotations )
+							this.constructor.static.getDataContentFromText( matches[ 2 ], context.annotations )
 						);
 
 						// Don't store this in wrappingParagraph.internal.whitespace[3]
@@ -1048,7 +1083,7 @@ ve.dm.Converter.prototype.getDataFromDomSubtree = function ( domElement, wrapper
 						wrappedWhitespace = matches[ 3 ];
 						wrappedWhitespaceIndex = data.length;
 						ve.batchPush( data,
-							ve.dm.Converter.static.getDataContentFromText( wrappedWhitespace, context.annotations )
+							this.constructor.static.getDataContentFromText( wrappedWhitespace, context.annotations )
 						);
 						prevElement = wrappingParagraph;
 						break;
@@ -1085,7 +1120,7 @@ ve.dm.Converter.prototype.getDataFromDomSubtree = function ( domElement, wrapper
 
 				// Annotate the text and output it
 				ve.batchPush( data,
-					ve.dm.Converter.static.getDataContentFromText( text, context.annotations )
+					this.constructor.static.getDataContentFromText( text, context.annotations )
 				);
 				break;
 		}
@@ -1171,15 +1206,20 @@ ve.dm.Converter.prototype.getInnerWhitespace = function ( data ) {
 /**
  * Convert document model to an HTML DOM
  *
- * @method
  * @param {ve.dm.Document} model Document model
- * @param {boolean} [forClipboard=false] Conversion is for clipboard
+ * @param {number} [mode=PARSER_MODE] Conversion mode, defaults to PARSER_MODE
  * @return {HTMLDocument} Document containing the resulting HTML
  */
-ve.dm.Converter.prototype.getDomFromModel = function ( model, forClipboard ) {
+ve.dm.Converter.prototype.getDomFromModel = function ( model, mode ) {
 	var doc = ve.createDocumentFromHtml( '' );
 
-	this.getDomSubtreeFromModel( model, doc.body, forClipboard );
+	// Backwards compatibility with 'forClipboard' argument
+	if ( typeof mode === 'boolean' ) {
+		mode = mode ? this.constructor.static.CLIPBOARD_MODE : this.constructor.static.PARSER_MODE;
+	}
+	mode = mode || this.constructor.static.PARSER_MODE;
+
+	this.getDomSubtreeFromModel( model, doc.body, mode );
 
 	return doc;
 };
@@ -1187,34 +1227,41 @@ ve.dm.Converter.prototype.getDomFromModel = function ( model, forClipboard ) {
 /**
  * Convert model node to an HTML DOM
  *
- * @method
  * @param {ve.dm.Node} node Model node
- * @param {boolean} [forClipboard=false] Conversion is for clipboard
+ * @param {number} [mode=PARSER_MODE] Conversion mode, defaults to PARSER_MODE
  * @return {HTMLDocument} Document containing the resulting HTML
  */
-ve.dm.Converter.prototype.getDomFromNode = function ( node, forClipboard ) {
+ve.dm.Converter.prototype.getDomFromNode = function ( node, mode ) {
+	// Backwards compatibility with 'forClipboard' argument
+	if ( typeof mode === 'boolean' ) {
+		mode = mode ? this.constructor.static.CLIPBOARD_MODE : this.constructor.static.PARSER_MODE;
+	}
+	mode = mode || this.constructor.static.PARSER_MODE;
 	return this.getDomFromModel(
 		node.getDocument().shallowCloneFromRange( node.isInternal() ? node.getRange() : node.getOuterRange() ),
-		forClipboard
+		mode
 	);
 };
 
 /**
  * Convert document model to an HTML DOM subtree and add it to a container element.
  *
- * @method
  * @param {ve.dm.Document} model Document model
  * @param {HTMLElement} container DOM element to add the generated elements to. Should be empty.
- * @param {boolean} [forClipboard=false] Conversion is for clipboard
+ * @param {number} [mode=PARSER_MODE] Conversion mode, defaults to PARSER_MODE
  */
-ve.dm.Converter.prototype.getDomSubtreeFromModel = function ( model, container, forClipboard ) {
+ve.dm.Converter.prototype.getDomSubtreeFromModel = function ( model, container, mode ) {
+	if ( typeof mode === 'boolean' ) {
+		mode = mode ? this.constructor.static.CLIPBOARD_MODE : this.constructor.static.PARSER_MODE;
+	}
+	mode = mode || this.constructor.static.PARSER_MODE;
 	// Set up the converter state
-	this.documentData = model.getFullData( undefined, true );
+	this.documentData = model.getFullData( undefined, 'roundTrip' );
 	this.store = model.getStore();
 	this.internalList = model.getInternalList();
 	// Internal list of the doc this was cloned from, or itself if not cloned
 	this.originalDocInternalList = model.getOriginalDocument() ? model.getOriginalDocument().getInternalList() : this.internalList;
-	this.forClipboard = !!forClipboard;
+	this.mode = mode;
 
 	this.getDomSubtreeFromData( this.documentData, container, model.getInnerWhitespace() );
 
@@ -1223,7 +1270,7 @@ ve.dm.Converter.prototype.getDomSubtreeFromModel = function ( model, container, 
 	this.store = null;
 	this.internalList = null;
 	this.originalDocInternalList = null;
-	this.forClipboard = null;
+	this.mode = null;
 };
 
 /**
@@ -1239,6 +1286,7 @@ ve.dm.Converter.prototype.getDomSubtreeFromData = function ( data, container, in
 		childDomElements, pre, ours, theirs, parentDomElement, lastChild, isContentNode, sibling,
 		previousSiblings, doUnwrap, textNode, type, annotatedDomElementStack, annotatedDomElements,
 		whitespaceList = this.constructor.static.whitespaceList,
+		whitespaceHtmlChars = ve.visibleWhitespaceCharacters,
 		dataLen = data.length,
 		converter = this,
 		doc = container.ownerDocument,
@@ -1367,6 +1415,16 @@ ve.dm.Converter.prototype.getDomSubtreeFromData = function ( data, container, in
 		return dataSlice;
 	}
 
+	function getChar( char ) {
+		if (
+			converter.isForPreview() &&
+			Object.prototype.hasOwnProperty.call( whitespaceHtmlChars, char )
+		) {
+			char = whitespaceHtmlChars[ char ];
+		}
+		return char;
+	}
+
 	for ( i = 0; i < dataLen; i++ ) {
 		if ( typeof data[ i ] === 'string' ) {
 			// Text
@@ -1380,8 +1438,8 @@ ve.dm.Converter.prototype.getDomSubtreeFromData = function ( data, container, in
 			while ( typeof data[ i ] === 'string' ) {
 				// HACK: Skip over leading whitespace (T53462/T142132) in non-whitespace-preserving tags
 				// This should possibly be handled by Parsoid or in the UI.
-				if ( !( isStart && data[ i ].match( new RegExp( '[' + whitespaceList + ']' ) ) && !this.forClipboard ) ) {
-					text += data[ i ];
+				if ( !( isStart && data[ i ].match( new RegExp( '[' + whitespaceList + ']' ) ) && this.isForParser() ) ) {
+					text += getChar( data[ i ] );
 					isStart = false;
 				}
 				i++;
@@ -1415,13 +1473,13 @@ ve.dm.Converter.prototype.getDomSubtreeFromData = function ( data, container, in
 				annotations = new ve.dm.AnnotationSet(
 					this.store, data[ i ].annotations || data[ i ][ 1 ]
 				);
-				ve.dm.Converter.static.openAndCloseAnnotations( annotationStack, annotations,
+				this.constructor.static.openAndCloseAnnotations( annotationStack, annotations,
 					openAnnotation, closeAnnotation
 				);
 
 				if ( data[ i ].annotations === undefined ) {
 					// Annotated text
-					text += data[ i ][ 0 ];
+					text += getChar( data[ i ][ 0 ] );
 				} else {
 					// Annotated node
 					// Add text if needed
@@ -1452,7 +1510,7 @@ ve.dm.Converter.prototype.getDomSubtreeFromData = function ( data, container, in
 				text = '';
 			}
 			// Close any remaining annotations
-			ve.dm.Converter.static.openAndCloseAnnotations( annotationStack, new ve.dm.AnnotationSet( this.store ),
+			this.constructor.static.openAndCloseAnnotations( annotationStack, new ve.dm.AnnotationSet( this.store ),
 				openAnnotation, closeAnnotation
 			);
 			// Put the annotated nodes in the DOM
@@ -1569,7 +1627,7 @@ ve.dm.Converter.prototype.getDomSubtreeFromData = function ( data, container, in
 							// element between this element and the previous sibling
 							// wrapper or parent node
 							doUnwrap = true;
-							previousSiblings = domElement.parentElement.childNodes;
+							previousSiblings = domElement.parentNode.childNodes;
 							// Note: previousSiblings includes the current element
 							// so we only go up to length - 2
 							for ( j = previousSiblings.length - 2; j >= 0; j-- ) {

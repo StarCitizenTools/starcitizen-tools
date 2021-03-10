@@ -14,6 +14,10 @@
  */
 class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 
+	/**
+	 * @param ApiQuery $query
+	 * @param string $moduleName
+	 */
 	public function __construct( $query, $moduleName ) {
 		parent::__construct( $query, $moduleName, 'mc' );
 	}
@@ -43,7 +47,7 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 
 		$group = MessageGroups::getGroup( $params['group'] );
 		if ( !$group ) {
-			$this->dieWithError( [ 'apierror-missingparam', 'mcgroup' ] );
+			$this->dieWithError( [ 'apierror-badparameter', 'mcgroup' ] );
 		}
 
 		$languageCode = $params[ 'language' ];
@@ -75,9 +79,8 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 		}
 
 		if ( MessageGroups::isDynamic( $group ) ) {
-			/**
-			 * @var RecentMessageGroup $group
-			 */
+			/** @var RecentMessageGroup $group */
+			// @phan-suppress-next-line PhanUndeclaredMethod
 			$group->setLanguage( $params['language'] );
 		}
 
@@ -135,10 +138,14 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 		$props = array_flip( $params['prop'] );
 
 		/** @var Title $title */
-		foreach ( $messages->keys() as $mkey => $title ) {
-			if ( is_null( $resultPageSet ) ) {
+		foreach ( $messages->keys() as $mkey => $titleValue ) {
+			$title = Title::newFromLinkTarget( $titleValue );
+
+			if ( $resultPageSet === null ) {
 				$data = $this->extractMessageData( $result, $props, $messages[$mkey] );
 				$data['title'] = $title->getPrefixedText();
+				$data['targetLanguage'] = $messages->getLanguage();
+
 				$handle = new MessageHandle( $title );
 
 				if ( $handle->isValid() ) {
@@ -151,7 +158,7 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 			}
 		}
 
-		if ( is_null( $resultPageSet ) ) {
+		if ( $resultPageSet === null ) {
 			$result->addIndexedTagName(
 				[ 'query', $this->getModuleName() ],
 				'message'
@@ -164,11 +171,11 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 	/**
 	 * @param ApiResult $result
 	 * @param array $props
-	 * @param ThinMessage $message
+	 * @param TMessage $message
 	 * @return array
 	 */
 	public function extractMessageData( $result, $props, $message ) {
-		$data['key'] = $message->key();
+		$data = [ 'key' => $message->key() ];
 
 		if ( isset( $props['definition'] ) ) {
 			$data['definition'] = $message->definition();
@@ -220,7 +227,7 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 		);
 	}
 
-	public function getAllowedParams() {
+	protected function getAllowedParams() {
 		return [
 			'group' => [
 				ApiBase::PARAM_TYPE => 'string',
@@ -258,7 +265,7 @@ class ApiQueryMessageCollection extends ApiQueryGeneratorBase {
 				ApiBase::PARAM_DFLT => 'definition|translation',
 				ApiBase::PARAM_ISMULTI => true,
 				ApiBase::PARAM_HELP_MSG =>
-					[ 'apihelp-query+messagecollection-param-prop', '!!FUZZY!!' ],
+					[ 'apihelp-query+messagecollection-param-prop', TRANSLATE_FUZZY ],
 			],
 		];
 	}

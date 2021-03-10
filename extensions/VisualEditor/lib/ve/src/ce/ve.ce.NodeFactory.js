@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable NodeFactory class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -54,7 +54,6 @@ ve.ce.NodeFactory.prototype.splitNodeOnEnter = function ( type ) {
 /**
  * Get primary command for node type.
  *
- * @method
  * @param {string} type Node type
  * @return {string|null} Primary command name
  * @throws {Error} Unknown node type
@@ -64,6 +63,23 @@ ve.ce.NodeFactory.prototype.getNodePrimaryCommandName = function ( type ) {
 		return this.registry[ type ].static.primaryCommandName;
 	}
 	throw new Error( 'Unknown node type: ' + type );
+};
+
+/**
+ * Create a view node from a model node.
+ *
+ * @param {ve.dm.Node} model Mode node
+ * @return {ve.ce.Node} View node
+ * @throws {Error} Unknown object name
+ */
+ve.ce.NodeFactory.prototype.createFromModel = function ( model ) {
+	var type = model.getType();
+	if ( ve.dm.nodeFactory.isMetaData( type ) ) {
+		// Metadata never has an explicit view representation, so a generic
+		// ve.ce.MetaItem should be fine
+		type = 'meta';
+	}
+	return this.create( type, model );
 };
 
 /* Initialization */

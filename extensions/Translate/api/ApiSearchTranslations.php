@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API module for search translations
  * @since 2015.07
@@ -17,6 +18,7 @@ class ApiSearchTranslations extends ApiBase {
 		$config = $wgTranslateTranslationServices[$params['service']];
 		/** @var SearchableTTMServer $server */
 		$server = TTMServer::factory( $config );
+		'@phan-var SearchableTTMServer $server';
 
 		$result = $this->getResult();
 
@@ -59,7 +61,7 @@ class ApiSearchTranslations extends ApiBase {
 		];
 	}
 
-	public function getAllowedParams() {
+	protected function getAllowedParams() {
 		global $wgLanguageCode,
 			$wgTranslateTranslationDefaultService;
 		$available = $this->getAvailableTranslationServices();

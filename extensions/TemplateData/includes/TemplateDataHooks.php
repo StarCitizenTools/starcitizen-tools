@@ -18,25 +18,6 @@ class TemplateDataHooks {
 	}
 
 	/**
-	 * Register qunit unit tests
-	 * @param array &$testModules
-	 * @param ResourceLoader &$resourceLoader
-	 * @return bool
-	 */
-	public static function onResourceLoaderTestModules(
-		array &$testModules,
-		ResourceLoader &$resourceLoader
-	) {
-		$testModules['qunit']['ext.templateData.test'] = [
-			'scripts' => [ 'tests/ext.templateData.tests.js' ],
-			'dependencies' => [ 'ext.templateDataGenerator.data' ],
-			'localBasePath' => dirname( __DIR__ ) ,
-			'remoteExtPath' => 'TemplateData',
-		];
-		return true;
-	}
-
-	/**
 	 * Conditionally register the jquery.uls.data module, in case they've already been
 	 * registered by the UniversalLanguageSelector extension or the VisualEditor extension.
 	 *
@@ -109,7 +90,7 @@ class TemplateDataHooks {
 		global $wgTemplateDataUseGUI;
 		if ( $wgTemplateDataUseGUI ) {
 			if ( $output->getTitle()->inNamespace( NS_TEMPLATE ) ) {
-				$output->addModules( 'ext.templateDataGenerator.editPage' );
+				$output->addModules( 'ext.templateDataGenerator.editTemplatePage' );
 			}
 		}
 		return true;
@@ -128,8 +109,8 @@ class TemplateDataHooks {
 	 *
 	 * @return string HTML to insert in the page.
 	 */
-	public static function render( $input, $args, $parser, $frame ) {
-		$ti = TemplateDataBlob::newFromJSON( $input );
+	public static function render( $input, $args, Parser $parser, $frame ) {
+		$ti = TemplateDataBlob::newFromJSON( wfGetDB( DB_REPLICA ), $input );
 
 		$status = $ti->getStatus();
 		if ( !$status->isOK() ) {
@@ -137,11 +118,102 @@ class TemplateDataHooks {
 			return '<div class="errorbox">' . $status->getHTML() . '</div>';
 		}
 
-		$parser->getOutput()->setProperty( 'templatedata', $ti->getJSONForDatabase() );
+		// Store the blob as page property for retrieval by ApiTemplateData.
+		// But, don't store it if we're parsing a doc sub page,  because:
+		// - The doc subpage should not appear in ApiTemplateData as a documented
+		// template itself, which is confusing to users (T54448).
+		// - The doc subpage should not appear at Special:PagesWithProp.
+		// - Storing the blob twice in the database is inefficient (T52512).
+		$title = $parser->getTitle();
+		$docPage = wfMessage( 'templatedata-doc-subpage' )->inContentLanguage();
+		if ( !$title->isSubpage() || $title->getSubpageText() !== $docPage->plain() ) {
+			$parser->getOutput()->setProperty( 'templatedata', $ti->getJSONForDatabase() );
+		}
 
-		$parser->getOutput()->addModuleStyles( 'ext.templateData' );
-		$parser->enableOOUI();
+		$parser->getOutput()->addModuleStyles( [
+			'ext.templateData',
+			'ext.templateData.images',
+			'jquery.tablesorter.styles',
+		] );
+		$parser->getOutput()->addModules( 'jquery.tablesorter' );
+		$parser->getOutput()->setEnableOOUI( true );
 
-		return $ti->getHtml( $parser->getOptions()->getUserLangObj() );
+		$userLang = $parser->getOptions()->getUserLangObj();
+
+		// FIXME: this hard-codes default skin, but it is needed because
+		// ::getHtml() will need a theme singleton to be set.
+		OutputPage::setupOOUI( 'bogus', $userLang->getDir() );
+		return $ti->getHtml( $userLang );
+	}
+
+	/**
+	 * Fetch templatedata for an array of titles.
+	 *
+	 * @todo Document this hook
+	 *
+	 * The following questions are yet to be resolved.
+	 * (a) Should we extend functionality to looking up an array of titles instead of one?
+	 *     The signature allows for an array of titles to be passed in, but the
+	 *     current implementation is not optimized for the multiple-title use case.
+	 * (b) Should this be a lookup service instead of this faux hook?
+	 *     This will be resolved separately.
+	 *
+	 * @param array $tplTitles
+	 * @param stdclass[] &$tplData
+	 */
+	public static function onParserFetchTemplateData( array $tplTitles, array &$tplData ): void {
+		$tplData = [];
+
+		// This inefficient implementation is currently tuned for
+		// Parsoid's use case where it requests info for exactly one title.
+		// For a real batch use case, this code will need an overhaul.
+		foreach ( $tplTitles as $tplTitle ) {
+			$title = Title::newFromText( $tplTitle );
+			if ( !$title ) {
+				// Invalid title
+				$tplData[$tplTitle] = null;
+				continue;
+			}
+
+			if ( $title->isRedirect() ) {
+				$title = ( new WikiPage( $title ) )->getRedirectTarget();
+				if ( !$title ) {
+					// Invalid redirecting title
+					$tplData[$tplTitle] = null;
+					continue;
+				}
+			}
+
+			if ( !$title->exists() ) {
+				$tplData[$tplTitle] = (object)[ "missing" => true ];
+				continue;
+			}
+
+			// FIXME: PageProps returns takes titles but returns by page id.
+			// This means we need to do our own look up and hope it matches.
+			// Spoiler, sometimes it won't. When that happens, the user won't
+			// get any templatedata-based interfaces for that template.
+			// The fallback is to not serve data for that template, which
+			// the clients have to support anyway, so the impact is minimal.
+			// It is also expected that such race conditions resolve themselves
+			// after a few seconds so the old "try again later" should cover this.
+			$pageId = $title->getArticleID();
+			$props = PageProps::getInstance()->getProperties( $title, 'templatedata' );
+			if ( !isset( $props[$pageId] ) ) {
+				// No templatedata
+				$tplData[$tplTitle] = (object)[ "notemplatedata" => true ];
+				continue;
+			}
+
+			$tdb = TemplateDataBlob::newFromDatabase( wfGetDB( DB_REPLICA ), $props[$pageId] );
+			$status = $tdb->getStatus();
+			if ( !$status->isOK() ) {
+				// Invalid data. Parsoid has no use for the error.
+				$tplData[$tplTitle] = (object)[ "notemplatedata" => true ];
+				continue;
+			}
+
+			$tplData[$tplTitle] = $tdb->getData();
+		}
 	}
 }

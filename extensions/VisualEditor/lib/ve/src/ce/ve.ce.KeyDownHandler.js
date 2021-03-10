@@ -1,9 +1,10 @@
 /*!
  * VisualEditor ContentEditable key down handler
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
+/* istanbul ignore next */
 /**
  * Key down handler.
  *

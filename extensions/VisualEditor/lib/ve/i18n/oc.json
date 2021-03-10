@@ -3,7 +3,8 @@
 		"authors": [
 			"Cedric31",
 			"Gloria sah",
-			"Jfblanc"
+			"Jfblanc",
+			"Quentí"
 		]
 	},
 	"visualeditor": "EditorVisual",
@@ -33,6 +34,7 @@
 	"visualeditor-commentinspector-title": "Comentari",
 	"visualeditor-commentinspector-tooltip": "Comentari",
 	"visualeditor-content-select-all": "Seleccionar tot",
+	"visualeditor-contextitemwidget-label-close": "Tampar",
 	"visualeditor-contextitemwidget-label-remove": "Suprimir",
 	"visualeditor-contextitemwidget-label-secondary": "Modificar",
 	"visualeditor-debugbar-close": "Tampar",
@@ -94,17 +96,17 @@
 	"visualeditor-linkinspector-title": "Ligam",
 	"visualeditor-listbutton-bullet-tooltip": "Lista amb de piuses",
 	"visualeditor-listbutton-number-tooltip": "Lista numerotada",
-	"visualeditor-mediasizewidget-button-originaldimensions": "Metre a la talha vertadièra",
-	"visualeditor-mediasizewidget-label-custom": "Personalizat",
 	"visualeditor-mediasizewidget-label-defaulterror": "Las valors de talha son pas validas.",
 	"visualeditor-mediasizewidget-label-scale": "Escala",
 	"visualeditor-mediasizewidget-label-scale-percent": "% de la talha d'una vinheta",
 	"visualeditor-mediasizewidget-sizeoptions-custom": "Personalizat",
 	"visualeditor-mediasizewidget-sizeoptions-default": "Per defaut",
 	"visualeditor-mediasizewidget-sizeoptions-scale": "Escala",
+	"visualeditor-pagemenu-tooltip": "Opcions de pagina",
 	"visualeditor-shortcuts-clipboard": "Quichapapièr",
 	"visualeditor-shortcuts-formatting": "Mesa en forma del paragraf",
 	"visualeditor-shortcuts-history": "Istoric",
+	"visualeditor-shortcuts-insert": "Inserir",
 	"visualeditor-shortcuts-other": "Autre",
 	"visualeditor-shortcuts-sequence-notice": "Tipe",
 	"visualeditor-shortcuts-text-style": "Estil del tèxte",

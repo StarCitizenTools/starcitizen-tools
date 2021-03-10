@@ -63,8 +63,15 @@ class TranslateLogFormatter extends LogFormatter {
 		return $message->isBlank() ? $value : $message->text();
 	}
 
+	/**
+	 * @param Title|null $title The page
+	 * @param string|null $text
+	 * @param array $parameters Query parameters
+	 * @return string
+	 * @return-taint onlysafefor_html
+	 */
 	protected function makePageLinkWithText(
-		Title $title = null, $text, array $parameters = []
+		?Title $title, $text, array $parameters = []
 	) {
 		if ( !$this->plaintext ) {
 			$link = Linker::link( $title, htmlspecialchars( $text ), [], $parameters );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWExternalLinkAnnotation class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,13 +15,16 @@
  * @param {ve.ce.ContentBranchNode} [parentNode] Node rendering this annotation
  * @param {Object} [config] Configuration options
  */
-ve.ce.MWExternalLinkAnnotation = function VeCeMWExternalLinkAnnotation() {
+ve.ce.MWExternalLinkAnnotation = function VeCeMWExternalLinkAnnotation( model ) {
 	// Parent constructor
 	ve.ce.MWExternalLinkAnnotation.super.apply( this, arguments );
 
 	// DOM changes
-	// TODO: Remove when fixed upstream in Parsoid (T58756)
-	this.$anchor.addClass( 'external' );
+	if ( model.getAttribute( 'rel' ) === 'mw:WikiLink/Interwiki' ) {
+		this.$anchor.addClass( 'extiw' );
+	} else {
+		this.$anchor.addClass( 'external' );
+	}
 };
 
 /* Inheritance */

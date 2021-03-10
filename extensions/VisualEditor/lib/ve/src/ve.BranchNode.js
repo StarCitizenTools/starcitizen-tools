@@ -1,7 +1,7 @@
 /*!
  * VisualEditor BranchNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -49,7 +49,6 @@ ve.BranchNode.prototype.traverse = function ( callback ) {
 /**
  * Check if the node has children.
  *
- * @method
  * @return {boolean} Whether the node has children
  */
 ve.BranchNode.prototype.hasChildren = function () {
@@ -59,7 +58,6 @@ ve.BranchNode.prototype.hasChildren = function () {
 /**
  * Get child nodes.
  *
- * @method
  * @return {ve.Node[]} List of child nodes
  */
 ve.BranchNode.prototype.getChildren = function () {
@@ -69,7 +67,6 @@ ve.BranchNode.prototype.getChildren = function () {
 /**
  * Get the index of a child node.
  *
- * @method
  * @param {ve.dm.Node} node Child node to find index of
  * @return {number} Index of child node or -1 if node was not found
  */
@@ -80,9 +77,8 @@ ve.BranchNode.prototype.indexOf = function ( node ) {
 /**
  * Set the root node.
  *
- * @method
  * @see ve.Node#setRoot
- * @param {ve.Node|null} root Node to use as root
+ * @param {ve.BranchNode|null} root Node to use as root
  */
 ve.BranchNode.prototype.setRoot = function ( root ) {
 	var i, len,
@@ -116,7 +112,6 @@ ve.BranchNode.prototype.setRoot = function ( root ) {
 /**
  * Set the document the node is a part of.
  *
- * @method
  * @see ve.Node#setDocument
  * @param {ve.Document} doc Document this node is a part of
  */
@@ -155,17 +150,23 @@ ve.BranchNode.prototype.setDocument = function ( doc ) {
  * This method is pretty expensive. If you need to get different slices of the same content, get
  * the content first, then slice it up locally.
  *
- * @method
  * @param {number} offset Offset get node for
  * @param {boolean} [shallow] Do not iterate into child nodes of child nodes
  * @return {ve.Node|null} Node at offset, or null if none was found
+ * @throws {Error} If offset is out of bounds
  */
 ve.BranchNode.prototype.getNodeFromOffset = function ( offset, shallow ) {
 	var i, length, nodeLength, childNode,
 		currentNode = this,
 		nodeOffset = 0;
+	if ( typeof offset !== 'number' ) {
+		throw new Error( 'Offset must be a number' );
+	}
 	if ( offset === 0 ) {
 		return currentNode;
+	}
+	if ( offset < 0 ) {
+		throw new Error( 'Offset out of bounds' );
 	}
 	// TODO a lot of logic is duplicated in selectNodes(), abstract that into a traverser or something
 	SIBLINGS:

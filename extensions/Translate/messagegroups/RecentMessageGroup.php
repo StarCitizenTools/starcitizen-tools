@@ -19,7 +19,6 @@ class RecentMessageGroup extends WikiMessageGroup {
 	 * @see MessageCollection::getPages()
 	 */
 	protected $namespace = false;
-
 	protected $language;
 
 	/**
@@ -93,7 +92,7 @@ class RecentMessageGroup extends WikiMessageGroup {
 
 		$db = wfGetDB( DB_REPLICA );
 
-		if ( is_callable( RecentChange::class, 'getQueryInfo' ) ) {
+		if ( is_callable( [ RecentChange::class, 'getQueryInfo' ] ) ) {
 			$rcQuery = RecentChange::getQueryInfo();
 			$tables = $rcQuery['tables'];
 			$joins = $rcQuery['joins'];
@@ -148,7 +147,7 @@ class RecentMessageGroup extends WikiMessageGroup {
 		return $defs;
 	}
 
-	public function getChecker() {
+	public function getValidator() {
 		return null;
 	}
 

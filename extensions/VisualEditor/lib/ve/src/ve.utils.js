@@ -1,7 +1,7 @@
 /*!
  * VisualEditor utilities.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -27,50 +27,148 @@ ve.isInstanceOfAny = function ( subject, classes ) {
 };
 
 /**
+ * Get a deeply nested property of an object using variadic arguments, protecting against
+ * undefined property errors.
+ *
+ * `quux = OO.getProp( obj, 'foo', 'bar', 'baz' );` is equivalent to `quux = obj.foo.bar.baz;`
+ * except that the former protects against JS errors if one of the intermediate properties
+ * is undefined. Instead of throwing an error, this function will return undefined in
+ * that case.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.html
+ *
  * @method
- * @inheritdoc OO#getProp
+ * @param {Object} obj
+ * @param {...Mixed} [keys]
+ * @return {Object|undefined} obj[arguments[1]][arguments[2]].... or undefined
  */
 ve.getProp = OO.getProp;
 
 /**
+ * Set a deeply nested property of an object using variadic arguments, protecting against
+ * undefined property errors.
+ *
+ * `OO.setProp( obj, 'foo', 'bar', 'baz' );` is equivalent to `obj.foo.bar = baz;` except that
+ * the former protects against JS errors if one of the intermediate properties is
+ * undefined. Instead of throwing an error, undefined intermediate properties will be
+ * initialized to an empty object. If an intermediate property is not an object, or if obj itself
+ * is not an object, this function will silently abort.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.html
+ *
  * @method
- * @inheritdoc OO#setProp
+ * @param {Object} obj
+ * @param {...Mixed} [keys]
+ * @param {Mixed} [value]
  */
 ve.setProp = OO.setProp;
 
 /**
+ * Delete a deeply nested property of an object using variadic arguments, protecting against
+ * undefined property errors, and deleting resulting empty objects.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.html
+ *
  * @method
- * @inheritdoc OO#deleteProp
+ * @param {Object} obj
+ * @param {...Mixed} [keys]
  */
 ve.deleteProp = OO.deleteProp;
 
 /**
+ * Create a new object that is an instance of the same
+ * constructor as the input, inherits from the same object
+ * and contains the same own properties.
+ *
+ * This makes a shallow non-recursive copy of own properties.
+ * To create a recursive copy of plain objects, use #copy.
+ *
+ *     var foo = new Person( mom, dad );
+ *     foo.setAge( 21 );
+ *     var foo2 = OO.cloneObject( foo );
+ *     foo.setAge( 22 );
+ *
+ *     // Then
+ *     foo2 !== foo; // true
+ *     foo2 instanceof Person; // true
+ *     foo2.getAge(); // 21
+ *     foo.getAge(); // 22
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.html
+ *
  * @method
- * @inheritdoc OO#cloneObject
+ * @param {Object} origin
+ * @return {Object} Clone of origin
  */
 ve.cloneObject = OO.cloneObject;
 
 /**
+ * Get an array of all property values in an object.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.html
+ *
  * @method
- * @inheritdoc OO#getObjectValues
+ * @param {Object} obj Object to get values from
+ * @return {Array} List of object values
  */
 ve.getObjectValues = OO.getObjectValues;
 
 /**
+ * Use binary search to locate an element in a sorted array.
+ *
+ * searchFunc is given an element from the array. `searchFunc(elem)` must return a number
+ * above 0 if the element we're searching for is to the right of (has a higher index than) elem,
+ * below 0 if it is to the left of elem, or zero if it's equal to elem.
+ *
+ * To search for a specific value with a comparator function (a `function cmp(a,b)` that returns
+ * above 0 if `a > b`, below 0 if `a < b`, and 0 if `a == b`), you can use
+ * `searchFunc = cmp.bind( null, value )`.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.html
+ *
  * @method
- * @inheritdoc OO#binarySearch
+ * @param {Array} arr Array to search in
+ * @param {Function} searchFunc Search function
+ * @param {boolean} [forInsertion] If not found, return index where val could be inserted
+ * @return {number|null} Index where val was found, or null if not found
  */
 ve.binarySearch = OO.binarySearch;
 
 /**
+ * Recursively compare properties between two objects.
+ *
+ * A false result may be caused by property inequality or by properties in one object missing from
+ * the other. An asymmetrical test may also be performed, which checks only that properties in the
+ * first object are present in the second object, but not the inverse.
+ *
+ * If either a or b is null or undefined it will be treated as an empty object.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.html
+ *
  * @method
- * @inheritdoc OO#compare
+ * @param {Object|undefined|null} a First object to compare
+ * @param {Object|undefined|null} b Second object to compare
+ * @param {boolean} [asymmetrical] Whether to check only that a's values are equal to b's
+ *  (i.e. a is a subset of b)
+ * @return {boolean} If the objects contain the same values as each other
  */
 ve.compare = OO.compare;
 
 /**
+ * Create a plain deep copy of any kind of object.
+ *
+ * Copies are deep, and will either be an object or an array depending on `source`.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.html
+ *
  * @method
- * @inheritdoc OO#copy
+ * @param {Object} source Object to copy
+ * @param {Function} [leafCallback] Applied to leaf values after they are cloned but before they are
+ *  added to the clone
+ * @param {Function} [nodeCallback] Applied to all values before they are cloned. If the
+ *  nodeCallback returns a value other than undefined, the returned value is used instead of
+ *  attempting to clone.
+ * @return {Object} Copy of source object
  */
 ve.copy = OO.copy;
 
@@ -87,10 +185,24 @@ ve.debounce = OO.ui.debounce;
 ve.throttle = OO.ui.throttle;
 
 /**
+ * Create a jQuery.Deferred-compatible object
+ *
+ * See http://api.jquery.com/jQuery.Deferred/
+ *
  * @method
- * @inheritdoc OO.ui.Element#scrollIntoView
+ * @return {jQuery.Deferred}
  */
-ve.scrollIntoView = OO.ui.Element.static.scrollIntoView.bind( OO.ui.Element.static );
+ve.createDeferred = $.Deferred;
+
+/**
+ * Create a promise which resolves when the list of promises has resolved
+ *
+ * @param {jQuery.Promise[]} promises List of promises
+ * @return {jQuery.Promise} Promise which resolves when the list of promises has resolved
+ */
+ve.promiseAll = function ( promises ) {
+	return $.when.apply( $, promises );
+};
 
 /**
  * Copy an array of DOM elements, optionally into a different document.
@@ -153,8 +265,9 @@ ve.compareClassLists = function ( classList1, classList2 ) {
 /**
  * Check to see if an object is a plain object (created using "{}" or "new Object").
  *
+ * See http://api.jquery.com/jQuery.isPlainObject/
+ *
  * @method
- * @source <http://api.jquery.com/jQuery.isPlainObject/>
  * @param {Object} obj The object that will be checked to see if it's a plain object
  * @return {boolean}
  */
@@ -163,8 +276,9 @@ ve.isPlainObject = $.isPlainObject;
 /**
  * Check to see if an object is empty (contains no properties).
  *
+ * See http://api.jquery.com/jQuery.isEmptyObject/
+ *
  * @method
- * @source <http://api.jquery.com/jQuery.isEmptyObject/>
  * @param {Object} obj The object that will be checked to see if it's empty
  * @return {boolean}
  */
@@ -179,8 +293,9 @@ ve.isEmptyObject = $.isEmptyObject;
  * 'target' as 'source' and 'this' as 'target'. Which means
  * ve.extendObject( { a: 1 } ); sets ve.a = 1;
  *
+ * See http://api.jquery.com/jQuery.extend/
+ *
  * @method
- * @source <http://api.jquery.com/jQuery.extend/>
  * @param {boolean} [recursive=false]
  * @param {Mixed} [target] Object that will receive the new properties
  * @param {...Mixed} [sources] Variadic list of objects containing properties
@@ -232,7 +347,7 @@ ve.supportsSplice = ( function () {
 /**
  * Splice one array into another.
  *
- * This is the equivalent of arr.splice( offset, remove, d1, d2, d3, ... ) except that arguments are
+ * This is the equivalent of arr.splice( offset, remove, d1, d2, d3, … ) except that arguments are
  * specified as an array rather than separate parameters.
  *
  * This method has been proven to be faster than using slice and concat to create a new array, but
@@ -264,7 +379,7 @@ ve.batchSplice = function ( arr, offset, remove, data ) {
 			splice = Array.prototype.splice;
 		} else {
 			// Standard Array.prototype.splice() function implemented using .slice() and .push().
-			splice = function ( offset, remove /* , data... */ ) {
+			splice = function ( offset, remove /* , data… */ ) {
 				var data, begin, removed, end;
 
 				data = Array.prototype.slice.call( arguments, 2 );
@@ -290,7 +405,7 @@ ve.batchSplice = function ( arr, offset, remove, data ) {
 	}
 
 	while ( index < data.length ) {
-		// Call arr.splice( offset, remove, i0, i1, i2, ..., i1023 );
+		// Call arr.splice( offset, remove, i0, i1, i2, …, i1023 );
 		// Only set remove on the first call, and set it to zero on subsequent calls
 		spliced = splice.apply(
 			arr, [ index + offset, toRemove ].concat( data.slice( index, index + batchSize ) )
@@ -371,7 +486,7 @@ ve.insertIntoArray = function ( arr, offset, src ) {
 /**
  * Push one array into another.
  *
- * This is the equivalent of arr.push( d1, d2, d3, ... ) except that arguments are
+ * This is the equivalent of arr.push( d1, d2, d3, … ) except that arguments are
  * specified as an array rather than separate parameters.
  *
  * @param {Array|ve.dm.BranchNode} arr Object supporting .push() to insert at the end of the array. Will be modified
@@ -389,7 +504,7 @@ ve.batchPush = function ( arr, data ) {
 		return arr.push.apply( arr, data );
 	}
 	while ( index < data.length ) {
-		// Call arr.push( i0, i1, i2, ..., i1023 );
+		// Call arr.push( i0, i1, i2, …, i1023 );
 		length = arr.push.apply(
 			arr, data.slice( index, index + batchSize )
 		);
@@ -432,18 +547,17 @@ ve.dir = ve.dir || function () {
 };
 
 /**
- * Select the contents of an element
+ * Deep freeze an object, making it immutable
  *
- * @param {HTMLElement} element Element
+ * This implementation does nothing, to add a real implementation ve.freeze needs to be loaded.
+ *
+ * @param {Object} obj
+ * @param {boolean} onlyProperties
+ * @return {Object}
  */
-ve.selectElement = function ( element ) {
-	var win = OO.ui.Element.static.getWindow( element ),
-		nativeRange = win.document.createRange(),
-		nativeSelection = win.getSelection();
-	nativeRange.setStart( element, 0 );
-	nativeRange.setEnd( element, element.childNodes.length );
-	nativeSelection.removeAllRanges();
-	nativeSelection.addRange( nativeRange );
+ve.deepFreeze = ve.deepFreeze || function ( obj ) {
+	// Don't do anything, this is just a stub
+	return obj;
 };
 
 /**
@@ -457,6 +571,19 @@ ve.msg = function () {
 	// Avoid using bind because ve.init.platform doesn't exist yet.
 	// TODO: Fix dependency issues between ve.js and ve.init.platform
 	return ve.init.platform.getMessage.apply( ve.init.platform, arguments );
+};
+
+/**
+ * Get an HTML localized message with HTML or DOM arguments.
+ *
+ * @param {string} key Message key
+ * @param {...Mixed} [params] Message parameters
+ * @return {Node[]} Localized message
+ */
+ve.htmlMsg = function () {
+	// Avoid using bind because ve.init.platform doesn't exist yet.
+	// TODO: Fix dependency issues between ve.js and ve.init.platform
+	return ve.init.platform.getHtmlMessage.apply( ve.init.platform, arguments );
 };
 
 /**
@@ -487,16 +614,6 @@ ve.userConfig = function ( key ) {
 		// set( key, value )
 		return ve.init.platform.setUserConfig.apply( ve.init.platform, arguments );
 	}
-};
-
-/**
- * Determine if the text consists of only unattached combining marks.
- *
- * @param {string} text Text to test
- * @return {boolean} The text is unattached combining marks
- */
-ve.isUnattachedCombiningMark = function ( text ) {
-	return ( /^[\u0300-\u036F]+$/ ).test( text );
 };
 
 /**
@@ -700,48 +817,9 @@ ve.convertDomElements = function ( value ) {
 	return value;
 };
 
-/**
- * Check whether a given DOM element has a block element type.
- *
- * @param {HTMLElement|string} element Element or element name
- * @return {boolean} Element is a block element
- */
-ve.isBlockElement = function ( element ) {
-	var elementName = typeof element === 'string' ? element : element.nodeName;
-	return ve.elementTypes.block.indexOf( elementName.toLowerCase() ) !== -1;
-};
-
-/**
- * Check whether a given DOM element is a void element (can't have children).
- *
- * @param {HTMLElement|string} element Element or element name
- * @return {boolean} Element is a void element
- */
-ve.isVoidElement = function ( element ) {
-	var elementName = typeof element === 'string' ? element : element.nodeName;
-	return ve.elementTypes.void.indexOf( elementName.toLowerCase() ) !== -1;
-};
-
-ve.elementTypes = {
-	block: [
-		'div', 'p',
-		// Tables
-		'table', 'tbody', 'thead', 'tfoot', 'caption', 'th', 'tr', 'td',
-		// Lists
-		'ul', 'ol', 'li', 'dl', 'dt', 'dd',
-		// HTML5 heading content
-		'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hgroup',
-		// HTML5 sectioning content
-		'article', 'aside', 'body', 'nav', 'section', 'footer', 'header', 'figure',
-		'figcaption', 'fieldset', 'details', 'blockquote',
-		// Other
-		'hr', 'button', 'canvas', 'center', 'col', 'colgroup', 'embed',
-		'map', 'object', 'pre', 'progress', 'video'
-	],
-	'void': [
-		'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img',
-		'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
-	]
+ve.visibleWhitespaceCharacters = {
+	'\n': '\u21b5', // ↵
+	'\t': '\u279e' // ➞
 };
 
 /**
@@ -776,174 +854,6 @@ ve.filterMetaElements = function ( contents ) {
 	// Also remove link and style tags nested inside other tags
 	$( contents ).find( 'link, style' ).remove();
 	return contents;
-};
-
-/**
- * Create an HTMLDocument from an HTML string.
- *
- * The html parameter is supposed to be a full HTML document with a doctype and an `<html>` tag.
- * If you pass a document fragment, it may or may not work, this is at the mercy of the browser.
- *
- * To create an empty document, pass the empty string.
- *
- * If your input is both valid HTML and valid XML, and you need to work around style
- * normalization bugs in Internet Explorer, use #parseXhtml and #serializeXhtml.
- *
- * @param {string} html HTML string
- * @return {HTMLDocument} Document constructed from the HTML string
- */
-ve.createDocumentFromHtml = function ( html ) {
-	var newDocument;
-
-	newDocument = ve.createDocumentFromHtmlUsingDomParser( html );
-	if ( newDocument ) {
-		return newDocument;
-	}
-
-	newDocument = ve.createDocumentFromHtmlUsingIframe( html );
-	if ( newDocument ) {
-		return newDocument;
-	}
-
-	return ve.createDocumentFromHtmlUsingInnerHtml( html );
-};
-
-/**
- * Private method for creating an HTMLDocument using the DOMParser
- *
- * @private
- * @param {string} html HTML string
- * @return {HTMLDocument|undefined} Document constructed from the HTML string or undefined if it failed
- */
-ve.createDocumentFromHtmlUsingDomParser = function ( html ) {
-	var newDocument;
-
-	// Support: IE
-	// IE doesn't like empty strings
-	html = html || '<body></body>';
-
-	try {
-		newDocument = new DOMParser().parseFromString( html, 'text/html' );
-		if ( newDocument ) {
-			return newDocument;
-		}
-	} catch ( e ) { }
-};
-
-/**
- * Private fallback for browsers which don't support DOMParser
- *
- * @private
- * @param {string} html HTML string
- * @return {HTMLDocument|undefined} Document constructed from the HTML string or undefined if it failed
- */
-ve.createDocumentFromHtmlUsingIframe = function ( html ) {
-	var newDocument, iframe;
-
-	// Here's what this fallback code should look like:
-	//
-	//     var newDocument = document.implementation.createHtmlDocument( '' );
-	//     newDocument.open();
-	//     newDocument.write( html );
-	//     newDocument.close();
-	//     return newDocument;
-	//
-	// Sadly, it's impossible:
-	// * On IE 9, calling open()/write() on such a document throws an "Unspecified error" (sic).
-	// * On Firefox 20, calling open()/write() doesn't actually do anything, including writing.
-	//   This is reported as Firefox bug 867102.
-	// * On Opera 12, calling open()/write() behaves as if called on window.document, replacing the
-	//   entire contents of the page with new HTML. This is reported as Opera bug DSK-384486.
-	//
-	// Funnily, in all of those browsers it's apparently perfectly legal and possible to access the
-	// newly created document's DOM itself, including modifying documentElement's innerHTML, which
-	// would achieve our goal. But that requires some nasty magic to strip off the <html></html> tag
-	// itself, so we're not doing that. (We can't use .outerHTML, either, as the spec disallows
-	// assigning to it for the root element.)
-	//
-	// There is one more way - create an <iframe>, append it to current document, and access its
-	// contentDocument. The only browser having issues with that is Opera (sometimes the accessible
-	// value is not actually a Document, but something which behaves just like an empty regular
-	// object...), so we're detecting that and using the innerHTML hack described above.
-
-	// Support: Firefox 20
-	// Support: Opera 12
-
-	html = html || '<body></body>';
-
-	// Create an invisible iframe
-	iframe = document.createElement( 'iframe' );
-	iframe.setAttribute( 'frameborder', '0' );
-	iframe.setAttribute( 'width', '0' );
-	iframe.setAttribute( 'height', '0' );
-	// Attach it to the document. We have to do this to get a new document out of it
-	document.documentElement.appendChild( iframe );
-	// Write the HTML to it
-	newDocument = ( iframe.contentWindow && iframe.contentWindow.document ) || iframe.contentDocument;
-	newDocument.open();
-	newDocument.write( html ); // Party like it's 1995!
-	newDocument.close();
-	// Detach the iframe
-	iframe.parentNode.removeChild( iframe );
-
-	if ( !newDocument.documentElement || newDocument.documentElement.cloneNode( false ) === undefined ) {
-		// Surprise! The document is not a document! Only happens on Opera.
-		// (Or its nodes are not actually nodes, while the document
-		// *is* a document. This only happens when debugging with Dragonfly.)
-		return;
-	}
-
-	return newDocument;
-};
-
-/**
- * Private fallback for browsers which don't support iframe technique
- *
- * @private
- * @param {string} html HTML string
- * @return {HTMLDocument} Document constructed from the HTML string
- */
-ve.createDocumentFromHtmlUsingInnerHtml = function ( html ) {
-	var i, htmlAttributes, wrapper, attributes,
-		newDocument = document.implementation.createHTMLDocument( '' );
-
-	html = html || '<body></body>';
-
-	// Carefully unwrap the HTML out of the root node (and doctype, if any).
-	newDocument.documentElement.innerHTML = html
-		.replace( /^\s*(?:<!doctype[^>]*>)?\s*<html[^>]*>/i, '' )
-		.replace( /<\/html>\s*$/i, '' );
-
-	// Preserve <html> attributes, if any
-	htmlAttributes = html.match( /<html([^>]*>)/i );
-	if ( htmlAttributes && htmlAttributes[ 1 ] ) {
-		wrapper = document.createElement( 'div' );
-		wrapper.innerHTML = '<div ' + htmlAttributes[ 1 ] + '></div>';
-		attributes = wrapper.firstChild.attributes;
-		for ( i = 0; i < attributes.length; i++ ) {
-			newDocument.documentElement.setAttribute(
-				attributes[ i ].name,
-				attributes[ i ].value
-			);
-		}
-	}
-
-	return newDocument;
-};
-
-/**
- * Resolve a URL relative to a given base.
- *
- * @param {string} url URL to resolve
- * @param {HTMLDocument} base Document whose base URL to use
- * @return {string} Resolved URL
- */
-ve.resolveUrl = function ( url, base ) {
-	var node = base.createElement( 'a' );
-	node.setAttribute( 'href', url );
-	// If doc.baseURI isn't set, node.href will be an empty string
-	// This is crazy, returning the original URL is better
-	return node.href || url;
 };
 
 /**
@@ -998,48 +908,6 @@ ve.resolveAttributes = function ( elementsOrJQuery, doc, attrs ) {
 			}
 			Array.prototype.forEach.call( element.querySelectorAll( '[' + attr + ']' ), resolveAttribute );
 		}
-	}
-};
-
-/**
- * Take a target document with a possibly relative base URL, and modify it to be absolute.
- * The base URL of the target document is resolved using the base URL of the source document.
- *
- * Note that the the fallbackBase parameter will be used if there is no <base> tag, even if
- * the document does have a valid base URL: this is to work around Firefox's behavior of having
- * documents created by DOMParser inherit the base URL of the main document.
- *
- * @param {HTMLDocument} targetDoc Document whose base URL should be resolved
- * @param {HTMLDocument} sourceDoc Document whose base URL should be used for resolution
- * @param {string} [fallbackBase] Base URL to use if resolving the base URL fails or there is no <base> tag
- */
-ve.fixBase = function ( targetDoc, sourceDoc, fallbackBase ) {
-	var baseNode = targetDoc.getElementsByTagName( 'base' )[ 0 ];
-	if ( baseNode ) {
-		// Support: Safari
-		// In Safari a base node with an invalid href (e.g. protocol-relative)
-		// in a document which has been dynamically created results in
-		// 'about:blank' rather than '' or null. The base's href will also be '',
-		// but that works out just setting the base to fallbackBase, so it's okay.
-		if ( !targetDoc.baseURI || targetDoc.baseURI === 'about:blank' ) {
-			// <base> tag present but not valid, try resolving its URL
-			baseNode.setAttribute( 'href', ve.resolveUrl( baseNode.getAttribute( 'href' ), sourceDoc ) );
-			if ( !targetDoc.baseURI && fallbackBase ) {
-				// That didn't work, use the fallback
-				baseNode.setAttribute( 'href', fallbackBase );
-			}
-		}
-		// Support: Chrome
-		// Chrome just entirely ignores <base> tags with a protocol-relative href attribute.
-		// Code below is *not a no-op*; reading the href property and setting it back
-		// will expand the href *attribute* to use an absolute URL if it was relative.
-		baseNode.href = baseNode.href;
-	} else if ( fallbackBase ) {
-		// Support: Firefox
-		// No <base> tag, add one
-		baseNode = targetDoc.createElement( 'base' );
-		baseNode.setAttribute( 'href', fallbackBase );
-		targetDoc.head.appendChild( baseNode );
 	}
 };
 
@@ -1113,220 +981,6 @@ ve.safeDecodeURIComponent = function ( s ) {
 };
 
 /**
- * Get the actual inner HTML of a DOM node.
- *
- * In most browsers, .innerHTML is broken and eats newlines in `<pre>` elements, see
- * https://bugzilla.mozilla.org/show_bug.cgi?id=838954 . This function detects this behavior
- * and works around it, to the extent possible. `<pre>\nFoo</pre>` will become `<pre>Foo</pre>`
- * if the browser is broken, but newlines are preserved in all other cases.
- *
- * @param {HTMLElement} element HTML element to get inner HTML of
- * @return {string} Inner HTML
- */
-ve.properInnerHtml = function ( element ) {
-	return ve.fixupPreBug( element ).innerHTML;
-};
-
-/**
- * Get the actual outer HTML of a DOM node.
- *
- * @see ve#properInnerHtml
- * @param {HTMLElement} element HTML element to get outer HTML of
- * @return {string} Outer HTML
- */
-ve.properOuterHtml = function ( element ) {
-	return ve.fixupPreBug( element ).outerHTML;
-};
-
-/**
- * Helper function for #properInnerHtml, #properOuterHtml and #serializeXhtml.
- *
- * Detect whether the browser has broken `<pre>` serialization, and if so return a clone
- * of the node with extra newlines added to make it serialize properly. If the browser is not
- * broken, just return the original node.
- *
- * @param {HTMLElement} element HTML element to fix up
- * @return {HTMLElement} Either element, or a fixed-up clone of it
- */
-ve.fixupPreBug = function ( element ) {
-	var div, $element;
-	if ( ve.isPreInnerHtmlBroken === undefined ) {
-		// Test whether newlines in `<pre>` are serialized back correctly
-		div = document.createElement( 'div' );
-		div.innerHTML = '<pre>\n\n</pre>';
-		ve.isPreInnerHtmlBroken = div.innerHTML === '<pre>\n</pre>';
-	}
-
-	if ( !ve.isPreInnerHtmlBroken ) {
-		return element;
-	}
-
-	// Workaround for bug 42469: if a `<pre>` starts with a newline, that means .innerHTML will
-	// screw up and stringify it with one fewer newline. Work around this by adding a newline.
-	// If we don't see a leading newline, we still don't know if the original HTML was
-	// `<pre>Foo</pre>` or `<pre>\nFoo</pre>`, but that's a syntactic difference, not a
-	// semantic one, and handling that is the integration target's job.
-	$element = $( element ).clone();
-	$element.find( 'pre, textarea, listing' ).each( function () {
-		var matches;
-		if ( this.firstChild && this.firstChild.nodeType === Node.TEXT_NODE ) {
-			matches = this.firstChild.data.match( /^(\r\n|\r|\n)/ );
-			if ( matches && matches[ 1 ] ) {
-				// Prepend a newline exactly like the one we saw
-				this.firstChild.insertData( 0, matches[ 1 ] );
-			}
-		}
-	} );
-	return $element.get( 0 );
-};
-
-/**
- * Helper function for #transformStyleAttributes.
- *
- * Normalize an attribute value. In compliant browsers, this should be
- * a no-op, but in IE style attributes are normalized on all elements,
- * color and bgcolor attributes are normalized on some elements (like `<tr>`),
- * and width and height attributes are normalized on some elements( like `<table>`).
- *
- * @param {string} name Attribute name
- * @param {string} value Attribute value
- * @param {string} [nodeName='div'] Element name
- * @return {string} Normalized attribute value
- */
-ve.normalizeAttributeValue = function ( name, value, nodeName ) {
-	var node = document.createElement( nodeName || 'div' );
-	node.setAttribute( name, value );
-	// Support: IE
-	// IE normalizes invalid CSS to empty string, then if you normalize
-	// an empty string again it becomes null. Return an empty string
-	// instead of null to make this function idempotent.
-	return node.getAttribute( name ) || '';
-};
-
-/**
- * Helper function for #parseXhtml and #serializeXhtml.
- *
- * Map attributes that are broken in IE to attributes prefixed with data-ve-
- * or vice versa.
- *
- * @param {string} html HTML string. Must also be valid XML. Must only have
- *   one root node (e.g. be a complete document).
- * @param {boolean} unmask Map the masked attributes back to their originals
- * @return {string} HTML string modified to mask/unmask broken attributes
- */
-ve.transformStyleAttributes = function ( html, unmask ) {
-	var xmlDoc, fromAttr, toAttr, i, len,
-		maskAttrs = [
-			// Support: IE
-			'style', // IE normalizes 'color:#ffd' to 'color: rgb(255, 255, 221);'
-			'bgcolor', // IE normalizes '#FFDEAD' to '#ffdead'
-			'color', // IE normalizes 'Red' to 'red'
-			'width', // IE normalizes '240px' to '240'
-			'height', // Same as width
-			// Support: Firefox
-			'rowspan', // IE and Firefox normalize rowspan="02" to rowspan="2"
-			'colspan' // Same as rowspan
-		];
-
-	// Parse the HTML into an XML DOM
-	xmlDoc = new DOMParser().parseFromString( html, 'text/xml' );
-
-	// Go through and mask/unmask each attribute on all elements that have it
-	for ( i = 0, len = maskAttrs.length; i < len; i++ ) {
-		fromAttr = unmask ? 'data-ve-' + maskAttrs[ i ] : maskAttrs[ i ];
-		toAttr = unmask ? maskAttrs[ i ] : 'data-ve-' + maskAttrs[ i ];
-		// eslint-disable-next-line no-loop-func
-		$( xmlDoc ).find( '[' + fromAttr + ']' ).each( function () {
-			var toAttrValue, fromAttrNormalized,
-				fromAttrValue = this.getAttribute( fromAttr );
-
-			if ( unmask ) {
-				this.removeAttribute( fromAttr );
-
-				// If the data-ve- version doesn't normalize to the same value,
-				// the attribute must have changed, so don't overwrite it
-				fromAttrNormalized = ve.normalizeAttributeValue( toAttr, fromAttrValue, this.nodeName );
-				// toAttr can't not be set, but IE returns null if the value was ''
-				toAttrValue = this.getAttribute( toAttr ) || '';
-				if ( toAttrValue !== fromAttrNormalized ) {
-					return;
-				}
-			}
-
-			this.setAttribute( toAttr, fromAttrValue );
-		} );
-	}
-
-	// FIXME T126032: Inject empty text nodes into empty non-void tags to prevent
-	// things like <a></a> from being serialized as <a /> and wreaking havoc
-	$( xmlDoc ).find( ':empty:not(' + ve.elementTypes.void.join( ',' ) + ')' ).each( function () {
-		this.appendChild( xmlDoc.createTextNode( '' ) );
-	} );
-
-	// Serialize back to a string
-	return new XMLSerializer().serializeToString( xmlDoc );
-};
-
-/**
- * Parse an HTML string into an HTML DOM, while masking attributes affected by
- * normalization bugs if a broken browser is detected.
- * Since this process uses an XML parser, the input must be valid XML as well as HTML.
- *
- * @param {string} html HTML string. Must also be valid XML. Must only have
- *   one root node (e.g. be a complete document).
- * @return {HTMLDocument} HTML DOM
- */
-ve.parseXhtml = function ( html ) {
-	// Support: IE
-	// Feature-detect style attribute breakage in IE
-	if ( ve.isStyleAttributeBroken === undefined ) {
-		ve.isStyleAttributeBroken = ve.normalizeAttributeValue( 'style', 'color:#ffd' ) !== 'color:#ffd';
-	}
-	if ( ve.isStyleAttributeBroken ) {
-		html = ve.transformStyleAttributes( html, false );
-	}
-	return ve.createDocumentFromHtml( html );
-};
-
-/**
- * Serialize an HTML DOM created with #parseXhtml back to an HTML string, unmasking any
- * attributes that were masked.
- *
- * @param {HTMLDocument} doc HTML DOM
- * @return {string} Serialized HTML string
- */
-ve.serializeXhtml = function ( doc ) {
-	return ve.serializeXhtmlElement( doc.documentElement );
-};
-
-/**
- * Serialize an HTML element created with #parseXhtml back to an HTML string, unmasking any
- * attributes that were masked.
- *
- * @param {HTMLElement} element HTML element
- * @return {string} Serialized HTML string
- */
-ve.serializeXhtmlElement = function ( element ) {
-	var xml;
-	// Support: IE
-	// Feature-detect style attribute breakage in IE
-	if ( ve.isStyleAttributeBroken === undefined ) {
-		ve.isStyleAttributeBroken = ve.normalizeAttributeValue( 'style', 'color:#ffd' ) !== 'color:#ffd';
-	}
-	if ( !ve.isStyleAttributeBroken ) {
-		// Support: Firefox
-		// Use outerHTML if possible because in Firefox, XMLSerializer URL-encodes
-		// hrefs but outerHTML doesn't
-		return ve.properOuterHtml( element );
-	}
-
-	xml = new XMLSerializer().serializeToString( ve.fixupPreBug( element ) );
-	// FIXME T126035: This strips out xmlns as a quick hack
-	xml = xml.replace( '<html xmlns="http://www.w3.org/1999/xhtml"', '<html' );
-	return ve.transformStyleAttributes( xml, true );
-};
-
-/**
  * Wrapper for node.normalize(). The native implementation is broken in IE,
  * so we use our own implementation in that case.
  *
@@ -1345,6 +999,7 @@ ve.normalizeNode = function ( node ) {
 		p.appendChild( document.createTextNode( 'Foo' ) );
 		p.appendChild( document.createTextNode( 'Bar' ) );
 		p.appendChild( document.createTextNode( '' ) );
+		// eslint-disable-next-line no-restricted-properties
 		p.normalize();
 		ve.isNormalizeBroken = p.childNodes.length !== 1;
 	}
@@ -1371,78 +1026,9 @@ ve.normalizeNode = function ( node ) {
 		}
 	} else {
 		// Use native implementation
+		// eslint-disable-next-line no-restricted-properties
 		node.normalize();
 	}
-};
-
-/**
- * Translate rect by some fixed vector and return a new offset object
- *
- * @param {Object} rect Offset object containing all or any of top, left, bottom, right, width & height
- * @param {number} x Horizontal translation
- * @param {number} y Vertical translation
- * @return {Object} Translated rect
- */
-ve.translateRect = function ( rect, x, y ) {
-	var translatedRect = {};
-	if ( rect.top !== undefined ) {
-		translatedRect.top = rect.top + y;
-	}
-	if ( rect.bottom !== undefined ) {
-		translatedRect.bottom = rect.bottom + y;
-	}
-	if ( rect.left !== undefined ) {
-		translatedRect.left = rect.left + x;
-	}
-	if ( rect.right !== undefined ) {
-		translatedRect.right = rect.right + x;
-	}
-	if ( rect.width !== undefined ) {
-		translatedRect.width = rect.width;
-	}
-	if ( rect.height !== undefined ) {
-		translatedRect.height = rect.height;
-	}
-	return translatedRect;
-};
-
-/**
- * Get the start and end rectangles (in a text flow sense) from a list of rectangles
- *
- * The start rectangle is the top-most, and the end rectangle is the bottom-most.
- *
- * @param {Array} rects Full list of rectangles
- * @return {Object|null} Object containing two rectangles: start and end, or null if there are no rectangles
- */
-ve.getStartAndEndRects = function ( rects ) {
-	var i, l, startRect, endRect;
-	if ( !rects || !rects.length ) {
-		return null;
-	}
-	for ( i = 0, l = rects.length; i < l; i++ ) {
-		if ( !startRect || rects[ i ].top < startRect.top ) {
-			// Use ve.extendObject as ve.copy copies non-plain objects by reference
-			startRect = ve.extendObject( {}, rects[ i ] );
-		} else if ( rects[ i ].top === startRect.top ) {
-			// Merge rects with the same top coordinate
-			startRect.left = Math.min( startRect.left, rects[ i ].left );
-			startRect.right = Math.max( startRect.right, rects[ i ].right );
-			startRect.width = startRect.right - startRect.left;
-		}
-		if ( !endRect || rects[ i ].bottom > endRect.bottom ) {
-			// Use ve.extendObject as ve.copy copies non-plain objects by reference
-			endRect = ve.extendObject( {}, rects[ i ] );
-		} else if ( rects[ i ].bottom === endRect.bottom ) {
-			// Merge rects with the same bottom coordinate
-			endRect.left = Math.min( endRect.left, rects[ i ].left );
-			endRect.right = Math.max( endRect.right, rects[ i ].right );
-			endRect.width = startRect.right - startRect.left;
-		}
-	}
-	return {
-		start: startRect,
-		end: endRect
-	};
 };
 
 /**
@@ -1603,7 +1189,6 @@ ve.compareTuples = function ( a, b ) {
  * @param {number|null} offset2 Second offset
  * @return {number|null} negative, zero or positive number, or null if nodes null or incomparable
  */
-
 ve.compareDocumentOrder = function ( node1, offset1, node2, offset2 ) {
 	var commonAncestor = ve.getCommonAncestor( node1, node2 );
 	if ( commonAncestor === null ) {
@@ -1617,21 +1202,6 @@ ve.compareDocumentOrder = function ( node1, offset1, node2, offset2 ) {
 		ve.getOffsetPath( commonAncestor, node1, offset1 ),
 		ve.getOffsetPath( commonAncestor, node2, offset2 )
 	);
-};
-
-/**
- * Get the client platform string from the browser.
- *
- * FIXME T126036: This is a wrapper for calling getSystemPlatform() on the current
- * platform except that if the platform hasn't been constructed yet, it falls back
- * to using the base class implementation in {ve.init.Platform}. A proper solution
- * would be not to need this information before the platform is constructed.
- *
- * @see ve.init.Platform#getSystemPlatform
- * @return {string} Client platform string
- */
-ve.getSystemPlatform = function () {
-	return ( ve.init.platform && ve.init.platform.constructor || ve.init.Platform ).static.getSystemPlatform();
 };
 
 /**
@@ -1852,46 +1422,4 @@ ve.countEdgeMatches = function ( before, after, equals ) {
  */
 ve.repeatString = function ( str, n ) {
 	return new Array( n + 1 ).join( str );
-};
-
-/**
- * Check whether a jQuery event represents a plain left click, without any modifiers
- *
- * @param {jQuery.Event} e The jQuery event object
- * @return {boolean} Whether it was an unmodified left click
- */
-ve.isUnmodifiedLeftClick = function ( e ) {
-	return e && e.which && e.which === OO.ui.MouseButtons.LEFT && !( e.shiftKey || e.altKey || e.ctrlKey || e.metaKey );
-};
-
-/**
- * Are multiple formats for clipboardData items supported?
- *
- * If you want to use unknown formats, an additional check for whether we're
- * on MS Edge needs to be made, as that only supports standard plain text / HTML.
- *
- * @param {jQuery.Event} e A jQuery event object for a copy/paste event
- * @param {boolean} [customTypes] Check whether non-standard formats are supported
- * @return {boolean} Whether multiple clipboardData item formats are supported
- */
-ve.isClipboardDataFormatsSupported = function ( e, customTypes ) {
-	var profile, clipboardData,
-		cacheKey = customTypes ? 'cachedCustom' : 'cached';
-
-	if ( ve.isClipboardDataFormatsSupported[ cacheKey ] === undefined ) {
-		profile = $.client.profile();
-		clipboardData = e.originalEvent.clipboardData;
-		ve.isClipboardDataFormatsSupported[ cacheKey ] = !!(
-			clipboardData &&
-			( !customTypes || profile.name !== 'edge' ) && (
-				// Support: Chrome
-				clipboardData.items ||
-				// Support: Firefox >= 48
-				// (but not Firefox Android, which has name='android' and doesn't support this feature)
-				( profile.name === 'firefox' && profile.versionNumber >= 48 )
-			)
-		);
-	}
-
-	return ve.isClipboardDataFormatsSupported[ cacheKey ];
 };

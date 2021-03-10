@@ -33,7 +33,7 @@ interface ReadableTTMServer {
 	 * Determines if the suggestion returned by this TTMServer comes
 	 * from this wiki or any other wiki.
 	 * @param array $suggestion
-	 * @return Bool
+	 * @return bool
 	 */
 	public function isLocalSuggestion( array $suggestion );
 
@@ -41,7 +41,7 @@ interface ReadableTTMServer {
 	 * Given suggestion returned by this TTMServer, constructs fully
 	 * qualified URL to the location of the translation.
 	 * @param array $suggestion
-	 * @return String URL
+	 * @return string URL
 	 */
 	public function expandLocation( array $suggestion );
 }
@@ -116,6 +116,12 @@ interface WritableTTMServer {
 	 * @return bool true if the service is frozen
 	 */
 	public function isFrozen();
+
+	/**
+	 * Instruct the service to fully wipe the index and start from scratch.
+	 * @since 2020.01
+	 */
+	public function setDoReIndex();
 }
 
 /**
@@ -135,19 +141,19 @@ interface SearchableTTMServer {
 	public function search( $queryString, $opts, $highlight );
 
 	/**
-	 * @param stdClass $resultset
+	 * @param mixed $resultset
 	 * @return array[]
 	 */
 	public function getFacets( $resultset );
 
 	/**
-	 * @param stdClass $resultset
+	 * @param mixed $resultset
 	 * @return int
 	 */
 	public function getTotalHits( $resultset );
 
 	/**
-	 * @param stdClass $resultset
+	 * @param mixed $resultset
 	 * @return array[]
 	 */
 	public function getDocuments( $resultset );

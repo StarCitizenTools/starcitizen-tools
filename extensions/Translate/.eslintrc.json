@@ -1,16 +1,25 @@
 {
 	"root": true,
-	"extends": "wikimedia",
-	"env": {
-		"browser": true
-	},
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/jquery",
+		"wikimedia/mediawiki",
+		"wikimedia/jsduck"
+	],
 	"globals": {
-		"mw": false,
-		"$": false,
-		"OO": false
+		"Chart": "readonly"
 	},
 	"rules": {
-		"max-len": 0,
-		"no-use-before-define": 0
+		"max-len": "off",
+		"no-use-before-define": "off",
+		"mediawiki/class-doc": "warn",
+		"no-jquery/no-animate-toggle": "warn",
+		"no-jquery/no-class-state": "off",
+		"no-jquery/no-each-util": "warn",
+		"no-jquery/no-global-selector": "off",
+		"no-jquery/no-map-util": "warn",
+		"no-jquery/no-sizzle": "warn",
+		"no-shadow": "warn",
+		"no-jquery/no-visibility": "error"
 	}
 }

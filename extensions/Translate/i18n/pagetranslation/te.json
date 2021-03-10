@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Chaduvari",
 			"Kiranmayee",
-			"Veeven",
-			"Chaduvari"
+			"Veeven"
 		]
 	},
 	"pagetranslation": "పేజీ అనువాదం",
@@ -17,7 +17,6 @@
 	"tpt-badtitle": "ఇచ్చిన పేజీ పేరు ($1) సరైన శీర్షిక కాదు",
 	"tpt-nosuchpage": "$1 అనే పుట లేనే లేదు",
 	"tpt-edit-failed": "పేజీని తాజాకరించలేకపోయాం: $1",
-	"tpt-already-marked": "ఈ పేజీ యొక్క సరికొత్త కూర్పుని ఇప్పటికే అనువాదానికై గుర్తించారు.",
 	"tpt-select-prioritylangs-reason": "కారణం:",
 	"tpt-sections-prioritylangs": "ప్రాధాన్య భాషలు",
 	"tpt-rev-mark": "అనువాదం కోసం గుర్తు పెట్టు",
@@ -31,7 +30,7 @@
 	"translate-tag-markthis": "ఈ పేజీని అనువాదం కొరకు గుర్తించు",
 	"translate-tag-markthisagain": "చివరిసారి <span class=\"plainlinks\">[$2 అనువాదానికి గుర్తించినప్పటి నుండి]</span> ఈ పేజీకి <span class=\"plainlinks\">[$1 మార్పులు]</span> జరిగాయి.",
 	"tpt-languages-legend": "ఇతర భాషలు:",
-	"tpt-languages-nonzero": "$1 ($2% అనువాదితం)",
+	"tpt-languages-nonzero": "$1 ($2% అనువాదమైంది)",
 	"tpt-aggregategroup-add": "చేర్చు",
 	"tpt-aggregategroup-save": "భద్రపరచు",
 	"tpt-aggregategroup-new-name": "పేరు:",

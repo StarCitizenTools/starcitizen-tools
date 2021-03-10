@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface data transfer handler class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -21,7 +21,7 @@ ve.ui.DataTransferHandler = function VeUiDataTransferHandler( surface, item ) {
 	this.progress = false;
 	this.progressBar = null;
 
-	this.insertableDataDeferred = $.Deferred();
+	this.insertableDataDeferred = ve.createDeferred();
 };
 
 /* Inheritance */

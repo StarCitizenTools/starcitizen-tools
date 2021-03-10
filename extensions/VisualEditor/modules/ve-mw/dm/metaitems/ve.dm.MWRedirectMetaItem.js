@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWRedirectMetaItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -45,6 +45,13 @@ ve.dm.MWRedirectMetaItem.static.toDomElements = function ( dataElement, doc ) {
 	// HACK piggy-back on MWInternalLinkAnnotation's logic
 	meta.setAttribute( 'href', ve.dm.MWInternalLinkAnnotation.static.getHref( dataElement ) );
 	return [ meta ];
+};
+
+ve.dm.MWRedirectMetaItem.static.describeChange = function ( key, change ) {
+	if ( key === 'title' ) {
+		return ve.htmlMsg( 'visualeditor-changedesc-mwredirect', this.wrapText( 'del', change.from ), this.wrapText( 'ins', change.to ) );
+	}
+	return null;
 };
 
 /* Registration */

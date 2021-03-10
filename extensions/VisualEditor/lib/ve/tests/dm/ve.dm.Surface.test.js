@@ -1,13 +1,13 @@
 /*!
  * VisualEditor DataModel Surface tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.Surface' );
 
 ve.dm.SurfaceStub = function VeDmSurfaceStub( data, range ) {
-	var doc = new ve.dm.Document( data || [ { type: 'paragraph' }, 'h', 'i', { type: '/paragraph' } ] );
+	var doc = new ve.dm.Document( data || [ { type: 'paragraph' }, 'h', 'i', { type: '/paragraph' }, { type: 'internalList' }, { type: '/internalList' } ] );
 
 	// Inheritance
 	ve.dm.SurfaceStub.super.call( this, doc );
@@ -30,6 +30,23 @@ QUnit.test( 'getSelection', function ( assert ) {
 	assert.strictEqual( surface.getSelection(), surface.selection );
 } );
 
+QUnit.test( 'setSelection out of range', function ( assert ) {
+	var range,
+		surface = new ve.dm.SurfaceStub( [
+			{ type: 'paragraph' },
+			'F', 'o', 'o',
+			{ type: '/paragraph' },
+			{ type: 'internalList' }, { type: '/internalList' }
+		] );
+
+	surface.setSelection( new ve.dm.LinearSelection( new ve.Range( 2, 100 ) ) );
+	range = surface.getSelection().getRange();
+	assert.deepEqual( [ range.start, range.end ], [ 2, 5 ] );
+	surface.setSelection( new ve.dm.LinearSelection( new ve.Range( 99, 100 ) ) );
+	range = surface.getSelection().getRange();
+	assert.deepEqual( [ range.start, range.end ], [ 5, 5 ] );
+} );
+
 QUnit.test( 'contextChange events', function ( assert ) {
 	var surface = new ve.dm.SurfaceStub( ve.dm.example.preprocessAnnotations( [
 			{ type: 'paragraph' },
@@ -43,7 +60,8 @@ QUnit.test( 'contextChange events', function ( assert ) {
 			[ 'a', [ ve.dm.example.italic ] ],
 			[ 'z', [ ve.dm.example.italic ] ],
 			'F', 'o', 'o',
-			{ type: '/paragraph' }
+			{ type: '/paragraph' },
+			{ type: 'internalList' }, { type: '/internalList' }
 		] ) ),
 		contextChanges = 0,
 		tests, i, iLen;
@@ -119,7 +137,7 @@ QUnit.test( 'contextChange events', function ( assert ) {
 		surface.setLinearSelection( tests[ i ].initialSelection || new ve.Range( 1 ) );
 		contextChanges = 0;
 		surface.setLinearSelection( tests[ i ].selection );
-		assert.equal( contextChanges, tests[ i ].expected, tests[ i ].title );
+		assert.strictEqual( contextChanges, tests[ i ].expected, tests[ i ].title );
 	}
 } );
 
@@ -143,7 +161,7 @@ QUnit.test( 'documentUpdate/select events', function ( assert ) {
 	assert.deepEqual( events, { documentUpdate: 1, select: 0 }, 'change with transaction only' );
 	surface.setLinearSelection( new ve.Range( 2 ) );
 	assert.deepEqual( events, { documentUpdate: 1, select: 1 }, 'setSelection' );
-	surface.change( tx.clone(), new ve.dm.LinearSelection( doc, new ve.Range( 3 ) ) );
+	surface.change( tx.clone(), new ve.dm.LinearSelection( new ve.Range( 3 ) ) );
 	assert.deepEqual( events, { documentUpdate: 2, select: 2 }, 'change with transaction and selection' );
 } );
 
@@ -152,7 +170,7 @@ QUnit.test( 'breakpoint/undo/redo', function ( assert ) {
 		surface = new ve.dm.SurfaceStub( null, range ),
 		fragment = surface.getFragment(),
 		doc = surface.getDocument(),
-		selection = new ve.dm.LinearSelection( doc, range ),
+		selection = new ve.dm.LinearSelection( range ),
 		tx = ve.dm.TransactionBuilder.static.newFromInsertion( doc, 1, [ 'x' ] );
 
 	assert.strictEqual( surface.breakpoint(), false, 'Returns false if no transactions applied' );
@@ -166,8 +184,9 @@ QUnit.test( 'breakpoint/undo/redo', function ( assert ) {
 
 	assert.deepEqual(
 		surface.undoStack, [ {
+			start: 0,
 			transactions: [ tx ],
-			selection: new ve.dm.LinearSelection( doc, tx.translateRange( selection.getRange() ) ),
+			selection: new ve.dm.LinearSelection( tx.translateRange( selection.getRange() ) ),
 			selectionBefore: selection
 		} ],
 		'Undo stack data matches after breakpoint'
@@ -188,6 +207,81 @@ QUnit.test( 'breakpoint/undo/redo', function ( assert ) {
 
 } );
 
+QUnit.test( 'multi-user undo', function ( assert ) {
+	var i, tx,
+		range, surface, doc,
+		surfaces = [];
+
+	// Create two surfaces owned by authors 1 & 2, consisting of interleaved
+	// transactions by both users, each adding to their own paragraph
+	for ( i = 1; i <= 2; i++ ) {
+		range = new ve.Range( 1 );
+		surface = new ve.dm.SurfaceStub( [
+			{ type: 'paragraph' }, { type: '/paragraph' },
+			{ type: 'paragraph' }, { type: '/paragraph' },
+			{ type: 'internalList' }, { type: '/internalList' }
+		], range );
+		surface.setAuthorId( i );
+		surface.setMultiUser( true );
+
+		doc = surface.getDocument();
+
+		tx = ve.dm.TransactionBuilder.static.newFromInsertion( doc, 1, 'foo'.split( '' ) );
+		tx.authorId = 1;
+		surface.change( tx );
+		surface.breakpoint();
+
+		tx = ve.dm.TransactionBuilder.static.newFromInsertion( doc, 6, '123'.split( '' ) );
+		tx.authorId = 2;
+		surface.change( tx );
+		surface.breakpoint();
+
+		tx = ve.dm.TransactionBuilder.static.newFromInsertion( doc, 4, 'bar'.split( '' ) );
+		tx.authorId = 1;
+		surface.change( tx );
+		surface.breakpoint();
+
+		tx = ve.dm.TransactionBuilder.static.newFromInsertion( doc, 12, '456'.split( '' ) );
+		tx.authorId = 2;
+		surface.change( tx );
+		surface.breakpoint();
+
+		surfaces.push( surface );
+	}
+
+	// User on surface 1 presses undo twice, reverting only their changes
+	surfaces[ 0 ].undo();
+	surfaces[ 0 ].undo();
+	assert.equalLinearData(
+		surfaces[ 0 ].getDocument().getData(),
+		[
+			{ type: 'paragraph' }, { type: '/paragraph' },
+			{ type: 'paragraph' }, '1', '2', '3', '4', '5', '6', { type: '/paragraph' },
+			{ type: 'internalList' }, { type: '/internalList' }
+		]
+	);
+	assert.strictEqual( surfaces[ 0 ].canUndo(), false, 'No more steps for user on surface 1 to undo' );
+
+	// User on surface 2 presses undo twice, reverting only their changes
+	surfaces[ 1 ].undo();
+	surfaces[ 1 ].undo();
+	assert.equalLinearData(
+		surfaces[ 1 ].getDocument().getData(),
+		[
+			{ type: 'paragraph' }, 'f', 'o', 'o', 'b', 'a', 'r', { type: '/paragraph' },
+			{ type: 'paragraph' }, { type: '/paragraph' },
+			{ type: 'internalList' }, { type: '/internalList' }
+		]
+	);
+	// TODO: We should disable undo as soon as the user runs out of transactions of their own
+	assert.strictEqual( surfaces[ 1 ].canUndo(), true, 'User on surface 2 thinks they can still undo' );
+	surfaces[ 1 ].undo();
+	assert.strictEqual( surfaces[ 1 ].canUndo(), false, 'User on surface 2 realises they can\'t undo' );
+	// Count complete history: 4 transactions + 2 undos
+	assert.strictEqual( surfaces[ 1 ].getDocument().getCompleteHistoryLength(), 6, 'Final undo was a no-op' );
+
+} );
+
 QUnit.test( 'change rollback', function ( assert ) {
 	var tx,
 		range = new ve.Range( 1, 3 ),
@@ -201,19 +295,18 @@ QUnit.test( 'change rollback', function ( assert ) {
 		'Transaction throws an exception'
 	);
 
-	assert.deepEqual( surface.canUndo(), false, 'No history to undo after failed change' );
+	assert.strictEqual( surface.canUndo(), false, 'No history to undo after failed change' );
 } );
 
 QUnit.test( 'range translation', function ( assert ) {
-	var sel, range,
+	var selection,
 		surface = new ve.dm.SurfaceStub( null, new ve.Range( 3 ) ),
 		doc = surface.getDocument(),
 		tx = ve.dm.TransactionBuilder.static.newFromInsertion( doc, 3, [ 'x' ] );
 	surface.change( tx );
-	sel = surface.getSelection();
-	assert.ok( sel instanceof ve.dm.LinearSelection, 'Selection is linear' );
-	range = sel.getRange();
-	assert.deepEqual( { from: range.from, to: range.to }, { from: 3, to: 3 }, 'Cursor is unmoved' );
+	selection = surface.getSelection();
+	assert.ok( selection instanceof ve.dm.LinearSelection, 'Selection is linear' );
+	assert.equalRange( selection.getRange(), new ve.Range( 3 ), 'Cursor is unmoved' );
 } );
 
 QUnit.test( 'staging', function ( assert ) {
@@ -371,7 +464,8 @@ QUnit.test( 'getOffsetFromSourceOffset / getSourceOffsetFromOffset / getRangeFro
 } );
 
 QUnit.test( 'autosave', function ( assert ) {
-	var autosaveFailed = 0,
+	var storage = ve.init.platform.sessionStorage,
+		autosaveFailed = 0,
 		done = assert.async(),
 		surface = new ve.dm.SurfaceStub(),
 		fragment = surface.getLinearFragment( new ve.Range( 3 ) ),
@@ -380,19 +474,19 @@ QUnit.test( 'autosave', function ( assert ) {
 			id: 1
 		};
 
-	assert.deepEqual( surface.restoreChanges(), false, 'restoreChanges returns false when nothing to restore' );
-	assert.deepEqual( surface.storeDocState( state, '<p>foo</p>' ), true, 'storeDocState returns true' );
-	assert.deepEqual( ve.init.platform.getSession( 've-docstate' ), JSON.stringify( state ), 'storeDocState writes doc state to session storage' );
-	assert.deepEqual( ve.init.platform.getSession( 've-dochtml' ), '<p>foo</p>', 'storeDocState writes custom HTML to session storage' );
+	assert.strictEqual( surface.restoreChanges(), false, 'restoreChanges returns false when nothing to restore' );
+	assert.strictEqual( surface.storeDocState( state, '<p>foo</p>' ), true, 'storeDocState returns true' );
+	assert.deepEqual( storage.getObject( 've-docstate' ), state, 'storeDocState writes doc state to session storage' );
+	assert.strictEqual( storage.get( 've-dochtml' ), '<p>foo</p>', 'storeDocState writes custom HTML to session storage' );
 	surface.storeDocState( state, '' );
-	assert.deepEqual( ve.init.platform.getSession( 've-dochtml' ), '', 'storeDocState can set HTML to empty string' );
+	assert.strictEqual( storage.get( 've-dochtml' ), '', 'storeDocState can set HTML to empty string' );
 	surface.storeDocState();
-	assert.deepEqual( ve.init.platform.getSession( 've-dochtml' ), '<p>hi</p>', 'storeDocState writes current HTML to session storage' );
-	assert.deepEqual( ve.init.platform.getSession( 've-docstate' ), null, 'docstate is empty if not provided' );
+	assert.strictEqual( storage.get( 've-dochtml' ), '<p>hi</p>', 'storeDocState writes current HTML to session storage' );
+	assert.strictEqual( storage.getObject( 've-docstate' ), null, 'docstate is empty if not provided' );
 
 	fragment.insertContent( ' bar' );
 	surface.breakpoint();
-	assert.deepEqual( ve.init.platform.getSessionList( 've-changes' ), [], 'Changes aren\'t stored before startStoringChanges' );
+	assert.deepEqual( storage.getList( 've-changes' ), [], 'Changes aren\'t stored before startStoringChanges' );
 
 	surface = new ve.dm.SurfaceStub();
 	fragment = surface.getLinearFragment( new ve.Range( 3 ) );
@@ -401,109 +495,120 @@ QUnit.test( 'autosave', function ( assert ) {
 	fragment.insertContent( ' bar' );
 	surface.breakpoint();
 	assert.deepEqual(
-		ve.init.platform.getSessionList( 've-changes' ).map( JSON.parse ),
+		storage.getList( 've-changes' ).map( JSON.parse ),
 		[ {
 			start: 0,
-			transactions: [ [ 3, [ '', ' bar' ], 1 ] ]
+			transactions: [ [ 3, [ '', ' bar' ], 3 ] ]
 		} ],
 		'First change stored'
 	);
 
 	surface.storeChanges();
-	assert.deepEqual( ve.init.platform.getSessionList( 've-changes' ).length, 1, 'No extra change stored if no changes since last store' );
+	assert.strictEqual( storage.getList( 've-changes' ).length, 1, 'No extra change stored if no changes since last store' );
 
 	fragment.convertNodes( 'heading', { level: 1 } );
-	surface.setLinearSelection( new ve.Range( 5 ) );
 	surface.breakpoint();
 	assert.deepEqual(
-		ve.init.platform.getSessionList( 've-changes' ).map( JSON.parse )[ 1 ],
+		storage.getList( 've-changes' ).map( JSON.parse )[ 1 ],
 		{
 			start: 1,
 			transactions: [ [
 				[ [ { type: 'paragraph' } ], [ { type: 'heading', attributes: { level: 1 } } ] ],
 				6,
-				[ [ { type: '/paragraph' } ], [ { type: '/heading' } ] ]
+				[ [ { type: '/paragraph' } ], [ { type: '/heading' } ] ],
+				2
 			] ]
 		},
 		'Second change stored'
 	);
+	fragment.collapseToEnd().insertContent( ' baz' );
+	surface.setLinearSelection( new ve.Range( 5 ) );
+	surface.breakpoint();
+	assert.strictEqual(
+		storage.getList( 've-changes' ).length, 3, 'Fourth change stored'
+	);
 	assert.deepEqual(
-		ve.init.platform.getSession( 've-selection' ),
-		JSON.stringify( { type: 'linear', range: { type: 'range', from: 5, to: 5 } } ),
+		storage.getObject( 've-selection' ),
+		{ type: 'linear', range: { type: 'range', from: 5, to: 5 } },
 		'Selection state stored'
 	);
 
 	surface.stopStoringChanges();
 	fragment.collapseToEnd().insertContent( ' quux' );
 	surface.breakpoint();
-	assert.deepEqual(
-		ve.init.platform.getSessionList( 've-changes' ).length, 2, 'Change not stored after stopStoringChanges'
+	assert.strictEqual(
+		storage.getList( 've-changes' ).length, 3, 'Change not stored after stopStoringChanges'
 	);
 
 	assert.throws(
 		function () {
+			surface.documentModel.completeHistory = new ve.dm.Change();
 			surface.restoreChanges();
 		},
 		/Failed to restore/,
-		'Calling restoreChanges on the wrong document state throws "Failed to restore..." error'
+		'Calling restoreChanges on the wrong document state throws "Failed to restore…" error'
 	);
 
 	surface = new ve.dm.SurfaceStub();
 	fragment = null;
-	assert.deepEqual( surface.getHtml(), '<p>hi</p>', 'Document HTML before restoreChanges' );
-	assert.deepEqual( surface.restoreChanges(), true, 'restoreChanges returns true on success' );
-	assert.deepEqual( surface.getHtml(), '<h1>hi bar</h1>', 'Document HTML restored' );
-	assert.deepEqual( surface.getDocument().getCompleteHistoryLength(), 2, 'Document history restored' );
+	assert.strictEqual( surface.getHtml(), '<p>hi</p>', 'Document HTML before restoreChanges' );
+	assert.strictEqual( surface.restoreChanges(), true, 'restoreChanges returns true on success' );
+	assert.strictEqual( surface.getHtml(), '<h1>hi bar baz</h1>', 'Document HTML restored' );
+	assert.strictEqual( surface.getDocument().getCompleteHistoryLength(), 3, 'Document history restored' );
 	setTimeout( function ( surface ) {
 		assert.equalHash( surface.getSelection(), { type: 'linear', range: { type: 'range', from: 5, to: 5 } }, 'Document selection restored (async)' );
+		surface.undo();
+		assert.equalHash( surface.getSelection(), { type: 'linear', range: { type: 'range', from: 7, to: 7 } }, 'Document selection guessed after undo' );
 		done();
 	}.bind( this, surface ) );
 
-	ve.init.platform.sessionDisabled = true;
-	assert.deepEqual( surface.restoreChanges(), false, 'restoreChanges returns false if session storage disabled' );
-	ve.init.platform.sessionDisabled = false;
+	ve.init.platform.storageDisabled = true;
+	assert.strictEqual( surface.restoreChanges(), false, 'restoreChanges returns false if session storage disabled' );
+	ve.init.platform.storageDisabled = false;
 
 	surface.removeDocStateAndChanges();
-	assert.deepEqual( ve.init.platform.getSession( 've-html' ), null, 'HTML empty after removeDocStateAndChanges' );
-	assert.deepEqual( ve.init.platform.getSession( 've-docstate' ), null, 'Doc state empty after removeDocStateAndChanges' );
-	assert.deepEqual( ve.init.platform.getSessionList( 've-changes' ), [], 'Changes empty after removeDocStateAndChanges' );
+	assert.strictEqual( storage.get( 've-html' ), null, 'HTML empty after removeDocStateAndChanges' );
+	assert.strictEqual( storage.getObject( 've-docstate' ), null, 'Doc state empty after removeDocStateAndChanges' );
+	assert.deepEqual( storage.getList( 've-changes' ), [], 'Changes empty after removeDocStateAndChanges' );
 
 	surface = new ve.dm.SurfaceStub();
 	fragment = surface.getLinearFragment( new ve.Range( 3 ) );
 	surface.startStoringChanges();
 	// Pass magic string to only fail when writing HTML
-	assert.deepEqual( surface.storeDocState( state, '__FAIL__' ), false, 'storeDocState returns false when HTML can\'t be stored' );
-	assert.deepEqual( ve.init.platform.getSession( 've-docstate' ), null, 'docstate is wiped if HTML storage failed' );
+	assert.strictEqual( surface.storeDocState( state, '__FAIL__' ), false, 'storeDocState returns false when HTML can\'t be stored' );
+	assert.strictEqual( storage.getObject( 've-docstate' ), null, 'docstate is wiped if HTML storage failed' );
 
-	ve.init.platform.sessionDisabled = true;
+	ve.init.platform.storageDisabled = true;
 	surface = new ve.dm.SurfaceStub();
 	fragment = surface.getLinearFragment( new ve.Range( 3 ) );
 	surface.startStoringChanges();
-	assert.deepEqual( surface.storeDocState( state ), false, 'storeDocState returns false when sessionStorage disabled' );
+	assert.strictEqual( surface.storeDocState( state ), false, 'storeDocState returns false when sessionStorage disabled' );
 	fragment.insertContent( ' bar' );
 	surface.breakpoint();
-	assert.deepEqual( ve.init.platform.getSessionList( 've-changes' ).length, 0, 'No changes recorded after storeDocState failure' );
-	ve.init.platform.sessionDisabled = false;
+	assert.strictEqual( storage.getList( 've-changes' ).length, 0, 'No changes recorded after storeDocState failure' );
+	ve.init.platform.storageDisabled = false;
 
-	surface.on( 'autosaveFailed', function () { autosaveFailed++; } );
+	surface.on( 'autosaveFailed', function () {
+		autosaveFailed++;
+	} );
 	surface.startStoringChanges();
 	surface.storeDocState( state );
-	ve.init.platform.sessionDisabled = true;
-	assert.deepEqual( autosaveFailed, 0, 'Autosave hasn\'t failed before first change' );
+	ve.init.platform.storageDisabled = true;
+	assert.strictEqual( autosaveFailed, 0, 'Autosave hasn\'t failed before first change' );
 	fragment.insertContent( ' bar' );
 	surface.breakpoint();
-	assert.deepEqual( autosaveFailed, 1, 'Autosave fails after first change' );
+	assert.strictEqual( autosaveFailed, 1, 'Autosave fails after first change' );
 	fragment.insertContent( ' baz' );
 	surface.breakpoint();
-	assert.deepEqual( autosaveFailed, 1, 'Subsequent failures don\'t fire autosaveFailed again' );
-	assert.deepEqual( ve.init.platform.getSessionList( 've-changes' ).length, 0, 'No changes recorded after storeChanges failure' );
-	ve.init.platform.sessionDisabled = false;
+	assert.strictEqual( autosaveFailed, 1, 'Subsequent failures don\'t fire autosaveFailed again' );
+	assert.strictEqual( storage.getList( 've-changes' ).length, 0, 'No changes recorded after storeChanges failure' );
+	ve.init.platform.storageDisabled = false;
 
 	surface.storeDocState( state, '<p>foo</p>' );
 	// This allows callers to call storeDocState after startStoringChanges, e.g. after the first transaction
-	assert.deepEqual( surface.lastStoredChange, 1, 'storeDocState with custom HTML doesn\'t advance the lastStoredChange pointer' );
+	assert.strictEqual( surface.lastStoredChange, 1, 'storeDocState with custom HTML doesn\'t advance the lastStoredChange pointer' );
 	surface.storeDocState( state );
-	assert.deepEqual( surface.lastStoredChange, 5, 'storeDocState without custom HTML advances the lastStoredChange pointer' );
+	assert.strictEqual( surface.lastStoredChange, 5, 'storeDocState without custom HTML advances the lastStoredChange pointer' );
 
 } );
 

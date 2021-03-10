@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LanguageResultWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -30,13 +30,13 @@ OO.inheritClass( ve.ui.LanguageResultWidget, OO.ui.OptionWidget );
 
 /* Methods */
 
-// eslint-disable-next-line valid-jsdoc
 /**
  * Update labels based on query
  *
  * @param {string} query Query text which matched this result
  * @param {string} matchedProperty Data property which matched the query text
  * @param {Function} [compare] String comparator
+ * @return {ve.ui.LanguageResultWidget}
  * @chainable
  */
 ve.ui.LanguageResultWidget.prototype.updateLabel = function ( query, matchedProperty, compare ) {

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ToolbarDialog class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -36,8 +36,6 @@ OO.inheritClass( ve.ui.ToolbarDialog, OO.ui.Dialog );
 
 ve.ui.ToolbarDialog.static.size = 'full';
 
-ve.ui.ToolbarDialog.static.activeSurface = true;
-
 ve.ui.ToolbarDialog.static.padded = true;
 
 /**
@@ -59,10 +57,16 @@ ve.ui.ToolbarDialog.prototype.initialize = function () {
 
 	this.$body.append( this.$shield );
 	this.$content.addClass( 've-ui-toolbarDialog-content' );
+	// The following classes are used here:
+	// * ve-ui-toolbarDialog-position-above
+	// * ve-ui-toolbarDialog-position-side
 	this.$element.addClass( 've-ui-toolbarDialog-position-' + this.constructor.static.position );
 	if ( this.constructor.static.padded ) {
 		this.$element.addClass( 've-ui-toolbarDialog-padded' );
 	}
+	// Invisible title for accessibility
+	this.title.setInvisibleLabel( true );
+	this.$element.prepend( this.title.$element );
 };
 
 /**

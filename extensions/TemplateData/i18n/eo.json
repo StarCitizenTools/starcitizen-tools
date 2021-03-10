@@ -1,21 +1,19 @@
 {
 	"@metadata": {
 		"authors": [
-			"Luckas",
 			"KuboF",
+			"Luckas",
+			"Psychoslave",
 			"Robin van der Vliet",
-			"Psychoslave"
+			"YvesNevelsteen"
 		]
 	},
 	"templatedata-desc": "Realigas datuman deponejon por ŝablonaj parametroj (uzante JSON)",
 	"templatedata-doc-desc-empty": "Sen priskribo.",
 	"templatedata-doc-no-params-set": "Neniuj parametroj estis specifitaj",
 	"templatedata-doc-param-autovalue": "Aŭtomata valoro",
-	"templatedata-doc-param-autovalue-empty": "malplena",
 	"templatedata-doc-param-default": "Defaŭlta",
-	"templatedata-doc-param-default-empty": "malplena",
 	"templatedata-doc-param-example": "Ekzemplo",
-	"templatedata-doc-param-example-empty": "malplena",
 	"templatedata-doc-param-desc": "Priskribo",
 	"templatedata-doc-param-desc-empty": "sen priskribo",
 	"templatedata-doc-param-name": "Parametro",
@@ -64,7 +62,7 @@
 	"templatedata-modal-table-param-example": "Ekzemplo ($1)",
 	"templatedata-modal-table-param-label": "Etikedo ($1)",
 	"templatedata-modal-table-param-name": "Nomo",
-	"templatedata-modal-table-param-required": "Nepra",
+	"templatedata-modal-table-param-required": "Deviga",
 	"templatedata-modal-table-param-suggested": "Sugestata",
 	"templatedata-modal-table-param-type": "Tipo",
 	"templatedata-modal-table-param-uneditablefield": "Neredaktebla",

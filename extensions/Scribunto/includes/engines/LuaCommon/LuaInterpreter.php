@@ -1,6 +1,5 @@
 <?php
 
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
 abstract class Scribunto_LuaInterpreter {
 	/**
 	 * Load a string. Return an object which can later be passed to callFunction.
@@ -17,8 +16,9 @@ abstract class Scribunto_LuaInterpreter {
 	 * at zero. If an error occurs, a Scribunto_LuaError will be thrown.
 	 *
 	 * @param mixed $func The function object
+	 * @param mixed ...$args Arguments to the function
 	 */
-	abstract public function callFunction( $func /*...*/ );
+	abstract public function callFunction( $func, ...$args );
 
 	/**
 	 * Wrap a PHP callable as a Lua function, which can be passed back into
@@ -60,9 +60,3 @@ abstract class Scribunto_LuaInterpreter {
 	 */
 	abstract public function unpauseUsageTimer();
 }
-
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
-class Scribunto_LuaInterpreterNotFoundError extends MWException {}
-
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
-class Scribunto_LuaInterpreterBadVersionError extends MWException {}

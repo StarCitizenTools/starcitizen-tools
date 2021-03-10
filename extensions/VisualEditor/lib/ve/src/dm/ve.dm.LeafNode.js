@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel LeafNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -34,6 +34,8 @@ OO.mixinClass( ve.dm.LeafNode, ve.LeafNode );
 
 ve.dm.LeafNode.static.childNodeTypes = [];
 
+ve.dm.LeafNode.static.isDiffedAsLeaf = true;
+
 /* Methods */
 
 /**
@@ -42,7 +44,6 @@ ve.dm.LeafNode.static.childNodeTypes = [];
  * Annotations are grabbed directly from the linear model, so they are updated live. If the linear
  * model element doesn't have a .annotations property, an empty array is returned.
  *
- * @method
  * @return {number[]} Annotation set indexes in the index-value store
  */
 ve.dm.LeafNode.prototype.getAnnotations = function () {

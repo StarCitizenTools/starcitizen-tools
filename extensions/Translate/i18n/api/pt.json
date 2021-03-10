@@ -1,16 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Vitorvicentevalente",
 			"Fúlvio",
-			"Hamilton Abreu"
+			"Hamilton Abreu",
+			"Mansil",
+			"Mansil alfalb",
+			"Vitorvicentevalente"
 		]
 	},
-	"apihelp-aggregategroups-description": "Administrar grupos agregadores de mensagens.\n\nPode adicionar e remover grupos agregadores de mensagens e associar-lhes ou desassociar-lhes grupos de mensagens (um de cada vez).",
-	"apihelp-aggregategroups-summary": "Administrar grupos agregadores de mensagens.",
-	"apihelp-aggregategroups-extended-description": "Pode adicionar e remover grupos agregadores de mensagens e associar-lhes ou desassociar-lhes grupos de mensagens (um de cada vez).",
-	"apihelp-aggregategroups-param-do": "O que fazer com o grupo agregador de mensagens.",
-	"apihelp-aggregategroups-param-aggregategroup": "Identificador do grupo agregador de mensagens.",
+	"apihelp-aggregategroups-description": "Administrar grupos de mensagens agregadas.\n\nPode adicionar e remover grupos de mensagens agregadas e associar-lhes ou desassociar-lhes grupos de mensagens (um de cada vez).",
+	"apihelp-aggregategroups-summary": "Administrar grupos de mensagens agregadas.",
+	"apihelp-aggregategroups-extended-description": "Pode adicionar e remover grupos de mensagens agregadas e associar-lhes ou desassociar-lhes grupos de mensagens (um de cada vez).",
+	"apihelp-aggregategroups-param-do": "O que fazer com o grupo de mensagens agregadas.",
+	"apihelp-aggregategroups-param-aggregategroup": "Identificador do grupo de mensagens agregadas.",
 	"apihelp-aggregategroups-param-group": "Identificador do grupo de mensagens.",
 	"apihelp-aggregategroups-param-groupname": "Nome do grupo agregador de mensagens.",
 	"apihelp-aggregategroups-param-groupdescription": "Descrição do grupo agregador de mensagens.",
@@ -27,6 +29,9 @@
 	"apihelp-query+languagestats-param-language": "Código de língua.",
 	"apihelp-query+languagestats-example-1": "Lista das estatísticas de finalização de traduções para finlandês",
 	"apihelp-query+messagecollection-description": "Consultar MessageCollection sobre traduções.",
+	"apihelp-query+managemessagegroups-param-groupId": "Identificador de grupo",
+	"apihelp-query+managemessagegroups-param-messageKey": "Chave de mensagem",
+	"apihelp-query+managemessagegroups-param-changesetName": "Alterar nome do conjunto - Padrão / Não vigiado / MediaWiki, etc.",
 	"apihelp-query+messagecollection-summary": "Consultar MessageCollection sobre traduções.",
 	"apihelp-query+messagecollection-param-group": "Grupo de mensagens.",
 	"apihelp-query+messagecollection-param-language": "Código de língua.",
@@ -57,6 +62,7 @@
 	"apihelp-query+messagetranslations-summary": "Consultar todas as traduções de uma única mensagem.",
 	"apihelp-query+messagetranslations-param-title": "Título completo de uma mensagem conhecida.",
 	"apihelp-query+messagetranslations-example-1": "Lista de traduções na wiki de \"MediaWiki:January\"",
+	"apihelp-managemessagegroups-param-groupId": "Identificador de grupo",
 	"apihelp-translatesandbox-description": "Registar e gerir os utilizadores em teste.",
 	"apihelp-translatesandbox-summary": "Registar e gerir os utilizadores em teste.",
 	"apihelp-translatesandbox-param-do": "O que fazer.",
@@ -104,7 +110,7 @@
 	"apihelp-searchtranslations-param-limit": "Tamanho do resultado.",
 	"apihelp-searchtranslations-example-1": "Mostrar as traduções para a língua.",
 	"apihelp-searchtranslations-example-2": "Mostrar as mensagens não traduzidas que coincidam com a consulta na língua de origem.",
-	"apihelp-translationcheck-description": "Validar a tradução fornecida contra os verificadores de mensagens.",
+	"apihelp-translationcheck-description": "Validar a tradução indicada contra as validações de mensagens configuradas.",
 	"apihelp-translationcheck-summary": "Validar traduções.",
 	"apihelp-translationcheck-param-title": "Título de página com espaço nominal e código de língua.",
 	"apihelp-translationcheck-param-translation": "A tradução para ser validada.",

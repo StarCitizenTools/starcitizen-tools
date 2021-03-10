@@ -1,13 +1,15 @@
 /*!
  * VisualEditor standalone demo
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 new ve.init.sa.Platform( ve.messagePaths ).getInitializedPromise().done( function () {
 
+	/* eslint-disable no-jquery/no-global-selector */
 	var $toolbar = $( '.ve-demo-targetToolbar' ),
 		$editor = $( '.ve-demo-editor' ),
+		/* eslint-enable no-jquery/no-global-selector */
 		// eslint-disable-next-line new-cap
 		target = new ve.demo.target(),
 		hashChanging = false,
@@ -16,6 +18,7 @@ new ve.init.sa.Platform( ve.messagePaths ).getInitializedPromise().done( functio
 		currentLang = ve.init.platform.getUserLanguages()[ 0 ],
 		currentDir = target.$element.css( 'direction' ) || 'ltr',
 		device = ve.demo.target === ve.init.sa.DesktopTarget ? 'desktop' : 'mobile',
+		theme = OO.ui.WikimediaUITheme && OO.ui.theme instanceof OO.ui.WikimediaUITheme ? 'wikimediaui' : 'apex',
 
 		// Menu widgets
 		addSurfaceContainerButton = new OO.ui.ButtonWidget( {
@@ -32,7 +35,11 @@ new ve.init.sa.Platform( ve.messagePaths ).getInitializedPromise().done( functio
 		deviceSelect = new OO.ui.ButtonSelectWidget().addItems( [
 			new OO.ui.ButtonOptionWidget( { data: 'desktop', label: 'Desktop' } ),
 			new OO.ui.ButtonOptionWidget( { data: 'mobile', label: 'Mobile' } )
-		] );
+		] ),
+		themeSelect = new OO.ui.ButtonSelectWidget().addItems( [
+			new OO.ui.ButtonOptionWidget( { data: 'apex', label: 'Apex' } ),
+			new OO.ui.ButtonOptionWidget( { data: 'wikimediaui', label: 'WikimediaUI' } )
+		] ).toggle( !OO.ui.isMobile() ); // Only one theme on mobile ATM
 
 	// HACK: Prepend a qqx/message keys option to the list
 	languageInput.dialogs.on( 'opening', function ( window, opening ) {
@@ -57,10 +64,10 @@ new ve.init.sa.Platform( ve.messagePaths ).getInitializedPromise().done( functio
 		$( '.stylesheet-' + currentDir ).prop( 'disabled', false );
 		$( '.stylesheet-' + oldDir ).prop( 'disabled', true );
 
-		$( 'body' ).css( 'direction', currentDir )
-			// The following classes can be used here:
-			// ve-demo-dir-ltr
-			// ve-demo-dir-rtl
+		$( document.body ).css( 'direction', currentDir )
+			// The following classes are used here:
+			// * ve-demo-dir-ltr
+			// * ve-demo-dir-rtl
 			.addClass( 've-demo-dir-' + currentDir )
 			.removeClass( 've-demo-dir-' + oldDir );
 	}
@@ -70,7 +77,19 @@ new ve.init.sa.Platform( ve.messagePaths ).getInitializedPromise().done( functio
 	deviceSelect.selectItemByData( device );
 
 	deviceSelect.on( 'select', function ( item ) {
-		location.href = location.href.replace( device, item.getData() );
+		location.href = location.href
+			.replace( device, item.getData() )
+			.replace( /mobile-(apex|wikimediaui)+/, 'mobile' );
+	} );
+
+	themeSelect.selectItemByData( theme );
+
+	themeSelect.on( 'select', function ( item ) {
+		if ( item.getData() === 'wikimediaui' ) {
+			location.href = location.href.replace( '.html', '-wikimediaui.html' );
+		} else {
+			location.href = location.href.replace( '-wikimediaui.html', '.html' );
+		}
 	} );
 
 	languageInput.setLangAndDir( currentLang, currentDir );
@@ -90,7 +109,9 @@ new ve.init.sa.Platform( ve.messagePaths ).getInitializedPromise().done( functio
 
 		// HACK: Override/restore message functions for qqx mode
 		if ( lang === 'qqx' ) {
-			ve.init.platform.getMessage = function ( key ) { return key; };
+			ve.init.platform.getMessage = function ( key ) {
+				return key;
+			};
 		} else {
 			ve.init.platform.getMessage = ve.init.sa.Platform.prototype.getMessage;
 		}
@@ -116,7 +137,8 @@ new ve.init.sa.Platform( ve.messagePaths ).getInitializedPromise().done( functio
 			$divider.clone(),
 			languageInput.$element,
 			$divider.clone(),
-			deviceSelect.$element
+			deviceSelect.$element,
+			themeSelect.$element
 		)
 	);
 
@@ -154,7 +176,7 @@ new ve.init.sa.Platform( ve.messagePaths ).getInitializedPromise().done( functio
 
 	function createSurfacesFromHash( hash ) {
 		var i, pages = [];
-		if ( /^#!(?:pages|localStorage|sessionStorage)\/.+$/.test( hash ) ) {
+		if ( hash.slice( 0, 2 ) === '#!' ) {
 			pages = hash.slice( 2 ).split( ',' );
 		}
 		if ( pages.length ) {
@@ -162,7 +184,7 @@ new ve.init.sa.Platform( ve.messagePaths ).getInitializedPromise().done( functio
 				addSurfaceContainer( pages[ i ] );
 			}
 		} else {
-			addSurfaceContainer( 'pages/simple.html' );
+			addSurfaceContainer( 'simple' );
 		}
 	}
 

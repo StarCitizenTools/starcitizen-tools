@@ -1,11 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Anh88",
 			"Cheers!",
 			"Jdforrester",
-			"Minh Nguyen",
 			"Max20091",
-			"Anh88"
+			"Minh Nguyen"
 		]
 	},
 	"ooui-outline-control-move-down": "Chuyển mục xuống",
@@ -24,5 +24,6 @@
 	"ooui-selectfile-button-select": "Chọn tập tin",
 	"ooui-selectfile-not-supported": "Không hỗ trợ việc chọn tập tin",
 	"ooui-selectfile-placeholder": "Không có tập tin nào được chọn",
-	"ooui-selectfile-dragdrop-placeholder": "Thả tập tin vào đây"
+	"ooui-selectfile-dragdrop-placeholder": "Thả tập tin vào đây",
+	"ooui-field-help": "Trợ giúp"
 }

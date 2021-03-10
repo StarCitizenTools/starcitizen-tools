@@ -1,7 +1,7 @@
 /*!
- * VisualEditor Logger class.
+ * Extremely detailed logging of function calls and state changes
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 /* global Set */
 
@@ -69,7 +69,6 @@ ve.Filibuster.prototype.clearLogs = function () {
 	this.callPath.length = 0;
 };
 
-// eslint-disable-next-line valid-jsdoc
 /**
  * Attaches an observer callback. The callback returns a value representing the current state,
  * which must be a string (this ensures state values are immutable, comparable with strict
@@ -80,6 +79,7 @@ ve.Filibuster.prototype.clearLogs = function () {
  *
  * @param {string} name The name of the observer, for display in the logs.
  * @param {Function} callback The callback; must return a string
+ * @return {ve.Filibuster}
  * @chainable
  */
 ve.Filibuster.prototype.setObserver = function ( name, callback ) {
@@ -112,7 +112,7 @@ ve.Filibuster.prototype.observe = function ( action ) {
 		}
 
 		if ( this.states[ name ] !== newState ) {
-			if ( this.states.hasOwnProperty( name ) ) {
+			if ( Object.prototype.hasOwnProperty.call( this.states, name ) ) {
 				// State change: write observation
 				changes[ name ] = {
 					oldState: oldState,
@@ -221,9 +221,9 @@ ve.Filibuster.prototype.log = function ( funcName, action, args, returned ) {
  * @param {Object} container The container with the function as a property
  * @param {string} klassName The name of the container, for display in the logs
  * @param {string} fnName The property name of the function in the container
+ * @return {ve.Filibuster}
  * @chainable
  */
-
 ve.Filibuster.prototype.wrapFunction = function ( container, klassName, fnName ) {
 	var wrapper, fn, filibuster = this,
 		fullName = ( klassName || 'unknown' ) + '.' + fnName;
@@ -249,15 +249,15 @@ ve.Filibuster.prototype.wrapFunction = function ( container, klassName, fnName )
 	return this;
 };
 
-// eslint-disable-next-line valid-jsdoc
 /**
  * Wrap the functions in a class with wrappers that perform logging.
  *
  * @param {Object} klass The class with the function as a property
- * @param {Function[]} [blacklist] Functions that should not be wrapped
+ * @param {Function[]} [nowrapList] Functions that should not be wrapped
+ * @return {ve.Filibuster}
  * @chainable
  */
-ve.Filibuster.prototype.wrapClass = function ( klass, blacklist ) {
+ve.Filibuster.prototype.wrapClass = function ( klass, nowrapList ) {
 	var i, len, fnName, fn, fnNames, container;
 	container = klass.prototype;
 	fnNames = Object.getOwnPropertyNames( container );
@@ -270,7 +270,7 @@ ve.Filibuster.prototype.wrapClass = function ( klass, blacklist ) {
 		if ( typeof fn !== 'function' || fn.wrappedFunction ) {
 			continue;
 		}
-		if ( blacklist && blacklist.indexOf( fn ) !== -1 ) {
+		if ( nowrapList && nowrapList.indexOf( fn ) !== -1 ) {
 			continue;
 		}
 		this.wrapFunction( container, klass.name, fnName );
@@ -278,35 +278,35 @@ ve.Filibuster.prototype.wrapClass = function ( klass, blacklist ) {
 	return this;
 };
 
-// eslint-disable-next-line valid-jsdoc
 /**
  * Recursively wrap the functions in a namespace with wrappers that perform logging.
  *
  * @param {Object} ns The namespace whose functions should be wrapped
  * @param {string} nsName The name of the namespace, for display in logs
- * @param {Function[]} [blacklist] Functions that should not be wrapped
+ * @param {Function[]} [nowrapList] Functions that should not be wrapped
+ * @return {ve.Filibuster}
  * @chainable
  */
-ve.Filibuster.prototype.wrapNamespace = function ( ns, nsName, blacklist ) {
+ve.Filibuster.prototype.wrapNamespace = function ( ns, nsName, nowrapList ) {
 	var i, len, propNames, propName, prop, isConstructor;
 	propNames = Object.getOwnPropertyNames( ns );
 	for ( i = 0, len = propNames.length; i < len; i++ ) {
 		propName = propNames[ i ];
 		prop = ns[ propName ];
-		if ( blacklist && blacklist.indexOf( prop ) !== -1 ) {
+		if ( nowrapList && nowrapList.indexOf( prop ) !== -1 ) {
 			continue;
 		}
 		isConstructor = (
 			typeof prop === 'function' &&
-			!$.isEmptyObject( prop.prototype )
+			!ve.isEmptyObject( prop.prototype )
 		);
 		if ( isConstructor ) {
-			this.wrapClass( prop, blacklist );
+			this.wrapClass( prop, nowrapList );
 		} else if ( typeof prop === 'function' ) {
 			this.wrapFunction( ns, nsName, propName );
 		} else if ( $.isPlainObject( prop ) ) {
 			// Might be a namespace; recurse
-			this.wrapNamespace( prop, nsName + '.' + propName, blacklist );
+			this.wrapNamespace( prop, nsName + '.' + propName, nowrapList );
 		}
 	}
 	return this;
@@ -478,7 +478,7 @@ ve.Filibuster.static.clonePlain = function ( val, seen ) {
 	}
 	if ( Array.isArray( val ) ) {
 		if ( seen.has( val ) ) {
-			return '...';
+			return '…';
 		}
 		seen.add( val );
 		return val.map( function ( x ) {
@@ -504,6 +504,7 @@ ve.Filibuster.static.clonePlain = function ( val, seen ) {
 		return { 've.dm.Selection': val.getDescription() };
 	} else if ( val.constructor === ve.dm.AnnotationSet ) {
 		return {
+			// eslint-disable-next-line no-restricted-syntax
 			've.dm.AnnotationSet': val.getStore()
 				.values( val.getHashes() )
 				.map( function ( annotation ) {
@@ -515,7 +516,7 @@ ve.Filibuster.static.clonePlain = function ( val, seen ) {
 		return '(' + ( val.constructor.name || 'unknown' ) + ')';
 	} else {
 		if ( seen.has( val ) ) {
-			return '...';
+			return '…';
 		}
 		seen.add( val );
 		plainVal = {};

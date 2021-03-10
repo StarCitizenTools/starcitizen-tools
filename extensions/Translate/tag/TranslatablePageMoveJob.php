@@ -1,31 +1,27 @@
 <?php
-/**
- * Contains class with job for moving translation pages.
- *
- * @file
- * @author Niklas Laxström
- * @license GPL-2.0-or-later
- */
+declare( strict_types = 1 );
+
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+use MediaWiki\MediaWikiServices;
 
 /**
  * Contains class with job for moving translation pages. Used together with
  * SpecialPageTranslationMovePage class.
  *
+ * @author Niklas Laxström
+ * @license GPL-2.0-or-later
  * @ingroup PageTranslation JobQueue
  */
 class TranslatablePageMoveJob extends Job {
+	private const LOCK_TIMEOUT = 3600 * 2;
 
-	/**
-	 * @param Title $source
-	 * @param Title $target
-	 * @param array $moves should include base-source and base-target
-	 * @param string $summary
-	 * @param User $performer
-	 * @return TranslatablePageMoveJob
-	 */
 	public static function newJob(
-		Title $source, Title $target, array $moves, $summary, User $performer
-	) {
+		Title $source,
+		Title $target,
+		array $moves,
+		string $summary,
+		User $performer
+	): self {
 		$params = [
 			'source' => $source->getPrefixedText(),
 			'target' => $target->getPrefixedText(),
@@ -41,7 +37,7 @@ class TranslatablePageMoveJob extends Job {
 		return $self;
 	}
 
-	public function __construct( $title, $params = [] ) {
+	public function __construct( Title $title, array $params = [] ) {
 		parent::__construct( __CLASS__, $title, $params );
 	}
 
@@ -77,7 +73,7 @@ class TranslatablePageMoveJob extends Job {
 		return true;
 	}
 
-	protected function doMoves() {
+	private function doMoves(): void {
 		$fuzzybot = FuzzyBot::getUser();
 		$performer = User::newFromName( $this->params['performer'] );
 
@@ -93,7 +89,9 @@ class TranslatablePageMoveJob extends Job {
 				$user = $fuzzybot;
 			}
 
-			$mover = new MovePage( $sourceTitle, $targetTitle );
+			$mover = MediaWikiServices::getInstance()
+				->getMovePageFactory()
+				->newMovePage( $sourceTitle, $targetTitle );
 			$status = $mover->move( $user, $this->params['summary'], false );
 			if ( !$status->isOK() ) {
 				$entry = new ManualLogEntry( 'pagetranslation', 'movenok' );
@@ -113,11 +111,9 @@ class TranslatablePageMoveJob extends Job {
 		PageTranslationHooks::$allowTargetEdit = false;
 	}
 
-	protected function moveMetadata( $oldGroupId, $newGroupId ) {
-		$types = [ 'prioritylangs', 'priorityforce', 'priorityreason' ];
-
+	private function moveMetadata( string $oldGroupId, string $newGroupId ): void {
 		TranslateMetadata::preloadGroups( [ $oldGroupId, $newGroupId ] );
-		foreach ( $types as $type ) {
+		foreach ( TranslatablePage::METADATA_KEYS as $type ) {
 			$value = TranslateMetadata::get( $oldGroupId, $type );
 			if ( $value !== false ) {
 				TranslateMetadata::set( $oldGroupId, $type, false );
@@ -150,19 +146,25 @@ class TranslatablePageMoveJob extends Job {
 		}
 	}
 
-	private function lock( array $titles ) {
-		$cache = wfGetCache( CACHE_ANYTHING );
+	/** @param string[] $titles */
+	private function lock( array $titles ): void {
+		$cache = ObjectCache::getInstance( CACHE_ANYTHING );
 		$data = [];
 		foreach ( $titles as $title ) {
-			$data[wfMemcKey( 'pt-lock', sha1( $title ) )] = 'locked';
+			$data[$cache->makeKey( 'pt-lock', sha1( $title ) )] = 'locked';
 		}
-		$cache->setMulti( $data );
+
+		// Do not lock pages indefinitely during translatable page moves since
+		// they can fail. Add a timeout so that the locks expire by themselves.
+		// Timeout value has been chosen by a gut feeling
+		$cache->setMulti( $data, self::LOCK_TIMEOUT );
 	}
 
-	private function unlock( array $titles ) {
-		$cache = wfGetCache( CACHE_ANYTHING );
+	/** @param string[] $titles */
+	private function unlock( array $titles ): void {
+		$cache = ObjectCache::getInstance( CACHE_ANYTHING );
 		foreach ( $titles as $title ) {
-			$cache->delete( wfMemcKey( 'pt-lock', sha1( $title ) ) );
+			$cache->delete( $cache->makeKey( 'pt-lock', sha1( $title ) ) );
 		}
 	}
 }

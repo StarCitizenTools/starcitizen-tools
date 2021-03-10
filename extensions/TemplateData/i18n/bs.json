@@ -5,9 +5,6 @@
 			"Srdjan m"
 		]
 	},
-	"apihelp-templatedata-description": "Uvezi podatke koje je TemplateData proširenje sačuvalo.",
-	"apihelp-templatedata-example-1": "Daj TemplateData za [[Template:Stub]] i [[Template:Example]], s ishodom ako šabloni ne postoje ili postoje, ali nemaju TemplateData",
-	"apihelp-templatedata-param-lang": "Prikaži lokalizirane vrijednosti za ovaj jezik. Predodređeno je da se svi dostupni prijevodi prikažu.",
 	"templatedata-desc": "Izvrši čuvanje podataka za parametre šablona (koristeći JSON)",
 	"templatedata-doc-desc-empty": "Nema opisa.",
 	"templatedata-doc-format-block": "Ovaj šablon preferira formatiranje parametara jedan ispod drugog.",
@@ -15,11 +12,8 @@
 	"templatedata-doc-format-inline": "Ovaj šablon preferira formatiranje parametara u istom redu.",
 	"templatedata-doc-no-params-set": "Nisu navedeni parametri",
 	"templatedata-doc-param-autovalue": "Automatska vrijednost",
-	"templatedata-doc-param-autovalue-empty": "prazno",
 	"templatedata-doc-param-default": "Predodređeno",
-	"templatedata-doc-param-default-empty": "prazno",
 	"templatedata-doc-param-example": "Primjer",
-	"templatedata-doc-param-example-empty": "prazno",
 	"templatedata-doc-param-desc": "Opis",
 	"templatedata-doc-param-desc-empty": "nema opisa",
 	"templatedata-doc-param-name": "Parametar",

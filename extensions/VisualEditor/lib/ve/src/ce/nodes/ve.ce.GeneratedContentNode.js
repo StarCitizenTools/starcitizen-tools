@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable GeneratedContentNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -66,7 +66,7 @@ ve.ce.GeneratedContentNode.static.awaitGeneratedContent = function ( view ) {
 		var promise;
 		if ( typeof node.generateContents === 'function' ) {
 			if ( node.isGenerating() ) {
-				promise = $.Deferred();
+				promise = ve.createDeferred();
 				node.once( 'rerender', promise.resolve );
 				promises.push( promise );
 			}
@@ -80,7 +80,7 @@ ve.ce.GeneratedContentNode.static.awaitGeneratedContent = function ( view ) {
 		queueNode( view );
 	}
 
-	return $.when.apply( $, promises );
+	return ve.promiseAll( promises );
 };
 
 /* Abstract methods */
@@ -137,7 +137,7 @@ ve.ce.GeneratedContentNode.prototype.getRenderedDomElements = function ( domElem
 	var rendering,
 		doc = this.getElementDocument();
 
-	rendering = ve.filterMetaElements(
+	rendering = this.filterRenderedDomElements(
 		// Clone the elements into the target document
 		ve.copyDomElements( domElements, doc )
 	);
@@ -168,6 +168,16 @@ ve.ce.GeneratedContentNode.prototype.getRenderedDomElements = function ( domElem
 };
 
 /**
+ * Filter out elemements from the rendered content which we don't want to display in the CE.
+ *
+ * @param {Node[]} domElements Clones of the DOM elements from the store, already copied into the document
+ * @return {Node[]} DOM elements to keep
+ */
+ve.ce.GeneratedContentNode.prototype.filterRenderedDomElements = function ( domElements ) {
+	return ve.filterMetaElements( domElements );
+};
+
+/**
  * Rerender the contents of this node.
  *
  * @param {Object|string|Array} generatedContents Generated contents, in the default case an HTMLElement array
@@ -176,7 +186,8 @@ ve.ce.GeneratedContentNode.prototype.getRenderedDomElements = function ( domElem
  * @fires teardown
  */
 ve.ce.GeneratedContentNode.prototype.render = function ( generatedContents, staged ) {
-	var $newElements;
+	var $newElements, lengthChange,
+		node = this;
 	if ( this.live ) {
 		this.emit( 'teardown' );
 	}
@@ -188,9 +199,19 @@ ve.ce.GeneratedContentNode.prototype.render = function ( generatedContents, stag
 			this.$element = $newElements;
 		} else {
 			// Switch out this.$element (which can contain multiple siblings) in place
+			lengthChange = this.$element.length !== $newElements.length;
 			this.$element.first().replaceWith( $newElements );
 			this.$element.remove();
 			this.$element = $newElements;
+			if ( lengthChange ) {
+				// Changing the DOM node count can move the cursor, so re-apply
+				// the cursor position from the model (T231094).
+				setTimeout( function () {
+					if ( node.getRoot() && node.getRoot().getSurface() ) {
+						node.getRoot().getSurface().showModelSelection();
+					}
+				} );
+			}
 		}
 	} else {
 		this.generatedContentsValid = false;
@@ -294,8 +315,6 @@ ve.ce.GeneratedContentNode.prototype.forceUpdate = function ( config, staged ) {
  * This function is only called when the node wasn't already generating content. If a second update
  * comes in, this function will only be called if the first update has already finished (i.e.
  * doneGenerating or failGenerating has already been called).
- *
- * @method
  */
 ve.ce.GeneratedContentNode.prototype.startGenerating = function () {
 	this.$element.addClass( 've-ce-generatedContentNode-generating' );
@@ -313,7 +332,7 @@ ve.ce.GeneratedContentNode.prototype.abortGenerating = function () {
 		// Unset this.generatingPromise first so that if the promise is resolved or rejected
 		// from within .abort(), this is ignored as it should be
 		this.generatingPromise = null;
-		if ( $.isFunction( promise.abort ) ) {
+		if ( typeof promise.abort === 'function' ) {
 			promise.abort();
 		}
 	}
@@ -323,7 +342,6 @@ ve.ce.GeneratedContentNode.prototype.abortGenerating = function () {
 /**
  * Called when the node successfully finishes generating new content.
  *
- * @method
  * @param {Object|string|Array} generatedContents Generated contents
  * @param {Object} [config] Config object passed to forceUpdate()
  * @param {boolean} [staged] Update happened in staging mode
@@ -331,23 +349,21 @@ ve.ce.GeneratedContentNode.prototype.abortGenerating = function () {
 ve.ce.GeneratedContentNode.prototype.doneGenerating = function ( generatedContents, config, staged ) {
 	var store, hash;
 
+	this.$element.removeClass( 've-ce-generatedContentNode-generating' );
+	this.generatingPromise = null;
+
 	// Because doneGenerating is invoked asynchronously, the model node may have become detached
 	// in the meantime. Handle this gracefully.
 	if ( this.model && this.model.doc ) {
 		store = this.model.doc.getStore();
 		hash = OO.getHash( [ this.model.getHashObjectForRendering(), config ] );
 		store.hash( generatedContents, hash );
+		this.render( generatedContents, staged );
 	}
-
-	this.$element.removeClass( 've-ce-generatedContentNode-generating' );
-	this.generatingPromise = null;
-	this.render( generatedContents, staged );
 };
 
 /**
  * Called when the GeneratedContentNode has failed to generate new content.
- *
- * @method
  */
 ve.ce.GeneratedContentNode.prototype.failGenerating = function () {
 	this.$element.removeClass( 've-ce-generatedContentNode-generating' );

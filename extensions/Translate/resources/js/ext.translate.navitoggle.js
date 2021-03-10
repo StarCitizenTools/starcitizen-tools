@@ -6,7 +6,12 @@
 ( function () {
 	'use strict';
 
-	var $body = $( 'body' );
+	var $body = $( document.body );
+
+	// Bail out on the new Vector skin
+	if ( $( '#mw-sidebar-button' ).length ) {
+		return;
+	}
 
 	if ( $body.width() < 1000 || mw.storage.get( 'translate-navitoggle' ) === '1' ) {
 		$body.addClass( 'tux-navi-collapsed' );
@@ -28,7 +33,7 @@
 		$toggle = $( '<div>' )
 			.addClass( 'tux-navitoggle' )
 			.css( rtl ? 'right' : 'left', delim )
-			.click( function () {
+			.on( 'click', function () {
 				$body.toggleClass( 'tux-navi-collapsed' );
 				mw.storage.set(
 					'translate-navitoggle',

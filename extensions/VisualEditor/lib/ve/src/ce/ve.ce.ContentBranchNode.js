@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable ContentBranchNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -19,7 +19,7 @@ ve.ce.ContentBranchNode = function VeCeContentBranchNode() {
 	// Properties
 	this.lastTransaction = null;
 	// Parent constructor calls renderContents, so this must be set first
-	this.rendered = this.rendered;
+	this.rendered = false;
 	this.unicornAnnotations = null;
 	this.unicorns = null;
 
@@ -51,7 +51,7 @@ OO.inheritClass( ve.ce.ContentBranchNode, ve.ce.BranchNode );
  * Warning: overriding this to false in a subclass will cause crashes on Enter key handling.
  *
  * @static
- * @property
+ * @property {boolean}
  * @inheritable
  */
 ve.ce.ContentBranchNode.static.splitOnEnter = true;
@@ -123,7 +123,6 @@ ve.ce.ContentBranchNode.prototype.onClick = function ( e ) {
  *
  * This is used to automatically render contents.
  *
- * @method
  * @param {ve.dm.Transaction} transaction Transaction
  */
 ve.ce.ContentBranchNode.prototype.onChildUpdate = function ( transaction ) {
@@ -145,6 +144,7 @@ ve.ce.ContentBranchNode.prototype.onSplice = function ( index, howmany ) {
 	// sufficient to keep this.slugNodes valid - only text changes can occur, which
 	// cannot create a requirement for a new slug (it can make an existing slug
 	// redundant, but it is harmless to leave it there).
+	// TODO fix the use of ve.ce.DocumentNode and getSurface
 	if (
 		this.root instanceof ve.ce.DocumentNode &&
 		this.root.getSurface().isRenderingLocked
@@ -162,6 +162,7 @@ ve.ce.ContentBranchNode.prototype.onSplice = function ( index, howmany ) {
 ve.ce.ContentBranchNode.prototype.setupBlockSlugs = function () {
 	// Respect render lock
 	// TODO: Can this check be moved into the parent method?
+	// TODO fix the use of ve.ce.DocumentNode and getSurface
 	if (
 		this.root instanceof ve.ce.DocumentNode &&
 		this.root.getSurface().isRenderingLocked()
@@ -178,6 +179,7 @@ ve.ce.ContentBranchNode.prototype.setupBlockSlugs = function () {
 ve.ce.ContentBranchNode.prototype.setupInlineSlugs = function () {
 	// Respect render lock
 	// TODO: Can this check be moved into the parent method?
+	// TODO fix the use of ve.ce.DocumentNode and getSurface
 	if (
 		this.root instanceof ve.ce.DocumentNode &&
 		this.root.getSurface().isRenderingLocked()
@@ -195,7 +197,6 @@ ve.ce.ContentBranchNode.prototype.setupInlineSlugs = function () {
  * do this with #appendRenderedContents, which resolves the cloned
  * nodes returned by this function back to their originals.
  *
- * @method
  * @return {HTMLElement} Wrapper containing rendered contents
  * @return {Object} return.unicornInfo Unicorn information
  */
@@ -217,6 +218,17 @@ ve.ce.ContentBranchNode.prototype.getRenderedContents = function () {
 		},
 		buffer = '',
 		node = this;
+
+	// Source mode optimization
+	if ( this.getModel().getDocument().sourceMode ) {
+		wrapper.appendChild(
+			document.createTextNode(
+				this.getModel().getDocument().getDataFromNode( this.getModel() ).join( '' )
+			)
+		);
+		wrapper.unicornInfo = unicornInfo;
+		return wrapper;
+	}
 
 	function openAnnotation( annotation ) {
 		var ann;
@@ -378,6 +390,7 @@ ve.ce.ContentBranchNode.prototype.getRenderedContents = function () {
 };
 
 ve.ce.ContentBranchNode.prototype.onModelDetach = function () {
+	// TODO fix the use of ve.ce.DocumentNode and getSurface
 	if ( this.root instanceof ve.ce.DocumentNode ) {
 		this.root.getSurface().setContentBranchNodeChanged();
 	}
@@ -386,12 +399,12 @@ ve.ce.ContentBranchNode.prototype.onModelDetach = function () {
 /**
  * Render contents.
  *
- * @method
  * @return {boolean} Whether the contents have changed
  */
 ve.ce.ContentBranchNode.prototype.renderContents = function () {
 	var i, len, element, rendered, unicornInfo, oldWrapper, newWrapper,
 		node = this;
+	// TODO fix the use of ve.ce.DocumentNode and getSurface
 	if (
 		this.root instanceof ve.ce.DocumentNode &&
 		this.root.getSurface().isRenderingLocked()
@@ -414,8 +427,8 @@ ve.ce.ContentBranchNode.prototype.renderContents = function () {
 	if ( this.rendered ) {
 		oldWrapper = this.$element[ 0 ].cloneNode( true );
 		$( oldWrapper )
-			.find( '.ve-ce-linkAnnotation-active' )
-			.removeClass( 've-ce-linkAnnotation-active' );
+			.find( '.ve-ce-annotation-active' )
+			.removeClass( 've-ce-annotation-active' );
 		$( oldWrapper )
 			.find( '.ve-ce-branchNode-inlineSlug' )
 			.children()
@@ -481,7 +494,7 @@ ve.ce.ContentBranchNode.prototype.detach = function () {
 	if ( this.getRoot() ) {
 		// This should be true, as the root is removed in the parent detach
 		// method which hasn't run yet. However, just in case a node gets
-		// double-detached...
+		// double-detached…
 		this.getRoot().getSurface().setNotUnicorning( this );
 	}
 

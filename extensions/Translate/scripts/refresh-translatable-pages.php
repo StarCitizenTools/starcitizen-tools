@@ -8,6 +8,8 @@
  */
 
 // Standard boilerplate to define $IP
+use MediaWiki\MediaWikiServices;
+
 if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 	$IP = getenv( 'MW_INSTALL_PATH' );
 } else {
@@ -23,13 +25,15 @@ require_once "$IP/maintenance/Maintenance.php";
 class RefreshTranslatablePages extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Ensure all translation pages are up to date.';
+		$this->addDescription( 'Ensure all translation pages are up to date.' );
 		$this->setBatchSize( 300 );
 		$this->addOption( 'jobqueue', 'Use JobQueue (asynchronous)' );
+		$this->requireExtension( 'Translate' );
 	}
 
 	public function execute() {
 		$groups = MessageGroups::singleton()->getGroups();
+		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 		$counter = 0;
 		$useJobQueue = $this->hasOption( 'jobqueue' );
 
@@ -41,7 +45,7 @@ class RefreshTranslatablePages extends Maintenance {
 
 			$counter++;
 			if ( ( $counter % $this->mBatchSize ) === 0 ) {
-				wfWaitForSlaves();
+				$lbFactory->waitForReplication();
 			}
 
 			$page = TranslatablePage::newFromTitle( $group->getTitle() );

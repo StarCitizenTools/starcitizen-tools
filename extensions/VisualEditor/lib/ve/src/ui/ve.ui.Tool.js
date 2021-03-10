@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Tool classes.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -89,14 +89,20 @@ ve.ui.Tool.static.getCommand = function ( surface ) {
 /**
  * Handle the toolbar state being updated.
  *
- * @method
  * @param {ve.dm.SurfaceFragment|null} fragment Surface fragment
  * @param {Object|null} direction Context direction with 'inline' & 'block' properties
  */
 ve.ui.Tool.prototype.onUpdateState = function ( fragment ) {
 	var command = this.getCommand();
 	if ( command !== null ) {
-		this.setDisabled( !command || !fragment || !command.isExecutable( fragment ) );
+		this.setDisabled(
+			!command || !fragment || !command.isExecutable( fragment ) ||
+			// Show command as disabled if a selection is required and the surface
+			// is read-only. Don't do this in Command as some are actually allowed
+			// to run, e.g. selectAll
+			// TODO: Add an allowedInReadOnly flag to some commands
+			( command.supportedSelections && fragment.getSurface() && fragment.getSurface().isReadOnly() )
+		);
 	}
 };
 
@@ -113,7 +119,7 @@ ve.ui.Tool.prototype.onSelect = function () {
 		if ( surface.context.inspector ) {
 			contextClosePromise = surface.context.inspector.close().closed;
 		} else {
-			contextClosePromise = $.Deferred().resolve().promise();
+			contextClosePromise = ve.createDeferred().resolve().promise();
 		}
 	}
 	if ( this.constructor.static.deactivateOnSelect ) {
@@ -126,7 +132,7 @@ ve.ui.Tool.prototype.onSelect = function () {
 		// N.B. If contextClosePromise is already resolved, then the handler is called
 		// before the call to .done returns
 		contextClosePromise.done( function () {
-			if ( !command.execute( surface ) ) {
+			if ( !command.execute( surface, undefined, 'tool' ) ) {
 				// If the command fails, ensure the tool is not active
 				tool.setActive( false );
 			}

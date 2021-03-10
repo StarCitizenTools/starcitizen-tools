@@ -8,13 +8,13 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+
 /**
  * @since 2012-11-01
  * @ingroup MessageGroup
  */
 class RecentAdditionsMessageGroup extends RecentMessageGroup {
-	protected $groupInfoCache = [];
-
 	public function getId() {
 		return '!additions';
 	}
@@ -43,12 +43,8 @@ class RecentAdditionsMessageGroup extends RecentMessageGroup {
 			'rc_id > ' . $this->getRCCutoff(),
 		];
 
-		if ( class_exists( ActorMigration::class ) ) {
-			$conds[] = ActorMigration::newMigration()
-				->getWhere( $db, 'rc_user', FuzzyBot::getUser() )['conds'];
-		} else {
-			$conds['rc_user'] = FuzzyBot::getUser()->getId();
-		}
+		$conds[] = ActorMigration::newMigration()
+			->getWhere( $db, 'rc_user', FuzzyBot::getUser() )['conds'];
 
 		return $conds;
 	}

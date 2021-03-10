@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"زكريا",
-			"Yahya Sakhnini",
-			"Mr. Ibrahem",
+			"HitomiAkane",
 			"McDutchie",
-			"Mido",
 			"Meno25",
-			"ديفيد"
+			"Mido",
+			"Mr. Ibrahem",
+			"Yahya Sakhnini",
+			"ديفيد",
+			"زكريا"
 		]
 	},
 	"scribunto-desc": "إطار عمل لتضمين لغات البرمجة النصية في صفحات ميدياويكي",
@@ -32,7 +33,7 @@
 	"scribunto-common-nofunction": "خطأ: يجب أن تحدد وظيفة للاتصال بها.",
 	"scribunto-common-nosuchfunction": "خطأ: الوظيفة \"$2\" غير موجودة.",
 	"scribunto-common-notafunction": "خطأ: \"$2\" ليس وظيفة.",
-	"scribunto-common-timeout": "الوقت المتاح لتشغيل البرامج النصية قد إنتهى.",
+	"scribunto-common-timeout": "الوقت المتاح لتشغيل البرامج النصية قد انتهى.",
 	"scribunto-common-oom": "تم تجاوز مقدار الذاكرة المسموح به لتشغيل البرامج النصية.",
 	"scribunto-common-backtrace": "المصحح:",
 	"scribunto-common-no-details": "لا توجد تفاصيل أخرى متوفرة.",
@@ -41,7 +42,7 @@
 	"scribunto-lua-in-function-at": "في الوظيفة عند $1:$2",
 	"scribunto-lua-error-location": "خطأ لوا $1: $2.",
 	"scribunto-lua-error": "خطأ لوا: $2.",
-	"scribunto-lua-notarrayreturn": "خطأ:أنتجت الوحدة $2 كقيمة، ومن المفترض أن تنتج جدول.",
+	"scribunto-lua-notarrayreturn": "خطأ: أنتجت الوحدة قيمة $2، ومن المفترض أن تنتج جدول.",
 	"scribunto-luastandalone-proc-error": "خطأ لوا: لا يمكن إنشاء العملية.",
 	"scribunto-luastandalone-proc-error-msg": "خطأ لوا: لا يمكن إنشاء العملية: $2",
 	"scribunto-luastandalone-proc-error-proc-open": "خطأ لوا: لا يمكن إنشاء العملية: proc_open غير متوفر; تحقق من توجيه تكوين \"disable_functions\" الخاص بـPHP.",
@@ -61,13 +62,6 @@
 	"scribunto-limitreport-profile": "ملف تعريف لوا",
 	"scribunto-limitreport-profile-ms": "$1 مللي ثانية",
 	"scribunto-limitreport-logs": "سجل لوا",
-	"apihelp-scribunto-console-description": "وحدة داخلية لخدمة طلبات XHR من وحدة Scribunto.",
-	"apihelp-scribunto-console-summary": "وحدة داخلية لخدمة طلبات XHR من وحدة Scribunto.",
-	"apihelp-scribunto-console-param-title": "عنوان الوحدة لاختبارها.",
-	"apihelp-scribunto-console-param-content": "المحتوى الجديد للوحدة.",
-	"apihelp-scribunto-console-param-session": "رمز الجلسة.",
-	"apihelp-scribunto-console-param-question": "السطر التالي للتقييم كنص.",
-	"apihelp-scribunto-console-param-clear": "اضبط لمسح حالة الجلسة الحالية.",
 	"nstab-module": "وحدة",
 	"tooltip-ca-nstab-module": "عرض صفحة الوحدة"
 }

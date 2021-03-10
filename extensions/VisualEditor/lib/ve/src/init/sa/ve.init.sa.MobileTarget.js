@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Standalone Initialization Mobile Target class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -17,6 +17,8 @@
 ve.init.sa.MobileTarget = function VeInitSaMobileTarget( config ) {
 	// Parent constructor
 	ve.init.sa.MobileTarget.super.call( this, config );
+
+	this.$element.addClass( 've-init-mobileTarget' );
 };
 
 /* Inheritance */
@@ -26,13 +28,16 @@ OO.inheritClass( ve.init.sa.MobileTarget, ve.init.sa.Target );
 /* Static Properties */
 
 ve.init.sa.MobileTarget.static.toolbarGroups = [
-	// History
-	{ include: [ 'undo' ] },
-	// Style
 	{
+		name: 'history',
+		include: [ 'undo' ]
+	},
+	{
+		name: 'style',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-text-style' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-style-tooltip' ),
-		classes: [ 've-test-toolbar-style' ],
+		label: OO.ui.deferMsg( 'visualeditor-toolbar-style-tooltip' ),
+		invisibleLabel: true,
 		type: 'list',
 		icon: 'textStyle',
 		include: [ { group: 'textStyle' }, 'language', 'clear' ],
@@ -40,36 +45,36 @@ ve.init.sa.MobileTarget.static.toolbarGroups = [
 		promote: [ 'bold', 'italic' ],
 		demote: [ 'strikethrough', 'code', 'underline', 'language', 'clear' ]
 	},
-	// Link
-	{ include: [ 'link' ] },
-	// Structure
 	{
+		name: 'link',
+		include: [ 'link' ]
+	},
+	{
+		name: 'structure',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
+		label: OO.ui.deferMsg( 'visualeditor-toolbar-structure' ),
+		invisibleLabel: true,
 		type: 'list',
 		icon: 'listBullet',
 		include: [ { group: 'structure' } ],
 		demote: [ 'outdent', 'indent' ]
 	},
-	// Insert
 	{
+		name: 'insert',
 		header: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
 		title: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
+		label: OO.ui.deferMsg( 'visualeditor-toolbar-insert' ),
+		invisibleLabel: true,
 		type: 'list',
 		icon: 'add',
-		label: '',
 		include: '*'
 	}
 ];
 
-/* Methods */
+// Move action groups into main toolbar
+ve.init.sa.MobileTarget.static.toolbarGroups = ve.init.sa.MobileTarget.static.toolbarGroups.concat(
+	ve.init.sa.MobileTarget.static.actionGroups
+);
 
-/**
- * @inheritdoc
- */
-ve.init.sa.MobileTarget.prototype.setupToolbar = function ( surface ) {
-	// Parent method
-	ve.init.sa.MobileTarget.super.prototype.setupToolbar.call( this, surface );
-
-	this.getToolbar().$bar.append( surface.context.$element );
-};
+ve.init.sa.MobileTarget.static.actionGroups = [];

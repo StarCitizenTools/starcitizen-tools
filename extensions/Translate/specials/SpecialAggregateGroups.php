@@ -18,14 +18,15 @@ class SpecialAggregateGroups extends SpecialPage {
 	}
 
 	protected function getGroupName() {
-		return 'wiki';
+		return 'translation';
 	}
 
 	public function execute( $parameters ) {
 		$this->setHeaders();
+		$this->addHelpLink( 'Help:Extension:Translate/Page translation administration' );
 
 		$out = $this->getOutput();
-		$out->addModuleStyles( 'ext.translate.special.aggregategroups.styles' );
+		$out->addModuleStyles( 'ext.translate.specialpages.styles' );
 
 		// Check permissions
 		if ( $this->getUser()->isAllowed( 'translate-manage' ) ) {
@@ -39,7 +40,7 @@ class SpecialAggregateGroups extends SpecialPage {
 		TranslateMetadata::preloadGroups( array_keys( $groupsPreload ) );
 
 		$groups = MessageGroups::getAllGroups();
-		uasort( $groups, [ 'MessageGroups', 'groupLabelSort' ] );
+		uasort( $groups, [ MessageGroups::class, 'groupLabelSort' ] );
 		$aggregates = [];
 		$pages = [];
 		foreach ( $groups as $group ) {
@@ -47,7 +48,7 @@ class SpecialAggregateGroups extends SpecialPage {
 				$pages[] = $group;
 			} elseif ( $group instanceof AggregateMessageGroup ) {
 				$subgroups = TranslateMetadata::getSubgroups( $group->getId() );
-				if ( $subgroups !== false ) {
+				if ( $subgroups !== null ) {
 					$aggregates[] = $group;
 				}
 			}
@@ -167,9 +168,7 @@ class SpecialAggregateGroups extends SpecialPage {
 		return $out;
 	}
 
-	/**
-	 * @param array $aggregates
-	 */
+	/** @param array $aggregates */
 	protected function showAggregateGroups( array $aggregates ) {
 		$out = $this->getOutput();
 		$out->addModules( 'ext.translate.special.aggregategroups' );
@@ -182,9 +181,7 @@ class SpecialAggregateGroups extends SpecialPage {
 
 		$out->addHTML( $nojs );
 
-		/**
-		 * @var AggregateMessageGroup $group
-		 */
+		/** @var AggregateMessageGroup $group */
 		foreach ( $aggregates as $group ) {
 			$out->addHTML( $this->showAggregateGroup( $group ) );
 		}
@@ -228,11 +225,12 @@ class SpecialAggregateGroups extends SpecialPage {
 		$out = Html::openElement( 'ol', [ 'id' => $id ] );
 
 		// Not calling $parent->getGroups() because it has done filtering already
-		$subgroupIds = TranslateMetadata::getSubgroups( $parent->getId() );
+		$subgroupIds = TranslateMetadata::getSubgroups( $parent->getId() ) ?? [];
 
 		// Get the respective groups and sort them
 		$subgroups = MessageGroups::getGroupsById( $subgroupIds );
-		uasort( $subgroups, [ 'MessageGroups', 'groupLabelSort' ] );
+		'@phan-var WikiPageMessageGroup[] $subgroups';
+		uasort( $subgroups, [ MessageGroups::class, 'groupLabelSort' ] );
 
 		// Avoid potentially thousands of separate database queries
 		$lb = new LinkBatch();

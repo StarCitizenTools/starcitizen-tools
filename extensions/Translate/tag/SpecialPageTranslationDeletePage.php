@@ -7,6 +7,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Special page which enables deleting translations of translatable pages
  *
@@ -15,32 +17,20 @@
 class SpecialPageTranslationDeletePage extends SpecialPage {
 	// Basic form parameters both as text and as titles
 	protected $text;
-
-	/**
-	 * @var Title
-	 */
+	/** @var Title */
 	protected $title;
-
 	// Other form parameters
 	/// 'check' or 'perform'
 	protected $subaction;
-
 	/// There must be reason for everything.
 	protected $reason;
-
 	/// Allow skipping non-translation subpages.
 	protected $doSubpages = false;
-
-	/**
-	 * @var TranslatablePage
-	 */
+	/** @var TranslatablePage */
 	protected $page;
-
 	/// Contains the language code if we are working with translation page
 	protected $code;
-
-	protected $sectionPages;
-
+	/** @var Title[] */
 	protected $translationPages;
 
 	public function __construct() {
@@ -56,6 +46,8 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 	}
 
 	public function execute( $par ) {
+		$this->addhelpLink( 'Help:Deletion_and_undeletion' );
+
 		$request = $this->getRequest();
 
 		$par = (string)$par;
@@ -64,8 +56,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 		$this->text = $request->getVal( 'wpTitle', $par );
 		$this->title = Title::newFromText( $this->text );
 		$this->reason = $request->getText( 'wpReason' );
-		// Checkboxes that default being checked are tricky
-		$this->doSubpages = $request->getBool( 'subpages', !$request->wasPosted() );
+		$this->doSubpages = $request->getBool( 'subpages' );
 
 		$user = $this->getUser();
 
@@ -147,15 +138,14 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 			throw new ErrorPageError( 'nopagetitle', 'nopagetext' );
 		}
 
-		$permissionErrors = $this->title->getUserPermissionsErrors( 'delete', $this->getUser() );
+		$permissionErrors = MediaWikiServices::getInstance()->getPermissionManager()
+			->getPermissionErrors( 'delete', $this->getUser(), $this->title );
 		if ( count( $permissionErrors ) ) {
 			throw new PermissionsError( 'delete', $permissionErrors );
 		}
 
 		# Check for database lock
-		if ( wfReadOnly() ) {
-			throw new ReadOnlyError;
-		}
+		$this->checkReadOnly();
 
 		// Let the caller know it's safe to continue
 		return true;
@@ -176,25 +166,9 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 	protected function showForm() {
 		$this->getOutput()->addWikiMsg( 'pt-deletepage-intro' );
 
-		$formDescriptor = [
-			'wpTitle' => [
-				'type' => 'text',
-				'name' => 'wpTitle',
-				'label' => $this->msg( 'pt-deletepage-current' )->text(),
-				'size' => 30,
-				'default' => $this->text,
-			],
-			'wpReason' => [
-				'type' => 'text',
-				'name' => 'wpReason',
-				'label' => $this->msg( 'pt-deletepage-reason' )->text(),
-				'size' => 60,
-				'default' => $this->reason,
-			]
-		];
+		$formDescriptor = $this->getCommonFormFields();
 
-		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() );
-		$htmlForm
+		HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
 			->addHiddenField( 'wpEditToken', $this->getUser()->getEditToken() )
 			->setMethod( 'post' )
 			->setAction( $this->getPageTitle( $this->text )->getLocalURL() )
@@ -212,14 +186,14 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 	protected function showConfirmation() {
 		$out = $this->getOutput();
 		$count = 0;
+		$subpageCount = 0;
 
 		$out->addWikiMsg( 'pt-deletepage-intro' );
 
 		$out->wrapWikiMsg( '== $1 ==', 'pt-deletepage-list-pages' );
 		if ( !$this->singleLanguage() ) {
 			$count++;
-			TranslateUtils::addWikiTextAsInterface(
-				$out,
+			$out->addWikiTextAsInterface(
 				$this->getChangeLine( $this->title )
 			);
 		}
@@ -231,7 +205,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 			$count++;
 			$lines[] = $this->getChangeLine( $old );
 		}
-		TranslateUtils::addWikiTextAsInterface( $out, implode( "\n", $lines ) );
+		$this->listPages( $out, $lines );
 
 		$out->wrapWikiMsg( '=== $1 ===', 'pt-deletepage-list-section' );
 		$sectionPages = $this->getSectionPages();
@@ -240,50 +214,39 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 			$count++;
 			$lines[] = $this->getChangeLine( $old );
 		}
-		TranslateUtils::addWikiTextAsInterface( $out, implode( "\n", $lines ) );
+		$this->listPages( $out, $lines );
 
-		$out->wrapWikiMsg( '=== $1 ===', 'pt-deletepage-list-other' );
-		$subpages = $this->getSubpages();
-		$lines = [];
-		foreach ( $subpages as $old ) {
-			if ( TranslatablePage::isTranslationPage( $old ) ) {
-				continue;
+		if ( TranslateUtils::allowsSubpages( $this->title ) ) {
+			$out->wrapWikiMsg( '=== $1 ===', 'pt-deletepage-list-other' );
+			$subpages = $this->getSubpages();
+			$lines = [];
+			foreach ( $subpages as $old ) {
+				if ( TranslatablePage::isTranslationPage( $old ) ) {
+					continue;
+				}
+
+				$subpageCount++;
+				$lines[] = $this->getChangeLine( $old );
 			}
-
-			if ( $this->doSubpages ) {
-				$count++;
-			}
-
-			$lines[] = $this->getChangeLine( $old, $this->doSubpages );
+			$this->listPages( $out, $lines );
 		}
-		TranslateUtils::addWikiTextAsInterface( $out, implode( "\n", $lines ) );
 
-		TranslateUtils::addWikiTextAsInterface( $out, "----\n" );
-		$out->addWikiMsg( 'pt-deletepage-list-count', $this->getLanguage()->formatNum( $count ) );
+		$totalPageCount = $count + $subpageCount;
 
-		$formDescriptor = [
-			'wpTitle' => [
-				'type' => 'text',
-				'name' => 'wpTitle',
-				'label' => $this->msg( 'pt-deletepage-current' )->text(),
-				'size' => 30,
-				'default' => $this->text,
-				'readonly' => true,
-			],
-			'wpReason' => [
-				'type' => 'text',
-				'name' => 'wpReason',
-				'label' => $this->msg( 'pt-deletepage-reason' )->text(),
-				'size' => 60,
-				'default' => $this->reason,
-			],
-			'subpages' => [
-				'type' => 'check',
-				'name' => 'subpages',
-				'id' => 'mw-subpages',
-				'label' => $this->msg( 'pt-deletepage-subpages' )->text(),
-				'default' => $this->doSubpages,
-			]
+		$out->addWikiTextAsInterface( "----\n" );
+		$out->addWikiMsg(
+			'pt-deletepage-list-count',
+			$this->getLanguage()->formatNum( $totalPageCount ),
+			$this->getLanguage()->formatNum( $subpageCount )
+		);
+
+		$formDescriptor = $this->getCommonFormFields();
+		$formDescriptor['subpages'] = [
+			'type' => 'check',
+			'name' => 'subpages',
+			'id' => 'mw-subpages',
+			'label' => $this->msg( 'pt-deletepage-subpages' )->text(),
+			'default' => $this->doSubpages,
 		];
 
 		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() );
@@ -310,15 +273,10 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 
 	/**
 	 * @param Title $title
-	 * @param bool $enabled
 	 * @return string One line of wikitext, without trailing newline.
 	 */
-	protected function getChangeLine( $title, $enabled = true ) {
-		if ( $enabled ) {
-			return '* ' . $title->getPrefixedText();
-		} else {
-			return '* <s>' . $title->getPrefixedText() . '</s>';
-		}
+	protected function getChangeLine( $title ) {
+		return '* ' . $title->getPrefixedText();
 	}
 
 	protected function performAction() {
@@ -349,7 +307,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 			);
 		}
 
-		if ( !$this->doSubpages ) {
+		if ( $this->doSubpages ) {
 			$subpages = $this->getSubpages();
 			foreach ( $subpages as $old ) {
 				if ( TranslatablePage::isTranslationPage( $old ) ) {
@@ -366,13 +324,23 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 			}
 		}
 
+		if ( !$this->singleLanguage() ) {
+			$jobs[$this->title->getPrefixedText()] = TranslateDeleteJob::newJob(
+				$this->title,
+				$base,
+				!$this->singleLanguage(),
+				$user,
+				$this->reason
+			);
+		}
+
 		JobQueueGroup::singleton()->push( $jobs );
 
-		$cache = wfGetCache( CACHE_DB );
+		$cache = ObjectCache::getInstance( CACHE_DB );
 		$cache->set(
-			wfMemcKey( 'pt-base', $target->getPrefixedText() ),
+			$cache->makeKey( 'pt-base', $target->getPrefixedText() ),
 			array_keys( $jobs ),
-			60 * 60 * 6
+			6 * $cache::TTL_HOUR
 		);
 
 		if ( !$this->singleLanguage() ) {
@@ -389,9 +357,9 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 	protected function clearMetadata() {
 		// remove the entries from metadata table.
 		$groupId = $this->page->getMessageGroupId();
-		TranslateMetadata::set( $groupId, 'prioritylangs', false );
-		TranslateMetadata::set( $groupId, 'priorityforce', false );
-		TranslateMetadata::set( $groupId, 'priorityreason', false );
+		foreach ( TranslatablePage::METADATA_KEYS as $type ) {
+			TranslateMetadata::set( $groupId, $type, false );
+		}
 		// remove the page from aggregate groups, if present in any of them.
 		$aggregateGroups = MessageGroups::getGroupsByType( AggregateMessageGroup::class );
 		TranslateMetadata::preloadGroups( array_keys( $aggregateGroups ) );
@@ -415,7 +383,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 
 	/**
 	 * Returns all section pages, including those which are currently not active.
-	 * @return Array of titles.
+	 * @return Title[]
 	 */
 	protected function getSectionPages() {
 		$code = $this->singleLanguage() ? $this->code : false;
@@ -425,7 +393,7 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 
 	/**
 	 * Returns only translation subpages.
-	 * @return Array of titles.
+	 * @return Title[]
 	 */
 	protected function getTranslationPages() {
 		if ( $this->singleLanguage() ) {
@@ -447,10 +415,36 @@ class SpecialPageTranslationDeletePage extends SpecialPage {
 		return $this->title->getSubpages();
 	}
 
-	/**
-	 * @return bool
-	 */
+	/** @return bool */
 	protected function singleLanguage() {
 		return $this->code !== '';
+	}
+
+	protected function getCommonFormFields() {
+		return [
+			'wpTitle' => [
+				'type' => 'text',
+				'name' => 'wpTitle',
+				'label' => $this->msg( 'pt-deletepage-current' )->text(),
+				'size' => 30,
+				'default' => $this->text,
+				'readonly' => true,
+			],
+			'wpReason' => [
+				'type' => 'text',
+				'name' => 'wpReason',
+				'label' => $this->msg( 'pt-deletepage-reason' )->text(),
+				'size' => 60,
+				'default' => $this->reason,
+			]
+		];
+	}
+
+	protected function listPages( OutputPage $out, array $lines ): void {
+		if ( $lines ) {
+			$out->addWikiTextAsInterface( implode( "\n", $lines ) );
+		} else {
+			$out->addWikiMsg( 'pt-deletepage-list-no-pages' );
+		}
 	}
 }

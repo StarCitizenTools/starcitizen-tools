@@ -91,7 +91,6 @@
 			sourceLangCode = this.options.sourcelangcode;
 			sourceLangDir = $.uls.data.getDir( sourceLangCode );
 			targetLangCode = this.options.targetlangcode;
-			targetLangDir = $.uls.data.getDir( targetLangCode );
 
 			$proofreadAction = $( '<div>' )
 				.attr( 'title', mw.msg( 'tux-proofread-action-tooltip' ) )
@@ -196,7 +195,7 @@
 		 * Mark this message as proofread.
 		 */
 		proofread: function () {
-			var reviews, counter, params,
+			var reviews, $counter, params,
 				message = this.message,
 				$message = this.$message,
 				api = new mw.Api();
@@ -212,12 +211,12 @@
 
 			api.postWithToken( 'csrf', params ).done( function () {
 				$message.find( '.tux-proofread-action' )
-					.removeClass( 'tux-warning' ) // in case, it failed previously
+					.removeClass( 'tux-notice' ) // in case, it failed previously
 					.addClass( 'accepted' );
 
-				counter = $message.find( '.tux-proofread-count' );
-				reviews = counter.data( 'reviewCount' );
-				counter.text( mw.language.convertNumber( reviews + 1 ) );
+				$counter = $message.find( '.tux-proofread-count' );
+				reviews = $counter.data( 'reviewCount' );
+				$counter.text( mw.language.convertNumber( reviews + 1 ) );
 
 				// Update stats
 				$( '.tux-action-bar .tux-statsbar' ).trigger(
@@ -231,7 +230,7 @@
 					mw.track( 'ext.translate.event.proofread', message );
 				}
 			} ).fail( function ( errorCode ) {
-				$message.find( '.tux-proofread-action' ).addClass( 'tux-warning' );
+				$message.find( '.tux-proofread-action' ).addClass( 'tux-notice' );
 				if ( errorCode === 'assertuserfailed' ) {
 					// eslint-disable-next-line no-alert
 					alert( mw.msg( 'tux-session-expired' ) );
@@ -269,9 +268,7 @@
 				data = $this.data( 'proofread' );
 
 			if ( !data ) {
-				$this.data( 'proofread',
-					( data = new Proofread( this, options ) )
-				);
+				$this.data( 'proofread', new Proofread( this, options ) );
 			}
 
 		} );

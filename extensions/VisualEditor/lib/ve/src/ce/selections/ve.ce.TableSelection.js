@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Table Selection class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -14,8 +14,7 @@
 ve.ce.TableSelection = function VeCeTableSelection() {
 	// Parent constructor
 	ve.ce.TableSelection.super.apply( this, arguments );
-
-	this.direction = null;
+	this.directionality = null;
 };
 
 /* Inheritance */
@@ -62,6 +61,20 @@ ve.ce.TableSelection.prototype.getSelectionBoundingRect = function () {
 		bottom = Math.max( bottom, cellOffset.bottom );
 		left = Math.min( left, cellOffset.left );
 		right = Math.max( right, cellOffset.right );
+	}
+
+	// Browser tweaks to adjust for border-collapse:collapse
+	if ( !ve.test ) {
+		switch ( $.client.profile().layout ) {
+			case 'webkit':
+				right += 1;
+				bottom += 1;
+				break;
+			case 'gecko':
+				left -= 1;
+				top -= 1;
+				break;
+		}
 	}
 
 	boundingRect = {
@@ -119,11 +132,11 @@ ve.ce.TableSelection.prototype.isNativeCursor = function () {
 /**
  * @inheritdoc
  */
-ve.ce.TableSelection.prototype.getDirection = function () {
-	if ( !this.direction ) {
-		this.direction = this.getSurface().getDocument().getDirectionFromRange( this.getModel().tableRange );
+ve.ce.TableSelection.prototype.getDirectionality = function ( doc ) {
+	if ( !this.directionality ) {
+		this.directionality = doc.getDirectionalityFromRange( this.getModel().tableRange );
 	}
-	return this.direction;
+	return this.directionality;
 };
 
 /* Registration */

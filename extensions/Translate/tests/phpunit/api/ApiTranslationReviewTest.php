@@ -1,21 +1,18 @@
 <?php
 /**
- *
  * @file
  * @author Niklas Laxström
  * @license GPL-2.0-or-later
  */
 
-/**
- * @group Database
- */
-class ApiTranslationReviewTest extends MediaWikiTestCase {
-	protected function setUp() {
+use MediaWiki\MediaWikiServices;
+
+/** @group Database */
+class ApiTranslationReviewTest extends MediaWikiIntegrationTestCase {
+	protected function setUp(): void {
 		parent::setUp();
 
-		global $wgHooks;
 		$this->setMwGlobals( [
-			'wgHooks' => $wgHooks,
 			'wgGroupPermissions' => [
 				'sysop' => [
 					'translate-messagereview' => true,
@@ -23,7 +20,8 @@ class ApiTranslationReviewTest extends MediaWikiTestCase {
 			],
 			'wgTranslateMessageNamespaces' => [ NS_MEDIAWIKI ],
 		] );
-		$wgHooks['TranslatePostInitGroups'] = [ [ $this, 'getTestGroups' ] ];
+		$this->setTemporaryHook( 'TranslatePostInitGroups', [ $this, 'getTestGroups' ] );
+
 		$mg = MessageGroups::singleton();
 		$mg->setCache( new WANObjectCache( [ 'cache' => wfGetCache( 'hash' ) ] ) );
 		$mg->recache();
@@ -97,8 +95,10 @@ class ApiTranslationReviewTest extends MediaWikiTestCase {
 
 		foreach ( $testcases as $case ) {
 			list( $expected, $user, $page, $comment ) = $case;
-			$revision = Revision::newFromTitle( Title::makeTitle( NS_MEDIAWIKI, $page ) );
-			$ok = ApiTranslationReview::getReviewBlockers( $user, $revision );
+			$revRecord = MediaWikiServices::getInstance()
+				->getRevisionLookup()
+				->getRevisionByTitle( new TitleValue( NS_MEDIAWIKI, $page ) );
+			$ok = ApiTranslationReview::getReviewBlockers( $user, $revRecord );
 			$this->assertEquals( $expected, $ok, $comment );
 		}
 	}

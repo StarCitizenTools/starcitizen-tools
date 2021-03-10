@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Amara-Amaziɣ",
+			"Hakim1bal",
 			"Mdb897"
 		]
 	},
@@ -15,16 +16,17 @@
 	"translate-taction-lstats": "ⵉⵙⵏⵎⴽⵜⴰⵏ ⵏ ⵜⵓⵜⵍⴰⵢⵜ",
 	"translate-taction-mstats": "ⵉⵙⵏⵎⴽⵜⴰⵏ ⵏ ⵉⴳⵔⴰⵡⵏ ⵏ ⵜⵓⵣⵉⵏⵉⵏ",
 	"translate-taction-export": "ⵙⵙⵓⴼⵖ",
+	"translate-page-settings-legend": "ⵜⵉⵙⵖⴰⵍ",
 	"translate-page-language": "ⵜⵓⵜⵍⴰⵢⵜ",
 	"translate-page-limit": "ⴰⵡⵜⵜⵓ",
-	"translate-pref-nonewsletter": "ⴰⴷ ⵢⵢⵉ ⵏ ⵓⵔ ⵜⵚⵚⵉⴼⵉⴹⴷ ⵜⵉⵎⵢⴰⵣⴰⵏⵉⵏ ⵏ ⵉⵏⵖⵎⵉⵙⵏ",
 	"right-translate": "ⵙⵏⴼⵍ ⵙ ⵓⵏⴳⵔⵓⴷⵎ ⵏ ⵓⵙⵓⵖⵍ",
 	"translate-statsf-count-registrations": "ⵉⵏⵙⵙⵎⵔⵙⵏ ⵉⵎⴰⵢⵏⵓⵜⵏ",
+	"translate-translations-project": "ⴰⵙⵏⴼⴰⵕ:",
 	"translate-manage-import-new": "ⵜⵓⵣⵉⵏⵜ ⵜⴰⵎⴰⵢⵏⵓⵜ $1",
 	"translate-manage-import-summary": "ⴰⵙⴽⵛⵎ ⵏ ⵜⵓⵏⵖⵉⵍⵜ ⵜⴰⵎⴰⵢⵏⵓⵜ ⵙⴳ ⵓⵙⴰⴳⵎ ⴰⴱⵔⵔⴰⵏⵉ",
-	"translate-js-support-title": "ⵜⵜⵔ ⵜⵉⵡⵉⵙⵉ ⵉⵖ ⵓⵔ ⵜⵓⴼⵉⵜ ⵉⵏⵖⵎⵉⵙⵏ ⵢⵓⴷⴰⵏ ⵃⵎⴰ ⴰⵙⵓⵖⵍ ⵉⵎⵉⴷⵉ ⵏ ⵜⵓⵣⵉⵏⵜ ⴰⴷ.",
 	"translate-documentation-language": "ⴰⵏⵜⴰⵎ ⵏ ⵜⵓⵣⵉⵏⵜ",
 	"translate-dynagroup-additions-desc": "ⵜⴰⴳⵔⴰⵡⵜ ⴰⴷ ⴰⵔ ⵜⵙⵎⴰⵍ ⵜⵉⵎⵢⴰⵣⴰⵏⵉⵏ ⵜⵉⵎⴰⵢⵏⵓⵜⵉⵏ ⴷ ⵜⵉⴷ ⵉⵜⵜⵡⴰⵙⵏⴼⵍⵏ",
+	"translate-msggroupselector-search-all": "ⴰⴽⴽⵯ",
 	"tux-languageselector": "ⵙⵙⵓⵖⵍ ⵙ",
 	"tux-empty-list-translated-action": "ⵙⵙⵓⵖⵍ",
 	"tux-empty-you-can-help-providing": "ⵜⵣⵎⵔⴷ ⴰⴷ ⵜⴰⵡⵙⴷ ⴳ ⵓⵎⵔⵏⵉⵡ ⵏ ⵜⵙⵓⵖⴰⵍ ⵜⵉⵎⴰⵢⵏⵓⵜⵉⵏ"

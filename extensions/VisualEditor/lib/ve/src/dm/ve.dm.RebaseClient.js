@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel rebase client class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -87,6 +87,7 @@ ve.dm.RebaseClient.prototype.removeFromHistory = null;
 /**
  * Add an event to the log. Default implementation does nothing; subclasses should override this
  * if they want to collect logs.
+ *
  * @param {Object} event Event data
  */
 ve.dm.RebaseClient.prototype.logEvent = function () {};
@@ -154,7 +155,10 @@ ve.dm.RebaseClient.prototype.acceptChange = function ( change ) {
 	}
 
 	unsent = this.getChangeSince( this.sentLength, false );
-	if ( authorId !== this.getAuthorId() ) {
+	if (
+		authorId !== this.getAuthorId() ||
+		change.start + change.getLength() > this.sentLength
+	) {
 		uncommitted = this.getChangeSince( this.commitLength, false );
 		result = ve.dm.Change.static.rebaseUncommittedChange( change, uncommitted );
 		if ( result.rejected ) {

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Content Editable Range State class
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -11,10 +11,10 @@
  *
  * @constructor
  * @param {ve.ce.RangeState|null} old Previous range state
- * @param {ve.ce.DocumentNode} documentNode Document node
+ * @param {ve.ce.BranchNode} root Surface root
  * @param {boolean} selectionOnly The caller promises the content has not changed from old
  */
-ve.ce.RangeState = function VeCeRangeState( old, documentNode, selectionOnly ) {
+ve.ce.RangeState = function VeCeRangeState( old, root, selectionOnly ) {
 	/**
 	 * @property {boolean} branchNodeChanged Whether the CE branch node changed
 	 */
@@ -63,7 +63,7 @@ ve.ce.RangeState = function VeCeRangeState( old, documentNode, selectionOnly ) {
 	 */
 	this.focusIsAfterAnnotationBoundary = null;
 
-	this.saveState( old, documentNode, selectionOnly );
+	this.saveState( old, root, selectionOnly );
 };
 
 /* Inheritance */
@@ -75,19 +75,18 @@ OO.initClass( ve.ce.RangeState );
 /**
  * Saves a snapshot of the current range state
  *
- * @method
  * @param {ve.ce.RangeState|null} old Previous range state
- * @param {ve.ce.DocumentNode} documentNode Document node
+ * @param {ve.ce.BranchNode} root Surface root
  * @param {boolean} selectionOnly The caller promises the content has not changed from old
  */
-ve.ce.RangeState.prototype.saveState = function ( old, documentNode, selectionOnly ) {
-	var $node, selection, anchorNodeChanged,
+ve.ce.RangeState.prototype.saveState = function ( old, root, selectionOnly ) {
+	var $node, selection, focusNodeChanged,
 		oldSelection = old ? old.misleadingSelection : ve.SelectionState.static.newNullSelection(),
-		nativeSelection = documentNode.getElementDocument().getSelection();
+		nativeSelection = root.getElementDocument().getSelection();
 
 	if (
 		nativeSelection.rangeCount &&
-		OO.ui.contains( documentNode.$element[ 0 ], nativeSelection.anchorNode, true )
+		OO.ui.contains( root.$element[ 0 ], nativeSelection.focusNode, true )
 	) {
 		// Freeze selection out of live object.
 		selection = new ve.SelectionState( nativeSelection );
@@ -106,18 +105,18 @@ ve.ce.RangeState.prototype.saveState = function ( old, documentNode, selectionOn
 		this.veRange = ve.ce.veRangeFromSelection( selection );
 	}
 
-	anchorNodeChanged = oldSelection.anchorNode !== selection.anchorNode;
+	focusNodeChanged = oldSelection.focusNode !== selection.focusNode;
 
-	if ( !anchorNodeChanged ) {
+	if ( !focusNodeChanged ) {
 		this.node = old && old.node;
 	} else {
-		$node = $( selection.anchorNode ).closest( '.ve-ce-branchNode' );
+		$node = $( selection.focusNode ).closest( '.ve-ce-branchNode' );
 		if ( $node.length === 0 ) {
 			this.node = null;
 		} else {
 			this.node = $node.data( 'view' );
 			// Check this node belongs to our document
-			if ( this.node && this.node.root !== documentNode ) {
+			if ( this.node && this.node.root !== root.root ) {
 				this.node = null;
 				this.veRange = null;
 			}
@@ -131,7 +130,7 @@ ve.ce.RangeState.prototype.saveState = function ( old, documentNode, selectionOn
 		this.text = null;
 		this.hash = null;
 		this.textState = null;
-	} else if ( selectionOnly && !anchorNodeChanged ) {
+	} else if ( selectionOnly && !focusNodeChanged ) {
 		this.text = old.text;
 		this.hash = old.hash;
 		this.textState = old.textState;

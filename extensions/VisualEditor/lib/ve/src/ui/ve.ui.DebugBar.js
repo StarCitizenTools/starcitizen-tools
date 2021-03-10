@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DebugBar class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -39,7 +39,8 @@ ve.ui.DebugBar = function VeUiDebugBar( surface, config ) {
 	this.showModelToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-showmodel' ) } );
 	this.updateModelToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-updatemodel' ) } );
 	this.transactionsToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-showtransactions' ) } );
-	this.inputDebuggingToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-inputdebug' ) } );
+	this.testSquasherToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-testsquasher' ) } );
+	this.inputDebuggingToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-inputdebug' ) } ).setValue( ve.inputDebug );
 	this.filibusterToggle = new OO.ui.ToggleButtonWidget( { label: ve.msg( 'visualeditor-debugbar-startfilibuster' ) } );
 
 	this.$dump =
@@ -57,11 +58,11 @@ ve.ui.DebugBar = function VeUiDebugBar( surface, config ) {
 					)
 				)
 			)
-		).hide();
+		).addClass( 'oo-ui-element-hidden' );
 
 	this.$transactions = $( '<div>' ).addClass( 've-ui-debugBar-transactions' );
 
-	this.$filibuster = $( '<div>' ).addClass( 've-ui-debugBar-filibuster' );
+	this.$filibuster = $( '<div>' ).addClass( [ 've-ui-debugBar-filibuster', 'oo-ui-element-hidden' ] );
 
 	// Events
 	this.logRangeButton.on( 'click', this.onLogRangeButtonClick.bind( this ) );
@@ -70,11 +71,14 @@ ve.ui.DebugBar = function VeUiDebugBar( surface, config ) {
 	this.inputDebuggingToggle.on( 'change', this.onInputDebuggingToggleChange.bind( this ) );
 	this.filibusterToggle.on( 'click', this.onFilibusterToggleClick.bind( this ) );
 	this.transactionsToggle.on( 'change', this.onTransactionsToggleChange.bind( this ) );
+	this.testSquasherToggle.on( 'change', this.onTestSquasherToggleChange.bind( this ) );
 	closeButton.on( 'click', this.$element.remove.bind( this.$element ) );
+
+	this.onHistoryDebounced = ve.debounce( this.onHistory.bind( this ) );
 
 	this.getSurface().getModel().connect( this, {
 		select: 'onSurfaceSelect',
-		history: 'onHistory'
+		history: 'onHistoryDebounced'
 	} );
 	this.onSurfaceSelect( this.getSurface().getModel().getSelection() );
 
@@ -88,6 +92,7 @@ ve.ui.DebugBar = function VeUiDebugBar( surface, config ) {
 			this.inputDebuggingToggle.$element,
 			this.filibusterToggle.$element,
 			this.transactionsToggle.$element,
+			this.testSquasherToggle.$element,
 			$( this.constructor.static.dividerTemplate ),
 			closeButton.$element
 		),
@@ -137,11 +142,11 @@ ve.ui.DebugBar.prototype.onSurfaceSelect = function () {
 /**
  * Handle history events on the attached surface
  */
-ve.ui.DebugBar.prototype.onHistory = ve.debounce( function () {
+ve.ui.DebugBar.prototype.onHistory = function () {
 	if ( this.transactionsToggle.getValue() ) {
 		this.updateTransactions();
 	}
-} );
+};
 
 /**
  * Handle click events on the log range button
@@ -149,9 +154,11 @@ ve.ui.DebugBar.prototype.onHistory = ve.debounce( function () {
  * @param {jQuery.Event} e Event
  */
 ve.ui.DebugBar.prototype.onLogRangeButtonClick = function () {
-	var i, ranges, selection = this.getSurface().getModel().getSelection();
+	var i, ranges,
+		selection = this.getSurface().getModel().getSelection(),
+		documentModel = this.getSurface().getModel().getDocument();
 	if ( selection instanceof ve.dm.LinearSelection || selection instanceof ve.dm.TableSelection ) {
-		ranges = selection.getRanges();
+		ranges = selection.getRanges( documentModel );
 		for ( i = 0; i < ranges.length; i++ ) {
 			ve.dir( this.getSurface().view.documentView.model.data.slice( ranges[ i ].start, ranges[ i ].end ) );
 		}
@@ -166,11 +173,10 @@ ve.ui.DebugBar.prototype.onLogRangeButtonClick = function () {
 ve.ui.DebugBar.prototype.onShowModelToggleChange = function ( value ) {
 	if ( value ) {
 		this.updateDump();
-		this.$dump.show();
 	} else {
 		this.updateModelToggle.setValue( false );
-		this.$dump.hide();
 	}
+	this.$dump.toggleClass( 'oo-ui-element-hidden', !value );
 };
 
 /**
@@ -241,6 +247,7 @@ ve.ui.DebugBar.prototype.generateListFromLinearData = function ( linearData ) {
 			$chunk.append( $label );
 			if ( annotations ) {
 				$annotations = $( '<span>' ).addClass( 've-ui-debugBar-dump-note' ).text(
+					// eslint-disable-next-line no-restricted-syntax
 					'[' + this.getSurface().getModel().getDocument().getStore().values( annotations ).map( function ( ann ) {
 						return JSON.stringify( ann.getComparableObject() );
 					} ).join( ', ' ) + ']'
@@ -334,21 +341,21 @@ ve.ui.DebugBar.prototype.onInputDebuggingToggleChange = function ( value ) {
  * @param {jQuery.Event} e Event
  */
 ve.ui.DebugBar.prototype.onFilibusterToggleClick = function () {
-	var debugBar = this;
-	if ( this.filibusterToggle.getValue() ) {
+	var value = this.filibusterToggle.getValue();
+	if ( value ) {
 		this.filibusterToggle.setLabel( ve.msg( 'visualeditor-debugbar-stopfilibuster' ) );
 		this.$filibuster.off( 'click' );
-		this.$filibuster.hide();
 		this.$filibuster.empty();
-		this.getSurface().startFilibuster();
+		ve.initFilibuster();
+		ve.filibuster.start();
 	} else {
-		this.getSurface().stopFilibuster();
-		this.$filibuster.html( this.getSurface().filibuster.getObservationsHtml() );
-		this.$filibuster.show();
+		ve.filibuster.stop();
+		this.$filibuster.html( ve.filibuster.getObservationsHtml() );
 		this.$filibuster.on( 'click', function ( e ) {
 			var path,
 				$li = $( e.target ).closest( '.ve-filibuster-frame' );
 
+			// eslint-disable-next-line no-jquery/no-class-state
 			if ( $li.hasClass( 've-filibuster-frame-expandable' ) ) {
 				$li.removeClass( 've-filibuster-frame-expandable' );
 				path = $li.data( 've-filibuster-frame' );
@@ -356,16 +363,20 @@ ve.ui.DebugBar.prototype.onFilibusterToggleClick = function () {
 					return;
 				}
 				$li.children( 'span' ).replaceWith(
-					$( debugBar.getSurface().filibuster.getObservationsHtml( path ) )
+					$( ve.filibuster.getObservationsHtml( path ) )
 				);
+				// eslint-disable-next-line no-jquery/no-class-state
 				$li.toggleClass( 've-filibuster-frame-expanded' );
 			} else if ( $li.children( 'ul' ).length ) {
+				// eslint-disable-next-line no-jquery/no-class-state
 				$li.toggleClass( 've-filibuster-frame-collapsed' );
+				// eslint-disable-next-line no-jquery/no-class-state
 				$li.toggleClass( 've-filibuster-frame-expanded' );
 			}
 		} );
 		this.filibusterToggle.setLabel( ve.msg( 'visualeditor-debugbar-startfilibuster' ) );
 	}
+	this.$filibuster.toggleClass( 'oo-ui-element-hidden', !!value );
 };
 
 /**
@@ -378,6 +389,21 @@ ve.ui.DebugBar.prototype.onTransactionsToggleChange = function ( value ) {
 		this.updateTransactions();
 	}
 	this.$transactions.toggleClass( 'oo-ui-element-hidden', !value );
+};
+
+/**
+ * Handle click events on the test squasher toggle button
+ *
+ * @param {boolean} value Value
+ */
+ve.ui.DebugBar.prototype.onTestSquasherToggleChange = function ( value ) {
+	var doc = this.getSurface().getModel().getDocument();
+	if ( value ) {
+		doc.connect( this, { transact: 'testSquasher' } );
+		this.testSquasher();
+	} else {
+		doc.disconnect( this, { transact: 'testSquasher' } );
+	}
 };
 
 /**
@@ -395,6 +421,44 @@ ve.ui.DebugBar.prototype.updateTransactions = function () {
 	} );
 
 	this.$transactions.empty().append( $transactionsList );
+};
+
+ve.ui.DebugBar.prototype.testSquasher = function () {
+	var i, iLen, squashed, squashedBefore, squashedAfter, doubleSquashed,
+		dump, doubleDump,
+		transactions = this.getSurface().getModel().getDocument().completeHistory.transactions;
+
+	function squashTransactions( transactions ) {
+		return new ve.dm.Change(
+			0,
+			transactions.map( function ( tx ) {
+				return tx.clone();
+			} ),
+			transactions.map( function () {
+				return new ve.dm.HashValueStore();
+			} ),
+			{}
+		).squash().transactions;
+	}
+	if ( transactions.length < 3 ) {
+		// Nothing interesting here
+		return;
+	}
+
+	squashed = squashTransactions( transactions );
+	for ( i = 1, iLen = transactions.length - 1; i < iLen; i++ ) {
+		squashedBefore = squashTransactions( transactions.slice( 0, i ) );
+		squashedAfter = squashTransactions( transactions.slice( i ) );
+		doubleSquashed = squashTransactions( [].concat(
+			squashedBefore,
+			squashedAfter
+		) );
+		dump = JSON.stringify( squashed );
+		doubleDump = JSON.stringify( doubleSquashed );
+		if ( dump !== doubleDump ) {
+			throw new Error( 'Discrepancy splitting at i=' + i );
+		}
+	}
 };
 
 /**

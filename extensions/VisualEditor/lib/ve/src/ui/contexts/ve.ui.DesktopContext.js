@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface DesktopContext class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -14,7 +14,9 @@
  * @param {ve.ui.Surface} surface
  * @param {Object} [config] Configuration options
  */
-ve.ui.DesktopContext = function VeUiDesktopContext() {
+ve.ui.DesktopContext = function VeUiDesktopContext( surface, config ) {
+	config = config || {};
+
 	// Parent constructor
 	ve.ui.DesktopContext.super.apply( this, arguments );
 
@@ -22,7 +24,7 @@ ve.ui.DesktopContext = function VeUiDesktopContext() {
 	this.popup = new OO.ui.PopupWidget( {
 		hideWhenOutOfView: false,
 		autoFlip: false,
-		$container: this.surface.$element
+		$container: config.$popupContainer || this.surface.$element
 	} );
 	this.position = null;
 	this.embeddable = null;
@@ -38,25 +40,20 @@ ve.ui.DesktopContext = function VeUiDesktopContext() {
 	this.surface.getView().connect( this, {
 		relocationStart: 'onSuppress',
 		relocationEnd: 'onUnsuppress',
-		blur: 'onSuppress',
-		focus: 'onUnsuppress',
 		position: 'onPosition'
-	} );
-	this.surface.getModel().connect( this, {
-		select: 'onModelSelect'
 	} );
 	this.inspectors.connect( this, {
 		resize: 'onInspectorResize'
 	} );
 	this.$window.on( {
-		resize: this.onWindowResizeHandler,
-		scroll: this.onWindowScrollDebounced
+		resize: this.onWindowResizeHandler
 	} );
+	ve.addPassiveEventListener( this.$window[ 0 ], 'scroll', this.onWindowScrollDebounced );
 
 	// Initialization
 	this.$element
 		.addClass( 've-ui-desktopContext' )
-		.append( this.popup.$element );
+		.append( this.$focusTrapBefore, this.popup.$element, this.$focusTrapAfter );
 	this.$group.addClass( 've-ui-desktopContext-menu' );
 	this.popup.$body.append( this.$group, this.inspectors.$element );
 };
@@ -111,18 +108,6 @@ ve.ui.DesktopContext.prototype.onUnsuppress = function () {
 };
 
 /**
- * Handle model select event.
- */
-ve.ui.DesktopContext.prototype.onModelSelect = function () {
-	if ( this.isVisible() ) {
-		if ( this.inspector && this.inspector.isOpened() ) {
-			this.inspector.close();
-		}
-		this.updateDimensionsDebounced();
-	}
-};
-
-/**
  * Handle cursor position change event.
  */
 ve.ui.DesktopContext.prototype.onPosition = function () {
@@ -169,10 +154,10 @@ ve.ui.DesktopContext.prototype.toggle = function ( show ) {
 	}
 	show = show === undefined ? !this.visible : !!show;
 	if ( show === this.visible ) {
-		return $.Deferred().resolve().promise();
+		return ve.createDeferred().resolve().promise();
 	}
 
-	this.transitioning = $.Deferred();
+	this.transitioning = ve.createDeferred();
 	promise = this.transitioning.promise();
 
 	// Parent method
@@ -217,11 +202,14 @@ ve.ui.DesktopContext.prototype.updateDimensions = function () {
 	focusedNode = surface.getFocusedNode();
 	// Selection when the inspector was opened. Used to stop the context from
 	// jumping when an inline selection expands, e.g. to cover a long word
-	startingSelection = !focusedNode && this.inspector && this.inspector.previousSelection;
-	// Don't use start selection if it comes from another document, e.g. the fake document used in
-	// source mode.
-	if ( startingSelection && startingSelection.getDocument() !== surface.getModel().getDocument ) {
-		startingSelection = null;
+	if (
+		!focusedNode && this.inspector && this.inspector.initialFragment &&
+		// Don't use initial selection if it comes from another document,
+		// e.g. the fake document used in source mode.
+		this.inspector.getFragment() &&
+		this.inspector.getFragment().getDocument() === surface.getModel().getDocument()
+	) {
+		startingSelection = this.inspector.initialFragment.getSelection();
 	}
 	currentSelection = this.surface.getModel().getSelection();
 	isTableSelection = ( startingSelection || currentSelection ) instanceof ve.dm.TableSelection;
@@ -229,6 +217,8 @@ ve.ui.DesktopContext.prototype.updateDimensions = function () {
 	boundingRect = isTableSelection ?
 		surface.getSelection( startingSelection ).getTableBoundingRect() :
 		surface.getSelection( startingSelection ).getSelectionBoundingRect();
+
+	this.$element.removeClass( 've-ui-desktopContext-embedded' );
 
 	if ( !boundingRect ) {
 		// If !boundingRect, the surface apparently isn't selected.
@@ -243,6 +233,7 @@ ve.ui.DesktopContext.prototype.updateDimensions = function () {
 			boundingRect.height > this.$group.outerHeight() + 5 &&
 			boundingRect.width > this.$group.outerWidth() + 10;
 		this.popup.toggleAnchor( !embeddable );
+		this.$element.toggleClass( 've-ui-desktopContext-embedded', !!embeddable );
 		if ( embeddable ) {
 			// Embedded context position depends on directionality
 			position = {
@@ -352,6 +343,13 @@ ve.ui.DesktopContext.prototype.setPopupSizeAndPosition = function ( repositionOn
 		return;
 	}
 
+	if ( this.popup.hasAnchor() ) {
+		// Reserve space for the anchor and one line of text
+		// ('40' is arbitrary and has been picked by experimentation)
+		viewport.top += 40;
+		viewport.height -= 40;
+	}
+
 	if ( this.position ) {
 		// Float the content if it's bigger than the viewport. Exactly how /
 		// whether it should be floated is situational, so this is a
@@ -372,7 +370,7 @@ ve.ui.DesktopContext.prototype.setPopupSizeAndPosition = function ( repositionOn
 				} else {
 					this.$element.css( {
 						left: this.position.x + viewport.left,
-						top: this.surface.toolbarHeight + margin,
+						top: this.surface.padding.top + margin,
 						bottom: ''
 					} );
 				}
@@ -426,14 +424,16 @@ ve.ui.DesktopContext.prototype.setPopupSizeAndPosition = function ( repositionOn
  * @inheritdoc
  */
 ve.ui.DesktopContext.prototype.destroy = function () {
+	// Hide, so a debounced updateDimensions does nothing
+	this.toggle( false );
 	// Disconnect
 	this.surface.getView().disconnect( this );
 	this.surface.getModel().disconnect( this );
 	this.inspectors.disconnect( this );
 	this.$window.off( {
-		resize: this.onWindowResizeHandler,
-		scroll: this.onWindowScrollDebounced
+		resize: this.onWindowResizeHandler
 	} );
+	ve.removePassiveEventListener( this.$window[ 0 ], 'scroll', this.onWindowScrollDebounced );
 	// Popups bind scroll events if they're in positioning mode, so make sure that's disabled
 	this.popup.togglePositioning( false );
 

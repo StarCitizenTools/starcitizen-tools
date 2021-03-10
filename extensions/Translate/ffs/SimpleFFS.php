@@ -24,21 +24,17 @@ class SimpleFFS implements FFS {
 		return [];
 	}
 
-	/**
-	 * @var FileBasedMessageGroup
-	 */
+	/** @var FileBasedMessageGroup */
 	protected $group;
-
 	protected $writePath;
-
 	/**
 	 * Stores the FILES section of the YAML configuration,
 	 * which can be accessed for extra FFS class specific options.
 	 */
 	protected $extra;
 
-	const RECORD_SEPARATOR = "\0";
-	const PART_SEPARATOR = "\0\0\0\0";
+	private const RECORD_SEPARATOR = "\0";
+	private const PART_SEPARATOR = "\0\0\0\0";
 
 	public function __construct( FileBasedMessageGroup $group ) {
 		$this->setGroup( $group );
@@ -46,30 +42,22 @@ class SimpleFFS implements FFS {
 		$this->extra = $conf['FILES'];
 	}
 
-	/**
-	 * @param FileBasedMessageGroup $group
-	 */
+	/** @param FileBasedMessageGroup $group */
 	public function setGroup( FileBasedMessageGroup $group ) {
 		$this->group = $group;
 	}
 
-	/**
-	 * @return FileBasedMessageGroup
-	 */
+	/** @return FileBasedMessageGroup */
 	public function getGroup() {
 		return $this->group;
 	}
 
-	/**
-	 * @param string $writePath
-	 */
+	/** @param string $writePath */
 	public function setWritePath( $writePath ) {
 		$this->writePath = $writePath;
 	}
 
-	/**
-	 * @return string
-	 */
+	/** @return string */
 	public function getWritePath() {
 		return $this->writePath;
 	}
@@ -122,6 +110,9 @@ class SimpleFFS implements FFS {
 
 		$input = Validator::cleanUp( $input );
 
+		// Strip BOM mark
+		$input = ltrim( $input, "\u{FEFF}" );
+
 		try {
 			return $this->readFromVariable( $input );
 		} catch ( Exception $e ) {
@@ -164,7 +155,7 @@ class SimpleFFS implements FFS {
 			$messages[$key] = $message;
 		}
 
-		$messages = $this->group->getMangler()->mangle( $messages );
+		$messages = $this->group->getMangler()->mangleArray( $messages );
 
 		return [
 			'AUTHORS' => $authors,
@@ -271,7 +262,13 @@ class SimpleFFS implements FFS {
 	 * @param MessageCollection $collection
 	 */
 	protected function tryReadSource( $filename, MessageCollection $collection ) {
-		if ( get_class( $this->group->getFFS() ) !== get_class( $this ) ) {
+		$ffs = $this->group->getFFS();
+
+		if ( $ffs === null ) {
+			return;
+		}
+
+		if ( get_class( $ffs ) !== get_class( $this ) ) {
 			return;
 		}
 

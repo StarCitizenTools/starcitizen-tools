@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ChangeDirectionalityTool class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -56,7 +56,9 @@ ve.ui.ChangeDirectionalityTool.prototype.onUpdateState = function ( fragment ) {
 	if ( modelDir !== this.modelDir ) {
 		// Icons used here textDirLTR, textDirRTL
 		this.setIcon( 'textDir' + ( modelDir === 'ltr' ? 'RTL' : 'LTR' ) );
-		// Messages used here: visualeditor-changedir-tool-ltr, visualeditor-changedir-tool-rtl
+		// The following messages are used here:
+		// * visualeditor-changedir-tool-ltr
+		// * visualeditor-changedir-tool-rtl
 		this.setTitle( ve.msg( 'visualeditor-changedir-tool-' + ( modelDir === 'ltr' ? 'rtl' : 'ltr' ) ) );
 		this.modelDir = modelDir;
 	}

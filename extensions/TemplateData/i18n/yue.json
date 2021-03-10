@@ -1,12 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Deryck Chan",
 			"Ktchankt",
-			"Deryck Chan"
+			"Shinjiman"
 		]
 	},
-	"apihelp-templatedata-description": "搵TemplateData架生仔儲住嘅數據。",
-	"apierror-templatedata-corrupt": "頁#$1嘅模板數據(templatedata)規格有錯：$2",
 	"templatedata-desc": "裝住模板參數嘅相關資訊（用JSON）",
 	"templatedata-doc-desc-empty": "無描述。",
 	"templatedata-doc-format-block": "呢個模，建議攤開格式，一行一個參數。",
@@ -14,11 +13,8 @@
 	"templatedata-doc-format-inline": "呢個模，建議一行過寫晒所有參數。",
 	"templatedata-doc-no-params-set": "冇指明參數",
 	"templatedata-doc-param-autovalue": "自動值",
-	"templatedata-doc-param-autovalue-empty": "空",
 	"templatedata-doc-param-default": "預設",
-	"templatedata-doc-param-default-empty": "空",
 	"templatedata-doc-param-example": "範例",
-	"templatedata-doc-param-example-empty": "空",
 	"templatedata-doc-param-desc": "描述",
 	"templatedata-doc-param-desc-empty": "無描述",
 	"templatedata-doc-param-name": "參數",
@@ -41,7 +37,7 @@
 	"templatedata-doc-param-type-wiki-page-name": "版",
 	"templatedata-doc-param-type-wiki-template-name": "模",
 	"templatedata-doc-param-type-wiki-user-name": "用戶",
-	"templatedata-doc-params": "模版參數",
+	"templatedata-doc-params": "模參數",
 	"templatedata-editbutton": "管理 TemplateData",
 	"templatedata-errormsg-jsonbadformat": "JSON格式唔啱。你可以取消而家做緊嘅嘢，改返啱佢；刪走現存嘅<templatedata>標籤然後再嚟過；或者用新嘅TemplateData冚咗現存嘅TemplateData。",
 	"templatedata-errormsg-insertblank": "你肯定你想加一舊空白嘅 TemplateData？",

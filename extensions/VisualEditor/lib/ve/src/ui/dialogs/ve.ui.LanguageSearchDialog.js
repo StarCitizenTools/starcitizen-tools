@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LanguageSearchDialog class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -34,7 +34,7 @@ ve.ui.LanguageSearchDialog.static.title =
 ve.ui.LanguageSearchDialog.static.actions = [
 	{
 		label: OO.ui.deferMsg( 'visualeditor-dialog-action-cancel' ),
-		flags: [ 'back' ]
+		flags: [ 'safe', 'close' ]
 	}
 ];
 
@@ -69,7 +69,7 @@ ve.ui.LanguageSearchDialog.prototype.initialize = function () {
 ve.ui.LanguageSearchDialog.prototype.onSearchResultsChoose = function ( item ) {
 	var data = item.getData();
 	this.close( {
-		action: 'apply',
+		action: 'done',
 		lang: data.code,
 		dir: ve.init.platform.getLanguageDirection( data.code )
 	} );

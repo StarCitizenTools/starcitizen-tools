@@ -8,7 +8,7 @@
 	 *  - position: accepts same values as jquery.ui.position
 	 *  - onSelect:
 	 *  - language:
-	 *  - preventSelector: boolean to load but not show the group selector.
+	 *  - preventSelector: boolean to not allow selection of subgroups.
 	 *  - recent: list of recent group ids
 	 * groups: list of message group ids
 	 *
@@ -17,7 +17,7 @@
 	 * @param {Object} [options.position] Accepts same values as jquery.ui.position.
 	 * @param {Function} [options.onSelect] Callback with message group id when selected.
 	 * @param {string} options.language Language code for statistics.
-	 * @param {boolean} [options.preventSelector] Whether not to show the group selector.
+	 * @param {boolean} [options.preventSelector] Do not allow selection of subgroups.
 	 * @param {string[]} [options.recent] List of recent message group ids.
 	 * @param {string[]} [groups] List of message group ids to show.
 	 */
@@ -64,7 +64,7 @@
 
 			this.$menu = $( '<div>' )
 				.addClass( 'tux-groupselector' )
-				.addClass( 'grid' );
+				.addClass( 'grid hide' );
 
 			$searchIcon = $( '<div>' )
 				.addClass( 'two columns tux-groupselector__filter__search__icon' );
@@ -117,17 +117,17 @@
 
 			this.$menu.append( $listFiltersGroup, this.$loader, this.$list );
 
-			$( 'body' ).append( this.$menu );
+			this.$menu.appendTo( document.body );
 		},
 
 		/**
 		 * Show the selector
 		 */
 		show: function () {
-			this.$menu.addClass( 'open' ).show();
+			this.$menu.addClass( 'open' ).removeClass( 'hide' );
 			this.position();
 			// Place the focus in the message group search box.
-			this.$search.focus();
+			this.$search.trigger( 'focus' );
 			// Start loading the groups, but assess the situation again after
 			// they are loaded, in case user has made further interactions.
 			if ( this.firstShow ) {
@@ -147,7 +147,7 @@
 				return;
 			}
 
-			this.$menu.hide().removeClass( 'open' );
+			this.$menu.addClass( 'hide' ).removeClass( 'open' );
 		},
 
 		/**
@@ -169,7 +169,7 @@
 				groupSelector = this;
 
 			// Hide the selector panel when clicking outside of it
-			$( 'html' ).on( 'click', this.hide.bind( this ) );
+			$( document.documentElement ).on( 'click', this.hide.bind( this ) );
 
 			groupSelector.$trigger.on( 'click', function () {
 				groupSelector.toggle();
@@ -256,6 +256,7 @@
 		 */
 		position: function () {
 			if ( this.options.position.of === undefined ) {
+				// eslint-disable-next-line no-jquery/variable-pattern
 				this.options.position.of = this.$trigger;
 			}
 			this.$menu.position( this.options.position );
@@ -300,7 +301,7 @@
 		showDefaultGroups: function () {
 			var groupSelector = this;
 
-			this.$loader.show();
+			this.$loader.removeClass( 'hide' );
 
 			this.loadGroups().done( function ( groups ) {
 				var groupsToShow = mw.translate.findGroup( groupSelector.parentGroupId, groups );
@@ -310,7 +311,7 @@
 					groupsToShow = groupsToShow.groups;
 				}
 
-				groupSelector.$loader.hide();
+				groupSelector.$loader.addClass( 'hide' );
 				groupSelector.$list.empty();
 				groupSelector.addGroupRows( groupsToShow );
 			} );
@@ -332,11 +333,11 @@
 		 */
 		showSelectedGroups: function ( groups ) {
 			var groupSelector = this;
-			this.$loader.show();
+			this.$loader.removeClass( 'hide' );
 			this.loadGroups()
 				.then( function ( allGroups ) {
 					var rows = [];
-					$.each( groups, function ( index, id ) {
+					groups.forEach( function ( id ) {
 						var group = mw.translate.findGroup( id, allGroups );
 						if ( group ) {
 							rows.push( groupSelector.prepareMessageGroupRow( group ) );
@@ -345,7 +346,7 @@
 					return rows;
 				} )
 				.always( function () {
-					groupSelector.$loader.hide();
+					groupSelector.$loader.addClass( 'hide' );
 					groupSelector.$list.empty();
 				} )
 				.done( function ( rows ) {
@@ -360,22 +361,24 @@
 		 * @param {Object} foundIDs The array in which the keys are IDs of message groups that were found already.
 		 */
 		flattenGroupList: function ( messageGroups, foundIDs ) {
-			var i;
+			var i, messageGroupList;
 
 			if ( messageGroups.groups ) {
-				messageGroups = messageGroups.groups;
+				messageGroupList = messageGroups.groups;
+			} else {
+				messageGroupList = messageGroups;
 			}
 
-			for ( i = 0; i < messageGroups.length; i++ ) {
+			for ( i = 0; i < messageGroupList.length; i++ ) {
 				// Avoid duplicate groups, and add the parent before subgroups
-				if ( !foundIDs[ messageGroups[ i ].id ] ) {
-					this.flatGroupList.push( messageGroups[ i ] );
-					foundIDs[ messageGroups[ i ].id ] = true;
+				if ( !foundIDs[ messageGroupList[ i ].id ] ) {
+					this.flatGroupList.push( messageGroupList[ i ] );
+					foundIDs[ messageGroupList[ i ].id ] = true;
 				}
 
 				// In case there are subgroups, add them recursively
-				if ( messageGroups[ i ].groups ) {
-					this.flattenGroupList( messageGroups[ i ].groups, foundIDs );
+				if ( messageGroupList[ i ].groups ) {
+					this.flattenGroupList( messageGroupList[ i ].groups, foundIDs );
 				}
 			}
 		},
@@ -412,7 +415,7 @@
 					}
 				}
 
-				self.$loader.hide();
+				self.$loader.addClass( 'hide' );
 				self.$list.empty();
 				self.addGroupRows( foundGroups );
 			} );
@@ -463,7 +466,7 @@
 				return;
 			}
 
-			$.each( groups, function ( index, group ) {
+			groups.forEach( function ( group ) {
 				/* Hide from the selector:
 				 * - discouraged groups (the only priority value currently supported).
 				 * - groups that are recommended for other languages.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Classes for message objects TMessage and ThinMessage.
+ * Classes for message objects TMessage, ThinMessage and FatMessage.
  *
  * @file
  * @author Niklas Laxström
@@ -54,7 +54,7 @@ abstract class TMessage {
 
 	/**
 	 * Get the message translation.
-	 * @return string|null
+	 * @return ?string
 	 */
 	abstract public function translation();
 
@@ -68,7 +68,7 @@ abstract class TMessage {
 
 	/**
 	 * Returns the committed translation.
-	 * @return string|null
+	 * @return ?string
 	 */
 	public function infile() {
 		return $this->infile;
@@ -93,7 +93,7 @@ abstract class TMessage {
 
 	/**
 	 * Return all tags for this message;
-	 * @return array of strings
+	 * @return string[]
 	 */
 	public function getTags() {
 		return $this->tags;
@@ -135,26 +135,42 @@ class ThinMessage extends TMessage {
 		'last-translator-text' => 'rev_user_text',
 		'last-translator-id' => 'rev_user',
 	];
-
-	/**
-	 * @var stdClass Database Result Row
-	 */
+	/** @var stdClass Database Result Row */
 	protected $row;
+	/** @var string Stored translation. */
+	protected $translation;
 
 	/**
 	 * Set the database row this message is based on.
-	 * @param array $row Database Result Row
+	 * @param stdClass $row Database Result Row
 	 */
 	public function setRow( $row ) {
 		$this->row = $row;
 	}
 
+	/**
+	 * Set the current translation of this message.
+	 * @param string $text
+	 */
+	public function setTranslation( $text ) {
+		$this->translation = $text;
+	}
+
+	/** @inheritDoc */
 	public function translation() {
 		if ( !isset( $this->row ) ) {
 			return $this->infile();
 		}
 
-		return Revision::getRevisionText( $this->row );
+		if ( $this->translation === null ) {
+			// Should only happen with MW < 1.34. Slow if the text table hasn't been joined in!
+			$text = Revision::getRevisionText( $this->row );
+			if ( $text !== false ) {
+				$this->translation = $text;
+			}
+		}
+
+		return $this->translation;
 	}
 
 	// Re-implemented
@@ -164,11 +180,8 @@ class ThinMessage extends TMessage {
 		}
 
 		$field = self::$propertyMap[$key];
-		if ( !isset( $this->row->$field ) ) {
-			return null;
-		}
 
-		return $this->row->$field;
+		return $this->row->$field ?? null;
 	}
 
 	// Re-implemented

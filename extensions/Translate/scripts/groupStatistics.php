@@ -88,7 +88,6 @@ class GroupStatistics extends Maintenance {
 		'ckb' => [ 50, 26, 'asia' ],
 		'ku-latn' => [ 50, 26, 'asia' ],
 	];
-
 	/**
 	 * Variable with key-value pairs with a named index and an array of key-value
 	 * pairs where the key is a MessageGroup ID and the value is a weight of the
@@ -116,7 +115,6 @@ class GroupStatistics extends Maintenance {
 			'ext-0-all' => 25
 		]
 	];
-
 	/**
 	 * Code map to map localisation codes to Wikimedia project codes. Only
 	 * exclusion and remapping is defined here. It is assumed that the first part
@@ -190,8 +188,8 @@ class GroupStatistics extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Script to generate statistics about the localisation ' .
-			'level of one or more message groups.';
+		$this->addDescription( 'Script to generate statistics about the localisation ' .
+			'level of one or more message groups.' );
 		$this->addOption(
 			'groups',
 			'(optional) Comma separated list of groups',
@@ -268,6 +266,7 @@ class GroupStatistics extends Maintenance {
 			false, /*required*/
 			true /*has arg*/
 		);
+		$this->requireExtension( 'Translate' );
 	}
 
 	public function execute() {
@@ -355,7 +354,7 @@ class GroupStatistics extends Maintenance {
 		}
 
 		if ( !count( $groups ) ) {
-			$this->error( 'No groups given', true );
+			$this->fatalError( 'No groups given' );
 		}
 
 		// List of all languages.
@@ -408,9 +407,7 @@ class GroupStatistics extends Maintenance {
 				);
 			}
 
-			/**
-			 * @var $g MessageGroup
-			 */
+			/** @var MessageGroup $g */
 			foreach ( $groups as $g ) {
 				// Add unprocessed description of group as heading
 				if ( $reportScore ) {
@@ -469,8 +466,6 @@ class GroupStatistics extends Maintenance {
 					$rows[$code][] = [ true, $fuzzy, $total ];
 				}
 			}
-
-			unset( $collection );
 		}
 
 		// init summary array
@@ -589,8 +584,7 @@ class GroupStatistics extends Maintenance {
 					if ( isset( $this->wikimediaCodeMap[$code] ) ) {
 						$wmfcode = $this->wikimediaCodeMap[$code];
 					} else {
-						$codeparts = explode( '-', $code );
-						$wmfcode = $codeparts[0];
+						$wmfcode = explode( '-', $code, 2 )[0];
 					}
 
 					if ( isset( $wmfscores[$wmfcode] ) ) {
@@ -622,7 +616,7 @@ class GroupStatistics extends Maintenance {
 		$out->footer();
 
 		if ( $reportScore && $this->hasOption( 'summary' ) ) {
-			if ( $reportScore && $this->hasOption( 'legendsummary' ) ) {
+			if ( $this->hasOption( 'legendsummary' ) ) {
 				$out->addFreeText( '{{' . $this->getOption( 'legendsummary' ) . "}}\n" );
 			}
 

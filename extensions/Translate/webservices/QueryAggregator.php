@@ -7,6 +7,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Runs multiple web service queries asynchronously to save time.
  *
@@ -54,13 +56,22 @@ class QueryAggregator {
 	public function run() {
 		global $wgSitename;
 
-		$version = TRANSLATE_VERSION;
+		$version = TranslateUtils::getVersion();
 
-		$http = new MultiHttpClient( [
+		$clientOptions = [
 			'reqTimeout' => $this->timeout,
 			'connTimeout' => 3,
 			'userAgent' => "MediaWiki Translate extension $version for $wgSitename"
-		] );
+		];
+
+		$httpRequestFactory = MediaWikiServices::getInstance()->getHttpRequestFactory();
+		// BC for MW < 1.35
+		if ( is_callable( [ $httpRequestFactory, 'createMultiClient' ] ) ) {
+			$http = $httpRequestFactory->createMultiClient( $clientOptions );
+		} else {
+			$http = new MultiHttpClient( $clientOptions );
+		}
+
 		$responses = $http->runMulti( $this->getMultiHttpQueries( $this->queries ) );
 		foreach ( $responses as $index => $response ) {
 			$this->responses[$index] = $response;

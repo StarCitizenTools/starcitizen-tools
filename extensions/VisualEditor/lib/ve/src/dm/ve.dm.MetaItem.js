@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MetaItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -43,10 +43,19 @@ ve.dm.MetaItem.static.canSerializeAsContent = true;
  * Symbolic name for the group this meta item type will be grouped in in ve.dm.MetaList.
  *
  * @static
- * @property
+ * @property {string}
  * @inheritable
  */
 ve.dm.MetaItem.static.group = 'misc';
+
+/**
+ * If the metaitem can be removed by regular remove operations
+ *
+ * @static
+ * @property {boolean}
+ * @inheritable
+ */
+ve.dm.MetaItem.static.removable = false;
 
 /* Methods */
 

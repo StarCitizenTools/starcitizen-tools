@@ -1,16 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Sureshkhole",
 			"V.narsikar",
-			"संतोष दहिवळ",
-			"Sureshkhole"
+			"संतोष दहिवळ"
 		]
 	},
-	"apihelp-templatedata-description": "टेंप्लेटडाटा विस्तारकातर्फे भंडारण केलेला डाटा मागवा.",
-	"apihelp-templatedata-summary": "टेंप्लेटडाटा विस्तारकाद्वारा साठवलेला डाटा घ्या",
-	"apihelp-templatedata-example-1": "[[Template:Stub]] व [[Template:Example]] साठीचा डाटा दाखवा. ज्या टेंप्लेटचा टेंप्लेटडाटा अस्तित्वात नाही किंवा टेंप्लेटच अस्तित्वात नाहीत त्यांच्या निकालासह सर्व निकाल दाखवा.",
-	"apihelp-templatedata-param-lang": "या भाषेतील स्थानिक मूल्ये दाखवा.अविचलरित्या, सर्व उपलब्ध भाषांतरे दाखवली जातात.",
-	"apierror-templatedata-corrupt": "पान $1 मध्ये टेंप्लेटडाटा अवैध आहे $2",
 	"templatedata-desc": "जेसन (JSON) वापरुन, साच्याच्या प्राचलांसाठी डाटा भंडारण लागू करा",
 	"templatedata-doc-desc-empty": "वर्णन नाही.",
 	"templatedata-doc-format-block": "ह्या साच्यासाठी प्राचलांचे ब्लॉक फॉर्मॅटिंग करा.",
@@ -18,11 +13,8 @@
 	"templatedata-doc-format-inline": "ह्या टेंप्लेटचे प्रारुपण आपण आपल्या इच्छेप्रमाणे करु शकता.",
 	"templatedata-doc-no-params-set": "काहीच प्राचले नमूद लेली नाहीत",
 	"templatedata-doc-param-autovalue": "स्वतःच मुल्ये घेते",
-	"templatedata-doc-param-autovalue-empty": "रिकामे",
 	"templatedata-doc-param-default": "अविचल",
-	"templatedata-doc-param-default-empty": "रिकामे",
 	"templatedata-doc-param-example": "उदाहरण",
-	"templatedata-doc-param-example-empty": "रिकामे",
 	"templatedata-doc-param-desc": "वर्णन",
 	"templatedata-doc-param-desc-empty": "काहीच वर्णन नाही",
 	"templatedata-doc-param-name": "प्राचल",

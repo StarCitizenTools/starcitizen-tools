@@ -1,17 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Iltever",
-			"Ernác"
+			"Ernác",
+			"Iltever"
 		]
 	},
-	"apihelp-templatedata-example-1": "[[Template:Stub]] бла [[Template:Example]]'ге билгилини къайтарады",
 	"templatedata-desc": "Шаблон параметрле ючюн билгиле сакъланнган джерни реализациясы (JSON'ни болушлугъу бла)",
 	"templatedata-doc-desc-empty": "Ачыкълау джокъду.",
 	"templatedata-doc-param-autovalue": "Авто-магъана",
-	"templatedata-doc-param-autovalue-empty": "бош",
 	"templatedata-doc-param-default": "Тынгылау бла",
-	"templatedata-doc-param-default-empty": "бош",
 	"templatedata-doc-param-desc": "Ачыкълау",
 	"templatedata-doc-param-desc-empty": "ачыкълаусуз",
 	"templatedata-doc-param-name": "Параметр",

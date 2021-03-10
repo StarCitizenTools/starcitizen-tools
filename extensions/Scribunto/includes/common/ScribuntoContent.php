@@ -9,12 +9,17 @@
  * @author Brad Jorsch <bjorsch@wikimedia.org>
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Represents the content of a Scribunto script page
  */
 class ScribuntoContent extends TextContent {
 
-	function __construct( $text ) {
+	/**
+	 * @param string $text
+	 */
+	public function __construct( $text ) {
 		parent::__construct( $text, CONTENT_MODEL_SCRIBUNTO );
 	}
 
@@ -27,9 +32,10 @@ class ScribuntoContent extends TextContent {
 	public function validate( Title $title ) {
 		$engine = Scribunto::newDefaultEngine();
 		$engine->setTitle( $title );
-		return $engine->validate( $this->getNativeData(), $title->getPrefixedDBkey() );
+		return $engine->validate( $this->getText(), $title->getPrefixedDBkey() );
 	}
 
+	/** @inheritDoc */
 	public function prepareSave( WikiPage $page, $flags, $parentRevId, User $user ) {
 		return $this->validate( $page->getTitle() );
 	}
@@ -39,7 +45,7 @@ class ScribuntoContent extends TextContent {
 	 *
 	 * @param Title $title The page title to use as a context for rendering
 	 * @param null|int $revId The revision being rendered (optional)
-	 * @param null|ParserOptions $options Any parser options
+	 * @param ParserOptions $options Any parser options
 	 * @param bool $generateHtml Whether to generate HTML (default: true).
 	 * @param ParserOutput &$output ParserOutput representing the HTML form of the text.
 	 * @return ParserOutput
@@ -47,9 +53,9 @@ class ScribuntoContent extends TextContent {
 	protected function fillParserOutput(
 		Title $title, $revId, ParserOptions $options, $generateHtml, ParserOutput &$output
 	) {
-		global $wgParser;
+		$parser = MediaWikiServices::getInstance()->getParser();
 
-		$text = $this->getNativeData();
+		$text = $this->getText();
 
 		// Get documentation, if any
 		$output = new ParserOutput();
@@ -84,16 +90,11 @@ class ScribuntoContent extends TextContent {
 					"\n" . $msg->plain() . "\n"
 				);
 
-				if ( !$options ) {
-					// NOTE: use canonical options per default to produce cacheable output
-					$options = ContentHandler::getForTitle( $doc )->makeParserOptions( 'canonical' );
-				} else {
-					if ( $options->getTargetLanguage() === null ) {
-						$options->setTargetLanguage( $doc->getPageLanguage() );
-					}
+				if ( $options->getTargetLanguage() === null ) {
+					$options->setTargetLanguage( $doc->getPageLanguage() );
 				}
 
-				$output = $wgParser->parse( $docWikitext, $title, $options, true, true, $revId );
+				$output = $parser->parse( $docWikitext, $title, $options, true, true, $revId );
 			}
 
 			// Mark the doc page as a transclusion, so we get purged when it

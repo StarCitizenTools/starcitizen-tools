@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface WindowAction class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -25,12 +25,6 @@ OO.inheritClass( ve.ui.WindowAction, ve.ui.Action );
 
 ve.ui.WindowAction.static.name = 'window';
 
-/**
- * List of allowed methods for the action.
- *
- * @static
- * @property
- */
 ve.ui.WindowAction.static.methods = [ 'open', 'close', 'toggle' ];
 
 /* Methods */
@@ -38,11 +32,10 @@ ve.ui.WindowAction.static.methods = [ 'open', 'close', 'toggle' ];
 /**
  * Open a window.
  *
- * @method
  * @param {string} name Symbolic name of window to open
  * @param {Object} [data] Window opening data
  * @param {string} [action] Action to execute after opening, or immediately if the window is already open
- * @return {boolean} Action was executed
+ * @return {boolean|jQuery.Promise} Action was executed; if a Promise, it'll resolve once the action is finished executing
  */
 ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 	var currentInspector, inspectorWindowManager, fragmentPromise,
@@ -54,20 +47,23 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 		autoClosePromises = [],
 		surface = this.surface,
 		fragment = surface.getModel().getFragment( undefined, true ),
-		dir = surface.getView().getSelection().getDirection(),
+		dir = surface.getView().getSelectionDirectionality(),
 		windowClass = ve.ui.windowFactory.lookup( name ),
-		mayContainFragment = windowClass.prototype instanceof ve.ui.FragmentDialog ||
-			windowClass.prototype instanceof ve.ui.FragmentInspector ||
-			windowType === 'toolbar' || windowType === 'inspector',
+		isFragmentWindow = !!windowClass.prototype.getFragment,
+		mayRequireFragment = isFragmentWindow ||
+			// HACK: Pass fragment to toolbar dialogs as well
+			windowType === 'toolbar',
 		// TODO: Add 'doesHandleSource' method to factory
-		sourceMode = surface.getMode() === 'source' && !windowClass.static.handlesSource;
+		sourceMode = surface.getMode() === 'source' && !windowClass.static.handlesSource,
+		openDeferred = ve.createDeferred(),
+		openPromise = openDeferred.promise();
 
 	if ( !windowManager ) {
 		return false;
 	}
 
-	if ( !mayContainFragment ) {
-		fragmentPromise = $.Deferred().resolve().promise();
+	if ( !mayRequireFragment ) {
+		fragmentPromise = ve.createDeferred().resolve().promise();
 	} else if ( sourceMode ) {
 		text = fragment.getText( true );
 		originalFragment = fragment;
@@ -85,7 +81,7 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 			return tempFragment;
 		} );
 	} else {
-		fragmentPromise = $.Deferred().resolve( fragment ).promise();
+		fragmentPromise = ve.createDeferred().resolve( fragment ).promise();
 	}
 
 	data = ve.extendObject( { dir: dir }, data, { $returnFocusTo: null } );
@@ -112,7 +108,7 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 	fragmentPromise.then( function ( fragment ) {
 		ve.extendObject( data, { fragment: fragment } );
 
-		$.when.apply( $, autoClosePromises ).always( function () {
+		ve.promiseAll( autoClosePromises ).always( function () {
 			windowManager.getWindow( name ).then( function ( win ) {
 				var instance = windowManager.openWindow( win, data );
 
@@ -121,12 +117,13 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 				}
 
 				if ( !win.constructor.static.activeSurface ) {
-					surface.getView().deactivate();
+					surface.getView().deactivate( false );
 				}
 
 				instance.opened.then( function () {
 					if ( sourceMode ) {
-						// HACK: previousSelection is assumed to be in the visible surface
+						// HACK: initialFragment/previousSelection is assumed to be in the visible surface
+						win.initialFragment = null;
 						win.previousSelection = null;
 					}
 				} );
@@ -137,18 +134,36 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 					if ( action ) {
 						win.executeAction( action );
 					}
+					openDeferred.resolve( instance );
 				} );
 
-				instance.closing.then( function () {
-					if ( !win.constructor.static.activeSurface ) {
-						surface.getView().activate();
-					}
-				} );
+				if ( !win.constructor.static.activeSurface ) {
+					windowManager.once( 'closing', function () {
+						// Collapsed mobile selection: We need to re-activate the surface in case an insertion
+						// annotation was generated. We also need to do it during the same event cycle otherwise
+						// the device may not open the virtual keyboard, so use the 'closing' event. (T203517)
+						if ( OO.ui.isMobile() && surface.getModel().getSelection().isCollapsed() ) {
+							surface.getView().activate();
+						} else {
+							// Otherwise use the closing promise to wait until the dialog has performed its actions,
+							// such as creating new annotations, before re-activating.
+							instance.closing.then( function () {
+								// Don't activate if mobile and expanded
+								if ( !( OO.ui.isMobile() && !surface.getModel().getSelection().isCollapsed() ) ) {
+									surface.getView().activate();
+								}
+							} );
+						}
+					} );
+				}
 
 				instance.closed.then( function ( closedData ) {
 					// Sequence-triggered window closed without action, undo
 					if ( data.strippedSequence && !( closedData && closedData.action ) ) {
 						surface.getModel().undo();
+						// Prevent redoing (which would remove the typed text)
+						surface.getModel().truncateUndoStack();
+						surface.getModel().emit( 'history' );
 					}
 					if ( sourceMode && fragment && fragment.getSurface().hasBeenModified() ) {
 						// Action may be async, so we use auto select to ensure the content is selected
@@ -161,13 +176,12 @@ ve.ui.WindowAction.prototype.open = function ( name, data, action ) {
 		} );
 	} );
 
-	return true;
+	return openPromise;
 };
 
 /**
  * Close a window
  *
- * @method
  * @param {string} name Symbolic name of window to open
  * @param {Object} [data] Window closing data
  * @return {boolean} Action was executed
@@ -187,7 +201,6 @@ ve.ui.WindowAction.prototype.close = function ( name, data ) {
 /**
  * Toggle a window between open and close
  *
- * @method
  * @param {string} name Symbolic name of window to open or close
  * @param {Object} [data] Window opening or closing data
  * @return {boolean} Action was executed

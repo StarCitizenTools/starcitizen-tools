@@ -24,7 +24,6 @@
 /**
  * This class provides some basic services that Lua libraries will probably need
  */
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
 abstract class Scribunto_LuaLibraryBase {
 	/**
 	 * @var Scribunto_LuaEngine
@@ -34,7 +33,7 @@ abstract class Scribunto_LuaLibraryBase {
 	/**
 	 * @param Scribunto_LuaEngine $engine
 	 */
-	function __construct( Scribunto_LuaEngine $engine ) {
+	public function __construct( Scribunto_LuaEngine $engine ) {
 		$this->engine = $engine;
 	}
 
@@ -47,7 +46,7 @@ abstract class Scribunto_LuaLibraryBase {
 	 *
 	 * @return array Lua package
 	 */
-	abstract function register();
+	abstract public function register();
 
 	/**
 	 * Get the engine

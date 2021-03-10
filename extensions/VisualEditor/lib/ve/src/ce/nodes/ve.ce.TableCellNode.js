@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable TableCellNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -30,6 +30,9 @@ ve.ce.TableCellNode = function VeCeTableCellNode() {
 		update: 'onUpdate',
 		attributeChange: 'onAttributeChange'
 	} );
+	this.connect( this, {
+		teardown: 'onTableCellTeardown'
+	} );
 };
 
 /* Inheritance */
@@ -42,6 +45,8 @@ OO.mixinClass( ve.ce.TableCellNode, ve.ce.ContentEditableNode );
 /* Static Properties */
 
 ve.ce.TableCellNode.static.name = 'tableCell';
+
+ve.ce.TableCellNode.static.trapsCursor = true;
 
 /* Methods */
 
@@ -59,7 +64,7 @@ ve.ce.TableCellNode.prototype.initialize = function () {
 
 	// DOM changes
 	this.$element
-		// The following classes can be used here:
+		// The following classes are used here:
 		// * ve-ce-tableCellNode-data
 		// * ve-ce-tableCellNode-header
 		.addClass( 've-ce-tableCellNode ve-ce-tableCellNode-' + this.model.getAttribute( 'style' ) );
@@ -96,6 +101,23 @@ ve.ce.TableCellNode.prototype.setEditing = function ( enable ) {
 };
 
 /**
+ * Handle teardown events
+ *
+ * Same functionality as the teardown handler in ve.ce.ActiveNode
+ */
+ve.ce.TableCellNode.prototype.onTableCellTeardown = function () {
+	// If the table cell is active on teardown, ensure the surface's
+	// activeNode is cleared.
+	var surface;
+	if ( this.getRoot() ) {
+		surface = this.getRoot().getSurface();
+		if ( surface.getActiveNode() === this ) {
+			surface.setActiveNode( null );
+		}
+	}
+};
+
+/**
  * @inheritdoc ve.ce.ContentEditableNode
  */
 ve.ce.TableCellNode.prototype.setContentEditable = function () {
@@ -108,8 +130,6 @@ ve.ce.TableCellNode.prototype.setContentEditable = function () {
  * Handle model update events.
  *
  * If the style changed since last update the DOM wrapper will be replaced with an appropriate one.
- *
- * @method
  */
 ve.ce.TableCellNode.prototype.onUpdate = function () {
 	this.updateTagName();
@@ -133,7 +153,7 @@ ve.ce.TableCellNode.prototype.onAttributeChange = function ( key, from, to ) {
 			}
 			break;
 		case 'style':
-			// The following classes can be used here:
+			// The following classes are used here:
 			// * ve-ce-tableCellNode-data
 			// * ve-ce-tableCellNode-header
 			this.$element

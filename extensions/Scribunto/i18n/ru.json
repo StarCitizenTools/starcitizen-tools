@@ -2,16 +2,20 @@
 	"@metadata": {
 		"authors": [
 			"Base",
-			"Ignatus",
-			"Kalan",
-			"Okras",
+			"Force majeure",
 			"HarpyWar",
+			"Ignatus",
+			"Jack who built the house",
 			"Kaganer",
-			"Lemondoge",
+			"Kalan",
 			"Kareyac",
+			"Lemondoge",
 			"MaxBioHazard",
+			"Movses",
+			"Okras",
+			"Ole Yves",
 			"Patrick Star",
-			"Jack who built the house"
+			"Stjn"
 		]
 	},
 	"scribunto-desc": "Средство для включения скриптовых языков на страницах MediaWiki",
@@ -22,7 +26,7 @@
 	"scribunto-error-long": "Ошибки скрипта:\n\n$1",
 	"scribunto-doc-page-name": "Module:$1/doc",
 	"scribunto-doc-page-does-not-exist": "''Для документации этого модуля может быть создана страница [[$1]]''",
-	"scribunto-doc-page-header": "''Это страница документации [[$1]]''",
+	"scribunto-doc-page-header": "''Это страница документации [[$1]].''",
 	"scribunto-console-intro": "* То, что экспортирует данный модуль, доступно как переменная «p», включая несохранённые изменения.\n* Предваряйте строку знаком «=», чтобы вычислить её как выражение, или используйте print(). Используйте mw.logObject() для таблицы.\n* Используйте mw.log() и mw.logObject() в коде модуля для вывода сообщений в эту консоль.",
 	"scribunto-console-title": "Консоль отладки",
 	"scribunto-console-too-large": "Этот сеанс консоли слишком большой. Очистите историю консоли или уменьшите размер модуля.",
@@ -57,7 +61,7 @@
 	"scribunto-luastandalone-exited": "Ошибка Lua: Внутренняя ошибка: Интерпретатор завершил работу со статусом $2.",
 	"scribunto-module-with-errors-category": "Модули Scribunto с ошибками",
 	"scribunto-module-with-errors-category-desc": "В модуле имеется ошибка.",
-	"scribunto-limitreport-timeusage": "Время использование Lua",
+	"scribunto-limitreport-timeusage": "Время использования Lua",
 	"scribunto-limitreport-timeusage-value": "$1/$2 секунд",
 	"scribunto-limitreport-virtmemusage": "Виртуальный размер Lua",
 	"scribunto-limitreport-estmemusage": "Предположительное использование памяти Lua",
@@ -65,8 +69,6 @@
 	"scribunto-limitreport-profile": "Профиль Lua",
 	"scribunto-limitreport-profile-ms": "$1 мс",
 	"scribunto-limitreport-logs": "Журналы Lua",
-	"apihelp-scribunto-console-param-content": "Новое содержимое модуля.",
-	"apihelp-scribunto-console-param-session": "Токен сессии.",
 	"nstab-module": "Модуль",
 	"tooltip-ca-nstab-module": "Просмотреть страницу модуля"
 }

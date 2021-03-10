@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Cumbril",
 			"Luckas",
-			"Pikne",
-			"Cumbril"
+			"Pikne"
 		]
 	},
 	"templatedata-desc": "Võimaldab JSONi abil malli parameetrite andmeid talletada.",
@@ -13,11 +13,8 @@
 	"templatedata-doc-format-inline": "Selle malli juures eelistatakse parameetrite tekstisisest vormistust.",
 	"templatedata-doc-no-params-set": "Ühtegi parameetrit pole määratud.",
 	"templatedata-doc-param-autovalue": "Etteantud väärtus",
-	"templatedata-doc-param-autovalue-empty": "tühi",
 	"templatedata-doc-param-default": "Vaikimisi",
-	"templatedata-doc-param-default-empty": "tühi",
 	"templatedata-doc-param-example": "Näide",
-	"templatedata-doc-param-example-empty": "tühi",
 	"templatedata-doc-param-desc": "Kirjeldus",
 	"templatedata-doc-param-desc-empty": "kirjeldus puudub",
 	"templatedata-doc-param-name": "Parameeter",
@@ -31,7 +28,7 @@
 	"templatedata-doc-param-type-content": "Sisu",
 	"templatedata-doc-param-type-date": "Kuupäev",
 	"templatedata-doc-param-type-line": "Lühitekst",
-	"templatedata-doc-param-type-number": "Number",
+	"templatedata-doc-param-type-number": "Arv",
 	"templatedata-doc-param-type-string": "Sõne",
 	"templatedata-doc-param-type-unbalanced-wikitext": "Ebatäielik vikitekst",
 	"templatedata-doc-param-type-unknown": "Teadmata",
@@ -40,10 +37,10 @@
 	"templatedata-doc-param-type-wiki-template-name": "Mall",
 	"templatedata-doc-param-type-wiki-user-name": "Kasutaja",
 	"templatedata-doc-params": "Malli parameetrid",
-	"templatedata-editbutton": "Halda malli andmeid",
+	"templatedata-editbutton": "Halda malliandmeid",
 	"templatedata-errormsg-jsonbadformat": "Vigane JSONi vorming. Saad sellest toimingust loobuda, et praegused <templatedata>-sildid kustutada ning uuesti proovida ja vorming parandada. Saad ka jätkata ja asendada praegused malliandmed uutega.",
-	"templatedata-errormsg-insertblank": "Kas oled kindel, et tahad lisada malli andmed ilma teabeta?",
-	"templatedata-exists-on-related-page": "Palun pane tähele, et seotud leheküljel \"[[$1]]\" juba on malliandmete plokk.",
+	"templatedata-errormsg-insertblank": "Kas oled kindel, et tahad lisada malliandmed ilma teabeta?",
+	"templatedata-exists-on-related-page": "Pane tähele, et seotud leheküljel \"[[$1]]\" juba on malliandmete plokk.",
 	"templatedata-helplink": "Teave malliandmete süsteemi kohta",
 	"templatedata-invalid-duplicate-value": "\"$1\" (\"$3\") on omaduse \"$2\" duplikaat.",
 	"templatedata-invalid-empty-array": "Omaduse \"$1\" massiiv peab sisaldama vähemalt üht väärtust.",
@@ -69,6 +66,7 @@
 	"templatedata-modal-confirmcancel": "Kas oled kindel, et tahad muudatustest loobuda?",
 	"templatedata-modal-current-language": "Praegune keel: $1",
 	"templatedata-modal-errormsg": "Leidub tõrkeid. Palun veendu, et ükski parameetri nimi pole tühi ega topelt ning et parameetrite nimed ei sisalda märke \"$1\", \"$2\" ega \"$3\".",
+	"templatedata-modal-errormsg-duplicate-name": "Leiti viga. Valitud nime kasutab juba teine parameeter.",
 	"templatedata-modal-errormsg-import-noparams": "Importimisel ei leitud uusi parameetreid.",
 	"templatedata-modal-format-block": "Plokk",
 	"templatedata-modal-format-custom": "Kohandatud",

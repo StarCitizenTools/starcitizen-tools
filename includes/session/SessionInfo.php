@@ -27,16 +27,19 @@ namespace MediaWiki\Session;
  * Value object returned by SessionProvider
  *
  * This holds the data necessary to construct a Session.
+ * May require services to be injected into the constructor.
+ *
+ * @newable
  *
  * @ingroup Session
  * @since 1.27
  */
 class SessionInfo {
 	/** Minimum allowed priority */
-	const MIN_PRIORITY = 1;
+	public const MIN_PRIORITY = 1;
 
 	/** Maximum allowed priority */
-	const MAX_PRIORITY = 100;
+	public const MAX_PRIORITY = 100;
 
 	/** @var SessionProvider|null */
 	private $provider;
@@ -50,16 +53,27 @@ class SessionInfo {
 	/** @var UserInfo|null */
 	private $userInfo = null;
 
+	/** @var bool */
 	private $persisted = false;
+
+	/** @var bool */
 	private $remembered = false;
+
+	/** @var bool */
 	private $forceHTTPS = false;
+
+	/** @var bool */
 	private $idIsSafe = false;
+
+	/** @var bool */
 	private $forceUse = false;
 
 	/** @var array|null */
 	private $providerMetadata = null;
 
 	/**
+	 * @stable to call
+	 *
 	 * @param int $priority Session priority
 	 * @param array $data
 	 *  - provider: (SessionProvider|null) If not given, the provider will be
@@ -71,7 +85,8 @@ class SessionInfo {
 	 *  - persisted: (bool) Whether this session was persisted
 	 *  - remembered: (bool) Whether the verified user was remembered.
 	 *    Defaults to true.
-	 *  - forceHTTPS: (bool) Whether to force HTTPS for this session
+	 *  - forceHTTPS: (bool) Whether to force HTTPS for this session. This is
+	 *    ignored if $wgForceHTTPS is true.
 	 *  - metadata: (array) Provider metadata, to be returned by
 	 *    Session::getProviderMetadata(). See SessionProvider::mergeMetadata()
 	 *    and SessionProvider::refreshSessionInfo().
@@ -262,7 +277,9 @@ class SessionInfo {
 	}
 
 	/**
-	 * Whether this session should only be used over HTTPS
+	 * Whether this session should only be used over HTTPS. This should be
+	 * ignored if $wgForceHTTPS is true.
+	 *
 	 * @return bool
 	 */
 	final public function forceHTTPS() {
@@ -282,7 +299,7 @@ class SessionInfo {
 	 * @return int Negative if $a < $b, positive if $a > $b, zero if equal
 	 */
 	public static function compare( $a, $b ) {
-		return $a->getPriority() - $b->getPriority();
+		return $a->getPriority() <=> $b->getPriority();
 	}
 
 }

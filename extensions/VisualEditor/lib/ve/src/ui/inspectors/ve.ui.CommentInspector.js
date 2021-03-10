@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface CommentInspector class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -46,8 +46,6 @@ ve.ui.CommentInspector.static.actions = [
 
 /**
  * Handle frame ready events.
- *
- * @method
  */
 ve.ui.CommentInspector.prototype.initialize = function () {
 	// Parent method
@@ -57,6 +55,7 @@ ve.ui.CommentInspector.prototype.initialize = function () {
 		autosize: true
 	} );
 	this.textWidget.connect( this, { resize: 'updateSize' } );
+	this.textWidget.$input.attr( 'aria-label', OO.ui.deferMsg( 'visualeditor-commentinspector-title' ) );
 
 	this.$content.addClass( 've-ui-commentInspector-content' );
 	this.form.$element.append( this.textWidget.$element );
@@ -77,7 +76,6 @@ ve.ui.CommentInspector.prototype.getActionProcess = function ( action ) {
 /**
  * Handle the inspector being setup.
  *
- * @method
  * @param {Object} [data] Inspector opening data
  * @return {OO.ui.Process}
  */
@@ -100,6 +98,7 @@ ve.ui.CommentInspector.prototype.getSetupProcess = function ( data ) {
 				] ).select();
 				this.commentNode = this.getSelectedNode();
 			}
+			this.textWidget.setReadOnly( this.isReadOnly() );
 		}, this );
 };
 

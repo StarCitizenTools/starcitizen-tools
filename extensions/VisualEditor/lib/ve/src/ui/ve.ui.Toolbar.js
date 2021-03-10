@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Toolbar class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -19,10 +19,12 @@ ve.ui.Toolbar = function VeUiToolbar( config ) {
 	// Parent constructor
 	ve.ui.Toolbar.super.call( this, ve.ui.toolFactory, ve.ui.toolGroupFactory, config );
 
+	this.updateToolStateDebounced = ve.debounce( this.updateToolState.bind( this ) );
+
 	this.groups = null;
 	// Default directions
 	this.contextDirection = { inline: 'ltr', block: 'ltr' };
-	// The following classes can be used here:
+	// The following classes are used here:
 	// * ve-ui-dir-inline-ltr
 	// * ve-ui-dir-inline-rtl
 	// * ve-ui-dir-block-ltr
@@ -81,6 +83,15 @@ ve.ui.Toolbar.prototype.setup = function ( groups, surface ) {
 	// do this if they have changed
 	if ( groups !== this.groups ) {
 		// Parent method
+		groups = groups.map( function ( group ) {
+			if ( group.name ) {
+				group.classes = group.classes || [];
+				group.classes.push( 've-ui-toolbar-group-' + group.name );
+			} else {
+				OO.ui.warnDeprecation( 'No name: ' + JSON.stringify( group ) );
+			}
+			return group;
+		} );
 		ve.ui.Toolbar.super.prototype.setup.call( this, groups );
 	}
 
@@ -94,6 +105,10 @@ ve.ui.Toolbar.prototype.setup = function ( groups, surface ) {
 	// Events
 	this.getSurface().getModel().connect( this, { contextChange: 'onContextChange' } );
 	this.getSurface().getDialogs().connect( this, {
+		opening: 'onInspectorOrDialogOpeningOrClosing',
+		closing: 'onInspectorOrDialogOpeningOrClosing'
+	} );
+	this.getSurface().getToolbarDialogs().connect( this, {
 		opening: 'onInspectorOrDialogOpeningOrClosing',
 		closing: 'onInspectorOrDialogOpeningOrClosing'
 	} );
@@ -132,7 +147,7 @@ ve.ui.Toolbar.prototype.isToolAvailable = function ( name ) {
 ve.ui.Toolbar.prototype.onInspectorOrDialogOpeningOrClosing = function ( win, openingOrClosing ) {
 	var toolbar = this;
 	openingOrClosing.then( function () {
-		toolbar.updateToolState();
+		toolbar.updateToolStateDebounced();
 	} );
 };
 
@@ -142,7 +157,7 @@ ve.ui.Toolbar.prototype.onInspectorOrDialogOpeningOrClosing = function ( win, op
  * @fires updateState
  */
 ve.ui.Toolbar.prototype.onContextChange = function () {
-	this.updateToolState();
+	this.updateToolStateDebounced();
 };
 
 /**
@@ -161,7 +176,7 @@ ve.ui.Toolbar.prototype.updateToolState = function () {
 	// Update context direction for button icons UI.
 	// By default, inline and block directions are the same.
 	// If no context direction is available, use document model direction.
-	dirInline = dirBlock = this.surface.getView().getSelection().getDirection();
+	dirInline = dirBlock = this.surface.getView().getSelectionDirectionality();
 
 	// 'inline' direction is different only if we are inside a language annotation
 	fragmentAnnotation = fragment.getAnnotations();
@@ -172,7 +187,7 @@ ve.ui.Toolbar.prototype.updateToolState = function () {
 	if ( dirInline !== this.contextDirection.inline ) {
 		// Remove previous class:
 		this.$element.removeClass( 've-ui-dir-inline-rtl ve-ui-dir-inline-ltr' );
-		// The following classes can be used here:
+		// The following classes are used here:
 		// * ve-ui-dir-inline-ltr
 		// * ve-ui-dir-inline-rtl
 		this.$element.addClass( 've-ui-dir-inline-' + dirInline );
@@ -180,26 +195,25 @@ ve.ui.Toolbar.prototype.updateToolState = function () {
 	}
 	if ( dirBlock !== this.contextDirection.block ) {
 		this.$element.removeClass( 've-ui-dir-block-rtl ve-ui-dir-block-ltr' );
-		// The following classes can be used here:
+		// The following classes are used here:
 		// * ve-ui-dir-block-ltr
 		// * ve-ui-dir-block-rtl
 		this.$element.addClass( 've-ui-dir-block-' + dirBlock );
 		this.contextDirection.block = dirBlock;
 	}
 
-	activeDialogs = $.map(
-		[
-			this.surface.getDialogs(),
-			this.surface.getContext().getInspectors(),
-			this.surface.getToolbarDialogs()
-		],
-		function ( windowManager ) {
-			if ( windowManager.getCurrentWindow() ) {
-				return windowManager.getCurrentWindow().constructor.static.name;
-			}
-			return null;
+	activeDialogs = [
+		this.surface.getDialogs(),
+		this.surface.getContext().getInspectors(),
+		this.surface.getToolbarDialogs()
+	].map( function ( windowManager ) {
+		if ( windowManager.getCurrentWindow() ) {
+			return windowManager.getCurrentWindow().constructor.static.name;
 		}
-	);
+		return null;
+	} ).filter( function ( name ) {
+		return name !== null;
+	} );
 
 	this.emit( 'updateState', fragment, this.contextDirection, activeDialogs );
 };

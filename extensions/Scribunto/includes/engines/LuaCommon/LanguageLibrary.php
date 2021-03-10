@@ -1,15 +1,16 @@
 <?php
 
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
+use MediaWiki\MediaWikiServices;
+
 class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 	public $langCache = [];
 	public $timeCache = [];
 	public $maxLangCacheSize;
 
-	function register() {
+	public function register() {
 		// Pre-populate the language cache
-		global $wgContLang;
-		$this->langCache[$wgContLang->getCode()] = $wgContLang;
+		$contLang = MediaWikiServices::getInstance()->getContentLanguage();
+		$this->langCache[$contLang->getCode()] = $contLang;
 		$this->maxLangCacheSize = $this->getEngine()->getOption( 'maxLangCacheSize' );
 
 		$statics = [
@@ -52,12 +53,22 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 		return $this->getEngine()->registerInterface( 'mw.language.lua', $lib );
 	}
 
-	function getContLangCode() {
-		global $wgContLang;
-		return [ $wgContLang->getCode() ];
+	/**
+	 * Handler for getContLangCode
+	 * @internal
+	 * @return string[]
+	 */
+	public function getContLangCode() {
+		return [ MediaWikiServices::getInstance()->getContentLanguage()->getCode() ];
 	}
 
-	function isSupportedLanguage( $code ) {
+	/**
+	 * Handler for isSupportedLanguage
+	 * @internal
+	 * @param string $code
+	 * @return bool[]
+	 */
+	public function isSupportedLanguage( $code ) {
 		$this->checkType( 'isSupportedLanguage', 1, $code, 'string' );
 		try {
 			// There's no good reason this should throw, but it does. Sigh.
@@ -67,34 +78,72 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 		}
 	}
 
-	function isKnownLanguageTag( $code ) {
+	/**
+	 * Handler for isKnownLanguageTag
+	 * @internal
+	 * @param string $code
+	 * @return bool[]
+	 */
+	public function isKnownLanguageTag( $code ) {
 		$this->checkType( 'isKnownLanguageTag', 1, $code, 'string' );
 		return [ Language::isKnownLanguageTag( $code ) ];
 	}
 
-	function isValidCode( $code ) {
+	/**
+	 * Handler for isValidCode
+	 * @internal
+	 * @param string $code
+	 * @return bool[]
+	 */
+	public function isValidCode( $code ) {
 		$this->checkType( 'isValidCode', 1, $code, 'string' );
 		return [ Language::isValidCode( $code ) ];
 	}
 
-	function isValidBuiltInCode( $code ) {
+	/**
+	 * Handler for isValidBuiltInCode
+	 * @internal
+	 * @param string $code
+	 * @return bool[]
+	 */
+	public function isValidBuiltInCode( $code ) {
 		$this->checkType( 'isValidBuiltInCode', 1, $code, 'string' );
 		return [ (bool)Language::isValidBuiltInCode( $code ) ];
 	}
 
-	function fetchLanguageName( $code, $inLanguage ) {
+	/**
+	 * Handler for fetchLanguageName
+	 * @internal
+	 * @param string $code
+	 * @param null|string $inLanguage
+	 * @return string[]
+	 */
+	public function fetchLanguageName( $code, $inLanguage ) {
 		$this->checkType( 'fetchLanguageName', 1, $code, 'string' );
 		$this->checkTypeOptional( 'fetchLanguageName', 2, $inLanguage, 'string', null );
 		return [ Language::fetchLanguageName( $code, $inLanguage ) ];
 	}
 
-	function fetchLanguageNames( $inLanguage, $include ) {
+	/**
+	 * Handler for fetchLanguageNames
+	 * @internal
+	 * @param null|string $inLanguage
+	 * @param null|string $include
+	 * @return array[][]
+	 */
+	public function fetchLanguageNames( $inLanguage, $include ) {
 		$this->checkTypeOptional( 'fetchLanguageNames', 1, $inLanguage, 'string', null );
 		$this->checkTypeOptional( 'fetchLanguageNames', 2, $include, 'string', 'mw' );
 		return [ Language::fetchLanguageNames( $inLanguage, $include ) ];
 	}
 
-	function getFallbacksFor( $code ) {
+	/**
+	 * Handler for fetchLanguageNames
+	 * @internal
+	 * @param string $code
+	 * @return string[][]
+	 */
+	public function getFallbacksFor( $code ) {
 		$this->checkType( 'getFallbacksFor', 1, $code, 'string' );
 		$ret = Language::getFallbacksFor( $code );
 		// Make 1-based
@@ -106,12 +155,13 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 
 	/**
 	 * Language object method handler
+	 * @internal
 	 * @param string $name
 	 * @param array $args
 	 * @return array
 	 * @throws Scribunto_LuaError
 	 */
-	function languageMethod( $name, $args ) {
+	public function languageMethod( $name, $args ) {
 		$name = strval( $name );
 		$code = array_shift( $args );
 		if ( !isset( $this->langCache[$code] ) ) {
@@ -157,11 +207,12 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 
 	/**
 	 * convertPlural handler
+	 * @internal
 	 * @param Language $lang
 	 * @param array $args
 	 * @return array
 	 */
-	function convertPlural( $lang, $args ) {
+	public function convertPlural( $lang, $args ) {
 		$number = array_shift( $args );
 		$this->checkType( 'convertPlural', 1, $number, 'number' );
 		if ( is_array( $args[0] ) ) {
@@ -173,11 +224,12 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 
 	/**
 	 * convertGrammar handler
+	 * @internal
 	 * @param Language $lang
 	 * @param array $args
 	 * @return array
 	 */
-	function convertGrammar( $lang, $args ) {
+	public function convertGrammar( $lang, $args ) {
 		$this->checkType( 'convertGrammar', 1, $args[0], 'string' );
 		$this->checkType( 'convertGrammar', 2, $args[1], 'string' );
 		return [ $lang->convertGrammar( $args[0], $args[1] ) ];
@@ -185,11 +237,12 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 
 	/**
 	 * gender handler
+	 * @internal
 	 * @param Language $lang
 	 * @param array $args
 	 * @return array
 	 */
-	function gender( $lang, $args ) {
+	public function gender( $lang, $args ) {
 		$this->checkType( 'gender', 1, $args[0], 'string' );
 		$username = trim( array_shift( $args ) );
 
@@ -220,24 +273,28 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 			// check parameter, or use the ParserOptions if in interface message
 			$user = User::newFromName( $username );
 			if ( $user ) {
-				$gender = GenderCache::singleton()->getGenderOf( $user, __METHOD__ );
+				$genderCache = MediaWikiServices::getInstance()->getGenderCache();
+				$gender = $genderCache->getGenderOf( $user, __METHOD__ );
 			} elseif ( $username === '' ) {
 				$parserOptions = $this->getParserOptions();
 				if ( $parserOptions->getInterfaceMessage() ) {
-					$gender = GenderCache::singleton()->getGenderOf( $parserOptions->getUser(), __METHOD__ );
+					$genderCache = MediaWikiServices::getInstance()->getGenderCache();
+					$gender = $genderCache->getGenderOf( $parserOptions->getUser(), __METHOD__ );
 				}
 			}
 		}
+		// @phan-suppress-next-line PhanTypeMismatchArgumentNullable gender always not null
 		return [ $lang->gender( $gender, $forms ) ];
 	}
 
 	/**
 	 * formatNum handler
+	 * @internal
 	 * @param Language $lang
 	 * @param array $args
 	 * @return array
 	 */
-	function formatNum( $lang, $args ) {
+	public function formatNum( $lang, $args ) {
 		$num = $args[0];
 		$this->checkType( 'formatNum', 1, $num, 'number' );
 
@@ -252,12 +309,13 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 
 	/**
 	 * formatDate handler
+	 * @internal
 	 * @param Language $lang
 	 * @param array $args
 	 * @return array
 	 * @throws Scribunto_LuaError
 	 */
-	function formatDate( $lang, $args ) {
+	public function formatDate( $lang, $args ) {
 		$this->checkType( 'formatDate', 1, $args[0], 'string' );
 		$this->checkTypeOptional( 'formatDate', 2, $args[1], 'string', '' );
 		$this->checkTypeOptional( 'formatDate', 3, $args[2], 'boolean', false );
@@ -273,7 +331,7 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 		} else {
 			# Correct for DateTime interpreting 'XXXX' as XX:XX o'clock
 			if ( preg_match( '/^[0-9]{4}$/', $date ) ) {
-				$date = '00:00 '.$date;
+				$date = '00:00 ' . $date;
 			}
 
 			$cacheKey = $date;
@@ -328,11 +386,12 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 
 	/**
 	 * formatDuration handler
+	 * @internal
 	 * @param Language $lang
 	 * @param array $args
 	 * @return array
 	 */
-	function formatDuration( $lang, $args ) {
+	public function formatDuration( $lang, $args ) {
 		$this->checkType( 'formatDuration', 1, $args[0], 'number' );
 		$this->checkTypeOptional( 'formatDuration', 2, $args[1], 'table', [] );
 
@@ -346,11 +405,12 @@ class Scribunto_LuaLanguageLibrary extends Scribunto_LuaLibraryBase {
 
 	/**
 	 * getDurationIntervals handler
+	 * @internal
 	 * @param Language $lang
 	 * @param array $args
 	 * @return array
 	 */
-	function getDurationIntervals( $lang, $args ) {
+	public function getDurationIntervals( $lang, $args ) {
 		$this->checkType( 'getDurationIntervals', 1, $args[0], 'number' );
 		$this->checkTypeOptional( 'getDurationIntervals', 2, $args[1], 'table', [] );
 

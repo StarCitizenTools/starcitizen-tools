@@ -7,6 +7,9 @@
  * @file
  */
 
+use MediaWiki\Extension\Translate\TranslatorSandbox\StashedTranslation;
+use MediaWiki\Extension\Translate\TranslatorSandbox\TranslationStashStorage;
+
 // Standard boilerplate to define $IP
 if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 	$IP = getenv( 'MW_INSTALL_PATH' );

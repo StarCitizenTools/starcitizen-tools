@@ -9,18 +9,18 @@
  * @file
  */
 
-class AppleFFSTest extends MediaWikiTestCase {
+class AppleFFSTest extends MediaWikiIntegrationTestCase {
 
 	protected $groupConfiguration = [
 		'BASIC' => [
-			'class' => 'FileBasedMessageGroup',
+			'class' => FileBasedMessageGroup::class,
 			'id' => 'test-id',
 			'label' => 'Test Label',
 			'namespace' => 'NS_MEDIAWIKI',
 			'description' => 'Test description',
 		],
 		'FILES' => [
-			'class' => 'AppleFFS',
+			'class' => AppleFFS::class,
 		],
 	];
 
@@ -31,6 +31,9 @@ class AppleFFSTest extends MediaWikiTestCase {
 /* You are reading the ".strings" entry. */
 /* It's all for fun and fun for all.
 On two lines! */
+ /* This is a
+    Multiline comment
+	  test */
 // Author: Testy McTesterson
 "website" = "<nowiki>http://en.wikipedia.org/</nowiki>";
 "language" = "English";
@@ -39,9 +42,7 @@ On two lines! */
 "key-with-{curlies}" = "Value that can be looked up with \"key-with-{curlies}\".";
 STRINGS;
 
-		/**
-		 * @var FileBasedMessageGroup $group
-		 */
+		/** @var FileBasedMessageGroup $group */
 		$group = MessageGroupBase::factory( $this->groupConfiguration );
 		$ffs = new AppleFFS( $group );
 		$parsed = $ffs->readFromVariable( $file );
@@ -59,9 +60,7 @@ STRINGS;
 		$this->assertEquals( $expected, $parsed );
 	}
 
-	/**
-	 * @dataProvider rowValuesProvider
-	 */
+	/** @dataProvider rowValuesProvider */
 	public function testRowRoundtrip( $key, $value, $comment ) {
 		$write = AppleFFS::writeRow( $key, $value );
 		// Trim the trailing newline

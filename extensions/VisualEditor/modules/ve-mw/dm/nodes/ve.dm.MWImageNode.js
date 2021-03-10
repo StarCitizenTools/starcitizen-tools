@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWImageNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -85,6 +85,28 @@ ve.dm.MWImageNode.static.getRdfa = function ( mediaClass, frameType ) {
 };
 
 /**
+ * Map media types to tag names
+ *
+ * @type {Object}
+ */
+ve.dm.MWImageNode.static.typesToTags = {
+	Image: 'img',
+	Audio: 'audio',
+	Video: 'video'
+};
+
+/**
+ * Map media types to source attributes
+ *
+ * @type {Object}
+ */
+ve.dm.MWImageNode.static.typesToSrcAttrs = {
+	Image: 'src',
+	Audio: null,
+	Video: 'poster'
+};
+
+/**
  * @inheritdoc ve.dm.GeneratedContentNode
  */
 ve.dm.MWImageNode.static.getHashObjectForRendering = function ( dataElement ) {
@@ -103,6 +125,11 @@ ve.dm.MWImageNode.static.getMatchRdfaTypes = function () {
 };
 
 ve.dm.MWImageNode.static.allowedRdfaTypes = [ 'mw:Error' ];
+
+ve.dm.MWImageNode.static.isDiffComparable = function ( element, other ) {
+	// Images with different src's shouldn't be diffed
+	return element.type === other.type && element.attributes.resource === other.attributes.resource;
+};
 
 ve.dm.MWImageNode.static.describeChanges = function ( attributeChanges, attributes ) {
 	var key, sizeFrom, sizeTo, change,
@@ -131,7 +158,9 @@ ve.dm.MWImageNode.static.describeChanges = function ( attributeChanges, attribut
 			);
 		}
 
-		descriptions.push( ve.msg( 'visualeditor-changedesc-image-size', sizeFrom, sizeTo ) );
+		descriptions.push(
+			ve.htmlMsg( 'visualeditor-changedesc-image-size', this.wrapText( 'del', sizeFrom ), this.wrapText( 'ins', sizeTo ) )
+		);
 	}
 	for ( key in attributeChanges ) {
 		if ( customKeys.indexOf( key ) === -1 ) {
@@ -147,14 +176,22 @@ ve.dm.MWImageNode.static.describeChanges = function ( attributeChanges, attribut
 };
 
 ve.dm.MWImageNode.static.describeChange = function ( key, change ) {
-	if ( key === 'align' ) {
-		return ve.msg( 'visualeditor-changedesc-align',
-			// Messages used:
-			// visualeditor-align-widget-left, visualeditor-align-widget-right,
-			// visualeditor-align-widget-center, visualeditor-align-widget-default
-			ve.msg( 'visualeditor-align-widget-' + change.from ),
-			ve.msg( 'visualeditor-align-widget-' + change.to )
-		);
+	switch ( key ) {
+		case 'align':
+			return ve.htmlMsg( 'visualeditor-changedesc-align',
+				// The following messages are used here:
+				// * visualeditor-align-desc-left
+				// * visualeditor-align-desc-right
+				// * visualeditor-align-desc-center
+				// * visualeditor-align-desc-default
+				// * visualeditor-align-desc-none
+				this.wrapText( 'del', ve.msg( 'visualeditor-align-desc-' + change.from ) ),
+				this.wrapText( 'ins', ve.msg( 'visualeditor-align-desc-' + change.to ) )
+			);
+		case 'originalClasses':
+		case 'unrecognizedClasses':
+			return;
+		// TODO: Handle valign
 	}
 	// Parent method
 	return ve.dm.Node.static.describeChange.apply( this, arguments );
@@ -168,7 +205,8 @@ ve.dm.MWImageNode.static.describeChange = function ( key, change ) {
  * @return {Object} The new width and height of the scaled image
  */
 ve.dm.MWImageNode.static.scaleToThumbnailSize = function ( dimensions, mediaType ) {
-	var defaultThumbSize = mw.config.get( 'wgVisualEditorConfig' ).defaultUserOptions.defaultthumbsize;
+	var defaultThumbSize = mw.config.get( 'wgVisualEditorConfig' )
+		.thumbLimits[ mw.user.options.get( 'thumbsize' ) ];
 
 	mediaType = mediaType || 'BITMAP';
 
@@ -219,7 +257,8 @@ ve.dm.MWImageNode.static.resizeToBoundingBox = function ( imageDimensions, bound
  */
 ve.dm.MWImageNode.static.syncScalableToType = function ( type, mediaType, scalable ) {
 	var originalDimensions, dimensions,
-		defaultThumbSize = mw.config.get( 'wgVisualEditorConfig' ).defaultUserOptions.defaultthumbsize;
+		defaultThumbSize = mw.config.get( 'wgVisualEditorConfig' )
+			.thumbLimits[ mw.user.options.get( 'thumbsize' ) ];
 
 	originalDimensions = scalable.getOriginalDimensions();
 
@@ -246,16 +285,31 @@ ve.dm.MWImageNode.static.syncScalableToType = function ( type, mediaType, scalab
 	}
 
 	// Deal with maximum dimensions for images and drawings
-	if ( mediaType !== 'DRAWING' ) {
+	if ( mediaType === 'DRAWING' ) {
+		// Vector images are scalable past their original dimensions
+		// EnforcedMax may have previously been set to true
+		scalable.setEnforcedMax( false );
+
+	} else if ( mediaType === 'AUDIO' ) {
+		// Audio files are scalable to any width but have fixed height
+		scalable.fixedRatio = false;
+		scalable.setMinDimensions( { width: 1, height: 32 } );
+		// TODO: No way to enforce max height but not max width
+		scalable.setMaxDimensions( { width: 99999, height: 32 } );
+		scalable.setEnforcedMax( true );
+		scalable.setEnforcedMin( true );
+
+		// Default dimensions for audio files are 0x0, which is no good
+		scalable.setDefaultDimensions( { width: defaultThumbSize, height: 32 } );
+
+	} else {
+		// Raster image files are limited to their original dimensions
 		if ( originalDimensions ) {
 			scalable.setMaxDimensions( originalDimensions );
 			scalable.setEnforcedMax( true );
 		} else {
 			scalable.setEnforcedMax( false );
 		}
-	} else {
-		// EnforcedMax may have previously been set to true
-		scalable.setEnforcedMax( false );
 	}
 	// TODO: Some day, when svgMaxSize works properly in MediaWiki
 	// we can add it back as max dimension consideration:
@@ -274,12 +328,12 @@ ve.dm.MWImageNode.static.getScalablePromise = function ( filename ) {
 	if ( ve.init.platform.imageInfoCache ) {
 		return ve.init.platform.imageInfoCache.get( filename ).then( function ( info ) {
 			if ( !info || info.missing ) {
-				return $.Deferred().reject().promise();
+				return ve.createDeferred().reject().promise();
 			}
 			return info;
 		} );
 	} else {
-		return $.Deferred().reject().promise();
+		return ve.createDeferred().reject().promise();
 	}
 };
 
@@ -290,7 +344,6 @@ ve.dm.MWImageNode.static.getScalablePromise = function ( filename ) {
  * Update the rendering of the 'align', src', 'width' and 'height' attributes
  * when they change in the model.
  *
- * @method
  * @param {string} key Attribute key
  * @param {string} from Old value
  * @param {string} to New value
@@ -307,14 +360,15 @@ ve.dm.MWImageNode.prototype.onAttributeChange = function ( key, from, to ) {
  * @return {string} Filename (including namespace)
  */
 ve.dm.MWImageNode.prototype.getFilename = function () {
-	return ve.normalizeParsoidResourceName( this.getAttribute( 'resource' ) || '' );
+	return mw.libs.ve.normalizeParsoidResourceName( this.getAttribute( 'resource' ) || '' );
 };
 
 /**
  * @inheritdoc
  */
 ve.dm.MWImageNode.prototype.getScalable = function () {
-	var imageNode = this;
+	var oldMediaType,
+		imageNode = this;
 	if ( !this.scalablePromise ) {
 		this.scalablePromise = ve.dm.MWImageNode.static.getScalablePromise( this.getFilename() );
 		// If the promise was already resolved before getScalablePromise returned, then jQuery will execute the done straight away.
@@ -325,6 +379,7 @@ ve.dm.MWImageNode.prototype.getScalable = function () {
 					width: info.width,
 					height: info.height
 				} );
+				oldMediaType = imageNode.mediaType;
 				// Update media type
 				imageNode.mediaType = info.mediatype;
 				// Update according to type
@@ -333,6 +388,7 @@ ve.dm.MWImageNode.prototype.getScalable = function () {
 					imageNode.mediaType,
 					imageNode.getScalable()
 				);
+				imageNode.emit( 'attributeChange', 'mediaType', oldMediaType, imageNode.mediaType );
 			}
 		} );
 	}

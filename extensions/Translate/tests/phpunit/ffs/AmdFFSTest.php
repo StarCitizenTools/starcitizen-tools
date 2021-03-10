@@ -8,23 +8,21 @@
  * @license GPL-2.0-or-later
  */
 
-/**
- * @see AmdFFS
- */
-class AmdFFSTest extends MediaWikiTestCase {
+/** @covers \AmdFFS */
+class AmdFFSTest extends MediaWikiIntegrationTestCase {
 
-	public function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		$this->groupConfiguration = [
 			'BASIC' => [
-				'class' => 'FileBasedMessageGroup',
+				'class' => FileBasedMessageGroup::class,
 				'id' => 'test-id',
 				'label' => 'Test Label',
 				'namespace' => 'NS_MEDIAWIKI',
 				'description' => 'Test description',
 			],
 			'FILES' => [
-				'class' => 'AmdFFS',
+				'class' => AmdFFS::class,
 				'sourcePattern' => 'fake_reference_not_used_in_practise',
 				'targetPattern' => 'fake_reference_not_used_in_practise',
 			],
@@ -33,13 +31,9 @@ class AmdFFSTest extends MediaWikiTestCase {
 
 	protected $groupConfiguration;
 
-	/**
-	 * @dataProvider amdProvider
-	 */
+	/** @dataProvider amdProvider */
 	public function testParsing( $messages, $authors, $file ) {
-		/**
-		 * @var FileBasedMessageGroup $group
-		 */
+		/** @var FileBasedMessageGroup $group */
 		$group = MessageGroupBase::factory( $this->groupConfiguration );
 		$ffs = new AmdFFS( $group );
 		$parsed = $ffs->readFromVariable( $file );
@@ -98,9 +92,7 @@ JS;
 
 	public function testExport() {
 		$collection = new MockMessageCollectionForExport();
-		/**
-		 * @var FileBasedMessageGroup $group
-		 */
+		/** @var FileBasedMessageGroup $group */
 		$group = MessageGroupBase::factory( $this->groupConfiguration );
 		$ffs = new AmdFFS( $group );
 		$data = $ffs->writeIntoVariable( $collection );

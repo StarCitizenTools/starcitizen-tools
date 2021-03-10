@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Transaction class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -58,7 +58,6 @@ OO.initClass( ve.dm.Transaction );
  * @type {Object.<string,Object.<string,string|Object.<string, string>>>}
  */
 ve.dm.Transaction.static.reversers = {
-	annotate: { method: { set: 'clear', clear: 'set' } }, // Swap 'set' with 'clear'
 	attribute: { from: 'to', to: 'from' }, // Swap .from with .to
 	replace: { // Swap .insert with .remove
 		insert: 'remove',
@@ -68,12 +67,11 @@ ve.dm.Transaction.static.reversers = {
 
 /* Static Methods */
 
-// ve.dm.Transaction.newFrom* methods are added by ve.dm.TransactionBuilder for legacy support.
-
 /**
  * Deserialize a transaction from a JSONable object
  *
  * Values are either new or deep copied, so there is no reference into the serialized structure
+ *
  * @param {Object|Array} data Transaction serialized as a JSONable object
  * @return {ve.dm.Transaction} Deserialized transaction
  */
@@ -124,9 +122,11 @@ ve.dm.Transaction.static.deserialize = function ( data ) {
  * Serialize the transaction into a JSONable object
  *
  * Values are not necessarily deep copied
- * @return {Object|Array} Serialized transaction
+ *
+ * @param {string} [key] Key in parent object
+ * @return {Object|Array} JSONable object
  */
-ve.dm.Transaction.prototype.serialize = function () {
+ve.dm.Transaction.prototype.toJSON = function () {
 	var operations;
 
 	function isSingleCodePoint( x ) {
@@ -168,6 +168,9 @@ ve.dm.Transaction.prototype.serialize = function () {
 	}
 };
 
+// Deprecated alias
+ve.dm.Transaction.prototype.serialize = ve.dm.Transaction.prototype.toJSON;
+
 /**
  * Push a retain operation
  *
@@ -176,8 +179,6 @@ ve.dm.Transaction.prototype.serialize = function () {
 ve.dm.Transaction.prototype.pushRetainOp = function ( length ) {
 	this.operations.push( { type: 'retain', length: length } );
 };
-
-// TODO: Bring in adjustRetain from ve.dm.Change and replace ve.dm.TransactionBuilder#pushRetain
 
 /**
  * Build a replace operation
@@ -209,17 +210,6 @@ ve.dm.Transaction.prototype.pushReplaceOp = function ( remove, insert, insertedD
  */
 ve.dm.Transaction.prototype.pushAttributeOp = function ( key, from, to ) {
 	this.operations.push( { type: 'attribute', key: key, from: from, to: to } );
-};
-
-/**
- * Build an annotate operation
- *
- * @param {string} method Method to use, either "set" or "clear"
- * @param {string} bias Bias, either "start" or "stop"
- * @param {Object} hash Store hash of annotation object
- */
-ve.dm.Transaction.prototype.pushAnnotateOp = function ( method, bias, hash ) {
-	this.operations.push( { type: 'annotate', method: method, bias: bias, index: hash } );
 };
 
 /**
@@ -276,7 +266,6 @@ ve.dm.Transaction.prototype.reversed = function () {
  * There may be more sophisticated checks that can be done, like looking for things being replaced
  * with identical content, but such transactions probably should not be created in the first place.
  *
- * @method
  * @return {boolean} Transaction is no-op
  */
 ve.dm.Transaction.prototype.isNoOp = function () {
@@ -292,7 +281,6 @@ ve.dm.Transaction.prototype.isNoOp = function () {
 /**
  * Get all operations.
  *
- * @method
  * @return {Object[]} List of operations
  */
 ve.dm.Transaction.prototype.getOperations = function () {
@@ -302,7 +290,6 @@ ve.dm.Transaction.prototype.getOperations = function () {
 /**
  * Check if the transaction has any operations with a certain type.
  *
- * @method
  * @param {string} type Operation type
  * @return {boolean} Has operations of a given type
  */
@@ -319,7 +306,6 @@ ve.dm.Transaction.prototype.hasOperationWithType = function ( type ) {
 /**
  * Check if the transaction has any content data operations, such as insertion or deletion.
  *
- * @method
  * @return {boolean} Has content data operations
  */
 ve.dm.Transaction.prototype.hasContentDataOperations = function () {
@@ -329,7 +315,6 @@ ve.dm.Transaction.prototype.hasContentDataOperations = function () {
 /**
  * Check if the transaction has any element attribute operations.
  *
- * @method
  * @return {boolean} Has element attribute operations
  */
 ve.dm.Transaction.prototype.hasElementAttributeOperations = function () {
@@ -337,19 +322,8 @@ ve.dm.Transaction.prototype.hasElementAttributeOperations = function () {
 };
 
 /**
- * Check if the transaction has any annotation operations.
- *
- * @method
- * @return {boolean} Has annotation operations
- */
-ve.dm.Transaction.prototype.hasAnnotationOperations = function () {
-	return this.hasOperationWithType( 'annotate' );
-};
-
-/**
  * Check whether the transaction has already been applied.
  *
- * @method
  * @return {boolean}
  */
 ve.dm.Transaction.prototype.hasBeenApplied = function () {
@@ -373,20 +347,36 @@ ve.dm.Transaction.prototype.markAsApplied = function () {
  * This is useful when you want to anticipate what an offset will be after a transaction is
  * processed.
  *
- * @method
  * @param {number} offset Offset in the linear model before the transaction has been processed
  * @param {boolean} [excludeInsertion] Map the offset immediately before an insertion to
  *  right before the insertion rather than right after
  * @return {number} Translated offset, as it will be after processing transaction
  */
 ve.dm.Transaction.prototype.translateOffset = function ( offset, excludeInsertion ) {
-	var i, op, insertLength, removeLength, prevAdjustment,
+	var i, op, insertLength, removeLength, retainLength, prevAdjustment,
 		cursor = 0,
 		adjustment = 0;
 
 	for ( i = 0; i < this.operations.length; i++ ) {
 		op = this.operations[ i ];
-		if ( op.type === 'replace' ) {
+		if ( op.type === 'retain' || (
+			// If a 'replace' only changes annotations, treat it like a 'retain'
+			// This imitates the behaviour of the old 'annotate' operation type.
+			op.type === 'replace' &&
+			op.insert.length === op.remove.length &&
+			// eslint-disable-next-line no-loop-func
+			op.insert.every( function ( insert, j ) {
+				return ve.dm.ElementLinearData.static.compareElementsUnannotated( insert, op.remove[ j ] );
+			} )
+
+		) ) {
+			retainLength = op.type === 'retain' ? op.length : op.remove.length;
+			if ( offset >= cursor && offset < cursor + retainLength ) {
+				return offset + adjustment;
+			}
+			cursor += retainLength;
+			continue;
+		} else if ( op.type === 'replace' ) {
 			insertLength = op.insert.length;
 			removeLength = op.remove.length;
 			prevAdjustment = adjustment;
@@ -417,11 +407,6 @@ ve.dm.Transaction.prototype.translateOffset = function ( offset, excludeInsertio
 				return cursor + removeLength + adjustment;
 			}
 			cursor += removeLength;
-		} else if ( op.type === 'retain' ) {
-			if ( offset >= cursor && offset < cursor + op.length ) {
-				return offset + adjustment;
-			}
-			cursor += op.length;
 		}
 	}
 	return offset + adjustment;
@@ -433,7 +418,6 @@ ve.dm.Transaction.prototype.translateOffset = function ( offset, excludeInsertio
  * This is useful when you want to anticipate what a selection will be after a transaction is
  * processed.
  *
- * @method
  * @see #translateOffset
  * @param {ve.Range} range Range in the linear model before the transaction has been processed
  * @param {boolean} [excludeInsertion] Do not grow the range to cover insertions
@@ -534,4 +518,167 @@ ve.dm.Transaction.prototype.getModifiedRange = function ( doc, includeInternalLi
 		return null;
 	}
 	return new ve.Range( start, end );
+};
+
+/**
+ * Calculate active range and length change
+ *
+ * @return {Object} Active range and length change
+ * @return {number|undefined} return.start Start offset of the active range
+ * @return {number|undefined} return.end End offset of the active range
+ * @return {number|undefined} return.startOpIndex Start operation index of the active range
+ * @return {number|undefined} return.endOpIndex End operation index of the active range
+ * @return {number} return.diff Length change the transaction causes
+ */
+ve.dm.Transaction.prototype.getActiveRangeAndLengthDiff = function () {
+	var i, len, op, start, end, startOpIndex, endOpIndex, active,
+		offset = 0,
+		diff = 0;
+
+	for ( i = 0, len = this.operations.length; i < len; i++ ) {
+		op = this.operations[ i ];
+		active = op.type !== 'retain';
+		// Place start marker
+		if ( active && start === undefined ) {
+			start = offset;
+			startOpIndex = i;
+		}
+		// Adjust offset and diff
+		if ( op.type === 'retain' ) {
+			offset += op.length;
+		} else if ( op.type === 'replace' ) {
+			offset += op.remove.length;
+			diff += op.insert.length - op.remove.length;
+		}
+		// Place/move end marker
+		if ( op.type === 'attribute' || op.type === 'replaceMetadata' ) {
+			// Op with length 0 but that effectively modifies 1 position
+			end = offset + 1;
+			endOpIndex = i + 1;
+		} else if ( active ) {
+			end = offset;
+			endOpIndex = i + 1;
+		}
+	}
+	return {
+		start: start,
+		end: end,
+		startOpIndex: startOpIndex,
+		endOpIndex: endOpIndex,
+		diff: diff
+	};
+};
+
+// TODO: Use adjustRetain to replace ve.dm.TransactionBuilder#pushRetain
+
+/**
+ * Adjust (in place) the retain length at the start/end of an operations list
+ *
+ * @param {string} place Where to adjust, start|end
+ * @param {number} diff Adjustment; must not cause negative retain length
+ */
+ve.dm.Transaction.prototype.adjustRetain = function ( place, diff ) {
+	var start = place === 'start',
+		ops = this.operations,
+		i = start ? 0 : ops.length - 1;
+
+	if ( diff === 0 ) {
+		return;
+	}
+	if ( !start && ops[ i ] && ops[ i ].type === 'retainMetadata' ) {
+		i = ops.length - 2;
+	}
+	if ( ops[ i ] && ops[ i ].type === 'retain' ) {
+		ops[ i ].length += diff;
+		if ( ops[ i ].length < 0 ) {
+			throw new Error( 'Negative retain length' );
+		} else if ( ops[ i ].length === 0 ) {
+			ops.splice( i, 1 );
+		}
+		return;
+	}
+	if ( diff < 0 ) {
+		throw new Error( 'Negative retain length' );
+	}
+	ops.splice( start ? 0 : ops.length, 0, { type: 'retain', length: diff } );
+};
+
+/**
+ * Split (in place) the retain at the given offset, if any
+ *
+ * Offset cannot be in the interior of a replace operation (i.e. the interior of its removed content).
+ *
+ * @param {number} offset The offset at which to split
+ * @return {number} Index in operations starting at offset
+ * @throws {Error} Offset is in the interior of a replace operation
+ */
+ve.dm.Transaction.prototype.trySplit = function ( offset ) {
+	var i, iLen, op, opLen,
+		n = 0;
+	for ( i = 0, iLen = this.operations.length; i < iLen; i++ ) {
+		op = this.operations[ i ];
+		opLen = ( op.type === 'retain' ? op.length : op.type === 'replace' ? op.remove.length : 0 );
+		if ( n + opLen <= offset ) {
+			n += opLen;
+			continue;
+		}
+		if ( n === offset ) {
+			// At start edge; no need to split
+			return i;
+		}
+		// Else n < offset < n + opLen
+		if ( op.type !== 'retain' ) {
+			throw new Error( 'Cannot split operation of type ' + op.type );
+		}
+		// Split the retain operation
+		op.length -= n + opLen - offset;
+		this.operations.splice( i + 1, 0, { type: 'retain', length: n + opLen - offset } );
+		return i + 1;
+	}
+	if ( n === offset ) {
+		return iLen + 1;
+	}
+	throw new Error( 'Offset beyond end of transaction' );
+};
+
+/**
+ * Unsplit (in place) the two operations around the given index, if possible
+ *
+ * @param {number} index The index at which to unsplit
+ */
+ve.dm.Transaction.prototype.tryUnsplit = function ( index ) {
+	var op1 = this.operations[ index - 1 ],
+		op2 = this.operations[ index ];
+	if ( !op1 || !op2 || op1.type !== op2.type ) {
+		return;
+	}
+	if ( op1.type === 'retain' ) {
+		op1.length += op2.length;
+		this.operations.splice( index, 1 );
+	} else if ( op1.type === 'replace' ) {
+		ve.batchSplice( op1.remove, op1.remove.length, 0, op2.remove );
+		ve.batchSplice( op1.insert, op1.insert.length, 0, op2.insert );
+		this.operations.splice( index, 1 );
+	}
+};
+
+/**
+ * Insert (in place) operations at the given offset
+ *
+ * Merges into existing operations where possible. Offset cannot be in the interior of a replace
+ * operation (i.e. the interior of its removed content).
+ *
+ * @param {number} offset The offset at which to insert
+ * @param {Object[]} operations The operations to insert
+ * @throws {Error} Offset is in the interior of a replace operation
+ */
+ve.dm.Transaction.prototype.insertOperations = function ( offset, operations ) {
+	var opIndex;
+	if ( operations.length === 0 ) {
+		return;
+	}
+	opIndex = this.trySplit( offset );
+	ve.batchSplice( this.operations, opIndex, 0, ve.copy( operations ) );
+	this.tryUnsplit( opIndex + operations.length );
+	this.tryUnsplit( opIndex );
 };

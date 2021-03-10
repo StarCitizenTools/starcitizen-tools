@@ -1,27 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Shahriar.dehghani24",
 			"علی ساکی لرستانی"
 		]
 	},
-	"apihelp-visualeditor-description": "HTML5 یە بألگەنە ز خیدمأت ھ پارسۉید ڤۉرئیگأردوٙنە.",
-	"apihelp-visualeditor-param-basetimestamp": "هینگام ھ ظأبط کیردأن، زأمان ھ ڤیرژین ھ ئیصلاح ڤیدھ نە سی ئی مۉرید تأنظیم کۉنیت. سی تأشخیص ھ تأعارۉض ھ ئیصلاح کاربۉرد دارھ.",
-	"apihelp-visualeditor-param-cachekey": "سی پیڤأند ھ فأرخ، ز نأتیجە ھ دأرخڤاست ھ فأرخ قأبلی ڤە ھوٙمیاری ئی کیلیت ئیستیفادھ کۉنیت. بازنیڤیسی $1html.",
-	"apihelp-visualeditor-param-html": "HTML سی ئیفریشتین ڤە پارسۉید سی تأبدیل ڤە مأتن ھ ڤیکی.",
-	"apihelp-visualeditor-param-oldid": "تیعداد ھ ڤیرژینل سی ئیستیفادھ (ئاخأرین ڤیرژین ڤە عۉنڤان ھ پیش فأرض)",
-	"apihelp-visualeditor-param-paction": "اقدام سی انجام دائن",
-	"apihelp-visualeditor-param-page": "بألگە سی ئیعمال ھ عأمأل ری ھۉ.",
-	"apihelp-visualeditor-param-pst": "پیش-ظأبط ھ مأتن ھ ڤیکی تأبدیل شۉدھ پیش ز ئیفریشتین ھۉ ڤە پارسۉید (paction=parsefragment).",
-	"apihelp-visualeditor-param-starttimestamp": "هینگام ھ ظأبط کیردأن، ھینە سی زأمان ھ بیلأم گیری ھ ڤیرژین تأنظیم کۉنیت. سی تأشخیص ھ تأعارۉض ھ ئیصلاح کاربۉرد دارھ.",
-	"apihelp-visualeditor-param-wikitext": "مأتن ھ ڤیکی سی ئیفریشتین ڤە پارسۉید سی تأبدیل ڤە ئیچ تی ئیم ئیل (paction=parsefragment).",
-	"apihelp-visualeditoredit-description": "ظأبط ھ بألگە HTML5 ڤە میدیا ڤیکی (تأبدیل ڤە مأتن ھ ڤیکی با سیرڤیس ھ پارسۉید)",
-	"apihelp-visualeditoredit-param-basetimestamp": "هینگام ھ ظأبط کیردأن، ھینە سی زأمان ھ ڤیرژین ھ ئیصلاح تأنظیم کۉنیت. سی تأشخیص ھ تأعارۉض ھ ئیصلاح کاربۉرد دارھ.",
 	"tooltip-ca-createsource": "درست کردن کد سرچشمه ای بلگه",
 	"tooltip-ca-edit": "ئی بألگە نە ڤا ئیستیفادھ ز ڤیکی مأتن ئیصلاح کۉنیت",
 	"tooltip-ca-editsource": "اصلاح کد سرچشمه ای بلگه",
-	"tooltip-ca-ve-edit": "اصلاح ای بلگه ۉا ۉیژۉال ادیتۉر",
+	"tooltip-ca-ve-edit": "اصلاح کِردَن ای ولاگ‏.",
 	"visualeditor-advancedsettings-tool": "تنظیمات پیشرفته",
-	"visualeditor-beta-label": "بتا",
 	"visualeditor-browserwarning": "ایشا ز مرورگری که و طور رسمی توسط ویژوال ادیتور پشتیبانی نیوا داریت استفاده ایکنیت.",
 	"visualeditor-ca-createlocaldescriptionsource": "ۉندن سرچشمه تۉضیحتل محلی",
 	"visualeditor-ca-createsource": "راس کردن سرچشمه",
@@ -49,8 +37,6 @@
 	"visualeditor-dialog-media-info-moreinfo": "اطلاعات هنی",
 	"visualeditor-dialog-media-info-readmore": "هنن هنی",
 	"visualeditor-dialog-media-info-uploaded": "بارهشته بیه:$1",
-	"visualeditor-dialog-media-noresults": "نتیجلی سیل نوابی.",
-	"visualeditor-dialog-media-originaldimensions": "بعدل اصلی",
 	"visualeditor-dialog-media-page-advanced": "تنظیمات پیشرفته",
 	"visualeditor-dialog-media-page-general": "تنظیمات کلی",
 	"visualeditor-dialog-media-position-center": "مینجآو",

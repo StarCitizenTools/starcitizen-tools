@@ -6,7 +6,7 @@
  * @file
  */
 
-use MediaWiki\Storage\RevisionRecord;
+use MediaWiki\Revision\RevisionRecord;
 
 /**
  * @ingroup API
@@ -52,10 +52,11 @@ class ApiTemplateData extends ApiBase {
 		$continuationManager = new ApiContinuationManager( $this, [], [] );
 		$this->setContinuationManager( $continuationManager );
 
-		if ( is_null( $params['lang'] ) ) {
+		if ( $params['lang'] === null ) {
 			$langCode = false;
 		} elseif ( !Language::isValidCode( $params['lang'] ) ) {
 			$this->dieWithError( [ 'apierror-invalidlang', 'lang' ] );
+			throw new LogicException();
 		} else {
 			$langCode = $params['lang'];
 		}
@@ -103,7 +104,7 @@ class ApiTemplateData extends ApiBase {
 
 			foreach ( $res as $row ) {
 				$rawData = $row->pp_value;
-				$tdb = TemplateDataBlob::newFromDatabase( $rawData );
+				$tdb = TemplateDataBlob::newFromDatabase( $db, $rawData );
 				$status = $tdb->getStatus();
 
 				if ( !$status->isOK() ) {
@@ -128,7 +129,9 @@ class ApiTemplateData extends ApiBase {
 				$data->params->{ApiResult::META_TYPE} = 'kvp';
 				$data->params->{ApiResult::META_KVP_KEY_NAME} = 'key';
 				$data->params->{ApiResult::META_INDEXED_TAG_NAME} = 'param';
-				ApiResult::setIndexedTagName( $data->paramOrder, 'p' );
+				if ( isset( $data->paramOrder ) ) {
+					ApiResult::setIndexedTagName( $data->paramOrder, 'p' );
+				}
 
 				if ( $includeMissingTitles ) {
 					unset( $resp[$row->pp_page]['notemplatedata'] );
@@ -206,6 +209,6 @@ class ApiTemplateData extends ApiBase {
 	}
 
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/Extension:TemplateData';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:TemplateData';
 	}
 }

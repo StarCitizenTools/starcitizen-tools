@@ -13,7 +13,7 @@
 		this.$container = $( container );
 
 		// Hide the workflow selector when clicking outside of it
-		$( 'html' ).on( 'click', function ( e ) {
+		$( document.documentElement ).on( 'click', function ( e ) {
 			if ( !e.isDefaultPrevented() ) {
 				$( container )
 					.find( '.tux-workflow-status-selector' )
@@ -99,28 +99,28 @@
 			$display = $( '<div>' )
 				.addClass( 'tux-workflow-status' )
 				.text( mw.msg( 'translate-workflow-state-' ) )
-				.click( function ( e ) {
+				.on( 'click', function ( e ) {
 					$list.toggleClass( 'hide' );
 					e.stopPropagation();
 				} );
 
-			$.each( this.states, function ( id, data ) {
-				var $state;
+			Object.keys( instance.states ).forEach( function ( key ) {
+				var data = instance.states[ key ], $state;
 
 				// Store the id also
-				data.id = id;
+				data.id = key;
 
 				$state = $( '<li>' )
 					.data( 'state', data )
 					.text( data.name );
 
-				if ( data.canchange && id !== instance.currentState ) {
+				if ( data.canchange && data.id !== instance.currentState ) {
 					$state.addClass( 'changeable' );
 				} else {
 					$state.addClass( 'unchangeable' );
 				}
 
-				if ( id === instance.currentState ) {
+				if ( data.id === instance.currentState ) {
 					$display.text( instance.getStateDisplay( data.name ) );
 					$display.append( $( '<span>' ).addClass( 'tux-workflow-status-triangle' ) );
 					$state.addClass( 'selected' );
@@ -129,7 +129,7 @@
 				$state.appendTo( $list );
 			} );
 
-			$list.find( '.changeable' ).click( function () {
+			$list.find( '.changeable' ).on( 'click', function () {
 				var state,
 					$this = $( this );
 
@@ -157,7 +157,7 @@
 				data = $this.data( 'workflowselector' );
 
 			if ( !data ) {
-				$this.data( 'workflowselector', ( data = new WorkflowSelector( this ) ) );
+				$this.data( 'workflowselector', new WorkflowSelector( this ) );
 			}
 			$this.data( 'workflowselector' ).receiveState( groupId, language, state );
 		} );

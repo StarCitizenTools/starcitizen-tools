@@ -1,14 +1,14 @@
 /*!
  * VisualEditor MWSignatureContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
  * Context item for a MWSignature.
  *
  * @class
- * @extends ve.ui.MWTransclusionContextItem
+ * @extends ve.ui.LinearContextItem
  *
  * @constructor
  * @param {ve.ui.Context} context Context item is in
@@ -21,14 +21,12 @@ ve.ui.MWSignatureContextItem = function VeUiMWSignatureContextItem() {
 
 	// Initialization
 	this.$element.addClass( 've-ui-mwSignatureContextItem' );
-	this.$body.remove();
-	this.$info.remove();
 	this.$actions.remove();
 };
 
 /* Inheritance */
 
-OO.inheritClass( ve.ui.MWSignatureContextItem, ve.ui.MWTransclusionContextItem );
+OO.inheritClass( ve.ui.MWSignatureContextItem, ve.ui.LinearContextItem );
 
 /* Static Properties */
 

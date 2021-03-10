@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWLinkAction class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -25,12 +25,6 @@ OO.inheritClass( ve.ui.MWLinkAction, ve.ui.LinkAction );
 
 /* Static Properties */
 
-/**
- * List of allowed methods for the action.
- *
- * @static
- * @property
- */
 ve.ui.MWLinkAction.static.methods = ve.ui.MWLinkAction.super.static.methods.concat( [ 'open', 'autolinkMagicLink' ] );
 
 /* Static methods */
@@ -54,7 +48,7 @@ ve.ui.MWLinkAction.static.getLinkAnnotation = function ( linktext, doc ) {
 		return ve.dm.MWMagicLinkNode.static.annotationFromContent( linktext );
 	}
 	// Is this an internal link?
-	targetData = ve.dm.MWInternalLinkAnnotation.static.getTargetDataFromHref( href, doc );
+	targetData = mw.libs.ve.getTargetDataFromHref( href, doc );
 	if ( targetData.isInternal ) {
 		title = mw.Title.newFromText( targetData.title );
 		return ve.dm.MWInternalLinkAnnotation.static.newFromTitle( title );
@@ -74,7 +68,6 @@ ve.ui.MWLinkAction.static.getLinkAnnotation = function ( linktext, doc ) {
  * candidate text, so that URLs with embedded matched parentheses (like
  * wiki articles with disambiguation text) autolink nicely.
  *
- * @method
  * @inheritdoc
  */
 ve.ui.MWLinkAction.prototype.getTrailingPunctuation = function ( candidate ) {
@@ -94,7 +87,6 @@ ve.ui.MWLinkAction.prototype.getTrailingPunctuation = function ( candidate ) {
 };
 
 /**
- * @method
  * @inheritdoc
  * @return {ve.dm.MWExternalLinkAnnotation|ve.dm.MWInternalLinkAnnotation} The annotation to use
  */
@@ -107,7 +99,6 @@ ve.ui.MWLinkAction.prototype.getLinkAnnotation = function ( linktext ) {
  * followed by whitespace.
  *
  * @see ve.ui.LinkAction#autolinkUrl
- * @method
  * @return {boolean}
  *   True if the selection is a valid RFC/PMID/ISBN and the autolink action
  *   was executed; otherwise false.
@@ -141,7 +132,6 @@ ve.ui.MWLinkAction.prototype.autolinkMagicLink = function () {
 /**
  * Open either the 'link' or 'linkNode' window, depending on what is selected.
  *
- * @method
  * @return {boolean} Action was executed
  */
 ve.ui.MWLinkAction.prototype.open = function () {

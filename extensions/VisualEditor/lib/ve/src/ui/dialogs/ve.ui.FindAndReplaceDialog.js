@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FindAndReplaceDialog class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -26,6 +26,10 @@ ve.ui.FindAndReplaceDialog = function VeUiFindAndReplaceDialog( config ) {
 OO.inheritClass( ve.ui.FindAndReplaceDialog, ve.ui.ToolbarDialog );
 
 ve.ui.FindAndReplaceDialog.static.name = 'findAndReplace';
+
+// Invisible title for accessibility
+ve.ui.FindAndReplaceDialog.static.title =
+	OO.ui.deferMsg( 'visualeditor-find-and-replace-title' );
 
 ve.ui.FindAndReplaceDialog.static.handlesSource = true;
 
@@ -72,57 +76,67 @@ ve.ui.FindAndReplaceDialog.prototype.initialize = function () {
 		}( this ) ),
 		tabIndex: 1
 	} );
-	this.matchCaseToggle = new OO.ui.ToggleButtonWidget( {
-		icon: 'searchCaseSensitive',
-		iconTitle: ve.msg( 'visualeditor-find-and-replace-match-case' ),
-		value: ve.userConfig( 'visualeditor-findAndReplace-matchCase' ),
-		tabIndex: 8
-	} );
-	this.regexToggle = new OO.ui.ToggleButtonWidget( {
-		icon: 'searchRegularExpression',
-		iconTitle: ve.msg( 'visualeditor-find-and-replace-regular-expression' ),
-		value: ve.userConfig( 'visualeditor-findAndReplace-regex' ),
-		tabIndex: 9
-	} );
-	this.wordToggle = new OO.ui.ToggleButtonWidget( {
-		icon: 'quotes',
-		iconTitle: ve.msg( 'visualeditor-find-and-replace-word' ),
-		value: ve.userConfig( 'visualeditor-findAndReplace-word' ),
-		tabIndex: 10
-	} );
-	this.diacriticToggle = new OO.ui.ToggleButtonWidget( {
-		icon: 'searchDiacritics',
-		iconTitle: ve.supportsIntl ?
-			ve.msg( 'visualeditor-find-and-replace-diacritic' ) :
-			ve.msg( 'visualeditor-find-and-replace-diacritic-unavailable' ),
-		value: ve.userConfig( 'visualeditor-findAndReplace-diacritic' ),
-		tabIndex: 11
-	} );
+	this.findText.$input.attr( 'aria-label', ve.msg( 'visualeditor-find-and-replace-find-text' ) );
+	this.updateUserConfigDebounced = ve.debounce( this.updateUserConfig.bind( this ), 500 );
 
 	this.previousButton = new OO.ui.ButtonWidget( {
 		icon: 'previous',
-		iconTitle: ve.msg( 'visualeditor-find-and-replace-previous-button' ) + ' ' +
+		title: ve.msg( 'visualeditor-find-and-replace-previous-button' ) + ' ' +
 			ve.ui.triggerRegistry.getMessages( 'findPrevious' ).join( ', ' ),
-		tabIndex: 6
+		tabIndex: 2
 	} );
 	this.nextButton = new OO.ui.ButtonWidget( {
 		icon: 'next',
-		iconTitle: ve.msg( 'visualeditor-find-and-replace-next-button' ) + ' ' +
+		title: ve.msg( 'visualeditor-find-and-replace-next-button' ) + ' ' +
 			ve.ui.triggerRegistry.getMessages( 'findNext' ).join( ', ' ),
-		tabIndex: 7
+		tabIndex: 2
 	} );
+	this.matchCaseToggle = new OO.ui.ToggleButtonWidget( {
+		icon: 'searchCaseSensitive',
+		title: ve.msg( 'visualeditor-find-and-replace-match-case' ),
+		value: ve.userConfig( 'visualeditor-findAndReplace-matchCase' ),
+		tabIndex: 2
+	} );
+	this.regexToggle = new OO.ui.ToggleButtonWidget( {
+		icon: 'searchRegularExpression',
+		title: ve.msg( 'visualeditor-find-and-replace-regular-expression' ),
+		value: ve.userConfig( 'visualeditor-findAndReplace-regex' ),
+		tabIndex: 2
+	} );
+	this.wordToggle = new OO.ui.ToggleButtonWidget( {
+		icon: 'quotes',
+		title: ve.msg( 'visualeditor-find-and-replace-word' ),
+		value: ve.userConfig( 'visualeditor-findAndReplace-word' ),
+		tabIndex: 2
+	} );
+	this.diacriticToggle = new OO.ui.ToggleButtonWidget( {
+		icon: 'searchDiacritics',
+		title: ve.supportsIntl ?
+			ve.msg( 'visualeditor-find-and-replace-diacritic' ) :
+			ve.msg( 'visualeditor-find-and-replace-diacritic-unavailable' ),
+		value: ve.userConfig( 'visualeditor-findAndReplace-diacritic' ),
+		tabIndex: 2
+	} );
+
 	this.replaceText = new OO.ui.TextInputWidget( {
 		placeholder: ve.msg( 'visualeditor-find-and-replace-replace-text' ),
 		value: ve.userConfig( 'visualeditor-findAndReplace-replaceText' ),
-		tabIndex: 2
+		tabIndex: 1
 	} );
+	this.replaceText.$input.attr( 'aria-label', ve.msg( 'visualeditor-find-and-replace-replace-text' ) );
+
 	this.replaceButton = new OO.ui.ButtonWidget( {
 		label: ve.msg( 'visualeditor-find-and-replace-replace-button' ),
-		tabIndex: 3
+		tabIndex: 1
 	} );
 	this.replaceAllButton = new OO.ui.ButtonWidget( {
 		label: ve.msg( 'visualeditor-find-and-replace-replace-all-button' ),
-		tabIndex: 4
+		tabIndex: 1
+	} );
+	doneButton = new OO.ui.ButtonWidget( {
+		classes: [ 've-ui-findAndReplaceDialog-cell' ],
+		label: ve.msg( 'visualeditor-find-and-replace-done' ),
+		tabIndex: 1
 	} );
 
 	optionsGroup = new OO.ui.ButtonGroupWidget( {
@@ -147,11 +161,6 @@ ve.ui.FindAndReplaceDialog.prototype.initialize = function () {
 			this.replaceButton,
 			this.replaceAllButton
 		]
-	} );
-	doneButton = new OO.ui.ButtonWidget( {
-		classes: [ 've-ui-findAndReplaceDialog-cell' ],
-		label: ve.msg( 'visualeditor-find-and-replace-done' ),
-		tabIndex: 5
 	} );
 	$findRow = $( '<div>' ).addClass( 've-ui-findAndReplaceDialog-row' );
 	$replaceRow = $( '<div>' ).addClass( 've-ui-findAndReplaceDialog-row' );
@@ -216,7 +225,9 @@ ve.ui.FindAndReplaceDialog.prototype.getSetupProcess = function ( data ) {
 			// Events
 			this.surface.getModel().connect( this, { documentUpdate: 'onSurfaceModelDocumentUpdate' } );
 			this.surface.getView().connect( this, { position: 'onSurfaceViewPosition' } );
-			this.surface.getView().$window.on( 'scroll', this.onWindowScrollThrottled );
+			ve.addPassiveEventListener( this.surface.getView().$window[ 0 ], 'scroll', this.onWindowScrollThrottled );
+
+			this.updateFragments();
 		}, this );
 };
 
@@ -243,24 +254,17 @@ ve.ui.FindAndReplaceDialog.prototype.getTeardownProcess = function ( data ) {
 			// Events
 			this.surface.getModel().disconnect( this );
 			surfaceView.disconnect( this );
-			this.surface.getView().$window.off( 'scroll', this.onWindowScrollThrottled );
+			ve.removePassiveEventListener( this.surface.getView().$window[ 0 ], 'scroll', this.onWindowScrollThrottled );
 
-			// If the surface isn't selected, put the selection back in a sensible place
-			if ( surfaceModel.getSelection().isNull() ) {
-				if ( this.fragments.length ) {
-					// Either the active search result...
-					selection = this.fragments[ this.focusedIndex ].getSelection();
-				} else if ( this.initialFragment && !( this.initialFragment.getSelection().isNull() ) ) {
-					// ... or the initial selection
-					selection = this.initialFragment.getSelection();
-				}
-			}
-			if ( selection ) {
-				surfaceModel.setSelection( selection );
+			if ( this.fragments.length ) {
+				// Either the active search result…
+				selection = this.fragments[ this.focusedIndex ].getSelection();
 			} else {
-				// If the selection wasn't changed, focus anyway
-				surfaceView.focus();
+				// … or the initial selection
+				selection = this.initialFragment.getSelection();
 			}
+			surfaceModel.setSelection( selection );
+
 			this.$findResults.empty().detach();
 			this.fragments = [];
 			this.surface = null;
@@ -309,20 +313,28 @@ ve.ui.FindAndReplaceDialog.prototype.onFindChange = function () {
 	this.renderFragments();
 	this.highlightFocused( true );
 	this.diacriticToggle.setDisabled( !ve.supportsIntl || this.regexToggle.getValue() );
-	ve.userConfig( {
-		'visualeditor-findAndReplace-findText': this.findText.getValue(),
-		'visualeditor-findAndReplace-matchCase': this.matchCaseToggle.getValue(),
-		'visualeditor-findAndReplace-regex': this.regexToggle.getValue(),
-		'visualeditor-findAndReplace-word': this.wordToggle.getValue(),
-		'visualeditor-findAndReplace-diacritic': this.diacriticToggle.getValue()
-	} );
+	this.updateUserConfigDebounced();
 };
 
 /**
  * Handle change events to the replace input
  */
 ve.ui.FindAndReplaceDialog.prototype.onReplaceChange = function () {
-	ve.userConfig( 'visualeditor-findAndReplace-replaceText', this.replaceText.getValue() );
+	this.updateUserConfigDebounced();
+};
+
+/**
+ * Remember inputs in the dialog in user config.
+ */
+ve.ui.FindAndReplaceDialog.prototype.updateUserConfig = function () {
+	ve.userConfig( {
+		'visualeditor-findAndReplace-findText': this.findText.getValue(),
+		'visualeditor-findAndReplace-matchCase': this.matchCaseToggle.getValue(),
+		'visualeditor-findAndReplace-regex': this.regexToggle.getValue(),
+		'visualeditor-findAndReplace-word': this.wordToggle.getValue(),
+		'visualeditor-findAndReplace-diacritic': this.diacriticToggle.getValue(),
+		'visualeditor-findAndReplace-replaceText': this.replaceText.getValue()
+	} );
 };
 
 /**
@@ -348,6 +360,7 @@ ve.ui.FindAndReplaceDialog.prototype.updateFragments = function () {
 	var i, l, startIndex,
 		surfaceModel = this.surface.getModel(),
 		documentModel = surfaceModel.getDocument(),
+		isReadOnly = surfaceModel.isReadOnly(),
 		ranges = [],
 		matchCase = this.matchCaseToggle.getValue(),
 		isRegex = this.regexToggle.getValue(),
@@ -388,8 +401,9 @@ ve.ui.FindAndReplaceDialog.prototype.updateFragments = function () {
 	this.focusedIndex = startIndex || 0;
 	this.nextButton.setDisabled( !this.results );
 	this.previousButton.setDisabled( !this.results );
-	this.replaceButton.setDisabled( !this.results );
-	this.replaceAllButton.setDisabled( !this.results );
+	this.replaceText.setDisabled( isReadOnly );
+	this.replaceButton.setDisabled( !this.results || isReadOnly );
+	this.replaceAllButton.setDisabled( !this.results || isReadOnly );
 };
 
 /**
@@ -399,7 +413,7 @@ ve.ui.FindAndReplaceDialog.prototype.renderFragments = function () {
 	var i, selection, viewportRange, start, end;
 
 	// Check the surface isn't hidden, such as during deactivation
-	if ( !this.surface || !this.surface.getView().$element.is( ':visible' ) ) {
+	if ( !this.surface ) {
 		return;
 	}
 
@@ -516,10 +530,11 @@ ve.ui.FindAndReplaceDialog.prototype.highlightFocused = function ( scrollIntoVie
 	if ( scrollIntoView ) {
 		surfaceView = this.surface.getView();
 		offset = top + surfaceView.$element.offset().top;
-		windowScrollTop = surfaceView.$window.scrollTop() + this.surface.toolbarHeight;
-		windowScrollHeight = surfaceView.$window.height() - this.surface.toolbarHeight;
+		windowScrollTop = surfaceView.$window.scrollTop() + this.surface.padding.top;
+		windowScrollHeight = surfaceView.$window.height() - this.surface.padding.top;
 
 		if ( offset < windowScrollTop || offset > windowScrollTop + windowScrollHeight ) {
+			// eslint-disable-next-line no-jquery/no-global-selector
 			$( 'body, html' ).animate( { scrollTop: offset - ( windowScrollHeight / 2 ) }, 'fast' );
 		}
 	}
@@ -540,7 +555,9 @@ ve.ui.FindAndReplaceDialog.prototype.findFirst = function () {
 		fragment = this.surface.getModel().getFragment( null, true );
 
 	this.initialFragment = fragment;
-	this.startOffset = ve.getProp( this.initialFragment.getSelection().getRanges(), 0, 'start' ) || 0;
+	this.startOffset = ve.getProp( this.initialFragment.getSelection().getRanges(
+		this.initialFragment.getDocument()
+	), 0, 'start' ) || 0;
 
 	text = fragment.getText();
 	if ( text && text !== this.findText.getValue() ) {
@@ -586,15 +603,11 @@ ve.ui.FindAndReplaceDialog.prototype.onReplaceButtonClick = function () {
 
 	this.updateFragments();
 
-	if ( !this.results ) {
-		this.focusedIndex = 0;
-		return;
-	}
 	while ( this.fragments[ this.focusedIndex ] && this.fragments[ this.focusedIndex ].getSelection().getRange().end <= end ) {
 		this.focusedIndex++;
 	}
-	// We may have iterated off the end
-	this.focusedIndex = this.focusedIndex % this.results;
+	// We may have iterated off the end, or run out of results
+	this.focusedIndex = this.results ? this.focusedIndex % this.results : 0;
 
 	this.clearRenderedResultsCache();
 	this.renderFragments();
@@ -607,11 +620,20 @@ ve.ui.FindAndReplaceDialog.prototype.onReplaceButtonClick = function () {
  * Handle click events on the previous all button
  */
 ve.ui.FindAndReplaceDialog.prototype.onReplaceAllButtonClick = function () {
-	var i, l;
+	var i, l,
+		surfaceView = this.surface.getView(),
+		wasActivated = !surfaceView.isDeactivated();
 
+	if ( wasActivated ) {
+		surfaceView.deactivate();
+	}
 	for ( i = 0, l = this.results; i < l; i++ ) {
 		this.replace( i );
 	}
+	if ( wasActivated ) {
+		surfaceView.activate();
+	}
+
 	this.updateFragments();
 	this.clearRenderedResultsCache();
 	this.renderFragments();

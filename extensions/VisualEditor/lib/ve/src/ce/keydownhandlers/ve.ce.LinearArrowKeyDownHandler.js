@@ -1,9 +1,10 @@
 /*!
  * VisualEditor ContentEditable linear arrow key down handler
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
+/* istanbul ignore next */
 /**
  * Arrow key down handler for linear selections.
  *
@@ -13,8 +14,8 @@
  * @constructor
  */
 ve.ce.LinearArrowKeyDownHandler = function VeCeLinearArrowKeyDownHandler() {
-	// Parent constructor
-	ve.ui.LinearArrowKeyDownHandler.super.apply( this, arguments );
+	// Parent constructor - never called because class is fully static
+	// ve.ui.LinearArrowKeyDownHandler.super.apply( this, arguments );
 };
 
 /* Inheritance */
@@ -44,7 +45,8 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 			e.keyCode === OO.ui.Keys.PAGEUP || e.keyCode === OO.ui.Keys.PAGEDOWN ||
 			e.keyCode === OO.ui.Keys.HOME || e.keyCode === OO.ui.Keys.END,
 		keyBlockDirection = e.keyCode === OO.ui.Keys.DOWN || e.keyCode === OO.ui.Keys.PAGEDOWN || e.keyCode === OO.ui.Keys.END ? 1 : -1,
-		range = surface.model.getSelection().getRange();
+		range = surface.model.getSelection().getRange(),
+		activeNode = surface.getActiveNode();
 
 	// TODO: onDocumentKeyDown did this already
 	surface.surfaceObserver.stopTimerLoop();
@@ -71,7 +73,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 			direction,
 			'character',
 			e.shiftKey,
-			surface.getActiveNode() ? surface.getActiveNode().getRange() : null
+			activeNode && ( e.shiftKey || activeNode.trapsCursor() ) ? activeNode.getRange() : null
 		);
 		surface.model.setLinearSelection( range );
 		e.preventDefault();
@@ -100,7 +102,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 				direction,
 				'character',
 				e.shiftKey,
-				surface.getActiveNode() ? surface.getActiveNode().getRange() : null
+				activeNode && ( e.shiftKey || activeNode.trapsCursor() ) ? activeNode.getRange() : null
 			);
 			surface.model.setLinearSelection( range );
 			e.preventDefault();
@@ -133,7 +135,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 	}
 	// Else keep DM range and DOM selection as-is
 
-	if ( e.shiftKey && !surface.nativeSelection.extend && range.isBackwards() ) {
+	if ( e.shiftKey && !ve.supportsSelectionExtend && range.isBackwards() ) {
 		// If the browser doesn't support backwards selections, but the dm range
 		// is backwards, then use "collapse to anchor - observe - expand".
 		collapseNode = surface.nativeSelection.anchorNode;
@@ -162,7 +164,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 		var viewNode, newRange, afterDirection;
 
 		// Support: Chrome
-		// Chrome bug lets you cursor into a multi-line contentEditable=false with up/down...
+		// Chrome bug lets you cursor into a multi-line contentEditable=false with up/down…
 		viewNode = $( surface.nativeSelection.focusNode ).closest( '.ve-ce-leafNode,.ve-ce-branchNode' ).data( 'view' );
 		if ( !viewNode ) {
 			// Irrelevant selection (or none)
@@ -200,7 +202,7 @@ ve.ce.LinearArrowKeyDownHandler.static.execute = function ( surface, e ) {
 			newRange = new ve.Range( range.from, newRange.to );
 			surface.getModel().setLinearSelection( newRange );
 		}
-		surface.updateActiveLink();
+		surface.updateActiveAnnotations();
 		surface.surfaceObserver.pollOnce();
 	} } );
 

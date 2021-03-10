@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LanguageInputWidget styles.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ui-languageInputWidget-selectedLanguageLabel {
@@ -10,16 +10,15 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	vertical-align: middle;
-}
-
-.ve-ui-languageInputWidget .oo-ui-fieldLayout.oo-ui-labelElement > .oo-ui-fieldLayout-body > .oo-ui-fieldLayout-header {
-	width: 7em;
+	white-space: nowrap;
 }
 
 .ve-ui-languageInputWidget-languageCodeTextInput {
 	width: 6em;
+	display: inline-block;
 }
 
-.ve-ui-languageInputWidget-directionSelect {
-	margin-bottom: 0.5em;
+.ve-ui-languageInputWidget-directionLabel {
+	margin-top: 0.5em;
+	display: block;
 }

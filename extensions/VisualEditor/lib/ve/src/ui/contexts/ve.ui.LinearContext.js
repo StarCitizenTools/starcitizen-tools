@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Linear Context class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -179,8 +179,8 @@ ve.ui.LinearContext.prototype.onInspectorOpening = function ( win, opening ) {
 			}
 			context.updateDimensionsDebounced();
 		} )
-		.always( function ( opened ) {
-			opened.always( function ( closed ) {
+		.then( function ( opened ) {
+			opened.then( function ( closed ) {
 				closed.always( function () {
 					// Don't try to close the inspector if a second
 					// opening has already been triggered
@@ -200,11 +200,6 @@ ve.ui.LinearContext.prototype.onInspectorOpening = function ( win, opening ) {
 					} else {
 						// Change state: inspector -> closed
 						context.toggle( false );
-					}
-
-					// Restore selection
-					if ( context.getSurface().getModel().getSelection() ) {
-						context.getSurface().getView().focus();
 					}
 				} );
 			} );
@@ -233,8 +228,7 @@ ve.ui.LinearContext.prototype.isInspectable = function () {
  * @inheritdoc
  */
 ve.ui.LinearContext.prototype.getRelatedSources = function () {
-	var i, len, toolClass, items, tools, models, selectedNode,
-		surfaceModel = this.surface.getModel(),
+	var surfaceModel = this.surface.getModel(),
 		selection = surfaceModel.getSelection(),
 		selectedModels = [];
 
@@ -246,53 +240,67 @@ ve.ui.LinearContext.prototype.getRelatedSources = function () {
 			selectedModels = [ surfaceModel.getSelectedNode() ];
 		}
 		if ( selectedModels.length ) {
-			models = [];
-			items = ve.ui.contextItemFactory.getRelatedItems( selectedModels );
-			for ( i = 0, len = items.length; i < len; i++ ) {
-				if ( !items[ i ].model.isInspectable() ) {
-					continue;
-				}
-				if ( ve.ui.contextItemFactory.isExclusive( items[ i ].name ) ) {
-					models.push( items[ i ].model );
-				}
-				this.relatedSources.push( {
-					type: 'item',
-					embeddable: ve.ui.contextItemFactory.isEmbeddable( items[ i ].name ),
-					name: items[ i ].name,
-					model: items[ i ].model
-				} );
-			}
-			tools = ve.ui.toolFactory.getRelatedItems( selectedModels );
-			for ( i = 0, len = tools.length; i < len; i++ ) {
-				if ( !tools[ i ].model.isInspectable() ) {
-					continue;
-				}
-				if ( models.indexOf( tools[ i ].model ) === -1 ) {
-					toolClass = ve.ui.toolFactory.lookup( tools[ i ].name );
-					this.relatedSources.push( {
-						type: 'tool',
-						embeddable: !toolClass || toolClass.static.makesEmbeddableContextItem,
-						name: tools[ i ].name,
-						model: tools[ i ].model
-					} );
-				}
-			}
-			if ( !this.relatedSources.length ) {
-				selectedNode = surfaceModel.getSelectedNode();
-				// For now we only need alien contexts to show the delete button
-				if ( selectedNode && selectedNode.isFocusable() && this.showDeleteButton() ) {
-					this.relatedSources.push( {
-						type: 'item',
-						embeddable: ve.ui.contextItemFactory.isEmbeddable( 'alien' ),
-						name: 'alien',
-						model: selectedNode
-					} );
-				}
-			}
+			this.relatedSources = this.getRelatedSourcesFromModels( selectedModels );
 		}
 	}
 
 	return this.relatedSources;
+};
+
+/**
+ * Get related for selected models
+ *
+ * @param {ve.dm.Model[]} selectedModels Models
+ * @return {Object[]} See #getRelatedSources
+ */
+ve.ui.LinearContext.prototype.getRelatedSourcesFromModels = function ( selectedModels ) {
+	var i, len, toolClass, tools, selectedNode,
+		models = [],
+		relatedSources = [],
+		items = ve.ui.contextItemFactory.getRelatedItems( selectedModels );
+
+	for ( i = 0, len = items.length; i < len; i++ ) {
+		if ( !items[ i ].model.isInspectable() ) {
+			continue;
+		}
+		if ( ve.ui.contextItemFactory.isExclusive( items[ i ].name ) ) {
+			models.push( items[ i ].model );
+		}
+		relatedSources.push( {
+			type: 'item',
+			embeddable: ve.ui.contextItemFactory.isEmbeddable( items[ i ].name ),
+			name: items[ i ].name,
+			model: items[ i ].model
+		} );
+	}
+	tools = ve.ui.toolFactory.getRelatedItems( selectedModels );
+	for ( i = 0, len = tools.length; i < len; i++ ) {
+		if ( !tools[ i ].model.isInspectable() ) {
+			continue;
+		}
+		if ( models.indexOf( tools[ i ].model ) === -1 ) {
+			toolClass = ve.ui.toolFactory.lookup( tools[ i ].name );
+			relatedSources.push( {
+				type: 'tool',
+				embeddable: !toolClass || toolClass.static.makesEmbeddableContextItem,
+				name: tools[ i ].name,
+				model: tools[ i ].model
+			} );
+		}
+	}
+	if ( !relatedSources.length ) {
+		selectedNode = this.surface.getModel().getSelectedNode();
+		// For now we only need alien contexts to show the delete button
+		if ( selectedNode && selectedNode.isFocusable() && this.showDeleteButton() ) {
+			relatedSources.push( {
+				type: 'item',
+				embeddable: ve.ui.contextItemFactory.isEmbeddable( 'alien' ),
+				name: 'alien',
+				model: selectedNode
+			} );
+		}
+	}
+	return relatedSources;
 };
 
 /**
@@ -307,7 +315,6 @@ ve.ui.LinearContext.prototype.getInspectors = function () {
 /**
  * Create a inspector window manager.
  *
- * @method
  * @abstract
  * @return {ve.ui.WindowManager} Inspector window manager
  */

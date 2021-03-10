@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @since 2017.10
  * @license GPL-2.0-or-later
@@ -14,52 +15,49 @@ class ApiTranslationCheck extends ApiBase {
 		$handle = new MessageHandle( $title );
 		$translation = $params[ 'translation' ];
 
-		$checkResults = $this->getWarnings( $handle, $translation );
+		$validationResult = $this->validateTranslation( $handle, $translation );
 
-		$warnings = [];
-		foreach ( $checkResults as $item ) {
-			$key = array_shift( $item );
-			$msg = $this->getContext()->msg( $key, $item )->parse();
-			$this->getResult()->addValue( 'warnings', null, $msg );
+		$validationOutput = [ 'errors' => [], 'warnings' => [] ];
+		if ( $validationResult ) {
+			$validationOutput['errors'] =
+				$validationResult->getDescriptiveErrors( $this->getContext() );
+			$validationOutput['warnings'] =
+				$validationResult->getDescriptiveWarnings( $this->getContext() );
 		}
+
+		$this->getResult()->addValue( null, 'validation', $validationOutput );
 	}
 
-	public function getWarnings( MessageHandle $handle, $translation ) {
-		if ( $translation === '' ) {
-			return [];
-		}
-
+	private function validateTranslation( MessageHandle $handle, $translation ) {
 		if ( $handle->isDoc() || !$handle->isValid() ) {
-			return [];
+			return null;
 		}
 
-		$checker = $handle->getGroup()->getChecker();
-		if ( !$checker ) {
-			return [];
+		$messageValidator = $handle->getGroup()->getValidator();
+		if ( !$messageValidator ) {
+			return null;
 		}
 
 		$definition = $this->getDefinition( $handle );
 		$message = new FatMessage( $handle->getKey(), $definition );
 		$message->setTranslation( $translation );
 
-		$checks = $checker->checkMessage( $message, $handle->getCode() );
-		if ( $checks === [] ) {
-			return [];
-		}
+		$validationResult = $messageValidator->validateMessage( $message, $handle->getCode() );
 
-		return $checks;
+		return $validationResult;
 	}
 
 	private function getDefinition( MessageHandle $handle ) {
 		$group = $handle->getGroup();
-		if ( method_exists( $group, 'getMessageContent' ) ) {
+		if ( is_callable( [ $group, 'getMessageContent' ] ) ) {
+			// @phan-suppress-next-line PhanUndeclaredMethod
 			return $group->getMessageContent( $handle );
 		} else {
 			return $group->getMessage( $handle->getKey(), $group->getSourceLanguage() );
 		}
 	}
 
-	public function getAllowedParams() {
+	protected function getAllowedParams() {
 		return [
 			'title' => [
 				ApiBase::PARAM_TYPE => 'string',

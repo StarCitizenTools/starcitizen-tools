@@ -8,6 +8,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+
 /**
  * Contains class with job for deleting translatable and translation pages.
  *
@@ -58,8 +60,34 @@ class TranslateDeleteJob extends Job {
 
 		$error = '';
 		$wikipage = new WikiPage( $title );
-		$status = $wikipage->doDeleteArticleReal( "{$summary}: $reason", false, 0, true, $error,
-			$user, [], 'delete', true );
+		if ( version_compare( TranslateUtils::getMWVersion(), '1.35', '<' ) ) {
+			$status = $wikipage->doDeleteArticleReal(
+				"{$summary}: $reason",
+				// https://phabricator.wikimedia.org/T262800
+				// @phan-suppress-next-line PhanTypeMismatchArgumentReal
+				false,
+				0,
+				true,
+				$error,
+				$user,
+				[],
+				'delete',
+				true
+			);
+		} else {
+			$status = $wikipage->doDeleteArticleReal(
+				"{$summary}: $reason",
+				$user,
+				false,
+				null,
+				$error,
+				null,
+				[],
+				'delete',
+				true
+			);
+		}
+
 		if ( !$status->isGood() ) {
 			$params = [
 				'target' => $base,
@@ -78,11 +106,12 @@ class TranslateDeleteJob extends Job {
 
 		PageTranslationHooks::$allowTargetEdit = false;
 
-		$cache = wfGetCache( CACHE_DB );
-		$pages = (array)$cache->get( wfMemcKey( 'pt-base', $base ) );
+		$cache = ObjectCache::getInstance( CACHE_DB );
+		$pageKey = $cache->makeKey( 'pt-base', $base );
+		$pages = (array)$cache->get( $pageKey );
 		$lastitem = array_pop( $pages );
 		if ( $title->getPrefixedText() === $lastitem ) {
-			$cache->delete( wfMemcKey( 'pt-base', $base ) );
+			$cache->delete( $pageKey );
 
 			$type = $this->getFull() ? 'deletefok' : 'deletelok';
 			$entry = new ManualLogEntry( 'pagetranslation', $type );
@@ -93,7 +122,7 @@ class TranslateDeleteJob extends Job {
 			$entry->publish( $logid );
 
 			$tpage = TranslatablePage::newFromTitle( $title );
-			$tpage->getTranslationPercentages( true );
+			$tpage->getTranslationPercentages();
 			foreach ( $tpage->getTranslationPages() as $page ) {
 				$page->invalidateCache();
 			}
@@ -128,9 +157,7 @@ class TranslateDeleteJob extends Job {
 		return $this->params['full'];
 	}
 
-	/**
-	 * @param User|string $performer
-	 */
+	/** @param User|string $performer */
 	public function setPerformer( $performer ) {
 		if ( is_object( $performer ) ) {
 			$this->params['performer'] = $performer->getName();
@@ -143,9 +170,7 @@ class TranslateDeleteJob extends Job {
 		return $this->params['performer'];
 	}
 
-	/**
-	 * @param User|string $user
-	 */
+	/** @param User|string $user */
 	public function setUser( $user ) {
 		if ( is_object( $user ) ) {
 			$this->params['user'] = $user->getName();

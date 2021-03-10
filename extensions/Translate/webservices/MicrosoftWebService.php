@@ -8,6 +8,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Implements support for Microsoft translation api v3.
  * @see https://docs.microsoft.com/fi-fi/azure/cognitive-services/Translator/reference/v3-0-reference
@@ -40,12 +42,13 @@ class MicrosoftWebService extends TranslationWebService {
 		$key = $this->config['key'];
 
 		$options = [];
-		$options['method']  = 'GET';
+		$options['method'] = 'GET';
 		$options['timeout'] = $this->config['timeout'];
 
 		$url = $this->config['url'] . '/languages?api-version=3.0';
 
-		$req = MWHttpRequest::factory( $url, $options );
+		$req = MediaWikiServices::getInstance()->getHttpRequestFactory()
+			->create( $url, $options, __METHOD__ );
 		$req->setHeader( 'Ocp-Apim-Subscription-Key', $key );
 
 		$status = $req->execute();

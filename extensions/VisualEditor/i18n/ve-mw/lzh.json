@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"StephDC",
-			"LNDDYL",
-			"Jason924tw",
-			"飞舞回堂前",
-			"SolidBlock",
+			"Davidzdh",
 			"Itsmine",
-			"Muhebbet"
+			"Jason924tw",
+			"LNDDYL",
+			"Muhebbet",
+			"SolidBlock",
+			"StephDC",
+			"飞舞回堂前"
 		]
 	},
 	"tooltip-ca-ve-edit": "纂是頁",
@@ -20,7 +21,6 @@
 	"visualeditor-dialog-media-info-moreinfo": "益訊",
 	"visualeditor-dialog-media-info-readmore": "閲甚",
 	"visualeditor-dialog-media-info-uploaded": "載：$1",
-	"visualeditor-dialog-media-noresults": "詢中無結",
 	"visualeditor-dialog-media-position-center": "中",
 	"visualeditor-dialog-media-position-left": "左",
 	"visualeditor-dialog-media-position-none": "無",
@@ -48,6 +48,5 @@
 	"visualeditor-dialog-meta-languages-name-label": "語言",
 	"visualeditor-dialog-meta-languages-section": "語言",
 	"visualeditor-dialog-meta-settings-index-disable": "否",
-	"visualeditor-dialog-meta-settings-index-force": "是",
-	"visualeditor-mweditmodesource-warning-switch": "留纂"
+	"visualeditor-dialog-meta-settings-index-force": "是"
 }

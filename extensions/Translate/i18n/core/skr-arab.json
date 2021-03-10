@@ -4,11 +4,8 @@
 			"Saraiki"
 		]
 	},
+	"translate-taction-translate": "ترجمہ کرو",
 	"translate-export-form-format": "فارمیٹ",
-	"translate-magic-cm-current": "موجودہ",
-	"translate-magic-cm-original": "اصل",
-	"translate-magic-cm-save": "بچاؤ",
-	"translate-magic-words": "جادوئی الفاظ",
 	"translate-rcfilters-translations": "ترجمے",
 	"translate-rcfilters-translations-only-label": "ترجمے",
 	"translate-rcfilters-translations-filter-label": "ترجمے کائنی",
@@ -38,8 +35,8 @@
 	"translate-ls-submit": "شماریات ݙکھاؤ",
 	"translate-mgs-submit": "شماریات ݙکھاؤ",
 	"translate-mgs-column-language": "زبان",
-	"translate-js-summary": "خلاصہ:",
-	"translate-js-save": "بچاؤ",
+	"supportedlanguages-activity": "$1: $2 {{PLURAL:$2|تبدیلی|تبدیلیاں}} ــ چھیکڑی تبدیلی $3 ݙین٘ہ پہلے",
+	"translate-supportedlanguages-cached": "ایہ معلومات $1 پہلے کٹھی تھئی ہائی۔",
 	"translate-gs-code": "کوڈ",
 	"translate-gs-continent": "براعظم",
 	"translate-gs-speakers": "الاوݨ آلے",
@@ -61,7 +58,7 @@
 	"tux-status-unsaved": "غیر محفوظ",
 	"tux-editor-cancel-button-label": "منسوخ",
 	"tux-editor-confirm-button-label": "ترجمہ دی تصدیق کرو",
-	"tux-warnings-hide": "لُکاؤ",
+	"tux-notices-hide": "لُکاؤ",
 	"tux-editor-translate-mode": "فہرست",
 	"tux-proofread-edit-label": "لکھو",
 	"tux-editor-page-mode": "ورقہ",
@@ -72,5 +69,6 @@
 	"tux-editor-collapse-tooltip": "لکاؤ",
 	"tux-editor-message-tools-delete": "مٹاؤ",
 	"tux-editor-message-tools-translations": "سارے ترجمے",
-	"tux-editor-loading": "لوڈ تھیندا پئے۔۔۔"
+	"tux-editor-loading": "لوڈ تھیندا پئے۔۔۔",
+	"specialpages-group-translation": "ترجمہ"
 }

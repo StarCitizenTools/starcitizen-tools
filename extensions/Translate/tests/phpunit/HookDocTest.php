@@ -8,7 +8,7 @@
  * @license GPL-2.0-or-later
  */
 
-class HookDocTest extends MediaWikiTestCase {
+class HookDocTest extends MediaWikiIntegrationTestCase {
 	protected $documented = [];
 	protected $used = [];
 	protected $paths = [
@@ -29,7 +29,7 @@ class HookDocTest extends MediaWikiTestCase {
 		],
 	];
 
-	protected function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		$contents = file_get_contents( __DIR__ . '/../../hooks.txt' );
 		$blocks = preg_split( '/\n\n/', $contents );

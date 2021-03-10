@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization desktop target Monobook skin styles.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -10,9 +10,8 @@
 	font-size: 1.28em; /* 0.8em / x-small */
 }
 
-.mw-body a.external.ve-ce-linkAnnotation-active {
-	/* Reset -2px from VE-core */
-	margin-right: 0;
+/* stylelint-disable-next-line selector-class-pattern */
+.mw-body a.external.ve-ce-linkAnnotation.ve-ce-annotation-active {
 	/* Monobook sets a background:url(); rule which overrides the colour. TODO: Fix upstream */
 	background-color: #e6f1ff;
 }

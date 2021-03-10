@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWInlineImageNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -25,7 +25,7 @@ ve.ce.MWInlineImageNode = function VeCeMWInlineImageNode( model, config ) {
 			.text( model.getFilename() );
 		$image = $( [] );
 	} else {
-		if ( model.getAttribute( 'isLinked' ) ) {
+		if ( model.getAttribute( 'href' ) ) {
 			this.$element = $( '<a>' ).addClass( 'image' );
 			$image = $( '<img>' ).appendTo( this.$element );
 		} else {
@@ -75,7 +75,6 @@ ve.ce.MWInlineImageNode.static.name = 'mwInlineImage';
 
 /**
  * Update CSS classes based on current attributes
- *
  */
 ve.ce.MWInlineImageNode.prototype.updateClasses = function () {
 	var valign = this.model.getAttribute( 'valign' );
@@ -111,6 +110,9 @@ ve.ce.MWInlineImageNode.prototype.onAttributeChange = function ( key, from, to )
 				break;
 			case 'height':
 				this.$image.css( 'height', to );
+				break;
+			case 'mediaType':
+				this.updateMediaType();
 				break;
 		}
 		this.updateClasses();

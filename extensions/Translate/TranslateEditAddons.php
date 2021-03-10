@@ -9,6 +9,10 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\User\UserIdentity;
+
 /**
  * Various editing enhancements to the edit page interface.
  * Partly succeeded by the new ajax-enhanced editor but kept for compatibility.
@@ -99,65 +103,6 @@ class TranslateEditAddons {
 	}
 
 	/**
-	 * Replace the normal save button with one that says if you are editing
-	 * message documentation to try to avoid accidents.
-	 * Hook: EditPageBeforeEditButtons
-	 *
-	 * @param EditPage $editpage
-	 * @param array &$buttons
-	 * @param int $tabindex
-	 */
-	public static function buttonHack( EditPage $editpage, &$buttons, $tabindex ) {
-		$handle = new MessageHandle( $editpage->getTitle() );
-		if ( !$handle->isValid() ) {
-			return;
-		}
-
-		$context = $editpage->getArticle()->getContext();
-
-		if ( $handle->isDoc() ) {
-			$langCode = $context->getLanguage()->getCode();
-			$name = TranslateUtils::getLanguageName( $handle->getCode(), $langCode );
-			$attribs = [
-				'id' => 'wpSave',
-				'name' => 'wpSave',
-				'tabindex' => ++$tabindex,
-			] + Linker::tooltipAndAccesskeyAttribs( 'save' );
-
-			$saveConfig = OOUI\Element::configFromHtmlAttributes( $attribs );
-			$buttons['save'] = new OOUI\ButtonInputWidget( [
-				// Support: IE 6 – Use <input>, otherwise it can't distinguish which button was clicked
-				'useInputTag' => true,
-				'flags' => [ 'progressive', 'primary' ],
-				'label' => $context->msg( 'translate-save', $name )->text(),
-				'type' => 'submit',
-			] + $saveConfig );
-		}
-
-		try {
-			$supportUrl = SupportAid::getSupportUrl( $handle->getTitle() );
-		} catch ( TranslationHelperException $e ) {
-			return;
-		}
-
-		$attribs = [
-			'id' => 'wpSupport',
-			'name' => 'wpSupport',
-			'type' => 'button',
-			'tabindex' => ++$tabindex,
-			'title' => $context->msg( 'translate-js-support-title' )->text(),
-		];
-
-		$attribs += [
-			'label' => $context->msg( 'translate-js-support' )->text(),
-			'href' => $supportUrl,
-			'target' => '_blank',
-		];
-		$saveConfig = OOUI\Element::configFromHtmlAttributes( $attribs );
-		$buttons['ask'] = new OOUI\ButtonWidget( $saveConfig );
-	}
-
-	/**
 	 * @param EditPage $editpage
 	 * @return string
 	 */
@@ -184,6 +129,85 @@ class TranslateEditAddons {
 
 	/**
 	 * Runs message checks, adds tp:transver tags and updates statistics.
+	 *
+	 * Only run in versions of mediawiki beginning 1.35; before 1.35, ::onSave is used
+	 *
+	 * Hook: PageSaveComplete
+	 * @param WikiPage $wikiPage
+	 * @param UserIdentity $userIdentity
+	 * @param string $summary
+	 * @param int $flags
+	 * @param RevisionRecord $revisionRecord
+	 * @param mixed $editResult documented as mixed because the EditResult class didn't exist
+	 *   before 1.35
+	 * @return true
+	 */
+	public static function onSaveComplete(
+		WikiPage $wikiPage,
+		UserIdentity $userIdentity,
+		string $summary,
+		int $flags,
+		RevisionRecord $revisionRecord,
+		$editResult
+	) {
+		global $wgEnablePageTranslation;
+
+		$content = $wikiPage->getContent();
+
+		if ( !$content instanceof TextContent ) {
+			// Screw it, not interested
+			return true;
+		}
+
+		$text = $content->getNativeData();
+		$title = $wikiPage->getTitle();
+		$handle = new MessageHandle( $title );
+
+		if ( !$handle->isValid() ) {
+			return true;
+		}
+
+		// Update it.
+		$revId = $revisionRecord->getId();
+
+		$fuzzy = self::checkNeedsFuzzy( $handle, $text );
+		self::updateFuzzyTag( $title, $revId, $fuzzy );
+
+		$group = $handle->getGroup();
+		// Update translation stats - source language should always be up to date
+		if ( $handle->getCode() !== $group->getSourceLanguage() ) {
+			// This will update in-process cache immediately, but the value is saved
+			// to the database in a deferred update. See MessageGroupStats::queueUpdates.
+			// In case an error happens before that, the stats may be stale, but that
+			// would be fixed by the next update or purge.
+			MessageGroupStats::clear( $handle );
+		}
+
+		MessageGroupStatesUpdaterJob::onChange( $handle );
+
+		$user = User::newFromIdentity( $userIdentity );
+
+		if ( $fuzzy === false ) {
+			Hooks::run( 'Translate:newTranslation', [ $handle, $revId, $text, $user ] );
+		}
+
+		TTMServer::onChange( $handle );
+
+		if ( $wgEnablePageTranslation && $handle->isPageTranslation() ) {
+			// Updates for translatable pages only
+			$minor = $flags & EDIT_MINOR;
+			PageTranslationHooks::onSectionSave( $wikiPage, $user, $content,
+				$summary, $minor, $flags, $handle );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Runs message checks, adds tp:transver tags and updates statistics.
+	 *
+	 * Only run in versions of mediawiki before 1.35; in 1.35+, ::onSaveComplete is used
+	 *
 	 * Hook: PageContentSaveComplete
 	 * @param WikiPage $wikiPage
 	 * @param User $user
@@ -216,13 +240,13 @@ class TranslateEditAddons {
 
 		// Update it.
 		if ( $revision === null ) {
-			$rev = $wikiPage->getTitle()->getLatestRevID();
+			$revId = $wikiPage->getTitle()->getLatestRevID();
 		} else {
-			$rev = $revision->getID();
+			$revId = $revision->getID();
 		}
 
 		$fuzzy = self::checkNeedsFuzzy( $handle, $text );
-		self::updateFuzzyTag( $title, $rev, $fuzzy );
+		self::updateFuzzyTag( $title, $revId, $fuzzy );
 
 		$group = $handle->getGroup();
 		// Update translation stats - source language should always be up to date
@@ -237,7 +261,7 @@ class TranslateEditAddons {
 		MessageGroupStatesUpdaterJob::onChange( $handle );
 
 		if ( $fuzzy === false ) {
-			Hooks::run( 'Translate:newTranslation', [ $handle, $rev, $text, $user ] );
+			Hooks::run( 'Translate:newTranslation', [ $handle, $revId, $text, $user ] );
 		}
 
 		TTMServer::onChange( $handle );
@@ -245,31 +269,36 @@ class TranslateEditAddons {
 		if ( $wgEnablePageTranslation && $handle->isPageTranslation() ) {
 			// Updates for translatable pages only
 			PageTranslationHooks::onSectionSave( $wikiPage, $user, $content,
-				$summary, $minor, $flags, $revision, $handle );
+				$summary, $minor, $flags, $handle );
 		}
 
 		return true;
 	}
 
 	/**
+	 * Returns true if message is fuzzy, OR fails checks OR fails validations (error OR warning).
 	 * @param MessageHandle $handle
 	 * @param string $text
 	 * @return bool
 	 */
 	protected static function checkNeedsFuzzy( MessageHandle $handle, $text ) {
-		// Check for explicit tag.
-		$fuzzy = MessageHandle::hasFuzzyString( $text );
-
 		// Docs are exempt for checks
 		if ( $handle->isDoc() ) {
-			return $fuzzy;
+			return false;
 		}
 
-		// Not all groups have checkers
+		// Check for explicit tag.
+		if ( MessageHandle::hasFuzzyString( $text ) ) {
+			return true;
+		}
+
+		// Not all groups have validators
 		$group = $handle->getGroup();
-		$checker = $group->getChecker();
-		if ( !$checker ) {
-			return $fuzzy;
+		$validator = $group->getValidator();
+
+		// no validator set
+		if ( !$validator ) {
+			return false;
 		}
 
 		$code = $handle->getCode();
@@ -278,13 +307,22 @@ class TranslateEditAddons {
 		$message = new FatMessage( $key, $en );
 		// Take the contents from edit field as a translation.
 		$message->setTranslation( $text );
-
-		$checks = $checker->checkMessage( $message, $code );
-		if ( count( $checks ) ) {
-			$fuzzy = true;
+		if ( $message->definition() === null ) {
+			// This should NOT happen, but add a check since it seems to be happening
+			// See: https://phabricator.wikimedia.org/T255669
+			LoggerFactory::getInstance( 'Translate' )->warning(
+				'Message definition is empty! Title: {title}, group: {group}, key: {key}',
+				[
+					'title' => $handle->getTitle()->getPrefixedText(),
+					'group' => $group->getId(),
+					'key' => $key
+				]
+			);
+			return false;
 		}
 
-		return $fuzzy;
+		$validationResult = $validator->quickValidate( $message, $code );
+		return $validationResult->hasIssues();
 	}
 
 	/**
@@ -393,7 +431,7 @@ class TranslateEditAddons {
 		$th->setEditMode( false );
 
 		$de->loadNewText();
-		if ( method_exists( $de, 'getNewRevision' ) ) {
+		if ( is_callable( [ $de, 'getNewRevision' ] ) ) {
 			$newRevision = $de->getNewRevision();
 			$newContent = $newRevision ? $newRevision->getContent( 'main' ) : null;
 		} else {
@@ -410,7 +448,6 @@ class TranslateEditAddons {
 		$boxes = [];
 		$boxes[] = $th->callBox( 'documentation', [ $th, 'getDocumentationBox' ] );
 		$boxes[] = $th->callBox( 'definition', [ $th, 'getDefinitionBox' ] );
-		$boxes[] = $th->callBox( 'translation', [ $th, 'getTranslationDisplayBox' ] );
 
 		$output = implode( "\n", $boxes );
 		$output = Html::rawElement(

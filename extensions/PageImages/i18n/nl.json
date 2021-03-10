@@ -7,6 +7,5 @@
 		]
 	},
 	"pageimages-desc": "Verzamelt informatie over afbeeldingen die worden gebruikt op de pagina",
-	"pageimages-info-label": "Pagina-afbeelding",
-	"apihelp-query+pageimages-paramvalue-license-free": "Alleen vrije afbeeldingen"
+	"pageimages-info-label": "Pagina-afbeelding"
 }

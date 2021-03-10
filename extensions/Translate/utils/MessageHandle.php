@@ -7,32 +7,25 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Linker\LinkTarget;
+use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
+
 /**
  * Class for pointing to messages, like Title class is for titles.
  * @since 2011-03-13
  */
 class MessageHandle {
-	/**
-	 * @var Title
-	 */
+	/** @var LinkTarget */
 	protected $title;
-
-	/**
-	 * @var string|null
-	 */
+	/** @var string|null */
 	protected $key;
-
-	/**
-	 * @var string|null Language code
-	 */
+	/** @var string|null Language code */
 	protected $code;
-
-	/**
-	 * @var string[]|null
-	 */
+	/** @var string[]|null */
 	protected $groupIds;
 
-	public function __construct( Title $title ) {
+	public function __construct( LinkTarget $title ) {
 		$this->title = $title;
 	}
 
@@ -42,7 +35,7 @@ class MessageHandle {
 	 */
 	public function isMessageNamespace() {
 		global $wgTranslateMessageNamespaces;
-		$namespace = $this->getTitle()->getNamespace();
+		$namespace = $this->title->getNamespace();
 
 		return in_array( $namespace, $wgTranslateMessageNamespaces );
 	}
@@ -53,9 +46,8 @@ class MessageHandle {
 	 */
 	public function figureMessage() {
 		if ( $this->key === null ) {
-			$title = $this->getTitle();
 			// Check if this is a valid message first
-			$this->key = $title->getDBkey();
+			$this->key = $this->title->getDBkey();
 			$known = MessageIndex::singleton()->getGroupIds( $this ) !== [];
 
 			$pos = strrpos( $this->key, '/' );
@@ -73,7 +65,7 @@ class MessageHandle {
 
 	/**
 	 * Returns the identified or guessed message key.
-	 * @return String
+	 * @return string
 	 */
 	public function getKey() {
 		$this->figureMessage();
@@ -84,7 +76,7 @@ class MessageHandle {
 	/**
 	 * Returns the language code.
 	 * For language codeless source messages will return empty string.
-	 * @return String
+	 * @return string
 	 */
 	public function getCode() {
 		$this->figureMessage();
@@ -99,10 +91,9 @@ class MessageHandle {
 	 * @since 2016-01
 	 */
 	public function getEffectiveLanguage() {
-		global $wgContLang;
 		$code = $this->getCode();
 		if ( $code === '' || $this->isDoc() ) {
-			return $wgContLang;
+			return MediaWikiServices::getInstance()->getContentLanguage();
 		}
 
 		return wfGetLangObj( $code );
@@ -124,7 +115,7 @@ class MessageHandle {
 	 * @return bool
 	 */
 	public function isPageTranslation() {
-		return $this->getTitle()->inNamespace( NS_TRANSLATIONS );
+		return $this->title->inNamespace( NS_TRANSLATIONS );
 	}
 
 	/**
@@ -175,10 +166,19 @@ class MessageHandle {
 		// Do another check that the group actually exists
 		$group = $this->getGroup();
 		if ( !$group ) {
-			$warning = "MessageIndex is out of date – refers to unknown group {$groups[0]}. ";
-			$warning .= 'Doing a rebuild.';
-			wfWarn( $warning );
-			MessageIndexRebuildJob::newJob()->run();
+			$logger = LoggerFactory::getInstance( 'Translate' );
+			$logger->warning(
+				'[MessageHandle] MessageIndex is out of date. Page {pagename} refers to ' .
+				'unknown group {messagegroup}',
+				[
+					'pagename' => $this->getTitle()->getPrefixedText(),
+					'messagegroup' => $groups[0],
+				]
+			);
+
+			// Schedule a job in the job queue (with deduplication)
+			$job = MessageIndexRebuildJob::newJob();
+			JobQueueGroup::singleton()->push( $job );
 
 			return false;
 		}
@@ -191,7 +191,7 @@ class MessageHandle {
 	 * @return Title
 	 */
 	public function getTitle() {
-		return $this->title;
+		return Title::newFromLinkTarget( $this->title );
 	}
 
 	/**
@@ -259,29 +259,24 @@ class MessageHandle {
 	 * @since 2017.10
 	 */
 	public function getInternalKey() {
-		global $wgContLang;
-
 		$key = $this->getKey();
 
-		if ( !MWNamespace::isCapitalized( $this->getTitle()->getNamespace() ) ) {
+		$nsInfo = MediaWikiServices::getInstance()->getNamespaceInfo();
+		if ( !$nsInfo->isCapitalized( $this->title->getNamespace() ) ) {
 			return $key;
 		}
 
 		$group = $this->getGroup();
-		$keys = [];
+		$keys = $group->getKeys();
 		// We cannot reliably map from the database key to the internal key if
 		// capital links setting is enabled for the namespace.
-		if ( method_exists( $group, 'getKeys' ) ) {
-			$keys = $group->getKeys();
-		} else {
-			$keys = array_keys( $group->getDefinitions() );
-		}
 
 		if ( in_array( $key, $keys, true ) ) {
 			return $key;
 		}
 
-		$lcKey = $wgContLang->lcfirst( $key );
+		$lcKey = MediaWikiServices::getInstance()->getContentLanguage()
+			->lcfirst( $key );
 		if ( in_array( $lcKey, $keys, true ) ) {
 			return $lcKey;
 		}

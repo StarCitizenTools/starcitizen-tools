@@ -1,15 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"HanV",
 			"Konovalov",
+			"Mainframe98",
+			"Robin van der Vliet",
+			"Robin0van0der0vliet",
 			"SPQRobin",
 			"Saruman",
 			"Siebrand",
-			"Sjoerddebruin",
-			"Robin0van0der0vliet",
-			"HanV",
-			"Robin van der Vliet",
-			"Mainframe98"
+			"Sjoerddebruin"
 		]
 	},
 	"scribunto-desc": "Framework voor het inbedden van scripttalen in pagina's",
@@ -63,9 +63,6 @@
 	"scribunto-limitreport-profile": "Luaprofiel",
 	"scribunto-limitreport-profile-ms": "$1 ms",
 	"scribunto-limitreport-logs": "Lua logboeken",
-	"apihelp-scribunto-console-param-title": "De titel van de module om te testen.",
-	"apihelp-scribunto-console-param-content": "De nieuwe inhoud van de module.",
-	"apihelp-scribunto-console-param-session": "Sessiesleutel.",
 	"nstab-module": "Module",
 	"tooltip-ca-nstab-module": "Modulepagina bekijken"
 }

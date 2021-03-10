@@ -1,5 +1,5 @@
 /*!
- * RangeFix v0.2.6
+ * RangeFix v0.2.9
  * https://github.com/edg2s/rangefix
  *
  * Copyright 2014-17 Ed Sanders.
@@ -51,7 +51,7 @@
 			t1 = document.createTextNode( 'aa' );
 			t2 = document.createTextNode( 'aa' );
 			img = document.createElement( 'img' );
-			img.setAttribute( 'src', '#null' );
+			img.setAttribute( 'src', 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' );
 			range = document.createRange();
 
 			broken = {};
@@ -166,7 +166,7 @@
 	 * @return {ClientRectList|ClientRect[]} ClientRectList or list of ClientRect objects describing range
 	 */
 	rangeFix.getClientRects = function ( range ) {
-		var rects, endContainer, endOffset, partialRange,
+		var rects, endContainer, endContainerRects, endOffset, partialRange,
 			broken = this.isBroken();
 
 		if ( broken.ieZoom ) {
@@ -181,17 +181,26 @@
 		// we got up to
 		// https://code.google.com/p/chromium/issues/detail?id=324437
 		rects = [];
+		endContainerRects = [];
 		endContainer = range.endContainer;
 		endOffset = range.endOffset;
 		partialRange = document.createRange();
+
+		function indexOf( child ) {
+			var i = 0;
+			while ( ( child = child.previousSibling ) ) {
+				i++;
+			}
+			return i;
+		}
 
 		while ( endContainer !== range.commonAncestorContainer ) {
 			partialRange.setStart( endContainer, 0 );
 			partialRange.setEnd( endContainer, endOffset );
 
-			batchPush( rects, partialRange.getClientRects() );
+			batchPush( endContainerRects, partialRange.getClientRects() );
 
-			endOffset = Array.prototype.indexOf.call( endContainer.parentNode.childNodes, endContainer );
+			endOffset = indexOf( endContainer );
 			endContainer = endContainer.parentNode;
 		}
 
@@ -200,6 +209,7 @@
 		partialRange = range.cloneRange();
 		partialRange.setEnd( endContainer, endOffset );
 		batchPush( rects, partialRange.getClientRects() );
+		batchPush( rects, endContainerRects );
 		return rects;
 	};
 

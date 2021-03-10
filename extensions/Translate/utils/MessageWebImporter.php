@@ -10,33 +10,25 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\SlotRecord;
+
 /**
  * Class which encapsulates message importing. It scans for changes (new, changed, deleted),
  * displays them in pretty way with diffs and finally executes the actions the user choices.
  */
 class MessageWebImporter {
-	/**
-	 * @var Title
-	 */
+	/** @var Title */
 	protected $title;
-
-	/**
-	 * @var User
-	 */
+	/** @var User */
 	protected $user;
-
-	/**
-	 * @var MessageGroup
-	 */
+	/** @var MessageGroup */
 	protected $group;
 	protected $code;
 	protected $time;
-
-	/**
-	 * @var OutputPage
-	 */
+	/** @var OutputPage */
 	protected $out;
-
 	/**
 	 * Maximum processing time in seconds.
 	 */
@@ -62,30 +54,22 @@ class MessageWebImporter {
 		return $this->title;
 	}
 
-	/**
-	 * @param Title $title
-	 */
+	/** @param Title $title */
 	public function setTitle( Title $title ) {
 		$this->title = $title;
 	}
 
-	/**
-	 * @return User
-	 */
+	/** @return User */
 	public function getUser() {
 		return $this->user ?: RequestContext::getMain()->getUser();
 	}
 
-	/**
-	 * @param User $user
-	 */
+	/** @param User $user */
 	public function setUser( User $user ) {
 		$this->user = $user;
 	}
 
-	/**
-	 * @return MessageGroup
-	 */
+	/** @return MessageGroup */
 	public function getGroup() {
 		return $this->group;
 	}
@@ -102,30 +86,22 @@ class MessageWebImporter {
 		}
 	}
 
-	/**
-	 * @return string
-	 */
+	/** @return string */
 	public function getCode() {
 		return $this->code;
 	}
 
-	/**
-	 * @param string $code
-	 */
+	/** @param string $code */
 	public function setCode( $code = 'en' ) {
 		$this->code = $code;
 	}
 
-	/**
-	 * @return string
-	 */
+	/** @return string */
 	protected function getAction() {
 		return $this->getTitle()->getFullURL();
 	}
 
-	/**
-	 * @return string
-	 */
+	/** @return string */
 	protected function doHeader() {
 		$formParams = [
 			'method' => 'post',
@@ -139,16 +115,12 @@ class MessageWebImporter {
 			Html::hidden( 'process', 1 );
 	}
 
-	/**
-	 * @return string
-	 */
+	/** @return string */
 	protected function doFooter() {
 		return '</form>';
 	}
 
-	/**
-	 * @return bool
-	 */
+	/** @return bool */
 	protected function allowProcess() {
 		$request = RequestContext::getMain()->getRequest();
 
@@ -157,9 +129,7 @@ class MessageWebImporter {
 			&& $this->getUser()->matchEditToken( $request->getVal( 'token' ) );
 	}
 
-	/**
-	 * @return array
-	 */
+	/** @return array */
 	protected function getActions() {
 		if ( $this->code === 'en' ) {
 			return [ 'import', 'fuzzy', 'ignore' ];
@@ -321,7 +291,7 @@ class MessageWebImporter {
 				foreach ( $actions as $action ) {
 					$label = $context->msg( "translate-manage-action-$action" )->text();
 					$name = self::escapeNameForPHP( "action-$type-$key" );
-					$id = Sanitizer::escapeId( "action-$key-$action" );
+					$id = Sanitizer::escapeIdForAttribute( "action-$key-$action" );
 					$act[] = Xml::radioLabel( $label, $name, $action, $id, $action === $defaction );
 				}
 
@@ -389,7 +359,7 @@ class MessageWebImporter {
 	 * Perform an action on a given group/key/code
 	 *
 	 * @param string $action Options: 'import', 'conflict' or 'ignore'
-	 * @param MessageGroup $group Group object
+	 * @param MessageGroup $group
 	 * @param string $key Message key
 	 * @param string $code Language code
 	 * @param string $message Contents for the $key/code combination
@@ -398,7 +368,7 @@ class MessageWebImporter {
 	 *        See Article::doEdit.
 	 * @param int $editFlags Integer bitfield: see Article::doEdit
 	 * @throws MWException
-	 * @return string Action result
+	 * @return array Action result
 	 */
 	public static function doAction( $action, $group, $key, $code, $message, $comment = '',
 		$user = null, $editFlags = 0
@@ -467,42 +437,47 @@ class MessageWebImporter {
 	 * @param string $comment
 	 * @param User $user
 	 * @param int $editFlags
-	 * @return array|String
+	 * @return array
 	 */
 	public static function doFuzzy( $title, $message, $comment, $user, $editFlags = 0 ) {
 		$context = RequestContext::getMain();
+		$services = MediaWikiServices::getInstance();
 
 		if ( !$context->getUser()->isAllowed( 'translate-manage' ) ) {
-			return $context->msg( 'badaccess-group0' )->text();
+			return [ 'badaccess-group0' ];
 		}
-
-		$dbw = wfGetDB( DB_MASTER );
-
-		// Work on all subpages of base title.
-		$handle = new MessageHandle( $title );
-		$titleText = $handle->getKey();
-
-		$conds = [
-			'page_namespace' => $title->getNamespace(),
-			'page_latest=rev_id',
-			'rev_text_id=old_id',
-			'page_title' . $dbw->buildLike( "$titleText/", $dbw->anyString() ),
-		];
-
-		$rows = $dbw->select(
-			[ 'page', 'revision', 'text' ],
-			[ 'page_title', 'page_namespace', 'old_text', 'old_flags' ],
-			$conds,
-			__METHOD__
-		);
 
 		// Edit with fuzzybot if there is no user.
 		if ( !$user ) {
 			$user = FuzzyBot::getUser();
 		}
 
-		// Process all rows.
+		// Work on all subpages of base title.
+		$handle = new MessageHandle( $title );
+		$titleText = $handle->getKey();
+
+		$revStore = $services->getRevisionStore();
+		$queryInfo = $revStore->getQueryInfo( [ 'page' ] );
+		$dbw = $services->getDBLoadBalancer()->getConnectionRef( DB_MASTER );
+		$rows = $dbw->select(
+			$queryInfo['tables'],
+			$queryInfo['fields'],
+			[
+				'page_namespace' => $title->getNamespace(),
+				'page_latest=rev_id',
+				'page_title' . $dbw->buildLike( "$titleText/", $dbw->anyString() ),
+			],
+			__METHOD__,
+			[],
+			$queryInfo['joins']
+		);
+
 		$changed = [];
+		$slots = [];
+		if ( is_callable( [ $revStore, 'getContentBlobsForBatch' ] ) ) {
+			$slots = $revStore->getContentBlobsForBatch( $rows, [ SlotRecord::MAIN ] )->getValue();
+		}
+
 		foreach ( $rows as $row ) {
 			global $wgTranslateDocumentationLanguageCode;
 
@@ -514,9 +489,14 @@ class MessageWebImporter {
 			) {
 				// Use imported text, not database text.
 				$text = $message;
+			} elseif ( isset( $slots[$row->rev_id] ) ) {
+				$slot = $slots[$row->rev_id][SlotRecord::MAIN];
+				$text = self::makeTextFuzzy( $slot->blob_data );
 			} else {
-				$text = Revision::getRevisionText( $row );
-				$text = self::makeTextFuzzy( $text );
+				$text = self::makeTextFuzzy( $revStore->newRevisionFromRow( $row )
+					->getContent( SlotRecord::MAIN )
+					->getNativeData()
+				);
 			}
 
 			// Do actual import

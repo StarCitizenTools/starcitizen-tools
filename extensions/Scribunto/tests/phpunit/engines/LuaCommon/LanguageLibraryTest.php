@@ -1,7 +1,11 @@
 <?php
 
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
-class Scribunto_LuaLanguageLibraryTest extends Scribunto_LuaEngineTestBase {
+use MediaWiki\MediaWikiServices;
+
+/**
+ * @covers Scribunto_LuaLanguageLibrary
+ */
+class Scribunto_LuaLanguageLibraryTest extends Scribunto_LuaEngineUnitTestBase {
 	protected static $moduleName = 'LanguageLibraryTests';
 
 	public function __construct(
@@ -30,13 +34,12 @@ class Scribunto_LuaLanguageLibraryTest extends Scribunto_LuaEngineTestBase {
 	}
 
 	public function testFormatDateTTLs() {
-		global $wgContLang;
-
 		$engine = $this->getEngine();
 		$pp = $engine->getParser()->getPreprocessor();
 
 		$ttl = null;
-		$wgContLang->sprintfDate( 's', '20130101000000', null, $ttl );
+		MediaWikiServices::getInstance()->getContentLanguage()
+			->sprintfDate( 's', '20130101000000', null, $ttl );
 		if ( $ttl === null ) {
 			$this->markTestSkipped( "Language::sprintfDate does not set a TTL" );
 		}
@@ -59,7 +62,7 @@ class Scribunto_LuaLanguageLibraryTest extends Scribunto_LuaEngineTestBase {
 
 		$frame = $pp->newFrame();
 		$module->invoke( 'formatCurrentDate', $frame );
-		$this->assertEquals( 1, $frame->getTTL(),
+		$this->assertSame( 1, $frame->getTTL(),
 			'TTL must be equal to 1 second when lang:formatDate( \'s\' ) is called' );
 
 		$frame = $pp->newFrame();

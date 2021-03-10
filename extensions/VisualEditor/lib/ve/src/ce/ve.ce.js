@@ -1,11 +1,12 @@
 /*!
  * VisualEditor ContentEditable namespace.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
  * Namespace for all VisualEditor ContentEditable classes, static methods and static properties.
+ *
  * @class
  * @singleton
  */
@@ -29,7 +30,6 @@ ve.ce.minImgDataUri = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs
  * non-editable elements are excluded (but replaced with the appropriate number of snowman
  * characters so the offsets match up with the linear model).
  *
- * @method
  * @param {HTMLElement} element DOM element to get text of
  * @return {string} Plain text of DOM element
  */
@@ -88,7 +88,6 @@ ve.ce.getDomText = function ( element ) {
  * serialization without any attributes or text contents. This can be used to observe structural
  * changes.
  *
- * @method
  * @param {HTMLElement} element DOM element to get hash of
  * @return {string} Hash of DOM element
  */
@@ -161,7 +160,6 @@ ve.ce.previousCursorOffset = function ( node ) {
 /**
  * Gets the linear offset from a given DOM node and offset within it.
  *
- * @method
  * @param {HTMLElement} domNode DOM node
  * @param {number} domOffset DOM offset within the DOM node
  * @return {number} Linear model offset
@@ -344,20 +342,22 @@ ve.ce.getOffset = function ( domNode, domOffset ) {
 /**
  * Gets the linear offset of a given slug
  *
- * @method
  * @param {HTMLElement} element Slug DOM element
  * @return {number} Linear model offset
  * @throws {Error}
  */
 ve.ce.getOffsetOfSlug = function ( element ) {
-	var model, $element = $( element );
+	var model, $prev, $element = $( element );
 	if ( $element.index() === 0 ) {
 		model = $element.parent().data( 'view' ).getModel();
 		return model.getOffset() + ( model.isWrapped() ? 1 : 0 );
-	} else if ( $element.prev().length ) {
-		model = $element.prev().data( 'view' ).getModel();
-		return model.getOffset() + model.getOuterLength();
 	} else {
+		// Don't pick up DOM nodes not from the view tree e.g. cursorHolders (T202103)
+		$prev = $element.prevAll( '.ve-ce-leafNode,.ve-ce-branchNode' ).first();
+		if ( $prev.length ) {
+			model = $prev.data( 'view' ).getModel();
+			return model.getOffset() + model.getOuterLength();
+		}
 		throw new Error( 'Incorrect slug location' );
 	}
 };
@@ -410,7 +410,6 @@ ve.ce.isAfterAnnotationBoundary = function ( node, offset ) {
 /**
  * Check if keyboard shortcut modifier key is pressed.
  *
- * @method
  * @param {jQuery.Event} e Key press event
  * @return {boolean} Modifier key is pressed
  */
@@ -440,171 +439,16 @@ ve.ce.veRangeFromSelection = function ( selection ) {
 };
 
 /**
- * Find the link in which a node lies
+ * Find the closest nailed annotation in which a node lies
  *
  * @param {Node|null} node The node to test
- * @return {Node|null} The link within which the node lies (possibly the node itself)
+ * @return {Node|null} The closest nailed annotation within which the node lies (possibly the node itself)
  */
-ve.ce.linkAt = function ( node ) {
+ve.ce.nailedAnnotationAt = function ( node ) {
 	if ( node && node.nodeType === Node.TEXT_NODE ) {
 		node = node.parentNode;
 	}
-	return $( node ).closest( '.ve-ce-linkAnnotation' )[ 0 ];
-};
-
-/**
- * Analyse a DOM content change to build a Transaction
- *
- * Content changes have oldState.node === newState.node and newState.contentChanged === true .
- * Annotations are inferred heuristically from plaintext to do what the user intended.
- * TODO: treat more changes as simple (not needing a re-render); see
- * https://phabricator.wikimedia.org/T114260 .
- *
- * @method
- * @param {ve.ce.RangeState} oldState The prior range state
- * @param {ve.ce.RangeState} newState The changed range state
- *
- * @return {Object} Results of analysis
- * @return {ve.dm.Transaction} return.transaction Transaction corresponding to the DOM content change
- * @return {ve.dm.Selection} return.selection Changed selection to apply (TODO: unsafe / useless?)
- * @return {boolean} return.rerender Whether the DOM needs rerendering after applying the transaction
- */
-ve.ce.modelChangeFromContentChange = function ( oldState, newState ) {
-	var data, len, annotations, bothCollapsed, oldStart, newStart, replacementRange,
-		fromLeft = 0,
-		fromRight = 0,
-		// It is guaranteed that oldState.node === newState.node , so just call it 'node'
-		node = newState.node,
-		nodeOffset = node.getModel().getOffset(),
-		oldText = oldState.text,
-		newText = newState.text,
-		oldRange = oldState.veRange,
-		newRange = newState.veRange,
-		oldData = oldText.split( '' ),
-		newData = newText.split( '' ),
-		lengthDiff = newText.length - oldText.length,
-		dmDoc = node.getModel().getDocument(),
-		modelData = dmDoc.data;
-
-	bothCollapsed = oldRange.isCollapsed() && newRange.isCollapsed();
-	oldStart = oldRange.start - nodeOffset - 1;
-	newStart = newRange.start - nodeOffset - 1;
-
-	// If the only change is an insertion just before the new cursor, then apply a
-	// single insertion transaction, using the annotations from the old start
-	// position (accounting for whether the cursor was before or after an annotation
-	// boundary)
-	if (
-		bothCollapsed &&
-		lengthDiff > 0 &&
-		oldText.slice( 0, oldStart ) === newText.slice( 0, oldStart ) &&
-		oldText.slice( oldStart ) === newText.slice( newStart )
-	) {
-		data = newData.slice( oldStart, newStart );
-		if ( node.unicornAnnotations ) {
-			annotations = node.unicornAnnotations;
-		} else {
-			annotations = modelData.getInsertionAnnotationsFromRange(
-				oldRange,
-				oldState.focusIsAfterAnnotationBoundary
-			);
-		}
-
-		if ( annotations.getLength() ) {
-			ve.dm.Document.static.addAnnotationsToData( data, annotations );
-		}
-
-		return {
-			transaction: ve.dm.TransactionBuilder.static.newFromInsertion(
-				dmDoc,
-				oldRange.start,
-				data
-			),
-			selection: new ve.dm.LinearSelection( dmDoc, newRange ),
-			rerender: false
-		};
-	}
-
-	// If the only change is a removal touching the old cursor position, then apply
-	// a single removal transaction.
-	if (
-		bothCollapsed &&
-		lengthDiff < 0 &&
-		oldText.slice( 0, newStart ) === newText.slice( 0, newStart ) &&
-		oldText.slice( newStart - lengthDiff ) === newText.slice( newStart )
-	) {
-		return {
-			transaction: ve.dm.TransactionBuilder.static.newFromRemoval(
-				dmDoc,
-				new ve.Range( newRange.start, newRange.start - lengthDiff )
-			),
-			selection: new ve.dm.LinearSelection( dmDoc, newRange ),
-			rerender: false
-		};
-	}
-
-	// Complex change (either removal+insertion or insertion not just before new cursor)
-	// 1. Count unchanged characters from left and right;
-	// 2. Assume that the minimal changed region indicates the replacement made by the user;
-	// 3. Hence guess how to map annotations.
-	// N.B. this logic can go wrong; e.g. this code will see slice->slide and
-	// assume that the user changed 'c' to 'd', but the user could instead have changed 'ic'
-	// to 'id', which would map annotations differently.
-
-	len = Math.min( oldData.length, newData.length );
-
-	while ( fromLeft < len && oldData[ fromLeft ] === newData[ fromLeft ] ) {
-		++fromLeft;
-	}
-
-	while (
-		fromRight < len - fromLeft &&
-		oldData[ oldData.length - 1 - fromRight ] ===
-		newData[ newData.length - 1 - fromRight ]
-	) {
-		++fromRight;
-	}
-	replacementRange = new ve.Range(
-		nodeOffset + 1 + fromLeft,
-		nodeOffset + 1 + oldData.length - fromRight
-	);
-	data = newData.slice( fromLeft, newData.length - fromRight );
-
-	if ( node.unicornAnnotations ) {
-		// This CBN is unicorned. Use the stored annotations.
-		annotations = node.unicornAnnotations;
-	} else {
-		// Guess the annotations from the (possibly empty) range being replaced.
-		//
-		// Still consider focusIsAfterAnnotationBoundary, even though the change is
-		// not necessarily at the cursor: assume the old focus was inside the same
-		// DOM text node as the insertion, and therefore has the same annotations.
-		// Otherwise, when using an IME that selects inserted text, this code path
-		// can cause an annotation discrepancy that triggers an unwanted re-render,
-		// closing the IME (For example, when typing at the start of <p><i>x</i></p>
-		// in Windows 8.1 Korean on IE11).
-		annotations = modelData.getInsertionAnnotationsFromRange(
-			replacementRange,
-			oldRange.isCollapsed() && oldState.focusIsAfterAnnotationBoundary
-		);
-	}
-	if ( annotations.getLength() ) {
-		ve.dm.Document.static.addAnnotationsToData( data, annotations );
-	}
-	if ( newRange.isCollapsed() ) {
-		// TODO: Remove this, or comment why it's necessary
-		// (When wouldn't we be at a cursor offset?)
-		newRange = new ve.Range( dmDoc.getNearestCursorOffset( newRange.start, 1 ) );
-	}
-	return {
-		transaction: ve.dm.TransactionBuilder.static.newFromReplacement(
-			dmDoc,
-			replacementRange,
-			data
-		),
-		selection: new ve.dm.LinearSelection( dmDoc, newRange ),
-		rerender: true
-	};
+	return $( node ).closest( '.ve-ce-nailedAnnotation' )[ 0 ];
 };
 
 /**

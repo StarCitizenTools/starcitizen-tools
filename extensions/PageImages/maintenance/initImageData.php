@@ -9,13 +9,13 @@ require_once "$IP/maintenance/Maintenance.php";
 use PageImages\Job\InitImageDataJob;
 
 /**
- * @license WTFPL 2.0
+ * @license WTFPL
  * @author Max Semenik
  */
 class InitImageData extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Initializes PageImages data';
+		$this->addDescription( 'Initializes PageImages data' );
 		$this->addOption( 'namespaces',
 			'Comma-separated list of namespace(s) to refresh', false, true );
 		$this->addOption( 'earlier-than',
@@ -118,5 +118,5 @@ class InitImageData extends Maintenance {
 	}
 }
 
-$maintClass = 'InitImageData';
+$maintClass = InitImageData::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

@@ -1,54 +1,25 @@
 /*!
  * VisualEditor UserInterface MobileContext styles.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
-.ve-ui-mobileContext .ve-ui-linearContextItem-body {
-	display: none;
-}
-
-.ve-ui-mobileContext-menu {
+.ve-ui-mobileContext {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: #fff;
+	/* Match toolbar border & shadow */
 	border-top: 1px solid #c8ccd1;
+	box-shadow: 0 -1px 1px 0 rgba( 0, 0, 0, 0.1 );
+	/* Transition out faster, as keyboard may be coming up */
+	transition: transform 100ms;
+	transform: translateY( 0% );
 }
 
-.ve-ui-mobileContext .ve-ui-linearContextItem-label {
-	min-width: auto;
-}
-
-.ve-ui-mobileContext .ve-ui-linearContextItem-title {
-	padding: 0 1em 0 0.5em;
-	line-height: 3em;
-}
-
-.ve-ui-mobileContext .ve-ui-linearContextItem-description {
-	line-height: 3em;
-}
-
-.ve-ui-mobileContext .ve-ui-linearContextItem-actions {
-	vertical-align: top;
-	padding: 0;
-	height: 100%;
-}
-
-.ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonWidget {
-	border-left: 1px solid #c8ccd1;
-	vertical-align: top;
-}
-
-.ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonElement-button {
-	vertical-align: top;
-}
-
-.ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonWidget.oo-ui-iconElement:not( .oo-ui-labelElement ) .oo-ui-buttonElement-button {
-	padding-left: 2.875em;
-	padding-top: 2.875em;
-}
-
-.ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonWidget.oo-ui-iconElement .oo-ui-iconElement-icon {
-	left: 0.7232em;
-}
-
-.ve-ui-mobileContext .ve-ui-linearContextItem-actions .oo-ui-buttonWidget.oo-ui-iconElement.oo-ui-labelElement .oo-ui-buttonElement-button {
-	padding: 0.90625em 0.5em 0.90625em 2.875em;
+.ve-ui-mobileContext.ve-ui-context-hidden {
+	display: block;
+	transition: transform 250ms;
+	transform: translateY( 100% );
 }

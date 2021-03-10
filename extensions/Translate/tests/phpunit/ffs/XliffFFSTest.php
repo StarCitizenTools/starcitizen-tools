@@ -5,17 +5,17 @@
  * @license GPL-2.0-or-later
  */
 
-class XliffFFSTest extends MediaWikiTestCase {
+class XliffFFSTest extends MediaWikiIntegrationTestCase {
 	protected $groupConfiguration = [
 		'BASIC' => [
-			'class' => 'FileBasedMessageGroup',
+			'class' => FileBasedMessageGroup::class,
 			'id' => 'test-id',
 			'label' => 'Test Label',
 			'namespace' => 'NS_MEDIAWIKI',
 			'description' => 'Test description',
 		],
 		'FILES' => [
-			'class' => 'XliffFFS',
+			'class' => XliffFFS::class,
 			'sourcePattern' => '',
 		],
 	];

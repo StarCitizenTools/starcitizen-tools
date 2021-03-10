@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWParameterResultWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -32,7 +32,11 @@ OO.inheritClass( ve.ui.MWParameterResultWidget, OO.ui.DecoratedOptionWidget );
 
 /* Methods */
 
-/** */
+/**
+ * Build the label element
+ *
+ * @return {jQuery}
+ */
 ve.ui.MWParameterResultWidget.prototype.buildLabel = function () {
 	var i, len,
 		$label = $( '<div>' )

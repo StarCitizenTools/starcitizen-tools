@@ -8,6 +8,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Translation aid which gives Gettext documentation.
  *
@@ -20,19 +22,28 @@ class GettextDocumentationAid extends TranslationAid {
 		// So $group can be different from $this->group
 		$group = $this->handle->getGroup();
 		if ( !$group instanceof FileBasedMessageGroup ) {
-			throw new TranslationHelperException( 'Not a Gettext group' );
+			throw new TranslationHelperException( 'Not a FileBasedMessageGroup group' );
 		}
 
 		$ffs = $group->getFFS();
 		if ( !$ffs instanceof GettextFFS ) {
-			throw new TranslationHelperException( 'Not a Gettext group' );
+			throw new TranslationHelperException( 'Group is not using GettextFFS' );
 		}
 
-		global $wgContLang;
-		$mykey = $wgContLang->lcfirst( $this->handle->getKey() );
+		$cache = $group->getMessageGroupCache( $group->getSourceLanguage() );
+		if ( !$cache->exists() ) {
+			throw new TranslationHelperException( 'Definitions are not cached' );
+		}
+
+		$extra = $cache->getExtra();
+		$contLang = MediaWikiServices::getInstance()->getContentLanguage();
+		$mykey = $contLang->lcfirst( $this->handle->getKey() );
 		$mykey = str_replace( ' ', '_', $mykey );
-		$data = $ffs->read( $group->getSourceLanguage() );
-		$help = $data['TEMPLATE'][$mykey]['comments'];
+
+		$help = $extra['TEMPLATE'][$mykey]['comments'] ?? null;
+		if ( !$help ) {
+			throw new TranslationHelperException( "No comments found for key '$mykey'" );
+		}
 
 		$conf = $group->getConfiguration();
 		if ( isset( $conf['BASIC']['codeBrowser'] ) ) {
@@ -59,11 +70,13 @@ class GettextDocumentationAid extends TranslationAid {
 			}
 		}
 
+		$html = $this->context->getOutput()->parseAsContent( $out );
+
 		return [
-			'language' => $wgContLang->getCode(),
+			'language' => $contLang->getCode(),
 			// @todo Provide raw data when possible
 			// 'value' => $help,
-			'html' => $this->context->getOutput()->parse( $out ),
+			'html' => $html,
 		];
 	}
 }

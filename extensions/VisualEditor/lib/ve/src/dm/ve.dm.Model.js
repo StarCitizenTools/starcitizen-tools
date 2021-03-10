@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Model class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -27,6 +27,7 @@ OO.initClass( ve.dm.Model );
 
 /**
  * Symbolic name for this model class. Must be set to a unique string by every subclass.
+ *
  * @static
  * @property {string}
  * @inheritable
@@ -37,6 +38,7 @@ ve.dm.Model.static.name = null;
  * Array of HTML tag names that this model should be a match candidate for.
  * Empty array means none, null means any.
  * For more information about element matching, see ve.dm.ModelRegistry.
+ *
  * @static
  * @property {string[]}
  * @inheritable
@@ -48,6 +50,7 @@ ve.dm.Model.static.matchTagNames = null;
  * Any other types the element might have must be specified in allowedRdfaTypes.
  * Empty array means none, null means any.
  * For more information about element matching, see ve.dm.ModelRegistry.
+ *
  * @static
  * @property {Array}
  * @inheritable
@@ -59,6 +62,7 @@ ve.dm.Model.static.matchRdfaTypes = null;
  * themselves trigger a match).
  * Empty array means none, null means any.
  * For more information about element matching, see ve.dm.ModelRegistry.
+ *
  * @static
  * @property {Array}
  * @inheritable
@@ -76,6 +80,7 @@ ve.dm.Model.static.allowedRdfaTypes = [];
  *
  * NOTE: This function is NOT a method, within this function "this" will not refer to an instance
  * of this class (or to anything reasonable, for that matter).
+ *
  * @static
  * @property {Function}
  * @inheritable
@@ -132,7 +137,6 @@ ve.dm.Model.static.matchFunction = null;
  *
  * @static
  * @inheritable
- * @method
  * @param {Node[]} domElements DOM elements to convert. Usually only one element
  * @param {ve.dm.Converter} converter Converter object
  * @return {Object|Array|null} Linear model element, or array with linear model data, or null to alienate
@@ -156,7 +160,6 @@ ve.dm.Model.static.toDataElement = function () {
  *
  * @static
  * @inheritable
- * @method
  * @param {Object|Array} dataElement Linear model element or array of linear model data
  * @param {HTMLDocument} doc HTML document for creating elements
  * @param {ve.dm.Converter} converter Converter object to optionally call `getDomSubtreeFromData` on
@@ -247,7 +250,7 @@ ve.dm.Model.static.getAllowedRdfaTypes = function () {
  * @param {Object} attributeChanges Attribute changes, keyed list containing objects with from and to properties
  * @param {Object} attributes New attributes
  * @param {Object} element New element
- * @return {Array} Descriptions, list of strings or jQuery objects
+ * @return {Array} Descriptions, list of strings or Node arrays
  */
 ve.dm.Model.static.describeChanges = function ( attributeChanges ) {
 	var key, change,
@@ -266,18 +269,31 @@ ve.dm.Model.static.describeChanges = function ( attributeChanges ) {
  *
  * @param {string} key Attribute key
  * @param {Object} change Change object with from and to properties
- * @return {string|jQuery|null} Description (string or jQuery object), or null if nothing to describe
+ * @return {string|Node[]|null} Description (string or Node array), or null if nothing to describe
  */
 ve.dm.Model.static.describeChange = function ( key, change ) {
 	if ( ( typeof change.from === 'object' && change.from !== null ) || ( typeof change.to === 'object' && change.to !== null ) ) {
-		return ve.msg( 'visualeditor-changedesc-unknown', key );
+		return ve.htmlMsg( 'visualeditor-changedesc-unknown', key );
 	} else if ( change.from === undefined ) {
-		return ve.msg( 'visualeditor-changedesc-set', key, change.to );
+		return ve.htmlMsg( 'visualeditor-changedesc-set', key, this.wrapText( 'ins', change.to ) );
 	} else if ( change.to === undefined ) {
-		return ve.msg( 'visualeditor-changedesc-unset', key, change.from );
+		return ve.htmlMsg( 'visualeditor-changedesc-unset', key, this.wrapText( 'del', change.from ) );
 	} else {
-		return ve.msg( 'visualeditor-changedesc-changed', key, change.from, change.to );
+		return ve.htmlMsg( 'visualeditor-changedesc-changed', key, this.wrapText( 'del', change.from ), this.wrapText( 'ins', change.to ) );
 	}
+};
+
+/**
+ * Utility function for wrapping text in a tag, equivalent to `$( '<tag>' ).text( text )`
+ *
+ * @param {string} tag Wrapping element's tag
+ * @param {string} text Text
+ * @return {HTMLElement} Element wrapping text
+ */
+ve.dm.Model.static.wrapText = function ( tag, text ) {
+	var wrapper = document.createElement( tag );
+	wrapper.appendChild( document.createTextNode( text ) );
+	return wrapper;
 };
 
 /**
@@ -286,6 +302,8 @@ ve.dm.Model.static.describeChange = function ( key, change ) {
  * @static
  * @param {Object} element This element
  * @param {Object} other Another element
+ * @param {ve.dm.HashValueStore} elementStore Store used by this element
+ * @param {ve.dm.HashValueStore} otherStore Store used by other elements
  * @return {boolean} Elements are of a comparable type
  */
 ve.dm.Model.static.isDiffComparable = function ( element, other ) {
@@ -321,7 +339,6 @@ ve.dm.Model.prototype.isEditable = function () {
 /**
  * Get a reference to the linear model element.
  *
- * @method
  * @return {Object} Linear model element passed to the constructor, by reference
  */
 ve.dm.Model.prototype.getElement = function () {
@@ -331,7 +348,6 @@ ve.dm.Model.prototype.getElement = function () {
 /**
  * Get a reference to the hash-value store used by the element.
  *
- * @method
  * @return {ve.dm.HashValueStore} Hash-value store
  */
 ve.dm.Model.prototype.getStore = function () {
@@ -341,7 +357,6 @@ ve.dm.Model.prototype.getStore = function () {
 /**
  * Get the symbolic name of this model's type.
  *
- * @method
  * @return {string} Type name
  */
 ve.dm.Model.prototype.getType = function () {
@@ -353,7 +368,6 @@ ve.dm.Model.prototype.getType = function () {
  *
  * Return value is by reference if array or object.
  *
- * @method
  * @param {string} key Name of attribute to get
  * @return {Mixed} Value of attribute, or undefined if no such attribute exists
  */
@@ -366,7 +380,6 @@ ve.dm.Model.prototype.getAttribute = function ( key ) {
  *
  * Values are by reference if array or object, similar to using the getAttribute method.
  *
- * @method
  * @param {string} [prefix] Only return attributes with this prefix, and remove the prefix from them
  * @return {Object} Attributes
  */
@@ -423,7 +436,6 @@ ve.dm.Model.prototype.getClonedElement = function () {
  *
  * This is a custom hash function for OO#getHash.
  *
- * @method
  * @return {Object} Hash object
  */
 ve.dm.Model.prototype.getHashObject = function () {
@@ -440,5 +452,5 @@ ve.dm.Model.prototype.getHashObject = function () {
  * @return {boolean} Elements are of a comparable type
  */
 ve.dm.Model.prototype.isDiffComparable = function ( other ) {
-	return this.constructor.static.isDiffComparable( this.element, other.element );
+	return this.constructor.static.isDiffComparable( this.element, other.element, this.getStore(), other.getStore() );
 };

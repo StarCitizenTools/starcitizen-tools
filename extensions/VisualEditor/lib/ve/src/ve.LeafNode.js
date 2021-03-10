@@ -1,7 +1,7 @@
 /*!
  * VisualEditor LeafNode mixin.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -20,7 +20,6 @@ ve.LeafNode = function VeLeafNode() {
 /**
  * Check if the node has children.
  *
- * @method
  * @return {boolean} Whether the node has children
  */
 ve.LeafNode.prototype.hasChildren = function () {

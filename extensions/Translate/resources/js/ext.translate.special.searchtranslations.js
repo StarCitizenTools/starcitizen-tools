@@ -6,21 +6,21 @@
 	$( function () {
 		resultGroups = $( '.facet.groups' ).data( 'facets' );
 
-		$( '.tux-searchpage .button' ).click( function () {
+		$( '.tux-searchpage .mw-ui-button' ).on( 'click', function () {
 			var query = $( '.tux-searchpage .searchinputbox' ).val(),
 				result = lexOperators( query ),
 				$form = $( '.tux-searchpage form[name=searchform]' );
 
-			$.each( result, function ( index, value ) {
+			Object.keys( result ).forEach( function ( index ) {
 				var $input = $( '<input>' ).prop( 'type', 'hidden' ),
 					$elem = $form.find( 'input[name=' + index + ']' );
 
 				if ( $elem.length ) {
-					$elem.val( value );
+					$elem.val( result[ index ] );
 				} else {
 					$form.append( $input
 						.prop( {
-							value: value,
+							value: result[ index ],
 							name: index
 						} )
 					);
@@ -33,7 +33,7 @@
 		showMessageGroups();
 
 		// Make the whole rows clickable
-		$( '.tux-searchpage .row .facet-item' ).click( function ( event ) {
+		$( '.tux-searchpage .row .facet-item' ).on( 'click', function ( event ) {
 			window.location = $( this ).find( 'a' ).attr( 'href' );
 			event.stopPropagation();
 		} );
@@ -135,7 +135,7 @@
 			);
 		}
 
-		$.each( Object.keys( languages ), function ( index, languageCode ) {
+		Object.keys( languages ).forEach( function ( languageCode ) {
 			ulslanguages[ languageCode ] = mw.config.get( 'wgTranslateLanguages' )[ languageCode ];
 		} );
 
@@ -191,7 +191,6 @@
 			currentGroup = $( '.facet.groups' ).data( 'group' ),
 			resultCount = groupList.length,
 			position,
-			groups,
 			options,
 			grouppath;
 
@@ -211,7 +210,7 @@
 		groupList.sort( sortGroups );
 		for ( i = 0; i < groupList.length; i++ ) {
 			groupId = groupList[ i ];
-			group = mw.translate.findGroup( groupId, resultGroups );
+			group = findGroup( groupId, resultGroups );
 			if ( !group ) {
 				continue;
 			}
@@ -266,7 +265,7 @@
 				);
 			$parent.append( $grouSelectorTrigger );
 
-			if ( $( 'body' ).hasClass( 'rtl' ) ) {
+			if ( $( document.body ).hasClass( 'rtl' ) ) {
 				position = {
 					my: 'right top',
 					at: 'right+90 top+40',
@@ -282,32 +281,30 @@
 			options = {
 				language: mw.config.get( 'wgUserLanguage' ),
 				position: position,
-				onSelect: function ( group ) {
-					var uri = new mw.Uri( location.href );
-					uri.extend( { group: group.id, grouppath: group.id } );
-					location.href = uri.toString();
+				onSelect: function ( selectedGroup ) {
+					var currentUri = new mw.Uri( location.href );
+					currentUri.extend( { group: selectedGroup.id, grouppath: selectedGroup.id } );
+					location.href = currentUri.toString();
 				},
 				preventSelector: true
 			};
-			groups = $.map( resultGroups, function ( value, index ) {
-				return index;
-			} );
+
 			$grouSelectorTrigger.msggroupselector(
 				options,
-				groups
+				Object.keys( resultGroups )
 			);
 		}
 	}
 
 	function lexOperators( str ) {
-		var string = str.split( ' ' ),
+		var splitValues = str.split( ' ' ),
 			result = {},
 			query = '';
 
-		$.each( string, function ( index, value ) {
-			matchOperators( value, function ( obj ) {
+		splitValues.forEach( function ( string ) {
+			matchOperators( string, function ( obj ) {
 				if ( obj === false ) {
-					query = query + ' ' + value;
+					query = query + ' ' + string;
 				} else {
 					result[ obj.operator ] = obj.value;
 				}
@@ -324,7 +321,7 @@
 			// Add operators for different filters
 			operatorRegex = [ 'language', 'group', 'filter' ];
 
-		$.each( operatorRegex, function ( index, value ) {
+		operatorRegex.forEach( function ( value ) {
 			var regex = new RegExp( value + ':(\\S+)', 'i' );
 			if ( ( matches = regex.exec( str ) ) !== null ) {
 				counter = true;
@@ -340,8 +337,8 @@
 	}
 
 	function sortGroups( groupIdA, groupIdB ) {
-		var groupAName = mw.translate.findGroup( groupIdA, resultGroups ).count,
-			groupBName = mw.translate.findGroup( groupIdB, resultGroups ).count;
+		var groupAName = findGroup( groupIdA, resultGroups ).count,
+			groupBName = findGroup( groupIdB, resultGroups ).count;
 
 		if ( groupAName > groupBName ) {
 			return -1;
@@ -350,6 +347,28 @@
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Finds a specific group from a groups object containing nested groups.
+	 *
+	 * @param {string} targetGroupId
+	 * @param {Object} groups
+	 * @return {Object} Message group object, or null if group is not found
+	 */
+	function findGroup( targetGroupId, groups ) {
+		var group = groups[ targetGroupId ], groupId;
+		if ( group ) {
+			return group;
+		}
+
+		for ( groupId in groups ) {
+			if ( groups[ groupId ].groups ) {
+				return findGroup( targetGroupId, groups[ groupId ].groups );
+			}
+		}
+
+		return null;
 	}
 
 	function sortLanguages( languageA, languageB ) {

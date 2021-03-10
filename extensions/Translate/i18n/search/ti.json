@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joanmp17"
+		]
+	},
+	"searchtranslations": "ትርጉማት ምድላይ",
+	"tux-sst-edit": "ትርጉም ኣመዓራርይ",
+	"tux-sst-view-foreign": "ኣብ $1 ርኣይ",
+	"tux-sst-search": "ምድላይ",
+	"tux-sst-search-ph": "ትርጉማት ምድላይ",
+	"tux-sst-count": "{{PLURAL:$1|ሓደ ውጽኢት ዝተረኸበ|$1 ውጺኢታት ዝተረኸቡ}}",
+	"tux-sst-facet-language": "ቋንቋታት",
+	"tux-sst-facet-group": "ጉጅለታት መልእኽትታት",
+	"tux-sst-nosolr-title": "ምድላይ ዘይርከብ",
+	"tux-sst-solr-offline-title": "ምድላይ ዘይርከብ",
+	"tux-sst-next": "ዝቕጽል ›",
+	"tux-sst-prev": "‹ ዝቐደመ",
+	"tux-sst-default": "ትርጉማት",
+	"tux-sst-translated": "ካብ $1 ትርጉማት",
+	"tux-sst-untranslated": "ካብ $1 ብዘይ ትርጉም",
+	"tux-sst-ellipsis-untranslated": "ብዘይ ትርጉም"
+}

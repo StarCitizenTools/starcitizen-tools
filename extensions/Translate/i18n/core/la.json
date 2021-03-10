@@ -1,15 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
+			"Andrew Dalby",
 			"SPQRobin",
-			"UV",
-			"Andrew Dalby"
+			"UV"
 		]
 	},
 	"translate": "Traducere",
 	"translate-next": "Pagina proxima",
 	"translate-prev": "Pagina superior",
-	"translate-magic-cm-save": "Servare",
 	"translate-sidebar-alltrans": "Linguis aliis",
 	"translate-documentation-language": "Ut facilius convertatur"
 }

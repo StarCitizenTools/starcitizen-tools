@@ -26,6 +26,7 @@ class ApiTTMServer extends ApiBase {
 
 		$config = $wgTranslateTranslationServices[$params['service']];
 		$server = TTMServer::factory( $config );
+		'@phan-var ReadableTTMServer $server';
 
 		$suggestions = $server->query(
 			$params['sourcelanguage'],
@@ -48,7 +49,8 @@ class ApiTTMServer extends ApiBase {
 
 		$good = [];
 		foreach ( $wgTranslateTranslationServices as $id => $config ) {
-			if ( isset( $config['public'] ) && $config['public'] === true ) {
+			$public = $config['public'] ?? false;
+			if ( $config['type'] === 'ttmserver' && $public ) {
 				$good[] = $id;
 			}
 		}
@@ -56,7 +58,7 @@ class ApiTTMServer extends ApiBase {
 		return $good;
 	}
 
-	public function getAllowedParams() {
+	protected function getAllowedParams() {
 		global $wgTranslateTranslationDefaultService;
 		$available = $this->getAvailableTranslationServices();
 

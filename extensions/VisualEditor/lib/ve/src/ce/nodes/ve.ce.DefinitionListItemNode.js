@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable DefinitionListItemNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -9,6 +9,7 @@
  *
  * @class
  * @extends ve.ce.BranchNode
+ * @mixins ve.ce.ContentEditableNode
  * @constructor
  * @param {ve.dm.DefinitionListItemNode} model Model to observe
  * @param {Object} [config] Configuration options
@@ -24,6 +25,7 @@ ve.ce.DefinitionListItemNode = function VeCeDefinitionListItemNode() {
 /* Inheritance */
 
 OO.inheritClass( ve.ce.DefinitionListItemNode, ve.ce.BranchNode );
+OO.mixinClass( ve.ce.DefinitionListItemNode, ve.ce.ContentEditableNode );
 
 /* Static Properties */
 
@@ -55,8 +57,6 @@ ve.ce.DefinitionListItemNode.prototype.getTagName = function () {
  * Handle model update events.
  *
  * If the style changed since last update the DOM wrapper will be replaced with an appropriate one.
- *
- * @method
  */
 ve.ce.DefinitionListItemNode.prototype.onUpdate = function () {
 	this.updateTagName();

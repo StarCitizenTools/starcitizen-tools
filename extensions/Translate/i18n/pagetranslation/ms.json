@@ -2,9 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Anakmalaysia",
-			"Pizza1016",
+			"Jeluang Terluang",
 			"Muhdnurhidayat",
-			"Jeluang Terluang"
+			"Pizza1016",
+			"Tofeiku"
 		]
 	},
 	"pagetranslation": "Penterjemahan laman",
@@ -31,17 +32,14 @@
 	"tpt-mark-nochanges": "Tiada perbezaan antara semakan ini dengan semakan tertanda yang terdahulu.",
 	"tpt-edit-failed": "Laman ini tidak dapat dikemas kini: $1",
 	"tpt-duplicate": "Nama unit terjemahan $1 terguna lebih daripada sekali.",
-	"tpt-already-marked": "Versi terkini laman ini sudah ditandai untuk diterjemah.",
 	"tpt-unmarked": "Laman $1 tidak lagi ditandai untuk diterjemah.",
 	"tpt-list-nopages": "Tiadanya laman yang ditandai untuk diterjemah atau sedia ditandai untuk diterjemah.",
 	"tpt-new-pages-title": "Laman yang diusulkan untuk diterjemah",
 	"tpt-old-pages-title": "Laman yang sedang diterjemah",
 	"tpt-other-pages-title": "Laman yang rosak",
-	"tpt-discouraged-pages-title": "Laman yang ditegah",
 	"tpt-new-pages": "{{PLURAL:$1|Laman|Laman-laman}} ini mengandungi teks dengan tag penterjemahan,\ntetapi tiada versi yang ditandai untuk diterjemah.",
 	"tpt-old-pages": "Suatu versi {{PLURAL:$1|laman|laman-laman}} ini telah ditandai untuk diterjemah.",
 	"tpt-other-pages": "{{PLURAL:$1|Satu versi lama laman|Versi lama laman-laman}} ini ditandai untuk diterjemah,\ntetapi {{PLURAL:$1|versi|versi-versi}} terkini tidak boleh ditandai untuk diterjemah.",
-	"tpt-discouraged-pages": "{{PLURAL:$1|Laman|Laman-laman}} ini telah ditegah daripada mendapat penterjemahan selanjutnya.",
 	"tpt-select-prioritylangs": "Senarai kod bahasa keutamaan yang diasingkan dengan koma:",
 	"tpt-select-prioritylangs-force": "Larang terjemahan ke bahasa-bahasa selain bahasa keutamaan",
 	"tpt-select-prioritylangs-reason": "Sebab:",
@@ -63,7 +61,7 @@
 	"tpt-languages-legend": "Bahasa lain:",
 	"tpt-languages-separator": "&#160;•&#32;",
 	"tpt-languages-zero": "Mulakan terjemahan dalam bahasa ini",
-	"tpt-languages-nonzero": "$1 ($2% terterjemah)",
+	"tpt-languages-nonzero": "$1 ($2% diterjemah)",
 	"tpt-tab-translate": "Terjemah",
 	"tpt-target-page": "Laman ini tidak boleh dikemaskini secara manual.\nLaman ini merupakan terjemahan laman [[$1]], dan terjemahannya boleh dikemas kini dengan menggunakan [$2 alatan penterjemahan].",
 	"tpt-unknown-page": "Ruang nama ini ditempah untuk penterjemahan laman kandungan.\nLaman yang anda cuba sunting itu nampaknya tidak berpadan dengan sebarang laman yang ditandai untuk diterjemah.",
@@ -73,8 +71,6 @@
 	"tpt-discouraged-language-header": "Penterjemahan ke $1 bukan keutamaan bagi halaman ini.",
 	"tpt-discouraged-language-content": "Seorang penyelia penterjemahan telah memutuskan untuk menumpukan usaha penterjemahan kepada $1.",
 	"tpt-discouraged-language-force": "<strong>Halaman ini tidak boleh diterjemahkan kepada bahasa $2.</strong>\n\nPenyelia penterjemahan telah memutuskan bahawa halaman ini boleh diterjemahkan kepada bahasa $3 sahaja.",
-	"tpt-discouraged-language": "<strong>Penterjemahan kepada bahasa $2 bukan keutamaan bagi halaman ini.</strong>\n\nPenyelia penterjemahan telah memutuskan untuk menumpukan usaha penterjemahan kepada bahasa $3.",
-	"tpt-discouraged-language-reason": "Sebab: $1",
 	"tpt-priority-languages": "Seorang penyelia penterjemahan telah menetapkan bahasa-bahasa utama kumpulan ini kepada: $1",
 	"tpt-render-summary": "Mengemas kini agar sepadan dengan versi baru laman sumber",
 	"aggregategroups": "Kumpulan agregat",
@@ -157,7 +153,9 @@
 	"pt-deletepage-lang-logreason": "Sebahagian laman penterjemahan $1.",
 	"pt-deletepage-started": "Sila periksa [[Special:Log/pagetranslation|log penterjemahan laman]] untuk ralat dan mesej penyiapan.",
 	"pt-deletepage-intro": "Laman khas ini membolehkan anda menghapuskan seluruh laman boleh terjemah atau halaman terjemahan individu dalam sesebuah bahasa.\nTindakan penghapusan itu tidak meninggalkan kesan serta-merta kerana semua halaman yang bergantung padanya akan turut dihapuskan.\nKegagalan akan dilogkan dalam [[Special:Log/pagetranslation|log penterjemahan laman]] dan perlu dibaiki dengan tangan.",
+	"pp-save-button-label": "Terbitkan",
 	"pp-cancel-button-label": "Batalkan",
+	"pp-save-message": "Laman tersebut diterbitkan. Anda boleh [$1 menyuntingnya].",
 	"tpt-unlink-confirm": "Sila sahkan bahawa anda benar-benar ingin menggugurkan laman ini dari sistem penterjemahan.\nPemilih bahasa dan nama-nama laman yang diterjemah akan berhenti berfungsi.\nLaman-laman penterjenahan akan tidak boleh disunting lagi.",
 	"tpt-unlink-button": "Gugurkan dari terjemahan",
 	"tpt-unlink-summary": "Menggugurkan laman dari terjemahan"

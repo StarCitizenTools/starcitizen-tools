@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWMediaDialog class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -48,6 +48,8 @@ ve.ui.MWMediaInfoFieldWidget = function VeUiMWMediaInfoFieldWidget( content, con
 	}
 
 	if ( config.label ) {
+		// Messages defined in ve.ui.MWMediaDialog#buildMediaInfoPanel
+		// eslint-disable-next-line mediawiki/msg-doc
 		content = ve.msg( config.label, content );
 	}
 
@@ -74,6 +76,9 @@ ve.ui.MWMediaInfoFieldWidget = function VeUiMWMediaInfoFieldWidget( content, con
 	this.$element
 		.append( this.$icon, this.$label )
 		.addClass( 've-ui-mwMediaInfoFieldWidget' )
+		// The following classes are used here:
+		// * ve-ui-mwMediaInfoFieldWidget-description
+		// * ve-ui-mwMediaInfoFieldWidget-attribute
 		.addClass( 've-ui-mwMediaInfoFieldWidget-' + this.type );
 	this.$icon.addClass( 've-ui-mwMediaInfoFieldWidget-icon' );
 

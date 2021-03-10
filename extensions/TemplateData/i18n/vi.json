@@ -1,14 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Minh Nguyen",
 			"Max20091",
+			"Minh Nguyen",
 			"Nguyên Lê"
 		]
 	},
-	"apihelp-templatedata-description": "Lấy dữ liệu được lưu giữ bởi phần mở rộng Dữ liệu bản mẫu.",
-	"apihelp-templatedata-example-1": "Cho ra dữ liệu bản mẫu cho [[Template:Stub]] và [[Template:Example]], có kết quả nếu các bản mẫu không tồn tại hoặc có tồn tại mà thiếu dữ liệu bản mẫu",
-	"apihelp-templatedata-param-lang": "Cho ra các giá trị địa phương hóa cho ngôn ngỮ này. Theo mặc định, tất cả các bản dịch có sẵn được cho ra.",
 	"templatedata-desc": "Lưu trữ dữ liệu cho tham số bản mẫu (qua JSON)",
 	"templatedata-doc-desc-empty": "Không có miêu tả.",
 	"templatedata-doc-format-block": "Bản mẫu này gợi ý định dạng các tham số ở dạng khối.",
@@ -16,11 +13,8 @@
 	"templatedata-doc-format-inline": "Bản mẫu này gợi ý định dạng các tham số ở dạng nội tuyến.",
 	"templatedata-doc-no-params-set": "Không định rõ tham số",
 	"templatedata-doc-param-autovalue": "Giá trị tự động",
-	"templatedata-doc-param-autovalue-empty": "trống",
 	"templatedata-doc-param-default": "Mặc định",
-	"templatedata-doc-param-default-empty": "trống",
 	"templatedata-doc-param-example": "Ví dụ",
-	"templatedata-doc-param-example-empty": "trống",
 	"templatedata-doc-param-desc": "Miêu tả",
 	"templatedata-doc-param-desc-empty": "không miêu tả",
 	"templatedata-doc-param-name": "Tham số",

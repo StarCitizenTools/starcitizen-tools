@@ -7,22 +7,61 @@
  * @license GPL-2.0-or-later
  */
 
+use Wikimedia\TestingAccessWrapper;
+
 /**
  * @group Database
  * @group large
  */
-class MessageIndexTest extends MediaWikiTestCase {
-	protected function setUp() {
+class MessageIndexTest extends MediaWikiIntegrationTestCase {
+	protected function setUp(): void {
 		parent::setUp();
 		$this->setMwGlobals( [
 			'wgTranslateCacheDirectory' => $this->getNewTempDirectory(),
 			'wgTranslateTranslationServices' => [],
+			'wgTranslateMessageNamespaces' => [ NS_MEDIAWIKI ]
 		] );
+
+		$this->setTemporaryHook( 'TranslatePostInitGroups', [ $this, 'getTestGroups' ] );
+
+		$mg = MessageGroups::singleton();
+		$mg->setCache( new WANObjectCache( [ 'cache' => ObjectCache::getInstance( 'hash' ) ] ) );
+		$mg->recache();
 	}
 
-	/**
-	 * @dataProvider provideTestGetArrayDiff
-	 */
+	public function getTestGroups( &$list ) {
+		$messages = [
+			'translated' => 'bunny',
+			'untranslated' => 'fanny',
+			'changedtranslated_1' => 'bunny',
+			'changedtranslated_2' => 'fanny'
+		];
+		$list['test-group'] =
+			new MockWikiMessageGroup( 'test-group', $messages );
+
+		return false;
+	}
+
+	public function provideTranslateMessageIndexConfig() {
+		yield [ 'DatabaseMessageIndex', DatabaseMessageIndex::class ];
+		yield [ [ 'DatabaseMessageIndex' ], DatabaseMessageIndex::class ];
+		yield [ [ 'SerializedMessageIndex' ], SerializedMessageIndex::class ];
+	}
+
+	/** @dataProvider provideTranslateMessageIndexConfig */
+	public function testSingleton( $configValue, $expectedClass ) {
+		$this->setMwGlobals( [
+			'wgTranslateMessageIndex' => $configValue,
+		] );
+		$wrapIndex = TestingAccessWrapper::newFromClass( MessageIndex::class );
+		$wrapIndex->instance = null;
+
+		$object = MessageIndex::singleton();
+
+		$this->assertInstanceOf( $expectedClass, $object );
+	}
+
+	/** @dataProvider provideTestGetArrayDiff */
 	public function testGetArrayDiff( $expected, $old, $new ) {
 		$actual = MessageIndex::getArrayDiff( $old, $new );
 		$this->assertEquals( $expected['keys'], $actual['keys'], 'key diff' );
@@ -116,15 +155,13 @@ class MessageIndexTest extends MediaWikiTestCase {
 	protected static function getTestData() {
 		static $data = null;
 		if ( $data === null ) {
-			$data = unserialize( file_get_contents( __DIR__ . '/messageindexdata.ser' ) );
+			$data = unserialize( file_get_contents( __DIR__ . '/data/messageindexdata.ser' ) );
 		}
 
 		return $data;
 	}
 
-	/**
-	 * @dataProvider provideMessageIndexImplementation
-	 */
+	/** @dataProvider provideMessageIndexImplementation */
 	public function testMessageIndexImplementation( $mi ) {
 		$data = self::getTestData();
 		/** @var TestableDatabaseMessageIndex|TestableCDBMessageIndex|TestableSerializedMessageIndex */
@@ -151,7 +188,7 @@ class MessageIndexTest extends MediaWikiTestCase {
 			);
 		}
 
-		$this->assertEquals(
+		$this->assertSame(
 			count( $data ),
 			count( $cached ),
 			'Cache has same number of elements'
@@ -167,6 +204,19 @@ class MessageIndexTest extends MediaWikiTestCase {
 			[ new TestableHashMessageIndex() ],
 			// Not testing CachedMessageIndex because there is no easy way to mockup those.
 		];
+	}
+
+	public function testInterimCache() {
+		$group = MessageGroups::getGroup( 'test-group' );
+		MessageIndex::singleton()->storeInterim( $group, [
+			'translated_changed',
+		] );
+
+		$handle = new MessageHandle(
+			Title::makeTitle( $group->getNamespace(), 'translated_changed' )
+		);
+
+		$this->assertTrue( $handle->isValid() );
 	}
 }
 

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor KeyDownHandlerFactory class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -26,7 +26,21 @@ OO.inheritClass( ve.ce.KeyDownHandlerFactory, OO.Factory );
 /* Methods */
 
 /**
- * @inheritdoc
+ * Register a constructor with the factory.
+ *
+ *     function MyClass() {};
+ *     OO.initClass( MyClass );
+ *     MyClass.static.name = 'hello';
+ *     // Register class with the factory, available via the symbolic name "hello"
+ *     factory.register( MyClass );
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.Factory.html
+ *
+ * @param {Function} constructor Constructor to use when creating object
+ * @param {string} [name] Symbolic name to use for #create().
+ *  This parameter may be omitted in favour of letting the constructor decide
+ *  its own name, through `constructor.static.name`.
+ * @throws {Error} If a parameter is invalid
  */
 ve.ce.KeyDownHandlerFactory.prototype.register = function ( constructor ) {
 	var i, ilen, keys, name;
@@ -80,7 +94,8 @@ ve.ce.KeyDownHandlerFactory.prototype.lookupHandlersForKey = function ( key, sel
  * @return {boolean} Some handlers acted
  */
 ve.ce.KeyDownHandlerFactory.prototype.executeHandlersForKey = function ( key, selectionName, surface, e ) {
-	var i, acted,
+	var i,
+		acted = false,
 		handlers = this.lookupHandlersForKey( key, selectionName );
 
 	// Length is likely to be 1 or 0 so don't cache

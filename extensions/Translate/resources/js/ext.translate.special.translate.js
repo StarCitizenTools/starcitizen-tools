@@ -70,8 +70,8 @@
 			uri.extend( params );
 
 			// Support removing keys from the query
-			$.each( params, function ( key, val ) {
-				if ( val === null ) {
+			Object.keys( params ).forEach( function ( key ) {
+				if ( params[ key ] === null ) {
 					delete uri.query[ key ];
 				}
 			} );
@@ -143,18 +143,18 @@
 	/**
 	 * Updates all group specific stuff on the page.
 	 *
-	 * @param {Object} state Information about current group and language.
-	 * @param {string} state.group Message group id.
-	 * @param {string} state.language Language.
+	 * @param {Object} stateInfo Information about current group and language.
+	 * @param {string} stateInfo.group Message group id.
+	 * @param {string} stateInfo.language Language.
 	 */
-	function updateGroupInformation( state ) {
+	function updateGroupInformation( stateInfo ) {
 		var props = 'id|priority|prioritylangs|priorityforce|description';
 
-		mw.translate.recentGroups.append( state.group );
+		mw.translate.recentGroups.append( stateInfo.group );
 
-		mw.translate.getMessageGroup( state.group, props ).done( function ( group ) {
+		mw.translate.getMessageGroup( stateInfo.group, props ).done( function ( group ) {
 			updateDescription( group );
-			updateGroupWarning( group, state.language );
+			updateGroupWarning( group, stateInfo.language );
 		} );
 	}
 
@@ -179,37 +179,50 @@
 	}
 
 	function updateGroupWarning( group, language ) {
-		var preferredLanguages, headerMessage, languagesMessage,
+		var $preferredLanguages, headerMessage, languagesMessage,
 			$groupWarning = $( '.tux-editor-header .group-warning' );
 
-		if ( isPriorityLanguage( language, group.prioritylangs ) ) {
+		if ( !group.prioritylangs || isPriorityLanguage( language, group.prioritylangs ) ) {
 			return;
 		}
 
 		// Make a comma-separated list of preferred languages
-		preferredLanguages = $.map( group.prioritylangs, function ( lang ) {
+		$preferredLanguages = $( '<span>' );
+		group.prioritylangs.forEach( function ( languageCode, index ) {
 			// bidi isolation for language names
-			return '<bdi>' + $.uls.data.getAutonym( lang ) + '</bdi>';
-		} ).join( ', ' );
+			$preferredLanguages.append(
+				$( '<bdi>' ).text( $.uls.data.getAutonym( languageCode ) )
+			);
 
-		headerMessage = mw.message(
-			group.priorityforce ?
-				'tpt-discouraged-language-force-header' :
+			// Add comma between languages
+			if ( index + 1 !== group.prioritylangs.length ) {
+				$preferredLanguages.append( ', ' );
+			}
+		} );
+
+		if ( group.priorityforce ) {
+			headerMessage = mw.message(
+				'tpt-discouraged-language-force-header',
+				$.uls.data.getAutonym( language )
+			);
+			languagesMessage = mw.message(
+				'tpt-discouraged-language-force-content',
+				$preferredLanguages
+			);
+		} else {
+			headerMessage = mw.message(
 				'tpt-discouraged-language-header',
-			$.uls.data.getAutonym( language )
-		).parse();
-
-		languagesMessage = mw.message(
-			group.priorityforce ?
-				'tpt-discouraged-language-force-content' :
+				$.uls.data.getAutonym( language )
+			);
+			languagesMessage = mw.message(
 				'tpt-discouraged-language-content',
-			preferredLanguages
-		).parse();
+				$preferredLanguages
+			);
+		}
 
 		$groupWarning.append(
-			$( '<p>' ).append( $( '<strong>' ).text( headerMessage ) ),
-			// html because of the <bdi> and because it's parsed
-			$( '<p>' ).html( languagesMessage )
+			$( '<p>' ).append( $( '<strong>' ).text( headerMessage.text() ) ),
+			$( '<p>' ).append( languagesMessage.parseDom() )
 		);
 	}
 
@@ -300,7 +313,7 @@
 			} );
 		}
 
-		if ( $( 'body' ).hasClass( 'rtl' ) ) {
+		if ( $( document.body ).hasClass( 'rtl' ) ) {
 			position = {
 				my: 'right top',
 				at: 'right+80 bottom+5'
@@ -319,7 +332,7 @@
 			var $target = $( this );
 			mw.loader.using( 'ext.uls.mediawiki' ).done( function () {
 				setupLanguageSelector( $target );
-				$target.click();
+				$target.trigger( 'click' );
 			} );
 		} );
 
@@ -337,7 +350,7 @@
 		$hideTranslatedButton = $translateContainer.find( '.tux-editor-clear-translated' );
 		$hideTranslatedButton
 			.prop( 'disabled', !getTranslatedMessages( $translateContainer ).length )
-			.click( function () {
+			.on( 'click', function () {
 				getTranslatedMessages( $translateContainer ).remove();
 				$( this ).prop( 'disabled', true );
 			} );
@@ -388,11 +401,11 @@
 			} );
 
 		$( '#tux-option-optional' ).on( 'change', function () {
-			var uri = new mw.Uri( window.location.href ),
+			var currentUri = new mw.Uri( window.location.href ),
 				checked = $( this ).prop( 'checked' );
 
 			mw.translate.changeUrl( { optional: checked ? 1 : 0 } );
-			mw.translate.changeFilter( uri.query.filter );
+			mw.translate.changeFilter( currentUri.query.filter );
 		} );
 	} );
 

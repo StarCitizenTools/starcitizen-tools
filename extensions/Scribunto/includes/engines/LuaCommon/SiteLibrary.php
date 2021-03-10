@@ -1,14 +1,15 @@
 <?php
 
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
+use MediaWiki\MediaWikiServices;
+
 class Scribunto_LuaSiteLibrary extends Scribunto_LuaLibraryBase {
 	private static $namespacesCacheLang = null;
 	private static $namespacesCache = null;
 	private static $interwikiMapCache = [];
 	private $pagesInCategoryCache = [];
 
-	function register() {
-		global $wgContLang, $wgNamespaceAliases;
+	public function register() {
+		global $wgNamespaceAliases;
 
 		$lib = [
 			'getNsIndex' => [ $this, 'getNsIndex' ],
@@ -18,20 +19,21 @@ class Scribunto_LuaSiteLibrary extends Scribunto_LuaLibraryBase {
 			'interwikiMap' => [ $this, 'interwikiMap' ],
 		];
 		$parser = $this->getParser();
+		$contLang = MediaWikiServices::getInstance()->getContentLanguage();
 		$info = [
 			'siteName' => $GLOBALS['wgSitename'],
 			'server' => $GLOBALS['wgServer'],
 			'scriptPath' => $GLOBALS['wgScriptPath'],
 			'stylePath' => $GLOBALS['wgStylePath'],
 			'currentVersion' => SpecialVersion::getVersion(
-				'', $parser ? $parser->getTargetLanguage() : $wgContLang
+				'', $parser ? $parser->getTargetLanguage() : $contLang
 			),
 		];
 
-		if ( !self::$namespacesCache || self::$namespacesCacheLang !== $wgContLang->getCode() ) {
+		if ( !self::$namespacesCache || self::$namespacesCacheLang !== $contLang->getCode() ) {
 			$namespaces = [];
 			$namespacesByName = [];
-			foreach ( $wgContLang->getFormattedNamespaces() as $ns => $title ) {
+			foreach ( $contLang->getFormattedNamespaces() as $ns => $title ) {
 				$canonical = MWNamespace::getCanonicalName( $ns );
 				$namespaces[$ns] = [
 					'id' => $ns,
@@ -61,7 +63,7 @@ class Scribunto_LuaSiteLibrary extends Scribunto_LuaLibraryBase {
 				}
 			}
 
-			$aliases = array_merge( $wgNamespaceAliases, $wgContLang->getNamespaceAliases() );
+			$aliases = array_merge( $wgNamespaceAliases, $contLang->getNamespaceAliases() );
 			foreach ( $aliases as $title => $ns ) {
 				if ( !isset( $namespacesByName[$title] ) && isset( $namespaces[$ns] ) ) {
 					$ct = count( $namespaces[$ns]['aliases'] );
@@ -73,7 +75,7 @@ class Scribunto_LuaSiteLibrary extends Scribunto_LuaLibraryBase {
 			$namespaces[NS_MAIN]['displayName'] = wfMessage( 'blanknamespace' )->inContentLanguage()->text();
 
 			self::$namespacesCache = $namespaces;
-			self::$namespacesCacheLang = $wgContLang->getCode();
+			self::$namespacesCacheLang = $contLang->getCode();
 		}
 		$info['namespaces'] = self::$namespacesCache;
 
@@ -90,6 +92,13 @@ class Scribunto_LuaSiteLibrary extends Scribunto_LuaLibraryBase {
 		return $this->getEngine()->registerInterface( 'mw.site.lua', $lib, $info );
 	}
 
+	/**
+	 * Handler for pagesInCategory
+	 * @internal
+	 * @param string|null $category
+	 * @param string|null $which
+	 * @return int[]|int[][]
+	 */
 	public function pagesInCategory( $category = null, $which = null ) {
 		$this->checkType( 'pagesInCategory', 1, $category, 'string' );
 		$this->checkTypeOptional( 'pagesInCategory', 2, $which, 'string', 'all' );
@@ -122,32 +131,55 @@ class Scribunto_LuaSiteLibrary extends Scribunto_LuaLibraryBase {
 		return [ $this->pagesInCategoryCache[$cacheKey][$which] ];
 	}
 
+	/**
+	 * Handler for pagesInNamespace
+	 * @internal
+	 * @param int|string|null $ns
+	 * @return int[]
+	 */
 	public function pagesInNamespace( $ns = null ) {
 		$this->checkType( 'pagesInNamespace', 1, $ns, 'number' );
 		return [ (int)SiteStats::pagesInNs( intval( $ns ) ) ];
 	}
 
+	/**
+	 * Handler for usersInGroup
+	 * @internal
+	 * @param string|null $group
+	 * @return int[]
+	 */
 	public function usersInGroup( $group = null ) {
 		$this->checkType( 'usersInGroup', 1, $group, 'string' );
 		return [ (int)SiteStats::numberingroup( strtolower( $group ) ) ];
 	}
 
+	/**
+	 * Handler for getNsIndex
+	 * @internal
+	 * @param string|null $name
+	 * @return int[]|bool[]
+	 */
 	public function getNsIndex( $name = null ) {
-		global $wgContLang;
 		$this->checkType( 'getNsIndex', 1, $name, 'string' );
 		// PHP call is case-insensitive but chokes on non-standard spaces/underscores.
 		$name = trim( preg_replace( '/[\s_]+/', '_', $name ), '_' );
-		return [ $wgContLang->getNsIndex( $name ) ];
+		return [ MediaWikiServices::getInstance()->getContentLanguage()->getNsIndex( $name ) ];
 	}
 
+	/**
+	 * Handler for interwikiMap
+	 * @internal
+	 * @param string|null $filter
+	 * @return array[]
+	 */
 	public function interwikiMap( $filter = null ) {
 		global $wgLocalInterwikis, $wgExtraInterlanguageLinkPrefixes;
 		$this->checkTypeOptional( 'interwikiMap', 1, $filter, 'string', null );
 		$local = null;
 		if ( $filter === 'local' ) {
-			$local = 1;
+			$local = '1';
 		} elseif ( $filter === '!local' ) {
-			$local = 0;
+			$local = '0';
 		} elseif ( $filter !== null ) {
 			throw new Scribunto_LuaError(
 				"bad argument #1 to 'interwikiMap' (unknown filter '$filter')"
@@ -158,7 +190,8 @@ class Scribunto_LuaSiteLibrary extends Scribunto_LuaLibraryBase {
 			// Not expensive because we can have a max of three cache misses in the
 			// entire page parse.
 			$interwikiMap = [];
-			$prefixes = Interwiki::getAllPrefixes( $local );
+			$lookup = MediaWikiServices::getInstance()->getInterwikiLookup();
+			$prefixes = $lookup->getAllPrefixes( $local );
 			foreach ( $prefixes as $row ) {
 				$prefix = $row['iw_prefix'];
 				$val = [

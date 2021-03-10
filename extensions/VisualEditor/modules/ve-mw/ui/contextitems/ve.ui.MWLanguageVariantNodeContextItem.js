@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWLanuageVariantNodeContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -52,7 +52,16 @@ ve.ui.MWLanguageVariantNodeContextItem.prototype.setup = function () {
 	// Set up label
 	var messageKey = 'visualeditor-mwlanguagevariantcontextitem-title-' +
 		this.model.getRuleType();
+
+	// The following messages are used here:
+	// * visualeditor-mwlanguagevariantcontextitem-title-disabled
+	// * visualeditor-mwlanguagevariantcontextitem-title-filter
+	// * visualeditor-mwlanguagevariantcontextitem-title-name
+	// * visualeditor-mwlanguagevariantcontextitem-title-oneway
+	// * visualeditor-mwlanguagevariantcontextitem-title-twoway
+	// * visualeditor-mwlanguagevariantcontextitem-title-unknown
 	this.setLabel( OO.ui.deferMsg( messageKey ) );
+
 	// Invoke superclass method.
 	return ve.ui.MWLanguageVariantNodeContextItem.super.prototype.setup.call( this );
 };
@@ -63,7 +72,7 @@ ve.ui.MWLanguageVariantNodeContextItem.prototype.setup = function () {
 ve.ui.MWLanguageVariantNodeContextItem.prototype.renderBody = function () {
 	var $body = this.$body,
 		$table = $( '<table>' ),
-		$header = $( '<tr> ' ),
+		$header = $( '<tr>' ),
 		variantInfo = this.model.getVariantInfo(),
 		type = this.model.getRuleType(),
 		isHidden = this.model.isHidden(),
@@ -147,7 +156,7 @@ ve.ui.MWLanguageVariantNodeContextItem.prototype.renderBody = function () {
 					name = ve.init.platform.getLanguageName( code.toLowerCase() ),
 					$text = $( '<td>' ).html( item.t );
 				ve.dm.MWLanguageVariantNode.static.processVariants(
-					$text, { showHidden: true }
+					$text[ 0 ], { showHidden: true }
 				);
 				$table
 					.append( $( '<tr>' )
@@ -165,7 +174,7 @@ ve.ui.MWLanguageVariantNodeContextItem.prototype.renderBody = function () {
 		// Don't put $table in $body if the table is empty; this allows
 		// CSS :empty rules to have their proper effect.
 		ve.dm.MWLanguageVariantNode.static.processVariants(
-			$table, { showHidden: true }
+			$table[ 0 ], { showHidden: true }
 		);
 		$body.append( $table );
 	}
@@ -173,6 +182,10 @@ ve.ui.MWLanguageVariantNodeContextItem.prototype.renderBody = function () {
 	[ 'describe', 'title', 'hidden' ].forEach( function ( flag ) {
 		var f = ( flag === 'hidden' ) ? isHidden : variantInfo[ flag ];
 		if ( f ) {
+			// The following messages can be used here:
+			// * visualeditor-mwlanguagevariantcontextitem-flag-describe
+			// * visualeditor-mwlanguagevariantcontextitem-flag-hidden
+			// * visualeditor-mwlanguagevariantcontextitem-flag-title
 			$body.append( $( '<p>' ).text( OO.ui.msg(
 				'visualeditor-mwlanguagevariantcontextitem-flag-' + flag
 			) ) );

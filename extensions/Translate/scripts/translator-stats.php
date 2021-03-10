@@ -19,8 +19,8 @@ require_once "$IP/maintenance/Maintenance.php";
 class TS extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Script to gather translator stats in tsv format. ' .
-			'You can further process the output with translate-stats-process.php';
+		$this->addDescription( 'Script to gather translator stats in tsv format. ' .
+			'You can further process the output with translate-stats-process.php' );
 	}
 
 	public function execute() {
@@ -102,11 +102,10 @@ class TS extends Maintenance {
 					$method = 'sandbox';
 					break;
 				} elseif ( $log->log_action === 'rights' ) {
-					Wikimedia\suppressWarnings();
-					$data = unserialize( $log->log_params );
-					Wikimedia\restoreWarnings();
+					// phpcs:disable Generic.PHP.NoSilencedErrors.Discouraged
+					$data = @unserialize( $log->log_params );
 					if ( $data === false ) {
-						$lines = explode( "\n", $log->log_params );
+						$lines = explode( "\n", $log->log_params, 3 );
 						if ( strpos( $lines[1], 'translator' ) !== false ) {
 							$promoted = $log->log_timestamp;
 							break;

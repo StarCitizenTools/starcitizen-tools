@@ -3,10 +3,13 @@
 		"authors": [
 			"Ganesh Paudel",
 			"NehalDaveND",
+			"Nirajan pant",
+			"पर्वत सुबेदी",
 			"राम प्रसाद जोशी"
 		]
 	},
 	"tpt-rev-encourage": "पूर्वावस्थामा ल्याउनुहोस्",
+	"tpt-languages-legend": "अन्य भाषाहरू:",
 	"tpt-languages-nonzero": "$1 ($2% अनुवादित)",
 	"tpt-tab-translate": "अनुवाद गर्नु",
 	"tpt-aggregategroup-add": "थप्न",
@@ -21,6 +24,6 @@
 	"pm-import-button-label": "आयात",
 	"pm-savepages-button-label": "संग्रह गर्ने",
 	"pm-cancel-button-label": "रद्द",
-	"pp-save-button-label": "संग्रह गर्नु",
+	"pp-save-button-label": "प्रकाशन",
 	"pp-cancel-button-label": "रद्द गर्नु"
 }

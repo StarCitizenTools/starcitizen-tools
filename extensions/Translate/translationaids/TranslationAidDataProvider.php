@@ -7,15 +7,15 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\SlotRecord;
 use Wikimedia\Rdbms\IDatabase;
 
-/**
- * @since 2018.01
- */
+/** @since 2018.01 */
 class TranslationAidDataProvider {
 	private $handle;
 	private $group;
-
 	private $definition;
 	private $translations;
 
@@ -35,7 +35,8 @@ class TranslationAidDataProvider {
 		}
 
 		// Optional performance optimization
-		if ( method_exists( $this->group, 'getMessageContent' ) ) {
+		if ( is_callable( [ $this->group, 'getMessageContent' ] ) ) {
+			// @phan-suppress-next-line PhanUndeclaredMethod
 			$this->definition = $this->group->getMessageContent( $this->handle );
 		} else {
 			$this->definition = $this->group->getMessage(
@@ -47,9 +48,7 @@ class TranslationAidDataProvider {
 		return $this->definition;
 	}
 
-	/**
-	 * @return Content
-	 */
+	/** @return Content */
 	public function getDefinitionContent() {
 		return ContentHandler::makeContent( $this->getDefinition(), $this->handle->getTitle() );
 	}
@@ -86,27 +85,21 @@ class TranslationAidDataProvider {
 	}
 
 	private static function loadTranslationData( IDatabase $db, MessageHandle $handle ) {
-		if ( method_exists( 'Revision', 'getQueryInfo' ) ) {
-			$queryInfo = Revision::getQueryInfo( [ 'page', 'text' ] );
+		$revisionStore = MediaWikiServices::getInstance()->getRevisionStore();
+		if ( is_callable( [ $revisionStore, 'newRevisionsFromBatch' ] ) ) {
+			$queryInfo = $revisionStore->getQueryInfo( [ 'page' ] );
 			$tables = $queryInfo[ 'tables' ];
 			$fields = $queryInfo[ 'fields' ];
 			$conds = [];
 			$options = [];
 			$joins = $queryInfo[ 'joins' ];
 		} else {
-			// BC for <= MW 1.31
-			$tables = [ 'page', 'text', 'revision' ];
-			$fields = array_merge(
-				Revision::selectFields(),
-				Revision::selectPageFields(),
-				Revision::selectTextFields()
-			);
+			$queryInfo = Revision::getQueryInfo( [ 'page', 'text' ] );
+			$tables = $queryInfo[ 'tables' ];
+			$fields = $queryInfo[ 'fields' ];
 			$conds = [];
 			$options = [];
-			$joins = [
-				'page' => Revision::pageJoinCond(),
-				'text' => [ 'INNER JOIN', [ 'rev_text_id=old_id' ] ]
-			];
+			$joins = $queryInfo[ 'joins' ];
 		}
 
 		// The list of pages we want to select, and their latest versions
@@ -126,10 +119,22 @@ class TranslationAidDataProvider {
 		$rows = $db->select( $tables, $fields, $conds, __METHOD__, $options, $joins );
 
 		$pages = [];
-		foreach ( $rows as $row ) {
-			$pages[$row->page_title] = Revision::getRevisionText( $row );
+		if ( is_callable( [ $revisionStore, 'newRevisionsFromBatch' ] ) ) {
+			$revisions = $revisionStore->newRevisionsFromBatch( $rows, [
+				'slots' => [ SlotRecord::MAIN ]
+			] )->getValue();
+			foreach ( $rows as $row ) {
+				/** @var RevisionRecord|null $rev */
+				$rev = $revisions[$row->rev_id];
+				if ( $rev && $rev->getContent( SlotRecord::MAIN ) instanceof TextContent ) {
+					$pages[$row->page_title] = $rev->getContent( SlotRecord::MAIN )->getText();
+				}
+			}
+		} else {
+			foreach ( $rows as $row ) {
+				$pages[$row->page_title] = Revision::getRevisionText( $row );
+			}
 		}
-
 		return $pages;
 	}
 }

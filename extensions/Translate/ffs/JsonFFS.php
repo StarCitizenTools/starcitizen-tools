@@ -16,6 +16,9 @@
  * @since 2012-09-21
  */
 class JsonFFS extends SimpleFFS {
+	/** @var ArrayFlattener */
+	private $flattener;
+
 	/**
 	 * @param string $data
 	 * @return bool
@@ -24,9 +27,7 @@ class JsonFFS extends SimpleFFS {
 		return is_array( FormatJson::decode( $data, /*as array*/true ) );
 	}
 
-	/**
-	 * @param FileBasedMessageGroup $group
-	 */
+	/** @param FileBasedMessageGroup $group */
 	public function __construct( FileBasedMessageGroup $group ) {
 		parent::__construct( $group );
 		$this->flattener = $this->getFlattener();
@@ -60,7 +61,7 @@ class JsonFFS extends SimpleFFS {
 			$messages = $this->flattener->flatten( $messages );
 		}
 
-		$messages = $this->group->getMangler()->mangle( $messages );
+		$messages = $this->group->getMangler()->mangleArray( $messages );
 
 		return [
 			'MESSAGES' => $messages,
@@ -77,27 +78,15 @@ class JsonFFS extends SimpleFFS {
 		$messages = [];
 		$template = $this->read( $collection->getLanguage() );
 
-		$messages['@metadata'] = [];
-		if ( isset( $template['METADATA'] ) ) {
-			$messages['@metadata'] = $template['METADATA'];
-		}
+		$messages['@metadata'] = $template['METADATA'] ?? [];
 
 		$authors = $collection->getAuthors();
-		$authors = $this->filterAuthors( $authors, $collection->code );
-
-		if ( isset( $template['AUTHORS'] ) ) {
-			$authors = array_unique( array_merge( $template['AUTHORS'], $authors ) );
-		}
-
-		if ( $authors !== [] ) {
-			$messages['@metadata']['authors'] = array_values( $authors );
-		}
+		$authors = $this->filterAuthors( $authors, $collection->getLanguage() );
+		$messages['@metadata']['authors'] = array_values( $authors );
 
 		$mangler = $this->group->getMangler();
 
-		/**
-		 * @var $m ThinMessage
-		 */
+		/** @var TMessage $m */
 		foreach ( $collection as $key => $m ) {
 			$value = $m->translation();
 			if ( $value === null ) {

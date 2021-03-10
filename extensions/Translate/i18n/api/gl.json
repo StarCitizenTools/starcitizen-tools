@@ -1,8 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"ArenaL5",
 			"Banjo",
 			"Elisardojm",
+			"Iváns",
+			"Maria zaos",
 			"Toliño"
 		]
 	},
@@ -85,18 +88,18 @@
 	"apihelp-ttmserver-param-service": "Que servizos de tradución usar, entre os dispoñibles.",
 	"apihelp-ttmserver-param-sourcelanguage": "O código de lingua do texto fonte.",
 	"apihelp-ttmserver-param-targetlanguage": "O código de lingua da suxestión.",
-	"apihelp-ttmserver-param-text": "Texto para o cal buscar suxestións.",
+	"apihelp-ttmserver-param-text": "Texto para o cal procurar suxestións.",
 	"apihelp-ttmserver-example-1": "Obter suxestións para traducir \"Help\" do inglés ao finés",
 	"apihelp-searchtranslations-description": "Procurar nas traducións.",
 	"apihelp-searchtranslations-summary": "Procurar nas traducións.",
 	"apihelp-searchtranslations-param-service": "O servizo de tradución a utilizar.",
-	"apihelp-searchtranslations-param-query": "A cadea que buscar.",
+	"apihelp-searchtranslations-param-query": "A cadea a procurar.",
 	"apihelp-searchtranslations-param-sourcelanguage": "O código de lingua do texto fonte.",
 	"apihelp-searchtranslations-param-language": "O código da lingua na que procurar a cadea.",
 	"apihelp-searchtranslations-param-group": "O identificador do grupo no que procurar a cadea.",
 	"apihelp-searchtranslations-param-filter": "Filtro do estado de tradución das mensaxes.",
-	"apihelp-searchtranslations-param-match": "Coincide con calquera/todas as palabras de busca.",
-	"apihelp-searchtranslations-param-case": "Busca sensible/non sensible a maiúsculas.",
+	"apihelp-searchtranslations-param-match": "Coincide con calquera/todas as palabras de procura.",
+	"apihelp-searchtranslations-param-case": "Procura sensible/non sensible a maiúsculas.",
 	"apihelp-searchtranslations-param-offset": "Desprazamento para as traducións.",
 	"apihelp-searchtranslations-param-limit": "Tamaño do resultado.",
 	"apihelp-searchtranslations-example-1": "Amosar as traducións para a lingua.",
@@ -111,7 +114,7 @@
 	"apierror-translate-invalidstate": "O estado solicitado non é válido.",
 	"apierror-translate-invalidlanguage": "A lingua solicitada non é válida.",
 	"apierror-translate-invalidupdate": "Actualización non válida",
-	"apierror-translate-language-disabled": "A tradución a esta lingua está desactivada",
+	"apierror-translate-language-disabled": "A tradución a $1 está desactivada",
 	"apierror-translate-nodynamicgroups": "Aquí non están admitidos os grupos de mensaxes dinámicas",
 	"apierror-translate-nomessagefortitle": "O título non se corresponde cunha mensaxe traducible",
 	"apierror-translate-owntranslation": "Non pode revisar as súas traducións",

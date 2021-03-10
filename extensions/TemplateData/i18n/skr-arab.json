@@ -4,11 +4,8 @@
 			"Saraiki"
 		]
 	},
-	"templatedata-doc-param-autovalue-empty": "خالی",
 	"templatedata-doc-param-default": "پہلے کنوں طے تھیا ہویا",
-	"templatedata-doc-param-default-empty": "خالی",
 	"templatedata-doc-param-example": "مثال",
-	"templatedata-doc-param-example-empty": "خالی",
 	"templatedata-doc-param-desc": "تفصیل",
 	"templatedata-doc-param-desc-empty": "وضاحت کائنی",
 	"templatedata-doc-param-name": "پیرامیٹر",
@@ -19,7 +16,7 @@
 	"templatedata-doc-param-type": "قسم",
 	"templatedata-doc-param-type-boolean": "بُولین",
 	"templatedata-doc-param-type-content": "شامل حصے",
-	"templatedata-doc-param-type-date": "تاریخ",
+	"templatedata-doc-param-type-date": "تریخ",
 	"templatedata-doc-param-type-line": "سطر",
 	"templatedata-doc-param-type-number": "عدد",
 	"templatedata-doc-param-type-string": "سٹرنگ",

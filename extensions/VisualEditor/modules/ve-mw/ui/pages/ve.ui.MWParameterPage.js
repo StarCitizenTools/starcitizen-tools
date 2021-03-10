@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWParameterPage class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,6 +16,7 @@
  * @param {string} name Unique symbolic name of page
  * @param {Object} [config] Configuration options
  * @cfg {jQuery} [$overlay] Overlay to render dropdowns in
+ * @cfg {boolean} [readOnly] Parameter is read-only
  */
 ve.ui.MWParameterPage = function VeUiMWParameterPage( parameter, name, config ) {
 	var paramName = parameter.getName();
@@ -48,6 +49,10 @@ ve.ui.MWParameterPage = function VeUiMWParameterPage( parameter, name, config ) 
 		.setValue( this.parameter.getValue() )
 		.connect( this, { change: 'onValueInputChange' } );
 
+	if ( config.readOnly && this.valueInput.setReadOnly ) {
+		this.valueInput.setReadOnly( true );
+	}
+
 	this.statusIndicator = new OO.ui.IndicatorWidget( {
 		classes: [ 've-ui-mwParameterPage-statusIndicator' ]
 	} );
@@ -61,7 +66,7 @@ ve.ui.MWParameterPage = function VeUiMWParameterPage( parameter, name, config ) 
 	if ( this.parameter.isRequired() ) {
 		this.statusIndicator
 			.setIndicator( 'required' )
-			.setIndicatorTitle(
+			.setTitle(
 				ve.msg( 'visualeditor-dialog-transclusion-required-parameter' )
 			);
 		this.$description.append(
@@ -74,7 +79,7 @@ ve.ui.MWParameterPage = function VeUiMWParameterPage( parameter, name, config ) 
 	} else if ( this.parameter.isDeprecated() ) {
 		this.statusIndicator
 			.setIndicator( 'alert' )
-			.setIndicatorTitle(
+			.setTitle(
 				ve.msg( 'visualeditor-dialog-transclusion-deprecated-parameter' )
 			);
 		this.$description.append(
@@ -145,7 +150,7 @@ ve.ui.MWParameterPage = function VeUiMWParameterPage( parameter, name, config ) 
 
 	this.$actions.append( this.infoButton.$element );
 
-	if ( !this.parameter.isRequired() ) {
+	if ( !this.parameter.isRequired() && !config.readOnly ) {
 		this.removeButton = new OO.ui.ButtonWidget( {
 			framed: false,
 			icon: 'trash',
@@ -188,7 +193,10 @@ ve.ui.MWParameterPage = function VeUiMWParameterPage( parameter, name, config ) 
 		.append( this.addButton.$element );
 	this.$element
 		.addClass( 've-ui-mwParameterPage' )
-		.append( this.$info, this.$field, this.$actions, this.$more );
+		.append( this.$info, this.$field, this.$actions );
+	if ( !config.readOnly ) {
+		this.$element.append( this.$more );
+	}
 };
 
 /* Inheritance */
@@ -250,23 +258,24 @@ ve.ui.MWParameterPage.prototype.createValueInput = function () {
 		type === 'wiki-page-name' &&
 		( value === '' || mw.Title.newFromText( value ) )
 	) {
-		return new mw.widgets.TitleInputWidget( valueInputConfig );
+		return new mw.widgets.TitleInputWidget( valueInputConfig, { api: ve.init.target.getContentApi() } );
 	} else if (
 		type === 'wiki-user-name' &&
 		( value === '' || mw.Title.newFromText( value ) )
 	) {
 		valueInputConfig.validate = function ( value ) {
 			// TODO: Check against wgMaxNameChars
-			// TODO: Check against unicode blacklist regex from MW core's User::isValidUserName
+			// TODO: Check against unicode validation regex from MW core's User::isValidUserName
 			return !!mw.Title.newFromText( value );
 		};
-		return new mw.widgets.UserInputWidget( valueInputConfig );
+		return new mw.widgets.UserInputWidget( valueInputConfig, { api: ve.init.target.getContentApi() } );
 	} else if (
 		type === 'wiki-template-name' &&
 		( value === '' || mw.Title.newFromText( value ) )
 	) {
 		return new mw.widgets.TitleInputWidget( $.extend( {}, valueInputConfig, {
-			namespace: mw.config.get( 'wgNamespaceIds' ).template
+			namespace: mw.config.get( 'wgNamespaceIds' ).template,
+			api: ve.init.target.getContentApi()
 		} ) );
 	} else if ( type === 'boolean' && ( value === '1' || value === '0' ) ) {
 		return new ve.ui.MWParameterCheckboxInputWidget( valueInputConfig );
@@ -278,9 +287,13 @@ ve.ui.MWParameterPage.prototype.createValueInput = function () {
 		)
 	) {
 		return ve.ui.MWExternalLinkAnnotationWidget.static.createExternalLinkInputWidget( valueInputConfig );
-	} else if ( type !== 'line' ) {
+	} else if ( type !== 'line' || value.indexOf( '\n' ) !== -1 ) {
+		// If the type is line, but there are already newlines in the provided
+		// value, don't break the existing content by only providing a single-
+		// line field. (This implies that the TemplateData for the field isn't
+		// complying with its use in practice...)
 		this.rawValueInput = true;
-		return new OO.ui.MultilineTextInputWidget( valueInputConfig );
+		return new ve.ui.MWLazyMultilineTextInputWidget( valueInputConfig );
 	}
 
 	return new OO.ui.TextInputWidget( valueInputConfig );
@@ -372,14 +385,14 @@ ve.ui.MWParameterPage.prototype.setOutlineItem = function () {
 		if ( this.parameter.isRequired() ) {
 			this.outlineItem
 				.setIndicator( 'required' )
-				.setIndicatorTitle(
+				.setTitle(
 					ve.msg( 'visualeditor-dialog-transclusion-required-parameter' )
 				);
 		}
 		if ( this.parameter.isDeprecated() ) {
 			this.outlineItem
 				.setIndicator( 'alert' )
-				.setIndicatorTitle(
+				.setTitle(
 					ve.msg( 'visualeditor-dialog-transclusion-deprecated-parameter' )
 				);
 		}

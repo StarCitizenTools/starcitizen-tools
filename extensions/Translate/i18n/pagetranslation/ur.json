@@ -1,15 +1,22 @@
 {
 	"@metadata": {
 		"authors": [
-			"පසිඳු කාවින්ද",
-			"عثمان خان شاہ",
+			"Muhammad Shuaib",
 			"Obaid Raza",
-			"Muhammad Shuaib"
+			"عثمان خان شاہ",
+			"පසිඳු කාවින්ද"
 		]
 	},
 	"pagetranslation": "صفحہ ترجمہ",
+	"action-pagetranslation": "قابلِ ترجمہ صفحات کا انتظام",
+	"tpt-section": "$1 یونٹ ترجمہ",
+	"tpt-section-new": "ترجمے کے نئے یونٹ.\nنام: $1",
+	"tpt-section-deleted": "$1 یونٹ ترجمہ",
 	"tpt-diff-old": "پچھلے ٹیکسٹ",
 	"tpt-diff-new": "نئے متن",
+	"tpt-submit": "اس نسخے کو ترجمہ کے لیے نشان زد کریں",
+	"tpt-sections-oldnew": "نئے اور موجود ترجمے کے یونٹ",
+	"tpt-sections-deleted": "ترجمے کے حذف شدہ یونٹ",
 	"tpt-sections-template": "ترجمہ صفحہ سانچے",
 	"tpt-action-nofuzzy": "ترجمہ باطل نہیں ہوتا",
 	"tpt-new-pages-title": "صفحات کے ترجمہ کے لئے رشتہ آيا",
@@ -30,7 +37,6 @@
 	"tpt-languages-zero": "اس زبان کے لئے ترجمہ شروع",
 	"tpt-languages-nonzero": "$1 ($2% ترجمہ ہوا)",
 	"tpt-tab-translate": "ترجمہ کریں",
-	"tpt-discouraged-language-reason": "وجہ:  $1",
 	"tpt-aggregategroup-add": "شامل کریں",
 	"tpt-aggregategroup-save": "محفوظ کریں",
 	"tpt-aggregategroup-add-new": "ایک نیا میرا گروپ شامل کریں",

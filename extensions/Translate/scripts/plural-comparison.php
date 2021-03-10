@@ -9,6 +9,8 @@
  * @file
  */
 
+use CLDRPluralRuleParser\Evaluator;
+
 // Standard boilerplate to define $IP
 if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 	$IP = getenv( 'MW_INSTALL_PATH' );
@@ -21,7 +23,7 @@ require_once "$IP/maintenance/Maintenance.php";
 class PluralCompare extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Script for comparing different plural implementations.';
+		$this->addDescription( 'Script for comparing different plural implementations.' );
 	}
 
 	public function execute() {
@@ -81,8 +83,9 @@ class PluralCompare extends Maintenance {
 			$mw = $gt = $cl = '?';
 
 			if ( $mwExp ) {
+				// @phan-suppress-next-line PhanPossiblyUndeclaredVariable
 				$exp = $lang->getCompiledPluralRules();
-				$mw = CLDRPluralRuleEvaluator::evaluateCompiled( $i, $exp );
+				$mw = Evaluator::evaluateCompiled( $i, $exp );
 			}
 
 			if ( $gtExp ) {
@@ -90,7 +93,7 @@ class PluralCompare extends Maintenance {
 			}
 
 			if ( $cldrExp ) {
-				$cl = CLDRPluralRuleEvaluator::evaluate( $i, $cldrExp );
+				$cl = Evaluator::evaluate( $i, $cldrExp );
 			}
 
 			if ( self::comp( $mw, $gt ) && self::comp( $gt, $cl ) && self::comp( $cl, $mw ) ) {

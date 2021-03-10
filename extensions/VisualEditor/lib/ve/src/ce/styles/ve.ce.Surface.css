@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Surface styles.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 .ve-ce-surface {
@@ -23,14 +23,24 @@
 	pointer-events: none;
 }
 
+.ve-ce-surface-deactivatedSelection-showAsDeactivated {
+	opacity: 0.15;
+}
+
 .ve-ce-surface-deactivatedSelection > div {
 	position: absolute;
 	background: #6da9f7;
 	margin-top: -0.15em;
 	padding: 0.15em 0;
 }
-.ve-ce-surface-deactivatedSelection-collapsed > div {
+
+.ve-ce-surface-deactivatedSelection-showAsDeactivated > div {
 	background: #000;
+}
+
+.ve-ce-surface-deactivatedSelection-collapsed {
+	opacity: 1;
+	/* Color is matched to font in ve.ce.Surface.js */
 }
 
 /* Support: IE, Edge */
@@ -38,6 +48,10 @@
    otherwise the opacity isn't applied at all */
 .ve-init-target-ie-or-edge .ve-ce-surface-deactivatedSelection > div {
 	opacity: 0.5;
+}
+
+.ve-init-target-ie-or-edge .ve-ce-surface-deactivatedSelection-showAsDeactivated > div {
+	opacity: 0.15;
 }
 
 .ve-ce-surface-dropMarker {
@@ -73,6 +87,7 @@
 	font-size: 0.7em;
 	background: #a66;
 	color: #fff;
+	text-shadow: 0 0 1px rgba( 0, 0, 0, 0.5 );
 	padding: 0.2em;
 	top: -1.4em;
 	height: 1em;
@@ -85,6 +100,10 @@
 
 .ve-ce-surface-highlights-user-cursor-inactive,
 .ve-ce-surface-highlights-user-selection-inactive {
+	opacity: 0.5;
+}
+
+.ve-ce-surface-paused {
 	opacity: 0.5;
 }
 

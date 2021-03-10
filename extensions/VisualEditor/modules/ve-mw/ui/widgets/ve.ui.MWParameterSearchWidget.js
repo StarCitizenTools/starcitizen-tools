@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWParameterSearchWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -36,8 +36,10 @@ ve.ui.MWParameterSearchWidget = function VeUiMWParameterSearchWidget( template, 
 	this.template.connect( this, { add: 'buildIndex', remove: 'buildIndex' } );
 	this.getResults().connect( this, { choose: 'onSearchResultsChoose' } );
 
+	this.query.$input.attr( 'aria-label', ve.msg( 'visualeditor-parameter-input-placeholder' ) );
 	// Initialization
 	this.$element.addClass( 've-ui-mwParameterSearchWidget' );
+	this.query.$input.attr( 'aria-label', ve.msg( 'visualeditor-parameter-input-placeholder' ) );
 	this.buildIndex();
 };
 
@@ -57,7 +59,6 @@ OO.inheritClass( ve.ui.MWParameterSearchWidget, OO.ui.SearchWidget );
 /**
  * Handle select widget select events.
  *
- * @method
  * @param {string} value New value
  */
 ve.ui.MWParameterSearchWidget.prototype.onQueryChange = function () {
@@ -71,7 +72,6 @@ ve.ui.MWParameterSearchWidget.prototype.onQueryChange = function () {
 /**
  * Handle SelectWidget choose events.
  *
- * @method
  * @param {OO.ui.OptionWidget} item Selected item
  * @fires choose
  * @fires showAll
@@ -89,7 +89,6 @@ ve.ui.MWParameterSearchWidget.prototype.onSearchResultsChoose = function ( item 
 /**
  * Build a searchable index of parameters.
  *
- * @method
  * @param {ve.dm.MWTemplateSpecModel} spec Template specification
  */
 ve.ui.MWParameterSearchWidget.prototype.buildIndex = function () {
@@ -116,7 +115,8 @@ ve.ui.MWParameterSearchWidget.prototype.buildIndex = function () {
 			name: name,
 			label: label,
 			aliases: aliases,
-			description: description
+			description: description,
+			deprecated: spec.isParameterDeprecated( name )
 		} );
 	}
 
@@ -126,8 +126,6 @@ ve.ui.MWParameterSearchWidget.prototype.buildIndex = function () {
 
 /**
  * Handle media query response events.
- *
- * @method
  */
 ve.ui.MWParameterSearchWidget.prototype.addResults = function () {
 	var i, len, item, textMatch, nameMatch, remainder,
@@ -146,6 +144,10 @@ ve.ui.MWParameterSearchWidget.prototype.addResults = function () {
 			nameMatch = item.names.indexOf( query ) >= 0;
 		}
 		if ( !hasQuery || textMatch || nameMatch ) {
+			// Only show exact matches for deprecated params
+			if ( item.deprecated && query !== item.name && item.aliases.indexOf( query ) === -1 ) {
+				continue;
+			}
 			items.push( new ve.ui.MWParameterResultWidget( { data: item } ) );
 			if ( hasQuery && nameMatch ) {
 				exactMatch = true;

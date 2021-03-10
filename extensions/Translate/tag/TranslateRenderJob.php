@@ -7,12 +7,16 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\Jobs\GenericTranslateJob;
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+use MediaWiki\MediaWikiServices;
+
 /**
  * Job for updating translation pages when translation or template changes.
  *
  * @ingroup PageTranslation JobQueue
  */
-class TranslateRenderJob extends Job {
+class TranslateRenderJob extends GenericTranslateJob {
 
 	/**
 	 * @param Title $target
@@ -37,25 +41,23 @@ class TranslateRenderJob extends Job {
 	}
 
 	public function run() {
-		global $wgTranslateKeepOutdatedTranslations;
+		$this->logInfo( 'Starting TranslateRenderJob' );
+
+		// We may be doing double wait here if this job was spawned by TranslationUpdateJob
+		$lb = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		if ( !$lb->waitForReplication() ) {
+			$this->logWarning( 'Continuing despite replication lag' );
+		}
 
 		// Initialization
 		$title = $this->title;
-		list( , $code ) = TranslateUtils::figureMessage( $title->getPrefixedText() );
-
-		// Return the actual translation page...
-		$page = TranslatablePage::isTranslationPage( $title );
-		if ( !$page ) {
-			throw new MWException( "Cannot render translation page for {$title->getPrefixedText()}!" );
+		$tpPage = TranslatablePage::getTranslationPageFromTitle( $title );
+		if ( !$tpPage ) {
+			$this->logError( 'Cannot render translation page!' );
+			return false;
 		}
 
-		$group = $page->getMessageGroup();
-		$collection = $group->initCollection( $code );
-
-		$text = $page->getParse()->getTranslationPageText(
-			$collection,
-			$wgTranslateKeepOutdatedTranslations
-		);
+		$text = $tpPage->generateSource();
 
 		// Other stuff
 		$user = $this->getUser();
@@ -63,14 +65,26 @@ class TranslateRenderJob extends Job {
 		$flags = $this->getFlags();
 
 		$page = WikiPage::factory( $title );
+		$model = $page->getTitle()->getContentModel();
 
 		// @todo FuzzyBot hack
 		PageTranslationHooks::$allowTargetEdit = true;
-		$content = ContentHandler::makeContent( $text, $page->getTitle() );
-		$page->doEditContent( $content, $summary, $flags, false, $user );
+		$content = ContentHandler::makeContent( $text, $page->getTitle(), $model );
+		$editStatus = $page->doEditContent( $content, $summary, $flags, false, $user );
+		if ( !$editStatus->isOK() ) {
+			$this->logError(
+				'Error while editing content in page.',
+				[
+					'content' => $content,
+					'errors' => $editStatus->getErrors()
+				]
+			);
+		}
 
+		$this->logInfo( 'Finished page edit operation' );
 		PageTranslationHooks::$allowTargetEdit = false;
 
+		$this->logInfo( 'Finished TranslateRenderJob' );
 		return true;
 	}
 
@@ -90,9 +104,7 @@ class TranslateRenderJob extends Job {
 		return $this->params['summary'];
 	}
 
-	/**
-	 * @param User|string $user
-	 */
+	/** @param User|string $user */
 	public function setUser( $user ) {
 		if ( $user instanceof User ) {
 			$this->params['user'] = $user->getName();

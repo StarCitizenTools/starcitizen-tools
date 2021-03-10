@@ -1,13 +1,22 @@
 {
 	"@metadata": {
 		"authors": [
+			"Charunandan16",
+			"NehalDaveND",
 			"Shubha",
-			"NehalDaveND"
+			"Soorya Hebbar"
 		]
 	},
-	"apihelp-visualeditoredit-param-summary": "सारांशः सम्पाद्यताम्",
+	"tooltip-ca-createsource": "अस्य पृष्ठस्य मूलपाठं रचयतु",
+	"tooltip-ca-edit": "विकिपाठ्यम् उपयुज्य पृष्ठं सम्पाद्यताम्",
+	"tooltip-ca-editsource": "अस्य पृष्ठस्य स्रोतपाठ्यं सम्पाद्यताम्",
 	"tooltip-ca-ve-edit": "इदं पृष्ठं सम्पाद्यताम्",
-	"visualeditor-beta-label": "उपान्त्यम्",
+	"visualeditor-advancedsettings-tool": "उन्नतानि संयोजनानि",
+	"visualeditor-autosave-modified-prompt-accept": "सम्पादनं पुनरारभ्यताम्",
+	"visualeditor-autosave-modified-prompt-reject": "नूतनसम्पादनम् आरभ्यताम्",
+	"visualeditor-autosave-modified-prompt-title": "सम्पादनं पुनरारभ्यताम्",
+	"visualeditor-autosave-not-recovered-text": "अरक्षितानां परिवर्तनानां पुनः प्राप्तिः न स्याद्",
+	"visualeditor-backbutton-tooltip": "प्रतिगम्यताम्",
 	"visualeditor-beta-warning": "यथादृश्यसम्पादिका अधुना उपान्त्ये अस्ति । विकि-पाठस्य स्रोतसम्पादके सम्पादयितुं यदा कदापि पतत्सूच्यां \"{{int:visualeditor-toolbar-savedialog}}\" नुदित्वा एतत् \"{{int:visualeditor-mweditmodesource-tool}}\" चीयताम् ।",
 	"visualeditor-ca-createlocaldescriptionsource": "स्थानीयवर्णनस्य मूलः योज्यताम्",
 	"visualeditor-ca-createsource": "स्रोतः सृज्यताम्",
@@ -32,7 +41,6 @@
 	"visualeditor-dialog-media-info-moreinfo": "अन्यविवरणम्",
 	"visualeditor-dialog-media-info-readmore": "अधिकं पठ्यताम्",
 	"visualeditor-dialog-media-info-uploaded": "उपारोहितम् : $1",
-	"visualeditor-dialog-media-noresults": "परिणामाः न लब्धाः",
 	"visualeditor-dialog-media-position-center": "केन्द्रं",
 	"visualeditor-dialog-media-position-left": "वामतः",
 	"visualeditor-dialog-media-position-none": "नैकमपि",
@@ -100,13 +108,12 @@
 	"visualeditor-meta-tool": "विकल्पाः",
 	"visualeditor-mweditmodesource-warning-cancel": "निरस्यताम्",
 	"visualeditor-mwgallerydialog-title": "वीथिका",
-	"visualeditor-pagemenu-tooltip": "पृष्ठविकल्पाः",
 	"visualeditor-parameter-input-placeholder": "स्थाननाम",
 	"visualeditor-preference-betatempdisable": "यावता यथादृश्यसम्पादिका उपान्त्ये अस्ति, तावता यथादृश्यसम्पादिका निष्क्रियताम् ।",
 	"visualeditor-preference-core-label": "यथादृश्यसम्पादिका",
 	"visualeditor-savedialog-label-create": "पृष्ठं सृज्यताम्",
 	"visualeditor-savedialog-label-error": "दोषः",
 	"visualeditor-savedialog-label-warning": "पूर्वसूचना",
-	"visualeditor-toolbar-savedialog": "पृष्ठं रक्ष्यताम्",
-	"visualeditor-version-label": "संस्करणम्"
+	"visualeditor-version-label": "संस्करणम्",
+	"visualeditor-wikitextconvert-plain": "साधारणपाठः प्रयुज्यताम्"
 }

@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"Amjad Khan",
 			"Baloch Khan"
 		]
 	},
@@ -84,18 +85,18 @@
 	"visualeditor-linkinspector-title": "تړنه",
 	"visualeditor-listbutton-bullet-tooltip": "گولۍ داره لړليک",
 	"visualeditor-listbutton-number-tooltip": "شمېرن لړليک",
-	"visualeditor-mediasizewidget-button-originaldimensions": "په بشپړه کچه جوړول",
-	"visualeditor-mediasizewidget-label-custom": "دوديز",
 	"visualeditor-mediasizewidget-label-defaulterror": "د کچې ارزښتونه ناسم دي.",
 	"visualeditor-mediasizewidget-label-scale": "تله",
 	"visualeditor-mediasizewidget-label-scale-percent": "% د بټنوک کچه",
 	"visualeditor-mediasizewidget-sizeoptions-custom": "دوديز",
 	"visualeditor-mediasizewidget-sizeoptions-default": "تلواليز",
 	"visualeditor-mediasizewidget-sizeoptions-scale": "تله",
+	"visualeditor-pagemenu-tooltip": "د مخ خوښنې",
 	"visualeditor-rebase-client-author-name": "نوم",
 	"visualeditor-shortcuts-clipboard": "کلېپ دړه",
 	"visualeditor-shortcuts-formatting": "د پاراگراف بڼه جوړونه",
 	"visualeditor-shortcuts-history": "پېښليک",
+	"visualeditor-shortcuts-insert": "ورټومبل",
 	"visualeditor-shortcuts-other": "بل",
 	"visualeditor-shortcuts-sequence-notice": "ډول",
 	"visualeditor-shortcuts-text-style": "متن ډول جوړونه",

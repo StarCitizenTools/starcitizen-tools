@@ -8,18 +8,18 @@
  * @file
  */
 
-class JavaFFSTest extends MediaWikiTestCase {
+class JavaFFSTest extends MediaWikiIntegrationTestCase {
 
 	protected $groupConfiguration = [
 		'BASIC' => [
-			'class' => 'FileBasedMessageGroup',
+			'class' => FileBasedMessageGroup::class,
 			'id' => 'test-id',
 			'label' => 'Test Label',
 			'namespace' => 'NS_MEDIAWIKI',
 			'description' => 'Test description',
 		],
 		'FILES' => [
-			'class' => 'JavaFFS',
+			'class' => JavaFFS::class,
 		],
 	];
 
@@ -39,9 +39,7 @@ key\ with\ spaces = Value that can be looked up with "key with spaces".
 key-with-{curlies} = Value that can be looked up with "key-with-{curlies}".
 PROPERTIES;
 
-		/**
-		 * @var FileBasedMessageGroup $group
-		 */
+		/** @var FileBasedMessageGroup $group */
 		$group = MessageGroupBase::factory( $this->groupConfiguration );
 		$ffs = new JavaFFS( $group );
 		$parsed = $ffs->readFromVariable( $file );
@@ -57,9 +55,7 @@ PROPERTIES;
 		$this->assertEquals( $expected, $parsed );
 	}
 
-	/**
-	 * @dataProvider rowValuesProvider
-	 */
+	/** @dataProvider rowValuesProvider */
 	public function testRowRoundtrip( $key, $sep, $value, $comment ) {
 		$write = JavaFFS::writeRow( $key, $sep, $value );
 		// Trim the trailing newline

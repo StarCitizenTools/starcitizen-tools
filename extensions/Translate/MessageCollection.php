@@ -8,76 +8,62 @@
  * @license GPL-2.0-or-later
  */
 
-use Wikimedia\Rdbms\IResultWrapper;
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\SlotRecord;
 
 /**
  * Core message collection class.
  *
- * Message group is collection of messages of one message group in one
+ * Message collection is collection of messages of one message group in one
  * language. It handles loading of the messages in one huge batch, and also
  * stores information that can be used to filter the collection in different
  * ways.
  */
 class MessageCollection implements ArrayAccess, Iterator, Countable {
 	/**
-	 * @var string Language code.
+	 * The queries can get very large because each message title is specified
+	 * individually. Very large queries can confuse the database query planner.
+	 * Queries are split into multiple separate queries having at most this many
+	 * items.
 	 */
+	private const MAX_ITEMS_PER_QUERY = 2000;
+
+	/** @var string Language code. */
 	public $code;
-
-	/**
-	 * @var MessageDefinitions
-	 */
+	/** @var MessageDefinitions */
 	protected $definitions = null;
-
-	/**
-	 * @var array array( %Message key => translation, ... )
-	 */
+	/** @var array array( %Message key => translation, ... ) */
 	protected $infile = [];
-
 	// Keys and messages.
 
-	/**
-	 * @var array array( %Message display key => database key, ... )
-	 */
+	/** @var array array( %Message display key => database key, ... ) */
 	protected $keys = [];
-
-	/**
-	 * @var array array( %Message String => TMessage, ... )
-	 */
+	/** @var array array( %Message String => TMessage, ... ) */
 	protected $messages = [];
-
-	/**
-	 * @var array
-	 */
+	/** @var array */
 	protected $reverseMap;
-
 	// Database resources
 
-	/** @var IResultWrapper Stored message existence and fuzzy state. */
+	/** @var ?Traversable Stored message existence and fuzzy state. */
 	protected $dbInfo;
-
-	/** @var IResultWrapper Stored translations in database. */
+	/** @var ?Traversable Stored translations in database. */
 	protected $dbData;
-
-	/** @var IResultWrapper Stored reviews in database. */
-	protected $dbReviewData = [];
-
+	/** @var ?Traversable Stored reviews in database. */
+	protected $dbReviewData;
 	/**
 	 * Tags, copied to thin messages
 	 * tagtype => keys
 	 * @var array[]
 	 */
 	protected $tags = [];
-
 	/**
 	 * Properties, copied to thin messages
 	 * @var array[]
 	 */
 	protected $properties = [];
-
-	/**
-	 * @var string[] Authors.
-	 */
+	/** @var string[] Authors. */
 	protected $authors = [];
 
 	/**
@@ -102,17 +88,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 		return $collection;
 	}
 
-	/**
-	 * Constructs a new empty message collection. Suitable for example for testing.
-	 * @param string $code Language code.
-	 * @return self
-	 */
-	public static function newEmpty( $code ) {
-	}
-
-	/**
-	 * @return string
-	 */
+	/** @return string */
 	public function getLanguage() {
 		return $this->code;
 	}
@@ -139,15 +115,15 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 	/**
 	 * Returns list of available message keys. This is affected by filtering.
-	 * @return array List of database keys indexed by display keys.
+	 * @return array List of database keys indexed by display keys (TitleValue).
 	 */
 	public function keys() {
 		return $this->keys;
 	}
 
 	/**
-	 * Returns list of titles of messages that are used in this collection after filtering.
-	 * @return Title[]
+	 * Returns list of TitleValues of messages that are used in this collection after filtering.
+	 * @return TitleValue[]
 	 * @since 2011-12-28
 	 */
 	public function getTitles() {
@@ -185,9 +161,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 		foreach ( $this->messages as $m ) {
 			// Check if there are authors
-			/**
-			 * @var TMessage $m
-			 */
+			/** @var TMessage $m */
 			$author = $m->getProperty( 'last-translator-text' );
 
 			if ( $author === null ) {
@@ -241,9 +215,14 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 * with ArrayAccess or iteration.
 	 */
 	public function loadTranslations() {
-		$this->loadData( $this->keys );
-		$this->loadInfo( $this->keys );
-		$this->loadReviewInfo( $this->keys );
+		// Performance optimization: Instead of building conditions based on key in every
+		// method, build them once and pass it on to each of them.
+		$dbr = TranslateUtils::getSafeReadDB();
+		$titleConds = $this->getTitleConds( $dbr );
+
+		$this->loadData( $this->keys, $titleConds );
+		$this->loadInfo( $this->keys, $titleConds );
+		$this->loadReviewInfo( $this->keys, $titleConds );
 		$this->initMessages();
 	}
 
@@ -255,8 +234,8 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	public function resetForNewLanguage( $code ) {
 		$this->code = $code;
 		$this->keys = $this->fixKeys();
-		$this->dbInfo = null;
-		$this->dbData = null;
+		$this->dbInfo = [];
+		$this->dbData = [];
 		$this->dbReviewData = [];
 		$this->messages = null;
 		$this->infile = [];
@@ -282,15 +261,9 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 		// Handle string offsets
 		if ( !ctype_digit( (string)$offset ) ) {
-			$count = 0;
-			foreach ( array_keys( $this->keys ) as $index ) {
-				if ( $index === $offset ) {
-					break;
-				}
-				$count++;
-			}
+			$pos = array_search( $offset, array_keys( $this->keys ), true );
 			// Now offset is always an integer, suitable for array_slice
-			$offset = $count;
+			$offset = $pos !== false ? $pos : count( $this->keys );
 		}
 
 		// False means that cannot go back or forward
@@ -356,9 +329,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 		$this->applyFilter( $type, $condition, $value );
 	}
 
-	/**
-	 * @return array
-	 */
+	/** @return array */
 	public static function getAvailableFilters() {
 		return [
 			'fuzzy',
@@ -414,18 +385,31 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 		$this->keys = $keys;
 	}
 
+	/** @internal For MessageGroupStats */
+	public function filterUntranslatedOptional(): void {
+		$optionalKeys = array_flip( $this->tags['optional'] ?? [] );
+		// Convert plain message keys to array<string,TitleValue>
+		$optional = $this->filterOnCondition( $this->keys, $optionalKeys, false );
+		// Then get reduce that list to those which have no translation. Ensure we don't
+		// accidentally populate the info cache with too few keys.
+		$this->loadInfo( $this->keys );
+		$untranslatedOptional = $this->filterHastranslation( $optional, true );
+		// Now remove that list from the full list
+		$this->keys = $this->filterOnCondition( $this->keys, $untranslatedOptional );
+	}
+
 	/**
 	 * Filters list of keys with other list of keys according to the condition.
 	 * In other words, you have a list of keys, and you have determined list of
 	 * keys that have some feature. Now you can either take messages that are
 	 * both in the first list and the second list OR are in the first list but
-	 * are not in the second list (conditition = true and false respectively).
+	 * are not in the second list (conditition = false and true respectively).
 	 * What makes this more complex is that second list of keys might not be a
 	 * subset of the first list of keys.
 	 * @param string[] $keys List of keys to filter.
 	 * @param string[] $condKeys Second list of keys for filtering.
 	 * @param bool $condition True (default) to return keys which are on first
-	 * and second list, false to return keys which are on the first but not on
+	 * but not on the second list, false to return keys which are on both.
 	 * second.
 	 * @return string[] Filtered keys.
 	 */
@@ -523,22 +507,38 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 			$origKeys = $keys;
 		}
 
+		$revStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$infileRows = [];
 		foreach ( $this->dbData as $row ) {
 			$mkey = $this->rowToKey( $row );
-			if ( !isset( $this->infile[$mkey] ) ) {
-				continue;
-			}
-
-			$text = Revision::getRevisionText( $row );
-			if ( $this->infile[$mkey] === $text ) {
-				// Remove unchanged messages from the list
-				unset( $keys[$mkey] );
+			if ( isset( $this->infile[$mkey] ) ) {
+				$infileRows[] = $row;
 			}
 		}
 
-		// Remove the messages which have not changed from the list
+		$revisions = $revStore->newRevisionsFromBatch( $infileRows, [
+			'slots' => [ SlotRecord::MAIN ],
+			'content' => true
+		] )->getValue();
+		foreach ( $infileRows as $row ) {
+			/** @var RevisionRecord|null $rev */
+			$rev = $revisions[$row->rev_id];
+			if ( $rev ) {
+				/** @var TextContent $content */
+				$content = $rev->getContent( SlotRecord::MAIN );
+				if ( $content ) {
+					$mkey = $this->rowToKey( $row );
+					if ( $this->infile[$mkey] === $content->getText() ) {
+						// Remove unchanged messages from the list
+						unset( $keys[$mkey] );
+					}
+				}
+			}
+		}
+
+		// Remove the messages which have changed from the original list
 		if ( $condition === false ) {
-			$keys = $this->filterOnCondition( $keys, $origKeys, false );
+			$keys = $this->filterOnCondition( $origKeys, $keys );
 		}
 
 		return $keys;
@@ -603,18 +603,13 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 */
 	protected function fixKeys() {
 		$newkeys = [];
-		// array( namespace, pagename )
-		$pages = $this->definitions->getPages();
-		$code = $this->code;
 
-		foreach ( $pages as $key => $page ) {
-			list( $namespace, $pagename ) = $page;
-			$title = Title::makeTitleSafe( $namespace, "$pagename/$code" );
-			if ( !$title ) {
-				wfWarn( "Invalid title $namespace:$pagename/$code" );
-				continue;
-			}
-			$newkeys[$key] = $title;
+		$pages = $this->definitions->getPages();
+		foreach ( $pages as $key => $baseTitle ) {
+			$newkeys[$key] = new TitleValue(
+				$baseTitle->getNamespace(),
+				$baseTitle->getDBkey() . '/' . $this->code
+			);
 		}
 
 		return $newkeys;
@@ -623,22 +618,21 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	/**
 	 * Loads existence and fuzzy state for given list of keys.
 	 * @param string[] $keys List of keys in database format.
+	 * @param string[]|null $titleConds Database query condition based on current keys.
 	 */
-	protected function loadInfo( array $keys ) {
-		if ( $this->dbInfo !== null ) {
+	protected function loadInfo( array $keys, ?array $titleConds = null ) {
+		if ( $this->dbInfo !== [] ) {
 			return;
 		}
 
-		$this->dbInfo = [];
-
 		if ( !count( $keys ) ) {
+			$this->dbInfo = new EmptyIterator();
 			return;
 		}
 
 		$dbr = TranslateUtils::getSafeReadDB();
 		$tables = [ 'page', 'revtag' ];
 		$fields = [ 'page_namespace', 'page_title', 'rt_type' ];
-		$conds = $this->getTitleConds( $dbr );
 		$joins = [ 'revtag' =>
 		[
 			'LEFT JOIN',
@@ -646,28 +640,38 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 		]
 		];
 
-		$this->dbInfo = $dbr->select( $tables, $fields, $conds, __METHOD__, [], $joins );
+		$titleConds = $titleConds ?? $this->getTitleConds( $dbr );
+		$iterator = new AppendIterator();
+		foreach ( $titleConds as $conds ) {
+			$iterator->append( $dbr->select( $tables, $fields, $conds, __METHOD__, [], $joins ) );
+		}
+
+		$this->dbInfo = $iterator;
+
+		// Populate and cache reverse map now, since if call to initMesages is delayed (e.g. a
+		// filter that calls loadData() is used, or ::slice is used) the reverse map will not
+		// contain all the entries that are present in our $iterator and will throw notices.
+		$this->getReverseMap();
 	}
 
 	/**
 	 * Loads reviewers for given messages.
 	 * @param string[] $keys List of keys in database format.
+	 * @param string[]|null $titleConds Database query condition based on current keys.
 	 */
-	protected function loadReviewInfo( array $keys ) {
+	protected function loadReviewInfo( array $keys, ?array $titleConds = null ) {
 		if ( $this->dbReviewData !== [] ) {
 			return;
 		}
 
-		$this->dbReviewData = [];
-
 		if ( !count( $keys ) ) {
+			$this->dbReviewData = new EmptyIterator();
 			return;
 		}
 
 		$dbr = TranslateUtils::getSafeReadDB();
 		$tables = [ 'page', 'translate_reviews' ];
 		$fields = [ 'page_namespace', 'page_title', 'trr_user' ];
-		$conds = $this->getTitleConds( $dbr );
 		$joins = [ 'translate_reviews' =>
 			[
 				'JOIN',
@@ -675,82 +679,91 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 			]
 		];
 
-		$this->dbReviewData = $dbr->select( $tables, $fields, $conds, __METHOD__, [], $joins );
+		$titleConds = $titleConds ?? $this->getTitleConds( $dbr );
+		$iterator = new AppendIterator();
+		foreach ( $titleConds as $conds ) {
+			$iterator->append( $dbr->select( $tables, $fields, $conds, __METHOD__, [], $joins ) );
+		}
+
+		$this->dbReviewData = $iterator;
+
+		// Populate and cache reverse map now, since if call to initMesages is delayed (e.g. a
+		// filter that calls loadData() is used, or ::slice is used) the reverse map will not
+		// contain all the entries that are present in our $iterator and will throw notices.
+		$this->getReverseMap();
 	}
 
 	/**
 	 * Loads translation for given list of keys.
 	 * @param string[] $keys List of keys in database format.
+	 * @param string[]|null $titleConds Database query condition based on current keys.
 	 */
-	protected function loadData( array $keys ) {
-		if ( $this->dbData !== null ) {
+	protected function loadData( array $keys, ?array $titleConds = null ) {
+		if ( $this->dbData !== [] ) {
 			return;
 		}
 
-		$this->dbData = [];
-
 		if ( !count( $keys ) ) {
+			$this->dbData = new EmptyIterator();
 			return;
 		}
 
 		$dbr = TranslateUtils::getSafeReadDB();
+		$revisionStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$revQuery = $revisionStore->getQueryInfo( [ 'page' ] );
+		$tables = $revQuery['tables'];
+		$fields = $revQuery['fields'];
+		$joins = $revQuery['joins'];
 
-		if ( is_callable( Revision::class, 'getQueryInfo' ) ) {
-			$revQuery = Revision::getQueryInfo( [ 'page', 'text' ] );
-		} else {
-			$revQuery = [
-				'tables' => [ 'page', 'revision', 'text' ],
-				'fields' => [
-					'page_namespace',
-					'page_title',
-					'page_latest',
-					'rev_user',
-					'rev_user_text',
-					'old_flags',
-					'old_text'
-				],
-				'joins' => [
-					'revision' => [ 'JOIN', 'page_latest = rev_id' ],
-					'text' => [ 'JOIN', 'old_id = rev_text_id' ],
-				],
-			];
+		$titleConds = $titleConds ?? $this->getTitleConds( $dbr );
+		$iterator = new AppendIterator();
+		foreach ( $titleConds as $conds ) {
+			$conds = [ 'page_latest = rev_id', $conds ];
+			$iterator->append( $dbr->select( $tables, $fields, $conds, __METHOD__, [], $joins ) );
 		}
-		$conds = [ 'page_latest = rev_id' ];
-		$conds[] = $this->getTitleConds( $dbr );
 
-		$res = $dbr->select(
-			$revQuery['tables'], $revQuery['fields'], $conds, __METHOD__, [], $revQuery['joins']
-		);
+		$this->dbData = $iterator;
 
-		$this->dbData = $res;
+		// Populate and cache reverse map now, since if call to initMesages is delayed (e.g. a
+		// filter that calls loadData() is used, or ::slice is used) the reverse map will not
+		// contain all the entries that are present in our $iterator and will throw notices.
+		$this->getReverseMap();
 	}
 
 	/**
 	 * Of the current set of keys, construct database query conditions.
 	 * @since 2011-12-28
 	 * @param \Wikimedia\Rdbms\IDatabase $db
-	 * @return string
+	 * @return string[]
 	 */
 	protected function getTitleConds( $db ) {
-		// Array of array( namespace, pagename )
-		$byNamespace = [];
-		foreach ( $this->getTitles() as $title ) {
-			$namespace = $title->getNamespace();
-			$pagename = $title->getDBkey();
-			$byNamespace[$namespace][] = $pagename;
+		$titles = $this->getTitles();
+		$chunks = array_chunk( $titles, self::MAX_ITEMS_PER_QUERY );
+		$results = [];
+
+		foreach ( $chunks as $titles ) {
+			// Array of array( namespace, pagename )
+			$byNamespace = [];
+			foreach ( $titles as $title ) {
+				$namespace = $title->getNamespace();
+				$pagename = $title->getDBkey();
+				$byNamespace[$namespace][] = $pagename;
+			}
+
+			$conds = [];
+			foreach ( $byNamespace as $namespaces => $pagenames ) {
+				$cond = [
+					'page_namespace' => $namespaces,
+					'page_title' => $pagenames,
+				];
+
+				$conds[] = $db->makeList( $cond, LIST_AND );
+			}
+
+			$results[] = $db->makeList( $conds, LIST_OR );
 		}
 
-		$conds = [];
-		foreach ( $byNamespace as $namespaces => $pagenames ) {
-			$cond = [
-				'page_namespace' => $namespaces,
-				'page_title' => $pagenames,
-			];
-
-			$conds[] = $db->makeList( $cond, LIST_AND );
-		}
-
-		return $db->makeList( $conds, LIST_OR );
+		return $results;
 	}
 
 	/**
@@ -783,9 +796,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 		}
 
 		$map = [];
-		/**
-		 * @var Title $title
-		 */
+		/** @var TitleValue $title */
 		foreach ( $this->keys as $mkey => $title ) {
 			$map[$title->getNamespace()][$title->getDBkey()] = $mkey;
 		}
@@ -805,12 +816,17 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 
 		$messages = [];
 		$definitions = $this->definitions->getDefinitions();
+		$revStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$queryFlags = TranslateUtils::shouldReadFromMaster() ? $revStore::READ_LATEST : 0;
 		foreach ( array_keys( $this->keys ) as $mkey ) {
 			$messages[$mkey] = new ThinMessage( $mkey, $definitions[$mkey] );
 		}
 
-		// Copy rows if any.
 		if ( $this->dbData !== null ) {
+			$slotRows = $revStore->getContentBlobsForBatch(
+				$this->dbData, [ SlotRecord::MAIN ], $queryFlags
+			)->getValue();
+
 			foreach ( $this->dbData as $row ) {
 				$mkey = $this->rowToKey( $row );
 				if ( !isset( $messages[$mkey] ) ) {
@@ -818,6 +834,11 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 				}
 				$messages[$mkey]->setRow( $row );
 				$messages[$mkey]->setProperty( 'revision', $row->page_latest );
+
+				if ( isset( $slotRows[$row->rev_id][SlotRecord::MAIN] ) ) {
+					$slot = $slotRows[$row->rev_id][SlotRecord::MAIN];
+					$messages[$mkey]->setTranslation( $slot->blob_data );
+				}
 			}
 		}
 
@@ -895,7 +916,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
-		return $this->messages[$offset];
+		return $this->messages[$offset] ?? null;
 	}
 
 	/**
@@ -906,9 +927,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 		$this->messages[$offset] = $value;
 	}
 
-	/**
-	 * @param mixed $offset
-	 */
+	/** @param mixed $offset */
 	public function offsetUnset( $offset ) {
 		unset( $this->keys[$offset] );
 	}
@@ -942,6 +961,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 			return false;
 		}
 
+		// @phan-suppress-next-line PhanTypeArraySuspiciousNullable
 		return $this->messages[key( $this->keys )];
 	}
 
@@ -960,6 +980,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 	public function count() {
 		return count( $this->keys() );
 	}
+
 	/** @} */
 }
 
@@ -971,6 +992,7 @@ class MessageCollection implements ArrayAccess, Iterator, Countable {
 class MessageDefinitions {
 	protected $namespace;
 	protected $messages;
+	protected $pages;
 
 	public function __construct( array $messages, $namespace = false ) {
 		$this->namespace = $namespace;
@@ -981,21 +1003,33 @@ class MessageDefinitions {
 		return $this->messages;
 	}
 
-	/**
-	 * @return Array of Array( namespace, pagename )
-	 */
+	/** @return Title[] List of title indexed by message key. */
 	public function getPages() {
 		$namespace = $this->namespace;
+		if ( $this->pages !== null ) {
+			return $this->pages;
+		}
+
 		$pages = [];
 		foreach ( array_keys( $this->messages ) as $key ) {
 			if ( $namespace === false ) {
 				// pages are in format ex. "8:jan"
-				$pages[$key] = explode( ':', $key, 2 );
+				[ $tns, $tkey ] = explode( ':', $key, 2 );
+				$title = Title::makeTitleSafe( $tns, $tkey );
 			} else {
-				$pages[$key] = [ $namespace, $key ];
+				$title = Title::makeTitleSafe( $namespace, $key );
 			}
+
+			if ( !$title ) {
+				wfWarn( "Invalid title ($namespace:)$key" );
+				continue;
+			}
+
+			$pages[$key] = $title;
 		}
 
-		return $pages;
+		$this->pages = $pages;
+
+		return $this->pages;
 	}
 }

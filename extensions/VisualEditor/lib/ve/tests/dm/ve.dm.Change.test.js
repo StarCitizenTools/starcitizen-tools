@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Change tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.Change' );
@@ -70,11 +70,11 @@ QUnit.test( 'rebaseTransactions', function ( assert ) {
 
 	assert.deepEqual( rebasedOnto( replace24, annotate12 ).operations, replace24.operations, 'Rebase onto upwind annotate' );
 
-	assert.deepEqual( rebasedOnto( replace12, annotate12 ), null, 'Rebase conflict with overlapping annotate' );
-	assert.deepEqual( rebasedOnto( replace12, replace13 ), null, 'Rebase conflict with surrounding replace' );
-	assert.deepEqual( rebasedOnto( replace13, replace12 ), null, 'Rebase conflict with surrounded replace' );
-	assert.deepEqual( rebasedOnto( replace13, replace24 ), null, 'Rebase conflict with overlapping downwind replace' );
-	assert.deepEqual( rebasedOnto( replace24, replace13 ), null, 'Rebase conflict with overlapping upwind replace' );
+	assert.strictEqual( rebasedOnto( replace12, annotate12 ), null, 'Rebase conflict with overlapping annotate' );
+	assert.strictEqual( rebasedOnto( replace12, replace13 ), null, 'Rebase conflict with surrounding replace' );
+	assert.strictEqual( rebasedOnto( replace13, replace12 ), null, 'Rebase conflict with surrounded replace' );
+	assert.strictEqual( rebasedOnto( replace13, replace24 ), null, 'Rebase conflict with overlapping downwind replace' );
+	assert.strictEqual( rebasedOnto( replace24, replace13 ), null, 'Rebase conflict with overlapping upwind replace' );
 
 	assert.deepEqual(
 		rebasedOnto( rebasedOnto( replace12, replace23 ), replace23.reversed() ).operations,
@@ -143,7 +143,7 @@ QUnit.test( 'Change operations', function ( assert ) {
 			TxInsert( doc, 3, [ [ 'e', bHash ] ] ),
 			TxInsert( doc, 4, [ ' ' ] )
 		], [ new ve.dm.HashValueStore( [ b ] ), emptyStore, emptyStore, emptyStore ], {
-			1: new ve.dm.LinearSelection( doc, new ve.Range( 7, 7 ) )
+			1: new ve.dm.LinearSelection( new ve.Range( 7, 7 ) )
 		} ),
 		insert2 = new ve.dm.Change( 0, [
 			TxInsert( doc, 1, [ [ 't', iHash ] ] ),
@@ -151,7 +151,7 @@ QUnit.test( 'Change operations', function ( assert ) {
 			TxInsert( doc, 3, [ [ 'o', iHash ] ] ),
 			TxInsert( doc, 4, [ ' ' ] )
 		], [ new ve.dm.HashValueStore( [ i ] ), emptyStore, emptyStore, emptyStore ], {
-			2: new ve.dm.LinearSelection( doc, new ve.Range( 1, 1 ) )
+			2: new ve.dm.LinearSelection( new ve.Range( 1, 1 ) )
 		} ),
 		underline3 = new ve.dm.Change( 0, [
 			TxAnnotate( doc, new ve.Range( 1, 6 ), 'set', u )
@@ -173,7 +173,7 @@ QUnit.test( 'Change operations', function ( assert ) {
 	], [ emptyStore ], {} );
 
 	change = insert2.reversed();
-	assert.deepEqual( change.start, 4, 'start for insert2.reversed()' );
+	assert.strictEqual( change.start, 4, 'start for insert2.reversed()' );
 	change.applyTo( surface );
 	assert.deepEqual( doc.data.data, origData, 'Apply insert2.reversed()' );
 
@@ -241,27 +241,27 @@ QUnit.test( 'Change operations', function ( assert ) {
 		'Conflict rebasing replace2 onto remove2'
 	);
 
-	assert.deepEqual(
-		{ type: 'range', from: 1, to: 1 },
-		ve.dm.Change.static.rebaseUncommittedChange( insert1, insert2 ).rebased.selections[ 2 ].range.toJSON(),
+	assert.equalRange(
+		ve.dm.Change.static.rebaseUncommittedChange( insert1, insert2 ).rebased.selections[ 2 ].range,
+		new ve.Range( 1 ),
 		'Selection before insertion is not adjusted when rebasing (1)'
 	);
 
-	assert.deepEqual(
-		{ type: 'range', from: 1, to: 1 },
-		ve.dm.Change.static.rebaseUncommittedChange( insert2, insert1 ).transposedHistory.selections[ 2 ].range.toJSON(),
+	assert.equalRange(
+		ve.dm.Change.static.rebaseUncommittedChange( insert2, insert1 ).transposedHistory.selections[ 2 ].range,
+		new ve.Range( 1 ),
 		'Selection before insertion is not adjusted when rebasing (2)'
 	);
 
-	assert.deepEqual(
-		ve.dm.Change.static.rebaseUncommittedChange( insert1, insert2 ).transposedHistory.selections[ 1 ].range.toJSON(),
-		{ type: 'range', from: 11, to: 11 },
+	assert.equalRange(
+		ve.dm.Change.static.rebaseUncommittedChange( insert1, insert2 ).transposedHistory.selections[ 1 ].range,
+		new ve.Range( 11 ),
 		'Selection after insertion is adjusted when rebasing (1)'
 	);
 
-	assert.deepEqual(
-		ve.dm.Change.static.rebaseUncommittedChange( insert2, insert1 ).rebased.selections[ 1 ].range.toJSON(),
-		{ type: 'range', from: 11, to: 11 },
+	assert.equalRange(
+		ve.dm.Change.static.rebaseUncommittedChange( insert2, insert1 ).rebased.selections[ 1 ].range,
+		new ve.Range( 11 ),
 		'Selection after insertion is adjusted when rebasing (2)'
 	);
 } );
@@ -282,31 +282,29 @@ QUnit.test( 'Rebase with conflicting annotations', function ( assert ) {
 		emptyStore = new ve.dm.HashValueStore(),
 		bStore = new ve.dm.HashValueStore( [ b ] );
 
-	assert.expect( 3 );
-
 	// Canonical history: text gets removed
 	remove = new ve.dm.Change( 1, [ TxRemove( doc, new ve.Range( 1, 2 ) ) ], [ emptyStore ], {} );
 	// Doomed conflicting history: text gets bolded
 	setBold = new ve.dm.Change( 1, [ TxAnnotate( doc, new ve.Range( 1, 2 ), 'set', b ) ], [ bStore ], {} );
 	result = ve.dm.Change.static.rebaseUncommittedChange( remove, setBold );
 	assert.deepEqual(
-		result.rebased.serialize(),
-		new ve.dm.Change( 2, [], [], {} ).serialize(),
+		result.rebased.toJSON(),
+		new ve.dm.Change( 2, [], [], {} ).toJSON(),
 		'Nothing got rebased'
 	);
 	assert.deepEqual(
-		result.rejected.serialize(),
-		setBold.serialize(),
+		result.rejected.toJSON(),
+		setBold.toJSON(),
 		'setBold got rejected'
 	);
 	assert.deepEqual(
-		result.transposedHistory.serialize(),
-		remove.serialize(),
+		result.transposedHistory.toJSON(),
+		remove.toJSON(),
 		'remove got transposed'
 	);
 } );
 
-QUnit.test( 'Serialize/deserialize', function ( assert ) {
+QUnit.test( 'toJSON/deserialize/unsafeDeserialize', function ( assert ) {
 	var origData = [ { type: 'paragraph' }, 'b', 'a', 'r', { type: '/paragraph' } ],
 		newSurface = function () {
 			return new ve.dm.Surface(
@@ -324,7 +322,7 @@ QUnit.test( 'Serialize/deserialize', function ( assert ) {
 			// Second insert is too short, as first insert wasn't applied to the doc
 			TxInsert( doc, 2, [ [ 'u', bHash ] ] )
 		], [ new ve.dm.HashValueStore( [ b ] ), emptyStore ], {} ),
-		simpleChange = new ve.dm.Change( 0, [ TxInsert( doc, 1, [ 'a' ] ) ], [ emptyStore ] ),
+		simpleChange = new ve.dm.Change( 0, [ TxInsert( doc, 1, [ 'a' ] ) ], [ emptyStore ], {} ),
 		serialized = {
 			start: 0,
 			transactions: [
@@ -355,37 +353,37 @@ QUnit.test( 'Serialize/deserialize', function ( assert ) {
 			start: 0,
 			transactions: [ { a: 'fred', o: [ 2 ] } ],
 			stores: [ { hashes: [ 'xx' ], hashStore: { xx: {
-				type: 'domNodeArray',
-				value: [
-					'<script></script>',
-					'<p onclick="alert(\'gotcha!\')"></p>'
-				]
+				type: 'domNodes',
+				value: '<script></script><p onclick="alert(\'gotcha!\')"></p>'
 			} } } ]
 		},
 		sanitized = {
 			start: 0,
 			transactions: [ { a: 'fred', o: [ 2 ] } ],
 			stores: [ { hashes: [ 'xx' ], hashStore: { xx: {
-				type: 'domNodeArray',
-				value: [
-					'<p></p>'
-				]
+				type: 'domNodes',
+				value: '<p></p>'
 			} } } ]
 		};
 
 	// Fixup second insert
 	change.transactions[ 1 ].operations[ 2 ].length += 1;
 
-	assert.deepEqual( change.serialize(), serialized, 'Serialize' );
+	assert.deepEqual( change.toJSON(), serialized, 'Serialize' );
+	assert.deepEqual(
+		JSON.parse( JSON.stringify( { change: change } ) ),
+		{ change: serialized },
+		'Serialize with JSON.stringify while nested (ensure arguments are no passed to serialize)'
+	);
 
 	assert.deepEqual(
-		ve.dm.Change.static.deserialize( serialized, doc ).serialize(),
+		ve.dm.Change.static.deserialize( serialized ).toJSON(),
 		serialized,
 		'Deserialize and reserialize'
 	);
 
 	assert.deepEqual(
-		ve.dm.Change.static.deserialize( serialized, doc, true ).stores.map( function ( store ) {
+		ve.dm.Change.static.deserialize( serialized, true ).getStores().map( function ( store ) {
 			return store.hashStore;
 		} ),
 		serialized.stores.map( function ( store ) {
@@ -395,7 +393,7 @@ QUnit.test( 'Serialize/deserialize', function ( assert ) {
 	);
 
 	assert.notDeepEqual(
-		ve.dm.Change.static.deserialize( serialized, doc ).stores.map( function ( store ) {
+		ve.dm.Change.static.deserialize( serialized ).getStores().map( function ( store ) {
 			return store.hashStore;
 		} ),
 		serialized.stores.map( function ( store ) {
@@ -405,27 +403,33 @@ QUnit.test( 'Serialize/deserialize', function ( assert ) {
 	);
 
 	assert.deepEqual(
-		ve.dm.Change.static.deserialize( serialized, doc, true ).serialize( true ),
+		ve.dm.Change.static.deserialize( serialized, true ).serialize( true ),
 		serialized,
 		'Deserialize and reserialize, preserving store values'
 	);
 
 	assert.deepEqual(
-		ve.dm.Change.static.deserialize( unsanitized ).serialize(),
+		ve.dm.Change.static.deserialize( unsanitized ).toJSON(),
 		sanitized,
 		'Unsanitized round trips into sanitized'
 	);
 
-	assert.deepEqual( simpleChange.serialize(), simpleSerialized, 'Serialize (simple)' );
+	assert.deepEqual(
+		ve.dm.Change.static.unsafeDeserialize( unsanitized ).toJSON(),
+		unsanitized,
+		'Unsanitized round trips into unsanitized in unsafe mode'
+	);
+
+	assert.deepEqual( simpleChange.toJSON(), simpleSerialized, 'Serialize (simple)' );
 
 	assert.deepEqual(
-		ve.dm.Change.static.deserialize( simpleSerialized, doc ).serialize(),
+		ve.dm.Change.static.deserialize( simpleSerialized ).toJSON(),
 		simpleSerialized,
 		'Deserialize and reserialize (simple)'
 	);
 
 	assert.deepEqual(
-		ve.dm.Change.static.deserialize( simpleSerialized, doc, true ).stores.map( function ( store ) {
+		ve.dm.Change.static.deserialize( simpleSerialized, true ).getStores().map( function ( store ) {
 			return store.hashStore;
 		} ),
 		[ {} ],
@@ -549,10 +553,10 @@ QUnit.test( 'Minified serialization', function ( assert ) {
 			null, null, null, null, null, null, null, null, null
 		]
 	};
-	assert.expect( 1 );
+
 	deserialized = ve.dm.Change.static.deserialize( serialized );
 	assert.deepEqual(
-		deserialized.serialize(),
+		deserialized.toJSON(),
 		serialized,
 		'Deserialize-serialize round trip'
 	);
@@ -562,15 +566,16 @@ QUnit.test( 'Same-offset typing', function ( assert ) {
 	var a, b, c, d, tests, i, len, test, operations, expected,
 		surface = new ve.dm.Surface( ve.dm.example.createExampleDocumentFromData( [
 			{ type: 'paragraph' },
-			{ type: '/paragraph' }
+			{ type: '/paragraph' },
+			{ type: 'internalList' }, { type: '/internalList' }
 		] ) ),
 		emptyStore = new ve.dm.HashValueStore(),
 		doc = surface.documentModel,
+		saved = doc.completeHistory.toJSON(),
 		clear = function () {
-			surface.change( doc.completeHistory.map( function ( tx ) {
-				return tx.reversed();
-			} ).reverse() );
-			doc.completeHistory.length = 0;
+			doc.getChangeSince( 0 ).reversed().applyTo( surface );
+			doc.completeHistory = ve.dm.Change.static.deserialize( saved );
+			doc.store = doc.completeHistory.store;
 		},
 		TxInsert = ve.dm.TransactionBuilder.static.newFromInsertion;
 
@@ -592,32 +597,32 @@ QUnit.test( 'Same-offset typing', function ( assert ) {
 		{
 			message: 'a on c',
 			change: a.rebasedOnto( c ),
-			expected: { before: 1, insert: 'a', after: 2 }
+			expected: { before: 1, insert: 'a', after: 4 }
 		},
 		{
 			message: 'c on a',
 			change: c.rebasedOnto( a ),
-			expected: { before: 2, insert: 'c', after: 1 }
+			expected: { before: 2, insert: 'c', after: 3 }
 		},
 		{
 			message: 'b on ( c on a )',
 			change: b.rebasedOnto( c.rebasedOnto( a ) ),
-			expected: { before: 2, insert: 'b', after: 2 }
+			expected: { before: 2, insert: 'b', after: 4 }
 		},
 		{
 			message: 'd on ( a on c )',
 			change: d.rebasedOnto( a.rebasedOnto( c ) ),
-			expected: { before: 3, insert: 'd', after: 1 }
+			expected: { before: 3, insert: 'd', after: 3 }
 		},
 		{
 			message: 'b on ( c+d on a )',
 			change: b.rebasedOnto( c.concat( d ).rebasedOnto( a ) ),
-			expected: { before: 2, insert: 'b', after: 3 }
+			expected: { before: 2, insert: 'b', after: 5 }
 		},
 		{
 			message: 'd on ( a+b on c )',
 			change: d.rebasedOnto( a.concat( b ).rebasedOnto( c ) ),
-			expected: { before: 4, insert: 'd', after: 1 }
+			expected: { before: 4, insert: 'd', after: 3 }
 		}
 	];
 
@@ -632,18 +637,18 @@ QUnit.test( 'Same-offset typing', function ( assert ) {
 	}
 
 	// Check that the order of application doesn't matter
-	expected = [ { type: 'paragraph' }, 'a', 'b', 'c', 'd', { type: '/paragraph' } ];
+	expected = [ { type: 'paragraph' }, 'a', 'b', 'c', 'd', { type: '/paragraph' }, { type: 'internalList' }, { type: '/internalList' } ];
 
 	clear();
-	surface.setSelection( new ve.dm.LinearSelection( doc, new ve.Range( 1 ) ) );
+	surface.setSelection( new ve.dm.LinearSelection( new ve.Range( 1 ) ) );
 	a.applyTo( surface );
 	b.applyTo( surface );
 	c.rebasedOnto( a.concat( b ) ).applyTo( surface );
 	d.rebasedOnto( a.concat( b ).rebasedOnto( c ) ).applyTo( surface );
 	assert.deepEqual( doc.data.data, expected, 'a,b,c,d' );
-	assert.deepEqual(
-		[ surface.getSelection().getRange().from, surface.getSelection().getRange().to ],
-		[ 1, 1 ],
+	assert.equalRange(
+		surface.getSelection().getRange(),
+		new ve.Range( 1 ),
 		'a,b,c,d range'
 	);
 

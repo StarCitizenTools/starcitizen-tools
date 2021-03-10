@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
+			"Hwangjy9",
+			"Jango",
 			"Klutzy",
 			"Kwj2772",
 			"Priviet",
-			"아라",
 			"SeoJeongHo",
-			"Hwangjy9",
-			"Ykhwong"
+			"Ykhwong",
+			"아라"
 		]
 	},
 	"scribunto-desc": "미디어위키 문서에 스크립트 언어를 넣기 위한 프레임워크",
@@ -27,6 +28,7 @@
 	"scribunto-console-cleared": "모듈을 업데이트했기 때문에 콘솔 상태가 지워졌습니다.",
 	"scribunto-console-cleared-session-lost": "세션 데이터를 잃었기 때문에 콘솔 상태가 지워졌습니다.",
 	"scribunto-common-error-category": "스크립트 오류가 있는 문서",
+	"scribunto-common-error-category-desc": "페이지에 있던 모듈을 처리하던 중에 오류가 발생했습니다.",
 	"scribunto-common-nosuchmodule": "스크립트 오류: \"$2\" 모듈이 없습니다.",
 	"scribunto-common-nofunction": "스크립트 오류: 호출할 함수를 지정해야 합니다.",
 	"scribunto-common-nosuchfunction": "스크립트 오류: 함수 \"$2\"가 존재하지 않습니다.",
@@ -34,6 +36,7 @@
 	"scribunto-common-timeout": "스크립트를 실행하는 데 할당한 시간이 만료되었습니다.",
 	"scribunto-common-oom": "스크립트를 실행하는 데 허용하는 메모리 크기를 초과했습니다.",
 	"scribunto-common-backtrace": "역추적:",
+	"scribunto-common-no-details": "더 자세한 정보를 사용할 수 없습니다.",
 	"scribunto-lua-in-function": "\"$1\" 함수에서",
 	"scribunto-lua-in-main": "메인 청크에서",
 	"scribunto-lua-in-function-at": "함수 $1, $2번째 줄에서",
@@ -58,9 +61,6 @@
 	"scribunto-limitreport-memusage": "루아 메모리 사용",
 	"scribunto-limitreport-profile": "루아 프로필",
 	"scribunto-limitreport-profile-ms": "$1ms",
-	"apihelp-scribunto-console-description": "Scribunto 콘솔에서 XHR 요청을 서비스하기 위한 내부 모듈입니다.",
-	"apihelp-scribunto-console-summary": "Scribunto 콘솔에서 XHR 요청을 서비스하기 위한 내부 모듈입니다.",
-	"apihelp-scribunto-console-param-title": "테스트할 모듈의 제목입니다.",
 	"nstab-module": "모듈",
 	"tooltip-ca-nstab-module": "모듈 문서 보기"
 }

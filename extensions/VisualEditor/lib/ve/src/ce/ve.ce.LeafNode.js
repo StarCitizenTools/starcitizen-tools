@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable LeafNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -63,7 +63,6 @@ ve.ce.LeafNode.prototype.initialize = function () {
  * The default implementation should be fine in most cases. A subclass only needs to override this
  * if the annotations aren't necessarily the same across the entire node (like in ve.ce.TextNode).
  *
- * @method
  * @return {Array} Array of HTML fragments, i.e.
  *  [ string | jQuery | [string|jQuery, ve.dm.AnnotationSet] ]
  */

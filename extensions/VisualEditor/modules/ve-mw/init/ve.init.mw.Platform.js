@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization Platform class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -48,6 +48,11 @@ ve.init.mw.Platform.prototype.getUnanchoredExternalLinkUrlProtocolsRegExp = func
 	return this.unanchoredExternalLinkUrlProtocolsRegExp;
 };
 
+/** @inheritdoc */
+ve.init.mw.Platform.prototype.notify = function ( message, title, options ) {
+	return mw.notify( message, ve.extendObject( { title: title }, options ) );
+};
+
 /**
  * Regular expression matching RESTBase IDs
  *
@@ -56,7 +61,7 @@ ve.init.mw.Platform.prototype.getUnanchoredExternalLinkUrlProtocolsRegExp = func
  * @inheritdoc
  */
 ve.init.mw.Platform.prototype.getMetadataIdRegExp = function () {
-	return /^mw[a-zA-Z0-9\-_]{2,6}$/;
+	return mw.libs.ve.restbaseIdRegExp;
 };
 
 /** @inheritdoc */
@@ -74,12 +79,36 @@ ve.init.mw.Platform.prototype.getMessage = mw.msg.bind( mw );
  * @method
  * @inheritdoc
  */
+ve.init.mw.Platform.prototype.parseNumber = function ( value ) {
+	var number = $.tablesorter.getParser( 'number' ).format( value );
+	// formatDigit returns -Infinity when parsing fails, change this to NaN
+	return number !== -Infinity ? number : NaN;
+};
+
+/**
+ * @method
+ * @inheritdoc
+ */
+ve.init.mw.Platform.prototype.formatNumber = function ( number ) {
+	return mw.language.convertNumber( number );
+};
+
+/**
+ * @inheritdoc
+ */
+ve.init.mw.Platform.prototype.getHtmlMessage = function () {
+	return mw.message.apply( mw.message, arguments ).parseDom().toArray();
+};
+
+/**
+ * @method
+ * @inheritdoc
+ */
 ve.init.mw.Platform.prototype.getConfig = mw.config.get.bind( mw.config );
 
 /**
  * All values are JSON-parsed. To get raw values, use mw.user.options.get directly.
  *
- * @method
  * @inheritdoc
  */
 ve.init.mw.Platform.prototype.getUserConfig = function ( keys ) {
@@ -106,11 +135,16 @@ ve.init.mw.Platform.prototype.getUserConfig = function ( keys ) {
  *
  * All values are JSON encoded. To set raw values, use mw.user.options.set directly.
  *
- * @method
  * @inheritdoc
  */
 ve.init.mw.Platform.prototype.setUserConfig = function ( keyOrValueMap, value ) {
 	var jsonValues, jsonValue;
+
+	// T214963: Don't try to set user preferences for logged-out users, it doesn't work
+	if ( mw.user.isAnon() ) {
+		return false;
+	}
+
 	if ( typeof keyOrValueMap === 'object' ) {
 		if ( OO.compare( keyOrValueMap, this.getUserConfig( Object.keys( keyOrValueMap ) ) ) ) {
 			return false;
@@ -120,7 +154,7 @@ ve.init.mw.Platform.prototype.setUserConfig = function ( keyOrValueMap, value ) 
 		Object.keys( keyOrValueMap ).forEach( function ( key ) {
 			jsonValues[ key ] = JSON.stringify( keyOrValueMap[ key ] );
 		} );
-		new mw.Api().saveOptions( jsonValues );
+		ve.init.target.getLocalApi().saveOptions( jsonValues );
 		return mw.user.options.set( jsonValues );
 	} else {
 		if ( value === this.getUserConfig( keyOrValueMap ) ) {
@@ -128,30 +162,17 @@ ve.init.mw.Platform.prototype.setUserConfig = function ( keyOrValueMap, value ) 
 		}
 		// JSON encode the value for API storage
 		jsonValue = JSON.stringify( value );
-		new mw.Api().saveOption( keyOrValueMap, jsonValue );
+		ve.init.target.getLocalApi().saveOption( keyOrValueMap, jsonValue );
 		return mw.user.options.set( keyOrValueMap, jsonValue );
 	}
 };
 
-/**
- * @inheritdoc
- */
-ve.init.mw.Platform.prototype.getSession = function ( key ) {
-	return mw.storage.session.get( key );
+ve.init.mw.Platform.prototype.createLocalStorage = function () {
+	return this.createListStorage( mw.storage );
 };
 
-/**
- * @inheritdoc
- */
-ve.init.mw.Platform.prototype.setSession = function ( key, value ) {
-	return mw.storage.session.set( key, value );
-};
-
-/**
- * @inheritdoc
- */
-ve.init.mw.Platform.prototype.removeSession = function ( key ) {
-	return mw.storage.session.remove( key );
+ve.init.mw.Platform.prototype.createSessionStorage = function () {
+	return this.createListStorage( mw.storage.session );
 };
 
 /**
@@ -173,6 +194,7 @@ ve.init.mw.Platform.prototype.getParsedMessage = function ( key ) {
 		return this.parsedMessages[ key ];
 	}
 	// Fallback to regular messages, with mw.message html escaping applied.
+	// eslint-disable-next-line mediawiki/msg-doc
 	return mw.message( key ).escaped();
 };
 
@@ -218,7 +240,8 @@ ve.init.mw.Platform.prototype.getUserLanguages = mw.language.getFallbackLanguage
  */
 ve.init.mw.Platform.prototype.fetchSpecialCharList = function () {
 	return mw.loader.using( 'mediawiki.language.specialCharacters' ).then( function () {
-		var characters = {},
+		var specialCharacterGroups = require( 'mediawiki.language.specialCharacters' ),
+			characters = {},
 			otherGroupName = mw.msg( 'visualeditor-special-characters-group-other' ),
 			otherMsg = mw.message( 'visualeditor-quick-access-characters.json' ).plain(),
 			// TODO: This information should be available upstream in mw.language.specialCharacters
@@ -236,8 +259,10 @@ ve.init.mw.Platform.prototype.fetchSpecialCharList = function () {
 			ve.log( err );
 		}
 
-		$.each( mw.language.specialCharacters, function ( groupName, groupCharacters ) {
+		// eslint-disable-next-line no-jquery/no-each-util
+		$.each( specialCharacterGroups, function ( groupName, groupCharacters ) {
 			groupObject = {}; // button label => character data to insert
+			// eslint-disable-next-line no-jquery/no-each-util
 			$.each( groupCharacters, function ( charKey, charVal ) {
 				// VE has a different format and it would be a pain to change it now
 				if ( typeof charVal === 'string' ) {
@@ -248,6 +273,28 @@ ve.init.mw.Platform.prototype.fetchSpecialCharList = function () {
 					groupObject[ charVal.label ] = charVal;
 				}
 			} );
+			// The following messages are used here:
+			// * special-characters-group-arabic
+			// * special-characters-group-arabicextended
+			// * special-characters-group-bangla
+			// * special-characters-group-canadianaboriginal
+			// * special-characters-group-cyrillic
+			// * special-characters-group-devanagari
+			// * special-characters-group-greek
+			// * special-characters-group-greekextended
+			// * special-characters-group-gujarati
+			// * special-characters-group-hebrew
+			// * special-characters-group-ipa
+			// * special-characters-group-khmer
+			// * special-characters-group-lao
+			// * special-characters-group-latin
+			// * special-characters-group-latinextended
+			// * special-characters-group-persian
+			// * special-characters-group-sinhala
+			// * special-characters-group-symbols
+			// * special-characters-group-tamil
+			// * special-characters-group-telugu
+			// * special-characters-group-thai
 			characters[ mw.msg( 'special-characters-group-' + groupName ) ] = groupObject;
 			groupObject.attributes = { dir: rtlGroups.indexOf( groupName ) !== -1 ? 'rtl' : 'ltr' };
 		} );

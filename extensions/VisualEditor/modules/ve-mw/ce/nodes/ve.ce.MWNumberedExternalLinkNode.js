@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWNumberedExternalLinkNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -19,6 +19,15 @@ ve.ce.MWNumberedExternalLinkNode = function VeCeMWNumberedExternalLinkNode() {
 	// Parent constructor
 	ve.ce.MWNumberedExternalLinkNode.super.apply( this, arguments );
 
+	// Wrap the link in a span. The link must remain empty to match :empty selectors.
+	// Also move ve-ce-* classes back up to the wrapper.
+	this.$link = this.$element.removeClass( 've-ce-leafNode' )
+		// These attributes are used for styling, so ensure they exists (they should
+		// have been copied from originalDomElements already)
+		.attr( 'rel', 'mw:ExtLink' )
+		.addClass( 'external' );
+	this.$element = $( '<span>' ).append( this.$link ).addClass( 've-ce-leafNode' );
+
 	// Mixin constructors
 	ve.ce.FocusableNode.call( this );
 
@@ -35,15 +44,7 @@ ve.ce.MWNumberedExternalLinkNode = function VeCeMWNumberedExternalLinkNode() {
 		// unicorn-like img tag or the actual apparent link text ("[1]", hitherto shown
 		// with CSS generated content) would fall foul of this bug. Use a zero-width
 		// space so it doesn't change the appearance.
-		.text( '\u200B' );
-
-	// Add link
-	this.$link = $( '<a>' )
-		// CSS for numbering needs rel=mw:ExtLink
-		.attr( 'rel', 'mw:ExtLink' )
-		// TODO: Remove when fixed upstream in Parsoid (T58756)
-		.addClass( 'external' )
-		.appendTo( this.$element );
+		.prepend( document.createTextNode( '\u200B' ) );
 
 	// Events
 	this.model.connect( this, { update: 'onUpdate' } );
@@ -62,7 +63,7 @@ OO.mixinClass( ve.ce.MWNumberedExternalLinkNode, ve.ce.FocusableNode );
 
 ve.ce.MWNumberedExternalLinkNode.static.name = 'link/mwNumberedExternal';
 
-ve.ce.MWNumberedExternalLinkNode.static.tagName = 'span';
+ve.ce.MWNumberedExternalLinkNode.static.tagName = 'a';
 
 ve.ce.MWNumberedExternalLinkNode.static.primaryCommandName = 'link';
 
@@ -79,8 +80,6 @@ ve.ce.MWNumberedExternalLinkNode.static.getDescription = function ( model ) {
 
 /**
  * Handle model update events.
- *
- * @method
  */
 ve.ce.MWNumberedExternalLinkNode.prototype.onUpdate = function () {
 	this.$link.attr( 'href', this.model.getAttribute( 'href' ) );

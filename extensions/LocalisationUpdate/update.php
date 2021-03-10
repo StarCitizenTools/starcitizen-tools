@@ -1,5 +1,13 @@
 <?php
 
+namespace LocalisationUpdate;
+
+use FormatJson;
+use Language;
+use LocalisationUpdate\Fetcher\FetcherFactory;
+use LocalisationUpdate\Reader\ReaderFactory;
+use Maintenance;
+
 $IP = strval( getenv( 'MW_INSTALL_PATH' ) ) !== ''
 	? getenv( 'MW_INSTALL_PATH' )
 	: realpath( __DIR__ . '/../../' );
@@ -9,7 +17,7 @@ require "$IP/maintenance/Maintenance.php";
 class Update extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Fetches translation updates to MediaWiki core, skins and extensions.';
+		$this->addDescription( 'Fetches translation updates to MediaWiki core, skins and extensions.' );
 		$this->addOption(
 			'repoid',
 			'Fetch translations from repositories identified by this',
@@ -27,7 +35,6 @@ class Update extends Maintenance {
 		ini_set( 'memory_limit', -1 );
 
 		global $IP;
-		global $wgExtensionMessagesFiles;
 		global $wgLocalisationUpdateRepositories;
 		global $wgLocalisationUpdateRepository;
 
@@ -40,9 +47,9 @@ class Update extends Maintenance {
 		$lc = Language::getLocalisationCache();
 		$messagesDirs = $lc->getMessagesDirs();
 
-		$finder = new LocalisationUpdate\Finder( $wgExtensionMessagesFiles, $messagesDirs, $IP );
-		$readerFactory = new LocalisationUpdate\ReaderFactory();
-		$fetcherFactory = new LocalisationUpdate\FetcherFactory();
+		$finder = new Finder( $messagesDirs, $IP );
+		$readerFactory = new ReaderFactory();
+		$fetcherFactory = new FetcherFactory();
 
 		$repoid = $this->getOption( 'repoid', $wgLocalisationUpdateRepository );
 		if ( !isset( $wgLocalisationUpdateRepositories[$repoid] ) ) {
@@ -57,7 +64,7 @@ class Update extends Maintenance {
 		$logger = $this;
 
 		// Do it ;)
-		$updater = new LocalisationUpdate\Updater();
+		$updater = new Updater();
 		$updatedMessages = $updater->execute(
 			$finder,
 			$readerFactory,

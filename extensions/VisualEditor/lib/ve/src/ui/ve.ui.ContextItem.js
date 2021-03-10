@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -25,7 +25,19 @@ ve.ui.ContextItem = function VeUiContextItem( context, model, config ) {
 	this.fragment = null;
 
 	// Events
-	this.$element.on( 'mousedown', false );
+	this.$element.on( 'mousedown', function () {
+		// Deactivate so context is not automatically closed
+		// by null selection
+		context.getSurface().getView().deactivate();
+	} );
+	this.$element.on( 'keydown', function ( e ) {
+		// Pressing escape while focus is in the context should
+		// return focus to the surface
+		if ( e.keyCode === OO.ui.Keys.ESCAPE && context.getSurface().getView().isDeactivated() ) {
+			context.getSurface().getView().activate();
+			return false;
+		}
+	} );
 
 	// Initialization
 	this.$element.addClass( 've-ui-contextItem' );
@@ -113,11 +125,19 @@ ve.ui.ContextItem.prototype.getFragment = function () {
 	return this.fragment;
 };
 
-/* eslint-disable valid-jsdoc */
+/**
+ * Check if the context's surface is readOnly
+ *
+ * @return {boolean} Context's surface is readOnly
+ */
+ve.ui.ContextItem.prototype.isReadOnly = function () {
+	return this.context.getSurface().isReadOnly();
+};
 
 /**
  * Setup the item.
  *
+ * @return {ve.ui.ContextItem}
  * @chainable
  */
 ve.ui.ContextItem.prototype.setup = function () {
@@ -127,6 +147,7 @@ ve.ui.ContextItem.prototype.setup = function () {
 /**
  * Teardown the item.
  *
+ * @return {ve.ui.ContextItem}
  * @chainable
  */
 ve.ui.ContextItem.prototype.teardown = function () {

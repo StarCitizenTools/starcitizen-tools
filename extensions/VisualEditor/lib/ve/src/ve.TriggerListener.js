@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface TriggerListener class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -51,7 +51,6 @@ ve.TriggerListener.prototype.getCommands = function () {
 /**
  * Get command associated with trigger string.
  *
- * @method
  * @param {string} trigger Trigger string
  * @return {ve.ui.Command|undefined} Command
  */

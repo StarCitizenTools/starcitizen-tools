@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface SequenceRegistry class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -23,7 +23,6 @@ OO.inheritClass( ve.ui.SequenceRegistry, OO.Registry );
 /**
  * Register a sequence with the factory.
  *
- * @method
  * @param {ve.ui.Sequence} sequence Sequence object
  * @throws {Error} If sequence is not an instance of ve.ui.Sequence
  */
@@ -44,11 +43,12 @@ ve.ui.SequenceRegistry.prototype.register = function ( sequence ) {
  * @param {ve.dm.ElementLinearData} data Linear data
  * @param {number} offset Offset
  * @param {boolean} [isPaste] Whether this in the context of a paste
+ * @param {boolean} [isDelete] Whether this is after content being deleted
  * @return {{sequence:ve.ui.Sequence,range:ve.Range}[]}
  *   Array of matching sequences, and the corresponding range of the match
  *   for each.
  */
-ve.ui.SequenceRegistry.prototype.findMatching = function ( data, offset, isPaste ) {
+ve.ui.SequenceRegistry.prototype.findMatching = function ( data, offset, isPaste, isDelete ) {
 	var textStart, plaintext, name, range, sequence,
 		state = 0,
 		sequences = [];
@@ -83,6 +83,9 @@ ve.ui.SequenceRegistry.prototype.findMatching = function ( data, offset, isPaste
 		if ( isPaste && !sequence.checkOnPaste ) {
 			continue;
 		}
+		if ( isDelete && !sequence.checkOnDelete ) {
+			continue;
+		}
 		range = sequence.match( data, offset, plaintext );
 		if ( range !== null ) {
 			sequences.push( {
@@ -105,4 +108,7 @@ ve.ui.sequenceRegistry.register(
 );
 ve.ui.sequenceRegistry.register(
 	new ve.ui.Sequence( 'numberDot', 'numberWrapOnce', [ { type: 'paragraph' }, '1', '.', ' ' ], 3 )
+);
+ve.ui.sequenceRegistry.register(
+	new ve.ui.Sequence( 'horizontalRule', 'insertHorizontalRule', [ { type: 'paragraph' }, '-', '-', '-', '-' ], 4 )
 );

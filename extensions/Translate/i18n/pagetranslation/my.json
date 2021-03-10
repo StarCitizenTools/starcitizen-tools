@@ -1,20 +1,22 @@
 {
 	"@metadata": {
 		"authors": [
+			"Dr Lotus Black",
 			"Ninjastrikers",
-			"Dr Lotus Black"
+			"Teitei Para"
 		]
 	},
 	"pagetranslation": "စာမျက်နှာ ဘာသာပြန်ခြင်း",
 	"right-pagetranslation": "စာမျက်နှာများ၏ဗားရှင်းကို ဘာသာပြန်အတွက် မှတ်သားရန်",
 	"action-pagetranslation": "ဘာသာပြန်နိုင်သော စာမျက်နှာများကို စီမံရန်",
+	"tps-edit-sourcepage-ve-warning-title": "သတိပေးချက်: မထောက်ခံသော စာမျက်နှာ",
+	"tps-edit-sourcepage-ve-warning-button": "အိုကေ",
 	"tpt-diff-old": "ယခင်စာသား",
 	"tpt-diff-new": "ရှေ့စာသား",
 	"tpt-submit": "ဤဗားရှင်းကို ဘာသာပြန်အတွက် မှတ်သားရန်",
 	"tpt-nosuchpage": "စာမျက်နှာ $1 မတည်ရှိပါ",
 	"tpt-mark-summary": "ဤဗားရှင်းကို ဘာသာပြန်အတွက် မှတ်သားခဲ့သည်",
 	"tpt-edit-failed": "ဤစာမျက်နှာကို မမွမ်းမံနိုင်ပါ: $1",
-	"tpt-already-marked": "ဤစာမျက်နှာ၏ နောက်ဆုံးဗားရှင်းကို ဘာသာပြန်ရန်အတွက် မှတ်သားပြီးဖြစ်သည်။",
 	"tpt-new-pages-title": "ဘာသာပြန်အတွက် အဆိုပြုထားသော စာမျက်နှာများ",
 	"tpt-old-pages-title": "ဘာသာပြန်ရှိ စာမျက်နှာများ",
 	"tpt-other-pages-title": "ကျိုးပျက်နေသော စာမျက်နှာများ",
@@ -38,8 +40,6 @@
 	"tpt-discouraged-language-header": "$1 သို့ ဘာသာပြန်ခြင်းသည် ဤစာမျက်နှာအတွက် ဦးစားပေးမဟုတ်ပါ။",
 	"tpt-discouraged-language-content": "ဘာသာပြန် စီမံခန့်ခွဲသူတစ်ဦးမှ ဘာသာပြန်ခြင်းကို $1 တွင် အာရုံစိုက်ကြရန် ဆုံးဖြတ်ခဲ့သည်။",
 	"tpt-discouraged-language-force": "<strong>ဤစာမျက်နှာကို $2 သို့ ဘာသာမပြန်နိုင်ပါ။</strong>\n\nဘာသာပြန် စီမံခန့်ခွဲသူတစ်ဦးက ဤစာမျက်နှာကို $3 တစ်ခုတည်းသို့သာ ဘာသာပြန်နိုင်သည်ဟု ဆုံးဖြတ်ခဲ့သည်။",
-	"tpt-discouraged-language": "<strong>ဤစာမျက်နှာအတွက် $2 သို့ ဘာသာပြန်ခြင်းသည် ဦးစားပေးမဟုတ်ပါ။</strong>\n\nဘာသာပြန် စီမံခန့်ခွဲသူတစ်ဦးက $3 သို့ ဘာသာပြန်ဆိုခြင်းအတွက် အာရုံစူးစိုက်ကြရန် ဆုံးဖြတ်ခဲ့သည်။",
-	"tpt-discouraged-language-reason": "အကြောင်းပြချက်: $1",
 	"tpt-priority-languages": "ဘာသာပြန် စီမံခန့်ခွဲသူတစ်ဦးက ဤအုပ်စုအတွက် ဦးစားပေးဘာသာစကားများကို $1 သို့ သတ်မှတ်ထားသည်။",
 	"aggregategroups": "စုပေါင်း အုပ်စုများ",
 	"tpt-aggregategroup-add": "ပေါင်းထည့်ရန်",

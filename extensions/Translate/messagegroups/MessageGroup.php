@@ -9,12 +9,14 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\Validation\ValidationRunner;
+
 /**
  * Interface for message groups.
  *
  * Message groups are the heart of the Translate extension. They encapsulate
  * a set of messages each. Aside from basic information like id, label and
- * description, the class defines which mangler, message checker and file
+ * description, the class defines which mangler, validators and file
  * system support (FFS), if any, the group uses.
  *
  * @ingroup MessageGroup
@@ -83,21 +85,20 @@ interface MessageGroup {
 	/**
 	 * Returns a FFS object that handles reading and writing messages to files.
 	 * May also return null if it doesn't make sense.
-	 * @return FFS or null
+	 * @return FFS|null
 	 */
 	public function getFFS();
 
 	/**
-	 * Returns a message checker object or null.
-	 * @todo Make an interface for message checkers.
-	 * @return MessageChecker or null
+	 * Returns a message validator object or null.
+	 * @return ValidationRunner|null
 	 */
-	public function getChecker();
+	public function getValidator();
 
 	/**
 	 * Return a message mangler or null.
 	 * @todo Make an interface for message manglers
-	 * @return StringMatcher or null
+	 * @return StringMatcher|null
 	 */
 	public function getMangler();
 
@@ -115,7 +116,7 @@ interface MessageGroup {
 	 * groups the messages may be loaded from a file (and differ from the
 	 * current translations or definitions).
 	 * @param string $code
-	 * @return array
+	 * @return string[]
 	 */
 	public function load( $code );
 
@@ -124,6 +125,13 @@ interface MessageGroup {
 	 * @return string[]
 	 */
 	public function getDefinitions();
+
+	/**
+	 * Shortcut for array_keys( getDefinitions() ) that can be optimized by
+	 * the implementing classes.
+	 * @return string[] List of message keys.
+	 */
+	public function getKeys();
 
 	/**
 	 * Returns message tags. If type is given, only message keys with that

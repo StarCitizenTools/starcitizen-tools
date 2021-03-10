@@ -5,20 +5,21 @@
 			"Breghtje",
 			"Catrope",
 			"Flightmare",
+			"Gloria sah",
 			"Hansmuller",
 			"Jdforrester",
 			"Keegan",
 			"Konovalov",
+			"Mainframe98",
+			"Marcelhospers",
 			"RajeshPandey",
 			"Romaine",
 			"SPQRobin",
 			"Saruman",
 			"Siebrand",
-			"Southparkfan",
-			"सरोज कुमार ढकाल",
 			"Sjoerddebruin",
-			"Gloria sah",
-			"Mainframe98"
+			"Southparkfan",
+			"सरोज कुमार ढकाल"
 		]
 	},
 	"ooui-outline-control-move-down": "Item omlaag verplaatsen",
@@ -34,8 +35,10 @@
 	"ooui-dialog-process-dismiss": "Sluiten",
 	"ooui-dialog-process-retry": "Opnieuw proberen",
 	"ooui-dialog-process-continue": "Doorgaan",
+	"ooui-combobox-button-label": "Schakelopties",
 	"ooui-selectfile-button-select": "Selecteer een bestand",
 	"ooui-selectfile-not-supported": "Selectie van een bestand wordt niet ondersteund",
 	"ooui-selectfile-placeholder": "Er is geen bestand geselecteerd",
-	"ooui-selectfile-dragdrop-placeholder": "Sleep hier een bestand heen"
+	"ooui-selectfile-dragdrop-placeholder": "Sleep hier een bestand heen",
+	"ooui-field-help": "Hulp"
 }

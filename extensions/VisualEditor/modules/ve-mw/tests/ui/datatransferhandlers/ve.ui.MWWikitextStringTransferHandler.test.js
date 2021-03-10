@@ -1,18 +1,22 @@
 /*!
  * VisualEditor UserInterface MWWikitextStringTransferHandler tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
-
-window.MWWIKITEXT_MOCK_API = true;
 
 QUnit.module( 've.ui.MWWikitextStringTransferHandler', QUnit.newMwEnvironment( {
 	setup: function () {
 		// Mock XHR for mw.Api()
-		this.server = window.MWWIKITEXT_MOCK_API ? this.sandbox.useFakeServer() : null;
+		this.server = this.sandbox.useFakeServer();
+		// Random number, chosen by a fair dice roll.
+		// Used to make #mwt ID deterministic
+		this.randomStub = sinon.stub( Math, 'random' ).returns( 0.04 );
 		ve.test.utils.mwEnvironment.setup.call( this );
 	},
-	teardown: ve.test.utils.mwEnvironment.teardown
+	teardown: function () {
+		this.randomStub.restore();
+		ve.test.utils.mwEnvironment.teardown.call( this );
+	}
 } ) );
 
 /* Tests */
@@ -31,7 +35,7 @@ ve.test.utils.runWikitextStringHandlerTest = function ( assert, server, string, 
 				};
 			},
 			createProgress: function () {
-				return $.Deferred().promise();
+				return ve.createDeferred().promise();
 			}
 		};
 
@@ -97,7 +101,6 @@ QUnit.test( 'convert', function ( assert ) {
 				annotations: [ {
 					type: 'link/mwInternal',
 					attributes: {
-						hrefPrefix: './',
 						lookupTitle: 'Foo',
 						normalizedTitle: 'Foo',
 						origTitle: 'Foo',
@@ -105,6 +108,7 @@ QUnit.test( 'convert', function ( assert ) {
 					}
 				} ],
 				expectedData: [
+					{ type: 'paragraph' },
 					's',
 					'o',
 					'm',
@@ -118,6 +122,7 @@ QUnit.test( 'convert', function ( assert ) {
 					'e',
 					'x',
 					't',
+					{ type: '/paragraph' },
 					{ type: 'internalList' },
 					{ type: '/internalList' }
 				]
@@ -130,7 +135,6 @@ QUnit.test( 'convert', function ( assert ) {
 				annotations: [ {
 					type: 'link/mwInternal',
 					attributes: {
-						hrefPrefix: './',
 						lookupTitle: 'Foo',
 						normalizedTitle: 'Foo',
 						origTitle: 'Foo',
@@ -153,6 +157,25 @@ QUnit.test( 'convert', function ( assert ) {
 					{ type: '/paragraph' },
 					{ type: '/listItem' },
 					{ type: '/list' },
+					{ type: 'internalList' },
+					{ type: '/internalList' }
+				]
+			},
+			{
+				msg: 'Simple template',
+				pasteString: '{{Template}}',
+				pasteType: 'text/plain',
+				parsoidResponse: '<div typeof="mw:Transclusion" about="#mwt1">Template</div>',
+				assertDom: true,
+				expectedData: [
+					{
+						type: 'mwTransclusionBlock',
+						attributes: {
+							mw: {}
+						},
+						originalDomElements: $( '<div typeof="mw:Transclusion" about="#mwt40000000">Template</div>' ).toArray()
+					},
+					{ type: '/mwTransclusionBlock' },
 					{ type: 'internalList' },
 					{ type: '/internalList' }
 				]

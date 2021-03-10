@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Action class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -39,7 +39,7 @@ OO.initClass( ve.ui.Action );
  * be carried out.
  *
  * @static
- * @property
+ * @property {string[]}
  * @inheritable
  */
 ve.ui.Action.static.methods = [];

@@ -1,8 +1,9 @@
 <?php
 
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
+use MediaWiki\MediaWikiServices;
+
 class Scribunto_LuaMessageLibrary extends Scribunto_LuaLibraryBase {
-	function register() {
+	public function register() {
 		$lib = [
 			'plain' => [ $this, 'messagePlain' ],
 			'check' => [ $this, 'messageCheck' ],
@@ -12,8 +13,7 @@ class Scribunto_LuaMessageLibrary extends Scribunto_LuaLibraryBase {
 		if ( $this->getParser() ) {
 			$lang = $this->getParser()->getTargetLanguage();
 		} else {
-			global $wgContLang;
-			$lang = $wgContLang;
+			$lang = MediaWikiServices::getInstance()->getContentLanguage();
 		}
 
 		return $this->getEngine()->registerInterface( 'mw.message.lua', $lib, [
@@ -21,6 +21,17 @@ class Scribunto_LuaMessageLibrary extends Scribunto_LuaLibraryBase {
 		] );
 	}
 
+	/**
+	 * Create a Message
+	 * @param array $data
+	 *  - 'rawMessage': (string, optional) If set, create a RawMessage using this as `$text`
+	 *  - 'keys': (string|string[]) Message keys. Required unless 'rawMessage' is set.
+	 *  - 'lang': (Language|StubUserLang|string) Language for the Message.
+	 *  - 'useDB': (bool) "Use database" flag.
+	 *  - 'params': (array) Parameters for the Message. May be omitted if $setParams is false.
+	 * @param bool $setParams Whether to use $data['params']
+	 * @return Message
+	 */
 	private function makeMessage( $data, $setParams ) {
 		if ( isset( $data['rawMessage'] ) ) {
 			$msg = new RawMessage( $data['rawMessage'] );
@@ -35,7 +46,13 @@ class Scribunto_LuaMessageLibrary extends Scribunto_LuaLibraryBase {
 		return $msg;
 	}
 
-	function messagePlain( $data ) {
+	/**
+	 * Handler for messagePlain
+	 * @internal
+	 * @param array $data
+	 * @return string[]
+	 */
+	public function messagePlain( $data ) {
 		try {
 			$msg = $this->makeMessage( $data, true );
 			return [ $msg->plain() ];
@@ -44,7 +61,14 @@ class Scribunto_LuaMessageLibrary extends Scribunto_LuaLibraryBase {
 		}
 	}
 
-	function messageCheck( $what, $data ) {
+	/**
+	 * Handler for messageCheck
+	 * @internal
+	 * @param string $what
+	 * @param array $data
+	 * @return bool[]
+	 */
+	public function messageCheck( $what, $data ) {
 		if ( !in_array( $what, [ 'exists', 'isBlank', 'isDisabled' ] ) ) {
 			throw new Scribunto_LuaError( "invalid what for 'messageCheck'" );
 		}

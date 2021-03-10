@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel AnnotationSet class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -29,7 +29,6 @@ ve.dm.AnnotationSet = function VeDmAnnotationSet( store, storeHashes ) {
 /**
  * Get the hash-value store.
  *
- * @method
  * @return {ve.dm.HashValueStore} Hash-value store
  */
 ve.dm.AnnotationSet.prototype.getStore = function () {
@@ -39,7 +38,6 @@ ve.dm.AnnotationSet.prototype.getStore = function () {
 /**
  * Get a clone.
  *
- * @method
  * @return {ve.dm.AnnotationSet} Copy of annotation set
  */
 ve.dm.AnnotationSet.prototype.clone = function () {
@@ -49,19 +47,19 @@ ve.dm.AnnotationSet.prototype.clone = function () {
 /**
  * Get an annotation set containing only annotations within the set with a specific name.
  *
- * @method
  * @param {string} name Type name
  * @return {ve.dm.AnnotationSet} Copy of annotation set
  */
 ve.dm.AnnotationSet.prototype.getAnnotationsByName = function ( name ) {
-	return this.filter( function ( annotation ) { return annotation.name === name; } );
+	return this.filter( function ( annotation ) {
+		return annotation.name === name;
+	} );
 };
 
 /**
  * Get an annotation set containing only annotations within the set which are comparable
  * to a specific annotation.
  *
- * @method
  * @param {ve.dm.Annotation} annotation Annotation to compare to
  * @return {ve.dm.AnnotationSet} Copy of annotation set
  */
@@ -78,7 +76,6 @@ ve.dm.AnnotationSet.prototype.getComparableAnnotations = function ( annotation )
  * Get an annotation set containing only annotations within the set which are comparable
  * to an annotation from another set.
  *
- * @method
  * @param {ve.dm.AnnotationSet} annotations Annotation set to compare to
  * @return {ve.dm.AnnotationSet} Copy of annotation set
  */
@@ -91,12 +88,13 @@ ve.dm.AnnotationSet.prototype.getComparableAnnotationsFromSet = function ( annot
 /**
  * Check if any annotations in the set have a specific name.
  *
- * @method
  * @param {string} name Type name
  * @return {boolean} Annotation of given type exists in the set
  */
 ve.dm.AnnotationSet.prototype.hasAnnotationWithName = function ( name ) {
-	return this.containsMatching( function ( annotation ) { return annotation.name === name; } );
+	return this.containsMatching( function ( annotation ) {
+		return annotation.name === name;
+	} );
 };
 
 /**
@@ -105,7 +103,6 @@ ve.dm.AnnotationSet.prototype.hasAnnotationWithName = function ( name ) {
  * set.get( 5 ) returns the annotation at offset 5, set.get() returns an array with all annotations
  * in the entire set.
  *
- * @method
  * @param {number} [offset] If set, only get the annotation at the offset
  * @return {ve.dm.Annotation[]|ve.dm.Annotation|undefined} The annotation at offset, or an array of all
  *  annotations in the set
@@ -114,6 +111,7 @@ ve.dm.AnnotationSet.prototype.get = function ( offset ) {
 	if ( offset !== undefined ) {
 		return this.getStore().value( this.getHash( offset ) );
 	} else {
+		// eslint-disable-next-line no-restricted-syntax
 		return this.getStore().values( this.getHashes() );
 	}
 };
@@ -140,7 +138,6 @@ ve.dm.AnnotationSet.prototype.getHashes = function () {
 /**
  * Get the length of the set.
  *
- * @method
  * @return {number} The number of annotations in the set
  */
 ve.dm.AnnotationSet.prototype.getLength = function () {
@@ -150,7 +147,6 @@ ve.dm.AnnotationSet.prototype.getLength = function () {
 /**
  * Check if the set is empty.
  *
- * @method
  * @return {boolean} The set is empty
  */
 ve.dm.AnnotationSet.prototype.isEmpty = function () {
@@ -162,7 +158,6 @@ ve.dm.AnnotationSet.prototype.isEmpty = function () {
  *
  * Annotations are compared by store hash.
  *
- * @method
  * @param {ve.dm.Annotation} annotation Annotation
  * @return {boolean} There is an annotation in the set with the same hash as annotation
  */
@@ -173,7 +168,6 @@ ve.dm.AnnotationSet.prototype.contains = function ( annotation ) {
 /**
  * Check whether a given store hash occurs in the set.
  *
- * @method
  * @param {number} storeHash Store hash of annotation
  * @return {boolean} There is an annotation in the set with this store hash
  */
@@ -184,7 +178,6 @@ ve.dm.AnnotationSet.prototype.containsHash = function ( storeHash ) {
 /**
  * Check whether the set contains any of the annotations in another set.
  *
- * @method
  * @param {ve.dm.AnnotationSet} set Set to compare the set with
  * @return {boolean} There is at least one annotation in set that is also in the set
  */
@@ -203,7 +196,6 @@ ve.dm.AnnotationSet.prototype.containsAnyOf = function ( set ) {
 /**
  * Check whether the set contains all of the annotations in another set.
  *
- * @method
  * @param {ve.dm.AnnotationSet} set Set to compare the set with
  * @return {boolean} All annotations in set are also in the set
  */
@@ -222,7 +214,6 @@ ve.dm.AnnotationSet.prototype.containsAllOf = function ( set ) {
 /**
  * Get the offset of a given annotation in the set.
  *
- * @method
  * @param {ve.dm.Annotation} annotation Annotation to search for
  * @return {number} Offset of annotation in the set, or -1 if annotation is not in the set.
  */
@@ -233,7 +224,6 @@ ve.dm.AnnotationSet.prototype.offsetOf = function ( annotation ) {
 /**
  * Get the offset of a given annotation in the set by store hash.
  *
- * @method
  * @param {number} storeHash Store hash of annotation to search for
  * @return {number} Offset of annotation in the set, or -1 if annotation is not in the set.
  */
@@ -246,7 +236,6 @@ ve.dm.AnnotationSet.prototype.offsetOfHash = function ( storeHash ) {
  *
  * This returns a new set with all annotations in the set for which the callback returned true for.
  *
- * @method
  * @param {Function} callback Function that takes an annotation and returns boolean true to include
  * @param {boolean} [returnBool] For internal use only
  * @return {ve.dm.AnnotationSet|boolean} New set containing only the matching annotations
@@ -330,7 +319,6 @@ ve.dm.AnnotationSet.prototype.containsComparableForSerialization = function ( an
  *
  * @see ve.dm.AnnotationSet#filter
  *
- * @method
  * @param {Function} callback Function that takes an annotation and returns boolean true to include
  * @return {boolean} At least one matching annotation found
  */
@@ -343,7 +331,6 @@ ve.dm.AnnotationSet.prototype.containsMatching = function ( callback ) {
  *
  * Compares annotations by their comparable object value.
  *
- * @method
  * @param {ve.dm.AnnotationSet} annotationSet The annotationSet to compare this one to
  * @return {boolean} The annotations are the same
  */
@@ -410,7 +397,6 @@ ve.dm.AnnotationSet.prototype.equalsInOrder = function ( set ) {
  * negative, it will be counted from the end (i.e. offset -1 is the last item, -2 the second-to-last,
  * etc.). If offset is out of bounds, the annotation will be added to the end of the set.
  *
- * @method
  * @param {ve.dm.Annotation} annotation Annotation to add
  * @param {number} offset Offset to add the annotation at
  */
@@ -436,10 +422,8 @@ ve.dm.AnnotationSet.prototype.add = function ( annotation, offset ) {
  *
  * The offset calculation happens before duplicates are removed.
  *
- * @method
  * @param {ve.dm.AnnotationSet} set Set to add to the set
  * @param {number} [offset] Offset at which to insert; defaults to the end of the set
-
  */
 ve.dm.AnnotationSet.prototype.addSet = function ( set, offset ) {
 	var hashes = this.getHashes();
@@ -456,7 +440,6 @@ ve.dm.AnnotationSet.prototype.addSet = function ( set, offset ) {
 /**
  * Add an annotation at the end of the set.
  *
- * @method
  * @param {ve.dm.Annotation} annotation Annotation to add
  */
 ve.dm.AnnotationSet.prototype.push = function ( annotation ) {
@@ -466,7 +449,6 @@ ve.dm.AnnotationSet.prototype.push = function ( annotation ) {
 /**
  * Add an annotation at the end of the set by store hash.
  *
- * @method
  * @param {number} storeHash Store hash of annotation to add
  */
 ve.dm.AnnotationSet.prototype.pushHash = function ( storeHash ) {
@@ -476,7 +458,6 @@ ve.dm.AnnotationSet.prototype.pushHash = function ( storeHash ) {
 /**
  * Remove the annotation at a given offset.
  *
- * @method
  * @param {number} offset Offset to remove item at. If negative, the counts from the end, see add()
  * @throws {Error} Offset out of bounds.
  */
@@ -495,7 +476,6 @@ ve.dm.AnnotationSet.prototype.removeAt = function ( offset ) {
  *
  * If the annotation isn't in the set, nothing happens.
  *
- * @method
  * @param {number} storeHash Store hash of annotation to remove
  */
 ve.dm.AnnotationSet.prototype.removeHash = function ( storeHash ) {
@@ -510,7 +490,6 @@ ve.dm.AnnotationSet.prototype.removeHash = function ( storeHash ) {
  *
  * If the annotation isn't in the set, nothing happens.
  *
- * @method
  * @param {ve.dm.Annotation} annotation Annotation to remove
  */
 ve.dm.AnnotationSet.prototype.remove = function ( annotation ) {
@@ -522,8 +501,6 @@ ve.dm.AnnotationSet.prototype.remove = function ( annotation ) {
 
 /**
  * Remove all annotations.
- *
- * @method
  */
 ve.dm.AnnotationSet.prototype.removeAll = function () {
 	this.storeHashes = [];
@@ -534,7 +511,6 @@ ve.dm.AnnotationSet.prototype.removeAll = function () {
  *
  * Annotations that aren't in the set are ignored.
  *
- * @method
  * @param {ve.dm.AnnotationSet} set Set to remove from the set
  */
 ve.dm.AnnotationSet.prototype.removeSet = function ( set ) {
@@ -544,7 +520,6 @@ ve.dm.AnnotationSet.prototype.removeSet = function ( set ) {
 /**
  * Remove all annotations that are not also in a given other set from the set.
  *
- * @method
  * @param {ve.dm.AnnotationSet} set Set to intersect with the set
  */
 ve.dm.AnnotationSet.prototype.removeNotInSet = function ( set ) {
@@ -556,7 +531,6 @@ ve.dm.AnnotationSet.prototype.removeNotInSet = function ( set ) {
  *
  * This returns a copy, the original set is not modified.
  *
- * @method
  * @return {ve.dm.AnnotationSet} Copy of the set with the order reversed.
  */
 ve.dm.AnnotationSet.prototype.reversed = function () {
@@ -570,7 +544,6 @@ ve.dm.AnnotationSet.prototype.reversed = function () {
  *
  * This returns a copy, the original set is not modified.
  *
- * @method
  * @param {ve.dm.AnnotationSet} set Other set
  * @return {ve.dm.AnnotationSet} Set containing all annotations in the set as well as all annotations in set
  */
@@ -583,7 +556,6 @@ ve.dm.AnnotationSet.prototype.mergeWith = function ( set ) {
 /**
  * Get the difference between the set and another set.
  *
- * @method
  * @param {ve.dm.AnnotationSet} set Other set
  * @return {ve.dm.AnnotationSet} New set containing all annotations that are in the set but not in set
  */
@@ -599,7 +571,6 @@ ve.dm.AnnotationSet.prototype.diffWith = function ( set ) {
  * This requires annotations to be strictly equal. To find annotations which are comparable
  * use the slower #getComparableAnnotationsFromSet with #addSet.
  *
- * @method
  * @param {ve.dm.AnnotationSet} set Other set
  * @return {ve.dm.AnnotationSet} New set containing all annotations that are both in the set and in set
  */

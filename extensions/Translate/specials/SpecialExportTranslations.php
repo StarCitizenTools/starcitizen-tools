@@ -1,18 +1,21 @@
 <?php
+
 /**
  * @license GPL-2.0-or-later
  * @ingroup SpecialPage TranslateSpecialPage
  */
 class SpecialExportTranslations extends SpecialPage {
+	/**
+	 * Maximum size of a group until exporting is not allowed due to performance reasons.
+	 */
+	public const MAX_EXPORT_SIZE = 10000;
+
 	/** @var string */
 	protected $language;
-
 	/** @var string */
 	protected $format;
-
 	/** @var string */
 	protected $groupId;
-
 	/** @var string[] */
 	public static $validFormats = [ 'export-as-po', 'export-to-file' ];
 
@@ -20,9 +23,7 @@ class SpecialExportTranslations extends SpecialPage {
 		parent::__construct( 'ExportTranslations' );
 	}
 
-	/**
-	 * @param null|string $par
-	 */
+	/** @param null|string $par */
 	public function execute( $par ) {
 		$out = $this->getOutput();
 		$request = $this->getRequest();
@@ -39,8 +40,8 @@ class SpecialExportTranslations extends SpecialPage {
 		if ( $this->groupId ) {
 			$status = $this->checkInput();
 			if ( !$status->isGood() ) {
-				TranslateUtils::wrapWikiTextAsInterface(
-					$out, 'error',
+				$out->wrapWikiTextAsInterface(
+					'error',
 					$status->getWikiText( false, false, $lang )
 				);
 				return;
@@ -79,8 +80,7 @@ class SpecialExportTranslations extends SpecialPage {
 				'default' => $this->format,
 			],
 		];
-		$form = HTMLForm::factory( 'ooui', $fields, $this->getContext() );
-		$form
+		HTMLForm::factory( 'ooui', $fields, $this->getContext() )
 			->setMethod( 'get' )
 			->setWrapperLegendMsg( 'translate-page-settings-legend' )
 			->setSubmitTextMsg( 'translate-submit' )
@@ -88,13 +88,11 @@ class SpecialExportTranslations extends SpecialPage {
 			->displayForm( false );
 	}
 
-	/**
-	 * @return array
-	 */
+	/** @return array */
 	protected function getGroupOptions() {
 		$selected = $this->groupId;
 		$groups = MessageGroups::getAllGroups();
-		uasort( $groups, [ 'MessageGroups', 'groupLabelSort' ] );
+		uasort( $groups, [ MessageGroups::class, 'groupLabelSort' ] );
 
 		$options = [];
 		foreach ( $groups as $id => $group ) {
@@ -110,9 +108,7 @@ class SpecialExportTranslations extends SpecialPage {
 		return $options;
 	}
 
-	/**
-	 * @return array
-	 */
+	/** @return array */
 	protected function getLanguageOptions() {
 		$languages = TranslateUtils::getLanguageNames( 'en' );
 		$options = [];
@@ -123,9 +119,7 @@ class SpecialExportTranslations extends SpecialPage {
 		return $options;
 	}
 
-	/**
-	 * @return array
-	 */
+	/** @return array */
 	protected function getFormatOptions() {
 		$options = [];
 		foreach ( self::$validFormats as $format ) {
@@ -135,9 +129,7 @@ class SpecialExportTranslations extends SpecialPage {
 		return $options;
 	}
 
-	/**
-	 * @return Status
-	 */
+	/** @return Status */
 	protected function checkInput() {
 		$status = Status::newGood();
 
@@ -156,7 +148,8 @@ class SpecialExportTranslations extends SpecialPage {
 		// Do not show this error if no/invalid format is specified for translatable
 		// page groups as we can show a textarea box containing the translation page text
 		// (however it's not currently supported for other groups).
-		if ( !$msgGroup instanceof WikiPageMessageGroup
+		if (
+			!$msgGroup instanceof WikiPageMessageGroup
 			&& !in_array( $this->format, self::$validFormats )
 		) {
 			$status->fatal( 'translate-export-invalid-format' );
@@ -166,6 +159,16 @@ class SpecialExportTranslations extends SpecialPage {
 			&& !$msgGroup instanceof FileBasedMessageGroup
 		) {
 			$status->fatal( 'translate-export-format-notsupported' );
+		}
+
+		if ( $msgGroup && !MessageGroups::isDynamic( $msgGroup ) ) {
+			$size = count( $msgGroup->getKeys() );
+			if ( $size > self::MAX_EXPORT_SIZE ) {
+				$status->fatal(
+					'translate-export-group-too-large',
+					Message::numParam( self::MAX_EXPORT_SIZE )
+				);
+			}
 		}
 
 		return $status;
@@ -201,6 +204,7 @@ class SpecialExportTranslations extends SpecialPage {
 			case 'export-to-file':
 				$out->disable();
 
+				'@phan-var FileBasedMessageGroup $group';
 				$filename = basename( $group->getSourceFilePath( $collection->getLanguage() ) );
 				$this->sendExportHeaders( $filename );
 
@@ -209,26 +213,30 @@ class SpecialExportTranslations extends SpecialPage {
 
 			default:
 				// @todo Add web viewing for groups other than WikiPageMessageGroup
-				$pageTranslation = $this->getConfig()->get( 'EnablePageTranslation' );
-				if ( $pageTranslation && $group instanceof WikiPageMessageGroup ) {
-					$collection->loadTranslations();
-					$page = TranslatablePage::newFromTitle( $group->getTitle() );
-					$text = $page->getParse()->getTranslationPageText( $collection );
-					$displayTitle = $page->getPageDisplayTitle( $this->language );
-					if ( $displayTitle ) {
-						$text = "{{DISPLAYTITLE:$displayTitle}}$text";
-					}
-					$box = Html::element(
-						'textarea',
-						[ 'id' => 'wpTextbox', 'rows' => 40, ],
-						$text
-					);
-					$out->addHTML( $box );
-					return;
+				if ( !$group instanceof WikiPageMessageGroup ) {
+					// This should have been prevented at validation. See checkInput().
+					throw new LogicException( 'Unexpected export format.' );
 				}
 
-				// This should have been prevented at validation. See checkInput().
-				throw new Exception( 'Unexpected export format.' );
+				$translatablePage = TranslatablePage::newFromTitle( $group->getTitle() );
+				$translationPage = $translatablePage->getTranslationPage( $collection->getLanguage() );
+
+				$translationPage->filterMessageCollection( $collection );
+				$messages = $translationPage->extractMessages( $collection );
+				$text = $translationPage->generateSourceFromTranslations( $messages );
+
+				$displayTitle = $translatablePage->getPageDisplayTitle( $this->language );
+				if ( $displayTitle ) {
+					$text = "{{DISPLAYTITLE:$displayTitle}}$text";
+				}
+
+				$box = Html::element(
+					'textarea',
+					[ 'id' => 'wpTextbox', 'rows' => 40, ],
+					$text
+				);
+				$out->addHTML( $box );
+
 		}
 	}
 
@@ -260,6 +268,6 @@ class SpecialExportTranslations extends SpecialPage {
 	}
 
 	protected function getGroupName() {
-		return 'wiki';
+		return 'translation';
 	}
 }

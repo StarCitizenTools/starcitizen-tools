@@ -7,6 +7,9 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\TranslatorSandbox\StashedTranslation;
+use MediaWiki\Extension\Translate\TranslatorSandbox\TranslationStashStorage;
+
 /**
  * WebAPI module for storing translations for users who are in a sandbox.
  * Access is controlled by hooks in TranslateSandbox class.
@@ -51,6 +54,7 @@ class ApiTranslationStash extends ApiBase {
 			$stash->addTranslation( $translation );
 		}
 
+		$output = [];
 		if ( $action === 'query' ) {
 			$output['translations'] = [];
 
@@ -99,7 +103,7 @@ class ApiTranslationStash extends ApiBase {
 		return 'csrf';
 	}
 
-	public function getAllowedParams() {
+	protected function getAllowedParams() {
 		return [
 			'subaction' => [
 				ApiBase::PARAM_TYPE => [ 'add', 'query' ],

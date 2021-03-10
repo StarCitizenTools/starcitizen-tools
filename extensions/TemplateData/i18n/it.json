@@ -2,16 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Beta16",
-			"Nivit",
+			"Fringio",
+			"Gianfranco",
 			"Giuseppe Forte",
 			"Macofe",
-			"Gianfranco",
-			"Fringio"
+			"Nivit",
+			"Ruthven"
 		]
 	},
-	"apihelp-templatedata-description": "Cerca fra i dati memorizzati dall'estensione TemplateData.",
-	"apihelp-templatedata-example-1": "Mostra TemplateData per [[Template:Stub]] e [[Template:Example]], con risultati se i template non esistono o esistono ma non hanno TemplateData",
-	"apihelp-templatedata-param-lang": "Mostra valori localizzati in questa lingua. Per impostazione predefinita, sono mostrate tutte le traduzioni disponibili.",
 	"templatedata-desc": "Implementa la memorizzazione dei dati per i parametri dei template (utilizzando JSON)",
 	"templatedata-doc-desc-empty": "Nessuna descrizione.",
 	"templatedata-doc-format-block": "Questo template preferisce la formattazione a blocco dei parametri.",
@@ -19,11 +17,8 @@
 	"templatedata-doc-format-inline": "Questo template preferisce la formattazione in linea dei parametri.",
 	"templatedata-doc-no-params-set": "Nessun parametro specificato",
 	"templatedata-doc-param-autovalue": "Valore automatico",
-	"templatedata-doc-param-autovalue-empty": "vuoto",
 	"templatedata-doc-param-default": "Predefinito",
-	"templatedata-doc-param-default-empty": "vuoto",
 	"templatedata-doc-param-example": "Esempio",
-	"templatedata-doc-param-example-empty": "vuota",
 	"templatedata-doc-param-desc": "Descrizione",
 	"templatedata-doc-param-desc-empty": "nessuna descrizione",
 	"templatedata-doc-param-name": "Parametro",
@@ -49,6 +44,7 @@
 	"templatedata-doc-params": "Parametri template",
 	"templatedata-editbutton": "Gestisci TemplateData",
 	"templatedata-errormsg-jsonbadformat": "Formato JSON errato. È possibile annullare quest'operazione. Per poter correggerla, cancella i tag <templatedata> attuali e riprova, oppure continua per sostituire il \"TemplateData\" attuale con uno nuovo.",
+	"templatedata-errormsg-insertblank": "Sei proprio sicuro che vuoi inserire TemplateData senza nessuna informazione?",
 	"templatedata-exists-on-related-page": "Attenzione: c'è già un blocco TemplateData sulla relativa pagina \"[[$1]]\".",
 	"templatedata-helplink": "Informazioni su TemplateData",
 	"templatedata-invalid-duplicate-value": "La proprietà \"$1\" (\"$3\") è un duplicato di \"$2\".",
@@ -75,10 +71,13 @@
 	"templatedata-modal-confirmcancel": "Sei sicuro di voler scartare le tue modifiche?",
 	"templatedata-modal-current-language": "Lingua attuale: $1",
 	"templatedata-modal-errormsg": "Sono stati trovati errori. Assicurati che non ci siano nomi dei parametri vuoti, duplicati, o che contengono \"$1\", \"$2\" o \"$3\".",
+	"templatedata-modal-errormsg-duplicate-name": "Errore trovato. Il nome scelto è già usato da un altro parametro.",
 	"templatedata-modal-errormsg-import-noparams": "Nessun nuovo parametro trovato durante l'importazione.",
 	"templatedata-modal-format-block": "Blocco",
+	"templatedata-modal-format-custom": "Personalizzato",
 	"templatedata-modal-format-inline": "In linea",
 	"templatedata-modal-format-null": "Non specificato",
+	"templatedata-modal-format-placeholder": "Parametro template in formato stringa",
 	"templatedata-modal-json-error-replace": "Sostituisci",
 	"templatedata-modal-notice-import-numparams": "$1 {{PLURAL:$1|nuovo parametro è stato importato|nuovi parametri sono stati importati}}: $2.",
 	"templatedata-modal-placeholder-paramkey": "Nome del parametro",
@@ -106,6 +105,7 @@
 	"templatedata-modal-title-paramorder": "Ordine dei parametri",
 	"templatedata-modal-title-templatedesc": "Descrizione template ($1)",
 	"templatedata-modal-title-templateformat": "Formattazione wikitesto consigliata",
+	"templatedata-modal-title-templateformatstring": "Stringa in formato personalizzato",
 	"templatedata-modal-title-templateparam-details": "Dettagli del parametro: $1",
 	"templatedata-modal-title-templateparams": "Parametri template"
 }

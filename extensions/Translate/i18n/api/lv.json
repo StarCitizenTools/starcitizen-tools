@@ -5,16 +5,20 @@
 		]
 	},
 	"apihelp-aggregategroups-param-group": "Ziņojumu grupas ID.",
+	"apihelp-aggregategroups-example-1": "Piesaistīt grupu",
 	"apihelp-groupreview-param-group": "Ziņojumu grupa.",
 	"apihelp-groupreview-param-language": "Valodas kods.",
 	"apihelp-query+languagestats-param-language": "Valodas kods.",
+	"apihelp-query+managemessagegroups-param-groupId": "Grupas Id",
 	"apihelp-query+messagecollection-param-group": "Ziņojumu grupa.",
 	"apihelp-query+messagecollection-param-language": "Valodas kods.",
 	"apihelp-query+messagecollection-example-1": "Atbalstīto valodu saraksts",
 	"apihelp-query+messagegroups-example-1": "Rādīt ziņojumu grupas",
 	"apihelp-query+messagegroupstats-param-group": "Ziņojumu grupas ID.",
+	"apihelp-managemessagegroups-param-groupId": "Grupas Id",
 	"apihelp-translatesandbox-param-do": "Ko darīt.",
 	"apihelp-translationstash-param-subaction": "Darbība.",
+	"apihelp-translationstash-param-title": "Tulkošanas vienības lapas nosaukums.",
 	"apihelp-translationstash-param-metadata": "JSON objekts.",
 	"apihelp-searchtranslations-description": "Meklēt tulkojumus.",
 	"apihelp-searchtranslations-summary": "Meklēt tulkojumus.",
@@ -22,5 +26,6 @@
 	"apihelp-searchtranslations-example-1": "Rādīt tulkojumus valodai.",
 	"apihelp-translationcheck-summary": "Validēt tulkojumus.",
 	"apierror-translate-owntranslation": "Savus tulkojumus nevar pārlasīt",
+	"apierror-translate-sandboxdisabled": "Smilšu kastes iespēja netiek izmantota",
 	"apierror-translate-sandbox-invalidppassword": "Nederīga parole"
 }

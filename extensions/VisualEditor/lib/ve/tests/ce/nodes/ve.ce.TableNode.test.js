@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable TableNode tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ce.TableNode' );
@@ -42,6 +42,89 @@ QUnit.test( 'getNearestCellNode', function ( assert ) {
 		assert.strictEqual( tableNode.getNearestCellNode( cases[ i ].element ), cases[ i ].node, cases[ i ].msg );
 	}
 	view.destroy();
+} );
+
+QUnit.test( 'getFirstSectionNode', function ( assert ) {
+	var view = ve.test.utils.createSurfaceViewFromHtml(
+			'<table>' +
+				'<caption>Caption</caption>' +
+				'<tr><td>Foo</td></tr>' +
+			'</table>'
+		),
+		documentNode = view.getDocument().getDocumentNode(),
+		tableNode = documentNode.children[ 0 ],
+		result = tableNode.getFirstSectionNode();
+
+	assert.strictEqual( result instanceof ve.ce.TableSectionNode, true, 'result is a TableSectionNode' );
+	assert.strictEqual( result, tableNode.children[ 1 ], 'result is 2nd child of table' );
+} );
+
+QUnit.test( 'onTableMouseDown/onTableMouseMove/onTableMouseUp/onTableDblClick', function ( assert ) {
+	var expectedSelection,
+		realVeCeSurfaceGetOffsetFromCoords = ve.ce.Surface.prototype.getOffsetFromCoords,
+		view = ve.test.utils.createSurfaceViewFromDocument( ve.dm.example.createExampleDocument( 'mergedCells' ) ),
+		model = view.getModel(),
+		documentNode = view.getDocument().getDocumentNode(),
+		tableNode = documentNode.children[ 0 ],
+		cell = tableNode.children[ 0 ].children[ 3 ].children[ 1 ],
+		e = {
+			target: cell.$element[ 0 ],
+			originalEvent: { pageX: 0, pageY: 0 },
+			preventDefault: function () {}
+		};
+
+	// Fake ve.ce.Surface#getOffsetFromCoords (the method doesn't work properly in this unit
+	// test, because our mouse event dummy coordinates do not actually relate in any way to
+	// the test surface coordinates).
+	ve.ce.Surface.prototype.getOffsetFromCoords = function () {
+		return -1;
+	};
+	try {
+		tableNode.onTableMouseDown( e );
+		tableNode.onTableMouseMove( e );
+		tableNode.onTableMouseUp( e );
+
+		expectedSelection = ve.test.utils.selectionFromRangeOrSelection(
+			model.getDocument(),
+			{
+				type: 'table',
+				tableRange: new ve.Range( 0, 171 ),
+				fromCol: 1,
+				fromRow: 3,
+				toCol: 3,
+				toRow: 5
+			}
+		);
+		assert.equalHash( model.getSelection(), expectedSelection, 'Selection after mouse up' );
+
+		tableNode.onTableDblClick( e );
+
+		expectedSelection = ve.test.utils.selectionFromRangeOrSelection(
+			model.getDocument(),
+			new ve.Range( 94 )
+		);
+		assert.equalHash( model.getSelection(), expectedSelection, 'Selection after double click' );
+
+		ve.extendObject( e, { target: e.target.previousSibling, shiftKey: true } );
+		tableNode.onTableMouseDown( e );
+		tableNode.onTableMouseUp( e );
+
+		expectedSelection = ve.test.utils.selectionFromRangeOrSelection(
+			model.getDocument(),
+			{
+				type: 'table',
+				tableRange: new ve.Range( 0, 171 ),
+				fromCol: 3,
+				fromRow: 3,
+				toCol: 0,
+				toRow: 5
+			}
+		);
+
+		assert.equalHash( model.getSelection(), expectedSelection, 'Selection after Shift-click on another cell' );
+	} finally {
+		ve.ce.Surface.prototype.getOffsetFromCoords = realVeCeSurfaceGetOffsetFromCoords;
+	}
 } );
 
 QUnit.test( 'onTableMouseDown', function ( assert ) {
@@ -88,7 +171,7 @@ QUnit.test( 'onTableMouseDown', function ( assert ) {
 		];
 
 	for ( i = 0; i < cases.length; i++ ) {
-		tableNode.onTableMouseDown( $.extend( mockEvent, cases[ i ].event ) );
+		tableNode.onTableMouseDown( ve.extendObject( mockEvent, cases[ i ].event ) );
 		assert.deepEqual(
 			tableNode.surface.getModel().getSelection().toJSON(),
 			cases[ i ].expectedSelection,

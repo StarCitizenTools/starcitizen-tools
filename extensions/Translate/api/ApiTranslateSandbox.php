@@ -7,6 +7,9 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserNameUtils;
+
 /**
  * WebAPI for the sandbox feature of Translate.
  * @ingroup API TranslateAPI
@@ -32,6 +35,8 @@ class ApiTranslateSandbox extends ApiBase {
 			case 'remind':
 				$this->doRemind();
 				break;
+			default:
+				$this->dieWithError( [ 'apierror-badparameter', 'do' ] );
 		}
 	}
 
@@ -46,7 +51,16 @@ class ApiTranslateSandbox extends ApiBase {
 		}
 
 		$username = $params['username'];
-		if ( User::getCanonicalName( $username, 'creatable' ) === false ) {
+
+		if ( is_callable( UserNameUtils::class, 'getCanonical' ) ) {
+			// MW 1.35+
+			$userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
+			$canonicalName = $userNameUtils->getCanonical( $username, UserNameUtils::RIGOR_CREATABLE );
+		} else {
+			$canonicalName = User::getCanonicalName( $username, 'creatable' );
+		}
+
+		if ( $canonicalName === false ) {
 			$this->dieWithError( 'noname', 'invalidusername' );
 		}
 
@@ -159,27 +173,23 @@ class ApiTranslateSandbox extends ApiBase {
 	 * preferences.
 	 *
 	 * @param User $user
-	 * @return Status|bool False when a user page already existed, or the Status
-	 *   of the user page creation from WikiPage::doEditContent().
 	 */
-	protected function createUserPage( User $user ) {
+	private function createUserPage( User $user ) {
 		$userpage = $user->getUserPage();
 
 		if ( $userpage->exists() ) {
-			return false;
+			return;
 		}
 
-		$languagePrefs = FormatJson::decode( $user->getOption( 'translate-sandbox' ) );
-		$languages = implode( '|', $languagePrefs->languages );
+		$languagePrefs = FormatJson::decode( $user->getOption( 'translate-sandbox' ), true );
+		$languages = implode( '|', $languagePrefs[ 'languages' ] ?? [] );
 		$babeltext = "{{#babel:$languages}}";
 		$summary = $this->msg( 'tsb-create-user-page' )->inContentLanguage()->text();
 
 		$page = WikiPage::factory( $userpage );
 		$content = ContentHandler::makeContent( $babeltext, $userpage );
 
-		$editResult = $page->doEditContent( $content, $summary, EDIT_NEW, false, $user );
-
-		return $editResult;
+		$page->doEditContent( $content, $summary, EDIT_NEW, false, $user );
 	}
 
 	public function isWriteMode() {
@@ -190,7 +200,7 @@ class ApiTranslateSandbox extends ApiBase {
 		return 'csrf';
 	}
 
-	public function getAllowedParams() {
+	protected function getAllowedParams() {
 		return [
 			'do' => [
 				ApiBase::PARAM_TYPE => [ 'create', 'delete', 'promote', 'remind' ],

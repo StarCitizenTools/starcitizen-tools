@@ -1,10 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"George Animal",
-			"Gomada",
 			"Bikarhêner",
-			"Cûndûllah el-Kurdî"
+			"Cûndûllah el-Kurdî",
+			"George Animal",
+			"Gomada"
 		]
 	},
 	"pagetranslation": "Wergera rûpelê",
@@ -22,7 +22,6 @@
 	"tpt-languages-nonzero": "$1 ($2% hate wergerandin)",
 	"tpt-tab-translate": "Wergerîne",
 	"tpt-discouraged-language-force-header": "Ev rûpel ji bo $1 nayê wergerandin",
-	"tpt-discouraged-language-reason": "Sedem: $1",
 	"tpt-aggregategroup-add": "Lê zêde bike",
 	"tpt-aggregategroup-save": "Tomar bike",
 	"tpt-aggregategroup-new-name": "Nav:",
@@ -36,7 +35,7 @@
 	"log-name-pagetranslation": "Têketina wergerandina rûpelan",
 	"log-action-filter-pagetranslation-delete": "Jêbirinên rûpelan",
 	"pt-movepage-list-translation": "{{PLURAL:$1|Rûpel|Rûpelên}} wergerê",
-	"pt-movepage-list-other": "Bin{{PLURAL:$1|rûpela|rûpelên}} din",
+	"pt-movepage-list-other": "{{PLURAL:$1|Binrûpela|Binrûpelên}} din",
 	"pt-movepage-current": "Navê niha:",
 	"pt-movepage-new": "Navê nû:",
 	"pt-movepage-reason": "Sedem:",
@@ -55,6 +54,6 @@
 	"pm-old-translations-missing": "$1 wergerên kevn nahewîne.",
 	"pm-pagetitle-placeholder": "Sernavê rûpelê binivîse",
 	"pm-pagetitle-missing": "Ji kerema xwe sernavê rûpelê binivîse",
-	"pp-save-button-label": "Tomar bike",
+	"pp-save-button-label": "Biweşîne",
 	"pp-cancel-button-label": "Betal bike"
 }

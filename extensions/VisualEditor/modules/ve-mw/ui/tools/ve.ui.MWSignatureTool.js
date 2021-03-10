@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface signature tool class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -31,12 +31,9 @@ ve.ui.MWSignatureTool.static.commandName = 'mwSignature';
 
 ve.ui.toolFactory.register( ve.ui.MWSignatureTool );
 
-if (
-	$.inArray(
-		new mw.Title( mw.config.get( 'wgRelevantPageName' ) ).getNamespaceId(),
-		mw.config.get( 'wgVisualEditorConfig' ).signatureNamespaces
-	) !== -1
-) {
+// Commands and sequences are only registered on supported namespaces.
+// On other namespaces the tool is still shown, but disabled.
+if ( mw.Title.wantSignaturesNamespace( mw.config.get( 'wgNamespaceNumber' ) ) ) {
 	// Command to insert signature node.
 	ve.ui.commandRegistry.register(
 		new ve.ui.Command( 'mwSignature', 'content', 'insert', {

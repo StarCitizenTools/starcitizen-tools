@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface SpecialCharacterPage class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -23,7 +23,6 @@ ve.ui.SpecialCharacterPage = function VeUiSpecialCharacterPage( name, config ) {
 	ve.ui.SpecialCharacterPage.super.apply( this, arguments );
 
 	this.label = config.label;
-	this.icon = config.icon;
 
 	characters = config.characters;
 	$characters = $( '<div>' ).addClass( 've-ui-specialCharacterPage-characters' );
@@ -41,6 +40,7 @@ ve.ui.SpecialCharacterPage = function VeUiSpecialCharacterPage( name, config ) {
 		characterNode = document.createElement( 'div' );
 		characterNode.className = 've-ui-specialCharacterPage-character';
 		if ( characters[ character ].titleMsg ) {
+			// eslint-disable-next-line mediawiki/msg-doc
 			characterNode.setAttribute( 'title', ve.msg( characters[ character ].titleMsg ) );
 		}
 		if ( characters[ character ].source ) {

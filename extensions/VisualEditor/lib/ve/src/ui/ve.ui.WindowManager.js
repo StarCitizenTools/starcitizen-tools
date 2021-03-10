@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface WindowManager class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -24,7 +24,7 @@ ve.ui.WindowManager = function VeUiWindowManager( config ) {
 	// Properties
 	this.overlay = config.overlay || null;
 
-	// The following classes can be used here:
+	// The following classes are used here:
 	// * ve-ui-dir-block-ltr
 	// * ve-ui-dir-block-rtl
 	this.$element.addClass( 've-ui-dir-block-' + this.getDir() );
@@ -42,7 +42,7 @@ OO.inheritClass( ve.ui.WindowManager, OO.ui.WindowManager );
  * @return {string} UI directionality
  */
 ve.ui.WindowManager.prototype.getDir = function () {
-	return $( 'body' ).css( 'direction' );
+	return $( document.body ).css( 'direction' );
 };
 
 /**

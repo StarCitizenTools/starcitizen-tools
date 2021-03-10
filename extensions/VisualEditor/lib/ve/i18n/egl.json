@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Lévi",
-			"Gloria sah"
+			"Gloria sah",
+			"Lévi"
 		]
 	},
 	"visualeditor": "VisualEditor",
@@ -55,8 +55,6 @@
 	"visualeditor-linkinspector-title": "Colegamèint",
 	"visualeditor-listbutton-bullet-tooltip": "Elèinch cun i pûnt",
 	"visualeditor-listbutton-number-tooltip": "Elèinch cun i nómer",
-	"visualeditor-mediasizewidget-button-originaldimensions": "Urganéşa al grandèsi uriginêli",
-	"visualeditor-mediasizewidget-label-custom": "Adatê a góst personêl",
 	"visualeditor-mediasizewidget-label-defaulterror": "I valōr dal grandèsi în mìa vâlid.",
 	"visualeditor-mediasizewidget-label-scale": "Schêla",
 	"visualeditor-mediasizewidget-label-scale-percent": "% dal grandèsi 'd la miniadûra",

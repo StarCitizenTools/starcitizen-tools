@@ -8,6 +8,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Implements the core of Translate extension - a special page which shows
  * a list of messages in a format defined by Tasks.
@@ -17,7 +19,6 @@
 class SpecialTranslate extends SpecialPage {
 	/** @var MessageGroup */
 	protected $group;
-
 	protected $defaults;
 	protected $nondefaults = [];
 	protected $options;
@@ -31,7 +32,7 @@ class SpecialTranslate extends SpecialPage {
 	}
 
 	protected function getGroupName() {
-		return 'wiki';
+		return 'translation';
 	}
 
 	/**
@@ -50,14 +51,14 @@ class SpecialTranslate extends SpecialPage {
 
 		$this->setHeaders();
 
-		if ( !defined( 'ULS_VERSION' ) ) {
-			throw new ErrorPageError(
-				'translate-ulsdep-title',
-				'translate-ulsdep-body'
-			);
+		$this->setup( $parameters );
+
+		// Redirect old export URLs to Special:ExportTranslations
+		if ( $this->getRequest()->getText( 'taction' ) === 'export' ) {
+			$exportPage = SpecialPage::getTitleFor( 'ExportTranslations' );
+			$out->redirect( $exportPage->getLocalURL( $this->nondefaults ) );
 		}
 
-		$this->setup( $parameters );
 		$out->addModules( 'ext.translate.special.translate' );
 		$out->addJsConfigVars( 'wgTranslateLanguages', TranslateUtils::getLanguageNames( null ) );
 
@@ -79,9 +80,8 @@ class SpecialTranslate extends SpecialPage {
 		$request = $this->getRequest();
 
 		$defaults = [
-			/* str  */'taction'  => 'translate',
 			/* str  */'language' => $this->getLanguage()->getCode(),
-			/* str  */'group'    => '!additions',
+			/* str  */'group' => '!additions',
 		];
 
 		// Dump everything here
@@ -121,23 +121,8 @@ class SpecialTranslate extends SpecialPage {
 				throw new MWException( '$r was not set' );
 			}
 
-			wfAppendToArrayIfNotDefault( $v, $r, $defaults, $nondefaults );
-		}
-
-		// Fix defaults based on what we got
-		if ( isset( $nondefaults['taction'] ) ) {
-			if ( $nondefaults['taction'] === 'export' ) {
-				// Redirect old export URLs to Special:ExportTranslations
-				$params = [];
-				if ( isset( $nondefaults['group'] ) ) {
-					$params['group'] = $nondefaults['group'];
-				}
-				if ( isset( $nondefaults['language'] ) ) {
-					$params['language'] = $nondefaults['language'];
-				}
-
-				$export = SpecialPage::getTitleFor( 'ExportTranslations' )->getLocalURL( $params );
-				$this->getOutput()->redirect( $export );
+			if ( $defaults[$v] !== $r ) {
+				$nondefaults[$v] = $r;
 			}
 		}
 
@@ -158,6 +143,7 @@ class SpecialTranslate extends SpecialPage {
 		}
 
 		if ( MessageGroups::isDynamic( $this->group ) ) {
+			// @phan-suppress-next-line PhanUndeclaredMethod
 			$this->group->setLanguage( $this->options['language'] );
 		}
 	}
@@ -219,7 +205,7 @@ class SpecialTranslate extends SpecialPage {
 		// and and also for the data-filter attribute.
 		// The message is shown as the check box's label.
 		$options = [
-			'optional' => $this->msg( 'tux-message-filter-optional-messages-label' )->escaped(),
+			'optional' => $this->msg( 'tux-message-filter-optional-messages-label' )->text(),
 		];
 
 		$container = Html::openElement( 'ul', [ 'class' => 'column tux-message-selector' ] );
@@ -247,16 +233,17 @@ class SpecialTranslate extends SpecialPage {
 		$output .= Html::closeElement( 'ul' );
 		$output .= Html::closeElement( 'div' ); // close nine columns
 		$output .= Html::openElement( 'div', [ 'class' => 'three columns' ] );
-		$output .= Html::openElement( 'div', [ 'class' => 'tux-message-filter-wrapper' ] );
-		$output .= Html::element( 'input', [
-			'class' => 'tux-message-filter-box',
-			'type' => 'search',
-		] );
-		$output .= Html::closeElement( 'div' ); // close tux-message-filter-wrapper
+		$output .= Html::rawElement(
+			'div',
+			[ 'class' => 'tux-message-filter-wrapper' ],
+			Html::element( 'input', [
+				'class' => 'tux-message-filter-box',
+				'type' => 'search',
+			] )
+		);
 
-		$output .= Html::closeElement( 'div' ); // close three columns
-
-		$output .= Html::closeElement( 'div' ); // close the row
+		// close three columns and the row
+		$output .= Html::closeElement( 'div' ) . Html::closeElement( 'div' );
 
 		return $output;
 	}
@@ -330,12 +317,8 @@ class SpecialTranslate extends SpecialPage {
 
 	protected function getGroupDescription( MessageGroup $group ) {
 		$description = $group->getDescription( $this->getContext() );
-		if ( $description !== null ) {
-			return TranslateUtils::parseAsInterface(
-				$this->getOutput(), $description
-			);
-		}
-		return '';
+		return $description === null ?
+			'' : $this->getOutput()->parseAsInterface( $description );
 	}
 
 	protected function tuxGroupWarning() {
@@ -369,9 +352,10 @@ class SpecialTranslate extends SpecialPage {
 	 */
 	public static function tabify( Skin $skin, array &$tabs ) {
 		$title = $skin->getTitle();
-		list( $alias, $sub ) = TranslateUtils::resolveSpecialPageAlias( $title->getText() );
+		list( $alias, $sub ) = MediaWikiServices::getInstance()
+			->getSpecialPageFactory()->resolveAlias( $title->getText() );
 
-		$pagesInGroup = [ 'Translate', 'LanguageStats', 'MessageGroupStats' ];
+		$pagesInGroup = [ 'Translate', 'LanguageStats', 'MessageGroupStats', 'ExportTranslations' ];
 		if ( !in_array( $alias, $pagesInGroup, true ) ) {
 			return true;
 		}
@@ -394,8 +378,6 @@ class SpecialTranslate extends SpecialPage {
 		$params['language'] = $request->getVal( 'language' );
 		$params['group'] = $request->getVal( 'group' );
 
-		$taction = $request->getVal( 'taction', 'translate' );
-
 		$translate = SpecialPage::getTitleFor( 'Translate' );
 		$languagestats = SpecialPage::getTitleFor( 'LanguageStats' );
 		$messagegroupstats = SpecialPage::getTitleFor( 'MessageGroupStats' );
@@ -409,7 +391,7 @@ class SpecialTranslate extends SpecialPage {
 			'class' => 'tux-tab',
 		];
 
-		if ( $alias === 'Translate' && $taction === 'translate' ) {
+		if ( $alias === 'Translate' ) {
 			$tabs['namespaces']['translate']['class'] .= ' selected';
 		}
 

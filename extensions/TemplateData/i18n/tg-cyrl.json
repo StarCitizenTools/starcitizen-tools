@@ -4,6 +4,7 @@
 			"ToJack"
 		]
 	},
-	"templatedata-doc-param-autovalue-empty": "холӣ",
-	"templatedata-doc-param-default-empty": "холӣ"
+	"templatedata-doc-param-default": "Пешфарз",
+	"templatedata-doc-param-desc": "Тавзеҳот",
+	"templatedata-doc-param-name": "Параметр"
 }

@@ -5,11 +5,9 @@
  * @license GPL-2.0-or-later
  */
 
-/**
- * @group medium
- */
+/** @group medium */
 class ApiQueryMessageCollectionTest extends ApiTestCase {
-	protected function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 
 		$this->setTemporaryHook(

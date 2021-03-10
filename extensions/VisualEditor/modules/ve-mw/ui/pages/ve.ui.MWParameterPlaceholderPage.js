@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWParameterPlaceholderPage class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -53,6 +53,8 @@ ve.ui.MWParameterPlaceholderPage = function VeUiMWParameterPlaceholderPage( para
 		classes: [ 've-ui-mwTransclusionDialog-addParameterFieldset' ],
 		$content: this.addParameterSearch.$element
 	} );
+
+	this.addParameterFieldset.$element.attr( 'aria-label', ve.msg( 'visualeditor-dialog-transclusion-add-param' ) );
 
 	// Initialization
 	this.$element

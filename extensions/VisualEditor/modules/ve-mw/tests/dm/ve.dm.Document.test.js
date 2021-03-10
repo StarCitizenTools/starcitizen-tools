@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Document tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -104,7 +104,7 @@ QUnit.test( 'getRelativeRange (mwBlockImage / mwInlineImage)', function ( assert
 						direction: 1,
 						expand: false,
 						given: new ve.Range( 0, 2 ),
-						expected: new ve.Range( 2 )
+						expected: new ve.Range( 2, 4 )
 					},
 					{
 						direction: 1,

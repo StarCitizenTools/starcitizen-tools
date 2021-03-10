@@ -2,16 +2,15 @@
 
 /**
  * @group TemplateData
+ * @group Database
+ * @covers TemplateDataBlob
  */
 class TemplateDataBlobTest extends MediaWikiTestCase {
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 
-		$this->setMwGlobals( [
-			'wgLanguageCode' => 'en',
-			'wgContLang' => Language::factory( 'en' ),
-		] );
+		$this->setContentLang( 'en' );
 	}
 
 	/**
@@ -54,7 +53,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'output' => '{
 					"description": null,
 					"params": {},
-					"paramOrder": [],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -108,7 +106,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"autovalue": null
 						}
 					},
-					"paramOrder": ["foo"],
 					"sets": [],
 					"format": null,
 					"maps": {}
@@ -141,7 +138,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"type": "line"
 						}
 					},
-					"paramOrder": ["comment"],
 					"sets": [],
 					"format": null,
 					"maps": {}
@@ -191,7 +187,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"autovalue": null
 						}
 					},
-					"paramOrder": ["nickname"],
 					"sets": [],
 					"format": null,
 					"maps": {}
@@ -253,7 +248,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"autovalue": null
 						}
 					},
-					"paramOrder": ["1d", "2d"],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -365,7 +359,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"autovalue": null
 						}
 					},
-					"paramOrder": ["foo", "bar", "quux"],
 					"sets": [
 						{
 							"label": {
@@ -430,7 +423,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"type": "line"
 						}
 					},
-					"paramOrder": ["bar"],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -514,7 +506,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'output' => '{
 					"description": null,
 					"params": {},
-					"paramOrder": [],
 					"sets": [],
 					"format": "inline",
 					"maps": {}
@@ -531,7 +522,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'output' => '{
 					"description": null,
 					"params": {},
-					"paramOrder": [],
 					"sets": [],
 					"format": "block",
 					"maps": {}
@@ -548,7 +538,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'output' => '{
 					"description": null,
 					"params": {},
-					"paramOrder": [],
 					"sets": [],
 					"format": "{{_ |\n ___ = _}}",
 					"maps": {}
@@ -565,7 +554,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'output' => '{
 					"description": null,
 					"params": {},
-					"paramOrder": [],
 					"sets": [],
 					"format": "{{_|_=_\n}}\n",
 					"maps": {}
@@ -574,15 +562,8 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'msg' => 'Custom parameter format string (2)',
 				'status' => true
 			],
-			[
-				// Should be long enough to trigger this condition after gzipping.
-				'input' => '{
-					"description": "' . self::generatePseudorandomString( 100000, 42 ) . '",
-					"params": {}
-				}',
-				'status' => 'Data too large to save (75,226 bytes, limit is 65,535)'
-			],
 		];
+
 		$calls = [];
 		foreach ( $cases as $case ) {
 			$calls[] = [ $case ];
@@ -591,14 +572,10 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 	}
 
 	protected static function getStatusText( Status $status ) {
-		$str = $status->getHtml();
-		// Based on wfMessage()->parse
-		$m = [];
-		if ( preg_match( '/^<p>(.*)\n?<\/p>\n?$/sU', $str, $m ) ) {
-			// Unescape char references for things like "[, "]" and "|" for
-			// cleaner test assertions and output
-			$str = Sanitizer::decodeCharReferences( $m[1] );
-		}
+		$str = Parser::stripOuterParagraph( $status->getHtml() );
+		// Unescape char references for things like "[, "]" and "|" for
+		// cleaner test assertions and output
+		$str = Sanitizer::decodeCharReferences( $str );
 		return $str;
 	}
 
@@ -653,15 +630,14 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 					"params": {},
 					"sets": [],
 					"maps": {},
-					"format": null,
-					"paramOrder": []
+					"format": null
 				}';
 			} else {
 				$case['output'] = $case['input'];
 			}
 		}
 
-		$t = TemplateDataBlob::newFromJSON( $case['input'] );
+		$t = TemplateDataBlob::newFromJSON( $this->db, $case['input'] );
 		$actual = $t->getJSON();
 		$status = $t->getStatus();
 		if ( !$status->isGood() ) {
@@ -686,7 +662,7 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 
 		// Assert this case roundtrips properly by running through the output as input.
 
-		$t = TemplateDataBlob::newFromJSON( $case['output'] );
+		$t = TemplateDataBlob::newFromJSON( $this->db, $case['output'] );
 
 		$status = $t->getStatus();
 		if ( !$status->isGood() ) {
@@ -712,18 +688,44 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 	}
 
 	/**
+	 * MySQL breaks if the input is too large even after compression
+	 */
+	public function testParseLongString() {
+		if ( $this->db->getType() === 'mysql' ) {
+			$this->assertTemplateData(
+				[
+					// Should be long enough to trigger this condition after gzipping.
+					'input' => '{
+						"description": "' . self::generatePseudorandomString( 100000, 42 ) . '",
+						"params": {}
+					}',
+					'status' => 'Data too large to save (75,217 bytes, limit is 65,535)'
+				]
+			);
+		} else {
+			$this->markTestSkipped( 'long compressed strings break on MySQL only' );
+		}
+	}
+
+	/**
 	 * Verify we can gzdecode() which came in PHP 5.4.0. Mediawiki needs a
 	 * fallback function for it.
 	 * If this test fail, we are most probably attempting to use gzdecode()
 	 * with PHP before 5.4.
 	 *
-	 * @see bug 54058
+	 * @see bug T56058
+	 *
+	 * Some databases will not be able to store compressed data cleanly
+	 * but the object will be initialized properly even if compressed
+	 * data are provided
+	 *
+	 * @see bug T203850
 	 */
 	public function testGetJsonForDatabase() {
 		// Compress JSON to trigger the code pass in newFromDatabase that ends
 		// up calling gzdecode().
 		$gzJson = gzencode( '{}' );
-		$templateData = TemplateDataBlob::newFromDatabase( $gzJson );
+		$templateData = TemplateDataBlob::newFromDatabase( $this->db, $gzJson );
 		$this->assertInstanceOf( 'TemplateDataBlob', $templateData );
 	}
 
@@ -743,7 +745,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'output' => '{
 					"description": "German",
 					"params": {},
-					"paramOrder": [],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -760,7 +761,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				',
 				'output' => '{
 					"description": "Hi",
-					"paramOrder": [],
 					"params": {},
 					"sets": [],
 					"format": null,
@@ -783,7 +783,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'output' => '{
 					"description": "Dutch",
 					"params": {},
-					"paramOrder": [],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -804,7 +803,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'output' => '{
 					"description": null,
 					"params": {},
-					"paramOrder": [],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -826,7 +824,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'output' => '{
 					"description": "German",
 					"params": {},
-					"paramOrder": [],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -863,7 +860,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"autovalue": null
 						}
 					},
-					"paramOrder": ["foo"],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -900,7 +896,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"example": null
 						}
 					},
-					"paramOrder": ["foo"],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -937,7 +932,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"autovalue": null
 						}
 					},
-					"paramOrder": ["foo"],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -978,7 +972,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"autovalue": null
 						}
 					},
-					"paramOrder": ["foo"],
 					"sets": [
 						{
 							"label": "Spanish",
@@ -1006,16 +999,13 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 	public function testGetDataInLanguage( array $case ) {
 		// Change content-language to be non-English so we can distinguish between the
 		// last 'en' fallback and the content language in our tests
-		$this->setMwGlobals( [
-			'wgLanguageCode' => 'nl',
-			'wgContLang' => Language::factory( 'nl' ),
-		] );
+		$this->setContentLang( 'nl' );
 
 		if ( !isset( $case['msg'] ) ) {
 			$case['msg'] = is_string( $case['status'] ) ? $case['status'] : 'TemplateData assertion';
 		}
 
-		$t = TemplateDataBlob::newFromJSON( $case['input'] );
+		$t = TemplateDataBlob::newFromJSON( $this->db, $case['input'] );
 		$status = $t->getStatus();
 
 		$this->assertTrue(
@@ -1082,7 +1072,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 							"autovalue": null
 						}
 					},
-					"paramOrder": ["foo", "bar", "baz"],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -1169,7 +1158,6 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 				'output' => '{
 					"description": null,
 					"params": {},
-					"paramOrder": [],
 					"sets": [],
 					"format": null,
 					"maps" : {}
@@ -1223,27 +1211,110 @@ class TemplateDataBlobTest extends MediaWikiTestCase {
 	 * @dataProvider provideGetRawParams
 	 */
 	public function testGetRawParams( $inputWikitext, $expectedParams ) {
-		$this->assertArrayEquals( $expectedParams, TemplateDataBlob::getRawParams( $inputWikitext ) );
+		$params = TemplateDataBlob::getRawParams( $inputWikitext );
+		$this->assertArrayEquals( $expectedParams, $params, true, true );
 	}
 
 	public function provideGetRawParams() {
 		return [
-			[
+			'No params' => [
 				'Lorem ipsum {{tpl}}.',
 				[]
 			],
-			[
-				'Lorem {{{name}}} ipsum',
+			'Two plain params' => [
+				'Lorem {{{name}}} ipsum {{{surname}}}',
+				[ 'name' => [], 'surname' => [] ]
+			],
+			'Param with multiple casing and default value' => [
+				'Lorem {{{name|{{{Name|Default name}}}}}} ipsum',
 				[ 'name' => [] ]
 			],
-			[
-				'Lorem {{{name|{{{Name|Default name}}}}}} ipsum',
-				[ 'name' => [], 'Name' => [] ]
-			],
-			[
+			'Param name contains comment' => [
 				'Lorem {{{name<!-- comment -->}}} ipsum',
 				[ 'name' => [] ]
 			],
+			'Letter-case and underscore-space normalization' => [
+				'Lorem {{{First name|{{{first_name}}}}}} ipsum {{{first-Name}}}',
+				[ 'First name' => [] ]
+			],
+			'Dynamic param name' => [
+				'{{{{{#if:{{{nominee|}}}|nominee|candidate}}|}}}',
+				[ 'nominee' => [] ]
+			],
+			'More complicated dynamic param name' => [
+				'{{{party{{#if:{{{party_election||}}}|_election||}}|}}}',
+				[ 'party_election' => [] ]
+			],
+			'Bang in a param name' => [
+				'{{{!}}} {{{foo!}}}',
+				[ '!' => [], 'foo!' => [] ]
+			],
+			'Bang as a magic word in a table construct' => [
+				'{{{!}} class=""',
+				[]
+			],
 		];
+	}
+
+	public static function provideGetHtml() {
+		// phpcs:disable Generic.Files.LineLength.TooLong
+		yield 'No params' => [
+			[ 'params' => [ (object)[] ] ],
+			<<<HTML
+<div class="mw-templatedata-doc-wrap">
+<p class="mw-templatedata-doc-desc mw-templatedata-doc-muted">(templatedata-doc-desc-empty)</p>
+<table class="wikitable mw-templatedata-doc-params">
+	<caption><p>(templatedata-doc-params)</p></caption>
+	<thead><tr><th colspan="2">(templatedata-doc-param-name)</th><th>(templatedata-doc-param-desc)</th><th>(templatedata-doc-param-type)</th><th>(templatedata-doc-param-status)</th></tr></thead>
+	<tbody>
+		<tr>
+			<td class="mw-templatedata-doc-muted" colspan="7">(templatedata-doc-no-params-set)</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+HTML
+		];
+		yield 'Basic params' => [
+			[ 'params' => [ 'foo' => (object)[], 'bar' => [ 'required' => true ] ] ],
+			<<<HTML
+<div class="mw-templatedata-doc-wrap">
+<p class="mw-templatedata-doc-desc mw-templatedata-doc-muted">(templatedata-doc-desc-empty)</p>
+<table class="wikitable mw-templatedata-doc-params sortable">
+	<caption><p>(templatedata-doc-params)</p></caption>
+	<thead><tr><th colspan="2">(templatedata-doc-param-name)</th><th>(templatedata-doc-param-desc)</th><th>(templatedata-doc-param-type)</th><th>(templatedata-doc-param-status)</th></tr></thead>
+	<tbody>
+		<tr>
+			<th>Foo</th>
+			<td class="mw-templatedata-doc-param-name"><code>foo</code></td>
+			<td class="mw-templatedata-doc-muted"><p>(templatedata-doc-param-desc-empty)</p><dl></dl></td>
+			<td class="mw-templatedata-doc-param-type mw-templatedata-doc-muted">(templatedata-doc-param-type-unknown)</td>
+			<td>(templatedata-doc-param-status-optional)</td>
+		</tr>
+		<tr>
+			<th>Bar</th>
+			<td class="mw-templatedata-doc-param-name"><code>bar</code></td>
+			<td class="mw-templatedata-doc-muted"><p>(templatedata-doc-param-desc-empty)</p><dl></dl></td>
+			<td class="mw-templatedata-doc-param-type mw-templatedata-doc-muted">(templatedata-doc-param-type-unknown)</td>
+			<td class="mw-templatedata-doc-param-status-required">(templatedata-doc-param-status-required)</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+HTML
+		];
+	}
+
+	/**
+	 * @dataProvider provideGetHtml
+	 */
+	public function testGetHtml( array $data, $expected ) {
+		$t = TemplateDataBlob::newFromJSON( $this->db, json_encode( $data ) );
+		$actual = $t->getHtml( Language::factory( 'qqx' ) );
+		$linedActual = preg_replace( '/>\s*</', ">\n<", $actual );
+
+		$linedExpected = preg_replace( '/>\s*</', ">\n<", trim( $expected ) );
+
+		$this->assertEquals( $linedExpected, $linedActual, 'html' );
 	}
 }

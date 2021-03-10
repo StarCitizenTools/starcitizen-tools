@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Node class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -55,7 +55,6 @@ ve.Node = function VeNode() {
 /**
  * Get allowed child node types.
  *
- * @method
  * @abstract
  * @return {string[]|null} List of node types allowed as children or null if any type is allowed
  */
@@ -64,7 +63,6 @@ ve.Node.prototype.getChildNodeTypes = null;
 /**
  * Get allowed parent node types.
  *
- * @method
  * @abstract
  * @return {string[]|null} List of node types allowed as parents or null if any type is allowed
  */
@@ -95,7 +93,6 @@ ve.Node.prototype.isAllowedParentNodeType = function ( type ) {
 /**
  * Get suggested parent node types.
  *
- * @method
  * @abstract
  * @return {string[]|null} List of node types suggested as parents or null if any type is suggested
  */
@@ -104,7 +101,6 @@ ve.Node.prototype.getSuggestedParentNodeTypes = null;
 /**
  * Check if the node can have children.
  *
- * @method
  * @abstract
  * @return {boolean} Node can have children
  */
@@ -113,7 +109,6 @@ ve.Node.prototype.canHaveChildren = null;
 /**
  * Check if the node can have children but not content nor be content.
  *
- * @method
  * @abstract
  * @return {boolean} Node can have children but not content nor be content
  */
@@ -122,7 +117,6 @@ ve.Node.prototype.canHaveChildrenNotContent = null;
 /**
  * Check if the node can contain content.
  *
- * @method
  * @abstract
  * @return {boolean} Node can contain content
  */
@@ -131,7 +125,6 @@ ve.Node.prototype.canContainContent = null;
 /**
  * Check if the node is content.
  *
- * @method
  * @abstract
  * @return {boolean} Node is content
  */
@@ -140,16 +133,22 @@ ve.Node.prototype.isContent = null;
 /**
  * Check if the node is an internal node
  *
- * @method
  * @abstract
  * @return {boolean} Node is an internal node
  */
 ve.Node.prototype.isInternal = null;
 
 /**
+ * Check if the node is a meta data node
+ *
+ * @abstract
+ * @return {boolean} Node is a meta data node
+ */
+ve.Node.prototype.isMetaData = null;
+
+/**
  * Check if the node has a wrapped element in the document data.
  *
- * @method
  * @abstract
  * @return {boolean} Node represents a wrapped element
  */
@@ -160,7 +159,6 @@ ve.Node.prototype.isWrapped = null;
  *
  * Can only be true of the node is wrapped.
  *
- * @method
  * @abstract
  * @return {boolean} Node represents a unwrappable element
  */
@@ -169,7 +167,6 @@ ve.Node.prototype.isUnwrappable = null;
 /**
  * Check if the node is focusable
  *
- * @method
  * @abstract
  * @return {boolean} Node is focusable
  */
@@ -178,7 +175,6 @@ ve.Node.prototype.isFocusable = null;
 /**
  * Check if the node is alignable
  *
- * @method
  * @abstract
  * @return {boolean} Node is alignable
  */
@@ -187,7 +183,6 @@ ve.Node.prototype.isAlignable = null;
 /**
  * Check if the node can behave as a table cell
  *
- * @method
  * @abstract
  * @return {boolean} Node can behave as a table cell
  */
@@ -196,18 +191,32 @@ ve.Node.prototype.isCellable = null;
 /**
  * Check the node, behaving as a table cell, can be edited in place
  *
- * @method
  * @abstract
  * @return {boolean} Node can be edited in place
  */
 ve.Node.prototype.isCellEditable = null;
 
 /**
+ * Check if the node behaves like a list for diffing
+ *
+ * @abstract
+ * @return {boolean} Node behaves like a list
+ */
+ve.Node.prototype.isDiffedAsList = null;
+
+/**
+ * Check if the node behaves like a leaf for diffing
+ *
+ * @abstract
+ * @return {boolean} Node behaves like a leaf
+ */
+ve.Node.prototype.isDiffedAsLeaf = null;
+
+/**
  * Check if the node has significant whitespace.
  *
  * Can only be true if canContainContent is also true.
  *
- * @method
  * @abstract
  * @return {boolean} Node has significant whitespace
  */
@@ -216,7 +225,6 @@ ve.Node.prototype.hasSignificantWhitespace = null;
 /**
  * Check if the node handles its own children
  *
- * @method
  * @abstract
  * @return {boolean} Node handles its own children
  */
@@ -225,7 +233,6 @@ ve.Node.prototype.handlesOwnChildren = null;
 /**
  * Check if the node's children should be ignored.
  *
- * @method
  * @abstract
  * @return {boolean} Node's children should be ignored
  */
@@ -234,7 +241,6 @@ ve.Node.prototype.shouldIgnoreChildren = null;
 /**
  * Get the length of the node.
  *
- * @method
  * @abstract
  * @return {number} Node length
  */
@@ -245,7 +251,6 @@ ve.Node.prototype.getLength = null;
  *
  * If the node has no parent than the result will always be 0.
  *
- * @method
  * @abstract
  * @return {number} Offset of node
  * @throws {Error} Node not found in parent's children array
@@ -255,7 +260,6 @@ ve.Node.prototype.getOffset = null;
 /**
  * Get the range inside the node.
  *
- * @method
  * @param {boolean} backwards Return a backwards range
  * @return {ve.Range} Inner node range
  */
@@ -268,7 +272,6 @@ ve.Node.prototype.getRange = function ( backwards ) {
 /**
  * Get the outer range of the node, which includes wrappers if present.
  *
- * @method
  * @param {boolean} backwards Return a backwards range
  * @return {ve.Range} Node outer range
  */
@@ -280,7 +283,6 @@ ve.Node.prototype.getOuterRange = function ( backwards ) {
 /**
  * Get the outer length of the node, which includes wrappers if present.
  *
- * @method
  * @return {number} Node outer length
  */
 ve.Node.prototype.getOuterLength = function () {
@@ -292,7 +294,6 @@ ve.Node.prototype.getOuterLength = function () {
 /**
  * Get the symbolic node type name.
  *
- * @method
  * @return {string} Symbolic name of element type
  */
 ve.Node.prototype.getType = function () {
@@ -302,7 +303,6 @@ ve.Node.prototype.getType = function () {
 /**
  * Get a reference to the node's parent.
  *
- * @method
  * @return {ve.Node|null} Reference to the node's parent, null if detached
  */
 ve.Node.prototype.getParent = function () {
@@ -312,7 +312,6 @@ ve.Node.prototype.getParent = function () {
 /**
  * Get the root node of the tree the node is currently attached to.
  *
- * @method
  * @return {ve.Node|null} Root node, null if detached
  */
 ve.Node.prototype.getRoot = function () {
@@ -324,7 +323,6 @@ ve.Node.prototype.getRoot = function () {
  *
  * This method is overridden by nodes with children.
  *
- * @method
  * @param {ve.Node|null} root Node to use as root
  * @fires root
  * @fires unroot
@@ -347,7 +345,6 @@ ve.Node.prototype.setRoot = function ( root ) {
 /**
  * Get the document the node is a part of.
  *
- * @method
  * @return {ve.Document|null} Document the node is a part of, null if detached
  */
 ve.Node.prototype.getDocument = function () {
@@ -359,7 +356,6 @@ ve.Node.prototype.getDocument = function () {
  *
  * This method is overridden by nodes with children.
  *
- * @method
  * @param {ve.Document|null} doc Document this node is a part of
  */
 ve.Node.prototype.setDocument = function ( doc ) {
@@ -380,7 +376,6 @@ ve.Node.prototype.setDocument = function ( doc ) {
 /**
  * Attach the node to another as a child.
  *
- * @method
  * @param {ve.Node} parent Node to attach to
  * @fires attach
  */
@@ -394,7 +389,6 @@ ve.Node.prototype.attach = function ( parent ) {
 /**
  * Detach the node from its parent.
  *
- * @method
  * @fires detach
  */
 ve.Node.prototype.detach = function () {
@@ -410,7 +404,6 @@ ve.Node.prototype.detach = function () {
  *
  * For each traversed node, the callback function will be passed the traversed node as a parameter.
  *
- * @method
  * @param {Function} callback Callback method to be called for every traversed node. Returning false stops the traversal.
  * @return {ve.Node|null} Node which caused the traversal to stop, or null if it didn't
  */
@@ -428,7 +421,6 @@ ve.Node.prototype.traverseUpstream = function ( callback ) {
 /**
  * Traverse upstream until a parent of a specific type is found
  *
- * @method
  * @param {Function} type Node type to find
  * @return {ve.Node|null} Ancestor of this node matching the specified type
  */
@@ -439,7 +431,32 @@ ve.Node.prototype.findParent = function ( type ) {
 };
 
 /**
- * Get the offset path from the document node to this node
+ * Traverse upstream and collect all nodes, including the node itself.
+ *
+ * @return {ve.Node[]} List of nodes which are upstream of the current node
+ */
+ve.Node.prototype.collectUpstream = function () {
+	var nodes = [];
+	this.traverseUpstream( function ( node ) {
+		nodes.push( node );
+	} );
+	return nodes;
+};
+
+/**
+ * Check if the current node is a descendant of (or equal to) a specific node.
+ *
+ * @param {ve.Node} upstreamNode Parent node to check for
+ * @return {boolean} Current node is a descendant
+ */
+ve.Node.prototype.isDownstreamOf = function ( upstreamNode ) {
+	return this.traverseUpstream( function ( node ) {
+		return node !== upstreamNode;
+	} ) !== null;
+};
+
+/**
+ * Get the offset path from the document node to this node.
  *
  * @return {number[]|null} The offset path, or null if not attached to a DocumentNode
  */

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -73,6 +73,18 @@ ve.init.mw.ArticleTargetEvents.prototype.trackTiming = function ( topic, data ) 
 };
 
 /**
+ * Track when the user makes their first transaction
+ */
+ve.init.mw.ArticleTargetEvents.prototype.onFirstTransaction = function () {
+	this.track( 'mwedit.firstChange' );
+
+	this.trackTiming( 'behavior.firstTransaction', {
+		duration: ve.now() - this.timings.surfaceReady,
+		mode: this.target.surface.getMode()
+	} );
+};
+
+/**
  * Track when user begins the save workflow
  */
 ve.init.mw.ArticleTargetEvents.prototype.onSaveWorkflowBegin = function () {
@@ -106,23 +118,21 @@ ve.init.mw.ArticleTargetEvents.prototype.onSaveInitiated = function () {
 /**
  * Track when the save is complete
  *
- * @param {string} content
- * @param {string} categoriesHtml
- * @param {number} newRevId
+ * @param {Object} data Save data from the API, see ve.init.mw.ArticleTarget#saveComplete
  */
-ve.init.mw.ArticleTargetEvents.prototype.onSaveComplete = function ( content, categoriesHtml, newRevId ) {
+ve.init.mw.ArticleTargetEvents.prototype.onSaveComplete = function ( data ) {
 	this.trackTiming( 'performance.user.saveComplete', { duration: ve.now() - this.timings.saveInitiated } );
 	this.timings.saveRetries = 0;
 	this.track( 'mwedit.saveSuccess', {
 		timing: ve.now() - this.timings.saveInitiated + ( this.timings.serializeForCache || 0 ),
-		'page.revid': newRevId
+		// eslint-disable-next-line camelcase
+		revision_id: data.newrevid
 	} );
 };
 
 /**
  * Track a save error by type
  *
- * @method
  * @param {string} type Text for error type
  */
 ve.init.mw.ArticleTargetEvents.prototype.trackSaveError = function ( type ) {
@@ -203,9 +213,10 @@ ve.init.mw.ArticleTargetEvents.prototype.onSaveReview = function () {
 };
 
 ve.init.mw.ArticleTargetEvents.prototype.onSurfaceReady = function () {
+	this.timings.surfaceReady = ve.now();
 	this.target.surface.getModel().getDocument().connect( this, {
 		transact: 'recordLastTransactionTime'
-	} );
+	} ).once( 'transact', this.onFirstTransaction.bind( this ) );
 };
 
 /**

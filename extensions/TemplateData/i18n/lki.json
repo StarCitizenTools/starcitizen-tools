@@ -1,18 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Lakzon",
-			"Hosseinblue"
+			"Hosseinblue",
+			"Lakzon"
 		]
 	},
-	"apihelp-templatedata-description": "آوردن داده‌های ذخیره‌شده توسط افزونهٔ TemplateData.",
-	"apihelp-templatedata-example-1": "برگرداندن داده‌های [[Template:Stub]] و [[Template:Example]]",
 	"templatedata-doc-desc-empty": "بدون توصیف.",
-	"templatedata-doc-param-autovalue-empty": "خالی/پةتی",
 	"templatedata-doc-param-default": "پیش‌فرض",
-	"templatedata-doc-param-default-empty": "خالی/پةتی",
 	"templatedata-doc-param-example": "مثال",
-	"templatedata-doc-param-example-empty": "خالی/پةتی",
 	"templatedata-doc-param-desc": "توضیحۀل",
 	"templatedata-doc-param-desc-empty": "بدون توصیف",
 	"templatedata-doc-param-name": "پارامتر",

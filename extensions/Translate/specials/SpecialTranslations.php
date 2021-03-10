@@ -8,6 +8,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Implements a special page which shows all translations for a message.
  * Bits taken from SpecialPrefixindex.php and TranslateTasks.php
@@ -16,11 +18,12 @@
  */
 class SpecialTranslations extends SpecialAllPages {
 	public function __construct() {
-		parent::__construct( 'Translations' );
+		parent::__construct();
+		$this->mName = 'Translations';
 	}
 
 	protected function getGroupName() {
-		return 'pages';
+		return 'translation';
 	}
 
 	public function getDescription() {
@@ -29,7 +32,7 @@ class SpecialTranslations extends SpecialAllPages {
 
 	/**
 	 * Entry point : initialise variables and call subfunctions.
-	 * @param string $par Message key. Becomes "MediaWiki:Allmessages" when called like
+	 * @param string|null $par Message key. Becomes "MediaWiki:Allmessages" when called like
 	 *             Special:Translations/MediaWiki:Allmessages (default null)
 	 */
 	public function execute( $par ) {
@@ -37,7 +40,7 @@ class SpecialTranslations extends SpecialAllPages {
 		$this->outputHeader();
 
 		$out = $this->getOutput();
-		$out->addModuleStyles( 'ext.translate.legacy' );
+		$out->addModuleStyles( 'ext.translate.specialpages.styles' );
 
 		$par = (string)$par;
 
@@ -113,8 +116,7 @@ class SpecialTranslations extends SpecialAllPages {
 		$context = new DerivativeContext( $this->getContext() );
 		$context->setTitle( $this->getPageTitle() ); // Remove subpage
 
-		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $context );
-		$htmlForm
+		HTMLForm::factory( 'ooui', $formDescriptor, $context )
 			->setMethod( 'get' )
 			->setSubmitTextMsg( 'allpagessubmit' )
 			->setWrapperLegendMsg( 'translate-translations-fieldset-title' )
@@ -128,11 +130,12 @@ class SpecialTranslations extends SpecialAllPages {
 	 * @return array ( string => int )
 	 */
 	public function getSortedNamespaces() {
-		global $wgTranslateMessageNamespaces, $wgContLang;
+		global $wgTranslateMessageNamespaces;
+		$contLang = MediaWikiServices::getInstance()->getContentLanguage();
 
 		$nslist = [];
 		foreach ( $wgTranslateMessageNamespaces as $ns ) {
-			$nslist[$wgContLang->getFormattedNsText( $ns )] = $ns;
+			$nslist[$contLang->getFormattedNsText( $ns )] = $ns;
 		}
 		ksort( $nslist );
 
@@ -194,7 +197,7 @@ class SpecialTranslations extends SpecialAllPages {
 		$pageInfo = TranslateUtils::getContents( $titles, $namespace );
 
 		$tableheader = Xml::openElement( 'table', [
-			'class' => 'mw-sp-translate-table sortable'
+			'class' => 'mw-sp-translate-table sortable wikitable'
 		] );
 
 		$tableheader .= Xml::openElement( 'tr' );
@@ -210,6 +213,7 @@ class SpecialTranslations extends SpecialAllPages {
 			'</sup>&#160;';
 		$separator = $this->msg( 'word-separator' )->plain();
 
+		$tools = [];
 		foreach ( $res as $s ) {
 			$key = $s->page_title;
 			$tTitle = Title::makeTitle( $s->page_namespace, $key );
@@ -235,10 +239,9 @@ class SpecialTranslations extends SpecialAllPages {
 				[ 'action' => 'history' ]
 			);
 
+			$class = '';
 			if ( MessageHandle::hasFuzzyString( $pageInfo[$key][0] ) || $tHandle->isFuzzy() ) {
-				$class = 'orig';
-			} else {
-				$class = 'def';
+				$class = 'mw-sp-translate-fuzzy';
 			}
 
 			$languageAttributes = [];

@@ -8,6 +8,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\PageTranslation\TranslationUnit;
+
 /**
  * This class represents the results of parsed source page, that is, the
  * extracted sections and a template.
@@ -17,18 +19,17 @@
 class TPParse {
 	/** @var Title Title of the page. */
 	protected $title;
-
-	/** @var TPSection[] Parsed sections indexed with placeholder.
+	/**
 	 * @todo Encapsulate
+	 * @var TranslationUnit[] Parsed sections indexed with placeholder.
 	 */
 	public $sections = [];
-	/** @var string Page source with content replaced with placeholders.
+	/**
 	 * @todo Encapsulate
+	 * @var string Page source with content replaced with placeholders.
 	 */
 	public $template = null;
-	/**
-	 * @var null|array Sections saved in the database. array( string => TPSection, ... )
-	 */
+	/** @var null|array Sections saved in the database. array( string => TranslationUnit, ... ) */
 	protected $dbSections = null;
 
 	/// Constructor
@@ -71,8 +72,9 @@ class TPParse {
 
 	/**
 	 * Gets the sections and assigns section id for new sections
+	 *
 	 * @param int $highest The largest used integer id (Since 2012-08-02)
-	 * @return TPSection[] array( string => TPSection, ... )
+	 * @return TranslationUnit[] array( string => TranslationUnit, ... )
 	 */
 	public function getSectionsForSave( $highest = 0 ) {
 		$this->loadFromDatabase();
@@ -108,7 +110,8 @@ class TPParse {
 
 	/**
 	 * Returns list of deleted sections.
-	 * @return TPSection[] List of sections indexed by id. array( string => TPsection, ... )
+	 *
+	 * @return TranslationUnit[] List of sections indexed by id. array( string => TranslationUnit, ... )
 	 */
 	public function getDeletedSections() {
 		$sections = $this->getSectionsForSave();
@@ -140,7 +143,7 @@ class TPParse {
 
 		$res = $db->select( $tables, $vars, $conds, __METHOD__ );
 		foreach ( $res as $r ) {
-			$section = new TPSection;
+			$section = new TranslationUnit;
 			$section->id = $r->trs_key;
 			$section->text = $r->trs_text;
 			$section->type = 'db';
@@ -164,87 +167,12 @@ class TPParse {
 	}
 
 	/**
-	 * Returns translation page with all possible translations replaced in, ugly
-	 * translation tags removed and outdated translation marked with a class
-	 * mw-translate-fuzzy.
-	 *
-	 * @param MessageCollection $collection Collection that holds translated messages.
-	 * @param bool $showOutdated Whether to show outdated sections, wrapped in a HTML class.
-	 * @return string Whole page as wikitext.
-	 */
-	public function getTranslationPageText( $collection, $showOutdated = false ) {
-		$text = $this->template; // The source
-
-		// For finding the messages
-		$prefix = $this->title->getPrefixedDBkey() . '/';
-
-		if ( $collection instanceof MessageCollection ) {
-			$collection->loadTranslations();
-			if ( $showOutdated ) {
-				$collection->filter( 'hastranslation', false );
-			} else {
-				$collection->filter( 'translated', false );
-			}
-		}
-
-		foreach ( $this->sections as $ph => $s ) {
-			$sectiontext = null;
-
-			if ( isset( $collection[$prefix . $s->id] ) ) {
-				/** @var TMessage $msg */
-				$msg = $collection[$prefix . $s->id];
-				/** @var string|null */
-				$sectiontext = $msg->translation();
-
-				// If translation is fuzzy, $sectiontext must be a string
-				if ( $msg->hasTag( 'fuzzy' ) ) {
-					// We do not ever want to show explicit fuzzy marks in the rendered pages
-					$sectiontext = str_replace( TRANSLATE_FUZZY, '', $sectiontext );
-
-					if ( $s->isInline() ) {
-						$sectiontext = "<span class=\"mw-translate-fuzzy\">$sectiontext</span>";
-					} else {
-						// We add new lines around the text to avoid disturbing any mark-up that
-						// has special handling on line start, such as lists.
-						$sectiontext = "<div class=\"mw-translate-fuzzy\">\n$sectiontext\n</div>";
-					}
-				}
-			}
-
-			// Use the original text if no translation is available.
-
-			// For the source language, this will actually be the source, which
-			// contains variable declarations (tvar) instead of variables ($1).
-			// The getTextWithVariables will convert declarations to normal variables
-			// for us so that the variable substitutions below will also work
-			// for the source language.
-			if ( $sectiontext === null || $sectiontext === $s->getText() ) {
-				$sectiontext = $s->getTextWithVariables();
-			}
-
-			// Substitute variables into section text and substitute text into document
-			$sectiontext = strtr( $sectiontext, $s->getVariables() );
-			$text = str_replace( $ph, $sectiontext, $text );
-		}
-
-		$nph = [];
-		$text = TranslatablePage::armourNowiki( $nph, $text );
-
-		// Remove translation markup from the template to produce final text
-		$cb = [ __CLASS__, 'replaceTagCb' ];
-		$text = preg_replace_callback( '~(<translate>)(.*)(</translate>)~sU', $cb, $text );
-		$text = TranslatablePage::unArmourNowiki( $nph, $text );
-
-		return $text;
-	}
-
-	/**
-	 * Chops of trailing or preceeding whitespace intelligently to avoid
-	 * build up of unintented whitespace.
+	 * Chops of trailing or preceding whitespace intelligently to avoid
+	 * build up of unintended whitespace.
 	 * @param string[] $matches
 	 * @return string
 	 */
 	protected static function replaceTagCb( $matches ) {
-		return preg_replace( '~^\n|\n\z~', '', $matches[2] );
+		return preg_replace( '~^\n|\n\z~', '', $matches[1] );
 	}
 }

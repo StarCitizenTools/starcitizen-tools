@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWMagicLinkNodeContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -43,7 +43,13 @@ ve.ui.MWMagicLinkNodeContextItem.prototype.setup = function () {
 	// Set up label
 	var msg = 'visualeditor-magiclinknodeinspector-title-' +
 		this.model.getMagicType().toLowerCase();
+
+	// The following messages are used here:
+	// * visualeditor-magiclinknodeinspector-title-isbn
+	// * visualeditor-magiclinknodeinspector-title-pmid
+	// * visualeditor-magiclinknodeinspector-title-rfc
 	this.setLabel( OO.ui.deferMsg( msg ) );
+
 	// Invoke superclass method.
 	return ve.ui.MWMagicLinkNodeContextItem.super.prototype.setup.call( this );
 };
@@ -52,6 +58,15 @@ ve.ui.MWMagicLinkNodeContextItem.prototype.getDescription = function () {
 	return this.model.getAttribute( 'content' );
 };
 
+/**
+ * @inheritdoc
+ */
+ve.ui.MWMagicLinkNodeContextItem.prototype.renderBody = function () {
+	// Parent method
+	ve.ui.MWMagicLinkNodeContextItem.super.prototype.renderBody.apply( this, arguments );
+
+	this.$labelLayout.remove();
+};
 /* Registration */
 
 ve.ui.contextItemFactory.register( ve.ui.MWMagicLinkNodeContextItem );

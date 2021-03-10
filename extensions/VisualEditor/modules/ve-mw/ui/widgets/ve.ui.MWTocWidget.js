@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWTocWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -47,6 +47,8 @@ ve.ui.MWTocWidget = function VeUiMWTocWidget( surface, config ) {
 		insert: 'onMetaListInsert',
 		remove: 'onMetaListRemove'
 	} );
+
+	this.buildDebounced = ve.debounce( this.build.bind( this ) );
 
 	this.initFromMetaList();
 	this.build();
@@ -99,15 +101,18 @@ ve.ui.MWTocWidget.prototype.onMetaListRemove = function ( metaItem ) {
 ve.ui.MWTocWidget.prototype.initFromMetaList = function () {
 	var i = 0,
 		items = this.metaList.getItemsInGroup( 'mwTOC' ),
-		len = items.length;
+		len = items.length,
+		property;
 	if ( len > 0 ) {
 		for ( ; i < len; i++ ) {
-			if ( items[ i ] instanceof ve.dm.MWTOCForceMetaItem ) {
-				this.mwTOCForce = true;
-			}
-			// Needs testing
-			if ( items[ i ] instanceof ve.dm.MWTOCDisableMetaItem ) {
-				this.mwTOCDisable = true;
+			if ( items[ i ] instanceof ve.dm.MWTOCMetaItem ) {
+				property = items[ i ].getAttribute( 'property' );
+				if ( property === 'mw:PageProp/forcetoc' ) {
+					this.mwTOCForce = true;
+				}
+				if ( property === 'mw:PageProp/notoc' ) {
+					this.mwTOCDisable = true;
+				}
 			}
 		}
 		this.updateVisibility();
@@ -126,14 +131,14 @@ ve.ui.MWTocWidget.prototype.updateVisibility = function () {
 /**
  * Rebuild TOC on ve.ce.MWHeadingNode teardown or setup
  *
- * Rebuilds on both teardown and setup of a node, so rebuild is debounced
+ * Rebuilds on both teardown and setup of a node, so build is debounced
  */
-ve.ui.MWTocWidget.prototype.rebuild = ve.debounce( function () {
+ve.ui.MWTocWidget.prototype.rebuild = function () {
 	if ( this.initialized ) {
 		// Wait for transactions to process
-		this.build();
+		this.buildDebounced();
 	}
-} );
+};
 
 /**
  * Update the text content of a specific heading node
@@ -166,9 +171,9 @@ ve.ui.MWTocWidget.prototype.build = function () {
 		return $list.children( 'li' ).length + ( n === stack.length - 1 ? 1 : 0 );
 	}
 
-	function linkClickHandler( heading ) {
+	function linkClickHandler( /* heading */ ) {
 		surfaceView.focus();
-		ve.init.target.goToHeading( heading );
+		// TODO: Impement heading scroll
 		return false;
 	}
 
@@ -195,6 +200,9 @@ ve.ui.MWTocWidget.prototype.build = function () {
 		tocNumber = stack.map( getItemIndex ).join( '.' );
 		viewNode = documentView.getBranchNodeFromOffset( modelNode.getRange().start );
 		uri.query.section = ( i + 1 ).toString();
+		// The following classes are used here:
+		// * toclevel-1, toclevel-2, ...
+		// * tocsection-1, tocsection-2, ...
 		$item = $( '<li>' ).addClass( 'toclevel-' + stack.length ).addClass( 'tocsection-' + ( i + 1 ) );
 		$link = $( '<a>' ).attr( 'href', uri )
 			.append( '<span class="tocnumber">' + tocNumber + '</span> ' );

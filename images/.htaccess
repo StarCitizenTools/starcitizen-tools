@@ -1,18 +1,6 @@
-# Protect against bug T30235
 <IfModule rewrite_module>
 	RewriteEngine On
 	RewriteOptions inherit
-	RewriteCond %{QUERY_STRING} \.[^\\/:*?\x22<>|%]+(#|\?|$) [nocase]
-	RewriteRule . - [forbidden]
 	# Fix for bug T64289
 	Options +FollowSymLinks
-	# TransformVia404
-	RewriteCond %{REQUEST_FILENAME} !-d
-	RewriteCond %{REQUEST_FILENAME} !-f
-	RewriteRule ^thumb/[0-9a-f]/[0-9a-f][0-9a-f]/[^/]+/[^/]+$ /thumb_handler.php [L,QSA]
-	#If your $wgHashedUploadDirectory is false, remove the first two steps after thumb/
-	RewriteCond %{REQUEST_FILENAME} !-d
-	RewriteCond %{REQUEST_FILENAME} !-f
-	RewriteRule ^thumb/archive/[0-9a-f]/[0-9a-f][0-9a-f]/[^/]+/[^/]+$ /thumb_handler.php [L,QSA]
-	# If your $wgHashedUploadDirectory is false, remove the first two steps after thumb/archive/
 </IfModule>

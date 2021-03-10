@@ -10,18 +10,6 @@
 		}
 	},
 	"images": {
-		"image-none": {
-			"file": "../images/icons/image-none.svg"
-		},
-		"image-frame": {
-			"file": "../images/icons/image-frame.svg"
-		},
-		"image-frameless": {
-			"file": "../images/icons/image-frameless.svg"
-		},
-		"image-thumbnail": {
-			"file": "../images/icons/image-thumbnail.svg"
-		},
 		"parameter": {
 			"file": "../images/icons/parameter-ltr.svg"
 		},
@@ -30,9 +18,6 @@
 		},
 		"public-domain": {
 			"file": "../images/icons/public-domain.svg"
-		},
-		"profile": {
-			"file": "../images/icons/profile.svg"
 		}
 	}
 }

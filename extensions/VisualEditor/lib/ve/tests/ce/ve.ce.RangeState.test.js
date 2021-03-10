@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable Document tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ce.RangeState' );
@@ -113,7 +113,7 @@ QUnit.test( 'Basic tests', function ( assert ) {
 			branchNodeChanged: state.branchNodeChanged,
 			selectionChanged: state.selectionChanged,
 			contentChanged: state.contentChanged,
-			veRange: state.veRange,
+			veRange: state.veRange && state.veRange.toJSON(),
 			node: state.node,
 			text: state.text,
 			hash: state.hash
@@ -134,7 +134,11 @@ QUnit.test( 'Basic tests', function ( assert ) {
 			oldState = null;
 		}
 		rangeState = new ve.ce.RangeState( oldState, doc );
-		assert.deepEqual( getSummary( rangeState ), cases[ i ].expected, cases[ i ].msg );
+		assert.deepEqualWithNodeTree(
+			getSummary( rangeState ),
+			getSummary( cases[ i ].expected ),
+			cases[ i ].msg
+		);
 		oldState = rangeState;
 	}
 	view.destroy();

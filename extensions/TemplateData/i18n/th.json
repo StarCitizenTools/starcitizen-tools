@@ -1,24 +1,22 @@
 {
 	"@metadata": {
 		"authors": [
-			"Octahedron80",
+			"Aefgh39622",
 			"Ans",
-			"Horus"
+			"Horus",
+			"Octahedron80",
+			"Patsagorn Y."
 		]
 	},
-	"apihelp-templatedata-description": "ดึงข้อมูลที่บันทึกโดยส่วนขยายข้อมูลแม่แบบ",
-	"apihelp-templatedata-example-1": "คืนค่าข้อมูลให้กับ [[Template:Stub]] และ [[Template:Example]]",
-	"apihelp-templatedata-param-lang": "คืนค่าที่เป็นท้องถิ่นในภาษานี้ การแปลที่ใช้ได้ทั้งหมดจะถูกคืนค่าโดยปริยาย",
 	"templatedata-desc": "ใช้งานแหล่งเก็บข้อมูลสำหรับพารามิเตอร์แม่แบบ (โดยใช้ JSON)",
 	"templatedata-doc-desc-empty": "ไม่มีคำอธิบาย",
 	"templatedata-doc-param-autovalue": "ค่าอัตโนมัติ",
-	"templatedata-doc-param-autovalue-empty": "ว่าง",
 	"templatedata-doc-param-default": "ค่าปริยาย",
-	"templatedata-doc-param-default-empty": "ว่าง",
+	"templatedata-doc-param-example": "ตัวอย่าง",
 	"templatedata-doc-param-desc": "คำอธิบาย",
 	"templatedata-doc-param-desc-empty": "ไม่มีคำอธิบาย",
 	"templatedata-doc-param-name": "พารามิเตอร์",
-	"templatedata-doc-param-status": "สถานภาพ",
+	"templatedata-doc-param-status": "สถานะ",
 	"templatedata-doc-param-status-deprecated": "เลิกใช้แล้ว",
 	"templatedata-doc-param-status-optional": "เลือกได้",
 	"templatedata-doc-param-status-required": "จำเป็น",
@@ -29,7 +27,7 @@
 	"templatedata-doc-param-type-date": "วันที่",
 	"templatedata-doc-param-type-line": "บรรทัด",
 	"templatedata-doc-param-type-number": "จำนวน",
-	"templatedata-doc-param-type-string": "สายอักขระ",
+	"templatedata-doc-param-type-string": "สตริง",
 	"templatedata-doc-param-type-unbalanced-wikitext": "ข้อความวิกิที่ไม่สมดุล",
 	"templatedata-doc-param-type-wiki-file-name": "ไฟล์",
 	"templatedata-doc-param-type-wiki-page-name": "หน้า",
@@ -57,7 +55,7 @@
 	"templatedata-modal-table-param-actions": "การกระทำ",
 	"templatedata-modal-table-param-aliases": "ชื่อพ้อง (แยกด้วยจุลภาค)",
 	"templatedata-modal-table-param-autovalue": "ค่าอัตโนมัติ",
-	"templatedata-modal-table-param-default": "ค่าปริยาย",
+	"templatedata-modal-table-param-default": "ค่าเริ่มต้น ($1)",
 	"templatedata-modal-table-param-description": "คำอธิบาย",
 	"templatedata-modal-table-param-label": "ป้ายชื่อ ($1)",
 	"templatedata-modal-table-param-name": "ชื่อ",

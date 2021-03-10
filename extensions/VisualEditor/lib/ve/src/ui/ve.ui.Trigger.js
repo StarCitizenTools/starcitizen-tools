@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Trigger class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -29,7 +29,7 @@ ve.ui.Trigger = function VeUiTrigger( e, allowInvalidPrimary ) {
 	this.primary = false;
 
 	// Initialization
-	if ( e instanceof jQuery.Event ) {
+	if ( e instanceof $.Event ) {
 		this.modifiers.meta = e.metaKey || false;
 		this.modifiers.ctrl = e.ctrlKey || false;
 		this.modifiers.alt = e.altKey || false;
@@ -68,7 +68,7 @@ OO.initClass( ve.ui.Trigger );
  * The order of this array affects the canonical order of a trigger string.
  *
  * @static
- * @property
+ * @property {string[]}
  * @inheritable
  */
 ve.ui.Trigger.static.modifierKeys = [ 'meta', 'ctrl', 'alt', 'shift' ];
@@ -77,7 +77,7 @@ ve.ui.Trigger.static.modifierKeys = [ 'meta', 'ctrl', 'alt', 'shift' ];
  * Symbolic primary key names.
  *
  * @static
- * @property
+ * @property {string[]}
  * @inheritable
  */
 ve.ui.Trigger.static.primaryKeys = [
@@ -173,7 +173,7 @@ ve.ui.Trigger.static.primaryKeys = [
  * Mappings to use when rendering string for a specific platform.
  *
  * @static
- * @property
+ * @property {Object}
  * @inheritable
  */
 ve.ui.Trigger.static.platformMapping = {
@@ -181,7 +181,7 @@ ve.ui.Trigger.static.platformMapping = {
 		alt: '⌥',
 		backspace: '⌫',
 		ctrl: '^',
-		'delete': '⌦',
+		delete: '⌦',
 		down: '↓',
 		end: '↗',
 		// Technically 'enter' is ⌤, but JS doesn't distinguish between 'enter' and
@@ -205,11 +205,11 @@ ve.ui.Trigger.static.platformMapping = {
  * Symbol to use when concatenating keys in a sequence.
  *
  * @static
- * @property
+ * @property {Object}
  * @inheritable
  */
 ve.ui.Trigger.static.platformStringJoiners = {
-	'default': '+',
+	default: '+',
 	mac: ''
 };
 
@@ -217,7 +217,7 @@ ve.ui.Trigger.static.platformStringJoiners = {
  * Special keys which have i18n messages
  *
  * @static
- * @property
+ * @property {string[]}
  * @inheritable
  */
 ve.ui.Trigger.static.translatableKeys = [
@@ -246,7 +246,7 @@ ve.ui.Trigger.static.translatableKeys = [
  * Aliases for modifier or primary key names.
  *
  * @static
- * @property
+ * @property {Object}
  * @inheritable
  */
 ve.ui.Trigger.static.keyAliases = {
@@ -255,7 +255,7 @@ ve.ui.Trigger.static.keyAliases = {
 	apple: 'meta',
 	windows: 'meta',
 	option: 'alt',
-	'return': 'enter',
+	return: 'enter',
 	// Shorthand
 	esc: 'escape',
 	cmd: 'meta',
@@ -276,7 +276,7 @@ ve.ui.Trigger.static.keyAliases = {
  * Mapping of key codes and symbolic key names.
  *
  * @static
- * @property
+ * @property {Object}
  * @inheritable
  */
 ve.ui.Trigger.static.primaryKeyMap = {
@@ -454,6 +454,26 @@ ve.ui.Trigger.prototype.getMessage = function ( explode ) {
 
 	// i18n
 	keys = keys.map( function ( key ) {
+		// The following messages are used here:
+		// * visualeditor-key-alt
+		// * visualeditor-key-backspace
+		// * visualeditor-key-ctrl
+		// * visualeditor-key-delete
+		// * visualeditor-key-down
+		// * visualeditor-key-end
+		// * visualeditor-key-enter
+		// * visualeditor-key-escape
+		// * visualeditor-key-home
+		// * visualeditor-key-insert
+		// * visualeditor-key-left
+		// * visualeditor-key-meta
+		// * visualeditor-key-page-down
+		// * visualeditor-key-page-up
+		// * visualeditor-key-right
+		// * visualeditor-key-shift
+		// * visualeditor-key-space
+		// * visualeditor-key-tab
+		// * visualeditor-key-up
 		return translatableKeys.indexOf( key ) !== -1 ? ve.msg( 'visualeditor-key-' + key ) : key.toUpperCase();
 	} );
 

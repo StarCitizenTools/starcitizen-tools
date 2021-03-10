@@ -2,16 +2,17 @@
 	"@metadata": {
 		"authors": [
 			"Armando-Martin",
-			"Jewbask",
-			"Maor X",
-			"Peter Bowman",
-			"Fitoschido",
-			"Vfrico",
-			"Macofe",
-			"Ryo567",
-			"Lemondoge",
 			"Dgstranz",
-			"McDutchie"
+			"Fitoschido",
+			"Jewbask",
+			"Lemondoge",
+			"Macofe",
+			"Maor X",
+			"MarcoAurelio",
+			"McDutchie",
+			"Peter Bowman",
+			"Ryo567",
+			"Vfrico"
 		]
 	},
 	"scribunto-desc": "Marco para la incorporación de lenguajes de script en páginas de MediaWiki",
@@ -23,7 +24,7 @@
 	"scribunto-doc-page-name": "Module:$1/doc",
 	"scribunto-doc-page-does-not-exist": "''La documentación para este módulo puede ser creada en [[$1]]''",
 	"scribunto-doc-page-header": "'''Esta es la página de documentación de [[$1]]'''",
-	"scribunto-console-intro": "* Las exportaciones del módulo están disponibles como la variable \"p\", incluidas las modificaciones sin guardar.\n* Inicia una línea con el carácter \"=\" para evaluarla como una expresión; o usa print().\n* Usa mw.log() en el código del módulo para enviar mensajes a esta consola.",
+	"scribunto-console-intro": "* Las exportaciones del módulo están disponibles como la variable \"p\", incluidas las modificaciones sin guardar.\n* Inicia una línea con el carácter \"=\" para evaluarla como una expresión; o usa print(). Usa mw.logObject() para tablas.\n* Usa mw.log() y mw.logObject() en el código del módulo para enviar mensajes a esta consola.",
 	"scribunto-console-title": "Consola de depuración de errores",
 	"scribunto-console-too-large": "La sesión de esta consola es demasiado grande. Limpia el historial de la consola o reduce el tamaño del módulo.",
 	"scribunto-console-current-src": "entrada de la consola",
@@ -65,12 +66,6 @@
 	"scribunto-limitreport-profile": "Perfil de Lua",
 	"scribunto-limitreport-profile-ms": "$1 ms",
 	"scribunto-limitreport-logs": "Registros de Lua",
-	"apihelp-scribunto-console-description": "Módulo interno para el mantenimiento de XHR las solicitudes de los Scribunto de la consola.",
-	"apihelp-scribunto-console-param-title": "El título del módulo que probar.",
-	"apihelp-scribunto-console-param-content": "El nuevo contenido del módulo.",
-	"apihelp-scribunto-console-param-session": "Token de sesión.",
-	"apihelp-scribunto-console-param-question": "El próximo renglón que evaluar como secuencia de órdenes.",
-	"apihelp-scribunto-console-param-clear": "Marcar para borrar el estado de la sesión actual.",
 	"nstab-module": "Módulo",
 	"tooltip-ca-nstab-module": "Ver la página del módulo"
 }

@@ -8,9 +8,10 @@
  * @ingroup FFS
  */
 class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
-	/**
-	 * @param FileBasedMessageGroup $group
-	 */
+	/** @var ArrayFlattener */
+	private $flattener;
+
+	/** @param FileBasedMessageGroup $group */
 	public function __construct( FileBasedMessageGroup $group ) {
 		parent::__construct( $group );
 		$this->flattener = $this->getFlattener();
@@ -31,15 +32,15 @@ class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 		$authors = $matches[1];
 
 		// Then messages.
-		$messages = TranslateYaml::loadString( $data );
+		$messages = TranslateYaml::loadString( $data ) ?? [];
 
 		// Some groups have messages under language code
 		if ( isset( $this->extra['codeAsRoot'] ) ) {
-			$messages = array_shift( $messages );
+			$messages = array_shift( $messages ) ?? [];
 		}
 
 		$messages = $this->flatten( $messages );
-		$messages = $this->group->getMangler()->mangle( $messages );
+		$messages = $this->group->getMangler()->mangleArray( $messages );
 		foreach ( $messages as &$value ) {
 			$value = rtrim( $value, "\n" );
 		}
@@ -61,9 +62,8 @@ class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 		$mangler = $this->group->getMangler();
 
 		$messages = [];
-		/**
-		 * @var $m TMessage
-		 */
+
+		/** @var TMessage $m */
 		foreach ( $collection as $key => $m ) {
 			$key = $mangler->unmangle( $key );
 			$value = $m->translation();
@@ -134,7 +134,7 @@ class YamlFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 	 * Obtains object used to flatten and unflatten arrays. In this implementation
 	 * we use the ArrayFlattener class which also supports CLDR pluralization rules.
 	 *
-	 * @return object with flatten, unflatten methods
+	 * @return ArrayFlattener with flatten, unflatten methods
 	 */
 	protected function getFlattener() {
 		$nestingSeparator = $this->extra['nestingSeparator'] ?? '.';

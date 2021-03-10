@@ -1,15 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Lévi",
-			"Gloria sah"
+			"Gloria sah",
+			"Lévi"
 		]
 	},
 	"tooltip-ca-createsource": "Fà al côdis surzéia ed cla pàgina ché.",
 	"tooltip-ca-editsource": "Mudéfica al côdis surzéia ed cla pàgina ché.",
 	"tooltip-ca-ve-edit": "Mudéfica cla pàgina ché",
 	"visualeditor-advancedsettings-tool": "Impustasiòun pió particulêri",
-	"visualeditor-beta-label": "beta",
 	"visualeditor-beta-warning": "S'ét cât di problēma tètnich quând ed fê dal mudéfichi, scrével ché sòt.",
 	"visualeditor-browserwarning": "A 's drē druvêr un navigadōr che 'n' è mia uficialmèint  arcgnusû per lavurêr cun l'editor ché.",
 	"visualeditor-ca-createlocaldescriptionsource": "Śòunta na surgìnt ed descrisiòun lochèla",
@@ -25,7 +24,6 @@
 	"visualeditor-descriptionpagelink": "Project:VisualEditor",
 	"visualeditor-dialog-media-alttext-section": "Tèst divêrs",
 	"visualeditor-dialog-media-content-section": "Didascaléia",
-	"visualeditor-dialog-media-noresults": "Mìa catê nisùn risultê.",
 	"visualeditor-dialog-media-page-advanced": "Impustasiòun pió particulêri",
 	"visualeditor-dialog-media-page-general": "Impustasiòun generêli",
 	"visualeditor-dialog-media-position-center": "Cèinter",
@@ -35,7 +33,6 @@
 	"visualeditor-dialog-media-position-right": "Dréta",
 	"visualeditor-dialog-media-position-section": "Puşisiòun",
 	"visualeditor-dialog-media-size-choosecustom": "Fisèr na dimensiòun persunaliśèda",
-	"visualeditor-dialog-media-size-originalsize-error": "L'é impusébil avèir incòra la larghèsa uriginêla dal file.",
 	"visualeditor-dialog-media-size-section": "Larghèsa 'd la figûra.",
 	"visualeditor-dialog-media-title": "Impustêr al file multimediêl",
 	"visualeditor-dialog-meta-categories-category": "Categoréia",
@@ -87,13 +84,8 @@
 	"visualeditor-formatdropdown-format-mw-heading6": "Secònd tétol 4",
 	"visualeditor-languages-tool": "Léngui",
 	"visualeditor-linkinspector-illegal-title": "Tétol 'd pàgina mìa vâlid",
-	"visualeditor-loadwarning": "Erōr mèint'r a gnîva carghê al j infurmasiòun dal terminêl:$1. Vōt pruvêr incòra?",
-	"visualeditor-loadwarning-token": "Erōr mèint'r a gnîva carghê al token ed mudéfica dal terminêl:$1. Vōt pruvêr incòra?",
 	"visualeditor-mainnamespacepagelink": "Project:Namespace principêl",
-	"visualeditor-media-input-placeholder": "Sērca file multimediêl",
 	"visualeditor-meta-tool": "Siēlti",
-	"visualeditor-mweditmodesource-title": "Pasêr a  \"{{int:visualeditor-ca-editsource}}\"?",
-	"visualeditor-mweditmodesource-warning": "T'é drē pasêr a la mudéfica wikitèst.  Vōt cuntinvêr?",
 	"visualeditor-mwgallerydialog-title": "Galerèia",
 	"visualeditor-parameter-input-placeholder": "Nòm câmp.",
 	"visualeditor-parameter-search-no-unused": "Sèinsa câmp mìa druvêdi.",
@@ -119,10 +111,8 @@
 	"visualeditor-saveerror": "Erōr mèint'r a gnîva salvê al j infurmasiòun insém al terminêl:$1.",
 	"visualeditor-serializeerror": "Erōr mèint'r a gnîva carghê al j infurmasiòun dal terminêl:$1.",
 	"visualeditor-settings-tool": "Impustasiòun 'd la pàgina",
-	"visualeditor-toolbar-savedialog": "Sêlva la pàgina",
 	"visualeditor-usernamespacepagelink": "Project:Namespace utèint",
 	"visualeditor-version-label": "Versiòun",
-	"visualeditor-viewpage-savewarning": "Ét sicûr ed vrèir lasêr còl che t'é mudifichê sèinsa préma salvêr?",
 	"visualeditor-wikitext-warning": "T'é drē druvêr l'editōr vişuêl – al [[{{MediaWiki:visualeditor-wikitext-warning-link}}|wikitèst]] che 'l funsiòuna mìa. Per pasêr a la mudéfica surgînt in ògni mumèint sèinsa pêrder al tō mudéfichi, cléca al ptòun scambiadōr.",
 	"visualeditor-wikitext-warning-title": "Nutê wikitèst"
 }

@@ -41,12 +41,13 @@ abstract class JavaScriptFFS extends SimpleFFS {
 		if ( $authors === $data ) {
 			$authors = [];
 		} else {
-			$authors = explode( "\n", $authors );
-			$count = count( $authors );
-			for ( $i = 0; $i < $count; $i++ ) {
-				// Each line should look like " *  - Translatorname"
-				$authors[$i] = substr( $authors[$i], 6 );
-			}
+			$authors = array_map(
+				function ( $author ) {
+					// Each line should look like " *  - Translatorname"
+					return substr( $author, 6 );
+				},
+				explode( "\n", $authors )
+			);
 		}
 
 		/* Pre-processing of messages */
@@ -96,29 +97,15 @@ abstract class JavaScriptFFS extends SimpleFFS {
 			/**
 			 * Concatenate separated strings.
 			 */
-			$segment = str_replace( '"+', '" +', $segment );
-			$segment = explode( '" +', $segment );
-			$count = count( $segment );
-			for ( $i = 0; $i < $count; $i++ ) {
-				$segment[$i] = ltrim( ltrim( $segment[$i] ), '"' );
-			}
-			$segment = implode( $segment );
+			$segment = preg_replace( '/"\s*\+\s*"/', '', $segment );
 
-			/**
-			 * Remove line breaks between message keys and messages.
-			 */
-			$segment = preg_replace( "#\:(\s+)[\\\"\']#", ': "', $segment );
-
-			/**
-			 * Break in to key and message.
-			 */
-			$segments = explode( ': "', $segment );
+			list( $key, $value ) = preg_split( '/:\s*[\'"]/', $segment, 2 );
 
 			/**
 			 * Strip excess whitespace from key and value, then quotation marks.
 			 */
-			$key = trim( trim( $segments[0] ), "'\"" );
-			$value = trim( trim( $segments[1] ), "'\"" );
+			$key = trim( trim( $key ), "'\"" );
+			$value = trim( trim( $value ), "'\"" );
 
 			/**
 			 * Unescape any JavaScript string syntax and append to message array.
@@ -126,7 +113,7 @@ abstract class JavaScriptFFS extends SimpleFFS {
 			$messages[$key] = self::unescapeJsString( $value );
 		}
 
-		$messages = $this->group->getMangler()->mangle( $messages );
+		$messages = $this->group->getMangler()->mangleArray( $messages );
 
 		return [
 			'AUTHORS' => $authors,
@@ -147,9 +134,7 @@ abstract class JavaScriptFFS extends SimpleFFS {
 		 * Get and write messages.
 		 */
 		$body = '';
-		/**
-		 * @var TMessage $message
-		 */
+		/** @var TMessage $message */
 		foreach ( $collection as $message ) {
 			if ( strlen( $message->translation() ) === 0 ) {
 				continue;
@@ -233,54 +218,5 @@ abstract class JavaScriptFFS extends SimpleFFS {
 	 */
 	protected static function unescapeJsString( $string ) {
 		return strtr( $string, array_flip( self::$pairs ) );
-	}
-}
-
-/**
- * File format support for Shapado, which uses JavaScript based format.
- * @ingroup FFS
- */
-class ShapadoJsFFS extends JavaScriptFFS {
-
-	/**
-	 * @param string $key
-	 *
-	 * @return string
-	 */
-	protected function transformKey( $key ) {
-		return $key;
-	}
-
-	/**
-	 * @param string $code
-	 * @param string[] $authors
-	 * @return string
-	 */
-	protected function header( $code, array $authors ) {
-		global $wgSitename;
-
-		$name = TranslateUtils::getLanguageName( $code );
-		$native = TranslateUtils::getLanguageName( $code, $code );
-		$authorsList = $this->authorsList( $authors );
-
-		/** @cond doxygen_bug */
-		return <<<EOT
-/** Messages for $name ($native)
- *  Exported from $wgSitename
- *
-{$authorsList}
- */
-
-var I18n = {
-
-EOT;
-		/** @endcond */
-	}
-
-	/**
-	 * @return string
-	 */
-	protected function footer() {
-		return "};\n\n";
 	}
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki SequenceRegistry registrations.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -32,7 +32,7 @@ ve.ui.sequenceRegistry.register(
 	new ve.ui.Sequence( 'wikitextDefinition', 'mwWikitextWarning', [ { type: 'paragraph' }, ';' ] )
 );
 ve.ui.sequenceRegistry.register(
-	new ve.ui.Sequence( 'wikitextDescription', 'blockquote', [ { type: 'paragraph' }, ':' ], 1 )
+	new ve.ui.Sequence( 'wikitextDescription', 'blockquoteWrap', [ { type: 'paragraph' }, ':' ], 1 )
 );
 ve.ui.sequenceRegistry.register(
 	new ve.ui.Sequence( 'wikitextTable', 'insertTable', '{|', 2 )

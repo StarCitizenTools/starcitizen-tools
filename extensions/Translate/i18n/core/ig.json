@@ -1,11 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"BaRaN6161 TURK",
 			"Ukabia",
 			"Uzoma Ozurumba"
 		]
 	},
 	"translate": "Tụ̀wári ásụ̀sụ̀",
+	"translate-taction-translate": "Tugharia",
 	"translate-page-settings-legend": "Otu ihe dị",
 	"translate-page-group": "Ọtú",
 	"translate-page-language": "Ásụ̀sụ̀",
@@ -19,8 +21,6 @@
 	"translate-ignored": "(atùfùghịrị)",
 	"translate-edit-title": "Mèzi \"$1\"",
 	"translate-edit-definition": "Mkpurụ ómárí ozi",
-	"translate-magic-cm-to-be": "I-bu",
-	"translate-magic-cm-save": "Dònye",
 	"translate-rc-translation-filter-no": "Emela ihe obulà",
 	"translate-stats-edits": "Ḿmezi",
 	"translate-stats-users": "Ndi na kuwari asụsụ na asụsụ nke ozor",
@@ -37,12 +37,10 @@
 	"translate-translations-project": "Nzu:",
 	"translate-language": "Ásụ̀sụ̀",
 	"translate-percentage-complete": "Mmechá",
-	"translate-save": "Dònye ($1)",
 	"translate-jssti-add": "Tinyé na ndetu",
 	"translate-manage-import-new": "Ozi ọhụrụ $1",
 	"translate-manage-import-deleted": "Ozi bakashịrị $1",
 	"translate-manage-import-done": "Omechá!",
-	"translate-js-save": "Dònye",
 	"translate-gs-code": "Edemede i zonari",
 	"translate-gs-continent": "Obodo ukwu",
 	"translate-gs-speakers": "Ndi na su",

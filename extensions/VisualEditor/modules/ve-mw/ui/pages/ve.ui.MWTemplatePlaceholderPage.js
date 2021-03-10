@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWTemplatePlaceholderPage class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -32,12 +32,19 @@ ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeh
 
 	this.addTemplateInput = new ve.ui.MWTemplateTitleInputWidget( {
 		$overlay: config.$overlay,
-		showDescriptions: true
+		showDescriptions: true,
+		api: ve.init.target.getContentApi()
 	} )
 		.connect( this, {
 			change: 'onTemplateInputChange',
 			enter: 'onAddTemplate'
 		} );
+
+	this.addTemplateInput.getLookupMenu().connect( this, {
+		choose: 'onAddTemplate'
+	} );
+
+	this.addTemplateInput.$input.attr( 'aria-label', ve.msg( 'visualeditor-dialog-transclusion-add-template' ) );
 
 	this.addTemplateButton = new OO.ui.ButtonWidget( {
 		label: ve.msg( 'visualeditor-dialog-transclusion-add-template' ),
@@ -62,7 +69,8 @@ ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeh
 
 	addTemplateActionFieldLayout = new OO.ui.ActionFieldLayout(
 		this.addTemplateInput,
-		this.addTemplateButton
+		this.addTemplateButton,
+		{ align: 'top' }
 	);
 
 	this.addTemplateFieldset = new OO.ui.FieldsetLayout( {
@@ -99,6 +107,15 @@ ve.ui.MWTemplatePlaceholderPage.prototype.setOutlineItem = function () {
 			.setFlags( [ 'placeholder' ] )
 			.setLabel( ve.msg( 'visualeditor-dialog-transclusion-placeholder' ) );
 	}
+};
+
+ve.ui.MWTemplatePlaceholderPage.prototype.focus = function () {
+	// Parent method
+	ve.ui.MWTemplatePlaceholderPage.super.prototype.focus.apply( this, arguments );
+
+	// HACK: Set the width of the lookupMenu to the width of the input
+	// TODO: This should be handled upstream in OOUI
+	this.addTemplateInput.lookupMenu.width = this.addTemplateInput.$input[ 0 ].clientWidth;
 };
 
 ve.ui.MWTemplatePlaceholderPage.prototype.onAddTemplate = function () {

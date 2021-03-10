@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MergeCellsContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -36,6 +36,8 @@ ve.ui.MergeCellsContextItem.static.label = OO.ui.deferMsg( 'visualeditor-table-m
 
 ve.ui.MergeCellsContextItem.static.commandName = 'mergeCells';
 
+ve.ui.MergeCellsContextItem.static.deletable = false;
+
 ve.ui.MergeCellsContextItem.static.embeddable = false;
 
 /* Methods */
@@ -53,17 +55,20 @@ ve.ui.MergeCellsContextItem.static.isCompatibleWith = function ( model ) {
 ve.ui.MergeCellsContextItem.prototype.setup = function () {
 	// If not disabled, selection must be table and spanning multiple matrix cells
 	var selection = this.getFragment().getSurface().getSelection(),
+		documentModel = this.getFragment().getDocument(),
 		// There's some situations involving transclusion table cells which
 		// can make us have a LinearSelection here, so make sure this will
 		// work:
-		isMergeable = ( selection instanceof ve.dm.TableSelection ) && selection.isMergeable();
+		isMergeable = ( selection instanceof ve.dm.TableSelection ) &&
+			selection.isMergeable( documentModel ) &&
+			!this.isReadOnly();
 
 	if ( !isMergeable ) {
-		// Ideally we Could check this in isCompatibleWith, but on the model node is available there
+		// Ideally we would check this in isCompatibleWith, but only the model node is available there
 		this.$element.detach();
 	} else {
 		this.editButton.setLabel(
-			isMergeable && selection.isSingleCell() ?
+			isMergeable && selection.isSingleCell( documentModel ) ?
 				ve.msg( 'visualeditor-table-merge-cells-unmerge' ) :
 				ve.msg( 'visualeditor-table-merge-cells-merge' )
 		);

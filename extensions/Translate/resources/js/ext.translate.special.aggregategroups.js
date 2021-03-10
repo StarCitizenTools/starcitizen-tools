@@ -31,7 +31,7 @@
 	}
 
 	function associate( event, resp ) {
-		var successFunction, params, subgroupId,
+		var successFunction, params, subgroupId, i,
 			$target = $( event.target ),
 			$parent = $target.parents( '.mw-tpa-group' ),
 			parentId = $parent.data( 'id' ),
@@ -57,17 +57,18 @@
 
 			$ol = $( '#mw-tpa-grouplist-' + parentId );
 			$ol.append( $( '<li>' ).append( $a, $span ) );
-			$span.click( dissociate );
+			$span.on( 'click', dissociate );
 			$parent.children( '.tp-group-input' ).val( '' );
 		};
 
 		// Get the label for the value and make API request if valid
 		subgroupId = '';
-		$.each( resp, function ( key, value ) {
-			if ( subgroupName === value.label ) {
-				subgroupId = value.id;
+		for ( i = 0; i < resp.length; ++i ) {
+			if ( subgroupName === resp[ i ].label ) {
+				subgroupId = resp[ i ].id;
+				break;
 			}
-		} );
+		}
 
 		if ( subgroupId ) {
 			params = $.extend( getApiParams( $target ), {
@@ -97,7 +98,7 @@
 		}
 
 		// XXX: 'confirm' is nonstandard.
-		if ( $.isFunction( window.confirm ) &&
+		if ( typeof window.confirm === 'function' &&
 			// eslint-disable-next-line no-alert
 			window.confirm( mw.msg( 'tpt-aggregategroup-remove-confirm' ) ) ) {
 			params = $.extend( getApiParams( $target ), {
@@ -121,10 +122,10 @@
 			$editGroup = $parent.children( '.tp-edit-group' ),
 			successFunction,
 			params,
-			aggGroupNameInputName = $editGroup.children( 'input.tp-aggregategroup-edit-name' ),
-			aggGroupNameInputDesc = $editGroup.children( 'input.tp-aggregategroup-edit-description' ),
-			aggregateGroupName = aggGroupNameInputName.val(),
-			aggregateGroupDesc = aggGroupNameInputDesc.val(),
+			$aggGroupNameInputName = $editGroup.children( 'input.tp-aggregategroup-edit-name' ),
+			$aggGroupNameInputDesc = $editGroup.children( 'input.tp-aggregategroup-edit-description' ),
+			aggregateGroupName = $aggGroupNameInputName.val(),
+			aggregateGroupDesc = $aggGroupNameInputDesc.val(),
 			api = new mw.Api();
 
 		successFunction = function () {
@@ -201,15 +202,19 @@
 
 			resp = [];
 
-			$.each( groups, function ( key, value ) {
-				if ( value.label.match( inp ) && exclude.indexOf( value.label ) === -1 ) {
-					resp.push( value );
+			Object.keys( groups ).forEach( function ( key ) {
+				if (
+					groups[ key ].label.match( inp ) &&
+					exclude.indexOf( groups[ key ].label ) === -1
+				) {
+					resp.push( groups[ key ] );
 				}
 			} );
+
 			response( resp );
 		};
 
-		$input.focus( excludeFunction );
+		$input.on( 'focus', excludeFunction );
 		$input.autocomplete( {
 			source: autocompleteFunction,
 			minLength: 0
@@ -218,13 +223,13 @@
 			$( this ).autocomplete( 'search', $( this ).val() );
 		} );
 
-		$( '.tp-aggregate-add-button' ).click( function ( event ) {
+		$( '.tp-aggregate-add-button' ).on( 'click', function ( event ) {
 			associate( event, resp );
 		} );
-		$( '.tp-aggregate-remove-button' ).click( dissociate );
-		$( '.tp-aggregate-remove-ag-button' ).click( removeGroup );
-		$( '.tp-aggregategroup-update' ).click( editGroup );
-		$( '.tp-aggregategroup-update-cancel' ).click( cancelEditGroup );
+		$( '.tp-aggregate-remove-button' ).on( 'click', dissociate );
+		$( '.tp-aggregate-remove-ag-button' ).on( 'click', removeGroup );
+		$( '.tp-aggregategroup-update' ).on( 'click', editGroup );
+		$( '.tp-aggregategroup-update-cancel' ).on( 'click', cancelEditGroup );
 
 		$( 'a.tpt-add-new-group' ).on( 'click', function ( event ) {
 			$( 'div.tpt-add-new-group' ).removeClass( 'hidden' );
@@ -241,16 +246,15 @@
 
 		$( '#tpt-aggregategroups-save' ).on( 'click', function () {
 			var successFunction, params,
-				aggGroupNameInputName = $( 'input.tp-aggregategroup-add-name' ),
-				aggGroupNameInputDesc = $( 'input.tp-aggregategroup-add-description' ),
-				aggregateGroupName = aggGroupNameInputName.val(),
-				aggregateGroupDesc = aggGroupNameInputDesc.val(),
-				api = new mw.Api();
+				$aggGroupNameInputName = $( 'input.tp-aggregategroup-add-name' ),
+				$aggGroupNameInputDesc = $( 'input.tp-aggregategroup-add-description' ),
+				aggregateGroupName = $aggGroupNameInputName.val(),
+				aggregateGroupDesc = $aggGroupNameInputDesc.val();
 
 			// Empty the fields. If they are not emptied, then when another group
 			// is added, the values will appear again.
-			aggGroupNameInputName.val( '' );
-			aggGroupNameInputDesc.val( '' );
+			$aggGroupNameInputName.val( '' );
+			$aggGroupNameInputDesc.val( '' );
 
 			successFunction = function ( data ) {
 				var $removeSpan, $editSpan, $displayHeader, $div, $groupSelector, $addButton,
@@ -292,8 +296,11 @@
 						} )
 						.val( aggregateGroupName )
 					)
-					.append( $( '<br /><label>' )
-						.text( mw.msg( 'tpt-aggregategroup-edit-description' ) ) )
+					.append(
+						$( '<br>' ),
+						$( '<label>' )
+							.text( mw.msg( 'tpt-aggregategroup-edit-description' ) )
+					)
 					.append( $( '<input>' )
 						.attr( {
 							class: 'tp-aggregategroup-edit-description',
@@ -314,7 +321,7 @@
 					type: 'text',
 					class: 'tp-group-input'
 				} );
-				$groupSelector.focus( excludeFunction );
+				$groupSelector.on( 'focus', excludeFunction );
 				$groupSelector.autocomplete( {
 					source: autocompleteFunction,
 					minLength: 0
@@ -330,7 +337,7 @@
 					} )
 					.val( mw.msg( 'tpt-aggregategroup-add' ) );
 				$div.append( $groupSelector, $addButton );
-				$addButton.click( function ( event ) {
+				$addButton.on( 'click', function ( event ) {
 					associate( event, resp );
 				} );
 				$editSpan.on( 'click', function ( event ) {
@@ -339,9 +346,9 @@
 					$parent.children( '.tp-edit-group' ).removeClass( 'hidden' );
 				} );
 
-				$saveButton.click( editGroup );
-				$cancelButton.click( cancelEditGroup );
-				$removeSpan.click( removeGroup );
+				$saveButton.on( 'click', editGroup );
+				$cancelButton.on( 'click', cancelEditGroup );
+				$removeSpan.on( 'click', removeGroup );
 				$( 'div.tpt-add-new-group' ).addClass( 'hidden' );
 				$( 'a.tpt-add-new-group' ).before( $div );
 			};

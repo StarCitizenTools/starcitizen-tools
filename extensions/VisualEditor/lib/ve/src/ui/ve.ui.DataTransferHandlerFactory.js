@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataTransferHandlerFactory class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -30,7 +30,21 @@ OO.inheritClass( ve.ui.DataTransferHandlerFactory, OO.Factory );
 /* Methods */
 
 /**
- * @inheritdoc
+ * Register a constructor with the factory.
+ *
+ *     function MyClass() {};
+ *     OO.initClass( MyClass );
+ *     MyClass.static.name = 'hello';
+ *     // Register class with the factory, available via the symbolic name "hello"
+ *     factory.register( MyClass );
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.Factory.html
+ *
+ * @param {Function} constructor Constructor to use when creating object
+ * @param {string} [name] Symbolic name to use for #create().
+ *  This parameter may be omitted in favour of letting the constructor decide
+ *  its own name, through `constructor.static.name`.
+ * @throws {Error} If a parameter is invalid
  */
 ve.ui.DataTransferHandlerFactory.prototype.register = function ( constructor ) {
 	// Parent method
@@ -40,7 +54,12 @@ ve.ui.DataTransferHandlerFactory.prototype.register = function ( constructor ) {
 };
 
 /**
- * @inheritdoc
+ * Unregister a constructor from the factory.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.Factory.html
+ *
+ * @param {string|Function} constructor Constructor function or symbolic name to unregister
+ * @throws {Error} If a parameter is invalid
  */
 ve.ui.DataTransferHandlerFactory.prototype.unregister = function ( constructor ) {
 	// Parent method
@@ -133,7 +152,7 @@ ve.ui.DataTransferHandlerFactory.prototype.getHandlerNameForItem = function ( it
 	// any component of the path is not present.
 	// This is similar to ve.getProp, except with a `hasOwnProperty`
 	// test to ensure we aren't fooled by __proto__ and friends.
-	function fetch( obj /* , args... */ ) {
+	function fetch( obj /* , args… */ ) {
 		var i;
 		for ( i = 1; i < arguments.length; i++ ) {
 			if (

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWExtensionNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -41,6 +41,7 @@ ve.dm.MWExtensionNode.static.childNodeTypes = [];
 
 /**
  * HTML tag name.
+ *
  * @static
  * @property {string}
  * @inheritable
@@ -49,6 +50,7 @@ ve.dm.MWExtensionNode.static.tagName = null;
 
 /**
  * Name of the extension and the parser tag name.
+ *
  * @static
  * @property {string}
  * @inheritable
@@ -84,7 +86,9 @@ ve.dm.MWExtensionNode.static.toDataElement = function ( domElements, converter, 
 	return dataElement;
 };
 
-/** */
+/**
+ * @inheritdoc ve.dm.Node
+ */
 ve.dm.MWExtensionNode.static.cloneElement = function () {
 	// Parent method
 	var clone = ve.dm.MWExtensionNode.super.static.cloneElement.apply( this, arguments );
@@ -107,7 +111,7 @@ ve.dm.MWExtensionNode.static.toDomElements = function ( dataElement, doc, conver
 		els = ve.copyDomElements( converter.getStore().value( dataElement.originalDomElementsHash ), doc );
 	} else {
 		if (
-			converter.isForClipboard() &&
+			converter.doesModeNeedRendering() &&
 			// Use getHashObjectForRendering to get the rendering from the store
 			( value = store.value( store.hashOfValue( null, OO.getHash( [ this.getHashObjectForRendering( dataElement ), undefined ] ) ) ) )
 		) {
@@ -144,21 +148,46 @@ ve.dm.MWExtensionNode.static.getExtensionName = function () {
 	return this.extensionName;
 };
 
-ve.dm.MWExtensionNode.static.describeChanges = function ( attributeChanges, change, element ) {
-	// HACK: Try to generate an '<Extension> has changed' message using associated tool's title
-	// Extensions should provide more detailed change descriptions
-	var tools = ve.ui.toolFactory.getRelatedItems( [ ve.dm.nodeFactory.createFromElement( element ) ] );
-	if ( tools.length ) {
-		return [ ve.msg( 'visualeditor-changedesc-unknown',
-			OO.ui.resolveMsg( ve.ui.toolFactory.lookup( tools[ 0 ].name ).static.title )
-		) ];
+ve.dm.MWExtensionNode.static.describeChanges = function ( attributeChanges, attributes, element ) {
+	var tools, change,
+		descriptions = [],
+		fromBody = attributeChanges.mw.from.body,
+		toBody = attributeChanges.mw.to.body;
+
+	if ( attributeChanges.mw ) {
+		// HACK: Try to generate an '<Extension> has changed' message using the associated tool's title
+		tools = ve.ui.toolFactory.getRelatedItems( [ ve.dm.nodeFactory.createFromElement( element ) ] );
+		if ( tools.length ) {
+			descriptions.push( ve.msg( 'visualeditor-changedesc-unknown',
+				OO.ui.resolveMsg( ve.ui.toolFactory.lookup( tools[ 0 ].name ).static.title )
+			) );
+		}
+		// Compare body - default behaviour in #describeChange does nothing
+		if ( !ve.compare( fromBody, toBody ) ) {
+			change = this.describeChange( 'body', {
+				from: fromBody && fromBody.extsrc,
+				to: toBody && toBody.extsrc
+			} );
+			if ( change ) {
+				descriptions.push( change );
+			}
+		}
+		// Append attribute changes
+		// Parent method
+		Array.prototype.push.apply( descriptions, ve.dm.MWExtensionNode.super.static.describeChanges.call(
+			this,
+			ve.ui.DiffElement.static.compareAttributes( attributeChanges.mw.from.attrs || {}, attributeChanges.mw.to.attrs || {} ),
+			attributes
+		) );
+		return descriptions;
 	}
-	// Parent method
-	return ve.dm.MWExtensionNode.super.static.describeChanges.apply( this, arguments );
+	// 'mw' should be the only attribute that changes...
+	return [];
 };
 
 ve.dm.MWExtensionNode.static.describeChange = function ( key ) {
-	if ( key === 'originalMw' ) {
+	if ( key === 'body' ) {
+		// TODO: Produce a diff of the body, suitable to display in the sidebar.
 		return null;
 	}
 	// Parent method
@@ -170,58 +199,8 @@ ve.dm.MWExtensionNode.static.describeChange = function ( key ) {
 /**
  * Get the extension's name
  *
- * @method
  * @return {string} Extension name
  */
 ve.dm.MWExtensionNode.prototype.getExtensionName = function () {
 	return this.constructor.static.getExtensionName( this.element );
 };
-
-/**
- * DataModel MediaWiki inline extension node.
- *
- * @class
- * @abstract
- * @extends ve.dm.MWExtensionNode
- *
- * @constructor
- * @param {Object} [element] Reference to element in linear model
- */
-ve.dm.MWInlineExtensionNode = function VeDmMWInlineExtensionNode() {
-	// Parent constructor
-	ve.dm.MWInlineExtensionNode.super.apply( this, arguments );
-};
-
-/* Inheritance */
-
-OO.inheritClass( ve.dm.MWInlineExtensionNode, ve.dm.MWExtensionNode );
-
-/* Static members */
-
-ve.dm.MWInlineExtensionNode.static.isContent = true;
-
-ve.dm.MWInlineExtensionNode.static.tagName = 'span';
-
-/**
- * DataModel MediaWiki block extension node.
- *
- * @class
- * @abstract
- * @extends ve.dm.MWExtensionNode
- *
- * @constructor
- * @param {Object} [element] Reference to element in linear model
- * @param {ve.dm.Node[]} [children]
- */
-ve.dm.MWBlockExtensionNode = function VeDmMWBlockExtensionNode() {
-	// Parent constructor
-	ve.dm.MWBlockExtensionNode.super.apply( this, arguments );
-};
-
-/* Inheritance */
-
-OO.inheritClass( ve.dm.MWBlockExtensionNode, ve.dm.MWExtensionNode );
-
-/* Static members */
-
-ve.dm.MWBlockExtensionNode.static.tagName = 'div';

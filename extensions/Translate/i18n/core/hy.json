@@ -1,18 +1,40 @@
 {
 	"@metadata": {
 		"authors": [
+			"Beko",
 			"Chaojoker",
+			"Kareyac",
 			"Vadgt",
-			"Դավիթ Սարոյան",
-			"Beko"
+			"Դավիթ Սարոյան"
 		]
 	},
 	"translate": "Թարգմանություն",
 	"translate-taction-translate": "Թարգմանություն",
 	"translate-taction-proofread": "Սրբագրել",
-	"translate-edit-translation": "Թարգմանություն",
-	"translate-magic-module": "Մոդուլ:",
+	"translate-page-group": "Խումբ",
+	"translate-page-language": "Լեզու",
+	"translate-page-limit": "Սահմանափակում",
+	"translate-page-navigation-legend": "Նավարկություն",
+	"translate-next": "Հաջորդ էջ",
+	"translate-prev": "Նախորդ էջ",
+	"translate-page-edit": "խմբագրել",
+	"translate-edit-title": "Խմբագրել \"$1\"",
+	"translate-export-form-format": "Ձևաչափ",
+	"translate-rcfilters-translations": "Թարգմանություններ",
+	"translate-rcfilters-translations-only-label": "Թարգմանություններ",
+	"translate-stats-edits": "Խմբագրումներ",
+	"translate-stats-users": "Թարգմանիչներ",
+	"translate-statsf-count-registrations": "Նոր մասնակիցներ",
 	"translate-sidebar-alltrans": "Այլ լեզուներով",
+	"translate-translations-fieldset-title": "Հաղորդագրություն",
+	"translate-translations-project": "Նախագիծ",
+	"translate-smg-rename-select": "Ընտրել",
+	"translate-smg-rename-cancel": "Չեղարկել",
+	"translate-smg-strong-sync-help": "Օգնություն",
 	"translate-manage-import-new": "Նոր Հաղորդագրություն $1",
-	"translate-documentation-language": "Հաղորդագրության փաստաթղթեր"
+	"translate-manage-action-rename": "Վերանվանել",
+	"translate-documentation-language": "Հաղորդագրության փաստաթղթեր",
+	"tux-editor-cancel-button-label": "Չեղարկել",
+	"tux-editor-doc-editor-cancel": "Չեղարկել",
+	"tux-editor-close-tooltip": "Փակել"
 }

@@ -15,7 +15,6 @@
  * @ingroup API TranslateAPI
  */
 class ApiQueryMessageGroups extends ApiQueryBase {
-
 	public function __construct( $query, $moduleName ) {
 		parent::__construct( $query, $moduleName, 'mg' );
 	}
@@ -43,11 +42,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 				}
 			} else {
 				$groups = MessageGroups::getAllGroups();
-				// Not sorted by default, so do it now
-				// Work around php bug: https://bugs.php.net/bug.php?id=50688
-				Wikimedia\suppressWarnings();
 				usort( $groups, [ 'MessageGroups', 'groupLabelSort' ] );
-				Wikimedia\restoreWarnings();
 			}
 			TranslateMetadata::preloadGroups( array_keys( $groups ) );
 		} elseif ( $params['root'] !== '' ) {
@@ -73,6 +68,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 			// Have dynamic groups appear first in the list
 			$groups = $dynamicGroups + $groups;
 		}
+		'@phan-var (MessageGroup|array)[] $groups';
 
 		// Do not list the sandbox group. The code that knows it
 		// exists can access it directly.
@@ -84,11 +80,11 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 
 		$result = $this->getResult();
 		$matcher = new StringMatcher( '', $filter );
-		/**
-		 * @var MessageGroup $mixed
-		 */
+		/** @var MessageGroup|array $mixed */
 		foreach ( $groups as $mixed ) {
-			if ( $filter !== [] && !$matcher->match( $mixed->getId() ) ) {
+			// array when Format = tree
+			$group = is_array( $mixed ) ? reset( $mixed ) : $mixed;
+			if ( $filter !== [] && !$matcher->matches( $group->getId() ) ) {
 				continue;
 			}
 
@@ -200,6 +196,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 				$a['groups'][] = $this->formatGroup( $sg, $props );
 			}
 			$result = $this->getResult();
+			// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
 			$result->setIndexedTagName( $a['groups'], 'group' );
 		}
 
@@ -247,7 +244,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 		return $stateConfig;
 	}
 
-	public function getAllowedParams() {
+	protected function getAllowedParams() {
 		$allowedParams = [
 			'depth' => [
 				ApiBase::PARAM_TYPE => 'integer',
@@ -282,31 +279,27 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 	}
 
 	/**
-	 * Returns array of key value pairs of properties and their descriptions
+	 * Returns an array of properties and their descriptions. Descriptions are ignored.
+	 *
+	 * Descriptions come from apihelp-query+messagegroups-param-prop and that is not
+	 * extensible.
 	 *
 	 * @return array
 	 */
 	protected static function getPropertyList() {
-		$properties = [
-			'id'             => ' id             - Include id of the group',
-			'label'          => ' label          - Include label of the group',
-			'description'    => ' description    - Include description of the group',
-			'class'          => ' class          - Include class name of the group',
-			'namespace'      =>
-				' namespace      - Include namespace of the group. Not all groups belong ' .
-					'to a single namespace.',
-			'exists'         =>
-				' exists         - Include self-calculated existence property of the group',
-			'icon'           => ' icon           - Include urls to icon of the group',
-			'priority'       => ' priority       - Include priority status like discouraged',
-			'prioritylangs'  =>
-				' prioritylangs  - Include preferred languages. If not set, this returns false',
-			'priorityforce'  =>
-				' priorityforce  - Include priority status - is the priority languages ' .
-					'setting forced',
-			'workflowstates' =>
-				' workflowstates - Include the workflow states for the message group',
-		];
+		$properties = array_flip( [
+			'id',
+			'label',
+			'description',
+			'class',
+			'namespace',
+			'exists',
+			'icon',
+			'priority',
+			'prioritylangs',
+			'priorityforce',
+			'workflowstates',
+		] );
 
 		Hooks::run( 'TranslateGetAPIMessageGroupsPropertyDescs', [ &$properties ] );
 
@@ -315,8 +308,7 @@ class ApiQueryMessageGroups extends ApiQueryBase {
 
 	protected function getExamplesMessages() {
 		return [
-			'action=query&meta=messagegroups'
-				=> 'apihelp-query+messagegroups-example-1',
+			'action=query&meta=messagegroups' => 'apihelp-query+messagegroups-example-1',
 		];
 	}
 }

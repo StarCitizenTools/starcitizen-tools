@@ -14,7 +14,6 @@
 class ArrayFlattener {
 	protected $sep;
 	protected $parseCLDRPlurals;
-
 	// For CLDR pluralization rules
 	protected static $pluralWords = [
 		'zero' => 1,
@@ -78,8 +77,8 @@ class ArrayFlattener {
 	 * @return bool|string
 	 */
 	public function flattenCLDRPlurals( $messages ) {
-		$pluralKeys = false;
-		$nonPluralKeys = false;
+		$hasNonPluralKeys = false;
+		$pluralKeys = [];
 		foreach ( $messages as $key => $value ) {
 			if ( is_array( $value ) ) {
 				// Plurals can only happen in the lowest level of the structure
@@ -88,9 +87,9 @@ class ArrayFlattener {
 
 			// Check if we find any reserved plural keyword
 			if ( isset( self::$pluralWords[$key] ) ) {
-				$pluralKeys = true;
+				$pluralKeys[] = $key;
 			} else {
-				$nonPluralKeys = true;
+				$hasNonPluralKeys = true;
 			}
 		}
 
@@ -100,7 +99,12 @@ class ArrayFlattener {
 		}
 
 		// Mixed plural keys with other keys, should not happen
-		if ( $nonPluralKeys ) {
+		if ( $hasNonPluralKeys ) {
+			 // Allow `other` with other keys, as long it is is only one of the reserved ones
+			if ( $pluralKeys === [ 'other' ] ) {
+				return false;
+			}
+
 			$keys = implode( ', ', array_keys( $messages ) );
 			throw new MWException( "Reserved plural keywords mixed with other keys: $keys." );
 		}
@@ -137,7 +141,7 @@ class ArrayFlattener {
 				if ( !is_array( $value ) ) {
 					$plurals = $this->unflattenCLDRPlurals( $key, $value );
 				}
-				if ( $plurals ) {
+				if ( is_array( $plurals ) ) {
 					$unflattenedPlurals += $plurals;
 				} else {
 					$unflattenedPlurals[$key] = $value;
@@ -179,7 +183,7 @@ class ArrayFlattener {
 	}
 
 	/**
-	 * Converts the MediaWiki plural syntax to array of CLDR style plurals
+	 * Converts the plural syntax to array of CLDR style plurals
 	 *
 	 * @param string $key Message key prefix
 	 * @param string $message The plural string
@@ -196,7 +200,7 @@ class ArrayFlattener {
 		 * Replace all variables with placeholders. Possible source of bugs
 		 * if other characters that given below are used.
 		 */
-		$regex = '~\{[a-zA-Z_-]+}~';
+		$regex = '/\{[a-z_-]+}/i';
 		$placeholders = [];
 		$match = [];
 
@@ -232,15 +236,11 @@ class ArrayFlattener {
 		 * multiple plural bocks which don't have the same set of keys.
 		 */
 		$pluralChoice = implode( '|', array_keys( self::$pluralWords ) );
-		$regex = "~($pluralChoice)\s*=\s*(.+)~s";
+		$regex = "~($pluralChoice)\s*=\s*(.*)~s";
 		foreach ( $matches as $ph => $plu ) {
 			$forms = explode( '|', $plu[1] );
 
 			foreach ( $forms as $form ) {
-				if ( $form === '' ) {
-					continue;
-				}
-
 				$match = [];
 				if ( preg_match( $regex, $form, $match ) ) {
 					$formWord = "$key{$this->sep}{$match[1]}";
@@ -265,7 +265,8 @@ class ArrayFlattener {
 		}
 
 		if ( !isset( $alts["$key{$this->sep}other"] ) ) {
-			wfWarn( "Other not set for key $key" );
+			// Ensure other form is always present, even if missing from the translation
+			$alts["$key{$this->sep}other"] = end( $alts );
 		}
 
 		return $alts;

@@ -1,12 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"VASANTH S.N.",
-			"Soundarya shetty s",
-			"Vishwanatha Badikana",
 			"BHARATHESHA ALASANDEMAJALU",
 			"Kiranpoojary",
-			"Ravi Mundkur"
+			"Ravi Mundkur",
+			"Soundarya shetty s",
+			"VASANTH S.N.",
+			"Vishwanatha Badikana"
 		]
 	},
 	"translate": "ಭಾಷಾಂತರ ಮಲ್ಪುಲೆ",
@@ -18,9 +18,7 @@
 	"translate-next": "ಬೊಕ್ಕದ ಪುಟೊ",
 	"translate-prev": "ದುಂಬುದ ಪುಟೊ",
 	"translate-edit-contribute": "ಸಹಾಯ ಕೊರ್ಲೆ",
-	"translate-edit-in-other-languages": "ಬೇತೆ ಬಾಸೆಲೆಡ್ ಸಂದೇಶೊ",
-	"translate-magic-module": "ಘಟಕ:",
-	"translate-pref-nonewsletter": "ಎಂಕ್ ಈ-ಮೈಲ್ ವಾರ್ತಾಪತ್ರೊಲೆನ್ ಕಡಪುಡುನ ಬೊಡ್ಚಿ",
+	"translate-export-group-too-large": "ಆಯ್ಕೆ ಮಲ್ತಿನ ಸಂದೇಸೊದ ಗುಂಪು ದಿಂಜ ಮಲ್ಲೆ ಆತ್ಂಡ್. ಗುಂಪು ೧ {{PLURAL: $ 1 | ಸಂದೇಸೊ | ಸಂದೇಸೊಲು}} ಡ್ದ್ ಕಡಮೆ ಇಪ್ಪುನ ಸಂದೇಸೊ ಗುಂಪುನು ನಾಡ್ ಅತ್ತಂಡ ಸಲಹೆಗಾದ್ ಅನುವಾದೊ ನಿರ್ವಾಹಕೆರೆನ್ ಸಂಪರ್ಕಿಸಲ.",
 	"translate-rc-translation-filter": "ತರ್ಜುಮೆದ ಅರಿಪೆ",
 	"translate-rc-translation-filter-no": "ದಾಲ ಮಲ್ಪೊಡ್ಚಿ",
 	"translate-rc-translation-filter-only": "ತರ್ಜುಮೆಲೆನ್ ಮಾತ್ರ ತೋಜಾಲೆ",
@@ -51,7 +49,6 @@
 	"languagestats-recenttranslations": "ಇಂಚಿಪದ ಅನುವಾದೋಲು",
 	"translate-language": "ಬಾಸೆ",
 	"translate-total": "ಸಂದೇಶಲು",
-	"translate-js-support": "ಪ್ರಶ್ನೆ ಕೇನ್‌ಲೆ",
 	"translate-gs-total": "ಒಟ್ಟು",
 	"translate-documentation-language": "ಸುದ್ದಿ ದಾಕಲೆ ಮಲ್ಪುನು",
 	"tux-languageselector": "ತರ್ಜುಮೆ ಮಲ್ಪೊಡಾಯಿನ ಬಾಸೆ",

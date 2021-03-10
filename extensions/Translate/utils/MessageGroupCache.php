@@ -1,9 +1,7 @@
 <?php
 /**
- * Code for caching the messages of file based message groups.
  * @file
  * @author Niklas Laxström
- * @copyright Copyright © 2009-2013 Niklas Laxström
  * @license GPL-2.0-or-later
  */
 
@@ -11,42 +9,39 @@
  * Caches messages of file based message group source file. Can also track
  * that the cache is up to date. Parsing the source files can be slow, so
  * constructing CDB cache makes accessing that data constant speed regardless
- * of the actual format.
+ * of the actual format. This also avoid having to deal with potentially unsafe
+ * external files during web requests.
  *
  * @ingroup MessageGroups
  */
 class MessageGroupCache {
-	const NO_SOURCE = 1;
-	const NO_CACHE = 2;
-	const CHANGED = 3;
+	public const NO_SOURCE = 1;
+	public const NO_CACHE = 2;
+	public const CHANGED = 3;
 
-	/**
-	 * @var MessageGroup
-	 */
+	/** @var FileBasedMessageGroup */
 	protected $group;
-
-	/**
-	 * @var \Cdb\Reader
-	 */
+	/** @var \Cdb\Reader */
 	protected $cache;
-
-	/**
-	 * @var string
-	 */
+	/** @var string */
 	protected $code;
+	/** @var string */
+	private $cacheFilePath;
 
 	/**
 	 * Contructs a new cache object for given group and language code.
-	 * @param string|FileBasedMessageGroup $group Group object or id.
-	 * @param string $code Language code. Default value 'en'.
+	 * @param FileBasedMessageGroup $group
+	 * @param string $code Language code.
+	 * @param string $cacheFilePath
 	 */
-	public function __construct( $group, $code = 'en' ) {
-		if ( is_object( $group ) ) {
-			$this->group = $group;
-		} else {
-			$this->group = MessageGroups::getGroup( $group );
-		}
+	public function __construct(
+		FileBasedMessageGroup $group,
+		string $code,
+		string $cacheFilePath
+	) {
+		$this->group = $group;
 		$this->code = $code;
+		$this->cacheFilePath = $cacheFilePath;
 	}
 
 	/**
@@ -54,22 +49,7 @@ class MessageGroupCache {
 	 * @return bool
 	 */
 	public function exists() {
-		$old = $this->getOldCacheFileName();
-		$new = $this->getCacheFileName();
-		$exists = file_exists( $new );
-
-		if ( $exists ) {
-			return true;
-		}
-
-		// Perform migration if possible
-		if ( file_exists( $old ) ) {
-			wfMkdirParents( dirname( $new ) );
-			rename( $old, $new );
-			return true;
-		}
-
-		return false;
+		return file_exists( $this->getCacheFilePath() );
 	}
 
 	/**
@@ -77,10 +57,19 @@ class MessageGroupCache {
 	 * @return string[] Message keys that can be passed one-by-one to get() method.
 	 */
 	public function getKeys() {
-		$value = $this->open()->get( '#keys' );
-		$array = unserialize( $value );
+		$reader = $this->open();
+		$keys = [];
 
-		return $array;
+		$key = $reader->firstkey();
+		while ( $key !== false ) {
+			if ( ( $key[0] ?? '' ) !== '#' ) {
+				$keys[] = $key;
+			}
+
+			$key = $reader->nextkey();
+		}
+
+		return $keys;
 	}
 
 	/**
@@ -109,32 +98,53 @@ class MessageGroupCache {
 	}
 
 	/**
+	 * Get a list of authors.
+	 * @return string[]
+	 * @since 2020.04
+	 */
+	public function getAuthors(): array {
+		$cache = $this->open();
+		return $cache->exists( '#authors' ) ?
+			$this->unserialize( $cache->get( '#authors' ) ) : [];
+	}
+
+	/**
+	 * Get other data cached from the FFS class.
+	 * @return array
+	 * @since 2020.04
+	 */
+	public function getExtra(): array {
+		$cache = $this->open();
+		return $cache->exists( '#extra' ) ? $this->unserialize( $cache->get( '#extra' ) ) : [];
+	}
+
+	/**
 	 * Populates the cache from current state of the source file.
 	 * @param bool|string $created Unix timestamp when the cache is created (for automatic updates).
 	 */
 	public function create( $created = false ) {
 		$this->close(); // Close the reader instance just to be sure
 
-		$messages = $this->group->load( $this->code );
+		$parseOutput = $this->group->parseExternal( $this->code );
+		$messages = $parseOutput['MESSAGES'];
 		if ( $messages === [] ) {
 			if ( $this->exists() ) {
 				// Delete stale cache files
-				unlink( $this->getCacheFileName() );
+				unlink( $this->getCacheFilePath() );
 			}
 
 			return; // Don't create empty caches
 		}
 		$hash = md5( file_get_contents( $this->group->getSourceFilePath( $this->code ) ) );
 
-		wfMkdirParents( dirname( $this->getCacheFileName() ) );
-		$cache = \Cdb\Writer::open( $this->getCacheFileName() );
-		$keys = array_keys( $messages );
-		$cache->set( '#keys', serialize( $keys ) );
+		wfMkdirParents( dirname( $this->getCacheFilePath() ) );
+		$cache = \Cdb\Writer::open( $this->getCacheFilePath() );
 
 		foreach ( $messages as $key => $value ) {
 			$cache->set( $key, $value );
 		}
-
+		$cache->set( '#authors', $this->serialize( $parseOutput['AUTHORS'] ) );
+		$cache->set( '#extra', $this->serialize( $parseOutput['EXTRA'] ) );
 		$cache->set( '#created', $created ?: wfTimestamp() );
 		$cache->set( '#updated', wfTimestamp() );
 		$cache->set( '#filehash', $hash );
@@ -154,24 +164,27 @@ class MessageGroupCache {
 	 */
 	public function isValid( &$reason ) {
 		$group = $this->group;
-		$groupId = $group->getId();
+		$uniqueId = $this->getCacheFilePath();
 
 		$pattern = $group->getSourceFilePath( '*' );
 		$filename = $group->getSourceFilePath( $this->code );
+
+		$parseOutput = null;
 
 		// If the file pattern is not dependent on the language, we will assume
 		// that all translations are stored in one file. This means we need to
 		// actually parse the file to know if a language is present.
 		if ( strpos( $pattern, '*' ) === false ) {
-			$source = $group->getFFS()->read( $this->code ) !== false;
+			$parseOutput = $group->parseExternal( $this->code );
+			$source = $parseOutput['MESSAGES'] !== [];
 		} else {
-			static $globCache = null;
-			if ( !isset( $globCache[$groupId] ) ) {
-				$globCache[$groupId] = array_flip( glob( $pattern, GLOB_NOESCAPE ) );
+			static $globCache = [];
+			if ( !isset( $globCache[$uniqueId] ) ) {
+				$globCache[$uniqueId] = array_flip( glob( $pattern, GLOB_NOESCAPE ) );
 				// Definition file might not match the above pattern
-				$globCache[$groupId][$group->getSourceFilePath( 'en' )] = true;
+				$globCache[$uniqueId][$group->getSourceFilePath( 'en' )] = true;
 			}
-			$source = isset( $globCache[$groupId][$filename] );
+			$source = isset( $globCache[$uniqueId][$filename] );
 		}
 
 		$cache = $this->exists();
@@ -204,7 +217,8 @@ class MessageGroupCache {
 		}
 
 		// Message count check
-		$messages = $group->load( $this->code );
+		$parseOutput = $parseOutput ?? $group->parseExternal( $this->code );
+		$messages = $parseOutput['MESSAGES'];
 		// CDB converts numbers to strings
 		$count = (int)( $this->get( '#msgcount' ) );
 		if ( $count !== count( $messages ) ) {
@@ -228,17 +242,33 @@ class MessageGroupCache {
 		return false;
 	}
 
+	public function invalidate(): void {
+		$this->close();
+		unlink( $this->getCacheFilePath() );
+	}
+
+	private function serialize( array $data ): string {
+		// Using simple prefix for easy future extension
+		return 'J' . json_encode( $data );
+	}
+
+	private function unserialize( string $serialized ): array {
+		$type = $serialized[0];
+
+		if ( $type !== 'J' ) {
+			throw new RuntimeException( 'Unknown serialization format' );
+		}
+
+		return json_decode( substr( $serialized, 1 ), true );
+	}
+
 	/**
 	 * Open the cache for reading.
-	 * @return self
+	 * @return \Cdb\Reader
 	 */
 	protected function open() {
 		if ( $this->cache === null ) {
-			$this->cache = \Cdb\Reader::open( $this->getCacheFileName() );
-			if ( $this->cache->get( '#version' ) !== '3' ) {
-				$this->close();
-				unlink( $this->getCacheFileName() );
-			}
+			$this->cache = \Cdb\Reader::open( $this->getCacheFilePath() );
 		}
 
 		return $this->cache;
@@ -258,19 +288,7 @@ class MessageGroupCache {
 	 * Returns full path to the cache file.
 	 * @return string
 	 */
-	protected function getCacheFileName() {
-		$cacheFileName = "translate_groupcache-{$this->group->getId()}/{$this->code}.cdb";
-
-		return TranslateUtils::cacheFile( $cacheFileName );
-	}
-
-	/**
-	 * Returns full path to the old cache file location.
-	 * @return string
-	 */
-	protected function getOldCacheFileName() {
-		$cacheFileName = "translate_groupcache-{$this->group->getId()}-{$this->code}.cdb";
-
-		return TranslateUtils::cacheFile( $cacheFileName );
+	protected function getCacheFilePath(): string {
+		return $this->cacheFilePath;
 	}
 }

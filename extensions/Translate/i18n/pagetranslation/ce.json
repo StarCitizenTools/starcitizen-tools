@@ -2,18 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Sasan700",
-			"Умар",
-			"Исмаил Садуев"
+			"Исмаил Садуев",
+			"Умар"
 		]
 	},
 	"pagetranslation": "АгӀонаш гочяр",
 	"tpt-diff-old": "Хьалхара йоза",
 	"tpt-diff-new": "Керла йоза",
 	"tpt-old-pages-title": "Гочан чура агӀонаш",
-	"tpt-discouraged-pages-title": "Юхатоьхна агӀонаш",
 	"tpt-new-pages": "{{PLURAL:$1|1=ХӀокху агӀона чулацам бу|ХӀокху агӀонийн чулацам бу}} гочан тегашца йоза, амма {{PLURAL:$1|1=хӀокху агӀона|хӀокху агӀонийн}} цхьа верси билгалйина яц гочян.",
 	"tpt-old-pages": "{{PLURAL:$1|1=хӀокху агӀона|хӀокху агӀонийн}} цхьайолу версеш гочян билгалйина ю.",
-	"tpt-discouraged-pages": "{{PLURAL:$1|1=ХӀара агӀо|ХӀара агӀонаш}} кхий гочйира яц аьлла сацам бина.",
 	"tpt-select-prioritylangs-reason": "Бахьана:",
 	"tpt-languages-legend": "Кхин меттанаш:",
 	"tpt-languages-nonzero": "$1 ($2% гочдина)",
@@ -52,5 +50,6 @@
 	"pp-save-message": "АгӀо Ӏалашйина. Хьан йиш ю иза [$1 таян].",
 	"pp-pagename-missing": "Дехар до, дӀаязъе агӀона цӀе.",
 	"pp-diff-old-header": "ДӀадолалун йоза",
-	"pp-diff-new-header": "Кечдина йоза"
+	"pp-diff-new-header": "Кечдина йоза",
+	"tpt-generic-button": "Бакъдан"
 }

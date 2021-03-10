@@ -11,6 +11,11 @@
  * @file
  */
 
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Shell\Shell;
+
 // Standard boilerplate to define $IP
 if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 	$IP = getenv( 'MW_INSTALL_PATH' );
@@ -26,8 +31,8 @@ $wgMaxShellMemory = 1024 * 200;
 class SyncGroup extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Import or update source messages and translations into ' .
-			'the wiki database.';
+		$this->addDescription( 'Import or update source messages and translations into ' .
+			'the wiki database.' );
 		$this->addOption(
 			'git',
 			'(optional) Use git to retrieve last modified date of i18n files. Will use subversion ' .
@@ -77,19 +82,21 @@ class SyncGroup extends Maintenance {
 			false, /*required*/
 			false /*has arg*/
 		);
+		$this->requireExtension( 'Translate' );
 	}
 
 	public function execute() {
 		$groupIds = explode( ',', trim( $this->getOption( 'group' ) ) );
 		$groupIds = MessageGroups::expandWildcards( $groupIds );
 		$groups = MessageGroups::getGroupsById( $groupIds );
+		'@phan-var FileBasedMessageGroup[] $groups';
 
 		if ( !count( $groups ) ) {
-			$this->error( 'ESG2: No valid message groups identified.', 1 );
+			$this->fatalError( 'ESG2: No valid message groups identified.' );
 		}
 
-		$start = $this->getOption( 'start' ) ? strtotime( $this->getOption( 'start' ) ) : false;
-		$end = $this->getOption( 'end' ) ? strtotime( $this->getOption( 'end' ) ) : false;
+		$start = $this->getTimeOptionWithDefault( 'start', false );
+		$end = $this->getTimeOptionWithDefault( 'end', false );
 
 		$this->output( 'Conflict times: ' . wfTimestamp( TS_ISO_8601, $start ) . ' - ' .
 			wfTimestamp( TS_ISO_8601, $end ) . "\n" );
@@ -129,7 +136,7 @@ class SyncGroup extends Maintenance {
 					continue;
 				}
 
-				$cs = new ChangeSyncer( $group, $this );
+				$cs = new ChangeSyncer( $group );
 				$cs->setProgressCallback( [ $this, 'myOutput' ] );
 				$cs->interactive = !$this->hasOption( 'noask' );
 				$cs->nocolor = $this->hasOption( 'nocolor' );
@@ -162,14 +169,14 @@ class SyncGroup extends Maintenance {
 	 * messages from the ChangeSyncer class to the commandline.
 	 * @param string $text The text to show to the user
 	 * @param string|null $channel Unique identifier for the channel.
-	 * @param bool $error Whether this is an error message
 	 */
-	public function myOutput( $text, $channel = null, $error = false ) {
-		if ( $error ) {
-			$this->error( $text, $channel );
-		} else {
-			$this->output( $text, $channel );
-		}
+	public function myOutput( $text, $channel = null ) {
+		$this->output( $text, $channel );
+	}
+
+	private function getTimeOptionWithDefault( string $optionName, $defaultValue ) {
+		$optionValue = $this->getOption( $optionName );
+		return $optionValue ? strtotime( $optionValue ) : $defaultValue;
 	}
 }
 
@@ -179,16 +186,12 @@ class SyncGroup extends Maintenance {
 class ChangeSyncer {
 	/** @var callable Function to report progress updates */
 	protected $progressCallback;
-
-	/** @var bool  Don't list changes in recent changes table. */
+	/** @var bool Don't list changes in recent changes table. */
 	public $norc = false;
-
 	/** @var bool Whether the script can ask questions. */
 	public $interactive = true;
-
 	/** @var bool Disable color output. */
 	public $nocolor = false;
-
 	/** @var MessageGroup */
 	protected $group;
 
@@ -205,25 +208,27 @@ class ChangeSyncer {
 	}
 
 	/// @see Maintenance::output for param docs
-	protected function reportProgress( $text, $channel, $severity = 'status' ) {
+	protected function reportProgress( $text, $channel ) {
 		if ( is_callable( $this->progressCallback ) ) {
-			$useErrorOutput = $severity === 'error';
-			call_user_func( $this->progressCallback, $text, $channel, $useErrorOutput );
+			call_user_func( $this->progressCallback, $text, $channel );
 		}
 	}
 
-	// svn component from pecl doesn't seem to have this in quick sight
 	/**
 	 * Fetch last changed timestamp for a versioned file for conflict resolution.
 	 * @param string $file Filename with full path.
 	 * @return string Timestamp or false.
 	 */
 	public function getTimestampsFromSvn( $file ) {
-		$file = escapeshellarg( $file );
-		$retval = 0;
-		$output = wfShellExec( "svn info $file 2>/dev/null", $retval );
+		$cmd = [
+			'svn',
+			'info',
+			$file
+		];
+		$result = Shell::command( $cmd )
+			->execute();
 
-		if ( $retval ) {
+		if ( $result->getExitCode() ) {
 			return false;
 		}
 
@@ -233,7 +238,7 @@ class ChangeSyncer {
 		// you
 		// PHP (for being an ass)!
 		$regex = '^Last Changed Date: (.*) \(';
-		$ok = preg_match( "~$regex~m", $output, $matches );
+		$ok = preg_match( "~$regex~m", $result->getStdout(), $matches );
 		if ( $ok ) {
 			return strtotime( $matches[1] );
 		}
@@ -247,15 +252,23 @@ class ChangeSyncer {
 	 * @return string|bool Timestamp or false.
 	 */
 	public function getTimestampsFromGit( $file ) {
-		$file = escapeshellarg( $file );
-		$retval = 0;
-		$output = wfShellExec( "git log -n 1 --format=%cd $file", $retval );
+		// TODO: This is already implemented by GitInfo#getHeadCommitDate
+		$cmd = [
+			'git',
+			'log',
+			'-n',
+			'1',
+			'--format=%cd',
+			$file
+		];
+		$result = Shell::command( $cmd )
+			->execute();
 
-		if ( $retval ) {
+		if ( $result->getExitCode() ) {
 			return false;
 		}
 
-		return strtotime( $output );
+		return strtotime( $result->getStdout() );
 	}
 
 	/**
@@ -430,18 +443,18 @@ class ChangeSyncer {
 	 * @return int|bool Timestamp or false.
 	 */
 	public function getLastGoodChange( $title, $startTs = false ) {
-		global $wgTranslateFuzzyBotName;
-
 		$wikiTs = false;
-		$revision = Revision::newFromTitle( $title );
+		$revisionLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+		$revision = $revisionLookup->getRevisionByTitle( $title );
 		while ( $revision ) {
 			// No need to go back further
 			if ( $startTs && $wikiTs && ( $wikiTs < $startTs ) ) {
 				break;
 			}
 
-			if ( $revision->getUserText( Revision::RAW ) === $wgTranslateFuzzyBotName ) {
-				$revision = $revision->getPrevious();
+			$revUser = $revision->getUser( RevisionRecord::RAW );
+			if ( !$revUser || $revUser->equals( FuzzyBot::getUser() ) ) {
+				$revision = $revisionLookup->getPreviousRevision( $revision );
 				continue;
 			}
 

@@ -4,20 +4,14 @@
 			"Lam-ang"
 		]
 	},
-	"apihelp-templatedata-description": "Agala iti datos nga inpenpen babaen ti pagpaatiddog ti TemplateData.",
-	"apihelp-templatedata-example-1": "Isubli ti datos para iti [[Template:Stub]] ken [[Template:Example]]",
-	"apihelp-templatedata-param-lang": "Isubli dagiti lokalisado a pateg iti daytoy a pagsasao. Babaen ti kasisigud amin dagiti magun-od a patarus ket maisubli.",
 	"templatedata-desc": "Isayangkatna ti pagipenpenan ti datos para kadagiti parametro ti plantilia (agaramat ti JSON)",
 	"templatedata-doc-desc-empty": "Awan ti deskripsion.",
 	"templatedata-doc-format-block": "Kinaykayat daytoy a plantilia ti muton a panagpormat dagiti parametro.",
 	"templatedata-doc-format-inline": "Kinaykayat daytoy a plantilia ti nailinia a panagpormat dagiti parametro.",
 	"templatedata-doc-no-params-set": "Awan dagiti nainaganan a parametro",
 	"templatedata-doc-param-autovalue": "Automatiko a pateg",
-	"templatedata-doc-param-autovalue-empty": "awan linaon",
 	"templatedata-doc-param-default": "Kasisigud",
-	"templatedata-doc-param-default-empty": "awan linaon",
 	"templatedata-doc-param-example": "Pagarigan",
-	"templatedata-doc-param-example-empty": "awan linaon",
 	"templatedata-doc-param-desc": "Deskripsion",
 	"templatedata-doc-param-desc-empty": "awan ti deskripsion",
 	"templatedata-doc-param-name": "Parametro",
@@ -100,7 +94,7 @@
 	"templatedata-modal-title-language": "Pagsasao",
 	"templatedata-modal-title-paramorder": "Urnos ti parametro",
 	"templatedata-modal-title-templatedesc": "Deskripsion ti plantilia ($1)",
-	"templatedata-modal-title-templateformat": "Kinaykayat a pormat ti plantilia",
+	"templatedata-modal-title-templateformat": "Naisingasing a pannakapormat iti teksto ti wiki",
 	"templatedata-modal-title-templateparam-details": "Dagiti salaysay ti parametro: $1",
 	"templatedata-modal-title-templateparams": "Dagiti parametro ti plantilia"
 }

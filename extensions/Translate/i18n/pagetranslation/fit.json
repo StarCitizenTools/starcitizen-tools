@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pyscowicz"
+		]
+	},
+	"tpt-diff-old": "Eelinen teksti",
+	"translate-tag-translate-link-desc": "Käänä tämä sivu",
+	"tpt-languages-nonzero": "$1 ($2 % käänetty)",
+	"tpt-tab-translate": "Käänä",
+	"tpt-aggregategroup-add": "Lissää",
+	"tpt-aggregategroup-save": "Säästä",
+	"tpt-aggregategroup-edit-description": "Kuvvaus:",
+	"tpt-aggregategroup-update": "Säästä",
+	"tpt-aggregategroup-update-cancel": "Lopeta",
+	"pt-movepage-subpages": "Siirä kaikki alasivut",
+	"pt-movepage-intro": "Tällä spesiaalisivula voit siirtää käänettäväksi merkittyjä sivuja.\nSiirto ei tapahdu heti, koska useita sivuja häätyy siirthää.\nSivut ovat lukittuna siirron ajan.\nEpäonnistuneet siirrot säästetään [[Special:Log/pagetranslation|sivunkääntölokiin]] ja ne häätyy korjata käsin.",
+	"pt-deletepage-lang-legend": "Ota poies käänössivu",
+	"pt-deletepage-full-legend": "Ota poies käännettävissä oleva sivu",
+	"pt-deletepage-any-legend": "Ota poies käännettävissä oleva sivu tai sellaisen käänös",
+	"pt-deletepage-subpages": "Ota poies kaikki alasivut",
+	"pm-import-button-label": "Importeeraa",
+	"pm-savepages-button-label": "Säästä",
+	"pm-cancel-button-label": "Lopeta",
+	"pp-save-button-label": "Säästä",
+	"pp-cancel-button-label": "Lopeta",
+	"pp-diff-old-header": "Läheteksti"
+}

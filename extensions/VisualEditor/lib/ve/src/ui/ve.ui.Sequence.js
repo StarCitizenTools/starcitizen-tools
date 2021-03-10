@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Sequence class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -24,8 +24,9 @@
  *     immediately, but only after more non-matching text is added afterwards or the selection is
  *     changed. This is useful for variable-length sequences (defined with RegExps).
  * @param {boolean} [checkOnPaste=false] Whether the sequence should also be matched after paste.
+ * @param {boolean} [checkOnDelete=false] Whether the sequence should also be matched after delete.
  */
-ve.ui.Sequence = function VeUiSequence( name, commandName, data, strip, setSelection, delayed, checkOnPaste ) {
+ve.ui.Sequence = function VeUiSequence( name, commandName, data, strip, setSelection, delayed, checkOnPaste, checkOnDelete ) {
 	this.name = name;
 	this.commandName = commandName;
 	this.data = data;
@@ -33,6 +34,7 @@ ve.ui.Sequence = function VeUiSequence( name, commandName, data, strip, setSelec
 	this.setSelection = setSelection;
 	this.delayed = delayed;
 	this.checkOnPaste = checkOnPaste;
+	this.checkOnDelete = checkOnDelete;
 };
 
 /* Inheritance */
@@ -115,19 +117,26 @@ ve.ui.Sequence.prototype.execute = function ( surface, range ) {
 		args[ 1 ].strippedSequence = !!this.strip;
 	}
 
-	executed = command.execute( surface, args );
-
-	if ( executed && stripFragment ) {
+	if ( stripFragment ) {
 		// Strip the typed text. This will be undone if the action triggered was
 		// window/open and the window is dismissed
 		stripFragment.removeContent();
 	}
+
+	executed = command.execute( surface, args, 'sequence' );
 
 	// Restore user's selection if:
 	// * This sequence was not executed after all
 	// * This sequence is delayed, so it only executes after the user changed the selection
 	if ( !executed || this.delayed ) {
 		originalSelectionFragment.select();
+	}
+
+	if ( stripFragment && !executed ) {
+		surfaceModel.undo();
+		// Prevent redoing (which would remove the typed text)
+		surfaceModel.truncateUndoStack();
+		surfaceModel.emit( 'history' );
 	}
 
 	return executed;
@@ -161,7 +170,7 @@ ve.ui.Sequence.prototype.getCommandName = function () {
  * @param {boolean} explode Whether to return the message split up into some
  *        reasonable sequence of inputs required to trigger the sequence (regexps
  *        in sequences will be considered a single "input" as a toString of
- *        the regexp, because they're hard to display no matter what...)
+ *        the regexp, because they're hard to display no matter what…)
  * @return {string} Message for display
  */
 ve.ui.Sequence.prototype.getMessage = function ( explode ) {
@@ -171,7 +180,9 @@ ve.ui.Sequence.prototype.getMessage = function ( explode ) {
 	} else if ( this.data instanceof RegExp ) {
 		data = [ this.data.toString() ];
 	} else {
-		data = this.data.filter( function ( key ) { return !ve.isPlainObject( key ); } );
+		data = this.data.filter( function ( key ) {
+			return !ve.isPlainObject( key );
+		} );
 	}
 	return explode ? data : data.join( '' );
 };

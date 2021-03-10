@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface TargetWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -13,16 +13,20 @@
  * @class
  * @abstract
  * @extends OO.ui.Widget
+ * @mixins OO.ui.mixin.PendingElement
  *
  * @constructor
  * @param {Object} [config] Configuration options
  * @cfg {ve.dm.Document} [doc] Initial document model
- * @cfg {Object[]} [tools] Toolbar configuration
+ * @cfg {Object} [modes] Available editing modes.
+ * @cfg {Object} [defaultMode] Default mode for new surfaces.
+ * @cfg {Object} [toolbarGroups] Target's toolbar groups config.
  * @cfg {string[]|null} [includeCommands] List of commands to include, null for all registered commands
  * @cfg {string[]} [excludeCommands] List of commands to exclude
  * @cfg {Object} [importRules] Import rules
- * @cfg {boolean} [multiline] Multi-line surface
+ * @cfg {boolean} [multiline=true] Multi-line surface
  * @cfg {string} [placeholder] Placeholder text to display when the surface is empty
+ * @cfg {boolean} [readOnly] Surface is read-only
  * @cfg {string} [inDialog] The name of the dialog this surface widget is in
  */
 ve.ui.TargetWidget = function VeUiTargetWidget( config ) {
@@ -32,26 +36,23 @@ ve.ui.TargetWidget = function VeUiTargetWidget( config ) {
 	// Parent constructor
 	ve.ui.TargetWidget.super.call( this, config );
 
+	// Mixin constructor
+	OO.ui.mixin.PendingElement.call( this, config );
+
 	// Properties
-	this.commandRegistry = config.commandRegistry || ve.init.target.getSurface().commandRegistry;
-	this.sequenceRegistry = config.sequenceRegistry || ve.init.target.getSurface().sequenceRegistry;
-	this.dataTransferHandlerFactory = config.dataTransferHandlerFactory || ve.init.target.getSurface().dataTransferHandlerFactory;
+	this.toolbarGroups = config.toolbarGroups;
 	// TODO: Override document/targetTriggerListener
-	this.tools = config.tools;
 	this.includeCommands = config.includeCommands;
 	this.excludeCommands = config.excludeCommands;
 	this.multiline = config.multiline !== false;
 	this.placeholder = config.placeholder;
+	this.readOnly = config.readOnly;
 	this.importRules = config.importRules;
 	this.inDialog = config.inDialog;
-	// TODO: Support source widgets
-	this.mode = 'visual';
+	this.modes = config.modes;
+	this.defaultMode = config.defaultMode;
 
-	this.surface = null;
-	this.toolbar = null;
-	// TODO: Use a TargetToolbar when trigger listeners are set here
-	this.$surfaceContainer = $( '<div>' ).addClass( 've-ui-targetWidget-surface' );
-	this.$toolbarContainer = $( '<div>' ).addClass( 've-ui-targetWidget-toolbar' );
+	this.target = this.createTarget();
 
 	if ( config.doc ) {
 		this.setDocument( config.doc );
@@ -59,12 +60,13 @@ ve.ui.TargetWidget = function VeUiTargetWidget( config ) {
 
 	// Initialization
 	this.$element.addClass( 've-ui-targetWidget' )
-		.append( this.$toolbarContainer, this.$surfaceContainer );
+		.append( this.target.$element );
 };
 
 /* Inheritance */
 
 OO.inheritClass( ve.ui.TargetWidget, OO.ui.Widget );
+OO.mixinClass( ve.ui.TargetWidget, OO.ui.mixin.PendingElement );
 
 /* Methods */
 
@@ -75,64 +77,65 @@ OO.inheritClass( ve.ui.TargetWidget, OO.ui.Widget );
  */
 
 /**
+ * The target's surface has been submitted, e.g. Ctrl+Enter
+ *
+ * @event submit
+ */
+
+/**
  * A document has been attached to the target, and a toolbar and surface created.
  *
  * @event setup
  */
 
 /**
+ * Create the target for this widget to use
+ *
+ * @return {ve.init.Target} Target
+ */
+ve.ui.TargetWidget.prototype.createTarget = function () {
+	return new ve.init.Target( {
+		register: false,
+		toolbarGroups: this.toolbarGroups,
+		inTargetWidget: true,
+		modes: this.modes,
+		defaultMode: this.defaultMode
+	} );
+};
+
+/**
  * Set the document to edit
+ *
+ * This replaces the entire surface in the target.
  *
  * @param {ve.dm.Document} doc Document
  */
 ve.ui.TargetWidget.prototype.setDocument = function ( doc ) {
+	var surface;
 	// Destroy the previous surface
-	if ( this.surface ) {
-		this.surface.destroy();
-	}
-	// Toolbars can be re-used
-	if ( !this.toolbar ) {
-		this.toolbar = new ve.ui.Toolbar();
-		this.$toolbarContainer.append( this.toolbar.$element );
-	}
-	this.surface = ve.init.target.createSurface( doc, {
-		mode: this.mode,
+	this.clear();
+	surface = this.target.addSurface( doc, {
 		inTargetWidget: true,
-		commandRegistry: this.commandRegistry,
-		sequenceRegistry: this.sequenceRegistry,
-		dataTransferHandlerFactory: this.dataTransferHandlerFactory,
 		includeCommands: this.includeCommands,
 		excludeCommands: this.excludeCommands,
 		importRules: this.importRules,
 		multiline: this.multiline,
 		placeholder: this.placeholder,
+		readOnly: this.readOnly,
 		inDialog: this.inDialog
 	} );
+	this.target.setSurface( surface );
 
 	// Events
-	this.getSurface().getModel().connect( this, { history: 'onSurfaceModelHistory' } );
-
-	// DOM changes
-	this.$surfaceContainer.append( this.surface.$element );
-	this.toolbar.$bar.append( this.surface.getToolbarDialogs().$element );
-
-	// Setup toolbar with new surface
-	if ( this.tools ) {
-		this.toolbar.setup( this.tools, this.surface );
-	}
+	this.getSurface().getView().connect( this, {
+		focus: 'onFocusChange',
+		blur: 'onFocusChange'
+	} );
+	// Rethrow as target events so users don't have to re-bind when the surface is changed
+	this.getSurface().getModel().connect( this, { history: [ 'emit', 'change' ] } );
+	this.getSurface().connect( this, { submit: [ 'emit', 'submit' ] } );
 
 	this.emit( 'setup' );
-};
-
-/**
- * Handle history events from the surface model.
- *
- * @fires change
- */
-ve.ui.TargetWidget.prototype.onSurfaceModelHistory = function () {
-	// Rethrow this event so users don't have to re-bind to
-	// surface model 'history' when the surface is changed in #setDocument
-	this.emit( 'change' );
 };
 
 /**
@@ -145,33 +148,52 @@ ve.ui.TargetWidget.prototype.hasBeenModified = function () {
 };
 
 /**
+ * Set the read-only state of the widget
+ *
+ * @param {boolean} readOnly Make widget read-only
+ */
+ve.ui.TargetWidget.prototype.setReadOnly = function ( readOnly ) {
+	this.readOnly = !!readOnly;
+	if ( this.getSurface() ) {
+		this.getSurface().setReadOnly( this.readOnly );
+	}
+	this.$element.toggleClass( 've-ui-targetWidget-readOnly', this.readOnly );
+};
+
+/**
+ * Check if the widget is read-only
+ *
+ * @return {boolean}
+ */
+ve.ui.TargetWidget.prototype.isReadOnly = function () {
+	return this.readOnly;
+};
+
+/**
  * Get surface.
  *
- * @method
  * @return {ve.ui.Surface|null} Surface
  */
 ve.ui.TargetWidget.prototype.getSurface = function () {
-	return this.surface;
+	return this.target.getSurface();
 };
 
 /**
  * Get toolbar.
  *
- * @method
  * @return {OO.ui.Toolbar} Toolbar
  */
 ve.ui.TargetWidget.prototype.getToolbar = function () {
-	return this.toolbar;
+	return this.target.getToolbar();
 };
 
 /**
  * Get content data.
  *
- * @method
  * @return {ve.dm.ElementLinearData} Content data
  */
 ve.ui.TargetWidget.prototype.getContent = function () {
-	return this.surface.getModel().getDocument().getData();
+	return this.getSurface().getModel().getDocument().getData();
 };
 
 /**
@@ -179,36 +201,43 @@ ve.ui.TargetWidget.prototype.getContent = function () {
  *
  * Widget must be attached to DOM before initializing.
  *
- * @method
+ * @deprecated
  */
 ve.ui.TargetWidget.prototype.initialize = function () {
-	if ( this.surface ) {
-		this.toolbar.initialize();
-		this.surface.initialize();
-	}
+	OO.ui.warnDeprecation( 've.ui.TargetWidget#initialize is deprecated and no longer needed.' );
 };
 
 /**
  * Destroy surface and toolbar.
- *
- * @method
  */
 ve.ui.TargetWidget.prototype.clear = function () {
-	if ( this.surface ) {
-		this.surface.destroy();
-		this.surface = null;
-	}
-	if ( this.toolbar ) {
-		this.toolbar.destroy();
-		this.toolbar = null;
-	}
+	this.target.clearSurfaces();
+	// Clear toolbar?
+};
+
+/**
+ * Handle focus and blur events
+ */
+ve.ui.TargetWidget.prototype.onFocusChange = function () {
+	// This may be null if the target is in the process of being destroyed
+	var surface = this.getSurface();
+	// Replacement for the :focus pseudo selector one would be able to
+	// use on a regular input widget
+	this.$element.toggleClass( 've-ui-targetWidget-focused', surface && surface.getView().isFocused() );
 };
 
 /**
  * Focus the surface.
  */
 ve.ui.TargetWidget.prototype.focus = function () {
-	if ( this.surface ) {
-		this.surface.getView().focus();
+	var surface = this.getSurface();
+	if ( surface ) {
+		if ( !surface.getView().attachedRoot.isLive() ) {
+			surface.once( 'ready', function () {
+				surface.getView().focus();
+			} );
+		} else {
+			surface.getView().focus();
+		}
 	}
 };

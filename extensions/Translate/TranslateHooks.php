@@ -7,6 +7,16 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Config\ServiceOptions;
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+use MediaWiki\Extension\Translate\SystemUsers\TranslateUserManager;
+use MediaWiki\Extension\Translate\TranslatorSandbox\ManageTranslatorSandboxSpecialPage;
+use MediaWiki\Extension\Translate\TranslatorSandbox\TranslationStashSpecialPage;
+use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
+use MediaWiki\Hook\PageMoveCompleteHook;
+use MediaWiki\Hook\SidebarBeforeOutputHook;
+use MediaWiki\MediaWikiServices;
+
 /**
  * Some hooks for Translate extension.
  */
@@ -23,45 +33,28 @@ class TranslateHooks {
 	];
 
 	/**
-	 * Hook: ResourceLoaderTestModules
-	 * @param array &$modules
-	 */
-	public static function onResourceLoaderTestModules( array &$modules ) {
-		$modules['qunit']['ext.translate.parsers.test'] = [
-			'scripts' => [ 'tests/qunit/ext.translate.parsers.test.js' ],
-			'dependencies' => [ 'ext.translate.parsers' ],
-			'localBasePath' => __DIR__,
-			'remoteExtPath' => 'Translate',
-		];
-
-		$modules['qunit']['ext.translate.special.pagemigration.test'] = [
-			'scripts' => [ 'tests/qunit/ext.translate.special.pagemigration.test.js' ],
-			'dependencies' => [ 'ext.translate.special.pagemigration' ],
-			'localBasePath' => __DIR__,
-			'remoteExtPath' => 'Translate',
-		];
-	}
-
-	/**
-	 * Initialises the extension.
-	 * Does late-initialization that is not possible at file level,
-	 * because it depends on user configuration.
+	 * Do late setup that depends on configuration.
 	 */
 	public static function setupTranslate() {
-		global $wgPageTranslationNamespace;
-		if ( isset( $wgPageTranslationNamespace ) &&
-		$wgPageTranslationNamespace !== NS_TRANSLATIONS ) {
-			throw new MWException(
-				'$wgPageTranslationNamespace is no longer supported. Instead, define ' .
-				'NS_TRANSLATIONS and NS_TRANSLATIONS_TALK in LocalSettings.php before loading ' .
-				'Translate.'
-			);
+		global $wgHooks, $wgTranslateYamlLibrary;
+
+		/*
+		 * Text that will be shown in translations if the translation is outdated.
+		 * Must be something that does not conflict with actual content.
+		 */
+		if ( !defined( 'TRANSLATE_FUZZY' ) ) {
+			define( 'TRANSLATE_FUZZY', '!!FUZZY!!' );
 		}
 
-		global $wgTranslatePHPlot, $wgAutoloadClasses, $wgHooks;
+		if ( $wgTranslateYamlLibrary === null ) {
+			$wgTranslateYamlLibrary = function_exists( 'yaml_parse' ) ? 'phpyaml' : 'spyc';
+		}
 
-		if ( $wgTranslatePHPlot ) {
-			$wgAutoloadClasses['PHPlot'] = $wgTranslatePHPlot;
+		$usePageSaveComplete = version_compare( TranslateUtils::getMWVersion(), '1.35', '>=' );
+		if ( $usePageSaveComplete ) {
+			$wgHooks['PageSaveComplete'][] = 'TranslateEditAddons::onSaveComplete';
+		} else {
+			$wgHooks['PageContentSaveComplete'][] = 'TranslateEditAddons::onSave';
 		}
 
 		// Page translation setup check and init if enabled.
@@ -117,8 +110,6 @@ class TranslateHooks {
 			$wgJobClasses['TranslateRenderJob'] = 'TranslateRenderJob';
 			$wgJobClasses['RenderJob'] = 'TranslateRenderJob';
 			$wgJobClasses['TranslatablePageMoveJob'] = 'TranslatablePageMoveJob';
-			$wgJobClasses['TranslateMoveJob'] = 'TranslateMoveJob';
-			$wgJobClasses['MoveJob'] = 'TranslateMoveJob';
 			$wgJobClasses['TranslateDeleteJob'] = 'TranslateDeleteJob';
 			$wgJobClasses['DeleteJob'] = 'TranslateDeleteJob';
 			$wgJobClasses['TranslationsUpdateJob'] = 'TranslationsUpdateJob';
@@ -136,8 +127,8 @@ class TranslateHooks {
 
 			/// Page translation hooks
 
-			/// @todo Register our css, is there a better place for this?
-			$wgHooks['OutputPageBeforeHTML'][] = 'PageTranslationHooks::injectCss';
+			/// Register our CSS and metadata
+			$wgHooks['BeforePageDisplay'][] = 'PageTranslationHooks::onBeforePageDisplay';
 
 			// Check syntax for \<translate>
 			$wgHooks['PageContentSave'][] = 'PageTranslationHooks::tpSyntaxCheck';
@@ -145,8 +136,12 @@ class TranslateHooks {
 				'PageTranslationHooks::tpSyntaxCheckForEditContent';
 
 			// Add transtag to page props for discovery
-			$wgHooks['PageContentSaveComplete'][] = 'PageTranslationHooks::addTranstag';
-			$wgHooks['RevisionInsertComplete'][] =
+			if ( $usePageSaveComplete ) {
+				$wgHooks['PageSaveComplete'][] = 'PageTranslationHooks::addTranstagAfterSave';
+			} else {
+				$wgHooks['PageContentSaveComplete'][] = 'PageTranslationHooks::addTranstag';
+			}
+			$wgHooks['RevisionRecordInserted'][] =
 				'PageTranslationHooks::updateTranstagOnNullRevisions';
 
 			// Register different ways to show language links
@@ -155,9 +150,14 @@ class TranslateHooks {
 			$wgHooks['SkinTemplateGetLanguageLink'][] = 'PageTranslationHooks::formatLanguageLink';
 
 			// Strip \<translate> tags etc. from source pages when rendering
-			$wgHooks['ParserBeforeStrip'][] = 'PageTranslationHooks::renderTagPage';
+			$wgHooks['ParserBeforeInternalParse'][] = 'PageTranslationHooks::renderTagPage';
 			$wgHooks['ParserOutputPostCacheTransform'][] =
 				'PageTranslationHooks::onParserOutputPostCacheTransform';
+
+			if ( interface_exists( BeforeParserFetchTemplateRevisionRecordHook::class ) ) {
+				$wgHooks['BeforeParserFetchTemplateRevisionRecord'][] =
+					'PageTranslationHooks::fetchTranslatableTemplateAndTitle';
+			}
 
 			// Set the page content language
 			$wgHooks['PageContentLanguage'][] = 'PageTranslationHooks::onPageContentLanguage';
@@ -168,9 +168,6 @@ class TranslateHooks {
 			// Prevent editing of translation pages directly
 			$wgHooks['getUserPermissionsErrorsExpensive'][] =
 				'PageTranslationHooks::preventDirectEditing';
-			// Prevent patroling of translation pages
-			$wgHooks['getUserPermissionsErrors'][] =
-				'PageTranslationHooks::preventPatrolling';
 
 			// Our custom header for translation pages
 			$wgHooks['ArticleViewHeader'][] = 'PageTranslationHooks::translatablePageHeader';
@@ -193,7 +190,11 @@ class TranslateHooks {
 			$wgHooks['SkinTemplateNavigation'][] = 'PageTranslationHooks::translateTab';
 
 			// Update translated page when translation unit is moved
-			$wgHooks['TitleMoveComplete'][] = 'PageTranslationHooks::onMoveTranslationUnits';
+			if ( interface_exists( PageMoveCompleteHook::class ) ) {
+				$wgHooks['PageMoveComplete'][] = 'PageTranslationHooks::onMovePageTranslationUnits';
+			} else {
+				$wgHooks['TitleMoveComplete'][] = 'PageTranslationHooks::onMoveTranslationUnits';
+			}
 
 			// Update translated page when translation unit is deleted
 			$wgHooks['ArticleDeleteComplete'][] = 'PageTranslationHooks::onDeleteTranslationUnit';
@@ -203,8 +204,35 @@ class TranslateHooks {
 		if ( $wgTranslateUseSandbox ) {
 			global $wgSpecialPages, $wgAvailableRights, $wgDefaultUserOptions;
 
-			$wgSpecialPages['ManageTranslatorSandbox'] = 'SpecialManageTranslatorSandbox';
-			$wgSpecialPages['TranslationStash'] = 'SpecialTranslationStash';
+			$wgSpecialPages['ManageTranslatorSandbox'] = [
+				'class' => ManageTranslatorSandboxSpecialPage::class,
+				'services' => [
+					'Translate:TranslationStashReader',
+				],
+				'args' => [
+					function () {
+						return new ServiceOptions(
+							ManageTranslatorSandboxSpecialPage::CONSTRUCTOR_OPTIONS,
+							MediaWikiServices::getInstance()->getMainConfig()
+						);
+					}
+				]
+			];
+			$wgSpecialPages['TranslationStash'] = [
+				'class' => TranslationStashSpecialPage::class,
+				'services' => [
+					'LanguageNameUtils',
+					'Translate:TranslationStashReader'
+				],
+				'args' => [
+					function () {
+						return new ServiceOptions(
+							TranslationStashSpecialPage::CONSTRUCTOR_OPTIONS,
+							MediaWikiServices::getInstance()->getMainConfig()
+						);
+					}
+				]
+			];
 			$wgDefaultUserOptions['translate-sandbox'] = '';
 			// right-translate-sandboxmanage action-translate-sandboxmanage
 			$wgAvailableRights[] = 'translate-sandboxmanage';
@@ -212,7 +240,6 @@ class TranslateHooks {
 			$wgHooks['GetPreferences'][] = 'TranslateSandbox::onGetPreferences';
 			$wgHooks['UserGetRights'][] = 'TranslateSandbox::enforcePermissions';
 			$wgHooks['ApiCheckCanExecute'][] = 'TranslateSandbox::onApiCheckCanExecute';
-			$wgHooks['UserGetRights'][] = 'TranslateSandbox::allowAccountCreation';
 
 			global $wgLogTypes, $wgLogActionsHandlers;
 			// log-name-translatorsandbox log-description-translatorsandbox
@@ -233,15 +260,30 @@ class TranslateHooks {
 			$wgAPIModules['translatesandbox'] = 'ApiTranslateSandbox';
 		}
 
-		// Back compatibility for MediaWiki <= 1.31
-		global $wgVersion, $wgResourceModules;
-		if ( version_compare( $wgVersion, '1.32', '<' ) ) {
-			$wgResourceModules['ext.translate.editor']['dependencies'][] = 'mediawiki.api.parse';
-			$wgResourceModules['ext.translate.special.translate']['dependencies'][] = 'mediawiki.api.parse';
-		}
-
 		global $wgNamespaceRobotPolicies;
 		$wgNamespaceRobotPolicies[NS_TRANSLATIONS] = 'noindex';
+
+		// If no service has been configured, we use a built-in fallback.
+		global $wgTranslateTranslationDefaultService,
+			$wgTranslateTranslationServices;
+		if ( $wgTranslateTranslationDefaultService === true ) {
+			$wgTranslateTranslationDefaultService = 'TTMServer';
+			if ( !isset( $wgTranslateTranslationServices['TTMServer'] ) ) {
+				$wgTranslateTranslationServices['TTMServer'] = [
+					'database' => false, // Passed to wfGetDB
+					'cutoff' => 0.75,
+					'type' => 'ttmserver',
+					'public' => false,
+				];
+			}
+		}
+
+		// Add the BaseTemplateToolbox handler only when the new hook hasn't been defined yet.
+		if ( interface_exists( SidebarBeforeOutputHook::class ) ) {
+			$wgHooks['SidebarBeforeOutput'][] = 'TranslateToolbox::toolboxAllTranslations';
+		} else {
+			$wgHooks['BaseTemplateToolbox'][] = 'TranslateToolbox::toolboxAllTranslationsOld';
+		}
 	}
 
 	/**
@@ -251,22 +293,20 @@ class TranslateHooks {
 	 * @param array &$names
 	 */
 	public static function onUserGetReservedNames( array &$names ) {
-		global $wgTranslateFuzzyBotName;
-		$names[] = $wgTranslateFuzzyBotName;
+		$names[] = FuzzyBot::getName();
+		$names[] = TranslateUserManager::getName();
 	}
 
 	/**
 	 * Used for setting an AbuseFilter variable.
 	 *
 	 * @param AbuseFilterVariableHolder &$vars
-	 * @param Title|null $title
+	 * @param Title $title
+	 * @param User $user
 	 */
-	public static function onAbuseFilterFilterAction( &$vars, $title ) {
-		if ( !$title instanceof Title ) {
-			wfDebugLog( 'T143073', 'Got non-Title in ' . wfGetAllCallers( 5 ) );
-			return;
-		}
-
+	public static function onAbuseFilterAlterVariables(
+		&$vars, Title $title, User $user
+	) {
 		$handle = new MessageHandle( $title );
 
 		// Only set this variable if we are in a proper namespace to avoid
@@ -277,11 +317,16 @@ class TranslateHooks {
 				'translate-get-source',
 				[ 'handle' => $handle ]
 			);
+			$vars->setLazyLoadVar(
+				'translate_target_language',
+				'translate-get-target-language',
+				[ 'handle' => $handle ]
+			);
 		}
 	}
 
 	/**
-	 * Computes the translate_source_text AbuseFilter variable
+	 * Computes the translate_source_text and translate_target_language AbuseFilter variables
 	 * @param string $method
 	 * @param AbuseFilterVariableHolder $vars
 	 * @param array $parameters
@@ -289,18 +334,22 @@ class TranslateHooks {
 	 * @return bool
 	 */
 	public static function onAbuseFilterComputeVariable( $method, $vars, $parameters, &$result ) {
-		if ( $method !== 'translate-get-source' ) {
+		if ( $method !== 'translate-get-source' && $method !== 'translate-get-target-language' ) {
 			return true;
 		}
 
 		$handle = $parameters['handle'];
-		$source = '';
+		$value = '';
 		if ( $handle->isValid() ) {
-			$group = $handle->getGroup();
-			$source = $group->getMessage( $handle->getKey(), $group->getSourceLanguage() );
+			if ( $method === 'translate-get-source' ) {
+				$group = $handle->getGroup();
+				$value = $group->getMessage( $handle->getKey(), $group->getSourceLanguage() );
+			} else {
+				$value = $handle->getCode();
+			}
 		}
 
-		$result = $source;
+		$result = $value;
 
 		return false;
 	}
@@ -311,7 +360,9 @@ class TranslateHooks {
 	 */
 	public static function onAbuseFilterBuilder( array &$builderValues ) {
 		// Uses: 'abusefilter-edit-builder-vars-translate-source-text'
+		// and 'abusefilter-edit-builder-vars-translate-target-language'
 		$builderValues['vars']['translate_source_text'] = 'translate-source-text';
+		$builderValues['vars']['translate_target_language'] = 'translate-target-language';
 	}
 
 	/**
@@ -323,24 +374,6 @@ class TranslateHooks {
 	public static function setupParserHooks( Parser $parser ) {
 		// For nice language list in-page
 		$parser->setHook( 'languages', [ 'PageTranslationHooks', 'languages' ] );
-	}
-
-	/**
-	 * Hook: UnitTestsList
-	 *
-	 * @param array &$files
-	 */
-	public static function setupUnitTests( array &$files ) {
-		$dir = __DIR__ . '/tests/phpunit';
-		$directoryIterator = new RecursiveDirectoryIterator( $dir );
-		$fileIterator = new RecursiveIteratorIterator( $directoryIterator );
-
-		/** @var SplFileInfo $fileInfo */
-		foreach ( $fileIterator as $fileInfo ) {
-			if ( substr( $fileInfo->getFilename(), -8 ) === 'Test.php' ) {
-				$files[] = $fileInfo->getPathname();
-			}
-		}
 	}
 
 	/**
@@ -449,6 +482,13 @@ class TranslateHooks {
 			"$dir/translate_reviews-patch-01-primary-key.sql",
 			true
 		] );
+
+		$updater->addExtensionUpdate( [
+			'addTable',
+			'translate_cache',
+			"$dir/translate_cache.sql",
+			true
+		] );
 	}
 
 	/**
@@ -547,7 +587,6 @@ class TranslateHooks {
 			return true;
 		}
 
-		$server = TTMServer::primary();
 		if ( TTMServer::primary() instanceof SearchableTTMServer ) {
 			$href = SpecialPage::getTitleFor( 'SearchTranslations' )
 				->getFullUrl( [ 'query' => $term ] );
@@ -639,7 +678,8 @@ class TranslateHooks {
 	 */
 	public static function hideRestrictedFromStats( $id, $code ) {
 		$filterLangs = TranslateMetadata::get( $id, 'prioritylangs' );
-		if ( strlen( $filterLangs ) === 0 ) {
+		$hasPriorityForce = TranslateMetadata::get( $id, 'priorityforce' ) === 'on';
+		if ( strlen( $filterLangs ) === 0 || !$hasPriorityForce ) {
 			// No restrictions, keep everything
 			return true;
 		}
@@ -670,9 +710,9 @@ class TranslateHooks {
 	 * @param OutputPage $out
 	 */
 	public static function addConfig( array &$vars, OutputPage $out ) {
-		$request = $out->getRequest();
 		$title = $out->getTitle();
-		list( $alias, ) = TranslateUtils::resolveSpecialPageAlias( $title->getText() );
+		[ $alias, ] = MediaWikiServices::getInstance()
+			->getSpecialPageFactory()->resolveAlias( $title->getText() );
 
 		if ( $title->isSpecialPage()
 			&& ( $alias === 'Translate'
@@ -685,6 +725,7 @@ class TranslateHooks {
 			$vars['TranslateMessageReviewRight'] =
 				$out->getUser()->isAllowed( 'translate-messagereview' );
 			$vars['DeleteRight'] = $out->getUser()->isAllowed( 'delete' );
+			$vars['TranslateManageRight'] = $out->getUser()->isAllowed( 'translate-manage' );
 			$vars['wgTranslateDocumentationLanguageCode'] = $wgTranslateDocumentationLanguageCode;
 			$vars['wgTranslatePermissionUrl'] = $wgTranslatePermissionUrl;
 			$vars['wgTranslateUseSandbox'] = $wgTranslateUseSandbox;
@@ -718,7 +759,7 @@ class TranslateHooks {
 		// Update the non-duplicate rows, we'll just delete
 		// the duplicate ones later
 		foreach ( self::$userMergeTables as $table => $field ) {
-			if ( $dbw->tableExists( $table ) ) {
+			if ( $dbw->tableExists( $table, __METHOD__ ) ) {
 				$dbw->update(
 					$table,
 					[ $field => $newUser->getId() ],
@@ -741,7 +782,7 @@ class TranslateHooks {
 
 		// Delete any remaining rows that didn't get merged
 		foreach ( self::$userMergeTables as $table => $field ) {
-			if ( $dbw->tableExists( $table ) ) {
+			if ( $dbw->tableExists( $table, __METHOD__ ) ) {
 				$dbw->delete(
 					$table,
 					[ $field => $oldUser->getId() ],
@@ -784,7 +825,8 @@ class TranslateHooks {
 			return true;
 		}
 
-		list( $name, $subpage ) = TranslateUtils::resolveSpecialPageAlias( $target->getDBkey() );
+		[ $name, $subpage ] = MediaWikiServices::getInstance()
+			->getSpecialPageFactory()->resolveAlias( $target->getDBkey() );
 		if ( $name !== 'MyLanguage' ) {
 			return true;
 		}
@@ -826,21 +868,298 @@ class TranslateHooks {
 		return '';
 	}
 
-	/**
-	 * @param ResourceLoader $resourceLoader
-	 */
+	/** @param ResourceLoader $resourceLoader */
 	public static function onResourceLoaderRegisterModules( ResourceLoader $resourceLoader ) {
-		$modules = [];
-		$modules['ext.translate.recentgroups'] = [
-			'scripts' => 'resources/js/ext.translate.recentgroups.js',
-			'dependencies' => [
-				'mediawiki.storage'
-			],
+		// Support: MediaWiki <= 1.34
+		$hasOldTokens = $hasOldNotify = version_compare(
+			TranslateUtils::getMWVersion(), '1.35', '<'
+		);
+
+		$tpl = [
 			'localBasePath' => __DIR__,
 			'remoteExtPath' => 'Translate',
 			'targets' => [ 'desktop', 'mobile' ],
 		];
 
+		$modules = [
+			'ext.translate.recentgroups' => $tpl + [
+				'scripts' => 'resources/js/ext.translate.recentgroups.js',
+				'dependencies' => [
+					'mediawiki.storage'
+				],
+			],
+			'ext.translate.groupselector' => $tpl + [
+				'styles' => 'resources/css/ext.translate.groupselector.less',
+				'scripts' => 'resources/js/ext.translate.groupselector.js',
+				'dependencies' => [
+					'ext.translate.base',
+					'ext.translate.loader',
+					'ext.translate.statsbar',
+					'jquery.ui',
+					'mediawiki.jqueryMsg'
+				],
+				'messages' => [
+					'translate-msggroupselector-search-all',
+					'translate-msggroupselector-search-placeholder',
+					'translate-msggroupselector-search-recent',
+					'translate-msggroupselector-view-subprojects'
+				]
+			],
+			'ext.translate.special.aggregategroups' => $tpl + [
+				'scripts' => 'resources/js/ext.translate.special.aggregategroups.js',
+				'dependencies' => [
+					'jquery.ui',
+					'mediawiki.api',
+					'mediawiki.util'
+				],
+				'messages' => [
+					'tpt-aggregategroup-add',
+					'tpt-aggregategroup-edit-description',
+					'tpt-aggregategroup-edit-name',
+					'tpt-aggregategroup-remove-confirm',
+					'tpt-aggregategroup-update',
+					'tpt-aggregategroup-update-cancel',
+					'tpt-invalid-group'
+				]
+			],
+			'ext.translate.special.importtranslations' => $tpl + [
+				'scripts' => 'resources/js/ext.translate.special.importtranslations.js',
+				'dependencies' => [
+					'jquery.ui',
+				]
+			],
+			'ext.translate.special.managetranslatorsandbox' => $tpl + [
+				'scripts' => 'resources/js/ext.translate.special.managetranslatorsandbox.js',
+				'dependencies' => array_merge( [
+					'ext.translate.loader',
+					'ext.translate.translationstashstorage',
+					'ext.uls.mediawiki',
+					'jquery.ui',
+					'mediawiki.api',
+					'mediawiki.jqueryMsg',
+					'mediawiki.language',
+				], $hasOldNotify ? [ 'mediawiki.notify' ] : [] ),
+				'messages' => [
+					'tsb-accept-all-button-label',
+					'tsb-accept-button-label',
+					'tsb-reject-confirmation',
+					'tsb-accept-confirmation',
+					'tsb-all-languages-button-label',
+					'tsb-didnt-make-any-translations',
+					'tsb-no-requests-from-new-users',
+					'tsb-older-requests',
+					'tsb-reject-all-button-label',
+					'tsb-reject-button-label',
+					'tsb-reminder-failed',
+					'tsb-reminder-link-text',
+					'tsb-reminder-sending',
+					'tsb-reminder-sent',
+					'tsb-reminder-sent-new',
+					'tsb-request-count',
+					'tsb-selected-count',
+					'tsb-translations-current',
+					'tsb-translations-source',
+					'tsb-translations-user',
+					'tsb-user-posted-a-comment'
+				]
+			],
+			'ext.translate.special.searchtranslations.operatorsuggest' => $tpl + [
+				'scripts' => 'resources/js/ext.translate.special.operatorsuggest.js',
+				'dependencies' => [
+					'jquery.ui',
+				]
+			],
+			'ext.translate.special.pagetranslation' => $tpl + [
+				'packageFiles' => [
+					'resources/js/ext.translate.special.pagetranslation.js',
+					'resources/js/LanguagesMultiselectWidget.js'
+				],
+				'dependencies' => [
+					'mediawiki.Uri',
+					'mediawiki.api',
+					'mediawiki.ui.button',
+					'mediawiki.widgets',
+					'oojs-ui-widgets',
+					$hasOldTokens ? 'user.tokens' : 'user.options',
+				],
+				'targets' => [
+					'desktop'
+				]
+			],
+			"ext.translate.editor" => $tpl + [
+				"scripts" => [
+					"resources/js/ext.translate.storage.js",
+					"resources/lib/jquery.autosize.js",
+					"resources/js/ext.translate.editor.helpers.js",
+					"resources/js/ext.translate.editor.js",
+					"resources/js/ext.translate.editor.shortcuts.js",
+					"resources/js/ext.translate.pagemode.js",
+					"resources/js/ext.translate.proofread.js"
+				],
+				"styles" => [
+					"resources/css/ext.translate.editor.css",
+					"resources/css/ext.translate.pagemode.css",
+					"resources/css/ext.translate.proofread.css"
+				],
+				"dependencies" => array_merge( [
+					"ext.translate.base",
+					"ext.translate.dropdownmenu",
+					"jquery.makeCollapsible",
+					"jquery.textSelection",
+					"jquery.textchange",
+					"mediawiki.Uri",
+					"mediawiki.api",
+					"mediawiki.jqueryMsg",
+					"mediawiki.language",
+					"mediawiki.user",
+					"mediawiki.util"
+				], $hasOldNotify ? [ 'mediawiki.notify' ] : [] ),
+				"messages" => [
+					"translate-edit-askpermission",
+					"translate-edit-nopermission",
+					"tux-editor-add-desc",
+					"tux-editor-ask-help",
+					"tux-editor-cancel-button-label",
+					"tux-editor-close-tooltip",
+					"tux-editor-collapse-tooltip",
+					"tux-editor-confirm-button-label",
+					"tux-editor-discard-changes-button-label",
+					"tux-editor-doc-editor-cancel",
+					"tux-editor-doc-editor-placeholder",
+					"tux-editor-doc-editor-save",
+					"tux-editor-edit-desc",
+					"tux-editor-expand-tooltip",
+					"tux-editor-in-other-languages",
+					"tux-editor-loading",
+					"tux-editor-loading-failed",
+					"tux-editor-message-desc-less",
+					"tux-editor-message-desc-more",
+					"tux-editor-message-tools-show-editor",
+					"tux-editor-message-tools-delete",
+					"tux-editor-message-tools-history",
+					"tux-editor-message-tools-translations",
+					"tux-editor-message-tools-linktothis",
+					"tux-editor-n-uses",
+					"tux-editor-need-more-help",
+					"tux-editor-outdated-notice",
+					"tux-editor-outdated-notice-diff-link",
+					"tux-editor-paste-original-button-label",
+					"tux-editor-placeholder",
+					"tux-editor-editsummary-placeholder",
+					"tux-editor-proofread-button-label",
+					"tux-editor-save-button-label",
+					"tux-editor-save-failed",
+					"tux-editor-shortcut-info",
+					"tux-editor-skip-button-label",
+					"tux-editor-suggestions-title",
+					"tux-editor-tm-match",
+					"tux-proofread-action-tooltip",
+					"tux-proofread-edit-label",
+					"tux-proofread-translated-by-self",
+					"tux-session-expired",
+					"tux-status-saving",
+					"tux-status-translated",
+					"tux-status-unsaved",
+					"tux-save-unknown-error",
+					"tux-notices-hide",
+					"tux-notices-more",
+					"spamprotectiontext"
+				],
+				"targets" => [
+					"desktop",
+					"mobile"
+				]
+			],
+			"ext.translate.special.managegroups" => $tpl + [
+				"dependencies" => array_merge( [
+					"ext.translate.messagerenamedialog"
+				], $hasOldNotify ? [ 'mediawiki.notify' ] : [] ),
+				"messages" => [
+					"translate-smg-rename-new",
+					"translate-smg-rename-rename",
+					"translate-smg-rename-dialog-title",
+					"percent"
+				],
+				"scripts" => [
+					"resources/js/ext.translate.special.managegroups.js"
+				],
+				"targets" => [
+					"desktop",
+					"mobile"
+				]
+			],
+		];
+
 		$resourceLoader->register( $modules );
+	}
+
+	/**
+	 * Runs the configured validator to ensure that the message meets the required criteria.
+	 * Hook: EditFilterMergedContent
+	 * @param IContextSource $context
+	 * @param Content $content
+	 * @param Status $status
+	 * @param string $summary
+	 * @param \User $user
+	 * @return bool true if message is valid, false otherwise.
+	 */
+	public static function validateMessage( IContextSource $context, Content $content,
+		Status $status, $summary, User $user
+	) {
+		if ( !$content instanceof TextContent ) {
+			// Not interested
+			return true;
+		}
+
+		$text = $content->getText();
+		$title = $context->getTitle();
+		$handle = new MessageHandle( $title );
+
+		if ( !$handle->isValid() ) {
+			return true;
+		}
+
+		// Don't bother validating if FuzzyBot or translation admin are saving.
+		if ( $user->isAllowed( 'translate-manage' ) || $user->equals( FuzzyBot::getUser() ) ) {
+			return true;
+		}
+
+		// Check the namespace, and perform validations for all messages excluding documentation.
+		if ( $handle->isMessageNamespace() && !$handle->isDoc() ) {
+			$group = $handle->getGroup();
+
+			if ( is_callable( [ $group, 'getMessageContent' ] ) ) {
+				// @phan-suppress-next-line PhanUndeclaredMethod
+				$definition = $group->getMessageContent( $handle );
+			} else {
+				$definition = $group->getMessage( $handle->getKey(), $group->getSourceLanguage() );
+			}
+
+			$message = new FatMessage( $handle->getKey(), $definition );
+			$message->setTranslation( $text );
+
+			$messageValidator = $group->getValidator();
+			if ( !$messageValidator ) {
+				return true;
+			}
+
+			$validationResponse = $messageValidator->validateMessage( $message, $handle->getCode() );
+			if ( $validationResponse->hasErrors() ) {
+				// @phan-suppress-next-line SecurityCheck-DoubleEscaped
+				$status->fatal( new \ApiRawMessage(
+					$context->msg( 'translate-syntax-error' )->parse(),
+					'translate-validation-failed',
+					[
+						'validation' => [
+							'errors' => $validationResponse->getDescriptiveErrors( $context ),
+							'warnings' => $validationResponse->getDescriptiveWarnings( $context )
+						]
+					]
+				) );
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

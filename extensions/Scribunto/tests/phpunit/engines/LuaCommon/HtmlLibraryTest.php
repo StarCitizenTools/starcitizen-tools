@@ -1,10 +1,9 @@
 <?php
 
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
-class Scribunto_LuaHtmlLibraryTest extends Scribunto_LuaEngineTestBase {
+class Scribunto_LuaHtmlLibraryTest extends Scribunto_LuaEngineUnitTestBase {
 	protected static $moduleName = 'HtmlLibraryTests';
 
-	protected function setUp() {
+	protected function setUp() : void {
 		parent::setUp();
 
 		// For strip marker test

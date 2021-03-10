@@ -26,8 +26,10 @@
 	"ooui-dialog-process-dismiss": "Ausblenden",
 	"ooui-dialog-process-retry": "Erneut versuchen",
 	"ooui-dialog-process-continue": "Fortfahren",
+	"ooui-combobox-button-label": "Optionen umschalten",
 	"ooui-selectfile-button-select": "Eine Datei auswählen",
 	"ooui-selectfile-not-supported": "Die Dateiauswahl wird nicht unterstützt",
 	"ooui-selectfile-placeholder": "Keine Datei ausgewählt",
-	"ooui-selectfile-dragdrop-placeholder": "Dateien hier ablegen"
+	"ooui-selectfile-dragdrop-placeholder": "Dateien hier ablegen",
+	"ooui-field-help": "Hilfe"
 }

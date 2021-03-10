@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel SourceSurfaceFragment class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -50,6 +50,14 @@ ve.dm.SourceSurfaceFragment.prototype.annotateContent = function () {
 /**
  * @inheritdoc
  */
+ve.dm.SourceSurfaceFragment.prototype.getAnnotations = function () {
+	// Source surface contains no annotations
+	return new ve.dm.AnnotationSet( this.getDocument().getStore() );
+};
+
+/**
+ * @inheritdoc
+ */
 ve.dm.SourceSurfaceFragment.prototype.convertNodes = function () {
 	var tempFragment, tempSurfaceModel,
 		args = arguments,
@@ -76,7 +84,7 @@ ve.dm.SourceSurfaceFragment.prototype.convertNodes = function () {
  * @inheritdoc
  */
 ve.dm.SourceSurfaceFragment.prototype.insertContent = function ( content, annotate ) {
-	var i, l, data, lines;
+	var data;
 
 	if ( typeof content !== 'string' ) {
 		data = new ve.dm.ElementLinearData( new ve.dm.HashValueStore(), content );
@@ -86,20 +94,7 @@ ve.dm.SourceSurfaceFragment.prototype.insertContent = function ( content, annota
 			return this;
 		}
 	} else {
-		// Similar to parent method's handling of strings, but doesn't
-		// remove empty lines.
-		lines = content.split( /\r?\n/ );
-
-		if ( lines.length > 1 ) {
-			content = [];
-			for ( i = 0, l = lines.length; i < l; i++ ) {
-				content.push( { type: 'paragraph' } );
-				ve.batchPush( content, lines[ i ].split( '' ) );
-				content.push( { type: '/paragraph' } );
-			}
-		} else {
-			content = content.split( '' );
-		}
+		content = ve.dm.sourceConverter.getDataFromSourceText( content, true );
 	}
 
 	// Parent method
@@ -151,17 +146,15 @@ ve.dm.SourceSurfaceFragment.prototype.insertDocument = function ( doc, newDocRan
 	}
 
 	this.pushPending(
-		this.convertToSource( doc )
-			.done( function ( source ) {
-				if ( source ) {
-					// Parent method
-					ve.dm.SourceSurfaceFragment.super.prototype.insertContent.call( fragment, source.trim() );
-				} else {
-					fragment.removeContent();
-				}
-			} ).fail( function () {
+		this.convertToSource( doc ).then(
+			function ( source ) {
+				fragment.insertContent( source.trim() );
+			},
+			function () {
 				ve.error( 'Failed to convert document', arguments );
-			} )
+				return ve.createDeferred().reject().promise();
+			}
+		)
 	);
 
 	return this;
@@ -222,17 +215,17 @@ ve.dm.SourceSurfaceFragment.prototype.wrapAllNodes = function ( wrapOuter, wrapE
  *
  * The default implementation converts to HTML synchronously.
  *
- * If the conversion is asynchornous it should lock the surface
+ * If the conversion is asynchronous it should lock the surface
  * until complete.
  *
  * @param {ve.dm.Document} doc Document
- * @return {jQuery.Promise} Promise with resolves with source, or rejects
+ * @return {jQuery.Promise} Promise which resolves with source, or rejects
  */
 ve.dm.SourceSurfaceFragment.prototype.convertToSource = function ( doc ) {
 	if ( !doc.data.hasContent() ) {
-		return $.Deferred().resolve( '' ).promise();
+		return ve.createDeferred().resolve( '' ).promise();
 	} else {
-		return $.Deferred().resolve(
+		return ve.createDeferred().resolve(
 			ve.properInnerHtml(
 				ve.dm.converter.getDomFromModel( doc ).body
 			)
@@ -245,18 +238,18 @@ ve.dm.SourceSurfaceFragment.prototype.convertToSource = function ( doc ) {
  *
  * The default implementation converts from HTML synchronously.
  *
- * If the conversion is asynchornous it should lock the surface
+ * If the conversion is asynchronous it should lock the surface
  * until complete.
  *
  * @param {string} source Source text
- * @return {jQuery.Promise} Promise with resolves with source
+ * @return {jQuery.Promise} Promise which resolves with document model
  */
 ve.dm.SourceSurfaceFragment.prototype.convertFromSource = function ( source ) {
 	var lang = this.getDocument().getLang(),
 		dir = this.getDocument().getDir();
 
 	if ( !source ) {
-		return $.Deferred().resolve(
+		return ve.createDeferred().resolve(
 			new ve.dm.Document(
 				[
 					{ type: 'paragraph', internal: { generated: 'wrapper' } }, { type: '/paragraph' },
@@ -267,7 +260,7 @@ ve.dm.SourceSurfaceFragment.prototype.convertFromSource = function ( source ) {
 			)
 		).promise();
 	} else {
-		return $.Deferred().resolve(
+		return ve.createDeferred().resolve(
 			ve.dm.converter.getModelFromDom(
 				ve.createDocumentFromHtml( source, { lang: lang, dir: dir } )
 			)

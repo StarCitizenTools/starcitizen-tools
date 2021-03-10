@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Document tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.Document' );
@@ -11,7 +11,7 @@ QUnit.module( 've.dm.Document' );
 QUnit.test( 'constructor', function ( assert ) {
 	var data, htmlDoc,
 		doc = ve.dm.example.createExampleDocument();
-	assert.expect( 11 );
+
 	assert.equalNodeTree( doc.getDocumentNode(), ve.dm.example.tree, 'node tree matches example data' );
 	assert.throws(
 		function () {
@@ -500,7 +500,7 @@ QUnit.test( 'getBranchNodeFromOffset', function ( assert ) {
 		for ( j = 0; j < expected[ i ].length; j++ ) {
 			node = node.children[ expected[ i ][ j ] ];
 		}
-		assert.ok( node === doc.getBranchNodeFromOffset( i ), 'reference at offset ' + i );
+		assert.strictEqual( node, doc.getBranchNodeFromOffset( i ), 'reference at offset ' + i );
 	}
 } );
 
@@ -937,76 +937,74 @@ QUnit.test( 'protection against double application of transactions', function ( 
 } );
 
 QUnit.test( 'getNearestCursorOffset', function ( assert ) {
-	var i, dir,
-		doc = ve.dm.converter.getModelFromDom(
-			ve.createDocumentFromHtml( ve.dm.example.html )
-		),
-		expected = {
-			// 10 offsets per row
-			'-1': [
-				1, 1, 2, 3, 4, 4, 4, 4, 4, 4,
-				10, 11, 11, 11, 11, 15, 16, 16, 16, 16,
-				20, 21, 21, 21, 21, 21, 21, 21, 21, 29,
-				30, 30, 30, 30, 30, 30, 30, 30, 38, 39,
-				39, 41, 42, 42, 42, 42, 46, 47, 47, 47,
-				47, 51, 52, 52, 52, 52, 56, 57, 57, 59,
-				60, 60, 60
-			],
-			1: [
-				1, 1, 2, 3, 4, 10, 10, 10, 10, 10,
-				10, 11, 15, 15, 15, 15, 16, 20, 20, 20,
-				20, 21, 29, 29, 29, 29, 29, 29, 29, 29,
-				30, 38, 38, 38, 38, 38, 38, 38, 38, 39,
-				41, 41, 42, 46, 46, 46, 46, 47, 51, 51,
-				51, 51, 52, 56, 56, 56, 56, 57, 59, 59,
-				60, 60, 60
-			]
-		};
+	var i, c, dir, doc, cases = [
+		{
+			name: 'example',
+			htmlDoc: ve.dm.example.html,
+			expected: {
+				// 10 offsets per row
+				'-1': [
+					1, 1, 2, 3, 4, 4, 4, 4, 4, 4,
+					10, 11, 11, 11, 11, 15, 16, 16, 16, 16,
+					20, 21, 21, 21, 21, 21, 21, 21, 21, 29,
+					30, 30, 30, 30, 30, 30, 30, 30, 38, 39,
+					39, 41, 42, 42, 42, 42, 46, 47, 47, 47,
+					47, 51, 52, 52, 52, 52, 56, 57, 57, 59,
+					60, 60, 60
+				],
+				1: [
+					1, 1, 2, 3, 4, 10, 10, 10, 10, 10,
+					10, 11, 15, 15, 15, 15, 16, 20, 20, 20,
+					20, 21, 29, 29, 29, 29, 29, 29, 29, 29,
+					30, 38, 38, 38, 38, 38, 38, 38, 38, 39,
+					41, 41, 42, 46, 46, 46, 46, 47, 51, 51,
+					51, 51, 52, 56, 56, 56, 56, 57, 59, 59,
+					60, 60, 60
+				]
+			}
+		},
+		{
+			name: 'figcaption',
+			htmlDoc: ve.dm.example.figcaptionHtml,
+			expected: {
+				// 10 offsets per row
+				'-1': [
+					// The results here look incorrect.
+					// Should be `6, 6` instead of `-1, -1`?
+					1, 1, 2, 2, -1, -1, 6, 7, 7, 7,
+					2, 11, 12, 12, 12
+				],
+				1: [
+					// Should be `7, 7` instead of `-1, -1`?
+					1, 1, 2, 11, 6, 6, 6, 7, -1, -1,
+					11, 11, 12, 12, 12
+				]
+			}
+		}
+	];
 
-	for ( dir = -1; dir <= 1; dir += 2 ) {
-		for ( i = 0; i < doc.data.getLength(); i++ ) {
-			assert.strictEqual(
-				doc.getNearestCursorOffset( i, dir ),
-				expected[ dir ][ i ],
-				'Direction: ' + dir + ' Offset: ' + i
-			);
+	for ( c = 0; c < cases.length; c++ ) {
+		doc = ve.dm.converter.getModelFromDom( ve.createDocumentFromHtml( cases[ c ].htmlDoc ) );
+		for ( dir = -1; dir <= 1; dir += 2 ) {
+			for ( i = 0; i < doc.data.getLength(); i++ ) {
+				assert.strictEqual(
+					doc.getNearestCursorOffset( i, dir ),
+					cases[ c ].expected[ dir ][ i ],
+					'Document "' + cases[ c ].name + '" - Direction: ' + dir + ' Offset: ' + i
+				);
+			}
 		}
 	}
 } );
 
 QUnit.test( 'Selection equality', function ( assert ) {
-	var selections, i, iLen, j, jLen, iSel, jSel, doc;
-	doc = new ve.dm.Document( [
-		{ type: 'paragraph' }, 'h', 'i', { type: '/paragraph' },
-		{ type: 'table' },
-		{ type: 'tableSection' },
-		{ type: 'tableRow' },
-		{ type: 'tableCell', attributes: { colspan: 2, rowspan: 2 } },
-		{ type: '/tableCell' },
-		{ type: 'tableCell', attributes: {} },
-		{ type: '/tableCell' },
-		{ type: '/tableRow' },
-		{ type: 'tableRow' },
-		{ type: 'tableCell', attributes: {} },
-		{ type: '/tableCell' },
-		{ type: '/tableRow' },
-		{ type: 'tableRow' },
-		{ type: 'tableCell', attributes: {} },
-		{ type: '/tableCell' },
-		{ type: 'tableCell', attributes: {} },
-		{ type: '/tableCell' },
-		{ type: 'tableCell', attributes: {} },
-		{ type: '/tableCell' },
-		{ type: '/tableRow' },
-		{ type: '/tableSection' },
-		{ type: '/table' }
-	] );
+	var selections, i, iLen, j, jLen, iSel, jSel;
 	selections = [
-		new ve.dm.LinearSelection( doc, new ve.Range( 1, 1 ) ),
-		new ve.dm.LinearSelection( doc, new ve.Range( 1, 3 ) ),
-		new ve.dm.LinearSelection( doc, new ve.Range( 3, 1 ) ),
-		new ve.dm.TableSelection( doc, new ve.Range( 4, 25 ), 0, 1, 2, 2, true ),
-		new ve.dm.NullSelection( doc ),
+		new ve.dm.LinearSelection( new ve.Range( 1, 1 ) ),
+		new ve.dm.LinearSelection( new ve.Range( 1, 3 ) ),
+		new ve.dm.LinearSelection( new ve.Range( 3, 1 ) ),
+		new ve.dm.TableSelection( new ve.Range( 4, 25 ), 0, 1, 2, 2 ),
+		new ve.dm.NullSelection(),
 		undefined,
 		null,
 		'foo'
@@ -1017,7 +1015,6 @@ QUnit.test( 'Selection equality', function ( assert ) {
 		if ( !( iSel instanceof ve.dm.Selection ) ) {
 			continue;
 		}
-		iSel = iSel.clone();
 		for ( j = 0, jLen = selections.length; j < jLen; j++ ) {
 			jSel = selections[ j ];
 			assert.strictEqual( iSel.equals( jSel ), i === j, 'Selections ' + i + ' and ' + j );
@@ -1025,14 +1022,14 @@ QUnit.test( 'Selection equality', function ( assert ) {
 	}
 } );
 
-QUnit.test( 'Find text', function ( assert ) {
+QUnit.test( 'findText (plain text)', function ( assert ) {
 	var i, ranges,
 		supportsIntl = ve.supportsIntl,
 		doc = ve.dm.converter.getModelFromDom( ve.createDocumentFromHtml(
 			// 0
 			'<p>Foo bar fooq.</p>' +
 			// 15
-			'<p>baz foob</p>' +
+			'<p>baz\nfoob</p>' +
 			// 25
 			'<p>Liberté, Égalité, Fraternité.</p>' +
 			// 56
@@ -1102,7 +1099,7 @@ QUnit.test( 'Find text', function ( assert ) {
 			},
 			{
 				msg: 'Overlapping regex',
-				query: /.*/g,
+				query: /[\s\S]*/g,
 				options: {
 					noOverlaps: true
 				},
@@ -1113,6 +1110,40 @@ QUnit.test( 'Find text', function ( assert ) {
 					new ve.Range( 57, 60 ),
 					new ve.Range( 62, 74 ),
 					new ve.Range( 76, 83 )
+				]
+			},
+			{
+				msg: 'Literal newline',
+				query: /\n/g,
+				options: {},
+				ranges: [
+					new ve.Range( 19, 20 )
+				]
+			},
+			{
+				msg: 'Anchor "^" matches at start of line, but does not match after literal newlines',
+				query: /^./g,
+				options: {},
+				ranges: [
+					new ve.Range( 1, 2 ),
+					new ve.Range( 16, 17 ),
+					new ve.Range( 26, 27 ),
+					new ve.Range( 57, 58 ),
+					new ve.Range( 62, 63 ),
+					new ve.Range( 76, 77 )
+				]
+			},
+			{
+				msg: 'Anchor "$" matches at end of line, but does not match before literal newlines',
+				query: /.$/g,
+				options: {},
+				ranges: [
+					new ve.Range( 13, 14 ),
+					new ve.Range( 23, 24 ),
+					new ve.Range( 54, 55 ),
+					new ve.Range( 59, 60 ),
+					new ve.Range( 73, 74 ),
+					new ve.Range( 82, 83 )
 				]
 			},
 			{
@@ -1253,6 +1284,85 @@ QUnit.test( 'Find text', function ( assert ) {
 	}
 } );
 
+QUnit.test( 'findText (non-text content)', function ( assert ) {
+	var i, ranges,
+		doc = ve.dm.converter.getModelFromDom( ve.createDocumentFromHtml(
+			//   1 3     5     7 9
+			//  / /     /     / /
+			'<p>ab<img/><img/>cd</p>'
+		) ),
+		cases = [
+			{
+				msg: 'Start of line anchor "^" does not match after nodes',
+				query: /^./g,
+				options: {
+					noOverlaps: true
+				},
+				ranges: [
+					new ve.Range( 1, 2 )
+				]
+			},
+			{
+				msg: 'End of line anchor "$" does not match before nodes',
+				query: /.$/g,
+				options: {
+					noOverlaps: true
+				},
+				ranges: [
+					new ve.Range( 8, 9 )
+				]
+			},
+			{
+				msg: 'A dot in regexp matches each node once',
+				query: /./g,
+				options: {
+					noOverlaps: true
+				},
+				ranges: [
+					new ve.Range( 1, 2 ),
+					new ve.Range( 2, 3 ),
+					new ve.Range( 3, 5 ),
+					new ve.Range( 5, 7 ),
+					new ve.Range( 7, 8 ),
+					new ve.Range( 8, 9 )
+				]
+			},
+			{
+				msg: 'Partial match of a node (start) is extended',
+				query: /ab./g,
+				options: {
+					noOverlaps: true
+				},
+				ranges: [
+					new ve.Range( 1, 5 )
+				]
+			},
+			{
+				msg: 'Partial match of a node (end) is skipped',
+				query: /.cd/g,
+				options: {
+					noOverlaps: true
+				},
+				ranges: []
+			},
+			{
+				msg: 'Partial match of a node (end) is skipped, but a shorter match is found',
+				query: /.?cd/g,
+				options: {
+					noOverlaps: true
+				},
+				ranges: [
+					new ve.Range( 7, 9 )
+				]
+			}
+		];
+
+	for ( i = 0; i < cases.length; i++ ) {
+		ranges = doc.findText( cases[ i ].query, cases[ i ].options );
+		assert.deepEqual( ranges, cases[ i ].ranges, cases[ i ].msg );
+	}
+} );
+
 QUnit.test( 'fixupInsertion', function ( assert ) {
 	var doc = new ve.dm.Document( [
 			{ type: 'list', attributes: { style: 'bullet' } },
@@ -1262,7 +1372,8 @@ QUnit.test( 'fixupInsertion', function ( assert ) {
 			'b',
 			{ type: '/paragraph' },
 			{ type: '/listItem' },
-			{ type: '/list' }
+			{ type: '/list' },
+			{ type: 'internalList' }, { type: '/internalList' }
 		] ),
 		surface = new ve.dm.Surface( doc ),
 		fragment = surface.getLinearFragment( new ve.Range( 4, 4 ) ),

@@ -6,10 +6,7 @@
 			"Ghybu"
 		]
 	},
-	"templatedata-doc-param-autovalue-empty": "vala",
-	"templatedata-doc-param-default-empty": "vala",
 	"templatedata-doc-param-example": "Mînak",
-	"templatedata-doc-param-example-empty": "vala",
 	"templatedata-doc-param-desc": "Danasîn",
 	"templatedata-doc-param-name": "Parametre",
 	"templatedata-doc-param-status": "Rewş",
@@ -22,6 +19,7 @@
 	"templatedata-doc-param-type-wiki-page-name": "Rûpel",
 	"templatedata-doc-param-type-wiki-template-name": "Şablon",
 	"templatedata-doc-param-type-wiki-user-name": "Bikarhêner",
+	"templatedata-doc-params": "Parametreyên şablonê",
 	"templatedata-modal-button-back": "Paşve",
 	"templatedata-modal-button-cancel": "Betal bike",
 	"templatedata-modal-button-changelang": "Zimanê biguherîne",

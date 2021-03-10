@@ -8,23 +8,21 @@
  * @license GPL-2.0-or-later
  */
 
-/**
- * @see JsonFFS
- */
-class JsonFFSTest extends MediaWikiTestCase {
+/** @covers \JsonFFS */
+class JsonFFSTest extends MediaWikiIntegrationTestCase {
 
-	public function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		$this->groupConfiguration = [
 			'BASIC' => [
-				'class' => 'FileBasedMessageGroup',
+				'class' => FileBasedMessageGroup::class,
 				'id' => 'test-id',
 				'label' => 'Test Label',
 				'namespace' => 'NS_MEDIAWIKI',
 				'description' => 'Test description',
 			],
 			'FILES' => [
-				'class' => 'JsonFFS',
+				'class' => JsonFFS::class,
 				'sourcePattern' => __DIR__ . '/../data/jsontest_%CODE%.json',
 				'targetPattern' => 'jsontest_%CODE%.json',
 			],
@@ -33,13 +31,9 @@ class JsonFFSTest extends MediaWikiTestCase {
 
 	protected $groupConfiguration;
 
-	/**
-	 * @dataProvider jsonProvider
-	 */
+	/** @dataProvider jsonProvider */
 	public function testParsing( $messages, $authors, $file ) {
-		/**
-		 * @var FileBasedMessageGroup $group
-		 */
+		/** @var FileBasedMessageGroup $group */
 		$group = MessageGroupBase::factory( $this->groupConfiguration );
 		$ffs = new JsonFFS( $group );
 		$parsed = $ffs->readFromVariable( $file );
@@ -112,9 +106,7 @@ JSON;
 
 	public function testExport() {
 		$collection = new MockMessageCollectionForExport();
-		/**
-		 * @var FileBasedMessageGroup $group
-		 */
+		/** @var FileBasedMessageGroup $group */
 		$group = MessageGroupBase::factory( $this->groupConfiguration );
 		$ffs = new JsonFFS( $group );
 		$data = $ffs->writeIntoVariable( $collection );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWEntityNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -31,16 +31,28 @@ ve.dm.MWEntityNode.static.isContent = true;
 
 ve.dm.MWEntityNode.static.matchTagNames = [ 'span' ];
 
-ve.dm.MWEntityNode.static.matchRdfaTypes = [ 'mw:Entity' ];
+ve.dm.MWEntityNode.static.matchRdfaTypes = [ 'mw:Entity', 'mw:DisplaySpace' ];
+
+ve.dm.MWEntityNode.static.allowedRdfaTypes = [ 'mw:Placeholder' ];
 
 ve.dm.MWEntityNode.static.toDataElement = function ( domElements ) {
-	return { type: this.name, attributes: { character: domElements[ 0 ].textContent } };
+	var dataElement = {
+		type: this.name,
+		attributes: {
+			character: domElements[ 0 ].textContent
+		}
+	};
+	if ( domElements[ 0 ].getAttribute( 'typeof' ).indexOf( 'mw:DisplaySpace' ) !== -1 ) {
+		dataElement.attributes.displaySpace = true;
+	}
+	return dataElement;
 };
 
 ve.dm.MWEntityNode.static.toDomElements = function ( dataElement, doc ) {
 	var domElement = doc.createElement( 'span' ),
 		textNode = doc.createTextNode( dataElement.attributes.character );
-	domElement.setAttribute( 'typeof', 'mw:Entity' );
+	domElement.setAttribute( 'typeof',
+		dataElement.attributes.displaySpace ? 'mw:DisplaySpace mw:Placeholder' : 'mw:Entity' );
 	domElement.appendChild( textNode );
 	return [ domElement ];
 };

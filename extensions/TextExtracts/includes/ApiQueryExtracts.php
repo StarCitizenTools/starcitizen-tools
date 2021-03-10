@@ -1,61 +1,42 @@
 <?php
-/**
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- * http://www.gnu.org/copyleft/gpl.html
- */
 
 namespace TextExtracts;
 
 use ApiBase;
 use ApiMain;
 use ApiQueryBase;
-use BagOStuff;
+use ApiUsageException;
 use Config;
 use FauxRequest;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-use MWTidy;
-
 use ParserOptions;
 use Title;
-use ApiUsageException;
-use UsageException;
 use User;
+use WANObjectCache;
 use WikiPage;
 
+/**
+ * @license GPL-2.0-or-later
+ */
 class ApiQueryExtracts extends ApiQueryBase {
 
 	/**
 	 * Bump when memcache needs clearing
 	 */
-	const CACHE_VERSION = 2;
+	private const CACHE_VERSION = 2;
 
-	/**
-	 * @var string
-	 */
-	const PREFIX = 'ex';
+	private const PREFIX = 'ex';
 
-	/**
-	 * @var ParserOptions
-	 */
-	private $parserOptions;
 	private $params;
 	/**
 	 * @var Config
 	 */
 	private $config;
+	/**
+	 * @var WANObjectCache
+	 */
+	private $cache;
 
 	// TODO: Allow extensions to hook into this to opt-in.
 	// This is partly for security reasons; see T107170.
@@ -68,10 +49,12 @@ class ApiQueryExtracts extends ApiQueryBase {
 	 * @param \ApiQuery $query API query module object
 	 * @param string $moduleName Name of this query module
 	 * @param Config $conf MediaWiki configuration
+	 * @param WANObjectCache $cache
 	 */
-	public function __construct( $query, $moduleName, Config $conf ) {
+	public function __construct( $query, $moduleName, Config $conf, WANObjectCache $cache ) {
 		parent::__construct( $query, $moduleName, self::PREFIX );
 		$this->config = $conf;
+		$this->cache = $cache;
 	}
 
 	/**
@@ -81,7 +64,7 @@ class ApiQueryExtracts extends ApiQueryBase {
 	 */
 	public function execute() {
 		$titles = $this->getPageSet()->getGoodTitles();
-		if ( count( $titles ) == 0 ) {
+		if ( $titles === [] ) {
 			return;
 		}
 		$isXml = $this->getMain()->isInternalMode()
@@ -91,7 +74,7 @@ class ApiQueryExtracts extends ApiQueryBase {
 		$this->requireMaxOneParameter( $params, 'chars', 'sentences' );
 		$continue = 0;
 		$limit = intval( $params['limit'] );
-		if ( $limit > 1 && !$params['intro'] ) {
+		if ( $limit > 1 && !$params['intro'] && count( $titles ) > 1 ) {
 			$limit = 1;
 			$this->addWarning( [ 'apiwarn-textextracts-limit', $limit ] );
 		}
@@ -184,26 +167,27 @@ class ApiQueryExtracts extends ApiQueryBase {
 		return $text;
 	}
 
-	private function cacheKey( BagOStuff $cache, WikiPage $page, $introOnly ) {
+	private function cacheKey( WANObjectCache $cache, WikiPage $page, $introOnly ) {
 		return $cache->makeKey( 'textextracts', self::CACHE_VERSION,
 			$page->getId(), $page->getTouched(),
 			$page->getTitle()->getPageLanguage()->getPreferredVariant(),
-			$this->params['plaintext'], $introOnly
+			$this->params['plaintext'] ? 'plaintext' : 'html',
+			$introOnly ? 'intro' : 'full'
 		);
 	}
 
 	private function getFromCache( WikiPage $page, $introOnly ) {
-		global $wgMemc;
-
-		$key = $this->cacheKey( $wgMemc, $page, $introOnly );
-		return $wgMemc->get( $key );
+		$cache = $this->cache;
+		// @TODO: replace with getWithSetCallback()
+		$key = $this->cacheKey( $cache, $page, $introOnly );
+		return $cache->get( $key );
 	}
 
 	private function setCache( WikiPage $page, $text ) {
-		global $wgMemc;
-
-		$key = $this->cacheKey( $wgMemc, $page, $this->params['intro'] );
-		$wgMemc->set( $key, $text, $this->getConfig()->get( 'ParserCacheExpireTime' ) );
+		$cache = $this->cache;
+		// @TODO: replace with getWithSetCallback()
+		$key = $this->cacheKey( $cache, $page, $this->params['intro'] );
+		$cache->set( $key, $text, $this->getConfig()->get( 'ParserCacheExpireTime' ) );
 	}
 
 	private function getFirstSection( $text, $plainText ) {
@@ -223,21 +207,14 @@ class ApiQueryExtracts extends ApiQueryBase {
 	 * @param WikiPage $page
 	 * @return string|null
 	 * @throws ApiUsageException
-	 * @throws UsageException
 	 */
 	private function parse( WikiPage $page ) {
 		$apiException = null;
-		if ( !$this->parserOptions ) {
-			$this->parserOptions = new ParserOptions( new User( '127.0.0.1' ) );
-			if ( is_callable( [ $this->parserOptions, 'setWrapOutputClass' ] ) &&
-				!defined( 'ParserOutput::SUPPORTS_UNWRAP_TRANSFORM' )
-			) {
-				$this->parserOptions->setWrapOutputClass( false );
-			}
-		}
+		$parserOptions = new ParserOptions( new User() );
+
 		// first try finding full page in parser cache
-		if ( $page->shouldCheckParserCache( $this->parserOptions, 0 ) ) {
-			$pout = MediaWikiServices::getInstance()->getParserCache()->get( $page, $this->parserOptions );
+		if ( $page->shouldCheckParserCache( $parserOptions, 0 ) ) {
+			$pout = MediaWikiServices::getInstance()->getParserCache()->get( $page, $parserOptions );
 			if ( $pout ) {
 				$text = $pout->getText( [ 'unwrap' => true ] );
 				if ( $this->params['intro'] ) {
@@ -282,23 +259,6 @@ class ApiQueryExtracts extends ApiQueryBase {
 				// on the off chance that is the right thing.
 				throw $e;
 			}
-		} catch ( UsageException $e ) {
-			$apiException = $e->__toString();
-			if ( $e->getCodeString() === 'nosuchsection' ) {
-				// Looks like we tried to get the intro to a page without
-				// sections!  Lets just grab what we can get.
-				unset( $request['section'] );
-				$api = new ApiMain( new FauxRequest( $request ) );
-				$api->execute();
-				$data = $api->getResult()->getResultData( null, [
-					'BC' => [],
-					'Types' => [],
-				] );
-			} else {
-				// Some other unexpected error - lets just report it to the user
-				// on the off chance that is the right thing.
-				throw $e;
-			}
 		}
 		if ( !array_key_exists( 'parse', $data ) ) {
 			LoggerFactory::getInstance( 'textextracts' )->warning(
@@ -321,7 +281,8 @@ class ApiQueryExtracts extends ApiQueryBase {
 	 */
 	public static function factory( $query, $name ) {
 		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'textextracts' );
-		return new self( $query, $name, $config );
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		return new self( $query, $name, $config, $cache );
 	}
 
 	/**
@@ -330,14 +291,10 @@ class ApiQueryExtracts extends ApiQueryBase {
 	 * @return string
 	 */
 	private function convertText( $text ) {
-		$fmt = new ExtractFormatter(
-			$text,
-			$this->params['plaintext'],
-			$this->config
-		);
+		$fmt = new ExtractFormatter( $text, $this->params['plaintext'] );
+		$fmt->remove( $this->config->get( 'ExtractsRemoveClasses' ) );
 		$text = $fmt->getText();
-
-		return trim( $text );
+		return $text;
 	}
 
 	/**
@@ -346,79 +303,44 @@ class ApiQueryExtracts extends ApiQueryBase {
 	 * @return string
 	 */
 	private function truncate( $text ) {
-		if ( $this->params['chars'] ) {
-			return $this->getFirstChars( $text, $this->params['chars'] );
-		} elseif ( $this->params['sentences'] ) {
-			return $this->getFirstSentences( $text, $this->params['sentences'] );
+		if ( !$this->params['plaintext'] ) {
+			$truncator = new TextTruncator( true );
+		} else {
+			$truncator = new TextTruncator( false );
 		}
-		return $text;
-	}
 
-	/**
-	 * Returns no more than a requested number of characters
-	 * @param string $text
-	 * @param int $requestedLength
-	 * @return string
-	 */
-	private function getFirstChars( $text, $requestedLength ) {
-		$text = ExtractFormatter::getFirstChars( $text, $requestedLength );
-		// Fix possibly unclosed tags
-		$text = $this->tidy( $text );
-		$text .= wfMessage( 'ellipsis' )->inContentLanguage()->text();
-		return $text;
-	}
-
-	/**
-	 * @param string $text
-	 * @param int $requestedSentenceCount
-	 * @return string
-	 */
-	private function getFirstSentences( $text, $requestedSentenceCount ) {
-		$text = ExtractFormatter::getFirstSentences( $text, $requestedSentenceCount );
-		$text = $this->tidy( $text );
-		return $text;
-	}
-
-	/**
-	 * A simple wrapper around tidy
-	 * @param string $text
-	 * @return string
-	 */
-	private function tidy( $text ) {
-		$tidyConfig = $this->getConfig()->get( 'TidyConfig' );
-
-		if ( $tidyConfig !== null && !$this->params['plaintext'] ) {
-			$text = trim( MWTidy::tidy( $text ) );
+		if ( $this->params['chars'] ) {
+			$text = $truncator->getFirstChars( $text, $this->params['chars'] ) .
+				$this->msg( 'ellipsis' )->text();
+		} elseif ( $this->params['sentences'] ) {
+			$text = $truncator->getFirstSentences( $text, $this->params['sentences'] );
 		}
 		return $text;
 	}
 
 	private function doSections( $text ) {
-		$text = preg_replace_callback(
-			"/" . ExtractFormatter::SECTION_MARKER_START . '(\d)' .
-				ExtractFormatter::SECTION_MARKER_END . "(.*?)$/m",
-			[ $this, 'sectionCallback' ],
-			$text
-		);
-		return $text;
-	}
+		$pattern = '/' .
+			ExtractFormatter::SECTION_MARKER_START . '(\d)' .
+			ExtractFormatter::SECTION_MARKER_END . '(.*)/';
 
-	private function sectionCallback( $matches ) {
-		if ( $this->params['sectionformat'] == 'raw' ) {
-			return $matches[0];
+		switch ( $this->params['sectionformat'] ) {
+			case 'raw':
+				return $text;
+
+			case 'wiki':
+				return preg_replace_callback( $pattern, function ( $matches ) {
+					$bars = str_repeat( '=', $matches[1] );
+					return "\n$bars " . trim( $matches[2] ) . " $bars";
+				}, $text );
+
+			case 'plain':
+				return preg_replace_callback( $pattern, function ( $matches ) {
+					return "\n" . trim( $matches[2] );
+				}, $text );
+
+			default:
+				throw new \LogicException( 'Invalid sectionformat' );
 		}
-		$sectionformat = ucfirst( $this->params['sectionformat'] );
-		$func = __CLASS__ . "::doSection{$sectionformat}";
-		return call_user_func( $func, $matches[1], trim( $matches[2] ) );
-	}
-
-	private static function doSectionWiki( $level, $text ) {
-		$bars = str_repeat( '=', $level );
-		return "\n$bars $text $bars";
-	}
-
-	private static function doSectionPlain( $level, $text ) {
-		return "\n$text";
 	}
 
 	/**
@@ -473,6 +395,6 @@ class ApiQueryExtracts extends ApiQueryBase {
 	 * @return string
 	 */
 	public function getHelpUrls() {
-		return 'https://www.mediawiki.org/wiki/Extension:TextExtracts#API';
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:TextExtracts#API';
 	}
 }

@@ -23,7 +23,7 @@ class ApiQueryMessageGroupStats extends ApiStatsQuery {
 	protected function validateTargetParamater( array $params ) {
 		$group = MessageGroups::getGroup( $params['group'] );
 		if ( !$group ) {
-			$this->dieWithError( [ 'apierror-missingparam', 'mgsgroup' ] );
+			$this->dieWithError( [ 'apierror-badparameter', 'mgsgroup' ] );
 		} elseif ( MessageGroups::isDynamic( $group ) ) {
 			$this->dieWithError( 'apierror-translate-nodynamicgroups', 'invalidparam' );
 		}
@@ -44,7 +44,7 @@ class ApiQueryMessageGroupStats extends ApiStatsQuery {
 		return $data;
 	}
 
-	public function getAllowedParams() {
+	protected function getAllowedParams() {
 		$params = parent::getAllowedParams();
 		$params['group'] = [
 			ApiBase::PARAM_TYPE => 'string',

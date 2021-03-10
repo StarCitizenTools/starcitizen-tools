@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Conquistador",
 			"OC Ripper",
-			"Sf",
-			"Conquistador"
+			"Sf"
 		]
 	},
 	"visualeditor": "VisualEditor",
@@ -85,17 +85,17 @@
 	"visualeditor-linkinspector-title": "Poveznica (link)",
 	"visualeditor-listbutton-bullet-tooltip": "Spisak s grafičkim oznakama",
 	"visualeditor-listbutton-number-tooltip": "Numerisani spisak",
-	"visualeditor-mediasizewidget-button-originaldimensions": "U stvarnoj veličini",
-	"visualeditor-mediasizewidget-label-custom": "Prilagođeno",
 	"visualeditor-mediasizewidget-label-defaulterror": "Vrijednosti veličina nisu valjane.",
 	"visualeditor-mediasizewidget-label-scale": "Skala",
 	"visualeditor-mediasizewidget-label-scale-percent": "% veličine minijature",
 	"visualeditor-mediasizewidget-sizeoptions-custom": "Prilagođeno",
 	"visualeditor-mediasizewidget-sizeoptions-default": "Zadano",
 	"visualeditor-mediasizewidget-sizeoptions-scale": "Skala",
+	"visualeditor-pagemenu-tooltip": "Opcije stranice",
 	"visualeditor-shortcuts-clipboard": "Međuspremnik",
 	"visualeditor-shortcuts-formatting": "Formatiranje paragrafa",
 	"visualeditor-shortcuts-history": "Historija",
+	"visualeditor-shortcuts-insert": "Unesi",
 	"visualeditor-shortcuts-other": "Ostalo",
 	"visualeditor-shortcuts-sequence-notice": "Ukucajte",
 	"visualeditor-shortcuts-text-style": "Stil teksta",

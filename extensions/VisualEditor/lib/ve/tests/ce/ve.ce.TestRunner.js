@@ -1,7 +1,7 @@
 /*!
  * VisualEditor IME-like testing
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -143,9 +143,9 @@ ve.ce.TestRunner = function VeCeTestRunner( surface ) {
  * @return {Node} The paragraph node
  */
 ve.ce.TestRunner.prototype.getParagraph = function () {
-	var p = this.view.$element.find( '.ve-ce-documentNode > p' )[ 0 ];
+	var p = this.view.$element.find( '.ve-ce-attachedRootNode > p' )[ 0 ];
 	if ( p === undefined ) {
-		if ( this.view.$element.find( '.ve-ce-documentNode' )[ 0 ] === undefined ) {
+		if ( this.view.$element.find( '.ve-ce-attachedRootNode' )[ 0 ] === undefined ) {
 			throw new Error( 'no CE div' );
 		}
 		throw new Error( 'CE div but no p' );
@@ -187,7 +187,7 @@ ve.ce.TestRunner.prototype.changeText = function ( text ) {
 	// with non-text nodes. It just works for the main cases that are important
 	// in the existing IME tests.
 
-	// Remove all descendent text nodes
+	// Remove all descendant text nodes
 	// This may clobber the selection, so the test had better call changeSel next.
 	paragraph = this.getParagraph();
 	$( paragraph ).find( '*' ).addBack().contents().each( function () {

@@ -32,10 +32,11 @@ class AppleFFS extends SimpleFFS {
 
 		$value = '';
 		foreach ( $lines as $line ) {
+			$line = trim( $line );
 			if ( $linecontinuation ) {
-				$linecontinuation = false;
-				$valuecont = $line;
-				$value .= $valuecont;
+				if ( strpos( $line, '*/' ) !== false ) {
+					$linecontinuation = false;
+				}
 			} else {
 				if ( $line === '' ) {
 					continue;
@@ -58,12 +59,12 @@ class AppleFFS extends SimpleFFS {
 					continue;
 				}
 
-				list( $key, $value ) = self::readRow( $line );
+				list( $key, $value ) = static::readRow( $line );
 				$messages[$key] = $value;
 			}
 		}
 
-		$messages = $this->group->getMangler()->mangle( $messages );
+		$messages = $this->group->getMangler()->mangleArray( $messages );
 
 		return [
 			'AUTHORS' => $authors,
@@ -73,6 +74,7 @@ class AppleFFS extends SimpleFFS {
 
 	/**
 	 * Parses non-empty strings file row to key and value.
+	 * Can be overridden by child classes.
 	 * @param string $line
 	 * @throws MWException
 	 * @return array array( string $key, string $val )
@@ -103,9 +105,7 @@ class AppleFFS extends SimpleFFS {
 		$output = '';
 		$mangler = $this->group->getMangler();
 
-		/**
-		 * @var TMessage $m
-		 */
+		/** @var TMessage $m */
 		foreach ( $collection as $key => $m ) {
 			$value = $m->translation();
 			$value = str_replace( TRANSLATE_FUZZY, '', $value );
@@ -120,7 +120,7 @@ class AppleFFS extends SimpleFFS {
 			}
 
 			$key = $mangler->unmangle( $key );
-			$output .= self::writeRow( $key, $value );
+			$output .= static::writeRow( $key, $value );
 		}
 
 		if ( $output ) {
@@ -134,6 +134,7 @@ class AppleFFS extends SimpleFFS {
 
 	/**
 	 * Writes well-formed properties file row with key and value.
+	 * Can be overridden by child classes.
 	 * @param string $key
 	 * @param string $value
 	 * @return string
@@ -210,5 +211,25 @@ class AppleFFS extends SimpleFFS {
 		}
 
 		return $output;
+	}
+
+	public static function getExtraSchema() {
+		$schema = [
+			'root' => [
+				'_type' => 'array',
+				'_children' => [
+					'FILES' => [
+						'_type' => 'array',
+						'_children' => [
+							'header' => [
+								'_type' => 'text',
+							],
+						]
+					]
+				]
+			]
+		];
+
+		return $schema;
 	}
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel InlineImageNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -37,18 +37,18 @@ ve.dm.InlineImageNode.static.isContent = true;
 ve.dm.InlineImageNode.static.matchTagNames = [ 'img' ];
 
 ve.dm.InlineImageNode.static.toDataElement = function ( domElements ) {
-	var $node = $( domElements[ 0 ] ),
-		alt = $node.attr( 'alt' ),
-		width = $node.attr( 'width' ),
-		height = $node.attr( 'height' );
+	var domElement = domElements[ 0 ],
+		alt = domElement.getAttribute( 'alt' ),
+		width = domElement.getAttribute( 'width' ),
+		height = domElement.getAttribute( 'height' );
 
 	return {
 		type: this.name,
 		attributes: {
-			src: $node.attr( 'src' ),
-			alt: alt !== undefined ? alt : null,
-			width: width !== undefined && width !== '' ? Number( width ) : null,
-			height: height !== undefined && height !== '' ? Number( height ) : null
+			src: domElement.getAttribute( 'src' ),
+			alt: alt,
+			width: width !== null && width !== '' ? +width : null,
+			height: height !== null && height !== '' ? +height : null
 		}
 	};
 };

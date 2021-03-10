@@ -1,13 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Arystanbek",
-			"Amankel'dy"
+			"Amankel'dy",
+			"Arystanbek"
 		]
 	},
 	"templatedata-doc-desc-empty": "Сипаттамасы жоқ.",
 	"templatedata-doc-param-default": "Әдепкі",
-	"templatedata-doc-param-default-empty": "бос",
 	"templatedata-doc-param-desc": "Сипаттамасы",
 	"templatedata-doc-param-desc-empty": "сипаттамасы жоқ",
 	"templatedata-doc-param-name": "Параметрі",

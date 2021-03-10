@@ -1,23 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"XXN",
+			"ImGelu",
 			"Minisarm",
-			"ImGelu"
+			"XXN"
 		]
 	},
-	"apihelp-templatedata-description": "Obține date stocate de extensia TemplateData.",
-	"apihelp-templatedata-example-1": "Returnează date pentru [[Template:Stub]] și [[Template:Example]]",
-	"apihelp-templatedata-param-lang": "Returnează valori localizate în această limbă. În mod implicit, sunt returnate toate traducerile disponibile.",
 	"templatedata-desc": "Implementează datele stocate pentru parametrii formatelor (folosind JSON)",
 	"templatedata-doc-desc-empty": "Fără descriere.",
 	"templatedata-doc-no-params-set": "Niciun parametru specificat",
 	"templatedata-doc-param-autovalue": "Valoare automată",
-	"templatedata-doc-param-autovalue-empty": "gol",
 	"templatedata-doc-param-default": "Implicit",
-	"templatedata-doc-param-default-empty": "gol",
 	"templatedata-doc-param-example": "Exemplu",
-	"templatedata-doc-param-example-empty": "gol",
 	"templatedata-doc-param-desc": "Descriere",
 	"templatedata-doc-param-desc-empty": "fără descriere",
 	"templatedata-doc-param-name": "Parametru",

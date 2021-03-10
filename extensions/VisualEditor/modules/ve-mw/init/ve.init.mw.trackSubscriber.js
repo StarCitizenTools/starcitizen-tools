@@ -3,21 +3,44 @@
  *
  * Subscribes to ve.track() events and routes them to mw.track().
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 ( function () {
-	var timing, editingSessionId;
+	var timing, editingSessionId,
+		actionPrefixMap = {
+			firstChange: 'first_change',
+			saveIntent: 'save_intent',
+			saveAttempt: 'save_attempt',
+			saveSuccess: 'save_success',
+			saveFailure: 'save_failure'
+		},
+		trackdebug = !!mw.Uri().query.trackdebug,
+		firstInitDone = false;
 
-	if ( mw.loader.getState( 'schema.Edit' ) === null ) {
-		// Only route any events into the Edit schema if the module is actually available.
-		// It won't be if EventLogging is installed but WikimediaEvents is not.
-		return;
+	function getEditingSessionIdFromRequest() {
+		return mw.config.get( 'wgWMESchemaEditAttemptStepSessionId' ) ||
+			mw.Uri().query.editingStatsId;
 	}
 
 	timing = {};
-	editingSessionId = mw.user.generateRandomSessionId();
+	editingSessionId = getEditingSessionIdFromRequest() || mw.user.generateRandomSessionId();
+
+	function log() {
+		// mw.log is a no-op unless resource loader is in debug mode, so
+		// this allows trackdebug to work independently (T211698)
+		// eslint-disable-next-line no-console
+		console.log.apply( console, arguments );
+	}
+
+	function inSample() {
+		// Not using mw.eventLog.inSample() because we need to be able to pass our own editingSessionId
+		return mw.eventLog.randomTokenMatch(
+			1 / mw.config.get( 'wgWMESchemaEditAttemptStepSamplingRate' ),
+			editingSessionId
+		);
+	}
 
 	function computeDuration( action, event, timeStamp ) {
 		if ( event.timing !== undefined ) {
@@ -25,17 +48,12 @@
 		}
 
 		switch ( action ) {
-			case 'init':
-				// Account for second opening
-				return timeStamp - Math.max(
-					window.mediaWikiLoadStart,
-					timing.saveSuccess || 0,
-					timing.abort || 0
-				);
 			case 'ready':
 				return timeStamp - timing.init;
 			case 'loaded':
 				return timeStamp - timing.init;
+			case 'firstChange':
+				return timeStamp - timing.ready;
 			case 'saveIntent':
 				return timeStamp - timing.ready;
 			case 'saveAttempt':
@@ -65,16 +83,25 @@
 		return -1;
 	}
 
-	ve.trackSubscribe( 'mwedit.', function ( topic, data, timeStamp ) {
+	function mwEditHandler( topic, data, timeStamp ) {
 		var action = topic.split( '.' )[ 1 ],
+			actionPrefix = actionPrefixMap[ action ] || action,
+			duration = 0,
 			event;
 
-		timeStamp = timeStamp || this.timeStamp; // I8e82acc12 back-compat
-
 		if ( action === 'init' ) {
-			// Regenerate editingSessionId
-			editingSessionId = mw.user.generateRandomSessionId();
-		} else if (
+			if ( firstInitDone ) {
+				// Regenerate editingSessionId
+				editingSessionId = mw.user.generateRandomSessionId();
+			}
+			firstInitDone = true;
+		}
+
+		if ( !inSample() && !mw.config.get( 'wgWMESchemaEditAttemptStepOversample' ) && !trackdebug ) {
+			return;
+		}
+
+		if (
 			action === 'abort' &&
 			( data.type === 'unknown' || data.type === 'unknown-edited' )
 		) {
@@ -96,36 +123,64 @@
 			}
 		}
 
-		// Convert mode=source/visual to editor name
+		// Convert mode=source/visual to interface name
 		if ( data && data.mode ) {
-			data.editor = data.mode === 'source' ? 'wikitext-2017' : 'visualeditor';
+			// eslint-disable-next-line camelcase
+			data.editor_interface = data.mode === 'source' ? 'wikitext-2017' : 'visualeditor';
 			delete data.mode;
 		}
 
+		if ( !data.platform ) {
+			if ( ve.init && ve.init.target && ve.init.target.constructor.static.platformType ) {
+				data.platform = ve.init.target.constructor.static.platformType;
+			} else {
+				data.platform = 'other';
+				// TODO: outright abort in this case, once we think we've caught everything
+				mw.log.warn( 've.init.mw.trackSubscriber: no target available and no platform specified', action );
+			}
+		}
+
+		/* eslint-disable camelcase */
 		event = $.extend( {
 			version: 1,
 			action: action,
-			editor: 'visualeditor',
-			platform: ve.init && ve.init.target && ve.init.target.constructor.static.platformType || 'other',
+			is_oversample: !inSample(),
+			editor_interface: 'visualeditor',
 			integration: ve.init && ve.init.target && ve.init.target.constructor.static.integrationType || 'page',
-			'page.id': mw.config.get( 'wgArticleId' ),
-			'page.title': mw.config.get( 'wgPageName' ),
-			'page.ns': mw.config.get( 'wgNamespaceNumber' ),
-			'page.revid': mw.config.get( 'wgRevisionId' ),
-			editingSessionId: editingSessionId,
-			'user.id': mw.user.getId(),
-			'user.editCount': mw.config.get( 'wgUserEditCount', 0 ),
-			'mediawiki.version': mw.config.get( 'wgVersion' )
+			page_id: mw.config.get( 'wgArticleId' ),
+			page_title: mw.config.get( 'wgPageName' ),
+			page_ns: mw.config.get( 'wgNamespaceNumber' ),
+			// eslint-disable-next-line no-jquery/no-global-selector
+			revision_id: mw.config.get( 'wgRevisionId' ) || $( 'input[name=parentRevId]' ).val(),
+			editing_session_id: editingSessionId,
+			page_token: mw.user.getPageviewToken(),
+			session_token: mw.user.sessionId(),
+			user_id: mw.user.getId(),
+			user_editcount: mw.config.get( 'wgUserEditCount', 0 ),
+			mw_version: mw.config.get( 'wgVersion' )
 		}, data );
 
 		if ( mw.user.isAnon() ) {
-			event[ 'user.class' ] = 'IP';
+			event.user_class = 'IP';
 		}
 
-		event[ 'action.' + action + '.type' ] = event.type;
-		event[ 'action.' + action + '.mechanism' ] = event.mechanism;
-		event[ 'action.' + action + '.timing' ] = Math.round( computeDuration( action, event, timeStamp ) );
-		event[ 'action.' + action + '.message' ] = event.message;
+		// Schema's kind of a mess of special properties
+		if ( action === 'init' || action === 'abort' || action === 'saveFailure' ) {
+			event[ actionPrefix + '_type' ] = event.type;
+		}
+		if ( action === 'init' || action === 'abort' ) {
+			event[ actionPrefix + '_mechanism' ] = event.mechanism;
+		}
+		if ( action !== 'init' ) {
+			// Schema actually does have an init_timing field, but we don't want to
+			// store it because it's not meaningful.
+			duration = Math.round( computeDuration( action, event, timeStamp ) );
+			event[ actionPrefix + '_timing' ] = duration;
+		}
+		if ( action === 'saveFailure' ) {
+			event[ actionPrefix + '_message' ] = event.message;
+		}
+		/* eslint-enable camelcase */
 
 		// Remove renamed properties
 		delete event.type;
@@ -139,14 +194,14 @@
 			timing[ action ] = timeStamp;
 		}
 
-		// Sample at 6.25%
-		if ( event.editingSessionId && event.editingSessionId[ 0 ] === '0' ) {
-			mw.track( 'event.Edit', event );
+		if ( trackdebug ) {
+			log( topic, duration + 'ms', event );
+		} else {
+			mw.track( 'event.EditAttemptStep', event );
 		}
+	}
 
-	} );
-
-	ve.trackSubscribe( 'mwtiming.', function ( topic, data ) {
+	function mwTimingHandler( topic, data ) {
 		// Add type for save errors; not in the topic for stupid historical reasons
 		if ( topic === 'mwtiming.performance.user.saveError' ) {
 			topic = topic + '.' + data.type;
@@ -154,7 +209,62 @@
 
 		// Map mwtiming.foo --> timing.ve.foo.mobile
 		topic = topic.replace( /^mwtiming/, 'timing.ve.' + data.targetName );
-		mw.track( topic, data.duration );
-	} );
+		if ( trackdebug ) {
+			log( topic, Math.round( data.duration ) + 'ms' );
+		} else {
+			mw.track( topic, data.duration );
+		}
+	}
+
+	function activityHandler( topic, data ) {
+		var feature = topic.split( '.' )[ 1 ],
+			event;
+
+		if ( !inSample() && !trackdebug ) {
+			return;
+		}
+
+		if ( ve.init.target && (
+			ve.init.target.constructor.static.platformType !== 'desktop'
+		) ) {
+			// We want to log activity events when we're also logging to
+			// EditAttemptStep. The EAS events are only fired from DesktopArticleTarget
+			// in this repo. As such, we suppress this unless the current target is at
+			// least inheriting that. (Other tools may fire their own instances of
+			// those events, but probably need to reimplement this anyway for
+			// session-identification reasons.)
+			return;
+		}
+
+		/* eslint-disable camelcase */
+		event = {
+			feature: feature,
+			action: data.action,
+			editingSessionId: editingSessionId,
+			user_id: mw.user.getId(),
+			user_editcount: mw.config.get( 'wgUserEditCount', 0 ),
+			editor_interface: ve.getProp( ve, 'init', 'target', 'surface', 'mode' ) === 'source' ? 'wikitext-2017' : 'visualeditor',
+			integration: ve.getProp( ve, 'init', 'target', 'constructor', 'static', 'integrationType' ) || 'page',
+			platform: ve.getProp( ve, 'init', 'target', 'constructor', 'static', 'platformType' ) || 'other'
+		};
+		/* eslint-enable camelcase */
+
+		if ( trackdebug ) {
+			log( topic, event );
+		} else {
+			mw.track( 'event.VisualEditorFeatureUse', event );
+		}
+	}
+
+	// Only log events if the WikimediaEvents extension is installed.
+	// It provides variables that the above code depends on and registers the schemas.
+	if ( mw.config.exists( 'wgWMESchemaEditAttemptStepSamplingRate' ) ) {
+		// Ensure 'ext.eventLogging' first, it provides mw.eventLog.randomTokenMatch.
+		mw.loader.using( 'ext.eventLogging' ).done( function () {
+			ve.trackSubscribe( 'mwedit.', mwEditHandler );
+			ve.trackSubscribe( 'mwtiming.', mwTimingHandler );
+			ve.trackSubscribe( 'activity.', activityHandler );
+		} );
+	}
 
 }() );

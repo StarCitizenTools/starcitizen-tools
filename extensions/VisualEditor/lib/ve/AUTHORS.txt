@@ -1,15 +1,19 @@
 Principal Authors (major contributors, alphabetically)
 
 Bartosz Dziewoński <matma.rex@gmail.com>
+C. Scott Ananian <cscott@cscott.net>
 Christian Williams <orbit@framezero.com>
 David Chan <david@troi.org>
+David Lynch <dlynch@wikimedia.org>
 Ed Sanders <esanders@wikimedia.org>
 Inez Korczyński <inez@wikia-inc.com>
 James D. Forrester <jforrester@wikimedia.org>
 Roan Kattouw <roan.kattouw@gmail.com>
 Rob Moen <rob.moen@gmail.com>
+Thalia Chan <thalia.e.chan@googlemail.com>
 Timo Tijhof <krinklemail@gmail.com>
 Trevor Parscal <trevorparscal@gmail.com>
+Volker E <volker.e@wikimedia.org>
 
 
 Patch Contributors (minor contributors, alphabetically)
@@ -24,11 +28,9 @@ Arlo Breault <abreault@wikimedia.org>
 Audrey Tang <audreyt@audreyt.org>
 Brad Jorsch <bjorsch@wikimedia.org>
 Brion Vibber <brion@wikimedia.org>
-C. Scott Ananian <cscott@cscott.net>
 Carl Fürstenberg <azatoth@gmail.com>
 Chad Horohoe <chadh@wikimedia.org>
 Chris McMahon <cmcmahon@wikimedia.org>
-David Lynch <dlynch@wikimedia.org>
 Deskana <dgarry@wikimedia.org>
 Erick Guan <fantasticfears@gmail.com>
 Erik Bernhardson <ebernhardson@wikimedia.org>
@@ -43,6 +45,7 @@ Juliusz Gonera <jgonera@gmail.com>
 Kaartic Sivaraam <kaartic.sivaraam@gmail.com>
 Kunal Mehta <legoktm@gmail.com>
 Kyle Florence <kyle.florence@gmail.com>
+Marcella L. Florence <mflorence@wikimedia.org>
 Mark A. Hershberger <mah@everybody.org>
 Mark Holmquist <mtraceur@member.fsf.org>
 Matthew Flaschen <mflaschen@wikimedia.org>
@@ -66,10 +69,8 @@ Siebrand Mazeland <s.mazeland@xs4all.nl>
 Steven Zhang <cro0016@gmail.com>
 Subramanya Sastry <ssastry@wikimedia.org>
 Sucheta Ghoshal <sghoshal@wikimedia.org>
-Thalia Chan <thalia.e.chan@googlemail.com>
 Tongbo Sui <beanixster@gmail.com>
 Umherirrender <umherirrender_de.wp@web.de>
-Volker E <volker.e@wikimedia.org>
 Yuki Shira <shirayuking@gmail.com>
 Željko Filipin <zeljko.filipin@gmail.com>
 

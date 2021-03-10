@@ -21,7 +21,7 @@ require_once "$IP/maintenance/Maintenance.php";
 class Poimport extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Po file importer (does not make changes unless specified).';
+		$this->addDescription( 'Po file importer (does not make changes unless specified).' );
 		$this->addOption(
 			'file',
 			'Gettext file to import (Translate specific formatting)',
@@ -40,6 +40,7 @@ class Poimport extends Maintenance {
 			false, /*required*/
 			false /*has arg*/
 		);
+		$this->requireExtension( 'Translate' );
 	}
 
 	public function execute() {
@@ -74,7 +75,7 @@ class Poimport extends Maintenance {
 	 */
 	public function myOutput( $text, $channel = null, $error = false ) {
 		if ( $error ) {
-			$this->error( $text, $channel );
+			$this->error( $text );
 		} else {
 			$this->output( $text, $channel );
 		}
@@ -88,16 +89,13 @@ class Poimport extends Maintenance {
 class PoImporter {
 	/** @var callable Function to report progress updates */
 	protected $progressCallback;
-
 	/**
 	 * Path to file to parse.
 	 * @var bool|string
 	 */
-	private $file = false;
+	private $file;
 
-	/**
-	 * @param string $file File to import
-	 */
+	/** @param string $file File to import */
 	public function __construct( $file ) {
 		$this->file = $file;
 	}
@@ -220,9 +218,7 @@ class PoImporter {
 class WikiWriter {
 	/** @var callable Function to report progress updates */
 	protected $progressCallback;
-
 	protected $user;
-
 	private $changes = [];
 	private $dryrun = true;
 	private $group = null;

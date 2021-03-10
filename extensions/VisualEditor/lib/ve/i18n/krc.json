@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Iltever",
-			"Ernác"
+			"Ernác",
+			"Iltever"
 		]
 	},
 	"visualeditor": "VisualEditor",
@@ -83,14 +83,13 @@
 	"visualeditor-linkinspector-title": "Джибериу",
 	"visualeditor-listbutton-bullet-tooltip": "Ышанлы тизим",
 	"visualeditor-listbutton-number-tooltip": "Номерленнген тизим",
-	"visualeditor-mediasizewidget-button-originaldimensions": "Толу ёлчемде кёргюзюу",
-	"visualeditor-mediasizewidget-label-custom": "Джарашдырылырча",
 	"visualeditor-mediasizewidget-label-defaulterror": "Ёлчемлени дараджалары джараусуздула.",
 	"visualeditor-mediasizewidget-label-scale": "Масштаб",
 	"visualeditor-mediasizewidget-label-scale-percent": "эскизни ёлчеминден %",
 	"visualeditor-mediasizewidget-sizeoptions-custom": "Джарашдырылырча",
 	"visualeditor-mediasizewidget-sizeoptions-default": "Тынгылау бла",
 	"visualeditor-mediasizewidget-sizeoptions-scale": "Масштаб",
+	"visualeditor-pagemenu-tooltip": "Бетни параметрлери",
 	"visualeditor-shortcuts-clipboard": "Ауушдуруу буфер",
 	"visualeditor-shortcuts-formatting": "Абзацны форматлау",
 	"visualeditor-shortcuts-history": "Тарих",

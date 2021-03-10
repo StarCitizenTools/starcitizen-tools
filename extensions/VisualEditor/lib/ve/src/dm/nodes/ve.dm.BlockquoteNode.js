@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel BlockquoteNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -21,7 +21,7 @@ ve.dm.BlockquoteNode = function VeDmBlockquoteNode() {
 
 /* Inheritance */
 
-OO.inheritClass( ve.dm.BlockquoteNode, ve.dm.ContentBranchNode );
+OO.inheritClass( ve.dm.BlockquoteNode, ve.dm.BranchNode );
 
 /* Static Properties */
 

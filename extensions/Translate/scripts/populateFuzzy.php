@@ -9,6 +9,9 @@
  */
 
 // Standard boilerplate to define $IP
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\SlotRecord;
+
 if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 	$IP = getenv( 'MW_INSTALL_PATH' );
 } else {
@@ -21,52 +24,68 @@ require_once "$IP/maintenance/Maintenance.php";
 class PopulateFuzzy extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'A script to populate fuzzy tags to revtag table.';
+		$this->addDescription( 'A script to populate fuzzy tags to revtag table.' );
 		$this->addOption(
 			'namespace',
 			'(optional) Namepace name or id',
 			/*required*/false,
 			/*has arg*/true
 		);
+		$this->setBatchSize( 5000 );
+		$this->requireExtension( 'Translate' );
 	}
 
 	public function execute() {
 		global $wgTranslateMessageNamespaces;
 
 		$namespace = $this->getOption( 'namespace', $wgTranslateMessageNamespaces );
-		if ( is_string( $namespace ) &&
-			!MWNamespace::exists( $namespace )
-		) {
-			$namespace = MWNamespace::getCanonicalIndex( $namespace );
-
+		$nsInfo = MediaWikiServices::getInstance()->getNamespaceInfo();
+		if ( is_string( $namespace ) && !$nsInfo->exists( $namespace ) ) {
+			$namespace = $nsInfo->getCanonicalIndex( $namespace );
 			if ( $namespace === null ) {
-				$this->error( 'Bad namespace', true );
+				$this->fatalError( 'Bad namespace' );
 			}
 		}
 
-		$dbw = wfGetDB( DB_MASTER );
-		$tables = [ 'page', 'text', 'revision' ];
-		$fields = [ 'page_id', 'page_title', 'page_namespace', 'rev_id', 'old_text', 'old_flags' ];
-		$conds = [
-			'page_latest = rev_id',
-			'old_id = rev_text_id',
-			'page_namespace' => $namespace,
-		];
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()
+			->getMaintenanceConnectionRef( DB_MASTER );
+		$revStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$queryInfo = $revStore->getQueryInfo( [ 'page' ] );
 
-		$limit = 100;
+		$limit = $this->getBatchSize();
 		$offset = 0;
 		while ( true ) {
 			$inserts = [];
 			$this->output( '.', 0 );
 			$options = [ 'LIMIT' => $limit, 'OFFSET' => $offset ];
-			$res = $dbw->select( $tables, $fields, $conds, __METHOD__, $options );
+			$res = $dbw->select(
+				$queryInfo['tables'],
+				$queryInfo['fields'],
+				[
+					'page_latest = rev_id',
+					'page_namespace' => $namespace,
+				],
+				__METHOD__,
+				$options,
+				$queryInfo['joins']
+			);
 
 			if ( !$res->numRows() ) {
 				break;
 			}
 
+			$slots = [];
+			if ( is_callable( [ $revStore, 'getContentBlobsForBatch' ] ) ) {
+				$slots = $revStore->getContentBlobsForBatch( $res, [ SlotRecord::MAIN ] )->getValue();
+			}
 			foreach ( $res as $r ) {
-				$text = Revision::getRevisionText( $r );
+				if ( isset( $slots[$r->rev_id] ) ) {
+					$text = $slots[$r->rev_id][SlotRecord::MAIN]->blob_data;
+				} else {
+					$text = $revStore->newRevisionFromRow( $r )
+						->getContent( SlotRecord::MAIN )
+						->getNativeData();
+				}
 				if ( strpos( $text, TRANSLATE_FUZZY ) !== false ) {
 					$inserts[] = [
 						'rt_page' => $r->page_id,
@@ -78,7 +97,9 @@ class PopulateFuzzy extends Maintenance {
 
 			$offset += $limit;
 
-			$dbw->replace( 'revtag', 'rt_type_page_revision', $inserts, __METHOD__ );
+			if ( $inserts ) {
+				$dbw->replace( 'revtag', 'rt_type_page_revision', $inserts, __METHOD__ );
+			}
 		}
 	}
 }

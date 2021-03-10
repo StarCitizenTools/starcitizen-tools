@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWMagicLinkNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -39,7 +39,7 @@ ve.dm.MWMagicLinkNode.static.matchTagNames = [ 'a' ];
 
 ve.dm.MWMagicLinkNode.static.matchRdfaTypes = [ 'mw:WikiLink', 'mw:ExtLink' ];
 
-ve.dm.MWMagicLinkNode.static.blacklistedAnnotationTypes = [ 'link' ];
+ve.dm.MWMagicLinkNode.static.disallowedAnnotationTypes = [ 'link' ];
 
 /**
  * Determine whether the given `element` is a magic link.
@@ -360,7 +360,7 @@ ve.dm.MWMagicLinkIsbnType.prototype.matchHref = function ( href ) {
 		return false;
 	}
 	// conf.specialBooksources has localized name for Special:Booksources
-	normalized = ve.decodeURIComponentIntoArticleTitle( matches[ 1 ], true ).replace( ' ', '_' );
+	normalized = mw.libs.ve.decodeURIComponentIntoArticleTitle( matches[ 1 ], true ).replace( ' ', '_' );
 	if ( normalized !== 'Special:BookSources' && normalized !== conf.specialBooksources ) {
 		return false;
 	}

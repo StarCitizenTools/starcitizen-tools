@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Belkacem77"
+			"Belkacem77",
+			"K Messaoudi"
 		]
 	},
 	"visualeditor": "Amaẓrag aẓrayan",
@@ -42,6 +43,7 @@
 	"visualeditor-clipboard-paste-special": "Senṭeḍ d aḍris aččuran",
 	"visualeditor-command-dialog-cancel": "Mdel / Sefsex asnifel",
 	"visualeditor-command-dialog-confirm": "Sentem asnifel",
+	"visualeditor-commentannotationcontextitem-comment": "Awennit",
 	"visualeditor-commentinspector-edit": "Ẓreg awennit",
 	"visualeditor-commentinspector-title": "Awennit",
 	"visualeditor-commentinspector-tooltip": "Awennit",
@@ -107,8 +109,6 @@
 	"visualeditor-linkinspector-title": "Aseɣwen",
 	"visualeditor-listbutton-bullet-tooltip": "Tabdart s tneqqidin",
 	"visualeditor-listbutton-number-tooltip": "Tabdart s wuṭṭunen",
-	"visualeditor-mediasizewidget-button-originaldimensions": "Sers ar teɣzi meṛṛa",
-	"visualeditor-mediasizewidget-label-custom": "Udmawan",
 	"visualeditor-mediasizewidget-label-defaulterror": "Azalen n teɣzi mačči d imeɣta.",
 	"visualeditor-mediasizewidget-label-scale": "Sellum",
 	"visualeditor-mediasizewidget-sizeoptions-custom": "Udmawan",

@@ -11,31 +11,29 @@
  */
 class BlackListTest extends MediaWikiTestCase {
 
-	/**
-	 * @var MessageGroup
-	 */
+	/** @var MessageGroup */
 	protected $group;
 	protected $codes;
 	protected $groupConfiguration = [
 		'BASIC' => [
-			'class' => 'FileBasedMessageGroup',
+			'class' => FileBasedMessageGroup::class,
 			'id' => 'test-id',
 			'label' => 'Test Label',
 			'namespace' => 'NS_MEDIAWIKI',
 			'description' => 'Test description',
 		],
 		'FILES' => [
-			'class' => 'TestFFS',
+			'class' => TestFFS::class,
 		],
 	];
 
-	protected function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		$this->group = MessageGroupBase::factory( $this->groupConfiguration );
 		$this->codes = array_flip( array_keys( TranslateUtils::getLanguageNames( 'en' ) ) );
 	}
 
-	protected function tearDown() {
+	protected function tearDown(): void {
 		unset( $this->group );
 		parent::tearDown();
 	}

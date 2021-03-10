@@ -22,7 +22,8 @@
 				mcfilter: filter,
 				mcprop: 'definition|translation|tags|properties',
 				rawcontinue: 1,
-				errorformat: 'html'
+				errorformat: 'html',
+				formatversion: 2
 			} );
 		}
 	} );
@@ -91,7 +92,7 @@
 				messageTable.switchMode( 'page' );
 			} );
 
-			this.$proofreadOwnTranslations.click( function () {
+			this.$proofreadOwnTranslations.on( 'click', function () {
 				var $this = $( this ),
 					hideMessage = mw.msg( 'tux-editor-proofreading-hide-own-translations' ),
 					showMessage = mw.msg( 'tux-editor-proofreading-show-own-translations' );
@@ -163,7 +164,7 @@
 
 			// Fuzzy translations need warning class
 			if ( status === 'fuzzy' ) {
-				statusClass = statusClass + ' tux-warning';
+				statusClass = statusClass + ' tux-notice';
 			}
 
 			// Label the status if it is not untranslated
@@ -200,7 +201,7 @@
 							// unicode-bidi: isolate
 							// is supported everywhere
 							$( '<span>' )
-								.html( $( 'body' ).hasClass( 'rtl' ) ? '&rlm;' : '&lrm;' ),
+								.html( $( document.body ).hasClass( 'rtl' ) ? '&rlm;' : '&lrm;' ),
 							$( '<span>' )
 								.addClass( 'tux-list-translation' )
 								.attr( {
@@ -214,6 +215,13 @@
 						.append(
 							$( '<span>' )
 								.addClass( statusClass )
+								// The following messages are used here:
+								// * tux-status-optional
+								// * tux-status-fuzzy
+								// * tux-status-proofread
+								// * tux-status-translated
+								// * tux-status-saving
+								// * tux-status-unsaved
 								.text( statusMsg ? mw.msg( statusMsg ) : '' )
 						),
 					$( '<div>' )
@@ -277,17 +285,17 @@
 				} );
 
 				setTimeout( function () {
-					var offset, $icon = $( '.autotooltip:visible' );
-					if ( !$icon.length ) {
+					var offset, $visibleIcon = $( '.autotooltip:visible' );
+					if ( !$visibleIcon.length ) {
 						return;
 					}
 
-					offset = $icon.offset();
-					tooltip.$element.appendTo( 'body' );
+					offset = $visibleIcon.offset();
+					tooltip.$element.appendTo( document.body );
 					tooltip.toggle( true ).toggleClipping( false ).togglePositioning( false );
 					tooltip.$element.css( {
-						top: offset.top + $icon.outerHeight() + 5,
-						left: offset.left + $icon.outerWidth() - tooltip.$element.width() / 2 - 15
+						top: offset.top + $visibleIcon.outerHeight() + 5,
+						left: offset.left + $visibleIcon.outerWidth() - tooltip.$element.width() / 2 - 15
 					} );
 
 					setTimeout( function () {
@@ -375,10 +383,14 @@
 		},
 
 		resize: function () {
-			var actualWidth = 0;
+			var actualWidth = 0, $messageSelector = $( '.row.tux-message-selector' );
+
+			if ( $messageSelector.is( ':hidden' ) ) {
+				return;
+			}
 
 			// Calculate the total width required for the filters
-			$( '.row.tux-message-selector > li' ).each( function () {
+			$messageSelector.children( 'li' ).each( function () {
 				actualWidth += $( this ).outerWidth( true );
 			} );
 
@@ -411,6 +423,9 @@
 			this.$loaderInfo.text(
 				mw.msg( 'tux-messagetable-loading-messages', this.$loader.data( 'pagesize' ) )
 			);
+
+			// Update the target language
+			this.$container.data( 'targetlangcode', this.settings.language );
 
 			// Reset the statsbar
 			this.$statsBar
@@ -494,7 +509,7 @@
 					}
 				}
 
-				$.each( messages, function ( index, message ) {
+				messages.forEach( function ( message, index ) {
 					message.group = self.settings.group;
 					self.add( message );
 					self.messages.push( message );
@@ -525,7 +540,7 @@
 
 					// Helpfully open the first message in show mode
 					// TODO: Refactor to avoid direct DOM access
-					$( '.tux-message-item' ).first().click();
+					$( '.tux-message-item' ).first().trigger( 'click' );
 				} else {
 					self.$loader.data( 'offset', result[ 'query-continue' ].messagecollection.mcoffset );
 
@@ -621,7 +636,7 @@
 							.attr( 'href', '#' )
 							.text( mw.msg( 'tux-empty-show-optional-messages' ) )
 							.on( 'click', function ( e ) {
-								$( '#tux-option-optional' ).click();
+								$( '#tux-option-optional' ).trigger( 'click' );
 								e.preventDefault();
 							} )
 					);
@@ -631,7 +646,7 @@
 					$actions.append( messageTable.otherActionButton(
 						'tux-empty-list-other-action',
 						function () {
-							$( '.tux-tab-unproofread' ).click();
+							$( '.tux-tab-unproofread' ).trigger( 'click' );
 							// @todo untranslated
 						} )
 					);
@@ -651,7 +666,7 @@
 					$actions.append( messageTable.otherActionButton(
 						'tux-empty-you-can-review-already-proofread',
 						function () {
-							$( '.tux-tab-translated' ).click();
+							$( '.tux-tab-translated' ).trigger( 'click' );
 						} )
 					);
 				}
@@ -665,7 +680,7 @@
 					$actions.append( messageTable.otherActionButton(
 						'tux-empty-list-translated-action',
 						function () {
-							mw.translate.changeFilter( $( '.tux-tab-untranslated' ).click() );
+							mw.translate.changeFilter( $( '.tux-tab-untranslated' ).trigger( 'click' ) );
 						} )
 					);
 				} else {
@@ -683,8 +698,8 @@
 
 					$actions.append( $( '<a>' )
 						.text( mw.msg( 'tux-empty-list-other-link' ) )
-						.click( function () {
-							$( '.tux-tab-all' ).click();
+						.on( 'click', function () {
+							$( '.tux-tab-all' ).trigger( 'click' );
 						} )
 					);
 				}
@@ -764,10 +779,10 @@
 			}
 
 			if ( messageTable.messages.length ) {
-				$.each( messageTable.messages, function ( index, message ) {
+				messageTable.messages.forEach( function ( message ) {
 					messageTable.add( message );
 				} );
-			} else if ( messageTable.initialized ) {
+			} else if ( messageTable.initialized && !messageTable.loading ) {
 				messageTable.displayEmptyListHelp();
 			}
 
@@ -840,8 +855,8 @@
 			var $warningContainer = $( '.tux-editor-header .group-warning' );
 
 			if ( errors ) {
-				$.map( errors, function ( error ) {
-					$warningContainer.append( error[ '*' ] );
+				errors.forEach( function ( error ) {
+					$warningContainer.append( error.html );
 				} );
 			} else {
 				$warningContainer.text( mw.msg( 'api-error-unknownerror', errorCode ) );

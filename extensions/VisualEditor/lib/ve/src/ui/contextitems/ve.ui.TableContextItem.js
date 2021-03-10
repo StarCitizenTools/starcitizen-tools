@@ -1,7 +1,7 @@
 /*!
  * VisualEditor TableContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -46,14 +46,14 @@ ve.ui.TableContextItem.static.embeddable = false;
  * @inheritdoc
  */
 ve.ui.TableContextItem.static.isCompatibleWith = function ( model ) {
-	return model instanceof ve.dm.Node && model.isCellable();
+	return model instanceof ve.dm.Node && model.isCellable() && !OO.ui.isMobile();
 };
 
 /**
  * @inheritdoc
  */
 ve.ui.TableContextItem.prototype.isDeletable = function () {
-	return true;
+	return !this.isReadOnly();
 };
 
 /**
@@ -65,6 +65,8 @@ ve.ui.TableContextItem.prototype.onDeleteButtonClick = function () {
 	surfaceModel.getLinearFragment(
 		surfaceModel.getSelectedNode().findParent( ve.dm.TableNode ).getOuterRange()
 	).delete();
+
+	ve.track( 'activity.table', { action: 'context-delete' } );
 };
 
 /* Registration */

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWSaveDialogAction class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 // TODO: Can perhaps extract a lot of the dialog lifecycle management code
@@ -29,12 +29,6 @@ OO.inheritClass( ve.ui.MWSaveDialogAction, ve.ui.Action );
 
 ve.ui.MWSaveDialogAction.static.name = 'mwSaveDialog';
 
-/**
- * List of allowed methods for the action.
- *
- * @static
- * @property
- */
 ve.ui.MWSaveDialogAction.static.methods = [ 'save', 'review', 'preview' ];
 
 /* Methods */
@@ -42,7 +36,6 @@ ve.ui.MWSaveDialogAction.static.methods = [ 'save', 'review', 'preview' ];
 /**
  * Open the save dialog
  *
- * @method
  * @param {string} checkbox Checkbox to toggle after opening
  * @return {boolean} Action was executed
  */
@@ -54,7 +47,6 @@ ve.ui.MWSaveDialogAction.prototype.save = function ( checkbox ) {
 /**
  * Open the save dialog, and set it to the review panel
  *
- * @method
  * @return {boolean} Action was executed
  */
 ve.ui.MWSaveDialogAction.prototype.review = function () {
@@ -65,7 +57,6 @@ ve.ui.MWSaveDialogAction.prototype.review = function () {
 /**
  * Open the save dialog, and set it to the preview panel
  *
- * @method
  * @return {boolean} Action was executed
  */
 ve.ui.MWSaveDialogAction.prototype.preview = function () {
@@ -169,6 +160,12 @@ ve.ui.commandRegistry.register(
 		];
 
 	shortcuts.forEach( function ( shortcut ) {
+		// The following messages can be used here:
+		// * accesskey-save
+		// * accesskey-diff
+		// * accesskey-preview
+		// * accesskey-minoredit
+		// * accesskey-watch
 		var accessKey = ve.msg( shortcut.accessKey );
 		if ( accessKey !== '-' && accessKey !== '' ) {
 			try {
@@ -183,6 +180,7 @@ ve.ui.commandRegistry.register(
 				trigger: shortcut.command,
 				label: shortcut.label
 			} );
+			ve.ui.MWCommandHelpDialog.static.commandGroups.other.demote = ve.ui.MWCommandHelpDialog.static.commandGroups.other.demote || [];
 			ve.ui.MWCommandHelpDialog.static.commandGroups.other.demote.push( shortcut.command );
 		}
 	} );

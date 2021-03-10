@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel ContentBranchNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -27,3 +27,5 @@ OO.inheritClass( ve.dm.ContentBranchNode, ve.dm.BranchNode );
 /* Static Properties */
 
 ve.dm.ContentBranchNode.static.canContainContent = true;
+
+ve.dm.ContentBranchNode.static.isDiffedAsLeaf = true;

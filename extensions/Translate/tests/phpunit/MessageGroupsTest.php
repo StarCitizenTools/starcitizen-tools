@@ -9,22 +9,23 @@
  * @group Database
  * ^ See AggregateMessageGroup::getGroups -> MessageGroups::getPriority
  */
-class MessageGroupsTest extends MediaWikiTestCase {
-	protected function setUp() {
+class MessageGroupsTest extends MediaWikiIntegrationTestCase {
+	protected function setUp(): void {
 		parent::setUp();
 
 		$conf = [
 			__DIR__ . '/data/ParentGroups.yaml',
+			__DIR__ . '/data/ValidatorGroup.yaml'
 		];
 
-		global $wgHooks;
 		$this->setMwGlobals( [
-			'wgHooks' => $wgHooks,
 			'wgTranslateGroupFiles' => $conf,
 			'wgTranslateTranslationServices' => [],
 			'wgTranslateMessageNamespaces' => [ NS_MEDIAWIKI ],
 		] );
-		$wgHooks['TranslatePostInitGroups'] = [ 'MessageGroups::getConfiguredGroups' ];
+
+		$this->setTemporaryHook( 'TranslateInitGroupLoaders',
+			'FileBasedMessageGroupLoader::registerLoader' );
 
 		$mg = MessageGroups::singleton();
 		$mg->setCache( new WANObjectCache( [ 'cache' => wfGetCache( 'hash' ) ] ) );
@@ -34,9 +35,7 @@ class MessageGroupsTest extends MediaWikiTestCase {
 		MessageIndex::singleton()->rebuild();
 	}
 
-	/**
-	 * @dataProvider provideGroups
-	 */
+	/** @dataProvider provideGroups */
 	public function testGetParentGroups( $expected, $target ) {
 		$group = MessageGroups::getGroup( $target );
 		$got = MessageGroups::getParentGroups( $group );
@@ -81,8 +80,17 @@ class MessageGroupsTest extends MediaWikiTestCase {
 		$this->assertEquals( 'en', MessageGroups::haveSingleSourceLanguage(
 			[ $enGroup1, $enGroup2 ] )
 		);
-		$this->assertEquals( '', MessageGroups::haveSingleSourceLanguage(
+		$this->assertSame( '', MessageGroups::haveSingleSourceLanguage(
 			[ $enGroup1, $enGroup2, $teGroup1 ] )
 		);
+	}
+
+	public function testGroupYAMLParsing() {
+		$group = MessageGroups::getGroup( 'test-validator-group' );
+		$msgValidator = $group->getValidator();
+		$suggester = $group->getInsertablesSuggester();
+
+		$this->assertCount( 1, $msgValidator->getValidators() );
+		$this->assertCount( 2, $suggester->getInsertables( "$1 \case" ) );
 	}
 }

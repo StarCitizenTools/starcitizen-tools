@@ -71,9 +71,9 @@ class AmdFFS extends SimpleFFS {
 
 		// Take care of regular language bundles, as well as the root bundle.
 		if ( isset( $messages['root'] ) ) {
-			$messages = $this->group->getMangler()->mangle( $messages['root'] );
+			$messages = $this->group->getMangler()->mangleArray( $messages['root'] );
 		} else {
-			$messages = $this->group->getMangler()->mangle( $messages );
+			$messages = $this->group->getMangler()->mangleArray( $messages );
 		}
 
 		return [
@@ -91,7 +91,7 @@ class AmdFFS extends SimpleFFS {
 		$messages = [];
 		$mangler = $this->group->getMangler();
 
-		/** @var ThinMessage $m */
+		/** @var TMessage $m */
 		foreach ( $collection as $key => $m ) {
 			$value = $m->translation();
 			if ( $value === null ) {

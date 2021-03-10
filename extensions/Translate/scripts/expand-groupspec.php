@@ -18,7 +18,7 @@ require_once "$IP/maintenance/Maintenance.php";
 class TranslateExpandGroupSpec extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Expands a message group specification.';
+		$this->addDescription( 'Expands a message group specification.' );
 		$this->addOption(
 			'exportable',
 			'List only groups that can be exported',
@@ -29,9 +29,9 @@ class TranslateExpandGroupSpec extends Maintenance {
 		$this->addArg(
 			'specification',
 			'For example page-*,main',
-			true, /*required*/
-			false /*has arg*/
+			true /*required*/
 		);
+		$this->requireExtension( 'Translate' );
 	}
 
 	public function execute() {

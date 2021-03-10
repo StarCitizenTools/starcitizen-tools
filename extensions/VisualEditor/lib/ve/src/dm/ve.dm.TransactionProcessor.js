@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel TransactionProcessor class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -35,18 +35,12 @@ ve.dm.TransactionProcessor = function VeDmTransactionProcessor( doc, transaction
 	// unadjusted offsets; this is needed to adjust those offsets after other modifications have been
 	// made to the linear model that have caused offsets to shift.
 	this.adjustment = 0;
-	// Set and clear are sets of annotations which should be added or removed to content being
-	// inserted or retained.
-	this.set = new ve.dm.AnnotationSet( this.document.getStore() );
-	this.clear = new ve.dm.AnnotationSet( this.document.getStore() );
-	this.annotatedRanges = [];
 	// State tracking for unbalanced replace operations
 	this.replaceRemoveLevel = 0;
 	this.replaceInsertLevel = 0;
 	this.replaceMinInsertLevel = 0;
 	this.retainDepth = 0;
 	this.balanced = true;
-	this.treeModifier = null;
 };
 
 /* Static members */
@@ -84,6 +78,19 @@ ve.dm.TransactionProcessor.prototype.executeOperation = function ( op ) {
 ve.dm.TransactionProcessor.prototype.process = function () {
 	var i, completed;
 
+	// Warning: some of this is vestigial. Before TreeModifier, things worked as follows:
+	// 1) executeOperation ran on each operation. This built a list of modifications,
+	// .modificationQueue, consisting of linear splices and attribute/annotation changes.
+	// 2) applyModifications processed .modificationQueue. In particular it executed the
+	// linear splices (invalidating the DM tree).
+	// 3) rebuildTree rebuilt the part of the DM tree invalidated by the linear splices.
+	//
+	// Since then, we removed annotation changes completely. And TreeModifier handles
+	// replacements. So for replacements:
+	// 1) executeOperation does very little (just a balancedness check)
+	// 2) applyModifications queues linear splices for rollback on error
+	// 3) rebuildTree is only called in the rollback case
+
 	// Ensure the pre-modification document tree has been generated
 	this.document.getDocumentNode();
 
@@ -100,11 +107,8 @@ ve.dm.TransactionProcessor.prototype.process = function () {
 	// Apply the queued modifications
 	try {
 		completed = false;
-		this.treeModifier = null;
 		this.applyModifications();
-		this.treeModifier = new ve.dm.TreeModifier( this.document, this.transaction );
-		this.treeModifier.process();
-		this.queueAnnotateEvents();
+		ve.dm.treeModifier.process( this.document, this.transaction );
 		completed = true;
 	} finally {
 		// Don't catch and re-throw errors so that they are reported properly
@@ -159,6 +163,7 @@ ve.dm.TransactionProcessor.prototype.queueUndoFunction = function ( func ) {
  */
 ve.dm.TransactionProcessor.prototype.applyModifications = function () {
 	var i, len, modifier, modifications = this.modificationQueue;
+
 	this.modificationQueue = [];
 	for ( i = 0, len = modifications.length; i < len; i++ ) {
 		modifier = ve.dm.TransactionProcessor.modifiers[ modifications[ i ].type ];
@@ -235,87 +240,6 @@ ve.dm.TransactionProcessor.prototype.advanceCursor = function ( increment ) {
 };
 
 /**
- * Apply the current annotation stacks.
- *
- * This will set all annotations in this.set and clear all annotations in `this.clear` on the data
- * between the offsets `this.cursor` and `this.cursor + to`. Annotations are set at the highest
- * annotation set offset below which annotations are uniform across the whole range.
- *
- * @private
- * @param {number} to Offset to stop annotating at, annotating starts at this.cursor
- * @throws {Error} Cannot annotate a branch element
- * @throws {Error} Annotation to be set is already set
- * @throws {Error} Annotation to be cleared is not set
- */
-ve.dm.TransactionProcessor.prototype.applyAnnotations = function ( to ) {
-	var annotationHashesForOffset, setIndex, isElement, annotations, i;
-
-	function setAndClear( anns, set, clear, index ) {
-		if ( anns.containsAnyOf( set ) ) {
-			throw new Error( 'Invalid transaction, annotation to be set is already set' );
-		} else {
-			anns.addSet( set, index );
-		}
-		if ( !anns.containsAllOf( clear ) ) {
-			throw new Error( 'Invalid transaction, annotation to be cleared is not set' );
-		} else {
-			anns.removeSet( clear );
-		}
-	}
-
-	if ( this.set.isEmpty() && this.clear.isEmpty() ) {
-		return;
-	}
-	// Set/clear annotations on data
-	annotationHashesForOffset = [];
-	for ( i = this.cursor; i < to; i++ ) {
-		annotationHashesForOffset[ i - this.cursor ] = this.document.data.getAnnotationHashesFromOffset( i );
-	}
-	// Calculate highest offset below which annotations are uniform across the whole range
-	setIndex = ve.getCommonStartSequenceLength( annotationHashesForOffset );
-
-	for ( i = this.cursor; i < to; i++ ) {
-		isElement = this.document.data.isElementData( i );
-		if ( isElement ) {
-			if ( !ve.dm.nodeFactory.canNodeSerializeAsContent( this.document.data.getType( i ) ) ) {
-				throw new Error( 'Invalid transaction, cannot annotate a non-content element' );
-			}
-			if ( this.document.data.isCloseElementData( i ) ) {
-				// Closing content element, ignore
-				continue;
-			}
-		}
-		annotations = this.document.data.getAnnotationsFromOffset( i );
-		setAndClear( annotations, this.set, this.clear, setIndex );
-		// Store annotation hashes in linear model
-		this.queueModification( {
-			type: 'annotateData',
-			args: [ i, annotations ]
-		} );
-	}
-	// Store the annotated range, for emitting annotate events later
-	if ( this.cursor < to ) {
-		this.annotatedRanges.push( new ve.Range( this.cursor, to ) );
-	}
-};
-
-/**
- * Queue annotate and update events on all leaf nodes whose annotations have changed
- */
-ve.dm.TransactionProcessor.prototype.queueAnnotateEvents = function () {
-	var i, iLen, range, j, jLen, selection, node;
-	for ( i = 0, iLen = this.annotatedRanges.length; i < iLen; i++ ) {
-		range = this.transaction.translateRange( this.annotatedRanges[ i ] );
-		selection = this.document.selectNodes( range, 'leaves' );
-		for ( j = 0, jLen = selection.length; j < jLen; j++ ) {
-			node = selection[ j ].node;
-			this.queueEvent( node, 'annotation' );
-			this.queueEvent( node, 'update', this.isStaging );
-		}
-	}
-};
-
-/**
  * Modifier methods.
  *
  * Each method executes a specific type of linear model modification, updates the model tree, and
@@ -375,25 +299,6 @@ ve.dm.TransactionProcessor.modifiers.splice = function ( splices ) {
 };
 
 /**
- * Set annotations at a given data offset.
- *
- * @param {number} offset Offset in data array (unadjusted)
- * @param {ve.dm.AnnotationSet} annotations New set of annotations; overwrites old set
- */
-ve.dm.TransactionProcessor.modifiers.annotateData = function ( offset, annotations ) {
-	var oldAnnotations,
-		data = this.document.data;
-	offset += this.adjustment;
-
-	data.setAnnotationsAtOffset( offset, annotations );
-
-	oldAnnotations = data.getAnnotationsFromOffset( offset );
-	this.queueUndoFunction( function () {
-		data.setAnnotationsAtOffset( offset, oldAnnotations );
-	} );
-};
-
-/**
  * Set an attribute at a given offset.
  *
  * @param {number} offset Offset in data array (unadjusted)
@@ -430,12 +335,8 @@ ve.dm.TransactionProcessor.modifiers.setAttribute = function ( offset, key, valu
 /**
  * Execute a retain operation.
  *
- * This method is called within the context of a transaction processor instance.
+ * Called within the context of a transaction processor instance; moves the cursor by op.length
  *
- * This moves the cursor by op.length and applies annotations to the characters that the cursor
- * moved over.
- *
- * @method
  * @param {Object} op Operation object:
  * @param {number} op.length Number of elements to retain
  */
@@ -451,45 +352,7 @@ ve.dm.TransactionProcessor.processors.retain = function ( op ) {
 			}
 		}
 	}
-	this.applyAnnotations( this.cursor + op.length );
 	this.advanceCursor( op.length );
-};
-
-/**
- * Execute an annotate operation.
- *
- * This method is called within the context of a transaction processor instance.
- *
- * This will add an annotation to or remove an annotation from `this.set` or `this.clear`.
- * This will then cause those annotations to be set or cleared from text and elements
- * when a retain passes over them.
- *
- * @method
- * @param {Object} op Operation object
- * @param {string} op.method Annotation method, either 'set' to add or 'clear' to remove
- * @param {string} op.bias End point of marker, either 'start' to begin or 'stop' to end
- * @param {string} op.annotation Annotation object to set or clear from content
- * @throws {Error} Invalid annotation method
- */
-ve.dm.TransactionProcessor.processors.annotate = function ( op ) {
-	var target, annotation;
-	if ( op.method === 'set' ) {
-		target = this.set;
-	} else if ( op.method === 'clear' ) {
-		target = this.clear;
-	} else {
-		throw new Error( 'Invalid annotation method ' + op.method );
-	}
-	annotation = this.document.getStore().value( op.index );
-	if ( !annotation ) {
-		throw new Error( 'No annotation stored for ' + op.index );
-	}
-	if ( op.bias === 'start' ) {
-		target.push( annotation );
-	} else {
-		target.remove( annotation );
-	}
-	// Actual changes are done by applyAnnotations() called from the retain processor
 };
 
 /**
@@ -502,7 +365,6 @@ ve.dm.TransactionProcessor.processors.annotate = function ( op ) {
  * in reverse mode. So if `op.from` is incorrect, the transaction will commit fine, but won't roll
  * back correctly.
  *
- * @method
  * @param {Object} op Operation object
  * @param {string} op.key Attribute name
  * @param {Mixed} op.from Old attribute value, or undefined if not previously set
@@ -521,7 +383,6 @@ ve.dm.TransactionProcessor.processors.attribute = function ( op ) {
 /**
  * Verify a replace operation (the actual processing is now done in ve.dm.TreeModifier)
  *
- * @method
  * @param {Object} op Operation object
  * @param {Array} op.remove Linear model data to remove
  * @param {Array} op.insert Linear model data to insert

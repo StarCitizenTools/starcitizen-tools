@@ -7,6 +7,10 @@
  * @since 1.25
  */
 class ComposerJson {
+	/**
+	 * @var array[]
+	 */
+	private $contents;
 
 	/**
 	 * @param string $location
@@ -18,13 +22,15 @@ class ComposerJson {
 	/**
 	 * Dependencies as specified by composer.json
 	 *
-	 * @return array
+	 * @return string[]
 	 */
 	public function getRequiredDependencies() {
 		$deps = [];
 		if ( isset( $this->contents['require'] ) ) {
 			foreach ( $this->contents['require'] as $package => $version ) {
-				if ( $package !== "php" && strpos( $package, 'ext-' ) !== 0 ) {
+				// Examples of package dependancies that don't have a / in the name:
+				// php, ext-xml, composer-plugin-api
+				if ( strpos( $package, '/' ) !== false ) {
 					$deps[$package] = self::normalizeVersion( $version );
 				}
 			}

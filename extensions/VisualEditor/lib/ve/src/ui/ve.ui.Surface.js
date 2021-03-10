@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Surface class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -12,10 +12,12 @@
  * @extends OO.ui.Widget
  *
  * @constructor
- * @param {HTMLDocument|Array|ve.dm.ElementLinearData|ve.dm.Document} dataOrDoc Document data to edit
+ * @param {HTMLDocument|Array|ve.dm.ElementLinearData|ve.dm.Document|ve.dm.Surface} dataOrDocOrSurface Document data, document model, or surface model to edit
  * @param {Object} [config] Configuration options
+ * @cfg {ve.dm.BranchNode} [attachedRoot] Node to surface, if ve.dm.Document passed in
  * @cfg {string} [mode] Editing mode
  * @cfg {jQuery} [$scrollContainer] The scroll container of the surface
+ * @cfg {jQuery} [$overlayContainer] Clipping container for local overlays, defaults to surface view
  * @cfg {ve.ui.CommandRegistry} [commandRegistry] Command registry to use
  * @cfg {ve.ui.SequenceRegistry} [sequenceRegistry] Sequence registry to use
  * @cfg {ve.ui.DataTransferHandlerFactory} [dataTransferHandlerFactory] Data transfer handler factory to use
@@ -24,9 +26,11 @@
  * @cfg {Object} [importRules] Import rules
  * @cfg {boolean} [multiline=true] Multi-line surface
  * @cfg {string} [placeholder] Placeholder text to display when the surface is empty
+ * @cfg {string} [readOnly] Surface is read-only
+ * @cfg {string} [nullSelectionOnBlur=true] Surface selection is set to null on blur
  * @cfg {string} [inDialog] The name of the dialog this surface is in
  */
-ve.ui.Surface = function VeUiSurface( dataOrDoc, config ) {
+ve.ui.Surface = function VeUiSurface( dataOrDocOrSurface, config ) {
 	var documentModel;
 
 	config = config || {};
@@ -35,7 +39,7 @@ ve.ui.Surface = function VeUiSurface( dataOrDoc, config ) {
 	ve.ui.Surface.super.call( this, config );
 
 	// Properties
-	this.$scrollContainer = config.$scrollContainer || $( this.getElementWindow() );
+	this.$scrollContainer = config.$scrollContainer || $( this.getClosestScrollableElementContainer() );
 	this.inDialog = config.inDialog || '';
 	this.mode = config.mode;
 
@@ -56,46 +60,65 @@ ve.ui.Surface = function VeUiSurface( dataOrDoc, config ) {
 		config.includeCommands || this.commandRegistry.getNames(), config.excludeCommands || []
 	);
 	this.triggerListener = new ve.TriggerListener( this.commands, this.commandRegistry );
-	if ( dataOrDoc instanceof ve.dm.Document ) {
-		// ve.dm.Document
-		documentModel = dataOrDoc;
-	} else if ( dataOrDoc instanceof ve.dm.ElementLinearData || Array.isArray( dataOrDoc ) ) {
-		// LinearData or raw linear data
-		documentModel = new ve.dm.Document( dataOrDoc );
+	if ( dataOrDocOrSurface instanceof ve.dm.Surface ) {
+		this.model = dataOrDocOrSurface;
 	} else {
-		// HTMLDocument
-		documentModel = ve.dm.converter.getModelFromDom( dataOrDoc );
+		if ( dataOrDocOrSurface instanceof ve.dm.Document ) {
+			// ve.dm.Document
+			documentModel = dataOrDocOrSurface;
+		} else if ( dataOrDocOrSurface instanceof ve.dm.ElementLinearData || Array.isArray( dataOrDocOrSurface ) ) {
+			// LinearData or raw linear data
+			documentModel = new ve.dm.Document( dataOrDocOrSurface );
+		} else {
+			// HTMLDocument
+			documentModel = ve.dm.converter.getModelFromDom( dataOrDocOrSurface );
+		}
+		this.model = this.createModel( documentModel, config.attachedRoot );
 	}
-	this.model = this.createModel( documentModel );
 	this.view = this.createView( this.model );
 	this.dialogs = this.createDialogWindowManager();
 	this.importRules = config.importRules || {};
 	this.multiline = config.multiline !== false;
-	this.context = this.createContext();
+	this.context = this.createContext( { $popupContainer: config.$overlayContainer } );
 	this.progresses = [];
 	this.showProgressDebounced = ve.debounce( this.showProgress.bind( this ) );
-	this.filibuster = null;
+	this.scrollSelectionIntoViewDebounced = ve.debounce( this.scrollSelectionIntoView.bind( this ), 500 );
 	this.debugBar = null;
 	this.placeholder = null;
 	this.placeholderVisible = false;
 	this.setPlaceholder( config.placeholder );
-	this.scrollPosition = null;
+	this.setReadOnly( !!config.readOnly );
+	this.nullSelectionOnBlur = config.nullSelectionOnBlur !== false;
+	this.completion = new ve.ui.CompletionWidget( this );
 
+	// Deprecated, use this.padding.top
 	this.toolbarHeight = 0;
+	this.padding = {
+		top: 0,
+		right: 0,
+		bottom: 0,
+		left: 0
+	};
 	this.toolbarDialogs = new ve.ui.ToolbarDialogWindowManager( this, {
 		factory: ve.ui.windowFactory,
 		modal: false
 	} );
 
 	// Events
-	this.getModel().connect( this, { select: 'scrollCursorIntoView' } );
+	this.getModel().connect( this, {
+		select: 'onModelSelect',
+		blur: 'onModelBlur',
+		focus: 'onModelFocus'
+	} );
 	this.getModel().getDocument().connect( this, { transact: 'onDocumentTransact' } );
-	this.dialogs.connect( this, { opening: 'onWindowOpening' } );
-	this.context.getInspectors().connect( this, { opening: 'onWindowOpening' } );
-	this.getView().connect( this, { position: 'onViewPosition' } );
+	this.getView().connect( this, {
+		position: 'onViewPosition',
+		activation: 'onViewActivation'
+	} );
+	this.getContext().connect( this, { resize: 'onContextResize' } );
 
 	// Initialization
-	this.$menus.append( this.context.$element );
+	this.$menus.append( this.context.$element, this.completion.$element );
 	this.$element
 		// The following classes are used here:
 		// * ve-ui-surface-visual
@@ -114,6 +137,12 @@ OO.inheritClass( ve.ui.Surface, OO.ui.Widget );
 /* Events */
 
 /**
+ * When a surface has been initialized
+ *
+ * @event ready
+ */
+
+/**
  * When a surface is destroyed.
  *
  * @event destroy
@@ -121,6 +150,7 @@ OO.inheritClass( ve.ui.Surface, OO.ui.Widget );
 
 /**
  * The surface was scrolled programmatically
+ * as a result of a native selection change
  *
  * @event scroll
  */
@@ -131,32 +161,23 @@ OO.inheritClass( ve.ui.Surface, OO.ui.Widget );
  * @event submit
  */
 
-/* Static Properties */
-
 /**
- * The surface is for use on mobile devices
+ * The surface read-only state has changed
  *
- * @static
- * @inheritable
- * @property {boolean}
+ * @event readOnly
+ * @param {boolean} readOnly The surface is read-only
  */
-ve.ui.Surface.static.isMobile = false;
 
 /* Methods */
-
-/* eslint-disable valid-jsdoc */
 
 /**
  * Destroy the surface, releasing all memory and removing all DOM elements.
  *
- * @method
+ * @return {ve.ui.Surface}
  * @chainable
  * @fires destroy
  */
 ve.ui.Surface.prototype.destroy = function () {
-	// Stop periodic history tracking in model
-	this.model.stopHistoryTracking();
-
 	// Destroy the ce.Surface, the ui.Context and window managers
 	this.context.destroy();
 	this.dialogs.destroy();
@@ -169,8 +190,6 @@ ve.ui.Surface.prototype.destroy = function () {
 	// Disconnect events
 	this.dialogs.disconnect( this );
 	this.context.getInspectors().disconnect( this );
-
-	this.toggleMobileGlobalOverlay( false );
 
 	// Remove DOM elements
 	this.$element.remove();
@@ -187,23 +206,25 @@ ve.ui.Surface.prototype.destroy = function () {
  *
  * This must be called after the surface has been attached to the DOM.
  *
+ * @return {ve.ui.Surface}
  * @chainable
  */
 ve.ui.Surface.prototype.initialize = function () {
 	// Attach globalOverlay to the global <body>, not the local frame's <body>
-	$( 'body' ).append( this.globalOverlay.$element );
+	$( document.body ).append( this.globalOverlay.$element );
 
 	if ( ve.debug ) {
 		this.setupDebugBar();
 	}
 
-	// The following classes can be used here:
+	// The following classes are used here:
 	// * ve-ui-surface-dir-ltr
 	// * ve-ui-surface-dir-rtl
 	this.$element.addClass( 've-ui-surface-dir-' + this.getDir() );
 
 	this.getView().initialize();
 	this.getModel().initialize();
+	this.emit( 'ready' );
 	return this;
 };
 
@@ -237,17 +258,16 @@ ve.ui.Surface.prototype.getMode = function () {
 /**
  * Create a context.
  *
- * @method
+ * @param {Object} config Configuration options
  * @return {ve.ui.Context} Context
  */
-ve.ui.Surface.prototype.createContext = function () {
-	return OO.ui.isMobile() ? new ve.ui.MobileContext( this ) : new ve.ui.DesktopContext( this );
+ve.ui.Surface.prototype.createContext = function ( config ) {
+	return OO.ui.isMobile() ? new ve.ui.MobileContext( this, config ) : new ve.ui.DesktopContext( this, config );
 };
 
 /**
  * Create a dialog window manager.
  *
- * @method
  * @return {ve.ui.WindowManager} Dialog window manager
  */
 ve.ui.Surface.prototype.createDialogWindowManager = function () {
@@ -263,10 +283,11 @@ ve.ui.Surface.prototype.createDialogWindowManager = function () {
  * Create a surface model
  *
  * @param {ve.dm.Document} doc Document model
+ * @param {ve.dm.BranchNode} [attachedRoot] Node to surface
  * @return {ve.dm.Surface} Surface model
  */
-ve.ui.Surface.prototype.createModel = function ( doc ) {
-	return new ve.dm.Surface( doc, { sourceMode: this.getMode() === 'source' } );
+ve.ui.Surface.prototype.createModel = function ( doc, attachedRoot ) {
+	return new ve.dm.Surface( doc, attachedRoot, { sourceMode: this.getMode() === 'source' } );
 };
 
 /**
@@ -277,15 +298,6 @@ ve.ui.Surface.prototype.createModel = function ( doc ) {
  */
 ve.ui.Surface.prototype.createView = function ( model ) {
 	return new ve.ce.Surface( model, this );
-};
-
-/**
- * Check if the surface is for use on mobile devices
- *
- * @return {boolean} The surface is for use on mobile devices
- */
-ve.ui.Surface.prototype.isMobile = function () {
-	return this.constructor.static.isMobile;
 };
 
 /**
@@ -321,7 +333,7 @@ ve.ui.Surface.prototype.getViewportDimensions = function () {
 		return null;
 	}
 
-	top = Math.max( this.toolbarHeight - rect.top, 0 );
+	top = Math.max( this.padding.top - rect.top, 0 );
 	bottom = $( this.getElementWindow() ).height() - rect.top;
 
 	return {
@@ -336,7 +348,6 @@ ve.ui.Surface.prototype.getViewportDimensions = function () {
  * Check if editing is enabled.
  *
  * @deprecated Use #isDisabled
- * @method
  * @return {boolean} Editing is enabled
  */
 ve.ui.Surface.prototype.isEnabled = function () {
@@ -346,7 +357,6 @@ ve.ui.Surface.prototype.isEnabled = function () {
 /**
  * Get the surface model.
  *
- * @method
  * @return {ve.dm.Surface} Surface model
  */
 ve.ui.Surface.prototype.getModel = function () {
@@ -356,7 +366,6 @@ ve.ui.Surface.prototype.getModel = function () {
 /**
  * Get the surface view.
  *
- * @method
  * @return {ve.ce.Surface} Surface view
  */
 ve.ui.Surface.prototype.getView = function () {
@@ -366,7 +375,6 @@ ve.ui.Surface.prototype.getView = function () {
 /**
  * Get the context menu.
  *
- * @method
  * @return {ve.ui.Context} Context user interface
  */
 ve.ui.Surface.prototype.getContext = function () {
@@ -376,7 +384,6 @@ ve.ui.Surface.prototype.getContext = function () {
 /**
  * Get dialogs window set.
  *
- * @method
  * @return {ve.ui.WindowManager} Dialogs window set
  */
 ve.ui.Surface.prototype.getDialogs = function () {
@@ -397,7 +404,6 @@ ve.ui.Surface.prototype.getToolbarDialogs = function () {
  *
  * Local overlays are attached to the same frame as the surface.
  *
- * @method
  * @return {ve.ui.Overlay} Local overlay
  */
 ve.ui.Surface.prototype.getLocalOverlay = function () {
@@ -409,7 +415,6 @@ ve.ui.Surface.prototype.getLocalOverlay = function () {
  *
  * Global overlays are attached to the top-most frame.
  *
- * @method
  * @return {ve.ui.Overlay} Global overlay
  */
 ve.ui.Surface.prototype.getGlobalOverlay = function () {
@@ -420,39 +425,30 @@ ve.ui.Surface.prototype.getGlobalOverlay = function () {
  * @inheritdoc
  */
 ve.ui.Surface.prototype.setDisabled = function ( disabled ) {
-	if ( disabled !== this.disabled && this.disabled !== null ) {
-		if ( disabled ) {
-			this.view.disable();
-			this.model.disable();
-		} else {
-			this.view.enable();
-			this.model.enable();
-		}
+	if ( disabled ) {
+		OO.ui.warnDeprecation( 'Surfaces can\'t be disabled, only set to readOnly' );
 	}
-	// Parent method
-	return ve.ui.Surface.super.prototype.setDisabled.call( this, disabled );
 };
 
 /**
- * Disable editing.
+ * Set the read-only state of the surface
  *
- * @deprecated Use #setDisabled
- * @method
- * @chainable
+ * @param {boolean} readOnly Make surface read-only
  */
-ve.ui.Surface.prototype.disable = function () {
-	return this.setDisabled( true );
+ve.ui.Surface.prototype.setReadOnly = function ( readOnly ) {
+	this.readOnly = !!readOnly;
+	this.model.setReadOnly( readOnly );
+	this.view.setReadOnly( readOnly );
+	this.emit( 'readOnly', readOnly );
 };
 
 /**
- * Enable editing.
+ * Check if the surface is read-only
  *
- * @deprecated Use #setDisabled
- * @method
- * @chainable
+ * @return {boolean}
  */
-ve.ui.Surface.prototype.enable = function () {
-	return this.setDisabled( false );
+ve.ui.Surface.prototype.isReadOnly = function () {
+	return this.readOnly;
 };
 
 /**
@@ -461,8 +457,6 @@ ve.ui.Surface.prototype.enable = function () {
 ve.ui.Surface.prototype.focus = function () {
 	this.getView().focus();
 };
-
-/* eslint-enable valid-jsdoc */
 
 /**
  * Handle transact events from the document model
@@ -476,126 +470,99 @@ ve.ui.Surface.prototype.onDocumentTransact = function () {
 };
 
 /**
- * Scroll the cursor into view
- *
- * Called in response to selection events.
- *
- * This is required when the cursor disappears under the floating toolbar.
+ * Handle select events from the model
  */
-ve.ui.Surface.prototype.scrollCursorIntoView = function () {
-	var view, clientRect, surfaceRect, cursorTop, cursorBottom, scrollTo, bottomBound, topBound;
-
-	view = this.getView();
-
-	if ( !view.nativeSelection.focusNode || OO.ui.contains( view.$pasteTarget[ 0 ], view.nativeSelection.focusNode, true ) ) {
-		return;
-	}
-
-	if ( this.getView().dragging ) {
+ve.ui.Surface.prototype.onModelSelect = function () {
+	// eslint-disable-next-line no-bitwise
+	if ( this.getView().dragging ^ OO.ui.isMobile() ) {
 		// Allow native scroll behavior while dragging, as the start/end
 		// points are unreliable until we're finished. Without this, trying to
 		// drag a selection larger than a single screen will sometimes lock
 		// the viewport in place, as it tries to keep the wrong end of the
 		// selection on-screen.
+		// On mobile the dragging flag is essentially reversed in meaning, as
+		// it is set during mouse down, which happens when you are tapping
+		// to select, but when you drag selection handles no mousedown event
+		// occurs (or any event other 'selectionchange') so the flag is unset.
 		return;
 	}
+	this.scrollSelectionIntoViewDebounced();
+};
+
+/**
+ * Scroll the selection into view
+ *
+ * Called in response to selection events.
+ *
+ * This is done for all selections, even native ones, to account
+ * for the extra padding of the floating toolbar.
+ *
+ * @fires scroll
+ */
+ve.ui.Surface.prototype.scrollSelectionIntoView = function () {
+	var profile, clientRect, surfaceRect, padding,
+		animate = true,
+		view = this.getView(),
+		selection = view.getSelection(),
+		surface = this;
 
 	// We only care about the focus end of the selection, the anchor never
-	// moves and should be allowed off screen. Thus, we collapse the selection
-	// to the anchor point (collapseToTo) before measuring.
-	clientRect = this.getView().getSelection( this.getModel().getSelection().collapseToTo() ).getSelectionBoundingRect();
-	if ( !clientRect ) {
+	// moves and should be allowed off screen.
+	clientRect = selection.getSelectionFocusRect();
+	surfaceRect = this.getBoundingClientRect();
+	if ( !clientRect || !surfaceRect ) {
 		return;
 	}
 
 	// We want viewport-relative coordinates, so we need to translate it
-	surfaceRect = this.getBoundingClientRect();
 	clientRect = ve.translateRect( clientRect, surfaceRect.left, surfaceRect.top );
 
-	// TODO: this has some long-standing assumptions that we're going to be in
-	// the context we expect. If we get VE in a scrollable div or suchlike,
-	// we'd no longer be able to make these assumptions about top/bottom of
-	// window.
-	topBound = this.toolbarHeight; // top of the window + height of the toolbar
-	bottomBound = window.innerHeight; // bottom of the window
+	padding = ve.copy( this.padding );
 
-	cursorTop = clientRect.top - 5;
-	cursorBottom = clientRect.bottom + 5;
+	if ( selection.isNativeCursor() ) {
+		animate = false;
+		if (
+			OO.ui.isMobile() &&
+			!this.getModel().getSelection().isCollapsed()
+		) {
+			profile = $.client.profile();
+			// Assume that if the selection has been expanded, then a context menu is visible
+			// above the selection. We don't want this to obscure the toolbar so add on an
+			// estimate of its height.
+			// Previously we applied this fix to iOS, even though scrolling closed the context,
+			// because the user could touch the selection to re-open it. However sometime between
+			// iOS 12 and 12.3, scrolling stopped closing the context, but it doesn't move it either,
+			// so this fix became useless.
+			// Older versions of Android draw the context menu in the address bar and so
+			// don't need to be fixed.
+			if ( profile.name === 'android' && profile.versionNumber >= 6 ) {
+				padding.top += 60;
+			}
+			// Also assume there are selection handles below on Android. (T204718)
+			if ( profile.name === 'android' || profile.name === 'firefox' ) {
+				padding.bottom += 30;
+			}
+		}
 
-	if ( cursorTop < topBound ) {
-		scrollTo = this.$scrollContainer.scrollTop() + ( cursorTop - topBound );
-		this.scrollTo( scrollTo );
-	} else if ( cursorBottom > bottomBound ) {
-		scrollTo = this.$scrollContainer.scrollTop() + ( cursorBottom - bottomBound );
-		this.scrollTo( scrollTo );
+		clientRect.top -= 5;
+		clientRect.bottom += 5;
 	}
+
+	ve.scrollIntoView( clientRect, {
+		animate: animate,
+		scrollContainer: this.$scrollContainer[ 0 ],
+		padding: padding
+	} ).then( function () {
+		if ( selection.isNativeCursor() ) {
+			// TODO: This event has only even been emitted for native selection
+			// scroll changes. Perhaps rename it.
+			surface.emit( 'scroll' );
+		}
+	} );
 };
 
-/**
- * Scroll the scroll container to a specific offset
- *
- * @param {number} offset Scroll offset
- * @fires scroll
- */
-ve.ui.Surface.prototype.scrollTo = function ( offset ) {
-	this.$scrollContainer.scrollTop( offset );
-	this.emit( 'scroll' );
-};
-
-/**
- * Handle an dialog opening event.
- *
- * @param {OO.ui.Window} win Window that's being opened
- * @param {jQuery.Promise} opening Promise resolved when window is opened; when the promise is
- *   resolved the first argument will be a promise which will be resolved when the window begins
- *   closing, the second argument will be the opening data
- * @param {Object} data Window opening data
- */
-ve.ui.Surface.prototype.onWindowOpening = function ( win, opening ) {
-	var surface = this;
-
-	if ( OO.ui.isMobile() ) {
-		opening
-			.progress( function ( data ) {
-				if ( data.state === 'setup' ) {
-					surface.toggleMobileGlobalOverlay( true );
-				}
-			} )
-			.always( function ( opened ) {
-				opened.always( function ( closed ) {
-					closed.always( function () {
-						surface.toggleMobileGlobalOverlay( false );
-					} );
-				} );
-			} );
-	}
-};
-
-/**
- * Show or hide mobile global overlay.
- *
- * @param {boolean} show Show the global overlay.
- */
-ve.ui.Surface.prototype.toggleMobileGlobalOverlay = function ( show ) {
-	var $body = $( 'body' );
-
-	if ( !OO.ui.isMobile() ) {
-		return;
-	}
-
-	// Store current position before we set overflow: hidden on body
-	if ( show ) {
-		this.scrollPosition = $body.scrollTop();
-	}
-
-	$( 'html, body' ).toggleClass( 've-ui-overlay-global-mobile-enabled', show );
-	this.globalOverlay.$element.toggleClass( 've-ui-overlay-global-mobile-visible', show );
-
-	// Restore previous position after we remove overflow: hidden on body
-	if ( !show ) {
-		$body.scrollTop( this.scrollPosition );
-	}
-};
+// Deprecated alias
+ve.ui.Surface.prototype.scrollCursorIntoView = ve.ui.Surface.prototype.scrollSelectionIntoView;
 
 /**
  * Set placeholder text
@@ -626,7 +593,7 @@ ve.ui.Surface.prototype.updatePlaceholder = function () {
 	if ( !hasContent ) {
 		// Use a clone of the first node in the document so the placeholder
 		// styling matches the text the users sees when they start typing
-		firstNode = this.getView().documentView.documentNode.getNodeFromOffset( 1 );
+		firstNode = this.getView().attachedRoot.children[ 0 ];
 		if ( firstNode ) {
 			$wrapper = firstNode.$element.clone();
 			if ( ve.debug ) {
@@ -663,7 +630,6 @@ ve.ui.Surface.prototype.getCommands = function () {
 /**
  * Execute an action or command.
  *
- * @method
  * @param {ve.ui.Trigger|string} triggerOrAction Trigger or symbolic name of action
  * @param {string} [method] Action method name
  * @param {...Mixed} [args] Additional arguments for action
@@ -671,10 +637,6 @@ ve.ui.Surface.prototype.getCommands = function () {
  */
 ve.ui.Surface.prototype.execute = function ( triggerOrAction, method ) {
 	var command, obj, ret;
-
-	if ( this.isDisabled() ) {
-		return;
-	}
 
 	if ( triggerOrAction instanceof ve.ui.Trigger ) {
 		command = this.triggerListener.getCommandByTrigger( triggerOrAction.toString() );
@@ -708,15 +670,78 @@ ve.ui.Surface.prototype.executeCommand = function ( commandName ) {
 	return false;
 };
 
-/**
- * Set the current height of the toolbar.
- *
- * Used for scroll-into-view calculations.
- *
- * @param {number} toolbarHeight Toolbar height
- */
+// Deprecated, use #setPadding
 ve.ui.Surface.prototype.setToolbarHeight = function ( toolbarHeight ) {
-	this.toolbarHeight = toolbarHeight;
+	this.setPadding( { top: toolbarHeight } );
+};
+
+/**
+ * Set content area padding.
+ *
+ * When UI components obscure the surface (e.g. the toolbar),
+ * set the appropriate amount of padding here so that
+ * scroll-into-view calculations can be adjusted.
+ *
+ * @param {Object} padding Padding object containing top, right, bottom
+ *  and/or left values. Omit properties to leave unchanged.
+ */
+ve.ui.Surface.prototype.setPadding = function ( padding ) {
+	ve.extendObject( this.padding, padding );
+	// Deprecated, use this.padding.top
+	this.toolbarHeight = this.padding.top;
+};
+
+/**
+ * Handle resize events from the context
+ */
+ve.ui.Surface.prototype.onContextResize = function () {
+	this.setPadding( { bottom: this.context.$element[ 0 ].clientHeight } );
+	this.adjustVisiblePadding();
+	this.scrollSelectionIntoView();
+};
+
+/**
+ * Handle surface model blur events
+ */
+ve.ui.Surface.prototype.onModelBlur = function () {
+	this.adjustVisiblePadding();
+};
+
+/**
+ * Handle surface model focus events
+ */
+ve.ui.Surface.prototype.onModelFocus = function () {
+	this.adjustVisiblePadding();
+};
+
+/**
+ * Handle surface view activation events
+ */
+ve.ui.Surface.prototype.onViewActivation = function () {
+	this.adjustVisiblePadding();
+};
+
+/**
+ * Adjust visible padding on the surface to allow the whole document
+ * to be scrolled to.
+ */
+ve.ui.Surface.prototype.adjustVisiblePadding = function () {
+	var bottom, keyboardShown;
+	if ( OO.ui.isMobile() && !this.getInDialog() ) {
+		keyboardShown = this.getView().getSelection().isNativeCursor() &&
+			!this.getView().isShownAsDeactivated();
+		if ( ve.init.platform.constructor.static.isIos() && keyboardShown ) {
+			// iOS needs a whole extra page of padding when the virtual keyboard is shown.
+			// Note: we keep this padding when surface is deactivated-but-shown-as-activated
+			// so that the view doesn't shift when e.g. opening a toolbar toolgroup popup.
+			bottom = $( window ).height() - this.padding.top;
+		} else {
+			// otherwise just add padding to account for the context
+			bottom = this.padding.bottom;
+		}
+		this.getView().$attachedRootNode.css( 'padding-bottom', bottom );
+		this.scrollSelectionIntoView();
+	}
 };
 
 /**
@@ -728,7 +753,7 @@ ve.ui.Surface.prototype.setToolbarHeight = function ( toolbarHeight ) {
  * @return {jQuery.Promise} Promise which resolves with a progress bar widget and a promise which fails if cancelled
  */
 ve.ui.Surface.prototype.createProgress = function ( progressCompletePromise, label, nonCancellable ) {
-	var progressBarDeferred = $.Deferred();
+	var progressBarDeferred = ve.createDeferred();
 
 	this.progresses.push( {
 		label: label,
@@ -774,70 +799,6 @@ ve.ui.Surface.prototype.isMultiline = function () {
  */
 ve.ui.Surface.prototype.getDir = function () {
 	return this.$element.css( 'direction' );
-};
-
-ve.ui.Surface.prototype.initFilibuster = function () {
-	var surface = this;
-	this.filibuster = new ve.Filibuster()
-		.wrapClass( ve.EventSequencer )
-		.wrapNamespace( ve.dm, 've.dm', [
-			// Blacklist
-			ve.dm.LinearSelection.prototype.getDescription,
-			ve.dm.TableSelection.prototype.getDescription,
-			ve.dm.NullSelection.prototype.getDescription
-		] )
-		.wrapNamespace( ve.ce, 've.ce' )
-		.wrapNamespace( ve.ui, 've.ui', [
-			// Blacklist
-			ve.ui.Surface.prototype.startFilibuster,
-			ve.ui.Surface.prototype.stopFilibuster
-		] )
-		.setObserver( 'dm doc', function () {
-			return JSON.stringify( ve.Filibuster.static.clonePlain(
-				surface.model.documentModel.data.data
-			) );
-		} )
-		.setObserver( 'dm selection', function () {
-			var selection = surface.model.selection;
-			if ( !selection ) {
-				return 'null';
-			}
-			return selection.getDescription();
-		} )
-		.setObserver( 'DOM doc', function () {
-			return ve.serializeNodeDebug( surface.view.$element[ 0 ] );
-		} )
-		.setObserver( 'DOM selection', function () {
-			var nativeRange,
-				nativeSelection = surface.view.nativeSelection;
-			if ( nativeSelection.rangeCount === 0 ) {
-				return 'null';
-			}
-			nativeRange = nativeSelection.getRangeAt( 0 );
-			return JSON.stringify( {
-				startContainer: ve.serializeNodeDebug( nativeRange.startContainer ),
-				startOffset: nativeRange.startOffset,
-				endContainer: (
-					nativeRange.startContainer === nativeRange.endContainer ?
-						'(=startContainer)' :
-						ve.serializeNodeDebug( nativeRange.endContainer )
-				),
-				endOffset: nativeRange.endOffset
-			} );
-		} );
-};
-
-ve.ui.Surface.prototype.startFilibuster = function () {
-	if ( !this.filibuster ) {
-		this.initFilibuster();
-	} else {
-		this.filibuster.clearLogs();
-	}
-	this.filibuster.start();
-};
-
-ve.ui.Surface.prototype.stopFilibuster = function () {
-	this.filibuster.stop();
 };
 
 /**

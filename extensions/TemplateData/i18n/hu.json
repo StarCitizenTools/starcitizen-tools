@@ -1,19 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Bencemac",
+			"Bináris",
+			"Csega",
+			"Máté",
 			"Tacsipacsi",
 			"Tgr",
-			"Csega",
-			"Bináris",
-			"Urbalazs",
-			"Máté"
+			"Urbalazs"
 		]
 	},
-	"apihelp-templatedata-description": "A TemplateData kiterjesztés által tárolt adatok lekérdezése.",
-	"apihelp-templatedata-example-1": "[[Template:Stub]] és [[Template:Example]] sablonadatainak visszaadása eredményekkel, ha a sablon nem létezik, vagy létezik ugyan, de nincs sablonadata",
-	"apihelp-templatedata-param-lang": "Lokalizált értékek visszaadása ezen a nyelven. Alapértelmezetten minden elérhető fordítást visszaad az API.",
-	"apierror-templatedata-corrupt": "A(z) #$1 lap hibás TemplateDatát tartalmaz: $2",
-	"apiwarn-templatedata-deprecation-format": "Az alapértelmezett formátum <kbd>jsonfm</kbd>-re fog változni a jövőben. Add meg a <kbd>format=json</kbd>-t explicit módon.",
 	"templatedata-desc": "A sablonok paraméterezését leíró adatokat tárol (JSON formátumban)",
 	"templatedata-doc-desc-empty": "Nincs leírás.",
 	"templatedata-doc-format-block": "Ennek a sablonnak ajánlott külön sorokba (blokkban) írni a paramétereit",
@@ -21,11 +17,8 @@
 	"templatedata-doc-format-inline": "Ennek a sablonnak ajánlott egy sorba írni a paramétereit.",
 	"templatedata-doc-no-params-set": "Nincs paraméter megadva",
 	"templatedata-doc-param-autovalue": "Automatikus érték",
-	"templatedata-doc-param-autovalue-empty": "üres",
-	"templatedata-doc-param-default": "Alapértelmezett",
-	"templatedata-doc-param-default-empty": "üres",
+	"templatedata-doc-param-default": "Alap­értelmezett",
 	"templatedata-doc-param-example": "Példa",
-	"templatedata-doc-param-example-empty": "üres",
 	"templatedata-doc-param-desc": "Leírás",
 	"templatedata-doc-param-desc-empty": "nincs leírás",
 	"templatedata-doc-param-name": "Paraméter",

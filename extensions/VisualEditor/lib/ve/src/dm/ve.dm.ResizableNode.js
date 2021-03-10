@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Resizable node.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -41,7 +41,6 @@ ve.dm.ResizableNode.prototype.getScalable = function () {
  * Create a scalable object based on the current object's width and height.
  *
  * @abstract
- * @method
  * @return {ve.dm.Scalable} Scalable object
  */
 ve.dm.ResizableNode.prototype.createScalable = null;
@@ -49,7 +48,6 @@ ve.dm.ResizableNode.prototype.createScalable = null;
 /**
  * Handle attribute change events from the model.
  *
- * @method
  * @param {string} key Attribute key
  * @param {string} from Old value
  * @param {string} to New value

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface internal link context item styles.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,6 +16,7 @@
 	background-color: #c8ccd1;
 	border: 0.35714em solid #c8ccd1;
 	opacity: 0.4;
+	margin-bottom: 0.3em;
 }
 
 .ve-ui-mwInternalLinkContextItem-hasImage {
@@ -30,21 +31,17 @@
 	padding: 0.35714em;
 }
 
-.ve-ui-mwInternalLinkContextItem-link,
 .ve-ui-mwInternalLinkContextItem-description {
 	display: block;
-}
-
-.ve-ui-mwInternalLinkContextItem-description {
 	color: #72777d;
 	margin-top: 0.5em;
 }
 
-.ve-ui-mwInternalLinkContextItem-withImage .ve-ui-mwInternalLinkContextItem-link,
+.ve-ui-mwInternalLinkContextItem-withImage .ve-ui-linkContextItem-link,
 .ve-ui-mwInternalLinkContextItem-withImage .ve-ui-mwInternalLinkContextItem-description {
-	margin-left: 5.5em;
+	margin-left: 5em;
 }
 
-.ve-ui-mwInternalLinkContextItem-withDescription .ve-ui-mwInternalLinkContextItem-link {
+.ve-ui-mwInternalLinkContextItem-withDescription .ve-ui-linkContextItem-link {
 	font-weight: bold;
 }

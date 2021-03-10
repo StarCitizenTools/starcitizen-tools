@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface TargetToolbar class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -20,6 +20,9 @@ ve.ui.TargetToolbar = function VeUiTargetToolbar( target, config ) {
 
 	// Initialization
 	this.$element.addClass( 've-ui-targetToolbar' );
+	if ( OO.ui.isMobile() ) {
+		this.$element.addClass( 've-ui-targetToolbar-mobile' );
+	}
 
 	// Properties
 	this.target = target;

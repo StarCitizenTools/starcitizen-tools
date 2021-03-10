@@ -4,6 +4,7 @@
 			"Cekli829",
 			"Interfase",
 			"Jduranboger",
+			"Serkanland",
 			"Wertuose"
 		]
 	},
@@ -31,6 +32,7 @@
 	"visualeditor-dialog-action-cancel": "İmtina",
 	"visualeditor-dialog-action-goback": "Geri qayıt",
 	"visualeditor-dialog-command-help-title": "Klavişlərin birləşməsi",
+	"visualeditor-find-and-replace-match-case": "Böyük/kiçik hərf həssaslığı",
 	"visualeditor-formatdropdown-format-blockquote": "İstinad bloku",
 	"visualeditor-formatdropdown-format-heading-label": "Başlıq (1-6)",
 	"visualeditor-formatdropdown-format-heading1": "Başlıq 1",
@@ -57,8 +59,8 @@
 	"visualeditor-linkinspector-title": "Keçid",
 	"visualeditor-listbutton-bullet-tooltip": "Nişanlanmış siyahı",
 	"visualeditor-listbutton-number-tooltip": "Nömrələnmiş siyahı",
-	"visualeditor-mediasizewidget-button-originaldimensions": "Tam ölçüdə göstər",
 	"visualeditor-mediasizewidget-label-defaulterror": "Ölçünün qiymətləri verilməyib",
+	"visualeditor-pagemenu-tooltip": "Səhifə parametrləri",
 	"visualeditor-shortcuts-formatting": "Abzasın formatlaşdırılması",
 	"visualeditor-shortcuts-history": "Tarix",
 	"visualeditor-shortcuts-other": "Digər",

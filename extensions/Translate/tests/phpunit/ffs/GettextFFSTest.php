@@ -8,32 +8,28 @@
  * @license GPL-2.0-or-later
  */
 
-/**
- * @see GettextFFS
- */
-class GettextFFSTest extends MediaWikiTestCase {
+/** @covers \GettextFFS */
+class GettextFFSTest extends MediaWikiIntegrationTestCase {
 	protected $groupConfiguration;
 
-	public function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		$this->groupConfiguration = [
 			'BASIC' => [
-				'class' => 'FileBasedMessageGroup',
+				'class' => FileBasedMessageGroup::class,
 				'id' => 'test-id',
 				'label' => 'Test Label',
 				'namespace' => 'NS_MEDIAWIKI',
 				'description' => 'Test description',
 			],
 			'FILES' => [
-				'class' => 'GettextFFS',
+				'class' => GettextFFS::class,
 				'sourcePattern' => __DIR__ . '/../data/gettext.po',
 			],
 		];
 	}
 
-	/**
-	 * @dataProvider provideMangling
-	 */
+	/** @dataProvider provideMangling */
 	public function testMangling( $expected, $item, $algo ) {
 		$this->assertEquals( $expected, GettextFFS::generateKeyFromItem( $item, $algo ) );
 	}
@@ -156,9 +152,7 @@ GETTEXT;
 		);
 	}
 
-	/**
-	 * @dataProvider provideShouldOverwrite
-	 */
+	/** @dataProvider provideShouldOverwrite */
 	public function testShouldOverwrite( $a, $b, $expected, $comment ) {
 		$group = MessageGroupBase::factory( $this->groupConfiguration );
 		$ffs = new GettextFFS( $group );
@@ -252,5 +246,20 @@ GETTEXT
 		];
 
 		return $cases;
+	}
+
+	public function testIsContentEqual() {
+		$group = MessageGroupBase::factory( $this->groupConfiguration );
+		$ffs = new GettextFFS( $group );
+
+		$this->assertTrue( $ffs->isContentEqual( 'Foo bar', 'Foo bar' ) );
+		$this->assertTrue( $ffs->isContentEqual(
+			'The bunnies stole {{PLURAL:GETTEXT|one carrot|%{count} carrots}}.',
+			'{{PLURAL:GETTEXT|The bunnies stole one carrot.|The bunnies stole %{count} carrots.}}' ) );
+
+		$this->assertFalse( $ffs->isContentEqual( 'Foo bar', 'Foo baz' ) );
+		$this->assertFalse( $ffs->isContentEqual(
+			'The bunnies stole {{PLURAL:GETTEXT|one banana|%{count} carrots}}.',
+			'{{PLURAL:GETTEXT|The bunnies stole one carrot.|The bunnies stole %{count} carrots.}}' ) );
 	}
 }

@@ -1,12 +1,16 @@
 /*!
  * VisualEditor MediaWiki UserInterface MWParameterResultWidget styles.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 .ve-ui-mwParameterResultWidget {
 	padding-right: 0.25em;
+}
+
+.ve-ui-mwParameterResultWidget.oo-ui-optionWidget-highlighted {
+	background-color: #e1f3ff;
 }
 
 .ve-ui-mwParameterResultWidget .oo-ui-optionWidget-icon {
@@ -20,7 +24,7 @@
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
-	/* HACK: Based on the expected width of this widget, using % produces unreliable results*/
+	/* HACK: Based on the expected width of this widget, using % produces unreliable results */
 	max-width: 33em;
 }
 
@@ -32,10 +36,11 @@
 .ve-ui-mwParameterResultWidget-names {
 	float: right;
 	font-size: 0.9em;
+	padding: 0.2em 0;
 }
 
 .ve-ui-mwParameterResultWidget-name {
-	padding: 0.125em 0.25em;
+	padding: 0.1em 0.25em;
 	margin-left: 0.5em;
 	color: #54595d;
 	background-color: #eaecf0;

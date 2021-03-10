@@ -1,18 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Akamycoco",
 			"Corainn",
 			"Hitaypayan",
-			"Akamycoco",
 			"Translatealcd"
 		]
 	},
-	"apierror-visualeditor-difffailed": "Wayal yaqih quw pinsspung niya’ sa kin ini’ ptnaq naha’",
-	"apihelp-visualeditoredit-param-summary": "Sr’zyut miru’ gnaygay lalu’.",
 	"tooltip-ca-ve-edit": "Sr’zyut squw zzngayan tay sqaniy",
 	"visualeditor-advancedsettings-tool": "Ssi’ sa mkkura’ kinqbaqan",
 	"visualeditor-backbutton-tooltip": "’bzinah",
-	"visualeditor-beta-label": "tlamiy",
 	"visualeditor-ca-createlocaldescriptionsource": "Twangiy miru’ sqaniy quw minmyawsu’ banggo’ puqing na rhzyal sqaniy",
 	"visualeditor-ca-createsource": "Ps’rux Yuensma’",
 	"visualeditor-ca-editsource": "Smr’zyut sa sniyan lalu’ na llpgan sa aring ’ringan.",
@@ -36,8 +33,6 @@
 	"visualeditor-dialog-media-info-moreinfo": "Pzyux na’ ggalan kinbbaq na zayzyuwaw",
 	"visualeditor-dialog-media-info-readmore": "Pzyux na’ quw lpgun",
 	"visualeditor-dialog-media-info-uploaded": "Pawsa’ sa kktan tay: $1",
-	"visualeditor-dialog-media-noresults": "Ktan ga ungat quw pcingan balay na zyuwaw.",
-	"visualeditor-dialog-media-originaldimensions": "Kinkrahu’ spngan ’ringan",
 	"visualeditor-dialog-media-page-advanced": "Ssi’ sa mkkura’ kinqbaqan",
 	"visualeditor-dialog-media-page-general": "Ssi’ na kwara’ na",
 	"visualeditor-dialog-media-position-center": "Syun kska’",
@@ -132,7 +127,6 @@
 	"visualeditor-linknodeinspector-add-label": "Twangiy sa qinlah lalu’",
 	"visualeditor-linknodeinspector-title": "Pinqiri na ’ubuy",
 	"visualeditor-magiclinknodeinspector-title-rfc": "’ubuy na RFC",
-	"visualeditor-media-input-placeholder": "Hkangi’ meti’",
 	"visualeditor-meta-tool": "Bbzyagan",
 	"visualeditor-mweditmode-tooltip": "Iyugun quw ssr’zyut qaniy",
 	"visualeditor-mweditmodesource-warning-cancel": "Laxan",
@@ -159,7 +153,6 @@
 	"visualeditor-mwlanguagevariantinspector-filter-langs-placeholder": "Banggo’ na ’niwan lalu’ na kay’",
 	"visualeditor-mwpredialog-convert": "Swalan quw inrkyasan na biru’",
 	"visualeditor-mwsignature-tool": "Bniru’ su’ lalu’",
-	"visualeditor-pagemenu-tooltip": "Bbzyagan nz zngazyan",
 	"visualeditor-parameter-input-placeholder": "Lalu’ na chansu’",
 	"visualeditor-parameter-search-unknown": "Ini’ bqbaqiy ginlaylwan chansu’",
 	"visualeditor-preference-core-label": "Sr’zyut miru’ sa ktan na rawziq",
@@ -178,12 +171,7 @@
 	"visualeditor-section-body-placeholder": "New section",
 	"visualeditor-section-title-placeholder": "Spzyang balay ptzyuwaw",
 	"visualeditor-settings-tool": "Ssi’ sa zngazyan",
-	"visualeditor-shortcuts-insert": "Shap",
 	"visualeditor-special-characters-group-other": "Mutuw sptzyuwaw krayryax",
 	"visualeditor-templatesused-tool": "Ppyzyuwaw na mopan",
-	"visualeditor-toolbar-savedialog": "Cucun zngazyan",
-	"visualeditor-version-label": "Ubuy gluw bbiru’ ni",
-	"visualeditor-viewpage-savewarning-discard": "Laxan quw sinr’zyut miru’",
-	"visualeditor-viewpage-savewarning-keep": "Siy lhingiy smr’zyut miru’",
-	"visualeditor-viewpage-savewarning-title": "Balay balay knita’ su’ ga?"
+	"visualeditor-version-label": "Ubuy gluw bbiru’ ni"
 }

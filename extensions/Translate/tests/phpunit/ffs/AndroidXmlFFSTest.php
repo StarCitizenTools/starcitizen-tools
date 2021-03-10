@@ -1,29 +1,35 @@
 <?php
+declare( strict_types = 1 );
+
 /**
- * @file
  * @author Niklas Laxström
  * @license GPL-2.0-or-later
+ * @covers \AndroidXmlFFS
  */
+class AndroidXmlFFSTest extends MediaWikiIntegrationTestCase {
+	private const DOCLANG = 'qqq';
 
-class AndroidXmlFFSTest extends MediaWikiTestCase {
+	protected function setUp(): void {
+		$this->setMwGlobals( 'wgTranslateDocumentationLanguageCode', self::DOCLANG );
+	}
 
 	protected $groupConfiguration = [
 		'BASIC' => [
-			'class' => 'FileBasedMessageGroup',
+			'class' => FileBasedMessageGroup::class,
 			'id' => 'test-id',
 			'label' => 'Test Label',
 			'namespace' => 'NS_MEDIAWIKI',
 			'description' => 'Test description',
 		],
 		'FILES' => [
-			'class' => 'AndroidXmlFFS',
+			'class' => AndroidXmlFFS::class,
 			'sourcePattern' => '',
 		],
 	];
 
 	public function testParsing() {
 		$file =
-<<<XML
+<<<'XML'
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Authors:
 * Imaginary translator
@@ -39,12 +45,13 @@ class AndroidXmlFFSTest extends MediaWikiTestCase {
 	<string name="starts_with_at">\@Wikipedia</string>
 	<string name="has_ampersand">1&amp;nbsp;000</string>
 	<string name="has_newline">first\nsecond</string>
+	<string name="has_slashes">first \\ second</string>
+	<string name="utf8_symbols">Hello World: \\u1234 \u1234 \\\u1234</string>
+	<string name="quote_double_slash">Hello World: \' \\\'</string>
 </resources>
 XML;
 
-		/**
-		 * @var FileBasedMessageGroup $group
-		 */
+		/** @var FileBasedMessageGroup $group */
 		$group = MessageGroupBase::factory( $this->groupConfiguration );
 		$ffs = new AndroidXmlFFS( $group );
 		$parsed = $ffs->readFromVariable( $file );
@@ -57,6 +64,9 @@ XML;
 				'starts_with_at' => '@Wikipedia',
 				'has_ampersand' => '1&nbsp;000',
 				'has_newline' => "first\nsecond",
+				'has_slashes' => 'first \\ second',
+				'utf8_symbols' => "Hello World: \u1234 ሴ \ሴ",
+				'quote_double_slash' => 'Hello World: \' \\\''
 			],
 			'AUTHORS' => [
 				'Imaginary translator',
@@ -67,9 +77,7 @@ XML;
 	}
 
 	public function testWrite() {
-		/**
-		 * @var FileBasedMessageGroup $group
-		 */
+		/** @var FileBasedMessageGroup $group */
 		$group = MessageGroupBase::factory( $this->groupConfiguration );
 		$ffs = new AndroidXmlFFS( $group );
 
@@ -79,6 +87,7 @@ XML;
 			'amuch' => '{{PLURAL|one=bunny|bunnies}}',
 			'ampersand' => '&nbsp; &foo',
 			'newlines' => "first\nsecond",
+			'slashes' => 'has \\ slash'
 		];
 		$authors = [
 			'1 Hyphen-Fan',
@@ -97,19 +106,43 @@ XML;
 		];
 		$this->assertEquals( $expected, $parsed );
 	}
+
+	public function testWriteDoc() {
+		/** @var FileBasedMessageGroup $group */
+		$group = MessageGroupBase::factory( $this->groupConfiguration );
+		$ffs = new AndroidXmlFFS( $group );
+
+		$messages = [
+			'a' => 'b',
+		];
+
+		$collection = new MockMessageCollection( $messages, self::DOCLANG );
+
+		$actual = $ffs->writeIntoVariable( $collection );
+		$expected = <<<'XML'
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="all">
+  <string name="a">b</string>
+</resources>
+
+XML;
+		$this->assertEquals( $expected, $actual );
+	}
 }
 
 class MockMessageCollection extends MessageCollection {
-	public function __construct( $messages ) {
+	public function __construct( array $messages, string $code = 'en' ) {
+		$this->code = $code;
 		$keys = array_keys( $messages );
 		$this->keys = array_combine( $keys, $keys );
 		foreach ( $messages as $key => $value ) {
 			$m = new FatMessage( $key, $value );
 			$m->setTranslation( $value );
+			if ( $key === 'foobar' ) {
+				$m->addTag( 'fuzzy' );
+			}
 			$this->messages[$key] = $m;
 		}
-
-		$this->messages['foobar']->addTag( 'fuzzy' );
 	}
 
 	public function filter( $type, $condition = true, $value = null ) {

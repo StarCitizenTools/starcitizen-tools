@@ -19,24 +19,18 @@ class TranslationHelpers {
 	 * @since 2012-01-04
 	 */
 	protected $handle;
-
-	/**
-	 * @var TranslationAidDataProvider
-	 */
+	/** @var TranslationAidDataProvider */
 	private $dataProvider;
-
 	/**
 	 * The group object of the message (or null if there isn't any)
-	 * @var MessageGroup
+	 * @var MessageGroup|null
 	 */
 	protected $group;
-
 	/**
 	 * The current translation.
 	 * @var string
 	 */
 	private $translation;
-
 	/**
 	 * HTML id to the text area that contains the translation. Used to insert
 	 * suggestion directly into the text area, for example.
@@ -79,18 +73,10 @@ class TranslationHelpers {
 
 	/**
 	 * Gets the HTML id of the text area that contains the translation.
-	 * @return String
+	 * @return string
 	 */
 	public function getTextareaId() {
 		return $this->textareaId;
-	}
-
-	/**
-	 * Sets the HTML id of the text area that contains the translation.
-	 * @param String $id
-	 */
-	public function setTextareaId( $id ) {
-		$this->textareaId = $id;
 	}
 
 	/**
@@ -103,7 +89,7 @@ class TranslationHelpers {
 
 	/**
 	 * Gets the message definition.
-	 * @return String
+	 * @return string
 	 */
 	public function getDefinition() {
 		$this->mustBeKnownMessage();
@@ -152,29 +138,10 @@ class TranslationHelpers {
 	}
 
 	/**
-	 * Gets the linguistically correct language code for translation
-	 * @return string
-	 */
-	public function getTargetLanguage() {
-		global $wgLanguageCode, $wgTranslateDocumentationLanguageCode;
-
-		$code = $this->handle->getCode();
-		if ( !$code ) {
-			$this->mustBeKnownMessage();
-			$code = $this->group->getSourceLanguage();
-		}
-		if ( $code === $wgTranslateDocumentationLanguageCode ) {
-			return $wgLanguageCode;
-		}
-
-		return $code;
-	}
-
-	/**
 	 * Returns block element HTML snippet that contains the translation aids.
 	 * Not all boxes are shown all the time depending on whether they have
 	 * any information to show and on configuration variables.
-	 * @return String Block level HTML snippet or empty string.
+	 * @return string Block level HTML snippet or empty string.
 	 */
 	public function getBoxes() {
 		// Box filter
@@ -218,13 +185,8 @@ class TranslationHelpers {
 		}
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getBoxNames() {
+	public function getBoxNames(): array {
 		return [
-			'other-languages' => [ $this, 'getOtherLanguagesBox' ],
-			'separator' => [ $this, 'getSeparatorBox' ],
 			'documentation' => [ $this, 'getDocumentationBox' ],
 			'definition' => [ $this, 'getDefinitionBox' ],
 		];
@@ -234,26 +196,17 @@ class TranslationHelpers {
 		$this->mustHaveDefinition();
 		$en = $this->getDefinition();
 
-		$title = Linker::link(
-			SpecialPage::getTitleFor( 'Translate' ),
-			htmlspecialchars( $this->group->getLabel() ),
-			[],
-			[
-				'group' => $this->group->getId(),
-				'language' => $this->handle->getCode()
-			]
-		);
-
+		$linkTag = self::ajaxEditLink( $this->handle->getTitle(), $this->group->getLabel() );
 		$label =
 			wfMessage( 'translate-edit-definition' )->escaped() .
 				wfMessage( 'word-separator' )->escaped() .
-				wfMessage( 'parentheses' )->rawParams( $title )->escaped();
+				wfMessage( 'parentheses' )->rawParams( $linkTag )->escaped();
 
 		// Source language object
 		$sl = Language::factory( $this->group->getSourceLanguage() );
 
 		$dialogID = $this->dialogID();
-		$id = Sanitizer::escapeId( "def-$dialogID" );
+		$id = Sanitizer::escapeIdForAttribute( "def-$dialogID" );
 		$msg = $this->adder( $id, $sl ) . "\n" . Html::rawElement( 'div',
 			[
 				'class' => 'mw-translate-edit-deftext',
@@ -265,87 +218,9 @@ class TranslationHelpers {
 
 		$msg .= $this->wrapInsert( $id, $en );
 
-		$class = [ 'class' => 'mw-sp-translate-edit-definition mw-translate-edit-definition' ];
+		$class = [ 'class' => 'mw-sp-translate-edit-definition' ];
 
 		return TranslateUtils::fieldset( $label, $msg, $class );
-	}
-
-	public function getTranslationDisplayBox() {
-		$en = $this->getTranslation();
-		if ( $en === null ) {
-			return null;
-		}
-		$label = wfMessage( 'translate-edit-translation' )->escaped();
-		$class = [ 'class' => 'mw-translate-edit-translation' ];
-		$msg = Html::rawElement( 'span',
-			[ 'class' => 'mw-translate-edit-translationtext' ],
-			TranslateUtils::convertWhiteSpaceToHTML( $en )
-		);
-
-		return TranslateUtils::fieldset( $label, $msg, $class );
-	}
-
-	public function getOtherLanguagesBox() {
-		$code = $this->handle->getCode();
-		$page = $this->handle->getKey();
-		$ns = $this->handle->getTitle()->getNamespace();
-
-		$boxes = [];
-		foreach ( self::getFallbacks( $code ) as $fbcode ) {
-			$text = TranslateUtils::getMessageContent( $page, $fbcode, $ns );
-			if ( $text === null ) {
-				continue;
-			}
-
-			$fbLanguage = Language::factory( $fbcode );
-			$context = RequestContext::getMain();
-			$label = TranslateUtils::getLanguageName( $fbcode, $context->getLanguage()->getCode() ) .
-				$context->msg( 'word-separator' )->text() .
-				$context->msg( 'parentheses', $fbLanguage->getHtmlCode() )->text();
-
-			$target = $this->handle->getTitleForLanguage( $fbcode );
-
-			if ( $target ) {
-				$label = self::ajaxEditLink( $target, $label );
-			}
-
-			$dialogID = $this->dialogID();
-			$id = Sanitizer::escapeId( "other-$fbcode-$dialogID" );
-
-			$params = [ 'class' => 'mw-translate-edit-item' ];
-
-			$display = TranslateUtils::convertWhiteSpaceToHTML( $text );
-			$display = Html::rawElement( 'div', [
-					'lang' => $fbLanguage->getHtmlCode(),
-					'dir' => $fbLanguage->getDir() ],
-				$display
-			);
-
-			$contents = self::legend( $label ) . "\n" . $this->adder( $id, $fbLanguage ) .
-				$display . self::clear();
-
-			$boxes[] = Html::rawElement( 'div', $params, $contents ) .
-				$this->wrapInsert( $id, $text );
-		}
-
-		if ( count( $boxes ) ) {
-			$sep = Html::element( 'hr', [ 'class' => 'mw-translate-sep' ] );
-
-			return TranslateUtils::fieldset(
-				wfMessage(
-					'translate-edit-in-other-languages',
-					$page
-				)->escaped(),
-				implode( "$sep\n", $boxes ),
-				[ 'class' => 'mw-sp-translate-edit-inother' ]
-			);
-		}
-
-		return null;
-	}
-
-	public function getSeparatorBox() {
-		return Html::element( 'div', [ 'class' => 'mw-translate-edit-extra' ] );
 	}
 
 	public function getDocumentationBox() {
@@ -380,9 +255,7 @@ class TranslationHelpers {
 		}
 		$class .= ' mw-sp-translate-message-documentation';
 
-		$contents = TranslateUtils::parseInlineAsInterface(
-			$context->getOutput(), $info
-		);
+		$contents = $context->getOutput()->parseInlineAsInterface( $info );
 
 		return TranslateUtils::fieldset(
 			$context->msg( 'translate-edit-information' )->rawParams( $edit )->escaped(),
@@ -390,60 +263,7 @@ class TranslationHelpers {
 		);
 	}
 
-	/**
-	 * @param string $label
-	 * @return string
-	 */
-	protected static function legend( $label ) {
-		# Float it to the opposite direction
-		return Html::rawElement( 'div', [ 'class' => 'mw-translate-legend' ], $label );
-	}
-
-	/**
-	 * @return string
-	 */
-	protected static function clear() {
-		return Html::element( 'div', [ 'style' => 'clear:both;' ] );
-	}
-
-	/**
-	 * @param string $code
-	 * @return array
-	 */
-	protected static function getFallbacks( $code ) {
-		global $wgTranslateLanguageFallbacks;
-
-		// User preference has the final say
-		$user = RequestContext::getMain()->getUser();
-		$preference = $user->getOption( 'translate-editlangs' );
-		if ( $preference !== 'default' ) {
-			$fallbacks = array_map( 'trim', explode( ',', $preference ) );
-			foreach ( $fallbacks as $k => $v ) {
-				if ( $v === $code ) {
-					unset( $fallbacks[$k] );
-				}
-			}
-
-			return $fallbacks;
-		}
-
-		// Global configuration settings
-		$fallbacks = [];
-		if ( isset( $wgTranslateLanguageFallbacks[$code] ) ) {
-			$fallbacks = (array)$wgTranslateLanguageFallbacks[$code];
-		}
-
-		$list = Language::getFallbacksFor( $code );
-		array_pop( $list ); // Get 'en' away from the end
-		$fallbacks = array_merge( $list, $fallbacks );
-
-		return array_unique( $fallbacks );
-	}
-
-	/**
-	 * @return string
-	 */
-	public function dialogID() {
+	public function dialogID(): string {
 		$hash = sha1( $this->handle->getTitle()->getPrefixedDBkey() );
 
 		return substr( $hash, 0, 4 );
@@ -451,7 +271,7 @@ class TranslationHelpers {
 
 	/**
 	 * @param string $source jQuery selector for element containing the source
-	 * @param Language $lang Language object
+	 * @param Language $lang
 	 * @return string
 	 */
 	public function adder( $source, $lang ) {

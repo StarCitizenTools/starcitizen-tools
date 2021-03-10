@@ -1,20 +1,26 @@
 {
 	"@metadata": {
 		"authors": [
-			"Lokal Profil",
-			"WikiPhoenix",
+			"Bengtsson96",
 			"Dan Koehl",
-			"Victorsa",
 			"Josve05a",
-			"Bengtsson96"
+			"Lokal Profil",
+			"Sabelöga",
+			"Victorsa",
+			"WikiPhoenix"
 		]
 	},
+	"apihelp-aggregategroups-description": "Hantera aggregerade meddelandegrupper.\n\nDu kan lägga till och ta bort aggregerade meddelandegrupper och associera eller sluta associera meddelandegrupper från dem (en i taget).",
+	"apihelp-aggregategroups-summary": "Hantera aggregerade meddelandegrupper.",
+	"apihelp-aggregategroups-extended-description": "Du kan lägga till och ta bort aggregerade meddelandegrupper och associera eller sluta associera meddelandegrupper från dem (en i taget).",
 	"apihelp-aggregategroups-param-group": "Meddelandegrupp-ID.",
 	"apihelp-aggregategroups-example-1": "Associera en grupp",
 	"apihelp-groupreview-param-group": "Meddelandegrupp.",
 	"apihelp-groupreview-param-language": "Språkkod.",
-	"apihelp-groupreview-example-1": "Markera gruppen \"group-Example\" som redo för tyska",
+	"apihelp-groupreview-example-1": "Markera statusen för den tyska översättningen av gruppen \"group-Example\" som redo",
 	"apihelp-query+languagestats-param-language": "Språkkod.",
+	"apihelp-query+managemessagegroups-param-groupId": "Grupp-ID",
+	"apihelp-query+managemessagegroups-param-messageKey": "Meddelandenyckel",
 	"apihelp-query+messagecollection-param-group": "Meddelandegrupp.",
 	"apihelp-query+messagecollection-param-language": "Språkkod.",
 	"apihelp-query+messagecollection-example-1": "Lista över språk som stöds",
@@ -22,12 +28,18 @@
 	"apihelp-query+messagegroups-example-1": "Visa meddelandegrupper",
 	"apihelp-query+messagegroupstats-param-group": "Meddelandegrupp-ID.",
 	"apihelp-query+messagetranslations-example-1": "Lista över översättningar i wikin för \"MediaWiki:January\"",
+	"apihelp-managemessagegroups-param-groupId": "Grupp-ID",
+	"apihelp-translatesandbox-description": "Registrera och hantera sandlådeanvändare.",
+	"apihelp-translatesandbox-summary": "Registrera och hantera sandlådeanvändare.",
+	"apihelp-translatesandbox-param-do": "Vad som ska göras.",
 	"apihelp-translatesandbox-param-username": "Användarnamn när du skapar en användare.",
 	"apihelp-translatesandbox-param-password": "Lösenord när du skapar en användare.",
 	"apihelp-translatesandbox-param-email": "E-post när du skapar en användare.",
 	"apihelp-translationaids-param-title": "Fullständig titel på ett känt meddelande.",
+	"apihelp-translationaids-param-prop": "Vilka översättningshjälpmedel som ska inkluderas.",
 	"apihelp-translationaids-example-1": "Visa hjälp för [[MediaWiki:January/fi]]",
 	"apihelp-translationreview-description": "Markera översättningar som granskade.",
+	"apihelp-translationreview-summary": "Markera översättningar som granskade.",
 	"apihelp-translationreview-param-revision": "Sidversionsnumret att granska.",
 	"apihelp-translationreview-example-1": "Granska sidversion 1",
 	"apihelp-translationstash-param-subaction": "Åtgärd.",
@@ -49,6 +61,9 @@
 	"apihelp-searchtranslations-param-limit": "Resultatets storlek.",
 	"apihelp-searchtranslations-example-1": "Visa översättningar för språket.",
 	"apihelp-searchtranslations-example-2": "Visa oöversatta meddelanden som överensstämmer förfrågan i källkoden.",
+	"apihelp-translationcheck-summary": "Validera översättningar.",
+	"apihelp-translationcheck-param-title": "Sidtitel med namnrymd och språkkod.",
+	"apihelp-translationcheck-param-translation": "Översättningen att validera.",
 	"apierror-translate-duplicateaggregategroup": "Meddelandegruppen finns redan",
 	"apierror-translate-fuzzymessage": "Kan inte granska föråldrade översättningar",
 	"apierror-translate-invalidlanguage": "Det begärda språket är inte giltigt.",
@@ -59,5 +74,6 @@
 	"apierror-translate-owntranslation": "Kan inte granska egna översättningar",
 	"apierror-translate-sandbox-invalidppassword": "Ogiltigt lösenord",
 	"apierror-translate-unknownmessage": "Okänt meddelande",
-	"apiwarn-translate-alreadyreviewedbyyou": "Har redan markerats som granskad av dig"
+	"apiwarn-translate-alreadyreviewedbyyou": "Har redan markerats som granskad av dig",
+	"apiwarn-translate-language-disabled-source": "Källspråket för denna grupp är $1. Välj ett annat språk att översätta till."
 }

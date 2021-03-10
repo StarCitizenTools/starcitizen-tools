@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Standalone Initialization Target class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -17,7 +17,7 @@
  *                 ve.createDocumentFromHtml( '<p>Hello, World!</p>' )
  *             )
  *         );
- *         $( 'body' ).append( target.$element );
+ *         $( document.body ).append( target.$element );
  *     } );
  *
  * @abstract
@@ -30,7 +30,7 @@
  */
 ve.init.sa.Target = function VeInitSaTarget( config ) {
 	config = config || {};
-	config.toolbarConfig = $.extend( { shadow: true, actions: true, floatable: true }, config.toolbarConfig );
+	config.toolbarConfig = ve.extendObject( { shadow: true, actions: true, floatable: true }, config.toolbarConfig );
 
 	// Parent constructor
 	ve.init.sa.Target.super.call( this, config );
@@ -48,10 +48,13 @@ OO.inheritClass( ve.init.sa.Target, ve.init.Target );
 
 ve.init.sa.Target.static.actionGroups = [
 	{
+		name: 'pageMenu',
 		type: 'list',
 		icon: 'menu',
 		indicator: null,
 		title: OO.ui.deferMsg( 'visualeditor-pagemenu-tooltip' ),
+		label: OO.ui.deferMsg( 'visualeditor-pagemenu-tooltip' ),
+		invisibleLabel: true,
 		include: [ 'findAndReplace', 'changeDirectionality', 'commandHelp' ]
 	}
 ];
@@ -60,6 +63,7 @@ ve.init.sa.Target.static.actionGroups = [
 
 /**
  * @inheritdoc
+ * @fires surfaceReady
  */
 ve.init.sa.Target.prototype.addSurface = function () {
 	// Parent method
@@ -70,6 +74,7 @@ ve.init.sa.Target.prototype.addSurface = function () {
 		this.setSurface( surface );
 	}
 	surface.initialize();
+	this.emit( 'surfaceReady' );
 	return surface;
 };
 

@@ -1,9 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Candalua"
+			"Candalua",
+			"Fierodelveneto"
 		]
 	},
 	"translate-tag-translate-link-desc": "Tradusi sta pagina",
-	"tpt-languages-nonzero": "$1 ($2% tradota)"
+	"tpt-translation-intro": "Sta pàjina ła xe na <span class=\"plainlinks\">[$1 version traduxesta]</span> de ła pàjina [[$2]] e ła tradusion ła xe finia al $3%",
+	"tpt-languages-nonzero": "$1 ($2% traduxesta)"
 }

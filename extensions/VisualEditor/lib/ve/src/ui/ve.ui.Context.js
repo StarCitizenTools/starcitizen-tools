@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Context class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -30,13 +30,19 @@ ve.ui.Context = function VeUiContext( surface, config ) {
 	this.visible = false;
 	this.choosing = false;
 
+	this.$focusTrapBefore = $( '<div>' ).prop( 'tabIndex', 0 );
+	this.$focusTrapAfter = $( '<div>' ).prop( 'tabIndex', 0 );
+	this.$focusTrapBefore.add( this.$focusTrapAfter ).on( 'focus', function () {
+		surface.getView().activate();
+	} );
+
 	// Initialization
 	// Hide element using a class, not this.toggle, as child implementations
 	// of toggle may require the instance to be fully constructed before running.
 	this.$group.addClass( 've-ui-context-menu' );
 	this.$element
-		.addClass( 've-ui-context oo-ui-element-hidden' )
-		.append( this.$group );
+		.addClass( 've-ui-context ve-ui-context-hidden' )
+		.append( this.$focusTrapBefore, this.$group, this.$focusTrapAfter );
 };
 
 /* Inheritance */
@@ -89,7 +95,6 @@ ve.ui.Context.prototype.isVisible = function () {
  *
  * Result is cached, and cleared when the model or selection changes.
  *
- * @method
  * @abstract
  * @return {Object[]} List of objects containing `type`, `name` and `model` properties,
  *   representing each compatible type (either `item` or `tool`), symbolic name of the item or tool
@@ -106,12 +111,11 @@ ve.ui.Context.prototype.getSurface = function () {
 	return this.surface;
 };
 
-/* eslint-disable valid-jsdoc */
-
 /**
  * Toggle the menu.
  *
  * @param {boolean} [show] Show the menu, omit to toggle
+ * @return {ve.ui.Context}
  * @chainable
  */
 ve.ui.Context.prototype.toggleMenu = function ( show ) {
@@ -134,6 +138,7 @@ ve.ui.Context.prototype.toggleMenu = function ( show ) {
  * Setup menu items.
  *
  * @protected
+ * @return {ve.ui.Context}
  * @chainable
  */
 ve.ui.Context.prototype.setupMenuItems = function () {
@@ -167,6 +172,7 @@ ve.ui.Context.prototype.setupMenuItems = function () {
  * Teardown menu items.
  *
  * @protected
+ * @return {ve.ui.Context}
  * @chainable
  */
 ve.ui.Context.prototype.teardownMenuItems = function () {
@@ -196,15 +202,16 @@ ve.ui.Context.prototype.toggle = function ( show ) {
 	show = show === undefined ? !this.visible : !!show;
 	if ( show !== this.visible ) {
 		this.visible = show;
-		this.$element.toggleClass( 'oo-ui-element-hidden', !this.visible );
+		this.$element.toggleClass( 've-ui-context-hidden', !this.visible );
 	}
 	this.emit( 'resize' );
-	return $.Deferred().resolve().promise();
+	return ve.createDeferred().resolve().promise();
 };
 
 /**
  * Update the size and position of the context.
  *
+ * @return {ve.ui.Context}
  * @chainable
  * @fires resize
  */
@@ -217,6 +224,7 @@ ve.ui.Context.prototype.updateDimensions = function () {
 /**
  * Destroy the context, removing all DOM elements.
  *
+ * @return {ve.ui.Context}
  * @chainable
  */
 ve.ui.Context.prototype.destroy = function () {

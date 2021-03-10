@@ -10,6 +10,8 @@
  */
 
 // Standard boilerplate to define $IP
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+
 if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 	$IP = getenv( 'MW_INSTALL_PATH' );
 } else {
@@ -21,7 +23,7 @@ require_once "$IP/maintenance/Maintenance.php";
 class CharacterEditStats extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Script to show number of characters translated .';
+		$this->addDescription( 'Script to show number of characters translated .' );
 		$this->addOption(
 			'top',
 			'(optional) Show given number of language codes (default: show all)',
@@ -40,10 +42,11 @@ class CharacterEditStats extends Maintenance {
 			false, /*required*/
 			true /*has arg*/
 		);
+		$this->requireExtension( 'Translate' );
 	}
 
 	public function execute() {
-		global $wgTranslateFuzzyBotName, $wgSitename, $wgTranslateMessageNamespaces;
+		global $wgSitename, $wgTranslateMessageNamespaces;
 
 		$days = (int)$this->getOption( 'days', 30 );
 		$top = (int)$this->getOption( 'top', -1 );
@@ -62,14 +65,14 @@ class CharacterEditStats extends Maintenance {
 		}
 
 		// Select set of edits to report on
-		$rows = self::getRevisionsFromHistory( $days, $namespaces );
+		$rows = $this->getRevisionsFromHistory( $days, $namespaces );
 
 		// Get counts for edits per language code after filtering out edits by FuzzyBot
 		$codes = [];
 
 		foreach ( $rows as $_ ) {
-			// Filter out edits by $wgTranslateFuzzyBotName
-			if ( $_->user_text === $wgTranslateFuzzyBotName ) {
+			// Filter out edits by FuzzyBot
+			if ( $_->user_text === FuzzyBot::getName() ) {
 				continue;
 			}
 
@@ -113,7 +116,7 @@ class CharacterEditStats extends Maintenance {
 		$cutoff = $dbr->addQuotes( $dbr->timestamp( time() - $days * 24 * 3600 ) );
 
 		// The field renames are to be compatible with recentchanges table query
-		if ( is_callable( Revision::class, 'getQueryInfo' ) ) {
+		if ( is_callable( [ Revision::class, 'getQueryInfo' ] ) ) {
 			$revQuery = Revision::getQueryInfo( [ 'page' ] );
 			$revUserText = $revQuery['fields']['rev_user_text'] ?? 'rev_user_text';
 		} else {

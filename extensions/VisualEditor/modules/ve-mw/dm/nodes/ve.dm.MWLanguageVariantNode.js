@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWLanguageVariantNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -75,9 +75,11 @@ ve.dm.MWLanguageVariantNode.static.hiddenType = 'mwLanguageVariantHidden';
 /**
  * Migrate field names from old Parsoid spec to new field names.
  * This method will go away after the next Parsoid flag day.
+ *
  * @static
- * @method
  * @private
+ * @param {Object} dataMwv
+ * @return {Object}
  */
 ve.dm.MWLanguageVariantNode.static.migrateFieldNames = function ( dataMwv ) {
 	// Field name migration: `bidir`=>`twoway`; `unidir`=>`oneway`
@@ -146,7 +148,7 @@ ve.dm.MWLanguageVariantNode.static.toDomElements = function ( dataElement, doc, 
 
 	domElement.setAttribute( 'typeof', rdfaType );
 	domElement.setAttribute( 'data-mw-variant', dataMwvJSON );
-	if ( converter.isForClipboard() && tagName !== 'META' ) {
+	if ( converter.doesModeNeedRendering() && tagName !== 'META' ) {
 		// Fill in contents of span for diff/cut-and-paste/etc.
 		this.insertPreviewElements( domElement, variantInfo );
 	}
@@ -159,35 +161,29 @@ ve.dm.MWLanguageVariantNode.static.toDomElements = function ( dataElement, doc, 
  * renderings.
  *
  * @static
- * @method
- * @param {jQuery} $element Element to process
+ * @param {HTMLElement} container Container element to process
  * @param {Object|null} opts Preview options
  * @param {boolean} [opts.describeAll=false] Treat all rules as if the
  *   "describe" flag was set. This displays every language and its associated
  *   text, not just the one appropriate for the current user.
- * @return {jQuery} $element
  */
-ve.dm.MWLanguageVariantNode.static.processVariants = function ( $element, opts ) {
-	var self = this,
-		selector = '[typeof="mw:LanguageVariant"]',
-		$variantElements = $element.find( selector ).addBack( selector );
+ve.dm.MWLanguageVariantNode.static.processVariants = function ( container, opts ) {
+	var self = this;
 
-	$variantElements.each( function ( _, child ) {
-		var dataMwvJSON = child.getAttribute( 'data-mw-variant' );
-		if ( dataMwvJSON && child.tagName !== 'META' ) {
+	Array.prototype.forEach.call( container.querySelectorAll( '[typeof="mw:LanguageVariant"]' ), function ( element ) {
+		var dataMwvJSON = element.getAttribute( 'data-mw-variant' );
+		if ( dataMwvJSON && element.tagName !== 'META' ) {
 			self.insertPreviewElements(
-				child, JSON.parse( dataMwvJSON ), opts
+				element, JSON.parse( dataMwvJSON ), opts
 			);
 		}
 	} );
-	return $element;
 };
 
 /**
  * Insert language variant preview for specified element.
  *
  * @static
- * @method
  * @param {HTMLElement} element Element to insert preview inside of.
  * @param {Object} variantInfo Language variant information object.
  * @param {Object|null} opts Preview options
@@ -198,10 +194,10 @@ ve.dm.MWLanguageVariantNode.static.processVariants = function ( $element, opts )
  */
 ve.dm.MWLanguageVariantNode.static.insertPreviewElements = function ( element, variantInfo, opts ) {
 	// Note that `element` can't be a <meta> (or other void tag)
-	$( element ).html( this.getPreviewHtml( variantInfo, opts ) );
+	element.innerHTML = this.getPreviewHtml( variantInfo, opts );
 	// This recurses into the children added by the `html` clause to ensure
 	// that nested variants are expanded.
-	this.processVariants( $( element ).children(), opts );
+	this.processVariants( element, opts );
 	return element;
 };
 
@@ -211,7 +207,6 @@ ve.dm.MWLanguageVariantNode.static.insertPreviewElements = function ( element, v
  * object and the user's currently preferred variant.
  *
  * @static
- * @method
  * @private
  * @param {Object} variantInfo Language variant information object.
  * @param {Object|null} opts Preview options
@@ -221,8 +216,7 @@ ve.dm.MWLanguageVariantNode.static.insertPreviewElements = function ( element, v
  * @return {string} HTML string
  */
 ve.dm.MWLanguageVariantNode.static.getPreviewHtml = function ( variantInfo, opts ) {
-	var languageIndex,
-		$holder;
+	var languageIndex, html;
 	if ( variantInfo.disabled ) {
 		return variantInfo.disabled.t;
 	} else if ( variantInfo.name ) {
@@ -230,29 +224,19 @@ ve.dm.MWLanguageVariantNode.static.getPreviewHtml = function ( variantInfo, opts
 	} else if ( variantInfo.filter ) {
 		return variantInfo.filter.t;
 	} else if ( variantInfo.describe || ( opts && opts.describeAll ) ) {
-		$holder = $( '<body>' );
 		if ( variantInfo.twoway && variantInfo.twoway.length ) {
 			variantInfo.twoway.forEach( function ( item ) {
-				$holder.append(
-					ve.init.platform.getLanguageName( item.l.toLowerCase() )
-				);
-				$holder.append( ':' );
-				$holder.append( $.parseHTML( item.t ) );
-				$holder.append( ';' );
+				html += ve.init.platform.getLanguageName( item.l.toLowerCase() ) + ':' +
+					item.t + ';';
 			} );
 		} else if ( variantInfo.oneway && variantInfo.oneway.length ) {
 			variantInfo.oneway.forEach( function ( item ) {
-				$holder.append( $.parseHTML( item.f ) );
-				$holder.append( '⇒' );
-				$holder.append(
-					ve.init.platform.getLanguageName( item.l.toLowerCase() )
-				);
-				$holder.append( ':' );
-				$holder.append( $.parseHTML( item.t ) );
-				$holder.append( ';' );
+				html += item.f + '⇒' +
+					ve.init.platform.getLanguageName( item.l.toLowerCase() ) + ':' +
+					item.t + ';';
 			} );
 		}
-		return $holder.html();
+		return html;
 	} else {
 		if ( variantInfo.twoway && variantInfo.twoway.length ) {
 			languageIndex = this.matchLanguage( variantInfo.twoway );
@@ -273,7 +257,9 @@ ve.dm.MWLanguageVariantNode.static.describeChanges = function () {
 	return ve.msg( 'visualeditor-changedesc-mwlanguagevariant' );
 };
 
-/** */
+/**
+ * @inheritdoc ve.dm.Node
+ */
 ve.dm.MWLanguageVariantNode.static.cloneElement = function () {
 	// Parent method
 	var clone = ve.dm.MWLanguageVariantNode.super.static.cloneElement.apply( this, arguments );
@@ -286,7 +272,6 @@ ve.dm.MWLanguageVariantNode.static.cloneElement = function () {
  * among a provided list of language codes.
  *
  * @static
- * @method
  * @param {Object[]} [items] An array of objects, each of which have a field
  *  named `l` equal to a language code.
  * @return {number} The index in `items` with the most appropriate language
@@ -317,10 +302,9 @@ ve.dm.MWLanguageVariantNode.static.matchLanguage = function ( items ) {
 
 /* Methods */
 
-/*
+/**
  * Helper function to get the description object for this markup node.
  *
- * @method
  * @return {Object}
  */
 ve.dm.MWLanguageVariantNode.prototype.getVariantInfo = function () {
@@ -330,7 +314,6 @@ ve.dm.MWLanguageVariantNode.prototype.getVariantInfo = function () {
 /**
  * Helper function to discriminate between hidden and shown rules.
  *
- * @method
  * @return {boolean} True if this node represents a conversion rule
  *  with no shown output
  */
@@ -342,7 +325,6 @@ ve.dm.MWLanguageVariantNode.prototype.isHidden = function () {
  * Helper function to discriminate between various types of language
  * converter markup.
  *
- * @method
  * @return {string}
  */
 ve.dm.MWLanguageVariantNode.prototype.getRuleType = function () {
@@ -354,97 +336,24 @@ ve.dm.MWLanguageVariantNode.prototype.getRuleType = function () {
  * converter markup.
  *
  * @static
- * @method
  * @param {Object} variantInfo Language variant information object.
  * @return {string}
  */
 ve.dm.MWLanguageVariantNode.static.getRuleType = function ( variantInfo ) {
-	if ( variantInfo.disabled ) { return 'disabled'; }
-	if ( variantInfo.filter ) { return 'filter'; }
-	if ( variantInfo.name ) { return 'name'; }
-	if ( variantInfo.twoway ) { return 'twoway'; }
-	if ( variantInfo.oneway ) { return 'oneway'; }
+	if ( variantInfo.disabled ) {
+		return 'disabled';
+	}
+	if ( variantInfo.filter ) {
+		return 'filter';
+	}
+	if ( variantInfo.name ) {
+		return 'name';
+	}
+	if ( variantInfo.twoway ) {
+		return 'twoway';
+	}
+	if ( variantInfo.oneway ) {
+		return 'oneway';
+	}
 	return 'unknown'; // should never happen
 };
-
-/* Concrete subclasses */
-
-/**
- * DataModel MediaWiki language variant block node.
- *
- * @class
- * @extends ve.dm.MWLanguageVariantNode
- *
- * @constructor
- * @param {Object} [element] Reference to element in linear model
- * @param {ve.dm.Node[]} [children]
- */
-ve.dm.MWLanguageVariantBlockNode = function VeDmMWLanguageVariantBlockNode() {
-	// Parent constructor
-	ve.dm.MWLanguageVariantBlockNode.super.apply( this, arguments );
-};
-
-OO.inheritClass( ve.dm.MWLanguageVariantBlockNode, ve.dm.MWLanguageVariantNode );
-
-ve.dm.MWLanguageVariantBlockNode.static.matchTagNames = [ 'div' ];
-
-ve.dm.MWLanguageVariantBlockNode.static.name = 'mwLanguageVariantBlock';
-
-/**
- * DataModel MediaWiki language variant inline node.
- *
- * @class
- * @extends ve.dm.MWLanguageVariantNode
- *
- * @constructor
- * @param {Object} [element] Reference to element in linear model
- * @param {ve.dm.Node[]} [children]
- */
-ve.dm.MWLanguageVariantInlineNode = function VeDmMWLanguageVariantInlineNode() {
-	// Parent constructor
-	ve.dm.MWLanguageVariantInlineNode.super.apply( this, arguments );
-};
-
-OO.inheritClass( ve.dm.MWLanguageVariantInlineNode, ve.dm.MWLanguageVariantNode );
-
-ve.dm.MWLanguageVariantInlineNode.static.matchTagNames = [ 'span' ];
-
-ve.dm.MWLanguageVariantInlineNode.static.name = 'mwLanguageVariantInline';
-
-ve.dm.MWLanguageVariantInlineNode.static.isContent = true;
-
-/**
- * DataModel MediaWiki language variant hidden node.
- *
- * @class
- * @extends ve.dm.MWLanguageVariantNode
- *
- * @constructor
- * @param {Object} [element] Reference to element in linear model
- * @param {ve.dm.Node[]} [children]
- */
-ve.dm.MWLanguageVariantHiddenNode = function VeDmMWLanguageVariantHiddenNode() {
-	// Parent constructor
-	ve.dm.MWLanguageVariantHiddenNode.super.apply( this, arguments );
-};
-
-OO.inheritClass( ve.dm.MWLanguageVariantHiddenNode, ve.dm.MWLanguageVariantNode );
-
-ve.dm.MWLanguageVariantHiddenNode.static.matchTagNames = [ 'meta' ];
-
-ve.dm.MWLanguageVariantHiddenNode.static.name = 'mwLanguageVariantHidden';
-
-ve.dm.MWLanguageVariantHiddenNode.static.isContent = true;
-
-/**
- * @inheritdoc
- */
-ve.dm.MWLanguageVariantHiddenNode.prototype.isHidden = function () {
-	return true;
-};
-
-/* Registration */
-
-ve.dm.modelRegistry.register( ve.dm.MWLanguageVariantBlockNode );
-ve.dm.modelRegistry.register( ve.dm.MWLanguageVariantInlineNode );
-ve.dm.modelRegistry.register( ve.dm.MWLanguageVariantHiddenNode );

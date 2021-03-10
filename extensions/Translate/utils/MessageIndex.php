@@ -8,6 +8,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Logger\LoggerFactory;
+
 /**
  * Creates a database of keys in all groups, so that namespace and key can be
  * used to get the groups they belong to. This is used as a fallback when
@@ -17,24 +19,25 @@
  * to message groups.
  */
 abstract class MessageIndex {
-	/**
-	 * @var self
-	 */
+	private const CACHEKEY = 'Translate-MessageIndex-interim';
+
+	/** @var self */
 	protected static $instance;
-
-	/**
-	 * @var MapCacheLRU|null
-	 */
+	/** @var MapCacheLRU|null */
 	private static $keysCache;
+	/** @var BagOStuff */
+	protected $interimCache;
 
-	/**
-	 * @return self
-	 */
+	/** @return self */
 	public static function singleton() {
 		if ( self::$instance === null ) {
 			global $wgTranslateMessageIndex;
 			$params = $wgTranslateMessageIndex;
+			if ( is_string( $params ) ) {
+				$params = (array)$params;
+			}
 			$class = array_shift( $params );
+			// @phan-suppress-next-line PhanTypeExpectedObjectOrClassName
 			self::$instance = new $class( $params );
 		}
 
@@ -57,7 +60,7 @@ abstract class MessageIndex {
 	 * @param MessageHandle $handle
 	 * @return array
 	 */
-	public static function getGroupIds( MessageHandle $handle ) {
+	public static function getGroupIds( MessageHandle $handle ): array {
 		global $wgTranslateMessageNamespaces;
 
 		$title = $handle->getTitle();
@@ -73,19 +76,14 @@ abstract class MessageIndex {
 		$cache = self::getCache();
 		$value = $cache->get( $normkey );
 		if ( $value === null ) {
-			$value = self::singleton()->get( $normkey );
-			$value = $value !== null
-				? (array)$value
-				: [];
+			$value = (array)self::singleton()->getWithCache( $normkey );
 			$cache->set( $normkey, $value );
 		}
 
 		return $value;
 	}
 
-	/**
-	 * @return MapCacheLRU
-	 */
+	/** @return MapCacheLRU */
 	private static function getCache() {
 		if ( self::$keysCache === null ) {
 			self::$keysCache = new MapCacheLRU( 30 );
@@ -104,6 +102,15 @@ abstract class MessageIndex {
 		return count( $groups ) ? array_shift( $groups ) : null;
 	}
 
+	private function getWithCache( $key ) {
+		$interimCacheValue = $this->getInterimCache()->get( self::CACHEKEY );
+		if ( $interimCacheValue && isset( $interimCacheValue['newKeys'][$key] ) ) {
+			return $interimCacheValue['newKeys'][$key];
+		}
+
+		return $this->get( $key );
+	}
+
 	/**
 	 * Looks up the stored value for single key. Only for testing.
 	 * @since 2012-04-10
@@ -113,11 +120,7 @@ abstract class MessageIndex {
 	protected function get( $key ) {
 		// Default implementation
 		$mi = $this->retrieve();
-		if ( isset( $mi[$key] ) ) {
-			return $mi[$key];
-		} else {
-			return null;
-		}
+		return $mi[$key] ?? null;
 	}
 
 	/**
@@ -144,7 +147,16 @@ abstract class MessageIndex {
 		return true;
 	}
 
-	public function rebuild() {
+	/**
+	 * Creates the index from scratch.
+	 *
+	 * @param float|null $timestamp Purge interim caches older than this timestamp.
+	 * @return array
+	 * @throws Exception
+	 */
+	public function rebuild( float $timestamp = null ): array {
+		$logger = LoggerFactory::getInstance( 'Translate' );
+
 		static $recursion = 0;
 
 		if ( $recursion > 0 ) {
@@ -156,11 +168,23 @@ abstract class MessageIndex {
 		}
 		$recursion++;
 
+		$logger->info(
+			'[MessageIndex] Started rebuild. Initiated by {callers}',
+			[ 'callers' => wfGetAllCallers( 20 ) ]
+		);
+
 		$groups = MessageGroups::singleton()->getGroups();
 
+		$tsStart = microtime( true );
 		if ( !$this->lock() ) {
-			throw new Exception( __CLASS__ . ': unable to acquire lock' );
+			throw new MessageIndexException( __CLASS__ . ': unable to acquire lock' );
 		}
+
+		$lockWaitDuration = microtime( true ) - $tsStart;
+		$logger->info(
+			'[MessageIndex] Got lock in {duration}',
+			[ 'duration' => $lockWaitDuration ]
+		);
 
 		self::getCache()->clear();
 
@@ -168,9 +192,7 @@ abstract class MessageIndex {
 		$old = $this->retrieve( 'rebuild' );
 		$postponed = [];
 
-		/**
-		 * @var MessageGroup $g
-		 */
+		/** @var MessageGroup $g */
 		foreach ( $groups as $g ) {
 			if ( !$g->exists() ) {
 				$id = $g->getId();
@@ -194,11 +216,60 @@ abstract class MessageIndex {
 		$diff = self::getArrayDiff( $old, $new );
 		$this->store( $new, $diff['keys'] );
 		$this->unlock();
+
+		$criticalSectionDuration = microtime( true ) - $tsStart - $lockWaitDuration;
+		$logger->info(
+			'[MessageIndex] Finished critical section in {duration}',
+			[ 'duration' => $criticalSectionDuration ]
+		);
+
+		$cache = $this->getInterimCache();
+		$interimCacheValue = $cache->get( self::CACHEKEY );
+		$timestamp = $timestamp ?? microtime( true );
+		if ( $interimCacheValue ) {
+			if ( $interimCacheValue['timestamp'] <= $timestamp ) {
+				$cache->delete( self::CACHEKEY );
+			} else {
+				// We got timestamp lower than newest front cache. This may be caused due to
+				// job deduplication. Just in case, spin off a new job to clean up the cache.
+				$job = MessageIndexRebuildJob::newJob();
+				JobQueueGroup::singleton()->push( $job );
+			}
+		}
+
 		$this->clearMessageGroupStats( $diff );
 
 		$recursion--;
 
 		return $new;
+	}
+
+	private function getInterimCache(): BagOStuff {
+		return ObjectCache::getInstance( CACHE_ANYTHING );
+	}
+
+	public function storeInterim( MessageGroup $group, array $newKeys ): void {
+		$namespace = $group->getNamespace();
+		$id = $group->getId();
+
+		$normalizedNewKeys = [];
+		foreach ( $newKeys as $key ) {
+			$normalizedNewKeys[TranslateUtils::normaliseKey( $namespace, $key )] = $id;
+		}
+
+		$cache = $this->getInterimCache();
+		// Merge existing with existing keys
+		$interimCacheValue = $cache->get( self::CACHEKEY, $cache::READ_LATEST );
+		if ( $interimCacheValue ) {
+			$normalizedNewKeys = array_merge( $interimCacheValue['newKeys'], $normalizedNewKeys );
+		}
+
+		$value = [
+			'timestamp' => microtime( true ),
+			'newKeys' => $normalizedNewKeys,
+		];
+
+		$cache->set( self::CACHEKEY, $value, $cache::TTL_DAY );
 	}
 
 	/**
@@ -258,7 +329,7 @@ abstract class MessageIndex {
 		foreach ( $old as $key => $groups ) {
 			if ( !isset( $new[$key] ) ) {
 				$keys['del'][$key] = [ (array)$groups, [] ];
-				$record( (array)$groups, [] );
+				$record( (array)$groups );
 			}
 			// We already checked for diffs above
 		}
@@ -275,14 +346,15 @@ abstract class MessageIndex {
 	 * @param array $diff
 	 */
 	protected function clearMessageGroupStats( array $diff ) {
-		MessageGroupStats::clearGroup( $diff['values'] );
+		$job = MessageGroupStatsRebuildJob::newRefreshGroupsJob( $diff['values'] );
+		JobQueueGroup::singleton()->push( $job );
 
 		foreach ( $diff['keys'] as $keys ) {
 			foreach ( $keys as $key => $data ) {
-				list( $ns, $pagename ) = explode( ':', $key, 2 );
+				[ $ns, $pagename ] = explode( ':', $key, 2 );
 				$title = Title::makeTitle( $ns, $pagename );
 				$handle = new MessageHandle( $title );
-				list( $oldGroups, $newGroups ) = $data;
+				[ $oldGroups, $newGroups ] = $data;
 				Hooks::run( 'TranslateEventMessageMembershipChange',
 					[ $handle, $oldGroups, $newGroups ] );
 			}
@@ -295,20 +367,8 @@ abstract class MessageIndex {
 	 * @param bool $ignore
 	 */
 	protected function checkAndAdd( &$hugearray, MessageGroup $g, $ignore = false ) {
-		if ( method_exists( $g, 'getKeys' ) ) {
-			$keys = $g->getKeys();
-		} else {
-			$messages = $g->getDefinitions();
-
-			if ( !is_array( $messages ) ) {
-				return;
-			}
-
-			$keys = array_keys( $messages );
-		}
-
+		$keys = $g->getKeys();
 		$id = $g->getId();
-
 		$namespace = $g->getNamespace();
 
 		foreach ( $keys as $key ) {
@@ -379,11 +439,8 @@ abstract class MessageIndex {
  * which provides random access - this backend doesn't support that.
  */
 class SerializedMessageIndex extends MessageIndex {
-	/**
-	 * @var array|null
-	 */
+	/** @var array|null */
 	protected $index;
-
 	protected $filename = 'translate_messageindex.ser';
 
 	/**
@@ -412,10 +469,6 @@ class SerializedMessageIndex extends MessageIndex {
 	}
 }
 
-/// BC
-class FileCachedMessageIndex extends SerializedMessageIndex {
-}
-
 /**
  * Storage on the database itself.
  *
@@ -428,9 +481,7 @@ class FileCachedMessageIndex extends SerializedMessageIndex {
  * @since 2012-04-12
  */
 class DatabaseMessageIndex extends MessageIndex {
-	/**
-	 * @var array|null
-	 */
+	/** @var array|null */
 	protected $index;
 
 	protected function lock() {
@@ -452,14 +503,18 @@ class DatabaseMessageIndex extends MessageIndex {
 		// Unlock once the rows are actually unlocked to avoid deadlocks
 		if ( !$dbw->trxLevel() ) {
 			$dbw->unlock( 'translate-messageindex', $fname );
-		} elseif ( method_exists( $dbw, 'onTransactionResolution' ) ) { // 1.28
+		} elseif ( is_callable( [ $dbw, 'onTransactionResolution' ] ) ) { // 1.28
 			$dbw->onTransactionResolution( function () use ( $dbw, $fname ) {
 				$dbw->unlock( 'translate-messageindex', $fname );
-			} );
+			}, $fname );
+		} elseif ( is_callable( [ $dbw, 'onTransactionCommitOrIdle' ] ) ) {
+			$dbw->onTransactionCommitOrIdle( function () use ( $dbw, $fname ) {
+				$dbw->unlock( 'translate-messageindex', $fname );
+			}, $fname );
 		} else {
 			$dbw->onTransactionIdle( function () use ( $dbw, $fname ) {
 				$dbw->unlock( 'translate-messageindex', $fname );
-			} );
+			}, $fname );
 		}
 
 		return true;
@@ -507,7 +562,7 @@ class DatabaseMessageIndex extends MessageIndex {
 
 		foreach ( [ $diff['add'], $diff['mod'] ] as $changes ) {
 			foreach ( $changes as $key => $data ) {
-				list( $old, $new ) = $data;
+				[ , $new ] = $data;
 				$updates[] = [
 					'tmi_key' => $key,
 					'tmi_value' => $this->serialize( $new ),
@@ -546,13 +601,10 @@ class DatabaseMessageIndex extends MessageIndex {
 class CachedMessageIndex extends MessageIndex {
 	protected $key = 'translate-messageindex';
 	protected $cache;
-
-	/**
-	 * @var array|null
-	 */
+	/** @var array|null */
 	protected $index;
 
-	protected function __construct( array $params ) {
+	protected function __construct() {
 		$this->cache = wfGetCache( CACHE_ANYTHING );
 	}
 
@@ -565,7 +617,7 @@ class CachedMessageIndex extends MessageIndex {
 			return $this->index;
 		}
 
-		$key = wfMemcKey( $this->key );
+		$key = $this->cache->makeKey( $this->key );
 		$data = $this->cache->get( $key );
 		if ( is_array( $data ) ) {
 			$this->index = $data;
@@ -577,7 +629,7 @@ class CachedMessageIndex extends MessageIndex {
 	}
 
 	protected function store( array $array, array $diff ) {
-		$key = wfMemcKey( $this->key );
+		$key = $this->cache->makeKey( $this->key );
 		$this->cache->set( $key, $array );
 
 		$this->index = $array;
@@ -598,19 +650,11 @@ class CachedMessageIndex extends MessageIndex {
  * @since 2012-04-10
  */
 class CDBMessageIndex extends MessageIndex {
-	/**
-	 * @var array|null
-	 */
+	/** @var array|null */
 	protected $index;
-
-	/**
-	 * @var \Cdb\Reader|null
-	 */
+	/** @var \Cdb\Reader|null */
 	protected $reader;
-
-	/**
-	 * @var string
-	 */
+	/** @var string */
 	protected $filename = 'translate_messageindex.cdb';
 
 	/**
@@ -650,11 +694,7 @@ class CDBMessageIndex extends MessageIndex {
 		$reader = $this->getReader();
 		// We might have the full cache loaded
 		if ( $this->index !== null ) {
-			if ( isset( $this->index[$key] ) ) {
-				return $this->index[$key];
-			} else {
-				return null;
-			}
+			return $this->index[$key] ?? null;
 		}
 
 		$value = $reader->get( $key );
@@ -708,9 +748,7 @@ class CDBMessageIndex extends MessageIndex {
  * @since 2015.04
  */
 class HashMessageIndex extends MessageIndex {
-	/**
-	 * @var array
-	 */
+	/** @var array */
 	protected $index = [];
 
 	/**
@@ -727,11 +765,7 @@ class HashMessageIndex extends MessageIndex {
 	 * @return mixed
 	 */
 	protected function get( $key ) {
-		if ( isset( $this->index[$key] ) ) {
-			return $this->index[$key];
-		} else {
-			return null;
-		}
+		return $this->index[$key] ?? null;
 	}
 
 	protected function store( array $array, array $diff ) {

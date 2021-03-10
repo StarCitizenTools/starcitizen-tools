@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pyscowicz"
+		]
+	},
+	"tsb-didnt-make-any-translations": "Käyttäjä ei ole tehnyt käänöksiä.",
+	"tsb-translations-source": "Lähe",
+	"tsb-translations-user": "{{GENDER:$1|Käyttäjän käänökset}}",
+	"tsb-translations-current": "Nykynen käänös",
+	"log-name-translatorsandbox": "Käänössantalootan loki"
+}

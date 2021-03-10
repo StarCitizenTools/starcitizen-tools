@@ -34,12 +34,12 @@ class ApiAggregateGroups extends ApiBase {
 			}
 			$aggregateGroup = $params['aggregategroup'];
 			$subgroups = TranslateMetadata::getSubgroups( $aggregateGroup );
-			if ( !$subgroups ) {
-				// For newly created groups the subgroups value might be empty,
-				// but check that.
-				if ( TranslateMetadata::get( $aggregateGroup, 'name' ) === false ) {
-					$this->dieWithError( 'apierror-translate-invalidaggregategroup', 'invalidaggregategroup' );
-				}
+			if ( $subgroups === null ) {
+				// For a newly created aggregate group, it may contain no subgroups, but null
+				// means the group does not exist or something has gone wrong.
+
+				$this->dieWithError( 'apierror-translate-invalidaggregategroup', 'invalidaggregategroup' );
+				// For static analysers
 				$subgroups = [];
 			}
 
@@ -120,11 +120,11 @@ class ApiAggregateGroups extends ApiBase {
 			$idExists = MessageGroups::getGroup( $aggregateGroupId );
 			if ( $idExists ) {
 				$i = 1;
-				while ( $idExists ) {
+				do {
 					$tempId = $aggregateGroupId . '-' . $i;
 					$idExists = MessageGroups::getGroup( $tempId );
 					$i++;
-				}
+				} while ( $idExists );
 				$aggregateGroupId = $tempId;
 			}
 
@@ -191,7 +191,7 @@ class ApiAggregateGroups extends ApiBase {
 		return 'csrf';
 	}
 
-	public function getAllowedParams() {
+	protected function getAllowedParams() {
 		return [
 			'do' => [
 				ApiBase::PARAM_TYPE => [ 'associate', 'dissociate', 'remove', 'add', 'update' ],

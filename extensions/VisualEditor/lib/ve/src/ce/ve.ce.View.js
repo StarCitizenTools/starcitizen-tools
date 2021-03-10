@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable View class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -58,7 +58,6 @@ OO.mixinClass( ve.ce.View, OO.EventEmitter );
 
 /* Static members */
 
-// eslint-disable-next-line valid-jsdoc
 /**
  * Allowed attributes for DOM elements, in the same format as ve.dm.Model#preserveHtmlAttributes
  *
@@ -72,6 +71,7 @@ OO.mixinClass( ve.ce.View, OO.EventEmitter );
  *
  * @static
  * @property {boolean|Function}
+ * @param {string} attribute
  * @inheritable
  */
 ve.ce.View.static.renderHtmlAttributes = function ( attribute ) {
@@ -124,8 +124,6 @@ ve.ce.View.prototype.initialize = function () {
 
 /**
  * Handle setup event.
- *
- * @method
  */
 ve.ce.View.prototype.onSetup = function () {
 	this.$element.data( 'view', this );
@@ -133,8 +131,6 @@ ve.ce.View.prototype.onSetup = function () {
 
 /**
  * Handle teardown event.
- *
- * @method
  */
 ve.ce.View.prototype.onTeardown = function () {
 	this.$element.removeData( 'view' );
@@ -143,7 +139,6 @@ ve.ce.View.prototype.onTeardown = function () {
 /**
  * Get the model the view observes.
  *
- * @method
  * @return {ve.dm.Model} Model the view observes
  */
 ve.ce.View.prototype.getModel = function () {
@@ -153,7 +148,6 @@ ve.ce.View.prototype.getModel = function () {
 /**
  * Check if the view is attached to the live DOM.
  *
- * @method
  * @return {boolean} View is attached to the live DOM
  */
 ve.ce.View.prototype.isLive = function () {
@@ -163,7 +157,6 @@ ve.ce.View.prototype.isLive = function () {
 /**
  * Set live state.
  *
- * @method
  * @param {boolean} live The view has been attached to the live DOM (use false on detach)
  * @fires setup
  * @fires teardown
@@ -190,7 +183,6 @@ ve.ce.View.prototype.isInContentEditable = function () {
  * Get a resolved URL from a model attribute.
  *
  * @abstract
- * @method
  * @param {string} key Attribute name whose value is a URL
  * @return {string} URL resolved according to the document's base
  */

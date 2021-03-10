@@ -46,7 +46,7 @@ class FlatPhpFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 			$messages[$key] = $value;
 		}
 
-		$messages = $this->group->getMangler()->mangle( $messages );
+		$messages = $this->group->getMangler()->mangleArray( $messages );
 
 		return [
 			'AUTHORS' => $authors,
@@ -65,9 +65,7 @@ class FlatPhpFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 
 		$mangler = $this->group->getMangler();
 
-		/**
-		 * @var TMessage $item
-		 */
+		/** @var TMessage $item */
 		foreach ( $collection as $item ) {
 			$key = $mangler->unmangle( $item->key() );
 			$key = stripcslashes( $key );
@@ -87,7 +85,7 @@ class FlatPhpFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 	}
 
 	protected function doHeader( MessageCollection $collection ) {
-		global $wgSitename, $wgTranslateDocumentationLanguageCode;
+		global $wgServer, $wgTranslateDocumentationLanguageCode;
 
 		$code = $collection->code;
 		$name = TranslateUtils::getLanguageName( $code );
@@ -105,7 +103,7 @@ class FlatPhpFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 		$output = <<<PHP
 /** $name ($native)
  * $docu
- * To improve a translation please visit http://$wgSitename
+ * To improve a translation please visit $wgServer
  *
  * @ingroup Language
  * @file

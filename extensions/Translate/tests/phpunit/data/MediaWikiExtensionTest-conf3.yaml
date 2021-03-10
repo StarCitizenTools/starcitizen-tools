@@ -10,19 +10,15 @@ FILES:
   class: JsonFFS
   sourcePattern: "%GROUPROOT%/mediawiki-extensions/extensions/ExampleJsonExtension/i18n/%CODE%.json"
 
-CHECKER:
-  class: MediaWikiMessageChecker
-  checks:
-   - pluralCheck
-   - pluralFormsCheck
-   - wikiParameterCheck
-   - wikiLinksCheck
-   - braceBalanceCheck
-   - pagenameMessagesCheck
-   - miscMWChecks
+VALIDATORS:
+  - id: BraceBalance
+  - id: MediaWikiLink
+  - id: MediaWikiPageName
+  - id: MediaWikiParameter
+  - id: MediaWikiPlural
 
 INSERTABLES:
-  class: MediaWikiInsertablesSuggester
+  - class: MediaWikiInsertablesSuggester
 
 TAGS:
   optional:

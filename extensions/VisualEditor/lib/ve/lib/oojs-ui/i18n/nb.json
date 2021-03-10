@@ -1,14 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Apple farmer",
 			"Danmichaelo",
 			"Event",
+			"Jdforrester",
 			"Jeblad",
+			"Jon Harald Søby",
 			"Laaknor",
 			"Njardarlogar",
-			"Jdforrester",
-			"Apple farmer",
-			"Jon Harald Søby"
+			"Orf3us"
 		]
 	},
 	"ooui-outline-control-move-down": "Flytt ned",
@@ -24,8 +25,10 @@
 	"ooui-dialog-process-dismiss": "Lukk",
 	"ooui-dialog-process-retry": "Prøv igjen",
 	"ooui-dialog-process-continue": "Fortsett",
+	"ooui-combobox-button-label": "Vis/skjul valg",
 	"ooui-selectfile-button-select": "Velg en fil",
 	"ooui-selectfile-not-supported": "Filvalg er ikke støttet",
 	"ooui-selectfile-placeholder": "Ingen fil er valgt",
-	"ooui-selectfile-dragdrop-placeholder": "Slipp fil her"
+	"ooui-selectfile-dragdrop-placeholder": "Slipp fil her",
+	"ooui-field-help": "Hjelp"
 }

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Selection class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -76,6 +76,18 @@ ve.ce.Selection.prototype.getSelectionStartAndEndRects = function () {
 };
 
 /**
+ * Get the rectangle for the selection's focus end
+ *
+ * The default gives the bounding rectanagle after using collapseToTo.
+ *
+ * @return {Object[]|null} Selection rectangle
+ */
+ve.ce.Selection.prototype.getSelectionFocusRect = function () {
+	var toSelection = new this.constructor( this.getModel().collapseToTo(), this.surface );
+	return toSelection.getSelectionBoundingRect();
+};
+
+/**
  * Get the coordinates of the selection's bounding rectangle relative to the surface.
  *
  * @abstract
@@ -118,9 +130,10 @@ ve.ce.Selection.prototype.equals = function ( other ) {
  * selection depends on both this and the browser's implementation of BIDI algorithm.
  *
  * @abstract
+ * @param {ve.ce.Document} doc The document to which this selection applies
  * @return {string} 'rtl', 'ltr'
  */
-ve.ce.Selection.prototype.getDirection = null;
+ve.ce.Selection.prototype.getDirectionality = null;
 
 /* Factory */
 

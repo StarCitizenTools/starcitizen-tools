@@ -1,11 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Luckas",
-			"Toniher",
-			"Vriullop",
 			"Fitoschido",
-			"Macofe"
+			"Luckas",
+			"Macofe",
+			"Toniher",
+			"Vriullop"
 		]
 	},
 	"templatedata-desc": "Implementa emmagatzematge de dades pels paràmetres de plantilles (utilitzant JSON)",
@@ -14,11 +14,8 @@
 	"templatedata-doc-format-inline": "Aquesta plantilla prefereix el format de paràmetres en la mateixa línia.",
 	"templatedata-doc-no-params-set": "Cap paràmetre especificat",
 	"templatedata-doc-param-autovalue": "Valor automàtic",
-	"templatedata-doc-param-autovalue-empty": "buit",
 	"templatedata-doc-param-default": "Per defecte",
-	"templatedata-doc-param-default-empty": "buit",
 	"templatedata-doc-param-example": "Exemple",
-	"templatedata-doc-param-example-empty": "buit",
 	"templatedata-doc-param-desc": "Descripció",
 	"templatedata-doc-param-desc-empty": "cap descripció",
 	"templatedata-doc-param-name": "Paràmetre",

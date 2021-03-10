@@ -9,18 +9,18 @@
  * @license GPL-2.0-or-later
  */
 
-class DtdFFSTest extends MediaWikiTestCase {
+class DtdFFSTest extends MediaWikiIntegrationTestCase {
 
 	protected $groupConfiguration = [
 		'BASIC' => [
-			'class' => 'FileBasedMessageGroup',
+			'class' => FileBasedMessageGroup::class,
 			'id' => 'test-id',
 			'label' => 'Test Label',
 			'namespace' => 'NS_MEDIAWIKI',
 			'description' => 'Test description',
 		],
 		'FILES' => [
-			'class' => 'DtdFFS',
+			'class' => DtdFFS::class,
 		],
 	];
 
@@ -38,9 +38,7 @@ class DtdFFSTest extends MediaWikiTestCase {
 "Retro">
 DTD;
 
-		/**
-		 * @var FileBasedMessageGroup $group
-		 */
+		/** @var FileBasedMessageGroup $group */
 		$group = MessageGroupBase::factory( $this->groupConfiguration );
 		$ffs = new DtdFFS( $group );
 		$parsed = $ffs->readFromVariable( $file );

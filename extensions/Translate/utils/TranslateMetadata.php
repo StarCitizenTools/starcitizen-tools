@@ -14,11 +14,9 @@ class TranslateMetadata {
 	/** @var array Map of (group => key => value) */
 	private static $cache = [];
 
-	/**
-	 * @param string[] $groups List of translate groups
-	 */
+	/** @param string[] $groups List of translate groups */
 	public static function preloadGroups( array $groups ) {
-		$missing = array_diff( $groups, array_keys( self::$cache ) );
+		$missing = array_keys( array_diff_key( array_flip( $groups ), self::$cache ) );
 		if ( !$missing ) {
 			return;
 		}
@@ -26,8 +24,13 @@ class TranslateMetadata {
 		self::$cache += array_fill_keys( $missing, null ); // cache negatives
 
 		$dbr = TranslateUtils::getSafeReadDB();
-		$conds = count( $groups ) <= 500 ? [ 'tmd_group' => $missing ] : [];
-		$res = $dbr->select( 'translate_metadata', '*', $conds, __METHOD__ );
+		$conds = count( $missing ) <= 500 ? [ 'tmd_group' => $missing ] : [];
+		$res = $dbr->select(
+			'translate_metadata',
+			[ 'tmd_group', 'tmd_key', 'tmd_value' ],
+			$conds,
+			__METHOD__
+		);
 		foreach ( $res as $row ) {
 			self::$cache[$row->tmd_group][$row->tmd_key] = $row->tmd_value;
 		}
@@ -46,6 +49,21 @@ class TranslateMetadata {
 	}
 
 	/**
+	 * Get a metadata value for the given group and key.
+	 * If it does not exist, return the default value.
+	 * @param string $group
+	 * @param string $key
+	 * @param string $defaultValue
+	 * @return string
+	 */
+	public static function getWithDefaultValue(
+		string $group, string $key, string $defaultValue
+	): string {
+		$value = self::get( $group, $key );
+		return $value === false ? $defaultValue : $value;
+	}
+
+	/**
 	 * Set a metadata value for the given group and metadata key. Updates the
 	 * value if already existing.
 	 * @param string $group The group id
@@ -57,7 +75,7 @@ class TranslateMetadata {
 		$data = [ 'tmd_group' => $group, 'tmd_key' => $key, 'tmd_value' => $value ];
 		if ( $value === false ) {
 			unset( $data['tmd_value'] );
-			$dbw->delete( 'translate_metadata', $data );
+			$dbw->delete( 'translate_metadata', $data, __METHOD__ );
 			unset( self::$cache[$group][$key] );
 		} else {
 			$dbw->replace(
@@ -73,12 +91,12 @@ class TranslateMetadata {
 	/**
 	 * Wrapper for getting subgroups.
 	 * @param string $groupId
-	 * @return string[]|bool
+	 * @return string[]|null
 	 * @since 2012-05-09
 	 */
-	public static function getSubgroups( $groupId ) {
+	public static function getSubgroups( string $groupId ): ?array {
 		$groups = self::get( $groupId, 'subgroups' );
-		if ( $groups !== false ) {
+		if ( is_string( $groups ) ) {
 			if ( strpos( $groups, '|' ) !== false ) {
 				$groups = explode( '|', $groups );
 			} else {
@@ -90,6 +108,8 @@ class TranslateMetadata {
 					unset( $groups[$index] );
 				}
 			}
+		} else {
+			$groups = null;
 		}
 
 		return $groups;
@@ -114,7 +134,7 @@ class TranslateMetadata {
 	public static function deleteGroup( $groupId ) {
 		$dbw = wfGetDB( DB_MASTER );
 		$conds = [ 'tmd_group' => $groupId ];
-		$dbw->delete( 'translate_metadata', $conds );
+		$dbw->delete( 'translate_metadata', $conds, __METHOD__ );
 		self::$cache[$groupId] = null;
 	}
 }

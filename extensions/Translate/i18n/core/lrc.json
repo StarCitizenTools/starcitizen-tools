@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Mogoeilor",
-			"Beyronvan"
+			"Beyronvan",
+			"Mogoeilor"
 		]
 	},
 	"translate": "والرن",
@@ -20,15 +20,8 @@
 	"translate-prev": "بلگه دمايی",
 	"translate-page-edit": "ڤیرایئشت",
 	"translate-edit-title": "ڤیرایئشت $1",
-	"translate-edit-translation": "لرسن",
 	"translate-edit-contribute": "هومياری كردن",
 	"translate-edit-askpermission": "قول بیئتو",
-	"translate-magic-cm-to-be": "تا بوئه",
-	"translate-magic-cm-current": "تازه باو",
-	"translate-magic-cm-original": "اصل",
-	"translate-magic-cm-comment": "نظر",
-	"translate-magic-cm-save": "ذخيره كردن",
-	"translate-magic-words": "كلميا جادويی",
 	"translate-pref-editassistlang": "زونيا ياريگر",
 	"translate-rc-translation-filter-no": "هيچی نكيد",
 	"translate-stats-edits": "ڤیرایئشتیا",
@@ -66,9 +59,6 @@
 	"translate-mgs-totals": "همه زونا وایک",
 	"supportedlanguages": "زونا حمایت بیه",
 	"supportedlanguages-recenttranslations": "لرسنيا تازه",
-	"translate-js-summary": "چكسته",
-	"translate-js-save": "ذخيره كردن",
-	"translate-js-support": "د سوال جؤاو دئين",
 	"translate-gs-code": "كد",
 	"translate-gs-speakers": "گپ زننه",
 	"translate-gs-score": "امتياز",

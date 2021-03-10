@@ -20,19 +20,22 @@
  * @file
  * @author Brandon Black <blblack@gmail.com>
  */
-namespace IPSet;
+namespace Wikimedia;
+
+use Wikimedia\AtEase\AtEase;
 
 /**
  * Matches IP addresses against a set of CIDR specifications
  *
  * Usage:
  *
+ *     use Wikimedia\IPSet;
  *     // At startup, calculate the optimized data structure for the set:
- *     $ipset = new IPSet( array(
+ *     $ipset = new IPSet( [
  *         '208.80.154.0/26',
  *         '2620:0:861:1::/64',
  *         '10.64.0.0/22',
- *     ) );
+ *     ] );
  *
  *     // Runtime check against cached set (returns bool):
  *     $allowme = $ipset->match( $ip );
@@ -65,16 +68,16 @@ namespace IPSet;
  *
  * The v4 tree would look like:
  *
- *     root4 => array(
+ *     root4 => [
  *         'comp' => 25,
- *         'next' => array(
+ *         'next' => [
  *             0 => true,
- *             1 => array(
+ *             1 => [
  *                 0 => false,
  *                 1 => true,
- *             ),
- *         ),
- *     );
+ *             ],
+ *         ],
+ *     ];
  *
  * (multi-byte compression nodes were attempted as well, but were
  * a net loss in my test scenarios due to additional match complexity)
@@ -104,6 +107,7 @@ class IPSet {
 	 * Add a single CIDR spec to the internal matching trees
 	 *
 	 * @param string $cidr String CIDR spec, IPv[46], optional /mask (def all-1's)
+	 * @return false|null Returns null on success, false on failure
 	 */
 	private function addCidr( $cidr ) {
 		// v4 or v6 check
@@ -123,15 +127,15 @@ class IPSet {
 			list( $net, $mask ) = explode( '/', $cidr, 2 );
 			if ( !ctype_digit( $mask ) || intval( $mask ) > $defMask ) {
 				trigger_error( "IPSet: Bad mask '$mask' from '$cidr', ignored", E_USER_WARNING );
-				return;
+				return false;
 			}
 		}
 		$mask = intval( $mask ); // explicit integer convert, checked above
 
 		// convert $net to an array of integer bytes, length 4 or 16:
-		$raw = inet_pton( $net );
+		$raw = AtEase::quietCall( 'inet_pton', $net );
 		if ( $raw === false ) {
-			return; // inet_pton() sends an E_WARNING for us
+			return false;
 		}
 		$rawOrd = array_map( 'ord', str_split( $raw ) );
 
@@ -151,9 +155,9 @@ class IPSet {
 			} elseif ( $node === false ) {
 				// create new subarray to go deeper
 				if ( !( $curBit & 7 ) && $curBit <= $mask - 8 ) {
-					$node = array( 'comp' => $rawOrd[$curBit >> 3], 'next' => false );
+					$node = [ 'comp' => $rawOrd[$curBit >> 3], 'next' => false ];
 				} else {
-					$node = array( false, false );
+					$node = [ false, false ];
 				}
 			}
 
@@ -170,8 +174,8 @@ class IPSet {
 					$unode = $node['next'];
 					for ( $i = 0; $i < 8; ++$i ) {
 						$unode = ( $comp & ( 1 << $i ) )
-							? array( false, $unode )
-							: array( $unode, false );
+							? [ false, $unode ]
+							: [ $unode, false ];
 					}
 					$node = $unode;
 				}
@@ -185,8 +189,8 @@ class IPSet {
 			}
 			$node =& $node[$index];
 			++$curBit;
-		}
-	}
+		} // Unreachable outside 'while'
+	} // @codeCoverageIgnore
 
 	/**
 	 * Match an IP address against the set
@@ -197,9 +201,9 @@ class IPSet {
 	 * @return bool True is match success, false is match failure
 	 */
 	public function match( $ip ) {
-		$raw = inet_pton( $ip );
+		$raw = AtEase::quietCall( 'inet_pton', $ip );
 		if ( $raw === false ) {
-			return false; // inet_pton() sends an E_WARNING for us
+			return false;
 		}
 
 		$rawOrd = array_map( 'ord', str_split( $raw ) );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface edit mode tool classes.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -24,6 +24,9 @@ OO.initClass( ve.ui.MWEditModeTool );
  * @inheritdoc mw.libs.ve.MWEditModeTool
  */
 ve.ui.MWEditModeTool.prototype.getMode = function () {
+	if ( !this.toolbar.getSurface() ) {
+		return 'source';
+	}
 	return this.toolbar.getSurface().getMode();
 };
 

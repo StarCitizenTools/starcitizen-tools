@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Transaction builder class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -24,7 +24,6 @@ OO.initClass( ve.dm.TransactionBuilder );
 /**
  * Generate a transaction that replaces data in a range.
  *
- * @method
  * @param {ve.dm.Document} doc Document in pre-transaction state
  * @param {ve.Range} range Range of data to remove
  * @param {Array} data Data to insert
@@ -45,7 +44,6 @@ ve.dm.TransactionBuilder.static.newFromReplacement = function ( doc, range, data
  * Generate a transaction that inserts data at an offset.
  *
  * @static
- * @method
  * @param {ve.dm.Document} doc Document in pre-transaction state
  * @param {number} offset Offset to insert at
  * @param {Array} data Data to insert
@@ -77,7 +75,6 @@ ve.dm.TransactionBuilder.static.newFromInsertion = function ( doc, offset, data 
  * 2. Elements can only be merged if {@link ve.dm.Node#canBeMergedWith} returns true
  * 3. Merges take place at the highest common ancestor
  *
- * @method
  * @param {ve.dm.Document} doc Document in pre-transaction state
  * @param {ve.Range} range Range of data to remove
  * @param {boolean} [removeMetadata=false] Remove metadata instead of collapsing it
@@ -236,7 +233,6 @@ ve.dm.TransactionBuilder.static.newFromDocumentInsertion = function ( doc, offse
  * Generate a transaction that changes one or more attributes.
  *
  * @static
- * @method
  * @param {ve.dm.Document} doc Document in pre-transaction state
  * @param {number} offset Offset of element
  * @param {Object.<string,Mixed>} attr List of attribute key and value pairs, use undefined value
@@ -269,7 +265,6 @@ ve.dm.TransactionBuilder.static.newFromAttributeChanges = function ( doc, offset
  * Generate a transaction that annotates content.
  *
  * @static
- * @method
  * @param {ve.dm.Document} doc Document in pre-transaction state
  * @param {ve.Range} range Range to annotate
  * @param {string} method Annotation mode
@@ -279,7 +274,7 @@ ve.dm.TransactionBuilder.static.newFromAttributeChanges = function ( doc, offset
  * @return {ve.dm.Transaction} Transaction that annotates content
  */
 ve.dm.TransactionBuilder.static.newFromAnnotation = function ( doc, range, method, annotation ) {
-	var i, iLen, covered, annotatable, txBuilder,
+	var i, iLen, covered, arrayIndex, annotatable, txBuilder, j, jLen, item, anns,
 		clear = method === 'clear',
 		run = null,
 		runs = [],
@@ -288,15 +283,47 @@ ve.dm.TransactionBuilder.static.newFromAnnotation = function ( doc, range, metho
 		insideContentNode = false,
 		ignoreChildrenDepth = 0;
 
+	/**
+	 * Return the array index of the annotation in the annotation array for the offset
+	 *
+	 * @param {number} offset Document offset
+	 * @return {number} Index in the annotation array (-1 if not present)
+	 */
+	function findAnnotation() {
+		return data.getAnnotationHashesFromOffset( i ).lastIndexOf( hash );
+	}
+
 	function startRun() {
 		run = {
 			start: i,
-			end: null
+			end: null,
+			data: null,
+			spliceAt: clear ? findAnnotation() : null
 		};
 	}
 
 	function endRun() {
 		run.end = i;
+		if ( !clear ) {
+			run.spliceAt = data.getCommonAnnotationArrayLength(
+				new ve.Range( run.start, i )
+			);
+		}
+		run.data = doc.getData( new ve.Range( run.start, run.end ) );
+		for ( j = 0, jLen = run.data.length; j < jLen; j++ ) {
+			item = ve.copy( run.data[ j ] );
+			anns = new ve.dm.AnnotationSet(
+				doc.getStore(),
+				ve.dm.ElementLinearData.static.getAnnotationHashesFromItem( item )
+			);
+			if ( clear ) {
+				anns.remove( annotation );
+			} else {
+				anns.add( annotation, run.spliceAt );
+			}
+			item = ve.dm.ElementLinearData.static.replaceAnnotationHashesForItem( item, anns.getHashes() );
+			run.data[ j ] = item;
+		}
 		runs.push( run );
 		run = null;
 	}
@@ -341,33 +368,36 @@ ve.dm.TransactionBuilder.static.newFromAnnotation = function ( doc, range, metho
 			// Expect comparable annotations to be removed individually otherwise
 			// we might try to remove more than one annotation per character, which
 			// a single transaction can't do.
-			covered = data.getAnnotationsFromOffset( i ).contains( annotation );
+			arrayIndex = findAnnotation();
 		}
 		if ( run && (
-			( clear && !covered ) ||
+			( clear && arrayIndex !== run.spliceAt ) ||
 			( !clear && covered )
 		) ) {
-			// Don't clear already unannotated content, or set already annotated content
+			// Inside a run and:
+			// - if clearing, annotation is absent entirely or at a new array index
+			// - if setting, Matching annotation is present already
 			endRun();
 		}
 		if ( !run && (
-			( clear && covered ) ||
+			( clear && arrayIndex > -1 ) ||
 			( !clear && !covered )
 		) ) {
-			// Clear annotated content, or set unannotated content
+			// Not inside a run, and:
+			// - if clearing, annotation is present
+			// - if setting, annotation is not present
 			startRun();
 		}
 	}
 	if ( run ) {
 		endRun();
 	}
+
 	txBuilder = new ve.dm.TransactionBuilder();
 	for ( i = 0, iLen = runs.length; i < iLen; i++ ) {
 		run = runs[ i ];
 		txBuilder.pushRetain( run.start - ( i > 0 ? runs[ i - 1 ].end : 0 ) );
-		txBuilder.pushStartAnnotating( method, hash );
-		txBuilder.pushRetain( run.end - run.start );
-		txBuilder.pushStopAnnotating( method, hash );
+		txBuilder.pushReplacement( doc, run.start, run.end - run.start, run.data, false );
 	}
 	txBuilder.pushFinalRetain( doc, runs.length > 0 ? runs[ runs.length - 1 ].end : 0 );
 	return txBuilder.getTransaction();
@@ -377,7 +407,6 @@ ve.dm.TransactionBuilder.static.newFromAnnotation = function ( doc, range, metho
  * Generate a transaction that converts elements that can contain content.
  *
  * @static
- * @method
  * @param {ve.dm.Document} doc Document in pre-transaction state
  * @param {ve.Range} range Range to convert
  * @param {string} type Symbolic name of element type to convert to
@@ -633,7 +662,6 @@ ve.dm.TransactionBuilder.prototype.getTransaction = function () {
  * Add a final retain operation to finish off a transaction (internal helper).
  *
  * @private
- * @method
  * @param {ve.dm.Document} doc The document in the state to which the transaction applies
  * @param {number} offset Final offset edited by the transaction up to this point.
  */
@@ -646,7 +674,6 @@ ve.dm.TransactionBuilder.prototype.pushFinalRetain = function ( doc, offset ) {
 /**
  * Add a retain operation.
  *
- * @method
  * @param {number} length Length of content data to retain
  * @throws {Error} Cannot retain backwards
  */
@@ -718,7 +745,6 @@ ve.dm.TransactionBuilder.prototype.addSafeRemoveOps = function ( doc, removeStar
  * Add a replace operation (internal helper).
  *
  * @private
- * @method
  * @param {Array} remove Data removed.
  * @param {Array} insert Data to insert.
  * @param {number} [insertedDataOffset] Inserted data offset
@@ -737,7 +763,6 @@ ve.dm.TransactionBuilder.prototype.pushReplaceInternal = function ( remove, inse
  * If metadata is collapsed instead of removed, it will be shifted backwards if necessary to
  * reach a legal position for metadata in the new document structure.
  *
- * @method
  * @param {ve.dm.Document} doc The document in the state to which the transaction applies
  * @param {number} offset Offset to start at
  * @param {number} removeLength Number of data items to remove
@@ -751,10 +776,11 @@ ve.dm.TransactionBuilder.prototype.pushReplacement = function ( doc, offset, rem
 
 	remove = doc.getData( new ve.Range( offset, offset + removeLength ) );
 	collapse = removeMetadata ? [] : remove.filter( function ( item ) {
-		return ve.dm.LinearData.static.isElementData( item ) &&
-			ve.dm.nodeFactory.isMetaData(
-				ve.dm.LinearData.static.getType( item )
-			);
+		var type = ve.dm.LinearData.static.isElementData( item ) &&
+			ve.dm.LinearData.static.getType( item );
+		return type &&
+			ve.dm.nodeFactory.isMetaData( type ) &&
+			!ve.dm.nodeFactory.isRemovableMetaData( type );
 	} );
 	if ( removeLength === collapse.length && insert.length === 0 ) {
 		// Don't push no-ops
@@ -796,7 +822,6 @@ ve.dm.TransactionBuilder.prototype.pushReplacement = function ( doc, offset, rem
 /**
  * Add an element attribute change operation.
  *
- * @method
  * @param {string} key Name of attribute to change
  * @param {Mixed} from Value change attribute from, or undefined if not previously set
  * @param {Mixed} to Value to change attribute to, or undefined to remove
@@ -815,31 +840,12 @@ ve.dm.TransactionBuilder.prototype.pushAttributeChanges = function ( changes, ol
 	var key;
 	for ( key in changes ) {
 		if ( oldAttrs[ key ] !== changes[ key ] ) {
-			this.pushReplaceElementAttribute( key, oldAttrs[ key ], changes[ key ] );
+			this.pushReplaceElementAttribute( key,
+				ve.copy( oldAttrs[ key ] ),
+				ve.copy( changes[ key ] )
+			);
 		}
 	}
-};
-
-/**
- * Add a start annotating operation.
- *
- * @method
- * @param {string} method Method to use, either "set" or "clear"
- * @param {Object} hash Store hash of annotation object to start setting or clearing from content data
- */
-ve.dm.TransactionBuilder.prototype.pushStartAnnotating = function ( method, hash ) {
-	this.transaction.pushAnnotateOp( method, 'start', hash );
-};
-
-/**
- * Add a stop annotating operation.
- *
- * @method
- * @param {string} method Method to use, either "set" or "clear"
- * @param {Object} hash Store hash of annotation object to stop setting or clearing from content data
- */
-ve.dm.TransactionBuilder.prototype.pushStopAnnotating = function ( method, hash ) {
-	this.transaction.pushAnnotateOp( method, 'stop', hash );
 };
 
 /**

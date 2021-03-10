@@ -1,8 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
+			"Kareyac",
 			"Դավիթ Սարոյան"
 		]
 	},
-	"tpt-languages-nonzero": "$1 ($2% թարգմանված)"
+	"tps-edit-sourcepage-ve-warning-button": "Լավ",
+	"tpt-languages-nonzero": "$1 ($2% թարգմանված)",
+	"tpt-aggregategroup-add": "Ավելացնել",
+	"tpt-aggregategroup-update-cancel": "Չեղարկել",
+	"pt-deletepage-list-no-pages": "Ոչ մի էջ չի գտնվել։",
+	"pm-cancel-button-label": "Չեղարկել",
+	"pp-save-button-label": "Հրապարակել",
+	"pp-cancel-button-label": "Չեղարկել"
 }

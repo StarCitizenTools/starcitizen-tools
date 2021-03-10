@@ -2,13 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Beta16",
+			"Bultro",
 			"Codicorumus",
 			"F. Cosoleto",
-			"Raoli",
-			"Ontsed",
 			"Giuseppe Forte",
-			"Bultro",
-			"Lucas2"
+			"Lucas2",
+			"Ontsed",
+			"Raoli"
 		]
 	},
 	"scribunto-desc": "Framework per incorporare linguaggi di scripting in pagine MediaWiki",
@@ -62,7 +62,6 @@
 	"scribunto-limitreport-profile": "Profilo Lua",
 	"scribunto-limitreport-profile-ms": "$1&nbsp;ms",
 	"scribunto-limitreport-logs": "Registri Lua",
-	"apihelp-scribunto-console-param-title": "Titolo del modulo su cui effettuare test.",
 	"nstab-module": "Modulo",
 	"tooltip-ca-nstab-module": "Vedi la pagina del modulo"
 }

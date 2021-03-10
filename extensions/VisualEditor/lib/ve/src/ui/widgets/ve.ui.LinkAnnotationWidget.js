@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LinkAnnotationWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -90,7 +90,7 @@ ve.ui.LinkAnnotationWidget.static.getTextFromAnnotation = function ( annotation 
  * @return {OO.ui.Widget} Text input widget
  */
 ve.ui.LinkAnnotationWidget.prototype.createInputWidget = function ( config ) {
-	return new OO.ui.TextInputWidget( $.extend( { validate: 'non-empty' }, config ) );
+	return new OO.ui.TextInputWidget( ve.extendObject( { validate: 'non-empty' }, config ) );
 };
 
 /**
@@ -110,12 +110,12 @@ ve.ui.LinkAnnotationWidget.prototype.setDisabled = function () {
 	ve.ui.LinkAnnotationWidget.super.prototype.setDisabled.apply( this, arguments );
 
 	this.getTextInputWidget().setDisabled( this.isDisabled() );
+	return this;
 };
 
 /**
  * Handle value-changing events from the text input
  *
- * @method
  * @param {string} value New input value
  */
 ve.ui.LinkAnnotationWidget.prototype.onTextChange = function ( value ) {
@@ -124,7 +124,7 @@ ve.ui.LinkAnnotationWidget.prototype.onTextChange = function ( value ) {
 
 	// RTL/LTR check
 	// TODO: Make this work properly
-	if ( $( 'body' ).hasClass( 'rtl' ) ) {
+	if ( document.body.classList.contains( 'rtl' ) ) {
 		isExt = ve.init.platform.getExternalLinkUrlProtocolsRegExp().test( value.trim() );
 		// If URL is external, flip to LTR. Otherwise, set back to RTL
 		this.getTextInputWidget().setDir( isExt ? 'ltr' : 'rtl' );
@@ -139,15 +139,14 @@ ve.ui.LinkAnnotationWidget.prototype.onTextChange = function ( value ) {
 		} );
 };
 
-// eslint-disable-next-line valid-jsdoc
 /**
  * Sets the annotation value.
  *
  * The input value will automatically be updated.
  *
- * @method
  * @param {ve.dm.LinkAnnotation|null} annotation Link annotation
  * @param {boolean} [fromText] Annotation was generated from text input
+ * @return {ve.ui.LinkAnnotationWidget}
  * @chainable
  */
 ve.ui.LinkAnnotationWidget.prototype.setAnnotation = function ( annotation, fromText ) {
@@ -174,7 +173,6 @@ ve.ui.LinkAnnotationWidget.prototype.setAnnotation = function ( annotation, from
 /**
  * Gets the annotation value.
  *
- * @method
  * @return {ve.dm.LinkAnnotation} Link annotation
  */
 ve.ui.LinkAnnotationWidget.prototype.getAnnotation = function () {
@@ -188,4 +186,16 @@ ve.ui.LinkAnnotationWidget.prototype.getAnnotation = function () {
  */
 ve.ui.LinkAnnotationWidget.prototype.getHref = function () {
 	return this.constructor.static.getTextFromAnnotation( this.annotation );
+};
+
+/**
+ * Set the read-only state of the widget
+ *
+ * @param {boolean} readOnly Make widget read-only
+ * @return {ve.ui.LinkAnnotationWidget}
+ * @chainable
+ */
+ve.ui.LinkAnnotationWidget.prototype.setReadOnly = function ( readOnly ) {
+	this.input.setReadOnly( readOnly );
+	return this;
 };

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor CommandHelpRegistry class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -97,24 +97,18 @@ ve.ui.commandHelpRegistry.register( 'textStyle', 'clear', { trigger: 'clear', la
 
 // Clipboard
 ve.ui.commandHelpRegistry.register( 'clipboard', 'cut', {
-	shortcuts: [ {
-		mac: 'cmd+x',
-		pc: 'ctrl+x'
-	} ],
+	trigger: 'cut',
+	ignoreCommand: true,
 	label: OO.ui.deferMsg( 'visualeditor-clipboard-cut' )
 } );
 ve.ui.commandHelpRegistry.register( 'clipboard', 'copy', {
-	shortcuts: [ {
-		mac: 'cmd+c',
-		pc: 'ctrl+c'
-	} ],
+	trigger: 'copy',
+	ignoreCommand: true,
 	label: OO.ui.deferMsg( 'visualeditor-clipboard-copy' )
 } );
 ve.ui.commandHelpRegistry.register( 'clipboard', 'paste', {
-	shortcuts: [ {
-		mac: 'cmd+v',
-		pc: 'ctrl+v'
-	} ],
+	trigger: 'paste',
+	ignoreCommand: true,
 	label: OO.ui.deferMsg( 'visualeditor-clipboard-paste' )
 } );
 ve.ui.commandHelpRegistry.register( 'clipboard', 'pasteSpecial', { trigger: 'pasteSpecial', label: OO.ui.deferMsg( 'visualeditor-clipboard-paste-special' ) } );
@@ -130,6 +124,10 @@ ve.ui.commandHelpRegistry.register( 'dialog', 'dialogConfirm', {
 		pc: 'ctrl+enter'
 	} ],
 	label: OO.ui.deferMsg( 'visualeditor-command-dialog-confirm' )
+} );
+ve.ui.commandHelpRegistry.register( 'dialog', 'focusContext', {
+	trigger: 'focusContext',
+	label: OO.ui.deferMsg( 'visualeditor-command-dialog-focus-context' )
 } );
 
 // Formatting
@@ -153,3 +151,6 @@ ve.ui.commandHelpRegistry.register( 'other', 'findPrevious', { trigger: 'findPre
 ve.ui.commandHelpRegistry.register( 'other', 'selectAll', { trigger: 'selectAll', label: OO.ui.deferMsg( 'visualeditor-content-select-all' ) } );
 ve.ui.commandHelpRegistry.register( 'other', 'changeDirectionality', { trigger: 'changeDirectionality', label: OO.ui.deferMsg( 'visualeditor-changedir' ) } );
 ve.ui.commandHelpRegistry.register( 'other', 'commandHelp', { trigger: 'commandHelp', label: OO.ui.deferMsg( 'visualeditor-dialog-command-help-title' ) } );
+
+// Insert
+ve.ui.commandHelpRegistry.register( 'insert', 'horizontalRule', { sequences: [ 'horizontalRule' ], label: OO.ui.deferMsg( 'visualeditor-horizontalrule-tooltip' ) } );

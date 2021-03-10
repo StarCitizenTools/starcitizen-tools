@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWMagicLinkNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -62,8 +62,6 @@ ve.ce.MWMagicLinkNode.static.getDescription = function ( model ) {
 
 /**
  * Handle model update events.
- *
- * @method
  */
 ve.ce.MWMagicLinkNode.prototype.onUpdate = function () {
 	this.$link

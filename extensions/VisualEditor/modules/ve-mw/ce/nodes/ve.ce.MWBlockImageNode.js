@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWBlockImageNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -50,11 +50,11 @@ ve.ce.MWBlockImageNode = function VeCeMWBlockImageNode() {
 
 	this.$element
 		.prepend( this.$a )
-		// The following classes can be used here:
-		// ve-ce-mwBlockImageNode-type-thumb
-		// ve-ce-mwBlockImageNode-type-frame
-		// ve-ce-mwBlockImageNode-type-frameless
-		// ve-ce-mwBlockImageNode-type-none
+		// The following classes are used here:
+		// * ve-ce-mwBlockImageNode-type-thumb
+		// * ve-ce-mwBlockImageNode-type-frame
+		// * ve-ce-mwBlockImageNode-type-frameless
+		// * ve-ce-mwBlockImageNode-type-none
 		.addClass( 've-ce-mwBlockImageNode ve-ce-mwBlockImageNode-type-' + type )
 		// 'typeof' should appear with the proper Parsoid-generated
 		// type. The model deals with converting it
@@ -63,6 +63,7 @@ ve.ce.MWBlockImageNode = function VeCeMWBlockImageNode() {
 	// Mixin constructors
 	ve.ce.MWImageNode.call( this, $focusable, $image );
 
+	// Initialization
 	this.updateSize();
 };
 
@@ -86,7 +87,7 @@ ve.ce.MWBlockImageNode.static.renderHtmlAttributes = false;
 ve.ce.MWBlockImageNode.static.transition = false;
 
 ve.ce.MWBlockImageNode.static.cssClasses = {
-	'default': {
+	default: {
 		left: 'mw-halign-left',
 		right: 'mw-halign-right',
 		center: 'mw-halign-center',
@@ -114,6 +115,8 @@ ve.ce.MWBlockImageNode.prototype.updateClasses = function ( oldAlign ) {
 
 	if ( oldAlign && oldAlign !== align ) {
 		// Remove previous alignment
+		// See static.cssClasses
+		// eslint-disable-next-line mediawiki/class-doc
 		this.$element
 			.removeClass( this.getCssClass( 'none', oldAlign ) )
 			.removeClass( this.getCssClass( 'default', oldAlign ) );
@@ -126,6 +129,7 @@ ve.ce.MWBlockImageNode.prototype.updateClasses = function ( oldAlign ) {
 		alignClass = this.getCssClass( 'none', align );
 		this.$image.removeClass( 've-ce-mwBlockImageNode-thumbimage' );
 	}
+	// eslint-disable-next-line mediawiki/class-doc
 	this.$element.addClass( alignClass );
 
 	// Border
@@ -155,10 +159,15 @@ ve.ce.MWBlockImageNode.prototype.updateClasses = function ( oldAlign ) {
  * @param {Object} [dimensions] Dimension object containing width & height
  */
 ve.ce.MWBlockImageNode.prototype.updateSize = function ( dimensions ) {
-	var
+	var isError = this.model.getAttribute( 'isError' ),
 		type = this.model.getAttribute( 'type' ),
 		borderImage = this.model.getAttribute( 'borderImage' ),
 		hasBorderOrFrame = ( type !== 'none' && type !== 'frameless' ) || borderImage;
+
+	if ( isError ) {
+		this.$element.css( { width: '', height: '' } );
+		return;
+	}
 
 	if ( !dimensions ) {
 		dimensions = {
@@ -186,7 +195,7 @@ ve.ce.MWBlockImageNode.prototype.updateSize = function ( dimensions ) {
  * @return {string} CSS class
  */
 ve.ce.MWBlockImageNode.prototype.getCssClass = function ( type, alignment ) {
-	// TODO use this.model.getAttribute( 'type' ) etc., see bug 52065
+	// TODO use this.model.getAttribute( 'type' ) etc., see T54065
 	// Default is different between RTL and LTR wikis:
 	if ( type === 'default' && alignment === 'default' ) {
 		if ( this.getModel().getDocument().getDir() === 'rtl' ) {
@@ -202,8 +211,6 @@ ve.ce.MWBlockImageNode.prototype.getCssClass = function ( type, alignment ) {
 /**
  * Override the default onSetup to add direction-dependent
  * classes to the image thumbnail.
- *
- * @method
  */
 ve.ce.MWBlockImageNode.prototype.onSetup = function () {
 	// Parent method
@@ -244,6 +251,8 @@ ve.ce.MWBlockImageNode.prototype.onAttributeChange = function ( key, from, to ) 
 				} );
 				break;
 			case 'type':
+				// See constructor for types used
+				// eslint-disable-next-line mediawiki/class-doc
 				this.$element
 					.removeClass( 've-ce-mwBlockImageNode-type-' + from )
 					.addClass( 've-ce-mwBlockImageNode-type-' + to )
@@ -263,6 +272,9 @@ ve.ce.MWBlockImageNode.prototype.onAttributeChange = function ( key, from, to ) 
 				} else {
 					this.$image.attr( key, to );
 				}
+				break;
+			case 'mediaType':
+				this.updateMediaType();
 				break;
 			case 'defaultSize':
 				this.$element.toggleClass( 'mw-default-size', to );

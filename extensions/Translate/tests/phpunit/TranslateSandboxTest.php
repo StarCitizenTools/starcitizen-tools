@@ -7,11 +7,11 @@
  * @license GPL-2.0-or-later
  */
 
-/**
- * @group Database
- */
-class TranslateSandboxTest extends MediaWikiTestCase {
-	protected function setUp() {
+use MediaWiki\MediaWikiServices;
+
+/** @group Database */
+class TranslateSandboxTest extends MediaWikiIntegrationTestCase {
+	protected function setUp(): void {
 		parent::setUp();
 		$this->setMwGlobals( [
 			'wgTranslateUseSandbox' => true,
@@ -22,11 +22,27 @@ class TranslateSandboxTest extends MediaWikiTestCase {
 		TranslateHooks::setupTranslate();
 	}
 
+	/**
+	 * @param User $user
+	 * @return array|string[]
+	 */
+	private function getUserGroups( User $user ): array {
+		if ( method_exists( MediaWikiServices::class, 'getUserGroupManager' ) ) {
+			// MediaWiki 1.35+
+			$userGroupManager = MediaWikiServices::getInstance()->getUserGroupManager();
+			$groups = $userGroupManager->getUserGroups( $user );
+		} else {
+			$groups = $user->getGroups();
+		}
+
+		return $groups;
+	}
+
 	public function testAddUser() {
 		$user = TranslateSandbox::addUser( 'Test user', 'test@blackhole.io', 'test password' );
-		$this->assertTrue( $user->isLoggedIn(), 'User exists' );
+		$this->assertTrue( $user->isRegistered(), 'User exists' );
 
-		$groups = array_unique( $user->getGroups() );
+		$groups = array_unique( $this->getUserGroups( $user ) );
 
 		$this->assertSame( [ 'translate-sandboxed' ], $groups, 'User is in the sandboxed group' );
 	}
@@ -34,13 +50,14 @@ class TranslateSandboxTest extends MediaWikiTestCase {
 	public function testDeleteUser() {
 		$user = TranslateSandbox::addUser( 'Test user2', 'test@blackhole.io', 'test password' );
 		TranslateSandbox::deleteUser( $user );
-		$this->assertFalse( $user->isLoggedIn(), 'User no longer exists' );
+		$this->assertFalse( $user->isRegistered(), 'User no longer exists' );
 	}
 
 	public function testDeleteUserPromoted() {
 		$user = TranslateSandbox::addUser( 'Test user3', 'test@blackhole.io', 'test password' );
 		TranslateSandbox::promoteUser( $user );
-		$this->setExpectedException( MWException::class, 'Not a sandboxed user' );
+		$this->expectException( MWException::class );
+		$this->expectExceptionMessage( 'Not a sandboxed user' );
 		TranslateSandbox::deleteUser( $user );
 	}
 
@@ -83,21 +100,30 @@ class TranslateSandboxTest extends MediaWikiTestCase {
 		$user = TranslateSandbox::addUser( 'Test user6', 'test@blackhole.io', 'test password' );
 		TranslateSandbox::promoteUser( $user );
 
-		$this->assertContains( 'translator', $user->getGroups() );
+		$this->assertContains( 'translator', $this->getUserGroups( $user ) );
 	}
 
 	public function testPermissions() {
 		$user = TranslateSandbox::addUser( 'Test user7', 'test@blackhole.io', 'test password' );
 		$title = Title::makeTitle( NS_USER_TALK, $user->getName() );
+		$pm = MediaWikiServices::getInstance()->getPermissionManager();
 
 		$this->assertFalse(
-			$title->userCan( 'edit', $user ),
+			$pm->userCan( 'edit', $user, $title ),
 			'Sandboxed users cannot edit their own talk page'
 		);
 		TranslateSandbox::promoteUser( $user );
 		$this->assertTrue(
-			$title->userCan( 'edit', $user ),
+			$pm->userCan( 'edit', $user, $title ),
 			'Promoted users can edit their own talk page'
 		);
+	}
+
+	public function testIsSandboxed() {
+		$userNotInGroup = $this->getTestUser()->getUser();
+		$userInGroup = $this->getTestUser( [ 'translate-sandboxed' ] )->getUser();
+
+		$this->assertTrue( TranslateSandbox::isSandboxed( $userInGroup ) );
+		$this->assertFalse( TranslateSandbox::isSandboxed( $userNotInGroup ) );
 	}
 }

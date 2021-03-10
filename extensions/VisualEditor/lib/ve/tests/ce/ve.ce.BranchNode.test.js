@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable BranchNode tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.ce.BranchNode' );
@@ -100,8 +100,6 @@ QUnit.test( 'getDomPosition', function ( assert ) {
 		.append( 'foo' )
 		.append( ceParent.children[ 4 ].$element )
 		.append( 'bar<b>baz</b>qux' );
-
-	assert.expect( 2 * ceParent.children.length + 2 );
 
 	for ( i = 0, len = ceParent.children.length + 1; i < len; i++ ) {
 		position = ceParent.getDomPosition( i );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor TableLineContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -105,12 +105,12 @@ ve.ui.TableLineContextItem.prototype.setup = function () {
 		sides.forEach( function ( side ) {
 			var sideName = sideNames[ side ];
 
-			// Classes created here:
+			className = 'Insert' + modeName + sideName + 'ContextItem';
+			// The following classes are used here:
 			// * ve.ui.InsertColumnBeforeContextItem
 			// * ve.ui.InsertColumnAfterContextItem
 			// * ve.ui.InsertRowBeforeContextItem
 			// * ve.ui.InsertRowAfterContextItem
-			className = 'Insert' + modeName + sideName + 'ContextItem';
 			ve.ui[ className ] = function VeUiInsertRowOrColumnContextItem() {
 				ve.ui.TableLineContextItem.apply( this, arguments );
 			};
@@ -128,12 +128,12 @@ ve.ui.TableLineContextItem.prototype.setup = function () {
 			ve.ui[ className ].static.commandName = 'insert' + modeName + sideName;
 			ve.ui.contextItemFactory.register( ve.ui[ className ] );
 
-			// Classes created here:
+			className = 'Move' + modeName + sideName + 'ContextItem';
+			// The following classes are used here:
 			// * ve.ui.MoveColumnBeforeContextItem
 			// * ve.ui.MoveColumnAfterContextItem
 			// * ve.ui.MoveRowBeforeContextItem
 			// * ve.ui.MoveRowAfterContextItem
-			className = 'Move' + modeName + sideName + 'ContextItem';
 			ve.ui[ className ] = function VeUiMoveRowOrColumnContextItem() {
 				ve.ui.TableLineContextItem.apply( this, arguments );
 			};
@@ -150,12 +150,13 @@ ve.ui.TableLineContextItem.prototype.setup = function () {
 				OO.ui.deferMsg( 'visualeditor-table-move-' + mode + '-' + side );
 			ve.ui[ className ].static.commandName = 'move' + modeName + sideName;
 			ve.ui[ className ].prototype.setup = function () {
-				var selection, matrix;
+				var selection, documentModel, matrix;
 
 				// Parent method
 				ve.ui.TableLineContextItem.prototype.setup.call( this );
 
 				selection = this.context.getSurface().getModel().getSelection();
+				documentModel = this.context.getSurface().getModel().getDocument();
 
 				if ( !( selection instanceof ve.dm.TableSelection ) ) {
 					this.actionButton.setDisabled( true );
@@ -168,7 +169,7 @@ ve.ui.TableLineContextItem.prototype.setup = function () {
 						( mode === 'col' && selection.startCol === 0 )
 					);
 				} else {
-					matrix = selection.getTableNode().getMatrix();
+					matrix = selection.getTableNode( documentModel ).getMatrix();
 					this.actionButton.setDisabled(
 						( mode === 'row' && selection.endRow === matrix.getRowCount() - 1 ) ||
 						( mode === 'col' && selection.endCol === matrix.getMaxColCount() - 1 )
@@ -178,12 +179,14 @@ ve.ui.TableLineContextItem.prototype.setup = function () {
 			ve.ui.contextItemFactory.register( ve.ui[ className ] );
 		} );
 
-		// Classes created here:
+		className = 'Delete' + modeName + 'ContextItem';
+		// The following classes are used here:
 		// * ve.ui.DeleteColumnContextItem
 		// * ve.ui.DeleteRowContextItem
-		className = 'Delete' + modeName + 'ContextItem';
 		ve.ui[ className ] = function VeUiDeleteRowOrColumnContextItem() {
 			ve.ui.TableLineContextItem.apply( this, arguments );
+
+			this.actionButton.setFlags( { destructive: true } );
 		};
 		OO.inheritClass( ve.ui[ className ], ve.ui.TableLineContextItem );
 		ve.ui[ className ].static.name = 'delete' + modeName;
@@ -202,7 +205,7 @@ ve.ui.TableLineContextItem.prototype.setup = function () {
 				count = selection.getColCount();
 			}
 
-			// Messages used here:
+			// The following messages are used here:
 			// * visualeditor-table-delete-col
 			// * visualeditor-table-delete-row
 			return ve.msg( 'visualeditor-table-delete-' + mode, count );
@@ -210,5 +213,65 @@ ve.ui.TableLineContextItem.prototype.setup = function () {
 		ve.ui.contextItemFactory.register( ve.ui[ className ] );
 
 	} );
+
+	ve.ui.TablePropertiesContextItem = function VeUiTablePropertiesContextItem() {
+		ve.ui.TableLineContextItem.apply( this, arguments );
+
+		this.actionButton.setFlags( { progressive: true } );
+	};
+	OO.inheritClass( ve.ui.TablePropertiesContextItem, ve.ui.TableLineContextItem );
+	ve.ui.TablePropertiesContextItem.static.name = 'tableProperties';
+	ve.ui.TablePropertiesContextItem.static.group = 'table';
+	ve.ui.TablePropertiesContextItem.static.icon = 'edit';
+	ve.ui.TablePropertiesContextItem.static.commandName = 'table';
+	ve.ui.TablePropertiesContextItem.static.title = OO.ui.deferMsg( 'visualeditor-table-contextitem-properties' );
+	ve.ui.TablePropertiesContextItem.prototype.onActionButtonClick = function () {
+		// Tweak the selection here:
+		var command = this.context.getSurface().commandRegistry.lookup( 'exitTableCell' );
+		if ( command ) {
+			command.execute( this.context.getSurface() );
+		}
+		return ve.ui.TablePropertiesContextItem.super.prototype.onActionButtonClick.apply( this, arguments );
+	};
+	ve.ui.contextItemFactory.register( ve.ui.TablePropertiesContextItem );
+
+	ve.ui.DeleteTableContextItem = function VeUiDeleteTableContextItem() {
+		ve.ui.TableLineContextItem.apply( this, arguments );
+
+		this.actionButton.setFlags( { destructive: true } );
+	};
+	OO.inheritClass( ve.ui.DeleteTableContextItem, ve.ui.TableLineContextItem );
+	ve.ui.DeleteTableContextItem.static.name = 'deleteTable';
+	ve.ui.DeleteTableContextItem.static.group = 'table';
+	ve.ui.DeleteTableContextItem.static.icon = 'trash';
+	ve.ui.DeleteTableContextItem.static.commandName = 'deleteTable';
+	ve.ui.DeleteTableContextItem.static.title = OO.ui.deferMsg( 'visualeditor-contextitemwidget-label-remove' );
+	ve.ui.contextItemFactory.register( ve.ui.DeleteTableContextItem );
+
+	ve.ui.ToggleTableSelectionContextItem = function VeUiToggleTableSelectionContextItem() {
+		ve.ui.TableLineContextItem.apply( this, arguments );
+
+		this.actionButton.setFlags( { progressive: true } );
+	};
+	OO.inheritClass( ve.ui.ToggleTableSelectionContextItem, ve.ui.TableLineContextItem );
+	ve.ui.ToggleTableSelectionContextItem.static.name = 'toggleTableEditing';
+	ve.ui.ToggleTableSelectionContextItem.static.group = 'table';
+	ve.ui.ToggleTableSelectionContextItem.static.icon = 'table';
+	ve.ui.ToggleTableSelectionContextItem.prototype.getCommand = function () {
+		var commandName = this.context.wasEditing ? 'exitTableCell' : 'enterTableCell';
+		return this.context.getSurface().commandRegistry.lookup( commandName );
+	};
+	ve.ui.ToggleTableSelectionContextItem.prototype.getTitle = function () {
+		var mode = 'cells',
+			selection = this.context.getSurface().getModel().getSelection();
+		if ( selection instanceof ve.dm.TableSelection ) {
+			mode = 'contents';
+		}
+		// The following messages are used here:
+		// * visualeditor-table-contextitem-selectionmode-cells
+		// * visualeditor-table-contextitem-selectionmode-contents
+		return ve.msg( 'visualeditor-table-contextitem-selectionmode-' + mode );
+	};
+	ve.ui.contextItemFactory.register( ve.ui.ToggleTableSelectionContextItem );
 
 }() );

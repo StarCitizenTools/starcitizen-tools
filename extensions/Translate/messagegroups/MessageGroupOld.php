@@ -31,9 +31,7 @@ abstract class MessageGroupOld implements MessageGroup {
 		return $this->label;
 	}
 
-	/**
-	 * @param string $value
-	 */
+	/** @param string $value */
 	public function setLabel( $value ) {
 		$this->label = $value;
 	}
@@ -43,16 +41,12 @@ abstract class MessageGroupOld implements MessageGroup {
 	 */
 	protected $id = 'none';
 
-	/**
-	 * @return string
-	 */
+	/** @return string */
 	public function getId() {
 		return $this->id;
 	}
 
-	/**
-	 * @param string $value
-	 */
+	/** @param string $value */
 	public function setId( $value ) {
 		$this->id = $value;
 	}
@@ -81,46 +75,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	}
 
 	/**
-	 * List of messages that are hidden by default, but can still be translated if
-	 * needed.
-	 */
-	protected $optional = [];
-
-	/**
-	 * @return array
-	 */
-	public function getOptional() {
-		return $this->optional;
-	}
-
-	/**
-	 * @param array $value
-	 */
-	public function setOptional( $value ) {
-		$this->optional = $value;
-	}
-
-	/**
-	 * List of messages that are always hidden and cannot be translated.
-	 */
-	protected $ignored = [];
-
-	/**
-	 * @return array
-	 */
-	public function getIgnored() {
-		return $this->ignored;
-	}
-
-	/**
-	 * @param array $value
-	 */
-	public function setIgnored( $value ) {
-		$this->ignored = $value;
-	}
-
-	/**
-	 * Holds descripton of this group. Description is a wiki text snippet that
+	 * Holds description of this group. Description is a wiki text snippet that
 	 * gives information about this group to translators.
 	 */
 	protected $description = null;
@@ -161,12 +116,10 @@ abstract class MessageGroupOld implements MessageGroup {
 	 */
 	protected $mangler = null;
 
-	/**
-	 * @return StringMatcher
-	 */
+	/** @return StringMatcher */
 	public function getMangler() {
 		if ( !isset( $this->mangler ) ) {
-			$this->mangler = StringMatcher::EmptyMatcher();
+			$this->mangler = new StringMatcher();
 		}
 
 		return $this->mangler;
@@ -185,7 +138,7 @@ abstract class MessageGroupOld implements MessageGroup {
 	 * this message group handles.
 	 *
 	 * @throws MWException
-	 * @return Array of messages definitions indexed by key.
+	 * @return string[] List of message definitions indexed by key.
 	 */
 	public function getDefinitions() {
 		$defs = $this->load( $this->getSourceLanguage() );
@@ -206,13 +159,18 @@ abstract class MessageGroupOld implements MessageGroup {
 		return $this->meta ? [] : $this->getDefinitions();
 	}
 
+	/** @inheritDoc */
+	public function getKeys() {
+		return array_keys( $this->getDefinitions() );
+	}
+
 	/**
 	 * Returns of stored translation of message specified by the $key in language
 	 * code $code.
 	 *
 	 * @param string $key Message key
 	 * @param string $code Language code
-	 * @return Mixed List of stored translation or \null.
+	 * @return mixed List of stored translation or \null.
 	 */
 	public function getMessage( $key, $code ) {
 		if ( !isset( $this->messages[$code] ) ) {
@@ -300,32 +258,20 @@ abstract class MessageGroupOld implements MessageGroup {
 		return $collection;
 	}
 
-	public function __construct() {
-	}
-
 	/**
-	 * Can be overwritten to retun false if something is wrong.
+	 * Can be overwritten to return false if something is wrong.
 	 * @return bool
 	 */
 	public function exists() {
 		return true;
 	}
 
-	public function getChecker() {
+	public function getValidator() {
 		return null;
 	}
 
 	public function getTags( $type = null ) {
-		$tags = [
-			'optional' => $this->optional,
-			'ignored' => $this->ignored,
-		];
-
-		if ( !$type ) {
-			return $tags;
-		}
-
-		return $tags[$type] ?? [];
+		return [];
 	}
 
 	/**
@@ -344,15 +290,14 @@ abstract class MessageGroupOld implements MessageGroup {
 	}
 
 	public function getConfiguration() {
+		return [];
 	}
 
 	public function getFFS() {
 		return null;
 	}
 
-	/**
-	 * @deprecated Use getMessageGroupStates
-	 */
+	/** @deprecated Use getMessageGroupStates */
 	public function getWorkflowConfiguration() {
 		global $wgTranslateWorkflowStates;
 		if ( !$wgTranslateWorkflowStates ) {

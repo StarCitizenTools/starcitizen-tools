@@ -9,11 +9,8 @@
  * @file
  */
 
-/**
- * Identifies Gettext plural exceptions.
- */
-class GettextPluralException extends MWException {
-}
+use MediaWiki\Extension\Translate\Utilities\GettextPlural;
+use MediaWiki\Logger\LoggerFactory;
 
 /**
  * New-style FFS class that implements support for gettext file format.
@@ -30,9 +27,7 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 
 	protected $offlineMode = false;
 
-	/**
-	 * @param bool $value
-	 */
+	/** @param bool $value */
 	public function setOfflineMode( $value ) {
 		$this->offlineMode = $value;
 	}
@@ -108,7 +103,8 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 				$potmode = true;
 			}
 		} else {
-			throw new MWException( "Gettext file header was not found:\n\n$data" );
+			$message = "Gettext file header was not found:\n\n$data";
+			throw new GettextParseException( $message );
 		}
 
 		$template = [];
@@ -127,15 +123,17 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 		/* At this stage we are only interested how many plurals forms we should
 		 * be expecting when parsing the rest of this file. */
 		$pluralCount = false;
-		if ( isset( $headers['Plural-Forms'] ) &&
-			preg_match( '/nplurals=([0-9]+).*;/', $headers['Plural-Forms'], $matches )
-		) {
-			$pluralCount = $metadata['plural'] = $matches[1];
+		if ( $potmode ) {
+			$pluralCount = 2;
+		} elseif ( isset( $headers['Plural-Forms'] ) ) {
+			$pluralCount = $metadata['plural'] = GettextPlural::getPluralCount( $headers['Plural-Forms'] );
 		}
+
+		$metadata['plural'] = $pluralCount;
 
 		// Then parse the messages
 		foreach ( $sections as $section ) {
-			$item = self::parseGettextSection( $section, $pluralCount, $metadata );
+			$item = self::parseGettextSection( $section, $pluralCount );
 			if ( $item === false ) {
 				continue;
 			}
@@ -157,13 +155,15 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 
 		return [
 			'MESSAGES' => $messages,
-			'TEMPLATE' => $template,
-			'METADATA' => $metadata,
-			'HEADERS' => $headers
+			'EXTRA' => [
+				'TEMPLATE' => $template,
+				'METADATA' => $metadata,
+				'HEADERS' => $headers,
+			],
 		];
 	}
 
-	public static function parseGettextSection( $section, $pluralCount, &$metadata ) {
+	public static function parseGettextSection( $section, $pluralCount ) {
 		if ( trim( $section ) === '' ) {
 			return false;
 		}
@@ -201,7 +201,7 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 		if ( $match !== null ) {
 			$pluralMessage = true;
 			$plural = self::formatForWiki( $match );
-			$item['id'] = "{{PLURAL:GETTEXT|{$item['id']}|$plural}}";
+			$item['id'] = GettextPlural::flatten( [ $item['id'], $plural ] );
 		}
 
 		if ( $pluralMessage ) {
@@ -258,7 +258,7 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 		}
 
 		if ( array_sum( array_map( 'strlen', $actualForms ) ) > 0 ) {
-			return '{{PLURAL:GETTEXT|' . implode( '|', $actualForms ) . '}}';
+			return GettextPlural::flatten( $actualForms );
 		} else {
 			return '';
 		}
@@ -308,13 +308,7 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 
 		if ( $algorithm === 'simple' ) {
 			$hash = substr( $hash, 0, 6 );
-			if ( !is_callable( [ $lang, 'truncateForDatabase' ] ) ) {
-				// Backwards compatibility code; remove once MW 1.30 is
-				// no longer supported (aka once MW 1.33 is released)
-				$snippet = $lang->truncate( $item['id'], 30, '' );
-			} else {
-				$snippet = $lang->truncateForDatabase( $item['id'], 30, '' );
-			}
+			$snippet = $lang->truncateForDatabase( $item['id'], 30, '' );
 			$snippet = str_replace( ' ', '_', trim( $snippet ) );
 		} else { // legacy
 			global $wgLegalTitleChars;
@@ -322,13 +316,7 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 			$snippet = preg_replace( "/[^$wgLegalTitleChars]/", ' ', $snippet );
 			$snippet = preg_replace( "/[:&%\/_]/", ' ', $snippet );
 			$snippet = preg_replace( '/ {2,}/', ' ', $snippet );
-			if ( !is_callable( [ $lang, 'truncateForDatabase' ] ) ) {
-				// Backwards compatibility code; remove once MW 1.30 is
-				// no longer supported (aka once MW 1.33 is released)
-				$snippet = $lang->truncate( $snippet, 30, '' );
-			} else {
-				$snippet = $lang->truncateForDatabase( $snippet, 30, '' );
-			}
+			$snippet = $lang->truncateForDatabase( $snippet, 30, '' );
 			$snippet = str_replace( ' ', '_', trim( $snippet ) );
 		}
 
@@ -370,7 +358,7 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 			if ( strpos( $line, ':' ) === false ) {
 				error_log( __METHOD__ . ": $line" );
 			}
-			list( $key, $value ) = explode( ':', $line, 2 );
+			[ $key, $value ] = explode( ':', $line, 2 );
 			$tags[trim( $key )] = trim( $value );
 		}
 
@@ -378,15 +366,26 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 	}
 
 	protected function writeReal( MessageCollection $collection ) {
-		$pot = $this->read( 'en' );
-		$template = $this->read( $collection->code );
-		$pluralCount = false;
-		$output = $this->doGettextHeader( $collection, $template, $pluralCount );
+		// FIXME: this should be the source language
+		$pot = $this->read( 'en' ) ?? [];
+		$code = $collection->code;
+		$template = $this->read( $code ) ?? [];
+		$output = $this->doGettextHeader( $collection, $template['EXTRA'] ?? [] );
+
+		$pluralRule = GettextPlural::getPluralRule( $code );
+		if ( !$pluralRule ) {
+			$pluralRule = GettextPlural::getPluralRule( 'en' );
+			LoggerFactory::getInstance( 'Translate' )->warning(
+				"T235180: Missing Gettext plural rule for '{languagecode}'",
+				[ 'languagecode' => $code ]
+			);
+		}
+		$pluralCount = GettextPlural::getPluralCount( $pluralRule );
 
 		/** @var TMessage $m */
 		foreach ( $collection as $key => $m ) {
-			$transTemplate = $template['TEMPLATE'][$key] ?? [];
-			$potTemplate = $pot['TEMPLATE'][$key] ?? [];
+			$transTemplate = $template['EXTRA']['TEMPLATE'][$key] ?? [];
+			$potTemplate = $pot['EXTRA']['TEMPLATE'][$key] ?? [];
 
 			$output .= $this->formatMessageBlock( $key, $m, $transTemplate, $potTemplate, $pluralCount );
 		}
@@ -394,7 +393,7 @@ class GettextFFS extends SimpleFFS implements MetaYamlSchemaExtender {
 		return $output;
 	}
 
-	protected function doGettextHeader( MessageCollection $collection, $template, &$pluralCount ) {
+	protected function doGettextHeader( MessageCollection $collection, $template ) {
 		global $wgSitename;
 
 		$code = $collection->code;
@@ -437,16 +436,8 @@ PHP;
 			$specs['X-Message-Group'] = $this->group->getId();
 		}
 
-		$plural = self::getPluralRule( $code );
-		if ( $plural ) {
-			$specs['Plural-Forms'] = $plural;
-		} elseif ( !isset( $specs['Plural-Forms'] ) ) {
-			$specs['Plural-Forms'] = 'nplurals=2; plural=(n != 1);';
-		}
-
-		$match = [];
-		preg_match( '/nplurals=(\d+);/', $specs['Plural-Forms'], $match );
-		$pluralCount = $match[1];
+		$specs['Plural-Forms'] = GettextPlural::getPluralRule( $code )
+			?: GettextPlural::getPluralRule( 'en' );
 
 		$output .= 'msgid ""' . "\n";
 		$output .= 'msgstr ""' . "\n";
@@ -512,13 +503,13 @@ PHP;
 			$flags[] = 'fuzzy';
 		}
 
-		if ( preg_match( '/{{PLURAL:GETTEXT/i', $msgid ) ) {
-			$forms = $this->splitPlural( $msgid, 2 );
+		if ( GettextPlural::hasPlural( $msgid ) ) {
+			$forms = GettextPlural::unflatten( $msgid, 2 );
 			$content .= 'msgid ' . self::escape( $forms[0] ) . "\n";
 			$content .= 'msgid_plural ' . self::escape( $forms[1] ) . "\n";
 
 			try {
-				$forms = $this->splitPlural( $msgstr, $pluralCount );
+				$forms = GettextPlural::unflatten( $msgstr, $pluralCount );
 				foreach ( $forms as $index => $form ) {
 					$content .= "msgstr[$index] " . self::escape( $form ) . "\n";
 				}
@@ -552,13 +543,7 @@ PHP;
 	 * @return mixed
 	 */
 	protected static function chainGetter( $key, $a, $b, $default ) {
-		if ( isset( $a[$key] ) ) {
-			return $a[$key];
-		} elseif ( isset( $b[$key] ) ) {
-			return $b[$key];
-		} else {
-			return $default;
-		}
+		return $a[$key] ?? $b[$key] ?? $default;
 	}
 
 	protected static function formatTime( $time ) {
@@ -568,14 +553,14 @@ PHP;
 	}
 
 	protected function getPotTime() {
-		$defs = new MessageGroupCache( $this->group );
+		$cache = $this->group->getMessageGroupCache( $this->group->getSourceLanguage() );
 
-		return $defs->exists() ? $defs->getTimestamp() : wfTimestampNow();
+		return $cache->exists() ? $cache->getTimestamp() : wfTimestampNow();
 	}
 
 	protected function getGenerator() {
 		return 'MediaWiki ' . SpecialVersion::getVersion() .
-			'; Translate ' . TRANSLATE_VERSION;
+			'; Translate ' . TranslateUtils::getVersion();
 	}
 
 	protected function formatDocumentation( $key ) {
@@ -614,65 +599,6 @@ PHP;
 		return $line;
 	}
 
-	/**
-	 * Returns plural rule for Gettext.
-	 * @param string $code Language code.
-	 * @return string
-	 */
-	public static function getPluralRule( $code ) {
-		$rulefile = __DIR__ . '/../data/plural-gettext.txt';
-		$rules = file_get_contents( $rulefile );
-		foreach ( explode( "\n", $rules ) as $line ) {
-			if ( trim( $line ) === '' ) {
-				continue;
-			}
-			list( $rulecode, $rule ) = explode( "\t", $line );
-			if ( $rulecode === $code ) {
-				return $rule;
-			}
-		}
-
-		return '';
-	}
-
-	protected function splitPlural( $text, $forms ) {
-		if ( $forms === 1 ) {
-			return $text;
-		}
-
-		$placeholder = TranslateUtils::getPlaceholder();
-		# |/| is commonly used in KDE to support inflections
-		$text = str_replace( '|/|', $placeholder, $text );
-
-		$plurals = [];
-		$match = preg_match_all( '/{{PLURAL:GETTEXT\|(.*)}}/iUs', $text, $plurals );
-		if ( !$match ) {
-			throw new GettextPluralException( "Failed to find plural in: $text" );
-		}
-
-		$splitPlurals = [];
-		for ( $i = 0; $i < $forms; $i++ ) {
-			# Start with the hole string
-			$pluralForm = $text;
-			# Loop over *each* {{PLURAL}} instance and replace
-			# it with the plural form belonging to this index
-			foreach ( $plurals[0] as $index => $definition ) {
-				$parsedFormsArray = explode( '|', $plurals[1][$index] );
-				if ( !isset( $parsedFormsArray[$i] ) ) {
-					error_log( "Too few plural forms in: $text" );
-					$pluralForm = '';
-				} else {
-					$pluralForm = str_replace( $pluralForm, $definition, $parsedFormsArray[$i] );
-				}
-			}
-
-			$pluralForm = str_replace( $placeholder, '|/|', $pluralForm );
-			$splitPlurals[$i] = $pluralForm;
-		}
-
-		return $splitPlurals;
-	}
-
 	public function shouldOverwrite( $a, $b ) {
 		$regex = '/^"(.+)-Date: \d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\+\d\d\d\d\\\\n"$/m';
 
@@ -707,5 +633,36 @@ PHP;
 		];
 
 		return $schema;
+	}
+
+	public function isContentEqual( $a, $b ) {
+		if ( $a === $b ) {
+			return true;
+		}
+
+		try {
+			$parsedA = GettextPlural::parsePluralForms( $a );
+			$parsedB = GettextPlural::parsePluralForms( $b );
+
+			// if they have the different number of plural forms, just fail
+			if ( count( $parsedA[1] ) !== count( $parsedB[1] ) ) {
+				return false;
+			}
+
+		} catch ( GettextPluralException $e ) {
+			// Something failed, invalid syntax?
+			return false;
+		}
+
+		$expectedPluralCount = count( $parsedA[1] );
+
+		// GettextPlural::unflatten() will return an empty array when $expectedPluralCount is 0
+		// So if they do not have translations and are different strings, they are not equal
+		if ( $expectedPluralCount === 0 ) {
+			return false;
+		}
+
+		return GettextPlural::unflatten( $a, $expectedPluralCount )
+			=== GettextPlural::unflatten( $b, $expectedPluralCount );
 	}
 }

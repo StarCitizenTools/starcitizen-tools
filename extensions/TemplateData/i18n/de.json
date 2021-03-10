@@ -2,19 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Flow",
+			"Kghbln",
 			"Metalhead64",
-			"Kghbln"
+			"Tacsipacsi"
 		]
 	},
-	"apihelp-templatedata-description": "Gespeicherte Daten von der Erweiterung „TemplateData“ abrufen.",
-	"apihelp-templatedata-summary": "Ruft Daten ab, die durch die Erweiterung „TemplateData“ gespeichert werden.",
-	"apihelp-templatedata-example-1": "Gibt Vorlagendaten für [[Template:Stub]] und [[Template:Example]] mit Ergebnissen zurück, falls die Vorlagen nicht vorhanden sind oder vorhanden sind, jedoch keine Vorlagendaten haben.",
-	"apihelp-templatedata-example-2": "Gibt Vorlagendaten für [[Template:Stub]] und [[Template:Example]] ohne Ergebnisse zurück, falls die Vorlagen nicht vorhanden sind oder vorhanden sind, jedoch keine Vorlagendaten haben.",
-	"apihelp-templatedata-param-doNotIgnoreMissingTitles": "Gibt Daten über Titel zurück, auch wenn sie oder Vorlagendaten fehlen. Standardmäßig (zur Abwärtskompatibilität) werden nur Titel zurückgegeben, wenn sie vorhanden sind und Vorlagendaten haben.",
-	"apihelp-templatedata-param-lang": "Gibt lokalisierte Werte in dieser Sprache zurück. Standardmäßig werden alle verfügbaren Übersetzungen zurückgegeben.",
-	"apierror-templatedata-corrupt": "Die Vorlagendaten der Seite $1 enthalten ungültige Daten: $2",
-	"apiwarn-templatedata-deprecation-legacyMode": "Die Standardausgabe wird geändert, um in Zukunft fehlende Titel mit einzubeziehen. Bitte ausdrücklich <kbd>doNotIgnoreMissingTitles=1</kbd> angeben.",
-	"apiwarn-templatedata-deprecation-format": "Das Standard-Ausgabeformat wird in Zukunft in <kbd>jsonfm</kbd> geändert. Bitte <kbd>format=json</kbd> ausdrücklich angeben.",
 	"templatedata-desc": "Ermöglicht die Festlegung von Vorlagenparametern im JSON-Format",
 	"templatedata-doc-desc-empty": "Keine Beschreibung.",
 	"templatedata-doc-format-block": "Diese Vorlage bevorzugt Blockformatierung von Parametern.",
@@ -22,11 +14,8 @@
 	"templatedata-doc-format-inline": "Diese Vorlage bevorzugt Inline-Formatierung von Parametern.",
 	"templatedata-doc-no-params-set": "Keine Parameter angegeben",
 	"templatedata-doc-param-autovalue": "Autowert",
-	"templatedata-doc-param-autovalue-empty": "leer",
 	"templatedata-doc-param-default": "Standard",
-	"templatedata-doc-param-default-empty": "leer",
 	"templatedata-doc-param-example": "Beispiel",
-	"templatedata-doc-param-example-empty": "leer",
 	"templatedata-doc-param-desc": "Beschreibung",
 	"templatedata-doc-param-desc-empty": "keine Beschreibung",
 	"templatedata-doc-param-name": "Parameter",

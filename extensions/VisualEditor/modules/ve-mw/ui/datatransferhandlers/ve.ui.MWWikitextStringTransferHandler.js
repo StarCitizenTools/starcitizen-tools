@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWWikitextStringTransferHandler class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /**
@@ -107,7 +107,7 @@ ve.ui.MWWikitextStringTransferHandler.prototype.process = function () {
 
 	// Don't immediately chain, as this.parsoidRequest must be abortable
 	this.parsoidRequest.then( function ( response ) {
-		var htmlDoc, doc, surface, elementsWithIds, len;
+		var htmlDoc, doc, surface;
 
 		if ( ve.getProp( response, 'visualeditor', 'result' ) !== 'success' ) {
 			return failure();
@@ -116,15 +116,10 @@ ve.ui.MWWikitextStringTransferHandler.prototype.process = function () {
 		htmlDoc = ve.createDocumentFromHtml( response.visualeditor.content );
 
 		// Strip RESTBase IDs
-		elementsWithIds = htmlDoc.querySelectorAll( '[id]' );
-		for ( i = 0, len = elementsWithIds.length; i < len; i++ ) {
-			if ( elementsWithIds[ i ].getAttribute( 'id' ).match( ve.init.platform.getMetadataIdRegExp() ) ) {
-				elementsWithIds[ i ].removeAttribute( 'id' );
-			}
-		}
+		mw.libs.ve.stripRestbaseIds( htmlDoc );
 
 		// Strip legacy IDs, for example in section headings
-		ve.stripParsoidFallbackIds( htmlDoc.body );
+		mw.libs.ve.stripParsoidFallbackIds( htmlDoc.body );
 
 		// Pass an empty object for the second argument (importRules) so that clipboard mode is used
 		// TODO: Fix that API
@@ -146,19 +141,11 @@ ve.ui.MWWikitextStringTransferHandler.prototype.process = function () {
 			}
 		}
 
+		// Clone elements to avoid about attribute conflicts (T204007)
+		doc.data.cloneElements( true );
+
 		if ( !doc.data.hasContent() ) {
 			return failure();
-		}
-
-		// Attempt to undo outermost p-wrapping if possible
-		try {
-			surface.change(
-				ve.dm.TransactionBuilder.static.newFromWrap( doc, new ve.Range( 0, doc.data.countNonInternalElements() ), [], [], [ { type: 'paragraph' } ], [] )
-			);
-		} catch ( e ) {
-			// Sometimes there is no p-wrapping, for example: "* foo"
-			// Sometimes there are multiple <p> tags in the output.
-			// That's okay: ignore the error and paste what we've got.
 		}
 		handler.resolve( doc );
 	}, failure );

@@ -4,7 +4,7 @@
 	/*!
 	 * VisualEditor standalone demo
 	 *
-	 * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+	 * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
 	 */
 	-->
 	<head>
@@ -13,36 +13,38 @@
 		<title>VisualEditor Standalone Demo</title>
 
 		<!-- oojs-ui-wikimediaui -->
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui.rtl.css" class="stylesheet-rtl">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-alerts.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-alerts.rtl.css" class="stylesheet-rtl">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-interactions.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-interactions.rtl.css" class="stylesheet-rtl">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-layout.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-layout.rtl.css" class="stylesheet-rtl">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-moderation.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-moderation.rtl.css" class="stylesheet-rtl">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-movement.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-movement.rtl.css" class="stylesheet-rtl">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-user.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-user.rtl.css" class="stylesheet-rtl">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-core.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-core.rtl.css" class="stylesheet-rtl">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-advanced.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-advanced.rtl.css" class="stylesheet-rtl">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-styling.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-styling.rtl.css" class="stylesheet-rtl">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-list.css" class="stylesheet-ltr">
-		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-list.rtl.css" class="stylesheet-rtl">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-alerts.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-alerts.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-content.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-content.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-interactions.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-interactions.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-layout.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-layout.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-moderation.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-moderation.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-movement.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-movement.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-user.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-user.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-core.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-core.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-advanced.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-advanced.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-styling.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-styling.rtl.css" class="stylesheet-rtl stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-list.css" class="stylesheet-ltr stylesheet-read">
+		<link rel=stylesheet href="../../lib/oojs-ui/oojs-ui-wikimediaui-icons-editing-list.rtl.css" class="stylesheet-rtl stylesheet-read">
 
-		<!-- visualEditor.core.build -->
+		<!-- visualEditor.core.view -->
 		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.FocusableNode.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.ActiveNode.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.AlienNode.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.BranchNode.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.ContentBranchNode.css" class="stylesheet-ve">
-		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.DocumentNode.css" class="stylesheet-ve">
+		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.RootNode.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.GeneratedContentNode.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.HorizontalRuleNode.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.CommentNode.css" class="stylesheet-ve">
@@ -54,20 +56,27 @@
 		<link rel=stylesheet href="../../src/ce/styles/nodes/ve.ce.TableNode.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ce/styles/ve.ce.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ce/styles/ve.ce.Surface.css" class="stylesheet-ve">
+
+		<!-- visualEditor.core.ui -->
 		<link rel=stylesheet href="../../src/ui/styles/dialogs/ve.ui.ToolbarDialog.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/dialogs/ve.ui.CommandHelpDialog.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/dialogs/ve.ui.FindAndReplaceDialog.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/dialogs/ve.ui.ProgressDialog.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/dialogs/ve.ui.SpecialCharacterDialog.css" class="stylesheet-ve">
+		<link rel=stylesheet href="../../src/ui/styles/dialogs/ve.ui.TableDialog.css" class="stylesheet-ve">
+		<link rel=stylesheet href="../../src/ui/styles/elements/ve.ui.PreviewElement.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/tools/ve.ui.FormatTool.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/widgets/ve.ui.LanguageInputWidget.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/widgets/ve.ui.LanguageSearchWidget.css" class="stylesheet-ve">
+		<link rel=stylesheet href="../../src/ui/styles/widgets/ve.ui.CompletionWidget.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/widgets/ve.ui.ContextOptionWidget.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/widgets/ve.ui.ContextSelectWidget.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/widgets/ve.ui.DimensionsWidget.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/widgets/ve.ui.MediaSizeWidget.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/inspectors/ve.ui.CommentInspector.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/inspectors/ve.ui.FragmentInspector.css" class="stylesheet-ve">
+		<link rel=stylesheet href="../../src/ui/styles/inspectors/ve.ui.LanguageInspector.css" class="stylesheet-ve">
+		<link rel=stylesheet href="../../src/ui/styles/ve.ui.Context.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/ve.ui.ContextItem.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/contextitems/ve.ui.LinearContextItem.css" class="stylesheet-ve">
 		<link rel=stylesheet href="../../src/ui/styles/contextitems/ve.ui.TableLineContextItem.css" class="stylesheet-ve">
@@ -86,6 +95,7 @@
 		<link rel=stylesheet href="../../src/ui/styles/elements/ve.ui.DiffElement.css">
 
 		<!-- visualEditor.standalone.build -->
+		<link rel=stylesheet href="../../src/init/sa/styles/ve.init.sa.Platform.css">
 		<link rel=stylesheet href="../../src/ui/styles/ve.ui.DebugBar.css">
 
 		<!-- visualEditor.mobile.build -->
@@ -102,6 +112,7 @@
 
 		<!-- visualEditor.mobile.standalone.demo -->
 		<link rel=stylesheet href="../../demos/ve/demo.mobile.css" class="stylesheet-read">
+		<link rel=stylesheet href="../../demos/ve/demo.wikimediaui.css" class="stylesheet-read">
 
 	</head>
 	<body>
@@ -160,9 +171,6 @@
 		<!-- papaparse -->
 		<script src="../../lib/papaparse/papaparse.js"></script>
 
-		<!-- visualEditor.supportCheck -->
-		<script src="../../src/init/ve.init.SupportCheck.js"></script>
-
 		<!-- unicodejs -->
 		<script src="../../lib/unicodejs/unicodejs.js"></script>
 
@@ -172,17 +180,39 @@
 		<!-- spark-md5 -->
 		<script src="../../lib/spark-md5/spark-md5.js"></script>
 
-		<!-- visualEditor.base.build -->
+		<!-- visualEditor.core.ve -->
 		<script src="../../src/ve.js"></script>
+
+		<!-- visualEditor.core.utils -->
 		<script src="../../src/ve.utils.js"></script>
 		<script src="../../src/ve.TriggerListener.js"></script>
 		<script src="../../src/ve.debug.js"></script>
+		<script src="../../src/ve.freeze.js"></script>
 		<script src="../../src/ve.track.js"></script>
+
+		<!-- visualEditor.core.utils.parsing -->
+		<script src="../../src/ve.utils.parsing.js"></script>
+
+		<!-- visualEditor.supportCheck -->
+		<script src="../../src/init/ve.init.SupportCheck.js"></script>
+
+		<!-- visualEditor.core.init -->
 		<script src="../../src/init/ve.init.js"></script>
+		<script src="../../src/init/ve.init.SafeStorage.js"></script>
+		<script src="../../src/init/ve.init.ListStorage.js"></script>
 		<script src="../../src/init/ve.init.Platform.js"></script>
 		<script src="../../src/init/ve.init.Target.js"></script>
 
-		<!-- visualEditor.core.build -->
+		<!-- dompurify -->
+		<script src="../../lib/dompurify/purify.js"></script>
+
+		<!-- visualEditor.sanitize -->
+		<script src="../../src/ve.sanitize.js"></script>
+
+		<!-- visualEditor.core.utils.client -->
+		<script src="../../src/ve.utils.client.js"></script>
+
+		<!-- visualEditor.core.root -->
 		<script src="../../src/ve.Range.js"></script>
 		<script src="../../src/ve.SelectionState.js"></script>
 		<script src="../../src/ve.Node.js"></script>
@@ -193,6 +223,8 @@
 		<script src="../../src/ve.EventSequencer.js"></script>
 		<script src="../../src/ve.Scheduler.js"></script>
 		<script src="../../src/ve.Filibuster.js"></script>
+
+		<!-- visualEditor.core.model -->
 		<script src="../../src/dm/ve.dm.js"></script>
 		<script src="../../src/dm/ve.dm.Model.js"></script>
 		<script src="../../src/dm/ve.dm.ModelFactory.js"></script>
@@ -206,8 +238,6 @@
 		<script src="../../src/dm/ve.dm.ResizableNode.js"></script>
 		<script src="../../src/dm/ve.dm.TableCellableNode.js"></script>
 		<script src="../../src/dm/ve.dm.Scalable.js"></script>
-		<script src="../../src/dm/ve.dm.APIResultsProvider.js"></script>
-		<script src="../../src/dm/ve.dm.APIResultsQueue.js"></script>
 		<script src="../../src/dm/ve.dm.Node.js"></script>
 		<script src="../../src/dm/ve.dm.BranchNode.js"></script>
 		<script src="../../src/dm/ve.dm.ContentBranchNode.js"></script>
@@ -220,6 +250,7 @@
 		<script src="../../src/dm/ve.dm.TransactionProcessor.js"></script>
 		<script src="../../src/dm/ve.dm.Transaction.js"></script>
 		<script src="../../src/dm/ve.dm.TransactionBuilder.js"></script>
+		<script src="../../src/dm/ve.dm.TransactionSquasher.js"></script>
 		<script src="../../src/dm/ve.dm.Change.js"></script>
 		<script src="../../src/dm/ve.dm.TreeCursor.js"></script>
 		<script src="../../src/dm/ve.dm.TreeModifier.js"></script>
@@ -234,6 +265,7 @@
 		<script src="../../src/dm/ve.dm.LinearData.js"></script>
 		<script src="../../src/dm/ve.dm.HashValueStore.js"></script>
 		<script src="../../src/dm/ve.dm.Converter.js"></script>
+		<script src="../../src/dm/ve.dm.SourceConverter.js"></script>
 		<script src="../../src/dm/selections/ve.dm.LinearSelection.js"></script>
 		<script src="../../src/dm/selections/ve.dm.NullSelection.js"></script>
 		<script src="../../src/dm/selections/ve.dm.TableSelection.js"></script>
@@ -241,6 +273,9 @@
 		<script src="../../src/dm/lineardata/ve.dm.ElementLinearData.js"></script>
 		<script src="../../src/dm/nodes/ve.dm.GeneratedContentNode.js"></script>
 		<script src="../../src/dm/nodes/ve.dm.AlienNode.js"></script>
+		<script src="../../src/dm/nodes/ve.dm.AlienBlockNode.js"></script>
+		<script src="../../src/dm/nodes/ve.dm.AlienInlineNode.js"></script>
+		<script src="../../src/dm/nodes/ve.dm.AlienTableCellNode.js"></script>
 		<script src="../../src/dm/nodes/ve.dm.ArticleNode.js"></script>
 		<script src="../../src/dm/nodes/ve.dm.BlockquoteNode.js"></script>
 		<script src="../../src/dm/nodes/ve.dm.BreakNode.js"></script>
@@ -294,8 +329,13 @@
 		<script src="../../src/dm/annotations/ve.dm.UserInputAnnotation.js"></script>
 		<script src="../../src/dm/annotations/ve.dm.VariableAnnotation.js"></script>
 		<script src="../../src/dm/metaitems/ve.dm.AlienMetaItem.js"></script>
+		<script src="../../src/dm/metaitems/ve.dm.RemovableAlienMetaItem.js"></script>
 		<script src="../../src/dm/metaitems/ve.dm.CommentMetaItem.js"></script>
 		<script src="../../src/dm/nodes/ve.dm.CommentNode.js"></script>
+		<script src="../../src/dm/nodes/ve.dm.FakeCommentNode.js"></script>
+		<script src="../../src/dm/nodes/ve.dm.RealCommentNode.js"></script>
+
+		<!-- visualEditor.core.view -->
 		<script src="../../src/ce/ve.ce.js"></script>
 		<script src="../../src/ce/ve.ce.debug.js"></script>
 		<script src="../../src/ce/ve.ce.TextStateChunk.js"></script>
@@ -330,12 +370,14 @@
 		<script src="../../src/ce/keydownhandlers/ve.ce.LinearEscapeKeyDownHandler.js"></script>
 		<script src="../../src/ce/keydownhandlers/ve.ce.TableArrowKeyDownHandler.js"></script>
 		<script src="../../src/ce/keydownhandlers/ve.ce.TableDeleteKeyDownHandler.js"></script>
-		<script src="../../src/ce/keydownhandlers/ve.ce.TableEnterKeyDownHandler.js"></script>
 		<script src="../../src/ce/keydownhandlers/ve.ce.LinearTabKeyDownHandler.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.GeneratedContentNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.ContentEditableNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.ActiveNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.AlienNode.js"></script>
+		<script src="../../src/ce/nodes/ve.ce.AlienBlockNode.js"></script>
+		<script src="../../src/ce/nodes/ve.ce.AlienInlineNode.js"></script>
+		<script src="../../src/ce/nodes/ve.ce.AlienTableCellNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.ArticleNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.BlockquoteNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.BreakNode.js"></script>
@@ -360,10 +402,12 @@
 		<script src="../../src/ce/nodes/ve.ce.TableRowNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.TableSectionNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.TextNode.js"></script>
+		<script src="../../src/ce/nodes/ve.ce.UnrenderedNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.ImageNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.BlockImageNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.BlockImageCaptionNode.js"></script>
 		<script src="../../src/ce/nodes/ve.ce.InlineImageNode.js"></script>
+		<script src="../../src/ce/annotations/ve.ce.NailedAnnotation.js"></script>
 		<script src="../../src/ce/annotations/ve.ce.LanguageAnnotation.js"></script>
 		<script src="../../src/ce/annotations/ve.ce.LinkAnnotation.js"></script>
 		<script src="../../src/ce/annotations/ve.ce.TextStyleAnnotation.js"></script>
@@ -389,6 +433,8 @@
 		<script src="../../src/ce/annotations/ve.ce.UnderlineAnnotation.js"></script>
 		<script src="../../src/ce/annotations/ve.ce.UserInputAnnotation.js"></script>
 		<script src="../../src/ce/annotations/ve.ce.VariableAnnotation.js"></script>
+
+		<!-- visualEditor.core.ui -->
 		<script src="../../src/ui/ve.ui.js"></script>
 		<script src="../../src/ui/ve.ui.Overlay.js"></script>
 		<script src="../../src/ui/ve.ui.Surface.js"></script>
@@ -409,6 +455,7 @@
 		<script src="../../src/ui/contextitems/ve.ui.ToolContextItem.js"></script>
 		<script src="../../src/ui/contextitems/ve.ui.TableContextItem.js"></script>
 		<script src="../../src/ui/contextitems/ve.ui.MergeCellsContextItem.js"></script>
+		<script src="../../src/ui/contextitems/ve.ui.SumCellsContextItem.js"></script>
 		<script src="../../src/ui/ve.ui.Tool.js"></script>
 		<script src="../../src/ui/ve.ui.Toolbar.js"></script>
 		<script src="../../src/ui/ve.ui.TargetToolbar.js"></script>
@@ -429,10 +476,13 @@
 		<script src="../../src/ui/ve.ui.DataTransferHandlerFactory.js"></script>
 		<script src="../../src/ui/ve.ui.DataTransferItem.js"></script>
 		<script src="../../src/ui/ve.ui.WindowManager.js"></script>
+		<script src="../../src/ui/ve.ui.FragmentWindow.js"></script>
 		<script src="../../src/ui/ve.ui.NodeWindow.js"></script>
 		<script src="../../src/ui/ve.ui.TabIndexScope.js"></script>
 		<script src="../../src/ui/windowmanagers/ve.ui.SurfaceWindowManager.js"></script>
 		<script src="../../src/ui/actions/ve.ui.AnnotationAction.js"></script>
+		<script src="../../src/ui/actions/ve.ui.BlockquoteAction.js"></script>
+		<script src="../../src/ui/actions/ve.ui.CompletionAction.js"></script>
 		<script src="../../src/ui/actions/ve.ui.ContentAction.js"></script>
 		<script src="../../src/ui/actions/ve.ui.FormatAction.js"></script>
 		<script src="../../src/ui/actions/ve.ui.HistoryAction.js"></script>
@@ -468,6 +518,7 @@
 		<script src="../../src/ui/widgets/ve.ui.LanguageInputWidget.js"></script>
 		<script src="../../src/ui/widgets/ve.ui.TargetWidget.js"></script>
 		<script src="../../src/ui/widgets/ve.ui.LinkAnnotationWidget.js"></script>
+		<script src="../../src/ui/widgets/ve.ui.CompletionWidget.js"></script>
 		<script src="../../src/ui/widgets/ve.ui.ContextSelectWidget.js"></script>
 		<script src="../../src/ui/widgets/ve.ui.ContextOptionWidget.js"></script>
 		<script src="../../src/ui/widgets/ve.ui.DimensionsWidget.js"></script>
@@ -480,6 +531,8 @@
 		<script src="../../src/ui/tools/ve.ui.WindowTool.js"></script>
 		<script src="../../src/ui/tools/ve.ui.FragmentWindowTool.js"></script>
 		<script src="../../src/ui/tools/ve.ui.FragmentInspectorTool.js"></script>
+		<script src="../../src/ui/tools/ve.ui.LinkInspectorTool.js"></script>
+		<script src="../../src/ui/tools/ve.ui.CommentInspectorTool.js"></script>
 		<script src="../../src/ui/tools/ve.ui.ToolbarDialogTool.js"></script>
 		<script src="../../src/ui/tools/ve.ui.FormatTool.js"></script>
 		<script src="../../src/ui/tools/ve.ui.HistoryTool.js"></script>
@@ -513,23 +566,39 @@
 
 		<!-- visualEditor.standalone.build -->
 		<script src="../../src/init/sa/ve.init.sa.js"></script>
+		<script src="../../src/init/sa/ve.init.sa.SafeStorage.js"></script>
 		<script src="../../src/init/sa/ve.init.sa.Platform.js"></script>
 		<script src="../../src/init/sa/ve.init.sa.Target.js"></script>
 
 		<!-- visualEditor.mobile.build -->
 		<script src="../../src/ui/contexts/ve.ui.MobileContext.js"></script>
-		<script src="../../src/ui/contextitems/ve.ui.MobileTableCellContextItem.js"></script>
 		<script src="../../src/ui/windowmanagers/ve.ui.MobileWindowManager.js"></script>
 
 		<!-- visualEditor.mobile.standalone -->
 		<script src="../../src/init/sa/ve.init.sa.MobileTarget.js"></script>
 
 		<script>
-			/* eslint-disable */
-			ve.messagePaths = ["../../i18n/","../../lib/oojs-ui/i18n/"];
-			ve.availableLanguages = ["ace","af","ais","am","ang","ar","arc","arq","as","ast","av","az","azb","ba","bcc","bcl","be-tarask","be","bg","bho","bn","bqi","br","bs","ca","cdo","ce","cjy-hant","ckb","co","cs","cu","cy","da","de","diq","dsb","dty","egl","el","eml","en-ca","en-gb","en","eo","es","et","eu","fa","fi","fo","fr","frp","frr","fur","fy","ga","gd","gl","glk","gn","gom-latn","gor","gsw","gu","gv","he","hi","hr","hrx","hsb","hu-formal","hu","hy","ia","id","ie","ilo","inh","io","is","it","ja","jv","ka","kab","khw","kk-cyrl","km","kn","ko-kp","ko","krc","kri","krl","ksh","ku-latn","kw","ky","la","lb","lez","li","lki","lmo","lrc","lt","luz","lv","lzh","lzz","mg","min","mk","ml","mn","mr","ms","mt","myv","nan","nap","nb","nds-nl","nds","ne","nl","nn","oc","olo","om","or","os","pa","pam","pfl","pl","pms","ps","pt-br","pt","qqq","qu","rm","ro","roa-tara","ru","rue","sa","sah","sc","scn","sco","sd","sgs","sh","shn","si","sk","skr-arab","sl","sq","sr-ec","sr-el","su","sv","sw","ta","tay","te","tg-cyrl","th","tl","tr","tt-cyrl","tyv","tzm","ug-arab","uk","ur","uz","vec","vep","vi","vo","war","wuu","xmf","yi","yue","zh-hans","zh-hant","ace","af","ais","am","ar","arc","arq","as","ast","awa","az","azb","ba","bcc","bcl","be-tarask","be","bg","bho","bn","bqi","br","bs","ca","cdo","ce","ckb","co","crh-cyrl","crh-latn","cs","cu","cy","da","de","diq","dsb","dty","egl","el","eml","en-ca","en-gb","en","eo","es","et","eu","fa","fi","fo","fr","frr","fur","fy","gd","gl","glk","gom-latn","gor","gu","he","hi","hif-latn","hr","hrx","hsb","hu-formal","hu","hy","ia","id","ie","ilo","inh","io","is","it","ja","jv","ka","kab","khw","kk-cyrl","km","kn","ko","krc","krl","ksh","ku-latn","kw","ky","la","lb","li","lki","lmo","lt","luz","lv","lzh","mg","min","mk","ml","mn","mr","ms","myv","nan","nap","nb","nds-nl","nds","ne","nl","nn","oc","olo","om","or","pa","pfl","pl","pms","pnb","ps","pt-br","pt","qqq","qu","ro","roa-tara","ru","sa","sah","scn","sco","sd","sh","shn","si","sk","skr-arab","sl","sq","sr-ec","sr-el","su","sv","sw","ta","tay","te","tg-cyrl","th","tl","tr","tt-cyrl","ug-arab","uk","ur","uz","vec","vep","vi","vo","war","wuu","xmf","yi","yo","yue","zh-hans","zh-hant"];
-			ve.demoPages = {"aliens":"pages/aliens.html","comments":"pages/comments.html","complex":"pages/complex.html","empty":"pages/empty.html","h1":"pages/h1.html","image":"pages/image.html","isolation":"pages/isolation.html","long":"pages/long.html","meta":"pages/meta.html","rtl":"pages/rtl.html","sections":"pages/sections.html","simple":"pages/simple.html","slugs":"pages/slugs.html","tables":"pages/tables.html"};
-			/* eslint-enable */
+			ve.messagePaths = [
+				'../../i18n/',
+				'../../lib/oojs-ui/i18n/'
+			];
+			ve.availableLanguages = [ 'ace', 'af', 'am', 'ang', 'ar', 'arc', 'arq', 'as', 'ast', 'av', 'awa', 'az', 'azb', 'ba', 'bcc', 'bcl', 'be', 'be-tarask', 'bg', 'bho', 'bjn', 'bn', 'bqi', 'br', 'bs', 'ca', 'cdo', 'ce', 'cjy-hant', 'ckb', 'co', 'crh-cyrl', 'crh-latn', 'cs', 'cu', 'cy', 'da', 'de', 'diq', 'dsb', 'dty', 'egl', 'el', 'eml', 'en', 'en-ca', 'en-gb', 'eo', 'es', 'et', 'eu', 'fa', 'fi', 'fo', 'fr', 'frp', 'frr', 'fur', 'fy', 'ga', 'gd', 'gl', 'glk', 'gn', 'gom-latn', 'gor', 'gsw', 'gu', 'gv', 'he', 'hi', 'hif-latn', 'hr', 'hrx', 'hsb', 'hu', 'hu-formal', 'hy', 'hyw', 'ia', 'id', 'ie', 'ilo', 'inh', 'io', 'is', 'it', 'ja', 'jv', 'ka', 'kab', 'khw', 'kk-cyrl', 'km', 'kn', 'ko', 'ko-kp', 'krc', 'kri', 'krl', 'ksh', 'ku-latn', 'kw', 'ky', 'la', 'lb', 'lez', 'lfn', 'li', 'lij', 'lki', 'lmo', 'lrc', 'lt', 'luz', 'lv', 'lzh', 'lzz', 'mai', 'mg', 'min', 'mk', 'ml', 'mn', 'mni', 'mr', 'ms', 'mt', 'my', 'myv', 'nan', 'nap', 'nb', 'nds', 'nds-nl', 'ne', 'nl', 'nn', 'oc', 'olo', 'om', 'or', 'os', 'pa', 'pam', 'pfl', 'pl', 'pms', 'pnb', 'ps', 'pt', 'pt-br', 'qqq', 'qu', 'rm', 'ro', 'roa-tara', 'ru', 'rue', 'sa', 'sah', 'sc', 'scn', 'sco', 'sd', 'sgs', 'sh', 'shn', 'si', 'sk', 'skr-arab', 'sl', 'sq', 'sr-ec', 'sr-el', 'su', 'sv', 'sw', 'szy', 'ta', 'tay', 'te', 'tg-cyrl', 'th', 'ti', 'tl', 'tr', 'tt-cyrl', 'tw', 'tyv', 'tzm', 'ug-arab', 'uk', 'ur', 'uz', 'vec', 'vep', 'vi', 'vo', 'war', 'wuu', 'xmf', 'yi', 'yo', 'yue', 'zh-hans', 'zh-hant' ];
+			ve.demoPages = [
+				'aliens',
+				'comments',
+				'complex',
+				'empty',
+				'h1',
+				'image',
+				'isolation',
+				'long',
+				'meta',
+				'rtl',
+				'sections',
+				'simple',
+				'slugs',
+				'tables'
+			];
 		</script>
 
 		<!-- visualEditor.standalone.demo -->

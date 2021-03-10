@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Macofe",
-			"Fitoschido",
+			"Canaan9801",
 			"Csbotero",
-			"Lemondoge",
 			"Dgstranz",
+			"Fitoschido",
+			"Lemondoge",
+			"Macofe",
 			"Tiberius1701"
 		]
 	},
@@ -26,6 +27,9 @@
 	"apihelp-query+languagestats-param-language": "Código de idioma.",
 	"apihelp-query+languagestats-example-1": "Lista de estadísticas de traducciones completadas en finés.",
 	"apihelp-query+messagecollection-description": "Consultar a MessageCollection acerca de las traducciones.",
+	"apihelp-query+managemessagegroups-param-groupId": "Identificador de grupo",
+	"apihelp-query+managemessagegroups-param-messageKey": "Clave de mensaje",
+	"apihelp-query+managemessagegroups-example-1": "Mostrar renombramientos posibles para la clave dada en el grupo dado.",
 	"apihelp-query+messagecollection-param-group": "Grupo de mensajes.",
 	"apihelp-query+messagecollection-param-language": "Código de idioma.",
 	"apihelp-query+messagecollection-param-limit": "El número de mensajes que mostrar (después de filtrar).",
@@ -45,6 +49,11 @@
 	"apihelp-query+messagetranslations-summary": "Consulta todas las traducciones de un solo mensaje.",
 	"apihelp-query+messagetranslations-param-title": "Título completo de un mensaje conocido.",
 	"apihelp-query+messagetranslations-example-1": "Lista de traducciones en el wiki de \"MediaWiki:January\"",
+	"apihelp-managemessagegroups-param-groupId": "Identificador de grupo",
+	"apihelp-managemessagegroups-param-renameMessageKey": "Se está renombrando la clave de mensaje específica",
+	"apihelp-managemessagegroups-param-messageKey": "Clave de mensaje de reemplazo",
+	"apihelp-managemessagegroups-param-operation": "La operación que se realizará. Valores posibles: rename, new",
+	"apihelp-managemessagegroups-param-changesetModified": "Una marca horaria de la última vez que el conjunto de cambios fue modificado. Si el conjunto de cambios ha sido modificado después, el API mostrará un error.",
 	"apihelp-translatesandbox-description": "Registrar y gestionar usuarios aislados (en \"sandbox\").",
 	"apihelp-translatesandbox-param-do": "Lo que hacer",
 	"apihelp-translatesandbox-param-userid": "Identificadores de los usuarios que se gestionan. Usa 0 para las creaciones.",
@@ -94,7 +103,9 @@
 	"apihelp-translationcheck-summary": "Validar traducciones.",
 	"apihelp-translationcheck-param-title": "Título de página con espacio de nombres y código de idioma.",
 	"apihelp-translationcheck-param-translation": "La traducción que validar.",
+	"apierror-translate-changeset-modified": "Otro usuario o proceso ha modificado el conjunto de cambios. No puede guardar tus cambios porque puede anular sus cambios. Por favor actualiza la página para ver los últimos cambios.",
 	"apierror-translate-duplicateaggregategroup": "El grupo de mensajes ya existe",
+	"apierror-translate-fuzzymessage": "No se pueden revisar las traducciones imprecisas",
 	"apierror-translate-invalidgroup": "El grupo no existe o no es válido",
 	"apierror-translate-invalidstate": "El estado solicitado no es válido.",
 	"apierror-translate-invalidlanguage": "El idioma solicitado no es válido.",
@@ -106,7 +117,9 @@
 	"apierror-translate-notranslationservices": "No se ha configurado ningún servicio público de traducciones. Los administradores del wiki deben configurar <var>$wgTranslateTranslationServices</var> adecuadamente para poder utilizar esta función.",
 	"apierror-translate-owntranslation": "No se pueden revisar las traducciones propias",
 	"apierror-translate-sandbox-invalidppassword": "La contraseña no es válida",
+	"apierror-translate-smg-nochanges": "No hay ningún cambio que procesar.",
 	"apierror-translate-unknownmessage": "Mensaje desconocido",
+	"apierror-translate-invalid-changeset-name": "Ha pasado un conjunto de cambios de nombre de archivo no válido - $1",
 	"apiwarn-translate-alreadyreviewedbyyou": "Ya la marcaste como revisada",
 	"apiwarn-translate-language-disabled-source": "El idioma original de este grupo es el $1. Selecciona otro idioma al cual traducir."
 }

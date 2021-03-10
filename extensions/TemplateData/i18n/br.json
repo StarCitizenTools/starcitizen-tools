@@ -1,18 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
-			"Y-M D",
+			"Fulup",
 			"Pymouss",
-			"Fulup"
+			"Y-M D"
 		]
 	},
 	"templatedata-doc-desc-empty": "Deskrivadur ebet.",
 	"templatedata-doc-param-autovalue": "Talvoud emgefreek",
-	"templatedata-doc-param-autovalue-empty": "goullo",
 	"templatedata-doc-param-default": "Dre ziouer",
-	"templatedata-doc-param-default-empty": "goullo",
 	"templatedata-doc-param-example": "Skouer",
-	"templatedata-doc-param-example-empty": "goullo",
 	"templatedata-doc-param-desc": "Deskrivadur",
 	"templatedata-doc-param-desc-empty": "deskrivadur ebet",
 	"templatedata-doc-param-name": "Arventenn",

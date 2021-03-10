@@ -182,7 +182,7 @@ Consumers MAY provide user interfaces that restrict or simplify entering values 
 #### 3.2.8 `inherits`
 * Value: `string`
 
-The key of another parameter from which this parameter will inherit properites. Local properties will override the inherited properties.
+The key of another parameter from which this parameter will inherit properties. Local properties will override the inherited properties.
 
 Authors MUST ensure that the value matches the key of a `Param` object in `Root.params`.
 

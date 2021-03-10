@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWInternalLinkAnnotation tests.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 QUnit.module( 've.dm.MWInternalLinkAnnotation' );
@@ -9,19 +9,66 @@ QUnit.module( 've.dm.MWInternalLinkAnnotation' );
 QUnit.test( 'toDataElement', function ( assert ) {
 	var i, l,
 		doc = ve.dm.example.createExampleDocument(),
-		internalLink = function ( pageTitle ) {
+		externalLink = function ( href ) {
 			var link = document.createElement( 'a' );
-			link.setAttribute( 'href', location.origin + mw.Title.newFromText( pageTitle ).getUrl() );
+			link.setAttribute( 'href', href );
+			return link;
+		},
+		internalLink = function ( pageTitle, params ) {
+			var link = document.createElement( 'a' );
+			link.setAttribute( 'href', location.origin + mw.Title.newFromText( pageTitle ).getUrl( params ) );
 			return link;
 		},
 		cases = [
+			{
+				msg: 'Not an internal link',
+				element: externalLink( 'http://example.com/' ),
+				expected: {
+					type: 'link/mwExternal',
+					attributes: {
+						href: 'http://example.com/'
+					}
+				}
+			},
 			{
 				msg: 'Simple',
 				element: internalLink( 'Foo' ),
 				expected: {
 					type: 'link/mwInternal',
 					attributes: {
-						hrefPrefix: '',
+						lookupTitle: 'Foo',
+						normalizedTitle: 'Foo',
+						origTitle: 'Foo',
+						title: 'Foo'
+					}
+				}
+			},
+			{
+				msg: 'History link',
+				element: internalLink( 'Foo', { action: 'history' } ),
+				expected: {
+					type: 'link/mwExternal',
+					attributes: {
+						href: location.origin + mw.Title.newFromText( 'Foo' ).getUrl( { action: 'history' } )
+					}
+				}
+			},
+			{
+				msg: 'Diff link',
+				element: internalLink( 'Foo', { diff: '3', oldid: '2' } ),
+				expected: {
+					type: 'link/mwExternal',
+					attributes: {
+						href: location.origin + mw.Title.newFromText( 'Foo' ).getUrl( { diff: '3', oldid: '2' } )
+					}
+				}
+			},
+			{
+				msg: 'Red link',
+				element: internalLink( 'Foo', { action: 'edit', redlink: '1' } ),
+				expected: {
+					type: 'link/mwInternal',
+					attributes: {
 						lookupTitle: 'Foo',
 						normalizedTitle: 'Foo',
 						origTitle: 'Foo',
@@ -36,11 +83,38 @@ QUnit.test( 'toDataElement', function ( assert ) {
 				expected: {
 					type: 'link/mwInternal',
 					attributes: {
-						hrefPrefix: '',
 						lookupTitle: 'Foo?',
 						normalizedTitle: 'Foo?',
 						origTitle: 'Foo%3F',
 						title: 'Foo?'
+					}
+				}
+			},
+			{
+				// The fragment should make it into some parts of this, and not others
+				msg: 'Fragments',
+				element: internalLink( 'Foo#bar' ),
+				expected: {
+					type: 'link/mwInternal',
+					attributes: {
+						lookupTitle: 'Foo',
+						normalizedTitle: 'Foo#bar',
+						origTitle: 'Foo#bar',
+						title: 'Foo#bar'
+					}
+				}
+			},
+			{
+				// Question marks in the fragment shouldn't confuse this
+				msg: 'Question marks in fragments',
+				element: internalLink( 'Foo#bar?' ),
+				expected: {
+					type: 'link/mwInternal',
+					attributes: {
+						lookupTitle: 'Foo',
+						normalizedTitle: 'Foo#bar.3F',
+						origTitle: 'Foo#bar.3F',
+						title: 'Foo#bar.3F'
 					}
 				}
 			}
@@ -61,7 +135,7 @@ QUnit.test( 'toDataElement', function ( assert ) {
 } );
 
 QUnit.test( 'getFragment', function ( assert ) {
-	var	i, l,
+	var i, l,
 		cases = [
 			{
 				msg: 'No fragment returns null',
@@ -101,6 +175,6 @@ QUnit.test( 'getFragment', function ( assert ) {
 		];
 
 	for ( i = 0, l = cases.length; i < l; i++ ) {
-		assert.deepEqual( ve.dm.MWInternalLinkAnnotation.static.getFragment( cases[ i ].original ), cases[ i ].expected, cases[ i ].msg );
+		assert.strictEqual( ve.dm.MWInternalLinkAnnotation.static.getFragment( cases[ i ].original ), cases[ i ].expected, cases[ i ].msg );
 	}
 } );

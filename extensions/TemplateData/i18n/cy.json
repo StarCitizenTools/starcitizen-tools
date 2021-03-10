@@ -8,7 +8,6 @@
 	"templatedata-desc": "Gweithredu storio data ar gyfer paramedrau nodynnau (gan ddefnyddio JSON)",
 	"templatedata-doc-desc-empty": "Dim disgrifiad.",
 	"templatedata-doc-param-default": "Yn ddiofyn",
-	"templatedata-doc-param-default-empty": "gwag",
 	"templatedata-doc-param-desc": "Disgrifiad",
 	"templatedata-doc-param-desc-empty": "dim disgrifiad",
 	"templatedata-doc-param-name": "Paramedr",

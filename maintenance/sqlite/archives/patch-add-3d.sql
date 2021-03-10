@@ -5,7 +5,7 @@
 -- (see code review on I7bf4ad01 and I335cb8d for details).
 
 ---- image
-  --
+--
 --CREATE TABLE /*_*/image_tmp (
 --  -- Filename.
 --  -- This is also the title of the associated description page,

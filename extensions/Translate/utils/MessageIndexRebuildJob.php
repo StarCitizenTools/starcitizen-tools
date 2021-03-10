@@ -8,18 +8,18 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\Jobs\GenericTranslateJob;
+
 /**
  * Job for rebuilding message index.
  *
  * @ingroup JobQueue
  */
-class MessageIndexRebuildJob extends Job {
-
-	/**
-	 * @return self
-	 */
+class MessageIndexRebuildJob extends GenericTranslateJob {
+	/** @return self */
 	public static function newJob() {
-		$job = new self( Title::newMainPage() );
+		$timestamp = microtime( true );
+		$job = new self( Title::newMainPage(), [ 'timestamp' => $timestamp ] );
 
 		return $job;
 	}
@@ -30,19 +30,55 @@ class MessageIndexRebuildJob extends Job {
 	 */
 	public function __construct( $title, $params = [] ) {
 		parent::__construct( __CLASS__, $title, $params );
+		$this->removeDuplicates = true;
 	}
 
 	public function run() {
-		MessageIndex::singleton()->rebuild();
+		// Make sure we have latest version of message groups from global cache.
+		// This should be pretty fast, just a few cache fetches with some post processing.
+		MessageGroups::singleton()->clearProcessCache();
+
+		// BC for existing jobs which may not have this parameter set
+		$timestamp = $this->getParams()['timestamp'] ?? microtime( true );
+
+		try {
+			MessageIndex::singleton()->rebuild( $timestamp );
+		} catch ( MessageIndexException $e ) {
+			// Currently there is just one type of exception: lock wait time exceeded.
+			// Assuming no bugs, this is a transient issue and retry will solve it.
+			$this->logWarning( $e->getMessage() );
+			// Try again later. See ::allowRetries
+			return false;
+		}
 
 		return true;
+	}
+
+	/** @inheritDoc */
+	public function allowRetries() {
+		// This is the default, but added for explicitness and clarity
+		return true;
+	}
+
+	/** @inheritDoc */
+	public function getDeduplicationInfo() {
+		$info = parent::getDeduplicationInfo();
+		// The timestamp is different for every job, so ignore it. The worst that can
+		// happen is that the front cache is not cleared until a future job is created.
+		// There is a check in MessageIndex to spawn a new job if timestamp is smaller
+		// than expected.
+		//
+		// Ideally we would take the latest timestamp, but it seems that the job queue
+		// just prevents insertion of duplicate jobs instead.
+		unset( $info['params']['timestamp'] );
+
+		return $info;
 	}
 
 	/**
 	 * Usually this job is fast enough to be executed immediately,
 	 * in which case having it go through jobqueue only causes problems
 	 * in installations with errant job queue processing.
-	 * @override
 	 */
 	public function insertIntoJobQueue() {
 		global $wgTranslateDelayedMessageIndexRebuild;

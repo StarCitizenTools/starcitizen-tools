@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Xqt",
-			"Purodha"
+			"Purodha",
+			"Xqt"
 		]
 	},
 	"translate": "Iwwersetze",
@@ -15,12 +15,6 @@
 	"translate-prev": "letscht Blatt",
 	"translate-page-edit": "ennere",
 	"translate-edit-title": "„$1“ ennere",
-	"translate-edit-translation": "Iwwersetzing",
-	"translate-edit-in-other-languages": "Meldinge in annere Schprooche",
-	"translate-magic-cm-to-be": "Sollt sei",
-	"translate-magic-cm-comment": "Aamaericking:",
-	"translate-magic-cm-save": "Beilege",
-	"translate-magic-namespace": "Naame von Blatznaame",
 	"translationstats": "Nummere vun Iwwersetzinge",
 	"translate-stats-edits": "Enneringe",
 	"translate-stats-users": "Iwwersetzer",
@@ -52,10 +46,8 @@
 	"translate-mgs-column-language": "Schprooch",
 	"supportedlanguages-translators": "{{PLURAL:$2|Iwwersetzer|Iwwersetzer}}: $1",
 	"supportedlanguages-recenttranslations": "Letscht Iwwersetzinge",
-	"translate-save": "Beilege ($1)",
 	"translate-jssti-add": "Zu de Lischt dezu duh",
 	"translate-manage-import-done": "Alles geduh!",
 	"translate-import-load": "Feil ufflaade",
-	"translate-js-save": "Beilege",
 	"translate-gs-speakers": "Schwetzer"
 }

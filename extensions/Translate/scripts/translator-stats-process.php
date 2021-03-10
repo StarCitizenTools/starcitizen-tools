@@ -19,8 +19,8 @@ require_once "$IP/maintenance/Maintenance.php";
 class TSP extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Script to calculate monthly stats about tsv data produced ' .
-			'by translator-stats.php.';
+		$this->addDescription( 'Script to calculate monthly stats about tsv data produced ' .
+			'by translator-stats.php.' );
 		$this->addArg(
 			'file',
 			'tsv file to process'
@@ -54,7 +54,7 @@ class TSP extends Maintenance {
 			}
 
 			$fields = explode( "\t", trim( $l, "\n" ) );
-			list( $name, $reg, $edits, $translator, $promoted, $method ) = $fields;
+			$reg = $fields[1];
 			$month = substr( $reg, 0, 4 ) . '-' . substr( $reg, 4, 2 ) . '-01';
 			$data[$month][] = $fields;
 		}
@@ -75,7 +75,7 @@ class TSP extends Maintenance {
 			$sbar = [];
 
 			foreach ( $period as $p ) {
-				list( $name, $reg, $edits, $translator, $promtime, $method ) = $p;
+				list( , $reg, $edits, $translator, $promtime, $method ) = $p;
 				$total++;
 				if ( $translator === 'translator' ) {
 					$promoted++;

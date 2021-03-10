@@ -1,20 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Papuass",
-			"Edgars2007"
+			"Edgars2007",
+			"Papuass"
 		]
 	},
 	"templatedata-doc-desc-empty": "Nav apraksta.",
 	"templatedata-doc-format-block": "Šai veidnei parametrus pieņemts izmantot bloka formā.",
+	"templatedata-doc-format-custom": "Šai veidnei ir pielāgots formatējums.",
 	"templatedata-doc-format-inline": "Šai veidnei parametrus pieņemts izmantot vienā rindā.",
 	"templatedata-doc-no-params-set": "Parametri nav norādīti",
 	"templatedata-doc-param-autovalue": "Automātiskā vērtība",
-	"templatedata-doc-param-autovalue-empty": "Tukšs",
 	"templatedata-doc-param-default": "Noklusējuma vērtība",
-	"templatedata-doc-param-default-empty": "Tukšs",
 	"templatedata-doc-param-example": "Piemērs",
-	"templatedata-doc-param-example-empty": "tukšs",
 	"templatedata-doc-param-desc": "Apraksts",
 	"templatedata-doc-param-desc-empty": "nav apraksta",
 	"templatedata-doc-param-name": "Parametrs",
@@ -39,8 +37,17 @@
 	"templatedata-doc-param-type-wiki-user-name": "Dalībnieks",
 	"templatedata-doc-params": "Veidnes parametri",
 	"templatedata-editbutton": "Pārvaldīt TemplateData",
+	"templatedata-errormsg-insertblank": "Vai tiešām vēlies ievietot TemplateData bez jebkādas informācijas?",
 	"templatedata-helplink": "Informācija par TemplateData",
+	"templatedata-invalid-duplicate-value": "Īpašība \"$1\" (\"$3\") dublē \"$2\".",
+	"templatedata-invalid-empty-array": "Īpašībai \"$1\" nepieciešama vismaz viena vērtība tās masīvā.",
+	"templatedata-invalid-format": "Īpašībai \"$1\" jāsatur \"inline\", \"block\" vai derīgs formāta šablons.",
+	"templatedata-invalid-missing": "Obligātā īpašība \"$1\" nav atrasta.",
+	"templatedata-invalid-param": "Nederīgs parametrs \"$1\" īpašībai \"$2\".",
 	"templatedata-invalid-parse": "JSON sintakses kļūda.",
+	"templatedata-invalid-type": "Īpašībai \"$1\" būtu jābūt datu tipam \"$2\".",
+	"templatedata-invalid-unknown": "Negaidīta īpašība \"$1\".",
+	"templatedata-invalid-value": "Nederīga īpašības \"$1\" vērtība.",
 	"templatedata-modal-button-add-language": "Pievienot valodu",
 	"templatedata-modal-button-addparam": "Pievienot parametru",
 	"templatedata-modal-button-apply": "Pielietot",
@@ -52,8 +59,9 @@
 	"templatedata-modal-button-importParams": "Importēt parametrus",
 	"templatedata-modal-button-restoreparam": "Atjaunot parametru",
 	"templatedata-modal-button-saveparam": "Saglabāt",
-	"templatedata-modal-confirmcancel": "Vai tiešām atcelt? Visas izmaiņas tika pazaudētas.",
+	"templatedata-modal-confirmcancel": "Vai tiešām vēlies atmest savas izmaiņas?",
 	"templatedata-modal-current-language": "Pašreizējā valoda: $1",
+	"templatedata-modal-errormsg-duplicate-name": "Atrasta kļūda. Izvēlēto nosaukumu jau lieto cits parametrs.",
 	"templatedata-modal-errormsg-import-noparams": "Importa laikā nav atrasti jauni parametri.",
 	"templatedata-modal-format-block": "Bloks",
 	"templatedata-modal-format-custom": "Pielāgots",
@@ -86,6 +94,7 @@
 	"templatedata-modal-title-paramorder": "Parametru secība",
 	"templatedata-modal-title-templatedesc": "Veidnes apraksts ($1)",
 	"templatedata-modal-title-templateformat": "Ieteiktas vikiteksta noformējums",
+	"templatedata-modal-title-templateformatstring": "Pielāgots formāta šablons",
 	"templatedata-modal-title-templateparam-details": "Parametra detaļas: $1",
 	"templatedata-modal-title-templateparams": "Veidnes parametri"
 }

@@ -8,37 +8,36 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Extension\Translate\PageTranslation\TranslatablePageInsertablesSuggester;
+use MediaWiki\Extension\Translate\PageTranslation\TranslationUnit;
+use MediaWiki\Extension\Translate\Validation\ValidationRunner;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\SlotRecord;
+
 /**
  * Wraps the translatable page sections into a message group.
  * @ingroup PageTranslation MessageGroup
  */
-class WikiPageMessageGroup extends WikiMessageGroup implements IDBAccessObject, \Serializable {
-	/**
-	 * @var Title|string
-	 */
+class WikiPageMessageGroup extends MessageGroupOld implements IDBAccessObject {
+	/** @var Title|string */
 	protected $title;
-
-	/**
-	 * @var int
-	 */
+	/** @var int */
 	protected $namespace = NS_TRANSLATIONS;
 
 	/**
 	 * @param string $id
-	 * @param Title|string $source
+	 * @param Title|string $title
 	 */
-	public function __construct( $id, $source ) {
+	public function __construct( $id, $title ) {
 		$this->id = $id;
-		$this->title = $source;
+		$this->title = $title;
 	}
 
 	public function getSourceLanguage() {
 		return $this->getTitle()->getPageLanguage()->getCode();
 	}
 
-	/**
-	 * @return Title
-	 */
+	/** @return Title */
 	public function getTitle() {
 		if ( is_string( $this->title ) ) {
 			$this->title = Title::newFromText( $this->title );
@@ -53,38 +52,46 @@ class WikiPageMessageGroup extends WikiMessageGroup implements IDBAccessObject, 
 	 */
 	protected $definitions;
 
-	/**
-	 * @return array
-	 */
+	/** @return string[] */
 	public function getDefinitions() {
 		if ( is_array( $this->definitions ) ) {
 			return $this->definitions;
 		}
 
+		$title = $this->getTitle();
+
 		$dbr = TranslateUtils::getSafeReadDB();
-		$tables = 'translate_sections';
+		$tables = [ 'page', 'translate_sections' ];
 		$vars = [ 'trs_key', 'trs_text' ];
-		$conds = [ 'trs_page' => $this->getTitle()->getArticleID() ];
+		$conds = [
+			'page_namespace' => $title->getNamespace(),
+			'page_title' => $title->getDBkey(),
+			// The join condition
+			'page_id = trs_page',
+		];
 		$options = [ 'ORDER BY' => 'trs_order' ];
 		$res = $dbr->select( $tables, $vars, $conds, __METHOD__, $options );
 
 		$defs = [];
-		$prefix = $this->getTitle()->getPrefixedDBkey() . '/';
 
 		foreach ( $res as $r ) {
-			$section = new TPSection();
+			$section = new TranslationUnit();
 			$section->text = $r->trs_text;
 			$defs[$r->trs_key] = $section->getTextWithVariables();
 		}
 
-		$new_defs = [];
-		foreach ( $defs as $k => $v ) {
-			$k = str_replace( ' ', '_', $k );
-			$new_defs[$prefix . $k] = $v;
-		}
+		$groupKeys = $this->makeGroupKeys( array_keys( $defs ) );
+		$this->definitions = array_combine( $groupKeys, array_values( $defs ) );
 
-		$this->definitions = $new_defs;
 		return $this->definitions;
+	}
+
+	public function makeGroupKeys( array $keys ): array {
+		$prefix = $this->getTitle()->getPrefixedDBkey() . '/';
+		foreach ( $keys as $index => $key ) {
+			$keys[$index] = $prefix . str_replace( ' ', '_', $key );
+		}
+		return $keys;
 	}
 
 	/**
@@ -141,33 +148,32 @@ class WikiPageMessageGroup extends WikiMessageGroup implements IDBAccessObject, 
 
 		$title = Title::makeTitleSafe( $this->getNamespace(), "$key/$code" );
 		if ( PageTranslationHooks::$renderingContext ) {
-			$revFlags = Revision::READ_NORMAL; // bug T95753
+			$revFlags = IDBAccessObject::READ_NORMAL; // bug T95753
 		} else {
 			$revFlags = ( $flags & self::READ_LATEST ) == self::READ_LATEST
-				? Revision::READ_LATEST
-				: Revision::READ_NORMAL;
+				? IDBAccessObject::READ_LATEST
+				: IDBAccessObject::READ_NORMAL;
 		}
-		$rev = Revision::newFromTitle( $title, false, $revFlags );
+		$rev = MediaWikiServices::getInstance()
+			->getRevisionLookup()
+			->getRevisionByTitle( $title, false, $revFlags );
 
 		if ( !$rev ) {
 			return null;
 		}
 
-		return ContentHandler::getContentText( $rev->getContent() );
+		return ContentHandler::getContentText( $rev->getContent( SlotRecord::MAIN ) );
 	}
 
-	/**
-	 * @return MediaWikiMessageChecker
-	 */
-	public function getChecker() {
-		$checker = new MediaWikiMessageChecker( $this );
-		$checker->setChecks( [
-			[ $checker, 'pluralCheck' ],
-			[ $checker, 'braceBalanceCheck' ],
-			[ $checker, 'miscMWChecks' ]
+	/** @return ValidationRunner */
+	public function getValidator() {
+		$validator = new ValidationRunner( $this->getId() );
+		$validator->setValidators( [
+			[ 'id' => 'MediaWikiPlural' ],
+			[ 'id' => 'BraceBalance' ]
 		] );
 
-		return $checker;
+		return $validator;
 	}
 
 	public function getInsertablesSuggester() {
@@ -194,55 +200,5 @@ class WikiPageMessageGroup extends WikiMessageGroup implements IDBAccessObject, 
 		self::addContext( $msg, $context );
 
 		return $msg->plain() . $customText;
-	}
-
-	public function serialize() {
-		$toSerialize = [
-			'title' => $this->getTitle()->getPrefixedText(),
-			'id' => $this->id,
-			'_v' => 1 // version - to track incompatible changes
-		];
-
-		// NOTE: get_class_vars returns properties before the constructor has run so if any default
-		// values have to be set for properties, do them while declaring the properties themselves.
-		// Also any properties that are object will automatically be serialized because `===`
-		// does not actually compare object properties to see that they are same.
-
-		// Using array_diff_key to unset the properties already set earlier.
-		$defaultProps = array_diff_key( get_class_vars( self::class ),  $toSerialize );
-
-		foreach ( $defaultProps as $prop => $defaultVal ) {
-			if ( $this->{$prop} === $defaultVal ) {
-				continue;
-			}
-
-			$toSerialize[$prop] = $this->{$prop};
-		}
-
-		return FormatJson::encode( $toSerialize, false, FormatJson::ALL_OK );
-	}
-
-	public function unserialize( $serialized ) {
-		$deserialized = FormatJson::decode( $serialized );
-		if ( $deserialized === false ) {
-			// Unrecoverable. This should not happen but still.
-			throw new \UnexpectedValueException(
-				'Error while deserializing to WikiPageMessageGroup object - FormatJson::decode failed. ' .
-				"Serialize string - $serialized."
-			);
-		}
-
-		// Use as needed in the future to track incompatible changes.
-		// $version = $deserialized->_v;
-		// unset($deserialized->_v);
-
-		// Only set the properties that are present in the class and the deserialized object.
-		$classProps = array_keys( get_class_vars( self::class ) );
-
-		foreach ( $classProps as $prop ) {
-			if ( property_exists( $deserialized, $prop ) ) {
-				$this->{$prop} = $deserialized->{$prop};
-			}
-		}
 	}
 }

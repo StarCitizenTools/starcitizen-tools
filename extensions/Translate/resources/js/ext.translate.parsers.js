@@ -36,33 +36,33 @@
 			} );
 
 			text = text.replace( /(^\*.*(\n|$))+/gm, function ( match ) {
-				match = match.replace( /^\*(.*)/gm, function ( match, p1 ) {
+				match = match.replace( /^\*(.*)/gm, function ( fullMatch, p1 ) {
 					return $( '<div>' ).append( $( '<li>' ).html( p1 ) ).html();
 				} );
 				return $( '<div>' ).append( $( '<ul>' ).html( match ) ).html();
 			} );
 
 			text = text.replace( /(^#.*(\n|$))+/gm, function ( match ) {
-				match = match.replace( /^#(.*)/gm, function ( match, p1 ) {
+				match = match.replace( /^#(.*)/gm, function ( fullMatch, p1 ) {
 					return $( '<div>' ).append( $( '<li>' ).html( p1 ) ).html();
 				} );
 				return $( '<div>' ).append( $( '<ol>' ).html( match ) ).html();
 			} );
 
 			text = text.replace( /\[\[([^\]|]+?)\|(.+?)\]\]/g, function ( match, p1, p2 ) {
-				var link = $( '<a>' ).html( p2 ).prop( 'href', mw.util.getUrl( p1 ) );
-				return $( '<div>' ).append( link ).html();
+				var $link = $( '<a>' ).html( p2 ).prop( 'href', mw.util.getUrl( p1 ) );
+				return $( '<div>' ).append( $link ).html();
 			} );
 
 			text = text.replace( /\[\[(.+?)\]\]/g, function ( match, p1 ) {
-				var link = $( '<a>' ).html( p1 ).prop( 'href', mw.util.getUrl( p1 ) );
-				return $( '<div>' ).append( link ).html();
+				var $link = $( '<a>' ).html( p1 ).prop( 'href', mw.util.getUrl( p1 ) );
+				return $( '<div>' ).append( $link ).html();
 			} );
 
 			externals = new RegExp( '\\[((' + protocols + ')[^ ]+) (.+?)\\]', 'g' );
 			text = text.replace( externals, function ( match, p1, p2, p3 ) {
-				var link = $( '<a>' ).html( p3 ).prop( 'href', p1 );
-				return $( '<div>' ).append( link ).html();
+				var $link = $( '<a>' ).html( p3 ).prop( 'href', p1 );
+				return $( '<div>' ).append( $link ).html();
 			} );
 
 			text = text.replace( /'''(.+?)'''/g, function ( match, p1 ) {

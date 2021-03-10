@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MediaWiki EducationPopupTool class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -16,23 +16,17 @@
  */
 ve.ui.MWEducationPopupTool = function VeUiMwEducationPopupTool( config ) {
 	var popupCloseButton, $popupContent, $shield,
-		usePrefs = !mw.user.isAnon(),
-		prefSaysShow = usePrefs && !mw.user.options.get( 'visualeditor-hideusered' ),
 		tool = this;
 
 	config = config || {};
 
-	if (
-		!( ve.init.mw.DesktopArticleTarget && ve.init.target instanceof ve.init.mw.DesktopArticleTarget ) ||
-		(
-			!prefSaysShow &&
-			!(
-				!usePrefs &&
-				mw.storage.get( 've-hideusered' ) === null &&
-				$.cookie( 've-hideusered' ) === null
-			)
-		)
-	) {
+	// Do not display on platforms other than desktop
+	if ( !( ve.init.mw.DesktopArticleTarget && ve.init.target instanceof ve.init.mw.DesktopArticleTarget ) ) {
+		return;
+	}
+
+	// Do not display if the user already acknowledged the popups
+	if ( !mw.libs.ve.shouldShowEducationPopups() ) {
 		return;
 	}
 
@@ -63,25 +57,25 @@ ve.ui.MWEducationPopupTool = function VeUiMwEducationPopupTool( config ) {
 	} );
 
 	this.shownEducationPopup = false;
-	this.$pulsatingDot = $( '<div>' ).addClass( 've-ui-pulsatingDot' );
-	this.$stillDot = $( '<div>' ).addClass( 've-ui-stillDot' );
+	this.$pulsatingDot = $( '<div>' ).addClass( 'mw-pulsating-dot' );
 	$shield = $( '<div>' ).addClass( 've-ui-educationPopup-shield' );
 	this.$element
 		.addClass( 've-ui-educationPopup' )
-		.append( $shield, this.popup.$element, this.$stillDot, this.$pulsatingDot );
+		.append( $shield, this.popup.$element, this.$pulsatingDot );
 	this.$element.children().not( this.popup.$element ).on( 'click', function () {
 		if ( !tool.shownEducationPopup ) {
 			if ( ve.init.target.openEducationPopupTool ) {
 				ve.init.target.openEducationPopupTool.popup.toggle( false );
 				ve.init.target.openEducationPopupTool.setActive( false );
-				ve.init.target.openEducationPopupTool.$pulsatingDot.show();
-				ve.init.target.openEducationPopupTool.$stillDot.show();
+				ve.init.target.openEducationPopupTool.$pulsatingDot.removeClass( 'oo-ui-element-hidden' );
 			}
 			ve.init.target.openEducationPopupTool = tool;
-			tool.$pulsatingDot.hide();
-			tool.$stillDot.hide();
+			tool.$pulsatingDot.addClass( 'oo-ui-element-hidden' );
 			tool.popup.toggle( true );
+			popupCloseButton.focus();
 			$shield.remove();
+
+			ve.track( 'activity.' + tool.constructor.static.name + 'EducationPopup', { action: 'show' } );
 		}
 	} );
 };
@@ -96,22 +90,11 @@ OO.initClass( ve.ui.MWEducationPopupTool );
  * Click handler for the popup close button
  */
 ve.ui.MWEducationPopupTool.prototype.onPopupCloseButtonClick = function () {
-	var usePrefs = !mw.user.isAnon(),
-		prefSaysShow = usePrefs && !mw.user.options.get( 'visualeditor-hideusered' );
-
 	this.shownEducationPopup = true;
 	this.popup.toggle( false );
 	this.setActive( false );
 	ve.init.target.openEducationPopupTool = undefined;
-
-	if ( prefSaysShow ) {
-		new mw.Api().saveOption( 'visualeditor-hideusered', 1 );
-		mw.user.options.set( 'visualeditor-hideusered', 1 );
-	} else if ( !usePrefs ) {
-		if ( !mw.storage.set( 've-hideusered', 1 ) ) {
-			$.cookie( 've-hideusered', 1, { path: '/', expires: 30 } );
-		}
-	}
+	mw.libs.ve.stopShowingEducationPopups();
 
 	this.onSelect();
 };

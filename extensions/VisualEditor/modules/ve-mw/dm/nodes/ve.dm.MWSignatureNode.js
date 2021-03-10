@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWSignatureNode class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -11,7 +11,7 @@
  * save.
  *
  * @class
- * @extends ve.dm.MWTransclusionInlineNode
+ * @extends ve.dm.LeafNode
  *
  * @constructor
  * @param {Object} [element] Reference to element in linear model
@@ -19,15 +19,23 @@
 ve.dm.MWSignatureNode = function VeDmMWSignatureNode() {
 	// Parent constructor
 	ve.dm.MWSignatureNode.super.apply( this, arguments );
+
+	// Mixin constructors
+	ve.dm.GeneratedContentNode.call( this );
+	ve.dm.FocusableNode.call( this );
 };
 
 /* Inheritance */
 
-OO.inheritClass( ve.dm.MWSignatureNode, ve.dm.MWTransclusionInlineNode );
+OO.inheritClass( ve.dm.MWSignatureNode, ve.dm.LeafNode );
+OO.mixinClass( ve.dm.MWSignatureNode, ve.dm.GeneratedContentNode );
+OO.mixinClass( ve.dm.MWSignatureNode, ve.dm.FocusableNode );
 
 /* Static members */
 
 ve.dm.MWSignatureNode.static.name = 'mwSignature';
+
+ve.dm.MWSignatureNode.static.isContent = true;
 
 ve.dm.MWSignatureNode.static.matchTagNames = null;
 
@@ -37,18 +45,7 @@ ve.dm.MWSignatureNode.static.matchFunction = function () {
 	return false;
 };
 
-ve.dm.MWSignatureNode.static.getHashObject = function ( dataElement ) {
-	return {
-		type: dataElement.type
-	};
-};
-
-ve.dm.MWSignatureNode.static.toDomElements = function ( dataElement, doc, converter ) {
-	dataElement = ve.dm.MWSignatureNode.static.toDataElement();
-	return ve.dm.MWSignatureNode.parent.static.toDomElements( dataElement, doc, converter );
-};
-
-ve.dm.MWSignatureNode.static.toDataElement = function () {
+ve.dm.MWSignatureNode.static.getTemplateDataElement = function () {
 	return {
 		type: 'mwTransclusionInline',
 		attributes: {
@@ -59,10 +56,19 @@ ve.dm.MWSignatureNode.static.toDataElement = function () {
 	};
 };
 
-/* Methods */
+ve.dm.MWSignatureNode.static.toDomElements = function ( dataElement, doc, converter ) {
+	// Ignore the mwSignature dataElement and create a wikitext transclusion
+	dataElement = this.getTemplateDataElement();
+	return ve.dm.MWTransclusionInlineNode.static.toDomElements( dataElement, doc, converter );
+};
 
-ve.dm.MWSignatureNode.prototype.getPartsList = function () {
-	return [ { content: '~~~~' } ];
+// Can't be generated from existing HTML documents, this method should never be called
+ve.dm.MWSignatureNode.static.toDataElement = null;
+
+// In previews we look up the rendering of the generated mwTransclusionInline node,
+// so use that node's hash object.
+ve.dm.MWSignatureNode.static.getHashObjectForRendering = function () {
+	return ve.dm.MWTransclusionNode.static.getHashObject( this.getTemplateDataElement() );
 };
 
 /* Registration */

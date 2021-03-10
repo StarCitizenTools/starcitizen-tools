@@ -8,20 +8,20 @@
  * @defgroup TTMServer The Translate extension translation memory interface
  */
 
+use MediaWiki\Extension\Translate\Services;
+
 /**
  * Some general static methods for instantiating TTMServer and helpers.
  * @since 2012-01-28
  * Rewritten in 2012-06-27.
  * @ingroup TTMServer
  */
-class TTMServer {
+abstract class TTMServer {
 	/** @var array */
 	protected $config;
 
-	/**
-	 * @param array $config
-	 */
-	protected function __construct( array $config ) {
+	/** @param array $config */
+	public function __construct( array $config ) {
 		$this->config = $config;
 	}
 
@@ -29,8 +29,10 @@ class TTMServer {
 	 * @param array $config
 	 * @return TTMServer|null
 	 * @throws MWException
+	 * @deprecated Use Services::getInstance()->getTtmServerFactory()->create()
 	 */
 	public static function factory( array $config ) {
+		// Cannot call factory directly because we don't have the name.
 		if ( isset( $config['class'] ) ) {
 			$class = $config['class'];
 
@@ -55,18 +57,10 @@ class TTMServer {
 	 * Primary instance is defined by $wgTranslateTranslationDefaultService
 	 * which is a key to $wgTranslateTranslationServices.
 	 * @return WritableTTMServer
+	 * @deprecated Use Services::getInstance()->getTtmServerFactory()->getDefault()
 	 */
 	public static function primary() {
-		global $wgTranslateTranslationServices,
-			$wgTranslateTranslationDefaultService;
-		if ( isset( $wgTranslateTranslationServices[$wgTranslateTranslationDefaultService] ) ) {
-			$obj = self::factory( $wgTranslateTranslationServices[$wgTranslateTranslationDefaultService] );
-			if ( $obj instanceof WritableTTMServer ) {
-				return $obj;
-			}
-		}
-
-		return new FakeTTMServer();
+		return Services::getInstance()->getTtmServerFactory()->getDefault();
 	}
 
 	/**
@@ -74,24 +68,11 @@ class TTMServer {
 	 * @return array[]
 	 */
 	public static function sortSuggestions( array $suggestions ) {
-		usort( $suggestions, [ __CLASS__, 'qualitySort' ] );
+		usort( $suggestions, function ( $a, $b ) {
+			return $b['quality'] <=> $a['quality'];
+		} );
 
 		return $suggestions;
-	}
-
-	/**
-	 * @param array $a
-	 * @param array $b
-	 * @return int
-	 */
-	protected static function qualitySort( $a, $b ) {
-		list( $c, $d ) = [ $a['quality'], $b['quality'] ];
-		if ( $c === $d ) {
-			return 0;
-		}
-
-		// Descending sort
-		return ( $c > $d ) ? -1 : 1;
 	}
 
 	/**
@@ -175,9 +156,7 @@ class TTMServer {
 		JobQueueGroup::singleton()->push( $job );
 	}
 
-	/**
-	 * @return string[]
-	 */
+	/** @return string[] */
 	public function getMirrors() {
 		global $wgTranslateTranslationServices;
 		if ( isset( $this->config['mirrors'] ) ) {
@@ -198,9 +177,7 @@ class TTMServer {
 		return [];
 	}
 
-	/**
-	 * @return bool
-	 */
+	/** @return bool */
 	public function isFrozen() {
 		return false;
 	}

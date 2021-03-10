@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWAceEditorWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /* global ace */
@@ -40,7 +40,7 @@ ve.ui.MWAceEditorWidget = function VeUiMWAceEditorWidget( config ) {
 	this.$ace = $( '<div>' ).attr( 'dir', 'ltr' );
 	this.editor = null;
 	// Initialise to a rejected promise for the setValue call in the parent constructor
-	this.loadingPromise = $.Deferred().reject().promise();
+	this.loadingPromise = ve.createDeferred().reject().promise();
 	this.styleHeight = null;
 
 	// Parent constructor
@@ -63,6 +63,7 @@ OO.inheritClass( ve.ui.MWAceEditorWidget, ve.ui.WhitespacePreservingTextInputWid
 
 /**
  * The editor has resized
+ *
  * @event resize
  */
 
@@ -75,7 +76,7 @@ ve.ui.MWAceEditorWidget.prototype.setup = function () {
 	if ( !this.loadingPromise ) {
 		this.loadingPromise = mw.loader.getState( 'ext.codeEditor.ace' ) ?
 			mw.loader.using( 'ext.codeEditor.ace' ) :
-			$.Deferred().reject().promise();
+			ve.createDeferred().reject().promise();
 		// Resolved promises will run synchronously, so ensure #setupEditor
 		// runs after this.loadingPromise is stored.
 		this.loadingPromise.done( this.setupEditor.bind( this ) );
@@ -146,6 +147,8 @@ ve.ui.MWAceEditorWidget.prototype.setupEditor = function () {
  * Set the autocomplete property
  *
  * @param {string} mode Symbolic name of autocomplete mode
+ * @return {ve.ui.MWAceEditorWidget}
+ * @chainable
  */
 ve.ui.MWAceEditorWidget.prototype.setAutocomplete = function ( mode ) {
 	var widget = this;
@@ -177,6 +180,8 @@ ve.ui.MWAceEditorWidget.prototype.setValue = function ( value ) {
  * Set the value of the Ace editor widget
  *
  * @param {string} value Value
+ * @return {ve.ui.MWAceEditorWidget}
+ * @chainable
  */
 ve.ui.MWAceEditorWidget.prototype.setEditorValue = function ( value ) {
 	var selectionState;
@@ -185,12 +190,15 @@ ve.ui.MWAceEditorWidget.prototype.setEditorValue = function ( value ) {
 		this.editor.setValue( value );
 		this.editor.session.selection.fromJSON( selectionState );
 	}
+	return this;
 };
 
 /**
  * Set the minimum number of rows in the Ace editor widget
  *
  * @param {number} minRows The minimum number of rows
+ * @return {ve.ui.MWAceEditorWidget}
+ * @chainable
  */
 ve.ui.MWAceEditorWidget.prototype.setMinRows = function ( minRows ) {
 	var widget = this;
@@ -203,6 +211,24 @@ ve.ui.MWAceEditorWidget.prototype.setMinRows = function ( minRows ) {
 	} );
 	// TODO: Implement minRows setter for OO.ui.TextInputWidget
 	// and call it here in loadingPromise.fail
+	return this;
+};
+
+/**
+ * @inheritdoc
+ */
+ve.ui.MWAceEditorWidget.prototype.setReadOnly = function ( readOnly ) {
+	var widget = this;
+
+	// Parent method
+	ve.ui.MWAceEditorWidget.super.prototype.setReadOnly.call( this, readOnly );
+
+	this.loadingPromise.done( function () {
+		widget.editor.setReadOnly( widget.isReadOnly() );
+	} );
+
+	this.$element.toggleClass( 've-ui-mwAceEditorWidget-readOnly', !!this.isReadOnly() );
+	return this;
 };
 
 /**
@@ -301,6 +327,7 @@ ve.ui.MWAceEditorWidget.prototype.onEditorResize = function () {
 /**
  * Clear the editor's undo stack
  *
+ * @return {ve.ui.MWAceEditorWidget}
  * @chainable
  */
 ve.ui.MWAceEditorWidget.prototype.clearUndoStack = function () {
@@ -317,6 +344,7 @@ ve.ui.MWAceEditorWidget.prototype.clearUndoStack = function () {
  * Toggle the visibility of line numbers
  *
  * @param {boolean} visible Visible
+ * @return {ve.ui.MWAceEditorWidget}
  * @chainable
  */
 ve.ui.MWAceEditorWidget.prototype.toggleLineNumbers = function ( visible ) {
@@ -331,6 +359,7 @@ ve.ui.MWAceEditorWidget.prototype.toggleLineNumbers = function ( visible ) {
  * Toggle the visibility of the print margin
  *
  * @param {boolean} visible Visible
+ * @return {ve.ui.MWAceEditorWidget}
  * @chainable
  */
 ve.ui.MWAceEditorWidget.prototype.togglePrintMargin = function ( visible ) {
@@ -345,6 +374,7 @@ ve.ui.MWAceEditorWidget.prototype.togglePrintMargin = function ( visible ) {
  * Set the language mode of the editor (programming language)
  *
  * @param {string} lang Language
+ * @return {ve.ui.MWAceEditorWidget}
  * @chainable
  */
 ve.ui.MWAceEditorWidget.prototype.setLanguage = function ( lang ) {
@@ -363,6 +393,7 @@ ve.ui.MWAceEditorWidget.prototype.setLanguage = function ( lang ) {
 /**
  * Focus the editor
  *
+ * @return {ve.ui.MWAceEditorWidget}
  * @chainable
  */
 ve.ui.MWAceEditorWidget.prototype.focus = function () {

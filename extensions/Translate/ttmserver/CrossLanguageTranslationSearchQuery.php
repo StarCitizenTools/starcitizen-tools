@@ -1,21 +1,18 @@
 <?php
+
 /**
  * Cross Language Translation Search.
  * @since 2015.08
  */
 class CrossLanguageTranslationSearchQuery {
-	/** @var TTMServer */
+	/** @var SearchableTTMServer */
 	protected $server;
-
 	/** @var array */
 	protected $params;
-
-	/** @var ResultSet */
+	/** @var \Elastica\ResultSet */
 	protected $resultset;
-
 	/** @var int */
 	protected $total = 0;
-
 	protected $hl = [ '', '' ];
 
 	public function __construct( array $params, SearchableTTMServer $server ) {
@@ -39,6 +36,7 @@ class CrossLanguageTranslationSearchQuery {
 		// locally.
 		$options['offset'] = 0;
 
+		// @phan-suppress-next-line PhanUndeclaredMethod
 		$search = $this->server->createSearch( $this->params['query'], $options, $this->hl );
 		$scroll = $search->scroll( '5s' );
 
@@ -59,6 +57,12 @@ class CrossLanguageTranslationSearchQuery {
 			if ( $count >= $offset + $limit ) {
 				break;
 			}
+		}
+
+		if ( !$this->resultset ) {
+			// No hits for documents, just set the result set.
+			$this->resultset = $scroll->current();
+			$this->total = $scroll->current()->getTotalHits();
 		}
 
 		// clear was introduced in Elastica 5.3.1, but Elastica extension uses 5.3.0
@@ -85,6 +89,7 @@ class CrossLanguageTranslationSearchQuery {
 		foreach ( $documents as $document ) {
 			$data = $document->getData();
 
+			// @phan-suppress-next-line PhanUndeclaredMethod
 			if ( !$this->server->isLocalSuggestion( $data ) ) {
 				continue;
 			}
@@ -117,7 +122,9 @@ class CrossLanguageTranslationSearchQuery {
 			$collection->loadTranslations();
 		}
 
-		foreach ( $collection->keys() as $mkey => $title ) {
+		foreach ( $collection->keys() as $mkey => $titleValue ) {
+			$title = Title::newFromLinkTarget( $titleValue );
+
 			$result = [];
 			$result['content'] = $messages[$mkey];
 			if ( $filter === 'translated' || $filter === 'fuzzy' ) {
@@ -133,9 +140,7 @@ class CrossLanguageTranslationSearchQuery {
 		return $ret;
 	}
 
-	/**
-	 * @return array
-	 */
+	/** @return array */
 	public function getAvailableFilters() {
 		return [
 			'translated',

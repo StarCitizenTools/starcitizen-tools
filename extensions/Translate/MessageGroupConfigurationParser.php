@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * @file
  * @author Niklas Laxström
  * @license GPL-2.0-or-later
@@ -31,7 +30,7 @@ class MessageGroupConfigurationParser {
 	 */
 	public function getHopefullyValidConfigurations( $data, $callback = null ) {
 		if ( !is_callable( $callback ) ) {
-			$callback = function () {
+			$callback = function ( $unused1, $unused2, $unused3 ) {
 				/*noop*/
 			};
 		}
@@ -77,7 +76,7 @@ class MessageGroupConfigurationParser {
 	 * it will be merged with other configurations.
 	 *
 	 * @param array $documents
-	 * @return array Unvalidated group configurations
+	 * @return array[][] Unvalidated group configurations
 	 */
 	public function parseDocuments( array $documents ) {
 		$groups = [];
@@ -97,7 +96,7 @@ class MessageGroupConfigurationParser {
 			foreach ( $groups as $i => $group ) {
 				$groups[$i] = self::mergeTemplate( $template, $group );
 				// Little hack to allow aggregate groups to be defined in same file with other groups.
-				if ( $groups[$i]['BASIC']['class'] === 'AggregateMessageGroup' ) {
+				if ( $groups[$i]['BASIC']['class'] === AggregateMessageGroup::class ) {
 					unset( $groups[$i]['FILES'] );
 				}
 			}
@@ -119,14 +118,14 @@ class MessageGroupConfigurationParser {
 	public function validate( array $config ) {
 		$schema = $this->baseSchema;
 
-		foreach ( $config as $sectionName => $section ) {
+		foreach ( $config as $section ) {
 			if ( !isset( $section['class'] ) ) {
 				continue;
 			}
 
 			$class = $section['class'];
 			// There is no sane way to check whether *class* implements interface in PHP
-			if ( !method_exists( $class, 'getExtraSchema' ) ) {
+			if ( !is_callable( [ $class, 'getExtraSchema' ] ) ) {
 				continue;
 			}
 

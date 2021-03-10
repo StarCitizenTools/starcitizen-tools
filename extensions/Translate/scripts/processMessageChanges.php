@@ -18,6 +18,9 @@ if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 }
 require_once "$IP/maintenance/Maintenance.php";
 
+use MediaWiki\Extension\Translate\MessageSync\MessageSourceChange;
+use MediaWiki\Extension\Translate\Utilities\StringComparators\SimpleStringComparator;
+
 /**
  * Script for processing message changes in file based message groups.
  *
@@ -28,16 +31,9 @@ require_once "$IP/maintenance/Maintenance.php";
  * @since 2012-04-23
  */
 class ProcessMessageChanges extends Maintenance {
-	protected $changes = [];
-
-	/**
-	 * @var int
-	 */
-	protected $counter;
-
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Script for processing message changes in file based message groups';
+		$this->addDescription( 'Script for processing message changes in file based message groups' );
 		$this->addOption(
 			'group',
 			'(optional) Comma separated list of group IDs to process (can use * as wildcard). ' .
@@ -64,12 +60,13 @@ class ProcessMessageChanges extends Maintenance {
 			false, /*required*/
 			false /*has arg*/
 		);
+		$this->requireExtension( 'Translate' );
 	}
 
 	public function execute() {
 		$groups = $this->getGroups();
 		$changes = [];
-		$comparator = new ExternalMessageSourceStateComparator();
+		$comparator = new ExternalMessageSourceStateComparator( new SimpleStringComparator() );
 
 		$scripted = $this->hasOption( 'safe-import' );
 
@@ -78,11 +75,19 @@ class ProcessMessageChanges extends Maintenance {
 			if ( !$scripted ) {
 				$this->output( "Processing $id\n" );
 			}
-			$changes[$id] = $comparator->processGroup( $group, $comparator::ALL_LANGUAGES );
+			try {
+				$changes[$id] = $comparator->processGroup( $group, $comparator::ALL_LANGUAGES );
+			} catch ( Exception $e ) {
+				$errorMsg = "Exception occurred while processing group: $id.\nException: $e";
+				$this->error( $errorMsg );
+				error_log( $errorMsg );
+			}
 		}
 
 		// Remove all groups without changes
-		$changes = array_filter( $changes );
+		$changes = array_filter( $changes, function ( MessageSourceChange $change ) {
+			return $change->getAllModifications() !== [];
+		} );
 
 		if ( $changes === [] ) {
 			if ( !$scripted ) {
@@ -92,7 +97,7 @@ class ProcessMessageChanges extends Maintenance {
 			return;
 		}
 
-		if ( $this->hasOption( 'safe-import' ) ) {
+		if ( $scripted ) {
 			$importer = new ExternalMessageSourceStateImporter();
 			$info = $importer->importSafe( $changes );
 			$this->printChangeInfo( $info );
@@ -102,7 +107,7 @@ class ProcessMessageChanges extends Maintenance {
 
 		$name = $this->getOption( 'name', MessageChangeStorage::DEFAULT_NAME );
 		if ( !MessageChangeStorage::isValidCdbName( $name ) ) {
-			$this->error( 'Invalid name', 1 );
+			$this->fatalError( 'Invalid name' );
 		}
 
 		$file = MessageChangeStorage::getCdbPath( $name );
@@ -114,10 +119,10 @@ class ProcessMessageChanges extends Maintenance {
 
 	/**
 	 * Gets list of message groups filtered by user input.
-	 * @return MessageGroup[]
+	 * @return FileBasedMessageGroup[]
 	 */
 	protected function getGroups() {
-		$groups = MessageGroups::getGroupsByType( 'FileBasedMessageGroup' );
+		$groups = MessageGroups::getGroupsByType( FileBasedMessageGroup::class );
 
 		// Include all if option not given
 		$include = $this->getOption( 'group', '*' );
@@ -147,8 +152,11 @@ class ProcessMessageChanges extends Maintenance {
 	}
 
 	protected function printChangeInfo( array $info ) {
-		foreach ( $info['processed'] as $group => $count ) {
-			$this->output( "Imported $count new messages or translations for $group.\n" );
+		foreach ( $info['processed'] as $group => $languages ) {
+			$newMessageCount = array_sum( $languages );
+			if ( $newMessageCount ) {
+				$this->output( "Imported $newMessageCount new messages or translations for $group.\n" );
+			}
 		}
 
 		if ( $info['skipped'] !== [] ) {

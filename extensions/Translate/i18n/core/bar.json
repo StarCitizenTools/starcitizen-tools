@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Bua333",
-			"Mucalexx",
-			"Joe Watzmo"
+			"Joe Watzmo",
+			"Mucalexx"
 		]
 	},
 	"translate": "Ibasetzn",
@@ -18,8 +18,6 @@
 	"translate-page-limit": "Limit",
 	"translate-submit": "Hoin",
 	"translate-edit-information": "Informazión zur da Systémnoochricht ($1)",
-	"translate-edit-in-other-languages": "Systémnoochricht auf åndre Sproochen",
-	"translate-magic-cm-updatedusing": "Aktualisird durch [[Special:AdvancedTranslate|{{int:Translate-magic-pagename}}]]",
 	"translationstats": "Staatistiken zua d' Ywersétzungen",
 	"translate-sidebar-alltrans": "Auf åndre Sproochen",
 	"translations": "Olle Ywersetzungen",
@@ -27,8 +25,6 @@
 	"translate-langstats-expandall": "olle auskloppm",
 	"translate-language": "Sprooch",
 	"supportedlanguages-recenttranslations": "Aktuelle Ywersétzungen",
-	"translate-js-history": "Ywersétzungsgschicht",
-	"translate-js-support": "A Frog stön",
 	"translate-searchprofile": "Ywersétzungen",
 	"translate-searchprofile-tooltip": "Suach in Iwasetzunga",
 	"tux-editor-expand-tooltip": "Auskloppn",

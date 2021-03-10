@@ -1,7 +1,7 @@
 /*!
  * VisualEditor HashValueStore class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
  */
 
 /* global SparkMD5 */
@@ -132,7 +132,6 @@ ve.dm.HashValueStore.prototype.clone = function () {
 /**
  * Insert a value into the store
  *
- * @method
  * @param {Object|string|Array} value Value to store
  * @param {string} [stringified] Stringified version of value; default OO.getHash( value )
  * @return {string} Hash value with low collision probability
@@ -143,7 +142,7 @@ ve.dm.HashValueStore.prototype.hash = function ( value, stringified ) {
 	if ( !this.hashStore[ hash ] ) {
 		if ( Array.isArray( value ) ) {
 			this.hashStore[ hash ] = ve.copy( value );
-		} else if ( typeof value === 'object' ) {
+		} else if ( value !== null && typeof value === 'object' ) {
 			this.hashStore[ hash ] = ve.cloneObject( value );
 		} else {
 			this.hashStore[ hash ] = value;
@@ -182,7 +181,6 @@ ve.dm.HashValueStore.prototype.replaceHash = function ( oldHash, value ) {
 /**
  * Get the hash of a value without inserting it in the store
  *
- * @method
  * @param {Object|string|Array} value Value to hash
  * @param {string} [stringified] Stringified version of value; default OO.getHash( value )
  * @return {string} Hash value with low collision probability
@@ -208,7 +206,6 @@ ve.dm.HashValueStore.prototype.hashOfValue = function ( value, stringified ) {
  *
  * Same as hash but with arrays.
  *
- * @method
  * @param {Object[]} values Values to lookup or store
  * @return {string[]} The hashes of the values in the store
  */
@@ -223,7 +220,6 @@ ve.dm.HashValueStore.prototype.hashAll = function ( values ) {
 /**
  * Get the value stored for a particular hash
  *
- * @method
  * @param {string} hash Hash to look up
  * @return {Object|undefined} Value stored for this hash if present, else undefined
  */
@@ -236,7 +232,6 @@ ve.dm.HashValueStore.prototype.value = function ( hash ) {
  *
  * Same as value but with arrays.
  *
- * @method
  * @param {string[]} hashes Hashes to lookup
  * @return {Array} Values for these hashes (undefined for any not present)
  */
@@ -262,6 +257,10 @@ ve.dm.HashValueStore.prototype.values = function ( hashes ) {
  */
 ve.dm.HashValueStore.prototype.merge = function ( other ) {
 	var i, len, hash;
+
+	if ( other === this ) {
+		return;
+	}
 
 	for ( i = 0, len = other.hashes.length; i < len; i++ ) {
 		hash = other.hashes[ i ];
@@ -290,46 +289,6 @@ ve.dm.HashValueStore.prototype.difference = function ( omit ) {
 		if ( !Object.prototype.hasOwnProperty.call( omit, hash ) ) {
 			store.hashes.push( hash );
 			store.hashStore[ hash ] = this.hashStore[ hash ];
-		}
-	}
-	return store;
-};
-
-/**
- * @param {ve.dm.Transaction[]} transactions List of transactions
- * @return {ve.dm.HashValueStore} The values in the transactions, in the order they occur
- */
-ve.dm.HashValueStore.prototype.filter = function ( transactions ) {
-	var t, tLen, operations, o, oLen, op, hash, e, eLen, annotations, a, aLen,
-		store = new ve.dm.HashValueStore();
-
-	for ( t = 0, tLen = transactions.length; t < tLen; t++ ) {
-		operations = transactions[ t ].operations;
-		for ( o = 0, oLen = operations.length; o < oLen; o++ ) {
-			op = operations[ o ];
-			if ( op.type === 'annotate' && op.bias === 'start' ) {
-				hash = op.index;
-				if ( !Object.prototype.hasOwnProperty.call( store.hashSet, hash ) ) {
-					store.hashSet[ hash ] = this.hashSet[ hash ];
-					store.hashes.push( hash );
-				}
-			}
-			if ( op.type !== 'replace' ) {
-				continue;
-			}
-			for ( e = 0, eLen = op.insert.length; e < eLen; e++ ) {
-				annotations = op.insert[ e ][ 1 ];
-				if ( !annotations ) {
-					continue;
-				}
-				for ( a = 0, aLen = annotations.length; a < aLen; a++ ) {
-					hash = annotations[ a ];
-					if ( !Object.prototype.hasOwnProperty.call( store.hashSet, hash ) ) {
-						store.hashSet[ hash ] = this.hashSet[ hash ];
-						store.hashes.push( hash );
-					}
-				}
-			}
 		}
 	}
 	return store;

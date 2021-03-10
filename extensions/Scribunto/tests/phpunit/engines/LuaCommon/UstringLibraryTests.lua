@@ -572,6 +572,10 @@ return testframework.getTestProvider( {
 	  args = { 'foo; fóó', '(f)(%a+)', '%%0=%0 %%1=%1 %%2=%2' },
 	  expect = { '%0=foo %1=f %2=oo; %0=fóó %1=f %2=óó', 2 }
 	},
+	{ name = 'gsub: string, undocumented behavior where %1 works as %0 if there are no captures', func = mw.ustring.gsub,
+	  args = { 'foo; fóó', '%a+', '%1!' },
+	  expect = { 'foo!; fóó!', 2 }
+	},
 	{ name = 'gsub: (anchored)', func = mw.ustring.gsub,
 	  args = { 'foofoofoo foo', '^foo', 'X' },
 	  expect = { 'Xfoofoo foo', 1 }
@@ -587,6 +591,14 @@ return testframework.getTestProvider( {
 	{ name = 'gsub: (table 3)', func = mw.ustring.gsub,
 	  args = { str2, 'f%a+', { ['főó'] = 'Y', ['foó'] = 'Z' }, 1 },
 	  expect = { str2, 1 }
+	},
+	{ name = 'gsub: (table 4)', func = mw.ustring.gsub,
+	  args = { str3, 'f(%a+)', { oo = 'X', ['őó'] = 'Y', ['oó'] = 'Z' } },
+	  expect = { '??? X bar Y Z baz foooo foofoo fo ok?', 6 }
+	},
+	{ name = 'gsub: (table 5)', func = mw.ustring.gsub,
+	  args = { str3, '(f)(%a+)', { f = 'F', oo = 'X', ['őó'] = 'Y', ['oó'] = 'Z' } },
+	  expect = { '??? F bar F F baz F F F ok?', 6 }
 	},
 	{ name = 'gsub: (inverted zero character class)', func = mw.ustring.gsub,
 	  args = { "ó", '%Z', 'repl' },
@@ -624,6 +636,10 @@ return testframework.getTestProvider( {
 	  args = { str3, 'f%a+', function(m) if m == 'fo' then return nil end return '-' .. mw.ustring.upper(m) .. '-' end },
 	  expect = { '??? -FOO- bar -FŐÓ- -FOÓ- baz -FOOOO- -FOOFOO- fo ok?', 6 }
 	},
+	{ name = 'gsub: (function 3)', func = mw.ustring.gsub,
+	  args = { str3, '(f)(%a+)', function(m1, m2) if m2 == 'o' then return nil end return '-' .. m1 .. mw.ustring.upper(m2) .. '-' end },
+	  expect = { '??? -fOO- bar -fŐÓ- -fOÓ- baz -fOOOO- -fOOFOO- fo ok?', 6 }
+	},
 	{ name = 'gsub: invalid replacement string', func = mw.ustring.gsub,
 	  args = { 'foo; fóó', '(%a+)', '%2' },
 	  expect = "invalid capture index %2 in replacement string"
@@ -639,6 +655,30 @@ return testframework.getTestProvider( {
 	{ name = 'gsub: passing numbers instead of strings (3)', func = mw.ustring.gsub,
 	  args = { '12345', '[3３]', 9 },
 	  expect = { '12945', 1 }
+	},
+	{ name = 'gsub: table replacement with a bad type (boolean)', func = mw.ustring.gsub,
+	  args = { 'abc', 'b', { b = true } },
+	  expect = 'invalid replacement value (a boolean)'
+	},
+	{ name = 'gsub: table replacement with a bad type (table)', func = mw.ustring.gsub,
+	  args = { 'abc', 'b', { b = {} } },
+	  expect = 'invalid replacement value (a table)'
+	},
+	{ name = 'gsub: table replacement with a bad type (function)', func = mw.ustring.gsub,
+	  args = { 'abc', 'b', { b = function () end } },
+	  expect = 'invalid replacement value (a function)'
+	},
+	{ name = 'gsub: function replacement with a bad type (boolean)', func = mw.ustring.gsub,
+	  args = { 'abc', 'b', function () return true end },
+	  expect = 'invalid replacement value (a boolean)'
+	},
+	{ name = 'gsub: function replacement with a bad type (table)', func = mw.ustring.gsub,
+	  args = { 'abc', 'b', function () return {} end },
+	  expect = 'invalid replacement value (a table)'
+	},
+	{ name = 'gsub: function replacement with a bad type (function)', func = mw.ustring.gsub,
+	  args = { 'abc', 'b', function () return function () end end },
+	  expect = 'invalid replacement value (a function)'
 	},
 
 	{ name = 'gcodepoint: basic test', func = mw.ustring.gcodepoint,

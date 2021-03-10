@@ -1,13 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"MokaAkashiyaPT",
-			"Athena in Wonderland"
+			"Athena in Wonderland",
+			"MokaAkashiyaPT"
 		]
 	},
 	"translate-taction-export": "Sportar",
-	"translate-edit-translation": "Traduçon",
-	"translate-magic-cm-export": "Sportar",
 	"languagestats": "Statísticas de la lhéngua",
 	"supportedlanguages": "Lhénguas sustentadas",
 	"translate-import-load": "Cargar fexeiro",

@@ -1,6 +1,10 @@
 <?php
 
-// @codingStandardsIgnoreLine Squiz.Classes.ValidClassName.NotCamelCaps
+use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionAccessException;
+use MediaWiki\Revision\SlotRecord;
+
 class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 	// Note these caches are naturally limited to
 	// $wgExpensiveParserFunctionLimit + 1 actual Title objects because any
@@ -9,7 +13,7 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 	private $titleCache = [];
 	private $idCache = [ 0 => null ];
 
-	function register() {
+	public function register() {
 		$lib = [
 			'newTitle' => [ $this, 'newTitle' ],
 			'makeTitle' => [ $this, 'makeTitle' ],
@@ -20,6 +24,7 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 			'protectionLevels' => [ $this, 'protectionLevels' ],
 			'cascadingProtection' => [ $this, 'cascadingProtection' ],
 			'redirectTarget' => [ $this, 'redirectTarget' ],
+			'recordVaryFlag' => [ $this, 'recordVaryFlag' ],
 		];
 		return $this->getEngine()->registerInterface( 'mw.title.lua', $lib, [
 			'thisTitle' => $this->getInexpensiveTitleData( $this->getTitle() ),
@@ -27,9 +32,14 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 		] );
 	}
 
+	/**
+	 * Check a namespace parameter
+	 * @param string $name Function name (for errors)
+	 * @param int $argIdx Argument index (for errors)
+	 * @param mixed &$arg Argument
+	 * @param int|null $default Default value, if $arg is null
+	 */
 	private function checkNamespace( $name, $argIdx, &$arg, $default = null ) {
-		global $wgContLang;
-
 		if ( $arg === null && $default !== null ) {
 			$arg = $default;
 		} elseif ( is_numeric( $arg ) ) {
@@ -40,7 +50,7 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 				);
 			}
 		} elseif ( is_string( $arg ) ) {
-			$ns = $wgContLang->getNsIndex( $arg );
+			$ns = MediaWikiServices::getInstance()->getContentLanguage()->getNsIndex( $arg );
 			if ( $ns === false ) {
 				throw new Scribunto_LuaError(
 					"bad argument #$argIdx to '$name' (unrecognized namespace name '$arg')"
@@ -61,6 +71,7 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 	private function getInexpensiveTitleData( Title $title ) {
 		$ns = $title->getNamespace();
 		$ret = [
+			'isCurrentTitle' => (bool)$title->equals( $this->getTitle() ),
 			'isLocal' => (bool)$title->isLocal(),
 			'interwiki' => $title->getInterwiki(),
 			'namespace' => $ns,
@@ -74,7 +85,8 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 			if ( $this->getParser() && !$title->equals( $this->getTitle() ) ) {
 				$this->getParser()->getOutput()->addLink( $title );
 			}
-			$ret['exists'] = (bool)SpecialPageFactory::exists( $title->getDBkey() );
+			$ret['exists'] = MediaWikiServices::getInstance()
+				->getSpecialPageFactory()->exists( $title->getDBkey() );
 		}
 		if ( $ns !== NS_FILE && $ns !== NS_MEDIA ) {
 			$ret['file'] = false;
@@ -89,6 +101,7 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 	 * title for repeated lookups. It may call incrementExpensiveFunctionCount() if
 	 * the title is not already cached.
 	 *
+	 * @internal
 	 * @param string $text Title text
 	 * @return array Lua data
 	 */
@@ -125,7 +138,8 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 			'contentModel' => $title->getContentModel(),
 		];
 		if ( $title->getNamespace() === NS_SPECIAL ) {
-			$ret['exists'] = (bool)SpecialPageFactory::exists( $title->getDBkey() );
+			$ret['exists'] = MediaWikiServices::getInstance()
+				->getSpecialPageFactory()->exists( $title->getDBkey() );
 		} else {
 			// bug 70495: don't just check whether the ID != 0
 			$ret['exists'] = $title->exists();
@@ -139,12 +153,13 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 	 * Calls Title::newFromID or Title::newFromTitle as appropriate for the
 	 * arguments.
 	 *
+	 * @internal
 	 * @param string|int $text_or_id Title or page_id to fetch
-	 * @param string|int $defaultNamespace Namespace name or number to use if
+	 * @param string|int|null $defaultNamespace Namespace name or number to use if
 	 *  $text_or_id doesn't override
 	 * @return array Lua data
 	 */
-	function newTitle( $text_or_id, $defaultNamespace = null ) {
+	public function newTitle( $text_or_id, $defaultNamespace = null ) {
 		$type = $this->getLuaType( $text_or_id );
 		if ( $type === 'number' ) {
 			if ( array_key_exists( $text_or_id, $this->idCache ) ) {
@@ -174,8 +189,8 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 				return [ null ];
 			}
 		} else {
-			// This will always fail
 			$this->checkType( 'title.new', 1, $text_or_id, 'number or string' );
+			throw new LogicException( 'checkType above should have failed' );
 		}
 
 		return [ $this->getInexpensiveTitleData( $title ) ];
@@ -186,13 +201,14 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 	 *
 	 * Calls Title::makeTitleSafe.
 	 *
+	 * @internal
 	 * @param string|int $ns Namespace
 	 * @param string $text Title text
-	 * @param string $fragment URI fragment
-	 * @param string $interwiki Interwiki code
+	 * @param string|null $fragment URI fragment
+	 * @param string|null $interwiki Interwiki code
 	 * @return array Lua data
 	 */
-	function makeTitle( $ns, $text, $fragment = null, $interwiki = null ) {
+	public function makeTitle( $ns, $text, $fragment = null, $interwiki = null ) {
 		$this->checkNamespace( 'makeTitle', 1, $ns );
 		$this->checkType( 'makeTitle', 2, $text, 'string' );
 		$this->checkTypeOptional( 'makeTitle', 3, $fragment, 'string', '' );
@@ -210,13 +226,14 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 
 	/**
 	 * Get a URL referring to this title
+	 * @internal
 	 * @param string $text Title text.
 	 * @param string $which 'fullUrl', 'localUrl', or 'canonicalUrl'
 	 * @param string|array|null $query Query string or query string data.
 	 * @param string|null $proto 'http', 'https', 'relative', or 'canonical'
 	 * @return array
 	 */
-	function getUrl( $text, $which, $query = null, $proto = null ) {
+	public function getUrl( $text, $which, $query = null, $proto = null ) {
 		static $protoMap = [
 			'http' => PROTO_HTTP,
 			'https' => PROTO_HTTPS,
@@ -250,7 +267,7 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 		if ( !$title ) {
 			return [ null ];
 		}
-		return [ call_user_func_array( [ $title, $func ], $args ) ];
+		return [ $title->$func( ...$args ) ];
 	}
 
 	/**
@@ -258,7 +275,7 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 	 *
 	 * The title is counted as a transclusion.
 	 *
-	 * @param $text string Title text
+	 * @param string $text Title text
 	 * @return Content|null The Content object of the title, null if missing
 	 */
 	private function getContentInternal( $text ) {
@@ -271,21 +288,52 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 		$this->getParser()->getOutput()->addTemplate(
 			$title, $title->getArticleID(), $title->getLatestRevID()
 		);
+
+		$rev = $this->getParser()->fetchCurrentRevisionRecordOfTitle( $title );
+
 		if ( $title->equals( $this->getTitle() ) ) {
-			$this->getParser()->getOutput()->setFlag( 'vary-revision' );
+			$parserOutput = $this->getParser()->getOutput();
+			$parserOutput->setFlag( 'vary-revision-sha1' );
+			$parserOutput->setRevisionUsedSha1Base36( $rev ? $rev->getSha1() : '' );
+			wfDebug( __METHOD__ . ": set vary-revision-sha1 for '$title'" );
 		}
 
-		$rev = $this->getParser()->fetchCurrentRevisionOfTitle( $title );
-		return $rev ? $rev->getContent() : null;
+		if ( !$rev ) {
+			return null;
+		}
+
+		try {
+			$content = $rev->getContent( SlotRecord::MAIN );
+		} catch ( RevisionAccessException $ex ) {
+			$logger = LoggerFactory::getInstance( 'Scribunto' );
+			$logger->warning(
+				__METHOD__ . ': Unable to transclude revision content',
+				[ 'exception' => $ex ]
+			);
+			$content = null;
+		}
+		return $content;
 	}
 
-	function getContent( $text ) {
+	/**
+	 * Handler for getContent
+	 * @internal
+	 * @param string $text
+	 * @return string[]|null[]
+	 */
+	public function getContent( $text ) {
 		$this->checkType( 'getContent', 1, $text, 'string' );
 		$content = $this->getContentInternal( $text );
 		return [ $content ? $content->serialize() : null ];
 	}
 
-	function getFileInfo( $text ) {
+	/**
+	 * Handler for getFileInfo
+	 * @internal
+	 * @param string $text
+	 * @return array
+	 */
+	public function getFileInfo( $text ) {
 		$this->checkType( 'getFileInfo', 1, $text, 'string' );
 		$title = Title::newFromText( $text );
 		if ( !$title ) {
@@ -297,7 +345,7 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 		}
 
 		$this->incrementExpensiveFunctionCount();
-		$file = wfFindFile( $title );
+		$file = MediaWikiServices::getInstance()->getRepoGroup()->findFile( $title );
 		if ( !$file ) {
 			return [ [ 'exists' => false ] ];
 		}
@@ -329,6 +377,11 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 		] ];
 	}
 
+	/**
+	 * Renumber an array for return to Lua
+	 * @param array $arr
+	 * @return array
+	 */
 	private static function makeArrayOneBased( $arr ) {
 		if ( empty( $arr ) ) {
 			return $arr;
@@ -336,6 +389,12 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 		return array_combine( range( 1, count( $arr ) ), array_values( $arr ) );
 	}
 
+	/**
+	 * Handler for protectionLevels
+	 * @internal
+	 * @param string $text
+	 * @return array
+	 */
 	public function protectionLevels( $text ) {
 		$this->checkType( 'protectionLevels', 1, $text, 'string' );
 		$title = Title::newFromText( $text );
@@ -351,6 +410,12 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 		) ];
 	}
 
+	/**
+	 * Handler for cascadingProtection
+	 * @internal
+	 * @param string $text
+	 * @return array
+	 */
 	public function cascadingProtection( $text ) {
 		$this->checkType( 'cascadingProtection', 1, $text, 'string' );
 		$title = Title::newFromText( $text );
@@ -372,10 +437,33 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 		] ];
 	}
 
+	/**
+	 * Handler for redirectTarget
+	 * @internal
+	 * @param string $text
+	 * @return string[]|null[]
+	 */
 	public function redirectTarget( $text ) {
 		$this->checkType( 'redirectTarget', 1, $text, 'string' );
 		$content = $this->getContentInternal( $text );
 		$redirTitle = $content ? $content->getRedirectTarget() : null;
 		return [ $redirTitle ? $this->getInexpensiveTitleData( $redirTitle ) : null ];
+	}
+
+	/**
+	 * Record a ParserOutput flag when the current title is accessed
+	 * @internal
+	 * @param string $text
+	 * @param string $flag
+	 * @return array
+	 */
+	public function recordVaryFlag( $text, $flag ) {
+		$this->checkType( 'recordVaryFlag', 1, $text, 'string' );
+		$this->checkType( 'recordVaryFlag', 2, $flag, 'string' );
+		$title = Title::newFromText( $text );
+		if ( $title && $title->equals( $this->getTitle() ) ) {
+			$this->getParser()->getOutput()->setFlag( $flag );
+		}
+		return [];
 	}
 }

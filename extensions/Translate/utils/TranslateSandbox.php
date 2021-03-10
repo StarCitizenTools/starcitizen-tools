@@ -7,17 +7,18 @@
  * @license GPL-2.0-or-later
  */
 
-use MediaWiki\Auth\AuthManager;
 use MediaWiki\Auth\AuthenticationRequest;
 use MediaWiki\Auth\AuthenticationResponse;
+use MediaWiki\Auth\AuthManager;
+use MediaWiki\Extension\Translate\SystemUsers\TranslateUserManager;
+use MediaWiki\MediaWikiServices;
+use Wikimedia\ScopedCallback;
 
 /**
  * Utility class for the sandbox feature of Translate. Do not try this yourself. This code makes a
  * lot of assumptions about what happens to the user account.
  */
 class TranslateSandbox {
-	public static $userToCreate = null;
-
 	/**
 	 * Adds a new user without doing much validation.
 	 *
@@ -42,35 +43,42 @@ class TranslateSandbox {
 			'realname' => '',
 		];
 
-		self::$userToCreate = $user;
-		$reqs = AuthManager::singleton()->getAuthenticationRequests( AuthManager::ACTION_CREATE );
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+		$creator = TranslateUserManager::getUser();
+		$guard = $permissionManager->addTemporaryUserRights( $creator, 'createaccount' );
+
+		if ( method_exists( MediaWikiServices::class, 'getAuthManager' ) ) {
+			// MediaWiki 1.35+
+			$authManager = MediaWikiServices::getInstance()->getAuthManager();
+		} else {
+			$authManager = AuthManager::singleton();
+		}
+		$reqs = $authManager->getAuthenticationRequests( AuthManager::ACTION_CREATE );
 		$reqs = AuthenticationRequest::loadRequestsFromSubmission( $reqs, $data );
-		$res = AuthManager::singleton()->beginAccountCreation( $user, $reqs, 'null:' );
-		self::$userToCreate = null;
+		$res = $authManager->beginAccountCreation( $creator, $reqs, 'null:' );
+
+		ScopedCallback::consume( $guard );
 
 		switch ( $res->status ) {
-		case AuthenticationResponse::PASS:
-			break;
-		case AuthenticationResponse::FAIL:
-			// Unless things are misconfigured, this will handle errors such as username taken,
-			// invalid user name or too short password. The WebAPI is prechecking these to
-			// provide nicer error messages.
-			$reason = $res->message->inLanguage( 'en' )->useDatabase( false )->text();
-			throw new MWException( "Account creation failed: $reason" );
-		default:
-			// Just in case it was a Secondary that failed
-			$user->clearInstanceCache( 'name' );
-			if ( $user->getId() ) {
-				self::deleteUser( $user, 'force' );
-			}
-			throw new MWException(
-				'AuthManager does not support such simplified account creation'
-			);
-		}
+			case AuthenticationResponse::PASS:
+				break;
+			case AuthenticationResponse::FAIL:
+				// Unless things are misconfigured, this will handle errors such as username taken,
+				// invalid user name or too short password. The WebAPI is prechecking these to
+				// provide nicer error messages.
+				$reason = $res->message->inLanguage( 'en' )->useDatabase( false )->text();
+				throw new MWException( "Account creation failed: $reason" );
+			default:
+				// A provider requested further user input. Abort but clean up first if it was a
+				// secondary provider (in which case the user was created).
+				if ( $user->getId() ) {
+					self::deleteUser( $user, 'force' );
+				}
 
-		// User now has an id, but we must clear the cache to see it. Without this the group
-		// addition below would not be saved in the database.
-		$user->clearInstanceCache( 'name' );
+				throw new MWException(
+					'AuthManager does not support such simplified account creation'
+				);
+		}
 
 		// group-translate-sandboxed group-translate-sandboxed-member
 		$user->addGroup( 'translate-sandboxed' );
@@ -87,7 +95,6 @@ class TranslateSandbox {
 	 */
 	public static function deleteUser( User $user, $force = '' ) {
 		$uid = $user->getId();
-		$username = $user->getName();
 
 		if ( $force !== 'force' && !self::isSandboxed( $user ) ) {
 			throw new MWException( 'Not a sandboxed user' );
@@ -99,20 +106,15 @@ class TranslateSandbox {
 		$dbw->delete( 'user_groups', [ 'ug_user' => $uid ], __METHOD__ );
 		$dbw->delete( 'user_properties', [ 'up_user' => $uid ], __METHOD__ );
 
-		if ( class_exists( ActorMigration::class ) ) {
-			$m = ActorMigration::newMigration();
+		$m = ActorMigration::newMigration();
+		$dbw->delete( 'actor', [ 'actor_user' => $uid ], __METHOD__ );
+		// Assume no joins are needed for logging or recentchanges
+		$dbw->delete( 'logging', $m->getWhere( $dbw, 'log_user', $user )['conds'], __METHOD__ );
+		$dbw->delete( 'recentchanges', $m->getWhere( $dbw, 'rc_user', $user )['conds'], __METHOD__ );
 
-			// Assume no joins are needed for logging or recentchanges
-			$dbw->delete( 'logging', $m->getWhere( $dbw, 'log_user', $user )['conds'], __METHOD__ );
-			$dbw->delete( 'recentchanges', $m->getWhere( $dbw, 'rc_user', $user )['conds'], __METHOD__ );
-		} else {
-			$dbw->delete( 'logging', [ 'log_user' => $uid ], __METHOD__ );
-			$dbw->delete(
-				'recentchanges',
-				[ 'rc_user' => $uid, 'rc_user_text' => $username ],
-				__METHOD__
-			);
-		}
+		// Update the site stats
+		$statsUpdate = SiteStatsUpdate::factory( [ 'users' => -1 ] );
+		$statsUpdate->doUpdate();
 
 		// If someone tries to access still object still, they will get anon user
 		// data.
@@ -139,15 +141,7 @@ class TranslateSandbox {
 	 */
 	public static function getUsers() {
 		$dbw = TranslateUtils::getSafeReadDB();
-		if ( is_callable( [ User::class, 'getQueryInfo' ] ) ) {
-			$userQuery = User::getQueryInfo();
-		} else {
-			$userQuery = [
-				'tables' => [ 'user' ],
-				'fields' => User::selectFields(),
-				'joins' => [],
-			];
-		}
+		$userQuery = User::getQueryInfo();
 		$tables = array_merge( $userQuery['tables'], [ 'user_groups' ] );
 		$fields = $userQuery['fields'];
 		$conds = [
@@ -251,11 +245,15 @@ class TranslateSandbox {
 	 * @since 2013.06
 	 */
 	public static function isSandboxed( User $user ) {
-		if ( in_array( 'translate-sandboxed', $user->getGroups(), true ) ) {
-			return true;
+		if ( method_exists( MediaWikiServices::class, 'getUserGroupManager' ) ) {
+			// MediaWiki 1.35+
+			$userGroupManager = MediaWikiServices::getInstance()->getUserGroupManager();
+			$groups = $userGroupManager->getUserGroups( $user );
+		} else {
+			$groups = $user->getGroups();
 		}
 
-		return false;
+		return in_array( 'translate-sandboxed', $groups, true );
 	}
 
 	/**
@@ -290,13 +288,6 @@ class TranslateSandbox {
 		return false;
 	}
 
-	/// Hook: UserGetRights
-	public static function allowAccountCreation( $user, &$rights ) {
-		if ( self::$userToCreate && $user->equals( self::$userToCreate ) ) {
-			$rights[] = 'createaccount';
-		}
-	}
-
 	/// Hook: onGetPreferences
 	public static function onGetPreferences( $user, &$preferences ) {
 		$preferences['translate-sandbox'] = $preferences['translate-sandbox-reminders'] =
@@ -325,10 +316,6 @@ class TranslateSandbox {
 			$class = get_class( $module );
 			if ( $module->isWriteMode() && !in_array( $class, $whitelist, true ) ) {
 				$message = ApiMessage::create( 'apierror-writeapidenied' );
-				if ( $message->getApiCode() === 'apierror-writeapidenied' ) {
-					// Backwards compatibility for pre-1.29 MediaWiki
-					$message = 'writerequired';
-				}
 				return false;
 			}
 		}

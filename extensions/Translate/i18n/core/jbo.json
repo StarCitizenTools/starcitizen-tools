@@ -2,14 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Gleki",
-			"Xbony2",
-			"Olwe519"
+			"Olwe519",
+			"Xbony2"
 		]
 	},
 	"translate-page-edit": "stika ti",
 	"translate-edit-title": "stika $1",
-	"translate-edit-in-other-languages": "lo notci poi se bangu lo drata",
-	"translate-magic-cm-save": "gau se vreji",
 	"translate-rc-translation-filter": "pagrygau lo xe fanva",
 	"translate-stats-edits": "stika",
 	"translate-stats-users": "le fanva",
@@ -18,14 +16,11 @@
 	"translate-translations-project": "co'a bandu",
 	"translate-translations-history-short": "c",
 	"translate-language": "lo bangu",
-	"translate-save": "rejgau to $1 toi",
-	"translate-js-save": "gau se vreji",
-	"translate-js-support": "ko retsku",
 	"translate-gs-total": "lo sumji",
 	"tux-edit": "stika",
 	"tux-editor-cancel-button-label": "kansele",
 	"tux-editor-in-other-languages": "bau lo drata",
-	"tux-warnings-hide": "cancygau",
+	"tux-notices-hide": "cancygau",
 	"tux-proofread-edit-label": "stika",
 	"tux-editor-page-mode": "lo papri",
 	"tux-editor-doc-editor-cancel": "kansele",

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWCategoryWidget class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -41,12 +41,15 @@ ve.ui.MWCategoryWidget = function VeUiMWCategoryWidget( config ) {
 	this.input = new ve.ui.MWCategoryInputWidget( this, { $overlay: config.$overlay } );
 	this.forceCapitalization = mw.config.get( 'wgCaseSensitiveNamespaces' ).indexOf( categoryNamespace ) === -1;
 	this.categoryPrefix = mw.config.get( 'wgFormattedNamespaces' )[ categoryNamespace ] + ':';
+	this.expandedItem = null;
 
 	// Events
 	this.input.connect( this, { choose: 'onInputChoose' } );
 	this.popup.connect( this, {
 		removeCategory: 'onRemoveCategory',
-		updateSortkey: 'onUpdateSortkey'
+		updateSortkey: 'onUpdateSortkey',
+		ready: 'onPopupOpened',
+		closing: 'onPopupClosing'
 	} );
 	this.connect( this, {
 		drag: 'onDrag'
@@ -117,6 +120,21 @@ ve.ui.MWCategoryWidget.prototype.onInputChoose = function ( item ) {
 };
 
 /**
+ * Hanle popup open event
+ *
+ */
+ve.ui.MWCategoryWidget.prototype.onPopupOpened = function () {
+	this.popup.removeButton.focus();
+};
+
+/**
+ * Handle popup closing dialog
+ */
+ve.ui.MWCategoryWidget.prototype.onPopupClosing = function () {
+	this.expandedItem.focus();
+};
+
+/**
  * Get a category item.
  *
  * @param {string} value Category name
@@ -178,7 +196,6 @@ ve.ui.MWCategoryWidget.prototype.reorder = function ( item, newIndex ) {
 /**
  * Removes category from model.
  *
- * @method
  * @param {string} name Removed category name
  */
 ve.ui.MWCategoryWidget.prototype.onRemoveCategory = function ( name ) {
@@ -189,7 +206,6 @@ ve.ui.MWCategoryWidget.prototype.onRemoveCategory = function ( name ) {
 /**
  * Update sortkey value, emit updateSortkey event
  *
- * @method
  * @param {string} name
  * @param {string} value
  */
@@ -215,6 +231,12 @@ ve.ui.MWCategoryWidget.prototype.onTogglePopupMenu = function ( item ) {
 	// Close open popup.
 	if ( item.value !== this.popup.category ) {
 		this.popup.openPopup( item );
+		this.expandedItem = item;
+		this.popup
+			.$element
+			.attr( 'aria-label',
+				ve.msg( 'visualeditor-dialog-meta-categories-category' )
+			);
 	} else {
 		// Handle toggle
 		this.popup.closePopup();
@@ -231,9 +253,31 @@ ve.ui.MWCategoryWidget.prototype.setDefaultSortKey = function ( value ) {
 };
 
 /**
+ * @inheritdoc
+ */
+ve.ui.MWCategoryWidget.prototype.setDisabled = function () {
+	var isDisabled;
+	// Parent method
+	ve.ui.MWCategoryWidget.super.prototype.setDisabled.apply( this, arguments );
+
+	isDisabled = this.isDisabled();
+
+	if ( this.input ) {
+		this.input.setDisabled( isDisabled );
+	}
+	if ( this.items ) {
+		this.items.forEach( function ( item ) {
+			item.setDisabled( isDisabled );
+		} );
+	}
+	if ( this.popup ) {
+		this.popup.closePopup();
+	}
+};
+
+/**
  * Get list of category names.
  *
- * @method
  * @return {string[]} List of category names
  */
 ve.ui.MWCategoryWidget.prototype.getCategories = function () {
@@ -269,12 +313,12 @@ ve.ui.MWCategoryWidget.prototype.queryCategoryStatus = function ( categoryNames 
 	} );
 
 	if ( !categoryNamesToQuery.length ) {
-		return $.Deferred().resolve( {} ).promise();
+		return ve.createDeferred().resolve( {} ).promise();
 	}
 
 	// Batch this up into groups of 50
 	while ( index < categoryNamesToQuery.length ) {
-		promises.push( new mw.Api().get( {
+		promises.push( ve.init.target.getContentApi().get( {
 			action: 'query',
 			prop: 'pageprops',
 			titles: categoryNamesToQuery.slice( index, index + batchSize ),
@@ -284,6 +328,7 @@ ve.ui.MWCategoryWidget.prototype.queryCategoryStatus = function ( categoryNames 
 			var linkCacheUpdate = {},
 				normalizedTitles = {};
 			if ( result && result.query && result.query.pages ) {
+				// eslint-disable-next-line no-jquery/no-each-util
 				$.each( result.query.pages, function ( index, pageInfo ) {
 					linkCacheUpdate[ pageInfo.title ] = {
 						missing: Object.prototype.hasOwnProperty.call( pageInfo, 'missing' ),
@@ -293,6 +338,7 @@ ve.ui.MWCategoryWidget.prototype.queryCategoryStatus = function ( categoryNames 
 				} );
 			}
 			if ( result && result.query && result.query.redirects ) {
+				// eslint-disable-next-line no-jquery/no-each-util
 				$.each( result.query.redirects, function ( index, redirectInfo ) {
 					widget.categoryRedirects[ redirectInfo.from ] = redirectInfo.to;
 				} );
@@ -300,6 +346,7 @@ ve.ui.MWCategoryWidget.prototype.queryCategoryStatus = function ( categoryNames 
 			ve.init.platform.linkCache.set( linkCacheUpdate );
 
 			if ( result.query && result.query.normalized ) {
+				// eslint-disable-next-line no-jquery/no-each-util
 				$.each( result.query.normalized, function ( index, normalisation ) {
 					normalizedTitles[ normalisation.from ] = normalisation.to;
 				} );
@@ -312,13 +359,12 @@ ve.ui.MWCategoryWidget.prototype.queryCategoryStatus = function ( categoryNames 
 		index += batchSize;
 	}
 
-	return $.when.apply( $, promises );
+	return ve.promiseAll( promises );
 };
 
 /**
  * Adds category items.
  *
- * @method
  * @param {Object[]} items Items to add
  * @param {number} [index] Index to insert items after
  * @return {jQuery.Promise}
@@ -327,6 +373,7 @@ ve.ui.MWCategoryWidget.prototype.addItems = function ( items, index ) {
 	var i, len, item, categoryItem, hadFocus,
 		categoryItems = [],
 		existingCategoryItems = [],
+		// eslint-disable-next-line no-jquery/no-map-util
 		categoryNames = $.map( items, function ( item ) {
 			return item.name;
 		} ),
@@ -358,6 +405,7 @@ ve.ui.MWCategoryWidget.prototype.addItems = function ( items, index ) {
 			}
 			config.hidden = cachedData.hidden;
 			config.missing = cachedData.missing;
+			config.disabled = widget.disabled;
 
 			categoryItem = new ve.ui.MWCategoryItemWidget( config );
 			categoryItem.connect( widget, {
@@ -367,7 +415,7 @@ ve.ui.MWCategoryWidget.prototype.addItems = function ( items, index ) {
 			// Index item
 			widget.categories[ itemTitle.getMainText() ] = categoryItem;
 			// Copy sortKey from old item when "moving"
-			existingCategoryItems = $.grep( widget.items, checkValueMatches );
+			existingCategoryItems = widget.items.filter( checkValueMatches );
 			if ( existingCategoryItems.length ) {
 				// There should only be one element in existingCategoryItems
 				categoryItem.sortKey = existingCategoryItems[ 0 ].sortKey;
@@ -411,13 +459,12 @@ ve.ui.MWCategoryWidget.prototype.removeItems = function ( items ) {
 
 /**
  * Auto-fit the input.
- *
- * @method
  */
 ve.ui.MWCategoryWidget.prototype.fitInput = function () {
 	var availableSpace, inputWidth, $lastItem,
 		$input = this.input.$element;
 
+	// eslint-disable-next-line no-jquery/no-sizzle
 	if ( !this.items.length || !$input.is( ':visible' ) ) {
 		return;
 	}

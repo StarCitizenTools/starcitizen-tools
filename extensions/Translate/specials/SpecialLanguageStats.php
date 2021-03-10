@@ -20,56 +20,43 @@
  * @ingroup SpecialPage TranslateSpecialPage Stats
  */
 class SpecialLanguageStats extends SpecialPage {
-	/**
-	 * @var StatsTable
-	 */
+	/** @var StatsTable */
 	protected $table;
-
-	/**
-	 * @var Array
-	 */
+	/** @var array */
 	protected $targetValueName = [ 'code', 'language' ];
-
 	/**
 	 * Most of the displayed numbers added together at the bottom of the table.
 	 */
 	protected $totals;
-
 	/**
 	 * Flag to set if nothing to show.
 	 * @var bool
 	 */
 	protected $nothing = false;
-
 	/**
 	 * Flag to set if not all numbers are available.
 	 * @var bool
 	 */
 	protected $incomplete = false;
-
 	/**
 	 * Whether to hide rows which are fully translated.
 	 * @var bool
 	 */
 	protected $noComplete = true;
-
 	/**
 	 * Whether to hide rows which are fully untranslated.
 	 * @var bool
 	 */
 	protected $noEmpty = false;
-
 	/**
 	 * The target of stats, language code or group id.
 	 */
 	protected $target;
-
 	/**
 	 * Whether to regenerate stats. Activated by action=purge in query params.
 	 * @var bool
 	 */
 	protected $purge;
-
 	/**
 	 * Helper variable to avoid overcounting message groups that appear
 	 * multiple times in the list with different parents. Aggregate message
@@ -78,10 +65,7 @@ class SpecialLanguageStats extends SpecialPage {
 	 * @var array
 	 */
 	protected $statsCounted = [];
-
-	/**
-	 * @var array
-	 */
+	/** @var array */
 	protected $states;
 
 	public function __construct() {
@@ -96,7 +80,7 @@ class SpecialLanguageStats extends SpecialPage {
 	}
 
 	protected function getGroupName() {
-		return 'wiki';
+		return 'translation';
 	}
 
 	public function execute( $par ) {
@@ -230,11 +214,13 @@ class SpecialLanguageStats extends SpecialPage {
 	}
 
 	protected function showPurgeForm() {
-		$formDescriptor[ 'intro' ] = [
-			'type' => 'info',
-			'vertical-label' => true,
-			'raw' => true,
-			'default' => $this->msg( 'confirm-purge-top' )->parse()
+		$formDescriptor = [
+			'intro' => [
+				'type' => 'info',
+				'vertical-label' => true,
+				'raw' => true,
+				'default' => $this->msg( 'confirm-purge-top' )->parse()
+			],
 		];
 
 		$context = new DerivativeContext( $this->getContext() );
@@ -251,27 +237,29 @@ class SpecialLanguageStats extends SpecialPage {
 	 * HTMLForm for the top form rendering.
 	 */
 	protected function addForm() {
-		$formDescriptor[ 'language' ] = [
-			'type' => 'text',
-			'name' => 'language',
-			'id' => 'language',
-			'label' => $this->msg( 'translate-language-code-field-name' )->text(),
-			'size' => 10,
-			'default' => $this->target,
-		];
-		$formDescriptor[ 'suppresscomplete' ] = [
-			'type' => 'check',
-			'label' => $this->msg( 'translate-suppress-complete' )->text(),
-			'name' => 'suppresscomplete',
-			'id' => 'suppresscomplete',
-			'default' => $this->noComplete,
-		];
-		$formDescriptor[ 'suppressempty' ] = [
-			'type' => 'check',
-			'label' => $this->msg( 'translate-ls-noempty' )->text(),
-			'name' => 'suppressempty',
-			'id' => 'suppressempty',
-			'default' => $this->noEmpty,
+		$formDescriptor = [
+			'language' => [
+				'type' => 'text',
+				'name' => 'language',
+				'id' => 'language',
+				'label' => $this->msg( 'translate-language-code-field-name' )->text(),
+				'size' => 10,
+				'default' => $this->target,
+			],
+			'suppresscomplete' => [
+				'type' => 'check',
+				'label' => $this->msg( 'translate-suppress-complete' )->text(),
+				'name' => 'suppresscomplete',
+				'id' => 'suppresscomplete',
+				'default' => $this->noComplete,
+			],
+			'suppressempty' => [
+				'type' => 'check',
+				'label' => $this->msg( 'translate-ls-noempty' )->text(),
+				'name' => 'suppressempty',
+				'id' => 'suppressempty',
+				'default' => $this->noEmpty,
+			],
 		];
 
 		$context = new DerivativeContext( $this->getContext() );
@@ -516,34 +504,41 @@ class SpecialLanguageStats extends SpecialPage {
 		$params[] = md5( $groupId );
 		$params[] = $this->getLanguage()->getCode();
 		$params[] = md5( $this->target );
-		$cachekey = wfMemcKey( __METHOD__ . '-v3', implode( '-', $params ) );
-		$cacheval = wfGetCache( CACHE_ANYTHING )->get( $cachekey );
-		if ( is_string( $cacheval ) ) {
-			return $cacheval;
-		}
+		$params[] = $parent ? $parent->getId() : '!';
 
-		$extra = [];
-		if ( $translated === $total ) {
-			$extra = [ 'action' => 'proofread' ];
-		}
+		$cache = ObjectCache::getInstance( CACHE_ANYTHING );
 
-		$rowParams = [];
-		$rowParams['data-groupid'] = $groupId;
-		$rowParams['class'] = get_class( $group );
-		if ( $parent ) {
-			$rowParams['data-parentgroup'] = $parent->getId();
-		}
+		return $cache->getWithSetCallback(
+			$cache->makeKey( __METHOD__ . '-v3', implode( '-', $params ) ),
+			$cache::TTL_DAY,
+			function () use ( $translated, $total, $groupId, $group, $parent, $stats, $state ) {
+				// Any data variable read below should be part of the cache key above
+				$extra = [];
+				if ( $translated === $total ) {
+					$extra = [ 'action' => 'proofread' ];
+				}
 
-		$out = "\t" . Html::openElement( 'tr', $rowParams );
-		$out .= "\n\t\t" . Html::rawElement( 'td', [],
-			$this->table->makeGroupLink( $group, $this->target, $extra ) );
-		$out .= $this->table->makeNumberColumns( $stats );
-		$out .= $this->getWorkflowStateCell( $groupId, $state );
-		$out .= "\n\t" . Html::closeElement( 'tr' ) . "\n";
+				$rowParams = [];
+				$rowParams['data-groupid'] = $groupId;
+				$rowParams['class'] = get_class( $group );
+				if ( $parent ) {
+					$rowParams['data-parentgroup'] = $parent->getId();
+				}
 
-		wfGetCache( CACHE_ANYTHING )->set( $cachekey, $out, 3600 * 24 );
-
-		return $out;
+				return "\t" .
+					Html::openElement( 'tr', $rowParams ) .
+					"\n\t\t" .
+					Html::rawElement(
+						'td',
+						 [],
+						$this->table->makeGroupLink( $group, $this->target, $extra )
+					) . $this->table->makeNumberColumns( $stats ) .
+					$this->getWorkflowStateCell( $groupId, $state ) .
+					"\n\t" .
+					Html::closeElement( 'tr' ) .
+					"\n";
+			}
+		);
 	}
 
 	protected function getWorkflowStates( $field = 'tgr_group', $filter = 'tgr_lang' ) {

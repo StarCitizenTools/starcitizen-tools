@@ -10,6 +10,11 @@
  */
 
 // Standard boilerplate to define $IP
+use MediaWiki\Extension\Translate\SystemUsers\FuzzyBot;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\SlotRecord;
+use Wikimedia\Rdbms\IResultWrapper;
+
 if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 	$IP = getenv( 'MW_INSTALL_PATH' );
 } else {
@@ -24,7 +29,7 @@ $wgMaxShellMemory = 1024 * 200;
 class Fuzzy extends Maintenance {
 	public function __construct() {
 		parent::__construct();
-		$this->mDescription = 'Fuzzy bot command line script.';
+		$this->addDescription( 'Fuzzy bot command line script.' );
 		$this->addArg(
 			'arg',
 			'Title pattern or username if user option is provided.'
@@ -51,6 +56,7 @@ class Fuzzy extends Maintenance {
 			false, /*required*/
 			false /*has arg*/
 		);
+		$this->requireExtension( 'Translate' );
 	}
 
 	public function execute() {
@@ -81,14 +87,9 @@ class Fuzzy extends Maintenance {
 	 * messages from the ChangeSyncer class to the commandline.
 	 * @param string $text The text to show to the user
 	 * @param string|null $channel Unique identifier for the channel.
-	 * @param bool $error Whether this is an error message
 	 */
-	public function myOutput( $text, $channel = null, $error = false ) {
-		if ( $error ) {
-			$this->error( $text, $channel );
-		} else {
-			$this->output( $text, $channel );
-		}
+	public function myOutput( $text, $channel = null ) {
+		$this->output( $text, $channel );
 	}
 }
 
@@ -96,30 +97,20 @@ class Fuzzy extends Maintenance {
  * Class for marking translation fuzzy.
  */
 class FuzzyScript {
-	/**
-	 * @var bool Check for configuration problems.
-	 */
-	private $allclear = false;
-
+	/** @var bool Check for configuration problems. */
+	private $allclear = true;
 	/** @var callable Function to report progress updates */
 	protected $progressCallback;
-
-	/**
-	 * @var bool Dont do anything unless confirmation is given
-	 */
+	/** @var bool Dont do anything unless confirmation is given */
 	public $dryrun = true;
-
-	/**
-	 * @var string Edit summary.
-	 */
+	/** @var string Edit summary. */
 	public $comment;
+	/** @var array[] */
+	public $pages;
 
-	/**
-	 * @param array $pages
-	 */
+	/** @param array $pages */
 	public function __construct( $pages ) {
 		$this->pages = $pages;
-		$this->allclear = true;
 	}
 
 	public function setProgressCallback( $callback ) {
@@ -127,10 +118,9 @@ class FuzzyScript {
 	}
 
 	/// @see Maintenance::output for param docs
-	protected function reportProgress( $text, $channel, $severity = 'status' ) {
+	protected function reportProgress( $text, $channel ) {
 		if ( is_callable( $this->progressCallback ) ) {
-			$useErrorOutput = $severity === 'error';
-			call_user_func( $this->progressCallback, $text, $channel, $useErrorOutput );
+			call_user_func( $this->progressCallback, $text, $channel );
 		}
 	}
 
@@ -144,10 +134,36 @@ class FuzzyScript {
 		$this->reportProgress( "Found $count pages to update.", 'pagecount' );
 
 		foreach ( $msgs as $phpIsStupid ) {
-			list( $title, $text ) = $phpIsStupid;
+			[ $title, $text ] = $phpIsStupid;
 			$this->updateMessage( $title, TRANSLATE_FUZZY . $text, $this->dryrun, $this->comment );
 			unset( $phpIsStupid );
 		}
+	}
+
+	/**
+	 * Gets the message contents from database rows.
+	 * @param IResultWrapper $rows
+	 * @return array containing page titles and the text content of the page
+	 */
+	private static function getMessageContentsFromRows( $rows ) {
+		$revStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$messagesContents = [];
+		$slots = [];
+		if ( is_callable( [ $revStore, 'getContentBlobsForBatch' ] ) ) {
+			$slots = $revStore->getContentBlobsForBatch( $rows, [ SlotRecord::MAIN ] )->getValue();
+		}
+		foreach ( $rows as $row ) {
+			$title = Title::makeTitle( $row->page_namespace, $row->page_title );
+			if ( isset( $slots[$row->rev_id] ) ) {
+				$text = $slots[$row->rev_id][SlotRecord::MAIN]->blob_data;
+			} else {
+				$text = $revStore->newRevisionFromRow( $row, IDBAccessObject::READ_NORMAL, $title )
+					->getContent( SlotRecord::MAIN )
+					->getNativeData();
+			}
+			$messagesContents[] = [ $title, $text ];
+		}
+		return $messagesContents;
 	}
 
 	/// Searches pages that match given patterns
@@ -176,7 +192,6 @@ class FuzzyScript {
 
 		$conds = [
 			'page_latest=rev_id',
-			'rev_text_id=old_id',
 			$dbr->makeList( $title_conds, LIST_OR ),
 		];
 
@@ -185,21 +200,18 @@ class FuzzyScript {
 			$conds[] = "substring_index(page_title, '/', -1) NOT IN ($skiplist)";
 		}
 
+		$revStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$queryInfo = $revStore->getQueryInfo( [ 'page' ] );
 		$rows = $dbr->select(
-			[ 'page', 'revision', 'text' ],
-			[ 'page_title', 'page_namespace', 'old_text', 'old_flags' ],
+			$queryInfo['tables'],
+			$queryInfo['fields'],
 			$conds,
-			__METHOD__
+			__METHOD__,
+			[],
+			$queryInfo['joins']
 		);
-
-		$messagesContents = [];
-		foreach ( $rows as $row ) {
-			$title = Title::makeTitle( $row->page_namespace, $row->page_title );
-			$messagesContents[] = [ $title, Revision::getRevisionText( $row ) ];
-		}
-
+		$messagesContents = self::getMessageContentsFromRows( $rows );
 		$rows->free();
-
 		return $messagesContents;
 	}
 
@@ -207,47 +219,31 @@ class FuzzyScript {
 		global $wgTranslateMessageNamespaces;
 		$dbr = wfGetDB( DB_REPLICA );
 
-		if ( class_exists( ActorMigration::class ) ) {
-			$revWhere = ActorMigration::newMigration()->getWhere( $dbr, 'rev_user', $user );
-		} else {
-			$revWhere = [
-				'tables' => [],
-				'conds' => 'rev_user = ' . (int)$user->getId(),
-				'joins' => [],
-			];
-		}
-
+		$revWhere = ActorMigration::newMigration()->getWhere( $dbr, 'rev_user', $user );
 		$conds = [
+			'page_latest=rev_id',
 			$revWhere['conds'],
 			'page_namespace' => $wgTranslateMessageNamespaces,
 			'page_title' . $dbr->buildLike( $dbr->anyString(), '/', $dbr->anyString() ),
 		];
-
 		if ( count( $skipLanguages ) ) {
 			$skiplist = $dbr->makeList( $skipLanguages );
 			$conds[] = "substring_index(page_title, '/', -1) NOT IN ($skiplist)";
 		}
 
+		$revStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$queryInfo = $revStore->getQueryInfo( [ 'page', 'user' ] );
 		$rows = $dbr->select(
-			[ 'page', 'revision', 'text' ] + $revWhere['tables'],
-			[ 'page_title', 'page_namespace', 'old_text', 'old_flags' ],
+			$queryInfo['tables'],
+			$queryInfo['fields'],
 			$conds,
 			__METHOD__,
 			[],
-			[
-				'revision' => [ 'JOIN', 'page_latest=rev_id' ],
-				'text' => [ 'JOIN', 'rev_text_id=old_id' ],
-			] + $revWhere['joins']
+			$queryInfo['joins'] + $revWhere['joins']
 		);
 
-		$messagesContents = [];
-		foreach ( $rows as $row ) {
-			$title = Title::makeTitle( $row->page_namespace, $row->page_title );
-			$messagesContents[] = [ $title, Revision::getRevisionText( $row ) ];
-		}
-
+		$messagesContents = self::getMessageContentsFromRows( $rows );
 		$rows->free();
-
 		return $messagesContents;
 	}
 
@@ -256,7 +252,7 @@ class FuzzyScript {
 	 * @param Title $title
 	 * @param string $text
 	 * @param bool $dryrun Whether to really do it or just show what would be done.
-	 * @param string $comment Edit summary.
+	 * @param string|null $comment Edit summary.
 	 */
 	private function updateMessage( $title, $text, $dryrun, $comment = null ) {
 		global $wgTranslateDocumentationLanguageCode;
